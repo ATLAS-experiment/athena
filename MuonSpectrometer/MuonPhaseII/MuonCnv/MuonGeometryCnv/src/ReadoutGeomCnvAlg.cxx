@@ -1,4 +1,3 @@
-
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
@@ -65,7 +64,7 @@ namespace {
         }
         return false;
     };
-    Amg::Transform3D amdbTransform(const ActsTrk::GeometryContext& gctx,
+    Acts::Transform3 amdbTransform(const ActsTrk::GeometryContext& gctx,
                                    const MuonGMR4::MuonReadoutElement& reEle) {
         return reEle.localToGlobalTransform(gctx) * 
                MuonGMR4::detail::rotationToAMDB(reEle.detectorType()).inverse();                       
@@ -237,9 +236,10 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsTrk::GeometryContext& gctx,
     const double lengthZ = (maxZ - minZ);
 
     /// Fetch the transform of the detector element which is AlignableNode x Station x [relative pos in station]
-    const Amg::Transform3D alignedTransform = amdbTransform(gctx, *copyMe) *
-                                             ( ( stationShiftNode ? stationShiftNode->getDefTransform() : Amg::Transform3D::Identity()) 
-                                               * readOutVol->getDefX()).inverse();
+    const Acts::Transform3 alignedTransform = amdbTransform(gctx, *copyMe) *
+                         Amg::toIsometry3D(( stationShiftNode ? stationShiftNode->getDefTransform()
+                                                              : GeoTrf::Transform3D::Identity()) 
+                                            * readOutVol->getDefX()).inverse();
 
 
     auto newStation = std::make_unique<MuonGM::MuonStation>(stName,
@@ -257,8 +257,8 @@ StatusCode ReadoutGeomCnvAlg::buildStation(const ActsTrk::GeometryContext& gctx,
                 <<" -- shortS: "<<shortS<<", longS: "<<longS
                 <<", lengthR: "<<lengthR<<", lengthZ: "<<lengthZ
                 <<std::endl<<"AlignableNode: "<<GeoTrf::toString(alignedTransform, true)
-                <<std::endl<<"Station shift: "<<GeoTrf::toString(stationShiftNode ? stationShiftNode->getDefTransform() 
-                                                                                  : Amg::Transform3D::Identity(), true)
+                <<std::endl<<"Station shift: "<<GeoTrf::toString(stationShiftNode ? Amg::toIsometry3D(stationShiftNode->getDefTransform()) 
+                                                                                  : Acts::Transform3::Identity(), true)
                 <<std::endl<<"AmdLRSToGlobal: "<<GeoTrf::toString(newStation->getNominalAmdbLRSToGlobal(), true)
                 <<std::endl<<"Readout transform: "<<GeoTrf::toString(readOutVol->getX(), true));
     cacheObj.detMgr->addMuonStation(std::move(newStation));
@@ -294,11 +294,11 @@ StatusCode ReadoutGeomCnvAlg::cloneReadoutVolume(const ActsTrk::GeometryContext&
     ///             Y = getX(Rpc) * delta(Rpc)  * getX(alignNode -> readoutFrame)
     ///             X = Y * getX(alignNode -> readoutFrame)^{-1}
     ///              
-    const Amg::Transform3D alignNodeToRE{copyMe->alignableTransform()->getDefTransform().inverse() *
-                                         readOutVol->getParent()->getX() * readOutVol->getX()};
-    const Amg::Transform3D alignedNode{amdbTransform(gctx, *copyMe) * alignNodeToRE.inverse()};
+    const Acts::Transform3 alignNodeToRE = Amg::toIsometry3D(copyMe->alignableTransform()->getDefTransform().inverse() *
+                                                            readOutVol->getParent()->getX() * readOutVol->getX());
+    const Acts::Transform3 alignedNode{amdbTransform(gctx, *copyMe) * alignNodeToRE.inverse()};
     
-    const Amg::Transform3D stationTrf{copiedStationVol->getX().inverse() * alignedNode};
+    const Acts::Transform3 stationTrf = Amg::toIsometry3D(copiedStationVol->getX().inverse() * alignedNode);
 
     copiedStationVol->add(cacheObj.makeTransform(stationTrf*alignNodeToRE));
     /// Clone the detector element with all of its subvolumes
@@ -386,10 +386,10 @@ StatusCode ReadoutGeomCnvAlg::buildRpc(const ActsTrk::GeometryContext& gctx, Con
         for (const Identifier& gapId : gapIds) {
             const int surfaceHash = newElement->surfaceHash(gapId);
             const int layerHash = newElement->layerHash(gapId);
-            const Amg::Transform3D refTrf{copyMe->localToGlobalTransform(gctx, gapId)* 
+            const Acts::Transform3 refTrf{copyMe->localToGlobalTransform(gctx, gapId)* 
                                           (m_idHelperSvc->measuresPhi(gapId) ? 
                                                 Amg::getRotateZ3D(90_degree) :
-                                                Amg::Isometry3D::Identity())};
+                                                Acts::Transform3::Identity())};
             ATH_MSG_VERBOSE("Assign transform: "<<m_idHelperSvc->toString(gapId)<<", "<<Amg::toString(refTrf));
             newElement->m_surfaceData->m_layerTransforms[surfaceHash] = refTrf;
             newElement->m_surfaceData->m_layerCenters[layerHash] = refTrf.translation();
@@ -844,7 +844,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
     for (unsigned int gasGap = 1; gasGap <= refEle.nGasGaps(); ++ gasGap) {
         const Identifier gapId = idHelper.channelID(refEle.identify(), refEle.multilayer(),  gasGap, 1);
         
-        const Amg::Transform3D& refTrf{refEle.localToGlobalTransform(gctx, gapId)};
+        const Acts::Transform3& refTrf{refEle.localToGlobalTransform(gctx, gapId)};
         const Amg::Transform3D& testTrf{testEle.transform(gapId)};
         if (!Amg::isIdentity(refTrf.inverse()*testTrf)) {
             ATH_MSG_FATAL("The layer "<<m_idHelperSvc->toStringGasGap(gapId)<<" does not transform equally"
@@ -898,7 +898,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
                 ATH_MSG_VERBOSE("SKip layer / tube "<<lay <<","<<tube);
                 continue;
             }
-            const Amg::Transform3D globToLocal = refEle.globalToLocalTransform(gctx, tubeHash);
+            const Acts::Transform3 globToLocal = Amg::toIsometry3D(refEle.globalToLocalTransform(gctx, tubeHash));
 
             const Amg::Vector3D refPos = refEle.globalTubePos(gctx, tubeHash);
             const Amg::Vector3D tubePos = testEle.tubePos(lay, tube);
@@ -956,9 +956,9 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
                                                                   refEle.doubletZ(), 
                                                                   doubPhi, gasGap, measPhi, strip);
                     
-                    const Amg::Transform3D refTrans{refEle.localToGlobalTransform(gctx, stripId) * 
+                    const Acts::Transform3 refTrans{refEle.localToGlobalTransform(gctx, stripId) * 
                                                     (measPhi ? Amg::getRotateZ3D(90_degree) : 
-                                                               Amg::Isometry3D::Identity())};
+                                                               Acts::Transform3::Identity())};
                     const Amg::Transform3D& testTrans{testEle.transform(stripId)};
                     if (strip == 1 && !Amg::isIdentity(refTrans.inverse()*testTrans)) {
                         ATH_MSG_ERROR("Transformation for "<<m_idHelperSvc->toString(stripId)<<" - "<<refEle.identHash()<<std::endl
@@ -1019,8 +1019,8 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
             const Identifier layId = idHelper.channelID(refEle.identify(), gasGap, isStrip, 1);
             ATH_MSG_VERBOSE("Test layer "<<m_idHelperSvc->toString(layId)<<", nCh: "<<refEle.numChannels(layHash)<<", layHash: "<<layHash);
             if (!refEle.numChannels(layHash)) continue;
-            const Amg::Transform3D refLayerTrf = refEle.localToGlobalTransform(gctx, refEle.constructHash(0, gasGap, false)) *
-                                                                            (!isStrip ? Amg::Isometry3D::Identity()
+            const Acts::Transform3 refLayerTrf = refEle.localToGlobalTransform(gctx, refEle.constructHash(0, gasGap, false)) *
+                                                                            (!isStrip ? Acts::Transform3::Identity()
                                                                                       : Amg::getRotateZ3D(-90._degree));
             const Amg::Transform3D& testLayerTrf = testEle.transform(layId);
             if (!Amg::isIdentity(refLayerTrf.inverse()* testLayerTrf)) {
@@ -1110,7 +1110,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
                     return StatusCode::FAILURE;
                 } 
                 const IdentifierHash measHash = refEle.measurementHash(chID);
-                Amg::Transform3D refTrans{refEle.localToGlobalTransform(gctx, refEle.layerHash(measHash))*
+                Acts::Transform3 refTrans{refEle.localToGlobalTransform(gctx, refEle.layerHash(measHash))*
                                         Amg::getRotateZ3D( -1.*(chType != sTgcIdHelper::sTgcChannelTypes::Strip)* 90._degree)};
                 const Amg::Transform3D& testTrans{testEle.transform(chID)};
                 if (channel == firstCh && (!Amg::doesNotDeform(testTrans.inverse()*refTrans)
@@ -1125,7 +1125,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
                 const Amg::Vector3D refChannelPos = refEle.globalChannelPosition(gctx, measHash);
 
                 if (chType == sTgcIdHelper::sTgcChannelTypes::Pad) {  
-                    const Amg::Transform3D& testPadTrans{testEle.transform(chID)};
+                    const Amg::Transform3D testPadTrans{testEle.transform(chID)};
                     Amg::Vector3D testChannelPos(Amg::Vector3D::Zero()); 
                     testEle.stripGlobalPosition(chID, testChannelPos);
                     

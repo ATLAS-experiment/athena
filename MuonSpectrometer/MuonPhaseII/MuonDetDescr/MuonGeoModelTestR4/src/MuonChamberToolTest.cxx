@@ -497,8 +497,8 @@ namespace MuonGMR4 {
                             <<"\n -- unaligned: "<<unAlignedPortals[p].surface->bounds());
                 retCode = StatusCode::FAILURE;
             }
-            const Amg::Transform3D& uTrf{unAlignedPortals[p].surface->localToGlobalTransform(geoCtx)};
-            const Amg::Transform3D& aTrf{portals[p]->localToGlobalTransform(geoCtx)};
+            const Acts::Transform3& uTrf{unAlignedPortals[p].surface->localToGlobalTransform(geoCtx)};
+            const Acts::Transform3& aTrf{portals[p]->localToGlobalTransform(geoCtx)};
 
             if (!Amg::isIdentity(uTrf * aTrf.inverse())) {
                 ATH_MSG_ERROR(__func__<<"() "<<__LINE__
@@ -834,7 +834,7 @@ namespace MuonGMR4 {
                 if (!mdtMl.isValid(idHash)){
                     continue;
                 }
-                const Amg::Transform3D& locToGlob{mdtMl.localToGlobalTransform(gctx, idHash)}; 
+                const Acts::Transform3& locToGlob{mdtMl.localToGlobalTransform(gctx, idHash)}; 
                 const Identifier measId{mdtMl.measurementId(idHash)};
 
                 ATH_CHECK(pointInside(gctx, chamber, detVol, mdtMl.globalTubePos(gctx, idHash), "tube center", measId));

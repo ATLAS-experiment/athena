@@ -32,7 +32,7 @@ namespace MuonR4::FastReco {
     GlobalPatternFinder::HitPayload::HitPayload(const Acts::GeometryContext& gctx,
                                                 const SpacePoint* sp,
                                                 const SpacePointBucket* bucket,
-                                                const Amg::Transform3D& localToGlobal)
+                                                const Acts::Transform3& localToGlobal)
         : position{localToGlobal * sp->localPosition()}, 
           spacePoint{sp}, bucket{bucket} {
 

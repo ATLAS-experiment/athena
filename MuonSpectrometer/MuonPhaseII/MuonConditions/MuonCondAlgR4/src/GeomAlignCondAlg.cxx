@@ -89,7 +89,7 @@ StatusCode GeomAlignCondAlg::loadDeltas(const EventContext& ctx,
                             <<" has no alignable transform.");
             continue;
         }
-        std::shared_ptr<const Amg::Transform3D>& cached = alignDeltas[alignTrans];
+        std::shared_ptr<const GeoTrf::Transform3D>& cached = alignDeltas[alignTrans];
         if (cached) {
             ATH_MSG_DEBUG("The alignable transformation for "<<m_idHelperSvc->toStringChamber(re->identify())
                          <<" has been cached before. ");
@@ -105,7 +105,7 @@ StatusCode GeomAlignCondAlg::loadDeltas(const EventContext& ctx,
             continue;
         }
         /// Store the alignable transformation
-        cached = std::make_shared<Amg::Transform3D>(aLineItr->delta());
+        cached = std::make_shared<GeoTrf::Transform3D>(aLineItr->delta());
         techTransforms[re->detectorType()].insert(alignTrans);
     }
     return StatusCode::SUCCESS;
@@ -257,7 +257,7 @@ StatusCode GeomAlignCondAlg::execute(const EventContext& ctx) const {
         const std::set<const GeoAlignableTransform*>& toStore =  techTransforms[subDet];
         /// Append the alignable transformations to the conditions object
         for (const GeoAlignableTransform* alignable : toStore) {
-           const std::shared_ptr<const Amg::Transform3D>& cached = alignDeltas[alignable];
+           const std::shared_ptr<const GeoTrf::Transform3D>& cached = alignDeltas[alignable];
            if (!cached) continue;
            writeCdo->geoModelAlignment->setDelta(alignable, alignDeltas[alignable]);
         }
@@ -298,7 +298,7 @@ StatusCode GeomAlignCondAlg::execute(const EventContext& ctx) const {
             /// Ensure that the rigid transformations of the detector elements are applied 
             std::ranges::for_each(m_detMgr->getAllReadoutElements(subDet),
                     [&](const MuonReadoutElement* re){
-                        const Amg::Transform3D& detTrf{re->getMaterialGeom()->getAbsoluteTransform(writeCdo->geoModelAlignment.get())};
+                        const GeoTrf::Transform3D& detTrf{re->getMaterialGeom()->getAbsoluteTransform(writeCdo->geoModelAlignment.get())};
                         ATH_MSG_VERBOSE("Detector element "<<m_idHelperSvc->toStringDetEl(re->identify())<<" is located at "
                                     <<Amg::toString(detTrf));     
                     });

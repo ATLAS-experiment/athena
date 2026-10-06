@@ -40,7 +40,7 @@ private:
     Identifier alignmentId(const MuonGMR4::MuonReadoutElement* reElement) const;
 
     /// Association map of the GeoAlignableTransforms with the rigid alignment transformations
-    using deltaMap = std::unordered_map<const GeoAlignableTransform*, std::shared_ptr<const Amg::Transform3D>>;
+    using deltaMap = std::unordered_map<const GeoAlignableTransform*, std::shared_ptr<const GeoTrf::Transform3D>>;
     /// Association map of the GeoAlignable transforms with the detector technologies.
     using alignTechMap = std::map<ActsTrk::DetectorType, std::set<const GeoAlignableTransform*>>;
     /// Loads the ALineContainer from the conditions store and fills the deltaMap with the

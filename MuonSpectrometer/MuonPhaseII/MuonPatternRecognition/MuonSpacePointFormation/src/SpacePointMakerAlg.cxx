@@ -49,8 +49,8 @@ namespace {
             // to be inlined here if possible.
             ATH_FLATTEN
         #endif
-        Amg::Transform3D toChamberTransform(const ActsTrk::GeometryContext& gctx, 
-                                            const Amg::Transform3D& sectorTrans,
+        Acts::Transform3 toChamberTransform(const ActsTrk::GeometryContext& gctx, 
+                                            const Acts::Transform3& sectorTrans,
                                             const MeasType& meas) {
         const MuonGMR4::MuonReadoutElement* reEle{meas.readoutElement()};
         if constexpr(std::is_same_v<MeasType, xAOD::MdtDriftCircle>) {
@@ -272,7 +272,7 @@ template <>
     }
 template <typename PrdType>
     void SpacePointMakerAlg::fillUncombinedSpacePoints(const ActsTrk::GeometryContext& gctx,
-                                                       const Amg::Transform3D& sectorTrans,
+                                                       const Acts::Transform3& sectorTrans,
                                                        const PrdVec_t<const PrdType*>& prdsToFill,
                                                        std::vector<SpacePoint>& outColl) const {
     if (prdsToFill.empty()) {
@@ -281,7 +281,7 @@ template <typename PrdType>
     const PrdType* refMeas = prdsToFill.front();
     bool allSpArePhi{false};
 
-    const Amg::Transform3D toSectorTrans = toChamberTransform(gctx, sectorTrans, *refMeas);
+    const Acts::Transform3 toSectorTrans = toChamberTransform(gctx, sectorTrans, *refMeas);
     /// Local coordinate system aligned such that the strips point along local y
     Amg::Vector3D sensorDir{Amg::Vector3D::Zero()}, toNextSen{Amg::Vector3D::Zero()};
     /// The measurement is a phi measurement
@@ -391,12 +391,12 @@ template <typename ContType>
 
     do {
         SpacePointsPerChamber& pointsInChamb = fillContainer[viewer.at(0)->readoutElement()->msSector()];
-        const Amg::Transform3D sectorTrans = viewer.at(0)->readoutElement()->msSector()->globalToLocalTransform(*gctx);
+        const Acts::Transform3 sectorTrans = viewer.at(0)->readoutElement()->msSector()->globalToLocalTransform(*gctx);
         ATH_MSG_DEBUG("Fill space points for chamber "<<m_idHelperSvc->toStringDetEl(viewer.at(0)->identify()));
         if constexpr( std::is_same_v<ContType, xAOD::MdtDriftCircleContainer>) {
             pointsInChamb.etaHits.reserve(pointsInChamb.etaHits.capacity() + viewer.size());       
             for (const auto& prd : viewer) {
-                Amg::Transform3D toChamberTrans{toChamberTransform(*gctx, sectorTrans, *prd)};
+                Acts::Transform3 toChamberTrans{toChamberTransform(*gctx, sectorTrans, *prd)};
                 SpacePoint& sp{pointsInChamb.etaHits.emplace_back(prd)};
                 sp.setPosition(toChamberTrans*prd->localMeasurementPos());
                 sp.setDirection(toChamberTrans.linear().col(Amg::z),
@@ -431,7 +431,7 @@ template <typename ContType>
                 pointsInChamb.etaHits.reserve(pointsInChamb.etaHits.size() + etaHits.size()*phiHits.size());               
                 /// Simple combination by taking the cross-product
                 const auto& firstEta{etaHits.front()};
-                const Amg::Transform3D toSectorTrans = toChamberTransform(*gctx, sectorTrans, *firstEta);
+                const Acts::Transform3 toSectorTrans = toChamberTransform(*gctx, sectorTrans, *firstEta);
                
                 Amg::Vector3D toNextDir{Amg::Vector3D::Zero()}, sensorDir{Amg::Vector3D::Zero()};
                 if constexpr (std::is_same_v<xAOD::RpcMeasurementContainer, ContType> ||
@@ -510,7 +510,7 @@ StatusCode SpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
     using namespace Acts::detail::LineHelper;
     do {
         SpacePointsPerChamber& pointsInChamb = fillContainer[viewer.at(0)->readoutElement()->msSector()];
-        const Amg::Transform3D sectorTrans = viewer.at(0)->readoutElement()->msSector()->globalToLocalTransform(*gctx);
+        const Acts::Transform3 sectorTrans = viewer.at(0)->readoutElement()->msSector()->globalToLocalTransform(*gctx);
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Fill space points for multiplet "<<m_idHelperSvc->toStringDetEl(viewer.at(0)->identify()));
         for(auto& HitColls: splitHitsPerGasGap(viewer)){ 
             auto& [etaHits, phiHits, two2DHits] =  HitColls;          
@@ -555,7 +555,7 @@ StatusCode SpacePointMakerAlg::loadContainerAndSort(const EventContext& ctx,
                 
                 /// Get first hit from the first collection 
                 const xAOD::sTgcMeasurement* firstHit = collB.front();
-                const Amg::Transform3D toSectorTrans = toChamberTransform(*gctx, sectorTrans, *firstHit);
+                const Acts::Transform3 toSectorTrans = toChamberTransform(*gctx, sectorTrans, *firstHit);
                
                 for(std::size_t idxA = 0; idxA < collA.size(); ++idxA) {
                     /// The hit in the collection has already been used

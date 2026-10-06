@@ -63,9 +63,9 @@ struct TgcChamber{
         return phi < other.phi;
     }
     /// Transformation of the underlying GeoModel element
-    Amg::Transform3D geoModelTransform{Amg::Transform3D::Identity()};
+    Acts::Transform3 geoModelTransform{Acts::Transform3::Identity()};
     /// Transformation of the underlying Alignable node
-    Amg::Transform3D alignableTransform{Amg::Transform3D::Identity()};
+    Acts::Transform3 alignableTransform{Acts::Transform3::Identity()};
 
     struct WireGang {
         unsigned int numWires{0};
@@ -84,7 +84,7 @@ struct TgcChamber{
     struct LayerTrans{
         unsigned int gasGap{0};
         bool measPhi{false};
-        Amg::Transform3D trans{Amg::Transform3D::Identity()};
+        Acts::Transform3 trans{Acts::Transform3::Identity()};
         
         float shortWidth{0.f};
         float longWidth{0.f};
@@ -415,7 +415,7 @@ int main1( int argc, char** argv ) {
         TEST_BASICPROP(longWidth, "chamber long width");
         TEST_BASICPROP(height, "chamber height");
 
-        const Amg::Transform3D alignableDistort = test.alignableTransform.inverse()*(ref.alignableTransform );
+        const Acts::Transform3 alignableDistort = test.alignableTransform.inverse()*(ref.alignableTransform );
         if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
             std::cerr<<"runTgcComparison() "<<__LINE__<<": The alignable nodes are at differnt places for  "
                      <<ref<<". " <<GeoTrf::toString(alignableDistort, true)<<std::endl;
@@ -434,7 +434,7 @@ int main1( int argc, char** argv ) {
             }
             const TgcChamber::LayerTrans& testTrans{*l_test_itr};
             /// check whether the transformations lead to the same point
-            const Amg::Transform3D layTest = testTrans.trans.inverse() * refTrans.trans;
+            const Acts::Transform3 layTest = testTrans.trans.inverse() * refTrans.trans;
             if (!Amg::doesNotDeform(layTest)) {
                 std::cerr<<"runTgcComparison() "<<__LINE__<<": In "<<ref<<" "<<refTrans
                          <<", the transformations are orientated diffrently "<<Amg::toString(layTest)<<std::endl;

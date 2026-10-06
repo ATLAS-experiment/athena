@@ -103,8 +103,8 @@ StatusCode GeoModelMmTest::execute(const EventContext& ctx) {
                         <<". But got instead "<<m_idHelperSvc->toStringDetEl(reElement->identify()));
             return StatusCode::FAILURE;
         }      
-        const Amg::Transform3D globToLocal{reElement->globalToLocalTransform(gctx)};
-        const Amg::Transform3D& localToGlob{reElement->localToGlobalTransform(gctx)};
+        const Acts::Transform3 globToLocal{Amg::toIsometry3D(reElement->globalToLocalTransform(gctx))};
+        const Acts::Transform3& localToGlob{reElement->localToGlobalTransform(gctx)};
         /// Closure test that the transformations actually close
         if (!Amg::doesNotDeform(globToLocal * localToGlob)) {
                 ATH_MSG_FATAL("Closure test failed for "<<m_idHelperSvc->toStringDetEl(test_me)
@@ -180,7 +180,7 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
     m_stStripPitch = reElement->stripLayer(MuonGMR4::MmReadoutElement::createHash(1,1)).design().stripPitch();
     ///
     /// Dump the local to global transformation of the readout element
-    const Amg::Transform3D& transform{reElement->localToGlobalTransform(gctx)};
+    const Acts::Transform3& transform{reElement->localToGlobalTransform(gctx)};
     m_readoutTransform = transform;
     m_alignableNode  = reElement->alignableTransform()->getDefTransform();
 
@@ -212,7 +212,7 @@ StatusCode GeoModelMmTest::dumpToTree(const EventContext& ctx,
 
             const MuonGMR4::StripDesign& design{reElement->stripLayer(measHash).design()};
             if (strip == fStrip) {
-                const Amg::Transform3D stripLocalToGlob = reElement->localToGlobalTransform(gctx, chId);
+                const Acts::Transform3 stripLocalToGlob = reElement->localToGlobalTransform(gctx, chId);
                 ATH_MSG_VERBOSE(m_idHelperSvc->toStringGasGap(chId)<<" "<< "transform: " 
                             << Amg::toString(stripLocalToGlob)<<", perp: "<<stripLocalToGlob.translation().perp());
                 m_stripRot.push_back(stripLocalToGlob);

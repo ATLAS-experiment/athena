@@ -158,7 +158,7 @@ namespace MuonR4{
              *                  1D space points are appended. */
             template <typename PrdType> 
                 void fillUncombinedSpacePoints(const ActsTrk::GeometryContext& gctx,
-                                               const Amg::Transform3D& sectorTrans,
+                                               const Acts::Transform3& sectorTrans,
                                                const PrdVec_t<const PrdType*>& prdsToFill,
                                                std::vector<SpacePoint>& outColl) const; 
             /** @brief Distribute the premade spacepoints per chamber into their individual SpacePoint

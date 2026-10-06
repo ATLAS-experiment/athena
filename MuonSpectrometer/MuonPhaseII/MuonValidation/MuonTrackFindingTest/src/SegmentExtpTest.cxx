@@ -57,7 +57,7 @@ namespace MuonValR4{
 
         auto extrapolate = [&](const Acts::BoundTrackParameters& start,
                                const MuonR4::SpacePoint& sp) {
-            const Amg::Transform3D& trf = sp.msSector()->localToGlobalTransform(tgContext);
+            const Acts::Transform3& trf = sp.msSector()->localToGlobalTransform(tgContext);
             const Acts::Surface& target = xAOD::muonSurface(sp.primaryMeasurement());
             const Amg::Vector3D n = target.normal(tgContext, 
                                                   Amg::Vector3D::Zero(),
@@ -143,7 +143,7 @@ namespace MuonValR4{
                
                 const auto& bounds = targetSurf.bounds();
                 Amg::Vector2D lPos{Amg::Vector2D::Zero()}, mPos{Amg::Vector2D::Zero()};
-                const Amg::Transform3D toSurf = targetSurf.localToGlobalTransform(tgContext).inverse() *
+                const Acts::Transform3 toSurf = targetSurf.localToGlobalTransform(tgContext).inverse() *
                                                 sector->surface().localToGlobalTransform(tgContext);
                 if (targetSurf.type() == Acts::Surface::SurfaceType::Plane) {
                     lPos = (toSurf * SeedingAux::extrapolateToPlane(line, *meas)).block<2,1>(0,0);

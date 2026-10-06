@@ -198,7 +198,7 @@ namespace MuonR4{
             }
                     
             ATH_MSG_VERBOSE(__LINE__<<" - Fetched "<<localVertices.size()<<" vertices.");
-            const Amg::Transform3D& loc2Glob{surface.localToGlobalTransform(gctx.context())};
+            const Acts::Transform3& loc2Glob{surface.localToGlobalTransform(gctx.context())};
             idHelper.get_module_hash(reEle->identify(), modHash);
             auto& lut = luts.at(modHash);
             if (!lut.centralPhi) {

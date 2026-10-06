@@ -269,10 +269,10 @@ StatusCode GeoModelMdtTest::execute(const EventContext& ctx) {
          return StatusCode::FAILURE;
       }
       ATH_CHECK(dumpToTree(ctx,gctx,reElement));
-      const Amg::Transform3D globToLocal{reElement->globalToLocalTransform(gctx)};
-      const Amg::Transform3D& localToGlob{reElement->localToGlobalTransform(gctx)};
+      const Acts::Transform3 globToLocal{Amg::toIsometry3D(reElement->globalToLocalTransform(gctx))};
+      const Acts::Transform3& localToGlob{reElement->localToGlobalTransform(gctx)};
       /// Closure test that the transformations actually close
-      const Amg::Transform3D transClosure = globToLocal * localToGlob;
+      const Acts::Transform3 transClosure = globToLocal * localToGlob;
       if (!Amg::doesNotDeform(transClosure)) {
             ATH_MSG_FATAL("Closure test failed for "<<detStr<<". Ended up with "<< Amg::toString(transClosure) );
             return StatusCode::FAILURE;         
@@ -343,7 +343,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
    m_tubePitch = readoutEle->tubePitch();
 
    /// Dump the local to global transformation of the readout element
-   const Amg::Transform3D& transform {readoutEle->localToGlobalTransform(gctx)};
+   const Acts::Transform3& transform {readoutEle->localToGlobalTransform(gctx)};
    m_readoutTransform = transform;
    m_alignableNode  = readoutEle->alignableTransform()->getDefTransform();
 
@@ -354,7 +354,7 @@ StatusCode GeoModelMdtTest::dumpToTree(const EventContext& ctx,
         for (unsigned int tube = 1; tube <= readoutEle->numTubesInLay(); ++tube) {
             const IdentifierHash measHash{readoutEle->measurementHash(lay,tube)};
             if (!readoutEle->isValid(measHash)) continue;
-            const Amg::Transform3D& tubeTransform{readoutEle->localToGlobalTransform(gctx,measHash)};
+            const Acts::Transform3& tubeTransform{readoutEle->localToGlobalTransform(gctx,measHash)};
             m_tubeLay.push_back(lay);
             m_tubeNum.push_back(tube);         
             m_tubeTransform.push_back(tubeTransform);

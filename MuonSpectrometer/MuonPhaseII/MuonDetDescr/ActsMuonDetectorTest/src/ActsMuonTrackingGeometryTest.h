@@ -80,9 +80,9 @@ namespace ActsTrk {
 
         Gaudi::Property<bool> m_startFromFirstHit{this, "StartFromFirstHit", false, "Start from first hit"};
 
-        Amg::Transform3D toLocalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const;
+        Acts::Transform3 toLocalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const;
 
-        Amg::Transform3D toGlobalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const;
+        Acts::Transform3 toGlobalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const;
 
         IdentifierHash layerHash(const Identifier& id) const;
 

@@ -56,7 +56,7 @@ namespace MuonR4{
             using SegPars_t = xAOD::PosAccessor<Acts::toUnderlying(SegmentFit::ParamDefs::nPars)>::element_type;
             SegPars_t& localPars{ship.dec_localSegPars(*convertedSeg)};
         
-            const Amg::Transform3D globToLoc{sector->globalToLocalTransform(tgContext)};            
+            const Acts::Transform3 globToLoc{sector->globalToLocalTransform(tgContext)};            
             const Amg::Vector3D locPos{globToLoc * pos};
             const Amg::Vector3D locDir{globToLoc.linear() * dir};
 

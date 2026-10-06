@@ -266,7 +266,7 @@ namespace MuonCombinedR4 {
                                                                                        segment->etaIndex());
             if (lastSector != msSector) {
                 lastSector = msSector;
-                const Amg::Transform3D toLocal = msSector->globalToLocalTransform(tgContext);
+                const Acts::Transform3 toLocal = msSector->globalToLocalTransform(tgContext);
 
                 const Amg::Vector3D locExitPos = toLocal * exitPos;
                 const Amg::Vector3D locExitDir = toLocal.linear()* exitDir;

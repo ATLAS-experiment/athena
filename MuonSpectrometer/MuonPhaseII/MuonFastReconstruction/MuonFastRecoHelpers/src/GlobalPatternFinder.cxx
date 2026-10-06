@@ -522,7 +522,7 @@ void GlobalPatternFinder::addPhiOnlyHits(const ActsTrk::GeometryContext& gctx,
 
         for (const SpacePointBucket* bucket : pat.getParentBuckets()) {
 
-            const Amg::Transform3D& localToGlobal {bucket->msSector()->localToGlobalTransform(gctx)};
+            const Acts::Transform3& localToGlobal {bucket->msSector()->localToGlobalTransform(gctx)};
             const StIndex station {m_cfg.idHelperSvc->stationIndex(bucket->front()->identify())};
             
             for (const auto& hit : *bucket) {
@@ -666,7 +666,7 @@ GlobalPatternFinder::constructTree(const ActsTrk::GeometryContext& gctx,
     for (const SpacePointContainer* spc : spacepoints) {
         for (const SpacePointBucket* bucket : *spc) {
             
-            const Amg::Transform3D& localToGlobal {bucket->msSector()->localToGlobalTransform(gctx)};
+            const Acts::Transform3& localToGlobal {bucket->msSector()->localToGlobalTransform(gctx)};
 
             for (const auto& hit : *bucket) {
                 // Ignore only-phi hits and MDT hits if desired

@@ -113,7 +113,7 @@ namespace MuonR4{
             return smearSegment(tgContext, segment, engine);
         }
 
-        const auto& locToGlob = segment.msSector()->localToGlobalTransform(tgContext);
+        const Acts::Transform3& locToGlob{segment.msSector()->localToGlobalTransform(tgContext)};
         if (smearLocDir.z() < 0) {
             smearLocDir = -smearLocDir;
         }
@@ -202,7 +202,7 @@ namespace MuonR4{
                         m_detMgr->getSectorEnvelope(reFitMe->chamberIndex(), 
                                                     reFitMe->sector(), 
                                                     reFitMe->etaIndex());
-            const auto& sectorTrf = msSector->localToGlobalTransform(tgContext);
+            const Acts::Transform3& sectorTrf{msSector->localToGlobalTransform(tgContext)};
             const Amg::Vector3D planeNormal = sectorTrf.linear().col(2);
 
             m_calibTool->stampSignsOnMeasurements(*reFitMe);
@@ -211,7 +211,7 @@ namespace MuonR4{
             const auto [seedPos, seedDir] = smearSegment(tgContext, *MuonR4::detailedSegment(*reFitMe), randEngine);
             /// Decorate the initial seed parameters to the segment
             {
-                const Amg::Isometry3D invTrf = sectorTrf.inverse();
+                const Acts::Transform3 invTrf = sectorTrf.inverse();
                 const Amg::Vector3D locSeedPos = invTrf * seedPos;
                 const Amg::Vector3D locSeedDir = invTrf.linear() *  seedDir;
                 auto& seedPars = dec_seedPars(*reFitMe);
@@ -253,9 +253,9 @@ namespace MuonR4{
 
                 /// We add two pseudo measurements above & beneath the segment to stabilize the  fit
                 
-                const Amg::Isometry3D trfBeneath = Amg::toIsometry3D(GeoTrf::GeoTransformRT{sectorAngles, 0.5*isectFirst.position() +  
+                const Acts::Transform3 trfBeneath = Amg::toIsometry3D(GeoTrf::GeoTransformRT{sectorAngles, 0.5*isectFirst.position() +  
                                                                                          0.5*isectEntrance.position()}); 
-                const Amg::Isometry3D trfAbove   = Amg::toIsometry3D(GeoTrf::GeoTransformRT{sectorAngles, 0.85*isectExit.position() + 
+                const Acts::Transform3 trfAbove   = Amg::toIsometry3D(GeoTrf::GeoTransformRT{sectorAngles, 0.85*isectExit.position() + 
                                                                                          0.15*isectLast.position() }); 
 
                 auto surfBeneath = Acts::Surface::makeShared<Acts::PlaneSurface>(trfBeneath);
@@ -276,9 +276,9 @@ namespace MuonR4{
 
             if (m_drawEvent) {
                 Acts::GeometryView3D::drawSurface(visualHelper, *entrancePortal, tgContext, 
-                                                  Amg::Isometry3D::Identity(), Acts::s_viewPortal);
+                                                  Acts::Transform3::Identity(), Acts::s_viewPortal);
                 Acts::GeometryView3D::drawSurface(visualHelper, *exitPortal, tgContext, 
-                                                  Amg::Isometry3D::Identity(), Acts::s_viewPortal);
+                                                  Acts::Transform3::Identity(), Acts::s_viewPortal);
                 
                 /// Draw the reference segment as a red line
                 MuonValR4::drawSegmentLine(tgContext, *reFitMe, visualHelper,
@@ -293,7 +293,7 @@ namespace MuonR4{
             
             Amg::Vector3D refPos = 0.85 * isectEntrance.position()
                                  + 0.15 * isectFirst.position();
-            const Amg::Isometry3D trf = Amg::toIsometry3D(GeoTrf::GeoTransformRT{sectorAngles, refPos});
+            const Acts::Transform3 trf = Amg::toIsometry3D(GeoTrf::GeoTransformRT{sectorAngles, refPos});
             if (msgLvl(MSG::VERBOSE)) {
                 const auto [locPos, locDir] = makeLine(localSegmentPars(*reFitMe));
 
@@ -346,7 +346,7 @@ namespace MuonR4{
             }
             if (m_drawEvent) {
                 Acts::GeometryView3D::drawSurface(visualHelper, *target, 
-                    tgContext, Amg::Isometry3D::Identity(), 
+                    tgContext, Acts::Transform3::Identity(), 
                     Acts::ViewConfig{.color={0,0,220}});
             }
 
@@ -433,7 +433,7 @@ namespace MuonR4{
             /// Direction is always expressed in global frame -> transform to local
             const Amg::Vector3D globDir = parameters.direction();
             /// Express the parameters at the reference surface of the original segment
-            const Amg::Isometry3D globToLoc = sectorTrf.inverse();
+            const Acts::Transform3 globToLoc{sectorTrf.inverse()};
             const Amg::Vector3D refitPos = globToLoc * parameters.position(tgContext);
             const Amg::Vector3D refitDir = globToLoc.linear() * globDir;
             /// Straight line extension to plane

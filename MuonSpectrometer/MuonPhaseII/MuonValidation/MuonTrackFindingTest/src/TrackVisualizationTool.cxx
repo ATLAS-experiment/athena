@@ -478,7 +478,7 @@ void TrackVisualizationTool::displaySeedSegmentsGlobalWithTruth(
                         continue;
                     }
                     Acts::GeometryView3D::drawSurface(visualHelper, *step.surface, tgContext,
-                                              Amg::Isometry3D::Identity(), Acts::s_viewPassive);
+                                              Acts::Transform3::Identity(), Acts::s_viewPassive);
                 }
                 MuonValR4::drawPropagation(stepsResult->first, visualHelper);
             } else {
