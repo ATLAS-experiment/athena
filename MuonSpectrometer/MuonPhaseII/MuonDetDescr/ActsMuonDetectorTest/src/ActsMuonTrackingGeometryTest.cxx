@@ -64,14 +64,14 @@ struct PropagatorRecorder{
 namespace ActsTrk {
 
 
-    Amg::Transform3D ActsMuonTrackingGeometryTest::toLocalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const {
+    Acts::Transform3 ActsMuonTrackingGeometryTest::toLocalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const {
         const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(hitId);    
         const IdentifierHash trfHash = reElement->detectorType() == ActsTrk::DetectorType::Mdt ?
                                     reElement->measurementHash(hitId) : reElement->layerHash(hitId);        
-        return reElement->globalToLocalTransform(gctx, trfHash);
+        return Amg::toIsometry3D(reElement->globalToLocalTransform(gctx, trfHash));
     }
 
-    Amg::Transform3D ActsMuonTrackingGeometryTest::toGlobalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const {
+    Acts::Transform3 ActsMuonTrackingGeometryTest::toGlobalTrf(const ActsTrk::GeometryContext& gctx, const Identifier& hitId) const {
     const MuonGMR4::MuonReadoutElement* reElement = m_r4DetMgr->getReadoutElement(hitId);
     const IdentifierHash trfHash = reElement->detectorType() == ActsTrk::DetectorType::Mdt ?
                                     reElement->measurementHash(hitId) : reElement->layerHash(hitId);            
@@ -298,7 +298,7 @@ namespace ActsTrk {
                     continue;
                 }
                 const Identifier ID = sCache->identify();
-                const Amg::Transform3D toGap{toLocalTrf(*gctx, ID)};
+                const Acts::Transform3 toGap{toLocalTrf(*gctx, ID)};
                 ATH_MSG_VERBOSE("Identify propagated hit " << m_idHelperSvc->toString(ID) << " with hit at local position " << Amg::toString(toGap*step.position)<<" and global direction "<<Amg::toString(step.momentum.unit()));
                 
                 

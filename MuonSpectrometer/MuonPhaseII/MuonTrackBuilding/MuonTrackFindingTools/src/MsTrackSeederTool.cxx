@@ -176,7 +176,7 @@ namespace MuonR4{
                 line extrapolation onto the plane */
             if (frontSegment != refSeg) {
                 const Amg::Vector3D frontSegPos = atFirstSurface(tgContext, *frontSegment);
-                const Amg::Transform3D toFirstTrf = firstSurf.localToGlobalTransform(tgContext).inverse();
+                const Acts::Transform3 toFirstTrf = firstSurf.localToGlobalTransform(tgContext).inverse();
                 const Amg::Vector3D locFrontSegPos = toFirstTrf * frontSegPos;
                 if (!volume->inside(tgContext, frontSegPos)) {
                     ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Segment "<<::print(*frontSegment)
@@ -187,7 +187,7 @@ namespace MuonR4{
                 }
                 /** Update the local seed direction */
                 {
-                    const Amg::Transform3D& toLoc{volume->globalToLocalTransform(tgContext)};
+                    const Acts::Transform3& toLoc{volume->globalToLocalTransform(tgContext)};
                     const Amg::Vector3D locSeedDir = toLoc.linear() * seedDir;
                     const Amg::Vector3D locFrontDir = toLoc.linear() * frontSegment->direction();
                     seedDir = volume->localToGlobalTransform(tgContext).linear() *
@@ -269,7 +269,7 @@ namespace MuonR4{
              *         the surface bounds.  */
             auto propagateToBoundary = [&](const Acts::Surface& volBoundary) -> Acts::Result<Amg::Vector3D> {
 
-                const Amg::Transform3D& trf{volBoundary.localToGlobalTransform(tgContext)};
+                const Acts::Transform3& trf{volBoundary.localToGlobalTransform(tgContext)};
                 using namespace Acts::PlanarHelper;
                 auto pIsect = intersectPlane(seedPos, seedDir, trf.linear().col(Amg::z), trf.translation());
                 /// The extrapolation needs to go backwards and stay within the surface boundaries
@@ -630,7 +630,7 @@ namespace MuonR4{
                 return std::make_pair(projSegPos,
                                       Acts::makeDirectionFromPhiTheta(circPhi, seg->direction().theta()));
             }
-            const Amg::Transform3D& toLoc {volume->globalToLocalTransform(tgContext)};
+            const Acts::Transform3& toLoc {volume->globalToLocalTransform(tgContext)};
             const Amg::Vector3D locSegDir {toLoc.linear() * seg->direction()};
             const Amg::Vector3D locNormal {toLoc.linear() * planeNorm};
             /** Contrain the direction to have the same tangent in the precision

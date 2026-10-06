@@ -90,7 +90,7 @@ namespace MuonR4::SegmentFit{
     }
     Result_t SegmentLineFitter::callLineFit(const Acts::CalibrationContext& cctx,
                                             const Parameters& startPars,
-                                            const Amg::Isometry3D& localToGlobal,
+                                            const Acts::Transform3& localToGlobal,
                                             HitVec_t&& calibHits) const {
 
         /// Check whether a beamspot constraint should be appended
@@ -137,7 +137,7 @@ namespace MuonR4::SegmentFit{
             } 
         }
         if (appendsBS) {
-            const Amg::Transform3D globToLoc{localToGlobal.inverse()};
+            const Acts::Transform3 globToLoc{localToGlobal.inverse()};
             Amg::Vector3D beamSpot{globToLoc.translation()};
             Amg::Vector3D beamLine{globToLoc.linear().col(2)};
             SpacePoint::Cov_t covariance{};
@@ -191,7 +191,7 @@ namespace MuonR4::SegmentFit{
         SegmentLineFitter::fitSegment(const EventContext& ctx,
                                       const SegmentSeed* parent,
                                       const Parameters& startPars,
-                                      const Amg::Isometry3D& localToGlobal,
+                                      const Acts::Transform3& localToGlobal,
                                       HitVec_t&& calibHits) const {
         
         const Acts::CalibrationContext cctx = ActsTrk::getCalibrationContext(ctx);
@@ -226,7 +226,7 @@ namespace MuonR4::SegmentFit{
         return finalSeg;
     }
     std::unique_ptr<Segment> 
-        SegmentLineFitter::convertToSegment(const Amg::Transform3D& locToGlob, 
+        SegmentLineFitter::convertToSegment(const Acts::Transform3& locToGlob, 
                                             const SegmentSeed* patternSeed,
                                             Result_t&& data) const {
         const auto [locPos, locDir] = makeLine(data.parameters);
@@ -253,7 +253,7 @@ namespace MuonR4::SegmentFit{
 
     bool SegmentLineFitter::removeOutliers(const Acts::CalibrationContext& cctx,
                                            const SegmentSeed& seed,
-                                           const Amg::Isometry3D& localToGlobal,
+                                           const Acts::Transform3& localToGlobal,
                                            const LinePar_t& startPars,
                                            Result_t& fitResult) const {
 
@@ -477,7 +477,7 @@ namespace MuonR4::SegmentFit{
     }
     bool SegmentLineFitter::plugHoles(const Acts::CalibrationContext& cctx,
                                       const SegmentSeed& seed,
-                                      const Amg::Isometry3D& localToGlobal,
+                                      const Acts::Transform3& localToGlobal,
                                       Result_t& toRecover) const {
         /** We've the first estimator of the segment fit */
         ATH_MSG_DEBUG(__func__<<"() - "<<__LINE__ <<": segment "<<toString(toRecover.parameters)

@@ -99,10 +99,10 @@ StatusCode GeoModelTgcTest::execute(const EventContext& ctx) {
                       <<". But got instead "<<m_idHelperSvc->toStringDetEl(reElement->identify()));
          return StatusCode::FAILURE;
       }
-      const Amg::Transform3D globToLocal{reElement->globalToLocalTransform(gctx)};
-      const Amg::Transform3D& localToGlob{reElement->localToGlobalTransform(gctx)};
+      const Acts::Transform3 globToLocal{Amg::toIsometry3D(reElement->globalToLocalTransform(gctx))};
+      const Acts::Transform3& localToGlob{reElement->localToGlobalTransform(gctx)};
       /// Closure test that the transformations actually close
-      const Amg::Transform3D transClosure = globToLocal * localToGlob;
+      const Acts::Transform3 transClosure = globToLocal * localToGlob;
       if (!Amg::doesNotDeform(transClosure)) {
             ATH_MSG_FATAL("Closure test failed for "<<m_idHelperSvc->toStringDetEl(test_me)
                         <<". Ended up with "<< Amg::toString(transClosure) );
@@ -168,7 +168,7 @@ StatusCode GeoModelTgcTest::dumpToTree(const EventContext& ctx,
             const IdentifierHash measHash = reElement->constructHash(strip, gap, true);
             const RadialStripDesign& layout{reElement->stripLayout(measHash)};
 
-            const Amg::Transform3D localToGlobal{reElement->localToGlobalTransform(gctx , 
+            const Acts::Transform3 localToGlobal{reElement->localToGlobalTransform(gctx , 
                                                                                 reElement->layerHash(measHash)) *
                                                 (Amg::getRotateZ3D(-90.*Gaudi::Units::deg))};
             if (strip == 1) {

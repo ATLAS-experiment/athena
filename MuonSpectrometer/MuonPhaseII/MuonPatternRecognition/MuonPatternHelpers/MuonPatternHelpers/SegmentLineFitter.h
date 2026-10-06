@@ -98,7 +98,7 @@ namespace MuonR4::SegmentFit {
             std::unique_ptr<Segment> fitSegment(const EventContext& ctx,
                                                 const SegmentSeed* parent,
                                                 const LinePar_t& startPars,
-                                                const Amg::Isometry3D& localToGlobal,
+                                                const Acts::Transform3& localToGlobal,
                                                 HitVec_t&& calibHits) const;
 
         private:
@@ -117,7 +117,7 @@ namespace MuonR4::SegmentFit {
              * @param calibHits: List of hits that will be fitted */
             Result_t callLineFit(const Acts::CalibrationContext& cctx,
                                  const Parameters& startPars,
-                                 const Amg::Isometry3D& localToGlobal,
+                                 const Acts::Transform3& localToGlobal,
                                  HitVec_t&& calibHits) const;
             /** @brief Cleans the fitted segment from the most outlier hit and then
              *         attempts to refit the segment. The outlier removal is not run
@@ -136,7 +136,7 @@ namespace MuonR4::SegmentFit {
              *                    on the result and the paramters are updated accordingly */
             bool removeOutliers(const Acts::CalibrationContext& cctx,
                                 const SegmentSeed& seed,
-                                const Amg::Isometry3D& localToGlobal,
+                                const Acts::Transform3& localToGlobal,
                                 const LinePar_t& startPars,
                                 Result_t& fitResult) const;
             /** @brief Recovery of missed hits. Hits in the space point bucket  that are maximally
@@ -153,7 +153,7 @@ namespace MuonR4::SegmentFit {
              *                    on the result and the paramters are updated accordingly */
             bool plugHoles(const Acts::CalibrationContext& cctx,
                            const SegmentSeed& seed,
-                           const Amg::Isometry3D& localToGlobal,
+                           const Acts::Transform3& localToGlobal,
                            Result_t& toRecover) const;
             /** @brief Removes all hits from the segment which are obvious outliers. E.g. tubes 
              *         which cannot be crossed by the segment. 
@@ -178,7 +178,7 @@ namespace MuonR4::SegmentFit {
              *                       global parameters
              *  @param parentSeed: Segment seed from which the segment was built
              *  @param toConvert: Fitted segment that needs conversion */
-            std::unique_ptr<Segment> convertToSegment(const Amg::Transform3D& locToGlobTrf, 
+            std::unique_ptr<Segment> convertToSegment(const Acts::Transform3& locToGlobTrf, 
                                                       const SegmentSeed* parentSeed,
                                                       Result_t&& toConvert) const;
             /** @brief Checks if the candidate has enough precision hits to fit a segment. In case of 

@@ -101,7 +101,7 @@ namespace MuonR4{
         const float e{hit.kineticEnergy()},m{hit.mass()};
         return std::sqrt(std::max(e*e - m*m, 0.f)) * std::sin(globDir.theta());
     }
-    Amg::Transform3D TruthSegmentMaker::toChamber(const ActsTrk::GeometryContext& gctx,
+    Acts::Transform3 TruthSegmentMaker::toChamber(const ActsTrk::GeometryContext& gctx,
                                                   const Identifier& chanId) const {
         const MuonGMR4::MuonReadoutElement* reEle = m_detMgr->getReadoutElement(chanId);
         const IdentifierHash trfHash{reEle->detectorType() == ActsTrk::DetectorType::Mdt ?
@@ -112,7 +112,7 @@ namespace MuonR4{
     }
 
     void TruthSegmentMaker::buildSegmentsFromBkg(const EventContext& ctx,
-                                                 const Amg::Transform3D& locToGlob,
+                                                 const Acts::Transform3& locToGlob,
                                                  const SimHitVec_t& simHits,
                                                  WriteDecorHolder& out)const {
         
@@ -182,7 +182,7 @@ namespace MuonR4{
     }
     xAOD::MuonSegment* 
         TruthSegmentMaker::constructSegmentFromHits(const EventContext& ctx,
-                                                    const Amg::Transform3D& locToGlob,
+                                                    const Acts::Transform3& locToGlob,
                                                     const SimHitVec_t& simHits,
                                                     WriteDecorHolder& out) const {
         /// Find the hit which is closest to the refernce plane to express the segment
@@ -316,7 +316,7 @@ namespace MuonR4{
                                 <<", genParticle: "<<genParticle);
                     continue;
                 }
-                const Amg::Transform3D toChTrf{toChamber(*gctx, simHit->identify())};
+                const Acts::Transform3 toChTrf{toChamber(*gctx, simHit->identify())};
                 hitCollector[id][genParticle].emplace_back(simHit, 
                                                            toChTrf *xAOD::toEigen(simHit->localPosition()),
                                                            toChTrf.linear()* xAOD::toEigen(simHit->localDirection())); 
@@ -330,7 +330,7 @@ namespace MuonR4{
         WriteDecorHolder writerHolder{*writeHandle,*this, ctx};
 
         for (auto& [chamber, collectedParts] : hitCollector) {
-            const Amg::Transform3D& locToGlob{chamber->localToGlobalTransform(*gctx)};
+            const Acts::Transform3& locToGlob{chamber->localToGlobalTransform(*gctx)};
             for (auto& [particle, simHits]: collectedParts) {                
                 /* Sort hits by local z */
                 std::ranges::stable_sort(simHits,[](const HitPosTuple_t& a, const HitPosTuple_t& b){

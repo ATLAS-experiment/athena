@@ -50,9 +50,9 @@ struct RpcChamber{
         return id < other.id;
     }
     /// Transformation of the underlying GeoModel element
-    Amg::Transform3D geoModelTransform{Amg::Transform3D::Identity()};
+    Acts::Transform3 geoModelTransform{Acts::Transform3::Identity()};
     /// Transformation of the underlying Alignable node
-    Amg::Transform3D alignableTransform{Amg::Transform3D::Identity()};
+    Acts::Transform3 alignableTransform{Acts::Transform3::Identity()};
 
 
     float stripPitchEta{0.f};
@@ -103,7 +103,7 @@ struct RpcChamber{
         /// @brief flag whether the strip measures phi
         bool measPhi{false};
         /// @ transformation
-        Amg::Transform3D transform{Amg::Transform3D::Identity()};
+        Acts::Transform3 transform{Acts::Transform3::Identity()};
         /// @brief Odering operator to use the strip with set
         bool operator<(const RpcLayer& other) const {
             if (measPhi != other.measPhi) return !measPhi;
@@ -380,7 +380,7 @@ int main1( int argc, char** argv ) {
         TEST_BASICPROP(stripLengthPhi, "phi strip length");
         if (!chamberOkay) continue;
 
-        Amg::Transform3D moduleDiff = reference.geoModelTransform.inverse() *
+        Acts::Transform3 moduleDiff = reference.geoModelTransform.inverse() *
                                       test.geoModelTransform;
         
         if (false && !Amg::doesNotDeform(moduleDiff)){
@@ -402,7 +402,7 @@ int main1( int argc, char** argv ) {
             }
             // break;
             const RpcLayer& testLayer{*lay_itr};
-            const Amg::Transform3D layAlignment = testLayer.transform.inverse() *
+            const Acts::Transform3 layAlignment = testLayer.transform.inverse() *
                                                   refLayer.transform;
             if (layAlignment.translation().mag() > tolerance) {
                 std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": "<<test<<" "
@@ -463,7 +463,7 @@ int main1( int argc, char** argv ) {
             continue;
         } 
 
-        const Amg::Transform3D alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
+        const Acts::Transform3 alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
         if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
             std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": The alignable nodes are at differnt places for  "
                      <<test<<". " <<Amg::toString(alignableDistort, true)<<std::endl;

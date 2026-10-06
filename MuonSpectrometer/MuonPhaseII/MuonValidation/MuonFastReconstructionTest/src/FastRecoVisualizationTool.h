@@ -85,7 +85,7 @@ namespace MuonValR4 {
               *  @param thetaMax: Maximum global theta of the search window
               *  @param canvas: Reference to the Canvas object to which the drawn lines. Needed to set the line limits
               *  @param view: Draw the line in the eta or RZ/ZR view */
-            void drawSearchWindow(const Amg::Transform3D& localToGlobalBucket,
+            void drawSearchWindow(const Acts::Transform3& localToGlobalBucket,
                                   PrimitiveVec& outputContainer,
                                   const double thetaMin, 
                                   const double thetaMax,
@@ -105,7 +105,7 @@ namespace MuonValR4 {
               *  @param canvas: Reference to the Canvas object to which the drawn lines. Needed to set the line limits
               *  @param view: Draw the line in the eta or RZ/ZR view */
             void drawLineResidual(const ActsTrk::GeometryContext& gctx,
-                                  const Amg::Transform3D& localToGlobalBucket,
+                                  const Acts::Transform3& localToGlobalBucket,
                                   PrimitiveVec& outputContainer,
                                   const MuonR4::SpacePoint* seed, 
                                   const MuonR4::SpacePoint* testHit,
@@ -123,7 +123,7 @@ namespace MuonValR4 {
                 *  @param canvas: Reference to the Canvas object to which the drawn lines. Needed to set the line limits
                 *  @param view: Draw the line in the eta or RZ/ZR view */
             void drawSegment(const xAOD::MuonSegment& segment,
-                             const Amg::Transform3D& localToGlobalBucket,
+                             const Acts::Transform3& localToGlobalBucket,
                              PrimitiveVec& outputContainer,
                              bool& drawnTrueLabel,
                              const Canvas_t& canvas,
@@ -141,7 +141,7 @@ namespace MuonValR4 {
               *  @param view: Either the eta or the phi view? */
             template<class SpacePointType>
                 bool drawHits(const MuonR4::SpacePointBucket& bucket,
-                              const Amg::Transform3D& localToGlobalBucket,
+                              const Acts::Transform3& localToGlobalBucket,
                               const std::vector<SpacePointType>& hitsToDraw,
                               Canvas_t& canvasDim,
                               const View view) const;
@@ -158,7 +158,7 @@ namespace MuonValR4 {
              *  @param fillStyle: Standard fill style for the box e.g. full. */
             template<class SpacePointType>
                 const MuonR4::SpacePoint* drawHit(const SpacePointType& hit,
-                                                  const Amg::Transform3D& localToGlobalBucket,
+                                                  const Acts::Transform3& localToGlobalBucket,
                                                   Canvas_t& canvas,
                                                   const View view, 
                                                   unsigned int fillStyle) const;
@@ -170,7 +170,7 @@ namespace MuonValR4 {
              *  @param outputContainer: Vector to which the drawn lines are appended
              *  @param view: Draw the hit either in the eta or phi view */
             void paintSimHits(const ActsTrk::GeometryContext& gctx,
-                              const Amg::Transform3D& localToGlobalBucket,
+                              const Acts::Transform3& localToGlobalBucket,
                               const xAOD::MuonSegment& truthSeg,
                               PrimitiveVec& outputContainer,
                               const View view) const;

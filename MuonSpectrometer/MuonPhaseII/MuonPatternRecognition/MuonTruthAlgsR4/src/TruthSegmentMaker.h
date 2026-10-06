@@ -43,7 +43,7 @@ namespace MuonR4{
           /** @brief Returns the transform from the local simHit frame -> chamber frame
            *  @param gctx: Geometry context to align the chambers within ATLAS
            *  @param chanId: Identifier of the channel for which the transform shall be fetched */
-          Amg::Transform3D toChamber(const ActsTrk::GeometryContext& gctx,
+          Acts::Transform3 toChamber(const ActsTrk::GeometryContext& gctx,
                                      const Identifier& chanId) const;
           
           /** @brief Tuple consisting out of pointer to the sim hit and the position & direction
@@ -95,7 +95,7 @@ namespace MuonR4{
            * @param writeShip: Helper struct carrying the output segment container &
            *                   the associated decorators */
           xAOD::MuonSegment* constructSegmentFromHits(const EventContext& ctx,
-                                                      const Amg::Transform3D& locToGlob,
+                                                      const Acts::Transform3& locToGlob,
                                                       const SimHitVec_t& hits,
                                                       WriteDecorHolder& writeShip) const;
           /** @brief Attempts to assemble truth segments from a list of loose sim hits, i.e.,
@@ -108,7 +108,7 @@ namespace MuonR4{
            * @param writeShip: Helper struct carrying the output segment container &
            *                   the associated decorators */
           void buildSegmentsFromBkg(const EventContext& ctx,
-                                    const Amg::Transform3D& locToGlob,
+                                    const Acts::Transform3& locToGlob,
                                     const SimHitVec_t& simHits,
                                     WriteDecorHolder& writeShip) const;
 

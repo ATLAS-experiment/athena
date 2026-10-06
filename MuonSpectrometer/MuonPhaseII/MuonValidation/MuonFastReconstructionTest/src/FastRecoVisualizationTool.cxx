@@ -205,7 +205,7 @@ namespace MuonValR4 {
         }
         /** Determine the view to use ad, in cae=se of Z-R view, check if we have two swap the axis (e.g. endcap) */
         View view{m_doEtaBucketViews ? View::objViewEta : (m_doPhiBucketViews ? View::objViewPhi : View::objViewZR)};
-        const Amg::Transform3D& localToGlobalBucket{bucket.msSector()->localToGlobalTransform(*geoCtx)};
+        const Acts::Transform3& localToGlobalBucket{bucket.msSector()->localToGlobalTransform(*geoCtx)};
         /** Check the orientatation of the local y axis. If is not aligned to the global Z, we will swap the axis for RZ views */
         if (view == View::objViewZR && !bucket.msSector()->barrel()) {
             view = View::objViewRZ;                        
@@ -284,7 +284,7 @@ namespace MuonValR4 {
                                                 nameTag);
         canvas->add(drawLabel(legendLabel, 0.15, 0.96));
     }
-    void FastRecoVisualizationTool::drawSearchWindow(const Amg::Transform3D& localToGlobalBucket,
+    void FastRecoVisualizationTool::drawSearchWindow(const Acts::Transform3& localToGlobalBucket,
                                                      PrimitiveVec& outputContainer,
                                                      const double thetaMin, 
                                                      const double thetaMax,
@@ -327,7 +327,7 @@ namespace MuonValR4 {
         addSearchWindowLine(thetaMax);                                        
     }
     void FastRecoVisualizationTool::drawLineResidual(const ActsTrk::GeometryContext& gctx,
-                                                     const Amg::Transform3D& localToGlobalBucket,
+                                                     const Acts::Transform3& localToGlobalBucket,
                                                      PrimitiveVec& outputContainer,
                                                      const MuonR4::SpacePoint* seed, 
                                                      const MuonR4::SpacePoint* testHit,
@@ -417,7 +417,7 @@ namespace MuonValR4 {
         }
     }
     void FastRecoVisualizationTool::drawSegment(const xAOD::MuonSegment& segment,
-                                                const Amg::Transform3D& localToGlobalBucket,
+                                                const Acts::Transform3& localToGlobalBucket,
                                                 PrimitiveVec& outputContainer,
                                                 bool& drawnTrueLabel,
                                                 const Canvas_t& canvas,
@@ -449,7 +449,7 @@ namespace MuonValR4 {
         }
     }
     void FastRecoVisualizationTool::paintSimHits(const ActsTrk::GeometryContext& gctx,
-                                                 const Amg::Transform3D& localToGlobalBucket,
+                                                 const Acts::Transform3& localToGlobalBucket,
                                                  const xAOD::MuonSegment& truthSeg,
                                                  PrimitiveVec& outputContainer,
                                                  const View view) const {
@@ -462,7 +462,7 @@ namespace MuonValR4 {
             const IdentifierHash hash = re->detectorType() == ActsTrk::DetectorType::Mdt ?
                                         re->measurementHash(simHit->identify()) :
                                         re->layerHash(simHit->identify());
-            const Amg::Transform3D trf = re->msSector()->globalToLocalTransform(gctx) *
+            const Acts::Transform3 trf = re->msSector()->globalToLocalTransform(gctx) *
                                          re->localToGlobalTransform(gctx, hash);
             const Amg::Vector3D locPos = trf * xAOD::toEigen(simHit->localPosition());
             const Amg::Vector3D locDir = trf.linear() * xAOD::toEigen(simHit->localDirection());
@@ -486,7 +486,7 @@ namespace MuonValR4 {
     template<class SpacePointType>        
         const SpacePoint* 
             FastRecoVisualizationTool::drawHit(const SpacePointType& hit, 
-                                               const Amg::Transform3D& localToGlobalBucket,
+                                               const Acts::Transform3& localToGlobalBucket,
                                                Canvas_t& canvas,
                                                const View view,
                                                unsigned int fillStyle) const {
@@ -590,7 +590,7 @@ namespace MuonValR4 {
 
     template<class SpacePointType>      
         bool FastRecoVisualizationTool::drawHits(const SpacePointBucket& bucket,
-                                                 const Amg::Transform3D& localToGlobalBucket,
+                                                 const Acts::Transform3& localToGlobalBucket,
                                                  const std::vector<SpacePointType>& hitsToDraw,
                                                  Canvas_t& canvas,
                                                  const View view) const {

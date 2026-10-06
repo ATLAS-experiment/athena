@@ -39,7 +39,7 @@ namespace MuonR4{
         inline std::optional<Acts::BoundMatrix> 
             translateCovariance(const Parameters& locSegPars,
                                 std::optional<Covariance>&& localCov,
-                                const Amg::Transform3D& localToGlobal) {
+                                const Acts::Transform3& localToGlobal) {
             if (!localCov) {
                 return std::nullopt;
             }
@@ -103,7 +103,7 @@ namespace MuonR4{
         Parameters localSegmentPars(const ActsTrk::GeometryContext& gctx,
                                     const Segment& segment) {
             Parameters pars{};
-            const Amg::Transform3D globToLoc = segment.msSector()->globalToLocalTransform(gctx);
+            const Acts::Transform3& globToLoc = segment.msSector()->globalToLocalTransform(gctx);
             const Amg::Vector3D locPos = globToLoc * segment.position();
             const Amg::Vector3D locDir = globToLoc.linear() * segment.direction();
             pars[Acts::toUnderlying(ParamDefs::x0)] = locPos.x();

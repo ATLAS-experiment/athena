@@ -47,9 +47,9 @@ struct MdtChamber{
     }
 
     /// Transformation of the underlying GeoModel element
-    Amg::Transform3D geoModelTransform{Amg::Transform3D::Identity()};
+    Acts::Transform3 geoModelTransform{Acts::Transform3::Identity()};
     /// Transformation of the underlying Alignable node
-    Amg::Transform3D alignableTransform{Amg::Transform3D::Identity()};
+    Acts::Transform3 alignableTransform{Acts::Transform3::Identity()};
     /// Number of tube layers
     unsigned int numLayers{0};
     /// Number of tubes
@@ -66,7 +66,7 @@ struct MdtChamber{
         /// Number of the tube
         unsigned int tubeNum{0};
         /// local -> global transformation of the tube
-        Amg::Transform3D localToGlobal{Amg::Transform3D::Identity()};
+        Acts::Transform3 localToGlobal{Acts::Transform3::Identity()};
         /// Position of the readout frame in global coordinates
         Amg::Vector3D readoutPos{Amg::Vector3D::Zero()};
         /// Tube length
@@ -300,7 +300,7 @@ int main1( int argc, char** argv ) {
         TEST_BASICPROP(tubePitch, "tube pitch");
         TEST_BASICPROP(tubeRadius, "tube radius");
         
-        const Amg::Transform3D distortion = test.geoModelTransform.inverse() * reference.geoModelTransform;
+        const Acts::Transform3 distortion = test.geoModelTransform.inverse() * reference.geoModelTransform;
         /// We do not care whether the orientation of the coordinate system along the wire flips for negative
         /// chambers or not
         bool flippedChamb = {reference.id.eta < 0 && Amg::doesNotDeform(distortion * Amg::getRotateX3D(M_PI))};
@@ -324,7 +324,7 @@ int main1( int argc, char** argv ) {
                 using TubePositioning = MdtChamber::TubePositioning;
                 const TubePositioning& refTube = reference.getTube(layer, tube);
                 const TubePositioning& testTube = test.getTube(layer, tube);
-                const Amg::Transform3D tubeDistortion = testTube.localToGlobal.inverse() * refTube.localToGlobal;
+                const Acts::Transform3 tubeDistortion = testTube.localToGlobal.inverse() * refTube.localToGlobal;
                 bool flippedTube{reference.id.eta < 0 && Amg::doesNotDeform(tubeDistortion * Amg::getRotateX3D(M_PI))};
         
                 if (!alignFailure && !(Amg::doesNotDeform(tubeDistortion)  || flippedTube)) {
@@ -348,7 +348,7 @@ int main1( int argc, char** argv ) {
                 /// In cases where the tube coordinate systems are not aligned, 
                 /// there's no point in checking the position of the reaodout
                 if (alignFailure || readoutOrient) continue;
-                const Amg::Transform3D refSystem = refTube.localToGlobal.inverse();
+                const Acts::Transform3 refSystem = refTube.localToGlobal.inverse();
 
                 const Amg::Vector3D refRO = refSystem * refTube.readoutPos;
                 const Amg::Vector3D testRO = refSystem* testTube.readoutPos;
@@ -367,7 +367,7 @@ int main1( int argc, char** argv ) {
             return_code = EXIT_FAILURE;
             continue;
         }
-        const Amg::Transform3D alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
+        const Acts::Transform3 alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
         if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
             std::cerr<<"runMdtGeoComparision() "<<__LINE__<<": The alignable nodes are at differnt places for  "
                      <<test<<". " <<GeoTrf::toString(alignableDistort, true)<<" chamber length: "<<

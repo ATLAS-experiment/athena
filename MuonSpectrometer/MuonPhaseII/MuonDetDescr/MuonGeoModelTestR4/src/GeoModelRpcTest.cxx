@@ -173,10 +173,10 @@ StatusCode GeoModelRpcTest::execute(const EventContext& ctx) {
       visualizeStripPanel(ctx, reElement->getParameters().etaDesign, reElement->identify(), false);
       visualizeStripPanel(ctx, reElement->getParameters().phiDesign, reElement->identify(), true);
       
-      const Amg::Transform3D globToLocal{reElement->globalToLocalTransform(gctx)};
-      const Amg::Transform3D& localToGlob{reElement->localToGlobalTransform(gctx)};
+      const Acts::Transform3 globToLocal{Amg::toIsometry3D(reElement->globalToLocalTransform(gctx))};
+      const Acts::Transform3& localToGlob{reElement->localToGlobalTransform(gctx)};
       /// Closure test that the transformations actually close
-      const Amg::Transform3D transClosure = globToLocal * localToGlob;
+      const Acts::Transform3 transClosure = globToLocal * localToGlob;
       if (!Amg::doesNotDeform(transClosure)) {
         ATH_MSG_FATAL("Closure test failed for "<<m_idHelperSvc->toStringDetEl(test_me)
                     <<". Ended up with "<< Amg::toString(transClosure) );
@@ -254,7 +254,7 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
    m_envelopeWidth  = 2.*reElement->getParameters().halfWidth;
    m_envelopeLength = 2.*reElement->getParameters().halfLength;
    /// Dump the local to global transformation of the readout element
-   const Amg::Transform3D& transform{reElement->localToGlobalTransform(gctx)};
+   const Acts::Transform3& transform{reElement->localToGlobalTransform(gctx)};
    m_readoutTransform = transform;
    m_alignableNode  = reElement->alignableTransform()->getDefTransform();
 
@@ -288,7 +288,7 @@ StatusCode GeoModelRpcTest::dumpToTree(const EventContext& ctx,
                     m_stripDblPhi.push_back(doubPhi);
 
                     if (strip != 1) continue;
-                    const Amg::Transform3D locToGlob = reElement->localToGlobalTransform(gctx, layHash)
+                    const Acts::Transform3 locToGlob = reElement->localToGlobalTransform(gctx, layHash)
                                                       * Amg::getRotateZ3D(90.*Gaudi::Units::deg * measPhi);
                     m_stripRot.push_back(locToGlob);
                     m_stripRotGasGap.push_back(gasGap);

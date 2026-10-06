@@ -142,7 +142,7 @@ namespace MuonCombinedR4{
             ActsTrk::detail::xAODUncalibMeasSurfAcc surfAcc{m_trackingGeometrySvc.get()};
             targetSurf = surfAcc.get(ship.beamSpot)->getSharedPtr();
         } else {
-            targetSurf = Acts::Surface::makeShared<Acts::PerigeeSurface>(Amg::Isometry3D::Identity());
+            targetSurf = Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Transform3::Identity());
         }
         // Do not refit if there is no beam spot or if there is no
         // beam spot surface

@@ -50,7 +50,7 @@ struct MmChamber{
     std::string design{};
 
     /// Transformation of the underlying Alignable node
-    Amg::Transform3D alignableTransform{Amg::Transform3D::Identity()};
+    Acts::Transform3 alignableTransform{Acts::Transform3::Identity()};
 
     /// Sorting operator to insert the object into std::set
     bool operator<(const MmChamber& other) const {
@@ -61,7 +61,7 @@ struct MmChamber{
     }
 
     /// Transformation of the underlying GeoModel element
-    Amg::Transform3D geoModelTransform{Amg::Transform3D::Identity()};
+    Acts::Transform3 geoModelTransform{Acts::Transform3::Identity()};
 
     ////Chamber Details
     unsigned int nGasGaps{0};
@@ -107,7 +107,7 @@ struct MmChamber{
         /// @brief Gas gap number of the layer
         unsigned int gasGap{0};
         /// @ transformation
-        Amg::Transform3D transform{Amg::Transform3D::Identity()};
+        Acts::Transform3 transform{Acts::Transform3::Identity()};
         /// @ Reference position of the first strip
         Amg::Vector2D firstStripPos{Amg::Vector2D::Zero()};
         /// @ Reference number of the first strip
@@ -371,7 +371,7 @@ int main1( int argc, char** argv ) {
         bool chamberOkay{true};
         const MmChamber& test = {*test_itr};
 
-        const Amg::Transform3D alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
+        const Acts::Transform3 alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
         if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
             std::cerr<<"runMmGeoComparison() "<<__LINE__<<": The alignable nodes are at differnt places for  "
                      <<test<<". " <<Amg::toString(alignableDistort, 3)<<std::endl;

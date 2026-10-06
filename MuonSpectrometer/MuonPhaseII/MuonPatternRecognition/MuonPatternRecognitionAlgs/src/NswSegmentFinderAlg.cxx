@@ -424,7 +424,7 @@ std::unique_ptr<Segment> NswSegmentFinderAlg::fitSegmentSeed(const EventContext&
                                                                patternSeed->localPosition(), 
                                                                patternSeed->localDirection(), 0.);
 
-    const auto& locToGlob = patternSeed->msSector()->localToGlobalTransform(gctx);
+    const Acts::Transform3& locToGlob{patternSeed->msSector()->localToGlobalTransform(gctx)};
  
     return m_lineFitter->fitSegment(ctx, patternSeed, patternSeed->parameters(),
                                                 locToGlob, std::move(calibratedHits));
@@ -740,7 +740,7 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
     SegmentSeedVec_t seeds{};
     SegmentVec_t segments{};
 
-    const Amg::Transform3D globToLocal = max.msSector()->globalToLocalTransform(gctx);
+    const Acts::Transform3 globToLocal = max.msSector()->globalToLocalTransform(gctx);
     //counters for the number of seeds, extented seeds and segments
 
     if (layerSize < minLayers) {
@@ -762,7 +762,7 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
             }
 
             const MuonGMR4::MuonReadoutElement* reEle = m_detMgr->getReadoutElement(simHit->identify());
-            const Amg::Transform3D toChamb = reEle->msSector()->globalToLocalTransform(gctx) * 
+            const Acts::Transform3 toChamb = reEle->msSector()->globalToLocalTransform(gctx) * 
                                              reEle->localToGlobalTransform(gctx, sp->identify());
 
             const Amg::Vector3D hitPos = toChamb * xAOD::toEigen(simHit->localPosition());

@@ -59,7 +59,7 @@ namespace  MuonValR4 {
                          Acts::ObjVisualization3D& visualHelper,
                          const Acts::ViewConfig& viewConfig) {
         /// Take the local z component of the local to global transform as plane normal
-        const Amg::Transform3D& locToGlob = segment.msSector()->localToGlobalTransform(tgContext);
+        const Acts::Transform3& locToGlob = segment.msSector()->localToGlobalTransform(tgContext);
         const Amg::Vector3D firstSurfPos = locToGlob*segment.measurements().front()->localPosition();
         const Amg::Vector3D lastSurfPos  = locToGlob*segment.measurements().back()->localPosition();
         const Amg::Vector3D planeNorm = locToGlob.linear().col(2);
@@ -146,7 +146,7 @@ namespace  MuonValR4 {
                                                                               Amg::getTranslate3D(driftCirc->localMeasurementPos()),
                                                                               std::move(newBounds));
             Acts::GeometryView3D::drawSurface(visualHelper, *dummySurface, tgContext,
-                                              Amg::Isometry3D::Identity(), viewConfig);
+                                              Acts::Transform3::Identity(), viewConfig);
             return;
         }
         double dX{0.}, dY{0.};
@@ -231,7 +231,7 @@ namespace  MuonValR4 {
 
         }
         Acts::GeometryView3D::drawSurface(visualHelper, *dummySurf, tgContext,
-                                          Amg::Isometry3D::Identity(), viewConfig);
+                                          Acts::Transform3::Identity(), viewConfig);
     }
     void drawBoundParameters(const Acts::GeometryContext& tgContext,
                              const Acts::BoundTrackParameters& pars,
@@ -249,7 +249,7 @@ namespace  MuonValR4 {
                         const Acts::ViewConfig& viewConfig) {
         if (spacePoint.dimension() == 2 && !spacePoint.isStraw() &&
             spacePoint.primaryMeasurement() != spacePoint.secondaryMeasurement()) {
-            const auto& locToGlob =  spacePoint.msSector()->localToGlobalTransform(tgContext);
+            const Acts::Transform3& locToGlob =  spacePoint.msSector()->localToGlobalTransform(tgContext);
             const double dX = std::sqrt(spacePoint.covariance()[Acts::toUnderlying(CovIdx::phiCov)]);
             const double dY = std::sqrt(spacePoint.covariance()[Acts::toUnderlying(CovIdx::etaCov)]);
             auto bounds = std::make_unique<Acts::RectangleBounds>(dX, dY);
@@ -270,12 +270,12 @@ namespace  MuonValR4 {
             drawSpacePoint(tgContext, *spacePoint.spacePoint(), visualHelper, viewConfig);
             return;
         }
-        const auto& locToGlob = msSector->localToGlobalTransform(tgContext);
+        const Acts::Transform3& locToGlob = msSector->localToGlobalTransform(tgContext);
         if (spacePoint.isStraw()) {
               const double dR = std::sqrt(spacePoint.covariance()[Acts::toUnderlying(CovIdx::etaCov)]);
               const double hZ = std::sqrt(spacePoint.covariance()[Acts::toUnderlying(CovIdx::phiCov)]);
               auto bounds = std::make_unique<Acts::LineBounds>(dR, hZ);
-              const Amg::Isometry3D trf = locToGlob * Amg::getTranslate3D(spacePoint.localPosition());
+              const Acts::Transform3 trf = locToGlob * Amg::getTranslate3D(spacePoint.localPosition());
               auto surface = Acts::Surface::makeShared<Acts::StrawSurface>(trf, std::move(bounds));    
               Acts::GeometryView3D::drawSurface(visualHelper, *surface, tgContext);    
         } else {

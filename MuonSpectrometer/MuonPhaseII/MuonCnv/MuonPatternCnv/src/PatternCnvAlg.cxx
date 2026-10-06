@@ -74,7 +74,7 @@ namespace MuonR4{
        
     
         for (const SegmentSeed* seed: seedContainer) {
-            const Amg::Transform3D& localToGlobal = seed->msSector()->localToGlobalTransform(*gctx);
+            const Acts::Transform3& localToGlobal = seed->msSector()->localToGlobalTransform(*gctx);
                 
             std::unordered_set<Identifier> channelsInMax{};
             for (const HoughHitType& hit : seed->getHitsInMax()) {
