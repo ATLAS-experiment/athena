@@ -11,6 +11,9 @@
 
 #include <Gaudi/Property.h>
 
+// Acts Core
+#include "Acts/Seeding/GbtsLayerConnection.hpp"
+
 #include <map>
 #include <tuple>
 #include <vector>
@@ -33,6 +36,9 @@ namespace ActsTrk {
 /// layer) and each group becomes one GBTS layer - but the result is handed out
 /// as `Acts::Experimental::GbtsLayerDescription` directly, with the layer's
 /// technology filled in rather than left to be decoded from its id.
+///
+/// Also includes helper functions to read in layer connection table, using
+/// the layer geometry, so that both GPU and CPU GBTS can use the same readers
 class GbtsLayerTool final : public extends<AthAlgTool, IGbtsLayerTool> {
  public:
   GbtsLayerTool(const std::string& type, const std::string& name,
@@ -54,6 +60,16 @@ class GbtsLayerTool final : public extends<AthAlgTool, IGbtsLayerTool> {
     return m_stripLayers;
   }
 
+  /// Reads the connection table and keeps the connections this pass is for:
+  /// both layers have to be layers this detector has, of one technology,
+  /// and that technology has to be one the pass asked for.
+  /// @param connections filled with the layer pairs, in stage order
+  /// @param etaBinWidth filled with the eta bin width the table was made for
+  StatusCode readConnections(
+    const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
+    std::vector<Acts::Experimental::GbtsLayerConnection>& connections,
+    float& etaBinWidth, std::string connectorInputFile, bool usePixel, bool useStrips) const override;
+
  private:
   /// One module, as grouped into a layer.
   struct ModuleEntry {
@@ -61,6 +77,32 @@ class GbtsLayerTool final : public extends<AthAlgTool, IGbtsLayerTool> {
     short etaIndex{};
     int hash{};
   };
+
+  /// One row of the table: the two layers it connects, and the stage it is in.
+  struct Connection {
+    std::uint32_t stage{};
+    std::uint32_t src{};
+    std::uint32_t dst{};
+  };
+
+  /// The table as it is on file.
+  struct ReadResult {
+    /// The eta bin width the table was made for.
+    float etaBinWidth{};
+    /// The connections, in file order.
+    std::vector<Connection> connections;
+  };
+
+  /// Read the GBTS layer connection table.
+  ///
+  /// The whole table, as written: which of it applies to the detector and to
+  /// the pass at hand is the caller's to decide. The bin table each connection
+  /// carries is skipped, GBTS recomputes it from the layer geometry.
+  ///
+  /// @param inputStream the table
+  /// @throws std::runtime_error if the table cannot be read
+  /// @return the table
+  ReadResult read(std::istream& inputStream) const;
 
   /// Layer key: (side, technology, volume id, layer id). The side is the
   /// barrel/endcap code, with the barrel remapped so that it sorts first.

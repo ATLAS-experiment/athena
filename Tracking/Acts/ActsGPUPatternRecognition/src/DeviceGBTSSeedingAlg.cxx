@@ -9,11 +9,7 @@
 // traccc EDM
 #include "traccc/edm/silicon_cell_collection.hpp"
 #include "traccc/edm/measurement_collection.hpp"
-#include "TrigInDetPattRecoTools/GNN_FasTrackConnector.h"
-#include "TrigInDetPattRecoTools/GNN_Geometry.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
-
-#include "PathResolver/PathResolver.h"
 
 // vecmem
 #include "vecmem/memory/memory_resource.hpp"
@@ -87,61 +83,46 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
 {
 
     // traccc-gbts defaults are ITk tuned
-    // get layer linking scheme from the athena tools
-    std::string conn_fileName =
-        PathResolver::find_file(m_connectionFileName, "DATAPATH");
-    if (conn_fileName.empty()) {
-        ATH_MSG_FATAL("Cannot find layer connections file for GBTS "
-                      << conn_fileName);
-        return StatusCode::FAILURE;
-    }
-    std::ifstream ifs(conn_fileName.c_str());
-    std::unique_ptr<GNN_FASTRACK_CONNECTOR> gbts_connector =
-        std::make_unique<GNN_FASTRACK_CONNECTOR>(ifs, false);
-    ATH_MSG_INFO("Layer connections are initialized from file for GBTS "
-                 << conn_fileName);
 
-    const std::vector<Acts::Experimental::GbtsLayerDescription>& layerDescs =
-        m_layerNumberTool->layerDescriptions();
+    // The layer tool builds the GBTS layers, in dense layer index order, and
+    // knows which layer each module hash belongs to and what it is made of.
+    const std::vector<Acts::Experimental::GbtsLayerDescription>& layers =
+      m_layerNumberTool->layerDescriptions();
 
-    std::vector<TrigInDetSiLayer> layerGeometry;
-    layerGeometry.reserve(layerDescs.size());
-    for (const auto& layer : layerDescs) {
-        TrigInDetSiLayer converted;
-        converted.m_subdet = layer.id;
-        converted.m_type =
-            (layer.type == Acts::Experimental::GbtsLayerType::Endcap) ? 1 : 0;
-        converted.m_refCoord = layer.refCoord;
-        converted.m_minBound = layer.minBound;
-        converted.m_maxBound = layer.maxBound;
-        layerGeometry.push_back(converted);
-    }
+    m_pixelHashToLayer = &m_layerNumberTool->pixelLayers();
+    m_stripHashToLayer = &m_layerNumberTool->stripLayers();
 
-    std::unique_ptr<TrigFTF_GNN_Geometry> GBTS_geo =
-        std::make_unique<TrigFTF_GNN_Geometry>(layerGeometry, gbts_connector);   
+    std::vector<Acts::Experimental::GbtsLayerConnection> connections;
+    float etaBinWidth = 0.0f;
+    ATH_CHECK(m_layerNumberTool->readConnections(layers, connections, etaBinWidth, m_connectorInputFile, true, false));
+
+    // create geoemtry object that holds allowed pairing of allowed eta regions in each layer
+    // holds all geometry information (m_layergeomtry and connection table)
+    auto gbtsGeo = std::make_shared<Acts::Experimental::GbtsGeometry>(
+      layers, connections, etaBinWidth, Acts::Experimental::GbtsZ0Range{}, logger());
 
     traccc::device::gbts_layerInfo layerInfo;
     // convert save and convert layer info to SoA
-    layerInfo.reserve(GBTS_geo->num_layers());
+    layerInfo.reserve(static_cast<unsigned int>(gbtsGeo->numLayers()));
 
-    for (unsigned int index = 0; index < GBTS_geo->num_layers(); ++index) {
-        const TrigFTF_GNN_Layer* layer =
-            GBTS_geo->getTrigFTF_GNN_LayerByIndex(index);
-        // pixel barrel=0 pixel endcap=1 pixel inc. barrel=2 strip=3
-        int vol_id =
-            (layer->m_layer.m_subdet - (layer->m_layer.m_subdet % 1000)) / 1000;
-        int is_inc_barrel = (vol_id == 97) | (vol_id == 95) | (vol_id == 93) |
-                            (vol_id == 77) | (vol_id == 75) | (vol_id == 73);
-        char type = (layer->m_layer.m_type != 0) + is_inc_barrel;
-        if (layer->m_layer.m_subdet <= 20000) {
-            type = 3;
-        }
-        // eta prediction cut occurs for type=0 and cluster width cut for type=1
-        layerInfo.addLayer(type, layer->m_bins[0], layer->num_bins(),
-                           layer->m_minEta, layer->m_etaBin);
+    for (unsigned int index = 0; index < gbtsGeo->numLayers(); ++index) {
+      Acts::Experimental::GbtsLayerBinning binning = gbtsGeo->layerBinning(index);
+      Acts::Experimental::GbtsLayerDescription desc =
+          gbtsGeo->layerDescription(index);
+      int vol_id = (desc.id - (desc.id % 1000)) / 1000;
+      bool is_inc_barrel = (vol_id == 97) | (vol_id == 95) | (vol_id == 93) |
+                           (vol_id == 77) | (vol_id == 75) | (vol_id == 73);
+      char type = 0;
+      if (desc.technology == Acts::Experimental::GbtsLayerTechnology::Strip) {
+        type = 3;
+      } else if (is_inc_barrel) {
+        type = 2;
+      } else if (desc.type == Acts::Experimental::GbtsLayerType::Endcap) {
+        type = 1;
+      }
+      layerInfo.addLayer(type, binning.firstBin, binning.numBins, binning.minEta,
+                         binning.etaBinWidth);
     }
-
-    const std::vector<short>& pixel_h2l = m_layerNumberTool->pixelLayers();
 
     std::vector<std::pair<std::uint64_t, short>> identifierBinning;
     identifierBinning.reserve(m_idMapping->size());
@@ -154,25 +135,19 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
             IdentifierHash idHash{};//default c'tor produces detectable invalid hash
             int rc = m_pixelID->get_hash(athenaId, idHash, &pixel_context); //rc=0 is ok
             if (rc!=0)[[unlikely]] continue;
-            const short layer = pixel_h2l.at(static_cast<int>(idHash));
+            const short layer = m_pixelHashToLayer->at(static_cast<int>(idHash));
             if (layer == IGbtsLayerTool::kNoLayer) [[unlikely]] continue;
             identifierBinning.push_back(std::make_pair(
-                detrayId, pixel_h2l.at(static_cast<int>(idHash))));
+                detrayId, layer));
         }
     }
     ATH_MSG_INFO(identifierBinning.size() << " identifiers with a layer");
 
     std::vector<std::pair<unsigned int, std::vector<unsigned int>>> binGroups;
-    {
-        const auto & rawBinGroups = GBTS_geo->bin_groups();
-        binGroups.reserve(rawBinGroups.size());
-        for (const auto& p : rawBinGroups) {
-            binGroups.emplace_back(static_cast<unsigned int>(p.first),
-                                    std::vector<unsigned int>(p.second.begin(), p.second.end()));
-        }
+    for (Acts::Experimental::GbtsBinGroup groups : gbtsGeo->binGroups()) {
+      binGroups.emplace_back(groups.bin, groups.links);
     }
 
-    
     if (!m_gbts_config.setLinkingScheme(binGroups, std::move(layerInfo), identifierBinning,
                                     900.0f, makeActsAthenaLogger(this, "GBTSConfig")))
         return StatusCode::FAILURE;

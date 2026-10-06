@@ -69,16 +69,6 @@ namespace ActsTrk {
     /// sets configs based on gaudi properties defined below
     StatusCode prepareConfiguration();
 
-    /// Reads the connection table and keeps the connections this pass is for:
-    /// both layers have to be layers this detector has, of one technology,
-    /// and that technology has to be one the pass asked for.
-    /// @param connections filled with the layer pairs, in stage order
-    /// @param etaBinWidth filled with the eta bin width the table was made for
-    StatusCode readConnections(
-      const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
-      std::vector<Acts::Experimental::GbtsLayerConnection>& connections,
-      float& etaBinWidth) const;
-
     /// Reads the tau lookup table the cluster width cuts need: per line a
     /// cluster width, the bulk tau bounds and the near-edge ones.
     StatusCode readTauLookupTable(
