@@ -148,6 +148,10 @@ StripStereoAnnulusDesign(const SiDetectorDesign::Axis &stripDirection,
     // cases, use the un-suffixes methods above
     SiLocalPosition localPositionOfCellPC(const SiCellId &cellId) const;
     SiLocalPosition localPositionOfClusterPC(const SiCellId &cellId, int clusterSize) const;
+    // convert an arbitrary local position (e.g. a cluster centre) to STRIP PC,
+    // with the same conventions as localPositionOfCellPC, but without snapping
+    // to the centre of the nearest strip
+    SiLocalPosition localPositionPC(const SiLocalPosition &pos) const;
 
     // position -> id
     virtual SiCellId cellIdOfPosition(const SiLocalPosition &localPos) const override;

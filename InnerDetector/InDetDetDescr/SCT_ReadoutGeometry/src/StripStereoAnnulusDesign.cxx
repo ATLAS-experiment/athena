@@ -470,6 +470,16 @@ SiLocalPosition StripStereoAnnulusDesign::localPositionOfClusterPC(SiCellId cons
     return (startPos + endPos)*0.5;
 }
 
+SiLocalPosition StripStereoAnnulusDesign::localPositionPC(SiLocalPosition const &pos) const {
+    SiLocalPosition pos_strip = beamToStrip(pos);
+    // beamToStrip returns (r, phi) when using PC, (x, y) otherwise
+    double rPrime = (m_usePC) ? pos_strip.xEta() : pos_strip.r();
+    double phiPrime = (m_usePC) ? pos_strip.xPhi() : pos_strip.phi();
+
+    // flip phi, like in localPositionOfCellPC
+    return SiLocalPosition(rPrime, -phiPrime);
+}
+
 /// Give end points of the strip that covers the given position
 std::pair<SiLocalPosition, SiLocalPosition> StripStereoAnnulusDesign::endsOfStrip(SiLocalPosition const &pos) const {
 

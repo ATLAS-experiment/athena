@@ -114,12 +114,13 @@ namespace TrackingUtilities {
       localPosition = localPos.x();
       localCovariance = element.phiPitch() * element.phiPitch() * one_over_twelve;
     } else {
-      InDetDD::SiCellId cellId = element.cellIdOfPosition(localPos);
       const auto* design = dynamic_cast<const InDetDD::StripStereoAnnulusDesign *>(&element.design());
       if ( design == nullptr ) {
         THROW_EXCEPTION("Invalid bounds from "<<cluster);
       }
-      InDetDD::SiLocalPosition localInPolar = design->localPositionOfCellPC(cellId);
+      // convert the cluster centre directly, rather than going via the cell id,
+      // which would snap the position to the centre of a single strip
+      InDetDD::SiLocalPosition localInPolar = design->localPositionPC(localPos);
       localPosition = localInPolar.xPhi();
       localCovariance = design->phiPitchPhi() * design->phiPitchPhi() * one_over_twelve;
     }
