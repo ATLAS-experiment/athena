@@ -767,7 +767,8 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                                         unique_energies.add(energy)
                                     if len(unique_energies) == 1:
                                         maybe_ok = True
-                                elif key in ["AtlasRelease", "IOVDbGlobalTag", "AODFixVersion"]:
+                                # randomSeed is maybe_ok due to mc16 corruption test failures (see ATLASG-3193)
+                                elif key in ["AtlasRelease", "IOVDbGlobalTag", "AODFixVersion", "randomSeed"]:
                                     maybe_ok = True
                                 if maybe_ok:
                                     msg.warning(
