@@ -2,7 +2,7 @@
 # art-description: Nightly test to compare G-130 vs C-230 (Full-scan) for EFTrack studies using singleMu 100GeV sample
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc15-opt
-# art-pathena-flags-add: --site=CERN-GPU
+# art-architecture: {"gpu_spec": {"vendor": "nvidia", "version": ">=13.3", "model": {"pattern": ".*(P100|V100).*", "excl": true}}}
 # art-input: mc21_14TeV:mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
 # art-input-nfiles: 400
 # art-output: IDTPM.*.root
