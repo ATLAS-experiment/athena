@@ -1,23 +1,22 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef SIMULATIONBASE
 #ifndef MUONGEOMODELR4_MUONCHAMBERASSMBLETOOL_H
 #define MUONGEOMODELR4_MUONCHAMBERASSMBLETOOL_H
 
-#include <AthenaBaseComps/AthAlgTool.h>
+#include "AthenaBaseComps/AthAlgTool.h"
 
-#include <MuonReadoutGeometryR4/SpectrometerSector.h>
+#include "MuonReadoutGeometryR4/SpectrometerSector.h"
 
-#include <GeoModelInterfaces/IGeoDbTagSvc.h>
-#include <MuonGeoModelR4/IMuonReaoutGeomTool.h>
-#include <MuonGeoModelR4/IMuonGeoUtilityTool.h>
-#include <MuonIdHelpers/IMuonIdHelperSvc.h>
+#include "MuonGeoModelR4/IMuonReaoutGeomTool.h"
+#include "MuonGeoModelR4/IMuonGeoUtilityTool.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
 
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 #include "Acts/Geometry/VolumeBounds.hpp"
 #include "Acts/Utilities/PointerTraits.hpp"
 #include "Acts/Utilities/BoundFactory.hpp"
+
 #include <tuple>
 
 namespace MuonGMR4 {
@@ -59,49 +58,8 @@ class ChamberAssembleTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
                                 const double margin) const
             requires (Acts::PointerConcept<ReObjType>);
 
-      /** @brief Builds the trapezoidal bounding box enclosing a single readout element
-        * @param reEle: Pointer to the readout element to fetch the bounds from
-        * @param boundSet: Cache of create bounds to share the same bounds across multiple volumes */
-      static VolBoundPtr_t boundingBox(const MuonReadoutElement* reEle,
-                                        Acts::VolumeBoundFactory& boundSet);
       using ChamberPtr = SpectrometerSector::ChamberPtr;
 
-      static VolBoundPtr_t boundingBox(const ChamberPtr& chamber,
-                                       Acts::VolumeBoundFactory& boundSet);
-
-      /** @brief Returns the 4 corners of the trapezoid in the x-y plane
-        * @param localToGlob: Transform from the trapezoid restframe -> chambers frame
-        * @param bounds: Reference to the trapezoidal bounds defining the volume */
-      static std::array<Amg::Vector3D, 4> cornerPointsPlane(const Acts::Transform3& localToGlob, 
-                                                            const VolBounds_t& bounds);
-
-      /** @brief Returns the 8 corners marking the trapezoid 
-        * @param localToGlob: Transform from the trapezoid restframe -> chambers frame
-        * @param bounds: Reference to the trapezoidal bounds defining the volume */
-      static std::array<Amg::Vector3D, 8> cornerPoints(const Acts::Transform3& localToGlob, 
-                                                       const VolBounds_t& bounds);
-
-      /** @brief Returns the translation transform centering the 8 corner points of the trapezoid.
-        *        The centre is defined as the centre point of the surrounding box
-        * @param cornerPoints: Array to all 8 corner points of the trapezoid */
-      static Acts::Transform3 centerTrapezoid(const std::array<Amg::Vector3D, 8>& cornerPoints);
-      /** @brief Returns the signed distances of an external point to the trapezoidal edge. 
-       *         Distances > 0 indicate that the point is inside the boundaries and outside otherwise
-       *  @param linePos: Arbitrary point on the trapezoidal edge
-       *  @param lineDir: Direction of the trapezoidal edge
-       *  @param testMe: External point to measure the distance
-       *  @param leftEdge: Switch indicating whether the edge is on the left & right side */
-      static double trapezoidEdgeDist(const Amg::Vector3D& linePos,
-                                      const Amg::Vector3D& lineDir,
-                                      const Amg::Vector3D& testMe,
-                                      bool leftEdge);
-      /** @brief Enlarge the parsed volume bounds by an extra margin attached to all 3 dimensions
-       *  @param enlargeMe: Bounds which are intended to be enlarged
-       *  @param margin: Amount by which the total length of the bounds should grow
-       *  @param volBoundsSet: Bound factory to assign equivalent bounds to multiple volumes*/
-      static VolBoundPtr_t enlargeBounds(const VolBounds_t& enlargeMe,
-                                         const double margin,
-                                         Acts::VolumeBoundFactory& volBoundSet);
       /** @brief Construct surface bounds which measure equal sizes in halfXlow/halfXhigh & halfY as the 
        *         parsed volume bounds
        *  @param volBounds: Bounds which are mapped to surface bounds
@@ -115,7 +73,4 @@ class ChamberAssembleTool : public extends<AthAlgTool, IMuonReadoutGeomTool> {
 };
 
 }
-
 #endif
-#endif
-

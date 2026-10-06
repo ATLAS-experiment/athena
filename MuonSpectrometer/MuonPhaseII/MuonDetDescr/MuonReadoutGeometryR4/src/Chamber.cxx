@@ -101,11 +101,17 @@ namespace MuonGMR4{
     const Acts::PlaneSurface& Chamber::surface() const {
         return *m_args.surface;
     }
-    const Amg::Isometry3D& Chamber::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
+    const Acts::Transform3& Chamber::localToGlobalTransform(const ActsTrk::GeometryContext& gctx) const {
         return m_args.placement->localToGlobalTransform(gctx.context());
     }
-    const Amg::Isometry3D& Chamber::globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const {
+    const Acts::Transform3& Chamber::globalToLocalTransform(const ActsTrk::GeometryContext& gctx) const {
         return m_args.placement->globalToLocalTransform(gctx.context());
+    }
+    const Acts::Transform3& Chamber::localToGlobalTransform(const Acts::GeometryContext& tgContext) const {
+        return m_args.placement->localToGlobalTransform(tgContext);
+    }
+    const Acts::Transform3& Chamber::globalToLocalTransform(const Acts::GeometryContext& tgContext) const {
+        return m_args.placement->globalToLocalTransform(tgContext);
     }
     const SpectrometerSector* Chamber::parent() const { return m_parent; }
     void Chamber::setParent(const SpectrometerSector* parent) { m_parent = parent; }
