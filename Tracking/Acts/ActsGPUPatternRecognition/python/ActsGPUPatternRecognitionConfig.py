@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Utils.unixtools import find_datafile
 
 from AthDeviceComps.AthDeviceCompsConfig import MemoryResourcesToolCfg, CopyToolCfg
 from AthDeviceComps.DeviceConfigFlags import DeviceBackend
@@ -110,6 +111,8 @@ def DeviceGBTSSeedingAlgCfg(flags,
     kwargs.setdefault("InputTracccPixelSpacepoints", "TracccPixelSpacepoints")
     kwargs.setdefault("InputTracccMeasurements", "TracccMeasurements")
     kwargs.setdefault("OutputTracccPixelSeeds", "TracccPixelSeeds")
+
+    kwargs.setdefault("connectorInputFile" , find_datafile(flags.Acts.Gbts.connectionTable))
 
     from ActsConfig.ActsSeedingConfig import ActsGbtsLayerToolCfg
     kwargs.setdefault("layerNumberTool", acc.popToolsAndMerge(ActsGbtsLayerToolCfg(flags)))

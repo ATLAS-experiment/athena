@@ -9,8 +9,6 @@
 
 #include "src/GbtsSeedingTool.h"
 
-#include "src/GbtsConnectionTableReader.h"
-
 #include "CxxUtils/inline_hints.h"
 
 #include <algorithm>
@@ -56,7 +54,7 @@ namespace ActsTrk {
 
     std::vector<Acts::Experimental::GbtsLayerConnection> connections;
     float etaBinWidth = 0.0f;
-    ATH_CHECK(readConnections(layers, connections, etaBinWidth));
+    ATH_CHECK(m_layerTool->readConnections(layers, connections, etaBinWidth, m_connectorInputFile.value(), m_usePixelLayers, m_useStripLayers));
 
     // option that allows for adding custom eta binning (default is at 0.2)
     if (m_etaBinWidthOverride.value() != 0.0f) {
@@ -220,100 +218,6 @@ namespace ActsTrk {
     }
 
     ATH_MSG_VERBOSE("Number of seeds created is " << seedContainer.size());
-    return StatusCode::SUCCESS;
-  }
-
-  // this is called in initialise
-  // adds all veriables that may have been changed in the gaudi properties defined in headerfile 
-  
-  StatusCode GbtsSeedingTool::readConnections(
-    const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
-    std::vector<Acts::Experimental::GbtsLayerConnection>& connections,
-    float& etaBinWidth) const
-  {
-    std::ifstream connectionStream(m_connectorInputFile.value());
-    if (!connectionStream.is_open()) {
-      ATH_MSG_ERROR("Cannot open the GBTS connection table "
-                    << m_connectorInputFile.value());
-      return StatusCode::FAILURE;
-    }
-
-    GbtsConnectionTable::ReadResult table;
-    try {
-      table = GbtsConnectionTable::read(connectionStream);
-    } catch (const std::exception& e) {
-      ATH_MSG_ERROR("Cannot read " << m_connectorInputFile.value() << ": "
-                    << e.what());
-      return StatusCode::FAILURE;
-    }
-
-    // the table names a layer by its id, the layer tool by its dense index
-    std::unordered_map<Acts::Experimental::GbtsExperimentLayerId,
-                       Acts::Experimental::GbtsLayerTechnology>
-      layerTechnologies;
-    layerTechnologies.reserve(layers.size());
-    for (const Acts::Experimental::GbtsLayerDescription& layer : layers) {
-      layerTechnologies.emplace(layer.id, layer.technology);
-    }
-
-    etaBinWidth = table.etaBinWidth;
-
-    // the stage column only fixes the order the connections are handed over in
-    std::vector<std::pair<std::uint32_t, Acts::Experimental::GbtsLayerConnection>> staged;
-    staged.reserve(table.connections.size());
-
-    std::size_t nOtherTechnology = 0;
-    std::size_t nUnknownLayer = 0;
-
-    for (const GbtsConnectionTable::Connection& connection :
-         table.connections) {
-      const auto src = layerTechnologies.find(connection.src);
-      const auto dst = layerTechnologies.find(connection.dst);
-      if (src == layerTechnologies.end() || dst == layerTechnologies.end()) {
-        ++nUnknownLayer;
-        continue;
-      }
-
-      // GBTS pairs a layer only with one of its own technology
-      const bool wanted = src->second == dst->second &&
-                          (src->second ==
-                             Acts::Experimental::GbtsLayerTechnology::Pixel
-                             ? m_pixelConnections.value()
-                             : m_stripConnections.value());
-      if (!wanted) {
-        ++nOtherTechnology;
-        continue;
-      }
-
-      staged.emplace_back(connection.stage,
-                          Acts::Experimental::GbtsLayerConnection{connection.src,
-                                                                  connection.dst});
-    }
-
-    std::ranges::stable_sort(staged, {}, [](const auto& entry) { return entry.first; });
-
-    connections.clear();
-    connections.reserve(staged.size());
-    for (const auto& entry : staged) {
-      connections.push_back(entry.second);
-    }
-    const std::size_t nKept = connections.size();
-
-    if (nUnknownLayer != 0) {
-      ATH_MSG_WARNING(nUnknownLayer << " connections of "
-                      << m_connectorInputFile.value() << " name no GBTS layer "
-                      "and were dropped");
-    }
-    if (nKept == 0) {
-      ATH_MSG_ERROR("None of the connections of "
-                    << m_connectorInputFile.value() << " are usable: the table "
-                    "does not match the detector this job is reconstructing");
-      return StatusCode::FAILURE;
-    }
-    ATH_MSG_DEBUG("Kept " << nKept << " GBTS layer connections, dropping "
-                  << nOtherTechnology << " of a technology not asked for, eta bin width "
-                  << etaBinWidth);
-
     return StatusCode::SUCCESS;
   }
 

@@ -205,6 +205,7 @@ StatusCode GbtsLayerTool::buildLayers() {
                            ? Acts::Experimental::GbtsLayerTechnology::Pixel
                            : Acts::Experimental::GbtsLayerTechnology::Strip;
     layer.refCoord = refCoordSum / nModules;
+    layer.layerThickness = barrelEc == 0 ? maxR-minR : maxZ-minZ;
     // The bounds span the coordinate the layer extends along.
     layer.minBound = barrelEc == 0 ? minZ : minR;
     layer.maxBound = barrelEc == 0 ? maxZ : maxR;
@@ -225,6 +226,141 @@ StatusCode GbtsLayerTool::buildLayers() {
   }
 
   return StatusCode::SUCCESS;
+}
+
+StatusCode GbtsLayerTool::readConnections(
+  const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
+  std::vector<Acts::Experimental::GbtsLayerConnection>& connections,
+  float& etaBinWidth, std::string connectorInputFile, bool usePixel, bool useStrip) const
+{
+  std::ifstream connectionStream(connectorInputFile);
+  if (!connectionStream.is_open()) {
+    ATH_MSG_ERROR("Cannot open the GBTS connection table "
+                  << connectorInputFile);
+    return StatusCode::FAILURE;
+  }
+
+  ReadResult table;
+  try {
+    table = read(connectionStream);
+  } catch (const std::exception& e) {
+    ATH_MSG_ERROR("Cannot read " << connectorInputFile << ": "
+                  << e.what());
+    return StatusCode::FAILURE;
+  }
+
+  // the table names a layer by its id, the layer tool by its dense index
+  std::unordered_map<Acts::Experimental::GbtsExperimentLayerId,
+                     Acts::Experimental::GbtsLayerTechnology>
+    layerTechnologies;
+  layerTechnologies.reserve(layers.size());
+  for (const Acts::Experimental::GbtsLayerDescription& layer : layers) {
+    layerTechnologies.emplace(layer.id, layer.technology);
+  }
+
+  etaBinWidth = table.etaBinWidth;
+
+  // the stage column only fixes the order the connections are handed over in
+  std::vector<std::pair<std::uint32_t, Acts::Experimental::GbtsLayerConnection>> staged;
+  staged.reserve(table.connections.size());
+
+  std::size_t nOtherTechnology = 0;
+  std::size_t nUnknownLayer = 0;
+
+  for (const Connection& connection :
+       table.connections) {
+    const auto src = layerTechnologies.find(connection.src);
+    const auto dst = layerTechnologies.find(connection.dst);
+    if (src == layerTechnologies.end() || dst == layerTechnologies.end()) {
+      ++nUnknownLayer;
+      continue;
+    }
+
+    const bool wanted = src->second == dst->second &&
+      (src->second == Acts::Experimental::GbtsLayerTechnology::Pixel
+        ? usePixel : useStrip);
+
+    if (!wanted) {
+      ++nOtherTechnology;
+      continue;
+    }
+
+    staged.emplace_back(connection.stage,
+                        Acts::Experimental::GbtsLayerConnection{connection.src,
+                                                                connection.dst});
+  }
+
+  std::ranges::stable_sort(staged, {}, [](const auto& entry) { return entry.first; });
+
+  connections.clear();
+  connections.reserve(staged.size());
+  for (const auto& entry : staged) {
+    connections.push_back(entry.second);
+  }
+  const std::size_t nKept = connections.size();
+
+  if (nUnknownLayer != 0) {
+    ATH_MSG_WARNING(nUnknownLayer << " connections of "
+                    << connectorInputFile << " name no GBTS layer "
+                    "and were dropped");
+  }
+  if (nKept == 0) {
+    ATH_MSG_ERROR("None of the connections of "
+                  << connectorInputFile << " are usable: the table "
+                  "does not match the detector this job is reconstructing");
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG("Kept " << nKept << " GBTS layer connections, dropping "
+                << nOtherTechnology << " of a technology not asked for, eta bin width "
+                << etaBinWidth);
+
+  return StatusCode::SUCCESS;
+}
+
+GbtsLayerTool::ReadResult GbtsLayerTool::read(
+  std::istream& inputStream) const {
+  ReadResult result;
+
+  std::uint32_t nConnections{};
+  std::uint32_t iConnection{};
+
+  const auto fail = [&nConnections, &iConnection](const std::string& what) {
+    throw std::runtime_error("GBTS connection table: cannot read " + what +
+                             " at connection " + std::to_string(iConnection) +
+                             " of " + std::to_string(nConnections));
+  };
+
+  if (!(inputStream >> nConnections >> result.etaBinWidth)) {
+    throw std::runtime_error(
+        "GBTS connection table: cannot read the connection count and the eta "
+        "bin width");
+  }
+
+  for (; iConnection < nConnections; ++iConnection) {
+    std::uint32_t index{};
+    std::uint32_t height{};
+    std::uint32_t width{};
+    std::uint32_t nEntries{};
+    Connection connection;
+
+    if (!(inputStream >> index >> connection.stage >> connection.src >>
+          connection.dst >> height >> width >> nEntries)) {
+      fail("the header");
+    }
+
+    // GBTS recomputes the bin table from the layer geometry
+    const std::uint64_t nBins = std::uint64_t{height} * width;
+    for (std::uint64_t bin = 0; bin < nBins; ++bin) {
+      std::uint32_t unused{};
+      if (!(inputStream >> unused)) {
+        fail("the bin table");
+      }
+    }
+
+    result.connections.push_back(connection);
+  }
+
+  return result;
 }
 
 }  // namespace ActsTrk

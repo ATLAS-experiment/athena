@@ -9,6 +9,7 @@
 #include "GaudiKernel/IAlgTool.h"
 
 // ACTS
+#include "Acts/Seeding/GbtsLayerConnection.hpp"
 #include "Acts/Seeding/GbtsLayerDescription.hpp"
 
 #include <vector>
@@ -22,6 +23,9 @@ namespace ActsTrk {
 /// descriptions in dense-index order, each carrying its technology, and the
 /// wafer hash to dense index maps that turn a space point's module into the
 /// layer it belongs to.
+///
+/// Also contains a helper function to read the layer connection table using
+/// the layer geometry
 class IGbtsLayerTool : virtual public IAlgTool {
  public:
   DeclareInterfaceID(IGbtsLayerTool, 1, 0);
@@ -38,6 +42,12 @@ class IGbtsLayerTool : virtual public IAlgTool {
 
   /// Strip wafer hash to dense GBTS layer index, `kNoLayer` where unused.
   virtual const std::vector<short>& stripLayers() const = 0;
+
+  /// Reads the connection table and returns only the connections asked for.
+  virtual StatusCode readConnections(
+    const std::vector<Acts::Experimental::GbtsLayerDescription>& layers,
+    std::vector<Acts::Experimental::GbtsLayerConnection>& connections,
+    float& etaBinWidth, std::string connectorInputFile, bool usePixel, bool useStrips) const = 0;
 };
 
 }  // namespace ActsTrk

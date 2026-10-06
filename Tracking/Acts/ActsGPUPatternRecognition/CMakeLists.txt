@@ -19,14 +19,12 @@ set( _libraries
   GaudiKernel
   AthenaBaseComps
   AthDeviceInterfacesLib
-  PathResolver
   InDetIdentifier
   PixelReadoutGeometryLib
   ActsGeometryInterfacesLib
   ActsGPUEventLib
   ActsGPUInterfacesLib
   ActsToolInterfacesLib
-  TrigInDetPattRecoToolsLib
   BeamSpotConditionsData
   MagFieldConditions
   MagFieldElements

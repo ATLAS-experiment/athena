@@ -17,6 +17,7 @@
 #include "ActsGPUEvent/TracccMeasurementCollection.h"
 #include "ActsGPUEvent/TracccSpacepointCollection.h"
 #include "ActsGPUEvent/TracccSeedCollection.h"
+#include "Acts/Seeding/GbtsGeometry.hpp"
 
 class PixelID;
 namespace InDetDD{
@@ -53,9 +54,19 @@ private:
 
     virtual StatusCode configureGBTS();
 
-    Gaudi::Property<std::string> m_connectionFileName{this, "ConnectionFileName",
-                                "binTables_ITK_RUN4.txt"};
+    /// Wafer hash to dense GBTS layer index, one map per technology. Used to
+    /// put a space point on the layer its module belongs to.
+    const std::vector<short>* m_stripHashToLayer = nullptr;
+    const std::vector<short>* m_pixelHashToLayer = nullptr;
 
+    /// Private access to the logger
+    const Acts::Logger &logger() const { return *m_logger; }
+
+    /// logging instance
+    std::unique_ptr<const Acts::Logger> m_logger;
+
+    Gaudi::Property<std::string> m_connectorInputFile {
+        this, "connectorInputFile","binTables_ITK_RUN4.txt", "input file for making connector object"};
 
     /// @name The tool that provides backend-specific traccc seeding algorithms
     ToolHandle<IDeviceSeedingAlgProviderTool> m_seedingAlgProviderTool{
