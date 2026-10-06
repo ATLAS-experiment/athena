@@ -96,7 +96,8 @@ class MuonMomentumCalibrationConfig (ConfigBlock):
                               'neflowisol20_CloseByCorr',
                               'ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt1000_CloseByCorr',
                               'ptvarcone30_Nonprompt_All_MaxWeightTTVA_pt500_CloseByCorr',
-                              'topoetcone20_CloseByCorr']
+                              'topoetcone20_CloseByCorr',
+                              'PLIT_TPLTmu_pmuxpromp', 'PLIT_TPLTmu_pnpxall']
             if self.addGlobalFELinksDep:
                 decorationList += ['neutralGlobalFELinks', 'chargedGlobalFELinks']
             if config.dataType() is not DataType.Data:

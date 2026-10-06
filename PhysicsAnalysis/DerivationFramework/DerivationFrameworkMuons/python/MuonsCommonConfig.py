@@ -111,6 +111,8 @@ def MuonVariablesCfg(flags):
        "DFCommonJetDr","DFCommonMuonPassIDCuts","DFCommonMuonPassPreselection","DFCommonGoodMuon",
         ##we should validate asap if we can remove this
        "CaloLRLikelihood","quality",
+       ## PLIT discriminants
+       "PLIT_TPLTmu_pmuxpromp", "PLIT_TPLTmu_pnpxall",
     ]
     ### Depending on the run period add other decorations
     from AthenaConfiguration.Enums import LHCPeriod

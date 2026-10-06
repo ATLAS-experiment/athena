@@ -165,7 +165,8 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
                               'ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt500',
                               'ptcone20_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr',
                               'ptvarcone30_Nonprompt_All_MaxWeightTTVALooseCone_pt1000_CloseByCorr',
-                              'topoetcone20_CloseByCorr','DFCommonAddAmbiguity']
+                              'topoetcone20_CloseByCorr','DFCommonAddAmbiguity',
+                              'PLIT_PLITel_pelxpromp', 'PLIT_PLITel_pnpxall']
             if self.addGlobalFELinksDep:
                 decorationList += ['neutralGlobalFELinks', 'chargedGlobalFELinks']
             if config.dataType() is not DataType.Data:
