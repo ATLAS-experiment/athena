@@ -169,7 +169,7 @@ private:
   chai::TagPtr         m_tag;                     ///< Resolved in preload(). Stays null for a metadata-only folder
 
   std::string m_folderDescription;
-  bool m_timestamp{false};                        ///< Indexed by timestamp (else runLB), from tag->getIovType()
+  bool m_timestamp{false};                        ///< Indexed by timestamp (else runLB), from <timeStamp>
 
   bool m_tagoverride{false};    ///< Unused on the CREST path. Present to satisfy IOVDbConditionsSource
   bool m_notagoverride{false};  ///< Unused on the CREST path. Present to satisfy IOVDbConditionsSource

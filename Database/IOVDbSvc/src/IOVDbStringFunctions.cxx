@@ -255,21 +255,4 @@ namespace IOVDbNamespace{
     return "crest_fs:" + ep;
   }
 
-  TimeStampCorrectionResult
-  correctTimeStampElement(const std::string & description, const std::string & token){
-    const std::string regex=R"delim(<timeStamp>\s*([^<\s]*)\s*</timeStamp>)delim";
-    const std::regex re(regex);
-    std::smatch tsMatch;
-    const std::string newElement = "<timeStamp>" + token + "</timeStamp>";
-    if (!std::regex_search(description, tsMatch, re)) {
-      return {newElement + description, TimeStampCorrection::Inserted, {}};
-    }
-    if (tsMatch[1] == token) {
-      return {description, TimeStampCorrection::Unchanged, tsMatch[1]};
-    }
-    std::string corrected{description};
-    corrected.replace(tsMatch.position(0), tsMatch.length(0), newElement);
-    return {corrected, TimeStampCorrection::Corrected, tsMatch[1]};
-  }
-
 }
