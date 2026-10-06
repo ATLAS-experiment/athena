@@ -142,8 +142,6 @@ PixelClusterOnTrackTool::correct
 InDet::PixelClusterOnTrack *
 PixelClusterOnTrackTool::correctDefault
   (const Trk::PrepRawData &rio, const Trk::TrackParameters &trackPar, const EventContext& ctx) const {
-  using CLHEP::micrometer;
-
 
   const double TOPHAT_SIGMA = 1. / std::sqrt(12.);
   const InDet::PixelCluster *pix = nullptr;
@@ -292,9 +290,10 @@ PixelClusterOnTrackTool::correctDefault
     // of the track path in silicon onto the module surface seems
     // appropriate
     if (std::abs(angle) > 1) {
-      errphi = 250 * micrometer * std::tan(std::abs(angle)) * TOPHAT_SIGMA;
-      erreta = width.z() > 250 * micrometer * std::tan(std::abs(boweta)) ?
-               width.z() * TOPHAT_SIGMA : 250 * micrometer * std::tan(std::abs(boweta)) * TOPHAT_SIGMA;
+      const double thickness = element->thickness();
+      errphi = thickness * std::tan(std::abs(angle)) * TOPHAT_SIGMA;
+      erreta = width.z() > thickness * std::tan(std::abs(boweta)) ?
+               width.z() * TOPHAT_SIGMA : thickness * std::tan(std::abs(boweta)) * TOPHAT_SIGMA;
       ATH_MSG_VERBOSE("Shallow track with tanl = " << tanl << " bowphi = " <<
                       bowphi << " angle = " << angle << " width.z = " << width.z() <<
                       " errphi = " << errphi << " erreta = " << erreta);
