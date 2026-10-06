@@ -10,111 +10,102 @@
 
 #include "Acts/Surfaces/CylinderSurface.hpp"
 #include "Acts/Surfaces/DiscSurface.hpp"
-#include "Acts/Surfaces/Surface.hpp"
+#include "Acts/Utilities/Helpers.hpp"
+
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 
-#include <map>
-#include <string>
-#include <vector>
+#include <array>
 #include <memory>
+#include <span>
 
-using caloSampleSurfaceMap_t = std::map<std::pair<std::string, CaloCell_ID::CaloSample>, std::vector<std::shared_ptr<Acts::Surface> > >;
-using caloSampleDDEElementsMap_t = std::map<std::pair<std::string, CaloCell_ID::CaloSample>, std::vector<const CaloDetDescrElement*> >;
-using caloDimensionMap_t = std::map<std::string, double>;
 
 namespace ActsTrk {
 
-    enum class caloRegion {DiscNegativeZ, DiscPositiveZ, CylinderSymmetricZZero, CylinderNegativeZ, CylinderPositiveZ};
 
     /** @class CaloBlueprintNodeBuilder
      *  @brief Builds the Calo Blueprint Node
      */
     class CaloBlueprintNodeBuilder : public extends<AthAlgTool, IBlueprintNodeBuilder> {
     public:
-        StatusCode initialize() override;
-        StatusCode finalize() override;
-        using base_class::base_class;
+        
+        enum class caloRegion {DiscNegativeZ, 
+                               DiscPositiveZ, 
+                               BarrelCylinder, 
+                               nRegions};
+        friend std::ostream& operator<<(std::ostream& ostr, const caloRegion region) {
+            using enum caloRegion;
+            switch(region) {
+              case DiscNegativeZ: ostr<<"DiscNegativeZ"; break;
+              case DiscPositiveZ: ostr<<"DiscPositiveZ"; break;
+              case BarrelCylinder: ostr<<"BarrelCylinder"; break;
+              case nRegions: ostr<<"nRegions"; break;
+            }
+            return ostr;
+        }
+        
+        using DetElVec_t = std::vector<const CaloDetDescrElement*>;
+        /** @brief Vector of Detector Elements per calorimeter layer */
+        using DetElementMap_t = std::array<DetElVec_t, CaloSampling::getNumberOfSamplings()>;
+        
+        /** @brief Vector of surfaces per calorimeter region */
+        using SurfaceMap_t = std::array<std::vector<std::shared_ptr<Acts::Surface>>,
+                                              Acts::toUnderlying(caloRegion::nRegions)>;
 
-        /** @brief Build the Itk Blueprint Node
-         *  @param gctx Geometry context
-         *  @param child The child node which is added to the itk node.*/
+        using base_class::base_class;
+        /** @copydoc IBlueprintNodeBuilder::buildBlueprintNode */
         std::shared_ptr<Acts::BlueprintNode> buildBlueprintNode(const Acts::GeometryContext& gctx,
-                                      std::shared_ptr<Acts::BlueprintNode>&& childNode) override;
+                                                                std::shared_ptr<Acts::BlueprintNode>&& childNode) override;
+        /** @copydoc AthAlgTool::initialize */
+        virtual StatusCode initialize() override final;
 
     private:
+        /** @brief Fill the detector elements per calorimeter layer and sort them in 
+         *         ascending r(z) for the  barrel (endcap) layers. Remove duplicates from
+         *         the list where r and z are within the precision tolerance
+         *  @param detDescrMgr: The calorimeter detector description manager from which
+         *                       the detector elements are retrieved */
+        DetElementMap_t fillDetectorElements(const CaloDetDescrManager& detDecrMgr) const;
+        /** @brief Translate all detector elements to a Cylinder and Disc surfaces. Per calorimeter
+         *         layer the detector elements are combined to single or multiple surfaces and then
+         *         sorted into the 
+         *  @param detElements: The calorimeter detector description elements split by their
+         *                      logical CaloSamplingID */
+        SurfaceMap_t translateToSurfaces(const DetElementMap_t& detElements) const;
 
-        /** fillMaps fills two maps.
-        ** The first maps each calo sampling to a vector of surfaces (initially empty)
-        ** The second maps each calo sampling to a vector of CaloDetDescrElements
-        ** The second map is filled by looping over all DDE in the CaloDetDescrManager
-        ** and adding each DDE to the vector corresponding to its sampling in the map
-        */
-        void fillMaps(std::map<caloRegion, caloSampleDDEElementsMap_t>& caloRegionSampleDDEElementsMap, 
-                      std::map<std::string, double>& caloDimensions) const;
+        /** @brief Create a cylinder surface from a list of Calo detector description elements. The surface is
+          *        constructed such that the radius is the radial midpoint of the passed elements, the thickness
+          *        is capturing the minimal and maximal passed radius and the half length completley encloses 
+          *        the passed description elements.
+          * @param detElements: The list of detector elements from which the envelope surface shall be translated. */
+        std::shared_ptr<Acts::Surface> createCylinderSurface(std::span<const CaloDetDescrElement* const> detElements) const;
 
-        /** generateCylinderSurfaces generates cylindrical surfaces for each calo sampling.
-        ** It does this for cylindrical layers by scanning in Z, for each Z finding the average radius of the cells in a phi ring
-        ** If the average radius changes by more than a tolerance value (m_radiusTolerance), a new cylinder surface is created.
-        ** The surfaces are added to the relevant vector of surfaces in the caloSampleSurfaceMap.    
-        */
-        void generateCylinderSurfaces(caloSampleSurfaceMap_t& caloSampleSurfaceMap, caloSampleDDEElementsMap_t& caloSampleDDEElementsMap, bool asymmetricZ) const;
-
-        /** generateCylinderSurface generates a cylindrical surface for a given set of parameters.
-        ** To do this it calculates the radius and length of the cylinder, then shifts it in Z to the midpoint of the Z values used to build it.
-        ** It then creates the Acts::CylinderSurface and returns it via a shared pointer.
-        */
-        std::shared_ptr<Acts::CylinderSurface> generateCylinderSurface(const double maxLArBRadius, 
-                                                                       const double minLArBRadius, 
-                                                                       const double lowZLarB,
-                                                                       const double highZLarB) const;
-
-        /** addCylindricalTrackingVolumeToCaloNode adds a cylindrical tracking volume to the calo node.
-        ** It takes as input the container node, the calo dimensions map, the name of the volume and the vector of surfaces to be added to the volume.
-        ** It creates a new CylinderContainerBlueprintNode in the container node, then creates a new Acts::TrackingVolume with the appropriate dimensions.
-        ** Finally it adds the Acts::CylinderSurface to that Acts::TrackingVolume, then adds the tracking volume to the container node.
-        */
-        void addCylindricalTrackingVolumeToCaloNode(Acts::CylinderContainerBlueprintNode& containerNode, const std::string& volumeName,const std::vector<std::shared_ptr<Acts::Surface>>& surfaces, int layerIndex,  const bool& isDisc) const;
-
-        void generateDiscSurfaces(caloSampleSurfaceMap_t& caloSampleSurfaceMap, caloSampleDDEElementsMap_t& caloSampleDDEElementsMap) const;
-
-        std::shared_ptr<Acts::DiscSurface> generateDiscSurface(const double& z, const double& maxLArBRadius, const double& minLArBRadius) const;
-
-        std::unique_ptr<CaloDetDescrManager> m_caloDetSecrMgr;   
-
-        //create lists from all possible calo samplings that tracks could hit
-        //The first list is for disc shaped samples and the second for cylindrical shaped samples
-        //Note that TileGap3 is the barrel, but is disk shaped. 
-        std::vector<std::pair<std::string, CaloCell_ID::CaloSample>> m_caloDiscSampleList{
-          {"PreSamplerE", CaloCell_ID::PreSamplerE},
-          {"EME1",CaloCell_ID::EME1},
-          {"EME2",CaloCell_ID::EME2},
-          {"EME3",CaloCell_ID::EME3},
-          {"HEC0",CaloCell_ID::HEC0},
-          {"HEC1",CaloCell_ID::HEC1},
-          {"HEC2",CaloCell_ID::HEC2}, 
-          {"HEC3",CaloCell_ID::HEC3}, 
-          {"TileGap3",CaloCell_ID::TileGap3},
-          {"FCAL0",CaloCell_ID::FCAL0},
-          {"FCAL1",CaloCell_ID::FCAL1},
-          {"FCAL2",CaloCell_ID::FCAL2}};
-
-        std::vector<std::pair<std::string, CaloCell_ID::CaloSample>> m_caloCylinderSymmetricSampleList{ 
-          { "PreSamplerB", CaloCell_ID::PreSamplerB}, 
-          {"EMB1", CaloCell_ID::EMB1},
-          {"EMB2", CaloCell_ID::EMB2},
-          {"EMB3", CaloCell_ID::EMB3},
-          {"TileBar0", CaloCell_ID::TileBar0},
-          {"TileBar1", CaloCell_ID::TileBar1},
-          {"TileBar2", CaloCell_ID::TileBar2}};
-
-        std::vector<std::pair<std::string, CaloCell_ID::CaloSample>> m_caloCylinderAsymmetricSampleList{ 
-          {"TileGap1", CaloCell_ID::TileGap1},
-          {"TileGap2", CaloCell_ID::TileGap2},
-          {"TileExt0", CaloCell_ID::TileExt0},
-          {"TileExt1", CaloCell_ID::TileExt1},
-          {"TileExt2", CaloCell_ID::TileExt2}};
-
+        /** @brief Create a disc surface from the passed calo description elements. The disc is placed at the central z 
+         *         considering the longitudinal spread of the elements. The radius of the disc fully encapsulates the 
+         *         detector description elements and the assigned thickness represents the maximum and minimum z
+         * @param detElements: The list of detector elements from which the envelope surface shall be translated. */
+        std::shared_ptr<Acts::Surface> createDiscSurface(std::span<const CaloDetDescrElement* const> detElements) const;
+        /** @brief Create the envelope volume of the Calo Tracking Geometry. The volume encapsulates 
+          *        all calorimeter surfaces taking the respective thickness into account. The inner radius
+          *        is set to zero to make space for the ITk. The GeometryIdentifier is set to the central
+          *        calo volume ID
+          * @param tgContext: The geometry context to align the particular surfaces and volumes
+          * @param surfacesPerRegion: List of the constructed calorimeter surfaces */
+        std::unique_ptr<Acts::TrackingVolume> envelopeVolume(const Acts::GeometryContext& tgContext,
+                                                             const SurfaceMap_t& surfacesPerRegion) const;
+        /** @brief Fill the layer with extra surfaces. Via the <insertExtraSuraces> property,
+         *         it can be steered how many extra surfaces are inserted between the central surface
+         *         and the virtual boundaries (defined by the extra thickness). E.g. a value of one
+         *         inserts one surface in front and another one behind the central surface
+         *  @param tgContext: The geometry context to access the surface transforms
+         *  @param centralSurf: The central surface to be duplicated */
+        std::vector<std::shared_ptr<Acts::Surface>> fillLayer(const Acts::GeometryContext& tgContext,
+                                                              std::shared_ptr<Acts::Surface>&& centralSurf) const;
+        
+        /** @brief Configure the insert of extra surfaces per each calorimeter layer  */
+        Gaudi::Property<std::vector<std::uint32_t>> m_surfaceDuplicates{this, "insertExtraSurfaces",
+            std::vector<std::uint32_t>(CaloSampling::Unknown, 0) };
+                              
         Gaudi::Property<double> m_radiusTolerance { this
         , "RadiusTolerance"
         , 2.0
@@ -124,63 +115,7 @@ namespace ActsTrk {
         , "ZTolerance"
         , 2.0
         , "Tolerance for determining if a ring of cells in phi has changed the z w.r.t to the previous ring in phi" };
-
-    // TODO: Temporary function to get the sample name from the enum value.
-    std::string getSampleName(CaloCell_ID::CaloSample currentSample) const {
-      std::string sampleName = "";
-      for ( auto& [name, sample] : m_caloCylinderSymmetricSampleList) {
-        if (currentSample == sample) {
-          sampleName = name;
-          break;
-        }
-      }
-      if (sampleName == "") {
-        for ( auto& [name, sample] : m_caloCylinderAsymmetricSampleList) {
-          if (currentSample == sample) {
-            sampleName = name;
-            break;
-          }
-        }
-      }
-      if (sampleName == "") {
-        for ( auto& [name, sample] : m_caloDiscSampleList) {
-          if (currentSample == sample) {
-            sampleName = name;
-            break;
-          }
-        }
-      }
-      return sampleName;
-    }
-    // TODO: Temporary function to get the sample enum value from the name.
-    CaloCell_ID::CaloSample getSampleEnum(const std::string& sampleName) const {
-      CaloCell_ID::CaloSample sampleEnum = CaloCell_ID::Unknown;
-      for (auto& [name, sample] : m_caloCylinderSymmetricSampleList) {
-        if (sampleName == name) {
-          sampleEnum = sample;
-          break;
-        }
-      }
-      if (sampleEnum == CaloCell_ID::Unknown) {
-        for (auto& [name, sample] : m_caloCylinderAsymmetricSampleList) {
-          if (sampleName == name) {
-            sampleEnum = sample;
-            break;
-          }
-        }
-      }
-      if (sampleEnum == CaloCell_ID::Unknown) {
-        for (auto& [name, sample] : m_caloDiscSampleList) {
-          if (sampleName == name) {
-            sampleEnum = sample;
-            break;
-          }
-        }
-      }
-      return sampleEnum;
-    }
-
-
   };
 }
+ACTS_OSTREAM_FORMATTER(ActsTrk::CaloBlueprintNodeBuilder::caloRegion);
 #endif
