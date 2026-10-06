@@ -575,6 +575,7 @@ def getClassesToIgnore(flags):
 
     if flags.Trigger.EDMVersion == 2:
         l.append("145610168")  # TrigMissingET (Run-1 class, ATR-32944)
+        l.append("1271751257") # ElectronMuonTopoInfoContainer (Run-1 class, ATR-32944)
 
     return l
 
