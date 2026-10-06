@@ -31,10 +31,6 @@
 #include "TrkEventPrimitives/FitQuality.h"
 #include "TrkEventPrimitives/LocalParameters.h"
 
-#include "TrkV0Vertex/V0Hypothesis.h"
-#include "TrkV0Vertex/V0Candidate.h"
-#include "TrkV0Vertex/V0Container.h"
-#include "TrkVertexAnalysisUtils/V0Tools.h"
 #include "CLHEP/Vector/LorentzVector.h"
 // ATLAS headers
 #include "GaudiKernel/IInterface.h"
