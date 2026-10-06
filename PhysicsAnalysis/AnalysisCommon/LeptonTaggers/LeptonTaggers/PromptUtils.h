@@ -69,7 +69,7 @@ namespace Prompt
     //
     // get the int aux-variable
     //
-    typename SG::AuxElement::Accessor<T2> acc(var_name);
+    typename SG::Accessor<T2> acc(var_name);
 
     if(!acc.isAvailable(*obj)) {
       return false;
@@ -85,7 +85,7 @@ namespace Prompt
     //
     // get the int aux-variable
     //
-    typename SG::AuxElement::Accessor<T2> acc(var_name);
+    typename SG::Accessor<T2> acc(var_name);
 
     if(!acc.isAvailable(obj)) {
       return false;

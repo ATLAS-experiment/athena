@@ -115,12 +115,12 @@ namespace Prompt {
 
         int                                                    m_secondaryVertexIndex{0};
 
-        std::unique_ptr<SG::AuxElement::Decorator<float> >     m_distToPriVtx;
-        std::unique_ptr<SG::AuxElement::Decorator<float> >     m_normDistToPriVtx;
-        std::unique_ptr<SG::AuxElement::Decorator<float> >     m_distToRefittedPriVtx;
-        std::unique_ptr<SG::AuxElement::Decorator<float> >     m_normDistToRefittedPriVtx;
-        std::unique_ptr<SG::AuxElement::Decorator<float> >     m_distToRefittedRmLepPriVtx;
-        std::unique_ptr<SG::AuxElement::Decorator<float> >     m_normDistToRefittedRmLepPriVtx;
+        std::unique_ptr<SG::Decorator<float> >     m_distToPriVtx;
+        std::unique_ptr<SG::Decorator<float> >     m_normDistToPriVtx;
+        std::unique_ptr<SG::Decorator<float> >     m_distToRefittedPriVtx;
+        std::unique_ptr<SG::Decorator<float> >     m_normDistToRefittedPriVtx;
+        std::unique_ptr<SG::Decorator<float> >     m_distToRefittedRmLepPriVtx;
+        std::unique_ptr<SG::Decorator<float> >     m_normDistToRefittedRmLepPriVtx;
     };
 } // namespace DerivationFramework
 #endif  // LEPTONTAGGERS_VertexFittingTool_H

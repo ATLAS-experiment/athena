@@ -16,23 +16,23 @@
 #include <unordered_set>
 namespace CP {
 
-    using CharAccessor = SG::AuxElement::ConstAccessor<char>;
-    using CharDecorator = SG::AuxElement::Decorator<char>;
+    using CharAccessor = SG::ConstAccessor<char>;
+    using CharDecorator = SG::Decorator<char>;
 
-    using FloatAccessor = SG::AuxElement::ConstAccessor<float>;
-    using FloatDecorator = SG::AuxElement::Decorator<float>;
+    using FloatAccessor = SG::ConstAccessor<float>;
+    using FloatDecorator = SG::Decorator<float>;
 
     using SelectionAccessor = std::unique_ptr<CharAccessor>;
     using SelectionDecorator = std::unique_ptr<CharDecorator>;
 
-    using BoolDecorator = SG::AuxElement::Decorator<bool>;
-    using BoolAccessor = SG::AuxElement::ConstAccessor<bool>;
+    using BoolDecorator = SG::Decorator<bool>;
+    using BoolAccessor = SG::ConstAccessor<bool>;
 
-    using IntDecorator = SG::AuxElement::Decorator<int>;
-    using IntAccessor = SG::AuxElement::ConstAccessor<int>;
+    using IntDecorator = SG::Decorator<int>;
+    using IntAccessor = SG::ConstAccessor<int>;
 
-    using ShortDecorator = SG::AuxElement::Decorator<short>;
-    using ShortAccessor = SG::AuxElement::ConstAccessor<short>;
+    using ShortDecorator = SG::Decorator<short>;
+    using ShortAccessor = SG::ConstAccessor<short>;
 
     using IsoType = xAOD::Iso::IsolationType;
     using IsoVector = std::vector<IsoType>;

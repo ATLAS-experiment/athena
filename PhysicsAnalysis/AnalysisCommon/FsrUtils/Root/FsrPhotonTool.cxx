@@ -186,9 +186,9 @@ namespace FSR {
                                                                      xAOD::PhotonContainer* photons_cont) {
 
 
-        static const SG::AuxElement::Accessor<char>  DFCommonPhotonsIsEMTight ("DFCommonPhotonsIsEMTight");
-        static const SG::AuxElement::Accessor<char>  DFCommonPhotonsCleaning  ("DFCommonPhotonsCleaning");
-        static const SG::AuxElement::Accessor<float> topoetcone20             ("topoetcone20");
+        static const SG::Accessor<char>  DFCommonPhotonsIsEMTight ("DFCommonPhotonsIsEMTight");
+        static const SG::Accessor<char>  DFCommonPhotonsCleaning  ("DFCommonPhotonsCleaning");
+        static const SG::Accessor<float> topoetcone20             ("topoetcone20");
 
         /// Set FSR type to far
         m_fsr_type = FsrCandidate::FsrType::FsrFar;
@@ -250,7 +250,7 @@ namespace FSR {
                                                                       const xAOD::PhotonContainer* photons_cont, 
                                                                       const xAOD::ElectronContainer* electrons_cont) {
 
-        static const SG::AuxElement::Accessor<char>  DFCommonPhotonsCleaning  ("DFCommonPhotonsCleaning");
+        static const SG::Accessor<char>  DFCommonPhotonsCleaning  ("DFCommonPhotonsCleaning");
 
         /// Set FSR type to far
         m_fsr_type = FsrCandidate::FsrType::FsrNear;

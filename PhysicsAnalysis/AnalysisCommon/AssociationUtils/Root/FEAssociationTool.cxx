@@ -33,26 +33,26 @@ namespace
 {
   constexpr float INV_GEV = 1.f / 1000.f;
 
-  static const SG::AuxElement::Accessor<ElementLink<xAOD::IParticleContainer>> ACC_partA("FE_ParticleA");
-  static const SG::AuxElement::Accessor<ElementLink<xAOD::IParticleContainer>> ACC_partB("FE_ParticleB");
-  static const SG::AuxElement::Accessor<int>   ACC_typeA("FE_ParticleA_Type");
-  static const SG::AuxElement::Accessor<int>   ACC_typeB("FE_ParticleB_Type");
-  static const SG::AuxElement::Accessor<float> ACC_sharedEc("FE_SharedEc");
-  static const SG::AuxElement::Accessor<float> ACC_sharedEn("FE_SharedEn");
-  static const SG::AuxElement::Accessor<float> ACC_fracAc("FE_FracAc");
-  static const SG::AuxElement::Accessor<float> ACC_fracAn("FE_FracAn");
-  static const SG::AuxElement::Accessor<float> ACC_fracBc("FE_FracBc");
-  static const SG::AuxElement::Accessor<float> ACC_fracBn("FE_FracBn");
+  static const SG::Accessor<ElementLink<xAOD::IParticleContainer>> ACC_partA("FE_ParticleA");
+  static const SG::Accessor<ElementLink<xAOD::IParticleContainer>> ACC_partB("FE_ParticleB");
+  static const SG::Accessor<int>   ACC_typeA("FE_ParticleA_Type");
+  static const SG::Accessor<int>   ACC_typeB("FE_ParticleB_Type");
+  static const SG::Accessor<float> ACC_sharedEc("FE_SharedEc");
+  static const SG::Accessor<float> ACC_sharedEn("FE_SharedEn");
+  static const SG::Accessor<float> ACC_fracAc("FE_FracAc");
+  static const SG::Accessor<float> ACC_fracAn("FE_FracAn");
+  static const SG::Accessor<float> ACC_fracBc("FE_FracBc");
+  static const SG::Accessor<float> ACC_fracBn("FE_FracBn");
 
 #ifndef XAOD_STANDALONE
   using FELinks_t = std::vector<ElementLink<xAOD::FlowElementContainer>>;
   using OrigObjLink_t = ElementLink<xAOD::IParticleContainer>;
 #else
-  static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer>>>
+  static const SG::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer>>>
     ACC_cFEs("chargedGlobalFELinks");
-  static const SG::AuxElement::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer>>>
+  static const SG::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer>>>
     ACC_nFEs("neutralGlobalFELinks");
-  static const SG::AuxElement::ConstAccessor<ElementLink<xAOD::IParticleContainer>>
+  static const SG::ConstAccessor<ElementLink<xAOD::IParticleContainer>>
     ACC_origObj("originalObjectLink");
 #endif
 

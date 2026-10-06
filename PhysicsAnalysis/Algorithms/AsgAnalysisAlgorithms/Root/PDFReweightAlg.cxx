@@ -66,11 +66,11 @@ namespace CP
 
     const xAOD::TruthEvent *truthEvent = TruthEventContainer->at(0);
 
-    static const SG::AuxElement::ConstAccessor<int> accPDGID1("PDGID1");
-    static const SG::AuxElement::ConstAccessor<int> accPDGID2("PDGID2");
-    static const SG::AuxElement::ConstAccessor<float> accX1("X1");
-    static const SG::AuxElement::ConstAccessor<float> accX2("X2");
-    static const SG::AuxElement::ConstAccessor<float> accQ("Q");
+    static const SG::ConstAccessor<int> accPDGID1("PDGID1");
+    static const SG::ConstAccessor<int> accPDGID2("PDGID2");
+    static const SG::ConstAccessor<float> accX1("X1");
+    static const SG::ConstAccessor<float> accX2("X2");
+    static const SG::ConstAccessor<float> accQ("Q");
 
     int pdgid1 = accPDGID1(*truthEvent);
     int pdgid2 = accPDGID2(*truthEvent);

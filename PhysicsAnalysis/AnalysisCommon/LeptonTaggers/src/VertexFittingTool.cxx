@@ -34,12 +34,12 @@ StatusCode Prompt::VertexFittingTool::initialize()
     ATH_CHECK(m_seedVertexFitter.retrieve());
   }
 
-  m_distToPriVtx                   = std::make_unique<SG::AuxElement::Decorator<float> > (m_distToPriVtxName);
-  m_normDistToPriVtx               = std::make_unique<SG::AuxElement::Decorator<float> > (m_normDistToPriVtxName);
-  m_distToRefittedPriVtx           = std::make_unique<SG::AuxElement::Decorator<float> > (m_distToRefittedPriVtxName);
-  m_normDistToRefittedPriVtx       = std::make_unique<SG::AuxElement::Decorator<float> > (m_normDistToRefittedPriVtxName);
-  m_distToRefittedRmLepPriVtx      = std::make_unique<SG::AuxElement::Decorator<float> > (m_distToRefittedRmLepPriVtxName);
-  m_normDistToRefittedRmLepPriVtx  = std::make_unique<SG::AuxElement::Decorator<float> > (m_normDistToRefittedRmLepPriVtxName);
+  m_distToPriVtx                   = std::make_unique<SG::Decorator<float> > (m_distToPriVtxName);
+  m_normDistToPriVtx               = std::make_unique<SG::Decorator<float> > (m_normDistToPriVtxName);
+  m_distToRefittedPriVtx           = std::make_unique<SG::Decorator<float> > (m_distToRefittedPriVtxName);
+  m_normDistToRefittedPriVtx       = std::make_unique<SG::Decorator<float> > (m_normDistToRefittedPriVtxName);
+  m_distToRefittedRmLepPriVtx      = std::make_unique<SG::Decorator<float> > (m_distToRefittedRmLepPriVtxName);
+  m_normDistToRefittedRmLepPriVtx  = std::make_unique<SG::Decorator<float> > (m_normDistToRefittedRmLepPriVtxName);
 
   m_timer.Reset();
 
@@ -105,8 +105,8 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::fitVertexWithPrimarySee
   m_secondaryVertexIndex++;
 
   // Decorate the newly created vertex
-  static const SG::AuxElement::Accessor<int> indexAcc("SecondaryVertexIndex");
-  static const SG::AuxElement::Accessor<int> typeAcc("SVType");
+  static const SG::Accessor<int> indexAcc("SecondaryVertexIndex");
+  static const SG::Accessor<int> typeAcc("SVType");
 
   indexAcc(*secondaryVtx) = m_secondaryVertexIndex;
   typeAcc(*secondaryVtx) = static_cast<int>(vtxType);
@@ -152,8 +152,8 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::fitVertexWithSeed(
   m_secondaryVertexIndex++;
 
   // Decorate the newly created vertex
-  static const SG::AuxElement::Accessor<int> indexAcc("SecondaryVertexIndex");
-  static const SG::AuxElement::Accessor<int> typeAcc("SVType");
+  static const SG::Accessor<int> indexAcc("SecondaryVertexIndex");
+  static const SG::Accessor<int> typeAcc("SVType");
 
   indexAcc(*secondaryVtx) = m_secondaryVertexIndex;
   typeAcc(*secondaryVtx) = static_cast<int>(vtxType);

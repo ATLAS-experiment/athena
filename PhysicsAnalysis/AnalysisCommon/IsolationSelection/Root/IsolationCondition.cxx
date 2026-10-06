@@ -41,6 +41,6 @@ namespace CP {
     unsigned int IsolationCondition::num_types() const { return m_isolationType.size(); }
     const std::string& IsolationCondition::name() const { return m_name; }
     xAOD::Iso::IsolationType IsolationCondition::type(unsigned int n) const { return m_isolationType[n]; }
-    const SG::AuxElement::ConstAccessor<float>& IsolationCondition::accessor(unsigned int n) const { return m_acc.at(n); }
-    const SG::AuxElement::ConstAccessor<float>& IsolationCondition::accessor_noCloseBy(unsigned int n) const { return m_acc_noCloseBy.at(n); }
+    const SG::ConstAccessor<float>& IsolationCondition::accessor(unsigned int n) const { return m_acc.at(n); }
+    const SG::ConstAccessor<float>& IsolationCondition::accessor_noCloseBy(unsigned int n) const { return m_acc_noCloseBy.at(n); }
 }  // namespace CP

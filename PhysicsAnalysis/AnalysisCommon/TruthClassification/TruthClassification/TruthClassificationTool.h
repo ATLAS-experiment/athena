@@ -47,24 +47,24 @@ private:
   bool m_useTruthParticleDecorations{false};
 
   // accessors
-  const SG::AuxElement::ConstAccessor<int> m_truthType{"truthType"};
-  const SG::AuxElement::ConstAccessor<int> m_truthOrigin{"truthOrigin"};
-  const SG::AuxElement::ConstAccessor<unsigned int> m_truthClassification{"truthClassification"};
-  const SG::AuxElement::ConstAccessor<int> m_truthPdgId{"truthPdgId"};
-  const SG::AuxElement::ConstAccessor<unsigned int> m_classifierParticleType{"classifierParticleType"};
-  const SG::AuxElement::ConstAccessor<unsigned int> m_classifierParticleOrigin{"classifierParticleOrigin"};
-  const SG::AuxElement::ConstAccessor<int> m_firstMotherTruthType{"firstEgMotherTruthType"};
-  const SG::AuxElement::ConstAccessor<int> m_firstMotherTruthOrigin{"firstEgMotherTruthOrigin"};
-  const SG::AuxElement::ConstAccessor<unsigned int> m_firstMotherTruthClassification{"firstEgMotherTruthClassification"};
-  const SG::AuxElement::ConstAccessor<int> m_firstMotherPdgId{"firstEgMotherPdgId"};
-  const SG::AuxElement::ConstAccessor<int> m_lastMotherTruthType{"lastEgMotherTruthType"};
-  const SG::AuxElement::ConstAccessor<int> m_lastMotherTruthOrigin{"lastEgMotherTruthOrigin"};
-  const SG::AuxElement::ConstAccessor<unsigned int> m_lastMotherTruthClassification{"lastEgMotherTruthClassification"};
-  const SG::AuxElement::ConstAccessor<int> m_lastMotherPdgId{"lastEgMotherPdgId"};
-  const SG::AuxElement::ConstAccessor<int> m_fallbackTruthType{"TruthClassifierFallback_truthType"};
-  const SG::AuxElement::ConstAccessor<int> m_fallbackTruthOrigin{"TruthClassifierFallback_truthOrigin"};
-  const SG::AuxElement::ConstAccessor<int> m_fallbackTruthClassification{"TruthClassifierFallback_truthClassification"};
-  const SG::AuxElement::ConstAccessor<float> m_fallbackDR{"TruthClassifierFallback_dR"};
+  const SG::ConstAccessor<int> m_truthType{"truthType"};
+  const SG::ConstAccessor<int> m_truthOrigin{"truthOrigin"};
+  const SG::ConstAccessor<unsigned int> m_truthClassification{"truthClassification"};
+  const SG::ConstAccessor<int> m_truthPdgId{"truthPdgId"};
+  const SG::ConstAccessor<unsigned int> m_classifierParticleType{"classifierParticleType"};
+  const SG::ConstAccessor<unsigned int> m_classifierParticleOrigin{"classifierParticleOrigin"};
+  const SG::ConstAccessor<int> m_firstMotherTruthType{"firstEgMotherTruthType"};
+  const SG::ConstAccessor<int> m_firstMotherTruthOrigin{"firstEgMotherTruthOrigin"};
+  const SG::ConstAccessor<unsigned int> m_firstMotherTruthClassification{"firstEgMotherTruthClassification"};
+  const SG::ConstAccessor<int> m_firstMotherPdgId{"firstEgMotherPdgId"};
+  const SG::ConstAccessor<int> m_lastMotherTruthType{"lastEgMotherTruthType"};
+  const SG::ConstAccessor<int> m_lastMotherTruthOrigin{"lastEgMotherTruthOrigin"};
+  const SG::ConstAccessor<unsigned int> m_lastMotherTruthClassification{"lastEgMotherTruthClassification"};
+  const SG::ConstAccessor<int> m_lastMotherPdgId{"lastEgMotherPdgId"};
+  const SG::ConstAccessor<int> m_fallbackTruthType{"TruthClassifierFallback_truthType"};
+  const SG::ConstAccessor<int> m_fallbackTruthOrigin{"TruthClassifierFallback_truthOrigin"};
+  const SG::ConstAccessor<int> m_fallbackTruthClassification{"TruthClassifierFallback_truthClassification"};
+  const SG::ConstAccessor<float> m_fallbackDR{"TruthClassifierFallback_dR"};
   
   /// \brief a helper to check if an electron is prompt
   bool isPromptElectron(const xAOD::IParticle &electron,

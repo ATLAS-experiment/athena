@@ -141,7 +141,7 @@ class TruthVertexDecoratorAlg: public AthReentrantAlgorithm {
             this, "truthMatchProbabilityCut", 0.5,
             "Tracks below this TMP value are assigned as Fakes"};
 
-        SG::AuxElement::ConstAccessor<float> m_truthMatchProbabilityAcc{"truthMatchProbability"};
+        SG::ConstAccessor<float> m_truthMatchProbabilityAcc{"truthMatchProbability"};
 
 
     }; // End of TruthVertexDecoratorAlg

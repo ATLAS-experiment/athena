@@ -31,9 +31,9 @@ StatusCode JetQuarkChargeLabelingTool::decorate(const JetContainer& jets) const
 
   ATH_MSG_VERBOSE("In " << name() << "::decorate()");
   
-  SG::AuxElement::Accessor<int> hadronAccessorHandle(m_hadronAccessor.value());
-  SG::AuxElement::Accessor<int> partonAccessorHandle(m_partonAccessor.value());
-  SG::AuxElement::Decorator<int> chargeDecoratorHandle(m_chargeDecorator.value());
+  SG::Accessor<int> hadronAccessorHandle(m_hadronAccessor.value());
+  SG::Accessor<int> partonAccessorHandle(m_partonAccessor.value());
+  SG::Decorator<int> chargeDecoratorHandle(m_chargeDecorator.value());
   
   for (const xAOD::Jet* jet: jets) {
     int final_pdgId = -999 ;

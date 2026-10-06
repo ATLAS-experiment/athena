@@ -221,7 +221,7 @@ template<>
 bool OverlapRemovalGenUseAlg::selectObject<xAOD::Electron>(const xAOD::Electron& obj)
 {
   if(m_electronLabel.empty()) return true;    //disable selection for objects with empty labels
-  const SG::AuxElement::ConstAccessor<char> acc_ElectronPass(m_electronLabel);
+  const SG::ConstAccessor<char> acc_ElectronPass(m_electronLabel);
   if(obj.pt() < m_ptCut*GeV || std::abs(obj.eta()) > m_etaCut) return false;
   if(!acc_ElectronPass(obj)) return false;
   return true;
@@ -232,7 +232,7 @@ template<>
 bool OverlapRemovalGenUseAlg::selectObject<xAOD::Photon>(const xAOD::Photon& obj)
 {
   if(m_photonLabel.empty()) return true;    //disable selection for objects with empty labels
-  const SG::AuxElement::ConstAccessor<char> acc_PhotonPass(m_photonLabel);
+  const SG::ConstAccessor<char> acc_PhotonPass(m_photonLabel);
   if(obj.pt() < m_ptCut*GeV || std::abs(obj.eta()) > m_etaCut) return false;
   if(!acc_PhotonPass(obj)) return false;
   return true;
@@ -243,7 +243,7 @@ template<>
 bool OverlapRemovalGenUseAlg::selectObject<xAOD::Muon>(const xAOD::Muon& obj)
 {
   if(m_muonLabel.empty()) return true;    //disable selection for objects with empty labels
-  const SG::AuxElement::ConstAccessor<char> acc_MuonPass(m_muonLabel);
+  const SG::ConstAccessor<char> acc_MuonPass(m_muonLabel);
   if(obj.pt() < m_ptCut*GeV || std::abs(obj.eta()) > m_etaCut) return false;
   if(!acc_MuonPass(obj)) return false;
   return true;
@@ -254,7 +254,7 @@ template<>
 bool OverlapRemovalGenUseAlg::selectObject<xAOD::TauJet>(const xAOD::TauJet& obj)
 {
   if(m_tauLabel.empty()) return true;    //disable selection for objects with empty labels
-  const SG::AuxElement::ConstAccessor<char> acc_TauPass(m_tauLabel);
+  const SG::ConstAccessor<char> acc_TauPass(m_tauLabel);
   if(obj.pt() < m_ptCut*GeV || std::abs(obj.eta()) > m_etaCut) return false;
   if(!acc_TauPass(obj)) return false;
   return true;

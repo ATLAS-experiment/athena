@@ -28,7 +28,7 @@ public:
   void lock(const xAOD::IParticleContainer* target) const;
 private:
   std::vector<int> m_pids;
-  SG::AuxElement::Decorator<unsigned char> m_dec;
+  SG::Decorator<unsigned char> m_dec;
   SG::auxid_t m_auxid;
 };
 

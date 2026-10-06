@@ -283,7 +283,7 @@ void ThinInDetClustersAlg::selectTrackHits(const xAOD::TrackParticleContainer& i
     if (not inputMask[trkIndex]) continue;
 
     // loop over the TrackStateValidation objects, and add them to the outputStatesMask
-    static const SG::AuxElement::ConstAccessor< StatesOnTrack > trackStateAcc("Reco_msosLink");
+    static const SG::ConstAccessor< StatesOnTrack > trackStateAcc("Reco_msosLink");
     if( ! trackStateAcc.isAvailable( *trkIt ) ) {
       ATH_MSG_INFO("Cannot find TrackState link from xAOD::TrackParticle. Skipping track.");
       continue;

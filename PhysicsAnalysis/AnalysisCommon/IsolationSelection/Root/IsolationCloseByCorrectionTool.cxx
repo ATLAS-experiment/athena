@@ -956,7 +956,7 @@ namespace CP {
         }
         for (unsigned int i = 0; i < iso_types.size(); ++i) {
             strPar.isolationValues.at(iso_types[i]) = corrections.at(i);
-            const SG::AuxElement::Accessor<float>* acc = xAOD::getIsolationAccessor(iso_types[i]);
+            const SG::Accessor<float>* acc = xAOD::getIsolationAccessor(iso_types[i]);
             if (acc)[[likely]]{
               float old = (*acc)(x);
               ATH_MSG_DEBUG("Correcting " << toString(iso_types[i]) << " from " << old << " to " << corrections[i]);
