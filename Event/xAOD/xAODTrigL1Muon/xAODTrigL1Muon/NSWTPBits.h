@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <numbers>
 
-namespace L0Muon {
+namespace L1Muon {
   namespace NSWTPBits {
     // Shifts and masks for Run 4 NSW-TP segment packed words
 

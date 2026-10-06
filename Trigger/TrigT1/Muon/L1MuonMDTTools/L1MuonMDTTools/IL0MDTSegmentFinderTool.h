@@ -10,11 +10,11 @@
 #include "L1MuonMDTTools/L0MDTSegment.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 
-namespace L0MDT {
+namespace L1Muon::L1MDT {
 
   /**
   * @class IL0MDTSegmentFinderTool
-  * @brief Interface for the implementation of L0MDT Segment Finder*/
+  * @brief Interface for the implementation of L1Muon::L1MDT Segment Finder*/
   
   class IL0MDTSegmentFinderTool: virtual public IAlgTool {
 
@@ -22,7 +22,7 @@ namespace L0MDT {
     DeclareInterfaceID(IL0MDTSegmentFinderTool, 1 ,0);
     virtual ~IL0MDTSegmentFinderTool() = default;
     virtual StatusCode findSegments(const std::vector<const xAOD::MdtDriftCircle*>& driftCircles, const ActsTrk::GeometryContext& gctx,
-                                    float m, float b,std::vector<L0MDT::Segment>& segments) const = 0;
+                                    float m, float b,std::vector<L1Muon::L1MDT::Segment>& segments) const = 0;
   };
 }
 #endif

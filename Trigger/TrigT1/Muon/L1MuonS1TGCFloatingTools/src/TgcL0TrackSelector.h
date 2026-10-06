@@ -9,7 +9,7 @@
 #include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
 #include "xAODL0MuonCand/TGCCandDataContainer.h"
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 /** @brief Select and convert floating-point TGC candidates. */
@@ -32,6 +32,6 @@ class TrackSelector {
 };
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

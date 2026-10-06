@@ -17,15 +17,15 @@ namespace {
 
 using CandidateGroup = std::pair<std::uint16_t, std::uint16_t>;
 
-CandidateGroup candidateGroup(const L0Muon::TgcL0Candidate &candidate) {
+CandidateGroup candidateGroup(const L1Muon::TgcL0Candidate &candidate) {
   return {candidate.subdetectorId, candidate.sectorId};
 }
 
-float selectionPt(const L0Muon::TgcL0Candidate &candidate) {
+float selectionPt(const L1Muon::TgcL0Candidate &candidate) {
   return std::isfinite(candidate.pt) && candidate.pt > 0.F ? candidate.pt : 0.F;
 }
 
-void fillOutputCandidate(const L0Muon::TgcL0Candidate &input, std::uint8_t tcId,
+void fillOutputCandidate(const L1Muon::TgcL0Candidate &input, std::uint8_t tcId,
                          xAOD::TGCCandData &output) {
   output.initialize(input.subdetectorId, input.sectorId, input.bcTag);
   output.setEta(input.eta);
@@ -46,7 +46,7 @@ void fillOutputCandidate(const L0Muon::TgcL0Candidate &input, std::uint8_t tcId,
 
 }  // namespace
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 void TrackSelector::select(const TgcL0CandidateContainer &candidates,
@@ -98,4 +98,4 @@ void TrackSelector::select(const TgcL0CandidateContainer &candidates,
 }
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon

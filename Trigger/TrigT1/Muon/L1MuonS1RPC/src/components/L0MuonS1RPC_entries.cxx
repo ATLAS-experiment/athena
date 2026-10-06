@@ -1,2 +1,2 @@
 #include "../RPCSimulation.h" 
-DECLARE_COMPONENT(L0Muon::RPCSimulation)
+DECLARE_COMPONENT(L1Muon::RPCSimulation)

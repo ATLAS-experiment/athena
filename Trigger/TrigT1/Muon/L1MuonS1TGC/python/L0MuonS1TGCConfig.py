@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 def L0MuonTGCSimCfg(
         flags,
-        name="L0Muon.TGCSimulation",
+        name="L1Muon.TGCSimulation",
         configureHistSvc=True,
         **kwargs):
 
@@ -35,7 +35,7 @@ def L0MuonTGCSimCfg(
             TgcL0FloatingTrackSelectorToolCfg(flags)
         )
 
-    alg = CompFactory.L0Muon.TGCSimulation(name=name, **kwargs)
+    alg = CompFactory.L1Muon.TGCSimulation(name=name, **kwargs)
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, "MonTool")

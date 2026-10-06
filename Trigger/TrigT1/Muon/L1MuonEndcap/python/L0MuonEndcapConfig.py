@@ -7,7 +7,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 def L0MuonEndcapAlgCfg(flags, name="L0MuonEndcapAlg", **kwargs):
     """Configure the initial TGC endcap data-flow boundary."""
     result = ComponentAccumulator()
-    result.addEventAlgo(CompFactory.L0Muon.L0MuonEndcapAlg(name, **kwargs))
+    result.addEventAlgo(CompFactory.L1Muon.L0MuonEndcapAlg(name, **kwargs))
     return result
 
 

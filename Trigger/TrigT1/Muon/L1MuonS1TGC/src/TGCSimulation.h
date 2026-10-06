@@ -14,7 +14,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "xAODL0MuonCand/TGCCandDataContainer.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 class TGCSimulation : public AthReentrantAlgorithm {
  public:
@@ -50,6 +50,6 @@ class TGCSimulation : public AthReentrantAlgorithm {
                                                "Monitoring tool"};
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

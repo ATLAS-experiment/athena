@@ -5,7 +5,7 @@
 /**
  * @file PtEstimationTool.cxx
  *
- * Temporary and explicitly simplified pT-proxy tool for L0Muon MDT studies.
+ * Temporary and explicitly simplified pT-proxy tool for L1Muon MDT studies.
  *
  * Important limitations of the current implementation:
  *   - no magnetic-field model is used
@@ -50,7 +50,7 @@ float pointToLineDistance(float z, float r,
 
 }  // namespace
 
-namespace L0MDT {
+namespace L1Muon::L1MDT {
 
 StatusCode PtEstimationTool::initialize() {
   ATH_MSG_DEBUG("Initializing " << name());
@@ -172,5 +172,5 @@ float PtEstimationTool::estimateThreeStationPt(float sagitta, float leverArm) co
   return kToyPtScale * leverArm * leverArm / absSagitta;
 }
 
-}  // namespace L0MDT
+}  // namespace L1Muon::L1MDT
 

@@ -4,7 +4,7 @@
 
 #include "TgcL0InnerCoincidence.h"
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 void InnerCoincidence::apply(TgcL0CandidateContainer &candidates) const {
@@ -16,4 +16,4 @@ void InnerCoincidence::apply(TgcL0CandidateContainer &candidates) const {
 }
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon

@@ -40,7 +40,7 @@
 #include <cmath>
 #include <numeric>
 
-namespace L0MDT {
+namespace L1Muon::L1MDT {
 
   StatusCode LegendreSegmentFinderTool::initialize() {
     ATH_MSG_DEBUG("Initializing " << name() << "...");
@@ -307,7 +307,7 @@ namespace L0MDT {
       const ActsTrk::GeometryContext& gctx,
       float m,
       float b,
-      std::vector<L0MDT::Segment>& segments) const {
+      std::vector<L1Muon::L1MDT::Segment>& segments) const {
 
     segments.clear();
 
@@ -379,7 +379,7 @@ namespace L0MDT {
 
     // Temporary validation-only status:
     // the fitted line parameters are computed and logged, but the final
-    // L0MDT::Segment EDM object is not yet fully filled and stored.
+    // L1Muon::L1MDT::Segment EDM object is not yet fully filled and stored.
     //
     // Future updates are expected to:
     //   - define the final segment EDM content
@@ -388,7 +388,7 @@ namespace L0MDT {
     //
     // Example placeholder:
     //
-    // L0MDT::Segment seg;
+    // L1Muon::L1MDT::Segment seg;
     // seg.setM(fit.m);
     // seg.setB(fit.b);
     // seg.setChi2(fit.chi2);
@@ -400,5 +400,5 @@ namespace L0MDT {
     return StatusCode::SUCCESS;
   }
 
-} // namespace L0MDT
+} // namespace L1Muon::L1MDT
 

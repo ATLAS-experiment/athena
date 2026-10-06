@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-namespace L0Muon {
+namespace L1Muon {
 
 enum class TgcL0FloatingPtResponseMode : std::uint8_t {
   Invalid = 0,
@@ -105,6 +105,6 @@ class TgcL0FloatingPtLut {
   bool m_isDevelopmentPayload{false};
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

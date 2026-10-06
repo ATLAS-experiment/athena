@@ -19,7 +19,7 @@ def L0MuonRPCSimCfg(flags, name = "L0MuonRPCSim", **kwargs):
     result = ComponentAccumulator()
     result.merge(TruthMuonCfg(flags))
 
-    alg = CompFactory.L0Muon.RPCSimulation(name = name, **kwargs)
+    alg = CompFactory.L1Muon.RPCSimulation(name = name, **kwargs)
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, 'MonTool')

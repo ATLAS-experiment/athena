@@ -23,7 +23,7 @@ CandidateGroup candidateGroup(const xAOD::TGCCandData &candidate) {
 
 }  // namespace
 
-namespace L0Muon {
+namespace L1Muon {
 
 std::unique_ptr<xAOD::TGCCandDataContainer> TgcL0MdtCandidateSelector::select(
     xAOD::TGCCandDataContainer &candidates) const {
@@ -65,4 +65,4 @@ std::unique_ptr<xAOD::TGCCandDataContainer> TgcL0MdtCandidateSelector::select(
   return output;
 }
 
-}  // namespace L0Muon
+}  // namespace L1Muon

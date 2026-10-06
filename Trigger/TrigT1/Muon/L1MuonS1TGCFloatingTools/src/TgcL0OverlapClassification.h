@@ -8,7 +8,7 @@
 
 #include <cstddef>
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 struct OverlapClassificationConfig {
@@ -44,6 +44,6 @@ class OverlapClassification {
 };
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

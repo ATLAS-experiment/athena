@@ -16,7 +16,7 @@
 BOOST_AUTO_TEST_SUITE(TgcL0SegmentReconstructionTest)
 
 BOOST_AUTO_TEST_CASE(WrapsPhysicalDeltaThetaAcrossAtan2BranchCut) {
-  using namespace L0Muon::TgcL0Floating;
+  using namespace L1Muon::TgcL0Floating;
 
   const HitGroupKey key{103U, 1U, 0x2U};
   StationCoincidenceContainer coincidences;
@@ -30,8 +30,8 @@ BOOST_AUTO_TEST_CASE(WrapsPhysicalDeltaThetaAcrossAtan2BranchCut) {
   coincidences.emplace_back(key, Station::M3, true, 1U, -1, 1U, 21U, 0x7U,
                             3U, 3U, -1.52F, 0.20F, 900.F, -11000.F);
 
-  L0Muon::TgcL0CandidateContainer candidates;
-  L0Muon::TgcL0SegmentContainer segments;
+  L1Muon::TgcL0CandidateContainer candidates;
+  L1Muon::TgcL0SegmentContainer segments;
   SegmentStatistics statistics;
   const SegmentReconstruction reconstruction;
 

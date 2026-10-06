@@ -9,7 +9,7 @@
 
 #include "xAODL0MuonCand/TGCCandData.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 /** @brief MuCTPI candidate words produced from one TGC candidate. */
 struct TgcL0SectorLogicWords {
@@ -24,6 +24,6 @@ class TgcL0SectorLogicWordEncoder final {
   static TgcL0SectorLogicWords encode(const xAOD::TGCCandData& candidate);
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif  // L1MUONENDCAP_TGCL0SECTORLOGICWORDENCODER_H

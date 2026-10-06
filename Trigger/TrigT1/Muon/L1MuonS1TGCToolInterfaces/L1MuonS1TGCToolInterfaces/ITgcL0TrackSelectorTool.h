@@ -9,7 +9,7 @@
 #include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
 #include "xAODL0MuonCand/TGCCandDataContainer.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 /** @brief Interface for selecting TGC candidates and filling TGCCandData. */
 class ITgcL0TrackSelectorTool : virtual public IAlgTool {
@@ -27,6 +27,6 @@ class ITgcL0TrackSelectorTool : virtual public IAlgTool {
                             const EventContext& ctx) const = 0;
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

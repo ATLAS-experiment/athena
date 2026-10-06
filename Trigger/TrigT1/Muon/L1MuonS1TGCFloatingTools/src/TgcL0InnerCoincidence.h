@@ -6,7 +6,7 @@
 
 #include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 /** @brief Apply the floating-point Inner-Coincidence response. */
@@ -21,6 +21,6 @@ class InnerCoincidence {
 };
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

@@ -4,7 +4,7 @@
 
 #include "TgcL0BitwiseCandidateBuilderTool.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 StatusCode TgcL0BitwiseCandidateBuilderTool::build(const TgcRdoContainer& rdos, TgcL0CandidateContainer& candidates, const EventContext& ctx) const {
   (void)rdos;
@@ -13,4 +13,4 @@ StatusCode TgcL0BitwiseCandidateBuilderTool::build(const TgcRdoContainer& rdos, 
   return StatusCode::SUCCESS;
 }
 
-}  // namespace L0Muon
+}  // namespace L1Muon

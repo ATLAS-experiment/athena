@@ -4,7 +4,7 @@
 
 #include "L1MuonInterface/ICandData.h"
 
-namespace L0Muon
+namespace L1Muon
 {
 
   /// set the kinematic parameters using the 
@@ -40,4 +40,4 @@ namespace L0Muon
     return static_cast<float>(m_pt)/static_cast<float>(s_ptBitRange)*s_ptRange;
   }
 
-} // namespace L0Muon
+} // namespace L1Muon

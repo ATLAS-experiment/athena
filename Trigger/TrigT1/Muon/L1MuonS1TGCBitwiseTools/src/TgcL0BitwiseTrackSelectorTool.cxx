@@ -4,7 +4,7 @@
 
 #include "TgcL0BitwiseTrackSelectorTool.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 StatusCode TgcL0BitwiseTrackSelectorTool::select(const TgcL0CandidateContainer& candidates, xAOD::TGCCandDataContainer& output, const EventContext& ctx) const {
   (void)candidates;
@@ -13,4 +13,4 @@ StatusCode TgcL0BitwiseTrackSelectorTool::select(const TgcL0CandidateContainer& 
   return StatusCode::SUCCESS;
 }
 
-}  // namespace L0Muon
+}  // namespace L1Muon

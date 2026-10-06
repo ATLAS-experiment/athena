@@ -6,7 +6,7 @@
 
 #include "TgcL0TrackSelector.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 StatusCode TgcL0FloatingTrackSelectorTool::select(
     const TgcL0CandidateContainer &candidates,
@@ -17,4 +17,4 @@ StatusCode TgcL0FloatingTrackSelectorTool::select(
   return StatusCode::SUCCESS;
 }
 
-}  // namespace L0Muon
+}  // namespace L1Muon

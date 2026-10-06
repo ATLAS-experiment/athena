@@ -41,7 +41,7 @@
 #include "CompactSegmentFinderTool.h"
 #include "L1MuonMDTTools/L0MDTSegment.h"
 
-namespace L0MDT {
+namespace L1Muon::L1MDT {
 
   StatusCode CompactSegmentFinderTool::initialize() {
     // Retrieve the MDT identifier helper service
@@ -55,7 +55,7 @@ namespace L0MDT {
       const ActsTrk::GeometryContext& gctx,
       float m,
       float rpcB,
-      std::vector<L0MDT::Segment>& segments) const {
+      std::vector<L1Muon::L1MDT::Segment>& segments) const {
 
     // Reset the output container for this call
     segments.clear();
@@ -164,7 +164,7 @@ namespace L0MDT {
 
     // Fill the output segment object here according to the actual EDM API
   
-    L0MDT::Segment seg;
+    L1Muon::L1MDT::Segment seg;
     seg.setM(fit.m);
     seg.setB(fit.b);
     seg.setChi2(fit.chi2);

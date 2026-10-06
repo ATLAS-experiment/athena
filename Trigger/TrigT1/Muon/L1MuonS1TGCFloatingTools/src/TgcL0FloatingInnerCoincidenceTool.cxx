@@ -6,7 +6,7 @@
 
 #include "TgcL0InnerCoincidence.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 StatusCode TgcL0FloatingInnerCoincidenceTool::apply(
     TgcL0CandidateContainer &candidates, const EventContext &ctx) const {
@@ -16,4 +16,4 @@ StatusCode TgcL0FloatingInnerCoincidenceTool::apply(
   return StatusCode::SUCCESS;
 }
 
-}  // namespace L0Muon
+}  // namespace L1Muon

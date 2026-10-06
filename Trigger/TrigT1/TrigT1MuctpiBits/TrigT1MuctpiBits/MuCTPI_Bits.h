@@ -251,7 +251,7 @@ namespace LVL1::MuCTPIBits {
 
 } // namespace LVL1::MuCTPIBits
 
-namespace L0Muon::MuCTPIBits {
+namespace L1Muon::MuCTPIBits {
   // Shifts and masks for RPC & TGC SL to MUCTPI data format for Run 4
   static constexpr uint32_t RUN4_SL2MUCTPI_BOARD_ID_SHIFT = 20;
   static constexpr uint32_t RUN4_SL2MUCTPI_BOARD_ID_MASK = 0x7F;

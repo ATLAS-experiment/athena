@@ -11,7 +11,7 @@
 
 #include <cstddef>
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 struct SegmentReconstructionConfig {
@@ -75,6 +75,6 @@ class SegmentReconstruction {
 };
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

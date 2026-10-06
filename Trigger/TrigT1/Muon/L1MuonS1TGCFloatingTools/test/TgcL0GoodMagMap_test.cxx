@@ -74,14 +74,14 @@ int main() {
   writeMap(mapPath);
 
   std::string error;
-  success &= check(!L0Muon::TgcL0GoodMagMap::loadAscii(
+  success &= check(!L1Muon::TgcL0GoodMagMap::loadAscii(
                        "TgcL0GoodMagMap_test_missing.txt", error),
                    "missing payload is rejected");
   success &= check(!error.empty(), "missing payload reports an error");
 
   error.clear();
   const auto map =
-      L0Muon::TgcL0GoodMagMap::loadAscii(mapPath.string(), error);
+      L1Muon::TgcL0GoodMagMap::loadAscii(mapPath.string(), error);
   if (!check(static_cast<bool>(map), "valid payload is loaded")) {
     std::filesystem::remove(mapPath);
     return EXIT_FAILURE;
@@ -139,7 +139,7 @@ int main() {
     writeMap(path, malformedPayloads[index]);
     error.clear();
     success &= check(
-        !L0Muon::TgcL0GoodMagMap::loadAscii(path.string(), error),
+        !L1Muon::TgcL0GoodMagMap::loadAscii(path.string(), error),
         "malformed payload is rejected");
     success &= check(!error.empty(), "malformed payload reports an error");
     std::filesystem::remove(path);

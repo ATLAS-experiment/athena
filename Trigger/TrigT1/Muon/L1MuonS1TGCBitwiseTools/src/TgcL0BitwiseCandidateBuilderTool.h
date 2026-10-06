@@ -7,7 +7,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1MuonS1TGCToolInterfaces/ITgcL0CandidateBuilderTool.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 class TgcL0BitwiseCandidateBuilderTool final
     : public extends<AthAlgTool, ITgcL0CandidateBuilderTool> {
@@ -22,6 +22,6 @@ class TgcL0BitwiseCandidateBuilderTool final
                    const EventContext& ctx) const override;
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif

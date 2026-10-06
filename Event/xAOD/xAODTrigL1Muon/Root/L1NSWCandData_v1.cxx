@@ -35,28 +35,28 @@ namespace xAOD {
 
   // Getting Element-by-Element
   uint16_t L1NSWCandData_v1::segEtaIndex(size_t i) const {
-    return (l1SegmentWords().at(i) >> L0Muon::NSWTPBits::RUN4_NSWTP_ETA_SHIFT) & L0Muon::NSWTPBits::RUN4_NSWTP_ETA_MASK;
+    return (l1SegmentWords().at(i) >> L1Muon::NSWTPBits::RUN4_NSWTP_ETA_SHIFT) & L1Muon::NSWTPBits::RUN4_NSWTP_ETA_MASK;
   }
 
   uint16_t L1NSWCandData_v1::segPhiIndex(size_t i) const {
-    return (l1SegmentWords().at(i) >> L0Muon::NSWTPBits::RUN4_NSWTP_PHI_SHIFT) & L0Muon::NSWTPBits::RUN4_NSWTP_PHI_MASK;
+    return (l1SegmentWords().at(i) >> L1Muon::NSWTPBits::RUN4_NSWTP_PHI_SHIFT) & L1Muon::NSWTPBits::RUN4_NSWTP_PHI_MASK;
   }
 
   uint8_t L1NSWCandData_v1::segDeltaThetaIndex(size_t i) const {
-    return (l1SegmentWords().at(i) >> L0Muon::NSWTPBits::RUN4_NSWTP_DTH_SHIFT) & L0Muon::NSWTPBits::RUN4_NSWTP_DTH_MASK;
+    return (l1SegmentWords().at(i) >> L1Muon::NSWTPBits::RUN4_NSWTP_DTH_SHIFT) & L1Muon::NSWTPBits::RUN4_NSWTP_DTH_MASK;
   }
 
   uint8_t L1NSWCandData_v1::segQuality(size_t i) const {
-    return (l1SegmentWords().at(i) >> L0Muon::NSWTPBits::RUN4_NSWTP_QUAL_SHIFT) & L0Muon::NSWTPBits::RUN4_NSWTP_QUAL_MASK;
+    return (l1SegmentWords().at(i) >> L1Muon::NSWTPBits::RUN4_NSWTP_QUAL_SHIFT) & L1Muon::NSWTPBits::RUN4_NSWTP_QUAL_MASK;
   }
 
   float L1NSWCandData_v1::segEta(size_t i) const {
-    return L0Muon::NSWTPBits::ETA_MIN +
-      (static_cast<float>(segEtaIndex(i)) / L0Muon::NSWTPBits::ETA_MAX_RAW) * (L0Muon::NSWTPBits::ETA_MAX - L0Muon::NSWTPBits::ETA_MIN);
+    return L1Muon::NSWTPBits::ETA_MIN +
+      (static_cast<float>(segEtaIndex(i)) / L1Muon::NSWTPBits::ETA_MAX_RAW) * (L1Muon::NSWTPBits::ETA_MAX - L1Muon::NSWTPBits::ETA_MIN);
   }
 
   float L1NSWCandData_v1::segPhi(size_t i) const {
-    return (static_cast<float>(segPhiIndex(i)) / L0Muon::NSWTPBits::PHI_MAX_RAW) * L0Muon::NSWTPBits::PHI_MAX;
+    return (static_cast<float>(segPhiIndex(i)) / L1Muon::NSWTPBits::PHI_MAX_RAW) * L1Muon::NSWTPBits::PHI_MAX;
   }
 
   // Add Segment
@@ -65,10 +65,10 @@ namespace xAOD {
 
     // Pack the fields into a single 32-bit container word
     uint32_t packedWord = 0;
-    packedWord |= (static_cast<uint32_t>(etaIndex) & L0Muon::NSWTPBits::RUN4_NSWTP_ETA_MASK) << L0Muon::NSWTPBits::RUN4_NSWTP_ETA_SHIFT;
-    packedWord |= (static_cast<uint32_t>(phiIndex) & L0Muon::NSWTPBits::RUN4_NSWTP_PHI_MASK) << L0Muon::NSWTPBits::RUN4_NSWTP_PHI_SHIFT;
-    packedWord |= (static_cast<uint32_t>(deltaThetaIndex) & L0Muon::NSWTPBits::RUN4_NSWTP_DTH_MASK) << L0Muon::NSWTPBits::RUN4_NSWTP_DTH_SHIFT;
-    packedWord |= (static_cast<uint32_t>(quality) & L0Muon::NSWTPBits::RUN4_NSWTP_QUAL_MASK) << L0Muon::NSWTPBits::RUN4_NSWTP_QUAL_SHIFT;
+    packedWord |= (static_cast<uint32_t>(etaIndex) & L1Muon::NSWTPBits::RUN4_NSWTP_ETA_MASK) << L1Muon::NSWTPBits::RUN4_NSWTP_ETA_SHIFT;
+    packedWord |= (static_cast<uint32_t>(phiIndex) & L1Muon::NSWTPBits::RUN4_NSWTP_PHI_MASK) << L1Muon::NSWTPBits::RUN4_NSWTP_PHI_SHIFT;
+    packedWord |= (static_cast<uint32_t>(deltaThetaIndex) & L1Muon::NSWTPBits::RUN4_NSWTP_DTH_MASK) << L1Muon::NSWTPBits::RUN4_NSWTP_DTH_SHIFT;
+    packedWord |= (static_cast<uint32_t>(quality) & L1Muon::NSWTPBits::RUN4_NSWTP_QUAL_MASK) << L1Muon::NSWTPBits::RUN4_NSWTP_QUAL_SHIFT;
 
     accWord(*this).push_back(packedWord);
   }

@@ -22,7 +22,7 @@
 #include "xAODL0MuonCand/RPCCandDataAuxContainer.h"
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
-namespace L0Muon
+namespace L1Muon
 {
 
   class RPCSimulation : public ::AthReentrantAlgorithm

@@ -12,7 +12,7 @@
 #include "xAODTrigger/MuonRoIContainer.h"
 #include <memory>
 
-namespace L0Muon {
+namespace L1Muon {
 
 class TruthTrackSmearer;
 

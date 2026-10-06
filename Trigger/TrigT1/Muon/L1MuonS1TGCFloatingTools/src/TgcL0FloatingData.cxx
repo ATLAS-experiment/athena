@@ -4,7 +4,7 @@
 
 #include "TgcL0FloatingData.h"
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 HitGroupKey::Tuple HitGroupKey::tie() const {
@@ -16,4 +16,4 @@ bool HitGroupKey::operator<(const HitGroupKey& other) const {
 }
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon

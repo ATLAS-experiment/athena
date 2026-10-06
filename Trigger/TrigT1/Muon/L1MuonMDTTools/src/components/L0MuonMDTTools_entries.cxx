@@ -6,6 +6,6 @@
 #include "../LegendreSegmentFinderTool.h"
 #include "../PtEstimationTool.h"
 
-DECLARE_COMPONENT( L0MDT::CompactSegmentFinderTool )
-DECLARE_COMPONENT( L0MDT::LegendreSegmentFinderTool )
-DECLARE_COMPONENT( L0MDT::PtEstimationTool )
+DECLARE_COMPONENT( L1Muon::L1MDT::CompactSegmentFinderTool )
+DECLARE_COMPONENT( L1Muon::L1MDT::LegendreSegmentFinderTool )
+DECLARE_COMPONENT( L1Muon::L1MDT::PtEstimationTool )

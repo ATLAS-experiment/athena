@@ -12,7 +12,7 @@
 #include "TgcL0SectorLogicWordEncoder.h"
 #include "xAODMuonViews/FillContainer.h"
 
-namespace L0Muon {
+namespace L1Muon {
 namespace {
 
 constexpr int currentBcOffset = 0;
@@ -56,4 +56,4 @@ StatusCode L0MuonEndcapAlg::execute(const EventContext& ctx) const {
   return StatusCode::SUCCESS;
 }
 
-}  // namespace L0Muon
+}  // namespace L1Muon

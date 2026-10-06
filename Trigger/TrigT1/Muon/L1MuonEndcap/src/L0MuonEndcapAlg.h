@@ -12,7 +12,7 @@
 #include "xAODTrigL1Muon/SectorLogicCandDataAuxContainer.h"
 #include "xAODTrigL1Muon/SectorLogicCandDataContainer.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 /**
  * @brief Initial data-flow boundary for the Phase-II endcap trigger.
@@ -38,6 +38,6 @@ class L0MuonEndcapAlg final : public AthReentrantAlgorithm {
       "TGC-side Sector Logic candidates sent towards MuCTPI"};
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif  // L1MUONENDCAP_L0MUONENDCAPALG_H

@@ -4,7 +4,7 @@
 
 #include "L1MuonMDTTools/L0MDTSegment.h"
 
-namespace L0MDT {
+namespace L1Muon::L1MDT {
 
   
 } // end of namespace

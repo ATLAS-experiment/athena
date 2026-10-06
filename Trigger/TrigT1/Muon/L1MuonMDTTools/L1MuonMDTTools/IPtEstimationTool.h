@@ -9,7 +9,7 @@
 #include "L1MuonMDTTools/L0MDTSegment.h"
 #include <optional>
 
-namespace L0MDT {
+namespace L1Muon::L1MDT {
 
 /// Output struct holding the result of a pT estimation.
 /// All fields are meaningful only when the optional returned by estimatePt is not empty.
@@ -24,7 +24,7 @@ struct PtEstimate {
 
 /**
  * @class IPtEstimationTool
- * @brief Interface for pT estimation tools in the L0Muon MDT chain.
+ * @brief Interface for pT estimation tools in the L1Muon MDT chain.
  *
  * Concrete implementations may use different strategies (geometric proxy,
  * magnetic field lookup, calibration tables, etc.).
@@ -44,6 +44,6 @@ public:
                                                const Segment* boSeg) const = 0;
 };
 
-}  // namespace L0MDT
+}  // namespace L1Muon::L1MDT
 
 #endif

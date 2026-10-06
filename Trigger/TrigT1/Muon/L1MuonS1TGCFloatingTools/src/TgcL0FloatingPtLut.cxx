@@ -47,7 +47,7 @@ constexpr bool hasEmptyCsvField(const std::string_view line) {
 std::uint8_t encodePtValue(const float ptGeV) {
   if (!std::isfinite(ptGeV) || ptGeV <= 0.F) return 0U;
   const long encoded = std::lround(2.F * std::min(
-      ptGeV, L0Muon::TgcL0FloatingPtLut::s_maxEncodedPtGeV));
+      ptGeV, L1Muon::TgcL0FloatingPtLut::s_maxEncodedPtGeV));
   return static_cast<std::uint8_t>(std::clamp(encoded, 0L, 255L));
 }
 
@@ -58,7 +58,7 @@ std::int8_t chargeFromSignedDTheta(const float signedDTheta) {
 
 }  // namespace
 
-namespace L0Muon {
+namespace L1Muon {
 
 std::unique_ptr<TgcL0FloatingPtLut> TgcL0FloatingPtLut::loadAscii(
     const std::string& calibrationPath, std::string& error) {
@@ -414,4 +414,4 @@ TgcL0FloatingPtEvaluation TgcL0FloatingPtLut::evaluate(
   return result;
 }
 
-}  // namespace L0Muon
+}  // namespace L1Muon

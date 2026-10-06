@@ -8,12 +8,12 @@
 #include "AthContainers/DataVector.h"
 #include "AthenaKernel/CLASS_DEF.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 using TGCCandDataContainer = DataVector<TGCCandData>;
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
-CLASS_DEF( L0Muon::TGCCandDataContainer , 1262868476 , 1 )
+CLASS_DEF( L1Muon::TGCCandDataContainer , 1262868476 , 1 )
 
 #endif  // L1MuonInterface_TGCCANDDATACONTAINER_H

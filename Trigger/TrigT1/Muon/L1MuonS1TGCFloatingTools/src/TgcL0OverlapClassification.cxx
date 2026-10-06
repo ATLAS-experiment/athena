@@ -13,8 +13,8 @@
 
 namespace {
 
-bool sameChamber(const L0Muon::TgcL0Candidate& first,
-                 const L0Muon::TgcL0Candidate& second,
+bool sameChamber(const L1Muon::TgcL0Candidate& first,
+                 const L1Muon::TgcL0Candidate& second,
                  std::uint8_t stationBit) {
   if (stationBit == 0x1U) {
     return first.m1StationEta == second.m1StationEta &&
@@ -38,9 +38,9 @@ std::size_t countBits(std::uint8_t value) {
 }
 
 bool isOverlapPair(
-    const L0Muon::TgcL0Candidate& first,
-    const L0Muon::TgcL0Candidate& second,
-    const L0Muon::TgcL0Floating::OverlapClassificationConfig& config) {
+    const L1Muon::TgcL0Candidate& first,
+    const L1Muon::TgcL0Candidate& second,
+    const L1Muon::TgcL0Floating::OverlapClassificationConfig& config) {
   if (first.bcTag != second.bcTag ||
       first.subdetectorId != second.subdetectorId) {
     return false;
@@ -92,7 +92,7 @@ class DisjointSet {
 
 }  // namespace
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 OverlapClassification::OverlapClassification(OverlapClassificationConfig config)
@@ -146,4 +146,4 @@ void OverlapClassification::classify(
 }
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon

@@ -4,7 +4,7 @@
  
 #include "NSWSimulation.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
   StatusCode NSWSimulation::initialize() {
     ATH_MSG_DEBUG("Initializing " << name() << "...");
@@ -98,4 +98,4 @@ namespace L0Muon {
     return StatusCode::SUCCESS;
   }
 
-}   // end of namespace L0Muon
+}   // end of namespace L1Muon

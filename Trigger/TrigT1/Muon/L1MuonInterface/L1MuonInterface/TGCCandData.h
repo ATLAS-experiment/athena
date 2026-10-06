@@ -6,7 +6,7 @@
 
 #include "L1MuonInterface/ICandData.h"
 
-namespace L0Muon {
+namespace L1Muon {
 
 class TGCCandData : public ICandData {
  public:
@@ -54,6 +54,6 @@ class TGCCandData : public ICandData {
 
 };
 
-}  // namespace L0Muon
+}  // namespace L1Muon
 
 #endif  // L1MuonInterface_TGCCANDDATA_H

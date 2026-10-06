@@ -8,7 +8,7 @@
 
 namespace {
 
-namespace bits = L0Muon::MuCTPIBits;
+namespace bits = L1Muon::MuCTPIBits;
 
 constexpr std::uint32_t encodeField(const std::uint32_t value,
                                     const std::uint32_t shift,
@@ -18,7 +18,7 @@ constexpr std::uint32_t encodeField(const std::uint32_t value,
 
 }  // namespace
 
-namespace L0Muon {
+namespace L1Muon {
 
 TgcL0SectorLogicWords TgcL0SectorLogicWordEncoder::encode(
     const xAOD::TGCCandData& candidate) {
@@ -44,4 +44,4 @@ TgcL0SectorLogicWords TgcL0SectorLogicWordEncoder::encode(
   return words;
 }
 
-}  // namespace L0Muon
+}  // namespace L1Muon

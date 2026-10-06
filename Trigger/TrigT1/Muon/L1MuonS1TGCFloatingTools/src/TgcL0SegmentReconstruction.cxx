@@ -20,14 +20,14 @@
 
 namespace {
 
-using Coincidence = L0Muon::TgcL0Floating::StationCoincidence;
-using Config = L0Muon::TgcL0Floating::SegmentReconstructionConfig;
-using Statistics = L0Muon::TgcL0Floating::SegmentStatistics;
-using Station = L0Muon::TgcL0Floating::Station;
-using GroupKey = L0Muon::TgcL0Floating::HitGroupKey;
-using OutputSegment = L0Muon::TgcL0Segment;
-using OutputSegments = L0Muon::TgcL0SegmentContainer;
-using Projection = L0Muon::TgcL0SegmentProjection;
+using Coincidence = L1Muon::TgcL0Floating::StationCoincidence;
+using Config = L1Muon::TgcL0Floating::SegmentReconstructionConfig;
+using Statistics = L1Muon::TgcL0Floating::SegmentStatistics;
+using Station = L1Muon::TgcL0Floating::Station;
+using GroupKey = L1Muon::TgcL0Floating::HitGroupKey;
+using OutputSegment = L1Muon::TgcL0Segment;
+using OutputSegments = L1Muon::TgcL0SegmentContainer;
+using Projection = L1Muon::TgcL0SegmentProjection;
 
 constexpr std::uint8_t stationBit(const Station station) {
   if (station == Station::M1) return 0x1U;
@@ -531,7 +531,7 @@ void countPositionMask(const std::uint8_t mask, Statistics& statistics) {
 
 }  // namespace
 
-namespace L0Muon {
+namespace L1Muon {
 namespace TgcL0Floating {
 
 SegmentReconstruction::SegmentReconstruction(SegmentReconstructionConfig config)
@@ -670,4 +670,4 @@ StatusCode SegmentReconstruction::build(
 }
 
 }  // namespace TgcL0Floating
-}  // namespace L0Muon
+}  // namespace L1Muon
