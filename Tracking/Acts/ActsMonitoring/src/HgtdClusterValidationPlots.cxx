@@ -3,6 +3,7 @@
 */
 
 #include "src/HgtdClusterValidationPlots.h"
+#include "ActsGeometryInterfaces/GeometryDefs.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
 #include "TrkSurfaces/Surface.h"
 

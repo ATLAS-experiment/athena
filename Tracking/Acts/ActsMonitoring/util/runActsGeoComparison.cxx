@@ -52,7 +52,7 @@ struct ActiveSensor {
     /// @brief Technology type of the sensor
     DetectorType detType{DetectorType::UnDefined};
     /// @brief Transform of the sensor
-    Amg::Transform3D transform{Amg::Transform3D::Identity()};
+    Acts::Transform3 transform{Acts::Transform3::Identity()};
     /// @brief sensor thickness
     double thickness{0.};
     /// @brief Boundary type
@@ -192,7 +192,7 @@ int main1( int argc, char** argv ) {
                      <<reference.thickness<<" vs. "<< test.thickness<<std::endl;
             sensorOkay = false;
         }      
-        const Amg::Transform3D distortion = test.transform.inverse() * reference.transform;
+        const Acts::Transform3 distortion = test.transform.inverse() * reference.transform;
         /// We do not care whether the orientation of the coordinate system along the wire flips for negative
         /// chambers or not
         if (!Amg::doesNotDeform(distortion)) {

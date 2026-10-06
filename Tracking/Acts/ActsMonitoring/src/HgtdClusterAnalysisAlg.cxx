@@ -3,6 +3,7 @@
 */
 
 #include "HgtdClusterAnalysisAlg.h"
+#include "ActsGeometryInterfaces/GeometryDefs.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
 #include "TrkSurfaces/Surface.h"
