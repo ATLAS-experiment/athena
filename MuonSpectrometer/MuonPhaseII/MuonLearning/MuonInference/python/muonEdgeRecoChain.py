@@ -37,7 +37,6 @@ def main(args):
             "SegmentEdgeInferenceAlg.SegmentEdgeClassifierTool",
             "SegmentEdgeInferenceAlg.SegmentEdgeClassifierTool.OnnxRuntimeSessionToolCPU",
             "SegmentEdgeInferenceAlg.SegmentEdgeClassifierTool.OnnxRuntimeSessionToolCUDA",
-            "MSTrackFinderAlg",
             "MSTrackFinderAlg.MlMsTrackSeeder",
         ]
 
@@ -126,19 +125,20 @@ def main(args):
 
     ms_track_finder = cfg.getEventAlgo("MSTrackFinderAlg")
     ms_track_finder.OutputLevel = output_level
+    if args.athenaDebug:
+        ms_track_finder.FittingTool.OutputLevel = 3
     if run_ml_seeder:
         from MuonTrackFindingAlgs.TrackFindingConfig import MsTrackSeedingToolCfg
         from AthenaConfiguration.ComponentFactory import CompFactory
         baseline_seeder = cfg.popToolsAndMerge(MsTrackSeedingToolCfg(flags))
-        ml_seeder_segment_container = (
-            filtered_segment_key if filter_segment_container else "MuonSegmentsFromR4"
-        )
         ms_track_finder.SeedingTool = CompFactory.MuonR4.MlMsTrackSeeder(
             "MlMsTrackSeeder",
             BaselineSeeder=baseline_seeder,
-            SegmentContainer=ml_seeder_segment_container,
+            SegmentContainer="MuonSegmentsFromR4",
             CandidateDecoration="mlTrackComponent",
             MinSegmentsPerCandidate=args.minSegmentsPerComponent,
+            MaxSegmentsPerCandidate=args.maxSegmentsPerSeedCandidate,
+            MinCosConsistency=args.minSeedCosConsistency,
         )
     elif filter_segment_container:
         ms_track_finder.SeedingTool.SegmentContainer = filtered_segment_key
@@ -228,6 +228,12 @@ if __name__ == "__main__":
                         help="Restrict seed anchors to inner segment(s)")
     parser.add_argument("--minSegmentsPerComponent", type=int, default=2,
                         help="Require this many retained chambers in an ML component before seeding (default: 2)")
+    parser.add_argument("--maxSegmentsPerSeedCandidate", type=int, default=0,
+                        help="Discard ML components with more than this many segments before seeding "
+                             "(MlMsTrackSeeder.MaxSegmentsPerCandidate); 0 disables the cap (default: 0)")
+    parser.add_argument("--minSeedCosConsistency", type=float, default=0.819,
+                        help="Minimum cos(angle) between a segment's direction and its seed anchor's "
+                             "direction for the segment to be kept in an ML seed.")
     parser.add_argument("--maxSegmentsPerBucket", type=int, default=0,
                         help="Keep at most this many best duplicate segments in each "
                              "(sector,chamber,eta) bucket before ONNX; 0 keeps all.")

@@ -6,6 +6,7 @@
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "MuonTrackEvent/MsTrackSeed.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
+#include "MuonStationIndex/MuonStationIndex.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "StoreGate/ReadHandle.h"
 
@@ -60,6 +61,8 @@ StatusCode MlMsTrackSeeder::findTrackSeeds(
   std::size_t constructedSeeds = 0;
   for (const auto& [componentId, component] : components) {
     if (component.segments.size() < m_minSegmentsPerCandidate.value() ||
+        (m_maxSegmentsPerCandidate.value() != 0 &&
+         component.segments.size() > m_maxSegmentsPerCandidate.value()) ||
         component.anchors.empty()) {
       continue;
     }
@@ -71,9 +74,26 @@ StatusCode MlMsTrackSeeder::findTrackSeeds(
               ? MsTrackSeed::Location::Barrel
               : MsTrackSeed::Location::Endcap;
       MsTrackSeed seed{location, ExpandedSector{anchor->position().phi()}};
+
+      // One segment per layer, best aligned with the anchor: the baseline seeder
+      // only builds seeds that span several layers, and the fit rejects single-layer tracks.
+      const Muon::MuonStationIndex::LayerIndex anchorLayer =
+          Muon::MuonStationIndex::toLayerIndex(anchor->chamberIndex());
+      std::map<Muon::MuonStationIndex::LayerIndex, std::pair<double, const xAOD::MuonSegment*>> bestPerLayer;
       for (const xAOD::MuonSegment* segment : component.segments) {
-        seed.addSegment(segment);
+        if (segment == anchor) continue;
+        const Muon::MuonStationIndex::LayerIndex layer =
+            Muon::MuonStationIndex::toLayerIndex(segment->chamberIndex());
+        if (layer == anchorLayer) continue;
+        const double cosAngle = anchor->direction().dot(segment->direction());
+        if (cosAngle < m_minCosConsistency.value()) continue;
+        auto& best = bestPerLayer[layer];
+        if (!best.second || cosAngle > best.first) best = {cosAngle, segment};
       }
+      if (bestPerLayer.size() + 1 < m_minLayers.value()) continue;
+
+      seed.addSegment(anchor);
+      for (const auto& [layer, choice] : bestPerLayer) seed.addSegment(choice.second);
       seed.setPosition(anchor->position());
       outSeeds.push_back(std::move(seed));
       ++constructedSeeds;

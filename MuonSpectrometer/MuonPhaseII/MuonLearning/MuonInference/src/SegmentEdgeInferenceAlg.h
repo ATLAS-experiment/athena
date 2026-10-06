@@ -18,6 +18,7 @@
 #include <atomic>
 #include <cstdint>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace MuonML {
@@ -39,6 +40,14 @@ namespace MuonML {
         const std::vector<unsigned char>& thresholded,
         const std::vector<std::uint8_t>& keptNode,
         const std::vector<unsigned char>& nodeDropReason) const;
+
+    /// MC-only: given the per-muon component memberships and mixed-status
+    /// gathered while the per-component classify every truth muon's final
+    //  grouping (clean/mixed/fragmented).
+    void classifyGroupPurity(
+        const std::unordered_map<std::int32_t, std::unordered_set<unsigned>>& muonComponents,
+        const std::unordered_map<std::int32_t, bool>& muonEverMixed,
+        const std::unordered_map<std::int32_t, double>& truthIdToAbsEta) const;
 
     SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "MuonSegmentsFromR4"};
     /**
@@ -131,6 +140,22 @@ namespace MuonML {
     /// Every element is a std::atomic, updated only with atomic additions.
     mutable TruthLossCounters m_truthLoss ATLAS_THREAD_SAFE;
     mutable std::atomic<bool> m_warnedMissingToolDiagnostics{false};
+
+    /// Job-summed grouping-purity diagnostics: does a formed (kept) component
+    /// mix segments from more than one truth muon, and does each truth muon's
+    /// retained segments end up in one clean component, a component shared
+    /// with another muon, or split across several components? 
+    struct GroupPurityCounters {
+      static constexpr std::size_t kSizeBins = 6;  // 2, 3, 4, 5-9, 10-19, 20+
+      static constexpr std::size_t kColumns = 4;   // all, barrel, transition, endcap
+      std::array<std::atomic<std::size_t>, 3> componentsByOutcome{};  //!< clean / mixed / bkgOnly
+      std::array<std::atomic<std::size_t>, kSizeBins> componentSizeHist{};
+      std::atomic<std::size_t> mixedComponentSegments{0};
+      std::array<std::atomic<std::size_t>, kColumns * 3> muonOutcome{};  //!< clean/mixed/fragmented, per column
+      std::atomic<std::uint64_t> worstMixedPacked{0};
+    };
+    /// Every element is a std::atomic, updated only with atomic additions/CAS.
+    mutable GroupPurityCounters m_groupPurity ATLAS_THREAD_SAFE;
   };
 }
 #endif
