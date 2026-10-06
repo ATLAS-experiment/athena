@@ -6,9 +6,10 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
+#include "ActsGeometryInterfaces/GeometryDefs.h"
 #include "AthAllocators/DataPool.h"
 #include "InDetPrepRawData/SiWidth.h"
-#include "GeoPrimitives/GeoPrimitives.h"
+#include "ActsGeometryInterfaces/GeometryDefs.h"
 
 #include "TrkSurfaces/Surface.h"
 

@@ -9,6 +9,7 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "GaudiKernel/EventContext.h"
 
+#include "ActsGeometryInterfaces/GeometryDefs.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "xAODInDetMeasurement/PixelCluster.h"
 #include "xAODInDetMeasurement/SpacePointContainer.h"

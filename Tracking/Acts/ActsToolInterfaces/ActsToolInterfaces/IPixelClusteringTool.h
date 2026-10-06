@@ -5,11 +5,12 @@
 #ifndef ACTSTOOLINTERFACES_IPIXELPIXELCLUSTERINGTOOL_H
 #define ACTSTOOLINTERFACES_IPIXELPIXELCLUSTERINGTOOL_H
 
-#include <InDetIdentifier/PixelID.h>
-#include <InDetRawData/InDetRawDataCollection.h>
-#include <InDetRawData/PixelRDO_Container.h>
-#include <InDetRawData/PixelRDORawData.h>
-#include <xAODInDetMeasurement/PixelClusterContainer.h>
+#include "ActsGeometryInterfaces/GeometryDefs.h"
+#include "InDetIdentifier/PixelID.h"
+#include "InDetRawData/InDetRawDataCollection.h"
+#include "InDetRawData/PixelRDO_Container.h"
+#include "InDetRawData/PixelRDORawData.h"
+#include "xAODInDetMeasurement/PixelClusterContainer.h"
 #include "xAODInDetMeasurement/PixelClusterAuxContainer.h"
 #include "ICellClusteringToolBase.h"
 #include <any>
