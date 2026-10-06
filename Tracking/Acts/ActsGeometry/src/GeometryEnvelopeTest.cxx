@@ -61,23 +61,13 @@ namespace ActsTrk{
         ATH_MSG_VERBOSE("Check whether all volumes are within the envelope defined by "
                         <<volume.volumeName()<<", "<<volume.volumeBounds());
         bool allGood{true};
-        for (const Acts::TrackingVolume& childVolume : volume.volumes()) {
-            for (const Amg::Vector3D& vert : edges(tgContext, childVolume)) {
-                const Amg::Vector3D lVert = volume.globalToLocalTransform(tgContext)* vert;
+        std::vector<Amg::Vector3D> allSurfVertices{};
 
-                if (!volume.volumeBounds().inside(lVert)) {
-                    ATH_MSG_ERROR("The vertex "<<Amg::toString(lVert)<<", perp:"<<lVert.perp()
-                        <<" is not inside of the volume envelope "<<volume.volumeName()
-                        <<" "<<volume.volumeBounds());
-                    allGood = false;
-                }
-            }
-        }
-        if (!allGood) {
-            return StatusCode::FAILURE;
-        }
         for (const Acts::Surface& surface : volume.surfaces()) {
-            for (const Amg::Vector3D& vert : vertices(tgContext, surface)) {
+            ATH_MSG_INFO("Check surface "<<surface.geometryId()<<", "<<surface.bounds()<<", "
+                        <<Amg::toString(surface.center(tgContext)));
+            std::vector<Amg::Vector3D> surfaceVertices = vertices(tgContext, surface);
+            for (const Amg::Vector3D& vert : surfaceVertices) {
                 const Amg::Vector3D lVert = volume.globalToLocalTransform(tgContext)* vert;
                 if (!volume.volumeBounds().inside(lVert, 0.1_mm)) {
                     ATH_MSG_ERROR("The vertex "<<Amg::toString(lVert)<<", perp:"<<lVert.perp()
@@ -85,6 +75,31 @@ namespace ActsTrk{
                         <<" "<<volume.volumeBounds());
                     allGood = false;
                 }
+            }
+            allSurfVertices.insert(allSurfVertices.end(), 
+                                    std::make_move_iterator(surfaceVertices.begin()),
+                                    std::make_move_iterator(surfaceVertices.end()));
+        }
+
+        for (const Acts::TrackingVolume& childVolume : volume.volumes()) {
+            /// Check that the child volume vertices are all conatined
+            for (const Amg::Vector3D& vert : edges(tgContext, childVolume)) {
+                const Amg::Vector3D lVert = volume.globalToLocalTransform(tgContext)* vert;
+                if (!volume.volumeBounds().inside(lVert)) {
+                    ATH_MSG_ERROR("The vertex "<<Amg::toString(lVert)<<", perp:"<<lVert.perp()
+                        <<" is not inside of the volume envelope "<<volume.volumeName()
+                        <<" "<<volume.volumeBounds());
+                    allGood = false;
+                }
+            }
+            for (const Amg::Vector3D& vert : allSurfVertices) {
+                const Amg::Vector3D lVert = childVolume.globalToLocalTransform(tgContext)* vert;
+                if (childVolume.volumeBounds().inside(lVert)) {
+                    ATH_MSG_ERROR("The vertex "<<Amg::toString(lVert)<<", perp: "<<lVert.perp()
+                        <<" is inside of the volume envelope "<<childVolume.volumeName()
+                        <<" "<<childVolume.volumeBounds());
+                    allGood = false;
+                }                
             }
         }
         if (!allGood) {

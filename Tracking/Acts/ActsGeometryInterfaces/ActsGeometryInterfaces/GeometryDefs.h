@@ -61,6 +61,8 @@ namespace ActsTrk {
         /** Volume Ids ofthe Calorimeter */
         constexpr std::size_t s_caloEnvelopeID = 39;
         constexpr std::size_t s_caloBarrelId = 40;
+        constexpr std::size_t s_caloEndcapAId = 41;
+        constexpr std::size_t s_caloEndcapCId = 42;
         /* Volume Ids used within the muon system */
         constexpr std::size_t s_muonBarrelId = 80;
         constexpr std::size_t s_muonEndcapAId = 81;
