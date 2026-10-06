@@ -3445,23 +3445,6 @@ def dump_Trig3Momentum (m, f):
     return
 
 
-def dump_TrigT2Jet (j, f):
-    fprint (f, '  ')
-    dump_Fourvec (j, f)
-    fprint (f, '  ', j.e(), j.ehad0(), j.eem0(), j.eta(), j.phi(), j.m(),
-            j.RoIword())
-    if j.grid():
-        for m in j.grid():
-            fprint (f, '\n   ')
-            dump_Trig3Momentum (m, f)
-    fprintln (f, ' ')
-    return
-@nolist
-def dump_TrigT2Jet_nolist (j, f):
-    dump_TrigT2Jet (j, f)
-    return
-
-
 def dump_TrigTauClusterDetails (t, f):
     if not t: return
     for s in range(4):
@@ -5353,7 +5336,6 @@ dumpspecs = [
     ["TrigCaloClusterContainer",             dump_TrigCaloCluster],
     ["TrigTauClusterDetailsContainer",       dump_TrigTauClusterDetails],
     ["TrigRoiDescriptor",                    dump_TrigRoiDescriptor_nolist],
-    ["TrigT2Jet",                            dump_TrigT2Jet_nolist],
     ["TrigTauCluster",                       dump_TrigTauCluster_nolist],
     ["TrigTauTracksInfo",                    dump_TrigTauTracksInfo_nolist],
     ["TrigSpacePointCounts",                 dump_TrigSpacePointCounts_nolist],
@@ -5386,7 +5368,6 @@ dumpspecs = [
     ["TrigL2BjetContainer",                  dump_TrigL2Bjet],
     ["TrigL2BphysContainer",                 dump_TrigL2Bphys],
     ["TrigPhotonContainer",                  dump_TrigPhoton],
-    ["TrigT2JetContainer",                   dump_TrigT2Jet],
     ["TrigTauClusterContainer",              dump_TrigTauCluster],
     ["TrigTauContainer",                     dump_TrigTau],
     ["TrigTauTracksInfoCollection",          dump_TrigTauTracksInfo],
