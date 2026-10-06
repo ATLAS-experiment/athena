@@ -29,11 +29,9 @@
 namespace Analysis {
 
   JetSecVertexingAlg::JetSecVertexingAlg(const std::string& name, ISvcLocator* pSvcLocator):
-    AthReentrantAlgorithm(name,pSvcLocator),
-    m_MSVvarFactory("Analysis::MSVVariablesFactory",this)
+    AthReentrantAlgorithm(name,pSvcLocator)
   {
     declareProperty("SecVtxFinderxAODBaseName", m_secVertexFinderBaseName);
-    declareProperty("MSVVariableFactory",          m_MSVvarFactory);
   }
 
   StatusCode JetSecVertexingAlg::initialize()
@@ -44,19 +42,9 @@ namespace Analysis {
     ATH_CHECK( m_TrackCollectionName.initialize() );
     ATH_CHECK( m_VxSecVertexInfoName.initialize() );
     ATH_CHECK( m_VertexCollectionName.initialize() );
-    ATH_CHECK( m_BTagSVCollectionName.initialize( (m_secVertexFinderBaseName == "SV1") || (m_secVertexFinderBaseName == "MSV") || (m_secVertexFinderBaseName == "SV1Flip") ) );
+    ATH_CHECK( m_BTagSVCollectionName.initialize( (m_secVertexFinderBaseName == "SV1") || (m_secVertexFinderBaseName == "SV1Flip") ) );
     ATH_CHECK( m_BTagJFVtxCollectionName.initialize( (m_secVertexFinderBaseName == "JetFitter") || (m_secVertexFinderBaseName == "JetFitterFlip") ) );
     ATH_CHECK( m_jetSVLinkName.initialize() );
-
-    /* ----------------------------------------------------------------------------------- */
-    /*                        RETRIEVE SERVICES FROM STOREGATE                             */
-    /* ----------------------------------------------------------------------------------- */
-
-    if ( m_MSVvarFactory.retrieve().isFailure() ) {
-       ATH_MSG_ERROR("#BTAG# Failed to retrieve " << m_MSVvarFactory);
-    } else {
-       ATH_MSG_DEBUG("#BTAG# Retrieved " << m_MSVvarFactory);
-    }
 
     return StatusCode::SUCCESS;
   }
@@ -83,7 +71,7 @@ namespace Analysis {
     }
 
     /* Record the BTagging Secondary Vertex output container */
-    if ((basename == "SV1") ||(basename == "SV1Flip")  || (basename == "MSV")) {
+    if ((basename == "SV1") || (basename == "SV1Flip")) {
       ATH_MSG_DEBUG("#BTAG# Record the BTagging Secondary Vertex output container");
       h_BTagSVCollectionName = SG::WriteHandle<xAOD::VertexContainer>(m_BTagSVCollectionName, ctx);
       ATH_CHECK( h_BTagSVCollectionName.record(std::make_unique<xAOD::VertexContainer>(),
@@ -102,8 +90,6 @@ namespace Analysis {
     }
  
     const xAOD::TrackParticleContainer* theTrackParticleContainer = h_TrackCollectionName.ptr();
-
-    const xAOD::Vertex* primaryVertex(nullptr);
 
     //retrieve primary vertex
     SG::ReadHandle<xAOD::VertexContainer> h_VertexCollectionName (m_VertexCollectionName, ctx);
@@ -130,46 +116,9 @@ namespace Analysis {
       ATH_MSG_ERROR("#BTAG#  Vertex container is empty");
       return StatusCode::FAILURE;
     }
-    for (const auto *fz : *h_VertexCollectionName) {
-      if (fz->vertexType() == xAOD::VxType::PriVtx) {
-        primaryVertex = fz;
-        break;
-      }
-    }
-
-    if (! primaryVertex) {
-      ATH_MSG_DEBUG("#BTAG#  No vertex labeled as VxType::PriVtx!");
-      xAOD::VertexContainer::const_iterator fz = h_VertexCollectionName->begin();
-      primaryVertex = *fz;
-      if (primaryVertex->nTrackParticles() == 0) {
-        ATH_MSG_DEBUG("#BTAG#  PV==BeamSpot: probably poor tagging");
-      }
-    }
-
-    const xAOD::Vertex& PrimaryVtx = *primaryVertex;
-
     Trk::VxSecVertexInfoContainer::const_iterator infoSVIter = h_VxSecVertexInfoName->begin();
 
-    if(basename == "MSV") {
-      for (const xAOD::Jet* jetToTag : *h_JetCollectionName) {
-        const Trk::VxSecVertexInfo* myVertexInfo = *infoSVIter++;
-        if(myVertexInfo != nullptr) {
-          if(const Trk::VxSecVKalVertexInfo* myVertexInfoVKal = dynamic_cast<const Trk::VxSecVKalVertexInfo*>(myVertexInfo)) {
-            ATH_MSG_DEBUG("#BTAG# Found VKalVertexInfo information");
-            StatusCode sc = m_MSVvarFactory->createMSVContainer(*jetToTag, myVertexInfoVKal, &(*h_BTagSVCollectionName), PrimaryVtx);
-            if(sc.isFailure()){
-               ATH_MSG_ERROR("#BTAG# error filling variables in MSVVariablesFactory" );
-              return sc;
-            }
-          }
-          else {
-            ATH_MSG_DEBUG("#BTAG# dynamic_cast failed for a non-nullptr myVertexInfo!");
-          }  
-        }
-      }
-    }
-
-    else if(basename == "SV1" || basename == "SV1Flip")  { //SV1
+    if(basename == "SV1" || basename == "SV1Flip")  { //SV1
       SG::WriteDecorHandle<xAOD::JetContainer,std::vector<ElementLink< xAOD::VertexContainer> > > h_jetSVLinkName(m_jetSVLinkName, ctx);
       for (const xAOD::Jet* jetToTag : *h_JetCollectionName) {
         const Trk::VxSecVertexInfo* myVertexInfo = *infoSVIter++;

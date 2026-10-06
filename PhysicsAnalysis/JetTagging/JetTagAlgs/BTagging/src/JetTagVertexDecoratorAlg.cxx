@@ -261,7 +261,6 @@ namespace Analysis {
             isDefaults = 0;
             const xAOD::Vertex* myVert  = vecVertices[0];
 
-            // from here: https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/JetTagging/JetTagTools/src/SVTag.cxx#L241
             const Amg::Vector3D PVposition = (*primaryVertex).position();
             const Amg::Vector3D position = myVert->position();
     

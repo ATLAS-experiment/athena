@@ -2,7 +2,6 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from BTagging.MSVVariablesFactoryConfig import MSVVariablesFactoryCfg
 
 
 def JetSecVertexingAlgCfg(flags, BTagVxSecVertexInfoName, SVAlgName, JetCollection, TrackCollection, PrimaryVertexCollectionName="", SVFinder="", **options):
@@ -24,10 +23,7 @@ def JetSecVertexingAlgCfg(flags, BTagVxSecVertexInfoName, SVAlgName, JetCollecti
         JetSVLink = 'SecVtx'
     if SVFinder == 'SV1Flip':
         JetSVLink = 'SecVtxFlip'
-    if SVFinder == 'MSV':
-        JetSVLink = 'MSecVtx' # Maybe no used
 
-    varFactory = acc.popToolsAndMerge(MSVVariablesFactoryCfg(flags, "MSVVarFactory"))
     jetcol_no_suffix = JetCollection.replace("Jets","")
     BTaggingCollection = f'BTagging_{jetcol_no_suffix}'
     options = {}
@@ -39,7 +35,6 @@ def JetSecVertexingAlgCfg(flags, BTagVxSecVertexInfoName, SVAlgName, JetCollecti
     options['BTagJFVtxCollectionName'] = BTaggingCollection + JetSVLink
     options['BTagSVCollectionName'] = BTaggingCollection + JetSVLink
     options['JetSecVtxLinkName'] = JetCollection + '.' + JetSVLink
-    options.setdefault('MSVVariableFactory', varFactory)
     options['name'] = SVAlgName
 
     # -- create the association algorithm

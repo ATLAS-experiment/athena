@@ -5,33 +5,20 @@ atlas_subdir( JetTagTools )
 
 # External dependencies:
 find_package( CLHEP )
-find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread
-    MathMore Minuit Minuit2 Matrix Physics HistPainter Rint RooFitCore RooFit )
 
 # Component(s) in the package:
 atlas_add_library( JetTagToolsLib
     JetTagTools/*.h
-    src/HistoHelperRoot.cxx src/NewLikelihoodTool.cxx
     src/VertexSignificance.cxx
-    src/SVTag.cxx
-    src/JetFitterInputWriter.cxx src/JetFitterDummyClassifier.cxx
-    src/MV2Tag.cxx
-    src/JetFitterVariablesFactory.cxx src/MSVVariablesFactory.cxx
-    src/MultiSVTag.cxx
-    src/MultivariateTagManager.cxx
-    src/TagNtupleDumper.cxx
+    src/JetFitterVariablesFactory.cxx
 
     PUBLIC_HEADERS JetTagTools
-    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
     PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
     PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-    LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CxxUtils GaudiKernel
-    GeoPrimitives ITrackToVertex InDetRecToolInterfaces JetTagCalibrationLib
-    MVAUtils StoreGateLib xAODBTagging xAODJet xAODTracking
+    LINK_LIBRARIES AthenaBaseComps GaudiKernel GeoPrimitives xAODBTagging
+    xAODJet xAODTracking
     PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES}
-    AthContainers PathResolver Particle ParticleJetToolsLib TrkEventPrimitives
-    TrkParameters TrkTrack TrkTrackLink TrkTrackSummary TrkVertexFitterInterfaces VxJetVertex
-    VxSecVertex VxVertex)
+    TrkParameters TrkTrackLink VxJetVertex VxSecVertex VxVertex )
 
 atlas_add_component( JetTagTools
     src/components/*.cxx
