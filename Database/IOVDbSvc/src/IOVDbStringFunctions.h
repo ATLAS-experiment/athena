@@ -155,25 +155,6 @@ namespace IOVDbNamespace{
   ///Appends /api-v6.0 to an HTTP(S) URL with no API-version path segment.
   std::string
   chaiConnectString(const std::string & endpoint);
-
-  ///Outcome of correctTimeStampElement(): whether the description's
-  ///<timeStamp> element already matched the given token, was replaced
-  ///because it disagreed, or was inserted because it was missing.
-  enum class TimeStampCorrection { Unchanged, Corrected, Inserted };
-
-  ///Result of correctTimeStampElement(): the (possibly corrected)
-  ///description string, what happened to its <timeStamp> element, and the
-  ///token the element held before any change (empty when Inserted).
-  struct TimeStampCorrectionResult {
-    std::string description;
-    TimeStampCorrection status{TimeStampCorrection::Unchanged};
-    std::string foundToken;
-  };
-
-  ///Force a folder/node description's <timeStamp> element to the given token
-  ///("time" or "run-lumi"), inserting the element if the description has none.
-  TimeStampCorrectionResult
-  correctTimeStampElement(const std::string & description, const std::string & token);
   
 }
   

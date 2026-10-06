@@ -223,39 +223,14 @@ IOVDbCrestTag::preload(ITagInfoMgr* /*tagInfoMgr*/, const unsigned int /*cacheRu
     }
     m_folderDescription = m_tag->getNodeDescription();
 
-    // The tag's IovType is the source of truth for the timebase. Fill in a missing
-    // <timeStamp> in the node description, but refuse an existing one on another axis.
-    switch (m_tag->getIovType()) {
-      case chai::TagIovType::Time:
-      case chai::TagIovType::RunNumberLumiBlock: {
-        const std::string token = chai::iovTypeToNodeDescTimeStampToken(m_tag->getIovType());
-        auto correction = IOVDbNamespace::correctTimeStampElement(m_folderDescription, token);
-        // COOL's run-event means run-lumi: a same-axis token is kept as written
-        if (correction.status == IOVDbNamespace::TimeStampCorrection::Corrected &&
-            chai::timeStampTokenAxis(correction.foundToken) == chai::iovTypeAxis(m_tag->getIovType())) {
-          correction.description = m_folderDescription;
-          correction.status = IOVDbNamespace::TimeStampCorrection::Unchanged;
-        }
-        if (correction.status == IOVDbNamespace::TimeStampCorrection::Corrected) {
-          ATH_MSG_FATAL("Folder " << m_foldername << "'s CREST description for tag "
-                        << m_tag->getName() << " disagrees with the tag's IovType ('"
-                        << chai::iovTypeToString(m_tag->getIovType()) << "'); description says '"
-                        << m_folderDescription << "', tag's IovType wants '" << token
-                        << "'. Fix the description on the CREST server");
-          return nullptr;
-        } else if (correction.status == IOVDbNamespace::TimeStampCorrection::Inserted) {
-          ATH_MSG_INFO("Folder " << m_foldername << "'s CREST description for tag "
-                       << m_tag->getName() << " has no <timeStamp> element; inserting '" << token
-                       << "' from the tag's IovType");
-        }
-        m_folderDescription = std::move(correction.description);
-        break;
-      }
-      default:
-        ATH_MSG_FATAL("Tag " << m_tag->getName() << " for folder " << m_foldername
-                      << " has unsupported IovType '" << chai::iovTypeToString(m_tag->getIovType())
-                      << "' (expected 'time' or 'run-lumi')");
-        return nullptr;
+    // A description without <timeStamp> takes the timebase from the tag's IovType.
+    // An existing element is used as is.
+    if (chai::extractNodeDescTimeStampToken(m_folderDescription).empty()) {
+      const std::string token = chai::iovTypeToNodeDescTimeStampToken(m_tag->getIovType());
+      ATH_MSG_INFO("Folder " << m_foldername << "'s CREST description for tag "
+                   << m_tag->getName() << " has no <timeStamp> element; inserting '" << token
+                   << "' from the tag's IovType");
+      m_folderDescription = "<timeStamp>" + token + "</timeStamp>" + m_folderDescription;
     }
   }
 
@@ -285,14 +260,6 @@ IOVDbCrestTag::preload(ITagInfoMgr* /*tagInfoMgr*/, const unsigned int /*cacheRu
     }
   }
 
-  // File metadata carries no CREST tag to derive the timebase from.
-  // A missing <timeStamp> defaults to run-lumi and logs a WARNING.
-  if (m_useFileMetaData && !folderpar.at("timeStamp").second) {
-    ATH_MSG_WARNING("Folder " << m_foldername
-                    << "'s file metadata has no <timeStamp> element. Defaulting to run-lumi, "
-                    << "which is wrong if the folder's CREST tag is time-indexed");
-  }
-
   IOVDbNamespace::FolderAddressSpec resolved;
   if (!IOVDbNamespace::resolveFolderAddress(msg(), folderpar, m_foldername, m_jokey, m_key, p_clidSvc, resolved)) {
     return nullptr;
@@ -316,16 +283,6 @@ IOVDbCrestTag::preload(ITagInfoMgr* /*tagInfoMgr*/, const unsigned int /*cacheRu
 
     m_foldertype = determineFolderType();
     if (m_foldertype == IOVDbNamespace::UNKNOWN) {
-      return nullptr;
-    }
-
-    // The node description and the tag's isVectorPayload() flag must agree on vector vs scalar
-    if ((m_foldertype == IOVDbNamespace::CoolVector) != m_tag->isVectorPayload()) {
-      ATH_MSG_FATAL("Folder " << m_foldername << " (tag " << m_tag->getName()
-                    << ") disagrees on vector-ness between its node description (typeName-derived "
-                    << "folder type " << IOVDbNamespace::folderTypeName(m_foldertype)
-                    << ") and its CHAI tag metadata (isVectorPayload()="
-                    << (m_tag->isVectorPayload() ? "true" : "false") << ")");
       return nullptr;
     }
   }
@@ -386,8 +343,8 @@ bool IOVDbCrestTag::loadAt(const cool::ValidityKey requestedVkey) {
 
     // CHAI needs to know if it's a vector or scalar payload to call the correct getXPayloadAt method.
     // This is what actually loads the payload at the desired time and caches it.
-    nchan = m_tag->isVectorPayload() ? storeResident(m_tag->getVectorPayloadAt(vkey))
-                                     : storeResident(m_tag->getPayloadAt(vkey));
+    nchan = (m_foldertype == IOVDbNamespace::CoolVector) ? storeResident(m_tag->getVectorPayloadAt(vkey))
+                                                         : storeResident(m_tag->getPayloadAt(vkey));
   } catch (const chai::NotFoundError& e) {
     // IOVDbFolder returns an empty collection when a collection-type folder has
     // zero matching objects and when the query time precedes the first IOV.

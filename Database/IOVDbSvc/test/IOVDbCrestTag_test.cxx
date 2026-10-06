@@ -190,8 +190,8 @@ struct CrestFsFixture:public GaudiKernelFixture{
     using enum chai::Type;
     chai::PayloadSpec spec(chai::FieldSpec({{"value", UInt32}}), chai::ChannelSpec({{0, ""}}));
 
-    // Two IOVs, description's <timeStamp> already matches the tag's IovType
-    // (the Unchanged case). Also used for loadAt/isResident/getAddress coverage.
+    // Two IOVs, description's <timeStamp> matches the tag's IovType. Also used
+    // for loadAt/isResident/getAddress coverage.
     auto agreeing = db.createTag(
       "AttrListTag_Agreeing", "test tag, timebase agrees", spec,
       {.iovType = chai::Tag::IovType::RunNumberLumiBlock,
@@ -205,7 +205,7 @@ struct CrestFsFixture:public GaudiKernelFixture{
     agreeing->addPayload(c2, 200);
 
     // IovType is RunNumberLumiBlock but the description's <timeStamp> says
-    // "time": the Corrected case (the coolr-migration bug fingerprint)
+    // "time"
     auto disagreeing = db.createTag(
       "AttrListTag_Disagreeing", "test tag, timebase disagrees", spec,
       {.iovType = chai::Tag::IovType::RunNumberLumiBlock,
@@ -215,19 +215,8 @@ struct CrestFsFixture:public GaudiKernelFixture{
     c3[0].push(3u);
     disagreeing->addPayload(c3, 100, 200);
 
-    // IovType this code doesn't understand at all: the same wrong-key
-    // fingerprint as an explicit disagreement, refused the same way.
-    auto unsupportedIovType = db.createTag(
-      "AttrListTag_RunNumberIovType", "test tag, IovType this code can't map", spec,
-      {.iovType = chai::Tag::IovType::RunNumber,
-       .nodeDescription = chai::Tag::buildNodeDescription(
-           chai::Tag::IovType::RunNumberLumiBlock, s_attrListTypeName, s_attrListClid)});
-    auto c3b = unsupportedIovType->buildContainer();
-    c3b[0].push(30u);
-    unsupportedIovType->addPayload(c3b, 100, 200);
-
     // COOL's older spelling of run-lumi, as found on migrated TRT and TGC
-    // folders: the same timebase as a RunNumberLumiBlock IovType.
+    // folders
     const std::string runEventDescription =
       "<timeStamp>run-event</timeStamp><addrHeader><address_header service_type=\"71\" clid=\"" +
       std::to_string(s_attrListClid) + "\" /></addrHeader><typeName>" + s_attrListTypeName +
@@ -238,14 +227,6 @@ struct CrestFsFixture:public GaudiKernelFixture{
     auto cRunEvent = runEvent->buildContainer();
     cRunEvent[0].push(31u);
     runEvent->addPayload(cRunEvent, 100, 200);
-
-    // The same run-event description on a Time tag is a real disagreement
-    auto runEventOnTime = db.createTag(
-      "AttrListTag_RunEventOnTime", "test tag, run-event description on a time tag", spec,
-      {.iovType = chai::Tag::IovType::Time, .nodeDescription = runEventDescription});
-    auto cRunEventOnTime = runEventOnTime->buildContainer();
-    cRunEventOnTime[0].push(32u);
-    runEventOnTime->addPayload(cRunEventOnTime, 100, 200);
 
     // An IOV whose until exceeds cool::ValidityKeyMax: CREST bounds are 64-bit,
     // COOL keys are 63-bit. Two IOVs, so the first one's until is the oversized
@@ -278,10 +259,11 @@ struct CrestFsFixture:public GaudiKernelFixture{
     cTime2[0].push(6u);
     timeIndexed->addPayload(cTime2, 1'700'000'000'000'000'000);
 
-    // No <timeStamp> element at all: the Inserted case.
+    // No <timeStamp> element at all. Time-indexed, so an inserted element is
+    // distinguishable from the run-lumi default.
     auto noTimestamp = db.createTag(
       "AttrListTag_NoTimeStamp", "test tag, timebase absent", spec,
-      {.iovType = chai::Tag::IovType::RunNumberLumiBlock,
+      {.iovType = chai::Tag::IovType::Time,
        .nodeDescription = "<addrHeader><address_header service_type=\"71\" clid=\"" +
                            std::to_string(s_attrListClid) + "\" /></addrHeader><typeName>" +
                            s_attrListTypeName + "</typeName>"});
@@ -364,8 +346,7 @@ struct CrestFsFixture:public GaudiKernelFixture{
     ccf[5].push(50u);
     channelFive->addPayload(ccf, 100, 200);
 
-    // Vector payload, three rows on one channel: exercises getAddress's
-    // CoolVector path and the typeName/isVectorPayload() cross-check in preload().
+    // Vector payload, three rows on one channel: exercises getAddress's CoolVector path
     chai::PayloadSpec vecSpec(chai::FieldSpec({{"value", UInt32}}), chai::ChannelSpec({{0, ""}}));
     auto vec = db.createTag(
       "CoolVectorTag", "test tag, vector payload multi-row", vecSpec,
@@ -447,7 +428,7 @@ BOOST_FIXTURE_TEST_SUITE(IOVDbCrestTagTest, GaudiKernelFixture)
       BOOST_TEST(tag.joTag() == "FromTag");
     }
 
-    BOOST_AUTO_TEST_CASE(preload_timebaseAgrees_noCorrection){
+    BOOST_AUTO_TEST_CASE(preload_timebaseAgrees){
       IOVDbParser folderprop("/test/folder", msgFixture.log);
       IOVDbCrestTag tag(nullptr, folderprop, msgFixture.log, nullptr, nullptr, db, "AttrListTag_Agreeing");
       auto addr = tag.preload(nullptr, 0, 0);
@@ -457,39 +438,17 @@ BOOST_FIXTURE_TEST_SUITE(IOVDbCrestTagTest, GaudiKernelFixture)
       BOOST_TEST(tag.clid() == static_cast<CLID>(s_attrListClid));
     }
 
-    // The disagreeing tag's timeStamp mismatches its IovType (the
-    // coolr-migration mis-key fingerprint): preload() must FATAL and return
-    // nullptr rather than correct it.
-    BOOST_AUTO_TEST_CASE(preload_timebaseDisagrees_fatals){
+    // A description's own <timeStamp> decides the timebase, even when the
+    // tag's IovType says otherwise
+    BOOST_AUTO_TEST_CASE(preload_timebaseDisagrees_descriptionWins){
       IOVDbParser folderprop("/test/folder", msgFixture.log);
       IOVDbCrestTag tag(nullptr, folderprop, msgFixture.log, nullptr, nullptr, db, "AttrListTag_Disagreeing");
-      StdoutCapture capture;
       auto addr = tag.preload(nullptr, 0, 0);
-      const std::string captured = capture.finish();
-      BOOST_TEST(addr == nullptr);
-      // Pin the reason: a nullptr alone could also come from any other
-      // preload() failure on the same tag.
-      BOOST_REQUIRE(!captured.empty());
-      BOOST_TEST(captured.find("FATAL") != std::string::npos);
-      BOOST_TEST(captured.find("disagrees with the tag's IovType") != std::string::npos);
+      BOOST_REQUIRE(addr != nullptr);
+      BOOST_TEST(tag.timeStamp() == true);
     }
 
-    // An IovType this code has no mapping for (RunNumber, Unspecified) must
-    // also FATAL rather than keying the tag off the description's own timebase.
-    BOOST_AUTO_TEST_CASE(preload_timebaseUnsupportedIovType_fatals){
-      IOVDbParser folderprop("/test/folder", msgFixture.log);
-      IOVDbCrestTag tag(nullptr, folderprop, msgFixture.log, nullptr, nullptr, db,
-                        "AttrListTag_RunNumberIovType");
-      StdoutCapture capture;
-      auto addr = tag.preload(nullptr, 0, 0);
-      const std::string captured = capture.finish();
-      BOOST_TEST(addr == nullptr);
-      BOOST_REQUIRE(!captured.empty());
-      BOOST_TEST(captured.find("FATAL") != std::string::npos);
-      BOOST_TEST(captured.find("has unsupported IovType") != std::string::npos);
-    }
-
-    // A run-event description agrees with a RunNumberLumiBlock IovType
+    // A run-event description reads as run-lumi
     BOOST_AUTO_TEST_CASE(preload_timebaseRunEvent_acceptedAsRunLumi){
       IOVDbParser folderprop("/test/folder", msgFixture.log);
       IOVDbCrestTag tag(nullptr, folderprop, msgFixture.log, nullptr, nullptr, db, "AttrListTag_RunEvent");
@@ -498,20 +457,6 @@ BOOST_FIXTURE_TEST_SUITE(IOVDbCrestTagTest, GaudiKernelFixture)
       BOOST_TEST(tag.timeStamp() == false);
       BOOST_TEST(tag.folderType() == IOVDbNamespace::AttrList);
       BOOST_TEST(tag.loadAt(150) == true);
-    }
-
-    // A run-event description on a Time tag FATALs
-    BOOST_AUTO_TEST_CASE(preload_timebaseRunEventOnTimeTag_fatals){
-      IOVDbParser folderprop("/test/folder", msgFixture.log);
-      IOVDbCrestTag tag(nullptr, folderprop, msgFixture.log, nullptr, nullptr, db,
-                        "AttrListTag_RunEventOnTime");
-      StdoutCapture capture;
-      auto addr = tag.preload(nullptr, 0, 0);
-      const std::string captured = capture.finish();
-      BOOST_TEST(addr == nullptr);
-      BOOST_REQUIRE(!captured.empty());
-      BOOST_TEST(captured.find("FATAL") != std::string::npos);
-      BOOST_TEST(captured.find("disagrees with the tag's IovType") != std::string::npos);
     }
 
     // Positive counterpart to the run-lumi cases: a timestamp-indexed tag
@@ -539,7 +484,7 @@ BOOST_FIXTURE_TEST_SUITE(IOVDbCrestTagTest, GaudiKernelFixture)
       IOVDbCrestTag tag(nullptr, folderprop, msgFixture.log, nullptr, nullptr, db, "AttrListTag_NoTimeStamp");
       auto addr = tag.preload(nullptr, 0, 0);
       BOOST_REQUIRE(addr != nullptr);
-      BOOST_TEST(tag.timeStamp() == false);
+      BOOST_TEST(tag.timeStamp() == true);
     }
 
     // isResident() treats since as inclusive and until as exclusive: reftime

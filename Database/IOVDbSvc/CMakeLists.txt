@@ -152,7 +152,7 @@ atlas_add_test( IOVDbCrestTag_test
    GeoModelInterfaces IOVDbMetaDataToolsLib IOVDbDataModel EventInfoMgtLib
    chai::chai
    Boost::unit_test_framework
-   LOG_IGNORE_PATTERN "has no CREST tag and is not read from file metadata|Failed to resolve CHAI tag|No covering IOV for folder|Failed to get tag|No resident payload for folder|No channel 0 for single-channel folder|disagrees with the tag.s IovType|has unsupported IovType"
+   LOG_IGNORE_PATTERN "has no CREST tag and is not read from file metadata|Failed to resolve CHAI tag|No covering IOV for folder|Failed to get tag|No resident payload for folder|No channel 0 for single-channel folder"
    POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( FolderAddressResolver_test

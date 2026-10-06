@@ -232,42 +232,4 @@ BOOST_AUTO_TEST_SUITE(IOVDbStringFunctionsTest)
     BOOST_TEST(IOVDbNamespace::chaiConnectString("https://crest-api-v2.cern.ch")
                == "crest:https://crest-api-v2.cern.ch/api-v6.0");
   }
-
-  BOOST_AUTO_TEST_CASE(correctTimeStampElement_agreeing){
-    // a <timeStamp> element already matching the requested token is left untouched
-    const std::string description=R"delim(<timeStamp>time</timeStamp><typeName>Foo</typeName>)delim";
-    const auto result=IOVDbNamespace::correctTimeStampElement(description, "time");
-    BOOST_TEST(result.description == description);
-    BOOST_TEST((result.status == IOVDbNamespace::TimeStampCorrection::Unchanged));
-    BOOST_TEST(result.foundToken == "time");
-  }
-
-  BOOST_AUTO_TEST_CASE(correctTimeStampElement_disagreeing){
-    // a <timeStamp> element disagreeing with the requested token is replaced,
-    // and only the <timeStamp> element itself changes
-    const std::string description=R"delim(<timeStamp>run-lumi</timeStamp><typeName>Foo</typeName>)delim";
-    const std::string expected=R"delim(<timeStamp>time</timeStamp><typeName>Foo</typeName>)delim";
-    const auto result=IOVDbNamespace::correctTimeStampElement(description, "time");
-    BOOST_TEST(result.description == expected);
-    BOOST_TEST((result.status == IOVDbNamespace::TimeStampCorrection::Corrected));
-    BOOST_TEST(result.foundToken == "run-lumi");
-  }
-
-  BOOST_AUTO_TEST_CASE(correctTimeStampElement_foundTokenTrimmed){
-    // the token is compared literally, and reported without surrounding whitespace
-    const std::string description=R"delim(<timeStamp> run-event </timeStamp><typeName>Foo</typeName>)delim";
-    const auto result=IOVDbNamespace::correctTimeStampElement(description, "run-lumi");
-    BOOST_TEST((result.status == IOVDbNamespace::TimeStampCorrection::Corrected));
-    BOOST_TEST(result.foundToken == "run-event");
-  }
-
-  BOOST_AUTO_TEST_CASE(correctTimeStampElement_absent){
-    // a description with no <timeStamp> element at all gets one inserted
-    const std::string description=R"delim(<typeName>Foo</typeName>)delim";
-    const std::string expected=R"delim(<timeStamp>run-lumi</timeStamp><typeName>Foo</typeName>)delim";
-    const auto result=IOVDbNamespace::correctTimeStampElement(description, "run-lumi");
-    BOOST_TEST(result.description == expected);
-    BOOST_TEST((result.status == IOVDbNamespace::TimeStampCorrection::Inserted));
-    BOOST_TEST(result.foundToken.empty());
-  }
 BOOST_AUTO_TEST_SUITE_END()
