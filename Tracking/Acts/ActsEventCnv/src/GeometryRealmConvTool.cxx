@@ -136,7 +136,7 @@ namespace ActsTrk{
     SurfacePtr_t GeometryRealmConvTool::translateFreeSurface(const EventContext& ctx,
                                                              const Acts::Surface& surface) const {
         const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
-        const Amg::Transform3D& trf{surface.localToGlobalTransform(tgContext)};
+        const Acts::Transform3& trf{surface.localToGlobalTransform(tgContext)};
         switch (surface.type()) {
             using enum Acts::Surface::SurfaceType;
             case Plane:
@@ -201,8 +201,7 @@ namespace ActsTrk{
         if (it != m_actsSurfaceMap.end()) {
           return it->second;
         }
-        /// Trk surfaces carry a general affine placement; Acts requires an isometry
-        const Amg::Isometry3D trf = Amg::toIsometry3D(atlasSurface.transform());
+        const Acts::Transform3 trf{Amg::toIsometry3D(atlasSurface.transform())};
         switch (atlasSurface.type()){
             using enum Trk::SurfaceType;
             case Plane:
