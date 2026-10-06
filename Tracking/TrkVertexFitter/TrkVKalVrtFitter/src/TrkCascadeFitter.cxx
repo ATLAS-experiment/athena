@@ -575,7 +575,6 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
 //-------------------------------------Saving
 //
     ATH_MSG_DEBUG("Now save results");
-    Amg::MatrixX VrtCovMtx(3,3);
     Trk::Perigee * measPerigee;
     std::vector<xAOD::Vertex*> xaodVrtList(0);
     double phi, theta, invP, mom, fullChi2=0.;
@@ -585,12 +584,6 @@ VxCascadeInfo * TrkVKalVrtFitter::fitCascade(IVKalState& istate,
 
     for(iv=0; iv<(int)cVertices.size(); iv++){
       Amg::Vector3D FitVertex(cVertices[iv].X+state.m_refFrameX,cVertices[iv].Y+state.m_refFrameY,cVertices[iv].Z+state.m_refFrameZ);
-      VrtCovMtx(0,0) = covVertices[iv][0]; VrtCovMtx(0,1) = covVertices[iv][1];
-      VrtCovMtx(1,1) = covVertices[iv][2]; VrtCovMtx(0,2) = covVertices[iv][3];
-      VrtCovMtx(1,2) = covVertices[iv][4]; VrtCovMtx(2,2) = covVertices[iv][5];
-      VrtCovMtx(1,0) = VrtCovMtx(0,1);
-      VrtCovMtx(2,0) = VrtCovMtx(0,2);
-      VrtCovMtx(2,1) = VrtCovMtx(1,2);
       double Chi2=0;
       for(it=0; it<(int)vertexDefinition[iv].size(); it++) { Chi2 += particleChi2[vertexDefinition[iv][it]];};
       fullChi2+=Chi2;
