@@ -21,7 +21,6 @@ namespace InDet {
 #include "xAODBTagging/BTagVertexContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
-#include "JetTagTools/IMSVVariablesFactory.h"
 
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -53,8 +52,6 @@ namespace Analysis
         
         StatusCode createSecVkalContainer(xAOD::VertexContainer*, std::vector< ElementLink< xAOD::VertexContainer > >*, const Trk::VxSecVKalVertexInfo*) const;
         StatusCode createJFContainer(xAOD::BTagVertexContainer*, std::vector< ElementLink< xAOD::BTagVertexContainer > >*, const Trk::VxJetFitterVertexInfo*, const xAOD::TrackParticleContainer*) const;
-
-        ToolHandle<IMSVVariablesFactory> m_MSVvarFactory;
 
         std::string m_secVertexFinderBaseName;
 

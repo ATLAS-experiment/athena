@@ -5,42 +5,10 @@ from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
 # For using GeV units
 import AthenaCommon.SystemOfUnits as Units
 
-calibrationChannelAliases = [
-    "AntiKt4EMTopo->AntiKt4EMTopo,AntiKt4EMPFlow",
-    "AntiKt4EMPFlow->AntiKt4EMPFlow,AntiKt4EMTopo",
-    "AntiKt4HI->AntiKt4HI,AntiKt4EMPFlow,AntiKt4EMTopo,AntiKt4LCTopo",
-    "AntiKtVR30Rmax4Rmin02PV0Track->AntiKtVR30Rmax4Rmin02PV0Track,AntiKt4EMPFlow,AntiKt4EMTopo",
-    "AntiKt4PFlowCustomVtx->AntiKt4EMPFlow,AntiKt4EMTopo",
-    "AntiKtVR30Rmax4Rmin02Track->AntiKtVR30Rmax4Rmin02PV0Track,AntiKt4EMPFlow,AntiKt4EMTopo",
-
-]
-
-def getTaggerList(flags):
-    base = ['SV1','JetFitterNN']
-    if flags.Trigger.doHLT:
-        base = []
-    elif flags.GeoModel.Run >= LHCPeriod.Run4:
-        base += ['MV2c10']
-    flip = ['SV1Flip']
-    if flags.BTagging.RunFlipTaggers:
-        return base + flip
-    return base
-
-
 def minimumJetPtForTrackAssociation(flags):
     if flags.Trigger.doHLT:
         return 5e3
     return 4e3
-
-
-def calibrationTag(flags):
-    if flags.GeoModel.Run >= LHCPeriod.Run4:
-        return "BTagCalibITk-23-00-03-v1"
-    return ""
-
-
-def saveSv1(prevFlags):
-    return prevFlags.GeoModel.Run >= LHCPeriod.Run4
 
 
 def runOldSecVrtSecIncl(prevFlags):
@@ -232,31 +200,15 @@ def getNNs(flags):
 def createBTaggingConfigFlags():
     btagcf = AthConfigFlags()
 
-    btagcf.addFlag("BTagging.taggerList", getTaggerList)
-    btagcf.addFlag("BTagging.databaseScheme", '')
-    btagcf.addFlag("BTagging.calibrationChannelAliases",
-                   calibrationChannelAliases)
-    btagcf.addFlag("BTagging.forcedCalibrationChannel", '')
-    btagcf.addFlag("BTagging.calibrationTag",
-                   calibrationTag)
-
     # the track association minimum is set to 4 GeV because of track
     # jets in offline reconstruction.
     btagcf.addFlag("BTagging.minimumJetPtForTrackAssociation",
                    minimumJetPtForTrackAssociation)
 
-    # these are only used for the SV1 likelihood
-    btagcf.addFlag("BTagging.RunModus", "analysis") # reference mode used in FlavourTagPerformanceFramework (RetagFragment.py)
-    btagcf.addFlag("BTagging.ReferenceType", "ALL") # reference type for the SV tagger (B, UDSG, ALL)
-    btagcf.addFlag("BTagging.JetPtMinRef", 15e3) # in MeV for uncalibrated pt
-
-
-    # Taggers for validation
-    btagcf.addFlag("BTagging.SaveSV1Probabilities", saveSv1)
-
-    # Run the SV1 likelihood as an onnx model instead of the legacy tagger.
+    # Run the SV1 likelihood as an onnx model.
     # The probabilities are not written to any output by default.
     btagcf.addFlag("BTagging.RunSV1Onnx", False)
+
     # Run the flip taggers
     btagcf.addFlag("BTagging.RunFlipTaggers", runFlipTag)
 

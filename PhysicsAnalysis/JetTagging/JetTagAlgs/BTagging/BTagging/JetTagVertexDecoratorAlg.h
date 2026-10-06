@@ -19,7 +19,6 @@
 #include "xAODBTagging/BTagVertexContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
 
-#include "JetTagTools/IMSVVariablesFactory.h"
 #include "JetTagTools/IJetFitterVariablesFactory.h"
 //#include "JetTagTools/JetFitterVariablesFactory.h"
 

@@ -20,7 +20,6 @@ def BTagAlgsCfg(
     inputFlags,
     JetCollection,
     nnList=[],
-    TaggerList=None,
     SecVertexers=None,
     trackCollection='InDetTrackParticles',
     primaryVertices='PrimaryVertices',
@@ -32,10 +31,6 @@ def BTagAlgsCfg(
     scheduling the tagging algorithms for a given jet collection.
     """
 
-    # If things aren't specified in the arguments, we'll read them
-    # from the config flags
-    if TaggerList is None:
-        TaggerList = inputFlags.BTagging.taggerList
     if SecVertexers is None:
         SecVertexers = ['JetFitter', 'SV1']
         if inputFlags.BTagging.RunFlipTaggers:
