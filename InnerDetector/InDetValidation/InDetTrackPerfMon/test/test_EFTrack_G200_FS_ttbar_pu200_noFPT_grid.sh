@@ -2,8 +2,7 @@
 # art-description: Nightly test to compare G-200 vs C-100 (Full-scan) for EFTrack studies using ttbar pu200 noFPT sample
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc15-opt
-# art-architecture: '&nvidia:model!=.*[PV]100.*'
-# art-pathena-flags-add: --excludedSite=UKI-LT2-QMUL_GPU,UKI-NORTHGRID-MAN-HEP_GPU,FZK-LCG2_GPU
+# art-architecture: {"gpu_spec": {"vendor": "nvidia", "version": ">=13.3", "model": {"pattern": ".*(P100|V100).*", "excl": true}}}
 # art-memory: 4095
 # art-output: IDTPM.*.root
 # art-output: *.json
