@@ -83,7 +83,7 @@ public:
   { std::abort(); }
   virtual StatusCode setConversionSvc(IConversionSvc* /*pService*/) override
   { std::abort(); }
-  virtual SmartIF<IConversionSvc>& conversionSvc()    const override
+  virtual SmartIF<IConversionSvc> conversionSvc() override
   { std::abort(); }
   virtual StatusCode setAddressCreator(IAddressCreator* /*creator*/) override
   { std::abort(); }

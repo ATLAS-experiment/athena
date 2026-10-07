@@ -12,7 +12,7 @@ ATLAS_BUILDTYPE="Release"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=110
                         -DLCG_VERSION_POSTFIX="_ATLAS_5"
                         -DCMAKE_CUDA_STANDARD=20 # See: ATLINFR-6204
-                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v40r4.002/Gaudi-v40r4.002.tar.gz;URL_MD5;72a2fa2008f37c0dc88fb1e5b039f295"
+                        -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v41r0.000/Gaudi-v41r0.000.tar.gz;URL_MD5;e3a0a34c35b026b047e1209d66e87e1f"
                         -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/releases/download/v48.0.1/acts-v48.0.1.tar.gz;URL_HASH;SHA256=cb9b196345119cbdbb73e4f53fae6c3ce6480560f9fd47a7164a17b51629a694"
                         -DATLAS_ACTS_BUILD_TRACCC=TRUE
                         -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.29.0/GeoModel-6.29.0.tar.bz2;URL_MD5;0c21efe670b74278b2004d522bb3cb5e"
