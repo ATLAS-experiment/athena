@@ -7,7 +7,7 @@ dcubeXml=dcube_ART_IDPVMPlots_vertex.xml
 # search in $DATAPATH for matching file
 dcubeShifterXml=$(find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 1 -name $dcubeXml -print -quit 2>/dev/null)
 # Don't run if dcube config not found
-if [ -z "$dcubeXmlAbsPath" ]; then
+if [ -z "$dcubeShifterXml" ]; then
     echo "art-result: 1 dcube-xml-config"
     exit 1
 fi
