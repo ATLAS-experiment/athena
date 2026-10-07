@@ -6,6 +6,7 @@
 #define IRECMUONCOMBINEDINDETEXTENSIONTOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
+#include "GaudiKernel/IInterface.h"
 #include "MuonCombinedEvent/InDetCandidateCollection.h"
 #include "MuonCombinedEvent/InDetCandidateToTagMap.h"
 #include "MuonPrepRawData/MMPrepDataContainer.h"
@@ -25,28 +26,31 @@ namespace MuonCombined {
     class IMuonCombinedInDetExtensionTool : virtual public IAlgTool {
     public:
         struct MuonPrdData {
-            MuonPrdData() : mdtPrds(nullptr), rpcPrds(nullptr), tgcPrds(nullptr), cscPrds(nullptr), stgcPrds(nullptr), mmPrds(nullptr) {}
-            const Muon::MdtPrepDataContainer* mdtPrds;
-            const Muon::RpcPrepDataContainer* rpcPrds;
-            const Muon::TgcPrepDataContainer* tgcPrds;
-            const Muon::CscPrepDataContainer* cscPrds;
-            const Muon::sTgcPrepDataContainer* stgcPrds;
-            const Muon::MMPrepDataContainer* mmPrds;
+            const Muon::MdtPrepDataContainer* mdtPrds{nullptr};
+            const Muon::RpcPrepDataContainer* rpcPrds{nullptr};
+            const Muon::TgcPrepDataContainer* tgcPrds{nullptr};
+            const Muon::CscPrepDataContainer* cscPrds{nullptr};
+            const Muon::sTgcPrepDataContainer* stgcPrds{nullptr};
+            const Muon::MMPrepDataContainer* mmPrds{nullptr};
         };
 
-        static const InterfaceID& interfaceID() {
-            static const InterfaceID IID_IMuonCombinedInDetExtensionTool("MuonCombined::IMuonCombinedInDetExtensionTool", 1, 0);
-            return IID_IMuonCombinedInDetExtensionTool;
-        }
-
+        DeclareInterfaceID(MuonCombined::IMuonCombinedInDetExtensionTool, 1, 0);
         /**IMuonCombinedInDetExtensionTool interface: build combined muons from ID candidates */
-        virtual void extend(const InDetCandidateCollection& inDetCandidates, InDetCandidateToTagMap* tagMap, TrackCollection* combTracks,
-                            TrackCollection* meTracks, Trk::SegmentCollection* segments, const EventContext& ctx) const = 0;
+        virtual void extend(const InDetCandidateCollection& inDetCandidates, 
+                            InDetCandidateToTagMap* tagMap, 
+                            TrackCollection* combTracks,
+                            TrackCollection* meTracks, 
+                            Trk::SegmentCollection* segments, 
+                            const EventContext& ctx) const = 0;
 
         /*New interface including PRDs for MuGirl segment-finding*/
-        virtual void extendWithPRDs(const InDetCandidateCollection& inDetCandidates, InDetCandidateToTagMap* tagMap,
-                                    IMuonCombinedInDetExtensionTool::MuonPrdData prdData, TrackCollection* combTracks,
-                                    TrackCollection* meTracks, Trk::SegmentCollection* segments, const EventContext& ctx) const = 0;
+        virtual void extendWithPRDs(const InDetCandidateCollection& inDetCandidates, 
+                                    InDetCandidateToTagMap* tagMap,
+                                    IMuonCombinedInDetExtensionTool::MuonPrdData prdData, 
+                                    TrackCollection* combTracks,
+                                    TrackCollection* meTracks, 
+                                    Trk::SegmentCollection* segments, 
+                                    const EventContext& ctx) const = 0;
 
         virtual ~IMuonCombinedInDetExtensionTool() = default;
     };
