@@ -218,6 +218,7 @@ def CPAlgorithmsCfg(flags):
     subConfig.setOptionValue ('.jetCollection', jetContainer)
     subConfig.setOptionValue ('.runFJvtSelection', False)
     subConfig.setOptionValue ('.runJvtSelection', False)
+    subConfig.setOptionValue ('.runNNJvtUpdate', False)
     subConfig.setOptionValue ('.runUncertainties', False)
     subConfig.setOptionValue ('.outputTruthLabelIDs', True)
     configSeq += subConfig
