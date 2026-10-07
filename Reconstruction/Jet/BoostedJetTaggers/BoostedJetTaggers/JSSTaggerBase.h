@@ -50,13 +50,10 @@ class JSSTaggerBase :   public asg::AsgTool ,
     /// Decorate jet collection with tagging info
     virtual StatusCode decorate( const xAOD::JetContainer& jets ) const override;
 
-  protected:
-
     /// Default constructor - to be used in all derived classes
     JSSTaggerBase(const std::string &name);
 
-    /// Default destructor - to be used in all derived classes
-    ~JSSTaggerBase() {};
+  protected:
 
     /// Decorate single jet with tagging info
     virtual StatusCode tag( const xAOD::Jet& jet ) const = 0;

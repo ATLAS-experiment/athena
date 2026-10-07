@@ -221,10 +221,13 @@ StatusCode JSSTaggerBase::initialize() {
     renounce(m_readParentKey);
   }
   if (m_suppressOutputDependence) {
+    renounce(m_decTaggedKey);
     renounce(m_decValidPtRangeHighKey);
     renounce(m_decValidPtRangeLowKey);
     renounce(m_decValidEtaRangeKey);
     renounce(m_decValidKinRangeKey);
+    renounce(m_decValidJetContentKey);
+    renounce(m_decValidEventContentKey);
     renounce(m_decTau21WTAKey);
     renounce(m_decTau32WTAKey);
     renounce(m_decTau42WTAKey);

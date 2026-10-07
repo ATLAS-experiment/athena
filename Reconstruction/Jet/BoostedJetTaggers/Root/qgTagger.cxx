@@ -1,14 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BoostedJetTaggers/qgTagger.h"
 
 namespace BJT{
-
-  qgTagger::qgTagger(const std::string& name) :
-    JSSTaggerBase(name)
-  {}
 
   StatusCode qgTagger::initialize() {
 
@@ -50,26 +46,6 @@ namespace BJT{
 
     /// Initialize additional decorators
     ATH_MSG_INFO("Additional decorators that will be attached to jet :");
-
-    m_decValidKinRangeKey = m_containerName + "." + m_decorationName + "_" + m_decValidKinRangeKey.key();
-    m_decPassScoreKey = m_containerName + "." + m_decorationName + "_" + m_decPassScoreKey.key();
-    m_decCutScoreKey = m_containerName + "." + m_decorationName + "_" + m_decCutScoreKey.key();
-
-    ATH_CHECK(m_decValidKinRangeKey.initialize());
-    ATH_CHECK(m_decPassScoreKey.initialize());
-    ATH_CHECK(m_decCutScoreKey.initialize());
-
-    ATH_MSG_INFO("  " << m_decValidKinRangeKey.key() << " : pass kinematic range");
-    ATH_MSG_INFO("  " << m_decPassScoreKey.key() << " : pass Score cut");
-    ATH_MSG_INFO("  " << m_decCutScoreKey.key() << " : Score cut");
-
-  #ifndef XAOD_STANDALONE
-    if (m_suppressOutputDependence) {
-      renounce(m_decTaggedKey);
-      renounce(m_decValidJetContentKey);
-      renounce(m_decValidEventContentKey);
-    }
-  #endif
     
     return StatusCode::SUCCESS;
 
@@ -91,7 +67,7 @@ namespace BJT{
     SG::WriteDecorHandle<xAOD::JetContainer, char> decValidKinRange(m_decValidKinRangeKey);
     SG::WriteDecorHandle<xAOD::JetContainer, char> decPassScore(m_decPassScoreKey);
     SG::WriteDecorHandle<xAOD::JetContainer, char> decTagged(m_decTaggedKey);
-    SG::WriteDecorHandle<xAOD::JetContainer, float> decCutScore(m_decCutScoreKey);
+    SG::WriteDecorHandle<xAOD::JetContainer, float> decCutScore(m_decScoreCutKey);
 
     /// Create asg::AcceptData object
     asg::AcceptData acceptData(&m_acceptInfo);
