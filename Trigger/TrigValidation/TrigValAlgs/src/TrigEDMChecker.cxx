@@ -602,7 +602,7 @@ StatusCode TrigEDMChecker::dumpLVL1_ROI() {
 
   ATH_MSG_INFO("REGTEST ==========START of LVL1_ROI DUMP===========");
 
-  const LVL1_ROI * lvl1ROI;
+  const LVL1_ROI * lvl1ROI = nullptr;
   StatusCode sc = evtStore()->retrieve(lvl1ROI);
   if (sc.isFailure() ) {
     ATH_MSG_INFO("REGTEST No LVL1_ROI found");
