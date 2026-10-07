@@ -139,7 +139,8 @@ def MuonReconstructionConfig(flags):
     if flags.Reco.EnableTracking:
         from MuonTrackFindingAlgs.TrackFindingConfig import MuonInDetTrackSelectionAlgCfg, \
                                                             MuonSegmentTaggingAlgCfg, \
-                                                            BeamSpotPreparatorAlgCfg
+                                                            BeamSpotPreparatorAlgCfg, \
+                                                            MuonLegacyCaloTagAlgCfg
         if flags.Muon.buildMETrack: result.merge(BeamSpotPreparatorAlgCfg(flags))
         result.merge(MuonInDetTrackSelectionAlgCfg(flags))
         result.merge(MuonSegmentTaggingAlgCfg(flags))
@@ -148,6 +149,9 @@ def MuonReconstructionConfig(flags):
         MuonTags+=["MuonTagsSTACO"]
         result.merge(MuonCombinedFitAlgCfg(flags))
         MuonTags+=["MuonTagsMuidCo"]
+        if flags.MuonCombined.doCaloTrkMuId:
+            result.merge(MuonLegacyCaloTagAlgCfg(flags))
+            MuonTags+=["LegacyCaloTags"]
     
     result.merge(MuidSaTagMakerAlgCfg(flags,
                                       CombinedTags="MuonTagsSTACO" if flags.Reco.EnableTracking else ""))

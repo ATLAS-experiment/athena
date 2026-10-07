@@ -169,6 +169,12 @@ def MuonCombinedStacoAlgCfg(flags, name="MuonCombinedStacoAlgR4", **kwargs ):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def MuonLegacyCaloTagAlgCfg(flags, name = "MuonLegacyCaloTagAlgR4", **kwargs):
+    result = ComponentAccumulator()
+    the_alg = CompFactory.MuonCombinedR4.LegacyCaloTagAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
 def MuonCombinedFitAlgCfg(flags, name="MuonCombinedFitAlg", **kwargs):
     result = ComponentAccumulator()
     the_alg = CompFactory.MuonCombinedR4.CombinedFitAlg(name, **kwargs)

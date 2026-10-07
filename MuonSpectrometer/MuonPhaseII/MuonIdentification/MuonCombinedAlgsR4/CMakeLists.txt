@@ -11,5 +11,7 @@ atlas_add_component( MuonCombinedAlgsR4
                                     MuonTrackEvent xAODMuonViews ActsEventLib xAODTracking
                                     MuonAnalysisInterfacesLib MuonRecToolInterfacesR4
                                     ActsToolInterfacesLib InDetTrackSelectionToolLib
-                                    FourMomUtils ActsCalibratorsLib)
+                                    FourMomUtils ActsCalibratorsLib
+                                    MuonCombinedEvent
+                                    )
 atlas_install_scripts(test/runR4_MuonCombRecoSPOTTest.sh)
