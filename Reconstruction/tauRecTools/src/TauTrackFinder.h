@@ -111,10 +111,8 @@ private:
     
     Gaudi::Property<double> m_maxJetDr_tau {this, "MaxJetDrTau", 0.2};
     Gaudi::Property<double> m_maxJetDr_wide {this, "MaxJetDrWide", 0.4};
-    Gaudi::Property<bool> m_applyZ0cut {this, "removeTracksOutsideZ0wrtLeadTrk", false};
     Gaudi::Property<float> m_z0maxDelta {this, "maxDeltaZ0wrtLeadTrk", 1000.};
     Gaudi::Property<bool> m_removeDuplicateCoreTracks {this, "removeDuplicateCoreTracks", true};
-    Gaudi::Property<bool> m_bypassExtrapolator {this, "BypassExtrapolator", false};
     Gaudi::Property<bool> m_useGhostTracks {this, "useGhostTracks", false};
     Gaudi::Property<double> m_ghostTrackDR {this, "ghostTrackDR", 0.25};
 
@@ -124,6 +122,9 @@ private:
     SG::ReadHandleKey<CaloExtensionCollection> m_ParticleCacheKey {this,"tauParticleCache", "ParticleCaloExtension", "Name of the particle measurement extrapolation cache for TauTrackFinder"};
     
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
+
+    bool m_bypassExtrapolator = false;
+    bool m_applyZ0cut = false; 
 
     std::set<CaloSampling::CaloSample> m_EMSamplings;
     std::set<CaloSampling::CaloSample> m_HadSamplings;
