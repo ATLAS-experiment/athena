@@ -15,6 +15,7 @@ standardghosts =  ["Track","MuonSegment","Truth"]
 
 
 flavourghosts = [ "BHadronsFinal","CHadronsFinal",
+                  "TausFinal",
                   "WBosons", "ZBosons", "HBosons", "TQuarksFinal",
                   "Partons"]
 

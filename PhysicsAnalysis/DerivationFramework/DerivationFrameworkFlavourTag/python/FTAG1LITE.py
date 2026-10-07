@@ -224,6 +224,9 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
 
     # ── Ftag-specific augmentations ──
     from JetTagDerivationUtils.JetMatchingConfig import JetMatchingCfg
+    from JetTagDerivationUtils.TruthTauDecoratorConfig import (
+        TruthTauDecoratorCfg,
+    )
     from DerivationFrameworkFlavourTag.FtagDerivationConfig import (
         ParentDecoratorCfg,
         TrackTruthDecoratorCfg,
@@ -465,20 +468,19 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
     )
 
     # ── Truth tau matching ──
-    # Match each jet to the nearest isolated truth tau using visible
-    # 4-momentum, and decorate with tau properties (isHadronicTau,
-    # decayMode, classifierParticleOutCome, pt_vis, deltaPt, matched).
-    # This replaces TDD's TruthTauMatcher ca_block, allowing TruthTaus
-    # to be excluded from the DAOD output.
+    # Decorate each jet with its ghost-associated truth taus, leading and
+    # subleading, taking the visible decay from TruthTaus.  This replaces
+    # TDD's TruthTauMatcher ca_block, allowing TruthTaus to be excluded
+    # from the DAOD output.
     if flags.Input.isMC:
-        acc.addEventAlgo(
-            CompFactory.FlavorTagDiscriminants.TruthTauDecoratorAlg(
-                f"TruthTauDecoratorAlg_{JETS}",
-                JetContainer=JETS,
-                TruthTauContainer="TruthTaus",
-                MaxDeltaR=0.3,
+        for cfg in JET_COLLECTIONS.values():
+            acc.merge(
+                TruthTauDecoratorCfg(
+                    flags,
+                    target_jets=cfg["name"],
+                    truth_taus="TruthTaus",
+                )
             )
-        )
 
     # ── Overlap lepton flag ──
     # For each jet, check if any truth electron/muon from W/Z/top

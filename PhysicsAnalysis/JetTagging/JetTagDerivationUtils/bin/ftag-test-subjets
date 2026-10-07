@@ -22,7 +22,12 @@ from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
 
 from JetTagDerivationUtils.SubjetBuilderConfig import SubjetBuilderCfg
-from JetTagDerivationUtils.TruthTauDecoratorConfig import TruthTauDecoratorCfg
+from JetTagDerivationUtils.TruthTauDecoratorConfig import (
+    DEFAULT_VARIABLES,
+    LEAD,
+    SUBLEAD,
+    TruthTauDecoratorCfg,
+)
 
 LARGE_R_JETS = 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets'
 TRUTH_TAUS = 'TruthTaus'
@@ -82,15 +87,17 @@ def output_cfg(flags, ca, args, jets, subjets):
     if args.do_subjets:
         jet_vars += [f'{subjets}Links', f'{subjets}Count']
     if args.do_truth_taus:
+        slots = [LEAD, SUBLEAD]
         jet_vars += ['nGhostTaus'] + [
-            f'truthtau_{slot}_{var}{tag}'
-            for slot in ['lead', 'sublead']
-            for var in ['pt', 'deta', 'dphi', 'm']
-            for tag in ['', '_vis']
+            f'{var}{slot}'
+            for slot in slots
+            for var in ['matchedTo', 'deltaRTo', 'deltaPtTo', 'dEtaTo',
+                        'dPhiTo', 'ptFrom', 'mFrom', 'chargeFrom']
         ] + [
-            f'truthtau_{slot}_{var}'
-            for slot in ['lead', 'sublead']
-            for var in ['numCharged', 'charge', 'isHadronic']
+            f'{var}From{slot}'
+            for slot in slots
+            for names in DEFAULT_VARIABLES.values()
+            for var in names
         ]
     item_list = [f'xAOD::JetContainer#{jets}',
                  f'xAOD::JetAuxContainer#{jets}Aux.' + '.'.join(jet_vars)]
