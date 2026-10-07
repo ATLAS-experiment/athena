@@ -32,6 +32,9 @@
 #include "AthContainersInterfaces/IAuxStoreIO.h"
 #include "CxxUtils/ClassName.h"
 #include "CxxUtils/no_sanitize_undefined.h"
+#ifndef XAOD_STANDALONE
+# include "SGTools/CurrentEventStore.h"
+#endif
 
 // Interface include(s):
 #include "xAODRootAccessInterfaces/TActiveEvent.h"
@@ -1161,6 +1164,9 @@ StatusCode TEvent::connectObject(const std::string &key, bool silent) {
   }
 
   // Make sure that the current object is the "active event":
+#ifndef XAOD_STANDALONE
+  SG::CurrentEventStore::Push save (SG::CurrentEventStore::store());
+#endif
   setActive();
 
   // The data type is always "other" for us:
