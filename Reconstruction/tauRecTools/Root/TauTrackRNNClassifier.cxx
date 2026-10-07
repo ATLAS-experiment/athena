@@ -187,26 +187,22 @@ StatusCode TauTrackRNNClassifier::classifyLRTTracks(std::vector<xAOD::TauTrack*>
     idScoreFake(*xTrack) = 0.;
 
     double d0_weight = (xTrack->d0TJVA() ? xTrack->d0SigTJVA() / xTrack->d0TJVA(): 0);
-    double log10_pt_ratio = std::log10(xTrack->pt() / xTau.pt());
-    double abs_d0_sig = std::abs(xTrack->d0SigTJVA());
+    double log10_pt_ratio = std::log10(xTrack->pt() / xTau.ptJetSeed());
+    double log10_abs_d0_sig = std::log10(std::abs(xTrack->d0SigTJVA()));
     double dR = xTau.p4().DeltaR(xTrack->p4());
     double log10_rConv = std::log10(xTrack->rConv());
 
     // Cut values taken from a trained decision tree classifier
     bool passed = false;
     if (dR <= 0.20) {
-        if (d0_weight <= 32.19) {
+        if (d0_weight <= 33.61) {
             // Captures high d0 tracks
-            if (log10_pt_ratio >= 0.08 && abs_d0_sig >= 5.95) {
+            if (log10_pt_ratio >= -1.40 && log10_abs_d0_sig >= 2.0) {
                 passed = true;
             }
         } else {
-            if (log10_rConv >= 1.41) {
+            if (log10_pt_ratio >= -1.40 || log10_rConv >= 1.49) {
                 passed = true;
-            } else {
-                if (dR <= 0.03) {
-                    passed = true;
-                }
             }
         }
     }
