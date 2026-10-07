@@ -608,6 +608,19 @@ public:
 
 
   /**
+   * @brief Set link to point to a new container (storable).
+   * @param data Reference to the container (storable).
+   * @param ctx The event context.
+   * @returns True if the link was changed.
+   *
+   * If the link is already set, this will return false and leave the
+   * link unchanged.
+   */
+  bool setStorableObject(BaseConstReference data,
+                         const EventContext& ctx);
+
+
+  /**
    * @brief Set the link to an element given by string key and index.
    * @param dataID Key of the object.
    * @param elemID The index of the element within the container.

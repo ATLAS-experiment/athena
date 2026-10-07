@@ -671,6 +671,24 @@ bool ElementLink<STORABLE>::setStorableObject(BaseConstReference data,
 /**
  * @brief Set link to point to a new container (storable).
  * @param data Reference to the container (storable).
+ * @param ctx The event context.
+ * @returns True if the link was changed.
+ *
+ * If the link is already set, this will return false and leave the
+ * link unchanged.
+ */
+template <class STORABLE>
+inline
+bool ElementLink<STORABLE>::setStorableObject(BaseConstReference data,
+                                              const EventContext& ctx)
+{
+  return this->setStorableObject (data, false, ctx);
+}
+
+
+/**
+ * @brief Set link to point to a new container (storable).
+ * @param data Reference to the container (storable).
  * @param replace True if we can change an existing link.
  * @param ctx The event context.
  * @returns True if the link was changed.
