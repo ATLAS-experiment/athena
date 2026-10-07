@@ -211,8 +211,7 @@ def test1 (flags_in):
        [ProxyProviderSvc ('ProxyProviderSvc',
                           ProviderNames=['CondProxyProvider']),
         CondProxyProvider ('CondProxyProvider',
-                           InputCollections=['FID:BC292F26-AE73-9041-BF5C-BCE6C5C651EC'],
-                           ConversionService=AthenaPoolCnvSvc('AthenaPoolCnvSvc')),
+                           InputCollections=['FID:BC292F26-AE73-9041-BF5C-BCE6C5C651EC'] ),
         ])
 
 
