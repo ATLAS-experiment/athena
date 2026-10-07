@@ -168,9 +168,6 @@ def NswGeoPlottingAlgCfg(flags, name="NswGeoPlotting", **kwargs):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
-
-    
-
 def setupGeoR4TestCfg(args,  flags = None):
     
     if flags is None:
@@ -188,6 +185,7 @@ def setupGeoR4TestCfg(args,  flags = None):
     
     flags.Exec.FPE= 500
     flags.Exec.EventPrintoutInterval = 500
+    flags.Common.MsgSuppression=False
     
     if args.defaultGeoFile == "RUN3":
         flags.GeoModel.SQLiteDBFullPath =  MuonPhaseIITestDefaults.GEODB_R3
@@ -271,10 +269,6 @@ def setupGeoR4TestCfg(args,  flags = None):
     else:
         from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
         cfg.merge(ActsGeometryContextAlgCfg(flags))
-
-    cfg.getService("MessageSvc").verboseLimit = 10000000
-    cfg.getService("MessageSvc").debugLimit = 10000000
-    cfg.getService("MessageSvc").errorLimit = 10000000
 
     return flags, cfg
 
