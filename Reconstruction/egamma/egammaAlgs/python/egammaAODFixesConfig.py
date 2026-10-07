@@ -123,7 +123,6 @@ def runAODFix(flags, correctCluster = True, checkRelMerge = True):
     doAmbiguityFix = doAmbiguityFix_meta
 
 
-    
     if checkRelMerge:
         doFixFromAMITags = []
         doFixFromAMITags, inputReleaseFromAMITags = FixFromAMITag(flags)
@@ -194,33 +193,34 @@ def egammaAODFixesCfg(flags, correctCluster = True):
         result.merge(InputRenameCfg("xAOD::PhotonAuxContainer", "PhotonsAux.", "old_PhotonsAux."))
 
     kwargs = dict()
-    kwargs['CorrectCluster'] = correctCluster
+    kwargs['CorrectCluster'] = 'egClusterL2_3Fix' in fixes
     kwargs['FixAmbiguityLinks'] = 'egammaAmbiguityLinksFix' in fixes
-    if correctCluster:
-          # First some detector config
-          # TO BE UNDERSTOOD : why is this explicitely needed here (without it : ERROR SG::ExcNoCondCont: Can't retrieve CondCont from ReadCondHandle for key ConditionStore+LArBadChannel. Can't retrieve.)
-          from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
-          result.merge(LArBadChannelCfg(flags))
-          #from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
-          #result.merge( TileBadChannelsCondAlgCfg(flags, **kwargs) )
-          from CaloBadChannelTool.CaloBadChanToolConfig import CaloBadChanToolCfg
-          result.popToolsAndMerge( CaloBadChanToolCfg(flags) )
-          from LArGeoAlgsNV.LArGMConfig import LArGMCfg
-          result.merge(LArGMCfg(flags))
-          # then the AODFix itself
-          result.merge(InputRenameCfg("xAOD::CaloClusterContainer", "egammaClusters", "old_egammaClusters"))
-          result.merge(InputRenameCfg("xAOD::CaloClusterAuxContainer", "egammaClustersAux.", "old_egammaClustersAux."))
-          result.merge(InputRenameCfg("CaloClusterCellLinkContainer", "egammaClusters_links", "old_egammaClusters_links"))
-          kwargs['CaloDetDescrManager'] = 'CaloDetDescrManager'
-          from egammaTools.egammaSwToolConfig import egammaSwToolCfg
-          kwargs['ClusterCorrectionTool'] =  result.popToolsAndMerge(egammaSwToolCfg(flags))
-          from egammaMVACalib.egammaMVACalibConfig import egammaMVASvcCfg
-          kwargs['MVACalibSvc'] = result.getPrimaryAndMerge(egammaMVASvcCfg(flags))
-          kwargs['EGammaClustersOutputName'] = flags.Egamma.Keys.Output.CaloClusters
-          kwargs['EGammaClustersInputName'] = f'old_{flags.Egamma.Keys.Output.CaloClusters}'
-
-          kwargs['IsoLeakCorrectionTool'] = CompFactory.CP.IsolationCorrectionTool(
-                LogLogFitForLeakage = True)
+    kwargs['FixEGTopoetcone']= 'egammatopoIsoFix' in fixes
+    if 'egClusterL2_3Fix' in fixes:
+        # First some detector config
+        # TO BE UNDERSTOOD : why is this explicitely needed here (without it : ERROR SG::ExcNoCondCont: Can't retrieve CondCont from ReadCondHandle for key ConditionStore+LArBadChannel. Can't retrieve.)
+        from LArBadChannelTool.LArBadChannelConfig import LArBadChannelCfg
+        result.merge(LArBadChannelCfg(flags))
+        #from TileConditions.TileBadChannelsConfig import TileBadChannelsCondAlgCfg
+        #result.merge( TileBadChannelsCondAlgCfg(flags, **kwargs) )
+        from CaloBadChannelTool.CaloBadChanToolConfig import CaloBadChanToolCfg
+        result.popToolsAndMerge( CaloBadChanToolCfg(flags) )
+        from LArGeoAlgsNV.LArGMConfig import LArGMCfg
+        result.merge(LArGMCfg(flags))
+        # then the AODFix itself
+        result.merge(InputRenameCfg("xAOD::CaloClusterContainer", "egammaClusters", "old_egammaClusters"))
+        result.merge(InputRenameCfg("xAOD::CaloClusterAuxContainer", "egammaClustersAux.", "old_egammaClustersAux."))
+        result.merge(InputRenameCfg("CaloClusterCellLinkContainer", "egammaClusters_links", "old_egammaClusters_links"))
+        kwargs['CaloDetDescrManager'] = 'CaloDetDescrManager'
+        from egammaTools.egammaSwToolConfig import egammaSwToolCfg
+        kwargs['ClusterCorrectionTool'] =  result.popToolsAndMerge(egammaSwToolCfg(flags))
+        from egammaMVACalib.egammaMVACalibConfig import egammaMVASvcCfg
+        kwargs['MVACalibSvc'] = result.getPrimaryAndMerge(egammaMVASvcCfg(flags))
+        kwargs['EGammaClustersOutputName'] = flags.Egamma.Keys.Output.CaloClusters
+        kwargs['EGammaClustersInputName'] = f'old_{flags.Egamma.Keys.Output.CaloClusters}'
+        
+        kwargs['IsoLeakCorrectionTool'] = CompFactory.CP.IsolationCorrectionTool(
+            LogLogFitForLeakage = True)
 
     #Re-run the required algorithms
     result.addEventAlgo(CompFactory.egammaAODFixes(**kwargs))

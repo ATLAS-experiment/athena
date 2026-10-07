@@ -31,11 +31,11 @@ egammaAODFixes::egammaAODFixes(const std::string& name,
 StatusCode
 egammaAODFixes::initialize()
 {
+  // The calo cell need to be there
+  ATH_CHECK(m_CaloCellsKey.initialize());
   // The main tool
   if (m_tpetcFix) {
     ATH_CHECK(m_egammaCellRecoveryTool.retrieve());
-    // The calo cell need to be there
-    ATH_CHECK(m_CaloCellsKey.initialize());
     if (m_correctCluster) {
       ATH_CHECK(m_egClusOutputKey.initialize());
       ATH_CHECK(m_egClusInputKey.initialize());
