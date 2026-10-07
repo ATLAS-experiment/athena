@@ -19,18 +19,12 @@ PURPOSE:  Create  a simple ntuple to perform EoverP studies with
 // INCLUDE GAUDI HEADER FILES:
 #include "GaudiKernel/MsgStream.h"
 #include "Gaudi/Property.h"
-#include "GaudiKernel/TypeNameString.h"
 
 #include <algorithm>
 #include <cmath>
 #include <vector>
 // Validation mode - TTree includes
 #include "GaudiKernel/ITHistSvc.h"
-
-#include "TrkTrack/Track.h"
-#include "Particle/TrackParticle.h"
-#include "TrkTrackSummary/TrackSummary.h"
-#include "TrkParticleBase/LinkToTrackParticleBase.h"
 
 #include "xAODMissingET/MissingET.h"
 #include "xAODMissingET/MissingETContainer.h"
@@ -46,7 +40,6 @@ PURPOSE:  Create  a simple ntuple to perform EoverP studies with
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TLorentzVector.h"
-#include "TruthUtils/ParticleConstants.h"
 
 using namespace std;
 using namespace Trk;
