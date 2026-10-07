@@ -3,6 +3,9 @@
 def getGoodRunsLists():
     GRLDict={}
     ## RUN 3
+    # 2026
+    GRLDict['GRL2026'] = ['GoodRunsLists/data26_13p6TeV/20261006/physics_25ns_data26_periodsCDHI.xml']
+
     # 2025
     GRLDict['GRL2025'] = ['GoodRunsLists/data25_13p6TeV/20260129/physics_25ns_data25_periodsDEFKMOQ.xml']
 
