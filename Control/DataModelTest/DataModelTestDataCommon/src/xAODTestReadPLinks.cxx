@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file DataModelTestDataCommon/src/xAODTestReadPLinks.cxx
@@ -12,6 +12,8 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "AthContainers/PackedLink.h"
+#include <format>
+#include <print>
 #include <sstream>
 
 
@@ -23,16 +25,9 @@ namespace {
  */
 std::string formEL (const DMTest::xAODTestReadPLinks::EL& el)
 {
-  std::ostringstream ss;
-  ss << "(" << el.dataID() << ":";
-  if (static_cast<int>(el.index()) == -1) {
-    ss << "inv";
-  }
-  else {
-    ss << el.index();
-  }
-  ss << ")";
-  return ss.str();
+  return std::format ("({}:{})",
+                      el.dataID(),
+                      static_cast<int>(el.index()) == -1 ? "inv" : std::to_string(el.index()));
 }
 
 
@@ -41,9 +36,7 @@ std::string formEL (const DMTest::xAODTestReadPLinks::EL& el)
  */
 std::string formDL (const DMTest::xAODTestReadPLinks::DL& dl)
 {
-  std::ostringstream ss;
-  ss << "(" << dl.dataID() << ")";
-  return ss.str();
+  return std::format ("({})", dl.dataID());
 }
 
 
@@ -80,9 +73,9 @@ StatusCode xAODTestReadPLinks::execute (const EventContext& ctx) const
     ATH_MSG_INFO( m_plinksContainerKey.key() );
 
     std::ostringstream ss;
-    ss << "  plink_DLinks: ";
+    std::print (ss, "  plink_DLinks: ");
     for (const DL& dl : acc_plink.getDataLinkSpan (*plinkscont)) {
-      ss << formDL (dl) << " ";
+      std::print (ss, "{} ", formDL (dl));
     }
     ATH_MSG_INFO( ss.str() );
 
@@ -97,9 +90,9 @@ StatusCode xAODTestReadPLinks::execute (const EventContext& ctx) const
     ATH_MSG_INFO( m_plinksInfoKey.key() );
 
     std::ostringstream ss;
-    ss << "  plinkInfo_DLinks: ";
+    std::print (ss, "  plinkInfo_DLinks: ");
     for (const DL& dl : acc_plink.getDataLinkSpan (*plinksinfo->container())) {
-      ss << formDL (dl) << " ";
+      std::print (ss, "{} ", formDL (dl));
     }
     ATH_MSG_INFO( ss.str() );
 
@@ -117,10 +110,10 @@ StatusCode xAODTestReadPLinks::execute (const EventContext& ctx) const
 StatusCode xAODTestReadPLinks::dumpPLinks (const PLinks& plinks) const
 {
   std::ostringstream ss;
-  ss << "  link: " << formEL (plinks.plink());
-  ss << "  links:";
+  std::print (ss, "  link: {}", formEL (plinks.plink()));
+  std::print (ss, "  links:");
   for (EL el : plinks.vlinks()) {
-    ss << " " << formEL (el);
+    std::print (ss, " {}", formEL (el));
   }
   ATH_MSG_INFO( ss.str() );
   return StatusCode::SUCCESS;
@@ -137,14 +130,14 @@ xAODTestReadPLinks::dumpDecor (const EventContext& ctx,
   std::ostringstream ss;
   if (!m_plinksDecorLinkKey.empty()) {
     SG::ReadDecorHandle<PLinksContainer, SG::PackedLink<CVec> > decor (m_plinksDecorLinkKey, ctx);
-    ss << "  decorLink: " << formEL (decor (plinks));
+    std::print (ss, "  decorLink: {}", formEL (decor (plinks)));
   }
 
   if (!m_plinksDecorVLinksKey.empty()) {
     SG::ReadDecorHandle<PLinksContainer, std::vector<SG::PackedLink<CVec> > > decor (m_plinksDecorVLinksKey, ctx);
-    ss << " decorVLinks:";
+    std::print (ss, " decorVLinks:");
     for (ElementLink<CVec> el : decor (plinks)) {
-      ss << " " << formEL (el);
+      std::print (ss, " {}", formEL (el));
     }
   }
   ATH_MSG_INFO( ss.str() );
@@ -162,14 +155,14 @@ xAODTestReadPLinks::dumpInfoDecor (const EventContext& ctx,
   std::ostringstream ss;
   if (!m_plinksInfoDecorLinkKey.empty()) {
     SG::ReadDecorHandle<PLinks, SG::PackedLink<CVec> > decor (m_plinksInfoDecorLinkKey, ctx);
-    ss << "  decorLink: " << formEL (decor (plinks));
+    std::print (ss, "  decorLink: {}", formEL (decor (plinks)));
   }
 
   if (!m_plinksInfoDecorVLinksKey.empty()) {
     SG::ReadDecorHandle<PLinks, std::vector<SG::PackedLink<CVec> > > decor (m_plinksInfoDecorVLinksKey, ctx);
-    ss << " decorVLinks:";
+    std::print (ss, " decorVLinks:");;
     for (ElementLink<CVec> el : decor (plinks)) {
-      ss << " " << formEL (el);
+      std::print (ss, " {}", formEL (el));
     }
   }
   ATH_MSG_INFO( ss.str() );

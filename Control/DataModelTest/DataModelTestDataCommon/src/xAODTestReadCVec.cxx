@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file  DataModelTestDataCommon/src/xAODTestReadCVec.cxx
@@ -21,6 +21,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/System.h"
 #include <memory>
+#include <print>
 #include <sstream>
 
 
@@ -54,9 +55,9 @@ StatusCode xAODTestReadCVec::execute (const EventContext& ctx) const
 
   if (m_brief) {
     std::ostringstream ost;
-    ost << m_cvecKey.key() << " ";
+    std::print (ost, "{} ", m_cvecKey.key());
     for (const C* c : *cvec) {
-      ost << c->anInt() << " ";
+      std::print (ost, "{} ", c->anInt());
     }
     ATH_MSG_INFO (ost.str());
     return StatusCode::SUCCESS;
@@ -81,47 +82,42 @@ StatusCode xAODTestReadCVec::execute (const EventContext& ctx) const
   for (SG::auxid_t auxid : cvec->getAuxIDs())
     names.push_back (r.getName(auxid));
   std::sort (names.begin(), names.end());
-  std::ostringstream ost1;
-  ost1 << m_cvecKey.key() << " aux items: ";
-  for (const std::string& n : names)
-    ost1 << n << " ";
-  ATH_MSG_INFO (ost1.str());
+  ATH_MSG_INFO ("{} aux items: {:n:s}", m_cvecKey.key(), names);
   {
     const SG::IConstAuxStore* auxstore = cvec->getConstStore();
-    ATH_MSG_INFO("Type of aux store: "
-                 << System::typeinfoName (typeid (*auxstore)));
+    ATH_MSG_INFO("Type of aux store: {}",
+                 System::typeinfoName (typeid (*auxstore)));
   }
 
   for (const C* c : *cvec) {
     std::ostringstream ost;
-    ost << " anInt1 " << c->anInt()
-        << " aFloat: " << c->aFloat();
+    std::print (ost, " anInt1 {} aFloat: {}", c->anInt(), c->aFloat());
     if (anInt2.isAvailable(*c))
-      ost << " anInt2: " << anInt2(*c);
+      std::print (ost, " anInt2: {}", anInt2(*c));
     if (dInt1.isAvailable(*c))
-      ost << " dInt1: " << dInt1(*c);
+      std::print (ost, " dInt1: {}", dInt1(*c));
     if (m_testDecorSE) {
       if (dVar1SE.isAvailable(*c))
-        ost << " dVar1: " << dVar1SE(*c);
+        std::print (ost, " dVar1: {}", dVar1SE(*c));
     }
     else {
       if (dVar1NoSE.isAvailable(*c))
-        ost << " dVar1: " << dVar1NoSE(*c);
+        std::print (ost, " dVar1: {}", dVar1NoSE(*c));
     }
     if (dInt100.isAvailable(*c))
-      ost << " dInt100: " << dInt100(*c);
+      std::print (ost, " dInt100: {}", dInt100(*c));
     if (dInt150.isAvailable(*c))
-      ost << " dInt150: " << dInt150(*c);
+      std::print (ost, " dInt150: {}", dInt150(*c));
     if (dInt200.isAvailable(*c))
-      ost << " dInt200: " << dInt200(*c);
+      std::print (ost, " dInt200: {}", dInt200(*c));
     if (dInt250.isAvailable(*c))
-      ost << " dInt250: " << dInt250(*c);
+      std::print (ost, " dInt250: {}", dInt250(*c));
     if (anInt10.isAvailable(*c))
-      ost << " anInt10: " << anInt10(*c);
+      std::print (ost, " anInt10: {}", anInt10(*c));
     if (cEL.isAvailable(*c))
-      ost << " cEL: " << cEL(*c).dataID()
-                << "[" << cEL(*c).index() << "]";
-    ost << "\n";
+      std::print (ost, " cEL: {}[{}]",
+                  cEL(*c).dataID(), cEL(*c).index());
+    std::println (ost);
     
     ATH_MSG_INFO (ost.str());
   }

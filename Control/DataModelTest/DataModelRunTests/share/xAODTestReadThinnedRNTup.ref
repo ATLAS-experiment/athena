@@ -1,65 +1,48 @@
-Tue Sep 24 20:51:56 EDT 2024
+Mon Aug 24 23:43:45 EDT 2026
 Preloading libexcabort.so
-ApplicationMgr    SUCCESS 
+ApplicationMgr     SUCCESS 
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Tue Sep 24 20:51:57 2024
+                                          running on karma on Mon Aug 24 23:43:50 2026
 ====================================================================================================================================
-ApplicationMgr       INFO Application Manager Configured successfully
-CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
+ApplicationMgr        INFO Application Manager Configured successfully
+Py:ComponentAccumulator    INFO Athena job with pid 1909941
+CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 6(Aborted) 8(Floating point exception) 14(Alarm clock) 
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
-ClassIDSvc           INFO getRegistryEntries: read 6380 CLIDRegistry entries for module ALL
 PyComponentMgr       INFO Initializing PyComponentMgr...
 LoadWriteDicts       INFO Initializing LoadWriteDicts...
+ClassIDSvc           INFO getRegistryEntries: read 14581 CLIDRegistry entries for module ALL
 PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
 PoolSvc              INFO Frontier compression level set to 5
-DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/dvtest/build/share/dbreplica.config
+DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/rootaccess/build-clang/share/dbreplica.config
 DBReplicaSvc         INFO No specific match for domain found - use default fallback
 DBReplicaSvc         INFO Total of 1 servers found for host karma [atlas_dd ]
 PoolSvc              INFO Successfully setup replica sorting algorithm
 PoolSvc              INFO Setting up FileCatalog and Streams
-PoolSvc              INFO POOL WriteCatalog is file:xAODTestReadThinned_catalog.xml
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+PoolSvc              INFO POOL WriteCatalog is file:xAODTestReadThinned_rntup_catalog.xml
+Domain[ROOT_All]     INFO >   Access   DbDomain     NOT_OPEN  [ROOT_All]
 PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] BF012F5D-24ED-4D8F-2F0B-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO                           xaodthinned1.root
-RootDatabase.open    INFO xaodthinned1.root File version:63204
-xaodthinned1.root    INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] BF012F5D-24ED-4D8F-2F0B-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
-PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] BF012F5D-24ED-4D8F-2F0B-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO                           xaodthinned1.root
-RootDatabase.open    INFO xaodthinned1.root File version:63204
-xaodthinned1.root    INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] BF012F5D-24ED-4D8F-2F0B-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 2F58CCCB-5DC8-E746-9183-46C104545D4F
-Domain[ROOT_All]     INFO                           xaodthinned1.root
-RootDatabase.open    INFO xaodthinned1.root File version:63204
+xaodthinned...root   INFO ->  Access   DbDatabase   READ      [ROOT_All] E6E1D332-0C76-AEF4-2309-0FF0FF0FF0FF
+RootDatabase         INFO xaodthinned1.rntup.root File version:64002
+xaodthinned...root   INFO Database being retired...
+xaodthinned...root   INFO ->  Deaccess DbDatabase   READ      [ROOT_All] E6E1D332-0C76-AEF4-2309-0FF0FF0FF0FF
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     NOT_OPEN  [ROOT_All]
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All]
+xaodthinned...root   INFO ->  Access   DbDatabase   READ      [ROOT_All] 60538A10-A032-11F1-8F4A-42A04CCD7558
+RootDatabase         INFO xaodthinned1.rntup.root File version:64002
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
-xaodthinned1.root    INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 2F58CCCB-5DC8-E746-9183-46C104545D4F
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 2F58CCCB-5DC8-E746-9183-46C104545D4F
-Domain[ROOT_All]     INFO                           xaodthinned1.root
-RootDatabase.open    INFO xaodthinned1.root File version:63204
+xaodthinned...root   INFO Database being retired...
+xaodthinned...root   INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 60538A10-A032-11F1-8F4A-42A04CCD7558
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All]
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All]
+xaodthinned...root   INFO ->  Access   DbDatabase   READ      [ROOT_All] 60538A10-A032-11F1-8F4A-42A04CCD7558
+RootDatabase         INFO xaodthinned1.rntup.root File version:64002
 ApplicationMgr       INFO Application Manager Started successfully
-ClassIDSvc           INFO getRegistryEntries: read 9541 CLIDRegistry entries for module ALL
 EventP...stencySvc   INFO Added successfully Conversion service AthenaPoolCnvSvc
-TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) 
@@ -83,11 +66,9 @@ xAODTestReadJVec     INFO   decorJVec: [304.5]
 xAODTestReadPLinks   INFO plinksContainer
 xAODTestReadPLinks   INFO   plink_DLinks: 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
-ClassIDSvc           INFO getRegistryEntries: read 103 CLIDRegistry entries for module ALL
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dVar1' (id=310 typename=float) has different type than the branch: vector<int>  Marking for schema evolution.
 xAODTestReadCVec     INFO  anInt1 301 aFloat: 600 anInt2: 901 dVar1: 1351 cEL: [0]
 
 xAODTestReadCVec     INFO  anInt1 305 aFloat: 600.4 anInt2: 905 dVar1: 1355 cEL: [0]
@@ -117,7 +98,7 @@ xAODTestReadPLinks   INFO   link: (:inv)  links:
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv) (ctrig:0) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 402 aFloat: 800.1 anInt2: 1202 dVar1: 1802 cEL: [0]
 
@@ -152,7 +133,7 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:4) (:inv) (:inv)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:7)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #0 3 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:inv) links: 
@@ -181,7 +162,7 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv) (:inv)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #0 4 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #0 4 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 603 aFloat: 1200.2 anInt2: 1803 dVar1: 2703 cEL: [0]
 
@@ -210,7 +191,7 @@ xAODTestReadPLinks   INFO   link: (cvec:1)  links: (ctrig:7)
 xAODTestReadPLinks   INFO   decorLink: (cvec:1) decorVLinks: (ctrig:0) (:inv) (cvec:0) (ctrig:3)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #0 5 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #0 5 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 701 aFloat: 1400 anInt2: 2101 dVar1: 3151 cEL: [0]
 
@@ -245,7 +226,7 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:0) (:inv) (cvec:1) (ctri
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:3) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #0 6 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #0 6 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 802 aFloat: 1600.1 anInt2: 2402 dVar1: 3602 cEL: [0]
 
@@ -284,7 +265,7 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:4) (ctrig:0) (:inv)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:1)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #0 7 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #0 7 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 901 aFloat: 1800 anInt2: 2701 dVar1: 4051 cEL: cvec[7]
 
@@ -329,7 +310,7 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:2)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:4) (ctrig:6) (:inv) (cvec:6)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #0 8 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #0 8 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1004 aFloat: 2000.3 anInt2: 3004 dVar1: 4504 cEL: [0]
 
@@ -362,7 +343,7 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv) (ctrig:6) (:inv) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #0 9 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #0 9 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1101 aFloat: 2200 anInt2: 3301 dVar1: 4951 cEL: [0]
 
@@ -401,7 +382,7 @@ xAODTestReadPLinks   INFO   link: (ctrig:3)  links: (:inv) (:inv) (ctrig:6)
 xAODTestReadPLinks   INFO   decorLink: (ctrig:3) decorVLinks: (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #0 10 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #11, run #0 10 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1202 aFloat: 2400.1 anInt2: 3602 dVar1: 5402 cEL: [0]
 
@@ -444,7 +425,7 @@ xAODTestReadPLinks   INFO   link: (ctrig:3)  links: (:inv) (cvec:2) (ctrig:6)
 xAODTestReadPLinks   INFO   decorLink: (ctrig:3) decorVLinks: (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #11, run #0 11 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #12, run #0 11 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1301 aFloat: 2600 anInt2: 3901 dVar1: 5851 cEL: cvec[7]
 
@@ -493,7 +474,7 @@ xAODTestReadPLinks   INFO   link: (cvec:4)  links:
 xAODTestReadPLinks   INFO   decorLink: (cvec:4) decorVLinks: (ctrig:9) (:inv) (cvec:1)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #12, run #0 12 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #13, run #0 12 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1403 aFloat: 2800.2 anInt2: 4203 dVar1: 6303 cEL: cvec[3]
 
@@ -530,7 +511,7 @@ xAODTestReadPLinks   INFO   link: (:inv)  links:
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:9) (:inv) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #13, run #0 13 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #14, run #0 13 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1501 aFloat: 3000 anInt2: 4501 dVar1: 6751 cEL: [0]
 
@@ -573,7 +554,7 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:6) (ctrig:9)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #14, run #0 14 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #15, run #0 14 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1602 aFloat: 3200.1 anInt2: 4802 dVar1: 7202 cEL: [0]
 
@@ -620,7 +601,7 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (:inv) (ctrig:9)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks:
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #15, run #0 15 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #16, run #0 15 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1701 aFloat: 3400 anInt2: 5101 dVar1: 7651 cEL: cvec[9]
 
@@ -673,7 +654,7 @@ xAODTestReadPLinks   INFO   link: (ctrig:9)  links: (:inv) (cvec:1) (ctrig:2) (:
 xAODTestReadPLinks   INFO   decorLink: (ctrig:9) decorVLinks: (:inv) (cvec:4)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #16, run #0 16 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #17, run #0 16 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCLinks   INFO clinks
 xAODTestReadCLinks   INFO   link: (:0) links: (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) (:0) 
@@ -698,7 +679,7 @@ xAODTestReadPLinks   INFO plinksContainer
 xAODTestReadPLinks   INFO   plink_DLinks: 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #17, run #0 17 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #18, run #0 17 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1901 aFloat: 3800 anInt2: 5701 dVar1: 8551 cEL: [0]
 
@@ -729,7 +710,7 @@ xAODTestReadPLinks   INFO   link: (:inv)  links: (ctrig:2)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (ctrig:5) (:inv) (:inv) (ctrig:8)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #18, run #0 18 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #19, run #0 18 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 2002 aFloat: 4000.1 anInt2: 6002 dVar1: 9002 cEL: [0]
 
@@ -764,7 +745,7 @@ xAODTestReadPLinks   INFO   link: (ctrig:9)  links: (:inv) (cvec:0) (ctrig:2) (:
 xAODTestReadPLinks   INFO   decorLink: (ctrig:9) decorVLinks: (:inv) (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #0 19 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #20, run #0 19 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 2101 aFloat: 4200 anInt2: 6301 dVar1: 9451 cEL: cvec[5]
 
@@ -804,16 +785,16 @@ xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:2) (ctrig:5) (:
 xAODTestReadPLinks   INFO   link: (:inv)  links: (cvec:2) (ctrig:5) (:inv)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (:inv)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
-xaodthinned1.root    INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 2F58CCCB-5DC8-E746-9183-46C104545D4F
+xaodthinned...root   INFO Database being retired...
+xaodthinned...root   INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 60538A10-A032-11F1-8F4A-42A04CCD7558
 ApplicationMgr       INFO Application Manager Stopped successfully
 LoadWriteDicts       INFO Finalizing LoadWriteDicts...
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All]
 AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
 AthenaPoolCnvSvc     INFO PerfStats Timing Measurements for AthenaPoolCnvSvc
 AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
-AthenaPoolCnvSvc     INFO PerfStats | cObjR_ALL       |              68 ms |
-AthenaPoolCnvSvc     INFO PerfStats | cObj_ALL        |             210 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cObjR_ALL       |              98 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cObj_ALL        |             393 ms |
 AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
 PyComponentMgr       INFO Finalizing PyComponentMgr...
 ApplicationMgr       INFO Application Manager Finalized successfully

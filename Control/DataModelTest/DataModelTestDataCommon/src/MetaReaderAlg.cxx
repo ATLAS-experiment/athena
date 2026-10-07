@@ -1,7 +1,6 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
-// $Id$
 /**
  * @file DataModelTestDataCommon/MetaReaderAlg.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -56,13 +55,13 @@ StatusCode MetaReaderAlg::execute (const EventContext& ctx) const
   SG::ReadMetaHandleKey<DMTest::S1> s1Key (m_s1Key.key(), sid);
   ATH_CHECK( s1Key.initialize() );
   SG::ReadMetaHandle<DMTest::S1> s1 (s1Key, ctx);
-  ATH_MSG_INFO ("MetaS1: " << s1->m_x);
+  ATH_MSG_INFO ("MetaS1: {}", s1->m_x);
 
   // Make a new key with the correct dbkey.
   SG::ReadMetaHandleKey<DMTest::C> cKey (m_cKey.key(), sid);
   ATH_CHECK( cKey.initialize() );
   SG::ReadMetaHandle<DMTest::C> c (cKey, ctx);
-  ATH_MSG_INFO ("MetaC: " << c->anInt() << " " << c->aFloat());
+  ATH_MSG_INFO ("MetaC: {} {}", c->anInt(), c->aFloat());
   return StatusCode::SUCCESS;
 }
 

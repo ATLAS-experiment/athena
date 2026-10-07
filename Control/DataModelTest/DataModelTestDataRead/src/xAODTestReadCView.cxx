@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file  DataModelTestDataRead/src/xAODTestReadCView.cxx
  * @author snyder@bnl.gov
@@ -17,6 +15,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include <memory>
+#include <print>
 #include <sstream>
 
 
@@ -60,11 +59,11 @@ StatusCode xAODTestReadCView::execute (const EventContext& ctx) const
 
   static const C::Accessor<int> anInt10 ("anInt10");
   std::ostringstream ost;
-  ost << m_cviewKey.key() << ":";
+  std::print (ost, "{}:", m_cviewKey.key());
   for (const C* c : *cview) {
-    ost << " " << c->anInt();
+    std::print (ost, " {}", c->anInt());
     if (anInt10.isAvailable(*c))
-      ost << "(" << anInt10(*c) << ")";
+      std::print (ost, "({})", anInt10(*c));
   }
   ATH_MSG_INFO (ost.str());
 

@@ -1,9 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
-// $Id$
 /**
  * @file DataModelTestDataCommon/src/CondAlg1.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -59,7 +56,8 @@ StatusCode CondAlg1::execute (const EventContext& ctx) const
   auto s2 = std::make_unique<DMTest::S2> (xint*100);
   ATH_CHECK( scond.record (range, std::move(s2) ) );
 
-  ATH_MSG_DEBUG("Recorded '" << scond.key() << "' with range " << range);
+  ATH_MSG_DEBUG("Recorded '{}' with range {}",
+                scond.key(), static_cast<std::string>(range));
 
   return StatusCode::SUCCESS;
 }

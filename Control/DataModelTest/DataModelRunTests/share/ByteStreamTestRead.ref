@@ -1,39 +1,37 @@
-Tue Sep 24 22:10:49 EDT 2024
+Mon Aug 24 23:55:26 EDT 2026
 Preloading libexcabort.so
-ApplicationMgr    SUCCESS 
+ApplicationMgr     SUCCESS 
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Tue Sep 24 22:10:49 2024
+                                          running on karma on Mon Aug 24 23:55:30 2026
 ====================================================================================================================================
-ApplicationMgr       INFO Application Manager Configured successfully
-CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
+ApplicationMgr        INFO Application Manager Configured successfully
+Py:ComponentAccumulator    INFO Athena job with pid 1917925
+CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 6(Aborted) 8(Floating point exception) 14(Alarm clock) 
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
-ClassIDSvc           INFO getRegistryEntries: read 14930 CLIDRegistry entries for module ALL
-ClassIDSvc           INFO getRegistryEntries: read 86 CLIDRegistry entries for module ALL
 PyComponentMgr       INFO Initializing PyComponentMgr...
 LoadReadDicts        INFO Initializing LoadReadDicts...
-ClassIDSvc           INFO getRegistryEntries: read 262 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 15002 CLIDRegistry entries for module ALL
 SGInputLoader        INFO Will explicitly preload the following DataObjects:
     +  ( 'ByteStreamMetadataContainer' , 'InputMetaDataStore+ByteStreamMetadata' ) 
     +  ( 'HLT::HLTResult' , 'StoreGateSvc+HLTResult_HLT' ) 
 MetaDataSvc          INFO Initializing MetaDataSvc
 PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
 PoolSvc              INFO Frontier compression level set to 5
-DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/dvtest/build/share/dbreplica.config
+DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/rootaccess/build-clang/share/dbreplica.config
 DBReplicaSvc         INFO No specific match for domain found - use default fallback
 DBReplicaSvc         INFO Total of 1 servers found for host karma [atlas_dd ]
 PoolSvc              INFO Successfully setup replica sorting algorithm
 PoolSvc              INFO Setting up FileCatalog and Streams
 PoolSvc              INFO POOL WriteCatalog is file:ByteStreamTestRead_catalog.xml
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO >   Access   DbDomain     NOT_OPEN  [ROOT_All]
 ToolSv...adataTool   INFO Initializing
 MetaDataSvc          INFO Found MetaDataTools = PublicToolHandleArray(['IOVDbMetaDataTool/IOVDbMetaDataTool','ByteStreamMetadataTool/ByteStreamMetadataTool'])
 MetaDataSvc          INFO   AlgTool: ToolSvc.IOVDbMetaDataTool
 MetaDataSvc          INFO   AlgTool: ToolSvc.ByteStreamMetadataTool
 ByteSt...oviderSvc   INFO Initializing
 ByteSt...oviderSvc   INFO -- Will fill Store with id =  0
-ClassIDSvc           INFO getRegistryEntries: read 1547 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 1429 CLIDRegistry entries for module ALL
 TrigSe...izeCnvSvc   INFO initialize()
 ByteStreamInputSvc   INFO Initializing
 ROBDataProviderSvc   INFO Initializing
@@ -41,6 +39,7 @@ ROBDataProviderSvc   INFO ---> Filter out empty ROB fragments = false
 ROBDataProviderSvc   INFO ---> Filter out specific ROBs by Status Code: # ROBs = 0
 ROBDataProviderSvc   INFO ---> Filter out Sub Detector ROBs by Status Code: # Sub Detectors = 0
 EventSelector        INFO reinitialization...
+ClassIDSvc           INFO getRegistryEntries: read 131 CLIDRegistry entries for module ALL
 ByteStreamInputSvc   INFO Picked valid file: test.bs
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
@@ -51,50 +50,12 @@ EventI...eamAuxCnv   INFO IsTestbeam : 0
 EventI...eamAuxCnv   INFO IsCalibration : 0
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
-Warning in <TClass::Init>: no dictionary for class TauRecDetails_p1 is available
-Warning in <TClass::Init>: no dictionary for class ParticleBase_p1 is available
-Warning in <TClass::Init>: no dictionary for class TauDetailsContainer_tlp1 is available
-Warning in <TClass::Init>: no dictionary for class JetCollection_tlp2 is available
-Warning in <TClass::Init>: no dictionary for class egDetailContainer_p1 is available
-Warning in <TClass::Init>: no dictionary for class egammaContainer_p1 is available
-Warning in <TClass::Init>: no dictionary for class TauJetContainer_p3 is available
-Warning in <TClass::Init>: no dictionary for class TauJet_p3 is available
-Warning in <TClass::Init>: no dictionary for class TauCommonDetails_p1 is available
-Warning in <TClass::Init>: no dictionary for class TauDetailsContainer_p1 is available
-Warning in <TClass::Init>: no dictionary for class TauCommonExtraDetails_p1 is available
-Warning in <TClass::Init>: no dictionary for class Tau1P3PDetails_p1 is available
-Warning in <TClass::Init>: no dictionary for class Tau1P3PExtraDetails_p1 is available
-Warning in <TClass::Init>: no dictionary for class TauRecExtraDetails_p1 is available
-Warning in <TClass::Init>: no dictionary for class tauAnalysisHelperObject_p1 is available
-Warning in <TClass::Init>: no dictionary for class JetCollection_p4 is available
-Warning in <TClass::Init>: no dictionary for class Jet_p4 is available
-Warning in <TClass::Init>: no dictionary for class JetAssociationBase_p1 is available
-Warning in <TClass::Init>: no dictionary for class egDetailContainer_p2 is available
-Warning in <TClass::Init>: no dictionary for class egammaContainer_p2 is available
-Warning in <TClass::Init>: no dictionary for class TauDetailsContainer_tlp2 is available
-Warning in <TClass::Init>: no dictionary for class TauCommonDetails_p2 is available
-Warning in <TClass::Init>: no dictionary for class JetCollection_tlp5 is available
-Warning in <TClass::Init>: no dictionary for class JetCollection_p5 is available
-Warning in <TClass::Init>: no dictionary for class Jet_p5 is available
-Warning in <TClass::Init>: no dictionary for class JetConverterTypes::momentum is available
-Warning in <TClass::Init>: no dictionary for class TauJetContainer_p4 is available
-Warning in <TClass::Init>: no dictionary for class JetKeyDescriptorCollection_p1 is available
-Warning in <TClass::Init>: no dictionary for class JetCollection_p6 is available
-Warning in <TClass::Init>: no dictionary for class Jet_p6 is available
-Warning in <TClass::Init>: no dictionary for class JetCollection_tlp6 is available
-Warning in <TClass::Init>: no dictionary for class JetMomentMapCollection_p6 is available
-Warning in <TClass::Init>: no dictionary for class TauDetailsContainer_tlp4 is available
-Warning in <TClass::Init>: no dictionary for class TauPi0Details_p2 is available
-Warning in <TClass::Init>: no dictionary for class TauPi0Candidate_p1 is available
-Warning in <TClass::Init>: no dictionary for class TauPi0Cluster_p1 is available
-Warning in <TClass::Init>: no dictionary for class TauShot_p1 is available
-Warning in <TClass::Init>: no dictionary for class TauJetContainer_p5 is available
 To...TrigSerTPTool   INFO Initializing
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
 APR:Db...x:forGuidWARNING  doing GUID scan on ALL types for Class ID=EAD7484F-1F40-4344-A667-BB9C47536BE6
 APR:Db...x:forGuidWARNING  doing GUID scan on ALL types for Class ID=740C4020-F0A3-40B3-88E1-B15A8055DB64
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 201 aFloat: 400 anInt2: 601 dInt1: 801 dVar1: 901 cEL: [9]
 
@@ -122,54 +83,54 @@ xAODTestReadPVec     INFO  pInt: 1001 pFloat: 0.02 dpInt1: 101
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 1002 pFloat: 1.02 dpInt1: 102
-  pvInt: [-290 ]
-  pvFloat: [-0.488 ]
-  dpvFloat: [0.120 ]
+  pvInt: [-290]
+  pvFloat: [-0.488]
+  dpvFloat: [0.120]
 
 xAODTestReadPVec     INFO  pInt: 1003 pFloat: 2.02 dpInt1: 103
-  pvInt: [-280 -279 ]
-  pvFloat: [-0.478 -0.378 ]
-  dpvFloat: [0.220 0.221 ]
+  pvInt: [-280, -279]
+  pvFloat: [-0.478, -0.378]
+  dpvFloat: [0.220, 0.221]
 
 xAODTestReadPVec     INFO  pInt: 1004 pFloat: 3.02 dpInt1: 104
-  pvInt: [-270 -269 -268 ]
-  pvFloat: [-0.468 -0.368 -0.268 ]
-  dpvFloat: [0.320 0.321 0.322 ]
+  pvInt: [-270, -269, -268]
+  pvFloat: [-0.468, -0.368, -0.268]
+  dpvFloat: [0.320, 0.321, 0.322]
 
 xAODTestReadPVec     INFO  pInt: 1005 pFloat: 4.02 dpInt1: 105
-  pvInt: [-260 -259 -258 -257 ]
-  pvFloat: [-0.458 -0.358 -0.258 -0.158 ]
-  dpvFloat: [0.420 0.421 0.422 0.423 ]
+  pvInt: [-260, -259, -258, -257]
+  pvFloat: [-0.458, -0.358, -0.258, -0.158]
+  dpvFloat: [0.420, 0.421, 0.422, 0.423]
 
 xAODTestReadPVec     INFO  pInt: 1006 pFloat: 5.02 dpInt1: 106
-  pvInt: [-250 -249 -248 -247 -246 ]
-  pvFloat: [-0.448 -0.348 -0.248 -0.148 -0.048 ]
-  dpvFloat: [0.520 0.521 0.522 0.523 0.524 ]
+  pvInt: [-250, -249, -248, -247, -246]
+  pvFloat: [-0.448, -0.348, -0.248, -0.148, -0.048]
+  dpvFloat: [0.520, 0.521, 0.522, 0.523, 0.524]
 
 xAODTestReadPVec     INFO  pInt: 1007 pFloat: 6.02 dpInt1: 107
-  pvInt: [-240 -239 -238 -237 -236 -235 ]
-  pvFloat: [-0.438 -0.338 -0.238 -0.138 -0.038 0.062 ]
-  dpvFloat: [0.620 0.621 0.622 0.623 0.624 0.625 ]
+  pvInt: [-240, -239, -238, -237, -236, -235]
+  pvFloat: [-0.438, -0.338, -0.238, -0.138, -0.038, 0.062]
+  dpvFloat: [0.620, 0.621, 0.622, 0.623, 0.624, 0.625]
 
 xAODTestReadPVec     INFO  pInt: 1008 pFloat: 7.02 dpInt1: 108
-  pvInt: [-230 -229 -228 -227 -226 -225 -224 ]
-  pvFloat: [-0.428 -0.328 -0.228 -0.128 -0.028 0.072 0.172 ]
-  dpvFloat: [0.720 0.721 0.722 0.723 0.724 0.725 0.726 ]
+  pvInt: [-230, -229, -228, -227, -226, -225, -224]
+  pvFloat: [-0.428, -0.328, -0.228, -0.128, -0.028, 0.072, 0.172]
+  dpvFloat: [0.720, 0.721, 0.722, 0.723, 0.724, 0.725, 0.726]
 
 xAODTestReadPVec     INFO  pInt: 1009 pFloat: 8.02 dpInt1: 109
-  pvInt: [-220 -219 -218 -217 -216 -215 -214 -213 ]
-  pvFloat: [-0.418 -0.318 -0.218 -0.118 -0.018 0.082 0.182 0.282 ]
-  dpvFloat: [0.820 0.821 0.822 0.823 0.824 0.825 0.826 0.827 ]
+  pvInt: [-220, -219, -218, -217, -216, -215, -214, -213]
+  pvFloat: [-0.418, -0.318, -0.218, -0.118, -0.018, 0.082, 0.182, 0.282]
+  dpvFloat: [0.820, 0.821, 0.822, 0.823, 0.824, 0.825, 0.826, 0.827]
 
 xAODTestReadPVec     INFO  pInt: 1010 pFloat: 9.02 dpInt1: 110
-  pvInt: [-210 -209 -208 -207 -206 -205 -204 -203 -202 ]
-  pvFloat: [-0.408 -0.308 -0.208 -0.108 -0.008 0.092 0.192 0.292 0.392 ]
-  dpvFloat: [0.920 0.921 0.922 0.923 0.924 0.925 0.926 0.927 0.928 ]
+  pvInt: [-210, -209, -208, -207, -206, -205, -204, -203, -202]
+  pvFloat: [-0.408, -0.308, -0.208, -0.108, -0.008, 0.092, 0.192, 0.292, 0.392]
+  dpvFloat: [0.920, 0.921, 0.922, 0.923, 0.924, 0.925, 0.926, 0.927, 0.928]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 210 209 208 207 206 205 204 203 202 201
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 801.5 802.5 803.5 804.5 805.5 806.5 807.5 808.5 809.5 810.5 811.5 812.5 813.5 814.5 815.5 816.5 817.5 818.5 819.5 820.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 820.5 819.5 818.5 817.5 816.5 815.5 814.5 813.5 812.5 811.5 810.5 809.5 808.5 807.5 806.5 805.5 804.5 803.5 802.5 801.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 201 aFloat: 400
 
@@ -193,8 +154,7 @@ xAODTestReadCVec2    INFO  anInt1 210 aFloat: 400.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
-ClassIDSvc           INFO getRegistryEntries: read 14163 CLIDRegistry entries for module ALL
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 301 aFloat: 600 anInt2: 901 dInt1: 1201 dVar1: 1351 cEL: [9]
 
@@ -222,54 +182,54 @@ xAODTestReadPVec     INFO  pInt: 1501 pFloat: 0.03 dpInt1: 151
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 1502 pFloat: 1.03 dpInt1: 152
-  pvInt: [-190 ]
-  pvFloat: [-0.487 ]
-  dpvFloat: [0.130 ]
+  pvInt: [-190]
+  pvFloat: [-0.487]
+  dpvFloat: [0.130]
 
 xAODTestReadPVec     INFO  pInt: 1503 pFloat: 2.03 dpInt1: 153
-  pvInt: [-180 -179 ]
-  pvFloat: [-0.477 -0.377 ]
-  dpvFloat: [0.230 0.231 ]
+  pvInt: [-180, -179]
+  pvFloat: [-0.477, -0.377]
+  dpvFloat: [0.230, 0.231]
 
 xAODTestReadPVec     INFO  pInt: 1504 pFloat: 3.03 dpInt1: 154
-  pvInt: [-170 -169 -168 ]
-  pvFloat: [-0.467 -0.367 -0.267 ]
-  dpvFloat: [0.330 0.331 0.332 ]
+  pvInt: [-170, -169, -168]
+  pvFloat: [-0.467, -0.367, -0.267]
+  dpvFloat: [0.330, 0.331, 0.332]
 
 xAODTestReadPVec     INFO  pInt: 1505 pFloat: 4.03 dpInt1: 155
-  pvInt: [-160 -159 -158 -157 ]
-  pvFloat: [-0.457 -0.357 -0.257 -0.157 ]
-  dpvFloat: [0.430 0.431 0.432 0.433 ]
+  pvInt: [-160, -159, -158, -157]
+  pvFloat: [-0.457, -0.357, -0.257, -0.157]
+  dpvFloat: [0.430, 0.431, 0.432, 0.433]
 
 xAODTestReadPVec     INFO  pInt: 1506 pFloat: 5.03 dpInt1: 156
-  pvInt: [-150 -149 -148 -147 -146 ]
-  pvFloat: [-0.447 -0.347 -0.247 -0.147 -0.047 ]
-  dpvFloat: [0.530 0.531 0.532 0.533 0.534 ]
+  pvInt: [-150, -149, -148, -147, -146]
+  pvFloat: [-0.447, -0.347, -0.247, -0.147, -0.047]
+  dpvFloat: [0.530, 0.531, 0.532, 0.533, 0.534]
 
 xAODTestReadPVec     INFO  pInt: 1507 pFloat: 6.03 dpInt1: 157
-  pvInt: [-140 -139 -138 -137 -136 -135 ]
-  pvFloat: [-0.437 -0.337 -0.237 -0.137 -0.037 0.063 ]
-  dpvFloat: [0.630 0.631 0.632 0.633 0.634 0.635 ]
+  pvInt: [-140, -139, -138, -137, -136, -135]
+  pvFloat: [-0.437, -0.337, -0.237, -0.137, -0.037, 0.063]
+  dpvFloat: [0.630, 0.631, 0.632, 0.633, 0.634, 0.635]
 
 xAODTestReadPVec     INFO  pInt: 1508 pFloat: 7.03 dpInt1: 158
-  pvInt: [-130 -129 -128 -127 -126 -125 -124 ]
-  pvFloat: [-0.427 -0.327 -0.227 -0.127 -0.027 0.073 0.173 ]
-  dpvFloat: [0.730 0.731 0.732 0.733 0.734 0.735 0.736 ]
+  pvInt: [-130, -129, -128, -127, -126, -125, -124]
+  pvFloat: [-0.427, -0.327, -0.227, -0.127, -0.027, 0.073, 0.173]
+  dpvFloat: [0.730, 0.731, 0.732, 0.733, 0.734, 0.735, 0.736]
 
 xAODTestReadPVec     INFO  pInt: 1509 pFloat: 8.03 dpInt1: 159
-  pvInt: [-120 -119 -118 -117 -116 -115 -114 -113 ]
-  pvFloat: [-0.417 -0.317 -0.217 -0.117 -0.017 0.083 0.183 0.283 ]
-  dpvFloat: [0.830 0.831 0.832 0.833 0.834 0.835 0.836 0.837 ]
+  pvInt: [-120, -119, -118, -117, -116, -115, -114, -113]
+  pvFloat: [-0.417, -0.317, -0.217, -0.117, -0.017, 0.083, 0.183, 0.283]
+  dpvFloat: [0.830, 0.831, 0.832, 0.833, 0.834, 0.835, 0.836, 0.837]
 
 xAODTestReadPVec     INFO  pInt: 1510 pFloat: 9.03 dpInt1: 160
-  pvInt: [-110 -109 -108 -107 -106 -105 -104 -103 -102 ]
-  pvFloat: [-0.407 -0.307 -0.207 -0.107 -0.007 0.093 0.193 0.293 0.393 ]
-  dpvFloat: [0.930 0.931 0.932 0.933 0.934 0.935 0.936 0.937 0.938 ]
+  pvInt: [-110, -109, -108, -107, -106, -105, -104, -103, -102]
+  pvFloat: [-0.407, -0.307, -0.207, -0.107, -0.007, 0.093, 0.193, 0.293, 0.393]
+  dpvFloat: [0.930, 0.931, 0.932, 0.933, 0.934, 0.935, 0.936, 0.937, 0.938]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 310 309 308 307 306 305 304 303 302 301
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 1201.5 1202.5 1203.5 1204.5 1205.5 1206.5 1207.5 1208.5 1209.5 1210.5 1211.5 1212.5 1213.5 1214.5 1215.5 1216.5 1217.5 1218.5 1219.5 1220.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 1220.5 1219.5 1218.5 1217.5 1216.5 1215.5 1214.5 1213.5 1212.5 1211.5 1210.5 1209.5 1208.5 1207.5 1206.5 1205.5 1204.5 1203.5 1202.5 1201.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 301 aFloat: 600
 
@@ -293,7 +253,7 @@ xAODTestReadCVec2    INFO  anInt1 310 aFloat: 600.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 401 aFloat: 800 anInt2: 1201 dInt1: 1601 dVar1: 1801 cEL: [9]
 
@@ -321,54 +281,54 @@ xAODTestReadPVec     INFO  pInt: 2001 pFloat: 0.04 dpInt1: 201
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 2002 pFloat: 1.04 dpInt1: 202
-  pvInt: [-90 ]
-  pvFloat: [-0.486 ]
-  dpvFloat: [0.140 ]
+  pvInt: [-90]
+  pvFloat: [-0.486]
+  dpvFloat: [0.140]
 
 xAODTestReadPVec     INFO  pInt: 2003 pFloat: 2.04 dpInt1: 203
-  pvInt: [-80 -79 ]
-  pvFloat: [-0.476 -0.376 ]
-  dpvFloat: [0.240 0.241 ]
+  pvInt: [-80, -79]
+  pvFloat: [-0.476, -0.376]
+  dpvFloat: [0.240, 0.241]
 
 xAODTestReadPVec     INFO  pInt: 2004 pFloat: 3.04 dpInt1: 204
-  pvInt: [-70 -69 -68 ]
-  pvFloat: [-0.466 -0.366 -0.266 ]
-  dpvFloat: [0.340 0.341 0.342 ]
+  pvInt: [-70, -69, -68]
+  pvFloat: [-0.466, -0.366, -0.266]
+  dpvFloat: [0.340, 0.341, 0.342]
 
 xAODTestReadPVec     INFO  pInt: 2005 pFloat: 4.04 dpInt1: 205
-  pvInt: [-60 -59 -58 -57 ]
-  pvFloat: [-0.456 -0.356 -0.256 -0.156 ]
-  dpvFloat: [0.440 0.441 0.442 0.443 ]
+  pvInt: [-60, -59, -58, -57]
+  pvFloat: [-0.456, -0.356, -0.256, -0.156]
+  dpvFloat: [0.440, 0.441, 0.442, 0.443]
 
 xAODTestReadPVec     INFO  pInt: 2006 pFloat: 5.04 dpInt1: 206
-  pvInt: [-50 -49 -48 -47 -46 ]
-  pvFloat: [-0.446 -0.346 -0.246 -0.146 -0.046 ]
-  dpvFloat: [0.540 0.541 0.542 0.543 0.544 ]
+  pvInt: [-50, -49, -48, -47, -46]
+  pvFloat: [-0.446, -0.346, -0.246, -0.146, -0.046]
+  dpvFloat: [0.540, 0.541, 0.542, 0.543, 0.544]
 
 xAODTestReadPVec     INFO  pInt: 2007 pFloat: 6.04 dpInt1: 207
-  pvInt: [-40 -39 -38 -37 -36 -35 ]
-  pvFloat: [-0.436 -0.336 -0.236 -0.136 -0.036 0.064 ]
-  dpvFloat: [0.640 0.641 0.642 0.643 0.644 0.645 ]
+  pvInt: [-40, -39, -38, -37, -36, -35]
+  pvFloat: [-0.436, -0.336, -0.236, -0.136, -0.036, 0.064]
+  dpvFloat: [0.640, 0.641, 0.642, 0.643, 0.644, 0.645]
 
 xAODTestReadPVec     INFO  pInt: 2008 pFloat: 7.04 dpInt1: 208
-  pvInt: [-30 -29 -28 -27 -26 -25 -24 ]
-  pvFloat: [-0.426 -0.326 -0.226 -0.126 -0.026 0.074 0.174 ]
-  dpvFloat: [0.740 0.741 0.742 0.743 0.744 0.745 0.746 ]
+  pvInt: [-30, -29, -28, -27, -26, -25, -24]
+  pvFloat: [-0.426, -0.326, -0.226, -0.126, -0.026, 0.074, 0.174]
+  dpvFloat: [0.740, 0.741, 0.742, 0.743, 0.744, 0.745, 0.746]
 
 xAODTestReadPVec     INFO  pInt: 2009 pFloat: 8.04 dpInt1: 209
-  pvInt: [-20 -19 -18 -17 -16 -15 -14 -13 ]
-  pvFloat: [-0.416 -0.316 -0.216 -0.116 -0.016 0.084 0.184 0.284 ]
-  dpvFloat: [0.840 0.841 0.842 0.843 0.844 0.845 0.846 0.847 ]
+  pvInt: [-20, -19, -18, -17, -16, -15, -14, -13]
+  pvFloat: [-0.416, -0.316, -0.216, -0.116, -0.016, 0.084, 0.184, 0.284]
+  dpvFloat: [0.840, 0.841, 0.842, 0.843, 0.844, 0.845, 0.846, 0.847]
 
 xAODTestReadPVec     INFO  pInt: 2010 pFloat: 9.04 dpInt1: 210
-  pvInt: [-10 -9 -8 -7 -6 -5 -4 -3 -2 ]
-  pvFloat: [-0.406 -0.306 -0.206 -0.106 -0.006 0.094 0.194 0.294 0.394 ]
-  dpvFloat: [0.940 0.941 0.942 0.943 0.944 0.945 0.946 0.947 0.948 ]
+  pvInt: [-10, -9, -8, -7, -6, -5, -4, -3, -2]
+  pvFloat: [-0.406, -0.306, -0.206, -0.106, -0.006, 0.094, 0.194, 0.294, 0.394]
+  dpvFloat: [0.940, 0.941, 0.942, 0.943, 0.944, 0.945, 0.946, 0.947, 0.948]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 410 409 408 407 406 405 404 403 402 401
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 1601.5 1602.5 1603.5 1604.5 1605.5 1606.5 1607.5 1608.5 1609.5 1610.5 1611.5 1612.5 1613.5 1614.5 1615.5 1616.5 1617.5 1618.5 1619.5 1620.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 1620.5 1619.5 1618.5 1617.5 1616.5 1615.5 1614.5 1613.5 1612.5 1611.5 1610.5 1609.5 1608.5 1607.5 1606.5 1605.5 1604.5 1603.5 1602.5 1601.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 401 aFloat: 800
 
@@ -392,16 +352,16 @@ xAODTestReadCVec2    INFO  anInt1 410 aFloat: 800.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #0 3 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCView    INFO HLT_DMTest__CView_cview:
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 2001.5 2002.5 2003.5 2004.5 2005.5 2006.5 2007.5 2008.5 2009.5 2010.5 2011.5 2012.5 2013.5 2014.5 2015.5 2016.5 2017.5 2018.5 2019.5 2020.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 2020.5 2019.5 2018.5 2017.5 2016.5 2015.5 2014.5 2013.5 2012.5 2011.5 2010.5 2009.5 2008.5 2007.5 2006.5 2005.5 2004.5 2003.5 2002.5 2001.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #0 4 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #0 4 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 601 aFloat: 1200 anInt2: 1801 dInt1: 2401 dVar1: 2701 cEL: [9]
 
@@ -429,54 +389,54 @@ xAODTestReadPVec     INFO  pInt: 3001 pFloat: 0.06 dpInt1: 301
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 3002 pFloat: 1.06 dpInt1: 302
-  pvInt: [110 ]
-  pvFloat: [-0.484 ]
-  dpvFloat: [0.160 ]
+  pvInt: [110]
+  pvFloat: [-0.484]
+  dpvFloat: [0.160]
 
 xAODTestReadPVec     INFO  pInt: 3003 pFloat: 2.06 dpInt1: 303
-  pvInt: [120 121 ]
-  pvFloat: [-0.474 -0.374 ]
-  dpvFloat: [0.260 0.261 ]
+  pvInt: [120, 121]
+  pvFloat: [-0.474, -0.374]
+  dpvFloat: [0.260, 0.261]
 
 xAODTestReadPVec     INFO  pInt: 3004 pFloat: 3.06 dpInt1: 304
-  pvInt: [130 131 132 ]
-  pvFloat: [-0.464 -0.364 -0.264 ]
-  dpvFloat: [0.360 0.361 0.362 ]
+  pvInt: [130, 131, 132]
+  pvFloat: [-0.464, -0.364, -0.264]
+  dpvFloat: [0.360, 0.361, 0.362]
 
 xAODTestReadPVec     INFO  pInt: 3005 pFloat: 4.06 dpInt1: 305
-  pvInt: [140 141 142 143 ]
-  pvFloat: [-0.454 -0.354 -0.254 -0.154 ]
-  dpvFloat: [0.460 0.461 0.462 0.463 ]
+  pvInt: [140, 141, 142, 143]
+  pvFloat: [-0.454, -0.354, -0.254, -0.154]
+  dpvFloat: [0.460, 0.461, 0.462, 0.463]
 
 xAODTestReadPVec     INFO  pInt: 3006 pFloat: 5.06 dpInt1: 306
-  pvInt: [150 151 152 153 154 ]
-  pvFloat: [-0.444 -0.344 -0.244 -0.144 -0.044 ]
-  dpvFloat: [0.560 0.561 0.562 0.563 0.564 ]
+  pvInt: [150, 151, 152, 153, 154]
+  pvFloat: [-0.444, -0.344, -0.244, -0.144, -0.044]
+  dpvFloat: [0.560, 0.561, 0.562, 0.563, 0.564]
 
 xAODTestReadPVec     INFO  pInt: 3007 pFloat: 6.06 dpInt1: 307
-  pvInt: [160 161 162 163 164 165 ]
-  pvFloat: [-0.434 -0.334 -0.234 -0.134 -0.034 0.066 ]
-  dpvFloat: [0.660 0.661 0.662 0.663 0.664 0.665 ]
+  pvInt: [160, 161, 162, 163, 164, 165]
+  pvFloat: [-0.434, -0.334, -0.234, -0.134, -0.034, 0.066]
+  dpvFloat: [0.660, 0.661, 0.662, 0.663, 0.664, 0.665]
 
 xAODTestReadPVec     INFO  pInt: 3008 pFloat: 7.06 dpInt1: 308
-  pvInt: [170 171 172 173 174 175 176 ]
-  pvFloat: [-0.424 -0.324 -0.224 -0.124 -0.024 0.076 0.176 ]
-  dpvFloat: [0.760 0.761 0.762 0.763 0.764 0.765 0.766 ]
+  pvInt: [170, 171, 172, 173, 174, 175, 176]
+  pvFloat: [-0.424, -0.324, -0.224, -0.124, -0.024, 0.076, 0.176]
+  dpvFloat: [0.760, 0.761, 0.762, 0.763, 0.764, 0.765, 0.766]
 
 xAODTestReadPVec     INFO  pInt: 3009 pFloat: 8.06 dpInt1: 309
-  pvInt: [180 181 182 183 184 185 186 187 ]
-  pvFloat: [-0.414 -0.314 -0.214 -0.114 -0.014 0.086 0.186 0.286 ]
-  dpvFloat: [0.860 0.861 0.862 0.863 0.864 0.865 0.866 0.867 ]
+  pvInt: [180, 181, 182, 183, 184, 185, 186, 187]
+  pvFloat: [-0.414, -0.314, -0.214, -0.114, -0.014, 0.086, 0.186, 0.286]
+  dpvFloat: [0.860, 0.861, 0.862, 0.863, 0.864, 0.865, 0.866, 0.867]
 
 xAODTestReadPVec     INFO  pInt: 3010 pFloat: 9.06 dpInt1: 310
-  pvInt: [190 191 192 193 194 195 196 197 198 ]
-  pvFloat: [-0.404 -0.304 -0.204 -0.104 -0.004 0.096 0.196 0.296 0.396 ]
-  dpvFloat: [0.960 0.961 0.962 0.963 0.964 0.965 0.966 0.967 0.968 ]
+  pvInt: [190, 191, 192, 193, 194, 195, 196, 197, 198]
+  pvFloat: [-0.404, -0.304, -0.204, -0.104, -0.004, 0.096, 0.196, 0.296, 0.396]
+  dpvFloat: [0.960, 0.961, 0.962, 0.963, 0.964, 0.965, 0.966, 0.967, 0.968]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 610 609 608 607 606 605 604 603 602 601
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 2401.5 2402.5 2403.5 2404.5 2405.5 2406.5 2407.5 2408.5 2409.5 2410.5 2411.5 2412.5 2413.5 2414.5 2415.5 2416.5 2417.5 2418.5 2419.5 2420.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 2420.5 2419.5 2418.5 2417.5 2416.5 2415.5 2414.5 2413.5 2412.5 2411.5 2410.5 2409.5 2408.5 2407.5 2406.5 2405.5 2404.5 2403.5 2402.5 2401.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 601 aFloat: 1200
 
@@ -500,7 +460,7 @@ xAODTestReadCVec2    INFO  anInt1 610 aFloat: 1200.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #0 5 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #0 5 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 701 aFloat: 1400 anInt2: 2101 dInt1: 2801 dVar1: 3151 cEL: [9]
 
@@ -528,54 +488,54 @@ xAODTestReadPVec     INFO  pInt: 3501 pFloat: 0.07 dpInt1: 351
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 3502 pFloat: 1.07 dpInt1: 352
-  pvInt: [210 ]
-  pvFloat: [-0.483 ]
-  dpvFloat: [0.170 ]
+  pvInt: [210]
+  pvFloat: [-0.483]
+  dpvFloat: [0.170]
 
 xAODTestReadPVec     INFO  pInt: 3503 pFloat: 2.07 dpInt1: 353
-  pvInt: [220 221 ]
-  pvFloat: [-0.473 -0.373 ]
-  dpvFloat: [0.270 0.271 ]
+  pvInt: [220, 221]
+  pvFloat: [-0.473, -0.373]
+  dpvFloat: [0.270, 0.271]
 
 xAODTestReadPVec     INFO  pInt: 3504 pFloat: 3.07 dpInt1: 354
-  pvInt: [230 231 232 ]
-  pvFloat: [-0.463 -0.363 -0.263 ]
-  dpvFloat: [0.370 0.371 0.372 ]
+  pvInt: [230, 231, 232]
+  pvFloat: [-0.463, -0.363, -0.263]
+  dpvFloat: [0.370, 0.371, 0.372]
 
 xAODTestReadPVec     INFO  pInt: 3505 pFloat: 4.07 dpInt1: 355
-  pvInt: [240 241 242 243 ]
-  pvFloat: [-0.453 -0.353 -0.253 -0.153 ]
-  dpvFloat: [0.470 0.471 0.472 0.473 ]
+  pvInt: [240, 241, 242, 243]
+  pvFloat: [-0.453, -0.353, -0.253, -0.153]
+  dpvFloat: [0.470, 0.471, 0.472, 0.473]
 
 xAODTestReadPVec     INFO  pInt: 3506 pFloat: 5.07 dpInt1: 356
-  pvInt: [250 251 252 253 254 ]
-  pvFloat: [-0.443 -0.343 -0.243 -0.143 -0.043 ]
-  dpvFloat: [0.570 0.571 0.572 0.573 0.574 ]
+  pvInt: [250, 251, 252, 253, 254]
+  pvFloat: [-0.443, -0.343, -0.243, -0.143, -0.043]
+  dpvFloat: [0.570, 0.571, 0.572, 0.573, 0.574]
 
 xAODTestReadPVec     INFO  pInt: 3507 pFloat: 6.07 dpInt1: 357
-  pvInt: [260 261 262 263 264 265 ]
-  pvFloat: [-0.433 -0.333 -0.233 -0.133 -0.033 0.067 ]
-  dpvFloat: [0.670 0.671 0.672 0.673 0.674 0.675 ]
+  pvInt: [260, 261, 262, 263, 264, 265]
+  pvFloat: [-0.433, -0.333, -0.233, -0.133, -0.033, 0.067]
+  dpvFloat: [0.670, 0.671, 0.672, 0.673, 0.674, 0.675]
 
 xAODTestReadPVec     INFO  pInt: 3508 pFloat: 7.07 dpInt1: 358
-  pvInt: [270 271 272 273 274 275 276 ]
-  pvFloat: [-0.423 -0.323 -0.223 -0.123 -0.023 0.077 0.177 ]
-  dpvFloat: [0.770 0.771 0.772 0.773 0.774 0.775 0.776 ]
+  pvInt: [270, 271, 272, 273, 274, 275, 276]
+  pvFloat: [-0.423, -0.323, -0.223, -0.123, -0.023, 0.077, 0.177]
+  dpvFloat: [0.770, 0.771, 0.772, 0.773, 0.774, 0.775, 0.776]
 
 xAODTestReadPVec     INFO  pInt: 3509 pFloat: 8.07 dpInt1: 359
-  pvInt: [280 281 282 283 284 285 286 287 ]
-  pvFloat: [-0.413 -0.313 -0.213 -0.113 -0.013 0.087 0.187 0.287 ]
-  dpvFloat: [0.870 0.871 0.872 0.873 0.874 0.875 0.876 0.877 ]
+  pvInt: [280, 281, 282, 283, 284, 285, 286, 287]
+  pvFloat: [-0.413, -0.313, -0.213, -0.113, -0.013, 0.087, 0.187, 0.287]
+  dpvFloat: [0.870, 0.871, 0.872, 0.873, 0.874, 0.875, 0.876, 0.877]
 
 xAODTestReadPVec     INFO  pInt: 3510 pFloat: 9.07 dpInt1: 360
-  pvInt: [290 291 292 293 294 295 296 297 298 ]
-  pvFloat: [-0.403 -0.303 -0.203 -0.103 -0.003 0.097 0.197 0.297 0.397 ]
-  dpvFloat: [0.970 0.971 0.972 0.973 0.974 0.975 0.976 0.977 0.978 ]
+  pvInt: [290, 291, 292, 293, 294, 295, 296, 297, 298]
+  pvFloat: [-0.403, -0.303, -0.203, -0.103, -0.003, 0.097, 0.197, 0.297, 0.397]
+  dpvFloat: [0.970, 0.971, 0.972, 0.973, 0.974, 0.975, 0.976, 0.977, 0.978]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 710 709 708 707 706 705 704 703 702 701
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 2801.5 2802.5 2803.5 2804.5 2805.5 2806.5 2807.5 2808.5 2809.5 2810.5 2811.5 2812.5 2813.5 2814.5 2815.5 2816.5 2817.5 2818.5 2819.5 2820.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 2820.5 2819.5 2818.5 2817.5 2816.5 2815.5 2814.5 2813.5 2812.5 2811.5 2810.5 2809.5 2808.5 2807.5 2806.5 2805.5 2804.5 2803.5 2802.5 2801.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 701 aFloat: 1400
 
@@ -599,7 +559,7 @@ xAODTestReadCVec2    INFO  anInt1 710 aFloat: 1400.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #0 6 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #0 6 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 801 aFloat: 1600 anInt2: 2401 dInt1: 3201 dVar1: 3601 cEL: [9]
 
@@ -627,54 +587,54 @@ xAODTestReadPVec     INFO  pInt: 4001 pFloat: 0.08 dpInt1: 401
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 4002 pFloat: 1.08 dpInt1: 402
-  pvInt: [310 ]
-  pvFloat: [-0.482 ]
-  dpvFloat: [0.180 ]
+  pvInt: [310]
+  pvFloat: [-0.482]
+  dpvFloat: [0.180]
 
 xAODTestReadPVec     INFO  pInt: 4003 pFloat: 2.08 dpInt1: 403
-  pvInt: [320 321 ]
-  pvFloat: [-0.472 -0.372 ]
-  dpvFloat: [0.280 0.281 ]
+  pvInt: [320, 321]
+  pvFloat: [-0.472, -0.372]
+  dpvFloat: [0.280, 0.281]
 
 xAODTestReadPVec     INFO  pInt: 4004 pFloat: 3.08 dpInt1: 404
-  pvInt: [330 331 332 ]
-  pvFloat: [-0.462 -0.362 -0.262 ]
-  dpvFloat: [0.380 0.381 0.382 ]
+  pvInt: [330, 331, 332]
+  pvFloat: [-0.462, -0.362, -0.262]
+  dpvFloat: [0.380, 0.381, 0.382]
 
 xAODTestReadPVec     INFO  pInt: 4005 pFloat: 4.08 dpInt1: 405
-  pvInt: [340 341 342 343 ]
-  pvFloat: [-0.452 -0.352 -0.252 -0.152 ]
-  dpvFloat: [0.480 0.481 0.482 0.483 ]
+  pvInt: [340, 341, 342, 343]
+  pvFloat: [-0.452, -0.352, -0.252, -0.152]
+  dpvFloat: [0.480, 0.481, 0.482, 0.483]
 
 xAODTestReadPVec     INFO  pInt: 4006 pFloat: 5.08 dpInt1: 406
-  pvInt: [350 351 352 353 354 ]
-  pvFloat: [-0.442 -0.342 -0.242 -0.142 -0.042 ]
-  dpvFloat: [0.580 0.581 0.582 0.583 0.584 ]
+  pvInt: [350, 351, 352, 353, 354]
+  pvFloat: [-0.442, -0.342, -0.242, -0.142, -0.042]
+  dpvFloat: [0.580, 0.581, 0.582, 0.583, 0.584]
 
 xAODTestReadPVec     INFO  pInt: 4007 pFloat: 6.08 dpInt1: 407
-  pvInt: [360 361 362 363 364 365 ]
-  pvFloat: [-0.432 -0.332 -0.232 -0.132 -0.032 0.068 ]
-  dpvFloat: [0.680 0.681 0.682 0.683 0.684 0.685 ]
+  pvInt: [360, 361, 362, 363, 364, 365]
+  pvFloat: [-0.432, -0.332, -0.232, -0.132, -0.032, 0.068]
+  dpvFloat: [0.680, 0.681, 0.682, 0.683, 0.684, 0.685]
 
 xAODTestReadPVec     INFO  pInt: 4008 pFloat: 7.08 dpInt1: 408
-  pvInt: [370 371 372 373 374 375 376 ]
-  pvFloat: [-0.422 -0.322 -0.222 -0.122 -0.022 0.078 0.178 ]
-  dpvFloat: [0.780 0.781 0.782 0.783 0.784 0.785 0.786 ]
+  pvInt: [370, 371, 372, 373, 374, 375, 376]
+  pvFloat: [-0.422, -0.322, -0.222, -0.122, -0.022, 0.078, 0.178]
+  dpvFloat: [0.780, 0.781, 0.782, 0.783, 0.784, 0.785, 0.786]
 
 xAODTestReadPVec     INFO  pInt: 4009 pFloat: 8.08 dpInt1: 409
-  pvInt: [380 381 382 383 384 385 386 387 ]
-  pvFloat: [-0.412 -0.312 -0.212 -0.112 -0.012 0.088 0.188 0.288 ]
-  dpvFloat: [0.880 0.881 0.882 0.883 0.884 0.885 0.886 0.887 ]
+  pvInt: [380, 381, 382, 383, 384, 385, 386, 387]
+  pvFloat: [-0.412, -0.312, -0.212, -0.112, -0.012, 0.088, 0.188, 0.288]
+  dpvFloat: [0.880, 0.881, 0.882, 0.883, 0.884, 0.885, 0.886, 0.887]
 
 xAODTestReadPVec     INFO  pInt: 4010 pFloat: 9.08 dpInt1: 410
-  pvInt: [390 391 392 393 394 395 396 397 398 ]
-  pvFloat: [-0.402 -0.302 -0.202 -0.102 -0.002 0.098 0.198 0.298 0.398 ]
-  dpvFloat: [0.980 0.981 0.982 0.983 0.984 0.985 0.986 0.987 0.988 ]
+  pvInt: [390, 391, 392, 393, 394, 395, 396, 397, 398]
+  pvFloat: [-0.402, -0.302, -0.202, -0.102, -0.002, 0.098, 0.198, 0.298, 0.398]
+  dpvFloat: [0.980, 0.981, 0.982, 0.983, 0.984, 0.985, 0.986, 0.987, 0.988]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 810 809 808 807 806 805 804 803 802 801
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 3201.5 3202.5 3203.5 3204.5 3205.5 3206.5 3207.5 3208.5 3209.5 3210.5 3211.5 3212.5 3213.5 3214.5 3215.5 3216.5 3217.5 3218.5 3219.5 3220.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 3220.5 3219.5 3218.5 3217.5 3216.5 3215.5 3214.5 3213.5 3212.5 3211.5 3210.5 3209.5 3208.5 3207.5 3206.5 3205.5 3204.5 3203.5 3202.5 3201.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 801 aFloat: 1600
 
@@ -698,7 +658,7 @@ xAODTestReadCVec2    INFO  anInt1 810 aFloat: 1600.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #0 7 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #0 7 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 901 aFloat: 1800 anInt2: 2701 dInt1: 3601 dVar1: 4051 cEL: [9]
 
@@ -726,54 +686,54 @@ xAODTestReadPVec     INFO  pInt: 4501 pFloat: 0.09 dpInt1: 451
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 4502 pFloat: 1.09 dpInt1: 452
-  pvInt: [410 ]
-  pvFloat: [-0.481 ]
-  dpvFloat: [0.190 ]
+  pvInt: [410]
+  pvFloat: [-0.481]
+  dpvFloat: [0.190]
 
 xAODTestReadPVec     INFO  pInt: 4503 pFloat: 2.09 dpInt1: 453
-  pvInt: [420 421 ]
-  pvFloat: [-0.471 -0.371 ]
-  dpvFloat: [0.290 0.291 ]
+  pvInt: [420, 421]
+  pvFloat: [-0.471, -0.371]
+  dpvFloat: [0.290, 0.291]
 
 xAODTestReadPVec     INFO  pInt: 4504 pFloat: 3.09 dpInt1: 454
-  pvInt: [430 431 432 ]
-  pvFloat: [-0.461 -0.361 -0.261 ]
-  dpvFloat: [0.390 0.391 0.392 ]
+  pvInt: [430, 431, 432]
+  pvFloat: [-0.461, -0.361, -0.261]
+  dpvFloat: [0.390, 0.391, 0.392]
 
 xAODTestReadPVec     INFO  pInt: 4505 pFloat: 4.09 dpInt1: 455
-  pvInt: [440 441 442 443 ]
-  pvFloat: [-0.451 -0.351 -0.251 -0.151 ]
-  dpvFloat: [0.490 0.491 0.492 0.493 ]
+  pvInt: [440, 441, 442, 443]
+  pvFloat: [-0.451, -0.351, -0.251, -0.151]
+  dpvFloat: [0.490, 0.491, 0.492, 0.493]
 
 xAODTestReadPVec     INFO  pInt: 4506 pFloat: 5.09 dpInt1: 456
-  pvInt: [450 451 452 453 454 ]
-  pvFloat: [-0.441 -0.341 -0.241 -0.141 -0.041 ]
-  dpvFloat: [0.590 0.591 0.592 0.593 0.594 ]
+  pvInt: [450, 451, 452, 453, 454]
+  pvFloat: [-0.441, -0.341, -0.241, -0.141, -0.041]
+  dpvFloat: [0.590, 0.591, 0.592, 0.593, 0.594]
 
 xAODTestReadPVec     INFO  pInt: 4507 pFloat: 6.09 dpInt1: 457
-  pvInt: [460 461 462 463 464 465 ]
-  pvFloat: [-0.431 -0.331 -0.231 -0.131 -0.031 0.069 ]
-  dpvFloat: [0.690 0.691 0.692 0.693 0.694 0.695 ]
+  pvInt: [460, 461, 462, 463, 464, 465]
+  pvFloat: [-0.431, -0.331, -0.231, -0.131, -0.031, 0.069]
+  dpvFloat: [0.690, 0.691, 0.692, 0.693, 0.694, 0.695]
 
 xAODTestReadPVec     INFO  pInt: 4508 pFloat: 7.09 dpInt1: 458
-  pvInt: [470 471 472 473 474 475 476 ]
-  pvFloat: [-0.421 -0.321 -0.221 -0.121 -0.021 0.079 0.179 ]
-  dpvFloat: [0.790 0.791 0.792 0.793 0.794 0.795 0.796 ]
+  pvInt: [470, 471, 472, 473, 474, 475, 476]
+  pvFloat: [-0.421, -0.321, -0.221, -0.121, -0.021, 0.079, 0.179]
+  dpvFloat: [0.790, 0.791, 0.792, 0.793, 0.794, 0.795, 0.796]
 
 xAODTestReadPVec     INFO  pInt: 4509 pFloat: 8.09 dpInt1: 459
-  pvInt: [480 481 482 483 484 485 486 487 ]
-  pvFloat: [-0.411 -0.311 -0.211 -0.111 -0.011 0.089 0.189 0.289 ]
-  dpvFloat: [0.890 0.891 0.892 0.893 0.894 0.895 0.896 0.897 ]
+  pvInt: [480, 481, 482, 483, 484, 485, 486, 487]
+  pvFloat: [-0.411, -0.311, -0.211, -0.111, -0.011, 0.089, 0.189, 0.289]
+  dpvFloat: [0.890, 0.891, 0.892, 0.893, 0.894, 0.895, 0.896, 0.897]
 
 xAODTestReadPVec     INFO  pInt: 4510 pFloat: 9.09 dpInt1: 460
-  pvInt: [490 491 492 493 494 495 496 497 498 ]
-  pvFloat: [-0.401 -0.301 -0.201 -0.101 -0.001 0.099 0.199 0.299 0.399 ]
-  dpvFloat: [0.990 0.991 0.992 0.993 0.994 0.995 0.996 0.997 0.998 ]
+  pvInt: [490, 491, 492, 493, 494, 495, 496, 497, 498]
+  pvFloat: [-0.401, -0.301, -0.201, -0.101, -0.001, 0.099, 0.199, 0.299, 0.399]
+  dpvFloat: [0.990, 0.991, 0.992, 0.993, 0.994, 0.995, 0.996, 0.997, 0.998]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 910 909 908 907 906 905 904 903 902 901
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 3601.5 3602.5 3603.5 3604.5 3605.5 3606.5 3607.5 3608.5 3609.5 3610.5 3611.5 3612.5 3613.5 3614.5 3615.5 3616.5 3617.5 3618.5 3619.5 3620.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 3620.5 3619.5 3618.5 3617.5 3616.5 3615.5 3614.5 3613.5 3612.5 3611.5 3610.5 3609.5 3608.5 3607.5 3606.5 3605.5 3604.5 3603.5 3602.5 3601.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 901 aFloat: 1800
 
@@ -797,7 +757,7 @@ xAODTestReadCVec2    INFO  anInt1 910 aFloat: 1800.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #0 8 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #0 8 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1001 aFloat: 2000 anInt2: 3001 dInt1: 4001 dVar1: 4501 cEL: [9]
 
@@ -825,54 +785,54 @@ xAODTestReadPVec     INFO  pInt: 5001 pFloat: 0.10 dpInt1: 501
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 5002 pFloat: 1.10 dpInt1: 502
-  pvInt: [510 ]
-  pvFloat: [-0.480 ]
-  dpvFloat: [0.200 ]
+  pvInt: [510]
+  pvFloat: [-0.480]
+  dpvFloat: [0.200]
 
 xAODTestReadPVec     INFO  pInt: 5003 pFloat: 2.10 dpInt1: 503
-  pvInt: [520 521 ]
-  pvFloat: [-0.470 -0.370 ]
-  dpvFloat: [0.300 0.301 ]
+  pvInt: [520, 521]
+  pvFloat: [-0.470, -0.370]
+  dpvFloat: [0.300, 0.301]
 
 xAODTestReadPVec     INFO  pInt: 5004 pFloat: 3.10 dpInt1: 504
-  pvInt: [530 531 532 ]
-  pvFloat: [-0.460 -0.360 -0.260 ]
-  dpvFloat: [0.400 0.401 0.402 ]
+  pvInt: [530, 531, 532]
+  pvFloat: [-0.460, -0.360, -0.260]
+  dpvFloat: [0.400, 0.401, 0.402]
 
 xAODTestReadPVec     INFO  pInt: 5005 pFloat: 4.10 dpInt1: 505
-  pvInt: [540 541 542 543 ]
-  pvFloat: [-0.450 -0.350 -0.250 -0.150 ]
-  dpvFloat: [0.500 0.501 0.502 0.503 ]
+  pvInt: [540, 541, 542, 543]
+  pvFloat: [-0.450, -0.350, -0.250, -0.150]
+  dpvFloat: [0.500, 0.501, 0.502, 0.503]
 
 xAODTestReadPVec     INFO  pInt: 5006 pFloat: 5.10 dpInt1: 506
-  pvInt: [550 551 552 553 554 ]
-  pvFloat: [-0.440 -0.340 -0.240 -0.140 -0.040 ]
-  dpvFloat: [0.600 0.601 0.602 0.603 0.604 ]
+  pvInt: [550, 551, 552, 553, 554]
+  pvFloat: [-0.440, -0.340, -0.240, -0.140, -0.040]
+  dpvFloat: [0.600, 0.601, 0.602, 0.603, 0.604]
 
 xAODTestReadPVec     INFO  pInt: 5007 pFloat: 6.10 dpInt1: 507
-  pvInt: [560 561 562 563 564 565 ]
-  pvFloat: [-0.430 -0.330 -0.230 -0.130 -0.030 0.070 ]
-  dpvFloat: [0.700 0.701 0.702 0.703 0.704 0.705 ]
+  pvInt: [560, 561, 562, 563, 564, 565]
+  pvFloat: [-0.430, -0.330, -0.230, -0.130, -0.030, 0.070]
+  dpvFloat: [0.700, 0.701, 0.702, 0.703, 0.704, 0.705]
 
 xAODTestReadPVec     INFO  pInt: 5008 pFloat: 7.10 dpInt1: 508
-  pvInt: [570 571 572 573 574 575 576 ]
-  pvFloat: [-0.420 -0.320 -0.220 -0.120 -0.020 0.080 0.180 ]
-  dpvFloat: [0.800 0.801 0.802 0.803 0.804 0.805 0.806 ]
+  pvInt: [570, 571, 572, 573, 574, 575, 576]
+  pvFloat: [-0.420, -0.320, -0.220, -0.120, -0.020, 0.080, 0.180]
+  dpvFloat: [0.800, 0.801, 0.802, 0.803, 0.804, 0.805, 0.806]
 
 xAODTestReadPVec     INFO  pInt: 5009 pFloat: 8.10 dpInt1: 509
-  pvInt: [580 581 582 583 584 585 586 587 ]
-  pvFloat: [-0.410 -0.310 -0.210 -0.110 -0.010 0.090 0.190 0.290 ]
-  dpvFloat: [0.900 0.901 0.902 0.903 0.904 0.905 0.906 0.907 ]
+  pvInt: [580, 581, 582, 583, 584, 585, 586, 587]
+  pvFloat: [-0.410, -0.310, -0.210, -0.110, -0.010, 0.090, 0.190, 0.290]
+  dpvFloat: [0.900, 0.901, 0.902, 0.903, 0.904, 0.905, 0.906, 0.907]
 
 xAODTestReadPVec     INFO  pInt: 5010 pFloat: 9.10 dpInt1: 510
-  pvInt: [590 591 592 593 594 595 596 597 598 ]
-  pvFloat: [-0.400 -0.300 -0.200 -0.100 0.000 0.100 0.200 0.300 0.400 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [590, 591, 592, 593, 594, 595, 596, 597, 598]
+  pvFloat: [-0.400, -0.300, -0.200, -0.100, 0.000, 0.100, 0.200, 0.300, 0.400]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 1010 1009 1008 1007 1006 1005 1004 1003 1002 1001
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 4001.5 4002.5 4003.5 4004.5 4005.5 4006.5 4007.5 4008.5 4009.5 4010.5 4011.5 4012.5 4013.5 4014.5 4015.5 4016.5 4017.5 4018.5 4019.5 4020.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 4020.5 4019.5 4018.5 4017.5 4016.5 4015.5 4014.5 4013.5 4012.5 4011.5 4010.5 4009.5 4008.5 4007.5 4006.5 4005.5 4004.5 4003.5 4002.5 4001.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 1001 aFloat: 2000
 
@@ -896,7 +856,7 @@ xAODTestReadCVec2    INFO  anInt1 1010 aFloat: 2000.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #0 9 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #0 9 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1101 aFloat: 2200 anInt2: 3301 dInt1: 4401 dVar1: 4951 cEL: [9]
 
@@ -924,54 +884,54 @@ xAODTestReadPVec     INFO  pInt: 5501 pFloat: 0.11 dpInt1: 551
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 5502 pFloat: 1.11 dpInt1: 552
-  pvInt: [610 ]
-  pvFloat: [-0.479 ]
-  dpvFloat: [0.210 ]
+  pvInt: [610]
+  pvFloat: [-0.479]
+  dpvFloat: [0.210]
 
 xAODTestReadPVec     INFO  pInt: 5503 pFloat: 2.11 dpInt1: 553
-  pvInt: [620 621 ]
-  pvFloat: [-0.469 -0.369 ]
-  dpvFloat: [0.310 0.311 ]
+  pvInt: [620, 621]
+  pvFloat: [-0.469, -0.369]
+  dpvFloat: [0.310, 0.311]
 
 xAODTestReadPVec     INFO  pInt: 5504 pFloat: 3.11 dpInt1: 554
-  pvInt: [630 631 632 ]
-  pvFloat: [-0.459 -0.359 -0.259 ]
-  dpvFloat: [0.410 0.411 0.412 ]
+  pvInt: [630, 631, 632]
+  pvFloat: [-0.459, -0.359, -0.259]
+  dpvFloat: [0.410, 0.411, 0.412]
 
 xAODTestReadPVec     INFO  pInt: 5505 pFloat: 4.11 dpInt1: 555
-  pvInt: [640 641 642 643 ]
-  pvFloat: [-0.449 -0.349 -0.249 -0.149 ]
-  dpvFloat: [0.510 0.511 0.512 0.513 ]
+  pvInt: [640, 641, 642, 643]
+  pvFloat: [-0.449, -0.349, -0.249, -0.149]
+  dpvFloat: [0.510, 0.511, 0.512, 0.513]
 
 xAODTestReadPVec     INFO  pInt: 5506 pFloat: 5.11 dpInt1: 556
-  pvInt: [650 651 652 653 654 ]
-  pvFloat: [-0.439 -0.339 -0.239 -0.139 -0.039 ]
-  dpvFloat: [0.610 0.611 0.612 0.613 0.614 ]
+  pvInt: [650, 651, 652, 653, 654]
+  pvFloat: [-0.439, -0.339, -0.239, -0.139, -0.039]
+  dpvFloat: [0.610, 0.611, 0.612, 0.613, 0.614]
 
 xAODTestReadPVec     INFO  pInt: 5507 pFloat: 6.11 dpInt1: 557
-  pvInt: [660 661 662 663 664 665 ]
-  pvFloat: [-0.429 -0.329 -0.229 -0.129 -0.029 0.071 ]
-  dpvFloat: [0.710 0.711 0.712 0.713 0.714 0.715 ]
+  pvInt: [660, 661, 662, 663, 664, 665]
+  pvFloat: [-0.429, -0.329, -0.229, -0.129, -0.029, 0.071]
+  dpvFloat: [0.710, 0.711, 0.712, 0.713, 0.714, 0.715]
 
 xAODTestReadPVec     INFO  pInt: 5508 pFloat: 7.11 dpInt1: 558
-  pvInt: [670 671 672 673 674 675 676 ]
-  pvFloat: [-0.419 -0.319 -0.219 -0.119 -0.019 0.081 0.181 ]
-  dpvFloat: [0.810 0.811 0.812 0.813 0.814 0.815 0.816 ]
+  pvInt: [670, 671, 672, 673, 674, 675, 676]
+  pvFloat: [-0.419, -0.319, -0.219, -0.119, -0.019, 0.081, 0.181]
+  dpvFloat: [0.810, 0.811, 0.812, 0.813, 0.814, 0.815, 0.816]
 
 xAODTestReadPVec     INFO  pInt: 5509 pFloat: 8.11 dpInt1: 559
-  pvInt: [680 681 682 683 684 685 686 687 ]
-  pvFloat: [-0.409 -0.309 -0.209 -0.109 -0.009 0.091 0.191 0.291 ]
-  dpvFloat: [0.910 0.911 0.912 0.913 0.914 0.915 0.916 0.917 ]
+  pvInt: [680, 681, 682, 683, 684, 685, 686, 687]
+  pvFloat: [-0.409, -0.309, -0.209, -0.109, -0.009, 0.091, 0.191, 0.291]
+  dpvFloat: [0.910, 0.911, 0.912, 0.913, 0.914, 0.915, 0.916, 0.917]
 
 xAODTestReadPVec     INFO  pInt: 5510 pFloat: 9.11 dpInt1: 560
-  pvInt: [690 691 692 693 694 695 696 697 698 ]
-  pvFloat: [-0.399 -0.299 -0.199 -0.099 0.001 0.101 0.201 0.301 0.401 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [690, 691, 692, 693, 694, 695, 696, 697, 698]
+  pvFloat: [-0.399, -0.299, -0.199, -0.099, 0.001, 0.101, 0.201, 0.301, 0.401]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 1110 1109 1108 1107 1106 1105 1104 1103 1102 1101
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 4401.5 4402.5 4403.5 4404.5 4405.5 4406.5 4407.5 4408.5 4409.5 4410.5 4411.5 4412.5 4413.5 4414.5 4415.5 4416.5 4417.5 4418.5 4419.5 4420.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 4420.5 4419.5 4418.5 4417.5 4416.5 4415.5 4414.5 4413.5 4412.5 4411.5 4410.5 4409.5 4408.5 4407.5 4406.5 4405.5 4404.5 4403.5 4402.5 4401.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 1101 aFloat: 2200
 
@@ -995,7 +955,7 @@ xAODTestReadCVec2    INFO  anInt1 1110 aFloat: 2200.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #0 10 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #11, run #0 10 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1201 aFloat: 2400 anInt2: 3601 dInt1: 4801 dVar1: 5401 cEL: [9]
 
@@ -1023,54 +983,54 @@ xAODTestReadPVec     INFO  pInt: 6001 pFloat: 0.12 dpInt1: 601
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 6002 pFloat: 1.12 dpInt1: 602
-  pvInt: [710 ]
-  pvFloat: [-0.478 ]
-  dpvFloat: [0.220 ]
+  pvInt: [710]
+  pvFloat: [-0.478]
+  dpvFloat: [0.220]
 
 xAODTestReadPVec     INFO  pInt: 6003 pFloat: 2.12 dpInt1: 603
-  pvInt: [720 721 ]
-  pvFloat: [-0.468 -0.368 ]
-  dpvFloat: [0.320 0.321 ]
+  pvInt: [720, 721]
+  pvFloat: [-0.468, -0.368]
+  dpvFloat: [0.320, 0.321]
 
 xAODTestReadPVec     INFO  pInt: 6004 pFloat: 3.12 dpInt1: 604
-  pvInt: [730 731 732 ]
-  pvFloat: [-0.458 -0.358 -0.258 ]
-  dpvFloat: [0.420 0.421 0.422 ]
+  pvInt: [730, 731, 732]
+  pvFloat: [-0.458, -0.358, -0.258]
+  dpvFloat: [0.420, 0.421, 0.422]
 
 xAODTestReadPVec     INFO  pInt: 6005 pFloat: 4.12 dpInt1: 605
-  pvInt: [740 741 742 743 ]
-  pvFloat: [-0.448 -0.348 -0.248 -0.148 ]
-  dpvFloat: [0.520 0.521 0.522 0.523 ]
+  pvInt: [740, 741, 742, 743]
+  pvFloat: [-0.448, -0.348, -0.248, -0.148]
+  dpvFloat: [0.520, 0.521, 0.522, 0.523]
 
 xAODTestReadPVec     INFO  pInt: 6006 pFloat: 5.12 dpInt1: 606
-  pvInt: [750 751 752 753 754 ]
-  pvFloat: [-0.438 -0.338 -0.238 -0.138 -0.038 ]
-  dpvFloat: [0.620 0.621 0.622 0.623 0.624 ]
+  pvInt: [750, 751, 752, 753, 754]
+  pvFloat: [-0.438, -0.338, -0.238, -0.138, -0.038]
+  dpvFloat: [0.620, 0.621, 0.622, 0.623, 0.624]
 
 xAODTestReadPVec     INFO  pInt: 6007 pFloat: 6.12 dpInt1: 607
-  pvInt: [760 761 762 763 764 765 ]
-  pvFloat: [-0.428 -0.328 -0.228 -0.128 -0.028 0.072 ]
-  dpvFloat: [0.720 0.721 0.722 0.723 0.724 0.725 ]
+  pvInt: [760, 761, 762, 763, 764, 765]
+  pvFloat: [-0.428, -0.328, -0.228, -0.128, -0.028, 0.072]
+  dpvFloat: [0.720, 0.721, 0.722, 0.723, 0.724, 0.725]
 
 xAODTestReadPVec     INFO  pInt: 6008 pFloat: 7.12 dpInt1: 608
-  pvInt: [770 771 772 773 774 775 776 ]
-  pvFloat: [-0.418 -0.318 -0.218 -0.118 -0.018 0.082 0.182 ]
-  dpvFloat: [0.820 0.821 0.822 0.823 0.824 0.825 0.826 ]
+  pvInt: [770, 771, 772, 773, 774, 775, 776]
+  pvFloat: [-0.418, -0.318, -0.218, -0.118, -0.018, 0.082, 0.182]
+  dpvFloat: [0.820, 0.821, 0.822, 0.823, 0.824, 0.825, 0.826]
 
 xAODTestReadPVec     INFO  pInt: 6009 pFloat: 8.12 dpInt1: 609
-  pvInt: [780 781 782 783 784 785 786 787 ]
-  pvFloat: [-0.408 -0.308 -0.208 -0.108 -0.008 0.092 0.192 0.292 ]
-  dpvFloat: [0.920 0.921 0.922 0.923 0.924 0.925 0.926 0.927 ]
+  pvInt: [780, 781, 782, 783, 784, 785, 786, 787]
+  pvFloat: [-0.408, -0.308, -0.208, -0.108, -0.008, 0.092, 0.192, 0.292]
+  dpvFloat: [0.920, 0.921, 0.922, 0.923, 0.924, 0.925, 0.926, 0.927]
 
 xAODTestReadPVec     INFO  pInt: 6010 pFloat: 9.12 dpInt1: 610
-  pvInt: [790 791 792 793 794 795 796 797 798 ]
-  pvFloat: [-0.398 -0.298 -0.198 -0.098 0.002 0.102 0.202 0.302 0.402 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [790, 791, 792, 793, 794, 795, 796, 797, 798]
+  pvFloat: [-0.398, -0.298, -0.198, -0.098, 0.002, 0.102, 0.202, 0.302, 0.402]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 1210 1209 1208 1207 1206 1205 1204 1203 1202 1201
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 4801.5 4802.5 4803.5 4804.5 4805.5 4806.5 4807.5 4808.5 4809.5 4810.5 4811.5 4812.5 4813.5 4814.5 4815.5 4816.5 4817.5 4818.5 4819.5 4820.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 4820.5 4819.5 4818.5 4817.5 4816.5 4815.5 4814.5 4813.5 4812.5 4811.5 4810.5 4809.5 4808.5 4807.5 4806.5 4805.5 4804.5 4803.5 4802.5 4801.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 1201 aFloat: 2400
 
@@ -1094,7 +1054,7 @@ xAODTestReadCVec2    INFO  anInt1 1210 aFloat: 2400.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #11, run #0 11 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #12, run #0 11 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1301 aFloat: 2600 anInt2: 3901 dInt1: 5201 dVar1: 5851 cEL: [9]
 
@@ -1122,54 +1082,54 @@ xAODTestReadPVec     INFO  pInt: 6501 pFloat: 0.13 dpInt1: 651
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 6502 pFloat: 1.13 dpInt1: 652
-  pvInt: [810 ]
-  pvFloat: [-0.477 ]
-  dpvFloat: [0.230 ]
+  pvInt: [810]
+  pvFloat: [-0.477]
+  dpvFloat: [0.230]
 
 xAODTestReadPVec     INFO  pInt: 6503 pFloat: 2.13 dpInt1: 653
-  pvInt: [820 821 ]
-  pvFloat: [-0.467 -0.367 ]
-  dpvFloat: [0.330 0.331 ]
+  pvInt: [820, 821]
+  pvFloat: [-0.467, -0.367]
+  dpvFloat: [0.330, 0.331]
 
 xAODTestReadPVec     INFO  pInt: 6504 pFloat: 3.13 dpInt1: 654
-  pvInt: [830 831 832 ]
-  pvFloat: [-0.457 -0.357 -0.257 ]
-  dpvFloat: [0.430 0.431 0.432 ]
+  pvInt: [830, 831, 832]
+  pvFloat: [-0.457, -0.357, -0.257]
+  dpvFloat: [0.430, 0.431, 0.432]
 
 xAODTestReadPVec     INFO  pInt: 6505 pFloat: 4.13 dpInt1: 655
-  pvInt: [840 841 842 843 ]
-  pvFloat: [-0.447 -0.347 -0.247 -0.147 ]
-  dpvFloat: [0.530 0.531 0.532 0.533 ]
+  pvInt: [840, 841, 842, 843]
+  pvFloat: [-0.447, -0.347, -0.247, -0.147]
+  dpvFloat: [0.530, 0.531, 0.532, 0.533]
 
 xAODTestReadPVec     INFO  pInt: 6506 pFloat: 5.13 dpInt1: 656
-  pvInt: [850 851 852 853 854 ]
-  pvFloat: [-0.437 -0.337 -0.237 -0.137 -0.037 ]
-  dpvFloat: [0.630 0.631 0.632 0.633 0.634 ]
+  pvInt: [850, 851, 852, 853, 854]
+  pvFloat: [-0.437, -0.337, -0.237, -0.137, -0.037]
+  dpvFloat: [0.630, 0.631, 0.632, 0.633, 0.634]
 
 xAODTestReadPVec     INFO  pInt: 6507 pFloat: 6.13 dpInt1: 657
-  pvInt: [860 861 862 863 864 865 ]
-  pvFloat: [-0.427 -0.327 -0.227 -0.127 -0.027 0.073 ]
-  dpvFloat: [0.730 0.731 0.732 0.733 0.734 0.735 ]
+  pvInt: [860, 861, 862, 863, 864, 865]
+  pvFloat: [-0.427, -0.327, -0.227, -0.127, -0.027, 0.073]
+  dpvFloat: [0.730, 0.731, 0.732, 0.733, 0.734, 0.735]
 
 xAODTestReadPVec     INFO  pInt: 6508 pFloat: 7.13 dpInt1: 658
-  pvInt: [870 871 872 873 874 875 876 ]
-  pvFloat: [-0.417 -0.317 -0.217 -0.117 -0.017 0.083 0.183 ]
-  dpvFloat: [0.830 0.831 0.832 0.833 0.834 0.835 0.836 ]
+  pvInt: [870, 871, 872, 873, 874, 875, 876]
+  pvFloat: [-0.417, -0.317, -0.217, -0.117, -0.017, 0.083, 0.183]
+  dpvFloat: [0.830, 0.831, 0.832, 0.833, 0.834, 0.835, 0.836]
 
 xAODTestReadPVec     INFO  pInt: 6509 pFloat: 8.13 dpInt1: 659
-  pvInt: [880 881 882 883 884 885 886 887 ]
-  pvFloat: [-0.407 -0.307 -0.207 -0.107 -0.007 0.093 0.193 0.293 ]
-  dpvFloat: [0.930 0.931 0.932 0.933 0.934 0.935 0.936 0.937 ]
+  pvInt: [880, 881, 882, 883, 884, 885, 886, 887]
+  pvFloat: [-0.407, -0.307, -0.207, -0.107, -0.007, 0.093, 0.193, 0.293]
+  dpvFloat: [0.930, 0.931, 0.932, 0.933, 0.934, 0.935, 0.936, 0.937]
 
 xAODTestReadPVec     INFO  pInt: 6510 pFloat: 9.13 dpInt1: 660
-  pvInt: [890 891 892 893 894 895 896 897 898 ]
-  pvFloat: [-0.397 -0.297 -0.197 -0.097 0.003 0.103 0.203 0.303 0.403 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [890, 891, 892, 893, 894, 895, 896, 897, 898]
+  pvFloat: [-0.397, -0.297, -0.197, -0.097, 0.003, 0.103, 0.203, 0.303, 0.403]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 1310 1309 1308 1307 1306 1305 1304 1303 1302 1301
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 5201.5 5202.5 5203.5 5204.5 5205.5 5206.5 5207.5 5208.5 5209.5 5210.5 5211.5 5212.5 5213.5 5214.5 5215.5 5216.5 5217.5 5218.5 5219.5 5220.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 5220.5 5219.5 5218.5 5217.5 5216.5 5215.5 5214.5 5213.5 5212.5 5211.5 5210.5 5209.5 5208.5 5207.5 5206.5 5205.5 5204.5 5203.5 5202.5 5201.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 1301 aFloat: 2600
 
@@ -1193,7 +1153,7 @@ xAODTestReadCVec2    INFO  anInt1 1310 aFloat: 2600.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #12, run #0 12 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #13, run #0 12 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1401 aFloat: 2800 anInt2: 4201 dInt1: 5601 dVar1: 6301 cEL: [9]
 
@@ -1221,54 +1181,54 @@ xAODTestReadPVec     INFO  pInt: 7001 pFloat: 0.14 dpInt1: 701
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 7002 pFloat: 1.14 dpInt1: 702
-  pvInt: [910 ]
-  pvFloat: [-0.476 ]
-  dpvFloat: [0.240 ]
+  pvInt: [910]
+  pvFloat: [-0.476]
+  dpvFloat: [0.240]
 
 xAODTestReadPVec     INFO  pInt: 7003 pFloat: 2.14 dpInt1: 703
-  pvInt: [920 921 ]
-  pvFloat: [-0.466 -0.366 ]
-  dpvFloat: [0.340 0.341 ]
+  pvInt: [920, 921]
+  pvFloat: [-0.466, -0.366]
+  dpvFloat: [0.340, 0.341]
 
 xAODTestReadPVec     INFO  pInt: 7004 pFloat: 3.14 dpInt1: 704
-  pvInt: [930 931 932 ]
-  pvFloat: [-0.456 -0.356 -0.256 ]
-  dpvFloat: [0.440 0.441 0.442 ]
+  pvInt: [930, 931, 932]
+  pvFloat: [-0.456, -0.356, -0.256]
+  dpvFloat: [0.440, 0.441, 0.442]
 
 xAODTestReadPVec     INFO  pInt: 7005 pFloat: 4.14 dpInt1: 705
-  pvInt: [940 941 942 943 ]
-  pvFloat: [-0.446 -0.346 -0.246 -0.146 ]
-  dpvFloat: [0.540 0.541 0.542 0.543 ]
+  pvInt: [940, 941, 942, 943]
+  pvFloat: [-0.446, -0.346, -0.246, -0.146]
+  dpvFloat: [0.540, 0.541, 0.542, 0.543]
 
 xAODTestReadPVec     INFO  pInt: 7006 pFloat: 5.14 dpInt1: 706
-  pvInt: [950 951 952 953 954 ]
-  pvFloat: [-0.436 -0.336 -0.236 -0.136 -0.036 ]
-  dpvFloat: [0.640 0.641 0.642 0.643 0.644 ]
+  pvInt: [950, 951, 952, 953, 954]
+  pvFloat: [-0.436, -0.336, -0.236, -0.136, -0.036]
+  dpvFloat: [0.640, 0.641, 0.642, 0.643, 0.644]
 
 xAODTestReadPVec     INFO  pInt: 7007 pFloat: 6.14 dpInt1: 707
-  pvInt: [960 961 962 963 964 965 ]
-  pvFloat: [-0.426 -0.326 -0.226 -0.126 -0.026 0.074 ]
-  dpvFloat: [0.740 0.741 0.742 0.743 0.744 0.745 ]
+  pvInt: [960, 961, 962, 963, 964, 965]
+  pvFloat: [-0.426, -0.326, -0.226, -0.126, -0.026, 0.074]
+  dpvFloat: [0.740, 0.741, 0.742, 0.743, 0.744, 0.745]
 
 xAODTestReadPVec     INFO  pInt: 7008 pFloat: 7.14 dpInt1: 708
-  pvInt: [970 971 972 973 974 975 976 ]
-  pvFloat: [-0.416 -0.316 -0.216 -0.116 -0.016 0.084 0.184 ]
-  dpvFloat: [0.840 0.841 0.842 0.843 0.844 0.845 0.846 ]
+  pvInt: [970, 971, 972, 973, 974, 975, 976]
+  pvFloat: [-0.416, -0.316, -0.216, -0.116, -0.016, 0.084, 0.184]
+  dpvFloat: [0.840, 0.841, 0.842, 0.843, 0.844, 0.845, 0.846]
 
 xAODTestReadPVec     INFO  pInt: 7009 pFloat: 8.14 dpInt1: 709
-  pvInt: [980 981 982 983 984 985 986 987 ]
-  pvFloat: [-0.406 -0.306 -0.206 -0.106 -0.006 0.094 0.194 0.294 ]
-  dpvFloat: [0.940 0.941 0.942 0.943 0.944 0.945 0.946 0.947 ]
+  pvInt: [980, 981, 982, 983, 984, 985, 986, 987]
+  pvFloat: [-0.406, -0.306, -0.206, -0.106, -0.006, 0.094, 0.194, 0.294]
+  dpvFloat: [0.940, 0.941, 0.942, 0.943, 0.944, 0.945, 0.946, 0.947]
 
 xAODTestReadPVec     INFO  pInt: 7010 pFloat: 9.14 dpInt1: 710
-  pvInt: [990 991 992 993 994 995 996 997 998 ]
-  pvFloat: [-0.396 -0.296 -0.196 -0.096 0.004 0.104 0.204 0.304 0.404 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [990, 991, 992, 993, 994, 995, 996, 997, 998]
+  pvFloat: [-0.396, -0.296, -0.196, -0.096, 0.004, 0.104, 0.204, 0.304, 0.404]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 1410 1409 1408 1407 1406 1405 1404 1403 1402 1401
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 5601.5 5602.5 5603.5 5604.5 5605.5 5606.5 5607.5 5608.5 5609.5 5610.5 5611.5 5612.5 5613.5 5614.5 5615.5 5616.5 5617.5 5618.5 5619.5 5620.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 5620.5 5619.5 5618.5 5617.5 5616.5 5615.5 5614.5 5613.5 5612.5 5611.5 5610.5 5609.5 5608.5 5607.5 5606.5 5605.5 5604.5 5603.5 5602.5 5601.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 1401 aFloat: 2800
 
@@ -1292,7 +1252,7 @@ xAODTestReadCVec2    INFO  anInt1 1410 aFloat: 2800.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #13, run #0 13 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #14, run #0 13 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1501 aFloat: 3000 anInt2: 4501 dInt1: 6001 dVar1: 6751 cEL: [9]
 
@@ -1320,54 +1280,54 @@ xAODTestReadPVec     INFO  pInt: 7501 pFloat: 0.15 dpInt1: 751
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 7502 pFloat: 1.15 dpInt1: 752
-  pvInt: [1010 ]
-  pvFloat: [-0.475 ]
-  dpvFloat: [0.250 ]
+  pvInt: [1010]
+  pvFloat: [-0.475]
+  dpvFloat: [0.250]
 
 xAODTestReadPVec     INFO  pInt: 7503 pFloat: 2.15 dpInt1: 753
-  pvInt: [1020 1021 ]
-  pvFloat: [-0.465 -0.365 ]
-  dpvFloat: [0.350 0.351 ]
+  pvInt: [1020, 1021]
+  pvFloat: [-0.465, -0.365]
+  dpvFloat: [0.350, 0.351]
 
 xAODTestReadPVec     INFO  pInt: 7504 pFloat: 3.15 dpInt1: 754
-  pvInt: [1030 1031 1032 ]
-  pvFloat: [-0.455 -0.355 -0.255 ]
-  dpvFloat: [0.450 0.451 0.452 ]
+  pvInt: [1030, 1031, 1032]
+  pvFloat: [-0.455, -0.355, -0.255]
+  dpvFloat: [0.450, 0.451, 0.452]
 
 xAODTestReadPVec     INFO  pInt: 7505 pFloat: 4.15 dpInt1: 755
-  pvInt: [1040 1041 1042 1043 ]
-  pvFloat: [-0.445 -0.345 -0.245 -0.145 ]
-  dpvFloat: [0.550 0.551 0.552 0.553 ]
+  pvInt: [1040, 1041, 1042, 1043]
+  pvFloat: [-0.445, -0.345, -0.245, -0.145]
+  dpvFloat: [0.550, 0.551, 0.552, 0.553]
 
 xAODTestReadPVec     INFO  pInt: 7506 pFloat: 5.15 dpInt1: 756
-  pvInt: [1050 1051 1052 1053 1054 ]
-  pvFloat: [-0.435 -0.335 -0.235 -0.135 -0.035 ]
-  dpvFloat: [0.650 0.651 0.652 0.653 0.654 ]
+  pvInt: [1050, 1051, 1052, 1053, 1054]
+  pvFloat: [-0.435, -0.335, -0.235, -0.135, -0.035]
+  dpvFloat: [0.650, 0.651, 0.652, 0.653, 0.654]
 
 xAODTestReadPVec     INFO  pInt: 7507 pFloat: 6.15 dpInt1: 757
-  pvInt: [1060 1061 1062 1063 1064 1065 ]
-  pvFloat: [-0.425 -0.325 -0.225 -0.125 -0.025 0.075 ]
-  dpvFloat: [0.750 0.751 0.752 0.753 0.754 0.755 ]
+  pvInt: [1060, 1061, 1062, 1063, 1064, 1065]
+  pvFloat: [-0.425, -0.325, -0.225, -0.125, -0.025, 0.075]
+  dpvFloat: [0.750, 0.751, 0.752, 0.753, 0.754, 0.755]
 
 xAODTestReadPVec     INFO  pInt: 7508 pFloat: 7.15 dpInt1: 758
-  pvInt: [1070 1071 1072 1073 1074 1075 1076 ]
-  pvFloat: [-0.415 -0.315 -0.215 -0.115 -0.015 0.085 0.185 ]
-  dpvFloat: [0.850 0.851 0.852 0.853 0.854 0.855 0.856 ]
+  pvInt: [1070, 1071, 1072, 1073, 1074, 1075, 1076]
+  pvFloat: [-0.415, -0.315, -0.215, -0.115, -0.015, 0.085, 0.185]
+  dpvFloat: [0.850, 0.851, 0.852, 0.853, 0.854, 0.855, 0.856]
 
 xAODTestReadPVec     INFO  pInt: 7509 pFloat: 8.15 dpInt1: 759
-  pvInt: [1080 1081 1082 1083 1084 1085 1086 1087 ]
-  pvFloat: [-0.405 -0.305 -0.205 -0.105 -0.005 0.095 0.195 0.295 ]
-  dpvFloat: [0.950 0.951 0.952 0.953 0.954 0.955 0.956 0.957 ]
+  pvInt: [1080, 1081, 1082, 1083, 1084, 1085, 1086, 1087]
+  pvFloat: [-0.405, -0.305, -0.205, -0.105, -0.005, 0.095, 0.195, 0.295]
+  dpvFloat: [0.950, 0.951, 0.952, 0.953, 0.954, 0.955, 0.956, 0.957]
 
 xAODTestReadPVec     INFO  pInt: 7510 pFloat: 9.15 dpInt1: 760
-  pvInt: [1090 1091 1092 1093 1094 1095 1096 1097 1098 ]
-  pvFloat: [-0.395 -0.295 -0.195 -0.095 0.005 0.105 0.205 0.305 0.405 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098]
+  pvFloat: [-0.395, -0.295, -0.195, -0.095, 0.005, 0.105, 0.205, 0.305, 0.405]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 1510 1509 1508 1507 1506 1505 1504 1503 1502 1501
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 6001.5 6002.5 6003.5 6004.5 6005.5 6006.5 6007.5 6008.5 6009.5 6010.5 6011.5 6012.5 6013.5 6014.5 6015.5 6016.5 6017.5 6018.5 6019.5 6020.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 6020.5 6019.5 6018.5 6017.5 6016.5 6015.5 6014.5 6013.5 6012.5 6011.5 6010.5 6009.5 6008.5 6007.5 6006.5 6005.5 6004.5 6003.5 6002.5 6001.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 1501 aFloat: 3000
 
@@ -1391,7 +1351,7 @@ xAODTestReadCVec2    INFO  anInt1 1510 aFloat: 3000.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #14, run #0 14 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #15, run #0 14 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1601 aFloat: 3200 anInt2: 4801 dInt1: 6401 dVar1: 7201 cEL: [9]
 
@@ -1419,54 +1379,54 @@ xAODTestReadPVec     INFO  pInt: 8001 pFloat: 0.16 dpInt1: 801
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 8002 pFloat: 1.16 dpInt1: 802
-  pvInt: [1110 ]
-  pvFloat: [-0.474 ]
-  dpvFloat: [0.260 ]
+  pvInt: [1110]
+  pvFloat: [-0.474]
+  dpvFloat: [0.260]
 
 xAODTestReadPVec     INFO  pInt: 8003 pFloat: 2.16 dpInt1: 803
-  pvInt: [1120 1121 ]
-  pvFloat: [-0.464 -0.364 ]
-  dpvFloat: [0.360 0.361 ]
+  pvInt: [1120, 1121]
+  pvFloat: [-0.464, -0.364]
+  dpvFloat: [0.360, 0.361]
 
 xAODTestReadPVec     INFO  pInt: 8004 pFloat: 3.16 dpInt1: 804
-  pvInt: [1130 1131 1132 ]
-  pvFloat: [-0.454 -0.354 -0.254 ]
-  dpvFloat: [0.460 0.461 0.462 ]
+  pvInt: [1130, 1131, 1132]
+  pvFloat: [-0.454, -0.354, -0.254]
+  dpvFloat: [0.460, 0.461, 0.462]
 
 xAODTestReadPVec     INFO  pInt: 8005 pFloat: 4.16 dpInt1: 805
-  pvInt: [1140 1141 1142 1143 ]
-  pvFloat: [-0.444 -0.344 -0.244 -0.144 ]
-  dpvFloat: [0.560 0.561 0.562 0.563 ]
+  pvInt: [1140, 1141, 1142, 1143]
+  pvFloat: [-0.444, -0.344, -0.244, -0.144]
+  dpvFloat: [0.560, 0.561, 0.562, 0.563]
 
 xAODTestReadPVec     INFO  pInt: 8006 pFloat: 5.16 dpInt1: 806
-  pvInt: [1150 1151 1152 1153 1154 ]
-  pvFloat: [-0.434 -0.334 -0.234 -0.134 -0.034 ]
-  dpvFloat: [0.660 0.661 0.662 0.663 0.664 ]
+  pvInt: [1150, 1151, 1152, 1153, 1154]
+  pvFloat: [-0.434, -0.334, -0.234, -0.134, -0.034]
+  dpvFloat: [0.660, 0.661, 0.662, 0.663, 0.664]
 
 xAODTestReadPVec     INFO  pInt: 8007 pFloat: 6.16 dpInt1: 807
-  pvInt: [1160 1161 1162 1163 1164 1165 ]
-  pvFloat: [-0.424 -0.324 -0.224 -0.124 -0.024 0.076 ]
-  dpvFloat: [0.760 0.761 0.762 0.763 0.764 0.765 ]
+  pvInt: [1160, 1161, 1162, 1163, 1164, 1165]
+  pvFloat: [-0.424, -0.324, -0.224, -0.124, -0.024, 0.076]
+  dpvFloat: [0.760, 0.761, 0.762, 0.763, 0.764, 0.765]
 
 xAODTestReadPVec     INFO  pInt: 8008 pFloat: 7.16 dpInt1: 808
-  pvInt: [1170 1171 1172 1173 1174 1175 1176 ]
-  pvFloat: [-0.414 -0.314 -0.214 -0.114 -0.014 0.086 0.186 ]
-  dpvFloat: [0.860 0.861 0.862 0.863 0.864 0.865 0.866 ]
+  pvInt: [1170, 1171, 1172, 1173, 1174, 1175, 1176]
+  pvFloat: [-0.414, -0.314, -0.214, -0.114, -0.014, 0.086, 0.186]
+  dpvFloat: [0.860, 0.861, 0.862, 0.863, 0.864, 0.865, 0.866]
 
 xAODTestReadPVec     INFO  pInt: 8009 pFloat: 8.16 dpInt1: 809
-  pvInt: [1180 1181 1182 1183 1184 1185 1186 1187 ]
-  pvFloat: [-0.404 -0.304 -0.204 -0.104 -0.004 0.096 0.196 0.296 ]
-  dpvFloat: [0.960 0.961 0.962 0.963 0.964 0.965 0.966 0.967 ]
+  pvInt: [1180, 1181, 1182, 1183, 1184, 1185, 1186, 1187]
+  pvFloat: [-0.404, -0.304, -0.204, -0.104, -0.004, 0.096, 0.196, 0.296]
+  dpvFloat: [0.960, 0.961, 0.962, 0.963, 0.964, 0.965, 0.966, 0.967]
 
 xAODTestReadPVec     INFO  pInt: 8010 pFloat: 9.16 dpInt1: 810
-  pvInt: [1190 1191 1192 1193 1194 1195 1196 1197 1198 ]
-  pvFloat: [-0.394 -0.294 -0.194 -0.094 0.006 0.106 0.206 0.306 0.406 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [1190, 1191, 1192, 1193, 1194, 1195, 1196, 1197, 1198]
+  pvFloat: [-0.394, -0.294, -0.194, -0.094, 0.006, 0.106, 0.206, 0.306, 0.406]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 1610 1609 1608 1607 1606 1605 1604 1603 1602 1601
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 6401.5 6402.5 6403.5 6404.5 6405.5 6406.5 6407.5 6408.5 6409.5 6410.5 6411.5 6412.5 6413.5 6414.5 6415.5 6416.5 6417.5 6418.5 6419.5 6420.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 6420.5 6419.5 6418.5 6417.5 6416.5 6415.5 6414.5 6413.5 6412.5 6411.5 6410.5 6409.5 6408.5 6407.5 6406.5 6405.5 6404.5 6403.5 6402.5 6401.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 1601 aFloat: 3200
 
@@ -1490,7 +1450,7 @@ xAODTestReadCVec2    INFO  anInt1 1610 aFloat: 3200.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #15, run #0 15 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #16, run #0 15 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1701 aFloat: 3400 anInt2: 5101 dInt1: 6801 dVar1: 7651 cEL: [9]
 
@@ -1518,54 +1478,54 @@ xAODTestReadPVec     INFO  pInt: 8501 pFloat: 0.17 dpInt1: 851
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 8502 pFloat: 1.17 dpInt1: 852
-  pvInt: [1210 ]
-  pvFloat: [-0.473 ]
-  dpvFloat: [0.270 ]
+  pvInt: [1210]
+  pvFloat: [-0.473]
+  dpvFloat: [0.270]
 
 xAODTestReadPVec     INFO  pInt: 8503 pFloat: 2.17 dpInt1: 853
-  pvInt: [1220 1221 ]
-  pvFloat: [-0.463 -0.363 ]
-  dpvFloat: [0.370 0.371 ]
+  pvInt: [1220, 1221]
+  pvFloat: [-0.463, -0.363]
+  dpvFloat: [0.370, 0.371]
 
 xAODTestReadPVec     INFO  pInt: 8504 pFloat: 3.17 dpInt1: 854
-  pvInt: [1230 1231 1232 ]
-  pvFloat: [-0.453 -0.353 -0.253 ]
-  dpvFloat: [0.470 0.471 0.472 ]
+  pvInt: [1230, 1231, 1232]
+  pvFloat: [-0.453, -0.353, -0.253]
+  dpvFloat: [0.470, 0.471, 0.472]
 
 xAODTestReadPVec     INFO  pInt: 8505 pFloat: 4.17 dpInt1: 855
-  pvInt: [1240 1241 1242 1243 ]
-  pvFloat: [-0.443 -0.343 -0.243 -0.143 ]
-  dpvFloat: [0.570 0.571 0.572 0.573 ]
+  pvInt: [1240, 1241, 1242, 1243]
+  pvFloat: [-0.443, -0.343, -0.243, -0.143]
+  dpvFloat: [0.570, 0.571, 0.572, 0.573]
 
 xAODTestReadPVec     INFO  pInt: 8506 pFloat: 5.17 dpInt1: 856
-  pvInt: [1250 1251 1252 1253 1254 ]
-  pvFloat: [-0.433 -0.333 -0.233 -0.133 -0.033 ]
-  dpvFloat: [0.670 0.671 0.672 0.673 0.674 ]
+  pvInt: [1250, 1251, 1252, 1253, 1254]
+  pvFloat: [-0.433, -0.333, -0.233, -0.133, -0.033]
+  dpvFloat: [0.670, 0.671, 0.672, 0.673, 0.674]
 
 xAODTestReadPVec     INFO  pInt: 8507 pFloat: 6.17 dpInt1: 857
-  pvInt: [1260 1261 1262 1263 1264 1265 ]
-  pvFloat: [-0.423 -0.323 -0.223 -0.123 -0.023 0.077 ]
-  dpvFloat: [0.770 0.771 0.772 0.773 0.774 0.775 ]
+  pvInt: [1260, 1261, 1262, 1263, 1264, 1265]
+  pvFloat: [-0.423, -0.323, -0.223, -0.123, -0.023, 0.077]
+  dpvFloat: [0.770, 0.771, 0.772, 0.773, 0.774, 0.775]
 
 xAODTestReadPVec     INFO  pInt: 8508 pFloat: 7.17 dpInt1: 858
-  pvInt: [1270 1271 1272 1273 1274 1275 1276 ]
-  pvFloat: [-0.413 -0.313 -0.213 -0.113 -0.013 0.087 0.187 ]
-  dpvFloat: [0.870 0.871 0.872 0.873 0.874 0.875 0.876 ]
+  pvInt: [1270, 1271, 1272, 1273, 1274, 1275, 1276]
+  pvFloat: [-0.413, -0.313, -0.213, -0.113, -0.013, 0.087, 0.187]
+  dpvFloat: [0.870, 0.871, 0.872, 0.873, 0.874, 0.875, 0.876]
 
 xAODTestReadPVec     INFO  pInt: 8509 pFloat: 8.17 dpInt1: 859
-  pvInt: [1280 1281 1282 1283 1284 1285 1286 1287 ]
-  pvFloat: [-0.403 -0.303 -0.203 -0.103 -0.003 0.097 0.197 0.297 ]
-  dpvFloat: [0.970 0.971 0.972 0.973 0.974 0.975 0.976 0.977 ]
+  pvInt: [1280, 1281, 1282, 1283, 1284, 1285, 1286, 1287]
+  pvFloat: [-0.403, -0.303, -0.203, -0.103, -0.003, 0.097, 0.197, 0.297]
+  dpvFloat: [0.970, 0.971, 0.972, 0.973, 0.974, 0.975, 0.976, 0.977]
 
 xAODTestReadPVec     INFO  pInt: 8510 pFloat: 9.17 dpInt1: 860
-  pvInt: [1290 1291 1292 1293 1294 1295 1296 1297 1298 ]
-  pvFloat: [-0.393 -0.293 -0.193 -0.093 0.007 0.107 0.207 0.307 0.407 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [1290, 1291, 1292, 1293, 1294, 1295, 1296, 1297, 1298]
+  pvFloat: [-0.393, -0.293, -0.193, -0.093, 0.007, 0.107, 0.207, 0.307, 0.407]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 1710 1709 1708 1707 1706 1705 1704 1703 1702 1701
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 6801.5 6802.5 6803.5 6804.5 6805.5 6806.5 6807.5 6808.5 6809.5 6810.5 6811.5 6812.5 6813.5 6814.5 6815.5 6816.5 6817.5 6818.5 6819.5 6820.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 6820.5 6819.5 6818.5 6817.5 6816.5 6815.5 6814.5 6813.5 6812.5 6811.5 6810.5 6809.5 6808.5 6807.5 6806.5 6805.5 6804.5 6803.5 6802.5 6801.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 1701 aFloat: 3400
 
@@ -1589,7 +1549,7 @@ xAODTestReadCVec2    INFO  anInt1 1710 aFloat: 3400.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #16, run #0 16 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #17, run #0 16 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1801 aFloat: 3600 anInt2: 5401 dInt1: 7201 dVar1: 8101 cEL: [9]
 
@@ -1617,54 +1577,54 @@ xAODTestReadPVec     INFO  pInt: 9001 pFloat: 0.18 dpInt1: 901
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 9002 pFloat: 1.18 dpInt1: 902
-  pvInt: [1310 ]
-  pvFloat: [-0.472 ]
-  dpvFloat: [0.280 ]
+  pvInt: [1310]
+  pvFloat: [-0.472]
+  dpvFloat: [0.280]
 
 xAODTestReadPVec     INFO  pInt: 9003 pFloat: 2.18 dpInt1: 903
-  pvInt: [1320 1321 ]
-  pvFloat: [-0.462 -0.362 ]
-  dpvFloat: [0.380 0.381 ]
+  pvInt: [1320, 1321]
+  pvFloat: [-0.462, -0.362]
+  dpvFloat: [0.380, 0.381]
 
 xAODTestReadPVec     INFO  pInt: 9004 pFloat: 3.18 dpInt1: 904
-  pvInt: [1330 1331 1332 ]
-  pvFloat: [-0.452 -0.352 -0.252 ]
-  dpvFloat: [0.480 0.481 0.482 ]
+  pvInt: [1330, 1331, 1332]
+  pvFloat: [-0.452, -0.352, -0.252]
+  dpvFloat: [0.480, 0.481, 0.482]
 
 xAODTestReadPVec     INFO  pInt: 9005 pFloat: 4.18 dpInt1: 905
-  pvInt: [1340 1341 1342 1343 ]
-  pvFloat: [-0.442 -0.342 -0.242 -0.142 ]
-  dpvFloat: [0.580 0.581 0.582 0.583 ]
+  pvInt: [1340, 1341, 1342, 1343]
+  pvFloat: [-0.442, -0.342, -0.242, -0.142]
+  dpvFloat: [0.580, 0.581, 0.582, 0.583]
 
 xAODTestReadPVec     INFO  pInt: 9006 pFloat: 5.18 dpInt1: 906
-  pvInt: [1350 1351 1352 1353 1354 ]
-  pvFloat: [-0.432 -0.332 -0.232 -0.132 -0.032 ]
-  dpvFloat: [0.680 0.681 0.682 0.683 0.684 ]
+  pvInt: [1350, 1351, 1352, 1353, 1354]
+  pvFloat: [-0.432, -0.332, -0.232, -0.132, -0.032]
+  dpvFloat: [0.680, 0.681, 0.682, 0.683, 0.684]
 
 xAODTestReadPVec     INFO  pInt: 9007 pFloat: 6.18 dpInt1: 907
-  pvInt: [1360 1361 1362 1363 1364 1365 ]
-  pvFloat: [-0.422 -0.322 -0.222 -0.122 -0.022 0.078 ]
-  dpvFloat: [0.780 0.781 0.782 0.783 0.784 0.785 ]
+  pvInt: [1360, 1361, 1362, 1363, 1364, 1365]
+  pvFloat: [-0.422, -0.322, -0.222, -0.122, -0.022, 0.078]
+  dpvFloat: [0.780, 0.781, 0.782, 0.783, 0.784, 0.785]
 
 xAODTestReadPVec     INFO  pInt: 9008 pFloat: 7.18 dpInt1: 908
-  pvInt: [1370 1371 1372 1373 1374 1375 1376 ]
-  pvFloat: [-0.412 -0.312 -0.212 -0.112 -0.012 0.088 0.188 ]
-  dpvFloat: [0.880 0.881 0.882 0.883 0.884 0.885 0.886 ]
+  pvInt: [1370, 1371, 1372, 1373, 1374, 1375, 1376]
+  pvFloat: [-0.412, -0.312, -0.212, -0.112, -0.012, 0.088, 0.188]
+  dpvFloat: [0.880, 0.881, 0.882, 0.883, 0.884, 0.885, 0.886]
 
 xAODTestReadPVec     INFO  pInt: 9009 pFloat: 8.18 dpInt1: 909
-  pvInt: [1380 1381 1382 1383 1384 1385 1386 1387 ]
-  pvFloat: [-0.402 -0.302 -0.202 -0.102 -0.002 0.098 0.198 0.298 ]
-  dpvFloat: [0.980 0.981 0.982 0.983 0.984 0.985 0.986 0.987 ]
+  pvInt: [1380, 1381, 1382, 1383, 1384, 1385, 1386, 1387]
+  pvFloat: [-0.402, -0.302, -0.202, -0.102, -0.002, 0.098, 0.198, 0.298]
+  dpvFloat: [0.980, 0.981, 0.982, 0.983, 0.984, 0.985, 0.986, 0.987]
 
 xAODTestReadPVec     INFO  pInt: 9010 pFloat: 9.18 dpInt1: 910
-  pvInt: [1390 1391 1392 1393 1394 1395 1396 1397 1398 ]
-  pvFloat: [-0.392 -0.292 -0.192 -0.092 0.008 0.108 0.208 0.308 0.408 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [1390, 1391, 1392, 1393, 1394, 1395, 1396, 1397, 1398]
+  pvFloat: [-0.392, -0.292, -0.192, -0.092, 0.008, 0.108, 0.208, 0.308, 0.408]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 1810 1809 1808 1807 1806 1805 1804 1803 1802 1801
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 7201.5 7202.5 7203.5 7204.5 7205.5 7206.5 7207.5 7208.5 7209.5 7210.5 7211.5 7212.5 7213.5 7214.5 7215.5 7216.5 7217.5 7218.5 7219.5 7220.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 7220.5 7219.5 7218.5 7217.5 7216.5 7215.5 7214.5 7213.5 7212.5 7211.5 7210.5 7209.5 7208.5 7207.5 7206.5 7205.5 7204.5 7203.5 7202.5 7201.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 1801 aFloat: 3600
 
@@ -1688,7 +1648,7 @@ xAODTestReadCVec2    INFO  anInt1 1810 aFloat: 3600.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #17, run #0 17 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #18, run #0 17 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 1901 aFloat: 3800 anInt2: 5701 dInt1: 7601 dVar1: 8551 cEL: [9]
 
@@ -1716,54 +1676,54 @@ xAODTestReadPVec     INFO  pInt: 9501 pFloat: 0.19 dpInt1: 951
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 9502 pFloat: 1.19 dpInt1: 952
-  pvInt: [1410 ]
-  pvFloat: [-0.471 ]
-  dpvFloat: [0.290 ]
+  pvInt: [1410]
+  pvFloat: [-0.471]
+  dpvFloat: [0.290]
 
 xAODTestReadPVec     INFO  pInt: 9503 pFloat: 2.19 dpInt1: 953
-  pvInt: [1420 1421 ]
-  pvFloat: [-0.461 -0.361 ]
-  dpvFloat: [0.390 0.391 ]
+  pvInt: [1420, 1421]
+  pvFloat: [-0.461, -0.361]
+  dpvFloat: [0.390, 0.391]
 
 xAODTestReadPVec     INFO  pInt: 9504 pFloat: 3.19 dpInt1: 954
-  pvInt: [1430 1431 1432 ]
-  pvFloat: [-0.451 -0.351 -0.251 ]
-  dpvFloat: [0.490 0.491 0.492 ]
+  pvInt: [1430, 1431, 1432]
+  pvFloat: [-0.451, -0.351, -0.251]
+  dpvFloat: [0.490, 0.491, 0.492]
 
 xAODTestReadPVec     INFO  pInt: 9505 pFloat: 4.19 dpInt1: 955
-  pvInt: [1440 1441 1442 1443 ]
-  pvFloat: [-0.441 -0.341 -0.241 -0.141 ]
-  dpvFloat: [0.590 0.591 0.592 0.593 ]
+  pvInt: [1440, 1441, 1442, 1443]
+  pvFloat: [-0.441, -0.341, -0.241, -0.141]
+  dpvFloat: [0.590, 0.591, 0.592, 0.593]
 
 xAODTestReadPVec     INFO  pInt: 9506 pFloat: 5.19 dpInt1: 956
-  pvInt: [1450 1451 1452 1453 1454 ]
-  pvFloat: [-0.431 -0.331 -0.231 -0.131 -0.031 ]
-  dpvFloat: [0.690 0.691 0.692 0.693 0.694 ]
+  pvInt: [1450, 1451, 1452, 1453, 1454]
+  pvFloat: [-0.431, -0.331, -0.231, -0.131, -0.031]
+  dpvFloat: [0.690, 0.691, 0.692, 0.693, 0.694]
 
 xAODTestReadPVec     INFO  pInt: 9507 pFloat: 6.19 dpInt1: 957
-  pvInt: [1460 1461 1462 1463 1464 1465 ]
-  pvFloat: [-0.421 -0.321 -0.221 -0.121 -0.021 0.079 ]
-  dpvFloat: [0.790 0.791 0.792 0.793 0.794 0.795 ]
+  pvInt: [1460, 1461, 1462, 1463, 1464, 1465]
+  pvFloat: [-0.421, -0.321, -0.221, -0.121, -0.021, 0.079]
+  dpvFloat: [0.790, 0.791, 0.792, 0.793, 0.794, 0.795]
 
 xAODTestReadPVec     INFO  pInt: 9508 pFloat: 7.19 dpInt1: 958
-  pvInt: [1470 1471 1472 1473 1474 1475 1476 ]
-  pvFloat: [-0.411 -0.311 -0.211 -0.111 -0.011 0.089 0.189 ]
-  dpvFloat: [0.890 0.891 0.892 0.893 0.894 0.895 0.896 ]
+  pvInt: [1470, 1471, 1472, 1473, 1474, 1475, 1476]
+  pvFloat: [-0.411, -0.311, -0.211, -0.111, -0.011, 0.089, 0.189]
+  dpvFloat: [0.890, 0.891, 0.892, 0.893, 0.894, 0.895, 0.896]
 
 xAODTestReadPVec     INFO  pInt: 9509 pFloat: 8.19 dpInt1: 959
-  pvInt: [1480 1481 1482 1483 1484 1485 1486 1487 ]
-  pvFloat: [-0.401 -0.301 -0.201 -0.101 -0.001 0.099 0.199 0.299 ]
-  dpvFloat: [0.990 0.991 0.992 0.993 0.994 0.995 0.996 0.997 ]
+  pvInt: [1480, 1481, 1482, 1483, 1484, 1485, 1486, 1487]
+  pvFloat: [-0.401, -0.301, -0.201, -0.101, -0.001, 0.099, 0.199, 0.299]
+  dpvFloat: [0.990, 0.991, 0.992, 0.993, 0.994, 0.995, 0.996, 0.997]
 
 xAODTestReadPVec     INFO  pInt: 9510 pFloat: 9.19 dpInt1: 960
-  pvInt: [1490 1491 1492 1493 1494 1495 1496 1497 1498 ]
-  pvFloat: [-0.391 -0.291 -0.191 -0.091 0.009 0.109 0.209 0.309 0.409 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [1490, 1491, 1492, 1493, 1494, 1495, 1496, 1497, 1498]
+  pvFloat: [-0.391, -0.291, -0.191, -0.091, 0.009, 0.109, 0.209, 0.309, 0.409]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 1910 1909 1908 1907 1906 1905 1904 1903 1902 1901
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 7601.5 7602.5 7603.5 7604.5 7605.5 7606.5 7607.5 7608.5 7609.5 7610.5 7611.5 7612.5 7613.5 7614.5 7615.5 7616.5 7617.5 7618.5 7619.5 7620.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 7620.5 7619.5 7618.5 7617.5 7616.5 7615.5 7614.5 7613.5 7612.5 7611.5 7610.5 7609.5 7608.5 7607.5 7606.5 7605.5 7604.5 7603.5 7602.5 7601.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 1901 aFloat: 3800
 
@@ -1787,7 +1747,7 @@ xAODTestReadCVec2    INFO  anInt1 1910 aFloat: 3800.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #18, run #0 18 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #19, run #0 18 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 2001 aFloat: 4000 anInt2: 6001 dInt1: 8001 dVar1: 9001 cEL: [9]
 
@@ -1815,54 +1775,54 @@ xAODTestReadPVec     INFO  pInt: 10001 pFloat: 0.20 dpInt1: 1001
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 10002 pFloat: 1.20 dpInt1: 1002
-  pvInt: [1510 ]
-  pvFloat: [-0.470 ]
-  dpvFloat: [0.300 ]
+  pvInt: [1510]
+  pvFloat: [-0.470]
+  dpvFloat: [0.300]
 
 xAODTestReadPVec     INFO  pInt: 10003 pFloat: 2.20 dpInt1: 1003
-  pvInt: [1520 1521 ]
-  pvFloat: [-0.460 -0.360 ]
-  dpvFloat: [0.400 0.401 ]
+  pvInt: [1520, 1521]
+  pvFloat: [-0.460, -0.360]
+  dpvFloat: [0.400, 0.401]
 
 xAODTestReadPVec     INFO  pInt: 10004 pFloat: 3.20 dpInt1: 1004
-  pvInt: [1530 1531 1532 ]
-  pvFloat: [-0.450 -0.350 -0.250 ]
-  dpvFloat: [0.500 0.501 0.502 ]
+  pvInt: [1530, 1531, 1532]
+  pvFloat: [-0.450, -0.350, -0.250]
+  dpvFloat: [0.500, 0.501, 0.502]
 
 xAODTestReadPVec     INFO  pInt: 10005 pFloat: 4.20 dpInt1: 1005
-  pvInt: [1540 1541 1542 1543 ]
-  pvFloat: [-0.440 -0.340 -0.240 -0.140 ]
-  dpvFloat: [0.600 0.601 0.602 0.603 ]
+  pvInt: [1540, 1541, 1542, 1543]
+  pvFloat: [-0.440, -0.340, -0.240, -0.140]
+  dpvFloat: [0.600, 0.601, 0.602, 0.603]
 
 xAODTestReadPVec     INFO  pInt: 10006 pFloat: 5.20 dpInt1: 1006
-  pvInt: [1550 1551 1552 1553 1554 ]
-  pvFloat: [-0.430 -0.330 -0.230 -0.130 -0.030 ]
-  dpvFloat: [0.700 0.701 0.702 0.703 0.704 ]
+  pvInt: [1550, 1551, 1552, 1553, 1554]
+  pvFloat: [-0.430, -0.330, -0.230, -0.130, -0.030]
+  dpvFloat: [0.700, 0.701, 0.702, 0.703, 0.704]
 
 xAODTestReadPVec     INFO  pInt: 10007 pFloat: 6.20 dpInt1: 1007
-  pvInt: [1560 1561 1562 1563 1564 1565 ]
-  pvFloat: [-0.420 -0.320 -0.220 -0.120 -0.020 0.080 ]
-  dpvFloat: [0.800 0.801 0.802 0.803 0.804 0.805 ]
+  pvInt: [1560, 1561, 1562, 1563, 1564, 1565]
+  pvFloat: [-0.420, -0.320, -0.220, -0.120, -0.020, 0.080]
+  dpvFloat: [0.800, 0.801, 0.802, 0.803, 0.804, 0.805]
 
 xAODTestReadPVec     INFO  pInt: 10008 pFloat: 7.20 dpInt1: 1008
-  pvInt: [1570 1571 1572 1573 1574 1575 1576 ]
-  pvFloat: [-0.410 -0.310 -0.210 -0.110 -0.010 0.090 0.190 ]
-  dpvFloat: [0.900 0.901 0.902 0.903 0.904 0.905 0.906 ]
+  pvInt: [1570, 1571, 1572, 1573, 1574, 1575, 1576]
+  pvFloat: [-0.410, -0.310, -0.210, -0.110, -0.010, 0.090, 0.190]
+  dpvFloat: [0.900, 0.901, 0.902, 0.903, 0.904, 0.905, 0.906]
 
 xAODTestReadPVec     INFO  pInt: 10009 pFloat: 8.20 dpInt1: 1009
-  pvInt: [1580 1581 1582 1583 1584 1585 1586 1587 ]
-  pvFloat: [-0.400 -0.300 -0.200 -0.100 0.000 0.100 0.200 0.300 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [1580, 1581, 1582, 1583, 1584, 1585, 1586, 1587]
+  pvFloat: [-0.400, -0.300, -0.200, -0.100, 0.000, 0.100, 0.200, 0.300]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadPVec     INFO  pInt: 10010 pFloat: 9.20 dpInt1: 1010
-  pvInt: [1590 1591 1592 1593 1594 1595 1596 1597 1598 ]
-  pvFloat: [-0.390 -0.290 -0.190 -0.090 0.010 0.110 0.210 0.310 0.410 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [1590, 1591, 1592, 1593, 1594, 1595, 1596, 1597, 1598]
+  pvFloat: [-0.390, -0.290, -0.190, -0.090, 0.010, 0.110, 0.210, 0.310, 0.410]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 2010 2009 2008 2007 2006 2005 2004 2003 2002 2001
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 8001.5 8002.5 8003.5 8004.5 8005.5 8006.5 8007.5 8008.5 8009.5 8010.5 8011.5 8012.5 8013.5 8014.5 8015.5 8016.5 8017.5 8018.5 8019.5 8020.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 8020.5 8019.5 8018.5 8017.5 8016.5 8015.5 8014.5 8013.5 8012.5 8011.5 8010.5 8009.5 8008.5 8007.5 8006.5 8005.5 8004.5 8003.5 8002.5 8001.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 2001 aFloat: 4000
 
@@ -1886,7 +1846,7 @@ xAODTestReadCVec2    INFO  anInt1 2010 aFloat: 4000.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #0 19 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #20, run #0 19 events processed so far  <<<===
-xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO HLT_DMTest__CVec_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec     INFO  anInt1 2101 aFloat: 4200 anInt2: 6301 dInt1: 8401 dVar1: 9451 cEL: [9]
 
@@ -1914,54 +1874,54 @@ xAODTestReadPVec     INFO  pInt: 10501 pFloat: 0.21 dpInt1: 1051
   dpvFloat: []
 
 xAODTestReadPVec     INFO  pInt: 10502 pFloat: 1.21 dpInt1: 1052
-  pvInt: [1610 ]
-  pvFloat: [-0.469 ]
-  dpvFloat: [0.310 ]
+  pvInt: [1610]
+  pvFloat: [-0.469]
+  dpvFloat: [0.310]
 
 xAODTestReadPVec     INFO  pInt: 10503 pFloat: 2.21 dpInt1: 1053
-  pvInt: [1620 1621 ]
-  pvFloat: [-0.459 -0.359 ]
-  dpvFloat: [0.410 0.411 ]
+  pvInt: [1620, 1621]
+  pvFloat: [-0.459, -0.359]
+  dpvFloat: [0.410, 0.411]
 
 xAODTestReadPVec     INFO  pInt: 10504 pFloat: 3.21 dpInt1: 1054
-  pvInt: [1630 1631 1632 ]
-  pvFloat: [-0.449 -0.349 -0.249 ]
-  dpvFloat: [0.510 0.511 0.512 ]
+  pvInt: [1630, 1631, 1632]
+  pvFloat: [-0.449, -0.349, -0.249]
+  dpvFloat: [0.510, 0.511, 0.512]
 
 xAODTestReadPVec     INFO  pInt: 10505 pFloat: 4.21 dpInt1: 1055
-  pvInt: [1640 1641 1642 1643 ]
-  pvFloat: [-0.439 -0.339 -0.239 -0.139 ]
-  dpvFloat: [0.610 0.611 0.612 0.613 ]
+  pvInt: [1640, 1641, 1642, 1643]
+  pvFloat: [-0.439, -0.339, -0.239, -0.139]
+  dpvFloat: [0.610, 0.611, 0.612, 0.613]
 
 xAODTestReadPVec     INFO  pInt: 10506 pFloat: 5.21 dpInt1: 1056
-  pvInt: [1650 1651 1652 1653 1654 ]
-  pvFloat: [-0.429 -0.329 -0.229 -0.129 -0.029 ]
-  dpvFloat: [0.710 0.711 0.712 0.713 0.714 ]
+  pvInt: [1650, 1651, 1652, 1653, 1654]
+  pvFloat: [-0.429, -0.329, -0.229, -0.129, -0.029]
+  dpvFloat: [0.710, 0.711, 0.712, 0.713, 0.714]
 
 xAODTestReadPVec     INFO  pInt: 10507 pFloat: 6.21 dpInt1: 1057
-  pvInt: [1660 1661 1662 1663 1664 1665 ]
-  pvFloat: [-0.419 -0.319 -0.219 -0.119 -0.019 0.081 ]
-  dpvFloat: [0.810 0.811 0.812 0.813 0.814 0.815 ]
+  pvInt: [1660, 1661, 1662, 1663, 1664, 1665]
+  pvFloat: [-0.419, -0.319, -0.219, -0.119, -0.019, 0.081]
+  dpvFloat: [0.810, 0.811, 0.812, 0.813, 0.814, 0.815]
 
 xAODTestReadPVec     INFO  pInt: 10508 pFloat: 7.21 dpInt1: 1058
-  pvInt: [1670 1671 1672 1673 1674 1675 1676 ]
-  pvFloat: [-0.409 -0.309 -0.209 -0.109 -0.009 0.091 0.191 ]
-  dpvFloat: [0.910 0.911 0.912 0.913 0.914 0.915 0.916 ]
+  pvInt: [1670, 1671, 1672, 1673, 1674, 1675, 1676]
+  pvFloat: [-0.409, -0.309, -0.209, -0.109, -0.009, 0.091, 0.191]
+  dpvFloat: [0.910, 0.911, 0.912, 0.913, 0.914, 0.915, 0.916]
 
 xAODTestReadPVec     INFO  pInt: 10509 pFloat: 8.21 dpInt1: 1059
-  pvInt: [1680 1681 1682 1683 1684 1685 1686 1687 ]
-  pvFloat: [-0.399 -0.299 -0.199 -0.099 0.001 0.101 0.201 0.301 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [1680, 1681, 1682, 1683, 1684, 1685, 1686, 1687]
+  pvFloat: [-0.399, -0.299, -0.199, -0.099, 0.001, 0.101, 0.201, 0.301]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadPVec     INFO  pInt: 10510 pFloat: 9.21 dpInt1: 1060
-  pvInt: [1690 1691 1692 1693 1694 1695 1696 1697 1698 ]
-  pvFloat: [-0.389 -0.289 -0.189 -0.089 0.011 0.111 0.211 0.311 0.411 ]
-  dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]
+  pvInt: [1690, 1691, 1692, 1693, 1694, 1695, 1696, 1697, 1698]
+  pvFloat: [-0.389, -0.289, -0.189, -0.089, 0.011, 0.111, 0.211, 0.311, 0.411]
+  dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]
 
 xAODTestReadCView    INFO HLT_DMTest__CView_cview: 2110 2109 2108 2107 2106 2105 2104 2103 2102 2101
 xAODTestReadHVec     INFO HLT_DMTest__HVec_hvec: 8401.5 8402.5 8403.5 8404.5 8405.5 8406.5 8407.5 8408.5 8409.5 8410.5 8411.5 8412.5 8413.5 8414.5 8415.5 8416.5 8417.5 8418.5 8419.5 8420.5
 xAODTestReadHVec     INFO HLT_DMTest__HView_hview: 8420.5 8419.5 8418.5 8417.5 8416.5 8415.5 8414.5 8413.5 8412.5 8411.5 8410.5 8409.5 8408.5 8407.5 8406.5 8405.5 8404.5 8403.5 8402.5 8401.5
-xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat anInt 
+xAODTestReadCVec2    INFO HLT_DMTest__CVec_cvec2 aux items: aFloat, anInt
 xAODTestReadCVec2    INFO Type of aux store: DMTest::CAuxContainer_v1
 xAODTestReadCVec2    INFO  anInt1 2101 aFloat: 4200
 
@@ -1984,7 +1944,7 @@ xAODTestReadCVec2    INFO  anInt1 2109 aFloat: 4200.8
 xAODTestReadCVec2    INFO  anInt1 2110 aFloat: 4200.9
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     NOT_OPEN  [ROOT_All]
 ApplicationMgr       INFO Application Manager Stopped successfully
 LoadReadDicts        INFO Finalizing LoadReadDicts...
 SGInputLoader        INFO Finalizing SGInputLoader...

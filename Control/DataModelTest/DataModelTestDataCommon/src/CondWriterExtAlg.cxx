@@ -25,13 +25,13 @@ StatusCode CondWriterExtAlg::initialize()
 
 StatusCode CondWriterExtAlg::execute(const EventContext& ctx)
 {
-  ATH_MSG_INFO ("Event " << ctx.eventID().event_number() <<
-                " LBN " << ctx.eventID().lumi_block());
+  ATH_MSG_INFO ("Event {} LBN {}",
+                ctx.eventID().event_number(), ctx.eventID().lumi_block());
 
   // Check if we need to execute a command
   auto it = m_cmd.find(ctx.eventID().lumi_block());
   if (it != m_cmd.end()) {
-    ATH_MSG_INFO("Executing: " << it->second);
+    ATH_MSG_INFO("Executing: {}", it->second);
     if ( system(it->second.c_str()) != 0 ) {
       ATH_MSG_ERROR("Error executing command");
       return StatusCode::FAILURE;
@@ -39,7 +39,7 @@ StatusCode CondWriterExtAlg::execute(const EventContext& ctx)
     // Remove this command
     m_cmd.erase(it);
 
-    ATH_MSG_INFO("Resetting and dropping payload of folder " << m_attrListKey.value());
+    ATH_MSG_INFO("Resetting and dropping payload of folder {}", m_attrListKey.value());
 
     ATH_CHECK( m_iovSvc->dropObjectFromDB(detStore()->clid(m_attrListKey), m_attrListKey, "StoreGateSvc") );
   }

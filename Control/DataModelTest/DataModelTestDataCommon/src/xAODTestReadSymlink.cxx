@@ -1,8 +1,6 @@
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
-
-// $Id$
 /**
  * @file DataModelTestDataCommon/src/xAODTestReadSymlink.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -46,8 +44,7 @@ StatusCode xAODTestReadSymlink::execute (const EventContext& ctx) const
   SG::ReadHandle<DMTest::S2> alias (m_aliasKey, ctx);
 
   static const SG::Accessor<int> anInt ("anInt");
-  ATH_MSG_INFO( "C (as AuxElement): " << anInt (*c)
-                << "; S " << s2->m_x );
+  ATH_MSG_INFO( "C (as AuxElement): {}; S {}", anInt (*c), s2->m_x );
   if (s2.cptr() != s1.cptr() || s2.cptr() != alias.cptr())
     ATH_MSG_ERROR( " S objects mismatch! ");
   return StatusCode::SUCCESS;

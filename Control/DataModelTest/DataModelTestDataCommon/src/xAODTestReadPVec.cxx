@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file  DataModelTestDataCommon/src/xAODTestReadPVec.cxx
@@ -18,7 +18,7 @@
 #include "AthContainers/ConstAccessor.h"
 #include <memory>
 #include <sstream>
-#include <format>
+#include <print>
 
 
 namespace DMTest {
@@ -48,35 +48,17 @@ StatusCode xAODTestReadPVec::execute (const EventContext& ctx) const
 
   for (const P* p : *pvec) {
     std::ostringstream ost;
-    ost << " pInt: " << p->pInt()
-        << " pFloat: " << std::format ("{:.2f}", p->pFloat());
+    std::print (ost, " pInt: {} pFloat: {:.2f}", p->pInt(), p->pFloat());
     if (dpInt1.isAvailable(*p))
-      ost << " dpInt1: " << dpInt1(*p);
-    ost << "\n";
+      std::print (ost, " dpInt1: {}", dpInt1(*p));
+    std::println(ost);
     
-    {
-      const std::vector<int>& pvi = p->pvInt();
-      ost << "  pvInt: [";
-      for (auto ii : pvi)
-        ost << ii << " ";
-      ost << "]\n";
-    }
-
-    {
-      const std::vector<float>& pvf = p->pvFloat();
-      ost << "  pvFloat: [";
-      for (auto f : pvf)
-        ost << std::format ("{:.3f}", f) << " ";
-      ost << "]\n";
-    }
+    std::println (ost, "  pvInt: {}", p->pvInt());
+    std::println (ost, "  pvFloat: {::.3f}", p->pvFloat());
 
     if (dpvFloat.isAvailable(*p))
     {
-      const std::vector<float>& pvf = dpvFloat(*p);
-      ost << "  dpvFloat: [";
-      for (auto f : pvf)
-        ost << std::format ("{:.3f}", f) << " ";
-      ost << "]\n";
+      std::println (ost, "  dpvFloat: {::.3f}", dpvFloat(*p));
     }
 
     ATH_MSG_INFO (ost.str());

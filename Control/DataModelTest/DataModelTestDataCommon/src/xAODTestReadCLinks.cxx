@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 /**
  * @file DataModelTestDataCommon/src/xAODTestReadCLinks.cxx
@@ -11,6 +11,8 @@
 
 #include "xAODTestReadCLinks.h"
 #include "StoreGate/ReadHandle.h"
+#include <format>
+#include <print>
 #include <sstream>
 
 
@@ -25,16 +27,9 @@ typedef ElementLink<DMTest::CVec> EL;
  */
 std::string formEL (const EL& el)
 {
-  std::ostringstream ss;
-  ss << "(" << el.dataID() << ":";
-  if (static_cast<int>(el.index()) == -1) {
-    ss << "inv";
-  }
-  else {
-    ss << el.index();
-  }
-  ss << ")";
-  return ss.str();
+  return std::format ("({}:{})",
+                      el.dataID(),
+                      static_cast<int>(el.index()) == -1 ? "inv" : std::to_string(el.index()));
 }
 
 
@@ -80,16 +75,16 @@ StatusCode xAODTestReadCLinks::execute (const EventContext& ctx) const
     ATH_MSG_INFO( m_clinksAODKey.key() );
 
     std::ostringstream ss1;
-    ss1 << "  ";
+    std::print (ss1, "  ");
     for (const EL& el : clinksaod->vel()) {
-      ss1 << formEL (el) << " ";
+      std::print (ss1, "{} ", formEL (el));
     }
     ATH_MSG_INFO (ss1.str());
 
     std::ostringstream ss2;
-    ss2 << "  ";
+    std::print (ss2, "  ");
     for (const EL el : clinksaod->elv()) {
-      ss2 << formEL (el) << " ";
+      std::print (ss2, "{} ", formEL (el));
     }
     ATH_MSG_INFO (ss2.str());
   }
@@ -104,9 +99,9 @@ StatusCode xAODTestReadCLinks::execute (const EventContext& ctx) const
 StatusCode xAODTestReadCLinks::dumpCLinks (const CLinks& clinks) const
 {
   std::ostringstream ss;
-  ss << "  link: " << formEL (clinks.link()) << " links: ";
+  std::print (ss, "  link: {} links: ", formEL (clinks.link()));
   for (const EL& el : clinks.links()) {
-    ss << formEL (el) << " ";
+    std::print (ss, "{} ", formEL (el));
   }
   ATH_MSG_INFO( ss.str() );
   return StatusCode::SUCCESS;
