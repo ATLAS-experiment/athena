@@ -13,7 +13,6 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory
 from AthenaCommon.CFElements import seqAND, parAND
-from AthenaCommon.Constants import INFO
 
 # IDTIDE Variables to be excluded from AOD
 IDTIDE_AOD_EXCLUDED_AUXDATA = [
@@ -185,7 +184,9 @@ def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
 
     acc.addEventAlgo(
         CompFactory.DerivationFramework.DerivationKernel(
-            "IDTIDEKernelPresel", SkimmingTools=skimmingTools))
+            "IDTIDEKernelPresel",
+            SkimmingTools=skimmingTools,
+            doChronoStat=(flags.Concurrency.NumThreads <= 1)))
 
     # ====================================================================
     # CREATE THE DERIVATION KERNEL ALGORITHM AND PASS THE ABOVE TOOLS
@@ -196,7 +197,7 @@ def IDTIDEKernelCommonCfg(flags, name='IDTIDEKernel'):
         SkimmingTools=skimmingTools,
         ThinningTools=[],
         RunSkimmingFirst=True,
-        OutputLevel=INFO))
+        doChronoStat=(flags.Concurrency.NumThreads <= 1)))
 
     return acc
 
@@ -232,7 +233,7 @@ def IDTIDEThinningKernelCfg(flags, name="IDTIDEThinningKernel", StreamName=""):
         name,
         AugmentationTools=[],
         ThinningTools=thinningTools,
-        OutputLevel=INFO))
+        doChronoStat=(flags.Concurrency.NumThreads <= 1)))
     return acc
 
 def IDTIDEKernelCfg(flags, StreamName=""):

@@ -168,7 +168,8 @@ def DFInDetTSOSKernelCfg(flags, name='DFInDetTSOSKernel'):
         name,
         AugmentationTools=tsos_augmentationTools,
         ThinningTools=[],
-        OutputLevel=INFO))
+        doChronoStat=(flags.Concurrency.NumThreads <= 1)))
+    
     return acc
 
 def ObserverTrackStateOnSurfaceDecoratorCfg(
