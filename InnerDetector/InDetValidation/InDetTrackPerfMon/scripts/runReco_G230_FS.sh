@@ -77,7 +77,9 @@ run Reco_tf.py \
                flags.Acts.Device.seedingStrategy=SeedingStrategy.Gbts; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
                flags.Concurrency.NumThreads=${numThreads}; \
-               flags.Concurrency.NumConcurrentEvents=${numThreads};" \
+               flags.Concurrency.NumConcurrentEvents=${numThreads}; \
+               flags.Acts.TrackingGeometry.UseBlueprint=True; \
+               flags.Acts.TrackingGeometry.BuildDetrayGeometry=True;" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
     --ignorePatterns "${ignore_pattern}" \
