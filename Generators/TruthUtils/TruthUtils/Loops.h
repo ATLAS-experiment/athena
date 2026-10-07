@@ -6,6 +6,7 @@
 #ifndef TRUTHUTILS_LOOPS_H
 #define TRUTHUTILS_LOOPS_H
 #include <algorithm>
+#include <map>
 #include <vector>
 #include <memory>
 
