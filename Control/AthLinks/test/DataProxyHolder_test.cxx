@@ -193,6 +193,19 @@ void test2 (SGTest::TestStore& store)
   assert (h1.proxy()->name() == "fooy");
   assert (h1.source() == &store);
 
+  {
+    TestStore store2 (StoreID::PILEUP_STORE);
+    Foo* foox2 = new Foo(99);
+    store2.record (foox2, "foox");
+    h1.clear();
+    h1.toTransient (sgkeyx, &store2);
+    assert (!h1.isDefault());
+    assert (h1.dataID() == "foox");
+    assert (h1.storableBase (foocast, fooclid, true) == foox2);
+    assert (h1.proxy()->name() == "foox");
+    assert (h1.source() == &store2);
+  }
+
   h1.clear();
   assert (h1.toTransient ("fooz", fooclid) == sgkeyz);
   assert (!h1.isDefault());

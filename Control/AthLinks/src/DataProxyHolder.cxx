@@ -336,7 +336,7 @@ DataProxyHolder::toTransient (sgkey_t sgkey,
     sg = SG::CurrentEventStore::store();
 
   // Do input renaming.
-  if (s_inputRenameMap) {
+  if (s_inputRenameMap && sg->storeID() == StoreID::EVENT_STORE) {
     using InputRenameMap_t = Athena::InputRenameMap_t;
     Athena::RCURead<InputRenameMap_t> r (*s_inputRenameMap);
     auto it = r->find (sgkey);
