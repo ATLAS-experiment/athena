@@ -66,19 +66,19 @@ def Lvl1SimulationCfg(flags, seqName = None):
     return acc
 
 if __name__ == '__main__':
+    import os
     import sys
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultTestFiles
 
     # The HLS code will trip an assertion is this doesn't exist...
-    import os
     os.makedirs ('tb_data', exist_ok = True)
 
     flags = initConfigFlags()
-    flags.Input.Files = ['root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/trig-val/TriggerTest/valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8528_s4369_s4370_r16083_tid42189392_00/RDO.42189392._000001.pool.root.1']
+    flags.Input.Files = defaultTestFiles.RDO_RUN3
     flags.Exec.MaxEvents = 5
     flags.Concurrency.NumThreads = 1
     flags.Trigger.triggerMenuSetup = 'Dev_pp_run3_v1'
-    from AthenaConfiguration.TestDefaults import defaultConditionsTags
     flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
     flags.Trigger.doHLT = True # this is necessary so that the simulation of L1Calo (if running on MC) gets output with keys that Topo sim expects
     flags.fillFromArgs()
