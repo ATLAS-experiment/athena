@@ -59,9 +59,8 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         StatusCode checkTrackingGeometry(const ActsTrk::GeometryContext& gctx, 
                                          const Acts::TrackingGeometry& trackingGeometry) const;
         /** @brief Checks whether the readout elements of an enevelope are completely embedded into the envelope */
-        template <class EnvelopeType>
-          StatusCode allReadoutInEnvelope(const ActsTrk::GeometryContext& ctx,
-                                          const EnvelopeType& envelope) const; 
+        StatusCode allReadoutInEnvelope(const ActsTrk::GeometryContext& ctx,
+                                        const Chamber& envelope) const; 
         
         /** @brief Checks whether the point is inside of an envelope object, i.e.
          *         the spectrometer sector or the chamber
@@ -71,24 +70,11 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
          *  @param point: Point that needs to be inside the volume
          *  @param descr: Description of the point
          *  @param channelId: Identifier for more information if the point is outside */
-        template <class EnvelopeType>        
-            StatusCode pointInside(const ActsTrk::GeometryContext& gctx,
-                                   const EnvelopeType& envelope,
-                                   const Acts::Volume& boundVol,
-                                   const Amg::Vector3D& point,
-                                   const std::string& descr,
-                                   const Identifier& channelId) const;
-        /** @brief Checks whether the point is inside a tracking volume
-         *  @param gctx: Geometry context carrying the aligned local -> global transfors
-         *  @param volume: Reference to the tracking volume to check
-         *  @param point: Point that needs to be inside the volume
-         *  @param descr: Description of the point
-         *  @param chamberId: Identifier for more information if the point is outside */
         StatusCode pointInside(const ActsTrk::GeometryContext& gctx,
-                               const Acts::TrackingVolume& volume,
-                               const Amg::Vector3D& point,
-                               const std::string& descr,
-                               const Identifier& chamberId) const;
+                                const Acts::Volume& boundVol,
+                                const Amg::Vector3D& point,
+                                const std::string& descr,
+                                const Identifier& channelId) const;
         /** @brief Checks whether the edge points from a trapezoid/cuboid/diamond form a volume
          *         overlapping with the given volume
          *  @param gctx: Geometry context carrying all alignment & global transformations
@@ -97,37 +83,56 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         bool hasOverlap(const ActsTrk::GeometryContext& gctx,
                         const std::vector<Amg::Vector3D>& chamberEdges,
                         const Acts::Volume& volume) const;
+        
+        /** @brief Tests whether all surfaces defined by the readout element have a valid
+         *         geometry identifier and whether they are all contained within the volume
+         *  @param gctx: The geometry context to align the readout element and the volume
+         *  @param element: The readout element to test
+         *  @param boundVol: The surrounding volume in which the element must be contained */
+        StatusCode testReadoutSurfaces(const ActsTrk::GeometryContext& gctx,
+                                       const MuonReadoutElement& element,
+                                       const Acts::Volume& boundVol) const;
+
         /** @brief Checks whether all channels of a given readout element are fully covered by the
          *         envelope.
          *  @param gctx: Geometry context carrying all alignment & global transformations
          *  @param readOutEle: Readout element to test
-         *  @param envelope: Reference to the envelope to check
          *  @param boundVol: Bounding volume representing the envelope */
-        template <class EnvelopeType>
-          StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
-                                    const MdtReadoutElement& readOutEle,
-                                    const EnvelopeType& envelope,
-                                    const Acts::Volume& boundVol) const;
-        template <class EnvelopeType>
-          StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
-                                    const RpcReadoutElement& readOutEle,
-                                    const EnvelopeType& envelope,
-                                    const Acts::Volume& boundVol) const;
-        template <class EnvelopeType>
-          StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
-                                    const TgcReadoutElement& readOutEle,
-                                    const EnvelopeType& envelope,
-                                    const Acts::Volume& boundVol) const;
-        template <class EnvelopeType>
-          StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
-                                    const sTgcReadoutElement& readOutEle,
-                                    const EnvelopeType& envelope,
-                                    const Acts::Volume& boundVol) const;
-        template <class EnvelopeType>
-          StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
-                                    const MmReadoutElement& readOutEle,
-                                    const EnvelopeType& envelope,
-                                    const Acts::Volume& boundVol) const;
+        StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
+                                  const MdtReadoutElement& readOutEle,
+                                  const Acts::Volume& boundVol) const;
+        /** @brief Checks whether all channels of a given readout element are fully covered by the
+         *         envelope.
+         *  @param gctx: Geometry context carrying all alignment & global transformations
+         *  @param readOutEle: Readout element to test
+         *  @param boundVol: Bounding volume representing the envelope */
+        StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
+                                  const RpcReadoutElement& readOutEle,
+                                  const Acts::Volume& boundVol) const;
+        /** @brief Checks whether all channels of a given readout element are fully covered by the
+         *         envelope.
+         *  @param gctx: Geometry context carrying all alignment & global transformations
+         *  @param readOutEle: Readout element to test
+         *  @param boundVol: Bounding volume representing the envelope */
+        StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
+                                  const TgcReadoutElement& readOutEle,
+                                  const Acts::Volume& boundVol) const;
+        /** @brief Checks whether all channels of a given readout element are fully covered by the
+         *         envelope.
+         *  @param gctx: Geometry context carrying all alignment & global transformations
+         *  @param readOutEle: Readout element to test
+         *  @param boundVol: Bounding volume representing the envelope */
+        StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
+                                  const sTgcReadoutElement& readOutEle,
+                                  const Acts::Volume& boundVol) const;
+        /** @brief Checks whether all channels of a given readout element are fully covered by the
+         *         envelope.
+         *  @param gctx: Geometry context carrying all alignment & global transformations
+         *  @param readOutEle: Readout element to test
+         *  @param boundVol: Bounding volume representing the envelope */
+        StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
+                                  const MmReadoutElement& readOutEle,
+                                  const Acts::Volume& boundVol) const;
 
 
 
