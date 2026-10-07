@@ -17,7 +17,7 @@ def getYearsForCampaign(campaign):
     elif campaign in [Campaign.MC23e]:
         return [2024]
     elif campaign in [Campaign.MC23g]:
-        return [2025]
+        return [2025, 2026]
     else:
         raise ValueError(f'Unsupported campaign {campaign}')
 
@@ -25,6 +25,9 @@ def getYearsForCampaign(campaign):
 def getLumicalcDict():
     GRLDict={}
     ## RUN 3
+    # 2026
+    GRLDict['GRL2026'] = ['GoodRunsLists/data26_13p6TeV/20261006/ilumicalc_histograms_None_516294-520882_OflLumi-Run3-010.root']
+
     # 2025
     GRLDict['GRL2025'] = ['GoodRunsLists/data25_13p6TeV/20260129/ilumicalc_histograms_None_497924-509849_OflLumi-Run3-006.root']
 
@@ -64,6 +67,9 @@ def getLumicalcDict():
 def getActualMuDict():
     GRLDict={}
     ## RUN 3
+    # 2026
+    GRLDict['GRL2026'] = ['GoodRunsLists/data26_13p6TeV/20261006/purw.actualMu_data26_13p6TeV_DetStatus-v143-pro56-01.root']
+
     # 2025
     GRLDict['GRL2025'] = ['GoodRunsLists/data25_13p6TeV/20260129/purw.actualMu.root']
 
@@ -129,7 +135,9 @@ def actualMuFiles(campaign, GRLSuffixDict={}):
             GRLKey = GRLKey + '_Triggerno17e33prim'
         file_list.extend(actualMuDict[GRLKey])
 
-    if campaign in [Campaign.MC16d, Campaign.MC20d, Campaign.MC16e, Campaign.MC20e, Campaign.MC21a, Campaign.MC23a, Campaign.MC23c, Campaign.MC23d, Campaign.MC23e, Campaign.MC23g]:
+    if campaign in [Campaign.MC23g]:
+        assert(len(file_list) == 2)
+    elif campaign in [Campaign.MC16d, Campaign.MC20d, Campaign.MC16e, Campaign.MC20e, Campaign.MC21a, Campaign.MC23a, Campaign.MC23c, Campaign.MC23d, Campaign.MC23e]:
         assert(len(file_list) == 1)
     else:
         assert(len(file_list) == 0)
