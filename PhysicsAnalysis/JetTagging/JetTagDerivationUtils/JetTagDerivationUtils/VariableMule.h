@@ -39,7 +39,8 @@ public:
   template <typename OWNER>
   StatusCode initialize(OWNER* parent,
                         const std::vector<std::string>& froms,
-                        const std::string& to) {
+                        const std::string& to,
+                        const std::string& prefix = "") {
     // the owner keeps pointers to the keys, so the storage must not move
     m_fromKeys.reserve(toCopy.size() * froms.size());
     m_toKeys.reserve(toCopy.size());
@@ -49,10 +50,11 @@ public:
       std::string doc = "Key to move " + key.first + "->" + key.second;
       for (const auto& from: froms) {
         std::string fullfrom = from + "." + key.first;
-        m_fromKeys.emplace_back(parent, "read_" + key.first, fullfrom, doc);
+        m_fromKeys.emplace_back(parent, prefix + "read_" + key.first, fullfrom,
+                                doc);
       }
       m_fromAcc.emplace_back(key.first);
-      m_toKeys.emplace_back(parent, "write_" + key.second, fullto, doc);
+      m_toKeys.emplace_back(parent, prefix + "write_" + key.second, fullto, doc);
     }
     ATH_CHECK(m_fromKeys.initialize());
     ATH_CHECK(m_toKeys.initialize());

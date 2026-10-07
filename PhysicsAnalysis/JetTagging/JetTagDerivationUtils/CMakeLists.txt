@@ -40,6 +40,7 @@ atlas_add_component(JetTagDerivationUtils
   HDF5Utils
   xAODMetaData
   xAODTruth
+  TruthUtils
   ${Boost_LIBRARIES}
   )
 
