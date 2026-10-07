@@ -85,6 +85,24 @@ namespace ActsTrk {
     auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
     auto trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
 
+    if(trackingGeometry->geometryVersion() == Acts::TrackingGeometry::GeometryVersion::Gen3) {
+      m_endOfWorldVolumeIds.value().clear();
+      switch (m_envelopeConstraint.value()) {
+         using enum ActsTrk::SystemEnvelope;
+         case Acts::toUnderlying(ITkExit):
+         case Acts::toUnderlying(CaloExit): {
+            const Acts::TrackingVolume* volume = m_trackingGeometrySvc
+                    ->getEnvelope(static_cast<SystemEnvelope>(m_envelopeConstraint.value()));
+            ATH_CHECK(volume != nullptr);
+            m_endOfWorldVolumeIds.value().push_back(volume->motherVolume()->geometryId().volume());
+            break;
+         } default: {
+            ATH_MSG_ERROR("Invalid configuration "<<m_envelopeConstraint);
+            return StatusCode::FAILURE;
+         }
+      }
+    }
+
     detail::Stepper stepper(std::move(magneticField));
     detail::Navigator::Config config{std::move(trackingGeometry)};
     config.resolvePassive = false;

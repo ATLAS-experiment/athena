@@ -146,6 +146,10 @@ namespace ActsTrk {
     Gaudi::Property<std::vector<std::size_t>> m_maxStripOutliers{this, "maxStripOutliers", {}, "maximum number of strip outliers"};
     Gaudi::Property<std::vector<std::size_t>> m_maxHgtdOutliers{this, "maxHgtdOutliers", {}, "maximum number of hgtd outliers"};
 
+    /** @brief Stop the propagation as soon as the envelope is left (Gen3 only) */
+    Gaudi::Property<std::uint32_t> m_envelopeConstraint{this, "EnvelopeConstaint",
+                                                      Acts::toUnderlying(ActsTrk::SystemEnvelope::ITkExit)};
+
     Gaudi::Property<std::vector<std::uint32_t>> m_endOfWorldVolumeIds {this, "EndOfTheWorldVolumeIds", {}, ""};
 
     // configuration of statistics tables

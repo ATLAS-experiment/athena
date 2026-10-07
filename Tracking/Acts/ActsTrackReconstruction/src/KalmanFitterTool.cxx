@@ -30,13 +30,34 @@ namespace ActsTrk {
 
 StatusCode KalmanFitterTool::initialize() {
 
-  ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
   ATH_CHECK(m_trackingGeometrySvc.retrieve());
   ATH_CHECK(m_geometryConvTool.retrieve());
   ATH_CHECK(m_ROTcreator.retrieve(EnableTool{!m_ROTcreator.empty()}));
   ATH_CHECK(m_muonCalibrator.retrieve(EnableTool{!m_muonCalibrator.empty()}));
   m_logger = makeActsAthenaLogger(this, "KalmanRefit");
 
+
+  auto trkGeo = m_trackingGeometrySvc->trackingGeometry();
+  if (trkGeo->geometryVersion() == Acts::TrackingGeometry::GeometryVersion::Gen3) {
+      switch (m_envelopeConstraint.value()) {
+          using enum ActsTrk::SystemEnvelope;
+         case Acts::toUnderlying(ITkExit):
+         case Acts::toUnderlying(CaloExit): {
+            const Acts::TrackingVolume* volume = m_trackingGeometrySvc
+                    ->getEnvelope(static_cast<SystemEnvelope>(m_envelopeConstraint.value()));
+            ATH_CHECK(volume != nullptr);
+            m_endOfWorldId = volume->motherVolume()->geometryId().volume();
+            break;
+         } case Acts::toUnderlying(MsExit) : {
+            break;
+         } default: {
+            ATH_MSG_ERROR("Invalid configuration "<<m_envelopeConstraint);
+            return StatusCode::FAILURE;
+         }
+      }
+      ATH_MSG_DEBUG("Abort propagation if "<<m_envelopeConstraint<<" is reached");
+
+  }
   auto field = std::make_shared<ATLASMagneticFieldWrapper>();
 
   // Fitter
@@ -52,7 +73,7 @@ StatusCode KalmanFitterTool::initialize() {
                 logger().cloneWithSuffix("DirectKalmanFitter"));
 
   } else {
-    Acts::Navigator navigator( Acts::Navigator::Config{ m_trackingGeometrySvc->trackingGeometry() },
+    Acts::Navigator navigator( Acts::Navigator::Config{trkGeo},
             logger().cloneWithSuffix("Navigator"));
     Acts::Propagator<Acts::SympyStepper, Acts::Navigator> propagator(stepper, 
                       std::move(navigator),
@@ -131,9 +152,11 @@ KalmanFitterTool::FitterOptions_t
   Acts::PropagatorPlainOptions propagationOption(tgContext, mfContext);
   propagationOption.maxSteps = m_option_maxPropagationStep;
   // Set the KalmanFitter options
-  return FitterOptions_t{tgContext, mfContext, calContext,
+  FitterOptions_t options{tgContext, mfContext, calContext,
                          kfExtensions, propagationOption,
                          surface};
+  options.propagatorPlainOptions.endOfWorldVolumeIds.push_back(m_endOfWorldId);
+  return options;
 }
 
 // fit a set of PrepRawData objects
