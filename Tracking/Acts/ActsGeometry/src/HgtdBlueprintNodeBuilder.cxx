@@ -223,14 +223,17 @@ void HgtdBlueprintNodeBuilder::addHgtdLayers(
   // Layer 3 (non-innermost) has no material faces; skip the
   // MaterialDesignator wrapper to avoid empty-designator warnings.
   if (hasMaterial) {
-    parent.addMaterial(name + "_Material", [&](auto& mat) {
+    const std::string materialName = name + "_Material";
+    parent.addMaterial(materialName, [&](auto& mat) {
       if (index != 3) {
         mat.configureFace(outwardDisc, AxisSpec::DeferredEquidistant(50, AxisR),
-                          AxisSpec::DeferredEquidistant(50, AxisPhi));
+                          AxisSpec::DeferredEquidistant(50, AxisPhi),
+                          materialName + "_Outward");
       }
       if (isInnermost) {
         mat.configureFace(inwardDisc, AxisSpec::DeferredEquidistant(50, AxisR),
-                          AxisSpec::DeferredEquidistant(50, AxisPhi));
+                          AxisSpec::DeferredEquidistant(50, AxisPhi),
+                          materialName + "_Inward");
       }
       configureLayer(mat);
     });

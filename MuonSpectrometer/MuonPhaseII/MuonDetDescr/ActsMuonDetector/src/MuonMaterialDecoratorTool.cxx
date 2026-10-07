@@ -13,6 +13,9 @@
 #include "MuonReadoutGeometryR4/MuonReadoutElement.h"
 #include <ActsPlugins/GeoModel/GeoModelMaterialConverter.hpp>
 #include "GeoModelValidation/GeoMaterialHelper.h"
+#include "ActsPlugins/Root/RootMaterialDecorator.hpp"
+#include "ActsPlugins/Json/JsonMaterialDecorator.hpp"
+#include "ActsPlugins/Json/MaterialMapJsonConverter.hpp"
 
 
 
@@ -28,10 +31,17 @@ namespace MuonGMR4 {
     }
 
     StatusCode MuonMaterialDecoratorTool::initialize(){
-        ActsPlugins::RootMaterialDecorator::Config decoratorConfig;
-        decoratorConfig.fileName = m_materialMapFile;
-        m_matDecorator = std::make_unique<ActsPlugins::RootMaterialDecorator>(decoratorConfig,
-                                                                             ActsTrk::actsLevelVector(msg().level()));                                                                           
+        const Acts::Logging::Level level = ActsTrk::actsLevelVector(msg().level());
+        const std::string& fileName = m_materialMapFile.value();
+        // Json (or Cbor) maps are read with the Json reader, everything else keeps the Root reader
+        if (fileName.ends_with(".json") || fileName.ends_with(".cbor")) {
+            Acts::MaterialMapJsonConverter::Config converterConfig;
+            m_matDecorator = std::make_unique<Acts::JsonMaterialDecorator>(converterConfig, fileName, level);
+        } else {
+            ActsPlugins::RootMaterialDecorator::Config decoratorConfig;
+            decoratorConfig.fileName = fileName;
+            m_matDecorator = std::make_unique<ActsPlugins::RootMaterialDecorator>(decoratorConfig, level);
+        }
         return StatusCode::SUCCESS;
     }
 

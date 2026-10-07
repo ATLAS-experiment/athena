@@ -169,12 +169,9 @@ def ITkMaterialDecoratorToolCfg(flags, name="ITkMaterialDecorator", **kwargs) ->
     filename = flags.Acts.TrackingGeometry.ITkHgtdMaterialSource
     folder = flags.Acts.TrackingGeometry.ITkHgtdMaterialMapPath
     if flags.Acts.TrackingGeometry.ITkHgtdMaterialSource == "Default":
-        extension = "itk"
-        if flags.Detector.GeometryHGTD:
-            extension += "-hgtd"
         # ITkMaterialDecoratorTool picks its reader (Json or Root) from the file
         # extension, so this is what selects the default format read back in.
-        filename = f"material-maps-{extension}-{flags.GeoModel.AtlasVersion}.json"
+        filename = f"material-maps-itk-hgtd-{flags.GeoModel.AtlasVersion}.json"
     kwargs.setdefault("MaterialDbFile", filename)
     kwargs.setdefault("MaterialDbFolder", folder)
     the_tool = CompFactory.ActsTrk.ITkMaterialDecoratorTool(name, **kwargs)

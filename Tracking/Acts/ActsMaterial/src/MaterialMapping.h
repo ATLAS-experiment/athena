@@ -11,10 +11,10 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "AsgTools/ToolHandleArray.h"
+#include "AsgTools/ToolHandle.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometry/RecordedMaterialTrackCollection.h"
-#include "ActsMaterial/IMaterialWriterTool.h"
+#include "ActsMaterial/IMaterialDumperTool.h"
 #include "Acts/Material/MaterialMapper.hpp"
 
 namespace ActsTrk {
@@ -35,8 +35,8 @@ namespace ActsTrk {
 
         private:
 
-            /// The material map writes
-            ToolHandleArray<IMaterialWriterTool> m_materialMapWriters{this, "MaterialMapWriters", {}, "The material map writes"};
+            /// The material dumper the produced maps are handed to
+            ToolHandle<IMaterialDumperTool> m_materialDumper{this, "MaterialDumper", "", "The material dumper tool"};
 
             /// The material mapper from the ACTS core components
             std::shared_ptr<Acts::MaterialMapper> m_materialMapper;
