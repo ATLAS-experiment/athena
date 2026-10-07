@@ -28,6 +28,9 @@
 #include "AthContainers/CurrentContext.h"
 #include "xAODCore/tools/IOStats.h"
 #include "xAODCore/tools/ReadStats.h"
+#ifndef XAOD_STANDALONE
+# include "SGTools/CurrentEventStore.h"
+#endif
 
 // ROOT include(s).
 #include <TFile.h>
@@ -926,6 +929,9 @@ StatusCode REvent::connectObject(const std::string& key, ::Bool_t silent) {
   }
 
   // Make sure that the current object is the "active event":
+#ifndef XAOD_STANDALONE
+  SG::CurrentEventStore::Push save (SG::CurrentEventStore::store());
+#endif
   setActive();
 
   // Check if the output already has this object. If it does, let's

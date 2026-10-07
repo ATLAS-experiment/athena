@@ -11,7 +11,7 @@
 #include "xAODRootAccessInterfaces/TActiveEvent.h"
 #include "AthContainers/CurrentContext.h"
 #ifndef XAOD_STANDALONE
-# include "AthenaKernel/ExtendedEventContext.h"
+# include "AthenaKernel/proxyDictFromEventContext.h"
 # include "SGTools/CurrentEventStore.h"
 #endif  // not XAOD_STANDALONE
 
@@ -36,11 +36,6 @@ Event::Event(std::string_view name)
 
   // Make this the active event.
   setActive();
-
-#ifndef XAOD_STANDALONE
-  /// Set context for this event.
-  m_ctx.setExtension( Atlas::ExtendedEventContext( this ) );
-#endif
 }
 
 Event::~Event() {
@@ -52,8 +47,9 @@ Event::~Event() {
     TActiveEvent::setEvent(nullptr);
   }
 #ifndef XAOD_STANDALONE
-  if (SG::CurrentEventStore::store() == this) {
+  if (Atlas::proxyDictFromEventContext() == this) {
     SG::CurrentEventStore::setStore(nullptr);
+    Atlas::setProxyDictInEventContext(nullptr);
   }
 #endif  // not XAOD_STANDALONE
 }
@@ -65,6 +61,7 @@ void Event::setActive() const {
   TActiveEvent::setEvent(static_cast<TVirtualEvent*>(nc_this));
 #ifndef XAOD_STANDALONE
   SG::CurrentEventStore::setStore(nc_this);
+  Atlas::setProxyDictInEventContext(nc_this);
 #endif  // not XAOD_STANDALONE
 }
 
