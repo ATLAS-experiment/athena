@@ -26,7 +26,6 @@ StatusCode ITkStripsRodDecoder::initialize()
   ATH_CHECK(detStore()->retrieve(m_itkStripsID,"SCT_ID"));
   m_contextITk = m_itkStripsID->wafer_context();
   m_swapPhiReadoutDirection.resize(m_itkStripsID->wafer_hash_max(), false);
-  ATH_CHECK(m_configTool.retrieve());
   const InDetDD::SCT_DetectorManager* itkStripsDetManager{nullptr};
   ATH_CHECK(detStore()->retrieve(itkStripsDetManager, "ITkStrip"));
   const InDetDD::SiDetectorElementCollection* sctDetElementColl{itkStripsDetManager->getDetectorElementCollection()};

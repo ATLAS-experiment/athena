@@ -818,6 +818,14 @@ EF_7j45_pf_ftf_presel7j30_L14jJ40:
     0: 7
     1: 50
   eventCount: 5
+EF_beamspot_trkFS_trkfast_BeamSpotPEB_L1All:
+  stepCounts:
+    0: 20
+    1: 20
+  stepFeatures:
+    0: 20
+    1: 20
+  eventCount: 20
 EF_e10_lhloose_mu12_L1eEM10L_MU5VF:
   stepCounts:
     0: 4
