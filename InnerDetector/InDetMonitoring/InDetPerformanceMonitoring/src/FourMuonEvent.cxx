@@ -14,9 +14,6 @@
 
 // ATLAS headers
 #include "AthenaKernel/getMessageSvc.h"
-#include "StoreGate/StoreGateSvc.h"
-
-#include "CLHEP/Random/RandFlat.h"
 
 //==================================================================================
 // Public Methods

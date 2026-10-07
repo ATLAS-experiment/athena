@@ -17,16 +17,6 @@
 
 #include "StoreGate/StoreGateSvc.h"
 
-#include "IdDictDetDescr/IdDictManager.h"
-#include "InDetIdentifier/PixelID.h"
-#include "InDetIdentifier/SCT_ID.h"
-#include "InDetIdentifier/TRT_ID.h"
-#include "TRT_ReadoutGeometry/TRT_DetectorManager.h"
-
-#include "TrkTrack/TrackCollection.h"
-#include "InDetRIO_OnTrack/SiClusterOnTrack.h"
-#include "InDetPrepRawData/SiCluster.h"
-
 #include "TrkEventPrimitives/FitQuality.h"
 #include "TrkEventPrimitives/LocalParameters.h"
 

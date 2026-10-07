@@ -10,7 +10,6 @@
 #include "TProfile.h"
 #include "TProfile2D.h"
 
-
 namespace{
   template <class HistoArrayType>
   void registerHistogramType
