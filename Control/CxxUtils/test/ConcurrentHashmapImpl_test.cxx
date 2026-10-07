@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentHashmapImpl_test.cxx
@@ -16,7 +16,7 @@
 #include <shared_mutex>
 #include <vector>
 #include <memory>
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <algorithm>
 #include <unistd.h>
@@ -140,7 +140,7 @@ using CHMImpl = CxxUtils::detail::ConcurrentHashmapImpl<TestUpdater, TestHash>;
 // Test CHMTableIterator
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   using TableIterator = CxxUtils::detail::CHMTableIterator<4>;
   // table capacity = 64
   TableIterator it (12345, 0x3f, 6, 16);
@@ -155,7 +155,7 @@ void test1()
 // Test ConcurrentHashmapImpl::Table.
 void ConcurrentHashmapImplTest::test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   using entry_t = CHMImpl::entry_t;
   using Table = CHMImpl::Table;
   std::unique_ptr<Table> table (new (16) Table (16));
@@ -213,7 +213,7 @@ void ConcurrentHashmapImplTest::test2()
 
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
   CHMImpl chm (CHMImpl::Updater_t(), 50,
                CHMImpl::Hasher_t(),
                CHMImpl::Matcher_t(),
@@ -369,7 +369,7 @@ void test3()
 
 void test_erase()
 {
-  std::cout << "test_erase\n";
+  std::println ("test_erase");
 
   // Having an explicit symbol for this avoids parse errors with cppcheck 2.14.
   static constexpr uintptr_t minus1 = static_cast<uintptr_t>(-1);
@@ -460,7 +460,7 @@ void test_erase()
 
 void test_swap()
 {
-  std::cout << "test_swap\n";
+  std::println ("test_swap");
 
   // Having an explicit symbol for this avoids parse errors with cppcheck 2.14.
   static constexpr uintptr_t minus1 = static_cast<uintptr_t>(-1);
@@ -751,7 +751,7 @@ void test4_iter()
 
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   for (int i=0; i < 5; i++) {
     test4_iter();
@@ -761,7 +761,7 @@ void test4()
 
 int main()
 {
-  std::cout << "CxxUtils/ConcurrentHashmapImpl_test\n";
+  std::println ("CxxUtils/ConcurrentHashmapImpl_test");
   test1();
   ConcurrentHashmapImplTest::test2();
   test3();

@@ -141,7 +141,7 @@ void test1 ()
   assert (packed == 0);
   out = tf2.unpack (packed, &err);
   assert (bitwise_equal (0, out));
-  assert (err == "Bad float number: inf (0 7ff00000)");
+  assert (err == "Bad float number: inf (0x00000000 0x7ff00000)");
   err.clear();
 
   // This gets a warning.
@@ -150,7 +150,7 @@ void test1 ()
   assert (packed == 0xfffffff);
   out = tf2.unpack (packed, &err);
   assert (almost_equal (out, 512, 24));
-  assert (err == "Float overflow during packing: 100000");
+  assert (err == "Float overflow during packing: 1e+05");
   err.clear();
 
   // Testing underflow to denormal.
@@ -254,7 +254,7 @@ void test1 ()
   unpacked = 1023. / 1024;
   packed = tf8.pack (unpacked, &err);
   assert (packed == 0xff);
-  assert (err == "Float overflow during packing: 0.999023");
+  assert (err == "Float overflow during packing: 0.9990234375");
   err.clear();
   out = tf8.unpack (packed, &err);
   tmp = 255. / 256;

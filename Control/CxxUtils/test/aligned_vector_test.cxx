@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/aligned_vector_test.cxx
@@ -12,7 +12,7 @@
 #undef NDEBUG
 #include "CxxUtils/aligned_vector.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 template <size_t N>
@@ -29,7 +29,7 @@ void testone()
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   testone<4>();
   testone<8>();
   testone<16>();

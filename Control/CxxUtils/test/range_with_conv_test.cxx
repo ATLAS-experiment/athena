@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/range_with_conv_test.cxx
@@ -12,17 +12,17 @@
 
 #undef NDEBUG
 #include "CxxUtils/range_with_conv.h"
-#include <iostream>
 #include <cassert>
 #include <vector>
 #include <list>
+#include <print>
 #include <span>
 #include <memory_resource>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   std::vector<int> v { 0, 1, 2, 3, 4 };
   using Rtest = CxxUtils::range_with_conv<std::span<int> >;
   Rtest r (v.begin(), v.size());
@@ -40,7 +40,7 @@ void test1()
 
 int main()
 {
-  std::cout << "CxxUtils/range_with_conv_test\n";
+  std::println ("CxxUtils/range_with_conv_test");
   test1();
   return 0;
 }

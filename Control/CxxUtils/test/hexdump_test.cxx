@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/hexdump_test.cxx
@@ -12,6 +12,7 @@
 #undef NDEBUG
 #include "CxxUtils/hexdump.h"
 #include <iostream>
+#include <print>
 #include <cassert>
 #include <cstdint>
 #include <stdlib.h>
@@ -21,7 +22,7 @@
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   const int n = 1024;
   char buf[n];
@@ -30,16 +31,16 @@ void test1()
   }
 
   CxxUtils::hexdump (std::cout, buf, 128, reinterpret_cast<uintptr_t> (buf));
-  std::cout << "\n";
+  std::println();
   CxxUtils::hexdump (std::cout, &buf[5], 128, reinterpret_cast<uintptr_t> (buf));
-  std::cout << "\n";
+  std::println();
   CxxUtils::hexdump (std::cout, buf, 99, reinterpret_cast<uintptr_t> (buf));
 }
 
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   // Granularity of this test.  Must be a multiple of the HW page size.
   const unsigned int BLOCK = 65536;
@@ -62,7 +63,7 @@ void test2()
                          reinterpret_cast<uintptr_t> (buf));
 
   mprotect (buf+BLOCK, BLOCK, PROT_NONE);
-  std::cout << "\n";
+  std::println();
   CxxUtils::safeHexdump (std::cout, buf+BLOCK-10, BLOCK+20,
                          reinterpret_cast<uintptr_t> (buf));
   mprotect (buf+BLOCK, BLOCK, PROT_WRITE);
@@ -73,7 +74,7 @@ void test2()
 
 int main()
 {
-  std::cout << "CxxUtils/hexdump_test\n";
+  std::println ("CxxUtils/hexdump_test");
   test1();
   test2();
   return 0;

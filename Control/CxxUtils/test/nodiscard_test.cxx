@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/nodiscard_test.cxx
@@ -7,7 +7,7 @@
  */
 
 #include "CxxUtils/nodiscard.h"
-#include <iostream>
+#include <print>
 ATLAS_NODISCARD
 int
 foo()
@@ -19,6 +19,6 @@ int
 main()
 {
   int bar = foo();
-  std::cout << bar << std::endl;
+  std::println ("{}", bar);
   return 0;
 }

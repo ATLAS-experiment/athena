@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file CxxUtils/test/Ring_test.cxx
  * @author scott snyder
@@ -13,13 +11,13 @@
 
 #undef NDEBUG
 #include "CxxUtils/Ring.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   CxxUtils::Ring<int> ring;
   assert (ring.getKeysDedup().empty());
@@ -61,7 +59,7 @@ void test1()
 
 int main()
 {
-  std::cout << "Ring_test\n";
+  std::println ("Ring_test");
   test1();
   return 0;
 }

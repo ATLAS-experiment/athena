@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/get_unaligned_test.cxx
@@ -12,6 +12,7 @@
 #include "CxxUtils/set_unaligned.h"
 #include "CxxUtils/restrict.h"
 #include <iostream>
+#include <print>
 #include <cassert>
 #include <vector>
 #include <algorithm>
@@ -21,13 +22,15 @@
 void compare (const uint8_t* arr, const std::vector<uint8_t>& exp)
 {
   if (!std::equal (exp.begin(), exp.end(), arr)) {
-    std::cout << "Comparison failure\n";
-    std::cout << "  expected:";
-    for (size_t i = 0; i < exp.size(); i++) std::cout << " " << static_cast<unsigned>(exp[i]);
-    std::cout << "\n";
-    std::cout << "  observed:";
-    for (size_t i = 0; i < exp.size(); i++) std::cout << " " << static_cast<unsigned>(arr[i]);
-    std::cout << "\n";
+    std::println ("Comparison failure");
+    std::print ("  expected:");
+    for (size_t i = 0; i < exp.size(); i++)
+      std::print (" {}", static_cast<unsigned>(exp[i]));
+    std::println();
+    std::print ("  observed:");
+    for (size_t i = 0; i < exp.size(); i++)
+      std::print (" {}", static_cast<unsigned>(arr[i]));
+    std::println();
     std::cout.flush();
     std::abort();
   }
@@ -36,7 +39,7 @@ void compare (const uint8_t* arr, const std::vector<uint8_t>& exp)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   uint8_t arr[11] = { 0 };
   uint8_t* p = arr+1;
   CxxUtils::set_unaligned<uint8_t> (p, 1);
@@ -109,7 +112,7 @@ void test1()
 
 int main()
 {
-  std::cout << "CxxUtils/set_unaligned_test\n";
+  std::println ("CxxUtils/set_unaligned_test");
   test1();
   return 0;
 }

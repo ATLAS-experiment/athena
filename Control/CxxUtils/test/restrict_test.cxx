@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/restrict_test.cxx
@@ -10,7 +10,7 @@
 
 #undef NDEBUG
 #include "CxxUtils/restrict.h"
-#include <iostream>
+#include <print>
 
 
 int foo (const int* ATH_RESTRICT p)
@@ -21,6 +21,6 @@ int foo (const int* ATH_RESTRICT p)
 
 int main()
 {
-  std::cout << "CxxUtils/restrict_test\n";
+  std::println ("CxxUtils/restrict_test");
   return 0;
 }

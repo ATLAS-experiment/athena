@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/ConcurrentBitset_test.cxx
@@ -43,7 +43,7 @@ extern "C" {
 #include <unordered_set>
 #include <sstream>
 #include <fstream>
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <cstring>
 
@@ -51,7 +51,7 @@ extern "C" {
 // Basic tests.
 void test_basic()
 {
-  std::cout << "test_basic\n";
+  std::println ("test_basic");
 
   CxxUtils::ConcurrentBitset bs0;
   assert (bs0.capacity() == 0);
@@ -128,7 +128,7 @@ void test_basic()
 // Reference.
 void test_reference()
 {
-  std::cout << "test_reference\n";
+  std::println ("test_reference");
 
   CxxUtils::ConcurrentBitset bs (128);
   const CxxUtils::ConcurrentBitset& cbs = bs;
@@ -168,13 +168,13 @@ void test_reference()
 // Iterate.
 void test_iterate()
 {
-  std::cout << "test_iterate\n";
+  std::println ("test_iterate");
 
   CxxUtils::ConcurrentBitset bs0;
   CxxUtils::ConcurrentBitset::const_iterator beg = bs0.begin();
   CxxUtils::ConcurrentBitset::const_iterator end = bs0.end();
   for (; beg != end; ++beg)
-    std::cout << "elt\n";
+    std::println ("elt");
   
   //std::vector<size_t> v0 (bs0.begin(), bs0.end());
   //assert (v0.empty());
@@ -241,7 +241,7 @@ void test_iterate()
 // Find.
 void test_find()
 {
-  std::cout << "test_find\n";
+  std::println ("test_find");
 
   CxxUtils::ConcurrentBitset bs (2048);
   assert (bs.find (123) == bs.end());
@@ -267,7 +267,7 @@ void test_find()
 // Insert.
 void test_insert()
 {
-  std::cout << "test_insert\n";
+  std::println ("test_insert");
 
   CxxUtils::ConcurrentBitset bs (3);
   assert (bs.capacity() == 3);
@@ -323,7 +323,7 @@ void test_insert()
 // Copy/assign/move
 void test_copy()
 {
-  std::cout << "test_copy\n";
+  std::println ("test_copy");
 
   CxxUtils::ConcurrentBitset bs1 (128);
   assert (bs1.capacity() == 128);
@@ -380,7 +380,7 @@ void test_copy()
 // Initializer list
 void test_initlist()
 {
-  std::cout << "test_initlist\n";
+  std::println ("test_initlist");
 
   CxxUtils::ConcurrentBitset bs1 { 10, 50 };
   assert (bs1.size() == 2);
@@ -404,7 +404,7 @@ void test_initlist()
 // Comparison
 void test_compare()
 {
-  std::cout << "test_compare\n";
+  std::println ("test_compare");
 
   CxxUtils::ConcurrentBitset bs1 { 10, 40, 50, 60 };
   CxxUtils::ConcurrentBitset bs2 { 10, 40, 50, 60 };
@@ -444,7 +444,7 @@ void test_compare()
 // Operators
 void test_operators()
 {
-  std::cout << "test_operators\n";
+  std::println ("test_operators");
 
   CxxUtils::ConcurrentBitset bs1 (256);
   CxxUtils::ConcurrentBitset bs2 (128);
@@ -486,7 +486,7 @@ void test_operators()
 // any/all/none/empty
 void test_anyall()
 {
-  std::cout << "test_anyall\n";
+  std::println ("test_anyall");
 
   CxxUtils::ConcurrentBitset bs (128);
   assert (bs.none());
@@ -679,7 +679,7 @@ void test_mt_iter()
 
 void test_mt()
 {
-  std::cout << "test_mt\n";
+  std::println ("test_mt");
 
   for (int i=0; i < 5; i++) {
     test_mt_iter();
@@ -778,7 +778,7 @@ public:
   void insert (size_t id)
   {
     if (!ck_hs_put (&m_hs, id, reinterpret_cast<const void*> (id))) {
-      std::cout << "ck_hs_put error\n";
+      std::println ("ck_hs_put error");
     }
   }
 
@@ -855,7 +855,7 @@ CKHSAdapter::CKHSAdapter()
                    128, // initial size
                    6602834))
   {
-    std::cout << "ck_hs_init error\n";
+    std::println ("ck_hs_init error");
   }
 }
 
@@ -1010,10 +1010,10 @@ TesterBase::TesterBase (const TestVectors& tv)
 
 void TesterBase::report()
 {
-  std::cout << "fill:    " << m_fill_timer.format();
-  std::cout << "copy:    " << m_copy_timer.format();
-  std::cout << "iterate: " << m_iterate_timer.format();
-  std::cout << "lookup:  " << m_lookup_timer.format();
+  std::println ("fill:    {}", m_fill_timer.format());
+  std::println ("copy:    {}", m_copy_timer.format());
+  std::println ("iterate: {}", m_iterate_timer.format());
+  std::println ("lookup:  {}", m_lookup_timer.format());
 }
 
 
@@ -1128,7 +1128,7 @@ template <class CONT>
 void perftest_one (const TestVectors& tv)
 {
   Tester<CONT> tester (tv);
-  std::cout << tester.name() << "\n";
+  std::println ("{}", tester.name());
   tester.test();
   tester.report();
 }
@@ -1157,7 +1157,7 @@ int main (int argc, char** argv)
 {
   if (argc > 2 && strcmp (argv[1], "--perf") == 0) {
 #ifdef NO_PERF
-    std::cout << " Performance tests disabled\n";
+    std::println (" Performance tests disabled");
 #else
     perftest (argv[2]);
 #endif

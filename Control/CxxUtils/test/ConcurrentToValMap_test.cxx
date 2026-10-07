@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentToValMap_test.cxx
@@ -20,7 +20,7 @@
 #include <memory>
 #include <mutex>
 #include <atomic>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -408,7 +408,7 @@ void test1a()
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   test1a<TestMapu>();
   assert (Payload::s_count == 0);
   test1a<TestMapi>();
@@ -554,7 +554,7 @@ void test2a()
 }
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   test2a<TestMapu>();
   assert (Payload::s_count == 0);
   test2a<TestMapi>();
@@ -616,7 +616,7 @@ void test_swap1()
 }
 void test_swap()
 {
-  std::cout << "test_swap\n";
+  std::println ("test_swap");
   test_swap1<TestMapu>();
   assert (Payload::s_count == 0);
   test_swap1<TestMapi>();
@@ -653,7 +653,7 @@ void test_nonconst1()
 // Test methods returning nonconst references to the mapped object.
 void test_nonconst()
 {
-  std::cout << "test_nonconst\n";
+  std::println ("test_nonconst");
   test_nonconst1<TestMapu>();
   assert (Payload::s_count == 0);
   test_nonconst1<TestMapi>();
@@ -881,7 +881,7 @@ void test4_iter()
 
 void test_threaded()
 {
-  std::cout << "test_threaded\n";
+  std::println ("test_threaded");
 
   for (int i=0; i < 5; i++) {
     test4_iter<TestMapu>();
@@ -896,7 +896,7 @@ void test_threaded()
 
 int main (int /*argc*/, char** /*argv*/)
 {
-  std::cout << "CxxUtils/ConcurrentToValMap_test\n";
+  std::println ("CxxUtils/ConcurrentToValMap_test");
   test1();
   test2();
   test_swap();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/vec_test_common.h
@@ -18,6 +18,7 @@
 #include <cassert>
 #include <cstdint>
 #include <iostream>
+#include <print>
 #include <limits>
 #include <type_traits>
 #include <typeinfo>
@@ -33,10 +34,10 @@ check(const VEC& v, const std::valarray<T>& a)
   assert(a.size() == N);
   for (size_t i = 0; i < N; ++i) {
     if (v[i] != a[i]) {
-      std::cerr << "Mismatch " << typeid(VEC).name() << " "
-                << typeid(std::valarray<T>).name() << " " << i << "\n";
+      std::println (std::cerr, "Mismatch {} {} {}",
+                    typeid(VEC).name(), typeid(std::valarray<T>).name(), i);
       for (size_t j = 0; j < N; j++) {
-        std::cerr << v[j] << " " << a[j] << "\n";
+        std::println (std::cerr, "{} {}", v[j], a[j]);
       }
       std::abort();
     }

@@ -38,7 +38,7 @@ extern "C" {
 #include <deque>
 #include <memory>
 #include <mutex>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -381,7 +381,7 @@ void test1a()
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   test1a<TestMapul>();
   test1a<TestMapip>();
   test1a<TestMappu>();
@@ -447,7 +447,7 @@ void test2a()
 }
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   test2a<TestMapul>();
   test2a<TestMapip>();
   test2a<TestMappu>();
@@ -533,7 +533,7 @@ void test3a()
 }
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
   test3a<TestMapul>();
   test3a<TestMapip>();
   test3a<TestMappu>();
@@ -608,7 +608,7 @@ void test_swap1()
 }
 void test_swap()
 {
-  std::cout << "test_swap\n";
+  std::println ("test_swap");
   test_swap1<TestMapul>();
   test_swap1<TestMapip>();
   test_swap1<TestMappu>();
@@ -853,7 +853,7 @@ void test4_iter()
 
 void test_threaded()
 {
-  std::cout << "test_threaded\n";
+  std::println ("test_threaded");
 
   for (int i=0; i < 5; i++) {
     test4_iter<TestMapul>();
@@ -1081,7 +1081,7 @@ CKHTAdapter::CKHTAdapter()
                    128, // initial size
                    6602834))
   {
-    std::cout << "ck_hs_init error\n";
+    std::println ("ck_hs_init error");
   }
 }
 #endif // HAVE_CK
@@ -1140,8 +1140,8 @@ TesterBase::TesterBase()
 
 void TesterBase::report()
 {
-  std::cout << "lookup:  " << m_lookup_timer.format();
-  std::cout << "iterate: " << m_iterate_timer.format();
+  std::println ("lookup:  {}", m_lookup_timer.format());
+  std::println ("iterate: {}", m_iterate_timer.format());
 }
 
 
@@ -1237,7 +1237,7 @@ void perftest_one()
   // Tester<> is large... allocate it from the heap rather than
   // from the stack.
   auto tester = std::make_unique<Tester<CONT >>();
-  std::cout << tester->name() << "\n";
+  std::println ("{}", tester->name());
   tester->test();
   tester->report();
 }
@@ -1261,14 +1261,14 @@ int main (int argc, char** argv)
 {
   if (argc >= 2 && strcmp (argv[1], "--perf") == 0) {
 #ifdef NO_PERF
-    std::cout << " Performance tests disabled\n";
+    std::println (" Performance tests disabled");
 #else
     perftest();
 #endif
     return 0;
   }
 
-  std::cout << "CxxUtils/ConcurrentMap_test\n";
+  std::println ("CxxUtils/ConcurrentMap_test");
   test1();
   test2();
   test3();

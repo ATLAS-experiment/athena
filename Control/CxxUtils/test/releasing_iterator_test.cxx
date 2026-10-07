@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/releasing_iterator_test.h
@@ -13,13 +13,13 @@
 #include "CxxUtils/releasing_iterator.h"
 #include <memory>
 #include <vector>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   std::vector<std::unique_ptr<int> > v1;
   for (int i = 0; i < 10; i++) {
@@ -42,7 +42,7 @@ void test1()
 
 int main()
 {
-  std::cout << "CxxUtils/releasing_iterator\n";
+  std::println ("CxxUtils/releasing_iterator");
   test1();
   return 0;
 }

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file CxxUtils/test/BitPackerUnpacker_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -19,7 +17,7 @@
 #include "TestTools/random.h"
 #include <vector>
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 
@@ -37,7 +35,7 @@ public:
 
 void test1 ATLAS_NOT_THREAD_SAFE ()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   std::vector<uint32_t> data;
   data.push_back (0x1eab8);
@@ -186,7 +184,7 @@ void test2 ATLAS_NOT_THREAD_SAFE ()
   testit2<BitPacker8,  BitUnpacker8,  TestStream<uint32_t> >  (8);
   testit2<BitPacker16, BitUnpacker16, TestStream<uint32_t> > (16);
 
-  std::cout << "test2\n";
+  std::println ("test2");
 }
 
 

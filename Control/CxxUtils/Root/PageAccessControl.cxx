@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #define DEBUG 1
@@ -122,7 +122,6 @@ bool PageAccessControl::accessed(const void* address) const {
   PageAccessControl::const_iterator ia(beginProtectedPtrs()),
     ea(endProtectedPtrs());
   while (!acc && ia != ea) {
-    //    std::cout << address << "page addr " << eaxx.addr << " ia " << ia->addr << " res " << ia->restored << std::endl;
     acc = (eaxx.addr == ia->addr && 0 != ia->restored);
     ++ia;
   }

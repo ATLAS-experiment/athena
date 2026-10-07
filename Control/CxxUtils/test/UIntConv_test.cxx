@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/SizedUInt.cxx
@@ -13,7 +13,7 @@
 
 #include "CxxUtils/UIntConv.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <cstdint>
 #include <type_traits>
 
@@ -26,7 +26,7 @@ void test1a (T x)
 }
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   test1a<uintptr_t> (123456789);
   test1a<unsigned long> (123456789);
@@ -42,7 +42,7 @@ void test1()
 
 int main()
 {
-  std::cout << "CxxUtils/UintConv_test\n";
+  std::println ("CxxUtils/UintConv_test");
   test1();
   return 0;
 }

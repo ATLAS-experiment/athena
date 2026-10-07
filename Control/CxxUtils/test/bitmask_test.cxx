@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/tests/bitmask_test.cxx
@@ -12,7 +12,7 @@
 #undef NDEBUG
 #include "CxxUtils/bitmask.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 enum class Bits { None=0, One=1, Two=2, Three=4, Four=8,
@@ -23,7 +23,7 @@ enum class Bits2 { None=0, Five=16, Six=32, Seven=64,
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   Bits b = Bits::None;
   b |= Bits::Two;
   assert (static_cast<unsigned>(b) == 2);
@@ -53,7 +53,7 @@ void test1()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   assert ((Bits::One | Bits2::Five) == 17);
   assert ((Bits::One & Bits2::None) == 0);
   assert ((Bits::One ^ Bits2::Six) == 33);
@@ -65,7 +65,7 @@ void test2()
 
 int main()
 {
-  std::cout << "bitmask_test\n";
+  std::println ("bitmask_test");
   test1();
   test2();
   return 0;

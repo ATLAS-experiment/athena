@@ -8,7 +8,7 @@
 
 #include "CxxUtils/Compressor.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <vector>
 
 
@@ -24,9 +24,10 @@ void testReduceToUS( const std::vector<float>& input )
 
   assert( output.size() == input.size() );
 
-  std::cout << "reduceToUS round-trip (" << input.size() << " values):" << std::endl;
+  std::println ("reduceToUS round-trip ({} values):",
+                input.size());
   for ( std::size_t i = 0; i < input.size(); ++i ) {
-    std::cout << "  in=" << input[i] << "  out=" << output[i] << std::endl;
+    std::println ("  in={}  out={}", input[i], output[i]);
   }
 }
 
@@ -46,12 +47,10 @@ void testReduce( const std::vector<float>& input, int nBits, bool ignoreSign = f
 
   assert( output.size() == input.size() );
 
-  std::cout << "reduce/expandToFloat round-trip"
-            << " (bits=" << nBits
-            << ( ignoreSign ? ", ignoreSign" : "" )
-            << ", " << input.size() << " values):" << std::endl;
+  std::println ("reduce/expandToFloat round-trip (bits={}{}, {} values):",
+                nBits, ( ignoreSign ? ", ignoreSign" : "" ), input.size());
   for ( std::size_t i = 0; i < input.size(); ++i ) {
-    std::cout << "  in=" << input[i] << "  out=" << output[i] << std::endl;
+    std::println ("  in={}  out={}", input[i], output[i]);
   }
 }
 

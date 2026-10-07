@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/throw_out_of_range_test.cxx
@@ -12,7 +12,7 @@
 #undef NDEBUG
 #include "CxxUtils/throw_out_of_range.h"
 #include <stdexcept>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -43,7 +43,7 @@ void test1()
 //coverity[root_function]
 int main()
 {
-  std::cout << "CxxUtils/throw_out_of_range_test\n";
+  std::println ("CxxUtils/throw_out_of_range_test");
   test1();
   return 0;
 }

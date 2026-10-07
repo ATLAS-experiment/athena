@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/iterator_range_test.cxx
@@ -14,7 +14,7 @@
 
 #include "CxxUtils/iterator_range.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <ranges>
 
 
@@ -30,7 +30,7 @@ void test1()
 
 int main()
 {
-  std::cout << "CxxUtils/iterator_range_test\n";
+  std::println ("CxxUtils/iterator_range_test");
   test1();
   return 0;
 }

@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <unistd.h>
 #include "CxxUtils/procmaps.h"
 #include "CxxUtils/page_access.h"
@@ -12,7 +12,7 @@
 // #define DEBUGIT 1
 using namespace std;
 int main(void) {
-  cout << "*** PageAccessControl_test starts ***" <<endl;
+  std::println ("*** PageAccessControl_test starts ***");
   long pagesize_ret = sysconf(_SC_PAGE_SIZE);
   if (pagesize_ret < 0 || pagesize_ret >= 1024*1024*1024) return 1;
   size_t pagesize = pagesize_ret;
@@ -34,7 +34,7 @@ int main(void) {
   //assert(pac.protectPage(pv, 10, PROT_READ));
   assert(pac.restorePageProt(pi));
   //assert(pac.restorePageProt(pv));
-  cout << "accessing restored pointer " << *pi << endl;
+  std::println ("accessing restored pointer {}", *pi);
 
   
 
@@ -42,6 +42,6 @@ int main(void) {
   free(p);
   free(pv);
 
-  cout << "*** PageAccessControl_test OK ***" <<endl;
+  std::println ("*** PageAccessControl_test OK ***");
   return 0;
 }

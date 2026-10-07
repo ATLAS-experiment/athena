@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/ClassName_test.cxx
@@ -11,7 +11,7 @@
 
 #undef NDEBUG
 #include "CxxUtils/ClassName.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -21,7 +21,7 @@
 void test1()
 {
   using CxxUtils::ClassName;
-  std::cout << "test1\n";
+  std::println ("test1");
   
   {
     ClassName cn ("Foo");
@@ -138,7 +138,7 @@ void test1()
 void test_eq()
 {
   using CxxUtils::ClassName;
-  std::cout << "test_eq\n";
+  std::println ("test_eq");
 
   assert (ClassName ("A::B<int>") == ClassName ("A::B<int>"));
   assert (ClassName ("A::B<int>") != ClassName ("X::B<int>"));
@@ -153,7 +153,7 @@ void test_eq()
 void test_match()
 {
   using CxxUtils::ClassName;
-  std::cout << "test_match\n";
+  std::println ("test_match");
 
   ClassName pat1 ("A::B<int>");
   ClassName pat2 ("std::vector<$T, std::allocator<$T> >");
@@ -192,7 +192,7 @@ void test_match()
 void test_subst()
 {
   using CxxUtils::ClassName;
-  std::cout << "test_subst\n";
+  std::println ("test_subst");
 
   ClassName pat1 ("std::vector<$T, std::allocator<$T> >");
   ClassName rep1 ("std::vector<$T>");
@@ -225,7 +225,7 @@ void test_subst()
 void test_rules()
 {
   using CxxUtils::ClassName;
-  std::cout << "test_rules\n";
+  std::println ("test_rules");
 
   ClassName::Rules rules;
 

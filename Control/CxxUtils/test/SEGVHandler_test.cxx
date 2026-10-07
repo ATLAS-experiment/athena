@@ -1,9 +1,9 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
-#include <iostream>
+#include <print>
 #include <signal.h>   /*sigaction*/
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,7 +20,7 @@
 using namespace std;
 
 int main ATLAS_NOT_THREAD_SAFE (void) {
-  cout << "*** SEGVHandler_test starts ***" <<endl;
+  std::println ("*** SEGVHandler_test starts ***");
   int rc=0;
   struct sigaction sa, stdSEGV;
   (void)sigaction(SIGSEGV,NULL,&stdSEGV);
@@ -65,11 +65,11 @@ int main ATLAS_NOT_THREAD_SAFE (void) {
   // String may have been allowed by prev. reads.  Lock it down again.
   assert(pac.forbidPage(pString));
   std::string strtmp = *pString;
-  cout << "reading from string " << strtmp << endl;
-  cout << "reading again from string " << *pString << endl;
+  std::println ("reading from string {}", strtmp);
+  std::println ("reading again from string {}", *pString);
   double xsecond = pPair->second;
-  cout << "reading double from pair " << xsecond << endl;
-  cout << "reading again double from pair " << pPair->second << endl;
+  std::println ("reading double from pair {}", xsecond);
+  std::println ("reading again double from pair {}", pPair->second);
 
   //restore default/old handler
   (void)sigaction(SIGSEGV,&stdSEGV,NULL);
@@ -77,12 +77,12 @@ int main ATLAS_NOT_THREAD_SAFE (void) {
   printf("read %d\n",*pInt);
   PtrAccessSEGVHandler::const_iterator i(h.beginAccessedPtrs()),
     e(h.endAccessedPtrs());
-  cout << "accessed ptrs" << endl;
+  std::println ("accessed ptrs");
   while (i != e) {
-    cout << '@' << hex << *i++ << endl; 
+    std::println ("@{}", *i++);
   }
   pString->~string();
   delete [] pool;
-  cout << "*** SEGVHandler_test OK ***" <<endl;
+  std::println ("*** SEGVHandler_test OK ***");
   return rc;
 }

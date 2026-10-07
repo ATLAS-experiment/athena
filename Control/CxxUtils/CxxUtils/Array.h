@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  Array.h
@@ -38,6 +38,8 @@
 
 #include "CxxUtils/Arrayrep.h"
 #include <iterator>
+#include <format>
+#include <sstream>
 
 
 namespace CxxUtils {
@@ -825,6 +827,29 @@ concept FromArrayrep =
 
 
 } // namespace CxxUtils
+
+
+namespace std {
+
+
+/**
+ * @brief Custom formatter for Array.
+ */
+template <unsigned int N>
+struct formatter<CxxUtils::Array<N> >
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format(const CxxUtils::Array<N>& a, FmtContext& ctx) const
+  {
+    std::ostringstream ss;
+    a.write_array (ss);
+    return formatter<string_view>::format (ss.str(), ctx);
+  }
+};
+
+
+} // namespace std
 
 
 #include "CxxUtils/Array.icc"

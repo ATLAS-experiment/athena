@@ -1,8 +1,6 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file CxxUtils/Root/MurmurHash2.cxx
  * @author scott snyder <snyder@bnl.gov>, derived from code by Austin Appleby
@@ -18,7 +16,7 @@
 #include "CxxUtils/MurmurHash2.h"
 #include <vector>
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <array>
 #include <bit>
 
@@ -54,7 +52,7 @@ uint32_t verificationTest (HASHTYP hash (const void*, int, HASHTYP))
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   assert (verificationTest<uint32_t> (CxxUtils::MurmurHash2) == 0x27864c1e);
   assert (verificationTest<uint32_t> (CxxUtils::MurmurHash2A) == 0x7fbd4396);
   assert (verificationTest<uint64_t> (CxxUtils::MurmurHash64A) == 0x1f0d3804);
@@ -64,7 +62,7 @@ void test1()
 
 int main()
 {
-  std::cout << "MurmurHash2_test\n";
+  std::println ("MurmurHash2_test");
   test1();
   return 0;
 }

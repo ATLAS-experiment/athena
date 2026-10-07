@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentPtrSet_test.cxx
@@ -37,7 +37,7 @@ extern "C" {
 #include <shared_mutex>
 #include <vector>
 #include <memory>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -146,7 +146,7 @@ using TestConstSet = CxxUtils::ConcurrentPtrSet<const int, TestUpdater>;
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   TestSet set {TestSet::Updater_t()};
 
   const size_t MAXKEYS = 1000;
@@ -255,7 +255,7 @@ void test1()
 // Bulk copy / insert.
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   std::vector<int> vdata { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
   std::vector<int*> data;
   for (int i = 0; i < 10; i++) {
@@ -300,7 +300,7 @@ void test2()
 // Const
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   TestConstSet set {TestConstSet::Updater_t()};
 
@@ -354,7 +354,7 @@ void test3()
 // Swap
 void test_swap()
 {
-  std::cout << "test_swap\n";
+  std::println ("test_swap");
 
   TestSet set1 {TestSet::Updater_t()};
   TestSet set2 {TestSet::Updater_t()};
@@ -579,7 +579,7 @@ void test4_iter()
 
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   for (int i=0; i < 5; i++) {
     test4_iter();
@@ -781,7 +781,7 @@ CKHTAdapter::CKHTAdapter()
                    128, // initial size
                    6602834))
   {
-    std::cout << "ck_hs_init error\n";
+    std::println ("ck_hs_init error");
   }
 }
 #endif // HAVE_CK
@@ -840,8 +840,8 @@ TesterBase::TesterBase()
 
 void TesterBase::report()
 {
-  std::cout << "lookup:  " << m_lookup_timer.format();
-  std::cout << "iterate: " << m_iterate_timer.format();
+  std::println ("lookup:  {}", m_lookup_timer.format());
+  std::println ("iterate: {}", m_iterate_timer.format());
 }
 
 
@@ -932,7 +932,7 @@ template <class CONT>
 void perftest_one()
 {
   auto tester = std::make_unique<Tester<CONT> >();
-  std::cout << tester->name() << "\n";
+  std::println ("{}", tester->name());
   tester->test();
   tester->report();
 }
@@ -956,14 +956,14 @@ int main (int argc, char** argv)
 {
   if (argc >= 2 && strcmp (argv[1], "--perf") == 0) {
 #ifdef NO_PERF
-    std::cout << " Performance tests disabled\n";
+    std::println (" Performance tests disabled");
 #else
     perftest();
 #endif
     return 0;
   }
 
-  std::cout << "CxxUtils/ConcurrentPtrSet_test\n";
+  std::println ("CxxUtils/ConcurrentPtrSet_test");
   test1();
   test2();
   test3();

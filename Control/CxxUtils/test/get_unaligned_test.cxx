@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/get_unaligned_test.cxx
@@ -11,14 +11,14 @@
 #undef NDEBUG
 #include "CxxUtils/get_unaligned.h"
 #include "CxxUtils/restrict.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <stdint.h>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   uint8_t arr[] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
   const uint8_t* p = arr+1;
   assert (CxxUtils::get_unaligned<uint8_t> (p) == 1);
@@ -76,7 +76,7 @@ void test1()
 
 int main()
 {
-  std::cout << "CxxUtils/get_unaligned_test\n";
+  std::println ("CxxUtils/get_unaligned_test");
   test1();
   return 0;
 }

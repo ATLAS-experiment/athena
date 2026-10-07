@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file xmalloc_test.cxx
@@ -13,7 +13,7 @@
 #include "CxxUtils/xmalloc.h"
 #include "TestTools/expect_exception.h"
 #include <new>
-#include <iostream>
+#include <print>
 
 
 void test1()
@@ -26,7 +26,7 @@ void test1()
 
 int main()
 {
-  std::cout << "CxxUtils/xmalloc_test\n";
+  std::println ("CxxUtils/xmalloc_test");
   test1();
   return 0;
 }

@@ -3,6 +3,7 @@
  */
 #undef NDEBUG
 #include <iostream>
+#include <print>
 #include <cstdint>
 #include <cassert>
 #include <format>
@@ -31,10 +32,13 @@ void run_test_case(T value) {
 
     // 3. Verify
     if (actual != expected) {
-        std::cerr << "[FAIL] Type Size: " << sizeof(T) << " bytes\n"
-                  << "Value (as int64): " << static_cast<int64_t>(value) << "\n"
-                  << "Expected: " << expected << "\n"
-                  << "Actual:   " << actual << "\n";
+        std::println (std::cerr,
+                      "[FAIL] Type Size: {} bytes\n"
+                      "Value (as int64): {}\n"
+                      "Expected: {}\n"
+                      "Actual:   {}",
+                      sizeof(T), static_cast<int64_t>(value),
+                      expected, actual);
         assert(false && "Output mismatch between HexString and std::format");
     }
 }
@@ -107,29 +111,29 @@ void test_constexpr() {
 }
 
 int main() {
-    std::cout << "Testing 8-bit integers...\n";
+  std::println ("Testing 8-bit integers...");
     test_integer_type<int8_t>();
     test_integer_type<uint8_t>();
 
-    std::cout << "Testing 16-bit integers...\n";
+    std::println ("Testing 16-bit integers...");
     test_integer_type<int16_t>();
     test_integer_type<uint16_t>();
 
-    std::cout << "Testing 32-bit integers...\n";
+    std::println ("Testing 32-bit integers...");
     test_integer_type<int32_t>();
     test_integer_type<uint32_t>();
 
-    std::cout << "Testing 64-bit integers...\n";
+    std::println ("Testing 64-bit integers...");
     test_integer_type<int64_t>();
     test_integer_type<uint64_t>();
 
-    std::cout << "Testing concatenation operators...\n";
+    std::println ("Testing concatenation operators...");
     test_operators();
 
-    std::cout << "Testing constexpr execution...\n";
+    std::println ("Testing constexpr execution...");
     test_constexpr();
 
-    std::cout << "All CxxUtils::HexString tests passed perfectly!\n";
+    std::println ("All CxxUtils::HexString tests passed perfectly!");
     
     return 0;
 }

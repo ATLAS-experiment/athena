@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/SimpleUpdater_test.cxx
@@ -14,7 +14,7 @@
 #include <algorithm>
 #include <vector>
 #include <memory>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -36,7 +36,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   std::vector<int> log;
 
   {
@@ -74,7 +74,7 @@ void test1()
 
 int main()
 {
-  std::cout << "CxxUtils/SimpleUpdater_test\n";
+  std::println ("CxxUtils/SimpleUpdater_test");
   test1();
   return 0;
 }

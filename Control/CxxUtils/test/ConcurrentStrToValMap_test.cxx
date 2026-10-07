@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentStrToValMap_test.cxx
@@ -20,7 +20,7 @@
 #include <memory>
 #include <mutex>
 #include <atomic>
-#include <iostream>
+#include <print>
 #include <sstream>
 #include <cassert>
 
@@ -177,9 +177,7 @@ void test1a()
   std::vector<std::string> keys;
 
   for (size_t i = 0; i < MAXKEYS; i++) {
-    std::ostringstream ss;
-    ss << i;
-    keys.push_back (ss.str());
+    keys.push_back (std::to_string (i));
   }
 
   assert (map.size() == 0);
@@ -385,7 +383,7 @@ void test1a()
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   test1a<TestMap>();
   assert (Payload::s_count == 0);
 }
@@ -545,7 +543,7 @@ void test2a()
 }
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   test2a<TestMap>();
   assert (Payload::s_count == 0);
 }
@@ -564,14 +562,10 @@ void test_swap1()
   std::vector<std::string> keys2;
 
   for (size_t i = 0; i < MAXKEYS; i++) {
-    std::ostringstream ss;
-    ss << i;
-    keys1.push_back (ss.str());
+    keys1.push_back (std::to_string (i));
   }
   for (size_t i = 0; i < MAXKEYS/2; i++) {
-    std::ostringstream ss;
-    ss << (i + MAXKEYS);
-    keys2.push_back (ss.str());
+    keys2.push_back (std::to_string (i + MAXKEYS));
   }
 
   for (size_t i = 0; i < MAXKEYS; i++) {
@@ -613,7 +607,7 @@ void test_swap1()
 }
 void test_swap()
 {
-  std::cout << "test_swap\n";
+  std::println ("test_swap");
   test_swap1<TestMap>();
   assert (Payload::s_count == 0);
 }
@@ -644,7 +638,7 @@ void test_nonconst1()
 // Test methods returning nonconst references to the mapped object.
 void test_nonconst()
 {
-  std::cout << "test_nonconst\n";
+  std::println ("test_nonconst");
   test_nonconst1<TestMap>();
   assert (Payload::s_count == 0);
 }
@@ -684,14 +678,10 @@ test4_Base<MAP>::test4_Base()
   : m_last_val (nwrites)
 {
   for (size_t i = 0; i < nwrites; i++) {
-    std::ostringstream ss;
-    ss << i;
-    m_keys.push_back (ss.str());
+    m_keys.push_back (std::to_string (i));
   }
   {
-    std::ostringstream ss;
-    ss << nwrites;
-    m_last_key = ss.str();
+    m_last_key = std::to_string (nwrites);
   }
 
   m_vals.reserve (nwrites);
@@ -876,7 +866,7 @@ void test4_iter()
 
 void test_threaded()
 {
-  std::cout << "test_threaded\n";
+  std::println ("test_threaded");
 
   for (int i=0; i < 5; i++) {
     test4_iter<TestMap>();
@@ -887,7 +877,7 @@ void test_threaded()
 
 int main (int /*argc*/, char** /*argv*/)
 {
-  std::cout << "CxxUtils/ConcurrentStrToValMap_test\n";
+  std::println ("CxxUtils/ConcurrentStrToValMap_test");
   test1();
   test2();
   test_swap();

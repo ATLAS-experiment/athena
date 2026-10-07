@@ -21,7 +21,7 @@
 // should be smart enough to call compression to short when 16 bits required. or maybe people should be aware that 16 bits is faster than 17?
  
 #include <vector>
-#include <iostream>
+#include <print>
 
 class Compressor{
 
@@ -37,11 +37,11 @@ public:
 		m_bits=bits;
 		m_bitStrip=true; // will be used to disable compression (already programmed for compressor but not decompressor.)
 		if (bits<12){
-			std::cout<<"WARNING -> Too large compression requested. Will leave 12 bits instead!"<<std::endl;
+			std::println ("WARNING -> Too large compression requested. Will leave 12 bits instead!");
 			m_bits=12;
 		}
 		else if(bits>=32 || bits==0){
-			std::cout<<"WARNING -> Compression to "<<bits<<" bits is not possible. Compressing to 31 bits !"<<std::endl;
+			std::println ("WARNING -> Compression to {} bits is not possible. Compressing to 31 bits !", bits);
 			m_bits=31;
 		}
 	}

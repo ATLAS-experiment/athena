@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/FPControl_test.cxx
@@ -13,7 +13,7 @@
 #include "CxxUtils/checker_macros.h"
 #include "CxxUtils/features.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <signal.h>
 #include <setjmp.h>
 
@@ -51,7 +51,7 @@ float testit (bool mask, bool expectsig)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
 #if HAVE_FEENABLEEXCEPT
   fedisableexcept (FE_DIVBYZERO);
@@ -84,7 +84,7 @@ void test1()
 
 int main()
 {
-  std::cout << "CxxUtils/FPControl_test\n";
+  std::println ("CxxUtils/FPControl_test");
   test1();
   return 0;
 }

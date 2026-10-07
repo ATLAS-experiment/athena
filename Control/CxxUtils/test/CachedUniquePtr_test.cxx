@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/CachedUniquePtr_test.cxx
@@ -12,7 +12,7 @@
 #undef NDEBUG
 #include "CxxUtils/CachedUniquePtr.h"
 #include <atomic>
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <thread>
 #include <shared_mutex>
@@ -32,7 +32,7 @@ std::atomic<int> P::s_count = 0; // C++17 only
 // Basic tests.
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   //int x1 = 0;
   //int x2 = 0;
   //int x4 = 0;
@@ -179,7 +179,7 @@ void ThreadingTest::threadedTest()
 // Threading test.
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   ThreadingTest test;
 #if 0
@@ -191,7 +191,7 @@ void test2()
 
 int main()
 {
-  std::cout << "CachedUniquePtr_test\n";
+  std::println ("CachedUniquePtr_test");
   test1();
   test2();
   return 0;

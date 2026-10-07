@@ -14,7 +14,7 @@
 #include "TestTools/expect_exception.h"
 #include <vector>
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <ranges>
 
 
@@ -69,7 +69,7 @@ void test1a(T& s2)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   CxxUtils::span<float> s1;
   assert (s1.size() == 0);
   assert (s1.size_bytes() == 0);
@@ -99,7 +99,7 @@ void test1()
 //coverity[root_function]
 int main()
 {
-  std::cout << "CxxUtils/span_test.cxx\n";
+  std::println ("CxxUtils/span_test.cxx");
   test1();
   return 0;
 }

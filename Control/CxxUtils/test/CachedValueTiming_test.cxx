@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 
 
@@ -23,7 +23,7 @@ const char* const description =
 #include <vector>
 #include <cmath>
 #include <cstdint>
-#include <iostream>
+#include <print>
 #include <cstdio>
 #include <string>
 #include <cassert>
@@ -239,7 +239,8 @@ double TestRand<OBJ>::doit (size_t ithread, size_t nloops)
 
 int main()
 {
-  std::cout << description << "\n\n";
+  std::println ("{}", description);
+  std::println ();
   
   for (int nthread = 1; nthread <= 8; ++nthread) {
     TestSeq<PCV> (10000).run (10000, nthread);

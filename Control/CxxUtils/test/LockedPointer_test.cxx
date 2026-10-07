@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/LockedPointer_test.cxx
@@ -12,7 +12,7 @@
 #undef NDEBUG
 #include "CxxUtils/LockedPointer.h"
 #include <mutex>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -23,7 +23,7 @@ void test1a (CxxUtils::LockedPointer<int> p)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   std::recursive_mutex m;
   int x = 42;
@@ -40,7 +40,7 @@ void test1()
 
 int main()
 {
-  std::cout << "CxxUtils/LockedPointer_test\n";
+  std::println ("CxxUtils/LockedPointer_test");
   test1();
   return 0;
 }

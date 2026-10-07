@@ -1,6 +1,6 @@
-prefetch address: 0 size: 1
-  prefetch address: 0
-  prefetch address: 0
+prefetch address: 0x0 size: 1
+  prefetch address: 0x0
+  prefetch address: 0x0
 prefetch address: 0x1 size: 1
   prefetch address: 0x1
   prefetch address: 0x1
@@ -10,8 +10,8 @@ prefetch address: 0x3f size: 1
 prefetch address: 0x40 size: 1
   prefetch address: 0x40
   prefetch address: 0x40
-prefetch address: 0 size: 2
-  prefetch address: 0
+prefetch address: 0x0 size: 2
+  prefetch address: 0x0
   prefetch address: 0x1
 prefetch address: 0x1 size: 2
   prefetch address: 0x1
@@ -25,8 +25,8 @@ prefetch address: 0x3f size: 2
 prefetch address: 0x40 size: 2
   prefetch address: 0x40
   prefetch address: 0x41
-prefetch address: 0 size: 64
-  prefetch address: 0
+prefetch address: 0x0 size: 64
+  prefetch address: 0x0
   prefetch address: 0x3f
 prefetch address: 0x1 size: 64
   prefetch address: 0x1
@@ -37,8 +37,8 @@ prefetch address: 0x3f size: 64
 prefetch address: 0x40 size: 64
   prefetch address: 0x40
   prefetch address: 0x7f
-prefetch address: 0 size: 67
-  prefetch address: 0
+prefetch address: 0x0 size: 67
+  prefetch address: 0x0
   prefetch address: 0x40
   prefetch address: 0x42
 prefetch address: 0x1 size: 67

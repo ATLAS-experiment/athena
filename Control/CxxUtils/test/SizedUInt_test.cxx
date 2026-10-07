@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 200223 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 200223,  CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/SizedUInt.cxx
@@ -13,14 +13,14 @@
 
 #include "CxxUtils/SizedUInt.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <cstdint>
 #include <type_traits>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   assert ((std::is_same_v<CxxUtils::detail::SizedUInt<1>::type, uint8_t>));
   assert ((std::is_same_v<CxxUtils::detail::SizedUInt<2>::type, uint16_t>));
   assert ((std::is_same_v<CxxUtils::detail::SizedUInt<4>::type, uint32_t>));
@@ -30,7 +30,7 @@ void test1()
 
 int main()
 {
-  std::cout << "CxxUtils/SizedUint_test\n";
+  std::println ("CxxUtils/SizedUint_test");
   test1();
   return 0;
 }
