@@ -74,6 +74,13 @@ def JsonMaterialWriterToolCfg(configFlags, name="JsonMaterialWriterTool", **kwar
   acc.setPrivateTools(CompFactory.ActsTrk.JsonMaterialWriterTool(name, **kwargs))
   return acc
 
+def MaterialDumperToolCfg(configFlags, name="MaterialDumperTool", **kwargs):
+  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+  from AthenaConfiguration.ComponentFactory import CompFactory
+  acc = ComponentAccumulator()
+  acc.setPrivateTools(CompFactory.ActsTrk.MaterialDumperTool(name, **kwargs))
+  return acc
+
 def MaterialMappingCfg(configFlags,
                        name="MaterialMapping",
                        StoreTracks=False,
@@ -101,12 +108,11 @@ def MaterialMappingCfg(configFlags,
       mapwriters += [acc.popToolsAndMerge(RootMaterialWriterToolCfg(configFlags))]
   if WriteJsonMaterialMap:
       mapwriters += [acc.popToolsAndMerge(JsonMaterialWriterToolCfg(configFlags))]
-  kwargs.setdefault("MaterialMapWriters", mapwriters)
+  # The mapped maps are dumped by the material dumper, which owns the writers
+  kwargs.setdefault("MaterialDumper", acc.popToolsAndMerge(MaterialDumperToolCfg(configFlags, MaterialMapWriters=mapwriters)))
 
   kwargs.setdefault("MappedMaterialTrackCollectionKey", OutputMappedMaterialTracks)
   kwargs.setdefault("UnmappedMaterialTrackCollectionKey", OutputUnmappedMaterialTracks)
-
-
 
   acc.addEventAlgo(CompFactory.ActsTrk.MaterialMapping(name, **kwargs), primary = True)
 
@@ -124,6 +130,34 @@ def MaterialMappingCfg(configFlags,
                                        OutStream="ACTSUNMAPPEDMATERIALWRITER",
                                        StoreSurface=StoreSurfInfo,
                                        MaterialTrackCollectionKey=OutputUnmappedMaterialTracks))
+
+  return acc
+
+
+def MaterialJsonDumpCfg(configFlags,
+                        name="MaterialJsonDump",
+                        FileName="material-maps",
+                        **kwargs) :
+  """Dump the material assigned to the tracking geometry (e.g. loaded from a
+  Root material map by the ITkMaterialDecoratorTool) with the Json material
+  writer. FileName is the output base name, without extension."""
+  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+  from AthenaConfiguration.ComponentFactory import CompFactory
+  acc = ComponentAccumulator()
+
+  # Need geometry
+  from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+  acc.merge( ActsTrackingGeometrySvcCfg(configFlags))
+  from MagFieldServices.MagFieldServicesConfig import AtlasFieldCacheCondAlgCfg
+  acc.merge(AtlasFieldCacheCondAlgCfg(configFlags))
+  from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
+  acc.merge(ActsGeometryContextAlgCfg(configFlags))
+
+  # Same dumper as the material mapping, here with only the Json writer
+  mapwriters = [acc.popToolsAndMerge(JsonMaterialWriterToolCfg(configFlags, FileName=FileName))]
+  kwargs.setdefault("MaterialDumper", acc.popToolsAndMerge(MaterialDumperToolCfg(configFlags, MaterialMapWriters=mapwriters)))
+
+  acc.addEventAlgo(CompFactory.ActsTrk.MaterialJsonDumpAlg(name, **kwargs), primary = True)
 
   return acc
 

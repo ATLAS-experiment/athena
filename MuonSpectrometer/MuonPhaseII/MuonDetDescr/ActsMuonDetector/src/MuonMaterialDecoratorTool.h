@@ -11,7 +11,7 @@
 
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Geometry/TrackingVolume.hpp"
-#include "ActsPlugins/Root/RootMaterialDecorator.hpp"
+#include "Acts/Material/IMaterialDecorator.hpp"
 
 namespace MuonGMR4{
 /** @brief Mutable tracking geometry visitor to load the material on the tracking surfaces
@@ -27,8 +27,9 @@ namespace MuonGMR4{
         virtual StatusCode finalize() override final;
 
     private:
+            /// Material map file, read with the Json reader for '.json' / '.cbor' and with the Root reader otherwise
             Gaudi::Property<std::string> m_materialMapFile{this, "MuonMaterialDbFile", "", ""};
-            std::unique_ptr<ActsPlugins::RootMaterialDecorator> m_matDecorator{};
+            std::unique_ptr<Acts::IMaterialDecorator> m_matDecorator{};
   };
 
 }

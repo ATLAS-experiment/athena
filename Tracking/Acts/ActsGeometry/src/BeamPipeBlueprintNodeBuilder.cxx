@@ -139,7 +139,8 @@ BeamPipeBlueprintNodeBuilder::buildBlueprintNode(
     // Place material on the outer cylindrical surface facing outward
     mat.configureFace(OuterCylinder,
                       Acts::AxisSpec::DeferredEquidistant(1, AxisRPhi),
-                      Acts::AxisSpec::DeferredEquidistant(35, AxisZ));
+                      Acts::AxisSpec::DeferredEquidistant(35, AxisZ),
+                      "BeamPipe_Material");
     // A solid cylinder from r=0 to beamPipeRadius, extending ±3 m in z
     mat.addStaticVolume(beamPipeTransform,
                         std::make_shared<Acts::CylinderVolumeBounds>(

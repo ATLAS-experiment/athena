@@ -25,7 +25,7 @@ StatusCode ActsTrk::MaterialMapping::initialize()
 
     ATH_CHECK(m_trackingGeometrySvc.retrieve());
 
-    ATH_CHECK(m_materialMapWriters.retrieve());
+    ATH_CHECK(m_materialDumper.retrieve());
 
     // Retrieve the material surfaces
     std::vector<const Acts::Surface*> materialSurfaces = {};
@@ -71,10 +71,8 @@ StatusCode ActsTrk::MaterialMapping::finalize()
     const ActsTrk::GeometryContext& geoContext{m_trackingGeometrySvc->getNominalContext()};
     Acts::TrackingGeometryMaterial detectorMaterial = m_materialMapper->finalizeMaps(*m_mappingState, geoContext.context());
 
-    // Loop over the available writers and write the maps
-    for (auto& materialWriter : m_materialMapWriters) {
-        materialWriter->writeMaterial(geoContext, detectorMaterial);
-    }
+    // Dump the maps through the material writers
+    m_materialDumper->dumpMaterial(geoContext, detectorMaterial);
 
     return StatusCode::SUCCESS;
 }
