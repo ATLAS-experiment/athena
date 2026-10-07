@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import textwrap
 import inspect
+from dataclasses import dataclass
 from functools import wraps
 import warnings
 
@@ -12,8 +13,8 @@ from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType, ExpertModeWarni
 import re
 
 def filter_dsids (filterList, config) :
-    """check whether the sample being run passes a"""
-    """possible DSID filter on the block"""
+    """check whether the sample being run passes a
+    possible DSID filter on the block"""
     if len(filterList) == 0:
         return True
     for dsid_filter in filterList:
@@ -29,9 +30,9 @@ def filter_dsids (filterList, config) :
     return False
 
 def alphanumeric_block_name(func):
-    """this wrapper ensures that the 'instanceName' of the various """
-    """config blocks is cleaned up of any non-alphanumeric characters """
-    """that may arise from using 'selectionName' in the naming."""
+    """this wrapper ensures that the 'instanceName' of the various
+    config blocks is cleaned up of any non-alphanumeric characters
+    that may arise from using 'selectionName' in the naming."""
     @wraps(func)
     def wrapper(*args, **kwargs):
         # Get the string returned by the 'instanceName()' method of a config block
@@ -47,35 +48,34 @@ def alphanumeric_block_name(func):
     return wrapper
 
 class BlockNameProcessorMeta(type):
-    """this meta class enforces the application of 'alphanumeric_block_names()' """
-    """to 'instanceName()' and will be used in the main ConfigBlock class in order """
-    """to propagate this rule also to all derived classes (the individual config blocks."""
+    """this meta class enforces the application of 'alphanumeric_block_names()'
+    to 'instanceName()' and will be used in the main ConfigBlock class in order
+    to propagate this rule also to all derived classes (the individual config blocks."""
     def __new__(cls, name, bases, dct):
         # Automatically apply alphanumeric-only decorator to 'instanceName()' method
         if 'instanceName' in dct and callable(dct['instanceName']):
             dct['instanceName'] = alphanumeric_block_name(dct['instanceName'])
         return super().__new__(cls, name, bases, dct)
 
+@dataclass(eq=False)
 class ConfigBlockOption:
     """the information for a single option on a configuration block"""
 
-    def __init__ (self, type=None, info='', noneAction='ignore', required=False,
-                  default=None, meta=None) :
-        self.type = type
-        self.info = info
-        self.required = required
-        self.noneAction = noneAction
-        self.default = default
-        self.meta = meta # metadata used only for downstream applications (e.g. docs)
+    type: object = None
+    info: str = ''
+    noneAction: str = 'ignore'
+    required: bool = False
+    default: object = None
+    meta: object = None # metadata used only for downstream applications (e.g. docs)
 
 
 
-class ConfigBlockDependency():
+@dataclass(eq=False)
+class ConfigBlockDependency:
     """Class encoding a blocks dependence on other blocks."""
 
-    def __init__(self, blockName, required=True):
-        self.blockName = blockName
-        self.required = required
+    blockName: str
+    required: bool = True
 
 
     def __eq__(self, name):
@@ -106,7 +106,7 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
     depend on what other blocks are scheduled before and afterwards,
     most importantly some algorithms will introduce shallow copies
     that subsequent algorithms will need to run on, and some
-    algorithms will add selection decorations that subquent algorithms
+    algorithms will add selection decorations that subsequent algorithms
     should use as preselections.
 
     The algorithms get created in a multi-step process (that may be
@@ -121,7 +121,7 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
     meta-configuration data attached to the algorithms, essentially an
     inversion of the approach in AnaAlgSequence in which the
     algorithms got created first with associated meta-configuration
-    and then get modified in susequent configuration steps.
+    and then get modified in subsequent configuration steps.
 
     For now this is mostly an empty base class, but another goal of
     this approach is to make it easier to build another configuration
@@ -188,15 +188,17 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
             ConfigBlock.instance_counts[cls] = 0
         # Note: we do need to check in the call stack that we are
         # in a real makeConfig situation, and not e.g. printAlgs
-        stack = inspect.stack()
-        for frame_info in stack:
+        frame = inspect.currentframe()
+        while frame is not None:
             # Get the class name (if any) from the frame
-            parent_cls = frame_info.frame.f_locals.get('self', None)
+            parent_cls = frame.f_locals.get('self', None)
             if parent_cls is None or not isinstance(parent_cls, ConfigBlock):
                 # If the frame does not belong to an instance of ConfigBlock, it's an external caller
-                if frame_info.function == "makeConfig":
+                if frame.f_code.co_name == "makeConfig":
                     ConfigBlock.instance_counts[cls] += 1
                     break
+            frame = frame.f_back
+        del frame
 
 
     def setBlockName(self, name):
@@ -289,9 +291,8 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
                     alg = getattr(alg, name)
                 else:
                     raise Exception(f"Tool {name} not found for override: {key}")
-            # Set the property on the algorithm/tool. This is probably a
-            # horrible hack, but `setattr` didn't work for me.
-            alg.__setattr__(parts[-1], value)
+            # Set the property on the algorithm/tool.
+            setattr(alg, parts[-1], value)
 
     def addDependency(self, dependencyName, required=True):
         """
@@ -342,14 +343,14 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
                 # in this case we will just check against the default value
                 self._expertModeSettings[name] = True
             elif not isinstance(expertMode, list):
-                raise TypeError (f'expertMode must be a list, got {type(expertMode)}')
+                raise TypeError (f'expertMode must be a list, got {expertMode.__class__}')
             else:
                 # here we will check against a list of custom values
                 self._expertModeSettings[name] = expertMode
 
         if meta is not None:
             if not isinstance(meta, dict):
-                raise TypeError(f'meta must be a dictionary, got {type(meta)}')
+                raise TypeError(f'meta must be a dictionary, got {meta.__class__}')
 
             unknown = set(meta) - {'choices', 'role'}
             if unknown:
@@ -452,7 +453,7 @@ class ConfigBlock(metaclass=BlockNameProcessorMeta):
 
     def __eq__(self, blockName):
         """
-        Implementation of == operator. Used for seaching configSeque.
+        Implementation of == operator. Used for searching configSeq.
         E.g. if blockName in configSeq:
         """
         return self._blockName == blockName

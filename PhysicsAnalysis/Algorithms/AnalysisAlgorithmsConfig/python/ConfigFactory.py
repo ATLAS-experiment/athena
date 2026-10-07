@@ -16,6 +16,7 @@
 
 
 import inspect
+from dataclasses import dataclass, field
 from AnalysisAlgorithmsConfig.ConfigSequence import ConfigSequence
 
 from AnaAlgorithm.Logging import logging
@@ -23,7 +24,7 @@ logCPAlgCfgFactory = logging.getLogger('CPAlgCfgFactory')
 
 
 def getDefaultArgs(func):
-    """return dict(par, val) with all func parameters with defualt values"""
+    """return dict(par, val) with all func parameters with default values"""
     signature = inspect.signature(func)
     return {
         k: v.default
@@ -43,68 +44,62 @@ def getFuncArgs(func):
 
 
 # class for config block information
-class FactoryBlock():
+@dataclass(eq=False)
+class FactoryBlock:
     """
     """
-    def __init__(self, alg, factoryName, algName, options, defaults, subAlgs=None):
-        self.alg = alg
-        self.factoryName = factoryName
-        self.algName = algName
-        self.options = options
-        self.defaults = defaults
-        if subAlgs is None:
-            self.subAlgs = {}
-        else:
-            self.subAlgs = subAlgs
+    alg: object
+    factoryName: object
+    algName: object
+    options: object
+    defaults: object
+    subAlgs: dict = field(default_factory=dict)
 
 
     def makeConfig(self, funcOptions):
-            """
-            Parameters
-            ----------
-            funcName: str
-                name associated with the algorithm. This name must have been added to the
-                list of available algorithms
-            funcOptions: dict
-                dictionary containing options for the algorithm read from the YAML file
+        """
+        Parameters
+        ----------
+        funcOptions: dict
+            dictionary containing options for the algorithm read from the YAML file
 
-            Returns
-            -------
-                configSequence
-            """
-            configSeq = ConfigSequence()
+        Returns
+        -------
+            configSequence, and the names of the arguments passed to the algorithm
+        """
+        configSeq = ConfigSequence()
 
-            func = self.alg
-            funcName = self.algName
-            funcDefaults = getDefaultArgs(func)
-            defaults = self.defaults
+        func = self.alg
+        funcName = self.algName
+        funcDefaults = getDefaultArgs(func)
+        defaults = self.defaults
 
-            args = {}
-            # loop over all options for the function
-            for arg in getFuncArgs(func):
-                # supplied from config file
-                if arg in funcOptions:
-                    args[arg] = funcOptions[arg]
-                # defaults set in function def
-                elif arg in funcDefaults:
-                    args[arg] = funcDefaults[arg]
-                # defaults provided when func was added
-                elif defaults is not None and arg in defaults:
-                    args[arg] = defaults[arg]
-                elif arg == 'seq':
-                    # 'seq' should be first arg of func (not needed for class)
-                    args[arg] = configSeq
-                elif arg == 'kwargs':
-                    # cannot handle arbitrary parameters
-                    continue
-                else:
-                    raise ValueError(f"{arg} is required for {funcName}")
-            if inspect.isclass(func):
-                configSeq.append(func(**args))
+        args = {}
+        # loop over all options for the function
+        for arg in getFuncArgs(func):
+            # supplied from config file
+            if arg in funcOptions:
+                args[arg] = funcOptions[arg]
+            # defaults set in function def
+            elif arg in funcDefaults:
+                args[arg] = funcDefaults[arg]
+            # defaults provided when func was added
+            elif defaults is not None and arg in defaults:
+                args[arg] = defaults[arg]
+            elif arg == 'seq':
+                # 'seq' should be first arg of func (not needed for class)
+                args[arg] = configSeq
+            elif arg == 'kwargs':
+                # cannot handle arbitrary parameters
+                continue
             else:
-                func(**args)
-            configSeq.setFactoryName(self.factoryName)
-            return configSeq, args.keys()
+                raise ValueError(f"{arg} is required for {funcName}")
+        if inspect.isclass(func):
+            configSeq.append(func(**args))
+        else:
+            func(**args)
+        configSeq.setFactoryName(self.factoryName)
+        return configSeq, args.keys()
 
 
 class ConfigFactory():
@@ -166,7 +161,7 @@ class ConfigFactory():
             elif pos in order:
                 order.insert(order.index(pos), algName)
             else:
-                raise ValueError(f"{pos} does not exit in already added config blocks")
+                raise ValueError(f"{pos} does not exist in already added config blocks")
         return
 
 
@@ -192,7 +187,7 @@ class ConfigFactory():
                                 seq.printOptions(verbose=printOpts)
                         except Exception:
                             # either a TypeError or something else due to missing args
-                            # try to print something for casses with required args
+                            # try to print something for cases with required args
                             for opt in algOptions:
                                 logCPAlgCfgFactory.info(f"    {opt}")
                 printAlg(algInfo.subAlgs)
@@ -207,12 +202,12 @@ class ConfigFactory():
         """
         try:
             if '.' in name:
-                algContext, algName = name.split('.')
+                algContext, algName = name.split('.', 1)
                 block = self._algs[algContext].subAlgs[algName]
             else:
                 block = self._algs[name]
         except KeyError:
-            raise ValueError(f"{name} config block not found. Make sure context is correct.")
+            raise ValueError(f"{name} config block not found. Make sure context is correct.") from None
         # Optional **kwargs are in the process of being retired. While the process is not fully complete
         # we still need to allow them to be passed. However, for blocks where they have already been retired
         # we want to raise an error so users don't experience undesirable behaviour where their extra options
