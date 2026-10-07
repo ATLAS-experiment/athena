@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@ namespace BJT{
       public:
 
         /// Constructor
-        qgTagger( const std::string& name );
+        using JSSTaggerBase::JSSTaggerBase;
 
         /// Run once at the start of the job to setup everything
         virtual StatusCode initialize() override;
@@ -40,19 +40,13 @@ namespace BJT{
 
         /// input parameters
         //Gaudi::Property<std::string> m_decorationName{this, "decorationName", "", "decoration name"};
-        Gaudi::Property<float> m_jetPtMin{this, "jetPtMin", 20., "minimum jet pT cut"};
-        Gaudi::Property<float> m_jetPtMax{this, "jetPtMax", 2000., "maximum jet pT cut"};
-        Gaudi::Property<float> m_jetEtaMax{this, "jetEtaMax", 4.5, "maximum jet eta cut"};
+        Gaudi::Property<float> m_jetPtMin{this, "JetPtMin", 20., "minimum jet pT cut"};
+        Gaudi::Property<float> m_jetPtMax{this, "JetPtMax", 2000., "maximum jet pT cut"};
 
         /// helper histogram tool
         ToolHandle<JetHelper::IVarTool> m_histTool2D {
           this, "HistoReader2D", "HistoInput2D", "Histogram reader as a JetHelper::IVarTool"
         };
-
-        /// WriteDecorHandle keys
-        SG::WriteDecorHandleKey<xAOD::JetContainer> m_decValidKinRangeKey{this, "ValidKinRangeName", "ValidKinRange", "SG key for ValidKinRange"};
-        SG::WriteDecorHandleKey<xAOD::JetContainer> m_decPassScoreKey{this, "PassScoreName", "PassScore", "SG key for PassScore"};
-        SG::WriteDecorHandleKey<xAOD::JetContainer> m_decCutScoreKey{this, "CutScoreName", "Cut_Score", "SG key for Cut_Score"};
 
     };
 

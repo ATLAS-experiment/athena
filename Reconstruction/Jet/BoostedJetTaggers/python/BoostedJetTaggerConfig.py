@@ -45,9 +45,9 @@ def qgTagAlgCfg(configFlags,
     tool_args.setdefault("HistoReader2D", histo2D)
 
     # configure the kinematic range
-    tool_args.setdefault("jetPtMin", 20.)
-    tool_args.setdefault("jetPtMax", 2000.)
-    tool_args.setdefault("jetEtaMax", 4.5)
+    tool_args.setdefault("JetPtMin", 20.)
+    tool_args.setdefault("JetPtMax", 2000.)
+    tool_args.setdefault("JetEtaMax", 4.5)
     
     # JSSTaggerBase write keys
     tool_args.setdefault("TaggedName", f"Tagged{wp_suffix}")
