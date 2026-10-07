@@ -283,31 +283,19 @@ void ActsLayerBuilder::buildBarrel(const Acts::GeometryContext &gctx,
                           << " modules in z");
 
     std::shared_ptr<Acts::Layer> layer;
-    if (m_cfg.mode == Mode::ITkStrip) {
+    if (m_cfg.mode == Mode::ITkStrip || m_cfg.mode == Mode::ITkPixelInner ||
+        m_cfg.mode == Mode::ITkPixelOuter) {
       size_t nBinsPhi = nModPhi * m_cfg.numberOfBinsFactor;
       size_t nBinsZ = nModZ * m_cfg.numberOfBinsFactor;
-      layer = m_cfg.layerCreator->cylinderLayer(gctx, surfaces, nBinsPhi,
-                                                nBinsZ, pl, transform,
-                                                std::move(approachDescriptor));
-    } else if (m_cfg.mode == Mode::ITkPixelInner ||
-               m_cfg.mode == Mode::ITkPixelOuter) {
-      size_t nBinsPhi = nModPhi * m_cfg.numberOfBinsFactor;
-      size_t nBinsZ = nModZ * m_cfg.numberOfBinsFactor;
-
-      // Special treatment to allow
-      // for larger bins at high-eta and potentially avoid missing innermost hits
-      // for tracks at shallow angles
-      if (m_cfg.mode == Mode::ITkPixelInner && key==0 ) {
-        nBinsZ = nModZ * m_cfg.numberOfInnermostLayerBinsFactor;
-      }
-      
-      layer = m_cfg.layerCreator->cylinderLayer(gctx, surfaces, nBinsPhi,
-                                                nBinsZ, pl, transform,
-                                                std::move(approachDescriptor));
+      layer = m_cfg.layerCreator->cylinderLayer(
+          gctx, surfaces, nBinsPhi, nBinsZ, pl, transform,
+          std::move(approachDescriptor), m_cfg.barrelNeighborWindow,
+          m_cfg.surfaceArrayOverfill);
     } else {
       layer = m_cfg.layerCreator->cylinderLayer(
           gctx, surfaces, Acts::equidistant, Acts::equidistant, pl, transform,
-          std::move(approachDescriptor));
+          std::move(approachDescriptor), m_cfg.barrelNeighborWindow,
+          m_cfg.surfaceArrayOverfill);
     }
 
     layersOutput.push_back(layer);
@@ -596,9 +584,10 @@ void ActsLayerBuilder::buildEndcap(const Acts::GeometryContext &gctx,
                    std::back_inserter(ownedSurfaces),
                    [](const auto &s) { return s->getSharedPtr(); });
 
-    auto layer = m_cfg.layerCreator->discLayer(gctx, ownedSurfaces, nBinsR,
-                                               nBinsPhi, pl, Transform3::Identity(),
-                                               std::move(approachDescriptor));
+    auto layer = m_cfg.layerCreator->discLayer(
+        gctx, ownedSurfaces, nBinsR, nBinsPhi, pl, Transform3::Identity(),
+        std::move(approachDescriptor), m_cfg.endcapNeighborWindow,
+        m_cfg.surfaceArrayOverfill);
 
     layersOutput.push_back(layer);
   }

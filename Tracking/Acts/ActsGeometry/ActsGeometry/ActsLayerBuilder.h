@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSGEOMETRY_ACTSLAYERBUILDER_H
@@ -14,12 +14,14 @@
 
 // ACTS
 #include "Acts/Geometry/ILayerBuilder.hpp"
+#include "Acts/Surfaces/SurfaceArray.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/BinningType.hpp"
 
 
 #include <mutex>
 #include <array>
+#include <cstdint>
 #include <iosfwd>
 #include <vector>
 #include <memory>
@@ -103,9 +105,19 @@ public:
     /// using a higher number will reduce the number of surfaces per bin, thus speeding up navigation, but increasing memory consumption.
     double numberOfBinsFactor = 5.0;
 
-    /// Special treatment for the innermost pixel layer to have more control on bin size to account for shallow angle tracks.
-    double numberOfInnermostLayerBinsFactor = 2.0;
-    
+    /// Bounds on the neighbor window of the barrel surface arrays, in bins
+    /// along (phi, z). The lookup sizes the window from the crossing angle
+    /// and the layer thickness, so the bound only has to cover the steepest
+    /// crossing.
+    Acts::SurfaceArray::NeighborWindow barrelNeighborWindow{{0, 0}, {1, 2}};
+
+    /// Bounds on the neighbor window of the endcap surface arrays, in bins
+    /// along (r, phi).
+    Acts::SurfaceArray::NeighborWindow endcapNeighborWindow{{0, 0}, {2, 1}};
+
+    /// Extra cells per direction and axis that each surface fills around its
+    /// footprint in the surface arrays.
+    std::uint8_t surfaceArrayOverfill = 0;
   };
 
   /// Constructor
