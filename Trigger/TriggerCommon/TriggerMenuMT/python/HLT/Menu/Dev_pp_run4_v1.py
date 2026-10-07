@@ -31,7 +31,9 @@ def setupMenu():
     chains['Bphysics'] += []
     chains['UnconventionalTracking'] += []
     chains['Combined'] += []
-    chains['Beamspot'] += []
+    chains['Beamspot'] += [
+        ChainProp(name='EF_beamspot_trkFS_trkfast_BeamSpotPEB_L1All' , l1SeedThresholds=['FSNOSEED'], stream=['BeamSpot'], groups=['RATE:BeamSpot',  'BW:BeamSpot']+DevGroup)
+    ]
     chains['MinBias'] += []
     chains['Calib'] += []
     chains['Streaming'] += []

@@ -13,7 +13,6 @@
 #include "SCT_ConditionsData/SCT_ByteStreamErrors.h"
 #include "ITkStripCabling/IITkStripCablingTool.h"
 #include "SCT_ConditionsTools/ISCT_ByteStreamErrorsTool.h"
-#include "SCT_ConditionsTools/ISCT_ConfigurationConditionsTool.h"
 #include "Identifier/IdContext.h"
 
 #include "GaudiKernel/ToolHandle.h"
@@ -322,12 +321,6 @@ class ITkStripsRodDecoder : public extends<AthAlgTool, IITkStripsRodDecoder>
                                          "ITkStripCablingTool", 
                                          "ITkStripCablingTool", 
                                          "Tool to retrieve ITkStrip Cabling"};
-
-  /** Service that keeps track of configuration conditions. */
-  ToolHandle<ISCT_ConfigurationConditionsTool> m_configTool{this, 
-                                                            "ConfigTool",
-                                                            "SCT_ConfigurationConditionsTool/InDetSCT_ConfigurationConditionsTool", 
-                                                            "Tool to retrieve SCT Configuration Tool"};
 
   /** Total number of single strips with hit decoded in condensed mode */
   mutable std::atomic_uint m_singleCondHitNumber{0};

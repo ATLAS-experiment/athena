@@ -2,6 +2,7 @@
 
 from TrigInDetConfig.InnerTrackerTrigSequence import InnerTrackerTrigSequence
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
+from AthenaConfiguration.Enums import Format
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -36,7 +37,8 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
                       ('TrigRoiDescriptorCollection',       str(self.rois)),
                       ('TagInfo' ,                          'DetectorStore+ProcessingTags' )} )
 
-    if self.flags.Input.isMC:
+    isByteStream = self.flags.Input.Format == Format.BS
+    if not isByteStream:
         ViewDataVerifier.DataObjects |= {( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
                                          ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
                                          ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map')}
@@ -64,10 +66,21 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
                   ( 'InDetSimDataCollection' , 'ITkPixelSDO_Map') ]
       acc.merge(SGInputLoaderCfg(self.flags, Load=loadRDOs))
 
+    if self.flags.Input.Format == Format.BS:
+      if self.flags.Detector.EnableITkPixel:
+        from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingAlgCfg
+        acc.merge( ITkPixelDecodingAlgCfg(self.flags) )
+
+      if self.flags.Detector.EnableITkStrip:
+        from ITkStripsByteStreamCnv.ITkStripByteStreamCnvConfig import ITkStripRawDataProviderCfg
+        acc.merge(ITkStripRawDataProviderCfg(self.flags))
+
     #Clusterisation
     from InDetConfig.InDetPrepRawDataFormationConfig import ITkTrigPixelClusterizationCfg, ITkTrigStripClusterizationCfg
-    acc.merge(ITkTrigPixelClusterizationCfg(self.flags, roisKey=self.rois, signature=signature))
-    acc.merge(ITkTrigStripClusterizationCfg(self.flags, roisKey=self.rois, signature=signature))
+    if self.flags.Detector.EnableITkPixel:
+      acc.merge(ITkTrigPixelClusterizationCfg(self.flags, roisKey=self.rois, signature=signature))
+    if self.flags.Detector.EnableITkStrip:
+      acc.merge(ITkTrigStripClusterizationCfg(self.flags, roisKey=self.rois, signature=signature))
     return acc
         
   def viewDataVerifierAfterPattern(self, viewVerifier='IDViewDataVerifierForAmbi') -> ComponentAccumulator:

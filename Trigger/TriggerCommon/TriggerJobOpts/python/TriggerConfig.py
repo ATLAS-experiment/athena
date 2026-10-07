@@ -688,7 +688,7 @@ def triggerRunCfg( flags, menu=None ):
         from HLTSeeding.HLTSeedingConfig import HLTSeedingCfg
         hltSeedingAcc = HLTSeedingCfg( flags )
         
-        if flags.Input.isMC and (flags.Input.Format is not Format.BS):
+        if flags.Input.isMC:
             from AthenaConfiguration.Enums import LHCPeriod
             if flags.GeoModel.Run > LHCPeriod.Run3:
                 from InDetConfig.TrackRecoConfig import SiDetectorElementStatusCfg
