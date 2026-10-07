@@ -25,6 +25,8 @@ void GeneralTauPlots::initializePlots(){
    m_ptHighPt = Book1D("ptHighPt", m_sTauJetContainerName+" HighPt"+"; pt; # Taus",20, 0.0, 1500.0);
    m_RNNEleScore = Book1D("RNNEleScore", m_sTauJetContainerName+" RNNEleScore;RNNEleScore;# Tau", 50,0.,1.);
    m_RNNEleScoreSigTrans = Book1D("RNNEleScoreSigTrans", m_sTauJetContainerName+" RNNEleScoreSigTrans;RNNEleScoreSigTrans;"+"# Tau", 50,0.,1.);
+   m_GNNEleScore = Book1D("GNNEleScore", m_sTauJetContainerName+" GNNEleScore;GNNEleScore;# Tau", 75,0.,15.);
+   m_GNNEleScoreSigTrans = Book1D("GNNEleScoreSigTrans", m_sTauJetContainerName+" GNNEleScoreSigTrans;GNNEleScoreSigTrans;"+"# Tau", 50,0.,1.);
    m_GNTauScore = Book1D("GNTauScore", m_sTauJetContainerName+" GNTauScore;GNTauScore;# Tau", 50,0.,1.);
    m_GNTauScoreSigTrans = Book1D("GNTauScoreSigTrans", m_sTauJetContainerName+" GNTauScoreSigTrans;GNTauScoreSigTrans;"+"# Tau", 50,0.,1.);
    m_ptGNTauLoose = Book1D("ptGNTauSigLoose",m_sTauJetContainerName+" GNTauSigLoose; pt; # Taus", 20, 0.0, 150.0);
@@ -62,6 +64,14 @@ void GeneralTauPlots::fill(const xAOD::TauJet& tau, float weight) {
      float rnnScore = acc_RNNEleScoreSigTrans(tau);
      m_RNNEleScoreSigTrans->Fill(rnnScore, weight);
   }
+  static const SG::ConstAccessor<float> acc_GNNEleScore("TauGNNeVetoScore");
+  if ( acc_GNNEleScore.isAvailable(tau) ) {
+     m_GNNEleScore->Fill(acc_GNNEleScore(tau), weight);
+  } 
+  static const SG::ConstAccessor<float> acc_GNNEleScoreSigTrans("TauGNNeVetoSigTrans");
+  if ( acc_GNNEleScoreSigTrans.isAvailable(tau) ) {
+     m_GNNEleScoreSigTrans->Fill(acc_GNNEleScoreSigTrans(tau), weight);
+  } 
   static const SG::ConstAccessor<float> acc_GNTauScore("GNTauScore_v0prune");
   if ( acc_GNTauScore.isAvailable(tau) ) {
      float gntauScore = acc_GNTauScore(tau);
