@@ -23,14 +23,16 @@ StatusCode TauTrackFinder::initialize() {
 
   // retrieve tools
   ATH_CHECK( m_trackSelectorTool_tau.retrieve() );
-  ATH_CHECK( m_trackToVertexTool.retrieve() );
-  ATH_CHECK( m_caloExtensionTool.retrieve() );
+
+  if(!m_trackToVertexTool.empty()){
+     ATH_CHECK( m_trackToVertexTool.retrieve() );
+     m_applyZ0cut = true;
+  }
+
   ATH_CHECK( m_trackToVertexIPEstimator.retrieve() );
 
   // initialize ReadHandleKey
   ATH_CHECK( m_trackPartInputContainer.initialize() );
-  // use CaloExtensionTool when key is empty 
-  ATH_CHECK( m_ParticleCacheKey.initialize(SG::AllowEmpty) );
   // allow empty for LRT
   ATH_CHECK( m_largeD0TracksInputContainer.initialize(SG::AllowEmpty) );
 
@@ -44,6 +46,15 @@ StatusCode TauTrackFinder::initialize() {
     ATH_CHECK( m_jetContainer.initialize(SG::AllowEmpty) );
   }
 
+  // Track-Calo extrapolation
+  if(m_caloExtensionTool.empty() && m_ParticleCacheKey.empty()){
+     m_bypassExtrapolator = true;  
+  }
+  ATH_CHECK( m_ParticleCacheKey.initialize(SG::AllowEmpty) );
+  if(!m_caloExtensionTool.empty()) {
+     ATH_CHECK( m_caloExtensionTool.retrieve() );
+  } 
+  
   ATH_CHECK( m_beamSpotKey.initialize(inTrigger()) );
 
   return StatusCode::SUCCESS;

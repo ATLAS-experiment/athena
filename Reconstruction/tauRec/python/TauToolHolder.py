@@ -86,7 +86,6 @@ def TauTrackFinderCfg(flags):
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     result.merge(BeamSpotCondAlgCfg(flags))
 
-    from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
     from TrkConfig.TrkVertexFitterUtilsConfig import AtlasTrackToVertexIPEstimatorCfg
     from InDetConfig.InDetTrackSelectorToolConfig import TauRecInDetTrackSelectorToolCfg
@@ -102,7 +101,7 @@ def TauTrackFinderCfg(flags):
                                     MaxJetDrTau = 0.2,
                                     MaxJetDrWide = 0.4,
                                     TrackSelectorToolTau      = result.popToolsAndMerge(TauRecInDetTrackSelectorToolCfg(flags)),
-                                    TrackToVertexTool         = result.popToolsAndMerge(TrackToVertexCfg(flags)),
+                                    TrackToVertexTool         = "",
                                     ParticleCaloExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)),
                                     tauParticleCache = getParticleCache(flags), # only returns a string
                                     removeDuplicateCoreTracks = flags.Tau.RemoveDupeCoreTracks,

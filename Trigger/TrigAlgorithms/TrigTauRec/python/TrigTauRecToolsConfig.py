@@ -29,9 +29,6 @@ def trigTauTrackFinderCfg(flags, name='', TrackParticlesContainer=''):
     from TrackToVertex.TrackToVertexConfig import TrackToVertexCfg
     TrackToVertexTool = acc.popToolsAndMerge(TrackToVertexCfg(flags))
 
-    from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
-    ParticleCaloExtensionTool = acc.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags))
-
     from InDetConfig.InDetTrackSelectorToolConfig import TrigTauInDetTrackSelectorToolCfg
     TrigTauInDetTrackSelectorTool = acc.popToolsAndMerge(TrigTauInDetTrackSelectorToolCfg(flags))
 
@@ -43,9 +40,7 @@ def trigTauTrackFinderCfg(flags, name='', TrackParticlesContainer=''):
         TrackToVertexTool               = TrackToVertexTool,
         Key_trackPartInputContainer     = TrackParticlesContainer,
         maxDeltaZ0wrtLeadTrk            = 0.75*mm,
-        removeTracksOutsideZ0wrtLeadTrk = True,
-        ParticleCaloExtensionTool       = ParticleCaloExtensionTool,
-        BypassExtrapolator              = True,
+        ParticleCaloExtensionTool       = "",
         tauParticleCache                = "",
         TrackToVertexIPEstimator        = AtlasTrackToVertexIPEstimator,
     ))
