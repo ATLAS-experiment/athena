@@ -6,6 +6,7 @@ from AnalysisAlgorithmsConfig.ConfigPropertySubstitution import (
     substituteValue,
 )
 from AthenaConfiguration.Enums import LHCPeriod, FlagEnum
+from dataclasses import dataclass, field, InitVar
 import re
 
 import warnings
@@ -37,7 +38,7 @@ class ExpertModeWarning(Warning):
     """Warning raised when an expert-only configuration option is used."""
     pass
 # Default filter: error out unless the user overrides
-if not any(f[0] == 'error' and f[2] is ExpertModeWarning for f in warnings.filters):
+if not any(f[2] is ExpertModeWarning for f in warnings.filters):
     warnings.simplefilter('error', ExpertModeWarning)
 
 # Route Python warnings through the logging system so they appear in
@@ -91,6 +92,9 @@ class ConfigDeprecationWarning(FutureWarning):
     in a future release."""
 
 
+_algPostfixExpr = re.compile ('^[_a-zA-Z0-9]*$')
+
+
 class DataType(FlagEnum):
     """holds the various data types as an enum"""
     Data = 'data'
@@ -98,37 +102,38 @@ class DataType(FlagEnum):
     FastSim = 'fastsim'
 
 
+@dataclass(eq=False)
 class SelectionConfig :
     """all the data for a given selection that has been registered
 
     the bits argument is for backward compatibility, does nothing, and will be
     removed in the future."""
 
-    def __init__ (self, selectionName, decoration,
-                  *, bits=0, preselection=None, comesFrom = '',
-                  writeToOutput=True) :
+    selectionName: InitVar[str]
+    decoration: str
+    bits: InitVar[int] = field(default=0, kw_only=True)
+    preselection: object = field(default=None, kw_only=True)
+    comesFrom: str = field(default='', kw_only=True)
+    writeToOutput: bool = field(default=True, kw_only=True)
+    name: str = field(init=False)
+
+    def __post_init__ (self, selectionName, bits) :
         self.name = selectionName
-        self.decoration = decoration
-        if preselection is not None :
-            self.preselection = preselection
-        else :
+        if self.preselection is None :
             self.preselection = (selectionName == '')
-        self.comesFrom = comesFrom
-        self.writeToOutput = writeToOutput
 
 
 
+@dataclass(eq=False)
 class OutputConfig :
     """all the data for a given variables in the output that has been registered"""
 
-    def __init__ (self, origContainerName, variableName,
-                  *, noSys, enabled, auxType) :
-        self.origContainerName = origContainerName
-        self.outputContainerName = None
-        self.variableName = variableName
-        self.noSys = noSys
-        self.enabled = enabled
-        self.auxType = auxType
+    origContainerName: str
+    variableName: str
+    noSys: object = field(kw_only=True)
+    enabled: object = field(kw_only=True)
+    auxType: object = field(kw_only=True)
+    outputContainerName: object = field(default=None, init=False)
 
     def __repr__ (self):
         return f'OutputConfig("{self.outputContainerName}.{self.variableName}" [enabled={self.enabled}])'
@@ -161,7 +166,7 @@ class ContainerConfig :
 
     def currentName (self, *, nominal=False) :
         if not self.names :
-            raise Exception ("should not get here, reading container name before created: " + self.name)
+            raise RuntimeError (f"should not get here, reading container name before created: {self.name}")
         result = self.names[-1]
         if nominal :
              result = result.replace("%SYS%", "NOSYS")
@@ -278,7 +283,7 @@ class ConfigAccumulator :
                 # allow possible string argument for `geometry` and convert it to enum
                 geometry = LHCPeriod(geometry)
                 if geometry is LHCPeriod.Run1:
-                    raise ValueError ("invalid Run geometry: %s" % geometry.value)
+                    raise ValueError (f"invalid Run geometry: {geometry.value}")
                 flags.GeoModel.Run = geometry
             if dsid != 0:
                 flags.Input.MCChannelNumber = dsid
@@ -315,7 +320,7 @@ class ConfigAccumulator :
         self._outputContainers = {}
         self._algorithms = {}
         self._currentAlg = None
-        self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]+')
+        self._selectionNameExpr = re.compile ('[A-Za-z_][A-Za-z_0-9]*')
         self.setSourceName ('EventInfo', 'EventInfo')
         self.setContainerMeta ('EventInfo', "nonContainer", True)
         self._eventcutflow = {}
@@ -412,8 +417,8 @@ class ConfigAccumulator :
         instanceName method, which will be used to generate the postfix
         automatically."""
         # make sure the postfix matches the expected format ([_a-zA-Z0-9]*)
-        if re.compile ('^[_a-zA-Z0-9]*$').match (postfix) is None :
-            raise ValueError ('invalid algorithm postfix: ' + postfix)
+        if _algPostfixExpr.match (postfix) is None :
+            raise ValueError (f'invalid algorithm postfix: {postfix}')
         if postfix == '' :
             self._algPostfix = ''
         elif postfix[0] != '_' :
@@ -436,7 +441,7 @@ class ConfigAccumulator :
         """create a new algorithm and register it as the current algorithm"""
         name = self._algPrefix + name + self._algPostfix
         if name in self._algorithms :
-            raise Exception ('duplicate algorithms: ' + name + ' with algPostfix=' + self._algPostfix)
+            raise ValueError (f'duplicate algorithms: {name} with algPostfix={self._algPostfix}')
         if reentrant:
             alg = DualUseConfig.createReentrantAlgorithm (type, name)
         else:
@@ -455,56 +460,44 @@ class ConfigAccumulator :
         return alg
 
 
-    def createService (self, type, name, isSingleton=True) :
-        '''create a new service and register it as the "current algorithm"'''
+    def _createServiceOrTool (self, type, name, isSingleton, kind, create, add) :
+        """shared implementation of createService and createPublicTool"""
         if not isSingleton:
             name = self._algPrefix + name + self._algPostfix
         if isSingleton and name in ConfigAccumulator._singleton_registry:
-            service = ConfigAccumulator._singleton_registry[name]
-            self._algorithms[name] = service
-            self._currentAlg = service
-            return service
+            component = ConfigAccumulator._singleton_registry[name]
+            self._algorithms[name] = component
+            self._currentAlg = component
+            return component
         if name in self._algorithms :
-            raise Exception ('duplicate service: ' + name)
-        service = DualUseConfig.createService (type, name)
+            raise ValueError (f'duplicate {kind}: {name}')
+        component = create (type, name)
         # Avoid importing AthenaCommon.AppMgr in a CA Athena job
         # as it modifies Gaudi behaviour
         if DualUseConfig.isAthena:
-            self.CA.addService(service)
+            add (component)
         else:
             # We're not, so let's remember this as a "normal" algorithm:
-            self._algSeq += service
-        self._algorithms[name] = service
-        self._currentAlg = service
+            self._algSeq += component
+        self._algorithms[name] = component
+        self._currentAlg = component
         if isSingleton:
-            ConfigAccumulator._singleton_registry[name] = service
-        return service
+            ConfigAccumulator._singleton_registry[name] = component
+        return component
+
+
+    def createService (self, type, name, isSingleton=True) :
+        '''create a new service and register it as the "current algorithm"'''
+        return self._createServiceOrTool (
+            type, name, isSingleton, 'service', DualUseConfig.createService,
+            lambda service: self.CA.addService(service))
 
 
     def createPublicTool (self, type, name, isSingleton=True) :
         '''create a new public tool and register it as the "current algorithm"'''
-        if not isSingleton:
-            name = self._algPrefix + name + self._algPostfix
-        if isSingleton and name in ConfigAccumulator._singleton_registry:
-            tool = ConfigAccumulator._singleton_registry[name]
-            self._algorithms[name] = tool
-            self._currentAlg = tool
-            return tool
-        if name in self._algorithms :
-            raise Exception ('duplicate public tool: ' + name)
-        tool = DualUseConfig.createPublicTool (type, name)
-        # Avoid importing AthenaCommon.AppMgr in a CA Athena job
-        # as it modifies Gaudi behaviour
-        if DualUseConfig.isAthena:
-            self.CA.addPublicTool(tool)
-        else:
-            # We're not, so let's remember this as a "normal" algorithm:
-            self._algSeq += tool
-        self._algorithms[name] = tool
-        self._currentAlg = tool
-        if isSingleton:
-            ConfigAccumulator._singleton_registry[name] = tool
-        return tool
+        return self._createServiceOrTool (
+            type, name, isSingleton, 'public tool', DualUseConfig.createPublicTool,
+            lambda tool: self.CA.addPublicTool(tool))
 
 
     def addPrivateTool (self, propertyName, toolType) :
@@ -547,9 +540,9 @@ class ConfigAccumulator :
             self._containerConfig[containerName] = ContainerConfig (containerName, sourceName = None, noSysSuffix = self._noSysSuffix)
         config = self._containerConfig[containerName]
         if config.sourceName is not None :
-            raise Exception ("trying to write container configured for input: " + containerName)
+            raise ValueError (f"trying to write container configured for input: {containerName}")
         if config.names :
-            raise Exception ("trying to write container twice: " + containerName)
+            raise ValueError (f"trying to write container twice: {containerName}")
         if isMet is not None :
             config.isMet = isMet
         return config.appendStep()
@@ -566,7 +559,7 @@ class ConfigAccumulator :
             return f"{containerName}_%SYS%"
 
         if containerName not in self._containerConfig :
-            raise Exception ("no source container for: " + containerName)
+            raise KeyError (f"no source container for: {containerName}")
         return self._containerConfig[containerName].currentName(nominal=nominal)
 
 
@@ -574,7 +567,7 @@ class ConfigAccumulator :
         """register that a copy of the container will be made and return
         its name"""
         if containerName not in self._containerConfig :
-            raise Exception ("unknown container: " + containerName)
+            raise KeyError (f"unknown container: {containerName}")
         return self._containerConfig[containerName].appendStep()
 
 
@@ -585,10 +578,10 @@ class ConfigAccumulator :
         made yet and the copy is needed to allow modifications, etc.
         """
         if containerName not in self._containerConfig :
-            raise Exception ("no source container for: " + containerName)
+            raise KeyError (f"no source container for: {containerName}")
         config = self._containerConfig[containerName]
         if len (config.names) == 0 :
-            raise Exception ("checking wantCopy on container with no name in event store: " + containerName)
+            raise ValueError (f"checking wantCopy on container with no name in event store: {containerName}")
         return config.names[-1] == config.sourceName
 
 
@@ -629,10 +622,10 @@ class ConfigAccumulator :
         operate on.
         """
         if containerName not in self._containerConfig :
-            raise Exception ("container unknown: " + containerName)
+            raise KeyError (f"container unknown: {containerName}")
         result = self._containerConfig[containerName].originalName
         if result is None :
-            raise Exception ("no original name for: " + containerName)
+            raise ValueError (f"no original name for: {containerName}")
         return result
 
     def getContainerMeta (self, containerName, metaField, defaultValue=None, *, failOnMiss=False) :
@@ -642,11 +635,11 @@ class ConfigAccumulator :
         configuration to the algorithms.
         """
         if containerName not in self._containerConfig :
-            raise Exception ("container unknown: " + containerName)
+            raise KeyError (f"container unknown: {containerName}")
         if metaField in self._containerConfig[containerName].meta :
             return self._containerConfig[containerName].meta[metaField]
         if failOnMiss :
-            raise Exception ('unknown meta-field' + metaField + ' on container ' + containerName)
+            raise KeyError (f'unknown meta-field {metaField} on container {containerName}')
         return defaultValue
 
     def setContainerMeta (self, containerName, metaField, value, *, allowOverwrite=False) :
@@ -656,9 +649,9 @@ class ConfigAccumulator :
         configuration to the algorithms.
         """
         if containerName not in self._containerConfig :
-            raise Exception ("container unknown: " + containerName)
+            raise KeyError (f"container unknown: {containerName}")
         if not allowOverwrite and metaField in self._containerConfig[containerName].meta :
-            raise Exception ('duplicate meta-field' + metaField + ' on container ' + containerName)
+            raise KeyError (f'duplicate meta-field {metaField} on container {containerName}')
         self._containerConfig[containerName].meta[metaField] = value
 
     def isMetContainer (self, containerName) :
@@ -668,7 +661,7 @@ class ConfigAccumulator :
         write out the whole container or just a single MET term.
         """
         if containerName not in self._containerConfig :
-            raise Exception ("container unknown: " + containerName)
+            raise KeyError (f"container unknown: {containerName}")
         return self._containerConfig[containerName].isMet
 
 
@@ -688,7 +681,7 @@ class ConfigAccumulator :
             objectName = split[0]
             selectionName = split[1]
         else :
-            raise Exception ('invalid object selection name: ' + containerName)
+            raise ValueError (f'invalid object selection name: {containerName}')
         return self.readName (objectName), self.getFullSelection (objectName, selectionName, excludeFrom=excludeFrom)
 
 
@@ -698,7 +691,7 @@ class ConfigAccumulator :
         container
         """
         if selectionName != '' and not self._selectionNameExpr.fullmatch (selectionName) :
-            raise ValueError ('invalid selection name: ' + selectionName)
+            raise ValueError (f'invalid selection name: {selectionName}')
         if containerName not in self._containerConfig :
             return ""
         config = self._containerConfig[containerName]
@@ -741,7 +734,7 @@ class ConfigAccumulator :
         if excludeFrom is None :
             excludeFrom = set()
         elif not isinstance(excludeFrom, set) :
-            raise ValueError ('invalid excludeFrom argument (need set of strings): ' + str(excludeFrom))
+            raise ValueError (f'invalid excludeFrom argument (need set of strings): {excludeFrom}')
 
         # Check if this is actually a selection expression,
         # e.g. `A||B` and if so translate it into a complex expression
@@ -778,7 +771,7 @@ class ConfigAccumulator :
             if selection.name == selectionName :
                 hasSelectionName = True
         if not hasSelectionName and selectionName != '' :
-            raise KeyError ('invalid selection name: ' + containerName + '.' + selectionName)
+            raise KeyError (f'invalid selection name: {containerName}.{selectionName}')
         return '&&'.join (decorations)
 
 
@@ -801,7 +794,7 @@ class ConfigAccumulator :
         # C++ parser ought to be able to read.
         if selectionName != '' and \
            not self._selectionNameExpr.fullmatch (selectionName) :
-            raise ValueError ('not allowed to do cutflow on selection expression: ' + selectionName)
+            raise ValueError (f'not allowed to do cutflow on selection expression: {selectionName}')
 
         config = self._containerConfig[containerName]
         decorations = []
@@ -817,7 +810,7 @@ class ConfigAccumulator :
         and value 'decorations', a list of decorated selections
         """
         if selection in self._eventcutflow.keys():
-            raise ValueError ('the event cutflow dictionary already contains an entry ' + selection)
+            raise ValueError (f'the event cutflow dictionary already contains an entry {selection}')
         else:
             self._eventcutflow[selection] = decorations
 
@@ -835,7 +828,7 @@ class ConfigAccumulator :
         """add another selection decoration to the selection of the given
         name for the given container"""
         if selectionName != '' and not self._selectionNameExpr.fullmatch (selectionName) :
-            raise ValueError ('invalid selection name: ' + selectionName)
+            raise ValueError (f'invalid selection name: {selectionName}')
         if containerName not in self._containerConfig :
             self._containerConfig[containerName] = ContainerConfig (containerName, containerName, noSysSuffix=self._noSysSuffix)
         config = self._containerConfig[containerName]
@@ -846,9 +839,9 @@ class ConfigAccumulator :
     def addOutputContainer (self, containerName, outputContainerName) :
         """register a copy of a container used in outputs"""
         if containerName not in self._containerConfig :
-            raise KeyError ("container unknown: " + containerName)
+            raise KeyError (f"container unknown: {containerName}")
         if outputContainerName in self._outputContainers :
-            raise KeyError ("duplicate output container name: " + outputContainerName)
+            raise KeyError (f"duplicate output container name: {outputContainerName}")
         self._outputContainers[outputContainerName] = containerName
 
 
@@ -860,7 +853,7 @@ class ConfigAccumulator :
             try:
                 return self._containerConfig[outputContainerName].name
             except KeyError:
-                raise KeyError ("output container unknown: " + outputContainerName)
+                raise KeyError (f"output container unknown: {outputContainerName}") from None
 
 
     def addOutputVar (self, containerName, variableName, outputName,
@@ -872,10 +865,10 @@ class ConfigAccumulator :
             return
 
         if containerName not in self._containerConfig :
-            raise KeyError ("container unknown: " + containerName)
+            raise KeyError (f"container unknown: {containerName}")
         baseConfig = self._containerConfig[containerName].outputs
         if outputName in baseConfig :
-            raise KeyError ("duplicate output variable name: " + outputName)
+            raise KeyError (f"duplicate output variable name: {outputName}")
         config = OutputConfig (containerName, variableName, noSys=noSys, enabled=enabled, auxType=auxType)
         baseConfig[outputName] = config
 
@@ -885,18 +878,18 @@ class ConfigAccumulator :
         if containerName in self._outputContainers :
             containerName = self._outputContainers[containerName]
         if containerName not in self._containerConfig :
-            raise KeyError ("unknown container for output: " + containerName)
+            raise KeyError (f"unknown container for output: {containerName}")
         return self._containerConfig[containerName].outputs
 
 
     def getSelectionNames (self, containerName, excludeFrom = None) :
         """Retrieve set of unique selections defined for a given container"""
         if containerName not in self._containerConfig :
-            return []
+            return set()
         if excludeFrom is None:
             excludeFrom = set()
         elif not isinstance(excludeFrom, set) :
-            raise ValueError ('invalid excludeFrom argument (need set of strings): ' + str(excludeFrom))
+            raise ValueError (f'invalid excludeFrom argument (need set of strings): {excludeFrom}')
 
         config = self._containerConfig[containerName]
         # because cuts are registered individually, selection names can repeat themselves
