@@ -62,6 +62,14 @@ namespace MuonR4 {
             void resolveAmbiguities(const ActsTrk::GeometryContext& gctx,
                                     SegmentVec_t& segmentCandidates) const;
 
+
+            /** @brief For BIL (specifically around eta3 chambers), there are cases where only a single multilayer is crossed by the muon trajectory (because of the instrumentation gap)
+             This function returns a set of recovery hits that are only from a multilayer which is crossed by the pattern seed. */
+            std::optional<SpacePointPerLayerSplitter::HitVec> makeBilRecoveryHits(const SegmentSeed& seed) const;
+            /** @brief BIM/BIR chambers are treated as the same sector, however, they don't overlap in many instances. Therefore, Mdt segment seeding might fail in these cases.
+             This function returns a set of recovery hits that are only either from BIM or BIR multilayers (and the neighbouring ones) compatible with the pattern seed. */
+            std::optional<SpacePointPerLayerSplitter::HitVec> makeBimBirRecoveryHits( const SegmentSeed& seed) const;
+
             /// ReadHandle of the seeds
             SG::ReadHandleKey<SegmentSeedContainer> m_seedKey{this, "ReadKey", "MuonHoughStationSegmentSeeds"};
             // write handle key for the output segment seeds 
@@ -115,16 +123,30 @@ namespace MuonR4 {
             /** @brief Tune the number of iterations */
             Gaudi::Property<unsigned> m_maxIter{this, "maxIterations", 50};
             /** @brief Cut on the number of hits per layer to use the layer for seeding */
-            Gaudi::Property<unsigned> m_busyLayerLimit{this, "busyLayerLimit",  2};
+            Gaudi::Property<unsigned> m_busyLayerLimit{this, "busyLayerLimit",  4};
             /** @brief Pointer to the ambiguity reosolution */
             std::unique_ptr<SegmentFit::SegmentAmbiSolver> m_ambiSolver{};
             /** @brief Pointer to the actual segment fitter */
             std::unique_ptr<SegmentFit::SegmentLineFitter> m_fitter{};
             /** @brief Pointer to the L-R segment seeder */
             std::unique_ptr<SegmentFit::MdtSegmentSeedGenerator> m_seeder{};
-            /** @brief Pointer to the L-R segment seeder used for the BEE
-             *         chambers -> increased hit occupancy */
-            std::unique_ptr<SegmentFit::MdtSegmentSeedGenerator> m_seederBEE{};
+
+            /** @brief Allow single multilayer fallback when standard segment reconstruction fails */
+            Gaudi::Property<bool> m_allowSegmentSeedingFallback{this, "allowSegmentSeedingFallback", true};
+
+            /** @brief Tolerance for the single multilayer edge crossing test, if the trajectory only slighty nicks the second ML still consider as one ML case */
+            Gaudi::Property<double> m_singleMlEdgeTolerance{ this, "SingleMlEdgeTolerance", 50. * Gaudi::Units::mm, "For Single-ML fallback to not trigger, the trajectory has to penetrate at least this much into the second multilayer (from either side) in local precision coordinate"};
+
+            /** @brief Tolerance for the single multilayer edge crossing test in the phi projection in case the trajectory only slightly nicks one of the ML */
+            Gaudi::Property<double> m_singleMlPhiEdgeTolerance{ this, "SingleMlPhiEdgeTolerance", 0. * Gaudi::Units::mm, "For Single-ML fallback to not trigger, the trajectory has to penetrate at least this much into the second multilayer (from either side) in local phi coordinate"};
+
+            /** @brief Cached BIL station index for quick access */
+            int m_bilStation{-1};
+            /** @brief Cached BIM station index for quick access */
+            int m_bimStation{-1};
+            /** @brief Cached BIR station index for quick access */
+            int m_birStation{-1};
+
     };
 }
 

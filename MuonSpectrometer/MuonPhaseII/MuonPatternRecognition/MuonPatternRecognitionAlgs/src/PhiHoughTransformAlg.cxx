@@ -132,7 +132,7 @@ void PhiHoughTransformAlg::preProcessMaximum(const ActsTrk::GeometryContext& gct
 std::vector<ActsPeakFinderForMuon::Maximum> 
     PhiHoughTransformAlg::findRankedSegmentSeeds(const EventContext& ctx, 
                                                  HoughEventData & eventData, const HoughMaximum & maximum) const{
-    std::unordered_map<int, std::vector<ActsPeakFinderForMuon::Maximum>>  rankedSeeds;  
+    std::map<int, std::vector<ActsPeakFinderForMuon::Maximum>>  rankedSeeds;  
     using namespace std::placeholders; 
     // reset the accumulator
     eventData.houghPlane->reset();

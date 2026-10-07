@@ -30,6 +30,17 @@ namespace MuonR4::SegmentFit{
         m_calibratePull{calibratePull},
         m_selector{std::move(seedSelector)} {}
 
+    SeederStateBase::SeederStateBase(const SegmentSeed* parentSeed,
+                                     const ISpacePointCalibrator* calibrator,
+                                     const bool calibratePull,
+                                     const SpacePointPerLayerSplitter::HitVec& hits,
+                                     SeedSelector_t&& seedSelector): 
+         SpacePointPerLayerSplitter{hits},
+         m_parent{parentSeed},
+         m_calibrator{calibrator},
+         m_calibratePull{calibratePull},
+         m_selector{std::move(seedSelector)} {} 
+
     const SegmentSeed* SeederStateBase::parent() const { return m_parent; }
 
     double SeederStateBase::strawRadius(const SpacePoint& testMdt) const {

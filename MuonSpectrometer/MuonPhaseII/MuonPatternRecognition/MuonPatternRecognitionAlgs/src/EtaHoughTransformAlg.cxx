@@ -439,18 +439,9 @@ void EtaHoughTransformAlg::processBucket(const EventContext& ctx,
         ATH_MSG_VERBOSE("Found maximum at (tanTheta, y0) = (" << max.x << ", " << max.y
                       << ") with " << max.hitIdentifiers.size() << " hits");
 
-        //Should this be really accepting just the centre bin of the maximum?
         bool maxPassSelection = true;
         unsigned int nPrec{0};
-        auto toBins = [&data](double x, double y){
-            return std::make_pair(
-                Acts::HoughTransformUtils::binIndex(data.currAxisRanges.xMin, data.currAxisRanges.xMax, data.houghPlane->nBinsX(), x), 
-                Acts::HoughTransformUtils::binIndex(data.currAxisRanges.yMin, data.currAxisRanges.yMax, data.houghPlane->nBinsY(), y)
-            );
-        };
-
-        auto accumulatorBins = toBins(max.x,max.y); 
-        for (const HoughHitType& hit : data.houghPlane->hitIds(accumulatorBins.first, accumulatorBins.second)) {
+        for (const HoughHitType& hit : max.hitIdentifiers) {
             auto res = seenHits.emplace(hit); 
             if (res.second){
                 nPrec += isPrecisionHit(hit);
