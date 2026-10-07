@@ -211,8 +211,33 @@ private:
   /// using a higher number will reduce the number of surfaces per bin, thus speeding up navigation, but increasing memory consumption.
   Gaudi::Property<double> m_numberOfBinsFactor{this, "NumberOfBinsFactor", 5.0};
 
-  /// Special treatment for the innermost pixel layer to have more control on bin size to account for shallow angle tracks.
-  Gaudi::Property<double> m_numberOfInnermostLayerBinsFactor{this, "NumberOfInnermostLayerBinsFactor",2.0};
+  /// Most bins the surface array lookup serves on each side of the crossing,
+  /// as {phi, z} for the barrel and {r, phi} for the endcap. The lookup sizes
+  /// the window from the crossing angle and the layer thickness, so these
+  /// values only cap it. The defaults cover the steepest crossing for
+  /// |z0| < 200 mm at NumberOfBinsFactor = 5.
+  Gaudi::Property<std::vector<unsigned int>> m_itkPixelInnerBarrelNeighborWindow{
+      this, "ITkPixelInnerBarrelNeighborWindow", {1, 8},
+      "Neighbor window bound {phi, z} of the ITk inner pixel barrel layers"};
+  Gaudi::Property<std::vector<unsigned int>> m_itkPixelInnerEndcapNeighborWindow{
+      this, "ITkPixelInnerEndcapNeighborWindow", {2, 1},
+      "Neighbor window bound {r, phi} of the ITk inner pixel endcap layers"};
+  Gaudi::Property<std::vector<unsigned int>> m_itkPixelOuterBarrelNeighborWindow{
+      this, "ITkPixelOuterBarrelNeighborWindow", {1, 3},
+      "Neighbor window bound {phi, z} of the ITk outer pixel barrel layers"};
+  Gaudi::Property<std::vector<unsigned int>> m_itkPixelOuterEndcapNeighborWindow{
+      this, "ITkPixelOuterEndcapNeighborWindow", {4, 1},
+      "Neighbor window bound {r, phi} of the ITk outer pixel endcap and inclined layers"};
+  Gaudi::Property<std::vector<unsigned int>> m_itkStripBarrelNeighborWindow{
+      this, "ITkStripBarrelNeighborWindow", {1, 4},
+      "Neighbor window bound {phi, z} of the ITk strip barrel layers"};
+  Gaudi::Property<std::vector<unsigned int>> m_itkStripEndcapNeighborWindow{
+      this, "ITkStripEndcapNeighborWindow", {2, 1},
+      "Neighbor window bound {r, phi} of the ITk strip endcap layers"};
+
+  /// Extra cells per direction and axis that each surface fills around its footprint
+  Gaudi::Property<unsigned int> m_surfaceArrayOverfill{this, "SurfaceArrayOverfill", 0,
+      "Extra cells per direction and axis that each surface fills in the surface arrays"};
   
   /// Special treatment for hgtd layers as well.
   Gaudi::Property<double> m_numberOfHgtdBinsFactor{this, "NumberOfHgtdBinsFactor", 1.0};

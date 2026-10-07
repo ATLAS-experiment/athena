@@ -73,8 +73,10 @@
 
 #include "TrackingGeoAlignVisitor.h"
 #include <Acts/Utilities/AxisDefinitions.hpp>
+#include <cstdint>
 #include <fstream>
 #include <limits>
+#include <optional>
 #include <random>
 #include <stdexcept>
 
@@ -96,6 +98,18 @@ namespace {
       }
       return volumeCfg;
     };
+  }
+
+  /// Convert a {max0, max1} bin count property into a neighbor window without a floor
+  std::optional<Acts::SurfaceArray::NeighborWindow> toNeighborWindow(
+      const std::vector<unsigned int>& maxBins) {
+    constexpr unsigned int limit = std::numeric_limits<std::uint8_t>::max();
+    if (maxBins.size() != 2 || maxBins[0] > limit || maxBins[1] > limit) {
+      return std::nullopt;
+    }
+    return Acts::SurfaceArray::NeighborWindow{
+        {0, 0},
+        {static_cast<std::uint8_t>(maxBins[0]), static_cast<std::uint8_t>(maxBins[1])}};
   }
 }
 
@@ -139,6 +153,23 @@ StatusCode TrackingGeometrySvc::initialize() {
                                       << " subdetectors:");
   for (const auto &s : buildSubdet) {
     ATH_MSG_INFO(" - " << s);
+  }
+
+  for (const Gaudi::Property<std::vector<unsigned int>>* window :
+       {&m_itkPixelInnerBarrelNeighborWindow, &m_itkPixelInnerEndcapNeighborWindow,
+        &m_itkPixelOuterBarrelNeighborWindow, &m_itkPixelOuterEndcapNeighborWindow,
+        &m_itkStripBarrelNeighborWindow, &m_itkStripEndcapNeighborWindow}) {
+    if (!toNeighborWindow(window->value()).has_value()) {
+      ATH_MSG_FATAL((*window)
+                    << " must hold two bin counts of at most "
+                    << static_cast<unsigned int>(std::numeric_limits<std::uint8_t>::max()));
+      return StatusCode::FAILURE;
+    }
+  }
+  if (m_surfaceArrayOverfill.value() > std::numeric_limits<std::uint8_t>::max()) {
+    ATH_MSG_FATAL(m_surfaceArrayOverfill
+                  << " exceeds " << static_cast<unsigned int>(std::numeric_limits<std::uint8_t>::max()));
+    return StatusCode::FAILURE;
   }
 
   ATH_MSG_DEBUG("Loading detector manager(s)");
@@ -362,6 +393,8 @@ StatusCode TrackingGeometrySvc::initialize() {
           [&](const auto &gctx, const auto &inner, const auto &) {
             auto cfg = makeLayerBuilderConfig(p_ITkPixelManager);
             cfg.mode = ActsLayerBuilder::Mode::ITkPixelInner;
+            cfg.barrelNeighborWindow = *toNeighborWindow(m_itkPixelInnerBarrelNeighborWindow);
+            cfg.endcapNeighborWindow = *toNeighborWindow(m_itkPixelInnerEndcapNeighborWindow);
             cfg.objDebugOutput = m_objDebugOutput;
             cfg.doEndcapLayerMerging = true;
             cfg.passiveBarrelLayerRadii = m_passiveITkInnerPixelBarrelLayerRadii;
@@ -389,6 +422,8 @@ StatusCode TrackingGeometrySvc::initialize() {
           [&](const auto &gctx, const auto &inner, const auto &) {
             auto cfg = makeLayerBuilderConfig(p_ITkPixelManager);
             cfg.mode = ActsLayerBuilder::Mode::ITkPixelOuter;
+            cfg.barrelNeighborWindow = *toNeighborWindow(m_itkPixelOuterBarrelNeighborWindow);
+            cfg.endcapNeighborWindow = *toNeighborWindow(m_itkPixelOuterEndcapNeighborWindow);
             cfg.objDebugOutput = m_objDebugOutput;
             cfg.doEndcapLayerMerging = false;
             cfg.passiveBarrelLayerRadii = m_passiveITkOuterPixelBarrelLayerRadii;
@@ -421,6 +456,8 @@ StatusCode TrackingGeometrySvc::initialize() {
           [&](const auto &gctx, const auto &inner, const auto &) {
             auto cfg = makeLayerBuilderConfig(p_ITkStripManager);
             cfg.mode = ActsLayerBuilder::Mode::ITkStrip;
+            cfg.barrelNeighborWindow = *toNeighborWindow(m_itkStripBarrelNeighborWindow);
+            cfg.endcapNeighborWindow = *toNeighborWindow(m_itkStripEndcapNeighborWindow);
             cfg.objDebugOutput = m_objDebugOutput;
             cfg.passiveBarrelLayerRadii = m_passiveITkStripBarrelLayerRadii;
             cfg.passiveBarrelLayerHalflengthZ = m_passiveITkStripBarrelLayerHalflengthZ;
@@ -956,7 +993,7 @@ ActsLayerBuilder::Config TrackingGeometrySvc::makeLayerBuilderConfig(
   cfg.layerCreator = layerCreator;
 
   cfg.numberOfBinsFactor = m_numberOfBinsFactor;
-  cfg.numberOfInnermostLayerBinsFactor = m_numberOfInnermostLayerBinsFactor;
+  cfg.surfaceArrayOverfill = static_cast<std::uint8_t>(m_surfaceArrayOverfill.value());
 
   // gmLayerBuilder = std::make_shared<const ActsLayerBuilder>(
   //     cfg, makeActsAthenaLogger(this, managerName + "GMLayBldr",
