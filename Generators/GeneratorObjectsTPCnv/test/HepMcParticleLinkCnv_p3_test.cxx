@@ -22,8 +22,6 @@
 #include "GeneratorObjectsTPCnv/HepMcParticleLinkCnv_p3.h"
 #include "StoreGate/WriteHandle.h"
 #include "GeneratorObjects/McEventCollection.h"
-#include "AthenaKernel/ExtendedEventContext.h"
-#include "GaudiKernel/ThreadLocalContext.h"
 
 #include "TestTools/initGaudi.h"
 
@@ -128,10 +126,6 @@ void createMcEventCollectionInStoreGate(std::vector<HepMC::GenParticlePtr>& genP
   // HepMcParticleLink knows about
   SG::WriteHandle<McEventCollection> inputTestDataHandle{"TruthEvent"};
   inputTestDataHandle = std::make_unique<McEventCollection>();
-  // create a dummy EventContext
-  EventContext ctx;
-  ctx.setExtension( Atlas::ExtendedEventContext( SG::CurrentEventStore::store() ) );
-  Gaudi::Hive::setCurrentContext( ctx );
 
   // Add a dummy GenEvent
   const int process_id1(20);

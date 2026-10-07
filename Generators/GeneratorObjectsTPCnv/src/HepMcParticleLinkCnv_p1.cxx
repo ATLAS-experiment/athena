@@ -1,13 +1,12 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Framework includes
 #include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/ThreadLocalContext.h"
-#include "AthenaKernel/ExtendedEventContext.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "TruthUtils/MagicNumbers.h"
 
 // GeneratorObjectsAthenaPool includes
@@ -55,8 +54,7 @@ void HepMcParticleLinkCnv_p1::transToPers( const HepMcParticleLink* transObj,
   // NB This method assumes that there all GenEvents are stored in a
   // single McEventCollection, as running with split
   // McEventCollections is not supported in 21.0.
-  const EventContext& ctx = Gaudi::Hive::currentContext();
-  const IProxyDict* proxy = Atlas::getExtendedEventContext(ctx).proxy();
+  const IProxyDict* proxy = Atlas::proxyDictFromEventContext();
   unsigned short index{0};
   const HepMcParticleLink::index_type position =
     HepMcParticleLink::getEventPositionInCollection(transObj->eventIndex(),
