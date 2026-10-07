@@ -70,7 +70,6 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
 
      ATH_CHECK( m_eventInfoKey.initialize() );
      //------------------------------------------
-     if(msgLvl(MSG::DEBUG)) ATH_CHECK(m_timingProfile.retrieve());
 //------------------------------------------
 // Chose whether IBL is installed
      if(m_existIBL){ // 4-layer pixel detector
@@ -292,8 +291,7 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
 
   StatusCode InDetVKalVxInJetTool::finalize()
   {
-    if(m_timingProfile)m_timingProfile->chronoPrint("InDetVKalVxInJetTool");
-    ATH_MSG_DEBUG("InDetVKalVxInJetTool finalize()");
+    ATH_MSG_INFO("InDetVKalVxInJetTool finalize()");
     return StatusCode::SUCCESS; 
   }
   
@@ -305,7 +303,6 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
 							           const TLorentzVector & jetDir,
 						 	           const std::vector<const xAOD::IParticle*> & IInpTrk)
     const  {
-    if(m_timingProfile)m_timingProfile->chronoStart("InDetVKalVxInJetTool");
     std::vector<double>     Results;
     std::vector<const xAOD::TrackParticle*>            InpTrk;
     std::vector<const xAOD::TrackParticle*>            SelSecTrk;
@@ -387,7 +384,6 @@ InDetVKalVxInJetTool::InDetVKalVxInJetTool(const std::string& type,
       Hists& h = getHists();
       h.m_tuple->Fill();
     };
-    if(m_timingProfile)m_timingProfile->chronoStop("InDetVKalVxInJetTool");
     return res;
    }
 

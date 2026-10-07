@@ -99,15 +99,12 @@ InDetTrkInJetType::InDetTrkInJetType(const std::string& type,
      
 
      m_initialised = 1;          // Tool is initialised successfully.
-//-----
-     if(msgLvl(MSG::DEBUG)) ATH_CHECK(m_timingProfile.retrieve());
-//-----
+
      return StatusCode::SUCCESS;
    }
 
    StatusCode InDetTrkInJetType::finalize()
    {
-    if(m_timingProfile)m_timingProfile->chronoPrint("InDet_TrkInJetType");
     ATH_MSG_DEBUG("InDetTrkInJetType finalize()");
     return StatusCode::SUCCESS; 
    }
@@ -186,7 +183,6 @@ InDetTrkInJetType::InDetTrkInJetType(const std::string& type,
      TLV.SetPtEtaPhiE(Trk->pt(),Trk->eta(),Trk->phi(),Trk->e());
      float pTvsJet=TLV.Perp(Jet.Vect());
 //---
-     if(m_timingProfile)m_timingProfile->chronoStart("InDet_TrkInJetType");
      //-----Use MVAUtils to save CPU
      std::vector<float> bdt_vars={Sig3D, prbP, pTvsJet, d0, SigR, SigZ, ptjet, (float)hitIBL, (float)hitBL, etatrk};
      std::vector<float> weights;
@@ -202,8 +198,6 @@ InDetTrkInJetType::InDetTrkInJetType(const std::string& type,
       weights = m_vTrkClassBDT.at(e_ptjet)->GetMultiResponse(bdt_vars,3); 
      }
      
-     //-----
-     if(m_timingProfile)m_timingProfile->chronoStop("InDet_TrkInJetType");
      return weights; //order: wgtB, wgtL, wgtG
    }
 
