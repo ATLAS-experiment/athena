@@ -19,12 +19,10 @@ def CondProxyProviderCfg (flags, poolFiles):
     result.addService (pps)
     
     CondProxyProvider = CompFactory.CondProxyProvider # EventSelectorAthenaPool
-    cpp = CondProxyProvider (InputCollections = poolFiles,
-                             ConversionService="AthenaPoolSharedIOCnvSvc" if flags.MP.UseSharedReader or flags.MP.UseSharedWriter else "AthenaPoolCnvSvc")
+    cpp = CondProxyProvider (InputCollections = poolFiles)
     result.addService (cpp)
 
     return result
-    
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags

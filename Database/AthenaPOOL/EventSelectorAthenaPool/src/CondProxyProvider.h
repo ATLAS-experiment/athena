@@ -14,16 +14,15 @@
 #include "Gaudi/Property.h"  /*no forward decl: typedef*/
 #include "AthenaKernel/IAddressProvider.h"
 #include "AthenaBaseComps/AthService.h"
-#include "AthenaPoolCnvSvc/IAthenaPoolCnvSvc.h"
 #include "PoolSvc/IPoolSvc.h"
 #include <memory>
 
 // Forward declarations
 namespace pool {
+   class ICollection;
    class ICollectionCursor;
 }
 class ISvcLocator;
-class PoolCollectionConverter;
 class IPoolSvc;
 class StoreGateSvc;
 
@@ -55,19 +54,14 @@ public: // Constructor and Destructor
                                     const EventContext& ctx) override;
 
 private: // data
-   ServiceHandle<IAthenaPoolCnvSvc> m_athenaPoolCnvSvc{this, "ConversionService", "AthenaPoolCnvSvc"};
    ServiceHandle<IPoolSvc> m_poolSvc{this, "PoolSvc", "PoolSvc"};
-   unsigned int m_contextId;
+   unsigned int m_contextId{IPoolSvc::kInputStream};
+   pool::ICollection* m_poolCollection{nullptr};
 
 private: // properties
    /// InputCollections, vector with names of the input collections.
    Gaudi::Property<std::vector<std::string>> m_inputCollectionsProp
    { this, "InputCollections", {}, "Files to read", "OrderedSet<std::string>" };
-   std::vector<std::string>::const_iterator m_inputCollectionsIterator{};
-
-private: // internal helper functions
-   /// Return pointer to new PoolCollectionConverter
-  std::unique_ptr<PoolCollectionConverter> getCollectionCnv();
 };
 
 #endif
