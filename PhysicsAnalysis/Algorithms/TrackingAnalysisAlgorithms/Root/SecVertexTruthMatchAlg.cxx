@@ -198,7 +198,7 @@ namespace CP {
     std::vector<const xAOD::Vertex*> recoVerticesToMatch;
     std::vector<const xAOD::TruthVertex*> truthVerticesToMatch;
 
-    for(const auto recoVertex : *recoVertexContainer) {
+    for(const auto *recoVertex : *recoVertexContainer) {
       if(recoVertex->vertexType() != xAOD::VxType::SecVtx ){
         ATH_MSG_DEBUG("Vertex not labeled as secondary");
         continue;
@@ -206,7 +206,7 @@ namespace CP {
       recoVerticesToMatch.push_back(recoVertex);
     }
 
-    for(const auto truthVertex : *truthVertexContainer) {
+    for(const auto *truthVertex : *truthVertexContainer) {
       if(truthVertex->nIncomingParticles() != 1) {
         continue;
       }
@@ -214,7 +214,7 @@ namespace CP {
       if(not truthPart) {
         continue;
       }
-      if(std::ranges::find(m_targetPDGIDs.value(), std::abs(truthPart->pdgId())) == m_targetPDGIDs.value().end()) {
+      if(!std::ranges::contains(m_targetPDGIDs.value(), std::abs(truthPart->pdgId()))) {
         continue;
       }
       if(truthVertex->nOutgoingParticles() < 2) {
@@ -248,37 +248,47 @@ namespace CP {
         {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::OtherOrigin, "OtherOrigin"},
         {InDetSecVtxTruthMatchUtils::VertexMatchOriginType::Signal, "Signal"},
       };
-
+      //initialise references before loop
+      const auto& matchedHists = m_recoHists.at("Matched");
+      const auto& mergedHists  = m_recoHists.at("Merged");
+      const auto& fakeHists    = m_recoHists.at("Fake");
+      const auto& splitHists   = m_recoHists.at("Split");
+      const auto& otherHists   = m_recoHists.at("Other");
+      const auto& allHists     = m_recoHists.at("All");
+      //
       std::vector<const RecoVertexHists*> categories;
-      for(const auto& secVtx : recoVerticesToMatch) {
+      //assuming the match types are mutually exclusive, but a reasonable guess in any case
+      categories.reserve(8);
+      //
+      for(const auto * secVtx : recoVerticesToMatch) {
         categories.clear();
-        int matchTypeBitset = matchTypeAcc(*secVtx);
+        const int matchTypeBitset = matchTypeAcc(*secVtx);
         hist("RecoVertex/matchType")->Fill(matchTypeBitset);
 
         if(InDetSecVtxTruthMatchUtils::isMatched(matchTypeBitset)) {
-          categories.push_back(&m_recoHists.at("Matched"));
+          categories.push_back(&matchedHists);
         }
         if(InDetSecVtxTruthMatchUtils::isMerged(matchTypeBitset)) {
-          categories.push_back(&m_recoHists.at("Merged"));
+          categories.push_back(&mergedHists);
         }
         if(InDetSecVtxTruthMatchUtils::isFake(matchTypeBitset)) {
-          categories.push_back(&m_recoHists.at("Fake"));
+          categories.push_back(&fakeHists);
         }
         if(InDetSecVtxTruthMatchUtils::isSplit(matchTypeBitset)) {
-          categories.push_back(&m_recoHists.at("Split"));
+          categories.push_back(&splitHists);
         }
         if(InDetSecVtxTruthMatchUtils::isOther(matchTypeBitset)) {
-          categories.push_back(&m_recoHists.at("Other"));
+          categories.push_back(&otherHists);
         }
-        categories.push_back(&m_recoHists.at("All"));
+        categories.push_back(&allHists);
 
         if (m_doSMOrigin) {
-          int smOriginTypeBitset = originTypeAcc(*secVtx);
+          const int smOriginTypeBitset = originTypeAcc(*secVtx);
           hist("RecoVertex/smOriginType")->Fill(smOriginTypeBitset);
 
-          for(const auto& entry : originTypeMap) {
-            if(InDetSecVtxTruthMatchUtils::isOriginType(smOriginTypeBitset, entry.first)) {
-              categories.push_back(&m_recoHists.at(entry.second));
+          for(const auto& [originType, name] : originTypeMap) {
+            if(InDetSecVtxTruthMatchUtils::isOriginType(smOriginTypeBitset, originType)) {
+              categories.push_back(&m_recoHists.at(name));
             }
           }
         }
@@ -287,8 +297,8 @@ namespace CP {
       }
 
       static const xAOD::TruthVertex::ConstAccessor<int> truthTypeAcc("truthVertexMatchType");
-      for(const auto& truthVtx : truthVerticesToMatch) {
-        int truthTypeBitset = truthTypeAcc(*truthVtx);
+      for(const auto * truthVtx : truthVerticesToMatch) {
+        const int truthTypeBitset = truthTypeAcc(*truthVtx);
         if(InDetSecVtxTruthMatchUtils::isReconstructable(truthTypeBitset)) {
           fillTruthHistograms(truthVtx, "Reconstructable");
 
@@ -392,11 +402,12 @@ namespace CP {
       if( DR > maxDR ){ maxDR = DR;}
 
       charge += trk.charge();
+      //coverity[UNNECESSARY_STRING_COPY]
+      static const SG::ConstAccessor<float> Trk_Chi2("chiSquared");
+      //coverity[UNNECESSARY_STRING_COPY]
+      static const SG::ConstAccessor<float> Trk_nDoF("numberDoF");
 
-      xAOD::TrackParticle::ConstAccessor<float> Trk_Chi2("chiSquared");
-      xAOD::TrackParticle::ConstAccessor<float> Trk_nDoF("numberDoF");
-
-      const bool hasChi2 = Trk_Chi2.isAvailable(trk) && Trk_Chi2(trk) && Trk_nDoF.isAvailable(trk) && Trk_nDoF(trk);
+      const bool hasChi2 = Trk_Chi2(trk) >0. && Trk_nDoF(trk) >0.;
       const auto& covDiag = trk.definingParametersCovMatrixDiagVec();
 
       for (const RecoVertexHists* h : categories) {
