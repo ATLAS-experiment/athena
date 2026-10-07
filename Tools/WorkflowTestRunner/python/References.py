@@ -29,7 +29,7 @@ references_map = {
     # Reco
     "q442": "v125",
     "q449": "v187",
-    "q452": "v91",
+    "q452": "v92",
     "q454": "v115",
     "q447": "v27",
     # Derivations

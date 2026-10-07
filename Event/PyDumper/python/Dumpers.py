@@ -3107,12 +3107,6 @@ def dump_TrackParticleAssocs (a, f):
     return dump_Assocs (a, f, PyAthena.Rec.TrackParticleContainer)
 
 
-def dump_ElectronMuonTopoInfo (a, f):
-    fprint (f, a.RoiWord(), a.DeltaPhi(), a.DeltaR(), a.InvMass(),
-            a.ElecValid(), a.OppositeCharge(), a.VertexState())
-    return
-
-
 def dump_MuonSpShower (m, f):
     fprint (f, "%f %f %d %d %d %d %d %d %d" %
             (m.eta(),
@@ -5437,7 +5431,6 @@ dumpspecs = [
     ["eflowObjectContainer",                 dump_eflowObjectContainer],
     ["TrigPassFlagsCollection",              dump_TrigPassFlags],
     ["TrackParticleAssocs",                  dump_TrackParticleAssocs],
-    ["ElectronMuonTopoInfoContainer",        dump_ElectronMuonTopoInfo],
     ["RecoTimingObj",                        dump_RecoTimingObj],
     ['MuonCaloEnergyContainer',              dump_CaloEnergy],
     ['CscSimDataCollection',                 dump_CscSimDataCollection],

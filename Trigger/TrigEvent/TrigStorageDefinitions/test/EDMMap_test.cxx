@@ -16,10 +16,10 @@ struct dummy{};
 // Just a "compilation test"
 int main(){
 
-  static_assert( std::is_same_v< Object2Container_t<ElectronMuonTopoInfo, TypeInfo_EDM>,
-                                 ElectronMuonTopoInfoContainer> );
+  static_assert( std::is_same_v< Object2Container_t<TrigRoiDescriptor, TypeInfo_EDM>,
+                                 TrigRoiDescriptorCollection> );
 
-  static_assert( IsKnownFeature<ElectronMuonTopoInfo>::value );
+  static_assert( IsKnownFeature<TrigRoiDescriptor>::value );
   static_assert( IsKnownFeature<xAOD::TrigElectronContainer>::value );
 
   static_assert( !IsKnownFeature<dummy>::value );
