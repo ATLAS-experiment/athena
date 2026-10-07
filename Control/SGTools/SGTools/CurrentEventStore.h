@@ -67,7 +67,4 @@ public:
 } // namespace SG
 
 
-#include "SGTools/CurrentEventStore.icc"
-
-
 #endif // not SGTOOLS_CURRENTEVENTSTORE_H

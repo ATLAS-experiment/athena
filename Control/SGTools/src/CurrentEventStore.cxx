@@ -21,6 +21,15 @@ thread_local IProxyDict* CurrentEventStore::m_curStore = nullptr;
 
 
 /**
+ * @brief Fetch the current store.
+ */
+IProxyDict* CurrentEventStore::store()
+{
+  return m_curStore;
+}
+
+
+/**
  * @brief Set the current store.
  * Returns the previous store.
  */
