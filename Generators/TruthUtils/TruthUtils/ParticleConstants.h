@@ -86,7 +86,7 @@ namespace ParticleConstants
     constexpr double tauMassInMeV = 1776.93;
 
     /// the mass of the Z0 boson (in MeV)
-    constexpr double ZZeroMassInMeV = 91188.0;
+    constexpr double ZMassInMeV = 91188.0;
 
     /// the mass of the pi zero (in MeV)
     constexpr double piZeroMassInMeV = 134.9768;
