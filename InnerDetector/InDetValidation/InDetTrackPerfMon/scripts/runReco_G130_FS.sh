@@ -72,7 +72,9 @@ run Reco_tf.py \
                flags.Acts.Gbts.connectionTable='binTables_ITK_RUN4_intraLayerLinks.txt'; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
                flags.Concurrency.NumThreads=${numThreads}; \
-               flags.Concurrency.NumConcurrentEvents=${numThreads};" \
+               flags.Concurrency.NumConcurrentEvents=${numThreads}; \
+               flags.Acts.TrackingGeometry.UseBlueprint=True; \
+               flags.Acts.TrackingGeometry.BuildDetrayGeometry=True;" \
     --inputRDOFile "${inputRDO}" \
     --outputAODFile "${outputAOD}" \
     --perfmon fullmonmt

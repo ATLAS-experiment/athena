@@ -71,7 +71,9 @@ run Reco_tf.py \
                flags.Tracking.doPixelDigitalClustering=True; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-               flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.Gbts;" \
+               flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.Gbts; \
+               flags.Acts.TrackingGeometry.UseBlueprint=True; \
+               flags.Acts.TrackingGeometry.BuildDetrayGeometry=True;" \
     --inputRDOFile ${inputRDO} \
     --outputAODFile ${outputAOD} \
     --perfmon fullmonmt
