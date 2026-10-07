@@ -202,7 +202,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
             "the correct config blocks to call for small- or large-R jets.")
         self.addOption ('runJvtUpdate', False, type=bool,
             info="whether to update the JVT.")
-        self.addOption ('runNNJvtUpdate', False, type=bool,
+        self.addOption ('runNNJvtUpdate', True, type=bool,
             info="whether to update the NN-JVT.")
         self.addOption ('runJvtSelection', True, type=bool,
             info="whether to run JVT selection.")
