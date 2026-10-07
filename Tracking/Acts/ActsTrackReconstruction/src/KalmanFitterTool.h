@@ -113,8 +113,8 @@ private:
                                  const Acts::Surface* surface,
                                  detail::SourceLinkType slType) const;
 
-
   ServiceHandle<ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+
   PublicToolHandle<IGeometryRealmConvTool> m_geometryConvTool{this, "GeometryRealmConvTool", ""};
 
   ToolHandle<MuonR4::ISpacePointCalibrator> m_muonCalibrator{this, "MuonCalibrationTool", ""};
@@ -130,7 +130,9 @@ private:
       "Maximum number of steps for one propagate call"};
   Gaudi::Property<bool> m_useDirectNavigation{this, "UseDirectNavigation", true,
       "GSF with direct navigation when refitting measurements"};
-
+  /** @brief Stop the propagation as soon as the envelope is left (Gen3 only) */
+  Gaudi::Property<std::uint32_t> m_envelopeConstraint{this, "EnvelopeConstaint",
+                                                      Acts::toUnderlying(ActsTrk::SystemEnvelope::ITkExit)};
   /** @brief Calibrator for the Trk::MeasurementBase track states (legacy EDM) */
   detail::TrkMeasurementCalibrator m_trkCalibrator{};
   /** @brief Accessor to fetch surfaces from the Trk::MeasurementBase track states (legacy EDM) */
@@ -169,6 +171,10 @@ private:
 
   /// logging instance
   std::unique_ptr<const Acts::Logger> m_logger;
+
+  std::uint32_t m_endOfWorldId{std::numeric_limits<std::uint32_t>::max()};
+
+  
 
 }; // end of namespace
 
