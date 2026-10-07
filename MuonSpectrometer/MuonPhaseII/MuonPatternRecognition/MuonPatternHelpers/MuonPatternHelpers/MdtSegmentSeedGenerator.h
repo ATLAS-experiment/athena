@@ -40,6 +40,24 @@ namespace MuonR4::SegmentFit {
                                      const ISpacePointCalibrator* calibrator,
                                      const bool calibratedPull,
                                      SeedSelector_t&& seedSelector = nullptr);
+
+            /** @brief Constructor to initialize the seeder state with a predefined set of hits 
+             * @param parentSeed: Pointer to the HoughSeed from which all the 
+             *                    Mdt segment seeds are constructed
+             * @param calibrator: Pointer to the calibrator to be used to construct
+             *                    the calibrated space points and (optionally)
+             *                    to refine the pull calculation
+             * @param calibratePull: First calibrate the space point before calculating
+             *                       the pull w.r.t. seed line 
+             * @param hits: Predefined set of hits to initialize the seeder state with
+             * @param seedSelector: Utility function to reject bad drift circle 
+             *                      seeds based on geometrical constaints  */
+            SeederStateBase(const SegmentSeed* parentSeed,
+                            const ISpacePointCalibrator* calibrator,
+                            bool calibratePull,
+                            const SpacePointPerLayerSplitter::HitVec& hits,
+                            SeedSelector_t&& seedSelector = nullptr);
+
         public:
             /** @brief Abrivation of the collection of calibrated space points */
             using CalibCont_t = Segment::MeasVec;
