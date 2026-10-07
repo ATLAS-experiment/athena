@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file GeneratorObjectsTPCnv/test/McEventCollectionCnv_p5_test.cxx
@@ -14,8 +14,7 @@
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
-#include "GaudiKernel/ThreadLocalContext.h"
-#include "AthenaKernel/ExtendedEventContext.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "SGTools/TestStore.h"
 #include "TestTools/initGaudi.h"
 
@@ -190,10 +189,7 @@ void test1 (SGTest::TestStore& store)
   std::cout << "test1\n";
 
   // create a dummy EventContext
-  EventContext ctx;
-  ctx.setEventID (EventIDBase (12345, 1));
-  ctx.setExtension( Atlas::ExtendedEventContext( &store ) );
-  Gaudi::Hive::setCurrentContext( ctx );
+  Atlas::setProxyDictInEventContext( &store );
 
   auto runInfo = std::make_shared<HepMC3::GenRunInfo>();
   runInfo->set_weight_names ({"weight1"});
