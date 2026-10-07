@@ -1,7 +1,6 @@
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
-// $Id$
 /**
  * @file CxxUtils/test/MD5_test.cxx
  * @author scott snyder
@@ -12,7 +11,7 @@
 
 #undef NDEBUG
 #include "CxxUtils/MD5.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -20,7 +19,7 @@
 //  <https://www.nist.gov/itl/ssd/software-quality-group/nsrl-test-data>
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   {
     MD5 md5 ((const unsigned char*)"abc", 3);

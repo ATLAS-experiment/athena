@@ -1,8 +1,6 @@
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
-
-// $Id$
 /**
  * @file CxxUtils/CachedPointer_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -14,7 +12,7 @@
 #undef NDEBUG
 #include "CxxUtils/CachedPointer.h"
 #include <vector>
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <thread>
 #include <shared_mutex>
@@ -26,7 +24,7 @@ typedef CxxUtils::CachedPointer<void> CVP;
 // Basic tests.
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   int x1 = 0;
   int x2 = 0;
   int x4 = 0;
@@ -153,7 +151,7 @@ void ThreadingTest::threadedTest()
 // Threading test.
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   ThreadingTest test;
   for (int i=0; i < 20; i++)

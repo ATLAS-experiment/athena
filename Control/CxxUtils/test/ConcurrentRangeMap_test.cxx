@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  CxxUtils/test/ConcurrentRangeMap_test.cxx
@@ -17,7 +17,7 @@
 #include <shared_mutex>
 #include <unordered_set>
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <cstdlib>
 #include <sstream>
 #include <unistd.h> // usleep
@@ -276,7 +276,8 @@ std::string str (const TestMap& m)
 {
   std::ostringstream ss;
   for (const auto& p : m.range()) {
-    ss << p.first.m_begin << ".." << p.first.m_end << "->" << p.second->m_x << " ";
+    std::print (ss, "{}..{}->{} ",
+                p.first.m_begin, p.first.m_end, p.second->m_x);
   }
   return ss.str();
 }
@@ -284,7 +285,7 @@ std::string str (const TestMap& m)
 
 void test1a()
 {
-  std::cout << "test1a\n";
+  std::println ("test1a");
   Payload::Hist phist;
   {
     TestMap map (TestMap::Updater_t(), std::make_shared<PayloadDeleter>(), 3);
@@ -758,7 +759,7 @@ void test1a()
 // Testing trim().
 void test1b()
 {
-  std::cout << "test1b\n";
+  std::println ("test1b");
 
   Payload::Hist phist;
   TestMap map (TestMap::Updater_t(), std::make_shared<PayloadDeleter>(), 100);
@@ -826,7 +827,7 @@ void test1b()
 // Testing detection of overlaps.
 void test1c()
 {
-  std::cout << "test1c\n";
+  std::println ("test1c");
   Payload::Hist phist;
 
   TestMap map (TestMap::Updater_t(), std::make_shared<PayloadDeleter>(), 3);
@@ -885,7 +886,7 @@ void test1c()
 // Test clear();
 void test1d()
 {
-  std::cout << "test1d\n";
+  std::println ("test1d");
   Payload::Hist phist;
   TestMap map (TestMap::Updater_t(), std::make_shared<PayloadDeleter>(), 3);
   assert (map.emplace (Range (10, 20), std::make_unique<Payload> (10, &phist)) ==
@@ -920,7 +921,7 @@ void test1e()
   //     new range being inserted
   // then we would return DUPLICATE rather than inserting new element.
   // Test for this failure.
-  std::cout << "test1e\n";
+  std::println ("test1e");
   Payload::Hist phist;
   TestMap map (TestMap::Updater_t(), std::make_shared<PayloadDeleter>(), 2);
 
@@ -1150,7 +1151,7 @@ void test2_iter()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   for (int i=0; i < 5; i++) {
     test2_iter();

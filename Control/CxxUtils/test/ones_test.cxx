@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/ones_test.cxx
@@ -11,7 +11,7 @@
 
 #undef NDEBUG
 #include "CxxUtils/ones.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <stdint.h>
 
@@ -30,7 +30,7 @@ void testit (unsigned int n)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   for (int i=0; i<=32; i++)
     testit<uint32_t> (i);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/minmax_transformed_element_test.cxx
@@ -11,7 +11,7 @@
 #undef NDEBUG
 #include "CxxUtils/minmax_transformed_element.h"
 #include <vector>
-#include <iostream>
+#include <print>
 #include <cmath>
 #include <cassert>
 
@@ -25,7 +25,7 @@ struct distfrom
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   std::vector<double> v { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
 
   {
@@ -44,7 +44,7 @@ void test1()
 
 int main()
 {
-  std::cout << "minmax_transformed_element_test\n";
+  std::println ("minmax_transformed_element_test");
   test1();
   return 0;
 }

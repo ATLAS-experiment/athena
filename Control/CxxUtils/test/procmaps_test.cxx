@@ -1,17 +1,17 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <fstream>
 #include "CxxUtils/procmaps.h"
 //#define DEBUGIT 1
 using namespace std;
 void nop() {}
 int main(void) {
-  cout << "*** procmaps_test starts ***" <<endl;
+  std::println ("*** procmaps_test starts ***");
 #ifdef DEBUGIT
   const bool DUMPMAPS(true);
 #else
@@ -22,9 +22,8 @@ int main(void) {
   const procmaps::Entry* pCodeEntry(pmaps.getEntry((void *)(unsigned long)&nop));
   assert(pCodeEntry); 
 #ifdef DEBUGIT
-  cout << "code entry " << hex << pCodeEntry->begAddress << " " 
-       << (void *)&nop  << " "
-       << pCodeEntry->endAddress << endl;
+  std::println ("code entry {:x} {} {:x}",
+                pCodeEntry->begAddress, (void *)&nop, pCodeEntry->endAddress);
 #endif
   assert(pCodeEntry->executable);
   assert(pCodeEntry->readable);
@@ -57,9 +56,8 @@ int main(void) {
   const procmaps::Entry* pHeapEntry(pmaps.getEntry(pi));
   assert(pHeapEntry); 
 #ifdef DEBUGIT
-  cout << "heap entry " << hex << pHeapEntry->begAddress << " " 
-       << pi  << " "
-       << pHeapEntry->endAddress << endl;
+  std::println ("heap entry {:x} {} {}",
+                pHeapEntry->begAddress, pi, pHeapEntry->endAddress);
 #endif
   //FIXME the heap should not be executable, right?  assert(!pHeapEntry->executable);
   assert(pHeapEntry->readable);
@@ -69,6 +67,6 @@ int main(void) {
 //make valgrind happy
   delete pi;
 
-  cout << "*** procmaps_test OK ***" <<endl;
+  std::println ("*** procmaps_test OK ***");
   return 0;
 }

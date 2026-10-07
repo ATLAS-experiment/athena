@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/atomic_bounded_decrement_test.h
@@ -16,7 +16,7 @@
 #include <thread>
 #include <shared_mutex>
 #include <limits>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 using CxxUtils::atomic_bounded_decrement;
@@ -48,7 +48,7 @@ void test1_test()
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   test1_test<char>();
   test1_test<signed char>();
@@ -134,7 +134,7 @@ void test2_test()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   test2_test<char>();
   test2_test<signed char>();

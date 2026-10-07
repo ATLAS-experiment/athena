@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  Array_test.cxx
@@ -15,6 +15,7 @@
 #include "CxxUtils/Array.h"
 #include <cassert>
 #include <iostream>
+#include <print>
 #include <sstream>
 
 
@@ -259,6 +260,9 @@ void test7()
           "    [1.5, 2.5],\n"
           "    [3.5, 4.5]\n"
           "    ]\n");
+  std::ostringstream ss1a;
+  std::print (ss1a, "{}", a1);
+  assert (ss1.str() == ss1a.str());
 
   Arrayrep rep0;
   rep0.m_data.push_back (101);
@@ -266,6 +270,9 @@ void test7()
   std::ostringstream ss2;
   ss2 << a0a;
   assert (ss2.str() == "101");
+  std::ostringstream ss2a;
+  std::print (ss2a, "{}", a0a);
+  assert (ss2.str() == ss2a.str());
 }
 
 

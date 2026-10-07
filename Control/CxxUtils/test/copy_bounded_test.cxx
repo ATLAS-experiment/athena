@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/copy_bounded_test.cxx
@@ -16,7 +16,7 @@
 #include <vector>
 #include <list>
 #include <cassert>
-#include <iostream>
+#include <print>
 #include <ranges>
 #include <algorithm>
 
@@ -114,7 +114,7 @@ struct test1a
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   test1a<std::vector<int> >::test();
   test1a<std::list<int> >::test();
   test1a<std::vector<int>, std::list<int> >::test();

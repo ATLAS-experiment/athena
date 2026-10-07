@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/src/hexdump.cxx
@@ -11,7 +11,7 @@
 
 #include "CxxUtils/hexdump.h"
 #include "CxxUtils/procmaps.h"
-#include <format>
+#include <print>
 #include <cstdint>
 #include <array>
 #include <bit>
@@ -45,20 +45,20 @@ void hexdump (std::ostream& s, const void* addr, size_t n, size_t offset /*= 0*/
 
   while (n-- > 0) {
     if ((ipos % width) == 0) {
-      s << std::format("{:016x} ", reinterpret_cast<uintptr_t>(ptr + ipos) - offset);
+      std::print (s, "{:016x} ", reinterpret_cast<uintptr_t>(ptr + ipos) - offset);
     }
     if ((ipos % 4) == 0) {
-      s << " ";
+      std::print (s, " " );
     }
     bbuf[ipos % 4] = static_cast<unsigned char>(ptr[ipos]);
     cbuf[ipos % width] = std::isgraph(static_cast<unsigned char>(ptr[ipos])) ? ptr[ipos] : '.';
 
     ++ipos;
     if ((ipos % 4) == 0) {
-      s << std::format("{:08x}", static_cast<unsigned int>(std::bit_cast<uint32_t>(bbuf)));
+      std::print (s, "{:08x}", static_cast<unsigned int>(std::bit_cast<uint32_t>(bbuf)));
     }
     if ((ipos % width) == 0) {
-      s << "  " << cbuf << "\n";
+      std::println (s, "  {}", cbuf);
     }
   }
 
@@ -68,17 +68,18 @@ void hexdump (std::ostream& s, const void* addr, size_t n, size_t offset /*= 0*/
       for (unsigned i = ntrail; i < 4; i++) {
         bbuf[i] = 0;
       }
-      s << std::format("{:0{}x}", static_cast<unsigned int>(std::bit_cast<uint32_t>(bbuf)), 2*ntrail);
+      std::print (s, "{:0{}x}",
+                  static_cast<unsigned int>(std::bit_cast<uint32_t>(bbuf)), 2*ntrail);
     }
     while ((ipos % width) != 0) {
       if ((ipos % 4) == 0) {
-        s << " ";
+        std::print (s, " ");
       }
-      s << "  ";
+      std::print (s, "  ");
       cbuf[ipos % width] = ' ';
       ++ipos;
     }
-    s << "  " << cbuf << "\n";
+    std::println (s, "  {}", cbuf);
   }
 }
 
@@ -127,8 +128,8 @@ void safeHexdump (std::ostream& s, const void* addr, size_t n, size_t offset /*=
       hexdump (s, ptr, thispage, offset);
     }
     else {
-      s << std::format("{:016x}  --- is not readable\n",
-                       reinterpret_cast<uintptr_t>(ptr) - offset);
+      std::println ("{:016x}  --- is not readable",
+                    reinterpret_cast<uintptr_t>(ptr) - offset);
       if (ent) {
         thispage = std::max (ent->endAddress - iptr, thispage);
       }

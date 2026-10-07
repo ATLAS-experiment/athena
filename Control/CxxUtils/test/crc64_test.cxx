@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file CxxUtils/test/crc64_test.cxx
  * @author scott snyder
@@ -15,7 +13,7 @@
 #include "CxxUtils/crc64.h"
 #include "boost/timer/timer.hpp"
 #include <vector>
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <string.h>
 
@@ -36,7 +34,7 @@ void testextend (const std::string& str, unsigned int x)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   const uint64_t p = 0xad93d23594c935a9;
   std::unique_ptr<CxxUtils::CRCTable> table = CxxUtils::makeCRCTable (p);
@@ -59,7 +57,7 @@ void test1()
 // Test crc64 against crc64_bytewise.
 void validate()
 {
-  std::cout << "validate\n";
+  std::println ("validate");
 
   for (int len=0; len<1000; len++) {
     std::string s;
@@ -182,10 +180,10 @@ uint64_t perftest()
     sum ^= corpus_long.time (t_long_crc64_vec, CxxUtils::crc64);
   }
 
-  std::cout << "short, old: " << t_short_crc64.format();
-  std::cout << "short, vec: " << t_short_crc64_vec.format();
-  std::cout << "long,  old: " << t_long_crc64.format();
-  std::cout << "long,  vec: " << t_long_crc64_vec.format();
+  std::println ("short, old: {}", t_short_crc64.format());
+  std::println ("short, vec: {}", t_short_crc64_vec.format());
+  std::println ("long,  old: {}", t_long_crc64.format());
+  std::println ("long,  vec: {}", t_long_crc64_vec.format());
 
   return sum;
 }
@@ -198,7 +196,7 @@ int main (int argc, const char** argv)
     return 0;
   }
 
-  std::cout << "crc64_test\n";
+  std::println ("crc64_test");
   test1();
   validate();
   return 0;

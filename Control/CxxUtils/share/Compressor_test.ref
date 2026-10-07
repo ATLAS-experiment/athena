@@ -1,33 +1,33 @@
 reduceToUS round-trip (8 values):
   in=1  out=1
   in=-1  out=-1
-  in=3.14159  out=3.14062
+  in=3.14159  out=3.140625
   in=-2.71828  out=-2.71875
   in=0.5  out=0.5
   in=1234.5  out=1232
-  in=-0.001  out=-0.000999451
-  in=100000  out=99840
+  in=-0.001  out=-0.0009994507
+  in=1e+05  out=99840
 reduce/expandToFloat round-trip (bits=16, 8 values):
   in=1  out=1
   in=-1  out=-1
-  in=3.14159  out=3.14062
+  in=3.14159  out=3.140625
   in=-2.71828  out=-2.71875
   in=0.5  out=0.5
   in=1234.5  out=1232
-  in=-0.001  out=-0.000999451
-  in=100000  out=99840
+  in=-0.001  out=-0.0009994507
+  in=1e+05  out=99840
 reduce/expandToFloat round-trip (bits=18, 6 values):
   in=1  out=1
   in=2.5  out=2.5
   in=-3.75  out=-3.75
   in=1000  out=1000
-  in=0.123  out=0.123047
+  in=0.123  out=0.123046875
   in=-456.789  out=-457
 reduce/expandToFloat round-trip (bits=16, ignoreSign, 5 values):
   in=1  out=1
   in=2.5  out=2.5
   in=100  out=100
-  in=0.001  out=0.000999451
+  in=0.001  out=0.0009994507
   in=10000  out=9984
 reduceToUS round-trip (0 values):
 reduce/expandToFloat round-trip (bits=16, 0 values):
@@ -39,15 +39,15 @@ reduce/expandToFloat round-trip (bits=4, 8 values):
   in=-2.71828  out=-2.75
   in=0.5  out=0.5
   in=1234.5  out=1280
-  in=-0.001  out=-0.000976562
-  in=100000  out=98304
+  in=-0.001  out=-0.0009765625
+  in=1e+05  out=98304
 WARNING -> Compression to 32 bits is not possible. Compressing to 31 bits !
 reduce/expandToFloat round-trip (bits=32, 8 values):
   in=1  out=1
   in=-1  out=-1
   in=3.14159  out=3.14159
-  in=-2.71828  out=-2.71828
+  in=-2.71828  out=-2.7182803
   in=0.5  out=0.5
   in=1234.5  out=1234.5
-  in=-0.001  out=-0.001
-  in=100000  out=100000
+  in=-0.001  out=-0.0010000002
+  in=1e+05  out=1e+05

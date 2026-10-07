@@ -12,8 +12,7 @@
 #include "CxxUtils/ones.h"
 #include "CxxUtils/trapping_fp.h"
 #include <limits>
-#include <sstream>
-#include <iomanip>
+#include <format>
 #include <stdexcept>
 #include <bit>
 #include <cstdint>
@@ -285,14 +284,10 @@ FloatPacker::pack (double src, std::string* err /*= nullptr*/) const
   // Check for NaN and infinity.
   if (biasedExponent(bits) == ieee754_double_exponent_all_ones) {    
     if (err) {
-      std::ostringstream os;
-      os << "Bad float number: " << src << " ("
-         << std::setbase(16)
-         << static_cast<std::uint32_t>(bits)
-         << " "
-         << static_cast<std::uint32_t>(bits >> 32)
-         << ")";
-      *err = os.str();
+      *err = std::format ("Bad float number: {} ({:#010x} {:#010x})",
+                          src,
+                          static_cast<std::uint32_t>(bits),
+                          static_cast<std::uint32_t>(bits >> 32));
     }
     d = 0;
     bits = doubleToBits(d);
@@ -312,9 +307,7 @@ FloatPacker::pack (double src, std::string* err /*= nullptr*/) const
     else {
       // Don't complain on -0.
       if (d < 0 && err) {
-        std::ostringstream os;
-        os << "Float overflow during packing: " << src;
-        *err = os.str();
+        *err = std::format ("Float overflow during packing: {}", src);
       }
       d = 0;
       bits = doubleToBits(d);
@@ -367,9 +360,7 @@ FloatPacker::pack (double src, std::string* err /*= nullptr*/) const
   // If the number is too large, bitch, and reset to the largest number.
   if (exponent > m_max_exp) {
     if (err) {
-      std::ostringstream os;
-      os << "Float overflow during packing: " << src;
-      *err = os.str();
+      *err = std::format ("Float overflow during packing: {}", src);
     }
     exponent = m_max_exp;
     mantissa = static_cast<Packdest> (~0);
@@ -449,9 +440,7 @@ FloatPacker::unpack(Packdest val, std::string* err /*= nullptr*/) const
     // Complain about overflow.
     if (exponent >= max_int(ieee754_double_exponent_bits)) {
       if (err) {
-        std::ostringstream os;
-        os << "Overflow while unpacking float; exponent: " << exponent;
-        *err = os.str();
+        *err = std::format ("Overflow while unpacking float; exponent: {}", exponent);
       }
       exponent = max_int(ieee754_double_exponent_bits) + 1;
       mantissa = 0; // Infinity.

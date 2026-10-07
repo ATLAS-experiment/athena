@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/ConcurrentStrMap_test.cxx
@@ -39,8 +39,7 @@ extern "C" {
 #include <vector>
 #include <deque>
 #include <memory>
-#include <iostream>
-#include <sstream>
+#include <print>
 #include <cassert>
 
 
@@ -233,9 +232,7 @@ void test1a()
   Values<mapped_type> vals2 (MAXKEYS, MAXKEYS + 0.5);
 
   for (size_t i = 0; i < MAXKEYS; i++) {
-    std::ostringstream ss;
-    ss << i;
-    keys.push_back (ss.str());
+    keys.push_back (std::to_string(i));
   }
 
   assert (map.size() == 0);
@@ -417,7 +414,7 @@ void test1a()
 }
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   test1a<TestMapu>();
   test1a<TestMapp>();
   test1a<TestMapi>();
@@ -511,7 +508,7 @@ void test2a()
 }
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   test2a<TestMapu>();
   test2a<TestMapp>();
   test2a<TestMapi>();
@@ -531,14 +528,10 @@ void test_swap1()
   std::vector<std::string> keys2;
 
   for (size_t i = 0; i < MAXKEYS; i++) {
-    std::ostringstream ss;
-    ss << i;
-    keys1.push_back (ss.str());
+    keys1.push_back (std::to_string(i));
   }
   for (size_t i = 0; i < MAXKEYS/2; i++) {
-    std::ostringstream ss;
-    ss << (i + MAXKEYS);
-    keys2.push_back (ss.str());
+    keys2.push_back (std::to_string(i + MAXKEYS));
   }
 
   using const_iterator = typename MAP::const_iterator;
@@ -581,7 +574,7 @@ void test_swap1()
 }
 void test_swap()
 {
-  std::cout << "test_swap\n";
+  std::println ("test_swap");
   test_swap1<TestMapu>();
 }
 
@@ -615,9 +608,7 @@ test4_Base::test4_Base (int slot)
   : m_slot (slot)
 {
   for (size_t i = 0; i < nwrites; i++) {
-    std::ostringstream ss;
-    ss << i;
-    m_keys.push_back (ss.str());
+    m_keys.push_back (std::to_string(i));
   }
 }
 
@@ -789,7 +780,7 @@ void test4_iter()
 
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   for (int i=0; i < 5; i++) {
     test4_iter();
@@ -1014,7 +1005,7 @@ CKHTAdapter::CKHTAdapter()
                    128, // initial size
                    6602834))
   {
-    std::cout << "ck_hs_init error\n";
+    std::println ("ck_hs_init error");
   }
 }
 #endif // HAVE_CK
@@ -1073,8 +1064,8 @@ TesterBase::TesterBase()
 
 void TesterBase::report()
 {
-  std::cout << "lookup:  " << m_lookup_timer.format();
-  std::cout << "iterate: " << m_iterate_timer.format();
+  std::println ("lookup:  {}", m_lookup_timer.format());
+  std::println ("iterate: {}", m_iterate_timer.format());
 }
 
 
@@ -1169,7 +1160,7 @@ template <class CONT>
 void perftest_one()
 {
   auto tester = std::make_unique<Tester<CONT> >();
-  std::cout << tester->name() << "\n";
+  std::println ("{}", tester->name());
   tester->test();
   tester->report();
 }
@@ -1193,14 +1184,14 @@ int main (int argc, char** argv)
 {
   if (argc >= 2 && strcmp (argv[1], "--perf") == 0) {
 #ifdef NO_PERF
-    std::cout << " Performance tests disabled\n";
+    std::println (" Performance tests disabled");
 #else
     perftest();
 #endif
     return 0;
   }
 
-  std::cout << "CxxUtils/ConcurrentStrMap_test\n";
+  std::println ("CxxUtils/ConcurrentStrMap_test");
   test1();
   test2();
   test_swap();

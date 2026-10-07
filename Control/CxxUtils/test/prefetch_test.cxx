@@ -1,11 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //--------------------------------------------------------------------------
-// File and Version Information:
-// 	$Id$
-//
 // Description:
 //	Test application for the prefetch.
 //
@@ -14,7 +11,7 @@
 //---------------
 // C++ Headers --
 //---------------
-#include <iostream>
+#include <print>
 
 //-------------------------------
 // Collaborating Class Headers --
@@ -22,7 +19,7 @@
 
 
 // redefine CXXUTILS_PREFETCH_ADDRESS macro to do useful stuff
-#define CXXUTILS_PREFETCH_ADDRESS(ADDR) std::cout << "  prefetch address: " << static_cast<const void*>(ADDR) << '\n'
+#define CXXUTILS_PREFETCH_ADDRESS(ADDR) std::println ("  prefetch address: {}", static_cast<const void*>(ADDR))
 
 #include "CxxUtils/prefetch.h"
 
@@ -37,7 +34,8 @@ template <unsigned SIZE>
 void prefetch(int address)
 {
   const Data< SIZE >* ptr = reinterpret_cast<const Data< SIZE >*>(address);
-  std::cout << "prefetch address: " << static_cast<const void*>(ptr) << " size: " << sizeof(Data<SIZE>) << '\n';
+  std::println ("prefetch address: {} size: {}",
+                static_cast<const void*>(ptr), sizeof(Data<SIZE>));
   CxxUtils::prefetchObj(ptr);
 }
 
@@ -90,7 +88,7 @@ void test5() {
 struct Foo { int x[10]; };
 
 void test6() {
-  std::cout << "test6\n";
+  std::println ("test6");
   Foo* foo[10];
   for (int i=0; i < 10; i++) foo[i] = reinterpret_cast<Foo*> (i*128);
 

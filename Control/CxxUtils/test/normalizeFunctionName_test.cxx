@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/test/normalizeFunctionName.cxx
@@ -12,13 +12,13 @@
 #undef NDEBUG
 #include "CxxUtils/normalizeFunctionName.h"
 #include <mutex>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 #define CHECK(a, b) assert(CxxUtils::normalizeFunctionName(a)==b)
   CHECK( "void FPGATrackSimPlaneMap::map(FPGATrackSimHit &)",
          "void FPGATrackSimPlaneMap::map(FPGATrackSimHit&)" );
@@ -33,7 +33,7 @@ void test1()
 
 int main()
 {
-  std::cout << "CxxUtils/normalizeFunctionName_test\n";
+  std::println ("CxxUtils/normalizeFunctionName_test");
   test1();
   return 0;
 }

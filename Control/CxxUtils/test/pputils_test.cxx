@@ -11,7 +11,7 @@
 
 #undef NDEBUG
 #include "CxxUtils/pputils.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -23,7 +23,7 @@ void check (int exp, int test=0)
 
 int main()
 {
-  std::cout << "CxxUtils/pputils_test\n";
+  std::println ("CxxUtils/pputils_test");
   check (0 CXXUTILS_PP_FIRST());
   check (1 CXXUTILS_PP_FIRST(1));
   check (1 CXXUTILS_PP_ARG1(1, 2, 3));

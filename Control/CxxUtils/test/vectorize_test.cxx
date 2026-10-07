@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/test/vectorize_test.cxx
@@ -10,7 +10,7 @@
 
 #undef NDEBUG
 #include "CxxUtils/vectorize.h"
-#include <iostream>
+#include <print>
 
 
 ATH_ENABLE_TREE_VECTORIZATION;
@@ -18,6 +18,6 @@ ATH_ENABLE_TREE_VECTORIZATION;
 
 int main()
 {
-  std::cout << "CxxUtils/vectorize_test\n";
+  std::println ("CxxUtils/vectorize_test");
   return 0;
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file RefCountedPtr_test.cxx
@@ -12,7 +12,7 @@
 #undef NDEBUG
 #include "CxxUtils/RefCountedPtr.h"
 #include <memory>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -42,7 +42,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   TestRC rc1;
   assert (rc1.m_rc == 0);
 
@@ -206,7 +206,7 @@ void test2()
 
 int main()
 {
-  std::cout << "CxxUtils/RefCountedPtr_test\n";
+  std::println ("CxxUtils/RefCountedPtr_test");
   test1();
   test2();
   return 0;

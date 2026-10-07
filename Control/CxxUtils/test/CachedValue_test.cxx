@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file CxxUtils/CachedValue_test.cxx
@@ -12,7 +12,7 @@
 #undef NDEBUG
 #include "CxxUtils/CachedValue.h"
 #include <vector>
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <thread>
 #include <shared_mutex>
@@ -52,7 +52,7 @@ void Payload::check (int x) const
 // Basic tests.
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   CxxUtils::CachedValue<Payload> cv1;
   assert (!cv1.isValid());
   cv1.store (Payload(1));
@@ -88,7 +88,7 @@ void test1()
 // Move operations.
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   Payload p1(1);
   assert (p1.valid());
@@ -227,7 +227,7 @@ void ThreadingTest::threadedTest()
 // Conversion test.
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
   CxxUtils::CachedValue<Payload> cv1 (Payload (1));
   CxxUtils::CachedValue<int> cv2 (cv1);
   assert (cv2.isValid());
@@ -238,7 +238,7 @@ void test3()
 // Threading test.
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   ThreadingTest test;
   for (int i=0; i < 5; i++) {

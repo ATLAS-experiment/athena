@@ -9,14 +9,14 @@
 #undef NDEBUG
 
 #include "CxxUtils/crc_combine.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <string>
 
 
 void test_crc_combine_uint32()
 {
-  std::cout << "test_crc_combine_uint32\n";
+  std::println ("test_crc_combine_uint32");
 
   // Test combining two uint32_t values
   uint32_t seed1 = 0x12345678;
@@ -41,14 +41,13 @@ void test_crc_combine_uint32()
   uint32_t result_reversed = CxxUtils::crc_combine(val1, seed1);
   assert(result_reversed != result1);  // Swapping order should produce different result
 
-  std::cout << "  seed1=" << std::hex << seed1 << " val1=" << val1 
-            << " result=" << result1 << std::dec << "\n";
+  std::println ("  seed1={:x} val1={:x} result={:x}", seed1, val1, result1);
 }
 
 
 void test_crc_combine_string()
 {
-  std::cout << "test_crc_combine_string\n";
+  std::println ("test_crc_combine_string");
 
   // Test combining a seed with a string
   uint32_t seed = 0x12345678;
@@ -74,8 +73,7 @@ void test_crc_combine_string()
   uint32_t result_long = CxxUtils::crc_combine(seed, long_str);
   assert(result_long != result1);
 
-  std::cout << "  seed=" << std::hex << seed << " str=\"" << str1 << "\" result=" 
-            << result1 << std::dec << "\n";
+  std::println ("  seed={:x} str=\"{}\" result={:x}", seed, str1, result1);
 }
 
 
@@ -83,6 +81,6 @@ int main()
 {
   test_crc_combine_uint32();
   test_crc_combine_string();
-  std::cout << "All tests passed!\n";
+  std::println ("All tests passed!");
   return 0;
 }
