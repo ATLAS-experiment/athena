@@ -153,8 +153,8 @@ StatusCode DeviceDetectorDescriptionSvc::initialize()
 
                     }
 
-                    thismod.row_centres = row_centres;
-                    thismod.column_centres = column_centres;
+                    thismod.row_centres = std::move(row_centres);
+                    thismod.column_centres = std::move(column_centres);
 
                     thismod.module_width = p_design->width();
                     thismod.module_length = p_design->length();
@@ -198,10 +198,11 @@ StatusCode DeviceDetectorDescriptionSvc::initialize()
                 }
                 default:
                     // unreachable, see filter above
+                    //coverity[DEADCODE]
                     return;
             }
             
-            m_atlasModuleInfo[athenaID] = thismod;
+            m_atlasModuleInfo[athenaID] = std::move(thismod);
             const auto geo_id = surface->geometryId();
             actsToAthena[geo_id] = athenaID;
             
@@ -292,7 +293,7 @@ StatusCode DeviceDetectorDescriptionSvc::initialize()
                         edgesY = thismod.column_centres;
                     }
                     
-                    designKey key{thismod.pixel, thismod.isAnnulus, edgesX, edgesY,
+                    designKey key{thismod.pixel, thismod.isAnnulus, std::move(edgesX), std::move(edgesY),
                                 std::abs(thismod.module_width), thismod.module_length};
 
                     const auto [it, inserted] = designLookup.try_emplace(key, nextDesignId);

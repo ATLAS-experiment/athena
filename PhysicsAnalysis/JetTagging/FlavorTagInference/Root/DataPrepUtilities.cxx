@@ -324,7 +324,7 @@ namespace FlavorTagInference {
       }
 
       std::vector<ConstituentsInputConfig> constituent_configs;
-      for (auto el: constituent_names){
+      for (const auto & el: constituent_names){
         constituent_configs.push_back(
           createConstituentsLoaderConfig(el.first, el.second, flip_config));
       }
@@ -363,10 +363,10 @@ namespace FlavorTagInference {
           link_prefix = str::sub_first(
               flip_converters, link_prefix, ctx);
         }
-        options.object_link_prefix = link_prefix;
+        options.object_link_prefix = std::move(link_prefix);
       }
       options.flip = flip_config;
-      options.remap_scalar = remap_scalar;
+      options.remap_scalar = std::move(remap_scalar);
       return std::make_tuple(input_config, constituent_configs, options);
     }
 
@@ -414,16 +414,11 @@ namespace FlavorTagInference {
             varsFromJet.push_back(std::make_pair(input.name, getter));
           }
         } else if (input.type == EDMType::CUSTOM_GETTER) {
-          varsFromJet.push_back(std::make_pair(input.name, getter_utils::namedCustomJetGetter(input.name)));
+          varsFromJet.emplace_back(input.name, getter_utils::namedCustomJetGetter(input.name));
         } else {
           // integer and char decorations go through the typed getters
-          auto getter = internal::get::varFromBTag(
-            input.name, input.type, input.default_flag);
-          internal::VarFromJet fromJet =
-            [getter](const xAOD::IParticle& j) -> internal::NamedVar {
-              return getter(j);
-            };
-          varsFromJet.push_back(std::make_pair(input.name, fromJet));
+          auto getter = internal::get::varFromBTag( input.name, input.type, input.default_flag);
+          varsFromJet.emplace_back(input.name, std::move(getter));
         }
         if (input.default_flag.size() > 0) {
           deps.bTagInputs.insert(input.default_flag);
@@ -468,7 +463,7 @@ namespace FlavorTagInference {
           SG::Decorator<float> f(name);
           node.emplace_back(element, f);
         }
-        decorators[node_name] = node;
+        decorators[node_name] = std::move(node);
       }
 
       return std::make_tuple(decorators, deps, used_remap);
@@ -521,7 +516,7 @@ namespace FlavorTagInference {
     {
       // we want to make sure every remapping was used
       std::set<std::string> unused;
-      for (auto [k, v]: requested) {
+      for (const auto & [k, v]: requested) {
         if (!used.count(k)) unused.insert(k);
       }
       if (unused.size() > 0) {
