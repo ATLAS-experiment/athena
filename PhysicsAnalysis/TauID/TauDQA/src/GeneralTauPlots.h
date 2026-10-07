@@ -39,9 +39,10 @@ class GeneralTauPlots: public PlotBase {
       TH1* m_ptHighPt{};
       TH1* m_tauTrackSummary{};
 
-      // RNN
       TH1* m_RNNEleScore{};
       TH1* m_RNNEleScoreSigTrans{};
+      TH1* m_GNNEleScore{};
+      TH1* m_GNNEleScoreSigTrans{};
       TH1* m_GNTauScore{};
       TH1* m_GNTauScoreSigTrans{};
       TH1* m_ptGNTauLoose{};

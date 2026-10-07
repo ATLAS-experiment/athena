@@ -16,7 +16,7 @@ class EVetoPlots: public PlotBase {
     virtual ~EVetoPlots() = default;
     void fill(const xAOD::TauJet& tau, float weight);
 
-
+    // RNN
     TH1* m_id_RNNEleScore{};
     TH1* m_id_RNNEleScoreSigTrans{};
     TH1* m_pt_eleRNNloose{};
@@ -25,6 +25,15 @@ class EVetoPlots: public PlotBase {
     TH1* m_pt_eleRNNlooseHighPt{};
     TH1* m_pt_eleRNNmedHighPt{}; 
     TH1* m_pt_eleRNNtightHighPt{};
+    // GNN
+    TH1* m_id_GNNEleScore{};
+    TH1* m_id_GNNEleScoreSigTrans{};
+    TH1* m_pt_eleGNNloose{};
+    TH1* m_pt_eleGNNmed{};
+    TH1* m_pt_eleGNNtight{};
+    TH1* m_pt_eleGNNlooseHighPt{};
+    TH1* m_pt_eleGNNmedHighPt{};
+    TH1* m_pt_eleGNNtightHighPt{};
     
   private:
     void initializePlots();
