@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DataModelTestDataCommon/src/CondReaderAlg.cxx
@@ -72,18 +72,18 @@ StatusCode CondReaderAlg::execute (const EventContext& ctx) const
 {
   SG::ReadHandle<xAOD::EventInfo> eventInfo (m_eventInfoKey, ctx);
 
-  ATH_MSG_INFO ("Event " << eventInfo->eventNumber() <<
-                " LBN " << eventInfo->lumiBlock());
+  ATH_MSG_INFO ("Event {} LBN {}",
+                eventInfo->eventNumber(), eventInfo->lumiBlock());
 
   SG::ReadCondHandle<AthenaAttributeList> attrList (m_attrListKey, ctx);
   ATH_MSG_INFO ("  xint " << (**attrList)["xint"]);
 
   SG::ReadCondHandle<DMTest::S1> s1 (m_scondKey, ctx);
-  ATH_MSG_INFO ("  scond " << s1->m_x );
+  ATH_MSG_INFO ("  scond {}", s1->m_x );
 
   if (!m_s2Key.key().empty()) {
     SG::ReadCondHandle<DMTest::S1> s2 (m_s2Key, ctx);
-    ATH_MSG_INFO ("  s2 " << s2->m_x );
+    ATH_MSG_INFO ("  s2 {}", s2->m_x );
   }
 
   if (!m_rltestKey.key().empty()) {
@@ -98,7 +98,7 @@ StatusCode CondReaderAlg::execute (const EventContext& ctx) const
 
   if (!m_s3Key.key().empty()) {
     SG::ReadCondHandle<DMTest::S3> s3 (m_s3Key, ctx);
-    ATH_MSG_INFO ("  s3 " << s3->m_x );
+    ATH_MSG_INFO ("  s3 {}", s3->m_x );
   }
 
   {

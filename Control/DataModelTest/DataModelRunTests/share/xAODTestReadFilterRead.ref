@@ -1,68 +1,51 @@
-Tue Sep 24 21:04:00 EDT 2024
+Tue Aug 25 12:09:45 EDT 2026
 Preloading libexcabort.so
-ApplicationMgr    SUCCESS 
+ApplicationMgr     SUCCESS 
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Tue Sep 24 21:04:01 2024
+                                          running on karma on Tue Aug 25 12:09:46 2026
 ====================================================================================================================================
-ApplicationMgr       INFO Application Manager Configured successfully
-CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
+ApplicationMgr        INFO Application Manager Configured successfully
+Py:ComponentAccumulator    INFO Athena job with pid 3661344
+CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 6(Aborted) 8(Floating point exception) 14(Alarm clock) 
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
-ClassIDSvc           INFO getRegistryEntries: read 6380 CLIDRegistry entries for module ALL
-ClassIDSvc           INFO getRegistryEntries: read 8257 CLIDRegistry entries for module ALL
 PyComponentMgr       INFO Initializing PyComponentMgr...
 LoadReadDicts        INFO Initializing LoadReadDicts...
+ClassIDSvc           INFO getRegistryEntries: read 14740 CLIDRegistry entries for module ALL
 PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
 PoolSvc              INFO Frontier compression level set to 5
-DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/dvtest/build/share/dbreplica.config
+DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/rootaccess/build-clang/share/dbreplica.config
 DBReplicaSvc         INFO No specific match for domain found - use default fallback
 DBReplicaSvc         INFO Total of 1 servers found for host karma [atlas_dd ]
 PoolSvc              INFO Successfully setup replica sorting algorithm
 PoolSvc              INFO Setting up FileCatalog and Streams
 PoolSvc              INFO POOL WriteCatalog is file:xAODTestReadFilterRead_catalog.xml
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO >   Access   DbDomain     NOT_OPEN  [ROOT_All]
 PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] FB6DAC2F-D141-44C5-9E33-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO                           xaoddata_filt.root
-RootDatabase.open    INFO xaoddata_filt.root File version:63204
+xaoddata_filt.root   INFO ->  Access   DbDatabase   READ      [ROOT_All] FB6DAC2F-D141-44C5-9E33-0FF0FF0FF0FF
+RootDatabase         INFO xaoddata_filt.root File version:64002
 xaoddata_filt.root   INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] FB6DAC2F-D141-44C5-9E33-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
-PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] FB6DAC2F-D141-44C5-9E33-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO                           xaoddata_filt.root
-RootDatabase.open    INFO xaoddata_filt.root File version:63204
-xaoddata_filt.root   INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] FB6DAC2F-D141-44C5-9E33-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 711D1E49-A657-A448-AAC0-60862C97DF51
-Domain[ROOT_All]     INFO                           xaoddata_filt.root
-RootDatabase.open    INFO xaoddata_filt.root File version:63204
+xaoddata_filt.root   INFO ->  Deaccess DbDatabase   READ      [ROOT_All] FB6DAC2F-D141-44C5-9E33-0FF0FF0FF0FF
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     NOT_OPEN  [ROOT_All]
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All]
+xaoddata_filt.root   INFO ->  Access   DbDatabase   READ      [ROOT_All] 24B5D770-A09F-11F1-9748-CE324ACF4E4B
+RootDatabase         INFO xaoddata_filt.root File version:64002
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
 xaoddata_filt.root   INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 711D1E49-A657-A448-AAC0-60862C97DF51
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 711D1E49-A657-A448-AAC0-60862C97DF51
-Domain[ROOT_All]     INFO                           xaoddata_filt.root
-RootDatabase.open    INFO xaoddata_filt.root File version:63204
+xaoddata_filt.root   INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 24B5D770-A09F-11F1-9748-CE324ACF4E4B
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All]
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All]
+xaoddata_filt.root   INFO ->  Access   DbDatabase   READ      [ROOT_All] 24B5D770-A09F-11F1-9748-CE324ACF4E4B
+RootDatabase         INFO xaoddata_filt.root File version:64002
 ApplicationMgr       INFO Application Manager Started successfully
-ClassIDSvc           INFO getRegistryEntries: read 1500 CLIDRegistry entries for module ALL
 EventP...stencySvc   INFO Added successfully Conversion service AthenaPoolCnvSvc
-TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
+TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo&TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
-TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dVar1' (id=310 typename=float) has different type than the branch: vector<int>  Marking for schema evolution.
+TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo&TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dVar1' (id=317 typename=float) has different type than the branch: vector<int>  Marking for schema evolution.
 xAODTestReadCVec     INFO  anInt1 201 aFloat: 400 anInt2: 601 dInt1: 801 dVar1: 901 cEL: cvec[9]
 
 xAODTestReadCVec     INFO  anInt1 203 aFloat: 400.2 anInt2: 603 dInt1: 803 dVar1: 903 cEL: cvec[7]
@@ -73,12 +56,11 @@ xAODTestReadCVec     INFO  anInt1 207 aFloat: 400.6 anInt2: 607 dInt1: 807 dVar1
 
 xAODTestReadCVec     INFO  anInt1 209 aFloat: 400.8 anInt2: 609 dInt1: 809 dVar1: 909 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 2111 aFloat: 111.2 anInt2: 4111 dInt1: 6111 cEL: cvec[2]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
-ClassIDSvc           INFO getRegistryEntries: read 142 CLIDRegistry entries for module ALL
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 301 aFloat: 600 anInt2: 901 dInt1: 1201 dVar1: 1351 cEL: cvec[9]
 
@@ -90,11 +72,11 @@ xAODTestReadCVec     INFO  anInt1 307 aFloat: 600.6 anInt2: 907 dInt1: 1207 dVar
 
 xAODTestReadCVec     INFO  anInt1 309 aFloat: 600.8 anInt2: 909 dInt1: 1209 dVar1: 1359 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 3111 aFloat: 111.3 anInt2: 6111 dInt1: 9111 cEL: cvec[3]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #3, run #0 2 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 401 aFloat: 800 anInt2: 1201 dInt1: 1601 dVar1: 1801 cEL: cvec[9]
 
@@ -106,17 +88,17 @@ xAODTestReadCVec     INFO  anInt1 407 aFloat: 800.6 anInt2: 1207 dInt1: 1607 dVa
 
 xAODTestReadCVec     INFO  anInt1 409 aFloat: 800.8 anInt2: 1209 dInt1: 1609 dVar1: 1809 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 4111 aFloat: 111.4 anInt2: 8111 dInt1: 12111 cEL: cvec[4]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #3, run #0 3 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #4, run #0 3 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 5111 aFloat: 111.5 anInt2: 10111 dInt1: 15111 cEL: [18446744073709551615]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #4, run #0 4 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #5, run #0 4 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 601 aFloat: 1200 anInt2: 1801 dInt1: 2401 dVar1: 2701 cEL: cvec[9]
 
@@ -128,11 +110,11 @@ xAODTestReadCVec     INFO  anInt1 607 aFloat: 1200.6 anInt2: 1807 dInt1: 2407 dV
 
 xAODTestReadCVec     INFO  anInt1 609 aFloat: 1200.8 anInt2: 1809 dInt1: 2409 dVar1: 2709 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 6111 aFloat: 111.6 anInt2: 12111 dInt1: 18111 cEL: cvec[1]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #5, run #0 5 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #6, run #0 5 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 701 aFloat: 1400 anInt2: 2101 dInt1: 2801 dVar1: 3151 cEL: cvec[9]
 
@@ -144,11 +126,11 @@ xAODTestReadCVec     INFO  anInt1 707 aFloat: 1400.6 anInt2: 2107 dInt1: 2807 dV
 
 xAODTestReadCVec     INFO  anInt1 709 aFloat: 1400.8 anInt2: 2109 dInt1: 2809 dVar1: 3159 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 7111 aFloat: 111.7 anInt2: 14111 dInt1: 21111 cEL: cvec[2]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #6, run #0 6 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #7, run #0 6 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 801 aFloat: 1600 anInt2: 2401 dInt1: 3201 dVar1: 3601 cEL: cvec[9]
 
@@ -160,11 +142,11 @@ xAODTestReadCVec     INFO  anInt1 807 aFloat: 1600.6 anInt2: 2407 dInt1: 3207 dV
 
 xAODTestReadCVec     INFO  anInt1 809 aFloat: 1600.8 anInt2: 2409 dInt1: 3209 dVar1: 3609 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 8111 aFloat: 111.8 anInt2: 16111 dInt1: 24111 cEL: cvec[3]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #7, run #0 7 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #8, run #0 7 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 901 aFloat: 1800 anInt2: 2701 dInt1: 3601 dVar1: 4051 cEL: cvec[9]
 
@@ -176,11 +158,11 @@ xAODTestReadCVec     INFO  anInt1 907 aFloat: 1800.6 anInt2: 2707 dInt1: 3607 dV
 
 xAODTestReadCVec     INFO  anInt1 909 aFloat: 1800.8 anInt2: 2709 dInt1: 3609 dVar1: 4059 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 9111 aFloat: 111.9 anInt2: 18111 dInt1: 27111 cEL: cvec[4]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #8, run #0 8 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #9, run #0 8 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 1001 aFloat: 2000 anInt2: 3001 dInt1: 4001 dVar1: 4501 cEL: cvec[9]
 
@@ -192,11 +174,11 @@ xAODTestReadCVec     INFO  anInt1 1007 aFloat: 2000.6 anInt2: 3007 dInt1: 4007 d
 
 xAODTestReadCVec     INFO  anInt1 1009 aFloat: 2000.8 anInt2: 3009 dInt1: 4009 dVar1: 4509 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 10111 aFloat: 112 anInt2: 20111 dInt1: 30111 cEL: cvec[0]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #9, run #0 9 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #10, run #0 9 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 1101 aFloat: 2200 anInt2: 3301 dInt1: 4401 dVar1: 4951 cEL: cvec[9]
 
@@ -208,11 +190,11 @@ xAODTestReadCVec     INFO  anInt1 1107 aFloat: 2200.6 anInt2: 3307 dInt1: 4407 d
 
 xAODTestReadCVec     INFO  anInt1 1109 aFloat: 2200.8 anInt2: 3309 dInt1: 4409 dVar1: 4959 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 11111 aFloat: 112.1 anInt2: 22111 dInt1: 33111 cEL: cvec[1]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #10, run #0 10 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #11, run #0 10 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 1201 aFloat: 2400 anInt2: 3601 dInt1: 4801 dVar1: 5401 cEL: cvec[9]
 
@@ -224,11 +206,11 @@ xAODTestReadCVec     INFO  anInt1 1207 aFloat: 2400.6 anInt2: 3607 dInt1: 4807 d
 
 xAODTestReadCVec     INFO  anInt1 1209 aFloat: 2400.8 anInt2: 3609 dInt1: 4809 dVar1: 5409 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 12111 aFloat: 112.2 anInt2: 24111 dInt1: 36111 cEL: cvec[2]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #11, run #0 11 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #12, run #0 11 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 1301 aFloat: 2600 anInt2: 3901 dInt1: 5201 dVar1: 5851 cEL: cvec[9]
 
@@ -240,11 +222,11 @@ xAODTestReadCVec     INFO  anInt1 1307 aFloat: 2600.6 anInt2: 3907 dInt1: 5207 d
 
 xAODTestReadCVec     INFO  anInt1 1309 aFloat: 2600.8 anInt2: 3909 dInt1: 5209 dVar1: 5859 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 13111 aFloat: 112.3 anInt2: 26111 dInt1: 39111 cEL: cvec[3]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #12, run #0 12 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #13, run #0 12 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 1401 aFloat: 2800 anInt2: 4201 dInt1: 5601 dVar1: 6301 cEL: cvec[9]
 
@@ -256,11 +238,11 @@ xAODTestReadCVec     INFO  anInt1 1407 aFloat: 2800.6 anInt2: 4207 dInt1: 5607 d
 
 xAODTestReadCVec     INFO  anInt1 1409 aFloat: 2800.8 anInt2: 4209 dInt1: 5609 dVar1: 6309 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 14111 aFloat: 112.4 anInt2: 28111 dInt1: 42111 cEL: cvec[4]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #13, run #0 13 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #14, run #0 13 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 1501 aFloat: 3000 anInt2: 4501 dInt1: 6001 dVar1: 6751 cEL: cvec[9]
 
@@ -272,11 +254,11 @@ xAODTestReadCVec     INFO  anInt1 1507 aFloat: 3000.6 anInt2: 4507 dInt1: 6007 d
 
 xAODTestReadCVec     INFO  anInt1 1509 aFloat: 3000.8 anInt2: 4509 dInt1: 6009 dVar1: 6759 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 15111 aFloat: 112.5 anInt2: 30111 dInt1: 45111 cEL: cvec[0]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #14, run #0 14 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #15, run #0 14 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 1601 aFloat: 3200 anInt2: 4801 dInt1: 6401 dVar1: 7201 cEL: cvec[9]
 
@@ -288,11 +270,11 @@ xAODTestReadCVec     INFO  anInt1 1607 aFloat: 3200.6 anInt2: 4807 dInt1: 6407 d
 
 xAODTestReadCVec     INFO  anInt1 1609 aFloat: 3200.8 anInt2: 4809 dInt1: 6409 dVar1: 7209 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 16111 aFloat: 112.6 anInt2: 32111 dInt1: 48111 cEL: cvec[1]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #15, run #0 15 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #16, run #0 15 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 1701 aFloat: 3400 anInt2: 5101 dInt1: 6801 dVar1: 7651 cEL: cvec[9]
 
@@ -304,11 +286,11 @@ xAODTestReadCVec     INFO  anInt1 1707 aFloat: 3400.6 anInt2: 5107 dInt1: 6807 d
 
 xAODTestReadCVec     INFO  anInt1 1709 aFloat: 3400.8 anInt2: 5109 dInt1: 6809 dVar1: 7659 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 17111 aFloat: 112.7 anInt2: 34111 dInt1: 51111 cEL: cvec[2]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #16, run #0 16 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #17, run #0 16 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 1801 aFloat: 3600 anInt2: 5401 dInt1: 7201 dVar1: 8101 cEL: cvec[9]
 
@@ -320,11 +302,11 @@ xAODTestReadCVec     INFO  anInt1 1807 aFloat: 3600.6 anInt2: 5407 dInt1: 7207 d
 
 xAODTestReadCVec     INFO  anInt1 1809 aFloat: 3600.8 anInt2: 5409 dInt1: 7209 dVar1: 8109 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 18111 aFloat: 112.8 anInt2: 36111 dInt1: 54111 cEL: cvec[3]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #17, run #0 17 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #18, run #0 17 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 1901 aFloat: 3800 anInt2: 5701 dInt1: 7601 dVar1: 8551 cEL: cvec[9]
 
@@ -336,11 +318,11 @@ xAODTestReadCVec     INFO  anInt1 1907 aFloat: 3800.6 anInt2: 5707 dInt1: 7607 d
 
 xAODTestReadCVec     INFO  anInt1 1909 aFloat: 3800.8 anInt2: 5709 dInt1: 7609 dVar1: 8559 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 19111 aFloat: 112.9 anInt2: 38111 dInt1: 57111 cEL: cvec[4]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #18, run #0 18 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #19, run #0 18 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 2001 aFloat: 4000 anInt2: 6001 dInt1: 8001 dVar1: 9001 cEL: cvec[9]
 
@@ -352,11 +334,11 @@ xAODTestReadCVec     INFO  anInt1 2007 aFloat: 4000.6 anInt2: 6007 dInt1: 8007 d
 
 xAODTestReadCVec     INFO  anInt1 2009 aFloat: 4000.8 anInt2: 6009 dInt1: 8009 dVar1: 9009 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 20111 aFloat: 113 anInt2: 40111 dInt1: 60111 cEL: cvec[0]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #19, run #0 19 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #20, run #0 19 events processed so far  <<<===
-xAODTestReadCVec     INFO cvec aux items: aFloat anInt anInt2 cEL dInt1 dVar1 
+xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: xAOD::AuxContainerBase
 xAODTestReadCVec     INFO  anInt1 2101 aFloat: 4200 anInt2: 6301 dInt1: 8401 dVar1: 9451 cEL: cvec[9]
 
@@ -368,19 +350,19 @@ xAODTestReadCVec     INFO  anInt1 2107 aFloat: 4200.6 anInt2: 6307 dInt1: 8407 d
 
 xAODTestReadCVec     INFO  anInt1 2109 aFloat: 4200.8 anInt2: 6309 dInt1: 8409 dVar1: 9459 cEL: cvec[1]
 
-xAODTestReadCInfo    INFO cinfo aux items: aFloat anInt anInt2 cEL dInt1 dInt1Base 
+xAODTestReadCInfo    INFO cinfo aux items: aFloat, anInt, anInt2, cEL, dInt1, dInt1Base
 xAODTestReadCInfo    INFO cinfo  anInt1 21111 aFloat: 113.1 anInt2: 42111 dInt1: 63111 cEL: cvec[1]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
 xaoddata_filt.root   INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 711D1E49-A657-A448-AAC0-60862C97DF51
+xaoddata_filt.root   INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 24B5D770-A09F-11F1-9748-CE324ACF4E4B
 ApplicationMgr       INFO Application Manager Stopped successfully
 LoadReadDicts        INFO Finalizing LoadReadDicts...
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All]
 AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
 AthenaPoolCnvSvc     INFO PerfStats Timing Measurements for AthenaPoolCnvSvc
 AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
-AthenaPoolCnvSvc     INFO PerfStats | cObjR_ALL       |              15 ms |
-AthenaPoolCnvSvc     INFO PerfStats | cObj_ALL        |              67 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cObjR_ALL       |              22 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cObj_ALL        |              68 ms |
 AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
 PyComponentMgr       INFO Finalizing PyComponentMgr...
 ApplicationMgr       INFO Application Manager Finalized successfully

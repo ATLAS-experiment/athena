@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file DataModelTestDataCommon/src/xAODTestReadJVec.cxx
@@ -14,6 +14,8 @@
 #include "StoreGate/ReadDecorHandle.h"
 #include "AthContainers/JaggedVec.h"
 #include "AthLinks/ElementLink.h"
+#include <format>
+#include <print>
 #include <sstream>
 
 
@@ -26,16 +28,9 @@ namespace {
 template <class CONT>
 std::string formEL (const ElementLink<CONT>& el)
 {
-  std::ostringstream ss;
-  ss << "(" << el.dataID() << ":";
-  if (static_cast<int>(el.index()) == -1) {
-    ss << "inv";
-  }
-  else {
-    ss << el.index();
-  }
-  ss << ")";
-  return ss.str();
+  return std::format ("({}:{})",
+                      el.dataID(),
+                      static_cast<int>(el.index()) == -1 ? "inv" : std::to_string(el.index()));
 }
 
 
@@ -45,9 +40,7 @@ std::string formEL (const ElementLink<CONT>& el)
 template <class T>
 std::string form_vec_elt (const T& x)
 {
-  std::ostringstream ss;
-  ss << x;
-  return ss.str();
+  return std::format ("{}", x);
 }
   
 
@@ -57,7 +50,7 @@ std::string form_vec_elt (const T& x)
  */
 std::string form_vec_elt (const std::string& x)
 {
-  return "'" + x + "'";
+  return std::format ("'{}'", x);
 }
   
 
@@ -77,14 +70,14 @@ std::string form_vec_elt (const ElementLink<CONT>& x)
 template <class RANGE>
 std::string formJVec (const RANGE& r) {
   std::ostringstream ss;
-  ss << "[";
+  std::print (ss, "[");
   std::string sep;
   for (const auto & elt : r) {
-    ss << sep;
+    std::print (ss, "{}", sep);
     sep = " ";
-    ss << form_vec_elt (elt);
+    std::print (ss, "{}", form_vec_elt (elt));
   }
-  ss << "]";
+  std::print (ss, "]");
   return ss.str();
 }
 
@@ -138,12 +131,11 @@ StatusCode xAODTestReadJVec::execute (const EventContext& ctx) const
  */
 StatusCode xAODTestReadJVec::dumpJVec (const JVec& jvec) const
 {
-  std::ostringstream ss;
-  ss << "  ivec: " << formJVec (jvec.ivec());
-  ss << "  fvec: " << formJVec (jvec.fvec());
-  ss << "  svec: " << formJVec (jvec.svec());
-  ss << "  lvec: " << formJVec (jvec.lvec());
-  ATH_MSG_INFO( ss.str() );
+  ATH_MSG_INFO( "  ivec: {}  fvec: {}  svec: {}  lvec: {}",
+                formJVec (jvec.ivec()),
+                formJVec (jvec.fvec()),
+                formJVec (jvec.svec()),
+                formJVec (jvec.lvec()));
   return StatusCode::SUCCESS;
 }
 
@@ -158,7 +150,7 @@ xAODTestReadJVec::dumpDecor (const EventContext& ctx,
   std::ostringstream ss;
   if (!m_jvecDecorKey.empty()) {
     SG::ReadDecorHandle<JVecContainer, SG::JaggedVecElt<double> > decor (m_jvecDecorKey, ctx);
-    ss << "  decorJVec: " << formJVec (decor (jvec));
+    std::print (ss, "  decorJVec: {}", formJVec (decor (jvec)));
   }
 
   ATH_MSG_INFO( ss.str() );
@@ -176,7 +168,7 @@ xAODTestReadJVec::dumpInfoDecor (const EventContext& ctx,
   std::ostringstream ss;
   if (!m_jvecInfoDecorKey.empty()) {
     SG::ReadDecorHandle<JVec, SG::JaggedVecElt<double> > decor (m_jvecInfoDecorKey, ctx);
-    ss << "  decorJVec: " << formJVec (decor (jvec));
+    std::print (ss, "  decorJVec: {}", formJVec (decor (jvec)));
   }
   
   ATH_MSG_INFO( ss.str() );

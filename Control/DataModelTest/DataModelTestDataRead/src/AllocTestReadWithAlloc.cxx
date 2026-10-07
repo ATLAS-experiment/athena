@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file DataModelTestDataRead/src/AllocTestReadWithAlloc.cxx
@@ -11,6 +11,7 @@
 
 #include "AllocTestReadWithAlloc.h"
 #include "DataModelTestDataRead/AllocTestAuxContainer.h"
+#include <print>
 #include <sstream>
 
 
@@ -37,17 +38,17 @@ StatusCode AllocTestReadWithAlloc::execute (const EventContext& ctx) const
   static const SG::Accessor<int, Athena_test::TestAlloc<int> >
     atInt4 ("atInt4");
 
-  // Write to a sstream first, to avpod having the output broken up by
+  // Write to a sstream first, to avoid having the output broken up by
   // schema evolution messges.
   std::ostringstream ss;
 
   SG::ReadHandle<AllocTestContainer> cont (m_containerKey, ctx);
-  ss << m_containerKey.key() << " ";
+  std::print (ss, "{} ", m_containerKey.key());
   for (const AllocTest* at : *cont) {
-    ss << at->atInt1() << " " << at->atInt2() << " "
-       << atInt3(*at) << " " << atInt4(*at) << " ";
+    std::print (ss, "{} {} {} {} ",
+                at->atInt1(), at->atInt2(), atInt3(*at), atInt4(*at));
   }
-  std::cout << ss.str() << "\n";
+  std::println ("{}", ss.str());
   return StatusCode::SUCCESS;
 }
 

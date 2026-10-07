@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-
 /**
  * @file  DataModelTestDataRead/DMTestRead.h
  * @author snyder@bnl.gov
@@ -46,6 +43,15 @@ public:
    * @brief Algorithm event processing.
    */
   virtual StatusCode execute(const EventContext& ctx) override;
+
+
+private:
+  template <class VEC>
+  StatusCode print_vec (const std::string& key) const;
+
+  StatusCode print_elvec (const std::string& key) const;
+
+  StatusCode remap_test() const;
 };
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  DataModelTestDataRead/src/xAODTestReadHVec.cxx
@@ -17,6 +17,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include <memory>
+#include <print>
 #include <sstream>
 
 
@@ -43,17 +44,17 @@ StatusCode xAODTestReadHVec::execute (const EventContext& ctx) const
 {
   const DMTest::HVec* hvec = SG::get (m_hvecKey, ctx);
   std::ostringstream ost1;
-  ost1 << m_hvecKey.key() << ":";
+  std::print (ost1, "{}:", m_hvecKey.key());
   for (const H* h : *hvec)
-    ost1 << " " << h->aFloat();
+    std::print (ost1, " {}", h->aFloat());
   ATH_MSG_INFO (ost1.str());
 
   if (!m_hviewKey.empty()) {
     const DMTest::HVec* hview = SG::get (m_hviewKey, ctx);
     std::ostringstream ost2;
-    ost2 << m_hviewKey.key() << ":";
+    std::print (ost2, "{}:", m_hviewKey.key());
     for (const H* h : *hview)
-      ost2 << " " << h->aFloat();
+      std::print (ost2, " {}", h->aFloat());
     ATH_MSG_INFO (ost2.str());
 
 

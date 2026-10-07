@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file DataModelTestDataCommon/src/AuxDataTestDecor.cxx
@@ -14,6 +14,7 @@
 #include "DataModelTestDataCommon/CVec.h"
 #include "StoreGate/ReadDecorHandle.h"
 #include "AthenaKernel/errorcheck.h"
+#include <print>
 
 
 namespace DMTest {
@@ -72,27 +73,27 @@ StatusCode xAODTestReadDecor::execute (const EventContext& ctx) const
     SG::ReadDecorHandle<CVec, int> cvecDecor (m_cvecDecorKey, ctx);
     if (!cvecDecor.isPresent()) return StatusCode::FAILURE;
     for (const C* celt : *cvecDecor) {
-      ss << " " << cvecDecor(*celt);
+      std::print (ss, " {}", cvecDecor(*celt));
     }
-    ATH_MSG_INFO (m_cvecDecorKey.key() << ":" << ss.str());
+    ATH_MSG_INFO ("{}:{}", m_cvecDecorKey.key(), ss.str());
   }
 
   if (!m_cinfoDecorKey.empty()) {
     SG::ReadDecorHandle<C, int> cinfoDecor (m_cinfoDecorKey, ctx);
     if (!cinfoDecor.isPresent()) return StatusCode::FAILURE;
-    ATH_MSG_INFO (m_cinfoDecorKey.key() << ": " << cinfoDecor(0));
+    ATH_MSG_INFO ("{}: {}", m_cinfoDecorKey.key(), cinfoDecor(0));
   }
 
   if (!m_cinfoBaseDecorKey.empty()) {
     SG::ReadDecorHandle<C, int> cinfoBaseDecor (m_cinfoBaseDecorKey, ctx);
     if (!cinfoBaseDecor.isPresent()) return StatusCode::FAILURE;
-    ATH_MSG_INFO (m_cinfoBaseDecorKey.key() << ": " << cinfoBaseDecor(0));
+    ATH_MSG_INFO ("{}: {}", m_cinfoBaseDecorKey.key(), cinfoBaseDecor(0));
   }
 
   if (!m_objDecorKey.empty()) {
     SG::ReadDecorHandle<SG::AuxElement, int> objDecor (m_objDecorKey, ctx);
     if (!objDecor.isPresent()) return StatusCode::FAILURE;
-    ATH_MSG_INFO (m_objDecorKey.key() << ": " << objDecor(0));
+    ATH_MSG_INFO ("{}: {}", m_objDecorKey.key(), objDecor(0));
   }
 
   if (!m_cinfoDecorKey.empty()) {

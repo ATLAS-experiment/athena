@@ -1,77 +1,59 @@
-Tue Sep 24 21:21:35 EDT 2024
+Tue Aug 25 12:07:50 EDT 2026
 Preloading libexcabort.so
-ApplicationMgr    SUCCESS 
+ApplicationMgr     SUCCESS 
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Tue Sep 24 21:21:36 2024
+                                          running on karma on Tue Aug 25 12:07:54 2026
 ====================================================================================================================================
-ApplicationMgr       INFO Application Manager Configured successfully
-CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 8(Floating point exception) 14(Alarm clock) 
+ApplicationMgr        INFO Application Manager Configured successfully
+Py:ComponentAccumulator    INFO Athena job with pid 3659688
+CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 6(Aborted) 8(Floating point exception) 14(Alarm clock) 
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 PyComponentMgr       INFO Initializing PyComponentMgr...
 LoadReadDicts        INFO Initializing LoadReadDicts...
-ClassIDSvc           INFO getRegistryEntries: read 14813 CLIDRegistry entries for module ALL
-ClassIDSvc           INFO getRegistryEntries: read 379 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 14994 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 688 CLIDRegistry entries for module ALL
 DecisionSvc          INFO Inserting stream: StreamStream1 with no Algs
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
-ClassIDSvc           INFO getRegistryEntries: read 432 CLIDRegistry entries for module ALL
 Stream...ream1Tool   INFO Initializing StreamStream1.StreamStream1Tool
 PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
 PoolSvc              INFO Frontier compression level set to 5
-DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/dvtest/build/share/dbreplica.config
+DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/rootaccess/build-clang/share/dbreplica.config
 DBReplicaSvc         INFO No specific match for domain found - use default fallback
 DBReplicaSvc         INFO Total of 1 servers found for host karma [atlas_dd ]
 PoolSvc              INFO Successfully setup replica sorting algorithm
 PoolSvc              INFO Setting up FileCatalog and Streams
 PoolSvc              INFO POOL WriteCatalog is file:xAODTestTypelessRead_catalog.xml
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-ClassIDSvc           INFO getRegistryEntries: read 356 CLIDRegistry entries for module ALL
+Domain[ROOT_All]     INFO >   Access   DbDomain     NOT_OPEN  [ROOT_All]
 MetaDataSvc          INFO Initializing MetaDataSvc
 MetaDataSvc          INFO Found MetaDataTools = PublicToolHandleArray([])
 PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 1AA9ED5E-1E4B-3A55-A718-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO                           xaoddata.root
-RootDatabase.open    INFO xaoddata.root File version:63204
+xaoddata.root        INFO ->  Access   DbDatabase   READ      [ROOT_All] 1AA9ED5E-1E4B-3A55-A718-0FF0FF0FF0FF
+RootDatabase         INFO xaoddata.root File version:64002
 xaoddata.root        INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 1AA9ED5E-1E4B-3A55-A718-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
-PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 1AA9ED5E-1E4B-3A55-A718-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO                           xaoddata.root
-RootDatabase.open    INFO xaoddata.root File version:63204
-xaoddata.root        INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 1AA9ED5E-1E4B-3A55-A718-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 1458DB6A-ABD2-354E-9CA6-D2B33C406B3C
-Domain[ROOT_All]     INFO                           xaoddata.root
-RootDatabase.open    INFO xaoddata.root File version:63204
+xaoddata.root        INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 1AA9ED5E-1E4B-3A55-A718-0FF0FF0FF0FF
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     NOT_OPEN  [ROOT_All]
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All]
+xaoddata.root        INFO ->  Access   DbDatabase   READ      [ROOT_All] 18D88254-A09F-11F1-94B2-CE324ACF4E4B
+RootDatabase         INFO xaoddata.root File version:64002
 StreamStream1        INFO Found HelperTools = PrivateToolHandleArray(['xAODMaker::EventFormatStreamHelperTool/Stream1_EventFormatStreamHelperTool','Athena::ThinningCacheTool/ThinningCacheTool_StreamStream1'])
 StreamStream1        INFO Data output: xaoddata3.root
 StreamStream1        INFO I/O reinitialization...
-ClassIDSvc           INFO getRegistryEntries: read 274 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 575 CLIDRegistry entries for module ALL
 ClassIDSvc           INFO getRegistryEntries: read 15 CLIDRegistry entries for module ALL
 ClassIDSvc           INFO getRegistryEntries: read 15 CLIDRegistry entries for module ALL
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
 xaoddata.root        INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 1458DB6A-ABD2-354E-9CA6-D2B33C406B3C
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   READ      [ROOT_All] 1458DB6A-ABD2-354E-9CA6-D2B33C406B3C
-Domain[ROOT_All]     INFO                           xaoddata.root
-RootDatabase.open    INFO xaoddata.root File version:63204
+xaoddata.root        INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 18D88254-A09F-11F1-94B2-CE324ACF4E4B
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All]
+Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All]
+xaoddata.root        INFO ->  Access   DbDatabase   READ      [ROOT_All] 18D88254-A09F-11F1-94B2-CE324ACF4E4B
+RootDatabase         INFO xaoddata.root File version:64002
 ApplicationMgr       INFO Application Manager Started successfully
-ClassIDSvc           INFO getRegistryEntries: read 19 CLIDRegistry entries for module ALL
 EventP...stencySvc   INFO Added successfully Conversion service AthenaPoolCnvSvc
-TBranc...DynReader   INFO RootAuxDynIO/src/TBranchAuxDynReader.cxx:308 (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
+TBranc...DynReader   INFO RootAuxDynIO/src/TBranchAuxDynReader.cxx:326 (TBranchAuxDynReader::BranchInfo&TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
 xAODTe...elessRead   INFO 1
@@ -303,8 +285,8 @@ xAODTe...elessRead   INFO
     dVar1: 901; 
 
 xAODTe...elessRead   INFO pvec types: dpInt1/unsigned int dpvFloat/std::vector<float,std::allocator<float> > pFloat/float pInt/unsigned int pvFloat/std::vector<float,std::allocator<float> > pvInt/std::vector<int,std::allocator<int> > 
-TBranc...DynReader   INFO RootAuxDynIO/src/TBranchAuxDynReader.cxx:308 (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dpInt1' (id=347 typename=unsigned int) has different type than the branch: SG::PackedContainer<unsigned int,allocator<unsigned int> >  Marking for schema evolution.
-TBranc...DynReader   INFO RootAuxDynIO/src/TBranchAuxDynReader.cxx:308 (TBranchAuxDynReader::BranchInfo& TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dpvFloat' (id=348 typename=std::vector<float>) has different type than the branch: SG::PackedContainer<vector<float>,allocator<vector<float> > >  Marking for schema evolution.
+TBranc...DynReader   INFO RootAuxDynIO/src/TBranchAuxDynReader.cxx:326 (TBranchAuxDynReader::BranchInfo&TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dpInt1' (id=354 typename=unsigned int) has different type than the branch: SG::PackedContainer<unsigned int,allocator<unsigned int> >  Marking for schema evolution.
+TBranc...DynReader   INFO RootAuxDynIO/src/TBranchAuxDynReader.cxx:326 (TBranchAuxDynReader::BranchInfo&TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dpvFloat' (id=355 typename=std::vector<float>) has different type than the branch: SG::PackedContainer<vector<float>,allocator<vector<float> > >  Marking for schema evolution.
 xAODTe...elessRead   INFO   
     dpInt1: 101; 
     dpvFloat: []; 
@@ -314,67 +296,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 102; 
-    dpvFloat: [0.120 ]; 
+    dpvFloat: [0.120]; 
     pFloat: 1.020; 
     pInt: 1002; 
-    pvFloat: [-0.488 ]; 
-    pvInt: [-290 ]; 
+    pvFloat: [-0.488]; 
+    pvInt: [-290]; 
   
     dpInt1: 103; 
-    dpvFloat: [0.220 0.221 ]; 
+    dpvFloat: [0.220, 0.221]; 
     pFloat: 2.020; 
     pInt: 1003; 
-    pvFloat: [-0.478 -0.378 ]; 
-    pvInt: [-280 -279 ]; 
+    pvFloat: [-0.478, -0.378]; 
+    pvInt: [-280, -279]; 
   
     dpInt1: 104; 
-    dpvFloat: [0.320 0.321 0.322 ]; 
+    dpvFloat: [0.320, 0.321, 0.322]; 
     pFloat: 3.020; 
     pInt: 1004; 
-    pvFloat: [-0.468 -0.368 -0.268 ]; 
-    pvInt: [-270 -269 -268 ]; 
+    pvFloat: [-0.468, -0.368, -0.268]; 
+    pvInt: [-270, -269, -268]; 
   
     dpInt1: 105; 
-    dpvFloat: [0.420 0.421 0.422 0.423 ]; 
+    dpvFloat: [0.420, 0.421, 0.422, 0.423]; 
     pFloat: 4.020; 
     pInt: 1005; 
-    pvFloat: [-0.458 -0.358 -0.258 -0.158 ]; 
-    pvInt: [-260 -259 -258 -257 ]; 
+    pvFloat: [-0.458, -0.358, -0.258, -0.158]; 
+    pvInt: [-260, -259, -258, -257]; 
   
     dpInt1: 106; 
-    dpvFloat: [0.520 0.521 0.522 0.523 0.524 ]; 
+    dpvFloat: [0.520, 0.521, 0.522, 0.523, 0.524]; 
     pFloat: 5.020; 
     pInt: 1006; 
-    pvFloat: [-0.448 -0.348 -0.248 -0.148 -0.048 ]; 
-    pvInt: [-250 -249 -248 -247 -246 ]; 
+    pvFloat: [-0.448, -0.348, -0.248, -0.148, -0.048]; 
+    pvInt: [-250, -249, -248, -247, -246]; 
   
     dpInt1: 107; 
-    dpvFloat: [0.620 0.621 0.622 0.623 0.624 0.625 ]; 
+    dpvFloat: [0.620, 0.621, 0.622, 0.623, 0.624, 0.625]; 
     pFloat: 6.020; 
     pInt: 1007; 
-    pvFloat: [-0.438 -0.338 -0.238 -0.138 -0.038 0.062 ]; 
-    pvInt: [-240 -239 -238 -237 -236 -235 ]; 
+    pvFloat: [-0.438, -0.338, -0.238, -0.138, -0.038, 0.062]; 
+    pvInt: [-240, -239, -238, -237, -236, -235]; 
   
     dpInt1: 108; 
-    dpvFloat: [0.720 0.721 0.722 0.723 0.724 0.725 0.726 ]; 
+    dpvFloat: [0.720, 0.721, 0.722, 0.723, 0.724, 0.725, 0.726]; 
     pFloat: 7.020; 
     pInt: 1008; 
-    pvFloat: [-0.428 -0.328 -0.228 -0.128 -0.028 0.072 0.172 ]; 
-    pvInt: [-230 -229 -228 -227 -226 -225 -224 ]; 
+    pvFloat: [-0.428, -0.328, -0.228, -0.128, -0.028, 0.072, 0.172]; 
+    pvInt: [-230, -229, -228, -227, -226, -225, -224]; 
   
     dpInt1: 109; 
-    dpvFloat: [0.820 0.821 0.822 0.823 0.824 0.825 0.826 0.827 ]; 
+    dpvFloat: [0.820, 0.821, 0.822, 0.823, 0.824, 0.825, 0.826, 0.827]; 
     pFloat: 8.020; 
     pInt: 1009; 
-    pvFloat: [-0.418 -0.318 -0.218 -0.118 -0.018 0.082 0.182 0.282 ]; 
-    pvInt: [-220 -219 -218 -217 -216 -215 -214 -213 ]; 
+    pvFloat: [-0.418, -0.318, -0.218, -0.118, -0.018, 0.082, 0.182, 0.282]; 
+    pvInt: [-220, -219, -218, -217, -216, -215, -214, -213]; 
   
     dpInt1: 110; 
-    dpvFloat: [0.920 0.921 0.922 0.923 0.924 0.925 0.926 0.927 0.928 ]; 
+    dpvFloat: [0.920, 0.921, 0.922, 0.923, 0.924, 0.925, 0.926, 0.927, 0.928]; 
     pFloat: 9.020; 
     pInt: 1010; 
-    pvFloat: [-0.408 -0.308 -0.208 -0.108 -0.008 0.092 0.192 0.292 0.392 ]; 
-    pvInt: [-210 -209 -208 -207 -206 -205 -204 -203 -202 ]; 
+    pvFloat: [-0.408, -0.308, -0.208, -0.108, -0.008, 0.092, 0.192, 0.292, 0.392]; 
+    pvInt: [-210, -209, -208, -207, -206, -205, -204, -203, -202]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -534,17 +516,15 @@ xAODTe...elessRead   INFO
     plink: cvec[3]; 
     vlinks: [ctrig[4]; [inv]; cvec[6]; ]; 
 
-ClassIDSvc           INFO getRegistryEntries: read 115 CLIDRegistry entries for module ALL
-DbSession            INFO     Open     DbSession    
-Domain[ROOT_All]     INFO >   Access   DbDomain     UPDATE    [ROOT_All] 
-Domain[ROOT_All]     INFO ->  Access   DbDatabase   CREATE    [ROOT_All] 2160CC4B-16DE-9D4A-9E19-87754F7A7004
-Domain[ROOT_All]     INFO                           xaoddata3.root
-RootDatabase.open    INFO xaoddata3.root File version:63204
-StorageSvc           INFO Building shape according to reflection information using shape ID for:
-StorageSvc           INFO DMTest::HAuxContainer_v2 [2BDBFB04-C1C2-4B14-A977-3A61B8054700]
-StorageSvc           INFO Building shape according to reflection information using shape ID for:
+ClassIDSvc           INFO getRegistryEntries: read 328 CLIDRegistry entries for module ALL
+Domain[ROOT_All]     INFO >   Access   DbDomain     WRITE     [ROOT_All]
+xaoddata3.root       INFO ->  Access   DbDatabase   WRITE     [ROOT_All] 2928F17A-A09F-11F1-8360-CE324ACF4E4B
+RootDatabase         INFO xaoddata3.root File version:64002
+StorageSvc           INFO Building shape according to reflection information using shape ID for: 
 StorageSvc           INFO DataVector<DMTest::H_v2> [CD6C3074-425B-4C08-AF1C-43D7E8C84288]
-StorageSvc           INFO Building shape according to reflection information using shape ID for:
+StorageSvc           INFO Building shape according to reflection information using shape ID for: 
+StorageSvc           INFO DMTest::HAuxContainer_v2 [2BDBFB04-C1C2-4B14-A977-3A61B8054700]
+StorageSvc           INFO Building shape according to reflection information using shape ID for: 
 StorageSvc           INFO ViewVector<DataVector<DMTest::H_v2> > [17849966-6667-4732-A1C7-096FBC778CF3]
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
@@ -786,67 +766,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 152; 
-    dpvFloat: [0.130 ]; 
+    dpvFloat: [0.130]; 
     pFloat: 1.030; 
     pInt: 1502; 
-    pvFloat: [-0.487 ]; 
-    pvInt: [-190 ]; 
+    pvFloat: [-0.487]; 
+    pvInt: [-190]; 
   
     dpInt1: 153; 
-    dpvFloat: [0.230 0.231 ]; 
+    dpvFloat: [0.230, 0.231]; 
     pFloat: 2.030; 
     pInt: 1503; 
-    pvFloat: [-0.477 -0.377 ]; 
-    pvInt: [-180 -179 ]; 
+    pvFloat: [-0.477, -0.377]; 
+    pvInt: [-180, -179]; 
   
     dpInt1: 154; 
-    dpvFloat: [0.330 0.331 0.332 ]; 
+    dpvFloat: [0.330, 0.331, 0.332]; 
     pFloat: 3.030; 
     pInt: 1504; 
-    pvFloat: [-0.467 -0.367 -0.267 ]; 
-    pvInt: [-170 -169 -168 ]; 
+    pvFloat: [-0.467, -0.367, -0.267]; 
+    pvInt: [-170, -169, -168]; 
   
     dpInt1: 155; 
-    dpvFloat: [0.430 0.431 0.432 0.433 ]; 
+    dpvFloat: [0.430, 0.431, 0.432, 0.433]; 
     pFloat: 4.030; 
     pInt: 1505; 
-    pvFloat: [-0.457 -0.357 -0.257 -0.157 ]; 
-    pvInt: [-160 -159 -158 -157 ]; 
+    pvFloat: [-0.457, -0.357, -0.257, -0.157]; 
+    pvInt: [-160, -159, -158, -157]; 
   
     dpInt1: 156; 
-    dpvFloat: [0.530 0.531 0.532 0.533 0.534 ]; 
+    dpvFloat: [0.530, 0.531, 0.532, 0.533, 0.534]; 
     pFloat: 5.030; 
     pInt: 1506; 
-    pvFloat: [-0.447 -0.347 -0.247 -0.147 -0.047 ]; 
-    pvInt: [-150 -149 -148 -147 -146 ]; 
+    pvFloat: [-0.447, -0.347, -0.247, -0.147, -0.047]; 
+    pvInt: [-150, -149, -148, -147, -146]; 
   
     dpInt1: 157; 
-    dpvFloat: [0.630 0.631 0.632 0.633 0.634 0.635 ]; 
+    dpvFloat: [0.630, 0.631, 0.632, 0.633, 0.634, 0.635]; 
     pFloat: 6.030; 
     pInt: 1507; 
-    pvFloat: [-0.437 -0.337 -0.237 -0.137 -0.037 0.063 ]; 
-    pvInt: [-140 -139 -138 -137 -136 -135 ]; 
+    pvFloat: [-0.437, -0.337, -0.237, -0.137, -0.037, 0.063]; 
+    pvInt: [-140, -139, -138, -137, -136, -135]; 
   
     dpInt1: 158; 
-    dpvFloat: [0.730 0.731 0.732 0.733 0.734 0.735 0.736 ]; 
+    dpvFloat: [0.730, 0.731, 0.732, 0.733, 0.734, 0.735, 0.736]; 
     pFloat: 7.030; 
     pInt: 1508; 
-    pvFloat: [-0.427 -0.327 -0.227 -0.127 -0.027 0.073 0.173 ]; 
-    pvInt: [-130 -129 -128 -127 -126 -125 -124 ]; 
+    pvFloat: [-0.427, -0.327, -0.227, -0.127, -0.027, 0.073, 0.173]; 
+    pvInt: [-130, -129, -128, -127, -126, -125, -124]; 
   
     dpInt1: 159; 
-    dpvFloat: [0.830 0.831 0.832 0.833 0.834 0.835 0.836 0.837 ]; 
+    dpvFloat: [0.830, 0.831, 0.832, 0.833, 0.834, 0.835, 0.836, 0.837]; 
     pFloat: 8.030; 
     pInt: 1509; 
-    pvFloat: [-0.417 -0.317 -0.217 -0.117 -0.017 0.083 0.183 0.283 ]; 
-    pvInt: [-120 -119 -118 -117 -116 -115 -114 -113 ]; 
+    pvFloat: [-0.417, -0.317, -0.217, -0.117, -0.017, 0.083, 0.183, 0.283]; 
+    pvInt: [-120, -119, -118, -117, -116, -115, -114, -113]; 
   
     dpInt1: 160; 
-    dpvFloat: [0.930 0.931 0.932 0.933 0.934 0.935 0.936 0.937 0.938 ]; 
+    dpvFloat: [0.930, 0.931, 0.932, 0.933, 0.934, 0.935, 0.936, 0.937, 0.938]; 
     pFloat: 9.030; 
     pInt: 1510; 
-    pvFloat: [-0.407 -0.307 -0.207 -0.107 -0.007 0.093 0.193 0.293 0.393 ]; 
-    pvInt: [-110 -109 -108 -107 -106 -105 -104 -103 -102 ]; 
+    pvFloat: [-0.407, -0.307, -0.207, -0.107, -0.007, 0.093, 0.193, 0.293, 0.393]; 
+    pvInt: [-110, -109, -108, -107, -106, -105, -104, -103, -102]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -1246,67 +1226,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 202; 
-    dpvFloat: [0.140 ]; 
+    dpvFloat: [0.140]; 
     pFloat: 1.040; 
     pInt: 2002; 
-    pvFloat: [-0.486 ]; 
-    pvInt: [-90 ]; 
+    pvFloat: [-0.486]; 
+    pvInt: [-90]; 
   
     dpInt1: 203; 
-    dpvFloat: [0.240 0.241 ]; 
+    dpvFloat: [0.240, 0.241]; 
     pFloat: 2.040; 
     pInt: 2003; 
-    pvFloat: [-0.476 -0.376 ]; 
-    pvInt: [-80 -79 ]; 
+    pvFloat: [-0.476, -0.376]; 
+    pvInt: [-80, -79]; 
   
     dpInt1: 204; 
-    dpvFloat: [0.340 0.341 0.342 ]; 
+    dpvFloat: [0.340, 0.341, 0.342]; 
     pFloat: 3.040; 
     pInt: 2004; 
-    pvFloat: [-0.466 -0.366 -0.266 ]; 
-    pvInt: [-70 -69 -68 ]; 
+    pvFloat: [-0.466, -0.366, -0.266]; 
+    pvInt: [-70, -69, -68]; 
   
     dpInt1: 205; 
-    dpvFloat: [0.440 0.441 0.442 0.443 ]; 
+    dpvFloat: [0.440, 0.441, 0.442, 0.443]; 
     pFloat: 4.040; 
     pInt: 2005; 
-    pvFloat: [-0.456 -0.356 -0.256 -0.156 ]; 
-    pvInt: [-60 -59 -58 -57 ]; 
+    pvFloat: [-0.456, -0.356, -0.256, -0.156]; 
+    pvInt: [-60, -59, -58, -57]; 
   
     dpInt1: 206; 
-    dpvFloat: [0.540 0.541 0.542 0.543 0.544 ]; 
+    dpvFloat: [0.540, 0.541, 0.542, 0.543, 0.544]; 
     pFloat: 5.040; 
     pInt: 2006; 
-    pvFloat: [-0.446 -0.346 -0.246 -0.146 -0.046 ]; 
-    pvInt: [-50 -49 -48 -47 -46 ]; 
+    pvFloat: [-0.446, -0.346, -0.246, -0.146, -0.046]; 
+    pvInt: [-50, -49, -48, -47, -46]; 
   
     dpInt1: 207; 
-    dpvFloat: [0.640 0.641 0.642 0.643 0.644 0.645 ]; 
+    dpvFloat: [0.640, 0.641, 0.642, 0.643, 0.644, 0.645]; 
     pFloat: 6.040; 
     pInt: 2007; 
-    pvFloat: [-0.436 -0.336 -0.236 -0.136 -0.036 0.064 ]; 
-    pvInt: [-40 -39 -38 -37 -36 -35 ]; 
+    pvFloat: [-0.436, -0.336, -0.236, -0.136, -0.036, 0.064]; 
+    pvInt: [-40, -39, -38, -37, -36, -35]; 
   
     dpInt1: 208; 
-    dpvFloat: [0.740 0.741 0.742 0.743 0.744 0.745 0.746 ]; 
+    dpvFloat: [0.740, 0.741, 0.742, 0.743, 0.744, 0.745, 0.746]; 
     pFloat: 7.040; 
     pInt: 2008; 
-    pvFloat: [-0.426 -0.326 -0.226 -0.126 -0.026 0.074 0.174 ]; 
-    pvInt: [-30 -29 -28 -27 -26 -25 -24 ]; 
+    pvFloat: [-0.426, -0.326, -0.226, -0.126, -0.026, 0.074, 0.174]; 
+    pvInt: [-30, -29, -28, -27, -26, -25, -24]; 
   
     dpInt1: 209; 
-    dpvFloat: [0.840 0.841 0.842 0.843 0.844 0.845 0.846 0.847 ]; 
+    dpvFloat: [0.840, 0.841, 0.842, 0.843, 0.844, 0.845, 0.846, 0.847]; 
     pFloat: 8.040; 
     pInt: 2009; 
-    pvFloat: [-0.416 -0.316 -0.216 -0.116 -0.016 0.084 0.184 0.284 ]; 
-    pvInt: [-20 -19 -18 -17 -16 -15 -14 -13 ]; 
+    pvFloat: [-0.416, -0.316, -0.216, -0.116, -0.016, 0.084, 0.184, 0.284]; 
+    pvInt: [-20, -19, -18, -17, -16, -15, -14, -13]; 
   
     dpInt1: 210; 
-    dpvFloat: [0.940 0.941 0.942 0.943 0.944 0.945 0.946 0.947 0.948 ]; 
+    dpvFloat: [0.940, 0.941, 0.942, 0.943, 0.944, 0.945, 0.946, 0.947, 0.948]; 
     pFloat: 9.040; 
     pInt: 2010; 
-    pvFloat: [-0.406 -0.306 -0.206 -0.106 -0.006 0.094 0.194 0.294 0.394 ]; 
-    pvInt: [-10 -9 -8 -7 -6 -5 -4 -3 -2 ]; 
+    pvFloat: [-0.406, -0.306, -0.206, -0.106, -0.006, 0.094, 0.194, 0.294, 0.394]; 
+    pvInt: [-10, -9, -8, -7, -6, -5, -4, -3, -2]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -1954,67 +1934,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 302; 
-    dpvFloat: [0.160 ]; 
+    dpvFloat: [0.160]; 
     pFloat: 1.060; 
     pInt: 3002; 
-    pvFloat: [-0.484 ]; 
-    pvInt: [110 ]; 
+    pvFloat: [-0.484]; 
+    pvInt: [110]; 
   
     dpInt1: 303; 
-    dpvFloat: [0.260 0.261 ]; 
+    dpvFloat: [0.260, 0.261]; 
     pFloat: 2.060; 
     pInt: 3003; 
-    pvFloat: [-0.474 -0.374 ]; 
-    pvInt: [120 121 ]; 
+    pvFloat: [-0.474, -0.374]; 
+    pvInt: [120, 121]; 
   
     dpInt1: 304; 
-    dpvFloat: [0.360 0.361 0.362 ]; 
+    dpvFloat: [0.360, 0.361, 0.362]; 
     pFloat: 3.060; 
     pInt: 3004; 
-    pvFloat: [-0.464 -0.364 -0.264 ]; 
-    pvInt: [130 131 132 ]; 
+    pvFloat: [-0.464, -0.364, -0.264]; 
+    pvInt: [130, 131, 132]; 
   
     dpInt1: 305; 
-    dpvFloat: [0.460 0.461 0.462 0.463 ]; 
+    dpvFloat: [0.460, 0.461, 0.462, 0.463]; 
     pFloat: 4.060; 
     pInt: 3005; 
-    pvFloat: [-0.454 -0.354 -0.254 -0.154 ]; 
-    pvInt: [140 141 142 143 ]; 
+    pvFloat: [-0.454, -0.354, -0.254, -0.154]; 
+    pvInt: [140, 141, 142, 143]; 
   
     dpInt1: 306; 
-    dpvFloat: [0.560 0.561 0.562 0.563 0.564 ]; 
+    dpvFloat: [0.560, 0.561, 0.562, 0.563, 0.564]; 
     pFloat: 5.060; 
     pInt: 3006; 
-    pvFloat: [-0.444 -0.344 -0.244 -0.144 -0.044 ]; 
-    pvInt: [150 151 152 153 154 ]; 
+    pvFloat: [-0.444, -0.344, -0.244, -0.144, -0.044]; 
+    pvInt: [150, 151, 152, 153, 154]; 
   
     dpInt1: 307; 
-    dpvFloat: [0.660 0.661 0.662 0.663 0.664 0.665 ]; 
+    dpvFloat: [0.660, 0.661, 0.662, 0.663, 0.664, 0.665]; 
     pFloat: 6.060; 
     pInt: 3007; 
-    pvFloat: [-0.434 -0.334 -0.234 -0.134 -0.034 0.066 ]; 
-    pvInt: [160 161 162 163 164 165 ]; 
+    pvFloat: [-0.434, -0.334, -0.234, -0.134, -0.034, 0.066]; 
+    pvInt: [160, 161, 162, 163, 164, 165]; 
   
     dpInt1: 308; 
-    dpvFloat: [0.760 0.761 0.762 0.763 0.764 0.765 0.766 ]; 
+    dpvFloat: [0.760, 0.761, 0.762, 0.763, 0.764, 0.765, 0.766]; 
     pFloat: 7.060; 
     pInt: 3008; 
-    pvFloat: [-0.424 -0.324 -0.224 -0.124 -0.024 0.076 0.176 ]; 
-    pvInt: [170 171 172 173 174 175 176 ]; 
+    pvFloat: [-0.424, -0.324, -0.224, -0.124, -0.024, 0.076, 0.176]; 
+    pvInt: [170, 171, 172, 173, 174, 175, 176]; 
   
     dpInt1: 309; 
-    dpvFloat: [0.860 0.861 0.862 0.863 0.864 0.865 0.866 0.867 ]; 
+    dpvFloat: [0.860, 0.861, 0.862, 0.863, 0.864, 0.865, 0.866, 0.867]; 
     pFloat: 8.060; 
     pInt: 3009; 
-    pvFloat: [-0.414 -0.314 -0.214 -0.114 -0.014 0.086 0.186 0.286 ]; 
-    pvInt: [180 181 182 183 184 185 186 187 ]; 
+    pvFloat: [-0.414, -0.314, -0.214, -0.114, -0.014, 0.086, 0.186, 0.286]; 
+    pvInt: [180, 181, 182, 183, 184, 185, 186, 187]; 
   
     dpInt1: 310; 
-    dpvFloat: [0.960 0.961 0.962 0.963 0.964 0.965 0.966 0.967 0.968 ]; 
+    dpvFloat: [0.960, 0.961, 0.962, 0.963, 0.964, 0.965, 0.966, 0.967, 0.968]; 
     pFloat: 9.060; 
     pInt: 3010; 
-    pvFloat: [-0.404 -0.304 -0.204 -0.104 -0.004 0.096 0.196 0.296 0.396 ]; 
-    pvInt: [190 191 192 193 194 195 196 197 198 ]; 
+    pvFloat: [-0.404, -0.304, -0.204, -0.104, -0.004, 0.096, 0.196, 0.296, 0.396]; 
+    pvInt: [190, 191, 192, 193, 194, 195, 196, 197, 198]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -2414,67 +2394,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 352; 
-    dpvFloat: [0.170 ]; 
+    dpvFloat: [0.170]; 
     pFloat: 1.070; 
     pInt: 3502; 
-    pvFloat: [-0.483 ]; 
-    pvInt: [210 ]; 
+    pvFloat: [-0.483]; 
+    pvInt: [210]; 
   
     dpInt1: 353; 
-    dpvFloat: [0.270 0.271 ]; 
+    dpvFloat: [0.270, 0.271]; 
     pFloat: 2.070; 
     pInt: 3503; 
-    pvFloat: [-0.473 -0.373 ]; 
-    pvInt: [220 221 ]; 
+    pvFloat: [-0.473, -0.373]; 
+    pvInt: [220, 221]; 
   
     dpInt1: 354; 
-    dpvFloat: [0.370 0.371 0.372 ]; 
+    dpvFloat: [0.370, 0.371, 0.372]; 
     pFloat: 3.070; 
     pInt: 3504; 
-    pvFloat: [-0.463 -0.363 -0.263 ]; 
-    pvInt: [230 231 232 ]; 
+    pvFloat: [-0.463, -0.363, -0.263]; 
+    pvInt: [230, 231, 232]; 
   
     dpInt1: 355; 
-    dpvFloat: [0.470 0.471 0.472 0.473 ]; 
+    dpvFloat: [0.470, 0.471, 0.472, 0.473]; 
     pFloat: 4.070; 
     pInt: 3505; 
-    pvFloat: [-0.453 -0.353 -0.253 -0.153 ]; 
-    pvInt: [240 241 242 243 ]; 
+    pvFloat: [-0.453, -0.353, -0.253, -0.153]; 
+    pvInt: [240, 241, 242, 243]; 
   
     dpInt1: 356; 
-    dpvFloat: [0.570 0.571 0.572 0.573 0.574 ]; 
+    dpvFloat: [0.570, 0.571, 0.572, 0.573, 0.574]; 
     pFloat: 5.070; 
     pInt: 3506; 
-    pvFloat: [-0.443 -0.343 -0.243 -0.143 -0.043 ]; 
-    pvInt: [250 251 252 253 254 ]; 
+    pvFloat: [-0.443, -0.343, -0.243, -0.143, -0.043]; 
+    pvInt: [250, 251, 252, 253, 254]; 
   
     dpInt1: 357; 
-    dpvFloat: [0.670 0.671 0.672 0.673 0.674 0.675 ]; 
+    dpvFloat: [0.670, 0.671, 0.672, 0.673, 0.674, 0.675]; 
     pFloat: 6.070; 
     pInt: 3507; 
-    pvFloat: [-0.433 -0.333 -0.233 -0.133 -0.033 0.067 ]; 
-    pvInt: [260 261 262 263 264 265 ]; 
+    pvFloat: [-0.433, -0.333, -0.233, -0.133, -0.033, 0.067]; 
+    pvInt: [260, 261, 262, 263, 264, 265]; 
   
     dpInt1: 358; 
-    dpvFloat: [0.770 0.771 0.772 0.773 0.774 0.775 0.776 ]; 
+    dpvFloat: [0.770, 0.771, 0.772, 0.773, 0.774, 0.775, 0.776]; 
     pFloat: 7.070; 
     pInt: 3508; 
-    pvFloat: [-0.423 -0.323 -0.223 -0.123 -0.023 0.077 0.177 ]; 
-    pvInt: [270 271 272 273 274 275 276 ]; 
+    pvFloat: [-0.423, -0.323, -0.223, -0.123, -0.023, 0.077, 0.177]; 
+    pvInt: [270, 271, 272, 273, 274, 275, 276]; 
   
     dpInt1: 359; 
-    dpvFloat: [0.870 0.871 0.872 0.873 0.874 0.875 0.876 0.877 ]; 
+    dpvFloat: [0.870, 0.871, 0.872, 0.873, 0.874, 0.875, 0.876, 0.877]; 
     pFloat: 8.070; 
     pInt: 3509; 
-    pvFloat: [-0.413 -0.313 -0.213 -0.113 -0.013 0.087 0.187 0.287 ]; 
-    pvInt: [280 281 282 283 284 285 286 287 ]; 
+    pvFloat: [-0.413, -0.313, -0.213, -0.113, -0.013, 0.087, 0.187, 0.287]; 
+    pvInt: [280, 281, 282, 283, 284, 285, 286, 287]; 
   
     dpInt1: 360; 
-    dpvFloat: [0.970 0.971 0.972 0.973 0.974 0.975 0.976 0.977 0.978 ]; 
+    dpvFloat: [0.970, 0.971, 0.972, 0.973, 0.974, 0.975, 0.976, 0.977, 0.978]; 
     pFloat: 9.070; 
     pInt: 3510; 
-    pvFloat: [-0.403 -0.303 -0.203 -0.103 -0.003 0.097 0.197 0.297 0.397 ]; 
-    pvInt: [290 291 292 293 294 295 296 297 298 ]; 
+    pvFloat: [-0.403, -0.303, -0.203, -0.103, -0.003, 0.097, 0.197, 0.297, 0.397]; 
+    pvInt: [290, 291, 292, 293, 294, 295, 296, 297, 298]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -2874,67 +2854,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 402; 
-    dpvFloat: [0.180 ]; 
+    dpvFloat: [0.180]; 
     pFloat: 1.080; 
     pInt: 4002; 
-    pvFloat: [-0.482 ]; 
-    pvInt: [310 ]; 
+    pvFloat: [-0.482]; 
+    pvInt: [310]; 
   
     dpInt1: 403; 
-    dpvFloat: [0.280 0.281 ]; 
+    dpvFloat: [0.280, 0.281]; 
     pFloat: 2.080; 
     pInt: 4003; 
-    pvFloat: [-0.472 -0.372 ]; 
-    pvInt: [320 321 ]; 
+    pvFloat: [-0.472, -0.372]; 
+    pvInt: [320, 321]; 
   
     dpInt1: 404; 
-    dpvFloat: [0.380 0.381 0.382 ]; 
+    dpvFloat: [0.380, 0.381, 0.382]; 
     pFloat: 3.080; 
     pInt: 4004; 
-    pvFloat: [-0.462 -0.362 -0.262 ]; 
-    pvInt: [330 331 332 ]; 
+    pvFloat: [-0.462, -0.362, -0.262]; 
+    pvInt: [330, 331, 332]; 
   
     dpInt1: 405; 
-    dpvFloat: [0.480 0.481 0.482 0.483 ]; 
+    dpvFloat: [0.480, 0.481, 0.482, 0.483]; 
     pFloat: 4.080; 
     pInt: 4005; 
-    pvFloat: [-0.452 -0.352 -0.252 -0.152 ]; 
-    pvInt: [340 341 342 343 ]; 
+    pvFloat: [-0.452, -0.352, -0.252, -0.152]; 
+    pvInt: [340, 341, 342, 343]; 
   
     dpInt1: 406; 
-    dpvFloat: [0.580 0.581 0.582 0.583 0.584 ]; 
+    dpvFloat: [0.580, 0.581, 0.582, 0.583, 0.584]; 
     pFloat: 5.080; 
     pInt: 4006; 
-    pvFloat: [-0.442 -0.342 -0.242 -0.142 -0.042 ]; 
-    pvInt: [350 351 352 353 354 ]; 
+    pvFloat: [-0.442, -0.342, -0.242, -0.142, -0.042]; 
+    pvInt: [350, 351, 352, 353, 354]; 
   
     dpInt1: 407; 
-    dpvFloat: [0.680 0.681 0.682 0.683 0.684 0.685 ]; 
+    dpvFloat: [0.680, 0.681, 0.682, 0.683, 0.684, 0.685]; 
     pFloat: 6.080; 
     pInt: 4007; 
-    pvFloat: [-0.432 -0.332 -0.232 -0.132 -0.032 0.068 ]; 
-    pvInt: [360 361 362 363 364 365 ]; 
+    pvFloat: [-0.432, -0.332, -0.232, -0.132, -0.032, 0.068]; 
+    pvInt: [360, 361, 362, 363, 364, 365]; 
   
     dpInt1: 408; 
-    dpvFloat: [0.780 0.781 0.782 0.783 0.784 0.785 0.786 ]; 
+    dpvFloat: [0.780, 0.781, 0.782, 0.783, 0.784, 0.785, 0.786]; 
     pFloat: 7.080; 
     pInt: 4008; 
-    pvFloat: [-0.422 -0.322 -0.222 -0.122 -0.022 0.078 0.178 ]; 
-    pvInt: [370 371 372 373 374 375 376 ]; 
+    pvFloat: [-0.422, -0.322, -0.222, -0.122, -0.022, 0.078, 0.178]; 
+    pvInt: [370, 371, 372, 373, 374, 375, 376]; 
   
     dpInt1: 409; 
-    dpvFloat: [0.880 0.881 0.882 0.883 0.884 0.885 0.886 0.887 ]; 
+    dpvFloat: [0.880, 0.881, 0.882, 0.883, 0.884, 0.885, 0.886, 0.887]; 
     pFloat: 8.080; 
     pInt: 4009; 
-    pvFloat: [-0.412 -0.312 -0.212 -0.112 -0.012 0.088 0.188 0.288 ]; 
-    pvInt: [380 381 382 383 384 385 386 387 ]; 
+    pvFloat: [-0.412, -0.312, -0.212, -0.112, -0.012, 0.088, 0.188, 0.288]; 
+    pvInt: [380, 381, 382, 383, 384, 385, 386, 387]; 
   
     dpInt1: 410; 
-    dpvFloat: [0.980 0.981 0.982 0.983 0.984 0.985 0.986 0.987 0.988 ]; 
+    dpvFloat: [0.980, 0.981, 0.982, 0.983, 0.984, 0.985, 0.986, 0.987, 0.988]; 
     pFloat: 9.080; 
     pInt: 4010; 
-    pvFloat: [-0.402 -0.302 -0.202 -0.102 -0.002 0.098 0.198 0.298 0.398 ]; 
-    pvInt: [390 391 392 393 394 395 396 397 398 ]; 
+    pvFloat: [-0.402, -0.302, -0.202, -0.102, -0.002, 0.098, 0.198, 0.298, 0.398]; 
+    pvInt: [390, 391, 392, 393, 394, 395, 396, 397, 398]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -3334,67 +3314,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 452; 
-    dpvFloat: [0.190 ]; 
+    dpvFloat: [0.190]; 
     pFloat: 1.090; 
     pInt: 4502; 
-    pvFloat: [-0.481 ]; 
-    pvInt: [410 ]; 
+    pvFloat: [-0.481]; 
+    pvInt: [410]; 
   
     dpInt1: 453; 
-    dpvFloat: [0.290 0.291 ]; 
+    dpvFloat: [0.290, 0.291]; 
     pFloat: 2.090; 
     pInt: 4503; 
-    pvFloat: [-0.471 -0.371 ]; 
-    pvInt: [420 421 ]; 
+    pvFloat: [-0.471, -0.371]; 
+    pvInt: [420, 421]; 
   
     dpInt1: 454; 
-    dpvFloat: [0.390 0.391 0.392 ]; 
+    dpvFloat: [0.390, 0.391, 0.392]; 
     pFloat: 3.090; 
     pInt: 4504; 
-    pvFloat: [-0.461 -0.361 -0.261 ]; 
-    pvInt: [430 431 432 ]; 
+    pvFloat: [-0.461, -0.361, -0.261]; 
+    pvInt: [430, 431, 432]; 
   
     dpInt1: 455; 
-    dpvFloat: [0.490 0.491 0.492 0.493 ]; 
+    dpvFloat: [0.490, 0.491, 0.492, 0.493]; 
     pFloat: 4.090; 
     pInt: 4505; 
-    pvFloat: [-0.451 -0.351 -0.251 -0.151 ]; 
-    pvInt: [440 441 442 443 ]; 
+    pvFloat: [-0.451, -0.351, -0.251, -0.151]; 
+    pvInt: [440, 441, 442, 443]; 
   
     dpInt1: 456; 
-    dpvFloat: [0.590 0.591 0.592 0.593 0.594 ]; 
+    dpvFloat: [0.590, 0.591, 0.592, 0.593, 0.594]; 
     pFloat: 5.090; 
     pInt: 4506; 
-    pvFloat: [-0.441 -0.341 -0.241 -0.141 -0.041 ]; 
-    pvInt: [450 451 452 453 454 ]; 
+    pvFloat: [-0.441, -0.341, -0.241, -0.141, -0.041]; 
+    pvInt: [450, 451, 452, 453, 454]; 
   
     dpInt1: 457; 
-    dpvFloat: [0.690 0.691 0.692 0.693 0.694 0.695 ]; 
+    dpvFloat: [0.690, 0.691, 0.692, 0.693, 0.694, 0.695]; 
     pFloat: 6.090; 
     pInt: 4507; 
-    pvFloat: [-0.431 -0.331 -0.231 -0.131 -0.031 0.069 ]; 
-    pvInt: [460 461 462 463 464 465 ]; 
+    pvFloat: [-0.431, -0.331, -0.231, -0.131, -0.031, 0.069]; 
+    pvInt: [460, 461, 462, 463, 464, 465]; 
   
     dpInt1: 458; 
-    dpvFloat: [0.790 0.791 0.792 0.793 0.794 0.795 0.796 ]; 
+    dpvFloat: [0.790, 0.791, 0.792, 0.793, 0.794, 0.795, 0.796]; 
     pFloat: 7.090; 
     pInt: 4508; 
-    pvFloat: [-0.421 -0.321 -0.221 -0.121 -0.021 0.079 0.179 ]; 
-    pvInt: [470 471 472 473 474 475 476 ]; 
+    pvFloat: [-0.421, -0.321, -0.221, -0.121, -0.021, 0.079, 0.179]; 
+    pvInt: [470, 471, 472, 473, 474, 475, 476]; 
   
     dpInt1: 459; 
-    dpvFloat: [0.890 0.891 0.892 0.893 0.894 0.895 0.896 0.897 ]; 
+    dpvFloat: [0.890, 0.891, 0.892, 0.893, 0.894, 0.895, 0.896, 0.897]; 
     pFloat: 8.090; 
     pInt: 4509; 
-    pvFloat: [-0.411 -0.311 -0.211 -0.111 -0.011 0.089 0.189 0.289 ]; 
-    pvInt: [480 481 482 483 484 485 486 487 ]; 
+    pvFloat: [-0.411, -0.311, -0.211, -0.111, -0.011, 0.089, 0.189, 0.289]; 
+    pvInt: [480, 481, 482, 483, 484, 485, 486, 487]; 
   
     dpInt1: 460; 
-    dpvFloat: [0.990 0.991 0.992 0.993 0.994 0.995 0.996 0.997 0.998 ]; 
+    dpvFloat: [0.990, 0.991, 0.992, 0.993, 0.994, 0.995, 0.996, 0.997, 0.998]; 
     pFloat: 9.090; 
     pInt: 4510; 
-    pvFloat: [-0.401 -0.301 -0.201 -0.101 -0.001 0.099 0.199 0.299 0.399 ]; 
-    pvInt: [490 491 492 493 494 495 496 497 498 ]; 
+    pvFloat: [-0.401, -0.301, -0.201, -0.101, -0.001, 0.099, 0.199, 0.299, 0.399]; 
+    pvInt: [490, 491, 492, 493, 494, 495, 496, 497, 498]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -3794,67 +3774,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 502; 
-    dpvFloat: [0.200 ]; 
+    dpvFloat: [0.200]; 
     pFloat: 1.100; 
     pInt: 5002; 
-    pvFloat: [-0.480 ]; 
-    pvInt: [510 ]; 
+    pvFloat: [-0.480]; 
+    pvInt: [510]; 
   
     dpInt1: 503; 
-    dpvFloat: [0.300 0.301 ]; 
+    dpvFloat: [0.300, 0.301]; 
     pFloat: 2.100; 
     pInt: 5003; 
-    pvFloat: [-0.470 -0.370 ]; 
-    pvInt: [520 521 ]; 
+    pvFloat: [-0.470, -0.370]; 
+    pvInt: [520, 521]; 
   
     dpInt1: 504; 
-    dpvFloat: [0.400 0.401 0.402 ]; 
+    dpvFloat: [0.400, 0.401, 0.402]; 
     pFloat: 3.100; 
     pInt: 5004; 
-    pvFloat: [-0.460 -0.360 -0.260 ]; 
-    pvInt: [530 531 532 ]; 
+    pvFloat: [-0.460, -0.360, -0.260]; 
+    pvInt: [530, 531, 532]; 
   
     dpInt1: 505; 
-    dpvFloat: [0.500 0.501 0.502 0.503 ]; 
+    dpvFloat: [0.500, 0.501, 0.502, 0.503]; 
     pFloat: 4.100; 
     pInt: 5005; 
-    pvFloat: [-0.450 -0.350 -0.250 -0.150 ]; 
-    pvInt: [540 541 542 543 ]; 
+    pvFloat: [-0.450, -0.350, -0.250, -0.150]; 
+    pvInt: [540, 541, 542, 543]; 
   
     dpInt1: 506; 
-    dpvFloat: [0.600 0.601 0.602 0.603 0.604 ]; 
+    dpvFloat: [0.600, 0.601, 0.602, 0.603, 0.604]; 
     pFloat: 5.100; 
     pInt: 5006; 
-    pvFloat: [-0.440 -0.340 -0.240 -0.140 -0.040 ]; 
-    pvInt: [550 551 552 553 554 ]; 
+    pvFloat: [-0.440, -0.340, -0.240, -0.140, -0.040]; 
+    pvInt: [550, 551, 552, 553, 554]; 
   
     dpInt1: 507; 
-    dpvFloat: [0.700 0.701 0.702 0.703 0.704 0.705 ]; 
+    dpvFloat: [0.700, 0.701, 0.702, 0.703, 0.704, 0.705]; 
     pFloat: 6.100; 
     pInt: 5007; 
-    pvFloat: [-0.430 -0.330 -0.230 -0.130 -0.030 0.070 ]; 
-    pvInt: [560 561 562 563 564 565 ]; 
+    pvFloat: [-0.430, -0.330, -0.230, -0.130, -0.030, 0.070]; 
+    pvInt: [560, 561, 562, 563, 564, 565]; 
   
     dpInt1: 508; 
-    dpvFloat: [0.800 0.801 0.802 0.803 0.804 0.805 0.806 ]; 
+    dpvFloat: [0.800, 0.801, 0.802, 0.803, 0.804, 0.805, 0.806]; 
     pFloat: 7.100; 
     pInt: 5008; 
-    pvFloat: [-0.420 -0.320 -0.220 -0.120 -0.020 0.080 0.180 ]; 
-    pvInt: [570 571 572 573 574 575 576 ]; 
+    pvFloat: [-0.420, -0.320, -0.220, -0.120, -0.020, 0.080, 0.180]; 
+    pvInt: [570, 571, 572, 573, 574, 575, 576]; 
   
     dpInt1: 509; 
-    dpvFloat: [0.900 0.901 0.902 0.903 0.904 0.905 0.906 0.907 ]; 
+    dpvFloat: [0.900, 0.901, 0.902, 0.903, 0.904, 0.905, 0.906, 0.907]; 
     pFloat: 8.100; 
     pInt: 5009; 
-    pvFloat: [-0.410 -0.310 -0.210 -0.110 -0.010 0.090 0.190 0.290 ]; 
-    pvInt: [580 581 582 583 584 585 586 587 ]; 
+    pvFloat: [-0.410, -0.310, -0.210, -0.110, -0.010, 0.090, 0.190, 0.290]; 
+    pvInt: [580, 581, 582, 583, 584, 585, 586, 587]; 
   
     dpInt1: 510; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 9.100; 
     pInt: 5010; 
-    pvFloat: [-0.400 -0.300 -0.200 -0.100 0.000 0.100 0.200 0.300 0.400 ]; 
-    pvInt: [590 591 592 593 594 595 596 597 598 ]; 
+    pvFloat: [-0.400, -0.300, -0.200, -0.100, 0.000, 0.100, 0.200, 0.300, 0.400]; 
+    pvInt: [590, 591, 592, 593, 594, 595, 596, 597, 598]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -4254,67 +4234,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 552; 
-    dpvFloat: [0.210 ]; 
+    dpvFloat: [0.210]; 
     pFloat: 1.110; 
     pInt: 5502; 
-    pvFloat: [-0.479 ]; 
-    pvInt: [610 ]; 
+    pvFloat: [-0.479]; 
+    pvInt: [610]; 
   
     dpInt1: 553; 
-    dpvFloat: [0.310 0.311 ]; 
+    dpvFloat: [0.310, 0.311]; 
     pFloat: 2.110; 
     pInt: 5503; 
-    pvFloat: [-0.469 -0.369 ]; 
-    pvInt: [620 621 ]; 
+    pvFloat: [-0.469, -0.369]; 
+    pvInt: [620, 621]; 
   
     dpInt1: 554; 
-    dpvFloat: [0.410 0.411 0.412 ]; 
+    dpvFloat: [0.410, 0.411, 0.412]; 
     pFloat: 3.110; 
     pInt: 5504; 
-    pvFloat: [-0.459 -0.359 -0.259 ]; 
-    pvInt: [630 631 632 ]; 
+    pvFloat: [-0.459, -0.359, -0.259]; 
+    pvInt: [630, 631, 632]; 
   
     dpInt1: 555; 
-    dpvFloat: [0.510 0.511 0.512 0.513 ]; 
+    dpvFloat: [0.510, 0.511, 0.512, 0.513]; 
     pFloat: 4.110; 
     pInt: 5505; 
-    pvFloat: [-0.449 -0.349 -0.249 -0.149 ]; 
-    pvInt: [640 641 642 643 ]; 
+    pvFloat: [-0.449, -0.349, -0.249, -0.149]; 
+    pvInt: [640, 641, 642, 643]; 
   
     dpInt1: 556; 
-    dpvFloat: [0.610 0.611 0.612 0.613 0.614 ]; 
+    dpvFloat: [0.610, 0.611, 0.612, 0.613, 0.614]; 
     pFloat: 5.110; 
     pInt: 5506; 
-    pvFloat: [-0.439 -0.339 -0.239 -0.139 -0.039 ]; 
-    pvInt: [650 651 652 653 654 ]; 
+    pvFloat: [-0.439, -0.339, -0.239, -0.139, -0.039]; 
+    pvInt: [650, 651, 652, 653, 654]; 
   
     dpInt1: 557; 
-    dpvFloat: [0.710 0.711 0.712 0.713 0.714 0.715 ]; 
+    dpvFloat: [0.710, 0.711, 0.712, 0.713, 0.714, 0.715]; 
     pFloat: 6.110; 
     pInt: 5507; 
-    pvFloat: [-0.429 -0.329 -0.229 -0.129 -0.029 0.071 ]; 
-    pvInt: [660 661 662 663 664 665 ]; 
+    pvFloat: [-0.429, -0.329, -0.229, -0.129, -0.029, 0.071]; 
+    pvInt: [660, 661, 662, 663, 664, 665]; 
   
     dpInt1: 558; 
-    dpvFloat: [0.810 0.811 0.812 0.813 0.814 0.815 0.816 ]; 
+    dpvFloat: [0.810, 0.811, 0.812, 0.813, 0.814, 0.815, 0.816]; 
     pFloat: 7.110; 
     pInt: 5508; 
-    pvFloat: [-0.419 -0.319 -0.219 -0.119 -0.019 0.081 0.181 ]; 
-    pvInt: [670 671 672 673 674 675 676 ]; 
+    pvFloat: [-0.419, -0.319, -0.219, -0.119, -0.019, 0.081, 0.181]; 
+    pvInt: [670, 671, 672, 673, 674, 675, 676]; 
   
     dpInt1: 559; 
-    dpvFloat: [0.910 0.911 0.912 0.913 0.914 0.915 0.916 0.917 ]; 
+    dpvFloat: [0.910, 0.911, 0.912, 0.913, 0.914, 0.915, 0.916, 0.917]; 
     pFloat: 8.110; 
     pInt: 5509; 
-    pvFloat: [-0.409 -0.309 -0.209 -0.109 -0.009 0.091 0.191 0.291 ]; 
-    pvInt: [680 681 682 683 684 685 686 687 ]; 
+    pvFloat: [-0.409, -0.309, -0.209, -0.109, -0.009, 0.091, 0.191, 0.291]; 
+    pvInt: [680, 681, 682, 683, 684, 685, 686, 687]; 
   
     dpInt1: 560; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 9.110; 
     pInt: 5510; 
-    pvFloat: [-0.399 -0.299 -0.199 -0.099 0.001 0.101 0.201 0.301 0.401 ]; 
-    pvInt: [690 691 692 693 694 695 696 697 698 ]; 
+    pvFloat: [-0.399, -0.299, -0.199, -0.099, 0.001, 0.101, 0.201, 0.301, 0.401]; 
+    pvInt: [690, 691, 692, 693, 694, 695, 696, 697, 698]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -4714,67 +4694,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 602; 
-    dpvFloat: [0.220 ]; 
+    dpvFloat: [0.220]; 
     pFloat: 1.120; 
     pInt: 6002; 
-    pvFloat: [-0.478 ]; 
-    pvInt: [710 ]; 
+    pvFloat: [-0.478]; 
+    pvInt: [710]; 
   
     dpInt1: 603; 
-    dpvFloat: [0.320 0.321 ]; 
+    dpvFloat: [0.320, 0.321]; 
     pFloat: 2.120; 
     pInt: 6003; 
-    pvFloat: [-0.468 -0.368 ]; 
-    pvInt: [720 721 ]; 
+    pvFloat: [-0.468, -0.368]; 
+    pvInt: [720, 721]; 
   
     dpInt1: 604; 
-    dpvFloat: [0.420 0.421 0.422 ]; 
+    dpvFloat: [0.420, 0.421, 0.422]; 
     pFloat: 3.120; 
     pInt: 6004; 
-    pvFloat: [-0.458 -0.358 -0.258 ]; 
-    pvInt: [730 731 732 ]; 
+    pvFloat: [-0.458, -0.358, -0.258]; 
+    pvInt: [730, 731, 732]; 
   
     dpInt1: 605; 
-    dpvFloat: [0.520 0.521 0.522 0.523 ]; 
+    dpvFloat: [0.520, 0.521, 0.522, 0.523]; 
     pFloat: 4.120; 
     pInt: 6005; 
-    pvFloat: [-0.448 -0.348 -0.248 -0.148 ]; 
-    pvInt: [740 741 742 743 ]; 
+    pvFloat: [-0.448, -0.348, -0.248, -0.148]; 
+    pvInt: [740, 741, 742, 743]; 
   
     dpInt1: 606; 
-    dpvFloat: [0.620 0.621 0.622 0.623 0.624 ]; 
+    dpvFloat: [0.620, 0.621, 0.622, 0.623, 0.624]; 
     pFloat: 5.120; 
     pInt: 6006; 
-    pvFloat: [-0.438 -0.338 -0.238 -0.138 -0.038 ]; 
-    pvInt: [750 751 752 753 754 ]; 
+    pvFloat: [-0.438, -0.338, -0.238, -0.138, -0.038]; 
+    pvInt: [750, 751, 752, 753, 754]; 
   
     dpInt1: 607; 
-    dpvFloat: [0.720 0.721 0.722 0.723 0.724 0.725 ]; 
+    dpvFloat: [0.720, 0.721, 0.722, 0.723, 0.724, 0.725]; 
     pFloat: 6.120; 
     pInt: 6007; 
-    pvFloat: [-0.428 -0.328 -0.228 -0.128 -0.028 0.072 ]; 
-    pvInt: [760 761 762 763 764 765 ]; 
+    pvFloat: [-0.428, -0.328, -0.228, -0.128, -0.028, 0.072]; 
+    pvInt: [760, 761, 762, 763, 764, 765]; 
   
     dpInt1: 608; 
-    dpvFloat: [0.820 0.821 0.822 0.823 0.824 0.825 0.826 ]; 
+    dpvFloat: [0.820, 0.821, 0.822, 0.823, 0.824, 0.825, 0.826]; 
     pFloat: 7.120; 
     pInt: 6008; 
-    pvFloat: [-0.418 -0.318 -0.218 -0.118 -0.018 0.082 0.182 ]; 
-    pvInt: [770 771 772 773 774 775 776 ]; 
+    pvFloat: [-0.418, -0.318, -0.218, -0.118, -0.018, 0.082, 0.182]; 
+    pvInt: [770, 771, 772, 773, 774, 775, 776]; 
   
     dpInt1: 609; 
-    dpvFloat: [0.920 0.921 0.922 0.923 0.924 0.925 0.926 0.927 ]; 
+    dpvFloat: [0.920, 0.921, 0.922, 0.923, 0.924, 0.925, 0.926, 0.927]; 
     pFloat: 8.120; 
     pInt: 6009; 
-    pvFloat: [-0.408 -0.308 -0.208 -0.108 -0.008 0.092 0.192 0.292 ]; 
-    pvInt: [780 781 782 783 784 785 786 787 ]; 
+    pvFloat: [-0.408, -0.308, -0.208, -0.108, -0.008, 0.092, 0.192, 0.292]; 
+    pvInt: [780, 781, 782, 783, 784, 785, 786, 787]; 
   
     dpInt1: 610; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 9.120; 
     pInt: 6010; 
-    pvFloat: [-0.398 -0.298 -0.198 -0.098 0.002 0.102 0.202 0.302 0.402 ]; 
-    pvInt: [790 791 792 793 794 795 796 797 798 ]; 
+    pvFloat: [-0.398, -0.298, -0.198, -0.098, 0.002, 0.102, 0.202, 0.302, 0.402]; 
+    pvInt: [790, 791, 792, 793, 794, 795, 796, 797, 798]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -5174,67 +5154,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 652; 
-    dpvFloat: [0.230 ]; 
+    dpvFloat: [0.230]; 
     pFloat: 1.130; 
     pInt: 6502; 
-    pvFloat: [-0.477 ]; 
-    pvInt: [810 ]; 
+    pvFloat: [-0.477]; 
+    pvInt: [810]; 
   
     dpInt1: 653; 
-    dpvFloat: [0.330 0.331 ]; 
+    dpvFloat: [0.330, 0.331]; 
     pFloat: 2.130; 
     pInt: 6503; 
-    pvFloat: [-0.467 -0.367 ]; 
-    pvInt: [820 821 ]; 
+    pvFloat: [-0.467, -0.367]; 
+    pvInt: [820, 821]; 
   
     dpInt1: 654; 
-    dpvFloat: [0.430 0.431 0.432 ]; 
+    dpvFloat: [0.430, 0.431, 0.432]; 
     pFloat: 3.130; 
     pInt: 6504; 
-    pvFloat: [-0.457 -0.357 -0.257 ]; 
-    pvInt: [830 831 832 ]; 
+    pvFloat: [-0.457, -0.357, -0.257]; 
+    pvInt: [830, 831, 832]; 
   
     dpInt1: 655; 
-    dpvFloat: [0.530 0.531 0.532 0.533 ]; 
+    dpvFloat: [0.530, 0.531, 0.532, 0.533]; 
     pFloat: 4.130; 
     pInt: 6505; 
-    pvFloat: [-0.447 -0.347 -0.247 -0.147 ]; 
-    pvInt: [840 841 842 843 ]; 
+    pvFloat: [-0.447, -0.347, -0.247, -0.147]; 
+    pvInt: [840, 841, 842, 843]; 
   
     dpInt1: 656; 
-    dpvFloat: [0.630 0.631 0.632 0.633 0.634 ]; 
+    dpvFloat: [0.630, 0.631, 0.632, 0.633, 0.634]; 
     pFloat: 5.130; 
     pInt: 6506; 
-    pvFloat: [-0.437 -0.337 -0.237 -0.137 -0.037 ]; 
-    pvInt: [850 851 852 853 854 ]; 
+    pvFloat: [-0.437, -0.337, -0.237, -0.137, -0.037]; 
+    pvInt: [850, 851, 852, 853, 854]; 
   
     dpInt1: 657; 
-    dpvFloat: [0.730 0.731 0.732 0.733 0.734 0.735 ]; 
+    dpvFloat: [0.730, 0.731, 0.732, 0.733, 0.734, 0.735]; 
     pFloat: 6.130; 
     pInt: 6507; 
-    pvFloat: [-0.427 -0.327 -0.227 -0.127 -0.027 0.073 ]; 
-    pvInt: [860 861 862 863 864 865 ]; 
+    pvFloat: [-0.427, -0.327, -0.227, -0.127, -0.027, 0.073]; 
+    pvInt: [860, 861, 862, 863, 864, 865]; 
   
     dpInt1: 658; 
-    dpvFloat: [0.830 0.831 0.832 0.833 0.834 0.835 0.836 ]; 
+    dpvFloat: [0.830, 0.831, 0.832, 0.833, 0.834, 0.835, 0.836]; 
     pFloat: 7.130; 
     pInt: 6508; 
-    pvFloat: [-0.417 -0.317 -0.217 -0.117 -0.017 0.083 0.183 ]; 
-    pvInt: [870 871 872 873 874 875 876 ]; 
+    pvFloat: [-0.417, -0.317, -0.217, -0.117, -0.017, 0.083, 0.183]; 
+    pvInt: [870, 871, 872, 873, 874, 875, 876]; 
   
     dpInt1: 659; 
-    dpvFloat: [0.930 0.931 0.932 0.933 0.934 0.935 0.936 0.937 ]; 
+    dpvFloat: [0.930, 0.931, 0.932, 0.933, 0.934, 0.935, 0.936, 0.937]; 
     pFloat: 8.130; 
     pInt: 6509; 
-    pvFloat: [-0.407 -0.307 -0.207 -0.107 -0.007 0.093 0.193 0.293 ]; 
-    pvInt: [880 881 882 883 884 885 886 887 ]; 
+    pvFloat: [-0.407, -0.307, -0.207, -0.107, -0.007, 0.093, 0.193, 0.293]; 
+    pvInt: [880, 881, 882, 883, 884, 885, 886, 887]; 
   
     dpInt1: 660; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 9.130; 
     pInt: 6510; 
-    pvFloat: [-0.397 -0.297 -0.197 -0.097 0.003 0.103 0.203 0.303 0.403 ]; 
-    pvInt: [890 891 892 893 894 895 896 897 898 ]; 
+    pvFloat: [-0.397, -0.297, -0.197, -0.097, 0.003, 0.103, 0.203, 0.303, 0.403]; 
+    pvInt: [890, 891, 892, 893, 894, 895, 896, 897, 898]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -5634,67 +5614,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 702; 
-    dpvFloat: [0.240 ]; 
+    dpvFloat: [0.240]; 
     pFloat: 1.140; 
     pInt: 7002; 
-    pvFloat: [-0.476 ]; 
-    pvInt: [910 ]; 
+    pvFloat: [-0.476]; 
+    pvInt: [910]; 
   
     dpInt1: 703; 
-    dpvFloat: [0.340 0.341 ]; 
+    dpvFloat: [0.340, 0.341]; 
     pFloat: 2.140; 
     pInt: 7003; 
-    pvFloat: [-0.466 -0.366 ]; 
-    pvInt: [920 921 ]; 
+    pvFloat: [-0.466, -0.366]; 
+    pvInt: [920, 921]; 
   
     dpInt1: 704; 
-    dpvFloat: [0.440 0.441 0.442 ]; 
+    dpvFloat: [0.440, 0.441, 0.442]; 
     pFloat: 3.140; 
     pInt: 7004; 
-    pvFloat: [-0.456 -0.356 -0.256 ]; 
-    pvInt: [930 931 932 ]; 
+    pvFloat: [-0.456, -0.356, -0.256]; 
+    pvInt: [930, 931, 932]; 
   
     dpInt1: 705; 
-    dpvFloat: [0.540 0.541 0.542 0.543 ]; 
+    dpvFloat: [0.540, 0.541, 0.542, 0.543]; 
     pFloat: 4.140; 
     pInt: 7005; 
-    pvFloat: [-0.446 -0.346 -0.246 -0.146 ]; 
-    pvInt: [940 941 942 943 ]; 
+    pvFloat: [-0.446, -0.346, -0.246, -0.146]; 
+    pvInt: [940, 941, 942, 943]; 
   
     dpInt1: 706; 
-    dpvFloat: [0.640 0.641 0.642 0.643 0.644 ]; 
+    dpvFloat: [0.640, 0.641, 0.642, 0.643, 0.644]; 
     pFloat: 5.140; 
     pInt: 7006; 
-    pvFloat: [-0.436 -0.336 -0.236 -0.136 -0.036 ]; 
-    pvInt: [950 951 952 953 954 ]; 
+    pvFloat: [-0.436, -0.336, -0.236, -0.136, -0.036]; 
+    pvInt: [950, 951, 952, 953, 954]; 
   
     dpInt1: 707; 
-    dpvFloat: [0.740 0.741 0.742 0.743 0.744 0.745 ]; 
+    dpvFloat: [0.740, 0.741, 0.742, 0.743, 0.744, 0.745]; 
     pFloat: 6.140; 
     pInt: 7007; 
-    pvFloat: [-0.426 -0.326 -0.226 -0.126 -0.026 0.074 ]; 
-    pvInt: [960 961 962 963 964 965 ]; 
+    pvFloat: [-0.426, -0.326, -0.226, -0.126, -0.026, 0.074]; 
+    pvInt: [960, 961, 962, 963, 964, 965]; 
   
     dpInt1: 708; 
-    dpvFloat: [0.840 0.841 0.842 0.843 0.844 0.845 0.846 ]; 
+    dpvFloat: [0.840, 0.841, 0.842, 0.843, 0.844, 0.845, 0.846]; 
     pFloat: 7.140; 
     pInt: 7008; 
-    pvFloat: [-0.416 -0.316 -0.216 -0.116 -0.016 0.084 0.184 ]; 
-    pvInt: [970 971 972 973 974 975 976 ]; 
+    pvFloat: [-0.416, -0.316, -0.216, -0.116, -0.016, 0.084, 0.184]; 
+    pvInt: [970, 971, 972, 973, 974, 975, 976]; 
   
     dpInt1: 709; 
-    dpvFloat: [0.940 0.941 0.942 0.943 0.944 0.945 0.946 0.947 ]; 
+    dpvFloat: [0.940, 0.941, 0.942, 0.943, 0.944, 0.945, 0.946, 0.947]; 
     pFloat: 8.140; 
     pInt: 7009; 
-    pvFloat: [-0.406 -0.306 -0.206 -0.106 -0.006 0.094 0.194 0.294 ]; 
-    pvInt: [980 981 982 983 984 985 986 987 ]; 
+    pvFloat: [-0.406, -0.306, -0.206, -0.106, -0.006, 0.094, 0.194, 0.294]; 
+    pvInt: [980, 981, 982, 983, 984, 985, 986, 987]; 
   
     dpInt1: 710; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 9.140; 
     pInt: 7010; 
-    pvFloat: [-0.396 -0.296 -0.196 -0.096 0.004 0.104 0.204 0.304 0.404 ]; 
-    pvInt: [990 991 992 993 994 995 996 997 998 ]; 
+    pvFloat: [-0.396, -0.296, -0.196, -0.096, 0.004, 0.104, 0.204, 0.304, 0.404]; 
+    pvInt: [990, 991, 992, 993, 994, 995, 996, 997, 998]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -6094,67 +6074,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 752; 
-    dpvFloat: [0.250 ]; 
+    dpvFloat: [0.250]; 
     pFloat: 1.150; 
     pInt: 7502; 
-    pvFloat: [-0.475 ]; 
-    pvInt: [1010 ]; 
+    pvFloat: [-0.475]; 
+    pvInt: [1010]; 
   
     dpInt1: 753; 
-    dpvFloat: [0.350 0.351 ]; 
+    dpvFloat: [0.350, 0.351]; 
     pFloat: 2.150; 
     pInt: 7503; 
-    pvFloat: [-0.465 -0.365 ]; 
-    pvInt: [1020 1021 ]; 
+    pvFloat: [-0.465, -0.365]; 
+    pvInt: [1020, 1021]; 
   
     dpInt1: 754; 
-    dpvFloat: [0.450 0.451 0.452 ]; 
+    dpvFloat: [0.450, 0.451, 0.452]; 
     pFloat: 3.150; 
     pInt: 7504; 
-    pvFloat: [-0.455 -0.355 -0.255 ]; 
-    pvInt: [1030 1031 1032 ]; 
+    pvFloat: [-0.455, -0.355, -0.255]; 
+    pvInt: [1030, 1031, 1032]; 
   
     dpInt1: 755; 
-    dpvFloat: [0.550 0.551 0.552 0.553 ]; 
+    dpvFloat: [0.550, 0.551, 0.552, 0.553]; 
     pFloat: 4.150; 
     pInt: 7505; 
-    pvFloat: [-0.445 -0.345 -0.245 -0.145 ]; 
-    pvInt: [1040 1041 1042 1043 ]; 
+    pvFloat: [-0.445, -0.345, -0.245, -0.145]; 
+    pvInt: [1040, 1041, 1042, 1043]; 
   
     dpInt1: 756; 
-    dpvFloat: [0.650 0.651 0.652 0.653 0.654 ]; 
+    dpvFloat: [0.650, 0.651, 0.652, 0.653, 0.654]; 
     pFloat: 5.150; 
     pInt: 7506; 
-    pvFloat: [-0.435 -0.335 -0.235 -0.135 -0.035 ]; 
-    pvInt: [1050 1051 1052 1053 1054 ]; 
+    pvFloat: [-0.435, -0.335, -0.235, -0.135, -0.035]; 
+    pvInt: [1050, 1051, 1052, 1053, 1054]; 
   
     dpInt1: 757; 
-    dpvFloat: [0.750 0.751 0.752 0.753 0.754 0.755 ]; 
+    dpvFloat: [0.750, 0.751, 0.752, 0.753, 0.754, 0.755]; 
     pFloat: 6.150; 
     pInt: 7507; 
-    pvFloat: [-0.425 -0.325 -0.225 -0.125 -0.025 0.075 ]; 
-    pvInt: [1060 1061 1062 1063 1064 1065 ]; 
+    pvFloat: [-0.425, -0.325, -0.225, -0.125, -0.025, 0.075]; 
+    pvInt: [1060, 1061, 1062, 1063, 1064, 1065]; 
   
     dpInt1: 758; 
-    dpvFloat: [0.850 0.851 0.852 0.853 0.854 0.855 0.856 ]; 
+    dpvFloat: [0.850, 0.851, 0.852, 0.853, 0.854, 0.855, 0.856]; 
     pFloat: 7.150; 
     pInt: 7508; 
-    pvFloat: [-0.415 -0.315 -0.215 -0.115 -0.015 0.085 0.185 ]; 
-    pvInt: [1070 1071 1072 1073 1074 1075 1076 ]; 
+    pvFloat: [-0.415, -0.315, -0.215, -0.115, -0.015, 0.085, 0.185]; 
+    pvInt: [1070, 1071, 1072, 1073, 1074, 1075, 1076]; 
   
     dpInt1: 759; 
-    dpvFloat: [0.950 0.951 0.952 0.953 0.954 0.955 0.956 0.957 ]; 
+    dpvFloat: [0.950, 0.951, 0.952, 0.953, 0.954, 0.955, 0.956, 0.957]; 
     pFloat: 8.150; 
     pInt: 7509; 
-    pvFloat: [-0.405 -0.305 -0.205 -0.105 -0.005 0.095 0.195 0.295 ]; 
-    pvInt: [1080 1081 1082 1083 1084 1085 1086 1087 ]; 
+    pvFloat: [-0.405, -0.305, -0.205, -0.105, -0.005, 0.095, 0.195, 0.295]; 
+    pvInt: [1080, 1081, 1082, 1083, 1084, 1085, 1086, 1087]; 
   
     dpInt1: 760; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 9.150; 
     pInt: 7510; 
-    pvFloat: [-0.395 -0.295 -0.195 -0.095 0.005 0.105 0.205 0.305 0.405 ]; 
-    pvInt: [1090 1091 1092 1093 1094 1095 1096 1097 1098 ]; 
+    pvFloat: [-0.395, -0.295, -0.195, -0.095, 0.005, 0.105, 0.205, 0.305, 0.405]; 
+    pvInt: [1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -6554,67 +6534,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 802; 
-    dpvFloat: [0.260 ]; 
+    dpvFloat: [0.260]; 
     pFloat: 1.160; 
     pInt: 8002; 
-    pvFloat: [-0.474 ]; 
-    pvInt: [1110 ]; 
+    pvFloat: [-0.474]; 
+    pvInt: [1110]; 
   
     dpInt1: 803; 
-    dpvFloat: [0.360 0.361 ]; 
+    dpvFloat: [0.360, 0.361]; 
     pFloat: 2.160; 
     pInt: 8003; 
-    pvFloat: [-0.464 -0.364 ]; 
-    pvInt: [1120 1121 ]; 
+    pvFloat: [-0.464, -0.364]; 
+    pvInt: [1120, 1121]; 
   
     dpInt1: 804; 
-    dpvFloat: [0.460 0.461 0.462 ]; 
+    dpvFloat: [0.460, 0.461, 0.462]; 
     pFloat: 3.160; 
     pInt: 8004; 
-    pvFloat: [-0.454 -0.354 -0.254 ]; 
-    pvInt: [1130 1131 1132 ]; 
+    pvFloat: [-0.454, -0.354, -0.254]; 
+    pvInt: [1130, 1131, 1132]; 
   
     dpInt1: 805; 
-    dpvFloat: [0.560 0.561 0.562 0.563 ]; 
+    dpvFloat: [0.560, 0.561, 0.562, 0.563]; 
     pFloat: 4.160; 
     pInt: 8005; 
-    pvFloat: [-0.444 -0.344 -0.244 -0.144 ]; 
-    pvInt: [1140 1141 1142 1143 ]; 
+    pvFloat: [-0.444, -0.344, -0.244, -0.144]; 
+    pvInt: [1140, 1141, 1142, 1143]; 
   
     dpInt1: 806; 
-    dpvFloat: [0.660 0.661 0.662 0.663 0.664 ]; 
+    dpvFloat: [0.660, 0.661, 0.662, 0.663, 0.664]; 
     pFloat: 5.160; 
     pInt: 8006; 
-    pvFloat: [-0.434 -0.334 -0.234 -0.134 -0.034 ]; 
-    pvInt: [1150 1151 1152 1153 1154 ]; 
+    pvFloat: [-0.434, -0.334, -0.234, -0.134, -0.034]; 
+    pvInt: [1150, 1151, 1152, 1153, 1154]; 
   
     dpInt1: 807; 
-    dpvFloat: [0.760 0.761 0.762 0.763 0.764 0.765 ]; 
+    dpvFloat: [0.760, 0.761, 0.762, 0.763, 0.764, 0.765]; 
     pFloat: 6.160; 
     pInt: 8007; 
-    pvFloat: [-0.424 -0.324 -0.224 -0.124 -0.024 0.076 ]; 
-    pvInt: [1160 1161 1162 1163 1164 1165 ]; 
+    pvFloat: [-0.424, -0.324, -0.224, -0.124, -0.024, 0.076]; 
+    pvInt: [1160, 1161, 1162, 1163, 1164, 1165]; 
   
     dpInt1: 808; 
-    dpvFloat: [0.860 0.861 0.862 0.863 0.864 0.865 0.866 ]; 
+    dpvFloat: [0.860, 0.861, 0.862, 0.863, 0.864, 0.865, 0.866]; 
     pFloat: 7.160; 
     pInt: 8008; 
-    pvFloat: [-0.414 -0.314 -0.214 -0.114 -0.014 0.086 0.186 ]; 
-    pvInt: [1170 1171 1172 1173 1174 1175 1176 ]; 
+    pvFloat: [-0.414, -0.314, -0.214, -0.114, -0.014, 0.086, 0.186]; 
+    pvInt: [1170, 1171, 1172, 1173, 1174, 1175, 1176]; 
   
     dpInt1: 809; 
-    dpvFloat: [0.960 0.961 0.962 0.963 0.964 0.965 0.966 0.967 ]; 
+    dpvFloat: [0.960, 0.961, 0.962, 0.963, 0.964, 0.965, 0.966, 0.967]; 
     pFloat: 8.160; 
     pInt: 8009; 
-    pvFloat: [-0.404 -0.304 -0.204 -0.104 -0.004 0.096 0.196 0.296 ]; 
-    pvInt: [1180 1181 1182 1183 1184 1185 1186 1187 ]; 
+    pvFloat: [-0.404, -0.304, -0.204, -0.104, -0.004, 0.096, 0.196, 0.296]; 
+    pvInt: [1180, 1181, 1182, 1183, 1184, 1185, 1186, 1187]; 
   
     dpInt1: 810; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 9.160; 
     pInt: 8010; 
-    pvFloat: [-0.394 -0.294 -0.194 -0.094 0.006 0.106 0.206 0.306 0.406 ]; 
-    pvInt: [1190 1191 1192 1193 1194 1195 1196 1197 1198 ]; 
+    pvFloat: [-0.394, -0.294, -0.194, -0.094, 0.006, 0.106, 0.206, 0.306, 0.406]; 
+    pvInt: [1190, 1191, 1192, 1193, 1194, 1195, 1196, 1197, 1198]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -7014,67 +6994,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 852; 
-    dpvFloat: [0.270 ]; 
+    dpvFloat: [0.270]; 
     pFloat: 1.170; 
     pInt: 8502; 
-    pvFloat: [-0.473 ]; 
-    pvInt: [1210 ]; 
+    pvFloat: [-0.473]; 
+    pvInt: [1210]; 
   
     dpInt1: 853; 
-    dpvFloat: [0.370 0.371 ]; 
+    dpvFloat: [0.370, 0.371]; 
     pFloat: 2.170; 
     pInt: 8503; 
-    pvFloat: [-0.463 -0.363 ]; 
-    pvInt: [1220 1221 ]; 
+    pvFloat: [-0.463, -0.363]; 
+    pvInt: [1220, 1221]; 
   
     dpInt1: 854; 
-    dpvFloat: [0.470 0.471 0.472 ]; 
+    dpvFloat: [0.470, 0.471, 0.472]; 
     pFloat: 3.170; 
     pInt: 8504; 
-    pvFloat: [-0.453 -0.353 -0.253 ]; 
-    pvInt: [1230 1231 1232 ]; 
+    pvFloat: [-0.453, -0.353, -0.253]; 
+    pvInt: [1230, 1231, 1232]; 
   
     dpInt1: 855; 
-    dpvFloat: [0.570 0.571 0.572 0.573 ]; 
+    dpvFloat: [0.570, 0.571, 0.572, 0.573]; 
     pFloat: 4.170; 
     pInt: 8505; 
-    pvFloat: [-0.443 -0.343 -0.243 -0.143 ]; 
-    pvInt: [1240 1241 1242 1243 ]; 
+    pvFloat: [-0.443, -0.343, -0.243, -0.143]; 
+    pvInt: [1240, 1241, 1242, 1243]; 
   
     dpInt1: 856; 
-    dpvFloat: [0.670 0.671 0.672 0.673 0.674 ]; 
+    dpvFloat: [0.670, 0.671, 0.672, 0.673, 0.674]; 
     pFloat: 5.170; 
     pInt: 8506; 
-    pvFloat: [-0.433 -0.333 -0.233 -0.133 -0.033 ]; 
-    pvInt: [1250 1251 1252 1253 1254 ]; 
+    pvFloat: [-0.433, -0.333, -0.233, -0.133, -0.033]; 
+    pvInt: [1250, 1251, 1252, 1253, 1254]; 
   
     dpInt1: 857; 
-    dpvFloat: [0.770 0.771 0.772 0.773 0.774 0.775 ]; 
+    dpvFloat: [0.770, 0.771, 0.772, 0.773, 0.774, 0.775]; 
     pFloat: 6.170; 
     pInt: 8507; 
-    pvFloat: [-0.423 -0.323 -0.223 -0.123 -0.023 0.077 ]; 
-    pvInt: [1260 1261 1262 1263 1264 1265 ]; 
+    pvFloat: [-0.423, -0.323, -0.223, -0.123, -0.023, 0.077]; 
+    pvInt: [1260, 1261, 1262, 1263, 1264, 1265]; 
   
     dpInt1: 858; 
-    dpvFloat: [0.870 0.871 0.872 0.873 0.874 0.875 0.876 ]; 
+    dpvFloat: [0.870, 0.871, 0.872, 0.873, 0.874, 0.875, 0.876]; 
     pFloat: 7.170; 
     pInt: 8508; 
-    pvFloat: [-0.413 -0.313 -0.213 -0.113 -0.013 0.087 0.187 ]; 
-    pvInt: [1270 1271 1272 1273 1274 1275 1276 ]; 
+    pvFloat: [-0.413, -0.313, -0.213, -0.113, -0.013, 0.087, 0.187]; 
+    pvInt: [1270, 1271, 1272, 1273, 1274, 1275, 1276]; 
   
     dpInt1: 859; 
-    dpvFloat: [0.970 0.971 0.972 0.973 0.974 0.975 0.976 0.977 ]; 
+    dpvFloat: [0.970, 0.971, 0.972, 0.973, 0.974, 0.975, 0.976, 0.977]; 
     pFloat: 8.170; 
     pInt: 8509; 
-    pvFloat: [-0.403 -0.303 -0.203 -0.103 -0.003 0.097 0.197 0.297 ]; 
-    pvInt: [1280 1281 1282 1283 1284 1285 1286 1287 ]; 
+    pvFloat: [-0.403, -0.303, -0.203, -0.103, -0.003, 0.097, 0.197, 0.297]; 
+    pvInt: [1280, 1281, 1282, 1283, 1284, 1285, 1286, 1287]; 
   
     dpInt1: 860; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 9.170; 
     pInt: 8510; 
-    pvFloat: [-0.393 -0.293 -0.193 -0.093 0.007 0.107 0.207 0.307 0.407 ]; 
-    pvInt: [1290 1291 1292 1293 1294 1295 1296 1297 1298 ]; 
+    pvFloat: [-0.393, -0.293, -0.193, -0.093, 0.007, 0.107, 0.207, 0.307, 0.407]; 
+    pvInt: [1290, 1291, 1292, 1293, 1294, 1295, 1296, 1297, 1298]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -7474,67 +7454,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 902; 
-    dpvFloat: [0.280 ]; 
+    dpvFloat: [0.280]; 
     pFloat: 1.180; 
     pInt: 9002; 
-    pvFloat: [-0.472 ]; 
-    pvInt: [1310 ]; 
+    pvFloat: [-0.472]; 
+    pvInt: [1310]; 
   
     dpInt1: 903; 
-    dpvFloat: [0.380 0.381 ]; 
+    dpvFloat: [0.380, 0.381]; 
     pFloat: 2.180; 
     pInt: 9003; 
-    pvFloat: [-0.462 -0.362 ]; 
-    pvInt: [1320 1321 ]; 
+    pvFloat: [-0.462, -0.362]; 
+    pvInt: [1320, 1321]; 
   
     dpInt1: 904; 
-    dpvFloat: [0.480 0.481 0.482 ]; 
+    dpvFloat: [0.480, 0.481, 0.482]; 
     pFloat: 3.180; 
     pInt: 9004; 
-    pvFloat: [-0.452 -0.352 -0.252 ]; 
-    pvInt: [1330 1331 1332 ]; 
+    pvFloat: [-0.452, -0.352, -0.252]; 
+    pvInt: [1330, 1331, 1332]; 
   
     dpInt1: 905; 
-    dpvFloat: [0.580 0.581 0.582 0.583 ]; 
+    dpvFloat: [0.580, 0.581, 0.582, 0.583]; 
     pFloat: 4.180; 
     pInt: 9005; 
-    pvFloat: [-0.442 -0.342 -0.242 -0.142 ]; 
-    pvInt: [1340 1341 1342 1343 ]; 
+    pvFloat: [-0.442, -0.342, -0.242, -0.142]; 
+    pvInt: [1340, 1341, 1342, 1343]; 
   
     dpInt1: 906; 
-    dpvFloat: [0.680 0.681 0.682 0.683 0.684 ]; 
+    dpvFloat: [0.680, 0.681, 0.682, 0.683, 0.684]; 
     pFloat: 5.180; 
     pInt: 9006; 
-    pvFloat: [-0.432 -0.332 -0.232 -0.132 -0.032 ]; 
-    pvInt: [1350 1351 1352 1353 1354 ]; 
+    pvFloat: [-0.432, -0.332, -0.232, -0.132, -0.032]; 
+    pvInt: [1350, 1351, 1352, 1353, 1354]; 
   
     dpInt1: 907; 
-    dpvFloat: [0.780 0.781 0.782 0.783 0.784 0.785 ]; 
+    dpvFloat: [0.780, 0.781, 0.782, 0.783, 0.784, 0.785]; 
     pFloat: 6.180; 
     pInt: 9007; 
-    pvFloat: [-0.422 -0.322 -0.222 -0.122 -0.022 0.078 ]; 
-    pvInt: [1360 1361 1362 1363 1364 1365 ]; 
+    pvFloat: [-0.422, -0.322, -0.222, -0.122, -0.022, 0.078]; 
+    pvInt: [1360, 1361, 1362, 1363, 1364, 1365]; 
   
     dpInt1: 908; 
-    dpvFloat: [0.880 0.881 0.882 0.883 0.884 0.885 0.886 ]; 
+    dpvFloat: [0.880, 0.881, 0.882, 0.883, 0.884, 0.885, 0.886]; 
     pFloat: 7.180; 
     pInt: 9008; 
-    pvFloat: [-0.412 -0.312 -0.212 -0.112 -0.012 0.088 0.188 ]; 
-    pvInt: [1370 1371 1372 1373 1374 1375 1376 ]; 
+    pvFloat: [-0.412, -0.312, -0.212, -0.112, -0.012, 0.088, 0.188]; 
+    pvInt: [1370, 1371, 1372, 1373, 1374, 1375, 1376]; 
   
     dpInt1: 909; 
-    dpvFloat: [0.980 0.981 0.982 0.983 0.984 0.985 0.986 0.987 ]; 
+    dpvFloat: [0.980, 0.981, 0.982, 0.983, 0.984, 0.985, 0.986, 0.987]; 
     pFloat: 8.180; 
     pInt: 9009; 
-    pvFloat: [-0.402 -0.302 -0.202 -0.102 -0.002 0.098 0.198 0.298 ]; 
-    pvInt: [1380 1381 1382 1383 1384 1385 1386 1387 ]; 
+    pvFloat: [-0.402, -0.302, -0.202, -0.102, -0.002, 0.098, 0.198, 0.298]; 
+    pvInt: [1380, 1381, 1382, 1383, 1384, 1385, 1386, 1387]; 
   
     dpInt1: 910; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 9.180; 
     pInt: 9010; 
-    pvFloat: [-0.392 -0.292 -0.192 -0.092 0.008 0.108 0.208 0.308 0.408 ]; 
-    pvInt: [1390 1391 1392 1393 1394 1395 1396 1397 1398 ]; 
+    pvFloat: [-0.392, -0.292, -0.192, -0.092, 0.008, 0.108, 0.208, 0.308, 0.408]; 
+    pvInt: [1390, 1391, 1392, 1393, 1394, 1395, 1396, 1397, 1398]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -7934,67 +7914,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 952; 
-    dpvFloat: [0.290 ]; 
+    dpvFloat: [0.290]; 
     pFloat: 1.190; 
     pInt: 9502; 
-    pvFloat: [-0.471 ]; 
-    pvInt: [1410 ]; 
+    pvFloat: [-0.471]; 
+    pvInt: [1410]; 
   
     dpInt1: 953; 
-    dpvFloat: [0.390 0.391 ]; 
+    dpvFloat: [0.390, 0.391]; 
     pFloat: 2.190; 
     pInt: 9503; 
-    pvFloat: [-0.461 -0.361 ]; 
-    pvInt: [1420 1421 ]; 
+    pvFloat: [-0.461, -0.361]; 
+    pvInt: [1420, 1421]; 
   
     dpInt1: 954; 
-    dpvFloat: [0.490 0.491 0.492 ]; 
+    dpvFloat: [0.490, 0.491, 0.492]; 
     pFloat: 3.190; 
     pInt: 9504; 
-    pvFloat: [-0.451 -0.351 -0.251 ]; 
-    pvInt: [1430 1431 1432 ]; 
+    pvFloat: [-0.451, -0.351, -0.251]; 
+    pvInt: [1430, 1431, 1432]; 
   
     dpInt1: 955; 
-    dpvFloat: [0.590 0.591 0.592 0.593 ]; 
+    dpvFloat: [0.590, 0.591, 0.592, 0.593]; 
     pFloat: 4.190; 
     pInt: 9505; 
-    pvFloat: [-0.441 -0.341 -0.241 -0.141 ]; 
-    pvInt: [1440 1441 1442 1443 ]; 
+    pvFloat: [-0.441, -0.341, -0.241, -0.141]; 
+    pvInt: [1440, 1441, 1442, 1443]; 
   
     dpInt1: 956; 
-    dpvFloat: [0.690 0.691 0.692 0.693 0.694 ]; 
+    dpvFloat: [0.690, 0.691, 0.692, 0.693, 0.694]; 
     pFloat: 5.190; 
     pInt: 9506; 
-    pvFloat: [-0.431 -0.331 -0.231 -0.131 -0.031 ]; 
-    pvInt: [1450 1451 1452 1453 1454 ]; 
+    pvFloat: [-0.431, -0.331, -0.231, -0.131, -0.031]; 
+    pvInt: [1450, 1451, 1452, 1453, 1454]; 
   
     dpInt1: 957; 
-    dpvFloat: [0.790 0.791 0.792 0.793 0.794 0.795 ]; 
+    dpvFloat: [0.790, 0.791, 0.792, 0.793, 0.794, 0.795]; 
     pFloat: 6.190; 
     pInt: 9507; 
-    pvFloat: [-0.421 -0.321 -0.221 -0.121 -0.021 0.079 ]; 
-    pvInt: [1460 1461 1462 1463 1464 1465 ]; 
+    pvFloat: [-0.421, -0.321, -0.221, -0.121, -0.021, 0.079]; 
+    pvInt: [1460, 1461, 1462, 1463, 1464, 1465]; 
   
     dpInt1: 958; 
-    dpvFloat: [0.890 0.891 0.892 0.893 0.894 0.895 0.896 ]; 
+    dpvFloat: [0.890, 0.891, 0.892, 0.893, 0.894, 0.895, 0.896]; 
     pFloat: 7.190; 
     pInt: 9508; 
-    pvFloat: [-0.411 -0.311 -0.211 -0.111 -0.011 0.089 0.189 ]; 
-    pvInt: [1470 1471 1472 1473 1474 1475 1476 ]; 
+    pvFloat: [-0.411, -0.311, -0.211, -0.111, -0.011, 0.089, 0.189]; 
+    pvInt: [1470, 1471, 1472, 1473, 1474, 1475, 1476]; 
   
     dpInt1: 959; 
-    dpvFloat: [0.990 0.991 0.992 0.993 0.994 0.995 0.996 0.997 ]; 
+    dpvFloat: [0.990, 0.991, 0.992, 0.993, 0.994, 0.995, 0.996, 0.997]; 
     pFloat: 8.190; 
     pInt: 9509; 
-    pvFloat: [-0.401 -0.301 -0.201 -0.101 -0.001 0.099 0.199 0.299 ]; 
-    pvInt: [1480 1481 1482 1483 1484 1485 1486 1487 ]; 
+    pvFloat: [-0.401, -0.301, -0.201, -0.101, -0.001, 0.099, 0.199, 0.299]; 
+    pvInt: [1480, 1481, 1482, 1483, 1484, 1485, 1486, 1487]; 
   
     dpInt1: 960; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 9.190; 
     pInt: 9510; 
-    pvFloat: [-0.391 -0.291 -0.191 -0.091 0.009 0.109 0.209 0.309 0.409 ]; 
-    pvInt: [1490 1491 1492 1493 1494 1495 1496 1497 1498 ]; 
+    pvFloat: [-0.391, -0.291, -0.191, -0.091, 0.009, 0.109, 0.209, 0.309, 0.409]; 
+    pvInt: [1490, 1491, 1492, 1493, 1494, 1495, 1496, 1497, 1498]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -8394,67 +8374,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 1002; 
-    dpvFloat: [0.300 ]; 
+    dpvFloat: [0.300]; 
     pFloat: 1.200; 
     pInt: 10002; 
-    pvFloat: [-0.470 ]; 
-    pvInt: [1510 ]; 
+    pvFloat: [-0.470]; 
+    pvInt: [1510]; 
   
     dpInt1: 1003; 
-    dpvFloat: [0.400 0.401 ]; 
+    dpvFloat: [0.400, 0.401]; 
     pFloat: 2.200; 
     pInt: 10003; 
-    pvFloat: [-0.460 -0.360 ]; 
-    pvInt: [1520 1521 ]; 
+    pvFloat: [-0.460, -0.360]; 
+    pvInt: [1520, 1521]; 
   
     dpInt1: 1004; 
-    dpvFloat: [0.500 0.501 0.502 ]; 
+    dpvFloat: [0.500, 0.501, 0.502]; 
     pFloat: 3.200; 
     pInt: 10004; 
-    pvFloat: [-0.450 -0.350 -0.250 ]; 
-    pvInt: [1530 1531 1532 ]; 
+    pvFloat: [-0.450, -0.350, -0.250]; 
+    pvInt: [1530, 1531, 1532]; 
   
     dpInt1: 1005; 
-    dpvFloat: [0.600 0.601 0.602 0.603 ]; 
+    dpvFloat: [0.600, 0.601, 0.602, 0.603]; 
     pFloat: 4.200; 
     pInt: 10005; 
-    pvFloat: [-0.440 -0.340 -0.240 -0.140 ]; 
-    pvInt: [1540 1541 1542 1543 ]; 
+    pvFloat: [-0.440, -0.340, -0.240, -0.140]; 
+    pvInt: [1540, 1541, 1542, 1543]; 
   
     dpInt1: 1006; 
-    dpvFloat: [0.700 0.701 0.702 0.703 0.704 ]; 
+    dpvFloat: [0.700, 0.701, 0.702, 0.703, 0.704]; 
     pFloat: 5.200; 
     pInt: 10006; 
-    pvFloat: [-0.430 -0.330 -0.230 -0.130 -0.030 ]; 
-    pvInt: [1550 1551 1552 1553 1554 ]; 
+    pvFloat: [-0.430, -0.330, -0.230, -0.130, -0.030]; 
+    pvInt: [1550, 1551, 1552, 1553, 1554]; 
   
     dpInt1: 1007; 
-    dpvFloat: [0.800 0.801 0.802 0.803 0.804 0.805 ]; 
+    dpvFloat: [0.800, 0.801, 0.802, 0.803, 0.804, 0.805]; 
     pFloat: 6.200; 
     pInt: 10007; 
-    pvFloat: [-0.420 -0.320 -0.220 -0.120 -0.020 0.080 ]; 
-    pvInt: [1560 1561 1562 1563 1564 1565 ]; 
+    pvFloat: [-0.420, -0.320, -0.220, -0.120, -0.020, 0.080]; 
+    pvInt: [1560, 1561, 1562, 1563, 1564, 1565]; 
   
     dpInt1: 1008; 
-    dpvFloat: [0.900 0.901 0.902 0.903 0.904 0.905 0.906 ]; 
+    dpvFloat: [0.900, 0.901, 0.902, 0.903, 0.904, 0.905, 0.906]; 
     pFloat: 7.200; 
     pInt: 10008; 
-    pvFloat: [-0.410 -0.310 -0.210 -0.110 -0.010 0.090 0.190 ]; 
-    pvInt: [1570 1571 1572 1573 1574 1575 1576 ]; 
+    pvFloat: [-0.410, -0.310, -0.210, -0.110, -0.010, 0.090, 0.190]; 
+    pvInt: [1570, 1571, 1572, 1573, 1574, 1575, 1576]; 
   
     dpInt1: 1009; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 8.200; 
     pInt: 10009; 
-    pvFloat: [-0.400 -0.300 -0.200 -0.100 0.000 0.100 0.200 0.300 ]; 
-    pvInt: [1580 1581 1582 1583 1584 1585 1586 1587 ]; 
+    pvFloat: [-0.400, -0.300, -0.200, -0.100, 0.000, 0.100, 0.200, 0.300]; 
+    pvInt: [1580, 1581, 1582, 1583, 1584, 1585, 1586, 1587]; 
   
     dpInt1: 1010; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 9.200; 
     pInt: 10010; 
-    pvFloat: [-0.390 -0.290 -0.190 -0.090 0.010 0.110 0.210 0.310 0.410 ]; 
-    pvInt: [1590 1591 1592 1593 1594 1595 1596 1597 1598 ]; 
+    pvFloat: [-0.390, -0.290, -0.190, -0.090, 0.010, 0.110, 0.210, 0.310, 0.410]; 
+    pvInt: [1590, 1591, 1592, 1593, 1594, 1595, 1596, 1597, 1598]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -8854,67 +8834,67 @@ xAODTe...elessRead   INFO
     pvInt: []; 
   
     dpInt1: 1052; 
-    dpvFloat: [0.310 ]; 
+    dpvFloat: [0.310]; 
     pFloat: 1.210; 
     pInt: 10502; 
-    pvFloat: [-0.469 ]; 
-    pvInt: [1610 ]; 
+    pvFloat: [-0.469]; 
+    pvInt: [1610]; 
   
     dpInt1: 1053; 
-    dpvFloat: [0.410 0.411 ]; 
+    dpvFloat: [0.410, 0.411]; 
     pFloat: 2.210; 
     pInt: 10503; 
-    pvFloat: [-0.459 -0.359 ]; 
-    pvInt: [1620 1621 ]; 
+    pvFloat: [-0.459, -0.359]; 
+    pvInt: [1620, 1621]; 
   
     dpInt1: 1054; 
-    dpvFloat: [0.510 0.511 0.512 ]; 
+    dpvFloat: [0.510, 0.511, 0.512]; 
     pFloat: 3.210; 
     pInt: 10504; 
-    pvFloat: [-0.449 -0.349 -0.249 ]; 
-    pvInt: [1630 1631 1632 ]; 
+    pvFloat: [-0.449, -0.349, -0.249]; 
+    pvInt: [1630, 1631, 1632]; 
   
     dpInt1: 1055; 
-    dpvFloat: [0.610 0.611 0.612 0.613 ]; 
+    dpvFloat: [0.610, 0.611, 0.612, 0.613]; 
     pFloat: 4.210; 
     pInt: 10505; 
-    pvFloat: [-0.439 -0.339 -0.239 -0.139 ]; 
-    pvInt: [1640 1641 1642 1643 ]; 
+    pvFloat: [-0.439, -0.339, -0.239, -0.139]; 
+    pvInt: [1640, 1641, 1642, 1643]; 
   
     dpInt1: 1056; 
-    dpvFloat: [0.710 0.711 0.712 0.713 0.714 ]; 
+    dpvFloat: [0.710, 0.711, 0.712, 0.713, 0.714]; 
     pFloat: 5.210; 
     pInt: 10506; 
-    pvFloat: [-0.429 -0.329 -0.229 -0.129 -0.029 ]; 
-    pvInt: [1650 1651 1652 1653 1654 ]; 
+    pvFloat: [-0.429, -0.329, -0.229, -0.129, -0.029]; 
+    pvInt: [1650, 1651, 1652, 1653, 1654]; 
   
     dpInt1: 1057; 
-    dpvFloat: [0.810 0.811 0.812 0.813 0.814 0.815 ]; 
+    dpvFloat: [0.810, 0.811, 0.812, 0.813, 0.814, 0.815]; 
     pFloat: 6.210; 
     pInt: 10507; 
-    pvFloat: [-0.419 -0.319 -0.219 -0.119 -0.019 0.081 ]; 
-    pvInt: [1660 1661 1662 1663 1664 1665 ]; 
+    pvFloat: [-0.419, -0.319, -0.219, -0.119, -0.019, 0.081]; 
+    pvInt: [1660, 1661, 1662, 1663, 1664, 1665]; 
   
     dpInt1: 1058; 
-    dpvFloat: [0.910 0.911 0.912 0.913 0.914 0.915 0.916 ]; 
+    dpvFloat: [0.910, 0.911, 0.912, 0.913, 0.914, 0.915, 0.916]; 
     pFloat: 7.210; 
     pInt: 10508; 
-    pvFloat: [-0.409 -0.309 -0.209 -0.109 -0.009 0.091 0.191 ]; 
-    pvInt: [1670 1671 1672 1673 1674 1675 1676 ]; 
+    pvFloat: [-0.409, -0.309, -0.209, -0.109, -0.009, 0.091, 0.191]; 
+    pvInt: [1670, 1671, 1672, 1673, 1674, 1675, 1676]; 
   
     dpInt1: 1059; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 8.210; 
     pInt: 10509; 
-    pvFloat: [-0.399 -0.299 -0.199 -0.099 0.001 0.101 0.201 0.301 ]; 
-    pvInt: [1680 1681 1682 1683 1684 1685 1686 1687 ]; 
+    pvFloat: [-0.399, -0.299, -0.199, -0.099, 0.001, 0.101, 0.201, 0.301]; 
+    pvInt: [1680, 1681, 1682, 1683, 1684, 1685, 1686, 1687]; 
   
     dpInt1: 1060; 
-    dpvFloat: [1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 1.000 ]; 
+    dpvFloat: [1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000, 1.000]; 
     pFloat: 9.210; 
     pInt: 10510; 
-    pvFloat: [-0.389 -0.289 -0.189 -0.089 0.011 0.111 0.211 0.311 0.411 ]; 
-    pvInt: [1690 1691 1692 1693 1694 1695 1696 1697 1698 ]; 
+    pvFloat: [-0.389, -0.289, -0.189, -0.089, 0.011, 0.111, 0.211, 0.311, 0.411]; 
+    pvInt: [1690, 1691, 1692, 1693, 1694, 1695, 1696, 1697, 1698]; 
 
 xAODTe...elessRead   INFO hvec types: aFloat/float 
 xAODTe...elessRead   INFO   
@@ -9075,24 +9055,24 @@ xAODTe...elessRead   INFO
     vlinks: [[inv]; cvec[4]; ]; 
 
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
-ClassIDSvc           INFO getRegistryEntries: read 12 CLIDRegistry entries for module ALL
+ClassIDSvc           INFO getRegistryEntries: read 61 CLIDRegistry entries for module ALL
 xaoddata.root        INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 1458DB6A-ABD2-354E-9CA6-D2B33C406B3C
+xaoddata.root        INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 18D88254-A09F-11F1-94B2-CE324ACF4E4B
 xaoddata3.root       INFO Database being retired...
-Domain[ROOT_All]     INFO ->  Deaccess DbDatabase   CREATE    [ROOT_All] 2160CC4B-16DE-9D4A-9E19-87754F7A7004
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     UPDATE    [ROOT_All] 
+xaoddata3.root       INFO ->  Deaccess DbDatabase   WRITE     [ROOT_All] 2928F17A-A09F-11F1-8360-CE324ACF4E4B
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     WRITE     [ROOT_All]
 ApplicationMgr       INFO Application Manager Stopped successfully
 LoadReadDicts        INFO Finalizing LoadReadDicts...
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All] 
+Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All]
 AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
 AthenaPoolCnvSvc     INFO PerfStats Timing Measurements for AthenaPoolCnvSvc
 AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
-AthenaPoolCnvSvc     INFO PerfStats | cObjR_ALL       |              38 ms |
-AthenaPoolCnvSvc     INFO PerfStats | commitOutput    |              29 ms |
-AthenaPoolCnvSvc     INFO PerfStats | fRep_ALL        |             141 ms |
-AthenaPoolCnvSvc     INFO PerfStats | cObj_ALL        |             107 ms |
-AthenaPoolCnvSvc     INFO PerfStats | cRepR_ALL       |              27 ms |
-AthenaPoolCnvSvc     INFO PerfStats | cRep_ALL        |               3 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cObjR_ALL       |             132 ms |
+AthenaPoolCnvSvc     INFO PerfStats | commitOutput    |              63 ms |
+AthenaPoolCnvSvc     INFO PerfStats | fRep_ALL        |             169 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cObj_ALL        |             283 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cRepR_ALL       |              67 ms |
+AthenaPoolCnvSvc     INFO PerfStats | cRep_ALL        |              10 ms |
 AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
 AthDictLoaderSvc     INFO in finalize...
 DecisionSvc          INFO Finalized successfully.

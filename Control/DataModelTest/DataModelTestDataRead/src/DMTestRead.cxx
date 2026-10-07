@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -31,6 +31,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include "CxxUtils/checker_macros.h"
 #include <iostream>
+#include <print>
 #include <sstream>
 #include <cassert>
 
@@ -48,97 +49,88 @@ DMTestRead::DMTestRead (const std::string& name, ISvcLocator* pSvcLocator)
 {
 }
 
-namespace {
-
 
 /**
  * @brief Print out one of our test objects of type @c VEC from storegate.
- * @param sg The @c StoreGateSvc object.
  * @param key The storegate key to use.
  */
 template <class VEC>
-StatusCode print_vec (MsgStream& log,
-                      StoreGateSvc* sg,
-                      const std::string& key,
-                      const std::string& context)
+StatusCode DMTestRead::print_vec (const std::string& key) const
 {
-  if (!sg->contains<VEC> (key))
+  if (!evtStore()->contains<VEC> (key))
   {
-    log << MSG::INFO << key << " not in SG; ignored." << endmsg;
+    ATH_MSG_INFO("{} not in SG; ignored.", key);
     return StatusCode::SUCCESS;
   }
 
-  const VEC* vec;
-  CHECK_WITH_CONTEXT( sg->retrieve (vec, key), context );
+  const VEC* vec = nullptr;
+  ATH_CHECK( evtStore()->retrieve (vec, key) );
   std::ostringstream ost;
-  ost << key << " as " << ClassName<VEC>::name() << ": ";
+  std::print (ost, "{} as {}: ", key, ClassName<VEC>::name());
   for (unsigned i=0; i < vec->size(); i++)
-    ost << (*vec)[i]->m_x << " ";
-  log << MSG::INFO << ost.str() << endmsg;
+    std::print (ost, "{} ", (*vec)[i]->m_x);
+  ATH_MSG_INFO (ost.str());
 
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode print_elvec (MsgStream& log,
-                        StoreGateSvc* sg,
-                        const std::string& key,
-                        const std::string& context)
+StatusCode DMTestRead::print_elvec (const std::string& key) const
 {
-  const ELVec* vec;
-  CHECK_WITH_CONTEXT( sg->retrieve (vec, key), context );
+  const ELVec* vec = nullptr;
+  ATH_CHECK( evtStore()->retrieve (vec, key) );
   std::vector<ElementLink<BVec> > el = vec->m_el;
   std::ostringstream ost;
-  ost << key << ": ";
+  std::print (ost, "{}: ", key);
   for (size_t i = 0; i < el.size(); i++) {
     const DMTest::B* b = *el[i];
     el[i].toPersistent();
-    ost << b->m_x << " ";
+    std::print (ost, "{} ", b->m_x);
   }
-  log << MSG::INFO << ost.str() << endmsg;
+  ATH_MSG_INFO (ost.str());
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode remap_test (MsgStream& log, StoreGateSvc* sg)
+StatusCode DMTestRead::remap_test() const
 {
-  const ELVec* vec;
-  CHECK_WITH_CONTEXT( sg->retrieve (vec, "elv_remap"), "remap_test" );
+  const ELVec* vec = nullptr;
+  ATH_CHECK( evtStore()->retrieve (vec, "elv_remap") );
 
   ElementLinkCnv_p3<ElementLink<BVec> > elcnv;
   std::vector<ElementLink<BVec> > el2; // Transient
   el2.resize (vec->m_el2_p.size());
   for (size_t i=0; i < vec->m_el2_p.size(); i++)
-    elcnv.persToTrans (&vec->m_el2_p[i], &el2[i], log);
+    elcnv.persToTrans (&vec->m_el2_p[i], &el2[i], msg());
 
   std::ostringstream ost1;
-  ost1 << "elv_remap: ";
+  std::print (ost1, "elv_remap: ");
   for (size_t i = 0; i < el2.size(); i++) {
     const DMTest::B* b = *el2[i];
-    ost1 << b->m_x << " ";
+    std::print (ost1, "{} ", b->m_x);
   }
-  log << MSG::INFO << ost1.str() << endmsg;
+  ATH_MSG_INFO (ost1.str());
 
   ElementLinkVectorCnv_p1<ElementLinkVector<BVec> > elvcnv;
   ElementLinkVector<BVec> elv2;    // Transient
-  elvcnv.persToTrans (&vec->m_elv2_p, &elv2, log);
+  elvcnv.persToTrans (&vec->m_elv2_p, &elv2, msg());
 
   std::ostringstream ost2;
-  ost2 << "elv_remap v2: ";
+  std::print (ost2, "elv_remap v2: ");
   for (size_t i = 0; i < elv2.size(); i++) {
     const DMTest::B* b = *elv2[i];
-    ost2 << b->m_x << " ";
+    std::print (ost2, "{} ", b->m_x);
   }
-  log << MSG::INFO << ost2.str() << endmsg;
+  ATH_MSG_INFO (ost2.str());
 
   DataLinkCnv_p1<DataLink<BVec> > dlcnv;
   std::vector<DataLink<BVec> > dl2; // Transient
   dl2.resize (vec->m_dl2_p.size());
   for (size_t i=0; i < vec->m_dl2_p.size(); i++)
-    dlcnv.persToTrans (&vec->m_dl2_p[i], &dl2[i], log);
+    dlcnv.persToTrans (&vec->m_dl2_p[i], &dl2[i], msg());
 
-  const BVec* b3;
-  CHECK_WITH_CONTEXT( sg->retrieve (b3, "b3"), "remap_test" );
+  const BVec* b3 = nullptr;
+  ATH_CHECK( evtStore()->retrieve (b3, "b3") );
   assert (dl2[0].cptr() == b3);
   assert (dl2[1].cptr() == b3);
 
@@ -146,31 +138,26 @@ StatusCode remap_test (MsgStream& log, StoreGateSvc* sg)
 }
 
 
-} // anonymous namespace
-
-
 /**
  * @brief Algorithm event processing.
  */
 StatusCode DMTestRead::execute(const EventContext& /*ctx*/)
 {
-  StoreGateSvc* sg = &*evtStore();
-
   // Test reading our four types.
-  CHECK( print_vec<BVec> (msg(), sg, "bvec", name()) );
-  CHECK( print_vec<BDer> (msg(), sg, "bder", name()) );
-  CHECK( print_vec<DVec> (msg(), sg, "dvec", name()) );
-  CHECK( print_vec<DDer> (msg(), sg, "dder", name()) );
+  ATH_CHECK( print_vec<BVec> ("bvec") );
+  ATH_CHECK( print_vec<BDer> ("bder") );
+  ATH_CHECK( print_vec<DVec> ("dvec") );
+  ATH_CHECK( print_vec<DDer> ("dder") );
 
   // Test using implicit symlinks.
-  CHECK( print_vec<BVec> (msg(), sg, "bder", name()) );
-  CHECK( print_vec<BVec> (msg(), sg, "dvec", name()) );
-  CHECK( print_vec<BVec> (msg(), sg, "dder", name()) );
-  CHECK( print_vec<DVec> (msg(), sg, "dder", name()) );
+  ATH_CHECK( print_vec<BVec> ("bder") );
+  ATH_CHECK( print_vec<BVec> ("dvec") );
+  ATH_CHECK( print_vec<BVec> ("dder") );
+  ATH_CHECK( print_vec<DVec> ("dder") );
 
-  CHECK( print_elvec (msg(), sg, "elvec", name()) );
+  ATH_CHECK( print_elvec ("elvec") );
 
-  CHECK( remap_test (msg(), sg) );
+  ATH_CHECK( remap_test() );
 
   return StatusCode::SUCCESS;
 }

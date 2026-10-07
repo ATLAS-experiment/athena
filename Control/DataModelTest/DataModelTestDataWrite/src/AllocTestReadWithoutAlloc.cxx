@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file DataModelTestDataWrite/src/AllocTestReadWithoutAlloc.cxx
@@ -11,6 +11,7 @@
 
 #include "AllocTestReadWithoutAlloc.h"
 #include "DataModelTestDataWrite/AllocTestAuxContainer.h"
+#include <print>
 #include <sstream>
 
 
@@ -40,12 +41,12 @@ StatusCode AllocTestReadWithoutAlloc::execute (const EventContext& ctx) const
   std::ostringstream ss;
 
   SG::ReadHandle<AllocTestContainer> cont (m_containerKey, ctx);
-  ss << m_containerKey.key() << " ";
+  std::print (ss, "{} ", m_containerKey.key());
   for (const AllocTest* at : *cont) {
-    ss << at->atInt1() << " " << at->atInt2() << " "
-       << atInt3(*at) << " " << atInt4(*at) << " ";
+    std::print (ss, "{} {} {} {} ",
+                at->atInt1(), at->atInt2(), atInt3(*at), atInt4(*at));
   }
-  std::cout << ss.str() << "\n";
+  std::println ("{}", ss.str());
   return StatusCode::SUCCESS;
 }
 
