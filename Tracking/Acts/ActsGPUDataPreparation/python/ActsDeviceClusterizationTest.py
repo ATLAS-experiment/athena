@@ -62,6 +62,7 @@ def GPUClusterizationCfg(flags) -> ComponentAccumulator:
     from AthenaConfiguration.ComponentFactory import CompFactory
     acc.addEventAlgo(CompFactory.ActsTrk.ActsClusterComparisonAlg(
         "GPU_ActsClusterComparisonAlg",
+        TracccCondKey="TracccHostCondConfig",
         checkSpacepoints=False,
         monitoredSpacepointsKey="ITkTracccPixelSpacepoints",
         referenceSpacepointsKey="ITkPixelSpacePoints",
