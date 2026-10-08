@@ -78,6 +78,7 @@ inline
 ReadHandle<T>::ReadHandle(const std::string& sgkey, IProxyDict* sg)
   : VarHandleBase(ClassID_traits<T>::ID(), sgkey, Gaudi::DataHandle::Reader, sg)
 {
+  // cppcheck-suppress missingReturn; false positive
 }
 
 
