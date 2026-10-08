@@ -536,7 +536,7 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
   std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readECFG331;
   std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readECFG311;
   std::unique_ptr<SG::ReadDecorHandle<xAOD::JetContainer, float>> readECFG212;
-
+  
   if(!m_isSmallRJet){
     readTau1WTA = std::make_unique<SG::ReadDecorHandle<xAOD::JetContainer, float> >(m_readTau1WTAKey);
     readTau2WTA = std::make_unique<SG::ReadDecorHandle<xAOD::JetContainer, float> >(m_readTau2WTAKey);
@@ -552,6 +552,15 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
     readECFG212 = std::make_unique<SG::ReadDecorHandle<xAOD::JetContainer, float> >(m_readECFG212Key);
   }
 
+
+  // check if the jets are decorated with the variables already
+  const bool c2_is_available = decC2.isAvailable();
+  const bool d2_is_available = decD2.isAvailable();
+  const bool e3_is_available = decE3.isAvailable();
+  const bool l2_is_available = decL2.isAvailable();
+  const bool l3_is_available = decL3.isAvailable();
+
+  
   for(const xAOD::Jet* jet : jets){
 
     float tau21_wta = -999.0;
@@ -587,34 +596,35 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
       float ECF2 = (*readECF2)(*jet);
       float ECF3 = (*readECF3)(*jet);
 
-      if(!decC2.isAvailable()){
+      if(!c2_is_available){
 	if ( ECF2 > 1e-8 )
 	  C2 = ECF3 * ECF1 / std::pow( ECF2, 2.0 );
       }
 
-      if(!decD2.isAvailable()){
+      if(!d2_is_available){
 	if ( ECF2 > 1e-8 )
 	  D2 = ECF3 * std::pow( ECF1, 3.0 ) / std::pow( ECF2, 3.0 );
       }
 
-      if(!decE3.isAvailable())
+      if(!e3_is_available)
 	e3 = ECF3 / std::pow( ECF1, 3.0 );
 
       // L-series for UFO top taggers
-      if(!decL2.isAvailable()){
-	if((*readECFG331).isAvailable() && (*readECFG212).isAvailable()){
+      if(!l2_is_available){
+        if((*readECFG331).isAvailable() && (*readECFG212).isAvailable()){
 	  if((*readECFG212)(*jet) > 1e-8){
 	    L2 = (*readECFG331)(*jet) / std::pow((*readECFG212)(*jet), 1.5);
 	  }
 	}
       }
 
-      if(!decL3.isAvailable()){
-	if((*readECFG331).isAvailable() && (*readECFG311).isAvailable()){
+
+      if(!l3_is_available){
+        if((*readECFG331).isAvailable() && (*readECFG311).isAvailable()){
 	  if((*readECFG331)(*jet) > 1e-8){
 	    L3 = (*readECFG311)(*jet) / std::pow((*readECFG331)(*jet), 1./3.);
 	  }
-	}
+        }
       }
 
     }
@@ -623,20 +633,20 @@ void JSSTaggerBase::decorateJSSRatios( const xAOD::JetContainer& jets ) const {
     decTau32WTA(*jet) = tau32_wta;
     decTau42WTA(*jet) = tau42_wta;
 
-    if(!decC2.isAvailable())
+    if(!c2_is_available)
       decC2(*jet) = C2;
 
-    if(!decD2.isAvailable())
+    if(!d2_is_available)
       decD2(*jet) = D2;
 
-    if(!decE3.isAvailable())
+    if(!e3_is_available)
       decE3(*jet) = e3;
+    
+    if(!l2_is_available)
+      decL2(*jet) = L2;
 
-    static const SG::ConstAccessor<float> accL2("L2");
-    if(!accL2.isAvailable(*jet)) decL2(*jet) = L2;
-
-    static const SG::ConstAccessor<float> accL3("L3");
-    if(!accL3.isAvailable(*jet)) decL3(*jet) = L3;
+    if(!l3_is_available)
+      decL3(*jet) = L3;
 
     // TODO: Add ECFG for ANN tagger whenever it is defined
 
