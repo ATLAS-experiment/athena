@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import os
 import re
@@ -565,6 +565,8 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                                 persistent_instances[name] = ROOT.EventStreamInfo_p3()
                         elif regexIOVMetaDataContainer.match(class_name):
                             persistent_instances[name] = ROOT.IOVMetaDataContainer_p1()
+                        elif regexByteStreamMetadataContainer.match(class_name):
+                            persistent_instances[name] = ROOT.ByteStreamMetadataContainer_p1()
                         elif regexXAODEventFormat.match(class_name):
                             persistent_instances[name] = ROOT.xAOD.EventFormat_v1()
                         elif regexXAODTriggerMenu.match(class_name) and _check_project() not in ['AthGeneration']:
@@ -1058,6 +1060,18 @@ def _extract_fields(obj):
     return result
 
 
+def _extract_fields_bsmd(value):
+    """One entry per bytestream file the metadata came from."""
+    return [{'runNumber': int(md.m_runNumber),
+             'lumiBlock': int(md.m_lumiBlock),
+             'numEvents': int(md.m_numEvents),
+             'guid': str(md.m_guid),
+             'stream': str(md.m_stream),
+             'project': str(md.m_project),
+             'beamType': int(md.m_beamType),
+             'beamEnergy': int(md.m_beamEnergy)} for md in value]
+
+
 def _convert_value(value, aux = None):
     cl=value.__class__
     if hasattr(cl, '__cpp_name__'):
@@ -1093,6 +1107,9 @@ def _convert_value(value, aux = None):
                         return r
                     # fall through to the default extraction if no IOV found for the run
                 return _extract_fields_iov( value, range(value.m_attrIndexes.size()) )
+
+            elif cl.__cpp_name__ == 'ByteStreamMetadataContainer_p1':
+                return _extract_fields_bsmd(value)
 
             elif cl.__cpp_name__ == 'xAOD::EventFormat_v1':
                 return _extract_fields_ef(value)
