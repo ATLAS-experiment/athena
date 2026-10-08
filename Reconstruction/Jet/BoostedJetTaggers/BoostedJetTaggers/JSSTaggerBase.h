@@ -162,7 +162,7 @@ class JSSTaggerBase :   public asg::AsgTool ,
 
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readSplit12Key{this, "Split12Name", "Split12", "SG key for Split12"};
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readSplit23Key{this, "Split23Name", "Split23", "SG key for Split23"};
-
+ 
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readQwKey{this, "QwName", "Qw", "SG key for Qw"};
 
     SG::ReadDecorHandleKey<xAOD::JetContainer> m_readThrustMajKey{this, "ThrustMajName", "ThrustMaj", "SG key for ThrustMaj"};
