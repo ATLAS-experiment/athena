@@ -326,14 +326,8 @@ double TrigL2MuonSA::PtEndcapLUT::ptcombined(int iEta, int iPhi, double ApT, dou
   }
 
   constexpr double ZERO_LIMIT = 1e-5;
-  int iphibin=iPhi;
+  int iphibin=iPhi < static_cast<int>(PHIS1) ? iPhi : PHIS-1 - iPhi;
   int ietabin=iEta/6;
-  if(iPhi==5||iPhi==6)iphibin=5;
-  if(iPhi==4||iPhi==7)iphibin=4;
-  if(iPhi==3||iPhi==8)iphibin=3;
-  if(iPhi==2||iPhi==9)iphibin=2;
-  if(iPhi==1||iPhi==10)iphibin=1;
-  if(iPhi==0||iPhi==11)iphibin=0;
   CApT=0.;
   CBpT=0.;
   double Ameana = m_meana[ietabin][iphibin][0];
