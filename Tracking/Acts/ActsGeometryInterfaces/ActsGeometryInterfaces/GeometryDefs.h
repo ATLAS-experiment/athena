@@ -41,6 +41,9 @@ namespace ActsTrk {
                envelope tracking volume from  */
     enum class SystemEnvelope: std::uint8_t {
         ITkExit,  // Envelope volume of the ITk
+        HgtdExit, // Envelope of the HGTD volume
+        HgtdSideA, // Hgtd volume at the A-side
+        HgtdSideC, // Hgtc volume at the C-side
         CaloExit, // Enevelope volume of the Calorimeter / Ms entrance
         MsExit // Envelope around the Muon system
     };
@@ -54,10 +57,11 @@ namespace ActsTrk {
         constexpr std::size_t s_innerPixelVolumeId = 5;
         constexpr std::size_t s_outerPixelVolumeId = 10;
         constexpr std::size_t s_beamPipeVolumeId = 1;
-        /** HGTD volume IDs */
         constexpr std::size_t s_ITkEnvelopeId = 29;
+        /** HGTD volume IDs */
         constexpr std::size_t s_hgtdPosVolumeId = 30;
         constexpr std::size_t s_hgtdNegVolumeId = 31;
+        constexpr std::size_t s_hgtdEnvelopeId = 32;
         /** Volume Ids ofthe Calorimeter */
         constexpr std::size_t s_caloEnvelopeID = 39;
         constexpr std::size_t s_caloBarrelId = 40;
@@ -95,6 +99,9 @@ namespace ActsTrk {
                 ENUM_ITEM_STR(ITkExit);
                 ENUM_ITEM_STR(CaloExit);
                 ENUM_ITEM_STR(MsExit);
+                ENUM_ITEM_STR(HgtdExit);
+                ENUM_ITEM_STR(HgtdSideA);
+                ENUM_ITEM_STR(HgtdSideC);
             }
             return "Unknown";
         }

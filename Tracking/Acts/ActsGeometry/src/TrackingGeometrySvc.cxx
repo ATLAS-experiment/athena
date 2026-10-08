@@ -100,6 +100,9 @@ namespace {
     };
   }
 
+  inline Acts::GeometryIdentifier volumeId(const std::size_t volume) {
+      return Acts::GeometryIdentifier{}.withVolume(volume);
+  }
   /// Convert a {max0, max1} bin count property into a neighbor window without a floor
   std::optional<Acts::SurfaceArray::NeighborWindow> toNeighborWindow(
       const std::vector<unsigned int>& maxBins) {
@@ -1327,10 +1330,19 @@ const Acts::TrackingVolume*
       switch (envType) {
           using enum ActsTrk::SystemEnvelope;
           case ITkExit:
-              retVol = m_trackingGeometry->findVolume(Acts::GeometryIdentifier{}.withVolume(s_ITkEnvelopeId));
+              retVol = m_trackingGeometry->findVolume(volumeId(s_ITkEnvelopeId));
+              break;
+          case HgtdExit:
+              retVol = m_trackingGeometry->findVolume(volumeId(s_hgtdEnvelopeId));
+              break;
+          case HgtdSideA:
+              retVol = m_trackingGeometry->findVolume(volumeId(s_hgtdPosVolumeId));
+              break;
+          case HgtdSideC:
+              retVol = m_trackingGeometry->findVolume(volumeId(s_hgtdNegVolumeId));
               break;
           case CaloExit:
-              retVol = m_trackingGeometry->findVolume(Acts::GeometryIdentifier{}.withVolume(s_caloEnvelopeID));
+              retVol = m_trackingGeometry->findVolume(volumeId(s_caloEnvelopeID));
               break;
           case MsExit:
               break;
