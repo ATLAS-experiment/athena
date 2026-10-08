@@ -1,9 +1,10 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // EDM include(s):
 #include <xAODCore/AuxStoreAccessorMacros.h>
+#include <AthContainers/CurrentContext.h>
 
 #include <xAODMuonSimHit/versions/MuonSimHit_v1.h>
 
@@ -77,7 +78,7 @@ const HepMcParticleLink& MuonSimHit_v1::genParticleLink() const {
 }
 void MuonSimHit_v1::setGenParticleLink(const HepMcParticleLink& link) {
    releaseParticleLink();
-   acc_mcEventIndex(*this) = link.getEventPositionInCollection(SG::CurrentEventStore::store());
+   acc_mcEventIndex(*this) = link.getEventPositionInCollection(Gaudi::Hive::currentContext());
    acc_uniqueID(*this) = link.id();
 }
 

@@ -32,7 +32,7 @@ find_package( GTest )
 atlas_add_test( SimHitTest
                 SOURCES test/test_simHit.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-                LINK_LIBRARIES ${GTEST_LIBRARIES} xAODMuonSimHit TestTools
+                LINK_LIBRARIES ${GTEST_LIBRARIES} xAODMuonSimHit AthenaKernel TestTools
                 POST_EXEC_SCRIPT noerror.sh)
     
 

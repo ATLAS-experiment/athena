@@ -11,6 +11,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include "TestTools/initGaudi.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/WriteHandle.h"
@@ -175,6 +176,8 @@ TEST_F(SimHitContainerTest, HepMCLinkAssignment) {
     ContainerHolder newContainer{};    
     ASSERT_TRUE(newContainer.empty());
 
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
 
     // create dummy input McEventCollection with a name that
     // HepMcParticleLink knows about
@@ -199,7 +202,7 @@ TEST_F(SimHitContainerTest, HepMCLinkAssignment) {
     ASSERT_EQ(HepMC::barcode(particle1), testLink1.barcode());
     ASSERT_EQ(HepMC::uniqueID(particle1), testLink1.id());
     ASSERT_EQ( refEvtNum1, testLink1.eventIndex());
-    ASSERT_EQ(dummyIndex1, testLink1.getEventPositionInCollection(SG::CurrentEventStore::store()));
+    ASSERT_EQ(dummyIndex1, testLink1.getEventPositionInCollection(ctx));
     ASSERT_EQ(particle1, testLink1.cptr());
 
     MuonSimHit* testHit1 = newContainer.newHit();
@@ -225,7 +228,7 @@ TEST_F(SimHitContainerTest, HepMCLinkAssignment) {
     ASSERT_EQ(HepMC::barcode(particle2), testLink2.barcode());
     ASSERT_EQ(HepMC::uniqueID(particle2), testLink2.id());
     ASSERT_EQ( refEvtNum2, testLink2.eventIndex());
-    ASSERT_EQ(dummyIndex2, testLink2.getEventPositionInCollection(SG::CurrentEventStore::store()));
+    ASSERT_EQ(dummyIndex2, testLink2.getEventPositionInCollection(ctx));
     ASSERT_EQ(particle2, testLink2.cptr());
 
     MuonSimHit* testHit2 = newContainer.newHit();
@@ -251,7 +254,7 @@ TEST_F(SimHitContainerTest, HepMCLinkAssignment) {
     ASSERT_EQ(HepMC::barcode(particle3), testLink3.barcode());
     ASSERT_EQ(HepMC::uniqueID(particle3), testLink3.id());
     ASSERT_EQ( refEvtNum3, testLink3.eventIndex());
-    ASSERT_EQ(dummyIndex3, testLink3.getEventPositionInCollection(SG::CurrentEventStore::store()));
+    ASSERT_EQ(dummyIndex3, testLink3.getEventPositionInCollection(ctx));
     ASSERT_EQ(particle3, testLink3.cptr());
 
     MuonSimHit* testHit3 = newContainer.newHit();
@@ -279,6 +282,8 @@ TEST_F(SimHitContainerTest, HepMCLinkAssignment) {
 
 TEST_F(SimHitContainerTest, HepMCLinkCopy) {
 
+    const EventContext& ctx = Gaudi::Hive::currentContext();
+
     ContainerHolder newContainer1{};    
     ContainerHolder newContainer2{};    
     
@@ -301,7 +306,7 @@ TEST_F(SimHitContainerTest, HepMCLinkCopy) {
         ASSERT_EQ(HepMC::barcode(particle), testLink.barcode());
         ASSERT_EQ(HepMC::uniqueID(particle), testLink.id());
         ASSERT_EQ(evtNum, testLink.eventIndex());
-        ASSERT_EQ(e, testLink.getEventPositionInCollection(SG::CurrentEventStore::store()));
+        ASSERT_EQ(e, testLink.getEventPositionInCollection(ctx));
         ASSERT_EQ(particle, testLink.cptr());
 
         MuonSimHit* hit1 = newContainer1.newHit();
