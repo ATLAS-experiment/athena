@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -303,14 +303,9 @@ MdtVsTgcRawDataValAlg::getStationMapIndex(int x, int l, int stationFE, int stati
     break;
   case 2:// Getting Phi Index
     if(stationFE==0){// Forward
-      if((l==7)||(l==8)){// FI
-        if(stationPhi>24) ATH_MSG_WARNING( "getStationMapIndex(" << x << ") passed invalid l=" << l << " FE=" << stationFE << " stationPhi=" << stationPhi  );
-        index=(stationPhi-1)*2;
-      }
-      else{// Forward Midstation
-        if(stationPhi>24) ATH_MSG_WARNING( "getStationMapIndex(" << x << ") passed invalid l=" << l << " FE=" << stationFE << " stationPhi=" << stationPhi  );
-        index=(stationPhi-1)*2;
-      }
+      //if (l==7)||(l==8), its an FI, otherwise a Forward midstation
+      if(stationPhi>24) ATH_MSG_WARNING( "getStationMapIndex(" << x << ") passed invalid l=" << l << " FE=" << stationFE << " stationPhi=" << stationPhi  );
+      index=(stationPhi-1)*2;
     }
     else{// Endcap
       if((l==7)||(l==8)){// EI
