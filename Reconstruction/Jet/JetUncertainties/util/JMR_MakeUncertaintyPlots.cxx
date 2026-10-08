@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -19,6 +19,7 @@
 #include <vector>
 #include <cmath>
 #include <memory> //to use make_unique
+#include <print>
 
 #include <TROOT.h>
 #include <TStyle.h>
@@ -500,6 +501,10 @@ void MakeJMRPlot(int atlas_approved, const std::string & histofile, const std::s
     legend1 = std::make_unique<TLegend>(0.55,0.70,0.85,0.88);
   }else if (uncmodel == "FullJMR"){
     legend1 = std::make_unique<TLegend>(0.55,0.55,0.85,0.88);
+  }
+  else {
+    std::println (std::cerr, "Unknown uncertainty model: {}", uncmodel);
+    return;
   }
   legend1->SetTextSize(0.035);
   legend1->SetTextFont(42);
