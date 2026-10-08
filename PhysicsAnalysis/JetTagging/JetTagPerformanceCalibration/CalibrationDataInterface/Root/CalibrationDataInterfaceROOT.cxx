@@ -846,7 +846,7 @@ Analysis::CalibrationDataInterfaceROOT::getScaleFactor (const CalibrationDataVar
         cerr << "Asked for " << ((unc == SFEigen) ? "eigenvariation" : "named variation") << " number: " << numVariation << " but overall number of available variations is: " << maxVariations << endl;
         return Analysis::kError;
       }
-      bool isOK = eigenVariation->getEigenvectorVariation(numVariation,up,down);
+      bool isOK = (unc == SFEigen) ? eigenVariation->getEigenvectorVariation(numVariation,up,down) : eigenVariation->getNamedVariation(numVariation,up,down);
       if (!isOK) {
         cerr << "Eigenvector object is there but cannot retrieve up and down uncertainty histograms." << endl;
         return Analysis::kError;
