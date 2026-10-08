@@ -10430,6 +10430,22 @@ leg001_EF_tau80_mediumRNN_tracktwoLLP_tau60_mediumRNN_tracktwoLLP_03dRAB_L1eTAU8
     2: 8
     3: 8
   eventCount: 0
+EF_xe100_pfopufit_L1gXEJWOJ100:
+  stepCounts:
+    0: 20
+    1: 3
+  stepFeatures:
+    0: 20
+    1: 3
+  eventCount: 3
+EF_xe100_pfopufit_L1jXE100:
+  stepCounts:
+    0: 20
+    1: 3
+  stepFeatures:
+    0: 20
+    1: 3
+  eventCount: 3
 EF_xe55_cell_xe105_nn_L1gXEJWOJ100:
   stepCounts:
     0: 7
@@ -10550,6 +10566,18 @@ leg001_EF_xe55_cell_xe95_nn_L1jXE90:
     0: 7
     1: 2
   eventCount: 0
+EF_xe60_cell_L1gXEJWOJ100:
+  stepCounts:
+    0: 6
+  stepFeatures:
+    0: 6
+  eventCount: 6
+EF_xe60_cell_L1jXE100:
+  stepCounts:
+    0: 6
+  stepFeatures:
+    0: 6
+  eventCount: 6
 EF_xe60_cell_xe100_nn_L1jXE90:
   stepCounts:
     0: 6
@@ -10718,6 +10746,18 @@ leg001_EF_xe75_cell_xe100_pfopufit_L1jXE100:
     0: 3
     1: 2
   eventCount: 0
+EF_xe80_cell_L1gXEJWOJ100:
+  stepCounts:
+    0: 3
+  stepFeatures:
+    0: 3
+  eventCount: 3
+EF_xe80_cell_L1jXE100:
+  stepCounts:
+    0: 3
+  stepFeatures:
+    0: 3
+  eventCount: 3
 EF_xe80_cell_xe115_tcpufit_L1gXEJWOJ100:
   stepCounts:
     0: 3
@@ -10754,6 +10794,22 @@ leg001_EF_xe80_cell_xe115_tcpufit_L1jXE100:
   stepFeatures:
     0: 3
   eventCount: 0
+EF_xe90_pfopufit_L1gXEJWOJ100:
+  stepCounts:
+    0: 20
+    1: 4
+  stepFeatures:
+    0: 20
+    1: 4
+  eventCount: 4
+EF_xe90_pfopufit_L1jXE100:
+  stepCounts:
+    0: 20
+    1: 4
+  stepFeatures:
+    0: 20
+    1: 4
+  eventCount: 4
 EF_2e12_lhloose_mu10_L12eEM10L_MU8F:
   eventCount: 0
 leg000_EF_2e12_lhloose_mu10_L12eEM10L_MU8F:

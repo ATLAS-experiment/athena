@@ -503,6 +503,17 @@ def addMCSignatures(chains):
         ChainProp(name='EF_xe55_cell_xe105_nn_L1gXEJWOJ100', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
         ChainProp(name='EF_xe65_cell_xe105_nn_L1jXE100', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
         ChainProp(name='EF_xe65_cell_xe105_nn_L1gXEJWOJ100', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
+        
+        #ATR-33100
+        ChainProp(name='EF_xe60_cell_L1jXE100', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
+        ChainProp(name='EF_xe60_cell_L1gXEJWOJ100', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
+        ChainProp(name='EF_xe80_cell_L1jXE100', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
+        ChainProp(name='EF_xe80_cell_L1gXEJWOJ100', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
+        ChainProp(name='EF_xe90_pfopufit_L1jXE100', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
+        ChainProp(name='EF_xe90_pfopufit_L1gXEJWOJ100', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
+        ChainProp(name='EF_xe100_pfopufit_L1jXE100', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),        
+        ChainProp(name='EF_xe100_pfopufit_L1gXEJWOJ100', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+METGroup, monGroups=['metMon:shifter']),
+
 
         # Phase-II MET
         ChainProp(name='EF_xe55_cell_xe115_nn_L1jXE100', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+METGroup),
