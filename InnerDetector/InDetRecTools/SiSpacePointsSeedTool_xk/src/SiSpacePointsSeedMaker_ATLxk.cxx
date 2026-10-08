@@ -1578,8 +1578,10 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::production3Sp(EventData& data) const
         int theNeighbourCell =  m_neighbourCellsBottom[phiZbin][neighbourCellNumber];
         /// only do something if this cell is populated 
         if (!data.rfz_map[theNeighbourCell]) continue;
-        /// plug the begin and end iterators to the SP in the cell into our array 
+        /// plug the begin and end iterators to the SP in the cell into our array
+        //cppcheck-suppress objectIndex; false positive
         iter_bottomCands [numberBottomCells] = data.rfz_Sorted[theNeighbourCell].begin();
+        //cppcheck-suppress objectIndex; false positive
         iter_endBottomCands[numberBottomCells++] = data.rfz_Sorted[theNeighbourCell].end();
       } 
 
@@ -1593,7 +1595,9 @@ void InDet::SiSpacePointsSeedMaker_ATLxk::production3Sp(EventData& data) const
         /// only do something if this cell is populated 
         if (!data.rfz_map[theNeighbourCell]) continue;
         /// plug the begin and end iterators to the SP in the cell into our array 
+        //cppcheck-suppress objectIndex; false positive
         iter_topCands [numberTopCells] = data.rfz_Sorted[theNeighbourCell].begin();
+        //cppcheck-suppress objectIndex; false positive
         iter_endTopCands[numberTopCells++] = data.rfz_Sorted[theNeighbourCell].end();
       } 
 
