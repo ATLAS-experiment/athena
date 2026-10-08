@@ -1044,7 +1044,7 @@ StatusCode IOVDbSvc::setupFolders() {
     std::string crestTag;
     if (m_source == IOVDbFolder::source_t::CRESTDB){
       crestTag = m_cresttagmap[folderdata.folderName()];
-      if(crestTag.empty() && folderdata.folderName() != "/TagInfo") {
+      if(crestTag.empty() && folderdata.folderName() != "/TagInfo" && !(folderdata.at("ctag").second)) {
         ATH_MSG_FATAL( "GlobalTag "<< m_par_globalTag.value() << " does not contain folder "
                        << folderdata.folderName());
         crestError=true;
