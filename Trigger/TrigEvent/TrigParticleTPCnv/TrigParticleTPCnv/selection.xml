@@ -54,19 +54,6 @@
   <class name="TrigL2Bphys_p1" />
   <class name="std::vector<TrigL2Bphys_p1>" />
 
-<!-- TrigL2BjetContainer --> 
-  <class name="TrigL2BjetContainer_tlp2" id="67162A5D-CEC3-4D9B-AF43-1858D6F1558E" />
-  <class name="TrigL2BjetContainer_p2" id="8EE1961C-A464-4C91-8BD3-59DCCCF207DD" />
-  <class name="std::vector<TrigL2BjetContainer_p2>" />
-
-  <class name="TrigL2BjetContainer_p3" id="65534D07-EECA-46B1-A6AA-A4DA4DFEAAEF" />
-  <class name="TrigL2Bjet_p3" id="9862829B-0A1A-47DB-93EC-7714CF8FFA40" />
-  <class name="std::vector<TrigL2Bjet_p3>" />
-  
-<!-- TrigL2Bjet -->
-  <class name="TrigL2Bjet_p2" />
-  <class name="std::vector<TrigL2Bjet_p2>" />
-
 <!-- TrigEFBphysContainer -->
   <class name="TrigEFBphysContainer_tlp2" id="D93906C2-4F81-44A7-98BE-71302891FE44" />
   <class name="TrigEFBphysContainer_tlp1" id="5F5B068F-32DB-4CC9-BA9E-C74C076AAAA1" />

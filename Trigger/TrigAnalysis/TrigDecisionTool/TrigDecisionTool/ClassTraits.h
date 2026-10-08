@@ -89,7 +89,6 @@ namespace TrigDec {
     DECLARE_ATTACHED_CONTAINER(CaloCell, CaloCellContainer)
     DECLARE_ATTACHED_CONTAINER(TrigPhoton, TrigPhotonContainer)
     DECLARE_ATTACHED_CONTAINER(TrigElectron, TrigElectronContainer)
-    DECLARE_ATTACHED_CONTAINER(TrigL2Bjet, TrigL2BjetContainer)
     //DECLARE_ATTACHED_CONTAINER(CosmicMuon, CosmicMuonCollection)
     //DECLARE_ATTACHED_CONTAINER(MdtTrackSegment, MdtTrackSegmentCollection)
     DECLARE_ATTACHED_CONTAINER(TrigL2Bphys, TrigL2BphysContainer)

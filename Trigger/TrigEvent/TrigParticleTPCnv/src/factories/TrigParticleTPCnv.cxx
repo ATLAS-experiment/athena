@@ -72,21 +72,6 @@
 #include "TrigParticleTPCnv/TrigEFBphysContainerCnv_tlp2.h"
 #include "TrigParticleTPCnv/TrigEFBphys_p3.h"
 
-// TrigL2Bjet
-#include "TrigParticleTPCnv/TrigL2BjetContainer_tlp1.h"
-#include "TrigParticleTPCnv/TrigL2BjetContainerCnv_tlp1.h"
-#include "TrigParticleTPCnv/TrigL2BjetContainer_p1.h"
-#include "TrigParticleTPCnv/TrigL2Bjet_p1.h" 
-
-#include "TrigParticleTPCnv/TrigL2BjetContainer_tlp2.h"
-#include "TrigParticleTPCnv/TrigL2BjetContainerCnv_tlp2.h"
-#include "TrigParticleTPCnv/TrigL2BjetContainer_p2.h"
-#include "TrigParticleTPCnv/TrigL2Bjet_p2.h"
-
-#include "TrigParticleTPCnv/TrigL2BjetContainerCnv_p3.h"
-#include "TrigParticleTPCnv/TrigL2BjetContainer_p3.h"
-#include "TrigParticleTPCnv/TrigL2Bjet_p3.h"
-
 DECLARE_TPCNV_FACTORY(TrigEFBphysContainerCnv_tlp1,
                       TrigEFBphysContainer,
                       TrigEFBphysContainer_tlp1,
@@ -110,21 +95,6 @@ DECLARE_TPCNV_FACTORY(TrigElectronContainerCnv_tlp2,
 DECLARE_TPCNV_FACTORY(TrigElectronContainerCnv_p3,
                       TrigElectronContainer,
                       TrigElectronContainer_p3,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigL2BjetContainerCnv_tlp1,
-                      TrigL2BjetContainer,
-                      TrigL2BjetContainer_tlp1,
-                      Athena::TPCnvVers::Old)
-                      
-DECLARE_TPCNV_FACTORY(TrigL2BjetContainerCnv_tlp2,
-                      TrigL2BjetContainer,
-                      TrigL2BjetContainer_tlp2,
-                      Athena::TPCnvVers::Old)
-
-DECLARE_TPCNV_FACTORY(TrigL2BjetContainerCnv_p3,
-                      TrigL2BjetContainer,
-                      TrigL2BjetContainer_p3,
                       Athena::TPCnvVers::Current)
                       
 DECLARE_TPCNV_FACTORY(TrigL2BphysContainerCnv_tlp1,

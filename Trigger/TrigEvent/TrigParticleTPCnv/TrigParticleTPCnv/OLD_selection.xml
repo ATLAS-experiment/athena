@@ -24,13 +24,4 @@
   <class name="TrigPhoton_p1"/>
   <class name="std::vector<TrigPhoton_p1>" />
 
-<!-- TrigL2BjetContainer --> 
-  <class name="TrigL2BjetContainer_tlp1" id="716A64FC-6EAF-4851-A0C8-8CE73C43C051" /> 
-  <class name="TrigL2BjetContainer_p1" id="542E0A22-4E51-4693-85C8-AD7936059DF2" />    
-  <class name="std::vector<TrigL2BjetContainer_p1>" /> 
-
-<!-- TrigL2Bjet -->
-  <class name="TrigL2Bjet_p1" />
-  <class name="std::vector<TrigL2Bjet_p1>" />
-
 </lcgdict>

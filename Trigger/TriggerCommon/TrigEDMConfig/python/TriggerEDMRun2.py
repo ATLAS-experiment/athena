@@ -734,7 +734,6 @@ TriggerHLTList = [
     ('TileTrackMuFeature#HLT',                                            'BS ESD',                 'Muon'),
     ('TrigElectronContainer#HLT_L2IDCaloFex',                             '',                       'Egamma'),  # ? is this still in use?? 
     ('TrigElectronContainer#HLT_L2ElectronFex',                           '',                       'Egamma'),
-    ('TrigL2BjetContainer#HLT_L2BjetFex',                                 '',                       'Bjet'),
     ('TrigT2MbtsBits#HLT_T2Mbts',                                         'BS ESD AODFULL AODSLIM', 'MinBias'),
     ('TrigSpacePointCounts#HLT_spacepoints',                              'BS ESD AODFULL AODSLIM', 'MinBias'), # ? do we realy need it!
     ('TrigTrtHitCounts#HLT_TrtHitCount',                                  '',                       'MinBias'),
@@ -1081,7 +1080,6 @@ TriggerL2EvolutionList = [
 #('TileTrackMuFeature#HLT',                                              ), # xAOD equivalent not found
 ('TrigElectronContainer#HLT_L2IDCaloFex',                                'xAOD::TrigElectronContainer#HLT_L2IDCaloFex'),
 ('TrigElectronContainer#HLT_L2ElectronFex',                              'xAOD::TrigElectronContainer#HLT_L2ElectronFex'),
-#('TrigL2BjetContainer#HLT_L2BjetFex',                                   ), # xAOD equivalent exists for EF -> HLT option only
 ('TrigT2MbtsBits#HLT_T2Mbts',                                            'xAOD::TrigT2MbtsBits#HLT_T2Mbts'),
 ('TrigSpacePointCounts#HLT_spacepoints',                                 'xAOD::TrigSpacePointCounts#HLT_spacepoints'),
 #('TrigTrtHitCounts#HLT_TrtHitCount',                                    ), # xAOD equivalent not found
@@ -1287,7 +1285,6 @@ EDMDetails[ "TrigElectronContainer" ]     = {'persistent':"TrigElectronContainer
 #EDMDetails[ "TrigPhotonContainer" ]       = {'persistent':"TrigPhotonContainer_tlp2",             'typealias':'' }
 EDMDetails[ "TrigPhotonContainer" ]       = {'persistent':"TrigPhotonContainer_p3",             'typealias':'AOD' }
 EDMDetails[ "TrigTau" ]                   = {'persistent':"TrigTauContainer_p3",                'typealias':'tau', 'collection':'TrigTauContainer'}
-#EDMDetails[ "TrigL2BjetContainer" ]       = {'persistent':"TrigL2BjetContainer_tlp2",             'typealias':'' }
 EDMDetails[ "TrigL2BjetContainer" ]       = {'persistent':"TrigL2BjetContainer_p3",             'typealias':'AOD' }
 #EDMDetails[ "TrigMissingET" ]             = {'persistent':"TrigMissingETContainer_tlp1",          'typealias':'MET', 'collection':'TrigMissingETContainer'}
 EDMDetails[ "TrigMissingET" ]             = {'persistent':"TrigMissingETContainer_p3",          'typealias':'MET', 'collection':'TrigMissingETContainer'}
