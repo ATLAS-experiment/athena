@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -910,6 +910,10 @@ std::unique_ptr<Trk::TrackParameters> InDet::SiTrackMaker_xk::getAtaPlane
   /// for tracklets we select first, second, and third spacepoint of the seed
   else if (m_trackletPoints == 5) {
     SP = {theSeed[0], theSeed[1], theSeed[2]};
+  }
+  else {
+    ATH_MSG_ERROR ("Invalid setting for trackletPoints: {}", m_trackletPoints.value());
+    return nullptr;
   }
 
 
