@@ -5074,6 +5074,7 @@ namespace Trk {
     }
 
     if (finaltrajectory != &trajectory) {
+      // cppcheck-suppress autovarInvalidDeallocation; false positive
       delete finaltrajectory;
     }
 
