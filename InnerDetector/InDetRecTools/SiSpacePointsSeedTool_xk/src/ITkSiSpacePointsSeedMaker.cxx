@@ -1570,7 +1570,9 @@ void SiSpacePointsSeedMaker::production3Sp(EventData &data) const
         if (!data.rfz_map[theNeighbourCell])
           continue;
         /// plug the begin and end iterators to the SP in the cell into our array
+        //cppcheck-suppress objectIndex; false positive
         iter_bottomCands[numberBottomCells] = data.rfz_ITkSorted[theNeighbourCell].begin();
+        //cppcheck-suppress objectIndex; false positive
         iter_endBottomCands[numberBottomCells++] = data.rfz_ITkSorted[theNeighbourCell].end();
       }
 
@@ -1586,7 +1588,9 @@ void SiSpacePointsSeedMaker::production3Sp(EventData &data) const
         if (!data.rfz_map[theNeighbourCell])
           continue;
         /// plug the begin and end iterators to the SP in the cell into our array
+        //cppcheck-suppress objectIndex; false positive
         iter_topCands[numberTopCells] = data.rfz_ITkSorted[theNeighbourCell].begin();
+        //cppcheck-suppress objectIndex; false positive
         iter_endTopCands[numberTopCells++] = data.rfz_ITkSorted[theNeighbourCell].end();
       }
 
