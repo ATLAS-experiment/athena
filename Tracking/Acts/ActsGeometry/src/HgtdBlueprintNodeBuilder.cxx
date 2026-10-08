@@ -5,36 +5,38 @@
 // This absolutely needs to go first to ensure Eigen plugin is loaded
 #include "GeoPrimitives/GeoPrimitives.h"
 //
-#include <GeoModelKernel/GeoTube.h>
-#include <GeoModelKernel/GeoVPhysVol.h>
+#include "HgtdBlueprintNodeBuilder.h"
 
-#include <Acts/Definitions/Direction.hpp>
-#include <Acts/Definitions/Units.hpp>
-#include <Acts/Geometry/Blueprint.hpp>
-#include <Acts/Geometry/BlueprintNode.hpp>
-#include <Acts/Geometry/ContainerBlueprintNode.hpp>
-#include <Acts/Geometry/CylinderVolumeBounds.hpp>
-#include <Acts/Geometry/Extent.hpp>
-#include <Acts/Geometry/GeometryIdentifierBlueprintNode.hpp>
-#include <Acts/Geometry/LayerBlueprintNode.hpp>
-#include <Acts/Geometry/MaterialDesignatorBlueprintNode.hpp>
-#include <Acts/Geometry/PadBlueprintNode.hpp>
-#include <Acts/Geometry/ProtoLayer.hpp>
-#include <Acts/Geometry/TrackingVolume.hpp>
-#include <Acts/Geometry/VolumeAttachmentStrategy.hpp>
-#include <Acts/Navigation/SurfaceArrayNavigationPolicy.hpp>
-#include <Acts/Navigation/CylinderNavigationPolicy.hpp>
-#include <Acts/Navigation/TryAllNavigationPolicy.hpp>
-#include <Acts/Surfaces/SurfaceArray.hpp>
-#include <Acts/Utilities/AxisDefinitions.hpp>
-#include <Acts/Utilities/AxisSpec.hpp>
-#include <cstddef>
-#include <ranges>
-#include <string>
+#include "GeoModelKernel/GeoTube.h"
+#include "GeoModelKernel/GeoVPhysVol.h"
 
+#include "Acts/Definitions/Direction.hpp"
+#include "Acts/Definitions/Units.hpp"
+#include "Acts/Geometry/Blueprint.hpp"
+#include "Acts/Geometry/BlueprintNode.hpp"
+#include "Acts/Geometry/ContainerBlueprintNode.hpp"
+#include "Acts/Geometry/CylinderVolumeBounds.hpp"
+#include "Acts/Geometry/Extent.hpp"
+#include "Acts/Geometry/GeometryIdentifierBlueprintNode.hpp"
+#include "Acts/Geometry/LayerBlueprintNode.hpp"
+#include "Acts/Geometry/MaterialDesignatorBlueprintNode.hpp"
+#include "Acts/Geometry/PadBlueprintNode.hpp"
+#include "Acts/Geometry/ProtoLayer.hpp"
+#include "Acts/Geometry/TrackingVolume.hpp"
+#include "Acts/Geometry/VolumeAttachmentStrategy.hpp"
+#include "Acts/Navigation/SurfaceArrayNavigationPolicy.hpp"
+#include "Acts/Navigation/CylinderNavigationPolicy.hpp"
+#include "Acts/Navigation/TryAllNavigationPolicy.hpp"
+#include "Acts/Surfaces/SurfaceArray.hpp"
+#include "Acts/Utilities/AxisDefinitions.hpp"
+#include "Acts/Utilities/AxisSpec.hpp"
 #include "Acts/Geometry/StaticBlueprintNode.hpp"
 #include "Acts/Geometry/VolumeResizeStrategy.hpp"
 #include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
+
+
+
+
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ActsElementVector.h"
 #include "ActsInterop/IdentityHelper.h"
@@ -42,8 +44,11 @@
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
-#include "HgtdBlueprintNodeBuilder.h"
 
+
+#include <cstddef>
+#include <ranges>
+#include <string>
 using namespace Acts;
 using namespace Acts::Experimental;
 using namespace Acts::UnitLiterals;
@@ -78,8 +83,6 @@ HgtdBlueprintNodeBuilder::buildBlueprintNode(
       .z = {20_mm, 20_mm},
       .r = {0_mm, 20_mm},
   }};
-  auto itkHgtdPad = std::make_shared<Acts::PadBlueprintNode>(
-      "itkHgtdPad", envelope);
 
   auto itkHgtdNode =
       std::make_shared<Acts::CylinderContainerBlueprintNode>(
@@ -89,9 +92,13 @@ HgtdBlueprintNodeBuilder::buildBlueprintNode(
     itkHgtdNode->addChild(std::move(child));
   }
   buildHgtdBlueprintNode(gctx, *itkHgtdNode);
-
-  itkHgtdPad->addChild(itkHgtdNode);
-  return itkHgtdPad;
+  auto itkHgtdPad = std::make_shared<Acts::PadBlueprintNode>("itkHgtdPad", envelope);
+  itkHgtdPad->addChild(std::move(itkHgtdNode));
+  
+  auto idNode = std::make_shared<Acts::GeometryIdentifierBlueprintNode>();
+  idNode->setDirectChildVolumeIdTo(s_hgtdEnvelopeId);
+  idNode->addChild(std::move(itkHgtdPad));
+  return idNode;
 }
 
 void HgtdBlueprintNodeBuilder::buildHgtdBlueprintNode(
