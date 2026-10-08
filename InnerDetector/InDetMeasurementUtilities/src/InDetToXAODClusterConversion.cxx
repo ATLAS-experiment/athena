@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/InDetToXAODClusterConversion.h"
@@ -125,7 +125,7 @@ StatusCode InDetToXAODClusterConversion::convertPixelClusters(const EventContext
       ATH_CHECK( TrackingUtilities::convertInDetToXaodCluster(*theCluster, *element, *pixelCl) );
 
       // Create auxiliary branches accessors
-      ElementLink<InDet::PixelClusterCollection> pixelLink(theCluster, *clusterCollection);
+      ElementLink<InDet::PixelClusterCollection> pixelLink(theCluster, *clusterCollection, ctx);
       pixelLinkAcc( *pixelCl ) = pixelLink;
     }
   }
@@ -179,7 +179,7 @@ StatusCode InDetToXAODClusterConversion::convertStripClusters(const EventContext
       ATH_CHECK( TrackingUtilities::convertInDetToXaodCluster(*theCluster, *element, *stripCl, m_isITk) );
       
       // Create auxiliary branches accessors
-      ElementLink<InDet::SCT_ClusterCollection> stripLink(theCluster, *clusterCollection);
+      ElementLink<InDet::SCT_ClusterCollection> stripLink(theCluster, *clusterCollection, ctx);
       stripLinkAcc( *stripCl ) = stripLink;
     }
   }
@@ -226,7 +226,7 @@ StatusCode InDetToXAODClusterConversion::convertHgtdClusters(const EventContext&
       ATH_CHECK( TrackingUtilities::convertInDetToXaodCluster(*theCluster, *element, *hgtdCl) );
 
       // Create auxiliary branches accessors
-      ElementLink<::HGTD_ClusterCollection> hgtdLink(theCluster, *clusterCollection);
+      ElementLink<::HGTD_ClusterCollection> hgtdLink(theCluster, *clusterCollection, ctx);
       hgtdLinkAcc( *hgtdCl ) = hgtdLink;
     }
   }

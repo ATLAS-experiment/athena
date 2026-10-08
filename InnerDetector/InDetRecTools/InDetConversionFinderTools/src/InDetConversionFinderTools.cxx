@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -242,9 +242,11 @@ InDetConversionFinderTools::InDetConversionFinderTools(const std::string& t,
               }
 
               ElementLink<xAOD::TrackParticleContainer> newLinkPos(*iter_pos,
-                                                                   *trk_coll);
+                                                                   *trk_coll,
+                                                                   ctx);
               ElementLink<xAOD::TrackParticleContainer> newLinkNeg(*iter_neg,
-                                                                   *trk_coll);
+                                                                   *trk_coll,
+                                                                   ctx);
               myVertex->addTrackAtVertex(newLinkPos);
               myVertex->addTrackAtVertex(newLinkNeg);
 
@@ -302,7 +304,7 @@ InDetConversionFinderTools::InDetConversionFinderTools(const std::string& t,
             sConver->clearTracks();
 
             ElementLink<xAOD::TrackParticleContainer> newLink;
-            newLink.toContainedElement(*trk_coll, *itk);
+            newLink.toContainedElement(*trk_coll, *itk, ctx);
             sConver->addTrackAtVertex(newLink);
             sConver->setVertexType(xAOD::VxType::ConvVtx);
             numSingle++;
