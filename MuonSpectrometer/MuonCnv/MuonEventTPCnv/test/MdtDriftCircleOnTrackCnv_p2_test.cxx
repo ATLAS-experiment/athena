@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file MuonEventTPCnv/test/MdtDriftCircleOnTrackCnv_p2_test.cxx
@@ -167,6 +167,7 @@ int main ATLAS_NOT_THREAD_SAFE ()
     std::cerr << "This test can not be run" << std::endl;
     return 0;
   }
+  SmartIF<IProxyDict> sg (pSvcLoc->service("StoreGateSvc"));
 
   const MuonGM::MuonDetectorManager& muo_dd = make_dd();
 

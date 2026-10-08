@@ -224,12 +224,13 @@ void init_dd (MuonGM::MuonDetectorManager& muo_dd,
 MuonGM::MuonDetectorManager&  init_cs (GeoFullPhysVol& pvol1,
                                        GeoFullPhysVol& pvol4)
 {
-  EventContext ctx (1);
+  EventContext ctx = Gaudi::Hive::currentContext();
+  ctx.setEvt (1);
   ctx.setEventID (EventIDBase (1000, 1000,
                                1650000000, 0,
                                1000));
-  Atlas::setExtendedEventContext(ctx,
-                                 Atlas::ExtendedEventContext (nullptr, 1000));
+  Atlas::ExtendedEventContext& ectx = Atlas::getExtendedEventContext(ctx);
+  ectx.setConditionsRun (1000);
   Gaudi::Hive::setCurrentContext (ctx);
 
   ServiceHandle<Athena::IRCUSvc> rcu ("Athena::RCUSvc", "test");
