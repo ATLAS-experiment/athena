@@ -16,7 +16,6 @@ class muonNames(object):
 
         #EFSA muon containers
         self.EFSAMuons = "Muons"
-        self.EFSAMuonsPhII = "Muons"
         self.EFSAMuonsPhIINewFast = "Muons"
         self.EFSAMuonsPhIIMlbkt = "Muons"
 
@@ -39,7 +38,6 @@ class muonNames(object):
 
         if "FS" in name:
             self.EFSAMuons = recordable("HLT_Muons_FS")
-            self.EFSAMuonsPhII = recordable("HLT_Muons_FSPhII")
             self.EFSAMuonsPhIINewFast = recordable("HLT_Muons_FSPhII_newFast")
             self.EFSAMuonsPhIIMlbkt = recordable("HLT_Muons_FSPhII_mlbkt")
 
@@ -53,7 +51,6 @@ class muonNames(object):
 
         if "RoI" in name:
             self.EFSAMuons = recordable("HLT_Muons_RoI")
-            self.EFSAMuonsPhII = recordable("HLT_Muons_RoIPhII")
             self.EFSAMuonsPhIINewFast = recordable("HLT_Muons_RoIPhII_newFast")
             self.EFSAMuonsPhIIMlbkt = recordable("HLT_Muons_RoIPhII_mlbkt")
 

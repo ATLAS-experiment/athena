@@ -89,9 +89,8 @@ TriggerHLTListRun4 = [
     ('xAOD::MuonAuxContainer#HLT_FastMuons_RoIAux.',                   'BS ESD AODFULL AODSLIM', 'Muon'),
 
     # EF Precise Reco muons (SA) in RoI views
-    ('xAOD::MuonContainer#HLT_Muons_RoIPhII',                          'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuMSReco_RoIPhIIViews')]),
-    ('xAOD::MuonAuxContainer#HLT_Muons_RoIPhIIAux.',                   'BS ESD AODFULL AODSLIM', 'Muon'),
-    
+    ('xAOD::MuonContainer#HLT_Muons_RoI',                                       'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuMSReco_RoIViews'),InViews('EFMuMSReco_RoIPhIIViews')]),
+    ('xAOD::MuonAuxContainer#HLT_Muons_RoIAux.',                                'BS ESD AODFULL AODSLIM', 'Muon'),
     ('xAOD::MuonContainer#HLT_Muons_RoIPhII_newFast',                  'BS ESD AODFULL AODSLIM', 'Muon', [InViews("EFMuMSReco_RoIPhII_newFastViews")]),
     ('xAOD::MuonAuxContainer#HLT_Muons_RoIPhII_newFastAux.',           'BS ESD AODFULL AODSLIM', 'Muon'),
 
@@ -99,9 +98,8 @@ TriggerHLTListRun4 = [
     ('xAOD::MuonAuxContainer#HLT_Muons_RoIPhII_mlbktAux.',             'BS ESD AODFULL AODSLIM', 'Muon'),
 
     # EF Precise Reco muons (SA) in FS views
-    ('xAOD::MuonContainer#HLT_Muons_FSPhII',                           'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuMSReco_FSPhIIViews')]),
-    ('xAOD::MuonAuxContainer#HLT_Muons_FSPhIIAux.',                    'BS ESD AODFULL AODSLIM', 'Muon'),
-   
+    ('xAOD::MuonContainer#HLT_Muons_FS',                                        'BS ESD AODFULL AODSLIM', 'Muon', [InViews('EFMuMSReco_FSViews'),InViews('EFMuMSReco_FSPhIIViews')]),
+    ('xAOD::MuonAuxContainer#HLT_Muons_FSAux.',                                 'BS ESD AODFULL AODSLIM', 'Muon'),
     ('xAOD::MuonContainer#HLT_Muons_FSPhII_newFast',                   'BS ESD AODFULL AODSLIM', 'Muon', [InViews("EFMuMSReco_FSPhII_newFastViews")]),
     ('xAOD::MuonAuxContainer#HLT_Muons_FSPhII_newFastAux.',            'BS ESD AODFULL AODSLIM', 'Muon'),
 

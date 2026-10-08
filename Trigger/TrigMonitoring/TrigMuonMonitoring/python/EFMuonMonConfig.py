@@ -28,7 +28,7 @@ def EFMuonMonConfig(helper, isPhaseII=False, **kwargs):
     isR4Menu = "run4" in getHLTMenuAccess(helper.flags).name()
 
     # Set muon containers names
-    monAlg.EFSAMuonContainerName = muNames.EFSAMuonsPhII if isPhaseII else muNames.EFSAMuons
+    monAlg.EFSAMuonContainerName = muNames.EFSAMuons
     monAlg.EFCBMuonContainerName = muNames.EFCBMuons
     monAlg.EFSAMlbktMuonContainerName = muNames.EFSAMuonsPhIIMlbkt if isPhaseII and isR4Menu else ""
     monAlg.EFSANewFastMuonContainerName = muNames.EFSAMuonsPhIINewFast if isPhaseII and isR4Menu else ""

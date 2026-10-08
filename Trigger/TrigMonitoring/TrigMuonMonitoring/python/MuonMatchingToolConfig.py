@@ -22,9 +22,9 @@ def MuonMatchingToolConfig(flags, **kwargs):
     # Set the containers that always exist but change name depending on whether we are running Phase II or not
     kwargs.setdefault("L2StandAloneMuonContainerName", muNames.L2SAMuons)
     kwargs.setdefault("L2CombinedMuonContainerName", muNames.L2CBMuons)
-    kwargs.setdefault("EFSAMuonContainerName", muNames.EFSAMuonsPhII if kwargs["isPhaseII"] else muNames.EFSAMuons)
+    kwargs.setdefault("EFSAMuonContainerName", muNames.EFSAMuons)
     kwargs.setdefault("EFCBMuonContainerName", muNames.EFCBMuons)
-    kwargs.setdefault("EFSAFSMuonContainerName", muNamesFS.EFSAMuonsPhII if kwargs["isPhaseII"] else muNamesFS.EFSAMuons)
+    kwargs.setdefault("EFSAFSMuonContainerName", muNamesFS.EFSAMuons)
     kwargs.setdefault("EFCBFSMuonContainerName", muNamesFS.EFCBMuons)
     
     # Set the containers that only exist when runing Phase II software & Run4 menu
