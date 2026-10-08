@@ -17,17 +17,20 @@ def TrigMuonMonConfig(inputFlags):
     from AthenaMonitoring import AthMonitorCfgHelper
     helper = AthMonitorCfgHelper(inputFlags,'TrigMuonMonitoringCfg')
 
-    L1MuonMonConfig(helper)
-    L2MuonSAMonConfig(helper)
-    L2MuonSAIOMonConfig(helper)
-    L2muCombMonConfig(helper)
-    L2OverlapRemoverMonConfig(helper)
-    EFMuonMonConfig(helper)
-    TrigMuonEfficiencyMonTTbarConfig(helper)
-    TrigMuonEfficiencyMonZTPConfig(helper)
-    MuonTriggerCountConfig(helper)
+    from TriggerMenuMT.HLT.Muon.TrigMuonKeys import muonNames
+    isPhaseIIalgs = (muonNames().getNames('RoI').EFSATrackParticlesPhII in inputFlags.Input.Collections) or inputFlags.Trigger.Offline.SA.Muon.scheduleActsReco
+
+    L1MuonMonConfig(helper, isPhaseIIalgs)
+    L2MuonSAMonConfig(helper, isPhaseIIalgs)
+    L2MuonSAIOMonConfig(helper, isPhaseIIalgs)
+    L2muCombMonConfig(helper, isPhaseIIalgs)
+    L2OverlapRemoverMonConfig(helper, isPhaseIIalgs)
+    EFMuonMonConfig(helper, isPhaseIIalgs)
+    TrigMuonEfficiencyMonTTbarConfig(helper, isPhaseIIalgs)
+    TrigMuonEfficiencyMonZTPConfig(helper, isPhaseIIalgs)
+    MuonTriggerCountConfig(helper, isPhaseIIalgs)
     if inputFlags.Input.isMC:
-        TrigMuonTruthMonConfig(helper)
+        TrigMuonTruthMonConfig(helper, isPhaseIIalgs)
 
     return helper.result()
 

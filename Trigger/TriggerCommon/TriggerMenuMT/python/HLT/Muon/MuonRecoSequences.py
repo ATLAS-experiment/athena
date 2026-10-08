@@ -347,6 +347,7 @@ def muEFSARecoSequenceCfg(flags, RoIs, suffix="", useBucketFilter=False):
 
     nameGroups = muNamesFS if 'FS' in suffix else muNames
 
+    msMuonName = nameGroups.EFSAMuons
     if flags.Muon.usePhaseIIGeoSetup and flags.Muon.scheduleActsReco:
 
         if "newFast" in suffix:
@@ -356,7 +357,6 @@ def muEFSARecoSequenceCfg(flags, RoIs, suffix="", useBucketFilter=False):
             msMuonName = nameGroups.EFSAMuonsPhIIMlbkt
             msTrackName = nameGroups.EFSATrackParticlesPhIIMlbkt
         else:
-            msMuonName = nameGroups.EFSAMuonsPhII
             msTrackName = nameGroups.EFSATrackParticlesPhII
 
         # Schedule reco-to-truth object association
@@ -426,8 +426,7 @@ def muEFSARecoSequenceCfg(flags, RoIs, suffix="", useBucketFilter=False):
         from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCombinedMuonCandidateAlgCfg
         acc.merge(MuonCombinedMuonCandidateAlgCfg(flags, name=f"MuonCombinedMuonCandidateAlg{suffix}",
                                                          MuonSpectrometerTrackParticleLocation = msTrackName))
-    else:
-        msMuonName = nameGroups.EFSAMuons
+    else:        
 
         from MuonConfig.MuonSegmentFindingConfig import MuonSegmentFinderAlgCfg, MuonLayerHoughAlgCfg
         acc.merge(MuonLayerHoughAlgCfg(flags, f"TrigMuonLayerHoughAlg{suffix}"))
