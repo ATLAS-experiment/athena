@@ -1,6 +1,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-#include "../ActsMuonTrackingGeometryTest.h"
+#include "../TrackingGeometryTest.h"
 
-DECLARE_COMPONENT(ActsTrk::ActsMuonTrackingGeometryTest)
+DECLARE_COMPONENT(MuonValR4::TrackingGeometryTest)

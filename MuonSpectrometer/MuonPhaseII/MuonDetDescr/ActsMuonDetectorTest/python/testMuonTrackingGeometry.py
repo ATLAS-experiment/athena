@@ -2,7 +2,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def MuonTrackingGeometryTestCfg(flags, name = "ActsMuonTrackingGeometryTest", **kwargs):
+def MuonTrackingGeometryTestCfg(flags, name = "TrackingGeometryTest", **kwargs):
   
     result = ComponentAccumulator()
 
@@ -17,8 +17,10 @@ def MuonTrackingGeometryTestCfg(flags, name = "ActsMuonTrackingGeometryTest", **
 
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
     result.merge(ActsTrackingGeometrySvcCfg(flags))
-   
-    the_alg = CompFactory.ActsTrk.ActsMuonTrackingGeometryTest(name, **kwargs)
+
+    from MuonTrackFindingAlgs.TrackFindingConfig import MSExtrapolatorCfg
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(MSExtrapolatorCfg(flags)))
+    the_alg = CompFactory.MuonValR4.TrackingGeometryTest(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
 
     return result

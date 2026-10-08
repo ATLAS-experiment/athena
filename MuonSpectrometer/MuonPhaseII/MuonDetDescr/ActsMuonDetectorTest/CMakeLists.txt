@@ -8,9 +8,9 @@ atlas_subdir( ActsMuonDetectorTest )
 
 atlas_add_component( ActsMuonDetectorTest
                      src/components/*.cxx src/*.cxx
-                     LINK_LIBRARIES AthenaKernel StoreGateLib GeoModelUtilities MuonTesterTreeLib
-                                    GaudiKernel MuonReadoutGeometryR4 MuonReadoutGeometry MuonGeoModelR4Lib ActsGeometryLib AthenaPoolUtilities MuonTruthHelpers
-                                    xAODTruth xAODMuonSimHit TrkExInterfaces CxxUtils ActsInteropLib)
+                     LINK_LIBRARIES AthenaKernel StoreGateLib  GaudiKernel MuonTesterTreeLib
+                                     ActsGeometryLib MuonReadoutGeometryR4  MuonTruthHelpers
+                                     xAODTruth xAODMuonSimHit CxxUtils ActsInteropLib)
 
 
 atlas_add_test( testMuonTrackingGeometry
