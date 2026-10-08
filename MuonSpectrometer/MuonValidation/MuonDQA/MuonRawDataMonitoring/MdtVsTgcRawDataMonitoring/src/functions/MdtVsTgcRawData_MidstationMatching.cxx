@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -184,7 +184,7 @@ for(int ndis=0;ndis<nDisqualifiedSegm;ndis++)copyDisqualifiedSegments.push_back(
         
         // Get position variables
         const Amg::Vector3D segm2Pos = segm2->globalPosition(); 
-	float segm2PosRho = std::abs(segm2Pos.perp());
+        float segm2PosRho = std::abs(segm2Pos.perp());
         float segm2PosPhi = segm2Pos.phi();
         float segm2PosZ   = segm2Pos.z();
         if(segm2PosPhi<0)segm2PosPhi+=2*M_PI;
@@ -296,7 +296,7 @@ for(int ndis=0;ndis<nDisqualifiedSegm;ndis++)copyDisqualifiedSegments.push_back(
       ////////////////////////////////////////////////////////////////////////
       // Check which PRD matches Segm1
       // Initialise hit registered arrays
-      bool sectorhitregistered[9][2] = {{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0},{0,0}};
+      bool sectorhitregistered[9][2]{} ;
       std::vector<const Muon::TgcPrepData*> tpdVector[2];
       
       // Loop over TGC Prep Data container
@@ -336,7 +336,7 @@ for(int ndis=0;ndis<nDisqualifiedSegm;ndis++)copyDisqualifiedSegments.push_back(
           
           // Get position variables
           const Amg::Vector3D prdPos = tpd->globalPosition(); 
-	  float tgcRho = std::abs(prdPos.perp());
+	        float tgcRho = std::abs(prdPos.perp());
           float tgcPhi = prdPos.phi();
           float tgcZ   = prdPos.z();
           if(tgcPhi<0)tgcPhi+=2*M_PI;
@@ -397,13 +397,7 @@ for(int ndis=0;ndis<nDisqualifiedSegm;ndis++)copyDisqualifiedSegments.push_back(
       // Find vector of PRD which forms a coherent line in the vicinity of Segm1
 
       // Variables to hold best PRD matching results
-      std::vector<const Muon::TgcPrepData*> *bestTPDmatches[2];
-      bestTPDmatches[0] = nullptr;
-      bestTPDmatches[1] = nullptr;
-      if(bestTPDmatches[0]->size()>0) bestTPDmatches[0]->clear();
-      if(bestTPDmatches[1]->size()>0) bestTPDmatches[1]->clear();
-      int bestTPDlayerMatches[2][9] = {{0,0,0,0,0,0,0,0,0},
-               {0,0,0,0,0,0,0,0,0}};
+      int bestTPDlayerMatches[2][9]{};
 
       for(int k=0;k<2;k++){// WireStrip
         // Variables to record quality of best match found
@@ -414,7 +408,6 @@ for(int ndis=0;ndis<nDisqualifiedSegm;ndis++)copyDisqualifiedSegments.push_back(
         int nTPD = tpdVector[k].size();
         for(int iTPD1=0;iTPD1<nTPD;iTPD1++){
           // Variables to hold matches found for this PRD
-          std::vector<const Muon::TgcPrepData*> thisTPDmatches;
           int thisTPDlayerMatches[9] = {0,0,0,0,0,0,0,0,0}; 
           
           // Get position variables
@@ -472,7 +465,6 @@ for(int ndis=0;ndis<nDisqualifiedSegm;ndis++)copyDisqualifiedSegments.push_back(
               
               // Add PRD2 to matches for PRD1
               if(layer2>=0)thisTPDlayerMatches[layer2]++;
-              thisTPDmatches.push_back(tpdVector[k].at(iTPD2));
             }
           }// nTPD2
           
@@ -490,7 +482,6 @@ for(int ndis=0;ndis<nDisqualifiedSegm;ndis++)copyDisqualifiedSegments.push_back(
               // Set maximum values to current segment's values
               nlayerMax = nlayerCurrent;
               nPRDMax   = nPRDCurrent;
-              bestTPDmatches[k]    = &thisTPDmatches;
               for(int l=0;l<9;l++){
                 bestTPDlayerMatches[k][l] = thisTPDlayerMatches[l];
               }
@@ -500,10 +491,6 @@ for(int ndis=0;ndis<nDisqualifiedSegm;ndis++)copyDisqualifiedSegments.push_back(
         
         // If matching array was somehow empty (should be impossible)
         if(nlayerMax==0)continue;
-        if(bestTPDmatches[k]->size()==0){
-          ATH_MSG_WARNING( "MidstationOnly: empty bestTPDmatches["<<k<<"] passed"  );
-          continue;
-        }
         
         // Set canCheck variables based on contents of matched PRD array
         for(int jTGC1=0;jTGC1<3;jTGC1++){// TGC Stations
@@ -555,6 +542,7 @@ for(int ndis=0;ndis<nDisqualifiedSegm;ndis++)copyDisqualifiedSegments.push_back(
     if(nValidatedSegm==1){
       for(int l=0;l<9;l++){//Layer
         int stationIndex = TGClayer2stationindex(l);
+        if (stationIndex < 0)[[unlikely]] continue;
         for(int k=0;k<2;k++){// WireStrip
           // If this station can be checked
           if(canCheckSectorFill[stationIndex]){
