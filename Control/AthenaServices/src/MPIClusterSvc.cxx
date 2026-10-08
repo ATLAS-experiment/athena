@@ -37,8 +37,8 @@ StatusCode MPIClusterSvc::initialize() {
   ATH_MSG_DEBUG("Got MPI_COMM_WORLD");
   m_rank = m_world.rank();
   ATH_MSG_INFO("On MPI rank {}", m_rank);
-  if (std::getenv("RANK") != std::to_string(m_rank)) {
-    const char* env_rank = std::getenv("RANK");
+  if (const char* env_rank = std::getenv("RANK");
+      env_rank && std::to_string(m_rank) != env_rank) {
     ATH_MSG_WARNING("MPI rank ({}) does not match $RANK = {}",
                     m_rank, env_rank);
   }
@@ -74,7 +74,8 @@ StatusCode MPIClusterSvc::initialize() {
       "INSERT INTO event_log(id, rank, inputFileId, runNumber, eventNumber, "
       "complete, "
       "start_time, request_time_ns) "
-      "VALUES(?1, ?4, ?6, ?2, ?3, 0, julianday('now'), ?5)");
+      // inputFileId stays NULL until the first BeginInputFile (hash 0)
+      "VALUES(?1, ?4, NULLIF(?6, 0), ?2, ?3, 0, julianday('now'), ?5)");
   m_mpiLog_completeEvent = m_mpiLog->createStatement(
       "UPDATE event_log SET complete = 1, status = ?4, end_time = "
       "julianday('now') WHERE runNumber = ?2 "
@@ -99,6 +100,12 @@ StatusCode MPIClusterSvc::finalize() {
       ->createStatement(
           "UPDATE ranks SET end_time = julianday('now') WHERE rank = ?1")
       .run(m_rank);
+  // Gaudi/Python references can keep this service alive past finalization.
+  // Release communicators and mpi3's attributes before finalizing MPI, while
+  // all ranks are still here, rather than relying on process-exit destruction.
+  m_datacom = mpi3::communicator{};
+  m_world = mpi3::communicator{};
+  m_env.reset();
   return StatusCode::SUCCESS;
 }
 
