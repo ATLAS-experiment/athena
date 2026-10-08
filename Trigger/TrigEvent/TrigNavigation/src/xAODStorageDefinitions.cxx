@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2026 by CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // For legacy EDM classes the registration with the Navigation was done
 // directly in the legacy Trig[ABC]Event package. But once we remove one of

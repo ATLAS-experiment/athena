@@ -5,7 +5,7 @@
 //    Interface for the new local RegionSelector tool
 // 
 //
-// Copyright (C) 2012-2019 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 
 
 #ifndef IREGIONSELECTOR_IREGSELTOOL_H

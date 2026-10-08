@@ -1,6 +1,6 @@
 // this file is -*- C++ -*-
 /*
-  Copyright (C) 2020-2026 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRACKCALOCLUSTERREC_TRACKCALOCLUSTERRECTOOLS_TCCHELPERS_H

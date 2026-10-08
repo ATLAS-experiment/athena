@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022  CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONCOMBINEDEVENT_MUONSEGMENTTAGSURFACES_H
 #define MUONCOMBINEDEVENT_MUONSEGMENTTAGSURFACES_H

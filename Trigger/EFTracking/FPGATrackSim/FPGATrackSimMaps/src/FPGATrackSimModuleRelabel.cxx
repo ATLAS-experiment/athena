@@ -1,4 +1,4 @@
-// Copyright (C) 2023-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 
 #include "FPGATrackSimMaps/FPGATrackSimModuleRelabel.h"

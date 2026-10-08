@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2026CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: TestIsolationAthenaAlg.cxx 672993 2015-06-06 16:55:34Z dzhang $

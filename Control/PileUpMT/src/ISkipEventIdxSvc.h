@@ -1,6 +1,6 @@
 /* -*- C++ -*- */
 /*
- * Copyright (C) 2023 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
  */
 #ifndef PILEUPMT_ISKIPEVENTIDXSVC_H
 #define PILEUPMT_ISKIPEVENTIDXSVC_H

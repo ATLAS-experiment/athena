@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#  Copyright (C) 2020 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
 
 # this is the 'old' postprocessing script, updated to use the compiled 
 # executable for backward compatibility. 

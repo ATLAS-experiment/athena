@@ -1,4 +1,4 @@
-// Copyright (C) 2023-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 // Module relabel object for remapping pixel endcap hits.
 // This small header contains a very simple object, which implements

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // These classes need including in a reflex dictionary (atlas_add_dictionary)
