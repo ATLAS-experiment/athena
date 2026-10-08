@@ -1,55 +1,25 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "GaudiKernel/MsgStream.h"
-#include "GaudiKernel/IToolSvc.h"
-
-#include "StoreGate/StoreGateSvc.h"
-
-#include "CaloIdentifier/CaloCell_ID.h"
-#include "CaloIdentifier/CaloDM_ID.h"
-#include "CaloIdentifier/CaloLVL1_ID.h"
-#include "CaloIdentifier/LArEM_ID.h"
-#include "CaloIdentifier/LArHEC_ID.h"
-#include "CaloIdentifier/LArFCAL_ID.h"
-#include "CaloIdentifier/LArID_Exception.h"
-
-#include "AthenaPoolUtilities/AthenaAttributeList.h"
-
-#include "Identifier/Range.h" 
-#include "Identifier/IdentifierHash.h"
-#include "Identifier/HWIdentifier.h"
+#include "LArCafJobs/LArHECNoise.h"
 
 #include "LArIdentifier/LArOnlineID.h"
-
-#include "LArRecEvent/LArEventBitInfo.h"
 #include "LArRawEvent/LArDigit.h"
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArRawEvent/LArRawChannelContainer.h"
  
-#include "NavFourMom/IParticleContainer.h"
-#include "NavFourMom/INavigable4MomentumCollection.h"
-
 #include "CaloDetDescr/CaloDetDescrManager.h"
-#include "CaloDetDescr/CaloDetectorElements.h"
-#include "AthenaPoolUtilities/CondAttrListCollection.h"
-
-#include "TTree.h"
-
-#include "xAODEventInfo/EventInfo.h"
-
+#include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloEvent/CaloCellContainer.h"
 
-#include "LArCafJobs/LArHECNoise.h"
+#include "xAODEventInfo/EventInfo.h"
+#include "Identifier/IdentifierHash.h"
+#include "Identifier/HWIdentifier.h"
 
-#include <algorithm>
-#include <math.h>
-#include <functional>
-#include <iostream>
+#include "TTree.h"
+#include "GaudiKernel/MsgStream.h"
 
-using namespace std;
-using xAOD::EventInfo;
 
 //////////////////////////////////////////////////////////////////////////////////////
 /// Constructor
@@ -99,15 +69,11 @@ LArHECNoise::LArHECNoise(const std::string& name,
    declareProperty("MinDigitADC",m_MinDigitADC=20);
    declareProperty("MaxDeltaT",m_MaxDeltaT=5);
 
-    m_nt_prescale = new float[m_TriggerLines.size()];
-    m_nt_trigger = new bool[m_TriggerLines.size()];
+   
  }
 
-// An out-of-line dtor keeps cppcheck from warning about the memory
-// allocations in the ctor.
-LArHECNoise::~LArHECNoise()
-{
-}
+
+LArHECNoise::~LArHECNoise() = default;
 
 StatusCode LArHECNoise::initialize() {
 
@@ -118,6 +84,9 @@ StatusCode LArHECNoise::initialize() {
   
   ATH_CHECK( m_cablingKey.initialize() );
   ATH_CHECK( m_pedKey.initialize() );
+  //resize here, after properties are set
+  m_nt_prescale.resize(m_TriggerLines.size());
+  m_nt_trigger.resize(m_TriggerLines.size());
 
   // Retrieve online ID helper
   const LArOnlineID* LArOnlineIDHelper = nullptr;
@@ -144,11 +113,7 @@ StatusCode LArHECNoise::initialize() {
   m_tree->Branch("iLB",&m_nt_lb,"iLB/I"); // LB
   m_tree->Branch("iBCID",&m_nt_bcid,"iBCID/I"); // BCID
   // prescale and trigger here
-  //const std::vector<float> &tp = m_nt_prescale;
-  //const std::vector<bool> &tt = m_nt_trigger;
   for(unsigned i=0; i<m_TriggerLines.size(); ++i) {
-     //m_tree->Branch((m_TriggerLines[i]+"_Prescale").c_str(),&(tp[i]),(m_TriggerLines[i]+"_Prescale/F").c_str());
-     //m_tree->Branch((m_TriggerLines[i]+"_Trigger").c_str(),tt[i],(m_TriggerLines[i]+"_Trigger/O").c_str());
      m_tree->Branch((m_TriggerLines[i]+"_Prescale").c_str(),&(m_nt_prescale[i]),(m_TriggerLines[i]+"_Prescale/F").c_str());
      m_tree->Branch((m_TriggerLines[i]+"_Trigger").c_str(),&(m_nt_trigger[i]),(m_TriggerLines[i]+"_Trigger/I").c_str());
   }
@@ -195,11 +160,7 @@ StatusCode LArHECNoise::execute(const EventContext& ctx) {
 
   for(unsigned i=0; i<m_TriggerLines.size(); ++i){
          m_nt_prescale[i] = m_trigDec->getPrescale(m_TriggerLines[i]);
-         if (m_trigDec->isPassed(m_TriggerLines[i])){
-                   m_nt_trigger[i] = true;
-         } else {
-                  m_nt_trigger[i] = false;
-         }
+         m_nt_trigger[i] = m_trigDec->isPassed(m_TriggerLines[i]);
   }
 
   const xAOD::EventInfo* eventInfo = nullptr;

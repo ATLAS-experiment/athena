@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCAFJOBS_LARNOISEBURSTS_H
@@ -7,51 +7,35 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ObjectVector.h"
-#include "GaudiKernel/AlgTool.h"
 
-#include "CLHEP/Units/SystemOfUnits.h"
 #include "GaudiKernel/ITHistSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
 //LAr services:
-#include "Identifier/Range.h" 
-#include "Identifier/IdentifierHash.h"
 #include "LArRecConditions/LArBadChannelCont.h"
 #include "LArCabling/LArOnOffIdMapping.h"
-#include "LArIdentifier/LArOnlineID.h"
-#include "LArIdentifier/LArElectrodeID.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
-#include "CaloIdentifier/CaloCell_ID.h"
 #include "LArRecEvent/LArNoisyROSummary.h"
 
 // Trigger
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "LumiBlockData/BunchCrossingCondData.h"
 
-// Electrons
-#include "egammaEvent/ElectronContainer.h"
-
 //STL:
 #include <string>
-#include <bitset>
 
 
 class LArOnlineID;
 class LArElectrodeID;
 class HWIdentifier;
-class LArOnlineIDStrHelper;
 class LArEM_ID;
 class LArHEC_ID;
 class LArFCAL_ID;
 class CaloNoise;
-
-class TileTBID;
-class TgcIdHelper;
-
+class LArHVLineID;
 class TTree;
 
-class LArHVLineID;
+
 
 class ATLAS_NOT_THREAD_SAFE LArNoiseBursts : public AthAlgorithm  {
 
