@@ -81,13 +81,4 @@
   <class name="TrigEFBphys_p1" />
   <class name="std::vector<TrigEFBphys_p1>" />
 
-<!-- TrigEFBjetContainer -->
-  <class name="TrigEFBjetContainer_tlp2" id="91EA22B6-9273-4206-AEB5-FE23A269C5AA" />
-  <class name="TrigEFBjetContainer_p2" id="E72CA4B2-FBDC-4332-9606-09B3A600EE97" />
-  <class name="std::vector<TrigEFBjetContainer_p2>" />
-
-<!-- TrigEFBjet -->
-  <class name="TrigEFBjet_p2" />
-  <class name="std::vector<TrigEFBjet_p2>" />
-
 </lcgdict>

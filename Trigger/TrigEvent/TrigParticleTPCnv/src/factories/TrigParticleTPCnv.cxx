@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // generate the T/P converter entries
@@ -87,27 +87,6 @@
 #include "TrigParticleTPCnv/TrigL2BjetContainer_p3.h"
 #include "TrigParticleTPCnv/TrigL2Bjet_p3.h"
 
-// TrigEFBjet
-#include "TrigParticleTPCnv/TrigEFBjetContainer_tlp1.h"  
-#include "TrigParticleTPCnv/TrigEFBjetContainerCnv_tlp1.h"
-#include "TrigParticleTPCnv/TrigEFBjetContainer_p1.h"
-#include "TrigParticleTPCnv/TrigEFBjet_p1.h"
-
-#include "TrigParticleTPCnv/TrigEFBjetContainer_tlp2.h" 
-#include "TrigParticleTPCnv/TrigEFBjetContainerCnv_tlp2.h" 
-#include "TrigParticleTPCnv/TrigEFBjetContainer_p2.h" 
-#include "TrigParticleTPCnv/TrigEFBjet_p2.h" 
-
-DECLARE_TPCNV_FACTORY(TrigEFBjetContainerCnv_tlp1,
-                      TrigEFBjetContainer,
-                      TrigEFBjetContainer_tlp1,
-                      Athena::TPCnvVers::Old)
-                      
-DECLARE_TPCNV_FACTORY(TrigEFBjetContainerCnv_tlp2,
-                      TrigEFBjetContainer,
-                      TrigEFBjetContainer_tlp2,
-                      Athena::TPCnvVers::Current)
-                      
 DECLARE_TPCNV_FACTORY(TrigEFBphysContainerCnv_tlp1,
                       TrigEFBphysContainer,
                       TrigEFBphysContainer_tlp1,

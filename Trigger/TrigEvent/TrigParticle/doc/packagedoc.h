@@ -18,7 +18,6 @@ This package contains the diverse TrigParticle classes
   - TrigL2Bphys  : stores L2 Bphysics candidates  (Julie.Kirk@rl.ac.uk)
   - TrigEFBphys  : stores EF Bphysics candidates  (Julie.Kirk@rl.ac.uk)
   - TrigL2Bjet   : stores L2 Bjet candidates      (Andrea.Coccaro@ge.infn.it)
-  - TrigEFBjet   : stores EF Bjet candidates      (Andrea.Coccaro@ge.infn.it)
   - TrigTau      : stores the Tau candidates      (casado@ifae.es)
 
 

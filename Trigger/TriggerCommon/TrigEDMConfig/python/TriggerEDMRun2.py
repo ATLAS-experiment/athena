@@ -882,7 +882,6 @@ TriggerHLTList = [
     ('TrigTrackCounts#HLT',                                               '',                        'MinBias'),
     ('TrigTrackCounts#HLT_trackcounts',                                   'BS ESD AODFULL AODSLIM',  'MinBias'), #? this is the CMS trigger obj
     ('TrigVertexCounts#HLT_vertexcounts',                                 'BS ESD AODFULL AODSLIM',  'MinBias'),
-    ('TrigEFBjetContainer#HLT_EFBjetFex',                                 'BS ESD AODFULL',          'Bjet'),
     ('Analysis::TauJetContainer#HLT_TrigTauRecMerged',                    '',  'Tau'),
     ('Analysis::TauJetContainer#HLT_TrigTauRecCalo',                      '',  'Tau'),
     ('JetCollection#HLT',                                                 '',                        'Jet'),
@@ -1215,7 +1214,6 @@ TriggerEFEvolutionList = [
 ('Analysis::TauDetailsContainer#HLT_TrigTauDetailsCalo',                        ''), # type not converted
 ('TrigTrackCounts#HLT_trackcounts',                                             'xAOD::TrigTrackCounts#HLT_trackcounts'),
 ('TrigVertexCounts#HLT_vertexcounts',                                           'xAOD::TrigVertexCounts#HLT_vertexcounts'),
-('TrigEFBjetContainer#HLT_EFBjetFex',                                           'xAOD::BTaggingContainer#HLT_HLTBjetFex'), # note different SG names
 ('TrigEFBphysContainer#HLT_EFBMuMuFex',                                         'xAOD::TrigBphysContainer#HLT_EFBMuMuFex'),
 ('TrigEFBphysContainer#HLT_EFBMuMuXFex',                                        'xAOD::TrigBphysContainer#HLT_EFBMuMuXFex'),
 ('TrigEFBphysContainer#HLT_EFDsPhiPiFex',                                       'xAOD::TrigBphysContainer#HLT_EFDsPhiPiFex'),

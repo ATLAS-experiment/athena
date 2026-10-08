@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -102,7 +102,6 @@ namespace TrigDec {
     DECLARE_ATTACHED_CONTAINER(egamma, egammaContainer)
     DECLARE_ATTACHED_CONTAINER_NAMESPACE(Rec, TrackParticle, TrackParticleContainer)
     DECLARE_ATTACHED_CONTAINER_NAMESPACE(Analysis, TauDetails, TauDetailsContainer)
-    DECLARE_ATTACHED_CONTAINER(TrigEFBjet, TrigEFBjetContainer)
     DECLARE_ATTACHED_CONTAINER(TrigEFBphys, TrigEFBphysContainer)
     DECLARE_ATTACHED_CONTAINER_NAMESPACE(Analysis, TauJet, TauJetContainer)
     DECLARE_ATTACHED_CONTAINER(Jet, JetCollection)

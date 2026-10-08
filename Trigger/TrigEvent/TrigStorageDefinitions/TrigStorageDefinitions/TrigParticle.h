@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSTORAGEDEF_TRIGPARTICLEEVENT
@@ -57,7 +57,6 @@ HLT_BEGIN_TYPE_REGISTRATION
   HLT_REGISTER_TYPE(class TrigL2Bjet, class TrigL2BjetContainer,class TrigL2BjetContainer)
      // EF
   HLT_REGISTER_TYPE(class TrigEFBphys, class  TrigEFBphysContainer,class TrigEFBphysContainer)
-  HLT_REGISTER_TYPE(class TrigEFBjet, class TrigEFBjetContainer,class TrigEFBjetContainer)
   HLT_REGISTER_TYPE(class JetKeyDescriptor, class JetKeyDescriptor,class JetKeyDescriptorCollection )
   HLT_REGISTER_TYPE(class JetMomentMap,class  JetMomentMap,class JetMomentMapCollection )
   HLT_REGISTER_TYPE(class Jet, class  JetCollection,class JetCollection )

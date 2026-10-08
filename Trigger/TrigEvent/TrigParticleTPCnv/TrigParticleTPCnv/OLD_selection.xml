@@ -33,13 +33,4 @@
   <class name="TrigL2Bjet_p1" />
   <class name="std::vector<TrigL2Bjet_p1>" />
 
-<!-- TrigEFBjetContainer -->
-  <class name="TrigEFBjetContainer_tlp1" id="F933A067-5788-4AD6-B696-C8B0E988EF2D" />
-  <class name="TrigEFBjetContainer_p1" id="1E2EAC70-D4B5-4FD2-A8EC-E38A02E72C81" />   
-  <class name="std::vector<TrigEFBjetContainer_p1>" />
-
-<!-- TrigEFBjet -->
-  <class name="TrigEFBjet_p1" />
-  <class name="std::vector<TrigEFBjet_p1>" />
-
 </lcgdict>

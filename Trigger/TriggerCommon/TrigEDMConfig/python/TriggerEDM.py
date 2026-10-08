@@ -574,9 +574,11 @@ def getClassesToIgnore(flags):
     l = []
 
     if flags.Trigger.EDMVersion == 2:
-        l.append("145610168")  # TrigMissingET (Run-1 class, ATR-32944)
-        l.append("1271751257") # ElectronMuonTopoInfoContainer (Run-1 class, ATR-32944)
-
+        # Ignore Run-1 EDM classes that were initially/mistakenly written as
+        # empty containers into Run-2 files (ATR-32944).
+        l.append("145610168")   # TrigMissingET
+        l.append("1271751257")  # ElectronMuonTopoInfoContainer
+        l.append("1142962358")  # TrigEFBjetContainer
     return l
 
 
