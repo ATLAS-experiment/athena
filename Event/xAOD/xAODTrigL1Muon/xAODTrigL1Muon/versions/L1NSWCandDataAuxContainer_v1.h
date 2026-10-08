@@ -30,9 +30,9 @@ namespace xAOD {
     std::vector<uint16_t>  fiberID {};
     /// Board ID (7 bits, bit order [26:20]) -- aligned with SectorLogicCandData's own boardID
     std::vector<uint16_t>  boardID {};
-    /// The attributes of each segment are packed in a 32-bit word.
+    /// The attributes of the segment are packed in a 32-bit word.
     /// eta, phi, deltaTheta, quality
-    std::vector<uint32_t> l1SegmentWords {};
+    std::vector<uint32_t> l1SegmentWord {};
 
   };
 }
