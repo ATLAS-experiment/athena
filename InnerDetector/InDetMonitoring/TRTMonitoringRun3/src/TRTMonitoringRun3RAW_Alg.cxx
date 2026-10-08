@@ -2295,10 +2295,7 @@ StatusCode TRTMonitoringRun3RAW_Alg::fillTRTHits(const EventContext& ctx,
             const bool isArgonStraw = ( Straw_Gastype( m_sumTool->getStatusHT(surfaceID, ctx) ) == GasType::Ar );
             // Assume always Xe if m_ArgonXenonSplitter is not enabled, otherwise check the straw status (good is Xe, non-good is Ar)
             float temp_locr = aTrackParam->parameters()[Trk::driftRadius];
-            int iphi_module = -9999;
-
-            if (iside == 0) iphi_module = phi_module;
-            else if (iside == 1) iphi_module = phi_module + 32;
+            int iphi_module = iside == 0 ? phi_module : phi_module + 32;
 
             trackfound[ibe][iphi_module] = true;
 
