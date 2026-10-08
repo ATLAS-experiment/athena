@@ -1,45 +1,29 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCAFJOBS_LARHECNOISE_H
 #define LARCAFJOBS_LARHECNOISE_H
 
-#include "GaudiKernel/ToolHandle.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
-#include "GaudiKernel/ObjectVector.h"
-#include "GaudiKernel/AlgTool.h"
-
-#include "CLHEP/Units/SystemOfUnits.h"
-#include "StoreGate/StoreGateSvc.h"
-#include "GaudiKernel/ITHistSvc.h"
-
 //LAr services:
-#include "Identifier/Range.h" 
-#include "Identifier/IdentifierHash.h"
 #include "LArCabling/LArOnOffIdMapping.h"
-#include "StoreGate/ReadCondHandleKey.h"
-#include "LArIdentifier/LArOnlineID.h"
-#include "LArIdentifier/LArElectrodeID.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
-
 #include "LArElecCalib/ILArPedestal.h"
 
 // Trigger
 #include "TrigDecisionTool/TrigDecisionTool.h"
 
+//Framework
+#include "StoreGate/ReadCondHandleKey.h"
+#include "GaudiKernel/ToolHandle.h"
+#include "AthenaBaseComps/AthAlgorithm.h"
+#include "GaudiKernel/ITHistSvc.h"
 
 //STL:
 #include <string>
-#include <bitset>
 
 
 class LArOnlineID;
-class LArElectrodeID;
-class HWIdentifier;
-class LArEM_ID;
-class LArHEC_ID;
-class LArFCAL_ID;
 
 class TTree;
 
@@ -58,7 +42,7 @@ class LArHECNoise : public AthAlgorithm  {
 
    ServiceHandle<ITHistSvc> m_thistSvc{this,"THistSvc","THistSvc"};
     
-   TTree* m_tree;
+   TTree* m_tree{};
 
    SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
    SG::ReadCondHandleKey<ILArPedestal> m_pedKey{this,"PedestalKey","LArPedestal","SG Key of Pedestal obj"};
@@ -104,8 +88,8 @@ class LArHECNoise : public AthAlgorithm  {
    float m_nt_r;
    float m_nt_ped;
    float m_nt_pedRMS;
-   float *m_nt_prescale;
-   bool  *m_nt_trigger;
+   std::vector<float> m_nt_prescale;
+   std::vector<int> m_nt_trigger;
 
    // other members
    std::vector<std::string> m_TriggerLines;

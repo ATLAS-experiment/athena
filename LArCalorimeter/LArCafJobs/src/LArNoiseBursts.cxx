@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// LArNoiseBursts
@@ -12,17 +12,13 @@
 #include "StoreGate/ReadCondHandle.h"
 
 #include "CaloIdentifier/CaloCell_ID.h"
-#include "CaloIdentifier/CaloDM_ID.h"
-#include "CaloIdentifier/CaloLVL1_ID.h"
+
 #include "CaloIdentifier/LArEM_ID.h"
 #include "CaloIdentifier/LArHEC_ID.h"
 #include "CaloIdentifier/LArFCAL_ID.h"
-#include "CaloIdentifier/LArMiniFCAL_ID.h"
 #include "CaloIdentifier/LArID_Exception.h"
 
-#include "AthenaPoolUtilities/AthenaAttributeList.h"
 
-#include "Identifier/Range.h" 
 #include "Identifier/IdentifierHash.h"
 #include "Identifier/HWIdentifier.h"
 
@@ -36,18 +32,14 @@
 #include "LArRawEvent/LArRawChannelContainer.h"
 #include "LArRecEvent/LArCollisionTime.h"
 #include "CaloConditions/CaloNoise.h"
- 
-#include "NavFourMom/IParticleContainer.h"
-#include "NavFourMom/INavigable4MomentumCollection.h"
 
-// Lar HV
-#include "CaloDetDescr/CaloDetectorElements.h"
-#include "AthenaPoolUtilities/CondAttrListCollection.h"
+#include <utility>
+ 
+
 
 ///////////////////////////////////////////////////////////////////
 
 #include "TTree.h"
-#include "CLHEP/Vector/LorentzVector.h"
 
 #include "xAODEventInfo/EventInfo.h"
 
@@ -55,12 +47,7 @@
 
 #include "LArCafJobs/LArNoiseBursts.h"
 
-#include <algorithm>
-#include <math.h>
-#include <functional>
-#include <iostream>
 
-using namespace std;
 
 int nlarcell=0;
 int n_noisy_cell_part[8] = {0,0,0,0,0,0,0,0};
@@ -684,17 +671,21 @@ StatusCode LArNoiseBursts::doEventProperties(){
   ATH_MSG_DEBUG("BCID is Filled: "<<m_nt_isbcidFilled);
   ATH_MSG_DEBUG("BCID is in Train: "<<m_nt_isbcidInTrain);
   ATH_MSG_DEBUG("bunch type "<<m_nt_bunchtype);
-
-  unsigned int distFromFront = bunchCrossing->distanceFromFront(m_nt_bcid,BunchCrossingCondData::BunchCrossings);
-  if(m_frontbunches < distFromFront) distFromFront=m_frontbunches;
-
+  //this function may return -1
+  int distFromFront = bunchCrossing->distanceFromFront(m_nt_bcid,BunchCrossingCondData::BunchCrossings);
+  if (distFromFront < 0)[[unlikely]]{
+    ATH_MSG_ERROR("distanceFromFront returned "<<distFromFront);
+    return StatusCode::FAILURE;
+  }
+  if(std::cmp_less(m_frontbunches, distFromFront)) distFromFront=static_cast<int>(m_frontbunches);
+  
   bool checkfirstbunch = true;
-  for(unsigned int i=1;i<=distFromFront;i++){
+  for(int i=1;i<=distFromFront;i++){
      bool isFilled=bunchCrossing->isFilled(m_nt_bcid-i);
      ATH_MSG_DEBUG("bunch "<<i<<" is Filled "<<isFilled);
      m_nt_isBunchesInFront.push_back(isFilled);
        if(isFilled){
-         if(i!=1){
+         if(i!=1){ //is this correct??
            if(checkfirstbunch){
              float time = 25.0*i;
              m_nt_bunchtime = time;
@@ -706,9 +697,7 @@ StatusCode LArNoiseBursts::doEventProperties(){
   }
 
   m_CosmicCaloStream = false;
-  //std::vector<TriggerInfo::StreamTag>::const_iterator streamInfoIt=myTriggerInfo->streamTags().begin();
-  //std::vector<TriggerInfo::StreamTag>::const_iterator streamInfoIt_e=myTriggerInfo->streamTags().end();
-  //for (;streamInfoIt!=streamInfoIt_e;streamInfoIt++) { 
+
   for (const auto& streamInfo : eventInfo->streamTags()) {
     const std::string& stream_name = streamInfo.name();
     const std::string& stream_type = streamInfo.type();
@@ -741,38 +730,7 @@ StatusCode LArNoiseBursts::doEventProperties(){
   m_nt_larflag_badHVlines = eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,LArEventBitInfo::BADHVLINES);
   
 
-  ///////////////////////////////////////end EventInfo variables/////////////////////////////////////////////////////////////////////////
-
-  //const AthenaAttributeList* attrList(0);
-  //ATH_CHECK( evtStore()->retrieve(attrList, "/TDAQ/RunCtrl/DataTakingMode") );
-  //if (attrList != 0) {
-  //  ATH_MSG_DEBUG ("ReadyForPhysics is: " << (*attrList)["ReadyForPhysics"].data<uint32_t>());
-  //  //m_valueCache = ((*attrList)["ReadyForPhysics"].data<uint32_t>() != 0);
-  //  m_nt_atlasready = (*attrList)["ReadyForPhysics"].data<uint32_t>();
-  // }
-
-   /*const AthenaAttributeList* fillstate(0);
-  sc =  evtStore()->retrieve(fillstate, "/LHC/DCS/FILLSTATE");
-  if (sc.isFailure()) {
-     ATH_MSG_WARNING ("Unable to retrieve fillstate information; falling back to" );
-     return StatusCode::SUCCESS;
-   }
-   if (fillstate != 0) {
-     ATH_MSG_DEBUG ("Stable beams is: " << (*fillstate)["StableBeams"].data<uint32_t>());
-     //m_valueCache = ((*attrList)["ReadyForPhysics"].data<uint32_t>() != 0);
-     m_nt_stablebeams.push_back((*fillstate)["StableBeams"].data<uint32_t>());
-     }*/
-
   
-  // 29/11/10 : Debug messages removed by BT 
-  //   mLog << MSG::INFO << "Event LAr flags " << std::hex
-  //      << eventInfo->errorState(xAOD::EventInfo::LAr) << " "
-  //      << std::hex << eventInfo->eventFlags(xAOD::EventInfo::LAr)
-  //      << ", bit 0: " << eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,0)
-  //      << ", bit 1: " << eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,1)
-  //      << ", bit 2: " << eventInfo->isEventFlagBitSet(xAOD::EventInfo::LAr,2)
-  //      << endmsg;
-
   // Retrieve LArCollision Timing information
   const LArCollisionTime *  larTime=nullptr;
   if (evtStore()->contains<LArCollisionTime>("LArCollisionTime")) {
