@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASINTERFACES_IPHYSICSCONSTRUCTOR_H

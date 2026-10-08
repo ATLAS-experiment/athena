@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2026 for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Demonstration: Workbench script for testing output of new dqm algorithm

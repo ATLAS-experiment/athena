@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2019, 2025 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 #include "T2TrackBSLLPoly.h"
 #include "idx.h"

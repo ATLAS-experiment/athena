@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2024-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef LARROD_LARNNRAWCHANNELBUILDER_H

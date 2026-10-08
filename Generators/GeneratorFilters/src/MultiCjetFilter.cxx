@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboratio
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // This is a general-purpose multi-c-jet filter with the removal of the 
 // c-hadrons orriginating from b-hadrons decay.

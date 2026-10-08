@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2026 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Replacing LAr_updateHVcalib_online.sh and LAr_updateHVcalibNoise.sh
 from concurrent.futures import ThreadPoolExecutor
 from hashlib import md5
