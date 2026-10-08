@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TRTStrawEfficiency.cxx
@@ -442,6 +442,7 @@ int TRTStrawEfficiency::fill_hit_data(const Trk::TrackStateOnSurface& hit) {
 		trtcircle = dynamic_cast<const InDet::TRT_DriftCircleOnTrack*> (measurement);
 	}	else {
 		ATH_MSG_ERROR("fill_hit_data(hit): null measurement");
+                return 0;
 	}
 
 	if(!trtcircle) {
@@ -465,7 +466,7 @@ int TRTStrawEfficiency::fill_hit_data(const Trk::TrackStateOnSurface& hit) {
 
 	// ------- added by dan -------
 	int is_tube_hit = -1;
-	if (measurement && (det == 3) ) {
+	if (det == 3 ) {
 		is_tube_hit = ((measurement->localCovariance())(Trk::locX,Trk::locX) > 1.0)? 1 : 0;
 		if (is_tube_hit) m_n_tube_hits++;
 	}
