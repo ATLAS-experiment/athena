@@ -154,7 +154,7 @@ namespace xAODMaker {
 							      const Trk::Track& tp,
                     const xAOD::Vertex* vtx) const {
     // create the xAOD::TrackParticle, the pointer is added to the container in the function
-    ElementLink<TrackCollection> trackLink( &tp, container );
+    ElementLink<TrackCollection> trackLink( &tp, container, ctx );
     return m_particleCreator->createParticle(ctx, trackLink, &xaod , vtx);
     //no!    return m_particleCreator->createParticle( tp, &xaod );
   }

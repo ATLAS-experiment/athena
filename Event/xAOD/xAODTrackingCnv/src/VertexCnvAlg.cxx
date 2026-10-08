@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi/Athena include(s):
@@ -48,7 +48,7 @@ namespace xAODMaker {
     return StatusCode::SUCCESS;
   }
 
-  StatusCode VertexCnvAlg::execute(const EventContext& /*ctx*/) {
+  StatusCode VertexCnvAlg::execute(const EventContext& ctx) {
     // Retrieve the AOD vertexes:
 
     if (!m_aod.isValid()) {
@@ -67,7 +67,7 @@ namespace xAODMaker {
        ATH_MSG_ERROR( "Problem creating " << m_xaodout.name() );
     }
 
-    m_xaodout->setStore( *m_xauxout );
+    m_xaodout->setStore( m_xauxout.ptr() );
 
 
     // Create the xAOD objects:
@@ -98,7 +98,7 @@ namespace xAODMaker {
             Trk::LinkToTrackParticleBase* linkToTrackPB = dynamic_cast<Trk::LinkToTrackParticleBase*>(trklink);  
             if (linkToTrackPB)                 {
                  ElementLink<xAOD::TrackParticleContainer> newLink;
-                 newLink.resetWithKeyAndIndex( m_TPContainerName, linkToTrackPB->index());
+                 newLink.resetWithKeyAndIndex( m_TPContainerName, linkToTrackPB->index(), ctx );
                  //Now set the newlink to the new xAOD vertex
                  vertex->addTrackAtVertex(newLink, VTAV->vtxCompatibility()); 
                 } 
@@ -106,7 +106,7 @@ namespace xAODMaker {
 	      Trk::LinkToXAODNeutralParticle* linkToTrackNP = dynamic_cast<Trk::LinkToXAODNeutralParticle*>(trklink);  
 	      if (linkToTrackNP)                 {
 		ElementLink<xAOD::NeutralParticleContainer> newLink;
-		newLink.resetWithKeyAndIndex( m_NPContainerName, linkToTrackNP->index());
+		newLink.resetWithKeyAndIndex( m_NPContainerName, linkToTrackNP->index(), ctx );
 		//Now set the newlink to the new xAOD vertex
 		vertex->addNeutralAtVertex(newLink, VTAV->vtxCompatibility()); 
 	      } 
