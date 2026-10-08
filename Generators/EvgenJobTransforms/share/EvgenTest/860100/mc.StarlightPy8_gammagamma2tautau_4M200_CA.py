@@ -5,8 +5,8 @@ from EvgenJobTransforms.EvgenCAConfig import EvgenConfig
 class Sample(EvgenConfig):
 
     def setupFlags(self, flags):
-        self.description = "Starlight+Pythia8+Tauolapp+Photospp gamma + gamma UPC collisions at 5020 GeV to continuum -> 2 tau, breakup mode 5 (no selection) with pT>3 GeV charged particle filter"
-        self.keywords = ["2photon","2lepton"]
+        self.description = "Starlight+Pythia8+Tauolapp+Photospp gamma + gamma UPC collisions to continuum -> 2 tau, breakup mode 5 (no selection) with pT>3 GeV charged tracks filter"
+        self.keywords = ["2photon","2lepton","2tau"]
         self.contact = ["pawel.rybczynski@cern.ch"]
         self.nEventsPerJob = 10000
 

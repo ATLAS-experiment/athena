@@ -5,8 +5,8 @@ from EvgenJobTransforms.EvgenCAConfig import EvgenConfig
 class Sample(EvgenConfig):
 
     def setupFlags(self, flags):
-        self.description = "Starlight+EvtGen coherent gamma + A UPC collisions at 5360 GeV to Psi(2S) -> all decays, breakup mode 5, pT(trk)>0.9GeV, |eta(trk)|<2.6"
-        self.keywords = ["2photon","2lepton"]
+        self.description = "Starlight+EvtGen coherent gamma + A UPC collisions to Psi(2S) -> all decays, breakup mode 5, pT(trk)>0.9GeV, |eta(trk)|<2.6"
+        self.keywords = ["coherent","resonance"]
         self.contact = ["pawel.rybczynski@cern.ch"]
         self.nEventsPerJob = 10000
 
@@ -35,4 +35,3 @@ class Sample(EvgenConfig):
         ))
 
         return sampleConfig
-
