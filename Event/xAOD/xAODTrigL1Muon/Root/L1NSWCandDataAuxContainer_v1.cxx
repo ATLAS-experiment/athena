@@ -14,6 +14,6 @@ namespace xAOD {
     AUX_VARIABLE(l1Overflow);
     AUX_VARIABLE(fiberID);
     AUX_VARIABLE(boardID);
-    AUX_VARIABLE(l1SegmentWords);
+    AUX_VARIABLE(l1SegmentWord);
   }
 }

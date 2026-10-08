@@ -56,51 +56,44 @@ namespace xAOD {
      */
     uint16_t boardID() const; // 7 bits, bit order [26:20]
 
-    /// Segments
+    /// Segment
     /**
-     * @brief Get the complete collection of packed 32-bit segment words
-     * @return Reference to the vector of packed segment data words
+     * @brief Get the packed 32-bit segment word
+     * @return The packed segment data word
      */
-    const std::vector<uint32_t>& l1SegmentWords() const;
-
-    /// Element-by-Element Index
-    /**
-     * @brief Retrieve the eta index for a specific segment
-     * @param i Index of the segment within the vector
-     */
-    uint16_t segEtaIndex(size_t i) const;
+    uint32_t l1SegmentWord() const;
 
     /**
-     * @brief Retrieve the phi index for a specific segment
-     * @param i Index of the segment within the vector
+     * @brief Retrieve the eta index of the segment
      */
-    uint16_t segPhiIndex(size_t i) const;
+    uint16_t segEtaIndex() const;
 
     /**
-     * @brief Retrieve the delta theta index for a specific segment
-     * @param i Index of the segment within the vector
+     * @brief Retrieve the phi index of the segment
      */
-    uint8_t segDeltaThetaIndex(size_t i) const;
+    uint16_t segPhiIndex() const;
 
     /**
-     * @brief Retrieve the quality flag for a specific segment
-     * @param i Index of the segment within the vector
+     * @brief Retrieve the delta theta index of the segment
      */
-    uint8_t segQuality(size_t i) const;
+    uint8_t segDeltaThetaIndex() const;
 
     /**
-     * @brief Retrieve the decoded physical eta coordinate for a specific segment
-     * @param i Index of the segment within the vector
+     * @brief Retrieve the quality flag of the segment
+     */
+    uint8_t segQuality() const;
+
+    /**
+     * @brief Retrieve the decoded physical eta coordinate of the segment
      * @return Transformed float value representing the physical eta position
      */
-    float segEta(size_t i) const;
+    float segEta() const;
 
     /**
-     * @brief Retrieve the decoded physical phi coordinate for a specific segment
-     * @param i Index of the segment within the vector
+     * @brief Retrieve the decoded physical phi coordinate of the segment
      * @return Transformed float value representing the physical phi position (in radians)
      */
-    float segPhi(size_t i) const;
+    float segPhi() const;
 
     /// Setters
 
@@ -135,19 +128,19 @@ namespace xAOD {
     void setBoardID(uint16_t board);
 
     /**
-     * @brief Pack and append a single segment
-     * @brief Push a new completed segment into the candidate's segment collections
+     * @brief Set the raw packed segment word
+     * @param word Packed segment data word
+     */
+    void setL1SegmentWord(uint32_t word);
+
+    /**
+     * @brief Pack and set the segment from its decoded fields
      * @param etaIndex Calculated eta index
      * @param phiIndex Calculated phi index
      * @param deltaThetaIndex Calculated theta index
      * @param quality Quality flag value
      */
-    void addSegment(uint16_t etaIndex, uint16_t phiIndex, uint8_t deltaThetaIndex, uint8_t quality);
-
-    /**
-     * @brief Clear all recorded segment vectors
-     */
-    void clearSegments();
+    void setSegment(uint16_t etaIndex, uint16_t phiIndex, uint8_t deltaThetaIndex, uint8_t quality);
 
     /**
      * @brief Produce a formatted string representation of the candidates
