@@ -76,23 +76,23 @@ namespace MuonCalib {
         ///< limits in RtRelationLookUp
         static std::unique_ptr<IRtRelation> getRtRelationLookUp(const std::vector<SamplePoint>& sample_points);
 
-        private:
-            /** @brief Executes the fit of  chebychev polynomials to the data points
-             *  @param dataPoints: Data points to fit. No normalization of the domain required
-             *  @param order: Number of Chebychev polynomials to use in the fit */
-            static CalibFunc::ParVec chebyFit(const std::vector<SamplePoint>& dataPoints,
-                                              const unsigned order);
+        /** @brief Executes the fit of  chebychev polynomials to the data points
+        *  @param dataPoints: Data points to fit. No normalization of the domain required
+        *  @param order: Number of Chebychev polynomials to use in the fit */
+        static CalibFunc::ParVec chebyFit(const std::vector<SamplePoint>& dataPoints,
+                                            const unsigned order);
 
-            /** @brief Executes the fit of Legendre polynomials to the data points
-             *  @param dataPoints: Data points to fit. No normalization of the domain required
-             *  @param order: Number of Legendre polynomials to use in the fit */
-            static CalibFunc::ParVec legendreFit(const std::vector<SamplePoint>& dataPoints,
-                                                 const unsigned order);
-            /** @brief Exectues the fit of simple monomials to the data points
-             *  @param dataPoints: Data points to fit.
-             *  @param order: Number of Legendre polynomials to use in the fit */
-            static CalibFunc::ParVec simplePolyFit(const std::vector<SamplePoint>& dataPoints,
-                                                   const unsigned order);
+    private:
+        /** @brief Executes the fit of Legendre polynomials to the data points
+            *  @param dataPoints: Data points to fit. No normalization of the domain required
+            *  @param order: Number of Legendre polynomials to use in the fit */
+        static CalibFunc::ParVec legendreFit(const std::vector<SamplePoint>& dataPoints,
+                                                const unsigned order);
+        /** @brief Exectues the fit of simple monomials to the data points
+            *  @param dataPoints: Data points to fit.
+            *  @param order: Number of Legendre polynomials to use in the fit */
+        static CalibFunc::ParVec simplePolyFit(const std::vector<SamplePoint>& dataPoints,
+                                                const unsigned order);
             
     };
 
