@@ -13,7 +13,7 @@ atlas_add_library( TrigParticle
 atlas_generate_cliddb( TrigParticle )
 
 atlas_add_sercnv_library( TrigParticleSerCnv
-                          FILES TrigParticle/TrigElectron.h TrigParticle/TrigElectronContainer.h TrigParticle/TrigPhoton.h TrigParticle/TrigPhotonContainer.h TrigParticle/TrigTau.h TrigParticle/TrigTauContainer.h TrigParticle/TrigL2Bjet.h TrigParticle/TrigL2BjetContainer.h TrigParticle/TrigEFBjet.h TrigParticle/TrigEFBjetContainer.h TrigParticle/TrigL2Bphys.h TrigParticle/TrigL2BphysContainer.h TrigParticle/TrigEFBphys.h TrigParticle/TrigEFBphysContainer.h egammaEvent/egammaContainer.h egammaEvent/egDetailContainer.h JetEvent/JetCollection.h JetEvent/JetMomentMap.h JetEvent/JetMomentMapCollection.h JetEvent/JetKeyDescriptor.h JetEvent/JetKeyDescriptorCollection.h
+                          FILES TrigParticle/TrigElectron.h TrigParticle/TrigElectronContainer.h TrigParticle/TrigPhoton.h TrigParticle/TrigPhotonContainer.h TrigParticle/TrigTau.h TrigParticle/TrigTauContainer.h TrigParticle/TrigL2Bjet.h TrigParticle/TrigL2BjetContainer.h TrigParticle/TrigL2Bphys.h TrigParticle/TrigL2BphysContainer.h TrigParticle/TrigEFBphys.h TrigParticle/TrigEFBphysContainer.h egammaEvent/egammaContainer.h egammaEvent/egDetailContainer.h JetEvent/JetCollection.h JetEvent/JetMomentMap.h JetEvent/JetMomentMapCollection.h JetEvent/JetKeyDescriptor.h JetEvent/JetKeyDescriptorCollection.h
                           LINK_LIBRARIES TrigParticle )
 
 atlas_add_sercnv_library( TrigParticlexAODSerCnv
@@ -26,6 +26,6 @@ atlas_add_dictionary( TrigParticleDict
                       TrigParticle/TrigParticleDict.h
                       TrigParticle/selection.xml
                       LINK_LIBRARIES TrigParticle
-                      DATA_LINKS TrigTau TrigPhotonContainer TrigEFBjetContainer TrigL2BjetContainer
+                      DATA_LINKS TrigTau TrigPhotonContainer TrigL2BjetContainer
                       ELEMENT_LINKS TrigL2BphysContainer TrigEFBphysContainer TrigElectronContainer )
 

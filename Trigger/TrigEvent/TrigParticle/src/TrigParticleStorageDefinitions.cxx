@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigParticle/TrigElectronContainer.h"
@@ -10,7 +10,6 @@
 #include "TrigParticle/TrigEFBphys.h"
 #include "TrigParticle/TrigEFBphysContainer.h"
 #include "TrigParticle/TrigL2BjetContainer.h"
-#include "TrigParticle/TrigEFBjetContainer.h"
 #include "JetEvent/JetCollection.h"
 #include "JetEvent/JetKeyDescriptor.h"
 #include "JetEvent/JetKeyDescriptorCollection.h"

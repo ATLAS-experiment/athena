@@ -93,7 +93,6 @@ StatusCode TrigSerializeConvHelper::initialize(){
   m_oldEDMmap[ "TrigVertexCollection" ]      = "TrigVertexCollection_tlp1";
   m_oldEDMmap[ "TrigL2BphysContainer" ]      = "TrigL2BphysContainer_tlp1";
   m_oldEDMmap[ "TrigEFBphysContainer" ]      = "TrigEFBphysContainer_tlp1";
-  m_oldEDMmap[ "TrigEFBjetContainer" ]       = "TrigEFBjetContainer_tlp2";
   m_oldEDMmap[ "JetCollection" ]             = "JetCollection_tlp2";
   m_oldEDMmap[ "CaloClusterContainer" ]      = "CaloClusterContainer_p4";
   m_oldEDMmap[ "CaloShowerContainer" ]       = "CaloShowerContainer_p2";

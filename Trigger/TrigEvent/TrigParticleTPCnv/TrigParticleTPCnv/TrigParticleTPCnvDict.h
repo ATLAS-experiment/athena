@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGPARTICLETPCNV_TRIGPARTICLETPCNVDICT_H
@@ -72,15 +72,6 @@
 #include "TrigParticleTPCnv/TrigL2BjetContainer_p3.h"
 #include "TrigParticleTPCnv/TrigL2Bjet_p3.h"
 
-// TrigEFBjet
-#include "TrigParticleTPCnv/TrigEFBjetContainer_tlp1.h"  
-#include "TrigParticleTPCnv/TrigEFBjetContainer_p1.h"
-#include "TrigParticleTPCnv/TrigEFBjet_p1.h"
-
-#include "TrigParticleTPCnv/TrigEFBjetContainer_tlp2.h" 
-#include "TrigParticleTPCnv/TrigEFBjetContainer_p2.h" 
-#include "TrigParticleTPCnv/TrigEFBjet_p2.h" 
-
 //dummy instances of all objects using std::vector<TPObjRef> for the dictionary
 struct dummy_TrigParticleTPCnvDict
 {
@@ -92,8 +83,6 @@ struct dummy_TrigParticleTPCnvDict
   std::vector<TrigPhoton_p1> 		      m_dummyTrigPhoton_p1;
   std::vector<TrigPhoton_p2> 		      m_dummyTrigPhoton_p2;
   std::vector<TrigPhoton_p3> 		      m_dummyTrigPhoton_p3;
-  std::vector<TrigEFBjet_p1>                  m_dummyEFBjet_p1;
-  std::vector<TrigEFBjet_p2>                  m_dummyEFBjet_p2;
   std::vector<TrigEFBphys_p1>                 m_dummyEFBphys_p1;
   std::vector<TrigEFBphys_p2>                 m_dummyEFBphys_p2;
   std::vector<TrigEFBphys_p3>                 m_dummyEFBphys_p3;
