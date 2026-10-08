@@ -729,8 +729,6 @@ TriggerHLTList = [
     ('TrigMuonClusterFeature#HLT_MuonCluster',                            'BS ESD', 'Muon'),
     ('CombinedMuonFeature#HLT',                                           'BS ESD AODFULL AODSLIM', 'Muon'),
     ('TrigPhotonContainer#HLT_L2PhotonFex',                               '',                       'Egamma'),
-    ('TrigT2Jet#HLT_TrigT2CaloJet',                                       '',                       'Jet'),
-    ('TrigT2Jet#HLT_TrigT2CosmicJet',                                     '',                       'Cosmics'), # ?slim
     ('TrigTau#HLT',                                                       '',                       'Tau'),
     ('TileMuFeature#HLT',                                                 'BS ESD',                 'Muon'),
     ('TileTrackMuFeature#HLT',                                            'BS ESD',                 'Muon'),
@@ -1078,8 +1076,6 @@ TriggerL2EvolutionList = [
 #('TrigMuonClusterFeature#HLT_MuonCluster',                              ), # xAOD equivalent not identified
 ('CombinedMuonFeature#HLT',                                              'xAOD::L2CombinedMuonContainer#HLT_MuonL2CBInfo'),
 ('TrigPhotonContainer#HLT_L2PhotonFex',                                  'xAOD::TrigPhotonContainer#HLT_L2PhotonFex'),
-#('TrigT2Jet#HLT_TrigT2CaloJet',                                         ), # xAOD equivalent not found
-#('TrigT2Jet#HLT_TrigT2CosmicJet',                                       ), # xAOD equivalent not found
 #('TrigTau#HLT',                                                         ), # xAOD equivalent not found
 #('TileMuFeature#HLT',                                                   ), # xAOD equivalent not found
 #('TileTrackMuFeature#HLT',                                              ), # xAOD equivalent not found
@@ -1285,7 +1281,6 @@ EDMDetails[ "TrigTauCluster" ]            = {'persistent':"TrigTauClusterContain
 EDMDetails[ "TrigTauClusterDetails" ]     = {'persistent':"TrigTauClusterDetailsContainer_p2",  'typealias':'TauDetails', 'collection': 'TrigTauClusterDetailsContainer' }
 #EDMDetails[ "TrigTauTracksInfo" ]         = {'persistent':"TrigTauTracksInfoCollection_tlp1",     'typealias':'TauTrInfo', 'collection':'TrigTauTracksInfoCollection'}
 EDMDetails[ "TrigTauTracksInfo" ]         = {'persistent':"TrigTauTracksInfoCollection_p2",     'typealias':'TauTrInfo', 'collection':'TrigTauTracksInfoCollection'}
-#EDMDetails[ "TrigT2Jet" ]                 = {'persistent':"TrigT2JetContainer_tlp1",              'typealias':'T2Jet', 'collection':'TrigT2JetContainer'}
 EDMDetails[ "TrigT2Jet" ]                 = {'persistent':"TrigT2JetContainer_p3",              'typealias':'T2Jet', 'collection':'TrigT2JetContainer'}
 #EDMDetails[ "TrigElectronContainer" ]     = {'persistent':"TrigElectronContainer_tlp2",           'typealias':'' }
 EDMDetails[ "TrigElectronContainer" ]     = {'persistent':"TrigElectronContainer_p3",           'typealias':'AOD' }

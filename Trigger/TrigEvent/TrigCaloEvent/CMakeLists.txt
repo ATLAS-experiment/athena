@@ -13,7 +13,7 @@ atlas_add_library( TrigCaloEvent
 atlas_generate_cliddb( TrigCaloEvent )
 
 atlas_add_sercnv_library( TrigCaloEventSerCnv
-                          FILES TrigCaloEvent/TrigCaloCluster.h TrigCaloEvent/TrigCaloClusterContainer.h TrigCaloEvent/TrigEMCluster.h TrigCaloEvent/TrigEMClusterContainer.h TrigCaloEvent/RingerRings.h TrigCaloEvent/RingerRingsContainer.h TrigCaloEvent/TrigTauCluster.h TrigCaloEvent/TrigTauClusterContainer.h TrigCaloEvent/TrigTauClusterDetails.h TrigCaloEvent/TrigTauClusterDetailsContainer.h TrigCaloEvent/TrigT2Jet.h TrigCaloEvent/TrigT2JetContainer.h TrigCaloEvent/Trig3Momentum.h TrigCaloEvent/TrigT2MbtsBits.h TrigCaloEvent/TrigT2MbtsBitsContainer.h TrigCaloEvent/TrigT2ZdcSignals.h TrigCaloEvent/TrigT2ZdcSignalsContainer.h TrigCaloEvent/TrigRNNOutput.h TrigCaloEvent/TrigRNNOutputContainer.h CaloEvent/CaloCellContainer.h CaloEvent/CaloClusterContainer.h CaloEvent/CaloShowerContainer.h CaloEvent/CaloTowerContainer.h CaloEvent/CaloCellLinkContainer.h
+                          FILES TrigCaloEvent/TrigCaloCluster.h TrigCaloEvent/TrigCaloClusterContainer.h TrigCaloEvent/TrigEMCluster.h TrigCaloEvent/TrigEMClusterContainer.h TrigCaloEvent/RingerRings.h TrigCaloEvent/RingerRingsContainer.h TrigCaloEvent/TrigTauCluster.h TrigCaloEvent/TrigTauClusterContainer.h TrigCaloEvent/TrigTauClusterDetails.h TrigCaloEvent/TrigTauClusterDetailsContainer.h TrigCaloEvent/Trig3Momentum.h TrigCaloEvent/TrigT2MbtsBits.h TrigCaloEvent/TrigT2MbtsBitsContainer.h TrigCaloEvent/TrigT2ZdcSignals.h TrigCaloEvent/TrigT2ZdcSignalsContainer.h TrigCaloEvent/TrigRNNOutput.h TrigCaloEvent/TrigRNNOutputContainer.h CaloEvent/CaloCellContainer.h CaloEvent/CaloClusterContainer.h CaloEvent/CaloShowerContainer.h CaloEvent/CaloTowerContainer.h CaloEvent/CaloCellLinkContainer.h
                           LINK_LIBRARIES TrigCaloEvent TrigSerializeCnvSvcLib )
 
 atlas_add_sercnv_library( TrigCaloEventxAODSerCnv
@@ -26,5 +26,5 @@ atlas_add_dictionary( TrigCaloEventDict
                       TrigCaloEvent/TrigCaloEventDict.h
                       TrigCaloEvent/selection.xml
                       LINK_LIBRARIES TrigCaloEvent
-                      DATA_LINKS TrigCaloCluster TrigEMCluster TrigT2Jet TrigTauCluster TrigTauClusterDetails RingerRings TrigRNNOutput
+                      DATA_LINKS TrigCaloCluster TrigEMCluster TrigTauCluster TrigTauClusterDetails RingerRings TrigRNNOutput
                       ELEMENT_LINKS TrigEMClusterContainer RingerRingsContainer TrigTauClusterContainer TrigTauClusterDetailsContainer TrigRNNOutputContainer )

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGCALOEVENTTPCNV_TRIGCALOEVENTTPCNVDICT_H
@@ -36,14 +36,6 @@
 #include "TrigCaloEventTPCnv/TrigT2MbtsBitsContainer_p1.h"
 #include "TrigCaloEventTPCnv/TrigT2MbtsBitsContainer_p3.h"
 #include "TrigCaloEventTPCnv/TrigT2MbtsBitsContainer_tlp1.h" 
-
-#include "TrigCaloEventTPCnv/TrigT2Jet_p3.h"
-#include "TrigCaloEventTPCnv/TrigT2JetContainer_p3.h"
-#include "TrigCaloEventTPCnv/TrigT2Jet_tlp1.h"
-#include "TrigCaloEventTPCnv/TrigT2JetContainer_tlp1.h"
-#include "TrigCaloEventTPCnv/TrigT2JetContainer_p1.h"
-#include "TrigCaloEventTPCnv/TrigT2Jet_p1.h"
-#include "TrigCaloEventTPCnv/TrigT2Jet_p2.h"
 
 #include "TrigCaloEventTPCnv/RingerRingsContainer_tlp1.h"
 #include "TrigCaloEventTPCnv/RingerRingsContainer_p1.h"
@@ -93,9 +85,6 @@ struct dummy_TrigCaloEventTPCnvDict
   std::vector<TrigT2MbtsBits_p1>              m_dummyT2MbtsBits_p1;
   std::vector<TrigT2MbtsBits_p2>              m_dummyT2MbtsBits_p2;
   std::vector<TrigT2MbtsBits_p3>              m_dummyT2MbtsBits_p3;
-  std::vector<TrigT2Jet_p1>                   m_dummyT2Jet_p1;
-  std::vector<TrigT2Jet_p2>                   m_dummyT2Jet_p2;
-  std::vector<TrigT2Jet_p3>                   m_dummyT2Jet_p3;
   std::vector<TrigEMCluster_p1>               m_dummyEMCluster_p1;
   std::vector<TrigEMCluster_p2>               m_dummyEMCluster_p2;
   std::vector<TrigEMCluster_p3>               m_dummyEMCluster_p3;

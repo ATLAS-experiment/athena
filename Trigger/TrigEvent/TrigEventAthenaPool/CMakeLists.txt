@@ -46,8 +46,7 @@ atlas_add_poolcnv_library( TrigEventAthenaPoolPoolCnv
          TrigCaloEvent/TrigTauClusterDetailsContainer.h
          TrigCaloEvent/TrigT2MbtsBits.h TrigCaloEvent/TrigT2MbtsBitsContainer.h
          TrigCaloEvent/TrigT2ZdcSignals.h
-         TrigCaloEvent/TrigT2ZdcSignalsContainer.h TrigCaloEvent/TrigT2Jet.h
-         TrigCaloEvent/TrigT2JetContainer.h
+         TrigCaloEvent/TrigT2ZdcSignalsContainer.h
          TrigCaloEvent/RingerRings.h
          TrigCaloEvent/RingerRingsContainer.h TrigCaloEvent/TrigRNNOutput.h
          TrigCaloEvent/TrigRNNOutputContainer.h TrigCaloEvent/TrigCaloCluster.h

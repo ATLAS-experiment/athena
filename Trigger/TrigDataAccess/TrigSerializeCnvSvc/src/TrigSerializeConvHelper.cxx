@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigSerializeCnvSvc/TrigSerializeConvHelper.h"
@@ -79,7 +79,6 @@ StatusCode TrigSerializeConvHelper::initialize(){
   m_oldEDMmap[ "TrigTauCluster" ]            = "TrigTauClusterContainer_tlp1";
   m_oldEDMmap[ "TrigTauClusterDetails" ]     = "TrigTauClusterDetailsContainer_tlp1";
   m_oldEDMmap[ "TrigTauTracksInfo" ]         = "TrigTauTracksInfoCollection_tlp1";
-  m_oldEDMmap[ "TrigT2Jet" ]                 = "TrigT2JetContainer_tlp1";
   m_oldEDMmap[ "TrigElectronContainer" ]     = "TrigElectronContainer_tlp2";
   m_oldEDMmap[ "TrigPhotonContainer" ]       = "TrigPhotonContainer_tlp2";
   m_oldEDMmap[ "TrigTau" ]                   = "TrigTauContainer_tlp1";

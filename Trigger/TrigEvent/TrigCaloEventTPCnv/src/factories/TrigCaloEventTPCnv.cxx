@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // generate the T/P converter entries
@@ -43,16 +43,6 @@
 #include "TrigCaloEventTPCnv/TrigT2MbtsBitsCnv_p3.h"
 #include "TrigCaloEventTPCnv/TrigT2MbtsBitsCnv_p2.h"
 #include "TrigCaloEventTPCnv/TrigT2MbtsBitsCnv_p1.h"
-
-#include "TrigCaloEventTPCnv/TrigT2Jet_tlp1.h"
-#include "TrigCaloEventTPCnv/TrigT2JetContainer_tlp1.h"
-#include "TrigCaloEventTPCnv/TrigT2JetContainerCnv_tlp1.h"
-#include "TrigCaloEventTPCnv/TrigT2JetContainer_p1.h"
-#include "TrigCaloEventTPCnv/TrigT2JetCnv_tlp1.h"
-#include "TrigCaloEventTPCnv/TrigT2Jet_p1.h"
-
-#include "TrigCaloEventTPCnv/TrigT2JetContainer_p3.h"
-#include "TrigCaloEventTPCnv/TrigT2JetContainerCnv_p3.h"
 
 #include "TrigCaloEventTPCnv/RingerRingsContainer_tlp1.h"
 #include "TrigCaloEventTPCnv/RingerRingsContainerCnv_tlp1.h"
@@ -168,21 +158,6 @@ DECLARE_TPCNV_FACTORY(TrigRNNOutputContainerCnv_tlp1,
 DECLARE_TPCNV_FACTORY(TrigRNNOutputContainerCnv_p2,
                       TrigRNNOutputContainer,
                       TrigRNNOutputContainer_p2,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigT2JetCnv_tlp1,
-                      TrigT2Jet,
-                      TrigT2Jet_tlp1,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigT2JetContainerCnv_tlp1,
-                      TrigT2JetContainer,
-                      TrigT2JetContainer_tlp1,
-                      Athena::TPCnvVers::Old)
-
-DECLARE_TPCNV_FACTORY(TrigT2JetContainerCnv_p3,
-                      TrigT2JetContainer,
-                      TrigT2JetContainer_p3,
                       Athena::TPCnvVers::Current)
                       
 DECLARE_TPCNV_FACTORY(TrigT2MbtsBitsCnv_p1,
