@@ -10,9 +10,9 @@
 #include "MuonDigitContainer/MmDigitContainer.h"
 #include "MuonDigitContainer/sTgcDigitContainer.h"
 
-#include "xAODL0MuonCand/NSWCandData.h"
-#include "xAODL0MuonCand/NSWCandDataContainer.h"
-#include "xAODL0MuonCand/NSWCandDataAuxContainer.h"
+#include "xAODTrigL1Muon/L1NSWCandData.h"
+#include "xAODTrigL1Muon/L1NSWCandDataContainer.h"
+#include "xAODTrigL1Muon/L1NSWCandDataAuxContainer.h"
 
 /**
  * @class NSWSimulation
@@ -35,7 +35,7 @@ namespace L1Muon {
     /// sTGC digits
     SG::ReadHandleKey<sTgcDigitContainer> m_keySTgcDigit{this, "sTGCDigits", "sTGC_DIGITS", "Input sTGC digit container"};
     /// Output NSW trigger candidate container
-    SG::WriteHandleKey<xAOD::NSWCandDataContainer> m_outputKey{ this, "OutputNSWCandidates", "L0MuonNSWCandidates", "Output NSW trigger candidates"};
+    SG::WriteHandleKey<xAOD::L1NSWCandDataContainer> m_outputKey{ this, "OutputNSWCandidates", "L1NSWCandidates", "Output NSW trigger candidates"};
 
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring Tool"};
   

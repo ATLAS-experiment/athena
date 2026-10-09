@@ -5,7 +5,7 @@ from AthenaCommon.Logging import logging
 
 _log = logging.getLogger(__name__)
 
-def L0MuonNSWSimCfg(flags, name = "L1Muon.NSWSimulation", **kwargs):
+def L1MuonNSWSimCfg(flags, name = "L1Muon.NSWSimulation", **kwargs):
 
     result = ComponentAccumulator()
 
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     flags, acc = setupGeoR4TestCfg(args, flags)
     from AthenaCommon.Constants import DEBUG
 
-    acc.merge(setupHistSvcCfg(flags, outFile="L0MuonNSW_Expert.root", outStream="EXPERT"))
+    acc.merge(setupHistSvcCfg(flags, outFile="L1MuonNSW_Expert.root", outStream="EXPERT"))
     
     from MuonConfig.MuonByteStreamCnvTestConfig import STGC_RdoToDigitCfg, MM_RdoToDigitCfg
     if flags.Detector.GeometrysTGC:
@@ -47,6 +47,6 @@ if __name__ == "__main__":
     if flags.Detector.GeometryMM:
         acc.merge(MM_RdoToDigitCfg(flags, MmRdoContainer="MMRDO", MmDigitContainer="MM_DIGITS"))
 
-    acc.merge(L0MuonNSWSimCfg(flags, OutputLevel = DEBUG))
+    acc.merge(L1MuonNSWSimCfg(flags, OutputLevel = DEBUG))
 
     executeTest(acc)

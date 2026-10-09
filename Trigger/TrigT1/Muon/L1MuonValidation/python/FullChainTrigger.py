@@ -75,8 +75,8 @@ if __name__ == "__main__":
     if flags.Detector.GeometryMM:
         acc.merge(MM_RdoToDigitCfg(flags, MmRdoContainer="MMRDO", MmDigitContainer="MM_DIGITS"))
 
-    from L1MuonNSW.L0MuonNSWConfig import L0MuonNSWSimCfg
-    acc.merge(L0MuonNSWSimCfg(flags, name="L0MuonNSWSim", OutputLevel=DEBUG))
+    from L1MuonNSW.L1MuonNSWConfig import L1MuonNSWSimCfg
+    acc.merge(L1MuonNSWSimCfg(flags, name="L1MuonNSWSim", OutputLevel=DEBUG))
 
     print("=== Registered services ===")
     for svc in acc.getServices():
@@ -94,8 +94,8 @@ if __name__ == "__main__":
         "xAOD::TGCCandDataAuxContainer#L0MuonTGCCandDataAux.",
         "xAOD::SectorLogicCandDataContainer#L0MuonTGCSectorLogicCandData",
         "xAOD::SectorLogicCandDataAuxContainer#L0MuonTGCSectorLogicCandDataAux.",
-        "xAOD::NSWCandDataContainer#NSWCandData",      
-        "xAOD::NSWCandDataAuxContainer#NSWCandDataAux." 
+        "xAOD::L1NSWCandDataContainer#L1NSWCandidates",
+        "xAOD::L1NSWCandDataAuxContainer#L1NSWCandidatesAux."
     ]
 
     acc.merge(OutputStreamCfg(flags,
