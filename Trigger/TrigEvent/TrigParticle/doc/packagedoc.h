@@ -15,7 +15,5 @@ This package contains the diverse TrigParticle classes
 
   - TrigElectron : stores the Electron candidates (Jose.Goncalo@cern.ch)
   - TrigPhoton   : stores the Photon candidates   (Valeria.Perez.Reale@cern.ch)
-  - TrigL2Bphys  : stores L2 Bphysics candidates  (Julie.Kirk@rl.ac.uk)
-  - TrigEFBphys  : stores EF Bphysics candidates  (Julie.Kirk@rl.ac.uk)
 
 */

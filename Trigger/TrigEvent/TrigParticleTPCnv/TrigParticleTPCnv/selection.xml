@@ -26,33 +26,4 @@
   <class name="TrigPhoton_p3" id="B01F1207-1117-4D9B-9B93-8C0C6E8A2502" />
   <class name="std::vector<TrigPhoton_p3>" />
 
-
-<!-- TrigL2BphysContainer -->
-  <class name="TrigL2BphysContainer_tlp2" id="2E35788D-BE17-4FE1-9DB5-709E05880CEC" />
-  <class name="TrigL2BphysContainer_tlp1" id="E8AA6B0A-B057-4058-B5A9-AC0B719626AF" />
-  <class name="TrigL2BphysContainer_p1" id="8C16BF2B-E8E3-4888-82EF-EBBBFCF32D71" />
-  <class name="std::vector<TrigL2BphysContainer_p1>" />
-  
-<!-- TrigL2Bphys -->
-  <class name="TrigL2Bphys_p3" />
-  <class name="std::vector<TrigL2Bphys_p3>" />
-  <class name="TrigL2Bphys_p2" />
-  <class name="std::vector<TrigL2Bphys_p2>" />
-  <class name="TrigL2Bphys_p1" />
-  <class name="std::vector<TrigL2Bphys_p1>" />
-
-<!-- TrigEFBphysContainer -->
-  <class name="TrigEFBphysContainer_tlp2" id="D93906C2-4F81-44A7-98BE-71302891FE44" />
-  <class name="TrigEFBphysContainer_tlp1" id="5F5B068F-32DB-4CC9-BA9E-C74C076AAAA1" />
-  <class name="TrigEFBphysContainer_p1" id="B3FB592D-8C96-4EB4-AA99-25F844B951BF" /> 
-  <class name="std::vector<TrigEFBphysContainer_p1>" />
-
-<!-- TrigEFBphys -->
-  <class name="TrigEFBphys_p3" />
-  <class name="std::vector<TrigEFBphys_p3>" />
-  <class name="TrigEFBphys_p2" />
-  <class name="std::vector<TrigEFBphys_p2>" />
-  <class name="TrigEFBphys_p1" />
-  <class name="std::vector<TrigEFBphys_p1>" />
-
 </lcgdict>

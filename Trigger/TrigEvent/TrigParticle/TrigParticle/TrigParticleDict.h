@@ -20,37 +20,22 @@ Authour: R.Goncalo - Thu Sep 20 18:01:20 BT 2005
 #include "TrigParticle/TrigElectron.h"
 #include "TrigParticle/TrigElectronContainer.h"
 
-
 #include "TrigParticle/TrigPhoton.h"
 #include "TrigParticle/TrigPhotonContainer.h"
-
-#include "TrigParticle/TrigL2Bphys.h"
-#include "TrigParticle/TrigL2BphysContainer.h"
-
-#include "TrigParticle/TrigEFBphys.h"
-#include "TrigParticle/TrigEFBphysContainer.h"
 
 
 //the function triggers loading dictionaries for typedefs
 void dummyTriggerForTrigPartTypedefs(TrigElectronContainer b,
-				     TrigL2BphysContainer c,
 				     TrigPhotonContainer d,
-				     TrigEFBphysContainer g,
 				     DataVector<TrigElectronContainer> i,
-				     DataVector<TrigL2BphysContainer> j,
-				     DataVector<TrigPhotonContainer> k,
-				     DataVector<TrigEFBphysContainer> n
+				     DataVector<TrigPhotonContainer> k
 				     ){
 
   //to avoid warnings about unused variables
   TrigElectronContainer bb=b;
-  TrigL2BphysContainer  cc=c; 
   TrigPhotonContainer   dd=d;
-  TrigEFBphysContainer  gg=g;
   DataVector<TrigElectronContainer> ii = i;
-  DataVector<TrigL2BphysContainer>  jj = j;
   DataVector<TrigPhotonContainer>   kk = k;
-  DataVector<TrigEFBphysContainer>  nn = n;
 }
 
 template class std::vector<const TrigElectron*>;

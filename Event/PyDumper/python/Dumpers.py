@@ -3359,41 +3359,6 @@ def dump_TrigInDetTrackCollection (t, f):
     return
 
 
-def dump_TrigEFBphys (j, f):
-    fprint (f, j.roiId(), j.particleType(), j.eta(), j.phi(),
-            j.mass(), j.fitmass(), j.fitchi2(), j.fitndof(),
-            j.fitx(), j.fity(), j.fitz())
-    if j.pSecondDecay():
-        fprint (f, '\n     second:')
-        dump_TrigEFBphys (j.pSecondDecay(), f)
-    vec = j.trackVector()
-    for i in range(len(vec)):
-        t = vec[i]
-        fprint (f, '\n     tv:')
-        if t.isValid():
-            fprint (f, t.dataID(), t.index())
-        else:
-            fprint (f, '(invalid)')
-    return
-
-
-def dump_TrigL2Bphys (j, f):
-    fprint (f, j.roiId(), j.particleType(), j.eta(), j.phi(),
-            j.mass(), j.fitmass(), j.fitchi2(), j.fitndof(),
-            j.fitx(), j.fity(), j.fitz())
-    if j.pSecondDecay():
-        fprint (f, '\n     second:')
-        dump_TrigL2Bphys (j.pSecondDecay(), f)
-    # ??? Straightforward iteration fails if jets are also dumped,
-    #     for 15.2.0 samples.  Why?
-    #for t in j.trackVector():
-    tv = j.trackVector()
-    for i in range(tv.size()):
-        t = tv[i]
-        fprint (f, '\n     tv:', t.dataID(), t.index())
-    return
-
-
 def dump_RoiDescriptor (d, f):
     fprint (f, '  ',
             d.version(), d.isFullscan(),
@@ -5303,8 +5268,6 @@ dumpspecs = [
     ["DataVector<TrigPhoton>",               dump_TrigPhoton],
     ["TrigEMCluster",                        dump_TrigEMCluster_nolist],
     ["TrigInDetTrackCollection",             dump_TrigInDetTrackCollection],
-    ["DataVector<TrigEFBphys>",              dump_TrigEFBphys],
-    ["DataVector<TrigL2Bphys>",              dump_TrigL2Bphys],
     ["TrigCaloClusterContainer",             dump_TrigCaloCluster],
     ["TrigTauClusterDetailsContainer",       dump_TrigTauClusterDetails],
     ["TrigRoiDescriptor",                    dump_TrigRoiDescriptor_nolist],
@@ -5334,10 +5297,8 @@ dumpspecs = [
     ['AtlasHitsVector<TGCSimHit>',           dump_TGCSimHit],
     ["CombinedMuonFeatureContainer",         dump_CombinedMuonFeature],
     ["MuonFeatureContainer",                 dump_MuonFeature],
-    ["TrigEFBphysContainer",                 dump_TrigEFBphys],
     ["TrigEMClusterContainer",               dump_TrigEMCluster],
     ["TrigElectronContainer",                dump_TrigElectron],
-    ["TrigL2BphysContainer",                 dump_TrigL2Bphys],
     ["TrigPhotonContainer",                  dump_TrigPhoton],
     ["TrigTauClusterContainer",              dump_TrigTauCluster],
     ["TrigTauTracksInfoCollection",          dump_TrigTauTracksInfo],
