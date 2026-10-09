@@ -76,7 +76,7 @@ namespace BJT{
     ATH_CHECK(resetCuts(acceptData));
 
     // tagger score accessor
-    const SG::ConstAccessor<float> Score(m_scoreDecorationName + "_ConstScore");
+    const SG::ConstAccessor<float> Score(m_decorationName + "_ConstScore");
 
     // loop over jets
     for(const xAOD::Jet* jet : jets){
