@@ -13,7 +13,8 @@ atlas_add_library( PyUtilsInterface
 add_dependencies( PyUtilsInterface PyUtilsPythonInstall )
 
 if( XAOD_STANDALONE )
-    atlas_install_python_modules( python/MetaReader.py
+    atlas_install_python_modules( python/MetaDiff.py
+                                  python/MetaReader.py
                                   python/PoolFile.py
                                   python/moduleExists.py
                                   python/RootUtils.py
