@@ -203,8 +203,8 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.SpacePoints.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
 
     # Strip and pixel are chosen separately so that either can be validated on its own
-    actscf.addFlag('Acts.SpacePointStrategy', SpacePointStrategy.ActsTrk, type=SpacePointStrategy)
-    actscf.addFlag('Acts.PixelSpacePointStrategy', SpacePointStrategy.ActsTrk, type=SpacePointStrategy)
+    actscf.addFlag('Acts.SpacePointStrategy', SpacePointStrategy.ActsCore, type=SpacePointStrategy)
+    actscf.addFlag('Acts.PixelSpacePointStrategy', SpacePointStrategy.ActsCore, type=SpacePointStrategy)
 
     # Seeding
     actscf.addFlag("Acts.Gbts.connectionTable", 'binTables_ITK_RUN4.txt')

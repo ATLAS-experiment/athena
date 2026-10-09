@@ -1,9 +1,8 @@
 #!/usr/bin/bash
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# Same setup as ActsCheckObjectCounts.sh, but with Acts::StripSpacePointBuilder
-# used for strip space point formation, so the two count dumps can be compared.
-# Pixels are left on the Athena implementation, see Acts.PixelSpacePointStrategy.
+# Same setup as ActsCheckObjectCounts.sh, but with the Athena implementation of
+# the pixel and strip space point formation, so the two count dumps can be compared.
 
 # ttbar mu=200 input
 input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
@@ -19,12 +18,12 @@ Reco_tf.py \
        flags.Detector.EnableCalo=True; \
        flags.Detector.EnableHGTD=True; \
        flags.Acts.doLowPt=True;" \
-       'from ActsConfig.ActsConfigFlags import SpacePointStrategy; flags.Acts.SpacePointStrategy=SpacePointStrategy.ActsCore' \
+       'from ActsConfig.ActsConfigFlags import SpacePointStrategy; flags.Acts.SpacePointStrategy=SpacePointStrategy.ActsTrk; flags.Acts.PixelSpacePointStrategy=SpacePointStrategy.ActsTrk' \
   --preInclude "InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.actsProductionFlags" \
   --ignorePatterns "${ignore_pattern}" \
   --conditionsTag ${conditions_tag} \
   --inputRDOFile ${input_rdo} \
-  --outputAODFile AOD.validateCoreSpacePoints.pool.root \
+  --outputAODFile AOD.validateActsTrkSpacePoints.pool.root \
   --maxEvents ${n_events} \
   --multithreaded > ${log_file} 2>&1
 
