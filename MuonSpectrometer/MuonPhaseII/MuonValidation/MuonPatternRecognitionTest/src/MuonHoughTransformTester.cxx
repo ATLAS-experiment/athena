@@ -23,6 +23,8 @@
  #include "Acts/Utilities/AlgebraHelpers.hpp"
  #include "Acts/Definitions/Units.hpp"
 
+#include "CxxUtils/trapping_fp.h"
+
 namespace {
     constexpr double c_inv = 1. /Gaudi::Units::c_light;
 
@@ -349,6 +351,9 @@ namespace MuonValR4 {
         double minYhit = std::numeric_limits<double>::max();
         double maxYhit = -1 * std::numeric_limits<double>::max();
         for (const xAOD::MuonSimHit* hit : getMatchingSimHits(*segment)){
+            // Tell clang to optimize assuming FP operations may trap.
+            // cf. ATLASRECTS-8447
+            CXXUTILS_TRAPPING_FP;
             const Identifier hitId = hit->identify();
             const MuonGMR4::MuonReadoutElement* RE = m_detMgr->getReadoutElement(hitId); 
             const IdentifierHash hash{m_idHelperSvc->isMdt(hitId) ? RE->measurementHash(hitId)
@@ -803,3 +808,4 @@ namespace MuonValR4 {
         }
     }
 }  // namespace MuonValR4
+
