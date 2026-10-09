@@ -157,7 +157,7 @@ bool TrigEgammaMonitorBaseAlgorithm::isPrescaled(const std::string& trigger) con
 
     if(trigger.starts_with( "L1" ))
         l1item=trigger;
-    if(trigger.starts_with("HLT")){
+    if(trigger.starts_with("HLT") || trigger.starts_with("EF")){
         l1item = getL1Item(trigger);
         const unsigned int bit=tdt()->isPassedBits(trigger);
         efprescale=bit & TrigDefs::EF_prescaled;
@@ -676,7 +676,8 @@ void TrigEgammaMonitorBaseAlgorithm::setTrigInfo(const std::string& trigger){
     std::string signature = "";
     float threshold = 0;
     // HLT_e/gXX_(pidname/etcut/idperf)_*_L1EMXX to e/gXX_(pidname/etcut/idperf)_*_L1EMXX
-    if(hltinfo.contains("HLT")) hltinfo.erase(0,4);
+    if(hltinfo.starts_with("HLT_")) hltinfo.erase(0,4);
+    if(hltinfo.contains("EF")) hltinfo.erase(0,3);
     std::vector<std::string> parts;
     for (auto&& part : hltinfo | std::views::split('_')) parts.emplace_back(part.begin(), part.end());
     std::string pidname;

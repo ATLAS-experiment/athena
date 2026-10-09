@@ -12,58 +12,58 @@ def mongroupsCfg(moniAccess, data_type):
         shifter_tp = moniAccess.monitoredChains(signatures="egammaMon", monLevels=["shifter_tp"])
         shifter_topo = moniAccess.monitoredChains(signatures="egammaMon", monLevels=["shifter_topo"])
 
-        monitoring_electron = list(filter(lambda x: ('HLT_e' in x and 'L1eEM28' not in x), shifter_eg)) # etcut chains
+        monitoring_electron = list(filter(lambda x: ('EF_e' in x and 'L1eEM28' not in x), shifter_eg)) # etcut chains
         monitoring_tags = []
         monitoringTP_electron = list(filter(lambda x: ('L1eEM28' not in x), shifter_tp))
 
         monitoringTP_tag = [
-            'HLT_2e17_lhvloose_L12eEM18M',
-            'HLT_2e24_lhvloose_L12eEM24L',
+            'EF_2e17_lhvloose_L12eEM18M',
+            'EF_2e24_lhvloose_L12eEM24L',
         ]
 
         monitoringTP_zrad = [
-                'HLT_2e17_lhvloose_g22_tight_probe_L12eEM18M',
-                'HLT_2e17_lhvloose_g25_medium_probe_L12eEM18M',
-                'HLT_2e17_lhvloose_g50_loose_probe_L12eEM18M',
-                'HLT_2e17_lhvloose_g35_medium_probe_L12eEM18M',
-                'HLT_2e24_lhvloose_g22_tight_probe_L12eEM24L',
-                'HLT_2e24_lhvloose_g25_medium_probe_L12eEM24L',
-                'HLT_2e24_lhvloose_g50_loose_probe_L12eEM24L',
-                'HLT_2e24_lhvloose_g35_medium_probe_L12eEM24L',
+                'EF_2e17_lhvloose_g22_tight_probe_L12eEM18M',
+                'EF_2e17_lhvloose_g25_medium_probe_L12eEM18M',
+                'EF_2e17_lhvloose_g50_loose_probe_L12eEM18M',
+                'EF_2e17_lhvloose_g35_medium_probe_L12eEM18M',
+                'EF_2e24_lhvloose_g22_tight_probe_L12eEM24L',
+                'EF_2e24_lhvloose_g25_medium_probe_L12eEM24L',
+                'EF_2e24_lhvloose_g50_loose_probe_L12eEM24L',
+                'EF_2e24_lhvloose_g35_medium_probe_L12eEM24L',
         ]
 
         monitoringTP_Matching = {
-            'HLT_2e17_lhvloose_L12eEM18M': [
-                'HLT_2e17_lhvloose_g22_tight_probe_L12eEM18M',
-                'HLT_2e17_lhvloose_g25_medium_probe_L12eEM18M',
-                'HLT_2e17_lhvloose_g35_medium_probe_L12eEM18M',
-                'HLT_2e17_lhvloose_g50_loose_probe_L12eEM18M'
+            'EF_2e17_lhvloose_L12eEM18M': [
+                'EF_2e17_lhvloose_g22_tight_probe_L12eEM18M',
+                'EF_2e17_lhvloose_g25_medium_probe_L12eEM18M',
+                'EF_2e17_lhvloose_g35_medium_probe_L12eEM18M',
+                'EF_2e17_lhvloose_g50_loose_probe_L12eEM18M'
             ],
         
-            'HLT_2e24_lhvloose_L12eEM24L': [
-                'HLT_2e24_lhvloose_g22_tight_probe_L12eEM24L',
-                'HLT_2e24_lhvloose_g25_medium_probe_L12eEM24L',
-                'HLT_2e24_lhvloose_g35_medium_probe_L12eEM24L',
-                'HLT_2e24_lhvloose_g50_loose_probe_L12eEM24L'
+            'EF_2e24_lhvloose_L12eEM24L': [
+                'EF_2e24_lhvloose_g22_tight_probe_L12eEM24L',
+                'EF_2e24_lhvloose_g25_medium_probe_L12eEM24L',
+                'EF_2e24_lhvloose_g35_medium_probe_L12eEM24L',
+                'EF_2e24_lhvloose_g50_loose_probe_L12eEM24L'
             ]
         }
 
         monitoring_photon = list(filter(lambda x: ('HLT_g' in x and 'noringer' not in x), shifter_eg))
 
         monitoring_bootstrap = {
-                'HLT_g22_tight_L1eEM18M'  : 'HLT_g20_tight_L1eEM18M',
-                'HLT_g25_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
-                'HLT_g35_medium_L1eEM24L' : 'HLT_g25_loose_L1eEM24L',
-                'HLT_g50_loose_L1eEM24L'  : 'HLT_g25_loose_L1eEM24L',
-                'HLT_g35_medium_noringer_L1eEM24L' : 'HLT_g25_loose_noringer_L1eEM24L',
+                'EF_g22_tight_L1eEM18M'  : 'EF_g20_tight_L1eEM18M',
+                'EF_g25_medium_L1eEM24L' : 'EF_g25_loose_L1eEM24L',
+                'EF_g35_medium_L1eEM24L' : 'EF_g25_loose_L1eEM24L',
+                'EF_g50_loose_L1eEM24L'  : 'EF_g25_loose_L1eEM24L',
+                'EF_g35_medium_noringer_L1eEM24L' : 'EF_g25_loose_noringer_L1eEM24L',
         }
 
         t0_tp = moniAccess.monitoredChains(signatures="egammaMon", monLevels=["t0_tp"])
 
         validationTP_electron_DNN = list(filter(lambda x: ('_dnn' in x), t0_tp ))
-        validation_electron = ['HLT_e25_etcut_L1eEM18M','HLT_e60_etcut_L1eEM26M']
+        validation_electron = ['EF_e25_etcut_L1eEM18M','EF_e60_etcut_L1eEM26M']
         validation_jpsi = list(filter(lambda x: ('_L1JPSI' in x), shifter_topo ))
-        validationTP_jpsiee = ['HLT_e10_lhvloose_L1eEM9']
+        validationTP_jpsiee = ['EF_e10_lhvloose_L1eEM9']
 
         monitoring_topo = []
         mongroups = { 
@@ -87,9 +87,9 @@ def mongroupsCfg(moniAccess, data_type):
                 mongroups['validationTP_electron_DNN']  = validationTP_electron_DNN
 
         elif data_type is DQDataType.Cosmics:
-                monitoring_electron_cosmic=['HLT_e5_etcut_L1eEM5']
-                monitoring_photon_cosmic=['HLT_g3_etcut_LArPEB_L1eEM5']
-                monitoring_bootstrap_cosmic = {'HLT_g3_etcut_LArPEB_L1eEM5' : 'HLT_g3_etcut_LArPEB_L1eEM5'}
+                monitoring_electron_cosmic=['EF_e5_etcut_L1eEM5']
+                monitoring_photon_cosmic=['EF_g3_etcut_LArPEB_L1eEM5']
+                monitoring_bootstrap_cosmic = {'EF_g3_etcut_LArPEB_L1eEM5' : 'EF_g3_etcut_LArPEB_L1eEM5'}
 
                 mongroups['monitoring_electron_cosmic']  = monitoring_electron_cosmic
                 mongroups['monitoring_photon_cosmic']    = monitoring_photon_cosmic
@@ -110,29 +110,29 @@ topo_config = {
 ######  
 
 primary_single_ele = [
-        'HLT_e26_lhtight_ivarloose_L1eEM26M',
-        'HLT_e26_lhtight_ivarloose_L1eEM26T',
-        'HLT_e28_lhtight_ivarloose_L1eEM28M',
-        'HLT_e60_lhmedium_L1eEM26M',
-        'HLT_e140_lhloose_L1eEM26M']
+        'EF_e26_lhtight_ivarloose_L1eEM26M',
+        'EF_e26_lhtight_ivarloose_L1eEM26T',
+        'EF_e28_lhtight_ivarloose_L1eEM28M',
+        'EF_e60_lhmedium_L1eEM26M',
+        'EF_e140_lhloose_L1eEM26M']
 
 primary_double_pho = [
-        'HLT_2g22_tight_L12eEM18M',
-        'HLT_g35_medium_g25_medium_L12eEM24L',
-        'HLT_2g50_loose_L12eEM24L',
+        'EF_2g22_tight_L12eEM18M',
+        'EF_g35_medium_g25_medium_L12eEM24L',
+        'EF_2g50_loose_L12eEM24L',
         ]
 
-monitoring_Zee = ['HLT_e26_lhtight_e14_etcut_probe_50invmAB130_L1eEM26M',
-                'HLT_e26_lhtight_e14_etcut_L1eEM26M',
-                'HLT_e26_lhtight_e14_etcut_probe_50invmAB130_L1eEM26M',
-                'HLT_e26_lhtight_e14_etcut_L1eEM26M'
+monitoring_Zee = ['EF_e26_lhtight_e14_etcut_probe_50invmAB130_L1eEM26M',
+                'EF_e26_lhtight_e14_etcut_L1eEM26M',
+                'EF_e26_lhtight_e14_etcut_probe_50invmAB130_L1eEM26M',
+                'EF_e26_lhtight_e14_etcut_L1eEM26M'
                 ] + primary_single_ele
 
 monitoring_Jpsiee = [
-        'HLT_e5_lhtight_e9_etcut_1invmAB5_L1JPSI-1M5-eEM9',
-        'HLT_e5_lhtight_e14_etcut_1invmAB5_L1JPSI-1M5-eEM15',
-        'HLT_e9_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-eEM9',
-        'HLT_e14_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-eEM15',
-        'HLT_e10_lhvloose_L1eEM9',
-        'HLT_e14_lhvloose_L1eEM12L'
+        'EF_e5_lhtight_e9_etcut_1invmAB5_L1JPSI-1M5-eEM9',
+        'EF_e5_lhtight_e14_etcut_1invmAB5_L1JPSI-1M5-eEM15',
+        'EF_e9_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-eEM9',
+        'EF_e14_lhtight_e4_etcut_1invmAB5_L1JPSI-1M5-eEM15',
+        'EF_e10_lhvloose_L1eEM9',
+        'EF_e14_lhvloose_L1eEM12L'
         ]
