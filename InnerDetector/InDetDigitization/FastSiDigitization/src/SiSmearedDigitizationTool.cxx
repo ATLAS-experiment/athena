@@ -313,62 +313,31 @@ StatusCode SiSmearedDigitizationTool::processAllSubEvents(const EventContext& ct
 
   ATH_MSG_DEBUG( "--- SiSmearedDigitizationTool: in pixel processAllSubEvents() ---" );
 
-  InDet::SiClusterContainer* symSiContainer=nullptr;
-
   if(m_SmearPixel){ // Smear Pixel
-    m_pixelClusterContainer = new InDet::PixelClusterContainer(m_pixel_ID->wafer_hash_max());
-
-    if(!m_pixelClusterContainer) {
-      ATH_MSG_FATAL( "[ --- ] Could not create PixelClusterContainer");
-      return StatusCode::FAILURE;
-    }
-
     // --------------------------------------
     // PixelCluster container registration
-
+    unsigned int nwafer = m_pixel_ID->wafer_hash_max();
+    SG::WriteHandle<InDet::PixelClusterContainer> wh (m_pixel_SiClustersName);
+    ATH_CHECK( wh.record (std::make_unique<InDet::PixelClusterContainer>(nwafer)) );
+    m_pixelClusterContainer = wh.ptr();
     m_pixelClusterContainer->cleanup();
-    if ((evtStore()->record(m_pixelClusterContainer, m_pixel_SiClustersName)).isFailure())   {
-      if ((evtStore()->retrieve(m_pixelClusterContainer, m_pixel_SiClustersName)).isFailure())   {
-        ATH_MSG_FATAL("[ hitproc ] Error while registering PixelCluster container");
-        return StatusCode::FAILURE;
-      }
-    }
 
     // symlink the Pixel Container
-    // Pixel
-
-    if ((evtStore()->symLink(m_pixelClusterContainer,symSiContainer)).isFailure()) {
-      ATH_MSG_FATAL( "[ --- ] PixelClusterContainer could not be symlinked to SiClusterContainter in StoreGate !" );
-      return StatusCode::FAILURE;
-    } else {
-      ATH_MSG_INFO( "[ hitproc ] PixelClusterContainer symlinked to SiClusterContainer in StoreGate" );
-    }
+    // FIXME: This results in a hard cast, which is undefined behavior as per C++.
+    ATH_CHECK( wh.symLink (SG::WriteHandleKey<InDet::SiClusterContainer>(wh.key())) );
 
   }else{ // Smear SCT
-    m_sctClusterContainer = new InDet::SCT_ClusterContainer(m_sct_ID->wafer_hash_max());
-
-    if(!m_sctClusterContainer) {
-      ATH_MSG_FATAL( "[ --- ] Could not create SCT_ClusterContainer");
-      return StatusCode::FAILURE;
-    }
-
     // --------------------------------------
     // SCT_Cluster container registration
+    unsigned int nwafer = m_sct_ID->wafer_hash_max();
+    SG::WriteHandle<InDet::SCT_ClusterContainer> wh (m_Sct_SiClustersName);
+    ATH_CHECK( wh.record (std::make_unique<InDet::SCT_ClusterContainer>(nwafer)) );
+    m_sctClusterContainer = wh.ptr();
     m_sctClusterContainer->cleanup();
-    if ((evtStore()->record(m_sctClusterContainer, m_Sct_SiClustersName)).isFailure())   {
-      ATH_MSG_FATAL("[ hitproc ] Error while registering SCT_Cluster container");
-      return StatusCode::FAILURE;
-    }
+
     // symlink the SCT Container
-    // SCT
-
-    if ((evtStore()->symLink(m_sctClusterContainer,symSiContainer)).isFailure()) {
-      ATH_MSG_FATAL( "[ --- ] SCT_ClusterContainer could not be symlinked to SiClusterContainter in StoreGate !" );
-      return StatusCode::FAILURE;
-    } else {
-      ATH_MSG_DEBUG( "[ hitproc ] SCT_ClusterContainer symlinked to SiClusterContainer in StoreGate" );
-    }
-
+    // FIXME: This results in a hard cast, which is undefined behavior as per C++.
+    ATH_CHECK( wh.symLink (SG::WriteHandleKey<InDet::SiClusterContainer>(wh.key())) );
   }
 
   if (retrieveTruth().isFailure()) {
