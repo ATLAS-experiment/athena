@@ -986,7 +986,7 @@ std::unique_ptr <Trk::TrackParameters> IDAlignMonResidualsAlg::getUnbiasedTrackP
 		      ATH_MSG_VERBOSE("After MagneticFieldProperties cast");
 		      ATH_MSG_VERBOSE("Before other side unbiased propagation");
 		      
-		      if (TempSurface->associatedLayer() && TempField) PropagatedTrackParams = m_propagator->propagate(
+		      if (TempField) PropagatedTrackParams = m_propagator->propagate(
 														       Gaudi::Hive::currentContext(),
 														       *OtherSideUnbiasedTrackParams,
 														       tsos->measurementOnTrack()->associatedSurface(),
