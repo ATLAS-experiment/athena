@@ -894,19 +894,15 @@ StatusCode SCT_FastDigitizationTool::digitize(const EventContext& ctx,
 
 StatusCode SCT_FastDigitizationTool::createAndStoreRIOs(const EventContext& ctx)
 {
+  unsigned int nwafer = m_sct_ID->wafer_hash_max();
   SG::WriteHandle<InDet::SCT_ClusterContainer> sctClusterContainer(m_sctClusterContainerKey, ctx);
-  sctClusterContainer = std::make_unique<InDet::SCT_ClusterContainer>(m_sct_ID->wafer_hash_max());
-  if(!sctClusterContainer.isValid()) {
-    ATH_MSG_FATAL( "[ --- ] Could not create SCT_ClusterContainer");
-    return StatusCode::FAILURE;
-  }
+  ATH_CHECK( sctClusterContainer.record (std::make_unique<InDet::SCT_ClusterContainer>(nwafer)) );
   sctClusterContainer->cleanup();
 
   // --------------------------------------
   // symlink the SCT Container
-  InDet::SiClusterContainer* symSiContainer=nullptr;
-  CHECK(evtStore()->symLink(sctClusterContainer.ptr(),symSiContainer));
-  ATH_MSG_DEBUG( "[ hitproc ] SCT_ClusterContainer symlinked to SiClusterContainer in StoreGate" );
+  // FIXME: This results in a hard cast, which is undefined behavior as per C++.
+  ATH_CHECK( sctClusterContainer.symLink (SG::WriteHandleKey<InDet::SiClusterContainer>(sctClusterContainer.key())) );
   // --------------------------------------
 
   // Get SCT_DetectorElementCollection
