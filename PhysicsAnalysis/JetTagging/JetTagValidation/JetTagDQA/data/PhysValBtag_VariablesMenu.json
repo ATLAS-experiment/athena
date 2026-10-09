@@ -20,7 +20,7 @@
             "title": "jet multiplicity",
             "xtitle": "Number of jets",
             "ytitle": "Events",
-            "path":  {"ART": "", "PHYSVAL": "jet"},
+            "path":  {"ART": "", "PHYSVAL": "global"},
             "xbins": 51,
             "xmin": -0.5,
             "xmax": 50.5,
@@ -137,7 +137,7 @@
             "title": "number of jets that passed the WP cuts",
             "xtitle": "Number of jets",
             "ytitle": "Events",
-            "path":  {"PHYSVAL": "jet"},
+            "path":  {"PHYSVAL": "global"},
             "xbins": 21,
             "xmin": -0.5,
             "xmax": 20.5,
@@ -296,6 +296,21 @@
             "forData": "true"
         },
 
+        "GN2HLv01": {
+            "_comment": "pb, pc, pu and ptau",
+            "title": "GN2HLv01",
+            "xtitle": "GN2HLv01 px",
+            "ytitle": "Jets",
+            "path":  {"PHYSVAL": "tagger"},
+            "xbins": 100,
+            "xmin": 0,
+            "xmax": 1,
+            "forEach": ["pb", "pc", "pu", "ptau"],
+            "forEachTruthType": ["U", "B", "C", "TAU", "DATA"],
+            "type": "TH1D",
+            "forData": "true"
+        },
+
         "GN3EPCLV01": {
             "_comment": "pb, pc, pu and ptau",
             "title": "GN3EPCLV01",
@@ -327,7 +342,7 @@
         },
 
 	"GN3XPV01": {
-            "_comment": "phbb, phcc, phtautauhad, ptop, pqcdbb, pqcdbx, pqcdcx, pqcdll and pwqq",
+            "_comment": "phbb, phcc, phtautauhad, ptop, pqcdbb, pqcdbx, pqcdcx, pqcdll and pWqq",
             "title": "GN3XPV01",
             "xtitle": "GN3XPV01 px",
             "ytitle": "Jets",
@@ -335,7 +350,7 @@
             "xbins": 100,
             "xmin": 0,
             "xmax": 1,
-            "forEach": ["phtautauhad","phbb", "phcc", "ptop","pqcdbb", "pqcdbx", "pqcdcx", "pqcdll", "pwqq"],
+            "forEach": ["phtautauhad","phbb", "phcc", "ptop","pqcdbb", "pqcdbx", "pqcdcx", "pqcdll", "pWqq"],
             "forEachTruthType": ["HTAUTAU","HBB", "HCC", "TOP", "QCDBB", "QCDBX", "QCDLL", "WQQ", "DATA"],
             "type": "TH1D",
             "forData": "true"
@@ -363,6 +378,19 @@
             "xbins": 250,
             "xmin": -25,
             "xmax": 25,
+            "type": "TH1D",
+            "forData": "false"
+        },
+
+        "pT_llrCut": {
+            "_comment": "",
+            "title": "p_{T} of matched jets",
+            "xtitle": "p_{T} [GeV]",
+            "ytitle": "Jets",
+            "path":  {"PHYSVAL": "tagger"},
+            "xbins": 100,
+            "xmin": 0,
+            "xmax": 1000,
             "type": "TH1D",
             "forData": "false"
         },
@@ -437,19 +465,6 @@
             "forEachTruthType": ["U", "B", "C", "DATA"],
             "type": "TH1D",
             "forData": "true"
-        },
-
-        "pT_llrCut": {
-            "_comment": "",
-            "title": "p_{T} of matched jets",
-            "xtitle": "p_{T} [GeV]",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "tagger"},
-            "xbins": 100,
-            "xmin": 0,
-            "xmax": 1000,
-            "type": "TH1D",
-            "forData": "false"
         },
 
         "track_sigz0": {
@@ -536,7 +551,7 @@
             "forData": "true"
         },
 
-        "numTracks": {
+        "numTracks_from": {
             "_comment": "in Physval 'OtherOrigin' is only produced for detail level > 10",
             "title": "number of tracks (per jet) from ",
             "xtitle": "Number of tracks",
@@ -550,7 +565,7 @@
             "forData": "false"
         },
 
-        "numTracks_Secondaries": {
+        "numTracks_from_Secondaries": {
             "_comment": "in Physval only produced for detail level > 10",
             "title": "number of tracks (per jet) from ",
             "xtitle": "Number of tracks",
@@ -741,7 +756,7 @@
             "title": "number of SV1 vertices",
             "xtitle": "number",
             "ytitle": "Jets",
-            "path":  {"PHYSVAL": "SV"},
+            "path":  {"PHYSVAL": "sv1"},
             "xbins": 3,
             "xmin": -0.5,
             "xmax": 2.5,
@@ -754,7 +769,7 @@
             "title": "mass of the secondary vertex",
             "xtitle": "sv mass [GeV]",
             "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "SV"},
+            "path":  {"ART": "bTagging", "PHYSVAL": "sv1"},
             "xbins": 50,
             "xmin": 0,
             "xmax": 8,
@@ -768,7 +783,7 @@
             "title": "number of two-track vertices",
             "xtitle": "number",
             "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "SV"},
+            "path":  {"ART": "bTagging", "PHYSVAL": "sv1"},
             "xbins": 26,
             "xmin": -0.5,
             "xmax": 25.5,
@@ -782,7 +797,7 @@
             "title": "ratio of track energies in SV to jet",
             "xtitle": "SV energy ratio",
             "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "SV"},
+            "path":  {"ART": "bTagging", "PHYSVAL": "sv1"},
             "xbins": 50,
             "xmin": -0.01,
             "xmax": 1.01,
@@ -796,7 +811,7 @@
             "title": "#DeltaR(jet, SV-PV)",
             "xtitle": "#DeltaR(jet, SV-PV)",
             "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "SV"},
+            "path":  {"ART": "bTagging", "PHYSVAL": "sv1"},
             "xbins": 50,
             "xmin": 0,
             "xmax": 0.6,
@@ -810,7 +825,7 @@
             "title": "SV1 significance 3d",
             "xtitle": "significance 3d",
             "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "SV"},
+            "path":  {"ART": "bTagging", "PHYSVAL": "sv1"},
             "xbins": 50,
             "xmin": 0,
             "xmax": 50,
@@ -824,7 +839,7 @@
             "title": "SV1 energyTrkInJet",
             "xtitle": "energy [GeV]",
             "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "SV"},
+            "path":  {"ART": "bTagging", "PHYSVAL": "sv1"},
             "xbins": 100,
             "xmin": 0,
             "xmax": 2000,
@@ -838,7 +853,7 @@
             "title": "number of good tracks in SV1 vertex",
             "xtitle": "number",
             "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "SV"},
+            "path":  {"ART": "bTagging", "PHYSVAL": "sv1"},
             "xbins": 16,
             "xmin": -0.5,
             "xmax": 15.5,
@@ -852,7 +867,7 @@
             "title": "SV1 L_{xy}",
             "xtitle": "L_{xy}",
             "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "SV"},
+            "path":  {"ART": "bTagging", "PHYSVAL": "sv1"},
             "xbins": 50,
             "xmin": 0,
             "xmax": 75,
@@ -866,7 +881,7 @@
             "title": "SV1 purity",
             "xtitle": "purity",
             "ytitle": "Jets",
-            "path":  {"PHYSVAL": "SV"},
+            "path":  {"PHYSVAL": "sv1"},
             "xbins": 10,
             "xmin": -0.01,
             "xmax": 1.01,
@@ -879,7 +894,7 @@
             "title": "SV1 fraction of tracks from ",
             "xtitle": "fraction",
             "ytitle": "Jets",
-            "path":  {"PHYSVAL": "SV"},
+            "path":  {"PHYSVAL": "sv1"},
             "xbins": 10,
             "xmin": -0.01,
             "xmax": 1.01,
@@ -888,12 +903,12 @@
             "forData": "false"
         },
 
-        "SV1_fracTracks_Secondaries": {
+        "SV1_fracTracks_from_Secondaries": {
             "_comment": "in Physval only produced for detail level > 10",
             "title": "SV1 fraction of tracks from ",
             "xtitle": "fraction",
             "ytitle": "Jets",
-            "path":  {"PHYSVAL": "SV"},
+            "path":  {"PHYSVAL": "sv1"},
             "xbins": 10,
             "xmin": -0.01,
             "xmax": 1.01,
@@ -907,7 +922,7 @@
             "title": "SV1 fraction of HF tracks in jet",
             "xtitle": "fraction",
             "ytitle": "Jets",
-            "path":  {"PHYSVAL": "SV"},
+            "path":  {"PHYSVAL": "sv1"},
             "xbins": 10,
             "xmin": -0.01,
             "xmax": 1.01,

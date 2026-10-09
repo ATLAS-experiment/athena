@@ -61,22 +61,24 @@ def PhysValBTagCfg(flags, **kwargs):
         kwargs.setdefault("trackTruthOriginTool", acc.popToolsAndMerge(
             InDetTrackTruthOriginToolCfg(flags)))
 
-    # the keys name the histograms and stay fixed, the values are the decorations to read
-    taggerDecorations = {"GN2v01": flags.BTagging.AK4TaggerName}
-    taggerFractionC = {"GN2v01": 0.2}
-    taggerFractionTau = {"GN2v01": 0.01}
+    # the keys name the histograms, the values are the decorations to read
+    ak4Tagger = flags.BTagging.AK4TaggerName
+    taggerDecorations = {ak4Tagger: ak4Tagger}
+    taggerFractionC = {ak4Tagger: 0.2}
+    taggerFractionTau = {ak4Tagger: 0.01}
     taggerWorkingPoints = {}
+    kwargs.setdefault("CDITaggerName", ak4Tagger)
     if flags.GeoModel.Run <= LHCPeriod.Run3:
-        GN2v01WorkingPoints = ["70"] if kwargs["DetailLevel"] <= 10 else ["65", "70", "77", "85", "90"]
-        kwargs.setdefault("GN2v01WorkingPoints", GN2v01WorkingPoints)
-        kwargs.setdefault("GN2v01SelectionTools", [
+        cdiWorkingPoints = ["70"] if kwargs["DetailLevel"] <= 10 else ["65", "70", "77", "85", "90"]
+        kwargs.setdefault("CDIWorkingPoints", cdiWorkingPoints)
+        kwargs.setdefault("CDISelectionTools", [
             CompFactory.BTaggingSelectionTool(
-                f"GN2v01SelectionTool_{wp}",
-                TaggerName=flags.BTagging.AK4TaggerName,
+                f"{ak4Tagger}SelectionTool_{wp}",
+                TaggerName=ak4Tagger,
                 JetAuthor="AntiKt4EMPFlowJets",
                 OperatingPoint=f"FixedCutBEff_{wp}",
                 ErrorOnTagWeightFailure=False,
-            ) for wp in GN2v01WorkingPoints
+            ) for wp in cdiWorkingPoints
         ])
 
         # Taken from the GN3EPCLV01 CDI in the GroupData dev area (MC23_2026-08-04_GN3EPCLV01_GN3PflowMuonsV00_GN2v01_v1_noSF.root),
