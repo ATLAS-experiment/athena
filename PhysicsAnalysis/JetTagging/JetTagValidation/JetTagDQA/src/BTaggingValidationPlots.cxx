@@ -35,32 +35,32 @@ namespace JetTagDQA{
     const std::vector<std::string> GN3XPV01Outputs = {"phtautauhad", "phbb", "phcc", "ptop", "pqcdbb", "pqcdbx", "pqcdcx", "pqcdll", "pWqq"};
     // GN3XPV01 training classes, see flavours.yaml in atlas-ftag-tools
     const std::vector<std::string> largeRClasses = {"htautauhad", "hbb", "hcc", "top", "qcdbb", "qcdbx", "qcdcx", "qcdll", "Wqq"};
-    // histogram name prefix and suffix, and histogram definition, for the large-R histograms per class
-    struct LargeRVariable { std::string prefix; std::string suffix; std::string definition; };
+    // histogram name and histogram definition for the large-R histograms, the truth class is appended to the name
+    struct LargeRVariable { std::string name; std::string definition; };
     const std::map<std::string, LargeRVariable> largeRVariables = {
-      {"jet_pt_ttbar", {"jet_pt_", "_ttbar", "jet_pT"}},
-      {"jet_pt_Zprime", {"jet_pt_", "_Zprime", "jet_pT_Zprime"}},
-      {"jet_eta", {"jet_eta_", "", "jet_eta"}},
-      {"jet_mass", {"jet_mass_", "", "jet_mass"}},
-      {"numTracks_perJet", {"numTracks_perJet_", "", "numTracks_perJet"}},
-      {"d0", {"d0_", "", "track_d0"}},
-      {"z0", {"z0_", "", "track_z0"}},
-      {"sigd0", {"sigd0_", "", "track_sigd0"}},
-      {"sigz0", {"sigz0_", "", "track_sigz0"}},
-      {"track_pT_frac", {"track_pT_frac_", "", "track_pT_frac"}},
-      {"DeltaR_jet_track", {"DeltaR_jet_track_", "", "DeltaR_jet_track"}},
-      {"nInnHits", {"nInnHits_", "", "nInnHits"}},
-      {"nNextToInnHits", {"nNextToInnHits_", "", "nNextToInnHits"}},
-      {"nBLHits", {"nBLHits_", "", "nBLHits"}},
-      {"nsharedBLHits", {"nsharedBLHits_", "", "nsharedBLHits"}},
-      {"nsplitBLHits", {"nsplitBLHits_", "", "nsplitBLHits"}},
-      {"nPixHits", {"nPixHits_", "", "nPixHits"}},
-      {"nPixHoles", {"nPixHoles_", "", "nPixHoles"}},
-      {"nsharedPixHits", {"nsharedPixHits_", "", "nsharedPixHits"}},
-      {"nsplitPixHits", {"nsplitPixHits_", "", "nsplitPixHits"}},
-      {"nSCTHits", {"nSCTHits_", "", "nSCTHits"}},
-      {"nSCTHoles", {"nSCTHoles_", "", "nSCTHoles"}},
-      {"nsharedSCTHits", {"nsharedSCTHits_", "", "nsharedSCTHits"}},
+      {"jet_pt_ttbar", {"pt_ttbar", "jet_pT"}},
+      {"jet_pt_Zprime", {"pt_Zprime", "jet_pT_Zprime"}},
+      {"jet_eta", {"eta", "jet_eta"}},
+      {"jet_mass", {"mass", "jet_mass"}},
+      {"numTracks_perJet", {"numTracks_perJet", "numTracks_perJet"}},
+      {"d0", {"d0", "track_d0"}},
+      {"z0", {"z0", "track_z0"}},
+      {"sigd0", {"sigd0", "track_sigd0"}},
+      {"sigz0", {"sigz0", "track_sigz0"}},
+      {"track_pT_frac", {"pT_frac", "track_pT_frac"}},
+      {"DeltaR_jet_track", {"DeltaR_jet_track", "DeltaR_jet_track"}},
+      {"nInnHits", {"nInnHits", "nInnHits"}},
+      {"nNextToInnHits", {"nNextToInnHits", "nNextToInnHits"}},
+      {"nBLHits", {"nBLHits", "nBLHits"}},
+      {"nsharedBLHits", {"nsharedBLHits", "nsharedBLHits"}},
+      {"nsplitBLHits", {"nsplitBLHits", "nsplitBLHits"}},
+      {"nPixHits", {"nPixHits", "nPixHits"}},
+      {"nPixHoles", {"nPixHoles", "nPixHoles"}},
+      {"nsharedPixHits", {"nsharedPixHits", "nsharedPixHits"}},
+      {"nsplitPixHits", {"nsplitPixHits", "nsplitPixHits"}},
+      {"nSCTHits", {"nSCTHits", "nSCTHits"}},
+      {"nSCTHoles", {"nSCTHoles", "nSCTHoles"}},
+      {"nsharedSCTHits", {"nsharedSCTHits", "nsharedSCTHits"}},
     };
   }
 
@@ -133,21 +133,21 @@ namespace JetTagDQA{
 
   void BTaggingValidationPlots::bookLargeRHistograms(){
     for (const std::string& output : GN3XPV01Outputs) {
-      const std::string name = "GN3XPV01_" + (output == "pWqq" ? "pwqq" : output);
-      m_GN3XPV01_probabilities[output] = bookHistogram(name, name, m_sParticleType);
+      const std::string name = m_GN3XPV01Name + "_" + output;
+      m_GN3XPV01_probabilities[output] = bookHistogram(name, "GN3XPV01_" + output, m_sParticleType);
     }
 
     for (const std::string& truth_class : largeRClasses) {
       for (const auto& [variable, def] : largeRVariables) {
-        m_largeRHistos[truth_class][variable] = bookHistogram(def.prefix + truth_class + def.suffix, def.definition, m_sParticleType, truth_class + " jets - ");
+        m_largeRHistos[truth_class][variable] = bookHistogram(def.name + "_" + truth_class, def.definition, m_sParticleType, truth_class + " jets - ");
       }
     }
     using namespace std::string_literals;
     const std::string llrStr{"llr"};
     for (const std::string & discriminant : {"Hbb"s, "Hcc"s}) {
-      const std::string prefix{"GN3XPV01_" + discriminant};
-      const std::string suffix{" jets, GN3XPV01 " + discriminant};
-      m_GN3XPV01_discriminants[discriminant] = bookHistogram(prefix, llrStr, m_sParticleType, "GN3XPV01 " + discriminant);
+      const std::string prefix{m_GN3XPV01Name + "_" + discriminant};
+      const std::string suffix{" jets, " + m_GN3XPV01Name + " " + discriminant};
+      m_GN3XPV01_discriminants[discriminant] = bookHistogram(prefix, llrStr, m_sParticleType, m_GN3XPV01Name + " " + discriminant);
       for (const std::string& truth_class : largeRClasses) {
         m_GN3XPV01_discriminants[discriminant + "_" + truth_class] = bookHistogram(prefix + "_" + truth_class, llrStr, m_sParticleType, truth_class + suffix);
       }
@@ -325,44 +325,44 @@ namespace JetTagDQA{
     m_PV_z = bookHistogram("PV_z", "PV_z");
 
     // jet kinematc vars
-    m_jet_e  = bookHistogram("jet_e", "jet_E", m_sParticleType);
-    m_jet_e_Zprime  = bookHistogram("jet_e_Zprime", "jet_E_Zprime", m_sParticleType);
-    m_jet_pt  = bookHistogram("jet_pt_ttbar", "jet_pT", m_sParticleType);
-    m_jet_pt_Zprime  = bookHistogram("jet_pt_Zprime", "jet_pT_Zprime", m_sParticleType);
-    m_jet_eta  = bookHistogram("jet_eta", "jet_eta", m_sParticleType);
-    m_jet_phi  = bookHistogram("jet_phi", "jet_phi", m_sParticleType);
+    m_jet_e  = bookHistogram("e", "jet_E", m_sParticleType);
+    m_jet_e_Zprime  = bookHistogram("e_Zprime", "jet_E_Zprime", m_sParticleType);
+    m_jet_pt  = bookHistogram("pt_ttbar", "jet_pT", m_sParticleType);
+    m_jet_pt_Zprime  = bookHistogram("pt_Zprime", "jet_pT_Zprime", m_sParticleType);
+    m_jet_eta  = bookHistogram("eta", "jet_eta", m_sParticleType);
+    m_jet_phi  = bookHistogram("phi", "jet_phi", m_sParticleType);
 
     // truth info
-    m_truthLabel  = bookHistogram("truthLabel", "truth_label", m_sParticleType);
+    m_truthLabel  = bookHistogram("truth_label", "truth_label", m_sParticleType);
 
     // IPs and IP significances
-    m_track_d0_incl = bookHistogram("d0_incl", "track_d0", m_sParticleType);
-    m_track_z0_incl = bookHistogram("z0_incl", "track_z0", m_sParticleType); 
-    m_track_sigd0_incl = bookHistogram("sigd0_incl", "track_sigd0", m_sParticleType);
-    m_track_sigz0_incl = bookHistogram("sigz0_incl", "track_sigz0", m_sParticleType); 
+    m_track_d0_incl = bookHistogram("d0", "track_d0", m_sParticleType);
+    m_track_z0_incl = bookHistogram("z0", "track_z0", m_sParticleType); 
+    m_track_sigd0_incl = bookHistogram("sigd0", "track_sigd0", m_sParticleType);
+    m_track_sigz0_incl = bookHistogram("sigz0", "track_sigz0", m_sParticleType); 
 
     // pT_frac
-    m_track_pT_frac_incl = bookHistogram("track_pT_frac_incl", "track_pT_frac", m_sParticleType); 
+    m_track_pT_frac_incl = bookHistogram("pT_frac", "track_pT_frac", m_sParticleType); 
 
     // DeltaR_jet_track
-    m_DeltaR_jet_track_incl = bookHistogram("DeltaR_jet_track_incl", "DeltaR_jet_track", m_sParticleType); 
+    m_DeltaR_jet_track_incl = bookHistogram("DeltaR_jet_track", "DeltaR_jet_track", m_sParticleType); 
 
     // numTracks_perJet 
-    m_numTracks_perJet_incl = bookHistogram("numTracks_perJet_incl", "numTracks_perJet", m_sParticleType); 
+    m_numTracks_perJet_incl = bookHistogram("numTracks_perJet", "numTracks_perJet", m_sParticleType); 
 
     // tracker hits
-    m_nInnHits_incl = bookHistogram("nInnHits_incl", "nInnHits", m_sParticleType); 
-    m_nNextToInnHits_incl = bookHistogram("nNextToInnHits_incl", "nNextToInnHits", m_sParticleType);
-    m_nBLHits_incl = bookHistogram("nBLHits_incl", "nBLHits", m_sParticleType);
-    m_nsharedBLHits_incl = bookHistogram("nsharedBLHits_incl", "nsharedBLHits", m_sParticleType);
-    m_nsplitBLHits_incl = bookHistogram("nsplitBLHits_incl", "nsplitBLHits", m_sParticleType);
-    m_nPixHits_incl = bookHistogram("nPixHits_incl", "nPixHits", m_sParticleType);
-    m_nPixHoles_incl = bookHistogram("nPixHoles_incl", "nPixHoles", m_sParticleType);
-    m_nsharedPixHits_incl = bookHistogram("nsharedPixHits_incl", "nsharedPixHits", m_sParticleType);
-    m_nsplitPixHits_incl = bookHistogram("nsplitPixHits_incl", "nsplitPixHits", m_sParticleType);
-    m_nSCTHits_incl = bookHistogram("nSCTHits_incl", "nSCTHits", m_sParticleType);
-    m_nSCTHoles_incl = bookHistogram("nSCTHoles_incl", "nSCTHoles", m_sParticleType);
-    m_nsharedSCTHits_incl = bookHistogram("nsharedSCTHits_incl", "nsharedSCTHits", m_sParticleType);
+    m_nInnHits_incl = bookHistogram("nInnHits", "nInnHits", m_sParticleType); 
+    m_nNextToInnHits_incl = bookHistogram("nNextToInnHits", "nNextToInnHits", m_sParticleType);
+    m_nBLHits_incl = bookHistogram("nBLHits", "nBLHits", m_sParticleType);
+    m_nsharedBLHits_incl = bookHistogram("nsharedBLHits", "nsharedBLHits", m_sParticleType);
+    m_nsplitBLHits_incl = bookHistogram("nsplitBLHits", "nsplitBLHits", m_sParticleType);
+    m_nPixHits_incl = bookHistogram("nPixHits", "nPixHits", m_sParticleType);
+    m_nPixHoles_incl = bookHistogram("nPixHoles", "nPixHoles", m_sParticleType);
+    m_nsharedPixHits_incl = bookHistogram("nsharedPixHits", "nsharedPixHits", m_sParticleType);
+    m_nsplitPixHits_incl = bookHistogram("nsplitPixHits", "nsplitPixHits", m_sParticleType);
+    m_nSCTHits_incl = bookHistogram("nSCTHits", "nSCTHits", m_sParticleType);
+    m_nSCTHoles_incl = bookHistogram("nSCTHoles", "nSCTHoles", m_sParticleType);
+    m_nsharedSCTHits_incl = bookHistogram("nsharedSCTHits", "nsharedSCTHits", m_sParticleType);
   }
 
   void BTaggingValidationPlots::bookSmallRHistograms(){
@@ -375,155 +375,155 @@ namespace JetTagDQA{
     m_fracJetsWithSV = bookHistogram("fracJetsWithSV", "fracJetsWithSV", m_sParticleType);
 
     // muon vars
-    m_leading_muon_pT_frac = bookHistogram("leading_muon_pT_frac", "leading_muon_pT_frac", m_sParticleType); 
-    m_subleading_muon_pT_frac = bookHistogram("subleading_muon_pT_frac", "subleading_muon_pT_frac", m_sParticleType); 
+    m_leading_muon_pT_frac = bookHistogram("leading_pT_frac", "leading_muon_pT_frac", m_sParticleType); 
+    m_subleading_muon_pT_frac = bookHistogram("subleading_pT_frac", "subleading_muon_pT_frac", m_sParticleType); 
 
-    m_jet_pt_b  = bookHistogram("jet_pt_b_ttbar", "jet_pT", m_sParticleType, "b-jets - ");
-    m_jet_pt_c  = bookHistogram("jet_pt_c_ttbar", "jet_pT", m_sParticleType, "c-jets - ");
-    m_jet_pt_l  = bookHistogram("jet_pt_l_ttbar", "jet_pT", m_sParticleType, "l-jets - ");
+    m_jet_pt_b  = bookHistogram("pt_ttbar_b", "jet_pT", m_sParticleType, "b-jets - ");
+    m_jet_pt_c  = bookHistogram("pt_ttbar_c", "jet_pT", m_sParticleType, "c-jets - ");
+    m_jet_pt_l  = bookHistogram("pt_ttbar_u", "jet_pT", m_sParticleType, "l-jets - ");
 
-    m_jet_pt_Zprime_b  = bookHistogram("jet_pt_b_Zprime", "jet_pT_Zprime", m_sParticleType, "b-jets - ");
-    m_jet_pt_Zprime_c  = bookHistogram("jet_pt_c_Zprime", "jet_pT_Zprime", m_sParticleType, "c-jets - ");
-    m_jet_pt_Zprime_l  = bookHistogram("jet_pt_l_Zprime", "jet_pT_Zprime", m_sParticleType, "l-jets - ");
+    m_jet_pt_Zprime_b  = bookHistogram("pt_Zprime_b", "jet_pT_Zprime", m_sParticleType, "b-jets - ");
+    m_jet_pt_Zprime_c  = bookHistogram("pt_Zprime_c", "jet_pT_Zprime", m_sParticleType, "c-jets - ");
+    m_jet_pt_Zprime_l  = bookHistogram("pt_Zprime_u", "jet_pT_Zprime", m_sParticleType, "l-jets - ");
 
-    m_jet_eta_b  = bookHistogram("jet_eta_b", "jet_eta", m_sParticleType, "b-jets - ");
-    m_jet_eta_c  = bookHistogram("jet_eta_c", "jet_eta", m_sParticleType, "c-jets - ");
-    m_jet_eta_l  = bookHistogram("jet_eta_l", "jet_eta", m_sParticleType, "l-jets - ");
+    m_jet_eta_b  = bookHistogram("eta_b", "jet_eta", m_sParticleType, "b-jets - ");
+    m_jet_eta_c  = bookHistogram("eta_c", "jet_eta", m_sParticleType, "c-jets - ");
+    m_jet_eta_l  = bookHistogram("eta_u", "jet_eta", m_sParticleType, "l-jets - ");
 
     // SV1 related vars
-    m_SV1_numSVs_incl = bookHistogram("SV1_numSVs_incl", "SV1_numSVs", m_sParticleType);
-    m_SV1_masssvx_incl = bookHistogram("SV1_masssvx_incl", "SV1_masssvx", m_sParticleType);
-    m_SV1_N2Tpair_incl = bookHistogram("SV1_N2Tpair_incl", "SV1_N2Tpair", m_sParticleType);
-    m_SV1_efracsvx_incl = bookHistogram("SV1_efracsvx_incl", "SV1_efracsvx", m_sParticleType);
-    m_SV1_deltaR_incl = bookHistogram("SV1_deltaR_incl", "SV1_deltaR", m_sParticleType);
-    m_SV1_significance3d_incl = bookHistogram("SV1_significance3d_incl", "SV1_significance3d", m_sParticleType);
-    m_SV1_energyTrkInJet_incl = bookHistogram("SV1_energyTrkInJet_incl", "SV1_energyTrkInJet", m_sParticleType);
-    m_SV1_NGTinSvx_incl = bookHistogram("SV1_NGTinSvx_incl", "SV1_NGTinSvx", m_sParticleType);
-    m_SV1_Lxy_incl = bookHistogram("SV1_Lxy_incl", "SV1_Lxy", m_sParticleType);
-    m_SV1_purity_incl = bookHistogram("SV1_purity_incl", "SV1_purity", m_sParticleType);
-    m_SV1_fracTracks_fromB_incl = bookHistogram("SV1_fracTracks_fromB_incl", "SV1_fracTracks_from_B", m_sParticleType);
-    m_SV1_fracTracks_fromC_incl = bookHistogram("SV1_fracTracks_fromC_incl", "SV1_fracTracks_from_C", m_sParticleType);
-    m_SV1_fracTracks_fromFragmentation_incl = bookHistogram("SV1_fracTracks_fromFragmentation_incl", "SV1_fracTracks_from_Fragmentation", m_sParticleType);
-    m_SV1_fracTracks_fromSecondaries_incl = bookHistogram("SV1_fracTracks_fromSecondaries_incl", "SV1_fracTracks_from_Secondaries", m_sParticleType);
-    m_SV1_fracTracks_fromPileup_incl = bookHistogram("SV1_fracTracks_fromPileup_incl", "SV1_fracTracks_from_Pileup", m_sParticleType);
-    m_SV1_fracTracks_fromFake_incl = bookHistogram("SV1_fracTracks_fromFake_incl", "SV1_fracTracks_from_Fake", m_sParticleType);
+    m_SV1_numSVs_incl = bookHistogram("numSVs", "SV1_numSVs", m_sParticleType);
+    m_SV1_masssvx_incl = bookHistogram("masssvx", "SV1_masssvx", m_sParticleType);
+    m_SV1_N2Tpair_incl = bookHistogram("N2Tpair", "SV1_N2Tpair", m_sParticleType);
+    m_SV1_efracsvx_incl = bookHistogram("efracsvx", "SV1_efracsvx", m_sParticleType);
+    m_SV1_deltaR_incl = bookHistogram("deltaR", "SV1_deltaR", m_sParticleType);
+    m_SV1_significance3d_incl = bookHistogram("significance3d", "SV1_significance3d", m_sParticleType);
+    m_SV1_energyTrkInJet_incl = bookHistogram("energyTrkInJet", "SV1_energyTrkInJet", m_sParticleType);
+    m_SV1_NGTinSvx_incl = bookHistogram("NGTinSvx", "SV1_NGTinSvx", m_sParticleType);
+    m_SV1_Lxy_incl = bookHistogram("Lxy", "SV1_Lxy", m_sParticleType);
+    m_SV1_purity_incl = bookHistogram("purity", "SV1_purity", m_sParticleType);
+    m_SV1_fracTracks_fromB_incl = bookHistogram("fracTracks_from_B", "SV1_fracTracks_from_B", m_sParticleType);
+    m_SV1_fracTracks_fromC_incl = bookHistogram("fracTracks_from_C", "SV1_fracTracks_from_C", m_sParticleType);
+    m_SV1_fracTracks_fromFragmentation_incl = bookHistogram("fracTracks_from_Fragmentation", "SV1_fracTracks_from_Fragmentation", m_sParticleType);
+    m_SV1_fracTracks_fromSecondaries_incl = bookHistogram("fracTracks_from_Secondaries", "SV1_fracTracks_from_Secondaries", m_sParticleType);
+    m_SV1_fracTracks_fromPileup_incl = bookHistogram("fracTracks_from_Pileup", "SV1_fracTracks_from_Pileup", m_sParticleType);
+    m_SV1_fracTracks_fromFake_incl = bookHistogram("fracTracks_from_Fake", "SV1_fracTracks_from_Fake", m_sParticleType);
 
-    m_SV1_numSVs_b = bookHistogram("SV1_numSVs_b", "SV1_numSVs", m_sParticleType, "b-jets - ");
-    m_SV1_masssvx_b = bookHistogram("SV1_masssvx_b", "SV1_masssvx", m_sParticleType, "b-jets - ");
-    m_SV1_N2Tpair_b = bookHistogram("SV1_N2Tpair_b", "SV1_N2Tpair", m_sParticleType, "b-jets - ");
-    m_SV1_efracsvx_b = bookHistogram("SV1_efracsvx_b", "SV1_efracsvx", m_sParticleType, "b-jets - ");
-    m_SV1_deltaR_b = bookHistogram("SV1_deltaR_b", "SV1_deltaR", m_sParticleType, "b-jets - ");
-    m_SV1_significance3d_b = bookHistogram("SV1_significance3d_b", "SV1_significance3d", m_sParticleType, "b-jets - ");
-    m_SV1_energyTrkInJet_b = bookHistogram("SV1_energyTrkInJet_b", "SV1_energyTrkInJet", m_sParticleType, "b-jets - ");
-    m_SV1_NGTinSvx_b = bookHistogram("SV1_NGTinSvx_b", "SV1_NGTinSvx", m_sParticleType, "b-jets - ");
-    m_SV1_Lxy_b = bookHistogram("SV1_Lxy_b", "SV1_Lxy", m_sParticleType, "b-jets - ");
-    m_SV1_purity_b = bookHistogram("SV1_purity_b", "SV1_purity", m_sParticleType, "b-jets - ");
-    m_SV1_fracTracks_fromB_b = bookHistogram("SV1_fracTracks_fromB_b", "SV1_fracTracks_from_B", m_sParticleType, "b-jets - ");
-    m_SV1_fracTracks_fromC_b = bookHistogram("SV1_fracTracks_fromC_b", "SV1_fracTracks_from_C", m_sParticleType, "b-jets - ");
-    m_SV1_fracTracks_fromFragmentation_b = bookHistogram("SV1_fracTracks_fromFragmentation_b", "SV1_fracTracks_from_Fragmentation", m_sParticleType, "b-jets - ");
-    m_SV1_fracTracks_fromSecondaries_b = bookHistogram("SV1_fracTracks_fromSecondaries_b", "SV1_fracTracks_from_Secondaries", m_sParticleType, "b-jets - ");
-    m_SV1_fracTracks_fromPileup_b = bookHistogram("SV1_fracTracks_fromPileup_b", "SV1_fracTracks_from_Pileup", m_sParticleType, "b-jets - ");
-    m_SV1_fracTracks_fromFake_b = bookHistogram("SV1_fracTracks_fromFake_b", "SV1_fracTracks_from_Fake", m_sParticleType, "b-jets - ");
+    m_SV1_numSVs_b = bookHistogram("numSVs_b", "SV1_numSVs", m_sParticleType, "b-jets - ");
+    m_SV1_masssvx_b = bookHistogram("masssvx_b", "SV1_masssvx", m_sParticleType, "b-jets - ");
+    m_SV1_N2Tpair_b = bookHistogram("N2Tpair_b", "SV1_N2Tpair", m_sParticleType, "b-jets - ");
+    m_SV1_efracsvx_b = bookHistogram("efracsvx_b", "SV1_efracsvx", m_sParticleType, "b-jets - ");
+    m_SV1_deltaR_b = bookHistogram("deltaR_b", "SV1_deltaR", m_sParticleType, "b-jets - ");
+    m_SV1_significance3d_b = bookHistogram("significance3d_b", "SV1_significance3d", m_sParticleType, "b-jets - ");
+    m_SV1_energyTrkInJet_b = bookHistogram("energyTrkInJet_b", "SV1_energyTrkInJet", m_sParticleType, "b-jets - ");
+    m_SV1_NGTinSvx_b = bookHistogram("NGTinSvx_b", "SV1_NGTinSvx", m_sParticleType, "b-jets - ");
+    m_SV1_Lxy_b = bookHistogram("Lxy_b", "SV1_Lxy", m_sParticleType, "b-jets - ");
+    m_SV1_purity_b = bookHistogram("purity_b", "SV1_purity", m_sParticleType, "b-jets - ");
+    m_SV1_fracTracks_fromB_b = bookHistogram("fracTracks_from_B_b", "SV1_fracTracks_from_B", m_sParticleType, "b-jets - ");
+    m_SV1_fracTracks_fromC_b = bookHistogram("fracTracks_from_C_b", "SV1_fracTracks_from_C", m_sParticleType, "b-jets - ");
+    m_SV1_fracTracks_fromFragmentation_b = bookHistogram("fracTracks_from_Fragmentation_b", "SV1_fracTracks_from_Fragmentation", m_sParticleType, "b-jets - ");
+    m_SV1_fracTracks_fromSecondaries_b = bookHistogram("fracTracks_from_Secondaries_b", "SV1_fracTracks_from_Secondaries", m_sParticleType, "b-jets - ");
+    m_SV1_fracTracks_fromPileup_b = bookHistogram("fracTracks_from_Pileup_b", "SV1_fracTracks_from_Pileup", m_sParticleType, "b-jets - ");
+    m_SV1_fracTracks_fromFake_b = bookHistogram("fracTracks_from_Fake_b", "SV1_fracTracks_from_Fake", m_sParticleType, "b-jets - ");
 
-    m_SV1_numSVs_c = bookHistogram("SV1_numSVs_c", "SV1_numSVs", m_sParticleType, "c-jets - ");
-    m_SV1_masssvx_c = bookHistogram("SV1_masssvx_c", "SV1_masssvx", m_sParticleType, "c-jets - ");
-    m_SV1_N2Tpair_c = bookHistogram("SV1_N2Tpair_c", "SV1_N2Tpair", m_sParticleType, "c-jets - ");
-    m_SV1_efracsvx_c = bookHistogram("SV1_efracsvx_c", "SV1_efracsvx", m_sParticleType, "c-jets - ");
-    m_SV1_deltaR_c = bookHistogram("SV1_deltaR_c", "SV1_deltaR", m_sParticleType, "c-jets - ");
-    m_SV1_significance3d_c = bookHistogram("SV1_significance3d_c", "SV1_significance3d", m_sParticleType, "c-jets - ");
-    m_SV1_energyTrkInJet_c = bookHistogram("SV1_energyTrkInJet_c", "SV1_energyTrkInJet", m_sParticleType, "c-jets - ");
-    m_SV1_NGTinSvx_c = bookHistogram("SV1_NGTinSvx_c", "SV1_NGTinSvx", m_sParticleType, "c-jets - ");
-    m_SV1_Lxy_c = bookHistogram("SV1_Lxy_c", "SV1_Lxy", m_sParticleType, "c-jets - ");
-    m_SV1_purity_c = bookHistogram("SV1_purity_c", "SV1_purity", m_sParticleType, "c-jets - ");
-    m_SV1_fracTracks_fromB_c = bookHistogram("SV1_fracTracks_fromB_c", "SV1_fracTracks_from_B", m_sParticleType, "c-jets - ");
-    m_SV1_fracTracks_fromC_c = bookHistogram("SV1_fracTracks_fromC_c", "SV1_fracTracks_from_C", m_sParticleType, "c-jets - ");
-    m_SV1_fracTracks_fromFragmentation_c = bookHistogram("SV1_fracTracks_fromFragmentation_c", "SV1_fracTracks_from_Fragmentation", m_sParticleType, "c-jets - ");
-    m_SV1_fracTracks_fromSecondaries_c = bookHistogram("SV1_fracTracks_fromSecondaries_c", "SV1_fracTracks_from_Secondaries", m_sParticleType, "c-jets - ");
-    m_SV1_fracTracks_fromPileup_c = bookHistogram("SV1_fracTracks_fromPileup_c", "SV1_fracTracks_from_Pileup", m_sParticleType, "c-jets - ");
-    m_SV1_fracTracks_fromFake_c = bookHistogram("SV1_fracTracks_fromFake_c", "SV1_fracTracks_from_Fake", m_sParticleType, "c-jets - ");
+    m_SV1_numSVs_c = bookHistogram("numSVs_c", "SV1_numSVs", m_sParticleType, "c-jets - ");
+    m_SV1_masssvx_c = bookHistogram("masssvx_c", "SV1_masssvx", m_sParticleType, "c-jets - ");
+    m_SV1_N2Tpair_c = bookHistogram("N2Tpair_c", "SV1_N2Tpair", m_sParticleType, "c-jets - ");
+    m_SV1_efracsvx_c = bookHistogram("efracsvx_c", "SV1_efracsvx", m_sParticleType, "c-jets - ");
+    m_SV1_deltaR_c = bookHistogram("deltaR_c", "SV1_deltaR", m_sParticleType, "c-jets - ");
+    m_SV1_significance3d_c = bookHistogram("significance3d_c", "SV1_significance3d", m_sParticleType, "c-jets - ");
+    m_SV1_energyTrkInJet_c = bookHistogram("energyTrkInJet_c", "SV1_energyTrkInJet", m_sParticleType, "c-jets - ");
+    m_SV1_NGTinSvx_c = bookHistogram("NGTinSvx_c", "SV1_NGTinSvx", m_sParticleType, "c-jets - ");
+    m_SV1_Lxy_c = bookHistogram("Lxy_c", "SV1_Lxy", m_sParticleType, "c-jets - ");
+    m_SV1_purity_c = bookHistogram("purity_c", "SV1_purity", m_sParticleType, "c-jets - ");
+    m_SV1_fracTracks_fromB_c = bookHistogram("fracTracks_from_B_c", "SV1_fracTracks_from_B", m_sParticleType, "c-jets - ");
+    m_SV1_fracTracks_fromC_c = bookHistogram("fracTracks_from_C_c", "SV1_fracTracks_from_C", m_sParticleType, "c-jets - ");
+    m_SV1_fracTracks_fromFragmentation_c = bookHistogram("fracTracks_from_Fragmentation_c", "SV1_fracTracks_from_Fragmentation", m_sParticleType, "c-jets - ");
+    m_SV1_fracTracks_fromSecondaries_c = bookHistogram("fracTracks_from_Secondaries_c", "SV1_fracTracks_from_Secondaries", m_sParticleType, "c-jets - ");
+    m_SV1_fracTracks_fromPileup_c = bookHistogram("fracTracks_from_Pileup_c", "SV1_fracTracks_from_Pileup", m_sParticleType, "c-jets - ");
+    m_SV1_fracTracks_fromFake_c = bookHistogram("fracTracks_from_Fake_c", "SV1_fracTracks_from_Fake", m_sParticleType, "c-jets - ");
 
-    m_SV1_numSVs_l = bookHistogram("SV1_numSVs_l", "SV1_numSVs", m_sParticleType, "l-jets - ");
-    m_SV1_masssvx_l = bookHistogram("SV1_masssvx_l", "SV1_masssvx", m_sParticleType, "l-jets - ");
-    m_SV1_N2Tpair_l = bookHistogram("SV1_N2Tpair_l", "SV1_N2Tpair", m_sParticleType, "l-jets - ");
-    m_SV1_efracsvx_l = bookHistogram("SV1_efracsvx_l", "SV1_efracsvx", m_sParticleType, "l-jets - ");
-    m_SV1_deltaR_l = bookHistogram("SV1_deltaR_l", "SV1_deltaR", m_sParticleType, "l-jets - ");
-    m_SV1_significance3d_l = bookHistogram("SV1_significance3d_l", "SV1_significance3d", m_sParticleType, "l-jets - ");
-    m_SV1_energyTrkInJet_l = bookHistogram("SV1_energyTrkInJet_l", "SV1_energyTrkInJet", m_sParticleType, "l-jets - ");
-    m_SV1_NGTinSvx_l = bookHistogram("SV1_NGTinSvx_l", "SV1_NGTinSvx", m_sParticleType, "l-jets - ");
-    m_SV1_Lxy_l = bookHistogram("SV1_Lxy_l", "SV1_Lxy", m_sParticleType, "l-jets - ");
-    m_SV1_purity_l = bookHistogram("SV1_purity_l", "SV1_purity", m_sParticleType, "l-jets - ");
-    m_SV1_fracTracks_fromB_l = bookHistogram("SV1_fracTracks_fromB_l", "SV1_fracTracks_from_B", m_sParticleType, "l-jets - ");
-    m_SV1_fracTracks_fromC_l = bookHistogram("SV1_fracTracks_fromC_l", "SV1_fracTracks_from_C", m_sParticleType, "l-jets - ");
-    m_SV1_fracTracks_fromFragmentation_l = bookHistogram("SV1_fracTracks_fromFragmentation_l", "SV1_fracTracks_from_Fragmentation", m_sParticleType, "l-jets - ");
-    m_SV1_fracTracks_fromSecondaries_l = bookHistogram("SV1_fracTracks_fromSecondaries_l", "SV1_fracTracks_from_Secondaries", m_sParticleType, "l-jets - ");
-    m_SV1_fracTracks_fromPileup_l = bookHistogram("SV1_fracTracks_fromPileup_l", "SV1_fracTracks_from_Pileup", m_sParticleType, "l-jets - ");
-    m_SV1_fracTracks_fromFake_l = bookHistogram("SV1_fracTracks_fromFake_l", "SV1_fracTracks_from_Fake", m_sParticleType, "l-jets - ");
+    m_SV1_numSVs_l = bookHistogram("numSVs_u", "SV1_numSVs", m_sParticleType, "l-jets - ");
+    m_SV1_masssvx_l = bookHistogram("masssvx_u", "SV1_masssvx", m_sParticleType, "l-jets - ");
+    m_SV1_N2Tpair_l = bookHistogram("N2Tpair_u", "SV1_N2Tpair", m_sParticleType, "l-jets - ");
+    m_SV1_efracsvx_l = bookHistogram("efracsvx_u", "SV1_efracsvx", m_sParticleType, "l-jets - ");
+    m_SV1_deltaR_l = bookHistogram("deltaR_u", "SV1_deltaR", m_sParticleType, "l-jets - ");
+    m_SV1_significance3d_l = bookHistogram("significance3d_u", "SV1_significance3d", m_sParticleType, "l-jets - ");
+    m_SV1_energyTrkInJet_l = bookHistogram("energyTrkInJet_u", "SV1_energyTrkInJet", m_sParticleType, "l-jets - ");
+    m_SV1_NGTinSvx_l = bookHistogram("NGTinSvx_u", "SV1_NGTinSvx", m_sParticleType, "l-jets - ");
+    m_SV1_Lxy_l = bookHistogram("Lxy_u", "SV1_Lxy", m_sParticleType, "l-jets - ");
+    m_SV1_purity_l = bookHistogram("purity_u", "SV1_purity", m_sParticleType, "l-jets - ");
+    m_SV1_fracTracks_fromB_l = bookHistogram("fracTracks_from_B_u", "SV1_fracTracks_from_B", m_sParticleType, "l-jets - ");
+    m_SV1_fracTracks_fromC_l = bookHistogram("fracTracks_from_C_u", "SV1_fracTracks_from_C", m_sParticleType, "l-jets - ");
+    m_SV1_fracTracks_fromFragmentation_l = bookHistogram("fracTracks_from_Fragmentation_u", "SV1_fracTracks_from_Fragmentation", m_sParticleType, "l-jets - ");
+    m_SV1_fracTracks_fromSecondaries_l = bookHistogram("fracTracks_from_Secondaries_u", "SV1_fracTracks_from_Secondaries", m_sParticleType, "l-jets - ");
+    m_SV1_fracTracks_fromPileup_l = bookHistogram("fracTracks_from_Pileup_u", "SV1_fracTracks_from_Pileup", m_sParticleType, "l-jets - ");
+    m_SV1_fracTracks_fromFake_l = bookHistogram("fracTracks_from_Fake_u", "SV1_fracTracks_from_Fake", m_sParticleType, "l-jets - ");
 
-    m_SV1_numSVs_muon = bookHistogram("SV1_numSVs_muon", "SV1_numSVs", m_sParticleType, "jets with muon - ");
-    m_SV1_masssvx_muon = bookHistogram("SV1_masssvx_muon", "SV1_masssvx", m_sParticleType, "jets with muon - ");
-    m_SV1_N2Tpair_muon = bookHistogram("SV1_N2Tpair_muon", "SV1_N2Tpair", m_sParticleType, "jets with muon - ");
-    m_SV1_efracsvx_muon = bookHistogram("SV1_efracsvx_muon", "SV1_efracsvx", m_sParticleType, "jets with muon - ");
-    m_SV1_deltaR_muon = bookHistogram("SV1_deltaR_muon", "SV1_deltaR", m_sParticleType, "jets with muon - ");
-    m_SV1_significance3d_muon = bookHistogram("SV1_significance3d_muon", "SV1_significance3d", m_sParticleType, "jets with muon - ");
-    m_SV1_energyTrkInJet_muon = bookHistogram("SV1_energyTrkInJet_muon", "SV1_energyTrkInJet", m_sParticleType, "jets with muon - ");
-    m_SV1_NGTinSvx_muon = bookHistogram("SV1_NGTinSvx_muon", "SV1_NGTinSvx", m_sParticleType, "jets with muon - ");
-    m_SV1_Lxy_muon = bookHistogram("SV1_Lxy_muon", "SV1_Lxy", m_sParticleType, "jets with muon - ");
-    m_SV1_purity_muon = bookHistogram("SV1_purity_muon", "SV1_purity", m_sParticleType, "jets with muon - ");
-    m_SV1_fracTracks_fromB_muon = bookHistogram("SV1_fracTracks_fromB_muon", "SV1_fracTracks_from_B", m_sParticleType, "jets with muon - ");
-    m_SV1_fracTracks_fromC_muon = bookHistogram("SV1_fracTracks_fromC_muon", "SV1_fracTracks_from_C", m_sParticleType, "jets with muon - ");
-    m_SV1_fracTracks_fromFragmentation_muon = bookHistogram("SV1_fracTracks_fromFragmentation_muon", "SV1_fracTracks_from_Fragmentation", m_sParticleType, "jets with muon - ");
-    m_SV1_fracTracks_fromSecondaries_muon = bookHistogram("SV1_fracTracks_fromSecondaries_muon", "SV1_fracTracks_from_Secondaries", m_sParticleType, "jets with muon - ");
-    m_SV1_fracTracks_fromPileup_muon = bookHistogram("SV1_fracTracks_fromPileup_muon", "SV1_fracTracks_from_Pileup", m_sParticleType, "jets with muon - ");
-    m_SV1_fracTracks_fromFake_muon = bookHistogram("SV1_fracTracks_fromFake_muon", "SV1_fracTracks_from_Fake", m_sParticleType, "jets with muon - ");
+    m_SV1_numSVs_muon = bookHistogram("numSVs_muon", "SV1_numSVs", m_sParticleType, "jets with muon - ");
+    m_SV1_masssvx_muon = bookHistogram("masssvx_muon", "SV1_masssvx", m_sParticleType, "jets with muon - ");
+    m_SV1_N2Tpair_muon = bookHistogram("N2Tpair_muon", "SV1_N2Tpair", m_sParticleType, "jets with muon - ");
+    m_SV1_efracsvx_muon = bookHistogram("efracsvx_muon", "SV1_efracsvx", m_sParticleType, "jets with muon - ");
+    m_SV1_deltaR_muon = bookHistogram("deltaR_muon", "SV1_deltaR", m_sParticleType, "jets with muon - ");
+    m_SV1_significance3d_muon = bookHistogram("significance3d_muon", "SV1_significance3d", m_sParticleType, "jets with muon - ");
+    m_SV1_energyTrkInJet_muon = bookHistogram("energyTrkInJet_muon", "SV1_energyTrkInJet", m_sParticleType, "jets with muon - ");
+    m_SV1_NGTinSvx_muon = bookHistogram("NGTinSvx_muon", "SV1_NGTinSvx", m_sParticleType, "jets with muon - ");
+    m_SV1_Lxy_muon = bookHistogram("Lxy_muon", "SV1_Lxy", m_sParticleType, "jets with muon - ");
+    m_SV1_purity_muon = bookHistogram("purity_muon", "SV1_purity", m_sParticleType, "jets with muon - ");
+    m_SV1_fracTracks_fromB_muon = bookHistogram("fracTracks_from_B_muon", "SV1_fracTracks_from_B", m_sParticleType, "jets with muon - ");
+    m_SV1_fracTracks_fromC_muon = bookHistogram("fracTracks_from_C_muon", "SV1_fracTracks_from_C", m_sParticleType, "jets with muon - ");
+    m_SV1_fracTracks_fromFragmentation_muon = bookHistogram("fracTracks_from_Fragmentation_muon", "SV1_fracTracks_from_Fragmentation", m_sParticleType, "jets with muon - ");
+    m_SV1_fracTracks_fromSecondaries_muon = bookHistogram("fracTracks_from_Secondaries_muon", "SV1_fracTracks_from_Secondaries", m_sParticleType, "jets with muon - ");
+    m_SV1_fracTracks_fromPileup_muon = bookHistogram("fracTracks_from_Pileup_muon", "SV1_fracTracks_from_Pileup", m_sParticleType, "jets with muon - ");
+    m_SV1_fracTracks_fromFake_muon = bookHistogram("fracTracks_from_Fake_muon", "SV1_fracTracks_from_Fake", m_sParticleType, "jets with muon - ");
 
-    m_SV1_fracHFTracksInJet_incl = bookHistogram("SV1_fracHFTracksInJet_incl", "SV1_fracHFTracksInJet", m_sParticleType);
-    m_SV1_fracHFTracksInJet_b = bookHistogram("SV1_fracHFTracksInJet_b", "SV1_fracHFTracksInJet", m_sParticleType, "b-jets - ");
-    m_SV1_fracHFTracksInJet_c = bookHistogram("SV1_fracHFTracksInJet_c", "SV1_fracHFTracksInJet", m_sParticleType, "c-jets - ");
-    m_SV1_fracHFTracksInJet_l = bookHistogram("SV1_fracHFTracksInJet_l", "SV1_fracHFTracksInJet", m_sParticleType, "l-jets - ");
-    m_SV1_fracHFTracksInJet_muon = bookHistogram("SV1_fracHFTracksInJet_muon", "SV1_fracHFTracksInJet", m_sParticleType, "jets with muon - ");
+    m_SV1_fracHFTracksInJet_incl = bookHistogram("fracHFTracksInJet", "SV1_fracHFTracksInJet", m_sParticleType);
+    m_SV1_fracHFTracksInJet_b = bookHistogram("fracHFTracksInJet_b", "SV1_fracHFTracksInJet", m_sParticleType, "b-jets - ");
+    m_SV1_fracHFTracksInJet_c = bookHistogram("fracHFTracksInJet_c", "SV1_fracHFTracksInJet", m_sParticleType, "c-jets - ");
+    m_SV1_fracHFTracksInJet_l = bookHistogram("fracHFTracksInJet_u", "SV1_fracHFTracksInJet", m_sParticleType, "l-jets - ");
+    m_SV1_fracHFTracksInJet_muon = bookHistogram("fracHFTracksInJet_muon", "SV1_fracHFTracksInJet", m_sParticleType, "jets with muon - ");
 
     if(m_detailLevel > 10){
-      m_SV1_fracTracks_Secondaries_KshortDecay_incl = bookHistogram("SV1_fracTracks_Secondaries_KshortDecay_incl", "SV1_fracTracks_Secondaries_KshortDecay", m_sParticleType); 
-      m_SV1_fracTracks_Secondaries_KshortDecay_b = bookHistogram("SV1_fracTracks_Secondaries_KshortDecay_b", "SV1_fracTracks_Secondaries_KshortDecay", m_sParticleType, "b-jets -"); 
-      m_SV1_fracTracks_Secondaries_KshortDecay_c = bookHistogram("SV1_fracTracks_Secondaries_KshortDecay_c", "SV1_fracTracks_Secondaries_KshortDecay", m_sParticleType, "c-jets -"); 
-      m_SV1_fracTracks_Secondaries_KshortDecay_u = bookHistogram("SV1_fracTracks_Secondaries_KshortDecay_l", "SV1_fracTracks_Secondaries_KshortDecay", m_sParticleType, "l-jets -"); 
-      m_SV1_fracTracks_Secondaries_KshortDecay_muon = bookHistogram("SV1_fracTracks_Secondaries_KshortDecay_muon", "SV1_fracTracks_Secondaries_KshortDecay", m_sParticleType, "jets with muon -"); 
+      m_SV1_fracTracks_Secondaries_KshortDecay_incl = bookHistogram("fracTracks_from_Secondaries_KshortDecay", "SV1_fracTracks_from_Secondaries_KshortDecay", m_sParticleType); 
+      m_SV1_fracTracks_Secondaries_KshortDecay_b = bookHistogram("fracTracks_from_Secondaries_KshortDecay_b", "SV1_fracTracks_from_Secondaries_KshortDecay", m_sParticleType, "b-jets -"); 
+      m_SV1_fracTracks_Secondaries_KshortDecay_c = bookHistogram("fracTracks_from_Secondaries_KshortDecay_c", "SV1_fracTracks_from_Secondaries_KshortDecay", m_sParticleType, "c-jets -"); 
+      m_SV1_fracTracks_Secondaries_KshortDecay_u = bookHistogram("fracTracks_from_Secondaries_KshortDecay_u", "SV1_fracTracks_from_Secondaries_KshortDecay", m_sParticleType, "l-jets -"); 
+      m_SV1_fracTracks_Secondaries_KshortDecay_muon = bookHistogram("fracTracks_from_Secondaries_KshortDecay_muon", "SV1_fracTracks_from_Secondaries_KshortDecay", m_sParticleType, "jets with muon -"); 
 
-      m_SV1_fracTracks_Secondaries_LambdaDecay_incl = bookHistogram("SV1_fracTracks_Secondaries_LambdaDecay_incl", "SV1_fracTracks_Secondaries_LambdaDecay", m_sParticleType); 
-      m_SV1_fracTracks_Secondaries_LambdaDecay_b = bookHistogram("SV1_fracTracks_Secondaries_LambdaDecay_b", "SV1_fracTracks_Secondaries_LambdaDecay", m_sParticleType, "b-jets -"); 
-      m_SV1_fracTracks_Secondaries_LambdaDecay_c = bookHistogram("SV1_fracTracks_Secondaries_LambdaDecay_c", "SV1_fracTracks_Secondaries_LambdaDecay", m_sParticleType, "c-jets -"); 
-      m_SV1_fracTracks_Secondaries_LambdaDecay_u = bookHistogram("SV1_fracTracks_Secondaries_LambdaDecay_l", "SV1_fracTracks_Secondaries_LambdaDecay", m_sParticleType, "l-jets -"); 
-      m_SV1_fracTracks_Secondaries_LambdaDecay_muon = bookHistogram("SV1_fracTracks_Secondaries_LambdaDecay_muon", "SV1_fracTracks_Secondaries_LambdaDecay", m_sParticleType, "jets with muon -"); 
+      m_SV1_fracTracks_Secondaries_LambdaDecay_incl = bookHistogram("fracTracks_from_Secondaries_LambdaDecay", "SV1_fracTracks_from_Secondaries_LambdaDecay", m_sParticleType); 
+      m_SV1_fracTracks_Secondaries_LambdaDecay_b = bookHistogram("fracTracks_from_Secondaries_LambdaDecay_b", "SV1_fracTracks_from_Secondaries_LambdaDecay", m_sParticleType, "b-jets -"); 
+      m_SV1_fracTracks_Secondaries_LambdaDecay_c = bookHistogram("fracTracks_from_Secondaries_LambdaDecay_c", "SV1_fracTracks_from_Secondaries_LambdaDecay", m_sParticleType, "c-jets -"); 
+      m_SV1_fracTracks_Secondaries_LambdaDecay_u = bookHistogram("fracTracks_from_Secondaries_LambdaDecay_u", "SV1_fracTracks_from_Secondaries_LambdaDecay", m_sParticleType, "l-jets -"); 
+      m_SV1_fracTracks_Secondaries_LambdaDecay_muon = bookHistogram("fracTracks_from_Secondaries_LambdaDecay_muon", "SV1_fracTracks_from_Secondaries_LambdaDecay", m_sParticleType, "jets with muon -"); 
 
-      m_SV1_fracTracks_Secondaries_GammaConversion_incl = bookHistogram("SV1_fracTracks_Secondaries_GammaConversion_incl", "SV1_fracTracks_Secondaries_GammaConversion", m_sParticleType); 
-      m_SV1_fracTracks_Secondaries_GammaConversion_b = bookHistogram("SV1_fracTracks_Secondaries_GammaConversion_b", "SV1_fracTracks_Secondaries_GammaConversion", m_sParticleType, "b-jets -"); 
-      m_SV1_fracTracks_Secondaries_GammaConversion_c = bookHistogram("SV1_fracTracks_Secondaries_GammaConversion_c", "SV1_fracTracks_Secondaries_GammaConversion", m_sParticleType, "c-jets -"); 
-      m_SV1_fracTracks_Secondaries_GammaConversion_u = bookHistogram("SV1_fracTracks_Secondaries_GammaConversion_l", "SV1_fracTracks_Secondaries_GammaConversion", m_sParticleType, "l-jets -"); 
-      m_SV1_fracTracks_Secondaries_GammaConversion_muon = bookHistogram("SV1_fracTracks_Secondaries_GammaConversion_muon", "SV1_fracTracks_Secondaries_GammaConversion", m_sParticleType, "jets with muon -"); 
+      m_SV1_fracTracks_Secondaries_GammaConversion_incl = bookHistogram("fracTracks_from_Secondaries_GammaConversion", "SV1_fracTracks_from_Secondaries_GammaConversion", m_sParticleType); 
+      m_SV1_fracTracks_Secondaries_GammaConversion_b = bookHistogram("fracTracks_from_Secondaries_GammaConversion_b", "SV1_fracTracks_from_Secondaries_GammaConversion", m_sParticleType, "b-jets -"); 
+      m_SV1_fracTracks_Secondaries_GammaConversion_c = bookHistogram("fracTracks_from_Secondaries_GammaConversion_c", "SV1_fracTracks_from_Secondaries_GammaConversion", m_sParticleType, "c-jets -"); 
+      m_SV1_fracTracks_Secondaries_GammaConversion_u = bookHistogram("fracTracks_from_Secondaries_GammaConversion_u", "SV1_fracTracks_from_Secondaries_GammaConversion", m_sParticleType, "l-jets -"); 
+      m_SV1_fracTracks_Secondaries_GammaConversion_muon = bookHistogram("fracTracks_from_Secondaries_GammaConversion_muon", "SV1_fracTracks_from_Secondaries_GammaConversion", m_sParticleType, "jets with muon -"); 
 
-      m_SV1_fracTracks_Secondaries_OtherDecay_incl = bookHistogram("SV1_fracTracks_Secondaries_OtherDecay_incl", "SV1_fracTracks_Secondaries_OtherDecay", m_sParticleType); 
-      m_SV1_fracTracks_Secondaries_OtherDecay_b = bookHistogram("SV1_fracTracks_Secondaries_OtherDecay_b", "SV1_fracTracks_Secondaries_OtherDecay", m_sParticleType, "b-jets -"); 
-      m_SV1_fracTracks_Secondaries_OtherDecay_c = bookHistogram("SV1_fracTracks_Secondaries_OtherDecay_c", "SV1_fracTracks_Secondaries_OtherDecay", m_sParticleType, "c-jets -"); 
-      m_SV1_fracTracks_Secondaries_OtherDecay_u = bookHistogram("SV1_fracTracks_Secondaries_OtherDecay_l", "SV1_fracTracks_Secondaries_OtherDecay", m_sParticleType, "l-jets -"); 
-      m_SV1_fracTracks_Secondaries_OtherDecay_muon = bookHistogram("SV1_fracTracks_Secondaries_OtherDecay_muon", "SV1_fracTracks_Secondaries_OtherDecay", m_sParticleType, "jets with muon -"); 
+      m_SV1_fracTracks_Secondaries_OtherDecay_incl = bookHistogram("fracTracks_from_Secondaries_OtherDecay", "SV1_fracTracks_from_Secondaries_OtherDecay", m_sParticleType); 
+      m_SV1_fracTracks_Secondaries_OtherDecay_b = bookHistogram("fracTracks_from_Secondaries_OtherDecay_b", "SV1_fracTracks_from_Secondaries_OtherDecay", m_sParticleType, "b-jets -"); 
+      m_SV1_fracTracks_Secondaries_OtherDecay_c = bookHistogram("fracTracks_from_Secondaries_OtherDecay_c", "SV1_fracTracks_from_Secondaries_OtherDecay", m_sParticleType, "c-jets -"); 
+      m_SV1_fracTracks_Secondaries_OtherDecay_u = bookHistogram("fracTracks_from_Secondaries_OtherDecay_u", "SV1_fracTracks_from_Secondaries_OtherDecay", m_sParticleType, "l-jets -"); 
+      m_SV1_fracTracks_Secondaries_OtherDecay_muon = bookHistogram("fracTracks_from_Secondaries_OtherDecay_muon", "SV1_fracTracks_from_Secondaries_OtherDecay", m_sParticleType, "jets with muon -"); 
 
-      m_SV1_fracTracks_Secondaries_HadronicInteraction_incl = bookHistogram("SV1_fracTracks_Secondaries_HadronicInteraction_incl", "SV1_fracTracks_Secondaries_HadronicInteraction", m_sParticleType); 
-      m_SV1_fracTracks_Secondaries_HadronicInteraction_b = bookHistogram("SV1_fracTracks_Secondaries_HadronicInteraction_b", "SV1_fracTracks_Secondaries_HadronicInteraction", m_sParticleType, "b-jets -"); 
-      m_SV1_fracTracks_Secondaries_HadronicInteraction_c = bookHistogram("SV1_fracTracks_Secondaries_HadronicInteraction_c", "SV1_fracTracks_Secondaries_HadronicInteraction", m_sParticleType, "c-jets -"); 
-      m_SV1_fracTracks_Secondaries_HadronicInteraction_u = bookHistogram("SV1_fracTracks_Secondaries_HadronicInteraction_l", "SV1_fracTracks_Secondaries_HadronicInteraction", m_sParticleType, "l-jets -"); 
-      m_SV1_fracTracks_Secondaries_HadronicInteraction_muon = bookHistogram("SV1_fracTracks_Secondaries_HadronicInteraction_muon", "SV1_fracTracks_Secondaries_HadronicInteraction", m_sParticleType, "jets with muon -"); 
+      m_SV1_fracTracks_Secondaries_HadronicInteraction_incl = bookHistogram("fracTracks_from_Secondaries_HadronicInteraction", "SV1_fracTracks_from_Secondaries_HadronicInteraction", m_sParticleType); 
+      m_SV1_fracTracks_Secondaries_HadronicInteraction_b = bookHistogram("fracTracks_from_Secondaries_HadronicInteraction_b", "SV1_fracTracks_from_Secondaries_HadronicInteraction", m_sParticleType, "b-jets -"); 
+      m_SV1_fracTracks_Secondaries_HadronicInteraction_c = bookHistogram("fracTracks_from_Secondaries_HadronicInteraction_c", "SV1_fracTracks_from_Secondaries_HadronicInteraction", m_sParticleType, "c-jets -"); 
+      m_SV1_fracTracks_Secondaries_HadronicInteraction_u = bookHistogram("fracTracks_from_Secondaries_HadronicInteraction_u", "SV1_fracTracks_from_Secondaries_HadronicInteraction", m_sParticleType, "l-jets -"); 
+      m_SV1_fracTracks_Secondaries_HadronicInteraction_muon = bookHistogram("fracTracks_from_Secondaries_HadronicInteraction_muon", "SV1_fracTracks_from_Secondaries_HadronicInteraction", m_sParticleType, "jets with muon -"); 
 
-      m_SV1_fracTracks_Secondaries_OtherSecondary_incl = bookHistogram("SV1_fracTracks_Secondaries_OtherSecondary_incl", "SV1_fracTracks_Secondaries_OtherSecondary", m_sParticleType); 
-      m_SV1_fracTracks_Secondaries_OtherSecondary_b = bookHistogram("SV1_fracTracks_Secondaries_OtherSecondary_b", "SV1_fracTracks_Secondaries_OtherSecondary", m_sParticleType, "b-jets -"); 
-      m_SV1_fracTracks_Secondaries_OtherSecondary_c = bookHistogram("SV1_fracTracks_Secondaries_OtherSecondary_c", "SV1_fracTracks_Secondaries_OtherSecondary", m_sParticleType, "c-jets -"); 
-      m_SV1_fracTracks_Secondaries_OtherSecondary_u = bookHistogram("SV1_fracTracks_Secondaries_OtherSecondary_l", "SV1_fracTracks_Secondaries_OtherSecondary", m_sParticleType, "l-jets -"); 
-      m_SV1_fracTracks_Secondaries_OtherSecondary_muon = bookHistogram("SV1_fracTracks_Secondaries_OtherSecondary_muon", "SV1_fracTracks_Secondaries_OtherSecondary", m_sParticleType, "jets with muon -"); 
+      m_SV1_fracTracks_Secondaries_OtherSecondary_incl = bookHistogram("fracTracks_from_Secondaries_OtherSecondary", "SV1_fracTracks_from_Secondaries_OtherSecondary", m_sParticleType); 
+      m_SV1_fracTracks_Secondaries_OtherSecondary_b = bookHistogram("fracTracks_from_Secondaries_OtherSecondary_b", "SV1_fracTracks_from_Secondaries_OtherSecondary", m_sParticleType, "b-jets -"); 
+      m_SV1_fracTracks_Secondaries_OtherSecondary_c = bookHistogram("fracTracks_from_Secondaries_OtherSecondary_c", "SV1_fracTracks_from_Secondaries_OtherSecondary", m_sParticleType, "c-jets -"); 
+      m_SV1_fracTracks_Secondaries_OtherSecondary_u = bookHistogram("fracTracks_from_Secondaries_OtherSecondary_u", "SV1_fracTracks_from_Secondaries_OtherSecondary", m_sParticleType, "l-jets -"); 
+      m_SV1_fracTracks_Secondaries_OtherSecondary_muon = bookHistogram("fracTracks_from_Secondaries_OtherSecondary_muon", "SV1_fracTracks_from_Secondaries_OtherSecondary", m_sParticleType, "jets with muon -"); 
 
-      m_SV1_fracTracks_OtherOrigin_incl = bookHistogram("SV1_fracTracks_OtherOrigin_incl", "SV1_fracTracks_from_OtherOrigin", m_sParticleType); 
-      m_SV1_fracTracks_OtherOrigin_b = bookHistogram("SV1_fracTracks_OtherOrigin_b", "SV1_fracTracks_from_OtherOrigin", m_sParticleType, "b-jets -"); 
-      m_SV1_fracTracks_OtherOrigin_c = bookHistogram("SV1_fracTracks_OtherOrigin_c", "SV1_fracTracks_from_OtherOrigin", m_sParticleType, "c-jets -"); 
-      m_SV1_fracTracks_OtherOrigin_u = bookHistogram("SV1_fracTracks_OtherOrigin_l", "SV1_fracTracks_from_OtherOrigin", m_sParticleType, "l-jets -"); 
-      m_SV1_fracTracks_OtherOrigin_muon = bookHistogram("SV1_fracTracks_OtherOrigin_muon", "SV1_fracTracks_from_OtherOrigin", m_sParticleType, "jets with muon -"); 
+      m_SV1_fracTracks_OtherOrigin_incl = bookHistogram("fracTracks_from_OtherOrigin", "SV1_fracTracks_from_OtherOrigin", m_sParticleType); 
+      m_SV1_fracTracks_OtherOrigin_b = bookHistogram("fracTracks_from_OtherOrigin_b", "SV1_fracTracks_from_OtherOrigin", m_sParticleType, "b-jets -"); 
+      m_SV1_fracTracks_OtherOrigin_c = bookHistogram("fracTracks_from_OtherOrigin_c", "SV1_fracTracks_from_OtherOrigin", m_sParticleType, "c-jets -"); 
+      m_SV1_fracTracks_OtherOrigin_u = bookHistogram("fracTracks_from_OtherOrigin_u", "SV1_fracTracks_from_OtherOrigin", m_sParticleType, "l-jets -"); 
+      m_SV1_fracTracks_OtherOrigin_muon = bookHistogram("fracTracks_from_OtherOrigin_muon", "SV1_fracTracks_from_OtherOrigin", m_sParticleType, "jets with muon -"); 
     }
 
     m_track_d0_b = bookHistogram("d0_b", "track_d0", m_sParticleType, "b-jets -");
@@ -536,106 +536,106 @@ namespace JetTagDQA{
     m_track_sigd0_c = bookHistogram("sigd0_c", "track_sigd0", m_sParticleType, "c-jets -");
     m_track_sigz0_c = bookHistogram("sigz0_c", "track_sigz0", m_sParticleType, "c-jets -"); 
     
-    m_track_d0_u = bookHistogram("d0_l", "track_d0", m_sParticleType, "l-jets -");
-    m_track_z0_u = bookHistogram("z0_l", "track_z0", m_sParticleType, "l-jets -"); 
-    m_track_sigd0_u = bookHistogram("sigd0_l", "track_sigd0", m_sParticleType, "l-jets -");
-    m_track_sigz0_u = bookHistogram("sigz0_l", "track_sigz0", m_sParticleType, "l-jets -"); 
+    m_track_d0_u = bookHistogram("d0_u", "track_d0", m_sParticleType, "l-jets -");
+    m_track_z0_u = bookHistogram("z0_u", "track_z0", m_sParticleType, "l-jets -"); 
+    m_track_sigd0_u = bookHistogram("sigd0_u", "track_sigd0", m_sParticleType, "l-jets -");
+    m_track_sigz0_u = bookHistogram("sigz0_u", "track_sigz0", m_sParticleType, "l-jets -"); 
     
     m_track_d0_muon = bookHistogram("d0_muon", "track_d0", m_sParticleType, "jets with muon -");
     m_track_z0_muon = bookHistogram("z0_muon", "track_z0", m_sParticleType, "jets with muon -"); 
     m_track_sigd0_muon = bookHistogram("sigd0_muon", "track_sigd0", m_sParticleType, "jets with muon -");
     m_track_sigz0_muon = bookHistogram("sigz0_muon", "track_sigz0", m_sParticleType, "jets with muon -"); 
-    m_track_pT_frac_b = bookHistogram("track_pT_frac_b", "track_pT_frac", m_sParticleType, "b-jets -"); 
-    m_track_pT_frac_c = bookHistogram("track_pT_frac_c", "track_pT_frac", m_sParticleType, "c-jets -"); 
-    m_track_pT_frac_u = bookHistogram("track_pT_frac_l", "track_pT_frac", m_sParticleType, "l-jets -"); 
-    m_track_pT_frac_muon = bookHistogram("track_pT_frac_muon", "track_pT_frac", m_sParticleType, "jets with muon -"); 
+    m_track_pT_frac_b = bookHistogram("pT_frac_b", "track_pT_frac", m_sParticleType, "b-jets -"); 
+    m_track_pT_frac_c = bookHistogram("pT_frac_c", "track_pT_frac", m_sParticleType, "c-jets -"); 
+    m_track_pT_frac_u = bookHistogram("pT_frac_u", "track_pT_frac", m_sParticleType, "l-jets -"); 
+    m_track_pT_frac_muon = bookHistogram("pT_frac_muon", "track_pT_frac", m_sParticleType, "jets with muon -"); 
     m_DeltaR_jet_track_b = bookHistogram("DeltaR_jet_track_b", "DeltaR_jet_track", m_sParticleType, "b-jets -"); 
     m_DeltaR_jet_track_c = bookHistogram("DeltaR_jet_track_c", "DeltaR_jet_track", m_sParticleType, "c-jets -"); 
-    m_DeltaR_jet_track_u = bookHistogram("DeltaR_jet_track_l", "DeltaR_jet_track", m_sParticleType, "l-jets -"); 
+    m_DeltaR_jet_track_u = bookHistogram("DeltaR_jet_track_u", "DeltaR_jet_track", m_sParticleType, "l-jets -"); 
     m_DeltaR_jet_track_muon = bookHistogram("DeltaR_jet_track_muon", "DeltaR_jet_track", m_sParticleType, "jets with muon -"); 
     m_numTracks_perJet_b = bookHistogram("numTracks_perJet_b", "numTracks_perJet", m_sParticleType, "b-jets -"); 
     m_numTracks_perJet_c = bookHistogram("numTracks_perJet_c", "numTracks_perJet", m_sParticleType, "c-jets -"); 
-    m_numTracks_perJet_u = bookHistogram("numTracks_perJet_l", "numTracks_perJet", m_sParticleType, "l-jets -"); 
+    m_numTracks_perJet_u = bookHistogram("numTracks_perJet_u", "numTracks_perJet", m_sParticleType, "l-jets -"); 
     m_numTracks_perJet_muon = bookHistogram("numTracks_perJet_muon", "numTracks_perJet", m_sParticleType, "jets with muon -"); 
 
     // number of tracks from different origins
-    m_numTracks_B_incl = bookHistogram("numTracks_B_incl", "numTracks_B", m_sParticleType); 
-    m_numTracks_C_incl = bookHistogram("numTracks_C_incl", "numTracks_C", m_sParticleType); 
-    m_numTracks_Fragmentation_incl = bookHistogram("numTracks_Fragmentation_incl", "numTracks_Fragmentation", m_sParticleType); 
-    m_numTracks_Secondaries_incl = bookHistogram("numTracks_Secondaries_incl", "numTracks_Secondaries", m_sParticleType); 
-    m_numTracks_Pileup_incl = bookHistogram("numTracks_Pileup_incl", "numTracks_Pileup", m_sParticleType); 
-    m_numTracks_Fake_incl = bookHistogram("numTracks_Fake_incl", "numTracks_Fake", m_sParticleType); 
+    m_numTracks_B_incl = bookHistogram("numTracks_from_B", "numTracks_from_B", m_sParticleType); 
+    m_numTracks_C_incl = bookHistogram("numTracks_from_C", "numTracks_from_C", m_sParticleType); 
+    m_numTracks_Fragmentation_incl = bookHistogram("numTracks_from_Fragmentation", "numTracks_from_Fragmentation", m_sParticleType); 
+    m_numTracks_Secondaries_incl = bookHistogram("numTracks_from_Secondaries", "numTracks_from_Secondaries", m_sParticleType); 
+    m_numTracks_Pileup_incl = bookHistogram("numTracks_from_Pileup", "numTracks_from_Pileup", m_sParticleType); 
+    m_numTracks_Fake_incl = bookHistogram("numTracks_from_Fake", "numTracks_from_Fake", m_sParticleType); 
 
-    m_numTracks_B_b = bookHistogram("numTracks_B_b", "numTracks_B", m_sParticleType, "b-jets -"); 
-    m_numTracks_C_b = bookHistogram("numTracks_C_b", "numTracks_C", m_sParticleType, "b-jets -"); 
-    m_numTracks_Fragmentation_b = bookHistogram("numTracks_Fragmentation_b", "numTracks_Fragmentation", m_sParticleType, "b-jets -"); 
-    m_numTracks_Secondaries_b = bookHistogram("numTracks_Secondaries_b", "numTracks_Secondaries", m_sParticleType, "b-jets -"); 
-    m_numTracks_Pileup_b = bookHistogram("numTracks_Pileup_b", "numTracks_Pileup", m_sParticleType, "b-jets -"); 
-    m_numTracks_Fake_b = bookHistogram("numTracks_Fake_b", "numTracks_Fake", m_sParticleType, "b-jets -"); 
+    m_numTracks_B_b = bookHistogram("numTracks_from_B_b", "numTracks_from_B", m_sParticleType, "b-jets -"); 
+    m_numTracks_C_b = bookHistogram("numTracks_from_C_b", "numTracks_from_C", m_sParticleType, "b-jets -"); 
+    m_numTracks_Fragmentation_b = bookHistogram("numTracks_from_Fragmentation_b", "numTracks_from_Fragmentation", m_sParticleType, "b-jets -"); 
+    m_numTracks_Secondaries_b = bookHistogram("numTracks_from_Secondaries_b", "numTracks_from_Secondaries", m_sParticleType, "b-jets -"); 
+    m_numTracks_Pileup_b = bookHistogram("numTracks_from_Pileup_b", "numTracks_from_Pileup", m_sParticleType, "b-jets -"); 
+    m_numTracks_Fake_b = bookHistogram("numTracks_from_Fake_b", "numTracks_from_Fake", m_sParticleType, "b-jets -"); 
 
-    m_numTracks_B_c = bookHistogram("numTracks_B_c", "numTracks_B", m_sParticleType, "c-jets -"); 
-    m_numTracks_C_c = bookHistogram("numTracks_C_c", "numTracks_C", m_sParticleType, "c-jets -"); 
-    m_numTracks_Fragmentation_c = bookHistogram("numTracks_Fragmentation_c", "numTracks_Fragmentation", m_sParticleType, "c-jets -"); 
-    m_numTracks_Secondaries_c = bookHistogram("numTracks_Secondaries_c", "numTracks_Secondaries", m_sParticleType, "c-jets -"); 
-    m_numTracks_Pileup_c = bookHistogram("numTracks_Pileup_c", "numTracks_Pileup", m_sParticleType, "c-jets -"); 
-    m_numTracks_Fake_c = bookHistogram("numTracks_Fake_c", "numTracks_Fake", m_sParticleType, "c-jets -"); 
+    m_numTracks_B_c = bookHistogram("numTracks_from_B_c", "numTracks_from_B", m_sParticleType, "c-jets -"); 
+    m_numTracks_C_c = bookHistogram("numTracks_from_C_c", "numTracks_from_C", m_sParticleType, "c-jets -"); 
+    m_numTracks_Fragmentation_c = bookHistogram("numTracks_from_Fragmentation_c", "numTracks_from_Fragmentation", m_sParticleType, "c-jets -"); 
+    m_numTracks_Secondaries_c = bookHistogram("numTracks_from_Secondaries_c", "numTracks_from_Secondaries", m_sParticleType, "c-jets -"); 
+    m_numTracks_Pileup_c = bookHistogram("numTracks_from_Pileup_c", "numTracks_from_Pileup", m_sParticleType, "c-jets -"); 
+    m_numTracks_Fake_c = bookHistogram("numTracks_from_Fake_c", "numTracks_from_Fake", m_sParticleType, "c-jets -"); 
 
-    m_numTracks_B_u = bookHistogram("numTracks_B_l", "numTracks_B", m_sParticleType, "l-jets -"); 
-    m_numTracks_C_u = bookHistogram("numTracks_C_l", "numTracks_C", m_sParticleType, "l-jets -"); 
-    m_numTracks_Fragmentation_u = bookHistogram("numTracks_Fragmentation_l", "numTracks_Fragmentation", m_sParticleType, "l-jets -"); 
-    m_numTracks_Secondaries_u = bookHistogram("numTracks_Secondaries_l", "numTracks_Secondaries", m_sParticleType, "l-jets -"); 
-    m_numTracks_Pileup_u = bookHistogram("numTracks_Pileup_l", "numTracks_Pileup", m_sParticleType, "l-jets -"); 
-    m_numTracks_Fake_u = bookHistogram("numTracks_Fake_l", "numTracks_Fake", m_sParticleType, "l-jets -"); 
+    m_numTracks_B_u = bookHistogram("numTracks_from_B_u", "numTracks_from_B", m_sParticleType, "l-jets -"); 
+    m_numTracks_C_u = bookHistogram("numTracks_from_C_u", "numTracks_from_C", m_sParticleType, "l-jets -"); 
+    m_numTracks_Fragmentation_u = bookHistogram("numTracks_from_Fragmentation_u", "numTracks_from_Fragmentation", m_sParticleType, "l-jets -"); 
+    m_numTracks_Secondaries_u = bookHistogram("numTracks_from_Secondaries_u", "numTracks_from_Secondaries", m_sParticleType, "l-jets -"); 
+    m_numTracks_Pileup_u = bookHistogram("numTracks_from_Pileup_u", "numTracks_from_Pileup", m_sParticleType, "l-jets -"); 
+    m_numTracks_Fake_u = bookHistogram("numTracks_from_Fake_u", "numTracks_from_Fake", m_sParticleType, "l-jets -"); 
 
-    m_numTracks_B_muon = bookHistogram("numTracks_B_muon", "numTracks_B", m_sParticleType, "jets with muon -"); 
-    m_numTracks_C_muon = bookHistogram("numTracks_C_muon", "numTracks_C", m_sParticleType, "jets with muon -"); 
-    m_numTracks_Fragmentation_muon = bookHistogram("numTracks_Fragmentation_muon", "numTracks_Fragmentation", m_sParticleType, "jets with muon -"); 
-    m_numTracks_Secondaries_muon = bookHistogram("numTracks_Secondaries_muon", "numTracks_Secondaries", m_sParticleType, "jets with muon -"); 
-    m_numTracks_Pileup_muon = bookHistogram("numTracks_Pileup_muon", "numTracks_Pileup", m_sParticleType, "jets with muon -"); 
-    m_numTracks_Fake_muon = bookHistogram("numTracks_Fake_muon", "numTracks_Fake", m_sParticleType, "jets with muon -"); 
+    m_numTracks_B_muon = bookHistogram("numTracks_from_B_muon", "numTracks_from_B", m_sParticleType, "jets with muon -"); 
+    m_numTracks_C_muon = bookHistogram("numTracks_from_C_muon", "numTracks_from_C", m_sParticleType, "jets with muon -"); 
+    m_numTracks_Fragmentation_muon = bookHistogram("numTracks_from_Fragmentation_muon", "numTracks_from_Fragmentation", m_sParticleType, "jets with muon -"); 
+    m_numTracks_Secondaries_muon = bookHistogram("numTracks_from_Secondaries_muon", "numTracks_from_Secondaries", m_sParticleType, "jets with muon -"); 
+    m_numTracks_Pileup_muon = bookHistogram("numTracks_from_Pileup_muon", "numTracks_from_Pileup", m_sParticleType, "jets with muon -"); 
+    m_numTracks_Fake_muon = bookHistogram("numTracks_from_Fake_muon", "numTracks_from_Fake", m_sParticleType, "jets with muon -"); 
 
     if(m_detailLevel > 10){
-      m_numTracks_Secondaries_KshortDecay_incl = bookHistogram("numTracks_Secondaries_KshortDecay_incl", "numTracks_Secondaries_KshortDecay", m_sParticleType); 
-      m_numTracks_Secondaries_KshortDecay_b = bookHistogram("numTracks_Secondaries_KshortDecay_b", "numTracks_Secondaries_KshortDecay", m_sParticleType, "b-jets -"); 
-      m_numTracks_Secondaries_KshortDecay_c = bookHistogram("numTracks_Secondaries_KshortDecay_c", "numTracks_Secondaries_KshortDecay", m_sParticleType, "c-jets -"); 
-      m_numTracks_Secondaries_KshortDecay_u = bookHistogram("numTracks_Secondaries_KshortDecay_l", "numTracks_Secondaries_KshortDecay", m_sParticleType, "l-jets -"); 
-      m_numTracks_Secondaries_KshortDecay_muon = bookHistogram("numTracks_Secondaries_KshortDecay_muon", "numTracks_Secondaries_KshortDecay", m_sParticleType, "jets with muon -"); 
+      m_numTracks_Secondaries_KshortDecay_incl = bookHistogram("numTracks_from_Secondaries_KshortDecay", "numTracks_from_Secondaries_KshortDecay", m_sParticleType); 
+      m_numTracks_Secondaries_KshortDecay_b = bookHistogram("numTracks_from_Secondaries_KshortDecay_b", "numTracks_from_Secondaries_KshortDecay", m_sParticleType, "b-jets -"); 
+      m_numTracks_Secondaries_KshortDecay_c = bookHistogram("numTracks_from_Secondaries_KshortDecay_c", "numTracks_from_Secondaries_KshortDecay", m_sParticleType, "c-jets -"); 
+      m_numTracks_Secondaries_KshortDecay_u = bookHistogram("numTracks_from_Secondaries_KshortDecay_u", "numTracks_from_Secondaries_KshortDecay", m_sParticleType, "l-jets -"); 
+      m_numTracks_Secondaries_KshortDecay_muon = bookHistogram("numTracks_from_Secondaries_KshortDecay_muon", "numTracks_from_Secondaries_KshortDecay", m_sParticleType, "jets with muon -"); 
 
-      m_numTracks_Secondaries_LambdaDecay_incl = bookHistogram("numTracks_Secondaries_LambdaDecay_incl", "numTracks_Secondaries_LambdaDecay", m_sParticleType); 
-      m_numTracks_Secondaries_LambdaDecay_b = bookHistogram("numTracks_Secondaries_LambdaDecay_b", "numTracks_Secondaries_LambdaDecay", m_sParticleType, "b-jets -"); 
-      m_numTracks_Secondaries_LambdaDecay_c = bookHistogram("numTracks_Secondaries_LambdaDecay_c", "numTracks_Secondaries_LambdaDecay", m_sParticleType, "c-jets -"); 
-      m_numTracks_Secondaries_LambdaDecay_u = bookHistogram("numTracks_Secondaries_LambdaDecay_l", "numTracks_Secondaries_LambdaDecay", m_sParticleType, "l-jets -"); 
-      m_numTracks_Secondaries_LambdaDecay_muon = bookHistogram("numTracks_Secondaries_LambdaDecay_muon", "numTracks_Secondaries_LambdaDecay", m_sParticleType, "jets with muon -"); 
+      m_numTracks_Secondaries_LambdaDecay_incl = bookHistogram("numTracks_from_Secondaries_LambdaDecay", "numTracks_from_Secondaries_LambdaDecay", m_sParticleType); 
+      m_numTracks_Secondaries_LambdaDecay_b = bookHistogram("numTracks_from_Secondaries_LambdaDecay_b", "numTracks_from_Secondaries_LambdaDecay", m_sParticleType, "b-jets -"); 
+      m_numTracks_Secondaries_LambdaDecay_c = bookHistogram("numTracks_from_Secondaries_LambdaDecay_c", "numTracks_from_Secondaries_LambdaDecay", m_sParticleType, "c-jets -"); 
+      m_numTracks_Secondaries_LambdaDecay_u = bookHistogram("numTracks_from_Secondaries_LambdaDecay_u", "numTracks_from_Secondaries_LambdaDecay", m_sParticleType, "l-jets -"); 
+      m_numTracks_Secondaries_LambdaDecay_muon = bookHistogram("numTracks_from_Secondaries_LambdaDecay_muon", "numTracks_from_Secondaries_LambdaDecay", m_sParticleType, "jets with muon -"); 
 
-      m_numTracks_Secondaries_GammaConversion_incl = bookHistogram("numTracks_Secondaries_GammaConversion_incl", "numTracks_Secondaries_GammaConversion", m_sParticleType); 
-      m_numTracks_Secondaries_GammaConversion_b = bookHistogram("numTracks_Secondaries_GammaConversion_b", "numTracks_Secondaries_GammaConversion", m_sParticleType, "b-jets -"); 
-      m_numTracks_Secondaries_GammaConversion_c = bookHistogram("numTracks_Secondaries_GammaConversion_c", "numTracks_Secondaries_GammaConversion", m_sParticleType, "c-jets -"); 
-      m_numTracks_Secondaries_GammaConversion_u = bookHistogram("numTracks_Secondaries_GammaConversion_l", "numTracks_Secondaries_GammaConversion", m_sParticleType, "l-jets -"); 
-      m_numTracks_Secondaries_GammaConversion_muon = bookHistogram("numTracks_Secondaries_GammaConversion_muon", "numTracks_Secondaries_GammaConversion", m_sParticleType, "jets with muon -"); 
+      m_numTracks_Secondaries_GammaConversion_incl = bookHistogram("numTracks_from_Secondaries_GammaConversion", "numTracks_from_Secondaries_GammaConversion", m_sParticleType); 
+      m_numTracks_Secondaries_GammaConversion_b = bookHistogram("numTracks_from_Secondaries_GammaConversion_b", "numTracks_from_Secondaries_GammaConversion", m_sParticleType, "b-jets -"); 
+      m_numTracks_Secondaries_GammaConversion_c = bookHistogram("numTracks_from_Secondaries_GammaConversion_c", "numTracks_from_Secondaries_GammaConversion", m_sParticleType, "c-jets -"); 
+      m_numTracks_Secondaries_GammaConversion_u = bookHistogram("numTracks_from_Secondaries_GammaConversion_u", "numTracks_from_Secondaries_GammaConversion", m_sParticleType, "l-jets -"); 
+      m_numTracks_Secondaries_GammaConversion_muon = bookHistogram("numTracks_from_Secondaries_GammaConversion_muon", "numTracks_from_Secondaries_GammaConversion", m_sParticleType, "jets with muon -"); 
 
-      m_numTracks_Secondaries_OtherDecay_incl = bookHistogram("numTracks_Secondaries_OtherDecay_incl", "numTracks_Secondaries_OtherDecay", m_sParticleType); 
-      m_numTracks_Secondaries_OtherDecay_b = bookHistogram("numTracks_Secondaries_OtherDecay_b", "numTracks_Secondaries_OtherDecay", m_sParticleType, "b-jets -"); 
-      m_numTracks_Secondaries_OtherDecay_c = bookHistogram("numTracks_Secondaries_OtherDecay_c", "numTracks_Secondaries_OtherDecay", m_sParticleType, "c-jets -"); 
-      m_numTracks_Secondaries_OtherDecay_u = bookHistogram("numTracks_Secondaries_OtherDecay_l", "numTracks_Secondaries_OtherDecay", m_sParticleType, "l-jets -"); 
-      m_numTracks_Secondaries_OtherDecay_muon = bookHistogram("numTracks_Secondaries_OtherDecay_muon", "numTracks_Secondaries_OtherDecay", m_sParticleType, "jets with muon -"); 
+      m_numTracks_Secondaries_OtherDecay_incl = bookHistogram("numTracks_from_Secondaries_OtherDecay", "numTracks_from_Secondaries_OtherDecay", m_sParticleType); 
+      m_numTracks_Secondaries_OtherDecay_b = bookHistogram("numTracks_from_Secondaries_OtherDecay_b", "numTracks_from_Secondaries_OtherDecay", m_sParticleType, "b-jets -"); 
+      m_numTracks_Secondaries_OtherDecay_c = bookHistogram("numTracks_from_Secondaries_OtherDecay_c", "numTracks_from_Secondaries_OtherDecay", m_sParticleType, "c-jets -"); 
+      m_numTracks_Secondaries_OtherDecay_u = bookHistogram("numTracks_from_Secondaries_OtherDecay_u", "numTracks_from_Secondaries_OtherDecay", m_sParticleType, "l-jets -"); 
+      m_numTracks_Secondaries_OtherDecay_muon = bookHistogram("numTracks_from_Secondaries_OtherDecay_muon", "numTracks_from_Secondaries_OtherDecay", m_sParticleType, "jets with muon -"); 
 
-      m_numTracks_Secondaries_HadronicInteraction_incl = bookHistogram("numTracks_Secondaries_HadronicInteraction_incl", "numTracks_Secondaries_HadronicInteraction", m_sParticleType); 
-      m_numTracks_Secondaries_HadronicInteraction_b = bookHistogram("numTracks_Secondaries_HadronicInteraction_b", "numTracks_Secondaries_HadronicInteraction", m_sParticleType, "b-jets -"); 
-      m_numTracks_Secondaries_HadronicInteraction_c = bookHistogram("numTracks_Secondaries_HadronicInteraction_c", "numTracks_Secondaries_HadronicInteraction", m_sParticleType, "c-jets -"); 
-      m_numTracks_Secondaries_HadronicInteraction_u = bookHistogram("numTracks_Secondaries_HadronicInteraction_l", "numTracks_Secondaries_HadronicInteraction", m_sParticleType, "l-jets -"); 
-      m_numTracks_Secondaries_HadronicInteraction_muon = bookHistogram("numTracks_Secondaries_HadronicInteraction_muon", "numTracks_Secondaries_HadronicInteraction", m_sParticleType, "jets with muon -"); 
+      m_numTracks_Secondaries_HadronicInteraction_incl = bookHistogram("numTracks_from_Secondaries_HadronicInteraction", "numTracks_from_Secondaries_HadronicInteraction", m_sParticleType); 
+      m_numTracks_Secondaries_HadronicInteraction_b = bookHistogram("numTracks_from_Secondaries_HadronicInteraction_b", "numTracks_from_Secondaries_HadronicInteraction", m_sParticleType, "b-jets -"); 
+      m_numTracks_Secondaries_HadronicInteraction_c = bookHistogram("numTracks_from_Secondaries_HadronicInteraction_c", "numTracks_from_Secondaries_HadronicInteraction", m_sParticleType, "c-jets -"); 
+      m_numTracks_Secondaries_HadronicInteraction_u = bookHistogram("numTracks_from_Secondaries_HadronicInteraction_u", "numTracks_from_Secondaries_HadronicInteraction", m_sParticleType, "l-jets -"); 
+      m_numTracks_Secondaries_HadronicInteraction_muon = bookHistogram("numTracks_from_Secondaries_HadronicInteraction_muon", "numTracks_from_Secondaries_HadronicInteraction", m_sParticleType, "jets with muon -"); 
 
-      m_numTracks_Secondaries_OtherSecondary_incl = bookHistogram("numTracks_Secondaries_OtherSecondary_incl", "numTracks_Secondaries_OtherSecondary", m_sParticleType); 
-      m_numTracks_Secondaries_OtherSecondary_b = bookHistogram("numTracks_Secondaries_OtherSecondary_b", "numTracks_Secondaries_OtherSecondary", m_sParticleType, "b-jets -"); 
-      m_numTracks_Secondaries_OtherSecondary_c = bookHistogram("numTracks_Secondaries_OtherSecondary_c", "numTracks_Secondaries_OtherSecondary", m_sParticleType, "c-jets -"); 
-      m_numTracks_Secondaries_OtherSecondary_u = bookHistogram("numTracks_Secondaries_OtherSecondary_l", "numTracks_Secondaries_OtherSecondary", m_sParticleType, "l-jets -"); 
-      m_numTracks_Secondaries_OtherSecondary_muon = bookHistogram("numTracks_Secondaries_OtherSecondary_muon", "numTracks_Secondaries_OtherSecondary", m_sParticleType, "jets with muon -"); 
+      m_numTracks_Secondaries_OtherSecondary_incl = bookHistogram("numTracks_from_Secondaries_OtherSecondary", "numTracks_from_Secondaries_OtherSecondary", m_sParticleType); 
+      m_numTracks_Secondaries_OtherSecondary_b = bookHistogram("numTracks_from_Secondaries_OtherSecondary_b", "numTracks_from_Secondaries_OtherSecondary", m_sParticleType, "b-jets -"); 
+      m_numTracks_Secondaries_OtherSecondary_c = bookHistogram("numTracks_from_Secondaries_OtherSecondary_c", "numTracks_from_Secondaries_OtherSecondary", m_sParticleType, "c-jets -"); 
+      m_numTracks_Secondaries_OtherSecondary_u = bookHistogram("numTracks_from_Secondaries_OtherSecondary_u", "numTracks_from_Secondaries_OtherSecondary", m_sParticleType, "l-jets -"); 
+      m_numTracks_Secondaries_OtherSecondary_muon = bookHistogram("numTracks_from_Secondaries_OtherSecondary_muon", "numTracks_from_Secondaries_OtherSecondary", m_sParticleType, "jets with muon -"); 
 
-      m_numTracks_OtherOrigin_incl = bookHistogram("numTracks_OtherOrigin_incl", "numTracks_OtherOrigin", m_sParticleType); 
-      m_numTracks_OtherOrigin_b = bookHistogram("numTracks_OtherOrigin_b", "numTracks_OtherOrigin", m_sParticleType, "b-jets -"); 
-      m_numTracks_OtherOrigin_c = bookHistogram("numTracks_OtherOrigin_c", "numTracks_OtherOrigin", m_sParticleType, "c-jets -"); 
-      m_numTracks_OtherOrigin_u = bookHistogram("numTracks_OtherOrigin_l", "numTracks_OtherOrigin", m_sParticleType, "l-jets -"); 
-      m_numTracks_OtherOrigin_muon = bookHistogram("numTracks_OtherOrigin_muon", "numTracks_OtherOrigin", m_sParticleType, "jets with muon -");
+      m_numTracks_OtherOrigin_incl = bookHistogram("numTracks_from_OtherOrigin", "numTracks_from_OtherOrigin", m_sParticleType); 
+      m_numTracks_OtherOrigin_b = bookHistogram("numTracks_from_OtherOrigin_b", "numTracks_from_OtherOrigin", m_sParticleType, "b-jets -"); 
+      m_numTracks_OtherOrigin_c = bookHistogram("numTracks_from_OtherOrigin_c", "numTracks_from_OtherOrigin", m_sParticleType, "c-jets -"); 
+      m_numTracks_OtherOrigin_u = bookHistogram("numTracks_from_OtherOrigin_u", "numTracks_from_OtherOrigin", m_sParticleType, "l-jets -"); 
+      m_numTracks_OtherOrigin_muon = bookHistogram("numTracks_from_OtherOrigin_muon", "numTracks_from_OtherOrigin", m_sParticleType, "jets with muon -");
     }
 
     m_nInnHits_b = bookHistogram("nInnHits_b", "nInnHits", m_sParticleType, "b-jets -"); 
@@ -664,18 +664,18 @@ namespace JetTagDQA{
     m_nSCTHoles_c = bookHistogram("nSCTHoles_c", "nSCTHoles", m_sParticleType, "c-jets -");
     m_nsharedSCTHits_c = bookHistogram("nsharedSCTHits_c", "nsharedSCTHits", m_sParticleType, "c-jets -");
 
-    m_nInnHits_u = bookHistogram("nInnHits_l", "nInnHits", m_sParticleType, "l-jets -"); 
-    m_nNextToInnHits_u = bookHistogram("nNextToInnHits_l", "nNextToInnHits", m_sParticleType, "l-jets -");
-    m_nBLHits_u = bookHistogram("nBLHits_l", "nBLHits", m_sParticleType, "l-jets -");
-    m_nsharedBLHits_u = bookHistogram("nsharedBLHits_l", "nsharedBLHits", m_sParticleType, "l-jets -");
-    m_nsplitBLHits_u = bookHistogram("nsplitBLHits_l", "nsplitBLHits", m_sParticleType, "l-jets -");
-    m_nPixHits_u = bookHistogram("nPixHits_l", "nPixHits", m_sParticleType, "l-jets -");
-    m_nPixHoles_u = bookHistogram("nPixHoles_l", "nPixHoles", m_sParticleType, "l-jets -");
-    m_nsharedPixHits_u = bookHistogram("nsharedPixHits_l", "nsharedPixHits", m_sParticleType, "l-jets -");
-    m_nsplitPixHits_u = bookHistogram("nsplitPixHits_l", "nsplitPixHits", m_sParticleType, "l-jets -");
-    m_nSCTHits_u = bookHistogram("nSCTHits_l", "nSCTHits", m_sParticleType, "l-jets -");
-    m_nSCTHoles_u = bookHistogram("nSCTHoles_l", "nSCTHoles", m_sParticleType, "l-jets -");
-    m_nsharedSCTHits_u = bookHistogram("nsharedSCTHits_l", "nsharedSCTHits", m_sParticleType, "l-jets -");
+    m_nInnHits_u = bookHistogram("nInnHits_u", "nInnHits", m_sParticleType, "l-jets -"); 
+    m_nNextToInnHits_u = bookHistogram("nNextToInnHits_u", "nNextToInnHits", m_sParticleType, "l-jets -");
+    m_nBLHits_u = bookHistogram("nBLHits_u", "nBLHits", m_sParticleType, "l-jets -");
+    m_nsharedBLHits_u = bookHistogram("nsharedBLHits_u", "nsharedBLHits", m_sParticleType, "l-jets -");
+    m_nsplitBLHits_u = bookHistogram("nsplitBLHits_u", "nsplitBLHits", m_sParticleType, "l-jets -");
+    m_nPixHits_u = bookHistogram("nPixHits_u", "nPixHits", m_sParticleType, "l-jets -");
+    m_nPixHoles_u = bookHistogram("nPixHoles_u", "nPixHoles", m_sParticleType, "l-jets -");
+    m_nsharedPixHits_u = bookHistogram("nsharedPixHits_u", "nsharedPixHits", m_sParticleType, "l-jets -");
+    m_nsplitPixHits_u = bookHistogram("nsplitPixHits_u", "nsplitPixHits", m_sParticleType, "l-jets -");
+    m_nSCTHits_u = bookHistogram("nSCTHits_u", "nSCTHits", m_sParticleType, "l-jets -");
+    m_nSCTHoles_u = bookHistogram("nSCTHoles_u", "nSCTHoles", m_sParticleType, "l-jets -");
+    m_nsharedSCTHits_u = bookHistogram("nsharedSCTHits_u", "nsharedSCTHits", m_sParticleType, "l-jets -");
 
     m_nInnHits_muon = bookHistogram("nInnHits_muon", "nInnHits", m_sParticleType, "jets with muon -"); 
     m_nNextToInnHits_muon = bookHistogram("nNextToInnHits_muon", "nNextToInnHits", m_sParticleType, "jets with muon -");
@@ -698,8 +698,8 @@ namespace JetTagDQA{
     }
 
     // B hadron Lxy
-    m_Truth_Lxy_b = bookHistogram("Truth_Lxy_b", "Truth_Lxy_b", m_sParticleType, "b-jets - ");
-    m_Truth_Lxy_c = bookHistogram("Truth_Lxy_c", "Truth_Lxy_c", m_sParticleType, "c-jets - ");
+    m_Truth_Lxy_b = bookHistogram("Lxy_b", "Truth_Lxy_b", m_sParticleType, "b-jets - ");
+    m_Truth_Lxy_c = bookHistogram("Lxy_c", "Truth_Lxy_c", m_sParticleType, "c-jets - ");
 
     // B hadron deltaR wrt jet 
     m_deltaR_truthBHadron_jet_b = bookHistogram("deltaR_truthBHadronJet_b", "deltaR_truthBHadronJet_b", m_sParticleType, "b-jets - ");

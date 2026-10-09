@@ -49,63 +49,28 @@
      </TDirectory>
      <TDirectory name="jet">
       <TDirectory name="jet">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_jet_nJets" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_jet_jet_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_jet_jet_eta" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_global_nJets" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_jet_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_jet_eta" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="tracks">
-      <TDirectory name="_incl">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_sigd0_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_sigz0_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nBLHits_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nsharedBLHits_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nsplitBLHits_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nSCTHits_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nSCTHoles_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nsharedSCTHits_incl" type="TH1F" plotopts="" tests="KS"/>
+      <TDirectory name="inclusive">
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_sigd0" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_sigz0" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nBLHits" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nsharedBLHits" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nsplitBLHits" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nSCTHits" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nSCTHoles" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_tracks_nsharedSCTHits" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
-     <TDirectory name="SV">
-      <TDirectory name="_incl">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_SV_SV1_masssvx_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_SV_SV1_efracsvx_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_SV_SV1_Lxy_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_SV_JetFitter_mass_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_SV_JetFitter_energyFraction_incl" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_IP3D">
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_pu" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_NTracks_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_gradeOfTracks_incl" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_valD0wrtPVofTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_valZ0wrtPVofTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_IP3D_sigD0wrtPVofTracks" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_DIPS">
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DIPS_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DIPS_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DIPS_pu" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_SV1">
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_SV1_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_SV1_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_SV1_pu" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
-     </TDirectory>
-     <TDirectory name="tagger_DL1dv01">
-      <TDirectory name="other">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_pb" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_pc" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_tagger_DL1dv01_pu" type="TH1F" plotopts="" tests="KS"/>
+     <TDirectory name="sv1">
+      <TDirectory name="inclusive">
+       <hist1D name="BTag_AntiKt4EMPFlowJets_sv1_masssvx" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_sv1_efracsvx" type="TH1F" plotopts="" tests="KS"/>
+       <hist1D name="BTag_AntiKt4EMPFlowJets_sv1_Lxy" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
      </TDirectory>
      <TDirectory name="tagger_GN2v01">

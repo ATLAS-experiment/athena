@@ -107,19 +107,19 @@ namespace JetTagDQA {
 
     m_jetPtCut = m_onZprime ? m_jetPtCutZprime : m_jetPtCutTtbar;
 
-    ATH_CHECK(m_GN2v01SelectionTools.retrieve());
-    if (m_GN2v01SelectionTools.size() != m_GN2v01WorkingPoints.size()) {
-      ATH_MSG_ERROR("GN2v01SelectionTools and GN2v01WorkingPoints need to have the same length");
+    ATH_CHECK(m_cdiSelectionTools.retrieve());
+    if (m_cdiSelectionTools.size() != m_cdiWorkingPoints.size()) {
+      ATH_MSG_ERROR("CDISelectionTools and CDIWorkingPoints need to have the same length");
       return StatusCode::FAILURE;
     }
-    std::map<std::string, double> GN2v01WorkingPoints;
-    for (std::size_t i = 0; i < m_GN2v01SelectionTools.size(); ++i) {
+    std::map<std::string, double> cdiWorkingPoints;
+    for (std::size_t i = 0; i < m_cdiSelectionTools.size(); ++i) {
       double cut = 0;
-      if (m_GN2v01SelectionTools[i]->getCutValue(0., cut) != CP::CorrectionCode::Ok) {
-        ATH_MSG_ERROR("Cannot get the GN2v01 cut value for working point " << m_GN2v01WorkingPoints[i]);
+      if (m_cdiSelectionTools[i]->getCutValue(0., cut) != CP::CorrectionCode::Ok) {
+        ATH_MSG_ERROR("Cannot get the " << m_cdiTaggerName << " cut value for working point " << m_cdiWorkingPoints[i]);
         return StatusCode::FAILURE;
       }
-      GN2v01WorkingPoints.emplace(m_GN2v01WorkingPoints[i], cut);
+      cdiWorkingPoints.emplace(m_cdiWorkingPoints[i], cut);
     }
 
     // convert the HistogramDefinitions vector to a map 
@@ -142,19 +142,19 @@ namespace JetTagDQA {
       }
       workingPoints[key.substr(0, split)].emplace(key.substr(split + 1), cut);
     }
-    workingPoints["GN2v01"] = std::move(GN2v01WorkingPoints);
+    workingPoints[m_cdiTaggerName] = std::move(cdiWorkingPoints);
 
     for(const auto& [name, plot]: m_btagplots){
       plot->setDetailLevel(m_detailLevel);
       plot->setHistogramDefinitions(m_HistogramDefinitionsMap);
       plot->setIsDataAndTMPCut(m_isData, m_truthMatchProbabilityCut);
       for (const auto& [tagger, decoration] : m_taggerDecorations) {
-        const bool fromCDI = tagger == "GN2v01" && !m_GN2v01SelectionTools.empty();
+        const bool fromCDI = tagger == m_cdiTaggerName && !m_cdiSelectionTools.empty();
         plot->addSmallRTagger(tagger, decoration,
                               m_taggerFractionC.value().count(tagger) ? m_taggerFractionC.value().at(tagger) : 0.,
                               m_taggerFractionTau.value().count(tagger) ? m_taggerFractionTau.value().at(tagger) : 0.,
                               workingPoints.count(tagger) ? workingPoints.at(tagger) : std::map<std::string, double>{},
-                              fromCDI ? m_GN2v01SelectionTools[0].get() : nullptr);
+                              fromCDI ? m_cdiSelectionTools[0].get() : nullptr);
       }
       if (!plot->setGN3XPV01Config(m_GN3XPV01Name, m_GN3XPV01HbbFractions, m_GN3XPV01HccFractions)) return StatusCode::FAILURE;
       plot->setIsLargeR(name == m_jetNameR10);

@@ -77,7 +77,7 @@ namespace JetTagDQA {
     PhysValBTag();
 
     ToolHandle<InDet::IInDetTrackTruthOriginTool> m_trackTruthOriginTool{this, "trackTruthOriginTool", "InDet::InDetTrackTruthOriginTool"};
-    ToolHandleArray<IBTaggingSelectionTool> m_GN2v01SelectionTools{this, "GN2v01SelectionTools", {}, "Selection tools providing the GN2v01 discriminant and cut values from the CDI, one per working point"};
+    ToolHandleArray<IBTaggingSelectionTool> m_cdiSelectionTools{this, "CDISelectionTools", {}, "Selection tools providing the cut values of CDITaggerName from the CDI, one per working point"};
 
     // isData flag
     bool m_isData;
@@ -118,7 +118,8 @@ namespace JetTagDQA {
     Gaudi::Property<std::map<std::string, double>> m_taggerFractionC{this, "TaggerFractionC", {}, "c-fraction of each small-R discriminant, unused where a selection tool provides it"};
     Gaudi::Property<std::map<std::string, double>> m_taggerFractionTau{this, "TaggerFractionTau", {}, "tau-fraction of each small-R discriminant, unused where a selection tool provides it"};
     Gaudi::Property<std::map<std::string, double>> m_taggerWorkingPoints{this, "TaggerWorkingPoints", {}, "Cut value of each working point, keyed by tagger and working point label as <tagger>_<wp>"};
-    Gaudi::Property<std::vector<std::string>> m_GN2v01WorkingPoints{this, "GN2v01WorkingPoints", {}, "Working point labels of GN2v01SelectionTools"};
+    Gaudi::Property<std::vector<std::string>> m_cdiWorkingPoints{this, "CDIWorkingPoints", {}, "Working point labels of CDISelectionTools"};
+    Gaudi::Property<std::string> m_cdiTaggerName{this, "CDITaggerName", "", "Tagger whose working points come from the CDI through CDISelectionTools"};
     Gaudi::Property<std::map<std::string, double>> m_GN3XPV01HbbFractions{this, "GN3XPV01HbbFractions", {}, "Background fractions of the GN3XPV01 Hbb discriminant, empty to disable"};
     Gaudi::Property<std::map<std::string, double>> m_GN3XPV01HccFractions{this, "GN3XPV01HccFractions", {}, "Background fractions of the GN3XPV01 Hcc discriminant, empty to disable"};
 
