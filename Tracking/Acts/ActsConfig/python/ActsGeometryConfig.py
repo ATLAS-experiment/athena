@@ -69,8 +69,9 @@ def ActsTrackingGeometrySvcCfg(flags,
 
   #first add the itk builder and then the muon system - this is the correct order
   if flags.Acts.TrackingGeometry.UseBlueprint:
-    blueprintTools += [acc.popToolsAndMerge(BeamPipeBlueprintNodeBuilderCfg(flags))]
-    if flags.Detector.GeometryITkPixel or flags.Detector.GeometryITkStrip:
+    if flags.Detector.GeometryBpipe or flags.Detector.GeometryITk:
+      blueprintTools += [acc.popToolsAndMerge(BeamPipeBlueprintNodeBuilderCfg(flags))]
+    if flags.Detector.GeometryITk:
       if flags.Acts.TrackingGeometry.ITkHgtdMaterialSource != "None":
         refineTools += [acc.popToolsAndMerge(ITkMaterialDecoratorToolCfg(flags))]
       blueprintTools += [acc.popToolsAndMerge(ItkBlueprintNodeBuilderCfg(flags))]
