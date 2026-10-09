@@ -29,11 +29,7 @@ def ActsPixelSpacePointToolCfg(flags,
 def ActsCorePixelSpacePointToolCfg(flags,
                                    name: str = "ActsCorePixelSpacePointTool",
                                    **kwargs: dict) -> ComponentAccumulator:
-    from InDetConfig.ITkActsHelpers import isFastPrimaryPass
-
     acc = ComponentAccumulator()
-    if isFastPrimaryPass(flags):
-        kwargs.setdefault('UseMaxVariance', True)
 
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
     acc.merge(ActsTrackingGeometrySvcCfg(flags))

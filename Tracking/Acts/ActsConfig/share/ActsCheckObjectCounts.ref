@@ -642,3 +642,15 @@ ActsHGTDTrackExtensionAlg                                         INFO Ratios
 |                                  2.6- 4.0 |          0 |
 |                                  4.0-+inf |          0 |
 |-------------------------------------------|------------|
+ActsStripSpacePointF...ActsCoreStripSpacePointTool                INFO Strip space point formation statistics
+|----------------------------------|--------------|
+| Accepted                         |       424271 |
+| ClusterPairDistanceExceeded      |            0 |
+| ClusterPairThetaDistanceExceeded |            0 |
+| ClusterPairPhiDistanceExceeded   |            0 |
+| CosmicToleranceNotMet            |            0 |
+| OutsideLimits                    |        56739 |
+| OutsideRelaxedLimits             |      1010852 |
+| NoSolutionFound                  |            0 |
+| OtherError                       |            0 |
+|----------------------------------|--------------|

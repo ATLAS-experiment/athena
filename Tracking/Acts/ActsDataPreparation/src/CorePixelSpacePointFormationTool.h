@@ -62,11 +62,6 @@ namespace ActsTrk {
     Gaudi::Property<bool> m_useSurfaceCache{this, "UseSurfaceCache", true,
       "Reuse the surface reference frame across the clusters of a module"};
 
-    /// Cap the covariance terms, as PixelSpacePointFormationTool does
-    Gaudi::Property<bool> m_useMaxVariance{this, "UseMaxVariance", false};
-    Gaudi::Property<float> m_maxVarianceZ{this, "MaxVarianceZ", 0.0014f};
-    Gaudi::Property<float> m_maxVarianceR{this, "MaxVarianceR", 0.015f};
-
   };
 
 }

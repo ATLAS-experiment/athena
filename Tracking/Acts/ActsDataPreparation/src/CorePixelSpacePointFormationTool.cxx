@@ -9,8 +9,6 @@
 
 #include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
 
-#include <algorithm>
-
 namespace ActsTrk {
 
     StatusCode CorePixelSpacePointFormationTool::initialize()
@@ -66,18 +64,10 @@ namespace ActsTrk {
                                                                    globalPosition.cast<double>(), localCov);
       }
 
-      float cov_z = static_cast<float>(variance[0]);
-      float cov_r = static_cast<float>(variance[1]);
-
-      if (m_useMaxVariance) {
-        cov_z = std::min(cov_z, m_maxVarianceZ.value());
-        cov_r = std::min(cov_r, m_maxVarianceR.value());
-      }
-
       sp.setSpacePoint(idHash,
                        globalPosition,
-                       cov_r,
-                       cov_z,
+                       static_cast<float>(variance[1]),
+                       static_cast<float>(variance[0]),
                        std::vector< const xAOD::UncalibratedMeasurement* >({&cluster}));
 
       return StatusCode::SUCCESS;
