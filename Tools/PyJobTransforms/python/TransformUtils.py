@@ -127,28 +127,25 @@ def DumpPickle(flags, cfg):
 def SortInput(flags, cfg):
     """Method that should be post-included after a typicaly configured Athena job
     It will read original input files, create a list of Events in memory, sort them and produce
-    an intermediate Event Collection file that Athena will read instead of the original inputs
+    an intermediate Event reference file that Athena will read instead of the original inputs
     Event information is read from EventInfoTags (stored by default in all Athena data files)
-    The default sort key value (Lumi) can be oveerriden, as the sorting order
-    The intermediate Collection file can be inspected using CollQuery cmdline utility"""
+    The default sort key value (LumiBlockN) can be overriden. The sorting order is ascending."""
     import os
     inputs = cfg.getService("EventSelector").InputCollections
 
     # set default sort parameters, read overrides from locals()
     tmpCollFile = locals().get("AthenaInputSortCollName", "sortedEventRefs" + str(os.getpid()) + ".root")
     sortTag     = locals().get("AthenaInputSortTag",      "LumiBlockN")
-    sortOrd     = locals().get("AthenaInputSortOrder",    "Ascending")
 
-    from CollectionSvc.SortedCollectionCreator import SortedCollectionCreator
-    sorter = SortedCollectionCreator(name="SortEvents")
+    from OutputStreamAthenaPool.SortedInputFileCreator import SortedInputFileCreator
+    sorter = SortedInputFileCreator()
     # Sort Inputs based on one of the EventInfoTag attributes
-    # Store sorted event collection in a temporary file
+    # Store sorted event references in a temporary file
     # This should run as postInclude, so we assume EventSelector.InputCollections is set earlier
 
     # moved execution to a subprocess, because Gaudi messaging created by collections causes
     # AppManager errors
-    from PyUtils import PoolFile
-    rc = sorter.executeInSubprocess(inputs, outputCollection=tmpCollFile, outputCollectionType=PoolFile.PoolOpts.CollectionType.RootTTreeCollection, sortAttribute=sortTag, sortOrder=sortOrd)
+    rc = sorter.executeInSubprocess(inputs, outputFile=tmpCollFile, sortAttribute=sortTag)
     if rc != 0:
        msg.error(f"Sorting failed with exit code: {rc}")
 
