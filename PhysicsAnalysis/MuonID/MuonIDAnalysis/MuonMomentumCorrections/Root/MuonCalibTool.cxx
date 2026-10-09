@@ -41,13 +41,13 @@ namespace CP
 	    m_applyCorrectionOnData = true;
         } else if (m_calibMode == MuonCalibTool::correctData_IDMS) {
             ATH_MSG_INFO("Data will be corrected for sagitta bias and Montecarlo will be corrected using ID+MS calibration");
-	    m_applyCorrectionOnData = false;
+	    m_applyCorrectionOnData = true;
         } else if (m_calibMode == MuonCalibTool::notCorrectData_IDMS) {
    	    ATH_MSG_INFO("Data will be untouched (no sagitta bias corrections) and Montecarlo will be corrected using ID+MS calibration");
 	    m_applyCorrectionOnData = false;
         } else if (m_calibMode == MuonCalibTool::notCorrectData_CB) {
             ATH_MSG_INFO("Data will be untouched (no sagitta bias corrections) and Montecarlo will be corrected using CB calibration");
-	    m_applyCorrectionOnData = true;
+	    m_applyCorrectionOnData = false;
 	} else if (m_calibMode == MuonCalibTool::correctData_IDonly) {
 	    ATH_MSG_INFO("Data will be corrected for sagitta bias and Montecarlo will be corrected using ID calibration only");
 	    m_applyCorrectionOnData = true;
@@ -554,12 +554,16 @@ namespace CP
 	// https://atlas-tagservices.cern.ch/tagservices/RunBrowser/runBrowserReport/rBR_Period_Report.php?fnt=data22_13p6TeV
 	// https://atlas-tagservices.cern.ch/tagservices/RunBrowser/runBrowserReport/rBR_Period_Report.php?fnt=data23_13p6TeV
 	// https://atlas-tagservices.cern.ch/tagservices/RunBrowser/runBrowserReport/rBR_Period_Report.php?fnt=data24_13p6TeV
+      	// https://atlas-tagservices.cern.ch/tagservices/RunBrowser/runBrowserReport/rBR_Period_Report.php?fnt=data25_13p6TeV
+      	// https://atlas-tagservices.cern.ch/tagservices/RunBrowser/runBrowserReport/rBR_Period_Report.php?fnt=data26_13p6TeV
         constexpr unsigned int last_run_16 = 320000;
         constexpr unsigned int last_run_17 = 342000;
         constexpr unsigned int last_run_18 = 370000;
-        constexpr unsigned int last_run_22 = 440614;
-        constexpr unsigned int last_run_23 = 456750;
-	constexpr unsigned int last_run_24 = 999999;
+        constexpr unsigned int last_run_22 = 440613;
+        constexpr unsigned int last_run_23 = 461002;
+	constexpr unsigned int last_run_24 = 486894;
+	constexpr unsigned int last_run_25 = 509891;
+	constexpr unsigned int last_run_26 = 524099;
 
         static const std::set<int> MCperiods1516{284500};
         static const std::set<int> MCperiods17{300000, 304000, 305000};
@@ -567,6 +571,7 @@ namespace CP
         static const std::set<int> MCperiods22{330000, 410000};
         static const std::set<int> MCperiods23{450000, 460000};
 	static const std::set<int> MCperiods24{470000, 488000, 488600};
+	static const std::set<int> MCperiods25{495000};
 
         static const std::set<int> MCperiodsRun4{350000, 350060, 350140, 350200};
 
@@ -605,6 +610,9 @@ namespace CP
             } else if (MCperiods24.count(run)) {
                 ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc23e / data24");
                 return MCP::DataYear::Data24;
+            } else if (MCperiods25.count(run)) {
+                ATH_MSG_DEBUG("The current run " << run << " corresponds to data mc23g / data25 / data26");
+                return MCP::DataYear::Data25;
             } else if (MCperiodsRun4.count(run)) {
                 ATH_MSG_DEBUG("The current run " << run << " corresponds to data Run4");
                 return MCP::DataYear::Run4;
@@ -625,20 +633,26 @@ namespace CP
             }  else if (run <= last_run_22) {
                 ATH_MSG_DEBUG("The current run " << run << " is taken in data 22");
                 return MCP::DataYear::Data22;
-            }  else if (run < last_run_23) {
+            }  else if (run <= last_run_23) {
                 ATH_MSG_DEBUG("The current run " << run << " is taken in data 23");
                 return MCP::DataYear::Data23;
-            }  else if (run < last_run_24) {
+            }  else if (run <= last_run_24) {
                 ATH_MSG_DEBUG("The current run " << run << " is taken in data 24");
                 return MCP::DataYear::Data24;
+            }  else if (run <= last_run_25) {
+                ATH_MSG_DEBUG("The current run " << run << " is taken in data 25");
+                return MCP::DataYear::Data25;
+            }  else if (run <= last_run_26) {
+                ATH_MSG_DEBUG("The current run " << run << " is taken in data 26");
+                return MCP::DataYear::Data25;
             }
         }
         static std::atomic<bool> warningPrinted {false};
         if (!warningPrinted) {
-            ATH_MSG_WARNING("Could not assign run-number " << run << " to a specific year of data-taking, using default year 24");
+            ATH_MSG_WARNING("Could not assign run-number " << run << " to a specific year of data-taking, using default run 4");
             warningPrinted = true;
         }
-        return MCP::DataYear::Data24;
+        return MCP::DataYear::Run4;
     }
 
 

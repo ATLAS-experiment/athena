@@ -25,13 +25,13 @@ namespace MCP {
     enum class ExpectedResParam{ r0, r1, r2, r2tan2 }; 
 
     // Data year
-    enum class DataYear {Data16, Data17, Data18, Data22, Data23, Data24, Run4};
+    enum class DataYear {Data16, Data17, Data18, Data22, Data23, Data24, Data25, Run4};
 
     // For HighPtSmearing
     enum class MST_Categories{Undefined, Zero, One, Two, Three, Four};
         
-    // Data24 and Run4 are not supported yet
-    static constexpr std::array<MCP::DataYear, 7> dataYearList{MCP::DataYear::Data16, MCP::DataYear::Data17, MCP::DataYear::Data18, MCP::DataYear::Data22, MCP::DataYear::Data23, MCP::DataYear::Data24, MCP::DataYear::Run4};
+    // Run4 is not supported yet
+    static constexpr std::array<MCP::DataYear, 8> dataYearList{MCP::DataYear::Data16, MCP::DataYear::Data17, MCP::DataYear::Data18, MCP::DataYear::Data22, MCP::DataYear::Data23, MCP::DataYear::Data24, MCP::DataYear::Data25, MCP::DataYear::Run4};
 
     // Need this defined as a simple enum to not change any interface class
     namespace DetectorType { enum { MS = 1, ID = 2, CB = 3 };}
@@ -64,6 +64,7 @@ namespace MCP {
         if(year == DataYear::Data22) return "Data22";
         if(year == DataYear::Data23) return "Data23";
 	if(year == DataYear::Data24) return "Data24";
+	if(year == DataYear::Data25) return "Data25";
         if(year == DataYear::Run4)   return "Run4";
         return "";
     }           
