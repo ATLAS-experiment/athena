@@ -54,7 +54,7 @@ void HepMcParticleLinkCnv_p1::transToPers( const HepMcParticleLink* transObj,
   // NB This method assumes that there all GenEvents are stored in a
   // single McEventCollection, as running with split
   // McEventCollections is not supported in 21.0.
-  const IProxyDict* proxy = Atlas::proxyDictFromEventContext();
+  IProxyDict* proxy = Atlas::proxyDictFromEventContext();
   unsigned short index{0};
   const HepMcParticleLink::index_type position =
     HepMcParticleLink::getEventPositionInCollection(transObj->eventIndex(),

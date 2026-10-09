@@ -43,7 +43,7 @@ void HepMcParticleLinkCnv_p2::transToPers( const HepMcParticleLink* transObj,
   // m_mcEvtIndex of zero as a special case, in which m_mcEvtIndex
   // should be interpreted as the position in the McEventCollection
   // rather than the value of GenEvent::event_number().
-  const IProxyDict* proxy = Atlas::proxyDictFromEventContext();
+  IProxyDict* proxy = Atlas::proxyDictFromEventContext();
   unsigned short index{0};
   const HepMcParticleLink::index_type position =
     HepMcParticleLink::getEventPositionInCollection(transObj->eventIndex(),
