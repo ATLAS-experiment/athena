@@ -19,7 +19,7 @@
  *
  * If one payload class derives from another, it is possible to declare
  * conditions containers so that they have the same inheritance by adding
- * the payload base class as a thir argument to @c CONDCONT_DEF.  For example,
+ * the payload base class as a third argument to @c CONDCONT_DEF.  For example,
  * if @c MyType derived from @c MyBase then you can use
  *@code
  *  CONDCONT_DEF (MyType, 12345, MyBase);
