@@ -279,12 +279,9 @@ $(OBJDIR)/%.o : %.c
 	mkdir -p $(@D)
 	touch $@
 
-rootdep : $(DICTHEADERS)
-	cp $(DICTHEADERS) . 
-
 $(SRCDIR)/TrigInDetAnalysisDict.cxx: $(DICTHEADERS)
-	@echo rootcint  -f $@ -c -I$(TID) $?
-	@rootcint       -f $@ -c -I$(TID) $?
+	@echo rootcling -f $@ -c -I$(TID) $^
+	@rootcling      -f $@ -c -I$(TID) $^
 
 
 $(OBJECTS) : $(HEADERS)
