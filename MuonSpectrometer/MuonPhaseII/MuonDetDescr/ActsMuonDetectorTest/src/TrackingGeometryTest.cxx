@@ -29,6 +29,7 @@
 #include "Acts/Propagator/detail/SteppingLogger.hpp"
 #include "Acts/Surfaces/StrawSurface.hpp"
 #include "Acts/Utilities/AngleHelpers.hpp"
+#include "Acts/Surfaces/detail/PlanarHelper.hpp"
 
 #include <chrono>
 
@@ -108,15 +109,28 @@ namespace MuonValR4 {
         }
         std::shared_ptr<const Acts::Surface> startSurf = surface(simHit.identify());
         const Acts::Transform3& trf = startSurf->localToGlobalTransform(tgContext);
-              
+        Amg::Vector3D locPos = xAOD::toEigen(simHit.localPosition());
+        const Amg::Vector3D locDir = xAOD::toEigen(simHit.localDirection());
+        if (startSurf->type() == Acts::Surface::SurfaceType::Plane &&
+            std::abs(locPos.z()) > Acts::s_onSurfaceTolerance) {
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Hit "<<Amg::toString(locPos)
+                        <<" is not exactly expressed on the plane of "
+                        <<m_idHelperSvc->toStringGasGap(simHit.identify()));
+            using namespace Acts::PlanarHelper;
+            auto isect = intersectPlane(locPos, locDir, Amg::Vector3D::UnitZ(), 0.);
+            locPos = isect.position();
+        }
+
+        const Amg::Vector3D globPos{trf * locPos};
+        const Amg::Vector3D globDir = trf.linear() * locDir;
+        
         auto pars = Acts::BoundTrackParameters::create(tgContext,
-                    startSurf, ActsTrk::convertPosToActs(trf*xAOD::toEigen(simHit.localPosition())),
-                    trf.linear()*xAOD::toEigen(simHit.localDirection()), 
+                    startSurf, ActsTrk::convertPosToActs(globPos), globDir, 
                     MC::charge(&simHit) / ActsTrk::energyToActs(simHit.kineticEnergy()), 
                     Acts::BoundMatrix::Identity(), *hypothesis);
         if (!pars.ok()) {
             ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - Failed to create valid parameters from sim hit "
-                <<m_idHelperSvc->toString(simHit.identify()));
+                <<m_idHelperSvc->toString(simHit.identify())<<" @"<<Amg::toString(locPos));
             return std::nullopt;
         }
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Created track parameters from sim hit "
