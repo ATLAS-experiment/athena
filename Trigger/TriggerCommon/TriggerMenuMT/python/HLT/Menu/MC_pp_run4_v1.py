@@ -103,6 +103,13 @@ def addMCSignatures(chains):
         ChainProp(name='EF_mu4_mu4_idperf_1invmAB5_L12MU3VF', l1SeedThresholds=['MU3VF','MU3VF'], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:t0']),
         ChainProp(name='EF_mu14_mu14_idtp_idZmumu_L12MU8F', l1SeedThresholds=['MU8F','MU8F'], groups=MultiMuonGroup+SupportGroup, monGroups=['idMon:shifter']),
 
+        # Support chains for the measurement of dimuon trigger efficiency for BLS. ATR-33099.
+        ChainProp(name='EF_2mu4_l2io_invmDimu_L12MU3V', l1SeedThresholds=['MU3V'], groups=MultiMuonGroup+SupportGroup), # Intended: CPS_2MU3V
+        ChainProp(name='EF_2mu4_l2io_invmDimu_L12MU3VF', l1SeedThresholds=['MU3VF'], groups=MultiMuonGroup+SupportGroup), # Intended: CPS_2MU3VF
+        ChainProp(name='EF_mu11_l2io_mu6_l2io_invmDimu_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=MultiMuonGroup+SupportGroup, monGroups=['bphysMon:shifter']),
+        ChainProp(name='EF_mu11_l2io_mu6_l2io_invmDimu_L12MU8F', l1SeedThresholds=['MU8VF', 'MU8F'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_l2io_mu6_l2io_invmDimu_L12MU5VF', l1SeedThresholds=['MU8VF', 'MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+
         # Phase-II Single muon
         ChainProp(name='EF_mu20_ivarmedium_L1MU12FCH', groups=PrimaryL1MuGroup+SingleMuonGroup, monGroups=['muonMon:shifter','muonMon:online']),
         ChainProp(name='EF_mu18_ivarmedium_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=PrimaryPhIGroup+SingleMuonGroup),
@@ -201,10 +208,13 @@ def addMCSignatures(chains):
         ChainProp(name='EF_e24_lhmedium_g12_loose_g12_loose_02dRAB_02dRAC_02dRBC_L1eEM24L_3eEM12L', l1SeedThresholds=['eEM24L','eEM12L','eEM12L'], groups=PrimaryPhIGroup+MultiElectronGroup),
         ChainProp(name='EF_e25_mergedtight_g35_medium_90invmAB_02dRAB_L12eEM24L', l1SeedThresholds=['eEM24L','eEM24L'], groups=PrimaryPhIGroup+MultiElectronGroup),
 
-        # B->K*ee chains
-        ChainProp(name='EF_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5','eEM5'], stream=['BphysDelayed'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
-        ChainProp(name='EF_e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5'], stream=['BphysDelayed','express'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online']),
-        ChainProp(name='EF_2e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5'], stream=['BphysDelayed','express'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
+        # (B->)eeX chains # ATR-33099
+        ChainProp(name='EF_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5','eEM5'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
+        ChainProp(name='EF_e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online']),
+        ChainProp(name='EF_2e5_lhvloose_bBeeM6000_L1BKeePrimary', l1SeedThresholds=['eEM5'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
+        ChainProp(name='EF_e5_lhvloose_L1eEM5_bBeeM6000_L1All', l1SeedThresholds=['eEM5'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online']),
+        ChainProp(name='EF_2e5_lhvloose_L1eEM5_bBeeM6000_L1All', l1SeedThresholds=['eEM5'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
+        ChainProp(name='EF_e5_lhvloose_L1eEM5_e3_lhvloose_L1eEM5_bBeeM6000_L1All', l1SeedThresholds=['eEM5','eEM5'], groups=SupportPhIGroup+BphysElectronGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
 
         # Support
         ChainProp(name='EF_e5_idperf_tight_L1eEM5', groups=SingleElectronGroup+SupportPhIGroup, monGroups=['idMon:t0']),
@@ -525,6 +535,8 @@ def addMCSignatures(chains):
     ]
 
     chainsMC['Bphysics'] = [ 
+        # See ATR-33099 for most of of the initially requests chains.
+
         #-- dimuon primary triggers
         ChainProp(name='EF_2mu10_bJpsimumu_L12MU8F', groups=BphysicsGroup+PrimaryL1MuGroup),
         ChainProp(name='EF_2mu10_bUpsimumu_L12MU8F', groups=BphysicsGroup+PrimaryL1MuGroup),
@@ -534,17 +546,75 @@ def addMCSignatures(chains):
         ChainProp(name='EF_mu10_l2mt_mu4_l2mt_bJpsimumu_L1MU12BOM', l1SeedThresholds=['MU12BOM']*2, groups=BphysicsGroup+PrimaryL1MuGroup),
 
         #-- mu11_mu6 chains
-        ChainProp(name='EF_mu11_mu6_bJpsimumu_L1MU8VF_2MU8F', l1SeedThresholds=['MU8VF','MU8F'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bJpsimumu_L1MU8VF_2MU8F', l1SeedThresholds=['MU8VF','MU8F'], groups=BphysicsGroup+PrimaryL1MuGroup), # Do we need this given EF_mu11_mu6_bJpsimumu_L1MU8VF_2MU5VF?
+        ChainProp(name='EF_mu11_mu6_bJpsimumu_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
         ChainProp(name='EF_mu11_mu6_bJpsimumu_Lxy0_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
         ChainProp(name='EF_mu11_mu6_bUpsimumu_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bDimu_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup, monGroups=['bphysMon:online','bphysMon:shifter']),
+        ChainProp(name='EF_mu11_mu6_bDimu2700_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bBmumu_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bTau_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup, monGroups=['bphysMon:online','bphysMon:t0']),
 
         #-- support
-        ChainProp(name='EF_2mu4_bBmumux_BsmumuPhi_L12MU3V', l1SeedThresholds=['MU3V'], groups=BphysicsGroup+EOFBPhysL1MuGroup, monGroups=['idMon:shifter']), # Note, delayed in R3
         ChainProp(name='EF_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+SupportGroup, monGroups=['idMon:shifter']), # Note, delayed in R3
+        ChainProp(name='EF_2mu4_bBmumux_BsmumuPhi_L12MU3V', l1SeedThresholds=['MU3V'], groups=BphysicsGroup+EOFBPhysL1MuGroup, monGroups=['idMon:shifter']), # Note, delayed in R3
+
+        #-- 2mu4 chains
+        ChainProp(name='EF_2mu4_bJpsimumu_L12MU3VF', l1SeedThresholds=['MU3VF'], groups=BphysicsGroup+EOFBPhysL1MuGroup),
+        ChainProp(name='EF_2mu4_bBmumu_L12MU3VF', l1SeedThresholds=['MU3VF'], groups=BphysicsGroup+EOFBPhysL1MuGroup),
+        ChainProp(name='EF_2mu4_bDimu_L12MU3VF', l1SeedThresholds=['MU3VF'], groups=BphysicsGroup+EOFBPhysL1MuGroup),
+        ChainProp(name='EF_2mu4_bDimu2700_sigmaLxy3_L12MU3VF', l1SeedThresholds=['MU3VF'], groups=BphysicsGroup+EOFBPhysL1MuGroup),
+        ChainProp(name='EF_2mu4_bUpsimumu_L12MU3VF', l1SeedThresholds=['MU3VF'], groups=BphysicsGroup+EOFBPhysL1MuGroup),
+
+        #-- multi muon primary triggers (only two muons are fitted to the common vertex except the case of bTau topology)
+        #-- 3mu
+        ChainProp(name='EF_3mu6_bJpsi_L13MU5VF', l1SeedThresholds=['MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu6_2mu4_bJpsi_L1MU5VF_3MU3VF', l1SeedThresholds=['MU5VF','MU3VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu6_2mu4_bJpsi_L1MU5VF_3MU3V', l1SeedThresholds=['MU5VF','MU3V'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_3mu4_bJpsi_L13MU3VF', l1SeedThresholds=['MU3VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_3mu4_bJpsi_L13MU3V', l1SeedThresholds=['MU3V'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_3mu6_bTau_L13MU5VF', l1SeedThresholds=['MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_2mu6_mu4_bTau_L12MU5VF_3MU3V', l1SeedThresholds=['MU5VF','MU3V'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu6_2mu4_bTau_L1MU5VF_3MU3VF', l1SeedThresholds=['MU5VF','MU3VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu6_2mu4_bTau_L1MU5VF_3MU3V', l1SeedThresholds=['MU5VF','MU3V'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_3mu4_bTau_L13MU3VF', l1SeedThresholds=['MU3VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_3mu4_bTau_L13MU3V', l1SeedThresholds=['MU3V'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        #-- 4mu
+        ChainProp(name='EF_4mu4_bDimu6000_L14MU3V', l1SeedThresholds=['MU3V'], groups=BphysicsGroup+PrimaryL1MuGroup),
+
+        #-- Bmumux primary triggers
+        #-- mu11_mu6 chains
+        ChainProp(name='EF_mu11_mu6_bBmumux_BpmumuKp_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup, monGroups=['bphysMon:online','bphysMon:shifter','idMon:t0']),
+        ChainProp(name='EF_mu11_mu6_bBmumux_BcmumuPi_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bBmumux_BsmumuPhi_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup, monGroups=['bphysMon:online','bphysMon:shifter','idMon:t0']),
+        ChainProp(name='EF_mu11_mu6_bBmumux_BdmumuKst_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup, monGroups=['bphysMon:online','bphysMon:shifter','idMon:t0']),
+        ChainProp(name='EF_mu11_mu6_bBmumux_LbPqKm_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bBmumux_BcmumuDsloose_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bBmumux_BcmumuDploose_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bBmumux_BcmumuD0Xloose_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bBmumux_BcmumuDstarloose_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        #-- Bmux primary triggers
+        ChainProp(name='EF_mu11_mu6_bBmux_BdmuDstarX_L1MU8VF_2MU5VF', l1SeedThresholds=['MU8VF','MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu23_bBmux_BpmuD0X_L1MU18VFCH', l1SeedThresholds=['MU18VFCH'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU18VFCH']),
+        ChainProp(name='EF_mu23_bBmux_BdmuDpX_L1MU18VFCH', l1SeedThresholds=['MU18VFCH'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU18VFCH']),
+        ChainProp(name='EF_mu23_bBmux_BdmuDstarX_L1MU18VFCH', l1SeedThresholds=['MU18VFCH'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU18VFCH']),
+        ChainProp(name='EF_mu23_mu4_bBmux_BdmuDstarX_L1MU18VFCH', l1SeedThresholds=['MU18VFCH','MU3V'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU18VFCH']),
+        ChainProp(name='EF_mu23_bBmux_BsmuDsX_L1MU18VFCH', l1SeedThresholds=['MU18VFCH'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU18VFCH']),
+        ChainProp(name='EF_mu23_bBmux_LbmuLcX_L1MU18VFCH', l1SeedThresholds=['MU18VFCH'], groups=BphysicsGroup+EOFBPhysL1MuGroup+['RATE:CPS_MU18VFCH']),
+
+        #-- non-PEB JPsi
+        ChainProp(name='EF_mu10_bJpsimutrk_L1MU8F', l1SeedThresholds=['MU8F'], groups=SupportGroup+BphysicsGroup, monGroups=['bphysMon:shifter']), # Intended: CPS_MU8F
+        ChainProp(name='EF_mu20_bJpsimutrk_L1MU14FCH', l1SeedThresholds=['MU14FCH'], groups=SupportGroup+BphysicsGroup, monGroups=['bphysMon:t0']), # Intended: CPS_MU14FCH
+        ChainProp(name='EF_mu20_bJpsimutrk_L1MU18VFCH', l1SeedThresholds=['MU18VFCH'], groups=SupportGroup+BphysicsGroup+['RATE:CPS_MU18VFCH'], monGroups=['bphysMon:t0']),
 
         # HL-LHC TDR inspired chains
-        ChainProp(name='EF_mu11_mu6_bBmumux_BpmumuKp_L12MU8F', l1SeedThresholds=['MU8VF', 'MU8F'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bJpsimumu_L12MU5VF', l1SeedThresholds=['MU8VF', 'MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
         ChainProp(name='EF_mu11_mu6_bUpsimumu_L12MU5VF', l1SeedThresholds=['MU8VF', 'MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bBmumux_BpmumuKp_L12MU5VF', l1SeedThresholds=['MU8VF', 'MU5VF'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bJpsimumu_L12MU8F', l1SeedThresholds=['MU8VF', 'MU8F'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bUpsimumu_L12MU8F', l1SeedThresholds=['MU8VF', 'MU8F'], groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_mu11_mu6_bBmumux_BpmumuKp_L12MU8F', l1SeedThresholds=['MU8VF', 'MU8F'], groups=BphysicsGroup+PrimaryL1MuGroup),
+
     ]
 
     chains['Monitor'] = [
