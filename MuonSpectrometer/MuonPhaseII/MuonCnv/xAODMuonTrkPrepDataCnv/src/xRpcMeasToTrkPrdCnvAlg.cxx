@@ -65,7 +65,7 @@ namespace MuonR4{
             
             }
             prd->setHashAndIndex(coll->identifyHash(), coll->size());
-            dec_link(*meas) = Link_t{*coll, coll->size()};
+            dec_link(*meas) = Link_t{*coll, coll->size(), ctx};
             coll->push_back(std::move(prd));
         }
         /// Write everything to disk in the end

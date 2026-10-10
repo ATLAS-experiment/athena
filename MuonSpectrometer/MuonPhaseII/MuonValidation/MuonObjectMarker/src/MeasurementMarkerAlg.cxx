@@ -67,7 +67,7 @@ namespace MuonR4{
             if (!readDecor(*seg)){
                 continue;
             }
-            SegLink_t segLink{segments, seg->index()};
+            SegLink_t segLink{m_segKey.key(), seg->index(), ctx};
             for (const PrdLink_t& link : prdLinks(*seg)) {
                 const auto* prd = (*link);
                 writeDecorMap.at(prd->container())(*prd) = readDecor(*seg);

@@ -50,7 +50,7 @@ namespace MuonR4 {
                                                               outEle,
                                                               meas->bcBitMap());
             outPrd->setHashAndIndex(coll->identifyHash(), coll->size());
-            dec_link(*meas) = Link_t{*coll, coll->size()};
+            dec_link(*meas) = Link_t{*coll, coll->size(), ctx};
             coll->push_back(std::move(outPrd));
 
         }

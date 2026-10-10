@@ -72,7 +72,7 @@ namespace MuonR4{
                                                                outEle, twin->tdc(), twin->adc(),
                                                                twin->twinTdc(), twin->twinAdc(), twin->status());
             }
-            dec_link(*meas) = Link_t{*coll, coll->size()};
+            dec_link(*meas) = Link_t{*coll, coll->size(), ctx};
             prd->setHashAndIndex(coll->identifyHash(), coll->size());
             coll->push_back(std::move(prd));
         }
