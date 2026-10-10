@@ -7,9 +7,6 @@
 #include "CxxUtils/checker_macros.h"
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
-#include "CollectionSvc/CollectionService.h"
-#include "CollectionSvc/ICollection.h"
-
 #include "TTree.h"
 #include "TList.h"
 #include "TObjString.h"
@@ -453,18 +450,6 @@ int main(int argc, char * argv[]){
     logger << Root::kINFO << "Being in TAG file mode..." << Root::GEndl;
 
     Root::TGoodRunsListReader reader;
-    for(std::vector<std::string>::iterator it = tagfile.begin(); it != tagfile.end(); ++it){
-      logger << Root::kINFO << "Processing file: <" << (*it) << ">" <<  Root::GEndl;
-      int n = (*it).find(".root");
-      std::string tagfilename =  (*it).substr(0,n);
-
-      // get Value for a Key
-      pool::ICollection* collection = pool::CollectionService::open(tagfilename, tagfilename);
-      if(collection == NULL) {
-         logger << Root::kERROR << "ICollection is NULL, exiting... " << Root::GEndl;
-         exit(-1);
-      }
-    }
     // do sorting of all grl objects
     reader.Interpret();
     grlcollection = reader.GetMergedGRLCollection();
