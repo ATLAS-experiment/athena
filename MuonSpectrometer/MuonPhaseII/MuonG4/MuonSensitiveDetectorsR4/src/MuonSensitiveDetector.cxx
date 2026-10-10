@@ -5,18 +5,19 @@
 
 #include "MuonSensitiveDetector.h"
 
-#include <MuonSensitiveDetectorsR4/Utils.h>
-#include <GeoPrimitives/CLHEPtoEigenConverter.h>
-#include <GeoModelKernel/throwExcept.h>
-#include <xAODMuonSimHit/MuonSimHitAuxContainer.h>
-#include <StoreGate/ReadHandle.h>
+#include "MuonSensitiveDetectorsR4/Utils.h"
+#include "GeoPrimitives/CLHEPtoEigenConverter.h"
+#include "GeoModelKernel/throwExcept.h"
+#include "xAODMuonSimHit/MuonSimHitAuxContainer.h"
+#include "StoreGate/ReadHandle.h"
 
-#include <G4Geantino.hh>
-#include <G4ChargedGeantino.hh>
+#include "G4Geantino.hh"
+#include "G4ChargedGeantino.hh"
 
-#include <MCTruth/TrackHelper.h>
-#include <MCTruth/TrackInformation.h>
-#include <MCTruth/AtlasG4EventUserInfo.h>
+#include "MCTruth/TrackHelper.h"
+#include "MCTruth/TrackInformation.h"
+#include "MCTruth/AtlasG4EventUserInfo.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 using namespace ActsTrk;
 
@@ -70,16 +71,16 @@ namespace MuonG4R4 {
     }
     bool MuonSensitiveDetector::processStep(const G4Step* aStep) const {
         const G4Track* currentTrack = aStep->GetTrack();
-        ATH_MSG_VERBOSE("Check whether step pdgId: "<<(*currentTrack)<<" will be processed.");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Check whether step pdgId: "<<(*currentTrack)<<" will be processed.");
         /// Reject secondary particles
         constexpr double velCutOff = 10.*Gaudi::Units::micrometer / Gaudi::Units::second;
         if (aStep->GetStepLength() < std::numeric_limits<float>::epsilon() || currentTrack->GetVelocity() < velCutOff) {
-            ATH_MSG_VERBOSE("Step length is too short ");
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Step length is too short ");
             return false;
         }
         /// Sensitive detector is only sensitive to charged particles or Geantinos
         if (currentTrack->GetDefinition()->GetPDGCharge() == 0.0) {
-            ATH_MSG_VERBOSE("Particle is neutral");
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Particle is neutral");
             return currentTrack->GetDefinition() == G4Geantino::GeantinoDefinition() ||
                    currentTrack->GetDefinition() == G4ChargedGeantino::ChargedGeantinoDefinition();
         }
@@ -105,23 +106,24 @@ namespace MuonG4R4 {
         /// Electrons randomly work through the gas instead of drifting through the gas -> take
         /// the prestep of the first snap shop inside the gas as pre step point
         xAOD::MuonSimHit* prevHit = lastSnapShot(hitID, aStep);
-        if (std::abs(currentTrack->GetParticleDefinition()->GetPDGEncoding()) == 11 && prevHit) {
-            locPreStep = xAOD::toEigen(prevHit->localPosition()) - 0.5* prevHit->stepLength() * 
-                        xAOD::toEigen(prevHit->localDirection());
+        if (MC::isElectron(currentTrack->GetParticleDefinition()->GetPDGEncoding()) && prevHit) {
+            locPreStep = xAOD::toEigen(prevHit->localPosition()) 
+                       - 0.5* prevHit->stepLength() * xAOD::toEigen(prevHit->localDirection());
 
             locHitDir = (locPostStep - locPreStep).unit();
         }
         const Amg::Vector3D locHitPos = 0.5* (locPreStep + locPostStep);
-        ATH_MSG_VERBOSE( m_detMgr->idHelperSvc()->toStringGasGap(hitID)<<" - track: "<<(*currentTrack)
-                        <<", deposit: "<<aStep->GetTotalEnergyDeposit()<<", -- local coords: "
-                        <<"prestep: "<<Amg::toString(locPreStep)<<",  post step: "<<Amg::toString(locPostStep) 
-                        <<" mid point: "<< Amg::toString(locHitPos)<<", direction: "<<Amg::toString(locHitDir)
-                        <<", deposit: "<<aStep->GetTotalEnergyDeposit());
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<m_detMgr->idHelperSvc()->toStringGasGap(hitID)
+            <<" - track: "<<(*currentTrack) <<", deposit: "<<aStep->GetTotalEnergyDeposit()
+            <<", -- local coords -- prestep: "<<Amg::toString(locPreStep)
+            <<",  post step: "<<Amg::toString(locPostStep) 
+            <<" mid point: "<< Amg::toString(locHitPos)<<", direction: "<<Amg::toString(locHitDir)
+            <<", deposit: "<<aStep->GetTotalEnergyDeposit());
 
         const double globalTime = currentTrack->GetGlobalTime() + locHitDir.dot(locPostStep - locHitPos) / currentTrack->GetVelocity();
   
         xAOD::MuonSimHit* newHit = saveHit(hitID, locHitPos, locHitDir, globalTime, aStep);
-        if (prevHit) {
+        if (newHit && prevHit) {
             newHit->setStepLength((locPostStep - locPreStep).mag());
         }
         return newHit;
@@ -149,16 +151,28 @@ namespace MuonG4R4 {
         hit->setLocalDirection(xAOD::toStorage(hitDir));
         hit->setMass(currentTrack->GetDefinition()->GetPDGMass());
         hit->setGlobalTime(globTime);
-        hit->setPdgId(currentTrack->GetDefinition()->GetPDGEncoding());
+        int pdgId = currentTrack->GetDefinition()->GetPDGEncoding();
+        /** Geantinos have an undefined pdgId */
+        if (pdgId ==0) {
+            if (currentTrack->GetDefinition() == G4ChargedGeantino::ChargedGeantinoDefinition()){
+              pdgId = std::copysign(MC::GEANTINOPLUS, currentTrack->GetDynamicParticle()->GetCharge());
+            } else if (currentTrack->GetDefinition() == G4Geantino::GeantinoDefinition()) {
+                pdgId = MC::GEANTINO0;
+            } else {
+                ATH_MSG_WARNING(__func__<<"() "<<__LINE__<<" - The track has an undefined pdgId "<<aStep);
+                m_outContainer->pop_back();
+                return nullptr;
+            }
+        }
+        hit->setPdgId(pdgId);
         hit->setEnergyDeposit(aStep->GetTotalEnergyDeposit() + (newHit ? 0. : hit->energyDeposit()));
         hit->setKineticEnergy(currentTrack->GetKineticEnergy());
         hit->setGenParticleLink(particleLink);
         hit->setStepLength(aStep->GetStepLength());
         
-        ATH_MSG_VERBOSE("Save new hit "<<m_detMgr->idHelperSvc()->toString(hitId)
-                        <<", pdgId: "<<hit->pdgId()
-                        <<", "<<particleLink
-                        <<", trackId: "<<currentTrack->GetTrackID()<<", "
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Save new hit "<<m_detMgr->idHelperSvc()->toString(hitId)
+                        <<", pdgId: "<<hit->pdgId()<<", "<<particleLink
+                        <<", trackId: "<<currentTrack->GetTrackID()
                         <<", "<<particleLink.cptr()<<std::endl
                         <<"pos: "<<Amg::toString(hitPos)<<", dir: "<<Amg::toString(hitDir)<<", time: "<<globTime
                         <<", energy: "<<hit->kineticEnergy()<<", stepLength: "<<hit->stepLength()<<", "

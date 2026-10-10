@@ -7,6 +7,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 class MuonPhaseIITestDefaults:
     ## Particle gun EVGen file (5 -250) GeV spectrum
     EVGEN_PG = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"]
+    ### Geantino file
+    EVGEN_GEANTINO = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_Geantino.pool.root"]
     ### Hits parsed though full R3 ATLAS layout (Only MS hits saved)
     HITS_PG_R3 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"]
     ### Hits parsed though full R4 ATLAS layout (Only MS hits saved)

@@ -169,7 +169,8 @@ namespace MuonValR4 {
                 continue;
             }
             ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Processing truth particle with PDG ID: " << truthParticle->absPdgId() << " ,pT: "
-                        << truthParticle->pt() << " , p: " << truthParticle->p4().P() << ", eta: " << truthParticle->eta() << " , phi: " << truthParticle->phi());
+                        << truthParticle->pt() << " , p: " << truthParticle->p4().P() << ", eta: " << truthParticle->eta() << " , phi: " 
+                        << truthParticle->phi()<<", charge: "<<truthParticle->charge());
 
             std::vector<std::pair<const xAOD::MuonSegment*, std::vector<const xAOD::MuonSimHit*>>> muonSegmentWithSimHits;
             for(const xAOD::MuonSegment* seg: MuonR4::getTruthSegments(*truthParticle)) {
