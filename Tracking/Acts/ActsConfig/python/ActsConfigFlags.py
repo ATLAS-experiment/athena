@@ -69,12 +69,14 @@ class TrackFitterType(FlagEnum):
 #   (AnalogueClustering)
 # - or add NN corrections, again either on the selected measurements
 #   (NNClustering) or on all candidates (NNClusteringBeforeSelection)
+# - or use truth information (TruthClusterSplitting)
 class PixelCalibrationStrategy(FlagEnum):
     Uncalibrated = "Uncalibrated"
     AnalogueClusteringBeforeSelection = "AnalogueClusteringBeforeSelection"
     AnalogueClustering = "AnalogueClustering"
     NNClusteringBeforeSelection = "NNClusteringBeforeSelection"
     NNClustering = "NNClustering"
+    TruthClusterSplitting = "TruthClusterSplitting"
 
     def usesCalibration(self):
         """whether a calibrator is needed at all"""

@@ -57,6 +57,21 @@ def ActsNNClusteringToolCfg(flags,
     acc.setPrivateTools(tools)
     return acc
 
+def ActsTruthClusterSplittingCalibrationToolCfg(flags, name='ActsTruthClusterSplittingCalibrationTool', **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("CalibrateAfterMeasurementSelection", not flags.Acts.PixelCalibrationStrategy.calibrateBeforeSelection())
+
+    if 'PixelLorentzAngleTool' not in kwargs:
+        from SiLorentzAngleTool.ITkPixelLorentzAngleConfig import ITkPixelLorentzAngleToolCfg
+        kwargs.setdefault("PixelLorentzAngleTool", acc.popToolsAndMerge(ITkPixelLorentzAngleToolCfg(flags)))
+
+    if 'TruthSelectionTool' not in kwargs:
+        from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import InDetRttTruthSelectionToolCfg
+        kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(InDetRttTruthSelectionToolCfg(flags)))
+
+    acc.setPrivateTools(CompFactory.ActsTrk.ITkTruthClusterSplittingTool(name, **kwargs))
+    return acc
+
 def ActsPixelCalibrationToolCfg(flags,
                                 **kwargs) -> ComponentAccumulator :
     from ActsConfig.ActsConfigFlags import PixelCalibrationStrategy
@@ -72,6 +87,9 @@ def ActsPixelCalibrationToolCfg(flags,
     elif flags.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.NNClustering :
         kwargs.setdefault("CalibrateAfterMeasurementSelection", True)
         return ActsNNClusteringToolCfg(flags,**kwargs)
+    elif flags.Acts.PixelCalibrationStrategy is PixelCalibrationStrategy.TruthClusterSplitting :
+        kwargs.setdefault("CalibrateAfterMeasurementSelection", True)
+        return ActsTruthClusterSplittingCalibrationToolCfg(flags,**kwargs)
     else :
         raise RuntimeError(f"No pixel calibration tool for calibration strategy {flags.Acts.PixelCalibrationStrategy}")
 

@@ -56,6 +56,7 @@ inline auto SharedHitCounter::computeSharedHits(typename track_container_t::Trac
   std::size_t nShared = 0;
   std::size_t nBadTrackMeasurements = 0;
   for (auto state : track.trackStatesReversed()) {
+    // filter for state that is a measurement (not hole, outlier etc):
     if (!state.typeFlags().hasMeasurement())
       continue;
 
@@ -108,15 +109,22 @@ inline auto SharedHitCounter::computeSharedHits(typename track_container_t::Trac
 
     // if removeSharedHits is false, this is the nominal behaviour
     if (!removeSharedHits) {
-      if (!firstState.typeFlags().isSharedHit()) {
-        firstState.typeFlags().setIsSharedHit();
-        firstTrack.nSharedHits()++;
+      // only count shared hits if the cluster is not split
+      // NOTE: Assumption is that isSplit only depends on cluster not on track
+      if (!firstState.typeFlags().isSplitHit()){
+        if (!firstState.typeFlags().isSharedHit()) {
+          firstState.typeFlags().setIsSharedHit();
+          firstTrack.nSharedHits()++;
+          ++nShared;
+        }
+        // Decorate this track state
+        state.typeFlags().setIsSharedHit();
+        track.nSharedHits()++;
         ++nShared;
+      } else {
+        // Do nothing for split hits
+        state.typeFlags().setIsSharedHit(false);
       }
-      // Decorate this track state
-      state.typeFlags().setIsSharedHit();
-      track.nSharedHits()++;
-      ++nShared;
 
     } else { // remove shared hits mode
       if (firstState.typeFlags().isSharedHit()) {

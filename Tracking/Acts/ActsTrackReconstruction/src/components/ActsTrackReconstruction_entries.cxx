@@ -16,6 +16,7 @@
 // Tools
 #include "src/ITkAnalogueClusteringTool.h"
 #include "src/ITkNNClusterCalibratorTool.h"
+#include "src/ITkTruthClusterSplittingTool.h"
 #include "src/ITkStripCalibrationTool.h"
 #include "src/TrackStatePrinterTool.h"
 #include "src/KalmanFitterTool.h"
@@ -40,6 +41,7 @@ DECLARE_COMPONENT( ActsTrk::TrackFindingGNNAlg )
 // Tools
 DECLARE_COMPONENT( ActsTrk::ITkAnalogueClusteringTool )
 DECLARE_COMPONENT( ActsTrk::ITkNNClusterCalibratorTool )
+DECLARE_COMPONENT( ActsTrk::ITkTruthClusterSplittingTool )
 DECLARE_COMPONENT( ActsTrk::ITkStripCalibrationTool )
 DECLARE_COMPONENT( ActsTrk::TrackStatePrinterTool )
 DECLARE_COMPONENT( ActsTrk::KalmanFitterTool )
