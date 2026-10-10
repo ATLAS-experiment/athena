@@ -20,7 +20,14 @@ StatusCode MvaTESVariableDecorator::initialize() {
   ATH_CHECK(m_aveIntPerXKey.initialize());
   ATH_CHECK(m_vertexContainerKey.initialize(SG::AllowEmpty));
   ATH_CHECK(m_eventShapeKey.initialize(SG::AllowEmpty));
-  
+ 
+  if (std::string(m_seedJet).find("EM") != std::string::npos) {
+    ATH_MSG_INFO("Set the cluster state to UNCALIBRATED");
+    m_clusterState = xAOD::CaloCluster::State::UNCALIBRATED;
+  } else {
+    m_clusterState = xAOD::CaloCluster::State::CALIBRATED;
+  }    
+
   return StatusCode::SUCCESS;
 }
 
@@ -132,8 +139,8 @@ StatusCode MvaTESVariableDecorator::executeTool(xAOD::TauJet& xTau,
 
       // FIXME: should we use calE for EMTopo clusters ?
       // what's the energy scale when calculating the cluster momentum
-      if (em_probability>0.5) clusters_EM_P4 += cluster.p4(xAOD::CaloCluster::State::CALIBRATED);      
-      else clusters_had_P4 += cluster.p4(xAOD::CaloCluster::State::CALIBRATED);
+      if (em_probability>0.5) clusters_EM_P4 += cluster.p4(m_clusterState);      
+      else clusters_had_P4 += cluster.p4(m_clusterState);
     }
     else ATH_MSG_WARNING("Failed to retrieve moment: EM_PROBABILITY");
 

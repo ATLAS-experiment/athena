@@ -671,7 +671,8 @@ def MvaTESVariableDecoratorCfg(flags):
     MvaTESVariableDecorator = MvaTESVariableDecorator(name = _name,
                                                       Key_vertexInputContainer = flags.Tau.ActiveConfig.VertexCollection,
                                                       EventShapeKey = eventShapeCollection,
-                                                      VertexCorrection = flags.Tau.doVertexCorrection)
+                                                      VertexCorrection = flags.Tau.doVertexCorrection,
+                                                      SeedJet = flags.Tau.ActiveConfig.SeedJetCollection)
     result.setPrivateTools(MvaTESVariableDecorator)
     return result
 
