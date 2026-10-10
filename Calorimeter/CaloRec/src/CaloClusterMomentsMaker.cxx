@@ -44,6 +44,8 @@
 #include <vector>
 #include <tuple>
 #include <string>
+#include <string_view>
+#include <algorithm>
 #include <cstdio>
 #include <cmath>
 
@@ -53,88 +55,66 @@ using enum xAOD::CaloCluster::MomentType;
 
 // Known moments
 namespace {
-  // name -> enum translator
-  const std::map<std::string,xAOD::CaloCluster::MomentType> momentNameToEnumMap = {
-    { "AVG_LAR_Q",         AVG_LAR_Q },
-    { "AVG_TILE_Q",        AVG_TILE_Q },
-    { "BADLARQ_FRAC",      BADLARQ_FRAC },
-    { "BAD_CELLS_CORR_E",  BAD_CELLS_CORR_E },
-    { "CELL_SIGNIFICANCE", CELL_SIGNIFICANCE },
-    { "CELL_SIG_SAMPLING", CELL_SIG_SAMPLING },
-    { "CENTER_LAMBDA",     CENTER_LAMBDA },
-    { "CENTER_MAG",        CENTER_MAG },
-    { "CENTER_X",          CENTER_X },
-    { "CENTER_Y",          CENTER_Y },
-    { "CENTER_Z",          CENTER_Z },
-    { "DELTA_ALPHA",       DELTA_ALPHA },
-    { "DELTA_PHI",         DELTA_PHI },
-    { "DELTA_THETA",       DELTA_THETA },
-    { "ENG_BAD_CELLS",     ENG_BAD_CELLS },
-    { "ENG_BAD_HV_CELLS",  ENG_BAD_HV_CELLS },
-    { "ENG_FRAC_CORE",     ENG_FRAC_CORE },
-    { "ENG_FRAC_EM",       ENG_FRAC_EM },
-    { "ENG_FRAC_MAX",      ENG_FRAC_MAX },
-    { "ENG_POS",           ENG_POS },
-    { "FIRST_ENG_DENS",    FIRST_ENG_DENS },
-    { "FIRST_ETA",         FIRST_ETA },
-    { "FIRST_PHI",         FIRST_PHI },
-    { "ISOLATION",         ISOLATION },
-    { "LATERAL",           LATERAL },
-    { "LONGITUDINAL",      LONGITUDINAL },
-    { "MASS",              MASS },
-    { "N_BAD_CELLS",       N_BAD_CELLS },
-    { "N_BAD_HV_CELLS",    N_BAD_HV_CELLS },
-    { "N_BAD_CELLS_CORR",  N_BAD_CELLS_CORR },
-    { "PTD",               PTD },
-    { "SECOND_ENG_DENS",   SECOND_ENG_DENS },
-    { "SECOND_LAMBDA",     SECOND_LAMBDA },
-    { "SECOND_R",          SECOND_R },
-    { "SECOND_TIME",       SECOND_TIME },
-    { "SIGNIFICANCE",      SIGNIFICANCE },
-    { "EM_PROBABILITY",    EM_PROBABILITY },
-    { "NCELL_SAMPLING",    NCELL_SAMPLING }
+  using MomentType = xAOD::CaloCluster::MomentType;
+  using Pair = std::pair<std::string_view, MomentType>;
+  // name -> enum pairs, in alphabetical order
+  constexpr std::array  momentMappings{
+    Pair{ "AVG_LAR_Q",         AVG_LAR_Q },
+    Pair{ "AVG_TILE_Q",        AVG_TILE_Q },
+    Pair{ "BADLARQ_FRAC",      BADLARQ_FRAC },
+    Pair{ "BAD_CELLS_CORR_E",  BAD_CELLS_CORR_E },
+    Pair{ "CELL_SIGNIFICANCE", CELL_SIGNIFICANCE },
+    Pair{ "CELL_SIG_SAMPLING", CELL_SIG_SAMPLING },
+    Pair{ "CENTER_LAMBDA",     CENTER_LAMBDA },
+    Pair{ "CENTER_MAG",        CENTER_MAG },
+    Pair{ "CENTER_X",          CENTER_X },
+    Pair{ "CENTER_Y",          CENTER_Y },
+    Pair{ "CENTER_Z",          CENTER_Z },
+    Pair{ "DELTA_ALPHA",       DELTA_ALPHA },
+    Pair{ "DELTA_PHI",         DELTA_PHI },
+    Pair{ "DELTA_THETA",       DELTA_THETA },
+    Pair{ "EM_PROBABILITY",    EM_PROBABILITY },
+    Pair{ "ENG_BAD_CELLS",     ENG_BAD_CELLS },
+    Pair{ "ENG_BAD_HV_CELLS",  ENG_BAD_HV_CELLS },
+    Pair{ "ENG_FRAC_CORE",     ENG_FRAC_CORE },
+    Pair{ "ENG_FRAC_EM",       ENG_FRAC_EM },
+    Pair{ "ENG_FRAC_MAX",      ENG_FRAC_MAX },
+    Pair{ "ENG_POS",           ENG_POS },
+    Pair{ "FIRST_ENG_DENS",    FIRST_ENG_DENS },
+    Pair{ "FIRST_ETA",         FIRST_ETA },
+    Pair{ "FIRST_PHI",         FIRST_PHI },
+    Pair{ "ISOLATION",         ISOLATION },
+    Pair{ "LATERAL",           LATERAL },
+    Pair{ "LONGITUDINAL",      LONGITUDINAL },
+    Pair{ "MASS",              MASS },
+    Pair{ "NCELL_SAMPLING",    NCELL_SAMPLING },
+    Pair{ "N_BAD_CELLS",       N_BAD_CELLS },
+    Pair{ "N_BAD_CELLS_CORR",  N_BAD_CELLS_CORR },
+    Pair{ "N_BAD_HV_CELLS",    N_BAD_HV_CELLS },
+    Pair{ "PTD",               PTD },
+    Pair{ "SECOND_ENG_DENS",   SECOND_ENG_DENS },
+    Pair{ "SECOND_LAMBDA",     SECOND_LAMBDA },
+    Pair{ "SECOND_R",          SECOND_R },
+    Pair{ "SECOND_TIME",       SECOND_TIME },
+    Pair{ "SIGNIFICANCE",      SIGNIFICANCE }
   };
-  // enum -> name translator
-  const std::map<xAOD::CaloCluster::MomentType,std::string> momentEnumToNameMap = {
-    { AVG_LAR_Q,          "AVG_LAR_Q"        },
-    { AVG_TILE_Q,         "AVG_TILE_Q"       },
-    { BADLARQ_FRAC,       "BADLARQ_FRAC"     },
-    { BAD_CELLS_CORR_E,   "BAD_CELLS_CORR_E" },
-    { CELL_SIGNIFICANCE,  "CELL_SIGNIFICANCE"},
-    { CELL_SIG_SAMPLING,  "CELL_SIG_SAMPLING"},
-    { CENTER_LAMBDA,      "CENTER_LAMBDA"    },
-    { CENTER_MAG,         "CENTER_MAG"       },
-    { CENTER_X,           "CENTER_X"         },
-    { CENTER_Y,           "CENTER_Y"         },
-    { CENTER_Z,           "CENTER_Z"         },
-    { DELTA_ALPHA,        "DELTA_ALPHA"      },
-    { DELTA_PHI,          "DELTA_PHI"        },
-    { DELTA_THETA,        "DELTA_THETA"      },
-    { ENG_BAD_CELLS,      "ENG_BAD_CELLS"    },
-    { ENG_BAD_HV_CELLS,   "ENG_BAD_HV_CELLS" },
-    { ENG_FRAC_CORE,      "ENG_FRAC_CORE"    },
-    { ENG_FRAC_EM,        "ENG_FRAC_EM"      },
-    { ENG_FRAC_MAX,       "ENG_FRAC_MAX"     },
-    { ENG_POS,            "ENG_POS"          },
-    { FIRST_ENG_DENS,     "FIRST_ENG_DENS"   },
-    { FIRST_ETA,          "FIRST_ETA"        },
-    { FIRST_PHI,          "FIRST_PHI"        },
-    { ISOLATION,          "ISOLATION"        },
-    { LATERAL,            "LATERAL"          },
-    { LONGITUDINAL,       "LONGITUDINAL"     },
-    { MASS,               "MASS"             },
-    { N_BAD_CELLS,        "N_BAD_CELLS"      },
-    { N_BAD_HV_CELLS,     "N_BAD_HV_CELLS"   },
-    { N_BAD_CELLS_CORR,   "N_BAD_CELLS_CORR" },
-    { PTD,                "PTD"              },
-    { SECOND_ENG_DENS,    "SECOND_ENG_DENS"  },
-    { SECOND_LAMBDA,      "SECOND_LAMBDA"    },
-    { SECOND_R,           "SECOND_R"         },
-    { SECOND_TIME,        "SECOND_TIME"      },
-    { SIGNIFICANCE,       "SIGNIFICANCE"     },
-    { EM_PROBABILITY,     "EM_PROBABILITY"   },
-    { NCELL_SAMPLING,     "NCELL_SAMPLING"   }
-  };
+  static_assert(std::ranges::is_sorted( momentMappings, std::less<>{}, &Pair::first));
+  std::optional<MomentType>
+  constexpr momentFromName(std::string_view name){
+    auto it = std::ranges::lower_bound(momentMappings, name, std::less<>{}, &Pair::first);
+    if (it == momentMappings.end()|| it->first != name) {
+      return std::nullopt;
+    }
+    return it->second;
+  }
+  std::optional<std::string_view>
+  constexpr nameFromMoment(MomentType m){
+    auto it = std::ranges::find(momentMappings, m, &Pair::second);
+    if (it == momentMappings.end()) {
+      return std::nullopt;
+    }
+    return it->first;
+  }
 }
 
 //###############################################################################
@@ -190,12 +170,12 @@ StatusCode CaloClusterMomentsMaker::initialize()
   for (const auto& mom : m_momentsNames) {
     ATH_MSG_DEBUG("Moment " << mom << " requested");
     // check if moment is known (enumerator available)
-    auto fmap(momentNameToEnumMap.find(mom));
-    if (fmap != momentNameToEnumMap.end()) {
+    auto fmap(momentFromName(mom));
+    if (fmap) {
       // valid moment found
       nstr = std::max(nstr, mom.length());
       ++nmom;
-      if (fmap->second == SECOND_TIME) {
+      if (fmap.value() == SECOND_TIME) {
         // special flag for second moment of cell times - this moment is not
         // calculated in this tool! Do not add to internal (!) valid moments
         // list. Its value is available from xAOD::CaloCluster::secondTime()!
@@ -205,31 +185,31 @@ StatusCode CaloClusterMomentsMaker::initialize()
         // to the auxiliary variable registry.  Otherwise, if we don't
         // set the moment for the first event (perhaps because there
         // are no clusters), then we can get warnings from AuxSelection.
-        (void)dummyCluster.getMomentValue (fmap->second);
-      } else if (fmap->second == NCELL_SAMPLING) {
+        (void)dummyCluster.getMomentValue (fmap.value());
+      } else if (fmap.value() == NCELL_SAMPLING) {
         // flag indicates if number of cells in a sampling should be counted.
         // This is a vector of integers counts that is filled in this tool but
         // does not need any post-processing (e.g. normalization). It is not
         // added to the valid moments list for this reason.
-        ATH_MSG_DEBUG("moment " << fmap->first << " found");
+        ATH_MSG_DEBUG("moment " << mom << " found");
         m_nCellsPerSampling = true;
         xAOD::CaloCluster::ncells_store_t cellsdum;
 
         // Make sure the variable used for the moment is declared
         // to the auxiliary variable registry.
-        (void)dummyCluster.retrieveMoment (fmap->second, cellsdum);
-      } else if (fmap->second == EM_PROBABILITY) {
+        (void)dummyCluster.retrieveMoment (fmap.value(), cellsdum);
+      } else if (fmap.value() == EM_PROBABILITY) {
         ATH_MSG_WARNING(mom
                         << " not calculated in this tool - misconfiguration?");
       } else {
         // Make sure the variable used for the moment is declared
         // to the auxiliary variable registry.
-        (void)dummyCluster.getMomentValue (fmap->second);
+        (void)dummyCluster.getMomentValue (fmap.value());
 
         // all other valid moments
-        m_validMoments.push_back(fmap->second);
+        m_validMoments.push_back(fmap.value());
         // flag some special requests
-        switch (fmap->second) {
+        switch (fmap.value()) {
           case SIGNIFICANCE:
           case CELL_SIGNIFICANCE:
             m_calculateSignificance = true;
@@ -249,22 +229,22 @@ StatusCode CaloClusterMomentsMaker::initialize()
       char buffer[128];
       std::string::size_type lstr(nstr);
       // determine field size
-      for (const auto& fmom : momentNameToEnumMap) {
-        lstr = std::max(lstr, fmom.first.length());
+      for (const auto& [name,moment] : momentMappings) {
+        lstr = std::max(lstr, name.length());
       }
       // print available moments
-      for (const auto& fmom : momentNameToEnumMap) {
-        sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)lstr,
-                (int)lstr, fmom.first.c_str(), (int)fmom.second);
+      for (const auto& [name,moment] : momentMappings) {
+        snprintf(buffer, sizeof(buffer),"moment name: %-*.*s - enumerator: %i", (int)lstr,
+                (int)lstr, name.data(), (int)moment);
         ATH_MSG_ERROR(buffer);
       }
-      auto fmom(momentNameToEnumMap.find("SECOND_TIME"));
-      sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
-              (int)nstr, fmom->first.c_str(), (int)fmom->second);
+      auto fmom(momentFromName("SECOND_TIME"));
+      snprintf(buffer, sizeof(buffer),"moment name: %-*.*s - enumerator: %i", (int)nstr,
+              (int)nstr, "SECOND_TIME", (int)fmom.value());
       ATH_MSG_ERROR(buffer);
-      fmom = momentNameToEnumMap.find("NCELL_SAMPLING");
-      sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
-              (int)nstr, fmom->first.c_str(), (int)fmom->second);
+      fmom = momentFromName("NCELL_SAMPLING");
+      snprintf(buffer, sizeof(buffer),"moment name: %-*.*s - enumerator: %i", (int)nstr,
+              (int)nstr, "NCELL_SAMPLING", (int)fmom.value());
       ATH_MSG_ERROR(buffer);
       return StatusCode::FAILURE;
     }  // found unknown moment name
@@ -280,20 +260,20 @@ StatusCode CaloClusterMomentsMaker::initialize()
   ATH_MSG_INFO("Construct and save " << nmom << " cluster moments: ");
   char buffer[128];
   for (auto menum : m_validMoments) {
-    sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
-            (int)nstr, momentEnumToNameMap.at(menum).c_str(), (int)menum);
+    snprintf(buffer, sizeof(buffer),"moment name: %-*.*s - enumerator: %i", (int)nstr,
+            (int)nstr, nameFromMoment(menum).value().data(), (int)menum);
     ATH_MSG_INFO(buffer);
   }
   if (m_secondTime) {
-    auto fmom(momentNameToEnumMap.find("SECOND_TIME"));
-    sprintf(buffer, "moment name: %-*.*s - enumerator: %i (save only)",
-            (int)nstr, (int)nstr, fmom->first.c_str(), (int)fmom->second);
+    auto fmom(momentFromName("SECOND_TIME"));
+    snprintf(buffer, sizeof(buffer),"moment name: %-*.*s - enumerator: %i (save only)",
+            (int)nstr, (int)nstr, "SECOND_TIME", (int)fmom.value());
     ATH_MSG_INFO(buffer);
   }
   if (m_nCellsPerSampling) {
-    auto fmom(momentNameToEnumMap.find("NCELL_SAMPLING"));
-    sprintf(buffer, "moment name: %-*.*s - enumerator: %i", (int)nstr,
-            (int)nstr, fmom->first.c_str(), (int)fmom->second);
+    auto fmom(momentFromName("NCELL_SAMPLING"));
+    snprintf(buffer, sizeof(buffer),"moment name: %-*.*s - enumerator: %i", (int)nstr,
+            (int)nstr, "NCELL_SAMPLING", (int)fmom.value());
     ATH_MSG_INFO(buffer);
   }
 
