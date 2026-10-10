@@ -3,7 +3,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True, 
+def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True,
                      outFile="MsTrkTester.root", **kwargs):
     result = ComponentAccumulator()
     kwargs.setdefault("isMC", flags.Input.isMC)
@@ -74,18 +74,15 @@ if __name__=="__main__":
 
     cfg.getService("MessageSvc").setVerbose = ["MSTrackFinderAlg"]
     cfg.getService("MessageSvc").setVerbose = []
-    from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
+    from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig 
     cfg.merge(MuonReconstructionConfig(flags))
 
-    
-    #### Schedule the legacy MS track building to compare the two reconstruction chains
-    from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
-
     if not args.noLegacyChain:
+        from MuonPatternRecognitionTest.PatternTestConfig import LegacyMuonRecoChainCfg
         cfg.merge(LegacyMuonRecoChainCfg(flags))
 
-    cfg.merge(MsTrackTesterCfg(flags, scheduleLegacy = not args.noLegacyChain,
-                                      outFile = args.outRootFile))
+
+    cfg.merge(MsTrackTesterCfg(flags, outFile = args.outRootFile))
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))

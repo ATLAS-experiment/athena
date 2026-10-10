@@ -285,6 +285,9 @@ def MuonCreatorAlgCfg(flags, name="MuonCreatorAlg", **kwargs):
         if flags.Muon.SAMuonTrigger:
             kwargs.setdefault("CreateSAmuons", True)
             kwargs.setdefault("TagMaps", [])
+    
+    if flags.Muon.scheduleActsReco:
+        kwargs.setdefault("MuonContainerLocation", "MuonsLegacy")
 
     alg = CompFactory.MuonCreatorAlg(name, **kwargs)
     result.addEventAlgo(alg, primary=True)
@@ -310,7 +313,7 @@ def LRT_MuonCreatorAlgCfg(flags, name="MuonCreatorAlg_LRT", **kwargs):
     if flags.MuonCombined.doMuonSegmentTagger:
         tag_maps += ["segmentTagMap_LRT"]
     kwargs.setdefault("TagMaps", tag_maps)
-    kwargs.setdefault("MuonContainerLocation", "MuonsLRT")
+    kwargs.setdefault("MuonContainerLocation", "MuonsLRT" if not flags.Muon.scheduleActsReco else "MuonsLRTLegacy")
     kwargs.setdefault("ExtrapolatedLocation", "ExtraPolatedMuonsLRT")
     kwargs.setdefault("MSOnlyExtrapolatedLocation",
                       "MSOnlyExtraPolatedMuonsLRT")
@@ -561,8 +564,13 @@ def CombinedMuonOutputCfg(flags):
     aod_items += ["xAOD::TrackParticleAuxContainer#"+col +
                   "Aux." + excludedAuxData for col in particle_col]
 
-    aod_items += ["xAOD::MuonContainer#Muons"]
-    aod_items += ["xAOD::MuonContainer#MuonsLRT"]
+    if not flags.Muon.scheduleActsReco:
+        aod_items += ["xAOD::MuonContainer#Muons"]
+        aod_items += ["xAOD::MuonContainer#MuonsLRT"]
+    else:
+        aod_items += ["xAOD::MuonContainer#MuonsLegacy"]
+        aod_items += ["xAOD::MuonContainer#MuonsLRTLegacy"]
+
 
     # FIXME! Next two lines are hack to remove derivation framework variables that are added by DRAW building and are supposed to be transient
     wp_decors = ["DFCommonMuonsTight", "DFCommonGoodMuon", "DFCommonMuonsMedium",

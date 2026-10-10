@@ -154,7 +154,7 @@ namespace MuonValR4{
         /** @brief Context provider for geometry, magnetic field and calibration contexts */
         ActsTrk::ContextUtility m_ctxProvider{this};
         /** @brief Dependency on the R4 muon container */
-        MuonKey_t m_muonKey{this, "MuonKey", "MuonsR4"};
+        MuonKey_t m_muonKey{this, "MuonKey", "Muons"};
         /** @brief Hit summary tool */
         ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" ,""};
         /** @brief The track seeding tool to construct the seed candidates and to estimate the initial parameters */
@@ -186,7 +186,7 @@ namespace MuonValR4{
         Gaudi::Property<double> m_tolerancePhi{this, "tolerancePhi", 2.*Gaudi::Units::deg};
 
         /** @brief Legacy muons  */
-        MuonKey_t m_legacyMuonKey{this,"LegacyMuonKey", "Muons"};
+        MuonKey_t m_legacyMuonKey{this,"LegacyMuonKey", "MuonsLegacy"};
 
         /** @brief Instance to the Acts logger */
         std::unique_ptr<const Acts::Logger> m_logger{};

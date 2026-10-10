@@ -62,7 +62,7 @@ namespace MuonCombinedR4 {
             /** @brief The Muon selection tool to assess the muon quality */
             ToolHandle<CP::IMuonSelectionTool> m_selectionTool{this, "SelectionTool", ""};
             /** @brief Key name to store the primary muon container  */
-            SG::WriteHandleKey<xAOD::MuonContainer> m_muonKey{this, "MuonKey", "MuonsR4"};
+            SG::WriteHandleKey<xAOD::MuonContainer> m_muonKey{this, "MuonKey", "Muons"};
             /** @brief Key name under which the input tags can be found*/
             SG::ReadHandleKeyArray<MuonR4::MuonTagContainer> m_tagKeys{this, "TagKeys", {}};
            /** @brief Handle to the muon summary tool */

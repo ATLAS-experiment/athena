@@ -35,7 +35,7 @@ namespace MuonR4{
             /** @brief Collector of all the decoration dependencies what are implicitly needed */
             SG::ReadDecorHandleKeyArray<SG::AuxVectorBase> m_decorKeys{this, "DeocrationKeys", {}};
             /** @brief the actual muon container that we want to decorate */
-            SG::ReadHandleKey<xAOD::MuonContainer> m_muonKey{this, "MuonKey", "MuonsR4"};
+            SG::ReadHandleKey<xAOD::MuonContainer> m_muonKey{this, "MuonKey", "Muons"};
             /** @brief Explicitly declare the truth particle link decoration. */
             SG::WriteDecorHandleKey<xAOD::MuonContainer> m_truthPartLinkKey{this, "TruthPartLinkKey", m_muonKey, "truthParticleLink"};
     };
