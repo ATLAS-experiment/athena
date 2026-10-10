@@ -5,6 +5,7 @@
 # art-architecture: {"gpu_spec": {"vendor": "nvidia", "version": ">=13.3", "model": {"pattern": ".*(P100|V100).*", "excl": true}}}
 # art-input: mc21_14TeV:mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
 # art-input-nfiles: 400
+# art-input-njobs: 1
 # art-output: IDTPM.*.root
 # art-output: *.json
 # art-output: *.xml
