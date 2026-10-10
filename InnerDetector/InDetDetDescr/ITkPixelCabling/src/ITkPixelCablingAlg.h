@@ -16,7 +16,11 @@
 //Athena includes
 #include "AthenaBaseComps/AthCondAlgorithm.h"
 #include "ITkPixelCabling/ITkPixelCablingData.h"
+#include "AthenaPoolUtilities/CondAttrListCollection.h"
 
+#include "PersistentDataModel/AthenaAttributeList.h"
+
+#include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/WriteCondHandleKey.h"
 
 //Gaudi includes
@@ -53,12 +57,12 @@ private:
 
   StatusCode generateTestCabling(std::unique_ptr<ITkPixelCablingData>& cabling) const;
 
-  StatusCode fillFromCREST(std::unique_ptr<ITkPixelCablingData>& cabling) const;
+  StatusCode fillFromCREST(std::unique_ptr<ITkPixelCablingData>& cabling, const std::string& c) const;
 
   Gaudi::Property<bool> m_useTestCabling{this, "UseTestCabling", false, "Generate a dummy cabling for testing/development purposes, as the online IDs don't exist yet"};
-  Gaudi::Property<std::string> m_crestServer{this, "CrestServer", "crest:https://atlas-crest-dev.cern.ch/api-v6.4", "CREST server name"};
-  Gaudi::Property<std::string> m_crestTag{this, "CrestTag", "ITkPixModIDMap-RUN4-00-00-TEST", "CREST Tag name"};
-  Gaudi::Property<uint64_t> m_crestTime{this, "CrestTime", 0, "Time within iov"};
+
+  //Retrieve the cabling from the store gate
+  SG::ReadCondHandleKey<AthenaAttributeList> m_readKey {this,"ReadKey","/ITk/Pixel/Identifier"};
   SG::WriteCondHandleKey<ITkPixelCablingData> m_writeKey{this, "WriteKey", "ITkPixelCablingData", "Key of output (derived) conditions data"};
   const PixelID* m_idHelper{nullptr};
   const InDetDD::PixelDetectorManager* m_detManager{};

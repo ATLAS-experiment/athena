@@ -58,6 +58,8 @@ ITkPixelCablingAlg::initialize() {
   ATH_CHECK(detStore()->retrieve(m_idHelper, "PixelID"));
   // det manager
   if (m_useTestCabling) ATH_CHECK(detStore()->retrieve(m_detManager, "ITkPixel"));
+  // Read Cond Key
+  ATH_CHECK( m_readKey.initialize() );
   // Write Cond Handle
   ATH_CHECK(m_writeKey.initialize());
 
@@ -76,6 +78,14 @@ ITkPixelCablingAlg::execute(const EventContext& ctx) const {
                   << " if multiple concurrent events are being processed out of order.");
     return StatusCode::SUCCESS;
   }
+  SG::ReadCondHandle<AthenaAttributeList> readHandle{m_readKey, ctx};
+  const AthenaAttributeList* attr{*readHandle};
+
+  if (attr==nullptr) {
+    ATH_MSG_ERROR("Failed to retrieve AthenaAttributeList with key " << m_readKey.key());
+    return StatusCode::FAILURE;
+  }
+  const std::string& pl = (*attr)["cabling"].data<std::string>();
 
   // Construct the output Cond Object and fill it in
   std::unique_ptr<ITkPixelCablingData> pCabling = std::make_unique<ITkPixelCablingData>();
@@ -98,7 +108,7 @@ ITkPixelCablingAlg::execute(const EventContext& ctx) const {
     return StatusCode::SUCCESS;
   }
 
-  ATH_CHECK(fillFromCREST(pCabling));
+  ATH_CHECK(fillFromCREST(pCabling, pl));
   const int numEntries = pCabling->size();
   ATH_MSG_DEBUG(numEntries << " entries were made to the identifier map.");
 
@@ -206,61 +216,39 @@ StatusCode ITkPixelCablingAlg::generateTestCabling(std::unique_ptr<ITkPixelCabli
     return StatusCode::SUCCESS;
 }
 
-StatusCode ITkPixelCablingAlg::fillFromCREST(std::unique_ptr<ITkPixelCablingData>& cabling) const {
+StatusCode ITkPixelCablingAlg::fillFromCREST(std::unique_ptr<ITkPixelCablingData>& cabling, const std::string& c) const {
 
-    chai::Database db(m_crestServer);
-    auto tag = db.getTag(m_crestTag);
-    auto [payload, since, until] = tag->getPayloadAt(m_crestTime);
-    auto config = payload.toJson();
-    //format the json file correctly, need to decode utf8 by hand...
-    if (config.contains("0")) {
-        config["sideAC"] = std::move(config["0"]);
-        config.erase("0");
+    // Remove Python bytes representation: b'...'
+    std::string s=c;
+    if (c.size() >= 3 &&
+        c.substr(0, 2) == "b'" &&
+        c.back() == '\''){
+        s = c.substr(2, c.size() - 3);
     }
-    //Clean and parse string elements inside 'sideAC'
-    if (config.contains("sideAC") && config["sideAC"].is_array()) {
-        for (auto& item : config["sideAC"]) {
-            if (item.is_string()) {
-                std::string str = item.get<std::string>();
-                // Strip leading b' and trailing '
-                if (str.rfind("b'", 0) == 0) {
-                    str = str.substr(2, str.length() - 3);
-                }
-                // Remove backslashes
-                str.erase(std::remove(str.begin(), str.end(), '\\'), str.end());
-                // Parse cleaned string back using nlohmann::json
-                item = nlohmann::json::parse(str);
-            }
-        }
-    }
+    // Parse JSON
+    nlohmann::json config = nlohmann::json::parse(s);
+
     std::unordered_set<uint32_t> seen;
 
-    for (const auto& [side, groups] : config.items()) {
+    for (const auto& entry : config) {
         
-        for (const auto& group : groups) {
-        
-            for (const auto& entry : group) {
-        
-                const uint32_t detectorResourceID = std::stoul(entry.at("DetectorResourceID").get<std::string>(), nullptr, 16);
+        const uint32_t detectorResourceID = std::stoul(entry.at("DetectorResourceID").get<std::string>(), nullptr, 16);
 
-                const uint32_t trueDetectorResourceID = std::stoul(entry.at("TrueDetectorResourceID").get<std::string>(), nullptr, 16);
+        const uint32_t trueDetectorResourceID = std::stoul(entry.at("TrueDetectorResourceID").get<std::string>(), nullptr, 16);
 
-                const uint32_t sourceID = std::stoul(entry.at("SourceID").get<std::string>(), nullptr, 16);
+        const uint32_t sourceID = std::stoul(entry.at("SourceID").get<std::string>(), nullptr, 16);
 
-                cabling->addEntryOffOn(detectorResourceID & ITkPixelCabling::OFFLINE_DRID_MASK, ITkPixelOnlineId(sourceID, detectorResourceID));
+        cabling->addEntryOffOn(detectorResourceID & ITkPixelCabling::OFFLINE_DRID_MASK, ITkPixelOnlineId(sourceID, detectorResourceID));
 
-                if (seen.insert(sourceID).second) cabling->addSourceID(sourceID);
+        if (seen.insert(sourceID).second) cabling->addSourceID(sourceID);
 
-                uint64_t moduleID = (static_cast<uint64_t>(ITkPixelCabling::dridToModuleID(trueDetectorResourceID)) << 32);
+        uint64_t moduleID = (static_cast<uint64_t>(ITkPixelCabling::dridToModuleID(trueDetectorResourceID)) << 32);
 
-                Identifier id(static_cast<Identifier::value_type>(moduleID));
-                if      (m_idHelper->barrel_ec(id) == 0 && m_idHelper->layer_disk(id) == 0) cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalIBTriplet);
-                else if (m_idHelper->barrel_ec(id) != 0 && (m_idHelper->layer_disk(id) == 0 || m_idHelper->layer_disk(id) == 1) ) cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalIECTriplet);
-                else cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalQuad);
-
-                ATH_MSG_DEBUG(std::hex << " key " << (detectorResourceID & ITkPixelCabling::OFFLINE_DRID_MASK) << " detectorResourceID " << detectorResourceID << " trueDetectorResourceID " << trueDetectorResourceID << " sourceID " << sourceID);
-            }
-        }
+        Identifier id(static_cast<Identifier::value_type>(moduleID));
+        if      (m_idHelper->barrel_ec(id) == 0 && m_idHelper->layer_disk(id) == 0) cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalIBTriplet);
+        else if (m_idHelper->barrel_ec(id) != 0 && (m_idHelper->layer_disk(id) == 0 || m_idHelper->layer_disk(id) == 1) ) cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalIECTriplet);
+        else cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalQuad);
+        ATH_MSG_DEBUG(std::hex << " key " << (detectorResourceID & ITkPixelCabling::OFFLINE_DRID_MASK) << " detectorResourceID " << detectorResourceID << " trueDetectorResourceID " << trueDetectorResourceID << " sourceID " << sourceID);
     }
 
     return StatusCode::SUCCESS;
