@@ -1,7 +1,9 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
+import functools
 import os
 import re
+import warnings
 from fnmatch import fnmatchcase
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.AthConfigFlags import isGaudiEnv
@@ -67,6 +69,23 @@ trigger_menu_json_map = {
 }
 
 
+def ignore_missing_dictionary_warnings(func):
+    """Ignore ROOT warnings about missing class dictionaries while func runs."""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore",
+                message=r".*no dictionary for class",
+                category=RuntimeWarning,
+            )
+            return func(*args, **kwargs)
+
+    return wrapper
+
+
+@ignore_missing_dictionary_warnings
 def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, meta_key_filter = None,
                   unique_tag_info_values = True, ignoreNonExistingLocalFiles=False):
     """
