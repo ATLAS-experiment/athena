@@ -8,12 +8,12 @@ atlas_add_component (L1MuonS1RPC
         src/*.cxx src/components/*.cxx
         INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
 	LINK_LIBRARIES AnaAlgorithmLib AthenaKernel xAODMuonRDO MuonDigitContainer AthenaMonitoringKernelLib
-	MuonCablingData xAODTrigger L1MuonInterface GeneratorObjects xAODMuonSimHit xAODMuon xAODL0MuonCand xAODTruth MuonTruthHelpers MuonReadoutGeometryR4
+	MuonCablingData xAODTrigger L1MuonInterface GeneratorObjects xAODMuonSimHit xAODMuon xAODTrigL1Muon xAODTruth MuonTruthHelpers MuonReadoutGeometryR4
         PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} )
 
 
 atlas_add_test( RunTest
-                SCRIPT python -m L1MuonS1RPC.L0MuonS1RPCConfig --nEvents 2
+                SCRIPT python -m L1MuonS1RPC.L1MuonS1RPCConfig --nEvents 2
                 PROPERTIES TIMEOUT 600
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh)

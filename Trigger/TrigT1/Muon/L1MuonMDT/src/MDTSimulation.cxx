@@ -28,7 +28,7 @@ namespace L1Muon {
 
   StatusCode MDTSimulation::execute(const EventContext& ctx) const {
 
-    const xAOD::RPCCandDataContainer* barrelCandidates{};
+    const xAOD::L1RPCCandDataContainer* barrelCandidates{};
     ATH_CHECK(SG::get(barrelCandidates, m_barrelCandidateKey, ctx));
 
   
@@ -40,7 +40,7 @@ namespace L1Muon {
 
 
   
-    for(const xAOD::RPCCandData_v1* cand : *barrelCandidates) {
+    for(const xAOD::L1RPCCandData_v1* cand : *barrelCandidates) {
 
       float m=0, b=0;
 
@@ -50,8 +50,8 @@ namespace L1Muon {
       }
 
       std::vector<const xAOD::MdtDriftCircle*> mdtHits;
-      float eta = (static_cast<float>(cand->eta()) / static_cast<float>(xAOD::ICandData_v1::etaBitRange())) * (2.0f * xAOD::ICandData_v1::etaRange()) - xAOD::ICandData_v1::etaRange();
-      float phi = (static_cast<float>(cand->phi()) / static_cast<float>(xAOD::ICandData_v1::phiBitRange())) * xAOD::ICandData_v1::phiRange() - M_PI;
+      float eta = (static_cast<float>(cand->l1Eta()) / static_cast<float>(xAOD::IL1CandData_v1::etaBitRange())) * (2.0f * xAOD::IL1CandData_v1::etaRange()) - xAOD::IL1CandData_v1::etaRange();
+      float phi = (static_cast<float>(cand->l1Phi()) / static_cast<float>(xAOD::IL1CandData_v1::phiBitRange())) * xAOD::IL1CandData_v1::phiRange() - M_PI;
       ATH_CHECK(collectMDTHits(ctx, gctx, eta, phi, mdtHits, m, b));
  
       // Split hits by station
@@ -148,9 +148,9 @@ namespace L1Muon {
   }
 
 
-  bool MDTSimulation::fitRPC(const xAOD::RPCCandData& cand,float& m, float& b, std::vector<float>& z_positions, std::vector<float>& r_positions) const {
+  bool MDTSimulation::fitRPC(const xAOD::L1RPCCandData& cand,float& m, float& b, std::vector<float>& z_positions, std::vector<float>& r_positions) const {
 
-    float eta = (static_cast<float>(cand.eta()) / static_cast<float>(xAOD::ICandData_v1::etaBitRange())) * (2.0f * xAOD::ICandData_v1::etaRange()) - xAOD::ICandData_v1::etaRange();
+    float eta = (static_cast<float>(cand.l1Eta()) / static_cast<float>(xAOD::IL1CandData_v1::etaBitRange())) * (2.0f * xAOD::IL1CandData_v1::etaRange()) - xAOD::IL1CandData_v1::etaRange();
     float theta = 2.f * std::atan(std::exp(-eta));
     float tanTheta = std::tan(theta);
 
@@ -158,7 +158,7 @@ namespace L1Muon {
     r_positions.clear();
 
     for (int i = 0; i < 4; ++i) {
-        const float z_pos = static_cast<float>(cand.zPos().at(i)) / static_cast<float>(xAOD::RPCCandData_v1::zPosBitRange()) * (2.0f * xAOD::RPCCandData_v1::zPosRange()) - xAOD::RPCCandData_v1::zPosRange();
+        const float z_pos = static_cast<float>(cand.l1ZPos().at(i)) / static_cast<float>(xAOD::L1RPCCandData_v1::zPosBitRange()) * (2.0f * xAOD::L1RPCCandData_v1::zPosRange()) - xAOD::L1RPCCandData_v1::zPosRange();
         z_positions.push_back(z_pos);
         r_positions.push_back(z_pos * tanTheta);
       }

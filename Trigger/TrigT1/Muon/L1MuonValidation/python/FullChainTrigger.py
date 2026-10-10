@@ -41,9 +41,9 @@ if __name__ == "__main__":
         acc.merge(RpcRdoToRpcDigitCfg(flags))
         ## Create the xAOD::TruthParticles for RPC simulation
 
-        from L1MuonS1RPC.L0MuonS1RPCConfig import L0MuonRPCSimCfg
-        acc.merge(L0MuonRPCSimCfg(flags,
-            name="L0MuonRPCSim",
+        from L1MuonS1RPC.L1MuonS1RPCConfig import L1MuonRPCSimCfg
+        acc.merge(L1MuonRPCSimCfg(flags,
+            name="L1MuonRPCSim",
             OutputLevel=DEBUG))
 
     from L1MuonS1TGC.L0MuonS1TGCConfig import L0MuonTGCSimCfg
@@ -86,8 +86,8 @@ if __name__ == "__main__":
     itemList = []
     if run_rpc_chain:
         itemList += [
-            "xAOD::RPCCandDataContainer#RPCCandData",
-            "xAOD::RPCCandDataAuxContainer#RPCCandDataAux.",
+            "xAOD::L1RPCCandDataContainer#L1RPCCandData",
+            "xAOD::L1RPCCandDataAuxContainer#L1RPCCandDataAux.",
         ]
     itemList += [
         "xAOD::TGCCandDataContainer#L0MuonTGCCandData",
