@@ -48,6 +48,7 @@ class TrigMuonEfficiencyMon : public TrigMuonMonitorAlgorithm{
   Gaudi::Property<bool> m_use_extrapolator {this, "UseExtrapolator", false, "Flag to activate the track extrapolator"};
   Gaudi::Property<double> m_mass_lowlim {this, "MassLowLim", 81., "Lower mass limit for the tag and probe method"};
   Gaudi::Property<double> m_mass_highlim {this, "MassHighLim", 101., "Higher mass limit for the tag and probe method"};
+  PublicToolHandle<Trig::TrigDecisionTool> m_trigDec {this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool", "TrigDecisionTool"};
 
   // data
   std::map<std::string, std::string> m_l1seeds {};

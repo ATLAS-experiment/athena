@@ -57,6 +57,11 @@ StatusCode TrigMuonEfficiencyMon :: selectMuons(const EventContext& ctx, SG::Rea
 StatusCode TrigMuonEfficiencyMon :: fillVariablesPerOfflineMuonPerChain(const EventContext& ctx, const xAOD::Muon* mu, const std::string &chain) const {
 
 
+  auto passBits=m_trigDec->isPassedBits(chain);
+  if(!((passBits & TrigDefs::L1_isPassedAfterVeto)  && ((passBits & TrigDefs::EF_prescaled)==0))){
+    ATH_MSG_DEBUG("Prescaled trigger: " << chain << " Skipping to normalize efficiencies");
+    return StatusCode::SUCCESS;
+  }
   auto muPt = Monitored::Scalar<double>(m_group+"_muPt");
   auto muEta = Monitored::Scalar<float>(m_group+"_muEta");
   auto muPhi = Monitored::Scalar<float>(m_group+"_muPhi");
