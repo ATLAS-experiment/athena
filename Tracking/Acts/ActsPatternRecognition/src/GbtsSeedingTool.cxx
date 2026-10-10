@@ -75,6 +75,9 @@ namespace ActsTrk {
       Acts::Experimental::GraphBasedTrackSeeder::DerivedConfig(m_finderCfg),
       gbtsGeo, logger().cloneWithSuffix("gbtsFinder"));
 
+    m_graphBuilder.emplace(m_graphCfg, gbtsGeo,
+      logger().cloneWithSuffix("gbtsGraphBuilder"));
+
     m_filter = Acts::Experimental::GbtsTrackingFilter(m_filterCfg, gbtsGeo);
 
     return StatusCode::SUCCESS;
@@ -108,8 +111,8 @@ namespace ActsTrk {
     Acts::Experimental::GbtsNodeStorage nodeStorage = m_finder->makeNodeStorage();
 
     // node positions are relative to the beam spot in x and y if the correction is on
-    const float offsetX = m_finderCfg.beamSpotCorrection ? beamSpotPos[0] : 0.0f;
-    const float offsetY = m_finderCfg.beamSpotCorrection ? beamSpotPos[1] : 0.0f;
+    const float offsetX = m_beamSpotCorrection ? beamSpotPos[0] : 0.0f;
+    const float offsetY = m_beamSpotCorrection ? beamSpotPos[1] : 0.0f;
 
     std::size_t nPixelNodes = 0;
     std::size_t nStripNodes = 0;
@@ -205,7 +208,8 @@ namespace ActsTrk {
     ATH_MSG_VERBOSE("Spacepoints successfully added to node storage");
 
     Acts::SeedContainer seeds;
-    m_finder->createSeeds(nodeStorage, m_internalRoi.value(), *m_filter, options, seeds);
+    m_finder->createSeeds(nodeStorage, m_internalRoi.value(), *m_graphBuilder,
+      *m_filter, options, seeds);
 
     // add seeds to the output container
     seedContainer.reserve(seedContainer.size() + seeds.size(), 7.0f);
@@ -222,7 +226,7 @@ namespace ActsTrk {
   }
 
   StatusCode GbtsSeedingTool::readTauLookupTable(
-    Acts::Experimental::detail::GbtsTauLookupTable& tauLookupTable) const
+    Acts::Experimental::GbtsTauLookupTable& tauLookupTable) const
   {
     std::ifstream lutStream(m_lutFile.value());
     if (!lutStream.is_open()) {
@@ -235,7 +239,7 @@ namespace ActsTrk {
     // the width is dropped: a row is located by index, one row per
     // tauLutBinWidth of cluster width, never searched
     float clusterWidth = 0.0f;
-    Acts::Experimental::detail::GbtsTauBounds bounds;
+    Acts::Experimental::GbtsTauBounds bounds;
     while (lutStream >> clusterWidth >> bounds.minTau >> bounds.maxTau >>
            bounds.minTauNearEdge >> bounds.maxTauNearEdge) {
       tauLookupTable.push_back(bounds);
@@ -258,35 +262,33 @@ namespace ActsTrk {
   }
 
   StatusCode GbtsSeedingTool::prepareConfiguration() {
-    m_finderCfg.useStripConnections = m_stripConnections;
     m_finderCfg.useClusterWidthCuts = m_useML;
-    m_finderCfg.matchBeforeCreate = m_matchBeforeCreate;
-    m_finderCfg.beamSpotCorrection = m_beamSpotCorrection;
-    m_finderCfg.minPt = m_minPt;
+    m_graphCfg.matchBeforeCreate = m_matchBeforeCreate;
+    m_graphCfg.minPt = m_minPt;
     m_finderCfg.nMaxPhiSlice = m_nMaxPhiSlice;
-    m_finderCfg.useEtaBinning = m_useEtaBinning;
-    m_finderCfg.doubletFilterRZ = m_doubletFilterRZ;
-    m_finderCfg.minDeltaRadius = m_minDeltaRadius;
-    m_finderCfg.nMaxEdges = m_nMaxEdges;
-    m_finderCfg.tauRatioCut = m_tauRatioCut; 
-    m_finderCfg.tauRatioPrecut = m_tauRatioPrecut;
+    m_graphCfg.useEtaBinning = m_useEtaBinning;
+    m_graphCfg.doubletFilterRZ = m_doubletFilterRZ;
+    m_graphCfg.minDeltaRadius = m_minDeltaRadius;
+    m_graphCfg.maxEdgesPerSP = m_maxEdgesPerSP;
+    m_graphCfg.tauRatioCut = m_tauRatioCut; 
+    m_graphCfg.tauRatioPrecut = m_tauRatioPrecut;
     m_finderCfg.edgeMaskMinEta = m_edgeMaskMinEta;
     m_finderCfg.hitShareThreshold = m_hitShareThreshold;
     m_finderCfg.maxEndcapClusterWidth = m_maxEndcapClusterwidth;
-    m_finderCfg.d0Max = m_d0Max;
+    m_graphCfg.d0Max = m_d0Max;
 
     //use roi for pixel and given value for strip
-    m_finderCfg.maxZ0 = m_maxZ0.value();
-    m_finderCfg.minZ0 = m_minZ0.value();
+    m_graphCfg.maxZ0 = m_maxZ0.value();
+    m_graphCfg.minZ0 = m_minZ0.value();
 
-    m_finderCfg.validateTriplets = m_validateTriplets;
-    m_finderCfg.useAdaptiveCuts = m_useAdaptiveCuts;
-    m_finderCfg.tauRatioCorr = m_tauRatioCorr;
+    m_graphCfg.validateTriplets = m_validateTriplets;
+    m_graphCfg.useAdaptiveCuts = m_useAdaptiveCuts;
+    m_graphCfg.tauRatioCorr = m_tauRatioCorr;
     m_finderCfg.addTriplets = m_addTriplets;
     m_finderCfg.maxAbsEtaAddTriplets = m_maxEtaAddTriplets;
-    m_finderCfg.cutDPhiMax = m_cutDPhiMax;
-    m_finderCfg.cutDCurvMax = m_cutDCurvMax;
-    m_finderCfg.maxOuterRadius = m_maxOuterRadius;
+    m_graphCfg.cutDPhiMax = m_cutDPhiMax;
+    m_graphCfg.cutDCurvMax = m_cutDCurvMax;
+    m_graphCfg.maxOuterRadius = m_maxOuterRadius;
 
     // The seeder no longer recognises an LRT mode, so spell out what it used
     // to imply: a triplet with no confirmation.
@@ -312,37 +314,37 @@ namespace ActsTrk {
   // called in initialise, used to make sure all config settings look sensible
 void GbtsSeedingTool::printGbtsConfig() const {
   ATH_MSG_DEBUG("===== GBTS finder config =====");
-  ATH_MSG_DEBUG( "beamSpotCorrection: " << m_finderCfg.beamSpotCorrection);
+  ATH_MSG_DEBUG( "beamSpotCorrection: " << m_beamSpotCorrection.value());
   ATH_MSG_DEBUG( "connectorInputFile: " << m_connectorInputFile.value());
   ATH_MSG_DEBUG( "lutInputFile: " << m_lutFile.value());
   ATH_MSG_DEBUG( "LRTmode: " << m_LRTmode.value());
-  ATH_MSG_DEBUG( "useStripConnections: " << m_finderCfg.useStripConnections);
+  ATH_MSG_DEBUG( "useStripConnections: " << m_stripConnections.value());
   ATH_MSG_DEBUG( "useClusterWidthCuts: " << m_finderCfg.useClusterWidthCuts);
-  ATH_MSG_DEBUG( "matchBeforeCreate: " << m_finderCfg.matchBeforeCreate);
-  ATH_MSG_DEBUG( "minSeedLevel: " << m_finderCfg.minSeedLevel);
-  ATH_MSG_DEBUG( "tauRatioPrecut: " << m_finderCfg.tauRatioPrecut);
-  ATH_MSG_DEBUG( "tauRatioCut: " << m_finderCfg.tauRatioCut);
-  ATH_MSG_DEBUG( "tauRatioCorr: " << m_finderCfg.tauRatioCorr);
+  ATH_MSG_DEBUG( "matchBeforeCreate: " << m_graphCfg.matchBeforeCreate);
+  ATH_MSG_DEBUG( "minSeedLevel: " << static_cast<unsigned>(m_finderCfg.minSeedLevel));
+  ATH_MSG_DEBUG( "tauRatioPrecut: " << m_graphCfg.tauRatioPrecut);
+  ATH_MSG_DEBUG( "tauRatioCut: " << m_graphCfg.tauRatioCut);
+  ATH_MSG_DEBUG( "tauRatioCorr: " << m_graphCfg.tauRatioCorr);
   ATH_MSG_DEBUG( "etaBinWidthOverride: " << m_etaBinWidthOverride.value());
   ATH_MSG_DEBUG( "nMaxPhiSlice: " << m_finderCfg.nMaxPhiSlice);
-  ATH_MSG_DEBUG( "minPt: " << m_finderCfg.minPt);
-  ATH_MSG_DEBUG( "useEtaBinning: " << m_finderCfg.useEtaBinning);
-  ATH_MSG_DEBUG( "doubletFilterRZ: " << m_finderCfg.doubletFilterRZ);
-  ATH_MSG_DEBUG( "nMaxEdges: " << m_finderCfg.nMaxEdges);
-  ATH_MSG_DEBUG( "minDeltaRadius: " << m_finderCfg.minDeltaRadius);
+  ATH_MSG_DEBUG( "minPt: " << m_graphCfg.minPt);
+  ATH_MSG_DEBUG( "useEtaBinning: " << m_graphCfg.useEtaBinning);
+  ATH_MSG_DEBUG( "doubletFilterRZ: " << m_graphCfg.doubletFilterRZ);
+  ATH_MSG_DEBUG( "maxEdgesPerSP: " << m_graphCfg.maxEdgesPerSP);
+  ATH_MSG_DEBUG( "minDeltaRadius: " << m_graphCfg.minDeltaRadius);
   ATH_MSG_DEBUG( "edgeMaskMinEta: " << m_finderCfg.edgeMaskMinEta);
   ATH_MSG_DEBUG( "hitShareThreshold: " << m_finderCfg.hitShareThreshold);
   ATH_MSG_DEBUG( "maxEndcapClusterWidth: " << m_finderCfg.maxEndcapClusterWidth);
-  ATH_MSG_DEBUG( "d0Max: " << m_finderCfg.d0Max);
-  ATH_MSG_DEBUG("maxZ0: " << m_finderCfg.maxZ0);
-  ATH_MSG_DEBUG("minZ0: " << m_finderCfg.minZ0);
-  ATH_MSG_DEBUG( "validateTriplets: " << m_finderCfg.validateTriplets);
-  ATH_MSG_DEBUG( "useAdaptiveCuts: " << m_finderCfg.useAdaptiveCuts);
+  ATH_MSG_DEBUG( "d0Max: " << m_graphCfg.d0Max);
+  ATH_MSG_DEBUG("maxZ0: " << m_graphCfg.maxZ0);
+  ATH_MSG_DEBUG("minZ0: " << m_graphCfg.minZ0);
+  ATH_MSG_DEBUG( "validateTriplets: " << m_graphCfg.validateTriplets);
+  ATH_MSG_DEBUG( "useAdaptiveCuts: " << m_graphCfg.useAdaptiveCuts);
   ATH_MSG_DEBUG( "addTriplets: " << m_finderCfg.addTriplets);
   ATH_MSG_DEBUG( "maxEtaAddTriplets: " << m_finderCfg.maxAbsEtaAddTriplets);
-  ATH_MSG_DEBUG("cutDphiMax: " << m_finderCfg.cutDPhiMax);
-  ATH_MSG_DEBUG("cutDCurvMax: " << m_finderCfg.cutDCurvMax);
-  ATH_MSG_DEBUG("maxOuterRadius: " << m_finderCfg.maxOuterRadius);
+  ATH_MSG_DEBUG("cutDphiMax: " << m_graphCfg.cutDPhiMax);
+  ATH_MSG_DEBUG("cutDCurvMax: " << m_graphCfg.cutDCurvMax);
+  ATH_MSG_DEBUG("maxOuterRadius: " << m_graphCfg.maxOuterRadius);
 
   ATH_MSG_DEBUG("===== GBTS filter config =====");
   ATH_MSG_DEBUG( "sigmaMS: " << m_filterCfg.sigmaMS);

@@ -14,6 +14,7 @@
 #include "xAODInDetMeasurement/PixelClusterContainer.h"
 
 // ACTS CORE
+#include "Acts/Seeding/GbtsGraphBuilder.hpp"
 #include "Acts/Seeding/GbtsLayerConnection.hpp"
 #include "Acts/Seeding/GraphBasedTrackSeeder.hpp"
 #include "Acts/Definitions/Units.hpp"
@@ -72,7 +73,7 @@ namespace ActsTrk {
     /// Reads the tau lookup table the cluster width cuts need: per line a
     /// cluster width, the bulk tau bounds and the near-edge ones.
     StatusCode readTauLookupTable(
-      Acts::Experimental::detail::GbtsTauLookupTable& tauLookupTable) const;
+      Acts::Experimental::GbtsTauLookupTable& tauLookupTable) const;
 
     /// Private access to the logger
     const Acts::Logger &logger() const { return *m_logger; }
@@ -83,11 +84,17 @@ namespace ActsTrk {
     /// steering for seeding algorithm
     Acts::Experimental::GraphBasedTrackSeeder::Config m_finderCfg;
 
+    /// steering for doublet graph building
+    Acts::Experimental::GbtsGraphBuilder::Config m_graphCfg;
+
     /// steering for track filter
     Acts::Experimental::GbtsTrackingFilter::Config m_filterCfg;
 
     /// the actual seed fining algorithm
     std::optional<Acts::Experimental::GraphBasedTrackSeeder> m_finder;
+
+    /// the doublet graph builder
+    std::optional<Acts::Experimental::GbtsGraphBuilder> m_graphBuilder;
 
     /// the seed filter
     std::optional<Acts::Experimental::GbtsTrackingFilter> m_filter;
@@ -135,7 +142,7 @@ namespace ActsTrk {
     Gaudi::Property<float> m_minPt {this, "minPt", 1000.0, "Lower cutoff for seeds"};
     Gaudi::Property<float> m_maxEtaAddTriplets{this, "maxEtaAddTriplets", 1.5, "eta region in which three sapcepoint seeds are allowed"}; 
     Gaudi::Property<float> m_minDeltaRadius {this, "minDeltaRadius",2.0, " min dr for doublet"}; 
-    Gaudi::Property<int> m_nMaxEdges {this, "MaxEdges",3000000, " max number of Gbts edges/doublets"};
+    Gaudi::Property<float> m_maxEdgesPerSP {this, "MaxEdgesPerSP", 30.0f, " max number of Gbts edges/doublets per space point"};
     Gaudi::Property<float> m_cutDPhiMax {this, "cutDPhiMax", 0.012f, "not sure"};
     Gaudi::Property<float> m_cutDCurvMax {this, "cutDCurvMax", 0.001f, "not sure"};
     Gaudi::Property<float> m_maxOuterRadius {this, "maxOuterRadius", 550.0f, "not sure"};

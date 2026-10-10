@@ -66,6 +66,10 @@ class GbtsTrainingAlg final : public AthReentrantAlgorithm {
 
   // applies configuration to algorithms
   void applyConfiguration();
+
+  // finds the GBTS layer that contains the hit coordinates
+  std::optional<Acts::Experimental::GbtsExperimentLayerId> findGbtsIdByCoord(
+      float r, float z) const;
 };
 
 }  // namespace ActsTrk
