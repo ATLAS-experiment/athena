@@ -10,8 +10,8 @@
 #include "IRegionSelector/IRegSelTool.h"
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h" 
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
-#include "xAODL0MuonCand/RPCCandData.h"
-#include "xAODL0MuonCand/RPCCandDataContainer.h"
+#include "xAODTrigL1Muon/L1RPCCandData.h"
+#include "xAODTrigL1Muon/L1RPCCandDataContainer.h"
 #include "L1MuonMDTTools/IL0MDTSegmentFinderTool.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
@@ -36,7 +36,7 @@ private:
 
 
 // helper functions
-  bool fitRPC(const xAOD::RPCCandData& cand,
+  bool fitRPC(const xAOD::L1RPCCandData& cand,
               float& m, float& b,
               std::vector<float>& z_positions,
               std::vector<float>& r_positions) const;
@@ -77,7 +77,7 @@ private:
 
   SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
   SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_mdtDriftCircleKey{this, "MdtDriftCircles", "xMdtDriftCircles"};
-  SG::ReadHandleKey<xAOD::RPCCandDataContainer> m_barrelCandidateKey{this, "RPCCandKey", "RPCCandData"};
+  SG::ReadHandleKey<xAOD::L1RPCCandDataContainer> m_barrelCandidateKey{this, "RPCCandKey", "L1RPCCandData"};
 
   };
 } // namespace L1Muon

@@ -45,8 +45,8 @@ namespace L1Muon
     ATH_MSG_DEBUG("Executing " << name() << "...");
 
     // output candidates container
-    SG::WriteHandle<xAOD::RPCCandDataContainer> outputCands_handle(m_outputCandKey, ctx);
-    ATH_CHECK(outputCands_handle.record(std::make_unique<xAOD::RPCCandDataContainer>(), std::make_unique<xAOD::RPCCandDataAuxContainer>()));
+    SG::WriteHandle<xAOD::L1RPCCandDataContainer> outputCands_handle(m_outputCandKey, ctx);
+    ATH_CHECK(outputCands_handle.record(std::make_unique<xAOD::L1RPCCandDataContainer>(), std::make_unique<xAOD::L1RPCCandDataAuxContainer>()));
     auto outputCands = outputCands_handle.ptr();
 
     if (m_useTruth)
@@ -102,7 +102,7 @@ namespace L1Muon
       return rpcHits;
   }
 
-  StatusCode RPCSimulation::buildFromTruth(xAOD::RPCCandDataContainer& outputCands,
+  StatusCode RPCSimulation::buildFromTruth(xAOD::L1RPCCandDataContainer& outputCands,
                                            const EventContext &ctx) const
   {
     const ActsTrk::GeometryContext* geoContextHandle{nullptr};
@@ -134,15 +134,14 @@ namespace L1Muon
       /// create the candidate
       /// do not set the sectorId and bcTag for the moment
       uint16_t subdetectorId = eta > 0 ? 0x65 : 0x66;
-      auto* cand = outputCands.push_back(std::make_unique<xAOD::RPCCandData>()); 
-      
+      auto* cand = outputCands.push_back(std::make_unique<xAOD::L1RPCCandData>());
+
       cand->initialize(subdetectorId, 0, 0);
-      cand->setEta(eta);
-      cand->setPhi(phi);
-      cand->setPt(pt);
-      cand->setThreshold(0);
-      cand->setCandCharge(charge);
-      cand->setMdtFlag(0);
+      cand->setL1Eta(eta);
+      cand->setL1Phi(phi);
+      cand->setL1Pt(pt);
+      cand->setL1Threshold(0);
+      cand->setL1CandCharge(charge);
 
       std::array<float, 4> zPos{};
       std::array<int, 4> nZPos{};
@@ -193,8 +192,7 @@ namespace L1Muon
           }
       }
       
-      cand->setZPos(zPos);
-      cand->setCandQuality(xAOD::ICandData_v1::Quality::Q_BEST); // Set to BEST for truth
+      cand->setL1ZPos(zPos);
     }
     // Implementation of building candidates from truth
     return StatusCode::SUCCESS;

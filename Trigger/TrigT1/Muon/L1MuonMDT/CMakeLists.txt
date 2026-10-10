@@ -5,8 +5,8 @@ atlas_subdir ( L1MuonMDT )
 atlas_add_component (L1MuonMDT
         src/*.cxx src/components/*.cxx
 
-        LINK_LIBRARIES AthenaKernel xAODMuonRDO MuonRDO MuonDigitContainer xAODTrigger AthenaMonitoringKernelLib IRegionSelector 
-  MuonReadoutGeometryR4 L1MuonMDTToolsLib TrigSteeringEvent xAODMuonViews xAODMuonPrepData xAODL0MuonCand MdtCalibSvcLib MuonCalibEventBase MuonCalibITools xAODMuonSimHit)
+        LINK_LIBRARIES AthenaKernel xAODMuonRDO MuonRDO MuonDigitContainer xAODTrigger AthenaMonitoringKernelLib IRegionSelector
+  MuonReadoutGeometryR4 L1MuonMDTToolsLib TrigSteeringEvent xAODMuonViews xAODMuonPrepData xAODTrigL1Muon MdtCalibSvcLib MuonCalibEventBase MuonCalibITools xAODMuonSimHit)
 
 
 
