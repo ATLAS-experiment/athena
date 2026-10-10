@@ -210,7 +210,7 @@ InDetTrkInJetType::InDetTrkInJetType(const std::string& type,
       std::vector<float> v_tctScore = trkTypeWgts(ctx,trk,PV,curjet->p4());
       trackWriteDecorHandleTCTScore(*trk) = std::move(v_tctScore);
       ElementLink< xAOD::JetContainer> linkJet;
-      linkJet.toContainedElement(jets, curjet);
+      linkJet.toContainedElement(jets, curjet, ctx);
       trackWriteDecorHandleJetLink(*trk) = linkJet;
     }
 
@@ -228,7 +228,7 @@ InDetTrkInJetType::InDetTrkInJetType(const std::string& type,
       //adapted from https://acode-browser1.usatlas.bnl.gov/lxr/source/athena/PhysicsAnalysis/JetTagging/JetTagAlgs/BTagging/src/JetBTaggingAlg.cxx
       //line 253-255
       ElementLink< xAOD::TrackParticleContainer> linkTrack;
-      linkTrack.toContainedElement(trkContainer, itrk);
+      linkTrack.toContainedElement(trkContainer, itrk, ctx);
       jetWriteDecorHandleTrackLink(*curjet).push_back(linkTrack);        
     } // end track loop
   }

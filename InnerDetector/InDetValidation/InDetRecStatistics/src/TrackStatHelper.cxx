@@ -195,7 +195,7 @@ void InDet::TrackStatHelper::addEvent(const EventContext& ctx,
     else {
       ElementLink<TrackCollection> tracklink;
       tracklink.setElement(track);
-      tracklink.setStorableObject(*recTracks);
+      tracklink.setStorableObject(*recTracks, ctx);
       const ElementLink<TrackCollection> tracklink2=tracklink;
       
       found = truthMap->find(tracklink2);
@@ -425,7 +425,7 @@ void InDet::TrackStatHelper::addEvent(const EventContext& ctx,
     bool matched = false;
     int nmatched = 0;
     
-    HepMcParticleLink hmpl2(particle,particle->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM);
+    HepMcParticleLink hmpl2(particle,particle->parent_event()->event_number(),HepMcParticleLink::IS_EVENTNUM, ctx);
     recoToTruthMap::iterator rttIter=rttMap.find(hmpl2);
     if(rttIter != rttMap.end()){
       for(imap = rttMap.lower_bound(hmpl2); imap !=rttMap.upper_bound(hmpl2); ++imap){
@@ -512,7 +512,7 @@ void InDet::TrackStatHelper::addEvent(const EventContext& ctx,
       bool matched = false;
       int nmatched = 0;
       
-      HepMcParticleLink hmpl2(particle,truth->second,HepMcParticleLink::IS_EVENTNUM); // FIXME truth->second is actually the position of the GenEvent in the McEventCollection!! See InDetRecStatisticsAlg::selectGenSignal(...) method (only client of TrackStatsHelper)
+      HepMcParticleLink hmpl2(particle,truth->second,HepMcParticleLink::IS_EVENTNUM, ctx); // FIXME truth->second is actually the position of the GenEvent in the McEventCollection!! See InDetRecStatisticsAlg::selectGenSignal(...) method (only client of TrackStatsHelper)
       recoToTruthMap::iterator rttIter=rttMap.find(hmpl2);
       if(rttIter != rttMap.end()){
 	for(imap = rttMap.lower_bound(hmpl2); imap !=rttMap.upper_bound(hmpl2); ++imap){

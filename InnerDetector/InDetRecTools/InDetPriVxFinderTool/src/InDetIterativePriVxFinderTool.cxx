@@ -146,7 +146,7 @@ InDetIterativePriVxFinderTool::findVertex(const EventContext& ctx,
       ElementLink<TrackCollection> link;
       link.setElement(*itr);
       Trk::LinkToTrack* linkTT = new Trk::LinkToTrack(link);
-      linkTT->setStorableObject(*trackTES);
+      linkTT->setStorableObject(*trackTES, ctx);
       selectedTracks.push_back(linkTT);
     }
   }
@@ -205,7 +205,7 @@ InDetIterativePriVxFinderTool::findVertex(
       link.setElement(*itr);
       Trk::LinkToXAODTrackParticle* linkTT =
         new Trk::LinkToXAODTrackParticle(link);
-      linkTT->setStorableObject(*trackParticles);
+      linkTT->setStorableObject(*trackParticles, ctx);
       selectedTracks.push_back(linkTT);
     }
   }
