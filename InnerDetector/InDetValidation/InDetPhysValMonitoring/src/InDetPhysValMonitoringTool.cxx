@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -225,6 +225,8 @@ InDetRttPlotConfig InDetPhysValMonitoringTool::getFilledPlotConfig() const{
 
   rttConfig.doDuplicatePlots = m_doDuplicatePlots;
   rttConfig.doTechEffPlots = m_fillTechnicalEfficiency;
+
+  rttConfig.doVertexTrackPlots = m_doVertexTrackPlots;
 
   /// turn off truth if none is present
   if (m_truthParticleName.key().empty()){

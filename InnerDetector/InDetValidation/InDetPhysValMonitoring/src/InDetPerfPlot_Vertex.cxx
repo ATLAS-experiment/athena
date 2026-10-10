@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,8 +21,11 @@
 using namespace IDPVM;
 
 
-InDetPerfPlot_Vertex::InDetPerfPlot_Vertex(InDetPlotBase* pParent, const std::string& sDir, bool isITk) :
-  InDetPlotBase(pParent, sDir), m_isITk(isITk) {
+InDetPerfPlot_Vertex::InDetPerfPlot_Vertex
+(InDetPlotBase* pParent, const std::string& sDir,
+ bool isITk, bool doTrackVertexPlots) :
+  InDetPlotBase(pParent, sDir), m_isITk(isITk),
+  m_doTrackVertexPlots(doTrackVertexPlots) {
   // nop
 }
 
@@ -44,9 +47,7 @@ InDetPerfPlot_Vertex::initializePlots() {
   book(m_vx_nTracks,"vx_nTracks");
   book(m_vx_track_weights,"vx_track_weights");
 
-
-
-  if (m_iDetailLevel >= 100) {
+  if (m_doTrackVertexPlots) {
     book(m_vx_track_pt,"vx_track_pt");
     book(m_vx_track_eta,"vx_track_eta");
     book(m_vx_track_nSiHits,"vx_track_nSiHits");
@@ -106,7 +107,7 @@ InDetPerfPlot_Vertex::fill(const xAOD::Vertex& vertex, float weight) {
   }
 
   // fill expert plots: tracks properties at vertex
-  if (m_iDetailLevel >= 100) {
+  if (m_doTrackVertexPlots) {
     // loop over tracks at vertex
     for (const auto& elTrk : vertex.trackParticleLinks()) {
       /// This should not be run on formats with a slimmed track record.

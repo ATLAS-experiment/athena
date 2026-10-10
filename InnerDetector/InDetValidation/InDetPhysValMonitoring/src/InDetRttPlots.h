@@ -78,7 +78,8 @@ struct InDetRttPlotConfig{
   bool doHitsMatchedTracksPlots{true};
 
   /// Vertexing plots - no truth requirement 
-  bool doVertexPlots{true}; 
+  bool doVertexPlots{true};
+  bool doVertexTrackPlots{true};
   bool doVerticesVsMuPlots{true}; 
   bool doHardScatterVertexPlots{true}; 
 
