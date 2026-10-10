@@ -137,21 +137,38 @@ StatusCode GbtsTrainingAlg::execute(const EventContext& ctx) const {
   ATH_CHECK(m_truthTrackBuilderTool->buildTruthTracks(ctx, truthTracks));
 
   for (auto& [truthParticle, truthClusters] : truthTracks) {
-    // add cluster positions to hits to be passed into layer connection tool
-    std::vector<Acts::Experimental::GbtsLayerConnectionTool::HitCoordinates>
-        hits{};
+    // find the GBTS layer of each cluster; a cluster without a layer splits
+    // the track, so that no transition skips over it
+    std::vector<std::vector<Acts::Experimental::GbtsExperimentLayerId>>
+        segments(1);
     for (const auto& cluster : truthClusters) {
 
       const float r =
           std::hypot(cluster.globalPosition.x(), cluster.globalPosition.y());
+      const float z = cluster.globalPosition.z();
 
-      hits.push_back({r, cluster.globalPosition.z()});
+      const auto gbtsId = findGbtsIdByCoord(r, z);
+      if (!gbtsId) {
+        ATH_MSG_WARNING("No Gbts Layer for coordinates with r: "
+                        << r << " and z: " << z);
+        if (!segments.back().empty()) {
+          segments.emplace_back();
+        }
+        continue;
+      }
+
+      segments.back().push_back(*gbtsId);
     }
 
-    // add track to training algorithm
+    // add track segments to training algorithm
     {
       std::lock_guard<std::mutex> lock(m_gbtsTrainingToolMutex);
-      m_layerConnectionTool->addTrack(hits);
+      for (const auto& segment : segments) {
+        if (segment.size() < 2) {
+          continue;
+        }
+        m_layerConnectionTool->addTrack(segment);
+      }
     }
   }
 
@@ -178,9 +195,21 @@ void GbtsTrainingAlg::applyConfiguration() {
 
   m_config.doSymmetrization = m_doSymmetrization;
   m_config.probThreshold = m_probThreshold;
-  m_config.rMaxTol = m_rMaxTol;
-  m_config.rMinTol = m_rMinTol;
-  m_config.zMaxTol = m_zMaxTol;
-  m_config.zMinTol = m_zMinTol;
+}
+
+std::optional<Acts::Experimental::GbtsExperimentLayerId>
+GbtsTrainingAlg::findGbtsIdByCoord(const float r, const float z) const {
+  for (const auto& layer : m_config.detectorGeometry) {
+    const float zMin = layer.minZ - m_zMinTol;
+    const float zMax = layer.maxZ + m_zMaxTol;
+    const float rMin = layer.minR - m_rMinTol;
+    const float rMax = layer.maxR + m_rMaxTol;
+
+    if (zMin <= z && z <= zMax && rMin <= r && r <= rMax) {
+      return layer.gbtsId;
+    }
+  }
+
+  return std::nullopt;
 }
 }  // namespace ActsTrk
