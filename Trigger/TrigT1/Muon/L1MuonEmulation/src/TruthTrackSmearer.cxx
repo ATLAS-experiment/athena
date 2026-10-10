@@ -19,7 +19,7 @@ double TruthTrackSmearer::effFunc(double pt) const {
   return (pt < 3000.) ? m_efficiencyMap[0] : m_efficiencyMap[1];
 }
   
-bool TruthTrackSmearer::emulateL0MuonTrack(double curv, float eta, float phi, L0MuonTrack& otrack) const {
+bool TruthTrackSmearer::emulateL1MuonTrack(double curv, float eta, float phi, L1MuonTrack& otrack) const {
   // input curv(q/pT) is in MeV
   CLHEP::HepRandomEngine* engine = m_rngWrapper->getEngine(Gaudi::Hive::currentContext());
 

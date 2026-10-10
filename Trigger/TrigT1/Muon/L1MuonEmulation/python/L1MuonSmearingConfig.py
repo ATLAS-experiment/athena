@@ -5,11 +5,11 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaCommon.Logging import logging
 _log = logging.getLogger(__name__)
 
-def L0MuonSmearingCfg(flags, name = "L0MuonSmearingAlg", **kwargs):
+def L1MuonSmearingCfg(flags, name = "L1MuonSmearingAlg", **kwargs):
 
     result = ComponentAccumulator()
 
-    alg = CompFactory.L1Muon.L0MuonSmearingAlg(name = name,
+    alg = CompFactory.L1Muon.L1MuonSmearingAlg(name = name,
                                                **kwargs)
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
@@ -60,8 +60,8 @@ if __name__ == "__main__":
     acc.merge(PoolReadCfg(flags))
 
     # example to smear the truth particles 
-    smearerTruth = L0MuonSmearingCfg(flags,
-                                     name = "L0MuonTruthSmearing",
+    smearerTruth = L1MuonSmearingCfg(flags,
+                                     name = "L1MuonTruthSmearing",
                                      InputTruthParticle = "TruthParticles",
                                      OutputLevel = DEBUG)
     acc.merge(smearerTruth)

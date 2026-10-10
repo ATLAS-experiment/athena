@@ -10,7 +10,7 @@
 
 #include "AthenaKernel/RNGWrapper.h"
 
-#include "L0MuonTrack.h"
+#include "L1MuonTrack.h"
 
 namespace L1Muon {
 
@@ -24,7 +24,7 @@ class TruthTrackSmearer {
 
   double effFunc(double pt) const;
 
-  bool emulateL0MuonTrack(double curv, float eta, float phi, L0MuonTrack& otrack) const;
+  bool emulateL1MuonTrack(double curv, float eta, float phi, L1MuonTrack& otrack) const;
 
  private:
   ATHRNG::RNGWrapper* m_rngWrapper;
