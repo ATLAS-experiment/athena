@@ -56,20 +56,20 @@ class MuonPhaseIITestDefaults:
     ###
 
     ### R3 ATLAS layout
-    GEODB_R3 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00.db"
+    GEODB_R3 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeometryDB/ATLAS-R3S-2021-03-02-00.db"
     ### R3 MS only layout
-    GEODB_R3MSOnly = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00_MSOnly.db"
+    GEODB_R3MSOnly = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeometryDB/ATLAS-R3S-2021-03-02-00_MSOnly.db"
     ### R3 MTech format - This file format will trigger the setup of the legacy MuonGeoModel and
     ###                   not of the Phase II software    
-    GEODB_MTECH = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-R3S-2021-03-02-00_MTech.db"
+    GEODB_MTECH = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeometryDB/ATLAS-R3S-2021-03-02-00_MTech.db"
     ### R4 ATLAS layout
-    GEODB_R4 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00.db"
+    GEODB_R4 = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeometryDB/ATLAS-P2-RUN4-01-00-00.db"
     ### R4 MS only layout
-    GEODB_R4MSOnly = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00_MSOnly.db"
+    GEODB_R4MSOnly = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeometryDB/ATLAS-P2-RUN4-01-00-00_MSOnly.db"
     ### ITk + Calo + R3-MS ATLAS layout
-    GEODB_ITk_R3MS = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00_R3MS.db"
+    GEODB_ITk_R3MS = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeometryDB/ATLAS-P2-RUN4-01-00-00_R3MS.db"
     #### Only the passive material
-    GEODB_TOROID = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/MUON_TOROID.db"
+    GEODB_TOROID = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeometryDB/MUON_TOROID.db"
 
     ### Tracking geometry material map
     TRKGEO_MATERIALMAP = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/material-maps.root"

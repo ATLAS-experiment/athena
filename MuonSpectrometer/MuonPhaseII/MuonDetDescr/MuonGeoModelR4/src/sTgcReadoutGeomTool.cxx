@@ -37,10 +37,10 @@ sTgcReadoutGeomTool::sTgcShape sTgcReadoutGeomTool::extractParameters(const GeoS
     sTgcShape result{};
     if (shape->typeID() == GeoTrd::getClassTypeID()) {
         const GeoTrd* trd = static_cast<const GeoTrd*>(shape);
-        result.longWidth = trd->getXHalfLength1();
-        result.shortWidth =  trd->getXHalfLength2();      
-        result.halfHeight =  trd->getYHalfLength1();
-        result.thickness =  trd->getZHalfLength();
+        result.longWidth = trd->getYHalfLength2();
+        result.shortWidth =  trd->getYHalfLength1();      
+        result.halfHeight =  trd->getZHalfLength();
+        result.thickness =  trd->getXHalfLength1();
     } else if (shape->typeID() == GeoSimplePolygonBrep::getClassTypeID()) {
         const GeoSimplePolygonBrep* poly = static_cast<const GeoSimplePolygonBrep*>(shape);
         std::vector<Amg::Vector2D> polyEdges = m_geoUtilTool->polygonEdges(*poly);
