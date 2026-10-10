@@ -238,7 +238,7 @@ StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
             std::vector<unsigned short> svec;
             svec.resize(electPath.electInd+1);
             svec[electPath.electInd]=electPath.pathologyType;
-            hasPathologyEM[index]=svec;
+            hasPathologyEM[index]=std::move(svec);
           }
         }
       }
@@ -254,7 +254,7 @@ StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
             std::vector<unsigned short> svec;
             svec.resize(electPath.electInd+1);
             svec[electPath.electInd]=electPath.pathologyType;
-            hasPathologyHEC[index]=svec;
+            hasPathologyHEC[index]=std::move(svec);
           }
         }
       }
@@ -270,7 +270,7 @@ StatusCode LArHVCondAlg::makeHVScaleCorr (const EventContext& ctx,
             std::vector<unsigned short> svec;
             svec.resize(electPath.electInd+1);
             svec[electPath.electInd]=electPath.pathologyType;
-            hasPathologyFCAL[index]=svec;
+            hasPathologyFCAL[index]=std::move(svec);
           }
  
         }
@@ -978,7 +978,7 @@ StatusCode LArHVCondAlg::searchNonNominalHV_EMB(CaloAffectedRegionInfoVec *vAffe
           for (unsigned int iEta=hvManager_EMBPS.beginEtaIndex();iEta<hvManager_EMBPS.endEtaIndex();iEta++) { //0 to 7
             const EMBPresamplerHVModule& hvMod = hvManager_EMBPS.getHVModule(iSide,iEta,iPhi);
             ATH_MSG_VERBOSE("iSide,iPhi,iEta " << iSide << " " << iPhi << " " << iEta);
-            double hv[2];
+            double hv[2]{};
             for (int iGap=0;iGap<2;iGap++) {
 	      unsigned int hvline = hvMod.hvLineNo(iGap,hvCabling);
 	      auto hvIt=voltage.find(hvline);
@@ -1054,7 +1054,7 @@ StatusCode LArHVCondAlg::searchNonNominalHV_EMEC_OUTER(CaloAffectedRegionInfoVec
 	    for (unsigned int ielec=0;ielec<hvMod.getNumElectrodes();ielec++) { //use hvMod->getNumElectrodes when bug is corrected
 	      const EMECHVElectrode& electrode = hvMod.getElectrode(ielec);
 
-	      double hv[2];
+	      double hv[2]{};
 	      for (unsigned int iGap=0;iGap<2;iGap++) { //EMEC : 2 gaps, TRY TO FIND AUTOMATICALLY NB OF GAPS
 		unsigned int hvline = electrode.hvLineNo(iGap,hvCabling);
 		auto hvIt=voltage.find(hvline);
@@ -1143,7 +1143,7 @@ StatusCode LArHVCondAlg::searchNonNominalHV_EMEC_OUTER(CaloAffectedRegionInfoVec
     for (unsigned int iSide=hvManager_EMECPS.beginSideIndex();iSide<hvManager_EMECPS.endSideIndex();iSide++) { // loop over HV modules
       for (unsigned int iPhi=hvManager_EMECPS.beginPhiIndex();iPhi<hvManager_EMECPS.endPhiIndex();iPhi++) {
             const EMECPresamplerHVModule& hvMod = hvManager_EMECPS.getHVModule(iSide,iPhi);
-            double hv[2];
+            double hv[2]{};
             for (int iGap=0;iGap<2;iGap++) {
 	      unsigned int hvline = hvMod.hvLineNo(iGap,hvCabling);
 	      auto hvIt=voltage.find(hvline);
@@ -1217,7 +1217,7 @@ StatusCode LArHVCondAlg::searchNonNominalHV_EMEC_INNER(CaloAffectedRegionInfoVec
 	    for (unsigned int ielec=0;ielec<hvMod.getNumElectrodes();ielec++) { 
 	      const EMECHVElectrode& electrode = hvMod.getElectrode(ielec);
 
-	      double hv[2];
+	      double hv[2]{};
 	      for (unsigned int iGap=0;iGap<2;iGap++) { 
 		unsigned int hvline = electrode.hvLineNo(iGap,hvCabling);
 		auto hvIt=voltage.find(hvline);
