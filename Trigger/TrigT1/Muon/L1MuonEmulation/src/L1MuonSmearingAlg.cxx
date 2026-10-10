@@ -2,7 +2,7 @@
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
  
-#include "L0MuonSmearingAlg.h"
+#include "L1MuonSmearingAlg.h"
 
 #include "xAODTrigger/MuonRoIAuxContainer.h"
 
@@ -15,14 +15,14 @@
 
 namespace L1Muon {
 
-L0MuonSmearingAlg::L0MuonSmearingAlg(const std::string& name, ISvcLocator* pSvcLocator)
+L1MuonSmearingAlg::L1MuonSmearingAlg(const std::string& name, ISvcLocator* pSvcLocator)
 : AthReentrantAlgorithm(name, pSvcLocator) {}
 
 
-L0MuonSmearingAlg::~L0MuonSmearingAlg() {}
+L1MuonSmearingAlg::~L1MuonSmearingAlg() {}
 
 
-StatusCode L0MuonSmearingAlg::initialize() {
+StatusCode L1MuonSmearingAlg::initialize() {
   ATH_MSG_INFO("Initializing " << name() << "...");
 
   ATH_CHECK(m_inputTruthParticleKey.initialize());
@@ -30,10 +30,10 @@ StatusCode L0MuonSmearingAlg::initialize() {
 
   ATH_CHECK(m_rndmSvc.retrieve());
 
-  ATH_MSG_INFO("########## L0MuonSmearingAlg Configurations are ########## ");
+  ATH_MSG_INFO("########## L1MuonSmearingAlg Configurations are ########## ");
   ATH_MSG_INFO("------- InputTruthParticleKey: " << m_inputTruthParticleKey.key());
   ATH_MSG_INFO("------- OutputMuonRoIKey: "<< m_outputMuonRoIKey.key());
-  ATH_MSG_INFO("########## L0MuonSmearingAlg Configurations: That's it. ########## ");
+  ATH_MSG_INFO("########## L1MuonSmearingAlg Configurations: That's it. ########## ");
 
   // configure the Smearer
   ATHRNG::RNGWrapper* rngWrapper = m_rndmSvc->getEngine(this);
@@ -44,13 +44,13 @@ StatusCode L0MuonSmearingAlg::initialize() {
 }
 
 
-StatusCode L0MuonSmearingAlg::finalize() {
+StatusCode L1MuonSmearingAlg::finalize() {
   ATH_MSG_INFO ("Finalizing " << name() << "...");
   return StatusCode::SUCCESS;
 }
 
 
-StatusCode L0MuonSmearingAlg::execute(const EventContext& ctx) const {
+StatusCode L1MuonSmearingAlg::execute(const EventContext& ctx) const {
   ATH_MSG_DEBUG ("Executing " << name() << "...");
 
   SG::ReadHandle<xAOD::TruthParticleContainer> inputTruth_handle(m_inputTruthParticleKey, ctx);
@@ -95,8 +95,8 @@ StatusCode L0MuonSmearingAlg::execute(const EventContext& ctx) const {
     }
 
 	  float qoverPt = part->charge() / part->pt();   // in MeV
-    L0MuonTrack otrack;
-    if (m_mySmearer->emulateL0MuonTrack(qoverPt, part->eta(), part->phi(), otrack) == false) {   // smearing here
+    L1MuonTrack otrack;
+    if (m_mySmearer->emulateL1MuonTrack(qoverPt, part->eta(), part->phi(), otrack) == false) {   // smearing here
       ATH_MSG_DEBUG("Killed by the efficiency: q/pt=" << qoverPt * 1000. << " (1/GeV)");
       continue;   // false means the truth muon is killed by the emulated efficiency
     }
@@ -142,10 +142,10 @@ StatusCode L0MuonSmearingAlg::execute(const EventContext& ctx) const {
     float thrvalue = static_cast<float>(((ptword>>1) + 0x2) & 0xf);
     outputRoIs->back()->initialize(roiword, roi_eta, roi_phi, emu_thr_name, thrvalue, extraword);
     if (outputRoIs->back()->pt() == 0.){
-      ATH_MSG_WARNING("L0MuonRoI: pT = 0");
+      ATH_MSG_WARNING("L1MuonRoI: pT = 0");
       continue;
     }
-    ATH_MSG_DEBUG("L0MuonRoI: phi = " << roi_phi << " (0x" << std::hex << phiword << std::dec << "), "
+    ATH_MSG_DEBUG("L1MuonRoI: phi = " << roi_phi << " (0x" << std::hex << phiword << std::dec << "), "
                       << "eta = " << roi_eta << " (0x" << std::hex << etaword << std::dec << "), "
                       << "pT = " << outputRoIs->back()->pt() << " (GeV) (0x" << std::hex << ptword << std::dec << "), "
                       << "q/pT= " << ((otrack.invpt() > 0) ? 1. : -1.) / outputRoIs->back()->pt());

@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L1MUONEMULATION_L0MUONSMEARINGALG_H
-#define L1MUONEMULATION_L0MUONSMEARINGALG_H
+#ifndef L1MUONEMULATION_L1MUONSMEARINGALG_H
+#define L1MUONEMULATION_L1MUONSMEARINGALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
@@ -16,10 +16,10 @@ namespace L1Muon {
 
 class TruthTrackSmearer;
 
-class L0MuonSmearingAlg: public ::AthReentrantAlgorithm { 
- public: 
-  L0MuonSmearingAlg(const std::string& name, ISvcLocator* pSvcLocator);
-  virtual ~L0MuonSmearingAlg();
+class L1MuonSmearingAlg: public ::AthReentrantAlgorithm {
+ public:
+  L1MuonSmearingAlg(const std::string& name, ISvcLocator* pSvcLocator);
+  virtual ~L1MuonSmearingAlg();
 
   virtual StatusCode  initialize() override;
   virtual StatusCode  execute(const EventContext& ctx) const override;
@@ -40,5 +40,5 @@ class L0MuonSmearingAlg: public ::AthReentrantAlgorithm {
 
 }   // end of namespace
 
-#endif  // L1MUONEMULATION_L0MUONSMEARINGALG_H
+#endif  // L1MUONEMULATION_L1MUONSMEARINGALG_H
 
