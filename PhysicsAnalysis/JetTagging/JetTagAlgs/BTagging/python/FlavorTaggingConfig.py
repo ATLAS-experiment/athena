@@ -16,7 +16,6 @@ from FlavorTagInference.FlavorTagNNConfig import (
     getFlipConfigs,
     resolveTaggerName,
 )
-from JetTagTools.JetFitterVariablesFactoryConfig import JetFitterVariablesFactoryCfg
 from BTagging.JetSecVtxFindingAlgConfig import JetSecVtxFindingAlgCfg
 from BTagging.JetSecVertexingAlgConfig import JetSecVertexingAlgCfg
 from JetTagDerivationUtils.CalibratedCopyTaggingConfig import (
@@ -394,8 +393,6 @@ def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssoci
     OutputFilesSVname = "SecVtx"
     OutputFilesSVFlipname = 'SecVtxFlip'
 
-    jetFitterVF = acc.popToolsAndMerge(JetFitterVariablesFactoryCfg('JFVarFactory'))
-
     VxSecVertexInfoNameList = []
 
     for sv in SecVertexers:
@@ -430,7 +427,6 @@ def JetTagVertexDecoratorCfg(flags, pv_col, jet, trackCollection, JetTrackAssoci
     }
     options.setdefault('SecVtxFinderxAODBaseNameList', secVtxFinderxAODBaseNameList)
     options.setdefault('vxPrimaryCollectionName', pv_col)
-    options.setdefault('JetFitterVariableFactory', jetFitterVF)
     options['JetSecVtxLinkName'] = jet + '.' + OutputFilesSVname
     options['JetCollectionName'] = jet
     options['TrackCollectionName'] = trackCollection

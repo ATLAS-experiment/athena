@@ -2,16 +2,16 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "JetTagTools/VertexSignificance.h"
+#include "SecVertexSignificance.h"
 
 #include <algorithm>
 #include <cmath>
 
 namespace Analysis {
 
-  double get3DSignificance(const xAOD::Vertex& priVertex,
-                           const std::vector<const xAOD::Vertex*>& secVertex,
-                           const Amg::Vector3D& jetDirection) {
+  double signedDecayLengthSignificance(const xAOD::Vertex& priVertex,
+                                       const std::vector<const xAOD::Vertex*>& secVertex,
+                                       const Amg::Vector3D& jetDirection) {
 
     std::vector<Amg::Vector3D> positions;
     std::vector<AmgSymMatrix(3)> weightMatrices;
@@ -58,9 +58,9 @@ namespace Analysis {
     return decaylength_significance;
   }
 
-  double get3DSignificanceCorr(const xAOD::Vertex& priVertex,
-                               const std::vector<const xAOD::Vertex*>& secVertex,
-                               const Amg::Vector3D& jetDirection) {
+  double maxSignedDecayLengthSignificance(const xAOD::Vertex& priVertex,
+                                          const std::vector<const xAOD::Vertex*>& secVertex,
+                                          const Amg::Vector3D& jetDirection) {
 
     std::vector<double> Sig3D(0);
     bool success=true;
