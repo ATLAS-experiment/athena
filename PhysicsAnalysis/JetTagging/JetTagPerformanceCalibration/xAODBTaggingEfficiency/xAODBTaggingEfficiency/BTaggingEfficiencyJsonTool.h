@@ -40,12 +40,22 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   Gaudi::Property<std::string> m_json_config_path {this, "JsonConfigFile", "", "Path to JSON config file"};
   Gaudi::Property<std::string> m_mcGenerator {this, "MCGenerator", "", "Name of the MC generator of the sample being processed (required for MC-MC scale factor)"};
 
+  // In the initialize function the min pT is converted into GeV as in the JSON files numbers are in GeV 
   Gaudi::Property<float> m_minPt {this, "MinPt", -1 /*MeV*/, "Minimum jet pT cut (in MeV)"};
   Gaudi::Property<float> m_maxEta {this, "MaxEta", 2.5, "Maximum jet eta cut"};
  
   json m_json_config;
   std::map<int, std::string> m_labelMap;
   std::map<int, std::string> m_labelMapMCMC;
+
+  // enumaration class to assign integers to different binning variables to speed up the tools performance
+  enum class varType {
+    unknown,
+    pT,
+    mass,  
+    eta,
+    abseta
+  };
 
   // Parent class of all handlers defined by an N-dimensional bins
   // i.e. a set of [low, high) bounds for a list of jet variables (e.g. pT, mass, abseta)
@@ -60,7 +70,7 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
       // NB: it's possible to pass all additional information with only one extra value that is itself 
       // a JSON list and can hold several fields e.g. the SF and its uncertainties.
       // varNames={"pT", "mass"}, nExtraValues=1 and entry = [[250, 500], [50, 100], {"SF": 0.9, "SF_uncert_1": 0.1, "SF_uncert_2": 0.03}]
-      BoundsHandler(const json& jsonConfig, const std::vector<std::string>& varNames, const size_t nExtraValues=1);
+      BoundsHandler(const json& jsonConfig, const std::vector<varType>& vTypes, const size_t nExtraValues=1);
       // Prevent handler from being copied forcing passing them by (const) references or using pointers
       // It ensures that the code is efficient memory wise as no duplicate can be created
       // The handlers should only be stored in vectors or maps and used directly basically
@@ -126,13 +136,12 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
         bool operator==(const BoundsHandler& o) const { return !(*this < o) && !(*this > o); }
         bool operator!=(const BoundsHandler& o) const { return !(*this == o); }
 
-        std::map<std::string,  varBounds> m_varBinBounds;
+        std::map<varType, varBounds> m_varBinBounds;
   };
 
   class MCMCHandler : public BoundsHandler {
     public:
-      MCMCHandler(const json& jsonConfig, const std::vector<std::string>& varNames);
-      virtual ~MCMCHandler() = default;
+      MCMCHandler(const json& jsonConfig, const std::vector<varType>& vTypes);
       // Prevent handler from being copied forcing passing them by (const) references or using pointers.
       // It ensures that the code is efficient memory wise as no duplicate can be created 
       // The handlers should only be stored in vectors or maps and used directly basically 
@@ -180,9 +189,11 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   StatusCode calcSystematicVariation(const CP::SystematicSet& systConfig, sysData& mySys ) const;
   float getSFSys ( const std::string& label, size_t bin_index) const;
   CP::CorrectionCode getMCToMCCorr( const xAOD::Jet& jet, float& corr) const;
-  float getJetPt( const xAOD::Jet& jet ) const;
-  float getJetMass( const xAOD::Jet& jet ) const;
-  float getJetQuantity( const xAOD::Jet& jet, const std::string &varName ) const;
+  static std::string getVariableName(const varType vType);
+  static varType getVariableType(const std::string& varName);
+  float getJetPtInGeV( const xAOD::Jet& jet ) const;
+  float getJetMassInGeV( const xAOD::Jet& jet ) const;
+  float getJetQuantity( const xAOD::Jet& jet, const varType vType ) const;
 };
 
 #endif

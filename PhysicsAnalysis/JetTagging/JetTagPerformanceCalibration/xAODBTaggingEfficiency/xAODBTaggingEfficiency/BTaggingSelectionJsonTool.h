@@ -29,6 +29,7 @@ public:
 
 private:
   bool m_initialised = false;
+  // In the initialize function the min pT is converted into GeV as in the JSON files numbers are in GeV 
   Gaudi::Property<float> m_minPt {this, "MinPt", -1 /*MeV*/, "Minimum jet pT cut (in MeV)"};
   Gaudi::Property<float> m_maxEta {this, "MaxEta", 2.5, "Maximum jet eta cut"};
   
@@ -76,8 +77,8 @@ private:
   std::vector<FractionAccessor> loadFractionValues(const json &meta) const;
   double getTaggerDiscriminantInternal(const xAOD::Jet& jet, const std::vector<FractionAccessor>& fractionAccessors) const;
   int findBin(const std::vector<float>& bins, float value) const;
-  float getJetMass(const xAOD::Jet& jet) const;
-  float getJetPt(const xAOD::Jet& jet) const;
+  float getJetMassInGeV(const xAOD::Jet& jet) const;
+  float getJetPtInGeV(const xAOD::Jet& jet) const;
 };
 
 #endif // CPBTAGGINGSELECTIONJSONTOOL_H
