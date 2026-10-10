@@ -128,6 +128,33 @@ else()
 			PROPERTIES TIMEOUT 900 )
     endif()
 
+    # tests that should not run in AthGeneration, AthSimulation
+    if( NOT GENERATIONBASE AND NOT SIMULATIONBASE )
+        atlas_add_test( filter_files_daod_physlite_run3_data
+                        SCRIPT test/filter_files_daod_physlite_run3_data.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                        LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                        PRIVATE_WORKING_DIRECTORY
+                        PROPERTIES TIMEOUT 900 )
+
+        atlas_add_test( filter_files_daod_physlite_run3_mc
+                        SCRIPT test/filter_files_daod_physlite_run3_mc.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                        LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                        PRIVATE_WORKING_DIRECTORY
+                        PROPERTIES TIMEOUT 900 )
+
+        atlas_add_test( filter_files_daod_phys_run3_data
+                        SCRIPT test/filter_files_daod_phys_run3_data.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                        LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                        PRIVATE_WORKING_DIRECTORY
+                        PROPERTIES TIMEOUT 900 )
+
+        atlas_add_test( filter_files_daod_phys_run3_mc
+                        SCRIPT test/filter_files_daod_phys_run3_mc.sh "${CMAKE_CURRENT_SOURCE_DIR}"
+                        LOG_SELECT_PATTERN "^[0-9]+ [0-9]+$"
+                        PRIVATE_WORKING_DIRECTORY
+                        PROPERTIES TIMEOUT 900 )
+    endif()
+
     # Create python package dependencies in release building mode.
     # Used as input for `acmd.py cmake depends`:
     if( NOT "${CMAKE_PROJECT_NAME}" STREQUAL "WorkDir" )
