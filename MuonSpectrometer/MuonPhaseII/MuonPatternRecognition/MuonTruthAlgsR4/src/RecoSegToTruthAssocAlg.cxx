@@ -72,11 +72,11 @@ namespace MuonR4 {
                 continue;
             }
             ATH_MSG_DEBUG("Found a matching candidate with "<<bestCount<<"/ "<<matchMe.hits.size()<<" hits.");
-            dec_truthSegLink(*matchMe.segment) = SegLink_t{truthSegments, bestMatch->index()};
+            dec_truthSegLink(*matchMe.segment) = SegLink_t{m_truthSegKey.key(), bestMatch->index(), ctx};
             const xAOD::TruthParticle* truthPart = getTruthMatchedParticle(*bestMatch);
             if (truthPart) {
                 const auto* truthCont = static_cast<const xAOD::TruthParticleContainer*>(truthPart->container());
-                dec_truthLink(*matchMe.segment) = TruthLink_t(truthCont, truthPart->index());
+                dec_truthLink(*matchMe.segment) = TruthLink_t(*truthCont, truthPart->index(), ctx);
             }
         }
         return StatusCode::SUCCESS;

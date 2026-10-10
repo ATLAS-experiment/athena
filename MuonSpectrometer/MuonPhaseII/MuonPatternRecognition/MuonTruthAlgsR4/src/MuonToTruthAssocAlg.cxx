@@ -14,11 +14,12 @@
 using Link_t = ElementLink<xAOD::TruthParticleContainer>;
 
 namespace {
-    Link_t createLink(const xAOD::TruthParticle* truthPart) {
+    Link_t createLink(const xAOD::TruthParticle* truthPart,
+                      const EventContext& ctx) {
         if (!truthPart) {
             return Link_t{};
         }
-        return Link_t{static_cast<const xAOD::TruthParticleContainer*>(truthPart->container()), truthPart->index()};
+        return Link_t{*static_cast<const xAOD::TruthParticleContainer*>(truthPart->container()), truthPart->index(), ctx};
     }
 }
 
@@ -65,7 +66,7 @@ namespace MuonR4{
             if (idTrack != nullptr) {
                 const xAOD::TruthParticle* truth = xAOD::TruthHelpers::getTruthParticle(*idTrack);
                 truth = truthPartToMuonMap.insert(std::make_pair(truth, truth)).first->second;
-                truthLink = createLink(truth);
+                truthLink = createLink(truth, ctx);
                 if (truth != nullptr ){
                     continue;
                 }
@@ -88,7 +89,7 @@ namespace MuonR4{
             const auto* truth = std::ranges::max_element(counts, [](const auto& a, const auto& b){
                     return a.second < b.second;
             })->first;
-            truthLink = createLink(truth);
+            truthLink = createLink(truth, ctx);
         }
 
         return StatusCode::SUCCESS;
