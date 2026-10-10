@@ -126,14 +126,17 @@ def main(args = None):
     # Combine into payload specification
     payload_spec = chai.PayloadSpec(field_spec, channel_spec)
     print(f"  ✓ Payload specification created with {len(field_spec)} fields and {len(channel_spec)} channels")
-    
+
+    # This is the standard node description we want for this Tag entry
+    node_description='<timeStamp>time</timeStamp><addrHeader><address_header service_type="256" clid="40774348" /></addrHeader><typeName>AthenaAttributeList</typeName>'
+    # node_description = ""
     # Create the tag
     try:
         tag = db.create_tag(
             args.tag,                          # tag_name
             "Test tag for demonstrating tag management operations",  # description
             payload_spec,                           # payload_spec
-            "",                                     # node description
+            node_description,                       # node description
             chai.IovType.Time,                      # iov_type
             "crest-json-single-iov",                # object_type
             chai.Synchronization.All,               # synchronization

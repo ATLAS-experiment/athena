@@ -13,7 +13,7 @@ atlas_add_library( ITkPixelCablingLib
                    src/ITkPixelOnlineId.cxx src/ITkPixelCablingData.cxx
                    PUBLIC_HEADERS ITkPixelCabling
                    LINK_LIBRARIES AthenaKernel Identifier InDetReadoutGeometry PixelReadoutGeometryLib
-                   PRIVATE_LINK_LIBRARIES chai::chai)
+                   PRIVATE_LINK_LIBRARIES chai::chai AthenaPoolUtilities PersistentDataModel )
 
 
 
