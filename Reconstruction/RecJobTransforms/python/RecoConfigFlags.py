@@ -57,7 +57,7 @@ def createRecoConfigFlags():
     # Enable Combined (InDet+MS) Muon Reconstruction
     flags.addFlag("Reco.EnableCombinedMuon",
                   lambda prevFlags: prevFlags.Detector.EnableMuon and
-                  prevFlags.Reco.EnableTracking)
+                  prevFlags.Reco.EnableTracking and prevFlags.Muon.scheduleLegacyReco)
     # Enable TrackOverlay Reconstruction
     flags.addFlag("Reco.EnableTrackOverlay", lambda prevFlags: False)
     # Enable PFlow Reconstruction

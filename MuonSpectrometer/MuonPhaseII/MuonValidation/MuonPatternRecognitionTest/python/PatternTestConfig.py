@@ -75,7 +75,7 @@ def LegacyMuonRecoChainCfg(flags):
     #### Create the xAOD::Muon from the MSOE tracks
     from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCreatorAlgCfg
     result.merge(MuonCreatorAlgCfg(flags, TagMaps=[], CreateSAmuons = True, MakeClusters= False,  
-                                   ClusterContainerName=""))
+                                   ClusterContainerName="", MuonContainerLocation="MuonsLegacy"))
     ### Mimimi there's no calo... mimimimimi    
     result.getEventAlgo("MuonCreatorAlg").MuonCreatorTool.RequireMSOEforSA = False
 

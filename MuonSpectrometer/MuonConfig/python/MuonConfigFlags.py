@@ -87,9 +87,13 @@ def createMuonConfigFlags():
     try:
         from TrkConfig.TrkConfigFlags import TrackingComponent
         mcf.addFlag("Muon.scheduleActsReco", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup and \
-                            prevFlags.Tracking.recoChain[0] in [TrackingComponent.ActsChain , TrackingComponent.ActsLegacyChain ]) 
+                            prevFlags.Tracking.recoChain[0] in [TrackingComponent.ActsChain , TrackingComponent.ActsLegacyChain ])
     except ImportError:
         mcf.addFlag("Muon.scheduleActsReco", False)
+
+    #### If this flag is enabled, the legacy MS track reconstruction algorithms are scheduled. In phase II production jobs only the Acts based reconstruction should be sheduled, but for testing and validation purposes the legacy reconstruction can be enabled as well to run in parallel
+    # For now keep it true since several clients crash otherwise but should eventually be set to false if the Acts reco is scheduled.
+    mcf.addFlag("Muon.scheduleLegacyReco", lambda prevFlags: not prevFlags.Muon.scheduleActsReco)
 
     try:
         from ActsConfig.ActsConfigFlags import TrackFitterType

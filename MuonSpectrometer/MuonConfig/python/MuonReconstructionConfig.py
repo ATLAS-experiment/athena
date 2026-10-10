@@ -126,6 +126,13 @@ def StandaloneMuonOutputCfg(flags):
 
 
 def MuonReconstructionCfg(flags):
+    from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+    result = ComponentAccumulator()
+    if flags.Muon.scheduleActsReco:
+        from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
+        result.merge(MuonReconstructionConfig(flags))
+        if not flags.Muon.scheduleLegacyReco:
+            return result
     # https://gitlab.cern.ch/atlas/athena/blob/master/MuonSpectrometer/MuonReconstruction/MuonRecExample/python/MuonStandalone.py
     from MuonConfig.MuonPrepDataConvConfig import MuonPrepDataConvCfg
     from MuonConfig.MuonRecToolsConfig import MuonTrackScoringToolCfg
@@ -135,7 +142,7 @@ def MuonReconstructionCfg(flags):
     from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
 
     # Many components need these services, so setup once here.
-    result = MuonIdHelperSvcCfg(flags)
+    result.merge(MuonIdHelperSvcCfg(flags))
     result.merge(MuonEDMHelperSvcCfg(flags))
 
     # Now setup reconstruction steps
@@ -205,9 +212,6 @@ def MuonReconstructionCfg(flags):
     # Setup output
     if flags.Output.doWriteESD or flags.Output.doWriteAOD:
         result.merge(StandaloneMuonOutputCfg(flags))
-    if flags.Muon.scheduleActsReco:
-        from MuonConfig.ReconstructionConfigR4 import MuonReconstructionConfig
-        result.merge(MuonReconstructionConfig(flags))
     return result
 
 # Run with python -m MuonConfig.MuonReconstructionConfig

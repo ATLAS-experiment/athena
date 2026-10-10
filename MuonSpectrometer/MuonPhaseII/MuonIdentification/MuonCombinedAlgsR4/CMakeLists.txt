@@ -14,4 +14,7 @@ atlas_add_component( MuonCombinedAlgsR4
                                     FourMomUtils ActsCalibratorsLib
                                     MuonCombinedEvent
                                     )
+# Install files from the package:
+atlas_install_python_modules( python/*.py  )
+
 atlas_install_scripts(test/runR4_MuonCombRecoSPOTTest.sh)
