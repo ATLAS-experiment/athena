@@ -52,7 +52,7 @@ struct sTgcChamber{
     std::string design{};
 
     /// Transformation of the underlying Alignable node
-    Amg::Transform3D alignableTransform{Amg::Transform3D::Identity()};
+    Acts::Transform3 alignableTransform{Acts::Transform3::Identity()};
 
     /// Sorting operator to insert the object into std::set
     bool operator<(const sTgcChamber& other) const {
@@ -63,7 +63,7 @@ struct sTgcChamber{
     }
 
     /// Transformation of the underlying GeoModel element
-    Amg::Transform3D geoModelTransform{Amg::Transform3D::Identity()};
+    Acts::Transform3 geoModelTransform{Acts::Transform3::Identity()};
 
     ////Chamber Details
     unsigned int numLayers{0};
@@ -174,7 +174,7 @@ struct sTgcChamber{
         using chType_t = sTgcIdHelper::sTgcChannelTypes;
         chType_t chType{chType_t::Wire};
         /// @ transformation 
-        Amg::Transform3D transform{Amg::Transform3D::Identity()};
+        Acts::Transform3 transform{Acts::Transform3::Identity()};
         /// @brief Ordering operator
         bool operator<(const sTgcLayer& other) const {
             if (chType != other.chType) return chType < other.chType;
@@ -395,41 +395,7 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
 
     TTreeReaderValue<std::vector<uint8_t>> stripRotGasGap{treeReader, "stripRotGasGap"};
     
-    /// Local to Global wire Group Transformation
-    TTreeReaderValue<std::vector<float>> wireGroupRotCol1X{treeReader, "wireGroupRotLinearCol1X"};
-    TTreeReaderValue<std::vector<float>> wireGroupRotCol1Y{treeReader, "wireGroupRotLinearCol1Y"};
-    TTreeReaderValue<std::vector<float>> wireGroupRotCol1Z{treeReader, "wireGroupRotLinearCol1Z"};
-
-    TTreeReaderValue<std::vector<float>> wireGroupRotCol2X{treeReader, "wireGroupRotLinearCol2X"};
-    TTreeReaderValue<std::vector<float>> wireGroupRotCol2Y{treeReader, "wireGroupRotLinearCol2Y"};
-    TTreeReaderValue<std::vector<float>> wireGroupRotCol2Z{treeReader, "wireGroupRotLinearCol2Z"};
-
-    TTreeReaderValue<std::vector<float>> wireGroupRotCol3X{treeReader, "wireGroupRotLinearCol3X"};
-    TTreeReaderValue<std::vector<float>> wireGroupRotCol3Y{treeReader, "wireGroupRotLinearCol3Y"};
-    TTreeReaderValue<std::vector<float>> wireGroupRotCol3Z{treeReader, "wireGroupRotLinearCol3Z"};
-
-    TTreeReaderValue<std::vector<float>> wireGroupRotTransX{treeReader, "wireGroupRotTranslationX"};
-    TTreeReaderValue<std::vector<float>> wireGroupRotTransY{treeReader, "wireGroupRotTranslationY"};
-    TTreeReaderValue<std::vector<float>> wireGroupRotTransZ{treeReader, "wireGroupRotTranslationZ"};
-
     TTreeReaderValue<std::vector<uint8_t>> wireGroupRotGasGap{treeReader, "wireGroupRotGasGap"};
-
-    /// Local to Global pad Transformation
-    TTreeReaderValue<std::vector<float>> padRotCol1X{treeReader, "padRotLinearCol1X"};
-    TTreeReaderValue<std::vector<float>> padRotCol1Y{treeReader, "padRotLinearCol1Y"};
-    TTreeReaderValue<std::vector<float>> padRotCol1Z{treeReader, "padRotLinearCol1Z"};
-
-    TTreeReaderValue<std::vector<float>> padRotCol2X{treeReader, "padRotLinearCol2X"};
-    TTreeReaderValue<std::vector<float>> padRotCol2Y{treeReader, "padRotLinearCol2Y"};
-    TTreeReaderValue<std::vector<float>> padRotCol2Z{treeReader, "padRotLinearCol2Z"};
-
-    TTreeReaderValue<std::vector<float>> padRotCol3X{treeReader, "padRotLinearCol3X"};
-    TTreeReaderValue<std::vector<float>> padRotCol3Y{treeReader, "padRotLinearCol3Y"};
-    TTreeReaderValue<std::vector<float>> padRotCol3Z{treeReader, "padRotLinearCol3Z"};
-
-    TTreeReaderValue<std::vector<float>> padRotTransX{treeReader, "padRotTranslationX"};
-    TTreeReaderValue<std::vector<float>> padRotTransY{treeReader, "padRotTranslationY"};
-    TTreeReaderValue<std::vector<float>> padRotTransZ{treeReader, "padRotTranslationZ"};
 
     TTreeReaderValue<std::vector<uint8_t>> padRotGasGap{treeReader, "padRotGasGap"};
 
@@ -567,12 +533,6 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             sTgcChamber::sTgcLayer wireGroupLayer{};
             wireGroupLayer.chType = sTgcIdHelper::sTgcChannelTypes::Wire;
             wireGroupLayer.gasGap = (*wireGroupRotGasGap)[l];
-            Amg::RotationMatrix3D wireGroupRot{Amg::RotationMatrix3D::Identity()};
-            wireGroupRot.col(0) = Amg::Vector3D((*wireGroupRotCol1X)[l],(*wireGroupRotCol1Y)[l], (*wireGroupRotCol1Z)[l]);
-            wireGroupRot.col(1) = Amg::Vector3D((*wireGroupRotCol2X)[l],(*wireGroupRotCol2Y)[l], (*wireGroupRotCol2Z)[l]);
-            wireGroupRot.col(2) = Amg::Vector3D((*wireGroupRotCol3X)[l],(*wireGroupRotCol3Y)[l], (*wireGroupRotCol3Z)[l]);
-            Amg::Vector3D layTrans{(*wireGroupRotTransX)[l], (*wireGroupRotTransY)[l], (*wireGroupRotTransZ)[l]};
-            wireGroupLayer.transform = Amg::getTransformFromRotTransl(std::move(wireGroupRot), std::move(layTrans));
             newchamber.layers.insert(std::move(wireGroupLayer));
         }
 
@@ -580,12 +540,6 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
             sTgcChamber::sTgcLayer padLayer{};
             padLayer.chType = sTgcIdHelper::sTgcChannelTypes::Pad;
             padLayer.gasGap = (*padRotGasGap)[l];
-            Amg::RotationMatrix3D padRot{Amg::RotationMatrix3D::Identity()};
-            padRot.col(0) = Amg::Vector3D((*padRotCol1X)[l],(*padRotCol1Y)[l], (*padRotCol1Z)[l]);
-            padRot.col(1) = Amg::Vector3D((*padRotCol2X)[l],(*padRotCol2Y)[l], (*padRotCol2Z)[l]);
-            padRot.col(2) = Amg::Vector3D((*padRotCol3X)[l],(*padRotCol3Y)[l], (*padRotCol3Z)[l]);
-            Amg::Vector3D layTrans{(*padRotTransX)[l], (*padRotTransY)[l], (*padRotTransZ)[l]};
-            padLayer.transform = Amg::getTransformFromRotTransl(std::move(padRot), std::move(layTrans));
             newchamber.layers.insert(std::move(padLayer));
         }
 
@@ -602,11 +556,11 @@ std::set<sTgcChamber> readTreeDump(const std::string& inputFile) {
 }
 
 #define TEST_BASICPROP(attribute, propName) \
-    if (std::abs(1.*test.attribute - 1.*reference.attribute) > tolerance) {           \
-        std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": The chamber "<<reference   \
-                 <<" differs w.r.t "<<propName<<" "<< reference.attribute             \
-                 <<" (ref) vs. " <<test.attribute << " (test)" << std::endl;          \
-        chamberOkay = false;                                                          \
+    if (std::abs(1.*test.attribute - 1.*reference.attribute) > tolerance) {   \
+        std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": "<<reference       \
+                 <<" differs w.r.t "<<propName<<" "<< reference.attribute     \
+                 <<" (ref) vs. " <<test.attribute << " (test)" << std::endl;  \
+        chamberOkay = false;                                                  \
     }
 
 int main1( int argc, char** argv ) {
@@ -657,13 +611,19 @@ int main1( int argc, char** argv ) {
         bool chamberOkay = true;
         const sTgcChamber& test = {*test_itr};
 
-        const Amg::Transform3D alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
+        const Acts::Transform3 alignableDistort = test.alignableTransform.inverse()*(reference.alignableTransform );
         if (!Amg::doesNotDeform(alignableDistort) || alignableDistort.translation().mag() > tolerance) {
-            std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": The alignable nodes are at differnt places for  "
+            std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": The alignable nodes are at different places for  "
                      <<test<<". " <<Amg::toString(alignableDistort, true)<<std::endl;
             chamberOkay = false;
         }
-        
+
+        const Acts::Transform3 trfDistort = test.geoModelTransform.inverse()*(reference.geoModelTransform);
+         if (!Amg::doesNotDeform(trfDistort) || trfDistort.translation().mag() > tolerance) {
+            std::cerr<<"runsTgcGeoComparison() "<<__LINE__<<": The GeoModel transform nodes are at different places for  "
+                     <<test<<". " <<Amg::toString(trfDistort, true)<<std::endl;
+            chamberOkay = false;
+        }
         TEST_BASICPROP(numLayers, "number of gas gaps");
         TEST_BASICPROP(yCutout, "yCutout of the Chamber");
         TEST_BASICPROP(gasTck, "thickness of the gas gap");
@@ -699,7 +659,7 @@ int main1( int argc, char** argv ) {
                 continue;
             }
             const sTgcLayer& testLayer{*lay_itr};
-            const Amg::Transform3D layAlignment = refLayer.transform.inverse() *
+            const Acts::Transform3 layAlignment = refLayer.transform.inverse() *
                                                   testLayer.transform;
             ///Uncomment to dump the local to global layer transformation 
             if (false)
