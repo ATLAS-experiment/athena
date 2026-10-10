@@ -84,6 +84,10 @@ class OutputAnalysisConfig (ConfigBlock):
             info="default basket size for all branches in the output tree. "
             "If not set (the default), no basket size is configured and ROOT's "
             "default will be used.")
+        self.addOption ('RNTupleApproxZippedClusterSize', 0, type=int,
+            info="approximate target compressed cluster size in bytes for RNTuple output (0 = ROOT default).")
+        self.addOption ('RNTupleMaxUnzippedClusterSize', 32 * 1024 * 1024, type=int,
+            info="maximum uncompressed cluster size in bytes for RNTuple output, bounds the write buffer memory (0 = ROOT default).")
 
     def instanceName (self) :
         """Return the instance name for this block"""
@@ -323,10 +327,14 @@ class OutputAnalysisConfig (ConfigBlock):
             alg.RootStreamName = self.streamName
             alg.OutputStreamName = self.streamName
             alg.NonContainers = list(nonContainers)
+            alg.ApproxZippedClusterSize = self.RNTupleApproxZippedClusterSize
+            alg.MaxUnzippedClusterSize = self.RNTupleMaxUnzippedClusterSize
 
             branchList = list(allBranches)
             branchList.sort(key=self.branchSortOrder)
-            alg.Branches = branchList
+            branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
+            branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
+            alg.Branches = branchList_nosys + branchList_sys
 
             return
 

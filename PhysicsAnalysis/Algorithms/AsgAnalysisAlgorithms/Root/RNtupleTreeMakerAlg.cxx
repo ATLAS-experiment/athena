@@ -7,10 +7,54 @@
 
 // ROOT include(s):
 #include <TFile.h>
+#include <TROOT.h>
 
 // Gaudi/EventLoop include(s):
 #ifdef XAOD_STANDALONE
 #include "EventLoop/Worker.h"
+#else
+#include "Gaudi/Parsers/CommonParsers.h"
+#endif
+
+#ifndef XAOD_STANDALONE
+namespace
+{
+
+TFile *fileForStream(const std::vector<std::string> &outputs,
+                     const std::string &stream)
+{
+    std::string fileName;
+    for (const std::string &entry : outputs) {
+        const auto pos = entry.find_first_of(" \t");
+        if (entry.substr(0, pos) == stream) {
+            static const std::regex re(R"((?:DATA)?FILE\s*=\s*['"]([^'"]+)['"])", std::regex::icase);
+            std::smatch m;
+            if (std::regex_search(entry, m, re)) {
+                fileName = m[1].str();
+                break;
+            }
+            return nullptr;
+        }
+    }
+
+    if (fileName.empty()) {
+        return nullptr;
+    }
+
+    for (TObject *file : *gROOT->GetListOfFiles()) {
+        if (file == nullptr) {
+            continue;
+        }
+
+        if (file->GetName() == fileName) {
+            return dynamic_cast<TFile*>(file);
+        }
+    }
+
+    return nullptr;
+}
+
+}
 #endif
 
 namespace CP {
@@ -21,7 +65,6 @@ namespace CP {
          return StatusCode::FAILURE;
       }
       ATH_CHECK( m_systematicsService.retrieve() );
-      m_isInitialized = false;
       return StatusCode::SUCCESS;
    }
 
@@ -44,10 +87,15 @@ namespace CP {
              return StatusCode::FAILURE;
          }
 #else
-        // naive implementation for AthAnalysis, I don't see any Ath Svc offer getting the output stream easily
-         m_outputFile.reset( TFile::Open( m_outputStreamName.value().c_str(), "UPDATE" ) );
-         if (m_outputFile && m_outputFile->IsZombie()) m_outputFile.reset();
-         outputFile = m_outputFile.get();
+         // Get the output file from THistSvc until we can use it directly
+         SmartIF<IProperty> prop{histSvc().get()};
+         std::vector<std::string> outputs;
+         ATH_CHECK(Gaudi::Parsers::parse(outputs, prop->getProperty("Output").toString()));
+         outputFile = fileForStream(outputs, m_outputStreamName.value());
+         if (outputFile == nullptr) {
+             ATH_MSG_ERROR( "Could not find TFile for stream: " << m_outputStreamName.value() );
+             return StatusCode::FAILURE;
+         }
 #endif
 
          if( !outputFile ) {
@@ -56,7 +104,19 @@ namespace CP {
          }
 
          try {
-             m_writer = ROOT::RNTupleWriter::Append( std::move(m_model), m_modelName.value(), *outputFile );
+             // ROOT requires the zipped target to not exceed the unzipped maximum
+             // at every step, so set the zipped target first
+             ROOT::RNTupleWriteOptions options;
+             if( m_approxZippedClusterSize.value() > 0 ) {
+                 options.SetApproxZippedClusterSize( m_approxZippedClusterSize.value() );
+             }
+             if( m_maxUnzippedClusterSize.value() > 0 ) {
+                 if ( options.GetApproxZippedClusterSize() > m_maxUnzippedClusterSize.value() ) {
+                    options.SetApproxZippedClusterSize( m_maxUnzippedClusterSize.value() );
+                 }
+                 options.SetMaxUnzippedClusterSize( m_maxUnzippedClusterSize.value() );
+             }
+             m_writer = ROOT::RNTupleWriter::Append( std::move(m_model), m_modelName.value(), *outputFile, options );
          } catch( const std::exception& e ) {
              ATH_MSG_ERROR( "Failed to create RNTupleWriter: " << e.what() );
              return StatusCode::FAILURE;
@@ -76,12 +136,6 @@ namespace CP {
 
    StatusCode RNtupleTreeMakerAlg::finalize() {
        m_writer.reset();
-#ifndef XAOD_STANDALONE
-       if (m_outputFile) {
-         m_outputFile->Close();
-         m_outputFile.reset();
-       }
-#endif
        return StatusCode::SUCCESS;
    }
 

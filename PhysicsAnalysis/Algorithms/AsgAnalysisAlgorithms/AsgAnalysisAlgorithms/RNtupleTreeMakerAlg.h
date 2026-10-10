@@ -6,8 +6,6 @@
 
 #include "AnaAlgorithm/AnaAlgorithm.h"
 #include "AsgTools/PropertyWrapper.h"
-#include "AsgTools/ToolHandle.h"
-#include "PATInterfaces/SystematicSet.h"
 
 // RNTuple include(s):
 #include <ROOT/RNTupleModel.hxx>
@@ -20,7 +18,6 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <unordered_map>
 
 namespace CP {
 
@@ -59,6 +56,14 @@ namespace CP {
       Gaudi::Property<std::vector<std::string>> m_nonContainers {
          this, "NonContainers", {}, "List of objects to treat as non-containers"};
 
+      Gaudi::Property<std::size_t> m_approxZippedClusterSize {
+         this, "ApproxZippedClusterSize", 0,
+         "Target compressed cluster size in bytes (0 = ROOT default)"};
+
+      Gaudi::Property<std::size_t> m_maxUnzippedClusterSize {
+         this, "MaxUnzippedClusterSize", 0,
+         "Maximum uncompressed cluster size in bytes, bounds the write buffer memory (0 = ROOT default)"};
+
       /// @}
 
       /// Service handle for systematics
@@ -74,10 +79,6 @@ namespace CP {
       CP::RNtupleFieldHelpers::ProcessorList m_processorList{this};
 
       bool m_isInitialized = false;
-
-#ifndef XAOD_STANDALONE
-      std::unique_ptr<TFile> m_outputFile;
-#endif
 
       /// @}
 
