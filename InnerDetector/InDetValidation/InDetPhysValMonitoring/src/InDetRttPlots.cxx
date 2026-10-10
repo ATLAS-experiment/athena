@@ -35,10 +35,24 @@ InDetRttPlots::InDetRttPlots(InDetPlotBase* pParent, const std::string& sDir, co
   if (m_config.doHitsRecoTracksPlots)                 m_hitsRecoTracksPlots= std::make_unique<InDetPerfPlot_Hits>(this, "Tracks/Selected/HitsOnTracks", m_config.isITk);
   if (m_config.doEffPlots)                            m_effPlots= std::make_unique<InDetPerfPlot_Efficiency>(this, "Tracks/Efficiency", m_config.doTechEffPlots, m_config.isITk);
   if (m_config.doDuplicatePlots)                      m_duplicatePlots = std::make_unique<InDetPerfPlot_Duplicate>(this, "Tracks/Duplicate");
-  if (m_config.doVerticesVsMuPlots)                   m_verticesVsMuPlots= std::make_unique<InDetPerfPlot_VerticesVsMu>(this, "Vertices/AllPrimaryVertices");
-  if (m_config.doVertexPlots)                         m_vertexPlots= std::make_unique<InDetPerfPlot_Vertex>(this, "Vertices/AllPrimaryVertices", m_config.isITk);
-  if (m_config.doHardScatterVertexPlots)              m_hardScatterVertexPlots= std::make_unique<InDetPerfPlot_Vertex>(this, "Vertices/HardScatteringVertex", m_config.isITk);
-  if (m_config.doHardScatterVertexTruthMatchingPlots) m_hardScatterVertexTruthMatchingPlots= std::make_unique<InDetPerfPlot_VertexTruthMatching>(this, "Vertices/HardScatteringVertex", m_iDetailLevel, m_config.isITk);
+
+  // Vertex plots
+  if (m_config.doVerticesVsMuPlots)
+    m_verticesVsMuPlots = std::make_unique<InDetPerfPlot_VerticesVsMu>
+      (this, "Vertices/AllPrimaryVertices");
+  if (m_config.doVertexPlots)
+    m_vertexPlots = std::make_unique<InDetPerfPlot_Vertex>
+      (this, "Vertices/AllPrimaryVertices", m_config.isITk,
+       m_config.doVertexTrackPlots);
+  if (m_config.doHardScatterVertexPlots)
+    m_hardScatterVertexPlots = std::make_unique<InDetPerfPlot_Vertex>
+      (this, "Vertices/HardScatteringVertex", m_config.isITk,
+       m_config.doVertexTrackPlots);
+  if (m_config.doHardScatterVertexTruthMatchingPlots)
+    m_hardScatterVertexTruthMatchingPlots =
+      std::make_unique<InDetPerfPlot_VertexTruthMatching>
+      (this, "Vertices/HardScatteringVertex", m_iDetailLevel, m_config.isITk);
+
   if (m_config.doTrtExtensionPlots)                   m_trtExtensionPlots= std::make_unique<InDetPerfPlot_TRTExtension>(this, "Tracks/TRTExtension");
   if (m_config.doNtupleTruthToReco)                   m_ntupleTruthToReco= std::make_unique<InDetPerfNtuple_TruthToReco>(this, "Ntuples", "TruthToReco");
   if (m_config.doResolutionPlotSecd)                  m_resolutionPlotSecd = std::make_unique<InDetPerfPlot_Resolution>(this, "Tracks/Matched/Resolutions/Secondary", false, m_config.hasHGTDReco);

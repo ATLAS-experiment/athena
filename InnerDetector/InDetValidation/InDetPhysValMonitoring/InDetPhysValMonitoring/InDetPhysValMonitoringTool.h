@@ -186,6 +186,8 @@ private:
     BooleanProperty m_doIDTIDEPlots{this, "doIDTIDEPlots", false, "do ID TIDE derivation plots"};
     BooleanProperty m_fillTechnicalEfficiency{this, "fillTechnicalEfficiency", false, "Fill the technical efficiency plot. Requires additional sihit information in input file"};
     BooleanProperty m_doPRW{this,"doPRW",false,"apply pileup reweight"};
+    BooleanProperty m_doVertexTrackPlots{this, "doVertexTrackPlots", true,
+      "Fill vertex-track plots - require PV-track link"};
 
     FloatProperty m_maxTrkJetDR{this,"maxTrkJetDR",0.4,"the maximum dR to jets to allow for track-in-jet plots"}; 
     StringProperty m_dirName {this, "DirName", "SquirrelPlots/", "Top level directory to write histograms into"}; 
