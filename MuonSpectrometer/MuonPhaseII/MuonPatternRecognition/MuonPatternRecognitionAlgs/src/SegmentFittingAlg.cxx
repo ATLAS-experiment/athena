@@ -33,17 +33,15 @@ namespace MuonR4 {
      *  @param phiEdgeTolerance the tolerance in the phi projection
      *  @return true if the trajectory passes through the chamber, false otherwise
      */
-    inline bool trajectoryPassesThroughChamber( const SpacePointBucket::chamberLocation& loc,
-                                            const SegmentSeed& seed,
-                                            double etaEdgeTolerance = 25. * Gaudi::Units::mm,
-                                            double phiEdgeTolerance = 0.){       
+    inline bool trajectoryPassesThroughChamber(const SpacePointBucket::chamberLocation& loc,
+                                               const SegmentSeed& seed,
+                                               double etaEdgeTolerance = 25. * Gaudi::Units::mm,
+                                               double phiEdgeTolerance = 0.){       
 
         // eta projection
         const double z = loc.location().z();
         const double yCross = seed.interceptY() + (z * seed.tanBeta());
-        const bool passEta = loc.minY() + etaEdgeTolerance < yCross && yCross < loc.maxY() - etaEdgeTolerance;
-
-        if (!passEta) { 
+        if (loc.minY() - etaEdgeTolerance > yCross || yCross > loc.maxY() + etaEdgeTolerance) { 
             return false; 
         }
 
@@ -130,14 +128,15 @@ namespace MuonR4 {
     }
     StatusCode SegmentFittingAlg::execute(const EventContext& ctx) const {
         const ActsTrk::GeometryContext* gctx{nullptr};
+        const SegmentSeedContainer* segmentSeeds{nullptr}; 
+
         ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
-        const SegmentSeedContainer* segmentSeeds=nullptr; 
         ATH_CHECK(SG::get(segmentSeeds, m_seedKey, ctx));
     
         SG::WriteHandle writeSegments{m_outSegments, ctx};
         ATH_CHECK(writeSegments.record(std::make_unique<SegmentContainer>()));
         SegmentVec_t allSegments{};
-        ATH_MSG_VERBOSE("execute() - Start processing " << segmentSeeds->size() << " pattern seeds.");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - execute() - Start processing " << segmentSeeds->size() << " pattern seeds.");
         for (const SegmentSeed* seed : *segmentSeeds) {
             SegmentVec_t segments = fitSegmentSeed(ctx, *gctx, seed);
              if (m_visionTool.isEnabled() && segments.size() > 1) {
@@ -190,7 +189,7 @@ namespace MuonR4 {
         writeSegments->insert(writeSegments->end(),
                                   std::make_move_iterator(allSegments.begin()),
                                   std::make_move_iterator(allSegments.end()));
-        ATH_MSG_VERBOSE("Found in total "<<writeSegments->size()<<" segments. ");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Found in total "<<writeSegments->size()<<" segments. ");
         return StatusCode::SUCCESS; 
     }
 
@@ -209,7 +208,7 @@ namespace MuonR4 {
 
 
         auto seedSelector = [&](const Amg::Vector3D& tangentSeedPos,
-                               const Amg::Vector3D& tangentSeedDir) {
+                                const Amg::Vector3D& tangentSeedDir) {
                                 if (!m_doBeamspotConstraint) {
                                     return true;
                                 }
@@ -258,14 +257,12 @@ namespace MuonR4 {
 
         // Make sure patternSeed->parameters() are in ACTS units!
         State_t seedState{patternSeed->parameters(), patternSeed, m_calibTool.get(), m_recalibSeed, seedSelector};
-        const auto* seeder =  m_seeder.get();
-
 
         auto visualizeSegmentSeeds = [&](State_t& state, const std::string_view label) {
             if (m_visionTool.isEnabled()) { 
                 PrimitiveVec seedLines{};
                 State_t drawMe{state};
-                while(auto s = seeder->nextSeed(cctx, drawMe)) {
+                while(auto s = m_seeder->nextSeed(cctx, drawMe)) {
                     seedLines.push_back(drawLine(s->parameters, -Gaudi::Units::m, Gaudi::Units::m, kViolet));
                 }
                 seedLines.push_back(drawLabel(std::format("{} possible seeds: {:d}", label, drawMe.nGenSeeds()), 0.2, 0.85, 14));
@@ -277,12 +274,9 @@ namespace MuonR4 {
         };
 
         auto runSeeder = [&](State_t&& state) {
-            while (auto seed = seeder->nextSeed(cctx, state)) {
-            
+            while (auto seed = m_seeder->nextSeed(cctx, state)) {
                 seed->parameters[toUnderlying(ParamDefs::t0)] = ActsTrk::timeToAthena( seed->parameters[toUnderlying(ParamDefs::t0)]);
-                    
-                auto segment = m_fitter->fitSegment( ctx, patternSeed, seed->parameters, locToGlob, std::move(seed->hits));
-                    
+                auto segment = m_fitter->fitSegment(ctx, patternSeed, seed->parameters, locToGlob, std::move(seed->hits));
                 if (segment) {
                     segments.push_back(std::move(segment));
                 }
@@ -290,16 +284,17 @@ namespace MuonR4 {
         };
 
         visualizeSegmentSeeds(seedState, "Nominal Seeds");
-        ATH_MSG_VERBOSE("fitSegmentHits() - Start segment seed search");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - fitSegmentHits() - Start segment seed search");
         runSeeder(std::move(seedState));
 
         //----------------------------------------------------------------------------------------
         /** MDT-multilayer fallback. Only try this when standard segment reconstruction failed.  */
         /* Trying to recover certain cases where we either have only one multilayer or where the chambers are not overlapping and there are no hits in the other (e.g. BIM & BIR)*/
         //----------------------------------------------------------------------------------------
-        if( m_allowSegmentSeedingFallback && segments.empty() && (patternSeed->msSector()->chamberIndex() == ChIndex::BIL) ) {
+        if( m_allowSegmentSeedingFallback && 
+            segments.empty() && (patternSeed->msSector()->chamberIndex() == ChIndex::BIL) ) {
             // Implement fallback logic here
-            ATH_MSG_VERBOSE( "fitSegmentSeed() - Standard MDT seeding failed. " "Trying ML fallback.");
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - fitSegmentSeed() - Standard MDT seeding failed. " "Trying ML fallback.");
 
             //For recovery seeding we will have smaller hit collection
             std::optional<SpacePointPerLayerSplitter::HitVec> recoveryHits{};
@@ -308,21 +303,19 @@ namespace MuonR4 {
             recoveryHits = makeBilRecoveryHits(*patternSeed);
 
             if (!recoveryHits) {
-                    ATH_MSG_VERBOSE(__func__<< ":" <<__LINE__<< "- BIL recovery did not succeed. Try BIM/BIR.");
-                    recoveryHits = makeBimBirRecoveryHits(*patternSeed);
+                ATH_MSG_VERBOSE(__func__<< ":" <<__LINE__<< "- BIL recovery did not succeed. Try BIM/BIR.");
+                recoveryHits = makeBimBirRecoveryHits(*patternSeed);
             }
 
              // Both recovery modes ultimately use exactly the same nominal MDT seeder. Only their input hits differ.
-             if (recoveryHits) {
-                ATH_MSG_VERBOSE( "fitSegmentSeed() - ML seeding fallback has " << recoveryHits->size() << " hits.");
-                State_t fallbackState{ patternSeed->parameters(), patternSeed, m_calibTool.get(), m_recalibSeed, *recoveryHits, seedSelector};
+            if (recoveryHits) {
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - fitSegmentSeed() - ML seeding fallback has " << recoveryHits->size() << " hits.");
+                State_t fallbackState{patternSeed->parameters(), patternSeed, m_calibTool.get(), m_recalibSeed, *recoveryHits, seedSelector};
                 visualizeSegmentSeeds(fallbackState , "Fallback Seeds");
                 runSeeder(std::move(fallbackState));
-             }
-
+            }
         }
-
-        ATH_MSG_VERBOSE("fitSegmentHits() - In total "<<segments.size()<<" segment were constructed ");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - fitSegmentHits() - In total "<<segments.size()<<" segment were constructed ");
         return segments;
 
     }
@@ -332,7 +325,7 @@ namespace MuonR4 {
         if (segmentCandidates.empty()) {
             return;
         }
-        ATH_MSG_VERBOSE("resolveAmbiguities() - Resolve ambiguities amongst "
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - resolveAmbiguities() - Resolve ambiguities amongst "
                         <<segmentCandidates.size()<<" segment candidates.");
         std::map<const MuonGMR4::SpectrometerSector*, SegmentVec_t,
                  MuonGMR4::MuonDetectorManager::MSEnvelopeSorter> candidatesPerChamber{};
@@ -351,11 +344,12 @@ namespace MuonR4 {
                                      std::make_move_iterator(resolvedSegments.begin()),
                                      std::make_move_iterator(resolvedSegments.end()));
         }
-        ATH_MSG_VERBOSE("Ambiguity solving done "<<segmentCandidates.size()<<" survived.");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Ambiguity solving done "<<segmentCandidates.size()<<" survived.");
     }
 
 
-std::optional<SpacePointPerLayerSplitter::HitVec>SegmentFittingAlg::makeBilRecoveryHits(const SegmentSeed& seed) const {
+std::optional<SpacePointPerLayerSplitter::HitVec>
+    SegmentFittingAlg::makeBilRecoveryHits(const SegmentSeed& seed) const {
 
     const auto& mdtHelper = m_idHelperSvc->mdtIdHelper();
 
@@ -365,11 +359,9 @@ std::optional<SpacePointPerLayerSplitter::HitVec>SegmentFittingAlg::makeBilRecov
     for (const auto& chamber : seed.parentBucket()->chamberLocations()) {
 
         const auto* readoutEle = chamber.readoutEle();
-
         if (readoutEle->detectorType() != ActsTrk::DetectorType::Mdt) {
             continue;
         }
-
         const Identifier id = readoutEle->identify();
         //For now do this only for BIL stations (technically could be even more specific, BIL eta 3 or 4), choose int comparison instead?
         if (mdtHelper.stationName(id) != m_bilStation) {
@@ -382,12 +374,13 @@ std::optional<SpacePointPerLayerSplitter::HitVec>SegmentFittingAlg::makeBilRecov
 
         crossedRE = readoutEle;
 
-        ATH_MSG_VERBOSE( "BIL recovery: Hough trajectory crosses " << m_idHelperSvc->toStringDetEl(id));
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - BIL recovery: Hough trajectory crosses " 
+                        << m_idHelperSvc->toStringDetEl(id));
     }
 
     // BIL recovery is strictly a single crossed-ML recovery.
     if (!crossedRE) {
-        ATH_MSG_VERBOSE( "BIL recovery rejected: trajectory crosses no BIL readout elements.");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - BIL recovery rejected: trajectory crosses no BIL readout elements.");
         return std::nullopt;
     }
 
@@ -403,17 +396,15 @@ std::optional<SpacePointPerLayerSplitter::HitVec>SegmentFittingAlg::makeBilRecov
             recoveryHits.push_back(hit);
             continue;
         }
-
         // Only MDT hits from the single geometrically crossed BIL RE.
         if (hit->primaryMeasurement()->readoutElement() != crossedRE) {
             continue;
         }
-
         recoveryHits.push_back(hit);
         ++nMdtHits;
     }
 
-    ATH_MSG_VERBOSE( "BIL recovery: keeping " << nMdtHits << " MDT hits from " << m_idHelperSvc->toStringDetEl( crossedRE->identify()));
+    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - BIL recovery: keeping " << nMdtHits << " MDT hits from " << m_idHelperSvc->toStringDetEl( crossedRE->identify()));
     return recoveryHits;
 }
 
@@ -423,13 +414,11 @@ std::optional<SpacePointPerLayerSplitter::HitVec> SegmentFittingAlg::makeBimBirR
     // For BIM/BIR we rely on the phi extension to distinguish
     // readout elements which overlap in the eta projection.
     if (!seed.hasPhiExtension()) {
-        ATH_MSG_VERBOSE(
-            "BIM/BIR recovery rejected: seed has no phi extension.");
+        ATH_MSG_VERBOSE("BIM/BIR recovery rejected: seed has no phi extension.");
         return std::nullopt;
     }
 
     const auto& mdtHelper = m_idHelperSvc->mdtIdHelper();
-
     /*
      * Use the geometrical crossing only to identify the recovery
      * station family (BIM/BIR) and stationPhi.
@@ -442,7 +431,6 @@ std::optional<SpacePointPerLayerSplitter::HitVec> SegmentFittingAlg::makeBimBirR
     for (const auto& chamber : seed.parentBucket()->chamberLocations()) {
 
         const auto* readoutEle = chamber.readoutEle();
-
         if (readoutEle->detectorType() != ActsTrk::DetectorType::Mdt) {
             continue;
         }
@@ -454,13 +442,12 @@ std::optional<SpacePointPerLayerSplitter::HitVec> SegmentFittingAlg::makeBimBirR
         if (station != m_bimStation && station != m_birStation) {
             continue;
         }
-
         //Don't need any tolerance here
         if (!trajectoryPassesThroughChamber(chamber, seed, 0., 0.)) {
             continue;
         }
 
-        ATH_MSG_VERBOSE( "BIM/BIR recovery: Hough trajectory crosses " << m_idHelperSvc->toStringDetEl(id));
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - BIM/BIR recovery: Hough trajectory crosses " << m_idHelperSvc->toStringDetEl(id));
 
         // First crossed BIM/BIR RE defines the recovery region.
         if (!recoveryStation) {
@@ -474,11 +461,10 @@ std::optional<SpacePointPerLayerSplitter::HitVec> SegmentFittingAlg::makeBimBirR
          * Different eta and multilayer are explicitly allowed.
          */
         if (*recoveryStation != station){ 
-            ATH_MSG_VERBOSE( "BIM/BIR recovery rejected: crossed readout " "elements belong to different station/phi regions.");
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - BIM/BIR recovery rejected: crossed readout " "elements belong to different station/phi regions.");
             return std::nullopt;
         }
     }
-
     // No geometrically compatible BIM/BIR region.
     if (!recoveryStation) {
         return std::nullopt;
@@ -496,9 +482,7 @@ std::optional<SpacePointPerLayerSplitter::HitVec> SegmentFittingAlg::makeBimBirR
     recoveryHits.reserve(seed.getHitsInMax().size());
 
     std::size_t nMdtHits{0};
-
     for (const SpacePoint* hit : seed.getHitsInMax()) {
-
         //Preserve the non-MDT content of the original seed.
         if (hit->type() != xAOD::UncalibMeasType::MdtDriftCircleType) {
             recoveryHits.push_back(hit);
@@ -506,18 +490,16 @@ std::optional<SpacePointPerLayerSplitter::HitVec> SegmentFittingAlg::makeBimBirR
         }
 
         const Identifier hitId = hit->identify();
-
         if (mdtHelper.stationName(hitId) != *recoveryStation) {
             continue;
         }
-
         recoveryHits.push_back(hit);
         ++nMdtHits;
 
-        ATH_MSG_VERBOSE( "BIM/BIR recovery keeps MDT hit " << m_idHelperSvc->toString(hitId));
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - BIM/BIR recovery keeps MDT hit " << m_idHelperSvc->toString(hitId));
     }
 
-    ATH_MSG_VERBOSE( "BIM/BIR recovery selected " << nMdtHits << " MDT hits from station " << mdtHelper.stationNameString(*recoveryStation));
+    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - BIM/BIR recovery selected " << nMdtHits << " MDT hits from station " << mdtHelper.stationNameString(*recoveryStation));
 
     if (nMdtHits == 0) {
         return std::nullopt;
