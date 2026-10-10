@@ -20,6 +20,11 @@ BTaggingSelectionJsonTool::BTaggingSelectionJsonTool(const std::string& name)
 StatusCode BTaggingSelectionJsonTool::initialize() {
     m_initialised = true;
 
+    if (m_minPt > 0.){ 
+        // Convert MeV cut to GeV as in the JSON files numbers are in GeV 
+        m_minPt = m_minPt * BTaggingToolUtil::MeVToGeV; 
+    }
+
     std::string pathToJsonConfigFile = PathResolverFindCalibFile(m_json_config_path);
     std::ifstream jsonFile(pathToJsonConfigFile);
     if (!jsonFile.is_open()) {
@@ -232,18 +237,18 @@ int BTaggingSelectionJsonTool::accept(const xAOD::Jet& jet) const
 {
     if (!m_initialised) throw std::runtime_error("BTaggingSelectionJsonTool has not been initialised.");
 
-    double pt = getJetPt(jet);
+    double pt = getJetPtInGeV(jet);
     double eta = jet.eta();
-    double mass = getJetMass(jet);
+    double mass = getJetMassInGeV(jet);
     double tagger_discriminant = getTaggerDiscriminant(jet);
     int index = 0;
 
     if (std::abs(eta) > m_maxEta || pt < m_minPt) return index;
 
-    int pt_bin_index = findBin(m_BinConfig.pTbins, pt / 1000.);
+    int pt_bin_index = findBin(m_BinConfig.pTbins, pt);
     if (pt_bin_index == -1) return index;
 
-    int mass_bin_index = findBin(m_BinConfig.massbins[pt_bin_index], mass / 1000.);
+    int mass_bin_index = findBin(m_BinConfig.massbins[pt_bin_index], mass);
     if (mass_bin_index == -1) return index;
 
     float cutvalue = m_BinConfig.OPCutValues[pt_bin_index][mass_bin_index];
@@ -261,10 +266,10 @@ int BTaggingSelectionJsonTool::accept(const xAOD::Jet& jet) const
         // Check if the jet does not pass the veto requirement
         double veto_discriminant = getVetoDiscriminant(jet);
 
-        int pt_veto_bin_index = findBin(m_VetoBinConfig.pTbins, pt / 1000.);
+        int pt_veto_bin_index = findBin(m_VetoBinConfig.pTbins, pt);
         if (pt_veto_bin_index == -1) return index;
 
-        int mass_veto_bin_index = findBin(m_VetoBinConfig.massbins[pt_veto_bin_index], mass / 1000.);
+        int mass_veto_bin_index = findBin(m_VetoBinConfig.massbins[pt_veto_bin_index], mass);
         if (mass_veto_bin_index == -1) return index;
 
         float veto_cutvalue = m_VetoBinConfig.OPCutValues[pt_veto_bin_index][mass_veto_bin_index];
@@ -283,10 +288,10 @@ int BTaggingSelectionJsonTool::acceptOnlyForXbbCalibrationUsage(double pt, doubl
     int index = 0;
     if (std::abs(eta) > m_maxEta || pt < m_minPt) return index;
 
-    int pt_bin_index = findBin(m_BinConfig.pTbins, pt / 1000.);
+    int pt_bin_index = findBin(m_BinConfig.pTbins, pt);
     if (pt_bin_index == -1) return index;
 
-    int mass_bin_index = findBin(m_BinConfig.massbins[pt_bin_index], mass / 1000.);
+    int mass_bin_index = findBin(m_BinConfig.massbins[pt_bin_index], mass);
     if (mass_bin_index == -1) return index;
 
     float cutvalue = m_BinConfig.OPCutValues[pt_bin_index][mass_bin_index];
@@ -305,22 +310,28 @@ int BTaggingSelectionJsonTool::findBin(const std::vector<float>& bins, float val
     return -1;
 }
 
-float BTaggingSelectionJsonTool::getJetMass(const xAOD::Jet& jet) const
-{
-    if (!m_massAcc) return jet.m();
+float BTaggingSelectionJsonTool::getJetMassInGeV(const xAOD::Jet& jet) const
+{   
+    // Convert mass from MeV to GeV 
+    if (!m_massAcc) {
+        return jet.m() * BTaggingToolUtil::MeVToGeV;
+    }
     if (!m_massAcc->isAvailable(jet)) {
         ATH_MSG_ERROR("Decorated mass '" << SG::AuxTypeRegistry::instance().getName( m_massAcc->auxid() ) << "' not available on jet. Cannot proceed.");
         throw std::runtime_error("Decorated mass not available on jet.");
     }
-    return (*m_massAcc)(jet);
+    return (*m_massAcc)(jet) * BTaggingToolUtil::MeVToGeV;
 }
 
-float BTaggingSelectionJsonTool::getJetPt(const xAOD::Jet& jet) const
-{
-    if (!m_ptAcc) return jet.pt();
+float BTaggingSelectionJsonTool::getJetPtInGeV(const xAOD::Jet& jet) const
+{   
+    // Convert pT from MeV to GeV 
+    if (!m_ptAcc) {
+        return jet.pt() * BTaggingToolUtil::MeVToGeV;
+    }
     if (!m_ptAcc->isAvailable(jet)) {
         ATH_MSG_ERROR("Decorated pT '" << SG::AuxTypeRegistry::instance().getName( m_ptAcc->auxid() ) << "' not available on jet. Cannot proceed.");
         throw std::runtime_error("Decorated pT not available on jet.");
     }
-    return (*m_ptAcc)(jet);
+    return (*m_ptAcc)(jet) * BTaggingToolUtil::MeVToGeV;
 }
