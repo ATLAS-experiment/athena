@@ -34,8 +34,8 @@ namespace CP {
         {364292,2018},
         {440613,2022},
         {456749,2023},
-        {486706,2024},
-        {509849,2025}
+        {486706,2024}
+        //{509849,2025}
     };
 
     const std::map<unsigned short int, std::vector< std::tuple<unsigned int,unsigned int,std::string> > > MuonTriggerScaleFactors::m_year_periods = {
@@ -110,16 +110,16 @@ namespace CP {
             {480188,482221,"M"},
             {482374,484799,"N"},
             {484909,486706,"O"}}
-        },
-        {2025, {
-            {497924,498434,"D"},
-            {498515,499592,"E"},
-            {499618,500348,"F"},
-            {502557,505458,"K"},
-            {506231,507775,"M"},
-            {508160,509452,"O"},
-            {509803,509849,"Q"}}
         }
+        //{2025, {
+        //    {497924,498434,"D"},
+        //    {498515,499592,"E"},
+        //    {499618,500348,"F"},
+        //    {502557,505458,"K"},
+        //    {506231,507775,"M"},
+        //    {508160,509452,"O"},
+        //    {509803,509849,"Q"}}
+        //}
     };
 
     MuonTriggerScaleFactors::MuonTriggerScaleFactors(const std::string& name) :
@@ -144,10 +144,10 @@ namespace CP {
           else if (year == 2016) fileName = "muontrigger_sf_2016_mc20a_v3.root";
           else if (year == 2017) fileName = "muontrigger_sf_2017_mc20d_v3.root";
           else if (year == 2018) fileName = "muontrigger_sf_2018_mc20e_v3.root";
-          else if (year == 2022) fileName = "muontrigger_sf_2022_mc23a_v4.root";
-          else if (year == 2023) fileName = "muontrigger_sf_2023_mc23d_v4.root";
-          else if (year == 2024) fileName = "muontrigger_sf_2024_mc23e_v4.root";
-          else if (year == 2025) fileName = "muontrigger_sf_2025_mc23g_v1.root";
+          else if (year == 2022) fileName = "muontrigger_sf_2022_mc23a_v3.root";
+          else if (year == 2023) fileName = "muontrigger_sf_2023_mc23d_v3.root";
+          else if (year == 2024) fileName = "muontrigger_sf_2024_mc23e_v1.root";
+          //else if (year == 2025) fileName = "muontrigger_sf_2025_mc23g_v1.root";
           else {
             ATH_MSG_WARNING("There is no SF file for year " << year << " yet");
             return StatusCode::SUCCESS;
@@ -286,7 +286,7 @@ namespace CP {
 
 
         if (m_campaign.empty()) {
-            constexpr auto years_to_run = std::to_array<int>({2015, 2016, 2017, 2018, 2022, 2023, 2024, 2025});
+            constexpr auto years_to_run = std::to_array<int>({2015, 2016, 2017, 2018, 2022, 2023, 2024/*, 2025*/});
             for (const int &year: years_to_run) {
                 ATH_CHECK(LoadTriggerMap(year));
             }
@@ -303,8 +303,8 @@ namespace CP {
             ATH_CHECK(LoadTriggerMap(2023));
         } else if (m_campaign.value() == "mc23e") {
             ATH_CHECK(LoadTriggerMap(2024));
-        } else if (m_campaign.value() == "mc23g") {
-            ATH_CHECK(LoadTriggerMap(2025));
+        //} else if (m_campaign.value() == "mc23g") {
+        //    ATH_CHECK(LoadTriggerMap(2025));
         } else {
             ATH_MSG_ERROR("Campaign " << m_campaign.value() << " is not supported. Please choose a valid campaign or leave empty to load all years.");
         }

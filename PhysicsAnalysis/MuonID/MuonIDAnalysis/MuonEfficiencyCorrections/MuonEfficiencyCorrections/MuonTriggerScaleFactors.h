@@ -116,7 +116,7 @@ namespace CP {
             Gaudi::Property<std::string> m_campaign {this, "Campaign", "", "the MC campaign to get the scale factors for"};
 
             // subfolder to load from the calibration db
-            Gaudi::Property<std::string> m_calibrationVersion {this, "CalibrationVersion", "261003_FallUpdate", "the calibration version to use"};
+            Gaudi::Property<std::string> m_calibrationVersion {this, "CalibrationVersion", "250731_SummerUpdate", "the calibration version to use"};
             Gaudi::Property<std::string> m_customInputFolder {this, "CustomInputFolder", "", "the custom input folder to use (debugging only)"};
             Gaudi::Property<std::map<unsigned int, std::string>> m_customInputFilePerYear {this, "CustomInputFilePerYear", {}, "the custom input file to use per year (debugging only)"};
             Gaudi::Property<std::string> m_binning {this, "Binning", "fine", "the binning to use"};
