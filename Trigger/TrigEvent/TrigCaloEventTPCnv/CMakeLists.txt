@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( TrigCaloEventTPCnv )
@@ -38,8 +38,6 @@ _add_test( TrigEMClusterCnv_p3_test )
 _add_test( TrigEMClusterCnv_p4_test )
 _add_test( TrigRNNOutputCnv_p1_test )
 _add_test( TrigRNNOutputCnv_p2_test )
-_add_test( TrigT2JetCnv_p2_test )
-_add_test( TrigT2JetCnv_p3_test )
 _add_test( TrigT2MbtsBitsCnv_p1_test )
 _add_test( TrigT2MbtsBitsCnv_p2_test )
 _add_test( TrigT2MbtsBitsCnv_p3_test )

@@ -10,12 +10,10 @@
 #include "TrigCaloEvent/TrigTauCluster.h"
 #include "TrigCaloEvent/TrigTauClusterDetails.h"
 #include "TrigCaloEvent/Trig3Momentum.h"
-#include "TrigCaloEvent/TrigT2Jet.h"
 #include "TrigCaloEvent/TrigCaloClusterContainer.h"
 #include "TrigCaloEvent/TrigEMClusterContainer.h"
 #include "TrigCaloEvent/TrigTauClusterContainer.h"
 #include "TrigCaloEvent/TrigTauClusterDetailsContainer.h"
-#include "TrigCaloEvent/TrigT2JetContainer.h"
 #include "TrigCaloEvent/TrigT2MbtsBits.h"
 #include "TrigCaloEvent/TrigT2MbtsBitsContainer.h"
 #include "TrigCaloEvent/TrigT2ZdcSignals.h"
@@ -36,7 +34,6 @@ void dummy_function_for_TrigCaloEvent_which_forces_dictionaries_generation (
 									     DataVector<TrigEMClusterContainer> c,
 									     DataVector<TrigTauClusterContainer> d,
                                                                              DataVector<TrigTauClusterDetailsContainer> d2,
-									     DataVector<TrigT2JetContainer> e,
                                                                              DataVector<TrigT2MbtsBitsContainer> h,
 									     DataVector<TrigT2ZdcSignalsContainer> o,
                                                                              DataVector<RingerRings> f,
@@ -47,8 +44,7 @@ void dummy_function_for_TrigCaloEvent_which_forces_dictionaries_generation (
   DataVector<TrigEMClusterContainer> cc = c;
   DataVector<TrigCaloClusterContainer> cc1 = c1;
   DataVector<TrigTauClusterContainer> dd = d;
-  DataVector<TrigTauClusterDetailsContainer> dd2 = d2; 
-  DataVector<TrigT2JetContainer> ee = e;
+  DataVector<TrigTauClusterDetailsContainer> dd2 = d2;
   DataVector<TrigT2MbtsBitsContainer> hh = h;
   DataVector<TrigT2ZdcSignalsContainer> oo = o;
   DataVector<RingerRings> ff = f;
@@ -62,7 +58,6 @@ template class std::vector<const TrigEMClusterContainer *>;
 template class std::vector<const TrigCaloClusterContainer *>;
 template class std::vector<const TrigTauClusterContainer *>;
 template class std::vector<const TrigTauClusterDetailsContainer *>;
-template class std::vector<const TrigT2JetContainer *>;
 template class std::vector<const TrigT2MbtsBitsContainer *>;
 template class std::vector<const TrigT2ZdcSignalsContainer *>;
 template class std::vector<const RingerRings *>;
@@ -73,5 +68,4 @@ template class std::vector<const TrigCaloCluster*>;
 template class std::vector<const TrigEMCluster*>;
 template class std::vector<const TrigTauCluster*>;
 template class std::vector<const TrigTauClusterDetails*>;
-template class std::vector<const TrigT2Jet*>;
 #endif

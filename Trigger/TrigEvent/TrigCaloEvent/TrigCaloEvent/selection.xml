@@ -29,13 +29,6 @@
 	<!--<class name="std::vector<Trig3Momentum*>"/>-->
 	<!--<class name="std::vector<const Trig3Momentum*>"/>-->
 
-	<class name="TrigT2Jet"	id="242473A8-A320-49F1-A680-136EA26C1FAF">
-           <field name="m_grid" transient="true" />
-        </class>
-	<class name="DataVector<TrigT2Jet>"/>
-	<class name="std::vector<TrigT2Jet*>"/>
-	<class name="std::vector<const TrigT2Jet*>"/>
-
     <class name="TrigEMClusterContainer" id="8F88F373-63B9-40D5-B787-C6BD67B7F3BC"/>
 	<class name="DataVector<TrigEMClusterContainer>" id="B09292A3-1DBC-40CA-9174-4B44C4A7FD2D" />
 	<class name="std::vector<TrigEMClusterContainer*>" />
@@ -50,12 +43,6 @@
 	<class name="DataVector<TrigTauClusterDetailsContainer>" id="36C1385E-34F1-4863-8392-15A809FEB02C" />
 	<class name="std::vector<TrigTauClusterDetailsContainer*>" />
 	<class name="std::vector<const TrigTauClusterDetailsContainer*>" />
-
-	<class name="TrigT2JetContainer" id="97C4C98E-0275-4974-944D-100C7C29E959"/>
-	<class name="DataVector<TrigT2JetContainer>" id="E59E0DB0-6607-4B9D-B2CC-AC3AB113A0B3" />
-	<class name="std::vector<TrigT2JetContainer*>" />
-	<class name="std::vector<const TrigT2JetContainer*>" />
-
 
 	<class name="RingerRingsContainer" id="F9380A75-4811-4FD6-A626-439E7A381721" />
 	<class name="DataVector<RingerRings>" id="8E82762A-0223-47C4-87B4-5D9FFD3C1B86" />

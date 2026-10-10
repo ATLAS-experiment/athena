@@ -49,21 +49,6 @@
   <class name="TrigT2MbtsBitsContainer_tlp1" id="82BAAC80-62FC-4E6D-9BD7-1619064FF7AC"/>
   <class name="TrigT2MbtsBitsContainer_p1" id="139D9BFE-0944-44A6-8D9E-10CEEF8B30B9"/>
   <class name="std::vector<TrigT2MbtsBitsContainer_p1>" />
-
-<!-- TrigT2JetContainer -->
-  <class name="TrigT2JetContainer_p3" id="6215BEE2-45E7-4681-9089-9BD470CDAF4D"/>
-  <class name="TrigT2JetContainer_tlp1" id="3B670168-C5AA-48A1-9813-C94530980EBF"/>
-  <class name="TrigT2JetContainer_p1" id="8355C5BC-1F0C-47F2-B27D-13E6A4C854B7"/>
-  <class name="std::vector<TrigT2JetContainer_p1>" />
-  
-<!-- TrigT2Jet -->
-  <class name="TrigT2Jet_tlp1" id="EAF10B4D-AD26-4030-AF0C-1060A39D663D"/>
-  <class name="TrigT2Jet_p1"/>
-  <class name="std::vector<TrigT2Jet_p1>" />
-  <class name="TrigT2Jet_p2"/>
-  <class name="std::vector<TrigT2Jet_p2>" />
-  <class name="TrigT2Jet_p3"/>
-  <class name="std::vector<TrigT2Jet_p3>" />
   
 <!-- TrigEMClusterContainer -->
   <class name="TrigEMClusterContainer_p4" id="7B430CA8-5D16-4E26-B0A4-461F983610EB"/>

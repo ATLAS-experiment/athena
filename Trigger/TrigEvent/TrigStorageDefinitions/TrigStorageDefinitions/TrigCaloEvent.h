@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGSTORAGEDEF_TRIGCALOEVENT
@@ -53,8 +53,6 @@ HLT_BEGIN_TYPE_REGISTRATION
   HLT_REGISTER_TYPE(class TrigTauCluster, class TrigTauCluster,class TrigTauClusterContainer)
   HLT_REGISTER_TYPE(class TrigTauClusterDetails,class TrigTauClusterDetails,class TrigTauClusterDetailsContainer)
   HLT_REGISTER_TYPE(class RingerRings, class RingerRings,class RingerRingsContainer)  
-  HLT_REGISTER_TYPE(class TrigT2Jet, class TrigT2Jet,class TrigT2JetContainer)
-  HLT_REGISTER_TYPE(class TrigT2Jet, class TrigT2JetContainer,class TrigT2JetContainer)
   HLT_REGISTER_TYPE(class TrigT2MbtsBits,class TrigT2MbtsBits,class TrigT2MbtsBitsContainer)
   HLT_REGISTER_TYPE(class TrigT2ZdcSignals,class TrigT2ZdcSignals,class TrigT2ZdcSignalsContainer)
   //EF
