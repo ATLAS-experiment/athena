@@ -6,6 +6,22 @@ EF_10j35_pf_ftf_presel7j30_L14jJ40:
     0: 7
     1: 75
   eventCount: 6
+EF_2e5_lhvloose_L1eEM5_bBeeM6000_L1All:
+  stepCounts:
+    0: 11
+    1: 11
+    2: 11
+    3: 8
+    4: 8
+    5: 8
+  stepFeatures:
+    0: 40
+    1: 40
+    2: 160
+    3: 28
+    4: 28
+    5: 28
+  eventCount: 0
 EF_2e5_lhvloose_bBeeM6000_L1BKeePrimary:
   stepCounts:
     0: 11
@@ -480,12 +496,66 @@ EF_2mu14_L12MU8F:
   stepFeatures:
     0: 2
   eventCount: 0
+EF_2mu4_bBmumu_L12MU3VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 6
+  eventCount: 0
 EF_2mu4_bBmumux_BsmumuPhi_L12MU3V:
   stepCounts:
     0: 3
   stepFeatures:
     0: 8
   eventCount: 0
+EF_2mu4_bDimu2700_sigmaLxy3_L12MU3VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 6
+  eventCount: 0
+EF_2mu4_bDimu_L12MU3VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 6
+  eventCount: 0
+EF_2mu4_bJpsimumu_L12MU3VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 6
+  eventCount: 0
+EF_2mu4_bUpsimumu_L12MU3VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 6
+  eventCount: 0
+EF_2mu4_l2io_invmDimu_L12MU3VF:
+  stepCounts:
+    0: 2
+    1: 1
+    2: 1
+    3: 1
+  stepFeatures:
+    0: 6
+    1: 3
+    2: 3
+    3: 2
+  eventCount: 1
+EF_2mu4_l2io_invmDimu_L12MU3V:
+  stepCounts:
+    0: 3
+    1: 2
+    2: 1
+    3: 1
+  stepFeatures:
+    0: 8
+    1: 5
+    2: 3
+    3: 2
+  eventCount: 1
 EF_2mu50_msonly_L1MU14FCH:
   stepCounts:
     0: 1
@@ -523,6 +593,24 @@ leg002_EF_2mu6_2j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
   stepFeatures:
     0: 2
     1: 1
+  eventCount: 0
+EF_2mu6_mu4_bTau_L12MU5VF_3MU3V:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_2mu6_mu4_bTau_L12MU5VF_3MU3V:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 2
+  eventCount: 0
+leg001_EF_2mu6_mu4_bTau_L12MU5VF_3MU3V:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
   eventCount: 0
 EF_3j100_pf_ftf_L1jJ40:
   stepCounts:
@@ -577,6 +665,30 @@ EF_3j60_0eta290_020jvt_bgn277_pf_ftf_presel3j45bgtwo95_L13jJ70p0ETA23:
     0: 15
     1: 15
     2: 56
+  eventCount: 0
+EF_3mu4_bJpsi_L13MU3VF:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_3mu4_bJpsi_L13MU3V:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_3mu4_bTau_L13MU3VF:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_3mu4_bTau_L13MU3V:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
   eventCount: 0
 EF_4j100_pf_ftf_L13jJ40:
   stepCounts:
@@ -643,6 +755,12 @@ EF_4mu4_L14MU3V:
   stepFeatures:
     0: 4
     1: 4
+  eventCount: 0
+EF_4mu4_bDimu6000_L14MU3V:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
   eventCount: 0
 EF_5j35c_020jvt_j25c_020jvt_SHARED_j25c_020jvt_bgn260_pf_ftf_presel5c25XXc25bgtwo85_L14jJ40:
   stepCounts:
@@ -2540,6 +2658,70 @@ EF_e5_idperf_tight_nogsf_L1eEM5:
     2: 33
     3: 33
   eventCount: 15
+EF_e5_lhvloose_L1eEM5_bBeeM6000_L1All:
+  stepCounts:
+    0: 16
+    1: 16
+    2: 16
+    3: 16
+    4: 16
+    5: 16
+  stepFeatures:
+    0: 45
+    1: 45
+    2: 174
+    3: 36
+    4: 36
+    5: 36
+  eventCount: 0
+EF_e5_lhvloose_L1eEM5_e3_lhvloose_L1eEM5_bBeeM6000_L1All:
+  stepCounts:
+    0: 11
+    1: 11
+    2: 11
+    3: 11
+    4: 11
+    5: 11
+  stepFeatures:
+    0: 40
+    1: 40
+    2: 160
+    3: 43
+    4: 43
+    5: 43
+  eventCount: 0
+leg000_EF_e5_lhvloose_L1eEM5_e3_lhvloose_L1eEM5_bBeeM6000_L1All:
+  stepCounts:
+    0: 11
+    1: 11
+    2: 11
+    3: 11
+    4: 11
+    5: 11
+  stepFeatures:
+    0: 40
+    1: 40
+    2: 160
+    3: 31
+    4: 31
+    5: 31
+  eventCount: 0
+leg001_EF_e5_lhvloose_L1eEM5_e3_lhvloose_L1eEM5_bBeeM6000_L1All:
+  stepCounts:
+    0: 11
+    1: 11
+    2: 11
+    3: 11
+    4: 11
+    5: 11
+  stepFeatures:
+    0: 40
+    1: 40
+    2: 160
+    3: 43
+    4: 43
+    5: 43
+  eventCount: 0
 EF_e5_lhvloose_bBeeM6000_L1BKeePrimary:
   stepCounts:
     0: 16
@@ -6456,6 +6638,18 @@ EF_j80_0eta290_020jvt_boffperf_pf_ftf_L1jJ70:
     1: 37
     2: 37
   eventCount: 18
+EF_mu10_bJpsimutrk_L1MU8F:
+  stepCounts:
+    0: 10
+    1: 9
+    2: 9
+    3: 9
+  stepFeatures:
+    0: 11
+    1: 11
+    2: 10
+    3: 9
+  eventCount: 0
 EF_mu10_ivarloose_tau35_mediumRNN_tracktwoMVA_03dRAB_L1MU5VF_cTAU30M:
   stepCounts:
     0: 10
@@ -6640,6 +6834,222 @@ EF_mu10_msonly_L1MU8F:
     0: 11
     1: 9
   eventCount: 9
+EF_mu11_l2io_mu6_l2io_invmDimu_L12MU5VF:
+  stepCounts:
+    0: 2
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 4
+    1: 2
+    2: 2
+  eventCount: 0
+leg000_EF_mu11_l2io_mu6_l2io_invmDimu_L12MU5VF:
+  stepCounts:
+    0: 2
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 3
+    1: 2
+    2: 2
+  eventCount: 0
+leg001_EF_mu11_l2io_mu6_l2io_invmDimu_L12MU5VF:
+  stepCounts:
+    0: 2
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 4
+    1: 2
+    2: 2
+  eventCount: 0
+EF_mu11_l2io_mu6_l2io_invmDimu_L12MU8F:
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 2
+    1: 2
+    2: 2
+  eventCount: 0
+leg000_EF_mu11_l2io_mu6_l2io_invmDimu_L12MU8F:
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 2
+    1: 2
+    2: 2
+  eventCount: 0
+leg001_EF_mu11_l2io_mu6_l2io_invmDimu_L12MU8F:
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 2
+    1: 2
+    2: 2
+  eventCount: 0
+EF_mu11_l2io_mu6_l2io_invmDimu_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 4
+    1: 2
+    2: 2
+  eventCount: 0
+leg000_EF_mu11_l2io_mu6_l2io_invmDimu_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 3
+    1: 2
+    2: 2
+  eventCount: 0
+leg001_EF_mu11_l2io_mu6_l2io_invmDimu_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 4
+    1: 2
+    2: 2
+  eventCount: 0
+EF_mu11_mu6_bBmumu_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bBmumu_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bBmumu_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu11_mu6_bBmumux_BcmumuD0Xloose_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bBmumux_BcmumuD0Xloose_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bBmumux_BcmumuD0Xloose_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu11_mu6_bBmumux_BcmumuDploose_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bBmumux_BcmumuDploose_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bBmumux_BcmumuDploose_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu11_mu6_bBmumux_BcmumuDsloose_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bBmumux_BcmumuDsloose_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bBmumux_BcmumuDsloose_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu11_mu6_bBmumux_BcmumuDstarloose_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bBmumux_BcmumuDstarloose_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bBmumux_BcmumuDstarloose_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu11_mu6_bBmumux_BcmumuPi_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bBmumux_BcmumuPi_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bBmumux_BcmumuPi_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu11_mu6_bBmumux_BdmumuKst_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bBmumux_BdmumuKst_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bBmumux_BdmumuKst_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
 EF_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:
   stepCounts:
     0: 2
@@ -6653,6 +7063,24 @@ leg000_EF_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:
     0: 3
   eventCount: 0
 leg001_EF_mu11_mu6_bBmumux_Bidperf_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu11_mu6_bBmumux_BpmumuKp_L12MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bBmumux_BpmumuKp_L12MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bBmumux_BpmumuKp_L12MU5VF:
   stepCounts:
     0: 2
   stepFeatures:
@@ -6675,6 +7103,180 @@ leg001_EF_mu11_mu6_bBmumux_BpmumuKp_L12MU8F:
     0: 1
   stepFeatures:
     0: 2
+  eventCount: 0
+EF_mu11_mu6_bBmumux_BpmumuKp_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bBmumux_BpmumuKp_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bBmumux_BpmumuKp_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu11_mu6_bBmumux_BsmumuPhi_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bBmumux_BsmumuPhi_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bBmumux_BsmumuPhi_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu11_mu6_bBmumux_LbPqKm_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bBmumux_LbPqKm_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bBmumux_LbPqKm_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu11_mu6_bBmux_BdmuDstarX_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 4
+    1: 2
+    2: 2
+  eventCount: 0
+leg000_EF_mu11_mu6_bBmux_BdmuDstarX_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 3
+    1: 2
+    2: 2
+  eventCount: 0
+leg001_EF_mu11_mu6_bBmux_BdmuDstarX_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 4
+    1: 2
+    2: 2
+  eventCount: 0
+EF_mu11_mu6_bDimu2700_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bDimu2700_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bDimu2700_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu11_mu6_bDimu_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bDimu_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bDimu_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu11_mu6_bJpsimumu_L12MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bJpsimumu_L12MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bJpsimumu_L12MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu11_mu6_bJpsimumu_L12MU8F:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 2
+  eventCount: 0
+leg000_EF_mu11_mu6_bJpsimumu_L12MU8F:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 2
+  eventCount: 0
+leg001_EF_mu11_mu6_bJpsimumu_L12MU8F:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 2
+  eventCount: 0
+EF_mu11_mu6_bJpsimumu_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bJpsimumu_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bJpsimumu_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
   eventCount: 0
 EF_mu11_mu6_bJpsimumu_L1MU8VF_2MU8F:
   stepCounts:
@@ -6712,6 +7314,24 @@ leg001_EF_mu11_mu6_bJpsimumu_Lxy0_L1MU8VF_2MU5VF:
   stepFeatures:
     0: 4
   eventCount: 0
+EF_mu11_mu6_bTau_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu11_mu6_bTau_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 3
+  eventCount: 0
+leg001_EF_mu11_mu6_bTau_L1MU8VF_2MU5VF:
+  stepCounts:
+    0: 2
+  stepFeatures:
+    0: 4
+  eventCount: 0
 EF_mu11_mu6_bUpsimumu_L12MU5VF:
   stepCounts:
     0: 2
@@ -6729,6 +7349,24 @@ leg001_EF_mu11_mu6_bUpsimumu_L12MU5VF:
     0: 2
   stepFeatures:
     0: 4
+  eventCount: 0
+EF_mu11_mu6_bUpsimumu_L12MU8F:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 2
+  eventCount: 0
+leg000_EF_mu11_mu6_bUpsimumu_L12MU8F:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 2
+  eventCount: 0
+leg001_EF_mu11_mu6_bUpsimumu_L12MU8F:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 2
   eventCount: 0
 EF_mu11_mu6_bUpsimumu_L1MU8VF_2MU5VF:
   stepCounts:
@@ -7064,6 +7702,30 @@ EF_mu20_LRT_idperf_L1MU14FCH:
     2: 7
     3: 6
   eventCount: 6
+EF_mu20_bJpsimutrk_L1MU14FCH:
+  stepCounts:
+    0: 6
+    1: 6
+    2: 6
+    3: 5
+  stepFeatures:
+    0: 7
+    1: 7
+    2: 7
+    3: 5
+  eventCount: 0
+EF_mu20_bJpsimutrk_L1MU18VFCH:
+  stepCounts:
+    0: 6
+    1: 6
+    2: 6
+    3: 5
+  stepFeatures:
+    0: 7
+    1: 7
+    2: 7
+    3: 5
+  eventCount: 0
 EF_mu20_idperf_L1MU12FCH:
   stepCounts:
     0: 7
@@ -7275,6 +7937,96 @@ leg001_EF_mu22_mu8noL1_L1MU14FCH:
     2: 4
     3: 4
     4: 3
+  eventCount: 0
+EF_mu23_bBmux_BdmuDpX_L1MU18VFCH:
+  stepCounts:
+    0: 6
+    1: 5
+    2: 4
+    3: 4
+  stepFeatures:
+    0: 7
+    1: 6
+    2: 5
+    3: 4
+  eventCount: 0
+EF_mu23_bBmux_BdmuDstarX_L1MU18VFCH:
+  stepCounts:
+    0: 6
+    1: 5
+    2: 4
+    3: 4
+  stepFeatures:
+    0: 7
+    1: 6
+    2: 5
+    3: 4
+  eventCount: 0
+EF_mu23_bBmux_BpmuD0X_L1MU18VFCH:
+  stepCounts:
+    0: 6
+    1: 5
+    2: 4
+    3: 4
+  stepFeatures:
+    0: 7
+    1: 6
+    2: 5
+    3: 4
+  eventCount: 0
+EF_mu23_bBmux_BsmuDsX_L1MU18VFCH:
+  stepCounts:
+    0: 6
+    1: 5
+    2: 4
+    3: 4
+  stepFeatures:
+    0: 7
+    1: 6
+    2: 5
+    3: 4
+  eventCount: 0
+EF_mu23_bBmux_LbmuLcX_L1MU18VFCH:
+  stepCounts:
+    0: 6
+    1: 5
+    2: 4
+    3: 4
+  stepFeatures:
+    0: 7
+    1: 6
+    2: 5
+    3: 4
+  eventCount: 0
+EF_mu23_mu4_bBmux_BdmuDstarX_L1MU18VFCH:
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 2
+    1: 2
+    2: 2
+  eventCount: 0
+leg000_EF_mu23_mu4_bBmux_BdmuDstarX_L1MU18VFCH:
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 2
+    1: 2
+    2: 2
+  eventCount: 0
+leg001_EF_mu23_mu4_bBmux_BdmuDstarX_L1MU18VFCH:
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 2
+    1: 2
+    2: 2
   eventCount: 0
 EF_mu24_idperf_L1MU14FCH:
   stepCounts:
@@ -7570,6 +8322,78 @@ EF_mu60_L1MU14FCH:
     2: 2
     3: 2
   eventCount: 2
+EF_mu6_2mu4_bJpsi_L1MU5VF_3MU3VF:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu6_2mu4_bJpsi_L1MU5VF_3MU3VF:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 2
+  eventCount: 0
+leg001_EF_mu6_2mu4_bJpsi_L1MU5VF_3MU3VF:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu6_2mu4_bJpsi_L1MU5VF_3MU3V:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu6_2mu4_bJpsi_L1MU5VF_3MU3V:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 2
+  eventCount: 0
+leg001_EF_mu6_2mu4_bJpsi_L1MU5VF_3MU3V:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu6_2mu4_bTau_L1MU5VF_3MU3VF:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu6_2mu4_bTau_L1MU5VF_3MU3VF:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 2
+  eventCount: 0
+leg001_EF_mu6_2mu4_bTau_L1MU5VF_3MU3VF:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
+  eventCount: 0
+EF_mu6_2mu4_bTau_L1MU5VF_3MU3V:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
+  eventCount: 0
+leg000_EF_mu6_2mu4_bTau_L1MU5VF_3MU3V:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 2
+  eventCount: 0
+leg001_EF_mu6_2mu4_bTau_L1MU5VF_3MU3V:
+  stepCounts:
+    0: 1
+  stepFeatures:
+    0: 4
+  eventCount: 0
 EF_mu6_idperf_L1MU5VF:
   stepCounts:
     0: 11
@@ -10843,6 +11667,10 @@ EF_2mu10_l2mt_L1MU10BOM:
 EF_3j190_pf_ftf_presel3j150_L1jJ160:
   eventCount: 0
 EF_3mu6_L13MU5VF:
+  eventCount: 0
+EF_3mu6_bJpsi_L13MU5VF:
+  eventCount: 0
+EF_3mu6_bTau_L13MU5VF:
   eventCount: 0
 EF_3mu6_msonly_L13MU5VF:
   eventCount: 0
