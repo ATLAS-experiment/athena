@@ -352,7 +352,7 @@ StatusCode L2MuonSAMon :: fillVariablesPerOfflineMuonPerChain(const EventContext
   auto invptresol = Monitored::Scalar<float>(chain+"_invptresol",-999.);
   if ( std::abs(offPt) > ZERO_LIMIT && std::abs(muSAPt) > ZERO_LIMIT ) {
     ptresol = std::abs(muSAPt)/std::abs(offPt) - 1.;
-    ATH_MSG_ALWAYS("Pt: "<< muSAPt << " vs " << offPt * offCharge << " => ptresol = " << ptresol);
+    ATH_MSG_DEBUG("Pt: "<< muSAPt << " vs " << offPt * offCharge << " => ptresol = " << ptresol);
     invptresol = (1./(offPt * offCharge) - 1./muSAPt) / (1./(offPt * offCharge));
   }
 
