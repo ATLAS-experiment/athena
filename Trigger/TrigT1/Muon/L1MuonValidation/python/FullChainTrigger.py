@@ -60,9 +60,9 @@ if __name__ == "__main__":
                                          RDOContainer = "MDTCSM" ))
 
         from RegionSelector.RegSelToolConfig import regSelTool_MDT_Cfg
-        from L1MuonMDT.L0MuonMDTConfig import L0MuonMDTSimCfg
-        acc.merge(L0MuonMDTSimCfg(flags,
-                                 name = "L0MuonMDTSim",
+        from L1MuonMDT.L1MuonMDTConfig import L1MuonMDTSimCfg
+        acc.merge(L1MuonMDTSimCfg(flags,
+                                 name = "L1MuonMDTSim",
                                  OutputLevel = DEBUG,
                                  RegSel_MDT = acc.popToolsAndMerge(regSelTool_MDT_Cfg(flags))
                                 ))

@@ -4,7 +4,6 @@ atlas_subdir ( L1MuonMDT )
 
 atlas_add_component (L1MuonMDT
         src/*.cxx src/components/*.cxx
-
         LINK_LIBRARIES AthenaKernel xAODMuonRDO MuonRDO MuonDigitContainer xAODTrigger AthenaMonitoringKernelLib IRegionSelector
   MuonReadoutGeometryR4 L1MuonMDTToolsLib TrigSteeringEvent xAODMuonViews xAODMuonPrepData xAODTrigL1Muon MdtCalibSvcLib MuonCalibEventBase MuonCalibITools xAODMuonSimHit)
 
@@ -12,7 +11,7 @@ atlas_add_component (L1MuonMDT
 
 
 atlas_add_test( RunTest
-        SCRIPT python -m L1MuonMDT.L0MuonMDTConfig --nEvents 2
+        SCRIPT python -m L1MuonMDT.L1MuonMDTConfig --nEvents 2
                 PRIVATE_WORKING_DIRECTORY
               	POST_EXEC_SCRIPT noerror.sh)
 
