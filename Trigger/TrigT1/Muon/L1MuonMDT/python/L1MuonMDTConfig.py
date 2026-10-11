@@ -8,7 +8,7 @@ from AthenaCommon.Logging import logging
 _log = logging.getLogger(__name__)
 
 
-def L0MuonMDTSimCfg(flags, name="L0MuonMDTSim", **kwargs):
+def L1MuonMDTSimCfg(flags, name="L1MuonMDTSim", **kwargs):
     """
     Config for L1Muon::MDTSimulation.
 
