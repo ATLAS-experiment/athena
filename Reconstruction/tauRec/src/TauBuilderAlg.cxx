@@ -137,7 +137,7 @@ StatusCode TauBuilderAlg::execute(const EventContext& ctx) const {
     for (const ToolHandle<ITauToolBase>& tool : m_tools) {
       ATH_MSG_DEBUG("ProcessorAlg Invoking tool " << tool->name());
 
-      if (tool->type() == "TauTrackFinder") {
+      if (tool->type() == "TauTrackFinder" || tool->type() == "TauTrackCaloExtrapolator") {
         sc = tool->executeTool(*pTau, ctx, *pTauTrackCont);
       } else if (tool->type() == "tauRecTools::TauTrackRNNClassifier") {
         sc = tool->executeTool(*pTau, ctx, *pTauTrackCont);

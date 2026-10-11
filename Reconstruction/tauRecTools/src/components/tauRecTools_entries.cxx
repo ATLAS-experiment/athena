@@ -11,6 +11,7 @@
 #include "../TauPi0CreateROI.h"
 #include "../TauPi0ClusterScaler.h"
 #include "../TauVertexVariables.h"
+#include "../TauTrackCaloExtrapolator.h"
 #endif
 
 #include "tauRecTools/TauCalibrateLC.h"
@@ -49,6 +50,7 @@ DECLARE_COMPONENT( TauPi0ClusterCreator )
 DECLARE_COMPONENT( TauPi0CreateROI )
 DECLARE_COMPONENT( TauPi0ClusterScaler )
 DECLARE_COMPONENT( TauVertexVariables )
+DECLARE_COMPONENT( TauTrackCaloExtrapolator )
 #endif
 
 DECLARE_COMPONENT( TauCalibrateLC )

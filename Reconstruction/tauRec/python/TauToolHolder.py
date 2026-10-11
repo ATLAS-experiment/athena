@@ -86,7 +86,6 @@ def TauTrackFinderCfg(flags):
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     result.merge(BeamSpotCondAlgCfg(flags))
 
-    from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
     from TrkConfig.TrkVertexFitterUtilsConfig import AtlasTrackToVertexIPEstimatorCfg
     from InDetConfig.InDetTrackSelectorToolConfig import TauRecInDetTrackSelectorToolCfg
 
@@ -102,8 +101,6 @@ def TauTrackFinderCfg(flags):
                                     MaxJetDrWide = 0.4,
                                     TrackSelectorToolTau      = result.popToolsAndMerge(TauRecInDetTrackSelectorToolCfg(flags)),
                                     TrackToVertexTool         = "",
-                                    ParticleCaloExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)),
-                                    tauParticleCache = getParticleCache(flags), # only returns a string
                                     removeDuplicateCoreTracks = flags.Tau.RemoveDupeCoreTracks,
                                     useGhostTracks = flags.Tau.useGhostTracks,
                                     ghostTrackDR = flags.Tau.ghostTrackDR,
@@ -115,6 +112,25 @@ def TauTrackFinderCfg(flags):
     )
     result.setPrivateTools(TauTrackFinder)
     return result
+
+########################################################################
+# Tau-Track Calo Extrapolator
+def TauTrackCaloExtrapolatorCfg(flags):
+    result = ComponentAccumulator()
+    _name = flags.Tau.ActiveConfig.prefix + 'TauTrackCaloExtrapolator'
+
+    from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
+
+    TauTrackCaloExtrapolator = CompFactory.getComp("TauTrackCaloExtrapolator")
+    TauTrackCaloExtrapolator = TauTrackCaloExtrapolator(name = _name,
+                                    ParticleCaloExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)),
+                                    tauParticleCache = getParticleCache(flags), # only returns a string
+                                    ExtrapOnlyChargedTracks = False if flags.GeoModel.Run <= LHCPeriod.Run3 else True,
+    )
+    result.setPrivateTools(TauTrackCaloExtrapolator)
+    return result
+
+
 
 ########################################################################
 # Associate the cluster in jet constituents to the tau candidate

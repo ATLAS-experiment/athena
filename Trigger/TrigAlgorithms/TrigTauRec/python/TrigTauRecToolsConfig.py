@@ -40,8 +40,6 @@ def trigTauTrackFinderCfg(flags, name='', TrackParticlesContainer=''):
         TrackToVertexTool               = TrackToVertexTool,
         Key_trackPartInputContainer     = TrackParticlesContainer,
         maxDeltaZ0wrtLeadTrk            = 0.75*mm,
-        ParticleCaloExtensionTool       = "",
-        tauParticleCache                = "",
         TrackToVertexIPEstimator        = AtlasTrackToVertexIPEstimator,
     ))
 
