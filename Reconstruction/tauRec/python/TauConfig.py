@@ -36,6 +36,9 @@ def TauBuildAlgCfg(flags):
     if flags.Beam.Type is not BeamType.Cosmics and flags.Tau.doRNNTrackClass:
         tools.append( result.popToolsAndMerge(tauTools.TauTrackRNNClassifierCfg(flags)) )
 
+    # track to calo extrapolation
+    tools.append( result.popToolsAndMerge(tauTools.TauTrackCaloExtrapolatorCfg(flags)) )
+
     # cluster association + vertex correction
     tools.append( result.popToolsAndMerge(tauTools.TauClusterFinderCfg(flags)) )
     tools.append( result.popToolsAndMerge(tauTools.TauVertexedClusterDecoratorCfg(flags)) )

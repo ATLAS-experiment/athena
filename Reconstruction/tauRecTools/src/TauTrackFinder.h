@@ -10,7 +10,6 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "ITrackToVertex/ITrackToVertex.h"
-#include "TrkCaloExtension/CaloExtensionCollection.h"
 
 #include "xAODTracking/Vertex.h"
 #include "xAODTracking/TrackParticleContainer.h"
@@ -67,12 +66,6 @@ public:
 				   xAOD::TauTrackContainer& tauTrackCon) const override;
     
 private:
-    //-------------------------------------------------------------
-    //! Extrapolate track eta and phi to the calorimeter middle surface
-    //-------------------------------------------------------------
-    StatusCode extrapolateToCaloSurface(const EventContext& ctx,
-                                        xAOD::TauJet& pTau,
-                                        xAOD::TauTrackContainer& tauTrackCon) const;
 
     TauTrackType tauTrackType( const xAOD::TauJet& tauJet,
 			       const xAOD::TrackParticle& trackParticle,
@@ -104,7 +97,6 @@ private:
     //-------------------------------------------------------------
     //! tools
     //-------------------------------------------------------------
-    ToolHandle<Trk::IParticleCaloExtensionTool> m_caloExtensionTool {this, "ParticleCaloExtensionTool", "Trk::ParticleCaloExtensionTool/ParticleCaloExtensionTool", "Tool for the extrapolation of charged tracks"};
     ToolHandle<Trk::ITrackSelectorTool> m_trackSelectorTool_tau {this, "TrackSelectorToolTau", "", "Tool for track selection"};
     ToolHandle<Reco::ITrackToVertex> m_trackToVertexTool {this, "TrackToVertexTool", "Reco::TrackToVertex"};
     ToolHandle<Trk::ITrackToVertexIPEstimator> m_trackToVertexIPEstimator {this, "TrackToVertexIPEstimator", ""};
@@ -119,15 +111,11 @@ private:
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_trackPartInputContainer {this,"Key_trackPartInputContainer", "InDetTrackParticles", "input track particle container key"};
     SG::ReadHandleKey<xAOD::TrackParticleContainer> m_largeD0TracksInputContainer {this,"Key_LargeD0TrackInputContainer", "", "input LRT particle container key"}; //Expecting InDetLargeD0TrackParticles (offline tracks) if using LRT used
     SG::ReadHandleKey<xAOD::JetContainer> m_jetContainer {this,"Key_jetContainer", "", "Name of the seed jet container, when using ghost matching"};
-    SG::ReadHandleKey<CaloExtensionCollection> m_ParticleCacheKey {this,"tauParticleCache", "ParticleCaloExtension", "Name of the particle measurement extrapolation cache for TauTrackFinder"};
     
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey { this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot" };
 
-    bool m_bypassExtrapolator = false;
     bool m_applyZ0cut = false; 
 
-    std::set<CaloSampling::CaloSample> m_EMSamplings;
-    std::set<CaloSampling::CaloSample> m_HadSamplings;
 };
 
 #endif // TAURECTOOLS_TAUTRACKFINDER_H
