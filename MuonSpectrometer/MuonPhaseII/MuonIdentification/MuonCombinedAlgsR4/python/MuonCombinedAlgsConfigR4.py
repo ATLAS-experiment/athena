@@ -39,12 +39,32 @@ def MuonCombinedStacoAlgCfg(flags, name="MuonCombinedStacoAlgR4", **kwargs ):
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def LRT_MuonCombinedStacoAlgCfg(flags, name="MuonCombinedStacoAlgR4_LRT", **kwargs ):
+    kwargs.setdefault("IdTrkKey", "MuonInDetCandidatesLRT")
+    kwargs.setdefault("writeKey","MuonTagsSTACOLRT")
+    kwargs.setdefault("writeTrkKey","STACOTrackParticlesLRT")
+    return MuonCombinedStacoAlgCfg(flags, name, **kwargs)
+
 def MuonLegacyCaloTagAlgCfg(flags, name = "MuonLegacyCaloTagAlgR4", **kwargs):
     result = ComponentAccumulator()
     from MuonCombinedConfig.MuonCombinedReconstructionConfig import MuonCaloTagAlgCfg, MuonCombinedInDetCandidateAlgCfg
     result.merge(MuonCombinedInDetCandidateAlgCfg(flags))
     result.merge(MuonCaloTagAlgCfg(flags))
     the_alg = CompFactory.MuonCombinedR4.LegacyCaloTagAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
+
+def LRT_MuonLegacyCaloTagAlgCfg(flags, name = "MuonLegacyCaloTagAlgR4_LRT", **kwargs):
+    result = ComponentAccumulator()
+    from TrackToCalo.CaloExtensionBuilderAlgCfg  import CaloExtensionBuilderAlgLRTCfg
+    from MuonCombinedConfig.MuonCombinedReconstructionConfig import LRT_MuonCaloTagAlgCfg, LRT_MuonCombinedInDetCandidateAlgCfg
+    result.merge(CaloExtensionBuilderAlgLRTCfg(flags))
+    result.merge(LRT_MuonCombinedInDetCandidateAlgCfg(flags))
+    result.merge(LRT_MuonCaloTagAlgCfg(flags))
+    kwargs.setdefault("IdTrackKey", "MuonInDetCandidatesLRT")
+    kwargs.setdefault("WriteKey","LegacyCaloTagsLRT")
+    kwargs.setdefault("CaloTagMap","caloTagMap_LRT")
+    the_alg  = CompFactory.MuonCombinedR4.LegacyCaloTagAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
 
@@ -67,6 +87,11 @@ def MuonInDetTrackSelectionAlgCfg(flags, name="MuonCombinedInDetCandidateAlgR4",
     result.addEventAlgo(the_alg, primary = True)
     return result
 
+def LRT_MuonInDetTrackSelectionAlgCfg(flags, name="MuonCombinedInDetCandidateAlgR4_LRT", **kwargs):
+    kwargs.setdefault("IdTrackKey", "InDetLargeD0TrackParticles")
+    kwargs.setdefault("writeKey", "MuonInDetCandidatesLRT")
+    return MuonInDetTrackSelectionAlgCfg(flags, name, **kwargs) 
+
 def MuonSegmentTaggingAlgCfg(flags, name="MuonCombinedSegmentTaggingAlgR4", **kwargs):
     result = ComponentAccumulator()
     from MuonTrackFindingAlgs.TrackFindingConfig import MSExtrapolatorCfg
@@ -74,6 +99,11 @@ def MuonSegmentTaggingAlgCfg(flags, name="MuonCombinedSegmentTaggingAlgR4", **kw
     the_alg = CompFactory.MuonCombinedR4.SegmentTaggingAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
+
+def LRT_MuonSegmentTaggingAlgCfg(flags, name="MuonCombinedSegmentTaggingAlgR4_LRT", **kwargs):
+    kwargs.setdefault("IdTrackKey", "MuonInDetCandidatesLRT")
+    kwargs.setdefault("writeKey", "SegmentTagsLRT")
+    return MuonSegmentTaggingAlgCfg(flags, name, **kwargs)
 
 def MuonCreatorAlgCfg(flags, name="MuonCreatorAlgR4", **kwargs):
     result = ComponentAccumulator()

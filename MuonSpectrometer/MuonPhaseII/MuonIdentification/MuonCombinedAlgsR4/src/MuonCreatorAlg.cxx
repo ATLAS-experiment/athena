@@ -169,6 +169,9 @@ void MuonCreatorAlg::createMuon(const EventContext& ctx,
         case MuTagIMO:
             newMuon->setMuonType(xAOD::Muon::MuonType::SegmentTagged);
             break;
+        case CaloScore:
+             newMuon->setMuonType(xAOD::Muon::MuonType::CaloTagged);
+             break;
         default:
             ATH_MSG_WARNING("Invalid muon author "<<newMuon->author()<<". Cannot determine the muon type");
             ship.muons->pop_back();
