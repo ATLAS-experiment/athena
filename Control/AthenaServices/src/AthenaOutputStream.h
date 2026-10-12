@@ -69,14 +69,16 @@ public:
    virtual StatusCode execute(const EventContext& ctx) override;
    //@}
 
-   /// Stream the data
+   /// Stream the data from the event store
    virtual StatusCode write(const EventContext& ctx);
+   /// Stream the data from the given store
+   StatusCode write(const EventContext& ctx, StoreGateSvc& store);
 
    /// Clear list of selected objects
    void clearSelection();
 
    /// Collect data objects for output streamer list
-   StatusCode collectAllObjects(const EventContext& ctx);
+   StatusCode collectAllObjects(const EventContext& ctx, StoreGateSvc& store);
 
    /// Return the list of selected objects
    IDataSelector* selectedObjects() {
@@ -95,7 +97,6 @@ protected:
    /// write out resides
    ServiceHandle<StoreGateSvc>  m_dataStore{this, "Store", "StoreGateSvc/StoreGateSvc", "Handle to event store"};
    ServiceHandle<StoreGateSvc>  m_metadataStore{this, "MetadataStore", "StoreGateSvc/MetaDataStore", "Handle to metadata store"};
-   ServiceHandle<StoreGateSvc>* m_currentStore;
 
    /// Handles to all the necessary services
    ServiceHandle<MetaDataSvc>              m_metaDataSvc{this, "MetaDataSvc", "MetaDataSvc"};
@@ -222,7 +223,7 @@ private:
    std::string m_outputAttributes;
 
    /// Add item data objects to output streamer list
-   StatusCode addItemObjects(const EventContext&, const SG::FolderItem&, SG::SelectionVetoes& vetoes, SG::CompressionInfo& compInfo);
+   StatusCode addItemObjects(const EventContext&, StoreGateSvc& store, const SG::FolderItem&, SG::SelectionVetoes& vetoes, SG::CompressionInfo& compInfo);
 
    void handleVariableSelection (const SG::IConstAuxStore& auxstore,
                                  SG::DataProxy& itemProxy,

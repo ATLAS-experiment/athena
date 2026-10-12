@@ -42,7 +42,6 @@
 // Standard Constructor
 AthenaOutputStream::AthenaOutputStream(const std::string& name, ISvcLocator* pSvcLocator)
       : base_class(name, pSvcLocator),
-        m_currentStore(&m_dataStore),
         m_p2BWritten(std::format("SG::Folder/{}_TopFolder", name), this),
         m_compressionDecoderHigh(std::format("SG::Folder/{}_compressed_high", name), this),
         m_compressionDecoderLow(std::format("SG::Folder/{}_compressed_low", name), this),
@@ -92,6 +91,7 @@ StatusCode AthenaOutputStream::initialize() {
    ATH_CHECK( m_dictLoader.retrieve() );
    ATH_CHECK( m_tpCnvSvc.retrieve() );
    ATH_CHECK( m_outSeqSvc.retrieve() );
+   ATH_CHECK( m_metaDataSvc.retrieve() );
 
    // Get Output Stream tool for writing
    ATH_CHECK( m_streamer.retrieve() );
@@ -341,7 +341,6 @@ void AthenaOutputStream::writeMetaData(const EventContext& ctx, const std::strin
 
    ATH_MSG_DEBUG("metadataItemList: {}", m_metadataItemList.value() );
    if (!m_metadataItemList.value().empty()) {
-      m_currentStore = &m_metadataStore;
       StatusCode status = streamer->connectServices(m_metadataStore.typeAndName(), m_persName, false);
       if (status.isFailure()) {
          throw GaudiException("Unable to connect metadata services", name(), StatusCode::FAILURE);
@@ -354,14 +353,13 @@ void AthenaOutputStream::writeMetaData(const EventContext& ctx, const std::strin
           (pAsIProp->setProperty("ItemList", m_metadataItemList.toString())).isFailure()) {
          throw GaudiException("Folder property [metadataItemList] not found", name(), StatusCode::FAILURE);
       }
-      if (write(ctx).isFailure()) {
+      if (write(ctx, *m_metadataStore).isFailure()) {
          throw GaudiException("Cannot write metadata", name(), StatusCode::FAILURE);
       }
       FileIncident incident(name(), "WriteDataHeaderForms", DHFWriteIncidentfileName + m_outputAttributes);
       m_incidentSvc->fireIncident(incident);
 
       m_outputAttributes.clear();
-      m_currentStore = &m_dataStore;
       status = streamer->connectServices(m_dataStore.typeAndName(), m_persName, m_extendProvenanceRecord);
       if (status.isFailure()) {
          throw GaudiException("Unable to re-connect services", name(), StatusCode::FAILURE);
@@ -440,6 +438,10 @@ StatusCode AthenaOutputStream::execute(const EventContext& ctx) {
 
 // The main method that performs the writing
 StatusCode AthenaOutputStream::write(const EventContext& ctx) {
+   return write(ctx, *m_dataStore);
+}
+
+StatusCode AthenaOutputStream::write(const EventContext& ctx, StoreGateSvc& store) {
    bool failed = false;
    IAthenaOutputStreamTool* streamer = &*m_streamer;
    std::string outputFN;
@@ -477,7 +479,7 @@ StatusCode AthenaOutputStream::write(const EventContext& ctx) {
    // Clear any previously existing item list
    // and collect all objects that are asked to be written out
    clearSelection();
-   ATH_CHECK( collectAllObjects(ctx) );
+   ATH_CHECK( collectAllObjects(ctx, store) );
 
    // keep a local copy of the object lists so they are not overwritten when we release the lock
    IDataSelector objects = std::move( m_objects );
@@ -530,7 +532,7 @@ void AthenaOutputStream::clearSelection()     {
 }
 
 // Collect objects
-StatusCode AthenaOutputStream::collectAllObjects(const EventContext& ctx) {
+StatusCode AthenaOutputStream::collectAllObjects(const EventContext& ctx, StoreGateSvc& store) {
    if (m_itemListFromTool) {
       if (!m_streamer->getInputItemList(&*m_p2BWritten).isSuccess()) {
          ATH_MSG_WARNING("collectAllObjects() could not get ItemList from Tool.");
@@ -545,7 +547,7 @@ StatusCode AthenaOutputStream::collectAllObjects(const EventContext& ctx) {
    m_p2BWritten->updateItemList(true);
    // Collect all objects that need to be persistified:
    for (const auto& i : *m_p2BWritten) {
-      ATH_CHECK( addItemObjects(ctx, i, *vetoes, *compInfo) );
+      ATH_CHECK( addItemObjects(ctx, store, i, *vetoes, *compInfo) );
    }
 
    // If there were any variable selections, record the information in SG.
@@ -565,6 +567,7 @@ StatusCode AthenaOutputStream::collectAllObjects(const EventContext& ctx) {
 // This function also builds the list of vetoed AuxIDs
 // and the lossy float compression lists.
 StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
+                                              StoreGateSvc& store,
                                               const SG::FolderItem& item,
                                               SG::SelectionVetoes& vetoes,
                                               SG::CompressionInfo& compInfo)
@@ -603,12 +606,14 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
    }
 
    // For MetaData objects of type T that are kept in MetaContainers get the MetaCont<T> ID
-   const CLID remapped_item_id = m_metaDataSvc->remapMetaContCLID( item_id );
+   // (only metadata is kept in MetaContainers)
+   const bool isMetaData = store.storeID() == StoreID::METADATA_STORE;
+   const CLID remapped_item_id = isMetaData ? m_metaDataSvc->remapMetaContCLID( item_id ) : item_id;
    SG::ConstProxyIterator iter, end;
    SG::ProxyMap map;
    bool gotProxies = false;
    // Look for the clid in storegate
-   SG::DataProxy* match = (*m_currentStore)->proxy(remapped_item_id, item_key, true);
+   SG::DataProxy* match = store.proxy(remapped_item_id, item_key, true);
    if (match != nullptr) {
       map.insert({item_key, match});
       iter = map.begin();
@@ -616,7 +621,7 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
       gotProxies = true;
    }
    // Look for the clid in storegate
-   if (!gotProxies && ((*m_currentStore)->proxyRange(remapped_item_id, iter, end)).isSuccess()) {
+   if (!gotProxies && (store.proxyRange(remapped_item_id, iter, end)).isSuccess()) {
       gotProxies = true;
    }
    if (gotProxies) {
@@ -626,7 +631,7 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
          SG::DataProxy* itemProxy(iter->second);
          std::string proxyName = itemProxy->name();
          std::string stream;
-         if( m_currentStore == &m_metadataStore ) {
+         if( isMetaData ) {
             // only check metadata keys
             stream = m_metaDataSvc->removeStreamFromKey(proxyName);  // can modify proxyName
          }
@@ -707,7 +712,7 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
                /// Handle variable selections.
                /// Both variable selection and lossy float compression
                /// are limited to event data for the time being
-               if ((*m_currentStore)->storeID() == StoreID::EVENT_STORE &&
+               if (store.storeID() == StoreID::EVENT_STORE &&
                    item_key.find( RootAuxDynIO::AUX_POSTFIX ) == ( item_key.size() - 4 )) {
 
                   const SG::IConstAuxStore* auxstore( nullptr );

@@ -8,8 +8,8 @@ LoadWriteDicts       INFO Initializing LoadWriteDicts...
 DecisionSvc          INFO Inserting stream: StreamThinned1 with no Algs
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
-Stream...nned1Tool   INFO Initializing StreamThinned1.StreamThinned1Tool
 MetaDataSvc          INFO Initializing MetaDataSvc
+Stream...nned1Tool   INFO Initializing StreamThinned1.StreamThinned1Tool
 StreamThinned1       INFO Data output: xaodthinned1.root
 StreamThinned1       INFO ../O reinitialization...
 EventSelector        INFO  Enter McEventSelector Initialization 

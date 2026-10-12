@@ -16,6 +16,7 @@ ClassIDSvc           INFO getRegistryEntries: read 1028 CLIDRegistry entries for
 DecisionSvc          INFO Inserting stream: StreamStream1 with no Algs
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
+MetaDataSvc          INFO Initializing MetaDataSvc
 Stream...ream1Tool   INFO Initializing StreamStream1.StreamStream1Tool
 PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
 PoolSvc              INFO Frontier compression level set to 5
@@ -26,7 +27,6 @@ PoolSvc              INFO Successfully setup replica sorting algorithm
 PoolSvc              INFO Setting up FileCatalog and Streams
 PoolSvc              INFO POOL WriteCatalog is file:xAODTestRead2_rntup_catalog.xml
 Domain[ROOT_All]     INFO >   Access   DbDomain     NOT_OPEN  [ROOT_All]
-MetaDataSvc          INFO Initializing MetaDataSvc
 MetaDataSvc          INFO Found MetaDataTools = PublicToolHandleArray([])
 PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
 xaoddata2.r...root   INFO ->  Access   DbDatabase   READ      [ROOT_All] 20DF6091-99D3-70EF-3FAB-0FF0FF0FF0FF

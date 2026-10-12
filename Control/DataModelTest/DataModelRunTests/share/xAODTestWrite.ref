@@ -8,8 +8,8 @@ LoadWriteDicts       INFO Initializing LoadWriteDicts...
 DecisionSvc          INFO Inserting stream: StreamStream1 with no Algs
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
-Stream...ream1Tool   INFO Initializing StreamStream1.StreamStream1Tool
 MetaDataSvc          INFO Initializing MetaDataSvc
+Stream...ream1Tool   INFO Initializing StreamStream1.StreamStream1Tool
 StreamStream1        INFO Data output: xaoddata.root
 StreamStream1        INFO ../O reinitialization...
 EventSelector        INFO  Enter McEventSelector Initialization 
