@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHENASERVICES_METADATASVC_H
@@ -307,7 +307,6 @@ class MetaDataSvc : public extends<::AthService,
   bool m_allowMetaDataStop{false};
   bool m_beginInputFileSeen{false};
   bool m_outputPrepared{false};
-  std::map<std::string_view, CLID> m_persToClid{};
 
   std::set<CLID>        m_handledClasses{};
   /// marker string for embedding stream name in MetaData object keys for SharedWriter server
