@@ -16,14 +16,14 @@ namespace GlobalSim {
   StatusCode TOBTextReader::initialize() {
     ATH_CHECK(m_outKey.initialize());
 
-    const auto entry = specRegistry().find(m_specName.value());
-    if (entry == specRegistry().end()) {
-      ATH_MSG_ERROR("Unknown BitSpec '" << m_specName.value()
-                    << "'. Known specs are: " << knownSpecNames());
+    std::string error;
+    const SpecEntry* entry = specEntry(m_specName.value(), error);
+    if (entry == nullptr) {
+      ATH_MSG_ERROR("BitSpec '" << m_specName.value() << "': " << error);
       return StatusCode::FAILURE;
     }
-    m_width = entry->second.width;
-    m_unpack = entry->second.unpack;
+    m_width = entry->width;
+    m_unpack = entry->unpack;
 
     // The whole file is read here so that execute() can stay const and
     // reentrant: after this point m_events is only ever read.

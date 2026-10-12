@@ -87,6 +87,17 @@ atlas_add_test( Object_test
 		LINK_LIBRARIES ${GTEST_LIBRARIES} GlobalSimulationLib
 		POST_EXEC_SCRIPT noerror.sh )
 
+# Checks that every spec listed in selection.xml can be built and used. Nothing
+# about a spec is verified when this package is compiled any more, so this is
+# what keeps a listed-but-unusable spec from reaching a job.
+atlas_add_test( SpecRegistry_test
+		SOURCES test/SpecRegistry_test.cxx src/SpecRegistry.cxx
+		        src/Utilities/hexStrToBinStr.cxx
+		INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+		             ${CMAKE_CURRENT_SOURCE_DIR}/src
+		LINK_LIBRARIES ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} GlobalSimulationLib
+		POST_EXEC_SCRIPT noerror.sh )
+
 atlas_add_test( JsonConfig
         SCRIPT "l1calo-ath-mon --evtMax 10 --postInclude GlobalSimulation/plugin_GlobalSimFromJson.py --filesInput RAW_RUN3_DATA24 -- Trigger.L1.doeFex=True Trigger.L1.dogFex=True IOVDb.GlobalTag='CONDBR2-BLKPA-2024-05'"
         PROPERTIES TIMEOUT 600
