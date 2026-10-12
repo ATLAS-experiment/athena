@@ -7,7 +7,6 @@
  **
  **   $Id: ConfiguredValue.h, v0.0   Tue  8 Sep 2026 12:34:40 BST sutt $
  **
- **   Copyright (C) 2026 sutt (sutt@cern.ch)    
  **   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
