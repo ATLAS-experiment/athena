@@ -413,7 +413,8 @@ def muEFSARecoSequenceCfg(flags, RoIs, suffix="", useBucketFilter=False):
                                                 WriteKey="TrackMuonSegments"))
         
         # Track building
-        from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg, StandaloneTrackPartCnvCfg, MuidSaTagMakerAlgCfg, MuonCreatorAlgCfg
+        from MuonTrackFindingAlgs.TrackFindingConfig import MSTrackFinderAlgCfg, StandaloneTrackPartCnvCfg
+        from MuonCombinedAlgsR4.MuonCombinedAlgsConfigR4 import MuidSaTagMakerAlgCfg, MuonCreatorAlgCfg
         acc.merge(MSTrackFinderAlgCfg(flags, name=f"MSTrackFinderAlg{suffix}"))
         acc.merge(StandaloneTrackPartCnvCfg(flags, name=f"MuonMsTrackParticleCnvR4{suffix}",
                                                    TrackParticlesOutKey = msTrackName))
