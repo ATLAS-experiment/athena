@@ -703,7 +703,9 @@ for (const auto& [energy, time] : *TimeE) {
          else sampleList[i] += Shape[j]*energy ;
        }
       }
+#ifndef NDEBUG
       msg() << MSG::DEBUG << endmsg;
+#endif
    }
 // Mode to use phase (tbin) to get pulse shape ( pulse shape with fine time binning should be available)
 
