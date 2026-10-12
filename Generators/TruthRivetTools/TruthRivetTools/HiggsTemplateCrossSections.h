@@ -1030,7 +1030,7 @@ int getBin(double x, const std::vector<double>& bins) const {
     }
 
     /// @brief Select H->ZZ->4l candidate: 4 charged leptons, net charge=0,
-    ///        combined invariant mass in [105, 130] GeV, passing angular overlap cut.
+    ///        combined invariant mass in [115, 130] GeV, passing angular overlap cut.
     /// @return a 8 bit number, first 6 bits for 6 cuts (lepton_num, jpsi, m12, m34, delta <, h_mass), 
     /// @return last 2 bits (i.e. most significant): 0b10 for contains mu, 0b01 for contains e (so 0b11 for 2e2mu)
     unsigned char findZZ4ldecay(std::vector<FourMomentum>        v_p4,
@@ -1056,7 +1056,7 @@ int getBin(double x, const std::vector<double>& bins) const {
         }
       }
 
-      cut_passed |= (hsum.mass() > 105 && hsum.mass() < 130) << 5;
+      cut_passed |= (hsum.mass() > 115 && hsum.mass() < 130) << 5;
 
       // We put additional 2 bits of info to cut_passed to determine if is 4e, 2e2mu, or 4mu!
       // side note: [0] and [2] takes 1 particle from each lepton pair
