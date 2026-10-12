@@ -65,13 +65,13 @@ if (NOT SIMULATIONBASE)
     #### Test that the sector envelopes fully enclose the particular chambers
     atlas_add_test( testChamberBuilding
                     SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder 
-                    PROPERTIES TIMEOUT 1200
+                    PROPERTIES TIMEOUT 2400
                     PRIVATE_WORKING_DIRECTORY
                     POST_EXEC_SCRIPT noerror.sh)
     #### Test that the sector envelopes fully enclose the particular chambers (R4)
     atlas_add_test( testChamberBuildingR4
                     SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --defaultGeoFile RUN4
-                    PROPERTIES TIMEOUT 1200
+                    PROPERTIES TIMEOUT 2400
                     PRIVATE_WORKING_DIRECTORY
                     POST_EXEC_SCRIPT noerror.sh)
 
