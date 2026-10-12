@@ -58,7 +58,7 @@ namespace ftag {
       VariableMule<int, xAOD::IParticleContainer> ints{-1};
       VariableMule<uint, xAOD::IParticleContainer> uints{0};
       VariableMule<ulong, xAOD::IParticleContainer> ulongs{0};
-      VariableMule<char, xAOD::IParticleContainer> chars{-1};
+      VariableMule<char, xAOD::IParticleContainer> chars{0};
 
       template <class OWNER>
       Slot(OWNER* owner, const SG::VarHandleKey& jets, const std::string& slot)
