@@ -4,7 +4,6 @@
 
 #include "TrigParticle/TrigElectronContainer.h"
 #include "TrigParticle/TrigPhotonContainer.h"
-#include "TrigParticle/TrigTauContainer.h"
 #include "TrigParticle/TrigL2Bphys.h"
 #include "TrigParticle/TrigL2BphysContainer.h"
 #include "TrigParticle/TrigEFBphys.h"

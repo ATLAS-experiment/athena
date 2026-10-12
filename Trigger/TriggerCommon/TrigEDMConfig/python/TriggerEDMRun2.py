@@ -729,7 +729,6 @@ TriggerHLTList = [
     ('TrigMuonClusterFeature#HLT_MuonCluster',                            'BS ESD', 'Muon'),
     ('CombinedMuonFeature#HLT',                                           'BS ESD AODFULL AODSLIM', 'Muon'),
     ('TrigPhotonContainer#HLT_L2PhotonFex',                               '',                       'Egamma'),
-    ('TrigTau#HLT',                                                       '',                       'Tau'),
     ('TileMuFeature#HLT',                                                 'BS ESD',                 'Muon'),
     ('TileTrackMuFeature#HLT',                                            'BS ESD',                 'Muon'),
     ('TrigElectronContainer#HLT_L2IDCaloFex',                             '',                       'Egamma'),  # ? is this still in use?? 
@@ -1075,7 +1074,6 @@ TriggerL2EvolutionList = [
 #('TrigMuonClusterFeature#HLT_MuonCluster',                              ), # xAOD equivalent not identified
 ('CombinedMuonFeature#HLT',                                              'xAOD::L2CombinedMuonContainer#HLT_MuonL2CBInfo'),
 ('TrigPhotonContainer#HLT_L2PhotonFex',                                  'xAOD::TrigPhotonContainer#HLT_L2PhotonFex'),
-#('TrigTau#HLT',                                                         ), # xAOD equivalent not found
 #('TileMuFeature#HLT',                                                   ), # xAOD equivalent not found
 #('TileTrackMuFeature#HLT',                                              ), # xAOD equivalent not found
 ('TrigElectronContainer#HLT_L2IDCaloFex',                                'xAOD::TrigElectronContainer#HLT_L2IDCaloFex'),

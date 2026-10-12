@@ -18,18 +18,6 @@
   </class>
 
 
-
-  <class name="TrigTauContainer" id="97510EA1-1A91-4AC6-BA9B-9366D342D131" />
-  <class name="DataVector<TrigTau>" id="D68DF4EB-5017-4673-B4BC-5471E71E11AF" />
-  <class name="std::vector<TrigTau*>" />
-  <class name="std::vector<const TrigTau*>" />
-  <class name="TrigTau" id="F95B5B76-13D3-4EB4-94BB-1383B8571ADD" >
-    <field name="m_cluster" transient="true" />
-    <field name="m_tracksInfo" transient="true" />
-    <field name="m_tracks" transient="true" />
-  </class>
-
-
   <class name="TrigL2BphysContainer" id="23296C53-6811-4D19-BD32-816B5DD0508F" />
   <class name="DataVector<TrigL2Bphys>" id="390F41C1-CCFA-4A1D-B046-F9F462FD64D0" />
   <class name="std::vector<TrigL2Bphys*>" />

@@ -34,22 +34,6 @@
 #include "TrigParticleTPCnv/TrigPhotonContainerCnv_p3.h"
 #include "TrigParticleTPCnv/TrigPhotonContainer_p3.h"
 
-//TrigTau and TrigTauContainer
-#include "TrigParticleTPCnv/TrigTauContainer_tlp1.h"
-#include "TrigParticleTPCnv/TrigTauContainerCnv_tlp1.h"
-#include "TrigParticleTPCnv/TrigTauContainer_p1.h"
-#include "TrigParticleTPCnv/TrigTau_tlp1.h"
-#include "TrigParticleTPCnv/TrigTauCnv_tlp1.h"
-#include "TrigParticleTPCnv/TrigTau_p1.h"
-#include "TrigParticleTPCnv/TrigTau_tlp2.h"
-#include "TrigParticleTPCnv/TrigTauCnv_tlp2.h"
-#include "TrigParticleTPCnv/TrigTau_p2.h"
-
-#include "TrigParticleTPCnv/TrigTau_p3.h"
-#include "TrigParticleTPCnv/TrigTauCnv_p3.h"
-#include "TrigParticleTPCnv/TrigTauContainer_p3.h"
-#include "TrigParticleTPCnv/TrigTauContainerCnv_p3.h"
-
 // TrigL2Bphys
 #include "TrigParticleTPCnv/TrigL2BphysContainer_tlp1.h"
 #include "TrigParticleTPCnv/TrigL2BphysContainerCnv_tlp1.h"
@@ -121,23 +105,4 @@ DECLARE_TPCNV_FACTORY(TrigPhotonContainerCnv_p3,
                       TrigPhotonContainer,
                       TrigPhotonContainer_p3,
                       Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigTauCnv_tlp1,
-                      TrigTau,
-                      TrigTau_tlp1,
-                      Athena::TPCnvVers::Old)
-                      
-DECLARE_TPCNV_FACTORY(TrigTauCnv_tlp2,
-                      TrigTau,
-                      TrigTau_tlp2,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigTauContainerCnv_tlp1,
-                      TrigTauContainer,
-                      TrigTauContainer_tlp1,
-                      Athena::TPCnvVers::Old)
 
-DECLARE_TPCNV_FACTORY(TrigTauContainerCnv_p3,
-                      TrigTauContainer,
-                      TrigTauContainer_p3,
-                      Athena::TPCnvVers::Current)
