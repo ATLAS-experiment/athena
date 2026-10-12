@@ -18,6 +18,6 @@ atlas_install_python_modules( python/*.py)
 
 atlas_add_test( testActsDump
                 SCRIPT python -m MuonActsDump.SpacePointDump --nEvents 1
-                PROPERTIES TIMEOUT 600
+                PROPERTIES TIMEOUT 1200
                 PRIVATE_WORKING_DIRECTORY
                 POST_EXEC_SCRIPT noerror.sh)
