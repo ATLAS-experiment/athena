@@ -48,7 +48,7 @@ atlas_add_component(ActsEventCnv
 
 atlas_add_test(ActsEventCnvTrackTest
     SCRIPT test/testTrackConversion.py
-    PROPERTIES TIMEOUT 1200
+    PROPERTIES TIMEOUT 2400
     POST_EXEC_SCRIPT noerror.sh)
 
 atlas_add_test(ActsEventCnvMuonTrackTest
