@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxTypeRegistry_test.cxx
@@ -16,7 +16,7 @@
 #include "AthContainers/exceptions.h"
 #include "AthLinks/ElementLink.h"
 #include "TestTools/expect_exception.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -269,7 +269,7 @@ void test_makeVector (const std::string& name)
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   assert (r.numVariables() == 0);
   test_type<int> ("int", "anInt");
@@ -293,7 +293,7 @@ void test2()
 
 void test_placeholder()
 {
-  std::cout << "test_placeholder\n";
+  std::println ("test_placeholder");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t auxid = r.getAuxID<SG::AuxTypePlaceholder> ("placeholder");
@@ -316,7 +316,7 @@ public:
 
 void test_factories()
 {
-  std::cout << "test_factories\n";
+  std::println ("test_factories");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   const SG::IAuxTypeVectorFactory* fac = r.getFactory (typeid(char),
@@ -356,7 +356,7 @@ struct FacTest3 {};
 
 void test_get_by_ti()
 {
-  std::cout << "test_get_by_ti\n";
+  std::println ("test_get_by_ti");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t auxid = r.getAuxID (typeid(short), "aShort");
@@ -375,7 +375,7 @@ void test_get_by_ti()
 
 void test_copyForOutput()
 {
-  std::cout << "test_copyForOutput\n";
+  std::println ("test_copyForOutput");
 
 #ifndef XAOD_STANDALONE
   std::unique_ptr<SGTest::TestStore> store = SGTest::getTestStore();
@@ -456,7 +456,7 @@ void addto_renameMap (Athena::InputRenameMap_t& map,
 
 void test_renameMap()
 {
-  std::cout << "test_renameMap\n";
+  std::println ("test_renameMap");
 
 #ifndef XAOD_STANDALONE
   TestStringPool pool;
@@ -477,7 +477,7 @@ void test_renameMap()
 
 void test_atomic()
 {
-  std::cout << "test_atomic\n";
+  std::println ("test_atomic");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t auxid1 = r.getAuxID<int> ("atest1");
@@ -498,7 +498,7 @@ void test_atomic()
 
 void test_linked()
 {
-  std::cout << "test_linked\n";
+  std::println ("test_linked");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t auxid1 = r.getAuxID<int> ("ltest1");

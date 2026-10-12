@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -22,16 +22,24 @@
 #define ATHCONTAINERS_ERROR_H
 
 
+#include <format>
+
+
+#define ATHCONTAINERS_MSG_OPEN (
+#define ATHCONTAINERS_MSG_CLOSE )
+#define ATHCONTAINERS_MSG(msg, ...) __VA_OPT__(std::format ATHCONTAINERS_MSG_OPEN ) msg  __VA_OPT__ (, __VA_ARGS__ ATHCONTAINERS_MSG_CLOSE)
+
+
 #ifdef XAOD_STANDALONE
 
 #include <string>
 #include <typeinfo>
 
-#define ATHCONTAINERS_ERROR(ctx, msg) \
-  AthContainers_detail::reportMessageStandalone(ctx, "ERROR", __FILE__, __LINE__, msg)
+#define ATHCONTAINERS_ERROR(ctx, msg, ...)                                  \
+  AthContainers_detail::reportMessageStandalone(ctx, "ERROR", __FILE__, __LINE__, ATHCONTAINERS_MSG(msg __VA_OPT__ (, __VA_ARGS__)))
 
-#define ATHCONTAINERS_WARNING(ctx, msg)                                   \
-  AthContainers_detail::reportMessageStandalone(ctx, "WARNING", __FILE__, __LINE__, msg)
+#define ATHCONTAINERS_WARNING(ctx, msg, ...)                                \
+  AthContainers_detail::reportMessageStandalone(ctx, "WARNING", __FILE__, __LINE__, ATHCONTAINERS_MSG(msg __VA_OPT__ (, __VA_ARGS__)))
 
 
 namespace AthContainers_detail {
@@ -51,11 +59,11 @@ std::string typeinfoName (const std::type_info& ti);
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/System.h"
 
-#define ATHCONTAINERS_ERROR(ctx, msg) \
-  errorcheck::ReportMessage(MSG::ERROR, __LINE__, __FILE__, "", ATLAS_PACKAGE_NAME, ctx).msgstream() << msg
+#define ATHCONTAINERS_ERROR(ctx, msg, ...)                                  \
+  errorcheck::ReportMessage(MSG::ERROR, __LINE__, __FILE__, "", ATLAS_PACKAGE_NAME, ctx).msgstream() << ATHCONTAINERS_MSG(msg __VA_OPT__ (, __VA_ARGS__))
 
-#define ATHCONTAINERS_WARNING(ctx, msg) \
-  errorcheck::ReportMessage(MSG::WARNING, __LINE__, __FILE__, "", ATLAS_PACKAGE_NAME, ctx).msgstream() << msg
+#define ATHCONTAINERS_WARNING(ctx, msg, ...)                               \
+  errorcheck::ReportMessage(MSG::WARNING, __LINE__, __FILE__, "", ATLAS_PACKAGE_NAME, ctx).msgstream() << ATHCONTAINERS_MSG(msg __VA_OPT__ (, __VA_ARGS__))
 
 namespace AthContainers_detail {
 

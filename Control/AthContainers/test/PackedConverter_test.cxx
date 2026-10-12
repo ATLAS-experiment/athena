@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
- * @file AthContainers/test/PackedContainer_test.cxx
+ * @file AthContainers/test/PackedConverter_test.cxx
  * @author scott snyder <snyder@bnl.gov>
  * @date Sep, 2014
- * @brief Regression tests for PackedContainer
+ * @brief Regression tests for PackedConverter
  */
 
 #undef NDEBUG
@@ -17,7 +15,7 @@
 #include "CxxUtils/ones.h"
 #include <typeinfo>
 #include <vector>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -111,7 +109,6 @@ void compare_int_vec (size_t nbits,
   uint32_t mask = CxxUtils::ones<uint32_t> (nbits);
   assert (c1.size() == c2.size());
   for (size_t i = 0; i < c1.size(); i++) {
-    //std::cout << c1[i] << " " << c2[i] << "\n";
     if (std::numeric_limits<T2>::is_signed)
       compare_signed_int (nbits, c1[i], c2[i]);
     else {
@@ -248,7 +245,7 @@ void testit (uint32_t& seed,
 
 void test1 (uint32_t& seed)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   for (int nbits=1; nbits <= 32; ++nbits) {
     TESTIT1(uint32_t) (seed, nbits);
@@ -273,7 +270,7 @@ void test1 (uint32_t& seed)
 // Test doubly-nested vectors.
 void test2 (uint32_t& seed)
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   for (int nbits=1; nbits <= 32; ++nbits) {
     TESTIT1(std::vector<uint32_t>) (seed, nbits);
     TESTIT1(std::vector<uint16_t>) (seed, nbits);
@@ -296,7 +293,7 @@ void test2 (uint32_t& seed)
 // Test triply-nested vectors.
 void test3 (uint32_t& seed)
 {
-  std::cout << "test3\n";
+  std::println ("test3");
   
   for (int nbits=1; nbits <= 32; ++nbits) {
     TESTIT1(std::vector<std::vector<uint32_t> >) (seed, nbits);
@@ -320,7 +317,7 @@ void test3 (uint32_t& seed)
 // Test some simple conversions.
 void test4 (uint32_t& seed)
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   testit<uint16_t, uint32_t> (seed, 13);
 }

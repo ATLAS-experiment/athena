@@ -22,8 +22,8 @@
 #ifndef ATHCONTAINERS_NO_THREADS
 #include <shared_mutex>
 #endif
-#include <iostream>
-#include <sstream>
+#include <format>
+#include <print>
 #include <cassert>
 
 
@@ -118,7 +118,7 @@ TestVecFactory::create (SG::auxid_t auxid,
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   AuxStoreInternalTest s;
   assert (!s.standalone());
 
@@ -259,7 +259,7 @@ void test1()
 // Test decorations / locking
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   SG::AuxStoreInternal s;
 
   SG::auxid_t ityp1 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
@@ -363,7 +363,7 @@ void test2()
 // Test setOption / getIOType
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
   SG::AuxStoreInternal s;
   SG::auxid_t ityp1 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
   SG::auxid_t ityp2 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt2");
@@ -402,7 +402,7 @@ void test3()
 // Test addVector
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   AuxStoreInternalTest s;
   SG::auxid_t ityp1 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
@@ -437,7 +437,7 @@ void test4()
 // Test insertMove
 void test5()
 {
-  std::cout << "test5\n";
+  std::println ("test5");
   SG::auxid_t ityp1 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
   SG::auxid_t ityp2 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anotherInt");
   SG::auxid_t ityp3 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt3");
@@ -541,7 +541,7 @@ void test5()
 // Test handling of linked variables.
 void test_linked()
 {
-  std::cout << "test_linked\n";
+  std::println ("test_linked");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t auxid1 = r.getAuxID<int> ("ltest1", "",
@@ -613,7 +613,7 @@ void test_linked()
 
 void test_linked2()
 {
-  std::cout << "test_linked2\n";
+  std::println ("test_linked2");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   (void)r.addFactory (typeid (TestObj),
@@ -650,7 +650,7 @@ void test_linked2()
 // test getCopyIDs()
 void test_copyIDs()
 {
-  std::cout << "test_copyIDs\n";
+  std::println ("test_copyIDs");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t i1 = r.getAuxID<int> ("i1");
@@ -675,7 +675,7 @@ void test_copyIDs()
   }
 
   {
-    std::cout << "Expect a warning here (except in standalone):\n";
+    std::println ("Expect a warning here (except in standalone):");
     SG::auxid_set_t out = SG::getCopyIDs (auxids, decors, true, {});
     assert (out == exp);
   }
@@ -698,7 +698,7 @@ void test_copyIDs()
   }
 
   {
-    std::cout << "Expect a warning here (except in standalone):\n";
+    std::println ("Expect a warning here (except in standalone):");
     SG::auxid_set_t out = s.getCopyIDs (true);
     assert (out == exp);
   }
@@ -728,7 +728,7 @@ public:
 #endif
 void test_totransient()
 {
-  std::cout << "test_totransient\n";
+  std::println ("test_totransient");
 
 #ifndef XAOD_STANDALONE
   SG::AuxStoreInternal s;
@@ -804,9 +804,7 @@ ThreadingTest::ThreadingTest()
 {
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   for (int i=0; i < 10000; i++) {
-    std::ostringstream ss;
-    ss << "xint" << i;
-    SG::auxid_t id = r.getAuxID<int> (ss.str());
+    SG::auxid_t id = r.getAuxID<int> (std::format ("xint{}", i));
     m_ids.push_back (id);
   }
 }
@@ -855,7 +853,7 @@ void ThreadingTest::threadedTest()
 
 void test_threading()
 {
-  std::cout << "test_threading\n";
+  std::println ("test_threading");
 
   ThreadingTest test;
   test.nonThreadedTest();

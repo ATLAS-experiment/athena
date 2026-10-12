@@ -18,7 +18,22 @@
 #include <ranges>
 #include <functional>
 #include <iostream>
+#include <print>
 #include <cassert>
+
+
+namespace std {
+template <class T>
+struct formatter<SG::JaggedVecElt<T> >
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format(const SG::JaggedVecElt<T>& e, FmtContext& ctx) const
+  {
+    return std::format_to (ctx.out(), "{}", e.end());
+  }
+};
+} // namespace std
 
 
 namespace {
@@ -31,13 +46,13 @@ void compareElts (const SG::JaggedVecElt<T>* ptr, size_t n,
   assert (n >= v.size());
   for (size_t i = 0; i  < v.size(); ++i) {
     if (ptr[i] != v[i]) {
-      std::cerr << "Elt comparison failure: [";
+      std::print (std::cerr, "Elt comparison failure: [");
       for (size_t ii = 0; ii  < v.size(); ++ii)
-        std::cerr << ptr[ii].end() << " ";
-      std::cerr << "] [";
+        std::print (std::cerr, "{} ", ptr[ii]);
+      std::print (std::cerr, "] [");
       for (size_t ii = 0; ii  < v.size(); ++ii)
-        std::cerr << v[ii].end() << " ";
-      std::cerr << "]\n";
+        std::print (std::cerr, "{} ", v[ii]);
+      std::println (std::cerr, "]");
       std::abort();
     }
   }
@@ -52,13 +67,13 @@ template <class T>
 void comparePayload (const T* ptr, const std::vector<T>& v)
 {
   if (!std::equal (v.begin(), v.end(), ptr, std::equal_to<T>())) {
-    std::cerr << "Payload comparison failure: [";
+    std::print (std::cerr, "Payload comparison failure: [");
     for (size_t ii = 0; ii  < v.size(); ++ii)
-      std::cerr << ptr[ii] << " ";
-    std::cerr << "] [";
+      std::print (std::cerr, "{} ", ptr[ii]);
+    std::print (std::cerr, "] [");
     for (size_t ii = 0; ii  < v.size(); ++ii)
-      std::cerr << v[ii] << " ";
-    std::cerr << "]\n";
+      std::print (std::cerr, "{} ", v[ii]);
+    std::println (std::cerr, "]");
     std::abort();
   }
 }
@@ -89,7 +104,7 @@ private:
 
 void test_JaggedVecConstConverter()
 {
-  std::cout << "test_JaggedVecConstConverter\n";
+  std::println ("test_JaggedVecConstConverter");
 
   std::vector<int> v1 { 1, 2, 3, 4, 5 };
   SG::AuxDataSpanBase sp1 { v1.data(), v1.size() };
@@ -109,7 +124,7 @@ void test_JaggedVecConstConverter()
 
 void test_JaggedVecProxyBase()
 {
-  std::cout << "test_JaggedVecProxyBase\n";
+  std::println ("test_JaggedVecProxyBase");
 
   using Payload_t = int;
   using Elt_t = SG::JaggedVecElt<int>;
@@ -201,7 +216,7 @@ void test_JaggedVecProxyBase()
 
 void test_JaggedVecProxyValBase()
 {
-  std::cout << "test_JaggedVecProxyValBase\n";
+  std::println ("test_JaggedVecProxyValBase");
 
   using Payload_t = int;
   using Elt_t = SG::JaggedVecElt<int>;
@@ -231,7 +246,7 @@ void test_JaggedVecProxyValBase()
 
 void test_JaggedVecProxyRefBase()
 {
-  std::cout << "test_JaggedVecProxyRefBase\n";
+  std::println ("test_JaggedVecProxyRefBase");
 
   using Payload_t = int;
   using Elt_t = SG::JaggedVecElt<int>;
@@ -262,7 +277,7 @@ void test_JaggedVecProxyRefBase()
 
 void test_JaggedVecProxy()
 {
-  std::cout << "test_JaggedVecProxy\n";
+  std::println ("test_JaggedVecProxy");
 
   using Payload_t = int;
   using Elt_t = SG::JaggedVecElt<int>;
@@ -505,7 +520,7 @@ void test_JaggedVecProxy()
 
 void test_JaggedVecConverter()
 {
-  std::cout << "test_JaggedVecConverter\n";
+  std::println ("test_JaggedVecConverter");
 
   using Payload_t = int;
   using Elt_t = SG::JaggedVecElt<int>;
@@ -545,7 +560,7 @@ void test_JaggedVecConverter()
 //coverity[root_function]
 int main()
 {
-  std::cout << "AthContainers/JaggedVecConversions_test\n";
+  std::println ("AthContainers/JaggedVecConversions_test");
   test_JaggedVecConstConverter();
   test_JaggedVecProxyBase();
   test_JaggedVecProxyValBase();

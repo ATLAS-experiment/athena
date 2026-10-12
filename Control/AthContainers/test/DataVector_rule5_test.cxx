@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -17,7 +17,7 @@
 #include "TestTools/leakcheck.h"
 #include "TestTools/random.h"
 #include "CxxUtils/checker_macros.h"
-#include <iostream>
+#include <print>
 struct apple
 {
   int size = 0;
@@ -56,7 +56,7 @@ void fillWithApples(apples & appleDataVec, uint32_t& seed){
 int
 main ATLAS_NOT_THREAD_SAFE ()
 {
-  std::cout << "AthContainers/DataVector_rule5_test\n";
+  std::println ("AthContainers/DataVector_rule5_test");
 
   [[maybe_unused]] applePie myPie;
 

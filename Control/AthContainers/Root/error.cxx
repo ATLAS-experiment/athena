@@ -15,9 +15,7 @@
 # include <cstdlib>
 # include <cxxabi.h>
 #endif
-#include <iomanip>
-#include <iostream>
-#include <sstream>
+#include <print>
 
 
 #ifdef XAOD_STANDALONE
@@ -42,12 +40,8 @@ void reportMessageStandalone (const std::string& context,
   }
 
   // Print the message to stdout/std::cout.
-  std::ostringstream output;
-  output << std::setiosflags(std::ios::left)
-         << std::setw(CONTEXT_WIDTH) << source << "  " << severity << " "
-         << file << ":" << line << ": "
-         << msg;
-  std::cout << output.str() << std::endl;
+  std::println ("{:<{}} {} {}:{}: {}",
+                source, CONTEXT_WIDTH, severity, file, line, msg);
   return;
 }
 

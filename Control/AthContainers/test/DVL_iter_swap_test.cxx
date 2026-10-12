@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DVL_iter_swap_test.cxx
@@ -18,7 +18,7 @@
 
 #include <string>
 #include <stdexcept>
-#include <sstream>
+#include <format>
 
 class test_err
   : public std::exception
@@ -37,10 +37,8 @@ private:
 test_err::test_err (const char* file,
                     int line,
                     const char* what)
+  : m_what (std::format ("{}:{}  assertion failure: {}", file, line, what))
 {
-  std::ostringstream os;
-  os << file << ":" << line << " assertion failure: " << what;
-  m_what = os.str();
 }
 
 

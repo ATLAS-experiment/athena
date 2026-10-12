@@ -18,7 +18,7 @@
 #include "AthContainers/exceptions.h"
 #include "CxxUtils/copy_bounded.h"
 #include "TestTools/expect_exception.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <memory>
 #include <vector>
@@ -119,7 +119,7 @@ void ConstAuxStoreTest::add (SG::auxid_t auxid,
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::Accessor<int> ityp1 ("anInt");
   SG::Accessor<float> ftyp1 ("aFloat");
@@ -296,7 +296,7 @@ public:
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   Elt elt;
   assert (elt.x == 0);
   assert (elt.usingPrivateStore());
@@ -379,7 +379,7 @@ void test2()
 
 void test_clear()
 {
-  std::cout << "test_clear\n";
+  std::println ("test_clear");
   Elt elt1;
   assert (elt1.usingPrivateStore());
   elt1.ityp1() = 1;
@@ -409,7 +409,7 @@ void test_clear()
 
 void test_copy()
 {
-  std::cout << "test_copy\n";
+  std::println ("test_copy");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
 
@@ -501,7 +501,7 @@ void test_copy()
 
 void test_standalone()
 {
-  std::cout << "test_standalone\n";
+  std::println ("test_standalone");
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t ityp1 = r.getAuxID<int> ("anInt");
   SG::Accessor<int> int1 ("anInt");
@@ -580,7 +580,7 @@ void test_standalone()
 
 void test_decoration()
 {
-  std::cout << "test_decoration\n";
+  std::println ("test_decoration");
 
   SG::AuxElement b;
   SG::AuxVectorBase v;
@@ -676,7 +676,7 @@ void test_decoration()
 
 void test_private_store()
 {
-  std::cout << "test_private_store\n";
+  std::println ("test_private_store");
   Elt elt;
   assert (elt.hasStore());
   assert (elt.hasNonConstStore());
@@ -703,7 +703,7 @@ void test_private_store()
 
 void test_const1()
 {
-  std::cout << "test_const1\n";
+  std::println ("test_const1");
 
   SG::ConstAccessor<int> ityp1_c ("anInt");
 
@@ -758,7 +758,7 @@ void test_const1()
 
 void test_const_decoration()
 {
-  std::cout << "test_const_decoration\n";
+  std::println ("test_const_decoration");
 
   SG::AuxVectorBase v;
   SG::AuxStoreInternal store;

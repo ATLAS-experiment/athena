@@ -10,6 +10,7 @@
 #include <sstream>
 #include <iomanip>
 #include <iostream>
+#include <print>
 #include <vector>
 #include <math.h>
 #include <atomic>
@@ -34,8 +35,9 @@ struct AbsFluff {
   static std::atomic<int> s_alive;
   AbsFluff() { ++s_alive; }
   virtual ~AbsFluff() {
-    std::cout << " ----> Destructor of AbsFluff called for " << this 
-              << ". After return, left alive " << --s_alive << std::endl;
+    --s_alive;
+    std::println (" ----> Destructor of AbsFluff called for {}. After return, left alive {}",
+                  static_cast<void*>(this), s_alive.load());
   } 
   virtual void foo() = 0;
   virtual void cfoo() const = 0;
@@ -49,7 +51,6 @@ struct DerivedFluff : public AbsFluff {
   std::string m_string;
   virtual ~DerivedFluff() 
   {
-    //    cout << " ----> Destructor of DerivedFluff called for " << this << std::endl;
   } 
   std::string m_anotherString;
   DerivedFluff() : AbsFluff(), m_int(1), m_float(-379.456f),  
@@ -61,8 +62,8 @@ struct DerivedFluff : public AbsFluff {
     m_string("this is the Fluff struct") { }
   DerivedFluff& operator= (const DerivedFluff&) = delete;
 
-  virtual void foo() override { /* cout << "foo called" << std::endl; */ }
-  virtual void cfoo() const override { /* cout << "foo called" << std::endl; */ }
+  virtual void foo() override { }
+  virtual void cfoo() const override { }
 };
 
 class FluffContainer : public DataVector<DerivedFluff>
@@ -75,7 +76,7 @@ public:
 
 void test1 ()
 {
-  std::cout << "*** DataVector_test test1 BEGIN ***" << std::endl;
+  std::println ("*** DataVector_test test1 BEGIN ***");
   typedef DataVector<int> IntVector;
   IntVector intV;
   myassert(intV.empty());
@@ -97,16 +98,16 @@ void test1 ()
   myassert(3 == *(intV.back()));
   {
     std::ostream_iterator<int*> os(std::cout, " ");
-    std::cout << "intV: " << std::hex;
+    std::print ("intV: ");
     std::copy(intV.begin(), intV.end(), os);
-    std::cout << std::dec <<std::endl;
+    std::println();
     std::ostream_iterator<int> intos(std::cout, " ");
     /*1.30    boost::indirect_iterator_generator<DataVector<int>::iterator, int>::type
       intVF(intV.begin()), intVL(intV.end());   */
     boost::indirect_iterator<DataVector<int>::iterator, int> intVF(intV.begin());
     boost::indirect_iterator<DataVector<int>::iterator, int> intVL(intV.end());
     std::copy(intVF, intVL, intos);
-    std::cout <<std::endl;
+    std::println();
   }
 
   //FIXME does not work  DataVector<int> intV2(5, new int(5));
@@ -119,16 +120,16 @@ void test1 ()
   myassert (6 == *intV2[4]);
   {
     std::ostream_iterator<int*> os(std::cout, " ");
-    std::cout << "intV2: " << std::hex;
+    std::print ("intV2: ");
     std::copy(intV2.begin(), intV2.end(), os);
-    std::cout << std::dec <<std::endl;
+    std::println();
     std::ostream_iterator<int> intos(std::cout, " ");
     /*1.30    boost::indirect_iterator_generator<DataVector<int>::iterator, int>::type
       intV2F(intV2.begin()), intV2L(intV2.end()); */
     boost::indirect_iterator<DataVector<int>::iterator, int> intV2F(intV2.begin());
     boost::indirect_iterator<DataVector<int>::iterator, int> intV2L(intV2.end());
     std::copy(intV2F, intV2L, intos);
-    std::cout <<std::endl;
+    std::println();
   }
   
 
@@ -174,9 +175,9 @@ void test1 ()
   int count(AbsFluff::s_alive);
   {
     std::ostream_iterator<DerivedFluff*> os(std::cout, " ");
-    std::cout << "dfluff: " << std::hex;
+    std::print ("dfluff: ");
     std::copy(dfluff->begin(), dfluff->end(), os);
-    std::cout << std::dec <<std::endl;
+    std::println();
   }
 
   myassert(2 == dfluff->size()); 
@@ -207,31 +208,30 @@ void test1 ()
   myassert(count == AbsFluff::s_alive);
 
   // delete copy:
-  std::cout << " --> Now deleting copied vector, but it should not delete elements as it does not own them. You should not see message of Element Destructor" << std::endl;
+  std::println (" --> Now deleting copied vector, but it should not delete elements as it does not own them. You should not see message of Element Destructor");
   delete fluff2; fluff2=0;
-  std::cout << " <-- delete done" << std::endl;
+  std::println (" <-- delete done");
   myassert(count == AbsFluff::s_alive);
 
-  std::cout << " --> Now deleting vector copied via iterator. You should NOT see the elements being deleted" << std::endl;
+  std::println (" --> Now deleting vector copied via iterator. You should NOT see the elements being deleted");
   count = AbsFluff::s_alive;
   delete fluff3; fluff3=0;
-  std::cout << " <-- delete done" << std::endl;
+  std::println (" <-- delete done");
   myassert(count == AbsFluff::s_alive);
 
-  std::cout << " --> Now resizing DataVector<DerivedFluff>" << std::endl;
-  std::cout << " --> You should see one DerivedFluff object being deleted" << std::endl;
+  std::println (" --> Now resizing DataVector<DerivedFluff>");
+  std::println (" --> You should see one DerivedFluff object being deleted");
   count = AbsFluff::s_alive - 1;
   dfluff->resize(dfluff->size()-1); //reduce dfluff by one
-  std::cout << " <-- resize done" << std::endl;
+  std::println (" <-- resize done");
   myassert(count == AbsFluff::s_alive);
 
-  std::cout << " --> Now deleting DataVector<DerivedFluff>. You should see all remaining DerivedFluff objects being deleted" << std::endl;
+  std::println (" --> Now deleting DataVector<DerivedFluff>. You should see all remaining DerivedFluff objects being deleted");
   count = AbsFluff::s_alive - dfluff->size();
   delete dfluff; dfluff=0;
-  std::cout << " <-- delete done" << std::endl;
+  std::println (" <-- delete done");
   myassert(count == AbsFluff::s_alive);
 
-  //  std::cout << " Working with a subclass of DataVector " << std::endl;
   FluffContainer fc;
   DerivedFluff* f1 = new DerivedFluff();
   DerivedFluff* f2 = new DerivedFluff();
@@ -243,9 +243,9 @@ void test1 ()
   fc.push_back(f4);
 
   count = AbsFluff::s_alive;
-  std::cout << " --> Now erasing one element of the DerivedFluff container. You should see one instance being deleted" << std::endl;
+  std::println (" --> Now erasing one element of the DerivedFluff container. You should see one instance being deleted");
   fc.erase(fc.begin(), fc.begin()+1);
-  std::cout << " <-- erase done" << std::endl;
+  std::println (" <-- erase done");
   myassert(fc.size() == 3);
   myassert(count - 1  == AbsFluff::s_alive);
 
@@ -282,16 +282,16 @@ void test1 ()
   dfluff4->push_back(p1);
   dfluff4->push_back(p2);
   count = AbsFluff::s_alive;
-  std::cout << " --> Now resizing view container. You should NOT see the elements being deleted" << std::endl;
+  std::println (" --> Now resizing view container. You should NOT see the elements being deleted");
   dfluff4->resize(0); //empties dfluff4;
-  std::cout << " <-- resize done" << std::endl;
+  std::println (" <-- resize done");
   myassert(0 == dfluff4->size());
   myassert(count == AbsFluff::s_alive);
 
-  std::cout << " --> Now deleting two DerivedFluff instances" << std::endl;
+  std::println (" --> Now deleting two DerivedFluff instances");
   delete p1;
   delete p2;
-  std::cout << " <-- delete done" << std::endl;
+  std::println (" <-- delete done");
   
 
   count = AbsFluff::s_alive;
@@ -330,7 +330,7 @@ void test1 ()
   myassert(count == AbsFluff::s_alive);
   myassert(absFluff.size() == dsize);
 
-  std::cout << "*** DataVector_test OK ***" <<std::endl;
+  std::println ("*** DataVector_test OK ***");
 }
 
 
@@ -394,7 +394,7 @@ void test2_check_indices()
   catch (const dv_test_err&) {
     caught = true;
   }
-  //myassert (caught); //xxx
+  myassert (caught);
 
   vba.clear (SG::VIEW_ELEMENTS);
   vbb.clear (SG::VIEW_ELEMENTS);
@@ -413,7 +413,7 @@ void test2_check_indices()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   test2_myassert();
   test2_check_indices();
   // Calls to do_test2 for specific classes are split out into separate
@@ -428,14 +428,6 @@ void test2()
   dump_classid<AA> ();
   dump_classid<BB> ();
   dump_classid<CC> ();
-#if 0
-  std::ostringstream os;
-  os << ClassID_traits<DataVector<AA> >::packageInfo();
-  myassert (os.str().substr(0,7) == "$Name: " || os.str() == "Package-00-00-00");
-  os.str ("");
-  os << ClassID_traits<DataVector<CC> >::packageInfo();
-  myassert (os.str() == "Package-00-00-00");
-#endif
 }
 
 
@@ -740,7 +732,7 @@ void test_auxdata1()
 
 void test_auxdata()
 {
-  std::cout << "test_auxdata\n";
+  std::println ("test_auxdata");
   test_auxdata1<AAux>();
   test_auxdata1<BAux>();
   test_auxdata1<CAux>();
@@ -778,7 +770,7 @@ public:
 };
 void test_emptysort()
 {
-  std::cout << "test_emptysort\n";
+  std::println ("test_emptysort");
   DataVector<AAux> v;
   TestEmptyStore store;
   v.setStore (&store);
@@ -865,7 +857,7 @@ void test_insertmove1()
 
 void test_insertmove()
 {
-  std::cout << "test_insertmove\n";
+  std::println ("test_insertmove");
   test_insertmove1<AAux>();
   test_insertmove1<BAux>();
   test_insertmove1<CAux>();
@@ -888,7 +880,7 @@ public:
 // Test forwarding ctor of ConstDataVector.
 void test_constctor()
 {
-  std::cout << "test_constctor\n";
+  std::println ("test_constctor");
   ConstDataVector<VBase> vb (SG::OWN_ELEMENTS, 1.5);
   assert (vb.asDataVector()->m_f == 1.5);
 }
@@ -896,7 +888,7 @@ void test_constctor()
 
 void test_upinsert()
 {
-  std::cout << "test_upinsert\n";
+  std::println ("test_upinsert");
   DataVector<AA> dv_aa;
 
   std::vector<std::unique_ptr<AA> > v_aa;
@@ -933,7 +925,7 @@ int main()
     test_upinsert();
   }
   catch (const std::runtime_error& e) {
-    std::cerr << e.what() << "\n";
+    std::println (std::cerr, "{}", e.what());
     return 1;
   }
   return 0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/DataVectorWithAlloc_test.cxx
@@ -16,7 +16,7 @@
 #include "AthContainers/exceptions.h"
 #include "TestTools/expect_exception.h"
 #include "CxxUtils/checker_macros.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <setjmp.h>
 #include <signal.h>
@@ -67,7 +67,7 @@ void expect_signal (CALLABLE code)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   using Vec = DataVectorWithAlloc<DataVector<int> >;
   Vec v (Vec::elt_allocator_type (100));
   Vec::Ptr p = v.allocate();
@@ -87,7 +87,7 @@ void test1()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   using Vec = DataVectorWithAlloc<DataVector<int> >;
   Vec v1;
@@ -120,7 +120,7 @@ void test2()
 // Test using a const type.
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   using Vec = DataVectorWithAlloc<DataVector<const int> >;
   Vec v1;
@@ -130,7 +130,7 @@ void test3()
 
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   using Vec = DataVectorWithAlloc<DataVector<const int> >;
   auto v = Vec::make_unique();
@@ -145,7 +145,7 @@ void test4()
 
 int main()
 {
-  std::cout << "AthContainers/DataVectorWithAlloc_test\n";
+  std::println ("AthContainers/DataVectorWithAlloc_test");
   test1();
   test2();
   test3();

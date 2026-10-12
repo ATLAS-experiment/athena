@@ -5,7 +5,8 @@
  * @file AthContainers/JaggedVecAccessor.h
  * @author scott snyder <snyder@bnl.gov>
  * @date Apr, 2024
- * @brief Helper class to provide type-safe access to aux data. xxx
+ * @brief Helper class to provide type-safe access to aux data,
+ *        specialized for @c JaggedVecElt.
  */
 
 

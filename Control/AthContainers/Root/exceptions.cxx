@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/src/exceptions.cxx
@@ -12,7 +12,7 @@
 #include "AthContainers/exceptions.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/tools/error.h"
-#include <sstream>
+#include <format>
 
 
 namespace SG {
@@ -21,19 +21,14 @@ namespace SG {
 /// Helper: format an aux data item name.
 std::string excFormatName (SG::auxid_t auxid)
 {
-  std::ostringstream os;
   if (auxid != null_auxid) {
     SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
-    os << "`" << r.getClassName (auxid);
-    if (!os.str().empty())
-      os << "::";
-    os << r.getName (auxid);
-    os << "' (" << auxid << ")";
+    return std::format ("`{}::{}' ({})",
+                        r.getClassName (auxid),
+                        r.getName (auxid),
+                        auxid);
   }
-  else {
-    os << "(null)";
-  }
-  return os.str();
+  return "(null)";
 }
   
 
@@ -43,23 +38,17 @@ std::string excFormatName (SG::auxid_t auxid)
 /// Helper: format exception error string.
 std::string excNoAuxStore_format (SG::auxid_t auxid)
 {
-  std::ostringstream os;
-  os << "SG::ExcNoAuxStore: "
-     << "Requested aux data item "
-     << excFormatName (auxid)
-     << " but there is no associated aux data store.";
-  return os.str();
+  return std::format ("SG::ExcNoAuxStore: "
+                      "Requested aux data item {} but there is no associated aux data store.",
+                      excFormatName (auxid));
 }
 
 
 /// Helper: format exception error string.
 std::string excNoAuxStore_format (const char* op)
 {
-  std::ostringstream os;
-  os << "SG::ExcNoAuxStore: "
-     << "Operation attempted on container with no associated aux data store: ";
-  os << op;
-  return os.str();
+  return std::format ("SG::ExcNoAuxStore: "
+                      "Operation attempted on container with no associated aux data store: {}", op);;
 }
 
 
@@ -89,12 +78,9 @@ ExcNoAuxStore::ExcNoAuxStore (const char* op)
 /// Helper: format exception error string.
 std::string excBadAuxVar_format (SG::auxid_t auxid)
 {
-  std::ostringstream os;
-  os << "SG::ExcBadAuxVar: "
-     << "Attempt to retrieve nonexistent aux data item "
-     << excFormatName (auxid)
-     << ".";
-  return os.str();
+  return std::format ("SG::ExcBadAuxVar: "
+                      "Attempt to retrieve nonexistent aux data item {}.",
+                      excFormatName (auxid));
 }
 
 
@@ -114,12 +100,9 @@ ExcBadAuxVar::ExcBadAuxVar (SG::auxid_t auxid)
 /// Helper: format exception error string.
 std::string excConstAuxData_format (const std::string& op, SG::auxid_t auxid)
 {
-  std::ostringstream os;
-  os << "SG::ExcConstAuxData: "
-     << "Non-const operation `" << op << "' performed on const aux data "
-     << excFormatName (auxid)
-     << ".";
-  return os.str();
+  return std::format ("SG::ExcConstAuxData: "
+                      "Non-const operation `{}' performed on const aux data {}.",
+                      op, excFormatName (auxid));
 }
 
 
@@ -173,18 +156,18 @@ std::string excAuxTypeMismatch_format (SG::auxid_t auxid,
                                        const std::string& new_alloc_type,
                                        const std::string& old_alloc_type)
 {
-  std::ostringstream os;
-  os << "SG::ExcAuxTypeMismatch: "
-     << "Type mismatch for aux variable "
-     << excFormatName (auxid)
-     << "; old type is " << AthContainers_detail::typeinfoName (old_type)
-     << " new type is "  << AthContainers_detail::typeinfoName (new_type);
+  std::string s =
+    std::format ("SG::ExcAuxTypeMismatch: "
+                 "Type mismatch for aux variable {}; old type is {} new type is {}",
+                 excFormatName (auxid),
+                 AthContainers_detail::typeinfoName (old_type),
+                 AthContainers_detail::typeinfoName (new_type));
   if (old_alloc_type != new_alloc_type)
   {
-    os << ".  Old allocator type is " << old_alloc_type
-       << " new allocator type is " << new_alloc_type;
+    s += std::format (".  Old allocator type is {} new allocator type is {}",
+                      old_alloc_type, new_alloc_type);
   }
-  return os.str();
+  return s;
 }
 
 
@@ -217,13 +200,11 @@ std::string excInsertionInBaseClass_format (const char* op,
                                             const std::type_info& base_type,
                                             const std::type_info& complete_type)
 {
-  std::ostringstream os;
-  os << "SG::ExcInsertionInBaseClass: "
-     << "Attempted to do " << op
-     << " on a " << AthContainers_detail::typeinfoName (base_type)
-     << " base class of " << AthContainers_detail::typeinfoName (complete_type)
-     << "; can only be done on the most-derived class.";
-  return os.str();
+  return std::format ("SG::ExcInsertionInBaseClass: "
+                      "Attempted to do {} on a {} base class of {}; can only be done on the most-derived class.",
+                      op,
+                      AthContainers_detail::typeinfoName (base_type),
+                      AthContainers_detail::typeinfoName (complete_type));
 }
 
 
@@ -250,22 +231,17 @@ ExcInsertionInBaseClass::ExcInsertionInBaseClass
 /// Helper: format exception error string.
 std::string excStoreLocked_format (SG::auxid_t auxid)
 {
-  std::ostringstream os;
-  os << "SG::ExcStoreLocked: "
-     << "Attempted to modify auxiliary data in a locked store: ";
-  os << excFormatName (auxid);
-  return os.str();
+  return std::format ("SG::ExcStoreLocked: "
+                      "Attempted to modify auxiliary data in a locked store: {}",
+                      excFormatName (auxid));
 }
 
 
 /// Helper: format exception error string.
 std::string excStoreLocked_format (const char* op)
 {
-  std::ostringstream os;
-  os << "SG::ExcStoreLocked: "
-     << "Attempted to modify auxiliary data in a locked store: ";
-  os << op;
-  return os.str();
+  return std::format ("SG::ExcStoreLocked: "
+                      "Attempted to modify auxiliary data in a locked store: {}", op);
 }
 
 
@@ -318,15 +294,13 @@ std::string excUnknownAuxItem_format (const std::string& name,
                                       const std::string& clsname,
                                       const std::type_info* typ)
 {
-  std::ostringstream os;
-  os << "SG::ExcUnknownAuxItem: "
-     << "Unknown aux data item ";
-  if (!clsname.empty())
-    os << clsname << "::";
-  os << name;
+  std::string s = std::format ("SG::ExcUnknownAuxItem: "
+                               "Unknown aux data item {}{}{}",
+                               clsname, (clsname.empty() ? "" : "::"), name);
   if (typ)
-    os << " (of type " << AthContainers_detail::typeinfoName (*typ) << ")";
-  return os.str();
+    s += std::format (" (of type {})",
+                      AthContainers_detail::typeinfoName (*typ));
+  return s;
 }
 
 
@@ -364,11 +338,9 @@ void throwExcUnknownAuxItem (const std::string& name,
 /// Helper: format exception error string.
 std::string excDVToELV_format (const std::string& detail)
 {
-  std::ostringstream os;
-  os << "SG::ExcDVToELV: "
-     << "Can't convert DataVector to vector of ElementLinks: "
-     << detail;
-  return os.str();
+  return std::format ("SG::ExcDVToELV: "
+                      "Can't convert DataVector to vector of ElementLinks: {}",
+                      detail);
 }
 
 
@@ -486,15 +458,13 @@ std::string excFlagMismatch_format (SG::auxid_t auxid,
                                     SG::AuxVarFlags existing_flags,
                                     SG::AuxVarFlags requested_flags)
 {
-  std::ostringstream os;
-  os << "SG::ExcFlagMismatch: "
-     << "Flag mismatch for aux variable "
-     << excFormatName (auxid)
-     << " of type " << AthContainers_detail::typeinfoName (type)
-     << " between existing " << excFormatFlags (existing_flags)
-     << " and requested " << excFormatFlags (requested_flags) << " flags. "
-     << "This may occur as a result of not using AtomicDecorator to access an atomic variable.";
-  return os.str();
+  return std::format ("SG::ExcFlagMismatch: "
+                      "Flag mismatch for aux variable {} of type {} between existing {} and requested {} flags. "
+                      "This may occur as a result of not using AtomicDecorator to access an atomic variable.",
+                      excFormatName (auxid),
+                      AthContainers_detail::typeinfoName (type),
+                      excFormatFlags (existing_flags),
+                      excFormatFlags (requested_flags));
 }
 
 
@@ -523,14 +493,12 @@ std::string excLinkMismatch_format (SG::auxid_t auxid,
                                     SG::auxid_t existing_linked_id,
                                     SG::auxid_t requested_linked_id)
 {
-  std::ostringstream os;
-  os << "SG::ExcLinkMismatch: "
-     << "Linked variable mismatch for aux variable "
-     << excFormatName (auxid)
-     << " of type " << AthContainers_detail::typeinfoName (type)
-     << " between existing " << excFormatName (existing_linked_id)
-     << " and requested " << excFormatName (requested_linked_id) << " linked variables.";
-  return os.str();
+  return std::format ("SG::ExcLinkMismatch: "
+                      "Linked variable mismatch for aux variable {} of type {} between existing {} and requested {} linked variables.",
+                      excFormatName (auxid),
+                      AthContainers_detail::typeinfoName (type),
+                      excFormatName (existing_linked_id),
+                      excFormatName (requested_linked_id));
 }
 
 
@@ -558,12 +526,9 @@ ExcLinkMismatch::ExcLinkMismatch (SG::auxid_t auxid,
 std::string excNoLinkedVar_format (SG::auxid_t auxid,
                                    const std::type_info& type)
 {
-  std::ostringstream os;
-  os << "SG::ExcNoLinkedVar: "
-     << "Linked variable not found for aux variable "
-     << excFormatName (auxid)
-     << " of type " << AthContainers_detail::typeinfoName (type);
-  return os.str();
+  return std::format ("SG::ExcNoLinkedVar: "
+                      "Linked variable not found for aux variable {} of type {}",
+                      excFormatName (auxid), AthContainers_detail::typeinfoName (type));
 }
 
 
@@ -586,11 +551,9 @@ ExcNoLinkedVar::ExcNoLinkedVar (SG::auxid_t auxid,
 std::string excInvalidThinningTarget_format (unsigned int clid,
                                              const std::string& key)
 {
-  std::ostringstream os;
-  os << "SG::ExcInvalidThinningTarget: "
-     << "ThinningHandle target does not exist: "
-     << clid << "/" << key;
-  return os.str();
+  return std::format ("SG::ExcInvalidThinningTarget: "
+                      "ThinningHandle target does not exist: {}/{}",
+                      clid, key);
 }
 
 
@@ -645,13 +608,12 @@ void throwExcAllocOwnership()
 /// Helper: format exception error string.
 std::string excBadVarName_format (const std::string& name)
 {
-  std::ostringstream os;
-  os << "SG::ExcBadVarName: "
-     << "Bad name for auxiliary variable `" << name << "'. "
-     << "Variable and class names must consist of only digits, letters, "
-     << "and underscores, and cannot start with a digit.  "
-     << "Variable names may not be empty, but class names may be.";
-  return os.str();
+  return std::format ("SG::ExcBadVarName: "
+                      "Bad name for auxiliary variable `{}'. "
+                      "Variable and class names must consist of only digits, letters, "
+                      "and underscores, and cannot start with a digit.  "
+                      "Variable names may not be empty, but class names may be.",
+                      name);
 }
 
 

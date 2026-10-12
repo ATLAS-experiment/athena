@@ -22,20 +22,26 @@
 #include "TestTools/expect_exception.h"
 #include <ranges>
 #include <iostream>
+#include <print>
+#include <format>
 #include <cassert>
 
 
 using Athena_test::floatEQ;
 
 
-namespace SG {
+namespace std {
 template <class T>
-std::ostream& operator<< (std::ostream& s, const JaggedVecElt<T>& e)
+struct formatter<SG::JaggedVecElt<T> >
+  : public formatter<string_view>
 {
-  s << e.end();
-  return s;
-}
-} // namespace SG
+  template <class FmtContext>
+  FmtContext::iterator format(const SG::JaggedVecElt<T>& e, FmtContext& ctx) const
+  {
+    return std::format_to (ctx.out(), "{}", e.end());
+  }
+};
+} // namespace std
 
 
 namespace {
@@ -48,13 +54,13 @@ void compareElts (const SG::JaggedVecElt<T>* ptr, size_t n,
   assert (n >= v.size());
   for (size_t i = 0; i  < v.size(); ++i) {
     if (ptr[i] != v[i]) {
-      std::cerr << "Elt comparison failure: [";
+      std::print (std::cerr, "Elt comparison failure: [");
       for (size_t ii = 0; ii  < v.size(); ++ii)
-        std::cerr << ptr[ii] << " ";
-      std::cerr << "] [";
+        std::print (std::cerr, "{} ", ptr[ii]);
+      std::print (std::cerr, "] [");
       for (size_t ii = 0; ii  < v.size(); ++ii)
-        std::cerr << v[ii] << " ";
-      std::cerr << "]\n";
+        std::print (std::cerr, "{} ", v[ii]);
+      std::println (std::cerr, "]");
       std::abort();
     }
   }
@@ -69,13 +75,13 @@ template <class T>
 void comparePayload (const T* ptr, const std::vector<T>& v)
 {
   if (!std::equal (v.begin(), v.end(), ptr, floatEQ)) {
-    std::cerr << "Payload comparison failure: [";
+    std::print (std::cerr, "Payload comparison failure: [");
     for (size_t ii = 0; ii  < v.size(); ++ii)
-      std::cerr << ptr[ii] << " ";
-    std::cerr << "] [";
+      std::print (std::cerr, "{} ", ptr[ii]);
+    std::print (std::cerr, "] [");
     for (size_t ii = 0; ii  < v.size(); ++ii)
-      std::cerr << v[ii] << " ";
-    std::cerr << "]\n";
+      std::print (std::cerr, "{} ", v[ii]);
+    std::println (std::cerr, "]");
     std::abort();
   }
 }
@@ -143,7 +149,7 @@ private:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   using Payload = float;
   using Elt = SG::JaggedVecElt<Payload>;
@@ -388,7 +394,7 @@ void test1()
 // spans
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   using Payload = float;
   using Elt = SG::JaggedVecElt<Payload>;
@@ -452,7 +458,7 @@ void test2()
 // Performance test for forward filling.
 void test_forward_fill (size_t n)
 {
-  std::cout << "forward_fill\n";
+  std::println ("forward_fill");
 
   if (n == 0) n = 100000;
 
@@ -487,12 +493,12 @@ void test_forward_fill (size_t n)
 //coverity[root_function]
 int main (int argc, char** argv)
 {
-  std::cout << "AthContainers/JaggedVecAccessor_test\n";
+  std::println ("AthContainers/JaggedVecAccessor_test");
   test1();
   test2();
   int n = argc >= 2 ? atoi(argv[1]) : 0;
   if (n < 0 || n > 100*1000*1000) {
-    std::cerr << "Argument out of range.\n";
+    std::println (std::cerr, "Argument out of range.");
     return 1;
   }
   test_forward_fill (n);

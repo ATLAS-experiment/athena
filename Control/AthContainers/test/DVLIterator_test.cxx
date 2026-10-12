@@ -15,8 +15,9 @@
 #include "AthContainers/tools/DVLIterator.h"
 #include "AthContainers/exceptions.h"
 #include <vector>
-#include <list>
 #include <iostream>
+#include <list>
+#include <print>
 #include <cassert>
 
 
@@ -318,7 +319,7 @@ int main()
   try {
     test1();
   } catch (const std::exception& e) {
-    std::cerr << "exception: " << e.what() << "\n";
+    std::println (std::cerr, "exception: {}", e.what());
     return 1;
   }
   return 0;

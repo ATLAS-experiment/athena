@@ -17,6 +17,8 @@
 #include "AthContainers/AuxStoreInternal.h"
 #include <iostream>
 #include <cassert>
+#include <print>
+#include <ranges>
 
 
 class AuxStoreInternalTest
@@ -338,7 +340,7 @@ void test1a (const std::string& name)
 }
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   test1a<float> ("tfloat");
   test1a<int> ("tint");
   test1a<double> ("tdouble");
@@ -378,7 +380,7 @@ void test2a (const std::string& name)
 }
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   test2a<float> ("tfloat");
 }
   
@@ -386,7 +388,7 @@ void test2()
 
 int main()
 {
-  std::cout << "AthContainers/JaggedVecVector_test\n";
+  std::println ("AthContainers/JaggedVecVector_test");
   test1();
   test2();
   return 0;

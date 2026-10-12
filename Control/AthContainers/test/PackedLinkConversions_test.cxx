@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/PackedLinkConversions_test.cxx
@@ -15,7 +15,7 @@
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/AuxTypeRegistry.h"
 #include "TestTools/expect_exception.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -50,7 +50,7 @@ private:
 
 void test_PackedLinkConstConverter()
 {
-  std::cout << "test_PackedLinkConstConverter\n";
+  std::println ("test_PackedLinkConstConverter");
   using Cont_t = std::vector<int>;
   using Link_t = ElementLink<Cont_t>;
   using DLink_t = DataLink<Cont_t>;
@@ -77,7 +77,7 @@ void test_PackedLinkConstConverter()
 
 void test_PackedLinkVectorConstConverter()
 {
-  std::cout << "test_PackedLinkVectorConstConverter\n";
+  std::println ("test_PackedLinkVectorConstConverter");
   using Cont_t = std::vector<int>;
   using Link_t = ElementLink<Cont_t>;
   using DLink_t = DataLink<Cont_t>;
@@ -121,7 +121,7 @@ void test_PackedLinkVectorConstConverter()
 
 void test_PackedLinkConverter()
 {
-  std::cout << "test_PackedLinkConverter\n";
+  std::println ("test_PackedLinkConverter");
   using Cont_t = std::vector<int>;
   using Link_t = ElementLink<Cont_t>;
   using DLink_t = DataLink<Cont_t>;
@@ -177,7 +177,7 @@ void test_PackedLinkConverter()
 
 int main()
 {
-  std::cout << "AthContainers/PackedLinkConversions_test\n";
+  std::println ("AthContainers/PackedLinkConversions_test");
   test_PackedLinkConstConverter();
   test_PackedLinkVectorConstConverter();
   test_PackedLinkConverter();

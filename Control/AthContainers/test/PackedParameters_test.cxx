@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/test/PackedParameters_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -14,12 +12,12 @@
 #undef NDEBUG
 #include "AthContainers/PackedParameters.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::PackedParameters p1;
   assert (p1.nbits() == 32);
@@ -138,7 +136,7 @@ bool testvalid (const std::string& s)
 }
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   assert (testvalid ("nbits"));
   assert (testvalid ("nmantissa"));
@@ -152,7 +150,7 @@ void test2()
 
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   SG::PackedParameters p;
   

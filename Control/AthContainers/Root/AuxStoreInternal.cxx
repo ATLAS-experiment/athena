@@ -10,7 +10,6 @@
 
 
 #include <iostream>
-#include <sstream>
 #include <atomic>
 #include <algorithm>
 
@@ -480,11 +479,9 @@ const void* AuxStoreInternal::getIODataInternal (auxid_t auxid, bool quiet) cons
   guard_t guard (m_mutex);
   if (auxid >= m_vecs.size() || !m_vecs[auxid]) {
     if (!quiet) {
-      std::ostringstream ss;
-      ss  << "Requested variable "
-          << SG::AuxTypeRegistry::instance().getName (auxid)
-          << " (" << auxid << ") doesn't exist";
-      ATHCONTAINERS_ERROR("AuxStoreInternal::getIODataInternal", ss.str());
+      ATHCONTAINERS_ERROR("AuxStoreInternal::getIODataInternal",
+                          "Requested variable {} ({}) doesn't exist",
+                          SG::AuxTypeRegistry::instance().getName (auxid), auxid);
     }
     return 0;
   }
@@ -513,11 +510,9 @@ void* AuxStoreInternal::getIODataInternal (auxid_t auxid, bool quiet)
   guard_t guard (m_mutex);
   if (auxid >= m_vecs.size() || !m_vecs[auxid]) {
     if (!quiet) {
-      std::ostringstream ss;
-      ss  << "Requested variable "
-          << SG::AuxTypeRegistry::instance().getName (auxid)
-          << " (" << auxid << ") doesn't exist";
-      ATHCONTAINERS_ERROR("AuxStoreInternal::getIODataInternal", ss.str());
+      ATHCONTAINERS_ERROR("AuxStoreInternal::getIODataInternal",
+                          "Requested variable {} ({}) doesn't exist",
+                          SG::AuxTypeRegistry::instance().getName (auxid), auxid);
     }
     return 0;
   }
@@ -889,10 +884,9 @@ SG::auxid_set_t getCopyIDs (const SG::auxid_set_t& auxids,
       if (out.test (decor)) {
         out.reset (decor);
         if (std::ranges::find (noWarn, r.getName (decor)) == noWarn.end()) {
-          std::ostringstream ss;
-          ss << "skipped unlocked decoration during copy " << r.getName(decor)
-             << " (" << decor << ")";
-          ATHCONTAINERS_WARNING("getCopyAuxIDs", ss.str());
+          ATHCONTAINERS_WARNING("getCopyAuxIDs",
+                                "skipped unlocked decoration during copy {} ({})",
+                                r.getName(decor), decor);
         }
       }
     }

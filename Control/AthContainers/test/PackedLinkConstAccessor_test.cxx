@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/PackedLinkConstAccessor_test.cxx
@@ -14,7 +14,7 @@
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/exceptions.h"
 #include "TestTools/expect_exception.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <type_traits>
 
@@ -94,7 +94,7 @@ private:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   using Cont = std::vector<int>;
   using PLink = SG::PackedLink<Cont>;
@@ -171,7 +171,7 @@ void test1()
 // spans
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   using Cont = std::vector<int>;
   using PLink = SG::PackedLink<Cont>;
@@ -229,7 +229,7 @@ void test2()
 // vector<PackedLink>
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   using Cont = std::vector<int>;
   using DLink = DataLink<Cont>;
@@ -331,7 +331,7 @@ void test3()
 // spans with vectors
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   using Cont = std::vector<int>;
   using PLink = SG::PackedLink<Cont>;
@@ -407,7 +407,7 @@ size_t asmtest [[maybe_unused]] (const SG::AuxElement& e,
 //coverity[root_function]
 int main()
 {
-  std::cout << "AthContainers/PackedLinkConstAccessor_test\n";
+  std::println ("AthContainers/PackedLinkConstAccessor_test");
   test1();
   test2();
   test3();

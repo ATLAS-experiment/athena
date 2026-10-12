@@ -19,7 +19,7 @@
 
 void test2_d()
 {
-  std::cout << "test2_d\n";
+  std::println ("test2_d");
   do_test2<M, R> ();
 }
 
@@ -30,7 +30,7 @@ int main()
     test2_d();
   }
   catch (const std::runtime_error& e) {
-    std::cerr << e.what() << "\n";
+    std::println (std::cerr, "{}", e.what());
     return 1;
   }
   return 0;

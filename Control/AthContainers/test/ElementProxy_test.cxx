@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file ElementProxy_test.cxx
@@ -18,9 +18,9 @@
 
 #include <string>
 #include <stdexcept>
-#include <sstream>
+#include <format>
 #include <memory>
-#include <iostream>
+#include <print>
 
 class test_err
   : public std::exception
@@ -39,10 +39,8 @@ private:
 test_err::test_err (const char* file,
                     int line,
                     const char* what)
+  : m_what (std::format ("{}:{} assertion failure: {}", file, line, what))
 {
-  std::ostringstream os;
-  os << file << ":" << line << " assertion failure: " << what;
-  m_what = os.str();
 }
 
 
@@ -161,7 +159,7 @@ struct Cont
 // own/cannot insert
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   Cont v;
   B* b1 = new B(1);
   v.push_back (b1);
@@ -206,7 +204,7 @@ void test1()
 // own/can insert
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   Cont v (SG::OWN_ELEMENTS, true);
   B* b1 = new B(1);
   v.push_back (b1);
@@ -263,7 +261,7 @@ void test2()
 // unowned/can insert
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
   Cont v (SG::VIEW_ELEMENTS, true);
   B* b1 = new B(1);
   v.push_back (b1);
@@ -312,7 +310,7 @@ public:
 // containers with must_own
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   typedef DataModel_detail::ElementProxy<Cont2> EP;
   Cont2 v (SG::OWN_ELEMENTS, true);
@@ -330,7 +328,7 @@ void test4()
 
 int main()
 {
-  std::cout << "AthContainers/ElementProxy_test\n";
+  std::println ("AthContainers/ElementProxy_test");
   test1();
   test2();
   test3();

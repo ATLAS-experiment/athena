@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/threading_test.cxx
@@ -13,20 +13,20 @@
 #include "AthContainers/tools/threading.h"
 #include "AthContainers/tools/upgrade_mutex.h"
 #include "AthContainers/tools/thread_specific_ptr.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
 class test_mutex
 {
 public:
-  void lock_shared() const { std::cout << "lock_shared\n"; }
-  void unlock_shared() const { std::cout << "unlock_shared\n"; }
-  void lock_upgrade() { std::cout << "lock_upgrade\n"; }
-  void unlock_upgrade() { std::cout << "unlock_upgrade\n"; }
-  void lock() { std::cout << "lock\n"; }
-  void unlock() { std::cout << "unlock\n"; }
-  void unlock_upgrade_and_lock() { std::cout << "unlock_upgrade_and_lock\n"; }
+  void lock_shared() const { std::println ("lock_shared"); }
+  void unlock_shared() const { std::println ("unlock_shared"); }
+  void lock_upgrade() { std::println ("lock_upgrade"); }
+  void unlock_upgrade() { std::println ("unlock_upgrade"); }
+  void lock() { std::println ("lock"); }
+  void unlock() { std::println ("unlock"); }
+  void unlock_upgrade_and_lock() { std::println ("unlock_upgrade_and_lock"); }
 };
 
 
@@ -34,7 +34,7 @@ void test1()
 {
   using AthContainers_detail::strict_shared_lock;
 
-  std::cout << "test1\n";
+  std::println ("test1");
   test_mutex m;
   strict_shared_lock<test_mutex> lock (m);
 }
@@ -45,7 +45,7 @@ void test2()
   using AthContainers_detail::upgrading_lock;
   using AthContainers_detail::upgrade_mutex;
 
-  std::cout << "test2\n";
+  std::println ("test2");
   test_mutex m;
   {
     upgrading_lock<test_mutex> lock (m);
@@ -74,7 +74,7 @@ void test3()
   using AthContainers_detail::mutex;
   using AthContainers_detail::lock_guard;
 
-  std::cout << "test3\n";
+  std::println ("test3");
 
   fence_acq_rel();
   fence_seq_cst();
@@ -88,8 +88,8 @@ void test3()
 
 struct Payload
 {
-  Payload(int i) : m_i(i) { std::cout << "ctor " << i << "\n"; }
-  ~Payload() { std::cout << "dtor " << m_i << "\n"; }
+  Payload(int i) : m_i(i) { std::println ("ctor {}", i); }
+  ~Payload() { std::println ("dtor {}", m_i); }
   Payload& operator= (const Payload&) = default;
   int m_i;
 };
@@ -98,7 +98,7 @@ void test4()
 {
   using AthContainers_detail::thread_specific_ptr;
 
-  std::cout << "test4\n";
+  std::println ("test4");
   
   thread_specific_ptr<Payload> p;
   assert (p.get() == 0);

@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/test/ViewVector_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -22,7 +20,7 @@
 #include "AthenaKernel/BaseInfo.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "TestTools/expect_exception.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -54,7 +52,7 @@ void checkit (const VV& vv, const DV& dv, int n = -1)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   DV dv;
   for (int i=0; i < 10; i++)
@@ -135,7 +133,7 @@ void test1()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   const SG::BaseInfoBase* bib = SG::BaseInfoBase::find (typeid (VV));
   assert (bib != nullptr);
@@ -150,7 +148,7 @@ VIEWVECTOR_CLASS_DEF(DView, 9823475)
 
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   EXPECT_EXCEPTION (SG::ExcMissingViewVectorCLID, ClassID_traits<VV>::ID());
   assert (ClassID_traits<DView>::ID() == 9823475);
@@ -162,7 +160,7 @@ void test3()
 // toPersistent/toTransient
 void test4 (SGTest::TestStore& store)
 {
-  std::cout << "test4\n";
+  std::println ("test4");
   DataVector<X> *dv = new DataVector<X>;
   for (int i=0; i < 10; i++)
     dv->push_back (new X(i));

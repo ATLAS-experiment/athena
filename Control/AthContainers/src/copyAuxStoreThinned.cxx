@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -131,11 +131,9 @@ void copyAuxStoreThinned NO_SANITIZE_UNDEFINED
     // Warn if this is a decoration --- decorations should have been locked
     // by now, except for mcEventWeights, for which this is expected.
     if (decors.test (auxid) && r.getName (auxid) != "mcEventWeights") {
-      std::ostringstream ss;
-      ss << "unlocked decoration " << r.getName(auxid)
-         << " (" << auxid << ") in object of type "
-         << AthContainers_detail::typeinfoName (typeid (orig));
-      ATHCONTAINERS_WARNING("copyAuxStoreThinned", ss.str());
+      ATHCONTAINERS_WARNING("copyAuxStoreThinned",
+                            "unlocked decoration {} ({}) in object of type {}",
+                            r.getName(auxid), auxid, AthContainers_detail::typeinfoName (typeid (orig)));
     }
 
     // FIXME: Do this via proper interfaces.
