@@ -213,32 +213,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 SimplePoolFile_xAOD.root                            DEBUG --> Access   DbContainer  WRITE     [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -340,32 +335,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -398,32 +388,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -456,32 +441,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -514,32 +494,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -572,32 +547,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -630,32 +600,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -688,32 +653,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -746,32 +706,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -804,32 +759,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -873,32 +823,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -931,32 +876,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -989,32 +929,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -1047,32 +982,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -1105,32 +1035,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -1163,32 +1088,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -1221,32 +1141,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -1279,32 +1194,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -1337,32 +1247,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root
@@ -1395,32 +1300,27 @@ StreamWritexAODElectrons                            DEBUG addItemObjects(9103,"M
 StreamWritexAODElectrons                            DEBUG            Key:MyTracks
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamWritexAODElectrons                            DEBUG  Added object 9103,"MyTracks"
 StreamWritexAODElectrons                            DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfoAux.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamWritexAODElectrons                            DEBUG  Added object 38853911,"EventInfoAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(45903698,"EventInfo") called
 StreamWritexAODElectrons                            DEBUG            Key:EventInfo
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamWritexAODElectrons                            DEBUG  Added object 45903698,"EventInfo"
 StreamWritexAODElectrons                            DEBUG addItemObjects(1202247486,"TestContainerAux.") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainerAux.
 StreamWritexAODElectrons                            DEBUG       Aux Attr:-decor2
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1202247486
 StreamWritexAODElectrons                            DEBUG  Added object 1202247486,"TestContainerAux."
 StreamWritexAODElectrons                            DEBUG addItemObjects(1340937587,"TestContainer") called
 StreamWritexAODElectrons                            DEBUG            Key:TestContainer
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamWritexAODElectrons                            DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #1340937587
 StreamWritexAODElectrons                            DEBUG  Added object 1340937587,"TestContainer"
 StreamWritexAODElectrons                            DEBUG connectOutput done for SimplePoolFile_xAOD.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile_xAOD.root

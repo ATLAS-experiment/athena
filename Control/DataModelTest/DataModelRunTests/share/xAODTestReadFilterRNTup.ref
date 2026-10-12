@@ -19,6 +19,7 @@ ClassIDSvc           INFO getRegistryEntries: read 348 CLIDRegistry entries for 
 DecisionSvc          INFO Inserting stream: StreamStream1 with no Algs
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
+MetaDataSvc          INFO Initializing MetaDataSvc
 Stream...ream1Tool   INFO Initializing StreamStream1.StreamStream1Tool
 PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
 PoolSvc              INFO Frontier compression level set to 5
@@ -31,7 +32,6 @@ PoolSvc              INFO POOL WriteCatalog is file:xAODTestReadFilter_rntup_cat
 DbSession            INFO     Open     DbSession    
 Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All] 
 ClassIDSvc           INFO getRegistryEntries: read 356 CLIDRegistry entries for module ALL
-MetaDataSvc          INFO Initializing MetaDataSvc
 MetaDataSvc          INFO Found MetaDataTools = PublicToolHandleArray([])
 PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
 DbSession            INFO     Open     DbSession    

@@ -204,25 +204,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 SimplePoolFile4.root                                DEBUG --> Access   DbContainer  WRITE     [ROOT_All] ##Shapes
 ##Shapes                                            DEBUG Opening
@@ -314,25 +310,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -362,25 +354,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -410,25 +398,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -458,25 +442,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -506,25 +486,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -554,25 +530,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -602,25 +574,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -650,25 +618,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -698,25 +662,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -746,25 +706,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -794,25 +750,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -842,25 +794,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -890,25 +838,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -938,25 +882,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -986,25 +926,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -1034,25 +970,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -1082,25 +1014,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -1130,25 +1058,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
@@ -1178,25 +1102,21 @@ StreamStream1                                       DEBUG addItemObjects(2101,"*
 StreamStream1                                       DEBUG            Key:*
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamStream1                                       DEBUG  Added object 2101,""
 StreamStream1                                       DEBUG addItemObjects(9103,"MyTracks") called
 StreamStream1                                       DEBUG            Key:MyTracks
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamStream1                                       DEBUG  Added object 9103,"MyTracks"
 StreamStream1                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamStream1                                       DEBUG            Key:EventInfoAux.
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamStream1                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamStream1                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamStream1                                       DEBUG            Key:EventInfo
 StreamStream1                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamStream1                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamStream1                                       DEBUG  Added object 45903698,"EventInfo"
 StreamStream1                                       DEBUG connectOutput done for SimplePoolFile4.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root

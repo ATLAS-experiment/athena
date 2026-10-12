@@ -107,7 +107,7 @@ int main() {
   assert( pStream );
 
   //fill the vector of selected objects
-  assert( pStream->collectAllObjects(ctx).isSuccess() );
+  assert( pStream->collectAllObjects(ctx, *pStore).isSuccess() );
 
   //  cout << pStream->selectedObjects()->end() - 
   //    pStream->selectedObjects()->begin() <<endl;

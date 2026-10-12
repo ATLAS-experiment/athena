@@ -205,13 +205,11 @@ WriteCond                                            INFO Hit x = 123.705 y = 57
 WriteCond                                            INFO Hit x = 126.915 y = 52.2228 z = -55.0735 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 130.125 y = 46.5439 z = -56.169 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Branch container 'xAOD::EventAuxInfo_v3_EventInfoAux.'
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opened container CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.) of type ROOT_Tree
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] CollectionTree(xAOD::EventInfo_v1/EventInfo)
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opening
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG    attributes# = 1
@@ -308,8 +306,6 @@ WriteCond                                            INFO Hit x = 223.705 y = 57
 WriteCond                                            INFO Hit x = 226.915 y = 52.2228 z = -155.073 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 230.125 y = 46.5439 z = -156.169 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967298, run #1 2 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -353,8 +349,6 @@ WriteCond                                            INFO Hit x = 323.705 y = 57
 WriteCond                                            INFO Hit x = 326.915 y = 52.2228 z = -255.073 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 330.125 y = 46.5439 z = -256.169 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967299, run #1 3 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -398,8 +392,6 @@ WriteCond                                            INFO Hit x = 423.705 y = 57
 WriteCond                                            INFO Hit x = 426.915 y = 52.2228 z = -355.073 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 430.125 y = 46.5439 z = -356.169 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967300, run #1 4 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -443,8 +435,6 @@ WriteCond                                            INFO Hit x = 523.705 y = 57
 WriteCond                                            INFO Hit x = 526.915 y = 52.2228 z = -455.073 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 530.125 y = 46.5439 z = -456.169 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967301, run #1 5 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -488,8 +478,6 @@ WriteCond                                            INFO Hit x = 623.705 y = 57
 WriteCond                                            INFO Hit x = 626.915 y = 52.2228 z = -555.073 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 630.125 y = 46.5439 z = -556.169 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967302, run #1 6 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -533,8 +521,6 @@ WriteCond                                            INFO Hit x = 723.705 y = 57
 WriteCond                                            INFO Hit x = 726.915 y = 52.2228 z = -655.073 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 730.125 y = 46.5439 z = -656.169 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967303, run #1 7 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -578,8 +564,6 @@ WriteCond                                            INFO Hit x = 823.705 y = 57
 WriteCond                                            INFO Hit x = 826.915 y = 52.2228 z = -755.073 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 830.125 y = 46.5439 z = -756.169 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967304, run #1 8 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -623,8 +607,6 @@ WriteCond                                            INFO Hit x = 923.705 y = 57
 WriteCond                                            INFO Hit x = 926.915 y = 52.2228 z = -855.073 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 930.125 y = 46.5439 z = -856.169 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967305, run #1 9 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -668,8 +650,6 @@ WriteCond                                            INFO Hit x = 1023.7 y = 57.
 WriteCond                                            INFO Hit x = 1026.91 y = 52.2228 z = -955.073 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 1030.12 y = 46.5439 z = -956.169 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967306, run #1 10 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -713,8 +693,6 @@ WriteCond                                            INFO Hit x = 1123.7 y = 57.
 WriteCond                                            INFO Hit x = 1126.91 y = 52.2228 z = -1055.07 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 1130.12 y = 46.5439 z = -1056.17 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967307, run #1 11 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -758,8 +736,6 @@ WriteCond                                            INFO Hit x = 1223.7 y = 57.
 WriteCond                                            INFO Hit x = 1226.91 y = 52.2228 z = -1155.07 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 1230.12 y = 46.5439 z = -1156.17 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967308, run #1 12 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -803,8 +779,6 @@ WriteCond                                            INFO Hit x = 1323.7 y = 57.
 WriteCond                                            INFO Hit x = 1326.91 y = 52.2228 z = -1255.07 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 1330.12 y = 46.5439 z = -1256.17 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967309, run #1 13 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -848,8 +822,6 @@ WriteCond                                            INFO Hit x = 1423.7 y = 57.
 WriteCond                                            INFO Hit x = 1426.91 y = 52.2228 z = -1355.07 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 1430.12 y = 46.5439 z = -1356.17 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967310, run #1 14 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -893,8 +865,6 @@ WriteCond                                            INFO Hit x = 1523.7 y = 57.
 WriteCond                                            INFO Hit x = 1526.91 y = 52.2228 z = -1455.07 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 1530.12 y = 46.5439 z = -1456.17 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967311, run #1 15 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -938,8 +908,6 @@ WriteCond                                            INFO Hit x = 1623.7 y = 57.
 WriteCond                                            INFO Hit x = 1626.91 y = 52.2228 z = -1555.07 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 1630.12 y = 46.5439 z = -1556.17 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967312, run #1 16 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -983,8 +951,6 @@ WriteCond                                            INFO Hit x = 1723.7 y = 57.
 WriteCond                                            INFO Hit x = 1726.91 y = 52.2228 z = -1655.07 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 1730.12 y = 46.5439 z = -1656.17 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967313, run #1 17 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -1028,8 +994,6 @@ WriteCond                                            INFO Hit x = 1823.7 y = 57.
 WriteCond                                            INFO Hit x = 1826.91 y = 52.2228 z = -1755.07 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 1830.12 y = 46.5439 z = -1756.17 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967314, run #1 18 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -1073,8 +1037,6 @@ WriteCond                                            INFO Hit x = 1923.7 y = 57.
 WriteCond                                            INFO Hit x = 1926.91 y = 52.2228 z = -1855.07 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 1930.12 y = 46.5439 z = -1856.17 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967315, run #1 19 events processed so far  <<<===
 AthenaPoolAddressProviderSvc                        DEBUG The current Event contains: 5 objects
@@ -1118,8 +1080,6 @@ WriteCond                                            INFO Hit x = 2023.7 y = 57.
 WriteCond                                            INFO Hit x = 2026.91 y = 52.2228 z = -1955.07 detector = DummyHitDetector
 WriteCond                                            INFO Hit x = 2030.12 y = 46.5439 z = -1956.17 detector = DummyHitDetector
 WriteCond                                            INFO registered all data
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile4.root
 AthenaEventLoopMgr                                   INFO   ===>>>  done processing event #4294967316, run #1 20 events processed so far  <<<===
 RootDatabase                                        DEBUG Closing DB SimplePoolFile1.root

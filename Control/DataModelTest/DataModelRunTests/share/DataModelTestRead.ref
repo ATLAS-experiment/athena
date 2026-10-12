@@ -5,6 +5,7 @@ LoadReadDicts        INFO Initializing LoadReadDicts...
 DecisionSvc          INFO Inserting stream: StreamStream1 with no Algs
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
+MetaDataSvc          INFO Initializing MetaDataSvc
 Stream...ream1Tool   INFO Initializing StreamStream1.StreamStream1Tool
 StreamStream1        INFO Data output: SimplePoolFile2.root
 StreamStream1        INFO ../O reinitialization...
@@ -24,7 +25,6 @@ DMTestRead           INFO dder as DataVector<DMTest::D>: 301 302 303 304 305 306
 DMTestRead           INFO elvec: 1 4 7 10 102 105 108 
 DMTestRead           INFO elv_remap: 101 102 103 104 105 106 107 108 109 110 201 202 203 204 205 206 207 208 209 210 
 DMTestRead           INFO elv_remap v2: 101 102 103 104 105 106 107 108 109 110 201 202 203 204 205 206 207 208 209 210 
-MetaDataSvc          INFO Initializing MetaDataSvc
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
 DMTestRead           INFO bvec as DataVector<DMTest::B>: 2 3 4 5 6 7 8 9 10 11 

@@ -8,6 +8,7 @@ LoadWriteDicts       INFO Initializing LoadWriteDicts...
 DecisionSvc          INFO Inserting stream: StreamStream1 with no Algs
 AthDictLoaderSvc     INFO in initialize...
 AthDictLoaderSvc     INFO acquired Dso-registry
+MetaDataSvc          INFO Initializing MetaDataSvc
 Stream...ream1Tool   INFO Initializing StreamStream1.StreamStream1Tool
 StreamStream1        INFO Data output: SimplePoolFile.root
 StreamStream1        INFO ../O reinitialization...
@@ -18,7 +19,6 @@ ApplicationMgr       INFO Application Manager Started successfully
 EventP...stencySvc   INFO Added successfully Conversion service:McCnvSvc
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
-MetaDataSvc          INFO Initializing MetaDataSvc
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #1, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #2, run #0 1 events processed so far  <<<===
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #2, run #0 2 events processed so far  <<<===

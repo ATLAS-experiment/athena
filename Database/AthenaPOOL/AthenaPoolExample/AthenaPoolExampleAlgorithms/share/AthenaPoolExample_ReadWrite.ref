@@ -238,13 +238,11 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
@@ -255,7 +253,6 @@ StreamReWrite                                       DEBUG addItemObjects(4590369
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] CollectionTree(xAOD::EventInfo_v1/EventInfo)
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opening
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG    attributes# = 1
@@ -381,19 +378,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -458,19 +452,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -535,19 +526,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -612,19 +600,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -689,19 +674,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -766,19 +748,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -843,19 +822,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -920,19 +896,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -997,19 +970,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -1074,19 +1044,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -1151,19 +1118,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -1228,19 +1192,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -1305,19 +1266,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -1382,19 +1340,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -1459,19 +1414,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -1536,19 +1488,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -1613,19 +1562,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -1690,19 +1636,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root
@@ -1767,19 +1710,16 @@ StreamReWrite                                       DEBUG addItemObjects(9103,"M
 StreamReWrite                                       DEBUG            Key:MyTracks
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9103
 StreamReWrite                                       DEBUG  Added object 9103,"MyTracks"
 StreamReWrite                                       DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamReWrite                                       DEBUG            Key:EventInfoAux.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamReWrite                                       DEBUG  Added object 38853911,"EventInfoAux."
 StreamReWrite                                       DEBUG addItemObjects(45903698,"EventInfo") called
 StreamReWrite                                       DEBUG            Key:EventInfo
 StreamReWrite                                       DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamReWrite                                       DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamReWrite                                       DEBUG  Added object 45903698,"EventInfo"
 StreamReWrite                                       DEBUG connectOutput done for SimplePoolFile3.root
 RootDatabase                                        DEBUG DB Action Commit in SimplePoolFile3.root

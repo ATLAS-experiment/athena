@@ -177,13 +177,11 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] CollectionTree(ExampleHitContainer_p1/MyHits)
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG Opening
 CollectionTree(ExampleHitContainer_p1/MyHits)       DEBUG    attributes# = 1
@@ -194,7 +192,6 @@ StreamCopy                                          DEBUG addItemObjects(3885391
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] CollectionTree(xAOD::EventAuxInfo_v3/EventInfoAux.)
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG Opening
 CollectionTree(xAOD::EventAuxInfo_v3/EventInfo...)  DEBUG    attributes# = 1
@@ -205,7 +202,6 @@ StreamCopy                                          DEBUG addItemObjects(4590369
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 SimplePoolFile1.root                                DEBUG --> Access   DbContainer  READ      [ROOT_TreeIndex] CollectionTree(xAOD::EventInfo_v1/EventInfo)
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG Opening
 CollectionTree(xAOD::EventInfo_v1/EventInfo)        DEBUG    attributes# = 1
@@ -306,25 +302,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -348,25 +340,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -390,25 +378,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -432,25 +416,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -474,25 +454,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -517,25 +493,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -559,25 +531,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -601,25 +569,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -643,25 +607,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -685,25 +645,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -728,25 +684,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -770,25 +722,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -812,25 +760,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -854,25 +798,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -896,25 +836,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -939,25 +875,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -981,25 +913,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -1023,25 +951,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
@@ -1065,25 +989,21 @@ StreamCopy                                          DEBUG addItemObjects(2101,"*
 StreamCopy                                          DEBUG            Key:*
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #2101
 StreamCopy                                          DEBUG  Added object 2101,"McEventInfo"
 StreamCopy                                          DEBUG addItemObjects(9102,"MyHits") called
 StreamCopy                                          DEBUG            Key:MyHits
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #9102
 StreamCopy                                          DEBUG  Added object 9102,"MyHits"
 StreamCopy                                          DEBUG addItemObjects(38853911,"EventInfoAux.") called
 StreamCopy                                          DEBUG            Key:EventInfoAux.
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #38853911
 StreamCopy                                          DEBUG  Added object 38853911,"EventInfoAux."
 StreamCopy                                          DEBUG addItemObjects(45903698,"EventInfo") called
 StreamCopy                                          DEBUG            Key:EventInfo
 StreamCopy                                          DEBUG      Comp Attr 0 with 7 mantissa bits.
 StreamCopy                                          DEBUG      Comp Attr 0 with 15 mantissa bits.
-MetaDataSvc                                         DEBUG Not translating metadata item ID #45903698
 StreamCopy                                          DEBUG  Added object 45903698,"EventInfo"
 StreamCopy.StreamCopyTool                           DEBUG In connectOutput SimplePoolReplica1.root
 StreamCopy.StreamCopyTool                           DEBUG Connected to SimplePoolReplica1.root
