@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/PackedLinkVectorFactory_test.cxx
@@ -16,7 +16,7 @@
 #include "AthContainers/AuxVectorData.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "TestTools/TestAlloc.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -274,7 +274,7 @@ void test_vector()
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   test_vector();
   test_vector<Athena_test::TestAlloc>();
 
@@ -504,7 +504,7 @@ void test_vvector()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   test_vvector();
   test_vvector<Athena_test::TestAlloc>();
@@ -528,7 +528,7 @@ void test2()
 // testing copyForOutput.
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
 #ifndef XAOD_STANDALONE
   std::unique_ptr<SGTest::TestStore> store = SGTest::getTestStore();
@@ -637,7 +637,7 @@ void test3()
 
 int main()
 {
-  std::cout << "AthContainers/PackedLinkVectorFactory_test\n";
+  std::println ("AthContainers/PackedLinkVectorFactory_test");
   test1();
   test2();
   test3();

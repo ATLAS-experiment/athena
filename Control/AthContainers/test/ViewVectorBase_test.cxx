@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/test/ViewVectorBase_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -19,7 +17,7 @@
 #include "AthContainers/AuxElement.h"
 #include "SGTools/TestStore.h"
 #include "AthenaKernel/CLASS_DEF.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -80,7 +78,7 @@ void ViewVectorBaseTest::checkELV (SG::sgkey_t sgkey)
 
 void test1 (SGTest::TestStore& store)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   ViewVectorBaseTest vvb1;
 
   DataVector<X>* dv = new DataVector<X>;

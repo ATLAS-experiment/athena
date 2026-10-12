@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/PackedLink_test.cxx
@@ -12,13 +12,13 @@
 #undef NDEBUG
 
 #include "AthContainers/PackedLinkImpl.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   SG::PackedLinkBase pl1;
   assert (pl1.index() == 0);
   assert (pl1.collection() == 0);
@@ -44,7 +44,7 @@ void test1()
 
 int main()
 {
-  std::cout << "AthContainers/PackedLink_test\n";
+  std::println ("AthContainers/PackedLink_test");
   test1();
   return 0;
 }

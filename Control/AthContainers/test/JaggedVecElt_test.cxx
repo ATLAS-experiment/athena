@@ -12,13 +12,13 @@
 #undef NDEBUG
 
 #include "AthContainers/JaggedVecImpl.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::JaggedVecElt<int> e1;
   assert (e1.end() == 0);
@@ -47,7 +47,7 @@ void test1()
 
 int main()
 {
-  std::cout << "AthContainers/JaggedVecElt_test\n";
+  std::println ("AthContainers/JaggedVecElt_test");
   test1();
   return 0;
 }

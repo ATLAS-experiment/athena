@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxVectorInterface_test.cxx
@@ -13,13 +13,13 @@
 #include "AthContainers/tools/AuxVectorInterface.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/AuxTypeRegistry.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::AuxStoreInternal store;
   SG::auxid_t ityp1 = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
@@ -61,7 +61,7 @@ void test1()
 
 int main()
 {
-  std::cout << "AthContainers/AuxVectorInterface_test\n";
+  std::println ("AthContainers/AuxVectorInterface_test");
   test1();
   return 0;
 }

@@ -21,8 +21,8 @@
 #ifndef ATHCONTAINERS_NO_THREADS
 #include <shared_mutex>
 #endif
-#include <iostream>
-#include <sstream>
+#include <format>
+#include <print>
 #include <cassert>
 
 
@@ -59,7 +59,7 @@ using SG::AuxVectorData_test;
 
 void test_get_data()
 {
-  std::cout << "test_get_data\n";
+  std::println ("test_get_data");
   AuxVectorData_test b1;
   const AuxVectorData& cb1 = b1;
   SG::auxid_t ityp = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
@@ -130,7 +130,7 @@ void test_get_data()
 
 void test_swap()
 {
-  std::cout << "test_swap\n";
+  std::println ("test_swap");
   SG::auxid_t ityp = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
 
   AuxVectorData_test b1;
@@ -154,7 +154,7 @@ void test_swap()
 
 void test_get_types()
 {
-  std::cout << "test_get_types\n";
+  std::println ("test_get_types");
   AuxVectorData_test b1;
 
   assert (b1.getAuxIDs().size() == 0);
@@ -186,7 +186,7 @@ void test_get_types()
 
 void test_decoration()
 {
-  std::cout << "test_decoration\n";
+  std::println ("test_decoration");
 
   AuxVectorData_test b1;
   const AuxVectorData& cb1 = b1;
@@ -232,7 +232,7 @@ void test_decoration()
 
 void test_move()
 {
-  std::cout << "test_move\n";
+  std::println ("test_move");
 
   AuxVectorData_test b1;
   SG::AuxStoreInternal store;
@@ -308,9 +308,7 @@ ThreadingTest::ThreadingTest()
 {
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   for (int i=0; i < 10000; i++) {
-    std::ostringstream ss;
-    ss << "xint" << i;
-    SG::auxid_t id = r.getAuxID<int> (ss.str());
+    SG::auxid_t id = r.getAuxID<int> (std::format ("xint{}", i));
     m_ids.push_back (id);
     int* data = reinterpret_cast<int*> (m_store.getData (id, m_nelt, m_nelt));
     for (size_t j = 0; j < m_nelt; j++)
@@ -410,7 +408,7 @@ SG::AuxDataOption TestStore::lastopt ("", 0);
 
 void test_setoption()
 {
-  std::cout << "test_setoption\n";
+  std::println ("test_setoption");
   AuxVectorData_test b;
   assert (!b.setOption (SG::null_auxid, SG::AuxDataOption ("opt", 1)));
   b.setStore (new TestStore);
@@ -452,7 +450,7 @@ void test_setoption()
 
 void test_storelink()
 {
-  std::cout << "test_storelink\n";
+  std::println ("test_storelink");
 
   AuxVectorData_test b1;
   assert (!b1.hasStore());
@@ -481,7 +479,7 @@ public:
 };
 void test_setcache()
 {
-  std::cout << "test_setcache\n";
+  std::println ("test_setcache");
   SG::auxid_t ityp = SG::AuxTypeRegistry::instance().getAuxID<int> ("anInt");
 
   int iarr[3] = {10, 8, 9};
@@ -499,7 +497,7 @@ void test_setcache()
 
 void test_linked()
 {
-  std::cout << "test_linked\n";
+  std::println ("test_linked");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t foo_links_id = r.getAuxID<int>
@@ -534,7 +532,7 @@ void test_linked()
 
 void test_threading()
 {
-  std::cout << "test_threading\n";
+  std::println ("test_threading");
 
   ThreadingTest test;
   test.nonThreadedTest();

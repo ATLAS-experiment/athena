@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxTypeVector_test.cxx
@@ -17,7 +17,7 @@
 #include "TestTools/TestAlloc.h"
 #include "CxxUtils/checker_macros.h"
 #include <vector>
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <memory>
 
@@ -327,7 +327,7 @@ void test_vector()
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   test_vector<int>();
   test_vector<bool>();
   test_vector<float>();
@@ -353,7 +353,7 @@ SG::AuxDataOption TestContainer::lastopt ("", 0);
 // test setOption
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   SG::AuxTypeVector<int> v1 (1, 10, 20, false);
   assert (!v1.setOption (SG::AuxDataOption ("opt", 1)));
@@ -398,7 +398,7 @@ void test3a()
 }
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   test3a<std::allocator>();
   test3a<Athena_test::TestAlloc>();
@@ -433,7 +433,7 @@ public:
 #endif
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
 #ifndef XAOD_STANDALONE
   SG::AuxTypeVector<TTest> tvec (123, 3, 3, false);
@@ -450,7 +450,7 @@ void test4()
 
 int main()
 {
-  std::cout << "AuxTypeVector_test\n";
+  std::println ("AuxTypeVector_test");
   test1();
   test2();
   test3();

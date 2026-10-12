@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/PackedLinkVector_test.cxx
@@ -16,7 +16,7 @@
 #include "AthContainers/PackedLinkImpl.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthLinks/DataLink.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -49,7 +49,7 @@ public:
 // PackedLinkVectorHolder
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   using Container = std::vector<int>;
 
@@ -123,7 +123,7 @@ void test1()
 // PackedLinkVector
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   using Container = std::vector<int>;
 
@@ -159,7 +159,7 @@ void test2()
 // PackedLinkVVectorHolder
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   using Container = std::vector<int>;
   using PLink_t = SG::PackedLink<Container>;
@@ -232,7 +232,7 @@ void test3()
 // PackedLinkVVector
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   using Container = std::vector<int>;
 
@@ -267,7 +267,7 @@ void test4()
 
 int main()
 {
-  std::cout << "AthContainers/PackedLinkVector_test\n";
+  std::println ("AthContainers/PackedLinkVector_test");
   test1();
   test2();
   test3();

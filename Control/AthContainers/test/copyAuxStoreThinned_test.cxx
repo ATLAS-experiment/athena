@@ -19,8 +19,7 @@
 #include "AthenaKernel/ThinningDecisionBase.h"
 #include "CxxUtils/FloatCompressor.h"
 #include <vector>
-#include <iostream>
-#include <iomanip>
+#include <print>
 #include <cassert>
 #include <bitset>
 
@@ -122,7 +121,7 @@ void compare (const SG::AuxStoreInternal& a,
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   SG::ThinningDecisionBase dec;
   SG::ThinningInfo info;
   info.m_decision = &dec;
@@ -200,7 +199,7 @@ void test1()
   copyAuxStoreThinned (src, dst2, &info);
   compare (src, dst2, true, ftyp);
 
-  std::cout << "should see unlocked decoration warning here\n";
+  std::println ("should see unlocked decoration warning here");
   src.lock();
   SG::auxid_t dityp = r.getAuxID<int> ("anIntDecor");
   src.getDecoration (dityp, 10, 10);
@@ -211,9 +210,9 @@ void test1()
 
 void test2()
 {
-  std::cout << std::endl;
-  std::cout << "Testing lossy float compression..." << std::endl;
-  std::cout << std::endl;
+  std::println();
+  std::println ("Testing lossy float compression...");
+  std::println();
 
   // Prepare the necessary bits and pieces
   SG::ThinningDecisionBase dec;
@@ -263,19 +262,19 @@ void test2()
 
   // Check the compression results
   for (int i = 0; i < 5; i++) {
-    std::cout << "Iteration [" << i << "]" << std::endl;
-    std::cout << std::endl;
+    std::println ("Iteration [{}]", i);
+    std::println();
 
     // Testing float
 
     // Print the original value
     float fvalue = fptr[i];
-    std::cout << "Original value    " << std::dec << std::setw( 15 ) << fvalue
-              << " (binary : " << intToBinStr(std::bit_cast<uint32_t>(fvalue)) << ")" << std::endl;
+    std::println ("Original value    {:15f} (binary : {})",
+                  fvalue, intToBinStr(std::bit_cast<uint32_t>(fvalue)));
     // Print the compressed value
     fvalue = rfptr[i];
-    std::cout << "Compressed value  " << std::dec << std::setw( 15 ) << fvalue
-              << " (binary : " << intToBinStr(std::bit_cast<uint32_t>(fvalue)) << ")" << std::endl;
+    std::println  ("Compressed value  {:15f} (binary : {})",
+                   fvalue, intToBinStr(std::bit_cast<uint32_t>(fvalue)));
     result = std::bit_cast<uint32_t>(fvalue);
     // Check against by-hand compression
     fvalue = fc.reduceFloatPrecision( fptr[i] );
@@ -291,19 +290,19 @@ void test2()
     for(int j = 0; j < 2; j++) {
       // Print the original value
       fvalue = invec->at(j);
-      std::cout << "Original value at [" << j << "]    " << std::dec << std::setw( 8 ) << fvalue
-                << " (binary : " << intToBinStr(std::bit_cast<uint32_t>(fvalue)) << ")" << std::endl;
+      std::println ("Original value at [{}]    {:8f} (binary : {})",
+                    j, fvalue, intToBinStr(std::bit_cast<uint32_t>(fvalue)));
       // Print the compressed value
       fvalue = outvec->at(j);
-      std::cout << "Compressed value at [" << j << "]  " << std::dec << std::setw( 8 ) << fvalue
-                << " (binary : " << intToBinStr(std::bit_cast<uint32_t>(fvalue)) << ")" << std::endl;
+      std::println ("Compressed value at [{}]  {:8f} (binary : {})",
+                    j, fvalue, intToBinStr(std::bit_cast<uint32_t>(fvalue)));
       result = std::bit_cast<uint32_t>(fvalue);
       // Check against by-hand compression
       fvalue = fc.reduceFloatPrecision( invec->at(j) );
       assert( result == std::bit_cast<uint32_t>(fvalue) );
     }
 
-    std::cout << std::endl;
+    std::println();
   }
 
 }

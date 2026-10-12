@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/JaggedVecConstAccessor_test.cxx
@@ -16,7 +16,7 @@
 #include "TestTools/expect_exception.h"
 #include "TestTools/FLOATassert.h"
 #include <ranges>
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -92,7 +92,7 @@ private:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   using Payload = float;
   using Elt = SG::JaggedVecElt<Payload>;
@@ -173,7 +173,7 @@ void test1()
 // spans
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   using Payload = float;
   using Elt = SG::JaggedVecElt<Payload>;
@@ -226,7 +226,7 @@ void test2()
 //coverity[root_function]
 int main()
 {
-  std::cout << "AthContainers/JaggedVecConstAccessor_test\n";
+  std::println ("AthContainers/JaggedVecConstAccessor_test");
   test1();
   test2();
   return 0;

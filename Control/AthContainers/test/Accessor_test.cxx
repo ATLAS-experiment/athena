@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/Accessor_test.cxx
@@ -14,7 +14,7 @@
 #include "AthContainers/AuxStoreInternal.h"
 #include "AthContainers/exceptions.h"
 #include "TestTools/expect_exception.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -67,7 +67,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::AuxElement b;
   SG::Accessor<int> ityp1 ("anInt");
@@ -147,7 +147,7 @@ void test1()
 
 int main()
 {
-  std::cout << "AthContainers/Accessor_test\n";
+  std::println ("AthContainers/Accessor_test");
   test1();
   return 0;
 }

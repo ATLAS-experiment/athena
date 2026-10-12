@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/exceptions_test.cxx
@@ -12,58 +12,58 @@
 #undef NDEBUG
 #include "AthContainers/exceptions.h"
 #include "AthContainers/AuxTypeRegistry.h"
-#include <iostream>
+#include <print>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t id1 = r.getAuxID<int> ("foo");
   SG::auxid_t id2 = r.getAuxID<float> ("bar", "cl");
 
-  std::cout << SG::ExcNoAuxStore(id1).what() << "\n";
-  std::cout << SG::ExcNoAuxStore(id2).what() << "\n";
-  std::cout << SG::ExcNoAuxStore(SG::null_auxid).what() << "\n";
-  std::cout << SG::ExcNoAuxStore("op").what() << "\n";
+  std::println ("{}",  SG::ExcNoAuxStore(id1).what());
+  std::println ("{}",  SG::ExcNoAuxStore(id2).what());
+  std::println ("{}",  SG::ExcNoAuxStore(SG::null_auxid).what());
+  std::println ("{}",  SG::ExcNoAuxStore("op").what());
 
-  std::cout << SG::ExcBadAuxVar(id1).what() << "\n";
+  std::println ("{}",  SG::ExcBadAuxVar(id1).what());
 
-  std::cout << SG::ExcConstAuxData("someop", id1).what() << "\n";
-  std::cout << SG::ExcConstAuxData("otherop").what() << "\n";
+  std::println ("{}",  SG::ExcConstAuxData("someop", id1).what());
+  std::println ("{}",  SG::ExcConstAuxData("otherop").what());
 
-  std::cout << SG::ExcUntrackedSetStore().what() << "\n";
+  std::println ("{}",  SG::ExcUntrackedSetStore().what());
 
-  std::cout << SG::ExcBadPrivateStore("op").what() << "\n";
+  std::println ("{}",  SG::ExcBadPrivateStore("op").what());
 
-  std::cout << SG::ExcAuxTypeMismatch(id1, typeid(int), typeid(float),
-                                      "aaa", "aaa").what() << "\n";
-  std::cout << SG::ExcAuxTypeMismatch(id2, typeid(int), typeid(float),
-                                      "aaa", "bbb").what() << "\n";
+  std::println ("{}",  SG::ExcAuxTypeMismatch(id1, typeid(int), typeid(float),
+                                              "aaa", "aaa").what());
+  std::println ("{}",  SG::ExcAuxTypeMismatch(id2, typeid(int), typeid(float),
+                                              "aaa", "bbb").what());
 
-  std::cout << SG::ExcInsertionInBaseClass("op", typeid(int), typeid(float)).what() << "\n";
+  std::println ("{}",  SG::ExcInsertionInBaseClass("op", typeid(int), typeid(float)).what());
 
-  std::cout << SG::ExcStoreLocked(id1).what() << "\n";
-  std::cout << SG::ExcStoreLocked("op").what() << "\n";
-  std::cout << SG::ExcNonowningContainer().what() << "\n";
-  std::cout << SG::ExcUnknownAuxItem("foo").what() << "\n";
-  std::cout << SG::ExcUnknownAuxItem("foo", "bar").what() << "\n";
-  std::cout << SG::ExcUnknownAuxItem("foo", "bar", &typeid(int)).what() << "\n";
-  std::cout << SG::ExcDVToELV("why").what() << "\n";
-  std::cout << SG::ExcViewVectorNotView().what() << "\n";
-  std::cout << SG::ExcMissingViewVectorCLID(typeid(int)).what() << "\n";
-  std::cout << SG::ExcInsertMoveOwnershipMismatch().what() << "\n";
-  std::cout << SG::ExcFlagMismatch(id2, typeid(int),
-                                   SG::AuxVarFlags::Atomic,
-                                   SG::AuxVarFlags::Atomic | SG::AuxVarFlags::Linked).what() << "\n";
-  std::cout << SG::ExcLinkMismatch(id1, typeid(int), id2, SG::null_auxid).what() << "\n";
-  std::cout << SG::ExcNoLinkedVar(id1, typeid(int)).what() << "\n";
-  std::cout << SG::ExcInvalidThinningTarget(1234, "asd").what() << "\n";
-  std::cout << SG::ExcBadIterSwap().what() << "\n";
-  std::cout << SG::ExcAllocOwnership().what() << "\n";
-  std::cout << SG::ExcBadVarName("foo asd").what() << "\n";
-  std::cout << SG::ExcJaggedVecOverlappingCopy().what() << "\n";
+  std::println ("{}",  SG::ExcStoreLocked(id1).what());
+  std::println ("{}",  SG::ExcStoreLocked("op").what());
+  std::println ("{}",  SG::ExcNonowningContainer().what());
+  std::println ("{}",  SG::ExcUnknownAuxItem("foo").what());
+  std::println ("{}",  SG::ExcUnknownAuxItem("foo", "bar").what());
+  std::println ("{}",  SG::ExcUnknownAuxItem("foo", "bar", &typeid(int)).what());
+  std::println ("{}",  SG::ExcDVToELV("why").what());
+  std::println ("{}",  SG::ExcViewVectorNotView().what());
+  std::println ("{}",  SG::ExcMissingViewVectorCLID(typeid(int)).what());
+  std::println ("{}",  SG::ExcInsertMoveOwnershipMismatch().what());
+  std::println ("{}",  SG::ExcFlagMismatch(id2, typeid(int),
+                                           SG::AuxVarFlags::Atomic,
+                                           SG::AuxVarFlags::Atomic | SG::AuxVarFlags::Linked).what());
+  std::println ("{}",  SG::ExcLinkMismatch(id1, typeid(int), id2, SG::null_auxid).what());
+  std::println ("{}",  SG::ExcNoLinkedVar(id1, typeid(int)).what());
+  std::println ("{}",  SG::ExcInvalidThinningTarget(1234, "asd").what());
+  std::println ("{}",  SG::ExcBadIterSwap().what());
+  std::println ("{}",  SG::ExcAllocOwnership().what());
+  std::println ("{}",  SG::ExcBadVarName("foo asd").what());
+  std::println ("{}",  SG::ExcJaggedVecOverlappingCopy().what());
 }
 
 

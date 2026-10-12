@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/LinkedVarAccessorBase_test.cxx
@@ -13,7 +13,7 @@
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxVectorData.h"
 #include "CxxUtils/as_const_ptr.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -48,7 +48,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   AuxVectorDataTest c;
   SG::ConstAuxElement e (&c, 0);
@@ -65,7 +65,7 @@ void test1()
 
 int main()
 {
-  std::cout << "CxxUtils/LinkedVarAccessorBase_test\n";
+  std::println ("CxxUtils/LinkedVarAccessorBase_test");
   test1();
   return 0;
 }

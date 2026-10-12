@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/supportsThinning_test.cxx
@@ -14,7 +14,7 @@
 #include "AthContainers/DataVector.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 struct A {};
@@ -30,7 +30,7 @@ struct D0 : public SG::AuxStoreInternal { static bool constexpr supportsThinning
 
 int main()
 {
-  std::cout << "AthContainers/supportsThinning_test\n";
+  std::println ("AthContainers/supportsThinning_test");
 
   assert (!SG::xAODInterfaceSupportingThinning<A>());
   assert (!SG::xAODStoreSupportingThinning<A>());

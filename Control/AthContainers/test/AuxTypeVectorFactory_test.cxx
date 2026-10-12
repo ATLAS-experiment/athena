@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/AuxTypeVectorFactory_test.cxx
@@ -16,7 +16,7 @@
 #include "AthContainers/AuxVectorData.h"
 #include "AthContainers/AuxStoreInternal.h"
 #include "TestTools/TestAlloc.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 #ifndef XAOD_STANDALONE
@@ -208,7 +208,7 @@ void test_vector2()
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   test_vector<int>();
   test_vector2<int>();
   test_vector<bool>();
@@ -242,7 +242,7 @@ void test1()
 // testing copyForOutput.
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
 #ifndef XAOD_STANDALONE
   std::unique_ptr<SGTest::TestStore> store = SGTest::getTestStore();
@@ -316,7 +316,7 @@ void test2()
 
 int main()
 {
-  std::cout << "AuxTypeVectorFactory_test\n";
+  std::println ("AuxTypeVectorFactory_test");
   test1();
   test2();
   return 0;

@@ -15,7 +15,7 @@
 #include "AthContainers/DataVector.h"
 #include "AthContainers/exceptions.h"
 #include "TestTools/FLOATassert.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -36,7 +36,7 @@ struct AAux : public SG::AuxElement
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   SG::AuxStoreConstMem cm (5);
   assert (cm.size() == 5);
   assert (cm.getData (1) == 0);
@@ -71,7 +71,7 @@ void test1()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   const size_t N = 5;
 
@@ -106,7 +106,7 @@ void test2()
 
 int main()
 {
-  std::cout << "AthContainers/AuxStoreConstMem_test\n";
+  std::println ("AthContainers/AuxStoreConstMem_test");
   test1();
   test2();
   return 0;

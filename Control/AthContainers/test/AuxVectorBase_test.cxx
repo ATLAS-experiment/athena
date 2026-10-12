@@ -11,7 +11,8 @@
 #undef NDEBUG
 #include <exception>
 #include <string>
-#include <sstream>
+#include <format>
+#include <print>
 
 
 //************************************************************************
@@ -34,10 +35,8 @@ private:
 dv_test_err::dv_test_err (const char* file,
                           int line,
                           const std::string& what)
+  : m_what (std::format ("{}:{} myassertion failure: {}", file, line, what))
 {
-  std::ostringstream os;
-  os << file << ":" << line << " myassertion failure: " << what;
-  m_what = os.str();
 }
 
 
@@ -322,7 +321,7 @@ void test_init()
 
 void test_set_store()
 {
-  std::cout << "test_set_store\n";
+  std::println ("test_set_store");
   SG::AuxVectorBase_test b;
   SG::AuxStoreInternal store;
   assert (!b.trackIndices());
@@ -360,7 +359,7 @@ void test_set_store()
 
 void test_set_store2()
 {
-  std::cout << "test_set_store2\n";
+  std::println ("test_set_store2");
   SG::AuxVectorBase_test b;
   SG::AuxStoreInternal store;
   assert (!b.trackIndices());
@@ -465,7 +464,7 @@ void test_clear_indices()
 
 void test_get_data()
 {
-  std::cout << "test_get_data\n";
+  std::println ("test_get_data");
   SG::AuxVectorBase_test b1;
   b1.initAuxVectorBase<B> (SG::OWN_ELEMENTS, SG::DEFAULT_TRACK_INDICES);
   const SG::AuxVectorBase& cb1 = b1;
@@ -523,7 +522,7 @@ void test_get_data()
 
 void test_isAvailable()
 {
-  std::cout << "test_isAvailable\n";
+  std::println ("test_isAvailable");
   SG::AuxVectorBase_test b1;
   b1.initAuxVectorBase<B> (SG::OWN_ELEMENTS, SG::DEFAULT_TRACK_INDICES);
 
@@ -565,7 +564,7 @@ std::vector<typename T::value_type> make_vector (const T& c)
 
 void test_get_span()
 {
-  std::cout << "test_get_span\n";
+  std::println ("test_get_span");
   SG::AuxVectorBase_test b1;
   b1.initAuxVectorBase<B> (SG::OWN_ELEMENTS, SG::DEFAULT_TRACK_INDICES);
   SG::AuxStoreInternal store;
@@ -590,7 +589,7 @@ void test_get_span()
 
 void test_reserve_resize()
 {
-  std::cout << "test_reserve_resize\n";
+  std::println ("test_reserve_resize");
   SG::AuxVectorBase_test b1;
   b1.initAuxVectorBase<B> (SG::OWN_ELEMENTS, SG::DEFAULT_TRACK_INDICES);
   SG::AuxStoreInternal_test store;
@@ -653,7 +652,7 @@ void test_reserve_resize()
 
 void test_shift()
 {
-  std::cout << "test_shift\n";
+  std::println ("test_shift");
   SG::AuxVectorBase_test b1;
   b1.initAuxVectorBase<B> (SG::OWN_ELEMENTS, SG::DEFAULT_TRACK_INDICES);
   SG::AuxStoreInternal store;
@@ -710,7 +709,7 @@ void test_shift()
 
 void test_get_types()
 {
-  std::cout << "test_get_types\n";
+  std::println ("test_get_types");
   SG::AuxVectorBase_test b1;
   b1.initAuxVectorBase<B> (SG::OWN_ELEMENTS, SG::DEFAULT_TRACK_INDICES);
 
@@ -732,7 +731,7 @@ void test_get_types()
 
 void test_copy_aux()
 {
-  std::cout << "test_copy_aux\n";
+  std::println ("test_copy_aux");
   SG::AuxVectorBase_test b1;
   SG::AuxStoreInternal store1;
   b1.initAuxVectorBase<B> (SG::OWN_ELEMENTS, SG::DEFAULT_TRACK_INDICES);
@@ -820,7 +819,7 @@ void test_copy_aux()
 
 void test_copy_base_aux()
 {
-  std::cout << "test_copy_base_aux\n";
+  std::println ("test_copy_base_aux");
   SG::AuxVectorBase_test b1;
   SG::AuxStoreInternal store1;
   b1.initAuxVectorBase<C> (SG::OWN_ELEMENTS, SG::DEFAULT_TRACK_INDICES);
@@ -841,7 +840,7 @@ void test_copy_base_aux()
 
 void test_clear_aux()
 {
-  std::cout << "test_clear_aux\n";
+  std::println ("test_clear_aux");
   SG::AuxVectorBase_test b1;
   SG::AuxStoreInternal store1;
   b1.initAuxVectorBase<B> (SG::OWN_ELEMENTS, SG::DEFAULT_TRACK_INDICES);
@@ -869,7 +868,7 @@ void test_clear_aux()
 
 void test_swap_elements_aux()
 {
-  std::cout << "test_swap_elements_aux\n";
+  std::println ("test_swap_elements_aux");
 
   SG::AuxVectorBase_test b1;
   SG::AuxStoreInternal store1;
@@ -1010,7 +1009,7 @@ void test_resort_aux1()
 }
 void test_resort_aux()
 {
-  std::cout << "test_resort_aux\n";
+  std::println ("test_resort_aux");
 
   std::vector<A*> va = make_v<A>();
   SG::AuxVectorBase_test b1;
@@ -1025,7 +1024,7 @@ void test_resort_aux()
 
 void test_move()
 {
-  std::cout << "test_move\n";
+  std::println ("test_move");
 
   SG::AuxVectorBase_test b1;
   b1.initAuxVectorBase<B> (SG::OWN_ELEMENTS, SG::DEFAULT_TRACK_INDICES);

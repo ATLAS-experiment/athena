@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/debug_test.cxx
@@ -18,7 +18,7 @@
 #include "AthContainers/JaggedVec.h"
 #include "AthContainers/PackedLink.h"
 #include <vector>
-#include <iostream>
+#include <print>
 #include <sstream>
 #include <cassert>
 
@@ -76,7 +76,7 @@ struct A
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   SG::auxid_t id1 = r.getAuxID<int> ("foo");
   SG::auxid_t id2 = r.getAuxID<int> ("foo", "bar");
@@ -95,7 +95,7 @@ void test1()
 
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
   DataVector<A> dv;
   SG::AuxStoreInternal store;
   dv.setStore (&store);
@@ -129,15 +129,15 @@ void test2()
   SG::auxid_t decor_id = r.getAuxID<int> ("decor");
   store.getDecoration (decor_id, 3, 3);
 
-  std::cout << "... set ...\n";
+  std::println ("... set ...");
   SGdebug::print_aux_vars (store.getAuxIDs());
-  std::cout << "... store ...\n";
+  std::println ("... store ...");
   SGdebug::print_aux_vars (store);
   SGdebug::print_aux_vars (&store);
-  std::cout << "... vec ...\n";
+  std::println ("... vec ...");
   SGdebug::print_aux_vars (dv);
   SGdebug::print_aux_vars (&dv);
-  std::cout << "... elt ...\n";
+  std::println ("... elt ...");
   SGdebug::print_aux_vars (dv[1]);
   SGdebug::print_aux_vars (*dv[1]);
 }
@@ -147,13 +147,13 @@ template <class T>
 void test3_one (const char* name, const T& val)
 {
   SG::auxid_t id = SG::AuxTypeRegistry::instance().getAuxID<T> (name);
-  std::cout << name << " " << SGdebug::aux_var_as_string (id, &val, 0) << "\n";
+  std::println ("{} {}", name, SGdebug::aux_var_as_string (id, &val, 0));
 }
 
 
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
   test3_one<int> ("a_int", -2);
   test3_one<unsigned int> ("a_uint", 10);
   test3_one<short> ("a_short", 10);
@@ -188,7 +188,7 @@ void test3()
 
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
   DataVector<A> dv;
   SG::AuxStoreInternal store;
   dv.setStore (&store);
@@ -224,31 +224,31 @@ void test4()
 
   SGdebug::dump_aux_vars (store, 10);
 
-  std::cout << "... print elt 1 from  store\n";
+  std::println ("... print elt 1 from  store");
   SGdebug::dump_aux_vars (store, 1);
-  std::cout << "... print elt 0 from  store\n";
+  std::println ("... print elt 0 from  store");
   SGdebug::dump_aux_vars (&store, 0);
 
-  std::cout << "\n";
-  std::cout << "... print entire store\n";
+  std::println ("");
+  std::println ("... print entire store");
   SGdebug::dump_aux_vars (store);
   SGdebug::dump_aux_vars (&store);
 
-  std::cout << "\n";
-  std::cout << "... print elt 1 from  vec\n";
+  std::println ("");
+  std::println ("... print elt 1 from  vec");
   SGdebug::dump_aux_vars (dv, 1);
-  std::cout << "... print elt 0 from  vec\n";
+  std::println ("... print elt 0 from  vec");
   SGdebug::dump_aux_vars (&dv, 0);
 
-  std::cout << "\n";
-  std::cout << "... print entire vec\n";
+  std::println ("");
+  std::println ("... print entire vec");
   SGdebug::dump_aux_vars (dv);
   SGdebug::dump_aux_vars (&dv);
 
-  std::cout << "\n";
-  std::cout << "... print elt 1\n";
+  std::println ("");
+  std::println ("... print elt 1");
   SGdebug::dump_aux_vars (*dv[1]);
-  std::cout << "... print elt 0\n";
+  std::println ("... print elt 0");
   SGdebug::dump_aux_vars (dv[0]);
 }
 
@@ -256,7 +256,7 @@ void test4()
 // Test dumping JaggedVecElt variables.
 void test5()
 {
-  std::cout << "test5\n";
+  std::println ("test5");
 
   DataVector<A> dv;
   SG::AuxStoreInternal store;
@@ -274,7 +274,7 @@ void test5()
 // Test dumping PackedLink/DataLink variables.
 void test6()
 {
-  std::cout << "test6\n";
+  std::println ("test6");
 
 #ifndef XAOD_STANDALONE
   std::unique_ptr<SGTest::TestStore> testStore = SGTest::getTestStore();

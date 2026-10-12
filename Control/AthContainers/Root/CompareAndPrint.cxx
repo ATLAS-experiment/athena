@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: CompareAndPrint.cxx 470529 2011-11-24 23:54:22Z ssnyder $
 /**
  * @file  AthContainers/src/CompareAndPrint.cxx
  * @author scott snyder, Paolo Calafiura, etc
@@ -13,7 +11,7 @@
 
 #include "AthContainers/tools/CompareAndPrint.h"
 #include "AthContainers/tools/error.h"
-#include <iostream>
+#include <print>
 
 
 namespace DataModel_detail {
@@ -25,10 +23,8 @@ namespace DataModel_detail {
  */
 void CompareAndPrint::warn (const std::type_info& ti, const void* f) const
 {
-  std::cout << "DataVector ERROR: duplicated pointer found in a DataVector of " 
-            << AthContainers_detail::typeinfoName(ti)
-            << " owning its elements! "
-            << std::hex << f << std::dec << std::endl;
+  std::println ("DataVector ERROR: duplicated pointer found in a DataVector of {} owning its elements! {}",
+                AthContainers_detail::typeinfoName(ti), f);
 }
 
 } // namespace DataModel_detail

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/ThinningDecision_test.cxx
@@ -15,7 +15,7 @@
 #include "AthContainers/exceptions.h"
 #include "SGTools/TestStore.h"
 #include "TestTools/expect_exception.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -24,7 +24,7 @@ CLASS_DEF( DataVector<int>, 194519923, 0 )
 
 void test1 (SGTest::TestStore& store)
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   auto dv = std::make_unique<DataVector<int> >();
   for (int i=0; i < 10; i++)
@@ -57,7 +57,7 @@ void test1 (SGTest::TestStore& store)
 
 int main()
 {
-  std::cout << "AthContainers/ThinningDecision_test\n";
+  std::println ("AthContainers/ThinningDecision_test");
   std::unique_ptr<SGTest::TestStore> store = SGTest::getTestStore();
   test1 (*store);
   return 0;

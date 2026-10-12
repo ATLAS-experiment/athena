@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file AthContainers/test/dataVectorAsELV_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -20,7 +18,7 @@
 #include "AthContainers/AuxElement.h"
 #include "SGTools/TestStore.h"
 #include "TestTools/expect_exception.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -33,7 +31,7 @@ CLASS_DEF( DataVector<Y> , 9902 , 1 )
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   size_t N = 3;
 
   DataVector<X> dvx1;

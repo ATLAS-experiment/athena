@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/ELProxy_test.cxx
@@ -18,7 +18,7 @@
 #include "AthContainers/tools/PackedLinkConversions.h"
 #include "AthLinks/ElementLink.h"
 #include "AthLinks/DataLink.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 #include <vector>
 
@@ -66,7 +66,7 @@ private:
 
 void test_ELProxy()
 {
-  std::cout << "test_ELProxy\n";
+  std::println ("test_ELProxy");
 
   using Cont_t = std::vector<int>;
   using Link_t = ElementLink<Cont_t>;
@@ -170,7 +170,7 @@ void test_ELProxy()
 
 void test_ELProxyConverter()
 {
-  std::cout << "test_ELProxyConverter\n";
+  std::println ("test_ELProxyConverter");
 
   using Cont_t = std::vector<int>;
   using Link_t = ElementLink<Cont_t>;
@@ -214,7 +214,7 @@ void test_ELProxyConverter()
 
 void test_ELSpanProxy()
 {
-  std::cout << "test_ELSpanProxy\n";
+  std::println ("test_ELSpanProxy");
 
   using Cont_t = std::vector<int>;
   using Link_t = ElementLink<Cont_t>;
@@ -326,7 +326,7 @@ void test_ELSpanProxy()
 
 void test_ELSpanConverter()
 {
-  std::cout << "test_ELSpanConverter\n";
+  std::println ("test_ELSpanConverter");
 
   using Cont_t = std::vector<int>;
   using Link_t = ElementLink<Cont_t>;
@@ -382,7 +382,7 @@ void test_ELSpanConverter()
 //coverity[root_function]
 int main()
 {
-  std::cout << "AthContainers/ELProxy_test\n";
+  std::println ("AthContainers/ELProxy_test");
   test_ELProxy();
   test_ELProxyConverter();
   test_ELSpanProxy();

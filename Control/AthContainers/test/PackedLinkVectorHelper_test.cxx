@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthContainers/test/PackedLinkVectorHeper_test.cxx
@@ -15,7 +15,7 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/PackedLinkImpl.h"
 #include "AthLinks/DataLink.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -41,7 +41,7 @@ CLASS_DEF( std::vector<int>, 12345, 0 )
 // PackedLinkVectorHelper
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   using Container = std::vector<int>;
   using DLink_t = DataLink<Container>;
@@ -212,7 +212,7 @@ void test1()
 
 void test_applyThinning()
 {
-  std::cout << "test_applyThinning\n";
+  std::println ("test_applyThinning");
 
 #ifndef XAOD_STANDALONE
   std::unique_ptr<SGTest::TestStore> store = SGTest::getTestStore();
@@ -260,7 +260,7 @@ void test_applyThinning()
 //coverity[root_function]
 int main()
 {
-  std::cout << "AthContainers/PackedLinkVectorHelper_test\n";
+  std::println ("AthContainers/PackedLinkVectorHelper_test");
   test1();
   test_applyThinning();
   return 0;

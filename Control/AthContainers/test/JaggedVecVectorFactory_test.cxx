@@ -22,6 +22,8 @@
 #include <algorithm>
 #include <vector>
 #include <iostream>
+#include <print>
+#include <format>
 #include <cassert>
 
 #ifndef XAOD_STANDALONE
@@ -31,14 +33,31 @@ CLASS_DEF (std::vector<int*>, 28374627, 0)
 #endif
 
 
-namespace SG {
+namespace std {
 template <class T>
-std::ostream& operator<< (std::ostream& s, const JaggedVecElt<T>& e)
+struct formatter<SG::JaggedVecElt<T> >
+  : public formatter<string_view>
 {
-  s << e.end();
-  return s;
-}
-} // namespace SG
+  template <class FmtContext>
+  FmtContext::iterator format(const SG::JaggedVecElt<T>& e, FmtContext& ctx) const
+  {
+    return std::format_to (ctx.out(), "{}", e.end());
+  }
+};
+
+#ifndef XAOD_STANDALONE
+template <>
+struct formatter<ElementLink<std::vector<int*> > >
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+    FmtContext::iterator format(const ElementLink<std::vector<int*> >& e, FmtContext& ctx) const
+  {
+    return std::format_to (ctx.out(), "{}:{}", e.key(), e.index());
+  }
+};
+#endif
+} // namespace std
 
 
 namespace {
@@ -58,13 +77,13 @@ void compareElts (const SG::JaggedVecElt<T>* ptr, size_t n,
   assert (n >= v.size());
   for (size_t i = 0; i  < v.size(); ++i) {
     if (ptr[i] != v[i]) {
-      std::cerr << "Elt comparison failure: [";
+      std::print (std::cerr, "Elt comparison failure: [");
       for (size_t ii = 0; ii  < v.size(); ++ii)
-        std::cerr << ptr[ii] << " ";
-      std::cerr << "] [";
+        std::print (std::cerr, "{} ", ptr[ii]);
+      std::print (std::cerr, "] [");
       for (size_t ii = 0; ii  < v.size(); ++ii)
-        std::cerr << v[ii] << " ";
-      std::cerr << "]\n";
+        std::print (std::cerr, "{} ", v[ii]);
+      std::println (std::cerr, "]");
       std::abort();
     }
   }
@@ -80,13 +99,13 @@ template <class T>
 void comparePayload (const T* ptr, const std::vector<T>& v)
 {
   if (!std::equal (v.begin(), v.end(), ptr)) {
-    std::cerr << "Payload comparison failure: [";
+    std::print (std::cerr, "Payload comparison failure: [");
     for (size_t ii = 0; ii  < v.size(); ++ii)
-      std::cerr << ptr[ii] << " ";
-    std::cerr << "] [";
+      std::print (std::cerr, "{} ", ptr[ii]);
+    std::print (std::cerr, "] [");
     for (size_t ii = 0; ii  < v.size(); ++ii)
-      std::cerr << v[ii] << " ";
-    std::cerr << "]\n";
+      std::print (std::cerr, "{} ", v[ii]);
+    std::println (std::cerr, "]");
     std::abort();
   }
 }
@@ -485,7 +504,7 @@ void test_vector (const std::string& name)
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   test_vector<float>  ("tfloat");
   test_vector<int>    ("tint");
   test_vector<double> ("tdouble");
@@ -512,7 +531,7 @@ void test1()
 // testing copyForOutput.
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
 #ifndef XAOD_STANDALONE
   std::unique_ptr<SGTest::TestStore> store = SGTest::getTestStore();
@@ -583,7 +602,7 @@ void test2()
 
 int main()
 {
-  std::cout << "AthContainers/JaggedVecVectorFactory_test\n";
+  std::println ("AthContainers/JaggedVecVectorFactory_test");
   test1();
   test2();
   return 0;

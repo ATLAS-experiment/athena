@@ -25,6 +25,7 @@
 #include <stdexcept>
 #include <string>
 #include <sstream>
+#include <print>
 
 
 //************************************************************************
@@ -47,10 +48,8 @@ private:
 dv_test_err::dv_test_err (const char* file,
                           int line,
                           const std::string& what)
+  : m_what (std::format ("{}:{} myassertion failure: {}", file, line, what))
 {
-  std::ostringstream os;
-  os << file << ":" << line << " myassertion failure: " << what;
-  m_what = os.str();
 }
 
 
@@ -6772,11 +6771,10 @@ template <class T>
 void dump_classid()
 {
   typedef ClassID_traits<DataVector<T> > traits;
-  std::cout << "name: " << traits::typeName() << "\n";
-  std::cout << " clid, vers, is_do: "
-            << std::hex << traits::ID() << std::dec << " "
-            << traits::s_version << " "
-            << traits::s_isDataObject << "\n";
+  std::println ("name: {}", traits::typeName());
+  int vers = traits::s_version;
+  bool isdo = traits::s_isDataObject;
+  std::println (" clid, vers, is_do: {:x} {} {}", traits::ID(), vers, isdo);
 }
 
 
