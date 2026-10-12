@@ -154,6 +154,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.TrackingGeometry.UseBlueprint', False)
     actscf.addFlag('Acts.TrackingGeometry.BuildDetrayGeometry', False)
     actscf.addFlag('Acts.TrackingGeometry.ObjDebugOutput', False)
+    actscf.addFlag('Acts.TrackingGeometry.FrustumNav', False)
     actscf.addFlag('Acts.TrackingGeometry.KeepGoingOnMaterialMergeFailure', False)
     # ITkMaterialSource can be:
     # a path to a local file
