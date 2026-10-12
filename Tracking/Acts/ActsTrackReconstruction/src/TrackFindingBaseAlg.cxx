@@ -57,6 +57,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_maxPixelHoles);
     ATH_MSG_DEBUG("   " << m_maxStripHoles);
     ATH_MSG_DEBUG("   " << m_maxOutliers);
+    ATH_MSG_DEBUG("   " << m_maxHolesAndOutliers);
     ATH_MSG_DEBUG("   " << m_maxPixelOutliers);
     ATH_MSG_DEBUG("   " << m_maxStripOutliers);
     ATH_MSG_DEBUG("   " << m_maxSharedHits);
@@ -160,6 +161,7 @@ namespace ActsTrk {
       setCut(cfg.minMeasurements, m_minMeasurements, cutIndex);
       setCut(cfg.maxHoles, m_maxHoles, cutIndex);
       setCut(cfg.maxOutliers, m_maxOutliers, cutIndex);
+      setCut(cfg.maxHolesAndOutliers, m_maxHolesAndOutliers, cutIndex);
       setCut(cfg.maxSharedHits, m_maxSharedHits, cutIndex);
       setCut(cfg.maxChi2, m_maxChi2, cutIndex);
       ++cutIndex;
@@ -380,6 +382,7 @@ namespace ActsTrk {
     bool enoughMeasurements = (track.nMeasurements() >= minMeasurementsBranchStop);
     bool tooManyHoles = (track.nHoles() > cutSet.maxHoles);
     bool tooManyOutliers = (track.nOutliers() > cutSet.maxOutliers);
+    bool tooManyHolesAndOutliers = (track.nHoles() + track.nOutliers() > cutSet.maxHolesAndOutliers);
 
     if (m_addCounts) {
       auto [enoughMeasurementsPS, tooManyHolesPS, tooManyOutliersPS] =
@@ -389,7 +392,7 @@ namespace ActsTrk {
       tooManyOutliers = tooManyOutliers || tooManyOutliersPS;
     }
 
-    if (!(tooManyHoles || tooManyOutliers)) {
+    if (!(tooManyHoles || tooManyOutliers || tooManyHolesAndOutliers)) {
       return BranchStopperResult::Continue;
     }
 

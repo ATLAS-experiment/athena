@@ -131,6 +131,7 @@ namespace ActsTrk {
     Gaudi::Property<std::vector<std::size_t>> m_minMeasurements{this, "minMeasurements", {}, "TrackSelector: minMeasurements"};
     Gaudi::Property<std::vector<std::size_t>> m_maxHoles{this, "maxHoles", {}, "TrackSelector: maxHoles"};
     Gaudi::Property<std::vector<std::size_t>> m_maxOutliers{this, "maxOutliers", {}, "TrackSelector: maxOutliers"};
+    Gaudi::Property<std::vector<std::size_t>> m_maxHolesAndOutliers{this, "maxHolesAndOutliers", {}, "TrackSelector: maximum number of holes and outliers together"};
     Gaudi::Property<std::vector<std::size_t>> m_maxSharedHits{this, "maxSharedHits", {}, "TrackSelector: maxSharedHits"};
     Gaudi::Property<std::vector<double>> m_maxChi2{this, "maxChi2", {}, "TrackSelector: maxChi2"};
 
