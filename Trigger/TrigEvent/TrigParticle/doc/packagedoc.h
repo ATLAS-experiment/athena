@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,7 +17,6 @@ This package contains the diverse TrigParticle classes
   - TrigPhoton   : stores the Photon candidates   (Valeria.Perez.Reale@cern.ch)
   - TrigL2Bphys  : stores L2 Bphysics candidates  (Julie.Kirk@rl.ac.uk)
   - TrigEFBphys  : stores EF Bphysics candidates  (Julie.Kirk@rl.ac.uk)
-  - TrigL2Bjet   : stores L2 Bjet candidates      (Andrea.Coccaro@ge.infn.it)
   - TrigTau      : stores the Tau candidates      (casado@ifae.es)
 
 

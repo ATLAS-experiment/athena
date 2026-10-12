@@ -30,19 +30,6 @@
   </class>
 
 
-  <class name="TrigL2BjetContainer" id="B4842D15-7BFB-476E-8C68-F2F38E588380" />
-  <class name="DataVector<TrigL2Bjet>" id="F6ACED03-42F3-4192-A4E2-47FA9A9B9D49" />
-  <class name="std::vector<TrigL2Bjet*>" />
-  <class name="std::vector<const TrigL2Bjet*>" />
-  <class name="TrigL2Bjet" id="F3EEF1D2-D602-466A-967D-B6EE93311850" >
-    <field name="m_track" transient="true" />
-    <field name="m_prmvertex" transient="true" />
-    <field name="m_secvertex" transient="true" />
-  </class>
-  <class name="DataVector<TrigL2BjetContainer>" id="5B24C2A4-5829-41C1-8391-5E2F9E5A7B30" />
-  <class name="std::vector<TrigL2BjetContainer*>" />
-  
-
   <class name="TrigL2BphysContainer" id="23296C53-6811-4D19-BD32-816B5DD0508F" />
   <class name="DataVector<TrigL2Bphys>" id="390F41C1-CCFA-4A1D-B046-F9F462FD64D0" />
   <class name="std::vector<TrigL2Bphys*>" />

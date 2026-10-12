@@ -3391,18 +3391,6 @@ def dump_TrigEFBphys (j, f):
     return
 
 
-def dump_TrigL2Bjet (j, f):
-    dump_Fourvec (j, f)
-    fprint (f, j.isValid(), j.roiId())
-    fprint (f, '\n   ', j.prmVtx(), j.xComb(), j.xIP1D(), j.xIP2D(),
-            j.xIP3D(), j.xCHI2(), j.xSV(), j.xMVtx(), j.xEVtx(), j.xNVtx())
-    fprint (f, '\n   ',
-            tonone(j.TrackCollection()),
-            tonone(j.PrmVertexCollection()),
-            tonone(j.SecVertexCollection()))
-    return
-
-
 def dump_TrigL2Bphys (j, f):
     fprint (f, j.roiId(), j.particleType(), j.eta(), j.phi(),
             j.mass(), j.fitmass(), j.fitchi2(), j.fitndof(),
@@ -5331,7 +5319,6 @@ dumpspecs = [
     ["TrigEMCluster",                        dump_TrigEMCluster_nolist],
     ["TrigInDetTrackCollection",             dump_TrigInDetTrackCollection],
     ["DataVector<TrigEFBphys>",              dump_TrigEFBphys],
-    ["DataVector<TrigL2Bjet>",               dump_TrigL2Bjet],
     ["DataVector<TrigL2Bphys>",              dump_TrigL2Bphys],
     ["TrigCaloClusterContainer",             dump_TrigCaloCluster],
     ["TrigTauClusterDetailsContainer",       dump_TrigTauClusterDetails],
@@ -5365,7 +5352,6 @@ dumpspecs = [
     ["TrigEFBphysContainer",                 dump_TrigEFBphys],
     ["TrigEMClusterContainer",               dump_TrigEMCluster],
     ["TrigElectronContainer",                dump_TrigElectron],
-    ["TrigL2BjetContainer",                  dump_TrigL2Bjet],
     ["TrigL2BphysContainer",                 dump_TrigL2Bphys],
     ["TrigPhotonContainer",                  dump_TrigPhoton],
     ["TrigTauClusterContainer",              dump_TrigTauCluster],

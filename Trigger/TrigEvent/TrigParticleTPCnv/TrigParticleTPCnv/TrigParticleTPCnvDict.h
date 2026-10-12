@@ -60,18 +60,6 @@
 #include "TrigParticleTPCnv/TrigEFBphysContainer_tlp2.h"
 #include "TrigParticleTPCnv/TrigEFBphys_p3.h"
 
-// TrigL2Bjet
-#include "TrigParticleTPCnv/TrigL2BjetContainer_tlp1.h"
-#include "TrigParticleTPCnv/TrigL2BjetContainer_p1.h"
-#include "TrigParticleTPCnv/TrigL2Bjet_p1.h" 
-
-#include "TrigParticleTPCnv/TrigL2BjetContainer_tlp2.h"
-#include "TrigParticleTPCnv/TrigL2BjetContainer_p2.h"
-#include "TrigParticleTPCnv/TrigL2Bjet_p2.h"
-
-#include "TrigParticleTPCnv/TrigL2BjetContainer_p3.h"
-#include "TrigParticleTPCnv/TrigL2Bjet_p3.h"
-
 //dummy instances of all objects using std::vector<TPObjRef> for the dictionary
 struct dummy_TrigParticleTPCnvDict
 {
@@ -89,9 +77,6 @@ struct dummy_TrigParticleTPCnvDict
   std::vector<TrigL2Bphys_p1>                 m_dummyL2Bphys_p1;
   std::vector<TrigL2Bphys_p2>                 m_dummyL2Bphys_p2;
   std::vector<TrigL2Bphys_p3>                 m_dummyL2Bphys_p3;
-  std::vector<TrigL2Bjet_p1>                  m_dummyL2Bjet_p1;
-  std::vector<TrigL2Bjet_p2>                  m_dummyL2Bjet_p2;
-  std::vector<TrigL2Bjet_p3>                  m_dummyL2Bjet_p3;
 
 };
 
