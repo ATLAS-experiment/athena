@@ -92,6 +92,9 @@ def StandaloneMuonOutputCfg(flags):
     #for now add also the muon container here. This should go into the combined config at some point
     aod_items += ["xAOD::MuonContainer#Muons"]
     aod_items += ["xAOD::MuonAuxContainerR4#MuonsAux."]
+    
+    aod_items += ["xAOD::MuonContainer#MuonsLRT"]
+    aod_items += ["xAOD::MuonAuxContainerR4#MuonsLRTAux."]
 
     esd_items += aod_items
     
@@ -173,6 +176,36 @@ def MuonCombinedReconstructionConfigR4(flags):
 
     return result
 
+def LRT_MuonCombinedReconstructionConfigR4(flags):
+    result = ComponentAccumulator()
+    if not flags.Reco.EnableTracking or not flags.Acts.doLargeRadius:
+        return result
+    
+    MuonTags = []
+    from MuonCombinedAlgsR4.MuonCombinedAlgsConfigR4 import LRT_MuonInDetTrackSelectionAlgCfg, \
+                                                        LRT_MuonCombinedStacoAlgCfg, \
+                                                        LRT_MuonLegacyCaloTagAlgCfg, \
+                                                        LRT_MuonSegmentTaggingAlgCfg, \
+                                                        MuonCreatorAlgCfg
+    from ActsConfig.CaloExtensionBuilderConfig import ActsCaloExtensionBuilderCfg
+
+    result.merge(ActsCaloExtensionBuilderCfg(flags, name="ActsCaloExtensionBuilderLRT",TrackParticleContainerName="InDetLargeD0TrackParticles", CaloExtensionName="CaloExtensionLRT"))
+    result.merge(LRT_MuonInDetTrackSelectionAlgCfg(flags))
+
+    result.merge(LRT_MuonSegmentTaggingAlgCfg(flags))
+    MuonTags+= ["SegmentTagsLRT"]
+    
+    result.merge(LRT_MuonCombinedStacoAlgCfg(flags))
+    MuonTags+=["MuonTagsSTACOLRT"]
+
+    if flags.MuonCombined.doCaloTrkMuId:
+        result.merge(LRT_MuonLegacyCaloTagAlgCfg(flags))
+        MuonTags+=["LegacyCaloTagsLRT"]
+    
+    result.merge(MuonCreatorAlgCfg(flags, name = "MuonActsCreatorAlg_LRT",
+                                      TagKeys=MuonTags, MuonKey="MuonsLRT"))
+    return result
+
 
 ### Standard reconstruction chain of phase II
 def MuonReconstructionConfig(flags):
@@ -207,6 +240,7 @@ def MuonReconstructionConfig(flags):
         result.merge(MsTrkRecoChainConfig(flags))
 
     result.merge(MuonCombinedReconstructionConfigR4(flags))
+    result.merge(LRT_MuonCombinedReconstructionConfigR4(flags)) 
 
     if flags.Output.doWriteAOD or flags.Output.doWriteESD:
         result.merge(StandaloneMuonOutputCfg(flags))
