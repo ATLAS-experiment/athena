@@ -251,6 +251,7 @@ def setupGeoR4TestCfg(args,  flags = None):
     #### Flags from ACTS are not defined in AthSimulation.
     try:
         flags.Acts.TrackingGeometry.UseBlueprint = True
+        flags.Acts.TrackingGeometry.FrustumNav = True
     except AttributeError: pass
     flags.Scheduler.CheckDependencies = True
     flags.Scheduler.ShowDataDeps = True
