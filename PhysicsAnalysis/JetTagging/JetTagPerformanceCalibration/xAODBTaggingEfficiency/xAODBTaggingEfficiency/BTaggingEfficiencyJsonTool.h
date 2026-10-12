@@ -149,8 +149,8 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
       MCMCHandler(MCMCHandler&&) noexcept = default;
       MCMCHandler(const MCMCHandler&) = delete;
       MCMCHandler& operator=(const MCMCHandler&) = delete;
+      virtual ~MCMCHandler() = default;
 
-      
       float getScaleFactor() const { return m_MCMCSF; }
 
       // For printing the content of a handler
