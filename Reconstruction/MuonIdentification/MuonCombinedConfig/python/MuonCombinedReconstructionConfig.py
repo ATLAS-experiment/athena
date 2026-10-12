@@ -459,7 +459,7 @@ def MuonDecorationAlgsCfg(flags):
                      "CombinedMuonTrackParticles",
                      "MSOnlyExtrapolatedMuonTrackParticles"]
     result.merge(MuonPrecisionLayerDecorAlgCfg(flags, "MuonCombPrecisionLayerDecorAlg",
-                                               MuonContainer="Muons",
+                                               MuonContainer="Muons" if not flags.Muon.scheduleActsReco else "MuonsLegacy",
                                                TrackContainer=prec_trk_cols))
     if flags.MuonCombined.doMuGirl and flags.MuonCombined.doMuGirlLowBeta:
 
