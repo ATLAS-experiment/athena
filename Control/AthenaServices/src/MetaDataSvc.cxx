@@ -25,6 +25,8 @@
 
 #include "OutputStreamSequencerSvc.h"
 
+#include <algorithm>
+#include <cctype>
 #include <vector>
 #include <sstream>
 #include <functional>
@@ -55,30 +57,7 @@ MetaDataSvc::MetaDataSvc( const std::string& name, ISvcLocator* pSvcLocator )
     , m_fileMgr( "FileMgr", name )
     , m_incSvc( "IncidentSvc", name )
     , m_outSeqSvc( "OutputStreamSequencerSvc", name )
-    , m_persToClid{ { "DataHeader_p5", 222376821 },
-                    { "EventStreamInfo_p3", 167728019 },
-                    { "ByteStreamMetadataContainer_p1", 1076128893 },
-                    { "IOVMetaDataContainer_p1", 1316383046 },
-                    { "xAOD::EventFormat_v1", 243004407 },
-                    { "xAOD::CutBookkeeperContainer_v1", 1234982351 },
-                    { "xAOD::CutBookkeeperAuxContainer_v1", 1147935274 },
-                    { "xAOD::TriggerMenuContainer_v1", 1107011239 },
-                    { "DataVector<xAOD::TriggerMenu_v1>", 1107011239 },
-                    { "xAOD::TriggerMenuAuxContainer_v1", 1212409402 },
-                    { "xAOD::TriggerMenuJsonContainer_v1", 1221262614 },
-                    { "DataVector<xAOD::TriggerMenuJson_v1>", 1221262614 },
-                    { "xAOD::TriggerMenuJsonAuxContainer_v1", 373045213 },
-                    { "xAOD::LumiBlockRangeContainer_v1", 1115934851 },
-                    { "DataVector<xAOD::LumiBlockRange_v1>", 1115934851 },
-                    { "xAOD::LumiBlockRangeAuxContainer_v1", 1251061086 },
-                    { "xAOD::FileMetaData_v1", 178309087 },
-                    { "xAOD::FileMetaDataAuxInfo_v1", 73252552 },
-                    { "xAOD::RingSetConfContainer_v1", 1157997427 },
-                    { "DataVector<xAOD::RingSetConf_v1>", 1157997427 },
-                    { "xAOD::RingSetConfAuxContainer_v1", 1307745126 },
-                    { "xAOD::TruthMetaDataContainer_v1", 1188015687 },
-                    { "DataVector<xAOD::TruthMetaData_v1>", 1188015687 },
-                    { "xAOD::TruthMetaDataAuxContainer_v1", 1094306618 } } {}
+{}
 
 //________________________________________________________________________________
 MetaDataSvc::~MetaDataSvc() = default;
@@ -422,7 +401,22 @@ StatusCode MetaDataSvc::addProxyToInputMetaDataStore(const std::string& tokenStr
    unsigned long num = 0;
    std::istringstream iss(numName);
    iss >> num;
-   CLID clid = m_persToClid[className];
+   // className is the persistent class sent by the client ([PNAME=]). xAOD metadata is written by
+   // T_AthenaPoolxAODCnv / T_AthenaPoolAuxContainerCnv, whose persistent class is the transient
+   // class, known to ClassIDSvc by its type-info name. The T/P metadata classes (EventStreamInfo,
+   // IOVMetaDataContainer, ByteStreamMetadataContainer) are named <transient>_p<N>, and ClassIDSvc
+   // knows <transient>; that is a convention, not enforced (PyUtils/MetaReader.py relies on it too).
+   // A metadata class that fits neither fails here.
+   CLID clid = CLID_NULL;
+   if (m_classIDSvc->getIDOfTypeInfoName(className, clid).isFailure()) {
+      const std::size_t ppos = className.rfind("_p");
+      const bool isTP = ppos != std::string::npos && ppos + 2 < className.size()
+         && std::all_of(className.begin() + ppos + 2, className.end(), [](unsigned char c) { return std::isdigit(c); });
+      if (!isTP || m_classIDSvc->getIDOfTypeName(className.substr(0, ppos), clid).isFailure()) {
+         ATH_MSG_ERROR("addProxyToInputMetaDataStore: no CLID for persistent class {} in {}", className, tokenStr);
+         return StatusCode::FAILURE;
+      }
+   }
 
    // make stream-unique keys for infile metadata objects
    // AthenaOutputStream will use this to distribute objects to the right stream (and restore the original key)
