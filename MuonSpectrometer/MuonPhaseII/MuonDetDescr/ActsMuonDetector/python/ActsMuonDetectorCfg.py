@@ -11,6 +11,7 @@ def MuonBlueprintNodeBuilderCfg(flags, name = "MuonBlueprintNodeBuilder", **kwar
     kwargs.setdefault("AssignActiveMaterial", flags.Muon.trackGeometryActiveMaterial)
     kwargs.setdefault("BuildPassiveVolumes", flags.Muon.trackGeometryPassiveMaterial)
     kwargs.setdefault("AssignEmptyPassiveMaterial", len(flags.Muon.trackGeometryMaterialMap) == 0)
+    kwargs.setdefault("UseFrustumNav",flags.Acts.TrackingGeometry.FrustumNav)
     the_tool = CompFactory.ActsTrk.MuonBlueprintNodeBuilder(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result

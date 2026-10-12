@@ -126,6 +126,8 @@ private:
   Gaudi::Property<std::size_t> m_nRBinsEM2{this, "nRBinsEMaBW", 5};
   /** @brief Number of bins in phi direction on the disc after the NSW */
   Gaudi::Property<std::size_t> m_nPhiBinsEM2{this, "nPhiBinsEMaBW", 16};
+  /** @brief Flag to use frustum navigation */
+  Gaudi::Property<bool> m_useFrustumNav{this, "UseFrustumNav", false};
 
   /** @brief Prepare a binned material which is associated to the surface
    *  @param type: The surface type on which the material is mapped (Plane, Disc, Cylinder)
@@ -136,7 +138,6 @@ private:
                                                           const std::size_t nBins2) const;
 
   std::pair<std::size_t, std::size_t> getMaterialBins(const Muon::MuonStationIndex::ChIndex chIdx) const;
-
   
   /** @brief Get the chamber's sensitive elements
     * @param gctx Geometry context
