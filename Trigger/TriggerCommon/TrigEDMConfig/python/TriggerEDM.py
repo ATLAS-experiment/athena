@@ -7,7 +7,6 @@
 # to the Run 3 section
 # ***********************************************************************************
 
-from TrigEDMConfig.TriggerEDMRun1 import TriggerL2List,TriggerEFList,TriggerResultsRun1List
 from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
 from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,EDMDetailsRun3,getSafeEDMInsertPosition,getRun3LowMuEDM
 from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4
@@ -177,7 +176,7 @@ def getTriggerEDMList(flags, key, runVersion=-1):
         runVersion = flags.Trigger.EDMVersion
 
     if runVersion == 1:
-        return _getTriggerRun1Run2ObjList(key, [TriggerL2List,TriggerEFList, TriggerResultsRun1List])
+        raise RuntimeError("Run-1 EDM is no longer supported")
 
     elif runVersion == 2:
         edmList = _getTriggerRun1Run2ObjList(key, [TriggerHLTList, TriggerResultsList])
@@ -408,7 +407,6 @@ def getCategory(s):
         if s12.count('_'): s12 = s12[s12.index('_')+1:]
         s12 = "HLT_"+s12
 
-    TriggerListRun1 = TriggerL2List + TriggerEFList + TriggerResultsRun1List
     TriggerListRun2 = TriggerResultsList + TriggerLvl1List + TriggerHLTList
     TriggerListRun3 = getRawTriggerEDMList(flags=None, runVersion=3)
 
@@ -416,7 +414,7 @@ def getCategory(s):
     bestMatch = ''
 
     """ Loop over all objects already defined in lists (and hopefully categorized!!) """
-    for item in TriggerListRun1+TriggerListRun2:
+    for item in TriggerListRun2:
         t,k = _getTypeAndKey(item[0])
 
         """ Clean up type name """
@@ -508,33 +506,6 @@ def getLvl1AODList():
     return _getTriggerRun1Run2ObjList('AODFULL',[TriggerLvl1List])
 
 
-
-def _getL2PreregistrationList():
-    """
-    List (Literally Python list) of trigger objects to be preregistered i.e. this objects we want in every event for L2
-    """
-    l = []
-    for item in TriggerL2List:
-        if len (item[1]) == 0: continue
-        t,k = _getTypeAndKey(item[0])
-        if('Aux' in t):
-            continue #we don't wat to preregister Aux containers
-        l += [t+"#"+_keyToLabel(k)]
-    return l
-
-def _getEFPreregistrationList():
-    """
-    List (Literally Python list) of trigger objects to be preregistered i.e. this objects we want in every event for EF
-    """
-    l = []
-    for item in TriggerEFList:
-        if len (item[1]) == 0: continue
-        t,k = _getTypeAndKey(item[0])
-        if('Aux' in t):
-            continue #we don't wat to preregister Aux containers
-        l += [t+"#"+_keyToLabel(k)]
-    return l
-
 def _getHLTPreregistrationList():
     """
     List (Literally Python list) of trigger objects to be preregistered i.e. this objects we want in every event for merged L2/EF in addition to default L2 and EF
@@ -559,11 +530,7 @@ def getPreregistrationList(version=2, doxAODConversion=True):
     if version==2:
         l = _getHLTPreregistrationList()
     elif version==1:
-        # remove duplicates while preserving order
-        objs=_getL2PreregistrationList()+_getEFPreregistrationList()
-        if doxAODConversion:
-            objs += _getHLTPreregistrationList()
-        l=list(dict.fromkeys(objs))
+        raise RuntimeError("Run-1 EDM is no longer supported")
     else:
         raise RuntimeError("Invalid version=%s supplied to getPreregistrationList" % version)
     return l
@@ -581,30 +548,6 @@ def getClassesToIgnore(flags):
         l.append("1142962358")  # TrigEFBjetContainer
     return l
 
-
-def _getL2BSTypeList():
-    """ List of L2 types to be read from BS, used by the TP
-    """
-    l = []
-    for item in TriggerL2List:
-        t,k = _getTypeAndKey(item[0])
-        ctype = t
-        if 'collection' in EDMDetails[t]:
-            ctype = EDMDetails[t]['collection']
-        l += [ctype]
-    return l
-
-def _getEFBSTypeList():
-    """ List of EF types to be read from BS, used by the TP
-    """
-    l = []
-    for item in TriggerEFList:
-        t,k = _getTypeAndKey(item[0])
-        ctype = t
-        if 'collection' in EDMDetails[t]:
-            ctype = EDMDetails[t]['collection']
-        l += [ctype]
-    return l
 
 def _getHLTBSTypeList():
     """ List of HLT types to be read from BS, used by the TP
@@ -627,7 +570,7 @@ def getTPList(version=2):
     if version==2:
         bslist = _getHLTBSTypeList()
     elif version==1:
-        bslist = list(set(_getL2BSTypeList() + _getEFBSTypeList()))
+        raise RuntimeError("Run-1 EDM is no longer supported")
     else:
         raise RuntimeError("Invalid version=%s supplied to getTPList" % version)
         
