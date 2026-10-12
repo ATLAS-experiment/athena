@@ -1,18 +1,5 @@
 <lcgdict>
 
-<!-- TrigTauContainer -->
-  <class name="TrigTauContainer_tlp1" id="1551CECC-52C7-4B5B-876C-27005A8DCCC8"  />
-  <class name="TrigTauContainer_p1" id="5884C914-FF12-4C8C-8422-ED4B90D4039D" />
-  <class name="std::vector<TrigTauContainer_p1>" />
-  <class name="TrigTauContainer_p3" id="32FE95F3-F85E-481E-9DD6-7BBA08ABDBD7" />
-
-<!-- TrigTau -->
-  <class name="TrigTau_p3" id="B7D9258F-F6BE-4F5F-81A8-FF27ACC1F720" />
-  <class name="std::vector<TrigTau_p3>" />
-  <class name="TrigTau_tlp2" id="B2619D46-FB89-4961-8A57-6A980A2EFB33"  />
-  <class name="TrigTau_p2" id="9CA7EFF2-DB12-4E06-A425-01B1D8367BE3" />
-  <class name="std::vector<TrigTau_p2>" />
-
 <!-- TrigElectronContainer -->
   <class name="TrigElectronContainer_tlp2"  id="2EDB14B9-0B61-4014-90C2-20AEB7AAFEBE" />
   <class name="TrigElectronContainer_p2" id="7E762579-74EB-4197-BA1B-53CBCA82A0C9" />

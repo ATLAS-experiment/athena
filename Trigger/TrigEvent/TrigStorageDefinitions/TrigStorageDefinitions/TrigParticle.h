@@ -53,7 +53,6 @@ HLT_BEGIN_TYPE_REGISTRATION
   HLT_REGISTER_TYPE(class TrigElectron, class TrigElectronContainer,class  TrigElectronContainer)
   HLT_REGISTER_TYPE(class TrigL2Bphys, class  TrigL2BphysContainer, class TrigL2BphysContainer)
   HLT_REGISTER_TYPE(class TrigPhoton, class TrigPhotonContainer,class TrigPhotonContainer)
-  HLT_REGISTER_TYPE(class TrigTau, class TrigTau,class TrigTauContainer)
      // EF
   HLT_REGISTER_TYPE(class TrigEFBphys, class  TrigEFBphysContainer,class TrigEFBphysContainer)
   HLT_REGISTER_TYPE(class JetKeyDescriptor, class JetKeyDescriptor,class JetKeyDescriptorCollection )

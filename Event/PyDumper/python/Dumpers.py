@@ -3310,20 +3310,6 @@ def dump_TrigTrackCounts_nolist (t, f):
     return
 
 
-def dump_TrigTau (t, f):
-    dump_Fourvec (t, f)
-    fprint (f, t.roiId(), t.Zvtx(), t.err_Zvtx(), t.etCalibCluster(),
-            t.simpleEtFlow(), t.nMatchedTracks())
-    fprint (f, '\n   ', tonone(t.tauCluster()),
-            tonone(t.trackCollection()),
-            tonone(t.tracksInfo()))
-    return
-@nolist
-def dump_TrigTau_nolist (t, f):
-    dump_TrigTau (t, f)
-    return
-
-
 def dump_TrigCaloCluster (c, f):
     fprint (f, c.rawEnergy(), c.rawEt(), c.rawEta(), c.rawPhi(), c.RoIword(),
             c.nCells(), c.quality())
@@ -5313,7 +5299,6 @@ dumpspecs = [
     ["DataVector<TrigVertex>",               dump_TrigVertex],
     ["TrigVertexCollection",                 dump_TrigVertex],
     ["TrigTrackCounts",                      dump_TrigTrackCounts_nolist],
-    ["TrigTau",                              dump_TrigTau_nolist],
     ["DataVector<TrigElectron>",             dump_TrigElectron],
     ["DataVector<TrigPhoton>",               dump_TrigPhoton],
     ["TrigEMCluster",                        dump_TrigEMCluster_nolist],
@@ -5355,7 +5340,6 @@ dumpspecs = [
     ["TrigL2BphysContainer",                 dump_TrigL2Bphys],
     ["TrigPhotonContainer",                  dump_TrigPhoton],
     ["TrigTauClusterContainer",              dump_TrigTauCluster],
-    ["TrigTauContainer",                     dump_TrigTau],
     ["TrigTauTracksInfoCollection",          dump_TrigTauTracksInfo],
     ["TrigSpacePointCountsCollection",       dump_TrigSpacePointCounts],
     ["TrigTrackCountsCollection",            dump_TrigTrackCounts],

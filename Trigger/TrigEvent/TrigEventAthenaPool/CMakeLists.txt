@@ -7,8 +7,7 @@ atlas_subdir( TrigEventAthenaPool )
 atlas_add_poolcnv_library( TrigEventAthenaPoolPoolCnv
    src/*.h src/*.cxx
    FILES TrigParticle/TrigL2BphysContainer.h
-         TrigParticle/TrigElectronContainer.h TrigParticle/TrigTauContainer.h
-         TrigParticle/TrigTau.h
+         TrigParticle/TrigElectronContainer.h
          TrigParticle/TrigPhotonContainer.h
          TrigParticle/TrigEFBphysContainer.h TrigDecisionEvent/TrigDecision.h
          TrigInDetEvent/TrigInDetTrackCollection.h

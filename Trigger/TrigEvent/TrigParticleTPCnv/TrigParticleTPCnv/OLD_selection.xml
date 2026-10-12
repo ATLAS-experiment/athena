@@ -1,10 +1,5 @@
 <lcgdict>
 
-<!-- TrigTau -->
-  <class name="TrigTau_tlp1" id="82AE3333-5398-4590-A51A-616832332D9B"  />
-  <class name="TrigTau_p1" id="9E512691-4402-48CC-B7EA-A9505CF22F52" />
-  <class name="std::vector<TrigTau_p1>" />
-
 <!-- TrigElectronContainer -->
 
   <class name="TrigElectronContainer_tlp1"  id="8831D2A9-F4B6-40BE-97C1-4BD7F9468267" />

@@ -31,17 +31,6 @@
 #include "TrigParticleTPCnv/TrigPhotonContainer_p3.h"
 #include "TrigParticleTPCnv/TrigPhoton_p3.h"
 
-//TrigTau and TrigTauContainer
-#include "TrigParticleTPCnv/TrigTauContainer_tlp1.h"
-#include "TrigParticleTPCnv/TrigTauContainer_p1.h"
-#include "TrigParticleTPCnv/TrigTau_tlp1.h"
-#include "TrigParticleTPCnv/TrigTau_p1.h"
-#include "TrigParticleTPCnv/TrigTau_tlp2.h"
-#include "TrigParticleTPCnv/TrigTau_p2.h"
-
-#include "TrigParticleTPCnv/TrigTauContainer_p3.h"
-#include "TrigParticleTPCnv/TrigTau_p3.h"
-
 // TrigL2Bphys
 #include "TrigParticleTPCnv/TrigL2BphysContainer_tlp1.h"
 #include "TrigParticleTPCnv/TrigL2BphysContainer_p1.h"
@@ -64,8 +53,6 @@
 struct dummy_TrigParticleTPCnvDict
 {
 
-  std::vector<TrigTau_p1>                     m_dummyTrigTau_p1;
-  std::vector<TrigTau_p3>                     m_dummyTrigTau_p3;
   std::vector<TrigElectron_p1>                m_dummyTrigElectron_p1;
   std::vector<TrigElectron_p2>                m_dummyTrigElectron_p2;
   std::vector<TrigPhoton_p1> 		      m_dummyTrigPhoton_p1;

@@ -24,9 +24,6 @@ Authour: R.Goncalo - Thu Sep 20 18:01:20 BT 2005
 #include "TrigParticle/TrigPhoton.h"
 #include "TrigParticle/TrigPhotonContainer.h"
 
-#include "TrigParticle/TrigTau.h"
-#include "TrigParticle/TrigTauContainer.h"
-
 #include "TrigParticle/TrigL2Bphys.h"
 #include "TrigParticle/TrigL2BphysContainer.h"
 
@@ -38,12 +35,10 @@ Authour: R.Goncalo - Thu Sep 20 18:01:20 BT 2005
 void dummyTriggerForTrigPartTypedefs(TrigElectronContainer b,
 				     TrigL2BphysContainer c,
 				     TrigPhotonContainer d,
-				     TrigTauContainer e,
 				     TrigEFBphysContainer g,
 				     DataVector<TrigElectronContainer> i,
 				     DataVector<TrigL2BphysContainer> j,
 				     DataVector<TrigPhotonContainer> k,
-				     DataVector<TrigTauContainer> l,
 				     DataVector<TrigEFBphysContainer> n
 				     ){
 
@@ -51,17 +46,14 @@ void dummyTriggerForTrigPartTypedefs(TrigElectronContainer b,
   TrigElectronContainer bb=b;
   TrigL2BphysContainer  cc=c; 
   TrigPhotonContainer   dd=d;
-  TrigTauContainer      ee=e;   
   TrigEFBphysContainer  gg=g;
   DataVector<TrigElectronContainer> ii = i;
   DataVector<TrigL2BphysContainer>  jj = j;
   DataVector<TrigPhotonContainer>   kk = k;
-  DataVector<TrigTauContainer>      ll = l;
   DataVector<TrigEFBphysContainer>  nn = n;
 }
 
 template class std::vector<const TrigElectron*>;
 template class std::vector<const TrigPhoton*>;
-template class std::vector<const TrigTau*>;
 
 #endif // TRIG_PARTICLE_DICT
