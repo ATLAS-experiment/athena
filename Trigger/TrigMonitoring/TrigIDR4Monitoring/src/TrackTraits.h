@@ -5,12 +5,11 @@
  **   @author  sutt
  **   @date    Wed 11 Mar 2026 17:54:21 GMT
  **
- **   $Id: TrackTraitsA.h, v0.0   Wed 11 Mar 2026 17:54:21 GMT sutt $
+ **   $Id: TrackTraits.h, v0.0   Wed 11 Mar 2026 17:54:21 GMT sutt $
  **
  **   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **
  **/
-
 
 #ifndef  TRACKTRAITS_H
 #define  TRACKTRAITS_H
@@ -19,7 +18,6 @@
 #include <cmath>
 #include <vector>
 #include <stdexcept>
-
 
 /// raw track traits - use for the TrackParticle by default, specialise
 /// for anything else, although in principle, all the TrackParticle Specific

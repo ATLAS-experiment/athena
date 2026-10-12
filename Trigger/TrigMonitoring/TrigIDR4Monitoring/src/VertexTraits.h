@@ -9,7 +9,7 @@
  **   @author  sutt
  **   @date    Wed 11 Mar 2026 17:54:21 GMT
  **
- **   $Id: VertexTraitsA.h, v0.0   Wed 11 Mar 2026 17:54:21 GMT sutt $
+ **   $Id: VertexTraits.h, v0.0   Wed 11 Mar 2026 17:54:21 GMT sutt $
  **
  **   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **
