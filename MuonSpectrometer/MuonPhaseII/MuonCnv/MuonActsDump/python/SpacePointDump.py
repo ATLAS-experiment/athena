@@ -42,8 +42,8 @@ if __name__=="__main__":
     from MuonSpacePointFormation.SpacePointFormationConfig import MuonSpacePointFormationCfg 
     cfg.merge(xAODUncalibMeasPrepCfg(flags))
     cfg.merge(MuonSpacePointFormationCfg(flags))
-    
-    cfg.merge(ActsWriteTrackingGeometryCfg(flags))
+    if not flags.Acts.TrackingGeometry.FrustumNav:
+        cfg.merge(ActsWriteTrackingGeometryCfg(flags))
     cfg.merge(SpacePointWriterCfg(flags))
     cfg.merge(TruthSegmentWriterCfg(flags))
     executeTest(cfg)

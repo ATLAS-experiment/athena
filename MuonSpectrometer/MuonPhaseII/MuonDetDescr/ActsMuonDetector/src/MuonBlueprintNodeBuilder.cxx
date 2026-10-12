@@ -155,17 +155,11 @@ auto endcapMiddleANode = buildMuonNode(gctx, endcapMiddleAStations, "EM_A", Acts
 auto endcapMiddleCNode = buildMuonNode(gctx, endcapMiddleCStations, "EM_C", Acts::GeometryIdentifier().withVolume(s_muonEndcapMiddleCId), boundsFactory, {ChIdx::EML, ChIdx::EMS});
 if(m_useFrustumNav){
 	ATH_MSG_INFO("Using Frustum Navigation Policy");
-	Acts::Experimental::FrustumNavigationPolicy::Config frustumConfig;
-	std::shared_ptr<Acts::NavigationPolicyFactory> bfactory = std::make_shared<Acts::NavigationPolicyFactory>(Acts::NavigationPolicyFactory{}.add<Acts::Experimental::FrustumNavigationPolicy>(frustumConfig));
-	barrelNode->setNavigationPolicyFactory(bfactory);
-	std::shared_ptr<Acts::NavigationPolicyFactory> eafactory = std::make_shared<Acts::NavigationPolicyFactory>(Acts::NavigationPolicyFactory{}.add<Acts::Experimental::FrustumNavigationPolicy>(frustumConfig));
-	endcapANode->setNavigationPolicyFactory(eafactory);
-	std::shared_ptr<Acts::NavigationPolicyFactory> ecfactory = std::make_shared<Acts::NavigationPolicyFactory>(Acts::NavigationPolicyFactory{}.add<Acts::Experimental::FrustumNavigationPolicy>(frustumConfig));
-	endcapCNode->setNavigationPolicyFactory(ecfactory);
-	std::shared_ptr<Acts::NavigationPolicyFactory> emafactory = std::make_shared<Acts::NavigationPolicyFactory>(Acts::NavigationPolicyFactory{}.add<Acts::Experimental::FrustumNavigationPolicy>(frustumConfig));
-	endcapMiddleANode->setNavigationPolicyFactory(emafactory);
-	std::shared_ptr<Acts::NavigationPolicyFactory> emcfactory = std::make_shared<Acts::NavigationPolicyFactory>(Acts::NavigationPolicyFactory{}.add<Acts::Experimental::FrustumNavigationPolicy>(frustumConfig));
-	endcapMiddleCNode->setNavigationPolicyFactory(emcfactory);
+  Acts::Experimental::FrustumNavigationPolicy::Config frustumConfig;
+  auto factory = std::make_shared<Acts::NavigationPolicyFactory>(Acts::NavigationPolicyFactory{}.add<Acts::Experimental::FrustumNavigationPolicy>(frustumConfig));
+  for (auto& node: {barrelNode, endcapANode, endcapCNode, endcapMiddleANode, endcapMiddleCNode}){
+      node->setNavigationPolicyFactory(factory);
+  }
 }
 //Add to the muon barrel child node (e.g calo or Itk) - if existed
 if(childNode){
