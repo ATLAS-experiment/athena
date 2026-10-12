@@ -5,11 +5,16 @@
 #define GLOBALSIM_SPECREGISTRY_H
 
 /*
-  The BitSpecs that can be read from and written to hex text, looked up by name.
+  Turns the name of a BitSpec into the pair of functions that pack and unpack
+  it. TOBTextReader and TOBTextWriter both take the name as a property and ask
+  for it here, so a TOB type becomes usable in both directions at once.
 
-  TOBTextReader and TOBTextWriter both take a BitSpec property and find their
-  entry here, so a TOB type is listed once and becomes usable in both
-  directions at the same time. Adding one is a single line in SpecRegistry.cxx.
+  Which specs exist is not stated in this package's C++ any more. A spec becomes
+  usable by being listed in GlobalSimulation/selection.xml, which is also what
+  the dictionary is generated from; the functions are then built from the type
+  name through the ROOT interpreter the first time that name is asked for, and
+  kept. Adding a TOB type touches the header that defines it and the two files
+  next to it, and nothing here.
 
   Keeping the layout behind a std::function means neither algorithm is a class
   template: there is one component per algorithm however many specs exist, and
@@ -20,7 +25,6 @@
 
 #include <cstddef>
 #include <functional>
-#include <map>
 #include <string>
 
 namespace GlobalSim {
@@ -39,10 +43,16 @@ namespace GlobalSim {
     std::function<void(SG::AuxElement&, const std::string&)> unpack;
   };
 
-  /// The known specs, by name. Built on first use.
-  const std::map<std::string, SpecEntry>& specRegistry();
+  /// The entry for one spec, or nullptr if there is not one. Built on the first
+  /// call for a given name and kept, so this is cheap to call again but should
+  /// still be called from initialize(): building one is not thread safe.
+  ///
+  /// On failure `error` is set to the reason, which is either that the name is
+  /// not among those listed in selection.xml, or that the interpreter would not
+  /// compile against it.
+  const SpecEntry* specEntry(const std::string& name, std::string& error);
 
-  /// Comma-separated list of the known names, for error messages.
+  /// Comma-separated list of the names in the dictionary, for error messages.
   std::string knownSpecNames();
 
 }

@@ -10,14 +10,14 @@ namespace GlobalSim {
   StatusCode TOBTextWriter::initialize() {
     ATH_CHECK(m_inKey.initialize());
 
-    const auto entry = specRegistry().find(m_specName.value());
-    if (entry == specRegistry().end()) {
-      ATH_MSG_ERROR("Unknown BitSpec '" << m_specName.value()
-                    << "'. Known specs are: " << knownSpecNames());
+    std::string error;
+    const SpecEntry* entry = specEntry(m_specName.value(), error);
+    if (entry == nullptr) {
+      ATH_MSG_ERROR("BitSpec '" << m_specName.value() << "': " << error);
       return StatusCode::FAILURE;
     }
-    m_width = entry->second.width;
-    m_pack = entry->second.pack;
+    m_width = entry->width;
+    m_pack = entry->pack;
 
     // Opened here rather than in finalize() so that a job which cannot write
     // its output fails before running the event loop.

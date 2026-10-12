@@ -1,4 +1,7 @@
 <lcgdict>
+    <!-- The BitSpecs the TOB text reader and writer can be pointed at. This is
+         the list: the pack and unpack functions are built from these names
+         through the interpreter, so a spec absent here cannot be used. -->
     <class name="GlobalSim::topoc_pu_type" />
     <class name="GlobalSim::GenericTOB" />
     <class name="GlobalSim::JET1Jet" />
