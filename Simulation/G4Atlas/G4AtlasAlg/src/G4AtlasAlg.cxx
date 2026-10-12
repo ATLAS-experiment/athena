@@ -315,6 +315,7 @@ void G4AtlasAlg::finalizeOnce()
   ATH_MSG_DEBUG("\t terminating the current G4 run");
   auto runMgr = G4RunManager::GetRunManager();
   runMgr->RunTermination();
+  G4StateManager::GetStateManager()->SetNewState(G4State_Quit);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
