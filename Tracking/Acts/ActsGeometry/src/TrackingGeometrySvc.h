@@ -240,7 +240,7 @@ private:
       "Extra cells per direction and axis that each surface fills in the surface arrays"};
   
   /// Special treatment for hgtd layers as well.
-  Gaudi::Property<double> m_numberOfHgtdBinsFactor{this, "NumberOfHgtdBinsFactor", 1.0};
+  Gaudi::Property<double> m_numberOfHgtdBinsFactor{this, "NumberOfHgtdBinsFactor", 5.0};
 
   std::unique_ptr<const ActsTrk::DetectorElementToActsGeometryIdMap> m_detIdMap{};
 
