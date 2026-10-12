@@ -320,23 +320,27 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
         float width_phiRZ = static_cast<float>(siWidth.widthPhiRZ()[1]);
         xaod_pcl->setWidthInEta(width_phiRZ);
 
-        // using width to scale the cluster covariance for space points
-        float covTerm = width_phiRZ * width_phiRZ * (1/12.0f);
-        
-        if( covTerm < localCovariance(1, 1) )
-            covTerm = localCovariance(1, 1);
-
-        const Amg::Transform3D& Tp = pDE->surface().transform();
-        float const cov_z =
-            6.f * covTerm *
-            static_cast<float>(Tp(0, 2) * Tp(0, 2) + Tp(1, 2) * Tp(1, 2));
-        float const cov_r = 6.f * covTerm *
-                            static_cast<float>(Tp(2, 2) * Tp(2, 2));
-        xaod_sp->setSpacePoint(xaod_pcl->identifierHash(),
-                               xaod_pcl->globalPosition(), cov_r, cov_z,
-                               {xaod_pcl});
-
       }
+
+      // Using width to scale the cluster covariance for space points.
+      // Read width back from the cluster so that this works with and without cells
+      // only works if 'diameter' strategy is set to channel1 in traccc
+      const float width_phiRZ = xaod_pcl->widthInEta();
+      float covTerm = width_phiRZ * width_phiRZ * (1/12.0f);
+
+      const float localVarEta = xaod_pcl->localCovariance<2>()(1, 1);
+      if( covTerm < localVarEta )
+          covTerm = localVarEta;
+
+      const Amg::Transform3D& Tp = pDE->surface().transform();
+      float const cov_z =
+          6.f * covTerm *
+          static_cast<float>(Tp(0, 2) * Tp(0, 2) + Tp(1, 2) * Tp(1, 2));
+      float const cov_r = 6.f * covTerm *
+                          static_cast<float>(Tp(2, 2) * Tp(2, 2));
+      xaod_sp->setSpacePoint(xaod_pcl->identifierHash(),
+                              xaod_pcl->globalPosition(), cov_r, cov_z,
+                              {xaod_pcl});
       ++pixel_idx;
 
     // ---- Strip ----
@@ -460,7 +464,7 @@ StatusCode TracccMeasurementConverterAlg::finalize()
 {
   ATH_MSG_DEBUG("Finalizing.");
 
-  ATH_MSG_DEBUG("Received total number of measurements = " << m_nMeas
+  ATH_MSG_INFO("Received total number of measurements = " << m_nMeas
                   << ", of which pixel clusters = " << m_nPix
                   << " and strip clusters = " << m_nStrip);
 
