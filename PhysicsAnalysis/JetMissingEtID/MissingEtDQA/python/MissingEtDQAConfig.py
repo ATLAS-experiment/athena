@@ -3,8 +3,7 @@
 #
 
 '''@file MissingEtDAQConfig.py
-@author T. Strebler
-@date 2022-06-16
+@contact atlas-cp-jetetmiss-jsv-conveners@cern.ch
 @brief Main CA-based python configuration for MissingEtDQA
 '''
 
@@ -25,14 +24,18 @@ def PhysValMETCfg(flags, **kwargs):
 
     from METUtilities.METMakerConfig import getMETMaker
     # for EMTopo jets no NNJvt is calculated so we need to fall back to Jvt (re-calculated in MissingEtDQA::PhysValMET as "NewJvt")
-    kwargs.setdefault("METMakerTopo", getMETMaker(jetCollection="AntiKt4EMTopoJets",
+    METMakerTopo = getMETMaker(jetCollection="AntiKt4EMTopoJets",
                                                   name="METMaker_AntiKt4Topo",
                                                   JetSelection="Loose",
-                                                  DoPFlow=False) )
-    kwargs.setdefault("METMakerPFlow", getMETMaker(jetCollection="AntiKt4EMPFlowJets",
+                                                  DoPFlow=False)
+    METMakerPFlow = getMETMaker(jetCollection="AntiKt4EMPFlowJets",
                                                    name="METMaker_AntiKt4PFlow",
                                                    JetSelection="Loose",
-                                                   DoPFlow=True) )
+                                                   DoPFlow=True)
+
+
+    kwargs.setdefault("METMakerTopo", METMakerTopo )
+    kwargs.setdefault("METMakerPFlow", METMakerPFlow )
 
     from METUtilities.METMakerConfig import getMuonSelectionTool, getEleSelLikelihood, getPhotonSelIsEM, getTauSelectionTool
     kwargs.setdefault("MuonSelectionTool", getMuonSelectionTool())
