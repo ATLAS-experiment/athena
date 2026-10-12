@@ -64,8 +64,9 @@ StatusCode TauPi0CreateROI::executeTool(xAOD::TauJet& tau,
   std::vector<CaloCell_ID::SUBCALO> emSubCaloBlocks;
   emSubCaloBlocks.push_back(CaloCell_ID::LAREM);
   std::unique_ptr<CaloCellList> cellList = std::make_unique<CaloCellList>(caloDDMgr, cellContainer, emSubCaloBlocks);
-  // FIXME: tau p4 is corrected to point at tau vertex, but the cells are not
-  cellList->select(tau.eta(), tau.phi(), m_maxDeltaRTauCells);
+  // use tau p4 not vertex corrected since the cells are also not corrected
+  TLorentzVector tauAxis = tauRecTools::getTauAxis(tau, false);
+  cellList->select(tauAxis.Eta(),tauAxis.Phi(), m_maxDeltaRTauCells);
 
   // take this opportunity to select EM1 cells for shot reconstruction
   std::vector<const CaloCell*> shotCells;

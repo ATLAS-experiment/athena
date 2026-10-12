@@ -27,11 +27,11 @@ references_map = {
     "d2029": "v12",
     "d2030": "v27",
     # Reco
-    "q442": "v126",
-    "q449": "v187",
+    "q442": "v127",
+    "q449": "v188",
     "q452": "v93",
     "q454": "v115",
-    "q447": "v31",
+    "q447": "v32",
     # Derivations
     "data_PHYS_Run2": "v101",
     "data_PHYSLITE_Run2": "v61",
