@@ -147,6 +147,9 @@ def ActsMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("d0Max", [ d0 / Units.mm * UnitConstants.mm for d0 in tolist(flags.Tracking.ActiveConfig.maxPrimaryImpact)])
     kwargs.setdefault("minMeasurements", tolist(flags.Tracking.ActiveConfig.minClusters))
     kwargs.setdefault("maxHoles", tolist(flags.Tracking.ActiveConfig.maxHoles))
+    kwargs.setdefault("maxOutliers", tolist(flags.Tracking.ActiveConfig.maxOutliers))
+    if flags.Tracking.ActiveConfig.maxHolesAndOutliers:
+        kwargs.setdefault("maxHolesAndOutliers", tolist(flags.Tracking.ActiveConfig.maxHolesAndOutliers))
     kwargs.setdefault("minPixelHits", tolist(flags.Tracking.ActiveConfig.minPixel))
     kwargs.setdefault("maxPixelHoles", tolist(flags.Tracking.ActiveConfig.maxPixelHoles))
     kwargs.setdefault("maxStripHoles", tolist(flags.Tracking.ActiveConfig.maxSctHoles))
