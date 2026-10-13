@@ -296,6 +296,7 @@ def meta_diff(
         regex=False,
         key_only=False,
         ignore_trigger=False,
+        normalize_type_names=False,
 ):
     """
     Compare the in-file metadata in two given files. Uses PyUtils.MetaReader
@@ -316,6 +317,10 @@ def meta_diff(
     diff_format  -- Return 'simple' or 'diff' style string (default: 'simple')
     regex        -- Use regex for the drop filter (default: False)
     key_only     -- Show only the keys instead of their value (default: False)
+    normalize_type_names -- MetaReader argument to report RNTuple item types
+                            using TTree class names and TTree item names
+                            using RNTuple field names, with the items sorted
+                            (default: False)
     """
     if len(files) != 2:
         raise ValueError("Wrong number of files passes, need two")
@@ -334,6 +339,7 @@ def meta_diff(
         mode=mode,
         meta_key_filter=meta_key_filter,
         promote=promote,
+        normalize_type_names=normalize_type_names,
     )
 
     if drop is not None and regex:

@@ -68,6 +68,19 @@ trigger_menu_json_map = {
     "TriggerMenuJson_L1Aux:": "DataVector<xAOD::TriggerMenuJson_v1>_TriggerMenuJson_L1",
 }
 
+# fixed-width integer types used in RNTuple type names and their ROOT class name equivalents
+_rntuple_integer_types = {
+    'std::int8_t': 'signed char',
+    'std::uint8_t': 'unsigned char',
+    'std::int16_t': 'short',
+    'std::uint16_t': 'unsigned short',
+    'std::int32_t': 'int',
+    'std::uint32_t': 'unsigned int',
+    'std::int64_t': 'long',
+    'std::uint64_t': 'unsigned long',
+}
+_rntuple_fundamental_types = {'bool', 'char', 'float', 'double', *_rntuple_integer_types}
+
 
 def ignore_missing_dictionary_warnings(func):
     """Ignore ROOT warnings about missing class dictionaries while func runs."""
@@ -87,13 +100,16 @@ def ignore_missing_dictionary_warnings(func):
 
 @ignore_missing_dictionary_warnings
 def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, meta_key_filter = None,
-                  unique_tag_info_values = True, ignoreNonExistingLocalFiles=False):
+                  unique_tag_info_values = True, ignoreNonExistingLocalFiles=False, normalize_type_names = False):
     """
     This tool is independent of Athena framework and returns the metadata from a given file.
     :param filenames: the input file from which metadata needs to be extracted.
     :param file_type: the type of file. POOL or BS (bytestream: RAW, DRAW) files.
     :param mode: if true, will return all metadata associated with the filename. By default, is false and this will
     return a "tiny" version which have only the following keys: 'file_guid', 'file_size', 'file_type', 'nentries'.
+    :param normalize_type_names: report the RNTuple item types using the class names of the equivalent TTree branches,
+    and the TTree item names using the names of the equivalent RNTuple fields, with the items sorted, e.g. to compare
+    the content of RNTuple and TTree files.
     :return: a dictionary of metadata for the given input file.
     """
 
@@ -214,23 +230,18 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                 isRNTuple(md:=current_file.Get(PoolOpts.RNTupleNames.MetaData))
                 and mode != "tiny"
             ):
-                msg.warning(
-                    "Reading in-file metadata from RNTuple is currently of limited support"
-                )
                 meta_dict[filename]["metadata_items"] = {}
 
-                try:
-                    from ROOT import RNTupleReader
-                except ImportError:
-                    from ROOT.Experimental import RNTupleReader
-
-                reader = RNTupleReader.Open(md)
-                entry = reader.CreateEntry()
-                reader.LoadEntry(0, entry)
+                # opening without a model only reads the header and footer,
+                # the descriptor is used to decide which fields need to be read
+                descriptor_reader = ROOT.RNTupleReader.Open(md)
+                descriptor = descriptor_reader.GetDescriptor()
                 auxes = {}
                 classes_with_aux = {
                     "xAOD::FileMetaData_v1",
                     "xAOD::FileMetaDataAuxInfo_v1",
+                    "xAOD::TriggerMenuAuxContainer_v1",
+                    "DataVector<xAOD::TriggerMenu_v1>",
                     "xAOD::TriggerMenuJsonAuxContainer_v1",
                     "DataVector<xAOD::TriggerMenuJson_v1>",
                     "xAOD::TruthMetaDataAuxContainer_v1",
@@ -241,11 +252,14 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     "DataVector<xAOD::LumiBlockRange_v1>",
                 }
 
-                dynamic_fmd_items = {}
+                # field names to read, keyed by the dynamic attribute name
+                dynamic_fmd_fields = {}
+                # field names and types to read, keyed by the normalized name
+                selected_fields = {}
 
                 meta_filter = get_meta_filter(mode, meta_key_filter)
 
-                for field in reader.GetDescriptor().GetTopLevelFields():
+                for field in descriptor.GetTopLevelFields():
                     normalizedName = field.GetFieldName()
                     if "index_ref" in normalizedName:
                         continue
@@ -277,12 +291,9 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         .replace("xAOD__", "xAOD::")
                         .replace("AuxDyn:", "AuxDyn.")
                     ):
-                        result = (
-                            False
-                            if entry[field.GetFieldName()] == "\x00"
-                            else entry[field.GetFieldName()]
+                        dynamic_fmd_fields[normalizedName.split(".")[1]] = (
+                            field.GetFieldName()
                         )
-                        dynamic_fmd_items[normalizedName.split(".")[1]] = result
                         meta_dict[filename]["metadata_items"][normalizedName] = (
                             field.GetTypeName()
                         )
@@ -351,12 +362,10 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     ):
                         continue
 
-                    try:
-                        meta_dict[filename][normalizedName] = _convert_value(
-                            entry[field.GetFieldName()]
-                        )
-                    except KeyError:
-                        msg.warning(f"missing type {field.GetTypeName()}")
+                    selected_fields[normalizedName] = (
+                        field.GetFieldName(),
+                        field.GetTypeName(),
+                    )
 
                 meta_dict[filename]["metadata_items"] = denormalize_metadata_types(
                     meta_dict[filename]["metadata_items"]
@@ -366,6 +375,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     # Remove known prefixes
                     key = aux_key
                     key = key.replace("xAOD__TriggerMenuJsonAuxContainer_v1_", "")
+                    key = key.replace("xAOD__TriggerMenuAuxContainer_v1_", "")
                     key = key.replace("xAOD__FileMetaDataAuxInfo_v1_", "")
                     key = key.replace("xAOD__TruthMetaDataAuxContainer_v1_", "")
                     # Remove known suffixes
@@ -383,6 +393,10 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     if main_key.startswith("DataVector_xAOD__TriggerMenuJson_v1__"):
                         main_base = main_key.replace(
                             "DataVector_xAOD__TriggerMenuJson_v1__", ""
+                        )
+                    elif main_key.startswith("DataVector_xAOD__TriggerMenu_v1__"):
+                        main_base = main_key.replace(
+                            "DataVector_xAOD__TriggerMenu_v1__", ""
                         )
                     # For FileMetaData
                     elif main_key.startswith("xAOD__FileMetaData_v1_"):
@@ -414,11 +428,9 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                             pairs.append((aux_key, main_map[base]))
                     return pairs
 
-                for pair in _find_associated_pairs(auxes):
-                    return_obj = _convert_value(
-                        entry[pair[1]],
-                        entry[pair[0]],
-                    )
+                def _keep_pair(
+                    pair: tuple[str, str], auxes: dict, meta_filter: dict
+                ) -> bool:
                     key = next(
                         (
                             k
@@ -441,7 +453,7 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                     except IndexError:
                         pass
 
-                    if not should_keep_meta(
+                    return should_keep_meta(
                         pair[0]
                         .replace("xAOD__", "xAOD::")
                         .replace("DataVector_", "DataVector<")
@@ -449,10 +461,82 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
                         .replace("Aux:", "Aux."),
                         key,
                         meta_filter,
-                    ):
-                        continue
+                    )
 
-                    if "TriggerMenuJson" in pair[0]:
+                selected_pairs = [
+                    pair
+                    for pair in _find_associated_pairs(auxes)
+                    if _keep_pair(pair, auxes, meta_filter)
+                ]
+                # Some transition AODs contain both the Run2 and Run3 trigger metadata formats.
+                # We only wish to read the Run3 format if such a file is encountered.
+                if any(
+                    regexXAODTriggerMenuJsonAux.match(auxes[pair[0]])
+                    for pair in selected_pairs
+                ):
+                    selected_pairs = [
+                        pair
+                        for pair in selected_pairs
+                        if not regexXAODTriggerMenuAux.match(auxes[pair[0]])
+                    ]
+                # dynamic attributes are only used together with the FileMetaData
+                read_dynamic_fmd = any(
+                    "FileMetaData" in pair[0] for pair in selected_pairs
+                )
+
+                fields_to_read = {name for name, _ in selected_fields.values()}
+                fields_to_read.update(name for pair in selected_pairs for name in pair)
+                if read_dynamic_fmd:
+                    fields_to_read.update(dynamic_fmd_fields.values())
+
+                # only the fields present in the model are read from the file
+                model = ROOT.RNTupleModel.Create()
+                for field in descriptor.GetTopLevelFields():
+                    if field.GetFieldName() in fields_to_read:
+                        model.AddField(ROOT.std.move(field.CreateField(descriptor)))
+
+                reader = ROOT.RNTupleReader.Open(ROOT.std.move(model), md)
+                entry = reader.CreateEntry()
+                reader.LoadEntry(0, entry)
+
+                # read the EventStreamInfo first, so only the IOVs of its run are read later
+                for normalizedName, (field_name, type_name) in sorted(
+                    selected_fields.items(),
+                    key=lambda item: regexEventStreamInfo.match(item[1][1]) is None,
+                ):
+                    try:
+                        value = _convert_value(
+                            _get_entry_value(entry, field_name, type_name)
+                        )
+                    except KeyError:
+                        msg.warning(f"missing type {type_name}")
+                        continue
+                    meta_dict[filename][normalizedName] = value
+                    if (
+                        regexEventStreamInfo.match(type_name)
+                        and value
+                        and len(value.get("runNumbers", [])) == 1
+                    ):
+                        _gbl_run = value["runNumbers"][0]
+                        msg.debug("Found RunNumber in EventStreamInfo: %d", _gbl_run)
+
+                dynamic_fmd_items = {}
+                if read_dynamic_fmd:
+                    for name, field_name in dynamic_fmd_fields.items():
+                        value = _convert_value(entry[field_name])
+                        if name.startswith("is"):
+                            # this is probably a boolean
+                            value = value != "\x00"
+                        dynamic_fmd_items[name] = value
+
+                for pair in selected_pairs:
+                    return_obj = _convert_value(
+                        _get_entry_value(entry, pair[1], auxes[pair[1]]),
+                        _get_entry_value(entry, pair[0], auxes[pair[0]]),
+                    )
+
+                    # both the Run3 TriggerMenuJson and the legacy Run2 TriggerMenu
+                    if "TriggerMenu" in pair[0]:
                         if "RAWTriggerMenuJson" in return_obj:
                             key = (
                                 pair[1]
@@ -820,7 +904,31 @@ def read_metadata(filenames, file_type = None, mode = 'lite', promote = None, me
             # If AnalysisBase the itemList must be grabbed another way
             if not isGaudiEnv():
                 if isinstance(collectionTree, ROOT.TTree):
-                    meta_dict[filename]['itemList'] = [ (b.GetClassName(), b.GetName()) for b in collectionTree.GetListOfBranches() ]
+                    item_list = [
+                        (str(b.GetClassName()), str(b.GetName())) for b in collectionTree.GetListOfBranches()
+                    ]
+                    if normalize_type_names:
+                        item_list = [
+                            (type_name, _branch_name_to_field_name(name)) for type_name, name in item_list
+                        ]
+                elif isRNTuple(eventData := current_file.Get(PoolOpts.RNTupleNames.EventData)):
+                    # keep the reader alive while iterating, as the descriptor is owned by it
+                    eventDataReader = ROOT.RNTupleReader.Open(eventData)
+                    # RNTuple fields use "Aux:"/"AuxDyn:" instead of "Aux."/"AuxDyn.",
+                    # convert them to the branch names used for TTree above
+                    item_list = [
+                        (str(f.GetTypeName()), re.sub(r'Aux(Dyn)?:', r'Aux\1.', str(f.GetFieldName()), count=1))
+                        for f in eventDataReader.GetDescriptor().GetTopLevelFields()
+                        if not str(f.GetTypeName()).startswith('DataHeader')
+                    ]
+                    if normalize_type_names:
+                        item_list = [
+                            (_rntuple_type_to_class_name(type_name), name) for type_name, name in item_list
+                        ]
+                if normalize_type_names:
+                    # the order of the TTree branches and RNTuple fields is not related
+                    item_list.sort()
+                meta_dict[filename]['itemList'] = item_list
 
         # ----- retrieves metadata from bytestream (BS) files (RAW, DRAW) ------------------------------------------#
         elif current_file_type == 'BS':
@@ -1012,13 +1120,9 @@ def _read_guid(filename):
     import ROOT
     root_file = ROOT.TFile.Open( _get_pfn(filename) )
     params = root_file.Get('##Params')
-    try:
-        from ROOT import RNTuple as rnt
-    except ImportError:
-        from ROOT.Experimental import RNTuple as rnt
     if not params:
         return
-    if not isinstance(params, ROOT.TTree) and not isinstance(params, rnt) and not isinstance(params, ROOT.TDirectory):
+    if not isinstance(params, ROOT.TTree) and not isinstance(params, ROOT.RNTuple) and not isinstance(params, ROOT.TDirectory):
         raise NotImplementedError(f"Cannot extract GUID from object {params!r} of type {type(params)!r}")
 
     regex = re.compile(r'\[NAME=(\w+)\]\[VALUE=(.*)\]', re.ASCII)
@@ -1031,12 +1135,8 @@ def _read_guid(filename):
             if result and result.group(1) == 'FID' :
                 # don't exit yet, it's the last FID entry that counts
                 fid = result.group(2)
-    elif isinstance(params, rnt):
-        try:
-            from ROOT import RNTupleReader
-        except ImportError:
-            from ROOT.Experimental import RNTupleReader
-        reader = RNTupleReader.Open(params)
+    elif isinstance(params, ROOT.RNTuple):
+        reader = ROOT.RNTupleReader.Open(params)
         try:
             entry = reader.CreateEntry()
         except AttributeError:
@@ -1062,6 +1162,50 @@ def _read_guid(filename):
                 fid = result.group(2)
 
     return fid
+
+
+def _get_entry_value(entry, field_name, type_name):
+    """Get the value of a field from a loaded RNTuple entry.
+
+    Indexing the entry instantiates the typed REntry::GetPtr<T>, which fails for
+    some classes (e.g. DataVector<xAOD::TriggerMenu_v1> in AnalysisBase), so
+    classes are retrieved type-erased and bound to their type by name instead.
+    """
+    import ROOT
+
+    if not ROOT.TClass.GetClass(type_name):
+        return entry[field_name]
+    return ROOT.bind_object(entry._GetPtr["void"](field_name).get(), type_name)
+
+
+def _rntuple_type_to_class_name(type_name):
+    """Convert an RNTuple type name to the class name of the equivalent TTree branch.
+
+    RNTuple uses the canonical type names (e.g. std::vector<std::int32_t>), while
+    TTree branches report the ROOT class names (e.g. vector<int>). Fundamental types
+    are stored as plain leaves in a TTree, which do not have a class name.
+    """
+    if type_name in _rntuple_fundamental_types:
+        return ''
+    type_name = re.sub(r'std::u?int(?:8|16|32|64)_t',
+                       lambda m: _rntuple_integer_types[m.group(0)], type_name)
+    type_name = type_name.replace('std::', '')
+    # ROOT class names separate consecutive closing brackets with a space
+    while '>>' in type_name:
+        type_name = type_name.replace('>>', '> >')
+    return type_name
+
+
+def _branch_name_to_field_name(branch_name):
+    """Convert a TTree branch name to the name of the equivalent RNTuple field.
+
+    RNTuple field names have all non-alphanumeric characters replaced by underscores
+    (e.g. L1DR-EM15TAU12I-J25 becomes L1DR_EM15TAU12I_J25). The "Aux."/"AuxDyn."
+    separator of the TTree branch names is kept.
+    """
+    parts = re.split(r'(Aux(?:Dyn)?\.)', branch_name, maxsplit=1)
+    return ''.join(part if i % 2 else re.sub(r'[^A-Za-z0-9]', '_', part)
+                   for i, part in enumerate(parts))
 
 
 def _extract_fields(obj):
@@ -1860,7 +2004,9 @@ def dataheader_nentries(infile):
     if not isinstance(infile, ROOT.TFile):
         infile = ROOT.TFile.Open(infile)
 
-    for name in {PoolOpts.TTreeNames.DataHeader, PoolOpts.RNTupleNames.DataHeader}:
+    # with the canonical naming scheme the DataHeader is stored in the EventData RNTuple
+    for name in (PoolOpts.TTreeNames.DataHeader, PoolOpts.RNTupleNames.DataHeader,
+                 PoolOpts.RNTupleNames.EventData):
         obj = infile.Get(name)
         msg.debug(f"dataheader_nentries: {name=}, {obj=}, {type(obj)=}")
         if not obj:
@@ -1872,10 +2018,7 @@ def dataheader_nentries(infile):
             if ROOT.gROOT.GetVersionInt() < 63100:
                 raise RuntimeError("ROOT ver. 6.31/01 or greater needed to read RNTuple files")
             if isRNTuple(obj):
-                try:
-                    return ROOT.Experimental.RNTupleReader.Open(obj).GetNEntries()
-                except AttributeError:
-                    return ROOT.RNTupleReader.Open(obj).GetNEntries()
+                return ROOT.RNTupleReader.Open(obj).GetNEntries()
             else:
                 raise NotImplementedError(f"Keys of type {type(obj)!r} not supported")
 
@@ -1963,6 +2106,7 @@ def denormalize_metadata_types(metadata_dict):
     - 'std::string' => 'string'
     - 'xAOD::FileMetaData_v1' => 'FileMetaData'
     - 'xAOD::FileMetaDataAuxInfo_v1' => 'FileMetaDataAux'
+    - template types, e.g. 'std::vector<std::uint32_t>' => 'vector<unsigned int>'
     (add more as needed)
     """
     type_map = {
@@ -1980,6 +2124,8 @@ def denormalize_metadata_types(metadata_dict):
                 new_v = new
             elif new_v.endswith("." + old):
                 new_v = new_v.rsplit(".", 1)[0] + "." + new
+        if "<" in new_v:
+            new_v = _rntuple_type_to_class_name(new_v)
         denormalized[k] = new_v
     return denormalized
 
