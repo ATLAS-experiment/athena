@@ -6,6 +6,7 @@
 # art-input: mc21_14TeV:mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8557_s4422_r16128
 # art-input-nfiles: 400
 # art-input-njobs: 1
+# art-athena-mt: 8
 # art-output: IDTPM.*.root
 # art-output: *.json
 # art-output: *.xml
