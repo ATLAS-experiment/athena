@@ -43,14 +43,14 @@ def TrigGeneralMonConfig(inputFlags):
 
     ####### Signature names and regexes
 
-    signature_names_regexes = [('HLT_AllChains','HLT_.*'), #0
-                               ('HLT_Electrons','HLT_[0-9]*e[0-9]+.*'), #1
-                               ('HLT_Gamma','HLT_[0-9]*g[0-9]+.*'), #2
-                               ('HLT_Muons','HLT_[0-9]*mu[0-9]+.*'), #3
-                               ('HLT_Taus','HLT_(tau[0-9]*|trk.*Tau).*'), #4
-                               ('HLT_MissingET','HLT_(t|x)e[0-9]+.*'), #5
-                               ('HLT_Jets','HLT_[0-9]*j[0-9]+.*'), #6
-                               ('HLT_MinBias','HLT_mb.*')] #7
+    signature_names_regexes = [('HLT_AllChains','(HLT|EF)_.*'), #0
+                               ('HLT_Electrons','(HLT|EF)_[0-9]*e[0-9]+.*'), #1
+                               ('HLT_Gamma','(HLT|EF)_[0-9]*g[0-9]+.*'), #2
+                               ('HLT_Muons','(HLT|EF)_[0-9]*mu[0-9]+.*'), #3
+                               ('HLT_Taus','(HLT|EF)_(tau[0-9]*|trk.*Tau).*'), #4
+                               ('HLT_MissingET','(HLT|EF)_(t|x)e[0-9]+.*'), #5
+                               ('HLT_Jets','(HLT|EF)_[0-9]*j[0-9]+.*'), #6
+                               ('HLT_MinBias','(HLT|EF)_mb.*')] #7
   
 
     #top level group
