@@ -1,13 +1,16 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // STL include(s):
+#include <algorithm>
+#include <cctype>
 #include <functional>
 #include <regex>
 
 // ROOT include(s):
 #include <TError.h>
+#include <ROOT/RNTupleDescriptor.hxx>
 
 // EDM include(s):
 #include "AthContainers/tools/error.h"
@@ -405,6 +408,42 @@ namespace xAOD {
          }
 
          return pre;
+      }
+
+      /// This function is used to find the name of the field in an RNTuple
+      /// that stores the object with a given key.
+      ///
+      /// RNTuples store the auxiliary stores with an "Aux:" postfix instead of
+      /// "Aux.". Athena also replaces all non-alphanumeric characters of the
+      /// key with underscores when writing the fields (e.g. for trigger chain
+      /// names containing '-' characters), so that name is used if no field is
+      /// found for the key itself.
+      ///
+      /// @param descriptor The descriptor of the RNTuple to search in
+      /// @param key The key (branch name) of the object
+      /// @returns The name of the field to read the object from
+      ///
+      std::string getFieldName( const ROOT::RNTupleDescriptor& descriptor,
+                                const std::string& key ) {
+
+         std::string fieldName = key;
+         if( fieldName.ends_with( "Aux." ) ) {
+            fieldName.back() = ':';
+         }
+         if( descriptor.FindFieldId( fieldName ) !=
+             ROOT::kInvalidDescriptorId ) {
+            return fieldName;
+         }
+
+         // Replace the characters the same way as Athena does when writing.
+         fieldName = key;
+         std::replace_if( fieldName.begin(), fieldName.end(),
+                          []( unsigned char c ) { return !std::isalnum( c ); },
+                          '_' );
+         if( fieldName.ends_with( "Aux_" ) ) {
+            fieldName.back() = ':';
+         }
+         return fieldName;
       }
 
    }  // namespace Utils

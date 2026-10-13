@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODROOTACCESS_TOOLS_UTILS_H
@@ -21,6 +21,11 @@
 #include <stdexcept>
 extern "C" {
 #include <stdint.h>
+}
+
+// Forward declaration(s):
+namespace ROOT {
+   class RNTupleDescriptor;
 }
 
 namespace xAOD {
@@ -55,6 +60,10 @@ namespace xAOD {
 
       /// Search for branches, returns search term on no result
       std::string getFirstBranchMatch( TTree* tree, const std::string& pre );
+
+      /// Get the name of the RNTuple field storing the object with a given key
+      std::string getFieldName( const ROOT::RNTupleDescriptor& descriptor,
+                                const std::string& key );
 
    }  // namespace Utils
 
