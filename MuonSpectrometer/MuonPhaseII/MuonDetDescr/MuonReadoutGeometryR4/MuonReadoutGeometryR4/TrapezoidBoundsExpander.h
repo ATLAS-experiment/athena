@@ -25,6 +25,8 @@ namespace MuonGMR4 {
                     patch.print(ostr);
                     return ostr;
                 }
+                /** @brief Calculates the area in the x-y plane */
+                double area() const;
                 /** @brief The transform to move to the outer trapezoid center */
                 Acts::Transform3 toCenter{Acts::Transform3::Identity()};
                 /** @brief Pointer to the volume bounds  */
@@ -34,7 +36,7 @@ namespace MuonGMR4 {
             enum class Side : std::int8_t{left = -1, right = 1};
             /** @brief Enum to select the top / bottom corners of a trapezoid */
             enum class Level : std::int8_t { bottom= -1, top = 1 };
-
+            /** @brief Pipe the Side to an ostream */
             friend std::ostream& operator<<(std::ostream& ostr, const Side side){
                 switch (side) {
                     case Side::left: return ostr<<"left";
@@ -42,6 +44,7 @@ namespace MuonGMR4 {
                 }
                 return ostr;
             }
+            /** @brief Pipe the Level to an ostream */
             friend std::ostream& operator<<(std::ostream& ostr, const Level lvl) {
                 switch (lvl) {
                     case Level::bottom: return ostr<<"bottom";
@@ -85,12 +88,30 @@ namespace MuonGMR4 {
             /** @copydoc BoundExpander::makeBounds */
             virtual std::shared_ptr<Acts::VolumeBounds> 
                     makeBounds(Acts::VolumeBoundFactory& factory) override final;      
-            /** @brief Apply an */
+            /** @brief Apply an extra margin to all four bound dimensions
+             *  @param margin: The extra margin to apply to the bounds */
             void setMargin(const double margin);
-
+            /** @brief Apply an extra margin to each individual bound side
+             *  @param marginXLow: The extra margin to apply to the halfX at low Y
+             *  @param marginXhigh: The extra margin to aplpy to the halfX at high Y
+             *  @param marginY: The extra margin to apply to the halfY
+             *  @param marginZ: The extgra margin to apply to the halfZ */
             void setMargin(const double marginXlow, const double marginXhigh,
                            const double marginY, const double marginZ);
-        private:       
+        private:
+            /** @brief Moves the position of the bottom and top corner of a trapezoid side 
+              *        such that all vertices are enclosed. The parallel lines are assumed to
+              *        be at +-halfY. The inclined edge is tilted to enclose all vertices
+              * @param botCorner: The bottom corner to be moved
+              * @param topCOrner: The top corner to be moved
+              * @param side: Is the left or the right side of the trapezoid considered
+              * @param lowPatch: First trapezoid patch to consider
+              * @param highPatch: Last trapezoid patch to consider */
+            void findTrapezoidEdge(Amg::Vector3D& botCorner,
+                                   Amg::Vector3D& topCorner,
+                                   const Side side,
+                                   const std::size_t lowPatch,
+                                   const std::size_t highPatch) const;  
             std::vector<TrapezoidPatch> m_constituents{};
             std::shared_ptr<Acts::VolumeBounds> m_finalBounds{};
             std::array<double, 4> m_margin{Acts::filledArray<double, 4>(0.)};

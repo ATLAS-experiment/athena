@@ -10,6 +10,10 @@
 namespace MuonGMR4{
      CylinderBoundsExpander::CylinderBoundsExpander(std::unique_ptr<const Acts::Logger> loggerObj):
             BoundsExpander{Acts::Transform3::Identity(), std::move(loggerObj)} {}
+    void CylinderBoundsExpander::setMargin(const double extraR, const double extraZ) {
+        m_extraR = extraR;
+        m_extraZ = extraZ;
+    }
     void CylinderBoundsExpander::expand(const Acts::GeometryContext& tgContext, 
                                         const Acts::Volume& volume) {
 

@@ -57,7 +57,7 @@ int SpectrometerSector::stationPhi() const { return m_args.chambers.front()->sta
 int SpectrometerSector::sector() const {return m_args.chambers.front()->sector(); }
 bool SpectrometerSector::barrel() const { return m_args.chambers.front()->barrel(); }
 std::string SpectrometerSector::identString() const {
-    return std::format("id: {:3d}, {:} {:}-side sector: {:2},",  m_args.id, 
+    return std::format("id: {:3d}, {:} {:}-side sector: {:2}",  m_args.id, 
                        Muon::MuonStationIndex::chName(chamberIndex()), 
                        side() == 1 ? 'A' : 'C' , sector());
 }

@@ -12,6 +12,7 @@ namespace MuonGMR4 {
      *         the ranges of the bounds are expanded using the vertices of the subvolume */
     class CylinderBoundsExpander final : public BoundsExpander{
       public:
+          /** @brief Constructor with an optional logger instance */
           explicit CylinderBoundsExpander(std::unique_ptr<const Acts::Logger> loggerObj = nullptr);
           /** @brief Use the expand overloads w.r.t. chamber, sector */
           using BoundsExpander::expand;
@@ -23,6 +24,10 @@ namespace MuonGMR4 {
           /** @copydoc BoundsExpander::makeBounds */
           virtual std::shared_ptr<Acts::VolumeBounds> 
                   makeBounds(Acts::VolumeBoundFactory& factory) override final;
+          /** @brief Assign an extra margin to the constructed bounds
+           *  @param extraR: Extra margin in radial direction
+           *  @param extraZ: Extra margin in longitudinal direction*/
+          void setMargin(const double extraR, const double extraZ);
           /** @brief Minimum seen radius */
           double rMin() const;
           /** @brief Minimum seen radius (non-const) */

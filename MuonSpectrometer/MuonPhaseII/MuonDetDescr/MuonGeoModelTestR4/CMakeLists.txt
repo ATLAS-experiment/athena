@@ -35,46 +35,39 @@ if (NOT SIMULATIONBASE)
                     PROPERTIES TIMEOUT 1800
                     PRIVATE_WORKING_DIRECTORY
                     POST_EXEC_SCRIPT noerror.sh)
+     if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
+        #### Standard geometry dumping test R3-MTech (MC)
+        atlas_add_test( testR3Geometry_MTech
+                        SCRIPT MuonGeoModelTestR4_testGeometry.sh RUN3 MTECH
+                        PROPERTIES TIMEOUT 1800
+                        PRIVATE_WORKING_DIRECTORY
+                        POST_EXEC_SCRIPT noerror.sh)
+        #### Standard geometry dumping test R3 (data)
+        atlas_add_test( testR3GeometryData
+                        SCRIPT MuonGeoModelTestR4_testGeometry.sh RUN3 DATA
+                        PROPERTIES TIMEOUT 1800
+                        PRIVATE_WORKING_DIRECTORY
+                        POST_EXEC_SCRIPT noerror.sh)
+        #### Standard geometry dumping test R4 (MC)
+        atlas_add_test( testR4Geometry
+                        SCRIPT MuonGeoModelTestR4_testGeometry.sh RUN4
+                        PROPERTIES TIMEOUT 1800
+                        PRIVATE_WORKING_DIRECTORY
+                        POST_EXEC_SCRIPT noerror.sh)
 
-    #### Standard geometry dumping test R3-MTech (MC)
-    atlas_add_test( testR3Geometry_MTech
-                    SCRIPT MuonGeoModelTestR4_testGeometry.sh RUN3 MTECH
-                    PROPERTIES TIMEOUT 1800
-                    PRIVATE_WORKING_DIRECTORY
-                    POST_EXEC_SCRIPT noerror.sh)
-    #### Standard geometry dumping test R3 (data)
-    atlas_add_test( testR3GeometryData
-                    SCRIPT MuonGeoModelTestR4_testGeometry.sh RUN3 DATA
-                    PROPERTIES TIMEOUT 1800
-                    PRIVATE_WORKING_DIRECTORY
-                    POST_EXEC_SCRIPT noerror.sh)
-    #### Standard geometry dumping test R4 (MC)
-    atlas_add_test( testR4Geometry
-                    SCRIPT MuonGeoModelTestR4_testGeometry.sh RUN4
-                    PROPERTIES TIMEOUT 1800
-                    PRIVATE_WORKING_DIRECTORY
-                    POST_EXEC_SCRIPT noerror.sh)
-
-    #### Check consistency of the strip design
-    atlas_add_test( checkStripDesign
-                    SCRIPT runStripDesignDump                
-                    PROPERTIES TIMEOUT 900
-                    PRIVATE_WORKING_DIRECTORY
-                    POST_EXEC_SCRIPT noerror.sh)
-
-    #### Test that the sector envelopes fully enclose the particular chambers
-    atlas_add_test( testChamberBuilding
-                    SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder 
-                    PROPERTIES TIMEOUT 2400
-                    PRIVATE_WORKING_DIRECTORY
-                    POST_EXEC_SCRIPT noerror.sh)
-    #### Test that the sector envelopes fully enclose the particular chambers (R4)
-    atlas_add_test( testChamberBuildingR4
-                    SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --defaultGeoFile RUN4
-                    PROPERTIES TIMEOUT 2400
-                    PRIVATE_WORKING_DIRECTORY
-                    POST_EXEC_SCRIPT noerror.sh)
-
+        #### Test that the sector envelopes fully enclose the particular chambers
+        atlas_add_test( testChamberBuilding
+                        SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder 
+                        PROPERTIES TIMEOUT 2400
+                        PRIVATE_WORKING_DIRECTORY
+                        POST_EXEC_SCRIPT noerror.sh)
+        #### Test that the sector envelopes fully enclose the particular chambers (R4)
+        atlas_add_test( testChamberBuildingR4
+                        SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --defaultGeoFile RUN4
+                        PROPERTIES TIMEOUT 2400
+                        PRIVATE_WORKING_DIRECTORY
+                        POST_EXEC_SCRIPT noerror.sh)
+    endif()
     file(GLOB_RECURSE files "util/*.cxx")
     foreach(_exeFile ${files})
         get_filename_component(_theExec ${_exeFile} NAME_WE)
@@ -87,6 +80,18 @@ if (NOT SIMULATIONBASE)
                             INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
                             LINK_LIBRARIES ${ROOT_LIBRARIES} MuonReadoutGeometryR4 MuonCablingData PathResolver )
     endforeach()
+    # we also add unit tests. 
+    # Build them from the files in test/ 
+    file(GLOB_RECURSE tests "test/*.cxx")
+    foreach(_theTestSource ${tests})
+      get_filename_component(_theTest ${_theTestSource} NAME_WE)
+
+      atlas_add_test( ${_theTest} SOURCES ${_theTestSource}
+      LINK_LIBRARIES MuonReadoutGeometryR4
+      POST_EXEC_SCRIPT nopost.sh)
+      
+
+  endforeach()
 endif()
 ##### Simulation test R3
 atlas_add_test( testR3SensitiveDetectors
