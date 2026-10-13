@@ -98,7 +98,7 @@ namespace columnar
     
 
 
-  template<ColumnarArrayMode CM>
+  template<ColumnarArrayModeConcept CM>
   class ColumnarTool<CM> : public ColumnarToolArray
   {
     /// Common Public Members

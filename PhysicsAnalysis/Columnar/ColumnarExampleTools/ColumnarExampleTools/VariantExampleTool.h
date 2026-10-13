@@ -20,7 +20,7 @@
 #include <ColumnarEgamma/EgammaDef.h>
 #include <ColumnarMuon/MuonDef.h>
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   /// @brief an example of a columnar tool using "variant" object ids
   /// and column accessors
@@ -43,7 +43,7 @@ namespace columnar
 
   class VariantExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public columnar::ColumnarTool<>
   {
   public:
 
@@ -54,17 +54,17 @@ namespace columnar
 
     virtual StatusCode initialize () override;
 
-    void callSingleEvent (ElectronRange electrons, MuonRange muons) const;
+    void callSingleEvent (columnar::ElectronRange electrons, columnar::MuonRange muons) const;
 
-    virtual void callEvents (EventContextRange events) const override;
+    virtual void callEvents (columnar::EventContextRange events) const override;
 
 
     /// @brief the object accessor for the underlying containers
     ///
     /// This is equivalent to a `ReadHandleKey` in the xAOD world.  It
     /// is used to access the range/container for a given event.
-    ElectronAccessor<ObjectColumn> electronsHandle {*this, "AnalysisElectrons"};
-    MuonAccessor<ObjectColumn> muonsHandle {*this, "AnalysisMuons"};
+    columnar::ElectronAccessor<columnar::ObjectColumn> electronsHandle {*this, "AnalysisElectrons"};
+    columnar::MuonAccessor<columnar::ObjectColumn> muonsHandle {*this, "AnalysisMuons"};
 
 
     /// @brief the variant definition we are using
@@ -76,7 +76,7 @@ namespace columnar
     /// base type/container that is used in xAOD mode for the internal
     /// pointer. If you also want to use it as a possible "variant"
     /// container id, you need to list it twice.
-    using MyVariantDef = VariantContainerId<ParticleDef, ElectronDef, MuonDef>;
+    using MyVariantDef = columnar::VariantContainerId<columnar::ParticleDef, columnar::ElectronDef, columnar::MuonDef>;
 
 
     /// @brief the pt and eta accessors for the variant container
@@ -91,21 +91,21 @@ namespace columnar
     /// Note that not every accessor needs to be a "variant" accessor.
     /// You can also convert the "variant" object id to a "regular"
     /// object id and use it directly.
-    ColumnAccessor<MyVariantDef,float> ptAcc {*this, "pt"};
-    ColumnAccessor<MyVariantDef,float> etaAcc {*this, "eta"};
+    columnar::ColumnAccessor<MyVariantDef,float> ptAcc {*this, "pt"};
+    columnar::ColumnAccessor<MyVariantDef,float> etaAcc {*this, "eta"};
 
 
     /// @brief the pt-rank decorator for the variant container
     ///
     /// Just like accessors, we can have decorators for our variant
     /// container as well.
-    ColumnDecorator<MyVariantDef,std::uint16_t> ptRankDec {*this, "ptRank"};
+    columnar::ColumnDecorator<MyVariantDef,std::uint16_t> ptRankDec {*this, "ptRank"};
 
     /// @brief a eta-rank decorator just for electrons
     ///
     /// this is to show how you can have accessors/decorators for just
     /// one of the contained "variants".
-    ColumnDecorator<ElectronDef,std::uint16_t> etaRankSpecialDec {*this, "etaRank"};
+    columnar::ColumnDecorator<columnar::ElectronDef,std::uint16_t> etaRankSpecialDec {*this, "etaRank"};
   };
 }
 

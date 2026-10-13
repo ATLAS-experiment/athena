@@ -21,7 +21,7 @@ namespace columnar
   /// `nullptr` taking the empty value.  This is its own type both for
   /// compactness and to allow a slightly more efficient representation
   /// internally.
-  template<ContainerIdConcept CI, typename CM> class OptObjectId;
+  template<ContainerIdConcept CI, ColumnarModeConcept CM> class OptObjectId;
 
 
 
@@ -105,7 +105,7 @@ namespace columnar
 
 
 
-  template<ContainerIdConcept CI,ColumnarArrayMode CM> class OptObjectId<CI,CM> final
+  template<ContainerIdConcept CI,ColumnarArrayModeConcept CM> class OptObjectId<CI,CM> final
   {
     /// Common Public Members
     /// =====================
@@ -194,13 +194,13 @@ namespace columnar
     std::size_t m_index = invalidObjectIndex;
   };
 
-  template<ContainerIdConcept CI, ColumnarArrayMode CM>
+  template<ContainerIdConcept CI, ColumnarArrayModeConcept CM>
   bool operator== (const OptObjectId<CI,CM>& lhs, const OptObjectId<CI,CM>& rhs)
   {
     return lhs.getIndex() == rhs.getIndex();
   }
 
-  template<ContainerIdConcept CI, ColumnarArrayMode CM>
+  template<ContainerIdConcept CI, ColumnarArrayModeConcept CM>
   bool operator!= (const OptObjectId<CI,CM>& lhs, const OptObjectId<CI,CM>& rhs)
   {
     return lhs.getIndex() != rhs.getIndex();

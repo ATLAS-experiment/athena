@@ -16,7 +16,7 @@
 namespace columnar
 {
   /// @brief a class representing a single object (electron, muons, etc.)
-  template<ContainerIdConcept CI, typename CM> class ObjectId;
+  template<ContainerIdConcept CI, ColumnarModeConcept CM> class ObjectId;
 
 
 
@@ -93,7 +93,7 @@ namespace columnar
 
 
 
-  template<ContainerIdConcept CI, ColumnarArrayMode CM>
+  template<ContainerIdConcept CI, ColumnarArrayModeConcept CM>
   class ObjectId<CI,CM> final
   {
     /// Common Public Members
@@ -158,19 +158,19 @@ namespace columnar
     std::size_t m_index = 0u;
   };
 
-  template<ContainerIdConcept CI, ColumnarArrayMode CM>
+  template<ContainerIdConcept CI, ColumnarArrayModeConcept CM>
   std::ostream& operator<< (std::ostream& str, const ObjectId<CI,CM>& obj)
   {
     return str << CI::idName << "/" << obj.getIndex();
   }
 
-  template<ContainerIdConcept CI, ColumnarArrayMode CM>
+  template<ContainerIdConcept CI, ColumnarArrayModeConcept CM>
   bool operator== (const ObjectId<CI,CM>& lhs, const ObjectId<CI,CM>& rhs)
   {
     return lhs.getIndex() == rhs.getIndex();
   }
 
-  template<ContainerIdConcept CI, ColumnarArrayMode CM>
+  template<ContainerIdConcept CI, ColumnarArrayModeConcept CM>
   bool operator!= (const ObjectId<CI,CM>& lhs, const ObjectId<CI,CM>& rhs)
   {
     return lhs.getIndex() != rhs.getIndex();

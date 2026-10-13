@@ -15,7 +15,7 @@
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/ParticleDef.h>
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   /// @brief example of a columnar tool with optional columns
   ///
@@ -25,7 +25,7 @@ namespace columnar
 
   class ConfigurableColumnExampleTool final
     : public asg::AsgTool,
-      public ColumnarTool<>
+      public columnar::ColumnarTool<>
   {
   public:
     
@@ -36,7 +36,7 @@ namespace columnar
 
     virtual StatusCode initialize () override;
 
-    virtual void callEvents (EventContextRange events) const override;
+    virtual void callEvents (columnar::EventContextRange events) const override;
 
 
     /// @brief the pt variable to use
@@ -51,7 +51,7 @@ namespace columnar
     /// This is equivalent to a `ReadHandleKey` in the xAOD world.  It
     /// is used to access the particle range/container for a given
     /// event.
-    ParticleAccessor<ObjectColumn> particlesHandle {*this, "Particles"};
+    columnar::ParticleAccessor<columnar::ObjectColumn> particlesHandle {*this, "Particles"};
 
 
     /// @brief the pt accessor for the particle container
@@ -59,7 +59,7 @@ namespace columnar
     /// This is the equivalent to an `AuxElement::Accessor` in the xAOD
     /// world.  Note that this accessor is not initialized here, but
     /// will be initialized in the `initialize` method.
-    ParticleAccessor<float> ptAcc;
+    columnar::ParticleAccessor<float> ptAcc;
 
 
     /// @brief the selection decorator for the particles
@@ -70,7 +70,7 @@ namespace columnar
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    ParticleDecorator<char> selectionDec {*this, "selection"};
+    columnar::ParticleDecorator<char> selectionDec {*this, "selection"};
   };
 }
 

@@ -81,13 +81,13 @@ namespace columnar
 
 
 
-  template<typename CM = ColumnarModeDefault> class MetAssociationHelper;
+  template<ColumnarModeConcept CM = ColumnarMode> class MetAssociationHelper;
 
 
 
   /// @brief the accessors @ref MetAssociationHelper needs to implement
   /// its operations
-  template<typename CM = ColumnarModeDefault> class MetAssocationAccessors final
+  template<ColumnarModeConcept CM = ColumnarMode> class MetAssocationAccessors final
   {
     /// Public Members
     /// ==============
@@ -338,7 +338,7 @@ namespace columnar
 
 
   /// @brief a columnar version of @ref xAOD::MissingETAssociationHelper
-  template<typename CM> class MetAssociationHelper final
+  template<ColumnarModeConcept CM> class MetAssociationHelper final
   {
     /// Public Members
     /// ==============
@@ -568,14 +568,14 @@ namespace columnar
 
 
 
-  template<typename CM>
+  template<ColumnarModeConcept CM>
   MetAssociationHelper<CM> MetAssocationAccessors<CM> ::
   operator () (xAOD::MissingETAssociationHelper& helper) const
   {
     return MetAssociationHelper<CM> (helper, *this);
   }
 
-  template<typename CM>
+  template<ColumnarModeConcept CM>
   MetAssociationHelper<CM> MetAssocationAccessors<CM> ::
   operator () (ObjectRange<MetAssociationDef,CM> map) const
   {

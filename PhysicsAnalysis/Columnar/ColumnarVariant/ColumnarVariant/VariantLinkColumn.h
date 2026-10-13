@@ -183,7 +183,7 @@ namespace columnar
 
 
 
-  template<ContainerIdConcept CIBase,ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  template<ContainerIdConcept CIBase,ContainerIdConcept... CIList, ColumnarArrayModeConcept CM>
   class ObjectLink<VariantContainerId<CIBase,CIList...>,CM> final
   {
     /// Public Members
@@ -309,7 +309,7 @@ namespace columnar
     const CM::LinkKeyType* m_keys = nullptr;
     void** m_dataArea = nullptr;
   };
-  template<typename... CIList, ColumnarArrayMode CM>
+  template<typename... CIList, ColumnarArrayModeConcept CM>
   std::ostream& operator<< (std::ostream& str, const ObjectLink<VariantContainerId<CIList...>,CM>& obj)
   {
     return str << obj.getLinkKey() << "/" << obj.getLinkIndex();
@@ -321,7 +321,7 @@ namespace columnar
   {
     // in Array mode we need to use a vector column, as well as an
     // extra column to contain our keys in order.
-    template<ColumnAccessMode CAM,ContainerIdConcept CIBase,ContainerIdConcept... CIList, ColumnarArrayMode CM>
+    template<ColumnAccessMode CAM,ContainerIdConcept CIBase,ContainerIdConcept... CIList, ColumnarArrayModeConcept CM>
     class ContainerFreeAccessor<ObjectLink<VariantContainerId<CIBase,CIList...>,CM>,CAM,CM> final
     {
       /// Public Members

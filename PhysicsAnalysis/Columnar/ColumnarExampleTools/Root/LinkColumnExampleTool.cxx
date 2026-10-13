@@ -14,7 +14,7 @@
 // method implementations
 //
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   LinkColumnExampleTool ::
   LinkColumnExampleTool (const std::string& name)
@@ -35,7 +35,7 @@ namespace columnar
 
 
   void LinkColumnExampleTool ::
-  callEvents (EventContextRange events) const
+  callEvents (columnar::EventContextRange events) const
   {
     // loop over all events and particles.  note that this is
     // deliberately looping by value, as the ID classes are very small
@@ -48,9 +48,9 @@ namespace columnar
       for (auto muon : muonsHandle(event))
       {
         // retrieve the track linked to the muon
-        OptTrackId track = trackLinkAcc(muon);
+        columnar::OptTrackId track = trackLinkAcc(muon);
 
-        // apply the selection, the OptTrackId tries to (mostly) behave
+        // apply the selection, the columnar::OptTrackId tries to (mostly) behave
         // like a std::optional<TrackId>, so we can use it in a similar
         // way.  Here we first check if the track is valid, then do a
         // curvature selection on the track.

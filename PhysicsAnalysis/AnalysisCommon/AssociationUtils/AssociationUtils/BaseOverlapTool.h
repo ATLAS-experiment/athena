@@ -73,13 +73,13 @@ namespace ORUtils
       /// than the refParticle, nothing happens. Otherwise, this method prints
       /// a debug message, decorates the testParticle as overlap, and
       /// optionally sets the object element link.
-      template<columnar::RegularContainerIdConcept CI1,columnar::RegularContainerIdConcept CI2,typename CM>
+      template<columnar::RegularContainerIdConcept CI1,columnar::RegularContainerIdConcept CI2,columnar::ColumnarModeConcept CM>
       StatusCode handleOverlap(const columnar::ObjectId<CI1,CM>& testParticle,
                                const columnar::ObjectId<CI2,CM>& refParticle) const;
 
 
       /// check whether the container is of the right type
-      template<typename XAODContainer,columnar::RegularContainerIdConcept CI,typename CM>
+      template<typename XAODContainer,columnar::RegularContainerIdConcept CI,columnar::ColumnarModeConcept CM>
       StatusCode checkForXAODContainer(columnar::ObjectRange<CI,CM> cont, std::string_view message) const
       {
         if constexpr (CM::isXAOD) {
@@ -173,7 +173,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Handle overlap condition
   //---------------------------------------------------------------------------
-  template<columnar::RegularContainerIdConcept CI1,columnar::RegularContainerIdConcept CI2,typename CM>
+  template<columnar::RegularContainerIdConcept CI1,columnar::RegularContainerIdConcept CI2,columnar::ColumnarModeConcept CM>
   StatusCode BaseOverlapTool ::
   handleOverlap(const columnar::ObjectId<CI1,CM>& testParticle,
                 const columnar::ObjectId<CI2,CM>& refParticle) const

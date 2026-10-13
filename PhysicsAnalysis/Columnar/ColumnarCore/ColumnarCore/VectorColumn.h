@@ -30,7 +30,7 @@ namespace columnar
 
   namespace detail
   {
-    template<typename CT,ColumnarMode CM>
+    template<typename CT,ColumnarModeConcept CM>
       requires (CM::useNestedVectors)
     class MemoryAccessor<std::vector<CT>,CM> final
     {

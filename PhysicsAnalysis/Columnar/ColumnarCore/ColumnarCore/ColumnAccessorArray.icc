@@ -22,7 +22,7 @@ namespace columnar
     };
 
     // the Array mode specialization for native types
-    template<typename CT,ColumnAccessMode CAM,ColumnarArrayMode CM>
+    template<typename CT,ColumnAccessMode CAM,ColumnarArrayModeConcept CM>
       requires (MemoryAccessor<CT,CM>::isDefined)
     class ContainerFreeAccessor<CT,CAM,CM> final
     {
@@ -112,7 +112,7 @@ namespace columnar
 
 
   // the Array mode specialization for native types
-  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,ColumnarArrayMode CM>
+  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,ColumnarArrayModeConcept CM>
     requires (CI::regularColumnAccessorArray && detail::ContainerFreeAccessor<CT,CAM,CM>::isDefined)
   class AccessorTemplate<CI,CT,CAM,CM> final
   {

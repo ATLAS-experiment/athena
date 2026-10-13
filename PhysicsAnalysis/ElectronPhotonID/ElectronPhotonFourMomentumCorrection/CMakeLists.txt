@@ -18,7 +18,7 @@ atlas_add_library( ElectronPhotonFourMomentumCorrectionLib
    ElectronPhotonFourMomentumCorrection/*.h Root/*.cxx
    PUBLIC_HEADERS ElectronPhotonFourMomentumCorrection
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgServicesLib AsgTools AsgTestingLib AsgMessagingLib ColumnarClusterLib ColumnarEgammaLib ColumnarCoreLib
+   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgServicesLib AsgTools AsgTestingLib AsgMessagingLib ColumnarClusterLib ColumnarEgammaLib ColumnarCoreLib ColumnarModeLib
    xAODEventInfo PATInterfaces EgammaAnalysisInterfacesLib egammaUtils PATCoreAcceptLib
    xAODRootAccess ColumnarTrackingLib ColumnarEventInfoLib 
    PRIVATE_LINK_LIBRARIES  AthLinks xAODMetaData egammaLayerRecalibTool

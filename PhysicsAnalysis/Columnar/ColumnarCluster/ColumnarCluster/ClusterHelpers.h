@@ -28,7 +28,7 @@ namespace columnar
     /// call and makes the function behave like a "regular" accessor.
 
 
-    template<ContainerIdConcept CI = ClusterDef,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ClusterDef,ColumnarModeConcept CM=ColumnarMode>
     class EnergyBEAccessor final
     {
       ColumnAccessor<CI,std::vector<float>,CM> m_eAcc;
@@ -55,7 +55,7 @@ namespace columnar
 
 
 
-    template<ContainerIdConcept CI = ClusterDef,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ClusterDef,ColumnarModeConcept CM=ColumnarMode>
     class EtaBEAccessor final
     {
       ColumnAccessor<CI,std::vector<float>,CM> m_eAcc;
@@ -83,7 +83,7 @@ namespace columnar
 
 
 
-    template<ContainerIdConcept CI = ClusterDef,typename CM=ColumnarModeDefault>
+    template<ContainerIdConcept CI = ClusterDef,ColumnarModeConcept CM=ColumnarMode>
     class PhiBEAccessor final
     {
       ColumnAccessor<CI,std::vector<float>,CM> m_eAcc;

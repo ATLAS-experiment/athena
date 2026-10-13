@@ -14,7 +14,7 @@ atlas_add_library( MuonMomentumCorrectionsLib
    MuonMomentumCorrections/*.h Root/*.cxx
    PUBLIC_HEADERS MuonMomentumCorrections
    INCLUDE_DIRS  ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES  ${ROOT_LIBRARIES} AsgTools ColumnarMuonLib MuonAnalysisInterfacesLib FourMomUtils ColumnarCoreLib ColumnarTrackingLib ColumnarEventInfoLib ColumnarVariantLib
+   LINK_LIBRARIES  ${ROOT_LIBRARIES} AsgTools ColumnarMuonLib MuonAnalysisInterfacesLib FourMomUtils ColumnarCoreLib ColumnarModeLib ColumnarTrackingLib ColumnarEventInfoLib ColumnarVariantLib
    PATInterfaces AsgDataHandlesLib AsgMessagingLib
    PRIVATE_LINK_LIBRARIES xAODEventInfo PathResolver )
 

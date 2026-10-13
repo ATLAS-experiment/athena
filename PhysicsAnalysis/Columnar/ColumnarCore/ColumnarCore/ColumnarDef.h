@@ -8,12 +8,13 @@
 #include <cstdint>
 #include <stdexcept>
 
+// IMPORTANT: If this include is not found, then you need to add
+// `ColumnarModeLib` to your (public) CMake dependencies. Do **not**
+// change this package to publicly depend on `ColumnarModeLib`.
+#include <ColumnarMode/ColumnarMode.h>
+
 namespace columnar
 {
-  // This checks that COLUMNAR_DEFAULT_ACCESS_MODE is indeed defined, plus makes it
-  // available for use with `if constexpr`.
-  constexpr unsigned columnarAccessMode = COLUMNAR_DEFAULT_ACCESS_MODE;
-
   struct ColumnarModeXAOD
   {
     /// Whather this is a columnar mode
@@ -214,21 +215,9 @@ namespace columnar
   };
 
   template<typename Mode>
-  concept ColumnarMode = Mode::isColumnarMode;
+  concept ColumnarModeConcept = Mode::isColumnarMode;
   template<typename Mode>
-  concept ColumnarArrayMode = ColumnarMode<Mode> && Mode::isArrayMode;
-
-
-
-#if COLUMNAR_DEFAULT_ACCESS_MODE == 0
-  using ColumnarModeDefault = ColumnarModeXAOD;
-#elif COLUMNAR_DEFAULT_ACCESS_MODE == 2
-  using ColumnarModeDefault = ColumnarModeArray;
-#elif COLUMNAR_DEFAULT_ACCESS_MODE == 100
-  using ColumnarModeDefault = ColumnarModeXAODArray;
-#else
-  #error "COLUMNAR_DEFAULT_ACCESS_MODE must be 0, 2, or 100"
-#endif
+  concept ColumnarArrayModeConcept = ColumnarModeConcept<Mode> && Mode::isArrayMode;
 }
 
 #endif

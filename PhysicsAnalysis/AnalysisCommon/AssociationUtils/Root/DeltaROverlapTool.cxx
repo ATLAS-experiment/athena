@@ -33,7 +33,7 @@ namespace ORUtils
     if (m_objectType1.value() != 0 && m_objectType2.value() != 0) {
       ATH_CHECK (m_dRMatcher->setObjectTypes (static_cast<xAODType::ObjectType>(m_objectType1.value()),
                                               static_cast<xAODType::ObjectType>(m_objectType2.value())));
-    } else if (!columnar::ColumnarModeDefault::isXAOD) {
+    } else if (!columnar::ColumnarMode::isXAOD) {
       ATH_MSG_INFO("Object types not set, please set ObjectType1 and ObjectType2 properties");
     }
     addSubtool(*m_dRMatcher);
@@ -43,7 +43,7 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Identify overlaps
   //---------------------------------------------------------------------------
-  template<columnar::ContainerIdConcept CI1,columnar::RegularContainerIdConcept CI2,typename CM>
+  template<columnar::ContainerIdConcept CI1,columnar::RegularContainerIdConcept CI2,columnar::ColumnarModeConcept CM>
   StatusCode DeltaROverlapTool::
   internalFindOverlaps(columnar::ObjectRange<CI1,CM> testCont, columnar::ObjectRange<CI2,CM> refCont) const
   {

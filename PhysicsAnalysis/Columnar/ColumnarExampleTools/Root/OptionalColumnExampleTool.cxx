@@ -14,7 +14,7 @@
 // method implementations
 //
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   OptionalColumnExampleTool ::
   OptionalColumnExampleTool (const std::string& name)
@@ -35,7 +35,7 @@ namespace columnar
 
 
   void OptionalColumnExampleTool ::
-  callEvents (EventContextRange events) const
+  callEvents (columnar::EventContextRange events) const
   {
     // loop over all events and particles.  note that this is
     // deliberately looping by value, as the ID classes are very small

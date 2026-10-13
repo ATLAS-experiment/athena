@@ -14,7 +14,7 @@
 // method implementations
 //
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   MomentumAccessorExampleTool ::
   MomentumAccessorExampleTool (const std::string& name)
@@ -40,9 +40,9 @@ namespace columnar
 
 
   void MomentumAccessorExampleTool ::
-  callSingleEvent (ParticleRange particles) const
+  callSingleEvent (columnar::ParticleRange particles) const
   {
-    for (ParticleId particle : particles)
+    for (columnar::ParticleId particle : particles)
     {
       selectionDec(particle) = momAcc.e(particle) > m_energyCut.value();
     }
@@ -51,7 +51,7 @@ namespace columnar
 
 
   void MomentumAccessorExampleTool ::
-  callEvents (EventContextRange events) const
+  callEvents (columnar::EventContextRange events) const
   {
     // loop over all events and particles.  note that this is
     // deliberately looping by value, as the ID classes are very small

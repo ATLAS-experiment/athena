@@ -14,7 +14,7 @@
 // method implementations
 //
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   SimpleSelectorExampleTool ::
   SimpleSelectorExampleTool (const std::string& name)
@@ -35,9 +35,9 @@ namespace columnar
 
 
   void SimpleSelectorExampleTool ::
-  callSingleEvent (ParticleRange particles) const
+  callSingleEvent (columnar::ParticleRange particles) const
   {
-    for (ParticleId particle : particles)
+    for (columnar::ParticleId particle : particles)
     {
       selectionDec(particle) = ptAcc(particle) > m_ptCut.value();
     }
@@ -46,7 +46,7 @@ namespace columnar
 
 
   void SimpleSelectorExampleTool ::
-  callEvents (EventContextRange events) const
+  callEvents (columnar::EventContextRange events) const
   {
     // loop over all events and particles.  note that this is
     // deliberately looping by value, as the ID classes are very small

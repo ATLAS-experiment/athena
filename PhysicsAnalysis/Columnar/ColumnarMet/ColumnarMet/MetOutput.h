@@ -28,7 +28,7 @@ namespace columnar
     /// up to the user to make sure that for each term a different
     /// weight vector gets passed in.
 
-    template<ContainerIdConcept CI_MET=MutableMetDef,ContainerIdConcept CI_OBJ=ParticleDef,typename CM=ColumnarModeDefault> class ObjectWeightDecorator;
+    template<ContainerIdConcept CI_MET=MutableMetDef,ContainerIdConcept CI_OBJ=ParticleDef,ColumnarModeConcept CM=ColumnarMode> class ObjectWeightDecorator;
 
 
     template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightDecorator<CI_MET,CI_OBJ,ColumnarModeXAOD> final
@@ -67,7 +67,7 @@ namespace columnar
     /// container and then does the "right thing" to record the object
     /// weight based on the columnar mode.
 
-    template<ContainerIdConcept CI_MET=MutableMetDef,ContainerIdConcept CI_OBJ=ParticleDef,typename CM=ColumnarModeDefault> class ObjectWeightHandle;
+    template<ContainerIdConcept CI_MET=MutableMetDef,ContainerIdConcept CI_OBJ=ParticleDef,ColumnarModeConcept CM=ColumnarMode> class ObjectWeightHandle;
 
     template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightHandle<CI_MET,CI_OBJ,ColumnarModeXAOD> final
     {

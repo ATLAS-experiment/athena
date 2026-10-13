@@ -201,11 +201,11 @@ namespace columnar
 
   // forward declarations of columnar core classes for which I often
   // provide specific aliases for different container ids.
-  template<ContainerIdConcept CI,typename CM = ColumnarModeDefault> class ObjectRange;
-  template<ContainerIdConcept CI, typename CM = ColumnarModeDefault> class ObjectId;
-  template<ContainerIdConcept CI, typename CM = ColumnarModeDefault> class OptObjectId;
-  template<ContainerIdConcept CI, typename CM = ColumnarModeDefault> class ObjectLink;
-  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,typename CM = ColumnarModeDefault> class AccessorTemplate;
+  template<ContainerIdConcept CI,ColumnarModeConcept CM = ColumnarMode> class ObjectRange;
+  template<ContainerIdConcept CI, ColumnarModeConcept CM = ColumnarMode> class ObjectId;
+  template<ContainerIdConcept CI, ColumnarModeConcept CM = ColumnarMode> class OptObjectId;
+  template<ContainerIdConcept CI, ColumnarModeConcept CM = ColumnarMode> class ObjectLink;
+  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,ColumnarModeConcept CM = ColumnarMode> class AccessorTemplate;
 
 
   using EventContextRange = ObjectRange<EventContextDef>;

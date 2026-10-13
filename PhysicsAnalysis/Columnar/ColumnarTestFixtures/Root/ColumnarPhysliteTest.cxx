@@ -2648,7 +2648,7 @@ void ColumnarPhysLiteTest ::doCallMulti(
     }
   }
 
-  if constexpr (columnarAccessMode == 2) {
+  if constexpr (std::is_same_v<columnar::ColumnarMode,columnar::ColumnarModeArray>) {
     // Create shared column header for all tools
     ColumnVectorHeader columnHeader;
 
@@ -2839,10 +2839,10 @@ void ColumnarPhysLiteTest ::doCallMulti(
           std::cout << std::endl;
         }
       }
-    } else if constexpr (columnarAccessMode == 0)
+    } else if constexpr (std::is_same_v<columnar::ColumnarMode,columnar::ColumnarModeXAOD>)
     {
       TestUtils::runXaodTest (userConfiguration, testDefinitions, file.get());
-    } else if constexpr (columnarAccessMode == 100)
+    } else if constexpr (std::is_same_v<columnar::ColumnarMode,columnar::ColumnarModeXAODArray>)
     {
       const auto& testDefinition = testDefinitions[0];
       TestUtils::runXaodArrayTest (userConfiguration, testDefinition, file.get());
