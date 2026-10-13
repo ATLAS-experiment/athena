@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CLIDCOMPS_CLASSIDSVC_H
@@ -12,6 +12,7 @@
 
 #include <unordered_map>
 #include <mutex>
+#include <set>
 #include <string>
 #include <vector>
 #include <utility> // for std::pair
@@ -120,6 +121,10 @@ private:
 
   Gaudi::Property<std::string> m_outputFileName{this, "OutputFileName", "NULL",
     "Path to clid.db file for writing. By default ('NULL') to not create the file."};
+
+  Gaudi::Property<std::set<CLID>> m_clidIgnore{this, "IgnoreCLIDs", {},
+    "Set of CLIDs to ignore. Can also be set via the ATLAS_CLID_IGNORE environment variable (comma-separated). "
+    "Useful for testing the removal of EDM classes in a local build."};
   //@}
   CLIDMap m_clidMap;
   NameMap m_nameMap;
