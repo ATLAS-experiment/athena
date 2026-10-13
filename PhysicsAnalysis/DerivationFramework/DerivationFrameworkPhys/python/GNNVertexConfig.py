@@ -151,26 +151,3 @@ def CustomJetsCfg(flags):
     acc.merge(JetRecCfg(flags,AntiKt4EMTopoCustomVtxGNN))
 
     return acc
-
-
-# Main algorithm config
-def GNNVertexCfg(flags, **kwargs):
-    acc = ComponentAccumulator()
-
-    from SGComps.AddressRemappingConfig import InputRenameCfg
-    acc.merge(InputRenameCfg("xAOD::VertexContainer", "PrimaryVertices", "PrimaryVertices_initial"))
-    acc.merge(InputRenameCfg("xAOD::VertexAuxContainer", "PrimaryVerticesAux.", "PrimaryVertices_initialAux."))
-
-    acc.merge(CustomJetsCfg(flags))
-
-    ## Hard-scatter vertex selection
-    from InDetConfig.InDetGNNHardScatterSelectionConfig import GNNSequenceCfg
-    acc.merge(GNNSequenceCfg(flags))
-
-    from TrkConfig.TrkVertexToolsConfig import GNNVertexCollectionSortingToolCfg
-    vxsort_gnn = GNNVertexCollectionSortingToolCfg(flags)
-    from InDetPriVxFinder.ResortVerticesConfig import ResortVerticesCfg
-    acc.merge(ResortVerticesCfg(flags, "PrimaryVertices_initial", "PrimaryVertices", vxsort_gnn))
-
-    return acc
-

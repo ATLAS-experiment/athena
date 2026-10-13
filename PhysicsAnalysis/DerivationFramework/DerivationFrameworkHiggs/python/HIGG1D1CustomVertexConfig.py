@@ -43,16 +43,20 @@ def ZeeVertexRefitterCfg(flags, name="ZeeVertexRefitKernel"):
 
 def DiphotonVertexDecoratorCfg(flags, **kwargs):
     acc = ComponentAccumulator()
+
+    kwargs.setdefault("VertexContainer", "PrimaryVertices")
+
     if "PhotonVertexSelectionTool" not in kwargs:
         from PhotonVertexSelection.PhotonVertexSelectionConfig import (
             PhotonVertexSelectionToolCfg)
         kwargs.setdefault("PhotonVertexSelectionTool", acc.popToolsAndMerge(
-            PhotonVertexSelectionToolCfg(flags)))
+            PhotonVertexSelectionToolCfg(flags, VertexContainer=kwargs["VertexContainer"])))
+
     acc.setPrivateTools(
         CompFactory.DerivationFramework.DiphotonVertexDecorator(**kwargs))
     return acc
 
-def DiPhotonVertexDecoratorKernelCfg(flags, name="DiphotonVertexKernel"):
+def DiPhotonVertexDecoratorKernelCfg(flags, VertexContainer="PrimaryVertices", name="DiphotonVertexKernel"):
     """ Diphoton vertex decoration tool """
 
     # Decorator creates a shallow copy of PrimaryVertices (HggPrimaryVertices) for diphoton events
@@ -60,15 +64,15 @@ def DiPhotonVertexDecoratorKernelCfg(flags, name="DiphotonVertexKernel"):
 
     acc = ComponentAccumulator()
     DiphotonVertexDecorator = acc.popToolsAndMerge(
-        DiphotonVertexDecoratorCfg(flags))
+        DiphotonVertexDecoratorCfg(flags, VertexContainer=VertexContainer))
     acc.addPublicTool(DiphotonVertexDecorator)
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(
         name,AugmentationTools=[DiphotonVertexDecorator]))
     return acc
 
-def DiPhotonVertexCfg(flags):
+def DiPhotonVertexCfg(flags, VertexContainer="PrimaryVertices"):
     from DerivationFrameworkEGamma.EGammaToolsConfig import (
         PhotonVertexSelectionWrapperKernelCfg)
-    acc = PhotonVertexSelectionWrapperKernelCfg(flags)
-    acc.merge(DiPhotonVertexDecoratorKernelCfg(flags))
+    acc = PhotonVertexSelectionWrapperKernelCfg(flags, VertexContainer=VertexContainer)
+    acc.merge(DiPhotonVertexDecoratorKernelCfg(flags, VertexContainer=VertexContainer))
     return acc
