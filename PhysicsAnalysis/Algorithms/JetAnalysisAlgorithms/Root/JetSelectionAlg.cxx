@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -10,8 +10,6 @@
 //
 
 #include <JetAnalysisAlgorithms/JetSelectionAlg.h>
-
-#include <SelectionHelpers/SelectionHelpers.h>
 
 //
 // method implementations
@@ -47,6 +45,10 @@ namespace CP
         {
           m_selectionHandle.setBool
             (*jet, m_selectionTool->keep(*jet), sys);
+        }
+        else
+        {
+          m_selectionHandle.setBool (*jet, false, sys);
         }
       }
     }

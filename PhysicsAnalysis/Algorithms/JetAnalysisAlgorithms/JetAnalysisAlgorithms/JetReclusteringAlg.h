@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tomas Dado
@@ -24,6 +24,10 @@
 #include <vector>
 
 namespace CP {
+
+  /// @brief an algorithm reclustering (selected) small-R jets into
+  /// larger-R jets with FastJet, decorating each reclustered jet with the
+  /// indices of its small-R constituents in the input jet container
 
   class JetReclusteringAlg final : public EL::AnaAlgorithm {
 
@@ -63,9 +67,6 @@ namespace CP {
       this, "reclusteredJetsRadius", 1.0, "radius parameter for the reclustered jets"
     };
     std::unique_ptr<fastjet::JetDefinition> m_fastjetClustering;
-
-  private:
-    std::vector<int> matchRCjets(const std::vector<const xAOD::Jet*>& smallJets, const std::vector<fastjet::PseudoJet>& constituents) const;
   };
 
 } // namespace
