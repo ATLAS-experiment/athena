@@ -69,7 +69,7 @@ namespace ftag {
           dPhi    {owner, slot + "DPhiKey",    jets, "dPhiTo"     + slot, "Visible tau phi wrt the jet axis"},
           pt      {owner, slot + "PtKey",      jets, "ptFrom"     + slot, "Total (neutrino-inclusive) tau pT"},
           m       {owner, slot + "MKey",       jets, "mFrom"      + slot, "Total (neutrino-inclusive) tau mass"},
-          charge  {owner, slot + "ChargeKey",  jets, "chargeFrom" + slot, "Tau charge"} {}
+          charge  {owner, slot + "ChargeKey",  jets, "truthChargeFrom" + slot, "Tau charge"} {}
 
       std::array<JetDecorKey*, 8> computed() {
         return {&matched, &deltaR, &deltaPt, &dEta, &dPhi, &pt, &m, &charge};

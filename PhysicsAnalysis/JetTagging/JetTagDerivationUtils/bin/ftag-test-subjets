@@ -92,7 +92,7 @@ def output_cfg(flags, ca, args, jets, subjets):
             f'{var}{slot}'
             for slot in slots
             for var in ['matchedTo', 'deltaRTo', 'deltaPtTo', 'dEtaTo',
-                        'dPhiTo', 'ptFrom', 'mFrom', 'chargeFrom']
+                        'dPhiTo', 'ptFrom', 'mFrom', 'truthChargeFrom']
         ] + [
             f'{var}From{slot}'
             for slot in slots

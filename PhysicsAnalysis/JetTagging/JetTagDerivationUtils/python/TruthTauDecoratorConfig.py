@@ -40,10 +40,11 @@ def TruthTauDecoratorCfg(flags,
     leading and subleading one fill a decoration slot each, suffixed
     ``TruthTaus`` and ``SubleadTruthTaus``. Per slot the algorithm writes
     ``matchedTo``, ``deltaRTo``, ``deltaPtTo``, ``dEtaTo``, ``dPhiTo`` (all
-    against the visible tau), ``ptFrom``, ``mFrom`` and ``chargeFrom`` (the
-    total, neutrino-inclusive tau), plus the variables in `variables_to_copy`
-    taken from the matched ``truth_taus`` entry as ``<name>From<slot>``. The
-    number of taus considered is written once per jet as ``nGhostTaus``.
+    against the visible tau), ``ptFrom``, ``mFrom`` and ``truthChargeFrom``
+    (the total, neutrino-inclusive tau), plus the variables in
+    `variables_to_copy` taken from the matched ``truth_taus`` entry as
+    ``<name>From<slot>``. The number of taus considered is written once per jet
+    as ``nGhostTaus``.
 
     Unmatched slots get NaN throughout, `matchedTo` 0 and the copied variables
     their per-type null value; gate on ``nGhostTaus`` or ``matchedTo``.
