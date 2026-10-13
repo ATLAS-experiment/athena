@@ -1141,6 +1141,7 @@ DataVector<T, BASE>::push_new(size_type n, F alloc) -> size_type
   SG::AuxVectorBase::resize<DataVector> (this->size());
   for (size_t i = 0; i < n; i++) {
     T* p = alloc();
+    if (!p) std::abort();
     this->m_pCont[sz+i] = p;
     if (trackIndices) {
       this->moveAuxNoClear (sz+i, p);
@@ -2978,6 +2979,7 @@ DATAVECTOR::push_new(size_type n, F alloc) -> size_type
   SG::AuxVectorBase::resize<DataVector> (this->size());
   for (size_t i = 0; i < n; i++) {
     T* p = alloc();
+    if (!p) std::abort();
     this->m_pCont[sz+i] = p;
     if (trackIndices) {
       this->moveAuxNoClear (sz+i, p);
