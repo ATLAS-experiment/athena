@@ -117,11 +117,11 @@ namespace GlobalSim {
       // src/Utilities, which is not part of the dictionary, so the interpreter
       // cannot see it. Keeping it here also leaves SpecEntry unchanged.
       return {*width,
-              [getter](const SG::AuxElement& tob) {
-                return binStrToHexStr((*getter)(tob));
+              [g = std::move(getter)](const SG::AuxElement& tob) {
+                return binStrToHexStr((*g)(tob));
               },
-              [setter](SG::AuxElement& tob, const std::string& token) {
-                (*setter)(tob, hexStrToBinStr(token));
+              [s = std::move(setter)](SG::AuxElement& tob, const std::string& token) {
+                (*s)(tob, hexStrToBinStr(token));
               }};
     }
 
@@ -159,7 +159,10 @@ namespace GlobalSim {
       if (not names.empty()) { names += ", "; }
       names += spec;
     }
-    return names.empty() ? "none -- no GlobalSim classes found in the rootmap" : names;
+    if (names.empty())[[unlikely]]{
+     return "none -- no GlobalSim classes found in the rootmap";
+    } 
+    return names;
   }
 
 }
