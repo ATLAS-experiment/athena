@@ -4,10 +4,6 @@
 
 #include "TrigParticle/TrigElectronContainer.h"
 #include "TrigParticle/TrigPhotonContainer.h"
-#include "TrigParticle/TrigL2Bphys.h"
-#include "TrigParticle/TrigL2BphysContainer.h"
-#include "TrigParticle/TrigEFBphys.h"
-#include "TrigParticle/TrigEFBphysContainer.h"
 #include "JetEvent/JetCollection.h"
 #include "JetEvent/JetKeyDescriptor.h"
 #include "JetEvent/JetKeyDescriptorCollection.h"

@@ -5,33 +5,12 @@
   <class name="TrigElectronContainer" id="EA6EA1A5-16FC-4DBF-896E-D933B25E65E0" />
   <class name="TrigElectron" id="DD54FA24-35C3-47D5-B8F3-BF54541DE025"/>
 
-
-
-
-
   <class name="TrigPhotonContainer" id="CB04DF3E-C363-49E3-9BE1-AD25230AB1EA" />
   <class name="DataVector<TrigPhoton>" id="65F1CCA1-B672-4E26-B74E-397CE6C8F617" />
   <class name="std::vector<TrigPhoton*>" />
   <class name="std::vector<const TrigPhoton*>" />
   <class name="TrigPhoton" id="155B0403-07B2-4E18-A577-A1EDDDBFF876" >
     <field name="m_cluster" transient="false" />
-  </class>
-
-
-  <class name="TrigL2BphysContainer" id="23296C53-6811-4D19-BD32-816B5DD0508F" />
-  <class name="DataVector<TrigL2Bphys>" id="390F41C1-CCFA-4A1D-B046-F9F462FD64D0" />
-  <class name="std::vector<TrigL2Bphys*>" />
-  <class name="TrigL2Bphys" id="924F2485-C761-4FD9-8D36-0C8FF33533AB" >
-    <field name="m_secondaryDecay" transient="false" />
-    <field name="m_trackVector" transient="false" />
-  </class>
-
-  <class name="TrigEFBphysContainer" id="033EAD89-6721-46F2-9D32-2670BA63B901" />
-  <class name="DataVector<TrigEFBphys>" id="760BB4E7-61C1-4365-BE20-C8251E808BA4" />
-  <class name="std::vector<TrigEFBphys*>" />
-  <class name="TrigEFBphys" id="CDD3BF9D-4C28-469B-8B77-7DFD149C94A6" >
-    <field name="m_secondaryDecay" transient="false" />
-    <field name="m_trackVector" transient="false" />
   </class>
 
   <function name="dummyTriggerForTrigPartTypedefs" />

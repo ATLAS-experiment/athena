@@ -34,38 +34,6 @@
 #include "TrigParticleTPCnv/TrigPhotonContainerCnv_p3.h"
 #include "TrigParticleTPCnv/TrigPhotonContainer_p3.h"
 
-// TrigL2Bphys
-#include "TrigParticleTPCnv/TrigL2BphysContainer_tlp1.h"
-#include "TrigParticleTPCnv/TrigL2BphysContainerCnv_tlp1.h"
-#include "TrigParticleTPCnv/TrigL2BphysContainer_p1.h"
-#include "TrigParticleTPCnv/TrigL2Bphys_p1.h"
-#include "TrigParticleTPCnv/TrigL2Bphys_p2.h"
-
-#include "TrigParticleTPCnv/TrigL2BphysContainer_tlp2.h"
-#include "TrigParticleTPCnv/TrigL2BphysContainerCnv_tlp2.h"
-#include "TrigParticleTPCnv/TrigL2Bphys_p3.h"
-
-// TrigEFBphys
-#include "TrigParticleTPCnv/TrigEFBphysContainer_tlp1.h"
-#include "TrigParticleTPCnv/TrigEFBphysContainerCnv_tlp1.h"
-#include "TrigParticleTPCnv/TrigEFBphysContainer_p1.h"
-#include "TrigParticleTPCnv/TrigEFBphys_p1.h"
-#include "TrigParticleTPCnv/TrigEFBphys_p2.h"
-
-#include "TrigParticleTPCnv/TrigEFBphysContainer_tlp2.h"
-#include "TrigParticleTPCnv/TrigEFBphysContainerCnv_tlp2.h"
-#include "TrigParticleTPCnv/TrigEFBphys_p3.h"
-
-DECLARE_TPCNV_FACTORY(TrigEFBphysContainerCnv_tlp1,
-                      TrigEFBphysContainer,
-                      TrigEFBphysContainer_tlp1,
-                      Athena::TPCnvVers::Old)
-
-DECLARE_TPCNV_FACTORY(TrigEFBphysContainerCnv_tlp2,
-                      TrigEFBphysContainer,
-                      TrigEFBphysContainer_tlp2,
-                      Athena::TPCnvVers::Current)
-                      
 DECLARE_TPCNV_FACTORY(TrigElectronContainerCnv_tlp1,
                       TrigElectronContainer,
                       TrigElectronContainer_tlp1,
@@ -79,16 +47,6 @@ DECLARE_TPCNV_FACTORY(TrigElectronContainerCnv_tlp2,
 DECLARE_TPCNV_FACTORY(TrigElectronContainerCnv_p3,
                       TrigElectronContainer,
                       TrigElectronContainer_p3,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigL2BphysContainerCnv_tlp1,
-                      TrigL2BphysContainer,
-                      TrigL2BphysContainer_tlp1,
-                      Athena::TPCnvVers::Old)
-
-DECLARE_TPCNV_FACTORY(TrigL2BphysContainerCnv_tlp2,
-                      TrigL2BphysContainer,
-                      TrigL2BphysContainer_tlp2,
                       Athena::TPCnvVers::Current)
                       
 DECLARE_TPCNV_FACTORY(TrigPhotonContainerCnv_tlp1,
