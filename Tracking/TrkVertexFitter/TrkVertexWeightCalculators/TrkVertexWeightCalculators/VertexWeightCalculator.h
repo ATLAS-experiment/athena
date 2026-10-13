@@ -2,8 +2,8 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TRKVERTEXWEIGHTCALCULATORS_GNNVERTEXWEIGHTCALCULATOR_H
-#define TRKVERTEXWEIGHTCALCULATORS_GNNVERTEXWEIGHTCALCULATOR_H
+#ifndef TRKVERTEXWEIGHTCALCULATORS_VERTEXWEIGHTCALCULATOR_H
+#define TRKVERTEXWEIGHTCALCULATORS_VERTEXWEIGHTCALCULATOR_H
 
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -15,22 +15,18 @@
 
 /**
  * @brief A tool to select the primary vertex associated to the hard-scatter
- * using a GNN
- *
- * This tool uses a GNN to select the hard-scatter vertex from a collection of
- * primary vertices.
- * It reads the GNN score created by GNNVertexDecoratorAlg
+ * using NN-based tool (e.g PVNN or HGamNN)
  *
  */
-class GNNVertexWeightCalculator final
+class VertexWeightCalculator final
     : public AthAlgTool,
       virtual public Trk::IVertexWeightCalculator {
 public:
-  GNNVertexWeightCalculator(const std::string& t,
+  VertexWeightCalculator(const std::string& t,
                             const std::string& n,
                             const IInterface* p);
 
-  virtual ~GNNVertexWeightCalculator() override;
+  virtual ~VertexWeightCalculator() override;
   virtual StatusCode initialize() override;
   /**
    * @brief Estimate the compatibility of the vertex with a hard scatter vertex,
@@ -40,9 +36,9 @@ public:
   estimateSignalCompatibility(const xAOD::Vertex &vertex) const override;
 
 private:
-  SG::ReadDecorHandleKey<xAOD::VertexContainer> m_gnnScoreKey{
-      this, "GNNScoreKey", "PrimaryVertices_initial.HSGN2_phsvertex",
-      "Name of the hard-scatter GNN decoration"};
+  SG::ReadDecorHandleKey<xAOD::VertexContainer> m_ScoreKey{
+      this, "ScoreKey", "",
+      "Name of the hard-scatter decoration"};
 };
 
-#endif // TRKVERTEXWEIGHTCALCULATORS_GNNVERTEXWEIGHTCALCULATOR_H
+#endif // TRKVERTEXWEIGHTCALCULATORS_VERTEXWEIGHTCALCULATOR_H

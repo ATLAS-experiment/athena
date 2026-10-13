@@ -142,11 +142,11 @@ def PhotonVertexSelectionWrapperCfg(
 
 
 def PhotonVertexSelectionWrapperKernelCfg(
-        flags, name="PhotonVertexSelectionWrapperKernel", **kwargs):
+        flags, name="PhotonVertexSelectionWrapperKernel", VertexContainer="PrimaryVertices", **kwargs):
     acc = ComponentAccumulator()
 
     augmentationTools = [
-        acc.addPublicTool(acc.popToolsAndMerge(PhotonVertexSelectionWrapperCfg(flags)))
+        acc.addPublicTool(acc.popToolsAndMerge(PhotonVertexSelectionWrapperCfg(flags, VertexContainer=VertexContainer)))
     ]
     kwargs.setdefault("AugmentationTools", augmentationTools)
 

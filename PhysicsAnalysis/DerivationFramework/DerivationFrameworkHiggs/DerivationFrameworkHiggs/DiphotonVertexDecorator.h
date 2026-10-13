@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////
@@ -52,9 +52,9 @@ namespace DerivationFramework {
     ///// TOOLS
     ToolHandle<CP::IPhotonVertexSelectionTool> m_photonVertexSelectionTool{this,  "PhotonVertexSelectionTool", "", ""};
 
-    SG::ReadHandleKey<xAOD::VertexContainer> m_primaryVertexKey{this, "PrimaryVertexName", "PrimaryVertices", "" };
+    SG::ReadHandleKey<xAOD::VertexContainer> m_primaryVertexKey{this, "VertexContainer", "PrimaryVertices", "" };
     SG::ReadHandleKey<xAOD::PhotonContainer> m_photonKey{this, "PhotonKey", "Photons", "" };
-    SG::WriteHandleKey<xAOD::VertexContainer> m_diphotonVertexKey{this, "DiphotonVertexName", "HggPrimaryVertices", "" };
+    SG::WriteHandleKey<xAOD::VertexContainer> m_diphotonVertexKey{this, "DiphotonVertexContainer", "HggPrimaryVertices", "" };
     SG::ReadHandleKey<xAOD::FlowElementContainer> m_FEContainerHandleKey{this,"PFOContainerName","JetETMissChargedParticleFlowObjects","ReadHandleKey for the PFO container"};
     ///////////////
     ///// SETTINGS

@@ -17,8 +17,11 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
 
     from TrkConfig.VertexFindingFlags import VertexSortingSetup
     if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
-        from DerivationFrameworkPhys.GNNVertexConfig import GNNVertexCfg
+        from DerivationFrameworkPhys.DerivationPrimaryVertexConfig import GNNVertexCfg
         acc.merge(GNNVertexCfg(flags))
+    elif flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.HGamNNSorting:
+        from DerivationFrameworkPhys.DerivationPrimaryVertexConfig import HGamNNVertexCfg
+        acc.merge(HGamNNVertexCfg(flags)) 
 
     from DerivationFrameworkTau.TauCommonConfig import AddTauMassDecoratorCfg
     # overwrite the tau mass from 0 to the reconstructed visible mass. Needs to be done before "AddStandardTruthContentsCfg"  

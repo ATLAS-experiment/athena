@@ -142,6 +142,8 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     from TrkConfig.VertexFindingFlags import VertexSortingSetup
     if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
         PHYSSlimmingHelper.ExtraVariables += ["PrimaryVertices.gnnScore"]
+    elif flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.HGamNNSorting:
+        PHYSSlimmingHelper.ExtraVariables += ["PrimaryVertices.HGamNNScore"]
 
     if flags.Tau.TauEleRM_isAvailable:
         PHYSSlimmingHelper.ExtraVariables += ["TauJets_EleRM.dRmax.etOverPtLeadTrk"]

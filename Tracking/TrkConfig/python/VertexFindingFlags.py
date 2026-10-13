@@ -10,6 +10,7 @@ class VertexSortingSetup(FlagEnum):
     SumPtSorting = 'SumPtSorting'
     JetWeightedSorting = 'JetWeightedSorting'
     GNNSorting = 'GNNSorting'
+    HGamNNSorting = 'HGamNNSorting'
 
 
 class VertexSetup(FlagEnum):

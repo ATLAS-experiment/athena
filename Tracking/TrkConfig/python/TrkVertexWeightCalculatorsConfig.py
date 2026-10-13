@@ -25,9 +25,20 @@ def SumPtVertexWeightCalculatorCfg(flags, name="SumPtVertexWeightCalculator",
 def GNNVertexWeightCalculatorCfg(flags, name="GNNVertexWeightCalculator",
                                  **kwargs):
     acc = ComponentAccumulator()
+    kwargs.setdefault("ScoreKey", "PrimaryVertices_initial.HSGN2_phsvertex")
     acc.setPrivateTools(
-        CompFactory.GNNVertexWeightCalculator(name, **kwargs))
+        CompFactory.VertexWeightCalculator(name, **kwargs))
     return acc
+
+
+def HGamNNVertexWeightCalculatorCfg(flags, name="HGamNNVertexWeightCalculator",
+                                 **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("ScoreKey", "HggPrimaryVertices.vertexScore")
+    acc.setPrivateTools(
+        CompFactory.VertexWeightCalculator(name, **kwargs))
+    return acc
+
 
 def BDTVertexWeightCalculatorCfg(flags, **kwargs):
     """

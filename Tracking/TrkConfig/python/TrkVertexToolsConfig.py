@@ -19,6 +19,7 @@ def SumPt2VertexCollectionSortingToolCfg(flags, name="SumPt2VertexCollectionSort
         CompFactory.Trk.VertexCollectionSortingTool(name,**kwargs))
     return acc
 
+
 def SumPtVertexCollectionSortingToolCfg(flags, name="SumPtVertexCollectionSortingTool", **kwargs):
     acc = ComponentAccumulator()
     
@@ -50,6 +51,7 @@ def JetRestrictedSumPt2VertexCollectionSortingToolCfg(flags, name="JetRestricted
         CompFactory.Trk.VertexCollectionSortingTool(name,**kwargs))
     return acc
 
+
 def GNNVertexCollectionSortingToolCfg(flags, name="GNNVertexCollectionSortingTool", **kwargs):
     acc = ComponentAccumulator()
 
@@ -64,6 +66,22 @@ def GNNVertexCollectionSortingToolCfg(flags, name="GNNVertexCollectionSortingToo
         CompFactory.Trk.VertexCollectionSortingTool(name,**kwargs))
     return acc
 
+
+def HGamNNVertexCollectionSortingToolCfg(flags, name="HGamNNVertexCollectionSortingTool", **kwargs):
+    acc = ComponentAccumulator()
+
+    if "VertexWeightCalculator" not in kwargs:
+        from TrkConfig.TrkVertexWeightCalculatorsConfig import HGamNNVertexWeightCalculatorCfg
+        kwargs.setdefault("VertexWeightCalculator", acc.popToolsAndMerge(
+            HGamNNVertexWeightCalculatorCfg(flags)))
+
+    kwargs.setdefault("decorationName", "HGamNNScore")
+
+    acc.setPrivateTools(
+        CompFactory.Trk.VertexCollectionSortingTool(name,**kwargs))
+    return acc
+
+
 def VertexCollectionSortingToolCfg(flags, **kwargs):
     if flags.Tracking.PriVertex.sortingSetup == \
        VertexSortingSetup.SumPt2Sorting:
@@ -72,8 +90,14 @@ def VertexCollectionSortingToolCfg(flags, **kwargs):
          VertexSortingSetup.SumPtSorting:
         return SumPtVertexCollectionSortingToolCfg(flags, **kwargs)
     elif flags.Tracking.PriVertex.sortingSetup == \
-         VertexSortingSetup.JetWeightedSumPt2Sorting:
+         VertexSortingSetup.JetWeightedSorting:
         return JetRestrictedSumPt2VertexCollectionSortingToolCfg(flags, **kwargs)
+    elif flags.Tracking.PriVertex.sortingSetup == \
+         VertexSortingSetup.GNNSorting:
+        return GNNVertexCollectionSortingToolCfg(flags, **kwargs)
+    elif flags.Tracking.PriVertex.sortingSetup == \
+         VertexSortingSetup.HGamNNSorting:
+        return HGamNNVertexCollectionSortingToolCfg(flags, **kwargs)
 
 
 def SecVertexMergingToolCfg(flags, name='SecVertexMergingTool', **kwargs):
