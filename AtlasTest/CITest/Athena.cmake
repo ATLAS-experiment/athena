@@ -446,8 +446,8 @@ atlas_add_citest( ACTS_TriggerC230
 #################################################################################
 #                 Muon Phase II CI tests
 #################################################################################
-atlas_add_citest( MuonR4_PatternRecognition
-         SCRIPT PatternRecognitionMuonR4.sh 1 100 --noMonitorPlots
+atlas_add_citest( MuonR4_Combined
+         SCRIPT runR4_MuonCombRecoSPOTTest.sh 1 5
          PROPERTIES PROCESSOR 1
 )
 #################################################################################
