@@ -148,11 +148,15 @@ REvent::REvent() : Event("xAOD::Experimental::REvent") {}
 
 REvent::~REvent() {
 
-  // Clear the input and output objects before the input/output files would be
-  // closed. Otherwise we can be left with RNTuple view objects pointing
-  // nowhere.
+  // Clear the input and output (meta-)objects before the input/output files
+  // would be closed. Otherwise we can be left with RNTuple view objects
+  // pointing nowhere. This has to be done here, as the containers are members
+  // of the base class, which are only destroyed after the readers of this
+  // class.
   m_inputObjects.clear();
   m_outputObjects.clear();
+  m_inputMetaObjects.clear();
+  m_outputMetaObjects.clear();
 }
 
 /// Implementation of interface method taking a TFile object. Forwards to the method with a string view below.
