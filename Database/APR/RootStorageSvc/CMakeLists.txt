@@ -5,13 +5,13 @@ atlas_subdir( RootStorageSvc )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core RIO Tree ROOTNTuple )
-find_package( VDT )
 
 # Component(s) in the package:
 atlas_add_component( RootStorageSvc
                    src/*.cpp
-                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel
+                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} ROOT::ROOTNTuple
+                                  AthenaBaseComps AthenaKernel
                                   CxxUtils DataModelRoot GaudiKernel
                                   RootAuxDynIOHeaders RootUtils StorageSvc )
 

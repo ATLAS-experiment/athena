@@ -6,8 +6,9 @@ atlas_subdir( RootUtils )
 # External dependencies:
 find_package( Boost COMPONENTS thread )
 find_package( Python COMPONENTS Development )
-find_package( ROOT COMPONENTS RIO Hist Tree Core MathCore ROOTTPython
-   CPyCppyy )
+find_package( ROOT
+   COMPONENTS RIO Hist Tree Core MathCore ROOTTPython
+   OPTIONAL_COMPONENTS CPyCppyy )
 
 set( ROOT_LIBRARIES_PYROOT ${ROOT_LIBRARIES} )
 unset( ROOT_FOUND )
@@ -27,12 +28,16 @@ atlas_add_library( RootUtils
    LINK_LIBRARIES ${ROOT_LIBRARIES} ${Boost_LIBRARIES} CxxUtils AthDSoCallBacks )
 add_dependencies( RootUtils RootUtilsDictGen )
 
+set( PYROOT_DEFS )
+if( TARGET ROOT::CPyCppyy )
+   set( PYROOT_DEFS PRIVATE_DEFINITIONS ATLAS_HAVE_CPYCPPYY )
+endif()
 atlas_add_library( RootUtilsPyROOT
    src/pyroot/*.cxx
    PUBLIC_HEADERS RootUtils
-   INCLUDE_DIRS ${Python_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
-   ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Python_LIBRARIES} ${Boost_LIBRARIES} ${ROOT_LIBRARIES_PYROOT}
+   ${PYROOT_DEFS}
+   INCLUDE_DIRS ${Python_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${Python_LIBRARIES} ${ROOT_LIBRARIES_PYROOT}
    CxxUtils )
 
 atlas_add_dictionary( RootUtilsPyROOTDict

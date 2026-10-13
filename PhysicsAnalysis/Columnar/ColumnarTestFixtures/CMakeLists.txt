@@ -6,7 +6,7 @@ atlas_subdir( ColumnarTestFixtures )
 
 find_package( GTest )
 find_package( nlohmann_json )
-find_package( VDT )
+find_package( ROOT COMPONENTS Core RIO ROOTNTuple )
 set (extra_libs)
 if (XAOD_STANDALONE)
   set (extra_libs )
@@ -33,8 +33,8 @@ foreach (CMODE_NAME CMODE_SUFFIX IN ZIP_LISTS COLUMNAR_MODE_NAME_LIST COLUMNAR_M
   atlas_add_library (ColumnarTestFixturesLib${CMODE_SUFFIX}
   ColumnarTestFixtures/*.h Root/*.cxx
     PUBLIC_HEADERS ColumnarTestFixtures
-    INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
-    LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperLib PATInterfaces AsgTestingLib xAODJet xAODMissingET ColumnarModeLib${CMODE_SUFFIX}
+    INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+    LINK_LIBRARIES ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} ROOT::ROOTNTuple ColumnarToolWrapperLib PATInterfaces AsgTestingLib xAODJet xAODMissingET ColumnarModeLib${CMODE_SUFFIX}
     PRIVATE_LINK_LIBRARIES ${extra_libs} ColumnarCoreLib nlohmann_json::nlohmann_json xAODCaloEvent xAODTracking xAODMuon xAODEventInfo xAODEgamma xAODRootAccess)
 
 endforeach()

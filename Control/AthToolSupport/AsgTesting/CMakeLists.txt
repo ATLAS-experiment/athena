@@ -9,7 +9,6 @@ find_package( GTest )
 find_package( GMock )
 find_package( nlohmann_json )
 find_package( ROOT COMPONENTS Gpad Hist ROOTDataFrame TreePlayer )
-find_package( VDT )
 
 # Component(s) in the package:
 atlas_add_library( AsgTestingLib
@@ -21,8 +20,9 @@ atlas_add_library( AsgTestingLib
 if( NOT SIMULATIONBASE )
    atlas_add_executable( compareFlatTrees
       utils/compareFlatTrees.cxx
-      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
-      LINK_LIBRARIES CxxUtils ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${VDT_LIBRARIES} nlohmann_json::nlohmann_json )
+      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES CxxUtils ${Boost_LIBRARIES} ${ROOT_LIBRARIES}
+                     ROOT::ROOTDataFrame nlohmann_json::nlohmann_json )
 endif()
 
 atlas_add_test( gt_UnitTest_test

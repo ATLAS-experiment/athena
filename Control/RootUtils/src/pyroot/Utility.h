@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file RootUtils/src/pyroot/Utility.h
@@ -19,11 +19,19 @@
 #include "TClass.h"
 
 
+#ifdef ATLAS_HAVE_CPYCPPYY
 #include "CPyCppyy/PyException.h"
 namespace RootUtils {
   using PyException = CPyCppyy::PyException;
 }
-
+#else
+#include <exception>
+namespace RootUtils {
+  struct PyException : public std::exception {
+    const char* what() const noexcept override { return "Python exception"; }
+  };
+}
+#endif  // ATLAS_HAVE_CPYCPPYY
 
 
 namespace RootUtils {
