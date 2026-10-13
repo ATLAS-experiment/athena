@@ -65,14 +65,14 @@ StatusCode TrigHLTMonitorAlgorithm::fillHistograms( const EventContext& ctx ) co
 
   //Set up the regex map
   std::map<std::string,std::string> streams;
-  streams.insert(std::make_pair("HLT_AllChains", "HLT_.*"));
-  streams.insert(std::make_pair("HLT_Electrons", "HLT_[0-9]*e[0-9]+.*"));
-  streams.insert(std::make_pair("HLT_Gamma",     "HLT_[0-9]*g[0-9]+.*"));
-  streams.insert(std::make_pair("HLT_Muons",     "HLT_[0-9]*mu[0-9]+.*"));
-  streams.insert(std::make_pair("HLT_Taus",      "HLT_(tau[0-9]*|trk.*Tau).*"));
-  streams.insert(std::make_pair("HLT_MissingET", "HLT_(t|x)e[0-9]+.*")); 
-  streams.insert(std::make_pair("HLT_Jets",      "HLT_[0-9]*j[0-9]+.*"));
-  streams.insert(std::make_pair("HLT_MinBias",   "HLT_mb.*"));
+  streams.insert(std::make_pair("HLT_AllChains", "(HLT|EF)_.*"));
+  streams.insert(std::make_pair("HLT_Electrons", "(HLT|EF)_[0-9]*e[0-9]+.*"));
+  streams.insert(std::make_pair("HLT_Gamma",     "(HLT|EF)_[0-9]*g[0-9]+.*"));
+  streams.insert(std::make_pair("HLT_Muons",     "(HLT|EF)_[0-9]*mu[0-9]+.*"));
+  streams.insert(std::make_pair("HLT_Taus",      "(HLT|EF)_(tau[0-9]*|trk.*Tau).*"));
+  streams.insert(std::make_pair("HLT_MissingET", "(HLT|EF)_(t|x)e[0-9]+.*"));
+  streams.insert(std::make_pair("HLT_Jets",      "(HLT|EF)_[0-9]*j[0-9]+.*"));
+  streams.insert(std::make_pair("HLT_MinBias",   "(HLT|EF)_mb.*"));
 
 		 
   //// Set the values of the monitored variables for the event	

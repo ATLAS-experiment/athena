@@ -92,7 +92,7 @@ StatusCode TrigDec::TrigDecisionMakerValidator::execute(const EventContext& cont
 
   if (m_doHLT) {
 
-    const Trig::ChainGroup* hltgroup = m_tdt->getChainGroup("HLT_.*");
+    const Trig::ChainGroup* hltgroup = m_tdt->getChainGroup("(HLT|EF)_.*");
     const std::vector<std::string> items = hltgroup->getListOfTriggers();
     const std::vector<bool> isPassed = hltgroup->isPassedForEach();
     const std::vector<unsigned int> bits = hltgroup->isPassedBitsForEach();
