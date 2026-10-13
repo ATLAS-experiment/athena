@@ -36,6 +36,9 @@ void TrapezoidBoundsExpander::TrapezoidPatch::print(std::ostream& ostr) const {
        <<", bounds: "<<(*bounds)
        <<", shift: "<<Amg::toString(toCenter);
 }
+double TrapezoidBoundsExpander::TrapezoidPatch::area() const {
+    return 2.*MuonGMR4::halfY(*bounds)*(MuonGMR4::halfXhighY(*bounds) + MuonGMR4::halfXhighY(*bounds));
+}
 Amg::Vector3D TrapezoidBoundsExpander::makeVertex(const TrapezoidPatch& trapezoid,
                                                   const Side side, const Level lvl) {
     const double halfX = lvl == Level::top ? MuonGMR4::halfXhighY(*trapezoid.bounds)
@@ -90,6 +93,18 @@ std::shared_ptr<Acts::VolumeBounds>
   
     const double halfZ = 0.5*(boxMax[Amg::z] - boxMin[Amg::z]);
     const double halfY = 0.5*(boxMax[Amg::y] - boxMin[Amg::y]);
+
+    if (std::ranges::all_of(m_constituents, [](const TrapezoidPatch& patch) {
+        return patch.bounds->type() == Acts::VolumeBounds::BoundsType::eCuboid;
+        })) {
+        ACTS_VERBOSE(__func__<<"() "<<__LINE__<<" Only cuboids have been passed. Construct a cuboid");
+        m_finalBounds = factory.makeBounds<Acts::CuboidVolumeBounds>(0.5*(boxMax[Amg::x] - boxMin[Amg::x]+ 
+                                                                     std::max(m_margin[0], m_margin[1])), 
+                                                                     halfY + 0.5*m_margin[2], 
+                                                                     halfZ + 0.5* m_margin[3]);
+        m_constituents.clear();
+        return m_finalBounds;
+    }
     /** shift first the constituents by the centering transform */
     for (TrapezoidPatch &trapezoid : m_constituents) {
         trapezoid.toCenter = toVertexCenter() * trapezoid.toCenter;
@@ -102,12 +117,13 @@ std::shared_ptr<Acts::VolumeBounds>
             ACTS_VERBOSE(__func__<<"() "<<__LINE__<<" - Flip trapezoid around Z: "
                     <<Amg::toString(trapezoid.toCenter));
         }
-        if (std::abs(rotAngles.alpha - 180._degree)< Acts::s_epsilon){
+        if (std::abs(rotAngles.alpha - 180._degree)< Acts::s_epsilon) {
             trapezoid.toCenter = trapezoid.toCenter *Amg::getRotateX3D(180._degree);
             ACTS_VERBOSE(__func__<<"() "<<__LINE__<<" - Flip trapezoid around X: "
                     <<Amg::toString(trapezoid.toCenter));
         }
     }
+
     std::array<Amg::Vector3D, 4> expandedCorners{Acts::filledArray<Amg::Vector3D, 4>(Amg::Vector3D::Zero())};
     for (const Side side : {Side::left, Side::right}) {
         std::ranges::sort(m_constituents, [side](const auto& a, const auto& b){
@@ -119,7 +135,13 @@ std::shared_ptr<Acts::VolumeBounds>
             return (botA.x()  - botB.x()) * Acts::toUnderlying(side) > 0.;
         });
         std::size_t highPatch{0ul};
-        for (std::size_t patch = 1ul; patch < m_constituents.size(); ++ patch) {
+        /** Find the first envelope which is a trapezoid (Needed to keep the 
+          * opening angle low in EIL4/5 */
+        std::optional<std::size_t> lowPatch{};
+        for (std::size_t patch = 0ul; patch < m_constituents.size(); ++ patch) {
+            if (!lowPatch.has_value() && m_constituents.at(patch).bounds->type() == Acts::VolumeBounds::eTrapezoid) {
+                lowPatch = patch;
+            }
             const Amg::Vector3D botA = makeVertex(m_constituents.at(highPatch),
                                                   side, Level::bottom);
             const Amg::Vector3D botB = makeVertex(m_constituents.at(patch),
@@ -135,46 +157,15 @@ std::shared_ptr<Acts::VolumeBounds>
                  <<" side. Resorted trapezoids:\n"<<toString(m_constituents)
                  <<"\n   ---- Selected upper trapezoid:\n"
                  <<m_constituents.at(highPatch));
-        Amg::Vector3D& botCorner{expandedCorners[toIndex(side, Level::bottom)]};
-        Amg::Vector3D& topCorner{expandedCorners[toIndex(side, Level::top)]};
-        ///
-        botCorner = makeVertex(m_constituents.at(0), side, Level::bottom);
-        topCorner = makeVertex(m_constituents.at(highPatch), side, Level::top);
-        const Amg::Vector3D edge = Amg::projectDirOntoPlane((botCorner - topCorner).unit(), 
-                                                            Amg::Vector3D::UnitZ());
-        /** Ensure that the corners are on the top and bottom of the box */
-        for (Level lvl : { Level::bottom, Level::top}) {
-            const std::uint8_t i = toIndex(side,lvl);
-            auto iSect = intersectPlane(expandedCorners.at(i), edge,
-                                        Amg::Vector3D::UnitY(),
-                                        Acts::copySign(halfY, lvl));
-            expandedCorners.at(i)= iSect.position();
-        }
-        ACTS_DEBUG(__func__<<"() "<<__LINE__<<" - Identified "<<Amg::toString(botCorner)
-                 <<", "<<Amg::toString(topCorner)<<" as vertices. Edge: "<<Amg::toString(edge));
-        /** Now we just move them outwards */
-        for (const TrapezoidPatch& patch : m_constituents) {
-            const double distBot = distanceToTrapezoid(botCorner, edge, 
-                                        makeVertex(patch, side, Level::bottom), side);
-            const double distTop = distanceToTrapezoid(topCorner, edge, 
-                                        makeVertex(patch, side, Level::top), side);
-            ACTS_VERBOSE(__func__<<"() "<<__LINE__<<" - Bottom (top) distance "<<distBot
-                              <<" ("<<distTop<<") to "<<patch);
-            /** The point is outside the trapzoid */
-            if (std::max(distBot, distTop) > 0.) {
-                const double d = std::max(distBot, distTop) * Acts::toUnderlying(side);
-                botCorner.x() += d;
-                topCorner.x() += d; 
-                ACTS_VERBOSE(__func__<<"() "<<__LINE__<<" - Shift the trapezoid.");
-            }
-        }
+      
+        findTrapezoidEdge(expandedCorners[toIndex(side, Level::bottom)],
+                          expandedCorners[toIndex(side, Level::top)], side, 
+                          lowPatch.value_or(0), highPatch);
     }
     const double halfXhighY = std::max(std::abs(expandedCorners[toIndex(Side::left, Level::top)].x()),
                                        std::abs(expandedCorners[toIndex(Side::right, Level::top)].x())); 
     const double halfXlowY = std::max(std::abs(expandedCorners[toIndex(Side::left, Level::bottom)].x()),
                                       std::abs(expandedCorners[toIndex(Side::right, Level::bottom)].x())); 
-
-                                      
     if (std::abs(halfXhighY - halfXlowY) > Acts::s_onSurfaceTolerance) {
         m_finalBounds = factory.makeBounds<Acts::TrapezoidVolumeBounds>(halfXlowY + 0.5*m_margin[0], 
                                                                         halfXhighY + 0.5*m_margin[1],
@@ -188,6 +179,63 @@ std::shared_ptr<Acts::VolumeBounds>
     ACTS_DEBUG(__func__<<"() "<<__LINE__<<" - Created new bounds "<<(*m_finalBounds));
     m_constituents.clear();
     return m_finalBounds;
+}
+void TrapezoidBoundsExpander::findTrapezoidEdge(Amg::Vector3D& botCorner,
+                                                Amg::Vector3D& topCorner,
+                                                const Side side,
+                                                const std::size_t lowPatch,
+                                                const std::size_t highPatch) const {
+    const double halfY = 0.5*(maxima()[Amg::y] - minima()[Amg::y]);
+    botCorner = makeVertex(m_constituents.at(lowPatch), side, Level::bottom);
+    topCorner = makeVertex(m_constituents.at(highPatch), side, Level::top);
+    Amg::Vector3D edge = Amg::projectDirOntoPlane((botCorner - topCorner).unit(), 
+                                                      Amg::Vector3D::UnitZ());
+    botCorner = intersectPlane(botCorner, edge, Amg::Vector3D::UnitY(), -halfY).position();
+    topCorner = intersectPlane(topCorner, edge, Amg::Vector3D::UnitY(), halfY).position();
+    
+    double steepM{0.}; 
+    /** @brief Update the slope of the tilted trapezoid edge to find the steepest one */
+    auto updateSlope = [&]( const Amg::Vector3D& v) {
+         if (v.y() <= botCorner.y()) {
+            return;
+         }
+         const double m = (v.x() - botCorner.x()) / (v.y() - botCorner.y());
+         if(std::abs(m)> std::abs(steepM)) {
+            steepM = m;
+         }
+    };
+    updateSlope(topCorner);
+    ACTS_INFO(__func__<<"() "<<__LINE__<<" - Identified "<<Amg::toString(botCorner)
+                <<", "<<Amg::toString(topCorner)<<" as vertices. Edge: "<<Amg::toString(edge));
+    Amg::Vector3D farestVtx{botCorner};
+    double area{0.};
+    for (const TrapezoidPatch& patch : m_constituents) {
+        area += patch.area();
+        for (auto  lvl : {Level::bottom, Level::top}) {
+            const Amg::Vector3D vtx = makeVertex(patch, side, lvl);
+            const double d = distanceToTrapezoid(botCorner, edge, vtx, side);
+            ACTS_VERBOSE(__func__<<"() "<<__LINE__<<" - Vertex at "<<lvl
+                        <<" edge "<<Amg::toString(vtx)<<" distance: "<<d);
+            /** If the point is outwards update the outer vertex and the slope */
+            if (d > 0. &&  d > distanceToTrapezoid(botCorner, edge, farestVtx, side)) {
+                updateSlope(vtx);
+                farestVtx = vtx;
+                ACTS_VERBOSE(__func__<<"() "<<__LINE__<<" - Shift the trapezoid.");
+            }
+        }
+    }
+    ACTS_VERBOSE(__func__<<"() "<<__LINE__<<" - The farest "<<Amg::toString(farestVtx)<<" with distance "
+        <<distanceToTrapezoid(botCorner, edge, farestVtx, side)<<", steepest m: "<<steepM
+        <<", start M: "<<(topCorner.x() - botCorner.x()) / (topCorner.y() - botCorner.y()));
+
+    edge = Amg::Vector3D{steepM, 1., 0.}.unit();
+    botCorner = intersectPlane(farestVtx, edge, Amg::Vector3D::UnitY(), -halfY).position();
+    topCorner = intersectPlane(farestVtx, edge, Amg::Vector3D::UnitY(), halfY).position();
+    /// Try to decrease
+    const double envArea = (std::abs(botCorner.x()) + std::abs(topCorner.x()))* 2.*halfY;
+    ACTS_VERBOSE(__func__<<"() "<<__LINE__<<" - Update corners to "<<Amg::toString(botCorner)
+        <<" (bottom) and "<<Amg::toString(topCorner)<<" (top) New area: "<<envArea
+    <<", old area: "<<area<<", diff: "<<(area/ envArea));
 }
     
 }

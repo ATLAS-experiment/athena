@@ -16,6 +16,10 @@
 #include "Acts/Geometry/TrackingVolume.hpp"
 #include "Acts/Geometry/CuboidVolumeBounds.hpp"
 #include "Acts/Geometry/TrapezoidVolumeBounds.hpp"
+#include "Acts/Surfaces/RectangleBounds.hpp"
+#include "Acts/Surfaces/TrapezoidBounds.hpp"
+
+#include <ranges>
 
 namespace MuonGMR4 {
     BoundsExpander::BoundsExpander(const Acts::Transform3& toVolume,
@@ -108,12 +112,13 @@ namespace MuonGMR4 {
         return m_locMax;
     }
     std::vector<Amg::Vector3D> BoundsExpander::cornerPoints(const Acts::GeometryContext& tgContext, 
-                                                            const Acts::Volume& volume) {
+                                                            const Acts::Volume& volume,
+                                                            const std::size_t nSegments) {
         std::vector<Amg::Vector3D> edges{};
         const Acts::VolumeBounds& bounds{volume.volumeBounds()};
         const Acts::Transform3& trf{volume.localToGlobalTransform(tgContext)};
         for (const Acts::OrientedSurface& boundary : bounds.orientedSurfaces(trf)) {
-            std::vector<Amg::Vector3D> corners = cornerPoints(tgContext, *boundary.surface);
+            std::vector<Amg::Vector3D> corners = cornerPoints(tgContext, *boundary.surface, nSegments);
             edges.insert(edges.end(), std::make_move_iterator(corners.begin()), 
                                       std::make_move_iterator(corners.end()));
         }
@@ -124,8 +129,62 @@ namespace MuonGMR4 {
         return edges;
     }
     std::vector<Amg::Vector3D> BoundsExpander::cornerPoints(const Acts::GeometryContext& tgContext, 
-                                                             const Acts::Surface& surface) {
-        return surface.polyhedronRepresentation(tgContext, 10).vertices;
+                                                            const Acts::Surface& surface,
+                                                            const std::size_t nSegments) {
+        constexpr std::array signs{-1., 1.};
+        std::vector<Amg::Vector3D> vertices{};
+        vertices.reserve(Acts::square(vertices.size()));
+        /**  Don't use the polyhedron representation for rectangles and trapezoids as 
+          *  we need the central point on the edge to properly constrain the radius of
+          *  a surrounding cylinder */
+        switch (surface.bounds().type()) {
+            using enum Acts::SurfaceBounds::BoundsType;
+            case eRectangle: {
+                const auto& bounds{static_cast<const Acts::RectangleBounds&>(surface.bounds())};
+                using enum Acts::RectangleBounds::BoundValues;
+                const double stepX = 2.*bounds.get(eMaxX) / nSegments;
+                const double stepY = 2.*bounds.get(eMaxY) / nSegments;
+                for (const double sign : signs) {
+                    for (unsigned seg = 0; seg <= nSegments ; ++seg) {
+                        vertices.push_back(surface.localToGlobalTransform(tgContext)*
+                            Amg::Vector3D{-bounds.get(eMaxX) + stepX * seg,
+                                          sign*bounds.get(eMaxY), 0.});
+                        vertices.push_back(surface.localToGlobalTransform(tgContext)*
+                            Amg::Vector3D{sign*bounds.get(eMaxX),
+                                          -bounds.get(eMaxY) + stepY * seg, 0.});
+                    }
+                }
+                break;
+            } case eTrapezoid: {
+                const auto& bounds{static_cast<const Acts::TrapezoidBounds&>(surface.bounds())};
+                using enum Acts::TrapezoidBounds::BoundValues;
+                const double hY = bounds.get(eHalfLengthY);
+                const double xS = bounds.get(eHalfLengthXnegY);
+                const double xL = bounds.get(eHalfLengthXposY);
+                const double m = (xL - xS) / (2.*hY);
+                Amg::Vector3D locPos{Amg::Vector3D::Zero()};
+                auto pushVertex = [&](const double x, const double y) {
+                    locPos.block<2,1>(0,0) = Eigen::Rotation2D{-bounds.get(eRotationAngle)} *
+                                             Amg::Vector2D{x,y};
+                    vertices.push_back(surface.localToGlobalTransform(tgContext)*locPos);                        
+                };
+                const double stepY =  2.*hY / nSegments;
+                for (const double sign : signs) {
+                    const double x = (sign > 0 ? xL : xS);
+                    const double stepX = 2.*x / nSegments;
+                    for (unsigned seg = 0; seg <= nSegments ; ++seg){
+                        pushVertex(-x + stepX*seg, sign*hY);
+                        const double y = -hY + stepY*seg;
+                        pushVertex(sign*(xS + (y+hY)*m), y);
+                    }
+                }
+                break;
+            }  default: {
+                vertices = surface.polyhedronRepresentation(tgContext, nSegments).vertices;
+                break;
+            }
+        }
+        return vertices;
     }
     std::unique_ptr<Acts::TrackingVolume> BoundsExpander::makeEnvelope(Acts::VolumeBoundFactory& factory,
                                                                        std::string_view volName) {

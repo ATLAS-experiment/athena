@@ -39,14 +39,18 @@ namespace MuonGMR4 {
         public:
             /** @brief Returns the vertices from a volume
              *  @param tgContext: The geometry context to align the volume
-             *  @param volume: The volume from which the vertices shall be retrieved */
+             *  @param volume: The volume from which the vertices shall be retrieved
+             *  @param nSegments: Number of segments to be generated  */
             static std::vector<Amg::Vector3D> cornerPoints(const Acts::GeometryContext& tgContext, 
-                                                           const Acts::Volume& volume);
+                                                           const Acts::Volume& volume,
+                                                           const std::size_t nSegments = 3);
             /** @brief Returns the vertices from a surface
              *  @param tgContext: The geometry context to align the surface
-             *  @param volume: The surface from which the vertices shall be retrieved */
+             *  @param volume: The surface from which the vertices shall be retrieved
+             *  @param nSegments: Number of segments to be generated */
             static std::vector<Amg::Vector3D> cornerPoints(const Acts::GeometryContext& tgContext, 
-                                                            const Acts::Surface& surface);
+                                                            const Acts::Surface& surface,
+                                                            const std::size_t nSegments = 3);
             /** @brief Crate volume bounds that enclose the readout element from the central
               *         localToGlobalTransform
               *  @param readoutElement: The readout element of interest
