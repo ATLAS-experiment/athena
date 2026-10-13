@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -18,11 +18,11 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref IJetSelector
+  /// @brief an algorithm for calling @ref IJetSelector
 
   class JetSelectionAlg final : public EL::AnaAlgorithm
   {
-    /// \brief the standard constructor
+    /// @brief the standard constructor
   public:
     using EL::AnaAlgorithm::AnaAlgorithm;
     StatusCode initialize () override;
@@ -30,25 +30,25 @@ namespace CP
 
 
 
-    /// \brief the selection tool
+    /// @brief the selection tool
   private:
     ToolHandle<IJetSelector> m_selectionTool {this, "selectionTool", "", "the selection tool we apply"};
 
-    /// \brief the systematics list we run
+    /// @brief the systematics list we run
   private:
     SysListHandle m_systematicsList {this};
 
-    /// \brief the jet collection we run on
+    /// @brief the jet collection we run on
   private:
     SysReadHandle<xAOD::JetContainer> m_jetHandle {
       this, "jets", "AntiKt4EMTopoJets", "the jet collection to run on"};
 
-    /// \brief the preselection we apply to our input
+    /// @brief the preselection we apply to our input
   private:
     SysReadSelectionHandle m_preselection {
       this, "preselection", "", "the preselection to apply"};
 
-    /// \brief the decoration for the jet selection
+    /// @brief the decoration for the jet selection
   private:
     SysWriteSelectionHandle m_selectionHandle {
       this, "selectionDecoration", "clean_jet", "the decoration for the jet selection"};

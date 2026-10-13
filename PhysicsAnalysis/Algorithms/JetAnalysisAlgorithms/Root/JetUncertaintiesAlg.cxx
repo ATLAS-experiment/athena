@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -55,35 +55,35 @@ namespace CP
   StatusCode JetUncertaintiesAlg ::
   execute (const EventContext& ctx)
   {
-    for (const auto& sys : m_systematicsVector)
-      {
-	ANA_CHECK (m_uncertaintiesTool->applySystematicVariation (sys));
-	xAOD::JetContainer *jets = nullptr;
-	ANA_CHECK (m_jetHandle.getCopy (jets, sys, ctx));
-	for (xAOD::Jet *jet : *jets)
-	  {
-	    // we need to tell the JES flavour uncertainty tool whether each jet is b-tagged at truth-level
-	    if (m_decIsJESbtag) {
-	      (*m_decIsJESbtag)(*jet) =  (*m_accTruthLabel)(*jet) == 5 ;
-	    }
-	    if (m_preselection.getBool (*jet, sys))
-	      {
-		ANA_CHECK_CORRECTION (m_outOfValidity, *jet, m_uncertaintiesTool->applyCorrection (*jet));
-	      }
-	  }
-      }
-    for (const auto& sys : m_systematicsVectorOnlyJERPseudoData)
+    ANA_CHECK (applyTool (m_uncertaintiesTool, m_systematicsVector, true, ctx));
+    ANA_CHECK (applyTool (m_uncertaintiesToolPD, m_systematicsVectorOnlyJERPseudoData, false, ctx));
+
+    return StatusCode::SUCCESS;
+  }
+
+
+
+  StatusCode JetUncertaintiesAlg ::
+  applyTool (ToolHandle<ICPJetUncertaintiesTool>& tool,
+             const std::vector<CP::SystematicSet>& systematics,
+             bool decorateBtag, const EventContext& ctx)
+  {
+    for (const auto& sys : systematics)
     {
-      ANA_CHECK (m_uncertaintiesToolPD->applySystematicVariation (sys));
+      ANA_CHECK (tool->applySystematicVariation (sys));
       xAOD::JetContainer *jets = nullptr;
       ANA_CHECK (m_jetHandle.getCopy (jets, sys, ctx));
       for (xAOD::Jet *jet : *jets)
-	{
-	  if (m_preselection.getBool (*jet, sys))
-	    {
-	      ANA_CHECK_CORRECTION (m_outOfValidity, *jet, m_uncertaintiesToolPD->applyCorrection (*jet));
-	    }
-	}
+      {
+        // we need to tell the JES flavour uncertainty tool whether each jet is b-tagged at truth-level
+        if (decorateBtag && m_decIsJESbtag) {
+          (*m_decIsJESbtag)(*jet) = m_accTruthLabel->isAvailable (*jet) && (*m_accTruthLabel)(*jet) == 5;
+        }
+        if (m_preselection.getBool (*jet, sys))
+        {
+          ANA_CHECK_CORRECTION (m_outOfValidity, *jet, tool->applyCorrection (*jet));
+        }
+      }
     }
 
     return StatusCode::SUCCESS;

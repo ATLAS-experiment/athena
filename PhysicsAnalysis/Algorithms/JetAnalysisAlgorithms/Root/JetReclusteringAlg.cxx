@@ -1,24 +1,20 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Tomas Dado
 
 #include "JetAnalysisAlgorithms/JetReclusteringAlg.h"
-#include "Math/Vector4D.h"
-#include "Math/VectorUtil.h"
 
 namespace CP {
-  using ROOT::Math::PtEtaPhiEVector;
-  using ROOT::Math::VectorUtil::DeltaR;
 
   StatusCode JetReclusteringAlg::initialize() {
 
     ANA_CHECK(m_jetsHandle.initialize(m_systematicsList));
     ANA_CHECK(m_jetSelection.initialize(m_systematicsList, m_jetsHandle, SG::AllowEmpty));
 
-    ANA_CHECK(m_smallRjetIndicesDecor.initialize(m_systematicsList, m_outHandle, SG::AllowEmpty));
-    ANA_CHECK(m_rcEnergyDecor.initialize(m_systematicsList, m_outHandle, SG::AllowEmpty));
+    ANA_CHECK(m_smallRjetIndicesDecor.initialize(m_systematicsList, m_outHandle));
+    ANA_CHECK(m_rcEnergyDecor.initialize(m_systematicsList, m_outHandle));
 
     ANA_CHECK(m_outHandle.initialize(m_systematicsList));
 
@@ -61,14 +57,16 @@ namespace CP {
       auto rcJetContainer = std::make_unique<xAOD::JetContainer>();
       rcJetContainer->setStore(rcJetAuxContainer.get());
 
-      // only take selected jets
+      // only take selected jets, remembering their index in the input
+      // container via the fastjet user index
       std::vector<fastjet::PseudoJet> clusters;
-      std::vector<const xAOD::Jet*> selectedJets;
-      for (const xAOD::Jet *jet : *jets) {
+      clusters.reserve(jets->size());
+      for (std::size_t i = 0; i < jets->size(); ++i) {
+        const xAOD::Jet *jet = (*jets)[i];
         if (m_jetSelection.getBool(*jet, sys)) {
           fastjet::PseudoJet pseudoJet(jet->px(), jet->py(), jet->pz(), jet->e());
+          pseudoJet.set_user_index(static_cast<int>(i));
           clusters.emplace_back(std::move(pseudoJet));
-          selectedJets.push_back(jet);
         }
       }
 
@@ -82,47 +80,29 @@ namespace CP {
       std::vector<fastjet::PseudoJet> rcJets = cluster_sequence.inclusive_jets(0.0);
 
       for (const auto& irc : rcJets) {
-        xAOD::Jet *rcJet = new xAOD::Jet();
+        xAOD::Jet *rcJet = rcJetContainer->push_back(std::make_unique<xAOD::Jet>());
 
         const xAOD::JetFourMom_t p4(irc.pt(), irc.eta(), irc.phi_std(), irc.m());
-        rcJetContainer->push_back(rcJet);
-
-        rcJetContainer->back()->setJetP4(p4);
+        rcJet->setJetP4(p4);
 
         const auto constituents = irc.constituents();
 
-        const std::vector<int> indices = this->matchRCjets(selectedJets, constituents);
-
-        if (indices.size() != constituents.size()) {
-          ANA_MSG_ERROR("Size of the contituents does not match the size of the indices");
-          ANA_CHECK(m_outHandle.record(std::move(rcJetContainer), std::move(rcJetAuxContainer), sys, ctx));
-          return StatusCode::FAILURE;
+        std::vector<int> indices;
+        indices.reserve(constituents.size());
+        for (const auto& iconst : constituents) {
+          indices.push_back(iconst.user_index());
         }
 
-        m_smallRjetIndicesDecor.set(*(rcJetContainer->back()), indices, sys);
+        m_smallRjetIndicesDecor.set(*rcJet, indices, sys);
 
         // Write energy to the RC jet, since default 4-vector form is (pt, eta, phi, m)
-        m_rcEnergyDecor.set(*(rcJetContainer->back()), irc.e(), sys);
+        m_rcEnergyDecor.set(*rcJet, irc.e(), sys);
       }
 
       ANA_CHECK(m_outHandle.record(std::move(rcJetContainer), std::move(rcJetAuxContainer), sys, ctx));
 
     }
     return StatusCode::SUCCESS;
-  }
-
-  std::vector<int> JetReclusteringAlg::matchRCjets(const std::vector<const xAOD::Jet*>& smallJets, const std::vector<fastjet::PseudoJet>& constituents) const {
-    std::vector<int> indices;
-    for (const auto& iconst : constituents) {
-      PtEtaPhiEVector iconstP4(iconst.pt(), iconst.eta(), iconst.phi_std(), iconst.e());
-      for (std::size_t i = 0; i < smallJets.size(); ++i) {
-        const float dR = DeltaR(smallJets.at(i)->p4(), iconstP4);
-        if (dR > 0.1) continue; // no match
-
-        indices.emplace_back(i);
-      }
-    }
-    return indices;
   }
 
 } // namespace

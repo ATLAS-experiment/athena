@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -32,13 +32,12 @@
 
 namespace CP
 {
-  /// \brief an algorithm for combining multiple ghost collections into one
+  /// @brief an algorithm for combining multiple ghost collections into one
   class JetGhostMergingAlg final : public EL::AnaReentrantAlgorithm
   {
-    /// \brief the standard constructor
+    /// @brief the standard constructor
   public:
-    JetGhostMergingAlg (const std::string& name,
-                        ISvcLocator* pSvcLocator);
+    using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
 
   public:
     StatusCode initialize () override;
@@ -47,21 +46,21 @@ namespace CP
     StatusCode execute (const EventContext &ctx) const override;
 
   private:
-    /// \brief the jet collection we run on
+    /// @brief the jet collection we run on
     SG::ReadHandleKey<xAOD::JetContainer> m_jetLocation {
       this, "JetCollection", "AntiKt4EMTopoJets"
     };
-    /// \brief the name of the output ghost collection
+    /// @brief the name of the output ghost collection
     SG::WriteDecorHandleKey< xAOD::JetContainer > m_mergedGhostContainer {
-      this, "MergedGhostName", "GhostTrackLRTMerged", "name of the output merged ghost container"
+      this, "MergedGhostName", m_jetLocation, "GhostTrackLRTMerged", "name of the output merged ghost decoration on the JetCollection"
     };
 
   private:
-    /// \brief internal vector to hold the ReadDecorHandles for the difference ghosts
-    std::vector<SG::ReadDecorHandleKey<xAOD::JetContainer> > m_ghostTrackKeys;
+    /// @brief internal vector to hold the ReadDecorHandles for the difference ghosts
+    std::vector<SG::ReadDecorHandleKey<xAOD::JetContainer>> m_ghostTrackKeys;
 
   private:
-    Gaudi::Property<std::vector<std::string> > m_inputGhostTrackNames {
+    Gaudi::Property<std::vector<std::string>> m_inputGhostTrackNames {
       this, "InputGhostTrackNames", {"GhostTrack","GhostTrackLRT"}
     };
 

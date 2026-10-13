@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Jackson Burzynski
@@ -13,13 +13,6 @@
 
 namespace CP
 {
-  JetGhostMergingAlg ::
-  JetGhostMergingAlg (const std::string& name,
-                      ISvcLocator* pSvcLocator)
-    : AnaReentrantAlgorithm (name, pSvcLocator)
-  {
-  }
-
   StatusCode JetGhostMergingAlg ::
   initialize ()
   {
@@ -30,10 +23,9 @@ namespace CP
     ATH_CHECK (m_mergedGhostContainer.initialize ());
 
     // accessors
-    m_ghostTrackKeys.reserve(m_ghostTrackKeys.size() + m_inputGhostTrackNames.size());
+    m_ghostTrackKeys.reserve(m_inputGhostTrackNames.size());
     for (const auto& ghostName: m_inputGhostTrackNames) {
-      std::string full = m_jetLocation.key() + "." + ghostName;
-      m_ghostTrackKeys.emplace_back( this, ghostName, full, "");
+      m_ghostTrackKeys.emplace_back( this, ghostName, m_jetLocation, ghostName, "");
       ATH_CHECK( m_ghostTrackKeys.back().initialize() );
     }
 
@@ -50,10 +42,10 @@ namespace CP
     }
 
     // define GhostTrackContainer type (GTC)
-    using GTC = std::vector<ElementLink<DataVector<xAOD::IParticle> > >;
+    using GTC = std::vector<ElementLink<DataVector<xAOD::IParticle>>>;
 
     // create the accessors for each ghost track collection
-    std::vector<SG::ReadDecorHandle<xAOD::JetContainer, GTC> > ghostTrackAccs;
+    std::vector<SG::ReadDecorHandle<xAOD::JetContainer, GTC>> ghostTrackAccs;
     ghostTrackAccs.reserve(m_ghostTrackKeys.size());
     for (const auto &key: m_ghostTrackKeys) {
       ghostTrackAccs.emplace_back(key, ctx);
@@ -63,6 +55,11 @@ namespace CP
 
     for(const xAOD::Jet *jet: *inputJets) {
         std::vector<ElementLink<xAOD::IParticleContainer>> mergedGhosts;
+        std::size_t nGhosts = 0;
+        for (const auto& ghostTrackAcc: ghostTrackAccs) {
+            nGhosts += ghostTrackAcc( *jet ).size();
+        }
+        mergedGhosts.reserve(nGhosts);
         for (const auto& ghostTrackAcc: ghostTrackAccs) {
             const GTC &ghosts = ghostTrackAcc( *jet );
             mergedGhosts.insert(mergedGhosts.end(), ghosts.begin(), ghosts.end());
