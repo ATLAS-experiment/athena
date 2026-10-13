@@ -874,11 +874,9 @@ StatusCode REvent::connectObject(const std::string& key, ::Bool_t silent) {
   // Check if we have metadata about this branch.
   const xAOD::EventFormatElement* ef = nullptr;
 
-  // RNTuples store fields with an "Aux:" postfix instead of "Aux.".
-  std::string fieldName = key;
-  if (key.ends_with("Aux.")) {
-    fieldName.replace(fieldName.size() - 1, 1, ":");
-  }
+  // Find the name of the field that stores the object.
+  const std::string fieldName =
+      Utils::getFieldName(m_eventReader->GetDescriptor(), key);
 
   if (m_inputEventFormat.exists(key) == false) {
     if (!silent) {
@@ -1010,11 +1008,9 @@ StatusCode REvent::connectMetaObject(const std::string& key, bool silent) {
     return StatusCode::SUCCESS;
   }
 
-  // RNTuples store fields with an "Aux:" postfix instead of "Aux.".
-  std::string fieldName = key;
-  if (key.ends_with("Aux.")) {
-    fieldName.replace(fieldName.size() - 1, 1, ":");
-  }
+  // Find the name of the field that stores the object.
+  const std::string fieldName =
+      Utils::getFieldName(m_metaReader->GetDescriptor(), key);
 
   // Check if the field exists in our input RNTuple.
   if (m_metaReader->GetDescriptor().FindFieldId(fieldName.c_str()) ==
@@ -1783,7 +1779,8 @@ StatusCode REvent::initStats() {
       ATH_MSG_VERBOSE("isInfo = {}", isInfo);
 
       // Scan the branches using a temporary RAuxStore instance.
-      const std::string fieldName = key.substr(0, key.size() - 1) + ":";
+      const std::string fieldName =
+          Utils::getFieldName(m_eventReader->GetDescriptor(), key);
       const RAuxStore::EStructMode mode =
           (!isInfo ? RAuxStore::EStructMode::kContainerStore
                    : RAuxStore::EStructMode::kObjectStore);
@@ -1803,7 +1800,9 @@ StatusCode REvent::initStats() {
     // If it's an interface container.
     else {
       // Check if it's part of the input ntuple.
-      if (m_eventReader->GetDescriptor().FindFieldId(key) !=
+      const ROOT::RNTupleDescriptor& descriptor =
+          m_eventReader->GetDescriptor();
+      if (descriptor.FindFieldId(Utils::getFieldName(descriptor, key)) !=
           ROOT::kInvalidDescriptorId) {
         IOStats::instance().stats().container(key);
       }
