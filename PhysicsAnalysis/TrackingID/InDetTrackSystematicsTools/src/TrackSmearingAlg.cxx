@@ -17,6 +17,20 @@ StatusCode TrackSmearingAlg::initialize()
   if (!m_systematicVariation.value().empty())
     m_systSet = CP::SystematicSet({CP::SystematicVariation(m_systematicVariation)});
 
+  // The tools silently ignore unknown systematics, so catch typos here.
+  if (m_strictMode && !m_systSet.empty()) {
+    const CP::SystematicVariation& var = *m_systSet.begin();
+    bool anyAffected = m_smearingTool->isAffectedBySystematic(var);
+    if (!m_biasingTool.empty()) {
+      anyAffected |= m_biasingTool->isAffectedBySystematic(var);
+    }
+    if (!anyAffected) {
+      ATH_MSG_ERROR("Systematic '" << m_systematicVariation.value()
+          << "' is not known to the smearing or biasing tool");
+      return StatusCode::FAILURE;
+    }
+  }
+
   // Pre-register the systematic set in each tool's cache so the
   // reentrant applyCorrection(track, syst) overload can look it up.
   ATH_CHECK(m_smearingTool->applySystematicVariation(m_systSet));
