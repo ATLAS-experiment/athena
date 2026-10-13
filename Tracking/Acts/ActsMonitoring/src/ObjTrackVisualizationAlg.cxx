@@ -5,6 +5,7 @@
 #include "ActsEvent/Decoration.h"
 #include "StoreGate/ReadHandle.h"
 
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
 #include "MuonVisualizationHelpersR4/FileHelpers.h"
 #include "GeoModelHelpers/StringUtils.h"
@@ -15,6 +16,7 @@
 #include "Acts/Visualization/GeometryView3D.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Definitions/Units.hpp"
+#include "Acts/Geometry/TrackingGeometry.hpp"
 
 
 #include <format>
@@ -36,6 +38,7 @@ namespace ActsTrk {
         ATH_CHECK(m_extrapolationTool.retrieve());
         ATH_CHECK(m_readKey.initialize());
         ATH_CHECK(m_ctxProvider.initialize());
+        ATH_CHECK(m_trackingGeoSvc.retrieve());
         return StatusCode::SUCCESS;
     }
     StatusCode ObjTrackVisualizationAlg::execute(const EventContext& ctx) {
@@ -49,6 +52,7 @@ namespace ActsTrk {
         Acts::ObjVisualization3D visualHelper{};
         std::unordered_set<std::shared_ptr<const Acts::Surface>> passedSurfaces{};
 
+        const auto trackingGeo = m_trackingGeoSvc->trackingGeometry();
 
         for (const xAOD::TrackParticle* particle : *tracks) {
             passedSurfaces.clear();
@@ -80,13 +84,33 @@ namespace ActsTrk {
             }
 
             drawPropagation(steps->first, visualHelper);
+            std::stringstream sstr{};
+            unsigned surfCounter{0};
             for (const auto& step : steps->first) {
-                if (step.surface && passedSurfaces.insert(step.surface).second) {
+                if (!step.surface) {
+                    continue;
+                }
+                sstr<<"  --- "<<(++surfCounter)<<" @"<<Amg::toString(step.position)
+                    <<", perp: "<<step.position.perp()
+                    <<", theta: "<<step.momentum.theta()
+                    <<", phi: "<<step.momentum.phi();
+                if (const Acts::TrackingVolume* vol = 
+                    trackingGeo->findVolume(step.surface->geometryId().withBoundary(0).withSensitive(0)); vol != nullptr) {
+                    sstr<<", volume: "<<vol->volumeName();
+                }
+                sstr<<", surface @"<<Amg::toString(step.surface->center(tgContext))
+                    <<", id: "<<step.surface->geometryId()
+                    <<", bounds: "<<step.surface->bounds()<<std::endl;
+                if (passedSurfaces.insert(step.surface).second) {
                     Acts::GeometryView3D::drawSurface(visualHelper, *step.surface,
                                                         tgContext, Acts::Transform3::Identity(),
                                                         Acts::s_viewPassive);
                 }
             }
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Propagated track particle "<<particle->index()
+                <<" with "<<(particle->pt()*1.e-3)<<" [GeV], eta: "<<particle->eta()
+                <<", phi: "<<particle->phi()<<", q: "<<particle->charge()
+                <<"\n"<<sstr.str());
             visualHelper.write(std::format("{:}/Track_{:}_pt_{:}_eta_{:}_phi_{:}.obj", outDir,
                                             particle->index(), toString(particle->pt() / 1.e3),
                                             toString(particle->eta()), toString(particle->phi())));

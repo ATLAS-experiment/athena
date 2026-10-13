@@ -8,6 +8,7 @@ def ActsCaloExtensionBuilderCfg(flags, name="ActsCaloExtensionBuilder", **kwargs
 
     result = ComponentAccumulator()
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault("useHGTD", flags.Detector.GeometryHGTD)
     kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags, 
                                                                                             MaxSteps=10000,
                                                                                             InteractionEloss = True,

@@ -73,23 +73,6 @@ namespace ActsTrk{
             ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - "<<volIndexNames.back().first<<" -> "
                 <<volIndexNames.back().second);
         }
-        /**  */
-        const Acts::TrackingVolume* caloExit = m_trackingGeometrySvc->getEnvelope(SystemEnvelope::CaloExit);
-        
-        caloExit->visitVolumes([&](const Acts::TrackingVolume *vol) {
-            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Check volume: "
-                                         <<vol->volumeName()<<", "<<vol->geometryId()<<".");
-            auto smpItr = std::ranges::find_if(volIndexNames, [&](const auto& sampleID) {
-                return vol->volumeName().starts_with(sampleID.first);
-            });
-            if (smpItr != volIndexNames.end()) {
-                m_geoLayerIds[vol->geometryId()] = smpItr->second;
-                ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Assign geometryID "<<vol->geometryId()
-                     <<"volume: "<<vol->volumeName()<<", to "<<smpItr->second<<".");
-            }
-        });
-      
-       
         return StatusCode::SUCCESS;
     }
     CaloExtensionAlg::SortedCluster_t 
@@ -125,7 +108,8 @@ namespace ActsTrk{
         ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Extrapolate track with pT: "<<(track->pt() * 1.e-3)
             <<" [GeV], eta: "<<track->eta()<<", phi: "<<(track->phi() / 1._degree)<<", q: "<<track->charge());
         const Acts::TrackingVolume* caloExit = m_trackingGeometrySvc->getEnvelope(SystemEnvelope::CaloExit);
-        const Acts::TrackingVolume* itkExit = m_trackingGeometrySvc->getEnvelope(SystemEnvelope::ITkExit);
+        const Acts::TrackingVolume* caloEntrance = m_trackingGeometrySvc->getEnvelope(m_useHGTD ? SystemEnvelope::HgtdExit:  
+                                                                                      SystemEnvelope::ITkExit);
         const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
         auto extension = std::make_unique<CaloExtension>(track);
         /// Retrieve the last track parameters with a measurement state
@@ -149,7 +133,8 @@ namespace ActsTrk{
         /// Loop over the recorded bound track parameters to append them onto the surface
         for (Acts::BoundTrackParameters& record : *surfaceRecord) {
             /// Skip the states that are inside the ITk envelope volume
-            if (itkExit->inside(tgContext, record.position(tgContext))) {
+            if (caloEntrance->inside(tgContext, record.position(tgContext), Acts::s_onSurfaceTolerance) ||
+                record.referenceSurface().geometryId().withBoundary(0) == caloEntrance->geometryId()) {
                 continue;
             }
             const Acts::GeometryIdentifier volId{record.referenceSurface().geometryId().withBoundary(0).withSensitive(0)};
@@ -219,22 +204,15 @@ namespace ActsTrk{
                                          CaloExtension& caloExtension) const {
         
         const auto exitPars = caloExtension.lastTrackParameters();
-        
         for (const xAOD::CaloCluster* matchMe : clusterContainer) {
             if (!checkBroadCriteria(tgContext, *matchMe, *exitPars)) {
                 continue;
             }
             for (const Acts::BoundTrackParameters& recordedPars: caloExtension.parameters()) {
                 const Acts::Surface& surf = recordedPars.referenceSurface();
-
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Try to match "<<recordedPars
                     <<",\nsurface:"<<surf.geometryId()<<", bounds: "<<surf.bounds());
-                const Acts::GeometryIdentifier volId = surf.geometryId().withSensitive(0).withBoundary(0);
                 
-                auto layerItr = m_geoLayerIds.find(volId);
-                if (layerItr == m_geoLayerIds.end()){
-                    continue;
-                }
                 const float dEta = clusterEta(*matchMe) - Acts::VectorHelpers::eta(recordedPars);
                 const float dPhi = P4Helpers::deltaPhi(matchMe->phi(), recordedPars.phi());
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - dEta: "<<dEta<<", dPhi: "<<dPhi<<".");

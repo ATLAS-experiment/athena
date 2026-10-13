@@ -8,6 +8,7 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "xAODTracking/TrackParticleContainer.h"
 #include "ActsEvent/ContextUtility.h"
 namespace ActsTrk{
@@ -23,6 +24,8 @@ namespace ActsTrk{
             SG::ReadHandleKey<xAOD::TrackParticleContainer> m_readKey{this, "ReadKey", "InDetTrackParticles"};
             /** @brief Track extrapolation tool */
             ToolHandle<IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
+            /** @brief The tracking geometry service */
+            ServiceHandle<ITrackingGeometrySvc> m_trackingGeoSvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
             Gaudi::Property<std::string> m_outPath{this, "outPath", "ObjPlots"};
 
 
