@@ -65,7 +65,7 @@ namespace CP
       else
       {
         ATH_MSG_ERROR( "The TruthFilterTool was requested with the unsupported selection working "
-                       "point "+ m_filterWP + ". Please use the cut levels 'Loose' or 'TightPrimary'." );
+                       "point "+ m_filterWP + ". Please use the working points 'LOOSE' or 'TIGHT'." );
         return StatusCode::FAILURE;
       }
 
@@ -113,9 +113,12 @@ namespace CP
       blankAccept.clear();
       m_setOnFail = selectionFromAccept(blankAccept);
 
-      ANA_CHECK (m_nameSvc.retrieve());
-      ANA_CHECK (m_nameSvc->addAcceptInfo (m_tracksHandle.getNamePattern(),
-                 m_selectionHandle.getLabel(), m_acceptInfo) );
+      if (!m_nameSvc.empty())
+      {
+        ANA_CHECK (m_nameSvc.retrieve());
+        ANA_CHECK (m_nameSvc->addAcceptInfo (m_tracksHandle.getNamePattern(),
+                   m_selectionHandle.getLabel(), m_acceptInfo) );
+      }
     }
 
     return StatusCode::SUCCESS;
@@ -126,17 +129,32 @@ namespace CP
   StatusCode InDetTrackSelectionAlg ::
   execute (const EventContext& ctx)
   {
+    const xAOD::Vertex *primary_vertex = nullptr;
+    if (!m_vertexContainerKey.key().empty())
+    {
+      SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexContainerKey, ctx);
+      if (!vertices.isValid())
+      {
+        ATH_MSG_ERROR ("Failed to retrieve vertex container " << m_vertexContainerKey.key());
+        return StatusCode::FAILURE;
+      }
+      for (const xAOD::Vertex *vertex : *vertices)
+      {
+        if (vertex->vertexType() == xAOD::VxType::PriVtx)
+        {
+          primary_vertex = vertex;
+          break;
+        }
+      }
+      // no PriVtx found: use the leading vertex (if any)
+      if (!primary_vertex && !vertices->empty())
+        primary_vertex = vertices->front();
+    }
+
     for (const auto& sys : m_systematicsList.systematicsVector())
     {
       if (!m_filterTool.empty())
         ANA_CHECK (m_filterTool->applySystematicVariation (sys));
-
-      const xAOD::Vertex *primary_vertex = nullptr;
-      if (!m_vertexContainerKey.key().empty())
-      {
-        SG::ReadHandle<xAOD::VertexContainer> vertices(m_vertexContainerKey, ctx);
-        primary_vertex = vertices->at(0);
-      }
 
       const xAOD::TrackParticleContainer *tracks = nullptr;
       ANA_CHECK (m_tracksHandle.retrieve (tracks, sys, ctx));
@@ -147,19 +165,15 @@ namespace CP
           if (!m_selectionTool.empty())
           {
             asg::AcceptData fullAccept (&m_acceptInfo);
-            asg::AcceptData selectAccept (&m_acceptInfo);
-            if (primary_vertex)
-            {
-              selectAccept = m_selectionTool->accept(*track, primary_vertex);
-            }
-            else
-            {
-              selectAccept = m_selectionTool->accept(track);
-            }
+            const asg::AcceptData selectAccept = primary_vertex
+              ? m_selectionTool->accept(*track, primary_vertex)
+              : m_selectionTool->accept(track);
 
+            // m_acceptInfo is a copy of the tool's AcceptInfo (plus an
+            // optional trailing truthFilter cut), so the indices match
             for (unsigned int i = 0; i < selectAccept.getNCuts(); i++)
             {
-              fullAccept.setCutResult (selectAccept.getCutName(i), selectAccept.getCutResult(i));
+              fullAccept.setCutResult (i, selectAccept.getCutResult(i));
             }
 
             if (!m_filterTool.empty())

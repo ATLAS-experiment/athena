@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef TRACKINGANALYSISALGORITHMS_TRACKPARTICLEMERGERALG_H
 #define TRACKINGANALYSISALGORITHMS_TRACKPARTICLEMERGERALG_H
@@ -14,11 +14,6 @@
 #include <AsgDataHandles/WriteHandleKey.h>
 #include <AsgDataHandles/ReadHandleKeyArray.h>
 #include <AsgDataHandles/ReadDecorHandleKeyArray.h>
-#include <AsgDataHandles/ReadHandleKey.h>
-#include <AsgDataHandles/WriteHandle.h>
-#include <AsgDataHandles/ReadHandle.h>
-
-#include <string>
 
 namespace CP {
 
@@ -36,7 +31,7 @@ namespace CP {
 
    public:
       /// Algorithm constructor
-      TrackParticleMergerAlg( const std::string& name, ISvcLocator* svcLoc );
+      using EL::AnaReentrantAlgorithm::AnaReentrantAlgorithm;
 
       /// @name Function(s) inherited from @c EL::AnaAlgorithm
       /// @{

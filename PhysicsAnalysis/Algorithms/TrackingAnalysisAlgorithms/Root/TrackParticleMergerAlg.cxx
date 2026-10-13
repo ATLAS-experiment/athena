@@ -1,16 +1,14 @@
 //
-// Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 
 // Local include(s):
 #include "TrackingAnalysisAlgorithms/TrackParticleMergerAlg.h"
 
-namespace CP {
+#include <AsgDataHandles/ReadHandle.h>
+#include <AsgDataHandles/WriteHandle.h>
 
-    TrackParticleMergerAlg::TrackParticleMergerAlg( const std::string& name,
-                                                    ISvcLocator* svcLoc )
-    : EL::AnaReentrantAlgorithm( name, svcLoc ) {
-    }
+namespace CP {
 
     StatusCode TrackParticleMergerAlg::initialize() {
 
@@ -27,36 +25,39 @@ namespace CP {
 
     StatusCode TrackParticleMergerAlg::execute(const EventContext& ctx) const {
 
-        // Setup containers for output, to avoid const conversions setup two different kind of containers
-        auto outputViewCol = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer>>(SG::VIEW_ELEMENTS);
-        auto outputCol = std::make_unique<xAOD::TrackParticleContainer>();
-
-        std::unique_ptr<xAOD::TrackParticleAuxContainer> outputAuxCol;
-        if(!m_createViewCollection) {
-            outputAuxCol = std::make_unique<xAOD::TrackParticleAuxContainer>();
-            outputCol->setStore(outputAuxCol.get());
-        }
-
         auto readHandles = m_inputTrackParticleLocations.makeHandles(ctx);
+        std::size_t nTracks = 0;
         for (auto& readHandle : readHandles) {
-            for (const xAOD::TrackParticle* tp : *readHandle) {
-                if (m_createViewCollection) {
-                    outputViewCol->push_back(tp);
-                } else {
-                    xAOD::TrackParticle* newTp = new xAOD::TrackParticle();
-                    outputCol->push_back(newTp);
-                    *newTp = *tp;
-                }
-           }
+            nTracks += readHandle->size();
         }
 
         if (m_createViewCollection) {
+            // View collection pointing to the input tracks
+            auto outputViewCol = std::make_unique<ConstDataVector<xAOD::TrackParticleContainer>>(SG::VIEW_ELEMENTS);
+            outputViewCol->reserve(nTracks);
+            for (auto& readHandle : readHandles) {
+                for (const xAOD::TrackParticle* tp : *readHandle) {
+                    outputViewCol->push_back(tp);
+                }
+            }
+
             SG::WriteHandle<ConstDataVector <xAOD::TrackParticleContainer> > outputTrackParticlesView(m_outputTrackParticleLocationView, ctx);
             ATH_CHECK( outputTrackParticlesView.record(std::move(outputViewCol)) );
-        }
-        else {
+        } else {
+            // Deep copy of the input tracks
+            auto outputCol = std::make_unique<xAOD::TrackParticleContainer>();
+            auto outputAuxCol = std::make_unique<xAOD::TrackParticleAuxContainer>();
+            outputCol->setStore(outputAuxCol.get());
+            outputCol->reserve(nTracks);
+            for (auto& readHandle : readHandles) {
+                for (const xAOD::TrackParticle* tp : *readHandle) {
+                    xAOD::TrackParticle* newTp = outputCol->push_back(std::make_unique<xAOD::TrackParticle>());
+                    *newTp = *tp;
+                }
+            }
+
             SG::WriteHandle<xAOD::TrackParticleContainer> outputTrackParticlesCopy(m_outputTrackParticleLocationCopy, ctx);
-            ATH_CHECK(outputTrackParticlesCopy.record(std::move(outputCol), std::move(outputAuxCol)));
+            ATH_CHECK( outputTrackParticlesCopy.record(std::move(outputCol), std::move(outputAuxCol)) );
         }
 
         return StatusCode::SUCCESS;
