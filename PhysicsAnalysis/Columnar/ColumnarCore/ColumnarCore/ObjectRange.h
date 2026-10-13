@@ -16,7 +16,7 @@
 namespace columnar
 {
   /// @brief a class representing a continuous sequence of objects (a.k.a. a container)
-  template<ContainerIdConcept CI,typename CM> class ObjectRange;
+  template<ContainerIdConcept CI,ColumnarModeConcept CM> class ObjectRange;
 
 
 
@@ -216,10 +216,10 @@ namespace columnar
 
 
 
-  template<ContainerIdConcept CI,int stepSize,ColumnarArrayMode CM>
+  template<ContainerIdConcept CI,int stepSize,ColumnarArrayModeConcept CM>
   class ObjectRangeIteratorArray;
 
-  template<ContainerIdConcept CI,ColumnarArrayMode CM> class ObjectRange<CI,CM> final
+  template<ContainerIdConcept CI,ColumnarArrayModeConcept CM> class ObjectRange<CI,CM> final
   {
     /// Common Public Members
     /// =====================
@@ -309,7 +309,7 @@ namespace columnar
   ///
   /// This is primarily to allow the use of range-for for ObjectRange
 
-  template<ContainerIdConcept CI,int stepSize,ColumnarArrayMode CM>
+  template<ContainerIdConcept CI,int stepSize,ColumnarArrayModeConcept CM>
   class ObjectRangeIteratorArray final
   {
   public:

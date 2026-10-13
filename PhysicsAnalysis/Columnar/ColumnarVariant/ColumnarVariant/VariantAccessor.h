@@ -19,7 +19,7 @@ namespace columnar
   // This internally contains a tuple of accessors, one for each
   // variant. This is probably not the best way to implement it, but it
   // fits best with the current accessor infrastructure.
-  template<RegularContainerIdConcept CIBase,RegularContainerIdConcept... CIList,typename CT,ColumnAccessMode CAM,ColumnarArrayMode CM>
+  template<RegularContainerIdConcept CIBase,RegularContainerIdConcept... CIList,typename CT,ColumnAccessMode CAM,ColumnarArrayModeConcept CM>
     requires requires { detail::ContainerFreeAccessor<CT,CAM,CM>::isDefined; }
   class AccessorTemplate<VariantContainerId<CIBase,CIList...>,CT,CAM,CM> final
   {

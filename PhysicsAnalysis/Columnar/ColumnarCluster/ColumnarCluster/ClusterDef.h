@@ -22,8 +22,8 @@ namespace columnar
 
   using ClusterId = ObjectId<ClusterDef>;
   using OptClusterId = OptObjectId<ClusterDef>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ClusterAccessor  = AccessorTemplate<ClusterDef,CT,ColumnAccessMode::input,CM>;
-  template<typename CT,typename CM=ColumnarModeDefault> using ClusterDecorator = AccessorTemplate<ClusterDef,CT,ColumnAccessMode::output,CM>;
+  template<typename CT,ColumnarModeConcept CM=ColumnarMode> using ClusterAccessor  = AccessorTemplate<ClusterDef,CT,ColumnAccessMode::input,CM>;
+  template<typename CT,ColumnarModeConcept CM=ColumnarMode> using ClusterDecorator = AccessorTemplate<ClusterDef,CT,ColumnAccessMode::output,CM>;
 }
 
 #endif

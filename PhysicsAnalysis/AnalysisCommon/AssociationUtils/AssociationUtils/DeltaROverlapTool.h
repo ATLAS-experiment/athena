@@ -81,7 +81,7 @@ namespace ORUtils
 
       /// @}
 
-      template<columnar::ContainerIdConcept CI1,columnar::RegularContainerIdConcept CI2,typename CM>
+      template<columnar::ContainerIdConcept CI1,columnar::RegularContainerIdConcept CI2,columnar::ColumnarModeConcept CM>
       StatusCode internalFindOverlaps(columnar::ObjectRange<CI1,CM> testCont, columnar::ObjectRange<CI2,CM> refCont) const;
 
   }; // class DeltaROverlapTool

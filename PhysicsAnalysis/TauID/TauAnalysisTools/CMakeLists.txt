@@ -18,7 +18,7 @@ atlas_add_library( TauAnalysisToolsLib
                   AsgTools xAODEgamma xAODMuon xAODJet xAODTau xAODTracking 
                   xAODTruth TruthUtils PATCoreLib PATInterfaces tauRecToolsLib 
                   AsgAnalysisInterfaces
-                  xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib ColumnarCoreLib ColumnarTauLib ColumnarEventInfoLib
+                  xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib ColumnarCoreLib ColumnarModeLib ColumnarTauLib ColumnarEventInfoLib
                   ColumnarTruthLib ColumnarJetLib TruthUtils
    PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
 

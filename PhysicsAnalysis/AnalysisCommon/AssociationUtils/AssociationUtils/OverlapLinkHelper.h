@@ -105,7 +105,7 @@ namespace ORUtils
     auto link = m_linkAccessor(p);
     if (!link)
       return {};
-    if constexpr (columnar::ColumnarModeDefault::isXAOD)
+    if constexpr (columnar::ColumnarMode::isXAOD)
     {
       if (link.getXAODObject()->container() != &container.getXAODObject())
         return {};

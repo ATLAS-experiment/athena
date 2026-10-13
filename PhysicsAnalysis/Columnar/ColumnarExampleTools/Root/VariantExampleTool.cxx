@@ -14,7 +14,7 @@
 // method implementations
 //
 
-namespace columnar
+namespace ADD_CMODE(columnar)
 {
   VariantExampleTool ::
   VariantExampleTool (const std::string& name)
@@ -35,7 +35,7 @@ namespace columnar
 
 
   void VariantExampleTool ::
-  callSingleEvent (ElectronRange electrons, MuonRange muons) const
+  callSingleEvent (columnar::ElectronRange electrons, columnar::MuonRange muons) const
   {
     // First copy all the wanted particles into a vector of variant
     // objects. These then no longer care whether they are electrons or
@@ -54,7 +54,7 @@ namespace columnar
     // this that saves about 33% of total execution time, but for
     // purposes of demonstration and testing the current setup is
     // simpler.
-    std::vector<ObjectId<MyVariantDef>> variantParticles;
+    std::vector<columnar::ObjectId<MyVariantDef>> variantParticles;
     variantParticles.reserve (electrons.size() + muons.size());
     for (auto electron : electrons)
       variantParticles.push_back(electron);
@@ -102,7 +102,7 @@ namespace columnar
       // something just for that container. in this case we are just
       // applying the same decoration under a different name, but it is
       // hopefully clear how that could be utilized otherwise.
-      if (auto castObject = variantParticles[rank].tryGetVariant<ElectronDef>())
+      if (auto castObject = variantParticles[rank].tryGetVariant<columnar::ElectronDef>())
         etaRankSpecialDec(*castObject) = rank;
     }
   }
@@ -110,9 +110,9 @@ namespace columnar
 
 
   void VariantExampleTool ::
-  callEvents (EventContextRange events) const
+  callEvents (columnar::EventContextRange events) const
   {
-    std::vector<ObjectId<MyVariantDef>> variantParticles;
+    std::vector<columnar::ObjectId<MyVariantDef>> variantParticles;
 
     // loop over all events and particles.  note that this is
     // deliberately looping by value, as the ID classes are very small
@@ -138,7 +138,7 @@ namespace columnar
       //   ptRankDec(variantParticles[rank]) = rank;
 
       //   // an example of how to convert to a specific 
-      //   if (auto castObject = variantParticles[rank].tryGetVariant<ElectronDef>())
+      //   if (auto castObject = variantParticles[rank].tryGetVariant<columnar::ElectronDef>())
       //     ptRankSpecialDec(*castObject) = rank;
       // }
       callSingleEvent (electronsHandle(event), muonsHandle (event));

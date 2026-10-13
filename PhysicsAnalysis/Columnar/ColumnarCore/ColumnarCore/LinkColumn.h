@@ -42,7 +42,7 @@ namespace columnar
 
     // if the columnar mode uses typed links, then the links with the
     // implicit types can simply redirect to the code for typed links
-    template<ContainerIdConcept LT,ColumnarMode CM>
+    template<ContainerIdConcept LT,ColumnarModeConcept CM>
       requires (CM::hasTypedLinks == true)
     class MemoryAccessor<OptObjectId<LT,CM>,CM> final
     {
@@ -70,7 +70,7 @@ namespace columnar
     // I'm just using the MemoryAccessor from OptObjectId, as the
     // behavior is exactly the same. Note that this is only for regular
     // container IDs, as e.g. VariantContainerId needs special handling.
-    template<RegularContainerIdConcept LT,typename ELT,ColumnarMode CM>
+    template<RegularContainerIdConcept LT,typename ELT,ColumnarModeConcept CM>
       requires (CM::hasTypedLinks == false && MemoryAccessor<OptObjectId<LT>,CM>::isDefined)
     class MemoryAccessor<LinkCastColumn<LT,ELT>,CM>
     {

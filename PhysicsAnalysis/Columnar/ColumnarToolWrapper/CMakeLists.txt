@@ -16,13 +16,13 @@ ColumnarToolWrapper/*.h Root/*.cxx
 atlas_add_test( gt_ColumnarToolWrapper
   SOURCES test/gt_ColumnarToolWrapper.cxx
   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-  LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperLib ColumnarCoreLib AsgTestingLib
+  LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperLib ColumnarCoreLib ColumnarModeLib AsgTestingLib
   POST_EXEC_SCRIPT noerror.sh )
 
 if (COLUMNAR_ANALYSIS)
   atlas_add_test( gt_RunColumnarTool
     SOURCES test/gt_RunColumnarTool.cxx
     INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-    LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperLib ColumnarCoreLib AsgTestingLib
+    LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperLib ColumnarCoreLib ColumnarModeLib AsgTestingLib
     POST_EXEC_SCRIPT noerror.sh )
 endif()

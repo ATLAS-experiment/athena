@@ -113,7 +113,7 @@ namespace columnar
     /// @par CAM the column access mode
     /// @par CM the columnar mode
 
-    template<typename CT,ColumnAccessMode CAM,ColumnarMode CM> class ContainerFreeAccessor final
+    template<typename CT,ColumnAccessMode CAM,ColumnarModeConcept CM> class ContainerFreeAccessor final
     {
     public:
       static constexpr bool isDefined = false;
@@ -135,7 +135,7 @@ namespace columnar
     /// able to define the column as `std::vector<MemoryType>` and then
     /// convert it to something that behaves like `std::span<const CT>>`.
 
-    template<typename CT,ColumnarMode CM> class MemoryAccessor final
+    template<typename CT,ColumnarModeConcept CM> class MemoryAccessor final
     {
     public:
       static constexpr bool isDefined = false;
@@ -143,7 +143,7 @@ namespace columnar
 
 
 
-    template<typename CT,ColumnarMode CM>
+    template<typename CT,ColumnarModeConcept CM>
       requires ((std::is_integral_v<CT> || std::is_floating_point_v<CT>) && !std::is_same_v<CT,bool>)
     class MemoryAccessor<CT,CM> final
     {
@@ -194,7 +194,7 @@ namespace columnar
   /// @par CT the column type
   /// @par CAM the column access mode
   /// @par CM the columnar mode
-  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,typename CM> class AccessorTemplate;
+  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,ColumnarModeConcept CM> class AccessorTemplate;
 
 
   /// @brief a type wrapper to force @ref AccessorTemplate to treat the
@@ -206,7 +206,7 @@ namespace columnar
   template<typename CT> struct NativeColumn final {};
   namespace detail
   {
-    template<typename CT,ColumnarMode CM>
+    template<typename CT,ColumnarModeConcept CM>
     class MemoryAccessor<NativeColumn<CT>,CM> final
     {
     public:
@@ -233,7 +233,7 @@ namespace columnar
 
   namespace detail
   {
-    template<typename UT,typename CT,ColumnarMode CM>
+    template<typename UT,typename CT,ColumnarModeConcept CM>
     class MemoryAccessor<RetypeColumn<UT,CT>,CM> final
     {
     public:
@@ -261,7 +261,7 @@ namespace columnar
   /// constructs.  Besides making accessor use slightly more consistent
   /// it should also make the code a little more efficient.
 
-  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,typename CM>
+  template<ContainerIdConcept CI,typename CT,ColumnAccessMode CAM,ColumnarModeConcept CM>
   void resetAccessor (AccessorTemplate<CI,CT,CAM,CM>& accessor, ColumnarTool<CM>& columnBase, const std::string& name, ColumnAccessorOptions&& options = {})
   {
     accessor = AccessorTemplate<CI,CT,CAM,CM> (columnBase, name, std::move (options));
@@ -271,9 +271,9 @@ namespace columnar
 
 
 
-  template<ContainerIdConcept CI,typename CT,typename CM=ColumnarModeDefault> using ColumnAccessor = AccessorTemplate<CI,CT,ColumnAccessMode::input,CM>;
-  template<ContainerIdConcept CI,typename CT,typename CM=ColumnarModeDefault> using ColumnDecorator = AccessorTemplate<CI,CT,ColumnAccessMode::output,CM>;
-  template<ContainerIdConcept CI,typename CT,typename CM=ColumnarModeDefault> using ColumnUpdater = AccessorTemplate<CI,CT,ColumnAccessMode::update,CM>;
+  template<ContainerIdConcept CI,typename CT,ColumnarModeConcept CM=ColumnarMode> using ColumnAccessor = AccessorTemplate<CI,CT,ColumnAccessMode::input,CM>;
+  template<ContainerIdConcept CI,typename CT,ColumnarModeConcept CM=ColumnarMode> using ColumnDecorator = AccessorTemplate<CI,CT,ColumnAccessMode::output,CM>;
+  template<ContainerIdConcept CI,typename CT,ColumnarModeConcept CM=ColumnarMode> using ColumnUpdater = AccessorTemplate<CI,CT,ColumnAccessMode::update,CM>;
 }
 
 #include "ColumnAccessorXAOD.icc"

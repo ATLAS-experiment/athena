@@ -113,7 +113,7 @@ namespace columnar
 
 
 
-  template<ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  template<ContainerIdConcept... CIList, ColumnarArrayModeConcept CM>
   class OptObjectId<VariantContainerId<CIList...>,CM> final
   {
     /// Common Public Members
@@ -225,20 +225,20 @@ namespace columnar
     std::size_t m_objectIndex = invalidObjectIndex;
   };
 
-  template<ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  template<ContainerIdConcept... CIList, ColumnarArrayModeConcept CM>
   std::ostream& operator<< (std::ostream& str, const OptObjectId<VariantContainerId<CIList...>,CM>& obj)
   {
     using CI = VariantContainerId<CIList...>;
     return str << CI::idNameArray.at(obj.getVariantIndex()) << "/" << obj.getObjectIndex();
   }
 
-  template<ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  template<ContainerIdConcept... CIList, ColumnarArrayModeConcept CM>
   bool operator== (const OptObjectId<VariantContainerId<CIList...>,CM>& lhs, const OptObjectId<VariantContainerId<CIList...>,CM>& rhs)
   {
     return lhs.getVariantIndex() == rhs.getVariantIndex() && lhs.getObjectIndex() == rhs.getObjectIndex();
   }
 
-  template<ContainerIdConcept... CIList, ColumnarArrayMode CM>
+  template<ContainerIdConcept... CIList, ColumnarArrayModeConcept CM>
   bool operator!= (const OptObjectId<VariantContainerId<CIList...>,CM>& lhs, const OptObjectId<VariantContainerId<CIList...>,CM>& rhs)
   {
     return lhs.getVariantIndex() != rhs.getVariantIndex() || lhs.getObjectIndex() != rhs.getObjectIndex();

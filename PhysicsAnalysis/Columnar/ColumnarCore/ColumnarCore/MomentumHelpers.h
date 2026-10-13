@@ -28,7 +28,7 @@ namespace columnar
 
 
   /// Computes efficiently @f$ \Delta{y} @f$
-  template<ContainerIdConcept CI1,ContainerIdConcept CI2,typename CM>
+  template<ContainerIdConcept CI1,ContainerIdConcept CI2,ColumnarModeConcept CM>
   double deltaRapidity( const MomentumAccessors<CI1,CM>& momAcc1, ObjectId<CI1,CM> p1, const MomentumAccessors<CI2,CM>& momAcc2, ObjectId<CI2,CM> p2, bool useRapidity=true )
   {
     if (useRapidity)
@@ -42,7 +42,7 @@ namespace columnar
   /// Check if 2 particles are in a @f$ \Delta{R} @f$ cone
   /// @param dR [in] @f$ \Delta{R} @f$
   /// @return true if they are
-  template<ContainerIdConcept CI1,ContainerIdConcept CI2,typename CM>
+  template<ContainerIdConcept CI1,ContainerIdConcept CI2,ColumnarModeConcept CM>
   bool isInDeltaR( const MomentumAccessors<CI1,CM>& momAcc1, ObjectId<CI1,CM> p1, const MomentumAccessors<CI2,CM>& momAcc2, ObjectId<CI2,CM> p2,
                     double dR, bool useRapidity=true )
   {

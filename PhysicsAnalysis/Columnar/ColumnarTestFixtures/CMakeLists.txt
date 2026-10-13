@@ -14,13 +14,30 @@ else()
   set (extra_libs POOLRootAccessLib)
 endif ()
 
-# Add the shared library:
-atlas_add_library (ColumnarTestFixturesLib
-ColumnarTestFixtures/*.h Root/*.cxx
-  PUBLIC_HEADERS ColumnarTestFixtures
-  INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
-  LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperLib PATInterfaces AsgTestingLib xAODJet xAODMissingET
-  PRIVATE_LINK_LIBRARIES ${extra_libs} ColumnarCoreLib nlohmann_json::nlohmann_json xAODCaloEvent xAODTracking xAODMuon xAODEventInfo xAODEgamma xAODRootAccess)
+# FIX ME: These settings should come from the Project configuration
+if (COLUMNAR_ANALYSIS)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeArray;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
+elseif (XAOD_STANDALONE)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
+else()
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD")
+  SET (COLUMNAR_MODE_SUFFIX_LIST "")
+endif()
+
+foreach (CMODE_NAME CMODE_SUFFIX IN ZIP_LISTS COLUMNAR_MODE_NAME_LIST COLUMNAR_MODE_SUFFIX_LIST)
+  message ("Building ColumnarTestFixtures with columnar mode ${CMODE_NAME} and suffix ${CMODE_SUFFIX}")
+
+  # Add the shared library:
+  atlas_add_library (ColumnarTestFixturesLib${CMODE_SUFFIX}
+  ColumnarTestFixtures/*.h Root/*.cxx
+    PUBLIC_HEADERS ColumnarTestFixtures
+    INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
+    LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperLib PATInterfaces AsgTestingLib xAODJet xAODMissingET ColumnarModeLib${CMODE_SUFFIX}
+    PRIVATE_LINK_LIBRARIES ${extra_libs} ColumnarCoreLib nlohmann_json::nlohmann_json xAODCaloEvent xAODTracking xAODMuon xAODEventInfo xAODEgamma xAODRootAccess)
+
+endforeach()
 
 atlas_add_test( gt_MultiToolTest
                 SOURCES test/gt_MultiToolTest.cxx

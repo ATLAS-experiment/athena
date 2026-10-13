@@ -106,10 +106,11 @@ namespace asg
   };
   #define DECLARE_COMPONENT_JOIN(x,y) DECLARE_COMPONENT_JOIN2(x,y)
   #define DECLARE_COMPONENT_JOIN2(x,y) x ## y
-  #define DECLARE_COMPONENT(TYPE) \
+  #define DECLARE_COMPONENT_IMP(TYPE) \
     namespace { \
       asg::AutoRegisterComponentFactory<TYPE> DECLARE_COMPONENT_JOIN(autoRegisterComponent,__LINE__) (#TYPE); \
     }
+  #define DECLARE_COMPONENT(TYPE) DECLARE_COMPONENT_IMP(TYPE)
 
   /// @brief get the list of loaded component factory types
   std::vector<std::string> getLoadedComponentFactoryTypes ();

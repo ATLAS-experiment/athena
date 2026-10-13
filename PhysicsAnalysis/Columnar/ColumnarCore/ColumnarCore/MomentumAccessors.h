@@ -88,7 +88,7 @@ namespace columnar
     /// configured (yet). Should this ever be used in actual columnar
     /// code, it will throw an exception when called.
 
-    template<ContainerIdConcept CIVal, typename CMVal = ColumnarModeDefault>
+    template<ContainerIdConcept CIVal, typename CMVal = ColumnarMode>
     class MomentumAccessorsIParticle
     {
     public:
@@ -178,7 +178,7 @@ namespace columnar
     };
 
     /// a core momentum accessor that reads pt, eta, phi, and m from the file
-    template<ContainerIdConcept CI, typename CM> struct CoreMomentumAccessorsPtEtaPhiReadM
+    template<ContainerIdConcept CI, ColumnarModeConcept CM> struct CoreMomentumAccessorsPtEtaPhiReadM
       : CoreMomentumAccessorsPtEtaPhi<CI,CM>
     {
       ColumnAccessor<CI,RetypeColumn<double,float>,CM> m;
@@ -194,7 +194,7 @@ namespace columnar
 
     /// a core momentum accessor that reads pt, eta, phi from the file, but
     /// uses a fixed value for m
-    template<ContainerIdConcept CI, typename CM>
+    template<ContainerIdConcept CI, ColumnarModeConcept CM>
     struct CoreMomentumAccessorsPtEtaPhiFixedM : CoreMomentumAccessorsPtEtaPhi<CI,CM>
     {
       double mValue = 0;
@@ -216,7 +216,7 @@ namespace columnar
     /// specializing this for each container ID, but that would need a
     /// serious extension of the underlying infrastructure. So for now
     /// this is the way to go.
-    template<ContainerIdConcept CI, typename CM = ColumnarModeDefault>
+    template<ContainerIdConcept CI, ColumnarModeConcept CM = ColumnarMode>
     class IMomentumAccessors
     {
     public:
@@ -285,7 +285,7 @@ namespace columnar
   /// to the `IParticle` implementation (which is not available in
   /// columnar mode).
 
-  template<ContainerIdConcept CI, typename CM = ColumnarModeDefault>
+  template<ContainerIdConcept CI, ColumnarModeConcept CM = ColumnarMode>
   class MomentumAccessors final
   {
   public:
@@ -336,38 +336,38 @@ namespace columnar
   /// further specializations if needed in other packages. In particular
   /// tracking momentum accessors need some enums from xAODTracking for
   /// the xAOD hypothesis, which I don't want to include here.
-  template<ContainerIdConcept CI, typename CM>
+  template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetIParticle (MomentumAccessors<CI,CM>& accessors) {
     accessors.reset (std::in_place_type<Detail::MomentumAccessorsIParticle<CI,CM>>); }
-  template<ContainerIdConcept CI, typename CM>
+  template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetPtEtaPhiReadM (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool) {
     accessors.reset (std::in_place_type<Detail::FullMomentumAccessorsPtEtaPhiM<Detail::CoreMomentumAccessorsPtEtaPhiReadM<CI,CM>>>, columnarTool); }
-  template<ContainerIdConcept CI, typename CM>
+  template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetPtEtaPhiFixedM (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool, double mValue) {
     accessors.reset (std::in_place_type<Detail::FullMomentumAccessorsPtEtaPhiM<Detail::CoreMomentumAccessorsPtEtaPhiFixedM<CI,CM>>>, columnarTool, mValue); }
-  template<ContainerIdConcept CI, typename CM>
+  template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetJet (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool) {
     resetPtEtaPhiReadM (accessors, columnarTool); }
-  template<ContainerIdConcept CI, typename CM>
+  template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetJetConstituentScale (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool, const std::string& prefix = "JetConstitScaleMomentum_") {
     accessors.reset (std::in_place_type<Detail::FullMomentumAccessorsPtEtaPhiM<Detail::CoreMomentumAccessorsPtEtaPhiReadM<CI,CM>>>, columnarTool, prefix); }
-  template<ContainerIdConcept CI, typename CM>
+  template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetElectron (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool) {
     resetPtEtaPhiFixedM (accessors, columnarTool, ParticleConstants::electronMassInMeV); }
-  template<ContainerIdConcept CI, typename CM>
+  template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetPhoton (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool) {
     resetPtEtaPhiFixedM (accessors, columnarTool, ParticleConstants::photonMassInMeV); }
-  template<ContainerIdConcept CI, typename CM>
+  template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetEgamma (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool) {
     resetPtEtaPhiReadM (accessors, columnarTool); }
-  template<ContainerIdConcept CI, typename CM>
+  template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetMuon (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool) {
     resetPtEtaPhiFixedM (accessors, columnarTool, ParticleConstants::muonMassInMeV); }
-  template<ContainerIdConcept CI, typename CM>
+  template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetTau (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool) {
     resetPtEtaPhiReadM (accessors, columnarTool); }
 
-  template<ContainerIdConcept CI, typename CM>
+  template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetObjectType (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool, xAODType::ObjectType type)
   {
     switch (type)
