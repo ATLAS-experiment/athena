@@ -220,7 +220,6 @@ std::shared_ptr<Acts::BlueprintNode>
       CaloBlueprintNodeBuilder::buildBlueprintNode(const Acts::GeometryContext& tgContext,
                                                    std::shared_ptr<Acts::BlueprintNode>&& childNode) {
     std::unique_ptr<CaloDetDescrManager> caloDetDescrMgr = buildCaloDetDescrNoAlign(serviceLocator(), Athena::getMessageSvc());
-    
     /** Build the list of detector elements */
     DetElementMap_t detElements = fillDetectorElements(*caloDetDescrMgr);
     /** Convert the detector elements to surfaces */                                      
@@ -247,12 +246,12 @@ std::shared_ptr<Acts::BlueprintNode>
         if (s_caloCylinderAsymmetricSampleList.count(layer) || 
             layer == CaloSampling::TileBar2) {
             std::ranges::for_each(fillLayer(tgContext, std::move(surface)),
-                                  [&](std::shared_ptr<Acts::Surface>& surfToAdd){
-                                    surfToAdd->assignGeometryId(Acts::GeometryIdentifier{}.withVolume(s_caloEnvelopeID)
-                                                                .withLayer(layer)
-                                                                .withSensitive(barrelExtraCounts[layer]++));
-                                    caloVolume->addSurface(std::move(surfToAdd));
-                                  });
+                [&](std::shared_ptr<Acts::Surface>& surfToAdd){
+                surfToAdd->assignGeometryId(Acts::GeometryIdentifier{}.withVolume(s_caloEnvelopeID)
+                                            .withLayer(layer)
+                                            .withSensitive(barrelExtraCounts[layer]++));
+                caloVolume->addSurface(std::move(surfToAdd));
+                });
             continue;
         }
         auto layerNode = std::make_shared<Acts::LayerBlueprintNode>(std::format("{:}_Layer", CaloSampling::getSamplingName(layer)));
@@ -331,12 +330,12 @@ std::unique_ptr<Acts::TrackingVolume> CaloBlueprintNodeBuilder::envelopeVolume(c
         CaloBlueprintNodeBuilder::fillLayer(const Acts::GeometryContext& tgContext,
                                             std::shared_ptr<Acts::Surface>&& centralSurf) const{
         unsigned extraSurf = m_surfaceDuplicates.value().at(centralSurf->geometryId().layer());
+        centralSurf->assignGeometryId(Acts::GeometryIdentifier{});
         if (extraSurf == 0) {
             return {std::move(centralSurf)};
         }
         const double stepLength =  centralSurf->thickness() / (extraSurf +1u);
         const Acts::Transform3& trf = centralSurf->localToGlobalTransform(tgContext);
-        centralSurf->assignGeometryId(Acts::GeometryIdentifier{});
         std::vector<std::shared_ptr<Acts::Surface>> surfaces{};
         if (centralSurf->type() == Acts::Surface::SurfaceType::Cylinder) {
             const auto& bounds = static_cast<const Acts::CylinderBounds&>(centralSurf->bounds());

@@ -149,16 +149,14 @@ namespace ActsTrk{
             Gaudi::Property<float> m_minClustEt{this, "minClusterEt", 10.*Gaudi::Units::MeV};
             /** @brief Maximum cut on the cluster's eta in order to be considered */
             Gaudi::Property<float> m_maxClustEta{this, "maxClustEta", 10.};
-
-
+            /** @brief Toggle whether the ITk or the HGTD envelope shall be used 
+             *         to reject non-calo track states */
+            Gaudi::Property<bool> m_useHGTD{this, "useHGTD", true};
             using CaloSample = xAOD::CaloCluster::CaloSample;
             /** @brief Narrow windows. */
             Gaudi::Property<float> m_narrowDeltaEta{this, "narrowDeltaEta", 0.05};
 
             Gaudi::Property<float> m_narrowDeltaPhi{this, "narrowDeltaPhi", 0.05};
-
-            std::unordered_map<Acts::GeometryIdentifier, CaloSample> m_geoLayerIds{};
-
     };
 }
 

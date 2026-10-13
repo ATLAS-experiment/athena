@@ -6,6 +6,7 @@
 
 #include "GeoPrimitives/GeoPrimitives.h"
 ///
+#include "ActsGeometryInterfaces/GeometryDefs.h"
 #include "xAODTracking/TrackParticle.h"
 #include "xAODCaloEvent/CaloCluster.h"
 
@@ -41,7 +42,19 @@ namespace ActsTrk{
             bool empty() const;
             /** @brief Returns the extension parameters associated with the n-th extension */
             const Acts::BoundTrackParameters& parameters(const std::size_t parIdx) const;
-            
+            /** @brief Returns the set of parameters that are associated with a given
+             *         calo sampling */
+            auto caloParameters(const CaloSampling::CaloSample s) const {
+                using namespace ActsTrk::detail::GeoVolIds;
+                constexpr std::array caloIds{s_caloEnvelopeID, s_caloBarrelId,
+                                             s_caloEndcapAId, s_caloEndcapCId};
+                return std::ranges::filter_view(m_parameters, 
+                  [&](const Acts::BoundTrackParameters& pars){
+                    const Acts::GeometryIdentifier id = pars.referenceSurface().geometryId();
+                    return id.layer() == static_cast<std::size_t>(s) && 
+                            Acts::rangeContainsValue(caloIds, id.volume());
+                });
+            }
             /** @brief Abrivation of the calo cluster vector */
             using ClusterVec_t = std::vector<const xAOD::CaloCluster*>;
             /** @brief Abrivation of the Bound track parameter vector */
