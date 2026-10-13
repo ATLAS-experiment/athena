@@ -3,6 +3,7 @@
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType
+from AthenaCommon import SystemOfUnits as Units
 
 
 def SiSpacePointsSeedMaker_CosmicCfg(
@@ -19,6 +20,21 @@ def SiSpacePointsSeedMaker_CosmicCfg(
 def SiSpacePointsSeedMaker_HeavyIonCfg(
         flags, name="InDetSpSeedsMaker_HeavyIon", **kwargs):
     acc = ComponentAccumulator()
+    # Disable Overlap space points, they do not really contribute
+    kwargs["useOverlapSpCollection"] = False
+    kwargs.setdefault("useVertexPosition", flags.Tracking.ActiveConfig.useVertexPositionDuringSeeding)
+    if flags.Tracking.ActiveConfig.extension == "HeavyIonLowPt":
+        kwargs.setdefault("pTmax", flags.Tracking.ActiveConfig.maxPT)
+        kwargs.setdefault("radMin", 0 * Units.mm)
+        kwargs.setdefault("maxSeedsForSpacePoint", 4)
+        kwargs.setdefault("minVRadius1", 0 * Units.mm)
+        kwargs.setdefault("maxVRadius1", 70 * Units.mm)
+        kwargs.setdefault("minVRadius2", 45 * Units.mm)
+        kwargs.setdefault("maxVRadius2", 150 * Units.mm)
+        kwargs.setdefault("minVRadius3", 70 * Units.mm)
+        kwargs.setdefault("radStep", 10)
+        kwargs.setdefault("mindRadius", 10)
+        kwargs.setdefault("mindRadiusTop", 10)
 
     kwargs.setdefault("maxdImpact",
                       flags.Tracking.ActiveConfig.maxPrimaryImpact)
@@ -29,6 +45,11 @@ def SiSpacePointsSeedMaker_HeavyIonCfg(
     kwargs.setdefault("maxdImpactSSS",
                       flags.Tracking.ActiveConfig.maxdImpactSSSSeeds)
     kwargs.setdefault("fieldScale",flags.BField.configuredSolenoidFieldScale)
+
+    if flags.Tracking.writeSeedValNtuple:
+        kwargs.setdefault("WriteNtuple", True)
+        acc.addService(CompFactory.THistSvc(
+            Output=["valNtuples DATAFILE='SeedMakerValidation.root' OPT='RECREATE'"]))
 
     acc.setPrivateTools(CompFactory.InDet.SiSpacePointsSeedMaker_HeavyIon(
         name+flags.Tracking.ActiveConfig.extension, **kwargs))
@@ -151,10 +172,10 @@ def SiSpacePointsSeedMakerCfg(flags, **kwargs):
     #
     if flags.Beam.Type is BeamType.Cosmics:
         return SiSpacePointsSeedMaker_CosmicCfg(flags, **kwargs)
+    elif flags.Tracking.ActiveConfig.extension in ["HeavyIon", "HeavyIonLowPt"]:
+        return SiSpacePointsSeedMaker_HeavyIonCfg(flags, **kwargs)
     elif flags.Tracking.ActiveConfig.isLowPt:
         return SiSpacePointsSeedMaker_LowMomentumCfg(flags, **kwargs)
-    elif flags.Tracking.ActiveConfig.extension == "HeavyIon":
-        return SiSpacePointsSeedMaker_HeavyIonCfg(flags, **kwargs)
     elif flags.Tracking.ActiveConfig.extension == "BeamGas":
         return SiSpacePointsSeedMaker_BeamGasCfg(flags, **kwargs)
     else:
