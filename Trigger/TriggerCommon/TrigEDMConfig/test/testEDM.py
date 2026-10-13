@@ -5,19 +5,18 @@ from AthenaCommon.Logging import logging
 from CLIDComps.clidGenerator import clidGenerator
 log = logging.getLogger('testEDM')
 
-from TrigEDMConfig.TriggerEDM import (TriggerL2List, TriggerEFList, TriggerResultsList, TriggerResultsRun1List,
-                        TriggerLvl1List, TriggerHLTList, _addExtraCollectionsToEDMList, isCLIDDefined)
+from TrigEDMConfig.TriggerEDM import (TriggerResultsList, TriggerLvl1List, TriggerHLTList,
+                                      _addExtraCollectionsToEDMList, isCLIDDefined)
 from TrigEDMConfig.TriggerEDMRun2 import EDMDetails
 from TrigEDMConfig.TriggerEDMDefs import InViews, allowTruncation
-from TrigEDMConfig import TriggerEDMRun1
+
 
 def main():
   import re
   serializable_names = []
   serializable_names_no_label = []
   cgen = clidGenerator("", False)
-  TriggerList = TriggerL2List + TriggerEFList + TriggerResultsList + TriggerResultsRun1List + TriggerLvl1List + TriggerHLTList
-  TriggerList += TriggerEDMRun1.TriggerL2List + TriggerEDMRun1.TriggerEFList + TriggerEDMRun1.TriggerResultsRun1List
+  TriggerList = TriggerResultsList + TriggerLvl1List + TriggerHLTList
   for TriggerSerializable in TriggerList:
     #print TriggerSerializable 
     serializable_name = TriggerSerializable[0]

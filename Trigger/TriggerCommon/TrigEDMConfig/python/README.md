@@ -5,7 +5,6 @@ The Trigger EDM (Event Data Model) defines our interface to trigger reconstructe
 Trigger EDM content is defined seperately for each LHC Run in the `TrigEDMConfig` package:
 ```
 Trigger/TriggerCommon/TrigEDMConfig/python
-|-- TriggerEDMRun1.py
 |-- TriggerEDMRun2.py
 |-- TriggerEDMRun3.py
 |-- TriggerEDMRun4.py
