@@ -47,6 +47,7 @@ find_package( LCG @LCG_VERSION_NUMBER@ REQUIRED EXACT ${_quietFlag} )
 find_package( GTest ${_quietFlag} )
 find_package( Boost ${_quietFlag} COMPONENTS thread regex ) # See ATEAM-1186 for the component selection.
 find_package( chai ${_quietFlag} )
+find_package( ROOT ${_quietFlag} )
 
 # Clean up.
 unset( _quietFlag )

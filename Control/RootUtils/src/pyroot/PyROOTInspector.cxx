@@ -24,7 +24,9 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 // PyROOT includes
 #include <TPython.h>
+#ifdef ATLAS_HAVE_CPYCPPYY
 #include "CPyCppyy/API.h"
+#endif  // ATLAS_HAVE_CPYCPPYY
 
 // fixes 'dereferencing type-punned pointer will break strict-aliasing rules'
 #ifdef Py_True
@@ -49,7 +51,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 namespace {
 PyObject*
-to_pyobj(void* ptr, EDataType mbr_dtype) 
+to_pyobj(void* ptr, EDataType mbr_dtype)
 {
   switch(mbr_dtype) {
 
@@ -286,6 +288,7 @@ recurse_pyinspect(PyObject *pyobj,
 // Hence, use the cppyy API CPyCppyy::Sequence_Check(PyObject*) function
 // See ATEAM-974 and root/issues/15161
   Int_t hdr = 0;
+#ifdef ATLAS_HAVE_CPYCPPYY
   if (CPyCppyy::Sequence_Check(pyobj)) {
     if (clsname == "CLHEP::Hep3Vector" ||
         clsname == "TLorentzVector" ||
@@ -298,6 +301,7 @@ recurse_pyinspect(PyObject *pyobj,
   } else {
     hdr = 0;
   }
+#endif  // ATLAS_HAVE_CPYCPPYY
 
   TList *members = tcls->GetListOfDataMembers();
   // members can be null for STL containers in root 6.08.
@@ -422,7 +426,7 @@ recurse_pyinspect(PyObject *pyobj,
     Py_DECREF(this_name);
     Py_DECREF(py_mbr_name);
     Py_DECREF(py_mbr);
-    
+
   }
 
 #if PYROOT_INSPECTOR_DBG
@@ -473,6 +477,7 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
   }
 
   Int_t hdr = 0;
+#ifdef ATLAS_HAVE_CPYCPPYY
   if (CPyCppyy::Sequence_Check(pyobj)) {
     if (!strcmp(tcls->GetName(), "CLHEP::Hep3Vector")) {
       hdr = 0;
@@ -482,6 +487,7 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
   } else {
     hdr = 0;
   }
+#endif  // ATLAS_HAVE_CPYCPPYY
 
   TList *members = tcls->GetListOfDataMembers();
   const Int_t nmembers = members->GetEntries();
@@ -562,7 +568,7 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
     }
 
     PyObject *py_item = PyTuple_New(2);
-    PyTuple_SET_ITEM(py_item, 0, 
+    PyTuple_SET_ITEM(py_item, 0,
                      PyUnicode_FromString(mbr->GetName()));
     PyTuple_SET_ITEM(py_item, 1, py_mbr);
     PyList_SET_ITEM(py_members, j+hdr, py_item);
@@ -586,4 +592,3 @@ PyROOTInspector::pyroot_inspect2(PyObject *pyobj,
 }
 
 } // namespace RootUtils
-

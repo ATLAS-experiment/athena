@@ -1,19 +1,17 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Set the name of the package.
 atlas_subdir( xAODDataSource )
 
-# External dependencies. VDT is necessary because the DataFrame code has
-# a public dependency on it.
+# External dependencies.
 find_package( ROOT COMPONENTS Core Tree TreePlayer RIO ROOTDataFrame )
-find_package( VDT )
 
 # Build the library.
 atlas_add_library( xAODDataSourceLib
    xAODDataSource/*.h Root/*.h Root/*.cxx
    PUBLIC_HEADERS xAODDataSource
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} ${VDT_LIBRARIES} xAODRootAccess )
+   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   LINK_LIBRARIES ${ROOT_LIBRARIES} ROOT::ROOTDataFrame xAODRootAccess )
 
 # Build its dictionary.
 atlas_add_dictionary( xAODDataSourceDict

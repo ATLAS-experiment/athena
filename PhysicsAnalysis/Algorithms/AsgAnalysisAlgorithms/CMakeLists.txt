@@ -5,18 +5,18 @@
 atlas_subdir( AsgAnalysisAlgorithms )
 
 find_package( ROOT COMPONENTS Core Hist Tree ROOTNTuple )
-find_package( VDT )
 find_package( Lhapdf )
 
 atlas_add_library( AsgAnalysisAlgorithmsLib
   AsgAnalysisAlgorithms/*.h AsgAnalysisAlgorithms/*.icc Root/*.cxx
   PUBLIC_HEADERS AsgAnalysisAlgorithms
-  PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${LHAPDF_INCLUDE_DIRS}
-  LINK_LIBRARIES AthContainers AthContainersInterfaces AsgTools AsgMessagingLib AsgServicesLib CxxUtils xAODBase
+  INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+  PRIVATE_INCLUDE_DIRS ${LHAPDF_INCLUDE_DIRS}
+  LINK_LIBRARIES  ${ROOT_LIBRARIES} ROOT::ROOTNTuple AthContainers AthContainersInterfaces AsgTools AsgMessagingLib AsgServicesLib CxxUtils xAODBase
   xAODEventInfo xAODCutFlow SelectionHelpersLib SystematicsHandlesLib PATCoreLib
   AnaAlgorithmLib AsgAnalysisInterfaces AssociationUtilsLib GammaORToolsLib
   EventBookkeeperToolsLib InDetTrackSystematicsToolsLib PMGAnalysisInterfacesLib xAODMissingET
-  PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} PATInterfaces xAODCore xAODMetaData xAODJet xAODMuon xAODTau xAODEgamma
+  PRIVATE_LINK_LIBRARIES PATInterfaces xAODCore xAODMetaData xAODJet xAODMuon xAODTau xAODEgamma
   xAODTracking xAODTruth xAODRootAccess RootCoreUtils TruthUtils ${LHAPDF_LIBRARIES})
 
 
@@ -31,7 +31,7 @@ atlas_add_dictionary( AsgAnalysisAlgorithmsDict
 
 atlas_add_component( AsgAnalysisAlgorithms
   src/components/*.cxx
-  INCLUDE_DIRS  ${LHAPDF_INCLUDE_DIRS} ${VDT_INCLUDE_DIRS}
+  INCLUDE_DIRS  ${LHAPDF_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
   LINK_LIBRARIES AsgAnalysisAlgorithmsLib ${LHAPDF_LIBRARIES} ${ROOT_LIBRARIES} )
 
 atlas_install_data( data/* )
