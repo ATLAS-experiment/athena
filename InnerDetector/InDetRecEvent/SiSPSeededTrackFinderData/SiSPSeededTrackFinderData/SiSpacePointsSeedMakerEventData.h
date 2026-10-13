@@ -59,6 +59,9 @@ namespace InDet {
       Trigger ////< SiSpacePointsSeedMaker_Trigger
     };
 
+    float zCollisionMinimum{0};
+    float zCollisionMaximum{0};
+    
     bool initialized{false};    ///< has the data object been initialized?
     bool trigger{false};        ///< are we running in trigger mode?
     bool izvertex{false};
