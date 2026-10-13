@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <memory>
 
-#include "xAODL0MuonCand/TGCCandDataContainer.h"
+#include "xAODTrigL1Muon/L1TGCCandDataContainer.h"
 
 namespace L1Muon {
 
@@ -22,8 +22,8 @@ class TgcL0MdtCandidateSelector {
    * DataVector views store non-const pointers; its elements are not modified.
    * @return Non-owning MDTTP candidate view.
    */
-  std::unique_ptr<xAOD::TGCCandDataContainer> select(
-      xAOD::TGCCandDataContainer &candidates) const;
+  std::unique_ptr<xAOD::L1TGCCandDataContainer> select(
+      xAOD::L1TGCCandDataContainer &candidates) const;
 
  private:
   // Fixed by the TGC-to-MDTTP interface; this is not a configurable cut.

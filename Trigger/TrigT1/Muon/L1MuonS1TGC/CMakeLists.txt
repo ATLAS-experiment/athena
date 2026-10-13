@@ -9,7 +9,7 @@ atlas_add_component( L1MuonS1TGC
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps AthenaMonitoringKernelLib
                                     L1MuonS1TGCToolInterfaces MuonRDO StoreGateLib
-                                    xAODL0MuonCand xAODMuonViews )
+                                    xAODTrigL1Muon xAODMuonViews )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
@@ -17,9 +17,9 @@ atlas_add_test( TgcL0MdtCandidateSelector_test
   SOURCES test/TgcL0MdtCandidateSelector_test.cxx
           src/TgcL0MdtCandidateSelector.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
-  LINK_LIBRARIES ${Boost_LIBRARIES} AthContainers xAODL0MuonCand
+  LINK_LIBRARIES ${Boost_LIBRARIES} AthContainers xAODTrigL1Muon
   POST_EXEC_SCRIPT nopost.sh )
 
-atlas_add_test( L0MuonS1TGCConfig
-                SCRIPT python -m L1MuonS1TGC.L0MuonS1TGCConfig
+atlas_add_test( L1MuonS1TGCConfig
+                SCRIPT python -m L1MuonS1TGC.L1MuonS1TGCConfig
                 POST_EXEC_SCRIPT nopost.sh )

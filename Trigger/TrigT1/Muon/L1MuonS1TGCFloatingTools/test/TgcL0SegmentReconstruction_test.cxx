@@ -30,8 +30,8 @@ BOOST_AUTO_TEST_CASE(WrapsPhysicalDeltaThetaAcrossAtan2BranchCut) {
   coincidences.emplace_back(key, Station::M3, true, 1U, -1, 1U, 21U, 0x7U,
                             3U, 3U, -1.52F, 0.20F, 900.F, -11000.F);
 
-  L1Muon::TgcL0CandidateContainer candidates;
-  L1Muon::TgcL0SegmentContainer segments;
+  L1Muon::TgcSLCandidateContainer candidates;
+  L1Muon::TgcSLSegmentContainer segments;
   SegmentStatistics statistics;
   const SegmentReconstruction reconstruction;
 

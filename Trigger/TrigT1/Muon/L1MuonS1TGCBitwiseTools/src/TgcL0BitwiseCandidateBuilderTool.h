@@ -18,7 +18,7 @@ class TgcL0BitwiseCandidateBuilderTool final
 
   /// \copydoc ITgcL0CandidateBuilderTool::build
   StatusCode build(const TgcRdoContainer& rdos,
-                   TgcL0CandidateContainer& candidates,
+                   TgcSLCandidateContainer& candidates,
                    const EventContext& ctx) const override;
 };
 

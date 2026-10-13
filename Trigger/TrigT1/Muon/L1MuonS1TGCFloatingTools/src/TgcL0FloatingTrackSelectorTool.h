@@ -15,8 +15,8 @@ class TgcL0FloatingTrackSelectorTool final
   using base_class::base_class;
 
   /// \copydoc ITgcL0TrackSelectorTool::select
-  StatusCode select(const TgcL0CandidateContainer& candidates,
-                    xAOD::TGCCandDataContainer& output,
+  StatusCode select(const TgcSLCandidateContainer& candidates,
+                    xAOD::L1TGCCandDataContainer& output,
                     const EventContext& ctx) const override;
 };
 

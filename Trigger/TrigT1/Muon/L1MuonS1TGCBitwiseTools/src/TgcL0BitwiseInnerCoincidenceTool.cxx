@@ -6,7 +6,7 @@
 
 namespace L1Muon {
 
-StatusCode TgcL0BitwiseInnerCoincidenceTool::apply(TgcL0CandidateContainer& candidates, const EventContext& ctx) const {
+StatusCode TgcL0BitwiseInnerCoincidenceTool::apply(TgcSLCandidateContainer& candidates, const EventContext& ctx) const {
   (void)candidates;
   (void)ctx;
   return StatusCode::SUCCESS;

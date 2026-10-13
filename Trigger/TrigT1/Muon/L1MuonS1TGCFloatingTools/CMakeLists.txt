@@ -38,7 +38,7 @@ atlas_add_test( TgcL0TrackSelector_test
           src/TgcL0TrackSelector.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} AthContainers
-                 L1MuonS1TGCToolInterfaces xAODL0MuonCand
+                 L1MuonS1TGCToolInterfaces xAODTrigL1Muon
   POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TgcL0InnerCoincidence_test

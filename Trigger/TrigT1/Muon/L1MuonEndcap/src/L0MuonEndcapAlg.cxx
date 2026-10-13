@@ -29,14 +29,14 @@ StatusCode L0MuonEndcapAlg::initialize() {
 }
 
 StatusCode L0MuonEndcapAlg::execute(const EventContext& ctx) const {
-  const xAOD::TGCCandDataContainer* inputHandle{};
+  const xAOD::L1TGCCandDataContainer* inputHandle{};
   ATH_CHECK(SG::get(inputHandle, m_inputKey, ctx));
 
   xAOD::FillContainer<xAOD::SectorLogicCandDataContainer,
                       xAOD::SectorLogicCandDataAuxContainer>
       output{};
 
-  for (const xAOD::TGCCandData* candidate : *inputHandle) {
+  for (const xAOD::L1TGCCandData* candidate : *inputHandle) {
     if (candidate->tcId() == 0U) continue;
 
     const TgcL0SectorLogicWords words =

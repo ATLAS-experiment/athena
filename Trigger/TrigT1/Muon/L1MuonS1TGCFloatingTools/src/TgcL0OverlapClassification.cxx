@@ -13,8 +13,8 @@
 
 namespace {
 
-bool sameChamber(const L1Muon::TgcL0Candidate& first,
-                 const L1Muon::TgcL0Candidate& second,
+bool sameChamber(const L1Muon::TgcSLCandidate& first,
+                 const L1Muon::TgcSLCandidate& second,
                  std::uint8_t stationBit) {
   if (stationBit == 0x1U) {
     return first.m1StationEta == second.m1StationEta &&
@@ -38,8 +38,8 @@ std::size_t countBits(std::uint8_t value) {
 }
 
 bool isOverlapPair(
-    const L1Muon::TgcL0Candidate& first,
-    const L1Muon::TgcL0Candidate& second,
+    const L1Muon::TgcSLCandidate& first,
+    const L1Muon::TgcSLCandidate& second,
     const L1Muon::TgcL0Floating::OverlapClassificationConfig& config) {
   if (first.bcTag != second.bcTag ||
       first.subdetectorId != second.subdetectorId) {
@@ -99,10 +99,10 @@ OverlapClassification::OverlapClassification(OverlapClassificationConfig config)
     : m_config(config) {}
 
 void OverlapClassification::classify(
-    TgcL0CandidateContainer& candidates,
+    TgcSLCandidateContainer& candidates,
     OverlapClassificationStatistics& statistics) const {
   statistics = OverlapClassificationStatistics{};
-  for (TgcL0Candidate& candidate : candidates) {
+  for (TgcSLCandidate& candidate : candidates) {
     candidate.overlapGroupId = 0U;
     candidate.overlapMultiplicity = 1U;
     candidate.inChamberOverlap = false;
@@ -136,7 +136,7 @@ void OverlapClassification::classify(
       statistics.maxMultiplicity =
           std::max(statistics.maxMultiplicity, multiplicities[root]);
     }
-    TgcL0Candidate& candidate = candidates[index];
+    TgcSLCandidate& candidate = candidates[index];
     candidate.overlapGroupId = groupIds[root];
     candidate.overlapMultiplicity = static_cast<std::uint8_t>(
         std::min<std::size_t>(multiplicities[root], 0xffU));

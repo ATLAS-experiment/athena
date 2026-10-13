@@ -6,8 +6,8 @@
 
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IAlgTool.h"
-#include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
-#include "L1MuonS1TGCToolInterfaces/TgcL0Segment.h"
+#include "L1MuonS1TGCToolInterfaces/TgcSLCandidate.h"
+#include "L1MuonS1TGCToolInterfaces/TgcSLSegment.h"
 #include "MuonRDO/TgcRdoContainer.h"
 
 namespace L1Muon {
@@ -24,7 +24,7 @@ class ITgcL0CandidateBuilderTool : virtual public IAlgTool {
    * @param ctx Event context.
    */
   virtual StatusCode build(const TgcRdoContainer& rdos,
-                           TgcL0CandidateContainer& candidates,
+                           TgcSLCandidateContainer& candidates,
                            const EventContext& ctx) const = 0;
 
   /**
@@ -36,8 +36,8 @@ class ITgcL0CandidateBuilderTool : virtual public IAlgTool {
    * change production output.
    */
   virtual StatusCode build(const TgcRdoContainer& rdos,
-                           TgcL0CandidateContainer& candidates,
-                           TgcL0SegmentContainer* segments,
+                           TgcSLCandidateContainer& candidates,
+                           TgcSLSegmentContainer* segments,
                            const EventContext& ctx) const {
     static_cast<void>(segments);
     return build(rdos, candidates, ctx);

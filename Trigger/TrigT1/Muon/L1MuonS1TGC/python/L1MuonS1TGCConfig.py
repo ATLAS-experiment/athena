@@ -3,7 +3,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 
-def L0MuonTGCSimCfg(
+def L1MuonTGCSimCfg(
         flags,
         name="L1Muon.TGCSimulation",
         configureHistSvc=True,
@@ -12,27 +12,27 @@ def L0MuonTGCSimCfg(
     result = ComponentAccumulator()
 
     if "CandidateBuilderTool" not in kwargs:
-        from L1MuonS1TGCFloatingTools.L0MuonS1TGCFloatingToolsConfig import (
-            TgcL0FloatingCandidateBuilderToolCfg,
+        from L1MuonS1TGCFloatingTools.L1MuonS1TGCFloatingToolsConfig import (
+            TgcSLFloatingCandidateBuilderToolCfg,
         )
         kwargs["CandidateBuilderTool"] = result.popToolsAndMerge(
-            TgcL0FloatingCandidateBuilderToolCfg(flags)
+            TgcSLFloatingCandidateBuilderToolCfg(flags)
         )
 
     if "InnerCoincidenceTool" not in kwargs:
-        from L1MuonS1TGCFloatingTools.L0MuonS1TGCFloatingToolsConfig import (
-            TgcL0FloatingInnerCoincidenceToolCfg,
+        from L1MuonS1TGCFloatingTools.L1MuonS1TGCFloatingToolsConfig import (
+            TgcSLFloatingInnerCoincidenceToolCfg,
         )
         kwargs["InnerCoincidenceTool"] = result.popToolsAndMerge(
-            TgcL0FloatingInnerCoincidenceToolCfg(flags)
+            TgcSLFloatingInnerCoincidenceToolCfg(flags)
         )
 
     if "TrackSelectorTool" not in kwargs:
-        from L1MuonS1TGCFloatingTools.L0MuonS1TGCFloatingToolsConfig import (
-            TgcL0FloatingTrackSelectorToolCfg,
+        from L1MuonS1TGCFloatingTools.L1MuonS1TGCFloatingToolsConfig import (
+            TgcSLFloatingTrackSelectorToolCfg,
         )
         kwargs["TrackSelectorTool"] = result.popToolsAndMerge(
-            TgcL0FloatingTrackSelectorToolCfg(flags)
+            TgcSLFloatingTrackSelectorToolCfg(flags)
         )
 
     alg = CompFactory.L1Muon.TGCSimulation(name=name, **kwargs)
@@ -75,19 +75,19 @@ if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
     flags.Common.MsgSuppression = False
-    flags.Output.RDOFileName = "L0MuonS1TGC.RDO.pool.root"
+    flags.Output.RDOFileName = "L1MuonS1TGC.RDO.pool.root"
 
     flags, acc = setupGeoR4TestCfg(args, flags)
     from AthenaCommon.Constants import DEBUG
-    from L1MuonS1TGCFloatingTools.L0MuonS1TGCFloatingToolsConfig import (
-        TgcL0FloatingCandidateBuilderToolCfg,
+    from L1MuonS1TGCFloatingTools.L1MuonS1TGCFloatingToolsConfig import (
+        TgcSLFloatingCandidateBuilderToolCfg,
     )
 
     candidateBuilderTool = acc.popToolsAndMerge(
-        TgcL0FloatingCandidateBuilderToolCfg(flags)
+        TgcSLFloatingCandidateBuilderToolCfg(flags)
     )
     acc.merge(
-        L0MuonTGCSimCfg(
+        L1MuonTGCSimCfg(
             flags,
             OutputLevel=DEBUG,
             CandidateBuilderTool=candidateBuilderTool,
@@ -101,8 +101,8 @@ if __name__ == "__main__":
             flags,
             "RDO",
             ItemList=[
-                "xAOD::TGCCandDataContainer#L0MuonTGCCandData",
-                "xAOD::TGCCandDataAuxContainer#L0MuonTGCCandDataAux.",
+                "xAOD::L1TGCCandDataContainer#L1TGCCandData",
+                "xAOD::L1TGCCandDataAuxContainer#L1TGCCandDataAux.",
             ],
             takeItemsFromInput=False,
         )

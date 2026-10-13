@@ -46,8 +46,8 @@ if __name__ == "__main__":
             name="L1MuonRPCSim",
             OutputLevel=DEBUG))
 
-    from L1MuonS1TGC.L0MuonS1TGCConfig import L0MuonTGCSimCfg
-    acc.merge(L0MuonTGCSimCfg(flags,
+    from L1MuonS1TGC.L1MuonS1TGCConfig import L1MuonTGCSimCfg
+    acc.merge(L1MuonTGCSimCfg(flags,
         configureHistSvc=False,
         OutputLevel=DEBUG))
 
@@ -90,8 +90,8 @@ if __name__ == "__main__":
             "xAOD::L1RPCCandDataAuxContainer#L1RPCCandDataAux.",
         ]
     itemList += [
-        "xAOD::TGCCandDataContainer#L0MuonTGCCandData",
-        "xAOD::TGCCandDataAuxContainer#L0MuonTGCCandDataAux.",
+        "xAOD::L1TGCCandDataContainer#L1TGCCandData",
+        "xAOD::L1TGCCandDataAuxContainer#L1TGCCandDataAux.",
         "xAOD::SectorLogicCandDataContainer#L0MuonTGCSectorLogicCandData",
         "xAOD::SectorLogicCandDataAuxContainer#L0MuonTGCSectorLogicCandDataAux.",
         "xAOD::L1NSWCandDataContainer#L1NSWCandidates",

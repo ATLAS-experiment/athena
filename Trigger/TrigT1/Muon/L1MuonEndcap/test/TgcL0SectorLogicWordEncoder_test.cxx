@@ -11,8 +11,8 @@
 #include <vector>
 
 #include "AthContainers/AuxStoreInternal.h"
-#include "xAODL0MuonCand/TGCCandData.h"
-#include "xAODL0MuonCand/TGCCandDataContainer.h"
+#include "xAODTrigL1Muon/L1TGCCandData.h"
+#include "xAODTrigL1Muon/L1TGCCandDataContainer.h"
 #include "xAODTrigL1Muon/SectorLogicCandData.h"
 #include "xAODTrigL1Muon/SectorLogicCandDataContainer.h"
 
@@ -26,17 +26,17 @@ bool check(const bool condition, const std::string_view description) {
 }  // namespace
 
 int main() {
-  xAOD::TGCCandDataContainer candidates;
+  xAOD::L1TGCCandDataContainer candidates;
   SG::AuxStoreInternal candidateAux;
   candidates.setStore(&candidateAux);
-  xAOD::TGCCandData* candidate =
-      candidates.push_back(std::make_unique<xAOD::TGCCandData>());
+  xAOD::L1TGCCandData* candidate =
+      candidates.push_back(std::make_unique<xAOD::L1TGCCandData>());
   candidate->initialize(0x65U, 17U, 0x2U);
-  candidate->setEta(-1.25F);
-  candidate->setPhi(2.1F);
-  candidate->setPt(42.5F);
-  candidate->setThreshold(11U);
-  candidate->setCandCharge(1U);
+  candidate->setL1Eta(-1.25F);
+  candidate->setL1Phi(2.1F);
+  candidate->setL1Pt(42.5F);
+  candidate->setL1Threshold(11U);
+  candidate->setL1CandCharge(1U);
   candidate->setCoinType(0U);
   candidate->setHasInnerCoincidence(true);
   candidate->setGoodMagneticField(true);
@@ -65,12 +65,12 @@ int main() {
   success &= check(decoded->BCIDOffset() == 0, "current-BC offset");
   success &= check(decoded->boardID() == 0U, "unset board ID");
   success &= check(decoded->fiberID() == 0U, "unset fiber ID");
-  success &= check(decoded->rawEta() == candidate->eta(), "eta code");
-  success &= check(decoded->rawPhi() == candidate->phi(), "phi code");
-  success &= check(decoded->pT() == candidate->pt(), "pT code");
+  success &= check(decoded->rawEta() == candidate->l1Eta(), "eta code");
+  success &= check(decoded->rawPhi() == candidate->l1Phi(), "phi code");
+  success &= check(decoded->pT() == candidate->l1Pt(), "pT code");
   success &=
-      check(decoded->charge() == candidate->candCharge(), "charge code");
-  success &= check(decoded->ptThresh() == candidate->threshold(),
+      check(decoded->charge() == candidate->l1CandCharge(), "charge code");
+  success &= check(decoded->ptThresh() == candidate->l1Threshold(),
                    "threshold code");
   success &= check(decoded->TCID() == candidate->tcId(), "TCID code");
   success &=

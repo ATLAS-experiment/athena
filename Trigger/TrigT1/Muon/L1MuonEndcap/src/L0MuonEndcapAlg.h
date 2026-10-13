@@ -8,7 +8,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "xAODL0MuonCand/TGCCandDataContainer.h"
+#include "xAODTrigL1Muon/L1TGCCandDataContainer.h"
 #include "xAODTrigL1Muon/SectorLogicCandDataAuxContainer.h"
 #include "xAODTrigL1Muon/SectorLogicCandDataContainer.h"
 
@@ -29,8 +29,8 @@ class L0MuonEndcapAlg final : public AthReentrantAlgorithm {
   StatusCode execute(const EventContext& ctx) const override;
 
  private:
-  SG::ReadHandleKey<xAOD::TGCCandDataContainer> m_inputKey{
-      this, "InputKey", "L0MuonTGCCandData",
+  SG::ReadHandleKey<xAOD::L1TGCCandDataContainer> m_inputKey{
+      this, "InputKey", "L1TGCCandData",
       "TGC Sector Logic candidates"};
 
   SG::WriteHandleKey<xAOD::SectorLogicCandDataContainer> m_outputKey{

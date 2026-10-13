@@ -97,14 +97,14 @@ StatusCode TgcL0FloatingCandidateBuilderTool::initialize() {
 }
 
 StatusCode TgcL0FloatingCandidateBuilderTool::build(
-    const TgcRdoContainer& rdos, TgcL0CandidateContainer& candidates,
+    const TgcRdoContainer& rdos, TgcSLCandidateContainer& candidates,
     const EventContext& ctx) const {
   return build(rdos, candidates, nullptr, ctx);
 }
 
 StatusCode TgcL0FloatingCandidateBuilderTool::build(
-    const TgcRdoContainer& rdos, TgcL0CandidateContainer& candidates,
-    TgcL0SegmentContainer* segments, const EventContext& ctx) const {
+    const TgcRdoContainer& rdos, TgcSLCandidateContainer& candidates,
+    TgcSLSegmentContainer* segments, const EventContext& ctx) const {
 
   const Muon::TgcCablingMap* cabling{};
   ATH_CHECK(SG::get(cabling, m_cablingKey, ctx));
@@ -149,7 +149,7 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
   overlapClassification.classify(candidates, overlapStatistics);
 
   std::size_t nValidPtEstimates = 0U;
-  for (TgcL0Candidate& candidate : candidates) {
+  for (TgcSLCandidate& candidate : candidates) {
     const TgcL0FloatingPtEvaluation evaluation =
         m_ptLut->evaluate(candidate.eta, candidate.phi, candidate.deltaTheta);
     candidate.goodMagneticField = m_goodMagMap->isGood(
@@ -280,7 +280,7 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
 
   for (std::size_t candidateIndex = 0; candidateIndex < candidates.size();
        ++candidateIndex) {
-    const TgcL0Candidate& candidate = candidates[candidateIndex];
+    const TgcSLCandidate& candidate = candidates[candidateIndex];
     ATH_MSG_DEBUG("Reconstructed candidate: index="
                   << candidateIndex << ", bcTag=" << candidate.bcTag
                   << ", subdetectorId=" << candidate.subdetectorId

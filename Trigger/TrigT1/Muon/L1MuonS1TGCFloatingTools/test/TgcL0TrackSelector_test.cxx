@@ -29,12 +29,12 @@ bool close(float left, float right, float tolerance) {
   return std::abs(left - right) <= tolerance;
 }
 
-L1Muon::TgcL0Candidate candidate(std::uint16_t subdetectorId,
+L1Muon::TgcSLCandidate candidate(std::uint16_t subdetectorId,
                                  std::uint16_t sectorId, std::uint16_t bcTag,
                                  float pt, std::uint8_t threshold,
                                  std::uint8_t selectorPriority,
                                  std::uint32_t marker) {
-  L1Muon::TgcL0Candidate result;
+  L1Muon::TgcSLCandidate result;
   result.subdetectorId = subdetectorId;
   result.sectorId = sectorId;
   result.bcTag = bcTag;
@@ -54,22 +54,22 @@ L1Muon::TgcL0Candidate candidate(std::uint16_t subdetectorId,
 
 // Keep the expected encoding owned by the xAOD setter used in production.
 std::uint8_t expectedPtCode(float pt) {
-  xAOD::TGCCandDataContainer candidates;
+  xAOD::L1TGCCandDataContainer candidates;
   SG::AuxStoreInternal candidatesAux;
   candidates.setStore(&candidatesAux);
-  xAOD::TGCCandData *referenceCandidate =
-      candidates.push_back(std::make_unique<xAOD::TGCCandData>());
-  referenceCandidate->setPt(pt);
-  return referenceCandidate->pt();
+  xAOD::L1TGCCandData *referenceCandidate =
+      candidates.push_back(std::make_unique<xAOD::L1TGCCandData>());
+  referenceCandidate->setL1Pt(pt);
+  return referenceCandidate->l1Pt();
 }
 
-std::size_t countGroup(const xAOD::TGCCandDataContainer &candidates,
+std::size_t countGroup(const xAOD::L1TGCCandDataContainer &candidates,
                        std::uint16_t subdetectorId, std::uint16_t sectorId) {
   return std::count_if(
       candidates.begin(), candidates.end(),
-      [subdetectorId, sectorId](const xAOD::TGCCandData *selected) {
-        return selected->subdetectorId() == subdetectorId &&
-               selected->sectorId() == sectorId;
+      [subdetectorId, sectorId](const xAOD::L1TGCCandData *selected) {
+        return selected->l1SubdetectorId() == subdetectorId &&
+               selected->l1SectorId() == sectorId;
       });
 }
 
@@ -99,8 +99,8 @@ struct CandidateFixture {
 
   void select() { selector.select(candidates, output); }
 
-  L1Muon::TgcL0CandidateContainer candidates;
-  xAOD::TGCCandDataContainer output;
+  L1Muon::TgcSLCandidateContainer candidates;
+  xAOD::L1TGCCandDataContainer output;
   SG::AuxStoreInternal outputAux;
   L1Muon::TgcL0Floating::TrackSelector selector;
 };
@@ -121,10 +121,10 @@ BOOST_FIXTURE_TEST_CASE(SelectsAtMostSixCandidatesPerSector,
 }
 
 BOOST_AUTO_TEST_CASE(RejectsZeroThreshold) {
-  L1Muon::TgcL0CandidateContainer candidates{
+  L1Muon::TgcSLCandidateContainer candidates{
       candidate(sideA, 5U, currentBc, 100.F, 0U, 2U, 100U),
       candidate(sideA, 5U, currentBc, 10.F, 1U, 2U, 10U)};
-  xAOD::TGCCandDataContainer output;
+  xAOD::L1TGCCandDataContainer output;
   SG::AuxStoreInternal outputAux;
   output.setStore(&outputAux);
 
@@ -132,8 +132,8 @@ BOOST_AUTO_TEST_CASE(RejectsZeroThreshold) {
   selector.select(candidates, output);
 
   BOOST_REQUIRE_EQUAL(output.size(), 1U);
-  BOOST_TEST(output[0]->nswSegment() == 10U);
-  BOOST_TEST(output[0]->threshold() == 1U);
+  BOOST_TEST(output[0]->l1NswSegment() == 10U);
+  BOOST_TEST(output[0]->l1Threshold() == 1U);
 }
 
 BOOST_FIXTURE_TEST_CASE(OrdersCandidatesAndAssignsTcIds, CandidateFixture) {
@@ -147,41 +147,38 @@ BOOST_FIXTURE_TEST_CASE(OrdersCandidatesAndAssignsTcIds, CandidateFixture) {
   const std::vector<std::uint32_t> firstGroupMarker{25U, 50U, 40U,
                                                     30U, 20U, 60U};
   for (std::size_t index = 0U; index < firstGroupPt.size(); ++index) {
-    const xAOD::TGCCandData &selected = *output[index];
-    BOOST_TEST(selected.subdetectorId() == sideA);
-    BOOST_TEST(selected.sectorId() == 5U);
+    const xAOD::L1TGCCandData &selected = *output[index];
+    BOOST_TEST(selected.l1SubdetectorId() == sideA);
+    BOOST_TEST(selected.l1SectorId() == 5U);
     BOOST_TEST(selected.bcTag() == currentBc);
     BOOST_TEST(selected.tcId() == index + 1U);
-    BOOST_TEST(selected.threshold() == firstGroupThreshold[index]);
-    BOOST_TEST(selected.pt() == expectedPtCode(firstGroupPt[index]));
-    BOOST_TEST(selected.nswSegment() == firstGroupMarker[index]);
+    BOOST_TEST(selected.l1Threshold() == firstGroupThreshold[index]);
+    BOOST_TEST(selected.l1Pt() == expectedPtCode(firstGroupPt[index]));
+    BOOST_TEST(selected.l1NswSegment() == firstGroupMarker[index]);
   }
 
-  BOOST_TEST(output[6]->sectorId() == 6U);
+  BOOST_TEST(output[6]->l1SectorId() == 6U);
   BOOST_TEST(output[6]->tcId() == 1U);
-  BOOST_TEST(output[6]->pt() == expectedPtCode(35.F));
-  BOOST_TEST(output[8]->subdetectorId() == sideC);
+  BOOST_TEST(output[6]->l1Pt() == expectedPtCode(35.F));
+  BOOST_TEST(output[8]->l1SubdetectorId() == sideC);
   BOOST_TEST(output[8]->tcId() == 1U);
-  BOOST_TEST(output[9]->nswSegment() == 703U);
-  BOOST_TEST(output[10]->nswSegment() == 704U);
-  BOOST_TEST(output[11]->nswSegment() == 701U);
+  BOOST_TEST(output[9]->l1NswSegment() == 703U);
+  BOOST_TEST(output[10]->l1NswSegment() == 704U);
+  BOOST_TEST(output[11]->l1NswSegment() == 701U);
 }
 
 BOOST_FIXTURE_TEST_CASE(MapsCandidateFields, CandidateFixture) {
   select();
   BOOST_REQUIRE_EQUAL(output.size(), 12U);
 
-  const xAOD::TGCCandData &mapped = *output[0];
-  BOOST_TEST(mapped.threshold() == 9U);
-  BOOST_TEST(mapped.candCharge() == 0U);
-  BOOST_TEST(output[1]->candCharge() == 1U);
-  BOOST_TEST(mapped.mdtFlag() == 0U);
+  const xAOD::L1TGCCandData &mapped = *output[0];
+  BOOST_TEST(mapped.l1Threshold() == 9U);
+  BOOST_TEST(mapped.l1CandCharge() == 0U);
+  BOOST_TEST(output[1]->l1CandCharge() == 1U);
   BOOST_TEST(!mapped.hasInnerCoincidence());
   BOOST_TEST(output[1]->hasInnerCoincidence());
   BOOST_TEST(!mapped.goodMagneticField());
   BOOST_TEST(output[1]->goodMagneticField());
-  BOOST_TEST(static_cast<int>(mapped.candQuality()) ==
-             static_cast<int>(xAOD::ICandData_v1::Quality::Q_UNDEFINED));
   BOOST_TEST(close(mapped.deltaPhi(), 0.012F, 0.005F));
   BOOST_TEST(close(mapped.deltaTheta(), -0.025F, 0.003F));
 }

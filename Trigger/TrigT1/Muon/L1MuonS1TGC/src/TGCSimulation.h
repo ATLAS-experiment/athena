@@ -9,10 +9,10 @@
 #include "L1MuonS1TGCToolInterfaces/ITgcL0CandidateBuilderTool.h"
 #include "L1MuonS1TGCToolInterfaces/ITgcL0InnerCoincidenceTool.h"
 #include "L1MuonS1TGCToolInterfaces/ITgcL0TrackSelectorTool.h"
-#include "L1MuonS1TGCToolInterfaces/TgcL0Segment.h"
+#include "L1MuonS1TGCToolInterfaces/TgcSLSegment.h"
 #include "MuonRDO/TgcRdoContainer.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "xAODL0MuonCand/TGCCandDataContainer.h"
+#include "xAODTrigL1Muon/L1TGCCandDataContainer.h"
 
 namespace L1Muon {
 
@@ -26,17 +26,17 @@ class TGCSimulation : public AthReentrantAlgorithm {
  private:
   SG::ReadHandleKey<TgcRdoContainer> m_keyTgcRdo{
       this, "InputRdo", "TGCRDO", "Location of the input TGC RDO container"};
-  SG::WriteHandleKey<TgcL0CandidateContainer> m_validationCandidateKey{
+  SG::WriteHandleKey<TgcSLCandidateContainer> m_validationCandidateKey{
       this, "ValidationCandidateKey", "",
       "Optional pre-Inner-Coincidence transient candidates for validation"};
-  SG::WriteHandleKey<TgcL0SegmentContainer> m_validationSegmentKey{
+  SG::WriteHandleKey<TgcSLSegmentContainer> m_validationSegmentKey{
       this, "ValidationSegmentKey", "",
       "Optional projection segments for validation"};
-  SG::WriteHandleKey<xAOD::TGCCandDataContainer> m_outputKey{
-      this, "OutputKey", "L0MuonTGCCandData",
+  SG::WriteHandleKey<xAOD::L1TGCCandDataContainer> m_outputKey{
+      this, "OutputKey", "L1TGCCandData",
       "TGC Sector Logic candidate output"};
-  SG::WriteHandleKey<xAOD::TGCCandDataContainer> m_outputToMdtKey{
-      this, "OutputToMdtKey", "L0MuonTGCCandDataToMdt",
+  SG::WriteHandleKey<xAOD::L1TGCCandDataContainer> m_outputToMdtKey{
+      this, "OutputToMdtKey", "L1TGCCandDataToMdt",
       "View of the highest-pT TGC candidates sent to MDTTP"};
 
   ToolHandle<ITgcL0CandidateBuilderTool> m_candidateBuilderTool{

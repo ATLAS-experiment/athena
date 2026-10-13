@@ -6,8 +6,8 @@
 
 #include <cstddef>
 
-#include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
-#include "xAODL0MuonCand/TGCCandDataContainer.h"
+#include "L1MuonS1TGCToolInterfaces/TgcSLCandidate.h"
+#include "xAODTrigL1Muon/L1TGCCandDataContainer.h"
 
 namespace L1Muon {
 namespace TgcL0Floating {
@@ -22,8 +22,8 @@ class TrackSelector {
    * selection.
    * @param output Output TGC candidate container.
    */
-  void select(const TgcL0CandidateContainer &candidates,
-              xAOD::TGCCandDataContainer &output) const;
+  void select(const TgcSLCandidateContainer &candidates,
+              xAOD::L1TGCCandDataContainer &output) const;
 
  private:
   // Fixed by the TGC Sector Logic output interface; this is not a

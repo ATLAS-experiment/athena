@@ -6,7 +6,7 @@
 
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IAlgTool.h"
-#include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
+#include "L1MuonS1TGCToolInterfaces/TgcSLCandidate.h"
 
 namespace L1Muon {
 
@@ -20,7 +20,7 @@ class ITgcL0InnerCoincidenceTool : virtual public IAlgTool {
    * @param candidates Candidate collection to update.
    * @param ctx Event context.
    */
-  virtual StatusCode apply(TgcL0CandidateContainer& candidates,
+  virtual StatusCode apply(TgcSLCandidateContainer& candidates,
                            const EventContext& ctx) const = 0;
 };
 

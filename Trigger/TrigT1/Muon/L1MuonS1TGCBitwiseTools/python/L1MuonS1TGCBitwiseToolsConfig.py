@@ -3,7 +3,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def TgcL0BitwiseCandidateBuilderToolCfg(
+def TgcSLBitwiseCandidateBuilderToolCfg(
     flags, name="L1Muon.TgcL0BitwiseCandidateBuilderTool", **kwargs
 ):
     result = ComponentAccumulator()
@@ -13,7 +13,7 @@ def TgcL0BitwiseCandidateBuilderToolCfg(
     return result
 
 
-def TgcL0BitwiseInnerCoincidenceToolCfg(
+def TgcSLBitwiseInnerCoincidenceToolCfg(
     flags, name="L1Muon.TgcL0BitwiseInnerCoincidenceTool", **kwargs
 ):
     result = ComponentAccumulator()
@@ -23,7 +23,7 @@ def TgcL0BitwiseInnerCoincidenceToolCfg(
     return result
 
 
-def TgcL0BitwiseTrackSelectorToolCfg(
+def TgcSLBitwiseTrackSelectorToolCfg(
     flags, name="L1Muon.TgcL0BitwiseTrackSelectorTool", **kwargs
 ):
     result = ComponentAccumulator()

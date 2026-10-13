@@ -5,7 +5,7 @@ atlas_subdir( L1MuonEndcap )
 atlas_add_component( L1MuonEndcap
                      src/*.cxx src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps StoreGateLib
-                                    TrigT1MuctpiBits xAODL0MuonCand
+                                    TrigT1MuctpiBits
                                     xAODMuonViews xAODTrigL1Muon )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
@@ -19,5 +19,5 @@ atlas_add_test( TgcL0SectorLogicWordEncoder_test
                         src/TgcL0SectorLogicWordEncoder.cxx
                 INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
                 LINK_LIBRARIES AthContainers TrigT1MuctpiBits
-                               xAODL0MuonCand xAODTrigL1Muon
+                               xAODTrigL1Muon
                 POST_EXEC_SCRIPT noerror.sh )

@@ -15,9 +15,9 @@ def L0MuonTGCChainCfg(flags, **kwargs):
     """Configure the minimal S1TGC-to-Endcap data-flow chain."""
     result = ComponentAccumulator()
 
-    from L1MuonS1TGC.L0MuonS1TGCConfig import L0MuonTGCSimCfg
+    from L1MuonS1TGC.L1MuonS1TGCConfig import L1MuonTGCSimCfg
 
-    result.merge(L0MuonTGCSimCfg(flags, **kwargs.pop("S1TGC", {})))
+    result.merge(L1MuonTGCSimCfg(flags, **kwargs.pop("S1TGC", {})))
     result.merge(L0MuonEndcapAlgCfg(flags, **kwargs.pop("Endcap", {})))
     if kwargs:
         raise TypeError(f"Unexpected configuration groups: {sorted(kwargs)}")
@@ -63,8 +63,8 @@ if __name__ == "__main__":
             flags,
             "RDO",
             ItemList=[
-                "xAOD::TGCCandDataContainer#L0MuonTGCCandData",
-                "xAOD::TGCCandDataAuxContainer#L0MuonTGCCandDataAux.",
+                "xAOD::L1TGCCandDataContainer#L1TGCCandData",
+                "xAOD::L1TGCCandDataAuxContainer#L1TGCCandDataAux.",
                 "xAOD::SectorLogicCandDataContainer#L0MuonTGCSectorLogicCandData",
                 "xAOD::SectorLogicCandDataAuxContainer#L0MuonTGCSectorLogicCandDataAux.",
             ],

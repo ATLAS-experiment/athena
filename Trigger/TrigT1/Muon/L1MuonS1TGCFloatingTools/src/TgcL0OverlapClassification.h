@@ -4,7 +4,7 @@
 #ifndef L1MUONS1TGCFLOATINGTOOLS_TGCL0OVERLAPCLASSIFICATION_H
 #define L1MUONS1TGCFLOATINGTOOLS_TGCL0OVERLAPCLASSIFICATION_H
 
-#include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
+#include "L1MuonS1TGCToolInterfaces/TgcSLCandidate.h"
 
 #include <cstddef>
 
@@ -36,7 +36,7 @@ class OverlapClassification {
   explicit OverlapClassification(
       OverlapClassificationConfig config = OverlapClassificationConfig{});
 
-  void classify(TgcL0CandidateContainer& candidates,
+  void classify(TgcSLCandidateContainer& candidates,
                 OverlapClassificationStatistics& statistics) const;
 
  private:

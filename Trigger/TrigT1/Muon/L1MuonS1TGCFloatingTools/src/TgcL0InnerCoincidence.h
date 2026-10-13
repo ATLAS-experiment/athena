@@ -4,7 +4,7 @@
 #ifndef L1MUONS1TGCFLOATINGTOOLS_TGCL0INNERCOINCIDENCE_H
 #define L1MUONS1TGCFLOATINGTOOLS_TGCL0INNERCOINCIDENCE_H
 
-#include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
+#include "L1MuonS1TGCToolInterfaces/TgcSLCandidate.h"
 
 namespace L1Muon {
 namespace TgcL0Floating {
@@ -17,7 +17,7 @@ class InnerCoincidence {
    * configured.
    * @param candidates Candidates to update.
    */
-  void apply(TgcL0CandidateContainer &candidates) const;
+  void apply(TgcSLCandidateContainer &candidates) const;
 };
 
 }  // namespace TgcL0Floating

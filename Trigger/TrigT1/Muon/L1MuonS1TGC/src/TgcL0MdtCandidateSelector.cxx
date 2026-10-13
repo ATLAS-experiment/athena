@@ -11,26 +11,26 @@
 #include <vector>
 
 #include "AthContainers/OwnershipPolicy.h"
-#include "xAODL0MuonCand/TGCCandData.h"
+#include "xAODTrigL1Muon/L1TGCCandData.h"
 
 namespace {
 
 using CandidateGroup = std::pair<std::uint16_t, std::uint16_t>;
 
-CandidateGroup candidateGroup(const xAOD::TGCCandData &candidate) {
-  return {candidate.subdetectorId(), candidate.sectorId()};
+CandidateGroup candidateGroup(const xAOD::L1TGCCandData &candidate) {
+  return {candidate.l1SubdetectorId(), candidate.l1SectorId()};
 }
 
 }  // namespace
 
 namespace L1Muon {
 
-std::unique_ptr<xAOD::TGCCandDataContainer> TgcL0MdtCandidateSelector::select(
-    xAOD::TGCCandDataContainer &candidates) const {
-  auto output = std::make_unique<xAOD::TGCCandDataContainer>(SG::VIEW_ELEMENTS);
-  std::vector<xAOD::TGCCandData *> orderedCandidates;
+std::unique_ptr<xAOD::L1TGCCandDataContainer> TgcL0MdtCandidateSelector::select(
+    xAOD::L1TGCCandDataContainer &candidates) const {
+  auto output = std::make_unique<xAOD::L1TGCCandDataContainer>(SG::VIEW_ELEMENTS);
+  std::vector<xAOD::L1TGCCandData *> orderedCandidates;
   orderedCandidates.reserve(candidates.size());
-  for (xAOD::TGCCandData *candidate : candidates) {
+  for (xAOD::L1TGCCandData *candidate : candidates) {
     if (candidate->tcId() == 0U)
       continue;
     orderedCandidates.emplace_back(candidate);
@@ -38,18 +38,18 @@ std::unique_ptr<xAOD::TGCCandDataContainer> TgcL0MdtCandidateSelector::select(
 
   std::stable_sort(
       orderedCandidates.begin(), orderedCandidates.end(),
-      [](const xAOD::TGCCandData *left, const xAOD::TGCCandData *right) {
+      [](const xAOD::L1TGCCandData *left, const xAOD::L1TGCCandData *right) {
         const CandidateGroup leftGroup = candidateGroup(*left);
         const CandidateGroup rightGroup = candidateGroup(*right);
         if (leftGroup != rightGroup)
           return leftGroup < rightGroup;
-        return left->pt() > right->pt();
+        return left->l1Pt() > right->l1Pt();
       });
 
   CandidateGroup currentGroup{};
   bool haveCurrentGroup{false};
   std::size_t groupCandidate{0U};
-  for (xAOD::TGCCandData *candidate : orderedCandidates) {
+  for (xAOD::L1TGCCandData *candidate : orderedCandidates) {
     const CandidateGroup group = candidateGroup(*candidate);
     if (!haveCurrentGroup || group != currentGroup) {
       currentGroup = group;

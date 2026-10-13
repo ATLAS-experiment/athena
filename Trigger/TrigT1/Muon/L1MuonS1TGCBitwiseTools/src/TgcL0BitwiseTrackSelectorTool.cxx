@@ -6,7 +6,7 @@
 
 namespace L1Muon {
 
-StatusCode TgcL0BitwiseTrackSelectorTool::select(const TgcL0CandidateContainer& candidates, xAOD::TGCCandDataContainer& output, const EventContext& ctx) const {
+StatusCode TgcL0BitwiseTrackSelectorTool::select(const TgcSLCandidateContainer& candidates, xAOD::L1TGCCandDataContainer& output, const EventContext& ctx) const {
   (void)candidates;
   (void)output;
   (void)ctx;

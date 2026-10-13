@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L1MUONS1TGCINTERFACES_TGCL0CANDIDATE_H
-#define L1MUONS1TGCINTERFACES_TGCL0CANDIDATE_H
+#ifndef L1MUONS1TGCINTERFACES_TGCSLCANDIDATE_H
+#define L1MUONS1TGCINTERFACES_TGCSLCANDIDATE_H
 
 #include "AthenaKernel/CLASS_DEF.h"
 
@@ -12,7 +12,7 @@
 namespace L1Muon {
 
 /** @brief Event-local candidate used by the TGC simulation tools. */
-struct TgcL0Candidate {
+struct TgcSLCandidate {
   /// Subdetector identifier.
   std::uint16_t subdetectorId{0};
   /// Trigger Sector identifier.
@@ -100,10 +100,10 @@ struct TgcL0Candidate {
 };
 
 /// Event-local candidate collection.
-using TgcL0CandidateContainer = std::vector<TgcL0Candidate>;
+using TgcSLCandidateContainer = std::vector<TgcSLCandidate>;
 
 }  // namespace L1Muon
 
-CLASS_DEF(L1Muon::TgcL0CandidateContainer, 1316895010, 1)
+CLASS_DEF(L1Muon::TgcSLCandidateContainer, 1237540512, 1)
 
 #endif
