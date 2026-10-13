@@ -306,7 +306,9 @@ StatusCode REvent::readFrom(std::string_view fileName) {
   }
 
   // Set up the main ntuple reader.
-  m_eventReader = ROOT::RNTupleReader::Open(EVENT_RNTUPLE_NAME, fileName);
+  // Files written by Athena also store non-xAOD types (e.g. DataHeader_p6) in the
+  // event ntuple, so protect for unknown types the same way as for the metadata
+  m_eventReader = ROOT::RNTupleReader::Open(opts, EVENT_RNTUPLE_NAME, fileName);
   if (!m_eventReader) {
     ATH_MSG_ERROR("Couldn't access RNTuple \"" << EVENT_RNTUPLE_NAME
                                                << "\" in file: " << fileName);
