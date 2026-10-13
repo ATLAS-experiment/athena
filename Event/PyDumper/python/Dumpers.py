@@ -3143,27 +3143,6 @@ def dump_TrigEMCluster_nolist (c, f):
     return
 
 
-def dump_TrigElectron (p, f):
-    dump_Fourvec (p, f)
-    fprint (f, p.isValid(), p.roiId())
-    fprint (f, '\n   ', p.trackAlgo(), p.trackIndx(), p.charge(),
-            p.Zvtx())
-    fprint (f, '\n   ', p.err_Pt(), p.err_eta(), p.err_phi(), p.err_Zvtx())
-    fprint (f, '\n   ', p.trkClusDeta(), p.trkClusDphi(), p.EtOverPt())
-    return
-
-
-def dump_TrigPhoton (p, f):
-    dump_Fourvec (p, f)
-    fprint (f, p.isValid(), p.roiId())
-    fprint (f, '\n   ', p.Et(), p.HadEt(), p.energyRatio(), p.rCore(),
-            p.dPhi(), p.dEta())
-    fprint (f, '\n   ')
-    if p.cluster():
-        dump_TrigEMCluster (p.cluster(), f)
-    return
-
-
 @nolist
 def dump_TrigInDetTrackCollection (t, f):
     fprintln (f, ' ROI ', t.RoI_ID())
@@ -5050,8 +5029,6 @@ dumpspecs = [
     ["DataVector<TrigVertex>",               dump_TrigVertex],
     ["TrigVertexCollection",                 dump_TrigVertex],
     ["TrigTrackCounts",                      dump_TrigTrackCounts_nolist],
-    ["DataVector<TrigElectron>",             dump_TrigElectron],
-    ["DataVector<TrigPhoton>",               dump_TrigPhoton],
     ["TrigEMCluster",                        dump_TrigEMCluster_nolist],
     ["TrigInDetTrackCollection",             dump_TrigInDetTrackCollection],
     ["TrigCaloClusterContainer",             dump_TrigCaloCluster],
@@ -5084,8 +5061,6 @@ dumpspecs = [
     ["CombinedMuonFeatureContainer",         dump_CombinedMuonFeature],
     ["MuonFeatureContainer",                 dump_MuonFeature],
     ["TrigEMClusterContainer",               dump_TrigEMCluster],
-    ["TrigElectronContainer",                dump_TrigElectron],
-    ["TrigPhotonContainer",                  dump_TrigPhoton],
     ["TrigTauClusterContainer",              dump_TrigTauCluster],
     ["TrigTauTracksInfoCollection",          dump_TrigTauTracksInfo],
     ["TrigSpacePointCountsCollection",       dump_TrigSpacePointCounts],

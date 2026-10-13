@@ -718,11 +718,8 @@ TriggerHLTList = [
     ('IsoMuonFeature#HLT',                                                'BS ESD',                 'Muon'),
     ('TrigMuonClusterFeature#HLT_MuonCluster',                            'BS ESD', 'Muon'),
     ('CombinedMuonFeature#HLT',                                           'BS ESD AODFULL AODSLIM', 'Muon'),
-    ('TrigPhotonContainer#HLT_L2PhotonFex',                               '',                       'Egamma'),
     ('TileMuFeature#HLT',                                                 'BS ESD',                 'Muon'),
     ('TileTrackMuFeature#HLT',                                            'BS ESD',                 'Muon'),
-    ('TrigElectronContainer#HLT_L2IDCaloFex',                             '',                       'Egamma'),  # ? is this still in use?? 
-    ('TrigElectronContainer#HLT_L2ElectronFex',                           '',                       'Egamma'),
     ('TrigT2MbtsBits#HLT_T2Mbts',                                         'BS ESD AODFULL AODSLIM', 'MinBias'),
     ('TrigSpacePointCounts#HLT_spacepoints',                              'BS ESD AODFULL AODSLIM', 'MinBias'), # ? do we realy need it!
     ('TrigTrtHitCounts#HLT_TrtHitCount',                                  '',                       'MinBias'),
@@ -1052,8 +1049,6 @@ EDMDetails[ "TrigTauCluster" ]            = {'persistent':"TrigTauClusterContain
 EDMDetails[ "TrigTauClusterDetails" ]     = {'persistent':"TrigTauClusterDetailsContainer_p2",  'typealias':'TauDetails', 'collection': 'TrigTauClusterDetailsContainer' }
 EDMDetails[ "TrigTauTracksInfo" ]         = {'persistent':"TrigTauTracksInfoCollection_p2",     'typealias':'TauTrInfo', 'collection':'TrigTauTracksInfoCollection'}
 EDMDetails[ "TrigT2Jet" ]                 = {'persistent':"TrigT2JetContainer_p3",              'typealias':'T2Jet', 'collection':'TrigT2JetContainer'}
-EDMDetails[ "TrigElectronContainer" ]     = {'persistent':"TrigElectronContainer_p3",           'typealias':'AOD' }
-EDMDetails[ "TrigPhotonContainer" ]       = {'persistent':"TrigPhotonContainer_p3",             'typealias':'AOD' }
 EDMDetails[ "TrigTau" ]                   = {'persistent':"TrigTauContainer_p3",                'typealias':'tau', 'collection':'TrigTauContainer'}
 EDMDetails[ "TrigL2BjetContainer" ]       = {'persistent':"TrigL2BjetContainer_p3",             'typealias':'AOD' }
 EDMDetails[ "TrigMissingET" ]             = {'persistent':"TrigMissingETContainer_p3",          'typealias':'MET', 'collection':'TrigMissingETContainer'}
@@ -1271,14 +1266,13 @@ EDMDetails['xAOD::CMXRoIAuxContainer']                    = {'persistent': "", '
 EDMLibraries = [ 'TrigSteeringEvent', 'TrigMuonEvent',
                  'TrigCaloEvent',
                  'TrigInDetEvent',
-                 'TrigParticle',
                  'TrigDecisionEvent', 'TrigMonitoringEvent',
                  'TrigTopoEvent',
                  'TrigMonitoringEventTPCnv',   'RecTPCnv',
                  'TrigCaloEventTPCnv',
                  'TrigDecisionEventTPCnv',     'TrigInDetEventTPCnv',
                  'TrigMuonEventTPCnv',
-                 'TrigParticleTPCnv',          'TrigSteeringEventTPCnv',
+                 'TrigSteeringEventTPCnv',
                  'TrigTopoEventTPCnv',
                  'RecTPCnvDict',
                  'TrigMonitoringEventTPCnvDict',

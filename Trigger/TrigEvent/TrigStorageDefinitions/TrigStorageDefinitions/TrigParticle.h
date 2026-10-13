@@ -6,13 +6,6 @@
 #define TRIGSTORAGEDEF_TRIGPARTICLEEVENT
 #include "TrigStorageDefinitions/EDM_TypeInformation.h"
 
-namespace Analysis{
-  class TauDetails;
-  class TauDetailsContainer;
-  class TauJet;
-  class TauJetContainer;  
-}
-
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODEgamma/ElectronAuxContainer.h"
 
@@ -49,18 +42,6 @@ namespace Analysis{
 
 
 HLT_BEGIN_TYPE_REGISTRATION
-    // Level2
-  HLT_REGISTER_TYPE(class TrigElectron, class TrigElectronContainer,class  TrigElectronContainer)
-  HLT_REGISTER_TYPE(class TrigPhoton, class TrigPhotonContainer,class TrigPhotonContainer)
-     // EF
-  HLT_REGISTER_TYPE(class JetKeyDescriptor, class JetKeyDescriptor,class JetKeyDescriptorCollection )
-  HLT_REGISTER_TYPE(class JetMomentMap,class  JetMomentMap,class JetMomentMapCollection )
-  HLT_REGISTER_TYPE(class Jet, class  JetCollection,class JetCollection )
-  HLT_REGISTER_TYPE(class egamma, class  egammaContainer,class egammaContainer)
-  HLT_REGISTER_TYPE(class egDetail, class egDetailContainer, class egDetailContainer )
-
-  // xAOD
-  //  HLT_REGISTER_TYPE(xAOD::Egamma, xAOD::EgammaContainer, xAOD::EgammaContainer, xAOD::EgammaAuxContainer)  
   HLT_REGISTER_TYPE(xAOD::Electron, xAOD::ElectronContainer, xAOD::ElectronContainer, xAOD::ElectronTrigAuxContainer)
   HLT_REGISTER_TYPE(xAOD::Photon, xAOD::PhotonContainer, xAOD::PhotonContainer, xAOD::PhotonTrigAuxContainer)
   HLT_REGISTER_TYPE(xAOD::TauJet, xAOD::TauJetContainer, xAOD::TauJetContainer, xAOD::TauJetAuxContainer)  

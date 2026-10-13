@@ -87,8 +87,6 @@ namespace TrigDec {
     SPECIALZE_CONTAINER_FOR_CLASS(a::x, y)
 
     DECLARE_ATTACHED_CONTAINER(CaloCell, CaloCellContainer)
-    DECLARE_ATTACHED_CONTAINER(TrigPhoton, TrigPhotonContainer)
-    DECLARE_ATTACHED_CONTAINER(TrigElectron, TrigElectronContainer)
     //DECLARE_ATTACHED_CONTAINER(CosmicMuon, CosmicMuonCollection)
     //DECLARE_ATTACHED_CONTAINER(MdtTrackSegment, MdtTrackSegmentCollection)
     DECLARE_ATTACHED_CONTAINER(TrigInDetTrack, TrigInDetTrackCollection)
