@@ -271,9 +271,6 @@
 + MuonSpectrometer/MuonPhaseII/MuonG4/MuonSimHitSorting
 + MuonSpectrometer/MuonPhaseII/Event/xAOD/xAODMuonSimHit
 + MuonSpectrometer/MuonPhaseII/Event/xAOD/xAODMuonSimHitAthenaPool
-+ Reconstruction/RecEvent
-+ Reconstruction/RecEventAthenaPool
-+ Reconstruction/RecEventTPCnv
 + Simulation/Barcode/BarcodeInterfaces
 + Simulation/Barcode/BarcodeServices
 + Simulation/BeamEffects
