@@ -126,7 +126,7 @@ class ITkStripsRodDecoder : public extends<AthAlgTool, IITkStripsRodDecoder>
     // Variables necessary for makeRDO
     int strip {INVALID_STRIP};
     int groupSize{0};
-    int timeBin{0};
+    int timeBin{2};
     IdentifierHash linkIDHash; // Determined from header and changed for links using Rx redundancy (waferHash)
     Identifier collID; // Determined from linkIDHash (waferID)
     int errors{0}; // Encodes the errors on the header (bit 4: error in condensed mode 1st hit, bit 5: error in condensed mode 2nd hit)
@@ -157,6 +157,7 @@ class ITkStripsRodDecoder : public extends<AthAlgTool, IITkStripsRodDecoder>
     void reset() {
       strip = INVALID_STRIP;
       groupSize = 0;
+      timeBin = 2;
       errors = 0;
       saved.fill(false);
       errorHit.clear();
