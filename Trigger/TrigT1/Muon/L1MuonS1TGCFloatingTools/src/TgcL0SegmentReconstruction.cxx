@@ -25,9 +25,9 @@ using Config = L1Muon::TgcL0Floating::SegmentReconstructionConfig;
 using Statistics = L1Muon::TgcL0Floating::SegmentStatistics;
 using Station = L1Muon::TgcL0Floating::Station;
 using GroupKey = L1Muon::TgcL0Floating::HitGroupKey;
-using OutputSegment = L1Muon::TgcL0Segment;
-using OutputSegments = L1Muon::TgcL0SegmentContainer;
-using Projection = L1Muon::TgcL0SegmentProjection;
+using OutputSegment = L1Muon::TgcSLSegment;
+using OutputSegments = L1Muon::TgcSLSegmentContainer;
+using Projection = L1Muon::TgcSLSegmentProjection;
 
 constexpr std::uint8_t stationBit(const Station station) {
   if (station == Station::M1) return 0x1U;
@@ -539,9 +539,9 @@ SegmentReconstruction::SegmentReconstruction(SegmentReconstructionConfig config)
 
 StatusCode SegmentReconstruction::build(
     const StationCoincidenceContainer& coincidences,
-    TgcL0CandidateContainer& candidates,
+    TgcSLCandidateContainer& candidates,
     SegmentStatistics& statistics,
-    TgcL0SegmentContainer* validationSegments) const {
+    TgcSLSegmentContainer* validationSegments) const {
   candidates.clear();
   statistics = SegmentStatistics{};
   if (validationSegments != nullptr) validationSegments->clear();
@@ -617,7 +617,7 @@ StatusCode SegmentReconstruction::build(
 
       const ProjectionSegment& wire = *pair.wire;
       const ProjectionSegment& strip = *pair.strip;
-      TgcL0Candidate candidate;
+      TgcSLCandidate candidate;
       candidate.subdetectorId = groupKey.subDetectorId;
       candidate.sectorId = groupKey.triggerSector;
       candidate.readoutSector = pair.position.wire->detectorSector;

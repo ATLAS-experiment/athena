@@ -15,7 +15,7 @@ class TgcL0FloatingInnerCoincidenceTool final
   using base_class::base_class;
 
   /// \copydoc ITgcL0InnerCoincidenceTool::apply
-  StatusCode apply(TgcL0CandidateContainer& candidates,
+  StatusCode apply(TgcSLCandidateContainer& candidates,
                    const EventContext& ctx) const override;
 };
 

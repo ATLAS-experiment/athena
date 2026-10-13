@@ -7,8 +7,8 @@
 namespace L1Muon {
 namespace TgcL0Floating {
 
-void InnerCoincidence::apply(TgcL0CandidateContainer &candidates) const {
-  for (TgcL0Candidate &candidate : candidates) {
+void InnerCoincidence::apply(TgcSLCandidateContainer &candidates) const {
+  for (TgcSLCandidate &candidate : candidates) {
     candidate.pt = candidate.preInnerCoincidencePt;
     candidate.threshold = candidate.preInnerCoincidenceThreshold;
     candidate.hasInnerCoincidence = false;

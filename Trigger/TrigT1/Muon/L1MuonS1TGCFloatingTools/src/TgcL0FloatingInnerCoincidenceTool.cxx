@@ -9,7 +9,7 @@
 namespace L1Muon {
 
 StatusCode TgcL0FloatingInnerCoincidenceTool::apply(
-    TgcL0CandidateContainer &candidates, const EventContext &ctx) const {
+    TgcSLCandidateContainer &candidates, const EventContext &ctx) const {
   (void)ctx;
   const TgcL0Floating::InnerCoincidence innerCoincidence;
   innerCoincidence.apply(candidates);

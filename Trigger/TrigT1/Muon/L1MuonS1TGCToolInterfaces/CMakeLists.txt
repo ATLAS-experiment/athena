@@ -5,4 +5,4 @@ atlas_subdir( L1MuonS1TGCToolInterfaces )
 atlas_add_library( L1MuonS1TGCToolInterfaces
                    INTERFACE
                    PUBLIC_HEADERS L1MuonS1TGCToolInterfaces
-                   LINK_LIBRARIES AthenaKernel GaudiKernel MuonRDO xAODL0MuonCand )
+                   LINK_LIBRARIES AthenaKernel GaudiKernel MuonRDO xAODTrigL1Muon )

@@ -6,7 +6,7 @@
 
 namespace L1Muon {
 
-StatusCode TgcL0BitwiseCandidateBuilderTool::build(const TgcRdoContainer& rdos, TgcL0CandidateContainer& candidates, const EventContext& ctx) const {
+StatusCode TgcL0BitwiseCandidateBuilderTool::build(const TgcRdoContainer& rdos, TgcSLCandidateContainer& candidates, const EventContext& ctx) const {
   (void)rdos;
   (void)candidates;
   (void)ctx;

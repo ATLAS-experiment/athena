@@ -21,20 +21,20 @@ constexpr std::uint32_t encodeField(const std::uint32_t value,
 namespace L1Muon {
 
 TgcL0SectorLogicWords TgcL0SectorLogicWordEncoder::encode(
-    const xAOD::TGCCandData& candidate) {
+    const xAOD::L1TGCCandData& candidate) {
   TgcL0SectorLogicWords words;
   words.candWord =
-      encodeField(candidate.pt(), bits::RUN4_SL2MUCTPI_PT_VAL_SHIFT,
+      encodeField(candidate.l1Pt(), bits::RUN4_SL2MUCTPI_PT_VAL_SHIFT,
                   bits::RUN4_SL2MUCTPI_PT_VAL_MASK) |
-      encodeField(candidate.candCharge(), bits::RUN4_SL2MUCTPI_CHARGE_SHIFT,
+      encodeField(candidate.l1CandCharge(), bits::RUN4_SL2MUCTPI_CHARGE_SHIFT,
                   bits::RUN4_SL2MUCTPI_CHARGE_MASK) |
-      encodeField(candidate.phi(), bits::RUN4_SL2MUCTPI_PHI_SHIFT,
+      encodeField(candidate.l1Phi(), bits::RUN4_SL2MUCTPI_PHI_SHIFT,
                   bits::RUN4_SL2MUCTPI_PHI_MASK) |
-      encodeField(candidate.eta(), bits::RUN4_SL2MUCTPI_ETA_SHIFT,
+      encodeField(candidate.l1Eta(), bits::RUN4_SL2MUCTPI_ETA_SHIFT,
                   bits::RUN4_SL2MUCTPI_ETA_MASK);
 
   words.candExtraWord =
-      encodeField(candidate.threshold(),
+      encodeField(candidate.l1Threshold(),
                   bits::RUN4_SL2MUCTPI_PTTHRESHOLD_SHIFT,
                   bits::RUN4_SL2MUCTPI_PTTHRESHOLD_MASK) |
       encodeField(candidate.tcId(), bits::RUN4_SL2MUCTPI_TCID_SHIFT,

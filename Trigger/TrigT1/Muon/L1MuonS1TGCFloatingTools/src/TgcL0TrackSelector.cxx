@@ -11,36 +11,34 @@
 #include <utility>
 #include <vector>
 
-#include "xAODL0MuonCand/TGCCandData.h"
+#include "xAODTrigL1Muon/L1TGCCandData.h"
 
 namespace {
 
 using CandidateGroup = std::pair<std::uint16_t, std::uint16_t>;
 
-CandidateGroup candidateGroup(const L1Muon::TgcL0Candidate &candidate) {
+CandidateGroup candidateGroup(const L1Muon::TgcSLCandidate &candidate) {
   return {candidate.subdetectorId, candidate.sectorId};
 }
 
-float selectionPt(const L1Muon::TgcL0Candidate &candidate) {
+float selectionPt(const L1Muon::TgcSLCandidate &candidate) {
   return std::isfinite(candidate.pt) && candidate.pt > 0.F ? candidate.pt : 0.F;
 }
 
-void fillOutputCandidate(const L1Muon::TgcL0Candidate &input, std::uint8_t tcId,
-                         xAOD::TGCCandData &output) {
+void fillOutputCandidate(const L1Muon::TgcSLCandidate &input, std::uint8_t tcId,
+                         xAOD::L1TGCCandData &output) {
   output.initialize(input.subdetectorId, input.sectorId, input.bcTag);
-  output.setEta(input.eta);
-  output.setPhi(input.phi);
-  output.setPt(selectionPt(input));
-  output.setThreshold(input.threshold);
-  output.setCandCharge(input.charge > 0 ? 1U : 0U);
-  output.setMdtFlag(0U);
-  output.setCandQuality(xAOD::ICandData_v1::Quality::Q_UNDEFINED);
+  output.setL1Eta(input.eta);
+  output.setL1Phi(input.phi);
+  output.setL1Pt(selectionPt(input));
+  output.setL1Threshold(input.threshold);
+  output.setL1CandCharge(input.charge > 0 ? 1U : 0U);
   output.setCoinType(0U);
   output.setHasInnerCoincidence(input.hasInnerCoincidence);
   output.setGoodMagneticField(input.goodMagneticField);
   output.setDeltaPhi(input.deltaPhi);
   output.setDeltaTheta(input.deltaTheta);
-  output.setNswSegment(input.nswSegment);
+  output.setL1NswSegment(input.nswSegment);
   output.setTcId(tcId);
 }
 
@@ -49,18 +47,18 @@ void fillOutputCandidate(const L1Muon::TgcL0Candidate &input, std::uint8_t tcId,
 namespace L1Muon {
 namespace TgcL0Floating {
 
-void TrackSelector::select(const TgcL0CandidateContainer &candidates,
-                           xAOD::TGCCandDataContainer &output) const {
-  std::vector<const TgcL0Candidate *> orderedCandidates;
+void TrackSelector::select(const TgcSLCandidateContainer &candidates,
+                           xAOD::L1TGCCandDataContainer &output) const {
+  std::vector<const TgcSLCandidate *> orderedCandidates;
   orderedCandidates.reserve(candidates.size());
-  for (const TgcL0Candidate &candidate : candidates) {
+  for (const TgcSLCandidate &candidate : candidates) {
     if (candidate.threshold == 0U)
       continue;
     orderedCandidates.emplace_back(&candidate);
   }
 
   std::stable_sort(orderedCandidates.begin(), orderedCandidates.end(),
-                   [](const TgcL0Candidate *left, const TgcL0Candidate *right) {
+                   [](const TgcSLCandidate *left, const TgcSLCandidate *right) {
                      const CandidateGroup leftGroup = candidateGroup(*left);
                      const CandidateGroup rightGroup = candidateGroup(*right);
                      if (leftGroup != rightGroup)
@@ -79,7 +77,7 @@ void TrackSelector::select(const TgcL0CandidateContainer &candidates,
   CandidateGroup currentGroup{};
   bool haveCurrentGroup{false};
   std::size_t groupCandidate{0U};
-  for (const TgcL0Candidate *candidate : orderedCandidates) {
+  for (const TgcSLCandidate *candidate : orderedCandidates) {
     const CandidateGroup group = candidateGroup(*candidate);
     if (!haveCurrentGroup || group != currentGroup) {
       currentGroup = group;
@@ -90,8 +88,8 @@ void TrackSelector::select(const TgcL0CandidateContainer &candidates,
       continue;
 
     ++groupCandidate;
-    xAOD::TGCCandData *outputCandidate =
-        output.push_back(std::make_unique<xAOD::TGCCandData>());
+    xAOD::L1TGCCandData *outputCandidate =
+        output.push_back(std::make_unique<xAOD::L1TGCCandData>());
     fillOutputCandidate(*candidate, static_cast<std::uint8_t>(groupCandidate),
                         *outputCandidate);
   }

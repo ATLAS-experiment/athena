@@ -9,8 +9,8 @@
 namespace L1Muon {
 
 StatusCode TgcL0FloatingTrackSelectorTool::select(
-    const TgcL0CandidateContainer &candidates,
-    xAOD::TGCCandDataContainer &output, const EventContext &ctx) const {
+    const TgcSLCandidateContainer &candidates,
+    xAOD::L1TGCCandDataContainer &output, const EventContext &ctx) const {
   (void)ctx;
   const TgcL0Floating::TrackSelector selector;
   selector.select(candidates, output);

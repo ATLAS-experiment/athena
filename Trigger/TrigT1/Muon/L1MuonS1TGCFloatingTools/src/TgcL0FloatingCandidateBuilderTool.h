@@ -28,13 +28,13 @@ class TgcL0FloatingCandidateBuilderTool final
 
   /// \copydoc ITgcL0CandidateBuilderTool::build
   StatusCode build(const TgcRdoContainer& rdos,
-                   TgcL0CandidateContainer& candidates,
+                   TgcSLCandidateContainer& candidates,
                    const EventContext& ctx) const override;
 
   /// \copydoc ITgcL0CandidateBuilderTool::build
   StatusCode build(const TgcRdoContainer& rdos,
-                   TgcL0CandidateContainer& candidates,
-                   TgcL0SegmentContainer* segments,
+                   TgcSLCandidateContainer& candidates,
+                   TgcSLSegmentContainer* segments,
                    const EventContext& ctx) const override;
 
  private:

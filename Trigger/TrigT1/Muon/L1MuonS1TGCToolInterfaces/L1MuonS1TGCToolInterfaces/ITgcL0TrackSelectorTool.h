@@ -6,12 +6,12 @@
 
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IAlgTool.h"
-#include "L1MuonS1TGCToolInterfaces/TgcL0Candidate.h"
-#include "xAODL0MuonCand/TGCCandDataContainer.h"
+#include "L1MuonS1TGCToolInterfaces/TgcSLCandidate.h"
+#include "xAODTrigL1Muon/L1TGCCandDataContainer.h"
 
 namespace L1Muon {
 
-/** @brief Interface for selecting TGC candidates and filling TGCCandData. */
+/** @brief Interface for selecting TGC candidates and filling L1TGCCandData. */
 class ITgcL0TrackSelectorTool : virtual public IAlgTool {
  public:
   DeclareInterfaceID(ITgcL0TrackSelectorTool, 1, 0);
@@ -19,11 +19,11 @@ class ITgcL0TrackSelectorTool : virtual public IAlgTool {
   /**
    * @brief Select candidates and fill the output container.
    * @param candidates Input candidate collection.
-   * @param output Output TGCCandData container.
+   * @param output Output L1TGCCandData container.
    * @param ctx Event context.
    */
-  virtual StatusCode select(const TgcL0CandidateContainer& candidates,
-                            xAOD::TGCCandDataContainer& output,
+  virtual StatusCode select(const TgcSLCandidateContainer& candidates,
+                            xAOD::L1TGCCandDataContainer& output,
                             const EventContext& ctx) const = 0;
 };
 

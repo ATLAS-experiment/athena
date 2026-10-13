@@ -7,7 +7,7 @@
 
 #include <cstdint>
 
-#include "xAODL0MuonCand/TGCCandData.h"
+#include "xAODTrigL1Muon/L1TGCCandData.h"
 
 namespace L1Muon {
 
@@ -21,7 +21,7 @@ struct TgcL0SectorLogicWords {
 class TgcL0SectorLogicWordEncoder final {
  public:
   /** @brief Encode one TGC candidate without MDT or overlap information. */
-  static TgcL0SectorLogicWords encode(const xAOD::TGCCandData& candidate);
+  static TgcL0SectorLogicWords encode(const xAOD::L1TGCCandData& candidate);
 };
 
 }  // namespace L1Muon

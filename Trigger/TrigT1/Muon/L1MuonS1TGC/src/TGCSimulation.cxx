@@ -7,7 +7,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 #include "TgcL0MdtCandidateSelector.h"
-#include "xAODL0MuonCand/TGCCandDataAuxContainer.h"
+#include "xAODTrigL1Muon/L1TGCCandDataAuxContainer.h"
 #include "xAODMuonViews/FillContainer.h"
 
 #include <memory>
@@ -35,36 +35,36 @@ StatusCode TGCSimulation::execute(const EventContext& ctx) const {
       "nTgcRdoCollections", tgcRdoContainer->size());
   Monitored::Group(m_monTool, nTgcRdoCollections);
 
-  TgcL0CandidateContainer candidates;
-  std::unique_ptr<TgcL0SegmentContainer> validationSegments;
+  TgcSLCandidateContainer candidates;
+  std::unique_ptr<TgcSLSegmentContainer> validationSegments;
   if (!m_validationSegmentKey.empty()) {
-    validationSegments = std::make_unique<TgcL0SegmentContainer>();
+    validationSegments = std::make_unique<TgcSLSegmentContainer>();
   }
   ATH_CHECK(m_candidateBuilderTool->build(
       *tgcRdoContainer, candidates, validationSegments.get(), ctx));
   if (validationSegments) {
-    SG::WriteHandle<TgcL0SegmentContainer> segmentHandle{
+    SG::WriteHandle<TgcSLSegmentContainer> segmentHandle{
         m_validationSegmentKey, ctx};
     ATH_CHECK(segmentHandle.record(std::move(validationSegments)));
   }
   if (!m_validationCandidateKey.empty()) {
-    SG::WriteHandle<TgcL0CandidateContainer> validationCandidates{
+    SG::WriteHandle<TgcSLCandidateContainer> validationCandidates{
         m_validationCandidateKey, ctx};
     ATH_CHECK(validationCandidates.record(
-        std::make_unique<TgcL0CandidateContainer>(candidates)));
+        std::make_unique<TgcSLCandidateContainer>(candidates)));
   }
   ATH_CHECK(m_innerCoincidenceTool->apply(candidates, ctx));
 
-  xAOD::FillContainer<xAOD::TGCCandDataContainer,
-                      xAOD::TGCCandDataAuxContainer>
+  xAOD::FillContainer<xAOD::L1TGCCandDataContainer,
+                      xAOD::L1TGCCandDataAuxContainer>
       output{};
   ATH_CHECK(m_trackSelectorTool->select(candidates, *output, ctx));
   const TgcL0MdtCandidateSelector mdtCandidateSelector;
-  std::unique_ptr<xAOD::TGCCandDataContainer> outputToMdt =
+  std::unique_ptr<xAOD::L1TGCCandDataContainer> outputToMdt =
       mdtCandidateSelector.select(*output);
 
   ATH_CHECK(output.record(m_outputKey, ctx));
-  SG::WriteHandle<xAOD::TGCCandDataContainer> outputToMdtHandle{
+  SG::WriteHandle<xAOD::L1TGCCandDataContainer> outputToMdtHandle{
       m_outputToMdtKey, ctx};
   ATH_CHECK(outputToMdtHandle.record(std::move(outputToMdt)));
   return StatusCode::SUCCESS;
