@@ -150,6 +150,9 @@ def _main():
 	parser.add_argument('--hideTrigger',
 						action='store_true',
 						help="Hide trigger metadata")
+	parser.add_argument('--normalizeTypeNames',
+						action='store_true',
+						help="Report RNTuple item types using TTree class names and TTree item names using RNTuple field names, with the items sorted")
 	args = parser.parse_args()
 
 	verbose = args.verbose
@@ -174,7 +177,8 @@ def _main():
 	startTime = time.time()
 	msg.info('Imported headers in: {0} miliseconds'.format((time.time() - startTime) * 1e3))
 	msg.info('The output file is: {0}'.format(output))
-	metadata = read_metadata(filenames, file_type, mode= mode, meta_key_filter= meta_key_filter, promote=args.promote)
+	metadata = read_metadata(filenames, file_type, mode= mode, meta_key_filter= meta_key_filter, promote=args.promote,
+							normalize_type_names=args.normalizeTypeNames)
 
 	if output is None:
 		if is_json:

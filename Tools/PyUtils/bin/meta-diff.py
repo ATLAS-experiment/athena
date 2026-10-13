@@ -128,6 +128,12 @@ def main():
         help="Ignore trigger metadata",
     )
 
+    parser.add_argument(
+        "--normalizeTypeNames",
+        action='store_true',
+        help="Report RNTuple item types using TTree class names and TTree item names using RNTuple field names, with the items sorted",
+    )
+
     args = parser.parse_args()
 
     if len(args.files) != 2:
@@ -153,6 +159,7 @@ def main():
         regex=args.regex,
         key_only=args.key_only,
         ignore_trigger=args.ignoreTrigger,
+        normalize_type_names=args.normalizeTypeNames,
     )
 
 
