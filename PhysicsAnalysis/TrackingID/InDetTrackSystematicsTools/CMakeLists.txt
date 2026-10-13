@@ -58,6 +58,12 @@ if( NOT XAOD_STANDALONE )
       PRIVATE_WORKING_DIRECTORY
       PROPERTIES TIMEOUT 300 )
 
+   atlas_add_test( TrackSmearingAlgUnknownSyst
+      SCRIPT test_TrackSmearingAlg.py --unknown-syst
+      POST_EXEC_SCRIPT nopost.sh
+      PRIVATE_WORKING_DIRECTORY
+      PROPERTIES TIMEOUT 300 )
+
    atlas_add_test( JetTrackFilteringAlg
       SCRIPT test_JetTrackFilteringAlg.py
       POST_EXEC_SCRIPT noerror.sh

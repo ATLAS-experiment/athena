@@ -8,6 +8,9 @@
 #   TRK_RES_D0_MEAS  -> InDetTrackSmearingTool
 #   TRK_BIAS_D0_WM   -> InDetTrackBiasingTool
 #
+# With --unknown-syst, a misspelt systematic is configured instead and the
+# test passes only if StrictMode makes initialize fail.
+#
 # Only reads InDetTrackParticles directly -- no element-link dereference --
 # so any format that stores tracks works (including DAOD_PHYS).
 
@@ -36,6 +39,11 @@ def main():
         help='Input AOD/xAOD file (default: defaultTestFiles.AOD_RUN3_MC)',
     )
     parser.add_argument('--events', type=int, default=10)
+    parser.add_argument(
+        '--unknown-syst',
+        action='store_true',
+        help='Expect failure for a systematic unknown to all tools',
+    )
     args = parser.parse_args()
 
     # mc23c has no dedicated recommendations; treat as mc23d for testing.
@@ -52,15 +60,19 @@ def main():
     acc.merge(PoolReadCfg(flags))
     acc.merge(PileupReweightingAlgCfg(flags))
 
-    for syst in ['TRK_RES_D0_MEAS', 'TRK_BIAS_D0_WM']:
+    systs = ['TRK_RES_D0_MAES'] if args.unknown_syst else [
+        'TRK_RES_D0_MEAS', 'TRK_BIAS_D0_WM']
+    for syst in systs:
         acc.merge(TrackSmearingAlgCfg(
             flags,
             syst=syst,
             input_tracks='InDetTrackParticles',
             output_tracks=f'InDetTrackParticles_{syst}',
+            strict_mode=True,
         ))
 
-    sys.exit(acc.run(args.events).isFailure())
+    sc = acc.run(args.events)
+    sys.exit(sc.isSuccess() if args.unknown_syst else sc.isFailure())
 
 
 if __name__ == '__main__':

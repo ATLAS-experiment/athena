@@ -242,7 +242,7 @@ def TrackSystematicsAlgCfg(flags, name="InDetTrackSystematicsAlg", **kwargs):
 
 
 def TrackSmearingAlgCfg(flags, syst, input_tracks, output_tracks,
-                        seed=4, bias_kwargs={}):
+                        seed=4, bias_kwargs={}, strict_mode=False):
     """Shallow-copy input_tracks and apply smearing/biasing for one syst.
 
     syst is a single smearing variation string (TRK_RES_*, TRK_BIAS_*), or
@@ -253,6 +253,9 @@ def TrackSmearingAlgCfg(flags, syst, input_tracks, output_tracks,
     as calibration kwargs (calibFiles, runNumberBounds, ...).  If none are
     supplied, InDetTrackBiasingCalibKwargs(flags) is called to derive them;
     exceptions from that call propagate to the caller.
+
+    If strict_mode is True, the algorithm fails in initialize when syst
+    is not known to the smearing or biasing tool.
     """
     ca = ComponentAccumulator()
 
@@ -278,6 +281,7 @@ def TrackSmearingAlgCfg(flags, syst, input_tracks, output_tracks,
         InputTrackContainer=input_tracks,
         OutputTrackContainer=output_tracks,
         SystematicVariation=syst,
+        StrictMode=strict_mode,
     )
     if biasingTool is not None:
         alg.BiasingTool = biasingTool

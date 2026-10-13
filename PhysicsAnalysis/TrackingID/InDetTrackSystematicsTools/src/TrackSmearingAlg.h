@@ -36,6 +36,9 @@ private:
   Gaudi::Property<std::string> m_systematicVariation{
       this, "SystematicVariation", "",
       "Systematic variation name (empty = nominal)"};
+  Gaudi::Property<bool> m_strictMode{
+      this, "StrictMode", false,
+      "Fail in initialize if no tool is affected by SystematicVariation"};
 
   // Built from m_systematicVariation in initialize(), const thereafter.
   // Passed to the reentrant applyCorrection(track, syst) overload in execute().
