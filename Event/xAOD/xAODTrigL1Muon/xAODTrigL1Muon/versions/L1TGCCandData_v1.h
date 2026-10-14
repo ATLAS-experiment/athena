@@ -14,7 +14,7 @@ namespace xAOD {
 
   /** @brief Data class describing the L0 muon candidates produced by TGC-SL
    *
-   * The candidates are consumed by MDT-TP and L0MuonEndcap. Common candidate
+   * The candidates are consumed by MDT-TP and L1MuonEndcap. Common candidate
    * quantities (including the trigger-candidate identifier) are provided by
    * IL1CandData_v1; this class stores only TGC-specific information.
    */

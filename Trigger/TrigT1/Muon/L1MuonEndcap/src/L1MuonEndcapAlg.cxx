@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "L0MuonEndcapAlg.h"
+#include "L1MuonEndcapAlg.h"
 
 #include <cstdint>
 #include <memory>
@@ -22,13 +22,13 @@ constexpr std::uint16_t unsetFiberId = 0U;
 
 }  // namespace
 
-StatusCode L0MuonEndcapAlg::initialize() {
+StatusCode L1MuonEndcapAlg::initialize() {
   ATH_CHECK(m_inputKey.initialize());
   ATH_CHECK(m_outputKey.initialize());
   return StatusCode::SUCCESS;
 }
 
-StatusCode L0MuonEndcapAlg::execute(const EventContext& ctx) const {
+StatusCode L1MuonEndcapAlg::execute(const EventContext& ctx) const {
   const xAOD::L1TGCCandDataContainer* inputHandle{};
   ATH_CHECK(SG::get(inputHandle, m_inputKey, ctx));
 

@@ -4,21 +4,21 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
-def L0MuonEndcapAlgCfg(flags, name="L0MuonEndcapAlg", **kwargs):
+def L1MuonEndcapAlgCfg(flags, name="L1MuonEndcapAlg", **kwargs):
     """Configure the initial TGC endcap data-flow boundary."""
     result = ComponentAccumulator()
-    result.addEventAlgo(CompFactory.L1Muon.L0MuonEndcapAlg(name, **kwargs))
+    result.addEventAlgo(CompFactory.L1Muon.L1MuonEndcapAlg(name, **kwargs))
     return result
 
 
-def L0MuonTGCChainCfg(flags, **kwargs):
+def L1MuonTGCChainCfg(flags, **kwargs):
     """Configure the minimal S1TGC-to-Endcap data-flow chain."""
     result = ComponentAccumulator()
 
     from L1MuonS1TGC.L1MuonS1TGCConfig import L1MuonTGCSimCfg
 
     result.merge(L1MuonTGCSimCfg(flags, **kwargs.pop("S1TGC", {})))
-    result.merge(L0MuonEndcapAlgCfg(flags, **kwargs.pop("Endcap", {})))
+    result.merge(L1MuonEndcapAlgCfg(flags, **kwargs.pop("Endcap", {})))
     if kwargs:
         raise TypeError(f"Unexpected configuration groups: {sorted(kwargs)}")
     return result
@@ -43,13 +43,13 @@ if __name__ == "__main__":
 
     flags = initConfigFlags()
     flags.Common.MsgSuppression = False
-    flags.Output.RDOFileName = "L0MuonEndcap.RDO.pool.root"
+    flags.Output.RDOFileName = "L1MuonEndcap.RDO.pool.root"
 
     flags, acc = setupGeoR4TestCfg(args, flags)
 
     from AthenaCommon.Constants import DEBUG
     acc.merge(
-        L0MuonTGCChainCfg(
+        L1MuonTGCChainCfg(
             flags,
             S1TGC={"OutputLevel": DEBUG},
             Endcap={"OutputLevel": DEBUG},
@@ -65,8 +65,8 @@ if __name__ == "__main__":
             ItemList=[
                 "xAOD::L1TGCCandDataContainer#L1TGCCandData",
                 "xAOD::L1TGCCandDataAuxContainer#L1TGCCandDataAux.",
-                "xAOD::SectorLogicCandDataContainer#L0MuonTGCSectorLogicCandData",
-                "xAOD::SectorLogicCandDataAuxContainer#L0MuonTGCSectorLogicCandDataAux.",
+                "xAOD::SectorLogicCandDataContainer#L1EndcapCandData",
+                "xAOD::SectorLogicCandDataAuxContainer#L1EndcapCandDataAux.",
             ],
             takeItemsFromInput=False,
         )
