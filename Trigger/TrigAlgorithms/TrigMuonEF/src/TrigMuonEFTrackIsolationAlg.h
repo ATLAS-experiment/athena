@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGMUONEF_TRIGMUONEFTRACKISOLATIONALG_H
@@ -13,13 +13,11 @@
 #include "AthenaMonitoringKernel/Monitored.h"
 
 // Retrieve containers
-#include "Particle/TrackParticleContainer.h" 
+#include "xAODTracking/TrackParticleContainer.h"
 #include "xAODMuon/MuonContainer.h"
 
 #include "TrigMuonToolInterfaces/IMuonEFTrackIsolationTool.h"
 
-
-//#include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
 class TrigMuonEFTrackIsolationAlg : public AthReentrantAlgorithm
 {
