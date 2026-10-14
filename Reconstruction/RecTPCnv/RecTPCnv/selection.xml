@@ -25,26 +25,6 @@
   <!-- Photon -->
   <!-- relocated to egammaEventTPCnv -->   
 
-  <!-- MissingET -->
-  <class name="MissingET_p3" id="AD744C55-6CA6-4D44-8E2F-C47FF3CE980E" />
-  <class name="MissingEtCalo_p3" id="0B9C9E87-92C8-49D3-8DF1-45ACDDD3336F" />
-  <class name="MissingEtTruth_p3" id="3FA8CC45-8798-4C24-9D0E-22E5F11AD85F" />
-  <class name="MissingEtRegions_p3"     />
-
-
-  <class name="MissingETComposition_p1" id="78E9CC2F-1FB4-4740-AD44-7C849D9CC865" />
-  <class name="std::vector<MissingETComposition_p1::Weight_p1>" />
-  <class name="MissingETComposition_p1::Weight_p1" />
-  <class name="Navigable_p2<unsigned int, MissingETComposition_p1::Weight_p1>"/>
-
-  <class name="MissingETComposition_p2" id="CF4110FB-35B4-4C8B-BB51-FE8C6CBE0277" />
-  <class name="std::vector<Weight_p1>" />
-  <class name="Weight_p1" />
-  <class name="Navigable_p2<unsigned int, Weight_p1>"/>
-  
-
-  <!-- End of MissingET -->
-
   <class name="MuonSpShower_p1" />
   <class name="std::vector<MuonSpShower_p1*>" />
   <class name="MuonSpShowerContainer_p1"    id="522A7143-856B-41E6-A3FA-AB97693010D8">

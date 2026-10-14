@@ -6,14 +6,12 @@ atlas_subdir( RecAthenaPool )
 # Component(s) in the package:
 atlas_add_poolcnv_library( RecAthenaPoolPoolCnv
    src/*.h src/*.cxx
-   FILES MissingETEvent/MissingEtCalo.h MissingETEvent/MissingEtTruth.h
-         MissingETEvent/MissingET.h MissingETEvent/MissingETComposition.h
-         muonEvent/MuonSpShowerContainer.h muonEvent/MuonCaloEnergyContainer.h
+   FILES muonEvent/MuonSpShowerContainer.h muonEvent/MuonCaloEnergyContainer.h
          muonEvent/MuonContainer.h src/MuonCaloEnergies.h
    TYPES_WITH_NAMESPACE Rec::MuonSpShowerContainer Analysis::MuonContainer
                         TPCnv::MuonCaloEnergies
    LINK_LIBRARIES AthenaPoolUtilities StoreGateLib AthenaPoolCnvSvcLib
-                  GaudiKernel MissingETEvent muonEvent RecTPCnv )
+                  GaudiKernel muonEvent RecTPCnv )
 
 # Install files from the package:
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

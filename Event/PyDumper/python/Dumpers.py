@@ -2006,193 +2006,6 @@ def dump_Segment (p, f):
     return
 
 
-@nolist
-def dump_MissingET (m, f):
-    fprint (f, '%d %f %f %f %f %f' %
-            (m.getSource(),
-             m.etx(),
-             m.ety(),
-             m.sumet(),
-             m.et(),
-             m.phi()))
-    r = m.getRegions()
-    if r:
-        for i in range(3):
-            fprint (f, '\n   %d %f %f %f' %
-                    (i,
-                     r.exReg(i),
-                     r.eyReg(i),
-                     r.etSumReg(i)))
-    fwrite (f, '\n')
-    return
-
-
-@nolist
-def dump_MissingETSig (m, f):
-    fprint (f, "%f %f" %
-            (m.metx(),
-             m.mety()))
-    fprint (f, "\n  %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f" %
-            (m.pL()     ,
-             m.sigL()   ,
-             m.sL()     ,
-             m.d0varL() ,
-             m.pT()     ,
-             m.sigT()   ,
-             m.sT()     ,
-             m.d0varT() ,
-             m.pA()     ,
-             m.sigA()   ,
-             m.sA()     ,
-             m.d0varA() ,
-             m.pB()     ,
-             m.sigB()   ,
-             m.sB()     ,
-             m.d0varB()))
-    fprint (f, "\n  %f %f %f %f %f %f %f %f" %
-            (m.phiA(),
-             m.phiAall() ,
-             m.tA()      ,
-             m.tAall()   ,
-             m.phiB()    ,
-             m.phiBall() ,
-             m.tB()      ,
-             m.tBall()))
-    fprint (f, "\n  %f %f %f %f" %
-            (m.met(),
-             m.phi(),
-             m.rho(),
-             m.oblat()))
-    return
-
-
-def dump_MissingETSigHypo (h, f):
-    if not h:
-        fprint (f, h)
-        return
-    fprint (f, '\n    ')
-    dump_Fourvec (h, f)
-    fprint (f, "%d %d %d %d %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %d %d %d" %
-            (h.isLinkValid(),
-             h.useLinkForNav(),
-             h.type(),
-             h.getType().type(),
-             h.eRaw(),
-             h.etaRaw(),
-             h.phiRaw(),
-             h.mRaw(),
-             h.e(),
-             h.eta(),
-             h.phi(),
-             h.m(),
-             h.exMiss(),
-             h.eyMiss(),
-             h.etMiss(),
-             h.phiMiss(),
-             h.ex(),
-             h.ey(),
-             h.ez(),
-             h.scale(),
-             h.getConeSize(),
-             h.sumEt(),
-             h.getReg(),
-             h.getReg(0.5),
-             h.isEmpty(),
-             ))
-    if h.getObject():
-        fprint (f, '\n     ')
-        dump_Fourvec (h.getObject(), f)
-    for r in range(3):
-        fprint (f, '\n     %d %f %f %f %f %f' %
-                (r,
-                 h.sumEt(r),
-                 h.exMiss(r),
-                 h.eyMiss(r),
-                 h.etMiss(r),
-                 h.phiMiss(r)))
-    fprint (f, '\n     ',  [x for x in toiter1(h)])
-    return
-
-
-def dump_MissingETSigObject (m, f):
-    dump_Fourvec (m, f)
-    fprint (f, " %d %d %d %d %d %d %d %d %d %f %f %f %f %f %f %f %f %f %f %f " %
-            (m.isValidDefault(),
-             m.isValidCurrent(),
-             m.isValid(),
-             m.isDefault(),
-             m.getType().type(),
-             m.getDefaultType().type(),
-             m.defaultType(),
-             m.type(0),
-             m.getType(0).type(),
-             m.eRaw(),
-             m.etaRaw(),
-             m.phiRaw(),
-             m.mRaw(),
-             m.e(),
-             m.eta(),
-             m.phi(),
-             m.m(),
-             m.ex(),
-             m.ey(),
-             m.ez()))
-    fprint (f, '\n  %f %f %f %f %f %f %f %d %d %d' %
-            (m.exMiss(),
-             m.eyMiss(),
-             m.etMiss(),
-             m.phiMiss(),
-             m.scale(),
-             m.getConeSize(),
-             m.sumEt(),
-             m.numHypos(),
-             m.idxDefault(),
-             m.idxCurrent()))
-    if m.isValid():
-        fprint (f, '\n  ', [i for i in m.types()])
-    for r in range (3):
-        fprint (f, '\n  %d %f %f %f %f %f' %
-                (r,
-                 m.sumEt(r),
-                 m.exMiss(r),
-                 m.eyMiss(r),
-                 m.etMiss(r),
-                 m.phiMiss(r)))
-    fprint (f, '\n  ', 
-            [x for x in toiter1 (m.getExcess())],
-            [x for x in toiter1 (m.getDeficit())])
-    dump_MissingETSigHypo (m.getHypo(), f)
-    dump_MissingETSigHypo (m.getDefaultHypo(), f)
-    dump_MissingETSigHypo (m.getHypo(0), f)
-    return
-
-
-@nolist
-def dump_MissingEtCalo (m, f):
-    dump_MissingET (m, f)
-    fprintln (f, '   ', m.calibType())
-    for i in range(7):
-        fprintln (f, '   %d %d %f %f %f' %
-                  (i,
-                   m.ncellCalo(i),
-                   m.exCalo(i),
-                   m.eyCalo(i),
-                   m.etSumCalo(i)))
-    return
-
-
-@nolist
-def dump_MissingEtTruth (m, f):
-    dump_MissingET (m, f)
-    for i in range(6):
-        fprintln (f, '   %d %f %f %f' %
-                  (i,
-                   m.exTruth(i),
-                   m.eyTruth(i),
-                   m.etSumTruth(i)))
-    return
-
-
 def dump_CaloCluster (c, f):
     # ??? cells, getNumberOfCells
     dump_Fourvec (c, f)
@@ -3903,22 +3716,6 @@ def dump_RawInfoSummaryForTag (p, f):
 
 
 @nolist
-def dump_MissingETComposition (m, f):
-    for p in toiter1 (m):
-        fprint (f, '  ', typename(p.__class__))
-        if not p:
-            fprint (f, '(null)')
-            continue
-        dump_Fourvec (p, f)
-        try:
-            w = m.getWeight (p)
-            fprint (f, ' [', w.wet(), w.wpx(), w.wpy(), w.statusWord(), ']')
-        except RuntimeError:
-            pass
-        fprintln (f, '')
-    return
-
-@nolist
 def dump_ChamberT0s (m, f):
     for p in m.getAllT0s():
         fprintln (f, '   ', p.first.getString(), p.second)
@@ -5221,9 +5018,6 @@ dumpspecs = [
     ["Rec::TrackParticleContainer",          dump_TrackParticle],
     ["DataVector<Trk::Track>",               dump_Track],
     ["DataVector<Trk::Segment>",             dump_Segment],
-    ["MissingET",                            dump_MissingET],
-    ["MissingEtCalo",                        dump_MissingEtCalo],
-    ["MissingEtTruth",                       dump_MissingEtTruth],
     ["CaloClusterContainer",                 dump_CaloClusters_sorted],
     ['CaloCellLinkContainer',                dump_CaloCellLink],
     ['CaloCellContainer',                    dump_CaloCell],
@@ -5246,13 +5040,10 @@ dumpspecs = [
     ["Rec::MuonSpShowerContainer",           dump_MuonSpShower],
     ["HLT::HLTResult",                       dump_HLTResult],
     ["HLT::HLTResultMT",                     dump_HLTResultMT],
-    ["MissingETSig",                         dump_MissingETSig],
     ["INav4MomAssocs",                       dump_INav4MomAssocs],
-    ["MissingETSigObjContainer",             dump_MissingETSigObject],
     ["DetStatusMap",                         dump_DetStatusMap],
     ["AtlasHitsVector<TrackRecord>",         dump_TrackRecord],
     ["AthenaHitsVector<TrackRecord>",        dump_TrackRecord],
-    ["MissingETSigHypoContainer",            dump_MissingETSigHypo],
     ["JetCollection",                        dump_Jet],
     ["V0Container",                          dump_V0Candidate],
     ["egammaContainer",                      dump_egamma],
@@ -5315,7 +5106,6 @@ dumpspecs = [
     ["LArNoisyROSummary",                    dump_LArNoisyROSummary],
     ["SkimDecisionCollection",               dump_SkimDecision],
     ["RawInfoSummaryForTag",                 dump_RawInfoSummaryForTag],
-    ["MissingETComposition",                 dump_MissingETComposition],
     ["Muon::ChamberT0s",                     dump_ChamberT0s],
     ["TrigMuonClusterFeatureContainer",      dump_TrigMuonClusterFeature],
     ["TrigPassBitsCollection",               dump_TrigPassBits],
