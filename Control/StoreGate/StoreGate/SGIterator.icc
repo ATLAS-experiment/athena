@@ -1,12 +1,61 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file StoreGate/SGIterator.icc
  * @brief A standard conforming forward iterator over items in StoreGate.
  */
+
+
+/**
+ * @brief Constructor from iterator pair over DataProxy*.
+ * @param itr Starting iterator.
+ * @param itrEnd Ending iterator.
+ * @param isConst If false, take only non-const proxies.
+ *
+ * Will skip ahead to the first valid proxy.
+ */
+template <SG::detail::DataProxyIterator ITERATOR>
+SG::detail::IteratorBase::IteratorBase (ITERATOR itr, ITERATOR itrEnd, bool isConst)
+{
+  setState (itr, itrEnd, isConst).ignore();
+}
+
+
+/**
+ * @brief Reset state of the iterator.
+ * @param itr Starting  iterator over DataProxy*.
+ * @param itrEnd Ending iterator.
+ * @param isConst Is this for a const iterator?
+ *
+ * Will skip ahead to the first valid proxy.
+ * Returns FAILURE if the range is empty.
+ */
+template <SG::detail::DataProxyIterator ITERATOR>
+StatusCode
+SG::detail::IteratorBase::setState (ITERATOR itr, ITERATOR itrEnd, bool isConst)
+{
+  if (!m_proxies.empty()) {
+    this->release();
+    m_proxies.clear();
+  }
+
+  // Save all valid proxies in reverse order.  Also take out a refcount on each.
+  while (itr != itrEnd) {
+    --itrEnd;
+    DataProxy* dp = *itrEnd;
+    if (dp->isValid() && (isConst || !dp->isConst())) {
+      m_proxies.push_back (dp);
+      dp->addRef();
+    }
+  }
+
+  if (m_proxies.empty()) {
+    return StatusCode::FAILURE;
+  }
+
+  return StatusCode::SUCCESS;
+}
 
 
 /**
@@ -56,6 +105,94 @@ void SG::detail::IteratorBase::release()
 
 
 /**
+ * @brief Constructor from proxy iterator pair.
+ * @param itr Starting proxy iterator.
+ * @param itrEnd Ending proxy iterator.
+ *
+ * Will skip ahead to the first valid proxy.
+ */
+inline
+SG::TypelessIterator::TypelessIterator (SG::ConstProxyIterator itr,
+                                        SG::ConstProxyIterator itrEnd)
+  : detail::IteratorBase (itr, itrEnd, true)
+{
+}
+
+
+/**
+ * @brief Constructor from iterator pair over DataProxy*.
+ * @param itr Starting iterator.
+ * @param itrEnd Ending iterator.
+ *
+ * Will skip ahead to the first valid proxy.
+ */
+template <SG::detail::DataProxyIterator ITERATOR>
+inline
+SG::TypelessIterator::TypelessIterator (ITERATOR itr, ITERATOR itrEnd)
+  : detail::IteratorBase (itr, itrEnd, true)
+{
+}
+
+
+/**
+ * @brief Reset state of the iterator.
+ * @param itr Starting proxy iterator.
+ * @param itrEnd Ending proxy iterator.
+ *
+ * Will skip ahead to the first valid proxy.
+ * Will return failure if the first proxy is const or if the range is empty.
+ */
+inline
+StatusCode
+SG::TypelessIterator::setState (SG::ConstProxyIterator itr,
+                                SG::ConstProxyIterator itrEnd)
+{
+  return detail::IteratorBase::setState (itr, itrEnd, true);
+}
+
+
+/**
+ * @brief Reset state of the iterator.
+ * @param itr Starting iterator over DataProxy*.
+ * @param itrEnd Ending iterator.
+ *
+ * Will skip ahead to the first valid proxy.
+ * Will return failure if the first proxy is const or if the range is empty.
+ */
+template <SG::detail::DataProxyIterator ITERATOR>
+inline
+StatusCode
+SG::TypelessIterator::setState (ITERATOR itr, ITERATOR itrEnd)
+{
+  return detail::IteratorBase::setState (itr, itrEnd, true);
+}
+
+
+/**
+ * @brief Equality check.
+ *
+ * Used by the boost iterator adapter.
+ */
+inline
+bool SG::TypelessIterator::equal(const TypelessIterator& rhs) const
+{
+  return detail::IteratorBase::eql(rhs);
+}
+
+
+/**
+ * @brief Dereference the iterator.
+ *
+ * Used by the boost iterator adapter.
+ */
+inline
+SG::DataProxy* SG::TypelessIterator::dereference() const
+{
+  return this->proxy();
+}
+
+
+/**
  * @brief Default constructor.
  */
 template <class DATA>
@@ -75,8 +212,8 @@ SG::ConstIterator<DATA>::ConstIterator()
  */
 template <class DATA>
 inline
-SG::ConstIterator<DATA>::ConstIterator (const SG::ConstProxyIterator& itr,
-                                        const SG::ConstProxyIterator& itrEnd)
+SG::ConstIterator<DATA>::ConstIterator (SG::ConstProxyIterator itr,
+                                        SG::ConstProxyIterator itrEnd)
   : detail::IteratorBase (itr, itrEnd, true)
 {
 }
@@ -93,8 +230,8 @@ SG::ConstIterator<DATA>::ConstIterator (const SG::ConstProxyIterator& itr,
 template <class DATA>
 inline
 StatusCode
-SG::ConstIterator<DATA>::setState (const SG::ConstProxyIterator& itr,
-                                   const SG::ConstProxyIterator& itrEnd)
+SG::ConstIterator<DATA>::setState (SG::ConstProxyIterator itr,
+                                   SG::ConstProxyIterator itrEnd)
 {
   return detail::IteratorBase::setState (itr, itrEnd, true);
 }
@@ -151,8 +288,8 @@ SG::Iterator<DATA>::Iterator()
  */
 template <class DATA>
 inline
-SG::Iterator<DATA>::Iterator (const SG::ConstProxyIterator& itr,
-                              const SG::ConstProxyIterator& itrEnd)
+SG::Iterator<DATA>::Iterator (SG::ConstProxyIterator itr,
+                              SG::ConstProxyIterator itrEnd)
   : detail::IteratorBase (itr, itrEnd, false)
 {
 }
@@ -169,8 +306,8 @@ SG::Iterator<DATA>::Iterator (const SG::ConstProxyIterator& itr,
 template <class DATA>
 inline
 StatusCode
-SG::Iterator<DATA>::setState (const SG::ConstProxyIterator& itr,
-                              const SG::ConstProxyIterator& itrEnd)
+SG::Iterator<DATA>::setState (SG::ConstProxyIterator itr,
+                              SG::ConstProxyIterator itrEnd)
 {
   return detail::IteratorBase::setState (itr, itrEnd, false);
 }

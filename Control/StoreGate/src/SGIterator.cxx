@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -10,14 +10,6 @@
 
 
 #include "StoreGate/SGIterator.h"
-
-
-/**
- * @brief Default constructor.
- */
-SG::detail::IteratorBase::IteratorBase()
-{
-}
 
 
 /**
@@ -32,15 +24,7 @@ SG::detail::IteratorBase::IteratorBase (SG::ConstProxyIterator itr,
                                         SG::ConstProxyIterator itrEnd,
                                         bool isConst)
 {
-  // Save all valid proxies in reverse order.  Also take out a refcount on each.
-  while (itr != itrEnd) {
-    --itrEnd;
-    DataProxy* dp = itrEnd->second;
-    if (dp->isValid() && (isConst || !dp->isConst())) {
-      m_proxies.push_back (dp);
-      dp->addRef();
-    }
-  }
+  setState (itr, itrEnd, isConst).ignore();
 }
 
 
@@ -95,9 +79,12 @@ SG::detail::IteratorBase::setState (SG::ConstProxyIterator itr,
                                     SG::ConstProxyIterator itrEnd,
                                     bool isConst)
 {
-  this->release();
-  m_proxies.clear();
+  if (!m_proxies.empty()) {
+    this->release();
+    m_proxies.clear();
+  }
 
+  // Save all valid proxies in reverse order.  Also take out a refcount on each.
   while (itr != itrEnd) {
     --itrEnd;
     DataProxy* dp = itrEnd->second;

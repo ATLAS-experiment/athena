@@ -609,26 +609,24 @@ StatusCode AthenaOutputStream::addItemObjects(const EventContext& ctx,
    // (only metadata is kept in MetaContainers)
    const bool isMetaData = store.storeID() == StoreID::METADATA_STORE;
    const CLID remapped_item_id = isMetaData ? m_metaDataSvc->remapMetaContCLID( item_id ) : item_id;
-   SG::ConstProxyIterator iter, end;
-   SG::ProxyMap map;
+   SG::TypelessIterator iter, end;
    bool gotProxies = false;
    // Look for the clid in storegate
    SG::DataProxy* match = store.proxy(remapped_item_id, item_key, true);
    if (match != nullptr) {
-      map.insert({item_key, match});
-      iter = map.begin();
-      end = map.end();
+      iter.setState (&match, &match+1).ignore();
+      end.setState (&match+1, &match+1).ignore();
       gotProxies = true;
    }
    // Look for the clid in storegate
-   if (!gotProxies && (store.proxyRange(remapped_item_id, iter, end)).isSuccess()) {
+   if (!gotProxies && (store.retrieve(remapped_item_id, iter, end)).isSuccess()) {
       gotProxies = true;
    }
    if (gotProxies) {
       bool added = false, removed = false;
       // Now loop over any found proxies
       for (; iter != end; ++iter) {
-         SG::DataProxy* itemProxy(iter->second);
+         SG::DataProxy* itemProxy = *iter;
          std::string proxyName = itemProxy->name();
          std::string stream;
          if( isMetaData ) {
