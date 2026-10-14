@@ -4,7 +4,7 @@
 atlas_subdir( AthenaRootComps )
 
 # External dependencies:
-find_package( ROOT COMPONENTS RIO Core Graf Tree MathCore Hist pthread )
+find_package( ROOT COMPONENTS RIO Core Graf Tree MathCore Hist ROOTNTuple pthread )
 find_package( Xrootd )
 find_package( Boost )
 

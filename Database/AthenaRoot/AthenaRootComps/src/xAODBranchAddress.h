@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // XAODBranchAddress.h 
@@ -17,14 +17,12 @@
 // Gaudi includes
 #include "GaudiKernel/GenericAddress.h"
 
-#include "DataModelRoot/RootType.h"
-
-#include "xAODTEvent.h"
+#include "xAODRootAccess/Event.h"
 
 namespace Athena {
 
   /** @class Athena::xAODBranchAddress
-   *  A simple class to do the retrieve from TEvent
+   *  A simple class to do the retrieve from TEvent or REvent
    */
 class xAODBranchAddress 
   : public GenericAddress
@@ -53,21 +51,15 @@ class xAODBranchAddress
                     unsigned long ip2=0);
 
   /// Destructor: 
-  virtual ~xAODBranchAddress(); 
+  virtual ~xAODBranchAddress() = default; 
 
+  xAOD::Event *event();
+  void setEventAddress();
 
-
-  xAOD::xAODTEvent *tevent();
-  void setTEventAddress();
-
-
-  //the data we get from the TEvent
-  void* m_ptr;
-
+  // the data we get from the TEvent or REvent
+  void* m_ptr = nullptr;
 
 }; 
-
-
 
 } //> end namespace Athena
 

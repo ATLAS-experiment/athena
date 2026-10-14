@@ -10,19 +10,19 @@
 ///////////////////////////////////////////////////////////////////
 
 // STL includes
-#include <sstream>
 #include <string>
-#include <algorithm>
 #include <vector>
 #include <stdint.h>
 
 // ROOT includes
 #include "TROOT.h"
-#include "RootUtils/TBranchElementClang.h"
 #include "TClass.h"
 #include "TFile.h"
 #include "TKey.h"
 #include "TLeaf.h"
+#include "RootUtils/TBranchElementClang.h"
+#include <ROOT/RNTuple.hxx>
+#include <ROOT/RNTupleReader.hxx>
 
 #include "Gaudi/Property.h"
 
@@ -36,7 +36,6 @@
 #include "GaudiKernel/System.h"
 #include "GaudiKernel/IClassIDSvc.h"
 #include "AthenaKernel/IDictLoaderSvc.h"
-#include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/CLIDRegistry.h"
 #include "CxxUtils/checker_macros.h"
 #include "StorageSvc/DbType.h"
@@ -60,21 +59,35 @@
 // Package includes
 #include "xAODEventSelector.h"
 #include "xAODBranchAddress.h"
+#include "xAODEvent.h"
 #include "RootGlobalsRestore.h"
 
 // xAOD include(s):
 #include "xAODRootAccess/Init.h"
+#include "xAODRootAccess/tools/Utils.h"
 
 #include "GaudiKernel/ServiceHandle.h"
 #include "AthenaKernel/IProxyProviderSvc.h"
-#include <map>
-
 
 #include "xAODCore/tools/ReadStats.h"
 #include "xAODCore/tools/PerfStats.h"
 #include "xAODCore/tools/IOStats.h"
 
 namespace Athena {
+
+namespace {
+  /// Check if the input file stores the event data in RNTuple, as is done in
+  /// xAOD::Event::createAndReadFrom. Files without events are checked through
+  /// their metadata object instead.
+  bool isRNTupleFile(const TFile& file) {
+    if (file.FindKey(xAOD::Event::EVENT_RNTUPLE_NAME)) return true;
+    if (file.FindKey(xAOD::Event::EVENT_TREE_NAME)) return false;
+    const TKey* key = file.FindKey(xAOD::Event::METADATA_OBJECT_NAME);
+    if (!key) return false;
+    const TClass* cl = TClass::GetClass(key->GetClassName(), kFALSE, kTRUE);
+    return cl && cl->InheritsFrom(ROOT::RNTuple::Class());
+  }
+}
 
 /** @class xAODEventContext
  *  event selector context ... just holds reference back to the selector
@@ -126,9 +139,9 @@ xAODEventSelector::xAODEventSelector( const std::string& name,
   m_collEvts (   ),
   m_needReload (true),
   m_rootAddresses (),
-  m_tevent(NULL),
+  m_event(),
   m_tfile(NULL),
-  m_tevent_entries(0)
+  m_event_entries(0)
 {
 //Properties important to end user:
    declareProperty( "InputCollections", m_inputCollectionsName,"List of input (ROOT) file names" );
@@ -144,8 +157,6 @@ xAODEventSelector::xAODEventSelector( const std::string& name,
   declareProperty( "ProxyProviderSvc" , m_ppSvc , "The ProxyProviderSvc that we should register ourself in and connect the EvtStore to");
   declareProperty( "InputMetaStore",m_imetaStore,  "Store where to publish (input) metadata");
   declareProperty( "MetaStore",m_ometaStore,       "Store where to publish (output) metadata");
-  declareProperty( "TreeName",m_tupleName = "CollectionTree","Name of the TTree to load/read from input file(s)" );
-  declareProperty( "MetaDataTreeName", m_metadataName = "MetaData","Name of the TTree to load/read metadata from input file(s)" );
 
   declareProperty( "ReadMetaDataWithPool", m_readMetadataWithPool=false, "If true, using POOL to read metadata, will ensure input file is registered with catalog");
   declareProperty( "printEventProxyWarnings", m_printEventProxyWarnings);
@@ -163,11 +174,6 @@ StatusCode xAODEventSelector::initialize()
 
   CHECK( m_clidsvc.retrieve() );
   CHECK( m_dictsvc.retrieve() );
-
-  if ( m_tupleName.value().empty() ) {
-    ATH_MSG_ERROR("You have to give a TTree name to read from the ROOT files !");
-    return StatusCode::FAILURE;
-  }
 
   const std::size_t nbrInputFiles = m_inputCollectionsName.value().size();
   if ( nbrInputFiles < 1 ) {
@@ -190,32 +196,40 @@ StatusCode xAODEventSelector::initialize()
     CHECK( ehSvc->initialize() ); //gives back control to svc
     CHECK( ehSvc.release() );
   }
-  switch(m_accessMode) {
-    case -1: ATH_MSG_INFO("Using DEFAULT xAOD access mode (usually same as CLASS mode)"); break;
-    case 0: ATH_MSG_INFO("Using BRANCH xAOD access mode"); break;
-    case 1: ATH_MSG_INFO("Using CLASS xAOD access mode"); break;
-    case 2: ATH_MSG_INFO("Using ATHENA xAOD access mode"); break;
-  }
-  if(m_accessMode != -1) {
-   m_tevent = new xAOD::xAODTEvent(xAOD::TEvent::EAuxMode(m_accessMode)); //our special class inheriting from xAOD::TEvent
-  } else {
-   m_tevent = new xAOD::xAODTEvent(); //our special class inheriting from xAOD::TEvent
-  }
-  m_tevent->printProxyWarnings(m_printEventProxyWarnings);
-
-  //use the first file to decide if reading metadata with POOL is ok
-  if(m_readMetadataWithPool) {
+  //use the first file to decide on the storage technology (TTree or RNTuple)
+  //of all input files and if reading metadata with POOL is ok
+  {
     std::unique_ptr<TFile> f( TFile::Open( m_inputCollectionsName.value()[0].c_str() ) );
     if(!f) {
       ATH_MSG_ERROR("Failed to open first input file: " << m_inputCollectionsName.value()[0]);
       return StatusCode::FAILURE;
     }
-    if(!f->Get("##Shapes")) {
-      ATH_MSG_INFO("First file is not POOL file (e.g. is CxAOD), so reading metadata with xAOD::TEvent instead");
+    m_isRNTuple = isRNTupleFile(*f);
+    //use FindKey as Get would read (and leak) the RNTuple anchor
+    if(m_readMetadataWithPool && !f->FindKey("##Shapes")) {
+      ATH_MSG_INFO("First file is not POOL file (e.g. is CxAOD), so reading metadata with xAOD::Event instead");
       m_readMetadataWithPool = false;
     }
     f->Close();
   }
+
+  if(m_isRNTuple) {
+    ATH_MSG_INFO("Using RNTuple xAOD access (AccessMode is only used for TTree input)");
+    m_event = std::make_unique<xAOD::xAODREvent>(); //our special class inheriting from xAOD::REvent
+  } else {
+    switch(m_accessMode) {
+      case -1: ATH_MSG_INFO("Using DEFAULT xAOD access mode (usually same as CLASS mode)"); break;
+      case 0: ATH_MSG_INFO("Using BRANCH xAOD access mode"); break;
+      case 1: ATH_MSG_INFO("Using CLASS xAOD access mode"); break;
+      case 2: ATH_MSG_INFO("Using ATHENA xAOD access mode"); break;
+    }
+    if(m_accessMode != -1) {
+     m_event = std::make_unique<xAOD::xAODTEvent>(xAOD::TEvent::EAuxMode(m_accessMode)); //our special class inheriting from xAOD::TEvent
+    } else {
+     m_event = std::make_unique<xAOD::xAODTEvent>(); //our special class inheriting from xAOD::TEvent
+    }
+  }
+  m_event->printProxyWarnings(m_printEventProxyWarnings);
 
 
   {
@@ -405,13 +419,13 @@ xAODEventSelector::next( IEvtSelector::Context& ctx ) const
       throw GaudiException("xAODEventSelector::next() - Fatal error when trying to setFile('')","xAODEventSelector",StatusCode::FAILURE);
     }
 
-    while( m_tevent_entries == 0 ) { //iterate through files until we have one with entries
+    while( m_event_entries == 0 ) { //iterate through files until we have one with entries
       if (m_collIdx < int(rctx->files().size())) {
          const std::string& fname = fnames[m_collIdx];
          if( rctx->setFile( fname ).isFailure() ) {
 	   throw GaudiException("xAODEventSelector::next() - Fatal error when trying to setFile('" + fname + "')","xAODEventSelector",StatusCode::FAILURE);
 	 }
-         ATH_MSG_DEBUG("TEvent entries = " << m_tevent_entries);
+         ATH_MSG_DEBUG("Event entries = " << m_event_entries);
 	 //fire incident for this file ..
 	 InputFileIncidentGuard::transition(m_inputFileGuard, *m_incsvc, name(),
 	                         rctx->file()->GetName(), {},
@@ -420,7 +434,7 @@ xAODEventSelector::next( IEvtSelector::Context& ctx ) const
          // end of collections
 	return StatusCode::FAILURE; //this is a valid failure ... athena will interpret as 'finished looping'
       }
-      if( m_tevent_entries==0) m_collIdx++;
+      if( m_event_entries==0) m_collIdx++;
 
 
    } //end of while loop
@@ -444,12 +458,12 @@ xAODEventSelector::next( IEvtSelector::Context& ctx ) const
 
 
 
-  if ( m_tevent_entries > entry ) {
+  if ( m_event_entries > entry ) {
 
     // Load the event:
-    if( m_tevent->getEntry( entry ) < 0 ) {
+    if( m_event->getEntry( entry ) < 0 ) {
          ATH_MSG_ERROR( "Failed to load entry " << static_cast< int >( entry ) );
-	 throw GaudiException("xAODEventSelector::next() - xAOD::TEvent::getEntry returned less than 0 bytes","xAODEventSelector",StatusCode::FAILURE);
+	 throw GaudiException("xAODEventSelector::next() - xAOD::Event::getEntry returned less than 0 bytes","xAODEventSelector",StatusCode::FAILURE);
     }
 
     ++m_nbrEvts;
@@ -461,7 +475,7 @@ xAODEventSelector::next( IEvtSelector::Context& ctx ) const
     // EventInfo is required, otherwise Athena will crash
     const xAOD::EventInfo* xaodEventInfo = 0;
     if(m_fillEventInfo) {
-      if(m_tevent->retrieve( xaodEventInfo , "EventInfo").isFailure()) {
+      if(m_event->retrieve( xaodEventInfo , "EventInfo").isFailure()) {
 	ATH_MSG_ERROR("Could not find xAOD::EventInfo");
 	throw GaudiException("xAODEventSelector::next() - Could not find xAOD::EventInfo","xAODEventSelector",StatusCode::FAILURE);
       }
@@ -777,21 +791,40 @@ xAODEventSelector::createRootBranchAddresses(StoreID::type storeID,
     return StatusCode::FAILURE;
   }
 
-  TTree* inputTree = dynamic_cast<TTree*>(m_tfile->Get(m_tupleName.value().c_str()));
+  TTree* inputTree = nullptr;
+  std::unique_ptr<ROOT::RNTupleReader> inputNTuple;
+  std::string ntupleName;
+  if (m_isRNTuple) {
+    if (m_tfile->FindKey(xAOD::Event::EVENT_RNTUPLE_NAME)) {
+      inputNTuple = ROOT::RNTupleReader::Open(xAOD::Event::EVENT_RNTUPLE_NAME, m_tfile->GetName());
+      ntupleName = xAOD::Event::EVENT_RNTUPLE_NAME;
+    }
+  } else {
+    inputTree = dynamic_cast<TTree*>(m_tfile->Get(xAOD::Event::EVENT_TREE_NAME));
+    ntupleName = xAOD::Event::EVENT_TREE_NAME;
+  }
 
-  if(inputTree!=0) {
+  //check if an object is available in the input collection, for RNTuple
+  //the field name is derived as in xAOD::Experimental::REvent::connectObject
+  auto hasInputObject = [&](const std::string& name) {
+    if (inputTree) return inputTree->GetBranch(name.c_str()) != nullptr;
+    const ROOT::RNTupleDescriptor& descriptor = inputNTuple->GetDescriptor();
+    return descriptor.FindFieldId(xAOD::Utils::getFieldName(descriptor, name)) != ROOT::kInvalidDescriptorId;
+  };
+
+  if(inputTree != nullptr || inputNTuple != nullptr) {
 
 
     ATH_MSG_DEBUG("Reading xAOD::EventFormat");
 
-    //  m_tevent->dump();
+    //  m_event->dump();
 
-    const void* value_ptr = m_tevent; //passed as 'parameter' to the address object
+    const void* value_ptr = m_event.get(); //passed as 'parameter' to the address object
 
     std::set<std::string> missingAux;
 
-    for( auto itr = m_tevent->inputEventFormat()->begin(); itr!=m_tevent->inputEventFormat()->end();++itr) {
-      if(inputTree->GetBranch(itr->second.branchName().c_str())==0) continue; //skip branches that are not available in the input collection
+    for( auto itr = m_event->inputEventFormat()->begin(); itr!=m_event->inputEventFormat()->end();++itr) {
+      if(!hasInputObject(itr->second.branchName())) continue; //skip branches that are not available in the input collection
       ATH_MSG_VERBOSE("EFE:" << itr->first << " branchName = " << itr->second.branchName() << " className=" << itr->second.className());
       CLID id = 0;
       if( m_clidsvc->getIDOfTypeInfoName(itr->second.className(), id).isFailure() &&
@@ -823,10 +856,10 @@ xAODEventSelector::createRootBranchAddresses(StoreID::type storeID,
 
       Athena::xAODBranchAddress* addr = new Athena::xAODBranchAddress
         (pool::ROOT_StorageType.type(), id,
-         m_tupleName.value(),
+         ntupleName,
          br_name,
          (unsigned long)(value_ptr),
-         (unsigned long)(0)); //IMPORTANT THIS IS 0: signals to xAODBranchAddress to read event-level info (see setTEventAddress)
+         (unsigned long)(0)); //IMPORTANT THIS IS 0: signals to xAODBranchAddress to read event-level info (see setEventAddress)
       // recycle old rootaddress, if any.
       SG::TransientAddress* taddr = NULL;
       // FIXME: should we only iterate over m_rootAddresses which have been marked
@@ -870,7 +903,7 @@ xAODEventSelector::createRootBranchAddresses(StoreID::type storeID,
     }
   } //end if block of requiring input tree to exist
   else {
-    ATH_MSG_DEBUG("No input collection " << m_tupleName.value() << " found in input file " << m_tfile->GetTitle() );
+    ATH_MSG_DEBUG("No input collection found in input file " << m_tfile->GetTitle() );
   }
 
   m_needReload = false;
@@ -892,27 +925,43 @@ xAODEventSelector::createMetaDataRootBranchAddresses() const
   }
 
   //FIXME JE
-  ATH_MSG_DEBUG("m_metadataName.value().c_str() = " << m_metadataName.value().c_str() );
-  TTree* tree = dynamic_cast<TTree*>(m_tfile->Get(m_metadataName.value().c_str()));
   ATH_MSG_DEBUG("m_tfile = " << m_tfile );
-  ATH_MSG_DEBUG("tree = " << tree );
-  if (!tree) std::abort();
-  TObjArray *leaves = tree->GetListOfLeaves();
-  if (!leaves) {
-    ATH_MSG_INFO("no leaves!!");
-    return StatusCode::SUCCESS;
+
+  // collect the names and type names of the metadata objects,
+  // stored as branches (TTree) or top-level fields (RNTuple)
+  std::vector<std::pair<std::string, std::string>> objects;
+  if (m_isRNTuple) {
+    if (!m_tfile->FindKey(xAOD::Event::METADATA_OBJECT_NAME)) std::abort();
+    auto reader = ROOT::RNTupleReader::Open(xAOD::Event::METADATA_OBJECT_NAME, m_tfile->GetName());
+    for (const auto& field : reader->GetDescriptor().GetTopLevelFields()) {
+      // RNTuples store fields with an "Aux:" postfix instead of "Aux."
+      std::string br_name = field.GetFieldName();
+      if (br_name.ends_with("Aux:")) br_name.back() = '.';
+      objects.emplace_back(std::move(br_name), field.GetTypeName());
+    }
+  } else {
+    TTree* tree = dynamic_cast<TTree*>(m_tfile->Get(xAOD::Event::METADATA_OBJECT_NAME));
+    ATH_MSG_DEBUG("tree = " << tree );
+    if (!tree) std::abort();
+    TObjArray *leaves = tree->GetListOfLeaves();
+    if (!leaves) {
+      ATH_MSG_INFO("no leaves!!");
+      return StatusCode::SUCCESS;
+    }
+    for (Int_t i = 0; i < leaves->GetEntries(); ++i) {
+      TLeaf *leaf = (TLeaf *)leaves->At(i);
+      TBranch *branch = leaf->GetBranch();
+      if (branch) {
+        objects.emplace_back(branch->GetName(), leaf->GetTypeName());
+      }
+    }
   }
 
-  // loop over leaves
-  for (Int_t i = 0; i < leaves->GetEntries(); ++i) {
-    TLeaf *leaf = (TLeaf *)leaves->At(i);
-    TBranch *branch = leaf->GetBranch();
-    if (branch) {
+  // loop over metadata objects
+  for (const auto& [br_name, type_name] : objects) {
 
       CLID id = 0;
-      const void* value_ptr = m_tevent;
-      const std::string type_name = leaf->GetTypeName();
-      const std::string br_name = branch->GetName();
+      const void* value_ptr = m_event.get();
       // Skip if type_name does contain xAOD, ie. is not an xAOD container
       const std::string toCheck = "xAOD::";
       if (type_name.find(toCheck) == std::string::npos) {
@@ -950,11 +999,11 @@ xAODEventSelector::createMetaDataRootBranchAddresses() const
 
 
 
-	ATH_MSG_DEBUG("id = " << id << ", m_metadataName.value() = " << m_metadataName.value() << ", br_name = " << br_name << ", value_ptr = " << value_ptr);
+	ATH_MSG_DEBUG("id = " << id << ", br_name = " << br_name << ", value_ptr = " << value_ptr);
         CxxUtils::RefCountedPtr<Athena::xAODBranchAddress> addr
           (new Athena::xAODBranchAddress
            (pool::ROOT_StorageType.type(), id,
-            m_metadataName.value(),
+            xAOD::Event::METADATA_OBJECT_NAME,
             br_name,
             (unsigned long)(value_ptr),
             (unsigned long)(1))); //IMPORTANT THIS IS 1: signals to BranchAddress to read metadata
@@ -968,7 +1017,6 @@ xAODEventSelector::createMetaDataRootBranchAddresses() const
 	// taddr->clearAddress(true);
 	// tads.push_back(taddr);
       }
-    }
   }
 
   ATH_MSG_DEBUG("In xAODEventSelector::createMetaDataRootBranchAddresses end ...");
@@ -1020,16 +1068,22 @@ StatusCode xAODEventSelector::setFile(const std::string& fname) {
     //we should also cleanup after pool, in case it has left open files dangling
   }
   m_tfile = newFile;
-  m_tevent_entries = 0; //will set in a moment
+  m_event_entries = 0; //will set in a moment
 
   if(!m_tfile) return StatusCode::SUCCESS; //must have been setting to blank file
 
-  if(m_tevent->readFrom( m_tfile ).isFailure()) {
-      ATH_MSG_FATAL( "xAODEventSelector: TEvent cannot read " << fname);
+  //the event object can only read files of the storage technology of the first file
+  if(isRNTupleFile(*m_tfile) != m_isRNTuple) {
+      ATH_MSG_FATAL( "xAODEventSelector: Cannot read " << fname << ", mixing TTree and RNTuple input files is not supported");
       return StatusCode::FAILURE;
   }
 
-  m_tevent_entries = m_tevent->getEntries();
+  if(m_event->readFrom( *m_tfile ).isFailure()) {
+      ATH_MSG_FATAL( "xAODEventSelector: xAOD::Event cannot read " << fname);
+      return StatusCode::FAILURE;
+  }
+
+  m_event_entries = m_event->getEntries();
 
   //need to load metadata for file
    if (!m_imetaStore->clearStore().isSuccess()) {
@@ -1120,8 +1174,13 @@ xAODEventSelector::find_coll_idx(int evtidx) const
           offset += jtr.max_entries;
         }
         itr.min_entries = offset;
-        TTree* tree = dynamic_cast<TTree*>(file->Get(m_tupleName.value().c_str()));
-        itr.max_entries = offset + ( (tree) ? tree->GetEntriesFast() : 0);
+        if (m_isRNTuple) {
+          const bool hasEvents = file->FindKey(xAOD::Event::EVENT_RNTUPLE_NAME) != nullptr;
+          itr.max_entries = offset + ( (hasEvents) ? ROOT::RNTupleReader::Open(xAOD::Event::EVENT_RNTUPLE_NAME, file->GetName())->GetNEntries() : 0);
+        } else {
+          TTree* tree = dynamic_cast<TTree*>(file->Get(xAOD::Event::EVENT_TREE_NAME));
+          itr.max_entries = offset + ( (tree) ? tree->GetEntriesFast() : 0);
+        }
       } else {
 	throw "xAODEventSelector: Unable to fetch ntuple";
       }
