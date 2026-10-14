@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -25,6 +25,10 @@ TBranchAuxDynStore::TBranchAuxDynStore(TBranchAuxDynReader& reader, long long en
 bool TBranchAuxDynStore::readData(SG::auxid_t auxid)
 {
    try {
+      // if have mutex, lock to prevent potential concurrent I/O from elsewhere;
+      // also protects the branch infos of the reader, which is shared between events
+      auto io_lock = m_iomutex? std::unique_lock<std::recursive_mutex>(*m_iomutex)
+         : std::unique_lock<std::recursive_mutex>();
       auto& brInfo = m_reader.getBranchInfo(auxid, *this);
       if( !brInfo.branch ) return false; 
 
@@ -42,10 +46,7 @@ bool TBranchAuxDynStore::readData(SG::auxid_t auxid)
          // reading fundamental type - ROOT expects a direct pointer
          data = vector;
       }
-   
-      // if have mutex, lock to prevent potential concurrent I/O from elsewhere
-      auto io_lock = m_iomutex? std::unique_lock<std::recursive_mutex>(*m_iomutex)
-         : std::unique_lock<std::recursive_mutex>();
+
       // read branch
       brInfo.setAddress(data);
       int  nbytes = brInfo.branch->GetEntry(m_entry);

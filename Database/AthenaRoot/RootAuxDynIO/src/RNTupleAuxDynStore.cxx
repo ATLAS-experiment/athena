@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/AuxTypeRegistry.h"
@@ -26,6 +26,10 @@ RNTupleAuxDynStore::RNTupleAuxDynStore( RNTupleAuxDynReader& aux_reader,
 bool RNTupleAuxDynStore::readData(SG::auxid_t auxid)
 {
    try {
+      // if have mutex, lock to prevent potential concurrent I/O from elsewhere;
+      // also protects the field infos of the reader, which is shared between events
+      auto io_lock = m_iomutex? std::unique_lock<std::recursive_mutex>(*m_iomutex)
+         : std::unique_lock<std::recursive_mutex>();
       auto& fieldInfo = m_reader.getFieldInfo(auxid, *this);
       if( fieldInfo.status == RNTupleAuxDynReader::FieldInfo::NotFound ) return false; 
 
@@ -38,10 +42,6 @@ bool RNTupleAuxDynStore::readData(SG::auxid_t auxid)
       // get memory location where to write data from the branch entry
       // const_cast because Field::CaptureValue() requires void*
       [[maybe_unused]] void* data ATLAS_THREAD_SAFE = const_cast<void*>(SG::AuxStoreInternal::getIOData(auxid));
-      
-      // if have mutex, lock to prevent potential concurrent I/O from elsewhere
-      auto io_lock = m_iomutex? std::unique_lock<std::recursive_mutex>(*m_iomutex)
-         : std::unique_lock<std::recursive_mutex>();
 
       fieldInfo.view->BindRawPtr(data);
       (*fieldInfo.view)(m_entry);
