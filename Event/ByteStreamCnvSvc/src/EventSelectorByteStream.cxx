@@ -214,6 +214,7 @@ StatusCode EventSelectorByteStream::stop() {
    if (m_filebased) {
       // Fire EndInputFile for any file still open
       m_inputFileGuard.reset();
+      m_pendingFile.reset();
       if (m_eventSource->ready()) {
          m_eventSource->closeBlockIterator(false);
       }
@@ -241,8 +242,10 @@ StatusCode EventSelectorByteStream::finalize() {
 }
 
 void EventSelectorByteStream::nextFile(lock_t& /*lock*/) const {
-   // EndInputFile is handled by the InputFileIncidentGuard via transition()
-   // when the next file is opened, or via reset() on stop().
+   // EndInputFile as soon as the file is done, also the last one: AthenaMP's event counter
+   // queues the last partial chunk on it, before it marks the end of the queue
+   m_inputFileGuard.reset();
+   m_pendingFile.reset();
    ++m_inputCollectionsIterator;
    ++m_fileCount;
 }
@@ -260,20 +263,16 @@ StatusCode EventSelectorByteStream::openNewRun(lock_t& lock) const {
    }
    std::string blockname = *m_inputCollectionsIterator;
    // try to open a file
-   auto nevguid = m_eventSource->getBlockIterator(blockname);
-   long nev = nevguid.first;
+   long nev = openBlock(blockname, lock);
    if (nev == -1) {
       ATH_MSG_FATAL("Unable to access file " << *m_inputCollectionsIterator << ", stopping here");
       throw ByteStreamExceptions::fileAccessError();
    }
-   // Fire EndInputFile for previous file (if any), then BeginInputFile for new file
-   InputFileIncidentGuard::transition(m_inputFileGuard, *m_incidentSvc, name(),
-                           "BSF:" + *m_inputCollectionsIterator, nevguid.second,
-                           /*endFileName=*/{});
 
    // check if file is empty
    if (nev == 0) {
       ATH_MSG_WARNING("no events in file " << blockname << " try next");
+      fileTransition(lock);
       if (m_eventSource->ready()) m_eventSource->closeBlockIterator(true);
       this->nextFile(lock);
       return openNewRun(lock);
@@ -282,6 +281,7 @@ StatusCode EventSelectorByteStream::openNewRun(lock_t& lock) const {
       ATH_MSG_WARNING("skipping more events " << m_skipEvents.value() - m_NumEvents << "(" << nev <<") than in file " << *m_inputCollectionsIterator << ", try next");
       m_NumEvents += nev;
       m_numEvt[m_fileCount] = nev;
+      fileTransition(lock);
       if (m_eventSource->ready()) m_eventSource->closeBlockIterator(true);
       this->nextFile(lock);
       return openNewRun(lock);
@@ -292,6 +292,24 @@ StatusCode EventSelectorByteStream::openNewRun(lock_t& lock) const {
    m_numEvt[m_fileCount] = nev;
 
    return StatusCode::SUCCESS;
+}
+
+long EventSelectorByteStream::openBlock(const std::string& fileName, lock_t& /*lock*/) const {
+   auto nevguid = m_eventSource->getBlockIterator(fileName);
+   if (nevguid.first != -1) {
+      m_pendingFile.emplace("BSF:" + fileName, nevguid.second);
+   }
+   return nevguid.first;
+}
+
+void EventSelectorByteStream::fileTransition(lock_t& /*lock*/) const {
+   if (m_pendingFile) {
+      // EndInputFile for the previous file (if any), then BeginInputFile for this one
+      InputFileIncidentGuard::transition(m_inputFileGuard, *m_incidentSvc, name(),
+                                         m_pendingFile->first, m_pendingFile->second,
+                                         /*endFileName=*/{});
+      m_pendingFile.reset();
+   }
 }
 
 StatusCode EventSelectorByteStream::createContext(IEvtSelector::Context*& it) const {
@@ -500,6 +518,9 @@ StatusCode EventSelectorByteStream::nextHandleFileTransitionImpl(IEvtSelector::C
       ctxt = *m_endIter;
       return StatusCode::FAILURE;
    }
+   // Input file incidents on the first event read from a newly opened file, so that the files
+   // seek() goes over (or opens without reading from) are not announced
+   fileTransition(lock);
 
    // If not secondary just return the status code based on if the event is bas
    if (!m_isSecondary.value()) {
@@ -679,10 +700,9 @@ StatusCode EventSelectorByteStream::seek(Context& /* it */, int evtNum) const {
       ATH_MSG_DEBUG("Seek to item: \"" << m_inputCollectionsProp.value()[fileNum] << "\" from the explicit file list.");
       std::string fileName = m_inputCollectionsProp.value()[fileNum];
       m_fileCount = fileNum;
-      // Open the correct file
-      auto nevguid = m_eventSource->getBlockIterator(fileName);
-      long nev = nevguid.first;
-      if (nev == -1) {
+      m_inputCollectionsIterator = m_inputCollectionsProp.value().begin() + fileNum;
+      // Open the correct file; next() fires its input file incidents when it reads from it
+      if (openBlock(fileName, lock) == -1) {
          ATH_MSG_FATAL("Unable to open file with seeked event " << evtNum << " file " << fileName);
          return StatusCode::FAILURE;
       }
@@ -845,6 +865,7 @@ int EventSelectorByteStream::findEvent(int evtNum, lock_t& /*lock*/) const {
       // if file not opened yet, check it
       if (m_numEvt[i] == -1) {
          std::string fileName = m_inputCollectionsProp.value()[i];
+         // only to count its events, so not openBlock(): it must not become the current file
          auto nevguid = m_eventSource->getBlockIterator(fileName);
          long nev = nevguid.first;
          // if failure on file open, exit
@@ -1001,6 +1022,7 @@ StatusCode EventSelectorByteStream::io_reinit() {
    }
    // all good... copy over.
    m_inputFileGuard.reset();
+   m_pendingFile.reset();
 
    // Set m_inputCollectionsProp.  But we _dont_ want to run the update
    // handler --- that calls reinit(), which will deadlock since

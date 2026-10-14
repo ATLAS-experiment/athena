@@ -68,6 +68,12 @@ atlas_add_test( AtlCopyBSEvent6
 atlas_add_test( AtlListBSEvents
    SCRIPT "AtlListBSEvents -s -c -l ${testFileRawRun2}" )
 
+atlas_add_test( ByteStreamMetadataAthenaMP_test
+   SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/ByteStreamMetadataAthenaMP_test.py
+   PROPERTIES TIMEOUT 600
+   PRIVATE_WORKING_DIRECTORY
+   POST_EXEC_SCRIPT noerror.sh )
+
 atlas_add_test( ByteStreamConfigTest
    SCRIPT "python -m ByteStreamCnvSvc.ByteStreamConfig"
    POST_EXEC_SCRIPT noerror.sh )

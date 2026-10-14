@@ -34,6 +34,7 @@
 #include "CxxUtils/checker_macros.h"
 #include <mutex>
 #include <optional>
+#include <utility>
 
 // Forward declarations.
 class ISvcLocator;
@@ -157,6 +158,11 @@ private: // internal member functions
    /// Reinitialize the service when a @c fork() occurred/was-issued
    StatusCode reinit(lock_t& lock);
    StatusCode openNewRun(lock_t& lock) const;
+   /// Open @c fileName as the current file, without input file incidents (see fileTransition()).
+   /// Returns the number of events in the file, -1 if it cannot be opened.
+   long openBlock(const std::string& fileName, lock_t& lock) const;
+   /// EndInputFile for the file begun last and BeginInputFile for the file opened since, if any
+   void fileTransition(lock_t& lock) const;
    void nextFile(lock_t& lock) const;
    /// Search for event with number evtNum.
    int findEvent(int evtNum, lock_t& lock) const;
@@ -198,6 +204,8 @@ private: // properties
    bool m_firstFileFired{};
    /// RAII guard: guarantees a matching EndInputFile for every BeginInputFile
    mutable std::optional<InputFileIncidentGuard> m_inputFileGuard ATLAS_THREAD_SAFE;
+   /// Name and GUID of the file opened last, until fileTransition() fires its BeginInputFile
+   mutable std::optional<std::pair<std::string, std::string>> m_pendingFile ATLAS_THREAD_SAFE;
 
    /// HelperTools, vector of names of AlgTools that are executed by the EventSelector
    ToolHandleArray<IAthenaSelectorTool> m_helperTools{this, "HelperTools", {}, "Helper tools executed by EventSelector"};
