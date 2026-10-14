@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <IsolationSelection/IsoVariableHelper.h>
@@ -76,12 +76,12 @@ namespace CP {
         }
         return CorrectionCode::Ok;
     }
-    CorrectionCode IsoVariableHelper::setIsolation(const xAOD::IParticle* particle, float value) const {
+    CorrectionCode IsoVariableHelper::setIsolation(const xAOD::IParticle* particle, float value, bool allowNonFinite) const {
         if (!particle) {
              ATH_MSG_ERROR(__func__<<"() -- "<<__LINE__<<": no particle given");
             return CorrectionCode::Error;
         }
-        if (std::isnan(value) || std::isinf(value)) {
+        if (!allowNonFinite && (std::isnan(value) || std::isinf(value))) {
             ATH_MSG_ERROR(__func__<<"() -- "<<__LINE__<<": the value is not a number");
             return CorrectionCode::Error;
         }
