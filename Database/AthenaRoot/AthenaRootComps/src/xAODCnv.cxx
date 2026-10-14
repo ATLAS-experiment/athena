@@ -153,7 +153,7 @@ xAODCnv::createObj(IOpaqueAddress* pAddr, DataObject*& pObj)
   //rba->setBranchAddress(m_type);
   ATH_MSG_DEBUG("xAODCnv::createObj 1");
   // FIXME JE
-  rba->setTEventAddress();
+  rba->setEventAddress();
   ATH_MSG_DEBUG("loading branch: [" << rba->par()[0]
                 << "/" << rba->par()[1] << "]... [done]");
   ATH_MSG_DEBUG("xAODCnv::createObj 2");

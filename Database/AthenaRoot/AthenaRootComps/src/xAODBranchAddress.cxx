@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // xAODBranchAddress.cxx
@@ -9,22 +9,12 @@
 // Author: Johannes ELmsheuser, Will Buttinger
 ///////////////////////////////////////////////////////////////////
 
-// AthenaRootComps includes
 #include "xAODBranchAddress.h"
-#include "xAODTEvent.h"
+#include "xAODEvent.h"
 
-// fwk includes
-#include "GaudiKernel/System.h"
 #include "AthenaKernel/CLIDRegistry.h"
 #include "CxxUtils/checker_macros.h"
 
-// ROOT includes
-#include "TBranch.h"
-#include "TTree.h"
-#include "TLeaf.h"
-
-#include "xAODRootAccess/TEvent.h"
-#include "TClass.h"
 #include <typeinfo>
 
 
@@ -67,80 +57,46 @@ xAODBranchAddress::xAODBranchAddress(long svc,
                                      const std::string& p2,
                                      unsigned long ip1,
                                      unsigned long ip2) :
-  GenericAddress(svc, clid, p1, p2, ip1, ip2),
-  m_ptr(0) //the actual data object that is retrieved
+  GenericAddress(svc, clid, p1, p2, ip1, ip2)
 {
-  // std::cerr << "::RBA::+RBA... (this=" << this << ") br=["
-  //           << this->par()[1] << "]\n";
-}
-
-/// Destructor:
-xAODBranchAddress::~xAODBranchAddress()
-{
-  // std::cerr << "::RBA::~RBA... (this=" << this << ") br=["
-  //           << this->par()[1] << "]\n";
 }
 
 
-xAOD::xAODTEvent*
-  xAODBranchAddress::tevent()
+xAOD::Event*
+  xAODBranchAddress::event()
 {
-  //std::cout << "xAODBranchAddress::tevent ..." << std::endl;
-  return reinterpret_cast<xAOD::xAODTEvent*>(reinterpret_cast<unsigned long*>(this->ipar()[0]));
+  return reinterpret_cast<xAOD::Event*>(reinterpret_cast<unsigned long*>(this->ipar()[0]));
 }
 
 void
-xAODBranchAddress::setTEventAddress()
+xAODBranchAddress::setEventAddress()
 {
-
-  //std::cout << "xAODBranchAddress::setTEvent ..." << std::endl;
-
-
-
   const std::string& br_name = this->par()[1];
-  xAOD::xAODTEvent* tevent = this->tevent();
-  //xAOD::TEvent* tevent = this->tevent();
-  //std::cout << "xAODBranchAddress::setTEventAddress  br_name=" << br_name << std::endl;
-  //std::cout << "xAODBranchAddress::setTEventAddress  tevent=" << tevent << " entries = " << tevent->getEntries() << std::endl;
-  //std::cout << "xAODBranchAddress::setTEventAddress  tlID()=" << this->clID() << std::endl;
-
   const std::type_info* ti = CLIDRegistry::CLIDToTypeinfo(this->clID());
-  //std::cout << "xAODBranchAddress::setTEventAddress ti=" << ti << std::endl;
+  xAOD::Event* event = this->event();
+  event->setActive(); // ensure we are active event
 
-  //  void* addr = *(char**)&tevent;
-
-
-  //we use the ipar()[1] to flag if we retrieve main event info (0) or metadata (1) (see xAODEventSelector where it creates BranchAddress)
+  // we use the ipar()[1] to flag if we retrieve main event info (0) or metadata (1) (see xAODEventSelector where it creates BranchAddress)
   switch( (this->ipar()[1]) ) {
   case 0:
-    {//reading event level info
-      tevent->setActive(); //ensure we are active tevent
+    { // reading event level info
       static constexpr bool SILENT = false;
       static constexpr bool METADATA = false;
-      void* addr ATLAS_THREAD_SAFE = const_cast<void*>(tevent->getInputObject(br_name, *ti, SILENT, METADATA));
+      void* addr ATLAS_THREAD_SAFE = const_cast<void*>(xAOD::getInputObject(*event, br_name, *ti, SILENT, METADATA));
       m_ptr = addr;
     }
     break;
   case 1:
-    {//reading metadata
-      //FIXME: NEEED TO ACCESS METADATA
-      //std::cout << "xAODBranchAddress::setTEventAddress metadata " << br_name << std::endl;
-      tevent->setActive(); //ensure we are active tevent
+    { // reading metadata
+      // FIXME: NEEED TO ACCESS METADATA
+      event->setActive(); //ensure we are active event
       static constexpr bool SILENT = false;
       static constexpr bool METADATA = true;
-      void* addr ATLAS_THREAD_SAFE = const_cast<void*>(tevent->getInputObject(br_name, *ti, SILENT, METADATA));
+      void* addr ATLAS_THREAD_SAFE = const_cast<void*>(xAOD::getInputObject(*event, br_name, *ti, SILENT, METADATA));
       m_ptr = addr;
     }
     break;
   }
-
-  //std::cout << "xAODBranchAddress::setTEventAddress m_ptr=" << m_ptr << std::endl;
-
-
 }
-
-///////////////////////////////////////////////////////////////////
-// Protected methods:
-///////////////////////////////////////////////////////////////////
 
 } //> end namespace Athena

@@ -28,8 +28,9 @@
 
 #include "TFile.h"
 
-#include "xAODTEvent.h"
+#include "xAODRootAccess/Event.h"
 
+#include <memory>
 #include <optional>
 #include <unordered_map>
 
@@ -43,8 +44,8 @@ namespace Athena { class xAODEventContext; }
 
 namespace Athena {
 
-/** @brief Class implementing the GAUDI @c IEvtSelector interface using 
- *         ROOT @c TTree as a backend
+/** @brief Class implementing the GAUDI @c IEvtSelector interface using
+ *         ROOT @c TTree or @c RNTuple as a backend
  */
 class ATLAS_NOT_THREAD_SAFE xAODEventSelector :
     public extends<::AthService,
@@ -183,14 +184,8 @@ class ATLAS_NOT_THREAD_SAFE xAODEventSelector :
   /// Handle to the proxy provider svc
   ServiceHandle<IProxyProviderSvc> m_ppSvc;
 
-  /// List of input files containing @c TTree 
+  /// List of input files containing @c TTree or @c RNTuple
   StringArrayProperty m_inputCollectionsName;
-
-  /// Name of @c TTree to load from collection of input files
-  StringProperty m_tupleName;
-
-  /// Name of @c TTree to load from metadata of input files
-  StringProperty m_metadataName;
 
   /// Number of events to skip at the beginning 
   long m_skipEvts;
@@ -223,15 +218,17 @@ class ATLAS_NOT_THREAD_SAFE xAODEventSelector :
   std::unordered_map<SG::TransientAddress*, bool> m_rootAddresses;
 
 
-  /// current TEvent being read
-  mutable xAOD::xAODTEvent* m_tevent;
+  /// current Event being read (xAODTEvent for TTree or xAODREvent for RNTuple)
+  mutable std::unique_ptr<xAOD::Event> m_event;
 
   /// current TFile being read
   mutable TFile* m_tfile;
 
-  mutable long m_tevent_entries; //used to cache getEntries result of tevent
+  mutable long m_event_entries; //used to cache getEntries result of event
 
   int m_accessMode; //tevent access mode
+
+  bool m_isRNTuple = false; //input files store event data in RNTuple, decided from the first file
 
   bool m_fillEventInfo = false; //if true, will fill EventInfo from xAOD::EventInfo
 
