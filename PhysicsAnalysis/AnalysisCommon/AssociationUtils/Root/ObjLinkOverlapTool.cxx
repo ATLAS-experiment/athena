@@ -11,7 +11,7 @@ namespace
   const float invGeV = 0.001;
 }
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   //---------------------------------------------------------------------------
@@ -70,4 +70,4 @@ namespace ORUtils
     return StatusCode::SUCCESS;
   }
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)

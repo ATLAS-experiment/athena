@@ -32,13 +32,13 @@
 
 class EventContext;
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
 class FEAssociationTool : public asg::AsgTool,
                           virtual public IFEAssociationTool
 {
-  ASG_TOOL_CLASS(FEAssociationTool, ORUtils::IFEAssociationTool)
+  ASG_TOOL_CLASS(FEAssociationTool, IFEAssociationTool)
 
 public:
   FEAssociationTool(const std::string& name);
@@ -235,6 +235,6 @@ private:
   };
 };
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

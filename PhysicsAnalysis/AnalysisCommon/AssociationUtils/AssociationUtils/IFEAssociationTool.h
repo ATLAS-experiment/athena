@@ -6,13 +6,14 @@
 #define ASSOCIATIONUTILS_IFEASSOCIATIONTOOL_H
 
 #include "AsgTools/IAsgTool.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 class EventContext;
 
-namespace ORUtils {
+namespace ADD_CMODE(ORUtils) {
 
 class IFEAssociationTool : public virtual asg::IAsgTool {
-  ASG_TOOL_INTERFACE(ORUtils::IFEAssociationTool)
+  ASG_TOOL_INTERFACE(IFEAssociationTool)
 
 public:
 #ifndef XAOD_STANDALONE
@@ -22,6 +23,6 @@ public:
 #endif
 };
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

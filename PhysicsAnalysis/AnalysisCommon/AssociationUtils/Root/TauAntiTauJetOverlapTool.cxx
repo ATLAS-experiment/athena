@@ -14,7 +14,7 @@
 #include "AsgTools/CurrentContext.h"
 #include "AsgDataHandles/ReadHandle.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   //---------------------------------------------------------------------------
@@ -229,4 +229,4 @@ namespace ORUtils
   }
   
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)

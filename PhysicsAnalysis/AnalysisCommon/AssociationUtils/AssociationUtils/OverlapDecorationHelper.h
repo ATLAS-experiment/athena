@@ -16,7 +16,7 @@
 // Local includes
 #include "AssociationUtils/OverlapRemovalDefs.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class OverlapDecorationHelper
@@ -214,6 +214,6 @@ namespace ORUtils
     //for(auto obj : container) setObjectPass(obj);
   }
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

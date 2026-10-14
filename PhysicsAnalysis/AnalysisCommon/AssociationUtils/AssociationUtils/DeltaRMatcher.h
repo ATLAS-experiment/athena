@@ -18,7 +18,7 @@
 // Local includes
 #include "AssociationUtils/IObjectAssociator.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class DeltaRMatcher
@@ -104,6 +104,6 @@ namespace ORUtils
 
   }; // class SlidingDeltaRMatcher
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

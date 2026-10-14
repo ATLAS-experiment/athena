@@ -15,6 +15,9 @@
 // Local includes
 #include "AssociationUtils/IOverlapRemovalTool.h"
 
+namespace ADD_CMODE(ORUtils)
+{
+
 /// A testing algorithm for the dual-use overlap removal tool in Athena
 ///
 /// @author Steve Farrell <Steven.Farrell@cern.ch>
@@ -48,7 +51,7 @@ class OverlapRemovalTestAlg : public AthAlgorithm
                       const std::string& type);
 
     /// Handle to the tool
-    ToolHandle<ORUtils::IOverlapRemovalTool> m_orTool;
+    ToolHandle<IOverlapRemovalTool> m_orTool;
 
     /// Configuration
     std::string m_selectionLabel;
@@ -56,5 +59,7 @@ class OverlapRemovalTestAlg : public AthAlgorithm
     std::string m_bJetLabel;
 
 };
+
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

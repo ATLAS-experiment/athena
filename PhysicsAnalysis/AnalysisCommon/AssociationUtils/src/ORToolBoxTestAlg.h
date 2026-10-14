@@ -13,6 +13,9 @@
 #include "AssociationUtils/OverlapRemovalInit.h"
 
 
+namespace ADD_CMODE(ORUtils)
+{
+
 /// @class ORToolBoxTestAlg
 /// @brief A testing algorithm for the dual-use overlap removal tool in Athena.
 ///
@@ -51,11 +54,13 @@ class ORToolBoxTestAlg : public AthAlgorithm
                       const std::string& type);
 
     /// The overlap removal tools' toolbox
-    ORUtils::ToolBox m_toolBox;
+    ToolBox m_toolBox;
 
     /// The overlap removal tools' configuration flags
-    ORUtils::ORFlags m_flags;
+    ORFlags m_flags;
 
 };
+
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

@@ -13,7 +13,7 @@
 #include "AssociationUtils/BaseOverlapTool.h"
 #include "AssociationUtils/DeltaRMatcher.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class DeltaROverlapTool
@@ -81,11 +81,11 @@ namespace ORUtils
 
       /// @}
 
-      template<columnar::ContainerIdConcept CI1,columnar::RegularContainerIdConcept CI2,columnar::ColumnarModeConcept CM>
-      StatusCode internalFindOverlaps(columnar::ObjectRange<CI1,CM> testCont, columnar::ObjectRange<CI2,CM> refCont) const;
+      template<columnar::ContainerIdConcept CI1,columnar::RegularContainerIdConcept CI2>
+      StatusCode internalFindOverlaps(columnar::ObjectRange<CI1> testCont, columnar::ObjectRange<CI2> refCont) const;
 
   }; // class DeltaROverlapTool
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

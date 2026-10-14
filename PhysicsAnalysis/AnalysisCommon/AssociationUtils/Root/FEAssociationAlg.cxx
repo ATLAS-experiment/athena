@@ -4,7 +4,7 @@
 
 #include "AssociationUtils/FEAssociationAlg.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
 #ifndef XAOD_STANDALONE
@@ -35,4 +35,4 @@ StatusCode FEAssociationAlg::execute()
 }
 #endif
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)

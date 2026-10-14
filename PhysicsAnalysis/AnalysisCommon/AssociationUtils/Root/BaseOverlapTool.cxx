@@ -5,7 +5,7 @@
 // Local includes
 #include "AssociationUtils/BaseOverlapTool.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   //---------------------------------------------------------------------------
@@ -70,4 +70,4 @@ namespace ORUtils
       ANA_CHECK_THROW (findOverlaps (baseAcc.m_particles1Acc (event), baseAcc.m_particles2Acc (event), event));
     }
   }
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)

@@ -18,7 +18,7 @@
 class ISvcLocator;
 class EventContext;
 
-namespace ORUtils {
+namespace ADD_CMODE(ORUtils) {
 
 class FEAssociationAlg final :
 #ifndef XAOD_STANDALONE
@@ -40,14 +40,14 @@ public:
 #endif
 
 private:
-  ToolHandle<ORUtils::IFEAssociationTool> m_tool{
+  ToolHandle<IFEAssociationTool> m_tool{
     this,
     "FEAssociationTool",
-    "ORUtils::FEAssociationTool/FEAssociationTool",
+    columnar::add_cmode("ORUtils")+"::FEAssociationTool/FEAssociationTool",
     "Tool building FE association map"
   };
 };
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

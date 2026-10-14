@@ -109,7 +109,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     bJetLabel = '' #default
     tauLabel = 'DFTauGNTauLoose'
     orTool_legacy = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,inputLabel=inputLabel_legacy,outputLabel=outputLabel_legacy,bJetLabel=bJetLabel))
-    algOR_legacy = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_EMTopo',
+    algOR_legacy = CompFactory.ORUtils.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_EMTopo',
                                                 JetKey="AntiKt4EMTopoJets",
                                                 SelectionLabel=inputLabel_legacy,
                                                 OverlapLabel=outputLabel_legacy,
@@ -123,7 +123,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     inputLabel = 'selected_eventClean_EMPFlow'
     outputLabel = 'DFCommonJets_passOR_EMPFlow'
     orTool = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags,inputLabel=inputLabel,outputLabel=outputLabel,bJetLabel=bJetLabel))
-    algOR = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg',
+    algOR = CompFactory.ORUtils.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg',
                                                 SelectionLabel=inputLabel,
                                                 OverlapLabel=outputLabel,
                                                 OverlapRemovalTool=orTool,

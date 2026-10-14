@@ -25,7 +25,7 @@
 #include "AssociationUtils/BaseOverlapTool.h"
 #include "AssociationUtils/DeltaRMatcher.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class EleMuSharedTrkOverlapTool
@@ -116,6 +116,6 @@ namespace ORUtils
 
   }; // class EleMuSharedTrkOverlapTool
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

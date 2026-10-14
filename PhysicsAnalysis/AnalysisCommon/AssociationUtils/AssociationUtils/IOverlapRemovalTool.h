@@ -7,6 +7,7 @@
 
 // Framework includes
 #include "AsgTools/IAsgTool.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 // EDM includes
 #include "xAODEgamma/ElectronContainer.h"
@@ -16,7 +17,7 @@
 #include "xAODTau/TauJetContainer.h"
 
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class IOverlapRemovalTool
@@ -45,6 +46,6 @@ namespace ORUtils
 
   }; // class IOverlapRemovalTool
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

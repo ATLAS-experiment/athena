@@ -260,7 +260,7 @@ def EGAM11KernelCfg(flags, name="EGAM11Kernel", **kwargs):
             flags, outputLabel=outputLabel, bJetLabel=bJetLabel, doTaus=False
         )
     )
-    algOR = CompFactory.OverlapRemovalGenUseAlg(
+    algOR = CompFactory.ORUtils.OverlapRemovalGenUseAlg(
         "OverlapRemovalGenUseAlg",
         OverlapLabel=outputLabel,
         OverlapRemovalTool=orTool,

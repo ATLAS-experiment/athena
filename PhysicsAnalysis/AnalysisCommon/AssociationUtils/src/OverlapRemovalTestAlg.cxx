@@ -16,6 +16,9 @@ namespace
   const float invGeV = 1./GeV;
 }
 
+namespace ADD_CMODE(ORUtils)
+{
+
 //-----------------------------------------------------------------------------
 // Constructor
 //-----------------------------------------------------------------------------
@@ -149,3 +152,5 @@ void OverlapRemovalTestAlg::printObjects(const xAOD::IParticleContainer& contain
     }
   }
 }
+
+} // namespace ADD_CMODE(ORUtils)

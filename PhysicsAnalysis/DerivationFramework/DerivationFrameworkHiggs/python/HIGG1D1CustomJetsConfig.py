@@ -253,7 +253,7 @@ def HIGG1D1CustomJetsCleaningCfg(ConfigFlags):
     bJetLabel = '' #default
     tauLabel = 'DFTauGNTauLoose'
     orTool = acc.popToolsAndMerge(OverlapRemovalToolCfg(ConfigFlags, outputLabel=outputLabel, bJetLabel=bJetLabel))
-    algOR = CompFactory.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_CustomVtx',
+    algOR = CompFactory.ORUtils.OverlapRemovalGenUseAlg('OverlapRemovalGenUseAlg_CustomVtx',
                                                 JetKey="AntiKt4EMPFlowCustomVtxJets",
                                                 OverlapLabel=outputLabel,
                                                 OverlapRemovalTool=orTool,

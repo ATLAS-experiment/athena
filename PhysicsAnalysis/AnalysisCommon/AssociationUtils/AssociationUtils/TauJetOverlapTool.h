@@ -20,7 +20,7 @@
 #include "AssociationUtils/BaseOverlapTool.h"
 #include "AssociationUtils/IObjectAssociator.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class TauJetOverlapTool
@@ -100,6 +100,6 @@ namespace ORUtils
 
   }; // class TauJetOverlapTool
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif
