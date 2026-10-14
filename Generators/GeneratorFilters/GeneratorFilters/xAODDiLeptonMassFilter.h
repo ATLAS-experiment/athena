@@ -13,6 +13,7 @@
 /// - Apply Pt and Eta cuts on leptons.  Default is Pt > 5 GeV and |eta| < 5
 /// - Optionally allow same sign paris.  Default is true
 /// - Optionally allow Z -> e mu.  Default is false
+/// - Optionally require same sign pairs only.  Default is false
 ///
 /// @author Carl Gwilliam <gwilliam@mail.cern.ch>
 class xAODDiLeptonMassFilter : public GenFilter {
@@ -33,6 +34,7 @@ private:
   Gaudi::Property<double> m_minDilepPt{this, "MinDilepPt", -1.};
   Gaudi::Property<bool>   m_allowElecMu{this, "AllowElecMu", false};
   Gaudi::Property<bool>   m_allowSameCharge{this, "AllowSameCharge", true};
+  Gaudi::Property<bool>   m_requireSameCharge{this, "RequireSameCharge", false};
   int m_AthenaCalls{};
 
 };

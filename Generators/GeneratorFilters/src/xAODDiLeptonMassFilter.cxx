@@ -9,6 +9,11 @@
 StatusCode xAODDiLeptonMassFilter::filterInitialize() {
   m_AthenaCalls = 0;
   CHECK(m_truthPartContKey.initialize());
+  if (m_requireSameCharge && !m_allowSameCharge) {
+    ATH_MSG_WARNING("RequireSameCharge=True is incompatible with "
+                    "AllowSameCharge=False: forcing AllowSameCharge=True");
+    m_allowSameCharge = true;
+  }
   ATH_MSG_DEBUG("MinPt           " << m_minPt);
   ATH_MSG_DEBUG("MaxEta          " << m_maxEta);
   ATH_MSG_DEBUG("MinMass         " << m_minMass);
@@ -16,6 +21,7 @@ StatusCode xAODDiLeptonMassFilter::filterInitialize() {
   ATH_MSG_DEBUG("MinDileptPt     " << m_minDilepPt);
   ATH_MSG_DEBUG("AllowElecMu     " << m_allowElecMu);
   ATH_MSG_DEBUG("AllowSameCharge " << m_allowSameCharge);
+  ATH_MSG_DEBUG("RequireSameCharge " << m_requireSameCharge);
   return StatusCode::SUCCESS;
 }
 
@@ -28,7 +34,8 @@ StatusCode xAODDiLeptonMassFilter::filterFinalize() {
     "    Mass range : (" << m_minMass << ", " << m_maxMass << ")\n"  <<
     "    Dilepton pT (GeV) : " << m_minDilepPt << "\n"               <<
     "    Allow el+mu : " << m_allowElecMu << "\n"                    <<
-    "    Allow same-sign : " << m_allowSameCharge << "\n"
+    "    Allow same-sign : " << m_allowSameCharge << "\n" <<
+    "    Require same-sign : " << m_requireSameCharge << "\n"
   );
 
   if (m_AthenaCalls == 0) {
@@ -67,6 +74,12 @@ StatusCode xAODDiLeptonMassFilter::filterEvent(const EventContext& ctx) {
             const xAOD::TruthParticle* lightLeptonParticle2 = (*xTruthParticleContainer)[iPart2];
             int pdgId2 = lightLeptonParticle2->pdgId();
             if( !MC::isStable(lightLeptonParticle) || iPart == iPart2) continue;
+
+            // Optionally keep only same-sign pairs. For leptons the sign of the PDG id is
+            // opposite to the electric charge, so same sign <=> pdgId1*pdgId2 > 0.
+            if (m_requireSameCharge && MC::charge(pdgId1)* MC::charge(pdgId2) < 0) {
+                continue;
+            }
 
             // Pick electrons or muons with Pt > m_inPt and |eta| < m_maxEta
             // If m_allowSameChagrge is not true only pick those with opposite charge to the first particle
