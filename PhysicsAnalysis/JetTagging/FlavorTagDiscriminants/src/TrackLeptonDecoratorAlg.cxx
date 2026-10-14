@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -66,11 +66,11 @@ namespace FlavorTagDiscriminants {
     ATH_MSG_DEBUG( "Retrieved " << tracks->size() << " tracks..." );
     SG::ReadHandle<xAOD::ElectronContainer> electrons(
       m_ElectronContainerKey,ctx);
-    CHECK( tracks.isValid() );
+    CHECK( electrons.isValid() );
     ATH_MSG_DEBUG( "Retrieved " << electrons->size() << " electrons..." );
     SG::ReadHandle<xAOD::MuonContainer> muons(
       m_MuonContainerKey,ctx);
-    CHECK( tracks.isValid() );
+    CHECK( muons.isValid() );
     ATH_MSG_DEBUG( "Retrieved " << muons->size() << " muons..." );
 
     using TPC = xAOD::TrackParticleContainer;
