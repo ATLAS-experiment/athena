@@ -7,7 +7,7 @@ atlas_subdir( RecTPCnv )
 atlas_add_library( RecTPCnv
                    src/*.cxx
                    PUBLIC_HEADERS RecTPCnv
-                   LINK_LIBRARIES AthenaPoolCnvSvcLib CxxUtils DataModelAthenaPoolLib EventCommonTPCnv GaudiKernel MissingETEvent ParticleEventTPCnv StoreGateLib TrkEventTPCnv TrkMaterialOnTrack muonEvent
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib CxxUtils DataModelAthenaPoolLib EventCommonTPCnv GaudiKernel ParticleEventTPCnv StoreGateLib TrkEventTPCnv TrkMaterialOnTrack muonEvent
                    PRIVATE_LINK_LIBRARIES AthenaKernel RootConversions )
 
 atlas_add_tpcnv_library( RecTPCnvFactories
@@ -38,20 +38,6 @@ _add_test( CaloEnergyCnv_p1_test )
 _add_test( CaloEnergyCnv_p2_test )
 _add_test( DepositInCaloCnv_p1_test )
 _add_test( DepositInCaloCnv_p2_test )
-_add_test( MissingETCnv_p1_test )
-_add_test( MissingETCnv_p2_test )
-_add_test( MissingETCnv_p3_test )
-_add_test( MissingETCompositionCnv_p1_test )
-_add_test( MissingETCompositionCnv_p2_test )
-_add_test( MissingEtCaloCnv_p1_test )
-_add_test( MissingEtCaloCnv_p2_test )
-_add_test( MissingEtCaloCnv_p3_test )
-_add_test( MissingEtRegionsCnv_p1_test )
-_add_test( MissingEtRegionsCnv_p2_test )
-_add_test( MissingEtRegionsCnv_p3_test )
-_add_test( MissingEtTruthCnv_p1_test )
-_add_test( MissingEtTruthCnv_p2_test )
-_add_test( MissingEtTruthCnv_p3_test )
 _add_test( MuonCaloEnergyContainerCnv_p1_test )
 _add_test( MuonCnv_p1_test )
 _add_test( MuonCnv_p2_test )
