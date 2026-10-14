@@ -32,7 +32,7 @@ AllowedOutputFormats = ['BS', 'ESD', 'AODFULL', 'AODSLIM', 'AODBLSSLIM' ]
 from TrigEDMConfig import DataScoutingInfo
 AllowedOutputFormats.extend(DataScoutingInfo.getAllDataScoutingIdentifiers())
 
-_allowedEDMPrefixes = ['HLT_', 'L1_', 'LVL1']
+_allowedEDMPrefixes = ['HLT_', 'EF_', 'L1_', 'LVL1']
 def recordable(arg):
     """
     Verify that the name is in the list of recorded objects and conform to the name convention

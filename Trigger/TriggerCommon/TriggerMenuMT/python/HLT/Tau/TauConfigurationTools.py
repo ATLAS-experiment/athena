@@ -194,6 +194,7 @@ def getPrecisionSequenceTauIDs(flags: AthConfigFlags, precision_sequence: str, a
         # Default Tau ID algorithms to run in all menus
         algs={
             'MVA': ['GNTau', 'MesonCuts', 'GNTauDev1'],
+            'EM': ['GNTau', 'MesonCuts', 'GNTauDev1'],
             'LLP': ['RNNLLP'],
             'LRT': ['RNNLLP'],
         },
@@ -201,6 +202,7 @@ def getPrecisionSequenceTauIDs(flags: AthConfigFlags, precision_sequence: str, a
         # Additional Tau ID algorithms to run ONLY if we're using the MC (or Dev) menu
         mc_algs={
             'MVA': ['DeepSet'],
+            'EM': ['DeepSet'],
         },
 
         # Additional Tau ID algorithms to run ONLY if we're using the Dev menu
