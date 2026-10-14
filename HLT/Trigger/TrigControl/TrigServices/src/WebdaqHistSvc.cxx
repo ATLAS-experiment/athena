@@ -654,7 +654,7 @@ void WebdaqHistSvc::monitoringTask(const std::string& appName, unsigned int numS
  
     //sleep till the next cycle
     const boost::posix_time::ptime now = boost::posix_time::microsec_clock::universal_time();
-    const int nowMs = (now-epoch).total_milliseconds();
+    const int64_t nowMs = (now-epoch).total_milliseconds();
     const boost::posix_time::time_duration next_cycle(boost::posix_time::milliseconds(interval_ms - (nowMs % interval_ms)));
     ATH_MSG_DEBUG("epoch " << epoch <<", interval_ms" << interval_ms << ", now_ms " << nowMs
                   << "sleeping for " << next_cycle.total_milliseconds() << " milliseconds till the next cycle");
@@ -670,7 +670,7 @@ void WebdaqHistSvc::syncPublish(long int interval_ms, const boost::posix_time::p
   //Sync the publication to a multple of the interval
   //Code taken from TDAQ monsvc https://gitlab.cern.ch/atlas-tdaq-software/monsvc/-/blob/master/src/PeriodicScheduler.cxx?ref_type=heads#L163
   const boost::posix_time::ptime now = boost::posix_time::microsec_clock::universal_time();
-  const int now_ms = (now-epoch).total_milliseconds();
+  const int64_t now_ms = (now-epoch).total_milliseconds();
   //If now_ms % interval_ms == 0 we skip a cycle. Too bad.
   const boost::posix_time::time_duration sync(boost::posix_time::milliseconds(interval_ms - (now_ms % interval_ms)));
   //Do not sync if we are below 50 ms
