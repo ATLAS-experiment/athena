@@ -189,8 +189,7 @@ namespace AllowedVariables
         dynamic_cast<AsgElectronSelectorTool*>(parentTool),
         modelPath.c_str(),
         quantilePath.c_str(),
-        tempVariables,
-        m_multiClass
+        tempVariables
     );
 
     m_defaultOutputs = std::vector<float>(m_nOutputs, -999.0f);

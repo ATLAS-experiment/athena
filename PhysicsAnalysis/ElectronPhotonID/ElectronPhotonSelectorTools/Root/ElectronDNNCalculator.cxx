@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -12,12 +12,9 @@
 */
 
 #include "ElectronDNNCalculator.h"
-#include "PathResolver/PathResolver.h"
-#include "TSystem.h"
 #include "TFile.h"
 #include <map>
 #include <fstream>
-#include <iostream>
 #include "lwtnn/parse_json.hh"
 #include "lwtnn/InputOrder.hh"
 #include <Eigen/Dense>
@@ -26,11 +23,9 @@
 ElectronDNNCalculator::ElectronDNNCalculator(AsgElectronSelectorTool* owner,
                                              const std::string& modelFileName,
                                              const std::string& quantileFileName,
-                                             const std::vector<std::string>& variables,
-                                             const bool multiClass) :
+                                             const std::vector<std::string>& variables) :
                                             asg::AsgMessagingForward(owner),
                                             m_quantiles(variables.size()),
-                                            m_multiClass(multiClass),
                                             m_variables(variables),
                                             m_var_size(variables.size())
 {
