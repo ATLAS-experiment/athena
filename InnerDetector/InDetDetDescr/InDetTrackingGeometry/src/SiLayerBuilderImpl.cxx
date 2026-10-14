@@ -780,33 +780,34 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
 
   // if there are additional layers to be built - never build for the DBM loop
   if (!m_endcapAdditionalLayerPosZ.empty() && !isDBM){
+      //
+      const std::size_t originalSize = discLayers->size();
+      std::size_t layerIndex = 0;
+      //
       // sort also the additional layer z positions
       auto addLayerIter     = m_endcapAdditionalLayerPosZ.begin();
-      auto addLayerIterEnd  = m_endcapAdditionalLayerPosZ.end();
       auto addLayerTypeIter = m_endcapAdditionalLayerType.begin();
-      // reassign the iterators
-      sortIter = discLayers->begin();
-      sortEnd   = discLayers->end();
       // get the last rmin / rmax
       double lastRmin = 0.;
       double lastRmax = 0.;
-      // build the additional layers -------------------------------------------
-      for ( ; sortIter != sortEnd || addLayerIter != addLayerIterEnd; ){
-          // cache befor last parameters are overwritten
+      //
+      while (layerIndex < originalSize || addLayerIter != m_endcapAdditionalLayerPosZ.end() ){
+          // cache before last parameters are overwritten
           double layerRmin       = lastRmin;
           double layerRmax       = lastRmax;
           double layerZposition   = 0.;
           // check if the z-position is smaller than the
-          if ( sortIter != sortEnd){
+          if ( layerIndex < originalSize){
+              const auto * layer = (*discLayers)[layerIndex];
               // get the current z position to guarantee a symmetrical setup
-              layerZposition = (*sortIter)->surfaceRepresentation().center().z();
+              layerZposition = layer->surfaceRepresentation().center().z();
               // get the bounds for the rMin / rMax setting
-              const Trk::DiscBounds* currentBounds = dynamic_cast<const Trk::DiscBounds*>(&((*sortIter)->surfaceRepresentation().bounds()));
-              lastRmin = currentBounds ? currentBounds->rMin() : 0.;
-              lastRmax = currentBounds ? currentBounds->rMax() : 0.;
-              ++sortIter;
+              const auto* bounds = dynamic_cast<const Trk::DiscBounds*>(&layer->surfaceRepresentation().bounds());
+              lastRmin = bounds ? bounds->rMin() : 0.;
+              lastRmax = bounds ? bounds->rMax() : 0.;
+              ++layerIndex;
           }
-          if ( addLayerIter != addLayerIterEnd){
+          if ( addLayerIter != m_endcapAdditionalLayerPosZ.end()){
               // symmetric setup around 0.
               double rMin = layerZposition > 0. ? layerRmin : lastRmin;
               double rMax = layerZposition > 0. ? layerRmax : lastRmax;
@@ -816,13 +817,10 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
               Amg::Transform3D passiveDiscTransf =
                 Amg::Transform3D(Amg::Translation3D(0., 0., *addLayerIter));
               if (*addLayerTypeIter) {
-                ATH_MSG_DEBUG(
-                  "Building an additional DiscLayer w/o sensitive modules at");
+                ATH_MSG_DEBUG( "Building an additional DiscLayer w/o sensitive modules at");
                 // create the material and the passive layer
-                const Trk::LayerMaterialProperties& passiveLayerMaterial =
-                  endcapLayerMaterial(rMin, rMax);
-                passiveLayer =
-                  new Trk::DiscLayer(passiveDiscTransf,
+                const Trk::LayerMaterialProperties& passiveLayerMaterial = endcapLayerMaterial(rMin, rMax);
+                passiveLayer = new Trk::DiscLayer(passiveDiscTransf,
                                      std::make_shared<Trk::DiscBounds>(rMin, rMax),
                                      passiveLayerMaterial,
                                      1. * Gaudi::Units::mm);
@@ -834,14 +832,14 @@ InDet::SiLayerBuilderImpl::createDiscLayersImpl(const InDetDD::SiDetectorElement
 
               // increase the iterator and push back the new layer
              ++addLayerIter;
+             ++addLayerTypeIter;
              discLayers->push_back(passiveLayer);
           }
-      } // the additional layers are build ------------------------------------
+      } // the additional layers are built
 
     // another round of sorting needed after adding the passive layers
-    sortIter = discLayers->begin();
-    sortEnd   = discLayers->end();
-    std::sort(sortIter, sortEnd, zSorter);
+    
+    std::ranges::sort(*discLayers,zSorter);
   }
 
   return discLayers;
