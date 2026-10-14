@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODTau )
@@ -34,6 +34,17 @@ atlas_add_dictionary( xAODTau_cDict
    xAODTau/xAODTau_cDict.h
    xAODTau/selection_c.xml
    LINK_LIBRARIES xAODTau )
+
+# Serializer converter for Trigger.
+IF( NOT XAOD_ANALYSIS )
+   atlas_add_sercnv_library( xAODTauSerCnv
+      FILES xAODTau/TauJetContainer.h xAODTau/TauJetAuxContainer.h
+            xAODTau/TauTrackContainer.h xAODTau/TauTrackAuxContainer.h
+      TYPES_WITH_NAMESPACE xAOD::TauJetContainer xAOD::TauJetAuxContainer
+                           xAOD::TauTrackContainer xAOD::TauTrackAuxContainer
+      CNV_PFX xAOD
+      LINK_LIBRARIES xAODTau TrigSerializeCnvSvcLib )
+endif()
 
 # Test(s) in the package.
 atlas_add_test( xAODTau_TauJet_test

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODTrigEgamma )
@@ -25,3 +25,16 @@ atlas_add_dictionary( xAODTrigEgammaDict
     ${_selectionFile}
     LINK_LIBRARIES xAODCore xAODTrigEgamma
     EXTRA_FILES Root/dict/*.cxx )
+
+# Serializer converter for Trigger.
+IF( NOT XAOD_ANALYSIS )
+   atlas_add_sercnv_library( xAODTrigEgammaSerCnv
+      FILES xAODTrigEgamma/TrigPhotonContainer.h xAODTrigEgamma/TrigPhotonAuxContainer.h
+            xAODTrigEgamma/TrigElectronContainer.h xAODTrigEgamma/TrigElectronAuxContainer.h
+            xAODTrigEgamma/PhotonTrigAuxContainer.h xAODTrigEgamma/ElectronTrigAuxContainer.h
+      TYPES_WITH_NAMESPACE xAOD::TrigPhotonContainer xAOD::TrigPhotonAuxContainer
+                           xAOD::TrigElectronContainer xAOD::TrigElectronAuxContainer
+                           xAOD::PhotonTrigAuxContainer xAOD::ElectronTrigAuxContainer
+      CNV_PFX xAOD
+      LINK_LIBRARIES xAODTrigEgamma TrigSerializeCnvSvcLib )
+endif()

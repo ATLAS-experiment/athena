@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( xAODJet )
@@ -45,6 +45,15 @@ atlas_add_dictionary( xAODJetDict
    ${_selectionFile}
    LINK_LIBRARIES xAODCore xAODJet
    EXTRA_FILES Root/dict/*.cxx )
+
+# Serializer converter for Trigger:
+IF( NOT XAOD_ANALYSIS AND NOT SIMULATIONBASE AND NOT GENERATIONBASE )
+   atlas_add_sercnv_library( xAODJetSerCnv
+      FILES xAODJet/JetContainer.h xAODJet/JetTrigAuxContainer.h
+      TYPES_WITH_NAMESPACE xAOD::JetContainer xAOD::JetTrigAuxContainer
+      CNV_PFX xAOD
+      LINK_LIBRARIES xAODJet TrigSerializeCnvSvcLib )
+endif()
 
 # Test(s) in the package:
 atlas_add_test( xAODJet_Jet_test
