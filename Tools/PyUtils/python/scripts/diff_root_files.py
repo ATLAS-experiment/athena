@@ -129,7 +129,7 @@ def parse_tolerances(arg):
                   help='set of regex matching names of branches to compare; assumes all if none specified.')
 @acmdlib.argument('--ignore-leaves',
                   nargs='+',
-                  default=('Token', 'index_ref', r'(.*)_timings\.(.*)', r'(.*)_mems\.(.*)', r'(.*)TrigCostContainer(.*)'),
+                  default=('Token', 'index_ref', r'(.*)TrigCostContainer(.*)'),
                   help='set of leaves names to ignore from comparison; can be a branch name or a partial leaf name (accepts regex)')
 @acmdlib.argument('--enforce-leaves',
                   nargs='+',

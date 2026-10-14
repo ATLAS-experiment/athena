@@ -116,7 +116,7 @@ echo "art-result: $? merging first input no events (PHYSLITE)";
 
 # Diff
 acmd diff-root \
-  --ignore-leaves 'index_ref' '(.*)_timings\.(.*)' '(.*)_mems\.(.*)' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
+  --ignore-leaves 'index_ref' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
   --nan-equal \
   --exact-branches \
   --order-trees DAOD_PHYS.ttree.pool.root DAOD_PHYS.ttree_AllWorkersHaveEvent.pool.root;
@@ -124,7 +124,7 @@ acmd diff-root \
 echo "art-result: $? diff PHYS AllWorkersHaveEvent";
 
 acmd diff-root \
-  --ignore-leaves 'index_ref' '(.*)_timings\.(.*)' '(.*)_mems\.(.*)' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
+  --ignore-leaves 'index_ref' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
   --nan-equal \
   --exact-branches \
   --order-trees DAOD_PHYS.ttree.pool.root DAOD_PHYS.ttree_EventlessWorker_FirstHasEvents.pool.root;
@@ -132,7 +132,7 @@ acmd diff-root \
 echo "art-result: $? diff PHYS EventlessWorker FirstHasEvents";
 
 acmd diff-root \
-  --ignore-leaves 'index_ref' '(.*)_timings\.(.*)' '(.*)_mems\.(.*)' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
+  --ignore-leaves 'index_ref' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
   --nan-equal \
   --exact-branches \
   --order-trees DAOD_PHYS.ttree.pool.root DAOD_PHYS.ttree_EventlessWorker_FirstNoEvents.pool.root;
@@ -140,7 +140,7 @@ acmd diff-root \
 echo "art-result: $? diff PHYS EventlessWorker FirstNoEvents";
 
 acmd diff-root \
-  --ignore-leaves 'index_ref' '(.*)_timings\.(.*)' '(.*)_mems\.(.*)' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
+  --ignore-leaves 'index_ref' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
   --nan-equal \
   --exact-branches \
   --order-trees DAOD_PHYSLITE.ttree.pool.root DAOD_PHYSLITE.ttree_AllWorkersHaveEvent.pool.root;
@@ -148,7 +148,7 @@ acmd diff-root \
 echo "art-result: $? diff PHYSLITE AllWorkersHaveEvent";
 
 acmd diff-root \
-  --ignore-leaves 'index_ref' '(.*)_timings\.(.*)' '(.*)_mems\.(.*)' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
+  --ignore-leaves 'index_ref' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
   --nan-equal \
   --exact-branches \
   --order-trees DAOD_PHYSLITE.ttree.pool.root DAOD_PHYSLITE.ttree_EventlessWorker_FirstHasEvents.pool.root;
@@ -156,7 +156,7 @@ acmd diff-root \
 echo "art-result: $? diff PHYSLITE EventlessWorker FirstHasEvents";
 
 acmd diff-root \
-  --ignore-leaves 'index_ref' '(.*)_timings\.(.*)' '(.*)_mems\.(.*)' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
+  --ignore-leaves 'index_ref' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
   --nan-equal \
   --exact-branches \
   --order-trees DAOD_PHYSLITE.ttree.pool.root DAOD_PHYSLITE.ttree_EventlessWorker_FirstNoEvents.pool.root;

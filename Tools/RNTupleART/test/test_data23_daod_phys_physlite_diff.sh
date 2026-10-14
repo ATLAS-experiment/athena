@@ -56,7 +56,7 @@ echo "art-result: $? conversion (PHYSLITE)";
 
 # Diff - See ATLASRECTS-7757 for non-default leaf list
 acmd diff-root \
-  --ignore-leaves 'index_ref' '(.*)_timings\.(.*)' '(.*)_mems\.(.*)' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
+  --ignore-leaves 'index_ref' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
   --nan-equal \
   --exact-branches \
   --order-trees DAOD_PHYS.ttree.pool.root DAOD_PHYS.rntuple-to-ttree.pool.root;
@@ -64,7 +64,7 @@ acmd diff-root \
 echo "art-result: $? diff (PHYS)";
 
 acmd diff-root \
-  --ignore-leaves 'index_ref' '(.*)_timings\.(.*)' '(.*)_mems\.(.*)' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
+  --ignore-leaves 'index_ref' '(.*)TrigCostContainer(.*)' '(.*)DFCommonJets(.*)fJvt' \
   --nan-equal \
   --exact-branches \
   --order-trees DAOD_PHYSLITE.ttree.pool.root DAOD_PHYSLITE.rntuple-to-ttree.pool.root;
