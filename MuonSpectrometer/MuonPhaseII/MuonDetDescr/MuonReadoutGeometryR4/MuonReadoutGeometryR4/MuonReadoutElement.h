@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELR4_MUONREADOUTELEMENT_H
 #define MUONGEOMODELR4_MUONREADOUTELEMENT_H
@@ -124,7 +124,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      *              z-axis: Points vertically outwards the chamber
      *                      (e.g. radially outwards for barrel or to the endcap cavern wall)
      *  @param ctx: Geometry context to take the alignment corrections into account */
-    Amg::Transform3D globalToLocalTransform(const ActsTrk::GeometryContext& ctx) const;
+    Acts::Transform3 globalToLocalTransform(const ActsTrk::GeometryContext& ctx) const;
     /** @brief Returns the transformations from the ATLAS coordinate system into the
      *         local coordinate system of the readout sensor. The orientiation of the
      *         axes depends on whether the sensor is described by a plane or by a
@@ -141,7 +141,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      *              z-axis: Points along the tube wire
      *  @param ctx: Geometry context to take the alignment corrections into account
      *  @param id: Identifier of the measurement for which the transform shall be retrieved */
-    Amg::Transform3D globalToLocalTransform(const ActsTrk::GeometryContext& ctx,
+    Acts::Transform3 globalToLocalTransform(const ActsTrk::GeometryContext& ctx,
                                             const Identifier& id) const;
     /** @brief Returns the transformations from the ATLAS coordinate system into the
      *         local coordinate system using the measurement / layer hash mechanism.
@@ -150,30 +150,30 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      *         plane transform or the particular tube transform shall be retrieved.
      *  @param ctx: Geometry context to take the alignment corrections into account.
      *  @param hash: Hash of the transform to fetch (Measurement or layer hash). */
-    Amg::Transform3D globalToLocalTransform(const ActsTrk::GeometryContext& ctx, 
+    Acts::Transform3 globalToLocalTransform(const ActsTrk::GeometryContext& ctx, 
                                             const IdentifierHash& hash) const;
     /** @brief Returns the transformation from the local coordinate system  of the readout
      *         element into the global ATLAS coordinate system (inverse of globalToLocal).
      *  @param ctx: Geometry context to take the alignment corrections into account. */
-    const Amg::Isometry3D& localToGlobalTransform(const ActsTrk::GeometryContext& ctx) const override final;
+    const Acts::Transform3& localToGlobalTransform(const ActsTrk::GeometryContext& ctx) const override final;
     /** @brief Returns the transformation from the local coordinate system  of the readout
      *         element into the global ATLAS coordinate system (inverse of globalToLocal).
      *  @param ctx: Geometry context to take the alignment corrections into account
      *  @param id: Identifier of the measurement for which the transform shall be retrieved */
-    const Amg::Isometry3D& localToGlobalTransform(const ActsTrk::GeometryContext& ctx,
-                                                  const Identifier& id) const;
+    const Acts::Transform3& localToGlobalTransform(const ActsTrk::GeometryContext& ctx,
+                                                   const Identifier& id) const;
     /** @brief Returns the transformation from the local coordinate system  of the readout
      *         element into the global ATLAS coordinate system (inverse of globalToLocal).
      *  @param ctx: Geometry context to take the alignment corrections into account
      *  @param hash: Hash of the transform to fetch (Measurement or layer hash). */
-    const Amg::Isometry3D& localToGlobalTransform(const ActsTrk::GeometryContext& ctx,
-                                                  const IdentifierHash& id) const;
+    const Acts::Transform3& localToGlobalTransform(const ActsTrk::GeometryContext& ctx,
+                                                   const IdentifierHash& id) const;
 
 #ifndef SIMULATIONBASE
     /** @brief Wrapper function of the localToGlobalTransform method to align
      *         with the Acts interface
      *  @param gctx: Acts representation of the GeometryContext */
-    const Amg::Isometry3D& localToGlobalTransform(const Acts::GeometryContext& gctx) const;
+    const Acts::Transform3& localToGlobalTransform(const Acts::GeometryContext& gctx) const;
     /** @brief Returns the surface associated with the readout element. It is placed in the 
      *         center of the readout element's volume and has the volumes surface bounds */
     const Acts::Surface& surface() const;
@@ -202,7 +202,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
     /** @brief Returns the pointer to the chamber enclosing this readout element */
     const Chamber* chamber() const;
 #endif
-    const Amg::Isometry3D& localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const override final;
+    const Acts::Transform3& localToGlobalTransform(const ActsTrk::DetectorAlignStore* store) const override final;
     /** @brief Returns the thickness in normal direction of the strip readout
      *         planes */
     virtual double thickness() const = 0;
@@ -224,7 +224,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
      *                                for detector mounted in the endcaps)
      *                 y-axis: Points along the edge which is parallel to the eta sensors
      *                 z-axis: Points along towards the next eta sensor */
-    const Amg::Transform3D& toStation(const ActsTrk::DetectorAlignStore* alignStore) const;
+    Acts::Transform3 toStation(const ActsTrk::DetectorAlignStore* alignStore) const;
     /** @brief Constructs the TransformDetEleCache associated with the hash of the 
      *         given Mdt tube or strip layer. The method is templated over the specific
     *         implementation of the readout element as the `ReadoutSurfacePositioning` implements
@@ -286,7 +286,7 @@ class MuonReadoutElement : public GeoVDetectorElement, public AthMessaging, publ
 }  // namespace MuonGMR4
 
 namespace ActsTrk{
-    template <> Amg::Transform3D 
+    template <> Acts::Transform3 
         ReadoutSurfacePositioning<MuonGMR4::MuonReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
 }
 

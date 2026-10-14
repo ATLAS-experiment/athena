@@ -68,8 +68,8 @@ namespace MuonGMR4{
             m_tubePos.insert(std::move(positioner));
         }
     }
-    const Amg::Transform3D& MdtTubeLayer::layerTransform() const {
-        return m_layTrf->getDefTransform();
+    Acts::Transform3 MdtTubeLayer::layerTransform() const {
+        return Amg::toIsometry3D(m_layTrf->getDefTransform());
     }
     PVConstLink MdtTubeLayer::getTubeNode(unsigned int tube) const {
         TubePositionerSet::const_iterator tube_itr = m_tubePos.find(tube);
@@ -79,7 +79,7 @@ namespace MuonGMR4{
         }
         return tube_itr->tubeVol;
     }
-    const Amg::Transform3D MdtTubeLayer::tubeTransform(const unsigned int tube) const {    
+    const Acts::Transform3 MdtTubeLayer::tubeTransform(const unsigned int tube) const {    
         TubePositionerSet::const_iterator tube_itr = m_tubePos.find(tube);
         if (tube_itr == m_tubePos.end()) {
             THROW_EXCEPTION(m_layerNode->getLogVol()->getName()<<" has only "<<nTubes()<<" tubes. But "

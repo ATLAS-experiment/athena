@@ -108,7 +108,7 @@ class TgcReadoutElement : public MuonReadoutElement {
         double m_gasThickness{0.};
 
         
-        Amg::Transform3D fromGapToChamOrigin(const IdentifierHash& layerHash) const;
+        Acts::Transform3 fromGapToChamOrigin(const IdentifierHash& layerHash) const;
         /// Returns the local strip position w.r.t. to the chamber origin
         Amg::Vector3D chamberStripPos(const IdentifierHash& measHash) const;
     public:
@@ -133,7 +133,7 @@ std::ostream& operator<<(std::ostream& ostr, const TgcReadoutElement::parameterB
 }  // namespace MuonGMR4
 
 namespace ActsTrk{
-    template <> Amg::Transform3D 
+    template <> Acts::Transform3 
         ReadoutSurfacePositioning<MuonGMR4::TgcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
     template <> Identifier
         ReadoutSurfacePositioning<MuonGMR4::TgcReadoutElement>::identify() const;

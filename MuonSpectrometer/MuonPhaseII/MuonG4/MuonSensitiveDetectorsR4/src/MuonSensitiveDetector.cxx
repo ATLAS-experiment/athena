@@ -92,7 +92,7 @@ namespace MuonG4R4 {
         return trHelper.GenerateParticleLink(g4EventInfo ? g4EventInfo->GetEventStore() : nullptr);
     }
     xAOD::MuonSimHit* MuonSensitiveDetector::propagateAndSaveStrip(const Identifier& hitID,
-                                                                   const Amg::Transform3D& toGasGap,
+                                                                   const Acts::Transform3& toGasGap,
                                                                    const G4Step* aStep) {
         
         const G4Track* currentTrack = aStep->GetTrack();

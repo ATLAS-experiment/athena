@@ -20,7 +20,7 @@ namespace ActsTrk{
         ActsTrk::AlignableGeoPositioning(portalIdx, parent->detectorType()),
         m_parent{parent} {}                                       
                     
-    Amg::Transform3D VolumePlacement::VolumeGeoPositioning::fetchTransform(const DetectorAlignStore* store) const {
+    Acts::Transform3 VolumePlacement::VolumeGeoPositioning::fetchTransform(const DetectorAlignStore* store) const {
         switch (m_flags) {
             case CacheFlags::volumeLocToGlob: {
                 return m_parent->localToGlobalTransform(store);
@@ -31,14 +31,14 @@ namespace ActsTrk{
                 return m_parent->localToGlobalTransform(store).inverse();
             }
         }
-        return Amg::Transform3D::Identity();
+        return Acts::Transform3::Identity();
     }
     //#################################################################################
     //                          VolumePlacement
     //#################################################################################
     VolumePlacement::VolumePlacement(const DetectorType detType,
                                      const AlignableNode_t parentNode,
-                                     const std::optional<Amg::Transform3D> & addShift):
+                                     const std::optional<Acts::Transform3> & addShift):
         m_parent{parentNode},
         m_locToGlobCache{std::make_unique<VolumeGeoPositioning>(VolumeGeoPositioning::CacheFlags::volumeLocToGlob, detType, this)},
         m_globToLocCache{std::make_unique<VolumeGeoPositioning>(VolumeGeoPositioning::CacheFlags::volumeGlobToLoc, detType, this)} {
@@ -53,7 +53,7 @@ namespace ActsTrk{
         m_children.push_back(std::move(child));
     }
     VolumePlacement::VolumePlacement(const IDetectorElement& parentElement,
-                                     const std::optional<Amg::Transform3D> & addShift):
+                                     const std::optional<Acts::Transform3> & addShift):
         m_parent{&parentElement},
         m_globToLocCache{std::make_unique<VolumeGeoPositioning>(VolumeGeoPositioning::CacheFlags::volumeGlobToLoc, 
                                                                 parentElement.detectorType(), this)} {
@@ -67,7 +67,7 @@ namespace ActsTrk{
     }
 
     VolumePlacement::VolumePlacement(const VolumePlacement& parentPlacement,
-                                     const std::optional<Amg::Transform3D> & addShift):
+                                     const std::optional<Acts::Transform3> & addShift):
         m_parent{&parentPlacement}{
         if (!addShift) {
             return;
@@ -101,7 +101,7 @@ namespace ActsTrk{
         }
         return m_locToGlobCache->getTransform(tgContext);
     }
-    const Amg::Isometry3D& VolumePlacement::localToGlobalTransform(const GeometryContext& gctx) const {
+    const Acts::Transform3& VolumePlacement::localToGlobalTransform(const GeometryContext& gctx) const {
         return localToGlobalTransform(gctx.context());
     }
     const Acts::Transform3& VolumePlacement::globalToLocalTransform(const Acts::GeometryContext& tgContext) const{
@@ -111,7 +111,7 @@ namespace ActsTrk{
         }
         return m_globToLocCache->getTransform(tgContext);
     }
-    const Amg::Isometry3D& VolumePlacement::globalToLocalTransform(const GeometryContext& gctx) const {
+    const Acts::Transform3& VolumePlacement::globalToLocalTransform(const GeometryContext& gctx) const {
         return globalToLocalTransform(gctx.context());
     }
 
@@ -125,7 +125,7 @@ namespace ActsTrk{
             THROW_EXCEPTION("Center surface already defined");
         }
         m_surfacePlacement = std::make_shared<Acts::detail::PortalPlacement>(std::numeric_limits<std::size_t>::max(),
-                                                                             Amg::Isometry3D::Identity(), this,
+                                                                             Acts::Transform3::Identity(), this,
                                                                              surface);
    }
    DetectorType VolumePlacement::detectorType() const { 
@@ -141,17 +141,17 @@ namespace ActsTrk{
        }, m_parent);
     }
 
-    Amg::Transform3D VolumePlacement::localToGlobalTransform(const DetectorAlignStore* store) const {
-        return std::visit([&](const auto& parent) -> Amg::Transform3D {
+    Acts::Transform3 VolumePlacement::localToGlobalTransform(const DetectorAlignStore* store) const {
+        return std::visit([&](const auto& parent) -> Acts::Transform3 {
             using visit_t = std::decay_t<decltype(parent)>;
             if constexpr(std::is_same_v<visit_t, AlignableNode_t>) {
-                return parent->getTransform(store ? store->geoModelAlignment.get() : nullptr);
+                return Amg::toIsometry3D(parent->getTransform(store ? store->geoModelAlignment.get() : nullptr));
             } else {
                 return parent->localToGlobalTransform(store);
             }
-            return Amg::Transform3D::Identity(); 
-        }, m_parent) * (m_refShift ? m_refShift->getDefTransform() 
-                                   : Amg::Transform3D::Identity());
+            return Acts::Transform3::Identity(); 
+        }, m_parent) * (m_refShift ? Amg::toIsometry3D(m_refShift->getDefTransform()) 
+                                   : Acts::Transform3::Identity());
     }
   
     unsigned VolumePlacement::storeAlignedTransforms(DetectorAlignStore& store) const {

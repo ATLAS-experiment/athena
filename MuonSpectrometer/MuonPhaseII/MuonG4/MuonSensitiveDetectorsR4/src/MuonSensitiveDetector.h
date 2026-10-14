@@ -104,7 +104,7 @@ namespace MuonG4R4 {
              *  @param hitStep: Step from which the particle's information and the pre and
              *                  post step positions are fetched */
             xAOD::MuonSimHit* propagateAndSaveStrip(const Identifier& hitId,
-                                                    const Amg::Transform3D& toGasGap,
+                                                    const Acts::Transform3& toGasGap,
                                                     const G4Step* hitStep);
 
             /** @brief Saves the current Step as a xAOD::MuonSimHit snapshot

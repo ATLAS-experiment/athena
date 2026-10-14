@@ -203,7 +203,7 @@ class sTgcReadoutElement : public MuonReadoutElement {
         /// Returns the gasGap (0 to 3) for a given identifierHash
         static unsigned gasGapNumber(const IdentifierHash& measHash);
         /// Returns the transform to go from the gasGap -> chamber origin
-        Amg::Transform3D fromGapToChamOrigin(const IdentifierHash& layerHash) const;
+        Acts::Transform3 fromGapToChamOrigin(const IdentifierHash& layerHash) const;
       
         parameterBook m_pars{};
         const sTgcIdHelper& m_idHelper{idHelperSvc()->stgcIdHelper()};
@@ -215,7 +215,7 @@ std::ostream& operator<<(std::ostream& ostr, const MuonGMR4::sTgcReadoutElement:
 }  // namespace MuonGMR4
 
 namespace ActsTrk{
-    template <> Amg::Transform3D 
+    template <> Acts::Transform3 
         ReadoutSurfacePositioning<MuonGMR4::sTgcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
     template <> Identifier
         ReadoutSurfacePositioning<MuonGMR4::sTgcReadoutElement>::identify() const;

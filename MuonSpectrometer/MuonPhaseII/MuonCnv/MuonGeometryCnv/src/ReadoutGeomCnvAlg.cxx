@@ -898,7 +898,7 @@ StatusCode ReadoutGeomCnvAlg::dumpAndCompare(const ActsTrk::GeometryContext& gct
                 ATH_MSG_VERBOSE("SKip layer / tube "<<lay <<","<<tube);
                 continue;
             }
-            const Acts::Transform3 globToLocal = Amg::toIsometry3D(refEle.globalToLocalTransform(gctx, tubeHash));
+            const Acts::Transform3 globToLocal = refEle.globalToLocalTransform(gctx, tubeHash);
 
             const Amg::Vector3D refPos = refEle.globalTubePos(gctx, tubeHash);
             const Amg::Vector3D tubePos = testEle.tubePos(lay, tube);

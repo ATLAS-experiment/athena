@@ -133,14 +133,14 @@ class MmReadoutElement : public MuonReadoutElement {
 
     const int m_multilayer{m_idHelper.multilayer(identify())};
 
-    Amg::Transform3D fromGapToChamOrigin(const IdentifierHash& layerHash) const;
+    Acts::Transform3 fromGapToChamOrigin(const IdentifierHash& layerHash) const;
 
 };
 std::ostream& operator<<(std::ostream& ostr, const MmReadoutElement::parameterBook& pars);
 }  // namespace MuonGMR4
 
 namespace ActsTrk{
-    template <> Amg::Transform3D 
+    template <> Acts::Transform3 
         ReadoutSurfacePositioning<MuonGMR4::MmReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
     /** Identifier of the transform cache equivalent to the Identifier of the first strip inside the gasGap */
     template <> Identifier

@@ -235,7 +235,7 @@ class MdtReadoutElement : public MuonReadoutElement {
         Amg::Vector3D localTubePos(const IdentifierHash& hash) const;
         /** @brief Returns the transformation to go into the reference frame of the as-buit & b-line model
                    starting from the readout element frame. */
-        Amg::Transform3D asBuiltRefFrame() const;
+        Acts::Transform3 asBuiltRefFrame() const;
         /** @brief Returns the pointer to the other readout element inside the muon station */
         const MdtReadoutElement* complementaryRE() const;
     private:
@@ -243,14 +243,14 @@ class MdtReadoutElement : public MuonReadoutElement {
         /// x-axis: Pointing towards the next layer
         /// y-axis: Pointing parallel to the wire layer 
         /// z-axis: Pointing along the wire
-        Amg::Transform3D toChamberLayer(const IdentifierHash& hash) const;
+        Acts::Transform3 toChamberLayer(const IdentifierHash& hash) const;
         /// Returns the transformation into the rest frame of the tube
         /// x-axis: Pointing towards the next layer
         /// y-axis: Pointing parallel to the wire layer 
         /// z-axis: Pointing along the wire
-        Amg::Transform3D toTubeFrame(const IdentifierHash& hash) const;
+        Acts::Transform3 toTubeFrame(const IdentifierHash& hash) const;
         /// Applies the B & as-built parameters
-        Amg::Transform3D fromIdealToDeformed(const IdentifierHash& tubeHash,
+        Acts::Transform3 fromIdealToDeformed(const IdentifierHash& tubeHash,
                                              const ActsTrk::DetectorAlignStore* store) const;
                                              
  #ifndef SIMULATIONBASE
@@ -293,7 +293,7 @@ std::ostream& operator<<(std::ostream& ostr, const MdtReadoutElement::parameterB
 }  // namespace MuonGMR4
 
 namespace ActsTrk{
-    template <> Amg::Transform3D 
+    template <> Acts::Transform3 
         ReadoutSurfacePositioning<MuonGMR4::MdtReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
     template <> Identifier
         ReadoutSurfacePositioning<MuonGMR4::MdtReadoutElement>::identify() const;

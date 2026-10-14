@@ -5,7 +5,7 @@
 #define MUONREADOUTGEOMETRYR4_STRIPLAYER_ICC
 
 namespace MuonGMR4{
-    inline const Amg::Transform3D& StripLayer::toOrigin() const { return m_transform->getDefTransform(); }
+    inline Acts::Transform3 StripLayer::toOrigin() const { return Amg::toIsometry3D(m_transform->getDefTransform()); }
     inline bool StripLayer::hasPhiDesign() const { 
         assert(m_phiDesign && m_etaDesign);
         return m_phiDesign.get() != m_etaDesign.get(); 

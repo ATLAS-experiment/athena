@@ -70,7 +70,7 @@ StatusCode RpcReadoutElement::initElement() {
     return StatusCode::SUCCESS;
 }
 
-Amg::Transform3D RpcReadoutElement::fromGapToChamOrigin(const IdentifierHash& hash) const{
+Acts::Transform3 RpcReadoutElement::fromGapToChamOrigin(const IdentifierHash& hash) const{
    return sensorLayout(hash)->toOrigin();
 }
 

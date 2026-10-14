@@ -120,7 +120,7 @@ public:
   /// is based on.
   const GeoVDetectorElement *upstreamDetectorElement() const;
 
-  Amg::Transform3D localToGlobal(const ActsTrk::DetectorAlignStore* store) const;
+  Acts::Transform3 localToGlobal(const ActsTrk::DetectorAlignStore* store) const;
 private:
   IdentifierHash m_idHash {};
   DetectorType m_type{DetectorType::UnDefined};
@@ -134,13 +134,13 @@ private:
   ///  Thickness of this detector element
   double m_thickness{0.};
 
-  std::unique_ptr<const Amg::Transform3D> m_trtTrf{};
+  std::unique_ptr<const Acts::Transform3> m_trtTrf{};
 
   Identifier m_explicitIdentifier{};
 };
 
 namespace ActsTrk{
-    template <> inline Amg::Transform3D 
+    template <> inline Acts::Transform3 
         ReadoutSurfacePositioning<ActsDetectorElement>::fetchTransform(const DetectorAlignStore* store) const{
         return m_parent->localToGlobal(store);
    }

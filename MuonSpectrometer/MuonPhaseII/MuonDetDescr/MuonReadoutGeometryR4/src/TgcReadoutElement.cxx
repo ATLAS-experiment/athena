@@ -85,7 +85,7 @@ StatusCode TgcReadoutElement::initElement() {
     return StatusCode::SUCCESS;
 }
 
-Amg::Transform3D TgcReadoutElement::fromGapToChamOrigin(const IdentifierHash& layHash) const {
+Acts::Transform3 TgcReadoutElement::fromGapToChamOrigin(const IdentifierHash& layHash) const {
     return sensorLayout(layHash)->toOrigin();
 }
 Amg::Vector3D TgcReadoutElement::channelPosition(const ActsTrk::GeometryContext& ctx, const IdentifierHash& measHash) const { 

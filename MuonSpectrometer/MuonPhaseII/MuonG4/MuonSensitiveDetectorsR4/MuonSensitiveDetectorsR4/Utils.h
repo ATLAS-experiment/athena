@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONSENSITIVEDETECTORSR4_UTILS_H
 #define MUONSENSITIVEDETECTORSR4_UTILS_H
@@ -26,12 +26,11 @@ namespace MuonG4R4 {
      * @brief Extracts the local -> global transformation from a TouchableHistory at a given level
      * @param history: Pointer to the history of the G4 track
      * @param level: Level inside the history - should not exceed GetNDepth() of the history
-     * @return: The transformation to go from the local into the global coordinate frame
-     * 
-    */
-    inline Amg::Transform3D getTransform(const G4VTouchable* history, unsigned int level) {
-        	return Amg::Translation3D{Amg::Hep3VectorToEigen(history->GetTranslation(level))}*
-                                      Amg::CLHEPRotationToEigen(*history->GetRotation(level)).inverse();
+     * @return: The transformation to go from the local into the global coordinate frame */
+    inline Acts::Transform3 getTransform(const G4VTouchable* history, unsigned int level) {
+        	return Amg::getTranslate3D(Amg::Hep3VectorToEigen(history->GetTranslation(level)))*
+                   Amg::getTransformFromRotTransl(Amg::CLHEPRotationToEigen(*history->GetRotation(level)).inverse(),
+                                                  Amg::Vector3D::Zero());
     }
 }
     inline std::ostream& operator<<(std::ostream& ostr, const G4Track& step) {

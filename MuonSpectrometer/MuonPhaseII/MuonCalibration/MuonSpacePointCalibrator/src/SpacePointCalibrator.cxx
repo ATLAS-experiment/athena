@@ -200,7 +200,7 @@ namespace MuonR4{
                 auto* strip = static_cast<const xAOD::RpcMeasurement*>(spacePoint->primaryMeasurement());
 
                 /// Transform the space point into the local frame to calculate the propagation time towards the readout
-                const Acts::Transform3 toGasGap{Amg::toIsometry3D(strip->readoutElement()->globalToLocalTransform(*gctx, strip->layerHash())) * locToGlob};
+                const Acts::Transform3 toGasGap{strip->readoutElement()->globalToLocalTransform(*gctx, strip->layerHash()) * locToGlob};
                 const Amg::Vector3D lPos = toGasGap * calibSpPos;
                 using EdgeSide = MuonGMR4::RpcReadoutElement::EdgeSide;
                 calibSP = std::make_unique<CalibratedSpacePoint>(spacePoint, std::move(calibSpPos));
@@ -237,7 +237,7 @@ namespace MuonR4{
                 /// Update the covariance of the strip measurements along the strip
                 if (spacePoint->primaryMeasurement()->measuresPhi()) {
                     const auto* strip = static_cast<const xAOD::TgcStrip*>(spacePoint->primaryMeasurement());
-                    const Acts::Transform3 toGasGap{Amg::toIsometry3D(strip->readoutElement()->globalToLocalTransform(*gctx, strip->layerHash())) * locToGlob};
+                    const Acts::Transform3 toGasGap{strip->readoutElement()->globalToLocalTransform(*gctx, strip->layerHash()) * locToGlob};
                     const Amg::Vector3D lPos = toGasGap * calibSP->localPosition();
                     const auto& sensorPlane = strip->readoutElement()->sensorLayout(strip->layerHash());
                     const auto& radialDesign = strip->readoutElement()->stripLayout(strip->layerHash());

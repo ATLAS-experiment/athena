@@ -35,7 +35,7 @@ G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
   const G4TouchableHistory* touchHist = static_cast<const G4TouchableHistory*>(aStep->GetPreStepPoint()->GetTouchable());
   const MuonGMR4::MmReadoutElement* readOutEle = getReadoutElement(gctx, touchHist);
 
-  const Amg::Transform3D localToGlobal = getTransform(touchHist, 0);
+  const Acts::Transform3 localToGlobal = getTransform(touchHist, 0);
   ATH_MSG_VERBOSE(" Track is inside volume "<< touchHist->GetHistory()->GetTopVolume()->GetName()
                  <<" transformation: "<<Amg::toString(localToGlobal));
 
@@ -45,7 +45,7 @@ G4bool MmSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory*) {
       return true;
   }
   /// Fetch the local -> global transformation  
-  const Amg::Transform3D toGasGap{readOutEle->globalToLocalTransform(gctx, hitID)};
+  const Acts::Transform3 toGasGap{readOutEle->globalToLocalTransform(gctx, hitID)};
   propagateAndSaveStrip(hitID, toGasGap, aStep);
   return true;
 }

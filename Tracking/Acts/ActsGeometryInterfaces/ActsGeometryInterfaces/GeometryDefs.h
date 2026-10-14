@@ -18,6 +18,14 @@
 #define ENUM_ITEM_STR(item) \
     case item: return #item;
 
+/** Map all the transforms to  */
+#ifdef SIMULATIONBASE
+namespace Acts{
+    using Transform3 = Amg::Isometry3D;
+}
+#else
+    static_assert(std::is_same_v<Acts::Transform3, Amg::Isometry3D>);
+#endif
 
 namespace ActsTrk {
     /// Simple enum to Identify the Type of the

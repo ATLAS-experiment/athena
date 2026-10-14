@@ -104,7 +104,7 @@ StatusCode GeoModelsTgcTest::execute(const EventContext& ctx) {
             return StatusCode::FAILURE;
         }
         ATH_CHECK(dumpToTree(ctx, gctx, reElement));
-        const Acts::Transform3 globToLocal{Amg::toIsometry3D(reElement->globalToLocalTransform(gctx))};
+        const Acts::Transform3 globToLocal{reElement->globalToLocalTransform(gctx)};
         const Acts::Transform3& localToGlob{reElement->localToGlobalTransform(gctx)};
         /// Closure test that the transformations actually close
         const Acts::Transform3 transClosure = globToLocal * localToGlob;
