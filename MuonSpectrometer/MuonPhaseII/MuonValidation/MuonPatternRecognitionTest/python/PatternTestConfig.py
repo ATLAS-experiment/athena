@@ -83,11 +83,12 @@ def LegacyMuonRecoChainCfg(flags):
     from DerivationFrameworkMuons.MuonsToolsConfig import DiMuonTaggingAlgCfg
     result.merge(DiMuonTaggingAlgCfg(flags, applyTrigger=False,  Mu1RequireQual = False, Mu2RequireQual = False, 
                                      UseTrackProbe = False, InvariantMassLow=60. * 1000., 
-                                     TrackContainerKey = "MuonSpectrometerTrackParticles", BranchPrefix="HabemusZ"))
+                                     TrackContainerKey = "MuonSpectrometerTrackParticles", BranchPrefix="HabemusZ",
+                                     MuonContainerKey = "MuonsLegacy"))
 
     #### Mark the associated segments 
     from MuonObjectMarker.ObjectMarkerConfig import SegmentMarkerAlgCfg, MeasurementMarkerAlgCfg
-    result.merge(SegmentMarkerAlgCfg(flags, SelectMuons="passHabemusZ", SegmentKey="MuonSegments"))
+    result.merge(SegmentMarkerAlgCfg(flags, SelectMuons="passHabemusZ", SegmentKey="MuonSegments", MuonKey="MuonsLegacy"))
 
     result.merge(MeasurementMarkerAlgCfg(flags, SelectSegments="passHabemusZ", 
                                          SegmentKey="MuonSegments", SegmentLinkKey="HabemusZ"))
