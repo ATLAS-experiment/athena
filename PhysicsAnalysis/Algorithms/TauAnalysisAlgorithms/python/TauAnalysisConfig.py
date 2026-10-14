@@ -85,8 +85,8 @@ class TauCalibrationConfig (ConfigBlock):
             alg.outputType = 'xAOD::TauJetContainer'
 
             extraInputs = [
-                ( 'SG::AuxVectorBase' , 'StoreGateSvc+TauJets.EleRNNLoose_v1' ),
-                ( 'SG::AuxVectorBase' , 'StoreGateSvc+TauJets.TESCompatibility' )    
+                ( 'SG::AuxVectorBase' , f'StoreGateSvc+{inputContainer}.EleRNNLoose_v1' ),
+                ( 'SG::AuxVectorBase' , f'StoreGateSvc+{inputContainer}.TESCompatibility' )
             ]
             config.setExtraInputs (extraInputs)
 
