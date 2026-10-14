@@ -44,7 +44,6 @@
 #include "AthAllocators/Arena.h"
 
 #include <SGTools/StringPool.h> 
-#include "SGTools/ProxyMap.h" /* for SG::ConstProxyIterator */
 
 // includes used in StoreGateSvc.icc
 #include "GaudiKernel/IClassIDSvc.h"
@@ -243,6 +242,11 @@ public:
   template <typename T> 
   StatusCode retrieve(SG::ConstIterator<T>& begin, 
                       SG::ConstIterator<T>& end) const;
+
+  /// Retrieve all objects of type CLID: returns an SG::ConstIterator range
+  StatusCode retrieve(CLID id,
+                      SG::TypelessIterator& begin,
+                      SG::TypelessIterator& end) const;
 
   /** Look up a keyed object in TDS (compare also tryRetrieve)
    *  returns false if object not available in TDS or persistent stores 
@@ -766,13 +770,6 @@ private:
   ///returns pointer to the current SGImplSvc
   SGImplSvc* currentStore() const;
 
-
-  ///access proxyRange()
-  friend class AthenaOutputStream;
-  ///return a range to all proxies of a given CLID
-  StatusCode proxyRange(const CLID& id,
-                        SG::ConstProxyIterator& beg,
-                        SG::ConstProxyIterator& end) const; 
 
   ///FIXME: access releaseObject
   friend class xAODMaker::AuxStoreWrapper;

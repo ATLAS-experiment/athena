@@ -579,13 +579,6 @@ private:
   SG::DataProxy* locatePersistent(const SG::TransientAddress* tAddr,
                                   bool checkValid = false) const;
 
-  ///access proxyRange()
-  friend class AthenaOutputStream;
-  ///return a range to all proxies of a given CLID
-  StatusCode proxyRange(const CLID& id,
-                        SG::ConstProxyIterator& beg,
-                        SG::ConstProxyIterator& end) const; 
-  
   friend class StoreGateSvc;
   ///access typeless_record
   friend class SG::VarHandleBase;                                                      

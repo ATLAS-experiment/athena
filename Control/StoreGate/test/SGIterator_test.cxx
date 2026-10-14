@@ -1,6 +1,9 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+/** @file DataHandle_test.cxx  unit test for DataHandle
+ * @author ATLAS Collaboration
+ ***************************************************************************/
 
 #undef NDEBUG
 #include "StoreGate/SGIterator.h"
@@ -12,9 +15,10 @@
 #include "AthenaKernel/StorableConversions.h"
 
 #include <algorithm>
+#include <memory>
+#include <vector>
 #include <cassert>
-#include <iostream>
-#include <list>
+#include <print>
 
 
 struct MyDataObj {
@@ -27,14 +31,7 @@ bool operator==(const MyDataObj& lhs, const MyDataObj& rhs) {
   return ( (lhs.m_i == rhs.m_i) && Athena_test::floatEQ(lhs.m_f,rhs.m_f) );
 }
 
-typedef std::list<int> IntList;
-/** @file DataHandle_test.cxx  unit test for DataHandle
- * @author ATLAS Collaboration
- * $Id: SGIterator_test.cxx,v 1.1 2008-09-26 23:37:53 calaf Exp $
- ***************************************************************************/
-
 #include "AthenaKernel/CLASS_DEF.h"
-CLASS_DEF(IntList, 8001, 3)
 CLASS_DEF(MyDataObj, 8000, 1)
 
 namespace Athena_test {
@@ -78,6 +75,127 @@ namespace Athena_test {
       }
     }
   };
+
+
+  class MyProxyVec
+    : public std::vector<SG::DataProxy*>
+  {
+  public:
+    ~MyProxyVec()
+    {
+      for (auto& p : *this) {
+        p->release();
+      }
+    }
+
+    void insert (std::unique_ptr<SG::DataProxy> p)
+    {
+      p->addRef();
+      push_back (p.release());
+    }
+
+    void insert (CLID clid,
+                 const std::string& name,
+                 DataObject* obj,
+                 bool isConst = false)
+    {
+      SG::TransientAddress taddr (clid, name);
+      auto dp = std::make_unique<SG::DataProxy> (obj,
+                                                 std::move (taddr),
+                                                 isConst);
+      insert (std::move (dp));
+    }
+
+    void checkOwn (const std::vector<std::string>& v)
+    {
+      for (SG::DataProxy* dp : *this)
+      {
+        size_t c = std::count (v.begin(), v.end(), dp->name());
+        assert (dp->refCount() == c+1);
+      }
+    }
+  };
+
+
+  void typelessIteratorTest() {
+    //empty
+    SG::TypelessIterator emptyIter;
+    assert (emptyIter == emptyIter);
+
+    MyProxyVec m;
+    m.insert (8000, "b", SG::asStorable(std::make_unique<MyDataObj> (2)));
+    m.insert (8000, "c", nullptr);
+    m.insert (8000, "d", SG::asStorable(std::make_unique<MyDataObj> (4)));
+
+    SG::TypelessIterator it2 (m.begin(), m.end());
+    SG::TypelessIterator it2_end (m.end(), m.end());
+    m.checkOwn ({"b", "d"});
+    assert (it2 != it2_end);
+    assert (it2.key() == "b");
+    assert ((*it2)->name() == "b");
+
+    ++it2;
+    assert (it2 != it2_end);
+    m.checkOwn ({"d"});
+    assert (it2.key() == "d");
+    assert ((*it2)->name() == "d");
+
+    ++it2;
+    assert (it2 == it2_end);
+    m.checkOwn ({});
+
+    m.insert (8000, "a2", nullptr);
+    assert (it2.setState(m.begin(), m.end()).isSuccess());
+    assert (it2_end.setState(m.end(), m.end()).isFailure());
+
+    m.checkOwn ({"b", "d"});
+    assert (it2 != it2_end);
+    assert (it2.key() == "b");
+    assert ((*it2)->name() == "b");
+
+    assert (it2.setState(m.end(), m.end()).isFailure());
+    m.checkOwn ({});
+
+    m.insert (8000, "c2", SG::asStorable(std::make_unique<MyDataObj> (3)),
+              true);
+    {
+      SG::TypelessIterator it3 (m.begin(), m.end());
+      SG::TypelessIterator it3_end (m.end(), m.end());
+
+      m.checkOwn ({"b", "d", "c2"});
+      assert (it3 != it3_end);
+      assert (it3.key() == "b");
+      assert ((*it3)->name() == "b");
+
+      ++it3;
+      ++it3;
+      m.checkOwn ({"c2"});
+      assert (it3 != it3_end);
+      assert (it3.key() == "c2");
+      assert ((*it3)->name() == "c2");
+    }
+    m.checkOwn ({});
+
+    assert (it2.setState(m.begin(), m.end()).isSuccess());
+    assert (it2_end.setState(m.end(), m.end()).isFailure());
+    m.checkOwn ({"b", "d", "c2"});
+    SG::TypelessIterator it4 (it2);
+    m.checkOwn ({"b", "b", "d", "d", "c2", "c2"});
+    assert (it4 == it2);
+    assert ((*it4)->name() == "b");
+
+    ++it4;
+    m.checkOwn ({"b", "d", "d", "c2", "c2"});
+    assert ((*it4)->name() == "d");
+
+    assert (std::distance (it2, it4) == 1);
+
+    it2 = it4;
+    m.checkOwn ({"d", "d", "c2", "c2"});
+    assert ((*it2)->name() == "d");
+
+    std::println ("*** SG::TypelessIterator test OK ***");
+  }
 
 
   void iteratorTest() {
@@ -158,7 +276,7 @@ namespace Athena_test {
     m.checkOwn ({"d", "d"});
     assert (it2->m_i == 4);
 
-    std::cout << "*** SGIterator test OK ***" <<std::endl;
+    std::println ("*** SGIterator test OK ***");
   }
 
 
@@ -244,17 +362,18 @@ namespace Athena_test {
               true);
     assert (it2.setState(m.begin(), m.end()).isSuccess());
 
-    std::cout << "*** SGConstIterator test OK ***" <<std::endl;
+    std::println ("*** SGConstIterator test OK ***");
   }
 }
 
 
 int main() { 
-  std::cout << "*** SGIterator_test starts ***" <<std::endl;
+  std::println ("*** SGIterator_test starts ***");
   ISvcLocator* pDum;
   Athena_test::initGaudi(pDum); //need MessageSvc
+  Athena_test::typelessIteratorTest();
   Athena_test::iteratorTest();
   Athena_test::constIteratorTest();
-  std::cout << "*** SGIterator_test OK ***" <<std::endl;
+  std::println ("*** SGIterator_test OK ***");
   return 0; 
 }

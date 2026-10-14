@@ -1252,14 +1252,6 @@ SGImplSvc::msg_update_handler(Gaudi::Details::PropertyBase& /*outputLevel*/)
   msgSvc()->setOutputLevel(name(), outputLevel());
 }
 
-StatusCode 
-SGImplSvc::proxyRange(const CLID& id,
-                      SG::ConstProxyIterator& begin,
-                      SG::ConstProxyIterator& end) const {
-  lock_t lock (m_mutex);
-  return m_pStore->pRange(id,begin,end);
-}
-
 StatusCode SGImplSvc::setConst(const void* pObject)
 {
   lock_t lock (m_mutex);
@@ -1744,7 +1736,7 @@ StatusCode SGImplSvc::retrieve (CLID clid,
   SG::ConstProxyIterator first;
   SG::ConstProxyIterator end;
 
-  if (!(proxyRange(clid,first,end)).isSuccess()) {
+  if (!(m_pStore->pRange(clid,first,end)).isSuccess()) {
     std::string typnam;
     m_pCLIDSvc->getTypeNameOfID(clid, typnam).ignore();
     SG_MSG_DEBUG("retrieve(range): no object found of type {} (CLID {})",

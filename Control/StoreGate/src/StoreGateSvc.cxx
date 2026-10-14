@@ -36,6 +36,17 @@ StoreGateSvc::StoreGateSvc(const std::string& name,ISvcLocator* svc) :
 StoreGateSvc::~StoreGateSvc()  
 {}
 
+/// Retrieve all objects of type CLID: returns an SG::ConstIterator range
+StatusCode
+StoreGateSvc::retrieve(CLID id,
+                       SG::TypelessIterator& begin,
+                       SG::TypelessIterator& end) const {
+  if (m_storeID == StoreID::EVENT_STORE && currentSlot() != nullptr) {
+    rememberBadRetrieve (id, "(iterator)");
+  }
+  _SGXCALL(retrieve, (id, begin, end), StatusCode::FAILURE);
+}
+
 void 
 StoreGateSvc::setDefaultStore(SGImplSvc* pStore) {
   m_defaultStore = pStore;
@@ -398,14 +409,6 @@ StoreGateSvc::tryELRemap (sgkey_t sgkey_in, size_t index_in,
                           sgkey_t& sgkey_out, size_t& index_out) {
   _SGXCALL( tryELRemap, (sgkey_in, index_in, sgkey_out, index_out), false );
 }
-
-StatusCode 
-StoreGateSvc::proxyRange(const CLID& id,
-                         SG::ConstProxyIterator& beg,
-                         SG::ConstProxyIterator& end) const {
-  _SGXCALL( proxyRange, (id, beg, end), StatusCode::FAILURE );
-}
-
 
 void 
 StoreGateSvc::releaseObject(const CLID& id, const std::string& key) {

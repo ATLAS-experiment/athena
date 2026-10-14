@@ -1,15 +1,14 @@
 *** SGIterator_test starts ***
-ApplicationMgr    SUCCESS 
+ApplicationMgr     SUCCESS 
 ====================================================================================================================================
                                                    Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Thu Jul 12 08:52:47 2018
+                                          running on karma on Mon Aug 10 11:40:56 2026
 ====================================================================================================================================
-ApplicationMgr       INFO Application Manager Configured successfully
-EventLoopMgr      WARNING Unable to locate service "EventSelector" 
-EventLoopMgr      WARNING No events will be processed from external input.
-HistogramPersis...WARNING Histograms saving not required.
-ApplicationMgr       INFO Application Manager Initialized successfully
+ApplicationMgr        INFO Application Manager Configured successfully
+EventLoopMgr          INFO Unable to locate service "EventSelector": No events will be processed from external input.
+ApplicationMgr        INFO Application Manager Initialized successfully
 ApplicationMgr Ready
+*** SG::TypelessIterator test OK ***
 *** SGIterator test OK ***
 *** SGConstIterator test OK ***
 *** SGIterator_test OK ***
