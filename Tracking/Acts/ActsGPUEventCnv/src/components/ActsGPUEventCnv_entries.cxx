@@ -10,6 +10,7 @@
 #include "../TracccTrackConverterAlg.h"
 #include "../xAODToTracccMeasurementConverterAlg.h"
 #include "../xAODToTracccSpacePointConverterAlg.h"
+#include "../ClusterValidationAlg.h"
 
 DECLARE_COMPONENT( ActsTrk::RDOtoTracccCellConverterAlg )
 DECLARE_COMPONENT( ActsTrk::PhaseIIRDOtoTracccCellConverterAlg )
@@ -19,3 +20,11 @@ DECLARE_COMPONENT( ActsTrk::TracccSeedConverterAlg )
 DECLARE_COMPONENT( ActsTrk::TracccTrackConverterAlg )
 DECLARE_COMPONENT( ActsTrk::xAODToTracccMeasurementConverterAlg )
 DECLARE_COMPONENT( ActsTrk::xAODToTracccSpacePointConverterAlg )
+DECLARE_COMPONENT( ActsTrk::ClusterValidationAlg )
+
+#ifdef ACTSGPUEVENTCNV_WITH_CUDA_COMPONENTS
+
+#include "src/cuda/TracccMeasurementDeviceConverterAlg.h"
+DECLARE_COMPONENT( ActsTrk::TracccMeasurementDeviceConverterAlg )
+
+#endif

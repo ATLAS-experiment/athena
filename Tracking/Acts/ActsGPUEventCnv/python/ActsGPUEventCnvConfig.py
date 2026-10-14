@@ -10,6 +10,7 @@ from AthDeviceComps.AthDeviceCompsConfig import (
     CopiesToolCfg,
 )
 from AthenaConfiguration.Enums import BeamType
+from AthCUDAServices.AthCUDAServicesConfig import StreamToolCfg
 
 # ============================================================
 # Algorithm configurations
@@ -156,4 +157,35 @@ def xAODToTracccSpacePointConverterAlgCfg(flags,
     kwargs.setdefault("OutputSPToHostIndex", f"{kwargs['OutputTracccSpacepoints']}ToHostIndex")
     acc.addEventAlgo(
         CompFactory.ActsTrk.xAODToTracccSpacePointConverterAlg(name, **kwargs))
+    return acc    
+
+def TracccMeasurementDeviceConverterAlgCfg(flags,
+        name="TracccMeasurementDeviceConverterAlg",
+        **kwargs) -> ComponentAccumulator:
+    
+    if kwargs.get("ConvertClustersWithCells", False) \
+        or flags.Tracking.doTruth:
+        raise ValueError("On-GPU conversion of GPU measurements does not, at the moment,"
+            " support conversion of associated RDOs and is therefore not compatible with"
+            " flags.Tracking.doTruth.")  
+
+    acc = ComponentAccumulator()
+    kwargs.setdefault("InputMeasurements",   "TracccMeasurements")
+    kwargs.setdefault("OutputPixelClusters", "ITkTracccPixelClusters")
+    kwargs.setdefault("OutputStripClusters", "ITkTracccStripClusters")
+    kwargs.setdefault("CopiesProviderTool", acc.popToolsAndMerge(CopiesToolCfg(flags)))
+    kwargs.setdefault("MemoryResourcesTool", acc.popToolsAndMerge(MemoryResourcesToolCfg(flags)))
+    kwargs.setdefault("StreamTool", acc.popToolsAndMerge(StreamToolCfg(flags)))
+    kwargs.setdefault("DeviceConditionsObjectName", "TracccDeviceCondConfig")
+    kwargs.setdefault("DeviceDetectorName", "TracccDeviceDetectorGeometry")
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TracccMeasurementDeviceConverterAlg(name, **kwargs))
+    return acc
+
+def ClusterValidationAlgCfg(flags,
+        name="ClusterValidationAlgCfg",
+        **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.ClusterValidationAlg(name, **kwargs))
     return acc
