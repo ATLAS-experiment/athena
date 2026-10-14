@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MSVertexRecoTool.h"
@@ -193,7 +193,7 @@ namespace Muon {
             clu.phi = trk.globalPosition().phi();
 
             trkClu.push_back(clu);
-            trkClu0.push_back(clu);
+            trkClu0.push_back(std::move(clu));
             ++ncluster;
             if (ncluster >= 99) {
                 return std::nullopt;
@@ -238,7 +238,10 @@ namespace Muon {
                         ++ntracks_new;
                     }
                 } 
-
+                if (ntracks_new == 0) [[unlikely]]{
+                  ATH_MSG_ERROR("ntracks_new == 0");
+                  return std::nullopt;
+                }
                 eta_new = eta_new / ntracks_new;
                 phi_new = std::atan2(sinPhi_new / ntracks_new, cosPhi_new / ntracks_new);
 
@@ -514,6 +517,10 @@ namespace Muon {
                 posWeight += 1. / std::pow(ExtrapErr,2);
             }
             // calculate the weighted average position of the tracklets
+            if (posWeight == 0.)[[unlikely]]{
+              ATH_MSG_ERROR("posWeight == 0.");
+              return;
+            }
             zLoF = aveZpos / posWeight;
             double zpossigma(dzLoF), Chi2(0), Chi2Prob(-1);
             unsigned int Nitr(0);
@@ -630,7 +637,7 @@ namespace Muon {
                     MyVx = VxMinQuad(getTracklets(trks, tmpTracks));
                     if (MyVx.perp() < 10000 && std::abs(MyVx.z()) > 7000 && std::abs(MyVx.z()) < 15000 &&
                         !EndcapHasBadTrack(getTracklets(trks, tmpTracks), MyVx))
-                        prelim_vx.insert(tmpTracks);
+                        prelim_vx.insert(std::move(tmpTracks));
                 }
             }
         }
@@ -659,7 +666,7 @@ namespace Muon {
                             if (MyVx.perp() < 10000 && std::abs(MyVx.z()) > 7000 && std::abs(MyVx.z()) < 15000 &&
                                 !EndcapHasBadTrack(getTracklets(trks, tempCluster), MyVx)) {
                                 new_prelim_vx.insert(tempCluster);
-                                prelim_vx.insert(tempCluster);
+                                prelim_vx.insert(std::move(tempCluster));
                                 foundNewVx = true;
                             }
                         }

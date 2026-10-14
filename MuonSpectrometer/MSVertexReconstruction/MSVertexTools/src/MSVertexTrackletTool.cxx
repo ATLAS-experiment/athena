@@ -608,6 +608,10 @@ namespace Muon {
                 sz += mdt_z / sigma2;
                 sy += mdt_y / sigma2;
             }
+            if ( s == 0.)[[unlikely]]{
+              ATH_MSG_ERROR("s == 0.");
+              continue;
+            }
             const double yc = sy / s;
             const double zc = sz / s;
 
@@ -730,7 +734,7 @@ namespace Muon {
                 }
                 if (isUnique) tmpSegs.push_back(segs.at(i1));
             }
-            segs = tmpSegs;
+            segs = std::move(tmpSegs);
         }
 
         // return the unique segments
@@ -852,8 +856,8 @@ namespace Muon {
                                         }
                                     }
                                     // reset the list of MDTs & the minimum number of segments an MDT must belong to
-                                    mdts = refitmdts;
-                                    nSeg = nrfsegs;
+                                    mdts = std::move(refitmdts);
+                                    nSeg = std::move(nrfsegs);
                                     // try to fit the new set of MDTs
                                     refitsegs = TrackletSegmentFitter(mdts);
                                     if (!refitsegs.empty()) {
@@ -1157,6 +1161,10 @@ namespace Muon {
                     Tracklet aveTrack(aveSegML1, momentum, matrix, 0);
                     UniqueTracks.push_back(aveTrack);
                 } else if (allSameSign) {
+                    if (nAmbigP == 0)[[unlikely]]{
+                      ATH_MSG_ERROR("nAmbigP == 0");
+                      continue;
+                    }
                     aveP = aveP / nAmbigP;
                     double pT = aveP * std::sin(tracks.at(tk1).getML1seg().alpha());
                     double pz = aveP * std::cos(tracks.at(tk1).getML1seg().alpha());
