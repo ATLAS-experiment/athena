@@ -86,7 +86,7 @@ StatusCode MuonGlobalPatternFindingAlg::execute(const EventContext& ctx) const {
     }
     ATH_MSG_DEBUG("Written "<<patWriteHandle->size()<<" GlobalPatterns into StoreGate.");
     if (msgLvl(MSG::DEBUG)) {
-        for (const auto& pat : *patWriteHandle) {
+        for (const auto pat : *patWriteHandle) {
             ATH_MSG_DEBUG(*pat);
         }
     }
