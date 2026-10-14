@@ -97,7 +97,7 @@ std::vector<Amg::Vector2D> MuonGeoUtilityTool::polygonEdges(const GeoSimplePolyg
 }
 
 std::vector<Amg::Vector3D> MuonGeoUtilityTool::shapeEdges(const GeoShape* shape,
-                                                          const Amg::Transform3D& refTrf) const {
+                                                          const Acts::Transform3& refTrf) const {
     return getPolyShapeEdges(shape, refTrf);
 }
 

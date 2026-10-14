@@ -6,7 +6,7 @@
 
 
 namespace ActsTrk{
-    template <> inline Amg::Transform3D 
+    template <> inline Acts::Transform3 
         ReadoutSurfacePositioning<MuonGMR4::sTgcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const{
             return  m_parent->toStation(store) * m_parent->fromGapToChamOrigin(hash());
         }

@@ -31,12 +31,12 @@ namespace ActsTrk {
    *          nominal transform if needed, but also immediatley deleted as soon as a new DetectorAlignStore
    *          instance is shown to the class. If the refernce to the cached transform is queried via
    *
-   *               const Amg::Isometry3D& getTransform(const DetectorAlignStore* store) const;
+   *               const Acts::Transform3& getTransform(const DetectorAlignStore* store) const;
    * 
    *          it is checked whether the (internal) store already hold the transform. If not, the asembly
    *          of the transform is queried via calling
    *
-   *                     Amg::Transform3D fetchTransform(const DetectorAlignStore* store) const
+   *                     Acts::Transform3 fetchTransform(const DetectorAlignStore* store) const
    *
    *          which  is a pure interface function and needs to be implemented downstream */
   class AlignableGeoPositioning {
@@ -65,10 +65,10 @@ namespace ActsTrk {
             *        is pointing to a perfectly aligned surface. In this case, the internal nominal
             *        transformation cache is invoked. 
             * @param store: Pointer to the detector aligment store */
-          const Amg::Isometry3D& getTransform(const DetectorAlignStore* store) const;
+          const Acts::Transform3& getTransform(const DetectorAlignStore* store) const;
           /** @brief returns the cached transform from the Acts Geometry context
            *  @param gctx: The geometry context holding the aligned transforms */
-          const Amg::Isometry3D& getTransform(const GeometryContext& gctx) const;
+          const Acts::Transform3& getTransform(const GeometryContext& gctx) const;
           /** @brief Store the final transform in the mutable alignment store. 
            *         Returns true whether a new transform was stored
            *  @param store: The reference to the store where the cache
@@ -78,17 +78,14 @@ namespace ActsTrk {
           /** @brief returns the cached transform from the Acts Geometry context
            *  @param tgContext: The geometry context to be unpacked to the 
            *                    ATLAS geometry context */
-          const Amg::Isometry3D& getTransform(const Acts::GeometryContext& tgContext) const;
+          const Acts::Transform3& getTransform(const Acts::GeometryContext& tgContext) const;
 #endif
           /** @brief resets the nominal cache associated with the detector element*/
           virtual void releaseNominalCache() const;
           /** @brief returns the detector type of the cache*/
           DetectorType detectorType() const;
       protected:
-          /** @brief Assembles the transform from the readout geometry. This is the GeoModel
-           *         facing side, so a general affine transform; the cache converts it to an
-           *         Amg::Isometry3D once, checking the linear part, before handing it to Acts. */
-          virtual Amg::Transform3D fetchTransform(const DetectorAlignStore* store) const = 0;
+          virtual Acts::Transform3 fetchTransform(const DetectorAlignStore* store) const = 0;
       private:
           const IdentifierHash m_hash{};
           const DetectorType m_type{DetectorType::UnDefined};
@@ -99,7 +96,7 @@ namespace ActsTrk {
           /** @brief Cache to hold the nominal transform, if no DetectorAlignStore is provided
            *         The cache is automatically erased as soon as an instantiated store is 
            *         presented to the class */
-          mutable CxxUtils::CachedUniquePtrT<Amg::Isometry3D> m_nomCache ATLAS_THREAD_SAFE{};
+          mutable CxxUtils::CachedUniquePtrT<Acts::Transform3> m_nomCache ATLAS_THREAD_SAFE{};
   };
 
 
@@ -151,7 +148,7 @@ namespace ActsTrk {
    *         Instantiate the identify and fetch transform methods after the class... 
    *            Identifier ReadoutSurfacePositioning<CakeDetectorElement>::identify() const { return parent()->identify(); }
    * 
-   *            Amg::Transform3D ReadoutSurfacePositioning<CakeDetectorElement>::fetchTransform(const DetectorAlignStore* store) const { 
+   *            Acts::Transform3 ReadoutSurfacePositioning<CakeDetectorElement>::fetchTransform(const DetectorAlignStore* store) const { 
    *                  return parent()->nominalTrf() *parent()->alignShift(store); 
    *            }
    */
@@ -169,7 +166,7 @@ namespace ActsTrk {
       Identifier identify() const override final;
     private:
       /** @copydoc IReadoutSurfacePositioning::fetchTransform */
-       Amg::Transform3D fetchTransform(const DetectorAlignStore* store) const override final;
+       Acts::Transform3 fetchTransform(const DetectorAlignStore* store) const override final;
        const CachingDetectorEle* m_parent{nullptr};
   };
 

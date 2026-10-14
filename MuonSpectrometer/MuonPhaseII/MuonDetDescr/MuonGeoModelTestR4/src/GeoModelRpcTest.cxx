@@ -173,7 +173,7 @@ StatusCode GeoModelRpcTest::execute(const EventContext& ctx) {
       visualizeStripPanel(ctx, reElement->getParameters().etaDesign, reElement->identify(), false);
       visualizeStripPanel(ctx, reElement->getParameters().phiDesign, reElement->identify(), true);
       
-      const Acts::Transform3 globToLocal{Amg::toIsometry3D(reElement->globalToLocalTransform(gctx))};
+      const Acts::Transform3 globToLocal{reElement->globalToLocalTransform(gctx)};
       const Acts::Transform3& localToGlob{reElement->localToGlobalTransform(gctx)};
       /// Closure test that the transformations actually close
       const Acts::Transform3 transClosure = globToLocal * localToGlob;

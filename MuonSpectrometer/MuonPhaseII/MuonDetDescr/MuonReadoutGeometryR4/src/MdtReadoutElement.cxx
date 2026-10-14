@@ -159,12 +159,12 @@ Amg::Vector3D MdtReadoutElement::highVoltPos(const ActsTrk::GeometryContext& ctx
    return localToGlobalTransform(ctx, hash) * 
           (-0.5*activeTubeLength(hash) * m_pars.readoutSide * Amg::Vector3D::UnitZ());
 }
-Amg::Transform3D MdtReadoutElement::toChamberLayer(const IdentifierHash& hash) const {   
+Acts::Transform3 MdtReadoutElement::toChamberLayer(const IdentifierHash& hash) const {   
    const unsigned int layer = layerNumber(hash);
    const MdtTubeLayer& zeroT{*m_pars.tubeLayers[layer]};
    return zeroT.layerTransform();
 }
-Amg::Transform3D MdtReadoutElement::toTubeFrame(const IdentifierHash& hash) const {
+Acts::Transform3 MdtReadoutElement::toTubeFrame(const IdentifierHash& hash) const {
    const unsigned int layer = layerNumber(hash);
    const unsigned int tube = tubeNumber(hash);
    const MdtTubeLayer& zeroT{*m_pars.tubeLayers[layer]};
@@ -216,10 +216,10 @@ void MdtReadoutElement::setComplementaryReadoutEle(const MdtReadoutElement* othe
     // to be inlined here if possible.
     ATH_FLATTEN
 #endif
-Amg::Transform3D MdtReadoutElement::asBuiltRefFrame() const {
-      return alignableTransform()->getDefTransform().inverse()*
-             getMaterialGeom()->getParent()->getX() *
-             getMaterialGeom()->getX();
+Acts::Transform3 MdtReadoutElement::asBuiltRefFrame() const {
+      return Amg::toIsometry3D(alignableTransform()->getDefTransform().inverse()*
+                               getMaterialGeom()->getParent()->getX() *
+                               getMaterialGeom()->getX());
 }
 
 #if defined(FLATTEN)
@@ -287,7 +287,7 @@ Amg::Vector3D MdtReadoutElement::wireEndpointAsBuilt(const MdtAsBuiltPar&  param
    const double y0 = params.y0(ml, side);
    const double z0 = params.z0(ml, side);
 
-   const Amg::Transform3D planeRot{Amg::getRotateX3D(-alpha)};
+   const Acts::Transform3 planeRot{Amg::getRotateX3D(-alpha)};
    ATH_MSG_VERBOSE("Rotation angle "<<(alpha/Gaudi::Units::deg));
 
    // Find the vector from the reference_point to the endplug
@@ -437,17 +437,17 @@ Amg::Vector3D MdtReadoutElement::applyBlineCorrections(const BLinePar& bline,
     // to be inlined here if possible.
     ATH_FLATTEN
 #endif
-Amg::Transform3D MdtReadoutElement::fromIdealToDeformed(const IdentifierHash& tubeHash,
+Acts::Transform3 MdtReadoutElement::fromIdealToDeformed(const IdentifierHash& tubeHash,
                                                         const ActsTrk::DetectorAlignStore* store) const {
 #ifdef SIMULATIONBASE
    ATH_MSG_VERBOSE("No deformed transformation available "<<idHelperSvc()->toString(measurementId(tubeHash))
                   <<"store address to make the compiler happy: "<<store);
-   return Amg::Transform3D::Identity();
+   return Acts::Transform3::Identity();
 #else
    /// No deformation parameters were parsed at all
    if (!store || !store->internalAlignment) {
       ATH_MSG_VERBOSE("No deformed transformation available "<<idHelperSvc()->toString(measurementId(tubeHash)));
-      return Amg::Transform3D::Identity();
+      return Acts::Transform3::Identity();
    }
    using ChamberDistortions = MdtAlignmentStore::chamberDistortions;
 
@@ -455,7 +455,7 @@ Amg::Transform3D MdtReadoutElement::fromIdealToDeformed(const IdentifierHash& tu
    const ChamberDistortions distortPars = static_cast<const MdtAlignmentStore&>(*store->internalAlignment).getDistortion(identify());
    if (!distortPars) {
       ATH_MSG_VERBOSE("No set of deformation parameters is in the DB for "<<idHelperSvc()->toString(measurementId(tubeHash)));
-      return Amg::Transform3D::Identity();
+      return Acts::Transform3::Identity();
    }
 
    const Amg::Vector3D fixedPoint{bLineReferencePoint()};
@@ -464,7 +464,7 @@ Amg::Transform3D MdtReadoutElement::fromIdealToDeformed(const IdentifierHash& tu
    const double height = std::max(moduleHeight(), m_reOtherMl->moduleHeight()) - 
                          (tubePitch() - 2. * tubeRadius());
 
-   const Amg::Transform3D toAMDB{asBuiltRefFrame()};
+   const Acts::Transform3 toAMDB{asBuiltRefFrame()};
    /// Relative sign to calculate the thickness. If multilayer == 1,
    /// we want the lower point and the upper point otherwise.
    const double relSign = (multilayer() == 1 ? -1. : 1.);
@@ -500,7 +500,7 @@ Amg::Transform3D MdtReadoutElement::fromIdealToDeformed(const IdentifierHash& tu
                 <<"/ "<<Amg::toString(alignableTransform()->getDefTransform() * fixedPoint)
                 <<", thickness: "<<thickness<<", height: "<<height);
 
-   const Amg::Transform3D fromAMDB{toAMDB.inverse()};
+   const Acts::Transform3 fromAMDB{toAMDB.inverse()};
    /// Switch tube ends back to MGM coordinates
    positiveEnd = fromAMDB * positiveEnd;
    negativeEnd = fromAMDB * negativeEnd;
@@ -512,13 +512,13 @@ Amg::Transform3D MdtReadoutElement::fromIdealToDeformed(const IdentifierHash& tu
    // Break transformation into translation of the wire center and the rotation of the wire
    // Move to the coordinate system originated at the wire center, then rotate the wire, then
    // move wire center to the new position
-   const Amg::Transform3D to_center{Amg::getTranslate3D(-idealTube)};
-   const Amg::Transform3D from_center{Amg::getTranslate3D( 0.5 * (positiveEndBline + negativeEndBline))};
+   const Acts::Transform3 to_center{Amg::getTranslate3D(-idealTube)};
+   const Acts::Transform3 from_center{Amg::getTranslate3D( 0.5 * (positiveEndBline + negativeEndBline))};
    const Amg::Vector3D old_direction = (positiveEnd - negativeEnd).unit();
    const Amg::Vector3D new_direction = (positiveEndBline - negativeEndBline).unit();
    const Amg::Vector3D rotation_vector = old_direction.cross(new_direction);
 
-  Amg::Transform3D deformedTransform{Amg::Transform3D::Identity()};
+  Acts::Transform3 deformedTransform{Acts::Transform3::Identity()};
    if (rotation_vector.mag() > 10. * std::numeric_limits<double>::epsilon()) {
       const Amg::AngleAxis3D wire_rotation(std::asin(rotation_vector.mag()), rotation_vector.unit());
       deformedTransform = from_center * wire_rotation * to_center;

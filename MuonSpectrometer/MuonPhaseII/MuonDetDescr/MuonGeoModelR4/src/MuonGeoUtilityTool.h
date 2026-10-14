@@ -41,7 +41,7 @@ class MuonGeoUtilityTool final :  public extends<AthAlgTool, IMuonGeoUtilityTool
     std::vector<Amg::Vector2D> polygonEdges(const GeoSimplePolygonBrep& polygon) const override;
 
     std::vector<Amg::Vector3D> shapeEdges(const GeoShape* shape,
-                                          const Amg::Transform3D& refTrf) const override;
+                                          const Acts::Transform3& refTrf) const override;
 
    private:
 

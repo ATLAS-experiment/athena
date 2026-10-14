@@ -149,7 +149,7 @@ class RpcReadoutElement : public MuonReadoutElement {
         static bool measuresPhi(const IdentifierHash& measHash);
 
 
-        Amg::Transform3D fromGapToChamOrigin(const IdentifierHash& layerHash) const;
+        Acts::Transform3 fromGapToChamOrigin(const IdentifierHash& layerHash) const;
         /// Returns the local strip position w.r.t. to the chamber origin
         Amg::Vector3D chamberStripPos(const IdentifierHash& measHash) const;
 
@@ -174,7 +174,7 @@ std::ostream& operator<<(std::ostream& ostr, const RpcReadoutElement::parameterB
 }  // namespace MuonGMR4
 
 namespace ActsTrk{
-    template <> Amg::Transform3D 
+    template <> Acts::Transform3 
         ReadoutSurfacePositioning<MuonGMR4::RpcReadoutElement>::fetchTransform(const DetectorAlignStore* store) const;
     /** Identifier of the transform cache equivalent to the Identifier of the first strip inside the gasGap */
     template <> Identifier

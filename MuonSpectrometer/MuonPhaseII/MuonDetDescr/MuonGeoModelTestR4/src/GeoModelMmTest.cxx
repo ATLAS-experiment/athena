@@ -103,7 +103,7 @@ StatusCode GeoModelMmTest::execute(const EventContext& ctx) {
                         <<". But got instead "<<m_idHelperSvc->toStringDetEl(reElement->identify()));
             return StatusCode::FAILURE;
         }      
-        const Acts::Transform3 globToLocal{Amg::toIsometry3D(reElement->globalToLocalTransform(gctx))};
+        const Acts::Transform3 globToLocal{reElement->globalToLocalTransform(gctx)};
         const Acts::Transform3& localToGlob{reElement->localToGlobalTransform(gctx)};
         /// Closure test that the transformations actually close
         if (!Amg::doesNotDeform(globToLocal * localToGlob)) {

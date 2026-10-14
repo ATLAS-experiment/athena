@@ -149,7 +149,7 @@ ActsDetectorElement::ActsDetectorElement(const Acts::Transform3 &trf,
     m_idHash(detElem.identifyHash()),
     m_type{DetectorType::Trt},
     m_detElement{&detElem}, 
-    m_trtTrf{std::make_unique<Amg::Transform3D>(trf)},
+    m_trtTrf{std::make_unique<Acts::Transform3>(trf)},
     m_explicitIdentifier(id)
 {
 
@@ -209,13 +209,13 @@ ActsDetectorElement::ActsDetectorElement(const InDetDD::HGTD_DetectorElement &de
   }
 }
 
-Amg::Transform3D ActsDetectorElement::localToGlobal(const ActsTrk::DetectorAlignStore* store) const {
+Acts::Transform3 ActsDetectorElement::localToGlobal(const ActsTrk::DetectorAlignStore* store) const {
    
     GeoAlignmentStore* geoModelStore = store ? store->geoModelAlignment.get() : nullptr;
-    Amg::Transform3D l2g{Amg::Transform3D::Identity()};
+    Acts::Transform3 l2g{Acts::Transform3::Identity()};
    switch (m_type) {
       case DetectorType::Hgtd:{
-         l2g= m_detElement->getMaterialGeom()->getAbsoluteTransform(geoModelStore);
+         l2g= Amg::toIsometry3D(m_detElement->getMaterialGeom()->getAbsoluteTransform(geoModelStore));
          break;
       } case DetectorType::Trt: {
          l2g = (*m_trtTrf);
@@ -228,21 +228,20 @@ Amg::Transform3D ActsDetectorElement::localToGlobal(const ActsTrk::DetectorAlign
           const Trk::SurfaceBounds::BoundsType boundsType = detElem.bounds().type();
 
           // extra shift for split row modules
-          Amg::Transform3D extraTransform{Amg::CLHEPTransformToEigen(detElem.recoToHitTransform())};    
+          Acts::Transform3 extraTransform{Amg::CLHEPTransformToEigen(detElem.recoToHitTransform())};    
           if (boundsType == Trk::SurfaceBounds::Rectangle &&
               typeid(design) == typeid(InDetDD::StripBoxDesign) ) {            
-              extraTransform = design.moduleShift() * extraTransform;
+              extraTransform = Amg::toIsometry3D(design.moduleShift()) * extraTransform;
           } else if (boundsType == Trk::SurfaceBounds::Annulus) {
               // need to rotate pi/2 to reproduce ABXY orientation, phiS so that phi=0
               // is center and symmetric
               const double phiShift = M_PI_2 - static_cast<const InDetDD::StripStereoAnnulusDesign&>(design).stereo();
 
               const Amg::Vector2D origin2D = static_cast<const Acts::AnnulusBounds&>(surface().bounds()).moduleOrigin();
-              const Amg::Translation3D transl{origin2D.x(), origin2D.y(), 0};
-              const Amg::Transform3D originTrf{transl * Amg::getRotateZ3D(-phiShift)};
+              const Acts::Transform3 originTrf{Amg::getTranslate3D(origin2D.x(), origin2D.y(), 0) * Amg::getRotateZ3D(-phiShift)};
               extraTransform = extraTransform * originTrf.inverse();
           }
-          l2g = m_detElement->getMaterialGeom()->getAbsoluteTransform(geoModelStore) * extraTransform;
+          l2g = Amg::toIsometry3D(m_detElement->getMaterialGeom()->getAbsoluteTransform(geoModelStore)) * extraTransform;
       }
    };
    // need to make sure translation has correct units

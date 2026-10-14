@@ -130,7 +130,7 @@ StatusCode MmReadoutGeomTool::loadDimensions(MmReadoutElement::defineArgs& defin
         stripDesign->defineTrapezoid(gapHalfShortY, gapHalfLongY, gapHalfHeight, paramBook.stereoAngle.at(gap));
 
         //Necessary strip layer rotation to match the alignment coordinate system
-        Amg::Transform3D stripLayerRotation{gapVol.transform
+        Acts::Transform3 stripLayerRotation{Amg::toIsometry3D(gapVol.transform)
                                     * Amg::getRotateY3D(-90.*Gaudi::Units::deg)
                                     * Amg::getRotateZ3D(stripDesign->stereoAngle())};
 

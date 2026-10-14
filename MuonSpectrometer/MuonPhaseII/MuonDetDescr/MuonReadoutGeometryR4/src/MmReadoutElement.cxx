@@ -69,7 +69,7 @@ StatusCode MmReadoutElement::initElement() {
     return StatusCode::SUCCESS;
 }
 
-Amg::Transform3D MmReadoutElement::fromGapToChamOrigin(const IdentifierHash& layHash) const {
+Acts::Transform3 MmReadoutElement::fromGapToChamOrigin(const IdentifierHash& layHash) const {
       return stripLayer(layHash).toOrigin();
 }
 

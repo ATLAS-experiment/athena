@@ -7,7 +7,7 @@
 #include <GaudiKernel/SystemOfUnits.h>
 #include <cassert>
 namespace ActsTrk{
-    template <> inline Amg::Transform3D 
+    template <> inline Acts::Transform3 
         ReadoutSurfacePositioning<MuonGMR4::MdtReadoutElement>::fetchTransform(const DetectorAlignStore* store) const {
             using RE = MuonGMR4::MdtReadoutElement;
             const unsigned layerTube = m_parent->tubeNumber(RE::measurementHash(1, 0));

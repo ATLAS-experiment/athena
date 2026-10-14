@@ -42,7 +42,7 @@ namespace MuonGMR4{
 
           /// Returns the transformation to go from the strip layer center 
           /// to the origin of the Strip chamber
-          const Amg::Transform3D& toOrigin() const;           
+          Acts::Transform3 toOrigin() const;           
           /** @brief Returns the underlying strip design.
            *  @param phiView: If the strip layer holds two designs, the one mapping the phi 
            *                   oriented strips is returned */

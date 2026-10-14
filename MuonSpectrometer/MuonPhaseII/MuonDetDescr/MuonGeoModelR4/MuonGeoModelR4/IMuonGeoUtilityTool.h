@@ -1,20 +1,20 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONGEOMODELR4_IMUONGEOUTILITYTOOL_H
 #define MUONGEOMODELR4_IMUONGEOUTILITYTOOL_H
 
 
-#include "GeoPrimitives/GeoPrimitives.h"
+#include "MuonReadoutGeometryR4/MuonDetectorDefs.h"
 /// Load the Eigen definitions.
 
-#include <GeoModelKernel/GeoFullPhysVol.h>
-#include <GeoModelKernel/GeoPhysVol.h>
-#include <GeoModelKernel/GeoShape.h>
-#include <GeoModelKernel/GeoSimplePolygonBrep.h>
-#include <GeoModelKernel/GeoAlignableTransform.h>
-#include <GeoModelHelpers/getChildNodesWithTrf.h>
-#include <GaudiKernel/IAlgTool.h>
+#include "GeoModelKernel/GeoFullPhysVol.h"
+#include "GeoModelKernel/GeoPhysVol.h"
+#include "GeoModelKernel/GeoShape.h"
+#include "GeoModelKernel/GeoSimplePolygonBrep.h"
+#include "GeoModelKernel/GeoAlignableTransform.h"
+#include "GeoModelHelpers/getChildNodesWithTrf.h"
+#include "GaudiKernel/IAlgTool.h"
 
 class GeoShapeUnion;
 
@@ -56,7 +56,7 @@ class IMuonGeoUtilityTool : virtual public IAlgTool {
 
         /// Returns the edge points of the polygon like GeoShapes
         virtual std::vector<Amg::Vector3D> shapeEdges(const GeoShape* shape,
-                                                      const Amg::Transform3D& volTrf) const = 0;
+                                                      const Acts::Transform3& volTrf) const = 0;
 
  
 };

@@ -66,7 +66,7 @@ StatusCode sTgcReadoutElement::initElement() {
    return StatusCode::SUCCESS;
 }
 
-Amg::Transform3D sTgcReadoutElement::fromGapToChamOrigin(const IdentifierHash& measHash) const{
+Acts::Transform3 sTgcReadoutElement::fromGapToChamOrigin(const IdentifierHash& measHash) const{
    return stripLayer(measHash).toOrigin();  
 }
 

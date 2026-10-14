@@ -149,7 +149,7 @@ StatusCode TgcReadoutGeomTool::loadDimensions(TgcReadoutElement::defineArgs& def
             if (!wireReadout && wireDesign) {
                 const IdentifierHash layHash = TgcReadoutElement::constructHash(0, gasGap+1, false);
                 ATH_MSG_VERBOSE("Wire hash "<<layHash);
-                const Amg::Transform3D trans{pVolTrans.transform 
+                const Acts::Transform3 trans{Amg::toIsometry3D(pVolTrans.transform) 
                                              * Amg::getRotateY3D(-90.*Gaudi::Units::deg)
                                              * Amg::getRotateX3D(180.* Gaudi::Units::deg)};
                 if (radDesign) {

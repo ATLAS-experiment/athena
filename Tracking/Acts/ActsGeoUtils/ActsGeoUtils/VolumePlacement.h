@@ -38,19 +38,19 @@ namespace ActsTrk{
              *  @param addShift: Additional optional shift to be applied on top of the alignable reference */
             explicit VolumePlacement(const DetectorType detType,
                                      const AlignableNode_t parentNode,
-                                     const std::optional<Amg::Transform3D> & addShift = std::nullopt);
+                                     const std::optional<Acts::Transform3> & addShift = std::nullopt);
             /** @brief Constructor taking the reference to a Detector element. The life time of the 
              *         detector element must be ensured to exceed the Placement's lifetime
              *  @param parentElement: The detector element which alignment the volume is following
              *  @param addShift: Additional optional shift to be applied on top of the alignable reference */
             explicit VolumePlacement(const IDetectorElement& parentElement,
-                                     const std::optional<Amg::Transform3D> & addShift = std::nullopt);
+                                     const std::optional<Acts::Transform3> & addShift = std::nullopt);
             /** @brief Constructor taking the reference to another placement The life time of the 
              *       object must be ensured to exceed the Placement's lifetime
              *  @param parentPlacement: The parent placement moving according to the alignment
              *  @param addShift: Additional optional shift to be applied on top of the alignable reference */
             explicit VolumePlacement(const VolumePlacement& parentPlacement,
-                                     const std::optional<Amg::Transform3D> & addShift = std::nullopt);
+                                     const std::optional<Acts::Transform3> & addShift = std::nullopt);
             /** @brief Add a child volume placement to this placement. The object takes
              *         ownership and fills the alignment cache
              *  @param child: The child to be appended  */
@@ -68,11 +68,11 @@ namespace ActsTrk{
            /** @copydoc Acts::VolumePlacmentBase::localToGlobalTransform */
             const Acts::Transform3& localToGlobalTransform(const Acts::GeometryContext& gctx) const override final;
            /** @copydoc ActsTrk::IVolumePlacement::localToGlobalTransform */ 
-            const Amg::Isometry3D& localToGlobalTransform(const GeometryContext& gctx) const;
+            const Acts::Transform3& localToGlobalTransform(const GeometryContext& gctx) const;
             /** @copydoc Acts::VolumePlacmentBase::localToGlobalTransform */
              const Acts::Transform3& globalToLocalTransform(const Acts::GeometryContext& gctx) const override final;
             /** @copydoc Acts::VolumePlacmentBase::globalToLocalTransform */
-            const Amg::Isometry3D& globalToLocalTransform(const GeometryContext& gctx) const;
+            const Acts::Transform3& globalToLocalTransform(const GeometryContext& gctx) const;
             /** @copydoc Acts::VolumePlacmentBase::portalLocalToGlobal */
             const Acts::Transform3& portalLocalToGlobal(const Acts::GeometryContext& gctx, 
                                                         const std::size_t portalIdx) const override final;
@@ -81,7 +81,7 @@ namespace ActsTrk{
              *         is forwarded to the parent and an optional shift is applied on top
              *  @param store: From which the alignment information is grepped and to which
              *                the final transform is written */
-            Amg::Transform3D localToGlobalTransform(const DetectorAlignStore* store) const;
+            Acts::Transform3 localToGlobalTransform(const DetectorAlignStore* store) const;
             /** @brief Auxiliary class to store the aligned transforms of the volume and 
              *         of the associated portals */
             class VolumeGeoPositioning: public AlignableGeoPositioning {
@@ -107,7 +107,7 @@ namespace ActsTrk{
                     explicit VolumeGeoPositioning(const VolumePlacement* parent,
                                                   const std::size_t portalIdx);
                     /** @brief Fetch the transform to store it in the detector alignment cache */
-                    virtual Amg::Transform3D fetchTransform(const DetectorAlignStore* store) const override;
+                    virtual Acts::Transform3 fetchTransform(const DetectorAlignStore* store) const override;
                 private:
                     /** @brief Back reference to the parent VolumePlacement */
                     const VolumePlacement* m_parent{nullptr};

@@ -64,7 +64,7 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
         return true;
     }
 
-    const Amg::Transform3D globalToLocal{reEle->globalToLocalTransform(gctx, reEle->measurementHash(HitID))};
+    const Acts::Transform3 globalToLocal{reEle->globalToLocalTransform(gctx, reEle->measurementHash(HitID))};
 
     // transform pre and post step positions to local positions
     const Amg::Vector3D prePosition{Amg::Hep3VectorToEigen(preStep->GetPosition())};
@@ -106,7 +106,7 @@ G4bool MdtSensitiveDetector::ProcessHits(G4Step* aStep,G4TouchableHistory* /*ROH
 Identifier MdtSensitiveDetector::getIdentifier(const ActsTrk::GeometryContext& gctx,
                                                const MuonGMR4::MdtReadoutElement* readOutEle,
                                                const G4TouchableHistory* touchHist) const {
-   const Amg::Transform3D localToGlobal{getTransform(touchHist, 0)};
+   const Acts::Transform3 localToGlobal{getTransform(touchHist, 0)};
    /// The Geant transform takes a hit global -> local --> inverse goes back to the global system
    /// Compose this one with the global to local transformation of the first tube in the layer -->
    Amg::Vector3D refTubePos = (readOutEle->globalToLocalTransform(gctx, readOutEle->measurementHash(1,1)) * localToGlobal).translation();
@@ -127,7 +127,7 @@ Identifier MdtSensitiveDetector::getIdentifier(const ActsTrk::GeometryContext& g
    tube = std::max(1u, std::min(readOutEle->numTubesInLay(), tube));
    /// It can happen that the tube is assigned to zero by numerical precision
    /// Catch these cases if the layer is fine
-  const Amg::Transform3D closureCheck{readOutEle->globalToLocalTransform(gctx, 
+  const Acts::Transform3 closureCheck{readOutEle->globalToLocalTransform(gctx, 
                                       readOutEle->measurementHash(layer, tube))*localToGlobal};
     if (!Amg::isIdentity(closureCheck)) {
         ATH_MSG_WARNING("Correction needed "<<layer<<","<<tube<<" "<<Amg::toString(closureCheck));
@@ -138,7 +138,7 @@ Identifier MdtSensitiveDetector::getIdentifier(const ActsTrk::GeometryContext& g
    const IdentifierHash tubeHash = readOutEle->measurementHash(layer, tube);
    const Identifier tubeId = readOutEle->measurementId(tubeHash);
    {
-        const Amg::Transform3D closureCheck{readOutEle->globalToLocalTransform(gctx, tubeHash)*localToGlobal};
+        const Acts::Transform3 closureCheck{readOutEle->globalToLocalTransform(gctx, tubeHash)*localToGlobal};
         if (!Amg::isIdentity(closureCheck)) {
             THROW_EXCEPTION("Tube hit in Nirvana --  It seems that the tube position "
                              <<Amg::toString(refTubePos, 2)<<", perp: "<<refTubePos.perp()

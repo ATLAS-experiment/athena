@@ -76,10 +76,10 @@ namespace MuonGMR4{
         ///@brief Returns the number of tubes in the layer
         unsigned int nTubes() const;
         ///@brief: Returns the transformation from the layer to the muon station
-        const Amg::Transform3D& layerTransform() const;
+        Acts::Transform3 layerTransform() const;
         ///@brief Returns the transformation of the tube to the muon station
         ///       Index counting [0 - nTubes()-1]
-        const Amg::Transform3D tubeTransform(const unsigned int tube) const;
+        const Acts::Transform3 tubeTransform(const unsigned int tube) const;
         ///@brief Returns the tube position within the given tube layer
         const Amg::Vector3D tubePosInLayer(const unsigned int tube) const;
         ///@brief Returns the half-length of the given tube 

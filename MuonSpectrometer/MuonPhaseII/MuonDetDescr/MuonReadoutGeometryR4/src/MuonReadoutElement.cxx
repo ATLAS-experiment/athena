@@ -43,8 +43,8 @@ IdentifierHash MuonReadoutElement::geoTransformHash() {
     return hash;
 }
 
-const Amg::Transform3D& MuonReadoutElement::toStation(const DetectorAlignStore* alignStore) const {
-   return getMaterialGeom()->getAbsoluteTransform(alignStore ? alignStore->geoModelAlignment.get() : nullptr);
+Acts::Transform3 MuonReadoutElement::toStation(const DetectorAlignStore* alignStore) const {
+   return Amg::toIsometry3D(getMaterialGeom()->getAbsoluteTransform(alignStore ? alignStore->geoModelAlignment.get() : nullptr));
 }
 void MuonReadoutElement::releaseUnAlignedTrfs() const {
     for (const auto& cache : m_localToGlobalCaches) {
@@ -72,14 +72,14 @@ unsigned MuonReadoutElement::storeAlignedTransforms(DetectorAlignStore& store) c
     return aligned;
 }
 
-Amg::Transform3D MuonReadoutElement::globalToLocalTransform(const GeometryContext& ctx) const {
+Acts::Transform3 MuonReadoutElement::globalToLocalTransform(const GeometryContext& ctx) const {
     return globalToLocalTransform(ctx, geoTransformHash());
 }
-const Amg::Isometry3D& MuonReadoutElement::localToGlobalTransform(const GeometryContext& ctx) const {
+const Acts::Transform3& MuonReadoutElement::localToGlobalTransform(const GeometryContext& ctx) const {
     return localToGlobalTransform(ctx, geoTransformHash());
 }
 #ifndef SIMULATIONBASE
-const Amg::Isometry3D& MuonReadoutElement::localToGlobalTransform(const Acts::GeometryContext& anygctx) const {
+const Acts::Transform3& MuonReadoutElement::localToGlobalTransform(const Acts::GeometryContext& anygctx) const {
     const GeometryContext *gctx = anygctx.get<const GeometryContext *>();
     return localToGlobalTransform(*gctx, geoTransformHash());
 }
