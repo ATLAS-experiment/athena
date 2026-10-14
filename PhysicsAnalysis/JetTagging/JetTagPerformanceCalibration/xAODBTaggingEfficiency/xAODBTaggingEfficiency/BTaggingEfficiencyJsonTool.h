@@ -78,7 +78,7 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
       BoundsHandler(BoundsHandler&&) noexcept = default;
       BoundsHandler(const BoundsHandler&) = delete;
       BoundsHandler& operator=(const BoundsHandler&) = delete;
-      ~BoundsHandler() = default;
+      virtual ~BoundsHandler() = default;
 
       bool isJetWithinBounds(const xAOD::Jet& jet,
                              const BTaggingEfficiencyJsonTool& tool) const;
