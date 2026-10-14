@@ -19,6 +19,8 @@
 #include "xAODEgamma/EgammaxAODHelpers.h"
 #include "CxxUtils/checker_macros.h"
 
+#include <cmath>
+
 namespace CP {
     using namespace xAOD::Iso;
     using caloDecorNames = IsolationCloseByCorrectionTool::caloDecorNames;
@@ -428,7 +430,10 @@ namespace CP {
                 return CorrectionCode::Error; 
             }
             ATH_MSG_DEBUG("copyIsoValuesForPartsNotSelected: Set pt, eta " << part->pt() << ", " << part->eta() << ", " << part->phi() << " for " << toString(iso_type) << " to " << iso_variable);
-            if (m_isohelpers.at(iso_type)->setIsolation(part, iso_variable) == CorrectionCode::Error) { 
+            if (!std::isfinite(iso_variable)) {
+                ATH_MSG_WARNING("Copying non-finite " << toString(iso_type) << " = " << iso_variable << " of particle with pt: " << part->pt() * MeVtoGeV << " GeV eta: " << part->eta() << " phi: " << part->phi());
+            }
+            if (m_isohelpers.at(iso_type)->setIsolation(part, iso_variable, true) == CorrectionCode::Error) {
                 ATH_MSG_ERROR("Cannot set " << toString(iso_type) << " to " << iso_variable);
                 return CorrectionCode::Error; 
             }

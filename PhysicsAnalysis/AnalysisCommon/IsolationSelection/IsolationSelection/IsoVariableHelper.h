@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #ifndef ISOLATIONSELECTION_ISOVARIABLEHELPER_H
@@ -22,7 +22,7 @@ namespace CP {
         CorrectionCode getOriginalIsolation(const xAOD::IParticle* particle, float& value) const;
         CorrectionCode getIsolation(const xAOD::IParticle* particle, float& value) const;
         CorrectionCode backupIsolation(const xAOD::IParticle* particle) const;
-        CorrectionCode setIsolation(const xAOD::IParticle* P, float value) const;
+        CorrectionCode setIsolation(const xAOD::IParticle* P, float value, bool allowNonFinite = false) const;
 
         IsoType isotype() const;
         std::string name() const;
