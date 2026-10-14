@@ -7,7 +7,7 @@
 # to the Run 3 section
 # ***********************************************************************************
 
-from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerHLTList,EDMDetails,EDMLibraries,TriggerL2EvolutionList,TriggerEFEvolutionList
+from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerHLTList,EDMDetails,EDMLibraries
 from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,EDMDetailsRun3,getSafeEDMInsertPosition,getRun3LowMuEDM
 from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4
 from TrigEDMConfig.TriggerEDMDefs import allowTruncation
@@ -602,50 +602,6 @@ def _InsertContainerNameForHLT(typedict):
                 newnames+=[el]
             output[k] = newnames
     return output
-
-def getEFRun1BSList():
-    """
-    List of EF trigger objects that were written to ByteStream in Run 1
-    """
-    l = []
-    for item in TriggerEFEvolutionList:
-        if len (item[1]) == 0: continue
-        t,k = _getTypeAndKey(item[0])
-        l += [t+"#"+_keyToLabel(k)]
-    return l
-
-def getEFRun2EquivalentList():
-    """
-    List of Run-2 containers equivalent to Run-1 EF containers
-    """
-    l = []
-    for item in TriggerEFEvolutionList:
-        if len (item[1]) == 0: continue
-        t,k = _getTypeAndKey(item[1])
-        l += [t+"#"+_keyToLabel(k)]
-    return l
-
-def getL2Run1BSList():
-    """
-    List of L2 trigger objects that were written to ByteStream in Run 1
-    """
-    l = []
-    for item in TriggerL2EvolutionList:
-        if len (item[1]) == 0: continue
-        t,k = _getTypeAndKey(item[0])
-        l += [t+"#"+_keyToLabel(k)]
-    return l
-
-def getL2Run2EquivalentList():
-    """
-    List of Run-2 containers equivalent to Run-1 L2 containers
-    """
-    l = []
-    for item in TriggerL2EvolutionList:
-        if len (item[1]) == 0: continue
-        t,k = _getTypeAndKey(item[1])
-        l += [t+"#"+_keyToLabel(k)]
-    return l
 
 def isCLIDDefined(cgen,typename):
   """
