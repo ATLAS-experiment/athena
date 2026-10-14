@@ -20,6 +20,9 @@
 // Local includes
 #include "AssociationUtils/IOverlapRemovalTool.h"
 
+namespace ADD_CMODE(ORUtils)
+{
+
 /// Algorithm to implement basic OR procedure as a prerequisite for event cleaning
 ///
 /// @author Julia Gonski <j.gonski@cern.ch>
@@ -57,7 +60,7 @@ class OverlapRemovalGenUseAlg : public EL::AnaAlgorithm
                       const std::string& type);
 
     /// Handle to the tool
-    ToolHandle<ORUtils::IOverlapRemovalTool> m_orTool{this, "OverlapRemovalTool", ""};
+    ToolHandle<IOverlapRemovalTool> m_orTool{this, "OverlapRemovalTool", ""};
    
     template <class ContainerType> class DataKeyHandler {
       public:
@@ -137,5 +140,7 @@ class OverlapRemovalGenUseAlg : public EL::AnaAlgorithm
     Gaudi::Property<float> m_etaCut{this, "EtaCut", 4.5, "Maximum eta for consideration"};
 
 };
+
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

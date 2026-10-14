@@ -22,27 +22,28 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 namespace
 {
+  using namespace ADD_CMODE(ORUtils);
   using namespace asg::msgUserCode;
 
   TEST(StandaloneToolHandleTest, OverlapTools)
   {
     auto toolStrings = {
-      "ORUtils::DeltaROverlapTool/DrORT1",
-      "ORUtils::ObjLinkOverlapTool/LinkORT1",
-      "ORUtils::EleEleOverlapTool/EleEleORT1",
-      "ORUtils::EleJetOverlapTool/EleJetORT1",
-      "ORUtils::EleMuSharedTrkOverlapTool/EleMuORT1",
-      "ORUtils::MuJetOverlapTool/MuJetORT1",
-      "ORUtils::AltMuJetOverlapTool/AltMuJetORT1",
-      "ORUtils::TauLooseEleOverlapTool/TauEleORT1",
-      "ORUtils::TauLooseMuOverlapTool/TauMuORT1",
-      "ORUtils::TauJetOverlapTool/TauJetORT1",
-      "ORUtils::TauAntiTauJetOverlapTool/AntiTauJetORT1",
+      columnar::add_cmode("ORUtils")+"::DeltaROverlapTool/DrORT1",
+      columnar::add_cmode("ORUtils")+"::ObjLinkOverlapTool/LinkORT1",
+      columnar::add_cmode("ORUtils")+"::EleEleOverlapTool/EleEleORT1",
+      columnar::add_cmode("ORUtils")+"::EleJetOverlapTool/EleJetORT1",
+      columnar::add_cmode("ORUtils")+"::EleMuSharedTrkOverlapTool/EleMuORT1",
+      columnar::add_cmode("ORUtils")+"::MuJetOverlapTool/MuJetORT1",
+      columnar::add_cmode("ORUtils")+"::AltMuJetOverlapTool/AltMuJetORT1",
+      columnar::add_cmode("ORUtils")+"::TauLooseEleOverlapTool/TauEleORT1",
+      columnar::add_cmode("ORUtils")+"::TauLooseMuOverlapTool/TauMuORT1",
+      columnar::add_cmode("ORUtils")+"::TauJetOverlapTool/TauJetORT1",
+      columnar::add_cmode("ORUtils")+"::TauAntiTauJetOverlapTool/AntiTauJetORT1",
     };
 
     // Try to create and initialize each tool with the StandaloneToolHandle
     for(const auto& toolStr : toolStrings) {
-      asg::StandaloneToolHandle<ORUtils::IOverlapTool> handle(toolStr);
+      asg::StandaloneToolHandle<IOverlapTool> handle(toolStr);
       EXPECT_SUCCESS( handle.initialize() );
     }
   }
@@ -50,11 +51,11 @@ namespace
   TEST(StandaloneToolHandleTest, MasterTools)
   {
     auto toolStrings = {
-      "ORUtils::OverlapRemovalTool/ORTool1",
+      columnar::add_cmode("ORUtils")+"::OverlapRemovalTool/ORTool1",
     };
     // Try to create and initialize each tool with the StandaloneToolHandle
     for(const auto& toolStr : toolStrings) {
-      asg::StandaloneToolHandle<ORUtils::IOverlapRemovalTool> handle(toolStr);
+      asg::StandaloneToolHandle<IOverlapRemovalTool> handle(toolStr);
       EXPECT_SUCCESS( handle.initialize() );
     }
   }
@@ -63,11 +64,11 @@ namespace
   TEST(StandaloneToolHandleTest, ToolAssignment)
   {
     // Specify the tool types and names
-    const auto masterToolName = "ORUtils::OverlapRemovalTool/ORTool2";
-    const auto overlapToolType = "ORUtils::DeltaROverlapTool";
+    const auto masterToolName = columnar::add_cmode("ORUtils")+"::OverlapRemovalTool/ORTool2";
+    const auto overlapToolType = columnar::add_cmode("ORUtils")+"::DeltaROverlapTool";
     const auto key = "EleJetORT";
     // Create the StandaloneToolHandles
-    asg::StandaloneToolHandle<ORUtils::IOverlapRemovalTool> masterHandle(masterToolName);
+    asg::StandaloneToolHandle<IOverlapRemovalTool> masterHandle(masterToolName);
     // Hook them up and initialize
     ASSERT_SUCCESS( masterHandle.createPrivateTool(key, overlapToolType) );
     ASSERT_SUCCESS( masterHandle.initialize() );
@@ -80,11 +81,11 @@ namespace
   TEST(StandaloneToolHandleTest, ToolAssignment2)
   {
     // Specify the tool types and names
-    const auto masterToolName = "ORUtils::OverlapRemovalTool/ORTool3";
-    const auto overlapToolType = "ORUtils::DeltaROverlapTool";
+    const auto masterToolName = columnar::add_cmode("ORUtils")+"::OverlapRemovalTool/ORTool3";
+    const auto overlapToolType = columnar::add_cmode("ORUtils")+"::DeltaROverlapTool";
     const auto key = "EleJetORT";
     // Create the StandaloneToolHandles
-    asg::StandaloneToolHandle<ORUtils::IOverlapRemovalTool> masterHandle(masterToolName);
+    asg::StandaloneToolHandle<IOverlapRemovalTool> masterHandle(masterToolName);
     // Hook up the sub-tool
     ASSERT_SUCCESS( masterHandle.createPrivateTool(key, overlapToolType) );
     ASSERT_SUCCESS( masterHandle.initialize() );

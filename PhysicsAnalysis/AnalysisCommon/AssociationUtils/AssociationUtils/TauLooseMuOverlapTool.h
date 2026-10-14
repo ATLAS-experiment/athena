@@ -19,7 +19,7 @@
 #include "AssociationUtils/BaseOverlapTool.h"
 #include "AssociationUtils/DeltaRMatcher.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class TauLooseMuOverlapTool
@@ -97,6 +97,6 @@ namespace ORUtils
 
   }; // class TauLooseMuOverlapTool
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

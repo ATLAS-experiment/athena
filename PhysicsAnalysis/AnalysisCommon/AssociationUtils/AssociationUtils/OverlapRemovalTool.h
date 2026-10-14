@@ -19,7 +19,7 @@
 #include "AssociationUtils/OverlapDecorationHelper.h"
 
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class OverlapRemovalTool
@@ -131,6 +131,6 @@ namespace ORUtils
 
   }; // class OverlapRemovalTool
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

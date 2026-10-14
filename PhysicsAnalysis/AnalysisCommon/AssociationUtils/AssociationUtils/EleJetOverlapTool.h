@@ -19,7 +19,7 @@
 #include "AssociationUtils/BaseOverlapTool.h"
 #include "AssociationUtils/DeltaRMatcher.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class EleJetOverlapTool
@@ -127,6 +127,6 @@ namespace ORUtils
 
   }; // class EleJetOverlapTool
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

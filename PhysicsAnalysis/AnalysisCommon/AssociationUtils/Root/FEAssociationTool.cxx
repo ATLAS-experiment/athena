@@ -62,7 +62,7 @@ namespace
   }
 }
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
 FEAssociationTool::PairKey
@@ -565,4 +565,4 @@ StatusCode FEAssociationTool::buildMapFromPairs(const std::vector<ObjView>& obje
   return StatusCode::SUCCESS;
 }
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)

@@ -14,7 +14,7 @@
 #include "AssociationUtils/MuJetGhostDRMatcher.h"
 #include "AssociationUtils/DeltaRMatcher.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   //---------------------------------------------------------------------------
@@ -92,4 +92,4 @@ namespace ORUtils
     return false;
   }
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)

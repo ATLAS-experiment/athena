@@ -23,7 +23,7 @@
 
 namespace
 {
-  using namespace ORUtils;
+  using namespace ADD_CMODE(ORUtils);
   using namespace asg::msgUserCode;
 
   TEST(OverlapRemovalInitTest, CurrentHelper)
@@ -31,9 +31,9 @@ namespace
     const std::string masterName = "MyORT";
     const std::string inputLabel = "MyInputLabel";
     const std::string outputLabel = "MyOutputLabel";
-    ORUtils::ORFlags flags(masterName, inputLabel, outputLabel);
-    ORUtils::ToolBox tools;
-    EXPECT_SUCCESS( ORUtils::recommendedTools(flags, tools) );
+    ORFlags flags(masterName, inputLabel, outputLabel);
+    ToolBox tools;
+    EXPECT_SUCCESS( recommendedTools(flags, tools) );
     EXPECT_SUCCESS( tools.initialize() );
   }
 }

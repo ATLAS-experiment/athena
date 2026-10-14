@@ -47,7 +47,7 @@ using columnar::ColumnarMemoryTest;
 using columnar::ColumnarPhysLiteTest;
 using columnar::TestUtils::IXAODToolCaller;
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
   TEST_F (ColumnarMemoryTest, DeltaROverlapTool)
   {

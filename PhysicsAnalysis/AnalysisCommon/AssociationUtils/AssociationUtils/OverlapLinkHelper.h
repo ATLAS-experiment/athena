@@ -20,7 +20,7 @@
 // Local includes
 #include "AssociationUtils/OverlapRemovalDefs.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class OverlapLinkHelper
@@ -113,6 +113,6 @@ namespace ORUtils
     return link.template tryGetVariant<LT>();
   }
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

@@ -14,6 +14,9 @@ namespace
   const float GeV = 1000.;
 }
 
+namespace ADD_CMODE(ORUtils)
+{
+
 //-----------------------------------------------------------------------------
 // Constructor
 //-----------------------------------------------------------------------------
@@ -38,7 +41,7 @@ StatusCode ORToolBoxTestAlg::initialize()
   ATH_MSG_INFO( "Initializing " << name() );
 
   // Configuration helper function
-  ATH_CHECK( ORUtils::recommendedTools(m_flags, m_toolBox) );
+  ATH_CHECK( recommendedTools(m_flags, m_toolBox) );
 
   // Initialize the tools
   ATH_CHECK( m_toolBox.initialize() );
@@ -124,3 +127,5 @@ bool ORToolBoxTestAlg::selectObject<xAOD::TauJet>(const xAOD::TauJet& obj)
   if(std::abs(obj.eta()) > 2.5) return false;
   return true;
 }
+
+} // namespace ADD_CMODE(ORUtils)

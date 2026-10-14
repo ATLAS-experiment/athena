@@ -26,7 +26,7 @@
 #include "AssociationUtils/BaseOverlapTool.h"
 #include "AssociationUtils/IObjectAssociator.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class AltMuJetOverlapTool
@@ -148,6 +148,6 @@ namespace ORUtils
 
   }; // class AltMuJetOverlapTool
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

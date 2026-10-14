@@ -44,7 +44,7 @@
 #include "AssociationUtils/OverlapRemovalInit.h"
 #include "AssociationUtils/OverlapRemovalDefs.h"
 
-using namespace ORUtils;
+using namespace ADD_CMODE(ORUtils);
 namespace po = boost::program_options;
 
 //-----------------------------------------------------------------------------
@@ -197,7 +197,7 @@ int main(int argc, char* argv[])
   Info(APP_NAME, "Processing %lli entries", entries);
 
   // Overlap removal tool configuration flags
-  ORUtils::ORFlags orFlags("OverlapRemovalTool", inputLabel, outputLabel);
+  ORFlags orFlags("OverlapRemovalTool", inputLabel, outputLabel);
 
   // Parse the requested working point
   const auto wp = vm["working-point"].as<std::string>();
@@ -219,8 +219,8 @@ int main(int argc, char* argv[])
   orFlags.outputPassValue = outputPassValue;
 
   // Get the recommended tool configuration
-  ORUtils::ToolBox toolBox;
-  CHECK( ORUtils::recommendedTools(orFlags, toolBox) );
+  ToolBox toolBox;
+  CHECK( recommendedTools(orFlags, toolBox) );
 
   // Special settings for photon-favored OR
   if(wp == "photonFavored") {

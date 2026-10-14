@@ -14,7 +14,7 @@
 // Local includes
 #include "AssociationUtils/EleMuSharedTrkOverlapTool.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   //---------------------------------------------------------------------------
@@ -151,4 +151,4 @@ namespace ORUtils
     return elGsfTrk[0].value()(acc.m_gsfOriginalTrackAcc);
   }
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)

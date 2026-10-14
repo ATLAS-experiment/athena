@@ -19,7 +19,7 @@
 
 namespace
 {
-  using namespace ORUtils;
+  using namespace ADD_CMODE(ORUtils);
   using namespace asg::msgUserCode;
 
   TEST(ToolBoxTest, Empty)
@@ -43,8 +43,8 @@ namespace
   TEST(ToolBoxTest, InitOneSubTool)
   {
     ToolBox tbox;
-    tbox.eleMuORT = ToolBox::OverlapHandle_t("ORUtils::DeltaROverlapTool/EleMuORT");
-    tbox.masterTool = ToolBox::MasterHandle_t("ORUtils::OverlapRemovalTool");
+    tbox.eleMuORT = ToolBox::OverlapHandle_t(columnar::add_cmode("ORUtils")+"::DeltaROverlapTool/EleMuORT");
+    tbox.masterTool = ToolBox::MasterHandle_t(columnar::add_cmode("ORUtils")+"::OverlapRemovalTool");
     EXPECT_SUCCESS( tbox.setGlobalProperty("OutputLevel", MSG::WARNING) );
     ASSERT_SUCCESS( tbox.initialize() );
     auto masterAsgTool = dynamic_cast<asg::AsgTool*>( tbox.masterTool.get() );

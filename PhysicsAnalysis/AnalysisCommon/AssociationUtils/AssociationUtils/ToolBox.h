@@ -22,7 +22,7 @@ namespace asg {
   class AsgTool;
 }
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class ToolBox
@@ -112,6 +112,6 @@ namespace ORUtils
     return StatusCode::SUCCESS;
   }
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

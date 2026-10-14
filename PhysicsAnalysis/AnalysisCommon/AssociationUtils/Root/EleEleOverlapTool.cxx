@@ -34,7 +34,7 @@ namespace
 
 }
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   //---------------------------------------------------------------------------
@@ -225,4 +225,4 @@ namespace ORUtils
     return false;
   }
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)

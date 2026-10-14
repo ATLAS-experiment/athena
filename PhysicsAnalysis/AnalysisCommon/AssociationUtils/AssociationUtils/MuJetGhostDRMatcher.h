@@ -21,7 +21,7 @@
 // Local includes
 #include "AssociationUtils/IObjectAssociator.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class MuJetGhostDRMatcher
@@ -66,6 +66,6 @@ namespace ORUtils
 
   }; // class MuJetGhostDRMatcher
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

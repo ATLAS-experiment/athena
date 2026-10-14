@@ -11,7 +11,7 @@
 // Local includes
 #include "AssociationUtils/TauLooseEleOverlapTool.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   //---------------------------------------------------------------------------
@@ -128,4 +128,4 @@ namespace ORUtils
     return StatusCode::SUCCESS;
   }
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)

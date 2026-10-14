@@ -12,7 +12,7 @@
 #include "ColumnarCore/ColumnarTool.h"
 #include "ColumnarCore/ParticleDef.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class IParticleAssociator
@@ -39,6 +39,6 @@ namespace ORUtils
       { return objectsMatch(p1, p2, true); }
   };
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

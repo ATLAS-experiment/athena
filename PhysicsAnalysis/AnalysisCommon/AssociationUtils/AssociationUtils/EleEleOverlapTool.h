@@ -20,7 +20,7 @@
 #include "AssociationUtils/IOverlapTool.h"
 #include "AssociationUtils/BaseOverlapTool.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class EleEleOverlapTool
@@ -111,6 +111,6 @@ namespace ORUtils
 
   }; // class EleEleOverlapTool
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

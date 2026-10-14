@@ -12,7 +12,7 @@
 #include "AssociationUtils/IOverlapTool.h"
 #include "AssociationUtils/BaseOverlapTool.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class ObjLinkOverlapTool
@@ -50,6 +50,6 @@ namespace ORUtils
       virtual StatusCode initializeDerived() override;
   }; // class ObjLinkOverlapTool
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

@@ -19,7 +19,7 @@
 // Local includes
 #include "AssociationUtils/ToolBox.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @brief A struct of global config options used to simplify the config
@@ -97,6 +97,6 @@ namespace ORUtils
   ///
   StatusCode recommendedTools(const ORFlags& flags, ToolBox& toolBox);
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif

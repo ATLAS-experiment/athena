@@ -21,7 +21,7 @@ namespace
   const double GeV = 1e3; // FIXME local unit definition!!
 }
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   //---------------------------------------------------------------------------
@@ -176,4 +176,4 @@ namespace ORUtils
     return acc.m_numTrkPt500Acc(jet)[vtx];
   }
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)

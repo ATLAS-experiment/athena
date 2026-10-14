@@ -5,7 +5,7 @@
 // Primary include
 #include "AssociationUtils/DeltaROverlapTool.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   //---------------------------------------------------------------------------
@@ -43,9 +43,9 @@ namespace ORUtils
   //---------------------------------------------------------------------------
   // Identify overlaps
   //---------------------------------------------------------------------------
-  template<columnar::ContainerIdConcept CI1,columnar::RegularContainerIdConcept CI2,columnar::ColumnarModeConcept CM>
+  template<columnar::ContainerIdConcept CI1,columnar::RegularContainerIdConcept CI2>
   StatusCode DeltaROverlapTool::
-  internalFindOverlaps(columnar::ObjectRange<CI1,CM> testCont, columnar::ObjectRange<CI2,CM> refCont) const
+  internalFindOverlaps(columnar::ObjectRange<CI1> testCont, columnar::ObjectRange<CI2> refCont) const
   {
     // Loop over surviving input objects
     for(const auto testPar : testCont){
@@ -53,7 +53,7 @@ namespace ORUtils
         for(const auto refPar : refCont){
           if(isSurvivingObject(refPar)){
             // Check for duplicates and overlap
-            if constexpr (CM::isXAOD) {
+            if constexpr (columnar::ColumnarMode::isXAOD) {
               if(&testPar.getXAODObject() == &refPar.getXAODObject()) continue;
             }
             if(m_dRMatcher->objectsMatch(testPar, refPar)){
@@ -85,4 +85,4 @@ namespace ORUtils
     return StatusCode::SUCCESS;
   }
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)

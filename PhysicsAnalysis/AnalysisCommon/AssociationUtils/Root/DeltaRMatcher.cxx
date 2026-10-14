@@ -8,7 +8,7 @@
 // Local includes
 #include "AssociationUtils/DeltaRMatcher.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   //---------------------------------------------------------------------------
@@ -68,4 +68,4 @@ namespace ORUtils
     return columnar::isInDeltaR(m_momAcc1, p1, m_momAcc2, p2, dR, m_useRapidity);
   }
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)

@@ -16,7 +16,7 @@
 #include "ColumnarCore/ObjectRange.h"
 #include "ColumnarCore/ParticleDef.h"
 
-namespace ORUtils
+namespace ADD_CMODE(ORUtils)
 {
 
   /// @class IOverlapTool
@@ -54,6 +54,6 @@ namespace ORUtils
 
   }; // class IOverlapTool
 
-} // namespace ORUtils
+} // namespace ADD_CMODE(ORUtils)
 
 #endif
