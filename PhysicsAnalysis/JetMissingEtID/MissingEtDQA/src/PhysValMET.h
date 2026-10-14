@@ -1,11 +1,10 @@
-
 /*
-  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValMET.h 
 // Header file for class PhysValMET
-// Contact: atlas-cp-jetetmiss-jsv-conveners@cern.ch
+// Author: Daniel Buescher <daniel.buescher@cern.ch>, Philipp Mogg <philipp.mogg@cern.ch>
 /////////////////////////////////////////////////////////////////// 
 #ifndef MISSINGETDQA_PHYSVALMET_H
 #define MISSINGETDQA_PHYSVALMET_H 1
@@ -15,18 +14,6 @@
 
 // FrameWork includes
 #include "GaudiKernel/ServiceHandle.h"
-
-#include "StoreGate/ReadHandleKey.h"
-#include "StoreGate/ReadHandleKeyArray.h"
-#include "StoreGate/WriteHandleKey.h"
-#include "xAODEventInfo/EventInfo.h"
-#include "xAODEgamma/PhotonContainer.h"
-#include "xAODTau/TauJetContainer.h"
-#include "xAODEgamma/ElectronContainer.h"
-#include "xAODMuon/MuonContainer.h"
-#include "xAODJet/JetContainer.h"
-#include "xAODMissingET/MissingETContainer.h"
-#include "xAODMissingET/MissingETAuxContainer.h"
 
 // Local includes
 #include "AthenaMonitoring/ManagedMonitorToolBase.h"
@@ -100,6 +87,10 @@ class PhysValMET
   PhysValMET();
 
   // Containers
+  std::string m_eleColl;
+  std::string m_gammaColl;
+  std::string m_tauColl;
+  std::string m_muonColl;
   std::string m_mapname;
   std::string m_corename;
 
@@ -111,13 +102,13 @@ class PhysValMET
   bool Accept(const xAOD::Jet* jet, double JvtCut, ToolHandle<IJetUpdateJvt>* jvtTool);
 
   // vector of collections
-  std::vector <std::string> m_jet_types;
+  std::vector <std::string> m_types;
 
   // vector of terms
   std::vector <std::string> m_terms;
 
   // Map for names
-  std::map <std::string,std::string> m_term_names;
+  std::map <std::string,std::string> m_names;
 
   // Hists
   TH1D *m_MET_Track = nullptr, *m_MET_Track_x = nullptr, *m_MET_Track_y = nullptr, *m_MET_Track_phi = nullptr, *m_MET_Track_sum = nullptr;
@@ -126,26 +117,38 @@ class PhysValMET
   TH1D *m_MET_Calo = nullptr, *m_MET_Calo_x = nullptr, *m_MET_Calo_y = nullptr, *m_MET_Calo_phi = nullptr, *m_MET_Calo_sum = nullptr;
 
   //Maps
-  std::map<std::string,std::vector<TH1D*> > m_MET;
-  std::map<std::string,std::vector<TH1D*> > m_MET_x;
-  std::map<std::string,std::vector<TH1D*> > m_MET_y;
-  std::map<std::string,std::vector<TH1D*> > m_MET_phi;
-  std::map<std::string,std::vector<TH1D*> > m_MET_sum;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_x;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_y;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_phi;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_sum;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Cumu;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Resolution;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Significance;
-  std::map<std::string,std::vector<TH1D*> > m_MET_dPhi;
-  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalTrk;
-  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalClus;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Kinematic_pt;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Kinematic_eta;
-  std::map<std::string,std::vector<TH1D*> > m_MET_Kinematic_phi;
-  std::map<std::string,std::vector<TH1D*> > m_MET_multi;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Ref;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Ref_x;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Ref_y;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Ref_phi;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Ref_sum;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref_x;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref_y;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref_phi;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Ref_sum;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Cumu_Ref;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Resolution_Ref;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Significance_Ref;
+  std::map<std::string,std::vector<TH1D*> > m_MET_dPhi_Ref;
+  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalTrk_Ref;
+  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalClus_Ref;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Reb;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Reb_x;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Reb_y;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Reb_phi;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Reb_sum;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb_x;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb_y;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb_phi;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Diff_Reb_sum;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Cumu_Reb;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Resolution_Reb;
+  std::map<std::string,std::vector<TH1D*> > m_MET_Significance_Reb;
+  std::map<std::string,std::vector<TH1D*> > m_MET_dPhi_Reb;
+  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalTrk_Reb;
+  std::map<std::string,std::vector<TH2D*> > m_MET_CorrFinalClus_Reb;
 
   std::vector<std::string> m_dir_met;
 
@@ -158,20 +161,8 @@ class PhysValMET
   ToolHandle<IMETMaker> m_metmakerPFlow                       {this, "METMakerPFlow",            "", "METMaker for EMPFlow jets"};
   ToolHandle<TauAnalysisTools::ITauSelectionTool> m_tauSelTool{this, "TauSelectionTool",         "", "Tau selection tool"};
   ToolHandle<IMETMaker>* m_metmaker;
-
-  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo","EventInfo container"};
-  SG::ReadHandleKey<xAOD::MuonContainer> m_muonColl{this,"MuonContainer","Muons","Muon container"};
-  SG::ReadHandleKey<xAOD::ElectronContainer> m_eleColl{this,"ElectronContainer","Electrons","Electron container"};
-  SG::ReadHandleKey<xAOD::PhotonContainer> m_gammaColl{this,"PhotonContainer","Photons","Photon container"};
-  SG::ReadHandleKey<xAOD::TauJetContainer> m_tauColl{this,"TauContainer","Taus","Electron container"};
-  SG::ReadHandleKeyArray<xAOD::JetContainer> m_jetKeys{this,"JetContainers",{},"Jet container keys"};
-  SG::ReadHandleKey<xAOD::MissingETContainer> m_coreMetKey{this,"CoreMET","MET_Reference_AntiKt4EMTopo","Core MissingET container"};
-  SG::WriteHandleKey<xAOD::MissingETContainer> m_metCaloKey{this,"METCaloKey","MET_Calo","Output MET calo container"};
-  SG::WriteHandleKey<xAOD::MissingETAuxContainer> m_metCaloAuxKey{this,"METCaloAuxKey","MET_CaloAux","Output MET calo aux container"};
-
 }; 
 
 }
 
 #endif //> !MISSINGETDQA_PHYSVALMET_H
-
