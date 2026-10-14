@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( xAODMuonCnv )
@@ -13,4 +13,4 @@ atlas_add_library( xAODMuonCnvLib
 atlas_add_component( xAODMuonCnv
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES xAODMuonCnvLib AthenaBaseComps AthenaKernel xAODPrimitives muonEvent Particle xAODTruth)
+                     LINK_LIBRARIES AthLinks AthenaBaseComps GaudiKernel MuonSegment TrkSegment xAODMuon xAODMuonCnvLib )
