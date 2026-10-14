@@ -151,6 +151,7 @@ def initConfigFlags():
     acf.addFlag('MP.EvtRangeScattererCaching', False, help='activate extra event caching by the EvtRangeScatterer')
     acf.addFlag('MP.MemSamplingInterval', 0, help='time interval in seconds between taking memory samples')
     acf.addFlag('MP.ChunkSize', -1, help='size of event chunks in shared queue (-1: auto_flush for LZMA-compressed files, -2: auto_flush for LZMA or ZLIB, -3: auto_flush for LZMA, ZLIB or LZ4, -4: auto_flush)')
+    acf.addFlag('MP.EnsureEventsForWorkers', True, help='set ChunkSize to 1 if there are too few events to give every worker a chunk')
     acf.addFlag('MP.ReadEventOrders', False, help='read event order from ASCII file for reproducibility')
     acf.addFlag('MP.EventOrdersFile', 'athenamp_eventorders.txt', help='file name for event order')
     acf.addFlag('MP.UseSharedReader', False, help='use shared reader')

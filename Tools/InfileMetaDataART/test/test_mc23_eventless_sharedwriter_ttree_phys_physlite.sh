@@ -9,14 +9,6 @@
 # art-output: log.*
 # art-athena-mt: 8
 
-##################################################################################
-# KNOWN ISSUES TRACKED BY THIS TEST:
-#
-# 1. Values for FileMetaData fields of output are same as input file for shared
-#    writer with eventless worker
-#    - mc23: productionRelease, dataType, lumiBlocks
-##################################################################################
-
 NEVENTS="2"
 INPUTAODFILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/AOD/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4159_r14799/1000events.AOD.34124794._001345.pool.root.1"
 
@@ -67,7 +59,7 @@ Derivation_tf.py \
   --inputAODFile="${INPUTAODFILE}" \
   --outputDAODFile="ttree_EventlessWorker.pool.root" \
   --formats "PHYS" "PHYSLITE" \
-  --preExec="flags.MP.ChunkSize=${NEVENTS};flags.Output.TreeAutoFlush={\"DAOD_PHYS\": 100, \"DAOD_PHYSLITE\": 100};";\
+  --preExec="flags.MP.EnsureEventsForWorkers=False;flags.MP.ChunkSize=${NEVENTS};flags.Output.TreeAutoFlush={\"DAOD_PHYS\": 100, \"DAOD_PHYSLITE\": 100};";\
 
 echo "art-result: $? ttree MP True SW True EventlessWorker";
 
@@ -108,11 +100,6 @@ echo "art-result: $? diff PHYSLITE sharedWriter EventlessWorker";
 
 METADATA_FIELDS_TO_IGNORE="file_size file_guid auto_flush .*eventTypes"
 METADATA_FIELDS_TO_IGNORE_EVENTLESS="file_size file_guid auto_flush .*eventTypes"
-
-### Ignore FileMetaData fields that are not set correctly when eventless worker is involved (to be removed when fixed)
-FILEMETADATA_FIELDS_TO_IGNORE="FileMetaData.dataType FileMetaData.lumiBlocks FileMetaData.productionRelease"
-echo "WARNING These FileMetaData fields will be ignored in diff for EventlessWorker: $FILEMETADATA_FIELDS_TO_IGNORE"
-METADATA_FIELDS_TO_IGNORE_EVENTLESS="$METADATA_FIELDS_TO_IGNORE_EVENTLESS $FILEMETADATA_FIELDS_TO_IGNORE"
 
 meta-diff -d $METADATA_FIELDS_TO_IGNORE --regex -m full -x diff -s \
   DAOD_PHYS.ttree.pool.root DAOD_PHYS.ttree_AllWorkersHaveEvent.pool.root;

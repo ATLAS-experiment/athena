@@ -87,7 +87,7 @@ def AthenaMPCfg(flags):
     if chunk_size < 1:
         msg.warning('Nonpositive ChunkSize (%i) caught, setting it to 1', chunk_size)
         chunk_size = 1
-    elif chunk_size > 1:
+    elif chunk_size > 1 and flags.MP.EnsureEventsForWorkers:
         # Check whether there are enough events to distribute across workers;
         # if not, set the chunk size to 1.
         # Ensuring that each worker processes at least some events is important
