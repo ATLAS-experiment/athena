@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from ElectronPhotonSelectorTools.AsgElectronLikelihoodToolsConfig import AsgElectronLikelihoodToolCfg
 from MuonSelectorTools.MuonSelectorToolsConfig import MuonLoosenedNonCalibratedSelectionToolCfg
@@ -23,6 +23,11 @@ def TrackLeptonDecorationCfg(cfgFlags) -> ComponentAccumulator:
         trackContainer="InDetTrackParticles",
         electronSelectionTool=electronID_tool,
         muonSelectionTool=muonID_tool,
+        # containers reached through the electron/muon links, loaded up front for MT
+        ExtraInputs=[
+            ("xAOD::TrackParticleContainer", "StoreGateSvc+GSFTrackParticles"),
+            ("xAOD::TrackParticleContainer", "StoreGateSvc+ExtrapolatedMuonTrackParticles"),
+        ],
     ))
 
     return acc
