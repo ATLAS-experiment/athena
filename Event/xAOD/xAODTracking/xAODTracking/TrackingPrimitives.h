@@ -1,5 +1,3 @@
-// Dear emacs, this is -*- c++ -*-
-
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
@@ -9,32 +7,29 @@
 #define XAODTRACKING_XAODPRIMITIVES_H
 
 // EDM include(s):
-#include "EventPrimitives/EventPrimitives.h"
+#include "GeoPrimitives/GeoPrimitives.h"
 #include "xAODMeasurementBase/EigenZeroDefs.h"
 #include "AthContainers/tools/AuxDataTraits.h"
 #include "CxxUtils/checker_macros.h"
 
-#ifndef AmgMatrixDef
-#define AmgMatrixDef
-#define AmgMatrix(col, row) Eigen::Matrix<double,col,row,0,col,row>
-#define AmgSymMatrix(dim) Eigen::Matrix<double,dim,dim,0,dim,dim>
-#endif
+#include <ostream>
+#include <string_view>
 
-#ifndef AmgVectorDef
-#define AmgVectorDef
-#define AmgVector(col) Eigen::Matrix<double, col, 1, 0, col, 1>
-#define AmgRowVector(row) Eigen::Matrix<double, 1, row, 0, 1, row>
-#endif
+
+#define DECLARE_ENUM_OSTREAM(enumType)                     \
+    std::string_view toString(const enumType obj);         \
+                                                           \
+    inline std::ostream& operator<<(std::ostream& ostr,    \
+                             const enumType obj) {  \
+      return (ostr<<toString(obj));                 \
+    }   
 
 namespace xAOD {
 
-  //typedef ROOT::Math::SMatrix<float,5,5,ROOT::Math::MatRepSym<float,5> >     ParametersCovMatrix_t;
-  //typedef ROOT::Math::SVector<float,5>                                       DefiningParameters_t;
-  //typedef ROOT::Math::SVector<float,6>                                       CurvilinearParameters_t;
-  typedef AmgSymMatrix(5)                                                       ParametersCovMatrix_t;
-  typedef Eigen::Matrix< bool, 5, 5, 0, 5, 5 >                                  ParametersCovMatrixFilled_t;
-  typedef AmgVector(5)                                                          DefiningParameters_t;
-  typedef AmgVector(6)                                                          CurvilinearParameters_t;
+  using ParametersCovMatrix_t = AmgSymMatrix(5);
+  using ParametersCovMatrixFilled_t = Eigen::Matrix< bool, 5, 5, 0, 5, 5 >;
+  using DefiningParameters_t = AmgVector(5);
+  using CurvilinearParameters_t = AmgVector(6);
     /// Enums to identify who created this track and which properties does it have.
   enum TrackFitter
   {
@@ -562,7 +557,7 @@ namespace xAOD {
     rejectReason_full,
   };
 
-
+  
   /// @enum SurfaceType
   ///
   /// This enumerator simplifies the persistency & calculations,
@@ -578,6 +573,18 @@ namespace xAOD {
     Other = 7
   };
 
+  DECLARE_ENUM_OSTREAM(TrackFitter)
+  DECLARE_ENUM_OSTREAM(TrackProperties)
+  DECLARE_ENUM_OSTREAM(TrackPatternRecoInfo)
+  DECLARE_ENUM_OSTREAM(ParticleHypothesis)
+  DECLARE_ENUM_OSTREAM(ParameterPosition)
+  DECLARE_ENUM_OSTREAM(SummaryType)
+  DECLARE_ENUM_OSTREAM(MuonSummaryType)
+  DECLARE_ENUM_OSTREAM(RejectionStep)
+  DECLARE_ENUM_OSTREAM(RejectionReason)
+  DECLARE_ENUM_OSTREAM(ObserverToolIndex)
+  DECLARE_ENUM_OSTREAM(SurfaceType)
+  
   /// A convenience namespace to make the client code easier to understand
   namespace VxType {
     /// Vertex types
@@ -595,6 +602,7 @@ namespace xAOD {
         KinkVtx = 6, ///< Kink vertex
         NotSpecified = -99 ///< Default value, no explicit type set
     };
+    DECLARE_ENUM_OSTREAM(VertexType)
   } // namespace VxType
 } //  namespace xAOD 
 
@@ -628,5 +636,5 @@ namespace xAOD {
 
 } // namespace xAOD
 
-
+#undef DECLARE_ENUM_OSTREAM
 #endif // XAODTRACKING_XAODPRIMITIVES_H
