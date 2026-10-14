@@ -38,6 +38,8 @@ namespace DerivationFramework{
     ATH_MSG_INFO("DSID " << m_DSID );
 
     ATH_CHECK(m_mcName.initialize());
+    ATH_CHECK(m_truthParticlesKey.initialize());
+    ATH_CHECK(m_truthVerticesKey.initialize());
     
     static const std::vector<Sample> samples = {
       // all Herwig++/Herwig7 showered samples
