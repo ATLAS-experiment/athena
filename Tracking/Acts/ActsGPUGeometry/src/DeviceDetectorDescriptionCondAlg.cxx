@@ -61,18 +61,20 @@ StatusCode DeviceDetectorDescriptionCondAlg::execute(const EventContext& ctx) co
         hostCond->acts_geometry_id()[condIndex] = entry.actsGeometryId;
 
         float shiftX = 0.f, shiftY = 0.f;
+        IdentifierHash module_id_hash{};
         if (entry.hasAthenaModule) {
             if (entry.isPixel) {
-                const IdentifierHash pixelHash = m_pixelID->wafer_hash(entry.athenaId);
-                shiftX = m_pixelLorentzAngleTool->getLorentzShift(pixelHash, ctx);
+                module_id_hash = m_pixelID->wafer_hash(entry.athenaId);
+                shiftX = m_pixelLorentzAngleTool->getLorentzShift(module_id_hash, ctx);
             } else {
-                const IdentifierHash waferHash = m_stripID->wafer_hash(entry.athenaId);
-                shiftX = m_stripLorentzAngleTool->getLorentzShift(waferHash, ctx);
+                module_id_hash = m_stripID->wafer_hash(entry.athenaId);
+                shiftX = m_stripLorentzAngleTool->getLorentzShift(module_id_hash, ctx);
             }
         }
 
         hostCond->measurement_translation()[condIndex] =
             traccc::vector2{static_cast<traccc::scalar>(shiftX), static_cast<traccc::scalar>(shiftY)};
+        hostCond->user_data()[condIndex] = module_id_hash.value();
     }
 
     auto copy = m_copy->copy(ctx);
