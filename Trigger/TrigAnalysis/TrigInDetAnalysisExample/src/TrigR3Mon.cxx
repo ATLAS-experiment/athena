@@ -289,7 +289,7 @@ StatusCode TrigR3Mon::bookHistograms() {
 	
 	/// check for configured chains only ...
 	
-	if ( chainName.head().find("HLT_")==std::string::npos ) {
+	if ( chainName.head().find("HLT_")==std::string::npos && chainName.head().find("EF_")==std::string::npos ) {
 	  ++toolitr;
 	  continue;
 	}
@@ -403,6 +403,7 @@ StatusCode TrigR3Mon::bookHistograms() {
     for ( size_t i=0 ; i<allchains.size() ; i++ ) {
       allcs.emplace_back( ChainString( allchains[i] ) );
       if ( allcs.back().head().find("HLT_")==0 ) continue;
+      if ( allcs.back().head().find("EF_")==0  ) continue;
       if ( allcs.back().head()=="Offline" ) { 
 	mcTruth   = false;
 	if ( allcs.back().tail()!="" ) {
@@ -558,7 +559,7 @@ StatusCode TrigR3Mon::fillHistograms(const EventContext &/*context*/) const {
 
   ATH_MSG_DEBUG( " ----- enter fill() ----- " );
 
-  const Trig::ChainGroup* chainGroup = m_tdt->getChainGroup( "HLT_e.*" );
+  const Trig::ChainGroup* chainGroup = m_tdt->getChainGroup( "(HLT|EF)_e.*" );
   const std::vector<std::string> selectChains = chainGroup->getListOfTriggers();
 
   /// print out all the configured chains if need be
