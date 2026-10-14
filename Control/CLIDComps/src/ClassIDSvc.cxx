@@ -2,10 +2,12 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
+#include <cstdlib>
 #include <format>
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <string_view>
 #include <CxxUtils/StringUtils.h>
 
 #include "GaudiKernel/IIncidentSvc.h"
@@ -216,9 +218,16 @@ ClassIDSvc::dump() const
 StatusCode 
 ClassIDSvc::initialize()
 {
+  using namespace std::string_view_literals;
+
   ATH_MSG_VERBOSE( "Initializing {}", name() ) ;
 
   CHECK( Service::initialize() );
+
+  // ignore CLIDs (for testing/debugging):
+  if (const char* clid_ignore = std::getenv("ATLAS_CLID_IGNORE")) {
+    m_clidIgnore.value().insert_range( CxxUtils::tokenizeInt(clid_ignore, ","sv) );
+  }
 
   // set up the incident service:
   ServiceHandle<IIncidentSvc> pIncSvc ("IncidentSvc", name());
@@ -406,6 +415,11 @@ ClassIDSvc::uncheckedSetTypePackageForID(const CLID& id,
   if (procName.empty()) {
     ATH_MSG_ERROR( "Empty type name for CLID {}", id );
     return StatusCode::FAILURE;
+  }
+
+  if (m_clidIgnore.value().contains(id)) {
+    ATH_MSG_WARNING( "Ignoring type '{}' with CLID {}", procName, id );
+    return StatusCode::SUCCESS;
   }
 
   // assign typeInfoName
