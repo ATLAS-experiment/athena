@@ -89,7 +89,13 @@ int PGraph::pgraphm_(long int *weit, long int edges, long int nodes,
 	    case 1:  goto L10;
 	    case 2:  goto L20;
 	    case 3:  goto L999;
-	}
+            default:
+              // Catch invalid or uninitialized m_choice states safely
+              // Should never happen
+              return 4;
+       }
+    }else{
+            m_choice = 0;
     }
     if (nodes == 1 || edges == 0) {
 	goto L900;
