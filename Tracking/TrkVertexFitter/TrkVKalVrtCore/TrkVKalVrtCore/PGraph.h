@@ -7,11 +7,22 @@
 namespace Trk {
   class PGraph{
 
-    short int m_teit[999000]	/* was [2][499500] */, m_sett[499500];
-    long int m_vset[1000], m_wset[1000];
+// 1. HOT SCALAR CONTROL VARIABLES (Grouped together to fit into 1-2 cache lines)
     long int m_tabnr;
-    long int m_lteit[1000], m_lweit, m_lsett[1000];
-    long int m_lvset, m_lwset, m_choice;
+    long int m_lweit;
+    long int m_lvset;
+    long int m_lwset;
+    long int m_choice{}; //initialized because improper use could corrupt memory
+
+    // 2. FREQUENTLY ACCESSED SMALL ARRAYS (Accessed heavily during graph traversal steps)
+    long int m_vset[1000];
+    long int m_wset[1000];
+    long int m_lteit[1000];
+    long int m_lsett[1000];
+
+    // 3. COLD / MASSIVE BUFFERS (Pushed to the end since they are accessed via bulk indexing)
+    short int m_teit[999000];
+    short int m_sett[499500];
 
 public:
     //coverity[UNINIT_CTOR]
