@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef L1MUONENDCAP_L0MUONENDCAPALG_H
-#define L1MUONENDCAP_L0MUONENDCAPALG_H
+#ifndef L1MUONENDCAP_L1MUONENDCAPALG_H
+#define L1MUONENDCAP_L1MUONENDCAPALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -21,7 +21,7 @@ namespace L1Muon {
  * container sent towards MuCTPI. Candidate combination and link identifiers
  * will be added in later merge requests.
  */
-class L0MuonEndcapAlg final : public AthReentrantAlgorithm {
+class L1MuonEndcapAlg final : public AthReentrantAlgorithm {
  public:
   using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
@@ -34,10 +34,10 @@ class L0MuonEndcapAlg final : public AthReentrantAlgorithm {
       "TGC Sector Logic candidates"};
 
   SG::WriteHandleKey<xAOD::SectorLogicCandDataContainer> m_outputKey{
-      this, "OutputKey", "L0MuonTGCSectorLogicCandData",
+      this, "OutputKey", "L1EndcapCandData",
       "TGC-side Sector Logic candidates sent towards MuCTPI"};
 };
 
 }  // namespace L1Muon
 
-#endif  // L1MUONENDCAP_L0MUONENDCAPALG_H
+#endif  // L1MUONENDCAP_L1MUONENDCAPALG_H

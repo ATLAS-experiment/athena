@@ -51,8 +51,8 @@ if __name__ == "__main__":
         configureHistSvc=False,
         OutputLevel=DEBUG))
 
-    from L1MuonEndcap.L0MuonEndcapConfig import L0MuonEndcapAlgCfg
-    acc.merge(L0MuonEndcapAlgCfg(flags))
+    from L1MuonEndcap.L1MuonEndcapConfig import L1MuonEndcapAlgCfg
+    acc.merge(L1MuonEndcapAlgCfg(flags))
 
     if run_mdt_chain:
         from MuonConfig.MuonRdoDecodeConfig import MdtRDODecodeCfg
@@ -92,8 +92,8 @@ if __name__ == "__main__":
     itemList += [
         "xAOD::L1TGCCandDataContainer#L1TGCCandData",
         "xAOD::L1TGCCandDataAuxContainer#L1TGCCandDataAux.",
-        "xAOD::SectorLogicCandDataContainer#L0MuonTGCSectorLogicCandData",
-        "xAOD::SectorLogicCandDataAuxContainer#L0MuonTGCSectorLogicCandDataAux.",
+        "xAOD::SectorLogicCandDataContainer#L1EndcapCandData",
+        "xAOD::SectorLogicCandDataAuxContainer#L1EndcapCandDataAux.",
         "xAOD::L1NSWCandDataContainer#L1NSWCandidates",
         "xAOD::L1NSWCandDataAuxContainer#L1NSWCandidatesAux."
     ]

@@ -10,8 +10,8 @@ atlas_add_component( L1MuonEndcap
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-atlas_add_test( L0MuonEndcapConfig
-                SCRIPT python -m L1MuonEndcap.L0MuonEndcapConfig
+atlas_add_test( L1MuonEndcapConfig
+                SCRIPT python -m L1MuonEndcap.L1MuonEndcapConfig
                 POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( TgcL0SectorLogicWordEncoder_test
