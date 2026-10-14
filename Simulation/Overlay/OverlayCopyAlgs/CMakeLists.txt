@@ -10,7 +10,7 @@ atlas_add_component( OverlayCopyAlgs
                      src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES GaudiKernel AthenaBaseComps
-                     CaloSimEvent GeneratorObjects RecEvent
+                     CaloSimEvent GeneratorObjects
                      TrackRecordLib xAODJet xAODTruth xAODEventInfo TrkTrack TrkTruthData InDetPrepRawData InDetIdentifier)
 
 # Install files from the package:

@@ -3993,11 +3993,6 @@ def dump_eflowObjectContainer (c, f):
     dump_list (c, f, dump_eflowObject)
     return
 
-@nolist
-def dump_RecoTimingObj (c, f):
-    fprintln (f, list (c))
-    return
-
 
 @nolist
 def dump_TrigConfKeys (p, f):
@@ -5330,7 +5325,6 @@ dumpspecs = [
     ["eflowObjectContainer",                 dump_eflowObjectContainer],
     ["TrigPassFlagsCollection",              dump_TrigPassFlags],
     ["TrackParticleAssocs",                  dump_TrackParticleAssocs],
-    ["RecoTimingObj",                        dump_RecoTimingObj],
     ['MuonCaloEnergyContainer',              dump_CaloEnergy],
     ['CscSimDataCollection',                 dump_CscSimDataCollection],
     ['MuonSimDataCollection',                dump_MuonSimDataCollection],

@@ -8,7 +8,6 @@
 
 #include "Navigation/Navigable.h"
 
-//#include "RecEvent/EnergyCluster.h"
 #include "EventKernel/INavigable4Momentum.h"
 
 #include "FourMom/P4EEtaPhiM.h"

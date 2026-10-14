@@ -124,9 +124,6 @@ acmd.py diff-root  --nan-equal \
                                   xAOD::JetAuxContainer_v1_AntiKt4TruthJetsAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
-                                  RecoTimingObj_p1_HITStoRDO_timings \
-                                  RecoTimingObj_p1_RAWtoESD_mems \
-                                  RecoTimingObj_p1_RAWtoESD_timings \
                                   index_ref \
                     --order-trees OUT_ESD_5thread.root OUT_ESD_1thread.root &> diff_5_vs_1.txt
 exit_code=$?
@@ -148,9 +145,6 @@ acmd.py diff-root  --nan-equal \
                                   xAOD::JetAuxContainer_v1_AntiKt4TruthJetsAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMTopoJetsAuxDyn \
                                   xAOD::JetAuxContainer_v1_AntiKt4EMPFlowJetsAuxDyn \
-                                  RecoTimingObj_p1_HITStoRDO_timings \
-                                  RecoTimingObj_p1_RAWtoESD_mems \
-                                  RecoTimingObj_p1_RAWtoESD_timings \
                                   index_ref \
                    --order-trees OUT_ESD_8thread.root OUT_ESD_1thread.root &> diff_8_vs_1.txt
 exit_code=$?

@@ -167,10 +167,6 @@
 + Reconstruction/Jet/JetRec
 + Reconstruction/Jet/JetRecConfig
 + Reconstruction/Particle
-#+ Reconstruction/RecAlgs
-#+ Reconstruction/RecEvent
-#+ Reconstruction/RecEventAthenaPool
-#+ Reconstruction/RecEventTPCnv
 + Simulation/G4Extensions/RHadrons
 + Simulation/Tools/AtlasCLHEP_RandomGenerators
 + Tools/ART
