@@ -79,9 +79,8 @@ class FileMetaDataCreatorTool
 
   /// @name IIncidentListener methods
   //@{
-  /// Handle BeginInputFile incident after MetaDataSvc
-  ///
-  /// Calls  updateFromNonEvent on BeginInputFile
+  /// Calls updateFromNonEvent on EndInputFile
+  /// Clears event information inherited from the parent process on PostFork
   void handle(const Incident&) override;
   //@}
 

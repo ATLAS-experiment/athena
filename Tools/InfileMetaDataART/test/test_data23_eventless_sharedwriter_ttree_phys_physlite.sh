@@ -9,15 +9,6 @@
 # art-output: log.*
 # art-athena-mt: 8
 
-##################################################################################
-# KNOWN ISSUES TRACKED BY THIS TEST:
-#
-# 1. Values for FileMetaData fields of output are same as input file for shared
-#    writer with eventless worker
-#    - data23: productionRelease, dataType
-# 2. dataYear field is absent from output of shared writer when eventless worker
-##################################################################################
-
 NEVENTS="2"
 INPUTAODFILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/data23/AOD/data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357/2012events.data23_13p6TeV.00453713.physics_Main.recon.AOD.f1357._lb1416._0006.1"
 
@@ -68,7 +59,7 @@ Derivation_tf.py \
   --inputAODFile="${INPUTAODFILE}" \
   --outputDAODFile="ttree_EventlessWorker.pool.root" \
   --formats "PHYS" "PHYSLITE" \
-  --preExec="flags.MP.ChunkSize=${NEVENTS};flags.Output.TreeAutoFlush={\"DAOD_PHYS\": 100, \"DAOD_PHYSLITE\": 100};";\
+  --preExec="flags.MP.EnsureEventsForWorkers=False;flags.MP.ChunkSize=${NEVENTS};flags.Output.TreeAutoFlush={\"DAOD_PHYS\": 100, \"DAOD_PHYSLITE\": 100};";\
 
 echo "art-result: $? ttree MP True SW True EventlessWorker";
 
@@ -107,13 +98,7 @@ echo "art-result: $? diff PHYSLITE sharedWriter EventlessWorker";
 
 # Metadata diff
 METADATA_FIELDS_TO_IGNORE="file_size file_guid auto_flush .*eventTypes"
-METADATA_FIELDS_TO_IGNORE_EVENTLESS="file_size file_guid auto_flush .*eventTypes metadata_items"
-
-### Ignore FileMetaData fields that are not set correctly when eventless worker is involved (to be removed when fixed)
-### In this case dataYear is missing completely (dropping FileMetaData.dataYear doesn't work) so we need to drop the entire FileMetaData
-FILEMETADATA_FIELDS_TO_IGNORE="FileMetaData"
-echo "WARNING These FileMetaData fields will be ignored in diff for EventlessWorker: $FILEMETADATA_FIELDS_TO_IGNORE"
-METADATA_FIELDS_TO_IGNORE_EVENTLESS="$METADATA_FIELDS_TO_IGNORE_EVENTLESS $FILEMETADATA_FIELDS_TO_IGNORE"
+METADATA_FIELDS_TO_IGNORE_EVENTLESS="file_size file_guid auto_flush .*eventTypes"
 
 meta-diff -d $METADATA_FIELDS_TO_IGNORE --regex -m full -x diff -s \
   DAOD_PHYS.ttree.pool.root DAOD_PHYS.ttree_AllWorkersHaveEvent.pool.root;
