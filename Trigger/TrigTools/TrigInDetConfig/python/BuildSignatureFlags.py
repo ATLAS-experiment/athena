@@ -191,7 +191,9 @@ def signatureTrigTrackingFlags(mode : str) -> AthConfigFlags:
     "muonLate"      : muon,
     
     "tauCore"       : tauCore,
+    "tauCoreEM"     : tauCoreEM,
     "tauIso"        : tauIso,
+    "tauIsoEM"      : tauIsoEM,
     "tauHitsHitZ"   : tauHitsHitZ,
     "tauCoreHitZ"   : tauCoreHitZ,
     "tauIsoHitZ"    : tauIsoHitZ,
@@ -372,6 +374,14 @@ def tauCore(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   return flags
 
 @signatureActions
+def tauCoreEM(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+  flags = tauCore(flags, instanceName, recoMode)
+  flags.name     = "tauCoreEM"
+  flags.suffix   = "TauCoreEM"
+  flags.roi      = "HLT_Roi_TauCoreEM"
+  return flags
+
+@signatureActions
 def tauCoreHitZ(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
   flags = tauCore(flags, instanceName, recoMode)
   flags.name     = "tauCoreHitZ"
@@ -394,6 +404,14 @@ def tauIso(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfig
   flags.vertex         = "HLT_IDVertex_Tau"
   flags.electronPID    = False
   flags.minPT          = processEtaDepSettings(flags.minPT,[0.8*Units.GeV])
+  return flags
+
+@signatureActions
+def tauIsoEM(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFlags:
+  flags = tauIso(flags, instanceName, recoMode)
+  flags.name     = "tauIsoEM"
+  flags.suffix   = "TauIsoEM"
+  flags.roi      = "HLT_Roi_TauIsoEM"
   return flags
 
 @signatureActions
@@ -856,10 +874,11 @@ def derivedFromSignatureFlags(flags: AthConfigFlags, recoMode : str):
   flags.trkTracks_FTF     = f'HLT_IDTrkTrack_{flags.suffix}_FTF'
   flags.trkTracks_IDTrig  = f'HLT_IDTrkTrack_{flags.suffix}_IDTrig'
   flags.tracks_FTF    = collToRecordable(flags, f'HLT_IDTrack_{flags.suffix}_FTF')
+
   # ToDo: shouldn't be setting flags using this if type structures, the flags should be
   #       actually set somewhere in appropriate config functions
   flags.tracks_IDTrig = \
-    collToRecordable(flags,"HLT_IDTrack_{}_IDTrig".format(flags.suffix if flags.input_name not in ['tauIso', 'tauIsoHitZ'] else "Tau"))
+    collToRecordable(flags, f"HLT_IDTrack_{flags.suffix if flags.input_name not in ['tauIso', 'tauIsoHitZ'] else "Tau"}_IDTrig")
 
   if recoMode == "Acts":
     flags.trkTracks_FTF     = f'HLT_Acts_{flags.suffix}_Tracks'
@@ -895,7 +914,7 @@ def collToRecordable(flags,name):
                      "beamSpot"]:
       record = False
   else:
-    if signature in ["tauHitsHitZ","tauCore","tauCoreHitZ","tauIso","tauIsoHitZ","tauIsoBDT",
+    if signature in ["tauHitsHitZ","tauCore","tauCoreEM","tauCoreHitZ","tauIso","tauIsoEM","tauIsoHitZ","tauIsoBDT",
                      "jet","fullScan","jetSuper","bhh",
                      "beamSpot","beamSpotFS",
                      "bjetLRT","DJetLRT","DVtxLRT"]:

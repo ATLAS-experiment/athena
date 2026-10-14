@@ -8426,6 +8426,12 @@ EF_noalg_CostMonDS_L1All:
   stepFeatures:
     0: 20
   eventCount: 20
+EF_tau0_ptonly_em_L1eTAU12:
+  stepCounts:
+    0: 19
+  stepFeatures:
+    0: 90
+  eventCount: 19
 EF_tau100_mediumRNN_tracktwoLLP_tau80_mediumRNN_tracktwoLLP_03dRAB_L1eTAU80_2eTAU60:
   stepCounts:
     0: 3
@@ -8534,6 +8540,20 @@ EF_tau200_mediumRNN_tracktwoLLP_L1eTAU120:
     2: 3
     3: 3
   eventCount: 0
+EF_tau20_idperf_em_L1eTAU12:
+  stepCounts:
+    0: 19
+    1: 19
+    2: 19
+    3: 19
+    4: 19
+  stepFeatures:
+    0: 90
+    1: 90
+    2: 90
+    3: 90
+    4: 90
+  eventCount: 19
 EF_tau20_idperf_tracktwoMVA_L1eTAU12:
   stepCounts:
     0: 19
@@ -8548,6 +8568,34 @@ EF_tau20_idperf_tracktwoMVA_L1eTAU12:
     3: 83
     4: 83
   eventCount: 19
+EF_tau20_mediumGNTau_em_L1eTAU12:
+  stepCounts:
+    0: 19
+    1: 19
+    2: 19
+    3: 19
+    4: 9
+  stepFeatures:
+    0: 90
+    1: 90
+    2: 90
+    3: 90
+    4: 9
+  eventCount: 9
+EF_tau20_perf_em_L1eTAU12:
+  stepCounts:
+    0: 19
+    1: 19
+    2: 19
+    3: 19
+    4: 18
+  stepFeatures:
+    0: 90
+    1: 90
+    2: 90
+    3: 90
+    4: 47
+  eventCount: 18
 EF_tau25_idperf_tracktwoMVA_L1cTAU20M:
   stepCounts:
     0: 17

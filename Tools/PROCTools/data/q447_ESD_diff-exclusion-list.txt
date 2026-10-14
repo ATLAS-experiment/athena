@@ -27,3 +27,6 @@ xAOD::JetAuxContainer*.*R4TruthLabel*.*
 # Ignore Fold variables for b-tagging on PFlow
 xAOD::JetAuxContainer.*PFlow.*jetFold.*
 xAOD::JetAuxContainer.*PFlow.*ConeExcl.*HadronsInitial
+
+(.*)_EF_(.*)
+(.*)_EFNav_(.*)

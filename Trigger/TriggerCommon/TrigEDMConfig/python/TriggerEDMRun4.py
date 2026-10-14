@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # ------------------------------------------------------------
 # Definition of trigger EDM for Run 4
@@ -16,7 +16,9 @@ __log = logging.getLogger('TriggerEDMRun4Config')
 # ------------------------------------------------------------
 from TrigEDMConfig.TriggerEDMDefs import InViews # Import when needed, Alias, allowTruncation
 
-# ----------------------------
+# ------------------------------------------------------------
+# Lists of variables to be kept in the collections 
+# ------------------------------------------------------------
 
 cPFOVarsToKeep = [
     'IsInDenseEnvironment',
@@ -41,6 +43,24 @@ nPFOVarsToKeep = [
     'SECOND_LAMBDA', 'SECOND_R',
     'TIMING',
 ]
+
+
+# ===========
+# === Tau ===
+def getTauIDVars(name: str, wps: list[str] | None = None, extra_wps: list[str] | None = None) -> list[str]:
+    if wps is None: wps = ['VeryLoose', 'Loose', 'Medium', 'Tight']
+    if extra_wps is not None: wps += extra_wps
+    # Default list of variables required for all triggers, according to the naming convention
+    return [f'{name}_{sfx}' for sfx in ['Score', 'ScoreSigTrans'] + wps]
+
+TauJet_vars = []
+TauJet_vars += getTauIDVars('GNTau')
+TauJet_vars += getTauIDVars('GNTauDev1', wps=['Loose', 'Medium'])
+TauJet_vars_str = '.'.join(TauJet_vars)
+
+TauTrack_vars = ['pt', 'eta', 'phi', 'flagSet', 'trackLinks', 'd0TJVA', 'd0SigTJVA', 'z0sinthetaTJVA', 'z0sinthetaSigTJVA']
+TauTrack_vars_str = '.'.join(TauTrack_vars)
+
 
 TriggerHLTListRun4 = [
 
@@ -68,7 +88,7 @@ TriggerHLTListRun4 = [
     ('xAOD::TrigRingerRingsContainer#HLT_FastCaloRinger',             'BS ESD AODFULL', 'Egamma', [InViews('EMCaloViews')]), #Ringer
     ('xAOD::TrigRingerRingsAuxContainer#HLT_FastCaloRingerAux.',      'BS ESD AODFULL', 'Egamma'), #Ringer
     
-# L1 Calo inputs, note we are giving extended EDM targets
+    # L1 Calo inputs, note we are giving extended EDM targets
     ("CaloCellContainer#SCell",                                'ESD AODFULL', 'L1'),
     # Placeholder output collections from GlobalSimulation
     ('std::vector<float>#L1_eFEXeta', 'ESD AODFULL', 'L1'),
@@ -83,7 +103,7 @@ TriggerHLTListRun4 = [
     ('xAOD::FlowElementContainer#HLT_ftfNeutralParticleFlowObjects', 'BS ESD', 'Jet'),
     ('xAOD::FlowElementAuxContainer#HLT_ftfNeutralParticleFlowObjectsAux.'+'.'.join(nPFOVarsToKeep), 'BS ESD', 'Jet'),
 
-# New EDM for Run 4 muons
+    # New EDM for Run 4 muons
     # EF Fast Reco muons (SA)
     ('xAOD::MuonContainer#HLT_FastMuons_RoI',                          'BS ESD AODFULL AODSLIM', 'Muon', [InViews('L2MuFastReco_RoIViews')]),
     ('xAOD::MuonAuxContainer#HLT_FastMuons_RoIAux.',                   'BS ESD AODFULL AODSLIM', 'Muon'),
@@ -125,5 +145,29 @@ TriggerHLTListRun4 = [
 
     ('xAOD::TrackParticleContainer#HLT_MuonMSTrackParticles_FSPhII_mlbkt',          'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_FSPhII_mlbktViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_MuonMSTrackParticles_FSPhII_mlbktAux.',   'BS ESD AODFULL', 'Muon'),
+
+    # Tau
+    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersEM',                       'BS ESD AODFULL', 'Tau', [InViews('tauCaloEMViews')]),   
+    ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersEMAux.nCells',      'BS ESD AODFULL', 'Tau'),
+
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_TauCoreEM_FTF',                  'BS ESD AODFULL', 'Tau', [InViews('tauFastTrackCoreEMViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauCoreEM_FTFAux.',           'BS ESD AODFULL', 'Tau'),
+
+    ('xAOD::TrackParticleContainer#HLT_IDTrack_TauIsoEM_FTF',                   'BS ESD AODFULL', 'Tau', [InViews('tauFastTrackIsoEMViews')]),
+    ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauIsoEM_FTFAux.',            'BS ESD AODFULL', 'Tau'),
+
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauCoreEM',                           'BS ESD AODFULL', 'Tau'),
+    ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoEM',                            'BS ESD AODFULL', 'Tau'),
+
+    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloEMOnly',                   'BS ESD AODFULL', 'Tau', [InViews('tauCaloEMViews')]),
+    ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_CaloEMOnlyAux.',            'BS ESD AODFULL', 'Tau'),
+
+    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_EM',                           'BS ESD AODFULL', 'Tau', [InViews('precEMTauViews'), InViews('tauPrecisionReco_EMViews')]),
+    ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_EMAux.' + TauJet_vars_str,  'BS ESD AODFULL', 'Tau'),
+
+    # tau tracks
+    ('xAOD::TauTrackContainer#HLT_tautrack_EM',                                 'BS ESD AODFULL', 'Tau', [InViews('precEMTauViews'), InViews('tauPrecisionReco_EMViews')]),
+    ('xAOD::TauTrackAuxContainer#HLT_tautrack_EMAux.' + TauTrack_vars_str,      'BS ESD AODFULL', 'Tau'),
+
 
 ]

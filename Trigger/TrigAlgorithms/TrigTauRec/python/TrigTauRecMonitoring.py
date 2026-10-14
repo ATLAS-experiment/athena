@@ -3,9 +3,9 @@
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
 
-def tauMonitoringCaloOnlyMVA(flags: AthConfigFlags, name: str = 'CaloMVA', RoI_name: str = 'L1'):
+def tauMonitoringCaloOnlyMVA(flags: AthConfigFlags, name: str = 'CaloMVA', RoI_name: str = 'L1', jet: str = 'lc'):
     monTool = GenericMonitoringTool(flags, 'MonTool')
-    monTool.HistPath = 'TrigTauRecMerged_CaloMVA'
+    monTool.HistPath = f'TrigTauRecMerged_Calo{jet.upper()}MVA'
 
     monTool.defineHistogram('NTauCandidates', path='EXPERT', type='TH1F', title=name+' Tau candidates; N Tau; Entries', xbins=10, xmin=-1.0, xmax=9)
 
@@ -68,9 +68,8 @@ def tauMonitoringCaloOnlyMVA(flags: AthConfigFlags, name: str = 'CaloMVA', RoI_n
     return monTool
 
 
-
-def tauMonitoringCaloHits(flags: AthConfigFlags, name: str, hitz_algs: list[str], tau_ids: list[str]):
-    monTool = tauMonitoringCaloOnlyMVA(flags, name, RoI_name='')
+def tauMonitoringCaloHits(flags: AthConfigFlags, name: str, hitz_algs: list[str], tau_ids: list[str], jet: str = 'lc'):
+    monTool = tauMonitoringCaloOnlyMVA(flags, name, RoI_name='', jet=jet)
     monTool.HistPath = f'TrigTauRecMerged_{name}'
 
     # HitZ input variables
