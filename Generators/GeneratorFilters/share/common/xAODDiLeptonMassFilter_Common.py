@@ -19,5 +19,6 @@ filtSeq += xAODDiLeptonMassFilter
 #filtSeq.xAODDiLeptonMassFilter.MinDilepPt = -1
 #filtSeq.xAODDiLeptonMassFilter.AllowElecMu =  False
 #filtSeq.xAODDiLeptonMassFilter.AllowSameCharge = False
-
+#filtSeq.xAODDiLeptonMassFilter.RequireSameCharge = False
+#filtSeq.xAODDiLeptonMassFilter.TruthParticleContainerKey = "TruthMuons"  # muon pairs only
 
