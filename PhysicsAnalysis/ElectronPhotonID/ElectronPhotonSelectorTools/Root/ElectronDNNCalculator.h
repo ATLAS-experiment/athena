@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -27,8 +27,7 @@ public:
   ElectronDNNCalculator( AsgElectronSelectorTool* owner,
                          const std::string& modelFileName,
                          const std::string& quantileFileName,
-                         const std::vector<std::string>& variablesName,
-                         const bool multiClass);
+                         const std::vector<std::string>& variablesName);
 
   /** Standard destructor*/
   ~ElectronDNNCalculator() {};
@@ -49,8 +48,6 @@ private:
   std::vector<std::vector<double>> m_quantiles;
   /// Reference values for the QuantileTransformer. Basically just equidistant bins between 0 and 1.
   std::vector<double> m_references;
-  /// Whether the used model is a multiclass model or not.
-  bool m_multiClass;
   /// Model variables
   std::vector<std::string> m_variables;
   uint m_var_size;
