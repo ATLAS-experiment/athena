@@ -34,8 +34,11 @@ ElectronDNNCalculator::ElectronDNNCalculator(AsgElectronSelectorTool* owner,
                                             m_variables(variables),
                                             m_var_size(variables.size())
 {
-  ATH_MSG_INFO("Initializing ElectronDNNCalculator...");
 
+  ATH_MSG_INFO("Initializing ElectronDNNCalculator...");
+  for (const auto& var : m_variables) {
+    ATH_MSG_DEBUG("VARIABLE: " << var );
+  }
   if (modelFileName.empty()){
     throw std::runtime_error("No file found at '" + modelFileName + "'");
   }
@@ -53,17 +56,6 @@ ElectronDNNCalculator::ElectronDNNCalculator(AsgElectronSelectorTool* owner,
   // create the model
   inputFile.open(modelFileName);
   auto parsedGraph = lwt::parse_json_graph(inputFile);
-  // Test whether the number of outputs of the given network corresponds to the expected number
-  size_t nOutputs = parsedGraph.outputs.begin()->second.labels.size();
-  if (nOutputs != 6 && nOutputs != 1){
-    throw std::runtime_error("Given model does not have 1 or 6 outputs. Something seems to be wrong with the model file.");
-  }
-  else if (nOutputs == 1 && m_multiClass){
-    throw std::runtime_error("Given model has 1 output but config file specifies mutliclass. Something is wrong");
-  }
-  else if (nOutputs == 6 && !m_multiClass){
-    throw std::runtime_error("Given model has 6 output but config file does not specify mutliclass. Something is wrong");
-  }
 
   m_graph = std::make_unique<lwt::generic::FastGraph<float>>(parsedGraph, order);
 
@@ -79,7 +71,6 @@ ElectronDNNCalculator::ElectronDNNCalculator(AsgElectronSelectorTool* owner,
 
   }
 }
-
 
 // takes the input variables, transforms them according to the given QuantileTransformer and predicts the DNN value(s)
 Eigen::Matrix<float, -1, 1> ElectronDNNCalculator::calculate( const std::vector<double>& variableValues ) const
