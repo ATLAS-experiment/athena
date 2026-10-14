@@ -844,7 +844,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 		  selectorTest.clear();
 
 
-		  if ( chainName.find("HLT_")!=std::string::npos ) {
+		  if ( chainName.find("HLT_")!=std::string::npos || chainName.find("EF_")!=std::string::npos ) {
 		    if ( selectTracks<xAOD::TrackParticleContainer>( &selectorTest, roi_link,  collectionName ) ); 
 		    else {
 		      if (m_provider->msg().level() <= MSG::DEBUG) {
@@ -891,7 +891,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 		  //// not yet ready to get the jet yet - this can come once everything else is working 
 		  // now get the jets if they are present
 		  std::vector<TrackTrigObject> jets; 
-		  if ( chainName.find("HLT_j")!=std::string::npos ) { 
+		  if ( chainName.find("HLT_j")!=std::string::npos || chainName.find("EF_j")!=std::string::npos ) { 
 		    if ( get_jets( comb, jets ) == 0 ) m_provider->msg(MSG::WARNING) << "\tjets could not be retrieved " << endmsg; 
 		  }			  		    
 #endif
@@ -965,7 +965,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 	      std::vector<std::pair<double,double> > philims;
 	      
 	      for ( ; citr!=chains.end() ; ++citr ) {
-		if ( citr->name().find("HLT_")!=std::string::npos ) { 
+		if ( citr->name().find("HLT_")!=std::string::npos || citr->name().find("EF_")!=std::string::npos ) { 
 		  for ( size_t ir=0 ; ir<citr->size() ; ir++ ) {
 		    TIDARoiDescriptor& roi = citr->rois()[ir].roi();
 		    if ( roi.composite() ) { 
