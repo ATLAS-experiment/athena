@@ -70,8 +70,8 @@ namespace {
                m_toMeasFrame += spacePoint->msSector()->globalToLocalTransform(tgContext)*
                                 measSurface.localToGlobalTransform(tgContext);
                using namespace MuonR4::SegmentFit;
-               m_covLoc0 += toFloat(spacePoint->covariance()[Acts::toUnderlying(AxisDefs::etaCov)]);
-               m_covLoc1 += toFloat(spacePoint->covariance()[Acts::toUnderlying(AxisDefs::phiCov)]);
+               m_covLoc0 += toFloat(spacePoint->covariance()[Acts::toUnderlying(AxisDefs::phiCov)]);
+               m_covLoc1 += toFloat(spacePoint->covariance()[Acts::toUnderlying(AxisDefs::etaCov)]);
                m_covT    += toFloat(spacePoint->covariance()[Acts::toUnderlying(AxisDefs::timeCov)]);
             }
             ++bucketCounter;
