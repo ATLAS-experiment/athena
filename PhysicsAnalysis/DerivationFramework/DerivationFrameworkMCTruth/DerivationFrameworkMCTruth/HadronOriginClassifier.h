@@ -16,6 +16,8 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODTruth/TruthEventContainer.h"
+#include "xAODTruth/TruthParticleContainer.h"
+#include "xAODTruth/TruthVertexContainer.h"
 #include "xAODEventInfo/EventInfo.h"
 
 #include <map>
@@ -86,6 +88,9 @@ namespace DerivationFramework{
     inline bool IsSherpa() const {return m_GenUsed==GEN_id::Sherpa;};
 
     SG::ReadHandleKey<xAOD::TruthEventContainer> m_mcName {this, "MCCollectionName", "TruthEvents", "TruthEventContainer key"};
+    // only reached through TruthEvent and parent/child links, declared so the scheduler knows about them
+    SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticlesKey {this, "TruthParticlesKey", "TruthParticles", "TruthParticleContainer key"};
+    SG::ReadHandleKey<xAOD::TruthVertexContainer> m_truthVerticesKey {this, "TruthVerticesKey", "TruthVertices", "TruthVertexContainer key"};
     Gaudi::Property<double> m_HadronPtMinCut{this, "HadronpTMinCut", 5000.}; /// MeV
     Gaudi::Property<double> m_HadronEtaMaxCut{this, "HadronetaMaxCut", 2.5};
     Gaudi::Property<int> m_DSID{this, "DSID", 410000};
