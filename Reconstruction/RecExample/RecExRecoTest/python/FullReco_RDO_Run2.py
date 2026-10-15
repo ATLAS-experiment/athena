@@ -1,5 +1,5 @@
 #!/usr/bin/env athena.py
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Example of configuring full reconstruction from RDO for Run2.
 
@@ -13,11 +13,13 @@ flags.Output.AODFileName = 'myAOD.pool.root'
 flags.Output.ESDFileName = 'myESD.pool.root'
 flags.Exec.MaxEvents = 10
 
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
 from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
 setupDetectorFlags(flags, None,
                    use_metadata=True,
                    toggle_geometry=True,
                    keep_beampipe=True)
+flags.IOVDb.GlobalTag = defaultConditionsTags.RUN2_MC
 flags.fillFromArgs()
 flags.lock()
 
