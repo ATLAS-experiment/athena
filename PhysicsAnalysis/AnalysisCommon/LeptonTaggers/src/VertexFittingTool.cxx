@@ -344,7 +344,7 @@ std::unique_ptr<xAOD::Vertex> Prompt::VertexFittingTool::getSecondaryVertexWithS
     for(const xAOD::TrackParticle *selectedtrack: tracksForFit) {
       ElementLink<xAOD::TrackParticleContainer> tpLink;
 
-      tpLink.toContainedElement(*inDetTracks, selectedtrack);
+      tpLink.toContainedElement(*inDetTracks, selectedtrack, ctx);
       tpLinks.push_back(tpLink);
     }
   }

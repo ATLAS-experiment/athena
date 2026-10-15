@@ -419,7 +419,7 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
       pdgid(*j) = p->pdgId();
       deltaR(*j) = nearest.deltaR;
       auto* container = dynamic_cast<const TPC*>(p->container());
-      link(*j) = JL(*container, p->index());
+      link(*j) = JL(*container, p->index(), cxt);
       index(*j) = nearest.parent_index;
       nMatched(*j) = matches.size();
       mask(*j) = matchMask(matches);
@@ -427,7 +427,7 @@ StatusCode TruthParentDecoratorAlg::execute(const EventContext& cxt) const
       matchPdgId(*j) = child->pdgId();
       matchChildCount(*j) = child->nChildren();
       auto* matchedContainer = dynamic_cast<const TPC*>(child->container());
-      matchLink(*j) = JL(*matchedContainer, child->index());
+      matchLink(*j) = JL(*matchedContainer, child->index(), cxt);
       dec_mass(*j) = p->m();
       dec_pt(*j) = p->pt();
       dec_energy(*j) = p->e();
