@@ -40,11 +40,16 @@ class DeviceMemoryResourceTool
   /// Get the provided @c std::pmr::memory_resource object
   virtual std::pmr::memory_resource& mr() const override;
 
+  /// The name of the device for which the memory resource is provided
+  virtual std::string_view deviceName() const override;
+
   /// @}
 
  private:
   /// The memory resource that this tool uses
   std::unique_ptr<std::pmr::memory_resource> m_mr;
+  /// Name of the device for which the memory resource is provided
+  std::string m_deviceName;
 
   /// @name Tool properties
   /// @{

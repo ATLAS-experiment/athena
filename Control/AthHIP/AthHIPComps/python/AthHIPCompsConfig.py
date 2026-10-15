@@ -21,6 +21,12 @@ def HostMemoryResourceToolCfg(flags, **kwargs):
     # Create the components that would collaborate to provide thread-safe
     # caching to the "bare" memory resource.
     tool = CompFactory.AthHIP.HostMemoryResourceTool(**kwargs)
+    if flags.Device.Memory.Monitor:
+        monitorTool = CompFactory.AthDevice.MonitoredMemoryResourceTool(
+            'HIPHostMemoryResourceMonitorTool',
+            MRTool=tool)
+        tool = monitorTool
+        pass
     if flags.Device.Memory.Debug:
         debugTool = CompFactory.AthDevice.DebugMemoryResourceTool(
             'HIPHostMemoryResourceDebugTool',
@@ -43,6 +49,12 @@ def HostMemoryResourceToolCfg(flags, **kwargs):
             tool = debugTool
             pass
         pass
+    if flags.Device.Memory.Monitor and flags.Device.Memory.Cache:
+        monitorTool = CompFactory.AthDevice.MonitoredMemoryResourceTool(
+            'HIPHostCachedMemoryResourceMonitorTool',
+            MRTool=tool)
+        tool = monitorTool
+        pass
     result.setPrivateTools(tool)
 
     # Return the CA.
@@ -62,6 +74,12 @@ def DeviceMemoryResourceToolCfg(flags, **kwargs):
     # Create the components that would collaborate to provide thread-safe
     # caching to the "bare" memory resource.
     tool = CompFactory.AthHIP.DeviceMemoryResourceTool(**kwargs)
+    if flags.Device.Memory.Monitor:
+        monitorTool = CompFactory.AthDevice.MonitoredMemoryResourceTool(
+            'HIPDeviceMemoryResourceMonitorTool',
+            MRTool=tool)
+        tool = monitorTool
+        pass
     if flags.Device.Memory.Debug:
         debugTool = CompFactory.AthDevice.DebugMemoryResourceTool(
             'HIPDeviceMemoryResourceDebugTool',
@@ -84,6 +102,12 @@ def DeviceMemoryResourceToolCfg(flags, **kwargs):
             tool = debugTool
             pass
         pass
+    if flags.Device.Memory.Monitor and flags.Device.Memory.Cache:
+        monitorTool = CompFactory.AthDevice.MonitoredMemoryResourceTool(
+            'HIPDeviceCachedMemoryResourceMonitorTool',
+            MRTool=tool)
+        tool = monitorTool
+        pass
     result.setPrivateTools(tool)
 
     # Return the CA.
@@ -103,6 +127,12 @@ def ManagedMemoryResourceToolCfg(flags, **kwargs):
     # Create the components that would collaborate to provide thread-safe
     # caching to the "bare" memory resource.
     tool = CompFactory.AthHIP.ManagedMemoryResourceTool(**kwargs)
+    if flags.Device.Memory.Monitor:
+        monitorTool = CompFactory.AthDevice.MonitoredMemoryResourceTool(
+            'HIPManagedMemoryResourceMonitorTool',
+            MRTool=tool)
+        tool = monitorTool
+        pass
     if flags.Device.Memory.Debug:
         debugTool = CompFactory.AthDevice.DebugMemoryResourceTool(
             'HIPManagedMemoryResourceDebugTool',
@@ -124,6 +154,12 @@ def ManagedMemoryResourceToolCfg(flags, **kwargs):
                 MRTool=tool)
             tool = debugTool
             pass
+        pass
+    if flags.Device.Memory.Monitor and flags.Device.Memory.Cache:
+        monitorTool = CompFactory.AthDevice.MonitoredMemoryResourceTool(
+            'HIPManagedCachedMemoryResourceMonitorTool',
+            MRTool=tool)
+        tool = monitorTool
         pass
     result.setPrivateTools(tool)
 

@@ -28,4 +28,9 @@ std::pmr::memory_resource& ManagedMemoryResourceTool::mr() const {
   return *m_mr;
 }
 
+std::string_view ManagedMemoryResourceTool::deviceName() const {
+
+  return "HIP Managed Memory";
+}
+
 }  // namespace AthHIP

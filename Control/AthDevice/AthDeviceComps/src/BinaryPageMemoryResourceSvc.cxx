@@ -30,11 +30,27 @@ StatusCode BinaryPageMemoryResourceSvc::initialize() {
   return StatusCode::SUCCESS;
 }
 
+StatusCode BinaryPageMemoryResourceSvc::finalize() {
+
+  // Reset the memory resources.
+  m_syncedMR.reset();
+  m_cachedMR.reset();
+
+  // Return gracefully.
+  return StatusCode::SUCCESS;
+}
+
 std::pmr::memory_resource& BinaryPageMemoryResourceSvc::mr() const {
 
   assert(m_cachedMR);
   assert(m_syncedMR);
   return *m_syncedMR;
+}
+
+std::string_view BinaryPageMemoryResourceSvc::deviceName() const {
+
+  assert(m_mrTool.isValid());
+  return m_mrTool->deviceName();
 }
 
 }  // namespace AthDevice

@@ -36,6 +36,8 @@ def createDeviceConfigFlags():
                    help='Whether or not to cache memory allocations')
     result.addFlag('Device.Memory.Debug', False,
                    help='Whether or not to actively debug memory allocations')
+    result.addFlag('Device.Memory.Monitor', False,
+                   help='Whether or not to monitor memory allocations')
     result.addFlag('Device.Memory.Shared', False,
                    help='Whether or not to use "shared" memory for device '
                         'allocations. In case it is set to False, a separate '

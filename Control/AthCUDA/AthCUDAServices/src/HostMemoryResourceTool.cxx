@@ -28,4 +28,9 @@ std::pmr::memory_resource& HostMemoryResourceTool::mr() const {
   return *m_mr;
 }
 
+std::string_view HostMemoryResourceTool::deviceName() const {
+
+  return "(Pinned) CUDA Host Memory";
+}
+
 }  // namespace AthCUDA
