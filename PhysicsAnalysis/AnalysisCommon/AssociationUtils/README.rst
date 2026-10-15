@@ -107,6 +107,8 @@ type-specific and do a runtime type check.
   write out overlap decorations for electrons and muons sharing tracks, and
   then use that result after slimming away the xAOD ID tracks with this tool
   to find overlaps using the final analysis selections and systematics.
+* FEOverlapTool - Tool which flags overlaps by checking for the amount of energy
+  shared between FlowElements associated with relevant objects.
 
 Refer to the class documentation for more details on each one's implementation
 or ask me if you have any questions.

@@ -223,10 +223,28 @@ private:
     "Large-R jet neutral global FE links decoration"
   };
 
-  SG::ReadDecorHandleKey<xAOD::FlowElementContainer> m_originalObjectLinkKey{
-    this, "OriginalObjectLinkDecorKey",
-    "JetETMissChargedParticleFlowObjects.originalObjectLink",
-    "FlowElement originalObjectLink decoration"
+  SG::ReadDecorHandleKey<xAOD::FlowElementContainer> m_chargedOriginalObjectLinkKey{
+    this, "ChargedOriginalObjectLinkDecorKey",
+    "CHSGChargedParticleFlowObjects.originalObjectLink",
+    "Charged FlowElement originalObjectLink decoration"
+  };
+
+  SG::ReadDecorHandleKey<xAOD::FlowElementContainer> m_neutralOriginalObjectLinkKey{
+    this, "NeutralOriginalObjectLinkDecorKey",
+    "CHSGNeutralParticleFlowObjects.originalObjectLink",
+    "Neutral FlowElement originalObjectLink decoration"
+  };
+
+  SG::ReadDecorHandleKey<xAOD::FlowElementContainer> m_lrchargedOriginalObjectLinkKey{
+    this, "ChargedLROriginalObjectLinkDecorKey",
+    "CSSKGChargedParticleFlowObjects.originalObjectLink",
+    "Charged large-R FlowElement originalObjectLink decoration"
+  };
+
+  SG::ReadDecorHandleKey<xAOD::FlowElementContainer> m_lrneutralOriginalObjectLinkKey{
+    this, "NeutralLROriginalObjectLinkDecorKey",
+    "CSSKGNeutralParticleFlowObjects.originalObjectLink",
+    "Neutral large-R FlowElement originalObjectLink decoration"
   };
 #endif
 

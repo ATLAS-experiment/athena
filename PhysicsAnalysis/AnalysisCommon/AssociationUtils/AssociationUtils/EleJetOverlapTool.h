@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILS_ELEJETOVERLAPTOOL_H
@@ -7,6 +7,7 @@
 
 // Framework includes
 #include "AsgTools/AsgTool.h"
+#include "AsgDataHandles/ReadHandleKey.h"
 
 // EDM includes
 #include "xAODEgamma/ElectronContainer.h"
@@ -18,6 +19,7 @@
 #include "AssociationUtils/IOverlapTool.h"
 #include "AssociationUtils/BaseOverlapTool.h"
 #include "AssociationUtils/DeltaRMatcher.h"
+#include "AssociationUtils/FEMatcher.h"
 
 namespace ADD_CMODE(ORUtils)
 {
@@ -102,6 +104,9 @@ namespace ADD_CMODE(ORUtils)
       /// Calculate deltaR using rapidity
       bool m_useRapidity;
 
+      /// Use flow element-based overlap removal
+      bool m_useFEOR;
+
       /// Columnar accessors
       struct Accessors final : columnar::ColumnarTool<>
       {
@@ -113,6 +118,10 @@ namespace ADD_CMODE(ORUtils)
       };
       std::unique_ptr<Accessors> m_accessors {std::make_unique<Accessors> (this)};
 
+      SG::ReadHandleKey<xAOD::MissingETAssociationMap> m_feMapKey{
+        this, "FEAssociationMap", "FEAssociationMap", "Flow element association map"
+      };
+
       /// @}
 
       /// @name Utilities
@@ -122,6 +131,8 @@ namespace ADD_CMODE(ORUtils)
       std::unique_ptr<IParticleAssociator> m_dRMatchCone1;
       /// Delta-R matcher for the outer cone
       std::unique_ptr<IParticleAssociator> m_dRMatchCone2;
+      // Flow element matcher
+      std::unique_ptr<FEMatcher> m_FEMatcher;
 
       /// @}
 

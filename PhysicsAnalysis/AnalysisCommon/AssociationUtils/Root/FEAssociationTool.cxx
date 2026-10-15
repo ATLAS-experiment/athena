@@ -39,14 +39,16 @@ namespace
   static const SG::Accessor<int>   ACC_typeB("FE_ParticleB_Type");
   static const SG::Accessor<float> ACC_sharedEc("FE_SharedEc");
   static const SG::Accessor<float> ACC_sharedEn("FE_SharedEn");
-  static const SG::Accessor<float> ACC_fracAc("FE_FracAc");
-  static const SG::Accessor<float> ACC_fracAn("FE_FracAn");
-  static const SG::Accessor<float> ACC_fracBc("FE_FracBc");
-  static const SG::Accessor<float> ACC_fracBn("FE_FracBn");
+  static const SG::Accessor<float> ACC_totAc("FE_TotAc");
+  static const SG::Accessor<float> ACC_totAn("FE_TotAn");
+  static const SG::Accessor<float> ACC_totBc("FE_TotBc");
+  static const SG::Accessor<float> ACC_totBn("FE_TotBn");
 
 #ifndef XAOD_STANDALONE
   using FELinks_t = std::vector<ElementLink<xAOD::FlowElementContainer>>;
   using OrigObjLink_t = ElementLink<xAOD::IParticleContainer>;
+  static const SG::ConstAccessor<ElementLink<xAOD::IParticleContainer>>
+    ACC_origObj("originalObjectLink");
 #else
   static const SG::ConstAccessor<std::vector<ElementLink<xAOD::FlowElementContainer>>>
     ACC_cFEs("chargedGlobalFELinks");
@@ -116,7 +118,10 @@ StatusCode FEAssociationTool::initialize()
   ATH_CHECK(m_srjNeutralFELinksKey.initialize(!m_srjNeutralFELinksKey.empty()));
   ATH_CHECK(m_lrjChargedFELinksKey.initialize(!m_lrjChargedFELinksKey.empty()));
   ATH_CHECK(m_lrjNeutralFELinksKey.initialize(!m_lrjNeutralFELinksKey.empty()));
-  ATH_CHECK(m_originalObjectLinkKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_chargedOriginalObjectLinkKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_neutralOriginalObjectLinkKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_lrchargedOriginalObjectLinkKey.initialize(SG::AllowEmpty));
+  ATH_CHECK(m_lrneutralOriginalObjectLinkKey.initialize(SG::AllowEmpty));
 #else
   ATH_CHECK(m_elKey.initialize());
   ATH_CHECK(m_muKey.initialize());
@@ -278,7 +283,7 @@ void FEAssociationTool::collectFEsFromIndex(const EventContext& ctx,
                                             std::size_t idx,
                                             ObjView& view) const
 #else
-void FEAssociationTool::collectFEsFromIndex(const ObjView::Type /*type*/,
+void FEAssociationTool::collectFEsFromIndex(const ObjView::Type type,
                                             const xAOD::IParticleContainer* cont,
                                             std::size_t idx,
                                             ObjView& view) const
@@ -407,37 +412,49 @@ void FEAssociationTool::collectFEsFromIndex(const ObjView::Type /*type*/,
   }
 #endif
 
-  if (!usedGlobal && p->type() == xAOD::Type::Jet)
-  {
+  if (!usedGlobal && p->type() == xAOD::Type::Jet) {
+    
     const auto* jet = static_cast<const xAOD::Jet*>(p);
 
-    for (const auto& cl : jet->constituentLinks())
-    {
+    for (const auto& cl : jet->constituentLinks()) {
+
       if (!cl.isValid()) continue;
 
-      const xAOD::IParticle* cpart = *cl;
+      const xAOD::IParticle* cpart = *cl; // either CHSG PFO for small R or UFOCSSK for large R
       if (!cpart) continue;
       if (cpart->type() != xAOD::Type::FlowElement) continue;
 
       const auto* constit = static_cast<const xAOD::FlowElement*>(cpart);
 
+      if (type == ObjView::Type::SmallRJet) {
 #ifndef XAOD_STANDALONE
-      SG::ReadDecorHandle<xAOD::FlowElementContainer, OrigObjLink_t> origObj(m_originalObjectLinkKey, ctx);
+        SG::ReadDecorHandle<xAOD::FlowElementContainer, OrigObjLink_t> charOrigObj(m_chargedOriginalObjectLinkKey, ctx);
+        SG::ReadDecorHandle<xAOD::FlowElementContainer, OrigObjLink_t> neutOrigObj(m_neutralOriginalObjectLinkKey, ctx);
 
-      if (origObj.isAvailable())
-      {
-        const auto& feLink = origObj(*constit);
+        const auto& feLink = [&]() {
+          if (charOrigObj.isAvailable() && charOrigObj(*constit).isValid()) return charOrigObj(*constit);
+          else if (neutOrigObj.isAvailable() && neutOrigObj(*constit).isValid()) return neutOrigObj(*constit);
+          else return ElementLink<DataVector<xAOD::IParticle>>();
+        }();
 #else
-      if (ACC_origObj.isAvailable(*constit))
-      {
-        const auto& feLink = ACC_origObj(*constit);
+        const auto& feLink = ACC_origObj.isAvailable(*constit) ? ACC_origObj(*constit) : ElementLink<DataVector<xAOD::IParticle>>();
 #endif
-        if (!feLink.isValid()) continue;
+        if (!feLink.isValid()) {
+          const auto* fe = constit;
+
+          if (fe->isCharged()) {
+            view.cSet.insert(fe);
+            view.EcTot += fe->e() * INV_GEV;
+          } else {
+            view.nSet.insert(fe);
+            view.EnTot += fe->e() * INV_GEV;
+          }
+          continue;
+        }
 
         const xAOD::IParticle* opart = *feLink;
         if (!opart) continue;
         if (opart->type() != xAOD::Type::FlowElement) continue;
-
         const auto* fe = static_cast<const xAOD::FlowElement*>(opart);
 
         if (fe->isCharged()) {
@@ -447,19 +464,53 @@ void FEAssociationTool::collectFEsFromIndex(const ObjView::Type /*type*/,
           view.nSet.insert(fe);
           view.EnTot += fe->e() * INV_GEV;
         }
-      }
-      else
-      {
-        const auto* fe = constit;
+      } // end small R jets
 
-        if (fe->isCharged()) {
-          view.cSet.insert(fe);
-          view.EcTot += fe->e() * INV_GEV;
-        } else {
-          view.nSet.insert(fe);
-          view.EnTot += fe->e() * INV_GEV;
+      else {
+        // Use constit (UFOCSSK) to get back to the CSSKG PFOs
+        for (size_t i=0;i<constit->otherObjects().size();i++) {
+          const xAOD::FlowElement* ufoFE = dynamic_cast<const xAOD::FlowElement*>(constit->otherObject(i)); // CSSKG PFOs
+
+#ifndef XAOD_STANDALONE
+          SG::ReadDecorHandle<xAOD::FlowElementContainer, OrigObjLink_t> lrcharOrigObj(m_lrchargedOriginalObjectLinkKey, ctx);
+          SG::ReadDecorHandle<xAOD::FlowElementContainer, OrigObjLink_t> lrneutOrigObj(m_lrneutralOriginalObjectLinkKey, ctx);
+
+          const auto& feLink = [&]() {
+            if (lrcharOrigObj.isAvailable() && lrcharOrigObj(*ufoFE).isValid()) return lrcharOrigObj(*ufoFE);
+            else if (lrneutOrigObj.isAvailable() && lrneutOrigObj(*ufoFE).isValid()) return lrneutOrigObj(*ufoFE);
+            else return ElementLink<DataVector<xAOD::IParticle>>();
+          }();
+#else
+          const auto& feLink = ACC_origObj.isAvailable(*ufoFE) ? ACC_origObj(*ufoFE) : ElementLink<DataVector<xAOD::IParticle>>();
+#endif
+          if (!feLink.isValid()) {
+            const auto* fe = ufoFE;
+            if (fe->isCharged()) {
+              view.cSet.insert(fe);
+              view.EcTot += fe->e() * INV_GEV;
+            } else {
+              view.nSet.insert(fe);
+              view.EnTot += fe->e() * INV_GEV;
+            }
+            continue;
+          }
+
+          const xAOD::IParticle* opart = *feLink;
+          if (!opart) continue;
+          if (opart->type() != xAOD::Type::FlowElement) continue;
+
+          const auto* fe = static_cast<const xAOD::FlowElement*>(opart);
+
+          if (fe->isCharged()) {
+            view.cSet.insert(fe);
+            view.EcTot += fe->e() * INV_GEV;
+          } else {
+            view.nSet.insert(fe);
+            view.EnTot += fe->e() * INV_GEV;
+          }
         }
-      }
+      } // end large R jets
+
     }
   }
 }
@@ -553,10 +604,10 @@ StatusCode FEAssociationTool::buildMapFromPairs(const std::vector<ObjView>& obje
     ACC_sharedEc(*assoc) = sh.Ec;
     ACC_sharedEn(*assoc) = sh.En;
 
-    ACC_fracAc(*assoc) = (sh.AcTot > 0.f ? sh.Ec / sh.AcTot : 0.f);
-    ACC_fracAn(*assoc) = (sh.AnTot > 0.f ? sh.En / sh.AnTot : 0.f);
-    ACC_fracBc(*assoc) = (sh.BcTot > 0.f ? sh.Ec / sh.BcTot : 0.f);
-    ACC_fracBn(*assoc) = (sh.BnTot > 0.f ? sh.En / sh.BnTot : 0.f);
+    ACC_totAc(*assoc) = sh.AcTot;
+    ACC_totAn(*assoc) = sh.AnTot;
+    ACC_totBc(*assoc) = sh.BcTot;
+    ACC_totBn(*assoc) = sh.BnTot;
   }
 
 #ifndef XAOD_STANDALONE

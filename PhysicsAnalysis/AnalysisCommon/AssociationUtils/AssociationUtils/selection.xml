@@ -25,5 +25,7 @@
   <class name="ORUtils::OverlapDecorationHelper" />
   <class name="ORUtils::OverlapLinkHelper" />
   <class name="ORUtils::FEAssociationTool" />
+  <class name="ORUtils::FEOverlapTool" />
+  <class name="ORUtils::FEMatcher" />
 
 </lcgdict>

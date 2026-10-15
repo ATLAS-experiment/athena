@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
@@ -65,6 +65,8 @@ namespace ADD_CMODE(ORUtils)
                     "Allow events with no primary vertex");
     declareProperty("PVContainerName", m_PVContName = "PrimaryVertices",
                     "PV Container to use");
+    declareProperty("DoFEOR", m_useFEOR = false,
+                    "Use flow element-based overlap removal");
   }
 
   //---------------------------------------------------------------------------
@@ -106,6 +108,11 @@ namespace ADD_CMODE(ORUtils)
     }
     ATH_CHECK (m_dRMatchCone2->setObjectTypes (xAODType::ObjectType::Muon, xAODType::ObjectType::Jet));
     addSubtool(*m_dRMatchCone2);
+
+    // Initialize FE matcher and FE Map accessor
+    ATH_CHECK( m_feMapKey.initialize() );
+    m_FEMatcher = std::make_unique<FEMatcher>();
+    addSubtool(*m_FEMatcher);
 
     // Additional config printouts
     ATH_MSG_DEBUG("Mu-jet matching config: NumJetTrk " << m_numJetTrk <<
@@ -208,8 +215,14 @@ namespace ADD_CMODE(ORUtils)
           if(highNumTrk && (!m_applyRelPt || highRelPt)) continue;
         } // end part related to PV
 
-        if(m_dRMatchCone1->objectsMatch(muon, jet)){
+        if(!m_useFEOR && m_dRMatchCone1->objectsMatch(muon, jet)){
           ATH_CHECK( handleOverlap(jet, muon) );
+        }
+        else if (m_useFEOR) {
+          SG::ReadHandle<xAOD::MissingETAssociationMap> fe_map(m_feMapKey);
+          if (m_FEMatcher->objectsMatch(&jet.getXAODObject(), &muon.getXAODObject(), *fe_map)) {
+            ATH_CHECK( handleOverlap(jet, muon) );
+          }
         }
       }
     }
@@ -221,8 +234,14 @@ namespace ADD_CMODE(ORUtils)
       for(const auto muon : muons){
         if(!isSurvivingObject(muon)) continue;
 
-        if(m_dRMatchCone2->objectsMatch(muon, jet)){
+        if(!m_useFEOR && m_dRMatchCone2->objectsMatch(muon, jet)){
           ATH_CHECK( handleOverlap(muon, jet) );
+        }
+        else if (m_useFEOR) {
+          SG::ReadHandle<xAOD::MissingETAssociationMap> fe_map(m_feMapKey);
+          if (m_FEMatcher->objectsMatch(&muon.getXAODObject(), &jet.getXAODObject(), *fe_map)) {
+            ATH_CHECK( handleOverlap(muon, jet) );
+          }
         }
       }
     }
