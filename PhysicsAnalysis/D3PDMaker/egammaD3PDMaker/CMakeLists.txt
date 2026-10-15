@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( egammaD3PDMaker )
@@ -11,9 +11,9 @@ atlas_add_component( egammaD3PDMaker
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} 
-                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib CaloIdentifier AthenaKernel Navigation StoreGateLib 
-                     EventKernel FourMomUtils xAODBase xAODCaloEvent xAODEgamma xAODJet xAODTracking xAODTruth GaudiKernel 
-                     AnalysisTriggerEvent D3PDMakerInterfaces D3PDMakerUtils MCTruthClassifierLib egammaEvent TrkParameters 
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib CaloIdentifier AthenaKernel StoreGateLib
+                     FourMomUtils xAODCaloEvent xAODEgamma xAODJet xAODTracking xAODTruth GaudiKernel
+                     D3PDMakerInterfaces D3PDMakerUtils MCTruthClassifierLib TrkParameters
                      TrkExInterfaces TrkVertexFitterInterfaces CaloTrackingGeometryLib CaloDetDescrLib)
 
 # Install files from the package:
