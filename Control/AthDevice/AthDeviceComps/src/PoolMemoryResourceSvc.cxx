@@ -30,11 +30,27 @@ StatusCode PoolMemoryResourceSvc::initialize() {
   return StatusCode::SUCCESS;
 }
 
+StatusCode PoolMemoryResourceSvc::finalize() {
+
+  // Reset the memory resources.
+  m_syncedMR.reset();
+  m_cachedMR.reset();
+
+  // Return gracefully.
+  return StatusCode::SUCCESS;
+}
+
 std::pmr::memory_resource& PoolMemoryResourceSvc::mr() const {
 
   assert(m_cachedMR);
   assert(m_syncedMR);
   return *m_syncedMR;
+}
+
+std::string_view PoolMemoryResourceSvc::deviceName() const {
+
+  assert(m_mrTool.isValid());
+  return m_mrTool->deviceName();
 }
 
 }  // namespace AthDevice

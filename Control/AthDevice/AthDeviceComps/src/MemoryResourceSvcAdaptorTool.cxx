@@ -26,4 +26,11 @@ std::pmr::memory_resource& MemoryResourceSvcAdaptorTool::mr() const {
   return m_mrSvc->mr();
 }
 
+std::string_view MemoryResourceSvcAdaptorTool::deviceName() const {
+
+  // Just return the device name provided by the service.
+  assert(m_mrSvc.isValid());
+  return m_mrSvc->deviceName();
+}
+
 }  // namespace AthDevice

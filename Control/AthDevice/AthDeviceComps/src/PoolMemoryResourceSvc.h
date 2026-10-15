@@ -30,8 +30,11 @@ class PoolMemoryResourceSvc : public extends<AthService, IMemoryResourceSvc> {
   /// @name Function(s) inherited from @c AthService
   /// @{
 
-  /// Initialize the tool
+  /// Initialize the service
   virtual StatusCode initialize() override;
+
+  /// Finalize the service
+  virtual StatusCode finalize() override;
 
   /// @}
 
@@ -40,6 +43,9 @@ class PoolMemoryResourceSvc : public extends<AthService, IMemoryResourceSvc> {
 
   /// Get the provided @c std::pmr::memory_resource object
   virtual std::pmr::memory_resource& mr() const override;
+
+  /// The name of the device for which the memory resource is provided
+  virtual std::string_view deviceName() const override;
 
   /// @}
 

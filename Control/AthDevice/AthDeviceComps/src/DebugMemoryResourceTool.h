@@ -38,6 +38,9 @@ class DebugMemoryResourceTool
   /// Get the provided @c std::pmr::memory_resource object
   virtual std::pmr::memory_resource& mr() const override;
 
+  /// The name of the device for which the memory resource is provided
+  virtual std::string_view deviceName() const override;
+
   /// @}
 
  private:

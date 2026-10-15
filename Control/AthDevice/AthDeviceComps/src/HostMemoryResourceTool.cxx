@@ -16,4 +16,9 @@ std::pmr::memory_resource& HostMemoryResourceTool::mr() const {
   return *(std::pmr::new_delete_resource());
 }
 
+std::string_view HostMemoryResourceTool::deviceName() const {
+
+  return "(Unpinned) Host";
+}
+
 }  // namespace AthDevice

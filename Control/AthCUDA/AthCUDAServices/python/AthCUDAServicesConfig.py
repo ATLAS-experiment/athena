@@ -28,6 +28,12 @@ def HostMemoryResourceToolCfg(flags, **kwargs):
     # Create the components that would collaborate to provide thread-safe
     # caching to the "bare" memory resource.
     tool = CompFactory.AthCUDA.HostMemoryResourceTool(**kwargs)
+    if flags.Device.Memory.Monitor:
+        monitorTool = CompFactory.AthDevice.MonitoredMemoryResourceTool(
+            'CUDAHostMemoryResourceMonitorTool',
+            MRTool=tool)
+        tool = monitorTool
+        pass
     if flags.Device.Memory.Debug:
         debugTool = CompFactory.AthDevice.DebugMemoryResourceTool(
             'CUDAHostMemoryResourceDebugTool',
@@ -50,6 +56,12 @@ def HostMemoryResourceToolCfg(flags, **kwargs):
             tool = debugTool
             pass
         pass
+    if flags.Device.Memory.Monitor and flags.Device.Memory.Cache:
+        monitorTool = CompFactory.AthDevice.MonitoredMemoryResourceTool(
+            'CUDAHostCachedMemoryResourceMonitorTool',
+            MRTool=tool)
+        tool = monitorTool
+        pass
     result.setPrivateTools(tool)
 
     # Return the CA.
@@ -69,6 +81,12 @@ def DeviceMemoryResourceToolCfg(flags, **kwargs):
     # Create the components that would collaborate to provide thread-safe
     # caching to the "bare" memory resource.
     tool = CompFactory.AthCUDA.DeviceMemoryResourceTool(**kwargs)
+    if flags.Device.Memory.Monitor:
+        monitorTool = CompFactory.AthDevice.MonitoredMemoryResourceTool(
+            'CUDADeviceMemoryResourceMonitorTool',
+            MRTool=tool)
+        tool = monitorTool
+        pass
     if flags.Device.Memory.Debug:
         debugTool = CompFactory.AthDevice.DebugMemoryResourceTool(
             'CUDADeviceMemoryResourceDebugTool',
@@ -91,6 +109,12 @@ def DeviceMemoryResourceToolCfg(flags, **kwargs):
             tool = debugTool
             pass
         pass
+    if flags.Device.Memory.Monitor and flags.Device.Memory.Cache:
+        monitorTool = CompFactory.AthDevice.MonitoredMemoryResourceTool(
+            'CUDADeviceCachedMemoryResourceMonitorTool',
+            MRTool=tool)
+        tool = monitorTool
+        pass
     result.setPrivateTools(tool)
 
     # Return the CA.
@@ -110,6 +134,12 @@ def ManagedMemoryResourceToolCfg(flags, **kwargs):
     # Create the components that would collaborate to provide thread-safe
     # caching to the "bare" memory resource.
     tool = CompFactory.AthCUDA.ManagedMemoryResourceTool(**kwargs)
+    if flags.Device.Memory.Monitor:
+        monitorTool = CompFactory.AthDevice.MonitoredMemoryResourceTool(
+            'CUDAManagedMemoryResourceMonitorTool',
+            MRTool=tool)
+        tool = monitorTool
+        pass
     if flags.Device.Memory.Debug:
         debugTool = CompFactory.AthDevice.DebugMemoryResourceTool(
             'CUDAManagedMemoryResourceDebugTool',
@@ -131,6 +161,12 @@ def ManagedMemoryResourceToolCfg(flags, **kwargs):
                 MRTool=tool)
             tool = debugTool
             pass
+        pass
+    if flags.Device.Memory.Monitor and flags.Device.Memory.Cache:
+        monitorTool = CompFactory.AthDevice.MonitoredMemoryResourceTool(
+            'CUDAManagedCachedMemoryResourceMonitorTool',
+            MRTool=tool)
+        tool = monitorTool
         pass
     result.setPrivateTools(tool)
 

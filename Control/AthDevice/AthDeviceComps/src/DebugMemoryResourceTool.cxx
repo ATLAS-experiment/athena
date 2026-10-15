@@ -28,4 +28,10 @@ std::pmr::memory_resource& DebugMemoryResourceTool::mr() const {
   return *m_mr;
 }
 
+std::string_view DebugMemoryResourceTool::deviceName() const {
+
+  assert(m_mrTool.isValid());
+  return m_mrTool->deviceName();
+}
+
 }  // namespace AthDevice
