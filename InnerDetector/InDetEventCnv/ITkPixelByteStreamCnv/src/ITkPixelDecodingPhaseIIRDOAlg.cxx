@@ -57,7 +57,7 @@ StatusCode ITkPixelDecodingPhaseIIRDOAlg::execute(const EventContext& ctx) const
     
     DataFormat fmt;
     fmt.options.en_chip_id = true;
-    fmt.options.en_eos = true;
+    fmt.options.en_eos = false;
     int container_list_size = 2;
 
     auto cont_coll = std::make_unique< PhaseIIPixelRawDataContainerMT>(m_idHelper->wafer_hash_max(), container_list_size);
