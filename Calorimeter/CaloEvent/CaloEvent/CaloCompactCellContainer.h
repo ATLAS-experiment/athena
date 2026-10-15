@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOEVENT_CALOCOMPACTCELLCONTAINER_H
@@ -24,8 +24,14 @@
  */
 
 #include "AthenaKernel/CLASS_DEF.h"
-#include "CaloEvent/CaloCompactCell.h"
 #include <vector>
+
+namespace CaloCompactCell {
+
+  typedef unsigned short  value_type;
+
+}
+
 
 class CaloCompactCellContainer
 {
@@ -66,30 +72,7 @@ class CaloCompactCellContainer
 
   virtual ~CaloCompactCellContainer() { };
 
-  /**
-   *  to speed things up ivukotic@cern.ch added this inline function
-   *  to be used instead of the two bellow.
-   *  It uses no vectors since it takes time to make them.
-   *  nwords and a loop over them is removed since nwords is always=1
-   *  as nBytesPerCell is = sizeof(CaloCompactCell::value_type)
-   *  Its inlined and calculation is simplifed
-   */
-    void getCompactCellDataTime(const int & iCell,  CaloCompactCell::value_type & dataTime) const;
-
-
-  /**
-   * @brief returns the compactified @c CaloCell data
-   * @param iCell the index of the cell in the @c CaloCompactCellContainer
-   * @param nBytesPerCell the size of each @c CaloCompactCell in bytes
-   * @return a @c CaloCompactCell
-   *
-   * returns the compactified @c CaloCell information in form of a
-   * @c CaloCompactCell which is needed to restore the original
-   * @c CaloCell object.
-   */
-  CaloCompactCell getCompactCell(const int & iCell,
-				 const int & nBytesPerCell) const;
-
+  
   /**
    * @brief returns the entire compact cell container (includes header)
    * @return a const reference to the vector holding the compact data
@@ -132,17 +115,6 @@ class CaloCompactCellContainer
    * @param iCell the index in the @c CaloCompactCellContainer
    * @param headerLength the space reserved for the header information
    */
-  void setCompactCell(const CaloCompactCell & theCompactCell,
-		      const int & iCell, const int &headerLength);
-  /**
-   *  to speed things up ivukotic@cern.ch added this inline function
-   *  to be used instead of the one above.
-   *  It uses no vectors since it takes time to make them.
-   *  nwords and a loop over them is removed since nwords is always=1
-   *  as nBytesPerCell is = sizeof(CaloCompactCell::value_type)
-   *  Its inlined and calculation is simplifed
-   */
-  void setCompactCellDataTime(CaloCompactCell::value_type &theCompactCell, const int & iCell,const int & headerLength);
 
 
   /**
@@ -261,26 +233,6 @@ class CaloCompactCellContainer
    */
   compact_output_iterator compact_begin_output(int headerLength);
 };
-
-inline  void CaloCompactCellContainer::getCompactCellDataTime(const int & iCell,  CaloCompactCell::value_type & dataTime) const{
-  	static const int nRatio = sizeof(value_type)/sizeof(CaloCompactCell::value_type);
-	int iPos = m_compactData[0] + (int)(iCell/nRatio);
-  	int iMod = (iCell%nRatio)<<(8/nRatio);
-  	dataTime=(CaloCompactCell::value_type) (((m_compactData[iPos])>>iMod) & CaloCompactCell::WORDMASK);
-    }
-
-inline void CaloCompactCellContainer::setCompactCellDataTime(CaloCompactCell::value_type &theCompactCell, const int & iCell,const int & headerLength) {
-
-  static const int nRatio = sizeof(value_type)/sizeof(CaloCompactCell::value_type);
-
-  // the compace data for one cell
-  //CaloCompactCell::value_type cData(theCompactCell);
-    int iPos = headerLength + (int)(iCell/nRatio);
-    int iMod = (iCell%nRatio)<<(8/nRatio);
-    if ( iMod == 0 ) m_compactData[iPos] = 0;
-    m_compactData[iPos] = m_compactData[iPos] | (theCompactCell<<iMod);
-
-}
 
 
 inline
