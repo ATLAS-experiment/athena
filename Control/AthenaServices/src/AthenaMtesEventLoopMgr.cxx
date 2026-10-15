@@ -1338,7 +1338,7 @@ AthenaMtesEventLoopMgr::drainScheduler(int& finishedEvts,bool report){
 	fail = true;
 	continue;
       } else {
-        std::print (outfile, "  done processing event #{}, run # {} events read so far  <<<===",
+        std::println (outfile, "  done processing event #{}, run #{} {} events read so far  <<<===",
                     n_evt, n_run, m_nev);
 	outfile.close();
       }  
