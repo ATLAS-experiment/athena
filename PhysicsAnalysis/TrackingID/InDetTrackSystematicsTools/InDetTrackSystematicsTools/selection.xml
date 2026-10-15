@@ -11,6 +11,9 @@
   <class name="InDet::IJetTrackFilterTool" />
   <class name="InDet::JetTrackFilterTool" />
 
+  <class name="InDet::ITrackFilterTool" />
+  <class name="InDet::TrackFilterTool" />
+
   <class name="InDet::IInDetTrackTruthFilterTool" />
   <class name="InDet::InDetTrackTruthFilterTool" />
 

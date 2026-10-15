@@ -58,7 +58,6 @@ namespace InDet {
 
   bool JetTrackFilterTool::accept(const xAOD::TrackParticle* track, const xAOD::Jet* jet) const
   {
-
     if ( track == nullptr) {
       ATH_MSG_DEBUG( "Pointer to track is null!" );
       return false;
@@ -91,6 +90,7 @@ namespace InDet {
     }
 
     int origin = m_trackOriginTool->getTrackOrigin(track);
+
 
     if( isActive( TRK_FAKE_RATE_LOOSE_TIDE ) ){
       if ( InDet::TrkOrigin::isFake(origin) ) {

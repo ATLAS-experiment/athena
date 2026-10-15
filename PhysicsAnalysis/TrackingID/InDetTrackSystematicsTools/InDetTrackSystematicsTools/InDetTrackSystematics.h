@@ -22,6 +22,7 @@ namespace InDet {
     // uncertainties in the fake rate for Loose and TightPrimary
     TRK_FAKE_RATE_LOOSE,
     TRK_FAKE_RATE_TIGHT,
+    TRK_FAKE_RATE_LOOSE_INCL,
     // uncertainties in the efficiency for two cut levels, "Loose" and "TightPrimary"
     // evaluated from extra material in the whole ID, in the IBL, and in the barrel/endcap overlap region (PP0 - "patch panel 0")
     TRK_EFF_LOOSE_GLOBAL,
@@ -38,6 +39,7 @@ namespace InDet {
     // uncertainties for tracking fake rates in jets
     TRK_FAKE_RATE_TIGHT_TIDE,
     TRK_FAKE_RATE_LOOSE_TIDE,
+
     // combined efficiency systematics for use in downstream objects such as secondary vertexing ONLY
     // this is not an additional systematic, but rather a replacement for the standard efficiencies in objects where four variations are prohibitive
     TRK_EFF_LOOSE_COMBINED,
@@ -56,6 +58,7 @@ namespace InDet {
     DEF_SYST( BIAS_QOVERP_SAGITTA_WM ),
     DEF_SYST( FAKE_RATE_LOOSE ),
     DEF_SYST( FAKE_RATE_TIGHT ),
+    DEF_SYST( FAKE_RATE_LOOSE_INCL ),
     DEF_SYST( EFF_LOOSE_GLOBAL ),
     DEF_SYST( EFF_LOOSE_IBL ),
     DEF_SYST( EFF_LOOSE_PP0 ),

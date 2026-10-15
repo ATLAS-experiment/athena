@@ -4,6 +4,7 @@
 #include "InDetTrackSystematicsTools/InDetTrackBiasingTool.h"
 #include "InDetTrackSystematicsTools/JetTrackFilterTool.h"
 #include "InDetTrackSystematicsTools/InclusiveTrackFilterTool.h"
+#include "InDetTrackSystematicsTools/TrackFilterTool.h"
 
 #ifndef XAOD_STANDALONE
 #include "../InDetTrackSmearingToolTester.h"
@@ -11,6 +12,7 @@
 #include "../TrackSystematicsAlg.h"
 #include "../TrackSmearingAlg.h"
 #include "../JetTrackFilteringAlg.h"
+#include "../FakeRateFilterAlg.h"
 #endif
 
 // Project include(s).
@@ -22,6 +24,7 @@ DECLARE_COMPONENT( InDet::InDetTrackTruthFilterTool )
 DECLARE_COMPONENT( InDet::InDetTrackBiasingTool )
 DECLARE_COMPONENT( InDet::JetTrackFilterTool )
 DECLARE_COMPONENT( InDet::InclusiveTrackFilterTool )
+DECLARE_COMPONENT( InDet::TrackFilterTool )
 
 #ifndef XAOD_STANDALONE
 DECLARE_COMPONENT( InDet::InDetTrackSmearingToolTester )
@@ -29,4 +32,6 @@ DECLARE_COMPONENT( InDet::InDetTrackBiasingToolTester )
 DECLARE_COMPONENT( InDet::TrackSystematicsAlg )
 DECLARE_COMPONENT( InDet::TrackSmearingAlg )
 DECLARE_COMPONENT( InDet::JetTrackFilteringAlg )
+DECLARE_COMPONENT( InDet::FakeRateFilterAlg )
+
 #endif
