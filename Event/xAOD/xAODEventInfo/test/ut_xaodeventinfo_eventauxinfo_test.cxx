@@ -14,7 +14,7 @@
 #include "AthContainers/exceptions.h"
 #include "TestTools/expect_exception.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 #ifndef XAOD_STANDALONE
 #include "GaudiKernel/EventContext.h"
@@ -25,7 +25,7 @@ class EventContext{};
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   xAOD::EventAuxInfo eai;
@@ -79,7 +79,7 @@ void test1()
 
 void test_copyIDs()
 {
-  std::cout << "test_copyIDs\n";
+  std::println ("test_copyIDs");
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   xAOD::EventAuxInfo eai;
   eai.lock();
@@ -97,7 +97,7 @@ void test_copyIDs()
   }
 
   {
-    std::cout << "Expect warning here (except in standalone):\n";
+    std::println ("Expect warning here (except in standalone):");
     SG::auxid_set_t out = eai.getCopyIDs (true);
   }
 }
@@ -105,7 +105,7 @@ void test_copyIDs()
 
 int main()
 {
-  std::cout << "ut_xaodeventinfo_eventauxinfo_test\n";
+  std::println ("ut_xaodeventinfo_eventauxinfo_test");
   test1();
   test_copyIDs();
   return 0;

@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: ut_xaodeventinfo_printop_test.cxx 680052 2015-07-03 10:45:40Z krasznaa $
-
 // System include(s):
-#include <iostream>
+#include <print>
+#include <sstream>
 
 // Local include(s):
 #include "xAODEventInfo/EventInfo.h"
@@ -26,7 +25,13 @@ int main() {
    ei.setDetectorMask( 0x12345678, 0x12345678 );
 
    // Try printing it:
-   std::cout << ei << std::endl;
+   std::println( "{}", ei );
+
+   std::ostringstream s1;
+   s1 << ei;
+   std::ostringstream s2;
+   std::print( s2, "{}", ei );
+   assert( s1.str() == s2.str() );
 
    // Return gracefully:
    return 0;
