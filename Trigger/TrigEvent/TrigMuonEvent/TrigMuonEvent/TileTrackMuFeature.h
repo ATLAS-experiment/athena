@@ -63,7 +63,7 @@ class TileTrackMuFeature :  public P4PtEtaPhiMBase,
   TileTrackMuFeature& operator=(TileTrackMuFeature&& muon_feature) noexcept;
 
   /** Move c'tor **/
-  TileTrackMuFeature(TileTrackMuFeature&&) noexcept;
+  TileTrackMuFeature(TileTrackMuFeature&&) noexcept = default;
   
   /** Assignment operator */ 
   TileTrackMuFeature& operator=(const TileTrackMuFeature& muon_feature);
