@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file egammaD3PDMaker/src/egammaTruthClassificationFillerTool.h
@@ -19,7 +19,6 @@
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/Photon.h"
 #include "xAODTruth/TruthParticle.h"
-#include "egammaEvent/egammaParamDefs.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
 #include "GaudiKernel/ToolHandle.h"
 #include <vector>
