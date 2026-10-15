@@ -54,9 +54,9 @@
 //____________________________________________________________________
 class AODSystemController::Imp {
 public:
-  AODSystemController * theclass;
+  AODSystemController * theclass{};
   Ui::VP1AODControllerForm ui;
-  AODCollWidget * collwidget;
+  AODCollWidget * collwidget{};
   bool updateComboBoxContents(QComboBox*cb,QStringList l,QString& restoredSelection);
   static const QString noneAvailString;
 
