@@ -79,7 +79,7 @@ def MDTCablingConfigCfg(flags, name = "MuonMDT_CablingAlg", **kwargs):
     if not flags.Detector.GeometryMDT: return acc
     from AthenaConfiguration.Enums import LHCPeriod
     
-    kwargs.setdefault("UseJSONFormat", True)
+    kwargs.setdefault("UseJSONFormat", flags.GeoModel.Run >= LHCPeriod.Run3)
     kwargs.setdefault("MezzanineJSON", "")
     kwargs.setdefault("CablingJSON", "")
 
