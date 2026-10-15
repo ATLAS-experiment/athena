@@ -88,24 +88,6 @@ public:
                      ARGS&&... args) const;
 
   /** 
-   * @brief Fill channels from LArDigitContainer to a FullEvent
-   * @param digit_cont Pointer to LArDigitContainer (input)
-   * @param fea Pointer to FullEventAssember (output)
-   * @return Gaudi StatusCode 
-   */
-  StatusCode WriteLArDigits(const LArDigitContainer* digit_cont,
-                            FEA_t& fea) const;
-
- /** 
-  * @brief Fill channels from LArCalibDigitContainer to a FullEvent
-  * @param digit_cont Pointer to LArCalibDigitContainer (input)
-  * @param fea Pointer to FullEventAssember (output)
-  * @return Gaudi StatusCode 
-  */
-  StatusCode WriteLArCalibDigits(const LArCalibDigitContainer* digit_cont,
-                                 FEA_t& fea) const;
-
-  /** 
    * @brief Fill channels from LArRawChannelContainer to a FullEvent
    * @param digit_cont Pointer to LArRawChannelContainer (input)
    * @param fea Pointer to FullEventAssember (output)
@@ -113,7 +95,7 @@ public:
    */
   StatusCode WriteLArRawChannels(const LArRawChannelContainer* CannelCont,
                                  FEA_t& fea) const;
- 
+
 private: 
   using RobIndex_t = std::map<eformat::SubDetectorGroup, std::vector<const uint32_t*> >;
 

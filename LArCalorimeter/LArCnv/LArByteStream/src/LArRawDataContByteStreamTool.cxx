@@ -95,187 +95,6 @@ LArRawDataContByteStreamTool::finalize()
   return StatusCode::SUCCESS;
 }
 
-
-StatusCode
-LArRawDataContByteStreamTool::WriteLArDigits(const LArDigitContainer* digitCont,
-                                             FEA_t& fea) const
-{
- if (!m_initializeForWriting) {
-   ATH_MSG_ERROR ( "Tool not setup for writing! Use property " 
-                   << name()<<".InitializeForWriting" );
-   return StatusCode::FAILURE;
- }
- ATH_MSG_DEBUG ( "Writing LArDigitContainer to ByteStream" );
- if (!digitCont) {
-   ATH_MSG_ERROR ( "Null pointer passed to WriteLArDigit routine!" );
-   return StatusCode::FAILURE;
- }
-
- std::unique_ptr<LArRodBlockStructure> blstruct = makeRodBlockStructure();
-
- if (!blstruct->canSetRawData() && !blstruct->canSetRawDataFixed()) {
-   ATH_MSG_DEBUG ( "This instance of LArRodBlockStructure can't hold LArDigits!" );
-   return StatusCode::FAILURE;
- }
- fea.setRodMinorVersion(m_RodBlockVersion);
- fea.setDetEvtType(m_DSPRunMode);
- ATH_MSG_DEBUG ( "Setting Detector Event Type to " << m_DSPRunMode 
-                 << " and Minor Version Number to " << m_RodBlockVersion );
- FEA_t::RODDATA*  theROD;
- LArDigitContainer::const_iterator it_b=digitCont->begin();
- LArDigitContainer::const_iterator it_e=digitCont->end();
- if (it_b==it_e) {
-   ATH_MSG_WARNING ( "Attempt to persistify an empty LArDigitContainer to ByteStream" );
-   return StatusCode::SUCCESS;
- }
-
- const EventContext& ctx = Gaudi::Hive::currentContext();
- SG::ReadCondHandle<LArOnOffIdMapping> onOffMapping (m_onOffIdMappingKey, ctx);
- SG::ReadCondHandle<LArFebRodMapping> febRodMapping (m_febRodMappingKey, ctx);
- SG::ReadCondHandle<CaloDetDescrManager> caloMgr (m_caloMgrKey, ctx);
- const Hid2RESrcID& hid2re = getHid2RESrcID (**febRodMapping);
-
- std::map<uint32_t, LArRodEncoder> mapEncoder; 
-
- auto getEncoder = [&] (uint32_t reid) -> LArRodEncoder&
-                   { return mapEncoder.try_emplace (reid,
-                                                    *m_onlineHelper,
-                                                    **caloMgr,
-                                                    **onOffMapping,
-                                                    blstruct.get()).first->second; };
-
- unsigned n=0;
- if (blstruct->canSetRawDataFixed() && checkGainConsistency(digitCont))
-   {//Set fixed gain raw data
-     int fixgain=(*it_b)->gain();
-     ATH_MSG_DEBUG(" number of Digits in LArDigitContainer for gain " << fixgain << ": " 
-                   << digitCont->size() );
-     // Sorting Channels by ROD
-     for(; it_b!=it_e; ++it_b){
-       const LArDigit* digit = *it_b; 
-       HWIdentifier  chid = digit->hardwareID() ; 
-       uint32_t reid      = hid2re.getRodID( **febRodMapping, chid );
-       getEncoder(reid).add (digit, fixgain);
-       n++;
-     }  
-     ATH_MSG_VERBOSE(" number of channels in the LArDigitContainer for gain " 
-                     << fixgain << ": "<<n );
-   } // end if
- else 
-   if (blstruct->canSetRawData()) { //Set free gain raw data
-     ATH_MSG_DEBUG(" number of channels in LArDigit container: "<< digitCont->size() );
-
-      // Sorting Channels by ROD
-      for(; it_b!=it_e; ++it_b){
-	const LArDigit* digit = *it_b; 
-	HWIdentifier  chid = digit->hardwareID() ; 
-	uint32_t reid      = hid2re.getRodID( **febRodMapping, chid ); 
-	getEncoder(reid).add (digit);
-	n++;
-      }  
-      ATH_MSG_VERBOSE(" number of channels added to framgent: "<<n );
-     }//  end else-if(can set Raw data)
-
- SG::ReadCondHandle<CaloNoise> noise (m_caloNoiseKey, ctx);
-
- // Now loop over map and fill all ROD Data Blocks
- std::map<uint32_t,LArRodEncoder>::iterator it  =mapEncoder.begin(); 
- std::map<uint32_t,LArRodEncoder>::iterator it_end=mapEncoder.end();
- // LArRodEncoder has collected all the channels, now can fill the
- // ROD block data.
- for(; it!=it_end;++it) {
-   theROD  = fea.getRodData( (*it).first );
-   ((*it).second).fillROD(*theROD,msg(), **noise, m_nfebsigma ) ; 
- } 
- ATH_MSG_DEBUG ( "Filled " << mapEncoder.size() << " Rod Blocks" );
- return StatusCode::SUCCESS;
-}
-
-
-
-StatusCode
-LArRawDataContByteStreamTool::WriteLArCalibDigits(const LArCalibDigitContainer* digitCont, 
-                                                  FEA_t& fea) const
-{
- if (!m_initializeForWriting) {
-   ATH_MSG_ERROR ( "Tool not setup for writing! Use property " 
-                   << name()<<".InitializeForWriting" );
-   return StatusCode::FAILURE;
- }
- ATH_MSG_DEBUG ( "Writing LArCalibDigitContainer to ByteStream" );
- if (!digitCont) {
-   ATH_MSG_DEBUG ( "Null pointer passed to WriteLArCalibDigit routine!" );
-   return StatusCode::FAILURE;
- }
-
- std::unique_ptr<LArRodBlockStructure> blstruct = makeRodBlockStructure();
-
- if (!blstruct->canSetCalibration()|| !blstruct->canSetRawDataFixed()) {
-   ATH_MSG_DEBUG ( "This instance of LArRodBlockStructure can't hold LArCalibDigits!" );
-   return StatusCode::FAILURE;
- }
- fea.setRodMinorVersion(m_RodBlockVersion);
- fea.setDetEvtType(m_DSPRunMode);
- ATH_MSG_DEBUG ( "Setting Detector Event Type to " << m_DSPRunMode 
-                 << "and Minor Version Number to " << m_RodBlockVersion );
- FEA_t::RODDATA*  theROD;
- LArCalibDigitContainer::const_iterator it_b=digitCont->begin();
- LArCalibDigitContainer::const_iterator it_e=digitCont->end();
- if (it_b==it_e) {
-   ATH_MSG_WARNING ( "Attempt to persistify a empty LArDigitContainer to ByteStream" );
-   return StatusCode::SUCCESS;
- }
- if (!checkGainConsistency(digitCont)) {
-   ATH_MSG_ERROR ( "Inconsistent gain in LArCalibDigitContainer" );
-   return StatusCode::FAILURE;
- }
-
- const EventContext& ctx = Gaudi::Hive::currentContext();
- SG::ReadCondHandle<LArOnOffIdMapping> onOffMapping (m_onOffIdMappingKey, ctx);
- SG::ReadCondHandle<LArFebRodMapping> febRodMapping (m_febRodMappingKey, ctx);
- SG::ReadCondHandle<CaloDetDescrManager> caloMgr (m_caloMgrKey, ctx);
- const Hid2RESrcID& hid2re = getHid2RESrcID (**febRodMapping);
-
- std::map<uint32_t, LArRodEncoder> mapEncoder; 
-
- auto getEncoder = [&] (uint32_t reid) -> LArRodEncoder&
-                   { return mapEncoder.try_emplace (reid,
-                                                    *m_onlineHelper,
-                                                    **caloMgr,
-                                                    **onOffMapping,
-                                                    blstruct.get()).first->second; };
-
- unsigned n=0;
- int fixgain=(*it_b)->gain();
- 
- // Sorting Channels by ROD
- for(; it_b!=it_e; ++it_b){
-   const LArCalibDigit* digit = *it_b; 
-   HWIdentifier  chid = digit->hardwareID() ; 
-   uint32_t reid      = hid2re.getRodID( **febRodMapping, chid );
-   getEncoder(reid).add (digit, fixgain);
-   n++;
- } 
- 
- ATH_MSG_VERBOSE(" number of channels in the LArCalibDigitContainer for gain " 
-                 << fixgain << ": "<<n );
-
- SG::ReadCondHandle<CaloNoise> noise (m_caloNoiseKey, ctx);
-
- // Now loop over map and fill all ROD Data Blocks
- std::map<uint32_t,LArRodEncoder>::iterator it  =mapEncoder.begin(); 
- std::map<uint32_t,LArRodEncoder>::iterator it_end=mapEncoder.end();
- // LArRodEncoder has collected all the channels, now can fill the
- // ROD block data.
- for(; it!=it_end;++it) {
-   theROD  = fea.getRodData( (*it).first ); 
-   ((*it).second).fillROD( *theROD,msg(), **noise, m_nfebsigma ) ; 
- } 
- ATH_MSG_DEBUG ( "Filled " << mapEncoder.size() << " Rod Blocks" );
- return StatusCode::SUCCESS;
-}
-
-
 StatusCode
 LArRawDataContByteStreamTool::WriteLArRawChannels(const LArRawChannelContainer* channelCont, 
                                                   FEA_t& fea) const
@@ -334,24 +153,24 @@ LArRawDataContByteStreamTool::WriteLArRawChannels(const LArRawChannelContainer* 
    // I may want to also include the digits
    if ( m_includeDigits ) {
         const LArDigitContainer* digitCont = nullptr;
-	if ( evtStore()->retrieve(digitCont,m_DigitContName).isFailure() ){
+    if ( evtStore()->retrieve(digitCont,m_DigitContName).isFailure() ){
           ATH_MSG_ERROR ( "Digits required but not really found" );
-	} else {
-	  if ( blstruct->canIncludeRawData() ){
-	   LArDigitContainer::const_iterator it_b=digitCont->begin();
-	   LArDigitContainer::const_iterator it_e=digitCont->end();
-	   if (it_b==it_e) {
+    } else {
+      if ( blstruct->canIncludeRawData() ){
+       LArDigitContainer::const_iterator it_b=digitCont->begin();
+       LArDigitContainer::const_iterator it_e=digitCont->end();
+       if (it_b==it_e) {
              ATH_MSG_WARNING ( "Attempt to persistify a empty LArDigitContainer to ByteStream" );
-	   }
-	   for(; it_b!=it_e; ++it_b){
-		const LArDigit* digit = *it_b;
-		HWIdentifier  chid = digit->hardwareID() ;
-		uint32_t reid      = hid2re.getRodID( **febRodMapping, chid );
-		// Lets use anygain for the moment
-		getEncoder(reid).add (digit);
-     	   }
-	  } // End of check whether format allows to include RawData
-	} // Finish checking for Digit container in SG
+       }
+       for(; it_b!=it_e; ++it_b){
+        const LArDigit* digit = *it_b;
+        HWIdentifier  chid = digit->hardwareID() ;
+        uint32_t reid      = hid2re.getRodID( **febRodMapping, chid );
+        // Lets use anygain for the moment
+        getEncoder(reid).add (digit);
+           }
+      } // End of check whether format allows to include RawData
+    } // Finish checking for Digit container in SG
    } // End of check for digits inclusion
 
  SG::ReadCondHandle<CaloNoise> noise (m_caloNoiseKey, ctx);
@@ -371,7 +190,6 @@ LArRawDataContByteStreamTool::WriteLArRawChannels(const LArRawChannelContainer* 
  return StatusCode::SUCCESS;
 }
 
- 
 StatusCode
 LArRawDataContByteStreamTool::prepareRobIndex(const RawEvent* re,
                                               RobIndex_t& robIndex) const

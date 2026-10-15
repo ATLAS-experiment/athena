@@ -11,19 +11,6 @@
 #include "GaudiKernel/IToolSvc.h"
 
 #include "LArByteStream/LArRodBlockStructure.h"
-#include "LArByteStream/LArRodBlockTransparentV0.h"
-#include "LArByteStream/LArRodBlockCalibrationV0.h"
-// IWS 14.07.2005
-#include "LArByteStream/LArRodBlockCalibrationV1.h"
-// IWS 25.04.2006
-#include "LArByteStream/LArRodBlockCalibrationV2.h"
-#include "LArByteStream/LArRodBlockCalibrationV3.h"
-#include "LArByteStream/LArRodBlockAccumulatedV3.h"
-#include "LArByteStream/LArRodBlockPhysicsV0.h"
-#include "LArByteStream/LArRodBlockPhysicsV1.h"
-#include "LArByteStream/LArRodBlockPhysicsV2.h"
-#include "LArByteStream/LArRodBlockPhysicsV3.h"
-#include "LArByteStream/LArRodBlockPhysicsV4.h"
 #include "LArByteStream/LArRodBlockPhysicsV5.h"
 #include "LArByteStream/LArRodBlockPhysicsV6.h"
 #include <algorithm>
@@ -885,50 +872,16 @@ LArRodDecoder::makeBlockStructure (unsigned int rodBlockType,
 {
   switch (rodBlockType) {
   case 2:
-    // RodBlockType 2 = Transparent mode only
-    switch (rodMinorVersion) {
-    case 0: // Transparent mode v0 05.01.2004
-    case 1: // Transparent mode v0
-    case 2: // Transparent mode v0
-    case 3: // Transparent mode v0
-    case 4: // Transparent mode v0
-      return std::make_unique<LArRodBlockTransparentV0<LArRodBlockHeaderTransparentV0> >(this->msgSvc().get());
-    case 5: // Calibration (Transparent mode) v1 17.01.2006
-      return std::make_unique<LArRodBlockCalibrationV1>(this->msgSvc().get());
-    case 6: // Calibration (Transparent mode) v3 31.05.2006
-    case 7: // Calibration (Transparent mode) v3
-    case 8: // Calibration (Transparent mode) v3
-    case 9: // Calibration (Transparent mode) v3
-    case 10:// Calibration (Transparent mode) v3
-    case 11:// Calibration (Transparent mode) v3
-    case 12:// Calibration (Transparent mode) v3
-      return std::make_unique<LArRodBlockCalibrationV3>(this->msgSvc().get());
-    default:
-      break;
-    }
     break;
 
   case 3:
     // RodBlockType 3 = Test mode
-    return std::make_unique<LArRodBlockTransparentV0<LArRodBlockHeaderTransparentV0> >(this->msgSvc().get());
+    //return std::make_unique<LArRodBlockTransparentV0<LArRodBlockHeaderTransparentV0> >(this->msgSvc().get());
+    break;
 
   case 4:
     // RodBlockType 4 = Physics mode
     switch (rodMinorVersion) {
-    case 0: // Physics mode v0 05.01.2004 first draft
-      return std::make_unique<LArRodBlockPhysicsV0>(this->msgSvc().get());
-    case 1: // Physics mode v1 19.08.2004 only small differences
-      return std::make_unique<LArRodBlockPhysicsV1>(this->msgSvc().get());
-    case 2: // Physics mode v2 05.10.2004 adapted to real DSP data
-    case 3: // Physics mode v2
-    case 4: // Physics mode v2
-    case 5: // Physics mode v2
-    case 6: // Physics mode v2
-    case 7: // Physics mode v2
-    case 8: // Physics mode v2
-      return std::make_unique<LArRodBlockPhysicsV2>(this->msgSvc().get());
-    case 9: // Physics mode v4 10.07.2007 for commissioning
-      return std::make_unique<LArRodBlockPhysicsV4>(this->msgSvc().get());
     case 10: // Physics mode v5 16.06.2008 for LHC 
     case 11: // Physics mode v5 16.06.2008 for LHC
       {
@@ -954,50 +907,22 @@ LArRodDecoder::makeBlockStructure (unsigned int rodBlockType,
   case 5:
     // RodBlockType 5 = Physics simulation mode
     // Physics mode v3 11.04.2005 for simulation
-    return std::make_unique<LArRodBlockPhysicsV3>(this->msgSvc().get());
+    //return std::make_unique<LArRodBlockPhysicsV3>(this->msgSvc().get());
+    break;
 
   case 6:
     // RodBlockType 6 = Physics test mode
-    switch (rodMinorVersion) {
-    case 0: // Physics mode v0 05.01.2004 first draft
-      return std::make_unique<LArRodBlockPhysicsV0>(this->msgSvc().get());
-    case 1: // Physics mode v2 05.10.2004 adapted to real DSP data
-    case 2: // Physics mode v2
-      return std::make_unique<LArRodBlockPhysicsV2>(this->msgSvc().get());
-    default:
-      break;
-    }
     break;
 
   case 7:
     // RodBlockType 7 = Calibration mode
-    switch (rodMinorVersion) {
-    case 0: // Calibration mode v0  05.01.2004
-      return std::make_unique<LArRodBlockCalibrationV0<LArRodBlockHeaderCalibrationV0> >(this->msgSvc().get());
-    case 1: // Calibration mode v1  17.01.2006
-    case 2: // Calibration mode v1 
-    case 3: // Calibration mode v1 
-    case 4: // Calibration mode v1 
-      return std::make_unique<LArRodBlockCalibrationV1>(this->msgSvc().get());
-    case 5: // Calibration mode v2  26.04.2006
-      return std::make_unique<LArRodBlockCalibrationV2>(this->msgSvc().get());
-    case 6: // Calibration mode v3  31.05.2006
-    case 7: // Calibration mode v3
-    case 8: // Calibration mode v3
-    case 9: // Calibration mode v3
-    case 10:// Calibration mode v3
-    case 11:// Calibration mode v3
-    case 12:// Calibration mode v3
-      return std::make_unique<LArRodBlockCalibrationV3>(this->msgSvc().get());
-    default:
-      break;
-    }
     break;
 
   case 10:
     // RodBlockType 10 = Accumulated mode (used for pre-processed pedestal runs)
     // Accumulated mode v3 10.06.2008
-    return std::make_unique<LArRodBlockAccumulatedV3>(this->msgSvc().get());
+    //return std::make_unique<LArRodBlockAccumulatedV3>(this->msgSvc().get());
+    break;
 
   default:
     break;

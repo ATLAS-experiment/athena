@@ -13,11 +13,12 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "ByteStreamCnvSvcBase/ByteStreamAddress.h" 
+#include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "AthenaBaseComps/AthConstConverter.h"
 
 
 class DataObject;
-class IROBDataProviderSvc; 
+//class IROBDataProviderSvc; 
 class LArLATOMEDecoder;
 
 
