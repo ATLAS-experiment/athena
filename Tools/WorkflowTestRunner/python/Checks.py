@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 import logging
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 from .Helpers import warnings_count
 from .Inputs import references_CVMFS_path
@@ -27,9 +27,7 @@ class FailedOrPassedCheck(WorkflowCheck):
                             errors.append(line[9:].strip())
                         elif "WARNING" in line and "| WARNING |" not in line:
                             warnings.append(line[9:].strip())
-                        elif '"successful run"' in line:
-                            counter += 1
-                        elif step == "DQHistogramMerge" and "Writing file: myHIST.root" in line:  # DQ merge hack
+                        elif '"successful run"' in line or step == "DQHistogramMerge" and "Writing file: myHIST.root" in line:
                             counter += 1
 
             if warnings:
@@ -82,10 +80,8 @@ class FailedOrPassedCheck(WorkflowCheck):
             counter = 0
             with log.open() as file:
                 for line in file:
-                    if '"successful run"' in line:
-                        counter += 1
-                    elif (step == "DQHistogramMerge"  # DQ merge hack
-                          and "Writing file: myHIST.root" in line):
+                    if '"successful run"' in line or (step == "DQHistogramMerge"
+                          and "Writing file: myHIST.root" in line):  # DQ merge hack
                         counter += 1
 
             if counter:
@@ -163,7 +159,7 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
                 for line in f:
                     stripped_line = line.rstrip()
                     if stripped_line and stripped_line[0] != '#':
-                        diff_root_list.append(r"'{}'".format(stripped_line))
+                        diff_root_list.append(rf"'{stripped_line}'")
         else:
             self.logger.info("No diff rules file exists, using the default list")
             diff_root_list = [r"'index_ref'"]
@@ -627,7 +623,7 @@ class FPECheck(WorkflowCheck):
                 self.logger.log(msgLvl, f" {step} validation test step FPEs")
                 for fpe, count in sorted(fpes.items(), key=lambda item: item[1]):
                     self.logger.log(msgLvl, f"{count:>5}  {fpe}")
-                for fpe in fpes.keys():
+                for fpe in fpes:
                     self.logger.log(msgLvl, "-----------------------------------------------------")
                     self.logger.log(msgLvl, f" first stack trace for algorithm {fpe}:")
                     for line in stack_traces[fpe]:

@@ -3,7 +3,6 @@ from glob import glob
 from logging import Logger
 from os import environ, path
 from pathlib import Path
-from typing import List
 
 
 def get_release_setup(logger: Logger, no_setup=False) -> str:
@@ -31,7 +30,7 @@ def get_release_setup(logger: Logger, no_setup=False) -> str:
     if current_nightly != latest_nightly:
         logger.info(f"Please be aware that you are not testing your tags in the latest available nightly, which is {latest_nightly}")
 
-    setup = "%s,%s,%s,Athena" % (release_base, platform.replace("-", ","), current_nightly)
+    setup = "{},{},{},Athena".format(release_base, platform.replace("-", ","), current_nightly)
 
     logger.info(f"Your tags will be tested in environment {setup}")
 
@@ -63,10 +62,9 @@ def list_changed_packages(logger: Logger, no_setup=False) -> None:
         logger.warning("quit by executing <CONTROL-C> if this is not your intention, and")
         logger.warning("source <YOUR_CMake_BUILD_AREA>/setup.sh")
         logger.warning("to pickup locally built packages in your environment.\n")
-    pass
 
 
-def warnings_count(file_name: Path) -> List[str]:
+def warnings_count(file_name: Path) -> list[str]:
     """Run a WARNING helper function."""
     warnings = []
     with file_name.open() as file:
