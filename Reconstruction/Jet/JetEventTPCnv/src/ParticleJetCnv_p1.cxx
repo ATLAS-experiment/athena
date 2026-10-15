@@ -11,25 +11,10 @@
 /////////////////////////////////////////////////////////////////// 
 
 
-// STL includes
-
-// JetTagEvent includes
 #include "JetEvent/Jet.h"
-
-#include "egammaEvent/ElectronConstituent.h"
-#include "egammaEvent/ElectronAssociation.h"
-#include "MuonIDEvent/MuonConstituent.h"
-#include "MuonIDEvent/MuonAssociation.h"
-
-
-// EventCommonTPCnv includes
 #include "EventCommonTPCnv/P4ImplPxPyPzECnv_p1.h"
-
-// ParticleEventTPCnv includes
 #include "ParticleEventTPCnv/ParticleBaseCnv_p1.h"
-
-
-// ParticleEventTPCnv includes
+#include "ParticleEvent/IConstituent.h"
 #include "JetEventTPCnv/ParticleJetCnv_p1.h"
 
 
