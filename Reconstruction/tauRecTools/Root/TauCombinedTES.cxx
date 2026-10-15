@@ -107,21 +107,6 @@ StatusCode TauCombinedTES::initialize() {
         ATH_MSG_FATAL("Failed to get an object with name " << graphName);
        	return StatusCode::FAILURE;
       }
-
-      // MVA resolution, optional
-      if(m_useMvaResolution) {
-	graphName = "FinalCalib/Graph_from_ResolutionEt_FinalCalib_" + m_decayModeNames[decayModeIndex] + "_" + m_etaBinNames.at(etaIndex);
-	graph = dynamic_cast<TGraph*> (calFile->Get(graphName.c_str()));
-	if(graph){
-	  m_mvaResMaxEt.at(decayModeIndex).at(etaIndex) = TMath::MaxElement(graph->GetN(), graph->GetX());
-	  m_mvaRes.at(decayModeIndex).at(etaIndex) = std::unique_ptr<TGraph>(graph);
-	  ATH_MSG_DEBUG("Adding graph: " << graphName);
-	}
-	else {
-	  ATH_MSG_FATAL("Failed to get an object with name " << graphName);
-	  return StatusCode::FAILURE;
-	}
-      }
     }
   }
   calFile->Close();
@@ -277,24 +262,6 @@ double TauCombinedTES::getPanTauCalEt(double panTauEt,
   double panTauCalEt = panTauEt - ratio * panTauEt;
 
   return panTauCalEt;
-}
-
-
-
-double TauCombinedTES::getMvaEnergyResolution(const xAOD::TauJet& tau) const {
-  // Assume the resolution to be 100% when no parametrisation is available
-  // "validity" criteria might have to be revised if such "invalid taus" end up in analyses
-  if (!isValid(tau) || !m_useMvaResolution) return 1.0;
-
-  xAOD::TauJetParameters::DecayMode decayMode = getDecayMode(tau);
-  int decayModeIndex = getDecayModeIndex(decayMode);
-
-  int etaIndex = getEtaIndex(tau.etaFinalCalib());
-
-  double pt = std::min(tau.ptFinalCalib(), m_mvaResMaxEt.at(decayModeIndex).at(etaIndex));
-  double resolution = m_mvaRes.at(decayModeIndex).at(etaIndex)->Eval(pt);
-
-  return resolution;
 }
 
 

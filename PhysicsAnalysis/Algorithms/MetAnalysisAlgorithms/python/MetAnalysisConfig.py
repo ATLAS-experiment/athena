@@ -72,10 +72,8 @@ class MetAnalysisConfig (ConfigBlock):
             info="ESModel for EGamma calibration (for MET significance).")
         self.addOption ('egammaDecorrelationModel', "", type=str,
             info="decorrelation model for EGamma calibration (for MET significance).")
-        self.addOption ('tauTESConfig', "CombinedTES_R22_Round2.5_v2.root", type=str,
+        self.addOption ('tauTESConfig', "tauRecTools/R22_preprod/CombinedTES_R22_Round2.5_v2.root", type=str,
             info="config file for tau energy scale calibration (for MET significance).")
-        self.addOption ('tauUseMVAResolution', True, type=bool,
-            info="whether to use MVA resolution for taus-jets (for MET significance).")
         self.addOption ('addExtraSignificanceVars', False, type=bool,
             info="whether to save some additional (event-based) MET significance variables.")
         self.addOption ('useLRT', False, type=bool,
@@ -235,7 +233,6 @@ class MetAnalysisConfig (ConfigBlock):
             alg.significanceTool.EgammaDecorrelationModel = egammaDecorrelationModel
             alg.significanceTool.EgammaUseFastsim = (config.dataType() is DataType.FastSim)
             alg.significanceTool.TauTESConfig = self.tauTESConfig
-            alg.significanceTool.TauUseMVAResolution = self.tauUseMVAResolution
             alg.met = config.readName (self.containerName)
             config.addOutputVar (self.containerName, 'significance_%SYS%', 'significance')
             if self.addExtraSignificanceVars:

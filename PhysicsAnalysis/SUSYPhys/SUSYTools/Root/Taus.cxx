@@ -16,7 +16,6 @@
 #include "TauAnalysisTools/ITauEfficiencyCorrectionsTool.h"
 #include "TauAnalysisTools/ITauSmearingTool.h"
 #include "TauAnalysisTools/ITauTruthMatchingTool.h"
-#include "tauRecTools/ITauToolBase.h"
 #include "TriggerMatchingTool/IMatchingTool.h"
 #include <string_view>
 #include <ranges>

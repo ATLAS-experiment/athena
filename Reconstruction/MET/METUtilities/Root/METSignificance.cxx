@@ -26,7 +26,7 @@
 #include "xAODEgamma/PhotonContainer.h"
 #include "xAODTau/TauJetContainer.h"
 
-#include "tauRecTools/TauCombinedTES.h"
+#include "TauAnalysisTools/TauResolutionTool.h"
 #include "AsgTools/AsgToolConfig.h"
 #include "PathResolver/PathResolver.h"
 
@@ -172,17 +172,16 @@ namespace met {
     if(m_egammaOK) ATH_CHECK( m_egammaCalibTool.retrieve() );
     else ATH_MSG_WARNING("No egamma calibration tool or config provided for MET Significance");
 
-    if (m_tauCombinedTES.empty()){
+    if (m_tauResolutionTool.empty()){
       if(m_tauTESConfig.empty())
         m_tauOK = false;
       else{
-        asg::AsgToolConfig toolConfig ("TauCombinedTES/METSigAutoConf_TauPerfTool");
+        asg::AsgToolConfig toolConfig ("TauAnalysisTools::TauResolutionTool/METSigAutoConf_TauPerfTool");
         ATH_CHECK( toolConfig.setProperty("WeightFileName", m_tauTESConfig) );
-        ATH_CHECK( toolConfig.setProperty("useMvaResolution", m_tauUseMVARes) );
-        ATH_CHECK( toolConfig.makePrivateTool(m_tauCombinedTES) );
+        ATH_CHECK( toolConfig.makePrivateTool(m_tauResolutionTool) );
       }
     }
-    if(m_tauOK) ATH_CHECK( m_tauCombinedTES.retrieve() );
+    if(m_tauOK) ATH_CHECK( m_tauResolutionTool.retrieve() );
     else ATH_MSG_WARNING("No tau calibration tool or config provided for MET Significance");
 
 
@@ -601,7 +600,7 @@ namespace met {
         return StatusCode::FAILURE;
       }
       const xAOD::TauJet* tau(static_cast<const xAOD::TauJet*>(obj));
-      if (auto *combp4 = dynamic_cast<TauCombinedTES*>(&*m_tauCombinedTES)) {
+      if (auto *combp4 = dynamic_cast<TauAnalysisTools::TauResolutionTool*>(&*m_tauResolutionTool)) {
         pt_reso = combp4->getMvaEnergyResolution(*tau);
       }
 

@@ -8,6 +8,7 @@
 // local include(s)
 #include "TauAnalysisTools/CommonSmearingTool.h"
 #include "TauAnalysisTools/TauSmearingTool.h"
+#include "TauAnalysisTools/TauResolutionTool.h"
 
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -19,9 +20,6 @@
 #include "TF1.h"
 #include "TClass.h"
 #include "TKey.h"
-
-// tauRecTools include(s)
-#include "tauRecTools/TauCombinedTES.h"
 
 using namespace TauAnalysisTools;
 /*
@@ -79,7 +77,7 @@ CommonSmearingTool::CommonSmearingTool(const std::string& sName)
   , m_fY(&finalTauEta)
   , m_bIsData(false)
   , m_bIsConfigured(false)
-  , m_tTauCombinedTES("TauCombinedTES", this)
+  , m_tauResolutionTool("TauResolutionTool", this)
   , m_eCheckTruth(TauAnalysisTools::Unknown)
 {
 }
@@ -124,12 +122,11 @@ StatusCode CommonSmearingTool::initialize()
   if (applySystematicVariation(CP::SystematicSet()) != StatusCode::SUCCESS )
     return StatusCode::FAILURE;
 
-  // TauCombinedTES tool must be set up when checking compatibility between calo TES and MVA TES
+  // TauResolutionTool tool must be set up when checking compatibility between calo TES and MVA TES
   if (m_bMVATESQualityCheck) 
   {
-    ATH_CHECK(ASG_MAKE_ANA_TOOL(m_tTauCombinedTES, TauCombinedTES));
-    ATH_CHECK(m_tTauCombinedTES.setProperty("WeightFileName", "CombinedTES_R22_Round2.5_v2.root"));
-    ATH_CHECK(m_tTauCombinedTES.initialize());
+    ATH_CHECK(ASG_MAKE_ANA_TOOL(m_tauResolutionTool, TauAnalysisTools::TauResolutionTool));
+    ATH_CHECK(m_tauResolutionTool.initialize());
   }
 
   return StatusCode::SUCCESS;
@@ -158,7 +155,7 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
     bool compatibility = true;
     static const SG::ConstAccessor<float> accPtTauEnergyScale ("ptTauEnergyScale");
     if(accPtTauEnergyScale.isAvailable(xTau)) {
-      const auto combinedTEStool = dynamic_cast<const TauCombinedTES*>(m_tTauCombinedTES.get());
+      const auto combinedTEStool = dynamic_cast<const TauAnalysisTools::TauResolutionTool*>(m_tauResolutionTool.get());
       if (!combinedTEStool)[[unlikely]]{
         throw std::runtime_error("CommonSmearingTool::applyCorrection: combinedTEStool is null");
       }

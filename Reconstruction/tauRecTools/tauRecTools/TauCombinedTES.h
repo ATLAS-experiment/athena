@@ -30,16 +30,12 @@ public:
   virtual StatusCode executeTool(xAOD::TauJet& xTau,
 				 const EventContext& ctx) const override;
 
-  /** Check if MVA TES and CaloTES are compatible, invoked by TauSmearing tool */
+  /** Check if MVA TES and CaloTES are compatible */
   bool getTESCompatibility(const xAOD::TauJet& tau) const;
-  
-  /** Get MVA Et resolution, invoked by METSignificance */
-  double getMvaEnergyResolution(const xAOD::TauJet& tau) const;
 
 private:
     
   Gaudi::Property<std::string> m_calFileName{this, "WeightFileName", ""};
-  Gaudi::Property<bool> m_useMvaResolution{this, "useMvaResolution", false};  
 
   /** Get the weighted four momentum of calo TES and PanTau */
   TLorentzVector getCombinedP4(const xAOD::TauJet& tau) const;
@@ -116,13 +112,7 @@ private:
   
   /// Maximum Et of m_panTauRes
   std::array<std::array<double, EtaBinning>, DecayModeBinning> m_panTauResMaxEt; //!
-
-  /// Calibration graph: MVA TES resolution as a function of MVA pt
-  std::array<std::array<std::unique_ptr<TGraph>, EtaBinning>, DecayModeBinning> m_mvaRes; //!
-  
-  /// Maximum Et of m_mvaRes
-  std::array<std::array<double, EtaBinning>, DecayModeBinning> m_mvaResMaxEt; //!
-  
+ 
   /// Calibration histogram: correlation coefficient of calo TES and PanTau
   std::array<std::unique_ptr<TH1F>, DecayModeBinning> m_correlationHists; //!
 

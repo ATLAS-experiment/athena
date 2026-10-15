@@ -2,6 +2,7 @@
 #include "TauAnalysisTools/CommonSmearingTool.h"
 #include "TauAnalysisTools/TauSelectionTool.h"
 #include "TauAnalysisTools/TauSmearingTool.h"
+#include "TauAnalysisTools/TauResolutionTool.h"
 #include "TauAnalysisTools/TauTruthMatchingTool.h"
 #include "TauAnalysisTools/TauTruthTrackMatchingTool.h"
 #include "TauAnalysisTools/TauEfficiencyCorrectionsTool.h"
@@ -25,6 +26,7 @@ DECLARE_COMPONENT( TauAnalysisTools::CommonEfficiencyTool )
 DECLARE_COMPONENT( TauAnalysisTools::CommonSmearingTool )
 DECLARE_COMPONENT( TauAnalysisTools::TauSelectionTool )
 DECLARE_COMPONENT( TauAnalysisTools::TauSmearingTool )
+DECLARE_COMPONENT( TauAnalysisTools::TauResolutionTool )	
 DECLARE_COMPONENT( TauAnalysisTools::TauTruthMatchingTool )
 DECLARE_COMPONENT( TauAnalysisTools::TauTruthTrackMatchingTool )
 DECLARE_COMPONENT( TauAnalysisTools::TauEfficiencyCorrectionsTool )
