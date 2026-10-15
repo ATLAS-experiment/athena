@@ -7,19 +7,13 @@ atlas_subdir( TrigParticle )
 atlas_add_library( TrigParticle
                    src/*.cxx
                    PUBLIC_HEADERS TrigParticle
-                   LINK_LIBRARIES AthContainers AthLinks AthenaKernel EventKernel FourMom Navigation Particle TrigCaloEvent TrigInDetEvent TrigNavigationLib TrigSerializeCnvSvcLib VxVertex egammaEvent 
-                   PRIVATE_LINK_LIBRARIES CaloGeoHelpers JetEvent TrigNavigationLib xAODBTagging xAODEgamma xAODJet xAODTau xAODTrigEgamma TruthUtils )
+                   LINK_LIBRARIES AthContainers AthLinks AthenaKernel EventKernel FourMom Navigation TrigCaloEvent TrigInDetEvent egammaEvent
+                   PRIVATE_LINK_LIBRARIES CaloGeoHelpers JetEvent TrigNavigationLib TruthUtils )
 
 atlas_generate_cliddb( TrigParticle )
 
 atlas_add_sercnv_library( TrigParticleSerCnv
                           FILES TrigParticle/TrigElectron.h TrigParticle/TrigElectronContainer.h TrigParticle/TrigPhoton.h TrigParticle/TrigPhotonContainer.h egammaEvent/egammaContainer.h egammaEvent/egDetailContainer.h JetEvent/JetCollection.h JetEvent/JetMomentMap.h JetEvent/JetMomentMapCollection.h JetEvent/JetKeyDescriptor.h JetEvent/JetKeyDescriptorCollection.h
-                          LINK_LIBRARIES TrigParticle )
-
-atlas_add_sercnv_library( TrigParticlexAODSerCnv
-                          FILES xAODTau/TauJetContainer.h xAODTau/TauJetAuxContainer.h xAODTau/TauTrackContainer.h xAODTau/TauTrackAuxContainer.h xAODJet/JetContainer.h xAODJet/JetTrigAuxContainer.h xAODTrigEgamma/TrigPhotonContainer.h xAODTrigEgamma/TrigPhotonAuxContainer.h xAODTrigEgamma/TrigElectronContainer.h xAODTrigEgamma/TrigElectronAuxContainer.h xAODTrigEgamma/ElectronTrigAuxContainer.h xAODTrigEgamma/PhotonTrigAuxContainer.h xAODEgamma/ElectronContainer.h xAODEgamma/ElectronAuxContainer.h xAODEgamma/PhotonContainer.h xAODEgamma/PhotonAuxContainer.h xAODBTagging/BTaggingContainer.h xAODBTagging/BTaggingTrigAuxContainer.h xAODBTagging/BTagVertexContainer.h xAODBTagging/BTagVertexAuxContainer.h
-                          TYPES_WITH_NAMESPACE xAOD::TauJetContainer xAOD::TauJetAuxContainer xAOD::TauTrackContainer xAOD::TauTrackAuxContainer xAOD::JetContainer xAOD::JetTrigAuxContainer xAOD::TrigPhotonContainer xAOD::TrigPhotonAuxContainer xAOD::TrigElectronContainer xAOD::TrigElectronAuxContainer xAOD::ElectronContainer xAOD::ElectronAuxContainer xAOD::PhotonContainer xAOD::PhotonAuxContainer xAOD::ElectronTrigAuxContainer xAOD::PhotonTrigAuxContainer xAOD::BTaggingContainer xAOD::BTaggingTrigAuxContainer xAOD::BTagVertexContainer xAOD::BTagVertexAuxContainer
-                          CNV_PFX xAOD
                           LINK_LIBRARIES TrigParticle )
 
 atlas_add_dictionary( TrigParticleDict

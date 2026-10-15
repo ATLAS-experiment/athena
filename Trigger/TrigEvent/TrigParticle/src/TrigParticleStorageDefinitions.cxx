@@ -11,16 +11,6 @@
 #include "JetEvent/JetMomentMapCollection.h"
 #include "egammaEvent/egammaContainer.h"
 #include "egammaEvent/egDetailContainer.h"
-#include "xAODJet/JetContainer.h" 
-#include "xAODTrigEgamma/TrigElectronContainer.h"
-#include "xAODTrigEgamma/TrigElectron.h"
-#include "xAODTrigEgamma/TrigPhotonContainer.h"
-#include "xAODTrigEgamma/TrigPhoton.h"
 
 #include "TrigNavigation/TypeRegistration.h"
 REGISTER_PACKAGE_WITH_NAVI(TrigParticle)
-
-// Avoid checkreq warnings.
-#include "xAODBTagging/BTaggingContainer.h"
-#include "xAODEgamma/ElectronContainer.h"
-#include "xAODTau/TauJetContainer.h"

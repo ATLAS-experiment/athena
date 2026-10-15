@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODBTagging )
@@ -23,3 +23,14 @@ atlas_add_dictionary( xAODBTaggingDict
    ${_selectionFile}
    LINK_LIBRARIES xAODCore xAODBTagging
    EXTRA_FILES Root/dict/*.cxx )
+
+# Serializer converter for Trigger:
+IF( NOT XAOD_ANALYSIS )
+   atlas_add_sercnv_library( xAODBTaggingSerCnv
+      FILES xAODBTagging/BTaggingContainer.h xAODBTagging/BTaggingTrigAuxContainer.h
+            xAODBTagging/BTagVertexContainer.h xAODBTagging/BTagVertexAuxContainer.h
+      TYPES_WITH_NAMESPACE xAOD::BTaggingContainer xAOD::BTaggingTrigAuxContainer
+                           xAOD::BTagVertexContainer xAOD::BTagVertexAuxContainer
+      CNV_PFX xAOD
+      LINK_LIBRARIES xAODBTagging TrigSerializeCnvSvcLib )
+endif()
