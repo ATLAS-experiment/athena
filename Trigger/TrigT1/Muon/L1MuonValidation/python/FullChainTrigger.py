@@ -31,7 +31,7 @@ if __name__ == "__main__":
     elif not run_mdt_chain:
         _log.warning("Skipping the MDT chain because MDT geometry is disabled")
 
-    acc.merge(setupHistSvcCfg(flags,outFile = "L0MuonFullChain.root", 
+    acc.merge(setupHistSvcCfg(flags,outFile = "L1MuonFullChain.root",
                                     outStream = "EXPERT"))
 
     if run_rpc_chain:
