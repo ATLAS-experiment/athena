@@ -17,10 +17,11 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <ColumnarMode/ColumnarMode.h>
 
 class TH1;
 
-namespace CP {
+namespace ADD_CMODE(CP) {
     typedef std::shared_ptr<TH1> TH1_Ptr;
 
     class MuonTriggerScaleFactors: virtual public CP::IMuonTriggerScaleFactors, public asg::AsgTool {
@@ -35,11 +36,11 @@ namespace CP {
             virtual StatusCode initialize(void);
 
             // for single lepton triggers
-            virtual CorrectionCode getTriggerScaleFactor(const xAOD::MuonContainer& mucont, Double_t& triggersf, const std::string& trigger) const;
+            virtual CP::CorrectionCode getTriggerScaleFactor(const xAOD::MuonContainer& mucont, Double_t& triggersf, const std::string& trigger) const;
 
-            virtual CorrectionCode getTriggerScaleFactor(const xAOD::Muon& muon, Double_t& triggersf, const std::string& trigger) const;
+            virtual CP::CorrectionCode getTriggerScaleFactor(const xAOD::Muon& muon, Double_t& triggersf, const std::string& trigger) const;
 
-            virtual CorrectionCode getTriggerEfficiency(const xAOD::Muon& mu, Double_t& efficiency, const std::string& trigger, Bool_t dataType) const;
+            virtual CP::CorrectionCode getTriggerEfficiency(const xAOD::Muon& mu, Double_t& efficiency, const std::string& trigger, Bool_t dataType) const;
 
             virtual bool isAffectedBySystematic(const CP::SystematicVariation& systematic) const;
 
@@ -57,15 +58,15 @@ namespace CP {
             virtual bool isTriggerSupported(const std::string& trigger) const;
         private:
 
-            virtual CorrectionCode getMuonEfficiency(Double_t& eff, const TrigMuonEff::Configuration& configuration, const xAOD::Muon& muon, const std::string& trigger, const std::string& systematic) const;
+            virtual CP::CorrectionCode getMuonEfficiency(Double_t& eff, const TrigMuonEff::Configuration& configuration, const xAOD::Muon& muon, const std::string& trigger, const std::string& systematic) const;
 
-            virtual CorrectionCode GetTriggerSF_dimu(Double_t& TriggerSF, TrigMuonEff::Configuration& configuration, const xAOD::MuonContainer& mucont, const std::string& trigger) const;
+            virtual CP::CorrectionCode GetTriggerSF_dimu(Double_t& TriggerSF, TrigMuonEff::Configuration& configuration, const xAOD::MuonContainer& mucont, const std::string& trigger) const;
 
-            virtual CorrectionCode GetTriggerSF(Double_t& TriggerSF, TrigMuonEff::Configuration& configuration, const xAOD::MuonContainer& mucont, const std::string& trigger) const;
+            virtual CP::CorrectionCode GetTriggerSF(Double_t& TriggerSF, TrigMuonEff::Configuration& configuration, const xAOD::MuonContainer& mucont, const std::string& trigger) const;
 
-            virtual CorrectionCode GetTriggerSF(Double_t& TriggerSF, TrigMuonEff::Configuration& configuration, const xAOD::Muon& muon, const std::string& trigger) const;
+            virtual CP::CorrectionCode GetTriggerSF(Double_t& TriggerSF, TrigMuonEff::Configuration& configuration, const xAOD::Muon& muon, const std::string& trigger) const;
 
-            virtual CorrectionCode getDimuonEfficiency(Double_t& eff, const TrigMuonEff::Configuration& configuration, const xAOD::MuonContainer& mucont, const std::string& chain, const std::string& systematic) const;
+            virtual CP::CorrectionCode getDimuonEfficiency(Double_t& eff, const TrigMuonEff::Configuration& configuration, const xAOD::MuonContainer& mucont, const std::string& chain, const std::string& systematic) const;
 
             const CP::SystematicSet& appliedSystematics() const {
                 return *m_appliedSystematics;
@@ -87,7 +88,7 @@ namespace CP {
             typedef std::pair<YearPeriod, unsigned int> EffiHistoIdent;
             typedef std::map<EffiHistoIdent, TH1_Ptr> EfficiencyMap;
 
-            CorrectionCode getThreshold(Int_t& threshold, const std::string& trigger) const;
+            CP::CorrectionCode getThreshold(Int_t& threshold, const std::string& trigger) const;
 
             std::string getTriggerCorrespondingToDimuonTrigger(const std::string& trigger) const;
         protected:

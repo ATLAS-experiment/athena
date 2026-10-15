@@ -22,10 +22,13 @@
 #include <ColumnarMuon/MuonDef.h>
 
 namespace CP {
-    class MuonEfficiencyScaleFactors;
-    class EfficiencyScaleFactor;
     class SystematicSet;
     class SystematicVariation;
+}
+
+namespace ADD_CMODE(CP) {
+    class MuonEfficiencyScaleFactors;
+    class EfficiencyScaleFactor;
     class CollectionContainer;
     /// The EffiCollection class handles the 5 different scale-factor maps binned in time. Each muon is piped to the correct map based 
     /// whether it's a calo-tag muon, belongs to the high-eta region or has low-pt. 
@@ -93,10 +96,10 @@ namespace CP {
             
             
             ///    Returns the systematic set affecting this collection.
-            SystematicSet* getSystSet() const;
+            CP::SystematicSet* getSystSet() const;
             ///    Returns whether the given set has variations affecting this Collection
-            bool  isAffectedBySystematic(const SystematicVariation& variation) const;
-            bool  isAffectedBySystematic(const SystematicSet& set) const;
+            bool  isAffectedBySystematic(const CP::SystematicVariation& variation) const;
+            bool  isAffectedBySystematic(const CP::SystematicSet& set) const;
             
 
             /// Method to retrieve a container from the class ordered by a collection type
@@ -124,7 +127,7 @@ namespace CP {
 
             /// The systematic set is returned back to the MuonEfficiencyScaleFactors instance to register
             /// The known systematics to the global service
-            std::unique_ptr<SystematicSet> m_syst_set;        
+            std::unique_ptr<CP::SystematicSet> m_syst_set;        
 
         public:
 

@@ -24,7 +24,7 @@
 #include <string>
 #include <cmath>
 
-namespace CP {
+namespace ADD_CMODE(CP) {
     constexpr double muon_barrel_endcap_boundary = 1.05;
 
     const std::map<unsigned int, int> MuonTriggerScaleFactors::m_runNumber_year = {
@@ -311,15 +311,15 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-    CorrectionCode MuonTriggerScaleFactors::getTriggerScaleFactor(const xAOD::Muon& muon, Double_t& triggersf, const std::string& trigger) const {
+    CP::CorrectionCode MuonTriggerScaleFactors::getTriggerScaleFactor(const xAOD::Muon& muon, Double_t& triggersf, const std::string& trigger) const {
       if(!m_experimental){
 	ATH_MSG_ERROR("MuonTriggerScaleFactors::getTriggerScaleFactor This is an experimental function. If you really know what you are doing set UseExperimental property.");
-      return CorrectionCode::Error;
+      return CP::CorrectionCode::Error;
       }
 
       if (trigger.empty()) {
 	ATH_MSG_ERROR("MuonTriggerScaleFactors::getTriggerScaleFactor Trigger must have value.");
-	return CorrectionCode::Error;
+	return CP::CorrectionCode::Error;
       }
 
       TrigMuonEff::Configuration configuration;
@@ -330,13 +330,13 @@ namespace CP {
 	ATH_MSG_WARNING("Di-muon trigger scale factors for single reco muons are not supported!");
       else
 	return GetTriggerSF(triggersf, configuration, muon, trigger);
-      return CorrectionCode::Ok;
+      return CP::CorrectionCode::Ok;
     }
 
-    CorrectionCode MuonTriggerScaleFactors::getTriggerScaleFactor(const xAOD::MuonContainer& mucont, Double_t& triggersf, const std::string& trigger) const{
+    CP::CorrectionCode MuonTriggerScaleFactors::getTriggerScaleFactor(const xAOD::MuonContainer& mucont, Double_t& triggersf, const std::string& trigger) const{
         if (trigger.empty()) {
             ATH_MSG_ERROR("MuonTriggerScaleFactors::getTriggerScaleFactor Trigger must have value.");
-            return CorrectionCode::Error;
+            return CP::CorrectionCode::Error;
         }
 
         TrigMuonEff::Configuration configuration;
@@ -344,13 +344,13 @@ namespace CP {
         if (trigger == "HLT_mu8noL1") {
             ATH_MSG_WARNING("What you are trying to do is not correct. For di-muon triggers you should get the efficiency with getTriggerEfficiency and compute the SF by yourself.");
         } else if (trigger.find("HLT_2mu10") != std::string::npos || trigger.find("HLT_2mu14") != std::string::npos) {
-	        CorrectionCode cc = GetTriggerSF_dimu(triggersf, configuration, mucont, trigger);
+	        CP::CorrectionCode cc = GetTriggerSF_dimu(triggersf, configuration, mucont, trigger);
 	        return cc;
         } else {
-            CorrectionCode cc = GetTriggerSF(triggersf, configuration, mucont, trigger);
+            CP::CorrectionCode cc = GetTriggerSF(triggersf, configuration, mucont, trigger);
             return cc;
         }
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
 
     // ==================================================================================
@@ -366,20 +366,20 @@ namespace CP {
         return atoi(sysBaseName.substr(pos + 5, pos + 8).c_str()); //toys for this trigger are around get the 3-digit number
     }
 
-    CorrectionCode MuonTriggerScaleFactors::getTriggerEfficiency(const xAOD::Muon& mu, Double_t& efficiency, const std::string& trigger, Bool_t dataType) const{
+    CP::CorrectionCode MuonTriggerScaleFactors::getTriggerEfficiency(const xAOD::Muon& mu, Double_t& efficiency, const std::string& trigger, Bool_t dataType) const{
         if (trigger.empty()) {
             ATH_MSG_ERROR("MuonTriggerScaleFactors::getTriggerEfficiency Trigger must have value.");
-            return CorrectionCode::Error;
+            return CP::CorrectionCode::Error;
         }
         TrigMuonEff::Configuration configuration;
         configuration.isData = dataType;
         configuration.replicaIndex = -1;
         Int_t threshold;
-        CorrectionCode result = getThreshold(threshold, trigger);
-        if (result != CorrectionCode::Ok) return result;
+        CP::CorrectionCode result = getThreshold(threshold, trigger);
+        if (result != CP::CorrectionCode::Ok) return result;
         if (mu.pt() < threshold) {
             efficiency = 0;
-            return CorrectionCode::Ok;
+            return CP::CorrectionCode::Ok;
         }
 
         // Pre-define uncertainty variations
@@ -410,7 +410,7 @@ namespace CP {
             configuration.replicaIndex = getReplica_index(appliedSystematics().begin()->basename(), trigger);
             if (configuration.replicaIndex != -1) systype = "replicas";
         }
-        CorrectionCode cc = getMuonEfficiency(efficiency, configuration, mu, trigger, systype);
+        CP::CorrectionCode cc = getMuonEfficiency(efficiency, configuration, mu, trigger, systype);
         return cc;
     }
 
@@ -449,7 +449,7 @@ namespace CP {
   int MuonTriggerScaleFactors::getBinNumber(const xAOD::Muon& muon, const std::string& trigger) const{
     if(!m_experimental){
       ATH_MSG_ERROR("MuonTriggerScaleFactors::getTriggerScaleFactor This is an experimental function. If you really know what you are doing set UseExperimental property.");
-      return CorrectionCode::Error;
+      return CP::CorrectionCode::Error;
     }
 
     const double mu_eta = muon.eta();
@@ -493,7 +493,7 @@ namespace CP {
         return getEfficiencyHistogram(getYear(run), getDataPeriod(run), trigger, isData, Systematic, isBarrel);
     }
 
-    CorrectionCode MuonTriggerScaleFactors::getMuonEfficiency(Double_t& eff, const TrigMuonEff::Configuration& configuration, const xAOD::Muon& muon, const std::string& trigger, const std::string& systematic) const{
+    CP::CorrectionCode MuonTriggerScaleFactors::getMuonEfficiency(Double_t& eff, const TrigMuonEff::Configuration& configuration, const xAOD::Muon& muon, const std::string& trigger, const std::string& systematic) const{
         const double mu_eta = muon.eta();
         const double mu_phi = muon.phi();
         bool isBarrel = std::abs(mu_eta) < muon_barrel_endcap_boundary;
@@ -508,18 +508,18 @@ namespace CP {
                 if (m_allowZeroSF) {
                     ATH_MSG_WARNING("Could not find what you are looking for in the efficiency map. The trigger you are looking for, year and mc are not consistent, or the trigger is unavailable in this data period. Returning efficiency = 0.");
                     eff = 0.;
-                    return CorrectionCode::Ok;
+                    return CP::CorrectionCode::Ok;
                 }
 
                 else {
                     ATH_MSG_ERROR("Could not find what you are looking for in the efficiency map. The trigger you are looking for, year and mc are not consistent, or the trigger is unavailable in this data period. Please check how you set up the tool.");
-                    return CorrectionCode::OutOfValidityRange;
+                    return CP::CorrectionCode::OutOfValidityRange;
                 }
             }
 
             if (configuration.replicaIndex >= (int) cit->second.size()) {
                 ATH_MSG_ERROR("MuonTriggerScaleFactors::getMuonEfficiency ; index for replicated histograms is out of range.");
-                return CorrectionCode::OutOfValidityRange;
+                return CP::CorrectionCode::OutOfValidityRange;
             }
 
             eff_h2 = cit->second[configuration.replicaIndex];
@@ -529,10 +529,10 @@ namespace CP {
                 if (m_allowZeroSF) {
                     ATH_MSG_WARNING("Could not find what you are looking for in the efficiency map. The trigger you are looking for, year and mc are not consistent, or the trigger is unavailable in this data period. Returning efficiency = 0.");
                     eff = 0.;
-                    return CorrectionCode::Ok;
+                    return CP::CorrectionCode::Ok;
                 } else {
                     ATH_MSG_ERROR("Could not find what you are looking for in the efficiency map. The trigger you are looking for, year and mc are not consistent, or the trigger is unavailable in this data period. Please check how you set up the tool.");
-                    return CorrectionCode::OutOfValidityRange;
+                    return CP::CorrectionCode::OutOfValidityRange;
                 }
             }
             eff_h2 = cit;
@@ -549,11 +549,11 @@ namespace CP {
 
         ATH_MSG_DEBUG("getMuonEfficiency [eta,phi,phi_corr]=[" << mu_eta << "," << mu_phi << "," << mu_phi_corr << "], ibin=" << bin << " eff=" << eff);
 
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
 
     }
 
-    CorrectionCode MuonTriggerScaleFactors::GetTriggerSF_dimu(Double_t& TriggerSF, TrigMuonEff::Configuration& configuration, const xAOD::MuonContainer& mucont, const std::string& trigger) const{
+    CP::CorrectionCode MuonTriggerScaleFactors::GetTriggerSF_dimu(Double_t& TriggerSF, TrigMuonEff::Configuration& configuration, const xAOD::MuonContainer& mucont, const std::string& trigger) const{
 
         if (mucont.size() != 2) {
             ATH_MSG_FATAL("MuonTriggerScaleFactors::GetTriggerSF;Currently dimuon trigger chains only implemented for events with exactly 2 muons.");
@@ -594,13 +594,13 @@ namespace CP {
         }
 
         configuration.isData = true;
-        CorrectionCode result = getDimuonEfficiency(eff_data, configuration, mucont, trigger, data_err);
-        if (result != CorrectionCode::Ok) return result;
+        CP::CorrectionCode result = getDimuonEfficiency(eff_data, configuration, mucont, trigger, data_err);
+        if (result != CP::CorrectionCode::Ok) return result;
 
         configuration.isData = false;
         configuration.replicaIndex = -1;
         result = getDimuonEfficiency(eff_mc, configuration, mucont, trigger, mc_err);
-        if (result != CorrectionCode::Ok) return result;
+        if (result != CP::CorrectionCode::Ok) return result;
 
         double event_SF = 1.;
 
@@ -609,13 +609,13 @@ namespace CP {
         }
 
         TriggerSF = event_SF;
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
 
-    CorrectionCode MuonTriggerScaleFactors::GetTriggerSF(Double_t& TriggerSF, TrigMuonEff::Configuration& configuration, const xAOD::MuonContainer& mucont, const std::string& trigger) const{
+    CP::CorrectionCode MuonTriggerScaleFactors::GetTriggerSF(Double_t& TriggerSF, TrigMuonEff::Configuration& configuration, const xAOD::MuonContainer& mucont, const std::string& trigger) const{
         Int_t threshold;
-        CorrectionCode result = getThreshold(threshold, trigger);
-        if (result != CorrectionCode::Ok) return result;
+        CP::CorrectionCode result = getThreshold(threshold, trigger);
+        if (result != CP::CorrectionCode::Ok) return result;
 
         double rate_not_fired_data = 1.;
         double rate_not_fired_mc = 1.;
@@ -669,12 +669,12 @@ namespace CP {
                 }
 
                 configuration.isData = true;
-                CorrectionCode result_data = getMuonEfficiency(eff_data, configuration, *mu, muon_trigger_name, data_err);
-                if (result_data != CorrectionCode::Ok) return result_data;
+                CP::CorrectionCode result_data = getMuonEfficiency(eff_data, configuration, *mu, muon_trigger_name, data_err);
+                if (result_data != CP::CorrectionCode::Ok) return result_data;
                 configuration.isData = false;
                 configuration.replicaIndex = -1;
-                CorrectionCode result_mc = getMuonEfficiency(eff_mc, configuration, *mu, muon_trigger_name, mc_err);
-                if (result_mc != CorrectionCode::Ok) return result_mc;
+                CP::CorrectionCode result_mc = getMuonEfficiency(eff_mc, configuration, *mu, muon_trigger_name, mc_err);
+                if (result_mc != CP::CorrectionCode::Ok) return result_mc;
             }
             rate_not_fired_data *= (1. - eff_data);
             rate_not_fired_mc *= (1. - eff_mc);
@@ -688,13 +688,13 @@ namespace CP {
         }
         TriggerSF = event_SF;
 
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
 
-  CorrectionCode MuonTriggerScaleFactors::GetTriggerSF(Double_t& TriggerSF, TrigMuonEff::Configuration& configuration, const xAOD::Muon& mu, const std::string& trigger) const{
+  CP::CorrectionCode MuonTriggerScaleFactors::GetTriggerSF(Double_t& TriggerSF, TrigMuonEff::Configuration& configuration, const xAOD::Muon& mu, const std::string& trigger) const{
         Int_t threshold;
-        CorrectionCode result = getThreshold(threshold, trigger);
-        if (result != CorrectionCode::Ok)
+        CP::CorrectionCode result = getThreshold(threshold, trigger);
+        if (result != CP::CorrectionCode::Ok)
 	  return result;
 
 	double eff_data = 0., eff_mc = 0.;
@@ -703,7 +703,7 @@ namespace CP {
 	  eff_data = 0.;
 	  eff_mc = 0.;
 	  TriggerSF = 1.;
-	  return CorrectionCode::Ok;
+	  return CP::CorrectionCode::Ok;
 	}
 
 	std::string muon_trigger_name = trigger;
@@ -739,44 +739,44 @@ namespace CP {
 	}
 
 	configuration.isData = true;
-	CorrectionCode result_data = getMuonEfficiency(eff_data, configuration, mu, muon_trigger_name, data_err);
-	if (result_data != CorrectionCode::Ok)
+	CP::CorrectionCode result_data = getMuonEfficiency(eff_data, configuration, mu, muon_trigger_name, data_err);
+	if (result_data != CP::CorrectionCode::Ok)
 	  return result_data;
 	configuration.isData = false;
 	configuration.replicaIndex = -1;
-	CorrectionCode result_mc = getMuonEfficiency(eff_mc, configuration, mu, muon_trigger_name, mc_err);
-	if (result_mc != CorrectionCode::Ok)
+	CP::CorrectionCode result_mc = getMuonEfficiency(eff_mc, configuration, mu, muon_trigger_name, mc_err);
+	if (result_mc != CP::CorrectionCode::Ok)
 	  return result_mc;
 	if (eff_data == 0)
 	  TriggerSF =  0;
         if (std::abs(eff_mc) > 0.0001)
 	  TriggerSF = eff_data / eff_mc;
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
   }
 
-    CorrectionCode MuonTriggerScaleFactors::getDimuonEfficiency(Double_t& eff, const TrigMuonEff::Configuration& configuration, const xAOD::MuonContainer& mucont, const std::string& chain, const std::string& systematic) const{
+    CP::CorrectionCode MuonTriggerScaleFactors::getDimuonEfficiency(Double_t& eff, const TrigMuonEff::Configuration& configuration, const xAOD::MuonContainer& mucont, const std::string& chain, const std::string& systematic) const{
 
         std::string trigger = getTriggerCorrespondingToDimuonTrigger(chain);
         Int_t threshold;
-        CorrectionCode result = getThreshold(threshold, trigger);
-        if (result != CorrectionCode::Ok) return result;
+        CP::CorrectionCode result = getThreshold(threshold, trigger);
+        if (result != CP::CorrectionCode::Ok) return result;
 
         xAOD::MuonContainer::const_iterator mu1 = mucont.begin();
         xAOD::MuonContainer::const_iterator mu2 = mucont.begin() + 1;
 
         Double_t eff1 = 0;
         if ((**mu1).pt() > threshold) {
-            CorrectionCode result1 = getMuonEfficiency(eff1, configuration, (**mu1), trigger, systematic);
-            if (result1 != CorrectionCode::Ok) return result1;
+            CP::CorrectionCode result1 = getMuonEfficiency(eff1, configuration, (**mu1), trigger, systematic);
+            if (result1 != CP::CorrectionCode::Ok) return result1;
         }
         Double_t eff2 = 0;
         if ((**mu2).pt() > threshold) {
-            CorrectionCode result2 = getMuonEfficiency(eff2, configuration, (**mu2), trigger, systematic);
-            if (result2 != CorrectionCode::Ok) return result2;
+            CP::CorrectionCode result2 = getMuonEfficiency(eff2, configuration, (**mu2), trigger, systematic);
+            if (result2 != CP::CorrectionCode::Ok) return result2;
         }
 
         eff = eff1 * eff2;
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
 
     std::string MuonTriggerScaleFactors::getTriggerCorrespondingToDimuonTrigger(const std::string& trigger) const {
@@ -785,7 +785,7 @@ namespace CP {
         throw std::runtime_error("Unknown dimuon trigger");
     }
 
-    CorrectionCode MuonTriggerScaleFactors::getThreshold(Int_t& threshold, const std::string& trigger) const{
+    CP::CorrectionCode MuonTriggerScaleFactors::getThreshold(Int_t& threshold, const std::string& trigger) const{
         std::size_t index = trigger.find("HLT_mu");
         if (index != std::string::npos) {
             std::string rawNumber = trigger.substr(index + 6);
@@ -793,11 +793,11 @@ namespace CP {
                 std::stringstream(rawNumber) >> threshold;
                 if (threshold < 10) threshold = 10000;
                 else threshold = (threshold + 1) * 1000;
-                return CorrectionCode::Ok;
+                return CP::CorrectionCode::Ok;
             }
         }
         ATH_MSG_ERROR("MuonTriggerScaleFactors::getThreshold Could not extract threshold for trigger " << trigger);
-        return CorrectionCode::Error;
+        return CP::CorrectionCode::Error;
     }
 
     unsigned int MuonTriggerScaleFactors::getYear(unsigned int run) const {
@@ -965,4 +965,4 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-} /* namespace CP */
+} /* namespace ADD_CMODE(CP) */

@@ -9,7 +9,7 @@
 #include "xAODMuon/MuonContainer.h"
 #include "xAODJet/JetContainer.h"
 #include "FourMomUtils/xAODP4Helpers.h"
-namespace CP {
+namespace ADD_CMODE(CP) {
     MuonCloseJetDecorationAlg::MuonCloseJetDecorationAlg(const std::string& name, ISvcLocator* svcLoc) :
                 AthAlgorithm(name, svcLoc),
                 m_muon_container("Muons"),                   
@@ -61,4 +61,4 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-} // namespace CP
+} // namespace ADD_CMODE(CP)

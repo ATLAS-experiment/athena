@@ -14,10 +14,10 @@
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
 
-DECLARE_COMPONENT( CP::MuonEfficiencyScaleFactors )
-DECLARE_COMPONENT( CP::MuonTriggerScaleFactors )
+DECLARE_COMPONENT( ADD_CMODE(CP)::MuonEfficiencyScaleFactors )
+DECLARE_COMPONENT( ADD_CMODE(CP)::MuonTriggerScaleFactors )
 
 #ifndef XAOD_STANDALONE
-DECLARE_COMPONENT( CP::MuonScaleFactorTestAlg )
-DECLARE_COMPONENT( CP::MuonCloseJetDecorationAlg )
+DECLARE_COMPONENT( ADD_CMODE(CP)::MuonScaleFactorTestAlg )
+DECLARE_COMPONENT( ADD_CMODE(CP)::MuonCloseJetDecorationAlg )
 #endif

@@ -8,8 +8,9 @@
 #include "AthContainers/AuxElement.h"
 // Gaudi/Athena include(s):
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "ColumnarMode/ColumnarMode.h"
 #include <memory>
-namespace CP {
+namespace ADD_CMODE(CP) {
 
     /// Small algorithm to quickly write the jetDR decoration needed for isolation
     /// scale-factors to the muon

@@ -13,7 +13,7 @@
 #include <TH1.h>
 #include <TH2Poly.h>
 
-namespace CP {
+namespace ADD_CMODE(CP) {
     //###########################################################################################################
     //                                                   AxisHandlerProvider
     //###########################################################################################################
@@ -46,25 +46,25 @@ namespace CP {
     }
   
   
-    CorrectionCode PtAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
+    CP::CorrectionCode PtAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
         value = ptAcc(mu) / 1000.;
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
-    CorrectionCode ChargeAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
+    CP::CorrectionCode ChargeAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
         value = chargeAcc (mu);
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
-    CorrectionCode EtaAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
+    CP::CorrectionCode EtaAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
         value = etaAcc(mu);
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
-    CorrectionCode AbsEtaAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
+    CP::CorrectionCode AbsEtaAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
         value = std::abs(etaAcc(mu));
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
-    CorrectionCode PhiAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
+    CP::CorrectionCode PhiAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
         value = phiAcc(mu);
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
     void dRJetAxisHandler::set_close_jet_decorator(const std::string& decor_name){
         s_close_jet_decor = decor_name;
@@ -82,7 +82,7 @@ namespace CP {
             m_use_2D_sf(s_use_2D_sf),
             m_acc(*this,s_close_jet_decor){}
     
-    CorrectionCode dRJetAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
+    CP::CorrectionCode dRJetAxisHandler::GetBinningParameter(columnar::MuonId mu, float & value) const {
         
         static std::atomic<unsigned int> warned = {0};
         
@@ -110,11 +110,11 @@ namespace CP {
                 ++warned;
             }
         }
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
     
-    CorrectionCode UndefinedAxisHandler::GetBinningParameter(columnar::MuonId, float &) const  {
-        return CorrectionCode::Error;
+    CP::CorrectionCode UndefinedAxisHandler::GetBinningParameter(columnar::MuonId, float &) const  {
+        return CP::CorrectionCode::Error;
     }
     //###########################################################################################################
     //                                                   HistHandler
@@ -164,21 +164,21 @@ namespace CP {
         TAxis* xAx = GetHist()->GetXaxis();
         return Form("%s_%.2f_to_%.2f", xAx->GetTitle(), xAx->GetBinLowEdge(bin), xAx->GetBinUpEdge(bin));
     }
-    CorrectionCode HistHandler_TH1::FindBin(columnar::MuonId muon, int & bin) const {
+    CP::CorrectionCode HistHandler_TH1::FindBin(columnar::MuonId muon, int & bin) const {
         if (!GetHist()) {
             bin = -1;
-            return CorrectionCode::Error;
+            return CP::CorrectionCode::Error;
         }
         float par = 0;
-        if (m_x_handler->GetBinningParameter(muon, par) == CorrectionCode::Error) {
-            return CorrectionCode::Error;
+        if (m_x_handler->GetBinningParameter(muon, par) == CP::CorrectionCode::Error) {
+            return CP::CorrectionCode::Error;
         } else {
             bin = GetHist()->FindBin(par);
             if (bin < 1 || bin > GetHist()->GetNbinsX()) {
-                return CorrectionCode::OutOfValidityRange;
+                return CP::CorrectionCode::OutOfValidityRange;
             }
         }
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
 
     //###########################################################################################################
@@ -199,22 +199,22 @@ namespace CP {
         GetHist()->GetBinXYZ(b,x,y,z);
         return  x == 0 ||  x == GetHist()->GetXaxis()->GetNbins() + 1 ||  y == 0 ||  y == GetHist()->GetYaxis()->GetNbins() + 1; 
     }
-    CorrectionCode HistHandler_TH2::FindBin(columnar::MuonId muon, int & bin) const {
-        if (!GetHist()) return CorrectionCode::Error;
+    CP::CorrectionCode HistHandler_TH2::FindBin(columnar::MuonId muon, int & bin) const {
+        if (!GetHist()) return CP::CorrectionCode::Error;
         float parx = 0;
         float pary = 0;
-        if (m_x_handler->GetBinningParameter(muon, parx) == CorrectionCode::Error || 
-            m_y_handler->GetBinningParameter(muon, pary) == CorrectionCode::Error) {
-            return CorrectionCode::Error;
+        if (m_x_handler->GetBinningParameter(muon, parx) == CP::CorrectionCode::Error || 
+            m_y_handler->GetBinningParameter(muon, pary) == CP::CorrectionCode::Error) {
+            return CP::CorrectionCode::Error;
         } else {
             int binx = GetHist()->GetXaxis()->FindBin(parx);
             int biny = GetHist()->GetYaxis()->FindBin(pary);
             if (binx < 1 || binx > GetHist()->GetNbinsX() || biny < 1 || biny > GetHist()->GetNbinsY()) {
-                return CorrectionCode::OutOfValidityRange;
+                return CP::CorrectionCode::OutOfValidityRange;
             }
             bin = GetHist()->GetBin(binx, biny);
         }
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
     HistHandler_TH2::~HistHandler_TH2() {
     }
@@ -255,24 +255,24 @@ namespace CP {
                 y == 0 ||  y == GetHist()->GetYaxis()->GetNbins() + 1 || 
                 z == 0 ||  z == GetHist()->GetZaxis()->GetNbins() + 1; 
     }   
-    CorrectionCode HistHandler_TH3::FindBin(columnar::MuonId muon, int & bin) const {
-        if (!GetHist()) return CorrectionCode::Error;
+    CP::CorrectionCode HistHandler_TH3::FindBin(columnar::MuonId muon, int & bin) const {
+        if (!GetHist()) return CP::CorrectionCode::Error;
         float parx = 0;
         float pary = 0;
         float parz = 0;
-        if (m_x_handler->GetBinningParameter(muon, parx) == CorrectionCode::Error || 
-            m_y_handler->GetBinningParameter(muon, pary) == CorrectionCode::Error || 
-            m_z_handler->GetBinningParameter(muon, parz) == CorrectionCode::Error) return CorrectionCode::Error;
+        if (m_x_handler->GetBinningParameter(muon, parx) == CP::CorrectionCode::Error || 
+            m_y_handler->GetBinningParameter(muon, pary) == CP::CorrectionCode::Error || 
+            m_z_handler->GetBinningParameter(muon, parz) == CP::CorrectionCode::Error) return CP::CorrectionCode::Error;
         else {
             int binx = GetHist()->GetXaxis()->FindBin(parx);
             int biny = GetHist()->GetYaxis()->FindBin(pary);
             int binz = GetHist()->GetZaxis()->FindBin(parz);
             if (binx < 1 || binx > GetHist()->GetNbinsX() || biny < 1 || biny > GetHist()->GetNbinsY() || binz < 1 || binz > GetHist()->GetNbinsZ()) {
-                return CorrectionCode::OutOfValidityRange;
+                return CP::CorrectionCode::OutOfValidityRange;
             }
             bin = GetHist()->GetBin(binx, biny, binz);
         }
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
 
     std::string HistHandler_TH3::GetBinName(unsigned int bin) const {
@@ -311,19 +311,19 @@ namespace CP {
     int HistHandler_TH2Poly::nOverFlowBins() const {return 10;}
     bool HistHandler_TH2Poly::isOverFlowBin(int b) const {return b < 1;}
 
-    CorrectionCode HistHandler_TH2Poly::FindBin(columnar::MuonId muon, int & bin) const {
-        if (!m_h) return CorrectionCode::Error;
+    CP::CorrectionCode HistHandler_TH2Poly::FindBin(columnar::MuonId muon, int & bin) const {
+        if (!m_h) return CP::CorrectionCode::Error;
         float parx = 0;
         float pary = 0;
-        if (m_x_handler->GetBinningParameter(muon, parx) == CorrectionCode::Error || 
-            m_y_handler->GetBinningParameter(muon, pary) == CorrectionCode::Error) return CorrectionCode::Error;
+        if (m_x_handler->GetBinningParameter(muon, parx) == CP::CorrectionCode::Error || 
+            m_y_handler->GetBinningParameter(muon, pary) == CP::CorrectionCode::Error) return CP::CorrectionCode::Error;
         else {
             bin = GetHist()->FindBin(parx, pary);
             if (bin < 0) {
-                return CorrectionCode::OutOfValidityRange;
+                return CP::CorrectionCode::OutOfValidityRange;
             }
         }
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
     std::string HistHandler_TH2Poly::GetBinName(unsigned int bin) const {
         int x(0), y(0), z(0);
@@ -334,4 +334,4 @@ namespace CP {
                 xAx->GetTitle(), xAx->GetBinLowEdge(x), xAx->GetBinUpEdge(x),
                 yAx->GetTitle(), yAx->GetBinLowEdge(y), yAx->GetBinUpEdge(y));
     }
-} // namespace CP
+} // namespace ADD_CMODE(CP)

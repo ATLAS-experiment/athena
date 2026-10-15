@@ -25,7 +25,7 @@
 #include <memory>
 #include <map>
 #include <unordered_map>
-namespace CP {
+namespace ADD_CMODE(CP) {
     class MuonEfficiencyScaleFactors: virtual public CP::IMuonEfficiencyScaleFactors, public asg::AsgTool, public columnar::ColumnarTool<>{
 
         public:
@@ -39,41 +39,41 @@ namespace CP {
             virtual StatusCode initialize() override;
 
             /// Retrieve the Scale factor and decorate the muon
-            virtual CorrectionCode getEfficiencyScaleFactor(const xAOD::Muon& mu, float& sf, const xAOD::EventInfo* info = 0) const override;
-            CorrectionCode getEfficiencyScaleFactor(columnar::MuonId mu, float& sf, columnar::EventInfoId info) const;
-            virtual CorrectionCode applyEfficiencyScaleFactor(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const override;
+            virtual CP::CorrectionCode getEfficiencyScaleFactor(const xAOD::Muon& mu, float& sf, const xAOD::EventInfo* info = 0) const override;
+            CP::CorrectionCode getEfficiencyScaleFactor(columnar::MuonId mu, float& sf, columnar::EventInfoId info) const;
+            virtual CP::CorrectionCode applyEfficiencyScaleFactor(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const override;
             /// replica generation
-            virtual CorrectionCode getEfficiencyScaleFactorReplicas(const xAOD::Muon& mu, std::vector<float> & sf_err, const xAOD::EventInfo* info = 0) const override;
-            virtual CorrectionCode applyEfficiencyScaleFactorReplicas(const xAOD::Muon& mu, int nreplicas = 50, const xAOD::EventInfo* info = 0) const override;
+            virtual CP::CorrectionCode getEfficiencyScaleFactorReplicas(const xAOD::Muon& mu, std::vector<float> & sf_err, const xAOD::EventInfo* info = 0) const override;
+            virtual CP::CorrectionCode applyEfficiencyScaleFactorReplicas(const xAOD::Muon& mu, int nreplicas = 50, const xAOD::EventInfo* info = 0) const override;
 
             /// returns: whether this tool is affected by the given systematis
-            virtual bool isAffectedBySystematic(const SystematicVariation& systematic) const override;
+            virtual bool isAffectedBySystematic(const CP::SystematicVariation& systematic) const override;
 
             /// returns: the list of all systematics this tool can be affected by
-            virtual SystematicSet affectingSystematics() const override;
+            virtual CP::SystematicSet affectingSystematics() const override;
 
             /// returns: the list of all systematics this tool recommends to use
-            virtual SystematicSet recommendedSystematics() const override;
+            virtual CP::SystematicSet recommendedSystematics() const override;
 
-            virtual StatusCode applySystematicVariation(const SystematicSet& systConfig) override;
+            virtual StatusCode applySystematicVariation(const CP::SystematicSet& systConfig) override;
 
             /// Obtain the muon efficiency measured using the data
-            virtual CorrectionCode getDataEfficiency(const xAOD::Muon& mu, float& eff, const xAOD::EventInfo* info = 0) const override;
-            virtual CorrectionCode applyDataEfficiency(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const override;
+            virtual CP::CorrectionCode getDataEfficiency(const xAOD::Muon& mu, float& eff, const xAOD::EventInfo* info = 0) const override;
+            virtual CP::CorrectionCode applyDataEfficiency(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const override;
 
-            virtual CorrectionCode getDataEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & sf_err, const xAOD::EventInfo* info = 0) const;
-            virtual CorrectionCode applyDataEfficiencyReplicas(const xAOD::Muon& mu, int nreplicas = 50, const xAOD::EventInfo* info = 0) const;
+            virtual CP::CorrectionCode getDataEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & sf_err, const xAOD::EventInfo* info = 0) const;
+            virtual CP::CorrectionCode applyDataEfficiencyReplicas(const xAOD::Muon& mu, int nreplicas = 50, const xAOD::EventInfo* info = 0) const;
 
             /// Obtain the muon efficiency measured using the MC
-            virtual CorrectionCode getMCEfficiency(const xAOD::Muon& mu, float& eff, const xAOD::EventInfo* info = 0) const override;
-            virtual CorrectionCode applyMCEfficiency(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const override;
+            virtual CP::CorrectionCode getMCEfficiency(const xAOD::Muon& mu, float& eff, const xAOD::EventInfo* info = 0) const override;
+            virtual CP::CorrectionCode applyMCEfficiency(const xAOD::Muon& mu, const xAOD::EventInfo* info = 0) const override;
 
-            virtual CorrectionCode getMCEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & sf_err, const xAOD::EventInfo* info = 0) const;
-            virtual CorrectionCode applyMCEfficiencyReplicas(const xAOD::Muon& mu, int nreplicas = 50, const xAOD::EventInfo* info = 0) const;
+            virtual CP::CorrectionCode getMCEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & sf_err, const xAOD::EventInfo* info = 0) const;
+            virtual CP::CorrectionCode applyMCEfficiencyReplicas(const xAOD::Muon& mu, int nreplicas = 50, const xAOD::EventInfo* info = 0) const;
 
             virtual int getUnCorrelatedSystBin(const xAOD::Muon& mu) const override;
             virtual std::string getUncorrelatedSysBinName(unsigned int Bin) const override;
-            virtual std::string getUncorrelatedSysBinName(const SystematicSet& systConfig) const override;
+            virtual std::string getUncorrelatedSysBinName(const CP::SystematicSet& systConfig) const override;
 
 
         private:
@@ -123,7 +123,7 @@ namespace CP {
             float lowPtTransition() const;
             
             /// Returns the type of the measurement to be carried out... E.g. Reco/TTVA/Iso
-            CP::MuonEfficiencyType measurement() const; 
+            MuonEfficiencyType measurement() const; 
             
             /// The apply<Blah> methods decorate their result directly to the muon. The name of the decorators
             /// can be set by the users themselves using several properties. To avoid that systmatics overwrite
@@ -209,7 +209,7 @@ namespace CP {
             /// Turn on if using LRT objects
             bool m_useLRT;
 
-            CP::MuonEfficiencyType m_Type;
+            MuonEfficiencyType m_Type;
 
             // a struct holding all columnar accessors, as those interfere
             // with the root dictionaries.
@@ -222,6 +222,6 @@ namespace CP {
             virtual void callEvents (columnar::EventContextRange events) const override;
     };
 
-} /* namespace CP */
+} /* namespace ADD_CMODE(CP) */
 
 #endif /* MUONEFFICIENCYSCALEFACTORS_H_ */
