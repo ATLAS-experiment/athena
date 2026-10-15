@@ -31,15 +31,10 @@
 #include "TrigInDetAnalysisUtils/OfflineObjectSelection.h"
 #include "TrigInDetAnalysis/TrackTrigObject.h"
 
-#ifdef XAODTRACKING_TRACKPARTICLE_H
 #include "xAODMuon/MuonContainer.h"
 #include "xAODEgamma/ElectronContainer.h"
 #include "xAODEgamma/ElectronxAODHelpers.h"
 #include "xAODTau/TauJetContainer.h"
-#else
-#include "muonEvent/MuonContainer.h"
-#include "egammaEvent/ElectronContainer.h"
-#endif
 
 class MsgSvc;
 
@@ -661,23 +656,14 @@ protected:
 			     const unsigned int selection=0,
 			     bool   raw_track=false,
 			     double ETOffline=0,
-#                            ifdef XAODTRACKING_TRACKPARTICLE_H
 			     const std::string& containerName = "Electrons"
-#                            else
-			     const std::string& containerName = "ElectronAODCollection"
-#                            endif
 			     )  {
 
     m_provider->msg(MSG::DEBUG) << "Fetching offline electrons: " << containerName << endmsg;
 
     selectorRef.clear();
 
-#   ifdef XAODTRACKING_TRACKPARTICLE_H
     typedef xAOD::ElectronContainer     Container;
-#   else
-    typedef ElectronContainer           Container;
-#   endif
-
 
     const Container* container = 0;
 
@@ -709,11 +695,7 @@ protected:
       //	       << endmsg;
 
       bool good_electron = false;
-#     ifdef XAODTRACKING_TRACKPARTICLE_H
       good_electron = TIDA::isGoodOffline( *(*elec), selection, ETOffline );
-#     else
-      good_electron = TIDA::isGoodOffline( *(*elec));
-#     endif
 
       if (good_electron) {
 	const xAOD::Electron_v1& eleduff = *(*elec);
@@ -744,18 +726,10 @@ protected:
   ////////////////////////////////////////////////////////////////////////////////////////////
   unsigned processMuons(     TrigTrackSelector& selectorRef,  const unsigned int selection=0,
 			     double ETOffline=0,
-#                            ifdef XAODTRACKING_TRACKPARTICLE_H
                              const std::string& containerName = "Muons"
-#                            else
-                             const std::string& containerName = "StacoMuonCollection"
-#                            endif
 			     )  {
 
-#   ifdef XAODTRACKING_TRACKPARTICLE_H
     typedef xAOD::MuonContainer     Container;
-#   else
-    typedef Analysis::MuonContainer Container;
-#   endif
 
     m_provider->msg(MSG::DEBUG) << " Offline muons (" << containerName << ")" << endmsg;
 
@@ -780,11 +754,7 @@ protected:
     //    std::cout << "SUTT Offline muons " << container->size() << "\t threshold " << ETOffline << std::endl;
 
     for( ; muon!=muon_end ; ++muon ){
-#     ifdef XAODTRACKING_TRACKPARTICLE_H
       if ( TIDA::isGoodOffline(*(*muon), selection, ETOffline ) ) selectorRef.selectTrack((*muon)->trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle));
-#     else
-      if ( TIDA::isGoodOffline(*(*muon)) ) selectorRef.selectTrack((*muon)->inDetTrackParticle());
-#     endif
     }
 
 
@@ -861,8 +831,7 @@ unsigned processTaus( TrigTrackSelector& selectorRef,
       bool trk_added = false;
 
       for ( unsigned i=N ; i-- ; )  {
-#       ifdef XAODTAU_TAUTRACK_H
-	
+
         std::vector< ElementLink<xAOD::TrackParticleContainer> > alink = (*tau)->track(i)->trackLinks();
 	
 	trk_added = false;
@@ -873,9 +842,6 @@ unsigned processTaus( TrigTrackSelector& selectorRef,
 	/// the previous version of the code ...
 	//        trk_added = selectorRef.selectTrack((*tau)->track(i)->track());
 	/// used the link to the Trk::Track
-#       else
-	trk_added = selectorRef.selectTrack((*tau)->track(i));
-#       endif
 	if ( trk_added ) tauobj.addChild( selectorRef.tracks().back()->id() );
       }
       if ( tauvec ) tauvec->push_back( tauobj );
