@@ -69,11 +69,8 @@ StatusCode ITkPixelCnvTool::convertToByteStream(const ContainerType* cont) const
 
     for (const auto& [onlineID, hitMap] : EventHitMaps){
 
-        //make a copy of the onlineID
-        uint64_t onID = (uint64_t)onlineID;
-
         //Encode the FE hits
-        std::vector<uint32_t> encodedStream = m_encodingTool->encodeFE(hitMap, onID & 0x3000000000000000);
+        std::vector<uint32_t> encodedStream = m_encodingTool->encodeFE(hitMap, ITkPixelCabling::dridToChipID(onlineID.detectorResourceID()) );
 
         //Build the ROD payload header. First word is size of the packet in 32bit words
         //including the header (16b), felix status (8b), swrod status (8b),

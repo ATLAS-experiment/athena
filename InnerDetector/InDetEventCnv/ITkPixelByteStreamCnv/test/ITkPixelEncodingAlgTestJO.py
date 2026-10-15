@@ -26,9 +26,8 @@ if __name__=="__main__":
    
    # --- set flags
    # the input file
-   flags.Input.Files = ['/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-03-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8481_s4149_r14700/RDO.33629020._000047.pool.root.1']
-   #from AthenaConfiguration.TestDefaults import defaultTestFiles
-   #flags.Input.Files = defaultTestFiles.RDO_RUN4
+   from AthenaConfiguration.TestDefaults import defaultTestFiles
+   flags.Input.Files = defaultTestFiles.RDO_RUN4
    
    # --- end flag customization
    flags.lock()

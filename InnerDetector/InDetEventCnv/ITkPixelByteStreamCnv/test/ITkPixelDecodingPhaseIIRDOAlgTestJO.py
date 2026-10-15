@@ -38,7 +38,6 @@ if __name__=="__main__":
    # We want to keep the commented code for debugging
    # from AthenaCommon.Constants import DEBUG
    # flags.Exec.OutputLevel=DEBUG
-   # flags.ITk.Conditions.PixelTestCablingFallback=True
 
    flags.lock()
 
@@ -47,23 +46,6 @@ if __name__=="__main__":
    # minimum stuff to read files:
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
    cfg = MainServicesCfg(flags)
-
-   #add cabling
-   #from ITkPixelCabling.ITkPixelCablingAlgConfig import ITkPixelCablingAlgCfg
-   #from ITkPixelCabling.ITkPixelCablingFromDB import ITkPixelCablingFromCREST
-   #testCablingFallback = False
-   #ITkPixelCablingFromCREST(output_file='cabling.json')
-   #
-   #if os.path.isfile("cabling.json"):
-   #  cfg.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=False, DataSource='cabling.json'))
-   #
-   #else:  
-   #  if testCablingFallback:
-   #     cfg.merge(ITkPixelCablingAlgCfg(flags, name="ITkPixelCablingAlg", UseTestCabling=True))
-   # 
-   #  else:
-   #    sys.exit("Error: cabling couldn't be fetched from CREST. Provide a cabling.json file in the run directory, or explicitly allow testCablingFallback.")
-   
 
    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamReadCfg
    cfg.merge(ByteStreamReadCfg(flags))
