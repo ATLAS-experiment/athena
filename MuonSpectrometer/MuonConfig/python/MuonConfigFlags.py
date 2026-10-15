@@ -72,7 +72,7 @@ def createMuonConfigFlags():
     mcf.addFlag("Muon.trackGeometryMaterialMap", "")
     # 1. Digitization
     mcf.addFlag("Muon.doFastMMDigitization", False) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
-    mcf.addFlag("Muon.doFastsTGCDigitization",True) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
+    mcf.addFlag("Muon.doFastsTGCDigitization",False) ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
     mcf.addFlag("Muon.doFastRpcDigitization",False)  ### The digitization flag is only relevant if usePhaseIIGeoSetup is activated
     ### Setup the Phase II truth matching algorithms
     mcf.addFlag("Muon.setupTruthAlgorithms", lambda prevFlags: prevFlags.Muon.usePhaseIIGeoSetup and \
