@@ -42,7 +42,7 @@ def MuonCombinedStacoAlgCfg(flags, name="MuonCombinedStacoAlgR4", **kwargs ):
 def LRT_MuonCombinedStacoAlgCfg(flags, name="MuonCombinedStacoAlgR4_LRT", **kwargs ):
     kwargs.setdefault("IdTrkKey", "MuonInDetCandidatesLRT")
     kwargs.setdefault("writeKey","MuonTagsSTACOLRT")
-    kwargs.setdefault("writeTrkKey","STACOTrackParticlesLRT")
+    kwargs.setdefault("writeTrkKey","MuonSTACOTrackParticlesLRT")
     return MuonCombinedStacoAlgCfg(flags, name, **kwargs)
 
 def MuonLegacyCaloTagAlgCfg(flags, name = "MuonLegacyCaloTagAlgR4", **kwargs):

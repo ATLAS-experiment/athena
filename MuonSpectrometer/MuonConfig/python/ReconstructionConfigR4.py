@@ -86,15 +86,21 @@ def StandaloneMuonOutputCfg(flags):
     aod_items += ["xAOD::MuonSegmentAuxContainer#MuonSegmentsFromR4Aux.-localSegPars.-parentSegment.-localSegCov"]
 
     #add MS track and track particle containers to the ESD output
-    for trk in ["MsTrksAtIpTrackParticles", "MsTrackParticlesR4","STACOTrackParticles"]:
+    for trk in ["MuonMsAtIpTrackParticles", "MuonMsTrackParticles","MuonSTACOTrackParticles"]:
         aod_items += [f"xAOD::TrackParticleContainer#{trk}",
                       f"xAOD::TrackParticleAuxContainer#{trk}Aux."]
     # convert the Acts muon track to its xAOD representation and add it to the ESD output
     if flags.Output.doWriteESD:
         from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
-        result.merge(ActsToXAODTrackConverterAlgCfg(flags, name = "MsTracksToXAODTrackConverterAlg", InputActsTracksLocation = "MsTracks", OutputActsTracksLocation="MsTracks"))
-        esd_items += MuonTrackContainersToPersistify("Ms")
-
+        result.merge(ActsToXAODTrackConverterAlgCfg(flags, name = "MsTracksToXAODTrackConverterAlg", 
+                                                    InputActsTracksLocation = "MuonMsTracks", 
+                                                    OutputActsTracksLocation="MuonMsTracks"))
+        esd_items += MuonTrackContainersToPersistify("MuonMs")
+        if flags.Muon.buildMETrack:
+            result.merge(ActsToXAODTrackConverterAlgCfg(flags, name = "MsAtIpTracksToXAODTrackConverterAlg", 
+                                                        InputActsTracksLocation = "MuonMsAtIpTracks", 
+                                                        OutputActsTracksLocation="MuonMsAtIpTracks"))
+        esd_items += MuonTrackContainersToPersistify("MuonMsAtIp")
     #for now add also the muon container here. This should go into the combined config at some point
     aod_items += ["xAOD::MuonContainer#Muons"]
     aod_items += ["xAOD::MuonAuxContainerR4#MuonsAux."]
@@ -121,7 +127,7 @@ def MsTrkRecoChainConfig(flags):
     from MuonCombinedConfig.MuonCombinedReconstructionConfig import  MuonCombinedMuonCandidateAlgCfg
     result.merge(MuonCombinedMuonCandidateAlgCfg(flags,
                 name="MuonMSOECandidateAlgR4",
-                MuonSpectrometerTrackParticleLocation="MsTrackParticlesR4",
+                MuonSpectrometerTrackParticleLocation="MuonMsTrackParticles",
                 MuonCandidateLocation="MuonCandidatesR4",
                 MSOnlyExtrapolatedTrackLocation="MSOETrksR4"))
             
@@ -170,7 +176,7 @@ def MuonCombinedReconstructionConfigR4(flags):
 
     if flags.Muon.buildMETrack:
         from MuonTrackFindingAlgs.TrackFindingConfig import TrackSummaryLockCfg  
-        result.merge(TrackSummaryLockCfg(flags, inContainer="MsTrksAtIpTrackParticles"))
+        result.merge(TrackSummaryLockCfg(flags, inContainer="MuonMsAtIpTrackParticles"))
     
     #### create the xAOD muons
     result.merge(MuonCreatorAlgCfg(flags, name = "MuonActsCreatorAlg",

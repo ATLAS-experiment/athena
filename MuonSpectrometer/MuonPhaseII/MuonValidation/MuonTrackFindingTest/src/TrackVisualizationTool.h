@@ -121,7 +121,7 @@ namespace MuonValR4{
             ToolHandle<MuonR4::ITrackSeedingDiagnosticsTool> m_seedingTool{this, "SeedingTool", ""};
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MuonSegmentsFromR4" };
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MsSegments" };
 
             /** @brief Dependency on the geometry alignment */
             ActsTrk::ContextUtility m_contextProvider{this};

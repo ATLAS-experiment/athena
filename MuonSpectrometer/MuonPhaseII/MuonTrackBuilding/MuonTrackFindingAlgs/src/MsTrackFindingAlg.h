@@ -102,7 +102,7 @@ namespace MuonR4{
             /** @brief Handle to the muon summary tool */
             ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" , ""};
             /** @brief Key to the output track container */
-            SG::WriteHandleKey<ActsTrk::TrackContainer> m_writeKey{this, "TrackWriteKey", "MsTracks"};
+            SG::WriteHandleKey<ActsTrk::TrackContainer> m_writeKey{this, "TrackWriteKey", "MuonMsTracks"};
     };      
 }
 

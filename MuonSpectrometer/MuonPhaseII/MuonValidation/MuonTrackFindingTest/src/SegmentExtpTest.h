@@ -25,7 +25,7 @@ namespace MuonValR4{
             virtual StatusCode execute(const EventContext& ctx) const override final;
         private:
           /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container */
-        SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_readKey{this, "SegmentKey", "MuonSegmentsFromR4"};
+        SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_readKey{this, "SegmentKey", "MsSegments"};
         /** @brief IdHelperSvc to decode the Identifiers */
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
         /** @brief Track extrapolation tool */

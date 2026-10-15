@@ -28,7 +28,7 @@ namespace MuonR4{
             SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthKey{this, "TruthKey", "MuonTruthParticles"};
             /** @brief Declare the dependency on the reconstructed segment container to establish the 
              *         reco -> truth link from the segment side */
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "MuonSegmentsFromR4"};
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "MsSegments"};
             /** @brief Additional track container dependencies. An additional dependency on the `truthParticleLink`
              *         decoration will be declared for each element in the list */
             SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_trkKeys{this, "TrackKeys", {}};

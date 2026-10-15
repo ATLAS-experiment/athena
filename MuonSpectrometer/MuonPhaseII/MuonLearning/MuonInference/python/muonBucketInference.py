@@ -47,7 +47,7 @@ if __name__ == "__main__":
                         help=("Print per-event good-bucket efficiency using the training label."))
     parser.add_argument("--bucket-label-print-first-n-buckets", type=int, default=20, dest="bucket_label_print_first_n_buckets",
                         help=("When --bucket-print-labels is enabled, print detailed label/decision."))
-    parser.add_argument("--bucket-label-segment-key", default="MuonSegmentsFromR4", dest="bucket_label_segment_key",
+    parser.add_argument("--bucket-label-segment-key", default="MsSegments", dest="bucket_label_segment_key",
                         help=("Optional xAOD::MuonSegmentContainer key used for the bucket_segments."))
     
     args = parser.parse_args()
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     if use_segment_labels and not args.bucket_label_segment_key:
         raise RuntimeError(
             "--bucket-print-labels was requested for recorded data, but "
-            "--bucket-label-segment-key is empty. Set it to MuonSegmentsFromR4 "
+            "--bucket-label-segment-key is empty. Set it to MsSegments "
             "or disable label printing."
         )
 

@@ -120,14 +120,14 @@ def StandaloneTrackPartCnvCfg(flags, name="MuonMsTrackParticleCnvR4", **kwargs):
     from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
     kwargs.setdefault("BeamSpotKey", "")
     kwargs.setdefault("VertexContainerKey", "")
-    kwargs.setdefault("ACTSTracksLocation" ,["MsTracks"])
-    kwargs.setdefault("TrackParticlesOutKey", "MsTrackParticlesR4")
+    kwargs.setdefault("ACTSTracksLocation" ,["MuonMsTracks"])
+    kwargs.setdefault("TrackParticlesOutKey", "MuonMsTrackParticles")
     kwargs.setdefault("PerigeeExpression", "DontRecalculate")
     return ActsTrackToTrackParticleCnvAlgCfg(flags, name=name, **kwargs)
 
 def MuonActsToTrkConvCfg(flags, name="MuonActsToTrkConverterAlg", **kwargs):
     result = ComponentAccumulator()
-    kwargs.setdefault('TrackParticles', "MsTrackParticlesR4")
+    kwargs.setdefault('TrackParticles', "MuonMsTrackParticles")
     kwargs.setdefault('OutTrackContainer', 'MsTracksTrkCnv')
     from ActsConfig.ActsEventCnvConfig import xAODtoTrkConverterAlgCfg
     result.merge(xAODtoTrkConverterAlgCfg(flags, name=name, 

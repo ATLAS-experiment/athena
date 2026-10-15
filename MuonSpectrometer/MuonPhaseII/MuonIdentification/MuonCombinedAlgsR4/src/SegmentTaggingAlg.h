@@ -66,9 +66,9 @@ namespace MuonCombinedR4 {
             SG::ReadHandleKey<MuonR4::MuonTagContainer> m_idTrkKey{this, "IdTrackKey", "MuonInDetCandidates"};
             /** @brief List of successfully outside -> in combined muon track candidates. Segments associated
                        with combined tracks are not considered for the SegmenTagging chain */
-            SG::ReadHandleKey<MuonR4::MuonTagContainer> m_cmbTrkKey{this, "CombedTrackKey", ""};
+            SG::ReadHandleKey<MuonR4::MuonTagContainer> m_cmbTrkKey{this, "CombinedTags", ""};
             /** @brief To pass the selection criteria, ITk tracks can alternatively be matched to  */
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "MuonSegmentsFromR4"};
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "MsSegments"};
             /** @brief The output key for the selected track candidates */           
             SG::WriteHandleKey<MuonR4::MuonTagContainer> m_writeKey{this, "writeKey", "SegmentTags"};
             /** @brief Detector manager to retrieve the sector envelope surfaces */

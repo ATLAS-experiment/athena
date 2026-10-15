@@ -49,13 +49,13 @@ namespace MuonML {
         const std::unordered_map<std::int32_t, bool>& muonEverMixed,
         const std::unordered_map<std::int32_t, double>& truthIdToAbsEta) const;
 
-    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "MuonSegmentsFromR4"};
+    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "MsSegments"};
     /**
      * Per-segment payload consumed by MlMsTrackSeeder: [componentId, isSeedAnchor]
      * Empty means that the segment was rejected by the ML preselection.
      */
     SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_pairGateDecorKey{
-        this, "PairGateDecoration", "MuonSegmentsFromR4.mlTrackComponent"};
+        this, "PairGateDecoration", "MsSegments.mlTrackComponent"};
     SG::WriteHandleKey<ConstDataVector<xAOD::MuonSegmentContainer>> m_filteredSegmentKey{
         this, "FilteredSegmentKey", "",
         "Optional VIEW container containing only segments incident to a "

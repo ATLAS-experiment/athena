@@ -74,7 +74,7 @@ namespace MuonR4{
                                                                   const MuonR4::Segment& segment,
                                                                   CLHEP::HepRandomEngine* engine) const;
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container */
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_readKey{this, "SegmentContainer", "MuonSegmentsFromR4"};
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_readKey{this, "SegmentContainer", "MsSegments"};
             /** @brief Declare the key for the refitted segment container */
             SG::WriteHandleKey<xAOD::MuonSegmentContainer> m_writeKey{this, "OutContainer", "ActsRefitSegments"};
             /** @brief  Construct a link from the refitted segment to the input segment. */

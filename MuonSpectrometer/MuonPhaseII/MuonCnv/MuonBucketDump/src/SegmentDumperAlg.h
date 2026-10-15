@@ -36,7 +36,7 @@ private:
       "Keys to the SpacePoint containers"};
 
   SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKeys{
-      this, "SegmentKeys", "MuonSegmentsFromR4",
+      this, "SegmentKeys", "MsSegments",
       "Keys to the reconstructed segment containers (aligned by index with SpacePointKeys)"};
 
   /// Truth decoration (MC)

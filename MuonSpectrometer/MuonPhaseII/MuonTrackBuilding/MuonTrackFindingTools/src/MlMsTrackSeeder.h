@@ -44,7 +44,7 @@ class MlMsTrackSeeder final :
       this, "BaselineSeeder", "",
       "Tool providing initial-parameter estimates for ML-built seeds"};
   SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{
-      this, "SegmentContainer", "MuonSegmentsFromR4"};
+      this, "SegmentContainer", "MsSegments"};
   SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_candidateDecorKey{
       this, "CandidateDecoration", m_segmentKey, "trackCandidateIds",
       "Scheduler dependency on the ML candidate decoration"};

@@ -22,6 +22,7 @@ namespace MuonCombinedR4{
             m_extrapolateToIP = true;
         }
         ATH_CHECK(m_combinedTagKey.initialize(m_extrapolateToIP && !m_combinedTagKey.empty()));
+        ATH_CHECK(m_combinedTagLRTKey.initialize(m_extrapolateToIP && !m_combinedTagLRTKey.empty()));
         ATH_CHECK(m_trackPartAtIpKey.initialize(m_extrapolateToIP));
         ATH_CHECK(m_trackAtIpKey.initialize(m_refitWithBS));
         ATH_CHECK(m_trackAtIpActsLinkKey.initialize(m_refitWithBS));
@@ -47,7 +48,7 @@ namespace MuonCombinedR4{
         ATH_CHECK(SG::get(combinedTags, m_combinedTagKey, ctx));
         /** Fill the MS tags to be processed by the algorithm */
         ship.msTracks.reserve(msTracks->size());
-        std::copy_if(msTracks->begin(), msTracks->end(), std::back_inserter(ship.msTracks),
+        std::ranges::copy_if(msTracks->begin(), msTracks->end(), std::back_inserter(ship.msTracks),
                     [combinedTags, this](const xAOD::TrackParticle* msTrack) {
                         // No combined tag container passed -> process them all
                         if (!combinedTags) {
@@ -64,7 +65,16 @@ namespace MuonCombinedR4{
                         }
                         return true;
                     });
-        
+        /** Load the ME track particles from the LRT chain  */
+        ATH_CHECK(SG::get(combinedTags, m_combinedTagLRTKey, ctx));
+        if (combinedTags) {
+            for (const MuonR4::MuonTag* tag : *combinedTags) {
+                if (Acts::rangeContainsValue(ship.msTracks, tag->msTrack()) && 
+                    tag->meTrack() != nullptr) {
+                    ship.meTracksLRT.emplace(tag->msTrack(), tag->meTrack());
+                }
+            }
+        }
         const xAOD::UncalibratedMeasurementContainer* beamSpotCont{};
         ATH_CHECK(SG::get(beamSpotCont, m_beamSpotKey, ctx));
         if (!beamSpotCont) {
@@ -97,7 +107,12 @@ namespace MuonCombinedR4{
                 return StatusCode::FAILURE;
             }
             if (m_extrapolateToIP) {
-                const xAOD::TrackParticle* meTrack = expressAtIP(ctx, *msTrack, dataShip);
+                const xAOD::TrackParticle* meTrack{nullptr};
+                if (const auto itr = dataShip.meTracksLRT.find(msTrack); itr != dataShip.meTracksLRT.end()) {
+                    meTrack = itr->second;
+                } else {
+                    meTrack = expressAtIP(ctx, *msTrack, dataShip);
+                }
                 if (meTrack) {
                     msTag->setMeTrack(meTrack);
                 } else if (m_rejectFailedIP){

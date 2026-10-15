@@ -103,8 +103,8 @@ def PatternRecognitionFromFastRecoCfg(flags, suffix = ""):
     if flags.Muon.setupTruthAlgorithms:
         from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
         result.merge(RecoSegmentTruthAssocCfg(flags,
-                                              name=f"MuonSegmentsFromR4TruthMatching{suffix}",
-                                              SegmentKey="MuonSegmentsFromR4"))
+                                              name=f"MsSegmentsTruthMatching{suffix}",
+                                              SegmentKey="MsSegments"))
     if flags.Muon.scheduleActsReco:
         from MuonSegmentCnv.MuonSegmentCnvConfig import MuonR4SegmentCnvAlgCfg
         result.merge(MuonR4SegmentCnvAlgCfg(flags,
