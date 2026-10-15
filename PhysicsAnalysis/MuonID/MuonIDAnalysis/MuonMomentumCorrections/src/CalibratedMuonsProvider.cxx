@@ -7,7 +7,7 @@
 #include "xAODBase/IParticleHelpers.h"
 #include "xAODCore/ShallowCopy.h"
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
     CalibratedMuonsProvider::CalibratedMuonsProvider(const std::string& name, ISvcLocator* svcLoc) : AthAlgorithm(name, svcLoc) {}
 
@@ -45,7 +45,7 @@ namespace CP {
         }
         for (xAOD::Muon* iParticle : *(output.first)) {
             ATH_MSG_DEBUG(" Old pt=" << iParticle->pt());
-            if (m_tool->applyCorrection(*iParticle).code() == CorrectionCode::Error) return StatusCode::FAILURE;
+            if (m_tool->applyCorrection(*iParticle).code() == CP::CorrectionCode::Error) return StatusCode::FAILURE;
             ATH_MSG_DEBUG(" New pt=" << iParticle->pt());
         }
         SG::WriteHandle<xAOD::MuonContainer> writeHandle{m_outputKey, ctx};
@@ -54,4 +54,4 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)

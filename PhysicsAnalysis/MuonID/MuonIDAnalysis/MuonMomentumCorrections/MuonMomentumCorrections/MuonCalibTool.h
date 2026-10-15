@@ -31,9 +31,9 @@
 #include "MuonMomentumCorrections/IMuonCalibIntTool.h"
 
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
-    class MuonCalibTool : public virtual IMuonCalibrationAndSmearingTool,
+    class MuonCalibTool : public virtual CP::IMuonCalibrationAndSmearingTool,
                                            public asg::AsgTool, public columnar::ColumnarTool<> {
         // Create a proper constructor for Athena
         ASG_TOOL_CLASS3(MuonCalibTool, CP::IMuonCalibrationAndSmearingTool, CP::ISystematicsTool,
@@ -54,25 +54,25 @@ namespace CP {
 
         // Interface methods that must be defined
         // Interface - Apply the correction on a modifyable object
-        virtual CorrectionCode applyCorrection(xAOD::Muon& mu) const override;
-        CorrectionCode applyCorrection(columnar::MuonId mu, columnar::EventInfoId evtInfo) const;
+        virtual CP::CorrectionCode applyCorrection(xAOD::Muon& mu) const override;
+        CP::CorrectionCode applyCorrection(columnar::MuonId mu, columnar::EventInfoId evtInfo) const;
         // Interface - Create a corrected copy from a constant muon
-        virtual CorrectionCode correctedCopy(const xAOD::Muon& input, xAOD::Muon*& output) const override;
+        virtual CP::CorrectionCode correctedCopy(const xAOD::Muon& input, xAOD::Muon*& output) const override;
         // Interface - Is the tool affected by a specific systematic?
-        virtual bool isAffectedBySystematic(const SystematicVariation& systematic) const override;
+        virtual bool isAffectedBySystematic(const CP::SystematicVariation& systematic) const override;
         // Interface - Which systematics have an effect on the tool's behaviour?
-        virtual SystematicSet affectingSystematics() const override;
+        virtual CP::SystematicSet affectingSystematics() const override;
         // Interface - Systematics to be used for physics analysis
-        virtual SystematicSet recommendedSystematics() const override;
+        virtual CP::SystematicSet recommendedSystematics() const override;
         // Interface - Use specific systematic
-        virtual StatusCode applySystematicVariation(const SystematicSet& systConfig) override;
+        virtual StatusCode applySystematicVariation(const CP::SystematicSet& systConfig) override;
         // Interface - get the expected resolution of the muon
         virtual double expectedResolution(const std::string& DetType, const xAOD::Muon& mu, const bool addMCCorrectionSmearing) const override;
         // Interface - get the expected resolution of the muon
         virtual double expectedResolution(const int& DetType, const xAOD::Muon& mu, const bool addMCCorrectionSmearing) const override;
         double expectedResolution(const int& DetType, columnar::MuonId mu, columnar::EventInfoId evtInfo, const bool addMCCorrectionSmearing) const;
         // Interface - Expert method to apply the MC correction on a modifyable trackParticle for ID- or MS-only corrections
-        virtual CorrectionCode applyCorrectionTrkOnly(xAOD::TrackParticle& inTrk, const int DetType) const override;
+        virtual CP::CorrectionCode applyCorrectionTrkOnly(xAOD::TrackParticle& inTrk, const int DetType) const override;
 
     public:
         // Constructor
@@ -120,10 +120,10 @@ namespace CP {
 
         asg::AnaToolHandle<CP::IMuonSelectionTool> m_MuonSelectionTool{""};
 
-        asg::AnaToolHandle<CP::IMuonCalibIntTool> m_MuonIntSagittaTool{""};
-        asg::AnaToolHandle<CP::IMuonCalibIntScaleSmearTool> m_MuonIntScaleSmearTool{""};
+        asg::AnaToolHandle<IMuonCalibIntTool> m_MuonIntSagittaTool{""};
+        asg::AnaToolHandle<IMuonCalibIntScaleSmearTool> m_MuonIntScaleSmearTool{""};
 
-        asg::AnaToolHandle<CP::IMuonCalibIntTool> m_MuonIntHighTSmearTool{""};
+        asg::AnaToolHandle<IMuonCalibIntTool> m_MuonIntHighTSmearTool{""};
 
 
         // internal tool function
@@ -151,6 +151,6 @@ namespace CP {
 
     };  // class MuonCalibTool
 
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)
 
 #endif

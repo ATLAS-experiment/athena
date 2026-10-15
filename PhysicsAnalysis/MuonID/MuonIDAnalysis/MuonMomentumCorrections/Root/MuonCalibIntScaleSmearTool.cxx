@@ -15,7 +15,7 @@
 #include "MuonMomentumCorrections/EnumDef.h"
 #include <MuonMomentumCorrections/CalibInitializer.h>
 
-namespace CP
+namespace ADD_CMODE(CP)
 {
 
     MuonCalibIntScaleSmearTool::MuonCalibIntScaleSmearTool(const std::string &name) : asg::AsgTool(name)
@@ -47,14 +47,14 @@ namespace CP
 
         m_currentParameters = nullptr;
         // Init the systematics
-        m_Parameters.initialize(affectingSystematics(), [this](const SystematicSet &systConfig, ParameterSetScaleSmear &param)
+        m_Parameters.initialize(affectingSystematics(), [this](const CP::SystematicSet &systConfig, ParameterSetScaleSmear &param)
                                 { return calcSystematicVariation(systConfig, param); });
-        if (!applySystematicVariation(SystematicSet()))
+        if (!applySystematicVariation(CP::SystematicSet()))
         {
             ATH_MSG_ERROR("Unable to run with no systematic");
             return StatusCode::FAILURE;
         }
-        SystematicRegistry &registry = SystematicRegistry::getInstance();
+        CP::SystematicRegistry &registry = CP::SystematicRegistry::getInstance();
         if (registry.registerSystematics(*this) != StatusCode::SUCCESS)
         {
             ATH_MSG_ERROR("Unkown systematic list");
@@ -64,10 +64,10 @@ namespace CP
         return StatusCode::SUCCESS;
     }
 
-    CorrectionCode MuonCalibIntScaleSmearTool::applyCorrection(MCP::MuonObj& mu) const
+    CP::CorrectionCode MuonCalibIntScaleSmearTool::applyCorrection(MCP::MuonObj& mu) const
     {
         // Do nothing, if it is data
-        if(mu.CB.isData) return CorrectionCode::Ok;
+        if(mu.CB.isData) return CP::CorrectionCode::Ok;
 
         // Get the correction constants for each year
         auto IDcorrConstants = getConstants(mu.ID, m_IDparams.at(mu.ID.year), m_currentParameters->m_IDparams);
@@ -111,7 +111,7 @@ namespace CP
 	}
 
         // Return gracefully:
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
 
     std::map<MCP::ScaleSmearParam, double> MuonCalibIntScaleSmearTool::getConstants(const MCP::TrackCalibObj& trk, const std::map<MCP::ScaleSmearParam, ScaleSmearCorrConstMap>& constants, const std::map<MCP::ScaleSmearParam, double>& direction) const
@@ -281,64 +281,64 @@ namespace CP
     }
 
 
-    bool MuonCalibIntScaleSmearTool::isAffectedBySystematic(const SystematicVariation &systematic) const
+    bool MuonCalibIntScaleSmearTool::isAffectedBySystematic(const CP::SystematicVariation &systematic) const
     {
-        SystematicSet sys = affectingSystematics();
+        CP::SystematicSet sys = affectingSystematics();
         return sys.find(systematic) != sys.end();
     }
 
-    SystematicSet MuonCalibIntScaleSmearTool::affectingSystematics() const
+    CP::SystematicSet MuonCalibIntScaleSmearTool::affectingSystematics() const
     {
-        SystematicSet result;
+        CP::SystematicSet result;
         /////////////////////////
         // Resolution systematics
         /////////////////////////
         if (m_calibMode == MuonCalibTool::correctData_CB || m_calibMode == MuonCalibTool::notCorrectData_CB || m_sysScheme == "AllSys") {
             // CB systematics
-            result.insert(SystematicVariation("MUON_CB", 1));
-            result.insert(SystematicVariation("MUON_CB", -1));
+            result.insert(CP::SystematicVariation("MUON_CB", 1));
+            result.insert(CP::SystematicVariation("MUON_CB", -1));
 	}
 	if (m_calibMode == MuonCalibTool::correctData_IDMS || m_calibMode == MuonCalibTool::notCorrectData_IDMS || m_calibMode == MuonCalibTool::correctData_IDonly || m_sysScheme == "AllSys") {
             // ID systematics
-            result.insert(SystematicVariation("MUON_ID", 1));
-            result.insert(SystematicVariation("MUON_ID", -1));
+            result.insert(CP::SystematicVariation("MUON_ID", 1));
+            result.insert(CP::SystematicVariation("MUON_ID", -1));
 	}
 	if (m_calibMode == MuonCalibTool::correctData_IDMS || m_calibMode == MuonCalibTool::notCorrectData_IDMS || m_calibMode == MuonCalibTool::correctData_MSonly || m_sysScheme == "AllSys") {
             // MS systematics
-            result.insert(SystematicVariation("MUON_MS", 1));
-            result.insert(SystematicVariation("MUON_MS", -1));
+            result.insert(CP::SystematicVariation("MUON_MS", 1));
+            result.insert(CP::SystematicVariation("MUON_MS", -1));
 	}
 
         /////////////////////
         /// Scale Systematics
         /////////////////////
         if (m_sysScheme == "Corr_Scale") {
-            result.insert(SystematicVariation("MUON_SCALE", 1));
-            result.insert(SystematicVariation("MUON_SCALE", -1));
+            result.insert(CP::SystematicVariation("MUON_SCALE", 1));
+            result.insert(CP::SystematicVariation("MUON_SCALE", -1));
         } 
         else if (m_sysScheme == "Decorr_Scale" || m_sysScheme == "AllSys") {
             // Either doing direct calib of CB or asking for all the sys
             if (m_calibMode == MuonCalibTool::correctData_CB || m_calibMode == MuonCalibTool::notCorrectData_CB || m_sysScheme == "AllSys") {
-                result.insert(SystematicVariation("MUON_SCALE_CB", 1));
-                result.insert(SystematicVariation("MUON_SCALE_CB", -1));
+                result.insert(CP::SystematicVariation("MUON_SCALE_CB", 1));
+                result.insert(CP::SystematicVariation("MUON_SCALE_CB", -1));
 
-                result.insert(SystematicVariation("MUON_SCALE_CB_ELOSS", 1));
-                result.insert(SystematicVariation("MUON_SCALE_CB_ELOSS", -1));
+                result.insert(CP::SystematicVariation("MUON_SCALE_CB_ELOSS", 1));
+                result.insert(CP::SystematicVariation("MUON_SCALE_CB_ELOSS", -1));
             }
 
             // Either not doing direct calib of CB or asking for IDonly calib or asking for all the sys
             if (m_calibMode == MuonCalibTool::correctData_IDMS || m_calibMode == MuonCalibTool::notCorrectData_IDMS || m_calibMode == MuonCalibTool::correctData_IDonly || m_sysScheme == "AllSys") {
-                result.insert(SystematicVariation("MUON_SCALE_ID", 1));
-                result.insert(SystematicVariation("MUON_SCALE_ID", -1));
+                result.insert(CP::SystematicVariation("MUON_SCALE_ID", 1));
+                result.insert(CP::SystematicVariation("MUON_SCALE_ID", -1));
 	    }
 
 	    // Either not doing direct calib of CB or asking for MEonly calib or asking for all the sys
 	    if (m_calibMode == MuonCalibTool::correctData_IDMS || m_calibMode == MuonCalibTool::notCorrectData_IDMS || m_calibMode == MuonCalibTool::correctData_MSonly || m_sysScheme == "AllSys") {
-                result.insert(SystematicVariation("MUON_SCALE_MS", 1));
-                result.insert(SystematicVariation("MUON_SCALE_MS", -1));
+                result.insert(CP::SystematicVariation("MUON_SCALE_MS", 1));
+                result.insert(CP::SystematicVariation("MUON_SCALE_MS", -1));
 
-                result.insert(SystematicVariation("MUON_SCALE_MS_ELOSS", 1));
-                result.insert(SystematicVariation("MUON_SCALE_MS_ELOSS", -1));
+                result.insert(CP::SystematicVariation("MUON_SCALE_MS_ELOSS", 1));
+                result.insert(CP::SystematicVariation("MUON_SCALE_MS_ELOSS", -1));
             }
         }
 
@@ -348,9 +348,9 @@ namespace CP
         return result;
     }
 
-    SystematicSet MuonCalibIntScaleSmearTool::recommendedSystematics() const { return affectingSystematics(); }
+    CP::SystematicSet MuonCalibIntScaleSmearTool::recommendedSystematics() const { return affectingSystematics(); }
 
-    StatusCode MuonCalibIntScaleSmearTool::calcSystematicVariation(const SystematicSet &systConfig, ParameterSetScaleSmear &param) const
+    StatusCode MuonCalibIntScaleSmearTool::calcSystematicVariation(const CP::SystematicSet &systConfig, ParameterSetScaleSmear &param) const
     {
         param.m_IDparams[MCP::ScaleSmearParam::s0] = MCP::SystVariation::Default;
         param.m_IDparams[MCP::ScaleSmearParam::s1] = MCP::SystVariation::Default;
@@ -372,13 +372,13 @@ namespace CP
 
 
         // ID systematics
-        SystematicVariation syst = systConfig.getSystematicByBaseName("MUON_ID");
+        CP::SystematicVariation syst = systConfig.getSystematicByBaseName("MUON_ID");
 
-        if (syst == SystematicVariation("MUON_ID", 1)) {
+        if (syst == CP::SystematicVariation("MUON_ID", 1)) {
             param.m_IDparams[MCP::ScaleSmearParam::r0] = MCP::SystVariation::Up;
             param.m_IDparams[MCP::ScaleSmearParam::r1] = MCP::SystVariation::Up;
             param.m_IDparams[MCP::ScaleSmearParam::r2] = MCP::SystVariation::Up;
-        } else if (syst == SystematicVariation("MUON_ID", -1)) {
+        } else if (syst == CP::SystematicVariation("MUON_ID", -1)) {
             param.m_IDparams[MCP::ScaleSmearParam::r0] = MCP::SystVariation::Down;
             param.m_IDparams[MCP::ScaleSmearParam::r1] = MCP::SystVariation::Down;
             param.m_IDparams[MCP::ScaleSmearParam::r2] = MCP::SystVariation::Down;
@@ -387,11 +387,11 @@ namespace CP
         // MS systematics
         syst = systConfig.getSystematicByBaseName("MUON_MS");
 
-        if (syst == SystematicVariation("MUON_MS", 1)) {
+        if (syst == CP::SystematicVariation("MUON_MS", 1)) {
             param.m_MEparams[MCP::ScaleSmearParam::r0] = MCP::SystVariation::Up;
             param.m_MEparams[MCP::ScaleSmearParam::r1] = MCP::SystVariation::Up;
             param.m_MEparams[MCP::ScaleSmearParam::r2] = MCP::SystVariation::Up;
-        } else if (syst == SystematicVariation("MUON_MS", -1)) {
+        } else if (syst == CP::SystematicVariation("MUON_MS", -1)) {
             param.m_MEparams[MCP::ScaleSmearParam::r0] = MCP::SystVariation::Down;
             param.m_MEparams[MCP::ScaleSmearParam::r1] = MCP::SystVariation::Down;
             param.m_MEparams[MCP::ScaleSmearParam::r2] = MCP::SystVariation::Down;
@@ -400,11 +400,11 @@ namespace CP
         // CB systematics
         syst = systConfig.getSystematicByBaseName("MUON_CB");
 
-        if (syst == SystematicVariation("MUON_CB", 1)) {
+        if (syst == CP::SystematicVariation("MUON_CB", 1)) {
             param.m_CBparams[MCP::ScaleSmearParam::r0] = MCP::SystVariation::Up;
             param.m_CBparams[MCP::ScaleSmearParam::r1] = MCP::SystVariation::Up;
             param.m_CBparams[MCP::ScaleSmearParam::r2] = MCP::SystVariation::Up;
-        } else if (syst == SystematicVariation("MUON_CB", -1)) {
+        } else if (syst == CP::SystematicVariation("MUON_CB", -1)) {
             param.m_CBparams[MCP::ScaleSmearParam::r0] = MCP::SystVariation::Down;
             param.m_CBparams[MCP::ScaleSmearParam::r1] = MCP::SystVariation::Down;
             param.m_CBparams[MCP::ScaleSmearParam::r2] = MCP::SystVariation::Down;
@@ -413,7 +413,7 @@ namespace CP
         // Scale systematics
         syst = systConfig.getSystematicByBaseName("MUON_SCALE");
 
-        if (syst == SystematicVariation("MUON_SCALE", 1)) {
+        if (syst == CP::SystematicVariation("MUON_SCALE", 1)) {
             param.m_IDparams[MCP::ScaleSmearParam::s0] = MCP::SystVariation::Down;
             param.m_IDparams[MCP::ScaleSmearParam::s1] = MCP::SystVariation::Down;
 
@@ -423,7 +423,7 @@ namespace CP
             param.m_CBparams[MCP::ScaleSmearParam::s0] = MCP::SystVariation::Down;
             param.m_CBparams[MCP::ScaleSmearParam::s1] = MCP::SystVariation::Down;
 
-        } else if (syst == SystematicVariation("MUON_SCALE", -1)) {
+        } else if (syst == CP::SystematicVariation("MUON_SCALE", -1)) {
             param.m_IDparams[MCP::ScaleSmearParam::s0] = MCP::SystVariation::Up;
             param.m_IDparams[MCP::ScaleSmearParam::s1] = MCP::SystVariation::Up;
 
@@ -437,50 +437,50 @@ namespace CP
         // Split scale ID/MS/EGloss
         syst = systConfig.getSystematicByBaseName("MUON_SCALE_ID");
 
-        if (syst == SystematicVariation("MUON_SCALE_ID", 1)) {
+        if (syst == CP::SystematicVariation("MUON_SCALE_ID", 1)) {
             param.m_IDparams[MCP::ScaleSmearParam::s0] = MCP::SystVariation::Down;
             param.m_IDparams[MCP::ScaleSmearParam::s1] = MCP::SystVariation::Down;
-        } else if (syst == SystematicVariation("MUON_SCALE_ID", -1)) {
+        } else if (syst == CP::SystematicVariation("MUON_SCALE_ID", -1)) {
             param.m_IDparams[MCP::ScaleSmearParam::s0] = MCP::SystVariation::Up;
             param.m_IDparams[MCP::ScaleSmearParam::s1] = MCP::SystVariation::Up;
         } else if (!syst.empty()) return StatusCode::FAILURE;
 
         syst = systConfig.getSystematicByBaseName("MUON_SCALE_MS");
 
-        if (syst == SystematicVariation("MUON_SCALE_MS", 1)) {
+        if (syst == CP::SystematicVariation("MUON_SCALE_MS", 1)) {
             param.m_MEparams[MCP::ScaleSmearParam::s1] = MCP::SystVariation::Down;
-        } else if (syst == SystematicVariation("MUON_SCALE_MS", -1)) {
+        } else if (syst == CP::SystematicVariation("MUON_SCALE_MS", -1)) {
             param.m_MEparams[MCP::ScaleSmearParam::s1] = MCP::SystVariation::Up;
         } else if (!syst.empty()) return StatusCode::FAILURE;
 
         syst = systConfig.getSystematicByBaseName("MUON_SCALE_MS_ELOSS");
 
-        if (syst == SystematicVariation("MUON_SCALE_MS_ELOSS", 1)) {
+        if (syst == CP::SystematicVariation("MUON_SCALE_MS_ELOSS", 1)) {
             param.m_MEparams[MCP::ScaleSmearParam::s0] = MCP::SystVariation::Down;
-        } else if (syst == SystematicVariation("MUON_SCALE_MS_ELOSS", -1)) {
+        } else if (syst == CP::SystematicVariation("MUON_SCALE_MS_ELOSS", -1)) {
             param.m_MEparams[MCP::ScaleSmearParam::s0] = MCP::SystVariation::Up;
         } else if (!syst.empty()) return StatusCode::FAILURE;
 
         syst = systConfig.getSystematicByBaseName("MUON_SCALE_CB");
 
-        if (syst == SystematicVariation("MUON_SCALE_CB", 1)) {
+        if (syst == CP::SystematicVariation("MUON_SCALE_CB", 1)) {
             param.m_CBparams[MCP::ScaleSmearParam::s1] = MCP::SystVariation::Down;
-        } else if (syst == SystematicVariation("MUON_SCALE_CB", -1)) {
+        } else if (syst == CP::SystematicVariation("MUON_SCALE_CB", -1)) {
             param.m_CBparams[MCP::ScaleSmearParam::s1] = MCP::SystVariation::Up;
         } else if (!syst.empty()) return StatusCode::FAILURE;
 
         syst = systConfig.getSystematicByBaseName("MUON_SCALE_CB_ELOSS");
 
-        if (syst == SystematicVariation("MUON_SCALE_CB_ELOSS", 1)) {
+        if (syst == CP::SystematicVariation("MUON_SCALE_CB_ELOSS", 1)) {
             param.m_CBparams[MCP::ScaleSmearParam::s0] = MCP::SystVariation::Down;
-        } else if (syst == SystematicVariation("MUON_SCALE_CB_ELOSS", -1)) {
+        } else if (syst == CP::SystematicVariation("MUON_SCALE_CB_ELOSS", -1)) {
             param.m_CBparams[MCP::ScaleSmearParam::s0] = MCP::SystVariation::Up;
         } else if (!syst.empty()) return StatusCode::FAILURE;
 
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonCalibIntScaleSmearTool::applySystematicVariation(const SystematicSet &systConfig)
+    StatusCode MuonCalibIntScaleSmearTool::applySystematicVariation(const CP::SystematicSet &systConfig)
     {
         return m_Parameters.get(systConfig, m_currentParameters);
     }
@@ -576,4 +576,4 @@ namespace CP
     }
 
 
-} // namespace CP
+} // namespace ADD_CMODE(CP)

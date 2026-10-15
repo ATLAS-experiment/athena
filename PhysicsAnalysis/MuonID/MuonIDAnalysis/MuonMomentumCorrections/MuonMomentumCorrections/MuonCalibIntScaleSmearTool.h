@@ -23,7 +23,7 @@
 #include "MuonMomentumCorrections/EnumDef.h"
 #include "MuonMomentumCorrections/CalibContainer.h"
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
     class MuonCalibIntScaleSmearTool : public virtual IMuonCalibIntScaleSmearTool,
                                            public asg::AsgTool {
@@ -34,18 +34,18 @@ namespace CP {
     public:
         // Interface methods that must be defined
         // Interface - Apply the correction on a modifyable object
-        virtual CorrectionCode applyCorrection(MCP::MuonObj& mu) const override;
+        virtual CP::CorrectionCode applyCorrection(MCP::MuonObj& mu) const override;
 
         virtual double getExpectedResolution(const int &DetType, double pT, double eta, double phi, MCP::DataYear year, bool isData) const override;
      
         // Interface - Is the tool affected by a specific systematic?
-        virtual bool isAffectedBySystematic(const SystematicVariation& systematic) const override;
+        virtual bool isAffectedBySystematic(const CP::SystematicVariation& systematic) const override;
         // Interface - Which systematics have an effect on the tool's behaviour?
-        virtual SystematicSet affectingSystematics() const override;
+        virtual CP::SystematicSet affectingSystematics() const override;
         // Interface - Systematics to be used for physics analysis
-        virtual SystematicSet recommendedSystematics() const override;
+        virtual CP::SystematicSet recommendedSystematics() const override;
         // Interface - Use specific systematic
-        virtual StatusCode applySystematicVariation(const SystematicSet& systConfig) override;
+        virtual StatusCode applySystematicVariation(const CP::SystematicSet& systConfig) override;
        
     public:
         // Constructor
@@ -80,9 +80,9 @@ namespace CP {
         };
         
         // calculate the parameter set for the given systematic
-        StatusCode calcSystematicVariation(const SystematicSet& systConfig, ParameterSetScaleSmear& param) const;
+        StatusCode calcSystematicVariation(const CP::SystematicSet& systConfig, ParameterSetScaleSmear& param) const;
 
-        SystematicsCache<ParameterSetScaleSmear> m_Parameters{this};
+        CP::SystematicsCache<ParameterSetScaleSmear> m_Parameters{this};
         const ParameterSetScaleSmear* m_currentParameters{nullptr};
 
         // Corrections from the data
@@ -109,6 +109,6 @@ namespace CP {
 
     };  // class MuonCalibIntScaleSmearTool
 
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)
 
 #endif

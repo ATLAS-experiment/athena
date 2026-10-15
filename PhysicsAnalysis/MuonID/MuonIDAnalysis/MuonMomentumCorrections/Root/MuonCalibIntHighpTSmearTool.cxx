@@ -16,7 +16,7 @@
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 
 
-namespace CP
+namespace ADD_CMODE(CP)
 {
 
     MuonCalibIntHighpTSmearTool::MuonCalibIntHighpTSmearTool(const std::string &name) : asg::AsgTool(name)
@@ -43,12 +43,12 @@ namespace CP
         }
 
 
-        if (!applySystematicVariation(SystematicSet()))
+        if (!applySystematicVariation(CP::SystematicSet()))
         {
             ATH_MSG_ERROR("Unable to run with no systematic");
             return StatusCode::FAILURE;
         }
-        SystematicRegistry &registry = SystematicRegistry::getInstance();
+        CP::SystematicRegistry &registry = CP::SystematicRegistry::getInstance();
         if (registry.registerSystematics(*this) != StatusCode::SUCCESS)
         {
             ATH_MSG_ERROR("Unkown systematic list");
@@ -58,10 +58,10 @@ namespace CP
         return StatusCode::SUCCESS;
     }
 
-    CorrectionCode MuonCalibIntHighpTSmearTool::applyCorrection(MCP::MuonObj& mu) const
+    CP::CorrectionCode MuonCalibIntHighpTSmearTool::applyCorrection(MCP::MuonObj& mu) const
     {
         // Do nothing, if it is data
-        if(mu.CB.isData) return CorrectionCode::Ok;
+        if(mu.CB.isData) return CP::CorrectionCode::Ok;
 
         auto cat = ConvertToMacroCategory(mu.raw_mst_category.value());
 
@@ -70,7 +70,7 @@ namespace CP
         // If undefined, don't perform any smearing
         if(cat == MCP::MST_Categories::Undefined)
         {
-            return CorrectionCode::Ok; 
+            return CP::CorrectionCode::Ok; 
         }
 
 
@@ -92,25 +92,25 @@ namespace CP
         mu.CB.calib_pt = smeared_combined_pt;
 
         // Return gracefully:
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
 
-    bool MuonCalibIntHighpTSmearTool::isAffectedBySystematic(const SystematicVariation &systematic) const
+    bool MuonCalibIntHighpTSmearTool::isAffectedBySystematic(const CP::SystematicVariation &systematic) const
     {
-        SystematicSet sys = affectingSystematics();
+        CP::SystematicSet sys = affectingSystematics();
         return sys.find(systematic) != sys.end();
     }
 
-    SystematicSet MuonCalibIntHighpTSmearTool::affectingSystematics() const
+    CP::SystematicSet MuonCalibIntHighpTSmearTool::affectingSystematics() const
     {
-        SystematicSet result;
+        CP::SystematicSet result;
         // No systematics for now
         return result;
     }
 
-    SystematicSet MuonCalibIntHighpTSmearTool::recommendedSystematics() const { return affectingSystematics(); }
+    CP::SystematicSet MuonCalibIntHighpTSmearTool::recommendedSystematics() const { return affectingSystematics(); }
 
-    StatusCode MuonCalibIntHighpTSmearTool::applySystematicVariation(const SystematicSet&)
+    StatusCode MuonCalibIntHighpTSmearTool::applySystematicVariation(const CP::SystematicSet&)
     {
         // No systematics current supported for this tool
         return StatusCode::SUCCESS;
@@ -119,15 +119,15 @@ namespace CP
     MCP::MST_Categories MuonCalibIntHighpTSmearTool::ConvertToMacroCategory(const int raw_mst_category) const {
         if (raw_mst_category < 0) {
             return MCP::MST_Categories::Undefined;
-        } else if (raw_mst_category & IMuonSelectionTool::CategoryZero)
+        } else if (raw_mst_category & CP::IMuonSelectionTool::CategoryZero)
             return MCP::MST_Categories::Zero;
-        else if (raw_mst_category & IMuonSelectionTool::CategoryOne)
+        else if (raw_mst_category & CP::IMuonSelectionTool::CategoryOne)
             return MCP::MST_Categories::One;
-        else if (raw_mst_category & IMuonSelectionTool::CategoryTwo)
+        else if (raw_mst_category & CP::IMuonSelectionTool::CategoryTwo)
             return MCP::MST_Categories::Two;
-        else if (raw_mst_category & IMuonSelectionTool::CategoryThree)
+        else if (raw_mst_category & CP::IMuonSelectionTool::CategoryThree)
             return MCP::MST_Categories::Three;
-        else if (raw_mst_category & IMuonSelectionTool::CategoryFour)
+        else if (raw_mst_category & CP::IMuonSelectionTool::CategoryFour)
             return MCP::MST_Categories::Four;
         else
             return MCP::MST_Categories::Undefined;
@@ -135,4 +135,4 @@ namespace CP
 
 
 
-} // namespace CP
+} // namespace ADD_CMODE(CP)

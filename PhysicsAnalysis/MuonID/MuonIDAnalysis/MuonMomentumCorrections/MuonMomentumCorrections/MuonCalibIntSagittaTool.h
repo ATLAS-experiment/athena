@@ -22,7 +22,7 @@
 #include "MuonMomentumCorrections/EnumDef.h"
 #include "MuonMomentumCorrections/CalibContainer.h"
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
     class MuonCalibIntSagittaTool : public virtual IMuonCalibIntTool,
                                            public asg::AsgTool {
@@ -33,16 +33,16 @@ namespace CP {
     public:
         // Interface methods that must be defined
         // Interface - Apply the correction on a modifyable object
-        virtual CorrectionCode applyCorrection(MCP::MuonObj& mu) const override;
+        virtual CP::CorrectionCode applyCorrection(MCP::MuonObj& mu) const override;
      
         // Interface - Is the tool affected by a specific systematic?
-        virtual bool isAffectedBySystematic(const SystematicVariation& systematic) const override;
+        virtual bool isAffectedBySystematic(const CP::SystematicVariation& systematic) const override;
         // Interface - Which systematics have an effect on the tool's behaviour?
-        virtual SystematicSet affectingSystematics() const override;
+        virtual CP::SystematicSet affectingSystematics() const override;
         // Interface - Systematics to be used for physics analysis
-        virtual SystematicSet recommendedSystematics() const override;
+        virtual CP::SystematicSet recommendedSystematics() const override;
         // Interface - Use specific systematic
-        virtual StatusCode applySystematicVariation(const SystematicSet& systConfig) override;
+        virtual StatusCode applySystematicVariation(const CP::SystematicSet& systConfig) override;
        
     public:
         // Constructor
@@ -87,9 +87,9 @@ namespace CP {
         };
         
         // calculate the parameter set for the given systematic
-        StatusCode calcSystematicVariation(const SystematicSet& systConfig, ParameterSetSagitta& param) const;
+        StatusCode calcSystematicVariation(const CP::SystematicSet& systConfig, ParameterSetSagitta& param) const;
 
-        SystematicsCache<ParameterSetSagitta> m_Parameters{this};
+        CP::SystematicsCache<ParameterSetSagitta> m_Parameters{this};
         const ParameterSetSagitta* m_currentParameters{nullptr};
 
         typedef std::map<MCP::SagittaCorrection, std::shared_ptr<MCP::CalibContainer>>  SagittaCorrConstMap;
@@ -113,11 +113,11 @@ namespace CP {
 
         // Statistical combination
         double statCombCorrection(const MCP::MuonObj& mu, double corrIDpT, double corrMEpT, double CBpT) const;
-        CorrectionCode applyStatCombination(AmgVector(5) parsID, const AmgSymMatrix(5)& covID, AmgVector(5) parsMS, const AmgSymMatrix(5)& covMS, int charge, AmgVector(5) & parsCB, AmgSymMatrix(5) & covCB, double& chi2) const;
+        CP::CorrectionCode applyStatCombination(AmgVector(5) parsID, const AmgSymMatrix(5)& covID, AmgVector(5) parsMS, const AmgSymMatrix(5)& covMS, int charge, AmgVector(5) & parsCB, AmgSymMatrix(5) & covCB, double& chi2) const;
 
 
     };  // class MuonCalibIntSagittaTool
 
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)
 
 #endif

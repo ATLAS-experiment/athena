@@ -15,7 +15,7 @@
 
 #include "ColumnarCore/OptObjectId.h"
 
-namespace CP
+namespace ADD_CMODE(CP)
 {
 
     MuonCalibTool::MuonCalibTool(const std::string &name) : asg::AsgTool(name){
@@ -87,7 +87,7 @@ namespace CP
 
         // Create the Sagitta tool
         if (m_MuonIntSagittaTool.empty()) {
-            m_MuonIntSagittaTool.setTypeAndName("CP::MuonCalibIntSagittaTool/" + name() + "_MCaST_Sagitta");
+            m_MuonIntSagittaTool.setTypeAndName(columnar::add_cmode("CP") + "::MuonCalibIntSagittaTool/" + name() + "_MCaST_Sagitta");
             ATH_CHECK(m_MuonIntSagittaTool.setProperty("release", m_release.value()));
             ATH_CHECK(m_MuonIntSagittaTool.setProperty("systematicScheme", m_sysScheme.value()));
 	    ATH_CHECK(m_MuonIntSagittaTool.setProperty("calibMode", m_calibMode));
@@ -98,7 +98,7 @@ namespace CP
 
         // Create the scale smear tool
         if (m_MuonIntScaleSmearTool.empty()) {
-            m_MuonIntScaleSmearTool.setTypeAndName("CP::MuonCalibIntScaleSmearTool/" + name() + "_MCaST_ScaleSmear");
+            m_MuonIntScaleSmearTool.setTypeAndName(columnar::add_cmode("CP") + "::MuonCalibIntScaleSmearTool/" + name() + "_MCaST_ScaleSmear");
             ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("release", m_release.value()));
             ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("systematicScheme", m_sysScheme.value()));
             ATH_CHECK(m_MuonIntScaleSmearTool.setProperty("calibMode", m_calibMode));
@@ -109,19 +109,19 @@ namespace CP
         /// Create the high pT tool            
         if (m_extra_highpt_smearing || m_2stations_highpt_smearing) {
             if (m_MuonIntHighTSmearTool.empty()) {
-                m_MuonIntHighTSmearTool.setTypeAndName("CP::MuonCalibIntHighpTSmearTool/" + name() + "_MCaST_highPtScaleSmear");
+                m_MuonIntHighTSmearTool.setTypeAndName(columnar::add_cmode("CP") + "::MuonCalibIntHighpTSmearTool/" + name() + "_MCaST_highPtScaleSmear");
                 ATH_CHECK(m_MuonIntHighTSmearTool.setProperty("release", m_release.value()));
                 ATH_CHECK(m_MuonIntHighTSmearTool.setProperty("OutputLevel", msg().level()));
             }
             ATH_CHECK(m_MuonIntHighTSmearTool.retrieve());
             m_MuonIntHighTSmearToolInitialized = !m_MuonIntHighTSmearTool.empty();
         }
-        if (!applySystematicVariation(SystematicSet()))
+        if (!applySystematicVariation(CP::SystematicSet()))
         {
             ATH_MSG_ERROR("Unable to run with no systematic");
             return StatusCode::FAILURE;
         }
-        SystematicRegistry &registry = SystematicRegistry::getInstance();
+        CP::SystematicRegistry &registry = CP::SystematicRegistry::getInstance();
         if (registry.registerSystematics(*this) != StatusCode::SUCCESS)
         {
             ATH_MSG_ERROR("Unkown systematic list");
@@ -132,14 +132,14 @@ namespace CP
         return StatusCode::SUCCESS;
     }
 
-    CorrectionCode MuonCalibTool::applyCorrection(xAOD::Muon &mu) const
+    CP::CorrectionCode MuonCalibTool::applyCorrection(xAOD::Muon &mu) const
     {
         // Retrieve the event information:
         SG::ReadHandle<xAOD::EventInfo> evtInfo(m_eventInfo);
         return applyCorrection(columnar::MuonId(mu), columnar::EventInfoId(*evtInfo));
     }
 
-    CorrectionCode MuonCalibTool::applyCorrection(columnar::MuonId mu, columnar::EventInfoId evtInfo) const
+    CP::CorrectionCode MuonCalibTool::applyCorrection(columnar::MuonId mu, columnar::EventInfoId evtInfo) const
     {
         auto& acc = *m_acc;
         ATH_MSG_VERBOSE("Muon Type = " << mu(acc.muonTypeAcc) << " ( 0: Combined, 1: StandAlone, 2: SegmentTagged, 3: CaloTagged, 4: SiliconAssociatedForwardMuon)");
@@ -161,8 +161,8 @@ namespace CP
             // Sagitta Correction  specifics
             if (m_applyCorrectionOnData) 
             {
-                CorrectionCode sgCode = m_MuonIntSagittaTool->applyCorrection(muonObj);
-                if (sgCode != CorrectionCode::Ok) return sgCode;
+                CP::CorrectionCode sgCode = m_MuonIntSagittaTool->applyCorrection(muonObj);
+                if (sgCode != CP::CorrectionCode::Ok) return sgCode;
             }
 
             // Override combined momentum for special cases
@@ -185,20 +185,20 @@ namespace CP
             ATH_MSG_DEBUG("Checking Output Muon Info for data - Pt_MS: " << acc.dec_mePt(mu));
             ATH_MSG_DEBUG("Checking Output Muon Info for data - Pt_CB: " << mu(acc.ptAcc));
 
-            return CorrectionCode::Ok;
+            return CP::CorrectionCode::Ok;
         }
 
         // Do Scale and Smearing corrections
-        CorrectionCode sgCode = m_MuonIntScaleSmearTool->applyCorrection(muonObj);
-        if (sgCode != CorrectionCode::Ok) return sgCode;
+        CP::CorrectionCode sgCode = m_MuonIntScaleSmearTool->applyCorrection(muonObj);
+        if (sgCode != CP::CorrectionCode::Ok) return sgCode;
 
         // Systematics for sagitta correction
         if ((mu(acc.muonTypeAcc) != xAOD::Muon::MuonType::SiliconAssociatedForwardMuon)) 
         {
             ATH_MSG_VERBOSE("Systematic uncertainties for sagitta bias ");
             // TODO:: something specific for calo tags
-            CorrectionCode sgCode = m_MuonIntSagittaTool->applyCorrection(muonObj);
-            if (sgCode != CorrectionCode::Ok) return sgCode;
+            CP::CorrectionCode sgCode = m_MuonIntSagittaTool->applyCorrection(muonObj);
+            if (sgCode != CP::CorrectionCode::Ok) return sgCode;
         }
 
         // Override combined momentum for special cases
@@ -220,13 +220,13 @@ namespace CP
 
         // Special case: if the proper flags are selected (m_extra_highpt_smearing or m_2stations_highpt_smearing)
         // an ad-hoc smearing of the combined momentum has to be applied
-        bool extra_smearing   = (m_extra_highpt_smearing && (muonObj.raw_mst_category.value() >= 0) && !( muonObj.raw_mst_category.value() & IMuonSelectionTool::CategoryFour));  // Extra smearing, if selected, gets anyway only applied to non-3-station muons!
-        bool highpt_smearing = (m_2stations_highpt_smearing && (muonObj.raw_mst_category.value() >= 0) && ( muonObj.raw_mst_category.value() & IMuonSelectionTool::CategoryThree));  // Special highpt smearing, if selected, gets anyway only applied to missing-inner, 2-station muons only!
+        bool extra_smearing   = (m_extra_highpt_smearing && (muonObj.raw_mst_category.value() >= 0) && !( muonObj.raw_mst_category.value() & CP::IMuonSelectionTool::CategoryFour));  // Extra smearing, if selected, gets anyway only applied to non-3-station muons!
+        bool highpt_smearing = (m_2stations_highpt_smearing && (muonObj.raw_mst_category.value() >= 0) && ( muonObj.raw_mst_category.value() & CP::IMuonSelectionTool::CategoryThree));  // Special highpt smearing, if selected, gets anyway only applied to missing-inner, 2-station muons only!
 
         if (((extra_smearing || highpt_smearing)) && (mu(acc.ptAcc) > m_HighPtSystThreshold * GeVtoMeV))
         {
             sgCode = m_MuonIntHighTSmearTool->applyCorrection(muonObj);
-            if (sgCode != CorrectionCode::Ok) return sgCode;
+            if (sgCode != CP::CorrectionCode::Ok) return sgCode;
         }
 
         // Final info to be written to the muon object
@@ -240,20 +240,20 @@ namespace CP
         ATH_MSG_DEBUG("Checking Output Muon Info - Pt_CB: " << acc.ptOutDec(mu));
 
         // If saggita was out of validity, return it here
-        if (sgCode == CorrectionCode::OutOfValidityRange) return sgCode;
+        if (sgCode == CP::CorrectionCode::OutOfValidityRange) return sgCode;
 
         // Return gracefully:
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
 
-    CorrectionCode MuonCalibTool::applyCorrectionTrkOnly(xAOD::TrackParticle &inTrk, const int DetType) const
+    CP::CorrectionCode MuonCalibTool::applyCorrectionTrkOnly(xAOD::TrackParticle &inTrk, const int DetType) const
     {
         // Convert to the internal object
         MCP::MuonObj muonObj = convertToMuonObj(inTrk, DetType);
 
         // Do Scale and Smearing corrections
-        CorrectionCode sgCode = m_MuonIntScaleSmearTool->applyCorrection(muonObj);
-        if (sgCode != CorrectionCode::Ok) return sgCode;
+        CP::CorrectionCode sgCode = m_MuonIntScaleSmearTool->applyCorrection(muonObj);
+        if (sgCode != CP::CorrectionCode::Ok) return sgCode;
 
         double res_pt = (DetType == MCP::DetectorType::MS) ? muonObj.ME.calib_pt*GeVtoMeV : muonObj.ID.calib_pt*GeVtoMeV;
 
@@ -261,10 +261,10 @@ namespace CP
                             inTrk.charge() / (res_pt * std::cosh(inTrk.eta())));
 
         // Return gracefully:
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
 
-    CorrectionCode MuonCalibTool::correctedCopy(const xAOD::Muon &input, xAOD::Muon *&output) const
+    CP::CorrectionCode MuonCalibTool::correctedCopy(const xAOD::Muon &input, xAOD::Muon *&output) const
     {
         // A sanity check:
         if (output)
@@ -286,23 +286,23 @@ namespace CP
         return retCode;
     }
 
-    bool MuonCalibTool::isAffectedBySystematic(const SystematicVariation &systematic) const
+    bool MuonCalibTool::isAffectedBySystematic(const CP::SystematicVariation &systematic) const
     {
-        SystematicSet sys = affectingSystematics();
+        CP::SystematicSet sys = affectingSystematics();
         return sys.find(systematic) != sys.end();
     }
 
-    SystematicSet MuonCalibTool::affectingSystematics() const
+    CP::SystematicSet MuonCalibTool::affectingSystematics() const
     {
-        SystematicSet result = m_MuonIntSagittaTool->affectingSystematics();
+        CP::SystematicSet result = m_MuonIntSagittaTool->affectingSystematics();
         result.insert(m_MuonIntScaleSmearTool->affectingSystematics());
         if (m_MuonIntHighTSmearToolInitialized) result.insert(m_MuonIntHighTSmearTool->affectingSystematics());
         return result;
     }
 
-    SystematicSet MuonCalibTool::recommendedSystematics() const { return affectingSystematics(); }
+    CP::SystematicSet MuonCalibTool::recommendedSystematics() const { return affectingSystematics(); }
 
-    StatusCode MuonCalibTool::applySystematicVariation(const SystematicSet &systConfig)
+    StatusCode MuonCalibTool::applySystematicVariation(const CP::SystematicSet &systConfig)
     {
         // Apply to the underlying tool
         StatusCode code = m_MuonIntSagittaTool->applySystematicVariation(systConfig);
@@ -682,4 +682,4 @@ namespace CP
         }
     }
 
-} // namespace CP
+} // namespace ADD_CMODE(CP)

@@ -13,13 +13,14 @@
 #include "MuonAnalysisInterfaces/IMuonCalibrationAndSmearingTool.h"
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 #include "PATInterfaces/SystematicsUtil.h"
+#include "ColumnarMode/ColumnarMode.h"
 #include "TrackInfo.h"
 
 // Root include(s)
 #include "TFile.h"
 #include "TTree.h"
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
     class TestMCASTTool : public AthAlgorithm {
     public:
@@ -53,6 +54,6 @@ namespace CP {
 
     };  // class TestMCASTTool
 
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)
 
 #endif  // MCAST_TOOLTESTER_H

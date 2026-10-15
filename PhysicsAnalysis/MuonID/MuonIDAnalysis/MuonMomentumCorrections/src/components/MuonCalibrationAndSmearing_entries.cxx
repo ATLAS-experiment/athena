@@ -16,13 +16,13 @@
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
 
-DECLARE_COMPONENT(CP::MuonCalibTool)
-DECLARE_COMPONENT(CP::MuonCalibIntSagittaTool)
-DECLARE_COMPONENT(CP::MuonCalibIntHighpTSmearTool)
-DECLARE_COMPONENT(CP::MuonCalibIntScaleSmearTool)
+DECLARE_COMPONENT(ADD_CMODE(CP)::MuonCalibTool)
+DECLARE_COMPONENT(ADD_CMODE(CP)::MuonCalibIntSagittaTool)
+DECLARE_COMPONENT(ADD_CMODE(CP)::MuonCalibIntHighpTSmearTool)
+DECLARE_COMPONENT(ADD_CMODE(CP)::MuonCalibIntScaleSmearTool)
 
 #ifndef XAOD_STANDALONE
-DECLARE_COMPONENT(CP::TestMCASTTool)
-DECLARE_COMPONENT(CP::CalibratedMuonsProvider)
-DECLARE_COMPONENT(CP::CalibratedTracksProvider)
+DECLARE_COMPONENT(ADD_CMODE(CP)::TestMCASTTool)
+DECLARE_COMPONENT(ADD_CMODE(CP)::CalibratedMuonsProvider)
+DECLARE_COMPONENT(ADD_CMODE(CP)::CalibratedTracksProvider)
 #endif
