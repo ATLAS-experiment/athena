@@ -20,7 +20,7 @@
 #include "PATInterfaces/SystematicSet.h"
 #include "PATInterfaces/SystematicVariation.h"
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
     // This is an interface class for all internal MCP sub-tools
     class IMuonCalibIntTool : public virtual asg::IAsgTool, virtual public CP::ISystematicsTool {
@@ -29,7 +29,7 @@ namespace CP {
 
     public:
         /// Apply the correction on a modifyable object
-        virtual CorrectionCode applyCorrection(MCP::MuonObj& mu) const = 0;
+        virtual CP::CorrectionCode applyCorrection(MCP::MuonObj& mu) const = 0;
 
     };  /// class IMuonCalibIntTool
 
@@ -46,6 +46,6 @@ namespace CP {
 
 
 
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)
 
 #endif  /// MCAST_IMuonCalibIntTool_H

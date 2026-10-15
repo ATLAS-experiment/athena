@@ -8,7 +8,7 @@
 #include "xAODBase/IParticleHelpers.h"
 #include "xAODCore/ShallowCopy.h"
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
     CalibratedTracksProvider::CalibratedTracksProvider(const std::string& name, ISvcLocator* svcLoc) : AthAlgorithm(name, svcLoc) {}
 
@@ -43,7 +43,7 @@ namespace CP {
 
         for (xAOD::TrackParticle* iParticle : *(output.first)) {
             ATH_MSG_VERBOSE("Old pt=" << iParticle->pt());
-            if (m_tool->applyCorrectionTrkOnly(*iParticle, m_detType).code() == CorrectionCode::Error) return StatusCode::FAILURE;
+            if (m_tool->applyCorrectionTrkOnly(*iParticle, m_detType).code() == CP::CorrectionCode::Error) return StatusCode::FAILURE;
             ATH_MSG_VERBOSE("New pt=" << iParticle->pt());
         }
         SG::WriteHandle<xAOD::TrackParticleContainer> writeHandle{m_outputKey, ctx};
@@ -53,4 +53,4 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)

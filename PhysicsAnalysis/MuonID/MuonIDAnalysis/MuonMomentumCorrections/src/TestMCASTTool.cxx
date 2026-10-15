@@ -10,7 +10,7 @@
 #include "xAODMuon/MuonContainer.h"
 #include "AthContainers/ConstAccessor.h"
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
     TestMCASTTool::TestMCASTTool(const std::string& name, ISvcLocator* svcLoc) :
         AthAlgorithm(name, svcLoc), m_MCaSTool("CP::MuonCalibrationAndSmearingTool/MuonCalibrationAndSmearingTool", this) {
@@ -141,4 +141,4 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)

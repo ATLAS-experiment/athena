@@ -30,6 +30,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 // method implementations
 //
 
+using namespace ADD_CMODE(CP);
 using columnar::ColumnarMemoryTest;
 using columnar::ColumnarPhysLiteTest;
 using columnar::TestUtils::IXAODToolCaller;
@@ -39,7 +40,7 @@ TEST_F (ColumnarMemoryTest, MuonCalibTool)
   if (!checkMode())
     return;
 
-  auto tool = std::make_unique<CP::MuonCalibTool> (makeUniqueName());
+  auto tool = std::make_unique<MuonCalibTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->setProperty ("IsRun3Geo", false));
   ASSERT_SUCCESS (tool->setProperty ("calibMode", 0));
   ASSERT_SUCCESS (tool->setProperty ("ExcludeNSWFromPrecisionLayers", false));
@@ -137,7 +138,7 @@ TEST_F (ColumnarMemoryTest, MuonCalibTool)
 class XAODTestToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
 {
 public:
-  XAODTestToolCaller (const CP::MuonCalibTool& tool, const std::string& name)
+  XAODTestToolCaller (const MuonCalibTool& tool, const std::string& name)
     : AsgMessaging ("XAODTestToolCaller"), m_tool (tool), m_name (name)
   {}
 
@@ -164,7 +165,7 @@ public:
   }
 
 private:
-  const CP::MuonCalibTool& m_tool;
+  const MuonCalibTool& m_tool;
   std::string m_name;
 
   const xAOD::MuonContainer *m_muons = nullptr;
@@ -174,12 +175,12 @@ private:
 TEST_F (ColumnarPhysLiteTest, MuonCalibTool)
 {
   asg::AsgToolConfig toolConfig;
-  toolConfig.setTypeAndName ("CP::MuonCalibTool/" + makeUniqueName());
+  toolConfig.setTypeAndName (columnar::add_cmode("CP") + "::MuonCalibTool/" + makeUniqueName());
   ASSERT_SUCCESS (toolConfig.setProperty ("IsRun3Geo", false));
   ASSERT_SUCCESS (toolConfig.setProperty ("calibMode", 0));
   ASSERT_SUCCESS (toolConfig.setProperty ("ExcludeNSWFromPrecisionLayers", false));
   ASSERT_SUCCESS (toolConfig.setProperty ("skipResolutionCategory", true));
-  ToolHandle<CP::MuonCalibTool> myToolHandle;
+  ToolHandle<MuonCalibTool> myToolHandle;
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
 

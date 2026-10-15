@@ -15,7 +15,7 @@
 #include "MuonMomentumCorrections/EnumDef.h"
 #include <MuonMomentumCorrections/CalibInitializer.h>
 
-namespace CP
+namespace ADD_CMODE(CP)
 {
 
     MuonCalibIntSagittaTool::MuonCalibIntSagittaTool(const std::string &name) : asg::AsgTool(name)
@@ -45,14 +45,14 @@ namespace CP
 
         m_currentParameters = nullptr;
         // Init the systematics
-        m_Parameters.initialize(affectingSystematics(), [this](const SystematicSet &systConfig, ParameterSetSagitta &param)
+        m_Parameters.initialize(affectingSystematics(), [this](const CP::SystematicSet &systConfig, ParameterSetSagitta &param)
                                 { return calcSystematicVariation(systConfig, param); });
-        if (!applySystematicVariation(SystematicSet()))
+        if (!applySystematicVariation(CP::SystematicSet()))
         {
             ATH_MSG_ERROR("Unable to run with no systematic");
             return StatusCode::FAILURE;
         }
-        SystematicRegistry &registry = SystematicRegistry::getInstance();
+        CP::SystematicRegistry &registry = CP::SystematicRegistry::getInstance();
         if (registry.registerSystematics(*this) != StatusCode::SUCCESS)
         {
             ATH_MSG_ERROR("Unkown systematic list");
@@ -62,7 +62,7 @@ namespace CP
         return StatusCode::SUCCESS;
     }
 
-    CorrectionCode MuonCalibIntSagittaTool::applyCorrection(MCP::MuonObj& mu) const
+    CP::CorrectionCode MuonCalibIntSagittaTool::applyCorrection(MCP::MuonObj& mu) const
     {
         auto IDCorrections = getCorrections(mu.ID);
         auto MECorrections = getCorrections(mu.ME);
@@ -130,7 +130,7 @@ namespace CP
 	else if(m_calibMode == MuonCalibTool::correctData_MSonly) mu.CB.calib_pt = corrMEpT;
 
         // Return gracefully:
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
 
     // This function applies the vector of corrections iteratively to the pT
@@ -363,8 +363,8 @@ namespace CP
         if(tlv.P() == 0) parsMS[4] = 1e12;
         else parsMS[4] = 1.0 / (tlv.P() * 1e3);
 
-        CorrectionCode SysCorrCode = applyStatCombination(parsID, covID, parsMS, covMS, mu.CB.calib_charge, parsCBNom, covCBNom, chi2Nom);
-        if (SysCorrCode != CorrectionCode::Ok) return CBpT;
+        CP::CorrectionCode SysCorrCode = applyStatCombination(parsID, covID, parsMS, covMS, mu.CB.calib_charge, parsCBNom, covCBNom, chi2Nom);
+        if (SysCorrCode != CP::CorrectionCode::Ok) return CBpT;
 
 
         // Do the statistical combination, with the original pTs
@@ -380,7 +380,7 @@ namespace CP
         else parsMS[4] = 1.0 / (tlv.P() * 1e3);
 
         SysCorrCode = applyStatCombination(parsID, covID, parsMS, covMS, mu.CB.calib_charge, parsCBCorr, covCBCorr, chi2Nom);
-        if (SysCorrCode != CorrectionCode::Ok) return CBpT;
+        if (SysCorrCode != CP::CorrectionCode::Ok) return CBpT;
 
 
         double statCombPtNom  = std::sin(parsCBNom[3]) / std::abs(parsCBNom[4]);
@@ -390,7 +390,7 @@ namespace CP
         return corrCBpT;
 
     }
-    CorrectionCode MuonCalibIntSagittaTool::applyStatCombination(AmgVector(5) parsID, const AmgSymMatrix(5)& covID, AmgVector(5) parsMS,
+    CP::CorrectionCode MuonCalibIntSagittaTool::applyStatCombination(AmgVector(5) parsID, const AmgSymMatrix(5)& covID, AmgVector(5) parsMS,
                                                                         const AmgSymMatrix(5)& covMS, int charge, AmgVector(5) & parsCB,
                                                                         AmgSymMatrix(5) & covCB, double& chi2) const {
         chi2 = 1e20;
@@ -401,7 +401,7 @@ namespace CP
         Eigen::FullPivLU<AmgSymMatrix(5)> matID(covID);
         if (!matID.isInvertible()) {
             ATH_MSG_DEBUG(" ID weight matrix computation failed     ");
-            return CorrectionCode::Error;
+            return CP::CorrectionCode::Error;
         }
         const AmgSymMatrix(5) weightID = matID.inverse();
 
@@ -409,7 +409,7 @@ namespace CP
         Eigen::FullPivLU<AmgSymMatrix(5)> matMS(covMS);
         if (!matMS.isInvertible()) {
             ATH_MSG_DEBUG(" MS weight matrix computation failed     ");
-            return CorrectionCode::Error;
+            return CP::CorrectionCode::Error;
         }
         const AmgSymMatrix(5) weightMS = matMS.inverse();
 
@@ -417,7 +417,7 @@ namespace CP
         Eigen::FullPivLU<AmgSymMatrix(5)> matCB(weightID + weightMS);
         if (!matCB.isInvertible()) {
             ATH_MSG_DEBUG(" Inversion of weightCB failed ");
-            return CorrectionCode::Error;
+            return CP::CorrectionCode::Error;
         }
         covCB = matCB.inverse();
 
@@ -425,7 +425,7 @@ namespace CP
         Eigen::FullPivLU<AmgSymMatrix(5)> matSum(covID + covMS);
         if (!matSum.isInvertible()) {
             ATH_MSG_DEBUG(" Inversion of weightCB failed ");
-            return CorrectionCode::Error;
+            return CP::CorrectionCode::Error;
         }
         AmgSymMatrix(5) invCovSum = matSum.inverse();
 
@@ -441,58 +441,58 @@ namespace CP
             parsCB[2] -= 2. * M_PI;
         else if (parsCB[2] < -M_PI)
             parsCB[2] += 2. * M_PI;
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
 
 
 
-    bool MuonCalibIntSagittaTool::isAffectedBySystematic(const SystematicVariation &systematic) const
+    bool MuonCalibIntSagittaTool::isAffectedBySystematic(const CP::SystematicVariation &systematic) const
     {
-        SystematicSet sys = affectingSystematics();
+        CP::SystematicSet sys = affectingSystematics();
         return sys.find(systematic) != sys.end();
     }
 
-    SystematicSet MuonCalibIntSagittaTool::affectingSystematics() const
+    CP::SystematicSet MuonCalibIntSagittaTool::affectingSystematics() const
     {
-        SystematicSet result;
+        CP::SystematicSet result;
         //////////////////////
         /// Sagitta Systematis
         //////////////////////
         if (!m_useFixedRho || m_sysScheme == "AllSys") {
-            result.insert(SystematicVariation("MUON_SAGITTA_RHO", 1));
-            result.insert(SystematicVariation("MUON_SAGITTA_RHO", -1));
+            result.insert(CP::SystematicVariation("MUON_SAGITTA_RHO", 1));
+            result.insert(CP::SystematicVariation("MUON_SAGITTA_RHO", -1));
         }
 
         if (m_doEtaSagittaSys) {
             // Sagitta correction residual bias
-            result.insert(SystematicVariation("MUON_SAGITTA_RESBIAS_NEGETA", 1));
-            result.insert(SystematicVariation("MUON_SAGITTA_RESBIAS_NEGETA", -1));
+            result.insert(CP::SystematicVariation("MUON_SAGITTA_RESBIAS_NEGETA", 1));
+            result.insert(CP::SystematicVariation("MUON_SAGITTA_RESBIAS_NEGETA", -1));
 
-            result.insert(SystematicVariation("MUON_SAGITTA_RESBIAS_POSETA", 1));
-            result.insert(SystematicVariation("MUON_SAGITTA_RESBIAS_POSETA", -1));
+            result.insert(CP::SystematicVariation("MUON_SAGITTA_RESBIAS_POSETA", 1));
+            result.insert(CP::SystematicVariation("MUON_SAGITTA_RESBIAS_POSETA", -1));
 
         } 
         else {
             // Sagitta correction residual bias
-            result.insert(SystematicVariation("MUON_SAGITTA_RESBIAS", 1));
-            result.insert(SystematicVariation("MUON_SAGITTA_RESBIAS", -1));
+            result.insert(CP::SystematicVariation("MUON_SAGITTA_RESBIAS", 1));
+            result.insert(CP::SystematicVariation("MUON_SAGITTA_RESBIAS", -1));
         }
 
-        result.insert(SystematicVariation("MUON_SAGITTA_DATASTAT", 1));
-        result.insert(SystematicVariation("MUON_SAGITTA_DATASTAT", -1));
+        result.insert(CP::SystematicVariation("MUON_SAGITTA_DATASTAT", 1));
+        result.insert(CP::SystematicVariation("MUON_SAGITTA_DATASTAT", -1));
         
-        result.insert(SystematicVariation("MUON_SAGITTA_GLOBAL", 1));
-        result.insert(SystematicVariation("MUON_SAGITTA_GLOBAL", -1));
+        result.insert(CP::SystematicVariation("MUON_SAGITTA_GLOBAL", 1));
+        result.insert(CP::SystematicVariation("MUON_SAGITTA_GLOBAL", -1));
 
-        result.insert(SystematicVariation("MUON_SAGITTA_PTEXTRA", 1));
-        result.insert(SystematicVariation("MUON_SAGITTA_PTEXTRA", -1));
+        result.insert(CP::SystematicVariation("MUON_SAGITTA_PTEXTRA", 1));
+        result.insert(CP::SystematicVariation("MUON_SAGITTA_PTEXTRA", -1));
 
         return result;
     }
 
-    SystematicSet MuonCalibIntSagittaTool::recommendedSystematics() const { return affectingSystematics(); }
+    CP::SystematicSet MuonCalibIntSagittaTool::recommendedSystematics() const { return affectingSystematics(); }
 
-    StatusCode MuonCalibIntSagittaTool::calcSystematicVariation(const SystematicSet &systConfig, ParameterSetSagitta &param) const
+    StatusCode MuonCalibIntSagittaTool::calcSystematicVariation(const CP::SystematicSet &systConfig, ParameterSetSagitta &param) const
     {
         param.SagittaRho        = MCP::SystVariation::Default;
         param.SagittaBias       = MCP::SystVariation::Default;
@@ -502,42 +502,42 @@ namespace CP
         param.SagittaEtaSlice   = MCP::SystVariation::Default;
 
         // Sagitta Rho systematics
-        SystematicVariation syst = systConfig.getSystematicByBaseName("MUON_SAGITTA_RHO");
+        CP::SystematicVariation syst = systConfig.getSystematicByBaseName("MUON_SAGITTA_RHO");
 
-        if      (syst == SystematicVariation("MUON_SAGITTA_RHO",  1)) param.SagittaRho = MCP::SystVariation::Down;
-        else if (syst == SystematicVariation("MUON_SAGITTA_RHO", -1)) param.SagittaRho = MCP::SystVariation::Up;
+        if      (syst == CP::SystematicVariation("MUON_SAGITTA_RHO",  1)) param.SagittaRho = MCP::SystVariation::Down;
+        else if (syst == CP::SystematicVariation("MUON_SAGITTA_RHO", -1)) param.SagittaRho = MCP::SystVariation::Up;
         else if (!syst.empty()) return StatusCode::FAILURE;
 
         // Sagitta Residual Bias systematics
         syst = systConfig.getSystematicByBaseName("MUON_SAGITTA_RESBIAS");
 
-        if      (syst == SystematicVariation("MUON_SAGITTA_RESBIAS",  1)) param.SagittaBias = MCP::SystVariation::Down;
-        else if (syst == SystematicVariation("MUON_SAGITTA_RESBIAS", -1)) param.SagittaBias = MCP::SystVariation::Up;
+        if      (syst == CP::SystematicVariation("MUON_SAGITTA_RESBIAS",  1)) param.SagittaBias = MCP::SystVariation::Down;
+        else if (syst == CP::SystematicVariation("MUON_SAGITTA_RESBIAS", -1)) param.SagittaBias = MCP::SystVariation::Up;
         else if (!syst.empty()) return StatusCode::FAILURE;
 
         // Sagitta Residual Global Bias systematics
         syst = systConfig.getSystematicByBaseName("MUON_SAGITTA_GLOBAL");
 
-        if      (syst == SystematicVariation("MUON_SAGITTA_GLOBAL",  1)) param.SagittaGlobal = MCP::SystVariation::Down;
-        else if (syst == SystematicVariation("MUON_SAGITTA_GLOBAL", -1)) param.SagittaGlobal = MCP::SystVariation::Up;
+        if      (syst == CP::SystematicVariation("MUON_SAGITTA_GLOBAL",  1)) param.SagittaGlobal = MCP::SystVariation::Down;
+        else if (syst == CP::SystematicVariation("MUON_SAGITTA_GLOBAL", -1)) param.SagittaGlobal = MCP::SystVariation::Up;
         else if (!syst.empty()) return StatusCode::FAILURE;
 
         // Sagitta Residual Bias systematics pt extrapolation
         syst = systConfig.getSystematicByBaseName("MUON_SAGITTA_PTEXTRA");
 
-        if      (syst == SystematicVariation("MUON_SAGITTA_PTEXTRA",  1)) param.SagittaPtExtra = MCP::SystVariation::Down;
-        else if (syst == SystematicVariation("MUON_SAGITTA_PTEXTRA", -1)) param.SagittaPtExtra = MCP::SystVariation::Up;
+        if      (syst == CP::SystematicVariation("MUON_SAGITTA_PTEXTRA",  1)) param.SagittaPtExtra = MCP::SystVariation::Down;
+        else if (syst == CP::SystematicVariation("MUON_SAGITTA_PTEXTRA", -1)) param.SagittaPtExtra = MCP::SystVariation::Up;
         else if (!syst.empty()) return StatusCode::FAILURE;
 
         // Sagitta Residual Bias systematics
         syst = systConfig.getSystematicByBaseName("MUON_SAGITTA_RESBIAS_POSETA");
 
-        if (syst == SystematicVariation("MUON_SAGITTA_RESBIAS_POSETA", 1)) 
+        if (syst == CP::SystematicVariation("MUON_SAGITTA_RESBIAS_POSETA", 1)) 
         {
             param.SagittaBias = MCP::SystVariation::Down;
             param.SagittaEtaSlice = MCP::SystVariation::Up;
         } 
-        else if (syst == SystematicVariation("MUON_SAGITTA_RESBIAS_POSETA", -1)) 
+        else if (syst == CP::SystematicVariation("MUON_SAGITTA_RESBIAS_POSETA", -1)) 
         {
             param.SagittaBias = MCP::SystVariation::Up;
             param.SagittaEtaSlice = MCP::SystVariation::Up;
@@ -547,12 +547,12 @@ namespace CP
         // Sagitta Residual Bias systematics
         syst = systConfig.getSystematicByBaseName("MUON_SAGITTA_RESBIAS_NEGETA");
 
-        if (syst == SystematicVariation("MUON_SAGITTA_RESBIAS_NEGETA", 1)) 
+        if (syst == CP::SystematicVariation("MUON_SAGITTA_RESBIAS_NEGETA", 1)) 
         {
             param.SagittaBias = MCP::SystVariation::Down;
             param.SagittaEtaSlice = MCP::SystVariation::Down;
         }
-        else if (syst == SystematicVariation("MUON_SAGITTA_RESBIAS_NEGETA", -1)) 
+        else if (syst == CP::SystematicVariation("MUON_SAGITTA_RESBIAS_NEGETA", -1)) 
         {
             param.SagittaBias = MCP::SystVariation::Up;
             param.SagittaEtaSlice = MCP::SystVariation::Down;
@@ -562,8 +562,8 @@ namespace CP
         // Sagitta Residual Bias systematics
         syst = systConfig.getSystematicByBaseName("MUON_SAGITTA_DATASTAT");
 
-        if      (syst == SystematicVariation("MUON_SAGITTA_DATASTAT",  1)) param.SagittaDataStat = MCP::SystVariation::Up;
-        else if (syst == SystematicVariation("MUON_SAGITTA_DATASTAT", -1)) param.SagittaDataStat = MCP::SystVariation::Down;
+        if      (syst == CP::SystematicVariation("MUON_SAGITTA_DATASTAT",  1)) param.SagittaDataStat = MCP::SystVariation::Up;
+        else if (syst == CP::SystematicVariation("MUON_SAGITTA_DATASTAT", -1)) param.SagittaDataStat = MCP::SystVariation::Down;
         else if (!syst.empty()) return StatusCode::FAILURE;
 
         //
@@ -577,11 +577,11 @@ namespace CP
         return StatusCode::SUCCESS;
     }
 
-    StatusCode MuonCalibIntSagittaTool::applySystematicVariation(const SystematicSet &systConfig)
+    StatusCode MuonCalibIntSagittaTool::applySystematicVariation(const CP::SystematicSet &systConfig)
     {
         return m_Parameters.get(systConfig, m_currentParameters);
     }
 
 
 
-} // namespace CP
+} // namespace ADD_CMODE(CP)

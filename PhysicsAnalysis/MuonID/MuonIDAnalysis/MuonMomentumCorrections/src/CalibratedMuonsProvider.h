@@ -13,8 +13,9 @@
 #include "StoreGate/WriteDecorHandleKeyArray.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODMuon/MuonContainer.h"
+#include "ColumnarMode/ColumnarMode.h"
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
     /// decorates a muon collection with efficiency and scale factor
 
@@ -38,13 +39,13 @@ namespace CP {
         SG::WriteDecorHandleKeyArray<xAOD::MuonContainer> m_ptDecorKeys{this, "DecorationKeys", {}};
 
         /// Muon calibration tool
-        ToolHandle<IMuonCalibrationAndSmearingTool> m_tool{this, "Tool", ""};
+        ToolHandle<CP::IMuonCalibrationAndSmearingTool> m_tool{this, "Tool", ""};
         Gaudi::Property<bool> m_useRndNumber{this, "useRndRunNumber", false};
         SG::ReadDecorHandleKey<xAOD::EventInfo> m_rndNumKey{this, "RandomNumberDecor", m_eventInfo, "RandomRunNumber",
                                                             "Dependency on the random run number"};
 
     };  // class
 
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)
 
 #endif  //

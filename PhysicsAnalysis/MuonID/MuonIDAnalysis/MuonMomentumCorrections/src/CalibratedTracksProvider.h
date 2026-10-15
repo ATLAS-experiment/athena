@@ -14,8 +14,9 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODTracking/TrackParticleContainer.h"
+#include "ColumnarMode/ColumnarMode.h"
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
     /// decorates a track collection with efficiency and scale factor
 
@@ -40,7 +41,7 @@ namespace CP {
                                                                      "Name of the final container written to storegate"};
 
         /// Calibration tool handle
-        ToolHandle<IMuonCalibrationAndSmearingTool> m_tool{this, "Tool", "",
+        ToolHandle<CP::IMuonCalibrationAndSmearingTool> m_tool{this, "Tool", "",
                                                            "Configured instance of the MuonMomentum and calibration tool"};
         /// detector type of track (MS or ID)
         Gaudi::Property<int> m_detType{this, "DetType", 1,
@@ -52,6 +53,6 @@ namespace CP {
 
     };  // class
 
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)
 
 #endif  //

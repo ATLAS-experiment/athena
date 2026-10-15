@@ -22,7 +22,7 @@
 #include "MuonMomentumCorrections/EnumDef.h"
 #include "MuonMomentumCorrections/CalibContainer.h"
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
     class MuonCalibIntHighpTSmearTool : public virtual IMuonCalibIntTool,
                                            public asg::AsgTool {
@@ -33,16 +33,16 @@ namespace CP {
     public:
         // Interface methods that must be defined
         // Interface - Apply the correction on a modifyable object
-        virtual CorrectionCode applyCorrection(MCP::MuonObj& mu) const override;
+        virtual CP::CorrectionCode applyCorrection(MCP::MuonObj& mu) const override;
      
         // Interface - Is the tool affected by a specific systematic?
-        virtual bool isAffectedBySystematic(const SystematicVariation& systematic) const override;
+        virtual bool isAffectedBySystematic(const CP::SystematicVariation& systematic) const override;
         // Interface - Which systematics have an effect on the tool's behaviour?
-        virtual SystematicSet affectingSystematics() const override;
+        virtual CP::SystematicSet affectingSystematics() const override;
         // Interface - Systematics to be used for physics analysis
-        virtual SystematicSet recommendedSystematics() const override;
+        virtual CP::SystematicSet recommendedSystematics() const override;
         // Interface - Use specific systematic
-        virtual StatusCode applySystematicVariation(const SystematicSet& systConfig) override;
+        virtual StatusCode applySystematicVariation(const CP::SystematicSet& systConfig) override;
        
     public:
         // Constructor
@@ -75,6 +75,6 @@ namespace CP {
 
     };  // class MuonCalibIntHighpTSmearTool
 
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)
 
 #endif
