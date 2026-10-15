@@ -466,6 +466,8 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
                 alg.efficiencyScaleFactorTool.WorkingPoint = workingPoint
                 alg.efficiencyScaleFactorTool.CalibrationRelease = release
                 alg.efficiencyScaleFactorTool.BreakDownSystematics = self.systematicBreakdown
+                if algSuffix == 'Reco':
+                    alg.efficiencyScaleFactorTool.UseLRT = self.useLRT
                 alg.muons = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, self.selectionName)
                 if self.saveDetailedSF:

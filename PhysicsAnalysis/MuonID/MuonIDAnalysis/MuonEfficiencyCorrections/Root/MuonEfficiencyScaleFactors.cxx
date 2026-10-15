@@ -520,8 +520,8 @@ namespace ADD_CMODE(CP) {
                 if (file_name == filename_Calo()) return EffiCollection::Calo;
                 if (file_name == filename_LowPtCalo()) return EffiCollection::CaloLowPt;
                 if (this->use_lrt()) {
-                    if (file_name == filename_LRTCentral()) return EffiCollection::Central;
-                    if (file_name == filename_LRTLowPt()) return EffiCollection::CentralLowPt;
+                    if (file_name == filename_LRTCentral()) return EffiCollection::LRTCentral;
+                    if (file_name == filename_LRTLowPt()) return EffiCollection::LRTCentralLowPt;
                 }
                 // last file which remains is forward
                 return EffiCollection::Forward;
