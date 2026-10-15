@@ -4,7 +4,7 @@
 #include "CoralBase/Attribute.h"
 
 #include "CollectionCursor.h"
-#include "CollectionSvc/CollectionColumn.h"
+#include "CollectionColumn.h"
 
 #include "StorageSvc/APRDefaults.h"
 #include "StorageSvc/DbContainer.h"
@@ -13,15 +13,13 @@ using namespace pool;
 
 
 CollectionCursor::CollectionCursor(
-   const CollectionDescription& description,
    const CollectionRowBuffer& collectionRowBuffer,
    ContainerMap& containers
    )
-   : m_description( description ),
-     m_collectionRowBuffer( collectionRowBuffer ),
-     m_attrContainers( containers ),
-     m_tokenContainer( containers[description.tokenColumn().name()] ),
-     m_idx( -1 )
+   : m_collectionRowBuffer( collectionRowBuffer ),
+      m_attrContainers( containers ),
+      m_tokenContainer( containers[CollectionColumn::tokenColumn().name()] ),
+      m_idx( -1 )
 {
 }
 

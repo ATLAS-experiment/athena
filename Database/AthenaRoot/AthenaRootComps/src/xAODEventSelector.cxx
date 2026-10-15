@@ -11,6 +11,8 @@
 
 // STL includes
 #include <string>
+#include <algorithm>
+#include <memory>
 #include <vector>
 #include <stdint.h>
 
@@ -39,8 +41,7 @@
 #include "AthenaKernel/CLIDRegistry.h"
 #include "CxxUtils/checker_macros.h"
 #include "StorageSvc/DbType.h"
-#include "CollectionSvc/ICollection.h"
-#include "CollectionSvc/CollectionService.h"
+#include "EventSelectorAthenaPool/Collection.h"
 
 // StoreGate includes
 
@@ -1096,10 +1097,11 @@ StatusCode xAODEventSelector::setFile(const std::string& fname) {
       //ensure input file collection created
       ATH_MSG_DEBUG("Creating poolsvc collection for " << fname);
       StatusCode sc = m_poolSvc->connectCollection( "PFN:"+fname , fname );
-      pool::ICollection* collPtr ATLAS_THREAD_SAFE = nullptr;
+      std::unique_ptr<pool::Collection> collPtr ATLAS_THREAD_SAFE;
       // Try to open EventTags Collection in the input file
       try {
-         collPtr = pool::CollectionService::open(fname, "PFN:"+fname, m_poolSvc->getInputContextSession(IPoolSvc::kInputStream));
+         auto fileDescr = m_poolSvc->getInputFileDescriptor(IPoolSvc::kInputStream, "PFN:"+fname);
+         collPtr = std::make_unique<pool::Collection>(fileDescr);
       } catch (std::exception &e) {
          collPtr = nullptr;
       }

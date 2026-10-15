@@ -85,7 +85,8 @@ public: // Non-static members
 
    /// @return size of the map of all labelled input contexts.
    virtual
-   pool::ISession* getInputContextSession(unsigned int contextId) const override;
+   pool::FileDescriptor getInputFileDescriptor(unsigned int contextId,
+                                               const std::string& connection) override;
 
    /// @return void
    /// @param shareCat [IN] bool to share the file catalog.

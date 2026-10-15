@@ -205,6 +205,7 @@ namespace APRDefaults {
 
    static constexpr const char* IndexColName = "index_ref";
    static constexpr const char* DataHeaderTypeName = "DataHeader";
+   static constexpr const char* TokenTypeName = "Token";
    static constexpr const char* DataHeaderFormTypeName = "DataHeaderForm";
    static constexpr const char* EventTagTypeName = "AttributeList";
    static constexpr const char* ParamsKeyEventTag = "POOL_CONTAINERNAME_EVENTTAG";

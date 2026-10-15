@@ -38,10 +38,10 @@ class IIncidentSvc;
 class IOpaqueAddress;
 class ISvcLocator;
 class EventContextAthenaPool;
-class PoolCollectionConverter;
 class StoreGateSvc;
 class IPoolSvc;
 namespace pool {
+   class Collection;
    class ICollectionCursor;
 }
 
@@ -145,14 +145,21 @@ private: // internal member functions
    StoreGateSvc* eventStore() const;
    /// Reinitialize the service when a @c fork() occurred/was-issued
    StatusCode reinit() const;
-   /// Return pointer to new PoolCollectionConverter
-   std::unique_ptr<PoolCollectionConverter> getCollectionCnv(bool throwIncidents = false) const;
+   /// Return pointer to new Collection
+   std::unique_ptr<pool::Collection> getCollection(bool throwIncidents = false) const;
+   /// Open a collection by name
+   StatusCode openCollection(std::string& inputCollection,
+                             std::unique_ptr<pool::Collection>& poolCollection,
+                             std::string* lastError = nullptr) const;
+   /// Disconnect current collection DB if open
+   void disconnectCollection() const;
    /// Search for event with number evtNum.
    int findEvent(int evtNum) const;
 
 private: // data
    EventContextAthenaPool*         m_endIter{};
-   mutable std::unique_ptr<PoolCollectionConverter> m_poolCollectionConverter ATLAS_THREAD_SAFE {};
+   mutable std::unique_ptr<pool::Collection> m_poolCollection ATLAS_THREAD_SAFE {};
+   mutable std::string             m_curCollectionName ATLAS_THREAD_SAFE;
    mutable std::unique_ptr<pool::ICollectionCursor> m_headerIterator ATLAS_THREAD_SAFE {};
    mutable Guid m_guid ATLAS_THREAD_SAFE {};
    mutable std::map<SG::SourceID, int> m_activeEventsPerSource ATLAS_THREAD_SAFE;

@@ -60,7 +60,6 @@
 + Control/Valkyrie
 + Control/xAODRootAccess
 + Control/xAODRootAccessInterfaces
-+ Database/APR/CollectionSvc
 + Database/APR/RootStorageSvc
 + Database/APR/StorageSvc
 + Database/AthenaPOOL/AthenaPoolCnvSvc

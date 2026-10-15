@@ -17,7 +17,7 @@ std::atomic<MSG::Level> DbPrintLvl::outputLvl = MSG::NIL;
  {
    // temporary solution to keep Collections logging at WARNING by default
    // while the rest of APR at the level set by Athena or by the environment if not in Athena
-   static const std::set<std::string> collNames = {"ImplicitCollection","RootCollection","CollectionSvc"};
+   static const std::set<std::string> collNames = {"Collection"};
    if( collNames.contains(name) or outputLvl == MSG::NIL ) {
       return DbPrint::getOutputLvl(); 
    } else {

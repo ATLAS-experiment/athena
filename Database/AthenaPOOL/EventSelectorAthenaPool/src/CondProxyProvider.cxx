@@ -21,9 +21,8 @@
 #include "StoreGate/StoreGateSvc.h"
 
 // Pool
-#include "CollectionSvc/ICollection.h"
-#include "CollectionSvc/ICollectionCursor.h"
-#include "CollectionSvc/CollectionService.h"
+#include "EventSelectorAthenaPool/Collection.h"
+#include "lib/ICollectionCursor.h"
 
 #include "StorageSvc/DbType.h"
 
@@ -79,15 +78,21 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
          inputCollection = std::format("PFN:{}", inputCollection);
       }
       StatusCode sc = m_poolSvc->connectCollection(inputCollection, "Input", m_contextId);
-      m_poolCollection = pool::CollectionService::open("Input", inputCollection, m_poolSvc->getInputContextSession(m_contextId));
-      if( sc.isRecoverable() || m_poolCollection == nullptr ) {
-         sc = m_poolSvc->checkCollection(inputCollection, m_contextId, m_poolCollection == nullptr);
+      std::unique_ptr<pool::Collection> poolCollection;
+      try {
+         auto fileDescr = m_poolSvc->getInputFileDescriptor(m_contextId, inputCollection);
+         poolCollection = std::make_unique<pool::Collection>(fileDescr);
+      } catch (const std::exception& e) {
+         ATH_MSG_DEBUG("Failed to open collection '" << inputCollection << "': " << e.what());
       }
-      if( !sc.isSuccess() || m_poolCollection == nullptr ) {
+      if( sc.isRecoverable() || poolCollection == nullptr ) {
+         sc = m_poolSvc->checkCollection(inputCollection, m_contextId, poolCollection == nullptr);
+      }
+      if( !sc.isSuccess() || poolCollection == nullptr ) {
          ATH_MSG_ERROR("Could not open item: \"" << inputCollection << "\" from the collection list.");
          return StatusCode::FAILURE;
       }
-      std::unique_ptr<pool::ICollectionCursor> headerIterator = m_poolCollection->cursor();
+      std::unique_ptr<pool::ICollectionCursor> headerIterator = poolCollection->cursor();
       if (!headerIterator->next()) {
          ATH_MSG_WARNING("Cannot retrieve Collection.");
          continue;

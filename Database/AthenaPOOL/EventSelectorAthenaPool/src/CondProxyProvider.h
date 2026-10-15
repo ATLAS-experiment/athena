@@ -18,10 +18,6 @@
 #include <memory>
 
 // Forward declarations
-namespace pool {
-   class ICollection;
-   class ICollectionCursor;
-}
 class ISvcLocator;
 class IPoolSvc;
 class StoreGateSvc;
@@ -56,7 +52,6 @@ public: // Constructor and Destructor
 private: // data
    ServiceHandle<IPoolSvc> m_poolSvc{this, "PoolSvc", "PoolSvc"};
    unsigned int m_contextId{IPoolSvc::kInputStream};
-   pool::ICollection* m_poolCollection{nullptr};
 
 private: // properties
    /// InputCollections, vector with names of the input collections.

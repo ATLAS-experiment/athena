@@ -15,6 +15,8 @@
 
 #include "DataModelRoot/RootType.h"
 
+#include "StorageSvc/FileDescriptor.h"
+
 #include <string>
 
 namespace coral {
@@ -22,7 +24,6 @@ namespace coral {
 }
 namespace pool {
    class DbType;
-   class ISession;
 }
 
 class Placement;
@@ -70,8 +71,12 @@ public: // Non-static members
    /// @return size of the map of all labelled input contexts.
    virtual unsigned int getInputContextMapSize() const = 0;
 
-   /// @return size of the map of all labelled input contexts.
-   virtual pool::ISession* getInputContextSession(unsigned int contextId) const = 0;
+   /// @return descriptor of an input file that has already been connected, see connectCollection.
+   /// Throws std::runtime_error if the file is not connected.
+   /// @param contextId [IN] id of the input context.
+   /// @param connection [IN] file name, optionally prefixed with PFN:, LFN: or FID:
+   virtual pool::FileDescriptor getInputFileDescriptor(unsigned int contextId,
+                                                        const std::string& connection) = 0;
 
    /// @return void
    /// @param shareCat [IN] bool to share the file catalog.

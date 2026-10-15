@@ -2,8 +2,8 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef COLLECTIONSVC_ICOLLECTIONCURSOR_H
-#define COLLECTIONSVC_ICOLLECTIONCURSOR_H
+#ifndef EVENTSELECTORATHENAPOOL_ICOLLECTIONCURSOR_H
+#define EVENTSELECTORATHENAPOOL_ICOLLECTIONCURSOR_H
 
 #include <cstddef>
 
@@ -14,7 +14,7 @@ namespace pool {
   class CollectionRowBuffer;
 
   /** 
-   * @class ICollectionCursor ICollectionCursor.h Collection/ICollectionCursor.h
+   * @class ICollectionCursor ICollectionCursor.h
    *
    * An interface used to navigate the result of a query on a collection.
    */

@@ -7,9 +7,8 @@
 
 #include "PersistentDataModel/Token.h"
 
-#include "CollectionSvc/CollectionRowBuffer.h"
-#include "CollectionSvc/CollectionDescription.h"
-#include "CollectionSvc/ICollectionCursor.h"
+#include "CollectionRowBuffer.h"
+#include "ICollectionCursor.h"
 #include "StorageSvc/DbContainer.h"
 
 #include <memory>
@@ -30,7 +29,6 @@ namespace pool {
       public:
 
          CollectionCursor(
-            const CollectionDescription& description,
             const CollectionRowBuffer& collectionRowBuffer,
             ContainerMap& attrContainers );
 
@@ -52,8 +50,6 @@ namespace pool {
          virtual ~CollectionCursor() = default;
 
       protected:
-         const CollectionDescription&        m_description;
-
          /// Row buffer containing the Token and Attributes
          CollectionRowBuffer                 m_collectionRowBuffer;
 
