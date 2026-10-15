@@ -254,7 +254,7 @@ SG::DataProxy* Event::proxy_exact(SG::sgkey_t sgkey) const {
 /// @param proxy The proxy to take posession of. Not used for anything
 ///              useful.
 ///
-StatusCode Event::addToStore(CLID clid, SG::DataProxy* proxy) {
+StatusCode Event::addToStore([[maybe_unused]] CLID clid, SG::DataProxy* proxy) {
 
   upgrading_lock_t lock(m_branchesMutex);
 
@@ -265,14 +265,17 @@ StatusCode Event::addToStore(CLID clid, SG::DataProxy* proxy) {
         "Function should only be called through an invalid ElementLink");
   }
 
-  // Hold on to the proxy with some non-existent, hopefully unique key:
-  const ::TString uniqueKey =
-      ::TString::Format("NonExistentKey_%lu", m_branches.size());
+  // Hold on to the proxy
   BranchInfo bi;
   bi.m_proxy.reset(proxy);
   lock.upgrade();
-  m_branches.insert(
-      std::make_pair(stringToKey(uniqueKey.Data(), clid), std::move(bi)));
+#ifdef XAOD_STANDALONE
+  std::string uniqueKey = std::format("NonExistentKey_{}", m_branches.size());
+  SG::sgkey_t sgkey = stringToKey(uniqueKey, clid);
+#else
+  SG::sgkey_t sgkey = proxy->sgkey();
+#endif
+  m_branches.emplace (sgkey, std::move(bi));
 
   // Return gracefully:
   return StatusCode::SUCCESS;
