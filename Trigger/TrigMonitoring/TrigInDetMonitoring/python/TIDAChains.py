@@ -7,6 +7,12 @@
 # get the list of configured chains matching the regex 
 # input parameter
 
+# NB: All these trigger chains start with "HLT_", so the getchains function
+#     will try to match with "HLT_xxx" first and if that doesn't match
+#     it will then try "EF_xxx" At some point, when we are mostly dealing with
+#     chains, we can swap them round.
+
+
 import re
 
 
@@ -58,6 +64,11 @@ _chains = None
 
 def _getconfiguredchains( flags, regex ):
 
+    r  = regex
+
+    r1 = None    
+    if regex.startswith("HLT") : r1 = "EF"+regex[3:]
+         
     global _chains
 
     if _chains is None :
@@ -77,19 +88,18 @@ def _getconfiguredchains( flags, regex ):
 
     chains = []    
     for c in _chains:
-        # print( c )
-        chain = re.findall( regex, c )
-        for a in chain: 
-            if a is not None and c == a :
-                chains.append( a )
-
+        if re.fullmatch(r,c) or (r1 and re.fullmatch(r1,c) ): chains.append(c) 
+                
     return chains
-
 
 
 
 def _getmonchains( flags, regex, monlevel=None ):
 
+    r = regex
+    r1 = None
+    if regex.startswith("HLT") : r1 = "EF"+regex[3:]
+    
     chains = []
 
     if monlevel is None: 
@@ -126,10 +136,7 @@ def _getmonchains( flags, regex, monlevel=None ):
 #       print( datetime.now(), "configured chains: ", len(_monchains) )
 
     for c in _monchains:
-        chain = re.findall( regex, c )
-        for a in chain:
-            if a is not None and c == a :
-                chains.append( a )
+        if re.fullmatch(r,c) or (r1 and re.fullmatch(r1,c)) : chains.append(c)
 
     return chains
 
