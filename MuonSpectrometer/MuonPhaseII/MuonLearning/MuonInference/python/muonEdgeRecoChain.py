@@ -17,7 +17,7 @@ def main(args):
     filter_segment_container = (
         args.filterSegmentsWithoutMlConnections and run_edge_classifier
     )
-    filtered_segment_key = "MuonSegmentsFromR4MlConnected"
+    filtered_segment_key = "MsSegmentsMlConnected"
 
     if args.skip_onnx and (args.enableBucketFilter or args.enableEdgeClassifier):
         print("INFO: --skip-onnx requested. Disabling bucket filter and edge classifier inference stages.")
@@ -101,7 +101,7 @@ def main(args):
             edge_classifier_kwargs["MaxDeltaThetaDeg"] = args.maxDeltaThetaDeg
         edge_inference_kwargs = {
             "EdgeClassifierTool": edge_classifier_kwargs,
-            "PairGateDecoration": "MuonSegmentsFromR4.mlTrackComponent",
+            "PairGateDecoration": "MsSegments.mlTrackComponent",
             "PairGateThreshold": args.edgeThreshold,
             "MaxEdgesPerNode": args.maxEdgesPerSegment,
             "UseDegreeCappedComponents": args.useDegreeCappedMlComponents,
@@ -134,7 +134,7 @@ def main(args):
         ms_track_finder.SeedingTool = CompFactory.MuonR4.MlMsTrackSeeder(
             "MlMsTrackSeeder",
             BaselineSeeder=baseline_seeder,
-            SegmentContainer="MuonSegmentsFromR4",
+            SegmentContainer="MsSegments",
             CandidateDecoration="mlTrackComponent",
             MinSegmentsPerCandidate=args.minSegmentsPerComponent,
             MaxSegmentsPerCandidate=args.maxSegmentsPerSeedCandidate,
@@ -162,17 +162,17 @@ def main(args):
         if flags.Input.isMC:
             from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg, TrackToTruthPartAssocCfg
             cfg.merge(RecoSegmentTruthAssocCfg(flags,
-                                               name="MuonSegmentsFromR4TruthMatching",
-                                               SegmentKey="MuonSegmentsFromR4"))
+                                               name="MsSegmentsTruthMatching",
+                                               SegmentKey="MsSegments"))
             cfg.merge(TrackToTruthPartAssocCfg(flags,
                                                name="TrackToTruthMuonSpectrometerTrackParticlesR4",
                                                TrackCollection="MuonSpectrometerTrackParticlesR4"))
 
         from MuonPatternRecognitionTest.PatternTestConfig import MuonRecoChainTesterCfg
         cfg.merge(MuonRecoChainTesterCfg(flags,
-                                         LegacySegmentKey="MuonSegmentsFromR4",
+                                         LegacySegmentKey="MsSegments",
                                          SegmentFromR4HoughKey="",
-                                         R4SegmentKey="MuonSegmentsFromR4",
+                                         R4SegmentKey="MsSegments",
                                          LegacyTrackKey="MuonSpectrometerTrackParticlesR4",
                                          TrackKeyHoughR4="",
                                          TrackKeyR4="MuonSpectrometerTrackParticlesR4"))

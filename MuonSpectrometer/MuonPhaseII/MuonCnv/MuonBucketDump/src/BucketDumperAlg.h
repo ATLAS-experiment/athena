@@ -58,7 +58,7 @@ class BucketDumperAlg: public AthHistogramAlgorithm {
     SG::ReadHandleKeyArray<SpacePointContainer> m_spacePointKeys{this, "SpacePointKeys", {"MuonSpacePoints"}, 
                                                      "Key to the space point container"};
 
-    SG::ReadHandleKeyArray<xAOD::MuonSegmentContainer> m_inSegmentKeys{this, "SegmentKey", {"MuonSegmentsFromR4"}};
+    SG::ReadHandleKeyArray<xAOD::MuonSegmentContainer> m_inSegmentKeys{this, "SegmentKey", {"MsSegments"}};
 
     SG::ReadDecorHandleKeyArray<xAOD::MuonSegmentContainer> m_truthDecorKeys{this, "TruthDecorLinks", {}};
     ActsTrk::GeoContextReadKey_t m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};

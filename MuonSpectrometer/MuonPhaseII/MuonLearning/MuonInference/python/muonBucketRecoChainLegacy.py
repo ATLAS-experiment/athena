@@ -93,7 +93,7 @@ if __name__=="__main__":
                     PatternVisualizationToolCfg(flags, CanvasLimits=0))
             else:
                 # LegacyMuonRecoChainCfg has already built the segment container.
-                bucket_tool_kwargs["LabelSegmentKey"] = "MuonSegmentsFromR4"
+                bucket_tool_kwargs["LabelSegmentKey"] = "MsSegments"
                 
         bucketTool = cfg.popToolsAndMerge(
             GraphBucketFilterToolCfg(flags, **bucket_tool_kwargs)

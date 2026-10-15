@@ -44,7 +44,7 @@ namespace MuonR4{
             /** @brief Input segment container key */
             SG::ReadHandleKeyArray<SegmentContainer> m_readKeys{this, "InSegmentKeys", {"R4MuonSegments"}};
             /** @brief Output xAOD::segment container key */
-            SG::WriteHandleKey<xAOD::MuonSegmentContainer> m_writeKey{this, "OutSegmentKey", "MuonSegmentsFromR4"};
+            SG::WriteHandleKey<xAOD::MuonSegmentContainer> m_writeKey{this, "OutSegmentKey", "MsSegments"};
             /** @brief Segment converter tool */
             ToolHandle<IxAODSegmentCnvTool> m_segmentCnvTool{this, "SegmentCnvTool", ""};
             /** @brief Alignment container key */            

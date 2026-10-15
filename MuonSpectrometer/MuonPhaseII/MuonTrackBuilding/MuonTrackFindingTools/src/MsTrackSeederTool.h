@@ -204,7 +204,7 @@ namespace MuonR4{
             ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MuonSegmentsFromR4" };
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MsSegments" };
             /** @brief  */
             const MuonGMR4::MuonDetectorManager* m_detMgr{nullptr};
     };

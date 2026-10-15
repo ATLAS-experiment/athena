@@ -73,7 +73,7 @@ def MuonSegmentDumpCfg(flags, name="MuonSegmentDumper", **kwargs):
     
     segCont = ""
     if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
-        segCont = "MuonSegmentsFromR4"
+        segCont = "MsSegments"
     
     kwargs.setdefault("SpacePointKeys", spCont)
     kwargs.setdefault("SegmentKeys", segCont)

@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     parser = SetupArgParser()
     parser.add_argument("--model-path", default="MuonInference/models/edge_class_dv_mu200.onnx")
-    parser.add_argument("--segment-key", default="MuonSegmentsFromR4")
+    parser.add_argument("--segment-key", default="MsSegments")
     parser.add_argument("--tower-container-key", default="CombinedTower")
     parser.add_argument("--min-tower-energy-mev", type=float, default=1000.0)
     parser.add_argument("--max-tower-segment-dr", type=float, default=0.4)

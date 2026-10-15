@@ -106,8 +106,8 @@ def SegmentEdgeInferenceAlgCfg(flags, name="SegmentEdgeInferenceAlg", **kwargs):
     if "EdgeClassifierTool" not in kwargs:
         kwargs["EdgeClassifierTool"] = result.popToolsAndMerge(
             SegmentEdgeClassifierToolCfg(flags, **edge_tool_kwargs))
-    kwargs.setdefault("SegmentKey", "MuonSegmentsFromR4")
-    kwargs.setdefault("PairGateDecoration", "MuonSegmentsFromR4.mlTrackComponent")
+    kwargs.setdefault("SegmentKey", "MsSegments")
+    kwargs.setdefault("PairGateDecoration", "MsSegments.mlTrackComponent")
     # An empty key disables this optional non-owning view. When enabled it
     # contains only segments incident to a post-classifier selected edge.
     kwargs.setdefault("FilteredSegmentKey", "")

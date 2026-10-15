@@ -70,7 +70,7 @@ namespace MuonValR4{
         /** @brief Segments seeded from the R4 pattern but made with the legacy segment maker */
         Gaudi::Property<std::string> m_r4PatternSegmentKey{this, "SegmentFromR4HoughKey", "MuonSegmentsFromHoughR4"};
         /** @brief Segments made from the R4 segment maker */
-        Gaudi::Property<std::string> m_segmentKeyR4{this, "R4SegmentKey", "MuonSegmentsFromR4"};        
+        Gaudi::Property<std::string> m_segmentKeyR4{this, "R4SegmentKey", "MsSegments"};        
        
         using SegmentKey_t = SG::ReadHandleKey<xAOD::MuonSegmentContainer>;
         /** @brief Segment from the truth hits */

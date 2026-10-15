@@ -45,11 +45,13 @@ namespace MuonCombinedR4{
             struct DataShip{
                 /** @brief Collection of MS track particles to be processed */
                 std::vector<const xAOD::TrackParticle*> msTracks{};
+                /** @brief Collection of LRT ME track particles */
+                std::unordered_map<const xAOD::TrackParticle*,
+                                   const xAOD::TrackParticle*> meTracksLRT{};
                 /** @brief Collection of ms track particles expressed at the beamspot or
                            the primary vertex */
                 xAOD::FillContainer<xAOD::TrackParticleContainer,
                                     xAOD::TrackParticleAuxContainer> msTracksAtIP{};
-                
                 /** @brief Refitted track particle container   */
                 ActsTrk::MutableTrackContainer actsTracksAtIP{Acts::VectorTrackContainer{}, 
                                                               Acts::VectorMultiTrajectory{}};
@@ -81,10 +83,14 @@ namespace MuonCombinedR4{
                                              const xAOD::TrackParticle& msTrack,
                                              DataShip& ship) const;
             /** @brief Key of the input muon track container */
-            SG::ReadHandleKey<xAOD::TrackParticleContainer> m_msTrackKey{this, "MsTracks", "MsTrackParticlesR4"};
+            SG::ReadHandleKey<xAOD::TrackParticleContainer> m_msTrackKey{this, "MsTracks", "MuonMsTrackParticles"};
             /** @brief Key of the combined muon tag container. MS tracks that were formed to a combined
              *         track are excluded from the back extrapolation to the IP. */
             SG::ReadHandleKey<MuonR4::MuonTagContainer> m_combinedTagKey{this, "CombinedTags", ""};
+            /** @brief Key to the combined muon container from the LRT chain. If the key is set and the
+             *         MuonTag has an extrapolated track particle. This particle is taken as ME track instead
+             *         of launching an ME refit */
+            SG::ReadHandleKey<MuonR4::MuonTagContainer> m_combinedTagLRTKey{this, "CombinedTagsLRT", ""};
             /** @brief Data dependency on the beam spot */
             SG::ReadHandleKey<xAOD::UncalibratedMeasurementContainer> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotMeasurements"};
             /** @brief Tracking geometry tool */
@@ -97,12 +103,12 @@ namespace MuonCombinedR4{
             SG::WriteHandleKey<MuonR4::MuonTagContainer> m_tagKey{this, "MsTags" , "MuonTagsSA"};
             /** @brief Key to store the extrapolated Acts track container */
             SG::WriteHandleKey<xAOD::TrackParticleContainer> m_trackPartAtIpKey{this, "TrackPartAtIpKey", 
-                                                                                "MsTrksAtIpTrackParticles"};
+                                                                                "MuonMsAtIpTrackParticles"};
             /** @brief Element link to the produced extrapolated Acts track */
             SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_trackAtIpActsLinkKey{this, "TrkAtIpLinkToActsKey", 
                                                                                           m_trackPartAtIpKey, "actsTrack"};
             /** @brief Key to the output track container */
-            SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackAtIpKey{this, "TrackAtIpKey", "MsTrksAtIp"};
+            SG::WriteHandleKey<ActsTrk::TrackContainer> m_trackAtIpKey{this, "TrackAtIpKey", "MuonMsAtIpTracks"};
             /** @brief Handle to the muon summary tool */
             ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "TrackSummaryTool" , ""};
             /** @brief Track fitting tool */

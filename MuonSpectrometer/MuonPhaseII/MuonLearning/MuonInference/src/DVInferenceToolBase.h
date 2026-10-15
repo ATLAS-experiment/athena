@@ -100,7 +100,7 @@ protected:
   float probabilityFromOutput(const Ort::Value& output, float& rawOutput) const;
 
   SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{
-      this, "SegmentKey", "MuonSegmentsFromR4", "Input R4 muon segment container"};
+      this, "SegmentKey", "MsSegments", "Input R4 muon segment container"};
   SG::ReadHandleKeyArray<MuonR4::SpacePointContainer> m_spacePointKeys{
       this, "SpacePointKeys", {"MuonSpacePoints"},
       "Default is MuonSpacePoints only, matching the training MuonBucketDump SegmentKey alignment."};

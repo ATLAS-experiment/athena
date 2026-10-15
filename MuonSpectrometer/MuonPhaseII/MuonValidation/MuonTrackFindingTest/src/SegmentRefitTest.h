@@ -24,7 +24,7 @@ namespace MuonValR4{
 
         private:
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container */
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_preFitKey{this, "PreFitContainer", "MuonSegmentsFromR4"};
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_preFitKey{this, "PreFitContainer", "MsSegments"};
             /** @brief Declare the data dependency on the post fit segment container */
             SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_postFitKey{this, "PostFitContainer", "ActsRefitSegments"};
             /** @brief  Construct a link from the refitted segment to the input segment. */

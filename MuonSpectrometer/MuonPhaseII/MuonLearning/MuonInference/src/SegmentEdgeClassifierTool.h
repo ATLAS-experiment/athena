@@ -130,7 +130,7 @@ namespace MuonML {
         this, "EnableTruthDiagnostics", false,
         "MC-only: fill SegmentEdgeGraph's truth diagnostics."};
     SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_truthLinkKey{
-        this, "TruthLinkKey", "MuonSegmentsFromR4.truthParticleLink"};
+        this, "TruthLinkKey", "MsSegments.truthParticleLink"};
     float m_cosMin{0.f};
 
     /// Node feature order expected by the model metadata (resolved at initialize).

@@ -41,7 +41,7 @@ class TruthTrackSeederTool: public extends<AthAlgTool, ITrackSeedingTool> {
         private:
             /** @brief Declare the data dependency on the standard Mdt+Rpc+Tgc segment container
              *         & on the NSW segment container */
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MuonSegmentsFromR4" };
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentContainer", "MsSegments" };
             /** @brief Dependency on the truth particle link */
             SG::ReadDecorHandleKey<xAOD::MuonSegmentContainer> m_truthLinkKey{this, "TruthLinkKey", m_segmentKey, "truthParticleLink"};
             /** @brief Instance to the muon detector manager */

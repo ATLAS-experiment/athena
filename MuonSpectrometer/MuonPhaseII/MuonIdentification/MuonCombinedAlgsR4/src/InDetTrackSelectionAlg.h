@@ -80,9 +80,9 @@ namespace MuonCombinedR4 {
             SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_extensionDecorKey{this, "CaloExtensionDecorKey", m_idTrkKey, "caloExtensionLink"};
             /** @brief Input key for the MS track particles. ID tracks are only considered if they can be
                       roughly matched to a MS track */
-            SG::ReadHandleKey<xAOD::TrackParticleContainer> m_msTrkKey{this, "MsTrackKey", "MsTrackParticlesR4"};
+            SG::ReadHandleKey<xAOD::TrackParticleContainer> m_msTrkKey{this, "MsTrackKey", "MuonMsTrackParticles"};
             /** @brief To pass the selection criteria, ITk tracks can alternatively be matched to  */
-            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "MuonSegmentsFromR4"};
+            SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "MsSegments"};
             /** @brief The output key for the selected track candidates */           
             SG::WriteHandleKey<MuonR4::MuonTagContainer> m_writeKey{this, "writeKey", "MuonInDetCandidates"};
             /** @brief Detector manager to retrieve the sector envelope surfaces */

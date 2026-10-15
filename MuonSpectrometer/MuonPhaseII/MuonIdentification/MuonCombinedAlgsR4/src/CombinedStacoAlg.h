@@ -39,14 +39,14 @@ namespace MuonCombinedR4 {
             /** @brief Context provider for geometry, magnetic field and calibration contexts */
             ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Input key to the reconstructed MS track particles */
-            SG::ReadHandleKey<xAOD::TrackParticleContainer> m_msTrackKey{this, "MsTracks", "MsTrackParticlesR4"};
+            SG::ReadHandleKey<xAOD::TrackParticleContainer> m_msTrackKey{this, "MsTracks", "MuonMsTrackParticles"};
             /** @brief Input key to the selected ID / ITk track particles */
             SG::ReadHandleKey<MuonR4::MuonTagContainer> m_idTrkKey{this, "IdTrkKey", "MuonInDetCandidates"};
             /** @brief Write key of the created STACO tags */
             SG::WriteHandleKey<MuonR4::MuonTagContainer> m_stacoKey{this, "writeKey" , "MuonTagsSTACO"};
             /** @brief Write key of the associated combined track particle container */
             SG::WriteHandleKey<xAOD::TrackParticleContainer> m_cmbTrkKey{this, "writeTrkKey", 
-                                                                         "STACOTrackParticles"};
+                                                                         "MuonSTACOTrackParticles"};
             /** @brief Upper cut on the delta eta between ID and MS track  */
             Gaudi::Property<float> m_match_dTheta{this, "maxDTheta", 2.*Gaudi::Units::deg};
             /** @brief Upper cut on the delat phi between ID and MS track */

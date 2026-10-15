@@ -101,7 +101,7 @@ namespace MuonValR4{
     /** @brief Name of the decorations for the truth segment */
     Gaudi::Property<std::vector<std::string>> m_truthLinks{this, "TruthSegLinks", {"simHitLinks", "truthParticleLink"}};
     /** @brief Key to the xAOD::MuonSegment container */
-    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_recoSegKey{this, "SegmentKey", "MuonSegmentsFromR4"};
+    SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_recoSegKey{this, "SegmentKey", "MsSegments"};
     /** @brief name of the truth link decorations for the reco segment container */
     Gaudi::Property<std::vector<std::string>> m_recoSegLinks{this, "RecoSegLinks", {"truthSegmentLink", "truthParticleLink"}};
     /** @brief List of the two segment seed containers from which the segments are buiit (Complets the pattern finding step) */

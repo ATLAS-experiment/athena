@@ -79,7 +79,7 @@ def ActsMuonSegmentRefitAlgCfg(flags,name="ActsMuonSegmentRefitAlg", **kwargs):
     kwargs.setdefault("Calibrator", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
     from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
     result.merge(ActsTrackingGeometrySvcCfg(flags))
-    kwargs.setdefault("SegmentContainer", "MuonSegmentsFromR4")
+    kwargs.setdefault("SegmentContainer", "MsSegments")
     theAlg = CompFactory.MuonR4.SegmentActsRefitAlg(name, **kwargs)
     result.addEventAlgo(theAlg, primary = True)
     return result
@@ -126,6 +126,6 @@ def MuonPatternRecognitionCfg(flags, suffix = ""):
     if flags.Muon.setupTruthAlgorithms:
         from MuonTruthAlgsR4.MuonTruthAlgsConfig import RecoSegmentTruthAssocCfg
         result.merge(RecoSegmentTruthAssocCfg(flags,
-                                              name=f"MuonSegmentsFromR4TruthMatching{suffix}",
-                                              SegmentKey="MuonSegmentsFromR4"))
+                                              name=f"MsSegmentsTruthMatching{suffix}",
+                                              SegmentKey="MsSegments"))
     return result
