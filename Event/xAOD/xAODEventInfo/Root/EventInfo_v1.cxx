@@ -1,11 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
 #include <atomic>
-#include <iostream>
-#include <iomanip>
+#include <print>
+#include <format>
 #include <stdexcept>
 
 // EDM include(s):
@@ -25,43 +25,16 @@
 
 namespace xAODEventInfoPrivate {
 
-   // Forward declaration(s):
-   template< typename T >
-   std::ostream& operator<<( std::ostream& out, const std::set< T >& s );
-
-   /// Convenience operator for printing the contents of vectors
-   template< typename T >
-   std::ostream& operator<<( std::ostream& out, const std::vector< T >& vec  ) {
-
-      out << "[";
-      for( size_t i = 0; i < vec.size(); ++i ) {
-         out << vec[ i ];
-         if( i != ( vec.size() - 1 ) ) {
-            out << ", ";
-         }
-      }
-      out << "]";
-      return out;
-   }
-
-   /// Convenience operator for printing the contents of sets
-   template< typename T >
-   std::ostream& operator<<( std::ostream& out, const std::set< T >& s ) {
-
-      return out << std::vector< T >( begin( s ), end( s ) );
-   }
-
    /// Function that would be possible to use to debug what client is trying
    /// to access pileup values from an @c xAOD::EventInfo object, before they
    /// would have been set.
    void pileupUnsetHook() {
       static std::atomic< bool > uninitPileupAccessPrinted = false;
       if( ! uninitPileupAccessPrinted ) {
-         std::cout << "xAOD::EventInfo WARNING Uninitialised pileup value was "
-                      "accessed.\n"
-                      "                        Debug it by breaking on "
-                      "xAODEventInfoPrivate::pileupUnsetHook function calls!"
-                   << std::endl;
+         std::println( "xAOD::EventInfo WARNING Uninitialised pileup value was "
+                       "accessed.\n"
+                       "                        Debug it by breaking on "
+                       "xAODEventInfoPrivate::pileupUnsetHook function calls!" );
          uninitPileupAccessPrinted = true;
       }
       return;
@@ -76,8 +49,6 @@ namespace xAODEventInfoPrivate {
 } // private namespace
 
 namespace xAOD {
-
-   using xAODEventInfoPrivate::operator<<;
 
    EventInfo_v1::EventInfo_v1()
       : SG::AuxElement(), m_streamTags(),
@@ -293,25 +264,22 @@ namespace xAOD {
                ( names( *this ).size() != robsets( *this ).size() ) ) ||
              ( detsets.isAvailable( *this ) &&
                ( names( *this ).size() != detsets( *this ).size() ) ) ) {
-            std::cerr << "<xAOD::EventInfo_v1::streamTags> ERROR "
-                      << "Corrupt information found!" << std::endl;
-            std::cerr << "  streamTagNames          = " << names( *this )
-                      << std::endl;
-            std::cerr << "  streamTagTypes          = " << types( *this )
-                      << std::endl;
-            std::cerr << "  streamTagObeysLumiblock = " << olb( *this )
-                      << std::endl;
-            std::cerr << "  streamTagRobs           = ";
+            std::println( std::cerr, "<xAOD::EventInfo_v1::streamTags> ERROR "
+                          "Corrupt information found!" );
+            std::println( std::cerr, "  streamTagNames          = {}", names( *this ) );
+            std::println( std::cerr, "  streamTagTypes          = {}", types( *this ) );
+            std::println( std::cerr, "  streamTagObeysLumiblock = {}", olb( *this ) );
+            std::print( std::cerr, "  streamTagRobs           = " );
             if( robsets.isAvailable( *this ) ) {
-               std::cerr << "N/A" << std::endl;
+               std::println( std::cerr, "N/A" );
             } else {
-               std::cerr << robsets( *this ) << std::endl;
+               std::println( std::cerr, "{}", robsets( *this ) );
             }
-            std::cerr << "  streamTagDets           = ";
+            std::print( std::cerr, "  streamTagDets           = " );
             if( detsets.isAvailable( *this ) ) {
-               std::cerr << "N/A" << std::endl;
+               std::println( std::cerr, "N/A" );
             } else {
-               std::cerr << detsets( *this ) << std::endl;
+               std::println( std::cerr, "{}", detsets( *this ) );
             }
          }
 
@@ -544,8 +512,7 @@ namespace xAOD {
      } else if( typeAcc.isAvailable( *this ) ) {
        size = typeAcc( *this ).size();
      } else {
-       std::cerr << "xAOD::EventInfo_v1 ERROR Logic error in subEvents()"
-                 << std::endl;
+       std::println( std::cerr, "xAOD::EventInfo_v1 ERROR Logic error in subEvents()" );
        return subEvents;
      }
      if( ( timeAcc.isAvailable( *this ) &&
@@ -556,21 +523,28 @@ namespace xAOD {
            ( size != linkAcc( *this ).size() ) ) ||
          ( typeAcc.isAvailable( *this ) &&
            ( size != typeAcc( *this ).size() ) ) ) {
-       std::cerr << "xAOD::EventInfo_v1 ERROR Data corruption found in "
-                 << "the sub-event information" << std::endl;
-       std::cerr << "subEventTime  = "
-                 << ( timeAcc.isAvailable( *this ) ? timeAcc( *this ) :
-                      std::vector< int16_t >() ) << std::endl;
-       std::cerr << "subEventIndex  = "
-                 << ( indexAcc.isAvailable( *this ) ? indexAcc( *this ) :
-                      std::vector< uint16_t >() ) << std::endl;
-       std::cerr << "subEventLink = "
-                 << ( linkAcc.isAvailable( *this ) ? linkAcc( *this ) :
-                      std::vector< ElementLink< EventInfoContainer_v1 > >() )
-                 << std::endl;
-       std::cerr << "subEventType  = "
-                 << ( typeAcc.isAvailable( *this ) ? typeAcc( *this ) :
-                      std::vector< uint16_t >() ) << std::endl;
+       std::println( std::cerr, "xAOD::EventInfo_v1 ERROR Data corruption found in "
+                     "the sub-event information" );
+       std::println( std::cerr, "subEventTime  = {}",
+                     ( timeAcc.isAvailable( *this ) ? timeAcc( *this ) :
+                       std::vector< int16_t >() ) );
+       std::println( std::cerr, "subEventIndex  = {}",
+                     ( indexAcc.isAvailable( *this ) ? indexAcc( *this ) :
+                       std::vector< uint16_t >() ) );
+
+       auto format_el = [] (const ElementLink< EventInfoContainer_v1 >& el)
+       {
+         return std::format ("{}:{}", el.dataID(), el.index());
+       };
+       const std::vector< ElementLink< EventInfoContainer_v1 > >& links =
+         linkAcc.isAvailable( *this ) ? linkAcc( *this ) :
+         std::vector< ElementLink< EventInfoContainer_v1 > >();
+       auto linksform = links | std::views::transform (format_el);
+
+       std::println( std::cerr, "subEventLink = {}", linksform );
+       std::println( std::cerr,"subEventType  = {}",
+                     ( typeAcc.isAvailable( *this ) ? typeAcc( *this ) :
+                       std::vector< uint16_t >() ) );
        return subEvents;
      }
      // Fill up the cache:
@@ -1032,6 +1006,18 @@ namespace xAOD {
       return;
    }
 
+   std::string EventInfo_v1::toString() const {
+      return std::format(
+         "[Run,Evt,Lumi,Time,BunchCross,DetMask] = [{},{},{},{}:{},{},{:#018x}]",
+         runNumber(),
+         eventNumber(),
+         lumiBlock(),
+         timeStamp(),
+         timeStampNSOffset(),
+         bcid(),
+         detectorMask() );
+   }
+
    /// This operator is provided to make it convenient to print debug messages
    /// including information about the current event. With something like:
    ///
@@ -1047,37 +1033,28 @@ namespace xAOD {
    ///   ATH_MSG_VERBOSE( "Event = " << *ei );
    /// </code>
    ///
+   /// A formatter specialization is also provided, so that these can also
+   /// be written
+   ///
+   /// <code>
+   ///   std::println( "Event = {}", *ei );
+   /// </code>
+   ///
+   /// or:
+   ///
+   /// <code>
+   ///   ATH_MSG_VERBOSE( "Event = {}", *ei );
+   /// </code>
+   ///
+   ///
    /// @param out The output stream to write EventInfo information to
    /// @param ei The EventInfo object to print information about
    /// @returns The same output stream that the operator received
    ///
    std::ostream& operator<< ( std::ostream& out,
                               const xAOD::EventInfo_v1& ei ) {
-
-      // Get the current state of the stream:
-      const char fillChar = out.fill();
-      const std::ios_base::fmtflags flags = out.flags();
-      const std::streamsize width = out.width();
-
-      // Do the printout:
-      out << "[Run,Evt,Lumi,Time,BunchCross,DetMask] = ["
-          << ei.runNumber()
-          << "," << ei.eventNumber()
-          << "," << ei.lumiBlock()
-          << "," << ei.timeStamp()
-          << ":" << ei.timeStampNSOffset()
-          << "," << ei.bcid()
-          << ",0x" << std::hex << std::setw( 16 ) << std::setfill( '0' )
-          << ei.detectorMask()
-          << "]";
-
-      // Restore the original state of the stream:
-      out.fill( fillChar );
-      out.flags( flags );
-      out.width( width );
-
-      // Return the stream:
-      return out;
+     std::print( out, "{}", ei.toString() );
+     return out;
    }
 
    /// This operator is provided to make it convenient to print debug messages
@@ -1089,24 +1066,7 @@ namespace xAOD {
    ///
    std::ostream& operator<<( std::ostream &out,
                              const xAOD::EventInfo_v1::PileUpMixtureID& id ) {
-
-       // Get the current state of the stream:
-       const char fillChar = out.fill();
-       const std::ios_base::fmtflags flags = out.flags();
-       const std::streamsize width = out.width();
-
-       // Do the printout:
-       out << std::hex << std::setw( 16 ) << std::setfill( '0' );
-       out << id.lowBits;
-       out << id.highBits;
-
-       // Restore the original state of the stream:
-       out.fill( fillChar );
-       out.flags( flags );
-       out.width( width );
-
-
-       // Return the stream:
+       std::print( out, "{}", id );
        return out;
    }
 

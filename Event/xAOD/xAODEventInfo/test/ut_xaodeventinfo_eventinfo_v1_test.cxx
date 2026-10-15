@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-/*
- */
 /**
  * @file xAODEventInfo/test/ut_xoadeventinfo_eventinfo_v1_test.cxx
  * @author scott snyder <snyder@bnl.gov>
@@ -17,13 +15,13 @@
 //#include "AthContainers/exceptions.h"
 //#include "TestTools/expect_exception.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 // Testing detector flags.
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   typedef xAOD::EventInfo_v1 EI;
 
@@ -120,7 +118,7 @@ void test1()
 
 int main()
 {
-  std::cout << "ut_xaodeventinfo_eventinfo_v1_test\n";
+  std::println ("ut_xaodeventinfo_eventinfo_v1_test");
   test1();
   return 0;
 }

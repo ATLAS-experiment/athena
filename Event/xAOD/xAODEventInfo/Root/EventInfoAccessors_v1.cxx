@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: EventInfoAccessors_v1.cxx 579930 2014-01-24 10:36:54Z krasznaa $
@@ -47,8 +47,9 @@ namespace xAOD {
          DEFINE_ACCESSOR( Lumi, lumiFlags );
 
       default:
-         std::cerr << "xAOD::EventInfo_v1 ERROR Unknown sub-detector ("
-                   << subDet << ") requested" << std::endl;
+         std::println (std::cerr,
+                       "xAOD::EventInfo_v1 ERROR Unknown sub-detector ({}) requested",
+                       static_cast<int>(subDet) );
          return nullptr;
       }
    }
@@ -71,8 +72,9 @@ namespace xAOD {
          DEFINE_CONST_ACCESSOR( Lumi, lumiFlags );
 
       default:
-         std::cerr << "xAOD::EventInfo_v1 ERROR Unknown sub-detector ("
-                   << subDet << ") requested" << std::endl;
+        std::println( std::cerr,
+                      "xAOD::EventInfo_v1 ERROR Unknown sub-detector ({}) requested",
+                      static_cast<int>(subDet) );
          return nullptr;
       }
    }

@@ -14,7 +14,7 @@
 #include "AthContainers/exceptions.h"
 #include "TestTools/expect_exception.h"
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 #ifndef XAOD_STANDALONE
@@ -26,7 +26,7 @@ class EventContext{};
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   xAOD::EventInfoAuxContainer_v1 eiac;
@@ -80,7 +80,7 @@ void test1()
 
 int main()
 {
-  std::cout << "ut_xaodeventinfo_eventinfoauxcontainer_v1_test\n";
+  std::println ("ut_xaodeventinfo_eventinfoauxcontainer_v1_test");
   test1();
   return 0;
 }

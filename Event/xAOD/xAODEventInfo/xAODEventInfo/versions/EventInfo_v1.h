@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef XAODEVENTINFO_VERSIONS_EVENTINFO_V1_H
@@ -504,6 +504,9 @@ namespace xAOD {
       /// Cleanse the object after being read in
       void toTransient();
 
+      /// Convert to a string representation.
+      std::string toString() const;
+
    private:
       std::vector< EventInfo_v1::SubEvent > makeSubEvents() const;
 
@@ -527,6 +530,36 @@ namespace xAOD {
    bool operator== ( const xAOD::EventInfo_v1::PileUpMixtureID& a, const xAOD::EventInfo_v1::PileUpMixtureID& b );
 
 } // namespace xAOD
+
+
+namespace std {
+
+// C++23 compatible formatters.
+template <>
+struct formatter<xAOD::EventInfo_v1>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format(const xAOD::EventInfo_v1& k, FmtContext& ctx) const
+  {
+    return formatter<string_view>::format( k.toString(), ctx );
+  }
+};
+
+template <>
+struct formatter<xAOD::EventInfo_v1::PileUpMixtureID>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format(const xAOD::EventInfo_v1::PileUpMixtureID& id, FmtContext& ctx) const
+  {
+    return std::format_to( ctx.out(),
+                           "{:016x}{:016x}", id.lowBits, id.highBits );
+  }
+};
+
+} // namespace std
+
 
 // Declare the inheritance of the type:
 #include "xAODCore/BaseInfo.h"

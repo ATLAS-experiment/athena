@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ut_xaodeventinfo_evtstore_test.cxx 727083 2016-03-01 15:20:50Z krasznaa $
 
 // System include(s):
 #include <memory>
@@ -40,7 +38,7 @@ private:
    do {                                                        \
       const bool result = EXP;                                 \
       if( ! result ) {                                         \
-         std::cerr << "Failed in test: " << #EXP << std::endl; \
+         std::println (std::cerr, "Failed in test: {}", #EXP );       \
          return 1;                                             \
       }                                                        \
    } while( 0 )
