@@ -27,14 +27,14 @@ MainGenerators += ["Epos4"]
 MainGenerators += ["ParticleGun"]
 MainGenerators += ["CosmicGenerator", "BeamHaloGenerator"]
 # Heavy ion generators - as a special group to avoid problems in sorting
-HIMainGenerators = ["AMPT","SuperChic","Starlight", "Hijing"]
+HIMainGenerators = ["SuperChic","Starlight", "Hijing"]
 # Reading in fully-formed events
 
 MainGenerators += ["HepMCAscii"]
 
 # Special QED and decay afterburners
 # note: we have to use TauolaPP, because Tauolapp is used as a namespace in the external Tauolapp code
-AfterburnerGenerators = ["Photospp", "TauolaPP", "EvtGen", "ParticleDecayer"]
+AfterburnerGenerators = ["Photospp", "TauolaPP", "EvtGen", "ParticleDecayer", "AddFlowByShifting"]
 
 # Set up list of allowed generators. The sample.generators list will be used
 # to set random seeds, determine input config and event files, and report used generators to AMI.

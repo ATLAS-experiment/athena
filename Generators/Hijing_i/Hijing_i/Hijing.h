@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef GENERATORMODULESHIJING_H
@@ -17,8 +17,6 @@
 #include "Hijing_i/HijJet4.h"
 #include "Hijing_i/HiStrng.h"
 #include "Hijing_i/HijCrdn.h"
-
-typedef std::vector<std::string> CommandVector;
 
 // new to store hijing event parameters
 #include "GeneratorObjects/HijingEventParams.h"
@@ -42,7 +40,7 @@ typedef std::vector<std::string> CommandVector;
 
 class Hijing:public GenModule {
 public:
-  Hijing(const std::string& name, ISvcLocator* pSvcLocator);
+  using GenModule::GenModule;
   virtual ~Hijing() = default;
 
   virtual StatusCode genInitialize() override;
@@ -71,21 +69,22 @@ protected:
 
   // Vertex shifting
 
-  float m_x{0.};
-  float m_y{0.};
-  float m_z{0.};
-  bool m_sel{false}; // Vertex shifting on or off
-  bool m_spec{true}; // TRUE  will keep specator information (default)
+  DoubleProperty m_x{this, "x", 0.};
+  DoubleProperty m_y{this, "y", 0.};
+  DoubleProperty m_z{this, "z", 0.};
+  BooleanProperty m_sel{this, "selectVertex", false}; // Select vertex location (off for random)
+  BooleanProperty m_spec{this, "keepSpectators", true}; // TRUE  will keep specator information (default)
 
   //Set internal randomization of vertices for beam gas gen (on or off).
-  bool m_rand{false};
-  bool m_wide{false}; // True allows particles with x,y distributions
-  bool m_prand{false}; //BPK mirror event randomly
-  bool m_keepAllDecayVertices{true};
+  BooleanProperty m_rand{this, "randomizeVertices", false};
+  // Allow randoms off the beamline (out to the pipe)
+  BooleanProperty m_wide{this, "wide", false}; // True allows particles with x,y distributions
+  BooleanProperty m_prand{this, "randomizeP", false}; // BPK randomizes the left<->right direction by mirroring momenta for beam gas
+  BooleanProperty m_keepAllDecayVertices{this, "keepAllDecayVertices", true};
 
   // Limit settings
-  double m_partonStoreMinPt{5.0};
-  double m_vertexOffsetCut{1.0E-7};
+  DoubleProperty m_partonStoreMinPt{this, "partonStoreMinPt", 5.0};
+  DoubleProperty m_vertexOffsetCut{this, "vertexOffsetCut", 1.0E-7};
 
   // Random numbers seed
   int  m_randomseed{0};
@@ -95,7 +94,11 @@ protected:
   int m_events{0};
 
   // Commands to setup hijing
-  CommandVector m_InitializeVector;
+  StringArrayProperty m_InitializeVector{this,
+                                         "Initialize",
+                                         {},
+                                         "List of parameters for Hijing initialization",
+                                         "GeneratorSettings<std::string>"};
 
   // Accessor to HIJING Options and parameters COMMON
   HiParnt m_hiparnt;
