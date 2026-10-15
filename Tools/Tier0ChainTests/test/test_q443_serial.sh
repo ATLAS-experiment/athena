@@ -26,7 +26,7 @@ rc2=-9999
 if [ $rc1 -eq 0 ]
 then
   art.py compare grid --entries 20 "$1" "$2" --mode=semi-detailed --order-trees --ignore-exit-code diff-pool \
-  --ignore-leave 'Token' --ignore-leave 'index_ref' --ignore-leave '(.*)_timings\.(.*)' --ignore-leave '(.*)_mems\.(.*)' --ignore-leave '(.*)TrigCostContainer(.*)' --ignore-leave '(.*)HLTNav_Summary_OnlineSlimmed(.*)'
+  --ignore-leave 'Token' --ignore-leave 'index_ref' --ignore-leave '(.*)TrigCostContainer(.*)' --ignore-leave '(.*)HLTNav_Summary_OnlineSlimmed(.*)'
   rc2=$?
 fi
 echo "art-result: $rc2 Diff"

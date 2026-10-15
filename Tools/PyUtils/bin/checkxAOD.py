@@ -45,7 +45,7 @@ if __name__ == "__main__":
     # "Trig" and "caloringer", "InDet" and "LRT"
     # Set up categorization matching strings:
     categoryStrings = {
-        "MetaData" : ["^DataHeader", "(.*)_mems$", "(.*)_timings$", "^Token$", "^RawInfoSummaryForTag$", "^index_ref$"],
+        "MetaData" : ["^DataHeader", "^Token$", "^RawInfoSummaryForTag$", "^index_ref$"],
         "Trig"     : ["^HLT", "^LVL1", "^L1", "^xTrig", "^Trig", "^CTP_Decision", "^TrigNavigation", ".*TriggerTowers", "TileTTL1MBTS", "^TileL2Cnt", "RoIBResult","^_TRIGGER","^L1TopoRawData", "BunchConfKey"],
         "MET"      : ["^MET", "^METMAP", "JEMEtSums"],
         "EvtId"    : ["^ByteStreamEventInfo", "^EventInfo", "^McEventInfo", "^LumiBlockN", "^EventWeight", "^RunNumber", "^ConditionsRun", "^EventTime", "^BunchId", "^EventNumber","^IsTestBeam", "^IsSimulation", "^IsCalibration", "^AvgIntPerXing", "^ActualIntPerXing", "^RandomNumber", "^McChannel"], 

@@ -166,7 +166,7 @@ class FrozenTier0PolicyCheck(WorkflowCheck):
                         diff_root_list.append(r"'{}'".format(stripped_line))
         else:
             self.logger.info("No diff rules file exists, using the default list")
-            diff_root_list = [r"'index_ref'", r"'(.*)_timings(.*)'", r"'(.*)_mems(.*)'"]
+            diff_root_list = [r"'index_ref'"]
 
         validation_file = test.validation_path / file_name
         log_file = test.validation_path / f"diff-root-{test.ID}.{self.format}.log"

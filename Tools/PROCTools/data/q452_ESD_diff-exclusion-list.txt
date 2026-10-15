@@ -1,6 +1,4 @@
 index_ref
-(.*)_mems(.*)
-(.*)_timings(.*)
 
 # Ignore most b-tagging outside the recommended taggers: GN2v01
 xAOD::BTagging(?!.*PFlow.*GN2v01_p.*)
