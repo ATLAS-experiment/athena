@@ -1,10 +1,10 @@
 // -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef INDETTRACKSYSTEMATICSTOOLS_ITRACKFILTERTOOL_H
-#define INDETTRACKSYSTEMATICSTOOLS_ITRACKFILTERTOOL_H
+#ifndef INDETTRACKSYSTEMATICSTOOLS_IINCLUSIVETRACKFILTERTOOL_H
+#define INDETTRACKSYSTEMATICSTOOLS_IINCLUSIVETRACKFILTERTOOL_H
 
 #include "AsgTools/IAsgTool.h"
 #include "PATInterfaces/ISystematicsTool.h"

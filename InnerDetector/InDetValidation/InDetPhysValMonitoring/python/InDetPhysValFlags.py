@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.Enums import LHCPeriod
 import AthenaCommon.SystemOfUnits as Units
@@ -52,7 +52,7 @@ def createIDPVMConfigFlags():
     icf.addFlag('JetAbsEtaMax', lambda pcf: 2.5 if pcf.Detector.GeometryID else 4.0)
     icf.addFlag('PrimaryVertexContainer', 'PrimaryVertices')
     
-    icf.addFlag("jetCollection", "AntiKt4EMPflowJets")
+    icf.addFlag("jetCollection", "AntiKt4EMPFlowJets")
     icf.addFlag('JetPtMin', 100.*Units.GeV)
     icf.addFlag('JetPtMax', 5000.*Units.GeV)
     icf.addFlag('setCSVName', "")

@@ -30,6 +30,7 @@
 #include "InDetTrackSystematicsTools/InDetTrackTruthFilterTool.h"
 #include "InDetTrackSystematicsTools/InDetTrackTruthOriginTool.h"
 #include "InDetTrackSystematicsTools/JetTrackFilterTool.h"
+#include "InDetTrackSystematicsTools/TrackFilterTool.h"
 
 // Smart slim testing includes:
 #include "xAODCore/tools/IOStats.h"

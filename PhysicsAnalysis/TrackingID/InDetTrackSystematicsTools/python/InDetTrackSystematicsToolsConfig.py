@@ -37,7 +37,7 @@ def InDetTrackTruthFilterToolCfg(flags, name="InDetTrackTruthFilterTool",
             InDetTrackTruthOriginToolCfg(flags)))
         
     # 2022 recommendations (MC23a)
-    if flags.Input.MCCampaign in [Campaign.MC23a, Campaign.MC23d, Campaign.MC23e, Campaign.MC23g]:
+    if flags.GeoModel.Run is LHCPeriod.Run3:
         kwargs.setdefault("calibFileNomEff", "InDetTrackSystematicsTools/CalibData_22.0_2022-v00/TrackingRecommendations_prelim_rel22.root")
         kwargs.setdefault("fFakeLoose", 0.40)
         kwargs.setdefault("fFakeTight", 1.00)
@@ -87,6 +87,39 @@ def JetTrackFilterToolCfg(flags, name="JetTrackFilterTool", seed=2, **kwargs):
     acc.setPrivateTools(CompFactory.InDet.JetTrackFilterTool(name, **kwargs))
     return acc
 
+def TrackFilterToolCfg(flags, name="TrackFilterTool",
+                       truthSeed=1, jetSeed=2, **kwargs):
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("TruthSeed", truthSeed)
+    kwargs.setdefault("JetSeed", jetSeed)
+
+    if "trackOriginTool" not in kwargs:
+        kwargs["trackOriginTool"] = acc.popToolsAndMerge(
+            InDetTrackTruthOriginToolCfg(flags)
+        )
+
+    if flags.GeoModel.Run is LHCPeriod.Run3:
+        kwargs.setdefault("fFakeLoose", 0.40)
+        kwargs.setdefault("fFakeTight", 1.00)
+        kwargs.setdefault("fFakeUncertTIDE", 0.25)
+
+    elif flags.GeoModel.Run is LHCPeriod.Run2:
+        kwargs.setdefault("fFakeLoose", 0.10)
+        kwargs.setdefault("fFakeTight", 1.00)
+        kwargs.setdefault("fFakeUncertTIDE", 0.35)
+
+    else:
+        raise ValueError(
+            f"Unsupported campaign/run for {name}"
+        )
+        
+    acc.setPrivateTools(
+        CompFactory.InDet.TrackFilterTool(name, **kwargs)
+    )
+
+    return acc
+
 def InclusiveTrackFilterToolCfg(flags, name="InclusiveTrackFilterTool",
                                  seed=3, **kwargs):
     acc = ComponentAccumulator()
@@ -99,6 +132,7 @@ def InclusiveTrackFilterToolCfg(flags, name="InclusiveTrackFilterTool",
         kwargs.setdefault("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/LargeD0TrackingRecommendations_mc23d.root")
     elif flags.Input.MCCampaign is Campaign.MC23e:
         kwargs.setdefault("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_25.2_2025-v00/LargeD0TrackingRecommendations_mc23e.root")
+
     # Run 2 recommendations (MC20)
     elif flags.GeoModel.Run is LHCPeriod.Run2:
         kwargs.setdefault("calibFileLRTEff", "InDetTrackSystematicsTools/CalibData_24.0_2023-v00/LargeD0TrackingRecommendations_20230824.root")
@@ -338,4 +372,61 @@ def JetTrackFilteringAlgCfg(
         ca.addPublicTool(alg.JetFilterTool)
 
     ca.addEventAlgo(alg)
+    return ca
+
+
+def FakeRateFilterAlgCfg(flags, name, mode, systematics, **kwargs):
+    """Configure a FakeRateFilterAlg for one systematic.
+
+    mode is one of "inclusive", "tide", or "tft" (track-filter-tool).
+    OutputTrackContainer is optional; if not provided, it defaults to
+    "InDetTrackParticles_Filtered".  The output container name is modified
+    for multiple systematics to avoid collisions.
+    """
+    ca = ComponentAccumulator()
+
+    kwargs.setdefault("InputTrackContainer", "InDetTrackParticles")
+    kwargs.setdefault("JetContainer", "AntiKt4EMPFlowJets")
+    output_tracks = kwargs.pop("OutputTrackContainer", None)
+
+    if output_tracks is None:
+        output_tracks = "InDetTrackParticles_Filtered"
+
+    for syst in systematics:
+        alg_kwargs = kwargs.copy()
+        alg_kwargs["SystematicVariation"] = syst
+
+        if len(systematics) == 1:
+            alg_kwargs["OutputTrackContainer"] = output_tracks
+        else:
+            alg_kwargs["OutputTrackContainer"] = f"{output_tracks}_{syst}"
+
+        if mode == "inclusive":
+            alg_kwargs.setdefault("InclusiveFilterTool", ca.popToolsAndMerge(
+                InDetTrackTruthFilterToolCfg(
+                    flags,
+                    name=f"InDetTrackTruthFilterTool_{syst}",
+                )
+            ))
+        elif mode == "tide":
+            alg_kwargs.setdefault("JetFilterTool", ca.popToolsAndMerge(
+                JetTrackFilterToolCfg(
+                    flags,
+                    name=f"JetTrackFilterTool_{syst}",
+                )
+            ))
+        elif mode == "tft":
+            alg_kwargs.setdefault("TrackFilterTool", ca.popToolsAndMerge(
+                TrackFilterToolCfg(
+                    flags,
+                    name=f"TrackFilterTool_{syst}",
+                )
+            ))
+        else:
+            raise ValueError(f"Unknown FakeRateFilterAlg mode: {mode}")
+
+        ca.addEventAlgo(
+            CompFactory.InDet.FakeRateFilterAlg(f"{name}_{syst}", **alg_kwargs)
+        )
+
     return ca
