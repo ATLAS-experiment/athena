@@ -48,7 +48,7 @@ StatusCode TauSmearingTool::initialize()
         if (m_sCampaign=="mc23") {
           m_sInputFilePath = sDirectory+"TES_TrueHadTau_GNTau_mc23_v0.root";
         } else {
-          ATH_MSG_ERROR("Tau Smearing recommendations with GNTau are not available for "<< m_sCampaign); 
+          m_sInputFilePath = sDirectory+"TES_TrueHadTau_GNTau_mc20_v0.root";  
         }  
       } else { 
         if (m_sCampaign=="mc23") {
