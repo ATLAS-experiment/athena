@@ -20,9 +20,6 @@
 #include "TrkEventPrimitives/FitQuality.h"
 #include "TrkEventPrimitives/LocalParameters.h"
 
-#include "egammaEvent/egammaParamDefs.h"
-#include "egammaEvent/egammaPIDdefsObs.h"
-
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/Egamma.h"
 #include "xAODEgamma/Photon.h"

@@ -23,9 +23,6 @@
 #include "GaudiKernel/SystemOfUnits.h"
 #include "GaudiKernel/PhysicalConstants.h"
 
-#include "egammaEvent/egammaParamDefs.h"
-#include "egammaEvent/egammaPIDdefsObs.h"
-
 #include "xAODMissingET/MissingET.h"
 #include "xAODMissingET/MissingETContainer.h"
 

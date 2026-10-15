@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( InDetPerformanceMonitoring )
@@ -12,6 +12,6 @@ atlas_add_component( InDetPerformanceMonitoring
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AsgTools AthenaBaseComps AthenaMonitoringLib ElectronPhotonSelectorToolsLib EventPrimitives GaudiKernel ITrackToVertex IdDictDetDescr BeamSpotConditionsData InDetTrackSelectionToolLib JetInterface MuonAnalysisInterfacesLib Particle StoreGateLib TRT_ReadoutGeometry TrigDecisionToolLib TrigConfxAODLib TriggerMatchingToolLib TrkEventPrimitives TrkExInterfaces TrkParameters TrkParticleBase TrkTrackSummary TrkTruthData TrkVertexFitterInterfaces TrackVertexAssociationToolLib egammaEvent egammaInterfacesLib xAODCaloEvent xAODEgamma xAODEventInfo xAODJet xAODMissingET xAODMuon xAODTracking xAODTruth TruthUtils )
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AsgTools AthContainers AthenaBaseComps AthenaKernel AthenaMonitoringLib ElectronPhotonSelectorToolsLib EventPrimitives GaudiKernel GeneratorObjects ITrackToVertex BeamSpotConditionsData InDetTrackSelectionToolLib JetInterface MuonAnalysisInterfacesLib StoreGateLib TrigDecisionToolLib TrigConfxAODLib TriggerMatchingToolLib TrkEventPrimitives TrkExInterfaces TrkParameters TrkTrack TrkTruthData TrkVertexFitterInterfaces TrackVertexAssociationToolLib egammaInterfacesLib xAODCaloEvent xAODEgamma xAODEventInfo xAODJet xAODMissingET xAODMuon xAODTracking xAODTruth TruthUtils )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
