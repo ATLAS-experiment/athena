@@ -69,7 +69,7 @@ namespace FlavorTagJetDecorators {
                        isoOverPt(*el), dpop(*el))) {
           selected.push_back(
             ElementLink<xAOD::IParticleContainer>(
-              *electrons, el->index()));
+              *electrons, el->index(), ctx));
         }
       }
 

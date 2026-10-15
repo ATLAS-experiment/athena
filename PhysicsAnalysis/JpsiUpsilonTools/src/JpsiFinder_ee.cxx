@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ****************************************************************************
@@ -400,7 +400,7 @@ namespace Analysis {
             std::vector<ElementLink<DataVector<xAOD::TrackParticle> > > newLinkVector;
             for(unsigned int i=0; i< myVxCandidate->trackParticleLinks().size(); i++){
                 ElementLink<DataVector<xAOD::TrackParticle> > mylink=myVxCandidate->trackParticleLinks()[i]; //makes a copy (non-const)
-                mylink.setStorableObject(*importedTrackCollection, true);
+                mylink.setStorableObject(*importedTrackCollection, true, ctx);
                 newLinkVector.push_back( mylink );
                 ATH_MSG_DEBUG("Set a link!");
             }

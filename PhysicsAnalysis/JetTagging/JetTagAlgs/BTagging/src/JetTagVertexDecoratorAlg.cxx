@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "BTagging/JetTagVertexDecoratorAlg.h"
@@ -267,7 +267,7 @@ namespace Analysis {
                 continue;
               }
               ElementLink<xAOD::TrackParticleContainer> tpel;
-              tpel.toContainedElement(*h_TrackCollectionName, tp);
+              tpel.toContainedElement(*h_TrackCollectionName, tp, ctx);
               badtrackEL.push_back(tpel);
             }
   
