@@ -26,16 +26,6 @@ namespace ActsTrk{
              *  @param volume: The envelope of interest to be checked */
             StatusCode checkVolume(const Acts::GeometryContext& tgContext,
                                    const Acts::TrackingVolume& volume) const;
-            /** @brief Extracts the vertices form the TrackingVolume marking its edges
-             *  @param tgContext: The geometry context to position the volume
-             *  @param volume: The envelope from which the vertex points shall be extracted */
-            std::vector<Amg::Vector3D> edges(const Acts::GeometryContext& tgContext,
-                                             const Acts::TrackingVolume& volume) const;
-            /** @brief Extracts the vertices from a surface
-              * @param tgContext: The geometry context to position the surface
-              * @param volume: The surface from which the edge vertices are to be extracted */
-            std::vector<Amg::Vector3D> vertices(const Acts::GeometryContext& tgContext,
-                                                const Acts::Surface& surface) const;
             /** @brief The handle to the tracking geometry service */
             ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
@@ -44,6 +34,8 @@ namespace ActsTrk{
             Gaudi::Property<std::string> m_caloExitVolume{this, "CaloExitVolume", ""};
             
             Gaudi::Property<std::string> m_MsExitVolume{this, "MsExitVolume", ""};
+
+            Gaudi::Property<unsigned> m_nVertices{this, "nVertices", 10};
             
     };
 }

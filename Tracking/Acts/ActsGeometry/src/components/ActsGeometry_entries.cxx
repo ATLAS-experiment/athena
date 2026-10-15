@@ -19,7 +19,6 @@
 #include "../WriteTrackingGeometry.h"
 #include "../TrackingGeometrySvc.h"
 #include "../ExtrapolationTool.h"
-#include "../GeometryEnvelopeTest.h"
 
 
 DECLARE_COMPONENT(ActsWriteTrackingGeometryTransforms)
@@ -35,5 +34,3 @@ DECLARE_COMPONENT(ActsTrk::CaloBlueprintNodeBuilder)
 DECLARE_COMPONENT(ActsTrk::ITkMaterialDecoratorTool)
 DECLARE_COMPONENT(ActsTrk::WriteTrackingGeometry)
 DECLARE_COMPONENT(ActsTrk::TrackingGeometrySvc)
-DECLARE_COMPONENT(ActsTrk::GeometryEnvelopeTest)
-

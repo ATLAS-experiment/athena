@@ -19,6 +19,7 @@
 #include "src/ReadoutGeoDumpAlg.h"
 #include "src/ExtrapolationTestAlg.h"
 #include "src/ObjTrackVisualizationAlg.h"
+#include "src/GeometryEnvelopeTest.h"
 // Tools
 #include "src/PhysValTool.h"
 
@@ -39,5 +40,6 @@ DECLARE_COMPONENT( ActsTrk::ActsInspectTruthContentAlg )
 DECLARE_COMPONENT( ActsTrk::ReadoutGeoDumpAlg )
 DECLARE_COMPONENT( ActsTrk::ExtrapolationTestAlg)
 DECLARE_COMPONENT( ActsTrk::ObjTrackVisualizationAlg)
+DECLARE_COMPONENT( ActsTrk::GeometryEnvelopeTest )
 // Tools
 DECLARE_COMPONENT( ActsTrk::PhysValTool )

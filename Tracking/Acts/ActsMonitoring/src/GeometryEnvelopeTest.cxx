@@ -10,6 +10,8 @@
 #include "Acts/Surfaces/RegularSurface.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 #include "Acts/Definitions/Units.hpp"
+
+#include "MuonReadoutGeometryR4/BoundsExpander.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 
 
@@ -66,7 +68,7 @@ namespace ActsTrk{
         for (const Acts::Surface& surface : volume.surfaces()) {
             ATH_MSG_INFO("Check surface "<<surface.geometryId()<<", "<<surface.bounds()<<", "
                         <<Amg::toString(surface.center(tgContext)));
-            std::vector<Amg::Vector3D> surfaceVertices = vertices(tgContext, surface);
+            std::vector<Amg::Vector3D> surfaceVertices = MuonGMR4::BoundsExpander::cornerPoints(tgContext, surface, m_nVertices);
             for (const Amg::Vector3D& vert : surfaceVertices) {
                 const Amg::Vector3D lVert = volume.globalToLocalTransform(tgContext)* vert;
                 if (!volume.volumeBounds().inside(lVert, 0.1_mm)) {
@@ -83,7 +85,8 @@ namespace ActsTrk{
 
         for (const Acts::TrackingVolume& childVolume : volume.volumes()) {
             /// Check that the child volume vertices are all conatined
-            for (const Amg::Vector3D& vert : edges(tgContext, childVolume)) {
+            for (const Amg::Vector3D& vert : MuonGMR4::BoundsExpander::cornerPoints(tgContext, childVolume, 
+                                                                                    m_nVertices)) {
                 const Amg::Vector3D lVert = volume.globalToLocalTransform(tgContext)* vert;
                 if (!volume.volumeBounds().inside(lVert)) {
                     ATH_MSG_ERROR("The vertex "<<Amg::toString(lVert)<<", perp:"<<lVert.perp()
@@ -109,21 +112,5 @@ namespace ActsTrk{
             ATH_CHECK(checkVolume(tgContext, childVolume));
         }
         return StatusCode::SUCCESS;
-    }
-     std::vector<Amg::Vector3D> GeometryEnvelopeTest::edges(const Acts::GeometryContext& tgContext,
-                                                            const Acts::TrackingVolume& volume) const {
-        std::vector<Amg::Vector3D> result{};
-        for (const auto& oriented :  volume.volumeBounds().orientedSurfaces(volume.localToGlobalTransform(tgContext))) {
-            std::vector<Amg::Vector3D> verts = vertices(tgContext,*oriented.surface);
-            result.insert(result.end(), 
-                          std::make_move_iterator(verts.begin()),
-                          std::make_move_iterator(verts.end()));
-        }
-        return result;
-    }
-    std::vector<Amg::Vector3D> GeometryEnvelopeTest::vertices(const Acts::GeometryContext& tgContext,
-                                                              const Acts::Surface& surface) const {
-        Acts::Polyhedron polyhedron = surface.polyhedronRepresentation(tgContext, 10);
-        return polyhedron.vertices;
     }
 }
