@@ -60,16 +60,22 @@ def StandaloneMuonOutputCfg(flags):
     
     #Add the xAOD muon PRD containers to the ESD output 
     exclude = ["", "mdtTrkPrdLink", "rpcTrkPrdLink", "tgcTrkPrdLink", "segmentFitDriftSign"]
-    for cont_t, cont_name in [("MdtDriftCircle", "xMdtDriftCircles"),
-                              ("MdtTwinDriftCircle", "xMdtTwinDriftCircles"),
-                              ("sTgcStrip", "xAODsTgcStrips"),
-                              ("sTgcPad", "xAODsTgcPads"),
-                              ("sTgcWire", "xAODsTgcWires"),
-                              ("MMCluster", "xAODMMClusters"),
-                              ("TgcStrip", "xTgcStrips"),
-                              ("RpcStrip", "xRpcStrips" ),
-                              ("RpcStrip2D", "xRpcBILStrips"),
-                              ("CombinedMuonStrip", "CombinedMuonPrds" )]:
+    contList =  [("MdtDriftCircle", "xMdtDriftCircles"),
+                 ("MdtTwinDriftCircle", "xMdtTwinDriftCircles"),
+                 ("sTgcStrip", "xAODsTgcStrips"),
+                 ("sTgcPad", "xAODsTgcPads"),
+                 ("sTgcWire", "xAODsTgcWires"),
+                 ("MMCluster", "xAODMMClusters"),
+                 ("TgcStrip", "xTgcStrips"),
+                 ("CombinedMuonStrip", "CombinedMuonPrds")]
+
+    from AthenaConfiguration.Enums import LHCPeriod
+    if flags.GeoModel.Run >= LHCPeriod.Run4:
+        contList += [ ("RpcStrip", "xRpcStrips" ), ("RpcStrip2D", "xRpcBILStrips") ]
+    else:
+        contList += [("RpcStrip", "xRpcMeasurements")]
+
+    for cont_t, cont_name in contList:
         esd_items+=[f"xAOD::{cont_t}Container#{cont_name}",
                     "xAOD::{cont_t}AuxContainer#{cont_name}Aux{exclude}".format(
                         cont_t = cont_t,cont_name = cont_name,
