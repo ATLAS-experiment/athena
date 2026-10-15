@@ -169,6 +169,7 @@ void MuonCreatorAlg::createMuon(const EventContext& ctx,
         case MuTagIMO:
             newMuon->setMuonType(xAOD::Muon::MuonType::SegmentTagged);
             break;
+        case CaloTag:
         case CaloScore:
              newMuon->setMuonType(xAOD::Muon::MuonType::CaloTagged);
              break;
