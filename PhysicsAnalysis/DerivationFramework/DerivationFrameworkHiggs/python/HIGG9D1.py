@@ -301,7 +301,7 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     DiphotonVertexDecorator = acc.popToolsAndMerge(DiphotonVertexDecoratorCfg(
         flags,
         MinimumPhotonPt    = 4800.0,
-        DiphotonVertexName = "HIGG9D1_DiphotonPrimaryVertices"))
+        DiphotonVertexContainer = "HIGG9D1_DiphotonPrimaryVertices"))
     acc.addPublicTool(DiphotonVertexDecorator)
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name = "DiphotonVertexAugmentation", AugmentationTools = [DiphotonVertexDecorator]), sequenceName="HIGG9D1Sequence")
 
