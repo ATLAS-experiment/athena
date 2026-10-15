@@ -1,12 +1,10 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( LArCafJobs )
 
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree MathCore Matrix Hist Graf RIO )
-find_package( CLHEP )
-
 
 # Component(s) in the package:
 atlas_add_library( LArCafJobsLib
@@ -32,9 +30,9 @@ atlas_add_library( LArCafJobsLib
                    src/LArReadCells.cxx
                    src/LArReadSC.cxx
                    PUBLIC_HEADERS LArCafJobs
-                   INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
-                   LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CaloConditions CaloDetDescrLib CaloIdentifier CaloUtilsLib GaudiKernel Identifier LArCablingLib LArElecCalib LArIdentifier LArRawConditions LArRawEvent LArRecConditions StoreGateLib TrigDecisionToolLib egammaEvent LumiBlockData LArRecEvent
-                   PRIVATE_LINK_LIBRARIES AthenaPoolUtilities CaloEvent CaloGeoHelpers NavFourMom TrigSteeringEvent TrigT1Result xAODEventInfo )
+                   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps AthenaKernel CaloConditions CaloDetDescrLib CaloEvent CaloIdentifier CxxUtils GaudiKernel LArCablingLib LArElecCalib LArIdentifier LArRawConditions LArRawEvent LArRecConditions StoreGateLib TrigDecisionToolLib LumiBlockData LArRecEvent
+                   PRIVATE_LINK_LIBRARIES CaloGeoHelpers CaloUtilsLib Identifier TrigSteeringEvent TrigT1Result xAODEventInfo )
 
 atlas_add_component( LArCafJobs
                      src/components/*.cxx
