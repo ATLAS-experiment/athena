@@ -25,8 +25,6 @@ CREATED:  July 2011
 // INCLUDE HEADER FILES:
 
 #include "AthenaBaseComps/AthAlgorithm.h"
-#include "egammaEvent/egammaParamDefs.h"
-#include "egammaEvent/egammaPIDdefsObs.h"
 
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/ElectronContainer.h"
