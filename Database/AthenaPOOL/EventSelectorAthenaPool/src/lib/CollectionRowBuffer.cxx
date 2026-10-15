@@ -2,9 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "CollectionSvc/CollectionRowBuffer.h"
-#include "CollectionSvc/CollectionDescription.h"
-#include "CollectionSvc/CollectionColumn.h"
+#include "CollectionRowBuffer.h"
+#include "CollectionColumn.h"
 #include "PersistentDataModel/Token.h"
 
 
@@ -94,7 +93,7 @@ pool::CollectionRowBuffer::token() const
 const std::string&
 pool::CollectionRowBuffer::tokenName() const
 {
-  return CollectionDescription::tokenColumn().name();
+  return CollectionColumn::tokenColumn().name();
 }
 
 

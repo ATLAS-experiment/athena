@@ -15,7 +15,7 @@
 /////////////////////////////////////////////////
 //
 // Class which acts like coral::AttributeSpecification 
-//   BUT allows annotation like pool::CollectionDescription
+//   BUT allows annotation of collection attributes
 //   BUT which is encased in name,value pair interface
 //   which is not accessible through the constructor
 //

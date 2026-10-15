@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef COLLECTIONSVC_COLLECTIONROWBUFFER_H
-#define COLLECTIONSVC_COLLECTIONROWBUFFER_H
+#ifndef EVENTSELECTORATHENAPOOL_COLLECTIONROWBUFFER_H
+#define EVENTSELECTORATHENAPOOL_COLLECTIONROWBUFFER_H
 
 #include "CoralBase/AttributeList.h"
 #include "CxxUtils/checker_macros.h"
@@ -15,7 +15,7 @@ class Token;
 namespace pool {
 
   /** 
-   * @class CollectionRowBuffer CollectionRowBuffer.h CollectionSvc/CollectionRowBuffer.h
+   * @class CollectionRowBuffer CollectionRowBuffer.h
    *
    * A class representing a row of a collection. It contains a list of named attributes
    * and a single POOL object reference. It is used when creatoing a new collection or when

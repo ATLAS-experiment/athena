@@ -9,7 +9,7 @@
 
 #include "EventSelectorAthenaPool.h"
 #include "EventContextAthenaPool.h"
-#include "PoolCollectionConverter.h"
+#include "EventSelectorAthenaPool/Collection.h"
 
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "PersistentDataModel/Token.h"
@@ -31,8 +31,8 @@
 #include "AthenaKernel/IDataShare.h"
 
 // Pool
-#include "CollectionSvc/ICollectionCursor.h"
-#include "CollectionSvc/CollectionRowBuffer.h"
+#include "lib/ICollectionCursor.h"
+#include "lib/CollectionRowBuffer.h"
 #include "StorageSvc/DbType.h"
 
 #include <CxxUtils/StringUtils.h>
@@ -206,9 +206,9 @@ StatusCode EventSelectorAthenaPool::reinit() const {
       return StatusCode::FAILURE;
    }
 
-   // Create an m_poolCollectionConverter to read the objects in
-   m_poolCollectionConverter = getCollectionCnv();
-   if (!m_poolCollectionConverter) {
+   // Create an m_poolCollection to read the objects in
+   m_poolCollection = getCollection();
+   if (!m_poolCollection) {
       ATH_MSG_INFO("No Events found in any Input Collections");
       if (m_processMetadata.value()) {
 	 m_inputCollectionsIterator = m_inputCollectionsProp.value().end();
@@ -224,48 +224,42 @@ StatusCode EventSelectorAthenaPool::reinit() const {
    }
    // Get DataHeader iterator
    try {
-      m_headerIterator = m_poolCollectionConverter->selectAll();
+      m_headerIterator = m_poolCollection->cursor();
    } catch (std::exception &e) {
       ATH_MSG_FATAL("Cannot open input collection - check data/software version.");
       ATH_MSG_ERROR(e.what());
       return StatusCode::FAILURE;
    }
    while (m_headerIterator == nullptr || m_headerIterator->next() == 0) { // no selected events
-      if (m_poolCollectionConverter) {
-         m_poolCollectionConverter->disconnectDb().ignore();
-         m_poolCollectionConverter.reset();
-      }
+      disconnectCollection();
       ++m_inputCollectionsIterator;
-      m_poolCollectionConverter = getCollectionCnv();
-      if (m_poolCollectionConverter) {
-         m_headerIterator = m_poolCollectionConverter->selectAll();
+      m_poolCollection = getCollection();
+      if (m_poolCollection) {
+         m_headerIterator = m_poolCollection->cursor();
       } else {
          break;
       }
    }
-   if (!m_poolCollectionConverter || m_headerIterator == nullptr) { // no event selected in any collection
+   if (!m_poolCollection || m_headerIterator == nullptr) { // no event selected in any collection
       m_inputCollectionsIterator = m_inputCollectionsProp.value().begin();
       m_curCollection = 0;
-      m_poolCollectionConverter = getCollectionCnv();
-      if (!m_poolCollectionConverter) {
+      m_poolCollection = getCollection();
+      if (!m_poolCollection) {
          return StatusCode::SUCCESS;
       }
-      m_headerIterator = m_poolCollectionConverter->selectAll();
+      m_headerIterator = m_poolCollection->cursor();
       while (m_headerIterator == nullptr || m_headerIterator->next() == 0) { // empty collection
-         if (m_poolCollectionConverter) {
-            m_poolCollectionConverter->disconnectDb().ignore();
-            m_poolCollectionConverter.reset();
-         }
+         disconnectCollection();
          ++m_inputCollectionsIterator;
-         m_poolCollectionConverter = getCollectionCnv();
-         if (m_poolCollectionConverter) {
-            m_headerIterator = m_poolCollectionConverter->selectAll();
+         m_poolCollection = getCollection();
+         if (m_poolCollection) {
+            m_headerIterator = m_poolCollection->cursor();
          } else {
             break;
          }
       }
    }
-   if (!m_poolCollectionConverter || m_headerIterator == nullptr) {
+   if (!m_poolCollection || m_headerIterator == nullptr) {
       return StatusCode::SUCCESS;
    }
    const Token& headRef = m_headerIterator->eventRef();
@@ -283,22 +277,18 @@ StatusCode EventSelectorAthenaPool::reinit() const {
 }
 //________________________________________________________________________________
 StatusCode EventSelectorAthenaPool::start() {
-   if (m_poolCollectionConverter) {
-      // Reset iterators and apply new query
-      m_poolCollectionConverter->disconnectDb().ignore();
-      m_poolCollectionConverter.reset();
-   }
+   disconnectCollection();
    m_inputCollectionsIterator = m_inputCollectionsProp.value().begin();
    m_curCollection = 0;
-   m_poolCollectionConverter = getCollectionCnv(true);
-   if (!m_poolCollectionConverter) {
+   m_poolCollection = getCollection(true);
+   if (!m_poolCollection) {
       ATH_MSG_INFO("No Events found in any Input Collections");
       m_inputCollectionsIterator = m_inputCollectionsProp.value().end();
       if (!m_inputCollectionsProp.value().empty()) {
          --m_inputCollectionsIterator; //leave iterator in state of last input file
       }
    } else {
-      m_headerIterator = m_poolCollectionConverter->selectAll();
+      m_headerIterator = m_poolCollection->cursor();
    }
    m_evtCount = 0;
    delete m_endIter;
@@ -331,9 +321,8 @@ StatusCode EventSelectorAthenaPool::finalize() {
    }
    delete m_endIter;   m_endIter   = nullptr;
    m_headerIterator = nullptr;
-   if (m_poolCollectionConverter) {
-     m_poolCollectionConverter.reset();
-   }
+   m_poolCollection.reset();
+   m_curCollectionName.clear();
    // Finalize the Service base class.
    return ::AthService::finalize();
 }
@@ -428,7 +417,7 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
       if (m_headerIterator == nullptr || m_headerIterator->next() == 0) {
          m_headerIterator = nullptr;
          // Close previous collection.
-         m_poolCollectionConverter.reset();
+         m_poolCollection.reset();
 
          // Fire EndInputFile while data is still accessible, then disconnect
          m_inputFileGuard.reset();
@@ -443,16 +432,16 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
          } else {
             // Open next file from inputCollections list.
             ++m_inputCollectionsIterator;
-            // Create PoolCollectionConverter for input file
-            m_poolCollectionConverter = getCollectionCnv(true);
-            if (!m_poolCollectionConverter) {
+            // Create Collection for input file
+            m_poolCollection = getCollection(true);
+            if (!m_poolCollection) {
                // Return end iterator
                ctxt = *m_endIter;
                // This is not a real failure but a Gaudi way of handling "end of job"
                return StatusCode::FAILURE;
             }
             // Get DataHeader iterator
-            m_headerIterator = m_poolCollectionConverter->selectAll();
+            m_headerIterator = m_poolCollection->cursor();
 
             // Return RECOVERABLE to mark we should still continue
             return StatusCode::RECOVERABLE;
@@ -604,10 +593,11 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
       return StatusCode::RECOVERABLE;
    }
    if (newColl != m_curCollection) {
-      if (!m_keepInputFilesOpen.value() && m_poolCollectionConverter) {
-         m_poolCollectionConverter->disconnectDb().ignore();
+      if (!m_keepInputFilesOpen.value()) {
+         disconnectCollection();
+      } else {
+         m_poolCollection.reset();
       }
-      m_poolCollectionConverter.reset();
       m_curCollection = newColl;
       try {
          ATH_MSG_DEBUG("Seek to item: \""
@@ -616,17 +606,16 @@ StatusCode EventSelectorAthenaPool::seek(Context& /*ctxt*/, int evtNum) const {
          // Reset input collection iterator to the right place
          m_inputCollectionsIterator = m_inputCollectionsProp.value().begin();
          m_inputCollectionsIterator += m_curCollection;
-         m_poolCollectionConverter = std::make_unique<PoolCollectionConverter>(
-               m_inputCollectionsProp.value()[m_curCollection],
-               IPoolSvc::kInputStream,
-               m_poolSvc.get());
-         if (!m_poolCollectionConverter || !m_poolCollectionConverter->initialize().isSuccess()) {
+         std::string collName = m_inputCollectionsProp.value()[m_curCollection];
+         StatusCode sc = openCollection(collName, m_poolCollection);
+         if (!sc.isSuccess() || !m_poolCollection) {
             m_headerIterator = nullptr;
-            ATH_MSG_ERROR("seek: Unable to initialize PoolCollectionConverter.");
+            ATH_MSG_ERROR("seek: Unable to initialize Collection.");
             return StatusCode::FAILURE;
          }
+         m_curCollectionName = collName;
          // Create DataHeader iterators
-         m_headerIterator = m_poolCollectionConverter->selectAll();
+         m_headerIterator = m_poolCollection->cursor();
          EventContextAthenaPool* beginIter = new EventContextAthenaPool(this);
          m_evtCount = m_firstEvt[m_curCollection];
          next(*beginIter).ignore();
@@ -659,20 +648,20 @@ int EventSelectorAthenaPool::curEvent (const Context& /*ctxt*/) const {
 int EventSelectorAthenaPool::findEvent(int evtNum) const {
    for (std::size_t i = 0, imax = m_numEvt.size(); i < imax; i++) {
       if (m_numEvt[i] == -1) {
-         PoolCollectionConverter pcc(
-               m_inputCollectionsProp.value()[i],
-               IPoolSvc::kInputStream,
-               m_poolSvc.get());
-         if (!pcc.initialize().isSuccess()) {
+         std::string collName = m_inputCollectionsProp.value()[i];
+         std::string lastError;
+         std::unique_ptr<pool::Collection> coll;
+         StatusCode status = openCollection(collName, coll, &lastError);
+         if (!status.isSuccess()) {
             break;
          }
          int collection_size = 0;
-         if (pcc.isValid()) {
-            std::unique_ptr<pool::ICollectionCursor> hi = pcc.selectAll();
+         if (coll) {
+            std::unique_ptr<pool::ICollectionCursor> hi = coll->cursor();
             collection_size = hi->size();
          }
          else {
-            ATH_MSG_ERROR( pcc.lastError() );
+            ATH_MSG_ERROR( lastError );
          }
          if (i > 0) {
             m_firstEvt[i] = m_firstEvt[i - 1] + m_numEvt[i - 1];
@@ -695,8 +684,43 @@ int EventSelectorAthenaPool::size(Context& /*ctxt*/) const {
    return std::accumulate(m_numEvt.begin(), m_numEvt.end(), 0);
 }
 //__________________________________________________________________________
-std::unique_ptr<PoolCollectionConverter>
-EventSelectorAthenaPool::getCollectionCnv(bool throwIncidents) const {
+StatusCode EventSelectorAthenaPool::openCollection(std::string& inputCollection,
+                                                   std::unique_ptr<pool::Collection>& poolCollection,
+                                                   std::string* lastError) const {
+   if (!inputCollection.starts_with("PFN:")
+       && !inputCollection.starts_with("LFN:")
+       && !inputCollection.starts_with("FID:")) {
+      inputCollection = std::format("PFN:{}", inputCollection);
+   }
+   StatusCode sc = m_poolSvc->connectCollection(inputCollection, "Input", IPoolSvc::kInputStream);
+   try {
+      auto fileDescr = m_poolSvc->getInputFileDescriptor(IPoolSvc::kInputStream, inputCollection);
+      poolCollection = std::make_unique<pool::Collection>(fileDescr);
+      if (lastError) lastError->clear();
+   } catch (const std::exception &e) {
+      if (lastError) {
+         *lastError = std::format("Failed to open collection '{}': {}", inputCollection, e.what());
+      }
+      poolCollection.reset();
+   }
+   if (sc.isRecoverable() || poolCollection == nullptr) {
+      return m_poolSvc->checkCollection(inputCollection, IPoolSvc::kInputStream, poolCollection == nullptr);
+   }
+   return StatusCode::SUCCESS;
+}
+//__________________________________________________________________________
+void EventSelectorAthenaPool::disconnectCollection() const {
+   if (m_poolCollection) {
+      if (!m_curCollectionName.empty()) {
+         m_poolSvc->disconnectDb(m_curCollectionName).ignore();
+         m_curCollectionName.clear();
+      }
+      m_poolCollection.reset();
+   }
+}
+//__________________________________________________________________________
+std::unique_ptr<pool::Collection>
+EventSelectorAthenaPool::getCollection(bool throwIncidents) const {
    while (m_inputCollectionsIterator != m_inputCollectionsProp.value().end()) {
       if (m_curCollection != 0) {
          m_numEvt[m_curCollection] = m_evtCount - m_firstEvt[m_curCollection];
@@ -704,24 +728,19 @@ EventSelectorAthenaPool::getCollectionCnv(bool throwIncidents) const {
          m_firstEvt[m_curCollection] = m_evtCount;
       }
       ATH_MSG_DEBUG("Try item: \"" << *m_inputCollectionsIterator << "\" from the collection list.");
-      auto pCollCnv = std::make_unique<PoolCollectionConverter>(
-            *m_inputCollectionsIterator,
-            IPoolSvc::kInputStream,
-            m_poolSvc.get());
-      StatusCode status = pCollCnv->initialize();
+      std::string collName = *m_inputCollectionsIterator;
+      std::unique_ptr<pool::Collection> coll;
+      StatusCode status = openCollection(collName, coll);
       if (!status.isSuccess()) {
-         // Close previous collection.
-         pCollCnv.reset();
          if (!status.isRecoverable()) {
-            ATH_MSG_ERROR("Unable to initialize PoolCollectionConverter.");
+            ATH_MSG_ERROR("Unable to initialize Collection.");
             throw GaudiException("Unable to read: " + *m_inputCollectionsIterator, name(), StatusCode::FAILURE);
          } else {
             ATH_MSG_ERROR("Unable to open: " << *m_inputCollectionsIterator);
             throw GaudiException("Unable to open: " + *m_inputCollectionsIterator, name(), StatusCode::FAILURE);
          }
       } else {
-         if (!pCollCnv->isValid().isSuccess()) {
-            pCollCnv.reset();
+         if (!coll) {
             ATH_MSG_DEBUG("No events found in: " << *m_inputCollectionsIterator << " skipped!!!");
             if (throwIncidents && m_processMetadata.value()) {
                // Scoped guard: fires BeginInputFile now, EndInputFile at scope exit
@@ -732,11 +751,12 @@ EventSelectorAthenaPool::getCollectionCnv(bool throwIncidents) const {
             m_poolSvc->disconnectDb(*m_inputCollectionsIterator).ignore();
             ++m_inputCollectionsIterator;
          } else {
-            return(pCollCnv);
+            m_curCollectionName = collName;
+            return coll;
          }
       }
    }
-   return(nullptr);
+   return nullptr;
 }
 //__________________________________________________________________________
 StatusCode EventSelectorAthenaPool::recordAttributeList() const {
@@ -785,10 +805,7 @@ StatusCode EventSelectorAthenaPool::fillAttributeList(coral::AttributeList *attr
 //__________________________________________________________________________
 StatusCode EventSelectorAthenaPool::io_reinit() {
    ATH_MSG_INFO("I/O reinitialization...");
-   if (m_poolCollectionConverter) {
-      m_poolCollectionConverter->disconnectDb().ignore();
-      m_poolCollectionConverter.reset();
-   }
+   disconnectCollection();
    m_headerIterator = nullptr;
    ServiceHandle<IIoComponentMgr> iomgr("IoComponentMgr", name());
    if (!iomgr.retrieve().isSuccess()) {
@@ -831,10 +848,7 @@ StatusCode EventSelectorAthenaPool::io_finalize() {
    ATH_MSG_INFO("I/O finalization...");
    // Fire EndInputFile before disconnecting — file data is still accessible here
    m_inputFileGuard.reset();
-   if (m_poolCollectionConverter) {
-      m_poolCollectionConverter->disconnectDb().ignore();
-      m_poolCollectionConverter.reset();
-   }
+   disconnectCollection();
    return StatusCode::SUCCESS;
 }
 

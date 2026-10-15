@@ -14,8 +14,8 @@
 #include "DoubleEventSelectorAthenaPool.h"
 
 // Pool
-#include "CollectionSvc/ICollectionCursor.h"
-#include "CollectionSvc/CollectionRowBuffer.h"
+#include "lib/ICollectionCursor.h"
+#include "lib/CollectionRowBuffer.h"
 
 #include "PersistentDataModel/AthenaAttributeList.h"
 

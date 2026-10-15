@@ -327,12 +327,26 @@ unsigned int PoolSvc::getInputContextMapSize() const {
    return(m_inputContextLabel.size());
 }
 //__________________________________________________________________________
-pool::ISession* PoolSvc::getInputContextSession(unsigned int contextId) const {
+pool::FileDescriptor PoolSvc::getInputFileDescriptor(unsigned int contextId,
+                                                     const std::string& connection) {
+   if (contextId == m_dbSessionVec.size()) {
+      ATH_MSG_DEBUG("getInputFileDescriptor: On-demand creating new input Stream id = " << contextId);
+      contextId = this->getInputContext("");
+   }
    if (contextId >= m_dbSessionVec.size()) {
-      ATH_MSG_WARNING("getInputContextSession: Using default input Stream instead of id = " << contextId);
+      ATH_MSG_WARNING("getInputFileDescriptor: Using default input Stream instead of id = " << contextId);
       contextId = IPoolSvc::kInputStream;
    }
-   return(m_dbSessionVec[contextId]);
+   ContextLock lock(contextId, m_pool_mut, m_pers_mut);
+   std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
+   if (!dbH) {
+      throw std::runtime_error("Could not retrieve a database handle to '" + connection + "'");
+   }
+   pool::FileDescriptor* fd = dbH->fileDescriptor();
+   if (!fd) {
+      throw std::runtime_error("Could not retrieve connection info from DB '" + connection + "'");
+   }
+   return *fd;
 }
 //__________________________________________________________________________
 void PoolSvc::setShareMode(bool shareCat) {

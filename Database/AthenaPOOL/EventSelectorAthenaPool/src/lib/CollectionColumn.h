@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef COLLECTIONSVC_COLLECTIONCOLUMN_H
-#define COLLECTIONSVC_COLLECTIONCOLUMN_H
+#ifndef EVENTSELECTORATHENAPOOL_COLLECTIONCOLUMN_H
+#define EVENTSELECTORATHENAPOOL_COLLECTIONCOLUMN_H
 
 #include "CoralBase/AttributeSpecification.h"
 
@@ -13,13 +13,19 @@
 namespace pool {
 
   /** 
-   * @class CollectionColumn CollectionColumn.h CollectionSvc/CollectionColumn.h
+   * @class CollectionColumn CollectionColumn.h
    *
    * An implementation for retrieving a description of a column of a collection.
    */
   class CollectionColumn
   {
   public:
+    static const CollectionColumn& tokenColumn()
+    {
+      static const CollectionColumn column( "Token", "Token" );
+      return column;
+    }
+
     /// Default constructor.
     CollectionColumn()
       : m_name( "" ),
