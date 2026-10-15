@@ -104,7 +104,10 @@ StatusCode TracccMeasurementDeviceConverterAlg::execute(const EventContext& ctx)
     m_detector->as_view<traccc::itk_detector>(), detector_conditions,
     n_meas, *traccc_measurements, n_pixels, n_strips,
     converted_pixel_meas_device_buffer, converted_strip_meas_device_buffer));
-
+  if (!converted_pixel_meas_device_buffer or !converted_strip_meas_device_buffer)[[unlikely]]{
+    ATH_MSG_ERROR("nullptr detected");
+    return StatusCode::FAILURE;
+  }
   // Create const device objects to access the field vectors directly
   DevicePixelMeasurementContainer::device pixel_meas_device{*converted_pixel_meas_device_buffer};
   DeviceStripMeasurementContainer::device strip_meas_device{*converted_strip_meas_device_buffer};
