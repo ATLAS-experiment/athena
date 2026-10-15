@@ -63,7 +63,6 @@
        <hist1D name="reco_ndof" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="reco_chi2Overndof" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="reco_author" plotopts="" tests="KS" type="TH1F"/>
-       <hist1D name="reco_time" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="truth_d0" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="truth_z0" plotopts="" tests="KS" type="TH1F"/>
        <hist1D name="truth_z0sin" plotopts="" tests="KS" type="TH1F"/>
@@ -267,23 +266,6 @@
         <hist1D name="pullmean_vs_pt_z0sin" plotopts="" tests="KS" type="TH1F"/>
         <hist1D name="sigma_vs_eta_z0sin" plotopts="" tests="meany" type="TProfile"/>
         <hist1D name="sigma_vs_pt_z0sin" plotopts="" tests="meany" type="TProfile"/>
-        <hist1D name="pull_time" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="res_time" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="sigma_time" plotopts="" tests="KS" type="TH1F"/>
-        <hist2D name="resHelper_eta_time" plotopts="" tests="KS" type="TH2F"/>
-        <hist2D name="resHelper_pt_time" plotopts="" tests="KS" type="TH2F"/>
-        <hist2D name="pullHelper_eta_time" plotopts="" tests="KS" type="TH2F"/>
-        <hist2D name="pullHelper_pt_time" plotopts="" tests="KS" type="TH2F"/>
-        <hist1D name="resolution_vs_eta_time" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="resmean_vs_eta_time" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="resolution_vs_pt_time" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="resmean_vs_pt_time" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="pullwidth_vs_eta_time" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="pullmean_vs_eta_time" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="pullwidth_vs_pt_time" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="pullmean_vs_pt_time" plotopts="" tests="KS" type="TH1F"/>
-        <hist1D name="sigma_vs_eta_time" plotopts="" tests="meany" type="TProfile"/>
-        <hist1D name="sigma_vs_pt_time" plotopts="" tests="meany" type="TProfile"/>
        </TDirectory>
       </TDirectory>
      </TDirectory>
@@ -308,6 +290,12 @@
     </TDirectory>
     <TDirectory name="Vertices">
      <TDirectory name="AllPrimaryVertices">
+      <hist1D name="vx_x" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_y" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_z" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_err_x" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_err_y" plotopts="" tests="KS" type="TH1F"/>
+      <hist1D name="vx_err_z" plotopts="" tests="KS" type="TH1F"/>
       <hist2D name="vx_n_vs_truthMu" plotopts="" tests="KS" type="TH2F"/>
       <hist2D name="vx_n_vs_actualMu" plotopts="" tests="KS" type="TH2F"/>
       <hist1D name="vx_hs_classification" plotopts="" tests="KS" type="TH1F"/>
