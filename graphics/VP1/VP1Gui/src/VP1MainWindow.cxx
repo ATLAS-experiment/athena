@@ -58,6 +58,7 @@
 #include <QProgressBar>
 #include <QStyleFactory>
 #include <QDateTime>
+#include <QTimeZone>
 #include <QMutex>
 #include <QDesktopServices>
 #include <QUrl>
@@ -83,6 +84,24 @@
 
 #include <cassert>
 #include <iostream>
+
+namespace {
+
+QString eventTimeUTC(unsigned timestamp)
+{
+	return QDateTime::fromSecsSinceEpoch(timestamp, Qt::UTC)
+			.toString(QStringLiteral("yyyy-MM-dd HH:mm:ss 'UTC'"));
+}
+
+QString eventTimeCERN(unsigned timestamp)
+{
+	const QTimeZone cernTimeZone("Europe/Zurich");
+	return QDateTime::fromSecsSinceEpoch(timestamp, Qt::UTC)
+			.toTimeZone(cernTimeZone)
+			.toString(QStringLiteral("yyyy-MM-dd HH:mm:ss t"));
+}
+
+}
 
 
 //_________________________________________________________________________________
@@ -993,7 +1012,7 @@ void VP1MainWindow::setRunEvtNumber(const int& r, const unsigned long long& e, c
 		QString trighex = triggerType > 0 ? "0x"+QString::number(triggerType, 16).toUpper().rightJustified(sizeof(triggerType),'0') : "";
 		QString expandedevtstr = evtstr
 				+ QString(trighex.isEmpty()?QString(""):", triggerType: "+trighex)
-				+ QString(time>0 ? ", time: "+QDateTime::fromTime_t(time).toString(Qt::ISODate).replace('T',' ') : "")
+				+ QString(time>0 ? ", time: "+eventTimeUTC(time) : "")
 				+ QString(m_currentStream.isEmpty()?"":", "+m_currentStream);
 
 	#ifdef BUILDVP1LIGHT
@@ -1003,7 +1022,15 @@ void VP1MainWindow::setRunEvtNumber(const int& r, const unsigned long long& e, c
     	#endif // BUILDVP1LIGHT
 
 		groupBox_event->setTitle("Event [loaded]");
-		label_run_event->setText("["+evtstr+"]");
+		QString eventDetails =
+				"Run: " + QString::number(m_runnumber) +
+				"\nEvent: " + QString::number(evNumber);
+		if (time > 0) {
+			eventDetails +=
+					"\nTime UTC: " + eventTimeUTC(time) +
+					"\nTime Europe/Zurich (CERN): " + eventTimeCERN(time);
+		}
+		label_run_event->setText(eventDetails);
 
 		addToMessageBox("New event: "+expandedevtstr,"color:#ff0000");
 
