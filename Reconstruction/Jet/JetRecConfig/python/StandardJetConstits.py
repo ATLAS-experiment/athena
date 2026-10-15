@@ -1,4 +1,3 @@
-
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 """
@@ -145,6 +144,13 @@ def getCaloClusterEnergyMLCalibAlgBuilder():
         from CaloRec.CaloClusterMLCalibAlgLiteConfig import CaloClusterMLCalibAlgLiteCfg
         return CaloClusterMLCalibAlgLiteCfg(flags._cflags)
     return f
+def getCaloClusterTritonAlgBuilder():
+    def f(jetdef,spec):
+        if isAnalysisRelease():
+            return None
+        from CaloRec.CaloClusterTritonConfig import CaloClusterTritonAlgCfg
+        return CaloClusterTritonAlgCfg(jetdef._cflags)
+    return f
 def getPFOClusterMLCorrectionAlgorithmBuilder():
     def f(flags,spec):
         from eflowRec.PFRun3Config import PFOClusterMLCorrectionAlgorithmBuilder
@@ -164,6 +170,8 @@ _stdInputList = [
     JetInputExternal("CaloCalTopoClusters", xAODType.CaloCluster, algoBuilder= standardReco("CaloClusters")),
 
     JetInputExternal("CaloCalTopoClustersML", xAODType.CaloCluster, algoBuilder= getCaloClusterEnergyMLCalibAlgBuilder(), prereqs = ["input:CaloCalTopoClusters"]),
+
+    JetInputExternal("CaloCalTopoClustersGNN", xAODType.CaloCluster, algoBuilder= getCaloClusterTritonAlgBuilder(), prereqs = ["input:CaloCalTopoClusters"]),
 
     JetInputExternal("HLT_TopoCaloClustersFS", xAODType.CaloCluster ),
 
@@ -453,6 +461,9 @@ _stdSeqList = [
     JetInputConstitSeq("MLTopoOrigin", xAODType.CaloCluster, ["ML","Origin"],
                        "CaloCalTopoClusters", "MLOriginTopoClusters", jetinputtype="EMTopo",
                        ),
+    JetInputConstitSeq("GNNTopoOrigin", xAODType.CaloCluster, ["GNN","Origin"],
+                       "CaloCalTopoClusters", "GNNOriginTopoClusters", jetinputtype="EMTopo",
+                       ),
     JetInputConstitSeq("LCTopoOrigin",xAODType.CaloCluster, ["LC","Origin"],
                        "CaloCalTopoClusters", "LCOriginTopoClusters", jetinputtype="LCTopo",
                        ),
@@ -612,6 +623,9 @@ _stdModList = [
     JetConstitModifier("Origin", "CaloClusterConstituentsOrigin", prereqs=[inputsFromContext("Vertices")]),
     JetConstitModifier("EM",     "ClusterAtEMScaleTool", ),
     JetConstitModifier("ML",     "ClusterAtMLScaleTool", prereqs=["input:CaloCalTopoClustersML"]),
+    JetConstitModifier("GNN",    "ClusterAtMLScaleTool", prereqs=["input:CaloCalTopoClustersGNN"],
+                       properties=dict(ClusterMLCorrectedEnergyDecorationKey="CaloCalTopoClusters.GNNCalibratedEnergy",
+                                       ClusterMLCorrectedEnergyDecorationType="double")),
     JetConstitModifier("LC",     "", ),
     # Particle flow
     JetConstitModifier("CorrectPFO", "CorrectPFOTool",

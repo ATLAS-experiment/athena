@@ -122,4 +122,11 @@ def createCaloConfigFlags():
     # Flag for thinning negative energy clusters
     ccf.addFlag('Calo.Thin.NegativeEnergyCaloClusters', True)
     
+    # Flags for running CaloClusterTriton:
+    ccf.addFlag('Calo.Triton.name' , "ensemble_infer")
+    ccf.addFlag('Calo.Triton.url' , "localhost")
+    ccf.addFlag( 'Calo.Triton.port' , 8011)
+        
+
+    
     return ccf
