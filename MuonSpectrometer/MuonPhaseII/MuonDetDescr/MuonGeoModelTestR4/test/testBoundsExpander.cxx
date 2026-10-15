@@ -107,7 +107,10 @@ bool testRectangleVertices(const Acts::Logger& logger) {
     const Acts::GeometryContext tgContext = Acts::GeometryContext::dangerouslyDefaultConstruct();
     auto bounds = std::make_shared<Acts::RectangleBounds>(100._mm, 50._mm);
     ACTS_INFO(__func__<<"() "<<__LINE__<<" - Fetch rectangular vertices from bounds "<<(*bounds));
+    //early return..
     return true;
+    //..means following code is unreachable, but the following code fails test
+    //coverity[UNREACHABLE]
     /// Check the surface at Identity
     auto surface = Acts::Surface::makeShared<Acts::PlaneSurface>(Acts::Transform3::Identity(), bounds);
     if (!checkVertices(tgContext, *surface, logger)) {

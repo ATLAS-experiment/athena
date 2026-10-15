@@ -43,7 +43,8 @@ __global__ void mark_pixels_strips(
     output_strips.at(index) = 1;
   }
 }
-
+//three parameters (position 1, 5, 6) here passed by value have size 232, 232, 208 bytes
+//coverity[PASS_BY_VALUE]
 __global__ void convertTracccToAthenaMeasurements(
     const traccc::itk_detector::view_type detector_view
   , const traccc::detector_conditions_description::const_view detector_conditions_view

@@ -959,13 +959,13 @@ xAODEventSelector::createMetaDataRootBranchAddresses() const
   }
 
   // loop over metadata objects
+  const std::string toCheck = "xAOD::";
   for (const auto& [br_name, type_name] : objects) {
 
       CLID id = 0;
       const void* value_ptr = m_event.get();
       // Skip if type_name does contain xAOD, ie. is not an xAOD container
-      const std::string toCheck = "xAOD::";
-      if (type_name.find(toCheck) == std::string::npos) {
+      if (!type_name.contains(toCheck)) {
 	ATH_MSG_DEBUG("** Skip type-name = " << type_name << ", br_name = " << br_name );
 	continue;
       }

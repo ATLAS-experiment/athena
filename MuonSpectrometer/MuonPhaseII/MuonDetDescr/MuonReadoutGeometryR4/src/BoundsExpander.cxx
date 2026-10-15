@@ -132,8 +132,9 @@ namespace MuonGMR4 {
                                                             const Acts::Surface& surface,
                                                             const std::size_t nSegments) {
         constexpr std::array signs{-1., 1.};
-        std::vector<Amg::Vector3D> vertices{};
-        vertices.reserve(Acts::square(vertices.size()));
+        std::vector<Amg::Vector3D> vertices{}; //vertices has size zero
+        //calculate transform once, outside of loops
+        const Acts::Transform3& transform = surface.localToGlobalTransform(tgContext);
         /**  Don't use the polyhedron representation for rectangles and trapezoids as 
           *  we need the central point on the edge to properly constrain the radius of
           *  a surrounding cylinder */
@@ -146,10 +147,10 @@ namespace MuonGMR4 {
                 const double stepY = 2.*bounds.get(eMaxY) / nSegments;
                 for (const double sign : signs) {
                     for (unsigned seg = 0; seg <= nSegments ; ++seg) {
-                        vertices.push_back(surface.localToGlobalTransform(tgContext)*
+                        vertices.push_back(transform *
                             Amg::Vector3D{-bounds.get(eMaxX) + stepX * seg,
                                           sign*bounds.get(eMaxY), 0.});
-                        vertices.push_back(surface.localToGlobalTransform(tgContext)*
+                        vertices.push_back(transform *
                             Amg::Vector3D{sign*bounds.get(eMaxX),
                                           -bounds.get(eMaxY) + stepY * seg, 0.});
                     }
@@ -166,7 +167,7 @@ namespace MuonGMR4 {
                 auto pushVertex = [&](const double x, const double y) {
                     locPos.block<2,1>(0,0) = Eigen::Rotation2D{-bounds.get(eRotationAngle)} *
                                              Amg::Vector2D{x,y};
-                    vertices.push_back(surface.localToGlobalTransform(tgContext)*locPos);                        
+                    vertices.push_back(transform *locPos);                        
                 };
                 const double stepY =  2.*hY / nSegments;
                 for (const double sign : signs) {
