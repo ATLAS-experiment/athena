@@ -1,3 +1,5 @@
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+
 # $Id: CMakeLists.txt 762209 2016-07-15 14:15:34Z krasznaa $
 ################################################################################
 # Package: Superchic_i

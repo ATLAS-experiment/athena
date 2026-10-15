@@ -7,18 +7,19 @@ from packaging.version import Version
 from AthenaCommon import Logging
 
 ## Get handle to Athena logging
-logger = Logging.logging.getLogger("Superchic_i")
+logger = Logging.logging.getLogger("SuperChicUtils")
 
 
 class SuperChicConfig:
 
-    def __init__(self, runArgs):
+    def __init__(self, runArgs=None):
         self.superchicpath = os.environ['SUPERCHIC_SOURCE_PATH']
         
         #SuperChic specific variables for input.DAT, see writeInputDAT function for more elaboration
         self.rts = 13000. #collision energy (GeV)
-        if hasattr(runArgs,"ecmEnergy"):
-            self.rts = runArgs.ecmEnergy
+        if runArgs is not None:
+            if hasattr(runArgs,"ecmEnergy"):
+                self.rts = runArgs.ecmEnergy
 
         self.isurv = 4 #Model of soft survival (from 1 -> 4, corresponding to arXiv:1306.2149)
         self.intag = 'in' #tag for input files
@@ -59,14 +60,16 @@ class SuperChicConfig:
         self.itend = 1000
 
         self.iseed = 34
-        if hasattr(runArgs,"randomSeed"):
-            self.iseed  = runArgs.randomSeed
+        if runArgs is not None:
+            if hasattr(runArgs,"randomSeed"):
+                self.iseed  = runArgs.randomSeed
 
         self.genunw = True
 
         self.nev = "500"
-        if hasattr(runArgs,"maxEvents"):
-            self.nev = runArgs.maxEvents
+        if runArgs is not None:
+            if hasattr(runArgs,"maxEvents"):
+                self.nev = runArgs.maxEvents
 
         self.erec = 'lhe' #output file type
         self.readwt = False
@@ -134,7 +137,7 @@ class SuperChicConfig:
         
         conf = ""
         conf+="***********************************************************************************\n"
-        conf+="****** Initialize afain if FIRST FIVE PARAMETERS ARE CHANGED (and beam = 'prot'):******\n"
+        conf+="****** Initialize again if FIRST FIVE PARAMETERS ARE CHANGED (and beam = 'prot'):******\n"
         conf+="***********************************************************************************\n"
         conf+=fortDouble(self.rts) + "                     ! [rts] : CMS collision energy (GeV) \n"
         conf+=fortInt(self.isurv) + "                         ! [isurv] : Model of soft survival (from 1 -> 4)\n"
@@ -322,101 +325,104 @@ class SuperChicConfig:
     def outputLHEFile(self):
         return "evrecs/evrec"+self.outtg+".dat"
 
+    def from_dict(self, params: dict):
+        for key, value in params.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                raise AttributeError(f"'{type(self).__name__}' has no attribute '{key}'")
+        return self
 
-def writeInputDAT(Init):
-    
-    with open("input.DAT", "w") as outF:
-        outF.write(Init.toFortran())
-    
-    return
-
-
-def run_command(command, stdin = None):
-    """
-    Run a command and print output continuously
-    """
-    process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stdin=stdin)
-    while True:
-        output = process.stdout.readline().decode("utf-8")
-        if output == '' and process.poll() is not None:
-            break
-        if output:
-            # remove ANSI escape formatting characters
-            reaesc = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
-            text = reaesc.sub('', output.strip())
-            logger.info(text)
-
-    rc = process.poll()
-    return rc
-
-
-def SuperChicInitialize(Init, stdin=None):
-
-    logger.info("Starting SuperChic Initialization")
-
-    os.makedirs('inputs', exist_ok=True)
-    os.makedirs('evrecs', exist_ok=True)
-    os.makedirs('outputs', exist_ok=True)
-    if not os.path.exists("param_card.dat"):
-      if os.path.exists(Init.superchicpath+"/share/doc/SuperChic/Cards/param_card.dat"):
-        shutil.copyfile(Init.superchicpath+"/share/doc/SuperChic/Cards/param_card.dat","param_card.dat")
-      else:
-        raise Exception('Unexpected error in superchic init execution: probably absent param_card.dat')
-    if not os.path.exists("ident_card.dat"):
-      if os.path.exists(Init.superchicpath+"/share/doc/SuperChic/Cards/ident_card.dat"):
-        shutil.copyfile(Init.superchicpath+"/share/doc/SuperChic/Cards/ident_card.dat","ident_card.dat")
-      else:
-        raise Exception('Unexpected error in superchic init execution: probably absent ident_card.dat')
-
-    try:
-        inputDAT = open('input.DAT')
-
-    except IOError:
-        raise Exception("problem with file IO; potentially input.DAT not created correctly")
-    else:
-
-        try: 
-            rc = run_command(Init.superchicpath+"/bin/init", inputDAT) 
-
-        except OSError:
-            raise Exception("init executable or file not found")
-
-        except Exception:
-            raise Exception("Non-OSError or IOError in init execution block")
-
-    if rc:
-        raise Exception('Unexpected error in superchic init execution')
+    def writeInputDAT(self):
         
-    return
+        with open("input.DAT", "w") as outF:
+            outF.write(self.toFortran())
+        
+        return
 
+    def run_command(self, command, stdin = None):
+        """
+        Run a command and print output continuously
+        """
+        process = subprocess.Popen(shlex.split(command), stdout=subprocess.PIPE, stdin=stdin)
+        while True:
+            output = process.stdout.readline().decode("utf-8")
+            if output == '' and process.poll() is not None:
+                break
+            if output:
+                # remove ANSI escape formatting characters
+                reaesc = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
+                text = reaesc.sub('', output.strip())
+                logger.info(text)
 
-def SuperChicExecute(Init):
+        rc = process.poll()
+        return rc
 
-    logger.info("Starting SuperChic Itself")
-    os.makedirs('inputs', exist_ok=True)
-    os.makedirs('evrecs', exist_ok=True)
-    os.makedirs('outputs', exist_ok=True)
+    def superChicInitialize(self, stdin=None):
 
-    try:
-        inputDAT = open('input.DAT')
-    except IOError:
-        raise  Exception ("problem with IO; potentially input.DAT not created correctly")
-    else: 
+        logger.info("Starting SuperChic Initialization")
 
-        try: 
-            rc = run_command(Init.superchicpath+'/bin/superchic', stdin=inputDAT)
+        os.makedirs('inputs', exist_ok=True)
+        os.makedirs('evrecs', exist_ok=True)
+        os.makedirs('outputs', exist_ok=True)
+        if not os.path.exists("param_card.dat"):
+            if os.path.exists(self.superchicpath+"/share/doc/SuperChic/Cards/param_card.dat"):
+                shutil.copyfile(self.superchicpath+"/share/doc/SuperChic/Cards/param_card.dat","param_card.dat")
+            else:
+                raise Exception('Unexpected error in superchic init execution: probably absent param_card.dat')
+        if not os.path.exists("ident_card.dat"):
+            if os.path.exists(self.superchicpath+"/share/doc/SuperChic/Cards/ident_card.dat"):
+                shutil.copyfile(self.superchicpath+"/share/doc/SuperChic/Cards/ident_card.dat","ident_card.dat")
+            else:
+                raise Exception('Unexpected error in superchic init execution: probably absent ident_card.dat')
 
-        except OSError:
-            raise Exception("Superchic executable or file not found")
+        try:
+            inputDAT = open('input.DAT')
 
-        except Exception:
-            raise Exception("Non-OSError or IOError in Superchic execution block")
+        except IOError:
+            raise Exception("problem with file IO; potentially input.DAT not created correctly")
+        else:
 
-    if rc:
-        raise Exception('Unexpected error in superchic execution')
+            try:
+                rc = self.run_command(self.superchicpath+"/bin/init", inputDAT) 
 
-    return
+            except OSError:
+                raise Exception("init executable or file not found")
 
+            except Exception:
+                raise Exception("Non-OSError or IOError in init execution block")
+
+        if rc:
+            raise Exception('Unexpected error in superchic init execution')
+            
+        return
+
+    def superChicExecute(self):
+
+        logger.info("Starting SuperChic Itself")
+        os.makedirs('inputs', exist_ok=True)
+        os.makedirs('evrecs', exist_ok=True)
+        os.makedirs('outputs', exist_ok=True)
+
+        try:
+            inputDAT = open('input.DAT')
+        except IOError:
+            raise  Exception ("problem with IO; potentially input.DAT not created correctly")
+        else: 
+
+            try: 
+                rc = self.run_command(self.superchicpath+'/bin/superchic', stdin=inputDAT)
+
+            except OSError:
+                raise Exception("Superchic executable or file not found")
+
+            except Exception:
+                raise Exception("Non-OSError or IOError in Superchic execution block")
+
+        if rc:
+            raise Exception('Unexpected error in superchic execution')
+
+        return
 
 
 def SuperChicRun(Init, genSeq):
@@ -427,8 +433,8 @@ def SuperChicRun(Init, genSeq):
     # attach config to genSequence for later usin in showering
     genSeq.SuperChicConfig = Init
     
-    writeInputDAT(Init)
-    SuperChicInitialize(Init)
-    SuperChicExecute(Init)
+    Init.writeInputDAT()
+    Init.superChicInitialize()
+    Init.superChicExecute()
     
     return
