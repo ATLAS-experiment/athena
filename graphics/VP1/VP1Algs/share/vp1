@@ -3,7 +3,7 @@
 
 # Simple wrapper to call actual VP1AlgConfig.SetupVP1() function
 
-intro_text = """
+intro_text = r"""
 ******************************************
 
  ___      ___ ________    _____     
