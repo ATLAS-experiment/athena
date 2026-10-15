@@ -94,10 +94,11 @@ StatusCode LArCaliWaveFromTuple::stop()
     std::pair<short, int>  idpair=std::make_pair(gain,dac);
     // check if we have this HWid and gain.dac pair already
     if(  ! wavesum.count(id) || ! wavesum[id].count(idpair)) { // we have new combination
-        wavesum[id][idpair].reserve((m_NPoints + m_prefixPoints) * ndelays);
-        wavesum2[id][idpair].reserve((m_NPoints + m_prefixPoints) * ndelays);
-        wavensum[id][idpair].reserve((m_NPoints + m_prefixPoints) * ndelays);
-        for ( unsigned int i = 0; i < (m_NPoints + m_prefixPoints) * ndelays; ++i ){
+        unsigned int totpoints = m_NPoints + m_prefixPoints.value();
+        wavesum[id][idpair].reserve(totpoints * ndelays);
+        wavesum2[id][idpair].reserve(totpoints * ndelays);
+        wavensum[id][idpair].reserve(totpoints * ndelays);
+        for ( unsigned int i = 0; i < totpoints * ndelays; ++i ){
           wavesum[id][idpair][i]=0;
           wavesum2[id][idpair][i]=0;
           wavensum[id][idpair][i]=0;
@@ -121,10 +122,11 @@ StatusCode LArCaliWaveFromTuple::stop()
     for(auto dgkey : std::views::keys(wavesum[hwid])) { 
        auto dac = dgkey.second;
        auto gain = dgkey.first;
-       std::vector<double> amp((m_NPoints + m_prefixPoints) * ndelays, 0.);
-       std::vector<double> err((m_NPoints + m_prefixPoints) * ndelays, 0.);
-       std::vector<int> ntrig((m_NPoints + m_prefixPoints) * ndelays, 0);
-       for(unsigned int i=0; i< (m_NPoints + m_prefixPoints) * ndelays; ++i) {
+       unsigned int totpoints = m_NPoints + m_prefixPoints.value();
+       std::vector<double> amp(totpoints * ndelays, 0.);
+       std::vector<double> err(totpoints * ndelays, 0.);
+       std::vector<int> ntrig(totpoints * ndelays, 0);
+       for(unsigned int i=0; i< totpoints * ndelays; ++i) {
           if(wavensum[hwid][dgkey][i] > 0) {
              amp[i] = (double)wavesum[hwid][dgkey][i] / wavensum[hwid][dgkey][i];
              err[i] = std::sqrt((double)wavesum2[hwid][dgkey][i] / wavensum[hwid][dgkey][i] - amp[i]*amp[i]);
