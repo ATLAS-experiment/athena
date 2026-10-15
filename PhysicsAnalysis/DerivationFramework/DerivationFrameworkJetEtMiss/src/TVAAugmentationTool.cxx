@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include "TVAAugmentationTool.h"
@@ -29,7 +29,7 @@ namespace DerivationFramework {
 
     for (const xAOD::Vertex* ivtx : *vertices)
       for (const xAOD::TrackParticle* itrk : matchMap[ivtx])
-        vtxDec_handle(*itrk).toContainedElement(*vertices, ivtx);
+        vtxDec_handle(*itrk).toContainedElement(*vertices, ivtx, ctx);
 
     return StatusCode::SUCCESS;
   }

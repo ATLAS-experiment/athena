@@ -72,7 +72,7 @@ StatusCode RecoverZeroPixelHitMuons::execute(const EventContext& context) const
       zeroPixelHitMuon->setP4(muon_match.pt(), t->eta(), t->phi());
       zeroPixelHitMuon->setCharge(muon_match.charge());
       zeroPixelHitMuon->setMuonType(xAOD::Muon::MuonType::ZeroPixelHit);
-      ElementLink<xAOD::TrackParticleContainer> link( *inputTracks, t->index() );
+      ElementLink<xAOD::TrackParticleContainer> link( *inputTracks, t->index(), context );
       zeroPixelHitMuon->setTrackParticleLink(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle, link);
     }
     
