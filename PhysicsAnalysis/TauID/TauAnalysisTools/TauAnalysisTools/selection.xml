@@ -4,6 +4,7 @@
   <class name="TauAnalysisTools::TauEfficiencyCorrectionsTool" />
   <class name="TauAnalysisTools::TauSelectionTool" />
   <class name="TauAnalysisTools::TauSmearingTool" />
+  <class name="TauAnalysisTools::TauResolutionTool" />
   <class name="TauAnalysisTools::BuildTruthTaus" />
   <class name="TauAnalysisTools::TauTruthMatchingTool" />
   <class name="TauAnalysisTools::TauTruthTrackMatchingTool" />

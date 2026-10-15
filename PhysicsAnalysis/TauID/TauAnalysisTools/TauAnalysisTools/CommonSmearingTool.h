@@ -21,16 +21,14 @@
 #include "xAODTruth/TruthParticle.h"
 #include "PATInterfaces/CorrectionCode.h"
 
-#include "tauRecTools/TauCombinedTES.h"
-
 // Local include(s):
 #include "TauAnalysisTools/Enums.h"
 #include "TauAnalysisTools/ITauSmearingTool.h"
+#include "TauAnalysisTools/ITauResolutionTool.h"
 #include "TauAnalysisTools/HelperFunctions.h"
 
-// tauRecTools include(s)
-#include "tauRecTools/ITauToolBase.h"
 #include <map>
+#include "TH1.h"
 
 class TFile;
 
@@ -107,7 +105,7 @@ protected:
   bool m_bIsData;
   bool m_bIsConfigured;
 
-  asg::AnaToolHandle<ITauToolBase> m_tTauCombinedTES;
+  asg::AnaToolHandle<TauAnalysisTools::ITauResolutionTool>  m_tauResolutionTool;
 
   TruthMatchedParticleType m_eCheckTruth;
   CP::SystematicSet m_sAffectingSystematics;

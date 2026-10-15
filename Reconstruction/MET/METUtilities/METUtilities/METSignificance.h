@@ -34,7 +34,7 @@
 #include "EgammaAnalysisInterfaces/IEgammaCalibrationAndSmearingTool.h"
 #include "MuonAnalysisInterfaces/IMuonCalibrationAndSmearingTool.h"
 #include "JetCalibTools/IJetCalibrationTool.h"
-#include "tauRecTools/ITauToolBase.h"
+#include "TauAnalysisTools/TauResolutionTool.h"
 
 namespace met {
 
@@ -89,7 +89,7 @@ namespace met {
     ToolHandle<IJetCalibrationTool>                   m_jetCalibTool {this, "jetCalibTool", "", "the IJetCalibrationTool we use"};
     ToolHandle<CP::IMuonCalibrationAndSmearingTool>   m_muonCalibrationAndSmearingTool {this, "MuonCalibTool", "", "the IMuonCalibrationAndSmearingTool we use"};
     ToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_egammaCalibTool {this, "egammaCalibTool", "", "the IEgammaCalibrationAndSmearingTool we use"};
-    ToolHandle<ITauToolBase>                          m_tauCombinedTES {this, "tauCombinedTES", "", "the TauCombinedTES tool we use"};
+    ToolHandle<TauAnalysisTools::ITauResolutionTool>  m_tauResolutionTool {this, "tauResolutionTool", "", "the tau Resolution tool we use"};
 
     Gaudi::Property<std::string> m_jetCalibConfig{this, "JetCalibConfig", "", "Config file for jet calibration/resolution"};
     Gaudi::Property<std::string> m_jetCalibSeq{this, "JetCalibSequence", "", "Calibration sequence used for input jets"};
@@ -98,10 +98,8 @@ namespace met {
     Gaudi::Property<std::string> m_egESModel{this, "EgammaESModel", "", "ESModel for egamma calibration"};
     Gaudi::Property<std::string> m_egDecorrModel{this, "EgammaDecorrelationModel", "", "Decorrelation model for egamma calibration"};
     Gaudi::Property<bool> m_egUseFastsim{this, "EgammaUseFastsim", false, "Use fastsim resolutions for egamma?"};
-    Gaudi::Property<std::string> m_tauTESConfig{this, "TauTESConfig", "CombinedTES_R22_Round2.5_v2.root", "Config file for tau energy scale calibration"};
-    Gaudi::Property<bool> m_tauUseMVARes{this, "TauUseMVAResolution", true, "Use MVA resolution for taus?"};
-
-
+    Gaudi::Property<std::string> m_tauTESConfig{this, "TauTESConfig", "tauRecTools/R22_preprod/CombinedTES_R22_Round2.5_v2.root", "Config file for tau energy scale calibration"};
+    
     StatusCode AddMuon    (const xAOD::IParticle* obj, float &pt_reso, float &phi_reso, float avgmu);
     StatusCode AddElectron(const xAOD::IParticle* obj, float &pt_reso, float &phi_reso, float avgmu);
     StatusCode AddPhoton  (const xAOD::IParticle* obj, float &pt_reso, float &phi_reso);
