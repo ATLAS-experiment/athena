@@ -433,7 +433,7 @@ namespace DerivationFramework {
 	  TrackParticleLinkVector tpLinkVector;
 	  for(size_t i=0; i<theResult->trackParticleLinks().size(); i++) {
 	    TrackParticleLink mylink = theResult->trackParticleLinks()[i];
-	    mylink.setStorableObject(*trackContainer.ptr(), true);
+	    mylink.setStorableObject(*trackContainer.ptr(), true, ctx);
 	    tpLinkVector.push_back( mylink );
 	  }
 	  theResult->clearTracks();
@@ -445,7 +445,7 @@ namespace DerivationFramework {
 	  TrackParticleLinkVector tpLinkVector_psi1;
 	  for(size_t i=0; i<psi1Vertex_->trackParticleLinks().size(); i++) {
 	    TrackParticleLink mylink = psi1Vertex_->trackParticleLinks()[i];
-	    mylink.setStorableObject(*trackContainer.ptr(), true);
+	    mylink.setStorableObject(*trackContainer.ptr(), true, ctx);
 	    tpLinkVector_psi1.push_back( mylink );
 	  }
 	  psi1Vertex_->clearTracks();
@@ -457,7 +457,7 @@ namespace DerivationFramework {
 	  TrackParticleLinkVector tpLinkVector_psi2;
 	  for(size_t i=0; i<psi2Vertex_->trackParticleLinks().size(); i++) {
 	    TrackParticleLink mylink = psi2Vertex_->trackParticleLinks()[i];
-	    mylink.setStorableObject(*trackContainer.ptr(), true);
+	    mylink.setStorableObject(*trackContainer.ptr(), true, ctx);
 	    tpLinkVector_psi2.push_back( mylink );
 	  }
 	  psi2Vertex_->clearTracks();
@@ -470,11 +470,11 @@ namespace DerivationFramework {
 	  VertexLinkVector precedingVertexLinks;
 	  VertexLink vertexLink1;
 	  vertexLink1.setElement(psi1Vertex_);
-	  vertexLink1.setStorableObject(*VtxWriteHandles[0].ptr());
+	  vertexLink1.setStorableObject(*VtxWriteHandles[0].ptr(), ctx);
 	  if( vertexLink1.isValid() ) precedingVertexLinks.push_back( vertexLink1 );
 	  VertexLink vertexLink2;
 	  vertexLink2.setElement(psi2Vertex_);
-	  vertexLink2.setStorableObject(*VtxWriteHandles[1].ptr());
+	  vertexLink2.setStorableObject(*VtxWriteHandles[1].ptr(), ctx);
 	  if( vertexLink2.isValid() ) precedingVertexLinks.push_back( vertexLink2 );
 
 	  SG::Decorator<VertexLinkVector> PrecedingLinksDecor("PrecedingVertexLinks");

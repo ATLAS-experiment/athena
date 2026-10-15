@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "TrigMissingETHypoAlg.h"
 
@@ -81,7 +81,7 @@ StatusCode TrigMissingETHypoAlg::decide(const xAOD::TrigMissingETContainer* metC
 
   // Create output Decision object, link it to prevDecision & its "feature"
   auto newDecision = TrigCompositeUtils::newDecisionIn(newDecisions, previousDecision, hypoAlgNodeName(), context);
-  ElementLink<xAOD::TrigMissingETContainer> metElementLink = ElementLink<xAOD::TrigMissingETContainer>(*metContainer, /*index*/ 0);
+  ElementLink<xAOD::TrigMissingETContainer> metElementLink = ElementLink<xAOD::TrigMissingETContainer>(*metContainer, /*index*/ 0, context);
   newDecision->setObjectLink<xAOD::TrigMissingETContainer>(featureString(), metElementLink);
   
   // Get set of active chains

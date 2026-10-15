@@ -320,7 +320,7 @@ std::unique_ptr<xAOD::Vertex> ReVertex::fit(const EventContext& ctx,
       for(unsigned int i=0; i< theResult->trackParticleLinks().size(); i++)
 	{
 	   ElementLink<DataVector<xAOD::TrackParticle> > mylink=theResult->trackParticleLinks()[i]; //makes a copy (non-const)
-	   mylink.setStorableObject( *importedTrackCollection, true);
+	   mylink.setStorableObject( *importedTrackCollection, true, ctx);
 	   newLinkVector.push_back( mylink );
 	}
       theResult->clearTracks();

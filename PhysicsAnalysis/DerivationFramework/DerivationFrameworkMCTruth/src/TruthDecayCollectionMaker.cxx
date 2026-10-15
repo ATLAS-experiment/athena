@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -143,11 +143,11 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthParticle( const Even
     }
     // Make a link to this particle
     int my_index = part_cont->size()-1;
-    ElementLink<xAOD::TruthParticleContainer> eltp(*part_cont, my_index);
+    ElementLink<xAOD::TruthParticleContainer> eltp(*part_cont, my_index,ctx);
     // Decay vertex information
     if (old_part.hasDecayVtx()) {
         int vert_index = addTruthVertex( ctx, *old_part.decayVtx(), part_cont, vert_cont, seen_particles, generations);
-        ElementLink<xAOD::TruthVertexContainer> eltv( *vert_cont, vert_index );
+        ElementLink<xAOD::TruthVertexContainer> eltv( *vert_cont, vert_index, ctx );
         xTruthParticle->setDecayVtxLink( eltv );
         (*vert_cont)[vert_index]->addIncomingParticleLink( eltp );
     }
@@ -177,7 +177,7 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthVertex( const EventC
     vert_cont->push_back( xTruthVertex );
     // Get a link to this vertex -- will be used to set production vertices on all the next particles
     int my_index = vert_cont->size()-1;
-    ElementLink<xAOD::TruthVertexContainer> eltv(*vert_cont, my_index);
+    ElementLink<xAOD::TruthVertexContainer> eltv(*vert_cont, my_index, ctx);
     // Set properties
     xTruthVertex->setStatus(HepMC::status(old_vert));
     xTruthVertex->setUid(HepMC::uniqueID(old_vert));
@@ -196,7 +196,7 @@ int DerivationFramework::TruthDecayCollectionMaker::addTruthVertex( const EventC
         // Continue on the next generation; note that we only decrement the generation if this particle doesn't also pass our cuts
         int part_index = addTruthParticle( ctx, *old_vert.outgoingParticle(n), part_cont, vert_cont, seen_particles,
                                            generations-1+(id_ok(*old_vert.outgoingParticle(n))?1:0) );
-        ElementLink<xAOD::TruthParticleContainer> eltp( *part_cont, part_index);
+        ElementLink<xAOD::TruthParticleContainer> eltp( *part_cont, part_index, ctx );
         xTruthVertex->addOutgoingParticleLink( eltp );
         (*part_cont)[part_index]->setProdVtxLink( eltv );
     }

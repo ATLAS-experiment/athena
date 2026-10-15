@@ -254,7 +254,7 @@ StatusCode DerivationFramework::TruthCollectionMakerBase::addBranches(const Even
       return StatusCode::SUCCESS;
     }
     for (unsigned int i=0; i<nParticles; ++i) {
-      ElementLink<xAOD::TruthParticleContainer> eltp(*truthParticles,i);
+      ElementLink<xAOD::TruthParticleContainer> eltp(*truthParticles,i,ctx);
       if (entries[i]==1) {
         //In TRUTH3, we want to remove all particles but the first and last in a decay chain.  This is off in TRUTH1.  The first and last particles in the decay chain are decorated as such.
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////
@@ -48,7 +48,7 @@ StatusCode DerivationFramework::TruthNavigationDecorator::addBranches(const Even
     for (size_t p=0;p<coll.ptr()->size();++p){
       if (!coll.ptr()->at(p)) continue; // Protection against null ptrs
       if (linkMap.find(HepMC::uniqueID(coll.ptr()->at(p))) != linkMap.end()) continue; // Particle in multiple collections
-      linkMap[HepMC::uniqueID(coll.ptr()->at(p))] = ElementLink<xAOD::TruthParticleContainer>(*coll,p);
+      linkMap[HepMC::uniqueID(coll.ptr()->at(p))] = ElementLink<xAOD::TruthParticleContainer>(*coll,p,ctx);
     } // Loop over particles in the collection
   } // Loop over collections
 

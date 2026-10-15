@@ -758,16 +758,16 @@ namespace DerivationFramework {
       VertexLinkVector cascadeVertexLinks;
       VertexLink vertexLink1;
       vertexLink1.setElement(cascadeVertices[0]);
-      vertexLink1.setStorableObject(*VtxWriteHandles[0].ptr());
+      vertexLink1.setStorableObject(*VtxWriteHandles[0].ptr(), ctx);
       if( vertexLink1.isValid() ) cascadeVertexLinks.push_back( vertexLink1 );
       VertexLink vertexLink2;
       vertexLink2.setElement(cascadeVertices[1]);
-      vertexLink2.setStorableObject(*VtxWriteHandles[1].ptr());
+      vertexLink2.setStorableObject(*VtxWriteHandles[1].ptr(), ctx);
       if( vertexLink2.isValid() ) cascadeVertexLinks.push_back( vertexLink2 );
       if(topoN==4) {
 	VertexLink vertexLink3;
 	vertexLink3.setElement(cascadeVertices[2]);
-	vertexLink3.setStorableObject(*VtxWriteHandles[2].ptr());
+	vertexLink3.setStorableObject(*VtxWriteHandles[2].ptr(), ctx);
 	if( vertexLink3.isValid() ) cascadeVertexLinks.push_back( vertexLink3 );
       }
       CascadeLinksDecor(*mainVertex) = std::move(cascadeVertexLinks);
