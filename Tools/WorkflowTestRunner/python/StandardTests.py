@@ -1,21 +1,33 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-from typing import List
-
-from .Checks import AODContentCheck, AODDigestCheck, FrozenTier0PolicyCheck, MetadataCheck
-from .Inputs import input_EVNT, input_HITS, \
-    input_HITS_unfiltered, \
-    input_RDO_BKG, input_RDO_BKG_data, input_BS_minimum_bias_overlay, \
-    input_EVNT_data_overlay, input_HITS_data_overlay, \
-    input_HITS_minbias_low, input_HITS_minbias_high, input_HITS_neutrino, \
-    input_HITS_minbias_low_fulltruth, input_HITS_minbias_high_fulltruth, \
-    input_AOD
+from .Checks import (
+    AODContentCheck,
+    AODDigestCheck,
+    FrozenTier0PolicyCheck,
+    MetadataCheck,
+)
+from .Inputs import (
+    input_AOD,
+    input_BS_minimum_bias_overlay,
+    input_EVNT,
+    input_EVNT_data_overlay,
+    input_HITS,
+    input_HITS_data_overlay,
+    input_HITS_minbias_high,
+    input_HITS_minbias_high_fulltruth,
+    input_HITS_minbias_low,
+    input_HITS_minbias_low_fulltruth,
+    input_HITS_neutrino,
+    input_HITS_unfiltered,
+    input_RDO_BKG,
+    input_RDO_BKG_data,
+)
 from .Test import TestSetup, WorkflowRun, WorkflowTest, WorkflowType
 
 
 class QTest(WorkflowTest):
     """General workflow q-test."""
 
-    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: list[str], setup: TestSetup, extra_args: str = "") -> None:
         if "maxEvents" not in extra_args:
             if type == WorkflowType.MCPileUpReco or run == WorkflowRun.Run4:
                 extra_args += " --maxEvents 5"
@@ -58,7 +70,7 @@ class QTest(WorkflowTest):
 class SimulationTest(WorkflowTest):
     """Simulation workflow test."""
 
-    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: list[str], setup: TestSetup, extra_args: str = "") -> None:
         if "maxEvents" not in extra_args:
             extra_args += " --maxEvents 20"
 
@@ -108,7 +120,7 @@ class SimulationTest(WorkflowTest):
 class OverlayTest(WorkflowTest):
     """MC overlay workflow test."""
 
-    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: list[str], setup: TestSetup, extra_args: str = "") -> None:
         if "maxEvents" not in extra_args:
             extra_args += " --maxEvents 10"
 
@@ -131,7 +143,7 @@ class OverlayTest(WorkflowTest):
 class DataOverlayTest(WorkflowTest):
     """Data overlay workflow test."""
 
-    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: list[str], setup: TestSetup, extra_args: str = "") -> None:
         if "maxEvents" not in extra_args:
             extra_args += " --maxEvents 10"
 
@@ -164,7 +176,7 @@ class DataOverlayTest(WorkflowTest):
 class PileUpTest(WorkflowTest):
     """Digitization with pile-up workflow test."""
 
-    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: list[str], setup: TestSetup, extra_args: str = "") -> None:
         if "maxEvents" not in extra_args:
             extra_args += " --maxEvents 5"
 
@@ -191,7 +203,7 @@ class PileUpTest(WorkflowTest):
 class DataOverlayPreparationTest(WorkflowTest):
     """Data overlay minimum bias preprocessing test."""
 
-    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: list[str], setup: TestSetup, extra_args: str = "") -> None:
         if "maxEvents" not in extra_args:
             extra_args += " --maxEvents 5"
 
@@ -212,7 +224,7 @@ class DataOverlayPreparationTest(WorkflowTest):
 class DerivationTest(WorkflowTest):
     """Derivations test."""
 
-    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: list[str], setup: TestSetup, extra_args: str = "") -> None:
         test_def = ID.split("_")
         multithreaded = False
         if test_def[-2] == "MT":
@@ -277,7 +289,7 @@ class DerivationTest(WorkflowTest):
 class GenerationTest(WorkflowTest):
     """Generation test."""
 
-    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup, extra_args: str = "") -> None:
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: list[str], setup: TestSetup, extra_args: str = "") -> None:
         if "output" not in extra_args:
             extra_args += " --outputEVNTFile myEVNT.pool.root"
 

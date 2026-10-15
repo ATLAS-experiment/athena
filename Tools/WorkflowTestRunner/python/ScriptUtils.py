@@ -5,7 +5,6 @@ from argparse import ArgumentParser, Namespace
 from os import environ
 from pathlib import Path
 from sys import exit, stdout
-from typing import List
 
 from .Checks import FailedOrPassedCheck, FPECheck, SimpleCheck, WarningsComparisonCheck
 from .Inputs import references_CVMFS_path
@@ -221,7 +220,7 @@ def parse_test_string(setup: TestSetup, options: Namespace) -> None:
         return
 
 
-def get_standard_performance_checks(setup: TestSetup) -> List[WorkflowCheck]:
+def get_standard_performance_checks(setup: TestSetup) -> list[WorkflowCheck]:
     return [
         SimpleCheck(setup, "CPU Time"       , "evtloop_time",     "msec/event",   4, 0.4),
         SimpleCheck(setup, "Physical Memory", "VmRSS",            "kBytes",       4, 0.2),
@@ -231,7 +230,7 @@ def get_standard_performance_checks(setup: TestSetup) -> List[WorkflowCheck]:
     ]
 
 
-def run_tests(setup: TestSetup, tests: List[WorkflowTest]) -> None:
+def run_tests(setup: TestSetup, tests: list[WorkflowTest]) -> None:
     if setup.checks_only:
         return
 
@@ -244,8 +243,8 @@ def run_tests(setup: TestSetup, tests: List[WorkflowTest]) -> None:
             threads[f"{test.ID}_reference"].start()
             threads[f"{test.ID}_validation"].start()
 
-        for thread in threads:
-            threads[thread].join()
+        for thread in threads.items():
+            thread.join()
     elif setup.validation_only:
         for test in tests:
             threads[f"{test.ID}_validation"] = threading.Thread(target=lambda test=test: test.run_validation())
@@ -254,8 +253,8 @@ def run_tests(setup: TestSetup, tests: List[WorkflowTest]) -> None:
                 threads[f"{test.ID}_validation"].join()
 
         if setup.parallel_execution:
-            for thread in threads:
-                threads[thread].join()
+            for thread in threads.items():
+                thread.join()
     else:
         for test in tests:
             threads[f"{test.ID}_reference"]   = threading.Thread(target=lambda test=test: test.run_reference())
@@ -266,7 +265,7 @@ def run_tests(setup: TestSetup, tests: List[WorkflowTest]) -> None:
             threads[f"{test.ID}_validation"].join()
 
 
-def run_checks(setup: TestSetup, tests: List[WorkflowTest], performance_checks: List[WorkflowCheck]) -> bool:
+def run_checks(setup: TestSetup, tests: list[WorkflowTest], performance_checks: list[WorkflowCheck]) -> bool:
     all_passed = True
     # define common checks
     main_check = FailedOrPassedCheck(setup)
@@ -281,7 +280,7 @@ def run_checks(setup: TestSetup, tests: List[WorkflowTest], performance_checks: 
     return all_passed
 
 
-def run_summary(setup: TestSetup, tests: List[WorkflowTest], status: bool) -> None:
+def run_summary(setup: TestSetup, tests: list[WorkflowTest], status: bool) -> None:
     setup.logger.info("-----------------------------------------------------")
     setup.logger.info("---------------------- Summary ----------------------")
     if status:

@@ -1,11 +1,10 @@
 # Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+import subprocess
 from enum import Enum
 from logging import Logger
 from os import environ
 from pathlib import Path
-from typing import List, Optional
 from uuid import uuid4
-import subprocess
 
 from .Helpers import get_release_setup, list_changed_packages
 from .Inputs import references_CVMFS_path, references_override_url
@@ -90,7 +89,7 @@ class WorkflowCheck:
         self.setup = setup
         self.logger = setup.logger
 
-    def reference_file(self, test: "WorkflowTest", file_name: str) -> Optional[Path]:
+    def reference_file(self, test: "WorkflowTest", file_name: str) -> Path | None:
         reference_path: Path = test.reference_path
         reference_file = reference_path / file_name
 
@@ -131,7 +130,7 @@ class WorkflowCheck:
 class WorkflowTest:
     """Workflow test base class."""
 
-    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: List[str], setup: TestSetup) -> None:
+    def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: list[str], setup: TestSetup) -> None:
         if not hasattr(self, "ID"):
             self.ID = ID
 
@@ -197,7 +196,7 @@ class WorkflowTest:
         self.logger.info(f"Finished validation in rel {self.setup.release_validation}")
         self.logger.info(f"\"{self.command}\"")
 
-    def run_checks(self, performance_checks: List[WorkflowCheck]) -> bool:
+    def run_checks(self, performance_checks: list[WorkflowCheck]) -> bool:
         self.logger.info("-----------------------------------------------------")
         self.logger.info(f"----------- Post-processing of {self.ID} Test -----------")
         result = True
