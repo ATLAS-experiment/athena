@@ -31,13 +31,13 @@
 #include <map>
 #include <cmath>
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
     //Interface class to retrieve the Muon dependent systematics
     class IKinematicSystHandler : public columnar::ColumnarTool<> {
         public:
             /// Add an additional uncertainty to the muon depending on its kinematics.
-            virtual CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const = 0;
+            virtual CP::CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const = 0;
             /// Set's the absolute scaling of the systematic. For daily puposes it's usually
             /// either 1 or -1 indicating if the instance is an upwards or downwards variation.
             virtual void SetSystematicWeight(float SystWeight) = 0;
@@ -72,7 +72,7 @@ namespace CP {
     ///     is smaller than the total value of the latter itself.
     class PtKinematicSystHandler : public IKinematicSystHandler {
         public:
-             CorrectionCode GetKineDependent(columnar::MuonId mu, float& eff) const override;
+             CP::CorrectionCode GetKineDependent(columnar::MuonId mu, float& eff) const override;
             
             void SetSystematicWeight(float syst_weight) override;
             
@@ -91,7 +91,7 @@ namespace CP {
     
     class PrimodialPtSystematic: public IKinematicSystHandler {
         public:
-            CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const override;
+            CP::CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const override;
     
             void SetSystematicWeight(float SystWeight) override;
 
@@ -110,7 +110,7 @@ namespace CP {
             
             void SetSystematicWeight( float SystWeight) override;
             bool initialize() override;
-            CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const override;
+            CP::CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const override;
         private:
             std::unique_ptr<HistHandler> m_Handler;
             float m_SystWeight;
@@ -118,7 +118,7 @@ namespace CP {
 
     class BadMuonVetoSystHandler: public IKinematicSystHandler {
         public:
-             CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const override;
+             CP::CorrectionCode GetKineDependent(columnar::MuonId mu, float& Eff) const override;
              void SetSystematicWeight(float SystWeight)override;
 
             bool initialize() override;
@@ -141,6 +141,6 @@ namespace CP {
             float m_SystWeight;
     };
     
-} /* namespace CP */
+} /* namespace ADD_CMODE(CP) */
 
 #endif /* EFFICIENCYSCALEFACTOR_H_ */

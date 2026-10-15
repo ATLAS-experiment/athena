@@ -9,6 +9,7 @@
 #include "AthenaBaseComps/AthHistogramAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 #include "MuonEfficiencyCorrections/MuonSFTestHelper.h"
 
@@ -20,7 +21,7 @@
 
 #include "MuonTesterTree/MuonTesterTree.h"
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
 /// small test algorithm to quickly test/demonstrate the usage of the MuonEfficiencyCorrections code within athena
 
@@ -74,6 +75,6 @@ namespace CP {
 
     };
 
-} // namespace CP
+} // namespace ADD_CMODE(CP)
 
 #endif //CPTOOLTESTS_MuonEfficiencyCorrections_TESTALG

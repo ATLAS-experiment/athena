@@ -83,7 +83,7 @@ public:
 
 	tool->msg().setLevel( MSG::WARNING );
 	ASG_CHECK_SA(m_appName, tool->initialize());
-	//CP::CorrectionCode result = tool->setRunNumber(atoi(runNumber));
+	//CorrectionCode result = tool->setRunNumber(atoi(runNumber));
 	//if (result != CP::CorrectionCode::Ok){
 	//    Error(m_appName, "Could not set run number");
 	//    return 1;

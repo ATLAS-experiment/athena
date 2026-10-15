@@ -30,6 +30,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 // method implementations
 //
 
+using namespace ADD_CMODE(CP);
 using columnar::ColumnarMemoryTest;
 using columnar::ColumnarPhysLiteTest;
 using columnar::TestUtils::IXAODToolCaller;
@@ -40,7 +41,7 @@ TEST_F (ColumnarMemoryTest, MuonEfficiencyScaleFactors)
     return;
 
   asg::AsgToolConfig toolConfig;
-  toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
+  toolConfig.setTypeAndName (columnar::add_cmode("CP")+"::MuonEfficiencyScaleFactors/" + makeUniqueName());
   ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
   ToolHandle<asg::AsgTool> myToolHandle;
   std::shared_ptr<void> cleanup;
@@ -88,7 +89,7 @@ TEST_F (ColumnarMemoryTest, MuonEfficiencyScaleFactors_systematic)
     return;
 
   asg::AsgToolConfig toolConfig;
-  toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
+  toolConfig.setTypeAndName (columnar::add_cmode("CP")+"::MuonEfficiencyScaleFactors/" + makeUniqueName());
   ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
   ToolHandle<asg::AsgTool> myToolHandle;
   std::shared_ptr<void> cleanup;
@@ -138,7 +139,7 @@ TEST_F (ColumnarMemoryTest, MuonEfficiencyScaleFactors_multiEvent)
     return;
 
   asg::AsgToolConfig toolConfig;
-  toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
+  toolConfig.setTypeAndName (columnar::add_cmode("CP")+"::MuonEfficiencyScaleFactors/" + makeUniqueName());
   ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
   ToolHandle<asg::AsgTool> myToolHandle;
   std::shared_ptr<void> cleanup;
@@ -181,7 +182,7 @@ TEST_F (ColumnarMemoryTest, MuonEfficiencyScaleFactors_multiEvent)
 class XAODToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
 {
 public:
-  XAODToolCaller (const CP::MuonEfficiencyScaleFactors& tool, const std::string& inputContainer)
+  XAODToolCaller (const MuonEfficiencyScaleFactors& tool, const std::string& inputContainer)
     : AsgMessaging ("XAODToolCaller"), m_tool (tool), m_inputContainer (inputContainer)
   {}
 
@@ -208,7 +209,7 @@ public:
   }
 
 private:
-  const CP::MuonEfficiencyScaleFactors& m_tool;
+  const MuonEfficiencyScaleFactors& m_tool;
   std::string m_inputContainer;
 
   const xAOD::MuonContainer *m_muons = nullptr;
@@ -219,9 +220,9 @@ private:
 TEST_F (ColumnarPhysLiteTest, MuonEfficiencyScaleFactors)
 {
   asg::AsgToolConfig toolConfig;
-  toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
+  toolConfig.setTypeAndName (columnar::add_cmode("CP")+"::MuonEfficiencyScaleFactors/" + makeUniqueName());
   ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
-  ToolHandle<CP::MuonEfficiencyScaleFactors> myToolHandle;
+  ToolHandle<MuonEfficiencyScaleFactors> myToolHandle;
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
 
@@ -234,9 +235,9 @@ TEST_F (ColumnarPhysLiteTest, MuonEfficiencyScaleFactors)
 TEST_F (ColumnarPhysLiteTest, MuonEfficiencyScaleFactors_systematics)
 {
   asg::AsgToolConfig toolConfig;
-  toolConfig.setTypeAndName ("CP::MuonEfficiencyScaleFactors/" + makeUniqueName());
+  toolConfig.setTypeAndName (columnar::add_cmode("CP")+"::MuonEfficiencyScaleFactors/" + makeUniqueName());
   ASSERT_SUCCESS (toolConfig.setProperty ("CalibrationRelease", "230213_Preliminary_r22run2_loosefix"));
-  ToolHandle<CP::MuonEfficiencyScaleFactors> myToolHandle;
+  ToolHandle<MuonEfficiencyScaleFactors> myToolHandle;
   std::shared_ptr<void> cleanup;
   ASSERT_SUCCESS (toolConfig.makeTool (myToolHandle, cleanup));
 

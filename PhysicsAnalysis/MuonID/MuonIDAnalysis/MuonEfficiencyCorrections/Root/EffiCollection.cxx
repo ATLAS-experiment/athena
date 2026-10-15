@@ -7,7 +7,7 @@
 #include <MuonEfficiencyCorrections/MuonEfficiencyScaleFactors.h>
 #include <MuonEfficiencyCorrections/UtilFunctions.h>
 #include <TTree.h>
-namespace CP {
+namespace ADD_CMODE(CP) {
     namespace {
         static const std::vector<std::string> ToRemove { "GeV", "MeV", "[", "]", "{", "}", "(", ")", "#", " " };
         typedef std::pair<std::string,std::string> stringpair;
@@ -23,7 +23,7 @@ namespace CP {
             m_lowpt_calo_eff(),
             m_lrt_central_eff(),
             m_lrt_lowpt_central_eff(),
-            m_syst_set(std::make_unique<SystematicSet>()){
+            m_syst_set(std::make_unique<CP::SystematicSet>()){
 
         ref_tool.addSubtool (*this);
 
@@ -197,7 +197,7 @@ namespace CP {
                         m_syst_set->insert(CP::SystematicVariation::makeToyVariation("MUON_EFF_" + container->sysname()  + GetBinName(bin) , bin, glob_sys));
                     }
                 } else {
-                    m_syst_set->insert( SystematicVariation("MUON_EFF_" + container->sysname(), container->isUpVariation() ? 1  : -1));
+                    m_syst_set->insert( CP::SystematicVariation("MUON_EFF_" + container->sysname(), container->isUpVariation() ? 1  : -1));
                 }
              }
         }
@@ -333,15 +333,15 @@ namespace CP {
         if (container) return container->FindBinSF(mu); 
         return -1;
     }
-    SystematicSet* EffiCollection::getSystSet() const{
+    CP::SystematicSet* EffiCollection::getSystSet() const{
         return m_syst_set.get();
     }
-    bool  EffiCollection::isAffectedBySystematic(const SystematicVariation& variation) const {
+    bool  EffiCollection::isAffectedBySystematic(const CP::SystematicVariation& variation) const {
         return m_syst_set->find(variation) != m_syst_set->end();
     }
-    bool  EffiCollection::isAffectedBySystematic(const SystematicSet& set) const{
+    bool  EffiCollection::isAffectedBySystematic(const CP::SystematicSet& set) const{
         if (set.empty()) return m_syst_set->empty();
-        for (const SystematicVariation& variation: set){
+        for (const CP::SystematicVariation& variation: set){
             if (isAffectedBySystematic(variation)) return true;
         }
         return false;

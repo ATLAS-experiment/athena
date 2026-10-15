@@ -13,7 +13,7 @@ namespace{
     constexpr double MeVtoGeV = 1.e-3;
 }
 
-namespace CP {
+namespace ADD_CMODE(CP) {
     MuonScaleFactorTestAlg::MuonScaleFactorTestAlg(const std::string& name, ISvcLocator* svcLoc) :
         AthHistogramAlgorithm(name, svcLoc) {
         // force strict checking of return codes
@@ -90,4 +90,4 @@ namespace CP {
         return StatusCode::SUCCESS;
     }
 
-} // namespace CP
+} // namespace ADD_CMODE(CP)

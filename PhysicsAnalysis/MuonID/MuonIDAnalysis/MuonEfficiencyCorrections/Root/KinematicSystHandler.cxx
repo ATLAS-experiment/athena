@@ -3,7 +3,7 @@
  */
 
 #include <MuonEfficiencyCorrections/KinematicSystHandler.h>
-namespace CP {
+namespace ADD_CMODE(CP) {
 
     float IKinematicSystHandler::Eta(columnar::MuonId mu) const {
         return mu(etaAcc);
@@ -37,17 +37,17 @@ namespace CP {
         m_loss.swap(energy_loss);
     }
    
-    CorrectionCode PtKinematicSystHandler::GetKineDependent(columnar::MuonId mu, float& eff) const {
+    CP::CorrectionCode PtKinematicSystHandler::GetKineDependent(columnar::MuonId mu, float& eff) const {
         int bin_flat(-1), bin_loss(-1);
         float syst = 0;
-        CorrectionCode cc_flat = m_flatness->FindBin(mu, bin_flat);
-        CorrectionCode cc_eloss = mu(ptAcc) > 200.e3 ? m_loss->FindBin(mu, bin_loss) : cc_flat;
+        CP::CorrectionCode cc_flat = m_flatness->FindBin(mu, bin_flat);
+        CP::CorrectionCode cc_eloss = mu(ptAcc) > 200.e3 ? m_loss->FindBin(mu, bin_loss) : cc_flat;
       
         float eloss_syst = bin_loss < 1 ? 1.e6 : std::abs( m_loss->GetBinContent(bin_loss) * mu(ptAcc)/1.0e6);
         /// We exceed the limits of the histogram
-        if (cc_flat != CorrectionCode::Ok){
+        if (cc_flat != CP::CorrectionCode::Ok){
             /// The eloss is going to take over now
-            if (cc_eloss == CorrectionCode::Ok){ 
+            if (cc_eloss == CP::CorrectionCode::Ok){ 
                 syst = eloss_syst;
                 eff *= 1 + m_SystWeight * std::abs(syst);
                 return cc_eloss;
@@ -55,7 +55,7 @@ namespace CP {
         } else {        
             // The eloss -systematic is valid and smaller than the error from the flatness        
             float abs_error = std::abs( m_flatness->GetBinError(bin_flat));
-            if (cc_eloss == CorrectionCode::Ok && mu(ptAcc) > 200.e3 && (eloss_syst < abs_error || abs_error == 0 || mu(ptAcc) > 500.e3)){
+            if (cc_eloss == CP::CorrectionCode::Ok && mu(ptAcc) > 200.e3 && (eloss_syst < abs_error || abs_error == 0 || mu(ptAcc) > 500.e3)){
                 syst = eloss_syst;
             // The flatness of the scale-factor is still more precise than the eloss. Assign this as an extra syst
             } else {            
@@ -83,14 +83,14 @@ namespace CP {
     }
     void TTVAClosureSysHandler::SetSystematicWeight( float SystWeight){m_SystWeight = SystWeight;}
     bool TTVAClosureSysHandler::initialize() { return m_Handler.get() != nullptr; }
-    CorrectionCode TTVAClosureSysHandler::GetKineDependent(columnar::MuonId mu, float& Eff) const{
+    CP::CorrectionCode TTVAClosureSysHandler::GetKineDependent(columnar::MuonId mu, float& Eff) const{
         int binsys = -1;
-        CorrectionCode cc = m_Handler->FindBin(mu, binsys);
-        if (cc != CorrectionCode::Ok) {
+        CP::CorrectionCode cc = m_Handler->FindBin(mu, binsys);
+        if (cc != CP::CorrectionCode::Ok) {
             return cc;
         }
         Eff *= (1. + m_SystWeight * std::abs(m_Handler->GetBinContent(binsys)));
-        return CorrectionCode::Ok;   
+        return CP::CorrectionCode::Ok;   
     }
     //###############################################################
     //                  PrimodialPtSystematic
@@ -100,18 +100,18 @@ namespace CP {
                     m_SystWeight(0) {
         m_Handler.swap(Handler);
     }
-    CorrectionCode PrimodialPtSystematic::GetKineDependent(columnar::MuonId mu, float& Eff) const {
+    CP::CorrectionCode PrimodialPtSystematic::GetKineDependent(columnar::MuonId mu, float& Eff) const {
         // Account for catastrophic energy loss for  very high
         // pt's
-        if (mu(ptAcc) <= 200.e3) return CorrectionCode::Ok;
+        if (mu(ptAcc) <= 200.e3) return CP::CorrectionCode::Ok;
 
         int binsys = -1;
-        CorrectionCode cc = m_Handler->FindBin(mu, binsys);
-        if (cc != CorrectionCode::Ok) {
+        CP::CorrectionCode cc = m_Handler->FindBin(mu, binsys);
+        if (cc != CP::CorrectionCode::Ok) {
             return cc;
         }
         Eff *= (1. + m_SystWeight * std::abs(m_Handler->GetBinContent(binsys)) * mu(ptAcc) / 1.0e6);
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
     void PrimodialPtSystematic::SetSystematicWeight(float SystWeight) {
         m_SystWeight = SystWeight;
@@ -171,16 +171,16 @@ namespace CP {
         }
 
     }
-    CorrectionCode BadMuonVetoSystHandler::GetKineDependent(columnar::MuonId mu, float& Eff) const {
+    CP::CorrectionCode BadMuonVetoSystHandler::GetKineDependent(columnar::MuonId mu, float& Eff) const {
         if (m_SystWeight == 0.) {           
-            return CorrectionCode::Ok;
+            return CP::CorrectionCode::Ok;
         }
         TF1* Poly = nullptr;
         // we know that Eff=(1+relative sys error), since SF==1
         float RelHighPtSys = 0.;
         if (mu(ptAcc) >= 100.e3) {
-            CorrectionCode cc = findAppropiatePolynomial(mu.getXAODObject(), Poly);
-            if (cc != CorrectionCode::Ok) {
+            CP::CorrectionCode cc = findAppropiatePolynomial(mu.getXAODObject(), Poly);
+            if (cc != CP::CorrectionCode::Ok) {
                 return cc;
             }            
             RelHighPtSys = Poly->Eval((this->*m_uncertVar)(mu.getXAODObject()));           
@@ -191,7 +191,7 @@ namespace CP {
         }
         Eff = 1 + m_SystWeight * std::sqrt(std::pow(Eff - 1,2) + RelHighPtSys * RelHighPtSys);
 
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
     void BadMuonVetoSystHandler::SetSystematicWeight(float SystWeight) {
         m_SystWeight = SystWeight;
@@ -213,24 +213,24 @@ namespace CP {
     CP::CorrectionCode BadMuonVetoSystHandler::findAppropiatePolynomial(const xAOD::Muon& mu, TF1* &Poly) const {
         if (!m_polySelVar) {
             Error("BadMuonVetoSystHandler()", "Something went wrong with the initialization");
-            return CorrectionCode::Error;
+            return CP::CorrectionCode::Error;
         }
         uint8_t nprecisionLayers=0;      
         if (!mu.summaryValue(nprecisionLayers, xAOD::SummaryType::numberOfPrecisionLayers)){
             Error("BadMuonSysVetoHandler()", "Precisionlayers unkown");
-            return CorrectionCode::Error;
+            return CP::CorrectionCode::Error;
         } else if (nprecisionLayers >= 3) {
             for (const auto& BinnedPoly : m_syst3Stations) {
                 if (BinnedPoly.first.first <= (this->*m_polySelVar)(mu) && (this->*m_polySelVar)(mu) < BinnedPoly.first.second) {
                     Poly = BinnedPoly.second.get();
-                    return CorrectionCode::Ok;
+                    return CP::CorrectionCode::Ok;
                 }
             }
         } else if (nprecisionLayers == 2) {
             for (const auto& BinnedPoly : m_syst2Stations) {
                 if (BinnedPoly.first.first <= (this->*m_polySelVar)(mu) && (this->*m_polySelVar)(mu) < BinnedPoly.first.second) {
                     Poly = BinnedPoly.second.get();
-                    return CorrectionCode::Ok;
+                    return CP::CorrectionCode::Ok;
                 }
             }
         }       
@@ -249,4 +249,4 @@ namespace CP {
         return Property;
     }
 
-} /* namespace CP */
+} /* namespace ADD_CMODE(CP) */

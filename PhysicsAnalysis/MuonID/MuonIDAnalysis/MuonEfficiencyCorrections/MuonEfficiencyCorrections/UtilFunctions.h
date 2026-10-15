@@ -9,8 +9,9 @@
 #include <TH1.h>
 #include <string>
 #include <memory>
+#include <ColumnarMode/ColumnarMode.h>
 
-namespace CP {
+namespace ADD_CMODE(CP) {
     /// Removes beginning and trailing white spaces from a string
     std::string EraseWhiteSpaces(std::string str);
     ///  Replaces all expressions an string by something else

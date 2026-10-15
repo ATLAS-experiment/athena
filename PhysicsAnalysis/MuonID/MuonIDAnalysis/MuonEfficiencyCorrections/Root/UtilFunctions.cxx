@@ -9,7 +9,7 @@
 #include <algorithm> //std::generate_n
 #include <cctype> //std::to_lower
 
-namespace CP{
+namespace ADD_CMODE(CP){
 
     std::string RandomString(size_t length) {
         auto randchar = []() -> char {

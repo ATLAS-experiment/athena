@@ -32,10 +32,12 @@
 #include <cmath>
 #include <memory>
 
-
 namespace CP {
-    
     class SystematicSet;
+}
+
+namespace ADD_CMODE(CP) {
+    
     class MuonEfficiencyScaleFactors;
     class EfficiencyScaleFactor : public columnar::ColumnarTool<> {
 
@@ -100,27 +102,27 @@ namespace CP {
             /// the important bits - extract SF info
 
             /// scale factors...
-            CorrectionCode ScaleFactor(const xAOD::Muon& mu, float & SF) const;
-            CorrectionCode ScaleFactor(columnar::MuonId mu, float & SF) const;
-            CorrectionCode ScaleFactorReplicas(const xAOD::Muon& mu, std::vector<float> & SF);
+            CP::CorrectionCode ScaleFactor(const xAOD::Muon& mu, float & SF) const;
+            CP::CorrectionCode ScaleFactor(columnar::MuonId mu, float & SF) const;
+            CP::CorrectionCode ScaleFactorReplicas(const xAOD::Muon& mu, std::vector<float> & SF);
             
             /// or you can just decorate the scale-factor to the muon
-            CorrectionCode ApplyScaleFactor(const xAOD::Muon& mu) const;
-            CorrectionCode ApplyScaleFactorReplicas(const xAOD::Muon& mu, int n_replicas);
+            CP::CorrectionCode ApplyScaleFactor(const xAOD::Muon& mu) const;
+            CP::CorrectionCode ApplyScaleFactorReplicas(const xAOD::Muon& mu, int n_replicas);
             
             /// ... and absolute efficiencies
-            CorrectionCode DataEfficiency(const xAOD::Muon& mu, float & Eff) const;
-            CorrectionCode DataEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & eff);
+            CP::CorrectionCode DataEfficiency(const xAOD::Muon& mu, float & Eff) const;
+            CP::CorrectionCode DataEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & eff);
             /// You can decorate the data efficiecny as well
-            CorrectionCode ApplyDataEfficiency(const xAOD::Muon& mu) const;
-            CorrectionCode ApplyDataEfficiencyReplicas(const xAOD::Muon& mu, int n_replicas);
+            CP::CorrectionCode ApplyDataEfficiency(const xAOD::Muon& mu) const;
+            CP::CorrectionCode ApplyDataEfficiencyReplicas(const xAOD::Muon& mu, int n_replicas);
             
             /// ... mc efficiency 
-            CorrectionCode MCEfficiency(const xAOD::Muon& mu, float & Eff) const;
-            CorrectionCode MCEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & eff);
+            CP::CorrectionCode MCEfficiency(const xAOD::Muon& mu, float & Eff) const;
+            CP::CorrectionCode MCEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & eff);
             /// ... or decorate them directly
-            CorrectionCode ApplyMCEfficiency(const xAOD::Muon& mu) const;
-            CorrectionCode ApplyMCEfficiencyReplicas(const xAOD::Muon& mu, int n_replicas);
+            CP::CorrectionCode ApplyMCEfficiency(const xAOD::Muon& mu) const;
+            CP::CorrectionCode ApplyMCEfficiencyReplicas(const xAOD::Muon& mu, int n_replicas);
             
             /// debug method
             void DebugPrint() const;
@@ -153,10 +155,10 @@ namespace CP {
             // use some maps for easy histo loading / arithmetics by name
             
             /// read the content of the correct bin in one of my histos. MCefficiencies actually do  not need a pt-dependet systematic
-            CorrectionCode GetContentFromHist(const HistHandler* Hist, const xAOD::Muon& mu, float & SF, bool add_kine_syst) const;
-            CorrectionCode GetContentFromHist(const HistHandler* Hist, columnar::MuonId mu, float & SF, bool add_kine_syst) const;
+            CP::CorrectionCode GetContentFromHist(const HistHandler* Hist, const xAOD::Muon& mu, float & SF, bool add_kine_syst) const;
+            CP::CorrectionCode GetContentFromHist(const HistHandler* Hist, columnar::MuonId mu, float & SF, bool add_kine_syst) const;
             /// read a vector of replica contents in the correct bin in one of my histos
-            CorrectionCode GetContentReplicasFromHist(EfficiencyScaleFactor::SFReplicaVec &replicas, const xAOD::Muon& mu, std::vector<float> & SF, bool add_kine_syst);
+            CP::CorrectionCode GetContentReplicasFromHist(EfficiencyScaleFactor::SFReplicaVec &replicas, const xAOD::Muon& mu, std::vector<float> & SF, bool add_kine_syst);
 
             
             // package a TH1 in a HistHandler
@@ -170,7 +172,7 @@ namespace CP {
             ///
             ///   Section of variables of the tool
             ///
-            CP::MuonEfficiencyType m_measurement;
+            MuonEfficiencyType m_measurement;
             std::string m_syst_name;
             
             /// Boolean whether the scale-factor is varying upwards or downwards
@@ -233,6 +235,6 @@ namespace CP {
             columnar::MuonAccessor<columnar::RetypeColumn<double,float>> phiAcc {*this, "phi"};
             columnar::MuonAccessor<columnar::RetypeColumn<xAOD::Muon::MuonType,std::uint16_t>> muonTypeAcc {*this, "muonType"};
     };
-} /* namespace CP */
+} /* namespace ADD_CMODE(CP) */
 
 #endif /* EFFICIENCYSCALEFACTOR_H_ */

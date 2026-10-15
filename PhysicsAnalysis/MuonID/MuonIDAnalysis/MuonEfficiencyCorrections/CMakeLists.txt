@@ -3,6 +3,18 @@
 # Declare the package name:
 atlas_subdir( MuonEfficiencyCorrections )
 
+# FIX ME: These settings should come from the Project configuration
+if (COLUMNAR_ANALYSIS)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeArray;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
+elseif (XAOD_STANDALONE)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
+else()
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD")
+  SET (COLUMNAR_MODE_SUFFIX_LIST "")
+endif()
+
 # External dependencies:
 find_package( ROOT COMPONENTS Core Tree RIO Hist Physics )
 find_package( GTest )
@@ -12,29 +24,39 @@ if( NOT XAOD_STANDALONE )
    set (extra_libs MuonTesterTreeLib)
 endif()
 
-# Libraries in the package:
-atlas_add_library( MuonEfficiencyCorrectionsLib
-   MuonEfficiencyCorrections/*.h Root/*.cxx
-   PUBLIC_HEADERS MuonEfficiencyCorrections
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} ${extra_libs} AsgTools ColumnarMuonLib ColumnarEventInfoLib MuonAnalysisInterfacesLib 
-                  PATInterfaces AsgDataHandlesLib ColumnarCoreLib ColumnarModeLib
-   PRIVATE_LINK_LIBRARIES FourMomUtils xAODTrigger PathResolver )
+foreach (CMODE_NAME CMODE_SUFFIX IN ZIP_LISTS COLUMNAR_MODE_NAME_LIST COLUMNAR_MODE_SUFFIX_LIST)
 
-if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16 )
-  # Work around gcc bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=122197
-  set_target_properties( MuonEfficiencyCorrectionsLib PROPERTIES COMPILE_FLAGS " --param max-devirt-targets=1 " )
-endif()
+   # Libraries in the package:
+   atlas_add_library( MuonEfficiencyCorrectionsLib${CMODE_SUFFIX}
+      MuonEfficiencyCorrections/*.h Root/*.cxx
+      PUBLIC_HEADERS MuonEfficiencyCorrections
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} ${extra_libs} AsgTools ColumnarMuonLib ColumnarEventInfoLib MuonAnalysisInterfacesLib 
+                     PATInterfaces AsgDataHandlesLib ColumnarCoreLib ColumnarModeLib${CMODE_SUFFIX}
+      PRIVATE_LINK_LIBRARIES FourMomUtils xAODTrigger PathResolver )
 
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( MuonEfficiencyCorrections
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES AsgAnalysisInterfaces AthContainers AthenaBaseComps FourMomUtils GaudiKernel MuonEfficiencyCorrectionsLib StoreGateLib xAODJet )
-else()
-   atlas_add_component( MuonEfficiencyCorrections
-      src/components/*.cxx
-      LINK_LIBRARIES MuonEfficiencyCorrectionsLib )
-endif()
+   if( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16 )
+   # Work around gcc bug https://gcc.gnu.org/bugzilla/show_bug.cgi?id=122197
+   set_target_properties( MuonEfficiencyCorrectionsLib${CMODE_SUFFIX} PROPERTIES COMPILE_FLAGS " --param max-devirt-targets=1 " )
+   endif()
+
+   if( NOT XAOD_STANDALONE )
+      atlas_add_component( MuonEfficiencyCorrections${CMODE_SUFFIX}
+         src/*.h src/*.cxx src/components/*.cxx
+         LINK_LIBRARIES AsgAnalysisInterfaces AthContainers AthenaBaseComps FourMomUtils GaudiKernel MuonEfficiencyCorrectionsLib${CMODE_SUFFIX} StoreGateLib xAODJet )
+   else()
+      atlas_add_component( MuonEfficiencyCorrections${CMODE_SUFFIX}
+         src/components/*.cxx
+         LINK_LIBRARIES MuonEfficiencyCorrectionsLib${CMODE_SUFFIX} )
+   endif()
+
+   atlas_add_test( gt_ColumnarToolTests${CMODE_SUFFIX}
+                  SOURCES test/gt_ColumnarToolTests.cxx
+                  INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+                  LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib${CMODE_SUFFIX} MuonEfficiencyCorrectionsLib${CMODE_SUFFIX} AsgTestingLib
+                  POST_EXEC_SCRIPT noerror.sh )
+
+endforeach()
 
 atlas_add_dictionary( MuonEfficiencyCorrectionsDict
    MuonEfficiencyCorrections/MuonEfficiencyCorrectionsDict.h
@@ -54,12 +76,6 @@ if( XAOD_STANDALONE )
    _add_exec( MuonTriggerSFFilesTest )
    _add_exec( MuonTriggerSFConfGenerator )
 endif()
-
-atlas_add_test( gt_ColumnarToolTests
-                SOURCES test/gt_ColumnarToolTests.cxx
-                INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-                LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib MuonEfficiencyCorrectionsLib AsgTestingLib
-                POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )

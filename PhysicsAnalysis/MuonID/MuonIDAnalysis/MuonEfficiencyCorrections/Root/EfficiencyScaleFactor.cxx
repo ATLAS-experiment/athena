@@ -7,7 +7,7 @@
 #include <MuonEfficiencyCorrections/EffiCollection.h>
 #include <TRandom3.h>
 #include <TClass.h>
-namespace CP {
+namespace ADD_CMODE(CP) {
     const unsigned int EfficiencyScaleFactor::m_warningLimit = 10;
     EfficiencyScaleFactor::EfficiencyScaleFactor(std::shared_ptr<EfficiencyScaleFactor> nominal,
                                   const MuonEfficiencyScaleFactors& ref_tool,
@@ -44,7 +44,7 @@ namespace CP {
             m_firstRun(1),
             m_lastRun(999999){
     
-        if (ref_tool.measurement() == CP::MuonEfficiencyType::Iso){
+        if (ref_tool.measurement() == MuonEfficiencyType::Iso){
             dRJetAxisHandler::set_close_jet_decorator(ref_tool.close_by_jet_decoration());
             dRJetAxisHandler::set_use_2D_sf(ref_tool.use_2D_iso_corrections());
         }    
@@ -131,7 +131,7 @@ namespace CP {
              return;
         }      
         // Load the systematic of the bad veto
-        if (m_measurement == CP::MuonEfficiencyType::BadMuonVeto) {
+        if (m_measurement == MuonEfficiencyType::BadMuonVeto) {
             TDirectory* SystDir = nullptr;
             f->GetObject(("KinematicSystHandler_" + time_unit).c_str(), SystDir);
             /// Old format of the pt-dependent systematic loaded
@@ -152,7 +152,7 @@ namespace CP {
             if (m_sf_KineDepsys)
                 addSubtool (*m_sf_KineDepsys);
             return;
-        } else if (m_measurement == CP::MuonEfficiencyType::TTVA){
+        } else if (m_measurement == MuonEfficiencyType::TTVA){
             m_sf_KineDepsys = std::make_unique<TTVAClosureSysHandler>(ReadHistFromFile(this,"SF_NonClosure_sys",f.get(),time_unit));
             if (!m_sf_KineDepsys->initialize()){
                 Error("EfficiencyScaleFactor()", "TTVA non closure systematic could not be loaded.");
@@ -294,13 +294,13 @@ namespace CP {
     bool EfficiencyScaleFactor::isOverFlowBin(int b) const{      
         return m_sf ? m_sf->isOverFlowBin(b) : true;
     }
-    CorrectionCode EfficiencyScaleFactor::ScaleFactor(const xAOD::Muon& mu, float & SF) const {
+    CP::CorrectionCode EfficiencyScaleFactor::ScaleFactor(const xAOD::Muon& mu, float & SF) const {
         return ScaleFactor (columnar::MuonId (mu), SF);
     }   
-    CorrectionCode EfficiencyScaleFactor::ScaleFactor(columnar::MuonId mu, float & SF) const {
+    CP::CorrectionCode EfficiencyScaleFactor::ScaleFactor(columnar::MuonId mu, float & SF) const {
         if (m_separateBinSyst && m_NominalFallBack) {
             int bin = -1;
-            CorrectionCode cc = m_sf->FindBin(mu, bin);
+            CP::CorrectionCode cc = m_sf->FindBin(mu, bin);
             if (cc == CP::CorrectionCode::Error) {
                 return cc;
             }
@@ -308,15 +308,15 @@ namespace CP {
                 return m_NominalFallBack->ScaleFactor(mu, SF);
             }
         }       
-        CorrectionCode cc = GetContentFromHist(m_sf.get(), mu, SF, true);
-        if (cc == CorrectionCode::Error) Error("EfficiencyScaleFactor", "Could not apply the scale factor");
+        CP::CorrectionCode cc = GetContentFromHist(m_sf.get(), mu, SF, true);
+        if (cc == CP::CorrectionCode::Error) Error("EfficiencyScaleFactor", "Could not apply the scale factor");
         return cc;
     }   
 
-    CorrectionCode EfficiencyScaleFactor::DataEfficiency(const xAOD::Muon& mu, float & Eff) const {
+    CP::CorrectionCode EfficiencyScaleFactor::DataEfficiency(const xAOD::Muon& mu, float & Eff) const {
         if (m_separateBinSyst && m_NominalFallBack && m_eff) {
             int bin = -1;
-            CorrectionCode cc = m_eff->FindBin(mu, bin);
+            CP::CorrectionCode cc = m_eff->FindBin(mu, bin);
             if (cc == CP::CorrectionCode::Error) {
                 return cc;
             }
@@ -324,14 +324,14 @@ namespace CP {
                 return m_NominalFallBack->DataEfficiency(mu, Eff);
             }
         }
-        CorrectionCode cc = GetContentFromHist(m_eff.get(), mu, Eff, true);
-        if (cc == CorrectionCode::Error) Error("EfficiencyScaleFactor", "Could not apply the data efficiency");
+        CP::CorrectionCode cc = GetContentFromHist(m_eff.get(), mu, Eff, true);
+        if (cc == CP::CorrectionCode::Error) Error("EfficiencyScaleFactor", "Could not apply the data efficiency");
         return cc;
     }
-    CorrectionCode EfficiencyScaleFactor::MCEfficiency(const xAOD::Muon& mu, float & Eff) const {
+    CP::CorrectionCode EfficiencyScaleFactor::MCEfficiency(const xAOD::Muon& mu, float & Eff) const {
         if (m_separateBinSyst && m_NominalFallBack && m_mc_eff) {
             int bin = -1;
-            CorrectionCode cc = m_mc_eff->FindBin(mu, bin);
+            CP::CorrectionCode cc = m_mc_eff->FindBin(mu, bin);
             if (cc == CP::CorrectionCode::Error) {
                 return cc;
             }
@@ -339,108 +339,108 @@ namespace CP {
                 return m_NominalFallBack->MCEfficiency(mu, Eff);
             }
         }
-        CorrectionCode cc = GetContentFromHist(m_mc_eff.get(), mu, Eff, false);
-        if (cc == CorrectionCode::Error) Error("EfficiencyScaleFactor", "Could not apply the Monte Carlo efficiency");
+        CP::CorrectionCode cc = GetContentFromHist(m_mc_eff.get(), mu, Eff, false);
+        if (cc == CP::CorrectionCode::Error) Error("EfficiencyScaleFactor", "Could not apply the Monte Carlo efficiency");
         return cc;
     }
 
-    CorrectionCode EfficiencyScaleFactor::GetContentFromHist(const HistHandler* Hist, const xAOD::Muon& mu, float & Eff, bool add_kine_syst) const {
+    CP::CorrectionCode EfficiencyScaleFactor::GetContentFromHist(const HistHandler* Hist, const xAOD::Muon& mu, float & Eff, bool add_kine_syst) const {
         return GetContentFromHist (Hist, columnar::MuonId (mu), Eff, add_kine_syst);
     }
-    CorrectionCode EfficiencyScaleFactor::GetContentFromHist(const HistHandler* Hist, columnar::MuonId mu, float & Eff, bool add_kine_syst) const {
+    CP::CorrectionCode EfficiencyScaleFactor::GetContentFromHist(const HistHandler* Hist, columnar::MuonId mu, float & Eff, bool add_kine_syst) const {
         Eff = m_default_eff;
         if (!Hist) {
             if (m_warnsPrinted < m_warningLimit){
                 Warning("EfficiencyScaleFactor", "Could not find histogram for variation %s and muon with pt=%.4f, eta=%.2f and phi=%.2f, returning %.1f", sysname().c_str(), ptAcc(mu), etaAcc(mu), phiAcc(mu), m_default_eff);
                 ++m_warnsPrinted;
             }
-            return CorrectionCode::OutOfValidityRange;
+            return CP::CorrectionCode::OutOfValidityRange;
         }
-        if (m_measurement == CP::MuonEfficiencyType::TTVA && std::abs(etaAcc(mu)) > 2.5 && std::abs(etaAcc(mu)) <= 2.7 && muonTypeAcc(mu) == xAOD::Muon::MuonType::MuonStandAlone) {
+        if (m_measurement == MuonEfficiencyType::TTVA && std::abs(etaAcc(mu)) > 2.5 && std::abs(etaAcc(mu)) <= 2.7 && muonTypeAcc(mu) == xAOD::Muon::MuonType::MuonStandAlone) {
             if (m_warnsPrinted < m_warningLimit){
                 Info("EfficiencyScaleFactor", "No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation %s and muon with pt=%.4f, eta=%.2f and phi=%.2f, returning %.1f", sysname().c_str(), ptAcc(mu), etaAcc(mu), phiAcc(mu), m_default_eff_ttva);
                 ++m_warnsPrinted;
             }
             Eff = m_default_eff_ttva;
-            return CorrectionCode::Ok;
+            return CP::CorrectionCode::Ok;
         }
         int bin = -1;       
-        CorrectionCode cc = Hist->FindBin(mu, bin);
-        if (cc != CorrectionCode::Ok) return cc;
+        CP::CorrectionCode cc = Hist->FindBin(mu, bin);
+        if (cc != CP::CorrectionCode::Ok) return cc;
         else Eff = Hist->GetBinContent(bin);
        
         if (add_kine_syst && m_respond_to_kineDepSyst) {           
             return m_sf_KineDepsys->GetKineDependent(mu, Eff);
         }
-        return CorrectionCode::Ok;
+        return CP::CorrectionCode::Ok;
     }
-    CorrectionCode EfficiencyScaleFactor::ApplyScaleFactor(const xAOD::Muon& mu) const{
+    CP::CorrectionCode EfficiencyScaleFactor::ApplyScaleFactor(const xAOD::Muon& mu) const{
         float sf = 0;
-        CorrectionCode result = ScaleFactor(mu, sf);
+        CP::CorrectionCode result = ScaleFactor(mu, sf);
         (*m_sf_decor)(mu) = sf;
         return result;  
     }
-    CorrectionCode EfficiencyScaleFactor::ApplyScaleFactorReplicas(const xAOD::Muon& mu, int n_replicas) {
+    CP::CorrectionCode EfficiencyScaleFactor::ApplyScaleFactorReplicas(const xAOD::Muon& mu, int n_replicas) {
         std::vector<float> replicas(n_replicas);
-        CorrectionCode result = ScaleFactorReplicas(mu, replicas);
+        CP::CorrectionCode result = ScaleFactorReplicas(mu, replicas);
         (*m_sf_rep_decor)(mu)= replicas;
         return result;
     }
     
-    CorrectionCode EfficiencyScaleFactor::ApplyDataEfficiency(const xAOD::Muon& mu) const {
+    CP::CorrectionCode EfficiencyScaleFactor::ApplyDataEfficiency(const xAOD::Muon& mu) const {
         float effi = 0;
-        CorrectionCode result = DataEfficiency(mu, effi);
+        CP::CorrectionCode result = DataEfficiency(mu, effi);
         (*m_eff_decor)(mu) = effi;
         return result;  
     }
-    CorrectionCode EfficiencyScaleFactor::ApplyDataEfficiencyReplicas(const xAOD::Muon& mu, int n_replicas){
+    CP::CorrectionCode EfficiencyScaleFactor::ApplyDataEfficiencyReplicas(const xAOD::Muon& mu, int n_replicas){
         std::vector<float> replicas(n_replicas);
-        CorrectionCode result = DataEfficiencyReplicas(mu, replicas);
+        CP::CorrectionCode result = DataEfficiencyReplicas(mu, replicas);
         (*m_eff_rep_decor)(mu) = replicas;
         return result;
     }
-   CorrectionCode EfficiencyScaleFactor::ApplyMCEfficiency(const xAOD::Muon& mu) const {
+   CP::CorrectionCode EfficiencyScaleFactor::ApplyMCEfficiency(const xAOD::Muon& mu) const {
         float effi = 0;
-        CorrectionCode result = MCEfficiency(mu, effi);
+        CP::CorrectionCode result = MCEfficiency(mu, effi);
         (*m_mc_eff_decor)(mu) = effi;
         return result;  
     }
-    CorrectionCode EfficiencyScaleFactor::ApplyMCEfficiencyReplicas(const xAOD::Muon& mu, int n_replicas){
+    CP::CorrectionCode EfficiencyScaleFactor::ApplyMCEfficiencyReplicas(const xAOD::Muon& mu, int n_replicas){
         std::vector<float> replicas(n_replicas);
-        CorrectionCode result = MCEfficiencyReplicas(mu, replicas);
+        CP::CorrectionCode result = MCEfficiencyReplicas(mu, replicas);
         (*m_mc_eff_rep_decor)(mu) = replicas;
         return result;
     } 
-    CorrectionCode EfficiencyScaleFactor::ScaleFactorReplicas(const xAOD::Muon& mu, std::vector<float> & SF) {
+    CP::CorrectionCode EfficiencyScaleFactor::ScaleFactorReplicas(const xAOD::Muon& mu, std::vector<float> & SF) {
         return GetContentReplicasFromHist(m_sf_replicas, mu, SF, true);
     }
-    CorrectionCode EfficiencyScaleFactor::DataEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & eff) {
+    CP::CorrectionCode EfficiencyScaleFactor::DataEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & eff) {
         return GetContentReplicasFromHist(m_eff_replicas, mu, eff, true);
     }
-    CorrectionCode EfficiencyScaleFactor::MCEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & eff) {
+    CP::CorrectionCode EfficiencyScaleFactor::MCEfficiencyReplicas(const xAOD::Muon& mu, std::vector<float> & eff) {
         return GetContentReplicasFromHist(m_mc_eff_replicas, mu, eff, false);
     }
-    CorrectionCode EfficiencyScaleFactor::GetContentReplicasFromHist(EfficiencyScaleFactor::SFReplicaVec &replicas, const xAOD::Muon& mu, std::vector<float> & SF, bool add_kine_syst) {
+    CP::CorrectionCode EfficiencyScaleFactor::GetContentReplicasFromHist(EfficiencyScaleFactor::SFReplicaVec &replicas, const xAOD::Muon& mu, std::vector<float> & SF, bool add_kine_syst) {
         if (replicas.size() != SF.size()) GenerateReplicas(SF.size(), 1000. * mu.phi() + mu.eta());
-        if (replicas.empty()) return CorrectionCode::OutOfValidityRange;
-        if (m_measurement == CP::MuonEfficiencyType::TTVA && std::abs(mu.eta()) > 2.5 && std::abs(mu.eta()) <= 2.7 && mu.muonType() == xAOD::Muon::MuonType::MuonStandAlone) {
+        if (replicas.empty()) return CP::CorrectionCode::OutOfValidityRange;
+        if (m_measurement == MuonEfficiencyType::TTVA && std::abs(mu.eta()) > 2.5 && std::abs(mu.eta()) <= 2.7 && mu.muonType() == xAOD::Muon::MuonType::MuonStandAlone) {
             if (m_warnsPrinted < m_warningLimit){
                 Info("EfficiencyScaleFactor", "No TTVA sf/efficiency provided for standalone muons with 2.5<|eta|<2.7 for variation %s and muon with pt=%.4f, eta=%.2f and phi=%.2f, returning %.1f", sysname().c_str(), mu.pt(), mu.eta(), mu.phi(), m_default_eff_ttva);
                 ++m_warnsPrinted;
             }
             for (auto& r : SF)
                 r = m_default_eff_ttva;
-            return CorrectionCode::Ok;
+            return CP::CorrectionCode::Ok;
         }
         int bin = -1;
         float extra_sys = 1;
         if (add_kine_syst && m_respond_to_kineDepSyst) {
-           CorrectionCode cc = m_sf_KineDepsys->GetKineDependent(mu, extra_sys);
-            if (cc != CorrectionCode::Ok) {}
+           CP::CorrectionCode cc = m_sf_KineDepsys->GetKineDependent(mu, extra_sys);
+            if (cc != CP::CorrectionCode::Ok) {}
         }
         
-        CorrectionCode res = (*replicas.begin())->FindBin(mu, bin);
-        if (res != CorrectionCode::Ok) return res;
+        CP::CorrectionCode res = (*replicas.begin())->FindBin(mu, bin);
+        if (res != CP::CorrectionCode::Ok) return res;
         else {
             for (size_t k = 0; k < SF.size(); k++) {
                 SF[k] = replicas.at(k)->GetBinContent(bin) * extra_sys;
@@ -491,11 +491,11 @@ namespace CP {
     
     int EfficiencyScaleFactor::FindBinSF(const xAOD::Muon & mu) const {
         int bin = -1;
-        CorrectionCode cc = m_sf->FindBin(mu, bin);
+        CP::CorrectionCode cc = m_sf->FindBin(mu, bin);
         if (cc == CP::CorrectionCode::Error) {
             return -1;
         }
         return bin;
     }
 
-} /* namespace CP */
+} /* namespace ADD_CMODE(CP) */
