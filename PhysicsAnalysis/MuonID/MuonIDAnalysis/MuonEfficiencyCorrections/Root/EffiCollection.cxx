@@ -51,24 +51,29 @@ namespace CP {
 
         if(m_ref_tool.use_lrt()) {
             if (m_ref_tool.filename_LRTCentral() != m_ref_tool.filename_Central()) {
-                m_lrt_central_eff = std::make_shared<CollectionContainer>(m_ref_tool,CollectionType::Central);
+                m_lrt_central_eff = std::make_shared<CollectionContainer>(m_ref_tool,CollectionType::LRTCentral);
+                m_lrt_central_eff->addSubtoolsTo(*this);
             }
             else {
                 m_lrt_central_eff = m_central_eff;
             }
             if (m_ref_tool.lowPtTransition() > 0 ) {
-                if (m_ref_tool.filename_LRTLowPt() == m_ref_tool.filename_LowPt()) {
+                if (m_ref_tool.filename_LRTLowPt() != m_ref_tool.filename_LRTCentral()) {
+                    m_lrt_lowpt_central_eff = m_lrt_central_eff;
+                }
+                else if (m_ref_tool.filename_LRTLowPt() == m_ref_tool.filename_LowPt()) {
                     m_lrt_lowpt_central_eff = m_lowpt_central_eff;
                 }
                 else if (m_ref_tool.filename_LRTLowPt() == m_ref_tool.filename_Central()) {
                     m_lrt_lowpt_central_eff = m_central_eff;
                 }
                 else {
-                    m_lrt_lowpt_central_eff = std::make_shared<CollectionContainer>(m_ref_tool,CollectionType::CentralLowPt);
+                    m_lrt_lowpt_central_eff = std::make_shared<CollectionContainer>(m_ref_tool,CollectionType::LRTCentralLowPt);
+                    m_lrt_lowpt_central_eff->addSubtoolsTo(*this);
                 }
             }
             else {
-                m_lrt_lowpt_central_eff = m_central_eff;
+                m_lrt_lowpt_central_eff = m_lrt_central_eff;
             }
         }
     }
@@ -109,8 +114,23 @@ namespace CP {
         m_lowpt_calo_eff->addSubtoolsTo (*this);
 
         if (m_ref_tool.use_lrt()) {
-            m_lrt_central_eff = make_variation(CollectionType::Central);
-            m_lrt_lowpt_central_eff = make_variation(CollectionType::CentralLowPt);
+            if(Nominal->m_lrt_central_eff == Nominal->m_central_eff) {
+                m_lrt_central_eff = m_central_eff;
+            }
+            else {
+                m_lrt_central_eff = make_variation(CollectionType::LRTCentral);
+                m_lrt_central_eff->addSubtoolsTo (*this);
+            }
+            if (Nominal->m_lrt_lowpt_central_eff == Nominal->m_lrt_central_eff) {
+                m_lrt_lowpt_central_eff = m_lrt_central_eff;
+            } else if (Nominal->m_lrt_lowpt_central_eff == Nominal->m_lowpt_central_eff) {
+                m_lrt_lowpt_central_eff = m_lowpt_central_eff;
+            } else if (Nominal->m_lrt_lowpt_central_eff == Nominal->m_central_eff) {
+                m_lrt_lowpt_central_eff = m_central_eff;
+            } else {
+                m_lrt_lowpt_central_eff = make_variation(CollectionType::LRTCentralLowPt);
+                m_lrt_lowpt_central_eff->addSubtoolsTo (*this);
+            }
         }
     }
     
@@ -120,6 +140,8 @@ namespace CP {
         if (Type == CollectionType::Calo) return m_calo_eff;
         if (Type == CollectionType::CentralLowPt) return m_lowpt_central_eff;
         if (Type == CollectionType::CaloLowPt) return m_lowpt_calo_eff;
+        if (Type == CollectionType::LRTCentral) return m_lrt_central_eff;
+        if (Type == CollectionType::LRTCentralLowPt) return m_lrt_lowpt_central_eff;
         return std::shared_ptr<CollectionContainer>();
     }
     bool EffiCollection::CheckConsistency()  {
@@ -183,10 +205,16 @@ namespace CP {
                 Error("EffiCollection()", "Invalid position in the list of systematics. It seems that I'm not part of the referring ScaleFactorTool.");
                 return false;
             }
-            for (const EffiCollection::CollectionType& file_type: {EffiCollection::Central, EffiCollection::Calo, EffiCollection::Forward,  
-                                         EffiCollection::CentralLowPt, EffiCollection::CaloLowPt}){
+
+            std::vector<EffiCollection::CollectionType> collection_types{EffiCollection::Central, EffiCollection::Calo, EffiCollection::Forward,
+                                                                   EffiCollection::CentralLowPt, EffiCollection::CaloLowPt};
+            if (m_ref_tool.use_lrt()) {
+                collection_types.push_back(EffiCollection::LRTCentral);
+                collection_types.push_back(EffiCollection::LRTCentralLowPt);
+            }
+            for (const EffiCollection::CollectionType& collection_type: collection_types){
                     
-                std::shared_ptr<CollectionContainer> container = retrieveContainer(file_type);
+                std::shared_ptr<CollectionContainer> container = retrieveContainer(collection_type);
                 if (container->isNominal()) continue;
                 if (container->separateBinSyst()){
                     /// Let the world implode... Yeaha register foreach bin
@@ -309,6 +337,8 @@ namespace CP {
         if (T == CollectionType::Forward) return "Forward";
         if (T == CollectionType::CentralLowPt) return "CentralLowPt";
         if (T == CollectionType::CaloLowPt) return "CaloLowPt";
+        if (T == CollectionType::LRTCentral) return "LRTCentral";
+        if (T == CollectionType::LRTCentralLowPt) return "LRTCentralLowPt";
         return "EffiCollection::FileTypeName() - WARNING: Unknown EffiCollection::CollectionType!";
     }
 
@@ -413,6 +443,8 @@ namespace CP {
         if (type() == EffiCollection::CollectionType::Calo) return ref_tool.filename_Calo();
         if (type() == EffiCollection::CollectionType::CentralLowPt) return ref_tool.filename_LowPt();
         if (type() == EffiCollection::CollectionType::CaloLowPt) return ref_tool.filename_LowPtCalo();
+        if (type() == EffiCollection::CollectionType::LRTCentral) return ref_tool.filename_LRTCentral();
+        if (type() == EffiCollection::CollectionType::LRTCentralLowPt) return ref_tool.filename_LRTLowPt();
         return ref_tool.filename_HighEta();
     }
                   

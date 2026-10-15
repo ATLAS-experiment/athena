@@ -47,11 +47,14 @@ namespace CP {
                 Forward = 1<<2, 
                 CentralLowPt = 1<<3, 
                 CaloLowPt = 1<<4, 
+                /// Bits 6-9 are already reserved for the systematic enum below
+                LRTCentral = 1<<10,
+                LRTCentralLowPt = 1<<11,
                 
-                ZAnalysis = Central | Calo | Forward,
+                ZAnalysis = Central | Calo | Forward | LRTCentral,
                 /// Distinguish these two because the systematics
                 /// are named with an extra LOWPT
-                JPsiAnalysis = CentralLowPt | CaloLowPt,                
+                JPsiAnalysis = CentralLowPt | CaloLowPt | LRTCentralLowPt,                
                
                
             };
