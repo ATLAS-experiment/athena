@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -44,6 +44,7 @@ namespace {
   static std::string hijing_stream = "HIJING_INIT";
 }
 
+typedef std::vector<std::string> CommandVector;
 
 extern "C" {
 
@@ -113,22 +114,6 @@ extern "C"
   void hijing_(const char*, float*, float*, long int);
 }
 
-Hijing::Hijing(const std::string& name,
-      ISvcLocator* pSvcLocator): GenModule(name,pSvcLocator)
-{
-  declareProperty("Initialize",       m_InitializeVector);
-  declareProperty("partonStoreMinPt", m_partonStoreMinPt);
-  declareProperty("vertexOffsetCut", m_vertexOffsetCut);
-  declareProperty("randomizeVertices", m_rand); // Randomize for beam gas
-  declareProperty("selectVertex", m_sel); // Select vertex location (off for random)
-  declareProperty("wide", m_wide); // Allow randoms off the beamline (out to the pipe)
-  declareProperty("x", m_x);
-  declareProperty("y", m_y);
-  declareProperty("z", m_z);
-  declareProperty("keepSpectators", m_spec);
-  declareProperty("randomizeP", m_prand); //BPK randomizes the left<->right direction by mirroring momenta for beam gas
-  declareProperty("keepAllDecayVertices", m_keepAllDecayVertices);
-}
 
 StatusCode Hijing::genInitialize()
 {
@@ -189,9 +174,12 @@ StatusCode Hijing::callGenerator()
     m_seeds.push_back(seeds[1]);
 
     // Generate event
+    ATH_MSG_DEBUG( "Generate event" );
     const char* frame       = m_frame.c_str();
     hijing_(frame, &m_bmin, &m_bmax, strlen(frame));
 
+
+    ATH_MSG_DEBUG( "Check for error using the new (custom) error return" );
     // Check for error using the new (custom) error return
     //
     int errorStatus =  m_himain1.ierrstat();
