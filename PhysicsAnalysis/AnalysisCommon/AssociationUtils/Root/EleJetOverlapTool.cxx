@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
@@ -48,6 +48,8 @@ namespace ADD_CMODE(ORUtils)
                     "Maximum size of sliding dR cone");
     declareProperty("UseRapidity", m_useRapidity = true,
                     "Calculate delta-R using rapidity");
+    declareProperty("DoFEOR", m_useFEOR = false,
+                    "Use flow element-based overlap removal");
   }
 
   //---------------------------------------------------------------------------
@@ -90,6 +92,11 @@ namespace ADD_CMODE(ORUtils)
     }
     ATH_CHECK (m_dRMatchCone2->setObjectTypes (xAODType::ObjectType::Electron, xAODType::ObjectType::Jet));
     addSubtool(*m_dRMatchCone2);
+
+    // Initialize FE matcher and FE Map accessor
+    ATH_CHECK( m_feMapKey.initialize() );
+    m_FEMatcher = std::make_unique<FEMatcher>();
+    addSubtool(*m_FEMatcher);
 
     // Additional debug printouts
     if(m_applyPtRatio) {
@@ -141,8 +148,14 @@ namespace ADD_CMODE(ORUtils)
         // Don't reject jets with high relative PT
         if(m_applyPtRatio && (electron(acc.m_elePtAcc)/jet(acc.m_jetPtAcc) < m_eleJetPtRatio)) continue;
 
-        if(m_dRMatchCone1->objectsMatch(jet, electron)){
+        if(!m_useFEOR && m_dRMatchCone1->objectsMatch(jet, electron)){
           ATH_CHECK( handleOverlap(jet, electron) );
+        }
+        else if (m_useFEOR) {
+          SG::ReadHandle<xAOD::MissingETAssociationMap> fe_map(m_feMapKey);
+          if (m_FEMatcher->objectsMatch(&jet.getXAODObject(), &electron.getXAODObject(), *fe_map)) {
+            ATH_CHECK( handleOverlap(jet, electron) );
+          }
         }
       }
     }
@@ -154,8 +167,14 @@ namespace ADD_CMODE(ORUtils)
       for(const auto electron : electrons){
         if(!isSurvivingObject(electron)) continue;
 
-        if(m_dRMatchCone2->objectsMatch(electron, jet)){
+        if(!m_useFEOR && m_dRMatchCone2->objectsMatch(electron, jet)){
           ATH_CHECK( handleOverlap(electron, jet) );
+        }
+        else if (m_useFEOR) {
+          SG::ReadHandle<xAOD::MissingETAssociationMap> fe_map(m_feMapKey);
+          if (m_FEMatcher->objectsMatch(&electron.getXAODObject(), &jet.getXAODObject(), *fe_map)) {
+            ATH_CHECK( handleOverlap(electron, jet) );
+          }
         }
       }
     }

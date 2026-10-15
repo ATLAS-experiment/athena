@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System includes
@@ -11,6 +11,7 @@
 // Local includes
 #include "AssociationUtils/OverlapRemovalInit.h"
 #include "AssociationUtils/DeltaROverlapTool.h"
+#include "AssociationUtils/FEOverlapTool.h"
 #include "AssociationUtils/EleMuSharedTrkOverlapTool.h"
 #include "AssociationUtils/EleJetOverlapTool.h"
 #include "AssociationUtils/MuJetOverlapTool.h"
@@ -71,6 +72,7 @@ namespace ADD_CMODE(ORUtils)
       ORT_CHECK( tbox.eleJetORT.setProperty("BJetLabel", flags.bJetLabel) );
       ORT_CHECK( tbox.eleJetORT.setProperty("MaxElePtForBJetAwareOR", flags.maxElePtForBJetAwareOR) );
       ORT_CHECK( tbox.eleJetORT.setProperty("UseSlidingDR", flags.boostedLeptons) );
+      ORT_CHECK( tbox.eleJetORT.setProperty("DoFEOR", flags.doFEOR) );
     }
     // Mu-jet
     if(flags.doMuons && flags.doJets && tbox.muJetORT.empty()) {
@@ -78,41 +80,78 @@ namespace ADD_CMODE(ORUtils)
                                    flags.masterName + ".MuJetORT");
       ORT_CHECK( tbox.muJetORT.setProperty("BJetLabel", flags.bJetLabel) );
       ORT_CHECK( tbox.muJetORT.setProperty("UseSlidingDR", flags.boostedLeptons) );
+      ORT_CHECK( tbox.eleJetORT.setProperty("DoFEOR", flags.doFEOR) );
     }
 
     // Tau-ele overlap tool
     if(flags.doTaus && flags.doElectrons && tbox.tauEleORT.empty()) {
-      tbox.tauEleORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::DeltaROverlapTool/" +
+      if (!flags.doFEOR) {
+        tbox.tauEleORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::DeltaROverlapTool/" +
                                     flags.masterName + ".TauEleORT");
-      ORT_CHECK( tbox.tauEleORT.setProperty("DR", 0.2) );
+        ORT_CHECK( tbox.tauEleORT.setProperty("DR", 0.2) );
+      }
+      else if (flags.doFEOR) {
+        tbox.tauEleORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::FEOverlapTool/" + 
+                                    flags.masterName + ".TauEleORT");
+      }
     }
     // Tau-mu overlap tool
     if(flags.doTaus && flags.doMuons && tbox.tauMuORT.empty()) {
-      tbox.tauMuORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::DeltaROverlapTool/" +
+      if (!flags.doFEOR) {
+        tbox.tauMuORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::DeltaROverlapTool/" +
                                    flags.masterName + ".TauMuORT");
-      ORT_CHECK( tbox.tauMuORT.setProperty("DR", 0.2) );
+        ORT_CHECK( tbox.tauMuORT.setProperty("DR", 0.2) );
+      }
+      else if (flags.doFEOR) {
+        tbox.tauMuORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::FEOverlapTool/" + 
+                                   flags.masterName + ".TauMuORT");
+      }
     }
     // Tau-jet overlap tool
     if(flags.doTaus && flags.doJets && tbox.tauJetORT.empty()) {
-      tbox.tauJetORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::DeltaROverlapTool/" +
+      if (!flags.doFEOR) {
+        tbox.tauJetORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::DeltaROverlapTool/" +
                                     flags.masterName + ".TauJetORT");
-      ORT_CHECK( tbox.tauJetORT.setProperty("DR", 0.2) );
+        ORT_CHECK( tbox.tauJetORT.setProperty("DR", 0.2) );
+      }
+      else if (flags.doFEOR) {
+        tbox.tauJetORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::FEOverlapTool/" + 
+                                    flags.masterName + ".TauJetORT");
+      }
     }
 
     // Pho-ele overlap tool
     if(flags.doPhotons && flags.doElectrons && tbox.phoEleORT.empty()) {
+      if (!flags.doFEOR) {
       tbox.phoEleORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::DeltaROverlapTool/" +
                                     flags.masterName + ".PhoEleORT");
+      }
+      else if (flags.doFEOR) {
+        tbox.phoEleORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::FEOverlapTool/" + 
+                                    flags.masterName + ".PhoEleORT");
+      }
     }
     // Pho-mu overlap tool
     if(flags.doPhotons && flags.doMuons && tbox.phoMuORT.empty()) {
-      tbox.phoMuORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::DeltaROverlapTool/" +
+      if (!flags.doFEOR) {
+        tbox.phoMuORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::DeltaROverlapTool/" +
                                    flags.masterName + ".PhoMuORT");
+      }
+      else if (flags.doFEOR) {
+        tbox.phoMuORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::FEOverlapTool/" + 
+                                    flags.masterName +".PhoMuORT");
+      }
     }
     // Pho-jet overlap tool
     if(flags.doPhotons && flags.doJets && tbox.phoJetORT.empty()) {
-      tbox.phoJetORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::DeltaROverlapTool/" +
+      if (!flags.doFEOR) {
+        tbox.phoJetORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::DeltaROverlapTool/" +
                                     flags.masterName + ".PhoJetORT");
+      }
+      else if (flags.doFEOR) {
+        tbox.phoJetORT.setTypeAndName(columnar::add_cmode("ORUtils")+"::FEOverlapTool/" + 
+                                    flags.masterName + ".PhoJetORT");
+      }
     }
 
     // Ele-fatjet overlap tool

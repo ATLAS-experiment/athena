@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration                                                                                                                                                                                                            
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration                                                                                                                                                                                                            
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -12,6 +12,7 @@ def OverlapRemovalToolCfg(ConfigFlags,
                           doEleEleOR=False,
                           doElectrons=True, doMuons=True, doJets=True,
                           doTaus=True, doPhotons=True, doFatJets=False,
+                          doFEOR=False,
                           **kwargs):
 
     """
@@ -70,33 +71,53 @@ def OverlapRemovalToolCfg(ConfigFlags,
                                                                  BJetLabel=bJetLabel,
                                                                  MaxElePtForBJetAwareOR=maxElePtForBJetAwareOR,
                                                                  UseSlidingDR=boostedLeptons,
+                                                                 DoFEOR=doFEOR,
                                                                  **common_args)
     # Muon-jet
     if doMuons and doJets:
         orTool.MuJetORT = CompFactory.ORUtils.MuJetOverlapTool('MuJetORT',
                                                                BJetLabel=bJetLabel,
                                                                UseSlidingDR=boostedLeptons,
+                                                               DoFEOR=doFEOR,
                                                                **common_args)
 
     # Tau-electron
     if doTaus and doElectrons:
-        orTool.TauEleORT = CompFactory.ORUtils.DeltaROverlapTool('TauEleORT', DR=0.2, **common_args)
+        if doFEOR :
+            orTool.TauEleORT = CompFactory.ORUtils.FEOverlapTool('TauEleORT', **common_args)
+        else :
+            orTool.TauEleORT = CompFactory.ORUtils.DeltaROverlapTool('TauEleORT', DR=0.2, **common_args)
     # Tau-muon
     if doTaus and doMuons:
-        orTool.TauMuORT = CompFactory.ORUtils.DeltaROverlapTool('TauMuORT', DR=0.2, **common_args)
+        if doFEOR :
+            orTool.TauMuORT = CompFactory.ORUtils.FEOverlapTool('TauMuORT', **common_args)
+        else :
+            orTool.TauMuORT = CompFactory.ORUtils.DeltaROverlapTool('TauMuORT', DR=0.2, **common_args)
     # Tau-jet
     if doTaus and doJets:
-        orTool.TauJetORT = CompFactory.ORUtils.DeltaROverlapTool('TauJetORT', DR=0.2, **common_args)
+        if doFEOR :
+            orTool.TauJetORT = CompFactory.ORUtils.FEOverlapTool('TauJetORT', **common_args)
+        else :
+            orTool.TauJetORT = CompFactory.ORUtils.DeltaROverlapTool('TauJetORT', DR=0.2, **common_args)
 
     # Photon-electron
     if doPhotons and doElectrons:
-        orTool.PhoEleORT = CompFactory.ORUtils.DeltaROverlapTool('PhoEleORT', **common_args)
+        if doFEOR :
+            orTool.PhoEleORT = CompFactory.ORUtils.FEOverlapTool('PhoEleORT', **common_args)
+        else :
+            orTool.PhoEleORT = CompFactory.ORUtils.DeltaROverlapTool('PhoEleORT', **common_args)
     # Photon-muon
     if doPhotons and doMuons:
-        orTool.PhoMuORT = CompFactory.ORUtils.DeltaROverlapTool('PhoMuORT', **common_args)
+        if doFEOR :
+            orTool.PhoMuORT = CompFactory.ORUtils.FEOverlapTool('PhoMuORT', **common_args)
+        else :
+            orTool.PhoMuORT = CompFactory.ORUtils.DeltaROverlapTool('PhoMuORT', **common_args)
     # Photon-jet
     if doPhotons and doJets:
-        orTool.PhoJetORT = CompFactory.ORUtils.DeltaROverlapTool('PhoJetORT', **common_args)
+        if doFEOR :
+            orTool.PhoJetORT = CompFactory.ORUtils.FEOverlapTool('PhoJetORT', **common_args)
+        else :
+            orTool.PhoJetORT = CompFactory.ORUtils.DeltaROverlapTool('PhoJetORT', **common_args)
 
     # Electron-fatjet
     if doElectrons and doFatJets:

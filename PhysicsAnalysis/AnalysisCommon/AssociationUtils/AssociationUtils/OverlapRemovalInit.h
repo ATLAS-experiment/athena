@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ASSOCIATIONUTILS_OVERLAPREMOVALINIT_H
@@ -53,6 +53,8 @@ namespace ADD_CMODE(ORUtils)
     bool linkOverlapObjects = false;
     /// Do electron-electron overlap
     bool doEleEleOR = false;
+    /// Do flow element based overlap removal
+    bool doFEOR = false;
 
     /// @name Objects to configure tools for
     /// @{
