@@ -299,10 +299,14 @@ struct TopCollection {
 
 
 struct AtlasMeasurementSelectorCuts {
+  /// Maximum local chi2 contribution (measurement, outlier) for each measurement dimension.
+  /// The index is the dimension, index 0 is not used.
+  using Chi2CutsPerDim = std::array<std::pair<float, float>, 4>;
+
   /// bins in |eta| to specify variable selections
   std::vector<float> etaBins{};
-  /// Maximum local chi2 contribution.
-  std::vector<std::pair<float, float> > chi2CutOff{ {15,25} };
+  /// Maximum local chi2 contribution for each eta bin.
+  std::vector<Chi2CutsPerDim> chi2CutOff{ Chi2CutsPerDim{ { {15,25}, {15,25}, {15,25}, {15,25} } } };
   /// Maximum number of associated measurements on a single surface.
   std::vector<std::size_t> numMeasurementsCutOff{1};
   /// Optional (expected negative) boundary tolerance to label edge holes as no measurement expected
@@ -670,12 +674,13 @@ protected:
 public:
    // get numMeasurement and maxChi2 cuts for the given surface
    // @TODO should the cuts just depend on the surface or really on the bound parameters (i.e. bound eta)
-   std::tuple< std::size_t, std::pair<float,float> > getCuts(const Acts::Surface& surface,
-                                                             const T_BoundState& boundState,
-                                                             const Acts::Logger& logger) const {
-      std::tuple< std::size_t, std::pair<float,float> > result;
+   std::tuple< std::size_t, AtlasMeasurementSelectorCuts::Chi2CutsPerDim >
+   getCuts(const Acts::Surface& surface,
+           const T_BoundState& boundState,
+           const Acts::Logger& logger) const {
+      std::tuple< std::size_t, AtlasMeasurementSelectorCuts::Chi2CutsPerDim > result;
       std::size_t &numMeasurementsCut = std::get<0>(result);
-      std::pair<float,float> &maxChi2Cut = std::get<1>(result);
+      AtlasMeasurementSelectorCuts::Chi2CutsPerDim &maxChi2Cut = std::get<1>(result);
       // Get geoID of this surface
       auto geoID = surface.geometryId();
       // Find the appropriate cuts
@@ -691,13 +696,17 @@ public:
          numMeasurementsCut = (!cuts->numMeasurementsCutOff.empty()
                                ? cuts->numMeasurementsCutOff[ std::min(cuts->numMeasurementsCutOff.size()-1, eta_bin) ]
                                : NMeasMax);
-         maxChi2Cut = ! cuts->chi2CutOff.empty()
-            ? cuts->chi2CutOff[ std::min(cuts->chi2CutOff.size()-1, eta_bin) ]
-            : std::make_pair<float,float>(std::numeric_limits<float>::max(),
-                                          std::numeric_limits<float>::max());
+         if (!cuts->chi2CutOff.empty()) {
+            maxChi2Cut = cuts->chi2CutOff[ std::min(cuts->chi2CutOff.size()-1, eta_bin) ];
+         }
+         else {
+            maxChi2Cut.fill(std::make_pair(std::numeric_limits<float>::max(),
+                                           std::numeric_limits<float>::max()));
+         }
          ACTS_VERBOSE("Get cut for eta-bin="
                       << (eta_bin < cuts->etaBins.size() ? cuts->etaBins[eta_bin] : std::numeric_limits<float>::max())
-                      << ": chi2 (max,max-outlier) " << maxChi2Cut.first << ", " << maxChi2Cut.second
+                      << ": chi2 (max,max-outlier) for 1D " << maxChi2Cut[1].first << ", " << maxChi2Cut[1].second
+                      << ", 2D " << maxChi2Cut[2].first << ", " << maxChi2Cut[2].second
                       << " max.meas." << numMeasurementsCut);
       }
       return result;
@@ -768,6 +777,7 @@ struct MeasurementSelectorWithDispatch : public MeasurementSelectorBase< NMeasMa
                                   forced] (const auto &measurement_container_with_dimension) {
                using ArgType = std::remove_cv_t<std::remove_reference_t< decltype(measurement_container_with_dimension) > >;
                constexpr std::size_t DIM = ArgType::dimension();
+               static_assert(DIM < std::tuple_size_v<AtlasMeasurementSelectorCuts::Chi2CutsPerDim>);
                auto measurement_range = this->derived().rangeForContainer(measurement_container_with_dimension,range);
                return
                   this->template
@@ -780,7 +790,7 @@ struct MeasurementSelectorWithDispatch : public MeasurementSelectorBase< NMeasMa
                                                            trajectory,
                                                            logger,
                                                            numMeasurementsCut,
-                                                           maxChi2Cut,
+                                                           maxChi2Cut[DIM],
                                                            forced);
             },
             *a_measurement_container_variant_ptr);

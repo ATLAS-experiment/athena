@@ -2,6 +2,7 @@
 
 from ActsConfig.ActsConfigFlags import SeedingStrategy
 import AthenaCommon.SystemOfUnits as Units
+import math
 
 def deactivateAthenaComponents(icf):
     icf.doAthenaCluster = False
@@ -86,9 +87,14 @@ def createActsTrackingPassFlags():
     icf.addFlag("nHolesMax"               , icf.maxHoles)
     icf.addFlag("nHolesGapMax"            , icf.maxHoles)
 
-    # Chi2 cut used together with 1 max. hole
+    # Chi2 cuts of the Athena track finder. The ACTS measurement selection does not use them, but the
+    # Athena passes which derive from these flags do.
     icf.addFlag("Xi2max"                  , [50.])
     icf.addFlag("Xi2maxNoAdd"             , [100.])
+    # Chi2 cuts of the ACTS measurement selection (measurement, outlier) in sigma of a 1D Gaussian.
+    # The track finding converts them to the same p-value for each measurement dimension.
+    icf.addFlag("Xi2maxSigma"             , [7.])
+    icf.addFlag("Xi2maxNoAddSigma"        , [10.])
     icf.addFlag("nWeightedClustersMin"    , [6])
 
     # --- seeding
@@ -170,8 +176,8 @@ def createActsLegacyTrackingPassFlags():
     icf.nHolesMax = icf.maxHoles
     icf.nHolesGapMax = icf.maxHoles
     # Chi2 cut used together with 2 max. holes
-    icf.Xi2max = [25.]
-    icf.Xi2maxNoAdd = [25.]
+    icf.Xi2maxSigma = [5.]
+    icf.Xi2maxNoAddSigma = [5.]
     return icf
 
 
@@ -193,8 +199,8 @@ def createActsHeavyIonTrackingPassFlags():
     icf.maxHoles         = [2]
     icf.nHolesMax = icf.maxHoles
     icf.nHolesGapMax = icf.maxHoles
-    icf.Xi2max           = [25.]
-    icf.Xi2maxNoAdd      = [25.]
+    icf.Xi2maxSigma      = [5.]
+    icf.Xi2maxNoAddSigma = [5.]
     icf.doBremRecoverySi = False
     icf.doAmbiguityProcessorTrackFit = False    
     return icf
@@ -210,8 +216,8 @@ def createActsLargeRadiusTrackingPassFlags():
     icf.storedTrackParticlesExtension = "LargeD0"
 
     # Override acts default values
-    icf.Xi2max = [25]
-    icf.Xi2maxNoAdd = [50]
+    icf.Xi2maxSigma = [5.]
+    icf.Xi2maxNoAddSigma = [math.sqrt(50.)]
 
     # Mark as secondary pass
     icf.isSecondaryPass = True
@@ -330,8 +336,8 @@ def createEFValidateF100TrackingPassFlags():
     icf.doActsTrack = True
     
     # Override acts default values
-    icf.Xi2max = [50]
-    icf.Xi2maxNoAdd = [100]
+    icf.Xi2maxSigma = [7.]
+    icf.Xi2maxNoAddSigma = [10.]
     icf.useITkStripSeeding = False
     return icf
 
@@ -347,8 +353,8 @@ def createEFValidateF150TrackingPassFlags():
     icf.doActsTrack = True
 
     # Override acts default values
-    icf.Xi2max = [50]
-    icf.Xi2maxNoAdd = [100]
+    icf.Xi2maxSigma = [7.]
+    icf.Xi2maxNoAddSigma = [10.]
     icf.PixelSeedingStrategy = SeedingStrategy.F150
     icf.useITkStripSeeding = False
     return icf
@@ -361,6 +367,9 @@ def createACTSInnerDetectorTrackingPassFlags():
     icf.extension               = ""
     icf.Xi2max = 25.0
     icf.Xi2maxNoAdd = 25.0
+    # Chi2 cuts of the ACTS measurement selection in sigma of a 1D Gaussian, see createActsTrackingPassFlags
+    icf.addFlag("Xi2maxSigma", [5.])
+    icf.addFlag("Xi2maxNoAddSigma", [5.])
     # ACTS components
     icf.addFlag("doActsCluster", True)
     icf.addFlag("doActsSpacePoint", True)

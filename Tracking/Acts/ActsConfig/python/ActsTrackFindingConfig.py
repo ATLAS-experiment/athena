@@ -118,9 +118,9 @@ def ActsMainTrackFindingAlgCfg(flags,
     # bins in |eta|, used for both MeasurementSelectorConfig and TrackSelector::EtaBinnedConfig
     if flags.Detector.GeometryITk:
         kwargs.setdefault("etaBins", flags.Tracking.ActiveConfig.etaBins)
-    # new default chi2 cuts optimise efficiency vs speed. Set same value as Athena's Xi2maxNoAdd.
-    kwargs.setdefault("chi2CutOff", flags.Tracking.ActiveConfig.Xi2max)
-    kwargs.setdefault("chi2OutlierCutOff", flags.Tracking.ActiveConfig.Xi2maxNoAdd)
+    # chi2 cuts in sigma of a 1D Gaussian, converted to the same p-value for each measurement dimension
+    kwargs.setdefault("chi2CutOffSigma", flags.Tracking.ActiveConfig.Xi2maxSigma)
+    kwargs.setdefault("chi2OutlierCutOffSigma", flags.Tracking.ActiveConfig.Xi2maxNoAddSigma)
 
     kwargs.setdefault("branchStopperPtMinFactor", 0.9)
     kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)

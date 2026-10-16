@@ -138,8 +138,8 @@ else # Do GNN Pixel Seeding
                    findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').ptMinMeasurements=[];\
                    findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').absEtaMaxMeasurements=[];\
                    findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').maxHoles=[2,1,1];\
-                   findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').chi2CutOff=[200,50,50];\
-                   findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').chi2OutlierCutOff=[200,100,100];"
+                   findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').chi2CutOffSigma=[14.142,7.071,7.071];\
+                   findAlgorithm(cfg.getSequence(),'ActsValidateF150TrackFindingAlg').chi2OutlierCutOffSigma=[14.142,10.,10.];"
 fi
 
 Reco_tf.py --CA \

@@ -15,6 +15,10 @@
 
 #include "ActsEvent/TrackContainerUtils.h"
 
+#include <boost/math/distributions/chi_squared.hpp>
+#include <cmath>
+#include <numbers>
+
 namespace ActsTrk {
   struct TrackFindingBaseAlg::CKF_pimpl : public detail::CKF_config {};
 
@@ -29,8 +33,8 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("Properties Summary:");
     ATH_MSG_DEBUG("   " << m_maxPropagationStep);
     ATH_MSG_DEBUG("   " << m_etaBins);
-    ATH_MSG_DEBUG("   " << m_chi2CutOff);
-    ATH_MSG_DEBUG("   " << m_chi2OutlierCutOff);
+    ATH_MSG_DEBUG("   " << m_chi2CutOffSigma);
+    ATH_MSG_DEBUG("   " << m_chi2OutlierCutOffSigma);
     ATH_MSG_DEBUG("   " << m_numMeasurementsCutOff);
     ATH_MSG_DEBUG("   " << m_ptMinMeasurements);
     ATH_MSG_DEBUG("   " << m_absEtaMaxMeasurements);
@@ -538,23 +542,43 @@ namespace ActsTrk {
   }
 
   StatusCode TrackFindingBaseAlg::initializeMeasurementSelector() {
-    std::vector<std::pair<float, float> > &chi2CutOffOutlier = m_measurementSelectorConfig.m_chi2CutOffOutlier;
-    chi2CutOffOutlier .reserve( m_chi2CutOff.size() );
-    if (!m_chi2OutlierCutOff.empty()) {
-       if (m_chi2CutOff.size() !=  m_chi2OutlierCutOff.size()) {
+    // the cuts for each eta bin are (measurement, outlier) pairs for each measurement dimension
+    auto &chi2CutOffOutlier = m_measurementSelectorConfig.m_chi2CutOffOutlier;
+    const std::vector<double> &cutOff = m_chi2CutOffSigma.value();
+    const std::vector<double> &outlierCutOff = m_chi2OutlierCutOffSigma.value();
+    chi2CutOffOutlier.reserve( cutOff.size() );
+    if (!outlierCutOff.empty()) {
+       if (cutOff.size() != outlierCutOff.size()) {
           ATH_MSG_ERROR("Outlier chi2 cut off provided but number of elements does not agree with"
                         " chi2 cut off for measurements which however is required: "
-                        << m_chi2CutOff.size() << " != " <<  m_chi2OutlierCutOff.size());
+                        << cutOff.size() << " != " << outlierCutOff.size());
           return StatusCode::FAILURE;
        }
     }
-    unsigned int idx=0;
-    for (const auto &elm : m_chi2CutOff) {
-       chi2CutOffOutlier.push_back( std::make_pair(static_cast<float>(elm),
-                                                   idx < m_chi2OutlierCutOff.size()
-                                                   ? static_cast<float>(m_chi2OutlierCutOff[idx])
-                                                   : std::numeric_limits<float>::max()) );
-       ++idx;
+    // A cut at n sigma of a 1D Gaussian (two-sided) has the p-value erfc(n/sqrt(2)). The chi2 cut for
+    // a measurement of dimension DIM is the chi2 value with this p-value for DIM degrees of freedom.
+    // For DIM=1 this is n^2.
+    auto chi2Cut = [](double cut, std::size_t dim) -> float {
+       const double pValue = std::erfc(cut / std::numbers::sqrt2);
+       return static_cast<float>(boost::math::quantile(
+          boost::math::complement(boost::math::chi_squared_distribution<double>(dim), pValue)));
+    };
+    for (std::size_t idx = 0; idx < cutOff.size(); ++idx) {
+       std::array<std::pair<float, float>, 4> cuts{};
+       for (std::size_t dim = 1; dim < cuts.size(); ++dim) {
+          cuts[dim] = std::make_pair(chi2Cut(cutOff[idx], dim),
+                                     idx < outlierCutOff.size()
+                                     ? chi2Cut(outlierCutOff[idx], dim)
+                                     : std::numeric_limits<float>::max());
+       }
+       cuts[0] = cuts[1];
+       chi2CutOffOutlier.push_back(cuts);
+       ATH_MSG_DEBUG("Measurement selector eta bin " << idx << ": chi2 cuts for "
+                    << cutOff[idx] << " / "
+                    << (idx < outlierCutOff.size() ? outlierCutOff[idx] : std::numeric_limits<double>::infinity())
+                    << " sigma: 1D " << cuts[1].first << " / " << cuts[1].second
+                    << ", 2D " << cuts[2].first << " / " << cuts[2].second
+                    << ", 3D " << cuts[3].first << " / " << cuts[3].second);
     }
     if (m_etaBins.size() > 2) {
       std::vector<float> &etaBinsf = m_measurementSelectorConfig.m_etaBins;

@@ -398,7 +398,7 @@ std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const Eve
        const ActsTrk::IHGTDOnTrackCalibratorTool<detail::RecoTrackStateContainer> *hgtdOnTrackCalibratorTool,
        const ActsTrk::detail::MeasurementRangeList &measurementRanges,
        const std::vector<float> &etaBinsf,
-       const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
+       const std::vector<std::array<std::pair<float, float>, 4> > &chi2CutOffOutlier,
        const std::vector<size_t> &numMeasurementsCutOff,
        double edge_hole_border_width) {
 
