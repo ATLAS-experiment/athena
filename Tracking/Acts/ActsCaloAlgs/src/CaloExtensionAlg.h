@@ -139,7 +139,7 @@ namespace ActsTrk{
             SG::WriteHandleKey<CaloExtensionContainer> m_caloExtensionKey{this, "CaloExtensionName", "CaloExtension"};
 
             /** @brief The minimum momentum cut applied on the ID tracks to be considered */
-            Gaudi::Property<float> m_trackPt{this, "minPt", 2.5*Gaudi::Units::GeV};
+            Gaudi::Property<float> m_trackPt{this, "minPt", 0.5*Gaudi::Units::GeV};
 
             /** @brief Broad windowsto initially match the calo cluster with the track exit parameters */
             Gaudi::Property<float> m_broadDeltaEta{this, "broadDeltaEta", 0.2, "Value of broad cut for delta eta" };
