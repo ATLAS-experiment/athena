@@ -91,7 +91,7 @@ StatusCode EventDataCopyExampleAlg::execute(const EventContext& ctx) const {
     auto output = std::make_unique<DeviceObjectCollection::buffer>(
         std::vector<unsigned int>(inputHandle->size(), 2), m_mrs->mainMR(),
         m_mrs->hostMR());
-    deviceCopy->setup(*output)->ignore();
+    deviceCopy->setup(vecmem::ignore_event, *output);
 
     // Perform the host->device copy.
     (*deviceCopy)(hostBuffer, *output)->wait();
