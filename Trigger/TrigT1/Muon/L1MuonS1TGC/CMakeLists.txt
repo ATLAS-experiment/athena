@@ -13,9 +13,9 @@ atlas_add_component( L1MuonS1TGC
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
-atlas_add_test( TgcL0MdtCandidateSelector_test
-  SOURCES test/TgcL0MdtCandidateSelector_test.cxx
-          src/TgcL0MdtCandidateSelector.cxx
+atlas_add_test( L1MuonS1TGC_MdtCandSelector_test
+  SOURCES test/MdtCandSelector_test.cxx
+          src/MdtCandSelector.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} AthContainers xAODTrigL1Muon
   POST_EXEC_SCRIPT nopost.sh )

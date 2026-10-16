@@ -1,18 +1,18 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L1MUONS1TGC_TGCL0MDTCANDIDATESELECTOR_H
-#define L1MUONS1TGC_TGCL0MDTCANDIDATESELECTOR_H
+#ifndef L1MUONS1TGC_MDTCANDSELECTOR_H
+#define L1MUONS1TGC_MDTCANDSELECTOR_H
 
 #include <cstddef>
 #include <memory>
 
 #include "xAODTrigL1Muon/L1TGCCandDataContainer.h"
 
-namespace L1Muon {
+namespace L1Muon::L1TGC {
 
 /** @brief Select the TGC candidates sent to MDTTP. */
-class TgcL0MdtCandidateSelector {
+class MdtCandSelector {
  public:
   /**
    * @brief Create a non-owning view of the three candidates with the highest
@@ -30,6 +30,6 @@ class TgcL0MdtCandidateSelector {
   static constexpr std::size_t s_maxCandidatesPerSector{3U};
 };
 
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC
 
 #endif

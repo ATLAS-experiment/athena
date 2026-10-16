@@ -5,16 +5,16 @@
 #define L1MUONS1TGCFLOATINGTOOLS_TGCL0FLOATINGINNERCOINCIDENCETOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "L1MuonS1TGCToolInterfaces/ITgcL0InnerCoincidenceTool.h"
+#include "L1MuonS1TGCToolInterfaces/IInnerCoincidenceTool.h"
 
 namespace L1Muon {
 
 class TgcL0FloatingInnerCoincidenceTool final
-    : public extends<AthAlgTool, ITgcL0InnerCoincidenceTool> {
+    : public extends<AthAlgTool, L1TGC::IInnerCoincidenceTool> {
  public:
   using base_class::base_class;
 
-  /// \copydoc ITgcL0InnerCoincidenceTool::apply
+  /// \copydoc L1TGC::IInnerCoincidenceTool::apply
   StatusCode apply(TgcSLCandidateContainer& candidates,
                    const EventContext& ctx) const override;
 };

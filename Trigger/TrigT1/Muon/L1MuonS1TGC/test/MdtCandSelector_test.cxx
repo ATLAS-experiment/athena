@@ -4,11 +4,11 @@
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE TgcL0MdtCandidateSelectorTest
+#define BOOST_TEST_MODULE MdtCandSelectorTest
 
 #include <boost/test/unit_test.hpp>
 
-#include "TgcL0MdtCandidateSelector.h"
+#include "MdtCandSelector.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -64,12 +64,12 @@ struct CandidateFixture {
 
   xAOD::L1TGCCandDataContainer candidates;
   SG::AuxStoreInternal candidatesAux;
-  L1Muon::TgcL0MdtCandidateSelector selector;
+  L1Muon::L1TGC::MdtCandSelector selector;
 };
 
 }  // namespace
 
-BOOST_AUTO_TEST_SUITE(TgcL0MdtCandidateSelectorTest)
+BOOST_AUTO_TEST_SUITE(MdtCandSelectorTest)
 
 BOOST_FIXTURE_TEST_CASE(SelectsThreeCandidatesPerSector, CandidateFixture) {
   std::unique_ptr<xAOD::L1TGCCandDataContainer> output =

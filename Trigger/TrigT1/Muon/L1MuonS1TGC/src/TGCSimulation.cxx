@@ -6,7 +6,7 @@
 
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
-#include "TgcL0MdtCandidateSelector.h"
+#include "MdtCandSelector.h"
 #include "xAODTrigL1Muon/L1TGCCandDataAuxContainer.h"
 #include "xAODMuonViews/FillContainer.h"
 
@@ -36,14 +36,14 @@ StatusCode TGCSimulation::execute(const EventContext& ctx) const {
   Monitored::Group(m_monTool, nTgcRdoCollections);
 
   TgcSLCandidateContainer candidates;
-  std::unique_ptr<TgcSLSegmentContainer> validationSegments;
+  std::unique_ptr<L1TGC::SegmentContainer> validationSegments;
   if (!m_validationSegmentKey.empty()) {
-    validationSegments = std::make_unique<TgcSLSegmentContainer>();
+    validationSegments = std::make_unique<L1TGC::SegmentContainer>();
   }
   ATH_CHECK(m_candidateBuilderTool->build(
       *tgcRdoContainer, candidates, validationSegments.get(), ctx));
   if (validationSegments) {
-    SG::WriteHandle<TgcSLSegmentContainer> segmentHandle{
+    SG::WriteHandle<L1TGC::SegmentContainer> segmentHandle{
         m_validationSegmentKey, ctx};
     ATH_CHECK(segmentHandle.record(std::move(validationSegments)));
   }
@@ -59,7 +59,7 @@ StatusCode TGCSimulation::execute(const EventContext& ctx) const {
                       xAOD::L1TGCCandDataAuxContainer>
       output{};
   ATH_CHECK(m_trackSelectorTool->select(candidates, *output, ctx));
-  const TgcL0MdtCandidateSelector mdtCandidateSelector;
+  const L1TGC::MdtCandSelector mdtCandidateSelector;
   std::unique_ptr<xAOD::L1TGCCandDataContainer> outputToMdt =
       mdtCandidateSelector.select(*output);
 

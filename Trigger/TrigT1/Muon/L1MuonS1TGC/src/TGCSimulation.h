@@ -6,10 +6,10 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
-#include "L1MuonS1TGCToolInterfaces/ITgcL0CandidateBuilderTool.h"
-#include "L1MuonS1TGCToolInterfaces/ITgcL0InnerCoincidenceTool.h"
-#include "L1MuonS1TGCToolInterfaces/ITgcL0TrackSelectorTool.h"
-#include "L1MuonS1TGCToolInterfaces/TgcSLSegment.h"
+#include "L1MuonS1TGCToolInterfaces/ICandBuilderTool.h"
+#include "L1MuonS1TGCToolInterfaces/IInnerCoincidenceTool.h"
+#include "L1MuonS1TGCToolInterfaces/ITrackSelectorTool.h"
+#include "L1MuonS1TGCToolInterfaces/Segment.h"
 #include "MuonRDO/TgcRdoContainer.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "xAODTrigL1Muon/L1TGCCandDataContainer.h"
@@ -29,7 +29,7 @@ class TGCSimulation : public AthReentrantAlgorithm {
   SG::WriteHandleKey<TgcSLCandidateContainer> m_validationCandidateKey{
       this, "ValidationCandidateKey", "",
       "Optional pre-Inner-Coincidence transient candidates for validation"};
-  SG::WriteHandleKey<TgcSLSegmentContainer> m_validationSegmentKey{
+  SG::WriteHandleKey<L1TGC::SegmentContainer> m_validationSegmentKey{
       this, "ValidationSegmentKey", "",
       "Optional projection segments for validation"};
   SG::WriteHandleKey<xAOD::L1TGCCandDataContainer> m_outputKey{
@@ -39,11 +39,11 @@ class TGCSimulation : public AthReentrantAlgorithm {
       this, "OutputToMdtKey", "L1TGCCandDataToMdt",
       "View of the highest-pT TGC candidates sent to MDTTP"};
 
-  ToolHandle<ITgcL0CandidateBuilderTool> m_candidateBuilderTool{
+  ToolHandle<L1TGC::ICandBuilderTool> m_candidateBuilderTool{
       this, "CandidateBuilderTool", "", "TGC candidate-builder implementation"};
-  ToolHandle<ITgcL0InnerCoincidenceTool> m_innerCoincidenceTool{
+  ToolHandle<L1TGC::IInnerCoincidenceTool> m_innerCoincidenceTool{
       this, "InnerCoincidenceTool", "", "TGC Inner-Coincidence implementation"};
-  ToolHandle<ITgcL0TrackSelectorTool> m_trackSelectorTool{
+  ToolHandle<L1TGC::ITrackSelectorTool> m_trackSelectorTool{
       this, "TrackSelectorTool", "", "TGC Track-Selector implementation"};
 
   ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "",
