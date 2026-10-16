@@ -205,7 +205,7 @@ void TrapezoidBoundsExpander::findTrapezoidEdge(Amg::Vector3D& botCorner,
          }
     };
     updateSlope(topCorner);
-    ACTS_INFO(__func__<<"() "<<__LINE__<<" - Identified "<<Amg::toString(botCorner)
+    ACTS_DEBUG(__func__<<"() "<<__LINE__<<" - Identified "<<Amg::toString(botCorner)
                 <<", "<<Amg::toString(topCorner)<<" as vertices. Edge: "<<Amg::toString(edge));
     Amg::Vector3D farestVtx{botCorner};
     double area{0.};
