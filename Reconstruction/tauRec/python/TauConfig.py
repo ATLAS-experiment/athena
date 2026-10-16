@@ -397,8 +397,8 @@ def TauConfigTest(flags=None):
 
         flags = initConfigFlags()
 
-        flags.Input.Files = defaultTestFiles.RDO_RUN3
-        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC
+        flags.Input.Files = defaultTestFiles.RDO_RUN3 if flags.GeoModel.Run <= LHCPeriod.Run3 else defaultTestFiles.RDO_RUN4
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC if flags.GeoModel.Run <= LHCPeriod.Run3 else defaultConditionsTags.RUN4_MC
 
         flags.Output.AODFileName = "AOD.pool.root"
         flags.Exec.MaxEvents = 50
@@ -412,6 +412,11 @@ def TauConfigTest(flags=None):
 
         from tauRec.ConfigurationHelpers import StandaloneTauRecoFlags
         StandaloneTauRecoFlags(flags)
+
+        #temporary extra setting if we use ACTS based track-calo extrapolation in Run4
+        if flags.Tau.useACTSExtrapolator and flags.GeoModel.Run > LHCPeriod.Run3:
+            flags.Acts.TrackingGeometry.UseBlueprint = True 
+            flags.Reco.EnableHGTDExtension = False
 
         flags.lock()
    

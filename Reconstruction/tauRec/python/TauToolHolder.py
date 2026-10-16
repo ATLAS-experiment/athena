@@ -121,12 +121,18 @@ def TauTrackCaloExtrapolatorCfg(flags):
 
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
 
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg 
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+
     TauTrackCaloExtrapolator = CompFactory.getComp("TauTrackCaloExtrapolator")
     TauTrackCaloExtrapolator = TauTrackCaloExtrapolator(name = _name,
                                     ParticleCaloExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)),
                                     tauParticleCache = getParticleCache(flags), # only returns a string
                                     ExtrapOnlyChargedTracks = False if flags.GeoModel.Run <= LHCPeriod.Run3 else True,
+                                    ExtrapolationTool = result.popToolsAndMerge(ActsExtrapolationToolCfg(flags,MaxSteps=10000)),
+                                    useACTSExtrapolator = True if (flags.Tau.useACTSExtrapolator and flags.GeoModel.Run > LHCPeriod.Run3) else False,
     )
+    result.merge(ActsTrackingGeometrySvcCfg(flags))
     result.setPrivateTools(TauTrackCaloExtrapolator)
     return result
 
