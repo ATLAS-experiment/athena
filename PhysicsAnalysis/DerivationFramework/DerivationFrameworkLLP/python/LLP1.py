@@ -1057,6 +1057,10 @@ def LLP1Cfg(flags):
                                         "DisappearingSCT_MSOSs",
                                         "LowPtRoISCT_MSOSs",
                                         "LVL1MuonRoIs",
+                                        "LVL1MuonRoIsBCm2",
+                                        "LVL1MuonRoIsBCm1",
+                                        "LVL1MuonRoIsBCp1",
+                                        "LVL1MuonRoIsBCp2",
                                         "NCB_MuonSegments",
                                         "HLT_MuRoICluster_Composites"]
     if flags.Tracking.doLargeD0:
