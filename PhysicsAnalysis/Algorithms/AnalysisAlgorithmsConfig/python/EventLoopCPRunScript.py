@@ -107,15 +107,25 @@ class EventLoopCPRunScript(CPBaseRunner):
             self.logger.info(f"renaming the hist-{self.outputName}.root to {self.outputName}.root")
             newHistFile.rename(currentDir / f"{self.outputName}.root")
 
-    def driverSubmit(self, driver):
+    def driverSubmit(self, driver, fork=True):
         '''
         Important if you want to run code after submitting the job, with external driver e.g., ExecDriver.
         Assistant function to call driver submit. Move the submission to a child process to avoid the main process being terminated.
         Directly calling external driver submission will not return controls to the main process, the main thread will be terminated.
+        The forking can be disabled, which also allows to debug it directly.
         '''
+        name = self.args.work_dir if self.args.work_dir else 'workDir'
+        if not fork:
+            try:
+                driver.submit(self.job, name)
+            except Exception:
+                import traceback
+                traceback.print_exc()
+                self.logger.error('Job submission failed')
+            return
+
         if (pid := os.fork()) == 0: # child process
             try:
-                name = self.args.work_dir if self.args.work_dir else 'workDir'
                 driver.submit(self.job, name)
             except Exception:
                 import traceback
@@ -170,7 +180,8 @@ class EventLoopCPRunScript(CPBaseRunner):
             self.job.options().setBool(ROOT.EL.Job.optAlgorithmMemoryMonitor, 1)
 
         driver = ROOT.EL.DirectDriver() if self.args.direct_driver else ROOT.EL.ExecDriver()
-        self.driverSubmit(driver)
+        fork = not self.args.direct_driver
+        self.driverSubmit(driver, fork=fork)
 
         if self.args.dump_full_config:
             self._dumpFullConfig()
