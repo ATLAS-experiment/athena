@@ -95,7 +95,7 @@ def ActsGnnModuleMapFinderToolCfg(flags, name='ActsGnnModuleMapFinderTool', **kw
     kwargs.setdefault("edgeCut", flags.Tracking.GNN.ActsPipeline.edgeCut)
     kwargs.setdefault("numTrtContexts", flags.Tracking.GNN.ActsPipeline.numTrtContexts)
     kwargs.setdefault("minCandidateMeasurements", flags.Tracking.GNN.ActsPipeline.minCandidateMeasurements)
-    kwargs.setdefault("useEdgeLayerConnector", flags.Tracking.GNN.ActsPipeline.useEdgeLayerConnector)
+    kwargs.setdefault("trackBuilder", flags.Tracking.GNN.ActsPipeline.trackBuilder.value)
     kwargs.setdefault("elcMaxHitsPerTrack", flags.Tracking.GNN.ActsPipeline.elcMaxHitsPerTrack)
     kwargs.setdefault("SpacepointFeatureTool", acc.popToolsAndMerge(SpacepointFeatureToolCfg(flags)))
 
