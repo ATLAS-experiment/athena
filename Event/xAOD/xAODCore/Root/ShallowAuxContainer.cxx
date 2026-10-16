@@ -417,13 +417,13 @@ namespace xAOD {
       // Create the variable in the dynamic store:
       void* ptr = m_store->getData( auxid, size, capacity );
 
-      remakeAuxIDs();
-
       // If in some weird way we already had this variable before, then don't
       // try to overwrite it with the parent's payload, and finish here already.
       if( cptr != nullptr ) {
          return ptr;
       }
+
+      remakeAuxIDs();
 
       // If the parent doesn't have this variable, then we're done already:
       if( ! m_parentLink.isValid() ) {
@@ -636,9 +636,25 @@ namespace xAOD {
        ids.insert (m_parentLink->getDecorIDs());
      }
 
-     m_decorids = std::move(decors);
+     // Move assignment no longer clears garbage for the LHS.
+     // To limit the buildup of garbage, we do this assignment operation
+     // via copy it it will fit, only doing a move in the case where
+     // the table would need to be expanded (and we would thus generate
+     // garbage anyway).  This is a non-atomic update, but that
+     // shouldn't matter for our purposes here.
+     if (decors.capacity() > m_decorids.capacity())
+       m_decorids = std::move(decors);
+     else
+       m_decorids = decors;
+
+     // Ensure that decoration updates are visible to other threads before
+     // auxid updates.
      std::atomic_thread_fence( std::memory_order_seq_cst );
-     m_auxids = std::move(ids);
+
+     if (ids.capacity() > m_auxids.capacity())
+       m_auxids = std::move(ids);
+     else
+       m_auxids = ids;
 
      m_auxidsValid = true;
    }
