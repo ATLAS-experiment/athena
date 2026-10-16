@@ -58,7 +58,7 @@ namespace SG {
     RootUtils::PyGILStateEnsure gil;
     // if requested type is same than myself ==> no conversion needed
     if ( clid == m_clid ) {
-      return clid == PyCLID 
+      return clid == PyCLID
 	? m_pyObj
 	: CPPInstance_ASVOIDPTR(m_pyObj);
     }
@@ -96,7 +96,11 @@ namespace SG {
       return CPPInstance_ASVOIDPTR(value);
     }
     Py_XDECREF(value);
+#ifdef ATLAS_HAVE_CPYCPPYY
     throw CPyCppyy::PyException();
+#else
+    throw std::runtime_error ("Python exception");
+#endif  // ATLAS_HAVE_CPYCPPYY
     return 0;
   }
 
@@ -128,7 +132,7 @@ namespace SG {
     TClass* clsnew = TClass::GetClass (tinfo);
     if (!clsnew) {
       PyErr_SetString
-        ( PyExc_RuntimeError, 
+        ( PyExc_RuntimeError,
           "SG::PyDataBucket::cast() can't find TClass" );
       return 0;
     }
@@ -196,7 +200,7 @@ namespace SG {
       Py_DECREF(m_clids);
     }
     // delete the proxy dicts...
-    for ( PyProxyMap_t::iterator 
+    for ( PyProxyMap_t::iterator
 	    i    = m_proxyMap.begin(),
 	    iEnd = m_proxyMap.end();
 	  i != iEnd;

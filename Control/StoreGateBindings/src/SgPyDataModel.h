@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATEBINDINGS_SGPYDATAMODEL_H
@@ -36,9 +36,12 @@ extern const CLID PyCLID;
 
 // PyROOT includes
 #include "AthenaPyRoot.h"
-#include "CPyCppyy/PyException.h"
+#ifdef ATLAS_HAVE_CPYCPPYY
+#  include "CPyCppyy/PyException.h"
+#endif  // ATLAS_HAVE_CPYCPPYY
 
 #include <unordered_map>
+#include <stdexcept>
 
 // Called from python, so only excuted single-threaded (GIL).
 #include "CxxUtils/checker_macros.h"
@@ -51,7 +54,7 @@ namespace SG { struct PyProxyDict; }
 namespace {
   /** @brief replace all occurences of 'from' with 'to' in 's'
    */
-  std::string::size_type 
+  std::string::size_type
   cxx_replace(std::string& s,
               const std::string& from,
               const std::string& to)
@@ -76,7 +79,7 @@ namespace {
 }
 
 namespace SG {
-  
+
   /**
    * @brief Concrete @c DataBucket that holds the object via a @c void*
    *        and uses the Root dictionary to do conversions.
@@ -104,19 +107,19 @@ namespace SG {
     /**
      * @brief Destructor.
      */
-    virtual ~PyDataBucket() override { 
+    virtual ~PyDataBucket() override {
       RootUtils::PyGILStateEnsure gil;
-      Py_DECREF( m_pyObj ); 
+      Py_DECREF( m_pyObj );
     }
 
     /**
      * @brief Return the held object.
      */
     virtual void* object() override
-    { 
+    {
       return m_clid != PyCLID
         ? CPPInstance_ASVOIDPTR(m_pyObj)
-        : m_pyObj; 
+        : m_pyObj;
     }
 
 
@@ -200,7 +203,7 @@ namespace SG {
 
     typedef std::unordered_map<StoreGateSvc*,SG::PyProxyDict*> PyProxyMap_t;
     PyProxyMap_t m_proxyMap;
-    
+
     /// a dictionary of CLID -> reflex typename
     typedef std::unordered_map<CLID, std::string> ClidMap_t;
     ClidMap_t m_clidMap;
@@ -240,7 +243,7 @@ namespace SG {
       PyObject* tp = PyDict_GetItem(m_clids, clid);
       if ( NULL == tp ) {
         std::string cpp_tp;
-        if (!m_clidSvc->getTypeNameOfID(PyLong_AsUnsignedLong(clid), 
+        if (!m_clidSvc->getTypeNameOfID(PyLong_AsUnsignedLong(clid),
                                         cpp_tp).isSuccess()) {
           return NULL;
         }
@@ -261,7 +264,7 @@ namespace SG {
     }
 
     /// returns a borrowed reference
-    inline 
+    inline
     PyObject* pytp(CLID clid)
     {
       PyObject* pyclid = PyLong_FromLong(clid);
@@ -385,7 +388,7 @@ namespace SG {
       Py_XINCREF(m_aliases);
       // don't need this one anymore
       Py_DECREF(module);
-      
+
       if ( !m_aliases ) {
         std::cerr << "SG::PyProxyDict WARNING: could not retrieve the "
                   << "dictionary of aliases from '"
@@ -395,7 +398,7 @@ namespace SG {
       }
       return m_aliases;
     }
-    
+
   }; //> class PyProxyMgr
 
   /** @brief a python front-end to the @c IProxyDict interface
@@ -406,11 +409,11 @@ namespace SG {
   {
     StoreGateSvc* m_sgSvc;
 
-    PyProxyDict( StoreGateSvc* sgSvc ) : 
+    PyProxyDict( StoreGateSvc* sgSvc ) :
       m_sgSvc( sgSvc )
     {}
 
-    ~PyProxyDict() 
+    ~PyProxyDict()
     {}
 
     inline
@@ -424,7 +427,7 @@ namespace SG {
       if (!PyArg_Parse( pyclid, "I", &id_tmp )) {
         return nullptr;
       }
-          
+
       CLID id = id_tmp;
       std::string skey;
       if (pykey != Py_None) {
@@ -433,10 +436,10 @@ namespace SG {
       SG::DataProxy* proxy = skey.empty()
         ? m_sgSvc->proxy(id)
         : m_sgSvc->proxy(id, skey);
-      _SGPY_MSG("PyProxyDict::proxy(" 
+      _SGPY_MSG("PyProxyDict::proxy("
                 << (proxy ? proxy->clID() : id)   << ", "
                 << (proxy ? proxy->name() : skey) << ")...");
-      pyproxy = TPython::CPPInstance_FromVoidPtr((void*)proxy, 
+      pyproxy = TPython::CPPInstance_FromVoidPtr((void*)proxy,
                                                  "SG::DataProxy");
 
       _SGPY_MSG("PyProxyDict::proxy(...)... [done]");
@@ -448,7 +451,11 @@ namespace SG {
     {
       PyObject* obj = NULL;
       if ( !(obj = TPython::CPPInstance_FromVoidPtr((void*)addr, klass)) ) {
+#ifdef ATLAS_HAVE_CPYCPPYY
         throw CPyCppyy::PyException();
+#else
+        throw std::runtime_error ("Python exception");
+#endif  // ATLAS_HAVE_CPYCPPYY
       }
       return obj;
     }
@@ -458,7 +465,7 @@ namespace SG {
 
   // -------- inlines ----------------------
   inline
-  PyProxyDict* 
+  PyProxyDict*
   PyProxyMgr::pyproxy(StoreGateSvc* sg)
   {
     SG::PyProxyDict* p = 0;
@@ -470,9 +477,8 @@ namespace SG {
     }
     return p;
   }
-  
+
 
 } //> end namespace SG
 
 #endif // !STOREGATEBINDINGS_SGPYDATAMODEL_H
-

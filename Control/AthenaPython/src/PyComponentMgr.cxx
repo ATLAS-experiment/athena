@@ -1,14 +1,14 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// PyComponentMgr.cxx 
+// PyComponentMgr.cxx
 // Implementation file for class PyComponentMgr
 // Author: S.Binet<binet@cern.ch>
 // Modified: Wim Lavrijsen <WLavrijsen@lbl.gov>
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
 
 // Python includes
 #include "Python.h"
@@ -20,17 +20,20 @@ CLASS_DEF (PyObject, 72785480, 1)
 #include "PyComponentMgr.h"
 #include "RootUtils/PyAthenaGILStateEnsure.h"
 
-// STL includes
-
 // FrameWork includes
 #include "Gaudi/Property.h"
 #include "AthenaPython/IPyComponent.h"
 
 // PyROOT includes
-#include "CPyCppyy/PyException.h"
+#ifdef ATLAS_HAVE_CPYCPPYY
+#  include "CPyCppyy/PyException.h"
+#endif  // ATLAS_HAVE_CPYCPPYY
 #include "TPython.h"
 #include "TROOT.h"
 #include "TClassGenerator.h"
+
+// STL includes
+#include <stdexcept>
 
 using namespace PyAthena;
 
@@ -69,15 +72,15 @@ void removePyGen ()
 
 // Constructors
 ////////////////
-PyComponentMgr::PyComponentMgr( const std::string& name, 
-				ISvcLocator* pSvcLocator ) : 
+PyComponentMgr::PyComponentMgr( const std::string& name,
+				ISvcLocator* pSvcLocator ) :
   base_class  ( name,     pSvcLocator ),
   m_dict      ( nullptr ),
   m_components(   )
 {
   //
   // Property declaration
-  // 
+  //
   //declareProperty( "Property", m_nProperty, "descr" );
 
 }
@@ -85,7 +88,7 @@ PyComponentMgr::PyComponentMgr( const std::string& name,
 // Destructor
 ///////////////
 PyComponentMgr::~PyComponentMgr()
-{ 
+{
   ATH_MSG_DEBUG("Calling destructor");
 
   // we own the repository of instances' description
@@ -112,7 +115,7 @@ PyComponentMgr::~PyComponentMgr()
 
 // Athena Algorithm's Hooks
 ////////////////////////////
-StatusCode 
+StatusCode
 PyComponentMgr::initialize()
 {
   ATH_MSG_INFO("Initializing " << name() << "...");
@@ -126,14 +129,18 @@ PyComponentMgr::initialize()
   if ( !module || !PyModule_Check( module ) ) {
     ATH_MSG_ERROR("Could not import [" << pyModuleName << "] !!");
     Py_XDECREF (module);
+#ifdef ATLAS_HAVE_CPYCPPYY
     throw CPyCppyy::PyException();
+#else
+    throw std::runtime_error ("Python exception");
+#endif  // ATLAS_HAVE_CPYCPPYY
   }
 
   const std::string pyClassName = "PyComponents";
   PyObject* pyClass = 0;
   pyClass = PyDict_GetItemString( PyModule_GetDict( module ),
 				  const_cast<char*>( pyClassName.c_str() ) );
-  
+
   // borrowed ref. so ->increment
   Py_XINCREF( pyClass );
 
@@ -194,7 +201,7 @@ PyComponentMgr::initialize()
   return StatusCode::SUCCESS;
 }
 
-StatusCode 
+StatusCode
 PyComponentMgr::finalize()
 {
   ATH_MSG_INFO("Finalizing " << name() << "...");
@@ -222,8 +229,8 @@ PyComponentMgr::pyObject( IPyComponent* cppComp )
     Py_INCREF( Py_None );
     return Py_None;
   }
-  
-  PyObject* o = PyDict_GetItemString( m_dict, 
+
+  PyObject* o = PyDict_GetItemString( m_dict,
 				      const_cast<char*>(name.c_str()) );
   // borrowed ref -> incr
   Py_XINCREF( o );
@@ -233,7 +240,11 @@ PyComponentMgr::pyObject( IPyComponent* cppComp )
     ATH_MSG_ERROR("No such python component [" << name
                   << "] or invalid item !!");
     Py_XDECREF( o );
+#ifdef ATLAS_HAVE_CPYCPPYY
     throw CPyCppyy::PyException();
+#else
+    throw std::runtime_error ("Python exception");
+#endif  // ATLAS_HAVE_CPYCPPYY
   }
   m_components[name] = o;
 

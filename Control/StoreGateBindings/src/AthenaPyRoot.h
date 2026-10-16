@@ -1,7 +1,7 @@
 // -*- C++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef STOREGATEBINDINGS_ATHENAPYROOT_H
@@ -12,10 +12,14 @@
 
 // PyROOT includes
 #include <TPython.h>
-#include "CPyCppyy/PyException.h"
+#ifdef ATLAS_HAVE_CPYCPPYY
+#  include "CPyCppyy/PyException.h"
+#endif  // ATLAS_HAVE_CPYCPPYY
 #ifndef ROOT_TPyException
 # define ROOT_TPyException 1 /* there was a typo in TPyException-v20882 */
 #endif
+
+#include <stdexcept>
 
 #define CPPInstance_ASVOIDPTR(o) (TPython::CPPInstance_AsVoidPtr(o))
 
@@ -36,7 +40,11 @@ void throw_py_exception (bool display = true)
     // and print
     PyErr_Print();
   }
+#ifdef ATLAS_HAVE_CPYCPPYY
   throw CPyCppyy::PyException();
+#else
+  throw std::runtime_error ("Python exception");
+#endif  // ATLAS_HAVE_CPYCPPYY
 }
 
 } //> namespace PyROOT
