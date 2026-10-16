@@ -9,7 +9,7 @@
 
 #include <AsgTools/AsgToolConfig.h>
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 TauResolutionTool::TauResolutionTool( const std::string& sName )

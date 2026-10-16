@@ -14,6 +14,7 @@
 
 // Framework include(s):
 #include "xAODTau/DiTauJet.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 // ROOT include(s):
 #include "TH1F.h"
@@ -25,7 +26,7 @@ namespace asg{
   class AcceptData;
 }
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class DiTauSelectionTool;
@@ -34,7 +35,7 @@ class DiTauSelectionCut
 {
 
 public:
-  DiTauSelectionCut(const std::string& sName, TauAnalysisTools::DiTauSelectionTool* tDTST);
+  DiTauSelectionCut(const std::string& sName, DiTauSelectionTool* tDTST);
   virtual ~DiTauSelectionCut();
 
   void writeControlHistograms();

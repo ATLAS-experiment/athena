@@ -29,7 +29,7 @@
 #include "TH1F.h"
 #include "TFile.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 /// forward declarations
@@ -58,7 +58,7 @@ class DiTauSelectionTool : public virtual IAsgSelectionTool,
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS2( DiTauSelectionTool,
                    IAsgSelectionTool,
-                   TauAnalysisTools::IDiTauSelectionTool )
+                   IDiTauSelectionTool )
 
 public:
   /// Constructor for standalone usage
@@ -116,7 +116,7 @@ private:
   bool m_useOmniScore=false;
 
   Gaudi::Property<std::string> m_sConfigPath{this, "ConfigPath", ""};
-  Gaudi::Property<int> m_iSelectionCuts{this, "SelectionCuts", NoDiTauCut};
+  Gaudi::Property<int> m_iSelectionCuts{this, "SelectionCuts", TauAnalysisTools::NoDiTauCut};
   Gaudi::Property<float> m_dPtMin{this, "PtMin", NAN};
   Gaudi::Property<float> m_dAbsEtaMin{this, "AbsEtaMin", NAN};
   Gaudi::Property<float> m_dAbsEtaMax{this, "AbsEtaMax", NAN};
@@ -135,7 +135,7 @@ protected:
 
 private:
 
-  std::map<DiTauSelectionCuts, std::unique_ptr<TauAnalysisTools::DiTauSelectionCut>> m_cMap;
+  std::map<TauAnalysisTools::DiTauSelectionCuts, std::unique_ptr<DiTauSelectionCut>> m_cMap;
 
   void setupCutFlowHistogram();
   int  convertStrToOmniIDWP(const std::string& sOmniIDWP) const;
@@ -151,6 +151,6 @@ protected:
 
 }; // class DiTauSelectionTool
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_DITAUSELECTIONTOOL_H

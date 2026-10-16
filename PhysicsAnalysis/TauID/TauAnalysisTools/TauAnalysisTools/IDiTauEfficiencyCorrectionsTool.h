@@ -22,10 +22,11 @@
 #include "xAODTau/DiTauJet.h"
 #include "PATInterfaces/CorrectionCode.h"
 #include "PATInterfaces/ISystematicsTool.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 // Local include(s):
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class IDiTauEfficiencyCorrectionsTool
@@ -58,6 +59,6 @@ public:
 
 }; // class IDiTauEfficiencyCorrectionsTool
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_IDITAUEFFICIENCYTOOL_H

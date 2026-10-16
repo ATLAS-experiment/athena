@@ -10,17 +10,18 @@
 #include "AsgTools/ToolHandle.h"
 #include "AsgTools/AsgMetadataTool.h"
 #include "AsgTools/PropertyWrapper.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 #include "TauAnalysisTools/ITauResolutionTool.h"
 
 #include "TGraph.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class TauResolutionTool
   : public asg::AsgMetadataTool
-  , public virtual ITauResolutionTool
+  , public virtual TauAnalysisTools::ITauResolutionTool
 {
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS( TauResolutionTool, TauAnalysisTools::ITauResolutionTool )

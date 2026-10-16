@@ -19,7 +19,9 @@
 
 #include <AsgTools/AsgToolConfig.h>
 
-namespace TauAnalysisTools
+using namespace TauAnalysisTools;
+
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 //______________________________________________________________________________
@@ -234,4 +236,4 @@ std::string DiTauEfficiencyCorrectionsTool::ConvertJetIDToString(const int iLeve
 }
 
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)

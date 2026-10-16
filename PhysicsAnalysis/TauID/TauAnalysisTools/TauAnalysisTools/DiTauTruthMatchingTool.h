@@ -21,17 +21,17 @@
 #include "CxxUtils/CachedValue.h"
 #include "AsgTools/PropertyWrapper.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class DiTauTruthMatchingTool
-  : public virtual TauAnalysisTools::BuildTruthTaus
-  , public virtual TauAnalysisTools::IDiTauTruthMatchingTool
+  : public virtual BuildTruthTaus
+  , public virtual IDiTauTruthMatchingTool
 {
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS2( DiTauTruthMatchingTool,
-                   TauAnalysisTools::IBuildTruthTaus,
-                   TauAnalysisTools::IDiTauTruthMatchingTool )
+                   IBuildTruthTaus,
+                   IDiTauTruthMatchingTool )
 
 public:                         // Interface functions
 
@@ -56,7 +56,7 @@ private:                        // private helper functions
                          const xAOD::TruthParticleContainer& xTruthTauContainer, 
                          const xAOD::TruthParticle* &xTruthMatch,
 			 const xAOD::Jet* &xTruthJetMatch,
-                         TruthMatchedParticleType &eTruthMatchedParticleType) const;
+                         TauAnalysisTools::TruthMatchedParticleType &eTruthMatchedParticleType) const;
 
 private:                        // steering variables
 

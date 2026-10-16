@@ -19,17 +19,17 @@
 #include <vector>
 #include <string>
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class TauTruthMatchingTool
-  : public virtual TauAnalysisTools::BuildTruthTaus
-  , public virtual TauAnalysisTools::ITauTruthMatchingTool
+  : public virtual BuildTruthTaus
+  , public virtual ITauTruthMatchingTool
 {
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS2( TauTruthMatchingTool,
-                   TauAnalysisTools::IBuildTruthTaus,
-                   TauAnalysisTools::ITauTruthMatchingTool )
+                   IBuildTruthTaus,
+                   ITauTruthMatchingTool )
 
 public:                         // Interface functions
 

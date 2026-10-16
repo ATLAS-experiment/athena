@@ -25,7 +25,7 @@
 // Tool include(s)
 #include "AsgAnalysisInterfaces/IPileupReweightingTool.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class TauEfficiencyCorrectionsTool
@@ -101,9 +101,9 @@ private:
   Gaudi::Property<bool> m_bReadRandomRunNumber{this, "AutoTriggerYear", false}; 
   Gaudi::Property<std::string> m_sTriggerSFMeasurement{this, "TriggerSFMeasurement", "combined"}; 
   Gaudi::Property<bool> m_bUseTauSubstructure{this, "UseTauSubstructure", false}; 
-  Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(JETIDNONE)}; 
+  Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(TauAnalysisTools::JETIDNONE)}; 
   Gaudi::Property<bool> m_useGNTau{this, "useGNTau",  false};
-  Gaudi::Property<int> m_iEleIDLevel{this, "EleIDLevel", static_cast<int>(ELEIDNONE)};
+  Gaudi::Property<int> m_iEleIDLevel{this, "EleIDLevel", static_cast<int>(TauAnalysisTools::ELEIDNONE)};
   Gaudi::Property<std::string> m_sCampaign{this, "Campaign", ""};
   Gaudi::Property<bool> m_useFastSim{this, "useFastSim", false};
   Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
@@ -121,6 +121,6 @@ private:
 
 }; // class TauEfficiencyCorrectionsTool
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_TAUEFFICIENCYCORRECTIONSTOOL_H

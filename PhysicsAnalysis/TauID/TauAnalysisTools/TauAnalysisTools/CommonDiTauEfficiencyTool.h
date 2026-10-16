@@ -32,7 +32,7 @@
 class TKey;
 
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 /** return the truth vis pT of the leading pT matched particle.*/
 double TruthLeadPt(const xAOD::DiTauJet& xDiTau);
@@ -152,9 +152,9 @@ protected:
   std::string m_sInputFileName;
   std::string m_sSFHistName;
 
-  TruthMatchedParticleType m_eCheckTruth;
+  TauAnalysisTools::TruthMatchedParticleType m_eCheckTruth;
 
 };
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_COMMONDITAUEFFICIENCYTOOL_H

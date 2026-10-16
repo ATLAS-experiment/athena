@@ -17,6 +17,7 @@
 #include "AsgTools/IAsgTool.h"
 #include "PATCore/AcceptInfo.h"
 #include "PATCore/AcceptData.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 // EDM include(s):
 #include "xAODTau/TauJet.h"
@@ -24,7 +25,7 @@
 // ROOT include(s):
 #include "TFile.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 /// Interface for tau selector tool
@@ -55,6 +56,6 @@ public:
   virtual void writeControlHistograms() = 0;
 }; // class ITauSelectionTool
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_ITAUONSELECTIONTOOL_H

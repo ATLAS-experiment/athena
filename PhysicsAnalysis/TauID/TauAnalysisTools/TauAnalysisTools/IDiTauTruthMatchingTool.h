@@ -27,17 +27,17 @@
 // local include(s)
 #include "TauAnalysisTools/Enums.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class IDiTauTruthMatchingTool
   // The order matters, do not switch them !!!
-  : public virtual TauAnalysisTools::IBuildTruthTaus
+  : public virtual IBuildTruthTaus
   , public virtual asg::IAsgTool
 {
 
   /// Declare the interface that the class provides
-  ASG_TOOL_INTERFACE( TauAnalysisTools::IDiTauTruthMatchingTool )
+  ASG_TOOL_INTERFACE( IDiTauTruthMatchingTool )
 
 public:
   /** initialize the tool*/
@@ -50,6 +50,6 @@ public:
 
 }; // class IDiTauTruthMatchingTool
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_IDITAUTRUTHMATCHINGTOOL_H

@@ -30,16 +30,16 @@
 // Local include(s):
 #include "TauAnalysisTools/IBuildTruthTaus.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class BuildTruthTaus
-  : public virtual TauAnalysisTools::IBuildTruthTaus
+  : public virtual IBuildTruthTaus
   , public asg::AsgMetadataTool
 {
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS( BuildTruthTaus,
-                  TauAnalysisTools::IBuildTruthTaus )
+                  IBuildTruthTaus )
 
 public:
 

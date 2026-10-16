@@ -34,15 +34,18 @@ enum TrackType_t
   PileupTrack           = 5, // Track is from pileup
   FakeTrack             = 6  // Track is a fake
 };
+}
 
 
+namespace ADD_CMODE(TauAnalysisTools)
+{
 class TauTruthTrackMatchingTool
-  : public TauAnalysisTools::ITauTruthTrackMatchingTool
+  : public ITauTruthTrackMatchingTool
   , public asg::AsgTool
 {
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS( TauTruthTrackMatchingTool,
-                  TauAnalysisTools::ITauTruthTrackMatchingTool )
+                  ITauTruthTrackMatchingTool )
 
 public:
 

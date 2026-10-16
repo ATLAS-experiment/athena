@@ -21,7 +21,7 @@
 #include "TauAnalysisTools/ITauSmearingTool.h"
 #include "TauAnalysisTools/CommonSmearingTool.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class TauSmearingTool
@@ -75,6 +75,6 @@ private:
 
 }; // class TauSmearingTool
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_TAUSMEARINGTOOL_H

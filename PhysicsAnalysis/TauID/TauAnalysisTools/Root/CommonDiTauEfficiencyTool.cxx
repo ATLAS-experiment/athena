@@ -16,7 +16,7 @@
 #include "TClass.h"
 #include <utility>
 
-using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 
 //______________________________________________________________________________
 CommonDiTauEfficiencyTool::CommonDiTauEfficiencyTool(const std::string& sName)
@@ -444,7 +444,7 @@ CP::CorrectionCode CommonDiTauEfficiencyTool::getValue(const std::string& sHistN
 }
 
 //______________________________________________________________________________
-double TauAnalysisTools::TruthLeadPt(const xAOD::DiTauJet& xDiTau)
+double ADD_CMODE(TauAnalysisTools)::TruthLeadPt(const xAOD::DiTauJet& xDiTau)
 {
   // return leading truth tau pt in GeV
   static const SG::ConstAccessor< float > acc( "TruthVisLeadPt" );
@@ -452,7 +452,7 @@ double TauAnalysisTools::TruthLeadPt(const xAOD::DiTauJet& xDiTau)
 }
 
 //______________________________________________________________________________
-double TauAnalysisTools::TruthSubleadPt(const xAOD::DiTauJet& xDiTau)
+double ADD_CMODE(TauAnalysisTools)::TruthSubleadPt(const xAOD::DiTauJet& xDiTau)
 {
   // return subleading truth tau pt in GeV
   static const SG::ConstAccessor< float > acc( "TruthVisSubleadPt" );
@@ -460,7 +460,7 @@ double TauAnalysisTools::TruthSubleadPt(const xAOD::DiTauJet& xDiTau)
 }
 
 //______________________________________________________________________________
-double TauAnalysisTools::TruthDeltaR(const xAOD::DiTauJet& xDiTau)
+double ADD_CMODE(TauAnalysisTools)::TruthDeltaR(const xAOD::DiTauJet& xDiTau)
 {
   // return truth taus distance delta R
   static const SG::ConstAccessor< float > acc( "TruthVisDeltaR" );

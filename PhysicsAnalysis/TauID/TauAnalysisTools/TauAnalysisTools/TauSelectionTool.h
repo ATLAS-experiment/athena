@@ -32,7 +32,7 @@
 #include "TH1F.h"
 #include "TFile.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 /// forward declarations
@@ -70,7 +70,7 @@ class TauSelectionTool : public virtual IAsgSelectionTool,
   /// Create a proper constructor for Athena
   ASG_TOOL_CLASS2( TauSelectionTool,
                    IAsgSelectionTool,
-                   TauAnalysisTools::ITauSelectionTool )
+                   ITauSelectionTool )
 
   // declaration of classes as friends to access private member variables
   friend class TauEfficiencyCorrectionsTool;
@@ -136,7 +136,7 @@ private:
   std::string m_sEleIDWP;
 
   // properties
-  Gaudi::Property<int> m_iSelectionCuts{this, "SelectionCuts", NoCut}; 
+  Gaudi::Property<int> m_iSelectionCuts{this, "SelectionCuts", TauAnalysisTools::NoCut}; 
   Gaudi::Property<float> m_dPtMin{this, "PtMin", NAN};
   Gaudi::Property<float> m_dAbsEtaMin{this, "AbsEtaMin", NAN};
   Gaudi::Property<float> m_dAbsEtaMax{this, "AbsEtaMax", NAN};
@@ -145,7 +145,7 @@ private:
   Gaudi::Property<float> m_dGNTauSigTransMin{this, "GNTauSigTransMin", NAN};
   Gaudi::Property<float> m_iNTrack{this, "NTrack", NAN};
   Gaudi::Property<float> m_dEleRNNSigTransMin{this, "EleRNNSigTransMin", NAN};
-  Gaudi::Property<int> m_iJetIDWP{this, "JetIDWP", 1}; // this corresponds to JETIDNONE
+  Gaudi::Property<int> m_iJetIDWP{this, "JetIDWP", 1}; // this corresponds to TauAnalysisTools::JETIDNONE
   Gaudi::Property<int> m_iEleIDWP{this, "EleIDWP", 0};
   Gaudi::Property<int> m_iEleIDVersion{this, "EleIDVersion", 1};
   Gaudi::Property<bool> m_bMuonOLR{this, "MuonOLR", false};
@@ -166,7 +166,7 @@ private:
   SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_eVetoDecorKey {this, "eVetoDecorName", "", "Name of eVeto decoration"};
   SG::ReadDecorHandleKey<xAOD::TauJetContainer> m_GNTauDecorKey {this, "GNTauDecorName", "", "Name of GnTauID decoration"};
 
-  std::map<SelectionCuts, std::unique_ptr<TauAnalysisTools::TauSelectionCut>> m_cMap;
+  std::map<TauAnalysisTools::SelectionCuts, std::unique_ptr<TauSelectionCut>> m_cMap;
 
   void setupCutFlowHistogram();
   int convertStrToJetIDWP(const std::string& sJetIDWP) const;
@@ -182,6 +182,6 @@ protected:
 
 }; // class TauSelectionTool
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_TAUSELECTIONTOOL_H

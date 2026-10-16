@@ -37,7 +37,7 @@
 #include "xAODCore/tools/IOStats.h"
 #include "xAODCore/tools/ReadStats.h"
 
-using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 
 #define CHECK( ARG )					\
   do {                                                  \

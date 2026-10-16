@@ -12,6 +12,7 @@
 
 // Framework include(s):
 #include "AsgTools/IAsgTool.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 // xAOD include(s):
 #include "xAODTau/TauTrack.h"
@@ -19,7 +20,7 @@
 // EDM include(s):
 #include "PATInterfaces/CorrectionCode.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class ITauTruthTrackMatchingTool : public virtual asg::IAsgTool
@@ -40,6 +41,6 @@ public:
 
 }; // class ITauTruthTrackMatchingTool
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_ITAUTRUTHTRACKMATCHINGTOOL_H
