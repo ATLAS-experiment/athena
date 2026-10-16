@@ -240,6 +240,7 @@ namespace ActsTrk {
     Acts::PropagatorPlainOptions plainSecondOptions{detContext.geometry, detContext.magField};
     plainSecondOptions.maxSteps = m_maxPropagationStep;
     plainSecondOptions.direction = plainOptions.direction.invert();
+    plainSecondOptions.endOfWorldVolumeIds = m_endOfWorldVolumeIds;
 
     TrackFinderOptions secondOptions(detContext.geometry, detContext.magField, detContext.calib,
                                      options.extensions, plainSecondOptions, pSurface);
