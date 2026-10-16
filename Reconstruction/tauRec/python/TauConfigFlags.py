@@ -23,6 +23,9 @@ def createTauConfigFlags():
     # Classify Large Radius Tracks in tau track classifier
     tau_cfg.addFlag("Tau.classifyLRT", False)
     tau_cfg.addFlag("Tau.classifyLRTWithDedicated", False)
+    
+    # Track-to-Calo extrapolation
+    tau_cfg.addFlag("Tau.useACTSExtrapolator", False)
 
     # Settings common to Run2 and Run3
     tau_cfg.addFlag("Tau.SeedMinPt", 0.0*Units.GeV)
@@ -38,7 +41,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.pi0MVACuts_1prong", [0.45, 0.37, 0.39, 0.40, 0.38])
     tau_cfg.addFlag("Tau.pi0MVACuts_mprong", [0.73, 0.69, 0.58, 0.69, 0.67])
     tau_cfg.addFlag("Tau.MinNeutralPFOPt", 100.*Units.MeV)
-
+ 
     # Run2 settings and calibration files
     tau_cfg.addFlag("Tau.tauRecToolsCVMFSPath", "tauRecTools/R22_preprod")
     tau_cfg.addFlag("Tau.tauRNNTrackClassConfig", lambda prevFlags: "RNNTrackClassifier_2021-07-19_14-25-14_90_25_30.json" if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else "Run4/RNNTrackClassifier_v1.json")
