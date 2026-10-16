@@ -399,6 +399,14 @@ protected:
       this, "doubletDPhiSlope", 2.0e-4,
       "curvature term of the prompt doublet phi window [rad/mm]"};
 
+  // strip calibration doublet cut, with the doublet chord as direction
+  Gaudi::Property<bool> m_doubletStripCalibrationCut{
+      this, "doubletStripCalibrationCut", false,
+      "reject strip doublets whose chord misses either strip pair"};
+  Gaudi::Property<float> m_doubletStripCalibrationTolerance{
+      this, "doubletStripCalibrationTolerance", 2.,
+      "strip calibration doublet cut tolerance [half strip lengths]"};
+
   Gaudi::Property<int> m_stateVectorReserveSize{
       this, "stateVectorReserveSize", 500,
       "Size of the initial Seeding State internal vectors"};

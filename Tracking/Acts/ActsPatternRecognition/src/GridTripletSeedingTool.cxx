@@ -4,6 +4,9 @@
 
 #include "src/GridTripletSeedingTool.h"
 
+#include "Acts/SpacePointFormation/detail/StripSpacePointCalibrationImpl.hpp"
+
+#include <array>
 #include <cmath>
 #include <cstdint>
 #include <numbers>
@@ -140,6 +143,13 @@ StatusCode GridTripletSeedingTool::initialize() {
 
   // Make the logger && Propagate to ACTS routines
   m_logger = makeActsAthenaLogger(this, "Acts");
+
+  // the cut needs the strip details
+  if (m_doubletStripCalibrationCut && !m_useDetailedDoubleMeasurementInfo) {
+    ATH_MSG_ERROR("doubletStripCalibrationCut needs "
+                  "useDetailedDoubleMeasurementInfo");
+    return StatusCode::FAILURE;
+  }
 
   // Both edge vectors define the bins of the corresponding grid axis, so n
   // edges give n-1 bins. Guard against an empty vector before subtracting, the
@@ -434,6 +444,27 @@ bool GridTripletSeedingTool::doubletSelectionFunction(
     }
   }
 
+  if (m_doubletStripCalibrationCut) {
+    // the chord length and sign do not matter
+    const auto& xyM = middle.xy();
+    const auto& zrM = middle.zr();
+    const auto& xyO = other.xy();
+    const auto& zrO = other.zr();
+    const std::array<float, 3> chord{xyO[0] - xyM[0], xyO[1] - xyM[1],
+                                     zrO[0] - zrM[0]};
+    std::array<float, 3> calibrated{};
+    for (const Acts::ConstSpacePointProxy* sp : {&middle, &other}) {
+      const Acts::OuterStripSpacePointCalibrationDetailsDerived derived =
+          Acts::detail::deriveOuterStripSpacePointCalibrationDetails(
+              sp->outerStripCalibrationDetails());
+      if (!Acts::detail::calibrateOuterStripSpacePoint(
+              chord, derived, calibrated,
+              m_doubletStripCalibrationTolerance)) {
+        return false;
+      }
+    }
+  }
+
   if (!m_useExperimentCuts) {
     return true;
   }
@@ -643,7 +674,8 @@ StatusCode GridTripletSeedingTool::createSeedsImpl(
                                         selectedSpacePointsAsinD0OverR, middle,
                                         other, cotTheta, isBottomCandidate);
       };
-  if (m_useExperimentCuts || m_doubletDPhiCut) {
+  if (m_useExperimentCuts || m_doubletDPhiCut ||
+      m_doubletStripCalibrationCut) {
     bottomDoubletFinderCfg.experimentCuts.connect(doubletSelection);
     topDoubletFinderCfg.experimentCuts.connect(doubletSelection);
   }
