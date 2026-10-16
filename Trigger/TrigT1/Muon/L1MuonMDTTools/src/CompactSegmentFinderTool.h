@@ -8,18 +8,18 @@
 
 // local includes
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
-#include "L1MuonMDTTools/IL0MDTSegmentFinderTool.h"
-#include "L1MuonMDTTools/L0MDTSegment.h"
+#include "L1MuonMDTTools/ISegmentFinderTool.h"
+#include "L1MuonMDTTools/Segment.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 #include <optional>
 
-// namespace for the L0MDTS related classes
+// namespace for the L1MDT related classes
 namespace L1Muon::L1MDT {
 
 /**
- * @class L0MDTSegmentFinderTool
+ * @class CompactSegmentFinderTool
  * @brief Athena tool to reconstruct L1Muon::L1MDT segments.
  *
  * This tool implements a compact MDT segment finding algorithm in the global
@@ -31,7 +31,7 @@ namespace L1Muon::L1MDT {
  *  - builds corrected track points
  *  - fits the final segment parameters
  */
-class CompactSegmentFinderTool : public extends<AthAlgTool, IL0MDTSegmentFinderTool> {
+class CompactSegmentFinderTool : public extends<AthAlgTool, ISegmentFinderTool> {
 
 public:
   using base_class::base_class;
@@ -51,7 +51,7 @@ public:
    */
   virtual StatusCode findSegments(const std::vector<const xAOD::MdtDriftCircle*>& driftCircles,
                                   const ActsTrk::GeometryContext& gctx, float m, float b,
-                                  std::vector<L1Muon::L1MDT::Segment>& segments) const override;
+                                  std::vector<Segment>& segments) const override;
 
 private:
 

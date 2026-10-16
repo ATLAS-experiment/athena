@@ -9,8 +9,8 @@
 
 // local includes
 #include "xAODMuonPrepData/MdtDriftCircleContainer.h"
-#include "L1MuonMDTTools/IL0MDTSegmentFinderTool.h"
-#include "L1MuonMDTTools/L0MDTSegment.h"
+#include "L1MuonMDTTools/ISegmentFinderTool.h"
+#include "L1MuonMDTTools/Segment.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 
 // C++ std
@@ -19,7 +19,7 @@
 
 namespace L1Muon::L1MDT {
 
-class LegendreSegmentFinderTool : public extends<AthAlgTool, IL0MDTSegmentFinderTool> {
+class LegendreSegmentFinderTool : public extends<AthAlgTool, ISegmentFinderTool> {
 public:
   using base_class::base_class;
   virtual ~LegendreSegmentFinderTool() override = default;
@@ -30,7 +30,7 @@ public:
                                   const ActsTrk::GeometryContext& gctx,
                                   float m,
                                   float b,
-                                  std::vector<L1Muon::L1MDT::Segment>& segments) const override;
+                                  std::vector<Segment>& segments) const override;
 
 private:
   // Per-hit information in the current reconstruction plane

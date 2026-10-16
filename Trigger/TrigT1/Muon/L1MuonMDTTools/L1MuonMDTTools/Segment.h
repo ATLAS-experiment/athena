@@ -2,8 +2,8 @@
  *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
-#ifndef L1MuonMDTTools_L0MDTSEGMENT_H
-#define L1MuonMDTTools_L0MDTSEGMENT_H
+#ifndef L1MUONMDTTOOLS_SEGMENT_H
+#define L1MUONMDTTOOLS_SEGMENT_H
 
 namespace L1Muon::L1MDT {
 

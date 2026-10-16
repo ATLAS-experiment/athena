@@ -6,7 +6,7 @@
 #define L1MuonMDTTools_IPTESTIMATIONTOOL_H
 
 #include "GaudiKernel/IAlgTool.h"
-#include "L1MuonMDTTools/L0MDTSegment.h"
+#include "L1MuonMDTTools/Segment.h"
 #include <optional>
 
 namespace L1Muon::L1MDT {

@@ -12,7 +12,7 @@
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "xAODTrigL1Muon/L1RPCCandData.h"
 #include "xAODTrigL1Muon/L1RPCCandDataContainer.h"
-#include "L1MuonMDTTools/IL0MDTSegmentFinderTool.h"
+#include "L1MuonMDTTools/ISegmentFinderTool.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
@@ -71,9 +71,9 @@ private:
   ToolHandle<IRegSelTool> m_regionSelector{this, "RegSel_MDT", "RegSelTool/RegSelTool_MDT"};
   ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "MuonIdHelperSvc", "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
   
-  ToolHandle<L1Muon::L1MDT::IL0MDTSegmentFinderTool> m_csfSegmentFinder{this, "CSFSegmentFinder", "L1Muon::L1MDT::CompactSegmentFinderTool"};
-  ToolHandle<L1Muon::L1MDT::IL0MDTSegmentFinderTool> m_legendreSegmentFinder{this, "LegendreSegmentFinder", "L1Muon::L1MDT::LegendreSegmentFinderTool"};
-  ToolHandle<L1Muon::L1MDT::IPtEstimationTool> m_ptEstimationTool{this,"PtEstimationTool","L1Muon::L1MDT::PtEstimationTool/PtEstimationTool","Tool to estimate pT from CSF segments"};
+  ToolHandle<L1MDT::ISegmentFinderTool> m_csfSegmentFinder{this, "CSFSegmentFinder", "L1Muon::L1MDT::CompactSegmentFinderTool"};
+  ToolHandle<L1MDT::ISegmentFinderTool> m_legendreSegmentFinder{this, "LegendreSegmentFinder", "L1Muon::L1MDT::LegendreSegmentFinderTool"};
+  ToolHandle<L1MDT::IPtEstimationTool> m_ptEstimationTool{this,"PtEstimationTool","L1Muon::L1MDT::PtEstimationTool/PtEstimationTool","Tool to estimate pT from CSF segments"};
 
   SG::ReadHandleKey<ActsTrk::GeometryContext> m_geoCtxKey{this, "AlignmentKey", "ActsAlignment", "cond handle key"};
   SG::ReadHandleKey<xAOD::MdtDriftCircleContainer> m_mdtDriftCircleKey{this, "MdtDriftCircles", "xMdtDriftCircles"};
