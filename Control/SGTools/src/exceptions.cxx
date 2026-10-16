@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file SGTools/src/exceptions.cxx
@@ -12,7 +12,7 @@
 #include "SGTools/exceptions.h"
 #include "SGTools/DataProxy.h"
 #include "GaudiKernel/System.h"
-#include <sstream>
+#include <format>
 #include <string>
 
 
@@ -22,10 +22,8 @@ namespace SG {
 /// Helper: Format exception string.
 std::string excBadDataProxyCast_format (CLID id, const std::type_info& tid)
 {
-  std::ostringstream os;
-  os << "Bad cast of DataProxy with CLID " << id
-     << " to type " << System::typeinfoName (tid);
-  return os.str();
+  return std::format ("ExcBadDataProxyCast: Bad cast of DataProxy with CLID {} to type {}",
+                      id, System::typeinfoName (tid));
 }
 
 
@@ -69,11 +67,9 @@ std::string excProxyCollision_format (CLID id,
                                       CLID primary_id,
                                       const std::string& primary_key)
 {
-  std::ostringstream os;
-  os << "ExcProxyCollision: proxy collision for clid/key "
-     << id << " / " << key
-     << " (primary " << primary_id << " / " << primary_key << ").";
-  return os.str();
+  return std::format ("ExcProxyCollision: proxy collision for clid/key {} / {}"
+                      " (primary {} / {}).",
+                      id, key, primary_id, primary_key);
 }
 
 
@@ -106,11 +102,9 @@ std::string excSgkeyCollision_format (const std::string& new_key,
                                       CLID old_clid,
                                       sgkey_t sgkey)
 {
-  std::ostringstream os;
-  os << "ExcSgkeyCollision: sgkey hash collision; new key: "
-     << new_key << "/" << new_clid << " and existing key: "
-     << old_key << "/" << old_clid << " both hash to " << sgkey;
-  return os.str();
+  return std::format ("ExcSgkeyCollision: sgkey hash collision; "
+                      "new key: {}/{} and existing key: {}/{} both hash to {}",
+                      new_key, new_clid, old_key, old_clid, sgkey);
 }
 
 

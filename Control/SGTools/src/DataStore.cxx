@@ -13,6 +13,7 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "CxxUtils/ConcurrentPtrSet.h"
 #include "CxxUtils/checker_macros.h"
+#include <print>
 
 using namespace std;
 using SG::DataStore;
@@ -45,7 +46,7 @@ DataStore::~DataStore()
 StatusCode DataStore::setSvcLoc(){
   StatusCode sc(StatusCode::FAILURE);
   m_pSvcLoc = Gaudi::svcLocator( );
-  if (!m_pSvcLoc) std::cout<<"DataStore::setSvcLoc: WARNING svcLocator not found! "<<std::endl;
+  if (!m_pSvcLoc) std::println ("DataStore::setSvcLoc: WARNING svcLocator not found!");
   return sc;
 }
 

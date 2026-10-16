@@ -16,10 +16,10 @@ using namespace std;
 using namespace SG;
 
 #define SGASSERTERROR( FALSEEXPR )   \
-    std::cerr << "Now we expect to see an error message:" << std::endl \
-              << "----Error Message Starts--->>" << std::endl; \
-    assert(!FALSEEXPR); \
-    std::cerr<< "<<---Error Message Ends-------" << std::endl
+    std::println (std::cerr, "Now we expect to see an error message:" \
+                  "----Error Message Starts--->>");                   \
+    assert(!FALSEEXPR);                                               \
+    std::println ("<<---Error Message Ends-------");
 
 void strtest (const VersionedKey& k, const std::string& exp)
 {
@@ -39,20 +39,17 @@ int main() {
   VersionedKey vk3(";00;default");
   VersionedKey vk4("default");
 
-  cout << "Versioned Key 1=" << vk1 << endl;
   strtest (vk1, ";01;bla");
   std::string k1;
   unsigned char v1(0);
   vk1.decode(k1,v1);
   assert("bla" == k1);
   assert(1 == v1);
-  cout << "Versioned Key 2=" << vk2 << endl;
   strtest (vk2, ";99;Bleah");
   vk2.decode(k1,v1);
   assert("Bleah"== k1);
   assert(99 == v1);
   assert(99 == vk2.version());
-  cout << "Versioned Key 3=" << vk3 << endl;
   strtest (vk3, ";00;default");
   vk3.decode(k1,v1);
   assert("default" == k1);

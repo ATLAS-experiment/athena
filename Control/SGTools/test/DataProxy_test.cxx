@@ -26,7 +26,7 @@
 #include <vector>
 #include <algorithm>
 #include <chrono>
-#include <iostream>
+#include <print>
 #include <cstdlib>
 #include <cassert>
 
@@ -43,7 +43,7 @@ class XLock : public ILockable
 {
 public:
   XLock() : m_locked (false) {}
-  virtual void lock() override { m_locked = true; std::cout << "lock\n"; }
+  virtual void lock() override { m_locked = true; std::println ("lock"); }
   bool m_locked;
 };
 CLASS_DEF(XLock, 8114, 1)
@@ -52,7 +52,7 @@ class XLockObj : public DataObject, public ILockable
 {
 public:
   XLockObj() : m_locked (false) {}
-  virtual void lock() override { m_locked = true; std::cout << "lock\n"; }
+  virtual void lock() override { m_locked = true; std::println ("lock"); }
   bool m_locked;
 };
 CLASS_DEF(XLockObj, 8124, 1)
@@ -62,58 +62,58 @@ class TestConversionSvc
 {
 public:
   virtual StatusCode addConverter(IConverter* /*pConverter*/) override
-  { std::cout << "addConverter\n"; std::abort(); }
+  { std::println ("addConverter"); std::abort(); }
   virtual StatusCode addConverter(const CLID& /*clid*/) override
-  { std::cout << "addConverter clid\n"; std::abort(); }
+  { std::println ("addConverter clid"); std::abort(); }
   virtual StatusCode removeConverter(const CLID& /*clid*/) override
-  { std::cout << "removeConverter\n"; std::abort(); }
+  { std::println ("removeConverter"); std::abort(); }
   virtual IConverter* converter(const CLID& /*clid*/) override
-  { std::cout << "converter\n"; std::abort(); }
+  { std::println ("converter"); std::abort(); }
   virtual StatusCode connectOutput(const std::string& /*outputFile*/) override
-  { std::cout << "connectOutput1\n"; std::abort(); }
+  { std::println ("connectOutput1"); std::abort(); }
   virtual StatusCode connectOutput(const std::string& /*outputFile*/,
                                    const std::string& /*openMode*/) override
-  { std::cout << "connectOutput2\n"; std::abort(); }
+  { std::println ("connectOutput2"); std::abort(); }
   virtual StatusCode commitOutput(const std::string& /*outputFile*/,
                                   bool /*do_commit*/) override
-  { std::cout << "commitOutput\n"; std::abort(); }
+  { std::println ("commitOutput"); std::abort(); }
 
   virtual StatusCode initialize() override
-  { std::cout << "initialize\n"; std::abort(); }
+  { std::println ("initialize"); std::abort(); }
   virtual StatusCode finalize() override
-  { std::cout << "finalize\n"; std::abort(); }
+  { std::println ("finalize"); std::abort(); }
   virtual const CLID& objType() const override
-  { std::cout << "objType\n"; std::abort(); }
+  { std::println ("objType"); std::abort(); }
   virtual long repSvcType() const override
-  { std::cout << "repSvcType\n"; std::abort(); }
+  { std::println ("repSvcType"); std::abort(); }
   virtual StatusCode setDataProvider(IDataProviderSvc* /*pService*/) override
-  { std::cout << "setDataProvider\n"; std::abort(); }
+  { std::println ("setDataProvider"); std::abort(); }
   virtual SmartIF<IDataProviderSvc>& dataProvider() const override
-  { std::cout << "dataProvider\n"; std::abort(); }
+  { std::println ("dataProvider"); std::abort(); }
   virtual StatusCode setConversionSvc(IConversionSvc* /*pService*/) override
-  { std::cout << "setConversionSvc\n"; std::abort(); }
+  { std::println ("setConversionSvc"); std::abort(); }
   virtual SmartIF<IConversionSvc> conversionSvc() override
-  { std::cout << "conversionSvc\n"; std::abort(); }
+  { std::println ("conversionSvc"); std::abort(); }
   virtual StatusCode setAddressCreator(IAddressCreator* /*creator*/) override
-  { std::cout << "setAddressCreator\n"; std::abort(); }
+  { std::println ("setAddressCreator"); std::abort(); }
   virtual SmartIF<IAddressCreator>& addressCreator()    const override
-  { std::cout << "addressCreator\n"; std::abort(); }
+  { std::println ("addressCreator"); std::abort(); }
   virtual StatusCode createObj(IOpaqueAddress* /*pAddress*/, DataObject*& /*refpObject*/) override
-  { std::cout << "createObj\n"; std::abort(); }
+  { std::println ("createObj"); std::abort(); }
   virtual StatusCode fillObjRefs(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/) override
-  { std::cout << "fillObjRefs\n"; std::abort(); }
+  { std::println ("fillObjRefs"); std::abort(); }
   virtual StatusCode updateObj(IOpaqueAddress* /*pAddress*/, DataObject* /*refpObject*/) override
-  { std::cout << "updateObj\n"; std::abort(); }
+  { std::println ("updateObj"); std::abort(); }
   virtual StatusCode updateObjRefs(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/) override
-  { std::cout << "updateObjRefs\n"; std::abort(); }
+  { std::println ("updateObjRefs"); std::abort(); }
   virtual StatusCode fillRepRefs(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/) override
-  { std::cout << "fillRepRefs\n"; std::abort(); }
+  { std::println ("fillRepRefs"); std::abort(); }
   virtual StatusCode updateRep(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/) override
-  { std::cout << "updateRep\n"; std::abort(); }
+  { std::println ("updateRep"); std::abort(); }
   virtual StatusCode updateRepRefs(IOpaqueAddress* /*pAddress*/, DataObject* /*pObject*/) override
-  { std::cout << "updateRepRefs\n"; std::abort(); }
+  { std::println ("updateRepRefs"); std::abort(); }
   virtual StatusCode createRep(DataObject* /*pObject*/, IOpaqueAddress*& /*refpAddress*/) override
-  { std::cout << "createRep\n"; std::abort(); }
+  { std::println ("createRep"); std::abort(); }
 };
 
 
@@ -125,17 +125,17 @@ public:
   virtual unsigned long        addRef     () override { return 1; }
   virtual unsigned long        release    () override { return 1; }
   virtual const CLID&          clID       () const override
-  { std::cout << "clID\n"; std::abort(); }
+  { std::println ("clID"); std::abort(); }
   virtual long                 svcType    () const override
-  { std::cout << "svcType\n"; std::abort(); }
+  { std::println ("svcType"); std::abort(); }
   virtual IRegistry*           registry   () const override
-  { std::cout << "registry\n"; std::abort(); }
+  { std::println ("registry"); std::abort(); }
   virtual void                 setRegistry(IRegistry* /*r*/) override
-  { std::cout << "setRegistry\n"; std::abort(); }
+  { std::println ("setRegistry"); std::abort(); }
   virtual const std::string*   par        () const override
-  { std::cout << "par\n"; std::abort(); }
+  { std::println ("par"); std::abort(); }
   virtual const unsigned long* ipar       () const override
-  { std::cout << "ipar\n"; std::abort(); }
+  { std::println ("ipar"); std::abort(); }
 };
 
 
@@ -156,7 +156,7 @@ public:
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   SGTest::TestStore store;
 
   SG::DataProxy dp;
@@ -169,7 +169,7 @@ void test1()
 // Test setConst()
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   X1* x1 = new X1;
   DataObject* b1 = SG::asStorable (x1);
@@ -238,7 +238,7 @@ Test3Loader::Test3Loader()
 // Test current event store setting in accessData.
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   SGTest::TestStore store1;
   SGTest::TestStore store2;
@@ -261,7 +261,7 @@ void test3()
 // Test bind/reset.
 void test4()
 {
-  std::cout << "test4\n";
+  std::println ("test4");
 
   SGTest::TestStore store;
   SG::DataProxy dp;
@@ -283,7 +283,7 @@ void test4()
 // Test move from TransientAddress.
 void test5()
 {
-  std::cout << "test5\n";
+  std::println ("test5");
 
   TestOpaqueAddress ad1;
   SG::TransientAddress tad1 (123, "key", &ad1);
@@ -312,7 +312,7 @@ void test5()
 // Test setObject.
 void test6()
 {
-  std::cout << "test6\n";
+  std::println ("test6");
 
   SG::DataProxy dp1;
   SG::DataProxy dp2;
@@ -487,8 +487,7 @@ void perftest1 (const int n)
   float t_storable = time_storable<TARGET> (n, *dbb_ptr, dp);
   float t_dp = time_proxy<TARGET> (n, dp);
   float t_acc = time_access (n, dp);
-  std::cout << std::format
-    ("{:2} -> {:2}  {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f}\n",
+  std::println ("{:2} -> {:2}  {:6.2f} {:6.2f} {:6.2f} {:6.2f} {:6.2f}",
      ClassID_traits<SOURCE>::typeName().c_str(),
      ClassID_traits<TARGET>::typeName().c_str(),
      t_clid,  t_ti, t_storable, t_dp, t_acc);
@@ -497,8 +496,8 @@ void perftest1 (const int n)
 
 void perftest (const int n)
 {
-  std::cout << std::format ("          {:6}  {:6}  {:6}  {:6}  {:6}\n",
-                            "clid", "ti", "storab", "proxy", "acc");
+  std::println ("          {:6}  {:6}  {:6}  {:6}  {:6}",
+                "clid", "ti", "storab", "proxy", "acc");
 
   perftest1<X1, X1> (n);
   perftest1<X2, X1> (n);

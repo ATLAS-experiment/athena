@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  SGTools/StringPool_test.cxx
@@ -20,7 +20,7 @@
 #include <string>
 #include <cstdlib>
 #include <cassert>
-#include <iostream>
+#include <print>
 
 
 const char* const teststrings[] = {
@@ -72,7 +72,7 @@ void checkPool (const SG::StringPool& sp,
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   
   SG::StringPool sp;
   std::vector<std::string> strings;
@@ -85,12 +85,12 @@ void test1()
     strings.push_back (teststrings[i]);
     keys.push_back (key);
     aux.push_back (i);
-    std::cout << CxxUtils::crc64format (key) << " " << teststrings[i] << "\n";
+    std::println ("{} {}", CxxUtils::crc64format (key), teststrings[i]);
   }
   size_t nstore = ntest;
   assert (sp.size() == nstore);
 
-  std::cout << "pool dump\n";
+  std::println ("pool dump");
   sp.dump();
 
   uint32_t seed = 1234;
@@ -125,7 +125,7 @@ void test1()
 
   sp.clear();
   assert (sp.size() == 0);
-  std::cout << "pool dump2\n";
+  std::println ("pool dump2");
   sp.dump();
 
   assert (sp2.size() == nstore);
@@ -152,7 +152,7 @@ void test1()
 // Test collisions.
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   SG::StringPool sp;
   SG::StringPool::sgkey_t key = sp.stringToKey ("HLTNav_ComboHypo_merged_Step3_Step3_1muEFSA_Step3_1muEFSA_MuonEFSAHypoAux.", 187169987);
@@ -181,7 +181,7 @@ void test2()
 // Test merge
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   SG::StringPool sp1;
   sp1.stringToKey ("foo1", 1);

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file TransientAddress_test.cxx
@@ -13,7 +13,7 @@
 #include "AthenaKernel/IAddressProvider.h"
 #include "GaudiKernel/IOpaqueAddress.h"
 #include "GaudiKernel/EventContext.h"
-#include <iostream>
+#include <print>
 #include <cstdlib>
 #include <cassert>
 
@@ -60,7 +60,7 @@ public:
 unsigned long TestAddress::addRef()
 {
   ++m_ref;
-  std::cout << "addRef " << m_x << " " << m_ref << "\n";
+  std::println ("addRef {} {}", m_x, m_ref);
   return m_ref;
 }
 
@@ -68,14 +68,14 @@ unsigned long TestAddress::addRef()
 unsigned long TestAddress::release()
 {
   --m_ref;
-  std::cout << "release " << m_x << " " << m_ref << "\n";
+  std::println ("release {} {}", m_x, m_ref);
   return m_ref;
 }
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::TransientAddress tad1;
   assert (tad1.clID() == CLID_NULL);
@@ -191,7 +191,7 @@ void test1()
 // Testing move.
 void test2()
 {
-  std::cout << "test2\n";
+  std::println ("test2");
 
   TestAddress ad1(1);
   SG::TransientAddress tad1 (123, "key", &ad1);
@@ -253,7 +253,7 @@ void test2()
 // Testing copy/assignment.
 void test3()
 {
-  std::cout << "test3\n";
+  std::println ("test3");
 
   TestAddress ad1(1);
   SG::TransientAddress tad1 (123, "key", &ad1);
