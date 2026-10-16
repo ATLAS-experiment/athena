@@ -1,13 +1,11 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibFitters/StraightPatRec.h"
 
 #include <TString.h>  // for Form
 
-#include <fstream>
-#include <iostream>
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "CLHEP/GenericFunctions/CumulativeChiSquare.hh"
@@ -18,7 +16,8 @@
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "MuonCalibMath/Combination.h"
 #include "time.h"
-
+#include <fstream>
+#include <iostream>
 using namespace MuonCalib;
 
 void StraightPatRec::init() {
@@ -291,7 +290,7 @@ bool StraightPatRec::fit(MuonCalibSegment &r_segment) const {
     HitSelection selection(r_segment.mdtHitsOnTrack(), 0);
 
     // call the other fit function //
-    return fit(r_segment, selection);
+    return fit(r_segment, std::move(selection));
 }
 bool StraightPatRec::fit(MuonCalibSegment &r_segment, HitSelection r_selection) const { return fitCallByReference(r_segment, r_selection); }
 bool StraightPatRec::fit(MuonCalibSegment &r_segment, HitSelection r_selection, MTStraightLine &line_track) const {

@@ -1,12 +1,12 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibFitters/DCSLFitter.h"
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
-#include "cmath"
+#include <cmath>
 
 namespace MuonCalib {
 
@@ -19,7 +19,7 @@ namespace MuonCalib {
         HitSelection selection(seg.mdtHitsOnTrack(), 0);
 
         // call fit function
-        return fit(seg, selection);
+        return fit(seg, std::move(selection));
     }
 
     bool DCSLFitter::fit(MuonCalibSegment& seg, HitSelection selection) const {
@@ -85,6 +85,11 @@ namespace MuonCalib {
                 Sy += w[ii] * y[ii];
                 ++ii;
             }
+        }
+        if (S == 0)[[unlikely]]{
+          MsgStream log(Athena::getMessageSvc(), "DCSLFitter");
+                log << MSG::ERROR << "Divisor is zero" << endmsg;
+                return false;
         }
         Zc = Sz / S;
         Yc = Sy / S;
