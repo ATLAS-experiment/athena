@@ -94,6 +94,7 @@
 + PhysicsAnalysis/JetTagging/FlavourTaggingTests
 + PhysicsAnalysis/JetTagging/JetH5Writer
 + PhysicsAnalysis/JetTagging/JetTagDerivationUtils
++ PhysicsAnalysis/JetTagging/FTagScaleFactorTools
 + PhysicsAnalysis/JetTagging/LZ4Plugin
 + PhysicsAnalysis/MCTruthClassifier
 + PhysicsAnalysis/MuonID/MuonIDAnalysis/.*
