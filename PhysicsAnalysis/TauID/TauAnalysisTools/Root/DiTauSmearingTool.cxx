@@ -9,7 +9,7 @@
 #include "TauAnalysisTools/DiTauSmearingTool.h"
 #include "TauAnalysisTools/SharedFilesVersion.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 DiTauSmearingTool::DiTauSmearingTool( const std::string& sName )
@@ -94,5 +94,5 @@ StatusCode DiTauSmearingTool::applySystematicVariation ( const CP::SystematicSet
 }
 
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 

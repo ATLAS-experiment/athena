@@ -19,7 +19,7 @@
 #include "TROOT.h"
 #include "TClass.h"
 
-using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 
 /*
   This tool acts as a common tool to apply efficiency scale factors and

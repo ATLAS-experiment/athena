@@ -9,7 +9,7 @@
 #include "xAODTruth/TruthVertex.h"
 #include "TruthUtils/HepMCHelpers.h"
 
-using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 
 //=================================PUBLIC-PART==================================
 //______________________________________________________________________________

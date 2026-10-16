@@ -7,6 +7,7 @@
 #include "TauAnalysisTools/HelperFunctions.h"
 
 using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 
 //=================================PUBLIC-PART==================================
 //______________________________________________________________________________
@@ -173,7 +174,7 @@ TLorentzVector TauTruthMatchingTool::getTruthTauP4Invis(const xAOD::TruthParticl
 //______________________________________________________________________________
 TauAnalysisTools::TruthMatchedParticleType TauTruthMatchingTool::getTruthParticleType(const xAOD::TauJet& xTau)
 {
-  return TauAnalysisTools::getTruthParticleType(xTau);
+  return ADD_CMODE(TauAnalysisTools)::getTruthParticleType(xTau);
 }
 
 //______________________________________________________________________________

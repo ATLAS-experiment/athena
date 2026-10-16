@@ -14,6 +14,7 @@
 
 // Framework include(s):
 #include "AsgTools/IAsgTool.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 // EDM include(s):
 #include "xAODTau/TauJet.h"
@@ -22,7 +23,7 @@
 
 // Local include(s):
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class ITauEfficiencyCorrectionsTool
@@ -47,6 +48,6 @@ public:
 
 }; // class ITauEfficiencyCorrectionsTool
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_ITAUEFFICIENCYCORRECTIONSTOOL_H

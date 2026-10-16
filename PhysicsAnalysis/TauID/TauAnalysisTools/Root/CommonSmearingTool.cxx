@@ -21,7 +21,7 @@
 #include "TClass.h"
 #include "TKey.h"
 
-using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 /*
   This tool acts as a common tool to apply tau energy smearing and
   uncertainties. By default, only nominal smearings without systematic
@@ -155,7 +155,7 @@ CP::CorrectionCode CommonSmearingTool::applyCorrection( xAOD::TauJet& xTau ) con
     bool compatibility = true;
     static const SG::ConstAccessor<float> accPtTauEnergyScale ("ptTauEnergyScale");
     if(accPtTauEnergyScale.isAvailable(xTau)) {
-      const auto combinedTEStool = dynamic_cast<const TauAnalysisTools::TauResolutionTool*>(m_tauResolutionTool.get());
+      const auto combinedTEStool = dynamic_cast<const TauResolutionTool*>(m_tauResolutionTool.get());
       if (!combinedTEStool)[[unlikely]]{
         throw std::runtime_error("CommonSmearingTool::applyCorrection: combinedTEStool is null");
       }

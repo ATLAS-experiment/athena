@@ -16,9 +16,10 @@
 #include "xAODMuon/MuonContainer.h"
 
 using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 
 //______________________________________________________________________________
-TauSelectionCut::TauSelectionCut(const std::string& sName, TauAnalysisTools::TauSelectionTool* tTST)
+TauSelectionCut::TauSelectionCut(const std::string& sName, TauSelectionTool* tTST)
   : m_sName(sName)
   , m_tTST(tTST)
 {

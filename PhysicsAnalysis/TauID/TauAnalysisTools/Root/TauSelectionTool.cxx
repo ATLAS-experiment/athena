@@ -14,6 +14,7 @@
 #include "THashList.h"
 
 using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 
 //=================================PUBLIC-PART==================================
 //______________________________________________________________________________
@@ -83,7 +84,7 @@ StatusCode TauSelectionTool::initialize()
     // if Cuts are specified in the config file take these ones, if not take all
     // specified in the config
     if (rEnv.Defined("SelectionCuts"))
-      TauAnalysisTools::split(rEnv, "SelectionCuts", ' ', vCuts);
+      ADD_CMODE(TauAnalysisTools)::split(rEnv, "SelectionCuts", ' ', vCuts);
     else
     {
       auto lList = rEnv.GetTable();
@@ -107,7 +108,7 @@ StatusCode TauSelectionTool::initialize()
       {
         iSelectionCuts = iSelectionCuts | CutAbsEta;
         if (m_vAbsEtaRegion.empty())
-          TauAnalysisTools::split(rEnv,"AbsEtaRegion", ';', m_vAbsEtaRegion);
+          ADD_CMODE(TauAnalysisTools)::split(rEnv,"AbsEtaRegion", ';', m_vAbsEtaRegion);
       }
       else if (sCut == "AbsEtaMin")
       {
@@ -125,7 +126,7 @@ StatusCode TauSelectionTool::initialize()
       {
         iSelectionCuts = iSelectionCuts | CutAbsCharge;
         if (m_vAbsCharges.empty())
-          TauAnalysisTools::split(rEnv,"AbsCharges", ';', m_vAbsCharges);
+          ADD_CMODE(TauAnalysisTools)::split(rEnv,"AbsCharges", ';', m_vAbsCharges);
       }
       else if (sCut == "AbsCharge")
       {
@@ -137,7 +138,7 @@ StatusCode TauSelectionTool::initialize()
       {
         iSelectionCuts = iSelectionCuts | CutNTrack;
         if (m_vNTracks.empty())
-          TauAnalysisTools::split(rEnv,"NTracks", ';', m_vNTracks);
+          ADD_CMODE(TauAnalysisTools)::split(rEnv,"NTracks", ';', m_vNTracks);
       }
       else if (sCut == "NTrack")
       {
@@ -224,21 +225,21 @@ StatusCode TauSelectionTool::initialize()
   ATH_CHECK( m_eVetoDecorKey.initialize( m_iSelectionCuts & CutEleIDWP ) );
 
   // specify all available cut descriptions
-  using map_type  = std::map<SelectionCuts, std::unique_ptr<TauAnalysisTools::TauSelectionCut>>;
+  using map_type  = std::map<SelectionCuts, std::unique_ptr<TauSelectionCut>>;
   using pair_type = map_type::value_type;
 
   pair_type elements[] =
   {
-   {CutPt, std::make_unique<TauAnalysisTools::TauSelectionCutPt>(this)},
-   {CutAbsEta, std::make_unique<TauAnalysisTools::TauSelectionCutAbsEta>(this)},
-   {CutAbsCharge, std::make_unique<TauAnalysisTools::TauSelectionCutAbsCharge>(this)},
-   {CutNTrack, std::make_unique<TauAnalysisTools::TauSelectionCutNTracks>(this)},
-   {CutJetRNNScoreSigTrans, std::make_unique<TauAnalysisTools::TauSelectionCutRNNJetScoreSigTrans>(this)},
-   {CutGNTauScoreSigTrans, std::make_unique<TauAnalysisTools::TauSelectionCutGNTauScoreSigTrans>(this)},
-   {CutJetIDWP, std::make_unique<TauAnalysisTools::TauSelectionCutJetIDWP>(this)},
-   {CutEleRNNScoreSigTrans, std::make_unique<TauAnalysisTools::TauSelectionCutRNNEleScoreSigTrans>(this)},
-   {CutEleIDWP, std::make_unique<TauAnalysisTools::TauSelectionCutEleIDWP>(this)},
-   {CutMuonOLR, std::make_unique<TauAnalysisTools::TauSelectionCutMuonOLR>(this)}
+   {CutPt, std::make_unique<TauSelectionCutPt>(this)},
+   {CutAbsEta, std::make_unique<TauSelectionCutAbsEta>(this)},
+   {CutAbsCharge, std::make_unique<TauSelectionCutAbsCharge>(this)},
+   {CutNTrack, std::make_unique<TauSelectionCutNTracks>(this)},
+   {CutJetRNNScoreSigTrans, std::make_unique<TauSelectionCutRNNJetScoreSigTrans>(this)},
+   {CutGNTauScoreSigTrans, std::make_unique<TauSelectionCutGNTauScoreSigTrans>(this)},
+   {CutJetIDWP, std::make_unique<TauSelectionCutJetIDWP>(this)},
+   {CutEleRNNScoreSigTrans, std::make_unique<TauSelectionCutRNNEleScoreSigTrans>(this)},
+   {CutEleIDWP, std::make_unique<TauSelectionCutEleIDWP>(this)},
+   {CutMuonOLR, std::make_unique<TauSelectionCutMuonOLR>(this)}
   };
   
   m_cMap = { std::make_move_iterator( begin(elements) ), std::make_move_iterator( end(elements) ) };

@@ -11,9 +11,10 @@
 #include "PATCore/AcceptInfo.h"
 
 using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 
 //______________________________________________________________________________
-DiTauSelectionCut::DiTauSelectionCut(const std::string& sName, TauAnalysisTools::DiTauSelectionTool* tDTST)
+DiTauSelectionCut::DiTauSelectionCut(const std::string& sName, DiTauSelectionTool* tDTST)
   : m_sName(sName)
   , m_tDTST(tDTST)
 {}

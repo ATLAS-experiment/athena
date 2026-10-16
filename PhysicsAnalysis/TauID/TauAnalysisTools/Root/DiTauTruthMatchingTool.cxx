@@ -11,6 +11,7 @@
 #include "TauAnalysisTools/DiTauTruthMatchingTool.h"
 
 using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 
 //=================================PUBLIC-PART==================================
 //______________________________________________________________________________

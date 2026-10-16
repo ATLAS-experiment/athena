@@ -31,7 +31,7 @@
 class TH3;
 class TFile;
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class CommonDiTauSmearingTool
@@ -91,7 +91,7 @@ protected:
   bool m_bIsData;
   bool m_bIsConfigured; 
 
-  TruthMatchedParticleType m_eCheckTruth;
+  TauAnalysisTools::TruthMatchedParticleType m_eCheckTruth;
   CP::SystematicSet m_sAffectingSystematics;
   CP::SystematicSet m_sRecommendedSystematics;
 
@@ -101,7 +101,7 @@ private:
   virtual StatusCode beginEvent();
 
 };
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_COMMONEFFICIENCYTOOL_H
 

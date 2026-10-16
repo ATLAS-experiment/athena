@@ -15,6 +15,7 @@
 
 // Framework include(s):
 #include "AsgTools/IAsgTool.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 // EDM include(s):
 #include "xAODTruth/TruthParticleContainer.h"
@@ -22,7 +23,7 @@
 // dummy EventContext for AnalysisBase
 #include "AsgTools/CurrentContext.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class IBuildTruthTaus :
@@ -50,6 +51,6 @@ public:
 
 }; // class IBuildTruthTaus
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_IBUILDTRUTHTAUS_H

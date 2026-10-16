@@ -9,30 +9,46 @@ atlas_subdir( TauAnalysisTools )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( onnxruntime )
 
-# Libraries in the package:
-atlas_add_library( TauAnalysisToolsLib
-   TauAnalysisTools/*.h Root/*.cxx
-   PUBLIC_HEADERS TauAnalysisTools
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} 
-                  AsgTools xAODEgamma xAODMuon xAODJet xAODTau xAODTracking 
-                  xAODTruth TruthUtils PATCoreLib PATInterfaces 
-                  AsgAnalysisInterfaces
-                  xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib ColumnarCoreLib ColumnarModeLib ColumnarTauLib ColumnarEventInfoLib
-                  ColumnarTruthLib ColumnarJetLib TruthUtils
-   PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
-
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( TauAnalysisTools
-      src/*.cxx src/components/*.cxx
-      INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AthenaBaseComps AsgTools xAODTau GaudiKernel
-      TauAnalysisToolsLib xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib ColumnarCoreLib ColumnarTauLib ColumnarEventInfoLib )
+# FIX ME: These settings should come from the Project configuration
+if (COLUMNAR_ANALYSIS)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeArray;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
+elseif (XAOD_STANDALONE)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
 else()
-   atlas_add_component( TauAnalysisTools
-      src/components/*.cxx
-      LINK_LIBRARIES TauAnalysisToolsLib)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD")
+  SET (COLUMNAR_MODE_SUFFIX_LIST "")
 endif()
+
+foreach (CMODE_NAME CMODE_SUFFIX IN ZIP_LISTS COLUMNAR_MODE_NAME_LIST COLUMNAR_MODE_SUFFIX_LIST)
+
+   # Libraries in the package:
+   atlas_add_library( TauAnalysisToolsLib${CMODE_SUFFIX}
+      TauAnalysisTools/*.h Root/*.cxx
+      PUBLIC_HEADERS TauAnalysisTools
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} 
+                     AsgTools xAODEgamma xAODMuon xAODJet xAODTau xAODTracking 
+                     xAODTruth TruthUtils PATCoreLib PATInterfaces 
+                     AsgAnalysisInterfaces
+                     xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib ColumnarCoreLib ColumnarModeLib${CMODE_SUFFIX} ColumnarTauLib ColumnarEventInfoLib
+                     ColumnarTruthLib ColumnarJetLib TruthUtils
+      PRIVATE_LINK_LIBRARIES AthLinks xAODEventInfo xAODMetaData PathResolver )
+
+   if( NOT XAOD_STANDALONE )
+      atlas_add_component( TauAnalysisTools${CMODE_SUFFIX}
+         src/*.cxx src/components/*.cxx
+         INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
+         LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} AthenaBaseComps AsgTools xAODTau GaudiKernel
+         TauAnalysisToolsLib${CMODE_SUFFIX} xAODCore xAODBTagging AthOnnxInterfaces AthOnnxUtilsLib ColumnarCoreLib ColumnarTauLib ColumnarEventInfoLib )
+   else()
+      atlas_add_component( TauAnalysisTools${CMODE_SUFFIX}
+         src/components/*.cxx
+         LINK_LIBRARIES TauAnalysisToolsLib${CMODE_SUFFIX})
+   endif()
+
+endforeach()
 
 atlas_add_dictionary( TauAnalysisToolsDict
    TauAnalysisTools/TauAnalysisToolsDict.h

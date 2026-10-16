@@ -23,9 +23,10 @@ using CLHEP::GeV;
 #include <sstream>
 
 using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 
 //______________________________________________________________________________
-void TauAnalysisTools::split(const std::string& sInput, const char cDelim, std::vector<std::string>& vOut)
+void ADD_CMODE(TauAnalysisTools)::split(const std::string& sInput, const char cDelim, std::vector<std::string>& vOut)
 {
   std::stringstream sSS(sInput);
   std::string sItem;
@@ -34,7 +35,7 @@ void TauAnalysisTools::split(const std::string& sInput, const char cDelim, std::
 }
 
 //______________________________________________________________________________
-void TauAnalysisTools::split(TEnv& rEnv, const std::string& sKey, const char cDelim, std::vector<std::string>& vOut)
+void ADD_CMODE(TauAnalysisTools)::split(TEnv& rEnv, const std::string& sKey, const char cDelim, std::vector<std::string>& vOut)
 {
   std::stringstream sSS(rEnv.GetValue(sKey.c_str(),""));
   std::string sItem;
@@ -43,7 +44,7 @@ void TauAnalysisTools::split(TEnv& rEnv, const std::string& sKey, const char cDe
 }
 
 //______________________________________________________________________________
-void TauAnalysisTools::split(TEnv& rEnv, const std::string& sKey, const char cDelim, std::vector<size_t>& vOut)
+void ADD_CMODE(TauAnalysisTools)::split(TEnv& rEnv, const std::string& sKey, const char cDelim, std::vector<size_t>& vOut)
 {
   std::stringstream sSS(rEnv.GetValue(sKey.c_str(),""));
   std::string sItem;
@@ -52,7 +53,7 @@ void TauAnalysisTools::split(TEnv& rEnv, const std::string& sKey, const char cDe
 }
 
 //______________________________________________________________________________
-void TauAnalysisTools::split(TEnv& rEnv, const std::string& sKey, const char cDelim, std::vector<int>& vOut)
+void ADD_CMODE(TauAnalysisTools)::split(TEnv& rEnv, const std::string& sKey, const char cDelim, std::vector<int>& vOut)
 {
   std::stringstream sSS(rEnv.GetValue(sKey.c_str(),""));
   std::string sItem;
@@ -61,7 +62,7 @@ void TauAnalysisTools::split(TEnv& rEnv, const std::string& sKey, const char cDe
 }
 
 //______________________________________________________________________________
-void TauAnalysisTools::split(TEnv& rEnv, const std::string& sKey, const char cDelim, std::vector<unsigned>& vOut)
+void ADD_CMODE(TauAnalysisTools)::split(TEnv& rEnv, const std::string& sKey, const char cDelim, std::vector<unsigned>& vOut)
 {
   std::stringstream sSS(rEnv.GetValue(sKey.c_str(),""));
   std::string sItem;
@@ -70,7 +71,7 @@ void TauAnalysisTools::split(TEnv& rEnv, const std::string& sKey, const char cDe
 }
 
 //______________________________________________________________________________
-void TauAnalysisTools::split(TEnv& rEnv, const std::string& sKey, const char cDelim, std::vector<float>& vOut)
+void ADD_CMODE(TauAnalysisTools)::split(TEnv& rEnv, const std::string& sKey, const char cDelim, std::vector<float>& vOut)
 {
   std::stringstream sSS(rEnv.GetValue(sKey.c_str(),""));
   std::string sItem;
@@ -79,7 +80,7 @@ void TauAnalysisTools::split(TEnv& rEnv, const std::string& sKey, const char cDe
 }
 
 //______________________________________________________________________________
-void TauAnalysisTools::split(TEnv& rEnv, const std::string& sKey, const char cDelim, std::vector<double>& vOut)
+void ADD_CMODE(TauAnalysisTools)::split(TEnv& rEnv, const std::string& sKey, const char cDelim, std::vector<double>& vOut)
 {
   std::stringstream sSS(rEnv.GetValue(sKey.c_str(),""));
   std::string sItem;
@@ -88,28 +89,28 @@ void TauAnalysisTools::split(TEnv& rEnv, const std::string& sKey, const char cDe
 }
 
 //______________________________________________________________________________
-double TauAnalysisTools::finalTauPt(const xAOD::TauJet& xTau)
+double ADD_CMODE(TauAnalysisTools)::finalTauPt(const xAOD::TauJet& xTau)
 {
   // return MVA based tau pt in GeV
   return xTau.ptFinalCalib()/GeV;
 }
 
 //______________________________________________________________________________
-double TauAnalysisTools::finalTauEta(const xAOD::TauJet& xTau)
+double ADD_CMODE(TauAnalysisTools)::finalTauEta(const xAOD::TauJet& xTau)
 {
   // return MVA based tau eta
   return xTau.etaFinalCalib();
 }
 
 //______________________________________________________________________________
-double TauAnalysisTools::finalTauAbsEta(const xAOD::TauJet& xTau)
+double ADD_CMODE(TauAnalysisTools)::finalTauAbsEta(const xAOD::TauJet& xTau)
 {
   // return MVA based absolute tau eta
   return std::abs(xTau.etaFinalCalib());
 }
 
 //______________________________________________________________________________
-double TauAnalysisTools::truthVisTauPt(const xAOD::TauJet& xTau)
+double ADD_CMODE(TauAnalysisTools)::truthVisTauPt(const xAOD::TauJet& xTau)
 {
   // return truth visible tau Pt in GeV
   const xAOD::TruthParticle* xTruthTau = xAOD::TauHelpers::getTruthParticle(&xTau);
@@ -123,7 +124,7 @@ double TauAnalysisTools::truthVisTauPt(const xAOD::TauJet& xTau)
     return 0.; 
 }
 //______________________________________________________________________________
-double TauAnalysisTools::truthTauAbsEta(const xAOD::TauJet& xTau)
+double ADD_CMODE(TauAnalysisTools)::truthTauAbsEta(const xAOD::TauJet& xTau)
 {
   // return truth tau absolute eta
   const xAOD::TruthParticle* xTruthTau = xAOD::TauHelpers::getTruthParticle(&xTau);
@@ -137,7 +138,7 @@ double TauAnalysisTools::truthTauAbsEta(const xAOD::TauJet& xTau)
 }
 
 //______________________________________________________________________________
-double TauAnalysisTools::truthDecayMode(const xAOD::TauJet& xTau)
+double ADD_CMODE(TauAnalysisTools)::truthDecayMode(const xAOD::TauJet& xTau)
 {
   // return truth tau decay mode.
   int iDecayMode = getTruthDecayMode(xTau);
@@ -145,7 +146,7 @@ double TauAnalysisTools::truthDecayMode(const xAOD::TauJet& xTau)
 }
 
 //______________________________________________________________________________
-xAOD::TauJetParameters::DecayMode TauAnalysisTools::getTruthDecayMode(const xAOD::TauJet& xTau)
+xAOD::TauJetParameters::DecayMode ADD_CMODE(TauAnalysisTools)::getTruthDecayMode(const xAOD::TauJet& xTau)
 {
   const xAOD::TruthParticle* xTruthTau = xAOD::TauHelpers::getTruthParticle(&xTau);
 
@@ -157,7 +158,7 @@ xAOD::TauJetParameters::DecayMode TauAnalysisTools::getTruthDecayMode(const xAOD
 }
 
 //______________________________________________________________________________
-xAOD::TauJetParameters::DecayMode TauAnalysisTools::getTruthDecayMode(const xAOD::TruthParticle& xTruthTau)
+xAOD::TauJetParameters::DecayMode ADD_CMODE(TauAnalysisTools)::getTruthDecayMode(const xAOD::TruthParticle& xTruthTau)
 {
   static const SG::ConstAccessor<size_t> accNumCharged ("numCharged");
   if (!(accNumCharged.isAvailable(xTruthTau)))
@@ -190,7 +191,7 @@ xAOD::TauJetParameters::DecayMode TauAnalysisTools::getTruthDecayMode(const xAOD
 }
 
 //______________________________________________________________________________
-int TauAnalysisTools::getNTauDecayParticles(const xAOD::TruthParticle& xTruthTau, int iPdgId, bool bCompareAbsoluteValues)
+int ADD_CMODE(TauAnalysisTools)::getNTauDecayParticles(const xAOD::TruthParticle& xTruthTau, int iPdgId, bool bCompareAbsoluteValues)
 {
   int iNum = 0;
   static const SG::ConstAccessor<std::vector<int> > accDecayModeVector("DecayModeVector");
@@ -213,7 +214,7 @@ int TauAnalysisTools::getNTauDecayParticles(const xAOD::TruthParticle& xTruthTau
 }
 
 //______________________________________________________________________________
-bool TauAnalysisTools::testFileForEOFContainsCharacters(const std::string& sFileName)
+bool ADD_CMODE(TauAnalysisTools)::testFileForEOFContainsCharacters(const std::string& sFileName)
 {
   // returns true if last line in file is empty or the line starts with the
   // number sign #
@@ -250,7 +251,7 @@ bool TauAnalysisTools::testFileForEOFContainsCharacters(const std::string& sFile
 }
 
 //______________________________________________________________________________
-void TauAnalysisTools::createPi0Vectors(const xAOD::TauJet* xTau, std::vector<TLorentzVector>& vPi0s)
+void ADD_CMODE(TauAnalysisTools)::createPi0Vectors(const xAOD::TauJet* xTau, std::vector<TLorentzVector>& vPi0s)
 {
   // reset the pi0s
   vPi0s.clear();
@@ -312,7 +313,7 @@ void TauAnalysisTools::createPi0Vectors(const xAOD::TauJet* xTau, std::vector<TL
 
 
 //______________________________________________________________________________
-void TauAnalysisTools::correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector<TLorentzVector>& correctedPi0s, TLorentzVector& TauP4){
+void ADD_CMODE(TauAnalysisTools)::correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector<TLorentzVector>& correctedPi0s, TLorentzVector& TauP4){
   //reset the pi0s
   correctedPi0s.clear();
 
@@ -427,7 +428,7 @@ void TauAnalysisTools::correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector
 }
 
 //______________________________________________________________________________
-TruthMatchedParticleType TauAnalysisTools::getTruthParticleType(const xAOD::TauJet& xTau)
+TruthMatchedParticleType ADD_CMODE(TauAnalysisTools)::getTruthParticleType(const xAOD::TauJet& xTau)
 {
   typedef ElementLink< xAOD::TruthParticleContainer > Link_t;
   static const SG::ConstAccessor< Link_t > accTruthParticleLink("truthParticleLink");
@@ -461,7 +462,7 @@ TruthMatchedParticleType TauAnalysisTools::getTruthParticleType(const xAOD::TauJ
   return Unknown;
 }
 
-TruthMatchedParticleType TauAnalysisTools::getTruthParticleType(const xAOD::DiTauJet& xDiTau)
+TruthMatchedParticleType ADD_CMODE(TauAnalysisTools)::getTruthParticleType(const xAOD::DiTauJet& xDiTau)
 {
   static const SG::ConstAccessor<char> accIsTruthHadronic("IsTruthHadronic");
   if (!accIsTruthHadronic.isAvailable(xDiTau))
@@ -517,7 +518,7 @@ int classifyAncestor(const xAOD::TruthParticle* particle, std::set<const xAOD::T
 }
 }
 
-int TauAnalysisTools::tauOrigin(const xAOD::TauJet& xTau)
+int ADD_CMODE(TauAnalysisTools)::tauOrigin(const xAOD::TauJet& xTau)
 {
   // Guard against missing truth match information
   typedef ElementLink< xAOD::TruthParticleContainer > Link_t;
@@ -554,7 +555,7 @@ int TauAnalysisTools::tauOrigin(const xAOD::TauJet& xTau)
   return classifyAncestor(xTruthCandidate, visited);
 }
 
-std::vector<const xAOD::TauJet*> TauAnalysisTools::combineTauJetsWithMuonRM(const xAOD::TauJetContainer* taus_std, const xAOD::TauJetContainer* taus_muonRM){
+std::vector<const xAOD::TauJet*> ADD_CMODE(TauAnalysisTools)::combineTauJetsWithMuonRM(const xAOD::TauJetContainer* taus_std, const xAOD::TauJetContainer* taus_muonRM){
   //! Special function to combine the muon-removed taus with the standard taus. 
   //! This can impact your MET calculation and OLR.
   //! You will know if you need this, otherwise please consult TauCP group.

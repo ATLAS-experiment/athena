@@ -4,7 +4,7 @@
 #include "BuildTruthTausAlg.h"
 #include "GaudiKernel/EventContext.h"
 
-namespace TauAnalysisTools {
+namespace ADD_CMODE(TauAnalysisTools) {
 
   BuildTruthTausAlg::BuildTruthTausAlg(const std::string& name, ISvcLocator* svcLoc)
     : AthReentrantAlgorithm(name, svcLoc)

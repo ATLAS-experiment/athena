@@ -15,13 +15,14 @@
 
 // Framework include(s):
 #include "AsgTools/IAsgTool.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 // EDM include(s):
 #include "xAODTau/DiTauJet.h"
 #include "PATInterfaces/CorrectionCode.h"
 #include "PATInterfaces/ISystematicsTool.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class IDiTauSmearingTool
@@ -42,7 +43,7 @@ public:
 
 }; // class IDiTauSmearingTool
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_IDITAUSMEARINGTOOL_H
 

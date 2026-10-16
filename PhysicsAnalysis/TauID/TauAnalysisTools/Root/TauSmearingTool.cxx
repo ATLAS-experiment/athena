@@ -12,7 +12,7 @@
 
 #include <AsgTools/AsgToolConfig.h>
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 TauSmearingTool::TauSmearingTool( const std::string& sName )
@@ -143,4 +143,4 @@ StatusCode TauSmearingTool::applySystematicVariation ( const CP::SystematicSet& 
 }
 
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)

@@ -18,7 +18,7 @@
 #include "TauAnalysisTools/ITauEfficiencyCorrectionsTool.h"
 #include "TauAnalysisTools/HelperFunctions.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class TauAnalysisToolsExampleAthena : public AthAlgorithm
@@ -51,6 +51,6 @@ private:
 
 }; // class TauAnalysisToolsExampleAthena
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLSEXAMPLEATHENA_H

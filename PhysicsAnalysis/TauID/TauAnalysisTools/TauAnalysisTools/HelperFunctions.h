@@ -24,13 +24,15 @@
 #include "xAODTau/DiTauJet.h"
 #include "xAODTruth/TruthParticle.h"
 
+#include "ColumnarMode/ColumnarMode.h"
+
 // Local include(s):
 #include "TauAnalysisTools/Enums.h"
 // stl include(s)
 #include <vector>
 #include <string>
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 void split(const std::string& sInput, const char cDelim, std::vector<std::string>& vOut);
 void split(TEnv& rEnv, const std::string& sIn, const char cDelim, std::vector<std::string>& vOut);
@@ -78,9 +80,9 @@ bool testFileForEOFContainsCharacters(const std::string& sFileName);
 void createPi0Vectors(const xAOD::TauJet* xTau, std::vector<TLorentzVector>& vPi0s);
 void correctedPi0Vectors(const xAOD::TauJet* xTau, std::vector<TLorentzVector>& correctedPi0s, TLorentzVector& TauP4);
 /** return TauJet match type*/
-TruthMatchedParticleType getTruthParticleType(const xAOD::TauJet& xTau);
+TauAnalysisTools::TruthMatchedParticleType getTruthParticleType(const xAOD::TauJet& xTau);
 /** return DiTauJet match type*/
-TruthMatchedParticleType getTruthParticleType(const xAOD::DiTauJet& xDiTau);
+TauAnalysisTools::TruthMatchedParticleType getTruthParticleType(const xAOD::DiTauJet& xDiTau);
 /** return truth origin class of the tau: -1 no truth match, 0 no hadron ancestor, 1 b-hadron, 2 c-hadron, 3 light hadron */
 int tauOrigin(const xAOD::TauJet &xTau);
 /** combine the standard taujets container with the muon removal container **/

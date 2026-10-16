@@ -23,7 +23,7 @@
 #include "TauAnalysisTools/IDiTauSmearingTool.h"
 #include "TauAnalysisTools/CommonDiTauSmearingTool.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class DiTauSmearingTool
@@ -67,7 +67,7 @@ private:
 
 }; // class DiTauSmearingTool
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_DITAUSMEARINGTOOL_H
 

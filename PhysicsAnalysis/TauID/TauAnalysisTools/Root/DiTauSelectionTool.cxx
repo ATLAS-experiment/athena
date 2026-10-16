@@ -17,6 +17,7 @@
 #include <cmath>  // for std::isnan
 
 using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 
 //=================================PUBLIC-PART==================================
 //______________________________________________________________________________
@@ -79,7 +80,7 @@ StatusCode DiTauSelectionTool::initialize()
     // if Cuts are specified in the config file take these ones, if not take all
     // specified in the config
     if (rEnv.Defined("SelectionCuts"))
-      TauAnalysisTools::split(rEnv, "SelectionCuts", ' ', vCuts);
+      ADD_CMODE(TauAnalysisTools)::split(rEnv, "SelectionCuts", ' ', vCuts);
     else
     {
       auto lList = rEnv.GetTable();
@@ -103,7 +104,7 @@ StatusCode DiTauSelectionTool::initialize()
       {
         iSelectionCuts = iSelectionCuts | DiTauCutAbsEta;
         if (m_vAbsEtaRegion.empty())
-          TauAnalysisTools::split(rEnv,"AbsEtaRegion", ';', m_vAbsEtaRegion);
+          ADD_CMODE(TauAnalysisTools)::split(rEnv,"AbsEtaRegion", ';', m_vAbsEtaRegion);
       }
       else if (sCut == "AbsEtaMin")
       {
@@ -127,7 +128,7 @@ StatusCode DiTauSelectionTool::initialize()
       {
         iSelectionCuts = iSelectionCuts | DiTauCutAbsCharge;
         if (m_vAbsCharges.empty())
-          TauAnalysisTools::split(rEnv,"AbsCharges", ';', m_vAbsCharges);
+          ADD_CMODE(TauAnalysisTools)::split(rEnv,"AbsCharges", ';', m_vAbsCharges);
       }
       else if (sCut == "AbsCharge")
       {
@@ -183,17 +184,17 @@ StatusCode DiTauSelectionTool::initialize()
   ATH_CHECK( m_OmniScoreDecorKey.initialize( m_useOmniScore ) );
 
   // specify all available cut descriptions
-  using map_type  = std::map<DiTauSelectionCuts, std::unique_ptr<TauAnalysisTools::DiTauSelectionCut>>;
+  using map_type  = std::map<DiTauSelectionCuts, std::unique_ptr<DiTauSelectionCut>>;
   using pair_type = map_type::value_type;
 
   pair_type elements[] =
   {
-   {DiTauCutPt, std::make_unique<TauAnalysisTools::DiTauSelectionCutPt>(this)},
-   {DiTauCutAbsEta, std::make_unique<TauAnalysisTools::DiTauSelectionCutAbsEta>(this)},
-   {DiTauCutNSubjets, std::make_unique<TauAnalysisTools::DiTauSelectionCutNSubjets>(this)},
-   {DiTauCutAbsCharge, std::make_unique<TauAnalysisTools::DiTauSelectionCutAbsCharge>(this)},
-   {DiTauCutOmniScore, std::make_unique<TauAnalysisTools::DiTauSelectionCutOmniScore>(this)}, 
-   {DiTauCutOmniIDWP, std::make_unique<TauAnalysisTools::DiTauSelectionCutOmniIDWP>(this)},
+   {DiTauCutPt, std::make_unique<DiTauSelectionCutPt>(this)},
+   {DiTauCutAbsEta, std::make_unique<DiTauSelectionCutAbsEta>(this)},
+   {DiTauCutNSubjets, std::make_unique<DiTauSelectionCutNSubjets>(this)},
+   {DiTauCutAbsCharge, std::make_unique<DiTauSelectionCutAbsCharge>(this)},
+   {DiTauCutOmniScore, std::make_unique<DiTauSelectionCutOmniScore>(this)}, 
+   {DiTauCutOmniIDWP, std::make_unique<DiTauSelectionCutOmniIDWP>(this)},
   };
   
   m_cMap = { std::make_move_iterator( begin(elements) ), std::make_move_iterator( end(elements) ) };

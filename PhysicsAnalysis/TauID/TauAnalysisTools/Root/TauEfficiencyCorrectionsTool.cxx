@@ -13,7 +13,8 @@
 
 #include <AsgTools/AsgToolConfig.h>
 
-namespace TauAnalysisTools
+using namespace TauAnalysisTools;
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 //______________________________________________________________________________
@@ -562,4 +563,4 @@ StatusCode TauEfficiencyCorrectionsTool::readRandomRunNumber()
   return StatusCode::SUCCESS;
 }
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)

@@ -35,7 +35,7 @@
 class TFile;
 class TKey;
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 // forward declaration
@@ -145,8 +145,8 @@ protected:
   Gaudi::Property<std::string> m_sVarName{this, "VarName", ""};
   Gaudi::Property<std::string> m_sWP{this, "WP", ""};
   Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};
-  Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(JETIDNONE)};
-  Gaudi::Property<int> m_iEleIDLevel{this, "EleIDLevel", static_cast<int>(ELEIDNONE)};
+  Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(TauAnalysisTools::JETIDNONE)};
+  Gaudi::Property<int> m_iEleIDLevel{this, "EleIDLevel", static_cast<int>(TauAnalysisTools::ELEIDNONE)};
   Gaudi::Property<bool> m_bUseTauSubstructure{this, "UseTauSubstructure", false};
   Gaudi::Property<bool> m_doTauTrig{this, "DoTauTrig", false};
   Gaudi::Property<bool> m_applyToData{this, "ApplyToData", false}; // for experts only
@@ -155,7 +155,7 @@ protected:
   std::string m_sSFHistName;
   bool m_bNoMultiprong;
 
-  TruthMatchedParticleType m_eCheckTruth;
+  TauAnalysisTools::TruthMatchedParticleType m_eCheckTruth;
 
   bool m_bSFIsAvailable;
   bool m_bSFIsAvailableChecked;
@@ -180,7 +180,7 @@ public:
     //columnar::TauJetAccessor<float> m_eta{*this,"eta"};
     //columnar::TauJetAccessor<float> m_pt{*this,"pt"};
     columnar::TauJetAccessor<int> m_decayMode{*this,"PanTau_DecayMode"};
-    TruthParticleTypeAccessor<> m_truthParticleType{*this};
+    TauAnalysisTools::TruthParticleTypeAccessor<> m_truthParticleType{*this};
     columnar::TauJetDecorator<float> m_sfDec{*this,"sfOut"};
     columnar::TauJetDecorator<char> m_validDec{*this,"validOut"};
   };
@@ -191,6 +191,6 @@ public:
 
 
 };
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_COMMONEFFICIENCYTOOL_H

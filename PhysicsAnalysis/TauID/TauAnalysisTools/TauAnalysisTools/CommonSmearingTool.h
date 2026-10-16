@@ -32,7 +32,7 @@
 
 class TFile;
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class CommonSmearingTool
@@ -107,7 +107,7 @@ protected:
 
   asg::AnaToolHandle<TauAnalysisTools::ITauResolutionTool>  m_tauResolutionTool;
 
-  TruthMatchedParticleType m_eCheckTruth;
+  TauAnalysisTools::TruthMatchedParticleType m_eCheckTruth;
   CP::SystematicSet m_sAffectingSystematics;
   CP::SystematicSet m_sRecommendedSystematics;
   
@@ -119,6 +119,6 @@ private:
   virtual StatusCode beginEvent();
 
 };
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_COMMONSMEARINGTOOL_H

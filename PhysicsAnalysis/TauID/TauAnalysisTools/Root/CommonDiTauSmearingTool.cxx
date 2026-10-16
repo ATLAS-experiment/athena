@@ -17,7 +17,7 @@
 #include "TH3.h"
 
 
-using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 
 //______________________________________________________________________________
 CommonDiTauSmearingTool::CommonDiTauSmearingTool(const std::string& sName)

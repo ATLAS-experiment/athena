@@ -23,7 +23,7 @@
 #include "TauAnalysisTools/ITauEfficiencyCorrectionsTool.h"
 #include "TauAnalysisTools/CommonDiTauEfficiencyTool.h"
 
-namespace TauAnalysisTools
+namespace ADD_CMODE(TauAnalysisTools)
 {
 
 class DiTauEfficiencyCorrectionsTool
@@ -108,9 +108,9 @@ private:
   Gaudi::Property<std::string> m_sInputFilePathJetIDHadTau{this, "InputFilePathJetIDHadTau", ""};
   Gaudi::Property<std::string> m_sVarNameJetIDHadTau{this, "VarNameJetIDHadTau", ""};
   Gaudi::Property<std::string> m_sRecommendationTag{this, "RecommendationTag", "2017-moriond"};
-  Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(JETIDBDTTIGHT)};
+  Gaudi::Property<int> m_iJetIDLevel{this, "JetIDLevel", static_cast<int>(TauAnalysisTools::JETIDBDTTIGHT)};
   Gaudi::Property<bool> m_bSkipTruthMatchCheck{this, "SkipTruthMatchCheck", false};   
-  Gaudi::Property<std::vector<int>> m_vEfficiencyCorrectionTypes{this, "EfficiencyCorrectionTypes", {SFJetIDHadTau}};
+  Gaudi::Property<std::vector<int>> m_vEfficiencyCorrectionTypes{this, "EfficiencyCorrectionTypes", {TauAnalysisTools::SFJetIDHadTau}};
 
   ToolHandle<IDiTauEfficiencyCorrectionsTool> m_tTool{this, "Tool", {}};
   bool m_bIsData;
@@ -118,6 +118,6 @@ private:
 
 }; // class DiTauEfficiencyCorrectionsTool
 
-} // namespace TauAnalysisTools
+} // namespace ADD_CMODE(TauAnalysisTools)
 
 #endif // TAUANALYSISTOOLS_DITAUEFFICIENCYCORRECTIONSTOOL_H

@@ -9,7 +9,7 @@
 // Local include(s):
 #include "TauAnalysisToolsExampleAthena.h"
 
-using namespace TauAnalysisTools;
+using namespace ADD_CMODE(TauAnalysisTools);
 
 TauAnalysisToolsExampleAthena::TauAnalysisToolsExampleAthena( const std::string& name, ISvcLocator* svcLoc )
   : AthAlgorithm( name, svcLoc )

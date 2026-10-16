@@ -4,7 +4,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "TauAnalysisTools/BuildTruthTaus.h"
 
-namespace TauAnalysisTools {
+namespace ADD_CMODE(TauAnalysisTools) {
 
   class BuildTruthTausAlg : public AthReentrantAlgorithm {
   public:
