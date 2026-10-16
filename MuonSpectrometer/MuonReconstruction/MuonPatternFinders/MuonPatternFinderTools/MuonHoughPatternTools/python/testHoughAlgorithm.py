@@ -5,7 +5,8 @@ def SetupArgParser():
 
     parser = ArgumentParser()
     parser.add_argument("-o", "--output", dest="output", default='', help="Text file containing each cabling channel", metavar="FILE")
-    parser.add_argument("--inputFile", "-i", default=["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/UnitTestInput/Run3MC.ESD.pool.root"], 
+    from AthenaConfiguration.TestDefaults import defaultTestFiles
+    parser.add_argument("--inputFile", "-i", default=defaultTestFiles.ESD_RUN3_MC, 
                         help="Input file to run on ", nargs="+")
     return parser
     

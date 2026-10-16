@@ -20,7 +20,7 @@ def BucketScoreDumpCfg(flags, name="GraphBucketFilterTool", **kwargs):
     kwargs_copy = kwargs.copy()
     kwargs_copy.setdefault("ReadSpacePoints", "MuonSpacePoints")
     kwargs_copy.setdefault("WriteSpacePointKey", "")
-    kwargs_copy.setdefault("ModelPath", "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/edgecnn_multi_bucket_sparse_meta.onnx")
+    kwargs_copy.setdefault("ModelPath", "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/MlPhaseII/edgecnn_multi_bucket_sparse_meta.onnx")
     kwargs_copy.setdefault("BiasClass0", 1.0)
     return GraphBucketFilterToolCfg(flags, name=name, **kwargs_copy)
 
