@@ -104,8 +104,8 @@ namespace VKalVrtAthena {
           }
 
           ElementLink<xAOD::TrackParticleContainer> link_i, link_j;
-          link_i.toIndexedElement( *cont_i, (*itrk)->index() );
-          link_j.toIndexedElement( *cont_j, (*jtrk)->index() );
+          link_i.toIndexedElement( *cont_i, (*itrk)->index(), ctx );
+          link_j.toIndexedElement( *cont_j, (*jtrk)->index(), ctx );
 
           if (!link_i.isValid() || !link_j.isValid()) {
             ATH_MSG_DEBUG("  link itrk (" << (*itrk)->index() << ") or jtrk (" << (*jtrk)->index() << ") is not valid");
@@ -212,7 +212,7 @@ namespace VKalVrtAthena {
           for( const auto *trk: baseTracks ) {
 
             // Acquire link to the track
-            ElementLink<xAOD::TrackParticleContainer>  trackElementLink( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), trk->index() );
+            ElementLink<xAOD::TrackParticleContainer>  trackElementLink( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), trk->index(), ctx );
 
             // Register link to the vertex
             vertex->addTrackAtVertex( trackElementLink, 1. );
@@ -2130,7 +2130,7 @@ namespace VKalVrtAthena {
           const xAOD::TrackParticle *trk = m_selectedTracks.at( trk_id );
 
           // Acquire link the track to the vertex
-          ElementLink<xAOD::TrackParticleContainer> link_trk( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), static_cast<long unsigned int>(trk->index()) );
+          ElementLink<xAOD::TrackParticleContainer> link_trk( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), static_cast<long unsigned int>(trk->index()), ctx );
 
           // Register the link to the vertex
           vertex->addTrackAtVertex( link_trk, 1. );
@@ -2142,7 +2142,7 @@ namespace VKalVrtAthena {
           const xAOD::TrackParticle *trk = m_associatedTracks.at( trk_id );
 
           // Acquire link the track to the vertex
-          ElementLink<xAOD::TrackParticleContainer> link_trk( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), static_cast<long unsigned int>(trk->index()) );
+          ElementLink<xAOD::TrackParticleContainer> link_trk( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), static_cast<long unsigned int>(trk->index()), ctx );
 
           // Register the link to the vertex
           vertex->addTrackAtVertex( link_trk, 1. );
@@ -2250,7 +2250,7 @@ namespace VKalVrtAthena {
           const xAOD::TrackParticle *trk = m_selectedTracks.at( trk_id );
 
           // Acquire link the track to the vertex
-          ElementLink<xAOD::TrackParticleContainer> link_trk( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), static_cast<long unsigned int>(trk->index()) );
+          ElementLink<xAOD::TrackParticleContainer> link_trk( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), static_cast<long unsigned int>(trk->index()), ctx );
 
           // Register the link to the vertex
           vertex->addTrackAtVertex( link_trk, 1. );
@@ -2262,7 +2262,7 @@ namespace VKalVrtAthena {
           const xAOD::TrackParticle *trk = m_associatedTracks.at( trk_id );
 
           // Acquire link the track to the vertex
-          ElementLink<xAOD::TrackParticleContainer> link_trk( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), static_cast<long unsigned int>(trk->index()) );
+          ElementLink<xAOD::TrackParticleContainer> link_trk( *( dynamic_cast<const xAOD::TrackParticleContainer*>( trk->container() ) ), static_cast<long unsigned int>(trk->index()), ctx );
 
           // Register the link to the vertex
           vertex->addTrackAtVertex( link_trk, 1. );

@@ -100,7 +100,7 @@ StatusCode MuSAVtxFitter::fillCollections(std::vector<MuSAVtxFitterTool::WrkVrt>
             *containerTrack=*workVertex.newExtrapolatedTracks[i];
 
             // Link the new tracks to the vertex
-            ElementLink<xAOD::TrackParticleContainer> link_trk(*MuSAExtrapolatedTracksContainer, MuSAExtrapolatedTracksContainer->size() - 1);
+            ElementLink<xAOD::TrackParticleContainer> link_trk(*MuSAExtrapolatedTracksContainer, MuSAExtrapolatedTracksContainer->size() - 1, ctx);
             MuSAVertex->addTrackAtVertex(link_trk, 1.0);
 
             //Also link the extrapolated tracks and vertices to their original muons -- extrapolated tracks and their muons should have the same index in workVertex
@@ -110,12 +110,12 @@ StatusCode MuSAVtxFitter::fillCollections(std::vector<MuSAVtxFitterTool::WrkVrt>
 
             ElementLink<xAOD::MuonContainer> link_muon;
             ElementLink<xAOD::TrackParticleContainer> link_MSTP;
-            muonLinkSuccess = link_muon.toContainedElement(muonContainer, workVertex.muonCandidates[i]);
+            muonLinkSuccess = link_muon.toContainedElement(muonContainer, workVertex.muonCandidates[i], ctx);
 
             const xAOD::Muon* muon = muonContainer[link_muon.index()];
             const xAOD::TrackParticle* MSTP = muon->trackParticle(xAOD::Muon::MuonSpectrometerTrackParticle);
             if (MSTP) {
-                MSTPLinkSuccess = link_MSTP.toContainedElement(MSTPContainer, MSTP);
+                MSTPLinkSuccess = link_MSTP.toContainedElement(MSTPContainer, MSTP, ctx);
             }
 
             // Check that links are valid

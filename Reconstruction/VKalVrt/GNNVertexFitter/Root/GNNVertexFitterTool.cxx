@@ -323,7 +323,8 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
         for (const auto *trk : xAODwrk->listSelTracks) {
           ElementLink<xAOD::TrackParticleContainer> link_trk(
               *(dynamic_cast<const xAOD::TrackParticleContainer *>(trk->container())),
-              trk->index());
+              trk->index(),
+              ctx);
           GNNvertex->addTrackAtVertex(link_trk, 1.);
         }
 
@@ -346,7 +347,7 @@ StatusCode GNNVertexFitterTool::fitAllVertices(const xAOD::JetContainer *inJetCo
         
         ElementLink<xAOD::VertexContainer> linkVertex;
         linkVertex.setElement(GNNvertex);
-        linkVertex.setStorableObject(*outVertexContainer);
+        linkVertex.setStorableObject(*outVertexContainer, ctx);
         jetWriteDecorHandleVertexLink(*jet).push_back(linkVertex);
 
       } // end of 2 Track requirement

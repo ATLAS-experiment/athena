@@ -499,7 +499,7 @@ namespace Rec{
              tmpVTAV.emplace_back( 1., tmpMeasPer );
              ElementLink<xAOD::TrackParticleContainer> TEL;  TEL.setElement( xAODwrk->tmpListTracks[0] );
              const xAOD::TrackParticleContainer* cont = (const xAOD::TrackParticleContainer* ) (xAODwrk->tmpListTracks[0]->container() );
-             TEL.setStorableObject(*cont);
+             TEL.setStorableObject(*cont, ctx);
              tmpVertex->addTrackAtVertex(TEL,1.);
              n1trVrt++;
           }
