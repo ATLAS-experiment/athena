@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import Format
+from TrkConfig.TrkConfigFlags import PerigeeExpression
 from TrkConfig.TrackingPassFlags import printActiveConfig
 from AthenaCommon.Constants import WARNING, INFO
 
@@ -378,7 +379,8 @@ def ITkTrackFinalCfg(flags,
     splitProbName = ITkClusterSplitProbabilityContainerName(flags)
 
     # This creates track particles
-    if flags.Tracking.perigeeExpression == "BeamLine":
+    if flags.Tracking.perigeeExpression in [
+            PerigeeExpression.BeamLine, PerigeeExpression.Origin]:
         from xAODTrackingCnv.xAODTrackingCnvConfig import ITkTrackParticleCnvAlgCfg
         result.merge(ITkTrackParticleCnvAlgCfg(
             flags,

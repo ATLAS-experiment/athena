@@ -6,7 +6,7 @@ def ITkActsTrackParticleCreationCfg(flags,
                                     TrackContainers: list[str],
                                     TrackParticleContainer: str,
                                     persistifyCollection: bool = True,
-                                    PerigeeExpression: str = None) -> ComponentAccumulator:
+                                    PerigeeExpression = None) -> ComponentAccumulator:
     # This function does the following:
     # - Creates track particles from a collection of track containers
     # - Attaches truth decoration to the track particles
@@ -38,7 +38,7 @@ def ITkActsTrackParticleCreationCfg(flags,
                                                 name = f"{prefix}TrackToTrackParticleCnvAlg",
                                                 ACTSTracksLocation = TrackContainers,
                                                 TrackParticlesOutKey = TrackParticleContainer,
-                                                PerigeeExpression = PerigeeExpression))
+                                                PerigeeExpression = PerigeeExpression.value))
     ### Do not convert Temporary track particles from the heavy ion chain
     ### or TrackContainer made up of ITk track seeds (No track parameters)
     if flags.Acts.doxAODToTrkConversion and \

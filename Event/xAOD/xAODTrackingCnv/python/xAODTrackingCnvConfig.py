@@ -4,6 +4,7 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TrkConfig.TrkConfigFlags import PerigeeExpression
 
 ######################################
 ###   TrackCollectionCnvTool
@@ -104,7 +105,7 @@ def TrackParticleCnvAlgCfg(flags, name="TrackParticleCnvAlg",
     else:
         kwargs.setdefault("AddTruthLink", False)
 
-    if flags.Tracking.perigeeExpression == "Vertex":
+    if flags.Tracking.perigeeExpression is PerigeeExpression.Vertex:
         from AthenaConfiguration.Enums import ProductionStep
         if flags.Common.ProductionStep is ProductionStep.MinbiasPreprocessing:
             kwargs.setdefault("PrimaryVerticesName", f"{flags.Overlay.BkgPrefix}PrimaryVertices")
@@ -160,7 +161,7 @@ def TrigTrackParticleCnvAlgCfg(flags, name="TrigTrackParticleCnvAlg",
                 TrackParticleCreator = kwargs["TrackParticleCreator"])))
 
     #temporarily - move base methods to ActiveConfig
-    if flags.Tracking.ActiveConfig.perigeeExpression == "Vertex":
+    if flags.Tracking.ActiveConfig.perigeeExpression is PerigeeExpression.Vertex:
         kwargs.setdefault("PrimaryVerticesName", "PrimaryVertices")
     else:
         kwargs.setdefault("PrimaryVerticesName", "")
@@ -190,7 +191,7 @@ def BeamLineTrackParticleCnvAlgCfg(flags, name="BeamLineTrackParticleCnvAlg",
                   AssociationMapName = AssociationMapName,
                   PerigeeExpression = "BeamLine")))
     
-    if flags.Tracking.perigeeExpression == "Vertex":
+    if flags.Tracking.perigeeExpression is PerigeeExpression.Vertex:
         kwargs.setdefault("PrimaryVerticesName", "")
 
     result.merge(TrackParticleCnvAlgCfg(flags, name, **kwargs))
@@ -257,7 +258,7 @@ def ITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
     kwargs.setdefault("ConvertTracks", True)
     kwargs.setdefault("TrackContainerName", "CombinedITkTracks")
     kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles")
-    if flags.Tracking.perigeeExpression == "Vertex":
+    if flags.Tracking.perigeeExpression is PerigeeExpression.Vertex:
         kwargs.setdefault('PrimaryVerticesName', 'PrimaryVertices')
     
     if "TrackParticleCreator" not in kwargs:
@@ -303,7 +304,7 @@ def TrigITkTrackParticleCnvAlgCfg(flags, name="ITkTrackParticleCnvAlg",
     kwargs.setdefault("TrackContainerName", "CombinedITkTracks")
     kwargs.setdefault("xAODTrackParticlesFromTracksContainerName", "InDetTrackParticles")
     
-    if flags.Tracking.ActiveConfig.perigeeExpression == "Vertex":
+    if flags.Tracking.ActiveConfig.perigeeExpression is PerigeeExpression.Vertex:
         kwargs.setdefault('PrimaryVerticesName', 'PrimaryVertices')
     
     if "TrackParticleCreator" not in kwargs:

@@ -156,7 +156,7 @@ def ActsTrackToTrackParticleCnvAlgCfg(flags,
             ActsTrackToTrackParticleCnvToolCfg(flags, **tool_kwargs))
 
     kwargs.setdefault('BeamSpotKey', 'BeamSpotData')
-    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
+    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression.value)
     kwargs.setdefault('VertexContainerKey', 'PrimaryVertices')
 
     acc.addEventAlgo(CompFactory.ActsTrk.TrackToTrackParticleCnvAlg(name, **kwargs), primary = True)

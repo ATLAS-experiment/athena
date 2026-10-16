@@ -2,6 +2,7 @@
 # Configuration of InDetPriVxFinder package
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TrkConfig.TrkConfigFlags import PerigeeExpression
 
 
 def InDetPriVxFinderCfg(flags,
@@ -23,7 +24,7 @@ def InDetPriVxFinderCfg(flags,
 
     kwargs.setdefault("doVertexSorting", True)
 
-    if flags.Tracking.perigeeExpression == "Vertex":
+    if flags.Tracking.perigeeExpression is PerigeeExpression.Vertex:
         associationMapName = "PRDtoTrackMapMerge_CombinedInDetTracks"
         if flags.Detector.GeometryITk:
             associationMapName = "PRDtoTrackMapMerge_CombinedITkTracks"
@@ -94,7 +95,7 @@ def primaryVertexFindingCfg(flags,
                               VxCandidatesOutputName=vxCandidatesOutputName,
                               **kwargs)
 
-    if flags.Tracking.perigeeExpression == "Vertex":
+    if flags.Tracking.perigeeExpression is PerigeeExpression.Vertex:
         associationMapName = "PRDtoTrackMapMerge_CombinedInDetTracks"
         if flags.Detector.GeometryITk:
             associationMapName = "PRDtoTrackMapMerge_CombinedITkTracks"

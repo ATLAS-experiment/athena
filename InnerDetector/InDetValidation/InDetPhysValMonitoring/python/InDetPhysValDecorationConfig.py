@@ -4,7 +4,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
+from TrkConfig.TrkConfigFlags import PerigeeExpression
 
 def canAddDecorator(flags):
     '''
@@ -131,7 +131,8 @@ def InDetPhysValTruthDecoratorAlgCfg(
 
     kwargs.setdefault('TruthParticleIndexDecoration',
                       'origTruthIndex' if flags.PhysVal.IDPVM.doTechnicalEfficiency else '')
-    kwargs.setdefault('UseTruthPVAsPerigee', flags.Tracking.perigeeExpression=="Vertex")
+    kwargs.setdefault('UseTruthPVAsPerigee',
+                      flags.Tracking.perigeeExpression is PerigeeExpression.Vertex)
 
     acc.addEventAlgo(CompFactory.InDetPhysValTruthDecoratorAlg(name, **kwargs))
     return acc

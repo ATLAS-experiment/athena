@@ -10,6 +10,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from TrkConfig.TrkConfigFlags import PerigeeExpression
 from enum import IntEnum
 
 
@@ -278,6 +279,8 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
         kwargs.setdefault('JetPtMax', 5000)
 
     kwargs.setdefault("doPRW", flags.PhysVal.IDPVM.doPRW)
+    kwargs.setdefault("doVertexTrackPlots", flags.Tracking.perigeeExpression is
+                      not PerigeeExpression.Vertex)
 
     acc.setPrivateTools(CompFactory.InDetPhysValMonitoringTool(**kwargs))
     return acc

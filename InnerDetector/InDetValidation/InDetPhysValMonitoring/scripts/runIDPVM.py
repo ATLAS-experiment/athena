@@ -1,9 +1,10 @@
 #!/usr/bin/env python
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from glob import glob
 from AthenaConfiguration.ComponentFactory import CompFactory
 import AthenaCommon.SystemOfUnits as Units
+from TrkConfig.TrkConfigFlags import PerigeeExpression
 from InDetPhysValMonitoring.InDetPhysValMonitoringConfig import HardScatterStrategy
 
 def GetCustomAthArgs():
@@ -129,7 +130,7 @@ flags.PhysVal.IDPVM.jetCollection = MyArgs.jetCollection
 flags.PhysVal.IDPVM.JetPtMin = MyArgs.JetPtMin * Units.GeV
 flags.PhysVal.IDPVM.JetPtMax = MyArgs.JetPtMax * Units.GeV
 if MyArgs.useTruthPVAsPerigee:
-    flags.Tracking.perigeeExpression = "Vertex"
+    flags.Tracking.perigeeExpression = PerigeeExpression.Vertex
 if MyArgs.JetAbsEtaMax != -1:
     flags.PhysVal.IDPVM.JetAbsEtaMax = MyArgs.JetAbsEtaMax
 

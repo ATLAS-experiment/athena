@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # Configuration of TrkParticleCreator package
 # Creating xAOD::TrackParticles starting from
 # input Trk::Tracks
@@ -73,7 +73,7 @@ def TrackParticleCreatorToolCfg(flags,
 
     kwargs.setdefault("KeepParameters", True)
     kwargs.setdefault("KeepFirstParameters", False)
-    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
+    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression.value)
 
     result.setPrivateTools(result.popToolsAndMerge(TrackParticleCreatorToolBaseCfg(
         flags, name, **kwargs)))
@@ -235,7 +235,7 @@ def ITkTrackParticleCreatorToolCfg(flags,
 
     kwargs.setdefault("KeepParameters", True)
     kwargs.setdefault("KeepFirstParameters", False)
-    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression)
+    kwargs.setdefault("PerigeeExpression", flags.Tracking.perigeeExpression.value)
 
     kwargs.setdefault("IBLParameterSvc", "")
     kwargs.setdefault("DoITk", True)
