@@ -292,23 +292,23 @@ ActsLargeRadiusStripOv...pSpacePointPreparationAlg                INFO Data Prep
 ActsLargeRadiusStripSeedingAlg                                    INFO Seed statistics
 |-------------|------------|
 | Spacepoints |     390549 |
-| Seeds       |      26733 |
+| Seeds       |      26701 |
 |-------------|------------|
 ActsLargeRadiusTrackFindingAlg                                    INFO statistics
 |-----------------------------------|------------|------------|
 |                           All eta | SSS        | ALL        |
 |-----------------------------------|------------|------------|
-| Input seeds                       |      26733 |      26733 |
+| Input seeds                       |      26701 |      26701 |
 | No track parameters               |          0 |          0 |
-| Used   seeds                      |      26178 |      26178 |
-| Cannot find track                 |      12854 |      12854 |
-| Duplicate seeds                   |        555 |        555 |
+| Used   seeds                      |      26147 |      26147 |
+| Cannot find track                 |      12842 |      12842 |
+| Duplicate seeds                   |        554 |        554 |
 | Initial param estimation failed   |          0 |          0 |
-| CKF tracks                        |       2552 |       2552 |
-| Seed refit Kalman fit failure     |       1772 |       1772 |
-| Rejected refined parameters       |      10772 |      10772 |
+| CKF tracks                        |       2551 |       2551 |
+| Seed refit Kalman fit failure     |       1769 |       1769 |
+| Rejected refined parameters       |      10754 |      10754 |
 | selected tracks                   |        804 |        804 |
-| Stopped tracks reaching max holes |      12849 |      12849 |
+| Stopped tracks reaching max holes |      12837 |      12837 |
 | Seeds with more than one branch   |          0 |          0 |
 | Tracks failing second CKF         |         15 |         15 |
 | Stopped tracks below pT cut       |          0 |          0 |
@@ -321,23 +321,23 @@ ActsLargeRadiusTrackFindingAlg                                    INFO Ratios
 |-------------------------------------------|------------|------------|
 |                                           | SSS        | ALL        |
 |-------------------------------------------|------------|------------|
-| failed / seeds                            |   0.480829 |   0.480829 |
-| duplication / seeds                       |  0.0207609 |  0.0207609 |
-| Rejected refined params / seeds           |   0.402948 |   0.402948 |
-| selected / CKF tracks                     |   0.315047 |   0.315047 |
-| selected tracks / used seeds              |  0.0307128 |  0.0307128 |
+| failed / seeds                            |   0.480956 |   0.480956 |
+| duplication / seeds                       |  0.0207483 |  0.0207483 |
+| Rejected refined params / seeds           |   0.402756 |   0.402756 |
+| selected / CKF tracks                     |   0.315171 |   0.315171 |
+| selected tracks / used seeds              |  0.0307492 |  0.0307492 |
 | resolved / selected tracks                |   0.956468 |   0.956468 |
-| resolved tracks / used seeds              |  0.0293758 |  0.0293758 |
+| resolved tracks / used seeds              |  0.0294106 |  0.0294106 |
 | branched tracks / used seeds              |          0 |          0 |
-| no 2nd CKF / CKF tracks                   | 0.00587774 | 0.00587774 |
-| shared hits / CKF tracks                  |   0.297022 |   0.297022 |
+| no 2nd CKF / CKF tracks                   | 0.00588005 | 0.00588005 |
+| shared hits / CKF tracks                  |   0.297138 |   0.297138 |
 | forced measurements / used seeds          |          0 |          0 |
 |-------------------------------------------|------------|------------|
-| resolved tracks / used seeds     0.0- 0.5 |  0.0664767 |  0.0664767 |
-|                                  0.5- 1.0 |  0.0672065 |  0.0672065 |
-|                                  1.0- 1.5 |  0.0498197 |  0.0498197 |
-|                                  1.5- 2.0 |  0.0158661 |  0.0158661 |
-|                                  2.0- 2.5 |   0.019286 |   0.019286 |
+| resolved tracks / used seeds     0.0- 0.5 |  0.0666349 |  0.0666349 |
+|                                  0.5- 1.0 |  0.0674249 |  0.0674249 |
+|                                  1.0- 1.5 |  0.0500494 |  0.0500494 |
+|                                  1.5- 2.0 |  0.0158719 |  0.0158719 |
+|                                  2.0- 2.5 |  0.0192821 |  0.0192821 |
 |                                  2.5- 3.0 |          0 |          0 |
 |                                  3.0- 3.5 |          0 |          0 |
 |                                  3.5-+inf |          0 |          0 |
