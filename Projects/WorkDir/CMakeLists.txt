@@ -58,7 +58,8 @@ check_language( Fortran )
 check_language( CUDA )
 check_language( HIP )
 
-# Potentially override the Acts package to use a local checkout.
+# Potentially override the Acts package(s) to use a local checkout.
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/VecMemOverride.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ActsOverride.cmake)
 
 # Find the project that we depend on:
