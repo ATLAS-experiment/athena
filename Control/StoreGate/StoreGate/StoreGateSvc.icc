@@ -656,43 +656,6 @@ StoreGateSvc::removeDataAndProxy(const T* pObject)  {
   _SGXCALL(removeDataAndProxy, (pObject), StatusCode::FAILURE);
 }
 
-template <typename T, class TKEY>
-StatusCode 
-StoreGateSvc::retrieveHighestVersion(SG::ObjectWithVersion<T>& dobjWithVersion, 
-                                     const TKEY& requestedKey) const
-{
-  std::list< SG::ObjectWithVersion<T> > allVersions;
-  StatusCode sc(this->retrieveAllVersions(allVersions,requestedKey));
-  if (sc.isSuccess()) {
-    allVersions.sort(); // on highest version number
-    dobjWithVersion.versionedKey.copyVK(allVersions.back().versionedKey.rawVersionKey());
-  }
-  return sc;
-}
-
-template <typename T, class TKEY>
-StatusCode
-StoreGateSvc::retrieveAllVersions(std::list< SG::ObjectWithVersion<T> >& allVersions,
-                                  const TKEY& requestedKey) const
-{
-  StatusCode sc(StatusCode::FAILURE);
-  SG::ConstIterator<T> i,e;
-  if ((this->retrieve<T>(i,e)).isSuccess()){
-    SG::VersionedKey reqVK(requestedKey);
-    while (i != e) {
-      SG::VersionedKey vk(i.key());
-      if (reqVK.sameKey(vk)) {
-        sc = StatusCode::SUCCESS;
-        SG::ObjectWithVersion<T> okOWV(vk, i.proxy());
-        allVersions.push_back(okOWV);
-      }
-      ++i;
-    }
-  }
-  return sc;
-}
-
-
 template <typename T>
 std::unique_ptr<T> 
 StoreGateSvc::retrieveUniquePrivateCopy (const std::string& key)

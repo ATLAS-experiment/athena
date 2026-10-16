@@ -310,35 +310,6 @@ StoreGateSvc         DEBUG Retrieved non-const pointer to object pSwapFoo2 of ty
 
 
 
-*** StoreGateSvcClient_test VersionedKey BEGINS ***
-StoreGateSvc         DEBUG Recorded object @0x5111f40 with key aVersObj of type Foo (CLID 8101)
- in DataObject @0x5112b10
- object modifiable when retrieved
-StoreGateSvc         DEBUG Retrieved non-const pointer to object aVersObj of type Foo (CLID 8101)
-StoreGateSvc         DEBUG Recorded object @0x23d1e20 with key ;77;aVersObj of type Foo (CLID 8101)
- in DataObject @0x50fcd90
- object modifiable when retrieved
-StoreGateSvc         DEBUG Retrieved non-const pointer to object ;77;aVersObj of type Foo (CLID 8101)
-StoreGateSvc         DEBUG Retrieved non-const pointer to object aVersObj of type Foo (CLID 8101)
-StoreGateSvc         DEBUG Retrieved non-const pointer to object ;00;aVersObj of type Foo (CLID 8101)
-StoreGateSvc         DEBUG Recorded object @0x50fc5e0 with key ;88;aVersObj of type Foo (CLID 8101)
- in DataObject @0x50ebfe0
- object modifiable when retrieved
-StoreGateSvc         DEBUG Retrieved non-const pointer to object ;88;aVersObj of type Foo (CLID 8101)
-Now we expect to see an error message:
-----Error Message Starts--->>
-StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key ;88;aVersObj and clid 8101
- Pre-existing valid DataProxy @0x50ecea0 found in Store for key ;88;aVersObj with clid 8101
-StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x50fcfb0
- recorded with key ;88;aVersObj of type Foo (CLID 8101) in DataObject @0x5115590
-<<---Error Message Ends-------
-StoreGateSvc         DEBUG Recorded object @0x50eafb0 with key ;66;aVersObj of type Foo (CLID 8101)
- in DataObject @0x51130c0
- object modifiable when retrieved
-StoreGateSvc         DEBUG Retrieved non-const pointer to object aVersObj of type Foo (CLID 8101)
-*** StoreGateSvcClient_test VersionedKey OK ***
-
-
 StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=true
 *** test_DVL_conversions
 StoreGateSvc         DEBUG Recorded object @0x5113170 with key contd of type CV (CLID 82734625)
