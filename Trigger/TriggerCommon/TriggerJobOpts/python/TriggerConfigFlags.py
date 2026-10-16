@@ -38,12 +38,12 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag("Trigger.disableL1ConsistencyChecker", False,
                   help='force disabling the L1 ConsistencyChecker')
 
-    flags.addFlag('Trigger.enableL0Muon',
+    flags.addFlag('Trigger.enableL1Muon',
                   lambda prevFlags: prevFlags.GeoModel.Run >= LHCPeriod.Run4,
-                  help='enable Run-4+ L0 Muon simulation or decoding')
+                  help='enable Run-4+ L1Muon Simulation or decoding')
 
     flags.addFlag('Trigger.enableL1MuonPhase1', lambda prevFlags:
-                  (not prevFlags.Trigger.enableL0Muon) and
+                  (not prevFlags.Trigger.enableL1Muon) and
                   prevFlags.Trigger.EDMVersion >= 3 or prevFlags.Detector.EnableMM or prevFlags.Detector.EnablesTGC,
                   help='enable Run-3 LVL1 muon decoding')
 
@@ -62,14 +62,14 @@ def createTriggerFlags(doTriggerRecoFlags):
                   len(prevFlags.Input.Files) > 0 and prevFlags.Input.Format is Format.BS and prevFlags.Reco.EnableTrigger and getDataYear(prevFlags)<2024,
                   help='enable Legacy L1Calo simulation and/or decoding')
 
-    # L0MuonSim category (for Run-4+) : needs Trigger.enableL0Muon=True
-    flags.addFlag('Trigger.L0MuonSim.doEmulation',
-                  lambda prevFlags: prevFlags.Trigger.enableL0Muon and
+    # L1MuonSim category for Run-4+ : needs Trigger.enableL1Muon=True
+    flags.addFlag('Trigger.L1MuonSim.doEmulation',
+                  lambda prevFlags: prevFlags.Trigger.enableL1Muon and
                                     prevFlags.Input.isMC and
                                     'TruthParticleContainer' in prevFlags.Input.Collections,
-                  help='Emulate the L0Muon trigger TOBs from smeared truth muon particles')
+                  help='Emulate the L1Muon trigger TOBs from smeared truth muon particles')
 
-    # L1MuonSim category
+    # L1Muon Sim category in Run-3
     flags.addFlag('Trigger.L1MuonSim.EmulateNSW', False,
                   help='enable emulation tool for NSW-TGC coincidence')
 
