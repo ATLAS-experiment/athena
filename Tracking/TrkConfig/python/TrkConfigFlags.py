@@ -19,7 +19,6 @@ class PrimaryPassConfig(FlagEnum):
     Default = 'Main'
     Acts = 'Acts'
 
-
 class ITkPrimaryPassConfig(FlagEnum):
     FTF = 'ITkFTF'
     FastTracking = 'ITkFast'
@@ -34,17 +33,19 @@ class TrackFitterType(FlagEnum):
     GlobalChi2Fitter = 'GlobalChi2Fitter'
     GaussianSumFilter = 'GaussianSumFilter'
 
-
 class KalmanUpdatorType(FlagEnum):
     KalmanUpdator = 'KalmanUpdator'
     KalmanUpdator_xk = 'KalmanUpdator_xk'
     KalmanUpdatorSMatrix = 'KalmanUpdatorSMatrix'
 
-
 class PixelClusterSplittingType(FlagEnum):
     NeuralNet = 'NeuralNet'
     Truth = 'Truth'
 
+class PerigeeExpression(FlagEnum):
+    BeamLine = 'BeamLine'
+    Vertex = 'Vertex'
+    Origin = 'Origin'
 
 class TrackingComponent(FlagEnum):
     AthenaChain = "AthenaChain"  # full Athena Chain (default)
@@ -142,13 +143,17 @@ def createTrackingConfigFlags():
                      prevFlags.Egamma.Keys.Internal.EgammaTopoClusters + 'Fwd'))
 
     # Express track parameters wrt. to : 'BeamLine','BeamSpot','Vertex' (first primary vertex)
-    icf.addFlag("Tracking.perigeeExpression", lambda prevFlags:
-                "Vertex" if (prevFlags.Tracking.PrimaryPassConfig in [
-                             PrimaryPassConfig.HeavyIon, PrimaryPassConfig.VtxLumiHeavyIon] or
-                             prevFlags.Tracking.ITkPrimaryPassConfig in [
-                                 ITkPrimaryPassConfig.HeavyIon, ITkPrimaryPassConfig.ActsHeavyIon]
-                )
-                else "BeamLine")
+    def perigeeExpression(flags):
+        if (flags.Tracking.PrimaryPassConfig in [
+                PrimaryPassConfig.HeavyIon, PrimaryPassConfig.VtxLumiHeavyIon] or
+            flags.Tracking.ITkPrimaryPassConfig in [
+                ITkPrimaryPassConfig.HeavyIon, ITkPrimaryPassConfig.ActsHeavyIon]):
+            return PerigeeExpression.Vertex
+        if flags.Beam.Type is BeamType.Cosmics:
+            return PerigeeExpression.Origin
+        else:
+            return PerigeeExpression.BeamLine
+    icf.addFlag("Tracking.perigeeExpression", perigeeExpression)
 
     # to make eta overlap space points in endcap (aligned with search eta neighbour in strip endcaps)
     icf.addFlag("Tracking.doEndcapEtaOverlapSpacePoint", lambda prevFlags: prevFlags.ITk.doEndcapEtaNeighbour)

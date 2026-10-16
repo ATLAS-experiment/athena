@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType, Format
+from TrkConfig.TrkConfigFlags import PerigeeExpression
 from TrkConfig.TrackingPassFlags import printActiveConfig, printPrimaryConfig
 
 _flags_set = []  # For caching
@@ -579,7 +580,8 @@ def TrackFinalCfg(flags,
             flags,
             TrackLocation=[TrackContainer]))
 
-    if flags.Tracking.perigeeExpression == "BeamLine":
+    if flags.Tracking.perigeeExpression in [
+            PerigeeExpression.BeamLine, PerigeeExpression.Origin]:
         from xAODTrackingCnv.xAODTrackingCnvConfig import TrackParticleCnvAlgCfg
         result.merge(TrackParticleCnvAlgCfg(
             flags,

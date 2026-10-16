@@ -1,5 +1,6 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from TrkConfig.TrkConfigFlags import PerigeeExpression
 
 def isPrimaryPass(flags) -> bool:
     if not flags.hasCategory("Tracking.ActiveConfig"):
@@ -123,11 +124,11 @@ def ActsTrackRecoCfg(flags) -> ComponentAccumulator:
     persistifyCollection = True
     particleCollection = trackParticleContainerName
     perigeeExpression = flags.Tracking.perigeeExpression
-    if flags.Tracking.perigeeExpression == "Vertex":
+    if flags.Tracking.perigeeExpression is PerigeeExpression.Vertex:
         # We do not want to persistify this temporary collection
         persistifyCollection = False
         particleCollection = f"{trackParticleContainerName}Temporary"
-        perigeeExpression = "BeamLine"
+        perigeeExpression = PerigeeExpression.BeamLine
         
     # Track particles wrt BeamLine
     from InDetConfig.ITkActsParticleCreationConfig import ITkActsTrackParticleCreationCfg
@@ -151,7 +152,7 @@ def ActsTrackRecoCfg(flags) -> ComponentAccumulator:
     # track particle creation using the vertex
     # The track collection(s) unchanged, only the final track particle container
     # has a different name
-    if flags.Tracking.perigeeExpression == "Vertex":
+    if flags.Tracking.perigeeExpression is PerigeeExpression.Vertex:
         assert flags.Tracking.doVertexFinding, \
             f"Requested the computation of track particles wrt but flags.Tracking.doVertexFinding is set to {flags.Tracking.doVertexFinding}"
         print('Requesting to compute the track particle collection wrt the Vertex')
