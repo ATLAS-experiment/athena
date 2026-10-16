@@ -7,7 +7,7 @@ atlas_subdir( TruthD3PDMaker )
 atlas_add_component( TruthD3PDMaker
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES TruthUtils AtlasHepMCLib AthenaBaseComps AthenaKernel Navigation xAODTruth GaudiKernel GeneratorObjects TruthUtils D3PDMakerInterfaces D3PDMakerUtils MCTruthClassifierLib JetEvent TrkToolInterfaces ParticleTruth )
+                     LINK_LIBRARIES LINK_LIBRARIES AthenaKernel AtlasHepMCLib D3PDMakerUtils GaudiKernel GeneratorObjects MCTruthClassifierLib Navigation Particle ParticleTruth StoreGateLib TrkParticleBase TruthUtils VxVertex xAODEgamma xAODJet xAODMuon xAODTruth )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
