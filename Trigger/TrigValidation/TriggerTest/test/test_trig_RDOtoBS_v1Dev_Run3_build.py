@@ -56,7 +56,6 @@ ex.flags = [
    'Tracking.doTruth=False',
    'Egamma.doTruthAssociation=False',
    'Reco.PostProcessing.GeantTruthThinning=False',
-   'Trigger.L1.dogFex=False',
    'Trigger.enableL1CaloLegacy=False',
    'Trigger.enabledSignatures=\'[\"Jet\"]\'',
    f'IOVDb.GlobalTag=\'{defaultConditionsTags.RUN3_MC}\'',
