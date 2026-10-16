@@ -1,14 +1,14 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// PyAthenaUtils.cxx 
+// PyAthenaUtils.cxx
 // Implementation file for various PyAthena helpers
 // Author: S.Binet<binet@cern.ch>
 // Modified: Wim Lavrijsen <WLavrijsen@lbl.gov>
-/////////////////////////////////////////////////////////////////// 
+///////////////////////////////////////////////////////////////////
 
 // Python includes
 #include "Python.h"
@@ -25,7 +25,9 @@
 
 // PyROOT includes
 #include "TPython.h"
-#include "CPyCppyy/PyException.h"
+#ifdef ATLAS_HAVE_CPYCPPYY
+#  include "CPyCppyy/PyException.h"
+#endif  // ATLAS_HAVE_CPYCPPYY
 
 // Reflex includes
 #include "DataModelRoot/RootType.h"
@@ -37,6 +39,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 
 namespace {
 
@@ -46,8 +49,8 @@ namespace {
     TClassRef m_class;
   };
 
-StatusCode 
-fetchInterfaceId( PyObject* klass, 
+StatusCode
+fetchInterfaceId( PyObject* klass,
 		  unsigned long& id,
 		  unsigned long& major,
 		  unsigned long& minor )
@@ -55,8 +58,8 @@ fetchInterfaceId( PyObject* klass,
   Py_INCREF( klass );
 
   RootUtils::PyGILStateEnsure ensure;
-  PyObject* idObj = PyObject_CallMethod( klass, 
-					 const_cast<char*>("interfaceID"), 
+  PyObject* idObj = PyObject_CallMethod( klass,
+					 const_cast<char*>("interfaceID"),
 					 const_cast<char*>("") );
   Py_DECREF (klass);
   if ( 0 == idObj ) {
@@ -102,7 +105,7 @@ fetchInterfaceId( PyObject* klass,
 }
 } //> anonymous namespace
 
-std::string 
+std::string
 PyAthena::repr( PyObject* o )
 {
   // PyObject_Repr returns a new ref.
@@ -117,7 +120,7 @@ PyAthena::repr( PyObject* o )
   return cpp_repr;
 }
 
-std::string 
+std::string
 PyAthena::str( PyObject* o )
 {
   // PyObject_Str returns a new ref.
@@ -157,10 +160,14 @@ void PyAthena::throw_py_exception (bool display)
       Py_XDECREF (f);
     }
   }
+#ifdef ATLAS_HAVE_CPYCPPYY
   throw CPyCppyy::PyException();
+#else
+  throw std::runtime_error ("Python exception");
+#endif  // ATLAS_HAVE_CPYCPPYY
 }
 
-StatusCode 
+StatusCode
 PyAthena::callPyMethod ATLAS_NOT_THREAD_SAFE ( PyObject* self,
                                                const char* methodName,
                                                PyObject* arg /*= nullptr*/)
@@ -168,36 +175,36 @@ PyAthena::callPyMethod ATLAS_NOT_THREAD_SAFE ( PyObject* self,
   // that's a bit ugly...
   char* method = const_cast<char*>(methodName);
 
-  // check arguments 
+  // check arguments
   if ( 0 == self || 0 == method ) { return StatusCode::FAILURE; }
-  
-  // call Python 
+
+  // call Python
   RootUtils::PyGILStateEnsure ensure;
   PyObject* r;
   if (arg)
     r = PyObject_CallMethod( self, method, const_cast<char*>("O"), arg );
   else
     r = PyObject_CallMethod( self, method, const_cast<char*>("") );
-  
-  if ( 0 == r ) { 
+
+  if ( 0 == r ) {
     throw_py_exception();
   }
-  
+
   if ( PyLong_Check( r ) ) {
     StatusCode sc(PyLong_AS_LONG( r ));
     Py_DECREF( r );
     return sc;
   }
-  
-  // look for the method getCode with the signature: 
+
+  // look for the method getCode with the signature:
   //  ' int getCode() '
   PyObject* c = 0;
   if ( PyObject_HasAttrString (r, (char*)"getCode") ) {
-    c = PyObject_CallMethod( r, 
-			     const_cast<char*>("getCode"), 
+    c = PyObject_CallMethod( r,
+			     const_cast<char*>("getCode"),
 			     const_cast<char*>("") );
     Py_DECREF (r);
-  } 
+  }
 
   else {
     std::ostringstream msg;
@@ -209,17 +216,17 @@ PyAthena::callPyMethod ATLAS_NOT_THREAD_SAFE ( PyObject* self,
     Py_XDECREF (c);
     throw_py_exception();
   }
-  
+
   if ( !c ) {
     // error on python side...
     throw_py_exception();
   }
 
-  if ( PyLong_Check (c) ) { 
+  if ( PyLong_Check (c) ) {
     StatusCode sc(PyLong_AsLong (c));
     Py_DECREF (c);
     return sc;
-  } 
+  }
 
   else {
     std::ostringstream msg;
@@ -242,13 +249,13 @@ StatusCode PyAthena::queryInterface ATLAS_NOT_THREAD_SAFE
   StatusCode sc = StatusCode::FAILURE;
 
   {
-    std::cout 
+    std::cout
       << "==============[ " << PyAthena::repr(self) << " ]=============="
       << std::endl;
   }
 
   RootUtils::PyGILStateEnsure ensure;
-  PyObject* type = PyObject_GetAttrString( self, 
+  PyObject* type = PyObject_GetAttrString( self,
 					   const_cast<char*>("__class__") );
   if ( !type ) {
     Py_XDECREF(type);
@@ -256,15 +263,15 @@ StatusCode PyAthena::queryInterface ATLAS_NOT_THREAD_SAFE
   }
 
   PyObject* bases;
-  bases = PyObject_CallMethod( type, 
-			       const_cast<char*>("mro"), 
+  bases = PyObject_CallMethod( type,
+			       const_cast<char*>("mro"),
  			       const_cast<char*>("") );
   if ( !bases || !PySequence_Check( bases ) ) {
     Py_XDECREF(type);
     Py_XDECREF(bases);
     return sc;
   }
-  
+
   const int nBases = PySequence_Size( bases );
   if ( -1 == nBases ) {
     Py_XDECREF(type);
@@ -305,18 +312,18 @@ StatusCode PyAthena::queryInterface ATLAS_NOT_THREAD_SAFE
     const std::string cppName = reinterpret_cast<MyObjProxy*>(self)->m_class->GetName();
 
     std::cout << "::: would like to do: *ppvInterface = static_cast<"
-	      << cppBaseName << "*>( " 
+	      << cppBaseName << "*>( "
 	      << cppName << "|m_self );"
 	      << std::endl;
-    
+
     const RootType fromType( cppName );
     const RootType toType( cppBaseName );
     void* objProxy = TPython::CPPInstance_AsVoidPtr(self);
     *ppvInterface = objProxy;
     if (fromType.Class() && toType.Class())
       *ppvInterface = fromType.Class()->DynamicCast (toType.Class(), objProxy);
-    std::cout << "::: [" << cppName << "]: " 
-	      << ( (bool)fromType ? " OK" : "ERR" ) 
+    std::cout << "::: [" << cppName << "]: "
+	      << ( (bool)fromType ? " OK" : "ERR" )
 	      << " " << objProxy
 	      << "\n"
 	      << "::: [" << cppBaseName << "]: "
@@ -325,8 +332,8 @@ StatusCode PyAthena::queryInterface ATLAS_NOT_THREAD_SAFE
 	      << "\n";
     std::cout << "::: *ppvInterface: " << *ppvInterface << std::endl;
     if ( *ppvInterface ) {
-      PyObject* c = PyObject_CallMethod( self, 
-					 const_cast<char*>("addRef"), 
+      PyObject* c = PyObject_CallMethod( self,
+					 const_cast<char*>("addRef"),
 					 const_cast<char*>("") );
       if ( c && PyLong_Check(c) ) {
 	sc = StatusCode::SUCCESS;
@@ -348,7 +355,7 @@ StatusCode PyAthena::queryInterface ATLAS_NOT_THREAD_SAFE
 void PyAthena::pyAudit ATLAS_NOT_THREAD_SAFE
  ( PyObject* self,
    const char* method,
-   const char* evt, 
+   const char* evt,
    const char* component )
 {
   RootUtils::PyGILStateEnsure ensure;
@@ -365,8 +372,8 @@ void PyAthena::pyAudit ATLAS_NOT_THREAD_SAFE
 
   /// helper function for PyAthena::Aud
 void PyAthena::pyAudit ATLAS_NOT_THREAD_SAFE
-  ( PyObject* self, 
-    const char* method, 
+  ( PyObject* self,
+    const char* method,
     const char* evt,
     const char* component,
     const StatusCode& sc )
@@ -375,7 +382,11 @@ void PyAthena::pyAudit ATLAS_NOT_THREAD_SAFE
   PyObject* pySc = TPython::CPPInstance_FromVoidPtr((void*)&sc,
 						    "StatusCode");
   if ( !pySc ) {
+#ifdef ATLAS_HAVE_CPYCPPYY
     throw CPyCppyy::PyException();
+#else
+    throw std::runtime_error ("Python exception");
+#endif  // ATLAS_HAVE_CPYCPPYY
   }
 
   PyObject* call = PyObject_CallMethod(self,
@@ -390,4 +401,3 @@ void PyAthena::pyAudit ATLAS_NOT_THREAD_SAFE
   Py_DECREF(call);
   return;
 }
-

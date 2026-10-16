@@ -5,12 +5,20 @@ atlas_subdir( AthenaPython )
 
 # External dependencies:
 find_package( Python COMPONENTS Development )
-find_package( ROOT COMPONENTS Core ROOTTPython )
+find_package( ROOT COMPONENTS Core ROOTTPython
+   OPTIONAL_COMPONENTS CPyCppyy )
+
+# Helper definition(s).
+set( PYROOT_DEFS )
+if( TARGET ROOT::CPyCppyy )
+   set( PYROOT_DEFS PRIVATE_DEFINITIONS ATLAS_HAVE_CPYCPPYY )
+endif()
 
 # Component(s) in the package:
 atlas_add_library( AthenaPython
    AthenaPython/*.h src/*.cxx
    PUBLIC_HEADERS AthenaPython
+   ${PYROOT_DEFS}
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${Python_INCLUDE_DIRS}
    LINK_LIBRARIES AthenaBaseComps GaudiKernel CxxUtils
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${Python_LIBRARIES} DataModelRoot
