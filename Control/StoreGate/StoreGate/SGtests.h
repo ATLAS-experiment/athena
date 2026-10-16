@@ -45,8 +45,6 @@ namespace Athena_test
 
   void testTransientSwap(StoreGateSvc& rSG);
 
-  void testVersionedKey(StoreGateSvc& rSG);
-
   void testKeys(StoreGateSvc& rSG);
 
   void testRetrieveAux(StoreGateSvc& rSG);

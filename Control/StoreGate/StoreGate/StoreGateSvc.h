@@ -51,7 +51,6 @@
 #include "AthenaKernel/IIOVSvc.h"
 #include "StoreGate/SGIterator.h"
 #include "StoreGate/SGWPtr.h"
-#include "StoreGate/SGObjectWithVersion.h"
 #include "CxxUtils/checker_macros.h"
 
 #include "GaudiKernel/IIncidentListener.h"
@@ -337,35 +336,6 @@ public:
   /////////////////////////////////////////////////////////////////////////
   /// \name Advanced Client Interface: data object access
   //@{
-
-  /// Retrieve version with highest cycle number for a given T,KEY combination
-  /// If there is only one available version of this data object
-  /// the returned ObjectWithVersion<T>.versionedKey is set to requestedKey
-  /// NOTICE that this method is significantly slower than 
-  ///     retrieve(const T*, const TKEY&)
-  /// which returns the last recorded version rather than the one with the
-  /// highest cycle number.
-  /// @returns StatusCode::FAILURE if no dataObject found
-  template <typename T, class TKEY>
-  StatusCode retrieveHighestVersion(SG::ObjectWithVersion<T>& dobjWithVersion, 
-                                    const TKEY& requestedKey) const;
-
-  /// Retrieve all versions of a given T,KEY combination
-  /// sets allVersions, a ref to a vector of ObjectWithVersion<T>
-  /// If there is only one available version of this dataObject
-  /// allVersions[0].versionedKey is set to requestedKey.
-  /// @returns StatusCode::FAILURE if no dataObject found
-  //FIXME using a vector exposes ObjectWithVersion definition and hence
-  //FIXME VersionedKey.h. Should try an iface like
-  //FIXME  retrieveAllVersions(const TKEY& requestedKey,
-  //FIXME                      ObjectWithVersion<T>& begin,
-  //FIXME                      ObjectWithVersion<T>& end)
-  template <typename T, class TKEY>
-  StatusCode
-  retrieveAllVersions(std::list< SG::ObjectWithVersion<T> >& allVersions,
-                      const TKEY& requestedKey) const;
-
-  
 
   /// EXPERTS ONLY: like readPrivateCopy this method returns your own private
   /// copy of a data object of type T and given key, if available and locked.

@@ -303,7 +303,6 @@ int main ATLAS_NOT_THREAD_SAFE () {
 
   testTransientSwap(*pStore);
 
-  testVersionedKey(*pStore);
   pStore->clearStore(/*force=*/true).ignore();
 
   test_DVL_conversions (*pStore);

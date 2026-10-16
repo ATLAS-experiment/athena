@@ -42,7 +42,6 @@
 #include "SGTools/DataStore.h"
 #include "SGTools/StringPool.h"
 #include "SGTools/TransientAddress.h"
-#include "SGTools/SGVersionedKey.h"
 #include "PersistentDataModel/DataHeader.h"
 #include "StoreGate/StoreClearedIncident.h"
 #include "AthAllocators/ArenaHeader.h"
@@ -1077,37 +1076,6 @@ SGImplSvc::record_impl( DataObject* pDObj, const std::string& key,
 {
   CLID clid = pDObj->clID();
   std::string rawKey(key);
-  bool isVKey(SG::VersionedKey::isVersionedKey(key));
-  if (isVKey) {
-    //FIXME VersionedKeys will need to be handled more efficiently
-    SG::VersionedKey vk(rawKey);
-    DataProxy *dp(proxy(clid, vk.key()));
-    if (dp) {
-      //proxies primary key
-      const std::string& pTAName(dp->name());
-      //original key as versioned
-      SG::VersionedKey primaryVK(pTAName);
-      
-      //if the existing matching object has no version
-      //create a versioned alias for the original unversioned key
-      //so it will remain accessible
-      if (!SG::VersionedKey::isVersionedKey(pTAName)) {
-        if (!(this->addAlias(primaryVK.rawVersionKey(), dp)).isSuccess()) {
-          SG_MSG_WARNING ("record_impl: Could not setup alias key {} for unversioned object {}",
-                          primaryVK.rawVersionKey(), pTAName);
-          return nullptr;
-        }
-      }
-      if (vk.isAuto()) {
-        //make a new versioned key incrementing the existing version
-        SG::VersionedKey newVK(primaryVK.key(), primaryVK.version()+1);
-        //FIXME this will fail in a confusing way if version+1 is in use
-        //FIXME need a better error message below, probably looking at all
-        //FIXME aliases
-        rawKey = newVK.rawVersionKey();
-      }
-    }
-  }
   if (!allowOverwrite && m_pPPS) {
     //do not overwrite a persistent object
     DataProxy* dp = m_pStore->proxy (clid, rawKey);
@@ -1166,20 +1134,6 @@ SGImplSvc::record_impl( DataObject* pDObj, const std::string& key,
   }
 
   addAutoSymLinks (rawKey, clid, dp, tinfo);
-
-  //handle versionedKeys: we register an alias with the "true" key
-  //unless an object as already been recorded with that key.
-  //Notice that addAlias overwrites any existing alias, so a generic
-  //retrieve will always return the last version added 
-  //FIXME not the one with the highest version
-  if (isVKey) {
-    SG::VersionedKey vk(rawKey);
-    if (!(this->addAlias(vk.key(), dp)).isSuccess()) {
-      SG_MSG_WARNING ("record_impl: Could not setup alias key {} for"
-                      " VersionedKey {}. Generic access to this object with clid {} will not work",
-                      vk.key(), rawKey, clid);
-    }
-  }
 
   return dp;
 }

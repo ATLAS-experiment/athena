@@ -52,8 +52,6 @@
 #include "AthenaKernel/IIOVSvc.h"
 #include "StoreGate/SGIterator.h"
 #include "StoreGate/SGWPtr.h"
-#include "SGTools/SGVersionedKey.h"
-#include "StoreGate/SGObjectWithVersion.h"
 #include "AthAllocators/Arena.h"
 
 #include "GaudiKernel/IIncidentSvc.h"

@@ -30,7 +30,6 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "SGTools/DataStore.h"
-#include "SGTools/SGVersionedKey.h"
 #include "AthenaKernel/IProxyProviderSvc.h"
 #include "GaudiKernel/IConversionSvc.h"
 #include "GaudiKernel/IOpaqueAddress.h"
@@ -694,64 +693,6 @@ namespace Athena_test {
     assert(pFoo2->i() == 1);
 
     cout << "*** StoreGateSvcClient_test transientSwap OK ***\n\n" <<endl;
-  }
-
-  void testVersionedKey(::StoreGateSvc& rSG) 
-  {  
-    std::println ("\n*** StoreGateSvcClient_test VersionedKey BEGINS ***");
-    //start by creating an unversioned object to test handling of legacy keys
-    StatusCode sc;
-    sc = rSG.record(new Foo(11), "aVersObj"); assert(sc.isSuccess());
-    const Foo* pFoo(0);
-    assert(0 != (pFoo = rSG.retrieve<Foo>("aVersObj")));
-    assert(pFoo->i() == 11);
-    
-    //try to put a VersionedKey on top
-    VersionedKey myKey("aVersObj", 77);
-    sc = rSG.record(new Foo(77), (std::string)myKey); assert(sc.isSuccess());
-    const Foo* pFoo77 = rSG.retrieve<Foo>(myKey);
-    assert(0 != pFoo77);
-    assert(pFoo77->i() == 77);
-    //test that we can retrieve the same object with an unversioned key
-    pFoo = rSG.retrieve<Foo>("aVersObj");
-    assert(0 != pFoo);
-    assert(pFoo->i() == 77);
-    
-    //check we can retrieve the old object with a default unversioned key
-    VersionedKey defVK("aVersObj");
-    pFoo = rSG.retrieve<Foo>((std::string)defVK);
-    assert(0 != pFoo);
-    assert(pFoo->i() == 11);
-
-
-    const std::string baseKey("aVersObj");
-    VersionedKey my2Key(baseKey, 88);
-    sc = rSG.record(new Foo(88), (std::string)my2Key); assert(sc.isSuccess());
-    const Foo* pFoo88 = rSG.retrieve<Foo>(my2Key);
-    assert(0 != pFoo88);
-    assert(pFoo88->i() == 88);
-
-    auto foo66 = new Foo(66);
-    SGASSERTERROR(rSG.record(foo66, (std::string)my2Key).isSuccess());
-    VersionedKey my3Key(baseKey, 66);
-    foo66 = new Foo(66);
-    assert(rSG.record(foo66, (std::string)my3Key).isSuccess());
-
-    //test that a generic retrieve now returns the third recorded object
-    //Notice how a generic retrieve will always return the last recorded
-    //object with that key, independent from the numeric value of its version
-    assert(0 != (pFoo = rSG.retrieve<Foo>(baseKey)));
-    assert(pFoo->i() == 66);
-
-    
-
-    std::list<SG::ObjectWithVersion<Foo> > allVersions;
-    assert(rSG.retrieveAllVersions(allVersions, baseKey));
-    SG::ObjectWithVersion<Foo> highest;
-    assert(rSG.retrieveHighestVersion(highest, baseKey));
-    assert(highest.versionedKey.version() == 88);
-    
-    std::println ("*** StoreGateSvcClient_test VersionedKey OK ***\n\n");
   }
 
   void testKeys(::StoreGateSvc& rSG) {
