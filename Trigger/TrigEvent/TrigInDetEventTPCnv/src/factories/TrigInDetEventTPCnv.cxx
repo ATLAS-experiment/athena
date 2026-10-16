@@ -5,17 +5,6 @@
 // generate the T/P converter entries
 #include "AthenaKernel/TPCnvFactory.h"
 
-#include "TrigInDetEventTPCnv/TrigTauTracksInfo_tlp1.h"
-#include "TrigInDetEventTPCnv/TrigTauTracksInfo_p1.h"
-#include "TrigInDetEventTPCnv/TrigTauTracksInfoCollection_p1.h"
-#include "TrigInDetEventTPCnv/TrigTauTracksInfoCollection_tlp1.h"
-#include "TrigInDetEventTPCnv/TrigTauTracksInfoCollectionCnv_tlp1.h"
-
-#include "TrigInDetEventTPCnv/TrigTauTracksInfo_p2.h"
-#include "TrigInDetEventTPCnv/TrigTauTracksInfoCnv_p2.h"
-#include "TrigInDetEventTPCnv/TrigTauTracksInfoCollection_p2.h"
-#include "TrigInDetEventTPCnv/TrigTauTracksInfoCollectionCnv_p2.h"
-
 #include "TrigInDetEventTPCnv/TrigInDetTrackCollection_tlp2.h"
 #include "TrigInDetEventTPCnv/TrigInDetTrackCollectionCnv_tlp2.h"
 
@@ -170,16 +159,6 @@ DECLARE_TPCNV_FACTORY(TrigSpacePointCountsCollectionCnv_tlp1,
 DECLARE_TPCNV_FACTORY(TrigSpacePointCountsCollectionCnv_p4,
                       TrigSpacePointCountsCollection,
                       TrigSpacePointCountsCollection_p4,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigTauTracksInfoCollectionCnv_tlp1,
-                      TrigTauTracksInfoCollection,
-                      TrigTauTracksInfoCollection_tlp1,
-                      Athena::TPCnvVers::Old)
-
-DECLARE_TPCNV_FACTORY(TrigTauTracksInfoCollectionCnv_p2,
-                      TrigTauTracksInfoCollection,
-                      TrigTauTracksInfoCollection_p2,
                       Athena::TPCnvVers::Current)
                       
 DECLARE_TPCNV_FACTORY(TrigTrackCountsCnv_p1,

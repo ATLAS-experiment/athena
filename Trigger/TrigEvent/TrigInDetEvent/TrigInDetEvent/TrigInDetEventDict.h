@@ -6,8 +6,6 @@
 #define TRIG_INDET_DICT_H
 
 #include "TrigInDetEvent/TrigInDetTrack.h"
-#include "TrigInDetEvent/TrigTauTracksInfo.h"
-#include "TrigInDetEvent/TrigTauTracksInfoCollection.h"
 #include "TrigInDetEvent/TrigInDetTrackCollection.h"
 #include "TrigInDetEvent/TrigVertex.h"
 #include "TrigInDetEvent/TrigVertexCollection.h"
@@ -34,8 +32,6 @@ void dummyTriggerForTVCollTypedef(TrigVertexCollection a,
 				  DataVector<TrigSpacePointCountsCollection> f,
 				  DataVector<TrigTrackCounts> g,
 				  DataVector<TrigTrackCountsCollection> h,
-				  DataVector<TrigTauTracksInfo> i,
-				  DataVector<TrigTauTracksInfoCollection> j,
 				  DataVector<TrigTrtHitCounts> k,
 				  DataVector<TrigTrtHitCountsCollection> l,
                                   DataVector<TrigHisto1D> m,
@@ -52,8 +48,6 @@ void dummyTriggerForTVCollTypedef(TrigVertexCollection a,
   DataVector<TrigSpacePointCountsCollection> ff = f;
   DataVector<TrigTrackCounts> gg = g;
   DataVector<TrigTrackCountsCollection> hh = h;
-  DataVector<TrigTauTracksInfo> ii = i;
-  DataVector<TrigTauTracksInfoCollection> jj = j;
   DataVector<TrigTrtHitCounts> kk = k;
   DataVector<TrigTrtHitCountsCollection> ll = l;
   DataVector<TrigHisto1D> mm = m; 

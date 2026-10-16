@@ -65,12 +65,4 @@
  <class name="std::vector<TrigVertexCounts*>" />
  <class name="TrigVertexCounts" id="6EB3B5D2-3376-4231-8B0A-0984139F1D23" /> 
 
- <class name="TrigTauTracksInfoCollection" id="27E95E77-0D99-417D-83C7-7F1B8E6DE511" />
- <class name="TrigTauTracksInfo" id="630E4944-7EDE-4938-B189-020DBC0436AE" >
-   <field name="m_tracks" transient="true" />
- </class>
- <class name="DataVector<TrigTauTracksInfo>" id="562459CC-233C-4135-BAF8-515B194FDD10" />
- <class name="std::vector<TrigTauTracksInfo*>" />
-
-
 </lcgdict>
