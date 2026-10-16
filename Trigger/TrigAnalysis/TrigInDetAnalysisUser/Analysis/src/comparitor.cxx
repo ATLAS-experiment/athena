@@ -826,7 +826,147 @@ double chi2( TH1* h0, TH1* h1 ) {
 void ifdbg( const std::string& /* s */ ) {
   //  std::cout << "if dbg: " << s << std::endl;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+void d0fit( const HistDetails& histo, TH1* ht, const std::string& chain="" ) {
+
+  TH1* hf = ht;
   
+  std::cout << green << "\n\nd0fit :: beam fitting !!" << histo.name() << reset << std::endl;
+	    
+  TVirtualPad* old = gPad;
+	    
+  std::cout << "old canvas: " << gPad << std::endl;
+  
+  std::cout << "dbg histo name: " << histo.name() << std::endl;	    
+  
+  bool first = false;
+  
+  TCanvas* tc = 0;
+  
+  if ( histo.name().find("_rec")!=std::string::npos ) { 
+    //  if ( fitcanvas_rec == 0 ) { 
+    fitcanvas_rec = new TCanvas( "fit_rec", "", 700, 600 );
+    first = true;
+    // }
+    tc = fitcanvas_rec;
+  }
+  
+  if ( histo.name().find("_rec")==std::string::npos ) { 
+    //if ( fitcanvas == 0 ) { 
+    fitcanvas = new TCanvas( "fit", "", 700, 600 );
+    first = true;
+    //}
+    tc = fitcanvas;
+  }
+  
+  TVirtualPad* tp = gPad; 
+  
+  if ( tc ) tc->cd();
+  
+  /// do we need these ? - keep for the time being ...
+  //	    TH1D* hf = (TH1D*)rtest.Mean()->Clone("cck");
+  //	    TH1D* hf = rtest.Mean(); 
+  
+  if ( histo.name().find("_rec")!=std::string::npos ) hf->SetTitle(";Trigger #phi;Trigger d_{0} [mm]");
+  else                                                hf->SetTitle(";Offline #phi;Offline d_{0} [mm]");
+  
+  TF1* tf = new TF1( "sinus", "[0]*sin(x+[1])+[2]" );
+  
+  tf->SetLineWidth(1);
+  
+  hf->GetYaxis()->SetTitleOffset( hf->GetYaxis()->GetTitleOffset()*1.1 );
+  
+  { 
+    TCanvas* tfc = new TCanvas( "tmp", "", 700, 600 ); 
+    tfc->cd();
+    hf->Fit( tf );      
+    delete tfc;
+  }	    
+  
+  double phi0 = tf->GetParameter(1);
+  //	    double x = 0.0001*int(tf->GetParameter(0)*cos(phi0)*10000);
+  //	    double y = 0.0001*int(tf->GetParameter(0)*sin(phi0)*10000);
+  double x = tf->GetParameter(0)*cos(phi0);
+  double y = tf->GetParameter(0)*sin(phi0);
+  double off = tf->GetParameter(2);
+  
+  std::cout << "\tx = " << x << std::endl;
+  std::cout << "\ty = " << y << std::endl;
+  std::cout << "\toffset = " << off << std::endl;
+  
+  std::string cckstr = chain;
+  
+  cckstr = cckstr.substr( cckstr.find("HLT_IDTrack") );
+  
+  std::string vstr = chain;
+  
+  vstr.resize(vstr.find("_boffperf"));
+  vstr.resize(vstr.find("_L1"));
+  
+  hf->SetMinimum( -0.03 );
+  hf->SetMaximum(  0.03 );
+  
+  tc->cd();
+  
+  if ( first ) hf->DrawCopy();
+  
+  hf->DrawCopy("same");
+  hf->DrawCopy("samee");
+  
+  
+  //  DrawLabel( 0.2, 0.89, cckstr );
+  // DrawLabel( 0.2, 0.85, vstr );
+  
+  DrawLabel( 0.2, 0.81, "x = " + eround(x) + " mm" );
+  DrawLabel( 0.2, 0.77, "y = " + eround(y) + " mm" );
+  DrawLabel( 0.2, 0.73, "offset = " + eround(off) + " mm" );
+  
+  std::string sht = chain+"-"+histo.name()+"-fit.pdf";
+  
+  size_t p = sht.find("/");
+  
+  while ( p!=std::string::npos ) { 
+    sht.erase( p, 1 );
+    p = sht.find("/");
+  } 
+  
+
+  gPad->Print( sht.c_str() );
+  gPad->Print( "sht.pdf" );
+  
+  delete tf;
+  
+  tp->cd();
+  
+  gPad = old; 
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2183,23 +2323,25 @@ int main(int argc, char** argv) {
       //    bool uselogy = yinfo.log();
       
       for ( unsigned int j=0; j<chains.size(); j++)  {
+
+	bool d0mod = false;
 	
-      TFile* fftest = ftest;
-      TFile* ffref  = fref;
-
-      std::string cc = ftest->GetName();
-      std::string cr = "";
-
-      if ( fref ) cr = fref->GetName();
-
-      if ( chainfiles.size()>0 && chainfiles.size()>j ) ffref = fftest = chainTFiles[j];
-
+	TFile* fftest = ftest;
+	TFile* ffref  = fref;
+	
+	std::string cc = ftest->GetName();
+	std::string cr = "";
+	
+	if ( fref ) cr = fref->GetName();
+	
+	if ( chainfiles.size()>0 && chainfiles.size()>j ) ffref = fftest = chainTFiles[j];
+	
 	/// get the actual chain name and track collection from 
 	/// the Chain histogram if present
 	
 	std::cout << "chain:    " << chains[j] << "\taddchains: " << addchains << std::endl;
 	std::cout << "chainref: " << chainref[j] << std::endl;
-
+	
 	noreftmp = noref;
 	Plotter::setplotref(!noreftmp);
 	
@@ -2209,10 +2351,9 @@ int main(int argc, char** argv) {
 	TH1F* htestnum = 0;
 	TH1F* htestden = 0;
 	TH1F* hrefnum  = 0;
-
-	TH2D* h2test = 0;
-
 	
+	TH2D* h2test = 0;
+      
 	TGraphAsymmErrors* tgtest = 0;
 	
 	std::cout << "refchain.size() " << refchain.size() << std::endl;
@@ -2319,7 +2460,7 @@ int main(int argc, char** argv) {
 	  
 	  /// get the test histogram
 	    
-	  Resplot rtest("tmp", htest2d );
+	  Resplot::Resplot rtest("tmp", htest2d );
 
 	  std::cout << "Resplot rtest\t" << rtest.finalised() << std::endl;
 
@@ -2357,8 +2498,12 @@ int main(int argc, char** argv) {
 	  std::cout << "\nhisto.name(): " << histo.name() << std::endl;
 
 	  std::cout << reset << std::endl;
-	  
-	  if ( true && histo.name().find("d0_vs_phi")!=std::string::npos ) {
+
+	  if ( !d0mod && histo.name().find("d0_vs_phi")!=std::string::npos ) {
+
+	    d0mod = true;
+	    
+	    std::cout << green << "\n\nbeam fitting !!" << histo.name() << reset << std::endl;
 	    
 	    TVirtualPad* old = gPad;
 	    
@@ -2488,7 +2633,7 @@ int main(int argc, char** argv) {
 	      
 	      std::cout << "Resplot rref:  " << href2d << std::endl;
 
-	      Resplot rref("tmp", href2d );
+	      Resplot::Resplot rref("tmp", href2d );
 
 	      std::cout << "Resplot rref:  " << href2d << " (2)" << std::endl;
 
@@ -2712,6 +2857,12 @@ int main(int argc, char** argv) {
 
 	if ( fulldbg ) std::cout << __LINE__ << std::endl;
 
+	if ( !d0mod && histo.name().find("d0_vs_phi")!=std::string::npos ) {
+	  d0mod = true;
+	  if ( htest ) d0fit( histo, htest, chains[j] );
+	  if ( href  ) d0fit( histo, href,  chains[j] );
+	}
+	
 	if ( !do2D && make_ref_efficiencies ) { 
 
 	  std::cout << "make ref efficiencies" << std::endl; 

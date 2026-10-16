@@ -36,12 +36,12 @@ int main() {
   double  ylimithi =  30;
 
 
-  Resplot  plot1("plot1", Nxbins, xlimitlo, xlimithi,   Nybins, ylimitlo, ylimithi );
-  Resplot  plot2("plot2", Nxbins, xlimitlo, xlimithi,   Nybins, ylimitlo, ylimithi );
+  Resplot::Resplot  plot1("plot1", Nxbins, xlimitlo, xlimithi,   Nybins, ylimitlo, ylimithi );
+  Resplot::Resplot  plot2("plot2", Nxbins, xlimitlo, xlimithi,   Nybins, ylimitlo, ylimithi );
 
   std::cout << "running" << std::endl;
 
-  Random& rnd = Random::RandomBuilder();
+  Resplot::Random& rnd = Resplot::Random::RandomBuilder();
 
 
   // loop over some "events"

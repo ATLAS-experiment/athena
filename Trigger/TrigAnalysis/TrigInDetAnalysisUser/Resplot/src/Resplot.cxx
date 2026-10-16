@@ -1,4 +1,3 @@
-
 /**
  **
  **   @file         Resplot.cxx  
@@ -32,18 +31,21 @@
 #include "generate.h"
 #include "rmsFrac.h"
 
-ClassImp(Resplot)
+namespace Resplot { 
+
+// ClassImp(Resplot)
 
 
-bool Resplot::s_mAddDirectoryStatus = true;
-bool Resplot::s_interpolate_flag = true;
-bool Resplot::s_nofit = false;
+bool s_mAddDirectoryStatus = false;
+
+bool s_interpolate_flag = true;
+bool s_nofit = false;
 
 /// use the new error estimates
-bool Resplot::s_oldrms95   = true;
-bool Resplot::s_scalerms95 = true;
+bool s_oldrms95   = true;
+bool s_scalerms95 = true;
 
-Resplot::ERROR Resplot::s_ErrorSet = Resplot::OK;
+// const Resplot::ERROR Resplot::s_ErrorSet = Resplot::OK;
 
 
 void binwidth(TH1D* h) { 
@@ -109,51 +111,80 @@ double getWeights(TH2D* h) {
 
 const std::string Resplot::s_rversion = "resplot-v29";
 
-void GetStats( TH1D* h, std::vector<double>& stats ) {
-  
-  stats.clear();
-  stats.resize(4);
+int  GetStats( TH1D* h, std::vector<double>& stats ) {
+
+  int errorstate = 0;
+
+  stats.assign(4,0); 
   
   TAxis& fXaxis = *h->GetXaxis();
+
+  /// what all these egregious root versions of standard types and
+  /// standard functions, uint32_t, std::fabs etc 
+
+  Int_t firstBinX = fXaxis.GetFirst();
+  Int_t lastBinX  = fXaxis.GetLast();
+
+  int del = lastBinX - firstBinX;
   
+  if ( del<1 ) return errorstate = 1; 
+    
   double s   = 0;
   double sx  = 0;
-  double sx2 = 0;
-  double sx4 = 0;
-  
+
+  double sr2 = 0;
+  double sr4 = 0;
   
   //  if ( fXaxis.TestBit(TAxis::kAxisRange)  ) {
   //    for (bin=0;bin<4;bin++) stats[bin] = 0;
-  
-  Int_t firstBinX = fXaxis.GetFirst();
-  Int_t lastBinX  = fXaxis.GetLast();
+
   // include underflow/overflow if TH1::StatOverflows(kTRUE) in case no range is set on the axis
   //      if (fgStatOverflows && !fXaxis.TestBit(TAxis::kAxisRange)) {
   //   if (firstBinX == 1) firstBinX = 0;
   //   if (lastBinX ==  fXaxis.GetNbins() ) lastBinX += 1;
   // }
+
   for (int binx = firstBinX; binx <= lastBinX; binx++) {
     double x   = fXaxis.GetBinCenter(binx);
     double w   = TMath::Abs(h->GetBinContent(binx));
-    //    err = TMath::Abs(GetBinError(binx));
-    s += w;
-    // stats[1] += err*err;
-    sx  += w*x;
-    sx2 += w*x*x;
-    sx4 += w*x*x*x*x;
+    s  += w;
+    sx += w*x;
+  }
+
+  if (s<=0){
+    std::cerr << "\tUnphysical denominator zero or less in GetStats()\n";
+    return errorstate = 2;
   }
   
-  if (s == 0){
-    std::cerr<<"Denominator of zero in GetStats()\n";
-    return;
-  }
   double mu = sx/s;
   
-  double v = sx2/s-mu*mu;
+  for (int binx = firstBinX; binx <= lastBinX; binx++) {
+    double x   = fXaxis.GetBinCenter(binx);
+    double w   = TMath::Abs(h->GetBinContent(binx));
+    double r = (x-mu);
+    sr2 += w*r*r;
+    sr4 += w*r*r*r*r;
+  }
   
-  double rms       = std::sqrt(v);
-  double rmserror  = std::sqrt(0.25*(sx4/v-v*s))/s;
-  //  double rmserror1 = std::sqrt(0.4*(sx4/s-v*v)/s);  << is this the correct one? it seems about 2* too large 
+  
+  double v = sr2/s;
+
+  double rms      = 0;
+  double rmserror = 0; 
+
+  /// calculate the rms and rms error ...
+  
+  if ( v<=0 ) return errorstate = 3; 
+    
+  double rms0 = std::sqrt(v);
+  
+  rms = rms0;
+  double r2 = 0.25*(sr4/v-sr2);
+  
+  if ( r2>0 ) rmserror = std::sqrt(r2)/s;
+  else errorstate = 4;
+
+  // prepare return values ...
   
   stats[0] = mu;
   stats[1] = std::sqrt(v/s);
@@ -161,30 +192,29 @@ void GetStats( TH1D* h, std::vector<double>& stats ) {
   stats[2] = rms;
   stats[3] = rmserror;
   
-  //  double duff = std::sqrt(0.5*v/s);
-  
 #if 0
   std::cout << "GetStats() "  
   //   << "\tmean " << stats[0] << " +- " << stats[1]
   << "\trms "  << stats[2] << " +- " << stats[3] << "\t(" << rmserror1 << ")" << "\t root " << duff << std::endl;
 #endif
-  
+
+  return errorstate;
 } 
 
 
+// #include "simpletimer.h"
 
 Resplot::~Resplot() { 
-  //  std::cout << "Resplot::~Resplot() " << Name() << std::endl;
-  
+
+  //   struct timeval st = simpletimer_start();
+
   delskip( m_Nentries );
   delskip( m_h2d ); 
   delskip( m_h1d ); 
   delskip( m_mean );
   delskip( m_sigma );
   delskip( m_chi2 );
-  
-  //    std::cout << "Resplot::~Resplot() deleteing slices" << Name() << std::endl;
-  
+
   for ( unsigned i=0 ; i<m_slices.size() ; i++ ) delskip(m_slices[i]);
   
   //    TH2D::SetDirectory(0);
@@ -337,6 +367,8 @@ void Resplot::Initialise(const std::string& name,
 }
 
 
+// #if 0
+
 /// boooo, need to use the *stupid* Int_t class because I foolishly
 /// gave this function the same name as TObject::Write
 
@@ -368,6 +400,9 @@ Int_t Resplot::DWrite(TDirectory* g) const {
 } 
 
 
+// #endif
+
+
 
 // Fill the helper histograms
 
@@ -389,13 +424,10 @@ double NCounter(TH1D* h) {
 int Resplot::Finalise(double a, double b, TF1* (*func)(TH1D* s, double a, double b)) {
   
   //  gDirectory->pwd();
-  
-  s_ErrorSet = OK;
-  
   //  std::cout << "Resplot::Finalise() Name " << Name() << "\tm_n_primary " << m_n_primary << std::endl;
   
-  gStyle->SetOptFit(1111);
-  gStyle->SetOptStat(2211);
+  //  gStyle->SetOptFit(1111);
+  //  gStyle->SetOptStat(2211);
   
   if ( m_finalised ) { 
     std::cerr << "Resplot::Finalise() " << m_name << " already called" << std::endl;
@@ -403,13 +435,15 @@ int Resplot::Finalise(double a, double b, TF1* (*func)(TH1D* s, double a, double
   }
   
   //  std::cout << "Resplot::Finalise() " << m_name << std::endl;  
-  
+
   clear();
   
   m_mean->SetStats(false);
   m_sigma->SetStats(false);
   
 #if 1
+
+  std::vector<double> ylimits = getLimits( m_h2d->GetYaxis() ); 
   
   for ( int i=1 ; i<=m_n_primary ; i++ ) {
     
@@ -427,7 +461,9 @@ int Resplot::Finalise(double a, double b, TF1* (*func)(TH1D* s, double a, double
     
     TH1D* s;
     if ( !m_finalised ) { 
-      s = m_h2d->ProjectionY(tagname("slice",i), i, i, "e");
+      //      s = m_h2d->ProjectionY(tagname("slice",i), i, i, "e");
+
+      s = projectionY( m_h2d, i, ylimits, tagname("slice", i) );
       
       //      std::cout << i << " fitnull " << getWeights( s ) << std::endl; 
       
@@ -496,7 +532,6 @@ int Resplot::Finalise(double a, double b, TF1* (*func)(TH1D* s, double a, double
   }
   
   
-  
 #endif
   
   
@@ -536,16 +571,18 @@ int Resplot::Finalise(double a, double b, TF1* (*func)(TH1D* s, double a, double
     delete f2;
   }
   else {
-    if ( !s_nofit ) std::cerr << "null overall fit Resplot:" << m_name << std::endl;
+    if ( !s_nofit ) std::cerr << "\tnull overall fit Resplot:" << m_name << std::endl;
     m_g_mean  = StatVal(0,0);
     m_g_sigma = StatVal(0,0);
   }
   
   
-  if ( AddDirectoryStatus() ) SetDirectory(gDirectory);
+  //  if ( AddDirectoryStatus() ) SetDirectory(gDirectory);
   
   m_finalised = true;
+
   
+#if 0  
   if ( s_ErrorSet!=OK ) {
     if ( s_ErrorSet == HISTOWIDTH ) {
       std::cerr << __FUNCTION__ << " for " << m_name 
@@ -556,294 +593,78 @@ int Resplot::Finalise(double a, double b, TF1* (*func)(TH1D* s, double a, double
       << " :\tbins too wide: cannot calculate rms95 " << std::endl;
     }
   }
+#endif
   
   return 0;
 }
 
 
-/// rotate a TH2D
-TH2D* Resplot::rotate(const TH2* h) { 
+/// rotate a TH2
+TH2D* Resplot::rotate(const TH2* h, const std::string& s) { 
   
-  std::vector<double> xbins;
-  std::vector<double> ybins;
+  std::vector<double> xbins = getLimits( h->GetXaxis() );
+  std::vector<double> ybins = getLimits( h->GetYaxis() );
   
-  TH1D* hy = (TH1D*)h->ProjectionX("1dx", 1, h->GetNbinsY());
-  TH1D* hx = (TH1D*)h->ProjectionY("1dy", 1, h->GetNbinsX());
+  //  std::cout << "rotate:" << std::endl;
+  //  std::cout << "x: " << xbins[0] << " - " << xbins.back() << std::endl;  
+  //  std::cout << "y: " << ybins[0] << " - " << ybins.back() << std::endl;  
+
+  std::string name = s;
+  if ( s.empty() ) name = "duff";
+
+  TH2D* h2 = new TH2D( name.c_str(),"", ybins.size()-1, &ybins[0],  xbins.size()-1, &xbins[0] );  
+  h2->SetDirectory(0);
   
-  hy->SetDirectory(0);
-  hx->SetDirectory(0);
-  
-  for ( int i=0 ; i<=hx->GetNbinsX()+1 ; i++ ) xbins.push_back( hx->GetBinLowEdge(i+1) );
-  for ( int i=0 ; i<=hy->GetNbinsX()+1 ; i++ ) ybins.push_back( hy->GetBinLowEdge(i+1) );
-  
-  std::cout << "rotate:" << std::endl;
-  
-  std::cout << "x: " << xbins[0] << " - " << xbins.back() << std::endl;  
-  std::cout << "y: " << ybins[0] << " - " << ybins.back() << std::endl;  
-  
-  TH2D* h2 = new TH2D("duff","duff", hx->GetNbinsX(), &xbins[0],  hy->GetNbinsX(), &ybins[0] );  
-  
-  for ( int i=0 ; i<hx->GetNbinsX() ; i++ ) { 
-    for ( int j=0 ; j<hy->GetNbinsX() ; j++ ) { 
-      h2->SetBinContent(j+1,i+1, h->GetBinContent(i+1,j+1));
-      h2->SetBinError(j+1,i+1, h->GetBinError(i+1,j+1));
+  for ( int i=1 ; i<=h->GetNbinsX() ; i++ ) { 
+    for ( int j=1 ; j<=h->GetNbinsY() ; j++ ) { 
+      h2->SetBinContent(j,i, h->GetBinContent(i,j));
+      h2->SetBinError(j,i, h->GetBinError(i,j));
     }
   }
   
   h2->SetEntries( h->GetEntries() );
-  
-  delete hy;
-  delete hx;
-  
+    
   return h2;
 }
 
 
+/// copy a TH2
+TH2D* Resplot::copy(const TH2* h, const std::string& s) { 
 
+  std::vector<double> xbins = getLimits( h->GetXaxis() );
+  std::vector<double> ybins = getLimits( h->GetYaxis() );
+  
+  //  std::cout << "copy:" << std::endl;
+  //  std::cout << "x: " << xbins[0] << " - " << xbins.back() << std::endl;  
+  //  std::cout << "y: " << ybins[0] << " - " << ybins.back() << std::endl;  
 
-/// combine bins in a 2D histogram
-/// it takes a value, x and all the bins with BinLowEdge > x get 
-/// combined N bins at a time. 
-TH2D* Resplot::combine(const TH2* h, double x, int N) { 
+  std::string name = s;
+  if ( s.empty() ) name = "duff";
   
-  if ( N==0 ) return 0; 
+  TH2D* h2 = new TH2D( name.c_str(), "", xbins.size()-1, &xbins[0],  ybins.size()-1, &ybins[0] );  
+  h2->SetDirectory(0);
   
-  std::vector<double> xbins;
-  std::vector<double> ybins;
-  
-  TH1D* hx = (TH1D*)h->ProjectionX("r1dx", 1, h->GetNbinsY()); 
-  TH1D* hy = (TH1D*)h->ProjectionY("r1dy", 1, h->GetNbinsX());
-  
-  hy->SetDirectory(0);
-  hx->SetDirectory(0);
-  
-  for ( int i=0 ; i<=hx->GetNbinsX()+1 ; i++ ) {
-    xbins.push_back( hx->GetBinLowEdge(i+1) );
-    if ( hx->GetBinLowEdge(i+1)>x ) for ( int k=1 ; k<N ; k++, i++ );
-  }
-  
-  for ( int i=0 ; i<=hy->GetNbinsX()+1 ; i++ ) ybins.push_back( hy->GetBinLowEdge(i+1) );
-  
-  if ( xbins.size()==0 || ybins.size()==0 ) { 
-    std::cerr << "Resplot::combine() bad limits for histogram: N xbins: " << xbins.size() << "\tN ybins: " << ybins.size() << std::endl;
-    return 0;
-  }
-  
-  std::cout << "x: " << xbins[0] << " - " << xbins.back() << std::endl;
-  std::cout << "y: " << ybins[0] << " - " << ybins.back() << std::endl;
-  
-  TH2D* h2 = new TH2D("duff","duff", xbins.size()-1, &xbins[0],  ybins.size()-1, &ybins[0] ); 
-  h2->SetDirectory(0); 
-  
-  
-  for ( int j=0 ; j<hy->GetNbinsX() ; j++ ) { 
-    int xbin = 1;
-    for ( int i=0 ; i<hx->GetNbinsX() ; i++ ) { 
-      double entries = h->GetBinContent(i+1,j+1);
-      double errorsq = h->GetBinError(i+1,j+1)*h->GetBinError(i+1,j+1);
-      if ( hx->GetBinLowEdge(i+1)>x ) { 
-        for ( int k=1 ; k<N ; k++, i++ ) { 
-          entries += h->GetBinContent(i+2,j+1);
-          errorsq += h->GetBinError(i+2,j+1)*h->GetBinError(i+2,j+1);
-        }
-      }
-      h2->SetBinContent(xbin, j+1, entries);
-      h2->SetBinError(xbin++, j+1, std::sqrt(errorsq) );
+  for ( int i=1 ; i<=h->GetNbinsX() ; i++ ) { 
+    for ( int j=1 ; j<=h->GetNbinsY() ; j++ ) { 
+      h2->SetBinContent(i,j, h->GetBinContent(i,j));
+      h2->SetBinError(i,j, h->GetBinError(i,j));
     }
   }
   
   h2->SetEntries( h->GetEntries() );
-  
-  delete hy;
-  delete hx;
-  
+    
   return h2;
 }
 
-
-
-/// combine bins in a 2D histogram
-/// it takes a value, x and all the bins with BinLowEdge > x get 
-/// combined N bins at a time. 
-TH1D* Resplot::combine(const TH1* h, double x, int N) { 
-  
-  if ( N==0 ) return 0; 
-  
-  std::vector<double> xbins;
-  
-  for ( int i=0 ; i<=h->GetNbinsX()+1 ; i++ ) {
-    xbins.push_back( h->GetBinLowEdge(i+1) );
-    if ( h->GetBinLowEdge(i+1)>x ) for ( int k=1 ; k<N ; k++, i++ );
-  }
-  
-  if ( xbins.size()==0 ) { 
-    std::cerr << "Resplot::combine() bad limits for histogram: N xbins: " << xbins.size() << std::endl;
-    return 0;
-  }
-  
-  std::cout << "x: " << xbins[0] << " - " << xbins.back() << std::endl;
-  
-  TH1D* h2 = new TH1D(  (std::string(h->GetName())+"-duff").c_str(),"duff", xbins.size()-1, &xbins[0] );
-  h2->SetDirectory(0); 
-  
-  
-  int xbin = 1;
-  for ( int i=0 ; i<h->GetNbinsX() ; i++ ) { 
-    double entries = h->GetBinContent(i+1);
-    double errorsq = h->GetBinError(i+1)*h->GetBinError(i+1);
-    if ( h->GetBinLowEdge(i+1)>x ) { 
-      for ( int k=1 ; k<N ; k++, i++ ) { 
-        entries += h->GetBinContent(i+2);
-        errorsq += h->GetBinError(i+2)*h->GetBinError(i+2);
-      }
-    }
-    
-    h2->SetBinContent(xbin, entries);
-    h2->SetBinError(xbin++, std::sqrt(errorsq) );
-  }
-  
-  h2->SetEntries( h->GetEntries() );
-  
-  return h2;
-}
-
-
-
-/// combine bins in a 2D histogram
-/// it takes a value, x and all the bins with BinLowEdge > x get 
-/// combined N bins at a time. 
-// TH2D* Resplot::combine(const TH2* h, double epsilon) { 
-TH2D* Resplot::combine(const TH2* h, double inveps2) { 
-  
-  std::cout << "combine" << std::endl;
-  
-  //    if ( epsilon==0 ) return 0; 
-  
-  std::vector<double> xbins;
-  std::vector<double> ybins;
-  
-  std::cout << "projection" << std::endl;
-  
-  TH1D* hx = (TH1D*)h->ProjectionX("r1dx", 1, h->GetNbinsY()); 
-  hx->SetDirectory(0);
-  
-  
-  //    hy->SetDirectory(0);
-  //    hx->SetDirectory(0);
-  
-  //    double inveps2 = 1/(epsilon*epsilon);
-  
-  double N = 0;
-  
-  bool newbin = true;
-  
-  std::cout << "combining bins " << std::endl;
-  
-  for ( int i=1 ; i<=hx->GetNbinsX() ; i++ ) {
-    
-    TH1D* hy = (TH1D*)h->ProjectionY("r1dy", i, i );
-    hy->SetDirectory(0);
-    N += generate::GetEntries(hy);
-    delete hy;
-    
-    if ( xbins.size()==0 ) { 
-      if ( N==0 ) continue;
-      else xbins.push_back( hx->GetBinLowEdge(i) );
-    }
-    
-    if ( newbin ) xbins.push_back( hx->GetBinLowEdge(i+1) );
-    else          xbins.back() = hx->GetBinLowEdge(i+1);
-    
-    newbin = false;
-    
-    if ( xbins.size()>0 ) std::cout << i << "\tN " << N << " " << " (" << inveps2 << ")" << "\t" << xbins.back() << std::endl;
-    
-    if ( N >= inveps2 ) { 
-      newbin = true;
-      N = 0;
-    }
-  }
-  
-  std::cout << "finishsed " << xbins.size() << std::endl; 
-  
-  TH1D* hy = (TH1D*)h->ProjectionY("1dy", 1, h->GetNbinsX());
-  hy->SetDirectory(0);
-  for ( int i=0 ; i<=hy->GetNbinsX()+1 ; i++ ) ybins.push_back( hy->GetBinLowEdge(i+1) );
-  
-  std::cout << "combine" << std::endl;
-  std::cout << "x bins " << hx->GetNbinsX() << "\t y bins " << hy->GetNbinsX() << std::endl;
-  
-  if ( xbins.size()==0 || ybins.size()==0 ) { 
-    std::cerr << "Resplot::combine() bad limits for histogram: N xbins: " << xbins.size() << "\tN ybins: " << ybins.size() << std::endl;
-    return 0;
-  }
-  
-  std::cout << "x: " << xbins.size() << " " << xbins[0] << " - " << xbins.back() << std::endl;
-  std::cout << "y: " << ybins.size() << " " << ybins[0] << " - " << ybins.back() << std::endl;
-  
-  TH2D* h2 = new TH2D( (std::string(h->GetName())+"-duff").c_str(), "duff", xbins.size()-1, &xbins[0],  ybins.size()-1, &ybins[0] ); 
-  h2->SetDirectory(0); 
-  
-  
-  for ( int j=1 ; j<=hy->GetNbinsX() ; j++ ) { 
-    
-    unsigned xbin = 0;
-    
-    for ( int i=1 ; i<=hx->GetNbinsX() ; i++ ) { 
-      
-      while ( hx->GetBinCenter(i)>xbins[xbin+1] && xbin<(xbins.size()-1) ) xbin++; 
-      
-      if ( hx->GetBinCenter(i)>=xbins[xbin] && hx->GetBinCenter(i)<xbins[xbin+1] ) { 
-        
-        /// bin contentes
-        double n  = h->GetBinContent(i,j);
-        double nh = h2->GetBinContent(xbin+1, j);
-        h2->SetBinContent(xbin+1, j, nh+n);
-        
-        /// bin error
-        double ne  = h->GetBinError(i,j);
-        double nhe = h2->GetBinError(xbin+1, j);
-        h2->SetBinError(xbin+1, j, std::sqrt( ne*ne + nhe*nhe ) );
-        
-      }
-    }
-    
-  }
-  
-  h2->SetEntries( h->GetEntries() );
-  
-  delete hy;
-  delete hx;
-  
-  return h2;
-}
-
-
-
-
-
-
-
-
-
-
-/// combine bins in a 2D histogram
-/// it takes a value, x and all the bins with BinLowEdge > x get 
-/// combined N bins at a time. 
-// TH2D* Resplot::combine(const TH2* h, double epsilon) { 
-TH1D* Resplot::combine(const TH1* h, double inveps2) { 
-  return rebin( h, findbins(h, inveps2) );
-}
 
 
 std::vector<double> Resplot::findbins(const TH1* h, double inveps2) { 
   
-  std::cout << "combine" << std::endl;
+  //  std::cout << "findbins" << std::endl;
   
   //    if ( epsilon==0 ) return 0; 
   
   std::vector<double> xbins;
-  
   
   //    hy->SetDirectory(0);
   //    hx->SetDirectory(0);
@@ -854,7 +675,7 @@ std::vector<double> Resplot::findbins(const TH1* h, double inveps2) {
   
   bool newbin = true;
   
-  std::cout << "combining bins " << std::endl;
+  //  std::cout << "combining bins " << std::endl;
   
   for ( int i=1 ; i<=h->GetNbinsX() ; i++ ) {
     
@@ -870,7 +691,7 @@ std::vector<double> Resplot::findbins(const TH1* h, double inveps2) {
     
     newbin = false;
     
-    if ( xbins.size()>0 ) std::cout << i << "\tN " << N << " " << " (" << inveps2 << ")" << "\t" << xbins.back() << std::endl;
+    //if ( xbins.size()>0 ) std::cout << i << "\tN " << N << " " << " (" << inveps2 << ")" << "\t" << xbins.back() << std::endl;
     
     if ( N >= inveps2 ) { 
       newbin = true;
@@ -878,12 +699,12 @@ std::vector<double> Resplot::findbins(const TH1* h, double inveps2) {
     }
   }
   
-  std::cout << "finishsed " << xbins.size() << std::endl; 
+  //  std::cout << "finishsed " << xbins.size() << std::endl; 
   
-  std::cout << "combine" << std::endl;
-  std::cout << "x bins " << h->GetNbinsX() << std::endl;
+  // std::cout << "combine" << std::endl;
+  // std::cout << "x bins " << h->GetNbinsX() << std::endl;
   
-  std::cout << "x: " << xbins.size() << " " << xbins[0] << " - " << xbins.back() << std::endl;  
+  //std::cout << "x: " << xbins.size() << " " << xbins[0] << " - " << xbins.back() << std::endl;  
   
   return xbins;
 }
@@ -965,9 +786,11 @@ TH1D* Resplot::GetEfficiencies(const std::string& hname, double lower, double up
   e->SetName(hname.c_str()); e->SetMarkerStyle(20);
   if ( m_xaxis!="" ) e->SetXTitle(m_xaxis.c_str());
   
-  
+  std::vector<double> ylimits = getLimits( m_h2d->GetYaxis() );
+   
   for ( int i=1 ; i<=m_n_primary ; i++ ) {
-    TH1D* s = m_h2d->ProjectionY(tagname(hname,i), i, i, "e");
+    //   TH1D* s = m_h2d->ProjectionY(tagname(hname,i), i, i, "e");
+    TH1D*  s = projectionY( m_h2d, i, ylimits, tagname(hname, i) );
     StatVal v = GetEfficiency(s, lower, upper);
     e->SetBinContent(i, v.value);
     e->SetBinError(i, v.error);
@@ -998,14 +821,16 @@ TH1D* Resplot::GetEfficiencies(const std::string& hname, double Nsigma ) {
   TH1D* e = (TH1D*) m_mean->Clone();
   e->SetName(hname.c_str()); e->SetMarkerStyle(20);
   if ( m_xaxis!="" ) e->SetXTitle(m_xaxis.c_str());
-  
-  
+
+  std::vector<double> ylimits = getLimits( m_h2d->GetYaxis() );
+   
   for ( int i=1 ; i<=m_n_primary ; i++ ) {
     
     double mean  = m_mean->GetBinContent(i);
     double sigma = m_sigma->GetBinContent(i);
     
-    TH1D* s = m_h2d->ProjectionY(tagname(hname,i), i, i, "e");
+    //    TH1D* s = m_h2d->ProjectionY(tagname(hname,i), i, i, "e");
+    TH1D* s = projectionY( m_h2d, i, ylimits, tagname(hname, i) );
     StatVal v = GetEfficiency(s, mean-Nsigma*sigma, mean+Nsigma*sigma);
     e->SetBinContent(i, v.value);
     e->SetBinError(i, v.error);
@@ -1023,18 +848,18 @@ TH1D* Resplot::GetEfficiencies(const std::string& hname, double Nsigma ) {
 
 // fit Gaussian to histogram
 
-TF1* Resplot::FitGaussian(TH1D* s, double a, double b) {
+TF1* FitGaussian(TH1D* s, double a, double b) {
   TF1* f1 = new TF1("gausr", "gaus"); 
   return FitInternal( s, a, b, f1 );
   //  s->GetXaxis()->SetRangeUser(-1, 1);
 }
 
-TF1* Resplot::FitRGaussian(TH1D* s, double a, double b) {
+TF1* FitRGaussian(TH1D* s, double a, double b) {
   TF1* f1 = new TF1("rgausr", "[0]*x*exp((x-[1])([1]-x)/(2*[2]*[2]))"); 
   return FitInternal( s, a, b, f1 );
 }
 
-TF1* Resplot::FitRBreit(TH1D* s, double a, double b) {
+TF1* FitRBreit(TH1D* s, double a, double b) {
   TF1* f1 = new TF1("rbreitr", "x*[0]*[2]*[2]/([2]*[2]+(x-[1])*(x-[1]))");
   
   f1->SetParName(0, "Maximum");
@@ -1049,7 +874,7 @@ TF1* Resplot::FitRBreit(TH1D* s, double a, double b) {
 }
 
 
-TF1* Resplot::FitInternal(TH1D* s, double a, double b, TF1* f1) {
+TF1* FitInternal(TH1D* s, double a, double b, TF1* f1) {
   
   if ( f1==0 ) return f1;
   
@@ -1078,7 +903,7 @@ TF1* Resplot::FitInternal(TH1D* s, double a, double b, TF1* f1) {
 
 
 
-TF1* Resplot::FitCentralGaussian(TH1D* s, double , double ) {
+TF1* FitCentralGaussian(TH1D* s, double , double ) {
   TF1* f1 = new TF1("gausr", "gaus"); 
   
   f1->SetNpx(5000);
@@ -1157,7 +982,7 @@ TF1* Resplot::FitCentralGaussian(TH1D* s, double , double ) {
 
 // or fit a Breit Wigner
 
-TF1* Resplot::FitBreit(TH1D* s, double a, double b) {
+TF1* FitBreit(TH1D* s, double a, double b) {
   
   //  TF1* f1 = new TF1("breitr", "[0]*[2]*[2]/([2]*[2]+(x-[1])*(x-[1]))", -100, 100 );
   TF1* f1 = new TF1("breitr", "[0]*[2]*[2]/([2]*[2]+(x-[1])*(x-[1]))");
@@ -1196,13 +1021,13 @@ TF1* Resplot::FitBreit(TH1D* s, double a, double b) {
 
 
 
-TF1* Resplot::FitATan(TH1D* s, double , double ) {
-  static int counter = 0;
+TF1* FitATan(TH1D* s, double , double ) {
+  //  static int counter = 0;
   
-  std::cout << "Resplot::FitATan() " << s->GetName() << " " << s->GetTitle() << std::endl;
+  std::cout << "FitATan() " << s->GetName() << " " << s->GetTitle() << std::endl;
   
   char name[8];
-  sprintf(name,"atan_%02d", counter); counter++;
+  //  sprintf(name,"atan_%02d", counter); counter++;
   
   // Cannot use "M_PI" here as root does not replace M_PI in the string expressions for function  in TF1 definition
   TF1* f1 = new TF1(name, "100*pow( (0.01*[3]-sqrt(0.0001*[2]*[2]))*(0.5-(1/3.14159)*atan( [1]*(x-[0]) ) )+sqrt(0.0001*[2]*[2]) , [4] )   ", -100, 100);
@@ -1264,7 +1089,7 @@ TF1* Resplot::FitATan(TH1D* s, double , double ) {
 
 
 
-TF1* Resplot::FitNull(TH1D* s, double , double ) {
+TF1* FitNull(TH1D* s, double , double ) {
   
   // unZeroErrors(s);
   
@@ -1383,8 +1208,8 @@ int findmax(TH1D* s) {
 
 
 
-// TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
-TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
+// TF1* FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
+TF1* FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
   
   TF1* f=new TF1("null", "[0]+[1]+[2]");
   
@@ -1396,8 +1221,8 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
   f->SetParameter(1, 0);
   f->SetParameter(2, 0);
   
-  if ( s==0 )            { std::cerr << "Resplot::FitNull95() histogram s = " << s << std::endl; return 0; }
-  if ( s->GetXaxis()==0) { std::cerr << "Resplot::FitNull95() histogram s->GetXaxis() not definied for histogram " << s->GetName() << std::endl; return 0; }
+  if ( s==0 )            { std::cerr << "FitNull95() histogram s = " << s << std::endl; return 0; }
+  if ( s->GetXaxis()==0) { std::cerr << "FitNull95() histogram s->GetXaxis() not definied for histogram " << s->GetName() << std::endl; return 0; }
   
   unZeroErrors(s);
   
@@ -1454,10 +1279,10 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
   
   double uppersum = 0; 
   double lowersum = 0; 
-  
+
   if ( sumn>entries*frac ) {
     s->GetXaxis()->SetRange(1,s->GetNbinsX());
-    s_ErrorSet = BINWIDTH;
+    //   ErrorSet = BINWIDTH;
     return f;
   }
   
@@ -1497,7 +1322,7 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
   
   if ( uppersum==0 ) { 
     s->GetXaxis()->SetRange(1,s->GetNbinsX());
-    s_ErrorSet = HISTOWIDTH;
+    // ErrorSet = HISTOWIDTH;
     return f;
   } 
   
@@ -1509,8 +1334,8 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
   
   //  std::cout << "upper " << upperbin << " " << lowerbin << " " << interpolate_flag << std::endl;
   
-  //  if ( upperbin!=lowerbin ) { 
-  if ( true ) { // technically wrong - 95% contained in only 3 bins, so RMS of the "central" bin is not defined
+  //  if ( true ) { // technically wrong - 95% contained in only 3 bins, so RMS of the "central" bin is not defined
+  if ( upperbin!=lowerbin ) { 
     
     double llim = s->GetBinLowEdge(1);
     double ulim = s->GetBinLowEdge(s->GetNbinsX()+1);
@@ -1534,54 +1359,49 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
       
       double rupper;
       double erupper;
-      
+
+      int errorflag = 0;
       
       /// root does not calculate the uncertainty on the rms correctly
       //certain values (rlower, erlower, rupper, erupper) are overwritten before they are used
       //due to the commented 'else'; add notation to indicate this is intentional.
       if ( !useroot ) { 
-        GetStats( s, stats );
-        //coverity[UNUSED_VALUE]
+	errorflag = GetStats( s, stats );
         rlower  = stats[2];
-        //coverity[UNUSED_VALUE]
         erlower = stats[3];
+	//	std::cout << "mu: " << stats[0] << " " << s->GetMean() << "\trlower: " << rlower << "\t+- " << erlower << "\troot: " << s->GetRMS() << " +- " << s->GetRMSError() << "\t(errorflags: " << errorflag << ")" << std::endl;    
       }
-      //      else { 
-      rlower  = s->GetRMS();     
-      erlower = s->GetRMSError();    
-      //   }
-      
-      //      std::cout <<  "FitNULL95()  " << s->GetName() << "\tmean " << m << "\t lower rms " << rlower << " +- " << s->GetRMSError() << " (wrong)\t " << stats[2] << " +- " << stats[3] << " (correct)" << std::endl;
-      //      std::cout << s->GetName() << " " << s->GetTitle() << "\t lower 95% rms " << rlower << " +- " << erlower << "\t( " << lowerbin << " - " << upperbin << " )" << std::endl;
-      
-      s->GetXaxis()->SetRange(lowerbin-1, upperbin+1);
-      
-      //      std::cout << "GetEntries " << s->GetName() << " " << generate::GetEntries(s,lowerbin-1,upperbin+1)/sentries << std::endl; 
-      
-      //      std::cout << "Range " << s->GetBinLowEdge(lowerbin) << " - " << s->GetBinLowEdge(upperbin+1) << std::endl; 
-      
-      if ( !useroot ) { 
-        GetStats( s, stats );
-        //coverity[UNUSED_VALUE]
-        rupper  = stats[2];
-        //coverity[UNUSED_VALUE]
-        erupper = stats[3];
+      else { 
+	rlower  = s->GetRMS();     
+	erlower = s->GetRMSError();    
       }
-      //      else { 
-      rupper  = s->GetRMS();     
-      erupper = s->GetRMSError();     
-      //   }
-      
-      //      std::cout <<  "FitNULL95()  " << s->GetName() << "\t upper rms " << rupper << " +- " << s->GetRMSError() << " (wrong)\t " << stats[2] << " +- " << stats[3] << " (correct)" << std::endl;
-      
-      //      std::cout << s->GetName() << " " << s->GetTitle() << "\t upper 95% rms " << rupper << " +- " << erupper << "\t( " << lowerbin-1 << " - " << upperbin+1 << " )" << std::endl;
-      
-      
-      
-      
-      rms  = rlower + (frac-lowersum)*(rupper-rlower)/(uppersum-lowersum);
-      erms = erlower + (frac-lowersum)*(erupper-erlower)/(uppersum-lowersum);
-      
+
+      if ( errorflag==0 ) {  
+	//      std::cout <<  "FitNULL95()  " << s->GetName() << "\tmean " << m << "\t lower rms " << rlower << " +- " << s->GetRMSError() << " (wrong)\t " << stats[2] << " +- " << stats[3] << " (correct)" << std::endl;
+	//      std::cout << s->GetName() << " " << s->GetTitle() << "\t lower 95% rms " << rlower << " +- " << erlower << "\t( " << lowerbin << " - " << upperbin << " )" << std::endl;
+	
+	s->GetXaxis()->SetRange(lowerbin-1, upperbin+1);
+	
+	//      std::cout << "GetEntries " << s->GetName() << " " << generate::GetEntries(s,lowerbin-1,upperbin+1)/sentries << std::endl; 
+	//      std::cout << "Range " << s->GetBinLowEdge(lowerbin) << " - " << s->GetBinLowEdge(upperbin+1) << std::endl; 
+	
+	if ( !useroot ) { 
+	  errorflag = GetStats( s, stats );
+	  rupper  = stats[2];
+	  erupper = stats[3];
+	  // std::cout << "mu: " << stats[0] << " " << s->GetMean() << "\trlower: " << rupper << "\t+- " << erupper << "\troot: " << s->GetRMS() << " +- " << s->GetRMSError() << "\t(errorflag: " << errorflag << ") II" << std::endl;    
+	}
+	else { 
+	  rupper  = s->GetRMS();     
+	  erupper = s->GetRMSError();     
+	}
+	
+	//      std::cout <<  "FitNULL95()  " << s->GetName() << "\t upper rms " << rupper << " +- " << s->GetRMSError() << " (wrong)\t " << stats[2] << " +- " << stats[3] << " (correct)" << std::endl;
+	//      std::cout << s->GetName() << " " << s->GetTitle() << "\t upper 95% rms " << rupper << " +- " << erupper << "\t( " << lowerbin-1 << " - " << upperbin+1 << " )" << std::endl;
+        
+	rms  = rlower + (frac-lowersum)*(rupper-rlower)/(uppersum-lowersum);
+	erms = erlower + (frac-lowersum)*(erupper-erlower)/(uppersum-lowersum);
+      }
     }
     else { 
       s->GetXaxis()->SetRange(lowerbin, upperbin);
@@ -1610,8 +1430,6 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
     
     std::cout << "limits " << s->GetName() << "\t" << s->GetBinLowEdge(lowerbin)  << " - " <<  s->GetBinLowEdge(upperbin+1) << std::endl;
     
-    
-    
     std::cout <<  "FitNULL95Obsolete()  " << s->GetName() << "\t rms " << rms << " +- " << erms << "\t inv " << 1/rms << std::endl;
     
     printf("rms %12.10lf   inv %12.10lf\n", rms, 1/rms ); 
@@ -1624,16 +1442,13 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
     /// corrected such that for a gaussian, will return 1.
     double scale = 1;
     if ( s_scalerms95 ) scale = 1.1479538518;
-    
-    
-    
+        
     //    f->FixParameter(2, s->GetRMS());     
     //    f->SetParError(2, s->GetRMSError());
     f->FixParameter(2, scale*rms);     
     f->SetParError(2, scale*erms);
     f->FixParameter(1, s->GetMean());     
     f->SetParError(1, s->GetMeanError());
-    // std::cout << s->GetName() << " " << s->GetTitle() << "\t 95% inter rms " << rms << " +- " << erms << std::endl;
     s->GetXaxis()->SetRangeUser(llim, ulim);
     
   }
@@ -1642,7 +1457,6 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
     f->SetParError(1, 0);
     f->FixParameter(2, 0);  
     f->SetParError(2, 0);
-    // std::cout << " 95% rms " << 0 << " +- " << 0 << "\t( " << lowerbin << " - " << upperbin << " )" << std::endl;
   }
   
   s->GetXaxis()->SetRange(1,s->GetNbinsX());
@@ -1654,21 +1468,15 @@ TF1* Resplot::FitNull95Obsolete(TH1D* s, double frac, bool useroot ) {
 
 
 
-TF1* Resplot::FitNull95(TH1D* s, double , double  ) {
-  //  if ( s_oldrms95 ) return Resplot::FitNull95Obsolete(s, 0.95, true ); /// use approximate root errors for speed
-  if ( s_oldrms95 ) return Resplot::FitNull95Obsolete( s, 0.95 ); /// use approximate root errors for speed
-  else            return Resplot::FitNull95New(s);
+TF1* FitNull95(TH1D* s, double , double  ) {
+  if ( s_oldrms95 ) return FitNull95Obsolete( s, 0.95 );
+  else              return FitNull95New(s);
 } 
 
 
 
-int  nexperiments_     = 0;
-int  nexperiments_max = 40;
-int  nexperiments_min = 20;
 
-
-
-TF1* Resplot::FitNull95New(TH1D* s, double, bool ) { // double frac, bool useroot ) {
+TF1* FitNull95New(TH1D* s, double, bool ) { // double frac, bool useroot ) {
   
   //  std::cout << "---------------------------------------\nFN95 " << std::endl;
   
@@ -1688,10 +1496,16 @@ TF1* Resplot::FitNull95New(TH1D* s, double, bool ) { // double frac, bool useroo
   //  double _entries = getWeights( s );
   const double entries = s->GetEffectiveEntries();
   
+  int  nexperiments_     = 0;
+  int  nexperiments_max = 40;
+  int  nexperiments_min = 20;
+
   
   //  int nexperiments = 20+int(800/std::sqrt(s->GetEntries()));
   //  int nexperiments = 20+int(800/std::sqrt(s->GetEntries()));
   int nexperiments = 20+int(1000/entries);
+
+
   
   if ( nexperiments_!=0 ) nexperiments = nexperiments_;
   
@@ -1735,7 +1549,7 @@ TF1* Resplot::FitNull95New(TH1D* s, double, bool ) { // double frac, bool useroo
 
 
 
-TF1* Resplot::FitNull95Central(TH1D* s) {
+TF1* FitNull95Central(TH1D* s) {
   
   TF1* f=new TF1("null", "[0]+[1]+[2]");
   
@@ -1747,8 +1561,8 @@ TF1* Resplot::FitNull95Central(TH1D* s) {
   f->SetParameter(1, 0);
   f->SetParameter(2, 0);
   
-  if ( s==0 )            { std::cerr << "Resplot::FitNull95() histogram s = " << s << std::endl; return 0; }
-  if ( s->GetXaxis()==0) { std::cerr << "Resplot::FitNull95() histogram s->GetXaxis() not definied for histogram " << s->GetName() << std::endl; return 0; }
+  if ( s==0 )            { std::cerr << "FitNull95() histogram s = " << s << std::endl; return 0; }
+  if ( s->GetXaxis()==0) { std::cerr << "FitNull95() histogram s->GetXaxis() not definied for histogram " << s->GetName() << std::endl; return 0; }
   
   //  std::cout << "FitNull " << s->GetName() << " " << generate::GetEntries(s) << std::endl;
   
@@ -1865,6 +1679,7 @@ TF1* Resplot::FitNull95Central(TH1D* s) {
     else { 
       s->GetXaxis()->SetRange(lowerbin, upperbin);
       GetStats( s, stats );
+	    
       rms  = stats[2];
       erms = stats[3];
       
@@ -1907,7 +1722,7 @@ TF1* Resplot::FitNull95Central(TH1D* s) {
 
 // or fit a Poissonian
 
-TF1* Resplot::FitPoisson(TH1D* s, double a, double b) {
+TF1* FitPoisson(TH1D* s, double a, double b) {
   
   char fstring[1024];  
   sprintf(fstring, "sqrt([0]*[0])*pow(sqrt([1]*[1]*([2]*[2])),x*[2]-[3])*exp(-sqrt([1]*[1]*([2]*[2])))/TMath::Gamma((x*[2]-[3])+1)");
@@ -1947,7 +1762,7 @@ TF1* Resplot::FitPoisson(TH1D* s, double a, double b) {
 
 
 
-TF1* Resplot::FitXExp(TH1D* s, double a, double b) {
+TF1* FitXExp(TH1D* s, double a, double b) {
   
   //  TF1* f1 = new TF1("breitr", "[0]*[2]*[2]/([2]*[2]+(x-[1])*(x-[1]))", -100, 100 );
   //  TF1* f1 = new TF1("xexpr", "[0]*(pow([2]*x,[1])*exp(-[2]*x))+[3]");
@@ -2063,7 +1878,7 @@ Double_t langaufun(Double_t *x_par, Double_t *par) {
 
 // fit Gaussian to histogram
 
-TF1* Resplot::FitLandauGauss(TH1D* s, double a, double b) {
+TF1* FitLandauGauss(TH1D* s, double a, double b) {
   //  TF1* f1 = new TF1("landgaus", "landgaus");
   // root is STUPID and you have to specify the FIT RANGE if you 
   // want to specify the number of fit parameters!!! 
@@ -2104,4 +1919,5 @@ TF1* Resplot::FitLandauGauss(TH1D* s, double a, double b) {
   return f1;
 }
 
+}  // namespace Resplot
 

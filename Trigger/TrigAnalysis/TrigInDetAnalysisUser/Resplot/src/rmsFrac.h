@@ -9,13 +9,13 @@
  **/
 
 
-#ifndef RMSFRAC_H
-#define RMSFRAC_H 
+#ifndef RESPLOT_RMSFRAC_H
+#define RESPLOT_RMSFRAC_H 
 
 #include "TH1D.h"
 #include "TF1.h"
 
-namespace generate {
+namespace Resplot::generate {
 
 double findMean(TH1D* s, double frac);
 
@@ -33,4 +33,4 @@ double GetEntries(TH1D* h);
 
 }
 
-#endif /// RMSFRAC_H 
+#endif /// RESPLOT_RMSFRAC_H 

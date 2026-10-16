@@ -197,27 +197,27 @@ private:
   TH2F* m_h2r;
 #endif
 
-  Resplot* m_h2 = 0;
-  Resplot* m_h2m = 0;
-  Resplot* m_h2r = 0;
+  Resplot::Resplot* m_h2 = 0;
+  Resplot::Resplot* m_h2m = 0;
+  Resplot::Resplot* m_h2r = 0;
 
-  Resplot* m_h2a0 = 0;
-  Resplot* m_h2a0r = 0;
+  Resplot::Resplot* m_h2a0 = 0;
+  Resplot::Resplot* m_h2a0r = 0;
 
-  Resplot* m_rChi2prob = 0;
-  Resplot* m_rChi2 = 0;
-  Resplot* m_rChi2dof = 0;
+  Resplot::Resplot* m_rChi2prob = 0;
+  Resplot::Resplot* m_rChi2 = 0;
+  Resplot::Resplot* m_rChi2dof = 0;
 
-  Resplot* m_rChi2prob_bad = 0;
-  Resplot* m_rChi2_bad = 0;
-  Resplot* m_rChi2dof_bad = 0;
+  Resplot::Resplot* m_rChi2prob_bad = 0;
+  Resplot::Resplot* m_rChi2_bad = 0;
+  Resplot::Resplot* m_rChi2dof_bad = 0;
 
-  Resplot* m_rChi2prob_rec = 0;
-  Resplot* m_rChi2_rec = 0;
-  Resplot* m_rChi2dof_rec = 0;
+  Resplot::Resplot* m_rChi2prob_rec = 0;
+  Resplot::Resplot* m_rChi2_rec = 0;
+  Resplot::Resplot* m_rChi2dof_rec = 0;
 
-  Resplot* m_rChi2d_vs_Chi2d = 0;
-  Resplot* m_rDChi2dof = 0;
+  Resplot::Resplot* m_rChi2d_vs_Chi2d = 0;
+  Resplot::Resplot* m_rDChi2dof = 0;
 
   //  TH2F* hnpix_v_sct;
   //  TH2F* hnpix_v_sct_rec;
@@ -230,108 +230,108 @@ private:
   int m_Nref = 0;
   int m_Nmatched = 0;
 
-  Resplot* m_rnpix_eta = 0;
-  Resplot* m_rnsct_eta = 0;
-  Resplot* m_rntrt_eta = 0;
-  Resplot* m_rnsihit_eta = 0;
+  Resplot::Resplot* m_rnpix_eta = 0;
+  Resplot::Resplot* m_rnsct_eta = 0;
+  Resplot::Resplot* m_rntrt_eta = 0;
+  Resplot::Resplot* m_rnsihit_eta = 0;
 
-  Resplot* m_rnpix_lb = 0;
-  Resplot* m_rnsct_lb = 0;
+  Resplot::Resplot* m_rnpix_lb = 0;
+  Resplot::Resplot* m_rnsct_lb = 0;
 
-  Resplot* m_rnpix_lb_rec = 0;
-  Resplot* m_rnsct_lb_rec = 0;
+  Resplot::Resplot* m_rnpix_lb_rec = 0;
+  Resplot::Resplot* m_rnsct_lb_rec = 0;
 
-  Resplot* m_rnpix_phi = 0;
-  Resplot* m_rnsct_phi = 0;
-  Resplot* m_rntrt_phi = 0;
+  Resplot::Resplot* m_rnpix_phi = 0;
+  Resplot::Resplot* m_rnsct_phi = 0;
+  Resplot::Resplot* m_rntrt_phi = 0;
 
-  Resplot* m_rnpix_pt = 0;
-  Resplot* m_rnsct_pt = 0;
-  Resplot* m_rntrt_pt = 0;
+  Resplot::Resplot* m_rnpix_pt = 0;
+  Resplot::Resplot* m_rnsct_pt = 0;
+  Resplot::Resplot* m_rntrt_pt = 0;
 
-  Resplot* m_rnpix_d0 = 0; // new
-  Resplot* m_rnsct_d0 = 0; // new
-  Resplot* m_rntrt_d0 = 0; // new
+  Resplot::Resplot* m_rnpix_d0 = 0; // new
+  Resplot::Resplot* m_rnsct_d0 = 0; // new
+  Resplot::Resplot* m_rntrt_d0 = 0; // new
 
-  Resplot* m_rnpix_d0_rec = 0; // new
-  Resplot* m_rnsct_d0_rec = 0; // new
-  Resplot* m_rntrt_d0_rec = 0; // new
+  Resplot::Resplot* m_rnpix_d0_rec = 0; // new
+  Resplot::Resplot* m_rnsct_d0_rec = 0; // new
+  Resplot::Resplot* m_rntrt_d0_rec = 0; // new
 
-  Resplot* m_rnpixh_pt = 0;
-  Resplot* m_rnscth_pt = 0;
+  Resplot::Resplot* m_rnpixh_pt = 0;
+  Resplot::Resplot* m_rnscth_pt = 0;
 
-  Resplot* m_rnpixh_d0 = 0; // new
-  Resplot* m_rnscth_d0 = 0; // new
+  Resplot::Resplot* m_rnpixh_d0 = 0; // new
+  Resplot::Resplot* m_rnscth_d0 = 0; // new
 
-  Resplot* m_rnsi_pt = 0;  // new
-  Resplot* m_rnsih_pt = 0; // new
+  Resplot::Resplot* m_rnsi_pt = 0;  // new
+  Resplot::Resplot* m_rnsih_pt = 0; // new
 
-  Resplot* m_rnsi_eta = 0;  // new
-  Resplot* m_rnsih_eta = 0; // new
+  Resplot::Resplot* m_rnsi_eta = 0;  // new
+  Resplot::Resplot* m_rnsih_eta = 0; // new
 
-  Resplot* m_rnsi_d0 = 0;  // new
-  Resplot* m_rnsih_d0 = 0; // new
+  Resplot::Resplot* m_rnsi_d0 = 0;  // new
+  Resplot::Resplot* m_rnsih_d0 = 0; // new
 
-  Resplot* m_rnbl_d0 = 0;  // new
-  Resplot* m_rnblh_d0 = 0; // new
+  Resplot::Resplot* m_rnbl_d0 = 0;  // new
+  Resplot::Resplot* m_rnblh_d0 = 0; // new
 
-  Resplot* m_rnpix_pt_bad = 0;
-  Resplot* m_rnsct_pt_bad = 0;
-  Resplot* m_rntrt_pt_bad = 0;
+  Resplot::Resplot* m_rnpix_pt_bad = 0;
+  Resplot::Resplot* m_rnsct_pt_bad = 0;
+  Resplot::Resplot* m_rntrt_pt_bad = 0;
 
-  Resplot* m_rnpix_eta_rec = 0;
-  Resplot* m_rnsct_eta_rec = 0;
-  Resplot* m_rntrt_eta_rec = 0;
-  Resplot* m_rnsihit_eta_rec = 0;
+  Resplot::Resplot* m_rnpix_eta_rec = 0;
+  Resplot::Resplot* m_rnsct_eta_rec = 0;
+  Resplot::Resplot* m_rntrt_eta_rec = 0;
+  Resplot::Resplot* m_rnsihit_eta_rec = 0;
 
-  Resplot* m_rnpix_phi_rec = 0;
-  Resplot* m_rnsct_phi_rec = 0;
-  Resplot* m_rntrt_phi_rec = 0;
+  Resplot::Resplot* m_rnpix_phi_rec = 0;
+  Resplot::Resplot* m_rnsct_phi_rec = 0;
+  Resplot::Resplot* m_rntrt_phi_rec = 0;
 
-  Resplot* m_rnpix_pt_rec = 0;
-  Resplot* m_rnsct_pt_rec = 0;
-  Resplot* m_rntrt_pt_rec = 0;
+  Resplot::Resplot* m_rnpix_pt_rec = 0;
+  Resplot::Resplot* m_rnsct_pt_rec = 0;
+  Resplot::Resplot* m_rntrt_pt_rec = 0;
 
-  Resplot* m_rnpixh_pt_rec = 0;
-  Resplot* m_rnscth_pt_rec = 0;
+  Resplot::Resplot* m_rnpixh_pt_rec = 0;
+  Resplot::Resplot* m_rnscth_pt_rec = 0;
 
-  std::vector<Resplot*> m_res;
+  std::vector<Resplot::Resplot*> m_res;
 
-  std::vector<Resplot*> m_retares;
-  std::vector<Resplot*> m_rphires;
-  std::vector<Resplot*> m_rzedres;
-  std::vector<Resplot*> m_rzedthetares;
-  std::vector<Resplot*> m_riptres;
-  std::vector<Resplot*> m_rptres;
-  std::vector<Resplot*> m_rd0res;
-  std::vector<Resplot*> m_rDd0res;
-  std::vector<Resplot*> m_rDa0res;
-  std::vector<Resplot*> m_rDz0res;
+  std::vector<Resplot::Resplot*> m_retares;
+  std::vector<Resplot::Resplot*> m_rphires;
+  std::vector<Resplot::Resplot*> m_rzedres;
+  std::vector<Resplot::Resplot*> m_rzedthetares;
+  std::vector<Resplot::Resplot*> m_riptres;
+  std::vector<Resplot::Resplot*> m_rptres;
+  std::vector<Resplot::Resplot*> m_rd0res;
+  std::vector<Resplot::Resplot*> m_rDd0res;
+  std::vector<Resplot::Resplot*> m_rDa0res;
+  std::vector<Resplot::Resplot*> m_rDz0res;
 
-  Resplot* m_rzedreslb = 0;
+  Resplot::Resplot* m_rzedreslb = 0;
 
-  Resplot* m_rzedlb = 0;
-  Resplot* m_rzedlb_rec = 0;
+  Resplot::Resplot* m_rzedlb = 0;
+  Resplot::Resplot* m_rzedlb_rec = 0;
 
-  //  std::vector<Resplot*> rd0res_95;
-  //  std::vector<Resplot*> rd0res_rms;
+  //  std::vector<Resplot::Resplot*> rd0res_95;
+  //  std::vector<Resplot::Resplot*> rd0res_rms;
 
-  std::vector<Resplot*> m_retaresPull;
-  std::vector<Resplot*> m_rphiresPull;
-  std::vector<Resplot*> m_rzedresPull;
-  std::vector<Resplot*> m_riptresPull;
-  std::vector<Resplot*> m_rptresPull;
-  std::vector<Resplot*> m_rd0resPull;
+  std::vector<Resplot::Resplot*> m_retaresPull;
+  std::vector<Resplot::Resplot*> m_rphiresPull;
+  std::vector<Resplot::Resplot*> m_rzedresPull;
+  std::vector<Resplot::Resplot*> m_riptresPull;
+  std::vector<Resplot::Resplot*> m_rptresPull;
+  std::vector<Resplot::Resplot*> m_rd0resPull;
 
-  Resplot* m_deltaR_v_eta = 0;
-  Resplot* m_deltaR_v_pt = 0;
+  Resplot::Resplot* m_deltaR_v_eta = 0;
+  Resplot::Resplot* m_deltaR_v_pt = 0;
 
   TH1F*  m_hphivsDd0res[3];
   TH1F*  m_hphivsDa0res[3];
 
   Efficiency1D* m_eff_vs_lb = 0;
 
-  Resplot* m_z_vs_lb = 0;
+  Resplot::Resplot* m_z_vs_lb = 0;
 
   std::map<int, int> m_rmap;
 
@@ -348,14 +348,14 @@ private:
 
   /// beam spot dependent
 
-  Resplot* m_rd0_vs_phi = 0;
-  Resplot* m_rd0_vs_phi_rec = 0;
+  Resplot::Resplot* m_rd0_vs_phi = 0;
+  Resplot::Resplot* m_rd0_vs_phi_rec = 0;
 
   /// Residuals
 
-  Resplot* m_rRoi_deta_vs_eta = 0;
-  Resplot* m_rRoi_dphi_vs_eta = 0;
-  Resplot* m_rRoi_dzed_vs_eta = 0;
+  Resplot::Resplot* m_rRoi_deta_vs_eta = 0;
+  Resplot::Resplot* m_rRoi_dphi_vs_eta = 0;
+  Resplot::Resplot* m_rRoi_dzed_vs_eta = 0;
 
   /// electron specific ET/PT related stuff
   TH1F* m_etovpt_raw = 0;
@@ -373,8 +373,8 @@ private:
   bool m_initialised = false;
   bool m_initialiseFirstEvent = false;
 
-  Resplot* m_rnsct_vs_npix = 0;
-  Resplot* m_rnsct_vs_npix_rec = 0;
+  Resplot::Resplot* m_rnsct_vs_npix = 0;
+  Resplot::Resplot* m_rnsct_vs_npix_rec = 0;
 };
 
 

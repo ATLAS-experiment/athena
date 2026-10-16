@@ -19,7 +19,6 @@
  **
  **/
 
-
 #ifndef RESPLOT_RESPLOT_H
 #define RESPLOT_RESPLOT_H
 
@@ -36,19 +35,20 @@
 #include "TFile.h"
 #include "TString.h"
 
-
 #include "StatVal.h"
 
-
-// Just because we inherit from a 
-// TH2D, but I bet it *still* won't work because I use the 
-// lovely "vector" class from the stl.
-#include "TObject.h"
+namespace Resplot { 
 
 
+/// forward declation because we use this in the class ... 
+TF1* FitGaussian(TH1D* s, double a=-999, double b=-999);
 
-class Resplot  : public TObject { 
-  
+extern bool s_mAddDirectoryStatus;
+// bool s_interpolate_flag;
+
+
+class Resplot { // : public TObject { 
+
 private:
   
   class ResException { 
@@ -135,10 +135,16 @@ public:
   { Initialise(name, a, b); }
 
 
+  //  Resplot(const Resplot& r, const std::string& tag="") = delete;  
 
+  //  Resplot(const Resplot& r ) = delete;  
+
+  Resplot& operator=(const Resplot&) = delete;
+  
+  //#if 0
   Resplot(const Resplot& r, const std::string& tag="") : 
     //    TH2D( (TH2D)r ),
-    TObject(r),
+    //  TObject(r),
     m_Set(r.m_Set),  m_name(r.m_name+tag),
     m_Nentries(new TH1D(*r.m_Nentries)), 
     m_mean(new TH1D(*r.m_mean)), m_sigma(new TH1D(*r.m_sigma)), m_chi2(new TH1D(*r.m_chi2)),  
@@ -157,7 +163,8 @@ public:
     skip(m_chi2);
     skip(m_Nentries);
   }
-
+  //#endif
+  
   Resplot(const std::string& name, TH2* hin, const bool flip=false) :
     m_Set(false),  m_name(name),
     m_Nentries(NULL), 
@@ -174,31 +181,25 @@ public:
     else        h = static_cast<TH2D*>(hin);
 
     // get the major bin edges
-    std::vector<double> a1;
+    std::vector<double> xlimits = getLimits( h->GetXaxis() );;
+    std::vector<double> ylimits = getLimits( h->GetYaxis() );
+    
+    int    n2 = ylimits.size()-1;;
+    double a2 = ylimits[0];;
+    double b2 = ylimits.back();
 
-    TAxis* axe = h->GetXaxis();
-
-    for ( int i=1 ; i<=axe->GetNbins()+1 ; i++ ) a1.push_back(axe->GetBinLowEdge(i));
-  
-    // get the y bin limits
-    TH1D* s = h->ProjectionY("_duff", 1, 1, "e");
-
-    int    n2 = s->GetNbinsX();
-    double a2 = s->GetBinLowEdge(1);
-    double b2 = s->GetBinLowEdge(s->GetNbinsX()+1);
-
-    delete s;
-
-    Initialise(name, a1, n2, a2, b2 ); 
+    Initialise(name, xlimits, n2, a2, b2 ); 
 
     // replace default histograms
     delete m_h2d;
-    m_h2d = (TH2D*)h->Clone("2d");
+    m_h2d = copy(h, "2d");
     skip(m_h2d);
-    
+
     delete m_h1d;
-    m_h1d = h->ProjectionY("1d", 1, h->GetNbinsX(), "e");
+    //    m_h1d = h->ProjectionY("1d", 1, h->GetNbinsX(), "e");
+    m_h1d = projectionY( h, 1, h->GetNbinsX(), ylimits, "1d" );
     m_h1d->SetTitle("1d");
+
     skip(m_h1d);
   } 
 
@@ -252,7 +253,10 @@ public:
     
   }
 
+  //  Resplot( const Resplot& r ) = delete;
 
+  //  Resplot& operator=( const Resplot& r) = delete;
+  
   virtual ~Resplot();
   
   
@@ -339,10 +343,11 @@ public:
     return d;
   }
     
-  const std::string& Name() const { return m_name; }  
-
   const std::string& Name(const std::string& s) { return m_name=s; }  
 
+  const std::string& Name() const { return m_name; }  
+  const std::string& name() const { return m_name; }
+  
   // get the histogram of the mean of the distributions
   TH1D*       Mean()        { return m_mean; } 
   const TH1D* Mean() const  { return m_mean; } 
@@ -384,51 +389,86 @@ public:
   // examples that will be safely encapsulated inside the 
   // class so there will be no interference with other functions
 
-  // fit Generic to histogram
-  static TF1* FitInternal(TH1D* s, double a=-999, double b=-999, TF1* f1=0);
 
-  // fit Gaussian to histogram
-  static TF1* FitGaussian(TH1D* s, double a=-999, double b=-999);
-
-  // fit Gaussian with radial dependence to histogram 
-  static TF1* FitRGaussian(TH1D* s, double a=-999, double b=-999);
+  /// projection utilities ...
+  /// NB: In athena, for some reason the destuctors for histograms created using
+  ///     TH2D::ProjectX/Y take ~ 13 ms to be deleted, around 300 times slower than
+  ///     a normal TH1 delete, so we implement our own projectionX/Y
   
-  // or fit a Breit Wigner
-  static TF1* FitBreit(TH1D* s, double a=-999, double b=-999);
+  static std::vector<double> getLimits( const TAxis* axis ) {
+    std::vector<double> limits( axis->GetNbins()+1, 0 );
+    for ( size_t i=axis->GetNbins()+1 ; i-- ; ) limits[i] = axis->GetBinLowEdge(i+1);
+    return limits;
+  }
 
-  // or fit a Breit Wigner with radial dependence 
-  static TF1* FitRBreit(TH1D* s, double a=-999, double b=-999);
+  static std::vector<double> getxLimits( TH2* h ) { return getLimits( h->GetXaxis() ); }
+
+  static std::vector<double> getyLimits( TH2* h ) { return getLimits( h->GetYaxis() ); }
+
+  /// actual local projections ...
+
+  static TH1D* projectionY( TH2* h2d, int col, const std::vector<double>& ylimits, const std::string& tagname ) {
+    TH1D* h = new TH1D( tagname.c_str(), "", ylimits.size()-1, &ylimits[0] ); h->SetDirectory(0);
+    double entries = 0;
+    for ( int i=1 ; i<=h->GetNbinsX() ; i++ ) {
+      double v = h2d->GetBinContent(col, i);
+      h->SetBinContent( i, v );
+      entries += v;
+    }
+    h->SetEntries(entries);
+    return h;
+  }
   
-  // or fit an inverse tan turn on curve 
-  static TF1* FitATan(TH1D* s, double a=-999, double b=-999);
+  static TH1D* projectionY( TH2* h2d, int col0, int col1, const std::vector<double>& ylimits, const std::string& tagname ) {
+    TH1D* h = new TH1D( tagname.c_str(), "", ylimits.size()-1, &ylimits[0] ); h->SetDirectory(0);
+    double entries = 0;
+    for ( int i=1 ; i<=h->GetNbinsX() ; i++ ) {
+      double sum = 0;
+      for ( int col=col0 ; col<=col1 ; col++ ) sum += h2d->GetBinContent(col, i);
+      h->SetBinContent( i, sum );
+      entries += sum;
+    }
+    h->SetEntries(entries);
+    return h;
+  }
 
-  // use histo mean and rms
-  static TF1* FitNull(TH1D* s, double a=-999, double b=-999); 
+  static TH1D* projectionX( TH2* h2d, int row, const std::vector<double>& xlimits, const std::string& tagname ) {
+    TH1D* h = new TH1D( tagname.c_str(), "", xlimits.size()-1, &xlimits[0] ); h->SetDirectory(0);
+    double entries = 0;
+    for ( int i=1 ; i<=h->GetNbinsX() ; i++ ) {
+      double v = h2d->GetBinContent( i, row );
+      h->SetBinContent( i, v );
+      entries += v;
+    }
+    h->SetEntries(entries);
+    return h;
+  }
 
-  // fit a poisson distribution 
-  static TF1* FitPoisson(TH1D* s, double a=-999, double b=-999); 
-
-  // fit a  ax^b exp(c*x)+d distribution 
-  static TF1* FitXExp(TH1D* s, double a=-999, double b=-999); 
-
-  static TF1* FitLandauGauss(TH1D* s, double a=-999, double b=-999);
-
-  // fit Central Gaussian to histogram
-  static TF1* FitCentralGaussian(TH1D* s, double a=-999, double b=-999);
-
-  // fit histo mean and rms only to central 95% of histogram
-  static TF1* FitNull95(TH1D* s, double a=0, double b=0);
-  //  static TF1* FitNull95(TH1D* s, double frac=0.95, bool useroot=false);
-  static TF1* FitNull95New(TH1D* s, double frac=0.95, bool useroot=false);
-  static TF1* FitNull95Obsolete(TH1D* s, double frac=0.95, bool useroot=false);
-
-  static TF1* FitNull95Central(TH1D* s);
-
-
-
+  static TH1D* projectionX( TH2* h2d, int row0, int row1, const std::vector<double>& xlimits, const std::string& tagname ) {
+    TH1D* h = new TH1D( tagname.c_str(), "", xlimits.size()-1, &xlimits[0] ); h->SetDirectory(0);
+    double entries = 0;
+    for ( int i=1 ; i<=h->GetNbinsX() ; i++ ) {
+      double sum = 0;
+      for ( int row=row0 ; row<=row1 ; row++ ) sum += h2d->GetBinContent(i, row);
+      h->SetBinContent( i, sum );
+      entries += sum;
+    }
+    h->SetEntries(entries);
+    return h;
+  }
+  
+  static double sum( TH1* h ) {
+    double sum = 0;
+    for ( int i=1 ; i<=h->GetNbinsX() ; i++ ) sum += h->GetBinContent(i);
+    //std::cout << "sum: " << sum << std::endl;
+    return sum;
+  }
+  
+  
   // Get the offsets and resolutions overall and for each slice 
   //  int Finalise(double a=-999, double b=-999, TF1* (*func)(TH1D* s, double a, double b)=Resplot::FitGaussian);
-  int Finalise(double a=-999, double b=-999, TF1* (*func)(TH1D* s, double a, double b)=Resplot::FitGaussian);
+
+  int Finalise(double a=-999, double b=-999, TF1* (*func)(TH1D* s, double a, double b)=FitGaussian);
 
   int Finalise(TF1* (*func)(TH1D* s, double a, double b), double a=-999, double b=-999 ) { 
     return Finalise( a, b, func);
@@ -447,6 +487,8 @@ public:
 
   TDirectory* Dir() { return m_dir; } 
 
+#if 1
+
   /// Hooray, this stupidity is to overwride both the const and non-const 
   /// TObject Write methods
   /// Fixme: should probably remove all of these so root can write out 
@@ -459,8 +501,9 @@ public:
   static void AddDirectory(bool t=false) { s_mAddDirectoryStatus=t; }
 
   void SetDirectory(TDirectory* =0) {  }
-
-  static void setInterpolateFlag(bool b) { s_interpolate_flag = b; }
+#endif
+  
+  //  static void setInterpolateFlag(bool b) { s_interpolate_flag = b; }
 
 
   /// operators 
@@ -498,16 +541,16 @@ public:
 
   Resplot& operator*=(double d) { 
 
-    std::cout << "Resplot::operator*= " << Name() << " " << m_finalised << " " << m_slices.size() << std::endl;
+    //    std::cout << "Resplot::operator*= " << Name() << " " << m_finalised << " " << m_slices.size() << std::endl;
     
     clear();
 
-    std::cout << "Resplot::operator*= " << Name() << " " << m_finalised  << " " << m_slices.size() << std::endl;
-    std::cout << "Resplot::operator*= " << Name() << "\tH2D " << H2D() << std::endl;
+    // std::cout << "Resplot::operator*= " << Name() << " " << m_finalised  << " " << m_slices.size() << std::endl;
+    // std::cout << "Resplot::operator*= " << Name() << "\tH2D " << H2D() << std::endl;
 
-    H2D()->DrawCopy();
+    //    H2D()->DrawCopy();
 
-    std::cout << "Resplot::operator*= " << Name() << "\tDraw " << std::endl;
+    //    std::cout << "Resplot::operator*= " << Name() << "\tDraw " << std::endl;
 
     for ( int i=0 ; i<=H2D()->GetNbinsX()+1 ; i++ ) { 
       for ( int j=0 ; j<=H2D()->GetNbinsY()+1 ; j++ ) { 
@@ -517,7 +560,7 @@ public:
     }
 
 
-    std::cout << "Resplot::operator*= " << Name() << "\tH1D " << H1D() << std::endl;
+    //    std::cout << "Resplot::operator*= " << Name() << "\tH1D " << H1D() << std::endl;
 
     for ( int i=0 ; i<=H1D()->GetNbinsX()+1 ; i++ ) { 
       H1D()->SetBinContent( i, H1D()->GetBinContent(i)*d );
@@ -526,7 +569,7 @@ public:
 
     m_finalised = false;
 
-    std::cout << "Resplot::operator*= done" << std::endl;
+    //    std::cout << "Resplot::operator*= done" << std::endl;
 
     return *this;
   }
@@ -552,23 +595,10 @@ public:
   void setUniform(bool t=false) { m_uniform=t; }
 
   static const std::string& version()      { return s_rversion; }
-  static bool setoldrms95(bool b)   { return s_oldrms95=b; }
-  static bool setscalerms95(bool b) { return s_scalerms95=b; }
-  static bool setnofit(bool b)      { return s_nofit=b; }
 
   /// flip the x and y axes
-  static TH2D* rotate(const TH2* h);
-
-  /// combine bins along the x axis
-  /// after value x, combine each N bins into a single bin
-  static TH2D* combine(const TH2* h, double x, int N);
-  /// after value x, combine each N bins into a single bin
-  static TH1D* combine(const TH1* h, double x, int N);
-
-  /// combine bins along the x axis
-  /// combine bins such that the stat precision is better than epsilon
-  static TH2D* combine(const TH2* h, double epsilon);
-  static TH1D* combine(const TH1* h, double epsilon);
+  static TH2D* rotate(const TH2* h, const std::string& s="" );
+  static TH2D*   copy(const TH2* h, const std::string& s="" );
 
   static std::vector<double> findbins(const TH1* h, double epsilon);
   static TH1D*               rebin(const TH1* h, const std::vector<double>& bins);
@@ -632,9 +662,6 @@ private:
   
 private:
 
-  static bool s_mAddDirectoryStatus;
-  static bool s_interpolate_flag;
-
   static const std::string s_rversion;
 
   bool m_Set;
@@ -666,27 +693,83 @@ private:
   std::string        m_fitname;
 
   bool        m_finalised;
-  TDirectory* m_slicedir = 0;
+  //  TDirectory* m_slicedir = 0;
 
   bool        m_uniform;
 
   /// temporarily allow toggeling between old 
   /// and new rms95 error estimates
-  static bool s_oldrms95;
-  static bool s_scalerms95;
+  //  static const bool s_oldrms95;
+  //  static const bool s_scalerms95;
 
-  static bool s_nofit;
+  //  static const bool s_nofit;
 
 
-  static ERROR s_ErrorSet; //! don't persistify this
+  //  static const ERROR s_ErrorSet; //! don't persistify this
 
-  ClassDef(Resplot, 1)
+  //  ClassDef(Resplot, 1)
 
 };
 
 
+extern bool s_interpolate_flag;
+extern bool s_nofit;
+
+/// use the new error estimates
+extern bool s_oldrms95;
+extern bool s_scalerms95;
+
+inline bool   setoldrms95(bool b) { return   s_oldrms95=b; }
+inline bool setscalerms95(bool b) { return s_scalerms95=b; }
+inline bool      setnofit(bool b) { return      s_nofit=b; }
+
+  
+// fit Generic to histogram
+TF1* FitInternal(TH1D* s, double a=-999, double b=-999, TF1* f1=0);
+
+// fit Gaussian to histogram
+// TF1* FitGaussian(TH1D* s, double a=-999, double b=-999);
+
+// fit Gaussian with radial dependence to histogram 
+TF1* FitRGaussian(TH1D* s, double a=-999, double b=-999);
+  
+// or fit a Breit Wigner
+TF1* FitBreit(TH1D* s, double a=-999, double b=-999);
+
+// or fit a Breit Wigner with radial dependence 
+TF1* FitRBreit(TH1D* s, double a=-999, double b=-999);
+  
+// or fit an inverse tan turn on curve 
+TF1* FitATan(TH1D* s, double a=-999, double b=-999);
+
+// use histo mean and rms
+TF1* FitNull(TH1D* s, double a=-999, double b=-999); 
+
+// fit a poisson distribution 
+TF1* FitPoisson(TH1D* s, double a=-999, double b=-999); 
+
+// fit a  ax^b exp(c*x)+d distribution 
+TF1* FitXExp(TH1D* s, double a=-999, double b=-999); 
+
+TF1* FitLandauGauss(TH1D* s, double a=-999, double b=-999);
+
+// fit Central Gaussian to histogram
+TF1* FitCentralGaussian(TH1D* s, double a=-999, double b=-999);
+
+// fit histo mean and rms only to central 95% of histogram
+TF1* FitNull95(TH1D* s, double a=0, double b=0);
+
+//  static TF1* FitNull95(TH1D* s, double frac=0.95, bool useroot=false);
+TF1* FitNull95New(TH1D* s, double frac=0.95, bool useroot=false);
+TF1* FitNull95Obsolete(TH1D* s, double frac=0.95, bool useroot=false);
+
+TF1* FitNull95Central(TH1D* s);
+
+
+  
 inline Resplot operator*(double d, Resplot r) { return (r*=d); }
 
-
+}
+  
 #endif  /* RESPLOT_RESPLOT_H */
 

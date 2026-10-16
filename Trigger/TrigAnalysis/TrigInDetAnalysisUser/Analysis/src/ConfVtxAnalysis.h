@@ -73,21 +73,21 @@ private:
 
   TH1F*    m_h_dntrax = 0;
 
-  Resplot* m_rdntrax_vs_zed = 0;
-  Resplot* m_rdntrax_vs_r = 0;
-  Resplot* m_rdntrax_vs_ntrax = 0;
+  Resplot::Resplot* m_rdntrax_vs_zed = 0;
+  Resplot::Resplot* m_rdntrax_vs_r = 0;
+  Resplot::Resplot* m_rdntrax_vs_ntrax = 0;
 
-  Resplot* m_rdz_vs_zed = 0;
-  Resplot* m_rdz_vs_ntrax = 0;
-  Resplot* m_rdz_vs_r = 0;
-  Resplot* m_rdz_vs_nvtx = 0;
-  Resplot* m_rdz_vs_mu = 0;
+  Resplot::Resplot* m_rdz_vs_zed = 0;
+  Resplot::Resplot* m_rdz_vs_ntrax = 0;
+  Resplot::Resplot* m_rdz_vs_r = 0;
+  Resplot::Resplot* m_rdz_vs_nvtx = 0;
+  Resplot::Resplot* m_rdz_vs_mu = 0;
 
-  Resplot* m_rdr_vs_zed = 0;
-  Resplot* m_rdr_vs_ntrax = 0;
-  Resplot* m_rdr_vs_r = 0;
+  Resplot::Resplot* m_rdr_vs_zed = 0;
+  Resplot::Resplot* m_rdr_vs_ntrax = 0;
+  Resplot::Resplot* m_rdr_vs_r = 0;
 
-  Resplot* m_rnvtxrec_nvtx = 0;
+  Resplot::Resplot* m_rnvtxrec_nvtx = 0;
 
   Efficiency1D* m_eff_zed = 0;
   Efficiency1D* m_eff_x = 0;
@@ -98,9 +98,9 @@ private:
   Efficiency1D* m_eff_lb = 0;
   Efficiency1D* m_eff_r = 0;
 
-  Resplot* m_rdx_vs_lb = 0;
-  Resplot* m_rdy_vs_lb = 0;
-  Resplot* m_rdz_vs_lb = 0;
+  Resplot::Resplot* m_rdx_vs_lb = 0;
+  Resplot::Resplot* m_rdy_vs_lb = 0;
+  Resplot::Resplot* m_rdz_vs_lb = 0;
  
   //  Contour<Efficiency1D>* eff_zed_vs_ntrax;
 
