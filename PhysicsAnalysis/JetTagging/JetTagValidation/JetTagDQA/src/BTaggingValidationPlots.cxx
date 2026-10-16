@@ -1113,36 +1113,48 @@ namespace JetTagDQA{
   void BTaggingValidationPlots::fillSVVariables(const xAOD::Jet* jet, const std::map<const xAOD::TrackParticle*, int> & track_truth_associations, const bool& has_muon, const int& truth_label, const int& num_HF_tracks_in_jet, bool& contains_SV, const xAOD::EventInfo* event){
     // SV1
 
-    // SV1 mass of the SV
+    float SV1_masssvx = -1.;
+    int SV1_N2Tpair = -1;
+    float SV1_efracsvx = -1.;
+    float SV1_deltaR = -1.;
+    float SV1_significance3d = -1.;
+    float SV1_energyTrkInJet = -1.;
+    int SV1_NGTinSvx = -1;
+    float SV1_Lxy = -1.;
+
     static const SG::ConstAccessor<float> SV1_masssvxAcc("SV1_masssvx");
-    float SV1_masssvx = SV1_masssvxAcc.isAvailable(*jet) ? SV1_masssvxAcc(*jet) : -1;
+    if(std::isfinite(SV1_masssvxAcc.withDefault(*jet, -1.))){
+      // SV1 mass of the SV
+      SV1_masssvx = SV1_masssvxAcc.withDefault(*jet, -1.);
 
-    // SV1 number of two-track vertices
-    static const SG::ConstAccessor<int> SV1_N2TpairAcc("SV1_N2Tpair");
-    int SV1_N2Tpair = SV1_N2TpairAcc.isAvailable(*jet) ? SV1_N2TpairAcc(*jet) : -1;
+      // SV1 number of two-track vertices
+      static const SG::ConstAccessor<int> SV1_N2TpairAcc("SV1_N2Tpair");
+      SV1_N2Tpair = SV1_N2TpairAcc.withDefault(*jet, -1);
 
-    // SV1 energy fraction
-    static const SG::ConstAccessor<float> SV1_efracsvxAcc("SV1_efracsvx");
-    float SV1_efracsvx = SV1_efracsvxAcc.isAvailable(*jet) ? SV1_efracsvxAcc(*jet) : -1;
+      // SV1 energy fraction
+      static const SG::ConstAccessor<float> SV1_efracsvxAcc("SV1_efracsvx");
+      SV1_efracsvx = SV1_efracsvxAcc.withDefault(*jet, -1.);
 
-    // SV1 deltaR jex axis - PV-SV
-    static const SG::ConstAccessor<float> SV1_deltaRAcc("SV1_deltaR");
-    float SV1_deltaR = SV1_deltaRAcc.withDefault(*jet, -1);
+      // SV1 deltaR jex axis - PV-SV
+      static const SG::ConstAccessor<float> SV1_deltaRAcc("SV1_deltaR");
+      SV1_deltaR = SV1_deltaRAcc.withDefault(*jet, -1.);
 
-    // SV1 significance 3d
-    static const SG::ConstAccessor<float> SV1_significance3dAcc("SV1_significance3d");
-    float SV1_significance3d = SV1_significance3dAcc.withDefault(*jet, -1);
+      // SV1 significance 3d
+      static const SG::ConstAccessor<float> SV1_significance3dAcc("SV1_significance3d");
+      SV1_significance3d = SV1_significance3dAcc.withDefault(*jet, -1.);
 
-    // SV1 energyTrkInJet
-    static const SG::ConstAccessor<float> SV1_energyTrkInJetAcc("SV1_energyTrkInJet");
-    float SV1_energyTrkInJet = SV1_energyTrkInJetAcc.withDefault(*jet, -1);
+      // SV1 energyTrkInJet
+      static const SG::ConstAccessor<float> SV1_energyTrkInJetAcc("SV1_energyTrkInJet");
+      SV1_energyTrkInJet = SV1_energyTrkInJetAcc.withDefault(*jet, -1.);
 
-    // SV1 NGTinSvx 
-    static const SG::ConstAccessor<int> SV1_NGTinSvxAcc("SV1_NGTinSvx");
-    int SV1_NGTinSvx = SV1_NGTinSvxAcc.withDefault(*jet, -1);
-    // SV1 Lxy 
-    static const SG::ConstAccessor<float> SV1_LxyAcc("SV1_Lxy");
-    float SV1_Lxy = SV1_LxyAcc.withDefault(*jet, -1);
+      // SV1 NGTinSvx
+      static const SG::ConstAccessor<int> SV1_NGTinSvxAcc("SV1_NGTinSvx");
+      SV1_NGTinSvx = SV1_NGTinSvxAcc.withDefault(*jet, -1);
+
+      // SV1 Lxy
+      static const SG::ConstAccessor<float> SV1_LxyAcc("SV1_Lxy");
+      SV1_Lxy = SV1_LxyAcc.withDefault(*jet, -1.);
+    }
 
     // SV1 track origing related variables (have them double such that taking a fraction doesn't result in an int)
     double SV1_numTracks = 0;
@@ -1232,23 +1244,27 @@ namespace JetTagDQA{
     double SV1_fracTracks_OtherOrigin = -1.; 
 
     if(!m_isData){
-      SV1_frac_HF_tracks_in_jet = (num_HF_tracks_in_jet != 0) ? ( SV1_numTracks_fromB + SV1_numTracks_fromC ) / num_HF_tracks_in_jet : -1;
-      SV1_purity = (SV1_numTracks != 0) ? (SV1_numTracks_fromB + SV1_numTracks_fromC) / SV1_numTracks : -1;
-      SV1_fracTracks_fromB = (SV1_numTracks != 0) ? SV1_numTracks_fromB / SV1_numTracks : -1.;
-      SV1_fracTracks_fromC = (SV1_numTracks != 0) ? SV1_numTracks_fromC / SV1_numTracks : -1.;
-      SV1_fracTracks_fromFragmentation = (SV1_numTracks != 0) ? SV1_numTracks_fromFragmentation / SV1_numTracks : -1.;
-      SV1_fracTracks_fromSecondaries = (SV1_numTracks != 0) ? SV1_numTracks_fromSecondaries / SV1_numTracks : -1.;
-      SV1_fracTracks_fromPileup = (SV1_numTracks != 0) ? SV1_numTracks_fromPileup / SV1_numTracks : -1.;
-      SV1_fracTracks_fromFake = (SV1_numTracks != 0) ? SV1_numTracks_fromFake / SV1_numTracks : -1.;
+      if (num_HF_tracks_in_jet>0)
+        SV1_frac_HF_tracks_in_jet = ( SV1_numTracks_fromB + SV1_numTracks_fromC ) / num_HF_tracks_in_jet;
 
-      if(m_detailLevel > 10){
-        SV1_fracTracks_Secondaries_KshortDecay = (SV1_numTracks != 0) ? SV1_numTracks_Secondaries_KshortDecay / SV1_numTracks : -1.; 
-        SV1_fracTracks_Secondaries_LambdaDecay = (SV1_numTracks != 0) ? SV1_numTracks_Secondaries_LambdaDecay / SV1_numTracks : -1.; 
-        SV1_fracTracks_Secondaries_GammaConversion = (SV1_numTracks != 0) ? SV1_numTracks_Secondaries_GammaConversion / SV1_numTracks : -1.; 
-        SV1_fracTracks_Secondaries_OtherDecay = (SV1_numTracks != 0) ? SV1_numTracks_Secondaries_OtherDecay / SV1_numTracks : -1.; 
-        SV1_fracTracks_Secondaries_HadronicInteraction = (SV1_numTracks != 0) ? SV1_numTracks_Secondaries_HadronicInteraction / SV1_numTracks : -1.; 
-        SV1_fracTracks_Secondaries_OtherSecondary = (SV1_numTracks != 0) ? SV1_numTracks_Secondaries_OtherSecondary / SV1_numTracks : -1.; 
-        SV1_fracTracks_OtherOrigin = (SV1_numTracks != 0) ? SV1_numTracks_OtherOrigin / SV1_numTracks : -1.; 
+      if (SV1_numTracks>0) {
+        SV1_purity = (SV1_numTracks_fromB + SV1_numTracks_fromC) / SV1_numTracks;
+        SV1_fracTracks_fromB = SV1_numTracks_fromB / SV1_numTracks;
+        SV1_fracTracks_fromC = SV1_numTracks_fromC / SV1_numTracks;
+        SV1_fracTracks_fromFragmentation = SV1_numTracks_fromFragmentation / SV1_numTracks;
+        SV1_fracTracks_fromSecondaries = SV1_numTracks_fromSecondaries / SV1_numTracks;
+        SV1_fracTracks_fromPileup = SV1_numTracks_fromPileup / SV1_numTracks;
+        SV1_fracTracks_fromFake = SV1_numTracks_fromFake / SV1_numTracks;
+
+        if(m_detailLevel > 10){
+          SV1_fracTracks_Secondaries_KshortDecay = SV1_numTracks_Secondaries_KshortDecay / SV1_numTracks;
+          SV1_fracTracks_Secondaries_LambdaDecay = SV1_numTracks_Secondaries_LambdaDecay / SV1_numTracks;
+          SV1_fracTracks_Secondaries_GammaConversion = SV1_numTracks_Secondaries_GammaConversion / SV1_numTracks;
+          SV1_fracTracks_Secondaries_OtherDecay = SV1_numTracks_Secondaries_OtherDecay / SV1_numTracks;
+          SV1_fracTracks_Secondaries_HadronicInteraction = SV1_numTracks_Secondaries_HadronicInteraction / SV1_numTracks;
+          SV1_fracTracks_Secondaries_OtherSecondary = SV1_numTracks_Secondaries_OtherSecondary / SV1_numTracks;
+          SV1_fracTracks_OtherOrigin = SV1_numTracks_OtherOrigin / SV1_numTracks;
+	}
       }
     }
 
