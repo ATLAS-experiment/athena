@@ -15,6 +15,7 @@
 #include <tuple>
 #include <type_traits>
 #include <utility>
+#include <algorithm>
 
 #include <nlohmann/json.hpp>
 
@@ -114,11 +115,82 @@ namespace GlobalSim {
     };
 
 
+    /**
+     * Custom Bitset class that can handle clamping of values
+     * @tparam N
+     * @tparam Clamp
+     * @tparam Signed
+     */
+    template <std::size_t N, bool Clamp = false, bool Signed = false>
+    class Bitset : public std::bitset<N> {
+        using Base = std::bitset<N>;
+
+        static constexpr std::uint64_t unsignedMax() {
+            if constexpr (N >= 64) return std::numeric_limits<std::uint64_t>::max();
+            else return (std::uint64_t{1} << N) - 1;
+        }
+
+        static constexpr std::int64_t signedMin() {
+            if constexpr (N >= 64) return std::numeric_limits<std::int64_t>::min();
+            else return -(std::int64_t{1} << (N - 1));
+        }
+
+        static constexpr std::int64_t signedMax() {
+            if constexpr (N == 64) return std::numeric_limits<std::int64_t>::max();
+            else return (std::int64_t{1} << (N - 1)) - 1;
+        }
+
+        template <typename T>
+        static constexpr std::uint64_t convert(T value) {
+            static_assert(std::is_integral_v<T>);
+
+            if constexpr (!Clamp) {
+                return static_cast<std::uint64_t>(value);
+            } else if constexpr (Signed) {
+                if constexpr (std::is_signed_v<T>) {
+                    return std::clamp(static_cast<std::int64_t>(value),signedMin(),signedMax());
+                } else {
+                    return std::clamp(static_cast<std::uint64_t>(value),std::uint64_t{0},static_cast<std::uint64_t>(signedMax()));
+                }
+            } else {
+                if constexpr (std::is_signed_v<T>) {
+                    if (value < 0)
+                        return 0;
+                }
+                return std::clamp(static_cast<std::uint64_t>(value),std::uint64_t{0},unsignedMax());
+            }
+        }
+
+    public:
+        // convenience max and min definition aliases
+        static constexpr auto max = [] {
+            if constexpr (Signed) return signedMax();
+            else return unsignedMax();
+        }();
+        static constexpr auto min = [] {
+            if constexpr (Signed) return signedMin();
+            else return std::uint64_t{0};
+        }();
+
+        constexpr Bitset() = default;
+        // Copy and move constructors from another Bitset
+        constexpr Bitset(const Bitset&) = default;
+        constexpr Bitset(Bitset&&) = default;
+
+        // Construct from the underlying std::bitset
+        constexpr Bitset(const Base& bits) : Base(bits) {}
+        constexpr Bitset(Base&& bits) : Base(std::move(bits)) {}
+
+        template <typename T>
+        requires std::is_integral_v<T>
+        constexpr Bitset(T value)
+                : Base(convert(value)) {}
+    };
 
 
     //struct NoMask {};
 
-    template<unsigned Lo, unsigned Hi, typename AuxValue, typename Value=AuxValue, bool Signed=false/*, auto Mask = NoMask{}*/>
+    template<unsigned Lo, unsigned Hi, typename AuxValue, typename Value=AuxValue, bool Signed=false, bool Clamped=true/*, auto Mask = NoMask{}*/>
     class BitField {
     public:
         static_assert(Hi >= Lo,"BitField: Hi must be >= Lo");
@@ -140,34 +212,57 @@ namespace GlobalSim {
         }();*/
 
         using value_type = Value;
-        using bits_type = std::bitset<width>;
+        using bits_type = Bitset<width,Clamped,Signed>;
+
+        static constexpr auto maxCode = bits_type::max;
+        static constexpr auto minCode = bits_type::min;
 
         using encoder_type = std::function<bits_type(Value)>;
         using decoder_type = std::function<std::pair<Value,Value>(bits_type)>; // pair is {lower,upper} boundaries
 
         constexpr BitField(
-                std::string_view name,
+                std::string_view name_,
                 std::string_view auxvar,
-                std::string_view description,
+                std::string_view description_,
                 encoder_type encoder = nullptr,
                 decoder_type decoder = nullptr,
-                Value scale = 0, Value offset = 0)
+                Value scale = 0, Value offset = 0, double centre = 0.5, bool lower_inc = true)
                 : auxspec(AuxSpec::parse(auxvar)),
-                  m_name(name),
-                  m_description(description),
-                  m_encoder(std::move(encoder)),
-                  m_decoder(std::move(decoder)),
+                  name(name_),
+                  description(description_),
+                  m_encoder(encoder),
+                  m_decoder(decoder),
                   m_acc(std::string{auxspec.name}), m_wacc(std::string{auxspec.name}) {
                 if(!m_encoder && !m_decoder && scale) {
-                    m_encoder = [scale,offset](Value v) {
-                        return bits_type{ static_cast<uint64_t>(std::round((v-offset)/scale)) };
-                    };
+                    if constexpr (Signed) {
+                        // need to cast to signed int, as casting a negative float to unsigned int is undefined behaviour
+                        // was previously then explicitly casting to uint64_t when bits_type was a std::bitset
+                        // which worked. But now using clampable bitsets, the behaviour isn't quite the same
+                        if(lower_inc) {
+                            m_encoder = [scale, offset](Value v) {
+                                return bits_type{static_cast<int64_t>(std::floor((v - offset) / scale))};
+                            };
+                        } else {
+                            m_encoder = [scale, offset](Value v) {
+                                return bits_type{static_cast<int64_t>((std::ceil((v - offset) / scale) - 1))};
+                            };
+                        }
+                    } else {
+                        m_encoder = [scale, offset, lower_inc](Value v) {
+                            return bits_type{static_cast<uint64_t>(lower_inc ? std::floor((v - offset) / scale) : (
+                                    std::ceil((v - offset) / scale) - 1))};
+                        };
+                    }
                     m_decoder = [scale,offset](bits_type bits) -> std::pair<Value,Value> {
                             const double c = static_cast<double>(code(bits));
-                            return {static_cast<Value>(offset + (c-0.5)*scale),
-                                    static_cast<Value>(offset + (c+0.5)*scale) };
+                            return {static_cast<Value>(offset + c*scale),
+                                    static_cast<Value>(offset + (c+1.0)*scale) };
                     };
                 }
+            if constexpr (std::is_arithmetic_v<Value> && !std::is_same_v<Value, bool>)
+            {
+                m_valueoffset = centre;
+            }
         }
 
         // Named-parameter aggregate for constructing a BitField.
@@ -179,19 +274,21 @@ namespace GlobalSim {
             std::string_view description{};
             encoder_type encoder{};
             decoder_type decoder{};
-            Value scale{};
-            Value offset{};
+            Value scale{0};
+            Value offset{0};
+            double centre{0.5};
+            bool lower_incl{true};
         };
 
-        constexpr BitField(const Params& p) : BitField(p.name,p.auxvar,p.description,p.encoder,p.decoder,p.scale,p.offset) { }
+        constexpr BitField(const Params& p) : BitField(p.name,p.auxvar.empty()?p.name:p.auxvar,p.description,p.encoder,p.decoder,p.scale,p.offset,p.centre,p.lower_incl) { }
 
         // ------------------------------------------------------------------------
         // Metadata
         // ------------------------------------------------------------------------
 
-        constexpr std::string_view name() const { return m_name; }
+        /*constexpr std::string_view name() const { return m_name; }
 
-        constexpr std::string_view description() const { return m_description; }
+        constexpr std::string_view description() const { return m_description; }*/
 
         // ------------------------------------------------------------------------
         // Get the value directly from an AOD object.
@@ -279,6 +376,27 @@ namespace GlobalSim {
                     value);
         }
 
+        // version of encode that returns actual code and
+        // also check if value being encoded lies on either of lower or upper boundary
+        template<typename... Args>
+        std::pair<std::int64_t,std::pair<bool,bool>> encodeAndCheckBoundary(const std::variant<Args...>& value) const {
+            return std::visit(
+                    [this](const auto& v) -> std::pair<std::int64_t,std::pair<bool,bool>> {
+                        using T = std::decay_t<decltype(v)>;
+
+                        if constexpr (std::is_convertible_v<T, Value>) {
+                            auto bits = encode(static_cast<Value>(v));
+                            auto r = range(bits);
+                            return {code(bits),{v==r.first,v==r.second}};
+                        } else {
+                            throw std::invalid_argument(
+                                "Variant alternative cannot be converted "
+                                "to BitField value type");
+                    }
+                    },
+                    value);
+        }
+
         // get the "code" of the encoding, i.e. converts the bitset to int64_t
         // respecting if this BitField is signed or not
         static std::int64_t code(bits_type bits) {
@@ -321,8 +439,7 @@ namespace GlobalSim {
             }
 
             if constexpr (std::is_arithmetic_v<Value> && !std::is_same_v<Value, bool>) {
-                return static_cast<Value>(
-                        (static_cast<double>(lo) + static_cast<double>(hi)) / 2.0);
+                return (lo+m_valueoffset*(hi-lo));
             } else {
                 // No well-defined midpoint for this Value type -- fall back to
                 // the lower bound rather than attempting arithmetic on it.
@@ -379,13 +496,15 @@ namespace GlobalSim {
         }
 
         AuxSpec auxspec;
+        std::string_view name;
+        std::string_view description;
     private:
 
-        std::string_view m_name;
-        std::string_view m_description;
+
 
         encoder_type m_encoder;
         decoder_type m_decoder;
+        Value m_valueoffset{}; // used by decode to return a value in the encoder range
 
         SG::ConstAccessor <AuxValue> m_acc;
         SG::Accessor <AuxValue> m_wacc;
@@ -394,6 +513,9 @@ namespace GlobalSim {
     // alias for setting the Signed bool
     template<unsigned Lo, unsigned Hi, typename AuxValue, typename Value = AuxValue>
     using SignedBitField = BitField<Lo, Hi, AuxValue, Value, true>;
+    // alias for unsetting the Clamped bool
+    template<unsigned Lo, unsigned Hi, typename AuxValue, typename Value = AuxValue>
+    using UnclampedBitField = BitField<Lo, Hi, AuxValue, Value, false,false>;
 
 
     template<typename Field>
@@ -442,6 +564,11 @@ namespace GlobalSim {
 
         auto bits() const {
             return m_field.bits(m_obj);
+        }
+
+
+        auto code() const {
+            return m_field.code(bits());
         }
 
         // ------------------------------------------------------------------------
@@ -528,8 +655,8 @@ namespace GlobalSim {
             j["fields"] = nlohmann::json::array();
             forEachField([&](const auto &field) {
                 nlohmann::json f;
-                f["name"] = field.name();
-                f["description"] = field.description();
+                f["name"] = field.name;
+                f["description"] = field.description;
                 f["start"] = field.lo;
                 f["width"] = field.width;
                 j["fields"].push_back(f);
@@ -657,9 +784,9 @@ namespace GlobalSim {
 #define FE_15(m, a, ...)   m(a) FE_14(m, __VA_ARGS__)
 #define FE_16(m, a, ...)   m(a) FE_15(m, __VA_ARGS__)
 #define FE_17(m, a, ...)   m(a) FE_16(m, __VA_ARGS__)
-#define FE_18(m, a, ...)   m(a) FE_18(m, __VA_ARGS__)
-#define FE_19(m, a, ...)   m(a) FE_19(m, __VA_ARGS__)
-#define FE_20(m, a, ...)   m(a) FE_20(m, __VA_ARGS__)
+#define FE_18(m, a, ...)   m(a) FE_17(m, __VA_ARGS__)
+#define FE_19(m, a, ...)   m(a) FE_18(m, __VA_ARGS__)
+#define FE_20(m, a, ...)   m(a) FE_19(m, __VA_ARGS__)
 
 #define GET_FE(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10, \
                _11,_12,_13,_14,_15,_16,_17,_18,_19,_20,NAME,...) NAME
