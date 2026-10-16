@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibFitters/CurvedCandidateFinder.h"
@@ -119,7 +119,7 @@ const std::vector<CurvedLine> &CurvedCandidateFinder::getCandidates(const double
                 }
 
                 // add the candidate line to list of candidates if there are enough hits //
-                if (nb_hits == m_hits.size()) { m_candidates.push_back(cand_line); }
+                if (nb_hits == m_hits.size()) { m_candidates.push_back(std::move(cand_line)); }
             }
         }
     }

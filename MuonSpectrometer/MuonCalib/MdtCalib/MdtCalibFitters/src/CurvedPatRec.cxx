@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibFitters/CurvedPatRec.h"
@@ -24,11 +24,11 @@ bool CurvedPatRec::fit(MuonCalibSegment &r_segment) const {
     // select all hits //
     HitSelection selection(r_segment.mdtHitsOnTrack(), 0);
     // call the other fit function //
-    return fit(r_segment, selection);
+    return fit(r_segment, std::move(selection));
 }
 bool CurvedPatRec::fit(MuonCalibSegment &r_segment, HitSelection r_selection) const {
     CurvedLine curved_track;
-    return fit(r_segment, r_selection, curved_track);
+    return fit(r_segment, std::move(r_selection), curved_track);
 }
 bool CurvedPatRec::fit(MuonCalibSegment &r_segment, HitSelection r_selection, CurvedLine &curved_track) const {
     ///////////////

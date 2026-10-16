@@ -1,14 +1,15 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibFitters/MuCCaFitter.h"
 
-#include <cmath>
+
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
-
+#include <cmath>
+#include <array>
 namespace MuonCalib {
 
     void MuCCaFitter::printLevel(int level) {
@@ -19,7 +20,7 @@ namespace MuonCalib {
         // select all hits
         HitSelection selection(seg.mdtHitsOnTrack(), 0);
         // call fit function
-        return fit(seg, selection);
+        return fit(seg, std::move(selection));
     }
 
     bool MuCCaFitter::fit(MuonCalibSegment& seg, HitSelection selection) const {
@@ -78,6 +79,10 @@ namespace MuonCalib {
                 ++jj;
             }
         }
+        if (S == 0)[[unlikely]]{
+          log << MSG::ERROR <<"Divisor S is zero."<<endmsg;
+          return false;
+        }
         Zc = Sz / S;
         Yc = Sy / S;
 
@@ -126,8 +131,13 @@ namespace MuonCalib {
         }
         Att = Syy + cosin * (2 * sinus * Szy - cosin * Syyzz);
         d = R / S;
-        if (log.level() <= MSG::DEBUG)
+        if (log.level() <= MSG::DEBUG){
             log << MSG::DEBUG << "fit() MuCCaFitter>>> d= " << d << " R= " << R << " S= " << S << " Att= " << Att << endmsg;
+        }
+        if (Att == 0.)[[unlikely]]{
+            log << MSG::ERROR << "Divisor Att is zero."<< endmsg;
+            return false;
+        }
         for (int i = 0; i < N; ++i) {
             if (selection[i]) continue;
             dist[i] = cosin * (y[i] - Yc) - sinus * (z[i] - Zc) - d;
@@ -282,9 +292,8 @@ namespace MuonCalib {
         double delta;
         double averagephi, dist, dphiin, dphiex;
         double bpar[4], phi;
-        double bfparn[2];
-        bfparn[0] = 0;
-        bfparn[1] = 0;
+        std::array<double, 2> bfparn{};
+        
         // int segnobfn[2];
         // int segnoc[2][4],ncandid[4],ncand;
         int ncandid[4], ncand;
@@ -337,19 +346,19 @@ namespace MuonCalib {
             double delta = 0.00001;
             ncand = 0;
             if (std::abs(bpar[0] - bpar[2]) < delta) {
-                bfparn[ncand] = bpar[0];
+                bfparn.at(ncand) = bpar[0];
                 ncand = ncand + 1;
             }
             if (std::abs(bpar[0] - bpar[3]) < delta) {
-                bfparn[ncand] = bpar[0];
+                bfparn.at(ncand) = bpar[0];
                 ncand = ncand + 1;
             }
             if (std::abs(bpar[1] - bpar[2]) < delta) {
-                bfparn[ncand] = bpar[1];
+                bfparn.at(ncand) = bpar[1];
                 ncand = ncand + 1;
             }
             if (std::abs(bpar[1] - bpar[3]) < delta) {
-                bfparn[ncand] = bpar[1];
+                bfparn.at(ncand) = bpar[1];
                 ncand = ncand + 1;
             }
             bcand[0][i] = bfparn[0];
@@ -378,9 +387,7 @@ namespace MuonCalib {
         /********************************************/
         double delta{0}, averagephi{0}, dist{0}, dphiin{0}, dphiex{0};
         double bpar[4], phi{0};
-        double bfparn[2];
-        bfparn[0] = 0;
-        bfparn[1] = 0;
+        std::array<double, 2> bfparn{};
         double bcand[2][4];
         int segnob[] = {1, -1, 1, -1};
         int ncandid[4], ncand;
@@ -430,19 +437,19 @@ namespace MuonCalib {
             double delta = 0.00001;
             ncand = 0;
             if (std::abs(bpar[0] - bpar[2]) < delta) {
-                bfparn[ncand] = bpar[0];
+                bfparn.at(ncand) = bpar[0];
                 ncand = ncand + 1;
             }
             if (std::abs(bpar[0] - bpar[3]) < delta) {
-                bfparn[ncand] = bpar[0];
+                bfparn.at(ncand) = bpar[0];
                 ncand = ncand + 1;
             }
             if (std::abs(bpar[1] - bpar[2]) < delta) {
-                bfparn[ncand] = bpar[1];
+                bfparn.at(ncand) = bpar[1];
                 ncand = ncand + 1;
             }
             if (std::abs(bpar[1] - bpar[3]) < delta) {
-                bfparn[ncand] = bpar[1];
+                bfparn.at(ncand) = bpar[1];
                 ncand = ncand + 1;
             }
             bcand[0][i] = bfparn[0];

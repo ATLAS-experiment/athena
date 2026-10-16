@@ -1,14 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibFitters/QuasianalyticLineReconstruction.h"
 
 #include <TString.h>  // for Form
-
-#include <cmath>
-#include <fstream>
-#include <iostream>
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "CLHEP/GenericFunctions/CumulativeChiSquare.hh"
@@ -16,6 +12,9 @@
 #include "CLHEP/Units/SystemOfUnits.h"
 #include "GaudiKernel/MsgStream.h"
 #include "time.h"
+#include <cmath>
+#include <fstream>
+#include <iostream>
 
 using namespace MuonCalib;
 
@@ -330,11 +329,11 @@ bool QuasianalyticLineReconstruction::fit(MuonCalibSegment& r_segment) const {
     HitSelection selection(r_segment.mdtHitsOnTrack(), 0);
 
     // call the other fit function //
-    return fit(r_segment, selection);
+    return fit(r_segment, std::move(selection));
 }
 bool QuasianalyticLineReconstruction::fit(MuonCalibSegment& r_segment, HitSelection r_selection) const {
     MTStraightLine final_track;
-    return fit(r_segment, r_selection, final_track);
+    return fit(r_segment, std::move(r_selection), final_track);
 }
 bool QuasianalyticLineReconstruction::fit(MuonCalibSegment& r_segment, HitSelection r_selection, MTStraightLine& final_track) const {
     ///////////////
