@@ -21,7 +21,7 @@ class HardScatterStrategy(IntEnum):
     SUM_PT2 = 0
     SUM_PT = 1
     SUM_PTW = 2
-    GNN = 3
+    PVNN = 3
     HYY = 4
 
 
@@ -135,18 +135,18 @@ def InDetPhysValMonitoringToolCfg(flags, **kwargs):
     hs_strategy = HardScatterStrategy(flags.PhysVal.IDPVM.hardScatterStrategy)
     
     # if we are running with sumpT(w) hard scatter selection, we need to schedule jet finding
-    if hs_strategy in [HardScatterStrategy.SUM_PTW, HardScatterStrategy.GNN]:
+    if hs_strategy in [HardScatterStrategy.SUM_PTW, HardScatterStrategy.PVNN]:
 
         from InDetPhysValMonitoring.addRecoJetsConfig import (
             AddRecoJetsIfNotExistingCfg)
         acc.merge(AddRecoJetsIfNotExistingCfg(
             flags, flags.PhysVal.IDPVM.jetsNameForHardScatter))
 
-    # if we are running with the GNN hard scatter selection, we need to schedule the dependencies
-    if hs_strategy == HardScatterStrategy.GNN:
-        from InDetConfig.InDetGNNHardScatterSelectionConfig import (
-            GNNSequenceCfg)
-        acc.merge(GNNSequenceCfg(flags))
+    # if we are running with the PVNN hard scatter selection, we need to schedule the dependencies
+    if hs_strategy == HardScatterStrategy.PVNN:
+        from InDetConfig.InDetPVNNSelectionConfig import (
+            PVNNSequenceCfg)
+        acc.merge(PVNNSequenceCfg(flags))
 
     # if we are running with the HGam hard scatter selection, we need to schedule the NN
     if hs_strategy == HardScatterStrategy.HYY:

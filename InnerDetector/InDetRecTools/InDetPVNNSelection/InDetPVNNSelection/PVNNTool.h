@@ -1,0 +1,60 @@
+/*
+  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+*/
+
+#ifndef PVNN_TOOL_H
+#define PVNN_TOOL_H
+
+// Tool includes
+#include "AsgTools/AsgTool.h"
+#include "IVertexDecorator.h"
+
+// EDM includes
+#include "xAODTracking/VertexFwd.h"
+#include "InDetPVNNSelection/PVNN.h"
+
+#include <memory>
+#include <string>
+#include <map>
+
+/**
+ * @class PVNNTool 
+ *
+ * Tool to score vertex hard-scatter probability
+ * using PVNN based taggers
+ *
+ * NOTE: The PVNN relies on decorations added in
+ * InDetPVNNSelection::VertexDecoratorAlg and as
+ * such should only be called from within that algorithm
+ *
+ * @author Jackson Burzynski <jackson.carl.burzynski@cern.ch>
+ */
+
+namespace InDetPVNNSelection {
+
+  class PVNNTool : public asg::AsgTool,
+                  virtual public IVertexDecorator
+  {
+
+    ASG_TOOL_CLASS(PVNNTool, IVertexDecorator)
+
+    public:
+      PVNNTool(const std::string& name);
+      ~PVNNTool();
+
+      StatusCode initialize() override;
+
+      virtual float decorate(const xAOD::Vertex& vertex) const override;
+
+    private:
+      Gaudi::Property<std::string> m_nn_file {
+        this,
+        "nnFile",
+        "InDetGNNHardScatterSelection/v0/HSGN2_export_090824.onnx",
+        "the path to the netowrk file used to run inference"
+      };
+
+      std::unique_ptr<const PVNN> m_pvnn;
+  };
+}
+#endif

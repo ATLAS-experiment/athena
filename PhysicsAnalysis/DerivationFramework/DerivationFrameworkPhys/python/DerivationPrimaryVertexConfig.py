@@ -6,19 +6,19 @@ from AthenaCommon.Logging import logging
 logPHYS = logging.getLogger('PHYS')
 
 
-def GNNVertexCfg(flags):
+def PVNNVertexCfg(flags):
     acc = ComponentAccumulator()
 
     from SGComps.AddressRemappingConfig import InputRenameCfg
     acc.merge(InputRenameCfg("xAOD::VertexContainer", "PrimaryVertices", "PrimaryVertices_initial"))
     acc.merge(InputRenameCfg("xAOD::VertexAuxContainer", "PrimaryVerticesAux.", "PrimaryVertices_initialAux."))
 
-    from DerivationFrameworkPhys.GNNVertexConfig import CustomJetsCfg
+    from DerivationFrameworkPhys.PVNNVertexConfig import CustomJetsCfg
     acc.merge(CustomJetsCfg(flags))
 
     ## Hard-scatter vertex selection
-    from InDetConfig.InDetGNNHardScatterSelectionConfig import GNNSequenceCfg
-    acc.merge(GNNSequenceCfg(flags))
+    from InDetConfig.InDetPVNNSelectionConfig import PVNNSequenceCfg
+    acc.merge(PVNNSequenceCfg(flags))
 
     from TrkConfig.TrkVertexToolsConfig import VertexCollectionSortingToolCfg
     vxsort = VertexCollectionSortingToolCfg(flags)

@@ -30,7 +30,7 @@ def DecoratePhotonPointingAlgCfg(flags, name="DecoratePhotonPointingAlg", **kwar
         kwargs["PhotonPointingTool"] = tool
     if "PhotonVertexSelectionTool" not in kwargs:
         from TrkConfig.VertexFindingFlags import VertexSortingSetup
-        pvContainer = "PrimaryVertices_initial" if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting else "PrimaryVertices"
+        pvContainer = "PrimaryVertices_initial" if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.PVNNSorting else "PrimaryVertices"
         kwargs.setdefault("PhotonVertexSelectionTool", acc.popToolsAndMerge(PhotonVertexSelectionToolCfg(flags, VertexContainer=pvContainer)))
 
     alg = CompFactory.DecoratePhotonPointingAlg("DecoratePhotonPointingAlg", **kwargs)

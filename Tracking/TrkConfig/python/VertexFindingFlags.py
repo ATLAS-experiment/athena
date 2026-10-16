@@ -9,7 +9,7 @@ class VertexSortingSetup(FlagEnum):
     SumPt2Sorting = 'SumPt2Sorting'
     SumPtSorting = 'SumPtSorting'
     JetWeightedSorting = 'JetWeightedSorting'
-    GNNSorting = 'GNNSorting'
+    PVNNSorting = 'PVNNSorting'
     HGamNNSorting = 'HGamNNSorting'
 
 
@@ -64,7 +64,7 @@ def createPriVertexingFlags():
 
     # string to store the type of sorting algorithm to separate signal and pile-up vertices.
     flags.addFlag("sortingSetup", VertexSortingSetup.SumPt2Sorting, type=VertexSortingSetup)
-    flags.addFlag("HSGNN.nnFile", "InDetGNNHardScatterSelection/v2.0/network.onnx")
+    flags.addFlag("PVNN.nnFile", "InDetGNNHardScatterSelection/v2.0/network.onnx")
     flags.addFlag("useBeamConstraint", lambda pcf:
                   not(pcf.Tracking.PrimaryPassConfig in [
                       PrimaryPassConfig.VtxLumi,

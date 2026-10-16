@@ -52,15 +52,15 @@ def JetRestrictedSumPt2VertexCollectionSortingToolCfg(flags, name="JetRestricted
     return acc
 
 
-def GNNVertexCollectionSortingToolCfg(flags, name="GNNVertexCollectionSortingTool", **kwargs):
+def PVNNVertexCollectionSortingToolCfg(flags, name="PVNNVertexCollectionSortingTool", **kwargs):
     acc = ComponentAccumulator()
 
     if "VertexWeightCalculator" not in kwargs:
-        from TrkConfig.TrkVertexWeightCalculatorsConfig import GNNVertexWeightCalculatorCfg
+        from TrkConfig.TrkVertexWeightCalculatorsConfig import PVNNVertexWeightCalculatorCfg
         kwargs.setdefault("VertexWeightCalculator", acc.popToolsAndMerge(
-            GNNVertexWeightCalculatorCfg(flags)))
+            PVNNVertexWeightCalculatorCfg(flags)))
 
-    kwargs.setdefault("decorationName", "gnnScore")
+    kwargs.setdefault("decorationName", "PVNNScore")
 
     acc.setPrivateTools(
         CompFactory.Trk.VertexCollectionSortingTool(name,**kwargs))
@@ -93,8 +93,8 @@ def VertexCollectionSortingToolCfg(flags, **kwargs):
          VertexSortingSetup.JetWeightedSorting:
         return JetRestrictedSumPt2VertexCollectionSortingToolCfg(flags, **kwargs)
     elif flags.Tracking.PriVertex.sortingSetup == \
-         VertexSortingSetup.GNNSorting:
-        return GNNVertexCollectionSortingToolCfg(flags, **kwargs)
+         VertexSortingSetup.PVNNSorting:
+        return PVNNVertexCollectionSortingToolCfg(flags, **kwargs)
     elif flags.Tracking.PriVertex.sortingSetup == \
          VertexSortingSetup.HGamNNSorting:
         return HGamNNVertexCollectionSortingToolCfg(flags, **kwargs)

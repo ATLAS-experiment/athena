@@ -88,7 +88,7 @@ calibcontexts = {
     "AntiKt4UFOCSSK":ufocontexts,
     "AntiKt4EMTopo":topocontexts,
     "AntiKt4LCTopo":topocontexts,
-    "AntiKt4EMTopoCustomVtxGNN":topocontexts,
+    "AntiKt4EMTopoCustomVtxPVNN":topocontexts,
     "AntiKt10LCTopo":fatjetcontexts,
     # Standard trimmed
     "AntiKt10LCTopoTrimmedPtFrac5SmallR20":fatjetcontexts,
@@ -173,7 +173,7 @@ def getJetCalibTool(jetdef, context, data_type, calibseq = "", rhoname = "", pvn
         ignore_substr = [
             '_noElectrons', '_noMuons', '_noLeptons', '_inclMuons',
             '_tauSeedEleRM',
-            'ByVertex', 'CustomVtxGNN', 'CustomVtx',
+            'ByVertex', 'CustomVtxPVNN', 'CustomVtx',
         ]
         for text in ignore_substr:
             if text in jetcollection :
@@ -218,7 +218,7 @@ def getJetCalibToolPrereqs(modspec,jetdef):
     prereqs.append("mod:ConstitFourMom")
     if "JetArea" in calibseq: # Will not insert a prefix here
         if calibcontext.startswith("Trig"): prereqs.append("input:HLT_EventDensity")
-        elif pvname == "PrimaryVertices_initial": prereqs.append("input:EventDensityCustomVtxGNN")
+        elif pvname == "PrimaryVertices_initial": prereqs.append("input:EventDensityCustomVtxPVNN")
         elif pvname != "PrimaryVertices": prereqs.append("input:EventDensityCustomVtx")
         else: prereqs.append(inputsFromContext("EventDensity")(jetdef))
     if "GSC" in calibseq:

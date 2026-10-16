@@ -90,7 +90,7 @@ def createJetContextFlags():
     # ****************
     # Add PHYS context :
     if moduleExists("DerivationFrameworkPhys"):
-        from DerivationFrameworkPhys.GNNVertexConfig import addJetContextFlags
+        from DerivationFrameworkPhys.PVNNVertexConfig import addJetContextFlags
         addJetContextFlags(flags)
         
     return flags

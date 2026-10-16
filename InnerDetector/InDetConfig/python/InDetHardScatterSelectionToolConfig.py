@@ -18,7 +18,7 @@ def InDetHardScatterSelectionToolCfg(flags, name="InDetHardScatterSelectionTool"
     elif sortingSetup is VertexSortingSetup.JetWeightedSorting:
         selectionMode = 2
         kwargs.setdefault("JetContainer", "AntiKt4EMTopoJets")
-    elif sortingSetup is VertexSortingSetup.GNNSorting:
+    elif sortingSetup is VertexSortingSetup.PVNNSorting:
         selectionMode = 3
 
     kwargs.setdefault("SelectionMode", selectionMode)
