@@ -33,7 +33,7 @@
  */
 
 #include "LegendreSegmentFinderTool.h"
-#include "L1MuonMDTTools/L0MDTSegment.h"
+#include "L1MuonMDTTools/Segment.h"
 #include "MuonReadoutGeometryR4/MdtReadoutElement.h"
 #include "CxxUtils/trapping_fp.h"
 #include <algorithm>
@@ -307,7 +307,7 @@ namespace L1Muon::L1MDT {
       const ActsTrk::GeometryContext& gctx,
       float m,
       float b,
-      std::vector<L1Muon::L1MDT::Segment>& segments) const {
+      std::vector<Segment>& segments) const {
 
     segments.clear();
 
@@ -379,7 +379,7 @@ namespace L1Muon::L1MDT {
 
     // Temporary validation-only status:
     // the fitted line parameters are computed and logged, but the final
-    // L1Muon::L1MDT::Segment EDM object is not yet fully filled and stored.
+    // Segment EDM object is not yet fully filled and stored.
     //
     // Future updates are expected to:
     //   - define the final segment EDM content
@@ -388,7 +388,7 @@ namespace L1Muon::L1MDT {
     //
     // Example placeholder:
     //
-    // L1Muon::L1MDT::Segment seg;
+    // Segment seg;
     // seg.setM(fit.m);
     // seg.setB(fit.b);
     // seg.setChi2(fit.chi2);

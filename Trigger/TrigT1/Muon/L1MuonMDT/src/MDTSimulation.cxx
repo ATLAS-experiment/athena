@@ -91,13 +91,13 @@ namespace L1Muon {
       }
 
       // Run the segment finder independently for each station
-      std::vector<L1Muon::L1MDT::Segment> biSegmentsCSF;
-      std::vector<L1Muon::L1MDT::Segment> bmSegmentsCSF;
-      std::vector<L1Muon::L1MDT::Segment> boSegmentsCSF;
+      std::vector<L1MDT::Segment> biSegmentsCSF;
+      std::vector<L1MDT::Segment> bmSegmentsCSF;
+      std::vector<L1MDT::Segment> boSegmentsCSF;
 
-      std::vector<L1Muon::L1MDT::Segment> biSegmentsLEG;
-      std::vector<L1Muon::L1MDT::Segment> bmSegmentsLEG;
-      std::vector<L1Muon::L1MDT::Segment> boSegmentsLEG;
+      std::vector<L1MDT::Segment> biSegmentsLEG;
+      std::vector<L1MDT::Segment> bmSegmentsLEG;
+      std::vector<L1MDT::Segment> boSegmentsLEG;
 
 
       if (biHits.size() >= 2) {
@@ -125,9 +125,9 @@ namespace L1Muon {
       << " BM=" << bmSegmentsLEG.size()
       << " BO=" << boSegmentsLEG.size());
 
-      const L1Muon::L1MDT::Segment* biSeg = biSegmentsCSF.empty() ? nullptr : &biSegmentsCSF.front();
-      const L1Muon::L1MDT::Segment* bmSeg = bmSegmentsCSF.empty() ? nullptr : &bmSegmentsCSF.front();
-      const L1Muon::L1MDT::Segment* boSeg = boSegmentsCSF.empty() ? nullptr : &boSegmentsCSF.front();
+      const L1MDT::Segment* biSeg = biSegmentsCSF.empty() ? nullptr : &biSegmentsCSF.front();
+      const L1MDT::Segment* bmSeg = bmSegmentsCSF.empty() ? nullptr : &bmSegmentsCSF.front();
+      const L1MDT::Segment* boSeg = boSegmentsCSF.empty() ? nullptr : &boSegmentsCSF.front();
 
       const auto ptResult = m_ptEstimationTool->estimatePt(biSeg, bmSeg, boSeg);
 

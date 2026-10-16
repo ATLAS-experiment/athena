@@ -39,7 +39,7 @@
  */
 
 #include "CompactSegmentFinderTool.h"
-#include "L1MuonMDTTools/L0MDTSegment.h"
+#include "L1MuonMDTTools/Segment.h"
 
 namespace L1Muon::L1MDT {
 
@@ -55,7 +55,7 @@ namespace L1Muon::L1MDT {
       const ActsTrk::GeometryContext& gctx,
       float m,
       float rpcB,
-      std::vector<L1Muon::L1MDT::Segment>& segments) const {
+      std::vector<Segment>& segments) const {
 
     // Reset the output container for this call
     segments.clear();
@@ -164,7 +164,7 @@ namespace L1Muon::L1MDT {
 
     // Fill the output segment object here according to the actual EDM API
   
-    L1Muon::L1MDT::Segment seg;
+    Segment seg;
     seg.setM(fit.m);
     seg.setB(fit.b);
     seg.setChi2(fit.chi2);
