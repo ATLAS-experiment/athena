@@ -3,7 +3,6 @@
 */
 
 #include "EgammaSshapeCalibration.h"
-//#include "TrigCaloEvent/TrigEMCluster.h"
 #include "xAODTrigCalo/TrigEMCluster.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloDetDescr/CaloDetDescriptor.h"
