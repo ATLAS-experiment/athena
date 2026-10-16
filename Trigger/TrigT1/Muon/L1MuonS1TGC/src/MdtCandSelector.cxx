@@ -2,7 +2,7 @@
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TgcL0MdtCandidateSelector.h"
+#include "MdtCandSelector.h"
 
 #include <algorithm>
 #include <cstdint>
@@ -23,9 +23,9 @@ CandidateGroup candidateGroup(const xAOD::L1TGCCandData &candidate) {
 
 }  // namespace
 
-namespace L1Muon {
+namespace L1Muon::L1TGC {
 
-std::unique_ptr<xAOD::L1TGCCandDataContainer> TgcL0MdtCandidateSelector::select(
+std::unique_ptr<xAOD::L1TGCCandDataContainer> MdtCandSelector::select(
     xAOD::L1TGCCandDataContainer &candidates) const {
   auto output = std::make_unique<xAOD::L1TGCCandDataContainer>(SG::VIEW_ELEMENTS);
   std::vector<xAOD::L1TGCCandData *> orderedCandidates;
@@ -65,4 +65,4 @@ std::unique_ptr<xAOD::L1TGCCandDataContainer> TgcL0MdtCandidateSelector::select(
   return output;
 }
 
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC

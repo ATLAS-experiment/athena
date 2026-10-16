@@ -104,7 +104,7 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
 
 StatusCode TgcL0FloatingCandidateBuilderTool::build(
     const TgcRdoContainer& rdos, TgcSLCandidateContainer& candidates,
-    TgcSLSegmentContainer* segments, const EventContext& ctx) const {
+    L1TGC::SegmentContainer* segments, const EventContext& ctx) const {
 
   const Muon::TgcCablingMap* cabling{};
   ATH_CHECK(SG::get(cabling, m_cablingKey, ctx));

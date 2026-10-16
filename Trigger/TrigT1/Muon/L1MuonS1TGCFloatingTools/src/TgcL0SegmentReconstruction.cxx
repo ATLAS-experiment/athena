@@ -25,9 +25,9 @@ using Config = L1Muon::TgcL0Floating::SegmentReconstructionConfig;
 using Statistics = L1Muon::TgcL0Floating::SegmentStatistics;
 using Station = L1Muon::TgcL0Floating::Station;
 using GroupKey = L1Muon::TgcL0Floating::HitGroupKey;
-using OutputSegment = L1Muon::TgcSLSegment;
-using OutputSegments = L1Muon::TgcSLSegmentContainer;
-using Projection = L1Muon::TgcSLSegmentProjection;
+using OutputSegment = L1Muon::L1TGC::Segment;
+using OutputSegments = L1Muon::L1TGC::SegmentContainer;
+using Projection = L1Muon::L1TGC::SegmentProjection;
 
 constexpr std::uint8_t stationBit(const Station station) {
   if (station == Station::M1) return 0x1U;
@@ -541,7 +541,7 @@ StatusCode SegmentReconstruction::build(
     const StationCoincidenceContainer& coincidences,
     TgcSLCandidateContainer& candidates,
     SegmentStatistics& statistics,
-    TgcSLSegmentContainer* validationSegments) const {
+    L1TGC::SegmentContainer* validationSegments) const {
   candidates.clear();
   statistics = SegmentStatistics{};
   if (validationSegments != nullptr) validationSegments->clear();

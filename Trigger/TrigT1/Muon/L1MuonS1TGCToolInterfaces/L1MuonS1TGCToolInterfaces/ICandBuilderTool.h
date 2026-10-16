@@ -1,21 +1,21 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L1MUONS1TGCINTERFACES_ITGCL0CANDIDATEBUILDERTOOL_H
-#define L1MUONS1TGCINTERFACES_ITGCL0CANDIDATEBUILDERTOOL_H
+#ifndef L1MUONS1TGCINTERFACES_ICANDBUILDERTOOL_H
+#define L1MUONS1TGCINTERFACES_ICANDBUILDERTOOL_H
 
 #include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IAlgTool.h"
 #include "L1MuonS1TGCToolInterfaces/TgcSLCandidate.h"
-#include "L1MuonS1TGCToolInterfaces/TgcSLSegment.h"
+#include "L1MuonS1TGCToolInterfaces/Segment.h"
 #include "MuonRDO/TgcRdoContainer.h"
 
-namespace L1Muon {
+namespace L1Muon::L1TGC {
 
 /** @brief Interface for building pre-Inner-Coincidence TGC candidates. */
-class ITgcL0CandidateBuilderTool : virtual public IAlgTool {
+class ICandBuilderTool : virtual public IAlgTool {
  public:
-  DeclareInterfaceID(ITgcL0CandidateBuilderTool, 1, 1);
+  DeclareInterfaceID(ICandBuilderTool, 1, 1);
 
   /**
    * @brief Build candidates from TGC RDO data.
@@ -37,13 +37,13 @@ class ITgcL0CandidateBuilderTool : virtual public IAlgTool {
    */
   virtual StatusCode build(const TgcRdoContainer& rdos,
                            TgcSLCandidateContainer& candidates,
-                           TgcSLSegmentContainer* segments,
+                           SegmentContainer* segments,
                            const EventContext& ctx) const {
     static_cast<void>(segments);
     return build(rdos, candidates, ctx);
   }
 };
 
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC
 
 #endif

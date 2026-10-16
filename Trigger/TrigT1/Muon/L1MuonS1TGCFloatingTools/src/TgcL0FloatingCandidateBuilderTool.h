@@ -5,7 +5,7 @@
 #define L1MUONS1TGCFLOATINGTOOLS_TGCL0FLOATINGCANDIDATEBUILDERTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "L1MuonS1TGCToolInterfaces/ITgcL0CandidateBuilderTool.h"
+#include "L1MuonS1TGCToolInterfaces/ICandBuilderTool.h"
 #include "MuonIdHelpers/IMuonIdHelperSvc.h"
 #include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
@@ -20,21 +20,21 @@
 namespace L1Muon {
 
 class TgcL0FloatingCandidateBuilderTool final
-    : public extends<AthAlgTool, ITgcL0CandidateBuilderTool> {
+    : public extends<AthAlgTool, L1TGC::ICandBuilderTool> {
  public:
   using base_class::base_class;
 
   StatusCode initialize() override;
 
-  /// \copydoc ITgcL0CandidateBuilderTool::build
+  /// \copydoc L1TGC::ICandBuilderTool::build
   StatusCode build(const TgcRdoContainer& rdos,
                    TgcSLCandidateContainer& candidates,
                    const EventContext& ctx) const override;
 
-  /// \copydoc ITgcL0CandidateBuilderTool::build
+  /// \copydoc L1TGC::ICandBuilderTool::build
   StatusCode build(const TgcRdoContainer& rdos,
                    TgcSLCandidateContainer& candidates,
-                   TgcSLSegmentContainer* segments,
+                   L1TGC::SegmentContainer* segments,
                    const EventContext& ctx) const override;
 
  private:
@@ -61,16 +61,16 @@ class TgcL0FloatingCandidateBuilderTool final
 
   Gaudi::Property<std::string> m_ptCalibrationFile{
       this, "PtCalibrationFile",
-      "L0MuonS1TGC/Floating/eta30_phi20_rel95_physicaldtheta_v2_goodmag_eta20_phi18_slope0p090_v4/"
-      "TgcL0PtCalibration.txt",
+      "L1MuonS1TGC/Floating/eta30_phi20_rel95_physicaldtheta_v2_goodmag_eta20_phi18_slope0p090_v4/"
+      "TgcL1PtCalibration.txt",
       "ASCII Floating-pT calibration path relative to the GroupData "
       "development directory"};
   std::unique_ptr<const TgcL0FloatingPtLut> m_ptLut{};
 
   Gaudi::Property<std::string> m_goodMagMapFile{
       this, "GoodMagMapFile",
-      "L0MuonS1TGC/Floating/eta30_phi20_rel95_physicaldtheta_v2_goodmag_eta20_phi18_slope0p090_v4/"
-      "TgcL0PoorMagneticFieldMap.txt",
+      "L1MuonS1TGC/Floating/eta30_phi20_rel95_physicaldtheta_v2_goodmag_eta20_phi18_slope0p090_v4/"
+      "TgcL1PoorMagneticFieldMap.txt",
       "ASCII GoodMag map path relative to the GroupData development "
       "directory"};
   std::unique_ptr<const TgcL0GoodMagMap> m_goodMagMap{};
