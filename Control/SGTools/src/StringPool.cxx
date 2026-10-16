@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file  SGTools/StringPool.cxx
@@ -18,8 +18,7 @@
 #include <vector>
 #include <algorithm>
 #include <cstdlib>
-#include <iostream>
-#include <iomanip>
+#include <print>
 
 
 namespace SG {
@@ -139,9 +138,7 @@ void StringPoolImpl::dump() const
   for (StringPool::sgkey_t k : keys) {
     keymap_t::const_iterator it = m_keymap.find (k);
     if (it != m_keymap.end()) {
-      std::cout << std::hex << std::setw(18) << k << " "
-                << std::dec << std::setw(9) << it->second.first << " "
-                << it->second.second << "\n";
+      std::println ("{:18x} {:9} {}", k, it->second.first, it->second.second);
     }
   }
 }

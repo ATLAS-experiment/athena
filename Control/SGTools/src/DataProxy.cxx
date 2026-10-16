@@ -23,6 +23,7 @@
 #include "AthenaKernel/EventContextClid.h"
 #include <algorithm> 
 #include <cassert>
+#include <print>
 #include <stdexcept>
 
 using SG::DataProxy;
@@ -439,7 +440,7 @@ std::unique_ptr<DataObject> DataProxy::readData (objLock_t&, ErrNo* errNo)
              <<" Returning NULL DataObject pointer  " << endmsg;
       }
       catch (const GaudiException&) {
-        std::cerr << "DataProxy::readData: Problem creating MsgStream\n";
+        std::println (std::cerr, "DataProxy::readData: Problem creating MsgStream");
       }
       return nullptr;
     }

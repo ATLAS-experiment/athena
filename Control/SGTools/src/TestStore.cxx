@@ -12,6 +12,7 @@
 #include "SGTools/TestStore.h"
 #include "AthenaKernel/DataBucketBase.h"
 #include "AthenaKernel/proxyDictFromEventContext.h"
+#include <print>
 #include <algorithm>
 #include <iostream>
 
@@ -36,7 +37,7 @@ StoreID::type TestStore::storeID() const
 
 std::vector<const SG::DataProxy*> TestStore::proxies() const
 {
-  std::cout << "proxies\n"; std::abort();
+  std::println ("proxies"); std::abort();
 }
 
 
@@ -50,7 +51,7 @@ void TestStore::registerKey (sgkey_t /*key*/,
                              const std::string& /*str*/,
                              CLID /*clid*/)
 {
-  std::cout << "registerKey\n"; std::abort();
+  std::println ("registerKey"); std::abort();
 }
 
 

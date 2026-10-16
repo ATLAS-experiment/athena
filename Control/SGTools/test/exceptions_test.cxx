@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file SGTools/test/exceptions_test.cxx
@@ -10,18 +10,16 @@
 
 #undef NDEBUG
 #include "SGTools/exceptions.h"
-#include <iostream>
+#include <print>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
-  std::cout << SG::ExcBadDataProxyCast (123, typeid(int)).what() << "\n";
-
-  std::cout << SG::ExcProxyCollision (123, "abc", 456, "def").what() << "\n";
-
-  std::cout << SG::ExcSgkeyCollision ("asd", 123, "def", 456, 789).what() << "\n";
+  std::println ("{}", SG::ExcBadDataProxyCast (123, typeid(int)).what());
+  std::println ("{}", SG::ExcProxyCollision (123, "abc", 456, "def").what());
+  std::println ("{}", SG::ExcSgkeyCollision ("asd", 123, "def", 456, 789).what());
 }
 
 

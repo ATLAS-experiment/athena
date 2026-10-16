@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file DataStore_test.cxx
@@ -22,7 +22,7 @@
 #include "CxxUtils/checker_macros.h"
 #include "TestTools/random.h"
 #include "boost/timer/timer.hpp"
-#include <iostream>
+#include <print>
 #include <cstdlib>
 #include <cassert>
 
@@ -62,7 +62,7 @@ SG::DataProxy* make_proxy (CLID clid,
 
 void test_ctor()
 {
-  std::cout << "test_ctor\n";
+  std::println ("test_ctor");
   SGTest::TestStore pool;
   SG::DataStore store (pool);
   assert (store.storeID() == StoreID::UNKNOWN);
@@ -73,7 +73,7 @@ void test_ctor()
 
 void test_addToStore ATLAS_NOT_THREAD_SAFE ()
 {
-  std::cout << "test_addToStore\n";
+  std::println ("test_addToStore");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -105,7 +105,7 @@ void test_addToStore ATLAS_NOT_THREAD_SAFE ()
 
 void test_addAlias ATLAS_NOT_THREAD_SAFE ()
 {
-  std::cout << "test_addAlias\n";
+  std::println ("test_addAlias");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -141,7 +141,7 @@ void test_addAlias ATLAS_NOT_THREAD_SAFE ()
 
 void test_addSymLink()
 {
-  std::cout << "test_addSymLink\n";
+  std::println ("test_addSymLink");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -168,7 +168,7 @@ void test_addSymLink()
 // Testing handling of an existing proxy.
 void test_addSymLink2()
 {
-  std::cout << "test_addSymLink2\n";
+  std::println ("test_addSymLink2");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -237,7 +237,7 @@ void test_addSymLink2()
 
 void test_proxy_exact ATLAS_NOT_THREAD_SAFE ()
 {
-  std::cout << "test_proxy_exact\n";
+  std::println ("test_proxy_exact");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -256,7 +256,7 @@ void test_proxy_exact ATLAS_NOT_THREAD_SAFE ()
 
 void test_proxy()
 {
-  std::cout << "test_proxy\n";
+  std::println ("test_proxy");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -289,7 +289,7 @@ void test_proxy()
 
 void test_typeCount()
 {
-  std::cout << "test_typeCount\n";
+  std::println ("test_typeCount");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -309,7 +309,7 @@ void test_typeCount()
 
 void test_tRange()
 {
-  std::cout << "test_tRange\n";
+  std::println ("test_tRange");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -337,7 +337,7 @@ void test_tRange()
 
 void test_pRange()
 {
-  std::cout << "test_pRange\n";
+  std::println ("test_pRange");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -374,7 +374,7 @@ void test_pRange()
 
 void test_keys()
 {
-  std::cout << "test_keys\n";
+  std::println ("test_keys");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -428,7 +428,7 @@ void test_keys()
 
 void test_removeProxy ATLAS_NOT_THREAD_SAFE ()
 {
-  std::cout << "test_removeProxy\n";
+  std::println ("test_removeProxy");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -486,7 +486,7 @@ void test_removeProxy ATLAS_NOT_THREAD_SAFE ()
 
 void test_clearStore ATLAS_NOT_THREAD_SAFE ()
 {
-  std::cout << "test_clearStore\n";
+  std::println ("test_clearStore");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -541,7 +541,7 @@ void test_clearStore ATLAS_NOT_THREAD_SAFE ()
 
 void test_t2p()
 {
-  std::cout << "test_t2p\n";
+  std::println ("test_t2p");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -562,7 +562,7 @@ void test_t2p()
 
 void test_dummy ATLAS_NOT_THREAD_SAFE ()
 {
-  std::cout << "test_dummy\n";
+  std::println ("test_dummy");
 
   SGTest::TestStore pool;
   SG::DataStore store (pool);
@@ -737,8 +737,8 @@ void time_clear (size_t niter)
       for (const SG::DataProxy* dp : transProxies) check_proxy (*dp);
     }
   }
-  std::cout << "clear " << tclear.format();
-  std::cout << "total " << ttotal.format();
+  std::print ("clear {}", tclear.format());
+  std::print ("total {}", ttotal.format());
 }
 
 

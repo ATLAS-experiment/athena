@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file  SGTools/test/SGFolderItem_test.cxx
  * @author scott snyder
@@ -14,13 +12,13 @@
 
 
 #include "SGTools/SGFolderItem.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   SG::FolderItem i1 (123, "key");
   assert (i1.id() == 123);
