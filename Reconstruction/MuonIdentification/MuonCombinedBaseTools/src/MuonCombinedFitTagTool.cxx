@@ -138,11 +138,11 @@ namespace MuonCombined {
             ATH_MSG_DEBUG("Combined Muon with ID " << m_printer->print(bestCandidate->indetTrackParticle().perigeeParameters())
                                                    << " match chi2 " << bestTag->matchChi2());
             combTracks->push_back(std::move(bestCombTrack));
-            ElementLink<TrackCollection> comblink(*combTracks, combTracks->size() - 1);
+            ElementLink<TrackCollection> comblink(*combTracks, combTracks->size() - 1, ctx);
             bestTag->setCombinedTrackLink(comblink);
             if (bestMETrack) {
                 METracks->push_back(std::move(bestMETrack));
-                ElementLink<TrackCollection> melink(*METracks, METracks->size() - 1);
+                ElementLink<TrackCollection> melink(*METracks, METracks->size() - 1, ctx);
                 bestTag->setUpdatedExtrapolatedTrackLink(melink);
             } else {
                 bestTag->setUpdatedExtrapolatedTrackLink(ElementLink<TrackCollection>());
