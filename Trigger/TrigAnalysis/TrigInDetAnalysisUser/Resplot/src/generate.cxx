@@ -25,7 +25,7 @@
 #include "generate.h"
 #include "rmsFrac.h"
 
-namespace generate { 
+namespace Resplot::generate { 
 
 static const bool printPad = false;
 
@@ -228,7 +228,7 @@ TH1D* smooth( TH1D* hin, bool sym ) {
 
 
 
-  hist_generator::hist_generator(TH1D* h, bool smooth_ ) : m_random(0) {
+  hist_generator::hist_generator(TH1D* h, bool smooth_ ) { //: m_random(0) {
     
   /// save the original histogram (should save a copy ho hum) 
   m_raw = h;
@@ -279,7 +279,7 @@ TH1D* smooth( TH1D* hin, bool sym ) {
   
   /// assign the actual generator
   /// use a shared generator
-  m_random = new BasicRandom(true);
+  //  m_random = &s_r;
   /// use a dedicated generator
   /// mrandom = new BasicRandom(false);
   
@@ -289,8 +289,8 @@ TH1D* smooth( TH1D* hin, bool sym ) {
 
 
 
-int Nevent_min = 0;
-int Nevent_max = 5000;
+const int Nevent_min = 0;
+const int Nevent_max = 5000;
 
 const double frac = 0.95;
 
@@ -451,5 +451,5 @@ experiment::experiment( TH1D* h, int Nexperiments, int fevents )
 
 }
 
-} // namespace generate
+} // namespace Resplot::generate
 

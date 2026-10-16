@@ -694,7 +694,7 @@ int main(int argc, char** argv)
   std::cout << "writing output to " << histofilename << std::endl;
 
   TH1D* hevent = new TH1D( "event", "event", 1000, 10000, 80000 );
-  Resplot* hcorr = new Resplot( "correlation", 21, -0.5, 20.5, 75, 0, 600); 
+  Resplot::Resplot* hcorr = new Resplot::Resplot( "correlation", 21, -0.5, 20.5, 75, 0, 600); 
 
   /// set up the filters etc
 

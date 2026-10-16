@@ -1,7 +1,6 @@
 /* emacs: this is -*- c++ -*- */
 /**
  **     @file    generate.h
- **
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:06:39 CET 
  **
@@ -21,7 +20,7 @@
 #include "BasicRandom.h"
 
 
-namespace generate { 
+namespace Resplot::generate { 
 
 /// mean and rms 
 double get_mean( const std::vector<double>& m );
@@ -54,14 +53,15 @@ public:
 /// breit-wigner generator
 class breit_generator : public generator_base { 
 
- public: 
+public: 
   
   virtual double generate() const {
-    static BasicRandom r;
     double x = std::tan((r.uniform()-0.5)*M_PI);
     return x;
   }
   
+  static inline thread_local BasicRandom r;
+
 };
 
 
@@ -78,11 +78,11 @@ public:
   hist_generator(const hist_generator &) = delete;
   hist_generator operator=(const hist_generator &) = delete;
   
-  virtual ~hist_generator() { delete m_s; if ( m_random ) delete m_random; }
+  virtual ~hist_generator() { delete m_s; } // if ( m_random ) delete m_random; }
 
   /// actually generate a random number from the distribution
   double generate() const {
-    return invert(m_random->uniform());
+    return invert(s_random.uniform());
   }
 
   TH1D* histogram()       { return m_s; }
@@ -117,9 +117,11 @@ private:
   TH1D* m_s;   // accumated histogram
   TH1D* m_raw;    // raw histogram
   TH1D* m_smooth; // smoothed raw histogram
+  
+  //  static BasicRandom* m_random;
 
-  BasicRandom* m_random;
-
+  static inline thread_local BasicRandom s_random = BasicRandom(true);
+  
 };
 
 

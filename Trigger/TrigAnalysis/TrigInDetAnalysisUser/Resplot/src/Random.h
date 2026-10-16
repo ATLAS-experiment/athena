@@ -23,6 +23,8 @@
 
 #include "TRandom3.h"
 
+namespace Resplot { 
+
 class Random : TRandom3 {
 
 public:
@@ -50,7 +52,7 @@ inline std::ostream& operator<<( std::ostream& s, const Random& _r ) {
   return s;
 }
 
-
+}
 
 #endif  //   RANDOM_H 
 

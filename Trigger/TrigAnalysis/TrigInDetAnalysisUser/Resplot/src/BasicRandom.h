@@ -29,18 +29,25 @@
 #include "TRandom3.h"
 
 
+namespace Resplot { 
+
 class BasicRandom {
 
 public:
 
-  BasicRandom(int shared=true, int seed=4357) 
+  BasicRandom(int shared=true, int seed=4357)  /// do we ever use a different seed ?? We probably should
     : m_shared(shared), m_random(0) { 
     if ( shared ) { 
-      static TRandom3 r(seed);
-      m_random = &r;
+      /// these are all shared now - we use a static thread_local
+      /// so they are shared within each thread
+      //      static TRandom3 r(seed);
+      m_random = &s_random;
+      if ( seed!=4357) m_random->SetSeed(seed);
     }
     else {
-      m_random = new TRandom3(seed);
+      //      m_random = new TRandom3(seed);
+      m_random = &s_random;
+      if ( seed ) m_random->SetSeed(seed);
     } 
   }
   BasicRandom(const BasicRandom &) = delete; //forbid copying
@@ -56,11 +63,13 @@ public:
 
 private:
   
-  bool      m_shared;
-  TRandom3* m_random;
+  bool                                m_shared;
+  static inline thread_local TRandom3 s_random = {4357};
+  TRandom3*                           m_random;
 
 };
 
+}
 
 #endif  /// BASICRANDOM_H 
 

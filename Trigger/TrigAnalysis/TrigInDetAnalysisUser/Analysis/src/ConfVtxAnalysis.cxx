@@ -139,19 +139,19 @@ void ConfVtxAnalysis::initialise() {
   m_hx_res   = new TH1F( "x_res",   "Delta x [mm]", 200, -0.1, 0.1 );
   m_hy_res   = new TH1F( "y_res",   "Delta y [mm]", 200, -0.1, 0.1 );
 
-  m_rdntrax_vs_zed   = new Resplot( "rdntrax_vs_zed",   100,  -300,  300,   61, -30.5, 30.5);
-  m_rdntrax_vs_ntrax = new Resplot( "rdntrax_vs_ntrax", 14,   -0.5, 13.5,   15, -30.5, 30.5);
-  m_rdntrax_vs_r     = new Resplot( "rdntrax_vs_r",     40, vrbins,   15, -7.5,  7.5 );
+  m_rdntrax_vs_zed   = new Resplot::Resplot( "rdntrax_vs_zed",   100,  -300,  300,   61, -30.5, 30.5);
+  m_rdntrax_vs_ntrax = new Resplot::Resplot( "rdntrax_vs_ntrax", 14,   -0.5, 13.5,   15, -30.5, 30.5);
+  m_rdntrax_vs_r     = new Resplot::Resplot( "rdntrax_vs_r",     40, vrbins,   15, -7.5,  7.5 );
 
-  m_rdz_vs_zed    = new Resplot( "rdz_vs_zed",   100, -300,    300,    1600, -20, 20 );
-  m_rdz_vs_ntrax  = new Resplot( "rdz_vs_ntrax", 201,   -0.5,  200.5,  1600, -20, 20 );
-  m_rdz_vs_nvtx   = new Resplot( "rdz_vs_nvtx",  81,    -0.5,   80.5,  1600, -20, 20 );
-  m_rdz_vs_mu     = new Resplot( "rdz_vs_mu",    30,     0,     30,    1600, -20, 20 );
-  m_rdz_vs_r      = new Resplot( "rdz_vs_r",     40,  vrbins,   1600,  -20,  20 );
+  m_rdz_vs_zed    = new Resplot::Resplot( "rdz_vs_zed",   100, -300,    300,    1600, -20, 20 );
+  m_rdz_vs_ntrax  = new Resplot::Resplot( "rdz_vs_ntrax", 201,   -0.5,  200.5,  1600, -20, 20 );
+  m_rdz_vs_nvtx   = new Resplot::Resplot( "rdz_vs_nvtx",  81,    -0.5,   80.5,  1600, -20, 20 );
+  m_rdz_vs_mu     = new Resplot::Resplot( "rdz_vs_mu",    30,     0,     30,    1600, -20, 20 );
+  m_rdz_vs_r      = new Resplot::Resplot( "rdz_vs_r",     40,  vrbins,   1600,  -20,  20 );
 
-  m_rdr_vs_zed    = new Resplot( "rdr_vs_zed",  100,   -300,  300, 800, -15, 15 );
-  m_rdr_vs_r      = new Resplot( "rdr_vs_r",     40, vrbins,  800, -15,  15 );
-  m_rdr_vs_ntrax  = new Resplot( "rdr_vs_ntrax", 14,   -0.5, 13.5, 800, -15, 15 );
+  m_rdr_vs_zed    = new Resplot::Resplot( "rdr_vs_zed",  100,   -300,  300, 800, -15, 15 );
+  m_rdr_vs_r      = new Resplot::Resplot( "rdr_vs_r",     40, vrbins,  800, -15,  15 );
+  m_rdr_vs_ntrax  = new Resplot::Resplot( "rdr_vs_ntrax", 14,   -0.5, 13.5, 800, -15, 15 );
 
   m_eff_zed   = new Efficiency1D( m_hzed,   "zed_eff" );
   m_eff_x     = new Efficiency1D( m_hx,     "x_eff" );
@@ -162,13 +162,13 @@ void ConfVtxAnalysis::initialise() {
   m_eff_lb    = new Efficiency1D( m_hlb, "lb_eff" );
   m_eff_r     = new Efficiency1D( m_hr, "r_eff" );
 
-  m_rnvtxrec_nvtx = new Resplot( "rnvtxrec_vs_nvtx",   81,  -0.5,   80.5,  81,   -0.5,   80.5 );
+  m_rnvtxrec_nvtx = new Resplot::Resplot( "rnvtxrec_vs_nvtx",   81,  -0.5,   80.5,  81,   -0.5,   80.5 );
 
   //  double ntrax[10] = { 0, 2, 5, 10, 15, 20, 30, 15, 100 }; 
 
-  m_rdz_vs_lb    = new Resplot( "rdz_vs_lb",  301, -0.5, 3009.5,  800, -20, 20 );
-  m_rdx_vs_lb    = new Resplot( "rdx_vs_lb",  301, -0.5, 3009.5,  300,  -3,  3 );
-  m_rdy_vs_lb    = new Resplot( "rdy_vs_lb",  301, -0.5, 3009.5,  300,  -3,  3 );
+  m_rdz_vs_lb    = new Resplot::Resplot( "rdz_vs_lb",  301, -0.5, 3009.5,  800, -20, 20 );
+  m_rdx_vs_lb    = new Resplot::Resplot( "rdx_vs_lb",  301, -0.5, 3009.5,  300,  -3,  3 );
+  m_rdy_vs_lb    = new Resplot::Resplot( "rdy_vs_lb",  301, -0.5, 3009.5,  300,  -3,  3 );
 
   m_dir->pop();
 

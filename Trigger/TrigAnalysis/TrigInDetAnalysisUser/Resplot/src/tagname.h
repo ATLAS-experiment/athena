@@ -24,9 +24,9 @@
 
 #include <string>
 
+namespace Resplot { 
 
-struct tagname
-{
+struct tagname {
 public:
   tagname(const std::string& base, int i) {
     char   sbase[512];
@@ -72,6 +72,7 @@ private:
 
 };
 
+}
 
 #endif  /* RESPLOT_TAGNAME_H */
 

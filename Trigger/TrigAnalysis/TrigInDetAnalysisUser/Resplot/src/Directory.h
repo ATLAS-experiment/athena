@@ -26,6 +26,8 @@
 
 // #include "utils.h"
 
+namespace Resplot {
+
 class Directory {
 
  public:
@@ -57,7 +59,7 @@ class Directory {
 
 };
 
-
+}
 
 #endif  /* RESPLOT_DIRECTORY_H */
 

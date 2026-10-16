@@ -10,11 +10,10 @@
 
 
 #include <cmath>
-#include <iostream>
 
 #include "rmsFrac.h"
 
-namespace generate {
+namespace Resplot::generate {
 
 
 

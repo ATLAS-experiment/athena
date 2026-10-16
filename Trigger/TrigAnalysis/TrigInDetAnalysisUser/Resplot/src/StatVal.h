@@ -20,6 +20,7 @@
 #include <iomanip>
 #include <cmath>
 
+namespace Resplot { 
 
 /// simple struct to hold a value and it's associated uncertainty.
 
@@ -56,7 +57,7 @@ inline std::ostream& operator<<(std::ostream& s, const StatVal& sv) {
 }
 
 
-
+}
 
 #endif  /* RESPLOT_STATVAL_H */
 

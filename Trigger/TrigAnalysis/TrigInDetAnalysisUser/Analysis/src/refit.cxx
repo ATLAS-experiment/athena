@@ -226,7 +226,7 @@ void search(TDirectory* td=0, const std::string& s="") {
 	  tnd->pwd();
 
 	  std::cout << "Resplot refitting " << tnd->GetName() << std::endl; 
-	  Resplot r( tnd->GetName() );
+	  Resplot::Resplot r( tnd->GetName() );
 
 	  std::cout << "deleting ..." << std::endl;
 	  gDirectory->Delete( (std::string(tnd->GetName())+";1").c_str() );
