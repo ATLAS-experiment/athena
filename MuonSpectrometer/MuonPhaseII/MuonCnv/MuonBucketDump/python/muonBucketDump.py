@@ -47,7 +47,7 @@ def main(args):
                 flags, 
                 BiasClass0=bias, 
                 WriteSpacePointKey="FilteredMlBuckets",
-                ModelPath="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/edgecnn_multi_bucket_sparse_meta.onnx"
+                ModelPath="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/MlPhaseII/edgecnn_multi_bucket_sparse_meta.onnx"
             )
         )
         cfg.merge(
