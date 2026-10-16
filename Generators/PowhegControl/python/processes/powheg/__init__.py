@@ -31,6 +31,8 @@ from .HZj_EW import HZj_EW
 from .jj import jj
 from .jjj import jjj
 from .LQ_s_chan import LQ_s_chan
+from .schan_top_dec import schan_top_dec
+from .tchan_top_dec import tchan_top_dec
 from .ssWWjj import ssWWjj
 from .t_sch import t_sch
 from .t_tch_4FS import t_tch_4FS

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from . import powheg_atlas_common
 import collections
@@ -126,6 +126,7 @@ class Registry(metaclass=Singleton):
         self.add_default("cmass", powheg_atlas_common.mass.c, name="mass_c", description="c-quark mass in GeV")        
         self.add_default("c_mass", powheg_atlas_common.mass.c, description="WZj_MiNNLO, ZZj_MiNNLO: charm mass for reshuffling momentum at event generation level (used if massive_leptons=1)")
         self.add_default("cmass_lhe", powheg_atlas_common.mass.c, name="mass_c", description="c-quark mass in GeV (for momentum reshuffling)")
+        self.add_default("collinearcut", 0.01, description="pT cut to avoid singularity in virtual matrix elements [default: 0.01]")
         self.add_default("collremnsamp\"", -1, name="collremnsamp", description="[-1:use Powheg default]")
         self.add_default("colltest", 1, description="check collinear limits. [0:disabled]")
         self.add_default("comparison_paper", -1, frozen=True, description="compare to paper. [>0:enabled]")
@@ -137,6 +138,7 @@ class Registry(metaclass=Singleton):
         self.add_default("compress_upb", -1, frozen=True, description="[-1:use Powheg default]")
         self.add_default("compute_rwgt", 0, frozen=True, description="whether to compute a reweighting factor. [1:enabled]")
         self.add_default("contr", "\'full\'",description="Contributions in gg4l:'full', 'only_h', 'no_h' or 'interf_h'")
+        self.add_default("conjugate", 0, description="0: top , 1: antitop production")
         self.add_default("corI", 1, description="particle pair to correlate - corI and corJ should be different and a number between 1 and 4.")
         self.add_default("corJ", 2, description="particle pair to correlate - corI and corJ should be different and a number between 1 and 4.")
         self.add_default("correlations", 1, name="correlate_top_decays", description="if 1, correlate top quark decays; otherwise treat them as uncorrelated")
@@ -165,7 +167,8 @@ class Registry(metaclass=Singleton):
         self.add_default("delta_mllmin", 10.0, description="if non-zero, use generation cut on m_ll [GeV]")
         self.add_default("Deltak_gam", 0, description="Delta_K(Gamma)")
         self.add_default("deltar", -1, description="[-1:use Powheg default]")
-        self.add_default("diagCKM", 0, description="which CKM matrix to use [0:normal CKM; 1:diagonal CKM]")
+        self.add_default("diagCKM", 0, name="diagCKM", description="which CKM matrix to use [0:normal CKM; 1:diagonal CKM]")
+        self.add_default("diagonalCKM", 0, name="diagCKM", description="which CKM matrix to use [0:normal CKM; 1:diagonal CKM]")
         self.add_default("dim6", 0, description="for (SM)EFT processes, whether to include dimension-6 operators [0:do not include; 1:include]")
         self.add_default("distribute_by_ub", -1,description=" 1: distribute d3 terms according to kinematics of ub")
         self.add_default("distribute_by_ub_AP",-1,description=" 1: distribute d3 terms according to kinematics of ub")
@@ -204,6 +207,7 @@ class Registry(metaclass=Singleton):
         self.add_default("Elmass", powheg_atlas_common.mass.e, name="mass_e", description="mass of electron in GeV")
         self.add_default("emalpharunning", -1, description="")
         self.add_default("emalpharunnning", -1, name="emalpharunning", description="")
+        self.add_default("emscales", 0, description="switch on emscales-based matching [1: enabled]")
         self.add_default("emvirtual", 1, description="compute soft-virtual QED terms (integrated subtractions)")
         self.add_default("enhancedradfac", -1, description="enhance photon statistics in direct photon (yj) production. If > 0, the splitting kernel used for photon radiation is multiplied by this factor")
         self.add_default("enhancereg", -1, description="enhance reg")
@@ -249,6 +253,7 @@ class Registry(metaclass=Singleton):
         self.add_default("gfermi", powheg_atlas_common.EW_parameters.G_F, name="G_F", description="Fermi constant")
         self.add_default("ggproc", -1, description="[-1:use Powheg default]")
         self.add_default("gmu", powheg_atlas_common.EW_parameters.G_F, name="G_F", description="Fermi constant")
+        self.add_default("globalsuppression", -1, description="perform global suppression")
         self.add_default("gqbproc", -1, description="[-1:use Powheg default]")
         self.add_default("hadronic", 0, hidden=True, description="WWj decay mode: W->jj W->jj [1:enabled]")
         self.add_default("hbzd", 5.0, description="theta[hbdz - R/(P_ij*B)] Born zero damping")
@@ -522,6 +527,7 @@ class Registry(metaclass=Singleton):
         self.add_default("powhegv2opt", -1, description="[-1:use Powheg default]")
         self.add_default("powj_suppfact", 2, description="ZgamJ MiNNLO: power controlling the ptj_suppfact term")
         self.add_default("proc","\'WW\'" ,description="Process in gg4l ZZ or WW")
+        self.add_default("process",1, name="procstop", description="single-top-dec: t-channel (1), s-channel is (2)")
         self.add_default("procVV",1 ,description="Process in VV_pol 1=W+W-, 2=ZZ, 3=W+-Z")
         self.add_default("psgen", -1, description="[-1:use Powheg default]")
         self.add_default("pta_suppfact", 10, description="ZgamJ MiNNLO:suppression of regions with jet(s) pt lower than ptj_suppfact")
@@ -585,7 +591,7 @@ class Registry(metaclass=Singleton):
         self.add_default("rwl_group_events", 10000, description="Number of events to group together when running reweighting. [<0:defaults to 10000]") # too small a number here may lead to slow reweighting
         self.add_default("s2eff", -1, description="value of the effective leptonic weak mixing angle")
         self.add_default("samesignleptons", 0, hidden=True, description="produce two same-sign leptons in ttW decay [1:enabled]")
-        self.add_default("scalechoice", 0, description="renormalisation/factorisation scale choice for ttW processes; see documentation for possible values")
+        self.add_default("scalechoice", 0, description="renormalisation/factorisation scale choice for ttW and single-top-dec processes; see documentation for possible values")
         self.add_default("scheme", 1, description="choice for EW NLO scheme. [0:Alpha(0); 1:Alpha(M_Z); 2:G_mu; 3:Alpha(q^2)]")
         self.add_default("select_EW_virt", 2, description="EW virtual corrections. [0: none; 1: full; 2: Sudakov approx; 3: full - Sudakov approx]")
         self.add_default("select_real", 0, description="gg4l: do gg qg qq channels") 
