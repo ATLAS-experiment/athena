@@ -478,7 +478,7 @@ TrackCaloClusterRecValidationTool::calibrateAndRecordShallowCopyJetCollection(co
 
   static const SG::Accessor<xAOD::IParticleLink> accSetOriginLink("originalObjectLink");
   for (xAOD::Jet* shallowCopyJet : *shallowCopy.first) {
-    const xAOD::IParticleLink originLink(*jetContainer, shallowCopyJet->index());
+    const xAOD::IParticleLink originLink(*jetContainer, shallowCopyJet->index(), ctx);
     accSetOriginLink(*shallowCopyJet) = originLink;
   }
 

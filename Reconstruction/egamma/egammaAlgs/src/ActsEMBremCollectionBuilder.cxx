@@ -184,7 +184,7 @@ StatusCode ActsEMBremCollectionBuilder::convertTracks(
 
     ATH_CHECK(m_cnvTool->convert(*tp, ctx, track, track.referenceSurface(), beamSpotData));
 
-    actsTrackLink(*tp) = ElementLink<ActsTrk::TrackContainer>(&actsContainer, track.index());
+    actsTrackLink(*tp) = ElementLink<ActsTrk::TrackContainer>(actsContainer, track.index(), ctx);
 
     originalTPLink(*tp) = ElementLink<xAOD::TrackParticleContainer>(
         originalTPs, originalTP->index(), ctx);

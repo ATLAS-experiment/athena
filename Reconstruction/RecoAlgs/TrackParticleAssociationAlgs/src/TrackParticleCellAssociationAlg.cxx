@@ -73,8 +73,8 @@ StatusCode TrackParticleCellAssociationAlg::execute(const EventContext& ctx) con
     }
 
     // create element links
-    ElementLink< xAOD::TrackParticleContainer > trackLink(m_trackParticleCollectionName.key(),i);
-    ElementLink< xAOD::CaloClusterContainer >   clusterLink(m_clusterContainerName.key(),clusColl->size()-1);
+    ElementLink< xAOD::TrackParticleContainer > trackLink(m_trackParticleCollectionName.key(),i, ctx);
+    ElementLink< xAOD::CaloClusterContainer >   clusterLink(m_clusterContainerName.key(),clusColl->size()-1, ctx);
 
     // if valid create TrackParticleClusterAssociation
     if( trackLink.isValid() && clusterLink.isValid() ){
