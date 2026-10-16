@@ -172,7 +172,9 @@ namespace GlobalSim {
             else return std::uint64_t{0};
         }();
 
-        constexpr Bitset() = default;
+        using Base::Base;
+        constexpr Bitset(unsigned long long value) : Base(convert(value)) {} // Hides the inherited bitset(unsigned long long)
+
         // Copy and move constructors from another Bitset
         constexpr Bitset(const Bitset&) = default;
         constexpr Bitset(Bitset&&) = default;
@@ -180,6 +182,15 @@ namespace GlobalSim {
         // Construct from the underlying std::bitset
         constexpr Bitset(const Base& bits) : Base(bits) {}
         constexpr Bitset(Base&& bits) : Base(std::move(bits)) {}
+
+        // allow construction from other size bitsets
+        template <std::size_t M>
+        constexpr Bitset(const std::bitset<M>& other) {
+            constexpr std::size_t count = (N < M) ? N : M;
+            for (std::size_t i = 0; i < count; ++i) {
+                this->set(i, other[i]);
+            }
+        }
 
         template <typename T>
         requires std::is_integral_v<T>
@@ -626,7 +637,7 @@ namespace GlobalSim {
     class BitSpec : public Base {
     public:
         static constexpr std::size_t width = N;
-        using bitset_type = std::bitset<N>;
+        using bitset_type = Bitset<N>;
         template<typename> friend class Object; // lets Object class access allFields() protected method
         using BaseSpec = Base;
 
@@ -833,6 +844,6 @@ namespace GlobalSim {
     }
 
 
-
+#include "GlobalSimulation/Object.h"
 
 #endif
