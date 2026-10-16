@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from ... import Logging
 from ..powheg_V2 import PowhegV2
@@ -91,6 +91,7 @@ class Zjj(PowhegV2):
         self.add_keyword("minlo", 1)
         self.add_keyword("mintupbratlim")
         self.add_keyword("mintupbxless")
+        self.add_keyword("mjjminsuppfact")
         self.add_keyword("mllmax", 120.0)
         self.add_keyword("mllmin", 60.0)
         self.add_keyword("ncall1", 700000)
