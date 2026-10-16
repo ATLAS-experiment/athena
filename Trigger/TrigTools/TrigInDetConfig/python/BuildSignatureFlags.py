@@ -171,8 +171,9 @@ def actsLRTTrigTrackingFlags(flags: AthConfigFlags) -> None:
   flags.maxPrimaryImpactSeed = 300.0 * Units.mm
   flags.maxZImpactSeed = 500.0 * Units.mm
   flags.minPixel = [0]
-  flags.Xi2max = [25.0]
-  flags.Xi2maxNoAdd = [50.0]
+  # chi2 cuts 25 / 50 for 1D measurements, in sigma of a 1D Gaussian
+  flags.Xi2maxSigma = [5.0]
+  flags.Xi2maxNoAddSigma = [math.sqrt(50.0)]
 
 def defaultModeTrigTrackingFlags(flags: AthConfigFlags) -> AthConfigFlags:
   return flags
@@ -450,6 +451,8 @@ def bjet(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFl
   flags.zedHalfWidth    = 10.0
   flags.minPT  = processEtaDepSettings(flags.minPT,[0.8*Units.GeV])
   flags.Xi2max = tsetter(flags.Xi2max,12.)
+  if recoMode == "Acts":
+    flags.Xi2maxSigma = [math.sqrt(12.)]
   return flags
 
 @signatureActions
@@ -639,6 +642,9 @@ def cosmics(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
 
   flags.Xi2max         = tsetter(flags.Xi2max,        60.)
   flags.Xi2maxNoAdd    = tsetter(flags.Xi2maxNoAdd,   100.)
+  if recoMode == "Acts":
+    flags.Xi2maxSigma      = [math.sqrt(60.)]
+    flags.Xi2maxNoAddSigma = [10.]
   flags.maxDoubleHoles = tsetter(flags.maxDoubleHoles,1)
   
   flags.nWeightedClustersMin = 8

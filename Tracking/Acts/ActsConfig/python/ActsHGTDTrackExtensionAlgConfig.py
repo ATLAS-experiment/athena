@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -24,8 +24,9 @@ def ActsHGTDTrackExtensionAlgCfg(flags,
     kwargs.setdefault("etaBins", [2.0, 3.0, 3.2, 3.4, 999.0])
 
     #Measurement selector
-    kwargs.setdefault("chi2CutOff", [ 15, 20, 10, 20])
-    kwargs.setdefault("chi2OutlierCutOff", [ 15, 20, 10, 20])
+    # in sigma of a 1D Gaussian; for the 3D HGTD measurements these are the chi2 cuts 15, 20, 10, 20
+    kwargs.setdefault("chi2CutOffSigma", [ 3.1187, 3.7603, 2.3541, 3.7603])
+    kwargs.setdefault("chi2OutlierCutOffSigma", [ 3.1187, 3.7603, 2.3541, 3.7603])
     kwargs.setdefault("numMeasurementsCutOff", [3])
 
     #Track selector

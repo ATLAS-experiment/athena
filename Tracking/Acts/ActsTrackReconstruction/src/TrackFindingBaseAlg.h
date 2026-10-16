@@ -52,7 +52,8 @@ namespace ActsTrk {
     using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
 
     struct MeasurementSelectorConfig {
-       std::vector<std::pair<float, float>> m_chi2CutOffOutlier;
+       // (measurement, outlier) chi2 cuts for each eta bin and measurement dimension (index 0 not used)
+       std::vector<std::array<std::pair<float, float>, 4>> m_chi2CutOffOutlier;
        std::vector<float>                   m_etaBins;
     } m_measurementSelectorConfig;
 
@@ -96,8 +97,10 @@ namespace ActsTrk {
     Gaudi::Property<unsigned int> m_maxPropagationStep{this, "maxPropagationStep", 1000, "Maximum number of steps for one propagate call"};
     Gaudi::Property<std::vector<double>> m_etaBins{this, "etaBins", {}, "bins in |eta| to specify variable selections"};
     // Acts::MeasurementSelector selection cuts for associating measurements with predicted track parameters on a surface.
-    Gaudi::Property<std::vector<double>> m_chi2CutOff{this, "chi2CutOff", {}, "MeasurementSelector: maximum local chi2 contribution"};
-    Gaudi::Property<std::vector<double>> m_chi2OutlierCutOff{this, "chi2OutlierCutOff", {}, "MeasurementSelector: maximum local chi2 contribution for outlier"};
+    Gaudi::Property<std::vector<double>> m_chi2CutOffSigma{this, "chi2CutOffSigma", {},
+       "MeasurementSelector: maximum local chi2 contribution for each eta bin, in sigma of a 1D Gaussian. The p-value of a two-sided cut at this number of sigma gives the chi2 cut for each measurement dimension."};
+    Gaudi::Property<std::vector<double>> m_chi2OutlierCutOffSigma{this, "chi2OutlierCutOffSigma", {},
+       "MeasurementSelector: maximum local chi2 contribution for outliers for each eta bin, in sigma, see chi2CutOffSigma. If empty, there is no cut."};
     Gaudi::Property<std::vector<size_t>> m_numMeasurementsCutOff{this, "numMeasurementsCutOff", {}, "MeasurementSelector: maximum number of associated measurements on a single surface"};
     Gaudi::Property<double> m_edgeHoleBorderWidth{this,"EdgeHoleBorderWidth", 0. ,"Width of the border of surfaces (mm) within which holes are not counted as holes."};
     Gaudi::Property<std::vector<std::size_t>> m_ptMinMeasurements{this, "ptMinMeasurements", {}, "if specified for the given seed collection, applies ptMin cut in branch stopper once ptMinMinMeasurements have been encountered"};

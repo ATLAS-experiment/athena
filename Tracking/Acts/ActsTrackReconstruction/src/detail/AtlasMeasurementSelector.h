@@ -6,6 +6,7 @@
 #define ACTSTRACKRECONSTRUCTION_ATLASMEASUREMENTSELECTOR_H
 
 #include "src/IMeasurementSelector.h"
+#include <array>
 #include <vector>
 #include <utility>
 #include <memory>
@@ -28,7 +29,7 @@ namespace ActsTrk::detail {
            const ActsTrk::IHGTDOnTrackCalibratorTool<detail::RecoTrackStateContainer> *hgtdOnTrackCalibratorTool,
            const ActsTrk::detail::MeasurementRangeList &measurementRanges,
            const std::vector<float> &etaBinsf,
-           const std::vector<std::pair<float, float> > &chi2CutOffOutlier,
+           const std::vector<std::array<std::pair<float, float>, 4> > &chi2CutOffOutlier,
            const std::vector<size_t> &numMeasurementsCutOff,
            double edge_hole_border_width);
 
