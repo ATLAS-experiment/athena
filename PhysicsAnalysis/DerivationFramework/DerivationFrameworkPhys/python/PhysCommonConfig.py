@@ -16,9 +16,9 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     acc = ComponentAccumulator()
 
     from TrkConfig.VertexFindingFlags import VertexSortingSetup
-    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
-        from DerivationFrameworkPhys.DerivationPrimaryVertexConfig import GNNVertexCfg
-        acc.merge(GNNVertexCfg(flags))
+    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.PVNNSorting:
+        from DerivationFrameworkPhys.DerivationPrimaryVertexConfig import PVNNVertexCfg
+        acc.merge(PVNNVertexCfg(flags))
     elif flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.HGamNNSorting:
         from DerivationFrameworkPhys.DerivationPrimaryVertexConfig import HGamNNVertexCfg
         acc.merge(HGamNNVertexCfg(flags)) 

@@ -138,10 +138,10 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     if addExtraVariables:
         PHYSSlimmingHelper.ExtraVariables += addExtraVariables
 
-    # HSGNN Score
+    # PVNN Score
     from TrkConfig.VertexFindingFlags import VertexSortingSetup
-    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.GNNSorting:
-        PHYSSlimmingHelper.ExtraVariables += ["PrimaryVertices.gnnScore"]
+    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.PVNNSorting:
+        PHYSSlimmingHelper.ExtraVariables += ["PrimaryVertices.PVNNScore"]
     elif flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.HGamNNSorting:
         PHYSSlimmingHelper.ExtraVariables += ["PrimaryVertices.HGamNNScore"]
 

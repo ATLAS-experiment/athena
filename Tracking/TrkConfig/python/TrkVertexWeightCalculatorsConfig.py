@@ -22,7 +22,7 @@ def SumPtVertexWeightCalculatorCfg(flags, name="SumPtVertexWeightCalculator",
     return acc
 
 
-def GNNVertexWeightCalculatorCfg(flags, name="GNNVertexWeightCalculator",
+def PVNNVertexWeightCalculatorCfg(flags, name="PVNNVertexWeightCalculator",
                                  **kwargs):
     acc = ComponentAccumulator()
     kwargs.setdefault("ScoreKey", "PrimaryVertices_initial.HSGN2_phsvertex")
