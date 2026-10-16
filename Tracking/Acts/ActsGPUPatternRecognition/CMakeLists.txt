@@ -30,6 +30,7 @@ set( _libraries
   MagFieldElements
 )
 
+set( GPU_TRACKING_DEFINITIONS )
 
 # CUDA-only sources and libraries
 if (TARGET traccc::cuda)
