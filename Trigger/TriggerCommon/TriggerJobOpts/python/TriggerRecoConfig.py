@@ -189,10 +189,6 @@ def TriggerEDMCfg(flags):
         nav = ['xAOD::TrigCompositeContainer#HLTNav*', 'xAOD::TrigCompositeAuxContainer#HLTNav*',]
         acc.merge(addToAOD(flags, nav))
         acc.merge(addToESD(flags, nav))
-    # extra jet keys
-    jetSpecials = ["JetKeyDescriptor#JetKeyMap", "JetMomentMap#TrigJetRecMomentMap",]
-    acc.merge(addToESD(flags, jetSpecials))
-    acc.merge(addToAOD(flags, jetSpecials))
 
     # RoIs
     if flags.Output.doWriteAOD and flags.Trigger.EDMVersion == 2:
