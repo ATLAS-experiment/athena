@@ -205,7 +205,18 @@
 
    <!-- Additional type(s). -->
    <class name="xAOD::CurvilinearParameters_t" />
-   <enum pattern="xAOD::*" />
+   <enum name="xAOD::TrackFitter" />
+   <enum name="xAOD::TrackProperties" />
+   <enum name="xAOD::TrackPatternRecoInfo" />
+   <enum name="xAOD::ParticleHypothesis" />
+   <enum name="xAOD::ParameterPosition" />
+   <enum name="xAOD::SummaryType" />
+   <enum name="xAOD::MuonSummaryType" />
+   <enum name="xAOD::RejectionStep" />
+   <enum name="xAOD::RejectionReason" />
+   <enum name="xAOD::ObserverToolIndex" />
+   <enum name="xAOD::SurfaceType" />
+   <enum name="xAOD::Vtx::VertexType" />
    <function pattern="xAOD::TrackParticleHelpers::*" />
 
 </lcgdict>
