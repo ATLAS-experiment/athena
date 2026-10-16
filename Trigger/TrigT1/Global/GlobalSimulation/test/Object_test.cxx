@@ -9,7 +9,24 @@
 
 #include "GlobalSimulation/Object.h"
 
+
 #include "TInterpreter.h"
+
+TEST( GlobalSimObjectTest, Bitset ) {
+    using namespace GlobalSim;
+
+    // test clamped unsigned bitset
+    Bitset<8,true,false> cubs{300ull};
+    ASSERT_EQ( cubs.to_ulong() , 255ul );
+
+    // clamped signed bitset
+    Bitset<8,true,true> csbs1{300ull};
+    ASSERT_EQ( csbs1.to_ulong() , 127ul );
+
+    Bitset<8,true,true> csbs2{-300ll};
+    ASSERT_EQ( csbs2.to_ulong() , 128ul ); // since this is -128 in unsigned
+
+}
 
 TEST( GlobalSimObjectTest, test1 ) {
 
@@ -26,9 +43,9 @@ TEST( GlobalSimObjectTest, test1 ) {
     // The BitSpec can be interrogated in a static manner:
     ASSERT_EQ( TestSpec::width, 64u );
     ASSERT_EQ( TestSpec::numFields() , 4u);
-    ASSERT_EQ( TestSpec::field<0>().name(), "f1"); // access field by index
-    ASSERT_EQ( TestSpec::field<1>().description(), "Description 2");
-    ASSERT_EQ( TestSpec::f3.name(), "f3"); // or if know it, access by name
+    ASSERT_EQ( TestSpec::field<0>().name, "f1"); // access field by index
+    ASSERT_EQ( TestSpec::field<1>().description, "Description 2");
+    ASSERT_EQ( TestSpec::f3.name, "f3"); // or if know it, access by name
 
     TestSpec::json(); // generates the json describing the bit specification (names, descriptions, widths)
 
@@ -59,7 +76,6 @@ TEST( GlobalSimObjectTest, test1 ) {
     ASSERT_EQ( obj.f4.value(), 2 );
     SG::ConstAccessor<uint8_t> acc("auxvar3"); // how to access an auxvar of type uint8_t
     ASSERT_EQ( acc(ae), 2 << obj.f4.auxspec.shift ); // auxspec.shift is bitspec metadata
-
 
 }
 

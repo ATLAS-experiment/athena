@@ -18,6 +18,7 @@
 #include <mutex>
 #include <set>
 #include <string_view>
+#include <iostream>
 
 namespace GlobalSim {
 
@@ -45,6 +46,10 @@ namespace GlobalSim {
           const std::string_view name = cls.substr(s_prefix.size());
           if (name.empty() or name.front() == '_' or
               name.find('<') != std::string_view::npos) { continue; }
+          // verify if not a namespace
+          if(auto tcls = TClass::GetClass(cls.data()); tcls && (tcls->Property()&kIsNamespace)) {
+              continue;
+          }
           found.emplace(name);
         }
         return found;

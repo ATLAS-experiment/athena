@@ -16,6 +16,9 @@ namespace GlobalSim {
 
 
     public:
+        // JET1Alg still expects ptt field, so declare it here
+        static inline const BitField<0, 12, float> ptt{{.name="ptt", .auxvar="et", .description="Transverse energy", .scale=0.1/*GeV*/}};
+
         static inline const BitField<32, 32, uint8_t, bool> flag_et_overflow{"flag_et_overflow","flags[0]", "flag description placeholder"};
         static inline const BitField<33, 33, uint8_t, bool> flag_error{"flag_error","flags[1]", "flag description placeholder"};
         static inline const BitField<34, 34, uint8_t, bool> flag_next_tob_same_et{"flag_next_tob_same_et","flags[2]", "flag description placeholder"};
@@ -31,7 +34,7 @@ namespace GlobalSim {
         static inline const BitField<101, 115, uint16_t> ring_one_ptt{"ring_one_ptt","ring_one_ptt", "Energy in the first ring"};
         static inline const BitField<116, 127, uint16_t> ring_zero_ptt{"ring_zero_ptt","ring_zero_ptt", "Energy in the zeroth ring"};
 
-      DECLARE_FIELDS(flag_et_overflow, flag_error, flag_next_tob_same_et, flag_truncate,
+      DECLARE_FIELDS(ptt,flag_et_overflow, flag_error, flag_next_tob_same_et, flag_truncate,
 		     ring_four_tobs, ring_three_tobs, ring_two_tobs, ring_one_tobs, total_tobs,
 		     ring_four_ptt, ring_three_ptt, ring_two_ptt, ring_one_ptt, ring_zero_ptt);
 
