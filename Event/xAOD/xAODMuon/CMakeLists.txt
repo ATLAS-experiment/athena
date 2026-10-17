@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODMuon )
@@ -19,8 +19,9 @@ atlas_add_library( xAODMuon
    PUBLIC_HEADERS xAODMuon
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthLinks xAODBase
-   xAODCaloEvent xAODCore xAODPrimitives xAODTracking MuonStationIndexLib
-   ${extra_libs} )
+                 xAODCaloEvent xAODCore xAODPrimitives xAODTracking MuonStationIndexLib
+                 ${extra_libs}
+   PRIVATE_LINK_LIBRARIES TruthUtils )
 
 atlas_add_xaod_smart_pointer_dicts(
    INPUT xAODMuon/selection.xml
@@ -38,10 +39,18 @@ atlas_add_dictionary( xAODMuonEnumsDict
    xAODMuon/xAODMuonEnumsDict.h
    xAODMuon/selectionEnums.xml)
 
+# Serializer converter for Trigger.
+if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
+   atlas_add_sercnv_library( xAODMuonSerCnv
+      FILES xAODMuon/MuonContainer.h xAODMuon/MuonAuxContainer.h
+      TYPES_WITH_NAMESPACE xAOD::MuonContainer xAOD::MuonAuxContainer
+      CNV_PFX xAOD
+      LINK_LIBRARIES xAODMuon TrigSerializeCnvSvcLib )
+endif()
+
 # Install files from the package.
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8})
 
-#
 # Test(s) in the package.
 atlas_add_test( xAODMuon_Muon_test
    SOURCES test/xAODMuon_Muon_test.cxx
