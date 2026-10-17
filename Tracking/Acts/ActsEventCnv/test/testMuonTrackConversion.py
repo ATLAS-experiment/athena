@@ -17,8 +17,9 @@ if "__main__" == __name__:
     flags.GeoModel.SQLiteDB = True
     #### The official upgrade samples contain an ITk but a R3-MS. To compare the input
     #### from those samples with the Phase-II style Muon geometry use a non-standard 
-    #### SQLite database with ITk + R3-MS. 
-    flags.GeoModel.SQLiteDBFullPath = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/GeoDB/ATLAS-P2-RUN4-01-00-00_R3MS.db"
+    #### SQLite database with ITk + R3-MS.
+    from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
+    flags.GeoModel.SQLiteDBFullPath = MuonPhaseIITestDefaults.GEODB_ITk_R3MS
 
     from AthenaConfiguration.TestDefaults import defaultConditionsTags
     flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
