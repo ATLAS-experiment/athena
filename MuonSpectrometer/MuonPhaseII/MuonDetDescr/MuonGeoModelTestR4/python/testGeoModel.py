@@ -28,7 +28,7 @@ class MuonPhaseIITestDefaults:
                             "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-20._0002.data",
                         ]
     ]
-    RDO_R3 = [ "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/myRDO.R3.pool.root"]
+    RDO_R3 = [ "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/myRDO.R3.pool.root"]
     ### First files taken from (https://gitlab.cern.ch/atlas-nextgen/work-package-2.5/SampleProduction/-/blob/master/FileLists/RDO_MU0/R4/999994.PG_DiMuon_Pt2to200.txt)
     RDO_R4 = [   
         "root://eosatlas.cern.ch:1094//eos/atlas/atlasgroupdisk/det-muon/dq2/rucio/group/det-muon/a0/d0/group.det-muon.52398372.EXT0._000001.RDO.pool.root",
