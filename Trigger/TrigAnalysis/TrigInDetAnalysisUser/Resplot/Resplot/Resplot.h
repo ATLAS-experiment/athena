@@ -35,7 +35,7 @@
 #include "TFile.h"
 #include "TString.h"
 
-#include "StatVal.h"
+#include "Resplot/StatVal.h"
 
 namespace Resplot { 
 

@@ -28,7 +28,7 @@
 #include "TrigInDetAnalysisUtils/TagNProbe.h"
 
 
-#include "Resplot.h"
+#include "Resplot/Resplot.h"
 
 
 #include "TH1F.h"

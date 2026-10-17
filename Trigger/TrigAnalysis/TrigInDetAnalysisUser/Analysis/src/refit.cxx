@@ -29,7 +29,7 @@
 #include "dataset.h"
 
 #include "TrigInDetAnalysis/Efficiency1D.h"
-#include "Resplot.h"
+#include "Resplot/Resplot.h"
 
 /// file names and file pointers
 std::vector<TFile*>      fptr;

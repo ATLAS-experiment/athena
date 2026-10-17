@@ -22,7 +22,8 @@
 
 #include "Directory.h"
 #include "tagname.h"
-#include "Resplot.h"
+
+#include "Resplot/Resplot.h"
 
 #include "TCanvas.h"
 #include "TStyle.h"

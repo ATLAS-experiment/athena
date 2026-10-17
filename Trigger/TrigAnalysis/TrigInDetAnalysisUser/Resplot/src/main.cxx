@@ -15,7 +15,7 @@
 #include "TStyle.h"
 #include "TMath.h"
 
-#include "Resplot.h"
+#include "Resplot/Resplot.h"
 
 #include "Random.h"
 

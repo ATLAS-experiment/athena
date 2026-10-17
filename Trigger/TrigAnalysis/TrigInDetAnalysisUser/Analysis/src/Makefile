@@ -116,7 +116,7 @@ CFLAGS   += -g
 
 
 CXXFLAGS += -I. -I$(TID) -I$(TIDU) -I$(TIDE) $(ROOTCFLAGS) -Wno-deprecated   
-CXXFLAGS += -I$(TIDUB)/Resplot/src -I$(TIDUB)/Readcards/src
+CXXFLAGS += -I$(TIDUB)/Resplot -I$(TIDUB)/Resplot/src -I$(TIDUB)/Readcards/src
 CXXFLAGS += -I$(HOME)/include -Wall 
 
 # CXXFLAGS += $(BOOSTINC)

@@ -20,7 +20,7 @@
 #include "TrigInDetAnalysis/TIDDirectory.h"
 #include "TrigInDetAnalysis/Efficiency1D.h"
 
-#include "Resplot.h"
+#include "Resplot/Resplot.h"
 
 class ConfVtxAnalysis : public VertexAnalysis {
 

@@ -94,10 +94,10 @@ OBJECTS  = $(OBJDIR)/main.o
 ROBJECTS = $(OBJDIR)/rmain.o $(OBJDIR)/Resplot.o 
 
 LOBJECTS = $(OBJDIR)/Resplot.o  $(OBJDIR)/generate.o  \
-	   $(OBJDIR)/rmsFrac.o  $(OBJDIR)/ResplotDict.o 
+	   $(OBJDIR)/rmsFrac.o
 
-HEADERS  = $(INCDIR)/Resplot.h $(INCDIR)/tagname.h \
-	   $(INCDIR)/StatVal.h $(INCDIR)/Directory.h 
+HEADERS  = $(INCDIR)/../Resplot/Resplot.h $(INCDIR)/tagname.h \
+	   $(INCDIR)/../Resplot/StatVal.h $(INCDIR)/Directory.h 
 
 
 LIBS += -L$(LIBDIR) -lResplot 
@@ -171,7 +171,7 @@ archive :
 install : dirs all 
 	cp $(HEADERS) $(HOME)/include
 	cp $(LIBDIR)/libResplot.{a,so} $(HOME)/lib
-	cp $(SRCDIR)/*.pcm $(HOME)/bin 
+
 
 dirs : $(OBJDIR)/.d $(LIBDIR)/.d $(EXEDIR)/.d 
 
