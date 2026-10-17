@@ -9,20 +9,17 @@ find_package( ROOT COMPONENTS Core Hist MathCore Graf Graf3d Gpad RIO Tree )
 atlas_disable_as_needed()
 
 # Libraries in the package:
-atlas_add_root_dictionary( Resplot
-   ResplotDictSource
-   ROOT_HEADERS Resplot/src/Resplot.h Resplot/src/LinkDef.h
-   EXTERNAL_PACKAGES ROOT )
 
 atlas_add_library( Resplot
-   Resplot/src/*.h Resplot/src/Resplot.cxx Resplot/src/generate.cxx
-   Resplot/src/rmsFrac.cxx ${ResplotDictSource}
-   NO_PUBLIC_HEADERS
+   Resplot/Resplot/*.h Resplot/src/*.h Resplot/src/Resplot.cxx Resplot/src/generate.cxx
+   Resplot/src/rmsFrac.cxx 
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+   PUBLIC_HEADERS Resplot
    LINK_LIBRARIES ${ROOT_LIBRARIES} )
+ 
 target_include_directories( Resplot PUBLIC
-   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Resplot/src> )
-
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Resplot> )
+  
 atlas_add_library( Readcards
    Readcards/src/*.h Readcards/src/IReadCards.cxx Readcards/src/ReadCards.cxx
    Readcards/src/Value.cxx Readcards/src/utils.cxx

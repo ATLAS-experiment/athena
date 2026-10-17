@@ -23,7 +23,7 @@
 
 // #include "TrigInDetAnalysis/Efficiency2D.h"
 
-#include "Resplot.h"
+#include "Resplot/Resplot.h"
 
 
 #include "TH1F.h"
