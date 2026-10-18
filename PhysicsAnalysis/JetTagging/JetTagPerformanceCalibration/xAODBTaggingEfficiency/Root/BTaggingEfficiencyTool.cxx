@@ -1105,8 +1105,7 @@ BTaggingEfficiencyTool::getMCEfficiencyONNX( const std::vector<std::vector<float
 // returns true if the argument systematic is supported by this tool
 bool BTaggingEfficiencyTool::isAffectedBySystematic( const SystematicVariation & systematic ) const
 {
-  SystematicSet sys = affectingSystematics();
-  return sys.find( systematic) != sys.end();
+  return m_systematics.find( systematic) != m_systematics.end();
 }
 
 // this returns a list of systematics supported by this tool
@@ -1235,7 +1234,7 @@ StatusCode BTaggingEfficiencyTool::applySystematicVariation( const SystematicSet
 
   // First filter out any systematics that do not apply to us
   SystematicSet filteredSysts;
-  if (SystematicSet::filterForAffectingSystematics(systConfig, affectingSystematics(), filteredSysts) != StatusCode::SUCCESS) {
+  if (SystematicSet::filterForAffectingSystematics(systConfig, m_systematics, filteredSysts) != StatusCode::SUCCESS) {
     ATH_MSG_ERROR("received unsupported systematics: " << systConfig.name());
     return StatusCode::FAILURE;
   }
