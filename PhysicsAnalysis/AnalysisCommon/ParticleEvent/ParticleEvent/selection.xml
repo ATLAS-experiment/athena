@@ -17,18 +17,6 @@
   <class name="Analysis::IConstituent" />
   <class name="std::vector<Analysis::IConstituent*>" />
 
-  <class name="CompositeParticleContainer" id="E14D5B90-5CCE-38F2-B2AD-E5EFFB2ADB37" />
-  <class name="DataVector<CompositeParticle>" />
-  <!--<class name="std::vector<CompositeParticle*>" />-->
-  <class name="CompositeParticle" />
-  <class name="CompositeParticle::Base_t" />
-  <exclusion>
-    <class name="CompositeParticle" >
-      <!-- gccxml gets confused by this one... -->
-      <method name="get_constituent" />
-    </class>
-  </exclusion>
-
   <class name="ParticleImpl<Navigable<DataVector<INavigable4Momentum>,double,std::vector<std::pair<ElementLink<DataVector<INavigable4Momentum> >,double> > >,P4ImplPxPyPzE,ParticleEvent::Base>"/>
 
   <!-- The ParticleImpl copy ctor methods have signatures long enough
@@ -37,10 +25,6 @@
   <exclusion>
     <class name="ParticleImpl<Navigable<DataVector<INavigable4Momentum>,double,std::vector<std::pair<ElementLink<DataVector<INavigable4Momentum> >,double> > >,P4ImplPxPyPzE,ParticleEvent::Base>">
       <method pattern="ParticleImpl*"/>
-    </class>
-    <class name="CompositeParticle::Base_t">
-      <method pattern="ParticleImpl*"/>
-      <method pattern="ParticleSigStateImpl*"/>
     </class>
   </exclusion>
 

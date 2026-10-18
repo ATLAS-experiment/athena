@@ -13,7 +13,6 @@
 
 #include "ParticleEvent/NeutrinoContainer.h" 
 #include "ParticleEvent/ParticleBaseContainer.h"
-#include "ParticleEvent/CompositeParticleContainer.h"
 #include "ParticleEvent/IConstituent.h"
 #include "ParticleEvent/ParticleImpl.h"
 #include "ParticleEvent/ParticleSigStateImpl.h"
@@ -38,7 +37,6 @@ namespace ParticleEventDict{
     ParticleLinks<ParticleBaseContainer> m_pb;
  ElementLink<ParticleBaseContainer> m_elpb;
     ParticleLinks<IParticleContainer> m_ip;
-    CompositeParticle::Base_t m_dum3;
     ParticleSigStateImpl<Navigable<DataVector<INavigable4Momentum>,double,std::vector<std::pair<ElementLink<DataVector<INavigable4Momentum> >,double> > >,P4ImplPxPyPzE,ParticleEvent::Base> m_dum4;
 
     // instantiations for egamma, muon and taujet

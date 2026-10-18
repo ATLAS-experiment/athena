@@ -986,7 +986,6 @@ _ignore_keys = [
       '*Meta/MissingETGoodnessD3PDObject*',
       '*Meta/EnergySumROID3PDObject*',
       '*Meta/EventInfoD3PDObject*',
-      '*Meta/CompositeParticle*',
       '*Meta/BunchConfTree',
       '*Meta/TrigConfTree',
       'egammaTrigDec',

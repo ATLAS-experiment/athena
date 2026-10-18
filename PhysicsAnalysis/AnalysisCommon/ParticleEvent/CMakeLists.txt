@@ -14,5 +14,5 @@ atlas_add_dictionary( ParticleEventDict
                       ParticleEvent/ParticleEventDict.h
                       ParticleEvent/selection.xml
                       LINK_LIBRARIES ParticleEvent
-                      NAVIGABLES DataVector<ParticleBase> NeutrinoContainer CompositeParticleContainer
+                      NAVIGABLES DataVector<ParticleBase> NeutrinoContainer 
                       DATA_LINKS TrackParticleAssocs INav4MomToTrackParticleAssocs )
