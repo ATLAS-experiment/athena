@@ -3,7 +3,7 @@
  **
  **     @author  mark sutton
  **
- **     Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 #include "TrigInDetAnalysisExample/AnalysisConfigMT_Ntuple.h"
@@ -318,10 +318,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 	if      (m_provider->evtStore()->contains<xAOD::TrackParticleContainer>("InDetTrackParticles")) {
 	  selectTracks<xAOD::TrackParticleContainer>( &selectorRef, "InDetTrackParticles" );
 	}
-	else if (m_provider->evtStore()->contains<Rec::TrackParticleContainer>("TrackParticleCandidate")) {
-	  selectTracks<Rec::TrackParticleContainer>( &selectorRef, "TrackParticleCandidate" );
-        }
-	else { 
+	else {
 	  m_provider->msg(MSG::WARNING) << " Offline tracks not found " << endmsg;
 	}
 	
@@ -448,10 +445,7 @@ void AnalysisConfigMT_Ntuple::loop() {
 	  size_t pos = collectionname.find("/");
 	  if ( pos!=std::string::npos ) collection_test = collectionname.substr( pos+1, collectionname.size()-pos );
 
-	  if (m_provider->evtStore()->contains<Rec::TrackParticleContainer>(collection_test)) {
-	    found = selectTracks<Rec::TrackParticleContainer>( &selectorTest, collectionname );
-	  }
-	  else if (m_provider->evtStore()->contains<xAOD::TrackParticleContainer>(collection_test)) {
+	  if (m_provider->evtStore()->contains<xAOD::TrackParticleContainer>(collection_test)) {
 	    found = selectTracks<xAOD::TrackParticleContainer>( &selectorTest, collectionname );
 	  }
 	  else if (m_provider->evtStore()->contains<TrackCollection>(collection_test)) {

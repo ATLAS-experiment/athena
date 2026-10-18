@@ -634,29 +634,16 @@ protected:
 
     if ( m_doOffline && !m_mcTruth) {
 
-      bool found_offline = false;
-
       for ( size_t it=0 ; it<m_offline_types.size() ; it++ ) {
 	if ( m_provider->evtStore()->template contains<xAOD::TrackParticleContainer>( m_offline_types[it] ) ) {
 	  this->template selectTracks<xAOD::TrackParticleContainer>( pselectorRef, m_offline_types[it] );
 	  refbeamspot = this->template getBeamspot<xAOD::TrackParticleContainer>( m_offline_types[it] );
-	  found_offline = true;
 	}
 	else { 
 	  m_provider->msg(MSG::WARNING) << "Offline tracks not found: " << m_offline_types[it] << endmsg;
 	}
       }
       
-      if ( !found_offline ) { 
-	if (m_provider->evtStore()->template contains<Rec::TrackParticleContainer>("TrackParticleCandidate") ) {
-	  /// do we still want to support Rec::TrackParticles ? Would this even still work ?
-	  this->template selectTracks<Rec::TrackParticleContainer>( pselectorRef, "TrackParticleCandidate" );
-	}
-	else { 
-	  m_provider->msg(MSG::WARNING) << "Offline tracks not found: " << "TrackParticleCandidate" << endmsg;
-	}
-      }
-
     }
 
     /// clone the asociator
