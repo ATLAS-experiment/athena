@@ -546,6 +546,8 @@ def getClassesToIgnore(flags):
         l.append("145610168")   # TrigMissingET
         l.append("1271751257")  # ElectronMuonTopoInfoContainer
         l.append("1142962358")  # TrigEFBjetContainer
+        l.append("243892660")   # TrigMonEvent (CostMon)
+        l.append("253562967")   # TrigMonConfig (CostMon)
     return l
 
 
