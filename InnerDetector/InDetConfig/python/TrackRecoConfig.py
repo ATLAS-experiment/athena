@@ -45,9 +45,12 @@ def CombinedTrackingPassFlagSets(flags, resetCache=False):
 
     # LowPt pass
     if flags.Tracking.doLowPt:
-        flagsLowPt = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                           "Tracking.LowPtPass")
-        flags_set += [flagsLowPt]
+        from TrkConfig.TrkConfigFlags import PrimaryPassConfig
+        flagsLowPt = None
+        if flags.Tracking.PrimaryPassConfig is not PrimaryPassConfig.HeavyIon:
+            flagsLowPt = flags.cloneAndReplace("Tracking.ActiveConfig",
+                                               "Tracking.LowPtPass")
+            flags_set += [flagsLowPt]
 
     # VeryLowPt pass
     if flags.Tracking.doVeryLowPt:
@@ -1014,6 +1017,15 @@ def InDetTrackRecoCfg(flags):
     from InDetConfig.InDetTrackOutputConfig import InDetTrackRecoOutputCfg
     result.merge(InDetTrackRecoOutputCfg(flags, _extensions_list))
 
+    # Special configuration for HI
+    from TrkConfig.TrkConfigFlags import PrimaryPassConfig
+    if flags.Tracking.PrimaryPassConfig is PrimaryPassConfig.HeavyIon and \
+       flags.Tracking.doLowPt:
+        from InDetConfig.InDetHeavyIonSpecialConfig import InDetHeavyIonSpecialCfg
+        result.merge(InDetHeavyIonSpecialCfg(flags))
+
+    result.printConfig(withDetails=False,
+                       summariseProps=False)
     return result
 
 # Run with python -m InDetConfig.TrackRecoConfig

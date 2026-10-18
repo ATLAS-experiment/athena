@@ -28,6 +28,8 @@
 #include "TrkTrack/TrackCollection.h"
 #include "TrkEventUtils/PRDtoTrackMap.h"
 #include "xAODEventInfo/EventInfo.h"
+#include "xAODTracking/VertexContainer.h"
+#include "xAODTracking/VertexAuxContainer.h"
 
 /// Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
@@ -116,6 +118,8 @@ namespace InDet {
     BooleanProperty m_doDumpGBTSTrainingDataLRT{this, "doDumpGBTSTrainingDataLRT", false, "write LRT training data used to create GBTS connection table"};
     BooleanProperty m_removeShortSegments{this, "removeShortSegments", false, "remove short segments from GBTS connection table"};
     StringProperty m_GBTSTrainingDataFileName{this, "GBTSTrainingDataFileName", "layer_connection_table.csv", "file to write training data used to create GBTS connection table"};
+    BooleanProperty m_useVertexPosition{this, "useVertexPosition", false};
+    FloatProperty m_collisionTollerance{this, "collisionTollerance", 10.};
     //@}
 
     /// @name Data members for new strategy reconstruction
@@ -132,7 +136,8 @@ namespace InDet {
     SG::ReadHandleKey<SpacePointContainer> m_SpacePointsPixelKey{this, "SpacePointsPixelName", "PixelSpacePoints"};
     SG::ReadHandleKey<Trk::PRDtoTrackMap> m_prdToTrackMap{this,"PRDtoTrackMap",""};
     SG::ReadHandleKey<ROIPhiRZContainer> m_caloClusterROIKey{this, "EMROIPhiRZContainer", "InDetCaloClusterROIPhiRZ15GeVUnordered", "Name of the calo cluster ROIs in Phi,R,Z parameterization"};
-
+    SG::ReadHandleKey<xAOD::VertexContainer> m_vertices{this, "Vertices", "PrimaryVertices"};
+    
     SG::ReadCondHandleKey<InDet::BeamSpotData> m_beamSpotKey{this, "BeamSpotKey", "BeamSpotData", "SG key for beam spot"};
 
     SG::ReadDecorHandleKey<xAOD::EventInfo> m_mbtsKey{this, "MBTSKey", m_evtKey, "MBTSBackground"};
