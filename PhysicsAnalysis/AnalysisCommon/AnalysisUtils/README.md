@@ -17,8 +17,6 @@ Authors Sebastien Binet, Tadashi Maeno
 
   - AnalysisPermutation:
 
-  - AnalysisSelection:
-
   - IFilterCuts: this is a class which is used internally  by the filters to copy their cut properties one to another (via the IFilterCuts::setFilter(ifilter) method).
 <i>Nota:</i> this class (contrary to IFilter) is not templated.
 
