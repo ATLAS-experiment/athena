@@ -11,20 +11,25 @@ BTaggingEfficiencyJsonTool::BTaggingEfficiencyJsonTool ( const std::string &name
   asg::AsgTool ( name )
 {
   m_initialised = false;
+
+  declareProperty("btagSelectionJsonTool", m_selTool, "Xbb JSON selection tool");
 }
 
 BTaggingEfficiencyJsonTool::~BTaggingEfficiencyJsonTool() {
 }
 
 StatusCode BTaggingEfficiencyJsonTool::initialize()
-{
-  ATH_MSG_INFO("Initialize BTagging Efficiency Json Tool from: " + m_json_config_path);
-
+{ 
   if (m_minPt > 0.){ 
     // Convert MeV cut to GeV as in the JSON files numbers are in GeV 
     m_minPt = m_minPt * BTaggingToolUtil::MeVToGeV; 
   }
 
+  // Retrieve selection tool 
+  ATH_MSG_INFO("Initialize BTagging Efficiency Json Tool: retrieving corresponding selection tool");
+  ANA_CHECK (m_selTool.retrieve());
+
+  ATH_MSG_INFO("Initialize BTagging Efficiency Json Tool from: " + m_json_config_path);
   std::string pathToJsonConfigFile = PathResolverFindCalibFile(m_json_config_path);
   std::ifstream jsonFile(pathToJsonConfigFile);
 
@@ -206,18 +211,12 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
     ATH_MSG_WARNING("No mc-to-mc corrections present in json.");
   }
 
-  // Now check there is no overlapping bins for MCMChandlers  
-  for (const auto& [labelStringMCMC, handlers] : m_mcmcHandlers) {
-    for (size_t i = 0; i < handlers.size(); ++i) {
-      for (size_t j = i + 1; j < handlers.size(); ++j) {
-        if (handlers[i].overlaps(handlers[j])) {
-          ATH_MSG_ERROR("Overlapping mc-to-mc bins for label " << labelStringMCMC
-                        << " and generator '" << m_mcGenerator.value() << "': "
-                        << handlers[i] << " and " << handlers[j] );
-          return StatusCode::FAILURE;
-        }
-      }
-    }
+  // Now check there is no overlapping bins for MCMChandlers
+  try {
+    BoundsHandler::checkOverlaps("mc-to-mc corrections of generator '" + m_mcGenerator.value() + "'", m_mcmcHandlers);
+  } catch (const std::exception& e) {
+    ATH_MSG_ERROR(e.what());
+    return StatusCode::FAILURE;
   }
   
   m_currentSys = nullptr;
@@ -446,6 +445,14 @@ BTaggingEfficiencyJsonTool::BoundsHandler::BoundsHandler(
     varBounds vBounds;
     vBounds.lowerBound = BTaggingToolUtil::getExtendedFloat(range[0]);
     vBounds.upperBound = BTaggingToolUtil::getExtendedFloat(range[1]);
+
+    // Make sure that lowerBounds and upperBounds are not NaNs 
+    if (!std::isfinite(vBounds.lowerBound)){ 
+      throw std::runtime_error("Bin issue lower bound is not a finite number for jsonConfig=" + jsonConfig.dump());
+    }
+    if (!std::isfinite(vBounds.upperBound)){
+      throw std::runtime_error("Bin issue upper bound is not a finite number for jsonConfig=" + jsonConfig.dump());
+    }
 
     // Let's make sure that lowerBound < upperBound
     if (vBounds.lowerBound >= vBounds.upperBound){

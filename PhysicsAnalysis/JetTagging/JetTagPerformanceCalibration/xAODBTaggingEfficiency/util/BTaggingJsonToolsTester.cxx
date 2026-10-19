@@ -42,12 +42,10 @@ bool containNoSF(const std::string& str) {
 
 int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
-  #ifdef XAOD_STANDALONE
   // Change type returned by the ANA_CHECK function in case of error 
   // NB: this is needed here because the main() function should return an integer
   // In principle you should NOT call this line for your regular code 
   ANA_CHECK_SET_TYPE (int);
-  #endif
 
   const char* TEST_NAME = argv[0];
 
@@ -62,7 +60,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   // Those lines are only included if using AnalysisBase
   ANA_CHECK (xAOD::Init()) ;
   #else
-  // Those lines are only included if using AthAnalysis
+  // Those lines are only included if using AthAnalysis or Athena 
   POOL::Init();
   #endif
 
@@ -73,43 +71,30 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   std::string mcGenerator = (argc > 5) ? argv[5] : "";
   std::string JetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
 
-  asg::StandaloneToolHandle<IBTaggingSelectionJsonTool> sel_tool("BTaggingSelectionJsonTool/BTagSelTest");
-  StatusCode sel_code1 = sel_tool.setProperty( "MaxEta", 2.5 );
-  StatusCode sel_code2 = sel_tool.setProperty( "MinPt",  0 );
-  StatusCode sel_code3 = sel_tool.setProperty( "OutputName", OutputName );
-  StatusCode sel_code4 = sel_tool.setProperty( "JetAuthor", JetCollection );
-  StatusCode sel_code5 = sel_tool.setProperty( "OperatingPoint", OperatingPoint );
-  StatusCode sel_code6 = sel_tool.setProperty( "JsonConfigFile", JsonConfigFile );
-  StatusCode sel_code7 = sel_tool.setProperty( "OutputLevel",    MSG::ERROR);
-  StatusCode sel_code8 = sel_tool.initialize();
-  std::vector<StatusCode> sel_codes = {sel_code1, sel_code2, sel_code3, sel_code4, sel_code5, sel_code6, sel_code7, sel_code8};
-  for(const auto& code : sel_codes) {
-    if(code.isFailure()) {
-      ANA_MSG_ERROR("Failed to set property or initialize tool");
-      return 1;
-    }
-  }
+  asg::StandaloneToolHandle<IBTaggingSelectionJsonTool> selTool("BTaggingSelectionJsonTool/BTagSelTest");
+  ANA_CHECK(selTool.setProperty( "MaxEta", 2.5 ));
+  ANA_CHECK(selTool.setProperty( "MinPt", 0. ));
+  ANA_CHECK(selTool.setProperty( "OutputName", OutputName ));
+  ANA_CHECK(selTool.setProperty( "JetAuthor", JetCollection ));
+  ANA_CHECK(selTool.setProperty( "OperatingPoint", OperatingPoint ));
+  ANA_CHECK(selTool.setProperty( "JsonConfigFile", JsonConfigFile ));
+  ANA_CHECK(selTool.setProperty( "OutputLevel", MSG::ERROR));
+  ANA_CHECK(selTool.initialize());
 
-  asg::StandaloneToolHandle<IBTaggingEfficiencyJsonTool> tool("BTaggingEfficiencyJsonTool/BTagEffTest");
+  asg::StandaloneToolHandle<IBTaggingEfficiencyJsonTool> effTool("BTaggingEfficiencyJsonTool/BTagEffTest");
   CP::SystematicSet sysSet;
   if (!containNoSF(JsonConfigFile)) {
-    StatusCode code1 = tool.setProperty( "MaxEta", 2.5 );
-    StatusCode code2 = tool.setProperty( "MinPt",  0 );
-    StatusCode code3 = tool.setProperty( "OutputName", OutputName );
-    StatusCode code4 = tool.setProperty( "JetAuthor", JetCollection );
-    StatusCode code5 = tool.setProperty( "OperatingPoint", OperatingPoint );
-    StatusCode code6 = tool.setProperty( "JsonConfigFile", JsonConfigFile );
-    StatusCode code7 = tool.setProperty( "MCGenerator", mcGenerator );
-    StatusCode code8 = tool.initialize();
-    std::vector<StatusCode> codes = {code1, code2, code3, code4, code5, code6, code7, code8};
-    for(const auto& code : codes) {
-      if(code.isFailure()) {
-        ANA_MSG_ERROR("Failed to set property or initialize tool");
-        return 1;
-      }
-    }
-
-    sysSet = tool->recommendedSystematics();
+    ANA_CHECK(effTool.setProperty( "MaxEta", 2.5 ));
+    ANA_CHECK(effTool.setProperty( "MinPt",  0 ));
+    ANA_CHECK(effTool.setProperty( "OutputName", OutputName ));
+    ANA_CHECK(effTool.setProperty( "JetAuthor", JetCollection ));
+    ANA_CHECK(effTool.setProperty( "OperatingPoint", OperatingPoint ));
+    ANA_CHECK(effTool.setProperty( "JsonConfigFile", JsonConfigFile ));
+    ANA_CHECK(effTool.setProperty( "MCGenerator", mcGenerator ));
+    ANA_CHECK(effTool.setProperty( "btagSelectionJsonTool", selTool ));
+    ANA_CHECK(effTool.initialize());
+    
+    sysSet = effTool->recommendedSystematics();
     ANA_MSG_INFO("Recommended systematics: " << sysSet.name());
   }
 
@@ -164,7 +149,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
       ANA_MSG_INFO("====================================");
       ANA_MSG_INFO("Jet(pT=" << jet->pt() << ", mass="<< jet->m()<< ", eta=" << jet->eta() <<")");
 
-      bool tagged = static_cast<bool>(sel_tool->accept(*jet));
+      bool tagged = static_cast<bool>(selTool->accept(*jet));
       ANA_MSG_INFO("Tagged: " << tagged);
 
       if (!containNoSF(JsonConfigFile)) {
@@ -172,7 +157,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
         for (const auto& var : sysSet) {
           CP::SystematicSet set;
           set.insert(var);
-          CP::CorrectionCode code = tool->getScaleFactor(*jet, sf, set);
+          CP::CorrectionCode code = effTool->getScaleFactor(*jet, sf, set);
 
           if (code != CP::CorrectionCode::Ok) {
             ANA_MSG_ERROR("Failed to get scale factor for jet");

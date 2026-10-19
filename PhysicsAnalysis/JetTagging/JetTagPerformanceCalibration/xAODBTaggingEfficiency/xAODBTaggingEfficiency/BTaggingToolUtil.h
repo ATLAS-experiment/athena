@@ -12,7 +12,7 @@ class BTaggingToolUtil {
 
   public:
   // Multiply a value in MeV by this factor to get it in GeV
-  static constexpr double MeVToGeV = 1e-3;
+  static constexpr double MeVToGeV = 1.e-3;
 
   static float getExtendedFloat(const nlohmann::json &pt);
   static std::string getExtendedString(const nlohmann::json &pt);
