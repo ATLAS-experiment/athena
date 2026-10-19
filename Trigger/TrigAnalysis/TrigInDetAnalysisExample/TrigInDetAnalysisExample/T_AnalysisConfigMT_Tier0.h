@@ -644,9 +644,6 @@ protected:
 	this->template selectTracks<xAOD::TrackParticleContainer>( m_selectorRef, "InDetTrackParticles" );
 	refbeamspot = this->template getBeamspot<xAOD::TrackParticleContainer>( "InDetTrackParticles" );
       }
-      else if (m_provider->evtStore()->template contains<Rec::TrackParticleContainer>("TrackParticleCandidate") ) {
-	this->template selectTracks<Rec::TrackParticleContainer>( m_selectorRef, "TrackParticleCandidate" );
-      }
       else if ( m_provider->msg().level() <= MSG::WARNING ) {
 	m_provider->msg(MSG::WARNING) << " Offline tracks not found " << endmsg;
       }

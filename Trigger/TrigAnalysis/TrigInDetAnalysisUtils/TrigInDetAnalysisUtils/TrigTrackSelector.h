@@ -5,7 +5,7 @@
  **     @author  mark sutton
  **     @date    Fri 11 Jan 2019 07:06:39 CET 
  **
- **     Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -13,11 +13,6 @@
 #define TIDAUTILS_TRIGTRACKSELECTOR_H
 
 #include "TrigInDetAnalysisUtils/TIDA_newtracking.h"
-
-
-/// offline and EF
-#include "Particle/TrackParticle.h"
-#include "Particle/TrackParticleContainer.h"
 
 /// MC truth
 #include "McParticleEvent/TruthParticleContainer.h"
@@ -94,15 +89,6 @@ public:
   void correctTracks(bool b=true) { m_correctTrkTracks = b; } 
 
   virtual void clear() override { for ( size_t i=m_tracks.size() ; i-- ; ) delete m_tracks[i]; m_tracks.clear(); }   
-
-
-  // add a TrackParticle 
-  bool selectTrack( const Rec::TrackParticle* track );
-  
-
-  // extract all the tracks from a TrackParticle collection and add them
-  void selectTracks( const Rec::TrackParticleContainer* trigtracks );
-
 
   // extract all the tracks from a TrackParticle collection and add them
   void selectTracks( const TruthParticleContainer* truthtracks );

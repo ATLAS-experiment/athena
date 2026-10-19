@@ -729,12 +729,7 @@ protected:
 	       key.find("_EFID")!=std::string::npos ||
 	       chainName.find("EF_")!=std::string::npos ||
 	       chainName.find("HLT_")!=std::string::npos ) {
-#         ifdef XAODTRACKING_TRACKPARTICLE_H
 	    if      ( this->template selectTracks<xAOD::TrackParticleContainer>( m_selectorTest, c, key ) ) testbeamspot = this->template getBeamspot<xAOD::TrackParticleContainer>( c, key );
-	    else if ( this->template selectTracks<Rec::TrackParticleContainer>( m_selectorTest, c, key ) );
-#         else
-	    if ( this->template selectTracks<Rec::TrackParticleContainer>( m_selectorTest, c, key ) );
-#         endif
 	    else if ( this->template selectTracks<TrackCollection>( m_selectorTest, c, key ) );
 	    else { 
 	      //m_provider->msg(MSG::WARNING) << "No track collection " << key << " found"  << endmsg;
@@ -743,11 +738,8 @@ protected:
 	  else {
 	    /// L2 track EDM
 	    if ( chainName.find("L2_")!=std::string::npos ) {
-	      if      ( this->template selectTracks<Rec::TrackParticleContainer>( m_selectorTest, c, key ) );
-	      else if ( this->template selectTracks<TrackCollection>( m_selectorTest, c, key ) );
-#           ifdef XAODTRACKING_TRACKPARTICLE_H
+	      if ( this->template selectTracks<TrackCollection>( m_selectorTest, c, key ) );
 	      else if ( this->template selectTracks<xAOD::TrackParticleContainer>( m_selectorTest, c, key ) ) testbeamspot = this->template getBeamspot<xAOD::TrackParticleContainer>( c, key );
-#           endif
 	      else m_provider->msg(MSG::WARNING) << "No track collection " << key << " found"  << endmsg;
 	    }
 	  }
@@ -1023,19 +1015,10 @@ protected:
 	
         if ( m_doOffline ) {
 	  
-#         ifdef XAODTRACKING_TRACKPARTICLE_H
           if ( m_provider->evtStore()->template contains<xAOD::TrackParticleContainer>("InDetTrackParticles") ) {
             this->template selectTracks<xAOD::TrackParticleContainer>( m_selectorRef, "InDetTrackParticles" );
 	    refbeamspot = this->template getBeamspot<xAOD::TrackParticleContainer>( "InDetTrackParticles" );
           }
-          else if (m_provider->evtStore()->template contains<Rec::TrackParticleContainer>("TrackParticleCandidate") ) {
-            this->template selectTracks<Rec::TrackParticleContainer>( m_selectorRef, "TrackParticleCandidate" );
-          }
-#         else
-          if (m_provider->evtStore()->template contains<Rec::TrackParticleContainer>("TrackParticleCandidate") ) {
-            this->template selectTracks<Rec::TrackParticleContainer>( m_selectorRef, "TrackParticleCandidate" );
-          }
-#         endif
           else if ( m_provider->msg().level() <= MSG::WARNING ) {
             m_provider->msg(MSG::WARNING) << " Offline tracks not found " << endmsg;
 	  }

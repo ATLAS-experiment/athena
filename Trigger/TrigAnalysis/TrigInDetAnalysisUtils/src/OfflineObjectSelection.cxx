@@ -4,14 +4,12 @@
  **     @author  mark sutton
  **     @date    Thu 10 Jan 2019 20:12:10 CET 
  **
- **     Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 #include "TrkTrackSummary/TrackSummary.h"
 #include "TrigInDetAnalysisUtils/OfflineObjectSelection.h"
 
-
-#ifdef  XAODTRACKING_TRACKPARTICLE_H
 
 // xAOD offline electron selection
 // selection: 0 take all; 1,4 tight; 2,5 medium; 3,6 loose; <4 cut based, >3 likelihood
@@ -113,98 +111,3 @@ bool TIDA::isGoodOffline(const xAOD::TauJet& tau, const unsigned int selection, 
 
   return good_tau;
 }
-
-
-#else
-
-
-
-bool TIDA::isGoodOffline(const Analysis::Electron& elec) {
-  if ( elec.trackParticle() && elec.isem(egammaPID::ElectronMediumPP)==0 ) {
-    //medium++ ID
-    if (elec.author() == 1 || elec.author() == 3) {
-      //Author = track or track+calo
-      return true;
-    }
-  }
-  return false;
-}
-
-
-bool TIDA::isGoodOffline(const Analysis::Muon& muon) {
-  if (!muon.isLoose()) {
-    //Tight muon
-    return false;
-  }
-
-  //Based on https://svnweb.cern.ch/trac/atlasgrp/browser/Physics/Common/OSCAR/OSSelectors/trunk/src/OSSelectMuon.cxx
-  if (muon.hasInDetTrackParticle()) {
-    const Rec::TrackParticle* idTrack = muon.inDetTrackParticle();
-    const Trk::TrackSummary* summary = idTrack->trackSummary();
-    if (!summary) return false;
-    
-    /// maybe select all these track based quantitied om the TIDA::Track, so we dont 
-    /// have to fuss with is it xAOD/is it not xAOD etc
-
-    // Expect B-Layer hit info not available for Rec::TrackParticle
-    
-    // Pix hits
-    int nPixelHits = summary->get(Trk::numberOfPixelHits);
-    int numberOfPixelDeadSensors = summary->get(Trk::numberOfPixelDeadSensors);
-    nPixelHits += numberOfPixelDeadSensors;
-    if (nPixelHits < 2) return false;
-    
-    // SCT hits
-    int nSCTHits = summary->get(Trk::numberOfSCTHits);
-    int numberOfSCTDeadSensors   = summary->get(Trk::numberOfSCTDeadSensors);
-    nSCTHits += numberOfSCTDeadSensors;
-    if (nSCTHits < 6) return false;
-    
-    // Pix+ + SCT holes
-    int numberOfPixelHoles=muon.numberOfPixelHoles();
-    int numberOfSCTHoles=muon.numberOfSCTHoles();
-    if ( numberOfPixelHoles+numberOfSCTHoles > 2) return false;
-    
-    float etaTrack = fabs(idTrack->eta());  // Need to extrapolate in principle
-    int nTrtHits = summary->get(Trk::numberOfTRTHits);
-    int nTrtOutliers = summary->get(Trk::numberOfTRTOutliers);
-    
-    if (etaTrack < 1.9) {
-      if ((nTrtHits + nTrtOutliers) < 5 ) return false;
-      if (nTrtOutliers >= (0.9 * (nTrtHits + nTrtOutliers))) return false;
-    } else {
-      if ((nTrtHits + nTrtOutliers) > 5) {
-	if (nTrtOutliers >= (0.9 * (nTrtHits + nTrtOutliers))) return false;
-      }
-    }
-    return true;
-  }
-  return false;
-}
-
-
-
-bool TIDA::isGoodOffline(const Analysis::TauJet& tau, const bool doThreeProng, const double EtCutOffline) {
-  //  std::cout << "have offline tau" << std::endl;
-  bool id_flag = false;
-  if (doThreeProng) { 
-    bool threeprong = ( tau.numTrack() == 3 && tau.tauID()->isTau(TauJetParameters::JetBDTSigMedium) ); 
-    id_flag = threeprong; 
-  } 
-  else {	  
-    bool oneprong = ( tau.numTrack() == 1 && tau.tauID()->isTau(TauJetParameters::JetBDTSigMedium) ); 
-    id_flag = oneprong;
-  }
-
-  if (id_flag) {  
-    if (tau.et() < EtCutOffline) return false;
-    if (tau.eta() > 2.47) return false;
-    if (tau.tauID()->isTau(TauJetParameters::EleBDTMedium) ) return false;
-    if (tau.tauID()->isTau(TauJetParameters::MuonVeto) ) return false;
-    if (fabs(tau.charge())!=1) return false;
-    return true;
-  }
-  return false;
-}
-
-#endif  

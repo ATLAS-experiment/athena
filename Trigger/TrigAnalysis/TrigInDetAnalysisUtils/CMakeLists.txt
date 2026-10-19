@@ -11,7 +11,7 @@ atlas_add_library( TrigInDetAnalysisUtils
    TrigInDetAnalysisUtils/*.h src/*.cxx
    PUBLIC_HEADERS TrigInDetAnalysisUtils
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel McParticleEvent Particle
+   LINK_LIBRARIES ${ROOT_LIBRARIES} GaudiKernel McParticleEvent
    xAODMuon xAODEgamma xAODTau xAODTruth xAODTracking
    TrkParameters TrkTrack TrkToolInterfaces TrkTrackSummary TrigDecisionToolLib
    TrigInDetAnalysis TrigSteeringEvent 
