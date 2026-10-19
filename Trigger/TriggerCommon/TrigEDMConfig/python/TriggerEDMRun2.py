@@ -740,7 +740,6 @@ TriggerHLTList = [
     ('TrigRNNOutput#HLT_TrigRingerNeuralFex',                             '',                 'Egamma'),
     ('TrigTauCluster#HLT_TrigT2CaloTau',                                  '',                       'Tau'),
     ('TrigTauClusterDetails#HLT_TrigT2CaloTauDetails',                    '',                       'Tau'),
-    ('TrigTauTracksInfo#HLT',                                             '',                       'Tau'),
     ('TrigRNNOutput#HLT_TrigTRTHTCounts',                                 '',                 'Egamma'),
 
     # tracking == L2 List
@@ -1047,7 +1046,6 @@ EDMDetails[ "RingerRings" ]               = {'persistent':"RingerRingsContainer_
 EDMDetails[ "TrigRNNOutput" ]             = {'persistent':"TrigRNNOutputContainer_p2",            'typealias':'RNNOut', 'collection':"TrigRNNOutputContainer"}
 EDMDetails[ "TrigTauCluster" ]            = {'persistent':"TrigTauClusterContainer_p5",         'typealias':'TauCl', 'collection': 'TrigTauClusterContainer' }
 EDMDetails[ "TrigTauClusterDetails" ]     = {'persistent':"TrigTauClusterDetailsContainer_p2",  'typealias':'TauDetails', 'collection': 'TrigTauClusterDetailsContainer' }
-EDMDetails[ "TrigTauTracksInfo" ]         = {'persistent':"TrigTauTracksInfoCollection_p2",     'typealias':'TauTrInfo', 'collection':'TrigTauTracksInfoCollection'}
 EDMDetails[ "TrigT2Jet" ]                 = {'persistent':"TrigT2JetContainer_p3",              'typealias':'T2Jet', 'collection':'TrigT2JetContainer'}
 EDMDetails[ "TrigTau" ]                   = {'persistent':"TrigTauContainer_p3",                'typealias':'tau', 'collection':'TrigTauContainer'}
 EDMDetails[ "TrigL2BjetContainer" ]       = {'persistent':"TrigL2BjetContainer_p3",             'typealias':'AOD' }

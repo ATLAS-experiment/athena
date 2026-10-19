@@ -3238,25 +3238,6 @@ def dump_TrigSpacePointCounts_nolist (c, f):
     return
 
 
-def dump_TrigTauTracksInfo (t, f):
-    fprint (f, '  ')
-    dump_Fourvec (t, f)
-    fprint (f, '  ', t.roiId(), t.nCoreTracks(), t.nSlowTracks(),
-            t.nIsoTracks(),
-            t.charge(), t.leadingTrackPt(), t.scalarPtSumCore(),
-            t.scalarPtSumIso(), t.ptBalance())
-    dump_Fourvec (t.threeFastestTracks(), f)
-    if t.trackCollection():
-        fprint (f, '\n   ')
-        dump_TrigInDetTrackCollection (t.trackCollection(), f)
-    fprintln (f, ' ')
-    return
-@nolist
-def dump_TrigTauTracksInfo_nolist (t, f):
-    dump_TrigTauTracksInfo (t, f)
-    return
-
-
 def dump_MuonFeature (m, f):
     fprint (f, '  ', m.roiId(), m.saddress(), m.pt(), m.radius(),
             m.eta(), m.phi(), m.dir_phi(), m.zeta(), m.dir_zeta(), m.beta(),
@@ -5035,7 +5016,6 @@ dumpspecs = [
     ["TrigTauClusterDetailsContainer",       dump_TrigTauClusterDetails],
     ["TrigRoiDescriptor",                    dump_TrigRoiDescriptor_nolist],
     ["TrigTauCluster",                       dump_TrigTauCluster_nolist],
-    ["TrigTauTracksInfo",                    dump_TrigTauTracksInfo_nolist],
     ["TrigSpacePointCounts",                 dump_TrigSpacePointCounts_nolist],
     ["CombinedMuonFeature",                  dump_CombinedMuonFeature_nolist],
     ["MuonFeature",                          dump_MuonFeature_nolist],
@@ -5062,7 +5042,6 @@ dumpspecs = [
     ["MuonFeatureContainer",                 dump_MuonFeature],
     ["TrigEMClusterContainer",               dump_TrigEMCluster],
     ["TrigTauClusterContainer",              dump_TrigTauCluster],
-    ["TrigTauTracksInfoCollection",          dump_TrigTauTracksInfo],
     ["TrigSpacePointCountsCollection",       dump_TrigSpacePointCounts],
     ["TrigTrackCountsCollection",            dump_TrigTrackCounts],
     ["TrigT2MbtsBitsContainer",              dump_TrigT2MbtsBits],

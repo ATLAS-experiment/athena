@@ -78,7 +78,6 @@ StatusCode TrigSerializeConvHelper::initialize(){
   m_oldEDMmap[ "RingerRings" ]               = "RingerRingsContainer_tlp1";
   m_oldEDMmap[ "TrigTauCluster" ]            = "TrigTauClusterContainer_tlp1";
   m_oldEDMmap[ "TrigTauClusterDetails" ]     = "TrigTauClusterDetailsContainer_tlp1";
-  m_oldEDMmap[ "TrigTauTracksInfo" ]         = "TrigTauTracksInfoCollection_tlp1";
   m_oldEDMmap[ "TrigElectronContainer" ]     = "TrigElectronContainer_tlp2";
   m_oldEDMmap[ "TrigPhotonContainer" ]       = "TrigPhotonContainer_tlp2";
   m_oldEDMmap[ "TrigMissingET" ]             = "TrigMissingETContainer_tlp1";

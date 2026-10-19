@@ -5,15 +5,6 @@
 #ifndef TRIGINDETEVENTTPCNV_TRIGINDETEVENTTPCNVDICT_H
 #define TRIGINDETEVENTTPCNV_TRIGINDETEVENTTPCNVDICT_H
 
-#include "TrigInDetEventTPCnv/TrigTauTracksInfo_tlp1.h"
-#include "TrigInDetEventTPCnv/TrigTauTracksInfo_p1.h"
-#include "TrigInDetEventTPCnv/TrigTauTracksInfoCollection_p1.h"
-#include "TrigInDetEventTPCnv/TrigTauTracksInfoCollection_tlp1.h"
-
-#include "TrigInDetEventTPCnv/TrigTauTracksInfo_p2.h"
-#include "TrigInDetEventTPCnv/TrigTauTracksInfoCollection_p2.h"
-
-
 #include "TrigInDetEventTPCnv/TrigInDetTrackCollection_tlp4.h"
 #include "TrigInDetEventTPCnv/TrigInDetTrackCollection_tlp3.h"
 #include "TrigInDetEventTPCnv/TrigInDetTrackCollection_tlp2.h"
@@ -72,8 +63,6 @@
 struct dummy_TrigInDetEventTPCnvDict
 {
 
-  std::vector<TrigTauTracksInfo_p1>           m_dummyTrigTauTracksInfo_p1;
-  std::vector<TrigTauTracksInfo_p2>           m_dummyTrigTauTracksInfo_p2;
   std::vector<TrigInDetTrackCollection_p1>    m_dummyTrigInDetTrackCollection_p1;
   std::vector<TrigInDetTrack_p1>              m_dummyTrigInDetTrack_p1;
   std::vector<TrigInDetTrack_p2>              m_dummyTrigInDetTrack_p2;

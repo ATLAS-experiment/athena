@@ -1,20 +1,5 @@
 <lcgdict>
 
-<!-- TrigTauTracksInfo -->
-  <class name="TrigTauTracksInfo_tlp1" id="ABF3C91C-A007-440E-8AEE-753FAA453352"  />
-  <class name="TrigTauTracksInfo_p1" id="FD7D1FE5-9771-4E0A-A29B-9B7187E52286" />
-  <class name="std::vector<TrigTauTracksInfo_p1>" />
-
-<!-- TrigTauTracksInfoCollection -->
-  <class name="TrigTauTracksInfoCollection_tlp1" id="8A208FA7-C52F-4CD3-AE20-EF1C99FC92A6"  />
-  <class name="TrigTauTracksInfoCollection_p1" id="1781A590-8892-4448-AD19-73FC92ED1B57" />
-  <class name="std::vector<TrigTauTracksInfoCollection_p1>" />
-
-  <class name="TrigTauTracksInfoCollection_p2" id="1AF8C4E5-4862-4625-B9B6-D9B53E716B17" />
-  <class name="TrigTauTracksInfo_p2" id="A714D1F9-3CED-4AED-BD41-5B06180FA5FD" />
-  <class name="std::vector<TrigTauTracksInfo_p2>" />
-
-
 <!-- TrigInDetTrack -->
   <class name="TrigInDetTrack_p5"/>
   <class name="std::vector<TrigInDetTrack_p5>" />

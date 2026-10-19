@@ -60,7 +60,6 @@ typedef DataVector<class TrackExtensionMap> TrackExtensionMapContainer;
 HLT_BEGIN_TYPE_REGISTRATION
      HLT_REGISTER_TYPE(class TrigInDetTrack,class TrigInDetTrack,class TrigInDetTrackCollection)
      HLT_REGISTER_TYPE(class TrigInDetTrack,class TrigInDetTrackCollection,class TrigInDetTrackCollection)
-     HLT_REGISTER_TYPE(class TrigTauTracksInfo,class TrigTauTracksInfo,class TrigTauTracksInfoCollection )
      HLT_REGISTER_TYPE(class TrigVertex,class TrigVertex,class TrigVertexCollection )
      HLT_REGISTER_TYPE(class TrigVertex, class TrigVertexCollection,class TrigVertexCollection )
      HLT_REGISTER_TYPE(class TrigSpacePointCounts,class  TrigSpacePointCounts,class TrigSpacePointCountsCollection )

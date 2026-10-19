@@ -9,8 +9,6 @@ atlas_add_poolcnv_library( TrigEventAthenaPoolPoolCnv
    FILES TrigDecisionEvent/TrigDecision.h
          TrigInDetEvent/TrigInDetTrackCollection.h
          TrigInDetEvent/TrigVertexCollection.h
-         TrigInDetEvent/TrigTauTracksInfo.h
-         TrigInDetEvent/TrigTauTracksInfoCollection.h
          TrigInDetEvent/TrigHisto1D.h TrigInDetEvent/TrigHisto2D.h
          TrigInDetEvent/TrigSpacePointCounts.h
          TrigInDetEvent/TrigSpacePointCountsCollection.h

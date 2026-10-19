@@ -3,7 +3,6 @@
 */
 
 #include "TrigInDetEvent/TrigInDetTrackCollection.h"
-#include "TrigInDetEvent/TrigTauTracksInfoCollection.h"
 #include "TrigInDetEvent/TrigVertexCollection.h"
 #include "TrigInDetEvent/TrigSpacePointCountsCollection.h"
 #include "TrigInDetEvent/TrigTrtHitCountsCollection.h"
