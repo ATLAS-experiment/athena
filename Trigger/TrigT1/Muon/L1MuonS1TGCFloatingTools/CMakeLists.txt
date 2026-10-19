@@ -31,7 +31,7 @@ atlas_add_test( L1MuonS1TGC_FloatingSegmentReconstruction_test
           src/FloatingSegmentReconstruction.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} FourMomUtils L1MuonS1TGCToolInterfaces
-  POST_EXEC_SCRIPT nopost.sh )
+  POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( L1MuonS1TGC_FloatingTrackSelector_test
   SOURCES test/FloatingTrackSelector_test.cxx
