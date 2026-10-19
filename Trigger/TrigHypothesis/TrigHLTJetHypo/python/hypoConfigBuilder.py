@@ -6,6 +6,7 @@ from TrigHLTJetHypo.FastReductionAlgToolFactory import toolfactory
 # from a scenario string
 from TrigHLTJetHypo.scenario_ht import scenario_ht
 from TrigHLTJetHypo.scenario_dipz import scenario_dipz
+from TrigHLTJetHypo.scenario_hitz import scenario_hitz
 from TrigHLTJetHypo.scenario_htdipz import scenario_htdipz
 from TrigHLTJetHypo.scenario_mult import scenario_mult
 from TrigHLTJetHypo.scenario_dijet import scenario_dijet
@@ -152,7 +153,22 @@ def process_dipz(scenario, chainPartInd):
     # build the helper config AlgTools
     helperconfigobjs = [buildHypoHelperConfigTool(params) for params in
                         helper_params]
-                           
+
+    return helperconfigobjs
+
+
+def process_hitz(scenario, chainPartInd):
+    """Obtain the paramters needed to build an AlgTool
+    to initialise a jet hypo HelperAlgTool"""
+
+    # obtain a list of parameter objects that will be used
+    # to build a helper config AlgTools
+    helper_params = scenario_hitz(scenario, chainPartInd)
+
+    # build the helper config AlgTools
+    helperconfigobjs = [buildHypoHelperConfigTool(params) for params in
+                        helper_params]
+
     return helperconfigobjs
 
 def process_ht(scenario, chainPartInd):
@@ -254,6 +270,7 @@ def process_nonsimple(scenario, chainPartInd):
 
     router = {
         'Z': process_dipz,
+        'HZ': process_hitz,
         'HTZ': process_htdipz,
         'HT': process_ht,
         'MULT': process_mult,

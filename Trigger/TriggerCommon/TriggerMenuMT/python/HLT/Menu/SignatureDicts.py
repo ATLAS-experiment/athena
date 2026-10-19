@@ -356,6 +356,14 @@ JetChainParts = {
        'preselZ142XX5c20',
        'preselZ134XX5c20',
        'preselZ124XX5c20',
+       #HitZ preselection
+       'preselHZ87MAXMULT30iXX4i20',
+       'preselHZ99MAXMULT30iXX4i20',
+       'preselHZ118MAXMULT30iXX4i20',
+       'preselHZ99MAXMULT30iXX2c20XX2c20',
+       'preselHZ145MAXMULT20iXX6i20',
+       'preselHZ167MAXMULT20iXX6i20',
+       'preselHZ196MAXMULT20iXX6i20',
        'preselVETOMULT11a10',
        'preselVETOMULT11a15'
      ],

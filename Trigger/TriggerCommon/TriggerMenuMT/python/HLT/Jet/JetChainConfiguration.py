@@ -12,6 +12,7 @@ from .JetRecoSequencesConfig import JetRecoDataDeps
 from .JetMenuSequencesConfig import (
     jetCaloHypoMenuSequenceGenCfg,
     jetRoITrackJetTagHypoMenuSequenceGenCfg,
+    jetRoIHitZHypoMenuSequenceGenCfg,
     jetFSTrackingHypoMenuSequenceGenCfg,
     jetCaloRecoMenuSequenceGenCfg, 
     jetCaloPreselMenuSequenceGenCfg,
@@ -141,7 +142,10 @@ class JetChainConfiguration(ChainConfigurationBase):
                 preselJetDef, jetPreselStep = self.getJetCaloPreselChainStep(flags)
                 chainSteps.append( jetPreselStep )
 
-                if re.match(r'.*((b|bg|bgtwo)\d\d)|.*Z|.*gntau|.*uht', self.trkpresel):
+                if JetPresel.hasHitZPresel(self.trkpresel):
+                    # HitZ reads only hits, so it takes the RoI FTF step's place and cuts before any tracking
+                    roitrkPreselStep = self.getJetRoIHitZPreselChainStep(flags, preselJetDef)
+                elif JetPresel.hasRoITrackingPresel(self.trkpresel):
                     # Preselection with super-RoI tracking for b-tagging, tau-tagging or pileup tagging
                     roitrkPreselStep = self.getJetRoITrackJetTagPreselChainStep(flags, preselJetDef)
                 else:
@@ -234,6 +238,17 @@ class JetChainConfiguration(ChainConfigurationBase):
         jetStep = self.getStep(flags, stepName, [jetCaloPreselMenuSequenceGenCfg], **preselJetDefDict)
 
         return preselJetDef, jetStep
+
+    def getJetRoIHitZPreselChainStep(self, flags, preselJetDef):
+        if JetPresel.hasRoITrackingPresel(self.trkpresel):
+            raise RuntimeError(f'{self.chainName}: HitZ takes the RoI FTF preselection step, '
+                               'so it cannot be combined with a tracking-based preselection')
+        # the menu unit tests build the Run-4 menus without ITk geometry
+        if not flags.Detector.GeometryITk:
+            log.warning("%s: HitZ needs ITk geometry, leaving its step empty", self.chainName)
+            return self.getEmptyStep('RoIFTFEmptyStep')
+        stepName = "RoIHitZStep_jet_"+self.recoDict['jetDefStr']
+        return self.getStep(flags, stepName, [jetRoIHitZHypoMenuSequenceGenCfg], jetDef=preselJetDef)
 
     # From here, only return ChainStep, no passing around of data dependencies
     def getJetRoITrackJetTagHypoChainStep(self, flags, preselJetDef):

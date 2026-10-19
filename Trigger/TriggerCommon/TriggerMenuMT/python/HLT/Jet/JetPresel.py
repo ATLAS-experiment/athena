@@ -60,7 +60,21 @@ def roiPreselJetHypoToolFromDict(flags, mainChainDict):
     return _preselJetHypoToolFromDict(flags, mainChainDict,doTaggingSel=True)
 
 
-def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
+# HitZ runs in place of the super-RoI tracking step; its hypo sees only the HZ part
+def hitZPreselJetHypoToolFromDict(flags, mainChainDict):
+    return _preselJetHypoToolFromDict(flags, mainChainDict,doTaggingSel=True,doHitZSel=True)
+
+
+def hasHitZPresel(trkpresel):
+    return bool(re.match(r'.*HZ', trkpresel))
+
+
+def hasRoITrackingPresel(trkpresel):
+    """b-tagging, DIPZ, tau-tagging or pileup tagging, which need the super-RoI tracking"""
+    return bool(re.match(r'.*((b|bg|bgtwo)\d\d)|.*(?<!H)Z|.*gntau|.*uht', trkpresel))
+
+
+def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False, doHitZSel=False):
 
     preselChainDict = dict(mainChainDict)
     preselChainDict['chainParts']=[]
@@ -68,13 +82,18 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
 
     # Get from the last chainPart in order to avoid to specify preselection for every leg
     #TODO: add protection for cases where the preselection is not specified in the last chainPart
-    presel_matched = re.match(r'presel(?P<cut>(VETOMULT)?\d?\d?(Z[\d\D]+)?[jacf]\d?(HT)?[\d\D]+)', trkpresel)
+    presel_matched = re.match(r'presel(?P<cut>(VETOMULT)?\d?\d?(H?Z[\d\D]+)?[jacfi]\d?(HT)?[\d\D]+)', trkpresel)
     assert presel_matched is not None, "Impossible to match preselection pattern for self.trkpresel=\'{0}\'.".format(trkpresel)
     presel_cut_str = presel_matched.groupdict()['cut'] #This is the cut string you want to parse. For example 'presel2j50XXj40'
     
-    usingDIPZ = bool(re.match(r'.*Z', presel_cut_str)) # Need to determine if there's DIPZ leg anywhere to enforce central jets across all calopresel legs
-    if usingDIPZ:
-        findSel = re.finditer(r'(?P<nJet>\d?[jacf])(?P<ptcut>\d+)', presel_cut_str) 
+    # HitZ has to be tested first, the DIPZ pattern also matches HZ
+    usingHITZ = bool(re.match(r'.*HZ', presel_cut_str))
+    usingDIPZ = bool(re.match(r'.*Z', presel_cut_str)) and not usingHITZ # Need to determine if there's DIPZ leg anywhere to enforce central jets across all calopresel legs
+    # DIPZ needs every leg central (c, |eta|<2.4). HitZ counts its jets over the
+    # ITk acceptance (i, |eta|<4.0) on its own, so the other legs keep their eta
+    zRegion = 'i' if usingHITZ else 'c'
+    if usingDIPZ or usingHITZ:
+        findSel = re.finditer(r'(?P<nJet>\d?[jacfi])(?P<ptcut>\d+)', presel_cut_str)
         findAllJets=[]
         findAllPts=[]
         for match in findSel:
@@ -82,8 +101,10 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
             findAllJets.append('1'+nJ if len(nJ)==1 else nJ)
             findAllPts.append(int(match.group("ptcut")))
         nAllJets = sum(int(i[:-1]) for i in findAllJets)
-        nCentralJets = sum(int(i[:-1]) if 'c' in i else 0 for i in findAllJets)        
+        nCentralJets = sum(int(i[:-1]) if 'c' in i else 0 for i in findAllJets)
         ptCut = min(int(i) for i in findAllPts)
+        if usingHITZ:
+            nCentralJets = nAllJets
         assert nAllJets == nCentralJets, "Your preselection has a DIPZ part but not only central jets were required. This isn't currently supported. Please investigate."
 
     preselCommonJetParts = dict(JetChainParts_Default)
@@ -97,28 +118,32 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
 
         hasBjetSel = bool(re.match(r'.*(b|bg|bgtwo)\d\d', p))
         hasTauSel = bool(re.match(r'.*(gntau|uht1tau)\d\d', p))
-        hasDIPZsel = bool(re.match(r'.*Z', p))
+        hasHITZsel = bool(re.match(r'.*HZ', p))
+        hasDIPZsel = bool(re.match(r'.*Z', p)) and not hasHITZsel
+        hasZsel = hasDIPZsel or hasHITZsel
 
-        if hasDIPZsel and not doTaggingSel: continue # Skipping calopresel step when DIPZ is run
-        if usingDIPZ and not hasDIPZsel and not hasBjetSel and doTaggingSel: continue # Skipping roiftf step only when running the calo selection leg (and if in the DIPZ scenario)
+        if hasZsel and not doTaggingSel: continue # Skipping calopresel step when DIPZ or HitZ is run
+        if hasHITZsel != doHitZSel: continue # HitZ has its own step, which runs only the HitZ part
+        if (usingDIPZ or usingHITZ) and not hasZsel and not hasBjetSel and doTaggingSel: continue # Skipping roiftf step only when running the calo selection leg (and if in the DIPZ or HitZ scenario)
 
-        assert not ( (hasBjetSel or hasDIPZsel) and not doTaggingSel), "Your jet preselection has a b-jet or DIPZ part but a calo-only preselection was requested instead. This should not be possible. Please investigate."        
+        assert not ( (hasBjetSel or hasZsel) and not doTaggingSel), "Your jet preselection has a b-jet, DIPZ or HitZ part but a calo-only preselection was requested instead. This should not be possible. Please investigate."
 
         bmatches = r'(?P<btagger>(b|bg|bgtwo))(?P<bwp>\d\d)' if hasBjetSel else ""
         taumatches = r'(?P<tauid>(gntau|uht1tau))(?P<tauwp>\d\d)' if hasTauSel else ""
 
         pattern_to_test = r'(?P<veto>(VETOMULT))?' # veto flag #TODO veto pt as well
-        pattern_to_test += r'(?P<mult>\d*)?(?P<region>[jacf])' # jet multiplicity and region and ptlow
+        pattern_to_test += r'(?P<mult>\d*)?(?P<region>[jacfi])' # jet multiplicity and region and ptlow
         pattern_to_test += r'(?P<scenario>(HT))?(?P<cut>\d+)?' # scenario string # could be made more general
         pattern_to_test += bmatches
         pattern_to_test += taumatches
         pattern_to_test += r'emf(?P<emfc>\d+)' if hascalSel else ''
-        if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)(?P<dipzwp>\d+)?(?P<prefilt>(MAXMULT\d+[jacf]?)?)'
+        if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)(?P<dipzwp>\d+)?(?P<prefilt>(MAXMULT\d+[jacfi]?)?)'
+        if hasHITZsel: pattern_to_test = r'(?P<scenario>HZ)(?P<dipzwp>\d+)?(?P<prefilt>(MAXMULT\d+[jacfi]?)?)'
         matched = re.match(pattern_to_test, p)
         assert matched is not None, "Impossible to extract preselection cut for \'{0}\' substring. Please investigate.".format(p)
         cut_dict = matched.groupdict()
-        if hasDIPZsel: cut_dict['region'] = 'c'
-        if hasDIPZsel: cut_dict['cut'] = ptCut
+        if hasZsel: cut_dict['region'] = zRegion
+        if hasZsel: cut_dict['cut'] = ptCut
 
 
         # any missing keys k below need to have cut_dict[k] set to "".
@@ -147,13 +172,13 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False):
         etarange = etaRangeAbbrev[region]
         if veto:
             scenario = cut_dict['veto'][4:]
-            assert (not (scenario in ['HT','Z'])), "Veto preselection not yet supported for HT or Z scenarios. Please investigate."
+            assert (not (scenario in ['HT','Z','HZ'])), "Veto preselection not yet supported for HT, Z or HZ scenarios. Please investigate."
         if scenario == "HT":
             hyposcenario=f'HT{cut}XX{etarange}'
             threshold='0'
             chainPartName=f'j0_{hyposcenario}'
-        elif scenario == "Z":
-            hyposcenario=f'Z{dipzwp}XX{nCentralJets}c{cut}'
+        elif scenario in ("Z", "HZ"):
+            hyposcenario=f'{scenario}{dipzwp}XX{nCentralJets}{zRegion}{cut}'
             prefilt = cut_dict['prefilt']   
             if prefilt != '': prefilters.append(prefilt)
             threshold='0'
