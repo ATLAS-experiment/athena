@@ -82,8 +82,8 @@ def StandaloneMuonOutputCfg(flags):
                         exclude = ".-".join(exclude))]
 
     #add the segments to the AOD output
-    aod_items += ["xAOD::MuonSegmentContainer#MuonSegmentsFromR4"]
-    aod_items += ["xAOD::MuonSegmentAuxContainer#MuonSegmentsFromR4Aux.-localSegPars.-parentSegment.-localSegCov"]
+    aod_items += ["xAOD::MuonSegmentContainer#MsSegments"]
+    aod_items += ["xAOD::MuonSegmentAuxContainer#MsSegmentsAux.-localSegPars.-parentSegment.-localSegCov"]
 
     #add MS track and track particle containers to the ESD output
     for trk in ["MuonMsAtIpTrackParticles", "MuonMsTrackParticles","MuonSTACOTrackParticles"]:
