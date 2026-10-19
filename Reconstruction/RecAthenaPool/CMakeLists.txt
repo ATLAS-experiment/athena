@@ -7,8 +7,8 @@ atlas_subdir( RecAthenaPool )
 atlas_add_poolcnv_library( RecAthenaPoolPoolCnv
    src/*.h src/*.cxx
    FILES muonEvent/MuonSpShowerContainer.h muonEvent/MuonCaloEnergyContainer.h
-         muonEvent/MuonContainer.h src/MuonCaloEnergies.h
-   TYPES_WITH_NAMESPACE Rec::MuonSpShowerContainer Analysis::MuonContainer
+         src/MuonCaloEnergies.h
+   TYPES_WITH_NAMESPACE Rec::MuonSpShowerContainer
                         TPCnv::MuonCaloEnergies
    LINK_LIBRARIES AthenaPoolUtilities StoreGateLib AthenaPoolCnvSvcLib
                   GaudiKernel muonEvent RecTPCnv )
