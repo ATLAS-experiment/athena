@@ -10,8 +10,8 @@
  **   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
-#ifndef IDTPM2_CONFIGUREDVALUEUTILS_H
-#define IDTPM2_CONFIGUREDVALUEUTILS_H
+#ifndef TRIGIDR4MONITORING_CONFIGUREDVALUEUTILS_H
+#define TRIGIDR4MONITORING_CONFIGUREDVALUEUTILS_H
 
 #include <stdexcept>
 
@@ -77,6 +77,6 @@ const T& require_set( const T& t ) {
 template <typename... T>
 void require_set(const T&... args) {  (require_set<std::runtime_error>(args), ...); }
 
-#endif  // IDTPM2_CONFIGUREDVALUEUTILS_H
+#endif  // TRIGIDR4MONITORING_CONFIGUREDVALUEUTILS_H
 
 
