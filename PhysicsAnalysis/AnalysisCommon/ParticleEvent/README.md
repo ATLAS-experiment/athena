@@ -74,8 +74,6 @@ You may also be interested in:
 
    - ParticleJet
 
-   - CompositeParticle
-
    - Analysis::JetTag and Analysis::TagInfo
 
    - MissingET objects in MissingETEvent

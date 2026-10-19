@@ -20,12 +20,6 @@
   <class name="Neutrino_p2" />
 
 
-  <!-- CompositeParticle _p1 -->
-  <class name="CompositeParticleContainer_p1" id="6CFA134E-F669-435B-B20E-FA9EB2F51DCD" />
-  <class name="std::vector<CompositeParticle_p1>" />
-  <class name="CompositeParticle_p1" />
-
-
   <!-- ParticleShallowClone _p1 -->
   <class name="ParticleShallowCloneContainer_p1" id="EF004D41-FFCD-4E68-85D7-7F39186158E5" />
   <class name="std::vector<ParticleShallowClone_p1>" />

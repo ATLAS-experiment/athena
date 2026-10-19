@@ -21,10 +21,6 @@
 #include "ParticleEventTPCnv/Neutrino_p2.h"
 #include "ParticleEventTPCnv/NeutrinoContainer_p2.h"
 
-
-#include "ParticleEventTPCnv/CompositeParticle_p1.h"
-#include "ParticleEventTPCnv/CompositeParticleContainer_p1.h"
-
 #include "ParticleEventTPCnv/ParticleShallowClone_p1.h"
 #include "ParticleEventTPCnv/ParticleShallowCloneContainer_p1.h"
 

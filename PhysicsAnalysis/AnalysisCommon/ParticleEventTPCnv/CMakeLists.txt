@@ -21,16 +21,6 @@ atlas_add_dictionary( ParticleEventTPCnvDict
                       LINK_LIBRARIES ParticleEventTPCnv )
 
 # Tests in the package:
-atlas_add_test( CompositeParticleCnv_p1_test
-                SOURCES
-                test/CompositeParticleCnv_p1_test.cxx
-                LINK_LIBRARIES AthenaPoolCnvSvcLib GaudiKernel ParticleEvent ParticleEventTPCnv SGTools TestTools CxxUtils TruthUtils)
-
-atlas_add_test( CompositeParticleContainerCnv_p1_test
-                SOURCES
-                test/CompositeParticleContainerCnv_p1_test.cxx
-                LINK_LIBRARIES AthAllocators GaudiKernel ParticleEvent ParticleEventTPCnv SGTools TestTools CxxUtils TruthUtils)
-
 atlas_add_test( INav4MomToTrackParticleAssocsCnv_p1_test
                 SOURCES
                 test/INav4MomToTrackParticleAssocsCnv_p1_test.cxx
