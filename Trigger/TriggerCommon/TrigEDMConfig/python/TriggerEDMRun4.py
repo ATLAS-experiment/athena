@@ -147,8 +147,11 @@ TriggerHLTListRun4 = [
     ('xAOD::TrackParticleAuxContainer#HLT_MuonMSTrackParticles_FSPhII_mlbktAux.',   'BS ESD AODFULL', 'Muon'),
 
     # Tau
-    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersEM',                       'BS ESD AODFULL', 'Tau', [InViews('tauCaloEMViews')]),   
+    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersEM',                       'BS ESD AODFULL', 'Tau', [InViews('tauCaloEMMVAViews')]),   
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersEMAux.nCells',      'BS ESD AODFULL', 'Tau'),
+
+    ('xAOD::JetContainer#HLT_jet_seed',                                         '', 'Tau', [InViews('tauCaloLCMVAViews'), InViews('tauCaloEMMVAViews')]),
+    ('xAOD::JetAuxContainer#HLT_jet_seedAux.',                                  '', 'Tau'),
 
     ('xAOD::TrackParticleContainer#HLT_IDTrack_TauCoreEM_FTF',                  'BS ESD AODFULL', 'Tau', [InViews('tauFastTrackCoreEMViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauCoreEM_FTFAux.',           'BS ESD AODFULL', 'Tau'),
@@ -159,7 +162,7 @@ TriggerHLTListRun4 = [
     ('TrigRoiDescriptorCollection#HLT_Roi_TauCoreEM',                           'BS ESD AODFULL', 'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoEM',                            'BS ESD AODFULL', 'Tau'),
 
-    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloEMOnly',                   'BS ESD AODFULL', 'Tau', [InViews('tauCaloEMViews')]),
+    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloEMOnly',                   'BS ESD AODFULL', 'Tau', [InViews('tauCaloEMMVAViews')]),
     ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_CaloEMOnlyAux.',            'BS ESD AODFULL', 'Tau'),
 
     ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_EM',                           'BS ESD AODFULL', 'Tau', [InViews('precEMTauViews'), InViews('tauPrecisionReco_EMViews')]),
