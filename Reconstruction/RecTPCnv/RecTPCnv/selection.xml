@@ -9,17 +9,6 @@
   <class name="std::vector<DepositInCalo_p2>" />
   <class name="DepositInCalo_p2" />
 
-  <!-- egamma -->
-  <!-- Electron -->
-  <!-- Photon -->
-  <!-- relocated to egammaEventTPCnv -->   
-
-  <class name="MuonSpShower_p1" />
-  <class name="std::vector<MuonSpShower_p1*>" />
-  <class name="MuonSpShowerContainer_p1"    id="522A7143-856B-41E6-A3FA-AB97693010D8">
-    <field name="m_ownshowers" transient="true"/>
-  </class>
-
   <class name="CaloEnergyCnv_p2_register_streamer"/>
 
 </lcgdict>

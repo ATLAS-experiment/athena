@@ -7,7 +7,6 @@
 
 #include "RecTPCnv/MuonCaloEnergyContainerCnv_tlp1.h"
 #include "RecTPCnv/MuonCaloEnergyContainerCnv_p1.h"
-#include "RecTPCnv/MuonSpShowerContainerCnv_p1.h"
 
 DECLARE_TPCNV_FACTORY(MuonCaloEnergyContainerCnv_tlp1,
                       MuonCaloEnergyContainer,
@@ -17,10 +16,5 @@ DECLARE_TPCNV_FACTORY(MuonCaloEnergyContainerCnv_tlp1,
 DECLARE_TPCNV_FACTORY(MuonCaloEnergyContainerCnv_p1,
                       MuonCaloEnergyContainer,
                       MuonCaloEnergyContainer_p1,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(MuonSpShowerContainerCnv_p1,
-                      Rec::MuonSpShowerContainer,
-                      MuonSpShowerContainer_p1,
                       Athena::TPCnvVers::Current)
                       

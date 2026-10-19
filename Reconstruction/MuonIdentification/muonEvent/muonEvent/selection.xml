@@ -4,11 +4,6 @@
   <class name="std::vector<DepositInCalo>" />
   <class name="std::vector<DepositInCalo*>" />
 
-  <class name="Rec::MuonSpShowerContainer" id="64AE1E07-67EC-549C-DE00-A953259EBC9E" />
-  <class name="DataVector<Rec::MuonSpShower>" />
-  <class name="std::vector<Rec::MuonSpShower*>" />
-  <class name="Rec::MuonSpShower" />
-
   <class name="MuonCaloEnergyContainer" id="CADD1FF7-EEEC-5CCC-DEBA-CA5BB59EBC9E" />
   <class name="DataVector<CaloEnergy>" />
   <class name="std::vector<CaloEnergy*>" />

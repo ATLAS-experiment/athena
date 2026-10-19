@@ -2839,20 +2839,6 @@ def dump_TrackParticleAssocs (a, f):
     return dump_Assocs (a, f, PyAthena.Rec.TrackParticleContainer)
 
 
-def dump_MuonSpShower (m, f):
-    fprint (f, "%f %f %d %d %d %d %d %d %d" %
-            (m.eta(),
-             m.phi(),
-             m.numberOfTriggerHits(),
-             m.numberOfInnerHits(),
-             m.numberOfMiddleHits(),
-             m.numberOfOuterHits(),
-             m.numberOfInnerSegments(),
-             m.numberOfMiddleSegments(),
-             m.numberOfOuterSegments()))
-    return
-
-
 def dump_JetAssociationBase (a, f):
     fprint (f, a.name())
     return
@@ -4934,7 +4920,6 @@ dumpspecs = [
     ["TrigConf::Lvl1AODPrescaleConfigData",  dump_Lvl1AODPrescaleConfigData],
     ["TrackParticleTruthCollection",         dump_TrackParticleTruthCollection],
     ["DetailedTrackTruthCollection",         dump_DetailedTrackTruthCollection],
-    ["Rec::MuonSpShowerContainer",           dump_MuonSpShower],
     ["HLT::HLTResult",                       dump_HLTResult],
     ["HLT::HLTResultMT",                     dump_HLTResultMT],
     ["INav4MomAssocs",                       dump_INav4MomAssocs],
