@@ -190,7 +190,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
                                           'PhotonShowerShapeFudgeAlg' )
             config.addPrivateTool( 'showerShapeFudgeTool',
                                     'ElectronPhotonVariableCorrectionTool' )
-            if config.geometry() is LHCPeriod.Run2: 
+            if config.geometry() is LHCPeriod.Run2:
                 alg.showerShapeFudgeTool.ConfigFile = \
               'EGammaVariableCorrection/TUNE25/ElPhVariableNominalCorrection.conf'
             if config.geometry() is LHCPeriod.Run3:
@@ -277,7 +277,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
                 TestingOnlyWarning, filename='', lineno=0)
 
         if self.minPt > 0:
-                
+
             # Set up the the pt selection
             alg = config.createAlgorithm( 'CP::AsgSelectionAlg', 'PhotonPtCutAlg' )
             alg.selectionDecoration = 'selectPt' + postfix + ',as_bits'
@@ -297,7 +297,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
                     " full sim config for isolation corrections."
                     " This is only intended to be used for testing purposes.",
                     TestingOnlyWarning, filename='', lineno=0)
-            
+
             alg = config.createAlgorithm( 'CP::EgammaIsolationCorrectionAlg',
                                           'PhotonIsolationCorrectionAlg' )
             config.addPrivateTool( 'isolationCorrectionTool',
@@ -351,8 +351,9 @@ class PhotonWorkingPointSelectionConfig (ConfigBlock) :
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")
         self.addOption ('qualityWP', None, type=str,
-            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, `Loose`.",
-            meta={'choices':(['Tight','Medium','Loose'],1)})
+            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, `Loose`, `NoID`.",
+            expertMode=['NoID'],
+            meta={'choices':(['Tight','Medium','Loose','NoID'],1)})
         self.addOption ('isolationWP', None, type=str,
             info="the isolation WP to use. Supported isolation WPs: "
             "`FixedCutLoose`, `FixedCutTight`, `TightCaloOnly`, `NonIso`.",
@@ -399,6 +400,10 @@ class PhotonWorkingPointSelectionConfig (ConfigBlock) :
             quality = ROOT.egammaPID.PhotonMedium
         elif self.qualityWP == 'Loose' :
             quality = ROOT.egammaPID.PhotonLoose
+        elif self.qualityWP == 'NoID':
+            quality = None
+            if self.recomputeIsEM:
+                raise ValueError('NoID WP cannot be recomputed.')
         else :
             raise Exception (f'unknown photon quality working point "{self.qualityWP}" should be Tight, Medium or Loose')
 
@@ -426,8 +431,9 @@ class PhotonWorkingPointSelectionConfig (ConfigBlock) :
         else:
             # Select from Derivation Framework flags
             config.addPrivateTool( 'selectionTool', 'CP::AsgFlagSelectionTool' )
-            dfFlag = 'DFCommonPhotonsIsEM' + self.qualityWP
-            alg.selectionTool.selectionFlags = [ dfFlag ]
+            if quality is not None:
+                dfFlag = 'DFCommonPhotonsIsEM' + self.qualityWP
+                alg.selectionTool.selectionFlags = [ dfFlag ]
         alg.particles = config.readName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, self.selectionName)
 
@@ -496,8 +502,9 @@ class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
             info="a postfix to apply to decorations and algorithm names. "
             "Typically not needed here as `selectionName` is used internally.")
         self.addOption ('qualityWP', None, type=str,
-            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, `Loose`.",
-            meta={'choices':(['Tight','Medium','Loose'],1)})
+            info="the ID WP to use. Supported ID WPs: `Tight`, `Medium`, `Loose`, `NoID`.",
+            expertMode=['NoID'],
+            meta={'choices':(['Tight','Medium','Loose','NoID'],1)})
         self.addOption ('isolationWP', None, type=str,
             info="the isolation WP to use. Supported isolation WPs: "
             "`FixedCutLoose`, `FixedCutTight`, `TightCaloOnly`, `NonIso`.",
@@ -557,7 +564,7 @@ class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
 
         sfList = []
         # Set up the ID/reco photon efficiency correction algorithm:
-        if config.dataType() is not DataType.Data and not self.noEffSFForID:
+        if config.dataType() is not DataType.Data and self.qualityWP != 'NoID' and not self.noEffSFForID:
             alg = config.createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',
                                           'PhotonEfficiencyCorrectionAlgID' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
@@ -614,7 +621,7 @@ class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
             config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix)
 
-            
+
 @groupBlocks
 def PhotonWorkingPoint(seq):
     seq.append(PhotonWorkingPointSelectionConfig())
