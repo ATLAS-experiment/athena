@@ -30,7 +30,7 @@ atlas_add_test( ut_basicRead_test
 atlas_add_test( ut_basicxAODRead_test
                  SOURCES test/ut_basicxAODRead_test.cxx
                       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-                      LINK_LIBRARIES ${ROOT_LIBRARIES} POOLRootAccessLib xAODBase xAODEventInfo xAODRootAccess CxxUtils
+                      LINK_LIBRARIES ${ROOT_LIBRARIES} POOLRootAccessLib xAODBase xAODEventFormat xAODEventInfo xAODMetaData xAODRootAccess CxxUtils
                       POST_EXEC_SCRIPT noerror.sh )
 
 atlas_add_test( ut_basicAlg_test

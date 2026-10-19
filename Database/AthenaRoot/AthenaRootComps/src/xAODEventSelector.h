@@ -232,7 +232,7 @@ class ATLAS_NOT_THREAD_SAFE xAODEventSelector :
 
   bool m_fillEventInfo = false; //if true, will fill EventInfo from xAOD::EventInfo
 
-  bool m_readMetadataWithPool = false; //interacts with PoolSvc to create collections, needed by MetaDataSvc
+  bool m_readMetadataWithPool = false; //metadata read by MetaDataSvc via AthenaPoolCnvSvc instead of TEvent
 
   bool m_printPerfStats = false; //should we monitor the touched input branches?
 
