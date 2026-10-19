@@ -16,9 +16,6 @@
 
 #include "LArByteStream/LArRodBlockStructure.h"
 #include "LArByteStream/LArRodBlockTransparentV0.h"
-#include "LArByteStream/LArRodBlockCalibrationV0.h"
-#include "LArByteStream/LArRodBlockPhysicsV0.h"
-#include "LArByteStream/LArRodBlockPhysicsV3.h"
 #include "LArByteStream/LArRodBlockPhysicsV5.h"
 #include "LArByteStream/LArRodBlockPhysicsV6.h"
 #include "GaudiKernel/MsgStream.h"
@@ -234,11 +231,6 @@ LArRawDataContByteStreamTool::makeRodBlockStructure() const
     return std::make_unique<LArRodBlockTransparentV0<LArRodBlockHeaderTransparentV0> >(this->msgSvc().get());
     break;
 
-  case 7: //Calibration mode
-    ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockCalibration (#7)" );
-    return std::make_unique<LArRodBlockCalibrationV0<LArRodBlockHeaderCalibrationV0> >(this->msgSvc().get());
-    break;
-
   case 4: //Physics assembly mode
     if ( m_RodBlockVersion == 10 ){
       ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockPhysics (#5)" );
@@ -249,18 +241,14 @@ LArRawDataContByteStreamTool::makeRodBlockStructure() const
       return std::make_unique<LArRodBlockPhysicsV6>(this->msgSvc().get());
     }
     else {
-      ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockPhysics (#4)" );
-      return std::make_unique<LArRodBlockPhysicsV0>(this->msgSvc().get());
+      ATH_MSG_ERROR ( "Unsupported Rod block version " << m_RodBlockVersion << " for physics assembly mode (#4)" );
+      std::abort();
     }
     break;
 
-  case 5: //Physics assembly mode
-    ATH_MSG_DEBUG ( "Set Rod Block Type to LArRodBlockPhysics (#5)" );
-    return std::make_unique<LArRodBlockPhysicsV3>(this->msgSvc().get());
-
   default:
-    ATH_MSG_WARNING ( "DSP runmode " << m_DSPRunMode << " is unknown. Using physics assembly mode (#4) by default" );
-    return std::make_unique<LArRodBlockPhysicsV0>(this->msgSvc().get());
+    ATH_MSG_ERROR ( "DSP runmode " << m_DSPRunMode << " is unknown." );
+    std::abort();
   }
 }
 
