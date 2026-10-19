@@ -31,7 +31,8 @@ class DipzMLPLCondition: public ICondition{
   DipzMLPLCondition(double wp, 
                 unsigned int capacity, // this is the number of jets to be considered in each combination 
                 const std::string &decName_z, 
-                const std::string &decName_negLogSigma2);
+                const std::string &decName_sigma,
+                bool sigmaIsStdDev = false);
 
   ~DipzMLPLCondition() override {}
 
@@ -45,9 +46,6 @@ class DipzMLPLCondition: public ICondition{
   
   double m_workingPoint;
   const unsigned int m_capacity;
-  const std::string m_decName_z;
-  const std::string m_decName_negLogSigma2;
-  
   DipzLikelihood m_likelihoodCalculator;           
   
 };

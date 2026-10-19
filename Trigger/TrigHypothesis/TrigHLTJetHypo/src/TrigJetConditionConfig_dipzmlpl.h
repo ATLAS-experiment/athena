@@ -39,8 +39,11 @@ public extends<AthAlgTool, ITrigJetConditionConfig> {
     m_capacity{this, "capacity", {}, "number of jets considered"};  
   Gaudi::Property<std::string> m_decName_z{
     this, "decName_z", {}, "dipz z accessor"};
-  Gaudi::Property<std::string> m_decName_negLogSigma2{
+  Gaudi::Property<std::string> m_decName_sigma{
     this, "decName_sigma", {}, "dipz sigma accessor"};
+  Gaudi::Property<bool> m_sigmaIsStdDev{
+    this, "sigmaIsStdDev", false,
+    "sigma decoration is the standard deviation rather than -2*log(sigma)"};
 
   StatusCode checkVals()  const;
 };

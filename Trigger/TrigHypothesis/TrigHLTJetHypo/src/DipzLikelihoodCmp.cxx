@@ -6,12 +6,15 @@
 #include "TrigHLTJetHypo/TrigHLTJetHypoUtils/HypoJetDefs.h"
 
 #include <cmath>
-#include <numeric>
+#include <limits>
+#include <vector>
 
 DipzLikelihood::DipzLikelihood(const std::string &decName_z,
-			       const std::string &decName_negLogSigma2):
+			       const std::string &decName_sigma,
+			       bool sigmaIsStdDev):
   m_decName_z(decName_z),
-  m_decName_negLogSigma2(decName_negLogSigma2){
+  m_decName_sigma(decName_sigma),
+  m_sigmaIsStdDev(sigmaIsStdDev){
 }
 
 double DipzLikelihood::checkedRatio(double num, double den) const {
@@ -39,78 +42,64 @@ double DipzLikelihood::getDipzMLPLDecValue(const pHypoJet &ip,
   return momentValue;
 }
 
-double DipzLikelihood::calcNum(double acml, const pHypoJet &ip) const {
-  
-  double sigma_squared =
-    std::exp(-1 * getDipzMLPLDecValue(ip, m_decName_negLogSigma2));
-  
-  double muoversigmasq =
-    checkedRatio( getDipzMLPLDecValue(ip, m_decName_z), sigma_squared);
-  
-  return acml + muoversigmasq;
+DipzLikelihood::Width DipzLikelihood::getWidth(const pHypoJet &ip) const {
+
+  const double dec = getDipzMLPLDecValue(ip, m_decName_sigma);
+
+  if (!m_sigmaIsStdDev) {
+    // decorated as the log precision -2*log(sigma)
+    return {std::exp(-1 * dec), dec};
+  }
+
+  // decorated as the standard deviation itself
+  if (!(std::isfinite(dec) && dec > 0.)) {
+    const double nan = std::numeric_limits<double>::quiet_NaN();
+    return {nan, nan};
+  }
+  return {dec * dec, -2. * std::log(dec)};
 }
-
-
-double DipzLikelihood::calcDenom(double acml, const pHypoJet &ip) const { 
-  double sigma_squared =
-    std::exp(-1 * getDipzMLPLDecValue(ip, m_decName_negLogSigma2));
-
-  double oneoversigmasq = checkedRatio(1, sigma_squared);
-  
-  return acml + oneoversigmasq;
-}
-
-double DipzLikelihood::calcLogTerm(double acml,
-				   const pHypoJet &ip,
-				   double zhat) const {
-
-  double dipz_mu = getDipzMLPLDecValue(ip, m_decName_z);
-
-  double dipz_negLogSigmaSq =
-    getDipzMLPLDecValue(ip, m_decName_negLogSigma2);
-
-  double sigma_squared = std::exp(-1 * dipz_negLogSigmaSq); 
-  
-  double logterm =
-    -0.5 * std::log(2.0 * M_PI)
-    + 0.5 * dipz_negLogSigmaSq
-    - checkedRatio(std::pow(zhat - dipz_mu, 2), (2.0 * sigma_squared) );
-  
-  return acml + logterm;
-
-}
-
 
 double DipzLikelihood::operator()(const HypoJetVector& ips) const {
-  
-  auto zhat_num = std::accumulate(ips.begin(),
-			      ips.end(),
-			      0.0,
-			      [this](double sum, const pHypoJet& jp) {
-				return this->calcNum(sum, jp);});
-  
-  auto zhat_den = std::accumulate(ips.begin(),
-				  ips.end(),
-				  0.0,
-				  [this](double sum, const pHypoJet& jp) {
-				    return this->calcDenom(sum, jp);});
-  
-  auto zhat = checkedRatio(zhat_num, zhat_den);
-  
-  auto logproduct =
-    std::accumulate(ips.begin(), 
-		    ips.end(), 
-		    0.0, 
-		    [&zhat,this](double sum, const pHypoJet& jp) {
-		      return this->calcLogTerm(sum, jp, zhat);});
-  
+
+  // decorations are read once per jet: string-keyed lookups dominate the hypo
+  std::vector<double> mu;
+  std::vector<Width> w;
+  mu.reserve(ips.size());
+  w.reserve(ips.size());
+  for (const auto& jp : ips) {
+    w.push_back(getWidth(jp));
+    // a NaN likelihood would raise FPE INVALID in the cut comparison
+    if (std::isnan(w.back().sigma2)) {
+      return -std::numeric_limits<double>::infinity();
+    }
+    mu.push_back(getDipzMLPLDecValue(jp, m_decName_z));
+  }
+
+  double zhat_num{0.};
+  double zhat_den{0.};
+  for (std::size_t i = 0; i != mu.size(); ++i) {
+    zhat_num += checkedRatio(mu[i], w[i].sigma2);
+    zhat_den += checkedRatio(1, w[i].sigma2);
+  }
+
+  const double zhat = checkedRatio(zhat_num, zhat_den);
+
+  double logproduct{0.};
+  for (std::size_t i = 0; i != mu.size(); ++i) {
+    logproduct +=
+      -0.5 * std::log(2.0 * M_PI)
+      + 0.5 * w[i].negLogSigma2
+      - checkedRatio(std::pow(zhat - mu[i], 2), (2.0 * w[i].sigma2));
+  }
+
   return logproduct;
 }
 
 
 DipzLikelihoodCmp::DipzLikelihoodCmp(const std::string &decName_z,
-				     const std::string &decName_negLogSigma2):
-  m_likelihoodCalculator(decName_z, decName_negLogSigma2) {
+				     const std::string &decName_sigma,
+				     bool sigmaIsStdDev):
+  m_likelihoodCalculator(decName_z, decName_sigma, sigmaIsStdDev) {
 }
 
 bool DipzLikelihoodCmp::operator()(const HypoJetVector& l,

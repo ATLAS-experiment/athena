@@ -31,7 +31,7 @@ StatusCode TrigJetConditionConfig_htdipz::initialize() {
 Condition TrigJetConditionConfig_htdipz::getCondition() const {
   auto a2d = ArgStrToDouble();
 
-  DipzLikelihoodCmp mlplComp(m_decName_z, m_decName_negLogSigma2);  
+  DipzLikelihoodCmp mlplComp(m_decName_z, m_decName_sigma, m_sigmaIsStdDev);
   std::unique_ptr<HTConditionFastReduction> HTcond = std::make_unique<HTConditionFastReduction>(a2d(m_min), a2d(m_max));
   return std::make_unique<MaxCombinationCondition<DipzLikelihoodCmp>>(a2d(m_capacity), std::move(HTcond), mlplComp);
 
