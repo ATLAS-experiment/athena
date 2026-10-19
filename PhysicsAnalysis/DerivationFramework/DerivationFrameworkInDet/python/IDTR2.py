@@ -92,17 +92,21 @@ def IDTR2Cfg(flags):
 
     if flags.Derivation.InDet.doTrackSystematics:
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
+        # Standard and LRT track efficiency variations applied together
+        SystTrackParticleContainer = (
+            TrackParticleContainer
+            + "_TRK_EFF_LOOSE_COMBINED_TRK_EFF_LARGED0_GLOBAL__1down")
         acc.merge(TrackSystematicsAlgCfg(
             flags,
             InputTrackContainer=TrackParticleContainer,
-            OutputTrackContainer=(
-                TrackParticleContainer+"_TRK_EFF_LARGED0_GLOBAL__1down")))
+            OutputTrackContainer=SystTrackParticleContainer,
+            SystematicVariationSTD="TRK_EFF_LOOSE_COMBINED",
+            SystematicVariationLRT="TRK_EFF_LARGED0_GLOBAL"))
 
         V0FinderToolSyst = acc.popToolsAndMerge(IDTR2_V0FinderToolCfg(
             flags,
             name="IDTR2_V0FinderTool_Syst",
-            TrackParticleCollection=(
-                TrackParticleContainer+"_TRK_EFF_LARGED0_GLOBAL__1down"),
+            TrackParticleCollection=SystTrackParticleContainer,
             V0ContainerName=IDTR2V0ContainerName + "Syst",
             KshortContainerName=IDTR2KshortContainerName + "Syst",
             LambdaContainerName=IDTR2LambdaContainerName + "Syst",

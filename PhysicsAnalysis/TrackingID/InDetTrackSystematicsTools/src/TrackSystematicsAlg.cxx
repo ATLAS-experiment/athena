@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/ServiceHandle.h"
@@ -21,12 +21,26 @@ namespace InDet {
     ATH_CHECK(m_trackFilterToolLRT.retrieve());
     ATH_CHECK(m_trackFilterToolSTD.retrieve());
 
-    CP::SystematicSet systSetLRT = {  
-      CP::SystematicVariation("TRK_EFF_LARGED0_GLOBAL")
+    if (m_systematicVariationSTD.value().empty() && m_systematicVariationLRT.value().empty()) {
+      ATH_MSG_ERROR("No track filter systematic configured (SystematicVariationSTD, SystematicVariationLRT)");
+      return StatusCode::FAILURE;
+    }
+
+    // The tools silently ignore unknown systematics, so reject them here
+    auto makeSet = [this](const std::string& name, const CP::ISystematicsTool& tool,
+                          const char* type, CP::SystematicSet& systSet) -> StatusCode {
+      if (name.empty()) return StatusCode::SUCCESS;
+      const CP::SystematicVariation var(name);
+      if (!tool.isAffectedBySystematic(var)) {
+        ATH_MSG_ERROR("Systematic '" << name << "' is not known to the " << type << " track filter tool");
+        return StatusCode::FAILURE;
+      }
+      systSet.insert(var);
+      return StatusCode::SUCCESS;
     };
-    CP::SystematicSet systSetSTD = {  
-      CP::SystematicVariation("TRK_EFF_LOOSE_COMBINED"),
-    };
+    CP::SystematicSet systSetSTD, systSetLRT;
+    ATH_CHECK(makeSet(m_systematicVariationSTD, *m_trackFilterToolSTD, "STD", systSetSTD));
+    ATH_CHECK(makeSet(m_systematicVariationLRT, *m_trackFilterToolLRT, "LRT", systSetLRT));
 
     ATH_CHECK(m_trackFilterToolLRT->applySystematicVariation(systSetLRT));
     ATH_CHECK(m_trackFilterToolSTD->applySystematicVariation(systSetSTD));

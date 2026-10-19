@@ -404,12 +404,15 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
     
     if flags.Input.isMC and flags.Derivation.LLP.doTrackSystematics:
         from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import TrackSystematicsAlgCfg
+        # Variation also applies TRK_EFF_LOOSE_COMBINED to standard tracks (suffix kept for DAOD compatibility)
         TrackSystSuffix = "_TRK_EFF_LARGED0_GLOBAL__1down"
         acc.merge(TrackSystematicsAlgCfg(
             flags,
             name=f"InDetTrackSystematicsAlg{TrackSystSuffix}",
             InputTrackContainer  = MergedTrackCollection,
-            OutputTrackContainer = f"{MergedTrackCollection}{TrackSystSuffix}"))
+            OutputTrackContainer = f"{MergedTrackCollection}{TrackSystSuffix}",
+            SystematicVariationSTD = "TRK_EFF_LOOSE_COMBINED",
+            SystematicVariationLRT = "TRK_EFF_LARGED0_GLOBAL"))
         acc.merge(VrtSecInclusiveCfg(flags,
                                      name = f"VrtSecInclusive{TrackSystSuffix}",
                                      AugmentingVersionString  = TrackSystSuffix,
@@ -422,7 +425,9 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
             flags,
             name=f"InDetTrackSystematicsAlg{TrackSystSuffixShortLifetime}",
             InputTrackContainer  = MergedTrackCollection,
-            OutputTrackContainer = f"{MergedTrackCollection}{TrackSystSuffixShortLifetime}"))
+            OutputTrackContainer = f"{MergedTrackCollection}{TrackSystSuffixShortLifetime}",
+            SystematicVariationSTD = "TRK_EFF_LOOSE_COMBINED",
+            SystematicVariationLRT = "TRK_EFF_LARGED0_GLOBAL"))
         acc.merge(VrtSecInclusiveCfg(flags,
                                      name = f"VrtSecInclusive{TrackSystSuffixShortLifetime}",
                                      AugmentingVersionString  = TrackSystSuffixShortLifetime,

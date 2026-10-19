@@ -50,7 +50,8 @@ atlas_add_executable( graph_to_function
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 if( NOT XAOD_STANDALONE )
-   atlas_install_scripts( test/test_TrackSmearingAlg.py test/test_JetTrackFilteringAlg.py )
+   atlas_install_scripts( test/test_TrackSmearingAlg.py test/test_JetTrackFilteringAlg.py
+      test/test_TrackSystematicsAlg.py )
 
    atlas_add_test( TrackSmearingAlg
       SCRIPT test_TrackSmearingAlg.py
@@ -67,6 +68,18 @@ if( NOT XAOD_STANDALONE )
    atlas_add_test( JetTrackFilteringAlg
       SCRIPT test_JetTrackFilteringAlg.py
       POST_EXEC_SCRIPT noerror.sh
+      PRIVATE_WORKING_DIRECTORY
+      PROPERTIES TIMEOUT 300 )
+
+   atlas_add_test( TrackSystematicsAlg
+      SCRIPT test_TrackSystematicsAlg.py
+      POST_EXEC_SCRIPT noerror.sh
+      PRIVATE_WORKING_DIRECTORY
+      PROPERTIES TIMEOUT 300 )
+
+   atlas_add_test( TrackSystematicsAlgUnknownSyst
+      SCRIPT test_TrackSystematicsAlg.py --unknown-syst
+      POST_EXEC_SCRIPT nopost.sh
       PRIVATE_WORKING_DIRECTORY
       PROPERTIES TIMEOUT 300 )
 endif()
