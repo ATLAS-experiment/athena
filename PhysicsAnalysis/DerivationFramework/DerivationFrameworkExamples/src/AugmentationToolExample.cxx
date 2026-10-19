@@ -74,11 +74,9 @@ namespace DerivationFramework {
 
     // Write decision to SG for access by downstream algs
     SG::WriteHandle<std::vector<float> > decision(m_decisionKey, ctx);
-    if (!decision.isValid()) {
+    if (decision.record(std::move(track_z0_PV)).isFailure()) {
       ATH_MSG_ERROR("Tool is attempting to write StoreGate keys which already exists. Please use a different key");
       return StatusCode::FAILURE;
-    } else {
-      decision = std::move(track_z0_PV);
     }
 
     return StatusCode::SUCCESS;

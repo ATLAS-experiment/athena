@@ -17,6 +17,7 @@
 // DerivationFramework includes
 #include "DerivationFrameworkInterfaces/ISkimmingTool.h"
 #include "xAODMuon/MuonContainer.h"
+#include "StoreGate/ReadHandleKey.h"
 
 namespace DerivationFramework {
 
@@ -34,13 +35,14 @@ namespace DerivationFramework {
     using base_class::base_class;
 
     /** Athena algtool's Hooks */
+    virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
     
     /** Check that the current event passes this filter */
     virtual bool eventPassesFilter(const EventContext& ctx) const override;
     
   private:
-    Gaudi::Property<std::string> m_muonSGKey
+    SG::ReadHandleKey<xAOD::MuonContainer> m_muonSGKey
       {this, "MuonContainerKey", "Muons", "Key for muon container"};
 
     Gaudi::Property<unsigned int> m_nMuons

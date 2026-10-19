@@ -11,8 +11,16 @@
 // which only passes events with N combined muons passing a pt cut of M
 
 #include "SkimmingToolExample.h"
+#include "StoreGate/ReadHandle.h"
 #include <vector>
 #include <string>
+
+
+StatusCode DerivationFramework::SkimmingToolExample::initialize()
+{
+  ATH_CHECK(m_muonSGKey.initialize());
+  return StatusCode::SUCCESS;
+}
 
 
 StatusCode DerivationFramework::SkimmingToolExample::finalize()
@@ -23,15 +31,14 @@ StatusCode DerivationFramework::SkimmingToolExample::finalize()
 
 
 // The filter itself
-bool DerivationFramework::SkimmingToolExample::eventPassesFilter(const EventContext& /*ctx*/) const
+bool DerivationFramework::SkimmingToolExample::eventPassesFilter(const EventContext& ctx) const
 {
   ++m_ntot;
 
   // Retrieve muon container
-  const xAOD::MuonContainer* muons{nullptr};
-  StatusCode sc = evtStore()->retrieve(muons,m_muonSGKey);
-  if (sc.isFailure()) {
-    ATH_MSG_FATAL("No muon collection with name " << m_muonSGKey << " found in StoreGate!");
+  SG::ReadHandle<xAOD::MuonContainer> muons(m_muonSGKey, ctx);
+  if (!muons.isValid()) {
+    ATH_MSG_FATAL("No muon collection with name " << m_muonSGKey.key() << " found in StoreGate!");
     return false;
   }
      

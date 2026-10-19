@@ -10,7 +10,7 @@ from AthenaCommon.CFElements import seqAND
 def TEST6SkimmingToolCfg(flags):
     """Configure the example skimming tool"""
     acc = ComponentAccumulator()
-    acc.addPublicTool(CompFactory.DerivationFramework.SkimmingToolExample(name                    = "TEST1SkimmingTool",
+    acc.addPublicTool(CompFactory.DerivationFramework.SkimmingToolExample(name                    = "TEST6SkimmingTool",
                                                                           MuonContainerKey        = "Muons",
                                                                           NumberOfMuons           = 1,
                                                                           MuonPtCut               = 1000.0),

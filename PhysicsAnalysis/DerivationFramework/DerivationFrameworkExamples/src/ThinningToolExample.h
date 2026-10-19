@@ -44,7 +44,7 @@ namespace DerivationFramework {
       { this, "StreamName", "", "Name of the stream being thinned" };
 
     Gaudi::Property<double> m_trackPtCut
-      { this, "TrackPtCut", 20.0, "Track p_T cut in GeV" };
+      { this, "TrackPtCut", 20000.0, "Track p_T cut in MeV" };
 
     SG::ThinningHandleKey<xAOD::TrackParticleContainer> m_inDetSGKey
       { this, "InDetTrackParticlesKey", "InDetTrackParticles", "Key for track particle container" };
