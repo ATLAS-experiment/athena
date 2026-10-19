@@ -56,7 +56,7 @@ Reco_tf.py \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy; \
-               flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GbtsFtf; \
+               flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.Gbts; \
                flags.Tracking.doPixelDigitalClustering=True; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=True;" \
     --inputRDOFile ${inputRDO} \

@@ -8,33 +8,6 @@ from ActsInterop import UnitConstants as ActsUnits
 import AthenaCommon.SystemOfUnits as GaudiUnits
 
 
-def ActsGbtsFtfSeedingTrigToolCfg(flags,name: str = "GbtsFtfActsSeedingTool", **kwargs) -> ComponentAccumulator:
-  acc = ComponentAccumulator()
-
-  if "layerNumberTool" not in kwargs:
-    from TrigFastTrackFinder.TrigFastTrackFinderConfig import (
-      ITkTrigL2LayerNumberToolCfg)
-    kwargs.setdefault("layerNumberTool", acc.popToolsAndMerge(
-      ITkTrigL2LayerNumberToolCfg(
-        flags, UseNewLayerScheme=True,
-        dumpGbtsGeometry=flags.Acts.Gbts.dumpGbtsGeometry,
-        geometryDump=flags.Acts.Gbts.geometryDump)))
-  
-  kwargs.setdefault("DoPhiFiltering", False) #no phi-filtering for full-scan tracking
-  kwargs.setdefault("UseBeamTilt", False)
-  kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPTSeed)
-  kwargs.setdefault("MaxGraphEdges", 3000000)
-  kwargs.setdefault("AddTriplets", False)
-
-  isLargeD0 = flags.Tracking.ActiveConfig.isLargeD0
-  kwargs.setdefault("ConnectionFileName",
-                    "binTables_ITK_RUN4_LRT.txt" if isLargeD0 else
-                    "binTables_ITK_RUN4.txt")
-
-  acc.setPrivateTools(CompFactory.GbtsFtfActsSeedingTool(name, **kwargs))
-  return acc
-
-
 # ACTS tools
 def ActsPixelGridTripletSeedingToolCfg(
     flags, name: str = "ActsPixelGridTripletSeedingTool",
@@ -454,9 +427,6 @@ def ActsPixelSeedingAlgCfg(flags,
         if flags.Tracking.ActiveConfig.PixelSeedingStrategy is SeedingStrategy.Gbts:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
               ActsPixelGbtsSeedingToolCfg(flags)))
-        elif flags.Tracking.ActiveConfig.PixelSeedingStrategy is SeedingStrategy.GbtsFtf:
-            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
-              ActsGbtsFtfSeedingTrigToolCfg(flags)))
         elif flags.Tracking.ActiveConfig.PixelSeedingStrategy is SeedingStrategy.Gnn:
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
               ActsGnnSeedingToolCfg(flags)))
@@ -512,8 +482,6 @@ def ActsStripSeedingAlgCfg(flags,
             kwargs.setdefault('SeedTool', acc.popToolsAndMerge(
               ActsLargeRadiusStripGbtsSeedingToolCfg(flags) if flags.Tracking.ActiveConfig.isLargeD0
               else ActsStripGbtsSeedingToolCfg(flags)))
-        elif flags.Tracking.ActiveConfig.StripSeedingStrategy is SeedingStrategy.GbtsFtf:
-            kwargs.setdefault('SeedTool', acc.popToolsAndMerge(ActsLargeRadiusStripGbtsSeedingToolCfg(flags)))
         elif flags.Tracking.ActiveConfig.StripSeedingStrategy is SeedingStrategy.GridTriplet:
             if flags.Tracking.ActiveConfig.isLargeD0:
                 kwargs.setdefault('SeedTool', acc.popToolsAndMerge(

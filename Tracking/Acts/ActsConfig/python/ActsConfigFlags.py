@@ -6,7 +6,6 @@ from AthenaConfiguration.Enums import FlagEnum, LHCPeriod
 class SeedingStrategy(FlagEnum):
     GridTriplet = "GridTriplet"
     Gbts = "Gbts"
-    GbtsFtf = "GbtsFtf"
     F150 = "F150"
     Gnn = "Gnn"
 
