@@ -140,7 +140,7 @@ namespace CP
 
     /// returns: the systematics joined into a single string.
     ///   Caches the name if not already done
-    std::string name() const;
+    const std::string& name() const;
 
     /// returns: hash value for the joined string.
     ///   Caches the hash if not already done

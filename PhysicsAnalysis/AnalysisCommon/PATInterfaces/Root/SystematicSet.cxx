@@ -274,7 +274,7 @@ namespace CP
 
 
   // Return the cached joined systematic name
-  std::string SystematicSet::name() const
+  const std::string& SystematicSet::name() const
   {
     if(!m_joinedName.isValid())
     {
