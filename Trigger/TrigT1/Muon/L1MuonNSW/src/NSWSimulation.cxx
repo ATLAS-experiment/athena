@@ -68,22 +68,23 @@ namespace L1Muon {
     cand1->setFiberID(0);
     cand1->setSegment(250, 120, 5, 3);
 
-    uint16_t eta0  = cand0->segEtaIndex();
-    uint16_t phi0  = cand0->segPhiIndex();
-    uint8_t  dth0  = cand0->segDeltaThetaIndex();
-    uint8_t  qual0 = cand0->segQuality();
+    if (msgLvl(MSG::DEBUG)) {
+      uint16_t eta0  = cand0->segEtaIndex();
+      uint16_t phi0  = cand0->segPhiIndex();
+      uint8_t  dth0  = cand0->segDeltaThetaIndex();
+      uint8_t  qual0 = cand0->segQuality();
 
-    uint16_t eta1  = cand1->segEtaIndex();
-    uint16_t phi1  = cand1->segPhiIndex();
-    uint8_t  dth1  = cand1->segDeltaThetaIndex();
-    uint8_t  qual1 = cand1->segQuality();
+      uint16_t eta1  = cand1->segEtaIndex();
+      uint16_t phi1  = cand1->segPhiIndex();
+      uint8_t  dth1  = cand1->segDeltaThetaIndex();
+      uint8_t  qual1 = cand1->segQuality();
 
-    ATH_MSG_DEBUG("Verification check:"
-                  << "\n  Cand0 -> Eta: " << eta0 << ", Phi: " << phi0
-                  << ", DeltaTheta: " << static_cast<int>(dth0) << ", Quality: " << static_cast<int>(qual0)
-                  << "\n  Cand1 -> Eta: " << eta1 << ", Phi: " << phi1
-                  << ", DeltaTheta: " << static_cast<int>(dth1) << ", Quality: " << static_cast<int>(qual1));
-
+      ATH_MSG_DEBUG("Verification check:"
+		    << "\n  Cand0 -> Eta: " << eta0 << ", Phi: " << phi0
+		    << ", DeltaTheta: " << static_cast<int>(dth0) << ", Quality: " << static_cast<int>(qual0)
+		    << "\n  Cand1 -> Eta: " << eta1 << ", Phi: " << phi1
+		    << ", DeltaTheta: " << static_cast<int>(dth1) << ", Quality: " << static_cast<int>(qual1));
+    }
     ATH_MSG_DEBUG(*cand0);
     ATH_MSG_DEBUG(*cand1);
 
