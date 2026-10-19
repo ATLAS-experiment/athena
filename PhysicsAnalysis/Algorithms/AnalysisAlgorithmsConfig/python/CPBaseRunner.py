@@ -216,10 +216,29 @@ class CPBaseRunner(ABC):
                 f"No valid input files found in \"{path}\"! Please check the input file list.")
         return files
 
-    def setup(self):
+    def setupArguments(self):
+        """Apply the parser hooks and parse the command line arguments.
+
+        This must run exactly once per process (the parser hooks add
+        arguments, and adding them twice is an argparse error), and it
+        deliberately does not touch the flags or the configuration, so
+        that a runner can fork off the actual configuration into a child
+        process after this point without any ROOT dictionaries loaded.
+        """
         self.modifyParserArguments()
+        _ = self.args
+
+    def setupConfig(self):
+        """Initialize the flags and read the YAML configuration.
+
+        Requires setupArguments() to have been called.
+        """
         self.flags = self._defaultFlagsInitialization()
         self.config = self._readYamlConfig()
+
+    def setup(self):
+        self.setupArguments()
+        self.setupConfig()
 
     def printAvailableArguments(self):
         self.parser.description = 'CPRunScript available arguments'

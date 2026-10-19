@@ -53,10 +53,17 @@ class EventLoopCPRunScript(CPBaseRunner):
 
     # This functionality should not be in the runscript, instead should be put into PrintConfiguration alg.
     # This is a temporary solution to dump the full config until PrintConfiguration alg is completely ready.
-    def _dumpFullConfig(self):
-        from AnalysisAlgorithmsConfig.SaveConfigUtils import save_algs_from_sequence_ELjob, combine_tools_and_algorithms_ELjob
+    #
+    # The dump happens in two steps: the algorithm sequence is written out by
+    # the process that did the configuration (before the job is submitted), and
+    # the combination with the tool configuration written by the job happens
+    # after the job has finished.
+    _algSequenceFile = "_alg_sequence.json"
+
+    def _dumpAlgSequence(self):
+        from AnalysisAlgorithmsConfig.SaveConfigUtils import save_algs_from_sequence_ELjob
         import json
-        with(open("_alg_sequence.json", 'w', encoding='utf-8')) as seq_out_file:
+        with open(self._algSequenceFile, 'w', encoding='utf-8') as seq_out_file:
             output_dict = {}
             try:
                 save_algs_from_sequence_ELjob(self.algSeq, output_dict)
@@ -64,15 +71,20 @@ class EventLoopCPRunScript(CPBaseRunner):
             except Exception as e:
                 self.logger.warning(f'Dumping full config failed with: {e}')
                 self.logger.warning('Please also check if "PrintConfiguration" is enabled in the text config.')
+
+    def _combineFullConfig(self):
+        from AnalysisAlgorithmsConfig.SaveConfigUtils import combine_tools_and_algorithms_ELjob
         try:
-            combine_tools_and_algorithms_ELjob(combine_dictionaries=True, alg_file="_alg_sequence.json", output_file="full_config.json")
+            combine_tools_and_algorithms_ELjob(combine_dictionaries=True, alg_file=self._algSequenceFile, output_file="full_config.json")
             self.logger.info("Combining full config to full_config.json succeeded")
 
         except Exception as e:
             self.logger.warning(f'Combining full config failed with: {e}')
             self.logger.warning('Please also check if "PrintConfiguration" is enabled in the text config.')
         finally:
-            os.remove("_alg_sequence.json")
+            # the file may be missing if the configuration failed before writing it
+            if os.path.exists(self._algSequenceFile):
+                os.remove(self._algSequenceFile)
 
     def moveOutputFiles(self):
         from pathlib import Path
@@ -107,51 +119,39 @@ class EventLoopCPRunScript(CPBaseRunner):
             self.logger.info(f"renaming the hist-{self.outputName}.root to {self.outputName}.root")
             newHistFile.rename(currentDir / f"{self.outputName}.root")
 
-    def driverSubmit(self, driver, fork=True):
-        '''
-        Important if you want to run code after submitting the job, with external driver e.g., ExecDriver.
-        Assistant function to call driver submit. Move the submission to a child process to avoid the main process being terminated.
-        Directly calling external driver submission will not return controls to the main process, the main thread will be terminated.
-        The forking can be disabled, which also allows to debug it directly.
-        '''
-        name = self.args.work_dir if self.args.work_dir else 'workDir'
-        if not fork:
-            try:
-                driver.submit(self.job, name)
-            except Exception:
-                import traceback
-                traceback.print_exc()
-                self.logger.error('Job submission failed')
-            return
-
-        if (pid := os.fork()) == 0: # child process
-            try:
-                driver.submit(self.job, name)
-            except Exception:
-                import traceback
-                traceback.print_exc()
-                sys.stdout.flush()
-                sys.stderr.flush()
-                os._exit(1)
-            sys.stdout.flush()
-            sys.stderr.flush()
-            os._exit(0)
-        else:
-            _, status = os.waitpid(pid, 0) # parent waits for child process to finish
-            if os.waitstatus_to_exitcode(status) != 0:
-                self.logger.error(f'Job submission in child process failed with exit code {os.waitstatus_to_exitcode(status)}')
-            return
+    @property
+    def submitDir(self):
+        return self.args.work_dir if self.args.work_dir else 'workDir'
 
     def getExitCode(self):
+        '''
+        Exit code for the direct driver, where the job ran in this process.
+        For the exec driver the exit status of the worker process is used
+        instead, so that this process never has to load ROOT.
+        '''
         import ROOT
-        statusCode = ROOT.EL.Driver.retrieve(self.args.work_dir if self.args.work_dir else 'workDir')
+        statusCode = ROOT.EL.Driver.retrieve(self.submitDir)
         if statusCode:
             return 0
         return 1
 
-    def run(self):
-        self.setup()
-        # importing ROOT has a long upfront time, so we do it here
+    @staticmethod
+    def _flushOutput():
+        sys.stdout.flush()
+        sys.stderr.flush()
+
+    def configureAndSubmit(self):
+        '''
+        Do the full job configuration and submit the job.
+
+        Everything that loads ROOT (and with it the ROOT-python
+        dictionaries, which account for most of the configuration-time
+        memory) happens in here.  With the exec driver, driver.submit()
+        replaces the current process with the worker and never returns.
+        '''
+        self.setupConfig()
+        # importing ROOT has a long upfront time and high memory
+        # consumption, so we do it here
         import ROOT
         ROOT.xAOD.Init().ignore()
         self.readSamples()
@@ -179,13 +179,70 @@ class EventLoopCPRunScript(CPBaseRunner):
         if self.args.algorithm_memory_monitoring:
             self.job.options().setBool(ROOT.EL.Job.optAlgorithmMemoryMonitor, 1)
 
+        if self.args.dump_full_config:
+            self._dumpAlgSequence()
+
         driver = ROOT.EL.DirectDriver() if self.args.direct_driver else ROOT.EL.ExecDriver()
-        fork = not self.args.direct_driver
-        self.driverSubmit(driver, fork=fork)
+        # the exec driver replaces this process, so anything still sitting in
+        # the python output buffers would be lost without this flush
+        self._flushOutput()
+        driver.submit(self.job, self.submitDir)
+
+    def runInChildProcess(self):
+        '''
+        Run configureAndSubmit() in a forked child process and return the
+        exit code of the job.
+
+        The fork has to happen here, before anything imports ROOT or reads
+        the input file metadata through the flags.  The exec driver frees the
+        configuration-time memory by replacing the configuring process with
+        the worker, and that only helps if the process that stays behind to
+        wait for the job (this one) never loaded ROOT in the first place.
+        Forking after the configuration would just keep all that memory alive
+        in the waiting parent for the duration of the job.
+
+        The worker (eventloop_exec_worker) runs all job segments, retrieves
+        the output and exits non-zero on any failure, so its exit status is
+        the exit status of the job.
+        '''
+        self._flushOutput()
+        if (pid := os.fork()) == 0: # child process
+            try:
+                self.configureAndSubmit()
+                # the exec driver never returns from submit, so getting here
+                # means the process was not replaced
+                self.logger.error('Job submission returned without running the job')
+            except Exception:
+                import traceback
+                traceback.print_exc()
+                self.logger.error('Job configuration or submission failed')
+            self._flushOutput()
+            os._exit(1)
+
+        _, status = os.waitpid(pid, 0) # parent waits for the job to finish
+        exitCode = os.waitstatus_to_exitcode(status)
+        if exitCode != 0:
+            self.logger.error(f'Job in child process failed with exit code {exitCode}')
+            return 1
+        return 0
+
+    def run(self):
+        # only the argument parsing happens before the fork, see runInChildProcess()
+        self.setupArguments()
+
+        if self.args.direct_driver:
+            try:
+                self.configureAndSubmit()
+            except Exception:
+                import traceback
+                traceback.print_exc()
+                self.logger.error('Job submission failed')
+            exitCode = self.getExitCode()
+        else:
+            exitCode = self.runInChildProcess()
 
         if self.args.dump_full_config:
-            self._dumpFullConfig()
-        exitCode = self.getExitCode()
+            self._combineFullConfig()
 
         if self.args.work_dir is None: # move output if work_dir is not used
             self.moveOutputFiles()
