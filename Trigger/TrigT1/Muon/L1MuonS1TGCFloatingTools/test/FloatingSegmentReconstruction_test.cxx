@@ -4,36 +4,36 @@
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE TgcL0SegmentReconstructionTest
+#define BOOST_TEST_MODULE FloatingSegmentReconstructionTest
 
 #include <boost/test/unit_test.hpp>
 
-#include "TgcL0FloatingData.h"
-#include "TgcL0SegmentReconstruction.h"
+#include "FloatingData.h"
+#include "FloatingSegmentReconstruction.h"
 
 #include <cmath>
 
-BOOST_AUTO_TEST_SUITE(TgcL0SegmentReconstructionTest)
+BOOST_AUTO_TEST_SUITE(FloatingSegmentReconstructionTest)
 
 BOOST_AUTO_TEST_CASE(WrapsPhysicalDeltaThetaAcrossAtan2BranchCut) {
-  using namespace L1Muon::TgcL0Floating;
+  using namespace L1Muon::L1TGC;
 
-  const HitGroupKey key{103U, 1U, 0x2U};
-  StationCoincidenceContainer coincidences;
+  const FloatingHitGroupKey key{103U, 1U, 0x2U};
+  FloatingStationCoincidenceContainer coincidences;
 
-  coincidences.emplace_back(key, Station::M1, false, 1U, -1, 1U, 10U, 0x7U,
+  coincidences.emplace_back(key, FloatingStation::M1, false, 1U, -1, 1U, 10U, 0x7U,
                             3U, 3U, -1.50F, 0.20F, 1000.F, -10000.F);
-  coincidences.emplace_back(key, Station::M3, false, 1U, -1, 1U, 11U, 0x7U,
+  coincidences.emplace_back(key, FloatingStation::M3, false, 1U, -1, 1U, 11U, 0x7U,
                             3U, 3U, -1.52F, 0.20F, 900.F, -11000.F);
-  coincidences.emplace_back(key, Station::M1, true, 1U, -1, 1U, 20U, 0x7U,
+  coincidences.emplace_back(key, FloatingStation::M1, true, 1U, -1, 1U, 20U, 0x7U,
                             3U, 3U, -1.50F, 0.20F, 1000.F, -10000.F);
-  coincidences.emplace_back(key, Station::M3, true, 1U, -1, 1U, 21U, 0x7U,
+  coincidences.emplace_back(key, FloatingStation::M3, true, 1U, -1, 1U, 21U, 0x7U,
                             3U, 3U, -1.52F, 0.20F, 900.F, -11000.F);
 
   L1Muon::TgcSLCandidateContainer candidates;
   L1Muon::L1TGC::SegmentContainer segments;
-  SegmentStatistics statistics;
-  const SegmentReconstruction reconstruction;
+  FloatingSegmentStatistics statistics;
+  const FloatingSegmentReconstruction reconstruction;
 
   const StatusCode status =
       reconstruction.build(coincidences, candidates, statistics, &segments);

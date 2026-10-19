@@ -2,12 +2,11 @@
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TgcL0InnerCoincidence.h"
+#include "FloatingInnerCoincidence.h"
 
-namespace L1Muon {
-namespace TgcL0Floating {
+namespace L1Muon::L1TGC {
 
-void InnerCoincidence::apply(TgcSLCandidateContainer &candidates) const {
+void FloatingInnerCoincidence::apply(TgcSLCandidateContainer &candidates) const {
   for (TgcSLCandidate &candidate : candidates) {
     candidate.pt = candidate.preInnerCoincidencePt;
     candidate.threshold = candidate.preInnerCoincidenceThreshold;
@@ -15,5 +14,4 @@ void InnerCoincidence::apply(TgcSLCandidateContainer &candidates) const {
   }
 }
 
-}  // namespace TgcL0Floating
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC

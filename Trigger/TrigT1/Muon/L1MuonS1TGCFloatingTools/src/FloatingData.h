@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L1MUONS1TGCFLOATINGTOOLS_TGCL0FLOATINGDATA_H
-#define L1MUONS1TGCFLOATINGTOOLS_TGCL0FLOATINGDATA_H
+#ifndef L1MUONS1TGCFLOATINGTOOLS_FLOATINGDATA_H
+#define L1MUONS1TGCFLOATINGTOOLS_FLOATINGDATA_H
 
 #include <cstddef>
 #include <cstdint>
@@ -10,14 +10,13 @@
 #include <tuple>
 #include <vector>
 
-namespace L1Muon {
-namespace TgcL0Floating {
+namespace L1Muon::L1TGC {
 
-enum class Station : std::uint8_t { M1, M2, M3, Inner, Unknown, NumberOfStations };
+enum class FloatingStation : std::uint8_t { M1, M2, M3, Inner, Unknown, NumberOfStations };
 
 /// Event-local hardware processing key. Hits are routed before Station
 /// Coincidence, matching the validated Floating simulation flow.
-struct HitGroupKey {
+struct FloatingHitGroupKey {
   using Tuple = std::tuple<std::uint16_t, std::uint16_t, std::uint16_t>;
 
   std::uint16_t subDetectorId{0};
@@ -25,10 +24,10 @@ struct HitGroupKey {
   std::uint16_t bcTag{0};
 
   Tuple tie() const;
-  bool operator<(const HitGroupKey& other) const;
+  bool operator<(const FloatingHitGroupKey& other) const;
 };
 
-struct Hit {
+struct FloatingHit {
   std::uint16_t subDetectorId{0};
   std::uint16_t triggerSector{0};
   std::uint16_t detectorSector{0};
@@ -40,7 +39,7 @@ struct Hit {
   std::uint16_t stationPhi{0};
   std::uint8_t gasGap{0};
   std::uint16_t channel{0};
-  Station station{Station::Unknown};
+  FloatingStation station{FloatingStation::Unknown};
   bool isStrip{false};
   float eta{0.F};
   float phi{0.F};
@@ -48,10 +47,10 @@ struct Hit {
   float z{0.F};
 };
 
-using HitContainer = std::vector<Hit>;
-using HitGroups = std::map<HitGroupKey, HitContainer>;
+using FloatingHitContainer = std::vector<FloatingHit>;
+using FloatingHitGroups = std::map<FloatingHitGroupKey, FloatingHitContainer>;
 
-struct DecodeStatistics {
+struct FloatingDecodeStatistics {
   std::size_t nRawData{0};
   std::size_t nHits{0};
   std::size_t nWireHits{0};
@@ -64,8 +63,8 @@ struct DecodeStatistics {
   std::size_t nInnerHits{0};
 };
 
-struct StationCoincidence {
-  StationCoincidence(const HitGroupKey& key, Station station, bool isStrip,
+struct FloatingStationCoincidence {
+  FloatingStationCoincidence(const FloatingHitGroupKey& key, FloatingStation station, bool isStrip,
                      std::uint16_t detectorSector, std::int16_t stationEta,
                      std::uint16_t stationPhi, std::uint16_t channel,
                      std::uint8_t layerMask, std::uint8_t observedLayers,
@@ -86,8 +85,8 @@ struct StationCoincidence {
         r{r},
         z{z} {}
 
-  HitGroupKey key{};
-  Station station{Station::Unknown};
+  FloatingHitGroupKey key{};
+  FloatingStation station{FloatingStation::Unknown};
   bool isStrip{false};
   /// Representative Run-3/chamber provenance; not a matching requirement.
   std::uint16_t detectorSector{0};
@@ -103,9 +102,8 @@ struct StationCoincidence {
   float z{0.F};
 };
 
-using StationCoincidenceContainer = std::vector<StationCoincidence>;
+using FloatingStationCoincidenceContainer = std::vector<FloatingStationCoincidence>;
 
-}  // namespace TgcL0Floating
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC
 
 #endif

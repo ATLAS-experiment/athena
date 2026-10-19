@@ -1,7 +1,7 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "TgcL0OverlapClassification.h"
+#include "FloatingOverlapClassification.h"
 
 #include "FourMomUtils/xAODP4Helpers.h"
 
@@ -40,7 +40,7 @@ std::size_t countBits(std::uint8_t value) {
 bool isOverlapPair(
     const L1Muon::TgcSLCandidate& first,
     const L1Muon::TgcSLCandidate& second,
-    const L1Muon::TgcL0Floating::OverlapClassificationConfig& config) {
+    const L1Muon::L1TGC::FloatingOverlapClassificationConfig& config) {
   if (first.bcTag != second.bcTag ||
       first.subdetectorId != second.subdetectorId) {
     return false;
@@ -92,16 +92,15 @@ class DisjointSet {
 
 }  // namespace
 
-namespace L1Muon {
-namespace TgcL0Floating {
+namespace L1Muon::L1TGC {
 
-OverlapClassification::OverlapClassification(OverlapClassificationConfig config)
+FloatingOverlapClassification::FloatingOverlapClassification(FloatingOverlapClassificationConfig config)
     : m_config(config) {}
 
-void OverlapClassification::classify(
+void FloatingOverlapClassification::classify(
     TgcSLCandidateContainer& candidates,
-    OverlapClassificationStatistics& statistics) const {
-  statistics = OverlapClassificationStatistics{};
+    FloatingOverlapClassificationStatistics& statistics) const {
+  statistics = FloatingOverlapClassificationStatistics{};
   for (TgcSLCandidate& candidate : candidates) {
     candidate.overlapGroupId = 0U;
     candidate.overlapMultiplicity = 1U;
@@ -145,5 +144,4 @@ void OverlapClassification::classify(
   }
 }
 
-}  // namespace TgcL0Floating
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC

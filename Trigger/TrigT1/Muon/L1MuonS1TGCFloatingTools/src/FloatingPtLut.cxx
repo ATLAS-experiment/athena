@@ -1,7 +1,7 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "TgcL0FloatingPtLut.h"
+#include "FloatingPtLut.h"
 
 #include "CxxUtils/StringUtilsTemplates.h"
 
@@ -47,7 +47,7 @@ constexpr bool hasEmptyCsvField(const std::string_view line) {
 std::uint8_t encodePtValue(const float ptGeV) {
   if (!std::isfinite(ptGeV) || ptGeV <= 0.F) return 0U;
   const long encoded = std::lround(2.F * std::min(
-      ptGeV, L1Muon::TgcL0FloatingPtLut::s_maxEncodedPtGeV));
+      ptGeV, L1Muon::L1TGC::FloatingPtLut::s_maxEncodedPtGeV));
   return static_cast<std::uint8_t>(std::clamp(encoded, 0L, 255L));
 }
 
@@ -58,9 +58,9 @@ std::int8_t chargeFromSignedDTheta(const float signedDTheta) {
 
 }  // namespace
 
-namespace L1Muon {
+namespace L1Muon::L1TGC {
 
-std::unique_ptr<TgcL0FloatingPtLut> TgcL0FloatingPtLut::loadAscii(
+std::unique_ptr<FloatingPtLut> FloatingPtLut::loadAscii(
     const std::string& calibrationPath, std::string& error) {
   error.clear();
   std::ifstream input{calibrationPath};
@@ -69,7 +69,7 @@ std::unique_ptr<TgcL0FloatingPtLut> TgcL0FloatingPtLut::loadAscii(
     return nullptr;
   }
 
-  auto lut = std::unique_ptr<TgcL0FloatingPtLut>{new TgcL0FloatingPtLut};
+  auto lut = std::unique_ptr<FloatingPtLut>{new FloatingPtLut};
   unsigned int schemaVersion = 0U;
   std::vector<bool> binSeen;
   std::vector<std::array<bool, 16>> thresholdSeen;
@@ -180,7 +180,7 @@ std::unique_ptr<TgcL0FloatingPtLut> TgcL0FloatingPtLut::loadAscii(
       }
       bin.thresholdCutsGeV[code] = cut;
       bin.thresholdStatuses[code] =
-          static_cast<TgcL0FloatingThresholdCalibrationStatus>(status);
+          static_cast<FloatingThresholdCalibrationStatus>(status);
       thresholdSeen[index][code] = true;
     } else if (record == "KNOT") {
       unsigned int knotIndex = 0U;
@@ -279,7 +279,7 @@ std::unique_ptr<TgcL0FloatingPtLut> TgcL0FloatingPtLut::loadAscii(
   return lut;
 }
 
-int TgcL0FloatingPtLut::etaBin(const float eta) const {
+int FloatingPtLut::etaBin(const float eta) const {
   if (!std::isfinite(eta)) return -1;
   const float absEta = std::abs(eta);
   if (absEta < m_absEtaMin || absEta > m_absEtaMax) return -1;
@@ -290,7 +290,7 @@ int TgcL0FloatingPtLut::etaBin(const float eta) const {
   return bin >= 0 && bin < static_cast<int>(m_etaBins) ? bin : -1;
 }
 
-int TgcL0FloatingPtLut::phiFoldBin(const float phi) const {
+int FloatingPtLut::phiFoldBin(const float phi) const {
   if (!std::isfinite(phi)) return -1;
   const float period = 2.F * std::numbers::pi_v<float> / 8.F;
   float folded = std::fmod(phi, period);
@@ -302,7 +302,7 @@ int TgcL0FloatingPtLut::phiFoldBin(const float phi) const {
       static_cast<int>(m_phiBinsPerFold) - 1);
 }
 
-const TgcL0FloatingPtLut::Bin* TgcL0FloatingPtLut::findBin(
+const FloatingPtLut::Bin* FloatingPtLut::findBin(
     const int eta, const int phi) const {
   if (eta < 0 || eta >= static_cast<int>(m_etaBins) || phi < 0 ||
       phi >= static_cast<int>(m_phiBinsPerFold)) {
@@ -311,7 +311,7 @@ const TgcL0FloatingPtLut::Bin* TgcL0FloatingPtLut::findBin(
   return &m_bins[static_cast<std::size_t>(eta) * m_phiBinsPerFold + phi];
 }
 
-bool TgcL0FloatingPtLut::invertFloatingResponse(
+bool FloatingPtLut::invertFloatingResponse(
     const Bin& bin, const float responseMagnitudeRad,
     float& inversePtGeVInv) const {
   const auto begin = m_knots.begin() + bin.knotOffset;
@@ -355,9 +355,9 @@ bool TgcL0FloatingPtLut::invertFloatingResponse(
   return true;
 }
 
-TgcL0FloatingPtEvaluation TgcL0FloatingPtLut::evaluate(
+FloatingPtEvaluation FloatingPtLut::evaluate(
     const float eta, const float phi, const float signedDTheta) const {
-  TgcL0FloatingPtEvaluation result{};
+  FloatingPtEvaluation result{};
   result.etaBin = etaBin(eta);
   result.phiFoldBin = phiFoldBin(phi);
   if (result.etaBin < 0 || result.phiFoldBin < 0 ||
@@ -375,7 +375,7 @@ TgcL0FloatingPtEvaluation TgcL0FloatingPtLut::evaluate(
       bin->linearSlopeMagnitudeRadGeV / bin->transitionPtGeV;
   float inversePt = 0.F;
   if (magnitude <= transitionMagnitude) {
-    result.responseMode = TgcL0FloatingPtResponseMode::Linear;
+    result.responseMode = FloatingPtResponseMode::Linear;
     if (magnitude == 0.F) {
       // Zero bending means that only a lower bound can be represented.  Keep
       // the diagnostic raw value finite while saturating the operational pT.
@@ -385,7 +385,7 @@ TgcL0FloatingPtEvaluation TgcL0FloatingPtLut::evaluate(
       inversePt = magnitude / bin->linearSlopeMagnitudeRadGeV;
     }
   } else {
-    result.responseMode = TgcL0FloatingPtResponseMode::FloatingMonotonicLut;
+    result.responseMode = FloatingPtResponseMode::FloatingMonotonicLut;
     if (!invertFloatingResponse(*bin, magnitude, inversePt)) return result;
   }
   if (!result.ptEstimateValid) {
@@ -414,4 +414,4 @@ TgcL0FloatingPtEvaluation TgcL0FloatingPtLut::evaluate(
   return result;
 }
 
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC

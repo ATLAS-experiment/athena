@@ -4,13 +4,13 @@
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE TgcL0InnerCoincidenceTest
+#define BOOST_TEST_MODULE FloatingInnerCoincidenceTest
 
 #include <boost/test/unit_test.hpp>
 
-#include "TgcL0InnerCoincidence.h"
+#include "FloatingInnerCoincidence.h"
 
-BOOST_AUTO_TEST_SUITE(TgcL0InnerCoincidenceTest)
+BOOST_AUTO_TEST_SUITE(FloatingInnerCoincidenceTest)
 
 BOOST_AUTO_TEST_CASE(PropagatesPreInnerResultWithoutInnerInput) {
   L1Muon::TgcSLCandidate first;
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(PropagatesPreInnerResultWithoutInnerInput) {
   second.goodMagneticField = false;
 
   L1Muon::TgcSLCandidateContainer candidates{first, second};
-  const L1Muon::TgcL0Floating::InnerCoincidence innerCoincidence;
+  const L1Muon::L1TGC::FloatingInnerCoincidence innerCoincidence;
   innerCoincidence.apply(candidates);
 
   BOOST_REQUIRE_EQUAL(candidates.size(), 2U);

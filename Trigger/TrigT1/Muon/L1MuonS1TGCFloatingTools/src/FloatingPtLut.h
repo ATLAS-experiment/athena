@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L1MUONS1TGCFLOATINGTOOLS_TGCL0FLOATINGPTLUT_H
-#define L1MUONS1TGCFLOATINGTOOLS_TGCL0FLOATINGPTLUT_H
+#ifndef L1MUONS1TGCFLOATINGTOOLS_FLOATINGPTLUT_H
+#define L1MUONS1TGCFLOATINGTOOLS_FLOATINGPTLUT_H
 
 #include <array>
 #include <cstdint>
@@ -10,15 +10,15 @@
 #include <string>
 #include <vector>
 
-namespace L1Muon {
+namespace L1Muon::L1TGC {
 
-enum class TgcL0FloatingPtResponseMode : std::uint8_t {
+enum class FloatingPtResponseMode : std::uint8_t {
   Invalid = 0,
   Linear = 1,
   FloatingMonotonicLut = 2
 };
 
-enum class TgcL0FloatingThresholdCalibrationStatus : std::uint8_t {
+enum class FloatingThresholdCalibrationStatus : std::uint8_t {
   None = 0,
   Direct = 1,
   PhiMedianFallback = 2,
@@ -27,7 +27,7 @@ enum class TgcL0FloatingThresholdCalibrationStatus : std::uint8_t {
   Provisional = 5
 };
 
-struct TgcL0FloatingPtEvaluation {
+struct FloatingPtEvaluation {
   bool modelValid{false};
   bool ptEstimateValid{false};
   int etaBin{-1};
@@ -41,10 +41,10 @@ struct TgcL0FloatingPtEvaluation {
   std::int8_t estimatedCharge{0};
   std::uint8_t thresholdCode{0};
   float thresholdCutGeV{0.F};
-  TgcL0FloatingPtResponseMode responseMode{
-      TgcL0FloatingPtResponseMode::Invalid};
-  TgcL0FloatingThresholdCalibrationStatus thresholdCalibrationStatus{
-      TgcL0FloatingThresholdCalibrationStatus::None};
+  FloatingPtResponseMode responseMode{
+      FloatingPtResponseMode::Invalid};
+  FloatingThresholdCalibrationStatus thresholdCalibrationStatus{
+      FloatingThresholdCalibrationStatus::None};
 };
 
 /**
@@ -52,15 +52,15 @@ struct TgcL0FloatingPtEvaluation {
  *
  * Loading performs all file I/O and validation. Evaluation is read-only.
  */
-class TgcL0FloatingPtLut {
+class FloatingPtLut {
  public:
   static constexpr float s_maxEncodedPtGeV = 127.5F;
 
   /// Load the human-readable calibration payload.
-  static std::unique_ptr<TgcL0FloatingPtLut> loadAscii(
+  static std::unique_ptr<FloatingPtLut> loadAscii(
       const std::string& calibrationPath, std::string& error);
 
-  TgcL0FloatingPtEvaluation evaluate(float eta, float phi,
+  FloatingPtEvaluation evaluate(float eta, float phi,
                                      float signedDTheta) const;
 
   const std::string& version() const { return m_version; }
@@ -72,7 +72,7 @@ class TgcL0FloatingPtLut {
   bool isDevelopmentPayload() const { return m_isDevelopmentPayload; }
 
  private:
-  TgcL0FloatingPtLut() = default;
+  FloatingPtLut() = default;
 
   struct Knot {
     float inversePtGeVInv{0.F};
@@ -85,7 +85,7 @@ class TgcL0FloatingPtLut {
     std::uint32_t knotOffset{0U};
     std::uint32_t knotCount{0U};
     std::array<float, 16> thresholdCutsGeV{};
-    std::array<TgcL0FloatingThresholdCalibrationStatus, 16>
+    std::array<FloatingThresholdCalibrationStatus, 16>
         thresholdStatuses{};
   };
 
@@ -105,6 +105,6 @@ class TgcL0FloatingPtLut {
   bool m_isDevelopmentPayload{false};
 };
 
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC
 
 #endif

@@ -1,20 +1,20 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L1MUONS1TGCFLOATINGTOOLS_TGCL0GOODMAGMAP_H
-#define L1MUONS1TGCFLOATINGTOOLS_TGCL0GOODMAGMAP_H
+#ifndef L1MUONS1TGCFLOATINGTOOLS_GOODMAGMAP_H
+#define L1MUONS1TGCFLOATINGTOOLS_GOODMAGMAP_H
 
 #include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace L1Muon {
+namespace L1Muon::L1TGC {
 
 /** @brief Immutable sparse GoodMag map loaded from ASCII. */
-class TgcL0GoodMagMap {
+class GoodMagMap {
  public:
-  static std::unique_ptr<TgcL0GoodMagMap> loadAscii(
+  static std::unique_ptr<GoodMagMap> loadAscii(
       const std::string& calibrationPath, std::string& error);
 
   /** @brief Return false for a masked or out-of-range calibration bin. */
@@ -36,7 +36,7 @@ class TgcL0GoodMagMap {
   std::size_t poorBinCount() const { return m_poorBinCount; }
 
  private:
-  TgcL0GoodMagMap() = default;
+  GoodMagMap() = default;
 
   int etaBin(float eta, float absEtaMin, float absEtaMax) const;
   int phiFoldBin(float phi) const;
@@ -48,6 +48,6 @@ class TgcL0GoodMagMap {
   std::size_t m_poorBinCount{0U};
 };
 
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC
 
 #endif

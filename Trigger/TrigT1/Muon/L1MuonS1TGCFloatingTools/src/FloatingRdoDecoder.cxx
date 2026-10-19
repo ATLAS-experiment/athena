@@ -2,7 +2,7 @@
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TgcL0RdoDecoder.h"
+#include "FloatingRdoDecoder.h"
 
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "Identifier/Identifier.h"
@@ -19,22 +19,22 @@
 
 namespace {
 
-L1Muon::TgcL0Floating::Station station(
+L1Muon::L1TGC::FloatingStation station(
     const Identifier& identifier, const Muon::IMuonIdHelperSvc& idHelperSvc) {
-  using L1Muon::TgcL0Floating::Station;
+  using L1Muon::L1TGC::FloatingStation;
   using Muon::MuonStationIndex::PhiIndex;
 
   switch (idHelperSvc.phiIndex(identifier)) {
     case PhiIndex::T1:
-      return Station::M1;
+      return FloatingStation::M1;
     case PhiIndex::T2:
-      return Station::M2;
+      return FloatingStation::M2;
     case PhiIndex::T3:
-      return Station::M3;
+      return FloatingStation::M3;
     case PhiIndex::T4:
-      return Station::Inner;
+      return FloatingStation::Inner;
     default:
-      return Station::Unknown;
+      return FloatingStation::Unknown;
   }
 }
 
@@ -53,17 +53,16 @@ std::uint16_t triggerSector(const float phi) {
 
 }  // namespace
 
-namespace L1Muon {
-namespace TgcL0Floating {
+namespace L1Muon::L1TGC {
 
-StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
+StatusCode FloatingRdoDecoder::decode(const TgcRdoContainer& rdos,
                               const Muon::TgcCablingMap& cabling,
                               const Muon::IMuonIdHelperSvc& idHelperSvc,
                               const MuonGM::MuonDetectorManager& detectorManager,
-                              HitGroups& hitGroups,
-                              DecodeStatistics& statistics) const {
+                              FloatingHitGroups& hitGroups,
+                              FloatingDecodeStatistics& statistics) const {
   hitGroups.clear();
-  statistics = DecodeStatistics{};
+  statistics = FloatingDecodeStatistics{};
 
   // Run-3 RDO conversion is isolated here. Hits are routed immediately to the
   // Phase-II side/Trigger-Sector/BC processing chain, as in the validated
@@ -82,7 +81,7 @@ StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
         continue;
       }
 
-      const Station hitStation = station(identifier, idHelperSvc);
+      const FloatingStation hitStation = station(identifier, idHelperSvc);
       const bool hitIsStrip = idHelperSvc.tgcIdHelper().isStrip(identifier);
       float eta = 0.F;
       float phi = 0.F;
@@ -103,7 +102,7 @@ StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
         continue;
       }
 
-      const Hit hit{
+      const FloatingHit hit{
           .subDetectorId = rawData->subDetectorId(),
           .triggerSector = hitTriggerSector,
           .detectorSector = rawData->rodId(),
@@ -126,7 +125,7 @@ StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
           .r = r,
           .z = z,
       };
-      const HitGroupKey key{.subDetectorId = hit.subDetectorId,
+      const FloatingHitGroupKey key{.subDetectorId = hit.subDetectorId,
                             .triggerSector = hit.triggerSector,
                             .bcTag = hit.bcTag};
       hitGroups[key].emplace_back(hit);
@@ -135,16 +134,16 @@ StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
       if (hitIsStrip) ++statistics.nStripHits;
       else ++statistics.nWireHits;
       switch (hitStation) {
-        case Station::M1:
+        case FloatingStation::M1:
           ++statistics.nM1Hits;
           break;
-        case Station::M2:
+        case FloatingStation::M2:
           ++statistics.nM2Hits;
           break;
-        case Station::M3:
+        case FloatingStation::M3:
           ++statistics.nM3Hits;
           break;
-        case Station::Inner:
+        case FloatingStation::Inner:
           ++statistics.nInnerHits;
           break;
         default:
@@ -156,5 +155,4 @@ StatusCode RdoDecoder::decode(const TgcRdoContainer& rdos,
   return StatusCode::SUCCESS;
 }
 
-}  // namespace TgcL0Floating
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC

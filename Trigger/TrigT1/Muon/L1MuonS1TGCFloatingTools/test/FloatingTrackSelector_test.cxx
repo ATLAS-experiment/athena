@@ -4,11 +4,11 @@
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MAIN
-#define BOOST_TEST_MODULE TgcL0TrackSelectorTest
+#define BOOST_TEST_MODULE FloatingTrackSelectorTest
 
 #include <boost/test/unit_test.hpp>
 
-#include "TgcL0TrackSelector.h"
+#include "FloatingTrackSelector.h"
 
 #include <algorithm>
 #include <cmath>
@@ -102,12 +102,12 @@ struct CandidateFixture {
   L1Muon::TgcSLCandidateContainer candidates;
   xAOD::L1TGCCandDataContainer output;
   SG::AuxStoreInternal outputAux;
-  L1Muon::TgcL0Floating::TrackSelector selector;
+  L1Muon::L1TGC::FloatingTrackSelector selector;
 };
 
 }  // namespace
 
-BOOST_AUTO_TEST_SUITE(TgcL0TrackSelectorTest)
+BOOST_AUTO_TEST_SUITE(FloatingTrackSelectorTest)
 
 BOOST_FIXTURE_TEST_CASE(SelectsAtMostSixCandidatesPerSector,
                         CandidateFixture) {
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(RejectsZeroThreshold) {
   SG::AuxStoreInternal outputAux;
   output.setStore(&outputAux);
 
-  const L1Muon::TgcL0Floating::TrackSelector selector;
+  const L1Muon::L1TGC::FloatingTrackSelector selector;
   selector.select(candidates, output);
 
   BOOST_REQUIRE_EQUAL(output.size(), 1U);

@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration */
 
-#include "TgcL0FloatingPtLut.h"
+#include "FloatingPtLut.h"
 
 #include <array>
 #include <cmath>
@@ -93,17 +93,17 @@ bool check(const bool condition, const std::string_view description) {
 
 int main() {
   bool success = true;
-  const std::filesystem::path calibration{"TgcL0FloatingPtLut_test.txt"};
+  const std::filesystem::path calibration{"FloatingPtLut_test.txt"};
   writeCalibration(calibration);
 
   std::string error;
-  success &= check(!L1Muon::TgcL0FloatingPtLut::loadAscii(
-                       "TgcL0FloatingPtLut_test_missing.txt", error),
+  success &= check(!L1Muon::L1TGC::FloatingPtLut::loadAscii(
+                       "FloatingPtLut_test_missing.txt", error),
                    "missing payload is rejected");
   success &= check(!error.empty(), "missing payload reports an error");
 
   error.clear();
-  const auto lut = L1Muon::TgcL0FloatingPtLut::loadAscii(
+  const auto lut = L1Muon::L1TGC::FloatingPtLut::loadAscii(
       calibration.string(), error);
   if (!check(static_cast<bool>(lut), "valid payload is loaded")) {
     std::filesystem::remove(calibration);
@@ -120,7 +120,7 @@ int main() {
   success &= check(linear.modelValid && linear.ptEstimateValid,
                    "linear estimate validity");
   success &= check(
-      linear.responseMode == L1Muon::TgcL0FloatingPtResponseMode::Linear,
+      linear.responseMode == L1Muon::L1TGC::FloatingPtResponseMode::Linear,
       "linear response mode");
   success &= check(close(linear.ptEstimateGeV, 20.F), "linear pT estimate");
   success &= check(linear.estimatedPtValueIndex == 40U,
@@ -140,7 +140,7 @@ int main() {
   const auto exactKnot = lut->evaluate(1.5F, 0.F, -0.2F);
   success &= check(
       exactKnot.responseMode ==
-          L1Muon::TgcL0FloatingPtResponseMode::FloatingMonotonicLut,
+          L1Muon::L1TGC::FloatingPtResponseMode::FloatingMonotonicLut,
       "LUT response mode");
   success &= check(close(exactKnot.ptEstimateGeV, 5.F), "exact-knot pT");
   success &= check(exactKnot.estimatedCharge == 1,
@@ -163,7 +163,7 @@ int main() {
                    "zero-bending validity");
   success &= check(
       close(zero.ptEstimateGeV,
-            L1Muon::TgcL0FloatingPtLut::s_maxEncodedPtGeV),
+            L1Muon::L1TGC::FloatingPtLut::s_maxEncodedPtGeV),
       "zero-bending saturation");
   success &= check(zero.estimatedPtValueIndex == 255U,
                    "zero-bending encoded pT");
@@ -173,11 +173,11 @@ int main() {
                    "saturated estimate validity");
   success &= check(
       saturated.rawPtEstimateGeV >
-          L1Muon::TgcL0FloatingPtLut::s_maxEncodedPtGeV,
+          L1Muon::L1TGC::FloatingPtLut::s_maxEncodedPtGeV,
       "unbounded raw pT");
   success &= check(
       close(saturated.ptEstimateGeV,
-            L1Muon::TgcL0FloatingPtLut::s_maxEncodedPtGeV),
+            L1Muon::L1TGC::FloatingPtLut::s_maxEncodedPtGeV),
       "operational pT saturation");
   success &= check(saturated.estimatedPtValueIndex == 255U,
                    "saturated encoded pT");
@@ -204,10 +204,10 @@ int main() {
       "non-finite phi");
 
   const std::filesystem::path repeatedResponseCalibration{
-      "TgcL0FloatingPtLut_test_repeated_response.txt"};
+      "FloatingPtLut_test_repeated_response.txt"};
   writeCalibration(repeatedResponseCalibration, Malformation::None, true);
   error.clear();
-  const auto repeatedResponseLut = L1Muon::TgcL0FloatingPtLut::loadAscii(
+  const auto repeatedResponseLut = L1Muon::L1TGC::FloatingPtLut::loadAscii(
       repeatedResponseCalibration.string(), error);
   success &= check(static_cast<bool>(repeatedResponseLut),
                    "repeated knot response is loaded");
@@ -229,11 +229,11 @@ int main() {
       Malformation::NegativeDimension, Malformation::LateMetadata};
   for (std::size_t index = 0U; index < malformedPayloads.size(); ++index) {
     const std::filesystem::path path{
-        "TgcL0FloatingPtLut_test_malformed_" + std::to_string(index) +
+        "FloatingPtLut_test_malformed_" + std::to_string(index) +
         ".txt"};
     writeCalibration(path, malformedPayloads[index]);
     error.clear();
-    success &= check(!L1Muon::TgcL0FloatingPtLut::loadAscii(
+    success &= check(!L1Muon::L1TGC::FloatingPtLut::loadAscii(
                          path.string(), error),
                      "malformed payload is rejected");
     success &= check(!error.empty(), "malformed payload reports an error");
@@ -245,11 +245,11 @@ int main() {
       Malformation::TrailingEmptyField};
   for (std::size_t index = 0U; index < emptyFieldPayloads.size(); ++index) {
     const std::filesystem::path path{
-        "TgcL0FloatingPtLut_test_empty_field_" +
+        "FloatingPtLut_test_empty_field_" +
         std::to_string(index) + ".txt"};
     writeCalibration(path, emptyFieldPayloads[index]);
     error.clear();
-    success &= check(!L1Muon::TgcL0FloatingPtLut::loadAscii(
+    success &= check(!L1Muon::L1TGC::FloatingPtLut::loadAscii(
                          path.string(), error),
                      "empty CSV field is rejected");
     success &= check(!error.empty(), "empty CSV field reports an error");

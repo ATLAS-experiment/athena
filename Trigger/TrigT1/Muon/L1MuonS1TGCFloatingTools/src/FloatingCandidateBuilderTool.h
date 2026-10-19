@@ -1,8 +1,8 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L1MUONS1TGCFLOATINGTOOLS_TGCL0FLOATINGCANDIDATEBUILDERTOOL_H
-#define L1MUONS1TGCFLOATINGTOOLS_TGCL0FLOATINGCANDIDATEBUILDERTOOL_H
+#ifndef L1MUONS1TGCFLOATINGTOOLS_FLOATINGCANDIDATEBUILDERTOOL_H
+#define L1MUONS1TGCFLOATINGTOOLS_FLOATINGCANDIDATEBUILDERTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "L1MuonS1TGCToolInterfaces/ICandBuilderTool.h"
@@ -10,31 +10,31 @@
 #include "MuonTGC_Cabling/TgcCablingMap.h"
 #include "MuonReadoutGeometry/MuonDetectorManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
-#include "TgcL0FloatingPtLut.h"
-#include "TgcL0GoodMagMap.h"
+#include "FloatingPtLut.h"
+#include "GoodMagMap.h"
 
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace L1Muon {
+namespace L1Muon::L1TGC {
 
-class TgcL0FloatingCandidateBuilderTool final
-    : public extends<AthAlgTool, L1TGC::ICandBuilderTool> {
+class FloatingCandidateBuilderTool final
+    : public extends<AthAlgTool, ICandBuilderTool> {
  public:
   using base_class::base_class;
 
   StatusCode initialize() override;
 
-  /// \copydoc L1TGC::ICandBuilderTool::build
+  /// \copydoc ICandBuilderTool::build
   StatusCode build(const TgcRdoContainer& rdos,
                    TgcSLCandidateContainer& candidates,
                    const EventContext& ctx) const override;
 
-  /// \copydoc L1TGC::ICandBuilderTool::build
+  /// \copydoc ICandBuilderTool::build
   StatusCode build(const TgcRdoContainer& rdos,
                    TgcSLCandidateContainer& candidates,
-                   L1TGC::SegmentContainer* segments,
+                   SegmentContainer* segments,
                    const EventContext& ctx) const override;
 
  private:
@@ -65,7 +65,7 @@ class TgcL0FloatingCandidateBuilderTool final
       "TgcL1PtCalibration.txt",
       "ASCII Floating-pT calibration path relative to the GroupData "
       "development directory"};
-  std::unique_ptr<const TgcL0FloatingPtLut> m_ptLut{};
+  std::unique_ptr<const FloatingPtLut> m_ptLut{};
 
   Gaudi::Property<std::string> m_goodMagMapFile{
       this, "GoodMagMapFile",
@@ -73,9 +73,9 @@ class TgcL0FloatingCandidateBuilderTool final
       "TgcL1PoorMagneticFieldMap.txt",
       "ASCII GoodMag map path relative to the GroupData development "
       "directory"};
-  std::unique_ptr<const TgcL0GoodMagMap> m_goodMagMap{};
+  std::unique_ptr<const GoodMagMap> m_goodMagMap{};
 };
 
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC
 
 #endif

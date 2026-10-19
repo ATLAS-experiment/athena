@@ -1,11 +1,11 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L1MUONS1TGCFLOATINGTOOLS_TGCL0RDODECODER_H
-#define L1MUONS1TGCFLOATINGTOOLS_TGCL0RDODECODER_H
+#ifndef L1MUONS1TGCFLOATINGTOOLS_FLOATINGRDODECODER_H
+#define L1MUONS1TGCFLOATINGTOOLS_FLOATINGRDODECODER_H
 
 #include "GaudiKernel/StatusCode.h"
-#include "TgcL0FloatingData.h"
+#include "FloatingData.h"
 
 class TgcRdoContainer;
 
@@ -18,20 +18,18 @@ namespace MuonGM {
 class MuonDetectorManager;
 }
 
-namespace L1Muon {
-namespace TgcL0Floating {
+namespace L1Muon::L1TGC {
 
-class RdoDecoder {
+class FloatingRdoDecoder {
  public:
   StatusCode decode(const TgcRdoContainer& rdos,
                     const Muon::TgcCablingMap& cabling,
                     const Muon::IMuonIdHelperSvc& idHelperSvc,
                     const MuonGM::MuonDetectorManager& detectorManager,
-                    HitGroups& hitGroups,
-                    DecodeStatistics& statistics) const;
+                    FloatingHitGroups& hitGroups,
+                    FloatingDecodeStatistics& statistics) const;
 };
 
-}  // namespace TgcL0Floating
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC
 
 #endif

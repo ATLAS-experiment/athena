@@ -1,6 +1,6 @@
 /* Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration */
 
-#include "TgcL0GoodMagMap.h"
+#include "GoodMagMap.h"
 
 #include <array>
 #include <cstdlib>
@@ -70,18 +70,18 @@ bool check(const bool condition, const std::string_view description) {
 
 int main() {
   bool success = true;
-  const std::filesystem::path mapPath{"TgcL0GoodMagMap_test.txt"};
+  const std::filesystem::path mapPath{"GoodMagMap_test.txt"};
   writeMap(mapPath);
 
   std::string error;
-  success &= check(!L1Muon::TgcL0GoodMagMap::loadAscii(
-                       "TgcL0GoodMagMap_test_missing.txt", error),
+  success &= check(!L1Muon::L1TGC::GoodMagMap::loadAscii(
+                       "GoodMagMap_test_missing.txt", error),
                    "missing payload is rejected");
   success &= check(!error.empty(), "missing payload reports an error");
 
   error.clear();
   const auto map =
-      L1Muon::TgcL0GoodMagMap::loadAscii(mapPath.string(), error);
+      L1Muon::L1TGC::GoodMagMap::loadAscii(mapPath.string(), error);
   if (!check(static_cast<bool>(map), "valid payload is loaded")) {
     std::filesystem::remove(mapPath);
     return EXIT_FAILURE;
@@ -135,11 +135,11 @@ int main() {
       Malformation::InteriorEmptyField, Malformation::TrailingEmptyField};
   for (std::size_t index = 0U; index < malformedPayloads.size(); ++index) {
     const std::filesystem::path path{
-        "TgcL0GoodMagMap_test_malformed_" + std::to_string(index) + ".txt"};
+        "GoodMagMap_test_malformed_" + std::to_string(index) + ".txt"};
     writeMap(path, malformedPayloads[index]);
     error.clear();
     success &= check(
-        !L1Muon::TgcL0GoodMagMap::loadAscii(path.string(), error),
+        !L1Muon::L1TGC::GoodMagMap::loadAscii(path.string(), error),
         "malformed payload is rejected");
     success &= check(!error.empty(), "malformed payload reports an error");
     std::filesystem::remove(path);

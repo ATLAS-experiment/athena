@@ -1,19 +1,18 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L1MUONS1TGCFLOATINGTOOLS_TGCL0TRACKSELECTOR_H
-#define L1MUONS1TGCFLOATINGTOOLS_TGCL0TRACKSELECTOR_H
+#ifndef L1MUONS1TGCFLOATINGTOOLS_FLOATINGTRACKSELECTOR_H
+#define L1MUONS1TGCFLOATINGTOOLS_FLOATINGTRACKSELECTOR_H
 
 #include <cstddef>
 
 #include "L1MuonS1TGCToolInterfaces/TgcSLCandidate.h"
 #include "xAODTrigL1Muon/L1TGCCandDataContainer.h"
 
-namespace L1Muon {
-namespace TgcL0Floating {
+namespace L1Muon::L1TGC {
 
 /** @brief Select and convert floating-point TGC candidates. */
-class TrackSelector {
+class FloatingTrackSelector {
  public:
   /**
    * @brief Fill the xAOD output with the six highest-threshold candidates per
@@ -31,7 +30,6 @@ class TrackSelector {
   static constexpr std::size_t s_maxCandidatesPerSector{6U};
 };
 
-}  // namespace TgcL0Floating
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC
 
 #endif
