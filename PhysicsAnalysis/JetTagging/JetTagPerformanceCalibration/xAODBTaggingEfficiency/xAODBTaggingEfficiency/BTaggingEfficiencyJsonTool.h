@@ -6,12 +6,20 @@
 #define CPBTAGGINGEFFICIENCYJSONTOOL_H
 
 #include "FTagAnalysisInterfaces/IBTaggingEfficiencyJsonTool.h"
+#include "FTagAnalysisInterfaces/IBTaggingSelectionJsonTool.h"
 #include "AsgTools/AsgTool.h"
 #include <AsgTools/PropertyWrapper.h>
+#include "AsgTools/ToolHandle.h"
 #include "PATInterfaces/SystematicsCache.h"
 #include <nlohmann/json.hpp>
+#include <cmath>
+#include <limits>
+#include <map>
 #include <ostream>
 #include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 using json = nlohmann::ordered_json;
 
 class BTaggingEfficiencyJsonTool: public asg::AsgTool,
@@ -48,11 +56,14 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   std::map<int, std::string> m_labelMap;
   std::map<int, std::string> m_labelMapMCMC;
 
+  /// Access to a BTaggingSelectionJsonTool 
+  ToolHandle<IBTaggingSelectionJsonTool> m_selTool;
+  
   // enumaration class to assign integers to different binning variables to speed up the tools performance
   enum class varType {
     unknown,
     pT,
-    mass,  
+    mass,
     eta,
     abseta
   };
@@ -98,6 +109,26 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
         return oss.str();
       }
 
+      // Check that the handlers i.e. N-dimensional bins of a set are disjoint
+      template<class handlerClass>
+      static void checkOverlaps(const std::string& context, const std::vector<handlerClass>& handlers) {
+        for (size_t i = 0; i < handlers.size(); ++i) {
+          for (size_t j = i + 1; j < handlers.size(); ++j) {
+            if (handlers[i].overlaps(handlers[j])) {
+              throw std::runtime_error("Overlapping bins for " + context + ": " + handlers[i].to_string() + " and " + handlers[j].to_string());
+            }
+          }
+        }
+      }
+
+      // Check that, for each key of the map, the handlers of the associated set are disjoint
+      template<class handlerClass>
+      static void checkOverlaps(const std::string& context, const std::map<std::string, std::vector<handlerClass>>& handlersMap) {
+        for (const auto& [key, handlers] : handlersMap) {
+          checkOverlaps(context + " for label " + key, handlers);
+        }
+      }
+
       protected:
         // Structure for storing a min and max value for a given variable
         // The varBounds structure also defines an ordering
@@ -111,6 +142,11 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
           // This value can be changed if needed when initializing the structure
           float varEps = 1.e-6f;
           static bool approxEqual(const float a, const float b, const float eps) {
+            // Exact equality also covers equal infinities e.g. two "inf" upper bounds
+            if (a == b) return true;
+            // An infinite value is never approximately equal to a different value
+            // otherwise |inf - x| <= eps * inf would be true for any finite x
+            if (!std::isfinite(a) || !std::isfinite(b)) return false;
             return std::abs(a - b) <= eps * std::max(std::abs(a), std::abs(b));
           }
 

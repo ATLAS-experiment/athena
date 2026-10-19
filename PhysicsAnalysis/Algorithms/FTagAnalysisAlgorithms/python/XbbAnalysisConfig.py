@@ -2,6 +2,7 @@
 
 from AnalysisAlgorithmsConfig.ConfigBlock import ConfigBlock
 from AnalysisAlgorithmsConfig.ConfigAccumulator import DataType
+from CalibrationDataInterface.MCMCGeneratorHelper import MCMC_dsid_map
 
 class XbbConfig (ConfigBlock):
     """the ConfigBlock for the Xbb tagging config"""
@@ -18,6 +19,9 @@ class XbbConfig (ConfigBlock):
                        info="the output name of the Xbb tagger - should match the first level key of the calibration json file." )
         self.addOption('calibFile', None, type=str,
                        info="path to a Xbb JSON calibration file.")
+        self.addOption ('generator', "autoconfig", type=str,
+            info="MC generator setup, for MC/MC SFs. The default is `autoconfig`"
+            " (relies on the sample metadata).")
         self.addOption('noEffSF', False, type=bool,
                        info="do not compute the efficiency SF.")
 
@@ -29,15 +33,22 @@ class XbbConfig (ConfigBlock):
 
         jetContainer = config.originalName(self.containerName)
         selectionName = f'{self.Xbbtagger}_{self.XbbWP}'
-
+        
+        # Create selection tool as public so it can be shared as the efficiency tool also needs the selection tool
+        # Must be created before the algorithm so the tool is initialized first
+        btagSelectionTool = config.createPublicTool( "BTaggingSelectionJsonTool", f"XbbLargeRJetSelectionJsonTool_{jetContainer}_{selectionName}")
+        # Get type/name tool as this is what is passed to initialize tool for AnalysisBase 
+        btagSelectionToolTypeName = f"{btagSelectionTool.getType()}/{btagSelectionTool.getName()}"
+        
+        btagSelectionTool.MaxEta = 4.5
+        btagSelectionTool.MinPt = 0.
+        btagSelectionTool.OutputName = self.Xbbtagger
+        btagSelectionTool.JetAuthor = jetContainer
+        btagSelectionTool.OperatingPoint = self.XbbWP
+        btagSelectionTool.JsonConfigFile = self.calibFile
+        
         alg = config.createAlgorithm( 'CP::XbbInformationDecoratorAlg', 'XbbInfoAlg' )
-        config.addPrivateTool('selectionTool', 'BTaggingSelectionJsonTool' )
-        alg.selectionTool.MaxEta = 4.5
-        alg.selectionTool.MinPt = 0.
-        alg.selectionTool.OutputName = self.Xbbtagger
-        alg.selectionTool.JetAuthor = jetContainer
-        alg.selectionTool.OperatingPoint = self.XbbWP
-        alg.selectionTool.JsonConfigFile = self.calibFile
+        alg.selectionTool = btagSelectionToolTypeName
         alg.preselection = config.getPreselection (self.containerName, '')
 
         alg.taggerDecisionDecoration = 'xbb_select_' + selectionName
@@ -54,6 +65,14 @@ class XbbConfig (ConfigBlock):
             alg.efficiencyTool.JetAuthor = jetContainer
             alg.efficiencyTool.OperatingPoint = self.XbbWP
             alg.efficiencyTool.JsonConfigFile = self.calibFile
+            
+            # MC/MC efficiency map for the generator
+            mcGenerator = MCMC_dsid_map(config.geometry(), config.generatorInfo(), self.generator, self.Xbbtagger)
+            alg.efficiencyTool.MCGenerator = mcGenerator
+            
+            # Provide the selection tool to the efficiency tool
+            alg.efficiencyTool.btagSelectionJsonTool = btagSelectionToolTypeName
+            
             alg.preselection = config.getPreselection (self.containerName, '')
             alg.outOfValidity = 2  # continue silently, but decorate jet with outOfValidityDeco
             alg.outOfValidityDeco = 'no_xbb_' + selectionName + ',as_char'

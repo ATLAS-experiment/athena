@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.Enums import LHCPeriod
 
 DL1dv01_MC20_Generator_dict = {
@@ -48,12 +48,36 @@ GN2v01_MC23_Generator_dict = {
     "Sherpa2214": "700808",
     "Sherpa2216": "700808",
 }
+
+GN3XPV01_MC20_Generator_dict = {
+    "Pythia8": "Pythia8",
+    "Herwig713": "Herwig7",
+    "Herwig721": "Herwig7",
+    "Herwig723": "Herwig7",
+    "Sherpa2210": "Sherpa",
+    "Sherpa2211": "Sherpa",
+    "Sherpa2212": "Sherpa",
+    "Sherpa2214": "Sherpa",
+    "Sherpa2216": "Sherpa",
+}
+
+GN3XPV01_MC23_Generator_dict = {
+    "Pythia8": "Pythia8",
+    "Herwig721": "Herwig7",
+    "Herwig723": "Herwig7",
+    "Sherpa2212": "Sherpa",
+    "Sherpa2214": "Sherpa",
+    "Sherpa2216": "Sherpa",
+}
+
 dict_tagger_generator = {
         ('DL1dv01', LHCPeriod.Run2): DL1dv01_MC20_Generator_dict,
         ('DL1dv01', LHCPeriod.Run3): DL1dv01_MC23_Generator_dict,
         ('GN2v01', LHCPeriod.Run2): GN2v01_MC20_Generator_dict,
         ('GN2v01', LHCPeriod.Run3): GN2v01_MC23_Generator_dict,
-        }
+        ('GN3XPV01_hbb_bjr', LHCPeriod.Run2): GN3XPV01_MC20_Generator_dict,
+        ('GN3XPV01_hbb_bjr', LHCPeriod.Run3): GN3XPV01_MC23_Generator_dict,
+}
 def MCMC_generator_map(generatorDict, tagger='GN2v01'):
     generator = None
     if tagger == 'DL1dv01':
@@ -86,7 +110,7 @@ def MCMC_dsid_map(geometry, generatorDict={}, selfDefineGenerator=None, tagger='
        to get the generator setting for MCMC efficiency map"""
 
     if (tagger, geometry) not in dict_tagger_generator:
-        raise ValueError("No CDI MCMC map available for " + tagger + " in " + str(geometry))
+        raise ValueError("No MCMC map available for " + tagger + " in " + str(geometry))
     mc_dict = dict_tagger_generator[tagger, geometry]
 
     dsid = None
@@ -100,6 +124,6 @@ def MCMC_dsid_map(geometry, generatorDict={}, selfDefineGenerator=None, tagger='
         dsid = mc_dict[generator]
 
     if dsid is None:
-        raise ValueError("No CDI MCMC map available for generator: " + generator + " with " + tagger + " in " + str(geometry))
+        raise ValueError("No MCMC map available for generator: " + generator + " with " + tagger + " in " + str(geometry))
     else:
         return dsid
