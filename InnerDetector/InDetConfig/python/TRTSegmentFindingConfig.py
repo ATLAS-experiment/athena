@@ -2,7 +2,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import BeamType
 
-def TRTSegmentFindingCfg(flags, InputCollections = None):
+def TRTSegmentFindingCfg(flags, InputCollections = None,
+                         ExtraAssociationTracks = None):
     acc = ComponentAccumulator()
 
     #
@@ -15,7 +16,7 @@ def TRTSegmentFindingCfg(flags, InputCollections = None):
             flags,
             name = 'InDetSegmentTrackPRD_Association',
             AssociationMapName = 'InDetSegmentPRDtoTrackMap',
-            TracksName = list(InputCollections)))
+            TracksName = list(InputCollections) + list(ExtraAssociationTracks or [])))
 
     #
     # --- TRT track reconstruction
