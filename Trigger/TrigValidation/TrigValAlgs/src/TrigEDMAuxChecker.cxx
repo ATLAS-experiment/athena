@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /** Adapted from code by A.Hamilton to check trigger EDM; R.Goncalo 21/11/07 */
@@ -50,7 +50,8 @@ StatusCode TrigEDMAuxChecker::finalize() {
     return StatusCode::SUCCESS; 
 }
 
-void TrigEDMAuxChecker::dumpDecorators(const xAOD::AuxContainerBase *x,const std::string& key){
+template <typename T>
+void TrigEDMAuxChecker::dumpDecorators(const T *x,const std::string& key){
     ATH_MSG_DEBUG("REGTEST: DUMP DECORATORS");
     ATH_MSG_DEBUG("Container size " << x->size() );
     //Get list of auxids
@@ -95,13 +96,24 @@ StatusCode TrigEDMAuxChecker::execute(const EventContext& /*ctx*/) {
   const xAOD::AuxContainerBase* aux=0;
   StatusCode sc = StatusCode::SUCCESS;
   for(const auto& key:m_auxList){
-      sc = evtStore()->retrieve(aux,key);
-      if (sc.isFailure()) {
-          ATH_MSG_WARNING("REGTEST Cannot retrieve " << key);
-          continue;
+      // check if retrieveable first as AuxContainerBase then ShallowAux
+      aux = evtStore()->tryConstRetrieve<xAOD::AuxContainerBase>(key);
+      if (!aux) {
+          const xAOD::ShallowAuxContainer* shallowaux=0;
+          shallowaux = evtStore()->tryConstRetrieve<xAOD::ShallowAuxContainer>(key);
+          if (!shallowaux){
+             ATH_MSG_WARNING("REGTEST Cannot retrieve " << key);
+          } else { // ShallowAuxContainer
+              ATH_MSG_DEBUG("REGTEST: retrieved ShallowAuxContainer type " << key);
+              ATH_MSG_DEBUG("REGTEST: Dump Aux variables for " << key);
+              dumpDecorators(shallowaux,key);
+          }
       }
-      ATH_MSG_DEBUG("REGTEST: Dump Aux variables for " << key);
-      dumpDecorators(aux,key);
+      else { // AuxBaseContainer
+          ATH_MSG_DEBUG("REGTEST: retrieved AuxBaseContainer type " << key);
+          ATH_MSG_DEBUG("REGTEST: Dump Aux variables for " << key);
+          dumpDecorators(aux,key);
+      }
   }
   m_count++;
   return sc;

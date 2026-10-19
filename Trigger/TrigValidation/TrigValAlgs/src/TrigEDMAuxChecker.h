@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIG_EDM_AUXCHECKER_H
@@ -8,6 +8,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ObjectVector.h"
 #include "xAODCore/AuxContainerBase.h"
+#include "xAODCore/ShallowAuxContainer.h"
 #include "AthenaBaseComps/AthAlgorithm.h"
 
 #include <string>
@@ -28,8 +29,8 @@ class TrigEDMAuxChecker : public AthAlgorithm  {
 
  private:
 
-
-   void dumpDecorators(const xAOD::AuxContainerBase *,const std::string&);
+   template<typename T>
+   void dumpDecorators(const T *,const std::string&);
    std::vector<std::string> m_auxList;
    std::map< std::string,std::vector<std::string> > m_auxmap;
    std::map< std::string,std::vector<std::string> > m_dynauxmap;
