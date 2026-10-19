@@ -2,19 +2,19 @@
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TgcL0FloatingTrackSelectorTool.h"
+#include "FloatingTrackSelectorTool.h"
 
-#include "TgcL0TrackSelector.h"
+#include "FloatingTrackSelector.h"
 
-namespace L1Muon {
+namespace L1Muon::L1TGC {
 
-StatusCode TgcL0FloatingTrackSelectorTool::select(
+StatusCode FloatingTrackSelectorTool::select(
     const TgcSLCandidateContainer &candidates,
     xAOD::L1TGCCandDataContainer &output, const EventContext &ctx) const {
   (void)ctx;
-  const TgcL0Floating::TrackSelector selector;
+  const FloatingTrackSelector selector;
   selector.select(candidates, output);
   return StatusCode::SUCCESS;
 }
 
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC

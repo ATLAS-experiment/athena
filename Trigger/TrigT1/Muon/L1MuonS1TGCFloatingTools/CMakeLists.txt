@@ -11,39 +11,39 @@ atlas_add_component( L1MuonS1TGCFloatingTools
                                     FourMomUtils MuonIdHelpersLib MuonReadoutGeometry
                                     MuonRDO MuonTGC_CablingLib PathResolver StoreGateLib )
 
-atlas_add_test( TgcL0FloatingPtLut_test
-  SOURCES test/TgcL0FloatingPtLut_test.cxx
-          src/TgcL0FloatingPtLut.cxx
+atlas_add_test( L1MuonS1TGC_FloatingPtLut_test
+  SOURCES test/FloatingPtLut_test.cxx
+          src/FloatingPtLut.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
   LINK_LIBRARIES CxxUtils
   POST_EXEC_SCRIPT noerror.sh )
 
-atlas_add_test( TgcL0GoodMagMap_test
-  SOURCES test/TgcL0GoodMagMap_test.cxx
-          src/TgcL0GoodMagMap.cxx
+atlas_add_test( L1MuonS1TGC_GoodMagMap_test
+  SOURCES test/GoodMagMap_test.cxx
+          src/GoodMagMap.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
   LINK_LIBRARIES CxxUtils
   POST_EXEC_SCRIPT noerror.sh )
 
-atlas_add_test( TgcL0SegmentReconstruction_test
-  SOURCES test/TgcL0SegmentReconstruction_test.cxx
-          src/TgcL0FloatingData.cxx
-          src/TgcL0SegmentReconstruction.cxx
+atlas_add_test( L1MuonS1TGC_FloatingSegmentReconstruction_test
+  SOURCES test/FloatingSegmentReconstruction_test.cxx
+          src/FloatingData.cxx
+          src/FloatingSegmentReconstruction.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} FourMomUtils L1MuonS1TGCToolInterfaces
   POST_EXEC_SCRIPT nopost.sh )
 
-atlas_add_test( TgcL0TrackSelector_test
-  SOURCES test/TgcL0TrackSelector_test.cxx
-          src/TgcL0TrackSelector.cxx
+atlas_add_test( L1MuonS1TGC_FloatingTrackSelector_test
+  SOURCES test/FloatingTrackSelector_test.cxx
+          src/FloatingTrackSelector.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} AthContainers
                  L1MuonS1TGCToolInterfaces xAODTrigL1Muon
   POST_EXEC_SCRIPT noerror.sh )
 
-atlas_add_test( TgcL0InnerCoincidence_test
-  SOURCES test/TgcL0InnerCoincidence_test.cxx
-          src/TgcL0InnerCoincidence.cxx
+atlas_add_test( L1MuonS1TGC_FloatingInnerCoincidence_test
+  SOURCES test/FloatingInnerCoincidence_test.cxx
+          src/FloatingInnerCoincidence.cxx
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src ${Boost_INCLUDE_DIRS}
   LINK_LIBRARIES ${Boost_LIBRARIES} L1MuonS1TGCToolInterfaces
   POST_EXEC_SCRIPT noerror.sh )

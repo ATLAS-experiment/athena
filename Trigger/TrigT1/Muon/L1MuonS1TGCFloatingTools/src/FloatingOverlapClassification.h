@@ -1,17 +1,16 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L1MUONS1TGCFLOATINGTOOLS_TGCL0OVERLAPCLASSIFICATION_H
-#define L1MUONS1TGCFLOATINGTOOLS_TGCL0OVERLAPCLASSIFICATION_H
+#ifndef L1MUONS1TGCFLOATINGTOOLS_FLOATINGOVERLAPCLASSIFICATION_H
+#define L1MUONS1TGCFLOATINGTOOLS_FLOATINGOVERLAPCLASSIFICATION_H
 
 #include "L1MuonS1TGCToolInterfaces/TgcSLCandidate.h"
 
 #include <cstddef>
 
-namespace L1Muon {
-namespace TgcL0Floating {
+namespace L1Muon::L1TGC {
 
-struct OverlapClassificationConfig {
+struct FloatingOverlapClassificationConfig {
   /// Candidate-position windows used only to identify possible chamber overlap.
   float maxDeltaEta{0.02F};
   float maxDeltaPhi{0.03F};
@@ -19,7 +18,7 @@ struct OverlapClassificationConfig {
   std::size_t minCommonStations{2U};
 };
 
-struct OverlapClassificationStatistics {
+struct FloatingOverlapClassificationStatistics {
   std::size_t nGroups{0};
   std::size_t nCandidates{0};
   std::size_t maxMultiplicity{0};
@@ -31,19 +30,18 @@ struct OverlapClassificationStatistics {
  * for a later overlap-removal stage, after pT and Inner-Coincidence information
  * are available.
  */
-class OverlapClassification {
+class FloatingOverlapClassification {
  public:
-  explicit OverlapClassification(
-      OverlapClassificationConfig config = OverlapClassificationConfig{});
+  explicit FloatingOverlapClassification(
+      FloatingOverlapClassificationConfig config = FloatingOverlapClassificationConfig{});
 
   void classify(TgcSLCandidateContainer& candidates,
-                OverlapClassificationStatistics& statistics) const;
+                FloatingOverlapClassificationStatistics& statistics) const;
 
  private:
-  OverlapClassificationConfig m_config{};
+  FloatingOverlapClassificationConfig m_config{};
 };
 
-}  // namespace TgcL0Floating
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC
 
 #endif

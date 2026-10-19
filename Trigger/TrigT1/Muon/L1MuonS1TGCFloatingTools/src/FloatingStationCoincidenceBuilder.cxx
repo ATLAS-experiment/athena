@@ -2,7 +2,7 @@
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TgcL0StationCoincidence.h"
+#include "FloatingStationCoincidenceBuilder.h"
 
 #include <algorithm>
 #include <array>
@@ -14,8 +14,8 @@
 
 namespace {
 
-using Hit = L1Muon::TgcL0Floating::Hit;
-using Station = L1Muon::TgcL0Floating::Station;
+using Hit = L1Muon::L1TGC::FloatingHit;
+using Station = L1Muon::L1TGC::FloatingStation;
 
 std::size_t stationIndex(const Station station) {
   if (station == Station::M1) return 0U;
@@ -43,10 +43,9 @@ bool betterRepresentativeHit(const Hit* lhs, const Hit* rhs,
 
 }  // namespace
 
-namespace L1Muon {
-namespace TgcL0Floating {
+namespace L1Muon::L1TGC {
 
-std::uint8_t StationCoincidenceBuilder::nominalLayers(
+std::uint8_t FloatingStationCoincidenceBuilder::nominalLayers(
     const Station station, const bool isStrip) {
   if (station == Station::M1 && !isStrip) return 3U;
   if (station == Station::M1 || station == Station::M2 ||
@@ -56,9 +55,9 @@ std::uint8_t StationCoincidenceBuilder::nominalLayers(
   return 0U;
 }
 
-StatusCode StationCoincidenceBuilder::build(
-    const HitGroups& hitGroups,
-    StationCoincidenceContainer& coincidences) const {
+StatusCode FloatingStationCoincidenceBuilder::build(
+    const FloatingHitGroups& hitGroups,
+    FloatingStationCoincidenceContainer& coincidences) const {
   coincidences.clear();
 
   for (const auto& [key, groupHits] : hitGroups) {
@@ -166,8 +165,8 @@ StatusCode StationCoincidenceBuilder::build(
   }
 
   std::sort(coincidences.begin(), coincidences.end(),
-            [](const StationCoincidence& lhs,
-               const StationCoincidence& rhs) {
+            [](const FloatingStationCoincidence& lhs,
+               const FloatingStationCoincidence& rhs) {
               if (lhs.key.tie() != rhs.key.tie()) {
                 return lhs.key.tie() < rhs.key.tie();
               }
@@ -181,5 +180,4 @@ StatusCode StationCoincidenceBuilder::build(
   return StatusCode::SUCCESS;
 }
 
-}  // namespace TgcL0Floating
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC

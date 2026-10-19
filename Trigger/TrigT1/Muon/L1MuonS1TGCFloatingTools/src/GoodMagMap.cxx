@@ -1,7 +1,7 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#include "TgcL0GoodMagMap.h"
+#include "GoodMagMap.h"
 
 #include "CxxUtils/StringUtils.h"
 
@@ -37,9 +37,9 @@ constexpr bool hasEmptyCsvField(const std::string_view line) {
 
 }  // namespace
 
-namespace L1Muon {
+namespace L1Muon::L1TGC {
 
-std::unique_ptr<TgcL0GoodMagMap> TgcL0GoodMagMap::loadAscii(
+std::unique_ptr<GoodMagMap> GoodMagMap::loadAscii(
     const std::string& calibrationPath, std::string& error) {
   error.clear();
   std::ifstream input{calibrationPath};
@@ -48,7 +48,7 @@ std::unique_ptr<TgcL0GoodMagMap> TgcL0GoodMagMap::loadAscii(
     return nullptr;
   }
 
-  auto map = std::unique_ptr<TgcL0GoodMagMap>{new TgcL0GoodMagMap};
+  auto map = std::unique_ptr<GoodMagMap>{new GoodMagMap};
   unsigned int schemaVersion = 0U;
   bool schemaVersionSeen = false;
   bool payloadVersionSeen = false;
@@ -164,7 +164,7 @@ std::unique_ptr<TgcL0GoodMagMap> TgcL0GoodMagMap::loadAscii(
   return map;
 }
 
-bool TgcL0GoodMagMap::isGood(const int etaBin,
+bool GoodMagMap::isGood(const int etaBin,
                              const int phiFoldBin) const {
   if (etaBin < 0 || phiFoldBin < 0 ||
       etaBin >= static_cast<int>(m_etaBins) ||
@@ -177,7 +177,7 @@ bool TgcL0GoodMagMap::isGood(const int etaBin,
   return !m_poorBins[index];
 }
 
-int TgcL0GoodMagMap::etaBin(const float eta, const float absEtaMin,
+int GoodMagMap::etaBin(const float eta, const float absEtaMin,
                             const float absEtaMax) const {
   if (!std::isfinite(eta) || !std::isfinite(absEtaMin) ||
       !std::isfinite(absEtaMax) || !(absEtaMax > absEtaMin)) {
@@ -192,7 +192,7 @@ int TgcL0GoodMagMap::etaBin(const float eta, const float absEtaMin,
   return bin >= 0 && bin < static_cast<int>(m_etaBins) ? bin : -1;
 }
 
-int TgcL0GoodMagMap::phiFoldBin(const float phi) const {
+int GoodMagMap::phiFoldBin(const float phi) const {
   if (!std::isfinite(phi)) return -1;
   const float period = 2.F * std::numbers::pi_v<float> / 8.F;
   float folded = std::fmod(phi, period);
@@ -204,10 +204,10 @@ int TgcL0GoodMagMap::phiFoldBin(const float phi) const {
       static_cast<int>(m_phiBinsPerFold) - 1);
 }
 
-bool TgcL0GoodMagMap::isGood(const float eta, const float phi,
+bool GoodMagMap::isGood(const float eta, const float phi,
                              const float absEtaMin,
                              const float absEtaMax) const {
   return isGood(etaBin(eta, absEtaMin, absEtaMax), phiFoldBin(phi));
 }
 
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC

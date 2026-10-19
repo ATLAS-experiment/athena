@@ -1,16 +1,15 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L1MUONS1TGCFLOATINGTOOLS_TGCL0INNERCOINCIDENCE_H
-#define L1MUONS1TGCFLOATINGTOOLS_TGCL0INNERCOINCIDENCE_H
+#ifndef L1MUONS1TGCFLOATINGTOOLS_FLOATINGINNERCOINCIDENCE_H
+#define L1MUONS1TGCFLOATINGTOOLS_FLOATINGINNERCOINCIDENCE_H
 
 #include "L1MuonS1TGCToolInterfaces/TgcSLCandidate.h"
 
-namespace L1Muon {
-namespace TgcL0Floating {
+namespace L1Muon::L1TGC {
 
 /** @brief Apply the floating-point Inner-Coincidence response. */
-class InnerCoincidence {
+class FloatingInnerCoincidence {
  public:
   /**
    * @brief Propagate the pre-Inner result when no inner-detector input is
@@ -20,7 +19,6 @@ class InnerCoincidence {
   void apply(TgcSLCandidateContainer &candidates) const;
 };
 
-}  // namespace TgcL0Floating
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC
 
 #endif

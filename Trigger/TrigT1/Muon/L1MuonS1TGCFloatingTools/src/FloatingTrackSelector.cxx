@@ -2,7 +2,7 @@
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TgcL0TrackSelector.h"
+#include "FloatingTrackSelector.h"
 
 #include <algorithm>
 #include <cmath>
@@ -44,10 +44,9 @@ void fillOutputCandidate(const L1Muon::TgcSLCandidate &input, std::uint8_t tcId,
 
 }  // namespace
 
-namespace L1Muon {
-namespace TgcL0Floating {
+namespace L1Muon::L1TGC {
 
-void TrackSelector::select(const TgcSLCandidateContainer &candidates,
+void FloatingTrackSelector::select(const TgcSLCandidateContainer &candidates,
                            xAOD::L1TGCCandDataContainer &output) const {
   std::vector<const TgcSLCandidate *> orderedCandidates;
   orderedCandidates.reserve(candidates.size());
@@ -95,5 +94,4 @@ void TrackSelector::select(const TgcSLCandidateContainer &candidates,
   }
 }
 
-}  // namespace TgcL0Floating
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC

@@ -2,10 +2,10 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "../TgcL0FloatingCandidateBuilderTool.h"
-#include "../TgcL0FloatingInnerCoincidenceTool.h"
-#include "../TgcL0FloatingTrackSelectorTool.h"
+#include "../FloatingCandidateBuilderTool.h"
+#include "../FloatingInnerCoincidenceTool.h"
+#include "../FloatingTrackSelectorTool.h"
 
-DECLARE_COMPONENT(L1Muon::TgcL0FloatingCandidateBuilderTool)
-DECLARE_COMPONENT(L1Muon::TgcL0FloatingInnerCoincidenceTool)
-DECLARE_COMPONENT(L1Muon::TgcL0FloatingTrackSelectorTool)
+DECLARE_COMPONENT(L1Muon::L1TGC::FloatingCandidateBuilderTool)
+DECLARE_COMPONENT(L1Muon::L1TGC::FloatingInnerCoincidenceTool)
+DECLARE_COMPONENT(L1Muon::L1TGC::FloatingTrackSelectorTool)

@@ -2,7 +2,7 @@
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TgcL0SegmentReconstruction.h"
+#include "FloatingSegmentReconstruction.h"
 
 #include "FourMomUtils/xAODP4Helpers.h"
 
@@ -20,11 +20,11 @@
 
 namespace {
 
-using Coincidence = L1Muon::TgcL0Floating::StationCoincidence;
-using Config = L1Muon::TgcL0Floating::SegmentReconstructionConfig;
-using Statistics = L1Muon::TgcL0Floating::SegmentStatistics;
-using Station = L1Muon::TgcL0Floating::Station;
-using GroupKey = L1Muon::TgcL0Floating::HitGroupKey;
+using Coincidence = L1Muon::L1TGC::FloatingStationCoincidence;
+using Config = L1Muon::L1TGC::FloatingSegmentReconstructionConfig;
+using Statistics = L1Muon::L1TGC::FloatingSegmentStatistics;
+using Station = L1Muon::L1TGC::FloatingStation;
+using GroupKey = L1Muon::L1TGC::FloatingHitGroupKey;
 using OutputSegment = L1Muon::L1TGC::Segment;
 using OutputSegments = L1Muon::L1TGC::SegmentContainer;
 using Projection = L1Muon::L1TGC::SegmentProjection;
@@ -531,19 +531,18 @@ void countPositionMask(const std::uint8_t mask, Statistics& statistics) {
 
 }  // namespace
 
-namespace L1Muon {
-namespace TgcL0Floating {
+namespace L1Muon::L1TGC {
 
-SegmentReconstruction::SegmentReconstruction(SegmentReconstructionConfig config)
+FloatingSegmentReconstruction::FloatingSegmentReconstruction(FloatingSegmentReconstructionConfig config)
     : m_config{std::move(config)} {}
 
-StatusCode SegmentReconstruction::build(
-    const StationCoincidenceContainer& coincidences,
+StatusCode FloatingSegmentReconstruction::build(
+    const FloatingStationCoincidenceContainer& coincidences,
     TgcSLCandidateContainer& candidates,
-    SegmentStatistics& statistics,
-    L1TGC::SegmentContainer* validationSegments) const {
+    FloatingSegmentStatistics& statistics,
+    SegmentContainer* validationSegments) const {
   candidates.clear();
-  statistics = SegmentStatistics{};
+  statistics = FloatingSegmentStatistics{};
   if (validationSegments != nullptr) validationSegments->clear();
 
   using Projections =
@@ -669,5 +668,4 @@ StatusCode SegmentReconstruction::build(
   return StatusCode::SUCCESS;
 }
 
-}  // namespace TgcL0Floating
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC

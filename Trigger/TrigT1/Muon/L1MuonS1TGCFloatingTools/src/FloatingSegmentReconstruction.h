@@ -1,20 +1,19 @@
 /*
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-#ifndef L1MUONS1TGCFLOATINGTOOLS_TGCL0SEGMENTRECONSTRUCTION_H
-#define L1MUONS1TGCFLOATINGTOOLS_TGCL0SEGMENTRECONSTRUCTION_H
+#ifndef L1MUONS1TGCFLOATINGTOOLS_FLOATINGSEGMENTRECONSTRUCTION_H
+#define L1MUONS1TGCFLOATINGTOOLS_FLOATINGSEGMENTRECONSTRUCTION_H
 
 #include "GaudiKernel/StatusCode.h"
 #include "L1MuonS1TGCToolInterfaces/TgcSLCandidate.h"
 #include "L1MuonS1TGCToolInterfaces/Segment.h"
-#include "TgcL0FloatingData.h"
+#include "FloatingData.h"
 
 #include <cstddef>
 
-namespace L1Muon {
-namespace TgcL0Floating {
+namespace L1Muon::L1TGC {
 
-struct SegmentReconstructionConfig {
+struct FloatingSegmentReconstructionConfig {
   /// Broad efficiency-first Floating candidate windows.
   float maxCandidateDThetaAbs{0.10F};
   float maxCandidateDPhiAbs{0.10F};
@@ -40,7 +39,7 @@ struct SegmentReconstructionConfig {
   float localDuplicatePhiWindow{0.03F};
 };
 
-struct SegmentStatistics {
+struct FloatingSegmentStatistics {
   std::size_t nWireSegments{0};
   std::size_t nStripSegments{0};
   std::size_t nM1M2M3Candidates{0};
@@ -60,21 +59,20 @@ struct SegmentStatistics {
 };
 
 /** @brief Reconstruct same-BC inter-station segments and transient candidates. */
-class SegmentReconstruction {
+class FloatingSegmentReconstruction {
  public:
-  explicit SegmentReconstruction(
-      SegmentReconstructionConfig config = SegmentReconstructionConfig{});
+  explicit FloatingSegmentReconstruction(
+      FloatingSegmentReconstructionConfig config = FloatingSegmentReconstructionConfig{});
 
-  StatusCode build(const StationCoincidenceContainer& coincidences,
+  StatusCode build(const FloatingStationCoincidenceContainer& coincidences,
                    TgcSLCandidateContainer& candidates,
-                   SegmentStatistics& statistics,
-                   L1TGC::SegmentContainer* validationSegments = nullptr) const;
+                   FloatingSegmentStatistics& statistics,
+                   SegmentContainer* validationSegments = nullptr) const;
 
  private:
-  SegmentReconstructionConfig m_config{};
+  FloatingSegmentReconstructionConfig m_config{};
 };
 
-}  // namespace TgcL0Floating
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC
 
 #endif

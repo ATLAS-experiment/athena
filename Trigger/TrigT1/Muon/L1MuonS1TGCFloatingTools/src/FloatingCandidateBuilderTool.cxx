@@ -2,16 +2,16 @@
    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TgcL0FloatingCandidateBuilderTool.h"
+#include "FloatingCandidateBuilderTool.h"
 
 #include "PathResolver/PathResolver.h"
 #include "StoreGate/ReadCondHandle.h"
-#include "TgcL0FloatingData.h"
-#include "TgcL0FloatingPtLut.h"
-#include "TgcL0RdoDecoder.h"
-#include "TgcL0OverlapClassification.h"
-#include "TgcL0SegmentReconstruction.h"
-#include "TgcL0StationCoincidence.h"
+#include "FloatingData.h"
+#include "FloatingPtLut.h"
+#include "FloatingRdoDecoder.h"
+#include "FloatingOverlapClassification.h"
+#include "FloatingSegmentReconstruction.h"
+#include "FloatingStationCoincidenceBuilder.h"
 
 #include <sstream>
 #include <utility>
@@ -28,7 +28,7 @@ struct CoincidenceQualityCounts {
 };
 
 void countCoincidenceQuality(
-    const L1Muon::TgcL0Floating::StationCoincidence& coincidence,
+    const L1Muon::L1TGC::FloatingStationCoincidence& coincidence,
     CoincidenceQualityCounts& counts) {
   if (coincidence.nominalLayers == 3U) {
     if (coincidence.observedLayers == 3U) {
@@ -49,9 +49,9 @@ void countCoincidenceQuality(
 
 }  // namespace
 
-namespace L1Muon {
+namespace L1Muon::L1TGC {
 
-StatusCode TgcL0FloatingCandidateBuilderTool::initialize() {
+StatusCode FloatingCandidateBuilderTool::initialize() {
   ATH_CHECK(m_idHelperSvc.retrieve());
   ATH_CHECK(m_cablingKey.initialize());
   ATH_CHECK(m_detectorManagerKey.initialize());
@@ -65,7 +65,7 @@ StatusCode TgcL0FloatingCandidateBuilderTool::initialize() {
   const std::string ptCalibrationPath =
       calibrationDirectory + "/" + m_ptCalibrationFile.value();
   std::string error;
-  m_ptLut = TgcL0FloatingPtLut::loadAscii(ptCalibrationPath, error);
+  m_ptLut = FloatingPtLut::loadAscii(ptCalibrationPath, error);
   if (!m_ptLut) {
     ATH_MSG_ERROR("Failed to load Floating-pT calibration: " << error);
     return StatusCode::FAILURE;
@@ -83,7 +83,7 @@ StatusCode TgcL0FloatingCandidateBuilderTool::initialize() {
   const std::string goodMagMapPath =
       calibrationDirectory + "/" + m_goodMagMapFile.value();
   error.clear();
-  m_goodMagMap = TgcL0GoodMagMap::loadAscii(goodMagMapPath, error);
+  m_goodMagMap = GoodMagMap::loadAscii(goodMagMapPath, error);
   if (!m_goodMagMap) {
     ATH_MSG_ERROR("Failed to load GoodMag map: " << error);
     return StatusCode::FAILURE;
@@ -96,15 +96,15 @@ StatusCode TgcL0FloatingCandidateBuilderTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode TgcL0FloatingCandidateBuilderTool::build(
+StatusCode FloatingCandidateBuilderTool::build(
     const TgcRdoContainer& rdos, TgcSLCandidateContainer& candidates,
     const EventContext& ctx) const {
   return build(rdos, candidates, nullptr, ctx);
 }
 
-StatusCode TgcL0FloatingCandidateBuilderTool::build(
+StatusCode FloatingCandidateBuilderTool::build(
     const TgcRdoContainer& rdos, TgcSLCandidateContainer& candidates,
-    L1TGC::SegmentContainer* segments, const EventContext& ctx) const {
+    SegmentContainer* segments, const EventContext& ctx) const {
 
   const Muon::TgcCablingMap* cabling{};
   ATH_CHECK(SG::get(cabling, m_cablingKey, ctx));
@@ -118,18 +118,18 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
   const MuonGM::MuonDetectorManager* detectorManager =
       detectorManagerHandle.cptr();
 
-  TgcL0Floating::HitGroups hitGroups;
-  TgcL0Floating::DecodeStatistics statistics;
-  const TgcL0Floating::RdoDecoder decoder;
+  FloatingHitGroups hitGroups;
+  FloatingDecodeStatistics statistics;
+  const FloatingRdoDecoder decoder;
   ATH_CHECK(decoder.decode(rdos, *cabling, *m_idHelperSvc, *detectorManager,
                            hitGroups, statistics));
 
-  TgcL0Floating::StationCoincidenceContainer coincidences;
-  const TgcL0Floating::StationCoincidenceBuilder coincidenceBuilder;
+  FloatingStationCoincidenceContainer coincidences;
+  const FloatingStationCoincidenceBuilder coincidenceBuilder;
   ATH_CHECK(coincidenceBuilder.build(hitGroups, coincidences));
 
 
-  TgcL0Floating::SegmentReconstructionConfig segmentConfig;
+  FloatingSegmentReconstructionConfig segmentConfig;
   segmentConfig.maxPivotWireStripDeltaEta =
       m_maxPivotWireStripDeltaEta.value();
   segmentConfig.maxPivotWireStripDeltaPhi =
@@ -138,19 +138,19 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
       m_maxSegmentCombinationsPerGroup.value();
   segmentConfig.maxCandidatesPerLocalBin =
       m_maxCandidatesPerLocalBin.value();
-  TgcL0Floating::SegmentStatistics segmentStatistics;
-  const TgcL0Floating::SegmentReconstruction segmentReconstruction{
+  FloatingSegmentStatistics segmentStatistics;
+  const FloatingSegmentReconstruction segmentReconstruction{
       std::move(segmentConfig)};
   ATH_CHECK(segmentReconstruction.build(coincidences, candidates,
                                         segmentStatistics, segments));
 
-  TgcL0Floating::OverlapClassificationStatistics overlapStatistics;
-  const TgcL0Floating::OverlapClassification overlapClassification;
+  FloatingOverlapClassificationStatistics overlapStatistics;
+  const FloatingOverlapClassification overlapClassification;
   overlapClassification.classify(candidates, overlapStatistics);
 
   std::size_t nValidPtEstimates = 0U;
   for (TgcSLCandidate& candidate : candidates) {
-    const TgcL0FloatingPtEvaluation evaluation =
+    const FloatingPtEvaluation evaluation =
         m_ptLut->evaluate(candidate.eta, candidate.phi, candidate.deltaTheta);
     candidate.goodMagneticField = m_goodMagMap->isGood(
         candidate.eta, candidate.phi, m_ptLut->absEtaMin(),
@@ -175,15 +175,15 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
   CoincidenceQualityCounts m3WireCounts;
   CoincidenceQualityCounts m3StripCounts;
 
-  for (const TgcL0Floating::StationCoincidence& coincidence : coincidences) {
+  for (const FloatingStationCoincidence& coincidence : coincidences) {
     countCoincidenceQuality(coincidence, totalCounts);
 
     CoincidenceQualityCounts* stationCounts{nullptr};
-    if (coincidence.station == TgcL0Floating::Station::M1) {
+    if (coincidence.station == FloatingStation::M1) {
       stationCounts = coincidence.isStrip ? &m1StripCounts : &m1WireCounts;
-    } else if (coincidence.station == TgcL0Floating::Station::M2) {
+    } else if (coincidence.station == FloatingStation::M2) {
       stationCounts = coincidence.isStrip ? &m2StripCounts : &m2WireCounts;
-    } else if (coincidence.station == TgcL0Floating::Station::M3) {
+    } else if (coincidence.station == FloatingStation::M3) {
       stationCounts = coincidence.isStrip ? &m3StripCounts : &m3WireCounts;
     }
     if (stationCounts != nullptr) {
@@ -335,4 +335,4 @@ StatusCode TgcL0FloatingCandidateBuilderTool::build(
   return StatusCode::SUCCESS;
 }
 
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC
