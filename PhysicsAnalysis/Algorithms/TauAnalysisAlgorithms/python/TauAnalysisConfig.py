@@ -144,8 +144,6 @@ class TauCalibrationConfig (ConfigBlock):
         config.addPrivateTool( 'smearingTool', 'TauAnalysisTools::TauSmearingTool' )
         alg.smearingTool.useFastSim = config.dataType() is DataType.FastSim
         alg.smearingTool.Campaign = _campaign(config)
-        if config.geometry() is LHCPeriod.Run2 and self.useGNTau:
-           raise RuntimeError("Tau Smearing recommendations with GNTau are not yet available for Run2") 
         alg.smearingTool.useGNTau = self.useGNTau
         alg.taus = config.readName (self.containerName)
         alg.tausOut = config.copyName (self.containerName)
