@@ -8,6 +8,8 @@
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODBase/IParticleContainer.h"
+#include "xAODMetaData/FileMetaData.h"
+#include "xAODEventFormat/EventFormat.h"
 #include "POOLRootAccess/TEvent.h"
 #include "CxxUtils/checker_macros.h"
 
@@ -132,6 +134,20 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
     evt.retrieve( jets, "AntiKt4EMPFlowJets" ).ignore();
    }
    std::cout << "...done.... now doing test..." << std::endl;
+
+   // kClassAccess is hybrid mode: input metadata is read with POOL by MetaDataSvc
+   const xAOD::FileMetaData* fmd = nullptr;
+   std::string dataType;
+   if (evt.inputMetaStore()->retrieve(fmd, "FileMetaData").isFailure()
+       || !fmd->value(xAOD::FileMetaData::dataType, dataType) || dataType.empty()) {
+     std::cout << "no FileMetaData in input metadata" << std::endl; return -1;
+   }
+   const xAOD::EventFormat* ef = nullptr;
+   if (evt.inputMetaStore()->retrieve(ef, "EventFormat" + dataType).isFailure()
+       || !ef->exists("EventInfo") || !ef->exists("Electrons")) {
+     std::cout << "no or incomplete EventFormat" << dataType << " in input metadata" << std::endl; return -1;
+   }
+   std::cout << "input metadata: FileMetaData and EventFormat" << dataType << " OK" << std::endl;
 
    // for unclear reasons, must do POOL::TEvent loop first b.c. xAODRootAccess's TEvent
    // seems to impact behaviour of the POOL::TEvent if its done first

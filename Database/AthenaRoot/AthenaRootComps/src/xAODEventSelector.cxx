@@ -41,7 +41,6 @@
 #include "AthenaKernel/CLIDRegistry.h"
 #include "CxxUtils/checker_macros.h"
 #include "StorageSvc/DbType.h"
-#include "EventSelectorAthenaPool/Collection.h"
 
 // StoreGate includes
 
@@ -159,7 +158,7 @@ xAODEventSelector::xAODEventSelector( const std::string& name,
   declareProperty( "InputMetaStore",m_imetaStore,  "Store where to publish (input) metadata");
   declareProperty( "MetaStore",m_ometaStore,       "Store where to publish (output) metadata");
 
-  declareProperty( "ReadMetaDataWithPool", m_readMetadataWithPool=false, "If true, using POOL to read metadata, will ensure input file is registered with catalog");
+  declareProperty( "ReadMetaDataWithPool", m_readMetadataWithPool=false, "If true, metadata is read with POOL (by MetaDataSvc) instead of xAOD::Event");
   declareProperty( "printEventProxyWarnings", m_printEventProxyWarnings);
 
 }
@@ -1093,27 +1092,12 @@ StatusCode xAODEventSelector::setFile(const std::string& fname) {
    }
 
 
-  if(m_readMetadataWithPool) {
-      //ensure input file collection created
-      ATH_MSG_DEBUG("Creating poolsvc collection for " << fname);
-      StatusCode sc = m_poolSvc->connectCollection( "PFN:"+fname , fname );
-      std::unique_ptr<pool::Collection> collPtr ATLAS_THREAD_SAFE;
-      // Try to open EventTags Collection in the input file
-      try {
-         auto fileDescr = m_poolSvc->getInputFileDescriptor(IPoolSvc::kInputStream, "PFN:"+fname);
-         collPtr = std::make_unique<pool::Collection>(fileDescr);
-      } catch (std::exception &e) {
-         collPtr = nullptr;
-      }
-      if (sc.isRecoverable() || collPtr == nullptr) {
-         m_poolSvc->checkCollection("PFN:"+fname, IPoolSvc::kInputStream, collPtr == nullptr).ignore();
-      }
-      //metadata will be read by MetaDataSvc, triggered by the BeginInputFile call
-   } else {
+  //with POOL, metadata is read by MetaDataSvc (which connects the file on demand), triggered by the BeginInputFile call
+  if(!m_readMetadataWithPool) {
       if (!createMetaDataRootBranchAddresses().isSuccess()) {
          ATH_MSG_ERROR("Could not load metadata");
       }
-   }
+  }
 
 
 
