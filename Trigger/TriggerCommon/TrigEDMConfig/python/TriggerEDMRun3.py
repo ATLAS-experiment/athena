@@ -787,7 +787,7 @@ TriggerHLTListRun3 = [
     # boosted ditau roi
     ('TrigRoiDescriptorCollection#HLT_Roi_DiTau',            'BS ESD',          'Tau'),
 
-    ('xAOD::JetContainer#HLT_jet_seed',                         '', 'Tau', [InViews('tauCaloMVAViews')]),
+    ('xAOD::JetContainer#HLT_jet_seed',                         '', 'Tau', [InViews('tauCaloMVAViews'), InViews('tauCaloLCMVAViews')]),
     ('xAOD::JetAuxContainer#HLT_jet_seedAux.',                  '', 'Tau'),
 
     #boosted ditau tracks
@@ -1071,7 +1071,7 @@ TriggerHLTListRun3 = [
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersFSAux.nCells', 'BS ESD', 'Calo'),
 
     # tau
-    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloMVAOnly',                      'BS ESD AODFULL',         'Tau', [InViews('tauCaloMVAViews')]),
+    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloMVAOnly',                      'BS ESD AODFULL',         'Tau', [InViews('tauCaloMVAViews'), InViews('tauCaloLCMVAViews')]),
     ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_CaloMVAOnlyAux.',               'BS ESD AODFULL',         'Tau'),
 
     ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloHits',                                        'BS ESD AODFULL', 'Tau', [InViews('tauCaloHits_HitZViews')]),
@@ -1243,7 +1243,7 @@ TriggerHLTListRun3 = [
     ('xAOD::TrigCompositeAuxContainer#HLT_AnomDet_ComboHypoAux.adScore', 'BS ESD AODFULL AODSLIM', 'AnomDet'),
 
     # tau calo clusters (moved as last because of the truncation errors ATR-29142)
-    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLC',                             'BS ESD AODFULL', 'Tau', [InViews('tauCaloMVAViews'), allowTruncation]),   
+    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLC',                             'BS ESD AODFULL', 'Tau', [InViews('tauCaloMVAViews'), InViews('tauCaloLCMVAViews'), allowTruncation]),   
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersLCAux.nCells.CENTER_MAG', 'BS ESD AODFULL', 'Tau', [allowTruncation]),
  
     # FS tracks (moved as last because of the truncation errors ATR-29142)
