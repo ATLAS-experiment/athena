@@ -18,7 +18,7 @@ usage () {
     -s  |  --nStripCU       INT         nStripCU
     -b  |  --bdfid          STRING      bdfid of the FPGA to run on
     -f  |  --runF110                    run F110 Integration algo
-    -g  |  --useGBTS                    use GNN seeding strategy (GbtsFtf)
+    -g  |  --useGBTS                    use GNN seeding strategy (Gbts)
     -h  |  --help                       this help
     "
     [ $# -gt 0 ] && exit $1
@@ -95,7 +95,7 @@ preExecFlags="flags.Tracking.doTruth=True;flags.Tracking.ITkActsValidateF100Pass
 
 # In case of GBTS seeding strategy
 if [ "$useGBTS" == "True" ]; then
-    preExecFlags="${preExecFlags};from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Tracking.ITkActsValidateF100Pass.SeedingStrategy=SeedingStrategy.GbtsFtf"
+    preExecFlags="${preExecFlags};from ActsConfig.ActsConfigFlags import SeedingStrategy;flags.Tracking.ITkActsValidateF100Pass.SeedingStrategy=SeedingStrategy.Gbts"
 fi
 
 ATHENA_CORE_NUMBER=${threads} Reco_tf.py --CA \

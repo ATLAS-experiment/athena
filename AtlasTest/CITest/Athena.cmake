@@ -441,9 +441,6 @@ atlas_add_citest( ACTS_ActsNNClustering
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow
   SCRIPT CheckCountTest.sh ActsCheckObjectCounts )
 
-atlas_add_citest( ACTS_CheckObjectCounts_Workflow_GbtsFtf
-  SCRIPT CheckCountTest.sh ActsCheckObjectCountsGbtsFtf )
-
 atlas_add_citest( ACTS_TriggerC100
   SCRIPT test_trigAna_ActsTriggerC100_build.py )
 
