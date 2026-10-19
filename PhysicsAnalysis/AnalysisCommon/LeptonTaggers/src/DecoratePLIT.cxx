@@ -5,7 +5,6 @@
 */
 
 #include "LeptonTaggers/DecoratePLIT.h"
-#include "AthContainers/ConstDataVector.h"
 #include "xAODEgamma/ElectronxAODHelpers.h"
 #include <AsgDataHandles/ReadDecorHandle.h>
 
@@ -532,7 +531,7 @@ namespace Prompt {
       const xAOD::TrackParticle *track = dynamic_cast<const xAOD::TrackParticle*>(part);
       if (!track) {
         ATH_MSG_ERROR("DecoratePLIT::execute - null track pointer");
-        continue;
+        return StatusCode::FAILURE;
       }
       
       // dr_lepton
@@ -801,7 +800,7 @@ namespace Prompt {
     for (const xAOD::TrackParticle *track: trackContainer) {
       if (!track) {
         ATH_MSG_ERROR("DecoratePLIT::fillParticles - null track pointer");
-        continue;
+        return StatusCode::FAILURE;
       }
       // check if track passed selection
       if (!passed_r22tracking_cuts(*track, ctx)) continue;
