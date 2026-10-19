@@ -12,11 +12,6 @@
 // PhysVal includes
 #include "PhysValMET.h"
 
-// STL includes
-#include <cmath>
-#include <map>
-#include <vector>
-
 // FrameWork includes
 #include "GaudiKernel/IToolSvc.h"
 #include "xAODMissingET/versions/MissingETBase.h" 
@@ -40,6 +35,10 @@
 #include "PATCore/AcceptData.h"
 #include "METUtilities/METHelpers.h"
 #include "AthContainers/Decorator.h"
+// STL includes
+#include <cmath>
+#include <map>
+#include <vector>
 
 using namespace xAOD;
 
@@ -207,7 +206,7 @@ namespace MissingEtDQA {
     double binphi = 3.15;
     double lowET = 0.;
     double suET = 2500.;
-
+    //all histograms only booked for level>=10
     if (m_detailLevel >= 10) {
 
       for (const auto& type : m_types){
@@ -268,14 +267,14 @@ namespace MissingEtDQA {
           v_MET_Ref_sum.push_back( new  TH1D((name_met + "_" + term + "_sum").c_str(), (name_met + " " + m_names[term] + " sum; E_{T}^{sum} [GeV]; Entries / 25 GeV").c_str(), nbinE, lowET, suET) );
           m_dir_met.push_back("MET/" + name_met + "/Terms/" + term + "/");
         }
-        
-        m_MET_Ref[type] = v_MET_Ref;
-        m_MET_Ref_x[type] = v_MET_Ref_x;
-        m_MET_Ref_y[type] = v_MET_Ref_y;
-        m_MET_Ref_phi[type] = v_MET_Ref_phi;
-        m_MET_Ref_sum[type] = v_MET_Ref_sum;
+        std::size_t n = v_MET_Ref.size();
+        m_MET_Ref[type] = std::move(v_MET_Ref);
+        m_MET_Ref_x[type] = std::move(v_MET_Ref_x);
+        m_MET_Ref_y[type] = std::move(v_MET_Ref_y);
+        m_MET_Ref_phi[type] = std::move(v_MET_Ref_phi);
+        m_MET_Ref_sum[type] = std::move(v_MET_Ref_sum);
 
-        for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Ref.size(); ++i) {
+        for(std::size_t i = 0; i < n; ++i) {
           ATH_CHECK(regHist(m_MET_Ref[type].at(i),m_dir_met[i],all));
           ATH_CHECK(regHist(m_MET_Ref_x[type].at(i),m_dir_met[i],all));
           ATH_CHECK(regHist(m_MET_Ref_y[type].at(i),m_dir_met[i],all));
@@ -362,14 +361,14 @@ namespace MissingEtDQA {
           v_MET_Diff_Ref_sum.push_back( new  TH1D((name_met + "_Diff_" + it +"_sum").c_str(), ("MET_Diff sumet " + m_names[it] + " in " + name_met +"; E_{T}^{sum} - #Sigma |p_{T}| [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -250, 250) );
           m_dir_met.push_back("MET/" + name_met + "/Differences/" + it + "/");
         }
+        n = v_MET_Diff_Ref.size();
+        m_MET_Diff_Ref[type] = std::move(v_MET_Diff_Ref);
+        m_MET_Diff_Ref_x[type] = std::move(v_MET_Diff_Ref_x);
+        m_MET_Diff_Ref_y[type] = std::move(v_MET_Diff_Ref_y);
+        m_MET_Diff_Ref_phi[type] = std::move(v_MET_Diff_Ref_phi);
+        m_MET_Diff_Ref_sum[type] = std::move(v_MET_Diff_Ref_sum);
         
-        m_MET_Diff_Ref[type] = v_MET_Diff_Ref;
-        m_MET_Diff_Ref_x[type] = v_MET_Diff_Ref_x;
-        m_MET_Diff_Ref_y[type] = v_MET_Diff_Ref_y;
-        m_MET_Diff_Ref_phi[type] = v_MET_Diff_Ref_phi;
-        m_MET_Diff_Ref_sum[type] = v_MET_Diff_Ref_sum;
-        
-        for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Diff_Ref.size(); ++i) {
+        for(std::size_t i = 0; i < n; ++i) {
           ATH_CHECK(regHist(m_MET_Diff_Ref[type].at(i),m_dir_met[i],all));
           ATH_CHECK(regHist(m_MET_Diff_Ref_x[type].at(i),m_dir_met[i],all));
           ATH_CHECK(regHist(m_MET_Diff_Ref_y[type].at(i),m_dir_met[i],all));
@@ -409,14 +408,14 @@ namespace MissingEtDQA {
           v_MET_Reb_sum.push_back( new  TH1D((name_met + "_" + term + "_sum").c_str(), (name_met + " " + m_names[term] + " sum; E_{T}^{sum} [GeV]; Entries / 25 GeV").c_str(), nbinE, lowET, suET) );
           m_dir_met.push_back("MET/" + name_met + "/Terms/" + term + "/");
         }
+        std::size_t n = v_MET_Reb.size();
+        m_MET_Reb[type] = std::move(v_MET_Reb);
+        m_MET_Reb_x[type] = std::move(v_MET_Reb_x);
+        m_MET_Reb_y[type] = std::move(v_MET_Reb_y);
+        m_MET_Reb_phi[type] = std::move(v_MET_Reb_phi);
+        m_MET_Reb_sum[type] = std::move(v_MET_Reb_sum);
         
-        m_MET_Reb[type] = v_MET_Reb;
-        m_MET_Reb_x[type] = v_MET_Reb_x;
-        m_MET_Reb_y[type] = v_MET_Reb_y;
-        m_MET_Reb_phi[type] = v_MET_Reb_phi;
-        m_MET_Reb_sum[type] = v_MET_Reb_sum;
-        
-        for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Reb.size(); ++i) {
+        for(std::size_t i = 0; i < n; ++i) {
           ATH_CHECK(regHist(m_MET_Reb[type].at(i),m_dir_met[i],all));
           ATH_CHECK(regHist(m_MET_Reb_x[type].at(i),m_dir_met[i],all));
           ATH_CHECK(regHist(m_MET_Reb_y[type].at(i),m_dir_met[i],all));
@@ -501,14 +500,14 @@ namespace MissingEtDQA {
           v_MET_Diff_Reb_sum.push_back( new  TH1D((name_met + "_Diff_" + it + "_sum").c_str(), ("MET_Diff sumet " + m_names[it] + " in " + name_met +"; E_{T}^{sum} - #Sigma |p_{T}| [GeV]; Entries / 5 GeV").c_str(), nbinpxy, -250, 250) );
           m_dir_met.push_back("MET/" + name_met + "/Differences/" + it + "/");
         }
+        n = v_MET_Diff_Reb.size();
+        m_MET_Diff_Reb[type] = std::move(v_MET_Diff_Reb);
+        m_MET_Diff_Reb_x[type] = std::move(v_MET_Diff_Reb_x);
+        m_MET_Diff_Reb_y[type] = std::move(v_MET_Diff_Reb_y);
+        m_MET_Diff_Reb_phi[type] = std::move(v_MET_Diff_Reb_phi);
+        m_MET_Diff_Reb_sum[type] = std::move(v_MET_Diff_Reb_sum);
         
-        m_MET_Diff_Reb[type] = v_MET_Diff_Reb;
-        m_MET_Diff_Reb_x[type] = v_MET_Diff_Reb_x;
-        m_MET_Diff_Reb_y[type] = v_MET_Diff_Reb_y;
-        m_MET_Diff_Reb_phi[type] = v_MET_Diff_Reb_phi;
-        m_MET_Diff_Reb_sum[type] = v_MET_Diff_Reb_sum;
-        
-        for(std::vector<TH1D*>::size_type i = 0; i < v_MET_Diff_Reb.size(); ++i) {
+        for(std::size_t i = 0; i < n; ++i) {
           ATH_CHECK(regHist(m_MET_Diff_Reb[type].at(i),m_dir_met[i],all));
           ATH_CHECK(regHist(m_MET_Diff_Reb_x[type].at(i),m_dir_met[i],all));
           ATH_CHECK(regHist(m_MET_Diff_Reb_y[type].at(i),m_dir_met[i],all));
@@ -565,8 +564,11 @@ namespace MissingEtDQA {
 
   StatusCode PhysValMET::fillHistograms(const EventContext& /*ctx*/)
   {
+    //dont fill unbooked histograms!
+    if (m_detailLevel < 10) {
+      return StatusCode::SUCCESS;
+    }
     ATH_MSG_DEBUG ("Filling hists " << name() << "...");
-
     //If we're running over new AODs without MET containers, don't do anything!
     if(!m_inputIsDAOD && !m_doMETRefPlots)
       return StatusCode::SUCCESS;
@@ -880,12 +882,12 @@ namespace MissingEtDQA {
       ATH_MSG_INFO( "  Rebuilding MET_" << type );
       MissingETContainer* met_Reb = new MissingETContainer();
       if( evtStore()->record(met_Reb,("MET_Rebuilt"+type).c_str()).isFailure() ) {
-        ATH_MSG_WARNING("Unable to record MissingETContainer: MET_Rebuilt_" << type);
+        ATH_MSG_ERROR("Unable to record MissingETContainer: MET_Rebuilt_" << type);
         return StatusCode::FAILURE;
       }
       MissingETAuxContainer* met_RebAux = new MissingETAuxContainer();
       if( evtStore()->record(met_RebAux,("MET_Rebuilt"+type+"Aux").c_str()).isFailure() ) {
-        ATH_MSG_WARNING("Unable to record MissingETAuxContainer: MET_Rebuilt" << type);
+        ATH_MSG_ERROR("Unable to record MissingETAuxContainer: MET_Rebuilt" << type);
         return StatusCode::FAILURE;
       }
       met_Reb->setStore(met_RebAux);
@@ -911,32 +913,38 @@ namespace MissingEtDQA {
 
       // Electrons
       if( (*m_metmaker)->rebuildMET("RefEle", xAOD::Type::Electron, met_Reb, metElectrons.asDataVector(), metHelper).isFailure() ) {
-        ATH_MSG_WARNING("Failed to build electron term.");
+        ATH_MSG_ERROR("Failed to build electron term.");
+        return StatusCode::FAILURE;
       }
 
       // Photons
       if( (*m_metmaker)->rebuildMET("RefGamma", xAOD::Type::Photon, met_Reb, metPhotons.asDataVector(), metHelper).isFailure() ) {
-        ATH_MSG_WARNING("Failed to build photon term.");
+        ATH_MSG_ERROR("Failed to build photon term.");
+        return StatusCode::FAILURE;
       }
 
       // Taus
       if( (*m_metmaker)->rebuildMET("RefTau", xAOD::Type::Tau, met_Reb,metTaus.asDataVector(),metHelper).isFailure() ){
-        ATH_MSG_WARNING("Failed to build tau term.");
+        ATH_MSG_ERROR("Failed to build tau term.");
+        return StatusCode::FAILURE;
       }
 
       // Muons
       if( (*m_metmaker)->rebuildMET("Muons", xAOD::Type::Muon, met_Reb, metMuons.asDataVector(), metHelper).isFailure() ) {
-        ATH_MSG_WARNING("Failed to build muon term.");
+        ATH_MSG_ERROR("Failed to build muon term.");
+        return StatusCode::FAILURE;
       }
 
       // Jets
       if( (*m_metmaker)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met_Reb, jets, coreMet, metHelper, true).isFailure() ) {
-        ATH_MSG_WARNING("Failed to build jet and soft terms.");
+        ATH_MSG_ERROR("Failed to build jet and soft terms.");
+        return StatusCode::FAILURE;
       }
       MissingETBase::Types::bitmask_t trksource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track);
       if((*met_Reb)["PVSoftTrk"]) trksource = (*met_Reb)["PVSoftTrk"]->source();
       if( met::buildMETSum("FinalTrk", met_Reb, trksource).isFailure() ){
-        ATH_MSG_WARNING("Building MET FinalTrk sum failed.");
+        ATH_MSG_ERROR("Building MET FinalTrk sum failed.");
+        return StatusCode::FAILURE;
       }
       MissingETBase::Types::bitmask_t clsource;
       if (type == "AntiKt4EMTopo") clsource = static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::EMTopo);
@@ -944,7 +952,8 @@ namespace MissingEtDQA {
       
       if((*met_Reb)["SoftClus"]) clsource = (*met_Reb)["SoftClus"]->source();
       if( met::buildMETSum("FinalClus", met_Reb, clsource).isFailure() ) {
-        ATH_MSG_WARNING("Building MET FinalClus sum failed.");
+        ATH_MSG_ERROR("Building MET FinalClus sum failed.");
+        return StatusCode::FAILURE;
       }
 
       // Fill MET_Reb
@@ -1034,17 +1043,31 @@ namespace MissingEtDQA {
       }
 
       if(m_doMETRefPlots){
-        (m_MET_dPhi_Ref[type]).at(0)->Fill( -remainder( leadPhi - (*met_Ref)["FinalClus"]->phi(), 2*M_PI ), weight );
-        (m_MET_dPhi_Ref[type]).at(1)->Fill( -remainder( subleadPhi - (*met_Ref)["FinalClus"]->phi(), 2*M_PI ), weight );
-        (m_MET_dPhi_Ref[type]).at(3)->Fill( -remainder( leadPhi - (*met_Ref)["FinalTrk"]->phi(), 2*M_PI ), weight );
-        (m_MET_dPhi_Ref[type]).at(4)->Fill( -remainder( subleadPhi - (*met_Ref)["FinalTrk"]->phi(), 2*M_PI ), weight );
+        const auto & dPhiRef = m_MET_dPhi_Ref[type];
+        const auto * pClus = (*met_Ref)["FinalClus"];
+        const auto * pTrk =  (*met_Ref)["FinalTrk"];
+        if (!pTrk or !pClus){
+          ATH_MSG_ERROR("Dereference of 'Ref' pClus or pTrk");
+          return StatusCode::FAILURE;
+        }
+        
+        dPhiRef.at(0)->Fill( -remainder( leadPhi - pClus->phi(), 2*M_PI ), weight );
+        dPhiRef.at(1)->Fill( -remainder( subleadPhi - pClus->phi(), 2*M_PI ), weight );
+        dPhiRef.at(3)->Fill( -remainder( leadPhi - pTrk->phi(), 2*M_PI ), weight );
+        dPhiRef.at(4)->Fill( -remainder( subleadPhi - pTrk->phi(), 2*M_PI ), weight );
       }
-
-      (m_MET_dPhi_Reb[type]).at(0)->Fill( -remainder( leadPhi - (*met_Reb)["FinalClus"]->phi(), 2*M_PI ), weight );
-      (m_MET_dPhi_Reb[type]).at(1)->Fill( -remainder( subleadPhi - (*met_Reb)["FinalClus"]->phi(), 2*M_PI ), weight );
-      (m_MET_dPhi_Reb[type]).at(3)->Fill( -remainder( leadPhi - (*met_Reb)["FinalTrk"]->phi(), 2*M_PI ), weight );
-      (m_MET_dPhi_Reb[type]).at(4)->Fill( -remainder( subleadPhi - (*met_Reb)["FinalTrk"]->phi(), 2*M_PI ), weight );
-  
+      const auto & dPhiReb = m_MET_dPhi_Reb[type];
+      const auto * pClus = (*met_Reb)["FinalClus"];
+      const auto * pTrk =  (*met_Reb)["FinalTrk"];
+      if (!pTrk or !pClus){
+        ATH_MSG_ERROR("Dereference of 'Reb' pClus or pTrk");
+        return StatusCode::FAILURE;
+      }
+      dPhiReb.at(0)->Fill( -remainder( leadPhi - pClus->phi(), 2*M_PI ), weight );
+      dPhiReb.at(1)->Fill( -remainder( subleadPhi - pClus->phi(), 2*M_PI ), weight );
+      dPhiReb.at(3)->Fill( -remainder( leadPhi - pTrk->phi(), 2*M_PI ), weight );
+      dPhiReb.at(4)->Fill( -remainder( subleadPhi - pTrk->phi(), 2*M_PI ), weight );
+      
       leadPt = 0.; leadPhi = 0.;
 
       xAOD::MuonContainer::const_iterator muon_itr = muons->begin();
@@ -1290,23 +1313,25 @@ namespace MissingEtDQA {
         ConstDataVector<JetContainer> metJetsEmpty(SG::VIEW_ELEMENTS);
         MissingETContainer* met_Calo = new MissingETContainer();
         if( evtStore()->record(met_Calo,("MET_Calo"+type).c_str()).isFailure() ) {
-          ATH_MSG_WARNING("Unable to record MissingETContainer: MET_Calo_" << type);
+          ATH_MSG_ERROR("Unable to record MissingETContainer: MET_Calo_" << type);
           return StatusCode::FAILURE;
         }
         MissingETAuxContainer* met_CaloAux = new MissingETAuxContainer();
         if( evtStore()->record(met_CaloAux,("MET_Calo"+type+"Aux").c_str()).isFailure() ) {
-          ATH_MSG_WARNING("Unable to record MissingETAuxContainer: MET_Calo" << type);
+          ATH_MSG_ERROR("Unable to record MissingETAuxContainer: MET_Calo" << type);
           return StatusCode::FAILURE;
         }
         met_Calo->setStore(met_CaloAux);
         MissingETAssociationHelper metHelper(metMap);
         if( (*m_metmaker)->rebuildJetMET("RefJet", "SoftClus", "PVSoftTrk", met_Calo, metJetsEmpty.asDataVector(), coreMet, metHelper, true).isFailure() ) {
-          ATH_MSG_WARNING("Failed to build jet and soft terms.");
+          ATH_MSG_ERROR("Failed to build jet and soft terms.");
+          return StatusCode::FAILURE;
         }
         
         if((*met_Calo)["SoftClus"]) clsource = (*met_Calo)["SoftClus"]->source();
         if( met::buildMETSum("FinalClus", met_Calo, clsource).isFailure() ) {
-          ATH_MSG_WARNING("Building MET FinalClus sum failed.");
+          ATH_MSG_ERROR("Building MET FinalClus sum failed.");
+          return StatusCode::FAILURE;
         }
         
         m_MET_Calo->Fill((*met_Calo)["FinalClus"]->met()/1000., weight);
@@ -1364,13 +1389,14 @@ namespace MissingEtDQA {
     }
 
    return StatusCode::SUCCESS;
-   //return StatusCode::FAILURE;
   }
   
   StatusCode PhysValMET::procHistograms()
   {
+    if (m_detailLevel < 10){ //don't do anything if histograms not booked & filled
+      return StatusCode::SUCCESS;
+    }
     ATH_MSG_INFO ("Finalising hists " << name() << "...");
-
     for (const auto& type : m_types){
       for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_Reb[type]).size(); ++i) {
         if (m_doMETRefPlots){
@@ -1521,17 +1547,6 @@ namespace MissingEtDQA {
     return (fabs(jet->eta()) > 2.4 || jet->pt() > 60e3 || (*jvtTool)->updateJvt(*jet) > JvtCut);
   }
 
-  /////////////////////////////////////////////////////////////////// 
-  // Protected methods: 
-  /////////////////////////////////////////////////////////////////// 
-
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
-  ///////////////////////////////////////////////////////////////////
-
-  /////////////////////////////////////////////////////////////////// 
-  // Non-const methods: 
-  /////////////////////////////////////////////////////////////////// 
 
 
 }
