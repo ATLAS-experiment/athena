@@ -520,8 +520,9 @@ def minBiasPixel(flags: AthConfigFlags, instanceName: str, recoMode: str) -> Ath
   flags.maxDoubleHoles   = 0
   flags.minSiNotShared   = 3
   flags.maxShared        = 0
-  flags.nHolesMax        = 0
-  flags.nHolesGapMax     = 0
+  if recoMode != "Acts":
+    flags.nHolesMax        = 0
+    flags.nHolesGapMax     = 0
   if recoMode=="InDet":
     flags.useSCT           = False
     flags.useSCTSeeding    = False
@@ -634,7 +635,8 @@ def cosmics(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.nClustersMin        = 4
   flags.minSiNotShared      = 3
   flags.maxShared           = 0
-  flags.nHolesMax           = 3
+  if recoMode != "Acts":
+    flags.nHolesMax           = 3
   flags.maxSiHoles          = 3
   flags.maxSCTHoles         = 3
   flags.maxPixelHoles       = tsetter(flags.maxPixelHoles,3)
@@ -890,15 +892,16 @@ def derivedFromSignatureFlags(flags: AthConfigFlags, recoMode : str):
     flags.trkTracks_FTF     = f'HLT_Acts_{flags.suffix}_Tracks'
     flags.trkTracks_IDTrig  = f'HLT_Acts_{flags.suffix}_Ambi_Tracks'
 
-  if flags.isLRT:             # to be moved to a separate function once LRTs differ 
+  if flags.isLRT:             # to be moved to a separate function once LRTs differ
     flags.minClusters         = tsetter(flags.minClusters         , 8)
-    flags.nHolesGapMax        = tsetter(flags.nHolesGapMax        , 1)
     flags.nWeightedClustersMin= tsetter(flags.nWeightedClustersMin, 8)
     flags.maxSiHoles          = tsetter(flags.maxSiHoles          , 2)
     flags.maxSCTHoles         = tsetter(flags.maxSCTHoles         , 1)
     flags.maxPixelHoles       = tsetter(flags.maxPixelHoles       , 1)
     flags.maxDoubleHoles      = tsetter(flags.maxDoubleHoles      , 0)
     flags.maxZImpact          = tsetter(flags.maxZImpact          , 500.)
+    if recoMode != "Acts":
+        flags.nHolesGapMax        = tsetter(flags.nHolesGapMax        , 1)
     
     
   if recoMode == "ITk":

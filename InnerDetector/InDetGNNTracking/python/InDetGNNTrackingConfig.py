@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 from pathlib import Path
@@ -265,8 +265,8 @@ def GNNSeedingTrackMakerCfg(flags, name="GNNSeedingTrackMaker", **kwargs):
     # similar to https://gitlab.cern.ch/atlas/athena/-/blob/main/InnerDetector/InDetConfig/python/SiTrackMakerConfig.py#L188
     kwargs.setdefault("nClustersMin", flags.Tracking.ActiveConfig.minClusters[0])
     kwargs.setdefault("nWeightedClustersMin", flags.Tracking.ActiveConfig.nWeightedClustersMin[0])
-    kwargs.setdefault("nHolesMax", flags.Tracking.ActiveConfig.nHolesMax[0])
-    kwargs.setdefault("nHolesGapMax", flags.Tracking.ActiveConfig.nHolesGapMax[0])
+    kwargs.setdefault("nHolesMax", flags.Tracking.ActiveConfig.maxHoles[0])
+    kwargs.setdefault("nHolesGapMax", flags.Tracking.ActiveConfig.maxHoles[0])
 
     kwargs.setdefault("pTmin", flags.Tracking.ActiveConfig.minPT[0])
     kwargs.setdefault("pTminBrem", flags.Tracking.ActiveConfig.minPTBrem[0])

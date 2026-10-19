@@ -123,6 +123,8 @@ def activateAthenaComponents(icf):
     icf.doAthenaSeed = True
     icf.doAthenaTrack = True
     icf.doAthenaAmbiguityResolution = True
+    icf.addFlag("nHolesMax", icf.maxHoles)
+    icf.addFlag("nHolesGapMax", icf.maxHoles)
 
 def deactivateActsComponents(icf):
     icf.doActsCluster = False
