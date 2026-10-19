@@ -261,6 +261,10 @@ def InDetTrackBiasingToolCfg(flags, name="InDetTrackBiasingTool",
     return acc
 
 def TrackSystematicsAlgCfg(flags, name="InDetTrackSystematicsAlg", **kwargs):
+    """View container of the input tracks surviving the track filter
+    systematics (TRK_EFF_*, TRK_FAKE_RATE_*): SystematicVariationSTD for
+    standard tracks, SystematicVariationLRT for LRT tracks.
+    """
     acc = ComponentAccumulator()
 
     if "TrackFilterToolLRT" not in kwargs:
