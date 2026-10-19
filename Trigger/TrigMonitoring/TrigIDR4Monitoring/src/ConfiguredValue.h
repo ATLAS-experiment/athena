@@ -10,8 +10,8 @@
  **   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
-#ifndef IDTPM2_CONFIGUREDVALUE_H
-#define IDTPM2_CONFIGUREDVALUE_H
+#ifndef TRIGIDR4MONITORING_CONFIGUREDVALUE_H
+#define TRIGIDR4MONITORING_CONFIGUREDVALUE_H
 
 
 #include <iostream>
@@ -76,6 +76,6 @@ std::ostream& operator<<( std::ostream& s, const ConfiguredValue<T>& p ) {
   return s << "not set";
 }
 
-#endif  // IDTPM2_CONFIGUREDVALUE_H
+#endif  // TRIGIDR4MONITORING_CONFIGUREDVALUE_H
 
 
