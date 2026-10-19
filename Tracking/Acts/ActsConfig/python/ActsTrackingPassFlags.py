@@ -84,8 +84,6 @@ def createActsTrackingPassFlags():
 
     # --- general pattern cuts for NewTracking
     icf.addFlag("roadWidth"               , 20.)
-    icf.addFlag("nHolesMax"               , icf.maxHoles)
-    icf.addFlag("nHolesGapMax"            , icf.maxHoles)
 
     # Chi2 cuts of the Athena track finder. The ACTS measurement selection does not use them, but the
     # Athena passes which derive from these flags do.
@@ -173,8 +171,6 @@ def createActsLegacyTrackingPassFlags():
     icf.useITkStripSeeding = True
     icf.minPixel = [1]
     icf.maxHoles = [2]
-    icf.nHolesMax = icf.maxHoles
-    icf.nHolesGapMax = icf.maxHoles
     # Chi2 cut used together with 2 max. holes
     icf.Xi2maxSigma = [5.]
     icf.Xi2maxNoAddSigma = [5.]
@@ -197,8 +193,6 @@ def createActsHeavyIonTrackingPassFlags():
     icf.maxSctHoles      = [1]
     icf.maxDoubleHoles   = [0]
     icf.maxHoles         = [2]
-    icf.nHolesMax = icf.maxHoles
-    icf.nHolesGapMax = icf.maxHoles
     icf.Xi2maxSigma      = [5.]
     icf.Xi2maxNoAddSigma = [5.]
     icf.doBremRecoverySi = False
@@ -241,8 +235,6 @@ def createActsLargeRadiusTrackingPassFlags():
     icf.maxShared          = [2]
     icf.minPixel           = [0]
     icf.maxHoles           = [1]
-    icf.nHolesMax          = icf.maxHoles
-    icf.nHolesGapMax       = icf.maxHoles
     icf.maxPixelHoles      = [1]
     icf.maxSctHoles        = [1]
     icf.maxDoubleHoles     = [0]
@@ -293,8 +285,6 @@ def createActsConversionTrackingPassFlags():
     icf.maxSctHoles             = [2]
     icf.maxDoubleHoles          = [1]
 
-    icf.nHolesMax               = icf.maxHoles
-    icf.nHolesGapMax            = icf.maxHoles
     icf.nWeightedClustersMin    = [6]
     icf.maxdImpactSSSSeeds      = [20.0 * Units.mm]
     icf.radMax                  = 1100. * Units.mm
