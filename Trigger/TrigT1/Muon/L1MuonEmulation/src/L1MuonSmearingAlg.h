@@ -30,7 +30,7 @@ class L1MuonSmearingAlg: public ::AthReentrantAlgorithm {
                                                                           "key for retrieval of input Truth particle"};
 
   SG::WriteHandleKey<xAOD::MuonRoIContainer> m_outputMuonRoIKey{this, "OutputMuonRoI", "LVL1MuonRoIs",
-                                                                "key for LVL0 emulated muon RoIs" };
+                                                                "key for LVL1 emulated muon RoIs" };
 
   ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring Tool"};
   ServiceHandle<IAthRNGSvc> m_rndmSvc{this, "RndmSvc", "AthRNGSvc", ""};   //!< Random number generator engine
