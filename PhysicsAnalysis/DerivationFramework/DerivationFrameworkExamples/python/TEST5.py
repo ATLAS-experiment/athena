@@ -44,7 +44,7 @@ def TEST5KernelCfg(flags, name='TEST5Kernel', **kwargs):
 def TEST5Cfg(flags):
 
     acc = ComponentAccumulator()
-    acc.merge(TEST5KernelCfg(flags, name="TEST5Kernel",StreamName = "OutputStreamDAOD_TEST5"))
+    acc.merge(TEST5KernelCfg(flags, name="TEST5Kernel"))
 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
