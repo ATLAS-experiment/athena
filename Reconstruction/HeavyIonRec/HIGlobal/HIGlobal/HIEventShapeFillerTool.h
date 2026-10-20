@@ -48,7 +48,7 @@ private:
 
   std::unique_ptr<const CaloCell> getMirroredCell(const CaloCell* pCell, const CaloCellContainer* ccc) const;
 
-  ToolHandle<IHITowerWeightTool>   m_towerWeightTool{ this, "TowerWeightTool", "HITowerWeightTool", "Handle to Tower Weight Tool" };
+  ToolHandle<IHITowerWeightTool>   m_towerWeightTool{ this, "TowerWeightTool", "", "Handle to Tower Weight Tool" };
   ToolHandle<IHIEventShapeMapTool> m_eventShapeMapTool{ this, "EventShapeMapTool", "HIEventShapeMapTool", "Handle to Event Shape Map Tool" };
 
   SG::ReadHandleKey<CaloCellContainer> m_caloCellKey{this, "CaloCellContainerKey","","cell container for mirror"};
