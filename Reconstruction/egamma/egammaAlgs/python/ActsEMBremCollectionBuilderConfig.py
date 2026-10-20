@@ -31,6 +31,13 @@ def ActsEMBremCollectionBuilderCfg(flags,
     kwargs.setdefault("useStrip", flags.Detector.GeometryITkStrip)
     kwargs.setdefault("useHGTD", flags.Reco.EnableHGTDExtension)
 
+    if kwargs["useHGTD"]:
+        extraInputs = [
+            ("xAOD::TrackParticleContainer",
+             "StoreGateSvc+" + kwargs["TrackParticleContainerName"] + ".time")
+        ]
+        kwargs.setdefault("ExtraInputs", extraInputs)
+
     alg = CompFactory.ActsEMBremCollectionBuilder(name, **kwargs)
     acc.addEventAlgo(alg)
 

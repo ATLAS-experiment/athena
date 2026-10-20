@@ -70,6 +70,8 @@ egammaCopyTrackParticleInfo::copy(xAOD::TrackParticle& created,
 
   if (toCopy.doHGTD) {
     created.setHasValidTime(original.hasValidTime());
+    // Use accessor instead of interface to bypass hasValidTime check
+    // and keep same value as original InDetTrackParticle
     static const SG::Accessor<float> time("time");
     created.setTime(time(original));
     static const SG::Accessor<float> timeRes("timeResolution");
