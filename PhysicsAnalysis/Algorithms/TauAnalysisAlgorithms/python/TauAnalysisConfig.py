@@ -597,6 +597,9 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
         self.addOption ('triggerChainsPerYear', {}, type=dict,
                         info="a dictionary with key (string) the year and value (list of "
                         "strings) the trigger chains.")
+        self.addOption ('useGNTau', False, type=bool,
+                        info="use GNTau-based ID instead of RNNTau ID. "
+                        "Recommendations: experimental feature and might become default soon.")
         self.addOption ('tauID', '', type=str,
                         info="the tau-jet quality WP to use.")
         self.addOption ('prefixSF', 'trigEffSF', type=str,
@@ -619,6 +622,11 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
 
         if config.dataType() is not DataType.Data:
             log = logging.getLogger('TauTriggerAnalysisSF')
+
+            # Temporary skip all MC campaigns apart from MC23a when using GNTau until SFs are available
+            if( self.useGNTau and config.campaign() is not Campaign.MC23a ):
+                log.warning("Tau trigger scale factors are only available for MC23a when using GNTau offline ID")
+                return 
 
             # Temporary skip for MC23e until SFs are available
             if config.campaign() is Campaign.MC23e:
@@ -646,6 +654,7 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                 else:
                     alg.efficiencyCorrectionsTool.Campaign = config.campaign().value
                 alg.efficiencyCorrectionsTool.TriggerName = chain
+                alg.efficiencyCorrectionsTool.useGNTau = self.useGNTau 
 
                 # JetIDLevel from
                 # https://gitlab.cern.ch/atlas/athena/-/blob/main/PhysicsAnalysis/TauID/TauAnalysisTools/TauAnalysisTools/Enums.h#L79
