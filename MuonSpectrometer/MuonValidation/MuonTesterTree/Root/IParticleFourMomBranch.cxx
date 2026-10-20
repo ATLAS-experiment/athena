@@ -6,7 +6,7 @@
 #include <xAODTracking/TrackParticle.h>
 #include <xAODTruth/TruthParticle.h>
 namespace {
-    constexpr size_t dummyIdx = -1;
+    constexpr size_t dummyIdx = std::numeric_limits<std::size_t>::max();
     constexpr float MeVtoGeV = 1.e-3;
     static const SG::ConstAccessor<float> acc_charge{"charge"};
 }
@@ -14,15 +14,19 @@ namespace {
 
 namespace MuonVal{
     IParticleFourMomBranch::IParticleFourMomBranch(MuonTesterTree& tree,
-                                               const std::string& particle): 
-        AthMessaging{"IParticle "+particle},
+                                                   const std::string& particle): 
+        AthMessaging{std::format("IParticle {:}", particle)},
         m_parent{tree},
         m_name{particle}{}
     
     MuonTesterTree& IParticleFourMomBranch::getTree() {
         return m_parent;
     }
-    const std::vector<const xAOD::IParticle*>& IParticleFourMomBranch::getCached()const {
+    std::span<const xAOD::IParticle* const> IParticleFourMomBranch::getCached(const EventContext& ctx) {
+        /* Reset the particles from the previous event*/
+        if (!m_updated && ctx.eventID().event_number() != m_lastFilled) {
+            m_cached_particles.clear();
+        }
         return m_cached_particles;
     }
 
@@ -40,7 +44,10 @@ namespace MuonVal{
         }
         /// Avoid that the particle is added twice to the tree
         if (!p || find(p) < size()){
-            if (p) ATH_MSG_VERBOSE("Rejected particle ("<<p<<") "<<p->pt()<<", "<<p->eta()<<", "<<p->phi()<<". Size: "<<size());
+            if (p) {
+                ATH_MSG_VERBOSE("Rejected particle ("<<p<<") "<<p->pt()<<", "<<p->eta()
+                                <<", "<<p->phi()<<". Size: "<<size());
+            }
             return;
         }
 
@@ -103,6 +110,7 @@ namespace MuonVal{
         }
         m_init = true;
         m_updated = false;
+        m_lastFilled = ctx.eventID().event_number();
         return true;
     }
     bool IParticleFourMomBranch::initialized() const {

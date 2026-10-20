@@ -82,7 +82,7 @@ namespace MuonVal{
         if (m_parent.size()) {
             /** Allocate the memory */
             get(m_parent.size() -1);
-            const std::vector<const xAOD::IParticle*>& linkMe = m_linkColl->getCached();
+            const auto linkMe = m_linkColl->getCached(ctx);
             for (std::size_t primToSec = 0 ; primToSec < linkMe.size(); ++primToSec) {
                 const xAOD::IParticle* primP = m_linkPrimToSec(linkMe[primToSec]);
                 const size_t linkIdx = m_parent.find([&](const xAOD::IParticle* inBilat){

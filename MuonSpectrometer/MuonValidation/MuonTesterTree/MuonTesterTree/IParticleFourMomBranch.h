@@ -4,11 +4,13 @@
 #ifndef MUONTESTERTREE_IPARTICLEFOURMOMBRANCH_H
 #define MUONTESTERTREE_IPARTICLEFOURMOMBRANCH_H
 
-#include <MuonTesterTree/IMuonTesterBranch.h>
-#include <MuonTesterTree/MuonTesterTree.h>
-#include <MuonTesterTree/AuxElementBranch.h>
-#include <AthenaBaseComps/AthMessaging.h>
+#include "MuonTesterTree/IMuonTesterBranch.h"
+#include "MuonTesterTree/MuonTesterTree.h"
+#include "MuonTesterTree/AuxElementBranch.h"
+#include "AthenaBaseComps/AthMessaging.h"
+
 #include <string_view>
+#include <span>
 
 namespace MuonVal {
     /** @brief  Helper class to easily to add xAOD::IParticles and associated decorator variables to the 
@@ -72,7 +74,7 @@ namespace MuonVal {
             */
             size_t find(std::function<bool(const xAOD::IParticle*)> func) const;
             /** @brief Returns the list of currently cached particles */
-            const std::vector<const xAOD::IParticle*>& getCached() const;
+            std::span<const xAOD::IParticle* const> getCached(const EventContext& ctx);
             /** @brief Writes a variable of type <T> which can be directly accessed via an SG::AuxElement e.g.
              *             SG::Accessor<float> acc_ptCone30{"pt_cone30"};
              *             const float ptCone30 = acc_ptCone30(*partPtr);
@@ -97,7 +99,7 @@ namespace MuonVal {
             /** @brief Write a variable of type <T> to the TTree, but divide it by 1k before dumping. 
              *         Useful for the conversion from MeV to GeV
              * @param variable: Name of the branch in the output tree
-|            * @param accName: Name of the accessor to obtain the information. If left empty, it's assumed 
+             * @param accName: Name of the accessor to obtain the information. If left empty, it's assumed 
              *                 that the accesor is the same as the variable name */
             template <typename T>
                 bool addVariableGeV(const std::string& variable, 
@@ -136,6 +138,9 @@ namespace MuonVal {
 
             std::vector<std::shared_ptr<IParticleDecorationBranch>> m_variables{};
             std::vector<const xAOD::IParticle*> m_cached_particles{};
+            
+            using evt_t = EventIDBase::event_number_t;
+            evt_t m_lastFilled{std::numeric_limits<evt_t>::max()};
 };
 
 }
