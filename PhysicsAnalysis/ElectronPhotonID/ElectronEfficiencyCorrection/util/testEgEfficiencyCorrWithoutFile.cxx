@@ -129,7 +129,7 @@ test1(int argc, char* argv[])
   // Configure the tool based on the inputs
   asg::StandaloneToolHandle<IAsgElectronEfficiencyCorrectionTool>
     ElEffCorrectionTool(
-      "AsgElectronEfficiencyCorrectionTool/ElEffCorrectionTool");
+      "CP::AsgElectronEfficiencyCorrectionTool/ElEffCorrectionTool");
   if (!fileName.empty()) {
     std::vector<std::string> inputFiles{ fileName };
     ANA_CHECK(

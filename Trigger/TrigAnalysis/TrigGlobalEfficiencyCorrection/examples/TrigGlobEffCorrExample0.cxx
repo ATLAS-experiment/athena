@@ -101,7 +101,7 @@ int main(int argc, char* argv[])
             "rel21.2/Consolidation_September2018_v1/map1.txt";
     for(int j=0;j<2;++j) /// two instances: 0 -> MC efficiencies, 1 -> SFs
     {
-        string name = "AsgElectronEfficiencyCorrectionTool/"
+        string name = "CP::AsgElectronEfficiencyCorrectionTool/"
                 + ((j? "ElTrigEff_" : "ElTrigSF_")
                 + std::to_string(factory.size()/2));
         auto t = factory.emplace(factory.end(), name);

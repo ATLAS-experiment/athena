@@ -12,7 +12,9 @@
 
 #include "EgammaAnalysisInterfaces/IAsgPhotonEfficiencyCorrectionTool.h"
 
-testAthenaPhotonAlg::testAthenaPhotonAlg( const std::string& name, ISvcLocator* pSvcLocator ) : AthAlgorithm( name, pSvcLocator ),  m_photonSF("AsgPhotonEfficiencyCorrectionTool/AsgPhotonEfficiencyCorrectionTool",this){
+namespace ADD_CMODE(CP) {
+
+testAthenaPhotonAlg::testAthenaPhotonAlg( const std::string& name, ISvcLocator* pSvcLocator ) : AthAlgorithm( name, pSvcLocator ),  m_photonSF("CP::AsgPhotonEfficiencyCorrectionTool/AsgPhotonEfficiencyCorrectionTool",this){
 
   //declareProperty( "Property", m_nProperty ); //example property declaration
   declareProperty( "PhotonEfficiencyCorrectionTool", m_photonSF );
@@ -109,3 +111,4 @@ for ( xAOD::Photon* ph : *(inContShallowCopy.first) ) {
 
   return StatusCode::SUCCESS;
 }
+} // namespace ADD_CMODE(CP)

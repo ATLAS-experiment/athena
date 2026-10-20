@@ -38,6 +38,9 @@
 #include <ColumnarCore/VectorColumn.h>
 #include <ColumnarEgamma/EgammaHelpers.h>
 
+namespace ADD_CMODE(CP)
+{
+
 class AsgPhotonEfficiencyCorrectionTool
   : virtual public IAsgPhotonEfficiencyCorrectionTool,
     virtual public CP::ISystematicsTool,
@@ -186,6 +189,7 @@ public:
 
 }; // End: class definition
 
+} // namespace ADD_CMODE(CP)
 
 #endif
 

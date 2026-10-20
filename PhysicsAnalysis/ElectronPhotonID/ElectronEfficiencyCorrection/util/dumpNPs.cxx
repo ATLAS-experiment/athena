@@ -46,7 +46,7 @@ struct NP
 struct Config
 {
   asg::AnaToolHandle<IAsgElectronEfficiencyCorrectionTool> tool{
-    "AsgElectronEfficiencyCorrectionTool/tool"};
+    "CP::AsgElectronEfficiencyCorrectionTool/tool"};
   std::vector<std::tuple<CP::SystematicSet, NP>> systematics{};
   std::vector<Domain> domains{};
   int run_number{0};
@@ -288,7 +288,7 @@ bool scanPhaseSpace(Config& cfg, map_t& affected_bins)
  
   xAOD::TStore store;
 
-  using RealTool = const AsgElectronEfficiencyCorrectionTool;
+  using RealTool = const CP::AsgElectronEfficiencyCorrectionTool;
   const auto *asgtool = dynamic_cast<RealTool*>(&*cfg.tool);
   const std::size_t jmax{subdiv_eta + 1}, kmax{subdiv_pt + 1};
   const std::size_t dmax{cfg.domains.size()};

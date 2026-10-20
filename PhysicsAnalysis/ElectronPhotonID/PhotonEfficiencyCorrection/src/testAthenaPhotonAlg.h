@@ -7,9 +7,12 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 // forward declarations
 class IAsgPhotonEfficiencyCorrectionTool;
+
+namespace ADD_CMODE(CP) {
 
 class testAthenaPhotonAlg: public ::AthAlgorithm { 
  public: 
@@ -24,5 +27,7 @@ class testAthenaPhotonAlg: public ::AthAlgorithm {
  /// The tool handle to our photon efficiency correction
  ToolHandle< IAsgPhotonEfficiencyCorrectionTool > m_photonSF;
 }; 
+
+} // namespace ADD_CMODE(CP)
 
 #endif //> !PHOTONEFFICIENCYCORRECTION_TESTATHENAPHOTONALG_H

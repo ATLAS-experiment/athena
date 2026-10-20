@@ -27,6 +27,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 // method implementations
 //
 
+using namespace ADD_CMODE(CP);
 using columnar::ColumnarMemoryTest;
 using columnar::ColumnarPhysLiteTest;
 using columnar::TestUtils::IXAODToolCaller;

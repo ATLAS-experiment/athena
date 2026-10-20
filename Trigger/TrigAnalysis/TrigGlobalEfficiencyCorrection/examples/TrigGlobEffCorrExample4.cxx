@@ -135,7 +135,7 @@ StatusCode testElectrons(const char* APP_NAME, bool quiet)
 		const std::string& trigKey = kv.first;
 		for(int j=0;j<2;++j) /// one tool instance for efficiencies, another for scale factors
 		{
-			auto t = electronToolsFactory.emplace(electronToolsFactory.end(), "AsgElectronEfficiencyCorrectionTool/ElTrigEff_"+std::to_string(nTools++));
+			auto t = electronToolsFactory.emplace(electronToolsFactory.end(), "CP::AsgElectronEfficiencyCorrectionTool/ElTrigEff_"+std::to_string(nTools++));
 			t->setProperty("MapFilePath", "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt").ignore();
 			t->setProperty("TriggerKey", (j? trigKey : "Eff_"+trigKey)).ignore();
 			t->setProperty("IdKey", "Tight").ignore();
@@ -216,7 +216,7 @@ StatusCode testPhotons(const char* APP_NAME, bool quiet)
 		const std::string& trigKey = kv.first;
 		for(int j=0;j<2;++j) /// one tool instance for efficiencies, another for scale factors
 		{
-			auto t = photonToolsFactory.emplace(photonToolsFactory.end(), "AsgPhotonEfficiencyCorrectionTool/PhTrigEff_"+std::to_string(nTools++));
+			auto t = photonToolsFactory.emplace(photonToolsFactory.end(), "CP::AsgPhotonEfficiencyCorrectionTool/PhTrigEff_"+std::to_string(nTools++));
 			t->setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt").ignore();
 			t->setProperty("TriggerKey", (j? trigKey : "Eff_"+trigKey)).ignore();
 			t->setProperty("IsoKey", "TightCaloOnly").ignore();

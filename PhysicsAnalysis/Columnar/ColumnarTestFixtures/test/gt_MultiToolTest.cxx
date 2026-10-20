@@ -28,6 +28,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 // method implementations
 //
 
+using namespace ADD_CMODE(CP);
 using columnar::ColumnarPhysLiteTest;
 using columnar::TestUtils::IXAODToolCaller;
 
@@ -149,7 +150,7 @@ TEST_F (ColumnarPhysLiteTest, MultiTool_ElectronCalibAndEfficiency)
 
   // Create and configure the efficiency tool
   asg::AsgToolConfig effToolConfig;
-  effToolConfig.setTypeAndName ("AsgElectronEfficiencyCorrectionTool/" + makeUniqueName());
+  effToolConfig.setTypeAndName ("CP::AsgElectronEfficiencyCorrectionTool/" + makeUniqueName());
   ASSERT_SUCCESS (effToolConfig.setProperty ("MapFilePath", "ElectronEfficiencyCorrection/2015_2018/rel21.2/Precision_Summer2020_v1/map4.txt"));
   ASSERT_SUCCESS (effToolConfig.setProperty ("ForceDataType", unsigned (PATCore::ParticleDataType::Full)));
   ASSERT_SUCCESS (effToolConfig.setProperty ("CorrelationModel", "TOTAL"));

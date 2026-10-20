@@ -7,8 +7,8 @@
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
 
-DECLARE_COMPONENT( AsgPhotonEfficiencyCorrectionTool )
+DECLARE_COMPONENT( ADD_CMODE(CP)::AsgPhotonEfficiencyCorrectionTool )
 
 #ifndef XAOD_STANDALONE
-DECLARE_COMPONENT( testAthenaPhotonAlg )
+DECLARE_COMPONENT( ADD_CMODE(CP)::testAthenaPhotonAlg )
 #endif

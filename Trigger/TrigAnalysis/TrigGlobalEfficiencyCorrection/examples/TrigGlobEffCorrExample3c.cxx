@@ -168,7 +168,7 @@ int main(int argc, char* argv[])
     for(auto& cfg : toolConfigs) /// one instance per trigger leg x working point
     for(int j=0;j<2;++j) /// two instances: 0 -> MC efficiencies, 1 -> SFs
     {
-        string name = "AsgElectronEfficiencyCorrectionTool/"
+        string name = "CP::AsgElectronEfficiencyCorrectionTool/"
                 + ((j? "ElTrigEff_" : "ElTrigSF_")
                 + std::to_string(factory.size()/2));
         auto t = factory.emplace(factory.end(), name);

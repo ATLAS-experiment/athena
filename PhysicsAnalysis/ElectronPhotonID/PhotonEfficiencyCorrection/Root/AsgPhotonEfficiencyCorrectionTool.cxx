@@ -36,6 +36,9 @@
 using Result = Root::TElectronEfficiencyCorrectionTool::Result;
 
 
+namespace ADD_CMODE(CP)
+{
+
 // =============================================================================
 // Standard constructor
 // =============================================================================
@@ -508,3 +511,5 @@ void AsgPhotonEfficiencyCorrectionTool::callEvents (columnar::EventContextRange 
     callSingleEvent (acc.photonsAcc(event), eventInfo);
   }
 }
+
+} // namespace ADD_CMODE(CP)

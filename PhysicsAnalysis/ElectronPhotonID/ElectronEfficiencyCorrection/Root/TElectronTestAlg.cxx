@@ -15,7 +15,10 @@
 #include <cmath>
 #include <optional>
 
-StatusCode CP::TElectronTestAlg::initialize() {
+namespace ADD_CMODE(CP)
+{
+
+StatusCode TElectronTestAlg::initialize() {
 
   // input
   ATH_CHECK(m_electronContainer.initialize());
@@ -84,7 +87,7 @@ StatusCode CP::TElectronTestAlg::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CP::TElectronTestAlg::execute(const EventContext& ctx) const {
+StatusCode TElectronTestAlg::execute(const EventContext& ctx) const {
 
   //
   unsigned int runNumber = 428648;  // use a dummy default for testing
@@ -241,3 +244,4 @@ StatusCode CP::TElectronTestAlg::execute(const EventContext& ctx) const {
   return StatusCode::SUCCESS;
 }
 
+} // namespace ADD_CMODE(CP)

@@ -11,6 +11,7 @@
 #include "TH2.h"
 #include "AthContainers/AuxElement.h"
 #include "xAODEgamma/ElectronFwd.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 #include <map>
 #include <string>
@@ -21,7 +22,7 @@ namespace xAOD {
 class IParticle;
 }
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
 class ElectronChargeEfficiencyCorrectionTool final
   : virtual public IAsgElectronEfficiencyCorrectionTool
@@ -53,15 +54,15 @@ public:
 
   /// Returns whether this tool is affected by the given systematics
   virtual bool isAffectedBySystematic(
-    const SystematicVariation& systematic) const override final;
+    const CP::SystematicVariation& systematic) const override final;
 
   /// Returns the list of all systematics this tool can be affected by
-  virtual SystematicSet affectingSystematics() const override final;
+  virtual CP::SystematicSet affectingSystematics() const override final;
 
   /// Returns the list of all systematics this tool recommends to use
   virtual CP::SystematicSet recommendedSystematics() const override final;
 
-  virtual StatusCode applySystematicVariation(const SystematicSet& systConfig) override final;
+  virtual StatusCode applySystematicVariation(const CP::SystematicSet& systConfig) override final;
 
 
   /// returns: the currently applied systematics
@@ -161,7 +162,7 @@ private:
   std::vector<std::string> m_systematics;
 
   std::map<CP::SystematicSet, CP::SystematicSet> m_filtered_sys_sets;
-  // boost::unordered_map<SystematicSet,EffiCollection*> m_sf_sets;
+  // boost::unordered_map<CP::SystematicSet,EffiCollection*> m_sf_sets;
   CP::SystematicSet m_mySysConf;
   CP::SystematicSet m_affectingSys;
 
@@ -173,6 +174,6 @@ private:
   SG::Decorator<float>* m_sfDec;
 };
 
-} // End namespace CP
+} // End namespace ADD_CMODE(CP)
 
 #endif

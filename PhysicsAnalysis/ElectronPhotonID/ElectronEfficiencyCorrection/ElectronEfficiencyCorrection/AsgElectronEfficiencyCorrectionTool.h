@@ -38,6 +38,9 @@ class TH2F;
 #include <ColumnarCore/VectorColumn.h>
 #include <ColumnarEgamma/EgammaDef.h>
 
+namespace ADD_CMODE(CP)
+{
+
 class AsgElectronEfficiencyCorrectionTool final
   : virtual public IAsgElectronEfficiencyCorrectionTool
   , public asg::AsgMetadataTool
@@ -259,5 +262,7 @@ public:
   void callEvents (columnar::EventContextRange events) const override;
 
 }; // End: class definition
+
+} // namespace ADD_CMODE(CP)
 
 #endif

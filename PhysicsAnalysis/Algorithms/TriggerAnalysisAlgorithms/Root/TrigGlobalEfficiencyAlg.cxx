@@ -133,7 +133,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
       return StatusCode::FAILURE;
     }
     ANA_CHECK(makeEgammaTools(m_electronToolsFactory, electronEffTools, electronSFTools, electronLegsPerKey,
-                              "AsgElectronEfficiencyCorrectionTool/ElTrigEff_",
+                              "CP::AsgElectronEfficiencyCorrectionTool/ElTrigEff_",
                               "_" + m_electronID.value() + "_" + m_electronIsol.value(),
                               [this](asg::AsgToolConfig& config) -> StatusCode {
                                 ANA_CHECK(config.setProperty("MapFilePath", std::string("ElectronEfficiencyCorrection/2015_2025/rel22.2/") +
@@ -154,7 +154,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
       return StatusCode::FAILURE;
     }
     ANA_CHECK(makeEgammaTools(m_photonToolsFactory, photonEffTools, photonSFTools, photonLegsPerKey,
-                              "AsgPhotonEfficiencyCorrectionTool/PhTrigEff_",
+                              "CP::AsgPhotonEfficiencyCorrectionTool/PhTrigEff_",
                               "_" + m_photonIsol.value(),
                               [this](asg::AsgToolConfig& config) -> StatusCode {
                                 if (!m_isRun3Geo) {
