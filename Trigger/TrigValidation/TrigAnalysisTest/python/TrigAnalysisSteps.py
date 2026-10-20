@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 
 '''
@@ -24,13 +24,14 @@ class TrigDecChecker(InputDependentStep):
         super().configure(test)
 
 class TrigEDMChecker(InputDependentStep):
-    def __init__(self, name='TrigEDMChecker', in_file='AOD.pool.root'):
+    def __init__(self, name='TrigEDMChecker', in_file='AOD.pool.root', args=''):
         super().__init__(name)
         self.input_file = in_file
+        self.args = args
         self.executable = 'trigEDMChecker.py'
 
     def configure(self, test):
-        self.args = f' --filesInput {self.input_file}'
+        self.args += f' --filesInput {self.input_file}'
         super().configure(test)
 
 
@@ -53,20 +54,20 @@ class CheckFileTrigSizeStep(CheckFileStep):
 # Getter functions
 ##################################################
 
-def trig_analysis_exec_steps(input_file='AOD.pool.root'):
+def trig_analysis_exec_steps(input_file='AOD.pool.root', args=''):
     # TODO: add TrigNavSlimming test
     tests = []
     tests.append(TrigDecChecker(name="TrigDecChecker", in_file=input_file))
     if 'DAOD' not in input_file: # DAOD won't have full trigger EDM
-        tests.append(TrigEDMChecker(name="TrigEDMChecker",in_file=input_file))
+        tests.append(TrigEDMChecker(name="TrigEDMChecker",in_file=input_file, args=args))
 
     return tests
 
 def trig_analysis_check_steps(input_file):
     return [CheckFileTrigSizeStep(name='CheckFileTrigSize', input_file=input_file)]
 
-def add_analysis_steps(test, input_file='AOD.pool.root'):
-    analysis_exec_steps = trig_analysis_exec_steps(input_file)
+def add_analysis_steps(test, input_file='AOD.pool.root', args=''):
+    analysis_exec_steps = trig_analysis_exec_steps(input_file,args)
     test.exec_steps.extend(analysis_exec_steps)
     test.check_steps.extend(trig_analysis_check_steps(input_file))
 
