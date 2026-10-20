@@ -30,24 +30,22 @@ using TEVENT = POOL::TEvent;
 #include <string>
 #include <iomanip>
 
-using CP::CorrectionCode;
-ANA_MSG_HEADER(testBTagEfficiency)
-ANA_MSG_SOURCE(testBTagEfficiency, "BtaggingEfficiencyToolTester")
-using namespace testBTagEfficiency;
+ANA_MSG_HEADER(testBTaggingEfficiencyToolTester)
+ANA_MSG_SOURCE(testBTaggingEfficiencyToolTester, "BTaggingEfficiencyToolTester")
+using namespace testBTaggingEfficiencyToolTester;
 
 int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
-
-  #ifdef XAOD_STANDALONE
   // Change type returned by the ANA_CHECK function in case of error 
   // NB: this is needed here because the main() function should return an integer
   // In principle you should NOT call this line for your regular code 
   ANA_CHECK_SET_TYPE (int);
 
+  #ifdef XAOD_STANDALONE
   // Important to do this first!
   // Those lines are only included if using AnalysisBase
   ANA_CHECK (xAOD::Init()) ;
   #else
-  // Those lines are only included if using AthAnalysis
+  // Those lines are only included if using AthAnalysis or Athena
   POOL::Init();
   #endif
 
@@ -171,17 +169,17 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
         // Storage for sf/eff values
         float sf=0;
         float eff=0;
-        CorrectionCode result;
+        CP::CorrectionCode result;
         ANA_MSG_DEBUG("Testing function calls without systematics...");
         result = tool->getEfficiency(*jet,eff);
-        if(result!=CorrectionCode::Ok){
+        if(result!=CP::CorrectionCode::Ok){
           ANA_MSG_ERROR("Jet get efficiency failed");
           return 1;
         } else {
           ANA_MSG_INFO("Jet Efficiency: " << eff);
         }
         result = tool->getScaleFactor(*jet,sf);
-        if( result!=CorrectionCode::Ok) {
+        if( result!=CP::CorrectionCode::Ok) {
           ANA_MSG_ERROR("Jet get scale factor failed");
           return 1;
         } else {

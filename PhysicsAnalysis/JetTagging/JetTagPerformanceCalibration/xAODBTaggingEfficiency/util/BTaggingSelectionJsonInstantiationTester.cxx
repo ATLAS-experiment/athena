@@ -34,14 +34,15 @@ class GaudiException { public: const char* what() const { return ""; } };
 #include "POOLRootAccess/TEvent.h"
 #endif
 
-ANA_MSG_HEADER(testBTagSelJsonInst)
-ANA_MSG_SOURCE(testBTagSelJsonInst, "BTaggingSelectionJsonInstantiationTester")
-using namespace testBTagSelJsonInst;
+ANA_MSG_HEADER(testBTaggingSelectionJsonInstantiationTester)
+ANA_MSG_SOURCE(testBTaggingSelectionJsonInstantiationTester, "BTaggingSelectionJsonInstantiationTester")
+using namespace testBTaggingSelectionJsonInstantiationTester;
 
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
-#ifdef XAOD_STANDALONE
+    // Change type returned by the ANA_CHECK function in case of error 
+    // NB: this is needed here because the main() function should return an integer
+    // In principle you should NOT call this line for your regular code 
     ANA_CHECK_SET_TYPE(int);
-#endif
 
     std::string jsonCalibPath;
     bool allowBinMismatch = false;
@@ -62,11 +63,14 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
         return 2;
     }
 
-#ifdef XAOD_STANDALONE
+    #ifdef XAOD_STANDALONE
+    // Important to do this first!
+    // Those lines are only included if using AnalysisBase
     ANA_CHECK(xAOD::Init());
-#else
+    #else
+    // Those lines are only included if using AthAnalysis or Athena
     POOL::Init();
-#endif
+    #endif
 
     // The tool resolves the calibration path itself, so pass the path straight
     // through to it. Resolve a copy here only to read the WP structure for

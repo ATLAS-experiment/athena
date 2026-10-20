@@ -15,7 +15,7 @@
 #include "xAODRootAccess/TEvent.h"
 using TEVENT = xAOD::TEvent;
 #else
-// Those lines are only included if using AthAnalysis
+// Those lines are only included if using AthAnalysis or Athena
 #include "POOLRootAccess/TEvent.h"
 using TEVENT = POOL::TEvent;
 #endif
@@ -24,9 +24,9 @@ using TEVENT = POOL::TEvent;
 #include "PATInterfaces/SystematicVariation.h"
 #include "TFile.h"
 
-ANA_MSG_HEADER(testBTagJson)
-ANA_MSG_SOURCE(testBTagJson, "BtaggingJsonToolTester")
-using namespace testBTagJson;
+ANA_MSG_HEADER(testBTaggingJsonToolTester)
+ANA_MSG_SOURCE(testBTaggingJsonToolTester, "BTaggingJsonToolTester")
+using namespace testBTaggingJsonToolTester;
 
 bool containNoSF(const std::string& str) {
   std::string target = "nosf";
@@ -41,7 +41,6 @@ bool containNoSF(const std::string& str) {
 }
 
 int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
-
   // Change type returned by the ANA_CHECK function in case of error 
   // NB: this is needed here because the main() function should return an integer
   // In principle you should NOT call this line for your regular code 

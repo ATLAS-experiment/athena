@@ -207,25 +207,25 @@ atlas_add_test(
   ut_BTaggingEfficiencyToolTester_Run3_PCBT
   SCRIPT BTaggingEfficiencyToolTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_LATEST_CDI_RUN3_PCBT} GN2v01 Continuous
   REF_FILE share/ut_BTaggingEfficiencyToolTester_Run3_PCBT.ref
-  LOG_IGNORE_PATTERN "^ApplicationMgr +INFO|^xAOD::Init +INFO|^xAOD::TEvent +WARNING"
+  LOG_IGNORE_PATTERN "^JobOptionsSvc +INFO|^ApplicationMgr +INFO|^xAOD::Init +INFO|^xAOD::TEvent +WARNING"
 )
 atlas_add_test(
   ut_BTaggingEfficiencyToolTester_Run3_PCFT
   SCRIPT BTaggingEfficiencyToolTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_LATEST_CDI_RUN3_PCFT} GN2v01 Continuous2D
   REF_FILE share/ut_BTaggingEfficiencyToolTester_Run3_PCFT.ref
-  LOG_IGNORE_PATTERN "^ApplicationMgr +INFO|^xAOD::Init +INFO|^xAOD::TEvent +WARNING"
+  LOG_IGNORE_PATTERN "^JobOptionsSvc +INFO|^ApplicationMgr +INFO|^xAOD::Init +INFO|^xAOD::TEvent +WARNING"
 )
 atlas_add_test(
   ut_BTaggingEfficiencyToolTester_Run2_PCBT
   SCRIPT BTaggingEfficiencyToolTester ${FTAG_INPUT_RUN2_DAOD} ${FTAG_LATEST_CDI_RUN2_PCBT} GN2v01 Continuous
   REF_FILE share/ut_BTaggingEfficiencyToolTester_Run2_PCBT.ref
-  LOG_IGNORE_PATTERN "^ApplicationMgr +INFO|^xAOD::Init +INFO|^xAOD::TEvent +WARNING"
+  LOG_IGNORE_PATTERN "^JobOptionsSvc +INFO|^ApplicationMgr +INFO|^xAOD::Init +INFO|^xAOD::TEvent +WARNING"
 )
 atlas_add_test(
   ut_BTaggingEfficiencyToolTester_Run2_PCFT
   SCRIPT BTaggingEfficiencyToolTester ${FTAG_INPUT_RUN2_DAOD} ${FTAG_LATEST_CDI_RUN2_PCFT} GN2v01 Continuous2D
   REF_FILE share/ut_BTaggingEfficiencyToolTester_Run2_PCFT.ref
-  LOG_IGNORE_PATTERN "^ApplicationMgr +INFO|^xAOD::Init +INFO|^xAOD::TEvent +WARNING"
+  LOG_IGNORE_PATTERN "^JobOptionsSvc +INFO|^ApplicationMgr +INFO|^xAOD::Init +INFO|^xAOD::TEvent +WARNING"
 )
 atlas_add_test(
   ut_BTaggingSystematicStrategyComparison
