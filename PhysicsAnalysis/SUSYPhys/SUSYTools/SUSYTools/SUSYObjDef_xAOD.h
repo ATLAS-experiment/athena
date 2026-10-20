@@ -562,6 +562,12 @@ namespace ST {
     std::string m_ZTagUncConfig;
     std::string m_TopTagUncConfig;
     std::string m_JetTruthLabelName;
+    // Additional variables to set for the truth labelling tool:
+    std::string m_fatUngroomedTruthJets;
+    std::string m_fatTruthJets;
+    bool m_getTruthGroomedJetValues;
+    bool m_matchUngroomedParent;
+    double m_dRTruthJet;
 
     bool m_tool_init;
     bool m_subtool_init;

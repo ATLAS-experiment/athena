@@ -250,6 +250,40 @@ def getJetGhostLabelTool(jetdef, modspec):
     return getJetGhostFlavorLabelTool(modspec)
 
 
+# Settings of JetTruthLabelingTool for each truth label
+truthLabelSettings = {
+    # Large R labels
+    "R10TruthLabel_R21Precision_2022v1": dict(
+        TruthJetContainer        = "AntiKt10TruthJets",
+        MatchUngroomedParent     = True,
+        dRTruthJet               = 0.75,
+    ),
+
+    "R10TruthLabel_R22v1": dict(
+        TruthJetContainer        = "AntiKt10TruthJets",
+        GetTruthGroomedJetValues = True,
+        TruthGroomedJetContainer = "AntiKt10TruthSoftDropBeta100Zcut10Jets",
+        MatchUngroomedParent     = True,
+        dRTruthJet               = 0.75,
+    ),
+
+    "R10WZTruthLabel_R22v1": dict(
+        TruthJetContainer        = "AntiKt10TruthDressedWZJets",
+        GetTruthGroomedJetValues = True,
+        TruthGroomedJetContainer = "AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets",
+        MatchUngroomedParent     = True,
+        dRTruthJet               = 0.75,
+    ),
+
+    # Small R labels
+    "R4TruthLabel":          dict(TruthJetContainer = "AntiKt4TruthJets",          dRTruthJet = 0.3, DoLargeRLabels = False),
+    "R4TruthDressedWZLabel": dict(TruthJetContainer = "AntiKt4TruthDressedWZJets", dRTruthJet = 0.3, DoLargeRLabels = False),
+    "R4InTimeTruthLabel":    dict(TruthJetContainer = "InTimeAntiKt4TruthJets",    dRTruthJet = 0.3, DoLargeRLabels = False),
+    "R4OutOfTimeTruthLabel": dict(TruthJetContainer = "OutOfTimeAntiKt4TruthJets", dRTruthJet = 0.3, DoLargeRLabels = False),
+}
+
+# end of truth label definition
+
 def getJetTruthLabelTool(jetdef, modspec):
 
     isTruthJet = 'Truth' in jetdef.fullname()
@@ -263,10 +297,10 @@ def getJetTruthLabelTool(jetdef, modspec):
         else:
             truthLabel = modspec
 
-    kwargs = {}
+    kwargs = dict(truthLabelSettings[truthLabel])
     if addopts:
         if 'DeltaR' in addopts:
-            kwargs['ForceDeltaRMatch'] = True
+            kwargs['UseGhostJetMatch'] = False
 
     jetTruthLabelTool = CompFactory.JetTruthLabelingTool('truthlabeler_{0}'.format(truthLabel),
                                                          RecoJetContainer = jetdef.fullname(),

@@ -17,31 +17,18 @@ JetTruthLabelingTool::JetTruthLabelingTool(const std::string& name) :
 
 JetTruthLabelingTool::TruthLabelConfiguration
 JetTruthLabelingTool::parseLabel(const std::string& name) {
-
-    if (name == "R10TruthLabel_R21Precision_2022v1")
-        return TruthLabelConfiguration::R21Precision_2022v1;
-
-    if (name == "R10TruthLabel_R22v1")
-        return TruthLabelConfiguration::R10TruthLabel_R22v1;
-
-    if (name == "R10WZTruthLabel_R22v1")
-        return TruthLabelConfiguration::R10WZTruthLabel_R22v1;
-
-    if (name == "R4TruthLabel")
-        return TruthLabelConfiguration::R4TruthLabel;
-
-    if (name == "R4TruthDressedWZLabel")
-        return TruthLabelConfiguration::R4TruthDressedWZLabel;
-
-    if (name == "R4InTimeTruthLabel")
-        return TruthLabelConfiguration::R4InTimeTruthLabel;
-
-    if (name == "R4OutOfTimeTruthLabel")
-        return TruthLabelConfiguration::R4OutOfTimeTruthLabel;
-
-    return TruthLabelConfiguration::Unknown;
+  static const std::map<std::string, TruthLabelConfiguration> labels{
+    {"R10TruthLabel_R21Precision_2022v1", TruthLabelConfiguration::R21Precision_2022v1},
+    {"R10TruthLabel_R22v1",               TruthLabelConfiguration::R10TruthLabel_R22v1},
+    {"R10WZTruthLabel_R22v1",             TruthLabelConfiguration::R10WZTruthLabel_R22v1},
+    {"R4TruthLabel",                      TruthLabelConfiguration::R4TruthLabel},
+    {"R4TruthDressedWZLabel",             TruthLabelConfiguration::R4TruthDressedWZLabel},
+    {"R4InTimeTruthLabel",                TruthLabelConfiguration::R4InTimeTruthLabel},
+    {"R4OutOfTimeTruthLabel",             TruthLabelConfiguration::R4OutOfTimeTruthLabel},
+  };
+  auto it = labels.find(name);
+  return it != labels.end() ? it->second : TruthLabelConfiguration::Unknown;
 }
-
 
 StatusCode JetTruthLabelingTool::initialize(){
 
@@ -53,72 +40,6 @@ StatusCode JetTruthLabelingTool::initialize(){
   if(m_truthLabelConfig == TruthLabelConfiguration::Unknown) {
     ATH_MSG_ERROR("TruthLabelName " << m_truthLabelName << " is not supported. Exiting...");
     return StatusCode::FAILURE;
-  }
-
-  /// Ghost Association values
-  m_useGhostJetMatch = false;
-  m_recoGhostFrac = 0.75;
-
-  switch(m_truthLabelConfig) {
-  /// Hard-code some values for R10TruthLabel_R21Precision_2022v1 and R10TruthLabel_R22v1                                                                                                     
-  case TruthLabelConfiguration::R21Precision_2022v1:
-  case TruthLabelConfiguration::R10TruthLabel_R22v1:
-    m_truthJetCollectionKey="AntiKt10TruthJets";
-    m_matchUngroomedParent = true;
-    m_dRTruthJet = 0.75;
-    if ( m_truthLabelConfig == TruthLabelConfiguration::R10TruthLabel_R22v1) {
-      m_getTruthGroomedJetValues = true;
-      m_truthGroomedJetCollectionKey="AntiKt10TruthSoftDropBeta100Zcut10Jets";
-    } else {
-      m_getTruthGroomedJetValues = false;
-    }
-    break;
-  /// Hard-code some values for R10WZTruthLabel_R22v1
-  case TruthLabelConfiguration::R10WZTruthLabel_R22v1:
-    m_truthJetCollectionKey="AntiKt10TruthDressedWZJets";
-    m_matchUngroomedParent = true;
-    m_dRTruthJet = 0.75;
-    m_mLowTop = 140.0;
-    m_mLowW = 50.0;
-    m_mLowZ = 50.0;
-    m_getTruthGroomedJetValues = true;
-    m_truthGroomedJetCollectionKey="AntiKt10TruthDressedWZSoftDropBeta100Zcut10Jets";
-    break;
-
-  /// Hard code for small-R jets
-  case TruthLabelConfiguration::R4TruthLabel:
-  case TruthLabelConfiguration::R4TruthDressedWZLabel:
-  case TruthLabelConfiguration::R4InTimeTruthLabel:
-  case TruthLabelConfiguration::R4OutOfTimeTruthLabel:
-    switch (m_truthLabelConfig) {
-    case TruthLabelConfiguration::R4TruthLabel:
-      m_truthJetCollectionKey = "AntiKt4TruthJets";
-      break;
-    case TruthLabelConfiguration::R4TruthDressedWZLabel:
-      m_truthJetCollectionKey = "AntiKt4TruthDressedWZJets";
-      break;
-    case TruthLabelConfiguration::R4InTimeTruthLabel:
-      m_truthJetCollectionKey = "InTimeAntiKt4TruthJets";
-      break;
-    case TruthLabelConfiguration::R4OutOfTimeTruthLabel:
-      m_truthJetCollectionKey = "OutOfTimeAntiKt4TruthJets";
-      break;
-    default: // Cannot hit anything else
-      break;
-    }
-    m_matchUngroomedParent = false;
-    m_dRTruthJet = 0.3;
-    m_getTruthGroomedJetValues = false;
-    m_useGhostJetMatch = false;
-    m_doLargeRLabels = false;
-    break;
-  default:
-    ATH_MSG_ERROR(" Unhandled TruthLabelName " << m_truthLabelName << "! Exiting...");
-    return StatusCode::FAILURE;
-  }
-
-  if(m_forceDeltaRMatch) {
-    m_useGhostJetMatch = false;
   }
 
   print();
