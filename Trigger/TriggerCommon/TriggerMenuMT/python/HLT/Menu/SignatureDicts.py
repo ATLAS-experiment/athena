@@ -738,6 +738,7 @@ TauChainParts = {
 
                         # GNTau ID WPs:
                         'verylooseGNTau', 'looseGNTau', 'mediumGNTau', 'tightGNTau',
+                        'mediumGNTauDev1',
 
                         # GNTauExt ID WPs:
                         'mediumnoperfGNTauDev1', 

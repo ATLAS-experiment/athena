@@ -2456,6 +2456,84 @@ leg001_EF_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM26M:
     10: 16
     11: 16
   eventCount: 0
+EF_e26_lhtight_ivarloose_tau25_mediumGNTau_probe_L1cTAU20M_03dRAB_L1eEM26M:
+  stepCounts:
+    0: 4
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 3
+    8: 3
+    9: 3
+    10: 3
+  stepFeatures:
+    0: 12
+    1: 12
+    2: 12
+    3: 12
+    4: 12
+    5: 12
+    6: 12
+    7: 10
+    8: 10
+    9: 10
+    10: 10
+  eventCount: 0
+leg000_EF_e26_lhtight_ivarloose_tau25_mediumGNTau_probe_L1cTAU20M_03dRAB_L1eEM26M:
+  stepCounts:
+    0: 4
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 3
+    8: 3
+    9: 3
+    10: 3
+  stepFeatures:
+    0: 4
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 3
+    8: 3
+    9: 3
+    10: 3
+  eventCount: 0
+leg001_EF_e26_lhtight_ivarloose_tau25_mediumGNTau_probe_L1cTAU20M_03dRAB_L1eEM26M:
+  stepCounts:
+    0: 4
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 3
+    8: 3
+    9: 3
+    10: 3
+  stepFeatures:
+    0: 8
+    1: 8
+    2: 8
+    3: 8
+    4: 8
+    5: 8
+    6: 8
+    7: 7
+    8: 7
+    9: 7
+    10: 7
+  eventCount: 0
 EF_e28_idperf_loose_L1eEM28M:
   stepCounts:
     0: 5
@@ -8126,6 +8204,72 @@ leg001_EF_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_L1cTAU20M_03dRAB_L1MU14
     8: 9
     9: 8
   eventCount: 0
+EF_mu24_ivarmedium_tau25_mediumGNTau_probe_L1eTAU20_03dRAB_L1MU14FCH:
+  stepCounts:
+    0: 6
+    1: 6
+    2: 4
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 4
+    8: 4
+  stepFeatures:
+    0: 31
+    1: 31
+    2: 19
+    3: 18
+    4: 18
+    5: 16
+    6: 16
+    7: 16
+    8: 16
+  eventCount: 0
+leg000_EF_mu24_ivarmedium_tau25_mediumGNTau_probe_L1eTAU20_03dRAB_L1MU14FCH:
+  stepCounts:
+    0: 6
+    1: 6
+    2: 4
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 4
+    8: 4
+  stepFeatures:
+    0: 7
+    1: 7
+    2: 5
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 4
+    8: 4
+  eventCount: 0
+leg001_EF_mu24_ivarmedium_tau25_mediumGNTau_probe_L1eTAU20_03dRAB_L1MU14FCH:
+  stepCounts:
+    0: 6
+    1: 6
+    2: 4
+    3: 4
+    4: 4
+    5: 4
+    6: 4
+    7: 4
+    8: 4
+  stepFeatures:
+    0: 24
+    1: 24
+    2: 14
+    3: 14
+    4: 14
+    5: 12
+    6: 12
+    7: 12
+    8: 12
+  eventCount: 0
 EF_mu24_msonly_L1MU14FCH:
   stepCounts:
     0: 6
@@ -8480,6 +8624,20 @@ EF_tau140_mediumGNTau_L1eTAU120:
     2: 4
     3: 4
   eventCount: 0
+EF_tau160_idperf_L1eTAU120:
+  stepCounts:
+    0: 4
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+  stepFeatures:
+    0: 4
+    1: 4
+    2: 4
+    3: 4
+    4: 4
+  eventCount: 4
 EF_tau160_mediumGNTau_L1eTAU120:
   stepCounts:
     0: 4
@@ -8492,6 +8650,20 @@ EF_tau160_mediumGNTau_L1eTAU120:
     2: 4
     3: 4
   eventCount: 0
+EF_tau160_perf_L1eTAU120:
+  stepCounts:
+    0: 4
+    1: 4
+    2: 4
+    3: 4
+    4: 1
+  stepFeatures:
+    0: 4
+    1: 4
+    2: 4
+    3: 4
+    4: 1
+  eventCount: 1
 EF_tau180_mediumGNTau_L1eTAU120:
   stepCounts:
     0: 3
@@ -8568,6 +8740,34 @@ EF_tau20_idperf_tracktwoMVA_L1eTAU12:
     3: 83
     4: 83
   eventCount: 19
+EF_tau20_mediumGNTauDev1_L1cTAU20M:
+  stepCounts:
+    0: 19
+    1: 19
+    2: 19
+    3: 19
+    4: 7
+  stepFeatures:
+    0: 50
+    1: 50
+    2: 50
+    3: 50
+    4: 7
+  eventCount: 7
+EF_tau20_mediumGNTau_L1cTAU20M:
+  stepCounts:
+    0: 19
+    1: 19
+    2: 19
+    3: 19
+    4: 7
+  stepFeatures:
+    0: 50
+    1: 50
+    2: 50
+    3: 50
+    4: 7
+  eventCount: 7
 EF_tau20_mediumGNTau_em_L1eTAU12:
   stepCounts:
     0: 19
@@ -8582,6 +8782,20 @@ EF_tau20_mediumGNTau_em_L1eTAU12:
     3: 90
     4: 9
   eventCount: 9
+EF_tau20_perf_L1cTAU20M:
+  stepCounts:
+    0: 19
+    1: 19
+    2: 19
+    3: 19
+    4: 14
+  stepFeatures:
+    0: 50
+    1: 50
+    2: 50
+    3: 50
+    4: 25
+  eventCount: 14
 EF_tau20_perf_em_L1eTAU12:
   stepCounts:
     0: 19
@@ -11194,6 +11408,20 @@ leg002_EF_tau60_mediumRNN_tracktwoMVA_tau25_mediumRNN_tracktwoMVA_xe50_cell_03dR
     2: 4
     3: 4
   eventCount: 0
+EF_tau80_mediumGNTau_L1eTAU80:
+  stepCounts:
+    0: 7
+    1: 7
+    2: 7
+    3: 7
+    4: 1
+  stepFeatures:
+    0: 9
+    1: 9
+    2: 9
+    3: 9
+    4: 1
+  eventCount: 1
 EF_tau80_mediumGNTau_tau35_mediumGNTau_03dRAB30_L1eTAU80_2cTAU30M_DR-eTAU30eTAU20:
   stepCounts:
     0: 7
