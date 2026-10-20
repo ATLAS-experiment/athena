@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "StoreGate/ReadHandle.h"
-#include "TgcL0SectorLogicWordEncoder.h"
+#include "SectorLogicWordEncoder.h"
 #include "xAODMuonViews/FillContainer.h"
 
 namespace L1Muon {
@@ -39,8 +39,8 @@ StatusCode L1MuonEndcapAlg::execute(const EventContext& ctx) const {
   for (const xAOD::L1TGCCandData* candidate : *inputHandle) {
     if (candidate->tcId() == 0U) continue;
 
-    const TgcL0SectorLogicWords words =
-        TgcL0SectorLogicWordEncoder::encode(*candidate);
+    const L1TGC::SectorLogicWords words =
+        L1TGC::SectorLogicWordEncoder::encode(*candidate);
     xAOD::SectorLogicCandData* outputCandidate =
         output->push_back(std::make_unique<xAOD::SectorLogicCandData>());
     outputCandidate->initialize(

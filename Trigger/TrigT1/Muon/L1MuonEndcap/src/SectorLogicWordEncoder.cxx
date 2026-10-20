@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TgcL0SectorLogicWordEncoder.h"
+#include "SectorLogicWordEncoder.h"
 
 #include "TrigT1MuctpiBits/MuCTPI_Bits.h"
 
@@ -18,11 +18,11 @@ constexpr std::uint32_t encodeField(const std::uint32_t value,
 
 }  // namespace
 
-namespace L1Muon {
+namespace L1Muon::L1TGC {
 
-TgcL0SectorLogicWords TgcL0SectorLogicWordEncoder::encode(
+SectorLogicWords SectorLogicWordEncoder::encode(
     const xAOD::L1TGCCandData& candidate) {
-  TgcL0SectorLogicWords words;
+  SectorLogicWords words;
   words.candWord =
       encodeField(candidate.l1Pt(), bits::RUN4_SL2MUCTPI_PT_VAL_SHIFT,
                   bits::RUN4_SL2MUCTPI_PT_VAL_MASK) |
@@ -44,4 +44,4 @@ TgcL0SectorLogicWords TgcL0SectorLogicWordEncoder::encode(
   return words;
 }
 
-}  // namespace L1Muon
+}  // namespace L1Muon::L1TGC

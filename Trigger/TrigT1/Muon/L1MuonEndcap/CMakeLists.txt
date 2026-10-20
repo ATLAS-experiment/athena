@@ -14,9 +14,9 @@ atlas_add_test( L1MuonEndcapConfig
                 SCRIPT python -m L1MuonEndcap.L1MuonEndcapConfig
                 POST_EXEC_SCRIPT noerror.sh )
 
-atlas_add_test( TgcL0SectorLogicWordEncoder_test
-                SOURCES test/TgcL0SectorLogicWordEncoder_test.cxx
-                        src/TgcL0SectorLogicWordEncoder.cxx
+atlas_add_test( L1MuonEndcap_SectorLogicWordEncoder_test
+                SOURCES test/SectorLogicWordEncoder_test.cxx
+                        src/SectorLogicWordEncoder.cxx
                 INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/src
                 LINK_LIBRARIES AthContainers TrigT1MuctpiBits
                                xAODTrigL1Muon
