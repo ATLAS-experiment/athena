@@ -30,16 +30,6 @@ StatusCode PoolMemoryResourceSvc::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode PoolMemoryResourceSvc::finalize() {
-
-  // Reset the memory resources.
-  m_syncedMR.reset();
-  m_cachedMR.reset();
-
-  // Return gracefully.
-  return StatusCode::SUCCESS;
-}
-
 std::pmr::memory_resource& PoolMemoryResourceSvc::mr() const {
 
   assert(m_cachedMR);

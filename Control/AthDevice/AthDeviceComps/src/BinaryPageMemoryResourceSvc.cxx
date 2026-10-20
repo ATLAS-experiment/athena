@@ -30,16 +30,6 @@ StatusCode BinaryPageMemoryResourceSvc::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode BinaryPageMemoryResourceSvc::finalize() {
-
-  // Reset the memory resources.
-  m_syncedMR.reset();
-  m_cachedMR.reset();
-
-  // Return gracefully.
-  return StatusCode::SUCCESS;
-}
-
 std::pmr::memory_resource& BinaryPageMemoryResourceSvc::mr() const {
 
   assert(m_cachedMR);

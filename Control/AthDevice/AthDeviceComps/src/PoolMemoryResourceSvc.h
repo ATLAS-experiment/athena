@@ -33,9 +33,6 @@ class PoolMemoryResourceSvc : public extends<AthService, IMemoryResourceSvc> {
   /// Initialize the service
   virtual StatusCode initialize() override;
 
-  /// Finalize the service
-  virtual StatusCode finalize() override;
-
   /// @}
 
   /// @name Function(s) inherited from @c IMemoryResourceSvc
