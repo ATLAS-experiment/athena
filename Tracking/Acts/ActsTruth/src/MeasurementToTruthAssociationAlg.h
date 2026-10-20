@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKFINDING_MEASUREMENTTOTRUTHASSOCIATIONALG_H
@@ -140,9 +140,7 @@ namespace ActsTrk
   class MeasurementToTruthAssociationAlg : public AthReentrantAlgorithm
   {
   public:
-    MeasurementToTruthAssociationAlg(const std::string &name,
-                           ISvcLocator *pSvcLocator);
-
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;

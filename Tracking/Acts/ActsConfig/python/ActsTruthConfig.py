@@ -95,49 +95,60 @@ def ActsInDetStripClusterToTruthAssociationAlgCfg(flags,
     acc.addEventAlgo( CompFactory.ActsTrk.StripClusterToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
+
+### Assemble the list of truth association keys for the TruthHitCount and the 
+### Track -> truth association algorithm
+def _truthAssociationKeysCfg(flags, doInner:bool =True, doMuon: bool = False):
+    assocKeys = []
+    if doInner and flags.Detector.EnablePixel:
+        assocKeys += ['PixelClustersToTruthParticles']
+    if doInner and  flags.Detector.EnableSCT:
+        assocKeys += [ 'SCT_ClustersToTruthParticles']
+    if doInner and  flags.Detector.EnableITkPixel:
+        assocKeys += ['ITkPixelClustersToTruthParticles']
+    if doInner and flags.Detector.EnableITkStrip:
+        assocKeys += ['ITkStripClustersToTruthParticles']
+    if doInner and flags.Reco.EnableHGTDExtension and flags.Acts.useHGTDClusterInTrackFinding:
+        assocKeys +=['HgtdClustersToTruthParticles']
+    if doMuon and flags.Muon.usePhaseIIGeoSetup:
+        from MuonConfig.MuonDataPrepConfig import PrimaryMeasContNamesCfg
+        assocKeys+=[f"{cont}_TruthAssocMap" for cont in PrimaryMeasContNamesCfg(flags)]
+    return assocKeys
+
+
 def ActsTrackToTruthAssociationAlgCfg(flags,
                                       name: str = 'ActsTracksToTruthAssociationAlg',
+                                      doInner:bool = True, doMuon: bool = False,
                                       **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    acc.merge( MapToInDetSimDataWrapSvcCfg(flags, collectionName='ITkStripSDO_Map') )
+    if doInner and flags.Detector.GeometryITk:
+        acc.merge( MapToInDetSimDataWrapSvcCfg(flags, collectionName='ITkStripSDO_Map') )
+    elif doInner and flags.Detector.GeometryID:
+        acc.merge( MapToInDetSimDataWrapSvcCfg(flags, collectionName='SCT_SDO_Map') ) 
 
     kwargs.setdefault('ACTSTracksLocation','ActsTracks')
-    kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
-    kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
-    if flags.Reco.EnableHGTDExtension and (flags.Acts.useHGTDClusterInTrackFinding or (flags.HGTD.doActs and flags.Tracking.doTruth)):
-        kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
+    kwargs.setdefault("MeasurementAssocKeys", _truthAssociationKeysCfg(flags, doInner = doInner, doMuon = doMuon))
     kwargs.setdefault('AssociationMapOut','ActsTracksToTruthParticles')
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV)
-
     acc.addEventAlgo( CompFactory.ActsTrk.TrackToTruthAssociationAlg(name=name, **kwargs) )
     return acc
 
 def ActsInDetTrackToTruthAssociationAlgCfg(flags,
                                       name: str = 'ActsInDetTracksToTruthAssociationAlg',
                                       **kwargs: dict) -> ComponentAccumulator:
-    # Inner Detector configurations
-    acc = ComponentAccumulator()
-    acc.merge( MapToInDetSimDataWrapSvcCfg(flags, collectionName='SCT_SDO_Map') )
-
-    kwargs.setdefault('ACTSTracksLocation','ActsTracks')
-    kwargs.setdefault('PixelClustersToTruthAssociationMap','PixelClustersToTruthParticles')
-    kwargs.setdefault('StripClustersToTruthAssociationMap','SCT_ClustersToTruthParticles')
-    kwargs.setdefault('AssociationMapOut','ActsTracksToTruthParticles')
-    kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV)
-
-    acc.addEventAlgo( CompFactory.ActsTrk.TrackToTruthAssociationAlg(name=name, **kwargs) )
-    return acc
+    return ActsTrackToTruthAssociationAlgCfg(flags, name=name, **kwargs)
 
 def ActsTruthParticleHitCountAlgCfg(flags,
                                     name: str = 'ActsTruthParticleHitCountAlg',
+                                    doInner:bool = True, doMuon: bool = False,
                                     **kwargs: dict) -> ComponentAccumulator:
     acc = ComponentAccumulator()
-    acc.merge( MapToInDetSimDataWrapSvcCfg(flags, collectionName='ITkStripSDO_Map') )
-
-    kwargs.setdefault('PixelClustersToTruthAssociationMap','ITkPixelClustersToTruthParticles')
-    kwargs.setdefault('StripClustersToTruthAssociationMap','ITkStripClustersToTruthParticles')
-    if flags.Reco.EnableHGTDExtension and flags.Acts.useHGTDClusterInTrackFinding:
-        kwargs.setdefault('HgtdClustersToTruthAssociationMap','HgtdClustersToTruthParticles')
+    if doInner and flags.Detector.GeometryITk:
+        acc.merge( MapToInDetSimDataWrapSvcCfg(flags, collectionName='ITkStripSDO_Map') )
+    elif doInner and flags.Detector.GeometryID:
+        acc.merge( MapToInDetSimDataWrapSvcCfg(flags, collectionName='SCT_SDO_Map') ) 
+    
+    kwargs.setdefault("MeasurementAssocKeys", _truthAssociationKeysCfg(flags, doInner = doInner, doMuon = doMuon))
     kwargs.setdefault('TruthParticleHitCountsOut','TruthParticleHitCounts')
     kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV) # @TODO introduce flag and synchronise with TrackToTruthAssociationAlg
     kwargs.setdefault('NHitsMin',4)
@@ -149,18 +160,7 @@ def ActsTruthParticleHitCountAlgCfg(flags,
 def ActsInDetTruthParticleHitCountAlgCfg(flags,
                                     name: str = 'ActsInDetTruthParticleHitCountAlg',
                                     **kwargs: dict) -> ComponentAccumulator:
-    # Inner Detector configurations
-    acc = ComponentAccumulator()
-    acc.merge( MapToInDetSimDataWrapSvcCfg(flags, collectionName='SCT_SDO_Map') )
-
-    kwargs.setdefault('PixelClustersToTruthAssociationMap','PixelClustersToTruthParticles')
-    kwargs.setdefault('StripClustersToTruthAssociationMap','SCT_ClustersToTruthParticles')
-    kwargs.setdefault('TruthParticleHitCountsOut','TruthParticleHitCounts')
-    kwargs.setdefault('MaxEnergyLoss',1e3*UnitConstants.TeV) # @TODO introduce flag and synchronise with TrackToTruthAssociationAlg
-    kwargs.setdefault('NHitsMin',4)
-
-    acc.addEventAlgo( CompFactory.ActsTrk.TruthParticleHitCountAlg(name=name, **kwargs) )
-    return acc
+    return ActsTruthParticleHitCountAlgCfg(flags, name=name, **kwargs)
 
 def ActsTruthAssociationAlgCfg(flags,
                               **kwargs: dict) -> ComponentAccumulator:
@@ -183,15 +183,29 @@ def ActsTruthAssociationAlgCfg(flags,
     return acc
 
 def setDefaultTruthMatchingArgs(kwargs) :
-    kwargs.setdefault('MatchWeights',[0.,                    # other
-                                      10., 5.,               # ID (pixel, strips)
-                                      0.,  0., 0. , 0., 0.,  # MS (MdtDriftCircle, RpcStrip, TgcStrip, MMCluster, sTgcStrip)
-                                      0. ])                  # HGTD
-    # weights used for hit purity and hit efficiencies
-    kwargs.setdefault('CountWeights',[0.,                   # other
-                                      1.,1.,                # ID (pixel, strips)
-                                      0., 0., 0. , 0., 0.,  # MS (MdtDriftCircle, RpcStrip, TgcStrip, MMCluster, sTgcStrip)
-                                      0. ])                 # HGTD
+    from ROOT.xAOD import UncalibMeasType
+    matchWeights = [0. for d in range(UncalibMeasType.nTypes)]
+    countWeights = [0. for d in range(UncalibMeasType.nTypes)]
+    matchWeights[UncalibMeasType.PixelClusterType] = 10.
+    matchWeights[UncalibMeasType.StripClusterType] = 5.
+
+    #TODO: Re-evaluate the weights!
+    matchWeights[UncalibMeasType.MdtDriftCircleType] = 1.
+    matchWeights[UncalibMeasType.MMClusterType] = 1.
+    matchWeights[UncalibMeasType.sTgcStripType] = 1.
+    matchWeights[UncalibMeasType.RpcStripType] = 1.
+    matchWeights[UncalibMeasType.TgcStripType] = 1.
+
+    countWeights[UncalibMeasType.PixelClusterType] = 1.
+    countWeights[UncalibMeasType.StripClusterType] = 1.
+    countWeights[UncalibMeasType.MdtDriftCircleType] = 1.
+    countWeights[UncalibMeasType.RpcStripType] = 0.5
+    countWeights[UncalibMeasType.TgcStripType] = 0.5
+    countWeights[UncalibMeasType.MMClusterType] = 0.25
+    countWeights[UncalibMeasType.sTgcStripType] = 0.25
+    
+    kwargs.setdefault('MatchWeights',matchWeights)
+    kwargs.setdefault('CountWeights', countWeights)    
     kwargs.setdefault('StatisticPtBins',[1e3,2.5e3,5e3,10e3,100e3])
     kwargs.setdefault('ShowDetailedTables',False)
     kwargs.setdefault('PdgIdCategorisation',False)

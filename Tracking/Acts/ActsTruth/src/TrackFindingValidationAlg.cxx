@@ -7,29 +7,16 @@
 namespace ActsTrk
 {
 
-  StatusCode TrackFindingValidationAlg::initialize()
-  {
-     StatusCode sc = TrackTruthMatchingBaseAlg::initialize();
+  StatusCode TrackFindingValidationAlg::initialize() {
      ATH_CHECK( m_trackToTruth.initialize() );
-     return sc;
+     return TrackTruthMatchingBaseAlg::initialize();
   }
 
-  StatusCode TrackFindingValidationAlg::finalize()
-  {
-     StatusCode sc = TrackTruthMatchingBaseAlg::finalize();
-     return sc;
-  }
-
-  StatusCode TrackFindingValidationAlg::execute(const EventContext &ctx) const
-  {
-    const TruthParticleHitCounts &truth_particle_hit_counts = getTruthParticleHitCounts(ctx);
-    SG::ReadHandle<TrackToTruthParticleAssociation> track_to_truth_handle = SG::makeHandle(m_trackToTruth, ctx);
-    if (!track_to_truth_handle.isValid()) {
-       ATH_MSG_ERROR("No track to truth particle association for key " << m_trackToTruth.key() );
-       return StatusCode::FAILURE;
-    }
-
-    EventStat event_stat(truthSelectionTool(),
+  StatusCode TrackFindingValidationAlg::execute(const EventContext &ctx) const {
+    const TruthParticleHitCounts& truth_particle_hit_counts = getTruthParticleHitCounts(ctx);
+    const TrackToTruthParticleAssociation* track_to_truth_handle{};
+    ATH_CHECK(SG::get(track_to_truth_handle, m_trackToTruth, ctx));
+    EventStat event_stat(*m_truthSelectionTool,
                          perEtaSize(),
                          perPdgIdSize(),
                          track_to_truth_handle->size());

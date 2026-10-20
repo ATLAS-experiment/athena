@@ -10,18 +10,9 @@
 #include <type_traits>
 #include <typeinfo>
 
-namespace ActsTrk
-{
+namespace ActsTrk {
 
-  template <class T_MeasurementCollection, class T_SimDataCollection, class T_TruthEventCollection, bool IsDebug >
-  MeasurementToTruthAssociationAlg<T_MeasurementCollection,
-                                   T_SimDataCollection,
-                                   T_TruthEventCollection,
-                                   IsDebug>::MeasurementToTruthAssociationAlg(const std::string &name,
-                                                                                             ISvcLocator *pSvcLocator)
-      : AthReentrantAlgorithm(name, pSvcLocator)
-  {
-  }
+  
 
   template <class T_MeasurementCollection, class T_SimDataCollection, class T_TruthEventCollection, bool IsDebug>
   StatusCode MeasurementToTruthAssociationAlg<T_MeasurementCollection,
@@ -89,31 +80,19 @@ namespace ActsTrk
     std::unique_ptr<MeasurementToTruthParticleAssociation>
        association( std::make_unique<MeasurementToTruthParticleAssociation>() );
 
-    SG::ReadHandle<T_SimDataCollection> simDataHandle = SG::makeHandle(m_simDataKey, ctx);
-    if (!simDataHandle.isValid()) {
-       ATH_MSG_ERROR("No sim data for key " << m_simDataKey.key() );
-       return StatusCode::FAILURE;
-    }
+    const T_SimDataCollection *simData{};
+    ATH_CHECK(SG::get(simData, m_simDataKey, ctx));
 
     ATH_MSG_DEBUG("Retrieving measurement collection with key: " << m_measurementKey.key());
-    SG::ReadHandle<T_MeasurementCollection> measurementHandle = SG::makeHandle(m_measurementKey, ctx);
-    if (!measurementHandle.isValid()) {
-       ATH_MSG_ERROR("No measurements for key " << m_measurementKey.key() );
-       return StatusCode::FAILURE;
-    }
-    ATH_MSG_DEBUG("Retrieved " << measurementHandle->size() << " input measurements" );
-    association->resize( measurementHandle->size() );
-    association->setSourceContainer(*measurementHandle, ctx);
+    const T_MeasurementCollection *measurements{nullptr};
+    ATH_CHECK(SG::get(measurements, m_measurementKey, ctx));
+    ATH_MSG_DEBUG("Retrieved " << measurements->size() << " input measurements" );
+    association->resize( measurements->size() );
+    association->setSourceContainer(measurements, ctx);
 
     const T_TruthEventCollection *truth_event_collection=nullptr;
-    if constexpr(!std::is_same<T_TruthEventCollection, void>::value) {
-       SG::ReadHandle<T_TruthEventCollection>
-          truthEventCollectionHandle = SG::makeHandle(m_truthEventCollectionKey, ctx);
-       if (!truthEventCollectionHandle.isValid()) {
-          ATH_MSG_ERROR("No truth event collection for key " << m_truthEventCollectionKey.key() );
-          return StatusCode::FAILURE;
-       }
-       truth_event_collection = truthEventCollectionHandle.cptr();
+    if constexpr(!std::is_same_v<T_TruthEventCollection, void>) {
+      ATH_CHECK(SG::get(truth_event_collection, m_truthEventCollectionKey, ctx));
     }
 
     auto deposit_to_truth_map = makeDepositToTruthParticleMap(truth_event_collection);
@@ -126,10 +105,7 @@ namespace ActsTrk
     std::array<std::size_t,4> depositCounts {0u, 0u, 0u, 0u};
     std::array<unsigned int, kNCategories> truth_stat{};
 
-    const T_SimDataCollection *simData = simDataHandle.cptr();
-
     std::vector<float> summed_contribution;
-    const T_MeasurementCollection *measurements = measurementHandle.cptr();
     for ( const auto *measurement : *measurements ) {
        summed_contribution.clear();
        for (const auto& a_rdo : getRDOList(*measurement) ) {

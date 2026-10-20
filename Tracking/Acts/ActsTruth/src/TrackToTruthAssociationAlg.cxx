@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrackToTruthAssociationAlg.h"
@@ -8,6 +8,7 @@
 
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthParticle.h"
+
 #include <iomanip>
 #include <cmath>
 #include <type_traits>
@@ -27,9 +28,7 @@ namespace ActsTrk
   {
      ATH_CHECK( m_ctxProvider.initialize() );
      ATH_CHECK( m_tracksContainerKey.initialize() );
-     ATH_CHECK( m_pixelClustersToTruth.initialize() );
-     ATH_CHECK( m_stripClustersToTruth.initialize() );
-     if (!m_hgtdClustersToTruth.key().empty()) ATH_CHECK( m_hgtdClustersToTruth.initialize() );
+     ATH_CHECK( m_measAssocKeys.initialize() );
      ATH_CHECK( m_trackToTruthOut.initialize() );
 
      m_elasticDecayUtil.setEnergyLossBinning(m_energyLossBinning.value());
@@ -100,155 +99,112 @@ namespace ActsTrk
 
   StatusCode TrackToTruthAssociationAlg::execute(const EventContext &ctx) const
   {
-    std::unique_ptr<TrackToTruthParticleAssociation>
-       track_association( std::make_unique<TrackToTruthParticleAssociation>() );
+    auto track_association = std::make_unique<TrackToTruthParticleAssociation>();
 
-    SG::ReadHandle<ActsTrk::MeasurementToTruthParticleAssociation> pixelClustersToTruthAssociation = SG::makeHandle(m_pixelClustersToTruth, ctx);
-    if (!pixelClustersToTruthAssociation.isValid()) {
-       ATH_MSG_ERROR("No pixel clusterss for key " << m_pixelClustersToTruth.key() );
-       return StatusCode::FAILURE;
-    }
-    SG::ReadHandle<ActsTrk::MeasurementToTruthParticleAssociation> stripClustersToTruthAssociation = SG::makeHandle(m_stripClustersToTruth, ctx);
-    if (!stripClustersToTruthAssociation.isValid()) {
-       ATH_MSG_ERROR("No strip clusterss for key " << m_stripClustersToTruth.key() );
-       return StatusCode::FAILURE;
-    }
+    const ActsTrk::TrackContainer* tracksContainer{};
+    ATH_CHECK(SG::get(tracksContainer, m_tracksContainerKey, ctx));
    
-    SG::ReadHandle<ActsTrk::TrackContainer> tracksContainer = SG::makeHandle( m_tracksContainerKey, ctx);
-    if (!tracksContainer.isValid()) {
-       ATH_MSG_ERROR("No tracks for key " << m_tracksContainerKey.key() );
-       return StatusCode::FAILURE;
-    }
     track_association->resize( tracksContainer->size() );
     track_association->setSourceContainer(DataLink<ActsTrk::TrackContainer>(*tracksContainer,ctx));
-    Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+    const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
 
-    std::array<const ActsTrk::MeasurementToTruthParticleAssociation *,
-               static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::nTypes)>
-       measurement_to_truth_association_maps{};
+   std::array<std::vector<const ActsTrk::MeasurementToTruthParticleAssociation*>,
+              Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)> prdToTruthMaps{};
    
-    measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation.cptr();
-    measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation.cptr();
-
-    if (!m_hgtdClustersToTruth.key().empty()) {
-       SG::ReadHandle<ActsTrk::MeasurementToTruthParticleAssociation> hgtdClustersToTruthAssociation = SG::makeHandle(m_hgtdClustersToTruth, ctx);
-         if (!hgtdClustersToTruthAssociation.isValid()) {
-            ATH_MSG_DEBUG("No HGTD clusterss for key " << m_hgtdClustersToTruth.key() );
-         }
-        measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::HGTDClusterType)]=hgtdClustersToTruthAssociation.cptr();
-    }
-
-    auto assocSize = [&measurement_to_truth_association_maps](xAOD::UncalibMeasType type) {
-      const ActsTrk::MeasurementToTruthParticleAssociation *assoc = measurement_to_truth_association_maps[Acts::toUnderlying(type)];
-      return assoc ? assoc->size() : 0ul;
-    };
-
-    ATH_MSG_DEBUG("Measurement association entries: "  << assocSize(xAOD::UncalibMeasType::PixelClusterType)
-                 << " + " << assocSize(xAOD::UncalibMeasType::StripClusterType)
-                 << " + " << assocSize(xAOD::UncalibMeasType::HGTDClusterType)
-                 );
-    unsigned int track_i=0;
-    std::array<unsigned int,s_NCounterForAssociatedTruth> tracks_with_associated_truth{};
-    std::pair<unsigned int, unsigned int> compatible_assoc_container_counts{};
-    if (m_nIncompatibleMeasurementContainer>0) {
-       // used to suppress reoccurring error messages
-       --m_nIncompatibleMeasurementContainer;
-       ++compatible_assoc_container_counts.second;
-    }
+   for (const auto& key : m_measAssocKeys) {
+       const MeasurementToTruthParticleAssociation* measAssocMap{};
+       ATH_CHECK(SG::get(measAssocMap, key, ctx));
+       if (measAssocMap->sourceContainer()->empty()) {
+            continue;
+       }
+       const xAOD::UncalibMeasType measType = measAssocMap->sourceContainer()->front()->type();
+       prdToTruthMaps[Acts::toUnderlying(measType)].push_back(measAssocMap);
+   }
+   std::array<unsigned int,s_NCounterForAssociatedTruth> tracks_with_associated_truth{};
+   std::pair<unsigned int, unsigned int> compatible_assoc_container_counts{};
+   if (m_nIncompatibleMeasurementContainer>0) {
+      // used to suppress reoccurring error messages
+      --m_nIncompatibleMeasurementContainer;
+      ++compatible_assoc_container_counts.second;
+   }
 
     std::vector<unsigned int> counted_truth_particles;
     counted_truth_particles.reserve(10);
-  
+
     for (const typename ActsTrk::TrackContainer::ConstTrackProxy track : *tracksContainer) {
-       const auto lastMeasurementIndex = track.tipIndex();
-         
+       const unsigned track_i = track.index();
        unsigned int n_measurements=0u;
      
        HitCounterArray &reco_hits = track_association->at(track_i).totalCounts();
        HitCounterArray &noise_hits = track_association->at(track_i).noiseCounts();
        ActsTrk::HitCountsPerTrack::container  &truth_particle_counts = track_association->at(track_i).countsPerTruthParticle();
-       tracksContainer->trackStateContainer().visitBackwards(
-          lastMeasurementIndex,
-          [this,
-           &n_measurements,
-           &measurement_to_truth_association_maps,
-           &truth_particle_counts,
-           &reco_hits,
-           &noise_hits,
-           &counted_truth_particles,
-           &compatible_assoc_container_counts
-           ](const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state) -> void
-          {
-            if (!state.typeFlags().isOutlier() && state.hasUncalibratedSourceLink()) {
-              const auto* uncalibMeas = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
-             
-              const ActsTrk::MeasurementToTruthParticleAssociation *association_map = measurement_to_truth_association_maps.at(Acts::toUnderlying(uncalibMeas->type()));
-              if (association_map) {
-                 if (!association_map->isCompatibleWith(dynamic_cast< const xAOD::UncalibratedMeasurementContainer *>(uncalibMeas->container()))) {
-                    if (compatible_assoc_container_counts.second==0) {
-                       ATH_MSG_ERROR("MeasurementToTruthParticleAssociation for measurement type " << uncalibMeas->type()
-                                     << " is not compatible with the measurement on track.");
-                    }
-                    ++compatible_assoc_container_counts.second;
-                    return;
-                 }
-                 else {
-                    ++compatible_assoc_container_counts.first;
-                 }
-                 ++n_measurements;
-                 counted_truth_particles.clear();
-                 for (const xAOD::TruthParticle *truth_particle : association_map->at(uncalibMeas->index()) ) {
-                    const xAOD::TruthParticle *mother_particle = m_elasticDecayUtil.getMother(*truth_particle, m_maxEnergyLoss.value());
+       for (const typename ActsTrk::TrackStateBackend::ConstTrackStateProxy &state : track.trackStatesReversed()) {
+         if (state.typeFlags().isOutlier() || !state.hasUncalibratedSourceLink()) {
+            continue;
+         }
+         const auto* uncalibMeas = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+         const auto typeIdx = Acts::toUnderlying(uncalibMeas->type());
 
-                    // do not count hits of associated truth particles again if they are associated to the same elastic decay chain:
-                    if (std::find(counted_truth_particles.begin(), counted_truth_particles.end(), mother_particle->index())
-                        ==counted_truth_particles.end()) {
-                       counted_truth_particles.push_back(mother_particle->index());
+         ++n_measurements;
 
-                       ActsTrk::HitCountsPerTrack::container::iterator
-                          hit_count_iter = std::find_if(truth_particle_counts.begin(),
-                                                        truth_particle_counts.end(),
-                                                        [mother_particle](const std::pair<const xAOD::TruthParticle *, HitCounterArray > &a) {
-                                                           return a.first == mother_particle;
-                                                        });
-                       if (hit_count_iter == truth_particle_counts.end()) {
-                          truth_particle_counts.push_back( std::make_pair(mother_particle, HitCounterArray{}));
-                          hit_count_iter = truth_particle_counts.end()-1;
-                       }
-                       ++(hit_count_iter->second.at( Acts::toUnderlying(uncalibMeas->type())));
-                    }
-                 }
-                 if (association_map->at(uncalibMeas->index()).empty()) {
-                    ++noise_hits.at( Acts::toUnderlying(uncalibMeas->type()));
-                 }
-              }
-              ++reco_hits.at( Acts::toUnderlying(uncalibMeas->type()));
+         const ActsTrk::MeasurementToTruthParticleAssociation* association_map{};
+         if (auto map_itr = std::ranges::find_if(prdToTruthMaps.at(typeIdx), 
+                           [uncalibMeas](const auto* map){
+                               return uncalibMeas->container() == map->sourceContainer();
+                           }); map_itr != prdToTruthMaps.at(typeIdx).end()) {
+            association_map = (*map_itr);
+         } else {
+            continue;
+         }
+         ++compatible_assoc_container_counts.second;
+         /** If no truth particle is associated mark it as noise */
+         if (association_map->at(uncalibMeas->index()).empty()) {
+            ++noise_hits.at(typeIdx);
+         }
+         counted_truth_particles.clear();
+         /** Loop over the associated truth particles */
+         for (const xAOD::TruthParticle *truth_particle : association_map->at(uncalibMeas->index()) ) {
+            const xAOD::TruthParticle *mother_particle = m_elasticDecayUtil.getMother(*truth_particle, m_maxEnergyLoss.value());
+            ATH_MSG_VERBOSE("Fill truth counts for "<<uncalibMeas->type()<<" hit with particle "<<(mother_particle->pt()*1.e-3)<<" [GeV], eta:"
+               <<mother_particle->eta()<<", " <<", phi: "<<mother_particle->phi()<<", pdgId: "<<mother_particle->pdgId()<<", index: "<<mother_particle->index()
+               <<", "<<mother_particle->container());
+            // do not count hits of associated truth particles again if they are associated to the same elastic decay chain:
+            if (!Acts::rangeContainsValue(counted_truth_particles, mother_particle->index())) {
+               counted_truth_particles.push_back(mother_particle->index());
+
+               ActsTrk::HitCountsPerTrack::container::iterator
+                  hit_count_iter = std::ranges::find_if(truth_particle_counts,
+                        [mother_particle](const std::pair<const xAOD::TruthParticle *, HitCounterArray > &a) {
+                           return a.first == mother_particle;
+                        });
+               if (hit_count_iter == truth_particle_counts.end()) {
+                  truth_particle_counts.push_back( std::make_pair(mother_particle, HitCounterArray{}));
+                  hit_count_iter = truth_particle_counts.end()-1;
+               }
+               ++(hit_count_iter->second.at(typeIdx));
             }
-
-          });
-       std::sort( truth_particle_counts.begin(),
-                  truth_particle_counts.end(),
-                  [](const std::pair<const xAOD::TruthParticle *, HitCounterArray > &a,
-                     const std::pair<const xAOD::TruthParticle *, HitCounterArray > &b) {
-                     return std::accumulate(a.second.begin(),a.second.end(),0u) > std::accumulate(b.second.begin(),b.second.end(),0u);
-                  });
-       m_associationCounter.fillStatistics(n_measurements, truth_particle_counts.size());
-       ++(tracks_with_associated_truth[std::min(truth_particle_counts.size(),tracks_with_associated_truth.size()-1u)]);
-       ++track_i;
+         }
+         ++reco_hits.at(typeIdx);
+      }
+      std::ranges::stable_sort(truth_particle_counts,
+               [](const std::pair<const xAOD::TruthParticle*, HitCounterArray>& a,
+                  const std::pair<const xAOD::TruthParticle*, HitCounterArray>& b) {
+                  return std::accumulate(a.second.begin(),a.second.end(),0u) > 
+                         std::accumulate(b.second.begin(),b.second.end(),0u);
+               });
+      m_associationCounter.fillStatistics(n_measurements, truth_particle_counts.size());
+      ++(tracks_with_associated_truth[std::min(truth_particle_counts.size(),
+                                               tracks_with_associated_truth.size()-1u)]);
     }
-    unsigned int idx=0;
-    for (unsigned int elm : tracks_with_associated_truth) {
-       m_nTracksWithAssociatedTruth[idx] += elm;
-       ++idx;
+    for (const auto[idx, elem] : Acts::enumerate(tracks_with_associated_truth)) {
+       m_nTracksWithAssociatedTruth[idx] += elem;
+
     }
     m_nIncompatibleMeasurementContainer += compatible_assoc_container_counts.second;
     m_nCcompatibleMeasurementContainer += compatible_assoc_container_counts.first;
 
-    SG::WriteHandle<TrackToTruthParticleAssociation> associationOutHandle(m_trackToTruthOut, ctx);
-    if (associationOutHandle.record( std::move(track_association)).isFailure()) {
-       ATH_MSG_ERROR("Failed to record track to truth assocition with key " << m_trackToTruthOut.key() );
-       return StatusCode::FAILURE;
-    }
+    SG::WriteHandle associationOutHandle{m_trackToTruthOut, ctx};
+    ATH_CHECK(associationOutHandle.record( std::move(track_association)));
     return StatusCode::SUCCESS;
   }
 

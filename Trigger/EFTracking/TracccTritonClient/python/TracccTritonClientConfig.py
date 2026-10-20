@@ -48,8 +48,8 @@ def addTruthClusterAssociations(acc, flags, prefix="", pixelKey=None, stripKey=N
     acc.merge(ActsTruthParticleHitCountAlgCfg(
         flags,
         name=f"{prefix}TruthParticleHitCountAlg",
-        PixelClustersToTruthAssociationMap=f"{prefix}PixelClustersToTruthParticles",
-        StripClustersToTruthAssociationMap=f"{prefix}StripClustersToTruthParticles",
+        MeasurementAssocKeys=[f"{prefix}PixelClustersToTruthParticles",
+                              f"{prefix}StripClustersToTruthParticles"],
         TruthParticleHitCountsOut=f"{prefix}TruthParticleHitCounts",
     ))
     return acc

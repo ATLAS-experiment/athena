@@ -48,13 +48,13 @@ struct ElasticDecayUtil {
       template <typename... T_Args>
       Empty(T_Args... ) {}
    };
-   mutable typename std::conditional<IsDebug,std::mutex,Empty>::type m_mutex ATLAS_THREAD_SAFE;
+   mutable typename std::conditional_t<IsDebug,std::mutex, Empty> m_mutex ATLAS_THREAD_SAFE;
 
    // PDG IDs of siblings.
-   mutable typename std::conditional<IsDebug,std::set<int>, Empty>::type m_outgoingPdgIds ATLAS_THREAD_SAFE;
+   mutable typename std::conditional_t<IsDebug,std::set<int>, Empty> m_outgoingPdgIds ATLAS_THREAD_SAFE;
 
    /// PDG IDs of parents.
-   mutable typename std::conditional<IsDebug,std::set<int>, Empty>::type m_outgoingMotherPdgIds ATLAS_THREAD_SAFE;
+   mutable typename std::conditional_t<IsDebug,std::set<int>, Empty> m_outgoingMotherPdgIds ATLAS_THREAD_SAFE;
    enum ParticleTypes {
       kNoSibling,
       kElectron,
@@ -63,10 +63,10 @@ struct ElasticDecayUtil {
       kNParticleTypes
    };
    /// energy less per vertex.
-   mutable typename std::conditional<IsDebug,std::array<ActsUtils::StatHist,kNParticleTypes>, Empty>::type m_energyLossStat ATLAS_THREAD_SAFE;
+   mutable typename std::conditional_t<IsDebug,std::array<ActsUtils::StatHist,kNParticleTypes>, Empty> m_energyLossStat ATLAS_THREAD_SAFE;
 
    // number of parents in a decay chain.
-   mutable typename std::conditional<IsDebug,ActsUtils::StatHist,Empty>::type m_nParentsStat ATLAS_THREAD_SAFE {20,-.5,20.-.5};
+   mutable typename std::conditional_t<IsDebug,ActsUtils::StatHist,Empty> m_nParentsStat ATLAS_THREAD_SAFE {20,-.5,20.-.5};
 };
 
 #include "ElasticDecayUtil.icc"

@@ -92,15 +92,15 @@ def DataPrepToActsCfg(flags, **kwargs) -> ComponentAccumulator:
     acc.merge(ActsStripClusterToTruthAssociationAlgCfg(flags, **extractChildKwargs(prefix='ActsStripClusterToTruthAssociation.', **kwargs)))
 
     kwargs.setdefault('ActsTruthParticleHitCount.name', 'FPGAActsTruthParticleHitCount')
-    kwargs.setdefault('ActsTruthParticleHitCount.PixelClustersToTruthAssociationMap', "ITkFPGAPixelClustersToTruthParticles")
-    kwargs.setdefault('ActsTruthParticleHitCount.StripClustersToTruthAssociationMap', "ITkFPGAStripClustersToTruthParticles")
+    kwargs.setdefault('ActsTruthParticleHitCount.MeasurementAssocKeys', ["ITkFPGAPixelClustersToTruthParticles",  
+                                                                         "ITkFPGAStripClustersToTruthParticles"])
     kwargs.setdefault('ActsTruthParticleHitCount.TruthParticleHitCountsOut', "FPGATruthParticleHitCounts")
     acc.merge(ActsTruthParticleHitCountAlgCfg(flags, **extractChildKwargs(prefix='ActsTruthParticleHitCount.', **kwargs)))
 
     from ActsConfig.ActsTruthConfig import ActsTrackToTruthAssociationAlgCfg, ActsTrackFindingValidationAlgCfg
     kwargs.setdefault('ActsTrackToTruthAssociation.name', 'FPGAActsTrackToTruthAssociation')
-    kwargs.setdefault('ActsTrackToTruthAssociation.PixelClustersToTruthAssociationMap', "ITkFPGAPixelClustersToTruthParticles")
-    kwargs.setdefault('ActsTrackToTruthAssociation.StripClustersToTruthAssociationMap', "ITkFPGAStripClustersToTruthParticles")
+    kwargs.setdefault('ActsTrackToTruthAssociation.MeasurementAssocKeys', ["ITkFPGAPixelClustersToTruthParticles",  
+                                                                           "ITkFPGAStripClustersToTruthParticles"])
     kwargs.setdefault('ActsTrackToTruthAssociation.ACTSTracksLocation', "FPGAActsTracks")
     kwargs.setdefault('ActsTrackToTruthAssociation.AssociationMapOut', "FPGAActsTracksFPGAToTruthParticleAssociation")
     acc.merge(ActsTrackToTruthAssociationAlgCfg(flags, **extractChildKwargs(prefix='ActsTrackToTruthAssociation.', **kwargs)))

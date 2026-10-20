@@ -16,17 +16,12 @@
 namespace ActsTrk
 {
   // NHitCounter is the number of types, without the Other (i.e. unknown) type
-   constexpr unsigned int NHitCounter = static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::nTypes);
+   constexpr unsigned int NHitCounter = Acts::toUnderlying(xAOD::UncalibMeasType::nTypes);
    constexpr unsigned int NTruthParticlesPerTrack = 5;  // a tiny fraction of measurements will have more than
                                                         // 5 associated GenParticles
 
    // Wrapper around std::array to ensure that by default elements are initialised to zero
-   class  HitCounterArray : public  std::array<uint8_t,  NHitCounter>
-   {
-   public:
-      HitCounterArray() : std::array<uint8_t,  NHitCounter>{} {}
-   };
-
+   using  HitCounterArray = std::array<uint8_t,  NHitCounter>;
    /** Container for hit counts per track
     * Contains hit counts per associated truth particle and the total hit counts
     * As last element in the container.
@@ -65,7 +60,7 @@ namespace ActsTrk
    private:
       container m_counts;
       enum ECounts {kTotal, kNoise, kNRecoCounts };
-      std::array<HitCounterArray,kNRecoCounts> m_recoCounts;
+      std::array<HitCounterArray,kNRecoCounts> m_recoCounts{};
    };
 
    class TrackToTruthParticleAssociation : public std::vector<HitCountsPerTrack> {

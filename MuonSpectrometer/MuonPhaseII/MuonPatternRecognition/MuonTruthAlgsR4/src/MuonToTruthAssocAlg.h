@@ -17,7 +17,9 @@
 
 namespace MuonR4{
     /** @brief Algorithm to match the xAOD::Muon objects to xAOD::TruthParticles 
-     *         stemming from the TruthMuons container, if possible. */
+     *         The algorithm attempts to retrieve the truth decoration from the primary 
+     *         particle. If not available it tries to examine the truth classification from the
+     *         associated Ms Segments */
     class MuonToTruthAssocAlg : public AthReentrantAlgorithm{
         public:
             using AthReentrantAlgorithm::AthReentrantAlgorithm;

@@ -10,6 +10,7 @@
 #include "../TruthSegConnectionAlg.h"
 #include "../TruthHitSummaryAlg.h"
 #include "../MuonToTruthAssocAlg.h"
+#include "../MeasTruthAssocMapProvider.h"
 
 DECLARE_COMPONENT(MuonR4::TruthSegmentMaker)
 DECLARE_COMPONENT(MuonR4::PrepDataToSimHitAssocAlg)
@@ -20,3 +21,4 @@ DECLARE_COMPONENT(MuonR4::SimHitToTruthPartAssocAlg)
 DECLARE_COMPONENT(MuonR4::TruthHitSummaryAlg)
 DECLARE_COMPONENT(MuonR4::TruthSegConnectionAlg)
 DECLARE_COMPONENT(MuonR4::MuonToTruthAssocAlg)
+DECLARE_COMPONENT(MuonR4::MeasTruthAssocMapProvider)

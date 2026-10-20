@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKFINDING_TRACKTOTRUTHASSOCIATIONALG_H
@@ -58,13 +58,8 @@ namespace ActsTrk
      SG::ReadHandleKey<ActsTrk::TrackContainer> m_tracksContainerKey
         {this, "ACTSTracksLocation", "","Track collection (ActsTrk variant)"};
 
-     SG::ReadHandleKey<MeasurementToTruthParticleAssociation>  m_pixelClustersToTruth
-        {this, "PixelClustersToTruthAssociationMap", "", "Association map from pixel measurements to generator particles." };
-     SG::ReadHandleKey<MeasurementToTruthParticleAssociation>  m_stripClustersToTruth
-        {this, "StripClustersToTruthAssociationMap", "", "Association map from strip measurements to generator particles." };
-     SG::ReadHandleKey<MeasurementToTruthParticleAssociation>  m_hgtdClustersToTruth
-        {this, "HgtdClustersToTruthAssociationMap", "", "Association map from HGTD measurements to generator particles." };
-
+     SG::ReadHandleKeyArray<MeasurementToTruthParticleAssociation>  m_measAssocKeys
+        {this, "MeasurementAssocKeys", {}, "Association map from the measurements to generator particles." };
      SG::WriteHandleKey<TrackToTruthParticleAssociation>  m_trackToTruthOut
         {this, "AssociationMapOut", "", "Output association map from measurements to generator particles." };
 
@@ -73,9 +68,7 @@ namespace ActsTrk
 
      ElasticDecayUtil<TrackToTruthParticleAssociationDebugHists> m_elasticDecayUtil;
      static constexpr float s_unitGeV = 1e3;
-     std::conditional<TrackToTruthParticleAssociationDebugHists,
-                      Gaudi::Property<std::vector<float> >,
-                      EmptyProperty >::type              m_energyLossBinning
+     Gaudi::Property<std::vector<float>> m_energyLossBinning
         {this, "EnergyLossBinning", {20.,0.,5.*s_unitGeV}, "Binning to be used for the energy loss histograms." };
 
      template <bool IsDebug>
