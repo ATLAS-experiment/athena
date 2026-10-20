@@ -75,15 +75,15 @@ StatusCode LArRawDataReadingAlg::initialize() {
 	}
       }
     }
-    else if (m_subCaloPreselection.value().find("HEC")!=std::string::npos || m_subCaloPreselection.value().find("FCAL")!=std::string::npos) {
-        if (m_subCaloPreselection.value().find("HEC")!=std::string::npos) {
+    else if (m_subCaloPreselection.value().contains("HEC") || m_subCaloPreselection.value().contains("FCAL")) {
+        if (m_subCaloPreselection.value().contains("HEC")) {
          for (auto febid : m_onlineId->feb_range()) {
            if (m_onlineId->isHECchannel(febid)) {
              subcaloFTs.insert(m_onlineId->feedthrough_Id(febid));
            } 
          }
        }
-       if (m_subCaloPreselection.value().find("FCAL")!=std::string::npos) {
+       if (m_subCaloPreselection.value().contains("FCAL")) {
          for (auto febid : m_onlineId->feb_range()) {
            if (m_onlineId->isFCALchannel(febid)) {
              subcaloFTs.insert(m_onlineId->feedthrough_Id(febid));
