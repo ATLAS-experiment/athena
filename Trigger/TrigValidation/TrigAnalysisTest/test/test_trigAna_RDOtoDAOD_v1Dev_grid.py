@@ -25,10 +25,8 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 
-preExec = ';'.join([
-  'flags.Trigger.triggerMenuSetup=\'Dev_pp_run3_v1_TriggerValidation_prescale\'',
-  'flags.Trigger.AODEDMSet=\'AODFULL\'',
-])
+flags = 'Trigger.triggerMenuSetup=\'Dev_pp_run3_v1_TriggerValidation_prescale\' Trigger.AODEDMSet=\'AODFULL\''
+preExec = ';'.join([f'flags.{flag}' for flag in flags.split()])
 
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 conditions = defaultConditionsTags.RUN3_MC
@@ -58,7 +56,7 @@ test = Test.Test()
 test.art_type = 'grid'
 test.exec_steps = [rdo2aod, aod2daod]
 test.check_steps = CheckSteps.default_check_steps(test)
-add_analysis_steps(test)
+add_analysis_steps(test,args=flags)
 
 import sys
 sys.exit(test.run())
