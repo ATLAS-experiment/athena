@@ -82,6 +82,4 @@ You may also be interested in:
 
    - \ref AnalysisTools
 
-   - \ref AnalysisAssociation
-
    - \ref AnalysisExamples to see how these classes may be used : FilterExample
