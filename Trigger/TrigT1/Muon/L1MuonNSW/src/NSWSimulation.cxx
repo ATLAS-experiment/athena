@@ -1,8 +1,14 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
- 
+
 #include "NSWSimulation.h"
+
+#include "StoreGate/ReadHandle.h"
+#include "StoreGate/WriteHandle.h"
+
+#include <memory>
+#include <vector>
 
 namespace L1Muon {
 
@@ -12,38 +18,42 @@ namespace L1Muon {
     ATH_CHECK(m_keyMmDigit.initialize());
     ATH_CHECK(m_keySTgcDigit.initialize());
 
-    /// Container of output NSW trigger candidates
+    // Container of output NSW trigger candidates
     ATH_CHECK(m_outputKey.initialize());
 
-    /// retrieve the monitoring tool
+    // MM trigger tool
+    ATH_CHECK(m_mmTrigger.retrieve(EnableTool{m_doMM}));
+
+    // Monitoring tool
     if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
     return StatusCode::SUCCESS;
   }
 
   StatusCode NSWSimulation::execute(const EventContext& ctx) const {
-    ATH_MSG_DEBUG ("Executing " << name() << "...");
+    ATH_MSG_DEBUG("Executing " << name() << "...");
 
-    SG::ReadHandle<MmDigitContainer> mmDigits(m_keyMmDigit, ctx);
-    if( !mmDigits.isValid() ){
-      ATH_MSG_ERROR("Cannot retrieve MmDigitContainer");
-      return StatusCode::FAILURE;
-    }
+    const MmDigitContainer* mmDigits{nullptr};
+    ATH_CHECK(SG::get(mmDigits, m_keyMmDigit, ctx));
+    const sTgcDigitContainer* stgcDigits{nullptr};
+    ATH_CHECK(SG::get(stgcDigits, m_keySTgcDigit, ctx));
 
-    SG::ReadHandle<sTgcDigitContainer> stgcDigits(m_keySTgcDigit, ctx);
-    if(!stgcDigits.isValid()) {
-      ATH_MSG_ERROR("Failed to retrieve the sTGC Digit container");
-      return StatusCode::FAILURE;
-    }
-  
     ATH_MSG_DEBUG("Number of MM Digits: " << mmDigits->size());
     ATH_MSG_DEBUG("Number of sTGC Digits: " << stgcDigits->size());
     ATH_MSG_DEBUG("Number of NSW Digits: " << (mmDigits->size() + stgcDigits->size()));
 
-    /// Monitor
-    auto nMMDigits = Monitored::Scalar<unsigned int>("nMMDigits", mmDigits->size() );
-    auto nsTGCDigits = Monitored::Scalar<unsigned int>("nsTGCDigits", stgcDigits->size() );
-    Monitored::Group(m_monTool, nMMDigits, nsTGCDigits);
+    // MM trigger. The candidates are not written yet: the encoding into the output comes next.
+    std::vector<L1MM::MMCandidate> mmCandidates;
+    if (m_doMM) {
+      ATH_CHECK(m_mmTrigger->runTrigger(ctx, mmCandidates, nullptr));
+    }
+    ATH_MSG_DEBUG("Number of MM trigger candidates: " << mmCandidates.size());
+
+    // Monitoring
+    auto nMMDigits = Monitored::Scalar<unsigned int>("nMMDigits", mmDigits->size());
+    auto nsTGCDigits = Monitored::Scalar<unsigned int>("nsTGCDigits", stgcDigits->size());
+    auto nMMCandidates = Monitored::Scalar<unsigned int>("nMMCandidates", mmCandidates.size());
+    Monitored::Group(m_monTool, nMMDigits, nsTGCDigits, nMMCandidates);
 
     SG::WriteHandle<xAOD::L1NSWCandDataContainer> output(m_outputKey, ctx);
 
@@ -51,7 +61,7 @@ namespace L1Muon {
     auto auxContainer = std::make_unique<xAOD::L1NSWCandDataAuxContainer>();
     container->setStore(auxContainer.get());
 
-    /// Dummy candidates
+    // Dummy candidates
     xAOD::L1NSWCandData* cand0 = container->push_back(std::make_unique<xAOD::L1NSWCandData>());
     cand0->setL1Bcid(ctx.eventID().bunch_crossing_id());
     cand0->setL1NSegments(2);
@@ -90,7 +100,7 @@ namespace L1Muon {
 
     ATH_CHECK(output.record(std::move(container), std::move(auxContainer)));
 
-    ATH_MSG_DEBUG( "Recorded NSW candidate container with " << output->size() << " candidate(s)");
+    ATH_MSG_DEBUG("Recorded NSW candidate container with " << output->size() << " candidate(s)");
 
     return StatusCode::SUCCESS;
   }
