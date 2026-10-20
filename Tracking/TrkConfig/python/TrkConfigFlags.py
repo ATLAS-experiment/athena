@@ -483,7 +483,7 @@ def createTrackingConfigFlags():
         createLowPtRoITrackingPassFlags, createForwardTracksTrackingPassFlags,
         createBeamGasTrackingPassFlags, createVtxLumiTrackingPassFlags, createVtxLumiHeavyIonTrackingPassFlags,
         createVtxBeamSpotTrackingPassFlags, createCosmicsTrackingPassFlags,
-        createHeavyIonTrackingPassFlags, createPixelTrackingPassFlags,
+        createHeavyIonTrackingPassFlags, createHeavyIonLowPtTrackingPassFlags, createPixelTrackingPassFlags,
         createDisappearingTrackingPassFlags, createSCTTrackingPassFlags,
         createTRTTrackingPassFlags, createTRTStandaloneTrackingPassFlags)
 
@@ -540,6 +540,8 @@ def createTrackingConfigFlags():
                          createVtxBeamSpotTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.CosmicsPass",
                          createCosmicsTrackingPassFlags, prefix=True)
+    icf.addFlagsCategory("Tracking.HeavyIonLowPtPass",
+                         createHeavyIonLowPtTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.HeavyIonPass",
                          createHeavyIonTrackingPassFlags, prefix=True)
     icf.addFlagsCategory("Tracking.PixelPass",

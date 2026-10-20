@@ -85,6 +85,10 @@ def SiTrackMaker_xkCfg(flags, name="InDetSiTrackMaker", **kwargs):
         kwargs.setdefault("TrackPatternRecoInfo",
                           'SiSpacePointsSeedMaker_HeavyIon')
 
+    elif flags.Tracking.ActiveConfig.extension == "HeavyIonLowPt":
+        kwargs.setdefault("TrackPatternRecoInfo",
+                          'SiSpacePointsSeedMaker_HeavyIonLowPt')
+
     elif flags.Tracking.ActiveConfig.extension == "BeamGas":
         kwargs.setdefault("TrackPatternRecoInfo",
                           'SiSpacePointsSeedMaker_BeamGas')

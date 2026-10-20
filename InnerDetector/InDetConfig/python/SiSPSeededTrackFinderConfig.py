@@ -4,6 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrkConfig.TrackingPassFlags import RoIStrategy
 from AthenaConfiguration.Enums import ProductionStep
+from AthenaCommon import SystemOfUnits as Units
 
 def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs):
     acc = ComponentAccumulator()
@@ -43,11 +44,13 @@ def SiSPSeededTrackFinderCfg(flags, name="InDetSiSpTrackFinder", **kwargs):
 
     # Heavy-ion config
     kwargs.setdefault("useZvertexTool",
-                      flags.Tracking.ActiveConfig.extension in ["HeavyIon", "VtxLumiHeavyIon"])
-    if flags.Tracking.ActiveConfig.extension in ["HeavyIon", "VtxLumiHeavyIon"]:
+                      flags.Tracking.ActiveConfig.extension in ["HeavyIon", "VtxLumiHeavyIon", "HeavyIonLowPt"])
+    if flags.Tracking.ActiveConfig.extension in ["HeavyIon", "VtxLumiHeavyIon", "HeavyIonLowPt"]:
         # Optimization from Igor
         kwargs.setdefault("FreeClustersCut", 2)
         kwargs.setdefault("useMBTSTimeDiff", True)
+        kwargs.setdefault("useVertexPosition", flags.Tracking.ActiveConfig.useVertexPositionDuringSeeding)
+        kwargs.setdefault("collisionTollerance", 7 * Units.mm)
 
         # Z-coordinates primary vertices finder (only for collisions)
         if "ZvertexTool" not in kwargs:

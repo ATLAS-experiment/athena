@@ -18,6 +18,7 @@ def createTrackingPassFlags():
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
     icf = AthConfigFlags()
 
+    icf.addFlag("useVertexPositionDuringSeeding", False)
     icf.addFlag("extension", "" ) ### for extension
 
     icf.addFlag("usePrdAssociationTool", False)
@@ -604,8 +605,6 @@ def createHeavyIonTrackingPassFlags():
 
     icf.nHolesMax        = 0
     icf.nHolesGapMax     = 0
-    icf.Xi2max           = 6.
-    icf.Xi2maxNoAdd      = 10.
 
     icf.minPT              = lambda pcf: (
         0.5 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
@@ -625,7 +624,38 @@ def createHeavyIonTrackingPassFlags():
     icf.doZBoundary      = False
     icf.maxSeedsPerSP_Pixels = 5
     icf.keepAllConfirmedPixelSeeds = False
+    return icf
 
+def createHeavyIonLowPtTrackingPassFlags():
+    icf = createHeavyIonTrackingPassFlags()
+    icf.extension        = "HeavyIonLowPt"
+    icf.maxPT            = lambda pcf: 0.5 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
+    icf.minPT            = lambda pcf: 0.2 * Units.GeV * pcf.BField.configuredSolenoidFieldScale
+    icf.useVertexPositionDuringSeeding = True
+    icf.useTRTExtension = False
+
+    icf.Xi2max           = 6.
+    icf.Xi2maxNoAdd      = 10.
+    icf.usePrdAssociationTool = True
+    icf.isLowPt          = True
+    icf.minClusters      = 6
+    icf.minSiNotShared   = 6
+    icf.minPixel         = 2   # At least one pixel hit for low-pt (assoc. seeded on pixels!)
+    # this is for the Ambi
+    icf.maxHoles         = 2
+    # this is for the CKF
+    icf.nHolesMax        = icf.maxHoles - 1
+    icf.maxPixelHoles    = 1
+    icf.maxSctHoles      = 2
+    icf.maxDoubleHoles   = 1
+    icf.radMax           = 380. * Units.mm
+    icf.nHolesGapMax     = icf.maxHoles # not as tight as 2*maxDoubleHoles
+    icf.maxPrimaryImpact = 10. * Units.mm
+    icf.maxdImpactPPSSeeds = 2. * Units.mm
+    icf.doBremRecoverySi = False
+    icf.doZBoundary      = False
+    icf.maxSeedsPerSP_Pixels = 5
+    icf.keepAllConfirmedPixelSeeds = False
     return icf
 
 ### Pixel mode ###############################################
