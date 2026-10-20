@@ -65,7 +65,8 @@ namespace xAOD {
          return StatusCode::RECOVERABLE;
       }
 
-      // Delete the hoder object:
+      // Forget its pointer, and delete the holder object:
+      m_names.erase( itr->second->get() );
       delete itr->second;
 
       // Now remove this element from the maps:
@@ -79,27 +80,16 @@ namespace xAOD {
    StatusCode TStore::remove( void* ptr ) {
 
       // Look for this object:
-      Objects_t::iterator itr = m_objects.begin();
-      Objects_t::iterator end = m_objects.end();
-      for( ; itr != end; ++itr ) {
-
-         // Check if this is the object in question:
-         if( itr->second->get() != ptr ) {
-            continue;
-         }
-
-         // Yes, it is...
-         delete itr->second;
-         m_keys.erase( Utils::hash( itr->first ) );
-         m_objects.erase( itr );
-         return StatusCode::SUCCESS;
+      auto itr = m_names.find( ptr );
+      if( itr == m_names.end() ) {
+         ::Warning( "xAOD::TStore::remove",
+                    "Couldn't find object with pointer %p",
+                    ptr );
+         return StatusCode::RECOVERABLE;
       }
 
-      // We didn't find the object in the store:
-      ::Warning( "xAOD::TStore::remove",
-                 "Couldn't find object with pointer %p",
-                 ptr );
-      return StatusCode::RECOVERABLE;
+      // Copy the key, removing the object destroys the string it points to:
+      return remove( std::string( *itr->second ) );
    }
 
    void TStore::clear() {
@@ -114,6 +104,7 @@ namespace xAOD {
       // And clear the maps:
       m_objects.clear();
       m_keys.clear();
+      m_names.clear();
 
       return;
    }
@@ -270,12 +261,8 @@ namespace xAOD {
 
       // Register the new object:
       if( isConst )
-         m_objects[ key ] = new THolder( const_cast<const void*>(obj), cl, isOwner );
-      else
-         m_objects[ key ] = new THolder( obj, cl, isOwner);
-
-      m_keys[ Utils::hash( key ) ] = key;
-      return StatusCode::SUCCESS;
+         return record( new THolder( const_cast<const void*>(obj), cl, isOwner ), key );
+      return record( new THolder( obj, cl, isOwner ), key );
    }
 
    StatusCode TStore::record( void* obj, const std::string& key,
@@ -292,12 +279,8 @@ namespace xAOD {
 
       // Register the new object:
       if( isConst )
-         m_objects[ key ] = new THolder( const_cast<const void*>(obj), ti, isOwner );
-      else
-         m_objects[ key ] = new THolder( obj, ti, isOwner );
-
-      m_keys[ Utils::hash( key ) ] = key;
-      return StatusCode::SUCCESS;
+         return record( new THolder( const_cast<const void*>(obj), ti, isOwner ), key );
+      return record( new THolder( obj, ti, isOwner ), key );
    }
 
    StatusCode TStore::record( THolder* hldr, const std::string& key ) {
@@ -315,8 +298,10 @@ namespace xAOD {
       }
 
       // Register the new object:
-      m_objects[ key ] = hldr;
+      const auto itr = m_objects.emplace( key, hldr ).first;
       m_keys[ Utils::hash( key ) ] = key;
+      // shortcut: one key per pointer, an object recorded twice (non-owning, from TPyStore) is lost by either remove; index all keys if that is ever used
+      m_names.emplace( hldr->get(), &itr->first );
       return StatusCode::SUCCESS;
    }
 
@@ -333,27 +318,13 @@ namespace xAOD {
       return ( m_keys.find( hash ) != m_keys.end() );
    }
 
-   /// This is a quite slow function. It needs to check each managed object to
-   /// possibly find which one of them has this pointer.
-   ///
    /// @param ptr Pointer to the object that may or may not be in the store
    /// @returns <code>kTRUE</code> if the object is managed by the store,
    ///          or <code>kFALSE</code> if it isn't
    ///
    ::Bool_t TStore::contains( const void* ptr ) const {
 
-      // Loop over all the managed objects:
-      Objects_t::const_iterator itr = m_objects.begin();
-      Objects_t::const_iterator end = m_objects.end();
-      for( ; itr != end; ++itr ) {
-         // Check if this is the right object:
-         if( itr->second->get() == ptr ) {
-            return kTRUE;
-         }
-      }
-
-      // We didn't find it:
-      return kFALSE;
+      return m_names.contains( ptr );
    }
 
    /// This is a fairly fast function. Used by ElementLinks that point to
@@ -379,26 +350,17 @@ namespace xAOD {
       return dummy;
    }
 
-   /// This is just as slow as the previous contains function. It needs to look
-   /// at all the managed objects one by one to find under what name it is
-   /// managed.
-   ///
    /// @param ptr Pointer to the object that we want to know the name of
    /// @returns The name with which this object was recorded into the store. Or
    ///          an empty string of the object is not known to the store.
    ///
    const std::string& TStore::getName( const void* ptr ) const {
 
-      // Loop over all the managed objects:
-      Objects_t::const_iterator itr = m_objects.begin();
-      Objects_t::const_iterator end = m_objects.end();
-      for( ; itr != end; ++itr ) {
-         // Check if this is the right object:
-         if( itr->second->get() == ptr ) {
-            return itr->first;
-         }
+      auto itr = m_names.find( ptr );
+      if( itr != m_names.end() ) {
+         return *itr->second;
       }
-      
+
       // We didn't find the object:
       ::Warning( "xAOD::TStore::getName", "Object %p is not held by the store",
                  ptr );

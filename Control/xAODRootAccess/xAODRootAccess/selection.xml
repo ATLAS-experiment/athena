@@ -38,6 +38,7 @@
    <class name="xAOD::TStore" >
       <field name="m_objects" transient="true" />
       <field name="m_keys" transient="true" />
+      <field name="m_names" transient="true" />
    </class>
 
    <!-- Python interface classes: -->

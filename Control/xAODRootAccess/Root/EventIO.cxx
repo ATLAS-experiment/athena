@@ -230,15 +230,11 @@ void* Event::getOutputObject(const std::string& key, const std::type_info& ti,
     // Do the following only for event data:
     if (!metadata) {
       // It's not in the event. Let's check if we find it in an active
-      // TStore object...
-      TStore* store = TActiveStore::store();
-      if ((!store) || (!store->contains(key, ti)) || store->isConst(key, ti)) {
-        // Nope, not there either...
-        return nullptr;
-      }
-      // Let's return the object from the TStore:
-      void* result = store->getObject(key, ti);
-      return result;
+      // TStore object. (getAs fails for const objects, and wrong types.)
+      const TStore* store = TActiveStore::store();
+      const THolder* holder = (store ? store->holder(key) : nullptr);
+      static constexpr bool SILENT = true;
+      return (holder ? holder->getAs(ti, SILENT) : nullptr);
     } else {
       // For metadata we don't use external resources.
       return nullptr;
@@ -297,10 +293,13 @@ const void* Event::getInputObject(const std::string& key,
 
   // The following catches the cases when we ask for a transient
   // ConstDataVector object to be returned as "const DataVector".
-  TStore* store = TActiveStore::store();
-  if (store && store->contains(keyToUse, ti) && store->isConst(keyToUse, ti)) {
-    const void* result = store->getConstObject(keyToUse, ti);
-    return result;
+  const TStore* store = TActiveStore::store();
+  if (const THolder* holder = (store ? store->holder(keyToUse) : nullptr)) {
+    static constexpr bool SILENT = true;
+    const void* result = holder->getAsConst(ti, SILENT);
+    if (result && !holder->getAs(ti, SILENT)) {
+      return result;
+    }
   }
 
   // A sanity check before checking for an object from the input file.

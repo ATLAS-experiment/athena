@@ -33,8 +33,9 @@ SG::sgkey_t Event::getHash(const std::string& key) const {
 
   // If the key is used in the input file, let's use the same hash for
   // the output file as well.
-  if (m_inputEventFormat.exists(key)) {
-    return m_inputEventFormat.get(key)->hash();
+  static constexpr bool QUIET = true;
+  if (const EventFormatElement* efe = m_inputEventFormat.get(key, QUIET)) {
+    return efe->hash();
   }
 
   // If it's a new key, make a new hash for it from scratch:
@@ -63,7 +64,13 @@ SG::sgkey_t Event::getKey(const void* obj) const {
 ///
 const std::string& Event::getName(const void* obj) const {
 
-  // First look among the output objects.
+  // Check the active TStore first, its pointer lookup is cheap.
+  const TStore* store = TActiveStore::store();
+  if (store && store->contains(obj)) {
+    return store->getName(obj);
+  }
+
+  // Then look among the output objects.
   for (const auto& [key, manager] : m_outputObjects) {
     // Check if this is our object.
     if (manager->object() == obj) {
@@ -79,13 +86,6 @@ const std::string& Event::getName(const void* obj) const {
       // If it is, let's return.
       return key;
     }
-  }
-
-  // If it's not there either, check if it's in an active TStore object:
-  const TStore* store = TActiveStore::store();
-  if (store && store->contains(obj)) {
-    // Get the name from the store then:
-    return store->getName(obj);
   }
 
   // We didn't find the object in the event...
@@ -105,13 +105,16 @@ const std::string& Event::getName(const void* obj) const {
 const std::string& Event::getName(SG::sgkey_t hash) const {
 
   // If the branch is known from the input:
-  if (m_inputEventFormat.exists(hash)) {
-    return m_inputEventFormat.get(hash)->branchName();
+  static constexpr bool QUIET = true;
+  if (const EventFormatElement* efe = m_inputEventFormat.get(hash, QUIET)) {
+    return efe->branchName();
   }
 
   // If the branch is known on the output:
-  if (m_outputEventFormat && m_outputEventFormat->exists(hash)) {
-    return m_outputEventFormat->get(hash)->branchName();
+  if (const EventFormatElement* efe =
+          (m_outputEventFormat ? m_outputEventFormat->get(hash, QUIET)
+                               : nullptr)) {
+    return efe->branchName();
   }
 
   // If this is an object in the active store:
