@@ -11,11 +11,15 @@
 
 #include <string>
 
-ANA_MSG_HEADER(testBTagEigenVecRec)
-ANA_MSG_SOURCE(testBTagEigenVecRec, "BTaggingEigenVectorRecompositionToolTester")
-using namespace testBTagEigenVecRec;
+ANA_MSG_HEADER(testBTaggingEigenVectorRecompositionToolTester)
+ANA_MSG_SOURCE(testBTaggingEigenVectorRecompositionToolTester, "BTaggingEigenVectorRecompositionToolTester")
+using namespace testBTaggingEigenVectorRecompositionToolTester;
 
 int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
+  // Change type returned by the ANA_CHECK function in case of error 
+  // NB: this is needed here because the main() function should return an integer
+  // In principle you should NOT call this line for your regular code 
+  ANA_CHECK_SET_TYPE (int);
 
   const char* TEST_NAME = argv[0];
   if (argc < 4) {
@@ -32,78 +36,55 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   ANA_MSG_INFO ( "EV scheme set to: " << scheme << ""); 
   
   asg::StandaloneToolHandle<IBTaggingEfficiencyTool> btag_eff_tool("BTaggingEfficiencyTool/BTagEffTest");
-  StatusCode code1 = btag_eff_tool.setProperty("ScaleFactorFileName", CDIPath);
-  StatusCode code2 = btag_eff_tool.setProperty("TaggerName",    taggerName);
-  StatusCode code3 = btag_eff_tool.setProperty("OperatingPoint", workingPointName);
-  StatusCode code4 = btag_eff_tool.setProperty("JetAuthor", "AntiKt4EMPFlowJets" );
-  StatusCode code5 = btag_eff_tool.setProperty("MinPt", 20. );
-  StatusCode code9  = btag_eff_tool.setProperty("EigenvectorReductionB", scheme );
-  StatusCode code10 = btag_eff_tool.setProperty("EigenvectorReductionC", scheme );
-  StatusCode code11 = btag_eff_tool.setProperty("EigenvectorReductionLight", scheme );
+  ANA_CHECK(btag_eff_tool.setProperty("ScaleFactorFileName", CDIPath));
+  ANA_CHECK(btag_eff_tool.setProperty("TaggerName",    taggerName));
+  ANA_CHECK(btag_eff_tool.setProperty("OperatingPoint", workingPointName));
+  ANA_CHECK(btag_eff_tool.setProperty("JetAuthor", "AntiKt4EMPFlowJets" ));
+  ANA_CHECK(btag_eff_tool.setProperty("MinPt", 20. ));
+  ANA_CHECK(btag_eff_tool.setProperty("EigenvectorReductionB", scheme ));
+  ANA_CHECK(btag_eff_tool.setProperty("EigenvectorReductionC", scheme ));
+  ANA_CHECK(btag_eff_tool.setProperty("EigenvectorReductionLight", scheme ));
   // Exclude certain original uncertainties from Eigenvector scheme so that
   // it these uncertainties will be exclude from eigen vector recomposition. 
   // The original uncertainty names are separated by semicolon.
   // Here exclude two uncertainties as an example.
   // StatusCode code0 = btag_eff_tool.setProperty("ExcludeFromEigenVectorBTreatment","FT_EFF_PDF4LHC_np_19;JET_EffectiveNP_Mixed3");
-  StatusCode code6 = btag_eff_tool.initialize();
-  std::vector<StatusCode> codes = {code1, code2, code3, code4, code5, code6, code9, code10, code11};
-  for (const auto& code : codes) {
-    if (code != StatusCode::SUCCESS) {
-      ANA_MSG_ERROR("Initialization of tool " << btag_eff_tool->name() << " failed! ");
-      return 1;
-    }else {
-      ANA_MSG_INFO("Initialization of tool " << btag_eff_tool->name() << " finished! ");
-    }
-  } 
+  ANA_CHECK(btag_eff_tool.initialize());
+  ANA_MSG_INFO("Initialization of tool " << btag_eff_tool->name() << " finished! ");
 
   ANA_MSG_INFO("----------------------------------");
   asg::StandaloneToolHandle<IBTaggingEigenVectorRecompositionTool> evr_tool("BTaggingEigenVectorRecompositionTool/BTagEVRTest");
-  StatusCode code7 = evr_tool.setProperty("BTaggingEfficiencyTool", btag_eff_tool);
-  StatusCode code8 = evr_tool.initialize();
-  std::vector<StatusCode> codes_evr = {code7, code8};
-  for (const auto& code : codes_evr) {
-    if (code != StatusCode::SUCCESS) {
-      ANA_MSG_ERROR("Initialization of tool " << evr_tool->name() << " failed! ");
-      return 1;
-    } else {
-      ANA_MSG_INFO("Initialization of tool " << evr_tool->name() << " finished! ");
-    }
-  }
-  
+  ANA_CHECK(evr_tool.setProperty("BTaggingEfficiencyTool", btag_eff_tool));
+  ANA_CHECK(evr_tool.initialize());
+  ANA_MSG_INFO("Initialization of tool " << evr_tool->name() << " finished! ");
   ANA_MSG_INFO("----------------------------------");
   const std::string flavour_labels[4] = {"B","C","T","Light"};
 
   for (const std::string& label : flavour_labels) {
     ANA_MSG_INFO("--- Eigenvector decomposition for flavour: " << label << " ---");
-
-    /**
-       getNumEigenVectors(label)
-       
-       input value:
-       1. label: flavour label in std::string format, could be one of B, C, T, Light
-       return value:
-       number of eigen vectors used for chosen label. Return 0 if error occured. 
-     */
-
+    // getNumEigenVectors(label)
+    // input value:
+    // 1. label: flavour label in std::string format, could be one of B, C, T, Light
+    // return value:
+    // number of eigen vectors used for chosen label. Return 0 if error occured. 
     int nEigen = evr_tool->getNumEigenVectors(label);
     ANA_MSG_DEBUG("----------------------------------");
     ANA_MSG_DEBUG("  Number of eigenvectors: " << nEigen);
     ANA_MSG_DEBUG("----------------------------------");
-    /**
-       getCoefficients(label, evIdx)
-       
-       input value:
-       1. label: flavour label in std::string format, could be one of B, C, T, Light
-       2. evIdx: The index of eigenvector user interested in.
-       output value:
-       vector of coefficient values. The order is the same as output given by
-       getListOfOriginalNuisanceParameters()
-     */
+   
+    // getCoefficients(label, evIdx)
+    // input value:
+    // 1. label: flavour label in std::string format, could be one of B, C, T, Light
+    // 2. evIdx: The index of eigenvector user interested in.
+    // output value:
+    // vector of coefficient values. The order is the same as output given by
+    // getListOfOriginalNuisanceParameters()
     const unsigned int evIdx = 0;
     std::vector<float> coeffs = evr_tool->getCoefficients(label, evIdx);
     ANA_MSG_DEBUG("Eigenvector " << evIdx << ":");
-    for (float c : coeffs)
+    for (float c : coeffs){
       ANA_MSG_DEBUG(" " << std::fixed << c);
+    }
     ANA_MSG_DEBUG("----------------------------------");
 
     float norm = std::sqrt(std::inner_product(coeffs.begin(), coeffs.end(), coeffs.begin(), 0.0f));
@@ -118,29 +99,27 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
     }
     ANA_MSG_DEBUG("----------------------------------");
 
-    /**
-       getListOfOriginalNuisanceParameters(label)
-       
-       input value:
-       1. label: flavour label in std::string format, could be one of B, C, T, Light
-       output value:
-       List of original nuisance parameter names.
-     */
+    
+    // getListOfOriginalNuisanceParameters(label)
+    // input value:
+    // 1. label: flavour label in std::string format, could be one of B, C, T, Light
+    // output value:
+    // List of original nuisance parameter names.
     std::vector<std::string> orig_nps = evr_tool->getListOfOriginalNuisanceParameters(label);
     ANA_MSG_DEBUG("Original nuisance parameters (" << orig_nps.size() << "):");
-    for (const auto& np : orig_nps)
+    for (const auto& np : orig_nps){
       ANA_MSG_DEBUG(np << " ");
+    }
     ANA_MSG_DEBUG("----------------------------------");
-    /**
-       getCoefficientMap(label, EigenIdxList)
-        input value:
-       1. label: flavour label in std::string format, could be one of B, C, T, Light
-       2. EigenIdxList is user defined vector containing all eigenvector index
-       that user interested in.
-       output:
-       Map of format map<string, map<string, float>> containing decomposition
-       coefficient of the list of eigenvectors defined by EigenIdxList.
-    */
+    
+    // getCoefficientMap(label, EigenIdxList)
+    // input value:
+    // 1. label: flavour label in std::string format, could be one of B, C, T, Light
+    // 2. EigenIdxList is user defined vector containing all eigenvector index
+    // that user interested in.
+    // output:
+    // Map of format map<string, map<string, float>> containing decomposition
+    // coefficient of the list of eigenvectors defined by EigenIdxList.
     std::vector<unsigned int> eigenIdxList = {0,1,2,3,4,5};
     std::map<std::string, std::map<std::string, float>> coefficientMap = evr_tool->getCoefficientMap(label, eigenIdxList);
     ANA_MSG_DEBUG("Coefficient map summary (first key):");

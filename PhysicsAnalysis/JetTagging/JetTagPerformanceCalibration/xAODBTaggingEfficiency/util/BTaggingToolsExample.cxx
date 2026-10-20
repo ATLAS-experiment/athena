@@ -21,13 +21,14 @@
 #include "xAODRootAccess/TEvent.h"
 using TEVENT = xAOD::TEvent;
 #else
-// Those lines are only included if using AthAnalysis
+// Those lines are only included if using AthAnalysis or Athena 
 #include "POOLRootAccess/TEvent.h"
 using TEVENT = POOL::TEvent;
 #endif
 
-using CP::CorrectionCode;
-using namespace asg::msgUserCode;
+ANA_MSG_HEADER(testBTaggingToolsExample)
+ANA_MSG_SOURCE(testBTaggingToolsExample, "BTaggingToolsExample")
+using namespace testBTaggingToolsExample;
 
 int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
@@ -120,16 +121,16 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
       // get the btagging SFs and systematics on a jet
       float sf = 0;
-      CorrectionCode result = btagEffTool->getScaleFactor(*jet, sf);
+      CP::CorrectionCode result = btagEffTool->getScaleFactor(*jet, sf);
 
       // If the retrieval of the scale factor failed and the jet is not out of range 
       // it implies there is an issue so raise error
-      if (result != CorrectionCode::Ok && result != CorrectionCode::OutOfValidityRange) {
+      if (result != CP::CorrectionCode::Ok && result != CP::CorrectionCode::OutOfValidityRange) {
         ANA_MSG_ERROR ( "Failed to get SFs on this jet! " );
         return 1;
       }
 
-      if (result != CorrectionCode::OutOfValidityRange){
+      if (result != CP::CorrectionCode::OutOfValidityRange){
         std::cout << "Nominal SF for this jet: " << sf << std::endl;
       }
       else {
@@ -149,7 +150,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
         ANA_CHECK( btagEffTool->applySystematicVariation(set) );
         
         result = btagEffTool->getScaleFactor(*jet, sf);
-        if (result != CorrectionCode::Ok) {
+        if (result != CP::CorrectionCode::Ok) {
           ANA_MSG_ERROR ( "Failed to get SFs on this jet! " );
           return 1;
         } else {

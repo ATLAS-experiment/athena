@@ -24,7 +24,7 @@
 #include "xAODRootAccess/TEvent.h"
 using TEVENT = xAOD::TEvent;
 #else
-// Those lines are only included if using AthAnalysis
+// Those lines are only included if using AthAnalysis or Athena
 #include "POOLRootAccess/TEvent.h"
 using TEVENT = POOL::TEvent;
 #endif
@@ -33,12 +33,16 @@ using TEVENT = POOL::TEvent;
 #include <iomanip>
 #include "TFile.h"
 
-using CP::CorrectionCode;
-ANA_MSG_HEADER(testBTagSelection)
-ANA_MSG_SOURCE(testBTagSelection, "BtaggingToolsTester")
-using namespace testBTagSelection;
+ANA_MSG_HEADER(testBTaggingToolsTester)
+ANA_MSG_SOURCE(testBTaggingToolsTester, "BTaggingToolsTester")
+using namespace testBTaggingToolsTester;
 
 int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
+  // Change type returned by the ANA_CHECK function in case of error 
+  // NB: this is needed here because the main() function should return an integer
+  // In principle you should NOT call this line for your regular code 
+  ANA_CHECK_SET_TYPE (int);
+
 
   const char* TEST_NAME = argv[0];
 
@@ -53,7 +57,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   // Those lines are only included if using AnalysisBase
   ANA_CHECK (xAOD::Init()) ;
   #else
-  // Those lines are only included if using AthAnalysis
+  // Those lines are only included if using AthAnalysis or Athena
   POOL::Init();
   #endif
 
@@ -70,66 +74,36 @@ unsigned int sample_dsid = 601414; // this is needed for the so called MC/MC eff
   // set up BTaggingSelectionTool which is needed to get the btagging decision
   //---------------------------------------------------------------------------
   asg::StandaloneToolHandle<IBTaggingSelectionTool> btagSelTool("BTaggingSelectionTool/BTagselecTest");
-  StatusCode code1 = btagSelTool.setProperty( "FlvTagCutDefinitionsFileName", CDIPath);
-  StatusCode code2 = btagSelTool.setProperty( "TaggerName",                   taggerName);
-  StatusCode code3 = btagSelTool.setProperty( "OperatingPoint",               workingPointName);
-  StatusCode code4 = StatusCode::SUCCESS;
-  StatusCode code5 = btagSelTool.setProperty( "OutputLevel",                  MSG::WARNING);
-  StatusCode code6 = btagSelTool.initialize();
-  std::vector<StatusCode> codes = {code1, code2, code3, code4, code5, code6};
-  for (const auto& code : codes) {
-    if (code != StatusCode::SUCCESS) {
-      ANA_MSG_ERROR ( "Initialization of tool " << btagSelTool->name() << " failed! " );
-      return 1;
-    }
-  }
+  ANA_CHECK(btagSelTool.setProperty( "FlvTagCutDefinitionsFileName", CDIPath ));
+  ANA_CHECK(btagSelTool.setProperty( "TaggerName", taggerName ));
+  ANA_CHECK(btagSelTool.setProperty( "OperatingPoint", workingPointName ));
+  ANA_CHECK(btagSelTool.setProperty( "OutputLevel", MSG::WARNING ));
+  ANA_CHECK(btagSelTool.initialize());
   
   //---------------------------------------------------------------------------
   // set up a second BTaggingSelectionTool for the 2D 77% b-jet efficiency veto
   //---------------------------------------------------------------------------
   
   asg::StandaloneToolHandle<IBTaggingSelectionTool> btagSelTool_bveto("BTaggingSelectionTool/BTagselecTest");
-  code1 = btagSelTool_bveto.setProperty( "FlvTagCutDefinitionsFileName", CDIPath);
-  code2 = StatusCode::SUCCESS;
-  code3 = btagSelTool_bveto.setProperty( "OperatingPoint", "FixedCutBEff_77");
-  code4 = StatusCode::SUCCESS;
-  code5 = btagSelTool_bveto.setProperty( "OutputLevel",                  MSG::WARNING);
-  code6 = btagSelTool_bveto.initialize();
-  std::vector<StatusCode> codes_veto = {code1, code2, code3, code4, code5, code6};
-  for (const auto& code : codes_veto) {
-    if (code != StatusCode::SUCCESS) {
-     ANA_MSG_ERROR ( "Initialization of tool " << btagSelTool_bveto->name() << " for b-veto failed! " );
-      return 1;
-    }
-  }
-  
+  ANA_CHECK(btagSelTool_bveto.setProperty( "FlvTagCutDefinitionsFileName", CDIPath ));
+  ANA_CHECK(btagSelTool_bveto.setProperty( "OperatingPoint", "FixedCutBEff_77" ));
+  ANA_CHECK(btagSelTool_bveto.setProperty( "OutputLevel", MSG::WARNING ));
+  ANA_CHECK(btagSelTool_bveto.initialize());
 
   //------------------------------------------------------------------------------
   // set up BTaggingEfficiencyTool which is needed to get the btagging SFs and systematics
   //------------------------------------------------------------------------------
   asg::StandaloneToolHandle<IBTaggingEfficiencyTool> btagEffTool("BTaggingEfficiencyTool/BTagEffTest");
-  code1 = btagEffTool.setProperty( "ScaleFactorFileName",  CDIPath); 
-  code2 = StatusCode::SUCCESS;
+  ANA_CHECK(btagEffTool.setProperty( "ScaleFactorFileName",  CDIPath)); 
   if (tagScheme == "1d") {
-    code3 = btagEffTool.setProperty( "OperatingPoint",       "Continuous");
+    ANA_CHECK(btagEffTool.setProperty( "OperatingPoint", "Continuous" ));
   } else {
-    code3 = btagEffTool.setProperty( "OperatingPoint",       "Continuous2D");
-  }
-  code4 = StatusCode::SUCCESS;
-  code5 = btagEffTool.setProperty( "IgnoreOutOfValidityRange", true);
-  code6 = btagEffTool.setProperty( "EfficiencyCalibrations", sample_dsid);
-  StatusCode code7 = btagEffTool.setProperty( "OutputLevel", MSG::WARNING);
-  StatusCode code8 = btagEffTool.initialize();
-  std::vector<StatusCode> effcodes = {code1, code2, code3, code4, code5, code6, code7, code8};
-  for (const auto& code : effcodes) { 
-    if ( code != StatusCode::SUCCESS ) {
-      ANA_MSG_ERROR ( "Initialization of tool " << btagEffTool->name() << " failed! " );
-      return 1;
-    }
+    ANA_CHECK(btagEffTool.setProperty( "OperatingPoint", "Continuous2D" ));
   }
   
- 
-
+  ANA_CHECK(btagEffTool.setProperty( "IgnoreOutOfValidityRange", true ));
+  ANA_CHECK(btagEffTool.setProperty( "EfficiencyCalibrations", sample_dsid ));
+  ANA_CHECK(btagEffTool.initialize());
   //------------------------------------------------------------------------------
   // read in the input file and event loop
   //------------------------------------------------------------------------------
@@ -169,8 +143,8 @@ unsigned int sample_dsid = 601414; // this is needed for the so called MC/MC eff
 
       // get the btagging SFs and systematics on a jet
       float sf = 0;
-      CorrectionCode result = btagEffTool->getScaleFactor(*jet, sf);
-      if (result != CorrectionCode::Ok) {
+      CP::CorrectionCode result = btagEffTool->getScaleFactor(*jet, sf);
+      if (result != CP::CorrectionCode::Ok) {
         ANA_MSG_ERROR ( "Failed to get SFs on this jet! " );
         return 1;
       } else {
@@ -187,7 +161,7 @@ unsigned int sample_dsid = 601414; // this is needed for the so called MC/MC eff
           return 1;
         }
         result = btagEffTool->getScaleFactor(*jet, sf);
-        if (result != CorrectionCode::Ok) {
+        if (result != CP::CorrectionCode::Ok) {
           ANA_MSG_ERROR ( "Failed to get SFs on this jet! " );
           return 1;
         } else {

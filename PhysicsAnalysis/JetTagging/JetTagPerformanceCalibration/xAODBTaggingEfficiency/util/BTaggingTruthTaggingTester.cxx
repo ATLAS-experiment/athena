@@ -14,35 +14,33 @@
 #include <iomanip>
 #include <vector>
 
+ANA_MSG_HEADER(testBTaggingTruthTaggingTester)
+ANA_MSG_SOURCE(testBTaggingTruthTaggingTester, "BTaggingTruthTaggingTester")
+using namespace testBTaggingTruthTaggingTester;
+
 int test1 ATLAS_NOT_THREAD_SAFE () {
+  // Change type returned by the ANA_CHECK function in case of error 
+  // NB: this is needed here because the main() function should return an integer
+  // In principle you should NOT call this line for your regular code 
+  ANA_CHECK_SET_TYPE (int);
 
   asg::StandaloneToolHandle<IBTaggingTruthTaggingTool> tool("BTaggingTruthTaggingTool/BtagTT_Tool");
 
+  //choose working point and CDI file
+  ANA_CHECK(tool.setProperty( "TaggerName", "MV2c10" ));
+  ANA_CHECK(tool.setProperty( "OperatingPoint", "FixedCutBEff_77" ));
+  ANA_CHECK(tool.setProperty( "JetAuthor", "AntiKt4EMTopoJets" ));
+  ANA_CHECK(tool.setProperty( "ScaleFactorFileName", "xAODBTaggingEfficiency/13TeV/2017-21-13TeV-MC16-CDI-2018-02-09_v1.root" ));
 
-   //choose working point and CDI file
-   StatusCode code = tool.setProperty("TaggerName", "MV2c10");
-   StatusCode code2 = tool.setProperty("OperatingPoint", "FixedCutBEff_77");
-   StatusCode code3 = tool.setProperty("JetAuthor", "AntiKt4EMTopoJets");
-   StatusCode code4 = tool.setProperty("ScaleFactorFileName", "xAODBTaggingEfficiency/13TeV/2017-21-13TeV-MC16-CDI-2018-02-09_v1.root");
+  //truth tagging settings
+  ANA_CHECK(tool.setProperty( "IgnoreScaleFactors", false )); //use the data/MC and MC/MC scale factors when computing event weights
+  ANA_CHECK(tool.setProperty( "UseSystematics", true )); // store event weights for all systematic variations in the results object
+  ANA_CHECK(tool.setProperty( "MaxNtagged", 3 ));
+  ANA_CHECK(tool.setProperty( "UsePermutations", true ));
+  ANA_CHECK(tool.setProperty( "UseQuantile", true ));
+  ANA_CHECK(tool.initialize());
 
-
-   //truth tagging settings
-   StatusCode code5 = tool.setProperty("IgnoreScaleFactors", false); //use the data/MC and MC/MC scale factors when computing event weights
-   StatusCode code6 = tool.setProperty("UseSystematics", true); // store event weights for all systematic variations in the results object
-   StatusCode code7 = tool.setProperty("MaxNtagged", 3);
-   StatusCode code8 = tool.setProperty("UsePermutations", true);
-   StatusCode code9 = tool.setProperty("UseQuantile", true);
-
-   StatusCode code10 = tool.initialize();
-
-  if (code != StatusCode::SUCCESS || code2 != StatusCode::SUCCESS || code3 != StatusCode::SUCCESS || code4 != StatusCode::SUCCESS || code5 != StatusCode::SUCCESS ||
-    code6 != StatusCode::SUCCESS || code7 != StatusCode::SUCCESS || code8 != StatusCode::SUCCESS ||  code9 != StatusCode::SUCCESS || code10 != StatusCode::SUCCESS ) {
-    std::cout << "Initialization of tool " << tool->name() << " failed! " << std::endl;
-    return -1;
-  }
-  else {
-    std::cout << "Initialization of tool " << tool->name() << " finished." << std::endl;
-  }
+  std::cout << "Initialization of tool " << tool->name() << " finished." << std::endl;
 
   //Set the jets to be used in the tool.
   std::vector<float> pt = {44000., 66000., 77000.};

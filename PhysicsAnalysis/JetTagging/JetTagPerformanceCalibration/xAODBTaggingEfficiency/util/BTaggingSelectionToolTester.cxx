@@ -16,7 +16,7 @@
 #include "xAODRootAccess/TEvent.h"
 using TEVENT = xAOD::TEvent;
 #else
-// Those lines are only included if using AthAnalysis
+// Those lines are only included if using AthAnalysis or Athena
 #include "POOLRootAccess/TEvent.h"
 using TEVENT = POOL::TEvent;
 #endif
@@ -25,19 +25,15 @@ using TEVENT = POOL::TEvent;
 #include <iomanip>
 #include "TFile.h"
 
-using CP::CorrectionCode;
-ANA_MSG_HEADER(testBTagSelection)
-ANA_MSG_SOURCE(testBTagSelection, "BtaggingSelectionToolTester")
-using namespace testBTagSelection;
+ANA_MSG_HEADER(testBTaggingSelectionToolTester)
+ANA_MSG_SOURCE(testBTaggingSelectionToolTester, "BTaggingSelectionToolTester")
+using namespace testBTaggingSelectionToolTester;
 
 int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
-
-  #ifdef XAOD_STANDALONE
   // Change type returned by the ANA_CHECK function in case of error 
   // NB: this is needed here because the main() function should return an integer
   // In principle you should NOT call this line for your regular code 
   ANA_CHECK_SET_TYPE (int);
-  #endif
 
   const char* TEST_NAME = argv[0];
 
@@ -52,7 +48,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   // Those lines are only included if using AnalysisBase
   ANA_CHECK (xAOD::Init()) ;
   #else
-  // Those lines are only included if using AthAnalysis
+  // Those lines are only included if using AthAnalysis or Athena 
   POOL::Init();
   #endif
   
@@ -74,19 +70,9 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   const SG::ConstAccessor<float> ptauAcc(EDMTaggerName + "_ptau");
 
   asg::StandaloneToolHandle<IBTaggingSelectionTool> tool("BTaggingSelectionTool/BTagSelecTest");
-  StatusCode code1 = tool.setProperty( "FlvTagCutDefinitionsFileName", CDIPath);
-  StatusCode code2 = StatusCode::SUCCESS;
-  StatusCode code3 = tool.setProperty( "OperatingPoint",               workingPointName);
-  StatusCode code4 = StatusCode::SUCCESS;
-  StatusCode code5 = StatusCode::SUCCESS;
-  StatusCode code6 = tool.initialize();
-  std::vector<StatusCode> codes = {code1, code2, code3, code4, code5, code6};
-  for (const auto& code : codes) {
-    if (code != StatusCode::SUCCESS) {
-      ANA_MSG_ERROR ( "Initialization of tool " << tool->name() << " failed! " );
-      return 1;
-    }
-  }
+  ANA_CHECK(tool.setProperty( "FlvTagCutDefinitionsFileName", CDIPath));
+  ANA_CHECK(tool.setProperty( "OperatingPoint", workingPointName));
+  ANA_CHECK(tool.initialize());
 
   //load some jets to show how to use the tool
   gErrorIgnoreLevel = kError;
@@ -114,7 +100,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
     //you can get the tagger weight,
     double tagweight;
-    if( tool->getTaggerWeight( *jet ,tagweight)!=CorrectionCode::Ok) { 
+    if( tool->getTaggerWeight( *jet ,tagweight)!=CP::CorrectionCode::Ok) { 
       ANA_MSG_ERROR (" error retrieving tagger weight! " );
       return 1;
     }
@@ -132,7 +118,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
         jet_ptau = ptauAcc(*btag);
       }
 
-      if( tool->getTaggerWeight(jet_pb,jet_pc,jet_pu, tagweight, jet_ptau) != CorrectionCode::Ok ){
+      if( tool->getTaggerWeight(jet_pb,jet_pc,jet_pu, tagweight, jet_ptau) != CP::CorrectionCode::Ok ){
         ANA_MSG_ERROR (" error retrieving tagger weight! " );
         return 1;
       }
@@ -148,7 +134,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
       //you can also extract the cut value (which may or may not depend on the jet pt)
       double cutval;
       //provide the pt in MeV
-      if( tool->getCutValue( jet->pt() , cutval)!=CorrectionCode::Ok ) {
+      if( tool->getCutValue( jet->pt() , cutval)!=CP::CorrectionCode::Ok ) {
         ANA_MSG_ERROR ( " error retrieving cut value " );
         return 1;
       }

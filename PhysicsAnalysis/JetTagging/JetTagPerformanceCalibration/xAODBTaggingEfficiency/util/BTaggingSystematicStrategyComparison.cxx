@@ -29,8 +29,6 @@ using TEVENT = xAOD::TEvent;
 using TEVENT = POOL::TEvent;
 #endif
 
-using CP::CorrectionCode;
-
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //// This executable cycles through the different calibrated flavour taggers                               //
 //// in a CDI file, and tests out both the SFEigen and SFGlobalEigen systematic strategies                 //
@@ -46,12 +44,12 @@ using CP::CorrectionCode;
 // outdated CDI files cannot be used on newer DAODs and vice versa! This code will fail otherwise - to avoid this, you
 // can filter down what combinations to study but adding some simple statements of the form "if(...) continue;", below
 
-ANA_MSG_HEADER(testSysStratComp)
-ANA_MSG_SOURCE(testSysStratComp, "BTaggingSystematicStrategyComparison")
-using namespace testSysStratComp;
+ANA_MSG_HEADER(testBTaggingSystematicStrategyComparison)
+ANA_MSG_SOURCE(testBTaggingSystematicStrategyComparison, "BTaggingSystematicStrategyComparison")
+using namespace testBTaggingSystematicStrategyComparison;
 
 int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
-
+  
   #ifdef XAOD_STANDALONE
   // Change type returned by the ANA_CHECK function in case of error 
   // NB: this is needed here because the main() function should return an integer
@@ -77,7 +75,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   // Those lines are only included if using AnalysisBase
   ANA_CHECK (xAOD::Init()) ;
   #else
-  // Those lines are only included if using AthAnalysis
+  // Those lines are only included if using AthAnalysis or Athena
   POOL::Init();
   #endif
 
@@ -159,17 +157,17 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
       // Storage for sf/eff values
       float sf=0;
       float eff=0;
-      CorrectionCode result;
+      CP::CorrectionCode result;
       ANA_MSG_DEBUG("Testing function calls without systematics...");
       result = tool->getEfficiency(*jet,eff);
-      if(result!=CorrectionCode::Ok){
+      if(result!=CP::CorrectionCode::Ok){
         ANA_MSG_ERROR("Jet get efficiency failed");
         return 1;
       } else {
         ANA_MSG_INFO("Jet get efficiency succeeded: " << eff);
       }
       result = tool->getScaleFactor(*jet,sf);
-      if( result!=CorrectionCode::Ok) {
+      if( result!=CP::CorrectionCode::Ok) {
         ANA_MSG_ERROR("Jet get scale factor failed");
         return 1;
       } else {
@@ -187,7 +185,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
           return 1;
         }
         result = tool->getScaleFactor(*jet,sf);
-        if( result!=CorrectionCode::Ok) {
+        if( result!=CP::CorrectionCode::Ok) {
           ANA_MSG_ERROR(var.name() << "getScaleFactor FAILED");
           return 1;
         } else {
