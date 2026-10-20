@@ -9,8 +9,16 @@
 #include "CaloUtils/CaloVertexedCell.h"
 #include "TrkParametersIdentificationHelpers/TrackParametersIdHelper.h"
 #include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
-
 #include "GaudiKernel/SystemOfUnits.h"
+
+#include "Acts/Geometry/TrackingGeometry.hpp"
+#include "Acts/Material/MaterialInteraction.hpp"
+#include "Acts/Propagator/detail/SteppingLogger.hpp"
+#include "Acts/Surfaces/CurvilinearSurface.hpp"
+#include "Acts/Surfaces/PlaneSurface.hpp"
+
+#include "ActsGeometryInterfaces/GeometryDefs.h"
+#include "ActsInterop/UnitConverters.h"
 
 #include <algorithm>
 #include <cmath>
@@ -25,11 +33,33 @@ TauElectronVetoVariables::TauElectronVetoVariables(const std::string &name) :
 TauRecToolBase(name) {}
 
 StatusCode TauElectronVetoVariables::initialize() {
-  ATH_CHECK( m_caloExtensionTool.retrieve() );
-  if (!m_ParticleCacheKey.key().empty()) {
-    ATH_CHECK(m_ParticleCacheKey.initialize());
+
+  if(!m_useACTSExtrapolator){    
+    ATH_CHECK( m_caloExtensionTool.retrieve() );
+    if (!m_ParticleCacheKey.key().empty()) {
+      ATH_CHECK(m_ParticleCacheKey.initialize());
+    } else {
+      m_useOldCalo = true;
+    }
   } else {
-    m_useOldCalo = true;
+   
+    ATH_CHECK(m_extrapolationTool.retrieve());
+    ATH_CHECK(m_trackingGeometrySvc.retrieve());
+
+    std::array<std::string,11> caloNames = { "PreSamplerENegZ_Layer", "PreSamplerEPosZ_Layer",
+	                                     "EME1NegZ_Layer", "EME1PosZ_Layer", "EMB1_Layer",
+					     "EME2NegZ_Layer", "EME2PosZ_Layer", "EMB2_Layer",
+                                             "EME3NegZ_Layer", "EME3PosZ_Layer", "EMB3_Layer",
+                                           };
+
+    m_trackingGeometrySvc->trackingGeometry()->visitVolumes([&](const Acts::TrackingVolume *vol) {
+      const auto & name = vol->volumeName();
+      ATH_MSG_DEBUG(name << " - " << vol->geometryId() << " - surfaces: " << vol->surfaces().size());
+      if (std::ranges::contains(caloNames, name)){
+        ATH_MSG_DEBUG("About to insert caloName " << name << " into map");
+        m_caloNameGeoIDMap[vol->geometryId().volume()] = name;
+      }
+    });
   }
   return StatusCode::SUCCESS;
 }
@@ -67,51 +97,124 @@ StatusCode TauElectronVetoVariables::executeTool(xAOD::TauJet& pTau,
     extrapolatedEta.fill(invalidCoordinate);
     extrapolatedPhi.fill(invalidCoordinate);
     
-    /*get the CaloExtension object*/
-    const Trk::CaloExtension * caloExtension = nullptr;
-    std::unique_ptr<Trk::CaloExtension> uniqueExtension ;
     const xAOD::TrackParticle *orgTrack = pTau.track(0)->track();
     trackIndex = orgTrack->index();
-    if (m_useOldCalo) {
-      /* If CaloExtensionBuilder is unavailable, use the calo extension tool */
-      ATH_MSG_VERBOSE("Using the CaloExtensionTool");
-      uniqueExtension = m_caloExtensionTool->caloExtension(ctx, *orgTrack);
-      caloExtension = uniqueExtension.get();
-    } else {
-      /*get the CaloExtension object*/
-      ATH_MSG_VERBOSE("Using the CaloExtensionBuilder Cache");
-      SG::ReadHandle<CaloExtensionCollection>  particleCache {m_ParticleCacheKey, ctx};
-      caloExtension = (*particleCache)[trackIndex];
-      ATH_MSG_VERBOSE("Getting element " << trackIndex << " from the particleCache");
-      if( not caloExtension ){
-        ATH_MSG_VERBOSE("Cache does not contain a calo extension -> Calculating with the a CaloExtensionTool" );
+
+    /*get the CaloExtension object*/
+    if(!m_useACTSExtrapolator){
+      const Trk::CaloExtension * caloExtension = nullptr;
+      std::unique_ptr<Trk::CaloExtension> uniqueExtension ;
+      if (m_useOldCalo) {
+        /* If CaloExtensionBuilder is unavailable, use the calo extension tool */
+        ATH_MSG_VERBOSE("Using the CaloExtensionTool");
         uniqueExtension = m_caloExtensionTool->caloExtension(ctx, *orgTrack);
         caloExtension = uniqueExtension.get();
+      } else {
+        /*get the CaloExtension object*/
+        ATH_MSG_VERBOSE("Using the CaloExtensionBuilder Cache");
+        SG::ReadHandle<CaloExtensionCollection>  particleCache {m_ParticleCacheKey, ctx};
+        caloExtension = (*particleCache)[trackIndex];
+        ATH_MSG_VERBOSE("Getting element " << trackIndex << " from the particleCache");
+        if( not caloExtension ){
+          ATH_MSG_VERBOSE("Cache does not contain a calo extension -> Calculating with the a CaloExtensionTool" );
+          uniqueExtension = m_caloExtensionTool->caloExtension(ctx, *orgTrack);
+          caloExtension = uniqueExtension.get();
+        }
+      }
+      if( not caloExtension){
+        ATH_MSG_DEBUG("extrapolation of leading track to calo surfaces failed  : caloExtension is nullptr" );
+        return StatusCode::RECOVERABLE;
+      }
+      const std::vector<Trk::CurvilinearParameters>& clParametersVector = caloExtension->caloLayerIntersections();
+      if(clParametersVector.empty() ){
+        ATH_MSG_DEBUG("extrapolation of leading track to calo surfaces failed  : caloLayerIntersection is empty" );
+        return StatusCode::RECOVERABLE;
+      }
+      // loop over calo layers
+      for( const Trk::CurvilinearParameters& cur : clParametersVector ){
+        // only use entry layer
+        if( !parsIdHelper.isEntryToVolume(cur.cIdentifier()) ) continue;
+        CaloSampling::CaloSample sample = parsIdHelper.caloSample(cur.cIdentifier());
+        int index = -1;
+        if( sample == CaloSampling::PreSamplerE || sample == CaloSampling::PreSamplerB ) index = 0;
+        else if( sample == CaloSampling::EME1 || sample == CaloSampling::EMB1 )          index = 1;
+        else if( sample == CaloSampling::EME2 || sample == CaloSampling::EMB2 )          index = 2;
+        else if( sample == CaloSampling::EME3 || sample == CaloSampling::EMB3 )          index = 3;
+        if( index < 0 ) continue;
+        extrapolatedEta[index] = cur.position().eta();
+        extrapolatedPhi[index] = cur.position().phi();
+      }
+    } 
+    else 
+    { // use ACTS Based extrapolation
+      unsigned int lastMeasIdx = 0;
+      if (!orgTrack->indexOfParameterAtPosition(lastMeasIdx, xAOD::LastMeasurement)) {
+          ATH_MSG_ERROR("TrackParticle has no last measurement parameters");
+          return StatusCode::FAILURE;
+      }
+
+      Acts::Vector3 lastPos{orgTrack->parameterX(lastMeasIdx),
+                            orgTrack->parameterY(lastMeasIdx),
+                            orgTrack->parameterZ(lastMeasIdx)};
+      Acts::Vector3 lastMom{ActsTrk::energyToActs(orgTrack->parameterPX(lastMeasIdx)),
+                            ActsTrk::energyToActs(orgTrack->parameterPY(lastMeasIdx)),
+                            ActsTrk::energyToActs(orgTrack->parameterPZ(lastMeasIdx))};
+
+      Acts::BoundVector lastBoundParams = Acts::BoundVector::Zero();
+      lastBoundParams[Acts::eBoundPhi]    = lastMom.phi();
+      lastBoundParams[Acts::eBoundTheta]  = lastMom.theta();
+      lastBoundParams[Acts::eBoundQOverP] = orgTrack->charge() / lastMom.norm();
+
+      std::shared_ptr<const Acts::Surface> lastSurface = Acts::CurvilinearSurface(lastPos, lastMom.normalized()).planeSurface()->getSharedPtr();
+
+      Acts::BoundTrackParameters boundPars{
+          std::move(lastSurface),
+          lastBoundParams,
+          std::nullopt,
+          Acts::ParticleHypothesis::pion()
+      };
+
+      Acts::Result<std::pair<std::vector<Acts::detail::Step>, Acts::RecordedMaterial>> result = m_extrapolationTool.get()->propagationSteps(ctx, boundPars);
+
+      if( !result.ok() ) {
+        ATH_MSG_WARNING("Error during extrapolation: " << result.error().message());
+	return StatusCode::RECOVERABLE;
+      }
+
+      const auto &[steps, _] = result.value();
+
+      for(const auto &step : steps) {
+
+        if( step.surface == nullptr || step.surface->geometryId().sensitive() == 0 ) {
+          continue;
+        }
+
+        Acts::GeometryIdentifier thisGeoID = step.geoID;
+        ATH_MSG_DEBUG("Got step with geoID " << thisGeoID);
+
+        if (m_caloNameGeoIDMap.contains(thisGeoID.volume())){
+          ATH_MSG_DEBUG("This step is in the calorimeter");
+          const auto &p = step.position;
+
+          // match to EM or Had calorimeter
+          std::string layer = m_caloNameGeoIDMap.at(thisGeoID.volume());
+
+          int index = -1;
+	  if( layer.find("PreSampler") != std::string::npos) index = 0;
+          else if( (layer.find("EME1") != std::string::npos) || (layer.find("EMB1") != std::string::npos) ) index = 1;
+	  else if( (layer.find("EME2") != std::string::npos) || (layer.find("EMB2") != std::string::npos) ) index = 2;    
+          else if( (layer.find("EME3") != std::string::npos) || (layer.find("EMB3") != std::string::npos) ) index = 3; 
+     
+	  if( index < 0 ) continue;
+
+          extrapolatedEta[index] = Acts::VectorHelpers::eta(p);
+          extrapolatedPhi[index] = Acts::VectorHelpers::phi(p);
+        }
       }
     }
-    if( not caloExtension){
-      ATH_MSG_DEBUG("extrapolation of leading track to calo surfaces failed  : caloExtension is nullptr" );
-      return StatusCode::RECOVERABLE;
-    }
-    const std::vector<Trk::CurvilinearParameters>& clParametersVector = caloExtension->caloLayerIntersections();
-    if(clParametersVector.empty() ){
-      ATH_MSG_DEBUG("extrapolation of leading track to calo surfaces failed  : caloLayerIntersection is empty" );
-      return StatusCode::RECOVERABLE;
-    }
-    // loop over calo layers
-    for( const Trk::CurvilinearParameters& cur : clParametersVector ){
-      // only use entry layer
-      if( !parsIdHelper.isEntryToVolume(cur.cIdentifier()) ) continue;
-      CaloSampling::CaloSample sample = parsIdHelper.caloSample(cur.cIdentifier());
-      int index = -1;
-      if( sample == CaloSampling::PreSamplerE || sample == CaloSampling::PreSamplerB ) index = 0;
-      else if( sample == CaloSampling::EME1 || sample == CaloSampling::EMB1 )          index = 1;
-      else if( sample == CaloSampling::EME2 || sample == CaloSampling::EMB2 )          index = 2;
-      else if( sample == CaloSampling::EME3 || sample == CaloSampling::EMB3 )          index = 3;
-      if( index < 0 ) continue;
-      extrapolatedEta[index] = cur.position().eta();
-      extrapolatedPhi[index] = cur.position().phi();
-    }
+
+    
+
     for (size_t i = 0; i < numberOfEM_Layers; ++i) {
       if ( extrapolatedEta[i] < invalidCoordinateThreshold || extrapolatedPhi[i] < invalidCoordinateThreshold ){
         ATH_MSG_DEBUG("extrapolation of leading track to calo surfaces failed for sampling : " << i );
