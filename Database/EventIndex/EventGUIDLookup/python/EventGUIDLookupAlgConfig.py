@@ -62,6 +62,7 @@ class EventGUIDLookupAlg(PyAthena.Alg):
                 self._outFH.write('%d %d %s\n' % (run, evt, guid))
                 self._outFH.flush()
                 self._found.add(key)
+                self.msg.info('Found GUID for run/dsid %d event %d dataType %s', run, evt, self.dataType)
             else:
                 self.msg.warning('run/dsid=%d event=%d has no %s provenance '
                                  'reference', run, evt, self.dataType)
@@ -75,7 +76,7 @@ class EventGUIDLookupAlg(PyAthena.Alg):
                               len(missing), len(self.requestedEvents),
                               self.dataType)
             for run, evt in sorted(missing):
-                self.msg.warning('  missing: run=%d event=%d', run, evt)
+                self.msg.debug('  missing: run=%d event=%d', run, evt)
         else:
             self.msg.info('Resolved GUIDs for all %d requested events',
                            len(self.requestedEvents))

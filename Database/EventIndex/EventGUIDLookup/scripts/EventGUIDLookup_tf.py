@@ -23,14 +23,10 @@ from PyJobTransforms.trfExe import athenaExecutor
 from PyJobTransforms.trfArgs import addAthenaArguments
 from PyJobTransforms.trfDecorators import stdTrfExceptionHandler, sigUsrStackTrace
 import PyJobTransforms.trfArgClasses as trfArgClasses
+from EventGUIDLookup.EventGUIDLookupArgClasses import argEventGUIDFile
 
+SUPPORTED_TYPES = ('RAW', 'ESD', 'AOD', 'DAOD', 'RDO', 'HITS', 'EVNT')
 
-SUPPORTED_TYPES = ('RAW', 'ESD', 'AOD', 'DAOD_PHYS', 'DAOD_PHYSLITE',
-                    'RDO', 'HITS', 'EVNT')
-
-
-@stdTrfExceptionHandler
-@sigUsrStackTrace
 
 def addEventGUIDLookupArgs(parser):
     parser.defineArgGroup('EventGUIDLookup', 'EventGUIDLookup Options')
@@ -48,8 +44,7 @@ def addEventGUIDLookupArgs(parser):
                              trfArgClasses.argAthenaFile, io='input',
                              runarg=True, type='input'),
                          group='EventGUIDLookup',
-                         help='Input file(s) to search (any POOL format, '
-                              'or RAW if --dataType RAW)')
+                         help='Input file(s) to search (any POOL format)')
 
     parser.add_argument('--inputDataType',
                          type=trfArgClasses.argFactory(trfArgClasses.argString,
@@ -58,7 +53,7 @@ def addEventGUIDLookupArgs(parser):
                          group='EventGUIDLookup',
                          help='Actual data type of --inputFile (always a '
                               'POOL format): one of %s'
-                              % ', '.join(SUPPORTED_TYPES))
+                              % ', '.join(SUPPORTED_TYPES[1:]))
 
     parser.add_argument('--eventList', required=True,
                          type=trfArgClasses.argFactory(trfArgClasses.argString,
@@ -68,7 +63,7 @@ def addEventGUIDLookupArgs(parser):
                               'per line (space separated)')
 
     parser.add_argument('--outputTXTFile', required=True,
-                         type=trfArgClasses.argFactory(trfArgClasses.argFile,
+                         type=trfArgClasses.argFactory(argEventGUIDFile,
                                                         io='output', runarg=True,
                                                         type='eventGUIDOutput'),
                          group='EventGUIDLookup',
@@ -92,6 +87,22 @@ def getTransform():
     addEventGUIDLookupArgs(trf.parser)
     return trf
 
+def setLineCounts(trf):
+    fileArg = trf.argdict.get('outputTXTFile')
+    if fileArg is None:
+        return
+
+    total = fileArg.getnentries()
+
+    if total:
+        msg.info('Total events across output files: %s', total)
+        exe = trf._executorDictionary.get('EventGUIDLookup')
+        if exe is not None:
+            exe._eventCount = total
+
+@stdTrfExceptionHandler
+@sigUsrStackTrace
+
 def main():
     msg.info('This is %s', sys.argv[0])
 
@@ -99,12 +110,16 @@ def main():
     trf.parseCmdLineArgs(sys.argv[1:])
 
     dataType = trf.argdict['dataType'].value
-    if dataType not in SUPPORTED_TYPES:
+    if dataType[:4] not in SUPPORTED_TYPES:
         msg.error('Unsupported --dataType %r (must be one of: %s)',
                    dataType, ', '.join(SUPPORTED_TYPES))
         sys.exit(1)
 
     trf.execute()
+    
+    # --- set nentries / nevents from the line count ---
+    setLineCounts(trf)
+    
     trf.generateReport()
 
     msg.info('%s stopped gracefully', sys.argv[0])

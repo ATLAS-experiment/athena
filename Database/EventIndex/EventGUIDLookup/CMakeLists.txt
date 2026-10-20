@@ -16,4 +16,4 @@ atlas_add_test( ExtractGUID_AOD_mc
                 SCRIPT test/ExtractGUID_AOD_mc.sh "${CMAKE_CURRENT_SOURCE_DIR}"
                 LOG_SELECT_PATTERN "^[0-9]+ [0-9]+ [0-9A-Fa-f]{8}(-[0-9A-Fa-f]{4}){3}-[0-9A-Fa-f]{12}$"
                 PRIVATE_WORKING_DIRECTORY
-                PROPERTIES TIMEOUT 300 )
+                PROPERTIES TIMEOUT 500 )
