@@ -5,7 +5,7 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from LArCellRec.LArTimeVetoAlgConfig import LArTimeVetoAlgCfg
 from IOVDbSvc.IOVDbSvcConfig import addOverride
 
-def EventVetoCearAlgCfg(flags):
+def EventVetoClearAlgCfg(flags):
 
     if flags.Input.isMC: #Do not run this in MC! 
         return None 

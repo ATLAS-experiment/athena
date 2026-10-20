@@ -23,10 +23,10 @@ def AODFixCfg(flags):
 
     # #Add list of known AOD Fixes here:
     from egammaAlgs.egammaAODFixesConfig import egammaAODFixesCfg
-    from LArCellRec.EventInfoClearAlgConfig import EventVetoCearAlgCfg
+    from LArCellRec.EventInfoClearAlgConfig import EventVetoClearAlgCfg
     listOfFixes = [
         egammaAODFixesCfg,
-        EventVetoCearAlgCfg,
+        EventVetoClearAlgCfg,
     ]
 
     fixApplied = False
