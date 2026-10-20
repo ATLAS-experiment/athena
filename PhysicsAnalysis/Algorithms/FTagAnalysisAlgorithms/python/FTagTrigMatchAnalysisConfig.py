@@ -70,6 +70,9 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
                 # Only used for Run 2
                 if config.geometry() is LHCPeriod.Run2:
                     configure_emulationTool(alg, config, [chain])
+                    # HLT jets on which the online b-tagging ran
+                    alg.HLT_BJets = ('HLT_xAOD__JetContainer_GSCJet' if '_gsc' in chain
+                                     else 'HLT_xAOD__JetContainer_SplitJet')
 
 
                 alg.matchingDecoration = 'ftag_jetTrigMatching_' + chain_out + '_%SYS%'
