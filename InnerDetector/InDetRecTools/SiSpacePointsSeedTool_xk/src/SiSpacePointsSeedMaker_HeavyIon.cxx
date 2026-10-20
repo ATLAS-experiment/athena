@@ -1581,9 +1581,9 @@ InDet::SiSpacePointForSeed* InDet::SiSpacePointsSeedMaker_HeavyIon::newSpacePoin
 
   if (data.i_spforseed!=data.l_spforseed.end()) {
     sps = &(*data.i_spforseed++);
-    sps->set(sp,&r[0]);
+    sps->set(sp,r);
   } else {
-    data.l_spforseed.emplace_back(sp, &r[0]);
+    data.l_spforseed.emplace_back(sp, r);
     sps = &(data.l_spforseed.back());
     data.i_spforseed = data.l_spforseed.end();
   }
