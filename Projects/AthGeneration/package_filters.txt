@@ -161,7 +161,6 @@
 #+ Reconstruction/eflowRec
 + Reconstruction/EventShapes/EventShapeInterface
 + Reconstruction/Jet/JetEDM
-+ Reconstruction/Jet/JetEvent
 + Reconstruction/Jet/JetInterface
 + Reconstruction/Jet/JetRec
 + Reconstruction/Jet/JetRecConfig

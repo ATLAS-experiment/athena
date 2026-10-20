@@ -94,7 +94,6 @@
 + PhysicsAnalysis/TrackingID/.*
 + Reconstruction/EventShapes/EventShapeInterface
 + Reconstruction/Jet/BoostedJetTaggers
-- Reconstruction/Jet/JetEvent.*
 - Reconstruction/Jet/JetMonitoring
 - Reconstruction/Jet/JetInputsMonitoring
 + Reconstruction/Jet/JetReclustering
