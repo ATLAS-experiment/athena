@@ -33,6 +33,7 @@ def lhe_cleaner(powheg_LHE_output):
     new_removed = FileParser(powheg_LHE_output).text_remove_all_if_one_line_matches("^#new weight", "NaN")
     matching_removed = FileParser(powheg_LHE_output).text_remove_all_if_one_line_matches("^#matching", "NaN")
     rdm_removed = FileParser(powheg_LHE_output).text_remove_all_if_one_line_matches("^ #Random", "NaN") # this one starts with a space
+    emscales_removed = FileParser(powheg_LHE_output).text_remove_all_if_one_line_matches("^#emscales", "NaN")
 
     if pdf_removed != 0:
         logger.info("{} line(s) starting with '#pdf' were removed in {} since at least one looked buggy".format(pdf_removed, powheg_LHE_output))
@@ -44,6 +45,8 @@ def lhe_cleaner(powheg_LHE_output):
         logger.info("{} line(s) starting with '#matching' were removed in {} since at least one looked buggy".format(matching_removed, powheg_LHE_output))
     if rdm_removed != 0:
         logger.info("{} line(s) starting with ' #Random' were removed in {} since at least one looked buggy".format(rdm_removed, powheg_LHE_output)) # this one starts with a space
+    if emscales_removed != 0:
+        logger.info("{} line(s) starting with '#emscales' were removed in {} since at least one looked buggy".format(emscales_removed, powheg_LHE_output))
 
     # Correct LHE version identification; otherwise Pythia will treat all files as v1
     FileParser(powheg_LHE_output).text_replace('LesHouchesEvents version="1.0"', 'LesHouchesEvents version="3.0"')
