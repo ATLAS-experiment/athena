@@ -1,14 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TAURECTOOLS_TRACKSORT_H
 #define TAURECTOOLS_TRACKSORT_H
 
-#ifndef XAOD_ANALYSIS
-#include "Particle/TrackParticle.h"
-#include "Particle/TrackParticleContainer.h"
-#endif
 #include "AthLinks/ElementLink.h"
 #include "xAODTracking/TrackParticle.h"
 
@@ -24,19 +20,7 @@
 class TrackSort {
 
 public:
-  TrackSort(){};
-
-#ifndef XAOD_ANALYSIS
-  bool operator() (const ElementLink<Rec::TrackParticleContainer>& t1, const ElementLink<Rec::TrackParticleContainer> &t2) const
-  {
-    return std::abs( (*t1)->pt() ) > std::abs( (*t2)->pt() );
-  };
-
-  bool operator() ( const Rec::TrackParticle *t1, const Rec::TrackParticle *t2 ) const
-  {
-    return std::abs( t1->pt() ) > std::abs( t2->pt() );
-  };
-#endif
+  TrackSort() = default;
 
   bool operator() ( const xAOD::TrackParticle *t1, const xAOD::TrackParticle *t2 ) const
   {

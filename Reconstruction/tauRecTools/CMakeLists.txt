@@ -15,14 +15,13 @@ find_package( nlohmann_json )
 set( extra_public_libs )
 set( extra_private_libs )
 if( NOT XAOD_ANALYSIS )
-   set( extra_public_libs CaloEvent Particle )
+   set( extra_public_libs CaloEvent )
    set( extra_private_libs GaudiKernel StoreGateLib CaloIdentifier
       CaloInterfaceLib CaloUtilsLib TrkCaloExtension TrkLinks
       TrkParametersIdentificationHelpers TrkToolInterfaces
       TrackVertexAssociationToolLib TrkVertexFitterInterfaces
       TrkVertexFittersLib RecoToolInterfaces ITrackToVertex
-      InDetTrackSelectionToolLib BeamSpotConditionsData VxVertex JetEDM
-      Particle )
+      InDetTrackSelectionToolLib BeamSpotConditionsData VxVertex JetEDM )
 endif()
 
 # Component(s) in the package:
