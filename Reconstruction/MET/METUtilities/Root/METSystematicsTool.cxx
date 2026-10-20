@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "METUtilities/METSystematicsTool.h"
@@ -806,6 +806,8 @@ namespace met {
   }
 
   void METSystematicsTool::setRandomSeed(unsigned long seed) const {
-    getTLSRandomGen()->SetSeed(seed);
+    // TRandom3 treats a seed of 0 as a request for a random (non-reproducible) seed.
+    // Callers seed with the soft term phi, which is 0 for an empty soft term.
+    getTLSRandomGen()->SetSeed(seed != 0 ? seed : 1);
   }
 }
