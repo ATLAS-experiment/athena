@@ -9,6 +9,10 @@
 
 #include "TrkCaloExtension/CaloExtensionCollection.h"
 
+#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
+#include "AthenaBaseComps/AthAlgTool.h"
+
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 
@@ -48,6 +52,16 @@ private:
     "ParticleCaloExtensionTool", "Trk::ParticleCaloExtensionTool/ParticleCaloExtensionTool", "Tool for calculating track extrapolation"}; 
   SG::ReadHandleKey<CaloExtensionCollection>  m_ParticleCacheKey{this,
     "tauEVParticleCache", "ParticleCaloExtension", "Name of the particle measurement extrapolation cache for TauEV Algorithm"};
+
+  
+  // ACTS Extrapolator
+  Gaudi::Property<bool> m_useACTSExtrapolator{this, "useACTSExtrapolator", false};
+  ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool {this, "ExtrapolationTool", "ExtrapolationTool", "Tool to run propagation in an ACTS tracking geometry" };
+  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+
+  std::map<unsigned int, std::string> m_caloNameGeoIDMap;
+
+
 };
 
 #endif // TAURECTOOLS_TAUELECTRONVETOVARIABLES_H

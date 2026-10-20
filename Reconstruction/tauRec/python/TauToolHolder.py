@@ -246,12 +246,17 @@ def ElectronVetoVarsCfg(flags):
     
     from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
 
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+
     TauElectronVetoVariables = CompFactory.getComp("TauElectronVetoVariables")
     TauElectronVetoVariables = TauElectronVetoVariables(name = _name,
                                                         VertexCorrection = flags.Tau.doVertexCorrection,
                                                         ParticleCaloExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)),
-                                                        tauEVParticleCache = getParticleCache(flags))
-
+                                                        tauEVParticleCache = getParticleCache(flags),
+                                                        ExtrapolationTool = result.popToolsAndMerge(ActsExtrapolationToolCfg(flags,MaxSteps=10000)),
+                                                        useACTSExtrapolator = False,)
+    result.merge(ActsTrackingGeometrySvcCfg(flags))
     result.setPrivateTools(TauElectronVetoVariables)
     return result
 
