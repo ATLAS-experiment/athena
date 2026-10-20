@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <time.h>
@@ -8,7 +8,6 @@
 #include <iostream>
 
 #include "AnalysisUtils/AnalysisMisc.h"
-#include "AnalysisUtils/AnalysisSelection.h"
 #include "AnalysisUtils/AnalysisCombination.h"
 #include "AnalysisUtils/AnalysisPermutation.h"
 
