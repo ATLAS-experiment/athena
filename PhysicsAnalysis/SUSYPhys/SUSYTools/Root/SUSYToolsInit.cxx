@@ -348,6 +348,11 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       if (!m_jetTruthLabelingTool.isUserConfigured()) {
 	m_jetTruthLabelingTool.setTypeAndName("JetTruthLabelingTool/ST_JetTruthLabelingTool");
 	ATH_CHECK( m_jetTruthLabelingTool.setProperty("RecoJetContainer", m_fatJets) );
+	ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthJetContainer", m_fatUngroomedTruthJets) );
+	ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthGroomedJetContainer", m_fatTruthJets) );
+	ATH_CHECK( m_jetTruthLabelingTool.setProperty("GetTruthGroomedJetValues", m_getTruthGroomedJetValues) );
+	ATH_CHECK( m_jetTruthLabelingTool.setProperty("MatchUngroomedParent", m_matchUngroomedParent) );
+	ATH_CHECK( m_jetTruthLabelingTool.setProperty("dRTruthJet", m_dRTruthJet) );
 	ATH_CHECK( m_jetTruthLabelingTool.setProperty("TruthLabelName", m_JetTruthLabelName) );
 	ATH_CHECK( m_jetTruthLabelingTool.setProperty("OutputLevel", this->msg().level()) );
 	ATH_CHECK( m_jetTruthLabelingTool.retrieve() );

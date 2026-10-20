@@ -34,7 +34,6 @@
 
 // Jet tools
 #include <JetCalibTools/JetCalibrationTool.h>
-#include <ParticleJetTools/JetTruthLabelingTool.h>
 #include <JetUncertainties/FFJetSmearingTool.h>
 
 // ROOT
@@ -331,10 +330,6 @@ int main(int argc, char* argv[]){
 
       // Shallow copy
       auto jets_shallowCopy = xAOD::shallowCopy( *jets );
-
-      ////// Give a TruthLabel to the jets. Needed in the FFSmearingTool to apply the uncertainties of one jet topology or another.
-      // Note: in principle not needed for most of the derivaiton formats, as we save this information in DAODs
-      //m_JetTruthLabelingTool.modify(*(jets_shallowCopy.first));
 
       if (want_to_debug){
         std::cout << "Start the loop over the jets" << std::endl;

@@ -22,6 +22,8 @@
 #include "ParticleJetTools/SmallRJetPileupLabelEnum.h"
 #include <optional>
 
+#include <map>
+
 class JetTruthLabelingTool :
   public asg::AsgTool,
   virtual public IJetDecorator
@@ -51,7 +53,6 @@ protected:
   Gaudi::Property<std::string> m_truthLabelName{this, "TruthLabelName", "R10TruthLabel_R22v1", "Truth label name"};
 
   Gaudi::Property<bool> m_isTruthJetCol{this, "IsTruthJetCollection", false, "Flag indicating whether input collection is a truth jet container"};
-  Gaudi::Property<bool> m_forceDeltaRMatch{this, "ForceDeltaRMatch", false, "Whether to force dR matching e.g. if GhostTruth is not available"};
 
   SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey{this, "EventInfoKey", "EventInfo", "Name of EventInfo object"};
 
@@ -60,16 +61,18 @@ protected:
   SG::ReadHandleKey<xAOD::JetContainer> m_ITJetName{ this, "ITJetContainer", "InTimeAntiKt4TruthJets", "Do not configure manually!" };
   SG::ReadHandleKey<xAOD::JetContainer> m_truthJetCollectionKey{this, "TruthJetContainer", "", "Do not configure manually!"};
   SG::ReadHandleKey<xAOD::JetContainer> m_truthGroomedJetCollectionKey{this, "TruthGroomedJetContainer", "", "Do not configure manually!"};
-  bool m_useGhostJetMatch{}; /// Use ghost association to match reco to truth jets, dR otherwise
-  bool m_isSmallR{}; /// Is the reco jet collection small or large R, default large.
-  bool m_matchUngroomedParent{}; /// Use the ungroomed reco jet parent to match to truth jet
-  bool m_getTruthGroomedJetValues{}; /// When truth jet matching to ungroomed truth, allow saving properties of groomed truth jets
-  double m_dRTruthJet{}; /// dR to match truth jet to reco jet
-  double m_recoGhostFrac{}; /// Ghost pT fraction to match truth jet to reco jet
-  double m_mLowTop{}; /// Lower mass cut for top label
-  double m_mLowW{}; /// Lower mass cut for W label
-  double m_mLowZ{}; /// Lower mass cut for Z label
-  bool m_doLargeRLabels{true}; /// Track internally if the W,Z,Top labels should be done (for large-R)
+
+  Gaudi::Property<bool> m_useGhostJetMatch{this, "UseGhostJetMatch", false, "Use ghost association to match reco to truth jets, dR otherwise"};
+  Gaudi::Property<double> m_recoGhostFrac{this, "RecoGhostFraction", 0.75, "Ghost pT fraction window for GA matching"};
+  Gaudi::Property<bool> m_matchUngroomedParent{this, "MatchUngroomedParent", false, "Use the ungroomed reco jet parent to match to truth jet"};
+  Gaudi::Property<bool> m_getTruthGroomedJetValues{this, "GetTruthGroomedJetValues", false, "Save properties of the groomed truth jet"};
+  Gaudi::Property<double> m_dRTruthJet{this, "dRTruthJet", 0.0, "dR to match truth jet to reco jet (<0: closest jet)"};
+  Gaudi::Property<bool> m_doLargeRLabels{this, "DoLargeRLabels", true, "Compute the W/Z/top labels (large R jets)"};
+
+  /// Large R containment cuts [GeV]
+  Gaudi::Property<double> m_mLowTop{this, "MassLowTop", 140.0, "Lower mass cut for top label [GeV]"};
+  Gaudi::Property<double> m_mLowW{this, "MassLowW", 50.0, "Lower mass cut for W label [GeV]"};
+  Gaudi::Property<double> m_mLowZ{this, "MassLowZ", 50.0, "Lower mass cut for Z label [GeV]"};
 
   struct DecorHandles {
     DecorHandles (const JetTruthLabelingTool& tool, const EventContext& ctx);
