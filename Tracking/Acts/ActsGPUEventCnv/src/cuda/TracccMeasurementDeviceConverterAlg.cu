@@ -2,16 +2,40 @@
 // Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 
+// Local include(s).
+#include "src/DeviceMeasurementContainers.h"
+
+// Framework include(s).
 #include "AthenaKernel/errorcheck.h"
 #include "GaudiKernel/StatusCode.h"
-#include "TracccMeasurementDeviceConverterAlg.h"
 
-#include <vecmem/utils/copy.hpp>
-#include <traccc/edm/measurement_collection.hpp>
-#include "traccc/geometry/detector_conditions_description.hpp"
+// Acts include(s).
 #include <detray/geometry/tracking_surface.hpp>
+#include <traccc/edm/measurement_collection.hpp>
+#include <traccc/geometry/detector.hpp>
+#include <traccc/geometry/detector_buffer.hpp>
+#include <traccc/geometry/detector_conditions_description.hpp>
+#include <vecmem/memory/memory_resource.hpp>
+#include <vecmem/utils/copy.hpp>
+
+// Thrust include(s).
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>
+
+/// Helper macro used for checking @c cudaError_t type return values.
+#define CUDA_ERROR_CHECK(EXP)                                      \
+  do {                                                             \
+    cudaError_t errorCode = EXP;                                   \
+    if (errorCode != cudaSuccess) {                                \
+      errorcheck::ReportMessage(MSG::ERROR, ERRORCHECK_ARGS,       \
+        __PRETTY_FUNCTION__,                                       \
+        StatusCode::FAILURE)                                       \
+              .msgstream()                                         \
+          << "Failed to execute: " << #EXP << " ("                 \
+          << cudaGetErrorString(errorCode) << ")";                 \
+      return StatusCode::FAILURE;                                  \
+    }                                                              \
+  } while (false)
 
 namespace ActsTrk {
 
@@ -103,10 +127,10 @@ StatusCode convertMeasurementsOnGPU(
   , vecmem::copy const & copy
   , traccc::itk_detector::view_type const & detector_view
   , traccc::detector_conditions_description::const_view const & detector_conditions_view
-  , size_type nb_measurements
+  , traccc::edm::measurement_collection::const_view::size_type nb_measurements
   , const traccc::edm::measurement_collection::const_view & input_meas
-  , size_type & output_n_pixels
-  , size_type & output_n_strips
+  , DevicePixelMeasurementContainer::view::size_type & output_n_pixels
+  , DeviceStripMeasurementContainer::view::size_type & output_n_strips
   , std::unique_ptr<DevicePixelMeasurementContainer::buffer> & output_pixel_meas
   , std::unique_ptr<DeviceStripMeasurementContainer::buffer> & output_strip_meas
 	)
@@ -191,4 +215,3 @@ StatusCode convertMeasurementsOnGPU(
 }
 
 } // namespace ActsTrk
-
