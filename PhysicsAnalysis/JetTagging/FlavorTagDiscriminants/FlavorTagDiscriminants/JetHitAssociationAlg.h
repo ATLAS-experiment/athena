@@ -91,6 +91,12 @@ namespace FlavorTagDiscriminants {
       Gaudi::Property<int> m_maxHits {
         this, "maxHits", 200, "Maximum number of total hits; 0 to keep all"};
 
+      Gaudi::Property<float> m_minJetPt {
+        this, "minJetPt", 0, "Jets below this pt [MeV] get an empty association; 0 to keep all"};
+
+      Gaudi::Property<float> m_maxAbsJetEta {
+        this, "maxAbsJetEta", -1, "Jets above this |eta| get an empty association; negative to keep all"};
+
 
       struct Hit {
         const xAOD::TrackMeasurementValidation* original_hit;

@@ -14,7 +14,7 @@ __log = logging.getLogger('TriggerEDMRun4Config')
 # ------------------------------------------------------------
 # Additional properties for EDM collections
 # ------------------------------------------------------------
-from TrigEDMConfig.TriggerEDMDefs import InViews # Import when needed, Alias, allowTruncation
+from TrigEDMConfig.TriggerEDMDefs import InViews, Alias # Import when needed, allowTruncation
 
 # ------------------------------------------------------------
 # Lists of variables to be kept in the collections 
@@ -96,6 +96,11 @@ TriggerHLTListRun4 = [
     ('std::vector<float>#L1_FailedeFEXeta', 'ESD AODFULL', 'L1'),
     ('std::vector<float>#L1_FailedeFEXphi', 'ESD AODFULL', 'L1'),
     ('std::vector<float>#L1_eGamma1BDT', 'ESD AODFULL', 'L1'),
+
+    # HitZ preselection, in its own super-RoI step ahead of the tracking
+    ('TrigRoiDescriptorCollection#HLT_Roi_JetSuperHitZ',                'BS ESD AODFULL', 'Jet'),
+    ('xAOD::JetContainer#HLT_AntiKt4EMTopoJets_subjesIS_hitz',           'BS ESD AODFULL', 'Jet', [Alias('JetContainerShallowCopy')]),
+    ('xAOD::ShallowAuxContainer#HLT_AntiKt4EMTopoJets_subjesIS_hitzAux.pt.eta.phi.m.HitZ_z0.HitZ_z0_sigma', 'BS ESD AODFULL', 'Jet'),
 
     # Particle Flow Objects, for assessing performance with ITk (and perhaps HGTD)
     ('xAOD::FlowElementContainer#HLT_ftfChargedParticleFlowObjects', 'BS ESD', 'Jet'),

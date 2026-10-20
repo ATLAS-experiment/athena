@@ -592,6 +592,16 @@ def FastFtaggedJetCopyAlgCfg(flags,jetDef):
     acc.addEventAlgo(JetRecConfig.getJetCopyAlg(jetsin=jetsIn,jetsoutdef=ftagJetDef,decorations=decorList))
     return acc, ftagJetDef
 
+# HitZ decorates a copy of its own, not the jets the RoI FTF step tags
+def HitZJetCopyAlgCfg(flags,jetDef):
+
+    acc = ComponentAccumulator()
+    jetsIn = jetDef.fullname()
+    hitzJetDef = jetDef.clone(suffix=jetDef.suffix+'_hitz',modifiers=[],lock=True)
+    decorList = getDecorList(jetDef)
+    acc.addEventAlgo(JetRecConfig.getJetCopyAlg(jetsin=jetsIn,jetsoutdef=hitzJetDef,decorations=decorList))
+    return acc, hitzJetDef
+
 # Returns reco sequence for RoI-based track reco + low-level flavour tagging
 @AccumulatorCache
 def JetRoITrackJetTagSequenceCfg(flags,jetsIn,trkopt,RoIs):
