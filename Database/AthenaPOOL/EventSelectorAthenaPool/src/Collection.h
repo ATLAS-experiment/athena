@@ -16,9 +16,8 @@
 
 namespace pool {
 
-   // Private to the package: callers of cursor() include collection/ICollectionCursor.h
    class CollectionColumn;
-   class ICollectionCursor;
+   class CollectionCursor;
 
    /**
       @brief Read-only collection implementation
@@ -34,7 +33,7 @@ namespace pool {
         ~Collection();
 
         /// Returns a cursor for the collection.
-        std::unique_ptr<ICollectionCursor> cursor();
+        std::unique_ptr<CollectionCursor> cursor();
 
      private:
         Collection(const Collection &) = delete;

@@ -28,13 +28,6 @@ namespace pool {
     CollectionRowBuffer();
 
     /**
-     * Constructor taking Attribute list as input.
-     *
-     * @param attributeList List of Attributes.
-     */
-    CollectionRowBuffer( coral::AttributeList& attributeList );
-
-    /**
      * Copy Constructor.
      *
      * @param rhs Object to be copied.
@@ -44,26 +37,7 @@ namespace pool {
     /// Default destructor.
     ~CollectionRowBuffer();
 
-    /**
-     * Assignment operator.
-     *
-     * @param rhs Collection row buffer to copy.
-     */
-    CollectionRowBuffer& operator=( const CollectionRowBuffer& rhs );
-
-    /**
-     * Equality operator.
-     *
-     * @param rhs Collection row buffer to compare to.
-     */
-    bool operator==( const CollectionRowBuffer& rhs ) const;
-
-    /**
-     * Inequality operator.
-     *
-     * @param rhs Collection row buffer to compare to.
-     */
-    bool operator!=( const CollectionRowBuffer& rhs ) const;
+    CollectionRowBuffer& operator=( const CollectionRowBuffer& rhs ) = delete;
 
     /**
      * Sets the Attribute list schema.

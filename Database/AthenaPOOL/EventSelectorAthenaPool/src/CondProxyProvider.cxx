@@ -21,8 +21,8 @@
 #include "StoreGate/StoreGateSvc.h"
 
 // Pool
-#include "EventSelectorAthenaPool/Collection.h"
-#include "lib/ICollectionCursor.h"
+#include "Collection.h"
+#include "CollectionCursor.h"
 
 #include "StorageSvc/DbType.h"
 
@@ -92,7 +92,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
          ATH_MSG_ERROR("Could not open item: \"" << inputCollection << "\" from the collection list.");
          return StatusCode::FAILURE;
       }
-      std::unique_ptr<pool::ICollectionCursor> headerIterator = poolCollection->cursor();
+      std::unique_ptr<pool::CollectionCursor> headerIterator = poolCollection->cursor();
       if (!headerIterator->next()) {
          ATH_MSG_WARNING("Cannot retrieve Collection.");
          continue;
