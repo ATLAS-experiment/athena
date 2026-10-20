@@ -17,12 +17,13 @@
 // Local include(s):
 #include "EgammaAnalysisInterfaces/IEgammaCalibrationAndSmearingTool.h"
 #include "xAODCore/ShallowCopy.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 #include "xAODEgamma/ElectronContainer.h" 
 #include "xAODEgamma/PhotonContainer.h" 
 #include "xAODEgamma/EgammaContainer.h" 
 #include "xAODEventInfo/EventInfo.h"
-namespace CP {
+namespace ADD_CMODE(CP) {
 
 class CalibratedEgammaProvider : public AthAlgorithm {
 

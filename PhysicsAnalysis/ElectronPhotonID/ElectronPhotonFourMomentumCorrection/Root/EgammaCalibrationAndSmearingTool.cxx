@@ -38,7 +38,7 @@
 #include "ElectronPhotonFourMomentumCorrection/egammaEnergyCorrectionTool.h"
 #include "egammaLayerRecalibTool/egammaLayerRecalibTool.h"
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
 const double GeV = 1000.;
 
@@ -2610,4 +2610,4 @@ callEvents (columnar::EventContextRange events) const
   }
 }
 
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)

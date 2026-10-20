@@ -178,10 +178,10 @@ namespace columnar {
   }
 }
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
 class EgammaCalibrationAndSmearingTool
-    : virtual public IEgammaCalibrationAndSmearingTool,
+    : virtual public CP::IEgammaCalibrationAndSmearingTool,
       public asg::AsgMetadataTool, public columnar::ColumnarTool<> {
   // Create a proper constructor for Athena
   ASG_TOOL_CLASS3(EgammaCalibrationAndSmearingTool,
@@ -492,5 +492,5 @@ public:
   void callEvents (columnar::EventContextRange events) const override;
 };
 
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)
 #endif
