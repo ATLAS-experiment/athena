@@ -165,6 +165,12 @@ int main() {
       return 1;
    }
 
+   // Removing objects, by pointer and by name, should forget their pointers:
+   RETURN_CHECK( APP_NAME, store.remove( objAPtr ) );
+   SIMPLE_ASSERT( APP_NAME, ! store.contains( objAPtr ) );
+   RETURN_CHECK( APP_NAME, store.remove( "MyObjB" ) );
+   SIMPLE_ASSERT( APP_NAME, ! store.contains( dummy4 ) );
+
    // Clear the container:
    store.clear();
 

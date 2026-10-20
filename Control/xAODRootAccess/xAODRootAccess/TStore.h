@@ -9,6 +9,7 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 // ROOT include(s):
@@ -161,7 +162,7 @@ namespace xAOD {
       /// @}
 
       /// Type of the internal container storing all the objects
-      typedef std::map< std::string, THolder* > Objects_t;
+      typedef std::unordered_map< std::string, THolder* > Objects_t;
       /// Type of the internal storage for the hashed keys of the object names
       typedef SG::SGKeyMap< std::string > HashedKeys_t;
 
@@ -169,6 +170,8 @@ namespace xAOD {
       Objects_t m_objects;
       /// The key map
       HashedKeys_t m_keys;
+      /// Key of each managed object, by object pointer (points into m_objects)
+      std::unordered_map< const void*, const std::string* > m_names;
 
    private:
       /// Internal implementation of the templated record method
