@@ -119,6 +119,8 @@ triggers2Metadata = [ # Main bBmumuxv2 triggers
                       "HLT_mu11_mu6_bBmumuxv2",
                       "HLT_2mu10_bBmumuxv2",
                       "HLT_2mu6_bBmumuxv2_L1LFV-MU6",
+                      "HLT_2mu6_bBmumuxv2",
+                      "HLT_2mu6_bBmumuxv2_delayed",
                       "HLT_mu11_mu6_bBmumux_BpmumuKp",
                       "HLT_2mu6_bBmumux_BpmumuKp_L1BPH-2M9-2MU6_BPH-2DR15-2MU6",
                       # Additional pure di-muon triggers
