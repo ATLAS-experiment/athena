@@ -8,11 +8,11 @@
 #include "PersistentDataModel/Token.h"
 
 #include "CollectionRowBuffer.h"
-#include "ICollectionCursor.h"
 #include "StorageSvc/DbContainer.h"
 
-#include <memory>
+#include <cstddef>
 #include <map>
+#include <string>
 
 
 namespace pool {
@@ -24,7 +24,7 @@ namespace pool {
        *
        * Reader object for Collections
        */
-      class CollectionCursor : public ICollectionCursor
+      class CollectionCursor
       {
       public:
 
@@ -33,23 +33,21 @@ namespace pool {
             ContainerMap& attrContainers );
 
          /// Advances the cursor to the next row of the result set.
-         virtual bool next() override final;
+         bool next();
 
          /// Returns the selected Tokens and Attributes for the current row of the result set.
-         virtual const CollectionRowBuffer& currentRow() const override final;
+         const CollectionRowBuffer& currentRow() const;
 
          /// Return the size of the collection.
-         virtual std::size_t size() override final;
+         std::size_t size();
 
          /// Seeks the cursor to a given position in the collection.
-         virtual bool seek(std::size_t position) override final;
+         bool seek(std::size_t position);
 
          /// Returns the event reference Token for the current row.
-         virtual const Token& eventRef() const override final;
+         const Token& eventRef() const;
 
-         virtual ~CollectionCursor() = default;
-
-      protected:
+      private:
          /// Row buffer containing the Token and Attributes
          CollectionRowBuffer                 m_collectionRowBuffer;
 

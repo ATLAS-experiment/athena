@@ -9,7 +9,7 @@
 
 #include "EventSelectorAthenaPool.h"
 #include "EventContextAthenaPool.h"
-#include "EventSelectorAthenaPool/Collection.h"
+#include "Collection.h"
 
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "PersistentDataModel/Token.h"
@@ -31,8 +31,8 @@
 #include "AthenaKernel/IDataShare.h"
 
 // Pool
-#include "lib/ICollectionCursor.h"
-#include "lib/CollectionRowBuffer.h"
+#include "CollectionCursor.h"
+#include "CollectionRowBuffer.h"
 #include "StorageSvc/DbType.h"
 
 #include <CxxUtils/StringUtils.h>
@@ -657,7 +657,7 @@ int EventSelectorAthenaPool::findEvent(int evtNum) const {
          }
          int collection_size = 0;
          if (coll) {
-            std::unique_ptr<pool::ICollectionCursor> hi = coll->cursor();
+            std::unique_ptr<pool::CollectionCursor> hi = coll->cursor();
             collection_size = hi->size();
          }
          else {

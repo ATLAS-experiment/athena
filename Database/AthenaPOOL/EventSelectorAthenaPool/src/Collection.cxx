@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "EventSelectorAthenaPool/Collection.h"
+#include "Collection.h"
 #include "CollectionCursor.h"
 
 #include "CoralBase/AttributeList.h"
@@ -88,7 +88,7 @@ namespace pool {
       }
 
 
-   std::unique_ptr<ICollectionCursor> Collection::cursor() {
+   std::unique_ptr<CollectionCursor> Collection::cursor() {
       if( m_containerMap.empty() ) {
          m_containerMap.emplace( APRDefaults::TokenTypeName, std::move(m_dhCont) );
       }

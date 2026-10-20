@@ -13,15 +13,6 @@ pool::CollectionRowBuffer::CollectionRowBuffer()
 {}
 
 
-pool::CollectionRowBuffer::CollectionRowBuffer( coral::AttributeList& attributeList )
-    : m_token( new Token ),
-      m_attributeList( new coral::AttributeList )
-{
-   // share data
-   m_attributeList->merge( attributeList );
-}
-
-
 pool::CollectionRowBuffer::CollectionRowBuffer( const pool::CollectionRowBuffer& rhs )
     : m_token( new Token ),
       m_attributeList( new coral::AttributeList )
@@ -43,30 +34,6 @@ bool pool::CollectionRowBuffer::deleteAL ATLAS_NOT_THREAD_SAFE()
 pool::CollectionRowBuffer::~CollectionRowBuffer()
 {
   [[maybe_unused]] bool flag ATLAS_THREAD_SAFE = deleteAL();
-}
-
-
-pool::CollectionRowBuffer&
-pool::CollectionRowBuffer::operator=( const pool::CollectionRowBuffer& rhs )
-{
-  rhs.token().setData( m_token );
-  *m_attributeList = *rhs.m_attributeList;
-
-  return *this;
-}
-
-
-bool
-pool::CollectionRowBuffer::operator==( const pool::CollectionRowBuffer& rhs ) const
-{
-  return *m_attributeList == *rhs.m_attributeList;
-}
-
-
-bool
-pool::CollectionRowBuffer::operator!=( const pool::CollectionRowBuffer& rhs ) const
-{
-  return ( ! ( *this == rhs ) );
 }
 
 

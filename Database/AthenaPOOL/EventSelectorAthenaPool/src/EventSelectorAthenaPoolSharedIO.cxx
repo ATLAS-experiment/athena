@@ -20,7 +20,7 @@
 #include "AthenaKernel/IDataShare.h"
 
 // Pool
-#include "lib/ICollectionCursor.h"
+#include "CollectionCursor.h"
 
 namespace {
    /// Helper to suppress thread-checker warnings for single-threaded execution
