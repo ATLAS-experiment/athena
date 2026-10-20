@@ -334,7 +334,12 @@ std::vector<unsigned int> GepCellsHandlerAlg::getNeighbours(const CaloCellContai
   std::vector<IdentifierHash> cellNeighbours;
 
   IdentifierHash cellHashID = m_CaloCell_ID->calo_cell_hash(acell->ID());
-  m_CaloCell_ID->get_neighbours(cellHashID,LArNeighbours::super3D,cellNeighbours);
+
+  if (m_restrictPSNeighbors && (m_CaloCell_ID->calo_sample(acell->ID()) == 0 || m_CaloCell_ID->calo_sample(acell->ID()) == 4)){
+    m_CaloCell_ID->get_neighbours(cellHashID,LArNeighbours::nextInSamp,cellNeighbours);
+  } else {// for all cells other than the Presamplers use super3D cell neighbors
+    m_CaloCell_ID->get_neighbours(cellHashID,LArNeighbours::super3D,cellNeighbours);
+  }
 
   std::vector<unsigned int> neighbour_ids;
   for (unsigned int iNeighbour = 0;
