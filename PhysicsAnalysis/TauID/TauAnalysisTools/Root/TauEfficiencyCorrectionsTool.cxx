@@ -364,11 +364,17 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
         ATH_MSG_ERROR("Property \"Trigger\" was not set, please provide a trigger name.");
         return StatusCode::FAILURE;
       }
+
+      std::string trigFold = m_useGNTau ? "GNTau" : "RNN";
+
+      if(m_useGNTau && m_sCampaign!="mc23a")
+	ATH_MSG_WARNING("TauTrigger recommendations using offline GNTau ID are ONLY available for 2022 datasets. In all other cases the tool is retrieving the offline RNN ID based recommendations, which are NOT recommended to use");        
+
       if (m_sInputFilePathTriggerHadTau.empty()) {
         // Determine the input file name from the given trigger name.
 	if(m_sCampaign=="mc23a"){
           if (m_sTriggerName.value().find("mediumRNN_tracktwoMVA") != std::string::npos) {
-            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_data2022"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/"+trigFold+"/Trigger_TrueHadTau_data2022"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
           }
           else {
             ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported for " << m_sCampaign << " campaign. Please fix \"TriggerName\" property. In case of doubt please consult with TauTrigger coordinators");
