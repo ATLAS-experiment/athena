@@ -84,6 +84,24 @@ def getTrackingInputMaker(flags : AthConfigFlags, trkopt : str):
         raise RuntimeError(f"Unrecognised trkopt '{trkopt}' provided, choices are ['ftf','roiftf']")
     return InputMakerAlg
 
+# The same super-RoI as the RoI FTF step, in views of its own
+def getHitZInputMaker(flags : AthConfigFlags):
+    return CompFactory.EventViewCreatorAlgorithm(
+        "IMJetRoIHitZ",
+        mergeUsingFeature = False,
+        RoITool = CompFactory.ViewCreatorJetSuperROITool(
+            'ViewCreatorJetSuperRoIHitZ',
+            RoisWriteHandleKey  = recordable( 'HLT_Roi_JetSuperHitZ' ),
+            RoIEtaWidth = flags.Trigger.InDetTracking.jetSuper.etaHalfWidth,
+            RoIPhiWidth = flags.Trigger.InDetTracking.jetSuper.phiHalfWidth,
+            RoIZWidth   = flags.Trigger.InDetTracking.jetSuper.zedHalfWidth,
+        ),
+        Views = "JetSuperRoIHitZViews",
+        InViewRoIs = "InViewRoIs",
+        RequireParentView = False,
+        ViewFallThrough = True,
+    )
+
 ###############################################################################################
 ### --- Menu Sequence helpers ---
 
@@ -360,3 +378,38 @@ def jetRoITrackJetTagHypoMenuSequenceGenCfg(flags, jetDef, isPresel=True):
     selAcc, hypoType = jetRoITrackJetTagSelCfg(flags, jetDef, isPresel)
     return MenuSequence(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))
 
+
+
+# HitZ on the super-RoI hits, before any tracking: returns the reco and the decorated jets
+def jetRoIHitZRecoCfg(flags, preselJetDef):
+    jetDefStr = jetDefToString(preselJetDef)+'_roihitz'
+    reco = InEventRecoCA(
+        f"jetRoIHitZHypo_{jetDefStr}_RecoSequence",
+        inputMaker=getHitZInputMaker(flags)
+    )
+
+    from .JetRecoSequencesConfig import (
+        HitZJetCopyAlgCfg, formatFilteredJetsName, JET_DEFAULT_VIEW_PT_MIN_GEV
+    )
+    from .JetRecoCommon import getDecorList
+    hitzjet_acc, hitzJetDef = HitZJetCopyAlgCfg(flags,preselJetDef)
+    hitzJetName = recordable(hitzJetDef.fullname())
+    reco.mergeReco(hitzjet_acc)
+
+    seqname = "JetRoIHitZ_RecoSequence"
+    reco.addSequence(parOR(seqname),primary=True)
+    from ..Bjet.BjetHitZConfig import hitZRoICfg
+    reco.merge(hitZRoICfg(flags, hitzJetName, RoIs=reco.inputMaker().InViewRoIs), seqname)
+    reco.inputMaker().ViewNodeName = seqname
+
+    # Not JetViewAlgCfg: its cache keys on the JetDefinition, whose hash ignores
+    # the suffix, so it would hand back the RoI FTF step's _fastftag view alg
+    filtered_jetsIn = formatFilteredJetsName(hitzJetName,JET_DEFAULT_VIEW_PT_MIN_GEV)
+    reco.addEventAlgo(CompFactory.JetViewAlg(
+        "jetview_"+filtered_jetsIn,
+        InputContainer=hitzJetName,
+        OutputContainer=filtered_jetsIn,
+        PtMin=JET_DEFAULT_VIEW_PT_MIN_GEV*1e3,
+        DecorDeps=getDecorList(hitzJetDef),
+    ))
+    return reco, filtered_jetsIn
