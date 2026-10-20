@@ -13,7 +13,7 @@
 
 #include "Gaudi/Interfaces/IOptionsSvc.h"
 
-namespace CP {
+namespace ADD_CMODE(CP) {
 
 CalibratedEgammaProvider::CalibratedEgammaProvider( const std::string& name, ISvcLocator* svcLoc )
   : AthAlgorithm( name, svcLoc ) { }

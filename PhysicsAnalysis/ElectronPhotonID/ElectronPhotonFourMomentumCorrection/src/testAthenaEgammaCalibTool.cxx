@@ -18,6 +18,8 @@
 // local include
 #include "testAthenaEgammaCalibTool.h"
 
+namespace ADD_CMODE(CP) {
+
 testAthenaEgammaCalibTool::testAthenaEgammaCalibTool( const std::string& name, ISvcLocator* svcLoc )
   : AthAlgorithm( name, svcLoc ),
     m_EgammaCalibrationAndSmearingTool("CP::EgammaCalibrationAndSmearingTool/EgammaCalibrationAndSmearingTool", this)
@@ -118,3 +120,5 @@ StatusCode testAthenaEgammaCalibTool::execute(const EventContext& /*ctx*/)
 
   return StatusCode::SUCCESS;
 }
+
+} // namespace ADD_CMODE(CP)

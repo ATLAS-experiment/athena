@@ -14,6 +14,8 @@
 // Local include(s):
 #include "EgammaAnalysisInterfaces/IEgammaCalibrationAndSmearingTool.h"
 
+namespace ADD_CMODE(CP) {
+
 class testAthenaEgammaCalibTool : public AthAlgorithm {
 
 public:
@@ -31,6 +33,8 @@ private:
   ToolHandle<CP::IEgammaCalibrationAndSmearingTool> m_EgammaCalibrationAndSmearingTool;
 
 }; // class testAthenaEgammaCalibTool
+
+} // namespace ADD_CMODE(CP)
 
 #endif // TESTATHENAEGAMMACALIBTOOL_H
 

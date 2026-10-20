@@ -31,6 +31,8 @@
 // local include
 #include "dumpAllSystematics.h"
 
+namespace ADD_CMODE(CP) {
+
 DumpAllSystematics::DumpAllSystematics(const std::string& name, ISvcLocator* svcLoc)
   : AthAlgorithm(name, svcLoc)
 {
@@ -364,3 +366,5 @@ StatusCode DumpAllSystematics::do_energy(xAOD::Egamma& particle, int itool)
 
   return StatusCode::SUCCESS;
 }
+
+} // namespace ADD_CMODE(CP)

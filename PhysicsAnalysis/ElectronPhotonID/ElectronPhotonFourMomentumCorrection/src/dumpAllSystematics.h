@@ -19,6 +19,8 @@
 #include <vector>
 #include <string>
 
+namespace ADD_CMODE(CP) {
+
 class DumpAllSystematics : public AthAlgorithm {
 
 public:
@@ -83,6 +85,8 @@ private:
 
   ToolHandleArray<CP::IEgammaCalibrationAndSmearingTool> m_EgammaCalibrationAndSmearingTools;
 
-}; // class testAthenaEgammaCalibTool
+}; // class DumpAllSystematics
+
+} // namespace ADD_CMODE(CP)
 
 #endif // DUMPALLSYSTEMATICS_H

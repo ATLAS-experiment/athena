@@ -13,29 +13,51 @@ endif()
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( GTest )
 
-# Component(s) in the package:
-atlas_add_library( ElectronPhotonFourMomentumCorrectionLib
-   ElectronPhotonFourMomentumCorrection/*.h Root/*.cxx
-   PUBLIC_HEADERS ElectronPhotonFourMomentumCorrection
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgServicesLib AsgTools AsgTestingLib AsgMessagingLib ColumnarClusterLib ColumnarEgammaLib ColumnarCoreLib ColumnarModeLib
-   xAODEventInfo PATInterfaces EgammaAnalysisInterfacesLib egammaUtils PATCoreAcceptLib
-   xAODRootAccess ColumnarTrackingLib ColumnarEventInfoLib 
-   PRIVATE_LINK_LIBRARIES  AthLinks xAODMetaData egammaLayerRecalibTool
-   PathResolver ${extra_libs} )
-
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( ElectronPhotonFourMomentumCorrection
-      src/*.h src/*.cxx src/components/*.cxx
-      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-      LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthenaBaseComps
-      EgammaAnalysisInterfacesLib ElectronPhotonFourMomentumCorrectionLib GaudiKernel
-      PATInterfaces xAODBase xAODCaloEvent xAODCore xAODEgamma xAODEventInfo xAODTruth )
-else ()
-   atlas_add_component( ElectronPhotonFourMomentumCorrection
-      src/components/*.cxx
-      LINK_LIBRARIES ElectronPhotonFourMomentumCorrectionLib )
+# FIX ME: These settings should come from the Project configuration
+if (COLUMNAR_ANALYSIS)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeArray;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
+elseif (XAOD_STANDALONE)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
+else()
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD")
+  SET (COLUMNAR_MODE_SUFFIX_LIST "")
 endif()
+
+foreach (CMODE_NAME CMODE_SUFFIX IN ZIP_LISTS COLUMNAR_MODE_NAME_LIST COLUMNAR_MODE_SUFFIX_LIST)
+
+   # Component(s) in the package:
+   atlas_add_library( ElectronPhotonFourMomentumCorrectionLib${CMODE_SUFFIX}
+      ElectronPhotonFourMomentumCorrection/*.h Root/*.cxx
+      PUBLIC_HEADERS ElectronPhotonFourMomentumCorrection
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} AsgServicesLib AsgTools AsgTestingLib AsgMessagingLib ColumnarClusterLib ColumnarEgammaLib ColumnarCoreLib ColumnarModeLib${CMODE_SUFFIX}
+      xAODEventInfo PATInterfaces EgammaAnalysisInterfacesLib egammaUtils PATCoreAcceptLib
+      xAODRootAccess ColumnarTrackingLib ColumnarEventInfoLib 
+      PRIVATE_LINK_LIBRARIES  AthLinks xAODMetaData egammaLayerRecalibTool
+      PathResolver ${extra_libs} )
+
+   if( NOT XAOD_STANDALONE )
+      atlas_add_component( ElectronPhotonFourMomentumCorrection${CMODE_SUFFIX}
+         src/*.h src/*.cxx src/components/*.cxx
+         INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+         LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AthenaBaseComps
+         EgammaAnalysisInterfacesLib ElectronPhotonFourMomentumCorrectionLib${CMODE_SUFFIX} GaudiKernel
+         PATInterfaces xAODBase xAODCaloEvent xAODCore xAODEgamma xAODEventInfo xAODTruth )
+   else ()
+      atlas_add_component( ElectronPhotonFourMomentumCorrection${CMODE_SUFFIX}
+         src/components/*.cxx
+         LINK_LIBRARIES ElectronPhotonFourMomentumCorrectionLib${CMODE_SUFFIX} )
+   endif()
+
+   atlas_add_test( gt_ColumnarToolTests${CMODE_SUFFIX}
+                  SOURCES test/gt_ColumnarToolTests.cxx
+                  INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+                  LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib${CMODE_SUFFIX} ElectronPhotonFourMomentumCorrectionLib${CMODE_SUFFIX}
+                  POST_EXEC_SCRIPT noerror.sh )
+
+endforeach()
 
 atlas_add_dictionary( ElectronPhotonFourMomentumCorrectionDict
    ElectronPhotonFourMomentumCorrection/ElectronPhotonFourMomentumCorrectionDict.h
@@ -82,12 +104,6 @@ if( XAOD_STANDALONE AND NOT COLUMNAR_ANALYSIS )
                    SCRIPT test/ut_ElectronPhotonFourMomentumCorrection_resolutiontest.py
                    POST_EXEC_SCRIPT noerror.sh )
 endif()
-
-atlas_add_test( gt_ColumnarToolTests
-                SOURCES test/gt_ColumnarToolTests.cxx
-                INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-                LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib ElectronPhotonFourMomentumCorrectionLib
-                POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

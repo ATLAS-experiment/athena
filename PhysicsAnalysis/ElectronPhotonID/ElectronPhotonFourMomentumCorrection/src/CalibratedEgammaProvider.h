@@ -23,7 +23,7 @@
 #include "xAODEgamma/PhotonContainer.h" 
 #include "xAODEgamma/EgammaContainer.h" 
 #include "xAODEventInfo/EventInfo.h"
-namespace CP {
+namespace ADD_CMODE(CP) {
 
 class CalibratedEgammaProvider : public AthAlgorithm {
 
