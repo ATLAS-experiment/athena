@@ -210,6 +210,9 @@ def reweighter(process, weight_groups, powheg_LHE_output):
             for pattern in comment_patterns: # no whitespace needed in patterns here
                 repair_comment_lines(powheg_LHE_output, pattern) # the last pattern starts with a space
 
+        # Restore #emscales comment lines needed by PowhegHooksST, regardless of remove_oldStyle_rwt_comments
+        restore_emscales_comments(powheg_LHE_output)
+
     replacelist = []    
     # Rename all weights
     for weight in weight_list:
@@ -417,3 +420,74 @@ def repair_comment_lines(lheFile, pattern):
             logger.info("No line starting with '{}' was replaced in {} ({} were found) since none seems buggy".format(pattern, lheFile, n_found))
         elif n_added_back !=0:
             logger.info("{} line(s) starting with '{}' added back in {} using the corresponding line(s) from {}.before_reweighting".format(n_added_back, pattern, lheFile, lheFile))
+
+
+def restore_emscales_comments(lheFile):
+    """! Restore #emscales comment blocks per event from before_reweighting.
+
+    POWHEG XML reweighting omits #emscales comment lines written by POWHEG-BOX-RES.
+    This restores each event's #emscales block exactly before </event>.
+    """
+    before_file = "{}.before_reweighting".format(lheFile)
+    if not os.path.isfile(before_file):
+        return
+
+    emscales_per_event = []
+    current_event_scales = []
+    inside_event = False
+    has_emscales = False
+    with open(before_file, "r") as f_in:
+        for line in f_in:
+            if line.lstrip().startswith("<event"):
+                inside_event = True
+                current_event_scales = []
+            elif line.lstrip().startswith("</event>"):
+                if inside_event:
+                    emscales_per_event.append(current_event_scales)
+                    inside_event = False
+            elif inside_event and line.lstrip().startswith("#emscales"):
+                has_emscales = True
+                current_event_scales.append(line)
+
+    if not has_emscales or len(emscales_per_event) == 0:
+        return
+
+    backup_file = "{}.emscales_backup".format(lheFile)
+    shutil.move(lheFile, backup_file)
+    n_restored = 0
+    event_idx = 0
+
+    try:
+        with open(lheFile, "w") as f_out, open(backup_file, "r") as f_in:
+            for line in f_in:
+                if line.lstrip().startswith("#emscales"):
+                    # Discard any stale or duplicated #emscales lines emitted during POWHEG XML reweighting
+                    continue
+                if line.lstrip().startswith("</event>"):
+                    if event_idx < len(emscales_per_event):
+                        for scale_line in emscales_per_event[event_idx]:
+                            f_out.write(scale_line)
+                            n_restored += 1
+                        event_idx += 1
+                f_out.write(line)
+
+        # Strict validation: prevent silent event desynchronization
+        if event_idx != len(emscales_per_event):
+            raise RuntimeError(
+                "Event count mismatch while restoring #emscales in {}: "
+                "found {} events in reweighted file but {} in {}".format(
+                    lheFile, event_idx, len(emscales_per_event), before_file)
+            )
+
+        if os.path.isfile(backup_file):
+            os.remove(backup_file)
+
+    except Exception:
+        # Atomic rollback on any error
+        if os.path.isfile(backup_file):
+            shutil.move(backup_file, lheFile)
+        raise
+
+    logger.info("{} line(s) starting with '#emscales' added back in {} across {} events using {}".format(
+        n_restored, lheFile, event_idx, before_file))
+
