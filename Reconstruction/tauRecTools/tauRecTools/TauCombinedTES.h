@@ -30,9 +30,6 @@ public:
   virtual StatusCode executeTool(xAOD::TauJet& xTau,
 				 const EventContext& ctx) const override;
 
-  /** Check if MVA TES and CaloTES are compatible */
-  bool getTESCompatibility(const xAOD::TauJet& tau) const;
-
 private:
     
   Gaudi::Property<std::string> m_calFileName{this, "WeightFileName", ""};

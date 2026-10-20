@@ -2,7 +2,7 @@
 #include "DerivationFrameworkTau/TauMassDecorator.h"
 #include "DerivationFrameworkTau/TauIDDecoratorWrapper.h"
 #include "DerivationFrameworkTau/TauThinningTool.h"
-#include "DerivationFrameworkTau/TauCombinedTESWrapper.h"
+#include "DerivationFrameworkTau/TauResolutionToolWrapper.h"
 #include "DerivationFrameworkTau/DiTauChargeDecorator.h"
 #include "DerivationFrameworkTau/DiTauIDDecoratorWrapper.h"
 
@@ -12,7 +12,7 @@ DECLARE_COMPONENT( TauTruthMatchingWrapper )
 DECLARE_COMPONENT( TauMassDecorator ) 	
 DECLARE_COMPONENT( TauIDDecoratorWrapper )
 DECLARE_COMPONENT( TauThinningTool )
-DECLARE_COMPONENT( TauCombinedTESWrapper )	
+DECLARE_COMPONENT( TauResolutionToolWrapper )	
 DECLARE_COMPONENT( DiTauChargeDecorator )
 DECLARE_COMPONENT( DiTauIDDecoratorWrapper ) 
 

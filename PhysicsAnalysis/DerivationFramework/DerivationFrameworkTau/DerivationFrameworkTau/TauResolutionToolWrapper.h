@@ -3,30 +3,30 @@
 */
 
 ///////////////////////////////////////////////////////////////////
-// TauCombinedTESWrapper.h
+// TauResolutionToolWrapper.h
 ///////////////////////////////////////////////////////////////////
 
-#ifndef DERIVATIONFRAMEWORK_TAUCOMBINEDTESWRAPPER_H
-#define DERIVATIONFRAMEWORK_TAUCOMBINEDTESWRAPPER_H
+#ifndef DERIVATIONFRAMEWORK_TAURESOLUTIONTOOLWRAPPER_H
+#define DERIVATIONFRAMEWORK_TAURESOLUTIONTOOLWRAPPER_H
 
 #include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "DerivationFrameworkInterfaces/IAugmentationTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "tauRecTools/TauCombinedTES.h"
+#include "TauAnalysisTools/TauResolutionTool.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "xAODTau/TauJetContainer.h"
 #include <AsgDataHandles/WriteDecorHandle.h>
 
 /**
- * wrapper tool for tau truth matching
+ * wrapper tool for tau energy resolution
 */
 
 namespace DerivationFramework {
 
-  class TauCombinedTESWrapper : public extends<AthAlgTool, IAugmentationTool> {
+  class TauResolutionToolWrapper : public extends<AthAlgTool, IAugmentationTool> {
     public:
 
     using base_class::base_class;
@@ -38,7 +38,7 @@ namespace DerivationFramework {
       SG::ReadHandleKey<xAOD::TauJetContainer> m_tauKey
          {this, "TauContainerName", "TauJets", "ReadHandleKey for input TauJetContainer"};
 
-      ToolHandle < TauCombinedTES > m_tTauCombinedTESTool{this, "TauCombinedTESTool", "TauCombinedTESTool"};
+      ToolHandle < TauAnalysisTools::TauResolutionTool > m_tTauResolutionTool{this, "TauResolutionTool", "TauResolutionTool"};
 
       SG::WriteDecorHandleKey<xAOD::TauJetContainer> m_tesCompatibilityKey
          {this, "TESCompatibilityKey", m_tauKey, "TESCompatibility", "WriteDecorHandleKey for TESCompatibility decoration"};
