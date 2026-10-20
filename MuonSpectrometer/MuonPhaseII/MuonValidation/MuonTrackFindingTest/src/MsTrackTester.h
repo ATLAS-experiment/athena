@@ -64,7 +64,8 @@ namespace MuonValR4{
         /** @brief Returns the matched truth particle that is dumped in the tree. This method
          *         only works downstream the dumpTruthContent call
          *  @param part: Reference to the particle of interest */
-        const xAOD::TruthParticle* truthTreeParticle(const xAOD::IParticle& part) const;
+        const xAOD::TruthParticle* truthTreeParticle(const xAOD::IParticle& part,
+                                                     const EventContext& ctx) const;
         /** @brief Returns the collection of reconstructed segments that can be associated to the id track
          *         If the track is connected with a truth muon, the list of reconstructed segments matched
          *         to the truth muon is returned. Otherwise, the list of segments associated with the

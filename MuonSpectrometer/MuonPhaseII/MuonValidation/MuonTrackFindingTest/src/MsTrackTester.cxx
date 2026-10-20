@@ -404,7 +404,7 @@ namespace MuonValR4 {
         if (m_isMC) {
             BilateralLinkerBranch::connectCollections(m_idTracks, m_truthTrks, 
                 [this](const xAOD::IParticle* trk) { 
-                    return truthTreeParticle(*trk); 
+                    return truthTreeParticle(*trk, Gaudi::Hive::currentContext()); 
                 }, "truth", "IdTrack");
 
         }
@@ -478,12 +478,13 @@ namespace MuonValR4 {
         return StatusCode::SUCCESS;
     }
 
-    const xAOD::TruthParticle* MsTrackTester::truthTreeParticle(const xAOD::IParticle& part) const {
+    const xAOD::TruthParticle* MsTrackTester::truthTreeParticle(const xAOD::IParticle& part,
+                                                                const EventContext& ctx) const {
         const xAOD::TruthParticle* truthTrk = xAOD::TruthHelpers::getTruthParticle(part);
         if (!truthTrk || !m_truthTrks) {
             return nullptr;
         }
-        for (const xAOD::IParticle* thisPart : m_truthTrks->getCached()) {
+        for (const xAOD::IParticle* thisPart : m_truthTrks->getCached(ctx)) {
             if (thisPart == truthTrk || truthTrk ==  xAOD::TruthHelpers::getTruthParticle(*thisPart)) {
                 return dynamic_cast<const xAOD::TruthParticle*>(thisPart);
             }
@@ -504,7 +505,7 @@ namespace MuonValR4 {
         MsTrackTester::getAssociatedSegments(const xAOD::TrackParticle& idTrack,
                                              const EventContext& ctx) const {
         std::vector<const xAOD::MuonSegment*> compatibleSegs{};
-        if (const xAOD::TruthParticle* truthPart = truthTreeParticle(idTrack); truthPart != nullptr) {
+        if (const xAOD::TruthParticle* truthPart = truthTreeParticle(idTrack, ctx); truthPart != nullptr) {
             std::vector<const xAOD::MuonSegment*> truthSegs = getTruthSegments(*truthPart);
             const xAOD::MuonSegmentContainer* recoSegs{nullptr};
             SG::get(recoSegs, m_recoSegmentKey, ctx).ignore();
@@ -746,10 +747,10 @@ namespace MuonValR4 {
             m_truthMuToSeedCounter[nT];
             m_truthMuRecoSegLinks[nT];
         }
-
         for (const xAOD::TruthParticle* truth : *truthMuons) {
             ATH_MSG_DEBUG("Truth muon: pT: "<<(truth->pt() *MeVtoGeV)
-                <<", eta: "<<truth->eta()<<", phi: "<<toDeg(truth->phi())<<", q: "<<truth->charge());
+                <<", eta: "<<truth->eta()<<", phi: "<<toDeg(truth->phi())<<", q: "<<truth->charge()
+                <<", uuid: "<<HepMC::uniqueID(truth));
             m_truthTrks->push_back(*truth);
         }
         
