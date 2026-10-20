@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TgcL0SectorLogicWordEncoder.h"
+#include "SectorLogicWordEncoder.h"
 
 #include <cstdlib>
 #include <iostream>
@@ -42,8 +42,8 @@ int main() {
   candidate->setGoodMagneticField(true);
   candidate->setTcId(5U);
 
-  const L1Muon::TgcL0SectorLogicWords words =
-      L1Muon::TgcL0SectorLogicWordEncoder::encode(*candidate);
+  const L1Muon::L1TGC::SectorLogicWords words =
+      L1Muon::L1TGC::SectorLogicWordEncoder::encode(*candidate);
 
   bool success = true;
   success &= check(words.candWord == 0x55ea912fU, "candidate word");
