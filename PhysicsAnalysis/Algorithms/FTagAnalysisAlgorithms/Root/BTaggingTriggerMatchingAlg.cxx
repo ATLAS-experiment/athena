@@ -15,6 +15,31 @@
 #include "TrigAnalysisHelpers/FeatureRequestDescriptor.h"
 #include "xAODBTagging/BTagging.h"
 
+#include <algorithm>
+#include <cctype>
+#include <cmath>
+
+namespace
+{
+  /// leg part with an online b-tagging requirement, e.g. "bmv2c2060" but not "boffperf"
+  bool isOnlineBTagPart(const std::string& part)
+  {
+    return part.starts_with('b') && part != "boffperf" && part != "bperf";
+  }
+
+  /// Run 2 GSC threshold leg part, e.g. "gsc55"
+  bool isGSCPart(const std::string& part)
+  {
+    return part.size() > 3 && part.starts_with("gsc") &&
+      std::all_of(part.begin() + 3, part.end(),
+                  [](unsigned char c) { return std::isdigit(c); });
+  }
+
+  /// maximum distance between two copies of the same HLT jet, as used by
+  /// the b-jet trigger emulation to associate the Run 2 HLT jet collections
+  constexpr float sameHLTJetDR = 0.05;
+}
+
 //
 // method implementations
 //
@@ -51,6 +76,37 @@ namespace CP
 
     }
 
+    // the jet legs of the chain do not change from event to event
+    int ileg = 0;
+    for (const ChainNameParser::LegInfo& legInfo :
+           ChainNameParser::HLTChainInfo(m_trigger.value())) {
+      if (legInfo.signature == "j") {
+        JetLegInfo leg;
+        leg.index = ileg;
+        leg.name = legInfo.legName();
+        leg.threshold = legInfo.threshold;
+        for (const std::string& part : legInfo.legParts) {
+          if (isOnlineBTagPart(part))
+            leg.isBTagged = true;
+          // the threshold of Run 2 GSC legs applies to the GSC-calibrated jets
+          else if (!m_useRun3TriggerEDM.value() && isGSCPart(part))
+            leg.threshold = std::stoi(part.substr(3));
+        }
+        ANA_MSG_DEBUG("Jet leg " << leg.index << ": " << leg.name
+                      << " threshold: " << leg.threshold << " GeV"
+                      << " b-tagged: " << leg.isBTagged);
+        m_jetLegs.push_back(std::move(leg));
+      }
+      ileg++;
+    }
+
+    if (!m_useRun3TriggerEDM.value() &&
+        std::none_of(m_jetLegs.begin(), m_jetLegs.end(),
+                     [](const JetLegInfo& leg) { return leg.isBTagged; })) {
+      ANA_MSG_WARNING("No b-tagged jet leg found in " << m_trigger.value()
+                      << ": no jet will pass the online b-tagging");
+    }
+
     return StatusCode::SUCCESS;
   }
 
@@ -60,27 +116,59 @@ namespace CP
   execute (const EventContext& ctx)
   {
 
-    // the trigger decision and features do not depend on the offline jets
+    // the trigger decision and the HLT jets do not depend on the offline jets;
+    // no jet is matched if the chain did not fire
+    const bool isTrigPassed = m_trigDecTool->isPassed(m_trigger.value());
+
+    // Run 3: HLT jets of each leg from the trigger navigation
     std::vector<HLTJetLeg> jetLegs;
-    if (m_trigDecTool->isPassed(m_trigger.value())) {
+    if (m_useRun3TriggerEDM && isTrigPassed) {
       Trig::FeatureRequestDescriptor frd;
       frd.setChainGroup(m_trigger.value());
 
-      int ileg = 0;
-      for (const ChainNameParser::LegInfo& legInfo :
-             ChainNameParser::HLTChainInfo(m_trigger)){
-        if (legInfo.signature == "j"){
-          ATH_MSG_VERBOSE(" Leg" << ileg << ": "
-            << " " << legInfo.legName() << " "
-            << legInfo.type() << " " << legInfo.signature
-            << " " << legInfo.threshold);
+      for (const JetLegInfo& leg : m_jetLegs) {
+        ATH_MSG_VERBOSE(" Leg" << leg.index << ": " << leg.name
+                        << " " << leg.threshold);
 
-          frd.setRestrictRequestToLeg(ileg);
-          jetLegs.push_back({legInfo.threshold,
-                             m_trigDecTool->features<xAOD::IParticleContainer>(frd)});
-        }
-        ileg++;
+        frd.setRestrictRequestToLeg(leg.index);
+        jetLegs.push_back({leg.threshold,
+                           m_trigDecTool->features<xAOD::IParticleContainer>(frd)});
       }
+    }
+
+    // Run 2: the trigger navigation is not available, the b-tagged legs are emulated
+    const xAOD::JetContainer* hltJetsRun2 = nullptr;
+    std::vector<const xAOD::Jet*> hltBTaggedJets;
+    if (!m_useRun3TriggerEDM && isTrigPassed) {
+      SG::ReadHandle<xAOD::JetContainer> hltJets(m_bjetInput, ctx);
+      if (!hltJets.isValid()) {
+        ANA_MSG_ERROR ("Failed to retrieve HLT jet container " << m_bjetInput.key());
+        return StatusCode::FAILURE;
+      }
+      hltJetsRun2 = hltJets.cptr();
+
+      const auto emulatedJets = m_emulationTool->getEmulatedJets(m_trigger.value());
+      for (const JetLegInfo& leg : m_jetLegs) {
+        if (!leg.isBTagged)
+          continue;
+        const auto emulated = emulatedJets.find(leg.name);
+        if (emulated == emulatedJets.end()) {
+          ANA_MSG_DEBUG(" No emulated jets for " << leg.name);
+          continue;
+        }
+        ANA_MSG_DEBUG(" Emulated jets for " << leg.name << ": " << emulated->second.size());
+        // the emulated jets of a b-tagged leg passed its online b-tagging requirement
+        for (const auto& [hlt_jet, passBtag] : emulated->second) {
+          ATH_MSG_VERBOSE("  pt: " << hlt_jet->pt()
+                          << " eta: " << hlt_jet->eta()
+                          << " phi: " << hlt_jet->phi()
+                          << " passBtag: " << passBtag);
+          if (passBtag)
+            hltBTaggedJets.push_back(hlt_jet);
+        }
+      }
+      ATH_MSG_VERBOSE("Num HLT-jets: " << hltJetsRun2->size()
+                      << " passing the online b-tagging: " << hltBTaggedJets.size());
     }
 
     for (const auto& sys : m_systematicsList.systematicsVector())
@@ -123,58 +211,38 @@ namespace CP
           m_bTagMatchingDecoration.set (*jet, passTrigger, sys);
         }
       } else {
-        std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> emulatedJets = m_emulationTool->getEmulatedJets(m_trigger);
-
-        std::vector<std::tuple<const xAOD::Jet *, bool, bool>>  hlt_bjets;
-
-        ATH_MSG_VERBOSE("Preparing HLT-jets "
-            << m_trigDecTool << " trigger -> " << m_trigger);
-
-        int ileg = 0;
-        for (const ChainNameParser::LegInfo &legInfo :
-            ChainNameParser::HLTChainInfo(m_trigger))
-        {
-          if (legInfo.signature == "j")
-          {
-            ATH_MSG_VERBOSE(" Leg" << ileg++ << ": "
-                << " " << legInfo.legName() << " "
-                << legInfo.type() << " " << legInfo.signature
-                << " " << legInfo.threshold);
-            auto hlt_emulated_jets = emulatedJets[legInfo.legName()]; // use pre-fetched emulation results
-            ATH_MSG_DEBUG(" Emulated jets for " << legInfo.legName() << ": " << hlt_emulated_jets.size());
-
-            for (const auto& [hlt_jet, passBtag]: hlt_emulated_jets) {
-              bool matched = false;
-              if (hlt_jet->pt() > legInfo.threshold &&  abs( hlt_jet->eta()) < m_etamax.value())
-                matched = true;
-              ATH_MSG_VERBOSE("  pt: " << hlt_jet->pt()
-                  << " eta: " << hlt_jet->eta()
-                  << " phi: " << hlt_jet->phi()
-                  << " passBtag: " << passBtag
-                  << " matched: " << matched);
-              bool btag = false;
-              if(legInfo.legName().find("mv2c10") != std::string::npos)
-                btag = passBtag;
-
-              hlt_bjets.push_back(std::make_tuple(hlt_jet, btag, matched));
-            }
-          }
-        }
-        ATH_MSG_VERBOSE("Num HLT-jets : " << hlt_bjets.size());
-
         for (const xAOD::Jet* jet : *jets) {
           bool bestHLTJetBTagPass = false;
           bool bestHLTJetMatched = false;
           float minDR = 0.4;
           const xAOD::Jet* bestHLTJet = nullptr;
-          if (m_preselection.getBool(*jet, sys)) {
-            for (const auto& [hlt_bjet, passBtag, matched]: hlt_bjets) {
-              float dR = jet->p4().DeltaR(hlt_bjet->p4());
+          if (hltJetsRun2 && m_preselection.getBool(*jet, sys)) {
+            // closest HLT jet on which the online b-tagging ran
+            for (const xAOD::Jet* hlt_jet : *hltJetsRun2) {
+              float dR = jet->p4().DeltaR(hlt_jet->p4());
               if (dR < minDR) {
                 minDR = dR;
-                bestHLTJet = hlt_bjet;
-                bestHLTJetBTagPass = passBtag;
-                bestHLTJetMatched = matched;
+                bestHLTJet = hlt_jet;
+              }
+            }
+          }
+          if (bestHLTJet) {
+            // the trigger looked at this jet if it passes the cuts of one of the jet legs;
+            // the Run 2 leg thresholds from the chain name are on the transverse energy, in GeV
+            if (std::abs(bestHLTJet->eta()) < m_etamax.value()) {
+              for (const JetLegInfo& leg : m_jetLegs) {
+                if (bestHLTJet->p4().Et() > 1e3 * leg.threshold) {
+                  bestHLTJetMatched = true;
+                  break;
+                }
+              }
+            }
+            // the jet passed the online b-tagging if it passed one of the b-tagged legs;
+            // compare kinematics, as the container may hold several copies of the same HLT jet
+            for (const xAOD::Jet* hlt_bjet : hltBTaggedJets) {
+              if (bestHLTJet->p4().DeltaR(hlt_bjet->p4()) < sameHLTJetDR) {
+                bestHLTJetBTagPass = true;
+                break;
               }
             }
           }

@@ -21,6 +21,7 @@
 #include <TrigDecisionTool/TrigDecisionTool.h>
 #include <TrigCompositeUtils/LinkInfo.h>
 
+#include <string>
 #include <unordered_map>
 #include <vector>
 #include <TrigBtagEmulationTool/ITrigBtagEmulationTool.h>
@@ -76,6 +77,15 @@ namespace CP
         SysWriteDecorHandle<char> m_bTagMatchingDecoration {
         this, "bTagMatchingDecoration", "", "the decoration for offline jet  matched to HLT b-tag"};
 
+        /// \brief the jet legs of the trigger chain, parsed from the chain name
+        struct JetLegInfo {
+            int index = 0;          ///< leg index in the chain (counting all legs)
+            std::string name;       ///< leg name, as used by the emulation tool
+            int threshold = 0;      ///< threshold in GeV (GSC threshold for Run 2 GSC legs)
+            bool isBTagged = false; ///< the leg has an online b-tagging requirement
+        };
+        std::vector<JetLegInfo> m_jetLegs;
+
         /// \brief the jet legs of the trigger chain and their features in the current event
         struct HLTJetLeg {
             int threshold = 0;
@@ -93,8 +103,9 @@ namespace CP
 
         StatusCode hasBTagDeco(const xAOD::IParticle* jet, bool& hasBtagDeco) const;
         
-        SG::ReadHandleKey<xAOD::JetContainer> m_bjetInput {this, "HLT_BJets", 
-        "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets", "Input b-Jet Collection Key, retrieved from reconstructed jets"};   
+        SG::ReadHandleKey<xAOD::JetContainer> m_bjetInput {this, "HLT_BJets",
+        "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_bJets", "HLT jets on which the online b-tagging ran "
+        "(Run 2: HLT_xAOD__JetContainer_SplitJet or HLT_xAOD__JetContainer_GSCJet)"};
 
         std::vector<SG::ConstAccessor<float>> m_ftagRun3TriggerDecorAccessors;
 
