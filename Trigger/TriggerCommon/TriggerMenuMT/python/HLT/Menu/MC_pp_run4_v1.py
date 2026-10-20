@@ -262,10 +262,15 @@ def addMCSignatures(chains):
     ]
 
     chainsMC['Tau'] = [
+        ChainProp(name='EF_tau80_mediumGNTau_L1eTAU80', groups=PrimaryPhIGroup+SingleTauGroup),
+
         ChainProp(name='EF_tau140_mediumGNTau_L1eTAU120', groups=PrimaryPhIGroup+SingleTauGroup),
         ChainProp(name="EF_tau160_mediumGNTau_L1eTAU120", groups=PrimaryPhIGroup+SingleTauGroup, monGroups=['tauMon:online','tauMon:t0']),
         ChainProp(name='EF_tau180_mediumGNTau_L1eTAU120', groups=PrimaryPhIGroup+SingleTauGroup),
         ChainProp(name='EF_tau200_mediumGNTau_L1eTAU120', groups=PrimaryPhIGroup+SingleTauGroup),
+
+        ChainProp(name='EF_tau20_mediumGNTau_L1cTAU20M', groups=PrimaryPhIGroup+SingleTauGroup),
+        ChainProp(name='EF_tau20_mediumGNTauDev1_L1cTAU20M', groups=PrimaryPhIGroup+SingleTauGroup),
 
         ChainProp(name='EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55', l1SeedThresholds=['cTAU30M','cTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:online','tauMon:shifter']), 
         ChainProp(name='EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25', l1SeedThresholds=['cTAU30M','cTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:t0']), 
@@ -282,6 +287,10 @@ def addMCSignatures(chains):
         # Support
         ChainProp(name="EF_tau20_idperf_tracktwoMVA_L1eTAU12", groups=SingleTauGroup+SupportPhIGroup, monGroups=['tauMon:online','tauMon:shifter','idMon:shifter']),
         ChainProp(name="EF_tau25_idperf_tracktwoMVA_L1cTAU20M", groups=SingleTauGroup+SupportPhIGroup, monGroups=['tauMon:online','tauMon:shifter','idMon:shifter']), #ATR-27013
+        
+        ChainProp(name="EF_tau20_perf_L1cTAU20M", groups=SingleTauGroup+SupportPhIGroup, monGroups=['tauMon:online', 'tauMon:shifter', 'idMon:shifter']),
+        ChainProp(name='EF_tau160_perf_L1eTAU120', groups=SingleTauGroup+SupportPhIGroup, monGroups=['tauMon:online', 'tauMon:shifter', 'idMon:shifter']),
+        ChainProp(name='EF_tau160_idperf_L1eTAU120', groups=SingleTauGroup+SupportPhIGroup, monGroups=['tauMon:online', 'tauMon:shifter', 'idMon:shifter']),
 
         # Phase-II di-tau
         ChainProp(name='EF_tau30_mediumGNTau_tau20_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M', l1SeedThresholds=['cTAU30M', 'cTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:online','tauMon:shifter']),
@@ -756,6 +765,8 @@ def addMCSignatures(chains):
 
         # Support
         ChainProp(name='EF_mu24_ivarmedium_tau25_idperf_tracktwoMVA_probe_L1cTAU20M_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['idMon:t0']),
+        ChainProp(name='EF_mu24_ivarmedium_tau25_mediumGNTau_probe_L1eTAU20_03dRAB_L1MU14FCH', l1SeedThresholds=['MU14FCH','PROBEeTAU20'], groups=TagAndProbePhIGroup+SingleMuonGroup, monGroups=['idMon:t0']),
+        ChainProp(name='EF_e26_lhtight_ivarloose_tau25_mediumGNTau_probe_L1cTAU20M_03dRAB_L1eEM26M', l1SeedThresholds=['eEM26M','PROBEcTAU20M'], groups=TagAndProbePhIGroup+SingleElectronGroup, monGroups=['tauMon:t0']),
 
         # Phase-II e+mu
         ChainProp(name='EF_e10_lhmedium_mu10_L1eEM10L_MU8F', l1SeedThresholds=['eEM10L','MU8F'], groups=PrimaryPhIGroup+EgammaMuonGroup),
