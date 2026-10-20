@@ -45,16 +45,12 @@ atlas_add_poolcnv_library( TrigEventAthenaPoolPoolCnv
          TrigCaloEvent/RingerRingsContainer.h TrigCaloEvent/TrigRNNOutput.h
          TrigCaloEvent/TrigRNNOutputContainer.h TrigCaloEvent/TrigCaloCluster.h
          TrigCaloEvent/TrigCaloClusterContainer.h
-         TrigMonitoringEvent/TrigMonEvent.h
-         TrigMonitoringEvent/TrigMonEventCollection.h
-         TrigMonitoringEvent/TrigMonConfig.h
-         TrigMonitoringEvent/TrigMonConfigCollection.h 
    TYPES_WITH_NAMESPACE TrigDec::TrigDecision
    LINK_LIBRARIES AthenaPoolUtilities GaudiKernel AthenaPoolCnvSvcLib
                   RootConversions TrigCaloEvent
                   TrigCaloEventTPCnv
                   TrigDecisionEvent TrigDecisionEventTPCnv TrigInDetEvent
                   TrigInDetEventTPCnv
-                  TrigMonitoringEvent TrigMonitoringEventTPCnv TrigMuonEvent
+                  TrigMuonEvent
                   TrigMuonEventTPCnv )
 

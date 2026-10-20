@@ -148,8 +148,6 @@ TriggerHLTList = [
     ('TrigRoiDescriptor#HLT_secondaryRoI_HLT',                             'BS ESD AODFULL AODSLIM',  'Steer'),
     ('TrigOperationalInfo#HLT_OPI_HLT',                                    'BS',                      'Steer'),
     ('TrigOperationalInfo#HLT_EXPRESS_OPI_HLT',                            'BS ESD',                  'Steer'),
-    ('TrigMonConfig#HLT_OPI_HLT_monitoring_config',                        'BS',                      'Steer'),
-    ('TrigMonEvent#HLT_OPI_HLT_monitoring_event',                          'BS',                      'Steer'), 
 
     ('xAOD::TrigCompositeContainer#HLT_ExpressInfo_HLT',                   'BS ESD AODFULL AODSLIM AODVERYSLIM AODBLSSLIM',  'Steer'),  
     ('xAOD::TrigCompositeAuxContainer#HLT_ExpressInfo_HLTAux.',            'BS ESD AODFULL AODSLIM AODVERYSLIM AODBLSSLIM',  'Steer'),  
@@ -780,8 +778,6 @@ TriggerHLTList = [
    ('TrigVertexCollection#HLT_TrigBeamSpotVertex',                       'BS ESD AODFULL AODSLIM',  'Bjet'),
    ('TrigVertexCollection#HLT_TrigBeamSpotVertex_SiTrack',               '',                        'Bjet'),
    ('TrigOperationalInfo#HLT_OPI_L2',                                    'BS',                      'Steer'),
-   ('TrigMonConfig#HLT_OPI_L2_monitoring_config',                        'BS',                      'Steer'),
-   ('TrigMonEvent#HLT_OPI_L2_monitoring_event',                          'BS',                      'Steer'),
    ('TrigInDetTrackCollection#HLT_TrigL2SiTrackFinder_Muon' ,            '',  'Muon'),
    ('TrigInDetTrackCollection#HLT_TrigL2SiTrackFinder_eGamma' ,          '',                        'Egamma'),
    ('TrigInDetTrackCollection#HLT_TrigL2SiTrackFinder_eGamma' ,          '',                        'Egamma'),
@@ -885,8 +881,6 @@ TriggerHLTList = [
     ('VxContainer#HLT_ConversionVx',                                      '',                        'Bjet'),
     ('TrigOperationalInfo#HLT_OPI_EF',                                    'BS',                      'Steer'),
     ('TrigOperationalInfo#HLT_EXPRESS_OPI_EF',                            'BS',                      'Steer'),
-    ('TrigMonConfig#HLT_OPI_EF_monitoring_config',                        'BS',                      'Steer'),
-    ('TrigMonEvent#HLT_OPI_EF_monitoring_event',                          'BS',                      'Steer'),
     ('CaloCellContainer#HLT_TrigCaloCellMaker_eGamma',                    'BS ESD',                  'Calo'), 
     ('CaloCellContainer#HLT_TrigCaloCellMaker_tau',                       'BS ESD',                  'Calo'),  
     ('CaloCellContainer#HLT_TrigCaloCellLoF',                             'BS ESD',                  'Calo'),        # category?  
@@ -1030,7 +1024,6 @@ EDMDetails = {}
 
 EDMDetails[ "TrigRoiDescriptor" ]         = {'persistent':"TrigRoiDescriptorCollection_p3",     'typealias':'Roi', 'collection':'TrigRoiDescriptorCollection' }
 EDMDetails[ "TrigOperationalInfo" ]       = {'persistent':"TrigOperationalInfoCollection_tlp1",   'typealias':'', 'collection':'TrigOperationalInfoCollection' }
-EDMDetails[ "TrigMonConfig" ]             = {'persistent':"TrigMonConfigCollection_tlp1",         'typealias':'', 'collection':'TrigMonConfigCollection' }
 EDMDetails[ "TrigMonEvent" ]              = {'persistent':"TrigMonEventCollection_tlp1",          'typealias':'', 'collection':'TrigMonEventCollection' }
 EDMDetails[ "TrigInDetTrackCollection" ]  = {'persistent':"TrigInDetTrackCollection_tlp2",        'typealias':'InDetTrk' }
 EDMDetails[ "MuonFeature" ]               = {'persistent':"MuonFeatureContainer_p3",            'typealias':'Mu', 'collection':'MuonFeatureContainer'}
@@ -1264,16 +1257,15 @@ EDMDetails['xAOD::CMXRoIAuxContainer']                    = {'persistent': "", '
 EDMLibraries = [ 'TrigSteeringEvent', 'TrigMuonEvent',
                  'TrigCaloEvent',
                  'TrigInDetEvent',
-                 'TrigDecisionEvent', 'TrigMonitoringEvent',
+                 'TrigDecisionEvent',
                  'TrigTopoEvent',
-                 'TrigMonitoringEventTPCnv',   'RecTPCnv',
+                 'RecTPCnv',
                  'TrigCaloEventTPCnv',
                  'TrigDecisionEventTPCnv',     'TrigInDetEventTPCnv',
                  'TrigMuonEventTPCnv',
                  'TrigSteeringEventTPCnv',
                  'TrigTopoEventTPCnv',
                  'RecTPCnvDict',
-                 'TrigMonitoringEventTPCnvDict',
                  'OLD_RecTPCnvDict',
                  'xAODCaloEvent', 'xAODEgamma', 'xAODTracking', 'xAODMuon', 'xAODTau', 'xAODJet',
                  'xAODTrigBphys', 'xAODTrigMissingET', 'xAODTrigEgamma', 'xAODTrigMuon', 'xAODTrigCalo',

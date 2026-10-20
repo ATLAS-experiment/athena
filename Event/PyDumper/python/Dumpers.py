@@ -1502,121 +1502,6 @@ def dump_LArRawChannel (p, f):
     return
 
 
-def dump_TrigMonROB (p, f):
-    fprint (f, [(x.getROBId(), x.isStatusOk(), x.isStatusPrefetched(),
-                 x.getROBSize(), x.getEncodedState(), x.getHistory(),
-                 x.getStatus()) for x in p.getData()],
-            list(p.getWord()))
-    return
-
-def dump_TrigMonRoi (p, f):
-    fprint (f, list(p.getWord()), list(p.getVarKey()), list(p.getVarVal()))
-    return
-
-def dump_TrigMonAlg (p, f):
-    fprint (f, [ord(x) for x in p.getByte()], list(p.getWord()))
-    return
-
-def dump_TrigMonSeq (p, f):
-    fprint (f, p.getEncoded(), list(p.getVarKey()), list(p.getVarVal()))
-    for a in p.getAlg():
-        fprint (f, '\n        ')
-        dump_TrigMonAlg (a, f)
-    return
-
-def dump_TrigMonTE (p, f):
-    fprint (f, p.getId(),
-            p.getIndex(), p.getType(),
-            p.getActiveState(), p.getErrorState(), p.isTerminalNode(),
-            p.isOutputL2Node(), p.isOutputEFNode(), p.isTopologicalTE(),
-            list(p.getChildIndex()), list (p.getParentIndex()),
-            list(p.getRoiId()), list(p.getClid()),
-            list(p.getVarKey()), list(p.getVarVal()))
-    return
-
-def dump_TrigMonEvent (p, f):
-    fprint (f, 'r/e/lb/bc', p.getRun(), p.getEvent(), p.getLumi(), p.getBunchId(),
-            'tm', p.getSec(), p.getNanoSec(), 'addl', list(p.word()))
-    fprint (f, '\n    robs')
-    for r in p.getROBVec():
-        fprint (f, '\n      ')
-        dump_TrigMonROB (r, f)
-    fprint (f, '\n    rois')
-    for r in p.getRoiVec():
-        fprint (f, '\n      ')
-        dump_TrigMonRoi (r, f)
-    fprint (f, '\n    seq2')
-    for r in p.getSeqVec():
-        fprint (f, '\n      ')
-        dump_TrigMonSeq (r, f)
-    fprint (f, '\n    tes')
-    for r in p.getTEVec():
-        fprint (f, '\n      ')
-        dump_TrigMonTE (r, f)
-    fprint (f, '\n    l1', list(p.getL1Item()))
-    fprint (f, '\n    hlt', list(p.getChain()))
-    fprint (f, '\n    key', list(p.getVarKey()))
-    fprint (f, '\n    val', list(p.getVarVal()))
-    return
-
-
-def dump_TrigConfSig (p, f):
-    fprint (f, p.getCounter(), p.getLogic(), p.getLabel(),
-            list(p.getOutputTEs()))
-    return
-
-def dump_TrigConfChain (p, f):
-    fprint (f, p.getName(), p.getChainName(), p.getLowerName(),
-            p.getId(), p.getCounter(),
-            p.getLowerId(), p.getLowerCounter(),
-            p.getLevelId(), p.getPrescale(), p.getPassThrough())
-    fprint (f, '\n      lower ids', list(p.getLowerIds()))
-    fprint (f, '\n      stream ps', list(p.getStreamPS()))
-    fprint (f, '\n      stream name', list(p.getStream()))
-    fprint (f, '\n      group', list(p.getGroup()))
-    fprint (f, '\n      EB hypo', list(p.getEBHypo()))
-    fprint (f, '\n      sigs')
-    for s in p.getSignature():
-        fprint (f, '\n        ')
-        dump_TrigConfSig (s, f)
-        
-    return
-
-def dump_TrigConfAlg (p, f):
-    ss = ROOT.ostringstream()
-    p.print(ss)
-    fprint (f, p.index(), ss.str())
-    return
-
-def dump_TrigConfSeq (p, f):
-    fprint (f, p.getName(), p.getIndex(), p.getId(), p.getTopoTE())
-    fprint (f, '\n      algs')
-    for a in p.getAlg():
-        fprint (f, '\n        ')
-        dump_TrigConfAlg (a, f)
-    fprint (f, '\n      input TE', list(p.getInputTEs()))
-    return
-
-def dump_TrigMonConfig (p, f):
-    fprint (f, 'r/e/lb', p.getRun(), p.getEvent(), p.getLumi(),
-            'tm', p.getSec(), p.getNanoSec(),
-            'keys', p.getMasterKey(), p.getHLTPrescaleKey(),
-            p.getLVL1PrescaleKey())
-    fprint (f, '\n    chains')
-    for r in p.getChainVec():
-        fprint (f, '\n      ')
-        dump_TrigConfChain (r, f)
-    fprint (f, '\n    seqs')
-    for r in p.getSeqVec():
-        fprint (f, '\n      ')
-        dump_TrigMonSeq (r, f)
-    fprint (f, '\n    key', list(p.getVarKey()))
-    fprint (f, '\n    val', list(p.getVarVal()))
-    fprint (f, '\n    pairkey', list(p.getPairKey()))
-    fprint (f, '\n    pairval', list(p.getPairVal()))
-    return
-
-
 @nolist
 def dump_BunchConfKey (p, f):
     fprint (f, p.id())
@@ -5126,8 +5011,6 @@ dumpspecs = [
     ['TRT_BSErrContainer',                   dump_TRT_BSErrContainer],
     ['LArFebHeaderContainer',                dump_LArFebHeader],
     ['LArRawChannelContainer',               dump_LArRawChannel],
-    ['TrigMonEventCollection',               dump_TrigMonEvent],
-    ['TrigMonConfigCollection',              dump_TrigMonConfig],
     ['LVL1CTP::Lvl1Result',                  dump_Lvl1Result],
     ['AFP_RawContainer',                     dump_AFP_RawContainer],
     ['ALFA_RawDataContainer',                dump_ALFA_RawDataContainer],
