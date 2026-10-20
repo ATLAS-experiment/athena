@@ -39,10 +39,12 @@ foreach (CMODE_NAME CMODE_SUFFIX IN ZIP_LISTS COLUMNAR_MODE_NAME_LIST COLUMNAR_M
 
 endforeach()
 
-atlas_add_test( gt_MultiToolTest
+# FIX ME: This should switch to the dual-library mechanism once the base
+# libraries are
+atlas_add_test( gt_MultiToolTest${CMODE_SUFFIX}
                 SOURCES test/gt_MultiToolTest.cxx
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib
-                               ElectronPhotonFourMomentumCorrectionLib
-                               ElectronEfficiencyCorrectionLib
+                              ElectronPhotonFourMomentumCorrectionLib
+                              ElectronEfficiencyCorrectionLib
                 POST_EXEC_SCRIPT noerror.sh )

@@ -757,7 +757,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgReco' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
-                                   'AsgElectronEfficiencyCorrectionTool' )
+                                   'CP::AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_reco_effSF' + selectionPostfix + '_%SYS%'
             alg.efficiencyCorrectionTool.MapFilePath = map_file
             alg.efficiencyCorrectionTool.RecoKey = "Reconstruction"
@@ -797,7 +797,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgID' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
-                                   'AsgElectronEfficiencyCorrectionTool' )
+                                   'CP::AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_id_effSF' + selectionPostfix + '_%SYS%'
             alg.efficiencyCorrectionTool.MapFilePath = map_file
             alg.efficiencyCorrectionTool.IdKey = self.identificationWP
@@ -826,7 +826,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgIsol' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
-                                   'AsgElectronEfficiencyCorrectionTool' )
+                                   'CP::AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_isol_effSF' + selectionPostfix + '_%SYS%'
             alg.efficiencyCorrectionTool.MapFilePath = map_file
             alg.efficiencyCorrectionTool.IdKey = self.identificationWP
@@ -866,7 +866,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::ElectronEfficiencyCorrectionAlg',
                                           'ElectronEfficiencyCorrectionAlgEcids' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
-                                   'AsgElectronEfficiencyCorrectionTool' )
+                                   'CP::AsgElectronEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'el_ecids_effSF' + selectionPostfix + '_%SYS%'
             if self.isolationWP != 'Tight_VarRad':
                 raise ValueError('ECIDS SFs are supported only for Tight_VarRad isolation.')
@@ -1092,7 +1092,7 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                                                  'EleTrigEfficiencyCorrectionsAlg' + deco +
                                                  '_' + label)
                     config.addPrivateTool( 'efficiencyCorrectionTool',
-                                           'AsgElectronEfficiencyCorrectionTool' )
+                                           'CP::AsgElectronEfficiencyCorrectionTool' )
 
                     # Reproduce config from TrigGlobalEfficiencyAlg
                     alg.efficiencyCorrectionTool.MapFilePath = map_Run3 if config.geometry() is LHCPeriod.Run3 else map_Run2

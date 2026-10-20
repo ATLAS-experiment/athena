@@ -17,10 +17,11 @@
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "AsgTools/PropertyWrapper.h"
+#include "ColumnarMode/ColumnarMode.h"
 //
 #include "ElectronEfficiencyCorrection/TElectronEfficiencyCorrectionTool.h"
 #include "xAODEgamma/ElectronContainer.h"
-namespace CP {
+namespace ADD_CMODE(CP) {
 class TElectronTestAlg : public EL::AnaReentrantAlgorithm {
 
  public:
@@ -90,6 +91,6 @@ class TElectronTestAlg : public EL::AnaReentrantAlgorithm {
   SG::WriteDecorHandleKey<xAOD::ElectronContainer> m_toys{this, "DoNotSet_",
                                                           "Electrons.toys", ""};
 };
-}  // namespace CP
+}  // namespace ADD_CMODE(CP)
 #endif
 

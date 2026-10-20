@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
             "rel21.2/Summer2018_Rec_v1/map1.txt";
     for(int j=0;j<2;++j) /// two instances: 0 -> MC efficiencies, 1 -> SFs
     {
-        string name = "AsgPhotonEfficiencyCorrectionTool/" + std::string(j? "PhTrigEff" : "PhTrigSF");
+        string name = "CP::AsgPhotonEfficiencyCorrectionTool/" + std::string(j? "PhTrigEff" : "PhTrigSF");
         auto t = factory.emplace(factory.end(), name);
         t->setProperty("MapFilePath", mapPath).ignore();
         t->setProperty("TriggerKey", string(j?"":"Eff_") + "DI_PH_2015_2016_g20_tight_2016_g22_tight_2017_2018_g20_tight_icalovloose_L1EM15VHI").ignore();

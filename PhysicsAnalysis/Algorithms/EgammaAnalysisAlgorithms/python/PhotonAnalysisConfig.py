@@ -568,7 +568,7 @@ class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',
                                           'PhotonEfficiencyCorrectionAlgID' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
-                                   'AsgPhotonEfficiencyCorrectionTool' )
+                                   'CP::AsgPhotonEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'ph_id_effSF' + postfix + '_%SYS%'
             if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = (
@@ -592,7 +592,7 @@ class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
             alg = config.createAlgorithm( 'CP::PhotonEfficiencyCorrectionAlg',
                                           'PhotonEfficiencyCorrectionAlgIsol' )
             config.addPrivateTool( 'efficiencyCorrectionTool',
-                                   'AsgPhotonEfficiencyCorrectionTool' )
+                                   'CP::AsgPhotonEfficiencyCorrectionTool' )
             alg.scaleFactorDecoration = 'ph_isol_effSF' + postfix + '_%SYS%'
             if config.dataType() is DataType.FastSim:
                 alg.efficiencyCorrectionTool.ForceDataType = (

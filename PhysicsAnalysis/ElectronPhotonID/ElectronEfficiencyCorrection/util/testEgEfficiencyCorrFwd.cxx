@@ -70,7 +70,7 @@ test1(int argc, char* argv[])
   }; // we don't support keys for fwd electrons, yet. Our latest file is 2012,
      // still
   asg::StandaloneToolHandle<IAsgElectronEfficiencyCorrectionTool> ElEffCorrectionTool(
-    "AsgElectronEfficiencyCorrectionTool/ElEffCorrectionTool");
+    "CP::AsgElectronEfficiencyCorrectionTool/ElEffCorrectionTool");
   ANA_CHECK(
     ElEffCorrectionTool.setProperty("CorrectionFileNameList", id_configFiles));
   ANA_CHECK(ElEffCorrectionTool.setProperty("ForceDataType", 1));

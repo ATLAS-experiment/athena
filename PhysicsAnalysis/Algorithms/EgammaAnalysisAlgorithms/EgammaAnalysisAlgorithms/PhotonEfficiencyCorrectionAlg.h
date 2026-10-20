@@ -33,7 +33,7 @@ namespace CP
 
     /// @brief the smearing tool
   private:
-    ToolHandle<IAsgPhotonEfficiencyCorrectionTool> m_efficiencyCorrectionTool {this, "efficiencyCorrectionTool", "AsgPhotonEfficiencyCorrectionTool", "the efficiency correction tool we apply"};
+    ToolHandle<IAsgPhotonEfficiencyCorrectionTool> m_efficiencyCorrectionTool {this, "efficiencyCorrectionTool", "CP::AsgPhotonEfficiencyCorrectionTool/AsgPhotonEfficiencyCorrectionTool", "the efficiency correction tool we apply"};
 
     /// @brief the systematics list we run
   private:

@@ -5,6 +5,6 @@
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
 
-DECLARE_COMPONENT( AsgElectronEfficiencyCorrectionTool )
-DECLARE_COMPONENT( CP::TElectronTestAlg )
-DECLARE_COMPONENT( CP::ElectronChargeEfficiencyCorrectionTool )
+DECLARE_COMPONENT( ADD_CMODE(CP)::AsgElectronEfficiencyCorrectionTool )
+DECLARE_COMPONENT( ADD_CMODE(CP)::TElectronTestAlg )
+DECLARE_COMPONENT( ADD_CMODE(CP)::ElectronChargeEfficiencyCorrectionTool )

@@ -86,7 +86,7 @@ using namespace ST;
 
 #define CONFIG_EG_EFF_TOOL( TOOLHANDLE, TOOLNAME, CORRFILE )                \
   if( !TOOLHANDLE.isUserConfigured() ) {                                \
-    TOOLHANDLE.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+TOOLNAME); \
+    TOOLHANDLE.setTypeAndName("CP::AsgElectronEfficiencyCorrectionTool/"+TOOLNAME); \
     std::vector< std::string > corrFileNameList = {CORRFILE}; \
     ATH_CHECK( TOOLHANDLE.setProperty("CorrectionFileNameList", corrFileNameList) ); \
     if(!isData())                                                        \
@@ -98,7 +98,7 @@ using namespace ST;
 
 #define CONFIG_EG_EFF_TOOL_KEY( TOOLHANDLE, TOOLNAME, KEYNAME, KEY, MAP )   \
   if( !TOOLHANDLE.isUserConfigured() ) {                                \
-    TOOLHANDLE.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+TOOLNAME); \
+    TOOLHANDLE.setTypeAndName("CP::AsgElectronEfficiencyCorrectionTool/"+TOOLNAME); \
     ATH_MSG_INFO( "Will now set key \"" << KEYNAME << "\" to value \"" << KEY << "\" when configuring an AsgElectronEfficiencyCorrectionTool" ); \
     ATH_CHECK( TOOLHANDLE.setProperty(KEYNAME, KEY) );                  \
     if(!isData())                                                        \
@@ -1159,7 +1159,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
             ATH_MSG_WARNING( "(" << toolName << ") Your electron Iso WP: " << EleIso<< " is no longer supported. This will almost certainly cause a crash now.");
           }
 
-          m_elecEfficiencySFTool_iso.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+toolName);
+          m_elecEfficiencySFTool_iso.setTypeAndName("CP::AsgElectronEfficiencyCorrectionTool/"+toolName);
 
           if ( m_EG_corrFNList.empty() ) {
             ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("MapFilePath", m_eleEffMapFilePath) );
@@ -1172,7 +1172,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
                             (EleIso.find("TightTrackOnly_FixedRad")!=std::string::npos)||
                             (EleIso.find("Tight_VarRad")!=std::string::npos)||
                             (EleIso.find("Loose_VarRad")!=std::string::npos))) {
-            if (isAtlfast()) ATH_MSG_WARNING("(AsgElectronEfficiencyCorrectionTool/"+toolName+"). Your selected electron Iso WP (" + EleIso + ") don't have AFII SF. Falling back to FullSim");
+            if (isAtlfast()) ATH_MSG_WARNING("(CP::AsgElectronEfficiencyCorrectionTool/"+toolName+"). Your selected electron Iso WP (" + EleIso + ") don't have AFII SF. Falling back to FullSim");
             ATH_CHECK( m_elecEfficiencySFTool_iso.setProperty("ForceDataType", static_cast<int>(PATCore::ParticleDataType::Full)));
           }
           else if (!isData()){
@@ -1191,7 +1191,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       } else if (std::find(eSF_keys.begin(), eSF_keys.end(), eleId+"_"+m_el_iso_fallback[m_eleIsoHighPt_WP]) != eSF_keys.end()){
         //--- Check to see if the only issue is an unknown isolation working point
         EleIsohighPt = m_el_iso_fallback[m_eleIsoHighPt_WP];
-        ATH_MSG_WARNING("(AsgElectronEfficiencyCorrectionTool_iso_*) Your selected high-pT electron Iso WP ("
+        ATH_MSG_WARNING("(CP::AsgElectronEfficiencyCorrectionTool_iso_*) Your selected high-pT electron Iso WP ("
           << m_eleIsoHighPt_WP
           << ") does not have iso SFs defined. Falling back to "
           << m_el_iso_fallback[m_eleIsoHighPt_WP]
@@ -1216,7 +1216,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
             ATH_MSG_WARNING( "(" << toolName << ") Your electron high-pt Iso WP: " << EleIsohighPt << " is no longer supported. This will almost certainly cause a crash now.");
           }
 
-          m_elecEfficiencySFTool_isoHighPt.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+toolName);
+          m_elecEfficiencySFTool_isoHighPt.setTypeAndName("CP::AsgElectronEfficiencyCorrectionTool/"+toolName);
 
           ATH_CHECK( m_elecEfficiencySFTool_isoHighPt.setProperty("MapFilePath", m_eleEffMapFilePath) );
           ATH_CHECK( m_elecEfficiencySFTool_isoHighPt.setProperty("IdKey", eleId) );
@@ -1332,7 +1332,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
       toolName = "AsgElectronEfficiencyCorrectionTool_trig_singleLep_" + triggerEleID;
       if ( !m_elecEfficiencySFTool_trig_singleLep.isUserConfigured() ) {
-        m_elecEfficiencySFTool_trig_singleLep.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+toolName);
+        m_elecEfficiencySFTool_trig_singleLep.setTypeAndName("CP::AsgElectronEfficiencyCorrectionTool/"+toolName);
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePathTriggerRun3 : m_eleEffMapFilePathTriggerRun2) );
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("TriggerKey", m_electronTriggerSFStringSingle) );
         ATH_CHECK( m_elecEfficiencySFTool_trig_singleLep.setProperty("IdKey", triggerEleID) );
@@ -1348,7 +1348,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
   
       toolName = "AsgElectronEfficiencyCorrectionTool_trigEff_singleLep_" + triggerEleID;
       if ( !m_elecEfficiencySFTool_trigEff_singleLep.isUserConfigured() ) {
-        m_elecEfficiencySFTool_trigEff_singleLep.setTypeAndName("AsgElectronEfficiencyCorrectionTool/"+toolName);
+        m_elecEfficiencySFTool_trigEff_singleLep.setTypeAndName("CP::AsgElectronEfficiencyCorrectionTool/"+toolName);
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePathTriggerRun3 : m_eleEffMapFilePathTriggerRun2) );
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("TriggerKey", "Eff_"+m_electronTriggerSFStringSingle) );
         ATH_CHECK( m_elecEfficiencySFTool_trigEff_singleLep.setProperty("IdKey", triggerEleID) );
@@ -1403,7 +1403,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
           ATH_MSG_VERBOSE ("Selected WP: " << item.second << "_" << triggerEleID << "_" << triggerMixedEleIso);
     
           toolName = "AsgElectronEfficiencyCorrectionTool_trig_mixLep_" + (item.first).substr(0,8) + m_eleId;
-          auto t_sf = m_elecEfficiencySFTool_trig_mixLep.emplace(m_elecEfficiencySFTool_trig_mixLep.end(), "AsgElectronEfficiencyCorrectionTool/"+toolName);
+          auto t_sf = m_elecEfficiencySFTool_trig_mixLep.emplace(m_elecEfficiencySFTool_trig_mixLep.end(), "CP::AsgElectronEfficiencyCorrectionTool/"+toolName);
           ATH_CHECK( t_sf->setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePathTriggerRun3 : m_eleEffMapFilePathTriggerRun2) );
           ATH_CHECK( t_sf->setProperty("TriggerKey", item.second) );
           ATH_CHECK( t_sf->setProperty("IdKey", triggerEleID) );
@@ -1422,7 +1422,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
           #endif
     
           toolName = "AsgElectronEfficiencyCorrectionTool_trigEff_mixLep_" + (item.first).substr(0,8) + m_eleId;
-          auto t_eff = m_elecEfficiencySFTool_trigEff_mixLep.emplace(m_elecEfficiencySFTool_trigEff_mixLep.end(), "AsgElectronEfficiencyCorrectionTool/"+toolName);
+          auto t_eff = m_elecEfficiencySFTool_trigEff_mixLep.emplace(m_elecEfficiencySFTool_trigEff_mixLep.end(), "CP::AsgElectronEfficiencyCorrectionTool/"+toolName);
           ATH_CHECK( t_eff->setProperty("MapFilePath", m_isRun3? m_eleEffMapFilePathTriggerRun3 : m_eleEffMapFilePathTriggerRun2) );
           ATH_CHECK( t_eff->setProperty("TriggerKey", "Eff_"+item.second) );
           ATH_CHECK( t_eff->setProperty("IdKey", triggerEleID) );
@@ -1454,7 +1454,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     // Initialise photon efficiency tool
 
     if (!m_photonEfficiencySFTool.isUserConfigured() && !isData()) {
-      m_photonEfficiencySFTool.setTypeAndName("AsgPhotonEfficiencyCorrectionTool/AsgPhotonEfficiencyCorrectionTool_" + m_photonId);
+      m_photonEfficiencySFTool.setTypeAndName("CP::AsgPhotonEfficiencyCorrectionTool/AsgPhotonEfficiencyCorrectionTool_" + m_photonId);
 
       if (m_photonId != "Tight" ) {
         ATH_MSG_WARNING( "No Photon efficiency available for " << m_photonId << ", using Tight instead..." );
@@ -1467,7 +1467,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
     } else if (m_photonEfficiencySFTool.isUserConfigured()) ATH_CHECK( m_photonEfficiencySFTool.retrieve() );
 
    if (!m_photonIsolationSFTool.isUserConfigured() && !isData()) {
-     m_photonIsolationSFTool.setTypeAndName("AsgPhotonEfficiencyCorrectionTool/AsgPhotonEfficiencyCorrectionTool_isol" + m_photonIso_WP);
+     m_photonIsolationSFTool.setTypeAndName("CP::AsgPhotonEfficiencyCorrectionTool/AsgPhotonEfficiencyCorrectionTool_isol" + m_photonIso_WP);
 
      if (m_photonIso_WP != "FixedCutTight" && m_photonIso_WP != "FixedCutLoose" && m_photonIso_WP != "TightCaloOnly") {
        ATH_MSG_WARNING( "No Photon efficiency available for " << m_photonIso_WP);
@@ -1482,7 +1482,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
 
     // trigger scale factors
     if (!m_photonTriggerSFTool.isUserConfigured() && !isData()) {
-      m_photonTriggerSFTool.setTypeAndName("AsgPhotonEfficiencyCorrectionTool/AsgPhotonEfficiencyCorrectionTool_trig" + m_photonTriggerName);
+      m_photonTriggerSFTool.setTypeAndName("CP::AsgPhotonEfficiencyCorrectionTool/AsgPhotonEfficiencyCorrectionTool_trig" + m_photonTriggerName);
 
       // Fallback to TightCaloOnly if Tight is selected
       std::string photonIso_forTrigSF = m_photonIso_WP;
@@ -1511,7 +1511,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
       for(auto const& item : diphotonTriggerSFMapAsymmetric){
 
         toolName = "AsgPhotonEfficiencyCorrectionTool_trigSF_asymm_diphoton_" + (item.first).substr(0,9) + photonIso_forTrigSF;
-        auto ph_trigSF = m_photonEfficiencySFTool_trigSF_AsymDiphoton.emplace(m_photonEfficiencySFTool_trigSF_AsymDiphoton.end(), "AsgPhotonEfficiencyCorrectionTool/"+toolName);
+        auto ph_trigSF = m_photonEfficiencySFTool_trigSF_AsymDiphoton.emplace(m_photonEfficiencySFTool_trigSF_AsymDiphoton.end(), "CP::AsgPhotonEfficiencyCorrectionTool/"+toolName);
         ATH_CHECK( ph_trigSF->setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt") );
         ATH_CHECK( ph_trigSF->setProperty("IsoKey", photonIso_forTrigSF) );
         ATH_CHECK( ph_trigSF->setProperty("TriggerKey", item.second) );
@@ -1526,7 +1526,7 @@ StatusCode SUSYObjDef_xAOD::SUSYToolsInit()
         #endif
 
         toolName = "AsgPhotonEfficiencyCorrectionTool_trigEff_asymm_diphoton_" + (item.first).substr(0,9) + photonIso_forTrigSF;
-        auto ph_trigEff = m_photonEfficiencySFTool_trigEff_AsymDiphoton.emplace(m_photonEfficiencySFTool_trigEff_AsymDiphoton.end(), "AsgPhotonEfficiencyCorrectionTool/"+toolName);
+        auto ph_trigEff = m_photonEfficiencySFTool_trigEff_AsymDiphoton.emplace(m_photonEfficiencySFTool_trigEff_AsymDiphoton.end(), "CP::AsgPhotonEfficiencyCorrectionTool/"+toolName);
         ATH_CHECK( ph_trigEff->setProperty("MapFilePath", "PhotonEfficiencyCorrection/2015_2018/rel21.2/Summer2020_Rec_v1/map3.txt") );
         ATH_CHECK( ph_trigEff->setProperty("IsoKey", photonIso_forTrigSF) );
         ATH_CHECK( ph_trigEff->setProperty("TriggerKey", "Eff_"+item.second) );

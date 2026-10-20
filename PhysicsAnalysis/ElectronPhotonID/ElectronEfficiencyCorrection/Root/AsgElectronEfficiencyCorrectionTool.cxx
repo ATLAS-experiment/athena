@@ -52,6 +52,10 @@ enum model
   SYST = 5
 };
 }
+
+namespace ADD_CMODE(CP)
+{
+
 AsgElectronEfficiencyCorrectionTool::AsgElectronEfficiencyCorrectionTool(
   const std::string& myname)
   : asg::AsgMetadataTool(myname)
@@ -1032,3 +1036,4 @@ void AsgElectronEfficiencyCorrectionTool::callEvents (columnar::EventContextRang
     callSingleEvent (acc.m_electrons(event), eventInfo);
   }
 }
+} // namespace ADD_CMODE(CP)

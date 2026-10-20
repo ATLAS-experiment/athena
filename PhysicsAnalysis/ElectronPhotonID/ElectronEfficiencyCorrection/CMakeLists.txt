@@ -13,20 +13,42 @@ else ()
   set (extra_private_libs AthAnalysisBaseCompsLib)
 endif ()
 
-# Component(s) in the package:
-atlas_add_library( ElectronEfficiencyCorrectionLib
-   ElectronEfficiencyCorrection/*.h Root/*.cxx
-   PUBLIC_HEADERS ElectronEfficiencyCorrection
-   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
-   PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
-   LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AsgTools AnaAlgorithmLib AsgDataHandlesLib
-   ColumnarEgammaLib ColumnarClusterLib ColumnarEventInfoLib PATInterfaces PATCoreAcceptLib AsgMessagingLib EgammaAnalysisInterfacesLib ColumnarModeLib
-   PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${extra_private_libs} xAODEventInfo AsgMessagingLib
-   xAODMetaData PathResolver )
+# FIX ME: These settings should come from the Project configuration
+if (COLUMNAR_ANALYSIS)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeArray;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
+elseif (XAOD_STANDALONE)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
+else()
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD")
+  SET (COLUMNAR_MODE_SUFFIX_LIST "")
+endif()
 
-atlas_add_component( ElectronEfficiencyCorrection
-   src/*.h src/*.cxx src/components/*.cxx
-   LINK_LIBRARIES ElectronEfficiencyCorrectionLib )
+foreach (CMODE_NAME CMODE_SUFFIX IN ZIP_LISTS COLUMNAR_MODE_NAME_LIST COLUMNAR_MODE_SUFFIX_LIST)
+
+   # Component(s) in the package:
+   atlas_add_library( ElectronEfficiencyCorrectionLib${CMODE_SUFFIX}
+      ElectronEfficiencyCorrection/*.h Root/*.cxx
+      PUBLIC_HEADERS ElectronEfficiencyCorrection
+      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+      PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
+      LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AsgTools AnaAlgorithmLib AsgDataHandlesLib
+      ColumnarEgammaLib ColumnarClusterLib ColumnarEventInfoLib PATInterfaces PATCoreAcceptLib AsgMessagingLib EgammaAnalysisInterfacesLib ColumnarModeLib${CMODE_SUFFIX}
+      PRIVATE_LINK_LIBRARIES ${Boost_LIBRARIES} ${extra_private_libs} xAODEventInfo AsgMessagingLib
+      xAODMetaData PathResolver )
+
+   atlas_add_component( ElectronEfficiencyCorrection${CMODE_SUFFIX}
+      src/*.h src/*.cxx src/components/*.cxx
+      LINK_LIBRARIES ElectronEfficiencyCorrectionLib${CMODE_SUFFIX} )
+
+   atlas_add_test( gt_ColumnarToolTests${CMODE_SUFFIX}
+                  SOURCES test/gt_ColumnarToolTests.cxx
+                  LINK_LIBRARIES ColumnarTestFixturesLib${CMODE_SUFFIX} ElectronEfficiencyCorrectionLib${CMODE_SUFFIX}
+                  PRIVATE_WORKING_DIRECTORY
+                  POST_EXEC_SCRIPT noerror.sh )
+
+endforeach()
 
 atlas_add_dictionary( ElectronEfficiencyCorrectionDict
    ElectronEfficiencyCorrection/ElectronEfficiencyCorrectionDict.h
@@ -90,11 +112,5 @@ elseif ( NOT COLUMNAR_ANALYSIS )
 	          SCRIPT test/testEgEfficiencyDetailed.py
 	      	  PROPERTIES TIMEOUT 300)
 endif()
-
-atlas_add_test( gt_ColumnarToolTests
-                SOURCES test/gt_ColumnarToolTests.cxx
-                LINK_LIBRARIES ColumnarTestFixturesLib ElectronEfficiencyCorrectionLib
-                PRIVATE_WORKING_DIRECTORY
-                POST_EXEC_SCRIPT noerror.sh )
 
 atlas_install_python_modules( util/*.py python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

@@ -84,9 +84,9 @@ int main( int argc, char* argv[] ) {
    }
 
 	// Initialize photonFS tool
-   AsgPhotonEfficiencyCorrectionTool photonSF_ID("AsgPhotonEfficiencyCorrectionTool_idSF");
-   AsgPhotonEfficiencyCorrectionTool photonSF_Iso("AsgPhotonEfficiencyCorrectionTool_isoSF");
-   AsgPhotonEfficiencyCorrectionTool photonSF_Trig("AsgPhotonEfficiencyCorrectionTool_TrigSF");
+   ADD_CMODE(CP)::AsgPhotonEfficiencyCorrectionTool photonSF_ID("AsgPhotonEfficiencyCorrectionTool_idSF");
+   ADD_CMODE(CP)::AsgPhotonEfficiencyCorrectionTool photonSF_Iso("AsgPhotonEfficiencyCorrectionTool_isoSF");
+   ADD_CMODE(CP)::AsgPhotonEfficiencyCorrectionTool photonSF_Trig("AsgPhotonEfficiencyCorrectionTool_TrigSF");
 
    photonSF_ID.msg().setLevel( mylevel );
    photonSF_Iso.msg().setLevel( mylevel );

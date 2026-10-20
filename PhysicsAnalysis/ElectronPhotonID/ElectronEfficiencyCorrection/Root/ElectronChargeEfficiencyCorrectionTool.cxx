@@ -24,11 +24,11 @@
 
 // STL includes
 #include <cstdlib> /* atoi */
-
+namespace ADD_CMODE(CP) {
 // =============================================================================
 // Standard constructor
 // =============================================================================
-CP::ElectronChargeEfficiencyCorrectionTool::
+ElectronChargeEfficiencyCorrectionTool::
   ElectronChargeEfficiencyCorrectionTool(const std::string& name)
   : AsgTool(name)
   , m_dataTypeOverwrite(-1)
@@ -74,7 +74,7 @@ CP::ElectronChargeEfficiencyCorrectionTool::
 // =============================================================================
 // Standard destructor
 // =============================================================================
-CP::ElectronChargeEfficiencyCorrectionTool::
+ElectronChargeEfficiencyCorrectionTool::
   ~ElectronChargeEfficiencyCorrectionTool()
 {
   if (m_sfDec)
@@ -85,7 +85,7 @@ CP::ElectronChargeEfficiencyCorrectionTool::
 // Athena initialize method
 // =============================================================================
 StatusCode
-CP::ElectronChargeEfficiencyCorrectionTool::initialize()
+ElectronChargeEfficiencyCorrectionTool::initialize()
 {
   ATH_MSG_DEBUG("initializing");
 
@@ -305,7 +305,7 @@ CP::ElectronChargeEfficiencyCorrectionTool::initialize()
 //
 
 CP::CorrectionCode
-CP::ElectronChargeEfficiencyCorrectionTool::getEfficiencyScaleFactor(
+ElectronChargeEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   const xAOD::Electron& ele,
   double& sf) const
 {
@@ -509,25 +509,25 @@ CP::ElectronChargeEfficiencyCorrectionTool::getEfficiencyScaleFactor(
   if (m_mySysConf.empty()) {
     ATH_MSG_DEBUG(" ... nominal SF: " << sf);
   } else if (*(m_mySysConf.begin()) ==
-             SystematicVariation("EL_CHARGEID_STAT", 1)) {
+             CP::SystematicVariation("EL_CHARGEID_STAT", 1)) {
     sf = (sf + (val_stat));
     ATH_MSG_DEBUG("SF after STATup = " << sf);
   } else if (*(m_mySysConf.begin()) ==
-             SystematicVariation("EL_CHARGEID_STAT", -1)) {
+             CP::SystematicVariation("EL_CHARGEID_STAT", -1)) {
     sf = (sf - (val_stat));
     ATH_MSG_DEBUG("SF after STATdown = " << sf);
   } else {
 
     for (unsigned int i = 0; i < m_systematics.size(); i++) {
       if (*(m_mySysConf.begin()) ==
-          SystematicVariation(
+          CP::SystematicVariation(
             Form("EL_CHARGEID_SYS%s", m_systematics.at(i).c_str()), 1)) {
         sf = (sf + (val_sys));
         ATH_MSG_DEBUG("SF after SYSup = " << sf);
       }
 
       if (*(m_mySysConf.begin()) ==
-          SystematicVariation(
+          CP::SystematicVariation(
             Form("EL_CHARGEID_SYS%s", m_systematics.at(i).c_str()), -1)) {
         sf = (sf - (val_sys));
         ATH_MSG_DEBUG("SF after SYSdown = " << sf);
@@ -544,12 +544,12 @@ CP::ElectronChargeEfficiencyCorrectionTool::getEfficiencyScaleFactor(
 //---------------------------------------------------------------------------------------
 
 CP::CorrectionCode
-CP::ElectronChargeEfficiencyCorrectionTool::applyEfficiencyScaleFactor(
+ElectronChargeEfficiencyCorrectionTool::applyEfficiencyScaleFactor(
   const xAOD::Electron& part) const
 {
   ATH_MSG_DEBUG(
     "In "
-    "CP::ElectronChargeEfficiencyCorrectionTool::applyEfficiencyScaleFactor("
+    "ElectronChargeEfficiencyCorrectionTool::applyEfficiencyScaleFactor("
     "const xAOD::IParticle& part) const");
   double sf = 0.0;
   CP::CorrectionCode result = this->getEfficiencyScaleFactor(part, sf);
@@ -560,7 +560,7 @@ CP::ElectronChargeEfficiencyCorrectionTool::applyEfficiencyScaleFactor(
 
 // Get the correction rate given pt (E), eta, histogram
 float
-CP::ElectronChargeEfficiencyCorrectionTool::getChargeFlipRate(
+ElectronChargeEfficiencyCorrectionTool::getChargeFlipRate(
   double eta,
   double pt,
   TH2* hrates,
@@ -584,8 +584,8 @@ CP::ElectronChargeEfficiencyCorrectionTool::getChargeFlipRate(
 /////////////////////////////////////////////////////////////////////////////////////////
 // returns whether this tool is affected by the given systematics
 bool
-CP::ElectronChargeEfficiencyCorrectionTool::isAffectedBySystematic(
-  const SystematicVariation& systematic) const
+ElectronChargeEfficiencyCorrectionTool::isAffectedBySystematic(
+  const CP::SystematicVariation& systematic) const
 {
 
   CP::SystematicSet sys = affectingSystematics();
@@ -596,16 +596,16 @@ CP::ElectronChargeEfficiencyCorrectionTool::isAffectedBySystematic(
 // returns the list of all systematics this tool can be affected by
 
 CP::SystematicSet
-CP::ElectronChargeEfficiencyCorrectionTool::affectingSystematics() const
+ElectronChargeEfficiencyCorrectionTool::affectingSystematics() const
 {
   CP::SystematicSet result;
-  result.insert(SystematicVariation("EL_CHARGEID_STAT", 1));
-  result.insert(SystematicVariation("EL_CHARGEID_STAT", -1));
+  result.insert(CP::SystematicVariation("EL_CHARGEID_STAT", 1));
+  result.insert(CP::SystematicVariation("EL_CHARGEID_STAT", -1));
 
   for (unsigned int i = 0; i < m_systematics.size(); i++) {
-    result.insert(SystematicVariation(
+    result.insert(CP::SystematicVariation(
       Form("EL_CHARGEID_SYS%s", m_systematics.at(i).c_str()), 1));
-    result.insert(SystematicVariation(
+    result.insert(CP::SystematicVariation(
       Form("EL_CHARGEID_SYS%s", m_systematics.at(i).c_str()), -1));
   }
   return result;
@@ -614,20 +614,20 @@ CP::ElectronChargeEfficiencyCorrectionTool::affectingSystematics() const
 ///////////////////////////////////////////////////////////////////////////////////////////
 // returns the list of all systematics this tool recommends to use
 CP::SystematicSet
-CP::ElectronChargeEfficiencyCorrectionTool::recommendedSystematics() const
+ElectronChargeEfficiencyCorrectionTool::recommendedSystematics() const
 {
 
   return affectingSystematics();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-// Gets a SystematicSet and filters it
+// Gets a CP::SystematicSet and filters it
 StatusCode
-CP::ElectronChargeEfficiencyCorrectionTool::applySystematicVariation(
-  const SystematicSet& systConfig)
+ElectronChargeEfficiencyCorrectionTool::applySystematicVariation(
+  const CP::SystematicSet& systConfig)
 {
 
-  if (!SystematicSet::filterForAffectingSystematics(
+  if (!CP::SystematicSet::filterForAffectingSystematics(
         systConfig, m_affectingSys, m_mySysConf)) {
     ATH_MSG_ERROR(
       "Unsupported combination of systematics passed to the tool! ");
@@ -638,7 +638,7 @@ CP::ElectronChargeEfficiencyCorrectionTool::applySystematicVariation(
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
 // Register the systematics with the registry and add them to the recommended list
-StatusCode CP::ElectronChargeEfficiencyCorrectionTool::registerSystematics() {
+StatusCode ElectronChargeEfficiencyCorrectionTool::registerSystematics() {
   CP::SystematicRegistry &registry = CP::SystematicRegistry::getInstance();
 
   if (registry.registerSystematics(*this) != StatusCode::SUCCESS) {
@@ -650,3 +650,4 @@ StatusCode CP::ElectronChargeEfficiencyCorrectionTool::registerSystematics() {
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
+}
