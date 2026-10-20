@@ -43,9 +43,6 @@
 
 namespace ActsTrk {
 
-// vecmem objects use this type for size
-using size_type = unsigned int;
-
 /**
  * @class TracccMeasurementDeviceConverterAlg
  *
@@ -135,10 +132,10 @@ StatusCode convertMeasurementsOnGPU(
   , vecmem::copy const & copy
   , traccc::itk_detector::view_type const & detector_view
   , traccc::detector_conditions_description::const_view const & detector_conditions_view
-  , size_type nb_measurements
+  , traccc::edm::measurement_collection::const_view::size_type nb_measurements
   , const traccc::edm::measurement_collection::const_view & input
-  , size_type & output_n_pixels
-  , size_type & output_n_strips
+  , DevicePixelMeasurementContainer::view::size_type & output_n_pixels
+  , DeviceStripMeasurementContainer::view::size_type & output_n_strips
   , std::unique_ptr<DevicePixelMeasurementContainer::buffer> & output_pixel_meas
   , std::unique_ptr<DeviceStripMeasurementContainer::buffer> & output_strip_meas
   );

@@ -78,7 +78,8 @@ StatusCode TracccMeasurementDeviceConverterAlg::execute(const EventContext& ctx)
   cudaStream_t cuda_stream = static_cast<cudaStream_t>(m_streamTool->stream(ctx));
   auto traccc_measurements = SG::makeHandle(m_inputMeasKey, ctx);
   ATH_CHECK(traccc_measurements.isValid());
-  size_type const n_meas = device_copy->get_size(*traccc_measurements);
+  traccc::edm::measurement_collection::const_view::size_type const n_meas =
+    device_copy->get_size(*traccc_measurements);
 
   // ---- Nothing to convert
   if (n_meas == 0) {
@@ -99,7 +100,8 @@ StatusCode TracccMeasurementDeviceConverterAlg::execute(const EventContext& ctx)
   std::unique_ptr<DeviceStripMeasurementContainer::buffer> converted_strip_meas_device_buffer{nullptr};
 
   // ---- Conversion on GPU
-  size_type n_pixels = 0, n_strips = 0;
+  DevicePixelMeasurementContainer::view::size_type n_pixels = 0;
+  DeviceStripMeasurementContainer::view::size_type n_strips = 0;
   ATH_CHECK(convertMeasurementsOnGPU(cuda_stream, m_mrTool->mainMR(), *device_copy,
     m_detector->as_view<traccc::itk_detector>(), detector_conditions,
     n_meas, *traccc_measurements, n_pixels, n_strips,
