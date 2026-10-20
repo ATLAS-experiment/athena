@@ -36,6 +36,17 @@ atlas_add_dictionary( xAODTrackingDict
    LINK_LIBRARIES xAODCore xAODTracking
    EXTRA_FILES Root/dict/*.cxx )
 
+# Serializer converter for Trigger.
+if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
+   atlas_add_sercnv_library( xAODTrackingSerCnv
+      FILES xAODTracking/VertexContainer.h xAODTracking/VertexAuxContainer.h
+            xAODTracking/TrackParticleContainer.h xAODTracking/TrackParticleAuxContainer.h
+      TYPES_WITH_NAMESPACE xAOD::TrackParticle xAOD::TrackParticleContainer xAOD::TrackParticleAuxContainer
+                           xAOD::Vertex xAOD::VertexContainer xAOD::VertexAuxContainer
+      CNV_PFX xAOD
+      LINK_LIBRARIES xAODTracking TrigSerializeCnvSvcLib )
+endif()
+
 # Test(s) in the package.
 atlas_add_test( xAODTracking_TrackParticle_test
    SOURCES test/xAODTracking_TrackParticle_test.cxx
@@ -49,8 +60,6 @@ atlas_add_test( xAODTracking_TrackParticlexAODHelpers_test
 atlas_add_test( ut_xaodtracking_vertex
    SOURCES test/ut_xaodtracking_vertex.cxx
    LINK_LIBRARIES xAODTracking )
-
-
 
 if( NOT SIMULATIONBASE AND NOT GENERATIONBASE AND NOT XAOD_ANALYSIS )
    atlas_add_test(MultiTrajectoryBackends_test

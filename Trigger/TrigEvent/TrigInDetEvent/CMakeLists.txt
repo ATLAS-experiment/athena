@@ -22,12 +22,6 @@ atlas_add_sercnv_library( TrigInDetEventSerCnv
                           TYPES_WITH_NAMESPACE Rec::TrackParticleContainer Trk::SegmentCollection
                           LINK_LIBRARIES TrigInDetEvent TrigSerializeCnvSvcLib )
 
-atlas_add_sercnv_library( TrigInDetEventxAODSerCnv
-                          FILES xAODTracking/VertexContainer.h xAODTracking/VertexAuxContainer.h xAODTracking/TrackParticleContainer.h xAODTracking/TrackParticleAuxContainer.h xAODTrigMinBias/TrigSpacePointCounts.h xAODTrigMinBias/TrigSpacePointCountsContainer.h xAODTrigMinBias/TrigSpacePointCountsAuxContainer.h xAODTrigMinBias/TrigHisto2D.h xAODTrigMinBias/TrigHisto2DContainer.h xAODTrigMinBias/TrigHisto2DAuxContainer.h xAODTrigMinBias/TrigVertexCounts.h xAODTrigMinBias/TrigVertexCountsContainer.h xAODTrigMinBias/TrigVertexCountsAuxContainer.h xAODTrigMinBias/TrigTrackCounts.h xAODTrigMinBias/TrigTrackCountsContainer.h xAODTrigMinBias/TrigTrackCountsAuxContainer.h
-                          TYPES_WITH_NAMESPACE xAOD::TrackParticle xAOD::TrackParticleContainer xAOD::TrackParticleAuxContainer xAOD::Vertex xAOD::VertexContainer xAOD::VertexAuxContainer xAOD::TrigSpacePointCounts xAOD::TrigSpacePointCountsContainer xAOD::TrigSpacePointCountsAuxContainer xAOD::TrigHisto2D xAOD::TrigHisto2DContainer xAOD::TrigHisto2DAuxContainer xAOD::TrigVertexCounts xAOD::TrigVertexCountsContainer xAOD::TrigVertexCountsAuxContainer xAOD::TrigTrackCounts xAOD::TrigTrackCountsContainer xAOD::TrigTrackCountsAuxContainer
-                          CNV_PFX xAOD
-                          LINK_LIBRARIES TrigInDetEvent TrigSerializeCnvSvcLib xAODTracking xAODTrigMinBias )
-
 atlas_add_dictionary( TrigInDetEvent_cDict
                       TrigInDetEvent/TrigInDetEvent_cDict.h
                       TrigInDetEvent/selection_c.xml
