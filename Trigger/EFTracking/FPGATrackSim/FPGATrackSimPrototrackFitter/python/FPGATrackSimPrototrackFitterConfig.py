@@ -62,8 +62,8 @@ def FPGATruthDecorationCfg(flags, FinalProtoTrackChainxAODTracksKey="xAODFPGAPro
     
     acc.merge(ActsTruthParticleHitCountAlgCfg(flags,
                                               name="ActsFPGATruthParticleHitCountAlg",
-                                              PixelClustersToTruthAssociationMap="ITkFPGAPixelClustersToTruthParticles",
-                                              StripClustersToTruthAssociationMap="ITkFPGAStripClustersToTruthParticles",
+                                              MeasurementAssocKeys =["ITkFPGAPixelClustersToTruthParticles",
+                                                                     "ITkFPGAStripClustersToTruthParticles"],
                                               TruthParticleHitCountsOut="FPGATruthParticleHitCounts"))
     
     
@@ -71,8 +71,8 @@ def FPGATruthDecorationCfg(flags, FinalProtoTrackChainxAODTracksKey="xAODFPGAPro
     acts_tracks=f"{flags.Tracking.ActiveConfig.extension}Tracks" if not flags.Acts.doAmbiguityResolution else f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks"
     acc.merge(ActsTrackToTruthAssociationAlgCfg(flags,
                                                 name=f"{acts_tracks}FPGATrackToTruthAssociationAlg",
-                                                PixelClustersToTruthAssociationMap="ITkFPGAPixelClustersToTruthParticles",
-                                                StripClustersToTruthAssociationMap="ITkFPGAStripClustersToTruthParticles",
+                                                MeasurementAssocKeys =["ITkFPGAPixelClustersToTruthParticles",
+                                                                       "ITkFPGAStripClustersToTruthParticles"],
                                                 ACTSTracksLocation=ACTSProtoTrackChainTrackKey,
                                                 AssociationMapOut=acts_tracks+"FPGAToTruthParticleAssociation"))
     

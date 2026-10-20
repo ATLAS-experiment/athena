@@ -60,6 +60,9 @@ def TruthHitAssociationCfg(flags, suffix = ""):
                                              name=f"Muon{cont_name}ToSimHitAssoc{suffix}",
                                              SimHits = simHits,
                                              Measurements=cont_name))
+        result.addEventAlgo(CompFactory.MuonR4.MeasTruthAssocMapProvider(name=f"Muon{cont_name}TruthAssocMap{suffix}",
+                                                                         PrdContainer=cont_name,
+                                                                         AssociationMap=f"{cont_name}_TruthAssocMap"))
     return result
 
 def SimHitToTruthPartAlgCfg(flags, useSDO = False):
@@ -162,9 +165,6 @@ def MuonToTruthAssocAlgCfg(flags, name="MuonToTruthMatchingAlg", **kwargs):
     result = ComponentAccumulator()
     if not flags.Muon.setupTruthAlgorithms:
         return result
-    tracks = []
-    if flags.Reco.EnableTracking: tracks +=["InDetTrackParticles"]
-    kwargs.setdefault("TrackKeys", tracks)
     the_alg = CompFactory.MuonR4.MuonToTruthAssocAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
@@ -198,8 +198,31 @@ def MuonTruthAlgsCfg(flags, useSDO=True, recoAssoc = True):
     if useSDO and recoAssoc:
         result.merge(TruthHitAssociationCfg(flags))
    
-    # result.merge(MuonTruthHitCountsAlgCfg(flags))
-    #### Disable for the moment because tracking geometry explodes for R4
-    ### from MuonConfig.MuonTruthAlgsConfig import MuonTruthAddTrackRecordsAlgCfg
-    ### result.merge(MuonTruthAddTrackRecordsAlgCfg(flags))
+    return result
+
+def MuonActsTruthMatchingCfg(flags, 
+                             TrackContainer:str,
+                             ParticleContainer:str,
+                             isCombined: bool = False):
+    result = ComponentAccumulator()
+    from ActsConfig.ActsTruthConfig import ActsTrackParticleTruthDecorationAlgCfg, \
+                                           ActsTrackToTruthAssociationAlgCfg, \
+                                           ActsTruthParticleHitCountAlgCfg
+    MapSuffix="MS" if not isCombined else "CB"                                     
+    TruthHitCountMap = f"ActsHitCountMap_{MapSuffix}"
+    ### Write the truth particle hit counts 
+    result.merge(ActsTruthParticleHitCountAlgCfg(flags, name=f"MuonActsTruthHitsCounts_{MapSuffix}",
+                                                 TruthParticleHitCountsOut= TruthHitCountMap,
+                                                 doInner = isCombined, doMuon=True))
+    #### Match the ACTS tracks to the truth particle
+    result.merge(ActsTrackToTruthAssociationAlgCfg(flags, name =f"MuonTrackTruthMatching_{TrackContainer}",
+                                                    ACTSTracksLocation=TrackContainer,
+                                                    AssociationMapOut=f"{TrackContainer}ToTruthParticles",
+                                                    doInner = isCombined, doMuon = True))
+    #### Decorate the truth information to the associated track particle
+    result.merge(ActsTrackParticleTruthDecorationAlgCfg(flags, name=f"MuonTrackParticleToTruth_{ParticleContainer}",
+                                                        TrackParticleContainerName=ParticleContainer,
+                                                        TrackToTruthAssociationMaps =[f"{TrackContainer}ToTruthParticles"],
+                                                        DerivateTruthKey="MuonTruthParticles",
+                                                        TruthParticleHitCounts=TruthHitCountMap))
     return result

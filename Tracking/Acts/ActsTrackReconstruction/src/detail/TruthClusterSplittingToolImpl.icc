@@ -70,7 +70,7 @@ TruthClusterSplittingCalibrator<traj_t>::calibrate(
     typename BASE::Cov cov = cluster.template localCovariance<2>();
     assert(!cluster.rdoList().empty());
 
-    if (! m_options.m_measToTruth->isCompatibleWith(dynamic_cast<const xAOD::UncalibratedMeasurementContainer *>(cluster.container())) ){ // check compatibility of association map with cluster
+    if (m_options.m_measToTruth->sourceContainer() != cluster.container()) { // check compatibility of association map with cluster
       throw std::runtime_error(std::format("AssociationMap and pixel cluster (index {:}) are not compatible.", cluster.index()));
     }
     if (cluster.index() >= m_options.m_measToTruth->size()) { // if cluster index inside container is bigger than number of cluster in container

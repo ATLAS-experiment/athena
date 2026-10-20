@@ -14,6 +14,7 @@
 
 // Handle Keys
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteDecorHandleKeyArray.h"
 
 #include "TrackTruthMatchingBaseAlg.h"
 #include "ActsEvent/TrackToTruthParticleAssociation.h"
@@ -28,10 +29,10 @@ namespace ActsTrk
     using TrackTruthMatchingBaseAlg::TrackTruthMatchingBaseAlg;
 
     virtual StatusCode initialize() override;
-    virtual StatusCode finalize() override;
     virtual StatusCode execute(const EventContext &ctx) const override;
 
   private:
+    /** @brief Hit-based truth matching from the Acts::Track -> truth particle  */
      SG::ReadHandleKeyArray<TrackToTruthParticleAssociation>  m_trackToTruth
         {this, "TrackToTruthAssociationMaps",{},
          "Association maps from tracks to generator particles for all Acts tracks linked from the given track particle." };
@@ -39,11 +40,15 @@ namespace ActsTrk
      SG::ReadHandleKey<xAOD::TrackParticleContainer>  m_trkParticleName
         {this,"TrackParticleContainerName", "InDetTrackParticles",""};
 
+     /** @brief Muon tracks are matched to the truth particle container insert a bypass to bend the
+      *         link to the desired truth particle container */
+     SG::ReadHandleKey<xAOD::TruthParticleContainer> m_derivateTruthKey{this, "DerivateTruthKey", ""};
+
      enum FloatDecorations { kMatchingProbability, kHitPurity, kHitEfficiency, kNFloatDecorators};
-     std::vector<SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> >   m_floatDecor;
+     SG::WriteDecorHandleKeyArray<xAOD::TrackParticleContainer> m_floatDecor{this, "FloatDecorators", {}};
 
      enum IntDecorations {kTruthType, kTruthOrigin, kNIntDecorators};
-     std::vector<SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> > m_intDecor;
+     SG::WriteDecorHandleKeyArray<xAOD::TrackParticleContainer> m_intDecor{this, "IntDecorators", {}};
      SG::WriteDecorHandleKey<xAOD::TrackParticleContainer> m_truthClassDecor
        {this, "TruthClassification", m_trkParticleName, "truthClassification"};
 

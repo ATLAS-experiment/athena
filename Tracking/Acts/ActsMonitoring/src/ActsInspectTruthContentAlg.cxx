@@ -84,23 +84,20 @@ namespace ActsTrk {
     // Fill Stat info for Cluster collection(s)
     for (std::size_t i(0); i<m_clusters.size(); ++i) {
       ATH_MSG_DEBUG( "Retrieving cluster collection with key " << m_clusters.at(i).key() );
-      SG::ReadHandle<xAOD::UncalibratedMeasurementContainer> clusterHandle = SG::makeHandle( m_clusters.at(i), ctx );
-      ATH_CHECK( clusterHandle.isValid() );
-      const xAOD::UncalibratedMeasurementContainer *clusters = clusterHandle.cptr();
+      const xAOD::UncalibratedMeasurementContainer *clusters{};
+      ATH_CHECK(SG::get(clusters, m_clusters.at(i), ctx));
 
       if (clusters->empty()) continue;
       xAOD::UncalibMeasType elementType = clusters->front()->type();
 	
       ATH_MSG_DEBUG( "Retrieving Measurement to Truth Particle Association map with key: " << m_associationMap_key.at(i).key() );
-      SG::ReadHandle<ActsTrk::MeasurementToTruthParticleAssociation> truthHandle = SG::makeHandle( m_associationMap_key.at(i), ctx );
-      ATH_CHECK( truthHandle.isValid() );
-      truths[static_cast<std::size_t>(elementType)] = truthHandle.cptr();
-
+      ATH_CHECK(SG::get(truths[Acts::toUnderlying(elementType)], m_associationMap_key.at(i), ctx ));
+      
       // Check truth and clusters are compatible
-      ATH_CHECK( truths[static_cast<std::size_t>(elementType)]->isCompatibleWith(clusters) );
+      ATH_CHECK( truths[Acts::toUnderlying(elementType)]->sourceContainer()  == clusters);
 
       ATH_CHECK( fillStatClusters(*clusters,
-				  *truths[static_cast<std::size_t>(elementType)],
+				  *truths[Acts::toUnderlying(elementType)],
 				  clusterStat) );
     }
 
@@ -108,22 +105,17 @@ namespace ActsTrk {
     
     for (std::size_t i(0); i<m_seeds.size(); ++i) {
       ATH_MSG_DEBUG( "Retrieving seed collection with key: " << m_seeds.at(i).key() );
-      SG::ReadHandle<ActsTrk::SeedContainer> seedHandle = SG::makeHandle( m_seeds.at(i), ctx );
-      ATH_CHECK( seedHandle.isValid() );
-      const ActsTrk::SeedContainer* seeds = seedHandle.cptr();
-
-      ATH_CHECK( fillStatSeeds(*seeds,
-			       truths,
-			       seedStat) );
+      const ActsTrk::SeedContainer* seeds{};
+      ATH_CHECK(SG::get(seeds, m_seeds.at(i), ctx ));
+      ATH_CHECK( fillStatSeeds(*seeds,  truths,seedStat) );
     }
 
     ATH_CHECK( copyStatTable(seedStat, m_seedStat) );
 
     for (std::size_t i(0); i<m_tracks.size(); ++i) {
       ATH_MSG_DEBUG( "Retrieving tracks collection with key " << m_tracks.at(i).key() );
-      SG::ReadHandle<ActsTrk::TrackContainer> trackHandle = SG::makeHandle( m_tracks.at(i), ctx );
-      ATH_CHECK( trackHandle.isValid() );
-      const ActsTrk::TrackContainer* tracks = trackHandle.cptr();
+      const ActsTrk::TrackContainer* tracks{};
+      ATH_CHECK(SG::get(tracks, m_tracks.at(i), ctx));
 
       cluster_stat_t onTrack_clusterStat {};
       track_stat_t trackStat {};
@@ -146,7 +138,7 @@ namespace ActsTrk {
   {
     ATH_MSG_DEBUG( "Checking truth for clusters ..." );
     for (const xAOD::UncalibratedMeasurement* meas : container) {
-      std::size_t clusterTypeIndex = static_cast<std::size_t>(meas->type());
+      std::size_t clusterTypeIndex = Acts::toUnderlying(meas->type());
       ++stat[Acts::toUnderlying(EStatClusters::kNTotal)][clusterTypeIndex];
       const auto& tps = truth.at(meas->index());
 

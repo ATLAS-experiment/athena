@@ -73,8 +73,8 @@ def ACTSClusterPostInclude(flags) -> ComponentAccumulator:
                                              **truthAssociationKwargs))
         acc.merge(ActsTruthParticleHitCountAlgCfg(flags,
                                                   name = "ActsOfflineTruthParticleHitCountAlg",
-                                                  PixelClustersToTruthAssociationMap = "ITkOfflinePixelClustersToTruthParticles",
-                                                  StripClustersToTruthAssociationMap = "ITkOfflineStripClustersToTruthParticles",
+                                                  MeasurementAssocKeys = ["ITkOfflinePixelClustersToTruthParticles",
+                                                                          "ITkOfflineStripClustersToTruthParticles"],
                                                   TruthParticleHitCountsOut = "OfflineTruthParticleHitCounts"))
         
         from InDetConfig.InDetPrepRawDataToxAODConfig import TruthParticleIndexDecoratorAlgCfg

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRK_TRUTHPARTICLEHITCOUNT_H
@@ -51,13 +51,9 @@ namespace ActsTrk
   private:
      /** @brief Context provider for geometry, magnetic field and calibration contexts */
      ContextUtility m_ctxProvider{this};
-     SG::ReadHandleKey<MeasurementToTruthParticleAssociation>  m_pixelClustersToTruth
-        {this, "PixelClustersToTruthAssociationMap", "", "Association map from pixel measurements to generator particles." };
-     SG::ReadHandleKey<MeasurementToTruthParticleAssociation>  m_stripClustersToTruth
-        {this, "StripClustersToTruthAssociationMap", "", "Association map from strip measurements to generator particles." };
-       SG::ReadHandleKey<MeasurementToTruthParticleAssociation>  m_hgtdClustersToTruth
-        {this, "HgtdClustersToTruthAssociationMap", "", "Association map from HGTD measurements to generator particles." };
-
+      
+     SG::ReadHandleKeyArray<MeasurementToTruthParticleAssociation>  m_measAssocKeys
+        {this, "MeasurementAssocKeys", {}, "Association map from the measurements to generator particles." };
      SG::WriteHandleKey<TruthParticleHitCounts>  m_truthHitCountsOut
         {this, "TruthParticleHitCountsOut", "", "Map from truth particle to hit counts." };
 
@@ -68,9 +64,8 @@ namespace ActsTrk
 
      ElasticDecayUtil<TruthParticleHitCountDebugHists> m_elasticDecayUtil;
      static constexpr float s_unitGeV = 1e3;
-     std::conditional<TruthParticleHitCountDebugHists,
-                      Gaudi::Property<std::vector<float> >,
-                      EmptyProperty >::type              m_energyLossBinning
+  
+     Gaudi::Property<std::vector<float>> m_energyLossBinning
         {this, "EnergyLossBinning", {20.,0.,5.*s_unitGeV}, "Binning to be used for the energy loss histograms." };
 
      template <bool IsDebug>

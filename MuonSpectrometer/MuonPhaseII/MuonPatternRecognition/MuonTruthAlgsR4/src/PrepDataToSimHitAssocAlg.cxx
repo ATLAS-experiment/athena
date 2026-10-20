@@ -23,7 +23,6 @@
 namespace{
     /** @brief phi channel decorator of the rpcs && tgcs  */
     using ChVec_t = std::vector<std::uint16_t>;
-    using ChVec_t = std::vector<std::uint16_t>;
     /// @brief Declare the secondary phi and eta channels matched to the SDO
     static const SG::ConstAccessor<ChVec_t> acc_phiChannel{"SDO_phiChannels"};
     static const SG::ConstAccessor<ChVec_t> acc_etaChannel{"SDO_etaChannels"};

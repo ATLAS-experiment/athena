@@ -4,6 +4,8 @@
 
 #include "TruthParticleHitCountAlg.h"
 
+#include "Acts/Utilities/Enumerate.hpp"
+
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthParticle.h"
 #include <iomanip>
@@ -11,29 +13,7 @@
 #include <type_traits>
 #include <typeinfo>
 #include <numeric>
-
-// for erase_if detection i.e. >=c++20
-#include <version>
-
-#ifndef  __cpp_lib_erase_if
-namespace std {
-   template <class T_container, class T_Func>
-   inline std::size_t erase_if(T_container &container, T_Func pred) {
-      std::size_t orig_size = container->size();
-      for ( typename T_container::iterator iter = container.begin();
-            iter != container.end();
-            /* increment only if nothing was erased! */ ) {
-         if (pred(*iter)) {
-            iter = erase(iter);
-         }
-         else {
-            ++iter;
-         }
-      }
-      return orig_size - container->size();
-   }
-}
-#endif
+#include <ranges>
 
 namespace ActsTrk
 {
@@ -43,13 +23,9 @@ namespace ActsTrk
      return out;
   }
 
-  StatusCode TruthParticleHitCountAlg::initialize()
-  {
+  StatusCode TruthParticleHitCountAlg::initialize() {
      ATH_CHECK( m_ctxProvider.initialize() );
-     ATH_CHECK( m_pixelClustersToTruth.initialize() );
-     ATH_CHECK( m_stripClustersToTruth.initialize() );
-     ATH_CHECK( m_hgtdClustersToTruth.initialize(not m_hgtdClustersToTruth.empty()) );
-
+     ATH_CHECK( m_measAssocKeys.initialize());
      ATH_CHECK( m_truthHitCountsOut.initialize() );
 
      m_elasticDecayUtil.setEnergyLossBinning(m_energyLossBinning.value());
@@ -86,57 +62,35 @@ namespace ActsTrk
      return StatusCode::SUCCESS;
   }
 
-  StatusCode TruthParticleHitCountAlg::execute(const EventContext &ctx) const
-  {
-    std::unique_ptr<TruthParticleHitCounts>
-       truth_particle_hit_counts( std::make_unique<TruthParticleHitCounts>() );
+  StatusCode TruthParticleHitCountAlg::execute(const EventContext &ctx) const {
+    auto truth_particle_hit_counts = std::make_unique<TruthParticleHitCounts>();
 
-    
-    const ActsTrk::MeasurementToTruthParticleAssociation* pixelClustersToTruthAssociation{nullptr};
-    ATH_CHECK(SG::get(pixelClustersToTruthAssociation, m_pixelClustersToTruth, ctx));
-  
-    const ActsTrk::MeasurementToTruthParticleAssociation* stripClustersToTruthAssociation{nullptr};
-    ATH_CHECK(SG::get(stripClustersToTruthAssociation, m_stripClustersToTruth, ctx));
-  
-    const ActsTrk::MeasurementToTruthParticleAssociation* hgtdClustersToTruthAssociation{nullptr};
-    ATH_CHECK(SG::get(hgtdClustersToTruthAssociation, m_hgtdClustersToTruth, ctx));
-   
-
-    Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
-
-    std::array<const ActsTrk::MeasurementToTruthParticleAssociation *,
-               static_cast< std::underlying_type<xAOD::UncalibMeasType>::type >(xAOD::UncalibMeasType::nTypes)>
+    const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+    using AssocMapVec_t = std::vector<const ActsTrk::MeasurementToTruthParticleAssociation *>;
+    std::array<AssocMapVec_t, Acts::toUnderlying(xAOD::UncalibMeasType::nTypes)>
        measurement_to_truth_association_maps{};
-    
-    measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::PixelClusterType)]=pixelClustersToTruthAssociation;
-    measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::StripClusterType)]=stripClustersToTruthAssociation;
-    measurement_to_truth_association_maps[Acts::toUnderlying(xAOD::UncalibMeasType::HGTDClusterType)]=hgtdClustersToTruthAssociation;
-    auto assocSize = [&measurement_to_truth_association_maps](xAOD::UncalibMeasType type) {
-      const ActsTrk::MeasurementToTruthParticleAssociation *assoc = measurement_to_truth_association_maps[Acts::toUnderlying(type)];
-      return assoc ? assoc->size() : 0ul;
-    };
-
-    ATH_MSG_DEBUG("Measurement association entries: "  << assocSize(xAOD::UncalibMeasType::PixelClusterType)
-                 << " + " << assocSize(xAOD::UncalibMeasType::StripClusterType) 
-                 << " + " << assocSize(xAOD::UncalibMeasType::HGTDClusterType)
-                 );
-
-    unsigned int measurement_type_i=0;
-    --measurement_type_i;
-    for( const ActsTrk::MeasurementToTruthParticleAssociation *associated_truth_particles : measurement_to_truth_association_maps ) {
-       ++measurement_type_i;
-       if (!associated_truth_particles) continue;
-       for (const ActsTrk::ParticleVector &truth_particles : *associated_truth_particles) {
-          for (const xAOD::TruthParticle *truth_particle : truth_particles) {
-             assert (truth_particle);
-             const xAOD::TruthParticle *mother_particle = m_elasticDecayUtil.getMother(*truth_particle, m_maxEnergyLoss.value());
-             if (mother_particle) {
-                assert(measurement_type_i < (*truth_particle_hit_counts)[mother_particle].size());
-                //coverity[INTEGER_OVERFLOW]
-                ++(*truth_particle_hit_counts)[mother_particle][measurement_type_i];
-             }
-          }
+    for (const auto& key : m_measAssocKeys) {
+       const ActsTrk::MeasurementToTruthParticleAssociation* assocMap{};
+       ATH_CHECK(SG::get(assocMap, key, ctx));
+       if (assocMap->empty()) {
+            continue;
        }
+       const auto typeIdx = Acts::toUnderlying(assocMap->sourceContainer()->front()->type());
+       measurement_to_truth_association_maps[typeIdx].push_back(assocMap);
+    }
+
+    for(const auto&[measurement_type_i, mapsPerType]: Acts::enumerate(measurement_to_truth_association_maps) ) {
+      for (const ActsTrk::MeasurementToTruthParticleAssociation* associated_truth_particles : mapsPerType) {
+         for (const ActsTrk::ParticleVector &truth_particles : *associated_truth_particles) {
+            for (const xAOD::TruthParticle *truth_particle : truth_particles) {
+               assert (truth_particle);
+               const xAOD::TruthParticle *mother_particle = m_elasticDecayUtil.getMother(*truth_particle, m_maxEnergyLoss.value());
+               if (mother_particle) {
+                   ++(*truth_particle_hit_counts)[mother_particle][measurement_type_i];
+               }
+            }
+         }
+      }
     }
     unsigned int n_hits_min = m_nHitsMin.value();
     unsigned int truth_particles_without_enough_measurements

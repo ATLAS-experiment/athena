@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
   */
 #ifndef MEASUREMENTTOGENPARTICLEASSOCIATION_H
 #define MEASUREMENTTOGENPARTICLEASSOCIATION_H
@@ -25,15 +25,6 @@ namespace ActsTrk
       const xAOD::UncalibratedMeasurementContainer *sourceContainer() const {
          return  m_sourceMeasurements.getDataPtr();
       }
-      bool isCompatibleWith(const xAOD::UncalibratedMeasurementContainer *container) const {
-         
-         if (!container) return false;
-
-         if (container == m_sourceMeasurements.getDataPtr()) return true;
-         
-         return false;
-      }
-
       // convenience methods to convert "data-links" to derived measurement container
       template <class T_MeasurementContainer>
       void setSourceContainer(const T_MeasurementContainer &source, const EventContext &ctx) {

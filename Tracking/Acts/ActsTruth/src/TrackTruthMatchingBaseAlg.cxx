@@ -6,6 +6,8 @@
 #include "xAODTruth/TruthVertex.h"
 #include "xAODTruth/TruthParticle.h"
 
+#include "GeoModelKernel/throwExcept.h"
+#include "Acts/Utilities/Enumerate.hpp"
 // for pdg_id -> name
 #include "GeneratorModules/GenData.h"
 
@@ -85,14 +87,13 @@ namespace {
       }
    }
 
-   inline double sqr(double a) { return a*a; }
    // computate ratio and its statistical uncertainty
    inline std::array<float, 2> computeRatio(unsigned int numerator_counts, unsigned int denominator_counts) {
       double inv_denominator_counts = denominator_counts > 0 ? 1./denominator_counts : 0.;
       return std::array<float, 2> {
          static_cast<float>(numerator_counts * inv_denominator_counts),
-         static_cast<float>(sqrt(  numerator_counts * (denominator_counts-numerator_counts)
-                                 * inv_denominator_counts * sqr(inv_denominator_counts) ))
+         static_cast<float>(std::sqrt(  numerator_counts * (denominator_counts-numerator_counts)
+                                 * inv_denominator_counts * Acts::square(inv_denominator_counts) ))
       };
    }
 
@@ -118,12 +119,6 @@ namespace ActsTrk
   inline MsgStream &operator<<(MsgStream &out, const ActsUtils::Stat &stat) {
      ActsUtils::dumpStat(out, stat);
      return out;
-  }
-
-  TrackTruthMatchingBaseAlg::TrackTruthMatchingBaseAlg(const std::string &name,
-                                                         ISvcLocator *pSvcLocator)
-      : AthReentrantAlgorithm(name, pSvcLocator)
-  {
   }
 
   StatusCode TrackTruthMatchingBaseAlg::initialize()
@@ -205,10 +200,10 @@ namespace ActsTrk
                                                TrackTruthMatchingBaseAlg::EventStat &event_stat) const
   {
        TruthMatchResult ret{};
-       std::array<unsigned int,2> best_match_i{std::numeric_limits<unsigned int>::max(),std::numeric_limits<unsigned int>::max()};
-       std::array<float,2> best_match_prob {};
+       auto best_match_i{Acts::filledArray<unsigned, 2>(std::numeric_limits<unsigned>::max())};
+       auto best_match_i_nonoise{Acts::filledArray<unsigned, 2>(std::numeric_limits<unsigned>::max())};
 
-       std::array<unsigned int,2> best_match_i_nonoise{std::numeric_limits<unsigned int>::max(),std::numeric_limits<unsigned int>::max()};
+       std::array<float,2> best_match_prob{};
        std::array<float,2> best_match_prob_nonoise{};
 
        const HitCounterArray &total_counts = track_hit_counts.totalCounts();
@@ -221,50 +216,46 @@ namespace ActsTrk
        total_sum_for_prob += noise_sum;
 
        if (total_sum_for_prob>0.) {
-       // compute total hit count per truth particle and remember the highest and second highest
-       // count per truth particle.
-       // The match probability is then max_counter / sum_{i in associated truth particles} counts_i
-       unsigned int truth_i=0;
-       --truth_i;
-       for (const std::pair<const xAOD::TruthParticle *, HitCounterArray > &
-               hit_counts_for_associated_truth_particle : track_hit_counts.countsPerTruthParticle() ) {
-          ++truth_i;
-          double truth_sum_for_prob=weightedCountSum(hit_counts_for_associated_truth_particle.second, m_weightsForProb.value() );
-          float match_prob_nonoise = truth_sum_for_prob /total_sum_for_prob_nonoise;
-          float match_prob = truth_sum_for_prob /total_sum_for_prob;
-          if (match_prob>1 || match_prob<0.) {
-             ATH_MSG_ERROR("Negative or too large truth match \"probability\". This should not happen."
-                           << " Track hits: " << dumpCounts(total_counts)
-                           << " noise hits of those: " << dumpCounts(noise_counts)
-                           << " truth hits: " << dumpCounts(hit_counts_for_associated_truth_particle.second));
-          }          // remember the highest and next-to-highest hit count per truth particle
-          if (match_prob>best_match_prob[1]) {
-             int dest_i=match_prob<best_match_prob[0];
-             best_match_i[1]=best_match_i[0];
-             best_match_prob[1]=best_match_prob[0];
-             best_match_prob[dest_i]=match_prob;
-             best_match_i[dest_i]=truth_i;
-          }
-          if (match_prob_nonoise>best_match_prob_nonoise[1]) {
-             int dest_i=match_prob_nonoise<best_match_prob_nonoise[0];
-             best_match_i_nonoise[1]=best_match_i_nonoise[0];
-             best_match_prob_nonoise[1]=best_match_prob_nonoise[0];
-             best_match_prob_nonoise[dest_i]=match_prob_nonoise;
-             best_match_i_nonoise[dest_i]=truth_i;
-          }
-
-       }
+         // compute total hit count per truth particle and remember the highest and second highest
+         // count per truth particle.
+         // The match probability is then max_counter / sum_{i in associated truth particles} counts_i
+         for (const auto&[truth_i,
+                 hit_counts_for_associated_truth_particle] : Acts::enumerate(track_hit_counts.countsPerTruthParticle())) {
+            double truth_sum_for_prob=weightedCountSum(hit_counts_for_associated_truth_particle.second, m_weightsForProb.value() );
+            float match_prob_nonoise = truth_sum_for_prob /total_sum_for_prob_nonoise;
+            float match_prob = truth_sum_for_prob /total_sum_for_prob;
+            if (match_prob>1 || match_prob<0.) {
+               THROW_EXCEPTION("Negative or too large truth match \"probability\". This should not happen."
+                             << " Track hits: " << dumpCounts(total_counts)
+                             << " noise hits of those: " << dumpCounts(noise_counts)
+                             << " truth hits: " << dumpCounts(hit_counts_for_associated_truth_particle.second));
+            }          // remember the highest and next-to-highest hit count per truth particle
+            if (match_prob> best_match_prob[1]) {
+               int dest_i=match_prob < best_match_prob[0];
+               best_match_i[1]=best_match_i[0];
+               best_match_prob[1]=best_match_prob[0];
+               best_match_prob[dest_i]=match_prob;
+               best_match_i[dest_i]=truth_i;
+            }
+            if (match_prob_nonoise>best_match_prob_nonoise[1]) {
+               int dest_i=match_prob_nonoise<best_match_prob_nonoise[0];
+               best_match_i_nonoise[1]=best_match_i_nonoise[0];
+               best_match_prob_nonoise[1]=best_match_prob_nonoise[0];
+               best_match_prob_nonoise[dest_i]=match_prob_nonoise;
+               best_match_i_nonoise[dest_i]=truth_i;
+            }
+         }
        }
 
        if (best_match_i_nonoise[0] != best_match_i[0]) {
           ++event_stat.m_nTruthParticleNonoiseMismatches;
        }
-       if (   best_match_i[0] < track_hit_counts.countsPerTruthParticle().size()
+       if (best_match_i[0] < track_hit_counts.countsPerTruthParticle().size()
            && track_hit_counts.countsPerTruthParticle()[ best_match_i[0] ].first) {
           ret.m_truthParticle  = track_hit_counts.countsPerTruthParticle()[ best_match_i[0] ].first;
           ret.m_matchProbability = best_match_prob[0];
 
-          const xAOD::TruthParticle *best_match = track_hit_counts.countsPerTruthParticle()[ best_match_i[0] ].first;
+          const xAOD::TruthParticle *best_match = ret.m_truthParticle;
           const IAthSelectionTool::CutResult accept = m_truthSelectionTool->accept(best_match);
           event_stat.m_truthSelectionCuts.add( event_stat.m_nTruthCuts - accept.missingCuts() );
           if (accept) {
@@ -306,14 +297,13 @@ namespace ActsTrk
           else {
              ++event_stat.m_nTracksWithoutSelectedTruthParticle;
           }
-       }
-       else {
+       } else {
           // no eta, pdg_id for tracks without associated truth particle
           // could use eta of track but not available to the algorithm
 
           ++event_stat.m_nTracksWithoutAssociatedTruthParticle;
           if (!track_hit_counts.countsPerTruthParticle().empty()) {
-             ATH_MSG_ERROR("Failed to select best matching truth particle out of " << track_hit_counts.countsPerTruthParticle().size()
+             THROW_EXCEPTION("Failed to select best matching truth particle out of " << track_hit_counts.countsPerTruthParticle().size()
                            << ". This should not happen." );
           }
        }

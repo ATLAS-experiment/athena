@@ -49,24 +49,20 @@ namespace ActsTrk
      friend struct BaseStat;
 
   public:
-    TrackTruthMatchingBaseAlg(const std::string &name,
-                               ISvcLocator *pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     virtual StatusCode initialize() override;
     virtual StatusCode finalize() override;
 
   protected:
      const TruthParticleHitCounts &getTruthParticleHitCounts(const EventContext &ctx) const {
-        SG::ReadHandle<TruthParticleHitCounts> truth_particle_hit_counts_handle = SG::makeHandle(m_truthHitCounts, ctx);
-        if (!truth_particle_hit_counts_handle.isValid()) {
+        const TruthParticleHitCounts* truth_particle_hit_counts_handle{};
+       if (!SG::get(truth_particle_hit_counts_handle, m_truthHitCounts, ctx).isSuccess()) {
            ATH_MSG_ERROR("No truth particle hit count map for key " << m_truthHitCounts.key() );
-           std::runtime_error("Failed to get truth particle hit count map");
+           throw std::runtime_error("Failed to get truth particle hit count map");
         }
         return *truth_particle_hit_counts_handle;
      }
-
-     const IAthSelectionTool &truthSelectionTool() const { return *m_truthSelectionTool; }
-
      std::size_t perEtaSize() const  {
         return m_detailedStat.perEtaSize();
      }
@@ -113,27 +109,27 @@ namespace ActsTrk
               }
            }
         }
-        using TruthParticleSet = std::conditional< DetailEnabled,
+        using TruthParticleSet = std::conditional_t< DetailEnabled,
                                                    std::unordered_set<const xAOD::TruthParticle *>,
-                                                   typename BaseStat<DetailEnabled>::Empty >::type;
+                                                   typename BaseStat<DetailEnabled>::Empty >;
         TruthParticleSet m_truthParticlesWithAssociatedTrack;
 
-        unsigned int m_nTruthParticleWithoutAssociatedCounts =0u;
-        unsigned int m_nTracksWithoutAssociatedTruthParticle =0u;
-        unsigned int m_nTracksWithoutSelectedTruthParticle =0u;
-        unsigned int m_nTruthParticleNonoiseMismatches=0u;
+        unsigned int m_nTruthParticleWithoutAssociatedCounts{0u};
+        unsigned int m_nTracksWithoutAssociatedTruthParticle{0u};
+        unsigned int m_nTracksWithoutSelectedTruthParticle{0u};
+        unsigned int m_nTruthParticleNonoiseMismatches{0u};
 
-        unsigned int m_nTruthCuts;
+        unsigned int m_nTruthCuts{0u};
      };
      using EventStat = EventStatBase<TrackFindingValidationDetailedStat>;
 
      /** Match result returned by @ref analyseTrackTruth
       */
      struct TruthMatchResult {
-        const xAOD::TruthParticle *m_truthParticle;  ///< best matching truth particle or nullptr
-        float m_matchProbability;                    ///< the matching probability based on weighted hit sums
-        float m_hitPurity;                           ///< fraction of hits originting from best match over total reco hits
-        float m_hitEfficiency;                       ///< fraction of hits originting from best match over total best match hits
+        const xAOD::TruthParticle *m_truthParticle{nullptr};  ///< best matching truth particle or nullptr
+        float m_matchProbability{0.f};                    ///< the matching probability based on weighted hit sums
+        float m_hitPurity{0.f};                           ///< fraction of hits originting from best match over total reco hits
+        float m_hitEfficiency{0.f};                       ///< fraction of hits originting from best match over total best match hits
      };
      /**
          @param return tuple containing pointer to best matching truth particle, matching probability, hit purity and hit efficiency.
@@ -146,57 +142,32 @@ namespace ActsTrk
      void postProcessEventStat(const TruthParticleHitCounts &truth_particle_hit_counts,
                                std::size_t n_tracks,
                                EventStat &event_stat) const;
-     
+  protected:
+      ToolHandle<IAthSelectionTool> m_truthSelectionTool{this, "TruthSelectionTool","AthTruthSelectionTool", "Truth selection tool (for efficiencies and resolutions)"};
   private:
      SG::ReadHandleKey<TruthParticleHitCounts>  m_truthHitCounts
         {this, "TruthParticleHitCounts","", "Map from truth particle to hit counts." };
 
      Gaudi::Property<std::vector<float> > m_weightsForProb
-        {this, "MatchWeights", {}, "Weights applied to the counts per measurement type for weighted sums"
+        {this, "MatchWeights", std::vector<float>(s_NMeasurementTypes,1.f), 
+         "Weights applied to the counts per measurement type for weighted sums"
                                   " which are used compute the match probability." };
-     Gaudi::Property<std::vector<float> > m_weights
-        {this, "CountWeights", {}, "Weights applied to the counts per measurement type for weighted sums"
-                                   " which are used to compute hit efficiencies and purities." };
-
-     // Empty struct emulating the interface of a Gaudi property to replace optional properties if disabled.
-     template <class Base>
-     struct DummyProperty {
-        template <class OWNER>
-        DummyProperty( OWNER*, std::string, Base&&, std::string ) {}
-        Base value() const { return Base{}; }
-        operator Base() const { return Base{}; }
-        
-        // some dummy implementations for vector properties:
-        std::size_t size() const {return 0u; }
-        bool empty() const {return true; }
-        auto operator[](std::size_t /*idx*/) { throw std::out_of_range("DummyProperty");}
-
-        // Delegate operator() to the value
-        template <class... Args>
-        decltype( std::declval<Base>()( std::declval<Args&&>()... ) ) operator()( Args&&... args ) const
-           noexcept( noexcept( std::declval<Base>()( std::declval<Args&&>()... ) ) ) {
-           return value()( std::forward<Args>( args )... );
-        }
-     };
-
-     template <class Base>
-     using Property = std::conditional< TrackFindingValidationDetailedStat, Gaudi::Property<Base>, DummyProperty<Base> >::type;
-     
-     Property<std::vector<float>> m_statEtaBins
+      Gaudi::Property<std::vector<float> > m_weights
+        {this, "CountWeights", std::vector<float>(s_NMeasurementTypes,1.f), 
+         "Weights applied to the counts per measurement type for weighted sums"
+         " which are used to compute hit efficiencies and purities." };
+      Gaudi::Property<std::vector<float>> m_statEtaBins
         {this, "StatisticEtaBins", {-4, -2.6, -2, 0, 2., 2.6, 4}, "Gather statistics separately for these eta bins."};
-     Property<std::vector<float>> m_statPtBins
+     Gaudi::Property<std::vector<float>> m_statPtBins
         {this, "StatisticPtBins", {1.e3,2.5e3,10e3, 100e3}, "Gather statistics separately for these pt bins."};
-     Property<bool> m_pdgIdCategorisation
+     Gaudi::Property<bool> m_pdgIdCategorisation
         {this, "PdgIdCategorisation", false, "Categorise by pdg id."};
-     Property<bool> m_showRawCounts
+     Gaudi::Property<bool> m_showRawCounts
         {this, "ShowRawCounts", false, "Show all counters."};
-     Property<bool> m_printDetails
+     Gaudi::Property<bool> m_printDetails
         {this, "ShowDetailedTables", false, "Show more details; stat. uncert., RMS, entries"};
-     Property<bool> m_computeTrackRecoEfficiency
+     Gaudi::Property<bool> m_computeTrackRecoEfficiency
         {this, "ComputeTrackRecoEfficiency", true, "Compute and print track reconstruction efficiency."};
-
-    ToolHandle<IAthSelectionTool> m_truthSelectionTool{this, "TruthSelectionTool","AthTruthSelectionTool", "Truth selection tool (for efficiencies and resolutions)"};
-
 
      // helper struct for compile time optional statistics
      template <bool IsDebug>
@@ -226,7 +197,7 @@ namespace ActsTrk
      DebugCounter<TrackFindingValidationDebugHists> m_debugCounter;
 
      // s_NMeasurementTypes is equal to the number of UncalibMeasType
-     constexpr static unsigned int s_NMeasurementTypes = static_cast<unsigned int>(xAOD::UncalibMeasType::nTypes);
+     constexpr static unsigned int s_NMeasurementTypes = Acts::toUnderlying(xAOD::UncalibMeasType::nTypes);
 
      // statistics counter
      enum ECounter {
