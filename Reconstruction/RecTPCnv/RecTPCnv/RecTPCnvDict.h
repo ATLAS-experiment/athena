@@ -21,27 +21,6 @@
 #include "RecTPCnv/DepositInCalo_p2.h"
 #include "RecTPCnv/DepositInCalo_p1.h"
 
-#include "RecTPCnv/Muon_p6.h"
-#include "RecTPCnv/MuonContainer_p6.h"
-
-#include "RecTPCnv/Muon_p5.h"
-#include "RecTPCnv/MuonContainer_p5.h"
-
-#include "RecTPCnv/Muon_p4.h"
-#include "RecTPCnv/MuonContainer_p4.h"
-
-#include "RecTPCnv/Muon_p3.h"
-#include "RecTPCnv/MuonContainer_p3.h"
-
-#include "RecTPCnv/Muon_p2.h"
-#include "RecTPCnv/MuonContainer_p2.h"
-
-#include "RecTPCnv/Muon_p1.h"
-#include "RecTPCnv/MuonContainer_p1.h"
-
-#include "RecTPCnv/MuonSpShower_p1.h"
-#include "RecTPCnv/MuonSpShowerContainer_p1.h"
-
 extern "C" {
   void caloenergy_cnv_p2_register_streamer();
 }

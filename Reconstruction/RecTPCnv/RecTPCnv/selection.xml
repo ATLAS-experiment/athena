@@ -1,16 +1,5 @@
 <lcgdict>
 
-
-
-
-  <class name="std::vector<Muon_p6>" />
-  <class name="MuonContainer_p6" id="56E6FC8D-E6B3-4FFB-83A2-A9AEF6E35FF3" />
-  <class name="Muon_p6" />
-
-  <class name="std::vector<Muon_p5>" />
-  <class name="MuonContainer_p5" id="45887564-EABA-EBC9-DE1A-2459F21780CC" />
-  <class name="Muon_p5" />
-
   <class name="std::vector<CaloEnergy_p2>" />  
   <class name="MuonCaloEnergyContainer_tlp1"  id="E60630E0-FAA1-4658-9BDD-8BB977C4200B" />
   <class name="MuonCaloEnergyContainer_p1"    id="DB3DC5CD-FF0F-01FE-4550-7BCE8DBB9968" />
@@ -19,17 +8,6 @@
 
   <class name="std::vector<DepositInCalo_p2>" />
   <class name="DepositInCalo_p2" />
-
-  <!-- egamma -->
-  <!-- Electron -->
-  <!-- Photon -->
-  <!-- relocated to egammaEventTPCnv -->   
-
-  <class name="MuonSpShower_p1" />
-  <class name="std::vector<MuonSpShower_p1*>" />
-  <class name="MuonSpShowerContainer_p1"    id="522A7143-856B-41E6-A3FA-AB97693010D8">
-    <field name="m_ownshowers" transient="true"/>
-  </class>
 
   <class name="CaloEnergyCnv_p2_register_streamer"/>
 

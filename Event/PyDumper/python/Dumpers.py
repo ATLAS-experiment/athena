@@ -68,8 +68,6 @@ if hasattr(ROOT,'TrackParticleTruthCollection'):
     if hasattr(ROOT,'Jet'):
         ROOT.Jet().jetTagInfoVector()
     getattr(ROOT, 'ElementLinkVector<CaloClusterContainer>')
-    if hasattr(ROOT,'Analysis::MuonContainer'):
-        getattr(ROOT, 'ElementLink<Analysis::MuonContainer>')().isValid()
     getattr(ROOT, 'vector<xAOD::CaloClusterBadChannelData_v1>')().__assign__(getattr(ROOT, 'vector<xAOD::CaloClusterBadChannelData_v1>')())
 hasattr (ROOT, 'xAOD::TruthParticle_v1')
 ROOT.TClass.GetClass('ElementLink<DataVector<xAOD::TruthParticle_v1> >')
@@ -617,85 +615,6 @@ def dump_CaloEnergy (p, f):
     for d in p.depositInCalo():
         fprint (f, " (%d %f %f)" % 
                 (d.subCaloId(), d.energyDeposited(), d.muonEnergyLoss()))
-    return
-
-
-def dump_Muon (m, f):
-    dump_ParticleImpl (m, f)
-    fprint (f, ' %1d' % m.author())
-    if m.inDetTrackLink().isValid():
-        fprint (f,  '\n      idtp: %2d:' % m.inDetTrackLink().index())
-        dump_Fourvec (m.inDetTrackParticle(), f)
-    # This isn't in 13.X.0 xxx
-    if hasattr(m, 'muonSpTrackLink') and m.muonSpTrackLink().isValid():
-        fprint (f,  '\n      sptp: %2d:' % m.muonSpTrackLink().index())
-        dump_Fourvec (m.muonSpectrometerTrackParticle(), f)
-    if m.muonExtrapTrackLink().isValid():
-        fprint (f,  '\n      mxtp: %2d:' % m.muonExtrapTrackLink().index())
-        dump_Fourvec (m.muonExtrapolatedTrackParticle(), f)
-    if m.innerExtrapTrackLink().isValid():
-        fprint (f,  '\n      ixtp: %2d:' % m.innerExtrapTrackLink().index())
-        dump_Fourvec (m.innerExtrapolatedTrackParticle(), f)
-    if m.combinedTrackLink().isValid():
-        fprint (f,  '\n      cmtp: %2d:' % m.combinedTrackLink().index())
-        dump_Fourvec (m.combinedMuonTrackParticle(), f)
-    if m.clusterLink().isValid():
-        fprint (f,  '\n      cl: %2d:' % m.clusterLink().index())
-        dump_Fourvec (m.cluster(), f)
-    fprint (f, '\n      a: %f %f %d %f %d %f %d' % 
-            (m.matchChi2(), m.matchChi2OverDoF(), m.matchNumberDoF(),
-             m.fitChi2(), m.fitNumberDoF(), m.fitChi2OverDoF(),
-             m.bestMatch()))
-    fprint (f, '\n      b: %d %d %d %d %d %d %d %d %d %d %d %d' % 
-            (m.numberOfInnermostPixelLayerHits(),
-             m.numberOfPixelHits(),
-             m.numberOfSCTHits(),
-             m.numberOfTRTHits(),
-             m.numberOfTRTHighThresholdHits(),
-             m.numberOfInnermostPixelLayerSharedHits(),
-             m.numberOfPixelSharedHits(),
-             m.numberOfPixelHoles(),
-             m.numberOfSCTSharedHits(),
-             m.numberOfSCTHoles(),
-             m.numberOfTRTOutliers(),
-             m.numberOfTRTHighThresholdOutliers()))
-    fprint (f, '\n      c: %d %d %d %d %d %d %d %d %d %d %d %d %d %d' % 
-            (m.numberOfMDTHits(),
-             m.numberOfMDTHoles(),
-             m.numberOfCSCEtaHits(),
-             m.numberOfCSCEtaHoles(),
-             m.numberOfCSCPhiHits(),
-             m.numberOfCSCPhiHoles(),
-             m.numberOfRPCEtaHits(),
-             m.numberOfRPCEtaHoles(),
-             m.numberOfRPCPhiHits(),
-             m.numberOfRPCPhiHoles(),
-             m.numberOfTGCEtaHits(),
-             m.numberOfTGCEtaHoles(),
-             m.numberOfTGCPhiHits(),
-             m.numberOfTGCPhiHoles()))
-    fprint (f, '\n      d: %d %d %f %f %f %f %f %f' % 
-            (m.numberOfGangedPixels(),
-             m.numberOfOutliersOnTrack(),
-             m.segmentDeltaEta(),
-             m.segmentChi2OverDoF(),
-             m.annBarrel(),
-             m.annEndCap(),
-             m.innAngle(),
-             m.midAngle()))
-    fprint (f, '\n      e: %f %f %d %d' % 
-            (m.parameter(etcone10),
-             m.parameter(nucone10),
-             m.alsoFoundByLowPt(),
-             m.alsoFoundByCaloMuonId()))
-    fprint (f, '\n      f:', [i for i in m.associatedEtaDigits()])
-    fprint (f, '\n      h:', [i for i in m.associatedPhiDigits()])
-    fprint (f, '\n      i:', [i for i in m.segmentEtaDigits()])
-    fprint (f, '\n      j:', [i for i in m.segmentPhiDigits()])
-    caloe = m.caloEnergyLoss()
-    if caloe:
-        fprint (f, '\n      k:')
-        dump_CaloEnergy (caloe, f)
     return
 
 
@@ -2805,20 +2724,6 @@ def dump_TrackParticleAssocs (a, f):
     return dump_Assocs (a, f, PyAthena.Rec.TrackParticleContainer)
 
 
-def dump_MuonSpShower (m, f):
-    fprint (f, "%f %f %d %d %d %d %d %d %d" %
-            (m.eta(),
-             m.phi(),
-             m.numberOfTriggerHits(),
-             m.numberOfInnerHits(),
-             m.numberOfMiddleHits(),
-             m.numberOfOuterHits(),
-             m.numberOfInnerSegments(),
-             m.numberOfMiddleSegments(),
-             m.numberOfOuterSegments()))
-    return
-
-
 def dump_JetAssociationBase (a, f):
     fprint (f, a.name())
     return
@@ -4857,7 +4762,6 @@ def dump_list (l, f, dumper, nmax = None):
 dumpspecs = [
     ["ElectronContainer",                    dump_Electron],
     ["PhotonContainer",                      dump_Photon],
-    ["Analysis::MuonContainer",              dump_Muon],
     ["Analysis::TauJetContainer",            dump_TauJet],
     ["TruthParticleContainer",               dump_TruthParticle],
     ["Rec::TrackParticleContainer",          dump_TrackParticle],
@@ -4882,7 +4786,6 @@ dumpspecs = [
     ["TrigConf::Lvl1AODPrescaleConfigData",  dump_Lvl1AODPrescaleConfigData],
     ["TrackParticleTruthCollection",         dump_TrackParticleTruthCollection],
     ["DetailedTrackTruthCollection",         dump_DetailedTrackTruthCollection],
-    ["Rec::MuonSpShowerContainer",           dump_MuonSpShower],
     ["HLT::HLTResult",                       dump_HLTResult],
     ["HLT::HLTResultMT",                     dump_HLTResultMT],
     ["INav4MomAssocs",                       dump_INav4MomAssocs],

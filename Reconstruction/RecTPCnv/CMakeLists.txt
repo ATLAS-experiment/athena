@@ -7,7 +7,7 @@ atlas_subdir( RecTPCnv )
 atlas_add_library( RecTPCnv
                    src/*.cxx
                    PUBLIC_HEADERS RecTPCnv
-                   LINK_LIBRARIES AthenaPoolCnvSvcLib CxxUtils DataModelAthenaPoolLib EventCommonTPCnv GaudiKernel ParticleEventTPCnv StoreGateLib TrkEventTPCnv TrkMaterialOnTrack muonEvent
+                   LINK_LIBRARIES AthenaPoolCnvSvcLib TrkEventTPCnv TrkMaterialOnTrack muonEvent
                    PRIVATE_LINK_LIBRARIES AthenaKernel RootConversions )
 
 atlas_add_tpcnv_library( RecTPCnvFactories
@@ -39,11 +39,3 @@ _add_test( CaloEnergyCnv_p2_test )
 _add_test( DepositInCaloCnv_p1_test )
 _add_test( DepositInCaloCnv_p2_test )
 _add_test( MuonCaloEnergyContainerCnv_p1_test )
-_add_test( MuonCnv_p1_test )
-_add_test( MuonCnv_p2_test )
-_add_test( MuonCnv_p3_test )
-_add_test( MuonCnv_p4_test )
-_add_test( MuonCnv_p5_test )
-_add_test( MuonCnv_p6_test )
-_add_test( MuonSpShowerCnv_p1_test )
-_add_test( MuonSpShowerContainerCnv_p1_test )
