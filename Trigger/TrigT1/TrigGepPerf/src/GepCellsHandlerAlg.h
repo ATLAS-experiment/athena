@@ -102,6 +102,9 @@ class GepCellsHandlerAlg: public ::AthReentrantAlgorithm {
   Gaudi::Property<std::string> m_LArCellMap {this, "LArCellMapFile", "UpgradePerformanceFunctions/LAr_Cell_Map_offlineID_0.csv", 
     "File associating LAr cells with readout FEBs and connection technology"};
 
+  Gaudi::Property<bool> m_restrictPSNeighbors {this, "RestrictPSNeighbors", true, 
+    "Restrict PS Neighbors in neighbor definition for clustering"};
+
   /** @brief Key of the CaloNoise Conditions data object. Typical values 
       are '"electronicNoise', 'pileupNoise', or '"totalNoise' (default) */
 
