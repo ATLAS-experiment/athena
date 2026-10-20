@@ -3,25 +3,25 @@
 */
 
 ///////////////////////////////////////////////////////////////////
-// TauCombinedTESWrapper.cxx
+// TauResolutionToolWrapper.cxx
 ///////////////////////////////////////////////////////////////////
 
-#include "DerivationFrameworkTau/TauCombinedTESWrapper.h"
+#include "DerivationFrameworkTau/TauResolutionToolWrapper.h"
 #include "StoreGate/ReadHandle.h"
 #include "AthContainers/Decorator.h"
 
 namespace DerivationFramework {
 
-  StatusCode TauCombinedTESWrapper::initialize()
+  StatusCode TauResolutionToolWrapper::initialize()
   {
     ATH_CHECK(m_tauKey.initialize());
     ATH_CHECK(m_tesCompatibilityKey.initialize());
-    CHECK( m_tTauCombinedTESTool.retrieve() );
+    CHECK( m_tTauResolutionTool.retrieve() );
     return StatusCode::SUCCESS;
   }
 
 
-  StatusCode TauCombinedTESWrapper::addBranches(const EventContext& ctx) const
+  StatusCode TauResolutionToolWrapper::addBranches(const EventContext& ctx) const
   {
     // Event context
 
@@ -36,7 +36,7 @@ namespace DerivationFramework {
 
     // Loop over taus
     for(auto xTau : *xTauContainer){
-       dec_tesCompatibility(*xTau) = m_tTauCombinedTESTool->getTESCompatibility(*xTau);  	    
+       dec_tesCompatibility(*xTau) = m_tTauResolutionTool->getTESCompatibility(*xTau);  	    
     }
 
     return StatusCode::SUCCESS;

@@ -141,29 +141,6 @@ StatusCode TauCombinedTES::executeTool(xAOD::TauJet& tau,
 
 
 
-bool TauCombinedTES::getTESCompatibility(const xAOD::TauJet& tau) const {
-  if (! isValid(tau)) return false;
-
-  xAOD::TauJetParameters::DecayMode decayMode = getDecayMode(tau); //can return 7
-  int decayModeIndex = getDecayModeIndex(decayMode);
-
-  int etaIndex = getEtaIndex(tau.etaTauEnergyScale());
-  
-  double caloSigma = tau.ptTauEnergyScale() * getCaloResolution(tau.ptTauEnergyScale(), decayModeIndex, etaIndex);
-  double deltaEt = tau.ptFinalCalib() - tau.ptTauEnergyScale();
-
-  bool compatibility  = true;
-
-  // FIXME: should we use combinedSigma here ??
-  if (std::abs(deltaEt) > 5 * caloSigma) {
-    compatibility = false;
-  }
-
-  return compatibility;
-}
-
-
-
 int TauCombinedTES::getEtaIndex(float eta) const {
   // It would be better to retrieve eta bins from the calibration file, e.g. for upgrade studies!
   float abseta = std::abs(eta);

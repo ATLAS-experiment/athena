@@ -192,24 +192,22 @@ def AddTauTESCompatibilityDecorationCfg(flags, **kwargs):
 
     acc = ComponentAccumulator()
 
-    import tauRec.TauToolHolder as tauTools
+    from TauAnalysisTools.TauAnalysisToolsConfig import TauResolutionToolCfg 
 
-    tauCombinedTESTool = acc.popToolsAndMerge(tauTools.TauCombinedTESCfg(
-            flags,
-            ))
+    tauResolutionTool = acc.popToolsAndMerge(TauResolutionToolCfg(flags,"TauResolutionToolCfg"))
 
-    acc.addPublicTool(tauCombinedTESTool)
-    kwargs.setdefault("TauCombinedTESTool", tauCombinedTESTool)
+    acc.addPublicTool(tauResolutionTool)
+    kwargs.setdefault("TauResolutionTool", tauResolutionTool)
     kwargs.setdefault("TauContainerName", "TauJets")
     
     prefix = kwargs["TauContainerName"]
-    TauCombinedTESWrapper = CompFactory.DerivationFramework.TauCombinedTESWrapper
-    TauCombinedTESKernel = CompFactory.DerivationFramework.CommonAugmentation
+    TauResolutionToolWrapper = CompFactory.DerivationFramework.TauResolutionToolWrapper
+    TauResolutionToolKernel = CompFactory.DerivationFramework.CommonAugmentation
     
-    TauCombinedTESWrapper = TauCombinedTESWrapper( name = f"{prefix}_TauCombinedTES", **kwargs )                                     
-    acc.addPublicTool(TauCombinedTESWrapper)
-    acc.addEventAlgo(TauCombinedTESKernel(name              = f"{prefix}_TauCombinedTESKernel",
-                                          AugmentationTools = [TauCombinedTESWrapper]))
+    TauResolutionToolWrapper = TauResolutionToolWrapper( name = f"{prefix}_TauResolutionTool", **kwargs )                                     
+    acc.addPublicTool(TauResolutionToolWrapper)
+    acc.addEventAlgo(TauResolutionToolKernel(name              = f"{prefix}_TauResolutionToolKernel",
+                                             AugmentationTools = [TauResolutionToolWrapper]))
     return acc
     
 

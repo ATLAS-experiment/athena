@@ -17,6 +17,11 @@ def TauTruthMatchingToolCfg(flags, name, **kwargs):
    acc.setPrivateTools(tool)
    return acc
 
+def TauResolutionToolCfg(flags, name, **kwargs):
+    acc = ComponentAccumulator()
+    tool = CompFactory.TauAnalysisTools.TauResolutionTool(name, **kwargs)
+    acc.setPrivateTools(tool)
+    return acc
 
 def BuildTruthTausCfg(flags, name, **kwargs):
     """Configure the BuildTruthTaus tool"""
