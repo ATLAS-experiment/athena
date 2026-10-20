@@ -2913,26 +2913,6 @@ def dump_TrigTrackCounts_nolist (t, f):
     return
 
 
-def dump_TrigCaloCluster (c, f):
-    fprint (f, c.rawEnergy(), c.rawEt(), c.rawEta(), c.rawPhi(), c.RoIword(),
-            c.nCells(), c.quality())
-    fprint (f, '\n    ', [c.rawEnergy(i) for i in range(25)])
-    return
-
-
-def dump_TrigEMCluster (c, f):
-    dump_TrigCaloCluster (c, f)
-    fprint (f, '\n    ', c.energy(), c.et(), c.eta(), c.phi(),
-            c.e237(), c.e277(), c.fracs1(), c.weta2(),
-            c.ehad1(), c.Eta1(), c.emaxs1(), c.e2tsts1())
-    fprint (f, '\n    ', [c.energyInSample(i) for i in range(25)])
-    return
-@nolist
-def dump_TrigEMCluster_nolist (c, f):
-    dump_TrigEMCluster (c, f)
-    return
-
-
 @nolist
 def dump_TrigInDetTrackCollection (t, f):
     fprintln (f, ' ROI ', t.RoI_ID())
@@ -2958,41 +2938,6 @@ def dump_TrigRoiDescriptor (d, f):
 @nolist
 def dump_TrigRoiDescriptor_nolist (d, f):
     dump_TrigRoiDescriptor (d, f)
-    return
-
-
-def dump_Trig3Momentum (m, f):
-    fprint (f, m.e(), m.eta(), m.phi(), m.inCone(), m.caloSample())
-    return
-
-
-def dump_TrigTauClusterDetails (t, f):
-    if not t: return
-    for s in range(4):
-        fprint (f, '\n    EM%d: '% s)
-        fprint (f, t.EMRadius(s), t.EMenergyWidth(s), t.EMenergyMedium(s),
-                t.EMenergyWide(s), t.EMenergyNarrow(s))
-    for s in range(3):
-        fprint (f, '\n    HAD%d: '% s)
-        fprint (f, t.HADRadius(s), t.HADenergyWidth(s), t.HADenergyMedium(s),
-                t.HADenergyWide(s), t.HADenergyNarrow(s))
-    return
-
-def dump_TrigTauCluster (t, f):
-    fprint (f, '  ')
-    dump_TrigCaloCluster (t, f)
-    fprint (f, '\n   ', t.energy(), t.EMCalibEnergy(), t.EMenergy(),
-            t.HADenergy(), t.eta(), t.phi(), t.IsoFrac(), t.numStripCells(),
-            t.stripWidth(), t.eCalib(), t.eEMCalib(), t.EMRadius2())
-    for s in range(25):
-        fprint (f, '\n    %2d: '% s)
-        fprint (f, t.energy(s))
-    dump_TrigTauClusterDetails (t.clusterDetails(), f)
-    fprintln (f, ' ')
-    return
-@nolist
-def dump_TrigTauCluster_nolist (t, f):
-    dump_TrigTauCluster (t, f)
     return
 
 
@@ -3137,14 +3082,6 @@ def dump_TRTUncompressedHit (t, f):
     return
 
 
-def dump_TrigT2MbtsBits (t, f):
-    if hasattr(t, 'triggerEnergies'):
-        fprint (f, list(t.triggerEnergies()), list(t.triggerTimes()))
-    else:
-        fprint (f, t.mbtsWord(), list(t.triggerTimes()))
-    return
-
-
 def dump_CosmicMuon (m, f):
     # Not really implemented.
     # The AODs i saw had containers of these, which were always empty.
@@ -3174,11 +3111,6 @@ def dump_MdtTrackSegment (t, f):
     return
 
 
-def dump_RingerRings (r, f):
-    fprint (f, list(r.rings()))
-    return
-
-
 def dump_TrigTrtHitCounts (p, f):
     fprint (f, '  barrel')
     dump_TrigHisto1D (p.barrel(), f)
@@ -3186,14 +3118,6 @@ def dump_TrigTrtHitCounts (p, f):
     dump_TrigHisto1D (p.endcapA(), f)
     fprint (f, '\n      endcapC')
     dump_TrigHisto1D (p.endcapC(), f)
-    return
-
-
-def dump_TrigRNNOutput (p, f):
-    fprint (f, list(p.output()))
-    #if p.isValid():
-    #    cl = p.cluster()
-    #    fprint (f, '  [', cl.rawEnergy(), cl.rawEta(), cl.rawPhi(), ']')
     return
 
 
@@ -4565,12 +4489,8 @@ dumpspecs = [
     ["DataVector<TrigVertex>",               dump_TrigVertex],
     ["TrigVertexCollection",                 dump_TrigVertex],
     ["TrigTrackCounts",                      dump_TrigTrackCounts_nolist],
-    ["TrigEMCluster",                        dump_TrigEMCluster_nolist],
     ["TrigInDetTrackCollection",             dump_TrigInDetTrackCollection],
-    ["TrigCaloClusterContainer",             dump_TrigCaloCluster],
-    ["TrigTauClusterDetailsContainer",       dump_TrigTauClusterDetails],
     ["TrigRoiDescriptor",                    dump_TrigRoiDescriptor_nolist],
-    ["TrigTauCluster",                       dump_TrigTauCluster_nolist],
     ["TrigSpacePointCounts",                 dump_TrigSpacePointCounts_nolist],
     ["TileContainer<TileMu>",                dump_TileMu],
     ["CaloShowerContainer",                  dump_CaloShower],
@@ -4590,17 +4510,12 @@ dumpspecs = [
     ['AtlasHitsVector<MDTSimHit>',           dump_MDTSimHit],
     ['AtlasHitsVector<RPCSimHit>',           dump_RPCSimHit],
     ['AtlasHitsVector<TGCSimHit>',           dump_TGCSimHit],
-    ["TrigEMClusterContainer",               dump_TrigEMCluster],
-    ["TrigTauClusterContainer",              dump_TrigTauCluster],
     ["TrigSpacePointCountsCollection",       dump_TrigSpacePointCounts],
     ["TrigTrackCountsCollection",            dump_TrigTrackCounts],
-    ["TrigT2MbtsBitsContainer",              dump_TrigT2MbtsBits],
     ["TrigRoiDescriptorCollection",          dump_TrigRoiDescriptor],
     ["CosmicMuonCollection",                 dump_CosmicMuon],
     ["MdtTrackSegmentCollection",            dump_MdtTrackSegment],
-    ["RingerRingsContainer",                 dump_RingerRings],
     ["TrigTrtHitCountsCollection",           dump_TrigTrtHitCounts],
-    ["TrigRNNOutputContainer",               dump_TrigRNNOutput],
     ["InDet::InDetLowBetaContainer",         dump_InDetLowBetaCandidate],
     ["LArNoisyROSummary",                    dump_LArNoisyROSummary],
     ["SkimDecisionCollection",               dump_SkimDecision],

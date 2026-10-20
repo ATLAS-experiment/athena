@@ -618,6 +618,8 @@ def getClassesToIgnore(flags):
         l.append("1173853172")  # TrigMuonEFInfoContainer
         l.append("1175295175")  # TrigMuonEFIsolationContainer
         l.append("1314529658")  # MuonSegmentCombinationCollection
+        l.append("31349851")    # TrigEMCluster
+        l.append("100986084")   # TrigT2MbtsBits
     return l
 
 

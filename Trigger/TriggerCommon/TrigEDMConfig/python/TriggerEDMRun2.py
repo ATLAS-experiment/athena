@@ -712,7 +712,6 @@ TriggerHLTList = [
     ('TrigPassFlags#HLT_passflags',                                       'BS ESD AODFULL', 'Steer'),
     
     # particles == L2 List
-    ('TrigT2MbtsBits#HLT_T2Mbts',                                         'BS ESD AODFULL AODSLIM', 'MinBias'),
     ('TrigSpacePointCounts#HLT_spacepoints',                              'BS ESD AODFULL AODSLIM', 'MinBias'), # ? do we realy need it!
     ('TrigTrtHitCounts#HLT_TrtHitCount',                                  '',                       'MinBias'),
     ('TrigMissingET#HLT_T2MissingET',                                     '', 'MET'),
@@ -720,19 +719,6 @@ TriggerHLTList = [
     ('TrigMissingET#HLT_L2MissingET_FEB',                                 '', 'MET'),
     ('ElectronMuonTopoInfo#HLT_EgMuTopoFEX',                              '',                       'Combined'),        # Muon? Egamma? Combined?
     ('ElectronMuonTopoInfo#HLT_L2_PhotonMuonTopoFEX',                     '',                       'Combined'),        # Muon? Egamma? Combined?
-
-    #clusters == L2 List
-    ('TrigEMCluster#HLT',                                                 '',                 'Egamma'),
-    ('TrigEMCluster#HLT_TrigT2CaloEgamma',                                '',                 'Egamma'),
-    ('TrigEMCluster#HLT_TrigCaloRinger',                                  '',                       'Egamma'),
-    ('TrigEMCluster#HLT_TrigT2CaloCosmic',                                'BS ESD AODFULL',         'Cosmics'),
-    ('TrigEMCluster#HLT_T2CaloSwCluster',                                 '',                 'Egamma'),
-    ('TrigEMCluster#HLT_TrigcaloSwCluster',                               '',                 'Egamma'),
-    ('TrigCaloCluster#HLT_TrigT2Calo',                                    '',                 'Egamma'),
-    ('TrigRNNOutput#HLT_TrigRingerNeuralFex',                             '',                 'Egamma'),
-    ('TrigTauCluster#HLT_TrigT2CaloTau',                                  '',                       'Tau'),
-    ('TrigTauClusterDetails#HLT_TrigT2CaloTauDetails',                    '',                       'Tau'),
-    ('TrigRNNOutput#HLT_TrigTRTHTCounts',                                 '',                 'Egamma'),
 
     # tracking == L2 List
    ('TrigInDetTrackCollection#HLT',                                      'BS ESD',                  'ID'),      # category?
@@ -1013,17 +999,10 @@ EDMDetails[ "TrigRoiDescriptor" ]         = {'persistent':"TrigRoiDescriptorColl
 EDMDetails[ "TrigOperationalInfo" ]       = {'persistent':"TrigOperationalInfoCollection_tlp1",   'typealias':'', 'collection':'TrigOperationalInfoCollection' }
 EDMDetails[ "TrigMonEvent" ]              = {'persistent':"TrigMonEventCollection_tlp1",          'typealias':'', 'collection':'TrigMonEventCollection' }
 EDMDetails[ "TrigInDetTrackCollection" ]  = {'persistent':"TrigInDetTrackCollection_tlp2",        'typealias':'InDetTrk' }
-EDMDetails[ "TrigEMCluster" ]             = {'persistent':"TrigEMClusterContainer_p4",          'typealias':'EMCl', 'collection':"TrigEMClusterContainer"}
-EDMDetails[ "TrigCaloCluster" ]            = {'persistent':"TrigCaloClusterContainer_p3",          'typealias':'CaloCl', 'collection':"TrigCaloClusterContainer"}
-EDMDetails[ "RingerRings" ]               = {'persistent':"RingerRingsContainer_p2",            'typealias':'RiRi', 'collection':"RingerRingsContainer"}
-EDMDetails[ "TrigRNNOutput" ]             = {'persistent':"TrigRNNOutputContainer_p2",            'typealias':'RNNOut', 'collection':"TrigRNNOutputContainer"}
-EDMDetails[ "TrigTauCluster" ]            = {'persistent':"TrigTauClusterContainer_p5",         'typealias':'TauCl', 'collection': 'TrigTauClusterContainer' }
-EDMDetails[ "TrigTauClusterDetails" ]     = {'persistent':"TrigTauClusterDetailsContainer_p2",  'typealias':'TauDetails', 'collection': 'TrigTauClusterDetailsContainer' }
 EDMDetails[ "TrigT2Jet" ]                 = {'persistent':"TrigT2JetContainer_p3",              'typealias':'T2Jet', 'collection':'TrigT2JetContainer'}
 EDMDetails[ "TrigTau" ]                   = {'persistent':"TrigTauContainer_p3",                'typealias':'tau', 'collection':'TrigTauContainer'}
 EDMDetails[ "TrigL2BjetContainer" ]       = {'persistent':"TrigL2BjetContainer_p3",             'typealias':'AOD' }
 EDMDetails[ "TrigMissingET" ]             = {'persistent':"TrigMissingETContainer_p3",          'typealias':'MET', 'collection':'TrigMissingETContainer'}
-EDMDetails[ "TrigT2MbtsBits" ]            = {'persistent':"TrigT2MbtsBitsContainer_p3",         'typealias':'AOD', 'collection':'TrigT2MbtsBitsContainer'}
 EDMDetails[ "TrigSpacePointCounts" ]      = {'persistent':"TrigSpacePointCountsCollection_p4",  'typealias':'AOD', 'collection':'TrigSpacePointCountsCollection'}
 EDMDetails[ "TrigTrtHitCounts" ]          = {'persistent':"TrigTrtHitCountsCollection_p2",      'typealias':'AOD', 'collection':'TrigTrtHitCountsCollection'}
 EDMDetails[ "TrigVertexCollection" ]      = {'persistent':"TrigVertexCollection_tlp1",            'typealias':'AOD'}
@@ -1048,7 +1027,6 @@ EDMDetails[ "TrigTrackCounts" ]           = {'persistent':"TrigTrackCountsCollec
 EDMDetails[ "TrigVertexCounts" ]           = {'persistent':"TrigVertexCountsCollection_tlp1",     'typealias':'VtxCount', 'collection':'TrigVertexCountsCollection'}
 EDMDetails[ "TrackCollection" ]           = { 'persistent':"Trk::TrackCollection_tlp2",           'typealias':'AOD' }
 EDMDetails[ "Rec::TrackParticleContainer" ]   = {'persistent':"Rec::TrackParticleContainer_tlp1", 'typealias':'' }
-EDMDetails[ "TrigT2ZdcSignals" ]        = {'persistent':"TrigT2ZdcSignals_p1",                    'typealias':'AOD', 'collection':'TrigT2ZdcSignalsContainer'}
 
 EDMDetails[ "Analysis::TauDetailsContainer" ] ={'persistent':"TauDetailsContainer_tlp2",          'typealias':'AOD' }
 EDMDetails[ "VxContainer" ]               = {'persistent':"Trk::VxContainer_tlp2",                'typealias':'' }
@@ -1232,12 +1210,10 @@ EDMDetails['xAOD::CMXRoIAuxContainer']                    = {'persistent': "", '
 # Move list of EDM libraries from HLTTriggerGetter.py to TriggerEDM.py
 #
 EDMLibraries = [ 'TrigSteeringEvent',
-                 'TrigCaloEvent',
                  'TrigInDetEvent',
                  'TrigDecisionEvent',
                  'TrigTopoEvent',
                  'RecTPCnv',
-                 'TrigCaloEventTPCnv',
                  'TrigDecisionEventTPCnv',     'TrigInDetEventTPCnv',
                  'TrigSteeringEventTPCnv',
                  'TrigTopoEventTPCnv',
