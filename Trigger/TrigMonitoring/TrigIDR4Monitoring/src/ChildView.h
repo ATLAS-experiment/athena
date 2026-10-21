@@ -19,9 +19,6 @@
 
 #include "TrackView.h"
 
-#include <vector>
-#include <iostream>
-
 
 /// a TrackView that can have a parent to store the Electron, or Tau etc
 /// Z bosons etc
@@ -38,6 +35,8 @@ public:
   
   ChildView( const ChildView* ) = delete; // don't want implicitly creating a ChildView with an internal ChildView*
   ChildView(       ChildView* ) = delete;
+
+  virtual ~ChildView() = default;
 
   bool hasParent() const override { return m_parent; }
   
