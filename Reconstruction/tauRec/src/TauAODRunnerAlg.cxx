@@ -98,7 +98,7 @@ StatusCode TauAODRunnerAlg::execute (const EventContext& ctx) const {
 
     // Link the original tau to the deepcopy
     ElementLink<xAOD::TauJetContainer> link_to_ori_tau;
-    link_to_ori_tau.toContainedElement(*pTauContainer, tau);
+    link_to_ori_tau.toContainedElement(*pTauContainer, tau, ctx);
     acc_ori_tau_link(*newTau) = link_to_ori_tau;
 
     // If the output TauTrackContainer is declared, create a new copy of all existing TauTracks
@@ -114,7 +114,7 @@ StatusCode TauAODRunnerAlg::execute (const EventContext& ctx) const {
 
         // Relink the tautrack
         ElementLink<xAOD::TauTrackContainer> linkToTauTrack;
-        linkToTauTrack.toContainedElement(*newTauTrkCon, newTauTrk);
+        linkToTauTrack.toContainedElement(*newTauTrkCon, newTauTrk, ctx);
         newTau->addTauTrackLink(linkToTauTrack);
       }
     }

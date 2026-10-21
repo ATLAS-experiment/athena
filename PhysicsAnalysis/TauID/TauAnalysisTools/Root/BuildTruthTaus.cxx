@@ -194,7 +194,7 @@ BuildTruthTaus::buildTruthTausFromTruthParticles(TruthTausEvent& truthTausEvent,
       classificationDecorator(*truthTau) = classificationReadDecor.isAvailable() ? classificationReadDecor(*xTruthParticle) : -1234;
 
       // create link to the original TruthParticle
-      ElementLink < xAOD::TruthParticleContainer > lTruthParticleLink(xTruthParticle, *truthTausEvent.m_xTruthParticleContainer);
+      ElementLink < xAOD::TruthParticleContainer > lTruthParticleLink(xTruthParticle, *truthTausEvent.m_xTruthParticleContainer, ctx);
       linkDecorator(*truthTau) = lTruthParticleLink;
     }
   }
