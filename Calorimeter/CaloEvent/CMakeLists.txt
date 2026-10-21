@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloEvent )
@@ -29,6 +29,15 @@ atlas_add_dictionary( CaloEventDict
    DATA_LINKS CaloTowerContainer
    ELEMENT_LINKS CaloShowerContainer CaloCellLinkContainer
    CaloClusterCellLinkContainer )
+
+# Serializer converter for Trigger.
+if( NOT GENERATIONBASE )
+   atlas_add_sercnv_library( CaloEventSerCnv
+      FILES CaloEvent/CaloCellContainer.h CaloEvent/CaloClusterContainer.h
+            CaloEvent/CaloShowerContainer.h CaloEvent/CaloTowerContainer.h
+            CaloEvent/CaloCellLinkContainer.h
+      LINK_LIBRARIES CaloEvent TrigSerializeCnvSvcLib )
+endif()
 
 atlas_install_joboptions( share/*.txt )
 
