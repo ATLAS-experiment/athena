@@ -153,35 +153,6 @@ public:
   void fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
                       const uint32_t* p, uint32_t n, LArRawChannelContainer& coll, const CaloGain::CaloGain gain) const; 
 
-  //Specialized method to convert ROD Data words into LArDigit
-  void fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
-                      const uint32_t* p, uint32_t n, LArDigitContainer& coll, const CaloGain::CaloGain gain) const;
-
-  //Specialized method to convert ROD Accumulated Calib Digit words into LArAccumulatedCalibDigit
-  void fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
-                      const uint32_t* p,
-                      uint32_t n,
-                      LArAccumulatedCalibDigitContainer& coll,
-                      const CaloGain::CaloGain gain,
-                      const LArCalibLineMapping& calibLineMapping) const;
-
-  //Specialized method to convert ROD Accumulated Digit words into LArAccumulatedDigit
-  void fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
-                      const uint32_t* p, uint32_t n, LArAccumulatedDigitContainer& coll, const CaloGain::CaloGain gain) const;
-
-  //Specialized method to convert ROD Data words into LArCalibDigit
-  void fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
-                      const uint32_t* p,
-                      uint32_t n,
-                      LArCalibDigitContainer& coll,
-                      const CaloGain::CaloGain gain,
-                      const LArCalibLineMapping& calibLineMapping,
-                      const LArOnOffIdMapping& onOffIdMapping) const;
-
-  //Specialized method to convert ROD Data words to read the headers of the Feb
-  void fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE::ROBFragment& robFrag,
-                      const uint32_t* p, uint32_t n, LArFebHeaderContainer& coll, const CaloGain::CaloGain) const;
-
   //Check an eformat fragment for validity. Report an error if it's not valid.
   template <class T>
   inline bool check_valid (const T* frag, MsgStream& log) const;
