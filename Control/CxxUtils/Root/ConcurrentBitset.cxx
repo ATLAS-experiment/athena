@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file CxxUtils/src/ConcurrentBitset.cxx
@@ -131,12 +131,13 @@ ConcurrentBitset& ConcurrentBitset::operator= (const ConcurrentBitset& other)
 ConcurrentBitset& ConcurrentBitset::operator= (ConcurrentBitset&& other)
 {
   if (this != &other) {
-    emptyGarbage();
+    Impl* impl = other.m_impl.exchange (nullptr);
+    impl = m_impl.exchange (impl);
+    if (impl) {
+      lock_t lock (m_mutex);
+      m_garbage.push_back (impl);
+    }
     other.emptyGarbage();
-    delete m_impl;
-    Impl* impl = other.m_impl;
-    other.m_impl = nullptr;
-    m_impl = impl;
   }
   return *this;
 }

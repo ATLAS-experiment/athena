@@ -9,3 +9,4 @@ test_compare
 test_operators
 test_anyall
 test_mt
+test_mt2

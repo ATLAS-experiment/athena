@@ -517,8 +517,8 @@ public:
   static const int niter = 500;
 
   test_mt_Thread (int slot, int nsets, int nslots,
-                std::vector<CxxUtils::ConcurrentBitset>& sets,
-                std::mutex* mutexes);
+                  std::vector<CxxUtils::ConcurrentBitset>& sets,
+                  std::mutex* mutexes);
   void operator()();
   void dowrite (int iset, int irand,
                 CxxUtils::ConcurrentBitset& flipsave);
@@ -683,6 +683,126 @@ void test_mt()
 
   for (int i=0; i < 5; i++) {
     test_mt_iter();
+  }
+}
+
+
+//************************ Second MT test.
+
+
+std::atomic<bool> pleaseStop = false;
+
+
+class test_mt2_Writer
+{
+public:
+  static const int niter = 500;
+
+  test_mt2_Writer (std::vector<CxxUtils::ConcurrentBitset>& sets);
+  void operator()();
+
+
+private:
+  std::vector<CxxUtils::ConcurrentBitset>& m_sets;
+};
+
+
+test_mt2_Writer::test_mt2_Writer (std::vector<CxxUtils::ConcurrentBitset>& sets)
+  : m_sets (sets)
+{
+}
+
+
+void test_mt2_Writer::operator()()
+{
+  std::shared_lock<std::shared_timed_mutex> lock (start_mutex);
+
+  CxxUtils::ConcurrentBitset pat1 = m_sets[0];
+  CxxUtils::ConcurrentBitset pat2 = ~pat1;
+
+  for (int iter = 0; iter < niter; iter++) {
+
+    for (CxxUtils::ConcurrentBitset& s : m_sets) {
+      s = pat1;
+    }
+    for (CxxUtils::ConcurrentBitset& s : m_sets) {
+      CxxUtils::ConcurrentBitset tmp = pat2;
+      s = std::move (tmp);
+    }
+
+  }
+}
+
+
+class test_mt2_Reader
+{
+public:
+  test_mt2_Reader (std::vector<CxxUtils::ConcurrentBitset>& sets);
+  void operator()();
+
+
+private:
+  std::vector<CxxUtils::ConcurrentBitset>& m_sets;
+};
+
+
+test_mt2_Reader::test_mt2_Reader (std::vector<CxxUtils::ConcurrentBitset>& sets)
+  : m_sets (sets)
+{
+}
+
+
+void test_mt2_Reader::operator()()
+{
+  std::shared_lock<std::shared_timed_mutex> lock (start_mutex);
+
+  while (!pleaseStop) {
+    for (CxxUtils::ConcurrentBitset& s : m_sets) {
+      if (s.count() != s.capacity()/2) std::abort();
+    }
+  }
+}
+
+
+void test_mt2_iter()
+{
+  const int nthread = 4;
+  const int nsets = 100;
+  const int capacity = 128;
+
+  CxxUtils::ConcurrentBitset pat (capacity);
+  for (size_t i = 0; i < capacity; i += 2){
+    pat.set (i);
+  }
+
+  std::vector<CxxUtils::ConcurrentBitset> bitsets (nsets, pat);
+
+  std::thread threads[nthread];
+  start_mutex.lock();
+  pleaseStop = false;
+
+  threads[0] = std::thread (test_mt2_Writer (bitsets));
+  for (int i=1; i < nthread; i++) {
+    threads[i] = std::thread (test_mt2_Reader (bitsets));
+  }
+
+  // Try to get the threads starting as much at the same time as possible.
+  start_mutex.unlock();
+
+  threads[0].join();
+  pleaseStop = true;
+  for (int i=1; i < nthread; i++) {
+    threads[i].join();
+  }
+}
+
+
+void test_mt2()
+{
+  std::println ("test_mt2");
+
+  for (int i=0; i < 5; i++) {
+    test_mt2_iter();
   }
 }
 
@@ -1175,7 +1295,6 @@ int main (int argc, char** argv)
   test_operators();
   test_anyall();
   test_mt();
+  test_mt2();
   return 0;
 }
-
-    
