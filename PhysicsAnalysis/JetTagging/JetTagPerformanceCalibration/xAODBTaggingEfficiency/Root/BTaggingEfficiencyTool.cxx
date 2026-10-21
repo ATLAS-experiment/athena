@@ -127,11 +127,6 @@ BTaggingEfficiencyTool::BTaggingEfficiencyTool( const std::string & name) : asg:
   // initialise some variables needed for caching
   // TODO : add configuration of the mapIndices - rather than just using the default of 0
   //m_mapIndices["Light"] = m_mapIndices["T"] = m_mapIndices["C"] = m_mapIndices["B"] = 0;
-  m_initialised = false;
-  m_applySyst      = false;
-  m_isContinuous   = false;
-  m_isContinuous2D = false;
-  m_using_conventional_labels = false;
 
   // declare the selection tool to be private (not absolutely sure this is needed?)
   m_selectionTool.declarePropertyFor(this, "BTaggingSelectionTool", "selection tool to be used internally");
@@ -147,6 +142,9 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   ATH_MSG_INFO( " TaggerName = " << m_taggerName.value() );
   ATH_MSG_INFO( " OP = " << m_OP.value() );
   ATH_MSG_INFO( " m_systStrategy is " << m_systStrategy.value() );
+
+  // Will be true only for the MV2 tagger 
+  m_isMV2Tagger = ( m_taggerName.value().find("MV2") != std::string::npos );
 
   m_SFNames["B"] = m_SFNamesB;
   m_SFNames["C"] = m_SFNamesC;
@@ -673,11 +671,9 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   if( registry.registerSystematics(*this) != StatusCode::SUCCESS) 
     return StatusCode::FAILURE;
 
-  // Finally, also initialise the selection tool, if needed (for now this is the case only for DL1 tag weight computations,
-  // so we do this only when DL1 is specified)
-  if (m_taggerName.value().find("DL1") != std::string::npos ||
-      m_taggerName.value().find("GN1") != std::string::npos ||
-      m_taggerName.value().find("GN2") != std::string::npos) {
+  // Finally, also initialise the selection tool, if needed 
+  // This concerns all the recent taggers the only tagger not concerned is MV2 tagger which is quite old 
+  if (!m_isMV2Tagger) {
     m_selectionTool.setTypeAndName("BTaggingSelectionTool/" + name() + "_selection");
     ATH_CHECK( m_selectionTool.setProperty("FlvTagCutDefinitionsFileName", m_SelectionCDIFile) );
     ATH_CHECK( m_selectionTool.setProperty("TaggerName",                   m_selectionTaggerName) );
@@ -687,7 +683,7 @@ StatusCode BTaggingEfficiencyTool::initialize() {
     ATH_CHECK( m_selectionTool.setProperty("useCTagging",                  m_useCTag) );
     ATH_CHECK( m_selectionTool.setProperty("readFromBTaggingObject",                  m_readFromBTaggingObject) );
     ATH_CHECK( m_selectionTool.retrieve() );
- }
+  }
 
   // if the user decides to ignore these errors, at least make her/him aware of this
   if (m_ignoreOutOfValidityRange) {
@@ -1281,10 +1277,9 @@ BTaggingEfficiencyTool::fillVariables( const xAOD::Jet & jet, CalibrationDataVar
         const xAOD::BTagging* tagInfo = xAOD::BTaggingUtilities::getBTagging( jet );
         if (!tagInfo) return false;
     }
-    // For now, we defer the tag weight computation to the selection tool only in the case of DL1* (this is likely to be revisited)
-    if (m_taggerName.value().find("DL1") != std::string::npos ||
-	m_taggerName.value().find("GN1") != std::string::npos ||
-	m_taggerName.value().find("GN2") != std::string::npos) {
+    // For now, we defer the tag weight computation to the selection tool 
+    // This concerns all the recent taggers the only tagger not concerned is MV2 tagger which is quite old 
+    if (!m_isMV2Tagger) {
       return (m_selectionTool->getTaggerWeight(jet, x.jetTagWeight, m_useCTag) == CP::CorrectionCode::Ok);
     } else {
       ATH_MSG_ERROR("BTaggingEfficiencyTool doesn't support tagger: "+m_taggerName);

@@ -293,8 +293,8 @@ private:
 
   /// pointer to the object doing the actual work
   //Analysis::CalibrationDataInterfaceROOT*  m_CDI = nullptr;
-   std::shared_ptr<Analysis::CalibrationDataInterfaceROOT> m_CDI;
-   /// pointer to the onnx tool
+  std::shared_ptr<Analysis::CalibrationDataInterfaceROOT> m_CDI;
+  /// pointer to the onnx tool
   std::unique_ptr<SaltModel> m_saltModel;
 
   /// @name core configuration properties (set at initalization time and not modified afterwards)
@@ -347,7 +347,7 @@ private:
   Gaudi::Property<std::string> m_uncertaintySuffixesLight{this, "UncertaintyLightSuffix", "", "optional suffix for light-flavour-jet uncertainty naming"};
   std::map<std::string, std::string> m_uncertaintySuffixes;
   
-  bool m_using_conventional_labels; // flag for if the labels in the CDI configuration are "conventional", e.g. "B", "C", "Light", and "T"
+  bool m_using_conventional_labels = false; // flag for if the labels in the CDI configuration are "conventional", e.g. "B", "C", "Light", and "T"
   // remove label dependence - work from a string of semi-colon sep. to populate m_SFNames
   Gaudi::Property<std::string> m_SFName_flex{this, "FlexibleScaleFactorCalibrations", "", "(semicolon-separated) name of scale factor calibration object for (0,1,2..) indexed flavour labels, e.g. '0:default;1:default;2:default;3:default'"};
   // remove label dependence - work from a string of semi-colon sep. to populate m_EVReduction
@@ -398,23 +398,24 @@ private:
 
   /// @name Cached variables
   /// @{
-
   /// flag to indicate tool is initialized correctly when set
-  bool m_initialised;
-
-
-  bool m_applySyst;
+  bool m_initialised = false;
+  bool m_applySyst = false;
   SystInfo m_applyThisSyst;
 
   std::map<CP::SystematicVariation,SystInfo> m_systematicsInfo;
   // cached for affectedBySystematics
   CP::SystematicSet m_systematics;
   // specifically for continuous tagging
-  bool m_isContinuous;
+  bool m_isContinuous = false;
   // specifically for continuous 2D tagging
-  bool m_isContinuous2D;
+  bool m_isContinuous2D = false;
   // pointer to a member function of a b-tagger
   // tagWeight_member_t m_getTagWeight;
+
+  // Boolean only true for the MV2 tagger 
+  // which is a quite old tagger 
+  bool m_isMV2Tagger = false;
 
   // cache the mapIndex variables (one for each flavour)
   std::map<std::string, unsigned int> m_mapIndices;
