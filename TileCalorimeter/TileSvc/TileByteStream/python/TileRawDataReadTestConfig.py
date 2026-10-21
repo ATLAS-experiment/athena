@@ -12,8 +12,7 @@ import glob
 
 def findAbsPath(path):
     refPaths = [os.environ.get('ATLAS_REFERENCE_DATA', None),
-                '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art',
-                '/afs/cern.ch/atlas/maxidisk/d33/referencefiles']
+                '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art']
     for refPath in refPaths:
         if refPath:
             absPath = os.path.join(refPath, path)

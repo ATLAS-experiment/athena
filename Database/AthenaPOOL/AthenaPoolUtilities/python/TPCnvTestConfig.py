@@ -25,8 +25,7 @@ def TPCnvTest(infile, keys, useGeoModelSvc=False, useIOVDbSvc=False, doPixel=Fal
 
     refpaths = [os.environ.get ('ATLAS_REFERENCE_DATA', None),
                 '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art',
-                '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs',
-                '/afs/cern.ch/atlas/maxidisk/d33/referencefiles']
+                '/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CommonInputs']
 
     if infile.startswith ('rtt:'):
         infile = infile[4:]
