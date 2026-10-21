@@ -20,7 +20,7 @@ GPUClusterInfoAndMomentsCalculator::GPUClusterInfoAndMomentsCalculator(const std
 StatusCode GPUClusterInfoAndMomentsCalculator::initialize_non_CUDA()
 {
   m_options.allocate();
-    
+
   m_options.m_options->use_abs_energy         = m_absOpt;
   m_options.m_options->use_two_gaussian_noise = m_twoGaussianNoise;
   m_options.m_options->skip_invalid_clusters  = m_skipInvalidClusters;
@@ -29,10 +29,11 @@ StatusCode GPUClusterInfoAndMomentsCalculator::initialize_non_CUDA()
   m_options.m_options->eta_inner_wheel        = m_etaInnerWheel;
   m_options.m_options->min_l_longitudinal     = m_minLLongitudinal;
   m_options.m_options->min_r_lateral          = m_minRLateral;
-  
-  
+
+
   ATH_CHECK( m_kernelSizeOptimizer.retrieve() );
-  
+  ATH_CHECK( m_streamTool.retrieve() );
+
   return StatusCode::SUCCESS;
 }
 
@@ -40,7 +41,7 @@ StatusCode GPUClusterInfoAndMomentsCalculator::initialize_CUDA()
 {
   m_options.sendToGPU();
   register_kernels( *(m_kernelSizeOptimizer.get()) );
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -48,9 +49,9 @@ StatusCode GPUClusterInfoAndMomentsCalculator::execute(const EventContext & ctx,
                                                        EventDataHolder & event_data, void * /*temporary_buffer*/) const
 {
   size_t times[num_time_measurements];
-  
-  calculateClusterPropertiesAndMoments(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), times, m_measureTimes);
-  
+
+  calculateClusterPropertiesAndMoments(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), m_streamTool->stream(ctx), times, m_measureTimes);
+
   if (m_measureTimes)
     {
       record_times(ctx.evt(),
@@ -67,7 +68,7 @@ StatusCode GPUClusterInfoAndMomentsCalculator::execute(const EventContext & ctx,
                    times[10]
                    );
     }
-    
+
   return StatusCode::SUCCESS;
 }
 
@@ -81,4 +82,3 @@ StatusCode GPUClusterInfoAndMomentsCalculator::finalize()
     }
   return StatusCode::SUCCESS;
 }
-

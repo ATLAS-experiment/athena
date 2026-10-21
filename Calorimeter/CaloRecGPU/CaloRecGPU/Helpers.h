@@ -177,22 +177,22 @@ namespace CaloRecGPU
     /*!
       \brief Copies \p num bytes from \p source in GPU memory to \p dest in CPU memory, asynchronously.
     */
-    void GPU_to_CPU_async(void * dest, const void * const source, const size_t num, CUDAStreamPtrHolder stream = {});
+    void GPU_to_CPU_async(void * dest, const void * const source, const size_t num, CUDAStreamPtrHolder stream);
 
     /*!
       \brief Copies \p num bytes from \p source in CPU memory to \p dest in GPU memory, asynchronously.
     */
-    void CPU_to_GPU_async(void * dest, const void * const source, const size_t num, CUDAStreamPtrHolder stream = {});
+    void CPU_to_GPU_async(void * dest, const void * const source, const size_t num, CUDAStreamPtrHolder stream);
 
     /*!
       \brief Copies \p num bytes from \p source to \p dest, both in GPU memory, asynchronously.
     */
-    void GPU_to_GPU_async(void * dest, const void * const source, const size_t num, CUDAStreamPtrHolder stream = {});
+    void GPU_to_GPU_async(void * dest, const void * const source, const size_t num, CUDAStreamPtrHolder stream);
 
     /*!
       \brief Synchronizes the \p stream. If called with no value, synchronizes with @c cudaStreamPerThread.
     */
-    void GPU_synchronize(CUDAStreamPtrHolder stream = {});
+    void GPU_synchronize(CUDAStreamPtrHolder stream);
 
     /*!
       \brief Optimizes block and grid size according to @c cudaOccupancyMaxPotentialBlockSize.
@@ -213,7 +213,7 @@ namespace CaloRecGPU
 
   namespace Helpers
   {
-    
+
     /// \brief Returns the ceiling of num/denom, with proper rounding.
     template <class T1, class T2>
     inline constexpr auto int_ceil_div(const T1 num, const T2 denom)
@@ -252,7 +252,7 @@ namespace CaloRecGPU
     //Though we could possibly bit-hack stuff due to IEEE-754 reliance elsewhere,
     //it's not valid and type-safe C++...
     //Since it's compile-time, this being a trifle slower is meaningless.
-    
+
     /// \brief Returns the ceiling of the base-2 logarithm of a number
     /// (i. e. the minimum number of bits to represent this number).
     template <class T>
@@ -262,7 +262,7 @@ namespace CaloRecGPU
       return sizeof(T) * CHAR_BIT - std::countl_zero(num);
 #else
       unsigned int ret = 64;
-    
+
       for (unsigned long long int mask = 0x8000000000000000U; mask > 0; mask >>= 1U)
         {
           if (num & mask)
@@ -450,7 +450,7 @@ namespace CaloRecGPU
     float eta_from_coordinates(const float x, const float y, const float z)
     {
       using namespace std;
-      
+
       if (x != 0 || y != 0)
         {
 #ifdef __CUDA_ARCH__
@@ -517,8 +517,8 @@ namespace CaloRecGPU
 
       return ret + corr;
     }
-    
-    
+
+
 #if CUDA_AVAILABLE
     ///Adds the contribution of a number @p v to the
     ///Kahan-Babushka-Neumaier summation that uses
@@ -1031,12 +1031,12 @@ namespace CaloRecGPU
       {
         return m_array;
       }
-      
+
       CUDA_HOS_DEV operator const void * () const
       {
         return m_array;
       }
-      
+
       CUDA_HOS_DEV operator void * ()
       {
         return m_array;
@@ -1224,12 +1224,12 @@ namespace CaloRecGPU
       {
         return m_array;
       }
-      
+
       CUDA_HOS_DEV operator const void * () const
       {
         return m_array;
       }
-      
+
       CUDA_HOS_DEV operator void * ()
       {
         return m_array;
@@ -1456,12 +1456,12 @@ namespace CaloRecGPU
       {
         return m_object;
       }
-      
+
       CUDA_HOS_DEV operator const void * () const
       {
         return m_object;
       }
-      
+
       CUDA_HOS_DEV operator void * ()
       {
         return m_object;
@@ -1647,7 +1647,7 @@ namespace CaloRecGPU
       {
         return m_object;
       }
-      
+
       CUDA_HOS_DEV operator void * ()
       {
         return m_object;
@@ -1704,7 +1704,7 @@ namespace CaloRecGPU
       T * get_pointer_if_available() const
       {
         const std::thread::id this_id = std::this_thread::get_id();
-        
+
         for (size_t i = 0; i < m_thread_equivs.size(); ++i)
           {
             if (m_thread_equivs[i] == this_id)
@@ -1718,14 +1718,14 @@ namespace CaloRecGPU
       T & add_one_and_return()
       {
         std::unique_lock<std::shared_mutex> lock(m_mutex);
-        
+
         const std::thread::id this_id = std::this_thread::get_id();
         const std::thread::id invalid_id{};
 
         bool empty_found = false;
-        
+
         size_t first_empty;
-        
+
         for (size_t i = 0; i < m_thread_equivs.size(); ++i)
           {
             if (m_thread_equivs[i] == this_id)

@@ -26,6 +26,7 @@ BasicEventDataGPUExporter::BasicEventDataGPUExporter(const std::string & type, c
 StatusCode BasicEventDataGPUExporter::initialize()
 {
   ATH_CHECK( m_cellsKey.initialize() );
+  ATH_CHECK( m_streamTool.retrieve() );
 
   return StatusCode::SUCCESS;
 }
@@ -62,11 +63,11 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
     {
       ATH_MSG_DEBUG("Taking slow path on event " << ctx.evt());
     }
-    
+
   ed.importCells(static_cast<const CaloCellContainer *>(&(*cell_collection)), m_missingCellsToFill);
 
   const auto post_cells = clock_type::now();
-  
+
   ed.importClusters(cluster_collection,
                     MomentsOptionsArray::all(),
                     m_outputCombinedTags,
@@ -76,8 +77,8 @@ StatusCode BasicEventDataGPUExporter::convert(const EventContext & ctx,
                     m_missingCellsToFill);
 
   const auto post_clusters = clock_type::now();
-  
-  ed.sendToGPU(MomentsOptionsArray::all(), false, false, m_measureTimes);
+
+  ed.sendToGPU(MomentsOptionsArray::all(), m_streamTool->stream(ctx), false, false, m_measureTimes);
 
   const auto post_send = clock_type::now();
 

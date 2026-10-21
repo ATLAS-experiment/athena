@@ -19,15 +19,15 @@ namespace BasicClusterInfoCalculator
   void updateSeedCellProperties(CaloRecGPU::EventDataHolder & holder,
                                 const CaloRecGPU::ConstantDataHolder & instance_data,
                                 const IGPUKernelSizeOptimizer & optimizer,
-                                const bool synchronize = false,
-                                CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+                                CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use,
+                                const bool synchronize = false);
 
   void calculateClusterProperties(CaloRecGPU::EventDataHolder & holder,
                                   const CaloRecGPU::ConstantDataHolder & instance_data,
                                   const IGPUKernelSizeOptimizer & optimizer,
+                                  CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use,
                                   const bool synchronize = false,
-                                  const bool cut_in_absolute_ET = true, const float absolute_ET_threshold = -1,
-                                  CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+                                  const bool cut_in_absolute_ET = true, const float absolute_ET_threshold = -1);
 
 }
 #endif //CALORECGPU_BASICGPUCLUSTERINFOCALCULATORIMPL_H

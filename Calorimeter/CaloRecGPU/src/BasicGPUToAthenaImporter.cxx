@@ -83,6 +83,8 @@ StatusCode BasicGPUToAthenaImporter::initialize()
       return StatusCode::FAILURE;
     }
 
+  ATH_CHECK( m_streamTool.retrieve() );
+
   return StatusCode::SUCCESS;
 }
 
@@ -96,7 +98,7 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
   {
     return boost::chrono::duration_cast<boost::chrono::microseconds>(after - before).count();
   };
-  
+
   cluster_container->clear();
 
   const auto start = clock_type::now();
@@ -109,7 +111,7 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
     }
   const DataLink<CaloCellContainer> cell_collection_link (cell_collection.name(), ctx);
 
-  ed.returnToCPU(MomentsOptionsArray::all(), false, false, true);
+  ed.returnToCPU(MomentsOptionsArray::all(), m_streamTool->stream(ctx), false, false, true);
 
   const auto after_send = clock_type::now();
 
@@ -125,7 +127,7 @@ StatusCode BasicGPUToAthenaImporter::convert (const EventContext & ctx,
                     m_measureTimes ? extra_times : nullptr);
 
   const auto after_export = clock_type::now();
-  
+
   for (auto && cluster : *cluster_container)
     {
       cluster->setClusterSize(m_clusterSize);

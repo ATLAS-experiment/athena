@@ -14,6 +14,8 @@
 #include "CaloRecGPU/CaloGPUTimed.h"
 #include "GPUClusterInfoAndMomentsCalculatorImpl.h"
 
+#include "AthCUDAInterfaces/IStreamTool.h"
+
 #include "CaloRecGPU/IGPUKernelSizeOptimizerSvc.h"
 
 #include "GaudiKernel/ServiceHandle.h"
@@ -41,9 +43,9 @@ class GPUClusterInfoAndMomentsCalculator:
   {
     return CaloGPUCUDAInitialization::initialize();
   }
-  
+
   virtual StatusCode initialize_non_CUDA() override;
-  
+
   virtual StatusCode initialize_CUDA() override;
 
   virtual StatusCode execute (const EventContext & ctx,
@@ -68,7 +70,7 @@ class GPUClusterInfoAndMomentsCalculator:
    * This defines the minimal distance the two leading cells might
    * have before this value is used instead of their real distance in
    * the normalization of the LATERAL moment. */
-  Gaudi::Property<double> m_minRLateral {this, "MinRLateral", 4 * CLHEP::cm, "The minimal r in the definition of the Lateral moment"};  
+  Gaudi::Property<double> m_minRLateral {this, "MinRLateral", 4 * CLHEP::cm, "The minimal r in the definition of the Lateral moment"};
 
   /**
    * @brief the minimal \f$\lambda\f$ in the definition of the
@@ -89,7 +91,7 @@ class GPUClusterInfoAndMomentsCalculator:
   Gaudi::Property<double> m_minBadLArQuality {this, "MinBadLArQuality", 4000, "The minimal cell quality in the LAr for declaring a cell bad"};
 
   /**
-   * @brief if set to true use abs E value of cells to calculate 
+   * @brief if set to true use abs E value of cells to calculate
    * cluster moments */
    Gaudi::Property<bool> m_absOpt {this, "WeightingOfNegClusters", false, "If set to true use abs E value of cells to calculate cluster moments"};
 
@@ -101,18 +103,21 @@ class GPUClusterInfoAndMomentsCalculator:
    * @brief if set to true use 2-gaussian noise description for
    * TileCal  */
    Gaudi::Property<bool> m_twoGaussianNoise {this, "TwoGaussianNoise", false, "If set to true use 2-gaussian noise description for TileCal"};
-  
+
   /** @brief If @p false, do the moment calculation even for invalid clusters (which may waste computation).
    *  Defaults to @p true.
    */
   Gaudi::Property<bool> m_skipInvalidClusters {this, "SkipInvalidClusters", true, "Check for and skip invalid clusters during moments calculation."};
-  
+
   /** @brief Options for the algorithm, held in a GPU-friendly way.
   */
   ClusterMomentsCalculator::CMCOptionsHolder m_options;
-    
+
   /** @brief Handle to the CUDA kernel block and grid size optimization service. */
   ServiceHandle<IGPUKernelSizeOptimizerSvc> m_kernelSizeOptimizer { this, "KernelSizeOptimizer", "GPUKernelSizeOptimizerSvc", "CUDA kernel size optimization service." };
+
+  /// Tool providing the CUDA stream to use
+  ToolHandle<AthCUDA::IStreamTool> m_streamTool {this, "StreamTool", "", "CUDA stream tool."};
 };
 
 #endif //CALORECGPU_TOPOAUTOMATONCLUSTERING_H

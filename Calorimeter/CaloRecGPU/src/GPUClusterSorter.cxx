@@ -20,13 +20,14 @@ GPUClusterSorter::GPUClusterSorter(const std::string & type, const std::string &
 }
 
 StatusCode GPUClusterSorter::initialize_non_CUDA()
-{ 
+{
   ATH_CHECK( m_kernelSizeOptimizer.retrieve() );
+  ATH_CHECK( m_streamTool.retrieve() );
   return StatusCode::SUCCESS;
 }
 
 StatusCode GPUClusterSorter::initialize_CUDA()
-{ 
+{
   register_kernels( *(m_kernelSizeOptimizer.get()) );
   return StatusCode::SUCCESS;
 }
@@ -39,23 +40,25 @@ StatusCode GPUClusterSorter::execute(const EventContext & ctx, const ConstantDat
   {
     return boost::chrono::duration_cast<boost::chrono::microseconds>(after - before).count();
   };
-  
+
   const auto start = clock_type::now();
-  
+
   const auto before_properties = clock_type::now();
-  
-  initialPropertiesCalculation(event_data, constant_data, *(m_kernelSizeOptimizer.get()), m_measureTimes, m_cutClustersInAbsE, m_clusterETThreshold);
-  
+
+  auto stream = m_streamTool->stream(ctx);
+
+  initialPropertiesCalculation(event_data, constant_data, *(m_kernelSizeOptimizer.get()), stream, m_measureTimes, m_cutClustersInAbsE, m_clusterETThreshold);
+
   const auto before_sort = clock_type::now();
-  
-  sortClusters(event_data, constant_data, *(m_kernelSizeOptimizer.get()), m_measureTimes);
-  
+
+  sortClusters(event_data, constant_data, *(m_kernelSizeOptimizer.get()), stream, m_measureTimes);
+
   const auto before_finalize = clock_type::now();
-  
-  finalizeClusterAssignment(event_data, constant_data, *(m_kernelSizeOptimizer.get()), m_measureTimes);
-  
+
+  finalizeClusterAssignment(event_data, constant_data, *(m_kernelSizeOptimizer.get()), stream, m_measureTimes);
+
   const auto end = clock_type::now();
-  
+
   if (m_measureTimes)
     {
       record_times(ctx.evt(),
@@ -79,4 +82,3 @@ StatusCode GPUClusterSorter::finalize()
     }
   return StatusCode::SUCCESS;
 }
-

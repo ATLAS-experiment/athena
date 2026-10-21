@@ -15,6 +15,8 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "CaloRecGPU/CaloGPUTimed.h"
 
+#include "AthCUDAInterfaces/IStreamTool.h"
+
 class CaloCell_ID;
 
 /**
@@ -73,6 +75,9 @@ class BasicGPUToAthenaImporter :
   * @brief if set to true, the uncalibrated state is saved when importing the clusters. Default is @p true.
   */
   Gaudi::Property<bool> m_saveUncalibrated {this, "SaveUncalibratedSignalState", true, "Use CaloClusterKineHelper::calculateKine instead of GPU-calculated cluster properties"};
+
+  /// Tool providing the CUDA stream to use
+  ToolHandle<AthCUDA::IStreamTool> m_streamTool {this, "StreamTool", "", "CUDA stream tool."};
 
 };
 

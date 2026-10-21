@@ -18,6 +18,8 @@
 #include <string>
 #include <mutex>
 
+#include "AthCUDAInterfaces/IStreamTool.h"
+
 #include "CLHEP/Units/SystemOfUnits.h"
 
 #include "CaloRecGPU/IGPUKernelSizeOptimizerSvc.h"
@@ -31,7 +33,7 @@
  * @date 31 May 2022
  * @brief Topological cluster maker algorithm to be run on GPUs.
  */
- 
+
 
 class TopoAutomatonClustering :
   public extends<AthAlgTool, CaloClusterGPUProcessor>, public CaloGPUTimed, public CaloGPUCUDAInitialization
@@ -44,23 +46,23 @@ class TopoAutomatonClustering :
   {
     return CaloGPUCUDAInitialization::initialize();
   }
-  
+
   virtual StatusCode initialize_non_CUDA() override;
-  
+
   virtual StatusCode initialize_CUDA() override;
-  
+
   virtual StatusCode execute (const EventContext & ctx,
                               const CaloRecGPU::ConstantDataHolder & constant_data,
                               CaloRecGPU::EventDataHolder & event_data,
                               void * temporary_buffer) const override;
 
   virtual StatusCode finalize() override;
-  
+
   virtual ~TopoAutomatonClustering() = default;
-  
+
  private:
 
-  /** 
+  /**
    * @brief vector of names of the calorimeters to consider.
    *
    * The default is to use all calorimeters (i.e. LAREM, LARHEC,
@@ -69,7 +71,7 @@ class TopoAutomatonClustering :
    * as input for the cluster maker.  This property is used in order
    * to ignore a certain subsystem (e.g. for LAREM only clusters
    * specify only LAREM in the jobOptions).  */
-  Gaudi::Property<std::vector<std::string>>  m_caloNames {this, "CalorimeterNames", {}, "Name(s) of Calorimeters to use for clustering"};  
+  Gaudi::Property<std::vector<std::string>>  m_caloNames {this, "CalorimeterNames", {}, "Name(s) of Calorimeters to use for clustering"};
 
   /**
    * @brief vector of names of the calorimeter samplings to consider
@@ -233,9 +235,9 @@ class TopoAutomatonClustering :
   Gaudi::Property<bool> m_restrictPSNeighbors {this, "RestrictPSNeighbors",
                                                false, "Limit the neighbors in presampler Barrel and Endcap"};
 
-  
+
   /**
-   * @brief If set to true, the time window is softened 
+   * @brief If set to true, the time window is softened
             in the EMB2 and EME2_OW due to crosstalk
             from direct neighbour cells in phi. */
   Gaudi::Property<bool> m_xtalkEM2 {this, "XTalkEM2",
@@ -251,9 +253,12 @@ class TopoAutomatonClustering :
   /** @brief Options for the algorithm, held in a GPU-friendly way.
   */
   TAGrowing::TACOptionsHolder m_options;
-  
+
   /** @brief Handle to the CUDA kernel block and grid size optimization service. */
   ServiceHandle<IGPUKernelSizeOptimizerSvc> m_kernelSizeOptimizer { this, "KernelSizeOptimizer", "GPUKernelSizeOptimizerSvc", "CUDA kernel size optimization service." };
+
+  /// Tool providing the CUDA stream to use
+  ToolHandle<AthCUDA::IStreamTool> m_streamTool {this, "StreamTool", "", "CUDA stream tool."};
 
 };
 

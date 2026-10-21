@@ -214,6 +214,9 @@ StatusCode GPUToAthenaImporterWithMoments::initialize()
     }
 
   m_doHVMoments = (m_momentsToDo[xAOD::CaloCluster::ENG_BAD_HV_CELLS] || m_momentsToDo[xAOD::CaloCluster::N_BAD_HV_CELLS]) && m_fillHVMoments;
+
+  ATH_CHECK( m_streamTool.retrieve() );
+
   return StatusCode::SUCCESS;
 }
 
@@ -235,7 +238,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
   const auto start = clock_type::now();
 
   SG::ReadHandle<CaloCellContainer> cell_collection(m_cellsKey, ctx);
-  
+
   if ( !cell_collection.isValid() )
     {
       ATH_MSG_ERROR( " Cannot retrieve CaloCellContainer: " << cell_collection.name()  );
@@ -250,6 +253,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
   ed.returnAndExportClusters(cluster_container,
                              &cell_collection_link,
                              m_momentsToDo,
+                             m_streamTool->stream(ctx),
                              false,
                              m_saveUncalibrated,
                              false,
@@ -278,7 +282,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
       for (int i = 0; i < ed.m_clusters->number_cells; ++i)
         {
           const int this_cluster = ed.m_clusters->clusterIndices[i];
-            
+
           const int this_cell_index = ed.m_clusters->cells.indices[i];
           const int this_hash_ID = ed.m_cell_info->get_hash_ID(this_cell_index, ed.m_cell_info->complete);
 
@@ -286,7 +290,7 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
             {
               continue;
             }
-          
+
           HWIdentifier hwid = cabling->createSignalChannelIDFromHash(this_hash_ID);
           const float corr = hvcorr->HVScaleCorr(hwid);
 
@@ -310,12 +314,12 @@ StatusCode GPUToAthenaImporterWithMoments::convert (const EventContext & ctx,
             }
         }
     }
-  
+
   if (!m_keepGPUData)
     {
       ed.clear_GPU();
     }
-  
+
   const auto after_HV = clock_type::now();
 
   if (m_measureTimes)

@@ -21,6 +21,8 @@
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArElecCalib/ILArHVScaleCorr.h"
 
+#include "AthCUDAInterfaces/IStreamTool.h"
+
 class CaloCell_ID;
 
 /**
@@ -82,13 +84,13 @@ class GPUToAthenaImporterWithMoments :
   * @brief if set to true, fill the HV-related moments using the respective tools.
   */
   Gaudi::Property<bool> m_fillHVMoments {this, "FillHVMoments", false, "Fill the HV-related moments using the respective tools."};
-  
+
   ///@brief Cabling for the CPU-based HV moments calculation.
    SG::ReadCondHandleKey<LArOnOffIdMapping> m_HVCablingKey{this, "LArCablingKey","LArOnOffIdMap","SG Key of LAr Cabling object"};
- 
+
  ///@brief HV corrections for the CPU-based HV moments.
    SG::ReadCondHandleKey<ILArHVScaleCorr> m_HVScaleKey{this,"HVScaleCorrKey","LArHVScaleCorr","SG key of HVScaleCorr conditions object"};
- 
+
   ///@brief Threshold above which a cell contributes to the HV moments.
    Gaudi::Property<float> m_HVthreshold{this,"HVThreshold",0.2,"Threshold to consider a cell 'affected' by HV issues"};
 
@@ -100,6 +102,9 @@ class GPUToAthenaImporterWithMoments :
   * @brief if set to true, the uncalibrated state is saved when importing the clusters. Default is @p true.
   */
   Gaudi::Property<bool> m_saveUncalibrated {this, "SaveUncalibratedSignalState", true, "Use CaloClusterKineHelper::calculateKine instead of GPU-calculated cluster properties"};
+
+  /// Tool providing the CUDA stream to use
+  ToolHandle<AthCUDA::IStreamTool> m_streamTool {this, "StreamTool", "", "CUDA stream tool."};
 
 
   /**

@@ -53,18 +53,18 @@ void TAGrowing::TACOptionsHolder::sendToGPU(const bool clear_CPU)
 namespace TACTemporaries
 {
   struct TACTemps;
-  
+
   CALORECGPU_TEMPWRAPPER(secondary_array, secondary_tag_array);
-  
+
   CALORECGPU_TEMPWRAPPER(merge_table,      tertiary_tag_array);
 
   CALORECGPU_TEMPBIGARR_3(pairs_1, energyPerSample, maxEPerSample, maxPhiPerSample, int);
   CALORECGPU_TEMPBIGARR_3(pairs_2, maxEtaPerSample, etaPerSample, phiPerSample, int);
-  
+
   constexpr static int start_terminal_pairs = NExactPairs;
-  
+
   CALORECGPU_TEMPCELLARR_1(seed_to_cluster_table, etaCaloFrame, phiCaloFrame, eta1CaloFrame, int);
-  
+
   CALORECGPU_TEMPVAR(num_seedgrow_pairs, firstPhi, 0, int);
   CALORECGPU_TEMPVAR(num_term_pairs,     firstEta, 0, int);
 
@@ -72,17 +72,17 @@ namespace TACTemporaries
   CALORECGPU_TEMPVAR(stop_flag,     secondLambda, 0, int);
 
   CALORECGPU_TEMPVAR(iterate_storage, deltaPhi, 0, IterateUntilCondition::Storage);
-  
+
   struct TACTemps
   {
     int continue_flag;
     int stop_flag;
-    
+
     int num_seedgrow_pairs;
     int num_term_pairs;
-    
+
     int seed_to_cluster_table[NCaloCells];
-    
+
     int pairs_1[2 * NExactPairs];
     int pairs_2[2 * NExactPairs];
 
@@ -236,10 +236,10 @@ void TAGrowing::signalToNoise(EventDataHolder & holder,
                               const ConstantDataHolder & instance_data,
                               const TACOptionsHolder & options,
                               const IGPUKernelSizeOptimizer & optimizer,
-                              const bool synchronize,
-                              CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
+                              CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
+                              const bool synchronize)
 {
-  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (cudaStream_t) stream;
 
   const CUDAKernelLaunchConfiguration config = optimizer.get_launch_configuration("TopoAutomatonGrowing", 0);
 
@@ -275,10 +275,10 @@ void cellPairsKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
   const int num_cells = cell_info_arr->number;
 
   constexpr int WarpSize = 32;
- 
+
   for (int cell = index; (cell/WarpSize) * WarpSize < num_cells; cell += grid_size)
     {
-      
+
       int neighbours[NMaxNeighbours];
 
       int num_seedgrow_neighs = 0, num_term_neighs = 0, num_total_neighs = 0;
@@ -287,7 +287,7 @@ void cellPairsKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
       constexpr unsigned int term_neighbour_mark      = 0x200000;
       //Mark growing or terminal neighbours.
       constexpr unsigned int clear_flags_mask = ~(grow_seed_neighbour_mark | term_neighbour_mark);
-          
+
       if (cell < num_cells)
         {
           const TACTag this_tag = clusters_arr->cells.tags[cell];
@@ -331,7 +331,7 @@ void cellPairsKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
                 }
             }
         }
-      
+
       constexpr unsigned int full_mask = 0xFFFFFFFFU;
 
       int seedgrow_prefix = num_seedgrow_neighs;
@@ -347,7 +347,7 @@ void cellPairsKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr,
           seedgrow_prefix += other_seedgrow;
           term_prefix     += other_term;
         }
-      
+
       int base_seedgrow_index = 0;
       int base_term_index = 0;
 
@@ -402,10 +402,10 @@ void TAGrowing::cellPairs(EventDataHolder & holder,
                           const ConstantDataHolder & instance_data,
                           const TACOptionsHolder & options,
                           const IGPUKernelSizeOptimizer & optimizer,
-                          const bool synchronize,
-                          CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
+                          CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
+                          const bool synchronize)
 {
-  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (cudaStream_t) stream;
 
   const CUDAKernelLaunchConfiguration config = optimizer.get_launch_configuration("TopoAutomatonGrowing", 1);
 
@@ -688,11 +688,11 @@ void TAGrowing::clusterGrowing(EventDataHolder & holder,
                                const ConstantDataHolder & instance_data,
                                const TACOptionsHolder & options,
                                const IGPUKernelSizeOptimizer & optimizer,
-                               const bool synchronize,
-                               CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
+                               CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
+                               const bool synchronize)
 {
 
-  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (cudaStream_t) stream;
 
   const CUDAKernelLaunchConfiguration cfg_iter = (optimizer.can_use_cooperative_groups() ?
                                                   optimizer.get_launch_configuration("TopoAutomatonGrowing", 2) :

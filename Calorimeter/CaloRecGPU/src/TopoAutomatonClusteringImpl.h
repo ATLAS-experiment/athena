@@ -271,22 +271,22 @@ namespace TAGrowing
                      const CaloRecGPU::ConstantDataHolder & instance_data,
                      const TACOptionsHolder & options,
                      const IGPUKernelSizeOptimizer & optimizer,
-                     const bool synchronize = false,
-                     CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+                     CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use,
+                     const bool synchronize = false);
 
   void cellPairs(CaloRecGPU::EventDataHolder & holder,
                  const CaloRecGPU::ConstantDataHolder & instance_data,
                  const TACOptionsHolder & options,
                  const IGPUKernelSizeOptimizer & optimizer,
-                 const bool synchronize = false,
-                 CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+                 CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use,
+                 const bool synchronize = false);
 
   void clusterGrowing(CaloRecGPU::EventDataHolder & holder,
                       const CaloRecGPU::ConstantDataHolder & instance_data,
                       const TACOptionsHolder & options,
                       const IGPUKernelSizeOptimizer & optimizer,
-                      const bool synchronize = false,
-                      CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+                      CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use,
+                      const bool synchronize = false);
 
 }
 #endif //CALORECGPU_TOPOAUTOMATONCLUSTERING_CUDA_H

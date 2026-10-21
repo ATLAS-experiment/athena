@@ -248,7 +248,7 @@ void CaloRecGPU::EventDataHolder::importCells(const void * p_cell_collection, co
           const CaloCell * cell = (*cell_it);
           export_cell(cell, cell_index, cell_index);
         }
-      
+
       m_cell_info->number = CaloRecGPU::NCaloCells;
       m_cell_info->complete = true;
       m_cell_info->all_cells_valid = true;
@@ -293,14 +293,14 @@ void CaloRecGPU::EventDataHolder::importCells(const void * p_cell_collection, co
       int index_inside = 0;
 
       const auto cells_end = cell_collection->end();
-      
+
       for (CaloCellContainer::const_iterator cell_it = cell_collection->begin(); cell_it != cells_end; ++cell_it, ++index_inside)
         {
           CaloPrefetch::nextDDE(cell_it, cells_end, 2);
           //May be adjusted later...
-          
+
           const CaloCell * cell = (*cell_it);
-          
+
           const int cell_index = cell->caloDDE()->calo_hash();
           export_cell(cell, cell_index, index_inside);
         }
@@ -368,14 +368,14 @@ void CaloRecGPU::EventDataHolder::importClusters(const void * p_cluster_collecti
           {
             return m_clusters->get_extra_cell_info(index);
           }
-          
+
       };
-      
+
       for (int i = 0; i < CaloRecGPU::NCaloCells; ++i)
         {
           get_cell_tag(i) = ClusterTag::make_invalid_tag();
         }
-      
+
       if (output_tags)
         {
           m_clusters->state = ClusterInformationState::TagsWithBasicInfo;
@@ -423,13 +423,13 @@ void CaloRecGPU::EventDataHolder::importClusters(const void * p_cluster_collecti
               if (consider_shared_cells)
                 {
                   const float weight = it.weight();
-                  
+
                   uint32_t weight_as_int = 0;
                   std::memcpy(&weight_as_int, &weight, sizeof(float));
                   //On the platforms we expect to be running this, it should be fine.
                   //Still UB.
                   //With C++20, we could do that bit-cast thing.
-                  
+
                   if (weight_as_int == 0)
                     {
                       weight_as_int = 1;
@@ -437,7 +437,7 @@ void CaloRecGPU::EventDataHolder::importClusters(const void * p_cluster_collecti
                       //but just to distinguish from
                       //a non-shared cluster.
                     }
-                  
+
                   const ClusterTag other_tag = get_cell_tag(cell_index_in_collection);
 
                   const int other_index = other_tag.is_part_of_cluster() ? other_tag.cluster_index() : -1;
@@ -468,18 +468,18 @@ void CaloRecGPU::EventDataHolder::importClusters(const void * p_cluster_collecti
                     {
                       get_cell_tag(cell_index_in_collection) = ClusterTag::make_tag(other_index, weight_as_int, cluster_number);
                     }
-                        
+
                   //All of this logic assumes a cell is shared by at most two clusters
                   //with weights such that w_1 + w_2 = 1.
                   //This is not necessarily valid with local calibrations.
-                      
+
                 }
               else
                 {
                   get_cell_tag(cell_index_in_collection) = ClusterTag::make_tag(cluster_number);
                 }
             }
-          
+
           if (!output_tags)
             {
               for (auto it = cell_links->begin(); it != cell_links->end(); ++it, ++overall_cell_index)
@@ -694,7 +694,7 @@ static void cluster_transfer_helper_cell_assignment(ReadStateFrom & state_holder
       CALORECGPU_MOMENTS_EXTRA_TAGS_HELPER(engCalibOutT);
       CALORECGPU_MOMENTS_EXTRA_TAGS_HELPER(engCalibDeadL);
       CALORECGPU_MOMENTS_EXTRA_TAGS_HELPER(engCalibDeadM);
-      
+
     }
   else if (state_holder->state != CaloRecGPU::ClusterInformationState::None)
     {
@@ -799,11 +799,11 @@ static void cluster_transfer_helper(ReadStateFrom & state_holder,
 
 
 void CaloRecGPU::EventDataHolder::sendToGPU(const MomentsOptionsArray & moments_to_add,
+                                            CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
                                             const bool full_copy,
                                             const bool clear_CPU,
-                                            const bool synchronize,
-                                            CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
-{  
+                                            const bool synchronize)
+{
   m_cell_info_dev.allocate();
   m_clusters_dev.allocate();
 
@@ -825,7 +825,7 @@ void CaloRecGPU::EventDataHolder::sendToGPU(const MomentsOptionsArray & moments_
   cluster_transfer_helper(m_clusters, m_clusters_dev, m_clusters, moments_to_add,
                           CaloRecGPU::CUDA_Helpers::CPU_to_GPU_async, full_copy, stream,
                           m_cell_info->number);
-  
+
   if (clear_CPU)
     {
       CaloRecGPU::CUDA_Helpers::GPU_synchronize(stream);
@@ -840,10 +840,10 @@ void CaloRecGPU::EventDataHolder::sendToGPU(const MomentsOptionsArray & moments_
 }
 
 void CaloRecGPU::EventDataHolder::returnToCPU(const MomentsOptionsArray & moments_to_add,
+                                              CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
                                               const bool full_copy,
                                               const bool clear_GPU,
                                               const bool synchronize,
-                                              CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
                                               const bool also_return_cells)
 {
   if (also_return_cells)
@@ -1061,7 +1061,7 @@ static void export_cluster_fill_cells_and_basic_info(const ClusterInfoArr * clus
                                                      std::vector<std::unique_ptr<CaloClusterCellLink>> & cell_links,
                                                      std::vector<int> & cluster_order,
                                                      const bool save_uncalibrated)
-{  
+{
   const int total_size = (cluster_order.size() ? cluster_order.size() : clusters->number);
   for (int i = 0; i < total_size; ++i)
     {
@@ -1125,7 +1125,7 @@ static void export_cluster_fill_moments(const ClusterInfoArr * clusters,
             {
               sampling_pattern |= (1U << static_cast<unsigned int>(CaloSampling::EME2));
             }
-          
+
           cluster->setSamplingPattern(sampling_pattern);
 
           for (int s = 0; s < NumSamplings; ++s)
@@ -1138,7 +1138,7 @@ static void export_cluster_fill_moments(const ClusterInfoArr * clusters,
 
           if (clusters->moments.nExtraCellSampling[cluster_index] > 0)
             {
-              cluster->setNumberCellsInSampling(CaloSampling::EME2, clusters->moments.nExtraCellSampling[cluster_index], true);              
+              cluster->setNumberCellsInSampling(CaloSampling::EME2, clusters->moments.nExtraCellSampling[cluster_index], true);
             }
 
           for (int s = 0; s < NumSamplings; ++s)
@@ -1269,12 +1269,12 @@ void CaloRecGPU::EventDataHolder::exportClusters(void * p_cluster_collection,
 void CaloRecGPU::EventDataHolder::returnAndExportClusters(void * p_cluster_collection,
                                                           const void * p_cell_collection_link,
                                                           const MomentsOptionsArray & moments_to_add,
+                                                          CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
                                                           bool sort_clusters,
                                                           const bool save_uncalibrated,
                                                           const bool output_extra_moments,
                                                           const std::vector<int> & extra_cells_to_fill,
-                                                          size_t * time_measurements,
-                                                          CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
+                                                          size_t * time_measurements)
 {
   using clock_type = boost::chrono::thread_clock;
   auto time_cast = [](const auto & before, const auto & after)

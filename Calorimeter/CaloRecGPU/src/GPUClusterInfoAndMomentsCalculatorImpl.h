@@ -69,11 +69,11 @@ namespace ClusterMomentsCalculator
           temp_mat[0][0] =    1.f;
           temp_mat[0][1] =    0.f;
           temp_mat[0][2] =    0.f;
-          
+
           temp_mat[1][0] =    0.f;
           temp_mat[1][1] =    1.f;
           temp_mat[1][2] =    0.f;
-          
+
           temp_mat[2][0] =    0.f;
           temp_mat[2][1] =    0.f;
           temp_mat[2][2] =    1.f;
@@ -81,7 +81,7 @@ namespace ClusterMomentsCalculator
       else
         {
           const float beta = hypot(d, f);
-          
+
           const float inv_beta = 1.f / beta;
 
           const float em_0_1 = d * inv_beta;
@@ -105,11 +105,11 @@ namespace ClusterMomentsCalculator
           temp_mat[0][0] =    1.f;
           temp_mat[0][1] =    0.f;
           temp_mat[0][2] =    0.f;
-          
+
           temp_mat[1][0] =    0.f;
           temp_mat[1][1] =  em_0_1;
           temp_mat[1][2] =  em_0_2;
-          
+
           temp_mat[2][0] =    0.f;
           temp_mat[2][1] =  em_0_2;
           temp_mat[2][2] = -em_0_1;
@@ -171,7 +171,7 @@ namespace ClusterMomentsCalculator
             {
               const float t = z / x;
               const float u = hypot(1.f, fabsf(t)) * ((x >= 0.f) - (x < 0.f));
-              
+
               givens_c = 1.f / u;
               givens_s = -t * givens_c;
             }
@@ -179,7 +179,7 @@ namespace ClusterMomentsCalculator
             {
               const float t = x / z;
               const float u = hypot(1.f, fabsf(t)) * ((z >= 0.f) - (z < 0.f));
-              
+
               givens_s = -1.f / u;
               givens_c = -t * givens_s;
             }
@@ -188,7 +188,7 @@ namespace ClusterMomentsCalculator
                                                                        temp_diag[k],
                                                                        givens_c,
                                                                        temp_subdiag[k]);
-                                                              
+
           const float dkp1 = CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(givens_s,
                                                                        temp_subdiag[k],
                                                                        givens_c,
@@ -232,10 +232,10 @@ namespace ClusterMomentsCalculator
             {
               float & c_1 = temp_mat[k]    [i];
               float & c_2 = temp_mat[k + 1][i];
-              
+
               const float c_1_old = c_1;
               const float c_2_old = c_2;
-               
+
               c_1 = CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(givens_c, c_1_old, -givens_s, c_2_old);
               c_2 = CaloRecGPU::Helpers::product_sum_cornea_harrison_tang(givens_s, c_1_old,  givens_c, c_2_old);
             }
@@ -695,9 +695,9 @@ namespace ClusterMomentsCalculator
                                             const CaloRecGPU::ConstantDataHolder & instance_data,
                                             const CMCOptionsHolder & options,
                                             const IGPUKernelSizeOptimizer & optimizer,
+                                            CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
                                             size_t (&times)[num_time_measurements],
-                                            const bool synchronize = false,
-                                            CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream = {});
+                                            const bool synchronize = false);
 }
 
 #endif

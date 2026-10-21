@@ -20,13 +20,14 @@ BasicGPUClusterInfoCalculator::BasicGPUClusterInfoCalculator(const std::string &
 }
 
 StatusCode BasicGPUClusterInfoCalculator::initialize_non_CUDA()
-{ 
+{
   ATH_CHECK( m_kernelSizeOptimizer.retrieve() );
+  ATH_CHECK( m_streamTool.retrieve() );
   return StatusCode::SUCCESS;
 }
 
 StatusCode BasicGPUClusterInfoCalculator::initialize_CUDA()
-{ 
+{
   register_kernels( *(m_kernelSizeOptimizer.get()) );
   return StatusCode::SUCCESS;
 }
@@ -44,11 +45,13 @@ StatusCode BasicGPUClusterInfoCalculator::execute(const EventContext & ctx, cons
 
   const auto before_seed_properties = clock_type::now();
 
-  updateSeedCellProperties(event_data, constant_data, *(m_kernelSizeOptimizer.get()), m_measureTimes);
+  auto stream = m_streamTool->stream(ctx);
+
+  updateSeedCellProperties(event_data, constant_data, *(m_kernelSizeOptimizer.get()), stream, m_measureTimes);
 
   const auto before_calculating = clock_type::now();
 
-  calculateClusterProperties(event_data, constant_data, *(m_kernelSizeOptimizer.get()), m_measureTimes, m_cutClustersInAbsE, m_clusterETThreshold);
+  calculateClusterProperties(event_data, constant_data, *(m_kernelSizeOptimizer.get()), stream, m_measureTimes, m_cutClustersInAbsE, m_clusterETThreshold);
 
   const auto end = clock_type::now();
 
@@ -76,4 +79,3 @@ StatusCode BasicGPUClusterInfoCalculator::finalize()
     }
   return StatusCode::SUCCESS;
 }
-

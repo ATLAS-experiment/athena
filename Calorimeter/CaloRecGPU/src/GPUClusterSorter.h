@@ -16,6 +16,8 @@
 #include "GPUClusterSorterImpl.h"
 #include "CaloRecGPU/CaloGPUCUDAInitialization.h"
 
+#include "AthCUDAInterfaces/IStreamTool.h"
+
 #include "GaudiKernel/ServiceHandle.h"
 
 #include "CaloRecGPU/IGPUKernelSizeOptimizerSvc.h"
@@ -41,9 +43,9 @@ class GPUClusterSorter:
   {
     return CaloGPUCUDAInitialization::initialize();
   }
-  
+
   virtual StatusCode initialize_non_CUDA() override;
-  
+
   virtual StatusCode initialize_CUDA() override;
 
   virtual StatusCode execute (const EventContext & ctx,
@@ -54,7 +56,7 @@ class GPUClusterSorter:
   virtual StatusCode finalize() override;
 
   virtual ~GPUClusterSorter() = default;
-  
+
  private:
 
   /**
@@ -74,6 +76,9 @@ class GPUClusterSorter:
 
   /** @brief Handle to the CUDA kernel block and grid size optimization service. */
   ServiceHandle<IGPUKernelSizeOptimizerSvc> m_kernelSizeOptimizer { this, "KernelSizeOptimizer", "GPUKernelSizeOptimizerSvc", "CUDA kernel size optimization service." };
+
+  /// Tool providing the CUDA stream to use
+  ToolHandle<AthCUDA::IStreamTool> m_streamTool {this, "StreamTool", "", "CUDA stream tool."};
 
 };
 

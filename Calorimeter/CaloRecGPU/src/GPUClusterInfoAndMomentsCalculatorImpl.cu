@@ -190,7 +190,7 @@ namespace
     //PTD and Mass must be in the same slot!
     //AvgLArQ and AvgLarQNorm must be in the same slot as FirstEngDens and SecondEngDens!
     //NumPositiveEnergyCells and Mass must be in the same slot!
-    
+
 
     using SecondPassCells = TypeList <
 #if CALORECGPU_MOMENTS_SEPARATE_CELLS_CALCULATION
@@ -592,7 +592,7 @@ void isolationCellPassKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> cluster
 
                 {
                   const int this_primary_cluster = tag.cluster_index();
-                  
+
                   Helpers::device_kahan_babushka_neumaier(&(clusters_arr->moments.energyPerSample[sampling][this_primary_cluster]),
                                                           CMCTemporaries::energyPerSampleAux_ptr(clusters_arr, sampling, this_primary_cluster),
                                                           energy * primary_weight);
@@ -613,7 +613,7 @@ void isolationCellPassKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> cluster
 
                 {
                   const int this_secondary_cluster = tag.secondary_cluster_index();
-                  
+
                   Helpers::device_kahan_babushka_neumaier(&(clusters_arr->moments.energyPerSample[sampling][this_secondary_cluster]),
                                                           CMCTemporaries::energyPerSampleAux_ptr(clusters_arr, sampling, this_secondary_cluster),
                                                           energy * secondary_weight);
@@ -731,7 +731,7 @@ void firstCellPassKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_ar
   const auto indexing = get_cell_pass_indexing();
 
   Parameters p {assume_complete_cells, indexing.moment, clusters_arr, cell_info_arr, geometry, noise_arr, opts};
-  
+
   for (int cell = indexing.cell; cell < clusters_arr->number_cells; cell += indexing.delta_cell)
     {
       do_cell_pass(ToCalculate::FirstPassCells{},
@@ -1023,12 +1023,12 @@ void finalClusterPassKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters
   const int grid_size = gridDim.x * blockDim.x;
 
   for (int cluster = index / WarpSize; cluster < cluster_number; cluster += grid_size / WarpSize)
-    {      
+    {
       if (skip_invalid && clusters_arr->seedCellIndex[cluster] < 0)
         {
           continue;
         }
-      
+
       const float sum_energies = clusters_arr->moments.engPos[cluster];
       if (thread_index < NumSamplings)
         {
@@ -1037,7 +1037,7 @@ void finalClusterPassKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters
           if (max_cell >= 0 && max_cell < NCaloCells)
             {
               const ClusterTag tag = clusters_arr->get_extra_cell_info(max_cell);
-              
+
               const float sec_weight = __uint_as_float(tag.secondary_cluster_weight());
 
               clusters_arr->moments.maxEPerSample[sampling][cluster]   = cell_info_arr->energy[max_cell] * (tag.cluster_index() == cluster ? 1.0f - sec_weight : sec_weight);
@@ -1285,11 +1285,11 @@ void ClusterMomentsCalculator::calculateClusterPropertiesAndMoments(CaloRecGPU::
                                                                     const ConstantDataHolder & instance_data,
                                                                     const CMCOptionsHolder & options,
                                                                     const IGPUKernelSizeOptimizer & optimizer,
+                                                                    CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
                                                                     size_t (&times)[num_time_measurements],
-                                                                    const bool synchronize,
-                                                                    CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
+                                                                    const bool synchronize)
 {
-  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (cudaStream_t) stream;
 
   const MomentsKernelConfigurations configs = get_configurations(optimizer);
 
@@ -1492,7 +1492,7 @@ void ClusterMomentsCalculator::calculateClusterPropertiesAndMoments(CaloRecGPU::
    instance_data.m_geometry_dev,
    options.m_options->skip_invalid_clusters,
    holder.m_cell_info->complete);
-  
+
   if (synchronize)
     {
       CUDA_ERRCHECK(cudaPeekAtLastError());
@@ -1503,7 +1503,7 @@ void ClusterMomentsCalculator::calculateClusterPropertiesAndMoments(CaloRecGPU::
     {
       holder.m_clusters->state = ClusterInformationState::WithMoments;
     }
-  
+
   const auto tB = clock_type::now();
 
   times[ 0] = time_cast(t0, t1);
