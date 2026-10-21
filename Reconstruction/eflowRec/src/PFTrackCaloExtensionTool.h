@@ -5,9 +5,11 @@
 
 #include "eflowTrackExtrapolatorBaseAlgTool.h"
 
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "ActsEvent/ContextUtility.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+
+#include "xAODTracking/TrackParticleContainer.h"
 
 /**
  Inherits from eflowTrackExtrapolatorBaseAlgTool and AthAlgTool. Uses ACTS to extrapolate tracks to the calorimeter, and creates an eflowTrackCaloPoints object.
@@ -25,16 +27,15 @@ public:
 
 private:
 
-     ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool {
-     this,
-     "ExtrapolationTool",
-     "ExtrapolationTool",
-     "Tool to run propagation in an ACTS tracking geometry"
-    };
+     /** The ContextUtility will give us access to the Acts geometry context */
+     ActsTrk::ContextUtility m_ctxProvider{this};
 
     ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
 
-    std::map<unsigned int, std::string> m_caloNameGeoIDMap;
+    SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_extensionReadDecorKey{this, "ExtensionDecoration", "InDetTrackParticles.caloExtensionLink"};
+
+    //Map each identifier volume and layer pair onto a calorimeter sampling layer.
+    std::map<std::pair<std::size_t, std::size_t>, std::string> m_caloVolumeLayerMap;
 
 };
 #endif

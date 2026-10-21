@@ -39,7 +39,6 @@ eflowTrackCaloPoints::eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, cons
     setEtaPhi(itPars->first, parToPosition(itPars->second));
     if (itPars->first == eflowCalo::EMB2) m_isEM2Barrel = true;
     m_positions[itPars->first] = parToPosition(itPars->second);
-    m_directions[itPars->first] = parToDirection(itPars->second);
   }
 
 }
@@ -55,11 +54,20 @@ eflowTrackCaloPoints::eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, cons
       setEtaPhi(itPars->first, parToPosition(itPars->second));
       if (itPars->first == eflowCalo::EMB2) m_isEM2Barrel = true;
       m_positions[itPars->first] = parToPosition(itPars->second);
-      m_directions[itPars->first] = parToDirection(itPars->second);
     }
 
   for (auto firstTileParam : tileTrackParamaters) setEtaPhiTile(firstTileParam.first,parToPosition(firstTileParam.second));
 
+  }
+
+eflowTrackCaloPoints::eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, const Acts::BoundTrackParameters&> & trackParameters,
+  const Acts::GeometryContext& gctx) :
+  m_isEM1Barrel(trackParameters.begin()->first == eflowCalo::EMB1){
+    for (auto keyValuePair : trackParameters) {
+      setEtaPhi(keyValuePair.first,parToPosition(keyValuePair.second, gctx));
+      if (keyValuePair.first == eflowCalo::EMB2) m_isEM2Barrel = true;
+      m_positions[keyValuePair.first] = parToPosition(keyValuePair.second, gctx);
+    }
   }
 
 eflowTrackCaloPoints::~eflowTrackCaloPoints() = default;
@@ -93,21 +101,15 @@ const eflowEtaPhiPosition& eflowTrackCaloPoints::getTileEtaPhiPos(CaloCell_ID::C
   return (it == m_tileEtaPhiPositions.end()) ? m_defaultEtaPhiPosition : it->second;
 }
 
-
 Amg::Vector3D eflowTrackCaloPoints::getPosition(eflowCalo::LAYER layer) {
   std::map<eflowCalo::LAYER, Amg::Vector3D>::const_iterator it = m_positions.find(layer);
   return (it == m_positions.end()) ? m_nullVector : it->second;
-}
-
-Amg::Vector3D eflowTrackCaloPoints::getDirection(eflowCalo::LAYER layer) {
-  std::map<eflowCalo::LAYER, Amg::Vector3D>::const_iterator it = m_directions.find(layer);
-  return (it == m_directions.end()) ? m_nullVector : it->second;
 }
 
 Amg::Vector3D eflowTrackCaloPoints::parToPosition(const Trk::TrackParameters* trackPars) {
   return (trackPars != nullptr) ? trackPars->position() : m_nullVector;
 }
 
-Amg::Vector3D eflowTrackCaloPoints::parToDirection(const Trk::TrackParameters* trackPars) {
-  return (trackPars != nullptr) ? trackPars->momentum() : m_nullVector;
+Amg::Vector3D eflowTrackCaloPoints::parToPosition(const Acts::BoundTrackParameters& trackPars, const Acts::GeometryContext& gctx) {
+  return trackPars.position(gctx);
 }
