@@ -47,8 +47,6 @@ namespace ActsTrk {
     for (std::size_t iseed = 0; iseed < seeds.size(); ++iseed) {
       ActsTrk::Seed seed = seeds[iseed];
 
-      const bool useTopSp = m_autoReverseSearch && shouldReverseSearch(seed);
-
       auto retrieveSurfaceFunction = 
         [this, &detElements] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& { 
           const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
@@ -61,7 +59,7 @@ namespace ActsTrk {
       const auto& [optTrackParams, estimationStatus] =
         m_paramEstimationTool->estimateTrackParameters(
 						       seed,
-						       useTopSp,
+						       /*reverseSearch=*/false,
 						       tgContext,
 						       mfContext,
 						       calContext,
@@ -77,18 +75,6 @@ namespace ActsTrk {
     }
 
     return StatusCode::SUCCESS;
-  }
-
-  bool SeedsToTrackParamsAlg::shouldReverseSearch(const ActsTrk::Seed& seed) const {
-    const xAOD::SpacePoint* bottom_sp = seed.sp().front();
-
-    const double r = bottom_sp->radius();
-    const double z = std::abs(bottom_sp->z());
-
-    const double rBoundary = m_useTopSpRZboundary.value()[0];
-    const double zBoundary = m_useTopSpRZboundary.value()[1];
-
-    return r > rBoundary || z > zBoundary;
   }
 
 }

@@ -2,7 +2,6 @@
 
 from ActsConfig.ActsConfigFlags import SeedingStrategy
 import AthenaCommon.SystemOfUnits as Units
-import math
 
 def deactivateAthenaComponents(icf):
     icf.doAthenaCluster = False
@@ -111,7 +110,6 @@ def createActsTrackingPassFlags():
     # ACTS specifc config flags
     icf.addFlag("isSecondaryPass", False)
     icf.addFlag("isLargeD0", False)
-    icf.addFlag("autoReverseSearch", False)
     icf.addFlag("PixelSeedingStrategy", SeedingStrategy.Gbts, type=SeedingStrategy)
     icf.addFlag("StripSeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
     # Extension used to name the persistified track particle container
@@ -209,17 +207,12 @@ def createActsLargeRadiusTrackingPassFlags():
     # LRT clients can rely on the same container name as in Run 3
     icf.storedTrackParticlesExtension = "LargeD0"
 
-    # Override acts default values
-    icf.Xi2maxSigma = [5.]
-    icf.Xi2maxNoAddSigma = [math.sqrt(50.)]
-
     # Mark as secondary pass
     icf.isSecondaryPass = True
     # Store sepate container for LRT
     # In Athena this is handled by the Tracking.storeSeparateLargeD0Container flag
     icf.storeSeparateContainer = True
     icf.isLargeD0 = True
-    icf.autoReverseSearch = True
 
     icf.usePrdAssociationTool = True
     icf.storeSeparateContainer = lambda pcf : pcf.Tracking.storeSeparateLargeD0Container

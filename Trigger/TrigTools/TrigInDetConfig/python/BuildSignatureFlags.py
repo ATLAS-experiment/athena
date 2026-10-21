@@ -164,16 +164,12 @@ def defaultITkActsTrigTrackingFlags() -> AthConfigFlags:
 def actsLRTTrigTrackingFlags(flags: AthConfigFlags) -> None:
   """Apply the Acts-specific steering and cuts needed by trigger LRT."""
   flags.isLargeD0 = True
-  flags.autoReverseSearch = True
   flags.etaBins = [-1.0, 2.7]
   flags.minPT = [1.0 * Units.GeV]
   flags.minPTSeed = 1.0 * Units.GeV
   flags.maxPrimaryImpactSeed = 300.0 * Units.mm
   flags.maxZImpactSeed = 500.0 * Units.mm
   flags.minPixel = [0]
-  # chi2 cuts 25 / 50 for 1D measurements, in sigma of a 1D Gaussian
-  flags.Xi2maxSigma = [5.0]
-  flags.Xi2maxNoAddSigma = [math.sqrt(50.0)]
 
 def defaultModeTrigTrackingFlags(flags: AthConfigFlags) -> AthConfigFlags:
   return flags

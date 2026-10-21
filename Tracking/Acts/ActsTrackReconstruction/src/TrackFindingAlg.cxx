@@ -76,10 +76,8 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_statEtaBins);
     ATH_MSG_DEBUG("   " << m_seedLabels);
     ATH_MSG_DEBUG("   " << m_dumpAllStatEtaBins);
-    ATH_MSG_DEBUG("   " << m_useTopSpRZboundary);
     ATH_MSG_DEBUG("   " << m_seedMeasOffset);
     ATH_MSG_DEBUG("   " << m_ambiStrategy);
-    ATH_MSG_DEBUG("   " << m_autoReverseSearch);
     ATH_MSG_DEBUG("   " << m_countSharedHits);
     ATH_MSG_DEBUG("   " << m_forceTrackOnSeed);
 
@@ -96,12 +94,6 @@ namespace ActsTrk
     if (m_paramEstimationTool.size() != m_seedContainerKeys.size()) {
       ATH_MSG_FATAL("There are " << m_seedContainerKeys.size() << " SeedContainerKeys. Each needs its own TrackParamsEstimationTool, but there are " << m_paramEstimationTool.size());
     }
-
-    if (m_useTopSpRZboundary.size() != 2)
-      {
-        ATH_MSG_FATAL("useTopSpRZboundary must have 2 elements, but has " << m_useTopSpRZboundary.size());
-        return StatusCode::FAILURE;
-      }
 
     if (m_ambiStrategy != 0u /* OUTSIDE_TF */) m_showResolvedStats = true;
     if (m_ambiStrategy == 1u /* END_OF_TF */) {
@@ -209,10 +201,7 @@ namespace ActsTrk
       {
         duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer], measurementIndex,
                                        m_paramEstimationTool[icontainer]->spacePointIndicesFun(),
-                                       [this,icontainer](const ActsTrk::Seed& seed) -> bool {
-                                         const bool reverseSearch = m_autoReverseSearch && shouldReverseSearch(seed);
-                                         return m_paramEstimationTool[icontainer]->estimateFromTopSp(reverseSearch);
-                                       });
+                                       [](const ActsTrk::Seed&) -> bool { return false; });
       }
 
     // Get Beam pos and make pSurface
@@ -389,18 +378,6 @@ namespace ActsTrk
     return StatusCode::SUCCESS;
   }
 
-  bool TrackFindingAlg::shouldReverseSearch(const ActsTrk::Seed& seed) const {
-    const xAOD::SpacePoint* bottom_sp = seed.sp().front();
-
-    const double r = bottom_sp->radius();
-    const double z = std::abs(bottom_sp->z());
-
-    const double rBoundary = m_useTopSpRZboundary.value()[0];
-    const double zBoundary = m_useTopSpRZboundary.value()[1];
-
-    return r > rBoundary || z > zBoundary;
-  }
-
   // === findTracks ==========================================================
 
   StatusCode
@@ -439,6 +416,21 @@ namespace ActsTrk
       return stopBranch(track, trackState, trackSelectorCfg, detContext.geometry, measurementIndex, typeIndex, event_stat[category_i]);
     };
     options.extensions.branchStopper.connect(stopBranchProxy);
+
+    // Without a stopper the second pass runs past the last findable hit, and a
+    // stray hit beyond the gap turns the layers it skipped into interior holes
+    // that trimTrack cannot remove. Stop it there instead and let addTrack
+    // extrapolate to the perigee. It must not drop: the first pass already
+    // found this track.
+    auto stopSecondBranchProxy = [&](const detail::RecoTrackContainer::TrackProxy &track,
+                                     const detail::RecoTrackContainer::TrackStateProxy &trackState) -> BranchStopperResult {
+      const BranchStopperResult result =
+        stopBranch(track, trackState, trackSelectorCfg, detContext.geometry, measurementIndex, typeIndex, event_stat[category_i]);
+      return result == BranchStopperResult::StopAndDrop ? BranchStopperResult::StopAndKeep : result;
+    };
+    if (m_doSecondPassBranchStopper) {
+      secondOptions.extensions.branchStopper.connect(stopSecondBranchProxy);
+    }
 
     Acts::PropagatorOptions<detail::Stepper::Options, detail::Navigator::Options,
                             Acts::ActorList<Acts::MaterialInteractor>>
@@ -482,13 +474,11 @@ namespace ActsTrk
         category_i = typeIndex * (m_statEtaBins.size() + 1);
         tracksContainerTemp.clear();
 
-        const bool reverseSearch = m_autoReverseSearch && shouldReverseSearch(seed);
-
         // Check if the seed is a duplicate seed
         const bool isDupSeed = duplicateSeedDetector.isDuplicate(typeIndex, iseed);
         if (isDupSeed) {
           ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
-          category_i = getSeedCategory(typeIndex, seed, m_paramEstimationTool[typeIndex]->estimateFromTopSp(reverseSearch));
+          category_i = getSeedCategory(typeIndex, seed);
           ++event_stat[category_i][kNTotalSeeds];
           ++event_stat[category_i][kNDuplicateSeeds];
           if (m_storeDestinies) destiny->at(iseed) = DestinyType::DUPLICATE;
@@ -498,7 +488,7 @@ namespace ActsTrk
         // Get first estimate of parameters from the seed
         const auto& [optTrackParams, estimationStatus] =
           m_paramEstimationTool[typeIndex]->estimateTrackParameters(seed,
-                                                                    reverseSearch,
+                                                                    /*reverseSearch=*/false,
                                                                     detContext.geometry,
                                                                     detContext.magField,
                                                                     detContext.calib,
@@ -507,7 +497,7 @@ namespace ActsTrk
         if (!optTrackParams) {
           ATH_MSG_DEBUG("Failed to estimate track parameters for seed " << iseed);
           if (!isDupSeed) {
-            category_i = getSeedCategory(typeIndex, seed, m_paramEstimationTool[typeIndex]->estimateFromTopSp(reverseSearch));
+            category_i = getSeedCategory(typeIndex, seed);
             ++event_stat[category_i][kNTotalSeeds];
             ++event_stat[category_i][kNNoEstimatedParams];
             if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
@@ -538,11 +528,6 @@ namespace ActsTrk
           }
         }
 
-        // Set the option accordingly - we change the direction and the target surface accordingly
-        options.propagatorPlainOptions.direction = reverseSearch ? Acts::Direction::Backward() : Acts::Direction::Forward();
-        secondOptions.propagatorPlainOptions.direction = options.propagatorPlainOptions.direction.invert();
-        options.targetSurface = reverseSearch ? &pSurface : nullptr;
-        secondOptions.targetSurface = reverseSearch ? nullptr : &pSurface;
         // TODO since the second pass is strictly an extension we should have a separate branch stopper which never drops and always extrapolates to the target surface
 
         xAOD::TrackFitter current_fitter = xAOD::KalmanFitter;
@@ -655,16 +640,10 @@ namespace ActsTrk
             firstMeasurement.previous() = secondTrack.outermostTrackState().index();
             secondTrack.tipIndex() = firstTrack.tipIndex();
 
-            if (reverseSearch) {
-              // smooth the full track
-              auto secondSmoothingResult = Acts::smoothTrack(detContext.geometry,
-                                                             secondTrack,
-                                                             logger());
-              if ( not secondSmoothingResult.ok() ) {
-                continue;
-              }
-              secondTrack.reverseTrackStates(true);
-            }
+            // The second pass extrapolates to the perigee, and only the
+            // perigee holds every measurement once. Do not smooth the stitched
+            // track: the second pass starts from the smoothed first pass, so a
+            // smoother counts the first pass twice.
 
             // Add track to collection
             ATH_CHECK( addTrack(detContext,
@@ -798,10 +777,9 @@ namespace ActsTrk
   }
 
   std::size_t TrackFindingAlg::getSeedCategory(std::size_t typeIndex,
-                                               const ActsTrk::Seed& seed,
-                                               bool useTopSp) const
+                                               const ActsTrk::Seed& seed) const
   {
-    const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
+    const xAOD::SpacePoint* sp = seed.sp().front();
     const xAOD::SpacePoint::ConstVectorMap pos = sp->globalPosition();
     double etaSeed = std::atanh(pos[2] / pos.norm());
     return getStatCategory(typeIndex, etaSeed);

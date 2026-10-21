@@ -751,7 +751,6 @@ def ActsBaseSeedsToTrackParamsAlgCfg(flags,
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
         kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
 
-    kwargs.setdefault("autoReverseSearch", flags.Tracking.ActiveConfig.autoReverseSearch)
 
     acc.addEventAlgo(CompFactory.ActsTrk.SeedsToTrackParamsAlg(name, **kwargs))
     return acc

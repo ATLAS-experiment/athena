@@ -99,8 +99,6 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
     kwargs.setdefault("inflateCovarianceTwoWay", True)
     kwargs.setdefault("twoWayinflateCovarianceFactor", 100.0)
-    kwargs.setdefault("autoReverseSearch", flags.Tracking.ActiveConfig.autoReverseSearch)
-    # kwargs.setdefault("useTopSpRZboundary",[ 229.0 * UnitConstants.mm, 450.0 * UnitConstants.mm])
     
     # forceTrackOnSeed isn't effective with secondary passes, which will have removed most/all of the seed measurements from the measurement containers.
     kwargs.setdefault("forceTrackOnSeed", flags.Acts.forceTrackOnSeed and not flags.Tracking.ActiveConfig.isSecondaryPass)
