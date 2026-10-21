@@ -122,8 +122,9 @@ namespace ActsTrk {
     
     measurements->push_back( new xAOD::TrackMeasurementValidation() );
     xAOD::TrackMeasurementValidation* measurement = measurements->back();    
-    ElementLink< xAOD::TrackMeasurementValidationContainer > mlink( measurements,
-								    measurements->back()->index() );
+    ElementLink< xAOD::TrackMeasurementValidationContainer > mlink( m_write_xaod_key.key(),
+								    measurements->back()->index(),
+                                                                    ctx );
 
     ATH_CHECK( mlink.isValid() );    
     decorator_measurement_link(*cluster) = std::move(mlink);

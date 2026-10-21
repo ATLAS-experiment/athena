@@ -193,7 +193,7 @@ namespace ActsTrk{
                 matchClusters(tgContext, coneClusters.at(binIdx), *extension);
             }
 
-            extensionLink = Link_t{writeHandle.cptr(), writeHandle->size()};
+            extensionLink = Link_t{writeHandle.key(), writeHandle->size(), ctx};
             writeHandle->push_back(std::move(extension));
         }
 

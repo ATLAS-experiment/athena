@@ -464,7 +464,7 @@ namespace Trk{
            const xAOD::TrackParticleContainer* cont = dynamic_cast< const xAOD::TrackParticleContainer* >( trkToFit[ i ]->container() );
            if(  cont )
            {
-             if( ! linkTT->toIndexedElement( *cont, trkToFit[ i ]->index() ) )
+             if( ! linkTT->toIndexedElement( *cont, trkToFit[ i ]->index(), ctx ) )
       	     {
 	       ATH_MSG_WARNING( "Failed to set the EL for this particle correctly" );
 	     }
@@ -483,7 +483,7 @@ namespace Trk{
            const xAOD::NeutralParticleContainer* cont = dynamic_cast< const xAOD::NeutralParticleContainer* >( neutToFit[ i ]->container() );
            if(  cont )
            {
-             if( ! linkTT->toIndexedElement( *cont, neutToFit[ i ]->index() ) )
+             if( ! linkTT->toIndexedElement( *cont, neutToFit[ i ]->index(), ctx ) )
              {
                ATH_MSG_WARNING( "Failed to set the EL for this particle correctly" );
              }

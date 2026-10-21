@@ -364,7 +364,7 @@ StatusCode HGTDTrackExtensionAlg::execute(const EventContext& ctx) const
 
     hgtdTrackLink(*trackParticles->at(ext.first))
          = ElementLink<ActsTrk::TrackContainer>( *const_track_container_ptr,
-                                                    ext.second );
+                                                ext.second, ctx );
 
 }
 
