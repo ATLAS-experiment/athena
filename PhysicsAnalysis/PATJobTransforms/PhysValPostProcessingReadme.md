@@ -145,6 +145,21 @@ adding_histograms:
   - {histo1_name: "Photon/Phot/All/KinPlots/Photon_Phot_All_KinPlots_et_endcap1", histo2_name: "Photon/Phot/All/KinPlots/Photon_Phot_All_KinPlots_et_endcap2", output: "Photon/Phot/All/KinPlots/Photon_Phot_All_KinPlots_etvseta_endcap", delete_inputs: True}
 ```
 
+### 7. **Templated Entries**
+
+An entry can be written once and repeated for every histogram it applies to, which is useful when the names are not known in advance. `for_each` gives a histogram pattern with `{field}` placeholders; the entry is repeated once per histogram in the input file matching it, with the placeholders filled in from the match. A field repeated in the pattern has to take the same value everywhere, and no field spans a `/`.
+
+The BTag domain uses this so that the plots follow the taggers, jet collections and working points that the reconstruction actually wrote, which differ between Run 3 and Run 4:
+
+```yaml
+roc_curves:
+  - {for_each: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_u_matched_weight", signal: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_b_matched_weight", background: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_u_matched_weight", output: "BTag/ROC/{collection}/{tagger}_uVsb", skip_if_empty: [signal, background]}
+```
+
+A pattern that matches nothing is reported and produces no entries, so a tagger that does not run in a given campaign is simply left out instead of being reported as a missing histogram.
+
+`skip_if_empty` names the inputs that have to carry entries for the repetition to be kept. It is meant for selections that only some samples fill, such as the ttbar and the Zprime jet selections: a ttbar sample leaves the Zprime denominators empty, and those entries are then skipped rather than producing empty plots. An input that is missing altogether is still reported as an error.
+
 ---
 
 In case of any assistance, please contact rasheed.hammad@cern.ch
