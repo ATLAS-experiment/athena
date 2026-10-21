@@ -20,26 +20,27 @@ atlas_add_library( Resplot
 target_include_directories( Resplot PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Resplot> )
 
+# try this ... 
 atlas_install_generic( Resplot/Resplot
-   DESTINATION include/Resplot
+   DESTINATION include
    TYPENAME ResplotHeaders )
  
 
 # leave this here until we know the alternative actually works properly ...
  
-# function(my_install_headers INCLUDE_DIR SOURCE_DIR) 
-#    atlas_get_package_dir(pkgDir)
-#    install( CODE "
-#      set( _destdir \"\$ENV{DESTDIR}\")
-#      if( NOT _destdir STREQUAL \"\" )
-#         set( _destdir \"\${_destdir}/\" )
-#      endif()
-#      execute_process( COMMAND \${CMAKE_COMMAND} -E make_directory \${_destdir}\${CMAKE_INSTALL_PREFIX}/include )
-#      execute_process( COMMAND \${CMAKE_COMMAND} -E create_symlink ../src/${pkgDir}/${SOURCE_DIR} \${_destdir}\${CMAKE_INSTALL_PREFIX}/include/${INCLUDE_DIR} )
-#      unset( _destdir )" )
-# endfunction()
+function(_my_install_headers INCLUDE_DIR SOURCE_DIR) 
+    atlas_get_package_dir(pkgDir)
+    install( CODE "
+      set( _destdir \"\$ENV{DESTDIR}\")
+      if( NOT _destdir STREQUAL \"\" )
+         set( _destdir \"\${_destdir}/\" )
+      endif()
+      execute_process( COMMAND \${CMAKE_COMMAND} -E make_directory \${_destdir}\${CMAKE_INSTALL_PREFIX}/include )
+      execute_process( COMMAND \${CMAKE_COMMAND} -E create_symlink ../src/${pkgDir}/${SOURCE_DIR} \${_destdir}\${CMAKE_INSTALL_PREFIX}/include/${INCLUDE_DIR} )
+      unset( _destdir )" )
+ endfunction()
 
-# my_install_headers( Resplot Resplot/Resplot )
+# _my_install_headers( Resplot Resplot/Resplot )
 
 atlas_add_library( Readcards
    Readcards/src/*.h Readcards/src/IReadCards.cxx Readcards/src/ReadCards.cxx
