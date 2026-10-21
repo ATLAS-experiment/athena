@@ -2,8 +2,8 @@
 
 This directory contains the documentation and user instructions of the ATLAS Powheg interface. It is called [PowhegControl](https://gitlab.cern.ch/atlas/athena/tree/21.6/Generators/PowhegControl) and is a part of [Athena](https://gitlab.cern.ch/atlas/athena). PowhegControl provides an interface to the [Powheg Box](http://powhegbox.mib.infn.it) software installed on CVMFS.
 
-Athena now uses the  [compilebox](https://gitlab.cern.ch/compilebox/compilebox) packaging and build system for POWHEG Monte Carlo generators. 
-The Powheg Box installations used by Athena are built, packaged, and published via compilebox onto CVMFS in LCG release.. 
+Athena now uses the [compilebox](https://gitlab.cern.ch/compilebox/compilebox) packaging and build system for POWHEG Monte Carlo generators.
+The Powheg Box installations used by Athena are built, packaged, and published via compilebox onto CVMFS in LCG releases.
 This means that the Powheg binaries referenced by `$POWHEGPATH` are managed through compilebox and may follow compilebox naming and versioning conventions.
 
 This file contains the most relevant documentation for users. Further documentation of various advanced aspects is organised into additional files:
@@ -28,7 +28,7 @@ The current Powheg experts in ATLAS and maintainers of Powheg installations and 
 * **Timothée Theveneaux-Pelzer** (@tpelzer) — mostly maintains PowhegControl interface
 * **Andrej Saibel** (@asaibel) —  PowhegControl interface (not active)
 * **Jan Kretzschmar** (@jkretz) — Powheg 'power user' happy to share his knowledge or help out with simple code changes
-* **Andrii VErbytskyi** (@averbyts) - compilebox developments
+* **Andrii Verbytskyi** (@averbyts) — compilebox development
 * All of us provide help with software usage and physics questions to our best availability and ability
 
 For any questions about Powheg or PowhegControl, please **contact** the experts at [**atlas-generators-powhegcontrol-experts@cern.ch**](mailto:atlas-generators-powhegcontrol-experts@cern.ch)!
@@ -39,11 +39,11 @@ If you're interested in getting news about Powheg(Control) in general, you can s
 
 # Supported processes
 
-The currently installed processes are listed. If the version is of the form `PowhegControl-XX-XX-XX`, the process has been available since long and will be available for any future releases. In case the form is `ATLASOTF-XX-XX-YY`, you may cross-check with [these tables](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgMcSoftware#Versions_release_21_6_AthGenerat) - generally you want the latest release if starting fresh.
+The currently installed processes are listed. If the version is of the form `PowhegControl-XX-XX-XX`, the process has been available for a long time and will remain available in future releases. If the form is `ATLASOTF-XX-XX-YY`, you may cross-check with [these tables](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgMcSoftware#Versions_release_21_6_AthGenerat) - generally you want the latest release if starting fresh.
 
 The process wrappers currently present in this PowhegControl checkout are taken from `Generators/PowhegControl/python/processes/powheg`. They correspond to the Athena process names that PowhegControl can instantiate and, when available through compilebox, run with the Powheg Box binaries.
 
-We try to make the naming of processes consistent in Athena. Therefore some processes are **named differently** than they are in Powheg Box wherever shown in the table.
+We try to make the naming of processes consistent in Athena. Therefore some processes are **named differently** from their Powheg Box names, as shown in the table.
 
 | PowhegControl name | Powheg Box name           | Process description           | Available since                                                          | Citation(s)                                          | Remarks              |
 | :----------------- | :------------------------ | :---------------------------- | :----------------------------------------------------------------------- | :--------------------------------------------------- | :------------------- |
@@ -69,10 +69,10 @@ We try to make the naming of processes consistent in Athena. Therefore some proc
 | `jj`               | `dijet`                   | dijet                         | `PowhegControl-00-00-08`                                                 | [1012.3380](https://arxiv.org/abs/1012.3380)   | [Process-specific documentation](process_specific/jj.md)      |
 | `jjj`              | `trijet`                  | trijet                        | `PowhegControl-00-00-12`                                                 | [1402.4001](https://arxiv.org/abs/1402.4001)   | [Process-specific documentation](process_specific/jjj.md)  |
 | `ssWWjj`           | `Wp_Wp_J_J`               | same-sign WW+2 jets           | `PowhegControl-00-02-14`                                                 | [1102.4846](https://arxiv.org/abs/1102.4846)   |                      |
-| `schan_top_dec`  | `single-top-dec` | single t (s-channel) offshell            | In preparation                                                           | [2610.03878](https://arxiv.org/pdf/2610.03878) |                      |
+| `schan_top_dec`  | `single-top-dec` | single t (s-channel) offshell            | `compilebox 8.15`                                                        | [2610.03878](https://arxiv.org/pdf/2610.03878) |                      |
 | `t_sch`            | `ST_sch`                  | single t (s-channel)          | `PowhegControl-00-02-09`                                                 | [0907.4076](https://arxiv.org/abs/0907.4076)   |                      |
 | `t_tch_4FS`        | `ST_tch_4f`               | single t (s-channel) 4FS      | `PowhegControl-00-03-00`                                                 | [1207.5391](https://arxiv.org/abs/1207.5391)   |                      |
-| `tchan_top_dec`  | `single-top-dec` | single t (t-channel) offshell            | In preparation                                                           | [2610.03878](https://arxiv.org/pdf/2610.03878) |                      |
+| `tchan_top_dec`  | `single-top-dec` | single t (t-channel) offshell            | `compilebox 8.15`                                                        | [2610.03878](https://arxiv.org/pdf/2610.03878) |                      |
 | `tt`               | `hvq`                     | ttbar                         | `PowhegControl-00-00-10`                                                 | [0707.3088](https://arxiv.org/abs/0707.3088)   |                      |
 | `tt_NLOdecays`     | `ttb_NLO_dec`             | ttbar with NLO decays         | `PowhegControl-00-03-00`                                                 | [1412.1828](https://arxiv.org/abs/1412.1828)   |                      |
 | `ttbb`             | -                         | $`\mathrm{t}\bar{\mathrm{t}}\mathrm{b}\bar{\mathrm{b}}`$  | `ATLASOTF-05-01`                                         | [1802.00426](https://arxiv.org/abs/1802.00426) | [Process-specific documentation](process_specific/ttbb.md) |
@@ -115,21 +115,26 @@ We try to make the naming of processes consistent in Athena. Therefore some proc
 | `DY_VLQ`          | -                         | Drell-Yan leptoquark production (pair)   | `compilebox 8.12`                                               | [2209.12780](https://arxiv.org/abs/2209.12780) |                      |
 | `LQ_s_chan`       | -                         | s-channel leptoquark production         | `compilebox 8.12`                                               | [2209.02599](https://arxiv.org/abs/2209.02599) |                      |
 | `VBF_ZZ`          | -                         | VBF ZZ                                  | `compilebox 8.12`                                               | [1312.3252](https://arxiv.org/abs/1312.3252)   |                      |
-| `VV_pol`          | -                         | vector-boson polarization study          | `compilebox 8.12`                                               | [2311.05220](https://arxiv.org/abs/2311.05220) |                      |
+| `VV_pol`          | -                         | vector-boson polarization study          | `compilebox 8.11`                                               | [2311.05220](https://arxiv.org/abs/2311.05220) |                      |
 | `VV_pol_EFT`      | -                         | EFT study of vector-boson polarization   | `compilebox 8.12`                                               | [2507.21768](https://arxiv.org/abs/2507.21768) |                      |
-| `Wc`              | -                         | W + charm                                | `compilebox 8.12`                                               | [2304.13791](https://arxiv.org/abs/2304.13791) |                      |
+| `Wc`              | -                         | W + charm                                | `compilebox 8.10`                                               | [2304.13791](https://arxiv.org/abs/2304.13791) |                      |
 | `WWj`             | -                         | WW + jet                                 | `compilebox 8.12`                                               | [1606.07062](https://arxiv.org/abs/1606.07062) |                      |
 | `WWj_MiNNLO`      | `WWjMiNNLO`               | WW + jet at NNLO                         | `compilebox 8.12`                                               | [2103.12077](https://arxiv.org/abs/2103.12077) |                      |
 | `WZj_MiNNLO`      | `WZjMiNNLO`               | WZ at NNLO                               | `compilebox 8.12`                                               | [2208.12660](https://arxiv.org/abs/2208.12660) |                      |
 | `Wt_DR_modified`  | -                         | Wt with modified diagram removal         | `compilebox 8.12`                                               | [1009.2450](https://arxiv.org/abs/1009.2450)   | variant of `Wt_DR`  |
 | `ZZj_MiNNLO`      | `ZZjMiNNLO`              | ZZ + jet at NNLO                         | `compilebox 8.12`                                               | [2108.05337](https://arxiv.org/abs/2108.05337) |                      |
-| `Zgamj_MiNNLO`    | `ZgamjMiNNLO`            | Z/gamma* + jet at NNLO                   | `compilebox 8.12`                                               | [2010.10478](https://arxiv.org/abs/2010.10478) |                      |
+| `Zgamj_MiNNLO`    | `ZgamjMiNNLO`            | Z/gamma* + jet at NNLO                   | `compilebox 8.08`                                               | [2010.10478](https://arxiv.org/abs/2010.10478) |                      |
 | `fourtops`        | -                         | four-top production                      | `compilebox 8.12`                                               | [2110.15159](https://arxiv.org/abs/2110.15159) |                      |
 | `gg4l`            | -                         | gg -> 4 leptons                           | `compilebox 8.12`                                               | [2102.07783](https://arxiv.org/abs/2102.07783) |                      |
 | `ggF_HH_SMEFT`    | -                         | gg -> HH in SMEFT                         | `compilebox 8.12`                                               | [2204.13045](https://arxiv.org/abs/2204.13045) |                      |
 | `ggF_HH_quartic`  | -                         | gg -> HH with quartic coupling variation  | `compilebox 8.12`                                               | [1810.04665](https://arxiv.org/abs/1810.04665) |                      |
 | `ttZ`             | -                         | ttZ                                      | `compilebox 8.12`                                               | [2112.08892](https://arxiv.org/abs/2112.08892) |                      |
 | `ttll`            | -                         | tt + ll                                  | `compilebox 8.12`                                               | [2112.08892](https://arxiv.org/abs/2112.08892) |                      |
+| `DIS`             | -                         | deep inelastic scattering (incl. polarised and neutrino-induced) | `compilebox 8.12`                                               | [2309.02127](https://arxiv.org/abs/2309.02127), [2404.07702](https://arxiv.org/abs/2404.07702), [2407.03894](https://arxiv.org/abs/2407.03894) | compilebox only, no PowhegControl wrapper yet |
+| `DY_VLQ_add`      | `DY_VLQ_NLO_add`          | Drell-Yan vector leptoquark production (second build of `DY_VLQ_NLO`) | `compilebox 8.13`                          | [2209.12780](https://arxiv.org/abs/2209.12780) | compilebox only, no PowhegControl wrapper yet |
+| `h_bbg`           | -                         | H -> bb decay with MiNLO | `compilebox 8.15`                                | [1912.09982](https://arxiv.org/abs/1912.09982) | compilebox only, no PowhegControl wrapper yet |
+| `HHj`             | `HHJ`                     | HH production at NNLO+PS (MiNNLO) | `compilebox 8.15`                                               | in preparation (Garosi, Wiesemann, Zanderighi) | compilebox only, no PowhegControl wrapper yet |
+| `vbs_ssWW_NLOEW`  | `vbs-ssww-nloew`          | same-sign W-boson scattering at NLO EW   | `compilebox 8.15`                                               | [1906.01863](https://arxiv.org/abs/1906.01863) | compilebox only, no PowhegControl wrapper yet |
 
 ## Requesting new processes
 
@@ -148,7 +153,7 @@ The standard steps needed are:
 | 1           | You                | Identify the Powheg Box/compilebox process name and any required source repository or version                                        | \>1 day          |
 | 2a          | You/Us             | Verify dependencies and that the process can be added to compilebox, create a merge request with the required changes                | 1-2 days         |
 | 2b          | You/Us             | If dependencies are missing -- prepare the dependencies and push them into LCG layer.                                                | 1-4 weeks        |
-| 3           | Us                 | Publish the new compilabox version, request it to be included into the LCG layer.                                                    | 1-2 days         |
+| 3           | Us                 | Publish the new compilebox version and request its inclusion in the LCG layer.                                                      | 1-2 days         |
 | 4           | You/Us             | Wait for the LCG layer.                                                                                                              | 1-2 weeks        |
 | 5           | You/Us             | Write the `PowhegControl` interface class and process defaults for Athena                                                            | 1 day            |
 | 6           | You/Us             | Update example job options, documentation, and any process-specific validation notes                                                 | 1-2 days         |
@@ -156,14 +161,14 @@ The standard steps needed are:
 | 8           | You                | Perform any dedicated physics or MC validation requested by the MC generators group                                                  | \>1 week         |
 | 9           | You                | Make a JIRA request for the final production event count if the process is approved                                                  | \>1 week         |
 
-**New available processes are only added to Athena by request**, so please get in touch early if you're interested.
+**Newly available processes are only added to Athena on request**, so please get in touch early if you're interested.
 
 
 # Usage instructions
 
 All of the following instructions assume that you are working in ATLAS generator software release 23.6. In the rare event that you need instructions for earlier (or later) releases, please [contact the Powheg experts](mailto:atlas-generators-powhegcontrol-experts@cern.ch).
 
-The current latest developments can be found in **Athena,main**. They are regularly synchronized to the production releases **release/23.6.XX**.
+The latest developments can be found in **Athena,main**. They are regularly synchronized to the production releases **release/23.6.XX**.
 
 For **MC16** MC, you should use **AthGeneration,21.6.XX**.
 
@@ -200,12 +205,12 @@ Gen_tf.py --jobConfig foo --ecmEnergy 13000 --runNumber 999999 --firstEvent 1 --
 [You can find example job option directories for all Powheg processes supported in ATLAS here](https://gitlab.cern.ch/atlas/athena/-/tree/21.6/Generators/PowhegControl/share/example/processes).
 
 
-**Powheg generates only the hard scattering process** (typically $`2 \to 1`$ or $`2 \to 2`$ or $`2 \to 3`$ at Born level) **plus NLO QCD corrections** (and sometimes other higher-order corrections). This includes the **virtual corrections** as well as the **real-emission correction** that involves the emission of an additional coloured parton (quark or gluon). These hard events are stored in the text-based [Les Houches Event format](https://arxiv.org/abs/hep-ph/0609017) (LHE). These Les Houches event may then be read by a suitably configured general-purpose MC generator, most commonly **Pythia 8 or Herwig 7**, which then generate
+**Powheg generates only the hard scattering process** (typically $`2 \to 1`$ or $`2 \to 2`$ or $`2 \to 3`$ at Born level) **plus NLO QCD corrections** (and sometimes other higher-order corrections). This includes the **virtual corrections** as well as the **real-emission correction** that involves the emission of an additional coloured parton (quark or gluon). These hard events are stored in the text-based [Les Houches Event format](https://arxiv.org/abs/hep-ph/0609017) (LHE). These Les Houches events may then be read by a suitably configured general-purpose MC generator, most commonly **Pythia 8 or Herwig 7**, which then generate
 
 * additional parton emissions in the [parton shower formalism](http://www.scholarpedia.org/article/Parton_shower_Monte_Carlo_event_generators),
 * (additional electroweak radiation,)
 * the underlying event (beam remnants, soft multiple parton interactions),
-* resonance decays (e.g. $`H \to b\bar{b}`$); if these were not included in the Powheg matrix element or performed by Powheg in the narrow-width approximation),
+* resonance decays (e.g. $`H \to b\bar{b}`$, if these were not included in the Powheg matrix element or performed by Powheg in the narrow-width approximation),
 * hadronisation (formation of physically observable, colour-neutral composite states from unobservable partons),
 * decays of "long-lived" particles such as τ-leptons and hadrons.
 
@@ -217,7 +222,7 @@ Since Powheg Box only provides *executables*, event generation with Powheg is do
 
 **Use the `Gen_tf.py` argument `--maxEvents` to request the number of events you want.** If you are generating showered events, i.e. not just [LHE-level events](#generating-lhe-only-events), PowhegControl applies a **default safety factor of 1.1 to your requested number of events**. This is to prevent the parton shower MC from "running out" of events in case some events are discarded. 
 
-**In cases where a generator filter is used** that rejects a significant fraction of your events, you will have to test and set this factor around $`1.1 / \mathrm{filter\,efficiency} `$, where again an 10% safety buffer is included here. E.g. in the case your filter only keeps 10% of the events, you will produce 11 times more LHE events than will eventually be available in the EVNT (and passed to simulation).
+**In cases where a generator filter is used** that rejects a significant fraction of your events, you will have to test and set this factor around $`1.1 / \mathrm{filter\,efficiency} `$, where again a 10% safety buffer is included here. E.g. if your filter only keeps 10% of the events, you will produce 11 times more LHE events than will eventually be available in the EVNT (and passed to simulation).
 
 If your parton shower MC does run out of events (you should see a line similar to: `Abort from Pythia::next: reached end of Les Houches Events File...` in the `log.generate` file), you need to understand why and potentially increase this factor in your job option like this:
 
@@ -253,7 +258,7 @@ Even when you want to make your own job options, say to study varying some param
 
 Most Powheg parameters exist for multiple processes. Important ones are listed here. For process-specific parameters, see TODO.
 
-The parameters available in `PowhegControl` and their meaning is given in the [Registry](https://gitlab.cern.ch/atlas/athena/-/blob/main/Generators/PowhegControl/python/parameters/registry.py).
+The parameters available in `PowhegControl` and their meaning are given in the [Registry](https://gitlab.cern.ch/atlas/athena/-/blob/main/Generators/PowhegControl/python/parameters/registry.py).
 
 | Parameter name | Meaning | Allowed values | Notes and examples |
 | :------------: | :-----: | :------------: |:----------------: |
@@ -267,7 +272,7 @@ The parameters available in `PowhegControl` and their meaning is given in the [R
 The Powheg Box executables need to receive a `runcard` which specifies various parameters and options. 
 `Default parameters` are already set for all the parameters associated with each process, and these are
 automatically set by including the relevant
-`PowhegControl_MyProcess_Common.py` file. Each process can all be
+`PowhegControl_MyProcess_Common.py` file. Each process can be
 accessed by changing the `MyProcess` in the jobOption include to the
 _Athena_ name of the desired process --- see the table of supported processes above. Example job options are available [here](https://gitlab.cern.ch/atlas/athena/-/tree/main/Generators/PowhegControl/share/example/processes).
 
@@ -347,9 +352,9 @@ makes use of the A14 parton shower tune of Pythia8, and the line
 include("Pythia8_i/Pythia8_Powheg_Main31.py")
 ```
 instructs Pythia8 to use the events in the produced LHE file assuming they
-are events produced by Powheg, using the main31 routine which is the 
+are events produced by Powheg, using the main31 routine, which is the 
 appropriate 'matching routine' for the majority of Powheg processes.
-Other tunes and/or other routines may be preferable or needed for some cases; in doubt, `ask your MC expert`.
+Other tunes and/or other routines may be preferable or needed for some cases; if in doubt, ask your MC expert.
 
 
 
@@ -365,17 +370,16 @@ dataset (for example, for correct citation in a paper). Currently a
 mixture of Powheg Box V1, Powheg Box V2 and Powheg Box-RES processes are
 used, although V1 processes are by now deprecated and generally replaced by V2,
 which also allows features such as PDF reweighting.
-Contact the experts in case your desired process is not available in V2, a request might need to be made to the process authors.
+Contact the experts in case your desired process is not available in V2; a request might need to be made to the process authors.
 
 **Powheg Box SVN revisions for the processes used in each
-`External/Powheg` tag are given in the following files
+`External/Powheg` tag are given in the following files:**
 
   - [ATLASOTF-07-09](https://gitlab.cern.ch/atlas-physics/pmg/mcexperts/powheg-experts/powheg-compilation/-/blob/ATLASOTF-07-09/Install.sh)
   - [ATLASOTF-07-08](https://gitlab.cern.ch/atlas-physics/pmg/mcexperts/powheg-experts/powheg-compilation/-/blob/ATLASOTF-07-08/Install.sh)
   - [ATLASOTF-07-07](https://gitlab.cern.ch/atlas-physics/pmg/mcexperts/powheg-experts/powheg-compilation/-/blob/ATLASOTF-07-07/Install.sh)
   - [ATLASOTF-07-06](https://gitlab.cern.ch/atlas-physics/pmg/mcexperts/powheg-experts/powheg-compilation/-/blob/ATLASOTF-07-06/Install.sh)
   - [older](https://docs.google.com/spreadsheets/d/16XvI5k2I2On4TkkIWJC9MXr0fMaRU2SvOkgBucRPzs0)
-.**
 
 
 
@@ -396,7 +400,7 @@ advanced users to change them.
 Powheg Box performs an integration over a
 multi-dimensional parameter space before generating events. The
 parameters used for this integration must be tuned to get the best
-integration speed while providing adequately numerically accurate results. The values used in
+integration speed while providing adequate numerical accuracy. The values used in
 `PowhegControl` have been chosen in line with the following guidelines
 recommended by the Powheg Box authors.
 
@@ -418,10 +422,10 @@ Py:PowhegControl INFO Integration test :: cross-section uncertainty : 0.26%
 
 If any of the integration tests have failed, the INFO messages will be
 WARNING messages, and you should increase the appropriate integration
-parameters. Few considerations:
-* The integration speed scales typically with `ncall1*itmx1` and `ncall2*itmx2`, if
+parameters. A few considerations:
+* The integration speed typically scales with `ncall1*itmx1` and `ncall2*itmx2`; if
   integrations become too slow to do, consider reusing integration grids and going multicore.
-* Both integration and unweighting (event generation) speed scale typically `foldx*foldy*foldphi`, where values of 1,2,5,10 are permissible for each of the three parameters.
+* Both integration and unweighting (event generation) speed typically scale with `foldx*foldy*foldphi`, where values of 1,2,5,10 are permissible for each of the three parameters.
   E.g. the speed difference between `1*1*1` and `10*10*10` will be roughly a factor of 1000, i.e. massive.
   It may not be feasible to push the negative weight fraction below 1%, in that case it is advisable to
   find a compromise between generation speed and negative weight fraction, see also [TWiki PmgNegativeWeights](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgNegativeWeights).
@@ -465,9 +469,9 @@ when running for a prolonged time on lxplus your jobs may just get killed.
 
 When running locally, you may speed up the process by running in multicore mode - see the [Running in multicore mode](#running-in-multicore-mode) section below.
 
-Futhermore, it is pointless to produce events with alternative scale and PDF weights,
+Furthermore, it is pointless to produce events with alternative scale and PDF weights,
 when running with the sole purpose of producing the integration grids.
-Therefore it may be usefull to temporarily modify the joboption as follows, to deactivate the computation of such weights:
+Therefore it may be useful to temporarily modify the joboption as follows, to deactivate the computation of such weights:
 ```python
 PowhegConfig.PDF = 93300 # replace by the lhapdf ID of your nominal PDF
 PowhegConfig.mu_F = 1.0
@@ -483,8 +487,8 @@ mentioned in [this twiki page](https://twiki.cern.ch/twiki/bin/viewauth/AtlasPro
 ### Event weights: Born-level suppression and negative weights
 
 Despite the name, POWHEG does generate negative weight events, although
-generally much less than NLO setups based on MC@NLO matching. These
-are accepted by default in all processes, this would otherwise result in biases.
+generally far fewer than NLO setups based on MC@NLO matching. These
+are accepted by default in all processes, as rejecting them would otherwise result in biases.
 Negative weights can, in some cases, lead to unphysical negative weight integrals (=events)
 in poorly populated areas of phase space and in general they may incur a significant penalty in statistical accuracy,
 see also [TWiki PmgNegativeWeights](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/PmgNegativeWeights).
@@ -496,7 +500,7 @@ The average weight is equal to the cross-section of the process in question.
 
 If the resulting spread of weights is large and events with very different weights end up in the same
 phase space, the events with large weights may disturb distributions
-as well as cross section (and filter efficiency) calculations. A typical case are
+as well as cross section (and filter efficiency) calculations. A typical case is
 low pT events that pick up hard jets from the parton shower. (Although by definition this
 should generally not happen, as `Powheg` is supposed to generate the hardest emission.)
 
@@ -524,7 +528,7 @@ experts' fork of Athena, use the following in a clean directory:
 setupATLAS
 lsetup git
 git clone ssh://git@gitlab.cern.ch:7999/atlas-physics/pmg/mcexperts/powheg-experts/athena.git
-# It's probably a good idea to use the Powheg expert's fork of Athena, which
+# It's probably a good idea to use the Powheg experts' fork of Athena, which
 # you get with the above command. This is where the development of PowhegControl
 # is done; any important changes are then regularly merged into central Athena.
 # If you want to use central Athena, just replace the line above with:
@@ -555,7 +559,7 @@ used instead of the one from the release, you can open a Python prompt
 ```python
 # In Python prompt
 import PowhegControl
-print PowhegControl.__file__
+print(PowhegControl.__file__)
 ```
 
 and check that the path that gets printed points to a location inside your local
@@ -591,7 +595,7 @@ event generation:
 
 - Powheg integration
 - Powheg event generation (and generation of weights)
-- Athena-based event hadronisation (eg. with Pythia or Herwig)
+- Athena-based event hadronisation (e.g. with Pythia or Herwig)
 - (optional) event filtering.
 
 By re-using the Powheg integration grids only the first of these steps
@@ -613,12 +617,11 @@ For production, the integration grids will be registered together with the job o
 [McSampleRequestProcedure](https://twiki.cern.ch/twiki/bin/viewauth/AtlasProtected/McSampleRequestProcedure)
  and look for "If you are using input tarballs".
 
-Please check the Powheg log file that the use of integration grids give a significant speed
-up. Simple processes like (NLO inclusive) ttbar or single W,Z boson processes 
+Please check the Powheg log file that the use of integration grids gives a significant speedup. Simple processes like (NLO inclusive) ttbar or single W or Z boson processes 
 may run the integrations on the fly on a single CPU core in minutes and thus do not 
 necessarily need pre-made integration grids. On the other hand, many more complex processes may need
 days on multiple CPU cores to perform the integrations and will not be feasible to run
-in central production without.
+in central production without them.
 
 Please note that integration grids generated in either single-core or
 multi-core mode can be re-used.
@@ -630,9 +633,9 @@ makes the appropriate check for existing integration grids.
 
 ### Running in multicore mode
 
-It is possible to run Powheg Box in multicore mode which can speed up
+It is possible to run Powheg Box in multicore mode, which can speed up
 event generation by parallelising the event generation. In order to
-enable this, simple set the following environment variable `ATHENA_CORE_NUMBER`
+enable this, simply set the following environment variable `ATHENA_CORE_NUMBER`
 to the desired number of cores to use, e.g.:
 
 ```bash
@@ -728,10 +731,10 @@ re-use of integration grids is explained [here](powheg_for_atlas#Re_using_integr
 
 
 ** How to test POWHEG process outside of Athena?**
-  Assuming the compilebox 8.12 was build for LCG_110 x86_64-el9-gcc15-opt
+  Assuming the compilebox 8.12 was built for LCG_110 x86_64-el9-gcc15-opt
 ```
   source /cvmfs/sft.cern.ch/lcg/views/setupViews.sh LCG_110 x86_64-el9-gcc15-opt
-  cd athena/Henerators/PowhegControl
+  cd athena/Generators/PowhegControl
 ```
 And run `python3 ./test.py`, where `test.py` has the following content
 ```
