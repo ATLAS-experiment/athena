@@ -24,7 +24,8 @@ hlt.concurrent_events = 4
 hlt.input = 'data'
 hlt.max_events = 50
 hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
-             'Trigger.doLVL1=True']
+             'Trigger.doLVL1=True',
+             'Trigger.EDMVersion=4']
 hlt.args = '-o output'
 
 # Extract the physics_Main stream out of the BS file with many streams
@@ -34,6 +35,7 @@ filter_bs = filterBS('Main')
 recoPreExec = ' '.join([
   f"flags.Trigger.triggerMenuSetup=\'{triggermenu}\';",
   "flags.Trigger.AODEDMSet=\'AODFULL\';",
+  "flags.Trigger.EDMVersion=4;",
   "from AthenaMonitoring.DQConfigFlags import allSteeringFlagsOff;",
   "allSteeringFlagsOff(flags);",
   "flags.DQ.Steering.doDataFlowMon=True;",
