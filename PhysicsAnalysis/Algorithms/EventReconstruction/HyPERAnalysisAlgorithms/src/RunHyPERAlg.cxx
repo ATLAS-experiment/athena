@@ -872,8 +872,6 @@ StatusCode RunHyPERAlg::buildGraph() {
     return StatusCode::FAILURE;
   }
 
-  using Features = std::vector<float>;
-
   // Remember... For HyPER we use the following particle IDs -> jet=1 e=2 mu=3
   // met=4 tau=5 Also... VERY important! The order of filling the particles for
   // the graph is important! We use this later for the reconstruction. The order
