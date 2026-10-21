@@ -4,6 +4,35 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
+def OfflineMuonReferenceToolCfg(
+        flags,
+        name="OfflineMuonReferenceTool",
+        **kwargs):
+    """Configure the common reconstructed offline-muon provider.
+
+    The provider preserves the input xAOD::MuonContainer ordering and applies
+    no physics selection.  This keeps detector-specific extrapolation modules
+    index-aligned while leaving reference cuts to downstream ROOT analysis.
+    """
+    acc = ComponentAccumulator()
+    acc.addPublicTool(
+        CompFactory.L1Muon.OfflineMuonReferenceTool(name, **kwargs),
+        primary=True,
+    )
+    return acc
+
+
+def OfflineMuonBranchToolCfg(flags, name="OfflineMuonBranchTool", **kwargs):
+    """Configure common reconstructed-muon MuonTester branches."""
+    acc = ComponentAccumulator()
+    if "OfflineMuonReferenceTool" not in kwargs:
+        kwargs["OfflineMuonReferenceTool"] = acc.getPrimaryAndMerge(
+            OfflineMuonReferenceToolCfg(flags)
+        )
+    acc.setPrivateTools(CompFactory.L1Muon.OfflineMuonBranchTool(name, **kwargs))
+    return acc
+
+
 def TruthMuonReferenceToolCfg(
         flags,
         name="TruthMuonReferenceTool",
