@@ -304,12 +304,6 @@ class SlimmingHelper:
                 for item in CompulsoryContent:
                         self.FinalItemList.append(item)
 
-                # non xAOD collections for MinBias
-                if (self.IncludeMinBiasTriggerContent is True):
-                        from DerivationFrameworkCore.MinBiasTrigger_nonxAOD_Content import MinBiasTrigger_nonxAOD_Content
-                        for item in MinBiasTrigger_nonxAOD_Content:
-                                self.FinalItemList.append(item)
-
                 if (triggerContent and self.IncludeTriggerNavigation):
                         # Run2
                         for item in CompulsoryTriggerNavigation:
