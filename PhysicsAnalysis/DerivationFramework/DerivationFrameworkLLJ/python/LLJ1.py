@@ -76,13 +76,22 @@ def LLJ1SkimmingToolCfg(flags):
             'HLT_j360_a10_lcw_sub_L1J100',
             'HLT_j420_a10_lcw_L1J100',
             'HLT_j460_a10t_lcw_jes_L1J100',
-            ### new run-3
+            ### recommended run-3
+            ### 2022/23
+            'HLT_j420_a10sd_cssk_pf_jes_ftf_preselj225_L1J100',
             'HLT_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1J100',
-            'HLT_j460_a10_lcw_subjes_L1J100',
-            'HLT_j460_a10r_L1J100',
-            ### new run-3 mass cut
+            ### 2024
+            'HLT_j420_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160',
+            'HLT_j460_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160',
+            ### 2025
+            'HLT_j460C_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160',
+            ### run-3: mass cut
+            ### 2022/23
             'HLT_j420_35smcINF_a10sd_cssk_pf_jes_ftf_preselj225_L1J100',
-            'HLT_j420_35smcINF_a10t_lcw_jes_L1J100',
+            ### 2024
+            'HLT_j420_35smcINF_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160',
+            ### 2025
+            'HLT_j420C_35smcINF_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160',
         ]
         print(TriggersList)
 
