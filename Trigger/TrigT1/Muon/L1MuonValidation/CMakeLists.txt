@@ -11,14 +11,14 @@ atlas_subdir( L1MuonValidation )
 atlas_add_library( L1MuonValidationLib
                    INTERFACE
                    PUBLIC_HEADERS L1MuonValidation
-                   LINK_LIBRARIES GaudiKernel MuonTesterTreeLib )
+                   LINK_LIBRARIES GaudiKernel MuonTesterTreeLib xAODMuon )
 
 atlas_add_component( L1MuonValidation
                      src/*.cxx
                      src/components/*.cxx
                      LINK_LIBRARIES AthenaBaseComps AtlasHepMCLib GaudiKernel
                                     GeneratorObjects L1MuonValidationLib
-                                    MuonTesterTreeLib StoreGateLib )
+                                    MuonTesterTreeLib StoreGateLib xAODMuon )
 
 atlas_add_test( TruthMuonSelection_test
                 SOURCES test/TruthMuonSelection_test.cxx
