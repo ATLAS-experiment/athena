@@ -14,6 +14,8 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "CaloRecGPU/CaloGPUTimed.h"
 
+#include "AthCUDAInterfaces/IStreamTool.h"
+
 class CaloCell_ID;
 
 /**
@@ -51,14 +53,14 @@ class BasicEventDataGPUExporter :
    *  Hurts performance when not needed.
    */
   Gaudi::Property<bool> m_outputMoments {this, "OutputMoments", false, "Output cluster moments too."};
-  
+
   /** @brief If @p true and `OutputMoments` is also @p true, send additional moments
    *  that are not calculated as part of topological clustering.
    */
   Gaudi::Property<bool> m_outputExtraMoments {this, "OutputExtraMoments", false,
                                               "Output cluster moments that are not calculated as part of topological clustering (e. g. local calibration probabilities)."};
-  
-  
+
+
   /** @brief If @p true, store cell assignment information in the (generic) tags instead of a list.
    *  Will skip storing cluster moments.
    *  Defaults to @p true.
@@ -70,10 +72,13 @@ class BasicEventDataGPUExporter :
    *  Defaults to @p true.
    */
   Gaudi::Property<bool> m_considerSharedCells {this, "ConsiderSharedCells", true, "Take into account the possibility of a cell being shared between clusters."};
-  
+
   /** @brief Cell indices to fill as disabled cells (useful if the cell vector is always missing the same cells).
    */
   Gaudi::Property<std::vector<int>> m_missingCellsToFill {this, "MissingCellsToFill", {}, "Force fill these cells as disabled on empty containers."};
+
+  /// Tool providing the CUDA stream to use
+  ToolHandle<AthCUDA::IStreamTool> m_streamTool {this, "StreamTool", "", "CUDA stream tool."};
 
 };
 

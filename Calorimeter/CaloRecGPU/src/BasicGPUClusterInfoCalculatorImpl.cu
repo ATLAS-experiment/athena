@@ -29,7 +29,7 @@ namespace
   namespace Temporaries
   {
     struct InfoTemps;
-    
+
     CALORECGPU_TEMPARR_1(seed_cell_phi, etaCaloFrame, float);
 
     CALORECGPU_TEMPARR_1(abs_energy, phiCaloFrame, float);
@@ -41,12 +41,12 @@ namespace
     CALORECGPU_TEMPARR_1(eta_aux, eta2CaloFrame, float);
 
     CALORECGPU_TEMPARR_1(phi_aux, phi2CaloFrame, float);
-    
+
     struct InfoTemps
     {
       float seed_cell_phi  [NMaxClusters];
       float abs_energy     [NMaxClusters];
-      float abs_energy_aux [NMaxClusters]; 
+      float abs_energy_aux [NMaxClusters];
       float energy_aux     [NMaxClusters];
       float eta_aux        [NMaxClusters];
       float phi_aux        [NMaxClusters];
@@ -104,10 +104,10 @@ void seedCellPropertiesKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> cluste
 void BasicClusterInfoCalculator::updateSeedCellProperties(CaloRecGPU::EventDataHolder & holder,
                                                           const ConstantDataHolder & instance_data,
                                                           const IGPUKernelSizeOptimizer & optimizer,
-                                                          const bool synchronize,
-                                                          CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
+                                                          CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
+                                                          const bool synchronize)
 {
-  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (cudaStream_t) stream;
 
   const CUDAKernelLaunchConfiguration launch_config = optimizer.get_launch_configuration("BasicClusterInfoCalculator", 0);
 
@@ -147,7 +147,7 @@ void calculateClusterInfoKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> clus
         phi_raw = geometry->phi[cell_hash_ID];
         eta = geometry->eta[cell_hash_ID];
       }
-    
+
     Helpers::device_kahan_babushka_neumaier(&(clusters_arr->clusterEnergy[cluster_index]),
                                             Temporaries::energy_aux_ptr(clusters_arr, cluster_index),
                                             energy * weight);
@@ -343,11 +343,11 @@ void clearInvalidCells(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr)
 void BasicClusterInfoCalculator::calculateClusterProperties(CaloRecGPU::EventDataHolder & holder,
                                                             const ConstantDataHolder & instance_data,
                                                             const IGPUKernelSizeOptimizer & optimizer,
+                                                            CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
                                                             const bool synchronize,
-                                                            const bool cut_in_absolute_ET, const float ET_threshold,
-                                                            CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
+                                                            const bool cut_in_absolute_ET, const float ET_threshold)
 {
-  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (cudaStream_t) stream;
 
   const CUDAKernelLaunchConfiguration cfg_calculate = optimizer.get_launch_configuration("BasicClusterInfoCalculator", 1);
   const CUDAKernelLaunchConfiguration cfg_finalize  = optimizer.get_launch_configuration("BasicClusterInfoCalculator", 2);

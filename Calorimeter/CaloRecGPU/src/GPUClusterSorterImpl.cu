@@ -47,7 +47,7 @@ namespace
   namespace Temporaries
   {
     struct SorterTemps;
-    
+
     CALORECGPU_TEMPVAR(clusters_to_exclude, nExtraCellSampling, 0, int);
     CALORECGPU_TEMPVAR(old_num_cells, nExtraCellSampling, 2, int);
 
@@ -62,7 +62,7 @@ namespace
     CALORECGPU_TEMPARR_1(abs_energy_aux, eta1CaloFrame, float);
 
     CALORECGPU_TEMPARR_1(energy_aux, phi1CaloFrame, float);
-    
+
     CALORECGPU_TEMPARR_1(eta_aux, eta2CaloFrame, float);
 
     CALORECGPU_TEMPARR_1(histogram_buffer, deltaPhi, uint32_t);
@@ -90,11 +90,11 @@ namespace
     {
       int clusters_to_exclude;
       int old_num_cells;
-            
+
       int old_seed_cells             [NMaxClusters];
       int num_cells_per_cluster      [NMaxClusters];
       int intermediate_cell_counters [NMaxClusters];
-      
+
       float abs_energy               [NMaxClusters];
       float abs_energy_aux           [NMaxClusters];
       float energy                   [NMaxClusters];
@@ -105,9 +105,9 @@ namespace
       uint32_t onesweep_counters     [NumSamplings][NMaxClusters];
       uint32_t sorting_keys          [NumSamplings][NMaxClusters];
       uint16_t sorting_values        [NumSamplings][NMaxClusters];
-      
+
       uint32_t prefix_sum_counters   [NMaxClusters];
-      
+
       int old_to_new_cluster_map     [NMaxClusters];
     };
   }
@@ -195,7 +195,7 @@ void firstCellIterationKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> cluste
               const float secondary_weight = __int_as_float(tag.secondary_cluster_weight());
               const float weight = 1.0f - secondary_weight;
 
-              add_cell_contribution(tag.cluster_index(), weight, energy, abs_energy, eta); 
+              add_cell_contribution(tag.cluster_index(), weight, energy, abs_energy, eta);
 
               add_cell_contribution(tag.secondary_cluster_index(), secondary_weight, energy, abs_energy, eta);
             }
@@ -231,13 +231,13 @@ void calculateInfoAndPrepareSort(Helpers::CUDA_kernel_object<ClusterInfoArr> clu
   const int index = blockIdx.x * blockDim.x + threadIdx.x;
   const int grid_size = gridDim.x * blockDim.x;
   const int cluster_number = clusters_arr->number;
-  
+
 #if CALORECGPU_SORTER_FORCE_FULL_ONESWEEP_SORTING
   const int max_cluster_number = max(cluster_number, 5000);
 #else
   const int max_cluster_number = cluster_number;
 #endif
-  
+
   for (int cluster = index; cluster < max_cluster_number; cluster += grid_size)
     {
 #if CALORECGPU_SORTER_FORCE_FULL_ONESWEEP_SORTING
@@ -245,19 +245,19 @@ void calculateInfoAndPrepareSort(Helpers::CUDA_kernel_object<ClusterInfoArr> clu
         {
           Temporaries::sorting_keys(clusters_arr, 0, cluster) = 0xFFFFFFFFU;
           Temporaries::sorting_values(clusters_arr, 0, cluster) = 0xFFFFU;
-          
+
           Temporaries::histogram_buffer(clusters_arr, cluster) = 0;
           for (int i = 0; i < ExpectedNumberOfSortingIterations; ++i)
             {
               Temporaries::onesweep_counters(clusters_arr, i, cluster) = 0;
             }
-          
+
           Temporaries::prefix_sum_counters(clusters_arr, cluster) = 0;
-      
+
           continue;
         }
 #endif
-      
+
       const float abs_energy = Temporaries::abs_energy(clusters_arr, cluster) +
                                Temporaries::abs_energy_aux(clusters_arr, cluster);
 
@@ -291,7 +291,7 @@ void calculateInfoAndPrepareSort(Helpers::CUDA_kernel_object<ClusterInfoArr> clu
               Temporaries::old_seed_cells(clusters_arr, cluster) = -1;
 
               Temporaries::sorting_keys(clusters_arr, 0, cluster) = 0xFFFFFFFFU;
-              
+
               atomicAdd(Temporaries::clusters_to_exclude_ptr(clusters_arr), 1);
             }
           else
@@ -315,16 +315,16 @@ void calculateInfoAndPrepareSort(Helpers::CUDA_kernel_object<ClusterInfoArr> clu
 
           atomicAdd(Temporaries::clusters_to_exclude_ptr(clusters_arr), 1);
         }
-      
+
 
       Temporaries::sorting_values(clusters_arr, 0, cluster) = cluster;
       Temporaries::old_to_new_cluster_map(clusters_arr, cluster) = -1;
-      
-      
+
+
       if (max_cluster_number > ExpectedNumberOfItemsPerBlock)
         {
           Temporaries::histogram_buffer(clusters_arr, cluster) = 0;
-          
+
           for (int i = 0; i < ExpectedNumberOfSortingIterations; ++i)
             {
               Temporaries::onesweep_counters(clusters_arr, i, cluster) = 0;
@@ -343,11 +343,11 @@ void calculateInfoAndPrepareSort(Helpers::CUDA_kernel_object<ClusterInfoArr> clu
 void GPUClusterSorting::initialPropertiesCalculation(CaloRecGPU::EventDataHolder & holder,
                                                      const ConstantDataHolder & instance_data,
                                                      const IGPUKernelSizeOptimizer & optimizer,
+                                                     CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
                                                      const bool synchronize,
-                                                     const bool cut_in_absolute_ET, const float ET_threshold,
-                                                     CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
+                                                     const bool cut_in_absolute_ET, const float ET_threshold)
 {
-  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (cudaStream_t) stream;
 
   const CUDAKernelLaunchConfiguration cfg_init = optimizer.get_launch_configuration("GPUClusterSorting", 0);
   const CUDAKernelLaunchConfiguration cfg_cell = optimizer.get_launch_configuration("GPUClusterSorting", 1);
@@ -415,20 +415,20 @@ namespace
 
   __device__ uint32_t onesweep_scan(const int this_thread_index, uint32_t * shared_counters, const uint32_t prefix = 0)
   {
-    static_assert(HistogramNumThreadsPerBlock >= OneSweepNumBinsPerDigit && 
+    static_assert(HistogramNumThreadsPerBlock >= OneSweepNumBinsPerDigit &&
                   ReorderNumThreadsPerBlock >= OneSweepNumBinsPerDigit       );
-    
+
     constexpr int num_warps_total = Helpers::int_ceil_div(OneSweepNumBinsPerDigit, WarpSize);
-    
+
     static_assert(num_warps_total <= WarpSize);
-    
+
     __shared__ uint32_t shared_offsets[num_warps_total];
-    
+
     constexpr unsigned int full_mask = 0xFFFFFFFFU;
-    
+
     const int this_warp_index  = this_thread_index / WarpSize;
     const int intra_warp_index = this_thread_index % WarpSize;
-    
+
     if (this_warp_index >= num_warps_total)
       {
         return 0;
@@ -439,49 +439,49 @@ namespace
       }
 
     uint32_t accum = (this_thread_index < OneSweepNumBinsPerDigit ? shared_counters[this_thread_index] : 0);
-    
+
     for (int i = 1; i < WarpSize; i *= 2)
       {
         const uint32_t other = __shfl_up_sync(full_mask, accum, i) * (intra_warp_index >= i);
-      
+
         accum += other;
       }
-  
+
     if (intra_warp_index == WarpSize - 1)
       {
         shared_offsets[this_warp_index] = accum;
       }
-  
+
     __syncthreads();
-    
+
     if (this_warp_index == 0)
       {
         uint32_t global_accum = (intra_warp_index < num_warps_total ? shared_offsets[intra_warp_index] : 0);
-        
+
         for (int i = 1; i < num_warps_total; i *= 2)
           {
             const uint32_t other = __shfl_up_sync(full_mask, global_accum, i) * (intra_warp_index >= i);
-            
+
             global_accum += other;
           }
-        
+
         if (intra_warp_index < num_warps_total)
           {
             shared_offsets[intra_warp_index] = global_accum;
           }
       }
-  
+
     __syncthreads();
-    
+
     if (this_thread_index < OneSweepNumBinsPerDigit)
       {
         shared_counters[this_thread_index] = (this_warp_index > 0 ? shared_offsets[this_warp_index - 1] : 0) +
                                              accum + prefix - shared_counters[this_thread_index];
       }
-    
+
     return shared_offsets[num_warps_total - 1];
   }
-  
+
   __device__ void onesweep_histogram(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr, const int num_clusters)
   {
     __shared__ uint32_t shared_counters[OneSweepNumDigits][OneSweepNumBinsPerDigit];
@@ -495,7 +495,7 @@ namespace
       }
 
     __syncthreads();
-    
+
     for (int i = 0; i < HistogramItemsPerThread; ++i)
       {
         const int this_index = this_block_index  * HistogramItemsPerBlock  +
@@ -511,7 +511,7 @@ namespace
                 const KeyType bits = (item >> (j * OneSweepBitsPerBin)) & bit_mask;
 
                 atomicInc(&shared_counters[j][bits], 0xFFFFFFFFU);
-                
+
                 //Can we do something smart here to minimize atomic operations
                 //by doing something per-warp?
               }
@@ -530,12 +530,12 @@ namespace
       {
         const int this_digit = i / OneSweepNumBinsPerDigit;
         const int this_bin   = i % OneSweepNumBinsPerDigit;
-        
+
         atomicAdd(&Temporaries::histogram_buffer(clusters_arr, this_digit * OneSweepNumBinsPerDigit + this_bin),
                   shared_counters[this_digit][this_bin]);
       }
   }
-  
+
   __device__ void onesweep_sort(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr, const int num_clusters, const int iteration)
   {
     __shared__ uint32_t shared_sum[OneSweepNumBinsPerDigit];
@@ -597,7 +597,7 @@ namespace
             local_keys[j] = 0xFFFFFFFFU;
           }
       }
-    
+
     __syncthreads();
 
     constexpr uint32_t full_mask = 0xFFFFFFFFU;
@@ -636,7 +636,7 @@ namespace
       }
 
     __syncthreads();
-    
+
     for (int i = this_thread_index; i < OneSweepNumBinsPerDigit; i += ReorderNumThreadsPerBlock)
       {
         uint32_t sum = 0;
@@ -647,7 +647,7 @@ namespace
           }
 
         shared_store.p1.hist[i] = sum;
-        
+
         const int this_index = OneSweepNumBinsPerDigit * this_block_index + i;
 
         constexpr uint32_t local_ready_mask = 0x40000000U;
@@ -665,7 +665,7 @@ namespace
             const int other_index = OneSweepNumBinsPerDigit * (other_block - 1) + i;
 
             volatile uint32_t *ptr = static_cast<volatile uint32_t *>(&Temporaries::onesweep_counters(clusters_arr, iteration, other_index));
-            
+
             uint32_t block_result = 0;
             do
               {
@@ -687,11 +687,11 @@ namespace
       }
 
     __syncthreads();
-    
+
     onesweep_scan(this_thread_index, &shared_store.p1.hist[0]);
-    
+
     __syncthreads();
-    
+
     for (int i = this_thread_index; i < OneSweepNumBinsPerDigit; i += ReorderNumThreadsPerBlock)
       {
         uint32_t sum = shared_store.p1.hist[i];
@@ -708,7 +708,7 @@ namespace
       }
 
     __syncthreads();
-    
+
     for (int i = 0; i < ReorderItemsPerThread; ++i)
       {
         const KeyType key_bits = get_key_bits(local_keys[i]);
@@ -716,7 +716,7 @@ namespace
       }
 
     __syncthreads();
-    
+
     const bool is_last_iter = (iteration == OneSweepNumDigits - 1);
 
     if (!is_last_iter)
@@ -734,7 +734,7 @@ namespace
           }
 
         __syncthreads();
-    
+
         for (int i = this_thread_index; i < ReorderItemsPerBlock; i += ReorderNumThreadsPerBlock)
           {
             const int this_index = this_block_index * ReorderItemsPerBlock + i;
@@ -752,7 +752,7 @@ namespace
 
         __syncthreads();
       }
-    
+
     for (int i = intra_warp_index, j = 0; i < ReorderItemsPerWarp; i += WarpSize, ++j)
       {
         const int this_index = this_block_index * ReorderItemsPerBlock + this_warp_index * ReorderItemsPerWarp + i;
@@ -767,7 +767,7 @@ namespace
       }
 
     __syncthreads();
-    
+
     int real_num_clusters = num_clusters;
 
     if (is_last_iter)
@@ -822,7 +822,7 @@ namespace
 
     static constexpr unsigned int s_bits_per_carrier    = sizeof(carrier_type) * CHAR_BIT; //64
     static constexpr unsigned int s_entries_per_carrier = Helpers::int_floor_div(s_bits_per_carrier, LocalSortingHistEntryNumBits); //4
-    
+
     static constexpr auto s_number_carriers = Helpers::int_ceil_div(LocalSortNumBinsPerDigit, s_entries_per_carrier); //4
 
     carrier_type carriers[s_number_carriers][LocalSortingNumThreads + 1];
@@ -839,10 +839,10 @@ namespace
     {
       const unsigned int index = bin / s_divider;
       const unsigned int shift = (bin % s_divider) * s_multiplier;
-      
+
       return (carriers[index][thread] >> shift) & s_mask;
     }
-    
+
     _Pragma("nv_diag_suppress 177")
     constexpr void set_value(const unsigned int thread, const unsigned int bin, const uint16_t value)
     {
@@ -865,78 +865,78 @@ namespace
       const unsigned int shift = (bin % s_divider) * s_multiplier;
 
       const carrier_type new_value = ((static_cast<carrier_type>(value) & s_mask) << shift);
-      
+
       carriers[index][thread] += new_value;
     }
   };
 
   __device__ void local_sort_bin_prefix_sum(const int this_thread_index, const int idx, PackedLocalHistogram & shared_hist, PackedLocalHistogram::carrier_type * shared_array)
-  {  
+  {
     static_assert(LocalSortingNumWarps <= WarpSize);
-  
+
     constexpr unsigned int full_mask = 0xFFFFFFFFU;
-    
+
     const int this_warp_index  = this_thread_index / WarpSize;
     const int intra_warp_index = this_thread_index % WarpSize;
-  
+
     PackedLocalHistogram::carrier_type accum = shared_hist.carriers[idx][this_thread_index];
-    
+
     for (int i = 1; i < WarpSize; i *= 2)
       {
         const PackedLocalHistogram::carrier_type other = __shfl_up_sync(full_mask, accum, i) * (intra_warp_index >= i);
-      
+
         accum += other;
       }
-  
+
     if (intra_warp_index == WarpSize - 1)
       {
         shared_array[this_warp_index] = accum;
       }
-  
+
     __syncthreads();
-  
+
     if (this_warp_index == 0)
       {
         PackedLocalHistogram::carrier_type global_accum = (intra_warp_index < LocalSortingNumWarps ? shared_array[intra_warp_index] : 0);
-    
+
         for (int i = 1; i < LocalSortingNumWarps; i *= 2)
           {
             const PackedLocalHistogram::carrier_type other = __shfl_up_sync(full_mask, global_accum, i) * (intra_warp_index >= i);
-      
+
             global_accum += other;
           }
-    
+
         if (intra_warp_index < LocalSortingNumWarps)
           {
             shared_array[intra_warp_index] = global_accum;
           }
       }
-  
+
     __syncthreads();
-  
+
     shared_hist.carriers[idx][this_thread_index] = (this_warp_index > 0 ? shared_array[this_warp_index - 1] : 0) + accum - shared_hist.carriers[idx][this_thread_index];
   }
 
   __device__ void local_sort_final_prefix_sum(const int this_thread_index, PackedLocalHistogram & shared_hist)
-  { 
+  {
     static_assert(LocalSortNumBinsPerDigit <= WarpSize);
-  
+
     constexpr unsigned int full_mask = 0xFFFFFFFFU;
-    
+
     const int this_warp_index  = this_thread_index / WarpSize;
     const int intra_warp_index = this_thread_index % WarpSize;
-  
+
     if (this_warp_index == 0)
       {
         unsigned int accum = (this_thread_index < LocalSortNumBinsPerDigit ? shared_hist.get_value(LocalSortingNumThreads, intra_warp_index) : 0);
-    
+
         for (int i = 1; i < LocalSortNumBinsPerDigit; i *= 2)
           {
             const unsigned int other = __shfl_up_sync(full_mask, accum, i) * (intra_warp_index >= i);
-        
+
             accum += other;
           }
-    
+
         if (intra_warp_index < LocalSortNumBinsPerDigit)
           {
             constexpr unsigned int partial_mask = (1U << LocalSortNumBinsPerDigit) - 1;
@@ -952,7 +952,7 @@ namespace
 
             const int this_carrier_index  = intra_warp_index / PackedLocalHistogram::s_entries_per_carrier;
             const int intra_carrier_index = intra_warp_index % PackedLocalHistogram::s_entries_per_carrier;
-            
+
             if (intra_carrier_index == (PackedLocalHistogram::s_entries_per_carrier - 1))
               {
                 shared_hist.carriers[this_carrier_index][LocalSortingNumThreads] = final_value;
@@ -961,7 +961,7 @@ namespace
           }
       }
   }
-  
+
   __device__ void local_sort_inner(const int this_offset,
                                    const int this_thread_index,
                                    KeyType * local_keys,
@@ -979,30 +979,30 @@ namespace
       {
         shared_hist.carriers[i][this_thread_index] = static_cast<PackedLocalHistogram::carrier_type>(0);
       }
-    
+
     for (int i = 0; i < real_items_per_thread; ++i)
       {
         const unsigned int key_bits = (local_keys[i] >> start_bit) & ((1U << BitsPerLocalSort) - 1);
 
         shared_hist.add_value(this_thread_index, key_bits, 1);
       }
-    
+
     for (int i = 0; i < PackedLocalHistogram::s_number_carriers; ++i)
       {
         local_sort_bin_prefix_sum(this_thread_index, i, shared_hist, shared_array);
-        
+
         if (this_thread_index == LocalSortingNumThreads - 1)
           {
             shared_hist.carriers[i][LocalSortingNumThreads] = shared_array[LocalSortingNumWarps - 1];
           }
-        
+
         __syncthreads();
       }
 
     local_sort_final_prefix_sum(this_thread_index, shared_hist);
 
     __syncthreads();
-    
+
     for (int i = 0; i < real_items_per_thread; ++i)
       {
         const unsigned int key_bits = (local_keys[i] >> start_bit) & ((1U << BitsPerLocalSort) - 1);
@@ -1012,20 +1012,20 @@ namespace
         const uint16_t rank = shared_hist.get_value(this_thread_index, key_bits);
 
         shared_hist.add_value(this_thread_index, key_bits, 1);
-        
+
         shared_keys  [offset + rank] = local_keys  [i];
         shared_values[offset + rank] = local_values[i];
       }
-    
+
     __syncthreads();
-    
+
     for (int i = 0; i < real_items_per_thread; ++i)
       {
         const int this_index = this_offset + i;
         local_keys  [i] = shared_keys  [this_index];
         local_values[i] = shared_values[this_index];
       }
-    
+
   }
 
   __device__ void local_sort(Helpers::CUDA_kernel_object<ClusterInfoArr> clusters_arr, const int cluster_number)
@@ -1103,7 +1103,7 @@ __global__ static void buildHistogramKernel(Helpers::CUDA_kernel_object<ClusterI
         {
           return;
         }
-      
+
       if (blockIdx.x == 0)
         {
           local_sort(clusters_arr, number_of_clusters);
@@ -1115,7 +1115,7 @@ __global__ static void buildHistogramKernel(Helpers::CUDA_kernel_object<ClusterI
         {
           return;
         }
-      
+
       onesweep_histogram(clusters_arr, number_of_clusters);
     }
 }
@@ -1130,7 +1130,7 @@ __global__ static void sortClustersKernel(Helpers::CUDA_kernel_object<ClusterInf
 #else
   const int number_of_clusters = clusters_arr->number;
 #endif
-  
+
   if (number_of_clusters > LocalSortingMaxNumber && blockIdx.x * ReorderItemsPerBlock < number_of_clusters)
     {
       onesweep_sort(clusters_arr, number_of_clusters, iteration);
@@ -1143,10 +1143,10 @@ __global__ static void sortClustersKernel(Helpers::CUDA_kernel_object<ClusterInf
 void GPUClusterSorting::sortClusters(CaloRecGPU::EventDataHolder & holder,
                                      const ConstantDataHolder & instance_data,
                                      const IGPUKernelSizeOptimizer & optimizer,
-                                     const bool synchronize,
-                                     CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
+                                     CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
+                                     const bool synchronize)
 {
-  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
+  const cudaStream_t & stream_to_use = (cudaStream_t) stream;
 
   buildHistogramKernel <<< BuildHistogramGridSize, BuildHistogramBlockSize, 0, stream_to_use>>>(holder.m_clusters_dev);
 
@@ -1277,7 +1277,7 @@ void numCellsPrefixSumKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> cluster
           for (int other_block = this_block_index; other_block > 0; --other_block)
             {
               volatile uint32_t *ptr = static_cast<volatile uint32_t *>(&Temporaries::prefix_sum_counters(clusters_arr, other_block - 1));
-                  
+
               uint32_t block_result = 0;
               do
                 {
@@ -1396,7 +1396,7 @@ void finalizeCellInformationKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> c
           else
             {
               const int old_cluster = tag.cluster_index();
-              
+
               const int new_cluster = Temporaries::old_to_new_cluster_map(clusters_arr, old_cluster);
 
               const int new_seed    = Temporaries::old_seed_cells(clusters_arr, old_cluster);
@@ -1428,15 +1428,15 @@ void finalizeCellInformationKernel(Helpers::CUDA_kernel_object<ClusterInfoArr> c
 void GPUClusterSorting::finalizeClusterAssignment(CaloRecGPU::EventDataHolder & holder,
                                                    const ConstantDataHolder & instance_data,
                                                    const IGPUKernelSizeOptimizer & optimizer,
-                                                   const bool synchronize,
-                                                   CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream)
+                                                   CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
+                                                   const bool synchronize)
 {
-  const cudaStream_t & stream_to_use = (stream ? * ((cudaStream_t *) stream) : cudaStreamPerThread);
-  
+  const cudaStream_t & stream_to_use = (cudaStream_t) stream;
+
   numCellsPrefixSumKernel <<< PrefixSumGridSize, PrefixSumThreadsPerBlock, 0, stream_to_use>>>(holder.m_clusters_dev);
 
   const CUDAKernelLaunchConfiguration cfg_finalize = optimizer.get_launch_configuration("GPUClusterSorting", 3);
-  
+
   finalizeCellInformationKernel <<< cfg_finalize.grid_x, cfg_finalize.block_x, 0, stream_to_use>>>(holder.m_clusters_dev);
 
   if (synchronize)
@@ -1450,7 +1450,7 @@ void GPUClusterSorting::finalizeClusterAssignment(CaloRecGPU::EventDataHolder & 
       holder.m_clusters->state = ClusterInformationState::Full;
       holder.m_clusters->has_deleted_clusters = false;
     }
-  
+
 #if CALORECGPU_SORTER_DEBUG_CELL_ASSIGNMENT
   holder.m_clusters = holder.m_clusters_dev;
 

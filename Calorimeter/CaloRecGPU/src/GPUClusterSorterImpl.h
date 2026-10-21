@@ -20,20 +20,20 @@ namespace GPUClusterSorting
   void initialPropertiesCalculation(CaloRecGPU::EventDataHolder & holder,
                                     const CaloRecGPU::ConstantDataHolder & instance_data,
                                     const IGPUKernelSizeOptimizer & optimizer,
+                                    CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use,
                                     const bool synchronize = false,
-                                    const bool cut_in_absolute_ET = true, const float absolute_ET_threshold = -1,
-                                    CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+                                    const bool cut_in_absolute_ET = true, const float absolute_ET_threshold = -1);
 
   void sortClusters(CaloRecGPU::EventDataHolder & holder,
                     const CaloRecGPU::ConstantDataHolder & instance_data,
                     const IGPUKernelSizeOptimizer & optimizer,
-                    const bool synchronize = false,
-                    CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
-                    
+                    CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use,
+                    const bool synchronize = false);
+
   void finalizeClusterAssignment(CaloRecGPU::EventDataHolder & holder,
                                  const CaloRecGPU::ConstantDataHolder & instance_data,
                                  const IGPUKernelSizeOptimizer & optimizer,
-                                 const bool synchronize = false,
-                                 CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+                                 CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use,
+                                 const bool synchronize = false);
 }
 #endif //CALORECGPU_GPUCLUSTERSORTERIMPL_H

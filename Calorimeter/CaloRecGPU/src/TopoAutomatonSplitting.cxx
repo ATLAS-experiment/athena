@@ -192,9 +192,10 @@ StatusCode TopoAutomatonSplitting::initialize_non_CUDA()
 
   m_options.m_options->limit_HECIW_and_FCal_neighs = m_restrictHECIWandFCalNeighbors;
   m_options.m_options->limit_PS_neighs = m_restrictPSNeighbors;
-  
+
   ATH_CHECK( m_kernelSizeOptimizer.retrieve() );
-  
+  ATH_CHECK( m_streamTool.retrieve() );
+
   return StatusCode::SUCCESS;
 }
 
@@ -202,7 +203,7 @@ StatusCode TopoAutomatonSplitting::initialize_CUDA()
 {
   m_options.sendToGPU();
   register_kernels( *(m_kernelSizeOptimizer.get()) );
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -217,27 +218,29 @@ StatusCode TopoAutomatonSplitting::execute(const EventContext & ctx, const Const
 
   const auto start = clock_type::now();
   const auto preprocessing_end = clock_type::now();
-  
-  fillNeighbours(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), m_measureTimes);
-  
+
+  auto stream = m_streamTool->stream(ctx);
+
+  fillNeighbours(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), stream, m_measureTimes);
+
   const auto after_neighs = clock_type::now();
-  
-  findLocalMaxima(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), m_measureTimes);
-  
+
+  findLocalMaxima(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), stream, m_measureTimes);
+
   const auto after_maxima = clock_type::now();
-  
-  excludeSecondaryMaxima(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), m_measureTimes);
-  
+
+  excludeSecondaryMaxima(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), stream, m_measureTimes);
+
   const auto after_secondary_maxima = clock_type::now();
-  
-  splitClusterGrowing(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), m_measureTimes);
-  
+
+  splitClusterGrowing(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), stream, m_measureTimes);
+
   const auto after_growing = clock_type::now();
-  
-  cellWeightingAndFinalization(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), m_measureTimes);
+
+  cellWeightingAndFinalization(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), stream, m_measureTimes);
 
   const auto end = clock_type::now();
-  
+
   if (m_measureTimes)
     {
       record_times(ctx.evt(),

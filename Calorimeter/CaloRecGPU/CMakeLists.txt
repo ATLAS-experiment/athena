@@ -16,10 +16,10 @@ find_package( Boost COMPONENTS chrono unit_test_framework)
 atlas_add_library( CaloRecGPULib
    CaloRecGPU/*.h src/*.cxx src/*.cu src/*.h
    PUBLIC_HEADERS CaloRecGPU
-   LINK_LIBRARIES AthenaBaseComps AthenaInterprocess CaloEvent CaloInterfaceLib CxxUtils GaudiKernel TileEvent TrigT2CaloCommonLib xAODTrigCalo
+   LINK_LIBRARIES AthenaBaseComps AthenaInterprocess CaloEvent CaloInterfaceLib CxxUtils GaudiKernel AthCUDAInterfacesLib TileEvent TrigT2CaloCommonLib xAODTrigCalo
    PRIVATE_INCLUDE_DIRS ${Boost_INCLUDE_DIRS} )
 
-# Suppress spurious warnings seen in the LTO build originating 
+# Suppress spurious warnings seen in the LTO build originating
 # in the boost parser code.
 set_target_properties( CaloRecGPULib
                        PROPERTIES LINK_FLAGS " -Wno-maybe-uninitialized "  )
@@ -27,7 +27,7 @@ set_target_properties( CaloRecGPULib
 atlas_add_component( CaloRecGPU
    src/components/*.cxx
    LINK_LIBRARIES CaloRecGPULib )
-   
+
 atlas_add_test( CaloRecUtilities_test
    SOURCES
    test/CaloRecUtilities_test.cxx

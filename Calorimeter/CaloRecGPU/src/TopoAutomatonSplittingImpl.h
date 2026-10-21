@@ -69,7 +69,7 @@ namespace TASplitting
     {
       return tag.counter();
     }
-    
+
     [[nodiscard]] constexpr carrier update_cell(const uint32_t new_index, const uint32_t new_energy) const
     {
       return make_generic_tag(new_index, energy_to_storage(new_energy), 0, 0, 0) | (value & ~(s_18_bit_mask | s_32_bit_mask));
@@ -107,7 +107,7 @@ namespace TASplitting
     static constexpr carrier s_unassigned_tag = 1;
 
    public:
-   
+
     [[nodiscard]] static constexpr carrier make_non_split_cluster_tag()
     {
       return s_unassigned_tag;
@@ -142,7 +142,7 @@ namespace TASplitting
     {
       return tag.is_part_of_splitter_cluster();
     }
-    
+
     [[nodiscard]] constexpr bool is_not_shared() const
     {
       return this->get_second_flag();
@@ -187,17 +187,17 @@ namespace TASplitting
     {
       return (other_tag & (~s_second_flag_mask)) | s_first_flag_mask | s_12_bit_mask;
     }
-  
+
     [[nodiscard]] constexpr bool is_first() const
     {
       return this->get_first_flag();
     }
-    
+
     [[nodiscard]] static constexpr bool is_first(const TASTag tag)
     {
       return tag.is_first();
     }
-    
+
     [[nodiscard]] constexpr carrier propagate() const
     {
       return (value - s_tag_propagation_delta) & (~s_first_flag_mask);
@@ -207,7 +207,7 @@ namespace TASplitting
     {
       return tag.propagate();
     }
-    
+
    protected:
 
     static constexpr carrier s_secondary_maxima_eliminator_tag = 0xFFFFFFFFFFFFFFFFULL;
@@ -228,32 +228,32 @@ namespace TASplitting
     {
       return tag.is_secondary_maxima_eliminator();
     }
-    
+
     [[nodiscard]] constexpr bool is_primary_maximum() const
     {
       return this->get_first_flag();
     }
-    
+
     [[nodiscard]] static constexpr bool is_primary_maximum(const TASTag tag)
     {
       return tag.is_primary_maximum();
     }
-    
+
     [[nodiscard]] constexpr bool is_secondary_maximum() const
     {
       return !this->is_primary_maximum();
     }
-    
+
     [[nodiscard]] static constexpr bool is_secondary_maximum(const TASTag tag)
     {
       return tag.is_secondary_maximum();
     }
-    
+
     [[nodiscard]] constexpr carrier unset_secondary() const
     {
       return this->set_first_flag();
     }
-    
+
     [[nodiscard]] static constexpr carrier unset_secondary(const TASTag tag)
     {
       return tag.unset_secondary();
@@ -280,7 +280,7 @@ namespace TASplitting
     //         maybe it makes some sense to still allow this here? In our configuration we'll keep it disabled, but...
 
     unsigned int neighbour_options;
-    
+
     static constexpr bool uses_this_sampling(const unsigned int pattern, const unsigned int sampling)
     {
       return (pattern >> sampling) & 1U;
@@ -290,12 +290,12 @@ namespace TASplitting
     {
       return uses_this_sampling(valid_sampling_primary, sampling);
     }
-    
+
     constexpr bool uses_secondary_sampling(const unsigned int sampling) const
     {
       return uses_this_sampling(valid_sampling_secondary, sampling);
     }
-    
+
     constexpr bool uses_sampling(const unsigned int sampling) const
     {
       return uses_this_sampling(valid_sampling_primary | valid_sampling_secondary, sampling);
@@ -322,36 +322,36 @@ namespace TASplitting
                       const CaloRecGPU::ConstantDataHolder & instance_data,
                       const TASOptionsHolder & options,
                       const IGPUKernelSizeOptimizer & optimizer,
-                      const bool synchronize = false,
-                      CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+                      CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use,
+                      const bool synchronize = false);
 
   void findLocalMaxima(CaloRecGPU::EventDataHolder & holder,
                        const CaloRecGPU::ConstantDataHolder & instance_data,
                        const TASOptionsHolder & options,
                        const IGPUKernelSizeOptimizer & optimizer,
-                       const bool synchronize = false,
-                       CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+                       CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use,
+                       const bool synchronize = false);
 
   void excludeSecondaryMaxima(CaloRecGPU::EventDataHolder & holder,
                               const CaloRecGPU::ConstantDataHolder & instance_data,
                               const TASOptionsHolder & options,
                               const IGPUKernelSizeOptimizer & optimizer,
-                              const bool synchronize = false,
-                              CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+                              CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use,
+                              const bool synchronize = false);
 
   void splitClusterGrowing(CaloRecGPU::EventDataHolder & holder,
                            const CaloRecGPU::ConstantDataHolder & instance_data,
                            const TASOptionsHolder & options,
                            const IGPUKernelSizeOptimizer & optimizer,
-                           const bool synchronize = false,
-                           CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+                           CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use,
+                           const bool synchronize = false);
 
   void cellWeightingAndFinalization(CaloRecGPU::EventDataHolder & holder,
                                     const CaloRecGPU::ConstantDataHolder & instance_data,
                                     const TASOptionsHolder & options,
                                     const IGPUKernelSizeOptimizer & optimizer,
-                                    const bool synchronize = false,
-                                    CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use = {});
+                                    CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream_to_use,
+                                    const bool synchronize = false);
 }
 
 #endif //CALORECGPU_TOPOAUTOMATONSPLITTING_CUDA_H

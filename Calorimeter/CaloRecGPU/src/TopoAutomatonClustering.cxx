@@ -85,7 +85,7 @@ StatusCode TopoAutomatonClustering::initialize_non_CUDA()
   PackType & seed_samplings = m_options.m_options->valid_sampling_seed;
 
   seed_samplings = 0;
-  
+
   for (const std::string & samp_name : m_samplingNames)
     {
       bool failed = false;
@@ -126,8 +126,8 @@ StatusCode TopoAutomatonClustering::initialize_non_CUDA()
         return CaloCell_ID::NOT_VALID;
       }
   };
-  
-  
+
+
   auto calo_to_sampling_mask = [](const CaloCell_ID::SUBCALO sc) -> PackType
   {
     switch (sc)
@@ -154,11 +154,11 @@ StatusCode TopoAutomatonClustering::initialize_non_CUDA()
           return 0;
       }
   };
-  
+
   PackType & calo_samplings = m_options.m_options->valid_calorimeter_by_sampling;
 
   calo_samplings = 0;
-  
+
   for (const std::string & calo_name : m_caloNames)
     {
       bool failed = false;
@@ -175,7 +175,7 @@ StatusCode TopoAutomatonClustering::initialize_non_CUDA()
           calo_samplings |= sample_mask;
         }
     }
-  
+
     auto get_neighbour_option_from_string = [](const std::string & str, bool & failed)
   {
     failed = false;
@@ -233,11 +233,12 @@ StatusCode TopoAutomatonClustering::initialize_non_CUDA()
 
   m_options.m_options->limit_HECIW_and_FCal_neighs = m_restrictHECIWandFCalNeighbors;
   m_options.m_options->limit_PS_neighs = m_restrictPSNeighbors;
-  
+
   m_options.m_options->use_crosstalk = m_xtalkEM2;
   m_options.m_options->crosstalk_delta = m_xtalkDeltaT;
 
   ATH_CHECK( m_kernelSizeOptimizer.retrieve() );
+  ATH_CHECK( m_streamTool.retrieve() );
 
   return StatusCode::SUCCESS;
 }
@@ -246,7 +247,7 @@ StatusCode TopoAutomatonClustering::initialize_CUDA()
 {
   m_options.sendToGPU();
   register_kernels( *(m_kernelSizeOptimizer.get()) );
-  
+
   return StatusCode::SUCCESS;
 }
 
@@ -261,20 +262,22 @@ StatusCode TopoAutomatonClustering::execute(const EventContext & ctx, const Cons
   {
     return boost::chrono::duration_cast<boost::chrono::microseconds>(after - before).count();
   };
-  
+
   const auto start = clock_type::now();
-  
+
   const auto before_snr = clock_type::now();
 
-  signalToNoise(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), m_measureTimes);
+  auto stream = m_streamTool->stream(ctx);
+
+  signalToNoise(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), stream, m_measureTimes);
 
   const auto before_pairs = clock_type::now();
 
-  cellPairs(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), m_measureTimes);
+  cellPairs(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), stream, m_measureTimes);
 
   const auto before_growing = clock_type::now();
 
-  clusterGrowing(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), m_measureTimes);
+  clusterGrowing(event_data, constant_data, m_options, *(m_kernelSizeOptimizer.get()), stream, m_measureTimes);
 
   const auto end = clock_type::now();
 
@@ -303,4 +306,3 @@ StatusCode TopoAutomatonClustering::finalize()
     }
   return StatusCode::SUCCESS;
 }
-

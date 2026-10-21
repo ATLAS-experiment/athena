@@ -61,7 +61,7 @@ namespace CaloRecGPU
     bool & operator[] (const int moment);
 
     bool operator[] (const int  moment) const;
-    
+
     static MomentsOptionsArray all();
   };
 
@@ -72,7 +72,7 @@ namespace CaloRecGPU
   class EventDataHolder
   {
    public:
-   
+
     ///We are using a void* for API to make this able to compile on the GPU
     ///without Athena-specific dependencies. The user should pass a
     ///`const CaloCellCollection *`.
@@ -82,7 +82,7 @@ namespace CaloRecGPU
     ///without Athena-specific dependencies. The user should pass a
     ///`const xAOD::CaloClusterContainer *`.
     ///@p moments_to_add specifies which moments we will import.
-    void importClusters(const void * cluster_collection, 
+    void importClusters(const void * cluster_collection,
                         const MomentsOptionsArray & moments_to_add,
                         const bool output_tags = true,
                         const bool consider_shared_cells = true,
@@ -98,10 +98,10 @@ namespace CaloRecGPU
     ///If @p clear_CPU is @c true, we will wait until the transfers are finished
     ///before deallocating. If @p synchronize is @c true, we will synchronize anyway.
     void sendToGPU(const MomentsOptionsArray & moments_to_add,
+                   CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
                    const bool full_copy = false,
                    const bool clear_CPU = false,
-                   const bool synchronize = false,
-                   CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream = {});
+                   const bool synchronize = false);
 
     ///@p moments_to_add specifies which moments we will transfer from the GPU.
     ///If @p full_copy is @c true, we will memcopy the whole structure
@@ -112,12 +112,12 @@ namespace CaloRecGPU
     ///If @p clear_GPU is @c true, we will wait until the transfers are finished
     ///before deallocating. If @p synchronize is @c true, we will synchronize anyway.
     void returnToCPU(const MomentsOptionsArray & moments_to_add,
+                     CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
                      const bool full_copy = false,
                      const bool clear_GPU = false,
                      const bool synchronize = false,
-                     CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream = {},
                      const bool also_return_cells = false);
-    
+
     ///We are using a void* for API to make this able to compile on the GPU
     ///without Athena-specific dependencies. The user should pass a
     ///`xAOD::CaloClusterContainer *` and a `const DataLink<CaloCellContainer> *`.
@@ -137,7 +137,7 @@ namespace CaloRecGPU
                         const bool output_extra_moments = false,
                         const std::vector<int> & extra_cells_to_fill = {},
                         size_t * time_measurements = nullptr);
-    
+
     ///We are using a void* for API to make this able to compile on the GPU
     ///without Athena-specific dependencies. The user should pass a
     ///`xAOD::CaloClusterContainer *` and a `const DataLink<CaloCellContainer> *`.
@@ -152,15 +152,15 @@ namespace CaloRecGPU
     void returnAndExportClusters(void * cluster_collection,
                                  const void * cell_collection_link,
                                  const MomentsOptionsArray & moments_to_add,
+                                 CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream,
                                  const bool sort_clusters = true,
                                  const bool save_uncalibrated = true,
                                  const bool output_extra_moments = false,
                                  const std::vector<int> & extra_cells_to_fill = {},
-                                 size_t * time_measurements = nullptr,
-                                 CaloRecGPU::CUDA_Helpers::CUDAStreamPtrHolder stream = {});
-    
+                                 size_t * time_measurements = nullptr);
+
     void allocate(const bool also_GPU = true);
-    
+
     void clear_GPU();
 
 #if CALORECGPU_USE_PINNED_MEMORY

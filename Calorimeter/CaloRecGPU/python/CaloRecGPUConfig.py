@@ -3,6 +3,8 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+from AthCUDAServices.AthCUDAServicesConfig import StreamToolCfg
+
 def SingleToolToPlot(tool_name, prefix):
     return (tool_name, prefix)
 
@@ -14,28 +16,30 @@ def MatchingOptions(min_similarity = 0.50, terminal_weight = 250., grow_weight =
 
 def BasicConstantDataExporterToolCfg(flags, name = "ConstantDataExporter", **kwargs):
     result=ComponentAccumulator()
-    
+
     kwargs.setdefault("MeasureTimes", flags.CaloRecGPU.ActiveConfig.MeasureTimes)
     kwargs.setdefault("TimeFileOutput", name + "Times.txt")
-        
+
     ConstantDataExporter = CompFactory.BasicConstantGPUDataExporter(name, **kwargs)
-    
+
     result.setPrivateTools(ConstantDataExporter)
     return result
 
 def BasicEventDataExporterToolCfg(flags, cellsname, name = "EventDataExporter", **kwargs):
     result=ComponentAccumulator()
-    
+
     kwargs.setdefault("MeasureTimes", flags.CaloRecGPU.ActiveConfig.MeasureTimes)
     kwargs.setdefault("TimeFileOutput", name + "Times.txt")
-    
+
     kwargs.setdefault("CellsName", cellsname)
-      
+
+    kwargs.setdefault("StreamTool", result.popToolsAndMerge(StreamToolCfg(flags)))
+
     if flags.CaloRecGPU.ActiveConfig.FillMissingCells:
         kwargs.setdefault("MissingCellsToFill", flags.CaloRecGPU.ActiveConfig.MissingCellsToFill)
-                
+
     EventDataExporter = CompFactory.BasicEventDataGPUExporter(name, **kwargs)
-    
+
     result.setPrivateTools(EventDataExporter)
     return result
 
@@ -45,9 +49,10 @@ def BasicAthenaClusterImporterToolCfg(flags, cellsname, name = "ClusterImporter"
     kwargs.setdefault("TimeFileOutput", name + "Times.txt")
     kwargs.setdefault("CellsName", cellsname)
     kwargs.setdefault("ClusterSize", flags.CaloRecGPU.ActiveConfig.ClusterSize)
+    kwargs.setdefault("StreamTool", result.popToolsAndMerge(StreamToolCfg(flags)))
     if flags.CaloRecGPU.ActiveConfig.FillMissingCells:
         kwargs.setdefault("MissingCellsToFill", flags.CaloRecGPU.ActiveConfig.MissingCellsToFill)
-                
+
     AthenaClusterImporter = CompFactory.BasicGPUToAthenaImporter(name, **kwargs)
     result.setPrivateTools(AthenaClusterImporter)
     return result
@@ -56,7 +61,7 @@ def CPUOutputToolCfg(flags, cellsname, name = "CPUOutput", **kwargs):
     result=ComponentAccumulator()
     kwargs.setdefault("CellsName", cellsname)
     kwargs.setdefault("SavePath", "output")
-    
+
     CPUOutput = CompFactory.CaloCPUOutput(name, **kwargs)
     result.setPrivateTools(CPUOutput)
     return result
@@ -65,7 +70,7 @@ def GPUOutputToolCfg(flags, name = "GPUOutput", **kwargs):
     result=ComponentAccumulator()
     kwargs.setdefault("UseSortedAndCutClusters", True)
     kwargs.setdefault("SavePath", "output")
-        
+
     GPUOutput = CompFactory.CaloGPUOutput(name, **kwargs)
     result.setPrivateTools(GPUOutput)
     return result
@@ -74,6 +79,7 @@ def ClusterInfoCalcToolCfg(flags, name = "GPUClusterInfoCalculator", do_cut = Tr
     result=ComponentAccumulator()
     kwargs.setdefault("MeasureTimes", flags.CaloRecGPU.ActiveConfig.MeasureTimes)
     kwargs.setdefault("TimeFileOutput", name + "Times.txt")
+    kwargs.setdefault("StreamTool", result.popToolsAndMerge(StreamToolCfg(flags)))
     if do_cut:
         kwargs.setdefault("ClusterCutsInAbsEt", flags.CaloRecGPU.ActiveConfig.PostGrowingClusterCutClustersInAbsEt)
         kwargs.setdefault("ClusterEtorAbsEtCut", flags.CaloRecGPU.ActiveConfig.PostGrowingClusterEnergyCut)
@@ -90,6 +96,7 @@ def ClusterSorterToolCfg(flags, name = "GPUClusterSorter", do_cut = False, **kwa
     result=ComponentAccumulator()
     kwargs.setdefault("MeasureTimes", flags.CaloRecGPU.ActiveConfig.MeasureTimes)
     kwargs.setdefault("TimeFileOutput", name + "Times.txt")
+    kwargs.setdefault("StreamTool", result.popToolsAndMerge(StreamToolCfg(flags)))
     if do_cut:
         kwargs.setdefault("ClusterCutsInAbsEt", flags.CaloRecGPU.ActiveConfig.PostGrowingClusterCutClustersInAbsEt)
         kwargs.setdefault("ClusterEtorAbsEtCut", flags.CaloRecGPU.ActiveConfig.PostGrowingClusterEnergyCut)
@@ -126,21 +133,23 @@ def TopoAutomatonClusteringToolCfg(flags, name = "TopoAutomatonClustering", **kw
     kwargs.setdefault("CutOOTseed", flags.CaloRecGPU.ActiveConfig.doTimeCut and flags.CaloRecGPU.ActiveConfig.extendTimeCut)
     kwargs.setdefault("UseTimeCutUpperLimit", flags.CaloRecGPU.ActiveConfig.useUpperLimitForTimeCut)
     kwargs.setdefault("TimeCutUpperLimit", flags.CaloRecGPU.ActiveConfig.timeCutUpperLimit)
-    
+
     kwargs.setdefault("SeedThresholdOnTAbs", flags.CaloRecGPU.ActiveConfig.GrowingTimeCutSeedThreshold)
-    
+
     kwargs.setdefault("TreatL1PredictedCellsAsGood", flags.CaloRecGPU.ActiveConfig.GrowingTreatL1PredictedCellsAsGood)
 
     kwargs.setdefault("XTalkEM2", flags.CaloRecGPU.ActiveConfig.xtalkEM2)
     kwargs.setdefault("XTalkDeltaT", flags.CaloRecGPU.ActiveConfig.xtalkDeltaT)
-    
+
     #The other cross-talk options are not supported yet.
 
     kwargs.setdefault("NeighborOption", flags.CaloRecGPU.ActiveConfig.GrowingNeighborOption)
-    
+
     kwargs.setdefault("RestrictHECIWandFCalNeighbors", flags.CaloRecGPU.ActiveConfig.GrowingRestrictHECIWandFCalNeighbors)
-    
+
     kwargs.setdefault("RestrictPSNeighbors", flags.CaloRecGPU.ActiveConfig.GrowingRestrictPSNeighbors)
+
+    kwargs.setdefault("StreamTool", result.popToolsAndMerge(StreamToolCfg(flags)))
 
     TAClusterMaker = CompFactory.TopoAutomatonClustering(name, **kwargs)
     result.setPrivateTools(TAClusterMaker)
@@ -150,18 +159,18 @@ def DefaultTopologicalClusteringToolCfg(flags, cellsname, name = "TopoClusterMak
     result=ComponentAccumulator()
 
     kwargs.setdefault("CellsName", cellsname)
-    
+
     kwargs.setdefault("CalorimeterNames", flags.CaloRecGPU.ActiveConfig.GrowingCalorimeterNames)
     kwargs.setdefault("SeedSamplingNames", flags.CaloRecGPU.ActiveConfig.GrowingSeedSamplingNames)
-    
+
     kwargs.setdefault("NeighborOption", flags.CaloRecGPU.ActiveConfig.GrowingNeighborOption)
     kwargs.setdefault("RestrictHECIWandFCalNeighbors", flags.CaloRecGPU.ActiveConfig.GrowingRestrictHECIWandFCalNeighbors)
     kwargs.setdefault("RestrictPSNeighbors", flags.CaloRecGPU.ActiveConfig.GrowingRestrictPSNeighbors)
-    
+
     kwargs.setdefault("SeedThresholdOnEorAbsEinSigma", flags.CaloRecGPU.ActiveConfig.SeedThreshold)
     kwargs.setdefault("NeighborThresholdOnEorAbsEinSigma", flags.CaloRecGPU.ActiveConfig.GrowThreshold)
     kwargs.setdefault("CellThresholdOnEorAbsEinSigma", flags.CaloRecGPU.ActiveConfig.TermThreshold)
-    
+
     kwargs.setdefault("SeedCutsInAbsE", flags.CaloRecGPU.ActiveConfig.UseAbsSeedThreshold)
     kwargs.setdefault("NeighborCutsInAbsE", flags.CaloRecGPU.ActiveConfig.UseAbsGrowThreshold)
     kwargs.setdefault("CellCutsInAbsE", flags.CaloRecGPU.ActiveConfig.UseAbsTermThreshold)
@@ -181,12 +190,12 @@ def DefaultTopologicalClusteringToolCfg(flags, cellsname, name = "TopoClusterMak
     kwargs.setdefault("XTalk3Eratio", flags.CaloRecGPU.ActiveConfig.xtalk3Eratio)
     kwargs.setdefault("XTalkEtaEratio", flags.CaloRecGPU.ActiveConfig.xtalkEtaEratio)
     kwargs.setdefault("XTalk2DEratio", flags.CaloRecGPU.ActiveConfig.xtalk2DEratio)
-    
+
     kwargs.setdefault("ClusterCutsInAbsEt", flags.CaloRecGPU.ActiveConfig.PostGrowingClusterCutClustersInAbsEt)
     kwargs.setdefault("ClusterEtorAbsEtCut", flags.CaloRecGPU.ActiveConfig.PostGrowingClusterEnergyCut)
-    
+
     kwargs.setdefault("TwoGaussianNoise", flags.CaloRecGPU.ActiveConfig.doTwoGaussianNoise)
-    
+
     kwargs.setdefault("SeedThresholdOnTAbs", flags.CaloRecGPU.ActiveConfig.GrowingTimeCutSeedThreshold)
 
     kwargs.setdefault("TreatL1PredictedCellsAsGood", flags.CaloRecGPU.ActiveConfig.GrowingTreatL1PredictedCellsAsGood)
@@ -199,7 +208,7 @@ def DefaultTopologicalClusteringToolCfg(flags, cellsname, name = "TopoClusterMak
 
 def TopoAutomatonSplitterToolCfg(flags, name = "ClusterSplitter", **kwargs):
     result=ComponentAccumulator()
-    
+
     kwargs.setdefault("MeasureTimes", flags.CaloRecGPU.ActiveConfig.MeasureTimes)
     kwargs.setdefault("TimeFileOutput", name + "Times.txt")
 
@@ -218,13 +227,15 @@ def TopoAutomatonSplitterToolCfg(flags, name = "ClusterSplitter", **kwargs):
     kwargs.setdefault("RestrictPSNeighbors", flags.CaloRecGPU.ActiveConfig.GPUSplittingRestrictPSNeighbors)
     #Since the CPU version does not restrict this!
 
+    kwargs.setdefault("StreamTool", result.popToolsAndMerge(StreamToolCfg(flags)))
+
     Splitter = CompFactory.TopoAutomatonSplitting(name, **kwargs)
     result.setPrivateTools(Splitter)
     return result
 
 def DefaultClusterSplittingToolCfg(flags, name = "TopoSplitter", **kwargs):
     result=ComponentAccumulator()
-    
+
     kwargs.setdefault("NeighborOption", flags.CaloRecGPU.ActiveConfig.SplittingNeighborOption)
     kwargs.setdefault("RestrictHECIWandFCalNeighbors", flags.CaloRecGPU.ActiveConfig.SplittingRestrictHECIWandFCalNeighbors)
 
@@ -264,6 +275,8 @@ def GPUClusterMomentsCalculatorToolCfg(flags, name = "GPUTopoMoments", **kwargs)
     kwargs.setdefault("MinRLateral", flags.CaloRecGPU.ActiveConfig.MomentsMinRLateral)
     kwargs.setdefault("MinLLongitudinal", flags.CaloRecGPU.ActiveConfig.MomentsMinLLongitudinal)
 
+    kwargs.setdefault("StreamTool", result.popToolsAndMerge(StreamToolCfg(flags)))
+
     GPUTopoMoments = CompFactory.GPUClusterInfoAndMomentsCalculator(name, **kwargs)
     result.setPrivateTools(GPUTopoMoments)
     return result
@@ -285,9 +298,9 @@ def DefaultClusterMomentsCalculatorToolCfg(flags, instantiateForTrigger, name = 
     kwargs.setdefault("MinLLongitudinal", flags.CaloRecGPU.ActiveConfig.MomentsMinLLongitudinal)
 
     kwargs.setdefault("UseGPUCriteria", not flags.CaloRecGPU.ActiveConfig.UseOriginalCriteria)
-        
+
     TopoMoments = CompFactory.CaloClusterMomentsMaker(name, **kwargs)
-    
+
     if not flags.Common.isOnline and not instantiateForTrigger and "LArHVFraction" not in kwargs:
         #If it's already in kwargs, don't override
         #(extra flexibility for the user, not that it's needed...)
@@ -297,18 +310,20 @@ def DefaultClusterMomentsCalculatorToolCfg(flags, instantiateForTrigger, name = 
             TopoMoments.LArHVFraction=CompFactory.LArHVFraction(HVScaleCorrKey="LArHVScaleCorr")
         else:
             TopoMoments.LArHVFraction=CompFactory.LArHVFraction(HVScaleCorrKey="LArHVScaleCorrRecomputed")
-    
+
     result.setPrivateTools(TopoMoments)
     return result
 
 def AthenaClusterAndMomentsImporterToolCfg(flags, cellsname, instantiateForTrigger, name = "ClusterAndMomentsImporter", **kwargs):
     result=ComponentAccumulator()
     kwargs.setdefault("CellsName", cellsname)
-    
+
     kwargs.setdefault("ClusterSize", flags.CaloRecGPU.ActiveConfig.ClusterSize)
 
     kwargs.setdefault("MeasureTimes", flags.CaloRecGPU.ActiveConfig.MeasureTimes)
     kwargs.setdefault("TimeFileOutput", name + "Times.txt")
+
+    kwargs.setdefault("StreamTool", result.popToolsAndMerge(StreamToolCfg(flags)))
 
     if not flags.Common.isOnline and not instantiateForTrigger:
         kwargs.setdefault("FillHVMoments", True)
@@ -376,11 +391,11 @@ def PerformanceInformationOutputToolCfg(flags, cellsname, name = "PerfInfoTool",
     kwargs.setdefault("SeedCutsInAbsE", flags.CaloRecGPU.ActiveConfig.UseAbsSeedThreshold)
     kwargs.setdefault("NeighborCutsInAbsE", flags.CaloRecGPU.ActiveConfig.UseAbsGrowThreshold)
     kwargs.setdefault("CellCutsInAbsE", flags.CaloRecGPU.ActiveConfig.UseAbsTermThreshold)
-    
+
     GPUCount = CompFactory.CaloPerformancePropertiesOutput(name, **kwargs)
     result.setPrivateTools(GPUCount)
     return result
-    
+
 def MomentsDumperToolCfg(flags, name = "MomentsDumper", **kwargs):
     result=ComponentAccumulator()
     kwargs.setdefault("SavePath", "moments")
@@ -402,22 +417,22 @@ def PlotterToolCfg(flags, cellsname, name = "PlotterMonitoring", **kwargs):
 
     if flags.CaloRecGPU.ActiveConfig.FillMissingCells:
         kwargs.setdefault("MissingCellsToFill", flags.CaloRecGPU.ActiveConfig.MissingCellsToFill)
-        
+
     #Tools and Combinations to plot
     #should be set by the end user.
 
     PloTool = CompFactory.CaloGPUClusterAndCellDataMonitor(name, **kwargs)
-    
+
     if "MonitoringTool" not in kwargs:
         from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
         PloTool.MonitoringTool = GenericMonitoringTool(flags, "PlotterMonitoringTool")
-    
+
     result.setPrivateTools(PloTool)
     return result
 
 def DefaultCalibMomentsToolCfg(flags, name = "TopoCalibMoments", **kwargs):
     result=ComponentAccumulator()
-    
+
     kwargs.setdefault("MomentsNames", ["ENG_CALIB_TOT"
                                        ,"ENG_CALIB_OUT_L"
                                        ,"ENG_CALIB_OUT_T"
@@ -441,20 +456,20 @@ def DefaultCalibMomentsToolCfg(flags, name = "TopoCalibMoments", **kwargs):
                                                        ,"LArCalibrationHitActive"
                                                        ,"TileCalibHitActiveCell"
                                                        ,"TileCalibHitInactiveCell"])
-                                                       
+
     kwargs.setdefault("DMCalibrationHitContainerNames", ["LArCalibrationHitDeadMaterial"
                                                          ,"TileCalibHitDeadMaterial"])
-    
+
     TopoCalibMoments = CompFactory.CaloCalibClusterMomentsMaker2(name, **kwargs)
     result.setPrivateTools(TopoCalibMoments)
     return result
 
 def DefaultTopoClusterLocalCalibToolsCfg(flags, instantiateForTrigger, prefix = ''):
     result=ComponentAccumulator()
-        
+
     CaloClusterLocalCalib=CompFactory.CaloClusterLocalCalib
-    
-    # Local cell weights    
+
+    # Local cell weights
     LCClassify   = CompFactory.CaloLCClassificationTool(prefix + "LCClassify")
     LCClassify.ClassificationKey   = "EMFracClassify"
     LCClassify.UseSpread = False
@@ -520,11 +535,11 @@ def DefaultTopoClusterLocalCalibToolsCfg(flags, instantiateForTrigger, prefix = 
         OOCCalib,
         OOCPi0Calib,
         DMCalib]
-    
+
     result.setPrivateTools(lccalibtools)
-    
+
     return result
-    
+
 #Depending on ReallyUseGPUTools,
 #instantiates GPU or CPU tools with consistent options...
 def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
@@ -542,44 +557,44 @@ def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
     clustersname_final = clustersname
     if flags.CaloRecGPU.ActiveConfig.applyClusterTimingCut:
         clustersname = f"{clustersname}BeforeTimingCut"
-    
+
     result = ComponentAccumulator()
-    
+
     if not instantiateForTrigger:
-    
+
       from LArGeoAlgsNV.LArGMConfig import LArGMCfg
       from TileGeoModel.TileGMConfig import TileGMCfg
       from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
-    
+
       result.merge(CaloNoiseCondAlgCfg(flags,"totalNoise"))
       result.merge(CaloNoiseCondAlgCfg(flags,"electronicNoise"))
-    
+
       result.merge(LArGMCfg(flags))
       result.merge(TileGMCfg(flags))
-    
+
 
     HybridClusterProcessor = CompFactory.CaloGPUHybridClusterProcessor(name)
     HybridClusterProcessor.ClustersOutputName = clustersname
-    
+
     HybridClusterProcessor.WriteTriggerSpecificInfo = instantiateForTrigger
-    
+
     HybridClusterProcessor.MeasureTimes = flags.CaloRecGPU.ActiveConfig.MeasureTimes
-    
+
     HybridClusterProcessor.TimeFileOutput = "GlobalTimes.txt"
-        
+
     HybridClusterProcessor.DeferConstantDataPreparationToFirstEvent = True
     HybridClusterProcessor.DoPlots = PlotterTool is not None
     HybridClusterProcessor.PlotterTool = PlotterTool
-    
+
     HybridClusterProcessor.NumPreAllocatedDataHolders = flags.CaloRecGPU.ActiveConfig.NumPreAllocatedDataHolders
 
     if ReallyUseGPUTools:
-    
+
       HybridClusterProcessor.ConstantDataToGPUTool = result.popToolsAndMerge( BasicConstantDataExporterToolCfg(flags) )
       HybridClusterProcessor.EventDataToGPUTool = result.popToolsAndMerge( BasicEventDataExporterToolCfg(flags, cellsname) )
       HybridClusterProcessor.GPUToEventDataTool = result.popToolsAndMerge( AthenaClusterAndMomentsImporterToolCfg(flags, cellsname, instantiateForTrigger) )
-      
-      
+
+
       HybridClusterProcessor.BeforeGPUTools = []
 
       HybridClusterProcessor.GPUTools = []
@@ -593,27 +608,27 @@ def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
       HybridClusterProcessor.GPUTools += [result.popToolsAndMerge( ClusterSorterToolCfg(flags, "GPUClusterSorting", False) )]
 
       HybridClusterProcessor.GPUTools += [result.popToolsAndMerge( GPUClusterMomentsCalculatorToolCfg(flags,"GPUTopoMoments") )]
-      
+
     else:
-      
+
       HybridClusterProcessor.ConstantDataToGPUTool = None
       HybridClusterProcessor.EventDataToGPUTool = None
       HybridClusterProcessor.GPUToEventDataTool = None
       HybridClusterProcessor.SkipConversions = True
-      
+
       HybridClusterProcessor.GPUTools = []
-      
-      HybridClusterProcessor.BeforeGPUTools = [] 
-      
+
+      HybridClusterProcessor.BeforeGPUTools = []
+
       HybridClusterProcessor.BeforeGPUTools += [result.popToolsAndMerge( DefaultTopologicalClusteringToolCfg(flags, cellsname,"CPUGrowing"))]
 
       HybridClusterProcessor.BeforeGPUTools += [result.popToolsAndMerge( DefaultClusterSplittingToolCfg(flags,"CPUSplitting") )]
 
       HybridClusterProcessor.BeforeGPUTools += [result.popToolsAndMerge( DefaultClusterMomentsCalculatorToolCfg(flags, instantiateForTrigger, "CPUTopoMoments") )]
-      
+
       HybridClusterProcessor.BeforeGPUTools += [ CompFactory.CaloClusterStoreRawProperties("RawPropertiesStorer") ]
-      
-      
+
+
 
     HybridClusterProcessor.AfterGPUTools = []
 
@@ -623,10 +638,10 @@ def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
       HybridClusterProcessor.AfterGPUTools += [CompFactory.CaloClusterBadChannelList(badChannelTool = caloBadChanTool)]
 
     if not instantiateForTrigger and flags.CaloRecGPU.ActiveConfig.doCalibHitMoments:
-    
+
         calibHitsMomentsMaker = result.popToolsAndMerge(DefaultCalibMomentsToolCfg(flags))
         HybridClusterProcessor.AfterGPUTools += [calibHitsMomentsMaker]
-    
+
     if doLCCalib:
         if not instantiateForTrigger:
             HybridClusterProcessor.AfterGPUTools += [CompFactory.CaloClusterSnapshot(OutputName=clustersnapname,
@@ -637,20 +652,20 @@ def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
           from CaloRec.CaloTopoClusterConfig import caloTopoCoolFolderCfg
           result.merge(CaloNoiseCondAlgCfg(flags, noisetype="electronicNoise"))
           result.merge(caloTopoCoolFolderCfg(flags))
-        
+
         calibTools = result.popToolsAndMerge(DefaultTopoClusterLocalCalibToolsCfg(flags, instantiateForTrigger, 'Trig' if instantiateForTrigger else ''))
-        
+
         HybridClusterProcessor.AfterGPUTools += calibTools
         #This is already a tool array.
-        
+
         if not instantiateForTrigger:
           from CaloRec.CaloTopoClusterConfig import caloTopoCoolFolderCfg
           result.merge(caloTopoCoolFolderCfg(flags))
-    
+
     if instantiateForTrigger:
       from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
       result.merge(CaloNoiseCondAlgCfg(flags))
-    
+
     result.addEventAlgo(HybridClusterProcessor, primary=addAsPrimary)
 
     if flags.CaloRecGPU.ActiveConfig.applyClusterTimingCut:
@@ -660,14 +675,14 @@ def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
     if instantiateForTrigger or clustersname_final in flags.CaloRecGPU.ActiveConfig.skipWriteList:
         # don't add these clusters to ESD and AOD
         return result
-    
+
     #Output config:
-    AODMoments=[ "SECOND_R" 
+    AODMoments=[ "SECOND_R"
                  ,"SECOND_LAMBDA"
                  ,"CENTER_MAG"
                  ,"CENTER_LAMBDA"
                  ,"FIRST_ENG_DENS"
-                 ,"ENG_FRAC_MAX" 
+                 ,"ENG_FRAC_MAX"
                  ,"ISOLATION"
                  ,"ENG_BAD_CELLS"
                  ,"N_BAD_CELLS"
@@ -720,20 +735,19 @@ def GPUCaloTopoClusterCfg(flags, instantiateForTrigger, cellsname,
              f"CaloClusterCellLinkContainer#{clustersname_final}_links"]
 
     AODMoments.append("CellLink") #Add data-link to cell-link container
-    if flags.CaloRecGPU.ActiveConfig.addCalibrationHitDecoration: #Add calib hit deco if requried 
+    if flags.CaloRecGPU.ActiveConfig.addCalibrationHitDecoration: #Add calib hit deco if requried
         AODMoments.append(flags.CaloRecGPU.ActiveConfig.CalibrationHitDecorationName)
 
     if flags.CaloRecGPU.ActiveConfig.addCPData:
         AODMoments += ["ClusterWidthEta","ClusterWidthPhi"]
 
     auxItems = f"xAOD::CaloClusterAuxContainer#{clustersname_final}Aux."
-    auxItems+= ".".join(AODMoments)    
+    auxItems+= ".".join(AODMoments)
 
     toAOD.append(auxItems)
- 
+
     result.merge(addToESD(flags, toESD))
     result.merge(addToAOD(flags, toAOD))
-    
-    
+
+
     return result
-  
