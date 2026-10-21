@@ -39,6 +39,7 @@ const ZDCJSONConfig::JSONParamList ZDCPulseAnalyzer::JSONConfigParams = {
     {"preSampleIdx", {JSON::value_t::number_integer, 1, true, true}},
     {"nominalPedestal", {JSON::value_t::number_integer, 1, false, true}},
     {"fitFunction", {JSON::value_t::string, 1, true, true}},
+    {"fitParameterSet", {JSON::value_t::string, 1, false, false}},
     {"peakSample", {JSON::value_t::number_integer, 1, true, true}},
     {"peakTolerance", {JSON::value_t::number_integer, 1, true, false}},
     {"quietFits", {JSON::value_t::boolean, 1, false, false}},
@@ -54,6 +55,14 @@ const ZDCJSONConfig::JSONParamList ZDCPulseAnalyzer::JSONConfigParams = {
     {"nominalTau2", {JSON::value_t::number_float, 1, true, false}},
     {"fixTau1", {JSON::value_t::boolean, 1, true, false}},
     {"fixTau2", {JSON::value_t::boolean, 1, true, false}},
+    {"nominalTau1HG", {JSON::value_t::number_float, 1, true, false}},
+    {"nominalTau2HG", {JSON::value_t::number_float, 1, true, false}},
+    {"fixTau1HG", {JSON::value_t::boolean, 1, true, false}},
+    {"fixTau2HG", {JSON::value_t::boolean, 1, true, false}},
+    {"nominalTau1LG", {JSON::value_t::number_float, 1, true, false}},
+    {"nominalTau2LG", {JSON::value_t::number_float, 1, true, false}},
+    {"fixTau1LG", {JSON::value_t::boolean, 1, true, false}},
+    {"fixTau2LG", {JSON::value_t::boolean, 1, true, false}},
     {"T0CutsHG", {JSON::value_t::array, 2, true, true}},
     {"T0CutsLG", {JSON::value_t::array, 2, true, true}},
     {"chisqDivAmpCutHG", {JSON::value_t::number_float, 1, true, true}},
@@ -265,11 +274,16 @@ void ZDCPulseAnalyzer::setDefaults()
 {
   m_LGMode = LGModeNormal;
   
-  m_nominalTau1 = 1.5;
-  m_nominalTau2 = 5;
+  m_nominalTau1HG = 1.5;
+  m_nominalTau1LG = 1.5;
+  m_nominalTau2HG = 5;
+  m_nominalTau2LG = 5;
 
-  m_fixTau1 = false;
-  m_fixTau2 = false;
+  m_fixTau1HG = false;
+  m_fixTau2HG = false;
+  
+  m_fixTau1LG = false;
+  m_fixTau2LG = false;
 
   m_HGOverflowADC  = 3500;
   m_HGUnderflowADC = 1;
@@ -433,9 +447,12 @@ void ZDCPulseAnalyzer::reset(bool repass)
   m_defaultT0Min = m_deltaTSample * (m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance - 1.5);
 
   if (m_initializedFits) {
-    m_defaultFitWrapper ->SetT0Range(m_defaultT0Min, m_defaultT0Max);
-    m_prePulseFitWrapper->SetT0Range(m_defaultT0Min, m_defaultT0Max);
-    m_preExpFitWrapper->SetT0Range(m_defaultT0Min, m_defaultT0Max);
+    m_defaultFitWrapperHG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
+    m_prePulseFitWrapperHG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
+    m_preExpFitWrapperHG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
+    m_defaultFitWrapperLG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
+    m_prePulseFitWrapperLG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
+    m_preExpFitWrapperLG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
   }
 
   // -----------------------
@@ -533,16 +550,21 @@ void ZDCPulseAnalyzer::SetFitMinMaxAmp(float minAmpHG, float minAmpLG, float max
 
 void ZDCPulseAnalyzer::SetTauT0Values(bool fixTau1, bool fixTau2, float tau1, float tau2, float t0HG, float t0LG)
 {
-  m_fixTau1     = fixTau1;
-  m_fixTau2     = fixTau2;
-  m_nominalTau1 = tau1;
-  m_nominalTau2 = tau2;
+  m_fixTau1HG     = fixTau1;
+  m_fixTau1LG     = fixTau1;
+  m_fixTau2HG     = fixTau2;
+  m_fixTau2LG     = fixTau2;
+  m_nominalTau1HG = tau1;
+  m_nominalTau2HG = tau2;
+  m_nominalTau1LG = tau1;
+  m_nominalTau2LG = tau2;
 
   m_nominalT0HG = t0HG;
   m_nominalT0LG = t0LG;
 
   std::ostringstream ostrm;
-  ostrm << "ZDCPulseAnalyzer::SetTauT0Values:: m_fixTau1=" << m_fixTau1 << "  m_fixTau2=" << m_fixTau2 << "  m_nominalTau1=" << m_nominalTau1 << "  m_nominalTau2=" << m_nominalTau2 << "  m_nominalT0HG=" << m_nominalT0HG << "  m_nominalT0LG=" << m_nominalT0LG;
+  ostrm << "ZDCPulseAnalyzer::SetTauT0Values:: fixTau1 = " << fixTau1 << ", fixTau2 = " << fixTau2 << ", nominalTau1 = "
+	<< tau1 << ", nominalTau2=" << tau2 << ", m_nominalT0HG=" << m_nominalT0HG << "  m_nominalT0LG=" << m_nominalT0LG;
 
   (*m_msgFunc_p)(ZDCMsg::Info, ostrm.str());
 
@@ -752,103 +774,143 @@ void ZDCPulseAnalyzer::SetupFitFunctions()
   float prePulseTMin = 0;
   float prePulseTMax = prePulseTMin + m_deltaTSample * (m_peak2ndDerivMinSample - m_peak2ndDerivMinTolerance);
 
+  std::string tagHG = m_tag + "HG";
+  std::string tagLG = m_tag + "LG";
+  
   if (m_fitFunction == "FermiExp") {
-    if (!m_fixTau1 || !m_fixTau2) {
+    if (!m_fixTau1HG || !m_fixTau2HG) {
       //
       // Use the variable tau version of the expFermiFit
       //
-      m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTaus(m_tag, m_tmin, m_tmax, m_fixTau1, m_fixTau2, m_nominalTau1, m_nominalTau2));
+      m_defaultFitWrapperHG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTaus(tagHG, m_tmin, m_tmax, m_fixTau1HG, m_fixTau2HG, m_nominalTau1HG, m_nominalTau2HG));
     }
     else {
-      m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiFixedTaus(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
+      m_defaultFitWrapperHG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiFixedTaus(tagHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG));
     }
 
-    m_preExpFitWrapper = std::unique_ptr<ZDCFitExpFermiPreExp>(new ZDCFitExpFermiPreExp(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2, m_nominalTau2, false));
-    m_prePulseFitWrapper = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiPrePulse(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
+    if (!m_fixTau1LG || !m_fixTau2LG) {
+      m_defaultFitWrapperLG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTaus(tagLG, m_tmin, m_tmax, m_fixTau1LG, m_fixTau2LG, m_nominalTau1LG, m_nominalTau2LG));
+    }
+    else {
+      m_defaultFitWrapperLG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiFixedTaus(tagLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG));
+    }
+
+    if (m_doPrePulseCheck) {
+      m_preExpFitWrapperHG = std::unique_ptr<ZDCFitExpFermiPreExp>(new ZDCFitExpFermiPreExp(tagHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG, m_nominalTau2HG, false));
+      m_preExpFitWrapperLG = std::unique_ptr<ZDCFitExpFermiPreExp>(new ZDCFitExpFermiPreExp(tagLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG, m_nominalTau2LG, false));
+
+      m_prePulseFitWrapperHG = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiPrePulse(tagHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG));
+      m_prePulseFitWrapperLG = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiPrePulse(tagLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG));
+    }
   }
   else if (m_fitFunction == "FermiExpRun3") {
-    if (!m_fixTau1 || !m_fixTau2) {
+    if (!m_fixTau1HG || !m_fixTau2HG) {
       //
       // Use the variable tau version of the expFermiFit
       //
-      m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausRun3(m_tag, m_tmin, m_tmax, m_fixTau1, m_fixTau2, m_nominalTau1, m_nominalTau2));
+      m_defaultFitWrapperHG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausRun3(tagHG, m_tmin, m_tmax, m_fixTau1HG, m_fixTau2HG, m_nominalTau1HG, m_nominalTau2HG));
     }
     else {
-      m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiFixedTaus(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
+      m_defaultFitWrapperHG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiFixedTaus(tagHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG));
     }
 
-    m_preExpFitWrapper = std::unique_ptr<ZDCFitExpFermiPreExp>(new ZDCFitExpFermiPreExp(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2, 6, false));
-    m_prePulseFitWrapper = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiPrePulse(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
+    if (!m_fixTau1LG || !m_fixTau2LG) {
+      m_defaultFitWrapperLG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausRun3(tagLG, m_tmin, m_tmax, m_fixTau1LG, m_fixTau2LG, m_nominalTau1LG, m_nominalTau2LG));
+    }
+    else {
+      m_defaultFitWrapperLG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiFixedTaus(tagLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG));
+    }
+
+    if (m_doPrePulseCheck) {
+      m_preExpFitWrapperHG = std::unique_ptr<ZDCFitExpFermiPreExp>(new ZDCFitExpFermiPreExp(tagHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG, m_nominalTau2HG, false));
+      m_preExpFitWrapperLG = std::unique_ptr<ZDCFitExpFermiPreExp>(new ZDCFitExpFermiPreExp(tagLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG, m_nominalTau2LG, false));
+
+      m_prePulseFitWrapperHG = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiPrePulse(tagHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG));
+      m_prePulseFitWrapperLG = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiPrePulse(tagLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG));
+    }
   }
   else if (m_fitFunction == "FermiExpLHCf") {
     //
     // Use the variable tau version of the expFermiFit
     //
-    m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausLHCf(m_tag, m_tmin, m_tmax, m_fixTau1, m_fixTau2,
-											      m_nominalTau1, m_nominalTau2));
+    m_defaultFitWrapperHG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausLHCf(tagHG, m_tmin, m_tmax, m_fixTau1HG, m_fixTau2HG,
+											      m_nominalTau1HG, m_nominalTau2HG));
+    m_defaultFitWrapperLG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausLHCf(tagLG, m_tmin, m_tmax, m_fixTau1LG, m_fixTau2LG,
+											      m_nominalTau1LG, m_nominalTau2LG));
 
-    m_preExpFitWrapper = std::unique_ptr<ZDCFitExpFermiLHCfPreExp>(new ZDCFitExpFermiLHCfPreExp(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2, 6, false));
-    
-    m_prePulseFitWrapper = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiLHCfPrePulse(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
+    if (m_doPrePulseCheck) {
+      m_preExpFitWrapperHG = std::unique_ptr<ZDCFitExpFermiLHCfPreExp>(new ZDCFitExpFermiLHCfPreExp(tagHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG, m_nominalTau2HG, false));
+      m_preExpFitWrapperLG = std::unique_ptr<ZDCFitExpFermiLHCfPreExp>(new ZDCFitExpFermiLHCfPreExp(tagLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG, m_nominalTau2LG, false));
+      
+      m_prePulseFitWrapperHG = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiLHCfPrePulse(tagHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG));
+      m_prePulseFitWrapperLG = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiLHCfPrePulse(tagLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG));
+    }
   }
   else if (m_fitFunction == "FermiExpInduct") {
-    //
-    // Use the variable tau version of the expFermiFit
-    //
-    m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausInduct(m_tag, m_tmin, m_tmax, m_fixTau1, m_fixTau2,
-											      m_nominalTau1, m_nominalTau2));
-    m_preExpFitWrapper = std::unique_ptr<ZDCFitExpFermiInductPreExp>(new ZDCFitExpFermiInductPreExp(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2, 6, false));
+    if (m_fitParameterSetHG == "") {
+      //
+      // Use the variable tau version of the expFermiFit
+      //
+      m_defaultFitWrapperHG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausInduct(tagHG, m_tmin, m_tmax, m_fixTau1HG, m_fixTau2HG,
+												m_nominalTau1HG, m_nominalTau2HG));
+      m_defaultFitWrapperLG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausInduct(tagLG, m_tmin, m_tmax, m_fixTau1LG, m_fixTau2LG,
+												m_nominalTau1LG, m_nominalTau2LG));
+      if (m_doPrePulseCheck) {
+	m_preExpFitWrapperHG = std::unique_ptr<ZDCFitExpFermiInductPreExp>(new ZDCFitExpFermiInductPreExp(tagHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG, m_nominalTau2HG, false));
+	m_preExpFitWrapperLG = std::unique_ptr<ZDCFitExpFermiInductPreExp>(new ZDCFitExpFermiInductPreExp(tagLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG, m_nominalTau2LG, false));
+      
+	m_prePulseFitWrapperHG = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiInductPrePulse(tagHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG));
+	m_prePulseFitWrapperLG = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiInductPrePulse(tagLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG));
+      }
+    }
+    else {
+      m_defaultFitWrapperHG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausInduct(tagHG, m_fitParameterSetHG, m_tmin, m_tmax, m_fixTau1HG, m_fixTau2HG,
+												  m_nominalTau1HG, m_nominalTau2HG));
+      m_defaultFitWrapperLG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausInduct(tagLG, m_fitParameterSetLG, m_tmin, m_tmax, m_fixTau1LG, m_fixTau2LG,
+												  m_nominalTau1LG, m_nominalTau2LG));
 
-    // We still have to implement the pre-pulse version of the new induct function For now, using old ("LHCf") version
-    //
-    m_prePulseFitWrapper = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiLHCfPrePulse(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
+      if (m_doPrePulseCheck) {
+	m_preExpFitWrapperHG = std::unique_ptr<ZDCFitExpFermiInductPreExp>(new ZDCFitExpFermiInductPreExp(tagHG, m_fitParameterSetHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG));
+	m_preExpFitWrapperLG = std::unique_ptr<ZDCFitExpFermiInductPreExp>(new ZDCFitExpFermiInductPreExp(tagLG, m_fitParameterSetLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2HG));
+	
+	m_prePulseFitWrapperHG = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiInductPrePulse(tagHG, m_fitParameterSetHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG));
+	m_prePulseFitWrapperLG = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiInductPrePulse(tagLG, m_fitParameterSetLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG));
+      }
+    }
   }
   else if (m_fitFunction == "FermiExpLinear") {
-    if (!m_fixTau1 || !m_fixTau2) {
+    if (!m_fixTau1HG || !m_fixTau2HG) {
       //
       // Use the variable tau version of the expFermiFit
       //
-      m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTaus(m_tag, m_tmin, m_tmax, m_fixTau1, m_fixTau2, m_nominalTau1, m_nominalTau2));
+      m_defaultFitWrapperHG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTaus(tagHG, m_tmin, m_tmax, m_fixTau1HG, m_fixTau2HG, m_nominalTau1HG, m_nominalTau2HG));
     }
     else {
-      m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiLinearFixedTaus(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
+      m_defaultFitWrapperHG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiLinearFixedTaus(tagHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG));
     }
 
-    m_preExpFitWrapper = std::unique_ptr<ZDCFitExpFermiPreExp>(new ZDCFitExpFermiPreExp(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2, 6, false));
-    m_prePulseFitWrapper = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiLinearPrePulse(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
-  }
-  else if (m_fitFunction == "ComplexPrePulse") {
-    if (!m_fixTau1 || !m_fixTau2) {
-      //
-      // Use the variable tau version of the expFermiFit
-      //
-      m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTaus(m_tag, m_tmin, m_tmax, m_fixTau1, m_fixTau2, m_nominalTau1, m_nominalTau2));
+    if (!m_fixTau1LG || !m_fixTau2LG) {
+      m_defaultFitWrapperLG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTaus(tagLG, m_tmin, m_tmax, m_fixTau1LG, m_fixTau2LG, m_nominalTau1LG, m_nominalTau2LG));
     }
     else {
-      m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiLinearFixedTaus(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
+      m_defaultFitWrapperLG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiLinearFixedTaus(tagLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG));
     }
 
-    m_prePulseFitWrapper  = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitComplexPrePulse(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
-  }
-  else if (m_fitFunction == "GeneralPulse") {
-    if (!m_fixTau1 || !m_fixTau2) {
-      //
-      // Use the variable tau version of the expFermiFit
-      //
-      m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTaus(m_tag, m_tmin, m_tmax, m_fixTau1, m_fixTau2, m_nominalTau1, m_nominalTau2));
+    if (m_doPrePulseCheck) {
+      m_preExpFitWrapperHG = std::unique_ptr<ZDCFitExpFermiPreExp>(new ZDCFitExpFermiPreExp(tagHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG, m_nominalTau2HG, false));
+      m_preExpFitWrapperLG = std::unique_ptr<ZDCFitExpFermiPreExp>(new ZDCFitExpFermiPreExp(tagLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG, m_nominalTau2LG, false));
+      
+      m_prePulseFitWrapperHG = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiLinearPrePulse(tagHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG));
+      m_prePulseFitWrapperLG = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitExpFermiLinearPrePulse(tagLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2LG));
     }
-    else {
-      m_defaultFitWrapper = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiLinearFixedTaus(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
-    }
-
-    m_prePulseFitWrapper  = std::unique_ptr<ZDCPrePulseFitWrapper>(new ZDCFitGeneralPulse(m_tag, m_tmin, m_tmax, m_nominalTau1, m_nominalTau2));
   }
   else {
     (*m_msgFunc_p)(ZDCMsg::Fatal, "Wrong fit function type: " + m_fitFunction);
   }
 
-  m_prePulseFitWrapper->SetPrePulseT0Range(prePulseTMin, prePulseTMax);
-  
+  m_prePulseFitWrapperHG->SetPrePulseT0Range(prePulseTMin, prePulseTMax);
+  m_prePulseFitWrapperLG->SetPrePulseT0Range(prePulseTMin, prePulseTMax);
+
   m_initializedFits = true;
 }
 
@@ -1437,7 +1499,7 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
 	}
       }
       else {
-	(*m_msgFunc_p)(ZDCMsg::Info, ("ZDCPulseAnalyzer for " + m_tag + " found a fake maximum at sample " + std::to_string(m_minDeriv2ndIndex) ));
+	(*m_msgFunc_p)(ZDCMsg::Debug, ("ZDCPulseAnalyzer for " + m_tag + " found a fake maximum at sample " + std::to_string(m_minDeriv2ndIndex) ));
       }
     }
   }
@@ -1730,14 +1792,19 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
   if (ampInitial < fitAmpMin) ampInitial = fitAmpMin * 1.5;
 
 
-  ZDCFitWrapper* fitWrapper = m_defaultFitWrapper.get();
+  ZDCFitWrapper* fitWrapper = nullptr;
   if (preExpTail()) {
-    fitWrapper = m_preExpFitWrapper.get();
-    (static_cast<ZDCPreExpFitWrapper*>(m_preExpFitWrapper.get()))->SetInitialExpPulse(m_initialExpAmp);
+    auto preExpfitWrapper = static_cast<ZDCPreExpFitWrapper*>(fitLG ? m_preExpFitWrapperLG.get() : m_preExpFitWrapperHG.get());
+    preExpfitWrapper->SetInitialExpPulse(m_initialExpAmp);
+    fitWrapper = preExpfitWrapper;
   }
   else if (prePulse()) {
-    fitWrapper = m_prePulseFitWrapper.get();
-    (static_cast<ZDCPrePulseFitWrapper*>(fitWrapper))->SetInitialPrePulse(m_initialPrePulseAmp, m_initialPrePulseT0,0,25);
+    auto preFitWrapper = static_cast<ZDCPrePulseFitWrapper*>(fitLG ? m_prePulseFitWrapperLG.get() : m_prePulseFitWrapperHG.get());
+    preFitWrapper->SetInitialPrePulse(m_initialPrePulseAmp, m_initialPrePulseT0,0,25);
+    fitWrapper = preFitWrapper;
+  }
+  else {
+    fitWrapper = fitLG ? m_defaultFitWrapperLG.get() : m_defaultFitWrapperHG.get();
   }
   
   if (m_adjTimeRangeEvent) {
@@ -1838,7 +1905,8 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
     m_fitAmpError = fitWrapper->GetAmpError();
 
     if (preExpTail()) {
-      m_fitExpAmp  = (static_cast<ZDCPreExpFitWrapper*>(m_preExpFitWrapper.get()))->GetExpAmp();
+      const ZDCPreExpFitWrapper* preExpWrapper = static_cast<ZDCPreExpFitWrapper*>(fitLG ? m_preExpFitWrapperLG.get() : m_preExpFitWrapperHG.get());
+      m_fitExpAmp  = preExpWrapper->GetExpAmp();
     }
     else {
       m_fitExpAmp = 0;
@@ -1920,15 +1988,14 @@ void ZDCPulseAnalyzer::DoFitCombined(bool refitLG)
   //
   if (ampInitial < fitAmpMin) ampInitial = fitAmpMin * 1.5;
 
-  ZDCFitWrapper* fitWrapper = m_defaultFitWrapper.get();
-  //if (prePulse()) fitWrapper = fitWrapper = m_preExpFitWrapper.get();
+  ZDCFitWrapper* fitWrapper = fitLG ? m_defaultFitWrapperLG.get() : m_defaultFitWrapperHG.get();
 
   if (preExpTail()) {
-    fitWrapper = m_preExpFitWrapper.get();
-    (static_cast<ZDCPreExpFitWrapper*>(m_preExpFitWrapper.get()))->SetInitialExpPulse(m_initialExpAmp);
+    fitWrapper = fitLG ? m_preExpFitWrapperLG.get() : m_preExpFitWrapperHG.get();;
+    (static_cast<ZDCPreExpFitWrapper*>(fitWrapper))->SetInitialExpPulse(m_initialExpAmp);
   }
   else if (prePulse()) {
-    fitWrapper = m_prePulseFitWrapper.get();
+    fitWrapper = fitLG ? m_prePulseFitWrapperLG.get() : m_prePulseFitWrapperHG.get();
     (static_cast<ZDCPrePulseFitWrapper*>(fitWrapper))->SetInitialPrePulse(m_initialPrePulseAmp, m_initialPrePulseT0,0,25);
   }
 
@@ -2127,14 +2194,16 @@ void ZDCPulseAnalyzer::DoFitCombined(bool refitLG)
     m_fitAmplitude = fitWrapper->GetAmplitude();
     m_fitTime      = fitWrapper->GetTime();
     if (prePulse()) {
-      m_fitPreT0   = (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->GetPreT0();
-      m_fitPreAmp  = (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->GetPreAmp();
-      m_fitPostT0  = (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->GetPostT0();
-      m_fitPostAmp = (static_cast<ZDCPrePulseFitWrapper*>(m_prePulseFitWrapper.get()))->GetPostAmp();
+      const ZDCPrePulseFitWrapper* wrapPtr = static_cast<ZDCPrePulseFitWrapper*>(fitLG ? m_prePulseFitWrapperLG.get() : m_prePulseFitWrapperHG.get());
+      m_fitPreT0   = wrapPtr->GetPreT0();
+      m_fitPreAmp  = wrapPtr->GetPreAmp();
+      m_fitPostT0  = wrapPtr->GetPostT0();
+      m_fitPostAmp = wrapPtr->GetPostAmp();
     }
     
     if (preExpTail()) {
-      m_fitExpAmp  = (static_cast<ZDCPreExpFitWrapper*>(m_preExpFitWrapper.get()))->GetExpAmp();
+      const ZDCPreExpFitWrapper* wrapPtr = static_cast<ZDCPreExpFitWrapper*>(fitLG ? m_preExpFitWrapperLG.get() : m_preExpFitWrapperHG.get());
+      m_fitExpAmp = wrapPtr->GetExpAmp();
     }
     else {
       m_fitExpAmp = 0;
@@ -2339,8 +2408,12 @@ void ZDCPulseAnalyzer::dumpConfiguration() const    // setting
     (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
   }
 
-  ostrStream <<"Fit function = " << m_fitFunction <<  "fixTau1 = " << m_fixTau1 <<  ", fixTau2 = " << m_fixTau2
-	     << ", nominalTau1 = " << m_nominalTau1 << ", nominalTau2 = " << m_nominalTau2 << "\n"
+  ostrStream <<"Fit function = " << m_fitFunction;
+  if (m_fitParameterSetHG != "") ostrStream << " with parameter sets, HG: " << m_fitParameterSetHG << ", " << ", LG: " << m_fitParameterSetLG << "\n";
+  ostrStream << " fixTau1HG = " << m_fixTau1HG <<  ", fixTau2HG = " << m_fixTau2HG
+	     << ", nominalTau1HG = " << m_nominalTau1HG << ", nominalTau2HG = " << m_nominalTau2HG << "\n"
+	     << " fixTau1LG = " << m_fixTau1LG <<  ", fixTau2LG = " << m_fixTau2LG
+	     << ", nominalTau1LG = " << m_nominalTau1LG << ", nominalTau2LG = " << m_nominalTau2LG << "\n"
 	     << ", nominalT0HG = " << m_nominalT0HG << ",  nominalT0LG = " << m_nominalT0LG
     	     << ", t0Cuts HG = [" << m_T0CutLowHG << ", " << m_T0CutHighHG << "], t0Cuts LG = ["
 	     << m_T0CutLowLG << ", " << m_T0CutHighLG << "]";
@@ -2705,6 +2778,16 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
     else if (key == "FADCFreqMHz") m_freqMHz = value;
     else if (key == "nominalPedestal") m_pedestal = value;
     else if (key == "fitFunction") m_fitFunction = value;
+    else if (key == "fitParameterSet") {
+      if (value.size() < 2) {
+	m_fitParameterSetHG = value;
+	m_fitParameterSetLG = value;
+      }
+      else {
+	m_fitParameterSetHG = value[0];
+	m_fitParameterSetLG = value[1];
+      }
+    }
     else if (key == "peakSample") m_peak2ndDerivMinSample = value;
     else if (key == "peakTolerance") m_peak2ndDerivMinTolerance = value;
     else if (key == "2ndDerivThreshHG") m_peak2ndDerivMinThreshHG = value;
@@ -2715,10 +2798,30 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
     else if (key == "LGOverflowADC") m_LGOverflowADC = value;
     else if (key == "nominalT0HG") m_nominalT0HG = value;
     else if (key == "nominalT0LG") m_nominalT0LG = value;
-    else if (key == "nominalTau1") m_nominalTau1 = value;
-    else if (key == "nominalTau2") m_nominalTau2 = value;
-    else if (key == "fixTau1") m_fixTau1 = value;
-    else if (key == "fixTau2") m_fixTau2 = value;
+    else if (key == "nominalTau1") {
+      m_nominalTau1HG = value;
+      m_nominalTau1LG = value;
+    }
+    else if (key == "nominalTau2") {
+      m_nominalTau2HG = value;
+      m_nominalTau2LG = value;
+    }
+    else if (key == "fixTau1") {
+      m_fixTau1HG = value;
+      m_fixTau1LG = value;
+    }
+    else if (key == "fixTau2") {
+      m_fixTau2HG = value;
+      m_fixTau2LG = value;
+    }
+    else if (key == "nominalTau1HG") m_nominalTau1HG = value;
+    else if (key == "nominalTau2HG") m_nominalTau2HG = value;
+    else if (key == "nominalTau1LG") m_nominalTau1LG = value;
+    else if (key == "nominalTau2LG") m_nominalTau2LG = value;
+    else if (key == "fixTau1HG") m_fixTau1HG = value;
+    else if (key == "fixTau2HG") m_fixTau2HG = value;
+    else if (key == "fixTau1LG") m_fixTau1LG = value;
+    else if (key == "fixTau2LG") m_fixTau2LG = value;
     else if (key == "T0CutsHG") {
       m_T0CutLowHG = value[0];
       m_T0CutHighHG = value[1];
