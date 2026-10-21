@@ -58,4 +58,4 @@ class VGammaORBlock(ConfigBlock):
 
         if self.noFilter:
             # if we don't apply the filter, we still want to study the output of the tool!
-            config.addOutputVar('EventInfo', 'in_vgamma_overlap', 'in_vgamma_overlap', noSys=True)
+            config.addOutputVar('EventInfo', 'in_vgamma_overlap', 'in_vgamma_overlap', noSys=True, auxType="char")
