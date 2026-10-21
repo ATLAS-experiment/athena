@@ -1,5 +1,5 @@
 /*
- *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  *   */
 
 #ifndef TRACKOVERLAYREC_TRACKOVERLAYDECISIONALG_H
@@ -20,10 +20,12 @@
 #include "xAODTruth/TruthParticleContainer.h"
 #include "xAODTruth/TruthEventContainer.h"
 #include "xAODTruth/TruthPileupEventContainer.h"
+#include "StoreGate/WriteDecorHandleKey.h"
+
 //ONNX Runtime include(s)
 #include <onnxruntime_cxx_api.h>
 #include "AthOnnxruntimeService/IONNXRuntimeSvc.h"
-namespace  TrackOverlayDecisionAlg{
+namespace TrackOverlay {
   const double M_TWOPI = 2.0 * M_PI;
   // Calculate constants only once for feature scaling
   const float px_diff = 0.00029734736; // (1/3363.07) px_max: 1893.19; px_min: -1.46988e+03
@@ -74,6 +76,7 @@ namespace  TrackOverlayDecisionAlg{
     FilterReporterParams m_filterParams {this, "TrackOverlayDecisionAlg", "Decides whether events should be reconstructed in track-overlay workflow or MC-overlay."};
     Gaudi::Property<bool>  m_invertfilter{this, "InvertFilter", false, "Invert filter decision."}; //!< invert filter decision at the end
     Gaudi::Property<float> m_MLthreshold{this, "MLThreshold", 0.74201, "ML threshold for bad/good tracks decision. ML scores larger than this threshold are considered as bad tracks."};
+    SG::WriteDecorHandleKey<xAOD::EventInfo> m_decIsMCOverlayKey{this, "IsMCOverlayDecor", m_eventInfoContainerName, "TrackOverlayIsMCOverlay", "1 if the event is reconstructed in the MC-overlay workflow"};
     // Set up the ONNX Runtime session
     ServiceHandle<AthONNX::IONNXRuntimeSvc> m_svc{this, "ONNXRuntimeSvc", "AthONNX::ONNXRuntimeSvc", "CaloMuonScoreTool ONNXRuntimeSvc"};
     std::tuple<std::vector<int64_t>, std::vector<char*>> m_inputInfo;
@@ -110,5 +113,5 @@ namespace  TrackOverlayDecisionAlg{
      }
   };
 
-}
+} // namespace TrackOverlay
 #endif
