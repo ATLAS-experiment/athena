@@ -64,6 +64,8 @@ public:
   VertexView( const VertexView* ) = delete; // don't want implicitly creating a VertexView with an internal VertexView*
   VertexView(       VertexView* ) = delete;
 
+  virtual ~VertexView() = default;
+
   const void* ptr() const { return m_ptr; } 
   
   float     x() const { return m_vtable->x(m_ptr); }

@@ -25,9 +25,6 @@
 
 #include "TrackView.h"
 
-#include <vector>
-#include <iostream>
-
 
 /// a TrackView that can store a z0, d0, and phi because a TruthParticle
 /// doesn't have them
@@ -43,6 +40,8 @@ public:
   
   TruthView( const TruthView* ) = delete; // don't want implicitly creating a TruthView with an internal TruthView*
   TruthView(       TruthView* ) = delete;
+
+  virtual ~TruthView() = default;
 
   bool hasDecorations() const override { return true; }
   

@@ -74,7 +74,9 @@ public:
   TrackView( const TrackView* ) = delete; // prevent implicitly creating a TrackView with an internal TrackView*
   TrackView(       TrackView* ) = delete;
 
-  
+  virtual ~TrackView() = default;
+
+
   const void* ptr() const { return m_ptr; } 
   
   float     pt() const { return m_vtable->pt(m_ptr);     }
