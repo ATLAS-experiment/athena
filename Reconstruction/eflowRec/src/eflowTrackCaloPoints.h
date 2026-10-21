@@ -17,10 +17,14 @@ CREATED:  4th January, 2006
 ********************************************************************/
 
 #include <map>
+
+
 #include "eflowCaloRegions.h"
 #include "GeoPrimitives/GeoPrimitives.h" // compiles without, throws down warning: CHECKREQ---> The following packages are apparently not needed. (severity 2)
 #include "TrkParameters/TrackParameters.h"  // typedef
 #include "eflowUtil.h"
+
+#include "Acts/Propagator/detail/SteppingLogger.hpp"
 
 class MsgStream;
 
@@ -33,7 +37,10 @@ class eflowTrackCaloPoints {
   eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, const Trk::TrackParameters*> & trackParameters);
   eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, const Trk::TrackParameters*> & trackParameters,
   std::map<CaloCell_ID::CaloSample,const Trk::TrackParameters*>& tileTrackParamaters);
- eflowTrackCaloPoints() : m_isEM1Barrel(false), m_isEM2Barrel(false)  {}
+  //Constructor when using Acts data structures  
+  eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, const Acts::BoundTrackParameters&> & trackParameters, const Acts::GeometryContext& gctx);
+
+  eflowTrackCaloPoints() : m_isEM1Barrel(false), m_isEM2Barrel(false)  {}
   ~eflowTrackCaloPoints();
 
   const std::pair<float, float> operator[] (eflowCalo::LAYER layer) const;
@@ -53,7 +60,6 @@ class eflowTrackCaloPoints {
   double getFCAL0eta() const {return getEtaPhiPos(eflowCalo::FCAL0).getEta(); }
   
   Amg::Vector3D getPosition(eflowCalo::LAYER layer);
-  Amg::Vector3D getDirection(eflowCalo::LAYER layer);
 
   static double defaultEta();
   static double defaultPhi();
@@ -66,7 +72,7 @@ class eflowTrackCaloPoints {
   void copyEtaPhi(eflowCalo::LAYER fromLay, eflowCalo::LAYER toLay);
 
   static Amg::Vector3D parToPosition(const Trk::TrackParameters* extrapolatedParameters);
-  static Amg::Vector3D parToDirection(const Trk::TrackParameters* extrapolatedParameters);
+  static Amg::Vector3D parToPosition(const Acts::BoundTrackParameters& extrapolatedParameters, const Acts::GeometryContext& gctx);
 
   bool m_isEM1Barrel;
   bool m_isEM2Barrel;
@@ -83,8 +89,9 @@ class eflowTrackCaloPoints {
   static const eflowEtaPhiPosition m_defaultEtaPhiPosition;
 
   std::map<eflowCalo::LAYER, Amg::Vector3D > m_positions;
-  std::map<eflowCalo::LAYER, Amg::Vector3D > m_directions;
+  /** Eta-Phi positions per calorimeter layer using simolified particle flow naming scheme */
   std::map<eflowCalo::LAYER, eflowEtaPhiPosition>  m_etaPhiPositions;
+  /** Eta-Phi positions per tile layer in the 3 tile calorimeters - only used for experimental DNN based e/p */
   std::map<CaloCell_ID::CaloSample,eflowEtaPhiPosition> m_tileEtaPhiPositions;
 };
 

@@ -10,11 +10,8 @@ def PFTrackSelectorAlgCfg(inputFlags,algName,useCaching=True):
     result = ComponentAccumulator()
 
     if inputFlags.PF.useActsExtrapolation:
-        #do something
-        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-        ActsExtrapolationTool = result.popToolsAndMerge(ActsExtrapolationToolCfg(inputFlags,MaxSteps=10000))
         PFTrackCaloExtensionTool=CompFactory.PFTrackCaloExtensionTool
-        TrackCaloExtensionTool=PFTrackCaloExtensionTool("PFTrackCaloExtensionTool_ACTS",ExtrapolationTool=ActsExtrapolationTool)
+        TrackCaloExtensionTool=PFTrackCaloExtensionTool("PFTrackCaloExtensionTool_ACTS")
         PFTrackSelector.trackExtrapolatorTool = TrackCaloExtensionTool
     else:
 

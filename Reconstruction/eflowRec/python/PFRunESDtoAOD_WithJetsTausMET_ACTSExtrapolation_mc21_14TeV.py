@@ -61,4 +61,7 @@ if __name__=="__main__":
 
     cfg.merge(trackingGeometrySvc)
 
+    from ActsConfig.CaloExtensionBuilderConfig import ActsCaloExtensionBuilderCfg
+    cfg.merge(ActsCaloExtensionBuilderCfg(cfgFlags))
+
     cfg.run()
