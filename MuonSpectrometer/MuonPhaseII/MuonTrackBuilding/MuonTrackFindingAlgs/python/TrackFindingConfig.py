@@ -12,8 +12,8 @@ def SegmentSelectorCfg(flags, name="SegmentSelectionTool", **kwargs):
 
 def MSExtrapolatorCfg(flags, name="MsExtrapolationTool", **kwargs):
     kwargs.setdefault("MaxSteps", 10000)
-    kwargs.setdefault("InteractionEloss", flags.Muon.trackGeometryPassiveMaterial)
-    kwargs.setdefault("InteractionMultiScatering", flags.Muon.trackGeometryPassiveMaterial)
+    kwargs.setdefault("InteractionEloss", flags.Acts.TrackingGeometry.MuonPassiveMaterial)
+    kwargs.setdefault("InteractionMultiScatering", flags.Acts.TrackingGeometry.MuonPassiveMaterial)
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
     return ActsExtrapolationToolCfg(flags, name, **kwargs)
 
@@ -31,8 +31,8 @@ def MSTrackFitterCfg(flags, name="MSTrackFitTool", **kwargs):
     kwargs.setdefault("MuonCalibrationTool", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
    
     if kwargs["fitterKind"] == TrackFitterType.GlobalChiSquareFitter:
-        kwargs.setdefault("IncludeScattering", flags.Muon.trackGeometryPassiveMaterial)
-        kwargs.setdefault("IncludeELoss",  flags.Muon.trackGeometryPassiveMaterial)
+        kwargs.setdefault("IncludeScattering", flags.Acts.TrackingGeometry.MuonPassiveMaterial)
+        kwargs.setdefault("IncludeELoss",  flags.Acts.TrackingGeometry.MuonPassiveMaterial)
         kwargs.setdefault("MaxPropagationStep", 1000000)
         kwargs.setdefault("MaxSurfacesPerNavStep", 10000000)
         kwargs.setdefault("DoFreeToBoundCorrection", True)

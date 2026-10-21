@@ -85,12 +85,11 @@ def ActsTrackingGeometrySvcCfg(flags,
       subDetectors += ["Muon"]
       from MuonConfig.MuonGeometryConfig import MuonGeoModelCfg
       acc.merge(MuonGeoModelCfg(flags))
-      from ActsMuonDetector.ActsMuonDetectorCfg import MuonBlueprintNodeBuilderCfg, MuonMaterialDecoratorToolCfg
       blueprintTools += [acc.popToolsAndMerge(MuonBlueprintNodeBuilderCfg(flags))]
       ### Only load the material decorator if the material map is also defined
       ### Otherwise it would break with the Material generation script
-      if flags.Muon.trackGeometryPassiveMaterial and \
-         len(flags.Muon.trackGeometryMaterialMap) > 0:
+      if flags.Acts.TrackingGeometry.MuonMaterialSource != "None" and \
+         flags.Acts.TrackingGeometry.MuonPassiveMaterial:
          refineTools+= [acc.popToolsAndMerge(MuonMaterialDecoratorToolCfg(flags))]
         
 
@@ -176,6 +175,21 @@ def ITkMaterialDecoratorToolCfg(flags, name="ITkMaterialDecorator", **kwargs) ->
     kwargs.setdefault("MaterialDbFile", filename)
     kwargs.setdefault("MaterialDbFolder", folder)
     the_tool = CompFactory.ActsTrk.ITkMaterialDecoratorTool(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
+def MuonMaterialDecoratorToolCfg(flags, name = "MuonMaterialDecoratorTool", **kwargs):    
+    result = ComponentAccumulator()
+    fileName = flags.Acts.TrackingGeometry.MuonMaterialSource
+    folderName = flags.Acts.TrackingGeometry.MuonMaterialMapPath
+    if flags.Acts.TrackingGeometry.MuonMaterialSource == "Default":
+        # MuonMaterialDecoratorTool picks its reader (Json or Root) from the file
+        # extension, so this is what selects the default format read back in.
+        folderName = "ACTS/MaterialMaps/gen3"
+        fileName = "material-maps-muon-v1.json"
+    kwargs.setdefault('MuonMaterialDbFolder', folderName)
+    kwargs.setdefault('MuonMaterialDbFile', fileName)
+    the_tool = CompFactory.MuonGMR4.MuonMaterialDecoratorTool(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
 
@@ -321,3 +335,19 @@ def caloBlueprintNodeBuilderCfg(flags,
     the_tool = CompFactory.ActsTrk.CaloBlueprintNodeBuilder(name, **kwargs)
     result.setPrivateTools(the_tool)
     return result
+
+def MuonBlueprintNodeBuilderCfg(flags, name = "MuonBlueprintNodeBuilder", **kwargs):
+    result = ComponentAccumulator()
+    from MuonGeoModelR4.MuonGeoModelConfig import MuonGeoModelCfg
+    from AthenaConfiguration.Enums import LHCPeriod
+    result.merge(MuonGeoModelCfg(flags))
+    kwargs.setdefault("run4Layout", flags.GeoModel.Run >= LHCPeriod.Run4)
+    kwargs.setdefault("AssignActiveMaterial", flags.Acts.TrackingGeometry.MuonActiveMaterial)
+    kwargs.setdefault("BuildPassiveVolumes", flags.Acts.TrackingGeometry.MuonPassiveMaterial)
+    kwargs.setdefault("AssignEmptyPassiveMaterial", flags.Acts.TrackingGeometry.MuonMaterialSource == 'None')
+    kwargs.setdefault("UseFrustumNav",flags.Acts.TrackingGeometry.FrustumNav)
+    the_tool = CompFactory.ActsTrk.MuonBlueprintNodeBuilder(name, **kwargs)
+    result.setPrivateTools(the_tool)
+    return result
+
+
