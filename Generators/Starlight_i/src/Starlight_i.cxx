@@ -235,7 +235,8 @@ Starlight_i::fillEvt(HepMC::GenEvent* evt)
       }
     ATH_MSG_DEBUG( "Saved " << ipart << " tracks "  );
 
-    MC::GeVToMeV(evt); //Only scales momenta and masses
+    // Conversion GeV -> MeV to ensure correct units
+    evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
 
     return StatusCode::SUCCESS;
 }
