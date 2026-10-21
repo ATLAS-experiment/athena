@@ -85,6 +85,13 @@ def PoolWriteCfg(flags):
         "D2AOD_PHYSLITE" : [5, 5,  500, 1, 1],
     }
 
+    # RNTuple output: different compression for some formats, TTree keeps the defaults above
+    # Stream : [compression algorithm, compression level]
+    rntupleCompression = {
+        "DAOD_PHYS"      : [5, 9],
+        "DAOD_PHYSLITE"  : [5, 9],
+    }
+
     # Metadata containers needed for augmentations
     OutputMetadataContainers = []
 
@@ -104,6 +111,8 @@ def PoolWriteCfg(flags):
             compAlg, compLvl, autoFlush, splitLvl, dynSplitLvl = 5, 5, 100, 0, 1 # Change the defaults for DAODs
         elif "D2AOD" in stream:
             compAlg, compLvl, autoFlush, splitLvl, dynSplitLvl = 5, 5, 500, 1, 1 # Change the defaults for D2AODs
+        if "RNTUPLE" in flags.Output.DefaultContainerType and stream in rntupleCompression:
+            compAlg, compLvl = rntupleCompression[stream]
 
         # For temporary streams/files we use either ZLIB or ZSTD for the compression algorithm to save CPU cycles
         # Temporary in this context might mean one of three things:
