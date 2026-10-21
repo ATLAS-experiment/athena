@@ -241,8 +241,10 @@ class DerivationTest(WorkflowTest):
 
         # If we're running a DAOD to DAOD job, the output stream is called D2AOD
         out_stream = "DAOD"
+        parallel_compression = "True"
         if "inputDAOD_PHYSFile" in extra_args:
             out_stream = "D2AOD"
+            parallel_compression = "False" # Disable parallel compression for DAOD to DAOD tests (ATEAM-1194)
 
         if "maxEvents" not in extra_args:
             base_events = 100
@@ -265,6 +267,7 @@ class DerivationTest(WorkflowTest):
                 " --multiprocess --multithreadedFileValidation True"
                 f" --athenaMPMergeTargetSize '{out_stream}_*:0'"
                 " --sharedWriter True"
+                f" --parallelCompression {parallel_compression}"
                 f" --output{out_stream}File myOutput.pool.root"
                 f" --imf False {extra_args}")
         else:
