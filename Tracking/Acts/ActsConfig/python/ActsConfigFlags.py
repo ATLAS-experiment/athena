@@ -164,6 +164,13 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.TrackingGeometry.ITkHgtdMaterialSource', 'Default')
     actscf.addFlag('Acts.TrackingGeometry.ITkHgtdMaterialMapPath', 'ACTS/MaterialMaps/gen3')
 
+    #MuonMaterialSource can be:
+    # a path to a local file
+    # 'Default' : material map source is evaluated from the geometry tag
+    # 'None'    : no material map is provided
+    actscf.addFlag('Acts.TrackingGeometry.MuonMaterialSource', 'Default')
+    actscf.addFlag('Acts.TrackingGeometry.MuonMaterialMapPath', 'ACTS/MaterialMaps/gen3')
+
     ## Enable Tracking geometry with additional passive layers
     actscf.addFlag('Acts.TrackingGeometry.InsertITkPassiveMaterialLayers', False)
     actscf.addFlag('Acts.TrackingGeometry.PassiveITkInnerPixelBarrelLayerRadii', [70.])
@@ -175,6 +182,11 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerRadii', [480., 665., 880.])
     actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerHalflengthZ', [1370., 1370., 1370.])
     actscf.addFlag('Acts.TrackingGeometry.PassiveITkStripBarrelLayerThickness', [1., 1., 1.])
+    #Flags to enable the active and the passive material in the muon tracking geometry.
+    #Enable chamber material blending on the portals of the chambers
+    actscf.addFlag('Acts.TrackingGeometry.MuonActiveMaterial', True)
+    #Enable the construction of binned material surfaces that are decorated with the passive material maps
+    actscf.addFlag('Acts.TrackingGeometry.MuonPassiveMaterial', True)
     # Monitoring
     actscf.addFlag('Acts.doMonitoring', False)
     actscf.addFlag('Acts.doAnalysis', False)

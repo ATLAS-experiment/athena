@@ -21,7 +21,7 @@ if __name__=="__main__":
     flags = initConfigFlags()
     flags.Acts.TrackingGeometry.UseBlueprint=True
     flags.Acts.TrackingGeometry.ObjDebugOutput = False
-    flags.Muon.trackGeometryPassiveMaterial= True
+    flags.Acts.TrackingGeometry.MuonPassiveMaterial= True
     flags, cfg = setupGeoR4TestCfg(args,flags)    
    
     ###

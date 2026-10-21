@@ -29,6 +29,7 @@ namespace MuonGMR4{
     private:
             /// Material map file, read with the Json reader for '.json' / '.cbor' and with the Root reader otherwise
             Gaudi::Property<std::string> m_materialMapFile{this, "MuonMaterialDbFile", "", ""};
+            Gaudi::Property<std::string> m_materialMapFolder{this, "MuonMaterialDbFolder", "", ""};
             std::unique_ptr<Acts::IMaterialDecorator> m_matDecorator{};
   };
 

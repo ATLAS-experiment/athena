@@ -134,8 +134,8 @@ if __name__ == "__main__":
 
     ### Don't setup the active muon material in the Acts tracking goemerty
     ### but the passive material representing the coils etc.
-    flags.Muon.trackGeometryActiveMaterial= False
-    flags.Muon.trackGeometryPassiveMaterial= True
+    flags.Acts.TrackingGeometry.MuonPassiveMaterial= True
+    flags.Acts.TrackingGeometry.MuonActiveMaterial= False
 
     if args.geoModelSqLiteFile:
          flags.GeoModel.SQLiteDB = True
