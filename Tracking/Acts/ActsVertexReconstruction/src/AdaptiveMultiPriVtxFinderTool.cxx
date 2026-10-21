@@ -102,9 +102,17 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
   std::string seederType = m_seederType;
 
     if (seederType == "Grid") {
-      Acts::GaussianGridTrackDensity::Config trackDensityConfig;
-      trackDensityConfig.mainGridSize           = m_gridMainGridSize;
-      trackDensityConfig.trkGridSize            = m_gridTrkGridSize;
+         int trkGridSize = m_gridTrkGridSize;
+         if (trkGridSize % 2 == 0) {
+           ATH_MSG_WARNING("GridTrkGridSize=" << m_gridTrkGridSize
+                       << " is even; ACTS requires an odd value. Using "
+                       << (trkGridSize + 1) << " instead.");
+           trkGridSize += 1;
+           }
+      Acts::GaussianGridTrackDensity::Config trackDensityConfig(
+      /*zMinMax_=*/100,
+      /*mainGridSize_=*/m_gridMainGridSize,
+      /*trkGridSize_=*/trkGridSize);   // <-- changed from m_gridTrkGridSize
       trackDensityConfig.useHighestSumZPosition = m_gridUseHighestSumZPosition;
       Acts::GaussianGridTrackDensity trackDensity(trackDensityConfig);
 
@@ -112,6 +120,9 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
       gridSeedFinderConfig.extractParameters.connect<&TrackWrapper::extractParameters>();
       gridSeedFinderConfig.maxD0TrackSignificance = m_gridMaxD0Significance;
       gridSeedFinderConfig.maxZ0TrackSignificance = m_gridMaxZ0Significance;
+      gridSeedFinderConfig.d0SignificanceCut = m_gridMaxD0Significance * m_gridMaxD0Significance;
+      gridSeedFinderConfig.z0SignificanceCut = m_gridMaxZ0Significance * m_gridMaxZ0Significance;
+      ATH_MSG_INFO("Grid seeder: d0SignificanceCut=" << gridSeedFinderConfig.d0SignificanceCut << " z0SignificanceCut=" << gridSeedFinderConfig.z0SignificanceCut);
 
       Acts::GridDensityVertexFinder gridSeedFinder(gridSeedFinderConfig);
 
