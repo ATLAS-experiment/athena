@@ -1,0 +1,165 @@
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+#ifndef ATHDEVICEUTILS_SOACOPY_ICC
+#define ATHDEVICEUTILS_SOACOPY_ICC
+
+// Local include(s).
+#include "AthDeviceUtils/details/AccessorTuple.h"
+#include "AthDeviceUtils/details/getData.h"
+
+namespace AthDevice {
+namespace Details {
+
+template <std::size_t INDEX, Concepts::SoAColumn... COLUMNS,
+          typename... VARTYPES, typename ACCESSOR_TUPLE>
+vecmem::copy::event_type copyColumn(
+    const SG::AuxVectorBase& input,
+    vecmem::edm::view<vecmem::edm::schema<VARTYPES...>>& output,
+    const vecmem::copy& copy, const ACCESSOR_TUPLE& accessors) {
+
+  static_assert(INDEX < sizeof...(COLUMNS),
+                "Index out of bounds in copyColumn.");
+  static_assert(
+      ((vecmem::edm::type::details::is_jagged_vector_v<
+            std::tuple_element_t<INDEX, std::tuple<VARTYPES...>>> == false) &&
+       (vecmem::edm::type::details::is_scalar_v<
+            std::tuple_element_t<INDEX, std::tuple<VARTYPES...>>> == false)),
+      "Only 1D vectors are currently supported");
+
+  const auto& acc = std::get<INDEX>(accessors);
+  constexpr std::size_t index =
+      std::tuple_element_t<INDEX, std::tuple<COLUMNS...>>::index;
+  if constexpr (INDEX + 1 < sizeof...(COLUMNS)) {
+    copy(getData(acc.getDataSpan(input)), output.template get<index>())
+        ->ignore();
+    return copyColumn<INDEX + 1, COLUMNS...>(input, output, copy, accessors);
+  } else {
+    return copy(getData(acc.getDataSpan(input)), output.template get<index>());
+  }
+}
+
+template <std::size_t INDEX, Concepts::SoAColumn... COLUMNS,
+          typename... VARTYPES, typename ACCESSOR_TUPLE>
+vecmem::copy::event_type copyColumn(
+    const vecmem::edm::view<vecmem::edm::schema<VARTYPES...>>& input,
+    SG::AuxVectorBase& output, const vecmem::copy& copy,
+    const ACCESSOR_TUPLE& accessors) {
+
+  static_assert(INDEX < sizeof...(COLUMNS),
+                "Index out of bounds in copyColumn.");
+  static_assert(
+      ((vecmem::edm::type::details::is_jagged_vector_v<
+            std::tuple_element_t<INDEX, std::tuple<VARTYPES...>>> == false) &&
+       (vecmem::edm::type::details::is_scalar_v<
+            std::tuple_element_t<INDEX, std::tuple<VARTYPES...>>> == false)),
+      "Only 1D vectors are currently supported");
+
+  const auto& acc = std::get<INDEX>(accessors);
+  constexpr std::size_t index =
+      std::tuple_element_t<INDEX, std::tuple<COLUMNS...>>::index;
+  if constexpr (INDEX + 1 < sizeof...(COLUMNS)) {
+    copy(input.template get<index>(), getData(acc.getDataSpan(output)))
+        ->ignore();
+    return copyColumn<INDEX + 1, COLUMNS...>(input, output, copy, accessors);
+  } else {
+    return copy(input.template get<index>(), getData(acc.getDataSpan(output)));
+  }
+}
+
+}  // namespace Details
+
+template <Concepts::SoAColumn... COLUMNS>
+SoACopy<COLUMNS...>::SoACopy(COLUMNS... columns)
+    : SoACopy(std::make_tuple(columns...)) {}
+
+template <Concepts::SoAColumn... COLUMNS>
+SoACopy<COLUMNS...>::SoACopy(const std::tuple<COLUMNS...>& columns)
+    : m_columns(columns) {}
+
+template <Concepts::SoAColumn... COLUMNS>
+template <typename SCHEMA>
+void SoACopy<COLUMNS...>::operator()(const SG::AuxVectorBase& input,
+                                     vecmem::edm::view<SCHEMA>& output,
+                                     const EventContext& ctx,
+                                     const IMemoryResourcesTool& mrs,
+                                     const ICopiesTool& copies) const {
+
+  static const auto accessors =
+      Details::AccessorTuple<SCHEMA>::get_const(m_columns);
+  static_assert(
+      std::tuple_size_v<decltype(accessors)> == sizeof...(COLUMNS),
+      "Number of accessors does not match number of column definitions.");
+
+  // If we have a separate "main" and "host" memory resource, then we first
+  // create a host-resident VecMem buffer with the appropriate data. Then we
+  // copy the host-resident buffer to the container passed to this function.
+  // (Which should be a device-resident buffer.)
+  if (mrs.hostMR() != nullptr) {
+    vecmem::edm::buffer<SCHEMA> hostBuffer(input.size_v(), *(mrs.hostMR()));
+    Details::copyColumn<0, COLUMNS...>(input, hostBuffer,
+                                       *(copies.hostCopy(ctx)), accessors)
+        ->wait();
+    (*(copies.deviceCopy(ctx)))(hostBuffer, output)->wait();
+  }
+  // If we only have a "main" memory resource, then we just directly copy
+  // into the vecmem container. Using the host copy object. Since the "one"
+  // memory resource should be host-accessible in this case.
+  else {
+    Details::copyColumn<0, COLUMNS...>(input, output, *(copies.hostCopy(ctx)),
+                                       accessors)
+        ->wait();
+  }
+}
+
+template <Concepts::SoAColumn... COLUMNS>
+template <typename SCHEMA, typename INTERFACE, typename BASE>
+void SoACopy<COLUMNS...>::operator()(const vecmem::edm::view<SCHEMA>& input,
+                                     DataVector<INTERFACE, BASE>& output,
+                                     const EventContext& ctx,
+                                     const IMemoryResourcesTool& mrs,
+                                     const ICopiesTool& copies) const {
+
+  static const auto accessors =
+      Details::AccessorTuple<SCHEMA>::get_nc(m_columns);
+  static_assert(
+      std::tuple_size_v<decltype(accessors)> == sizeof...(COLUMNS),
+      "Number of accessors does not match number of column definitions.");
+
+  // Resize the output xAOD container to match the input VecMem container.
+  typename vecmem::edm::view<SCHEMA>::size_type size = 0u;
+  if (mrs.hostMR() != nullptr) {
+    auto async_size = copies.deviceCopy(ctx)->get_size(input, *(mrs.hostMR()));
+    // Wait for the asynchronous size retrieval to complete.
+    size = async_size.get();
+  } else {
+    size = copies.hostCopy(ctx)->get_size(input);
+  }
+  if (output.size() != size) {
+    if (output.size() > 0u) {
+      output.clear();
+    }
+    output.push_new(size, []() { return new INTERFACE{}; });
+  }
+
+  // If we have a separate "main" and "host" memory resource, then we first
+  // copy into a host-resident VecMem buffer. Then we copy the columns one by
+  // one from this host-resident buffer into the output xAOD container.
+  if (mrs.hostMR() != nullptr) {
+    auto hostBuffer = copies.deviceCopy(ctx)->to(
+        input, *(mrs.hostMR()), nullptr, vecmem::copy::type::device_to_host);
+    Details::copyColumn<0, COLUMNS...>(hostBuffer, output,
+                                       *(copies.hostCopy(ctx)), accessors)
+        ->wait();
+  }
+  // If we only have a "main" memory resource, then we just directly copy
+  // from the vecmem container. Using the host copy object. Since the "one"
+  // memory resource should be host-accessible in this case.
+  else {
+    Details::copyColumn<0, COLUMNS...>(input, output, *(copies.hostCopy(ctx)),
+                                       accessors)
+        ->wait();
+  }
+}
+
+}  // namespace AthDevice
+
+#endif  // ATHDEVICEUTILS_SOACOPY_ICC

@@ -1,0 +1,16 @@
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+#ifndef ATHDEVICEUTILS_DETAILS_GETDATA_ICC
+#define ATHDEVICEUTILS_DETAILS_GETDATA_ICC
+
+namespace AthDevice::Details {
+
+template <typename T>
+vecmem::data::vector_view<T> getData(CxxUtils::span<T> data) {
+
+  return {static_cast<vecmem::data::vector_view<T>::size_type>(data.size()),
+          data.data()};
+}
+
+}  // namespace AthDevice::Details
+
+#endif  // ATHDEVICEUTILS_DETAILS_GETDATA_ICC

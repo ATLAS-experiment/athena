@@ -1,0 +1,42 @@
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+#ifndef ATHDEVICEUTILS_DETAILS_ACCESSORTUPLE_ICC
+#define ATHDEVICEUTILS_DETAILS_ACCESSORTUPLE_ICC
+
+// Local include(s).
+#include "AthDeviceUtils/details/AccessorType.h"
+
+namespace AthDevice::Details {
+
+template <typename... VARTYPES>
+template <Concepts::SoAColumn... COLUMNS>
+auto AccessorTuple<vecmem::edm::schema<VARTYPES...>>::get_const(
+    const std::tuple<COLUMNS...>& columns) {
+
+  return std::apply(
+      [](const auto&... column) {
+        return std::make_tuple(
+            ConstAccessorType_t<
+                std::tuple_element_t<column.index, std::tuple<VARTYPES...>>>(
+                std::string{column.name})...);
+      },
+      columns);
+}
+
+template <typename... VARTYPES>
+template <Concepts::SoAColumn... COLUMNS>
+auto AccessorTuple<vecmem::edm::schema<VARTYPES...>>::get_nc(
+    const std::tuple<COLUMNS...>& columns) {
+
+  return std::apply(
+      [](const auto&... column) {
+        return std::make_tuple(
+            AccessorType_t<
+                std::tuple_element_t<column.index, std::tuple<VARTYPES...>>>(
+                std::string{column.name})...);
+      },
+      columns);
+}
+
+}  // namespace AthDevice::Details
+
+#endif  // ATHDEVICEUTILS_DETAILS_ACCESSORTUPLE_ICC

@@ -1,0 +1,11 @@
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+
+ApplicationMgr.ExtSvc += {"ToolSvc"};
+
+ToolSvc += {"AthDevice::MemoryResourcesAdaptorTool/HostMemoryResources"};
+ToolSvc.HostMemoryResources.MainMRTool =
+   "AthDevice::HostMemoryResourceTool/HostMemoryResource";
+
+ToolSvc += {"AthDevice::CopiesAdaptorTool/HostCopies"};
+ToolSvc.HostCopies.HostCopyTool = "AthDevice::HostCopyTool/HostCopy";
+ToolSvc.HostCopies.DeviceCopyTool = "AthDevice::HostCopyTool/HostCopy";
