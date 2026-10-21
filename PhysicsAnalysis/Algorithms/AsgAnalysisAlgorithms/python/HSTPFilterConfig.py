@@ -53,6 +53,17 @@ class HSTPFilterBlock(ConfigBlock):
         selected_dsids += [
             str(dsid) for dsid in range(700816, 700825)
         ]  # Sherpa2214 Systematic
+        selected_dsids += [
+            "802067",  # JZ1
+            "800285",  # JZ2
+            "800286",  # JZ3
+            "800287",  # JZ4
+            "802068",  # JZ5
+            "802069",  # JZ6
+            "802070",  # JZ7
+            "802071",  # JZ8
+            "802072",  # JZ9incl
+        ]  # Run 2+3 dijet+bb
 
         self.setOptionValue("skipOnData", True)
         self.setOptionValue("onlyForDSIDs", selected_dsids)
