@@ -106,6 +106,9 @@ namespace ActsTrk {
     Gaudi::Property<std::vector<std::size_t>> m_ptMinMeasurements{this, "ptMinMeasurements", {}, "if specified for the given seed collection, applies ptMin cut in branch stopper once ptMinMinMeasurements have been encountered"};
     Gaudi::Property<std::vector<std::size_t>> m_absEtaMaxMeasurements{this, "absEtaMaxMeasurements", {}, "if specified for the given seed collection, applies absEtaMax cut in branch stopper once absEtaMaxMeasurements have been encountered"};
     Gaudi::Property<bool> m_doBranchStopper{this, "doBranchStopper", true, "use branch stopper"};
+    // The second pass extends a track the first pass already found, so its
+    // stopper truncates the extension instead of dropping the track.
+    Gaudi::Property<bool> m_doSecondPassBranchStopper{this, "doSecondPassBranchStopper", false, "run the branch stopper in the second pass, keeping instead of dropping"};
     Gaudi::Property<bool> m_doTwoWay{this, "doTwoWay", true, "run CKF twice, first with forward propagation with smoothing, then with backward propagation"};
     Gaudi::Property<bool> m_recordMaterialStates{this, "recordMaterialStates", false, "record track states on surfaces which have material but no measurement; keeping them off is faster, but they have to be on for the multi-component stepper and for anything downstream which needs the full track state sequence"};
     Gaudi::Property<bool> m_inflateCovarianceTwoWay{this, "inflateCovarianceTwoWay", false, "inflate covariance matrix at the beginning of two-way track finding"};
@@ -249,7 +252,6 @@ namespace ActsTrk {
      * @param tracksContainerTemp Track proxy container
      * @param options Fit options
      * @param tgContext Geometry context
-     * @param reverseSearch Flag for searching in reverse direction
      * @param seedType Seed type (only used for warnings/debug printouts)
      * @param iseed Seed number (only used for warnings/debug printouts)
      * @param itrack Track number (only used for warnings/debug printouts)
