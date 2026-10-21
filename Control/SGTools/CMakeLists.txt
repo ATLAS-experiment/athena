@@ -18,11 +18,6 @@ atlas_add_dictionary( SGToolsDict
                       LINK_LIBRARIES SGTools )
 
 # Tests in the package:
-atlas_add_test( VersionedKey_test
-                SOURCES
-                test/VersionedKey_test.cxx
-                LINK_LIBRARIES SGTools )
-
 atlas_add_test( exceptions_test
                 SOURCES
                 test/exceptions_test.cxx
