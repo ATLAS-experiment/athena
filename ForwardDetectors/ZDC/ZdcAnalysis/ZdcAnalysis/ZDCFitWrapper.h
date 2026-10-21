@@ -22,9 +22,46 @@ inline double getInductFuncTimeMax(const TF1* theTF1);
 
 class ZDCFitWrapper
 {
+public:
+  class FitParameter {
+  public:
+    //
+    // name, default value, fixed, lower limit, upper limit, step size, constrain fixed?, constrain value
+    //
+    using ParameterDescriptor = std::tuple<std::string, float, bool, float, float, float, bool, float>;
+
+    ParameterDescriptor m_parData;
+    
+  public:
+    
+    FitParameter(const ParameterDescriptor& inData) :
+      m_parData(inData)
+    {}
+
+    void setFixed(float fixedValue)
+    {
+      std::get<2>(m_parData) = true;
+      std::get<1>(m_parData) = fixedValue;
+    }
+
+    void setDefaultValue(float value) {
+      std::get<1>(m_parData) = value;
+    }
+    
+    std::string name() const {return std::get<0>(m_parData);}
+    float defaultValue() const {return std::get<1>(m_parData);}
+    bool fixed() const {return std::get<2>(m_parData);}
+    float lowerLimit() const {return std::get<3>(m_parData);}
+    float upperLimit() const {return std::get<4>(m_parData);}
+    float stepSize() const {return std::get<5>(m_parData);}
+    bool constrainFixed() const {return std::get<6>(m_parData);}
+    float constrainValue() const {return std::get<7>(m_parData);}
+  };
+
+
 private:
   std::shared_ptr<TF1> m_wrapperTF1{};
-
+  
   float m_tmin{0};
   float m_tmax{0};
 
@@ -39,6 +76,9 @@ private:
   float m_tempTmin{0};
   float m_tempTmax{0};
 
+  bool m_haveParameterSet{false};
+  std::vector<FitParameter> m_parameterSet;
+
   bool m_finalized{false};
   
 protected:
@@ -46,7 +86,15 @@ protected:
   //
   virtual void SetT0FitLimits(float tMin, float tMax) = 0;
 
+  virtual void doConstrainFit() = 0;
+  virtual void doUnconstrainFit() = 0;
+
+  void LoadDefaultParameterSet(const std::vector<FitParameter>& parameterSet);
+
 public:
+
+  ZDCFitWrapper() = delete;
+  
   ZDCFitWrapper(const std::shared_ptr<TF1>& wrapperTF1) : m_wrapperTF1(wrapperTF1),
     m_ampMin(0),
     m_adjTLimitsEvent(true)  // true here forces a setting of T0 par limits on first event
@@ -58,8 +106,28 @@ public:
     m_t0Max = m_tmax;
   }
 
+  // Constructor used to provide parameter set
+  //
+  ZDCFitWrapper(const std::shared_ptr<TF1>& wrapperTF1, const std::vector<FitParameter>& defaultParamSet) :
+    m_wrapperTF1(wrapperTF1),
+    m_ampMin(0),
+    m_adjTLimitsEvent(true)  // true here forces a setting of T0 par limits on first event
+  {
+    m_tmin = m_wrapperTF1->GetXmin();
+    m_tmax = m_wrapperTF1->GetXmax();
+
+    m_t0Min = m_tmin;
+    m_t0Max = m_tmax;
+
+    LoadDefaultParameterSet(defaultParamSet);
+  }
+
   virtual ~ZDCFitWrapper() {}
 
+  bool HaveParameterSet() const {return m_haveParameterSet;}
+  void OverrideParameterSet(const std::vector<FitParameter>& parameterSet);
+  const FitParameter& GetParameterDescr(std::string name); 
+  
   void Initialize(float initialAmp, float initialT0, float ampMin, float ampMax);
   void Initialize(float initialAmp, float initialT0, float ampMin, float ampMax, float fitTmin, float fitTmax, float fitTRef);
 
@@ -90,8 +158,8 @@ public:
     SetT0FitLimits(t0Min, t0Max);
   }
 
-  virtual void ConstrainFit() = 0;
-  virtual void UnconstrainFit() = 0;
+  void ConstrainFit();
+  void UnconstrainFit();
 
   virtual float GetAmplitude() const = 0;
   virtual float GetAmpError() const = 0;
@@ -141,6 +209,12 @@ public:
     m_preT0Min = GetTMin();
     m_preT0Max = GetTMax();
   }
+  ZDCPrePulseFitWrapper(std::shared_ptr<TF1> wrapperTF1, const std::vector<FitParameter>& defaultParamSet) :
+    ZDCFitWrapper(wrapperTF1, defaultParamSet)
+  {
+    m_preT0Min = GetTMin();
+    m_preT0Max = GetTMax();
+  }
 
   virtual void SetInitialPrePulse(float amp, float t0, float expamp, bool fixPrePulseToZero) = 0;
 
@@ -168,6 +242,14 @@ public:
   ZDCPreExpFitWrapper(std::shared_ptr<TF1> wrapperTF1, float defaultExpTau, bool fixTau) :
     ZDCFitWrapper(wrapperTF1), m_defaultTau(defaultExpTau), m_fixTau(fixTau)
     {}
+
+  ZDCPreExpFitWrapper(std::shared_ptr<TF1> wrapperTF1, const std::vector<FitParameter>& defaultParamSet) :
+    ZDCFitWrapper(wrapperTF1, defaultParamSet)
+    {
+      auto tauParamDescr = GetParameterDescr("tauexp");
+      m_defaultTau = tauParamDescr.defaultValue();
+      m_fixTau = tauParamDescr.fixed();
+    }
 
   virtual void SetInitialExpPulse(float expamp) = 0;
 
@@ -236,8 +318,8 @@ public:
     return ZDCFermiExpFit(x, p);
   }
 
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 };
 
 //
@@ -304,12 +386,14 @@ public:
     return ZDCFermiExpFitRefl(x, p);
   }
 
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 };
 
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiVariableTausInduct : public ZDCFitWrapper
 {
+  static const std::map<std::string, std::vector<ZDCFitWrapper::FitParameter>> s_ConfigParamMap;
+  
 protected:
   bool m_fixTau1{false};
   bool m_fixTau2{false};
@@ -334,6 +418,8 @@ public:
 
   ZDCFitExpFermiVariableTausInduct(const std::string& tag, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2);
 
+  ZDCFitExpFermiVariableTausInduct(const std::string& tag, std::string paramSet, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2);
+
   virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
   virtual void SetT0FitLimits(float tMin, float tMax) override;
 
@@ -345,7 +431,9 @@ public:
   
   virtual float GetAmplitude() const override {
     if (finalized()) return m_funcMax;
-    return GetWrapperTF1()->Eval(getInductFuncTimeMax(GetWrapperTF1()));
+    double time = getInductFuncTimeMax(GetWrapperTF1());
+    if (std::isnan(time)) return 0;
+    return GetWrapperTF1()->Eval(time);
   }
   
   virtual float GetAmpError() const override {
@@ -383,8 +471,8 @@ public:
     return ZDCFermiExpFitInduct(x, p);
   }
 
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 };
 
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiVariableTausRun3 : public ZDCFitExpFermiVariableTaus
@@ -413,8 +501,8 @@ public:
   virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
   virtual void SetT0FitLimits(float tMin, float tMax) override;
 
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 
   virtual float GetAmplitude() const override {return GetWrapperTF1()->GetParameter(0); }
   virtual float GetAmpError() const override {return GetWrapperTF1()->GetParError(0); }
@@ -486,8 +574,8 @@ public:
   virtual void SetPrePulseT0Range(float tmin, float tmax) override;
   virtual void SetPostPulseT0Range(float /*tmin*/, float /*tmax*/, float /*initialPostT0*/) override {return;}
 
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 
   virtual unsigned int GetPreT0ParIndex() const override {return 3;}
 
@@ -597,8 +685,8 @@ public:
   virtual void SetPrePulseT0Range(float tmin, float tmax) override;
   virtual void SetPostPulseT0Range(float /*tmin*/, float /*tmax*/, float /*initialPostT0*/) override {return;}
 
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 
   virtual unsigned int GetPreT0ParIndex() const override {return 3;}
 
@@ -703,8 +791,8 @@ public:
     GetWrapperTF1()->SetParameter(2, std::max(amp, (float) 0.5)); //0.5 here ensures that we're above lower limit (0)   
   }
 
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 
   virtual float GetAmplitude() const override {return GetWrapperTF1()->GetParameter(0); }
   virtual float GetAmpError() const override {return GetWrapperTF1()->GetParError(0); }
@@ -793,8 +881,8 @@ public:
     GetWrapperTF1()->SetParameter(4, std::max(amp, (float) 0.5)); //0.5 here ensures that we're above lower limit (0)   
   }
 
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 
   virtual float GetAmplitude() const override {return GetWrapperTF1()->GetParameter(0); }
   virtual float GetAmpError() const override {return GetWrapperTF1()->GetParError(0); }
@@ -883,10 +971,10 @@ public:
 
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiInductPreExp : public ZDCPreExpFitWrapper
 {
-private:
+  static const std::map<std::string, std::vector<ZDCFitWrapper::FitParameter>> s_ConfigParamMap;
+
   float m_tau1{0};
   float m_tau2{0};
-  float m_timeCorr{0};
 
   float m_tFuncMax;
   float m_funcMax;
@@ -899,14 +987,21 @@ private:
     m_expFermiInductFunc->SetNpx(20);
     double t0 = GetWrapperTF1()->GetParameter(1);
     double tsubtr = getInductFuncTimeMax(m_expFermiInductFunc.get());
-      
-    m_tFuncMax = tsubtr + t0;
-    m_funcMax = m_expFermiInductFunc->Eval(tsubtr);
+    if (std::isnan(tsubtr)) {
+      m_tFuncMax = -100; 
+      m_funcMax = 0;
+    }
+    else {
+      m_tFuncMax = tsubtr + t0;
+      m_funcMax = m_expFermiInductFunc->Eval(tsubtr);
+    }
   }
 
 public:
   ZDCFitExpFermiInductPreExp(const std::string& tag, float tmin, float tmax, float tau1, float tau2,
 			   float defExpTau, float fixExpTau);
+  ZDCFitExpFermiInductPreExp(const std::string& tag, std::string overRideParams, float tmin, float tmax,
+			     float tau1, float tau2);
   ~ZDCFitExpFermiInductPreExp() {}
 
   virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
@@ -917,8 +1012,8 @@ public:
     GetWrapperTF1()->SetParameter(2, std::max(amp, (float) 0.5)); //0.5 here ensures that we're above lower limit (0)   
   }
 
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 
   virtual float GetAmplitude() const override {
     if (finalized()) return m_funcMax;
@@ -932,7 +1027,9 @@ public:
 
   virtual float GetTime() const override {
     if (finalized()) return m_tFuncMax;
-    return getInductFuncTimeMax(m_expFermiInductFunc.get()) +  GetWrapperTF1()->GetParameter(1);
+    double timeMax = getInductFuncTimeMax(m_expFermiInductFunc.get());
+    if (std::isnan(timeMax)) return -100;
+    else return + GetWrapperTF1()->GetParameter(1);
   }
 
   virtual float GetExpAmp() const override {return GetWrapperTF1()->GetParameter(2);}
@@ -979,12 +1076,16 @@ public:
     double expTau = p[3];
     double bexpSqrt = p[4];
     double C = p[5];
-    double inductA = p[6];
-    double inductB = p[7];
+    double period = p[6];
+    double inductA = p[7];
+    double inductB = p[8];
+    double bI = p[9];
 
     m_expFermiInductFunc->SetParameter(0, amp);
+    m_expFermiInductFunc->SetParameter(5, period);
     m_expFermiInductFunc->SetParameter(6, inductA);
     m_expFermiInductFunc->SetParameter(7, inductB);
+    m_expFermiInductFunc->SetParameter(8, bI);
 
     double deltaT = t - t0;
     double pulse = m_expFermiInductFunc->operator()(deltaT);
@@ -1003,7 +1104,8 @@ public:
 
 class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiInductPrePulse : public ZDCPrePulseFitWrapper
 {
-private:
+  static const std::map<std::string, std::vector<ZDCFitWrapper::FitParameter>> s_ConfigParamMap;
+
   float m_tau1{0};
   float m_tau2{0};
   float m_timeCorr{0};
@@ -1028,6 +1130,9 @@ private:
 
 public:
   ZDCFitExpFermiInductPrePulse(const std::string& tag, float tmin, float tmax, float tau1, float tau2);
+  ZDCFitExpFermiInductPrePulse(const std::string& tag, std::string overRideParams, float tmin, float tmax,
+			       float tau1, float tau2);
+
   ~ZDCFitExpFermiInductPrePulse() {}
 
   virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
@@ -1048,8 +1153,8 @@ public:
   virtual void SetPrePulseT0Range(float tmin, float tmax) override;
   virtual void SetPostPulseT0Range(float /*tmin*/, float /*tmax*/, float /*initialPostT0*/) override {return;}
 
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 
   virtual unsigned int GetPreT0ParIndex() const override {return 3;}
 
@@ -1076,14 +1181,12 @@ public:
     return getInductFuncTimeMax(m_expFermiInductFunc.get()) +  GetWrapperTF1()->GetParameter(1);
   }
 
-  virtual unsigned int GetNumShapeParameters() const override {return 3;}
+  virtual unsigned int GetNumShapeParameters() const override {return 5;}
   
   virtual float GetShapeParameter(size_t index) const override
   {
-    if (index < 3) {
-      if (index == 0) return GetWrapperTF1()->GetParameter(4);
-      if (index == 1) return GetWrapperTF1()->GetParameter(6);
-      if (index == 2) return GetWrapperTF1()->GetParameter(7);
+    if (index < 5) {
+      return GetWrapperTF1()->GetParameter(index + 4);
     }
     throw std::runtime_error("Fit parameter does not exist.");
   }
@@ -1115,12 +1218,16 @@ public:
     double preAmp = p[2];
     double preT0 = p[3];
     double C = p[4];
-    double indA = p[5];
-    double indBFact = p[6];
+    double period = p[5];
+    double indA = p[6];
+    double indB = p[7];
+    double bI = p[8];
 
     m_expFermiInductFunc->SetParameter(0, amp);
+    m_expFermiInductFunc->SetParameter(5, period);
     m_expFermiInductFunc->SetParameter(6, indA);
-    m_expFermiInductFunc->SetParameter(7, indBFact);
+    m_expFermiInductFunc->SetParameter(7, indB);
+    m_expFermiInductFunc->SetParameter(8, bI);
 
     double deltaT = t - t0;
     double deltaTPre = t - preT0;
@@ -1160,8 +1267,8 @@ public:
   virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
   virtual void SetT0FitLimits(float tMin, float tMax) override;
 
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 
   virtual float GetAmplitude() const override {return GetWrapperTF1()->GetParameter(0); }
   virtual float GetAmpError() const override {return GetWrapperTF1()->GetParError(0); }
@@ -1223,8 +1330,8 @@ public:
   virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
   virtual void SetT0FitLimits(float tMin, float tMax) override;
 
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 
   virtual void SetInitialPrePulse(float amp, float t0, float /*expamp = 0*/, bool /*fixPrePulseToZero = false*/) override {
     GetWrapperTF1()->SetParameter(2, std::max(amp, (float) 1.5)); //1.5 here ensures that we're above lower limit
@@ -1344,8 +1451,8 @@ public:
     GetWrapperTF1()->SetParameter(6, std::max(std::abs(expamp), (float) 1.5));
   }
   
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 
   virtual void SetPrePulseT0Range(float tmin, float tmax) override;
   virtual void SetPostPulseT0Range(float /*tmin*/, float /*tmax*/, float /*initialPostT0*/) override {return;}
@@ -1468,8 +1575,8 @@ public:
     }
   }
 
-  virtual void ConstrainFit() override;
-  virtual void UnconstrainFit() override;
+  virtual void doConstrainFit() override;
+  virtual void doUnconstrainFit() override;
 
   virtual void SetPrePulseT0Range(float tmin, float tmax) override;
   virtual void SetPostPulseT0Range(float tmin, float tmax, float initialPostT0) override;
@@ -1666,7 +1773,7 @@ double ZDCFermiExpFitInduct(const double* xvec, const double* pvec)
   double period = pvec[5];
   double Acos = pvec[6];
   double Bsin = pvec[7];
-  double tauI = pvec[8];
+  double bI = pvec[8];
   double delta = pvec[9];
 
   double twoPiOverPeriod = 2.0*M_PI/period;
@@ -1675,9 +1782,9 @@ double ZDCFermiExpFitInduct(const double* xvec, const double* pvec)
   double norm = 1, expTerm = 1, fermiTerm = 1, inductTerm = 1;
   
   if (deltaT > 0) {
-    expTerm = delta + std::exp(-deltaT / tau2);
-    inductTerm = (1.0 + exp(-deltaT/tauI)*(Acos*std::cos(deltaT*twoPiOverPeriod) +
+    inductTerm = (1.0 + exp(-bI*deltaT)*(Acos*std::cos(deltaT*twoPiOverPeriod) +
 					   Bsin*std::sin(deltaT*twoPiOverPeriod)))/(1+Acos);
+    expTerm = delta + std::exp(-deltaT / tau2)*inductTerm;
   }
   if (deltaT/tau1 < 7) fermiTerm = 1. / (1. + std::exp(-deltaT / tau1));
 
