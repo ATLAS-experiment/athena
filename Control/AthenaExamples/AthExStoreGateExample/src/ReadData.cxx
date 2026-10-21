@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -25,7 +25,7 @@ StatusCode ReadData::initialize() {
   ATH_MSG_INFO ("in initialize()");
 
   // Print out the location of the data objects
-  ATH_MSG_INFO ("Data Object producer: " << m_DataProducer.value());
+  ATH_MSG_INFO ("Data Object producer: {}", m_DataProducer.value());
 
   //locate the StoreGateSvc and initialize our local ptr
   ATH_CHECK (evtStore().retrieve());
@@ -48,7 +48,7 @@ StatusCode ReadData::execute(const EventContext& ctx) {
   // Get a specific MyDataObj by providing its key
   // (in this case the name of the algo which recorded it)
 
-  ATH_MSG_INFO ("Get the MyDataObj recorded by " << m_DataProducer.value());
+  ATH_MSG_INFO ("Get the MyDataObj recorded by {}", m_DataProducer.value());
 
   //this time we set a *non-const* pointer. *If* we get back a valid
   //pointer we'll be able to modify the content of the underlying transient obj
@@ -113,7 +113,7 @@ StatusCode ReadData::execute(const EventContext& ctx) {
     float time = obj->time();
     int ID     = obj->id();
     
-    ATH_MSG_INFO ("Time: " << time << "  ID: " << ID);
+    ATH_MSG_INFO ("Time: {}  ID: {}", time, ID);
   }
 
   /////////////////////////////////////////////////////////////////////
@@ -123,7 +123,7 @@ StatusCode ReadData::execute(const EventContext& ctx) {
 
   ATH_CHECK (evtStore()->retrieve(pVec));
   for (unsigned int it=0; it<pVec->size(); it++) {
-    ATH_MSG_INFO ("pVec [" << it << "] = " << (*pVec)[it]);
+    ATH_MSG_INFO ("pVec [{}] = {}", it, (*pVec)[it]);
   }
 
   // test if an object is not in the store
@@ -153,7 +153,7 @@ StatusCode ReadData::execute(const EventContext& ctx) {
   std::list<VecElemLink>::const_iterator endL= pList->end();
 
   while(itL != endL) {
-    ATH_MSG_INFO ("ListVecLinks::linked element " << **itL);
+    ATH_MSG_INFO ("ListVecLinks::linked element {}", **itL);
     ++itL;
   }
 
@@ -174,20 +174,6 @@ StatusCode ReadData::execute(const EventContext& ctx) {
        << " - stored as " << *itV);
     ++itV;
   }
-
-  //try to "read back" a link
-  //    istrstream istr("due 0");
-  //    MapElemLink toBeRead;
-  //    istr >> toBeRead;
-  //    if (!toBeRead.isValid()) {
-  //      log << MSG::ERROR 
-  //  	<< "Could not read back MapElement" 
-  //  	<< endmsg;
-  //      return( StatusCode::FAILURE);
-  //    } else {
-  //      log << MSG::INFO <<  "MapElement read back: key " << toBeRead->first
-  //  	<< "  value " << toBeRead->second <<endmsg;
-  //    }
 
   /////////////////////////////////////////////////////////////////////
   // Part 3: symbolic links and derived types
@@ -213,9 +199,7 @@ StatusCode ReadData::execute(const EventContext& ctx) {
   if(eventInfo.isValid()) {
     int event = eventInfo->eventNumber();
     int run = eventInfo->runNumber();
-    ATH_MSG_INFO (" EventInfo : " 
-		  << " event: " << event 
-		  << " run: " << run);
+    ATH_MSG_INFO (" EventInfo :  event: {} run: {}", event, run);
   }
   else
   {

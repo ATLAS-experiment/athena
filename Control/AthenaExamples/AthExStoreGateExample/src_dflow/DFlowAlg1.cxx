@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // DFlowAlg1.cxx 
@@ -43,7 +43,7 @@ DFlowAlg1::~DFlowAlg1()
 ////////////////////////////
 StatusCode DFlowAlg1::initialize()
 {
-  ATH_MSG_INFO ("Initializing " << name() << "...");
+  ATH_MSG_INFO ("Initializing {}...", name());
   ATH_CHECK( m_w_int.initialize() );
   ATH_CHECK( m_r_evtInfo.initialize() );
 
@@ -52,14 +52,14 @@ StatusCode DFlowAlg1::initialize()
 
 StatusCode DFlowAlg1::finalize()
 {
-  ATH_MSG_INFO ("Finalizing " << name() << "...");
+  ATH_MSG_INFO ("Finalizing {}...", name());
 
   return StatusCode::SUCCESS;
 }
 
 StatusCode DFlowAlg1::execute (const EventContext& ctx) const
 {  
-  ATH_MSG_DEBUG ("Executing " << name() << "...");
+  ATH_MSG_DEBUG ("Executing {}...", name());
 
   SG::ReadHandle<xAOD::EventInfo> r_evtInfo (m_r_evtInfo, ctx);
   if (!r_evtInfo.isValid()) {
@@ -67,33 +67,33 @@ StatusCode DFlowAlg1::execute (const EventContext& ctx) const
     return StatusCode::RECOVERABLE;
   }
   ATH_MSG_INFO("evtinfo handle...");
-  ATH_MSG_INFO("name: [" << r_evtInfo.name() << "]");
-  ATH_MSG_INFO("store [" << r_evtInfo.store() << "]");
-  ATH_MSG_INFO("clid: [" << r_evtInfo.clid() << "]");
-  ATH_MSG_INFO("ei: " << *r_evtInfo);
+  ATH_MSG_INFO("name: [{}]", r_evtInfo.name());
+  ATH_MSG_INFO("store [{}]", r_evtInfo.store());
+  ATH_MSG_INFO("clid: [{}]", r_evtInfo.clid());
+  ATH_MSG_INFO("ei: {}", *r_evtInfo);
   ATH_MSG_INFO("retrieving event-info...");
   unsigned int runnbr = r_evtInfo->runNumber();
-  ATH_MSG_INFO("evt-info.runnbr: " << runnbr);
-  ATH_MSG_INFO("evt-info.evtnbr: " << r_evtInfo->eventNumber());
+  ATH_MSG_INFO("evt-info.runnbr: {}", runnbr);
+  ATH_MSG_INFO("evt-info.evtnbr: {}", r_evtInfo->eventNumber());
   
   ATH_MSG_INFO("myint handle...");
   SG::WriteHandle<int> w_int (m_w_int, ctx);
-  ATH_MSG_INFO("name: [" << w_int.name() << "]");
-  ATH_MSG_INFO("store [" << w_int.store() << "]");
-  ATH_MSG_INFO("clid: [" << w_int.clid() << "]");
+  ATH_MSG_INFO("name: [{}]", w_int.name());
+  ATH_MSG_INFO("store [{}]", w_int.store());
+  ATH_MSG_INFO("clid: [{}]", w_int.clid());
 
   ATH_CHECK( w_int.record (std::make_unique<int>(r_evtInfo->eventNumber())) );
 
   //redundant check as op = would throw if w_int was not valid (e.g. because if clid/key combo was duplicated)
   if (w_int.isValid()) {
-    ATH_MSG_INFO("ptr: " << w_int.cptr());
-    ATH_MSG_INFO("val: " << *w_int);
+    ATH_MSG_INFO("ptr: {}", static_cast<const void*>(w_int.cptr()));
+    ATH_MSG_INFO("val: {}", *w_int);
     
     ATH_MSG_INFO("modify myint by value...");
     *w_int = r_evtInfo->eventNumber() + 20;
 
-    ATH_MSG_INFO("ptr: " << w_int.cptr());
-    ATH_MSG_INFO("val: " << *w_int);
+    ATH_MSG_INFO("ptr: {}", static_cast<const void*>(w_int.cptr()));
+    ATH_MSG_INFO("val: {}", *w_int);
   }
   return StatusCode::SUCCESS;
 }
