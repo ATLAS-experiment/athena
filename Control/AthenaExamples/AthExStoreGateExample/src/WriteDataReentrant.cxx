@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -256,8 +256,8 @@ StatusCode WriteDataReentrant::execute (const EventContext& ctx) const
   // Part 5
   // finally dump the structure of the StoreGate before returning
   ATH_MSG_INFO (" registered all data objects");
-  ATH_MSG_INFO (" StoreGate structure before returning from execute \n"
-		<< evtStore()->dump());
+  ATH_MSG_INFO (" StoreGate structure before returning from execute \n{}",
+		evtStore()->dump());
 
   return StatusCode::SUCCESS;
 }
@@ -266,8 +266,8 @@ StatusCode WriteDataReentrant::execute (const EventContext& ctx) const
 
 StatusCode WriteDataReentrant::onError() const
 {
-  ATH_MSG_ERROR ("Dumping StoreGate after error occurred\n" 
-		 << evtStore()->dump());
+  ATH_MSG_ERROR ("Dumping StoreGate after error occurred\n{}",
+		 evtStore()->dump());
   return StatusCode::FAILURE;
 }
 

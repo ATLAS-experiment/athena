@@ -1,7 +1,6 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 /**
  * @file ReadDataReentrant.h
  * @author scott snyder <snyder@bnl.gov>
@@ -81,7 +80,7 @@ StatusCode ReadDataReentrant::execute (const EventContext& ctx) const
     float time = obj->time();
     int ID     = obj->id();
     
-    ATH_MSG_INFO ("Time: " << time << "  ID: " << ID);
+    ATH_MSG_INFO ("Time: {}  ID: {}", time, ID);
   }
 
   /////////////////////////////////////////////////////////////////////
@@ -89,17 +88,17 @@ StatusCode ReadDataReentrant::execute (const EventContext& ctx) const
 
   SG::ReadHandle<std::vector<float> > pVec (m_vFloatKey, ctx);
   for (unsigned int it=0; it<pVec->size(); it++) {
-    ATH_MSG_INFO ("pVec [" << it << "] = " << (*pVec)[it]);
+    ATH_MSG_INFO ("pVec [{}] = {}", it, (*pVec)[it]);
   }
 
   /////////////////////////////////////////////////////////////////////
   // test if an object is not in the store
   SG::ReadHandle<MyDataObj> nonexisting (m_nonexistingKey, ctx);
   if (nonexisting.isValid()) {
-    ATH_MSG_ERROR ("event store claims it contains MyDataObj with " << m_nonexistingKey);
+    ATH_MSG_ERROR ("event store claims it contains MyDataObj with {}", m_nonexistingKey);
     return StatusCode::FAILURE;
   } else {
-    ATH_MSG_INFO ("event store does not contain MyDataObj with " << m_nonexistingKey);
+    ATH_MSG_INFO ("event store does not contain MyDataObj with {}", m_nonexistingKey);
   }	
 
   /////////////////////////////////////////////////////////////////////
@@ -110,7 +109,7 @@ StatusCode ReadDataReentrant::execute (const EventContext& ctx) const
   typedef ElementLink<std::vector<float> > VecElemLink;
   auto pList = SG::makeHandle (m_pLinkListKey, ctx);
   for (const VecElemLink& l : *pList) {
-    ATH_MSG_INFO ("ListVecLinks::linked element " << *l);
+    ATH_MSG_INFO ("ListVecLinks::linked element {}", *l);
   }
 
   // Get the vector of links, print out its contents
@@ -119,8 +118,8 @@ StatusCode ReadDataReentrant::execute (const EventContext& ctx) const
   for (const MapElemLink& l : *vectorHandle) {
     ATH_MSG_INFO 
       ("VectorMapLinks::linked element: key " << l.index()
-       << " - value " << (*l) 
-       << " - stored as " << l);
+      << " - value " << (*l)
+      << " - stored as " << l);
   }
 
   return StatusCode::SUCCESS;

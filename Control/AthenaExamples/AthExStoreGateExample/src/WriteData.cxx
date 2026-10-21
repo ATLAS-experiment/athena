@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #undef NDEBUG
@@ -301,8 +301,8 @@ StatusCode WriteData::execute(const EventContext& ctx) {
   // Part 5
   // finally dump the sturcture of the StoreGate before returning
   ATH_MSG_INFO (" registered all data objects");
-  ATH_MSG_INFO (" StoreGate structure before returning from execute \n"
-		<< evtStore()->dump());
+  ATH_MSG_INFO (" StoreGate structure before returning from execute \n{}",
+		evtStore()->dump());
 
   return StatusCode::SUCCESS;
 }
@@ -311,8 +311,8 @@ StatusCode WriteData::execute(const EventContext& ctx) {
 
 StatusCode WriteData::onError() {
 
-  ATH_MSG_ERROR ("Dumping StoreGate after error occurred\n" 
-		 << evtStore()->dump());
+  ATH_MSG_ERROR ("Dumping StoreGate after error occurred\n{}",
+		 evtStore()->dump());
   return StatusCode::FAILURE;
 }
 
