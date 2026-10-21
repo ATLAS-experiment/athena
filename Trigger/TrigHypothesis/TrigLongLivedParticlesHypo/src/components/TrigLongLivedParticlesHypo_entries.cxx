@@ -20,6 +20,9 @@
 #include "../DisplacedJetDispHypoAlg.h"
 #include "../DisplacedJetRankComboHypoTool.h"
 
+#include "../MlMuonDVtxHypoAlg.h"
+#include "../MlMuonDVtxHypoTool.h"
+
 DECLARE_COMPONENT( TrigDisappearingTrackHypoAlg )
 DECLARE_COMPONENT( TrigDisappearingTrackHypoTool )
 DECLARE_COMPONENT( TrigHitDVHypoAlg )
@@ -40,3 +43,6 @@ DECLARE_COMPONENT( DisplacedJetPromptHypoTool )
 DECLARE_COMPONENT( DisplacedJetRankComboHypoTool )
 DECLARE_COMPONENT( MuonClusterHypoAlg )
 DECLARE_COMPONENT( MuonClusterHypoTool )
+
+DECLARE_COMPONENT( MlMuonDVtxHypoAlg )
+DECLARE_COMPONENT( MlMuonDVtxHypoTool )

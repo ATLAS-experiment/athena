@@ -7,6 +7,8 @@ DEFAULT_BUCKET_MODEL_PATH         = "dev/MuonRecRTT/edgecnn_mu200.onnx"
 DEFAULT_BUCKET_SCORE_THRESHOLD    = 0.160
 DEFAULT_BUCKET_SINGLE_OUTPUT_MODE = "logit"
 
+DEFALT_DV_MODEL_PATH = "/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/MlPhaseII/edge_gatv2.onnx"
+
 def MuonLearningOnnxRuntimeSvcCfg(flags, name="OnnxRuntimeSvc", **kwargs):
     """Configure the shared ONNX Runtime service used by MuonLearning tools."""
     result = ComponentAccumulator()
@@ -132,7 +134,7 @@ def DisplacedVertexInferenceToolCfg(flags, name="DisplacedVertexInferenceTool", 
     from AthOnnxComps.OnnxRuntimeSessionConfig import OnnxRuntimeSessionToolCfg
 
     result = ComponentAccumulator()
-    model_path = kwargs.pop("ModelPath", "MuonInference/models/edge_class_dv_mu200.onnx")
+    model_path = kwargs.pop("ModelPath", DEFALT_DV_MODEL_PATH)
 
     result.merge(MuonLearningOnnxRuntimeSvcCfg(flags))
     kwargs.setdefault("ModelSession", result.popToolsAndMerge(
@@ -211,8 +213,6 @@ def DisplacedVertexInferenceAlgCfg(flags, name="DisplacedVertexInferenceAlg", **
         "FallbackToAllSegments",
         "DebugDumpFirstNNodes",
         "DebugDumpFirstNEdges",
-        "SpacePointKeys",
-        "UseBucketSegmentSelection",
         "OutputLevel",
     ):
         if key in kwargs:
@@ -256,11 +256,6 @@ def DisplacedVertexInferenceAlgCfg(flags, name="DisplacedVertexInferenceAlg", **
     if alg_output_level is not None:
         kwargs["OutputLevel"] = alg_output_level
 
-    kwargs.setdefault("ScoreDecoration", "EventInfo.dv_score")
-    kwargs.setdefault("RawOutputDecoration", "EventInfo.dv_rawOutput")
-    kwargs.setdefault("PassDecoration", "EventInfo.dv_pass")
-    kwargs.setdefault("NNodesDecoration", "EventInfo.dv_nNodes")
-    kwargs.setdefault("NEdgesDecoration", "EventInfo.dv_nEdges")
     alg = CompFactory.MuonML.DVInferenceAlg(name=name, **kwargs)
     result.addEventAlgo(alg, primary=True)
     return result

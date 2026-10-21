@@ -1037,7 +1037,54 @@ def muRoiClusterSequenceGenCfg(flags):
 
     return muRoIClusterSequence
 
+###########################
+### ML Displaced Vertex ###
+###########################
 
+@AccumulatorCache
+def MlMuonDVtxCaloTowerSequenceGenCfg(flags):
+    
+    reco = InEventRecoCA(name="EFMlMuonDVtxCaloTower_RecoSequence")
+
+    from .MuonRecoSequences import MlMuonDVtxCaloTowerRecoSequenceCfg
+    reco.mergeReco(MlMuonDVtxCaloTowerRecoSequenceCfg(flags))
+
+    selAcc = SelectionCA("EFMlMuonDVtxCaloTower_passthrough")
+    selAcc.mergeReco(reco)
+
+    selAcc.addHypoAlgo(CompFactory.TrigStreamerHypoAlg("TrigStreamerHypoAlg_MlMuonDVtx_passthrough"))
+
+    def hypoToolFromDict(flags, chainDict):
+        return CompFactory.TrigStreamerHypoTool(chainDict["chainName"])
+    
+    return MenuSequence(flags, selAcc, hypoToolFromDict)
+
+
+@AccumulatorCache
+def MlMuonDVtxSequenceGenCfg(flags):
+
+    recoMS = InEventRecoCA("EFMlMuonDVtxReco")
+
+    #Clone and replace offline flags so we can set muon trigger specific values
+    muonflags = flags.cloneAndReplace('Muon', 'Trigger.Offline.SA.Muon')
+
+    from .MuonRecoSequences import MlMuonDVtxRecoSequenceCfg, muonDecodeCfg
+    recoMS.mergeReco(muonDecodeCfg(muonflags, RoIs = 'SeedLess', inView = False))
+    recoMS.mergeReco(MlMuonDVtxRecoSequenceCfg(muonflags))
+
+    selAcc = SelectionCA('EFMlMuonDVtxSel')
+    selAcc.mergeReco(recoMS)
+
+    from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConfig import MlMuonDVtxHypoAlgConfig, MlMuonDVtxHypoToolFromDict
+    efmuMSHypo = MlMuonDVtxHypoAlgConfig(flags,
+                                         name = 'TrigMlMuonDVtxHypoAlg')
+
+    selAcc.addHypoAlgo(efmuMSHypo)
+    
+    efmuMSSequence = MenuSequence(flags, selAcc,
+                                  HypoToolGen = MlMuonDVtxHypoToolFromDict)
+
+    return efmuMSSequence
 
 ##############################
 ### Get Bphysics triggers to #

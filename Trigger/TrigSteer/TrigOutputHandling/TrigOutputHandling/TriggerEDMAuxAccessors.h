@@ -254,7 +254,8 @@ auto floatAccessors = initAccessors<float>(
   "LAYERENERGY_TileGap1", "LAYERENERGY_TileGap2", "LAYERENERGY_TileGap3",
   "TIMING",
   "AVG_LAR_Q", "AVG_TILE_Q", "BADLARQ_FRAC",
-  "ENG_BAD_CELLS", "ENG_POS", "ISOLATION", "N_BAD_CELLS"
+  "ENG_BAD_CELLS", "ENG_POS", "ISOLATION", "N_BAD_CELLS",
+  "Score"
   );
 
 auto doubleAccessors = initAccessors<double>("ptcone02", "ptcone03", "JetDensityEMPFlow",

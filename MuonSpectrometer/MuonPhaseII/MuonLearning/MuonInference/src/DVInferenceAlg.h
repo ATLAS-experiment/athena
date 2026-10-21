@@ -4,16 +4,11 @@
 #ifndef MUONINFERENCE_DVINFERENCEALG_H
 #define MUONINFERENCE_DVINFERENCEALG_H
 
-#include <string>
+#include "DVInferenceToolBase.h"
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "GaudiKernel/ToolHandle.h"
-#include "StoreGate/ReadHandleKey.h"
-#include "StoreGate/WriteDecorHandleKey.h"
 
-#include "xAODEventInfo/EventInfo.h"
-
-#include "DVInferenceToolBase.h"
+#include "xAODTrigger/TrigCompositeContainer.h"
 
 namespace MuonML {
 
@@ -33,22 +28,11 @@ private:
   ToolHandle<MuonML::DVInferenceToolBase> m_inferenceTool{
       this, "InferenceTool", "MuonML::DVInferenceToolBase/DisplacedVertexInferenceTool"};
 
-  SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{
-      this, "EventInfoKey", "EventInfo", "Optional validation EventInfo object to decorate with DV inference output"};
+  Gaudi::Property<bool> m_writeDVoutput{
+      this, "WriteDVoutput", false, "Whether to write the DV inference output into storegate"};
 
-  Gaudi::Property<bool> m_decorateEventInfo{
-      this, "DecorateEventInfo", false, "Opt-in: Decorate EventInfo with DV classifier outputs"};
-
-  SG::WriteDecorHandleKey<xAOD::EventInfo> m_scoreDecorKey{
-      this, "ScoreDecoration", "EventInfo.dv_score", "Optional: Event-level DV signal probability"};
-  SG::WriteDecorHandleKey<xAOD::EventInfo> m_rawDecorKey{
-      this, "RawOutputDecoration", "EventInfo.dv_rawOutput", "Optional: Raw event-level DV ONNX output"};
-  SG::WriteDecorHandleKey<xAOD::EventInfo> m_passDecorKey{
-      this, "PassDecoration", "EventInfo.dv_pass", "Optional: Whether DV score passes ScoreThreshold"};
-  SG::WriteDecorHandleKey<xAOD::EventInfo> m_nNodesDecorKey{
-      this, "NNodesDecoration", "EventInfo.dv_nNodes", "Optional: Number of nodes in the DV event graph"};
-  SG::WriteDecorHandleKey<xAOD::EventInfo> m_nEdgesDecorKey{
-      this, "NEdgesDecoration", "EventInfo.dv_nEdges", "Optional: Number of directed edges in the DV event graph"};
+  SG::WriteHandleKey<xAOD::TrigCompositeContainer> m_trigCompositeKey{
+      this, "TrigCompositeKey", "EF_MuonDVInferenceOutput", "Optional: Dummy xAOD::TrigComposite object to be decorated with DV inference outputs"};
 
   Gaudi::Property<float> m_scoreThreshold{
       this, "ScoreThreshold", 0.5f, "DV event score threshold used for the pass decision"};

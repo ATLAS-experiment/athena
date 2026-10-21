@@ -142,7 +142,10 @@ def addMCSignatures(chains):
         ChainProp(name='EF_mu4_msonly_newFast_L1MU3V', groups=SupportGroup+SingleMuonGroup+MuonPhaseIIRecoGroup, monGroups=['muonMon:shifter']),
 
         # HL-LHC TDR inspired chains
-        ChainProp(name="EF_mu3vtx_L12MU8F", groups=PrimaryPhIGroup+SingleTauGroup),
+        ChainProp(name="EF_mu3vtx_L12MU8F", groups=PrimaryPhIGroup+MultiMuonGroup),
+
+        # Displaced vertices chain
+        ChainProp(name="EF_mu0mlvtx_L1MU3V", groups=SupportGroup+SingleMuonGroup+MuonPhaseIIRecoGroup, monGroups=['muonMon:shifter']),
     ]
 
     chainsMC['Egamma'] = [
