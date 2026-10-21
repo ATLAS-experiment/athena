@@ -6,6 +6,7 @@
 #ifndef INDETTRACKSYSTEMATICSTOOLS_INDETTRACKSYSTEMATICSTOOL_H
 #define INDETTRACKSYSTEMATICSTOOLS_INDETTRACKSYSTEMATICSTOOL_H
 
+#include <cstdint>
 #include <string>
 #include <map>
 #include <memory>
@@ -67,6 +68,12 @@ namespace InDet {
     /// caller-provided filtered set rather than the shared m_activeSysts.
     bool isActive(TrackSystematic syst,
                   const CP::SystematicSet& filtered) const;
+
+    /// Extra per-track PRNG seed term so each variation draws independent random
+    /// numbers: one bit per active TrackSystematic (enum value as bit index)
+    static uint64_t variationMask(const CP::SystematicSet& filtered);
+    /// variationMask() of the set activated by applySystematicVariation()
+    uint64_t activeVariationMask() const;
 
   };
 

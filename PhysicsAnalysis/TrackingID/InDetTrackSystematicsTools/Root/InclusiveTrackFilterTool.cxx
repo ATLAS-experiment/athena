@@ -69,6 +69,7 @@ namespace InDet {
       probDrop *= std::abs(getTrackUncertainty( track ));
       FastReseededPRNG prng(
           m_seed,
+          activeVariationMask(),
           static_cast<uint32_t>(std::abs(track->phi()) * 1e6),
           static_cast<uint32_t>(std::abs(track->eta()) * 1e3),
           InDet::getEventNumber(evtStore()));

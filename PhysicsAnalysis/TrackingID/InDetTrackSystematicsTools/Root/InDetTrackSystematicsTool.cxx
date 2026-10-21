@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetTrackSystematicsTools/InDetTrackSystematicsTool.h"
@@ -117,6 +117,20 @@ namespace InDet {
   {
     return filtered.find(InDet::TrackSystematicMap.at(syst))
         != filtered.end();
+  }
+
+  uint64_t InDetTrackSystematicsTool::variationMask(const CP::SystematicSet& filtered)
+  {
+    uint64_t mask = 0;
+    for (const auto& [syst, var] : InDet::TrackSystematicMap) {
+      if (filtered.find(var) != filtered.end()) mask |= (uint64_t{1} << syst);
+    }
+    return mask;
+  }
+
+  uint64_t InDetTrackSystematicsTool::activeVariationMask() const
+  {
+    return m_activeSysts ? variationMask(*m_activeSysts) : 0;
   }
 
   std::unique_ptr<TFile> InDetTrackSystematicsTool::getFile(const std::string& filename) const
