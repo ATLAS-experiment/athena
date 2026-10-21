@@ -3,20 +3,13 @@
 */
 #include "DVInferenceAlg.h"
 
-#include "StoreGate/ReadHandle.h"
-#include "StoreGate/WriteDecorHandle.h"
+#include "xAODTrigger/TrigCompositeAuxContainer.h"
 
 namespace MuonML {
 
 StatusCode DVInferenceAlg::initialize() {
   ATH_CHECK(m_inferenceTool.retrieve());
-  const bool decorateEventInfo = m_decorateEventInfo;
-  ATH_CHECK(m_eventInfoKey.initialize(decorateEventInfo));
-  ATH_CHECK(m_scoreDecorKey.initialize(decorateEventInfo));
-  ATH_CHECK(m_rawDecorKey.initialize(decorateEventInfo));
-  ATH_CHECK(m_passDecorKey.initialize(decorateEventInfo));
-  ATH_CHECK(m_nNodesDecorKey.initialize(decorateEventInfo));
-  ATH_CHECK(m_nEdgesDecorKey.initialize(decorateEventInfo));
+  ATH_CHECK(m_trigCompositeKey.initialize(m_writeDVoutput));
 
   m_thresholdModeName = m_thresholdMode;
   if (m_thresholdModeName != "score" && m_thresholdModeName != "raw") {
@@ -27,10 +20,7 @@ StatusCode DVInferenceAlg::initialize() {
   const float scoreThreshold = m_scoreThreshold;
   ATH_MSG_INFO("Initialized DVInferenceAlg with ScoreThreshold=" << scoreThreshold
                << ", ThresholdMode=" << m_thresholdModeName
-               << ", DecorateEventInfo=" << decorateEventInfo);
-  if (decorateEventInfo) {
-    ATH_MSG_INFO("EventInfo DV decorations are enabled for validation/debug output only");
-  }
+               << ", WriteDVoutput=" << m_writeDVoutput);
   return StatusCode::SUCCESS;
 }
 
@@ -68,21 +58,18 @@ StatusCode DVInferenceAlg::execute(const EventContext& ctx) const {
                   << " edges=" << result.nEdges);
   }
 
-  if (m_decorateEventInfo) {
-    const xAOD::EventInfo* eventInfo{};
-    ATH_CHECK(SG::get(eventInfo, m_eventInfoKey, ctx));
+  if (m_writeDVoutput) {
+    SG::WriteHandle<xAOD::TrigCompositeContainer> outputHandle{m_trigCompositeKey, ctx};
+    ATH_CHECK(outputHandle.record(std::make_unique<xAOD::TrigCompositeContainer>(),
+                                  std::make_unique<xAOD::TrigCompositeAuxContainer>()));
 
-    SG::WriteDecorHandle<xAOD::EventInfo, float> scoreDecor{m_scoreDecorKey, ctx};
-    SG::WriteDecorHandle<xAOD::EventInfo, float> rawDecor{m_rawDecorKey, ctx};
-    SG::WriteDecorHandle<xAOD::EventInfo, char> passDecor{m_passDecorKey, ctx};
-    SG::WriteDecorHandle<xAOD::EventInfo, unsigned int> nNodesDecor{m_nNodesDecorKey, ctx};
-    SG::WriteDecorHandle<xAOD::EventInfo, unsigned int> nEdgesDecor{m_nEdgesDecorKey, ctx};
+    xAOD::TrigComposite* trigComposite = outputHandle->push_back(std::make_unique<xAOD::TrigComposite>());
 
-    scoreDecor(*eventInfo) = result.valid ? result.probability : -1.f;
-    rawDecor(*eventInfo) = result.valid ? result.rawOutput : -1.f;
-    passDecor(*eventInfo) = pass ? 1 : 0;
-    nNodesDecor(*eventInfo) = static_cast<unsigned int>(result.nNodes);
-    nEdgesDecor(*eventInfo) = static_cast<unsigned int>(result.nEdges);
+    trigComposite->setDetail<float>("Score", result.valid ? result.probability : -1.f);
+    trigComposite->setDetail<float>("RawOutput", result.valid ? result.rawOutput : -1.f);
+    trigComposite->setDetail<char>("Pass", pass ? 1 : 0);
+    trigComposite->setDetail<unsigned int>("NNodes", static_cast<unsigned int>(result.nNodes));
+    trigComposite->setDetail<unsigned int>("NEdges", static_cast<unsigned int>(result.nEdges));
   }
 
   return StatusCode::SUCCESS;

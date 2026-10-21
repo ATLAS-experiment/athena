@@ -25,3 +25,17 @@ def MuonClusterHypoToolConfig(flags, name="MuonClusterHypoToolConfig"):
     return CompFactory.MuonClusterHypoTool(name,
         MonTool = HypoMon.trigMuonClusterHypoToolMonitoring(flags),
         acceptAll = False)
+
+def MlMuonDVtxHypoAlgConfig(flags, name="MlMuonDVtxHypoAlgConfig"):
+    """Monitoring Tool Configuration for HypoAlg"""
+    return CompFactory.MlMuonDVtxHypoAlg(name)
+
+def MlMuonDVtxHypoToolConfig(flags, name="MlMuonDVtxHypoToolConfig"):
+    """Monitoring Tool Configuration for HypoTool"""
+    the_tool =  CompFactory.MlMuonDVtxHypoTool(name)
+    the_tool.score_cut = 0.94
+    return the_tool
+
+def MlMuonDVtxHypoToolFromDict(flags, chainDict):
+    name = chainDict['chainName']
+    return MlMuonDVtxHypoToolConfig(flags, name)

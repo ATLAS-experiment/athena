@@ -98,13 +98,21 @@ def MuDataPrepViewDataVerifierCfg(flags):
     return result
 
 
-def muonDecodeCfg(flags, RoIs):
+def muonDecodeCfg(flags, RoIs, inView=True):
     acc = ComponentAccumulator()
 
     doSeededDecoding =True
-    if 'FSRoI' in RoIs:
+    if 'FSRoI' in RoIs or not inView:
       doSeededDecoding = False
-    acc.merge(MuDataPrepViewDataVerifierCfg(flags))
+
+    if inView:
+      acc.merge(MuDataPrepViewDataVerifierCfg(flags))
+    else:
+       loadFromSG = []
+       if flags.Input.isMC:
+         loadFromSG += [( 'MdtCsmContainer' , 'StoreGateSvc+MDTCSM' )]
+       from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+       acc.merge(SGInputLoaderCfg(flags, loadFromSG))
         
     # Get RPC BS decoder
     if not flags.Input.isMC:
@@ -747,3 +755,68 @@ def efLateMuRoISequenceCfg(flags):
   acc.merge(TrigmuRoIConfig(flags, "TrigmuRoI", outputRoIs=sequenceOut))
 
   return acc, sequenceOut
+
+###########################
+### ML Displaced Vertex ###
+###########################
+
+def MlMuonDVtxCaloTowerRecoSequenceCfg(flags):
+    acc = ComponentAccumulator()
+
+    # Use same names of calo algs as in Jet reco to avoid running them twice
+    """ Create the calo cells """
+    acc = ComponentAccumulator()
+    from TrigCaloRec.TrigCaloRecConfig import hltCaloCellSeedlessMakerCfg, hltHICaloTowerMakerCfg
+    acc.merge(hltCaloCellSeedlessMakerCfg(flags, roisKey=''))
+    
+    """ Create the calo towers """
+    from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import fs_towers
+    acc.merge(hltHICaloTowerMakerCfg(flags, name="HLTCaloTowerMakerFS",  
+                                            towersKey=fs_towers, 
+                                            cellsKey="SeedLessFS",
+                                            RoIs=''))
+    return acc
+
+
+def MlMuonDVtxRecoSequenceCfg(flags):
+
+    acc = ComponentAccumulator()
+
+    # Pattern recognition & segment fitting
+    from MuonPatternRecognitionAlgs.MuonPatternRecognitionConfig import MuonEtaHoughTransformAlgCfg, MuonNSWSegmentFinderAlgCfg, MuonPhiHoughTransformAlgCfg, MuonSegmentFittingAlgCfg
+    segmentContainers = []
+    if flags.Detector.GeometrysTGC or flags.Detector.GeometryMM:
+        segmentContainers+=["MuonNswSegments"]
+        acc.merge(MuonEtaHoughTransformAlgCfg(flags, name="MuonNswEtaHoughTransformAlgMlVtx", 
+                                                     EtaHoughMaxContainer = "MuonHoughNswMaxima", 
+                                                     SpacePointContainer = "NswSpacePoints"))
+        acc.merge(MuonNSWSegmentFinderAlgCfg(flags, name="MuonNswSegmentFinderAlgMlVtx", 
+                                                    MuonNswSegmentWriteKey = segmentContainers[-1], 
+                                                    MuonNswSegmentSeedWriteKey = "MuonNswSegmentSeeds",
+                                                    CombinatorialReadKey = "MuonHoughNswMaxima"))
+    
+    if flags.Detector.GeometryMDT or flags.Detector.GeometryRPC or flags.Detector.GeometryTGC:
+        acc.merge(MuonEtaHoughTransformAlgCfg(flags, name = "MuonEtaHoughTransformAlgMlVtx")) 
+        acc.merge(MuonPhiHoughTransformAlgCfg(flags, name = "MuonPhiHoughTransformAlgMlVtx"))
+        
+        segmentContainers+=["R4MuonSegments"]
+        acc.merge(MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlgMlVtx",
+                                                    OutSegmentContainer=segmentContainers[-1]))
+        
+    from MuonSegmentCnv.MuonSegmentCnvConfig import xAODSegmentCnvAlgCfg
+    acc.merge(xAODSegmentCnvAlgCfg(flags, name = "MuonR4xAODSegmentCnvAlgMlVtx", 
+                                          InSegmentKeys = segmentContainers))
+
+    from MuonInference.InferenceConfig import DisplacedVertexInferenceToolCfg
+    from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import fs_towers
+    dv_tool = acc.popToolsAndMerge(DisplacedVertexInferenceToolCfg(flags, 
+                                                                   TowerContainerKey=fs_towers,
+                                                                   SpacePointKeys=["MuonSpacePoints", "NswSpacePoints"]))
+    alg = CompFactory.MuonML.DVInferenceAlg(name="InferenceAlgMlVtx", 
+                                            WriteDVoutput=True,
+                                            InferenceTool = dv_tool)
+    acc.addEventAlgo(alg, primary=True)
+
+    return acc
+
+

@@ -146,6 +146,10 @@ TriggerHLTListRun4 = [
     ('xAOD::TrackParticleContainer#HLT_MuonMSTrackParticles_FSPhII_mlbkt',          'BS ESD AODFULL', 'Muon', [InViews('EFMuMSReco_FSPhII_mlbktViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_MuonMSTrackParticles_FSPhII_mlbktAux.',   'BS ESD AODFULL', 'Muon'),
 
+    # EF Displaced Vertex inference outputs
+    ('xAOD::TrigCompositeContainer#EF_MuonDVInferenceOutput',                       'BS ESD AODFULL', 'Muon'),
+    ('xAOD::TrigCompositeAuxContainer#EF_MuonDVInferenceOutputAux.Score',           'BS ESD AODFULL', 'Muon'),
+
     # Tau
     ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersEM',                       'BS ESD AODFULL', 'Tau', [InViews('tauCaloEMViews')]),   
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersEMAux.nCells',      'BS ESD AODFULL', 'Tau'),
