@@ -12,7 +12,6 @@
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbConnection.h"
-#include "StorageSvc/DbPrint.h"
 
 #include <exception>
 #include <memory>
@@ -69,8 +68,7 @@ pool::DatabaseHandler::containers()
    std::vector<const Token*> containerTokens;
    DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
    if( !dbH.containers(containerTokens, false).isSuccess() ) {
-      DbPrint log( m_fileDescriptor.PFN() );
-      log << MSG::ERROR << "Could not retrieve the list of containers." << endmsg;
+    return result;
    }
    for ( std::vector<const Token*>::const_iterator iToken = containerTokens.begin();
          iToken != containerTokens.end(); ++iToken ) {

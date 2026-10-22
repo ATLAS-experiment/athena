@@ -10,6 +10,7 @@
 #include "GaudiKernel/SmartIF.h"
 #include "SimpleTestClass.h"
 #include "PoolSvc/IDatabase.h"
+#include "PoolTestBase.h"
 
 class Token;
 
@@ -20,13 +21,10 @@ namespace Gaudi {
 
 namespace pool {
 
-  class TestDriver {
+  class TestDriver : public PoolTestBase {
   public:
     TestDriver(const std::string& filename, const std::string& catname);
     ~TestDriver();
-    TestDriver(const TestDriver & ) = delete;
-    TestDriver& operator=(const TestDriver & ) = delete;
-    void loadLibraries( const std::vector<std::string>& libraries );
     void write();
      // read back using possibly a different path and name type
      void read(const std::string& fileName = "",  // by default use the name used for writing

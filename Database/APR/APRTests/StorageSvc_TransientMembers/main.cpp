@@ -3,17 +3,15 @@
 */
 
 #include <iostream>
-#include <exception>
 #include "TestDriver.h"
 #include "TestTools/initGaudi.h"
 
 int main( int, char** ) {
   ISvcLocator* svcloc = nullptr;
   if (!Athena_test::initGaudi (svcloc)) std::abort();
+  std::cout << "[OVAL] Creating the test driver." << std::endl;
   try {
-    std::cout << "[OVAL] Creating the test driver." << std::endl;
     TestDriver driver;
-
     std::cout << "[OVAL] Loading the shared libraries." << std::endl;
     std::vector< std::string > libraries;
     libraries.push_back( "test_StorageSvc_TransientMembersDict" );
@@ -31,7 +29,6 @@ int main( int, char** ) {
     std::cerr << e.what() << std::endl;
     return 1;
   }
-
   std::cout << "[OVAL] Exiting..." << std::endl;
   return 0;
 }

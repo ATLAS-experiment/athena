@@ -6,15 +6,15 @@
 #define TESTDRIVER_H
 
 #include "StorageSvc/DbType.h"
+#include "PoolTestBase.h"
 
 #include <vector>
 #include <string>
 
-class TestDriver {
+class TestDriver : public PoolTestBase {
 public:
   TestDriver();
   ~TestDriver();
-  void loadLibraries( const std::vector<std::string>& libraries );
   void testWriting();
   void testReading();
 

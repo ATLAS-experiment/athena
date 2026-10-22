@@ -1,11 +1,8 @@
-ApplicationMgr       INFO Application Manager Configured successfully
+ApplicationMgr        INFO Application Manager Configured successfully
 Athena...ntLoopMgr                INFO Initializing AthenaHiveEventLoopMgr
 PyComponentMgr               0    INFO Initializing PyComponentMgr...
 LoadReadDicts                0    INFO Initializing LoadReadDicts...
 ThreadPoolSvc                0    INFO no thread init tools attached
-Avalan...edulerSvc           0    INFO Activating scheduler in a separate thread
-Avalan...edulerSvc           0    INFO Found 9 algorithms
-Avalan...edulerSvc           0    INFO Data Dependencies for Algorithms:
   BeginIncFiringAlg
       none
   IncidentProcAlg1
@@ -27,25 +24,8 @@ Avalan...edulerSvc           0    INFO Data Dependencies for Algorithms:
       none
   IncidentProcAlg3
       none
-Avalan...edulerSvc           0    INFO Will attribute the following unmet INPUT dependencies to "SGInputLoader/SGInputLoader" Algorithm
-Avalan...edulerSvc           0    INFO    o  ( 'DMTest::S1' , 'StoreGateSvc+S2' )     required by Algorithm: 
-Avalan...edulerSvc           0    INFO        * xAODTestReadSymlink
-Avalan...edulerSvc           0    INFO    o  ( 'DMTest::S2' , 'StoreGateSvc+S2' )     required by Algorithm: 
-Avalan...edulerSvc           0    INFO        * xAODTestReadSymlink
-Avalan...edulerSvc           0    INFO    o  ( 'DMTest::S2' , 'StoreGateSvc+S2alias' )     required by Algorithm: 
-Avalan...edulerSvc           0    INFO        * xAODTestReadSymlink
-Avalan...edulerSvc           0    INFO    o  ( 'SG::AuxElement' , 'StoreGateSvc+cinfo' )     required by Algorithm: 
-Avalan...edulerSvc           0    INFO        * xAODTestReadSymlink
 PrecedenceSvc                0    INFO Assembling CF and DF task precedence rules
 PrecedenceSvc                0    INFO PrecedenceSvc initialized successfully
-Avalan...edulerSvc           0    INFO Concurrency level information:
-Avalan...edulerSvc           0    INFO  o Number of events in flight: 1
-Avalan...edulerSvc           0    INFO  o TBB thread pool size:  'ThreadPoolSize':1
-Avalan...edulerSvc           0    INFO  o Fiber thread pool size:  'NumOffloadThreads':0
-Avalan...edulerSvc           0    INFO Task scheduling settings:
-Avalan...edulerSvc           0    INFO  o Avalanche generation mode: disabled
-Avalan...edulerSvc           0    INFO  o Preemptive scheduling of CPU-blocking tasks: disabled
-Avalan...edulerSvc           0    INFO  o Scheduling of condition tasks: disabled
 Athena...ntLoopMgr           0    INFO Setup EventSelector service EventSelector
 ApplicationMgr               0    INFO Application Manager Initialized successfully
 ApplicationMgr               0    INFO Application Manager Started successfully
@@ -112,6 +92,7 @@ Athena...ntLoopMgr    19     0    INFO   ===>>>  start processing event #20, run
 xAODTe...adSymlink    19     0    INFO C (as AuxElement): 21000; S 2000
 Athena...ntLoopMgr    19     0    INFO   ===>>>  done processing event #20, run #0 on slot 0,  20 events processed so far  <<<===
 ApplicationMgr                    INFO Application Manager Stopped successfully
+ToolSvc                           INFO Removing all tools created by ToolSvc
 ApplicationMgr                    INFO Application Manager Finalized successfully
 ApplicationMgr                    INFO Application Manager Terminated successfully
 Py:Athena            INFO leaving with code 0: "successful run"

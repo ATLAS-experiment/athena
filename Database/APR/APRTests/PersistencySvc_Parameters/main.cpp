@@ -12,7 +12,7 @@ int main( int, char** ) {
     // Suppress Athena MessageSvc warnings about not finding Gaudi MessageSvc
     Athena::getMessageSvcQuiet = true;
     std::cout << "[OVAL] Creating the test driver." << std::endl;
-    pool::TestDriver driver;
+    TestDriver driver;
 
     std::cout << "[OVAL] Writing parameters in the database." << std::endl;
     driver.write();

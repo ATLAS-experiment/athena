@@ -5,8 +5,6 @@
 #include "TestDriver.h"
 #include "SimpleTestClass.h"
 
-#include "libname.h"
-
 #include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
 
@@ -27,7 +25,7 @@
 #include <memory>
 
 using namespace std;
-
+using namespace pool;
 
 TestDriver::TestDriver()
 { }

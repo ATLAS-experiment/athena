@@ -9,6 +9,7 @@
 #include <string>
 #include "GaudiKernel/SmartIF.h"
 #include "SimpleTestClass.h"
+#include "PoolTestBase.h"
 
 class Token;
 
@@ -19,13 +20,11 @@ namespace Gaudi {
 
 namespace pool {
 
-  class TestDriver {
+  class TestDriver : public PoolTestBase {
   public:
     explicit TestDriver( const std::string& catname = "FCO.catatlog.xml" );
     ~TestDriver();
-    TestDriver( const TestDriver & ) = delete;
-    TestDriver& operator=(const TestDriver & ) = delete;
-    void loadLibraries( const std::vector<std::string>& libraries );
+
     void write();
     void addlfns();
     void read();

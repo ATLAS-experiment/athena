@@ -2,39 +2,37 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef POOLSVC_USERSESSION_H
-#define POOLSVC_USERSESSION_H
+#ifndef POOLSVC_SESSIONTOOL_H
+#define POOLSVC_SESSIONTOOL_H
 
-#include "AthenaBaseComps/AthMessaging.h"
-#include "PoolSvc/ISession.h"
-#include "StorageSvc/DbPrint.h"
+#include "PoolSvc/ISessionTool.h"
 
 #include <map>
 
 namespace pool {
-
-  // forward declarations
   class DatabaseRegistry;
-  class MicroSessionManager;
+}
 
-  /** @class UserSession
-   *
-   *  UserSession is an implementation of the ISession interface
-   *
-   */
-
-  class UserSession : public ISession, public APRMessaging
-  {
+/** @class SessionTool
+  *   *
+  */
+class SessionTool : public ISessionTool
+{
   public:
-    /// Constructor
-    explicit UserSession( Gaudi::IFileCatalog& fileCatalog, int ageLimit );
+    /// Constructors 
+    explicit SessionTool(const std::string& type,
+                       const std::string& name,
+                       const IInterface* parent);
+ 
+   
 
     /// Destructor
-    virtual ~UserSession();
+    virtual ~SessionTool();
 
-    UserSession (const UserSession&) = delete;
-    UserSession& operator= (const UserSession&) = delete;
+    SessionTool (const SessionTool&) = delete;
+    SessionTool& operator= (const SessionTool&) = delete;
 
+    virtual void setupFC( Gaudi::IFileCatalog& fileCatalog, int ageLimit ) override final;
 
     /** Retrieves an object from persistent store and return with type information
      *  The handle to the reflection class is necessary to later delete the object.
@@ -47,7 +45,7 @@ namespace pool {
      *
      * In case of failure zero is returned.
      */
-    virtual void* readObject( const Token& token, void* object = 0 ) override;
+    virtual void* readObject( const Token& token, void* object = 0 ) override final;
 
 
     /**  registerForWrite registers an object for writing to the persistent medium
@@ -59,11 +57,11 @@ namespace pool {
      *
      * @return Token*   the token address of the persistent object. I case of failure 0 is returned.
      */
-    virtual Token* registerForWrite( const Placement& place, const void* object, const RootType& type ) override;
+    virtual Token* registerForWrite( const Placement& place, const void* object, const RootType& type ) override final;
 
 
     // Signatures needed for the PersistencySvc
-    DatabaseRegistry& registry();
+    pool::DatabaseRegistry& registry() {return *m_registry; }
 
     /** Explicitly disconnects all the databases.
      *  If a transaction is active, then all the changes since the last commit are aborted.
@@ -80,28 +78,31 @@ namespace pool {
     virtual bool commitAndHold() override final;
 
     /// Returns the transaction type
-    virtual Io::IoFlag type() const override final { return m_transactionType; }
+    virtual Io::IoFlag openMode() const override final { return m_transactionType; }
 
     /// Creates and returns a new database handle object
-    virtual std::unique_ptr<IDatabase>
-    databaseHandle( const std::string& dbName, DatabaseSpecification::NameType dbNameType ) override final;
+    virtual std::unique_ptr<pool::IDatabase>
+    databaseHandle( const std::string& dbName, pool::DatabaseSpecification::NameType dbNameType ) override final;
 
     /// Returns the file catalog in use
     virtual Gaudi::IFileCatalog& fileCatalog();
 
     /// Return StorageSvc for a given technology used in this session
-    virtual IStorageSvc& getStorageSvc( long technology ) override final;
+    virtual pool::IStorageSvc& getStorageSvc( long technology ) override final;
 
     /// Returns the technology given a technology type.
-    MicroSessionManager& microSessionManager( long technology ) override final;
+    pool::MicroSessionManager& microSessionManager( long technology ) override final;
+
+    void closeSession() override final;
+    StatusCode finalize() override final;
 
   private:
     Gaudi::IFileCatalog*           m_catalog;
     int                            m_ageLimit;
-    DatabaseRegistry*              m_registry;
+    std::unique_ptr<pool::DatabaseRegistry>  m_registry;
     Io::IoFlag                     m_transactionType;
-    std::map< long, std::unique_ptr<MicroSessionManager> >    m_technologies;
+    std::map< long, std::unique_ptr<pool::MicroSessionManager> >    m_technologies;
   };
-}
+
 
 #endif

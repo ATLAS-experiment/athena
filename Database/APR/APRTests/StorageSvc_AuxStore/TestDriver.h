@@ -8,8 +8,9 @@
 #include "StorageSvc/DbType.h"
 #include <string>
 #include <vector>
+#include "PoolTestBase.h"
 
-class TestDriver {
+class TestDriver : public PoolTestBase {
 
 public:
    TestDriver(const std::string& filename, pool::DbType storage_type);
@@ -17,8 +18,6 @@ public:
 
    std::string testWriting();
    void testReading(const std::string& testTypeID);
-
-   static void loadLibraries( const std::vector<std::string>& libraries );
 
 protected:
    std::string          m_fileName;

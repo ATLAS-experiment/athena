@@ -5,8 +5,6 @@
 #include "TestDriver.h"
 #include "SimpleTestClass.h"
 
-#include "libname.h"
-
 #include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
 #include "GaudiKernel/StatusCode.h"

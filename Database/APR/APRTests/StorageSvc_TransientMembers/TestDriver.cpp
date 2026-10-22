@@ -6,8 +6,6 @@
 #include "TestClassWithTransients.h"
 #include "TestClassTransient.h"
 
-#include "libname.h"
-
 #include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
 #include "GaudiKernel/StatusCode.h"
@@ -26,6 +24,7 @@
 #include <sstream>
 #include <memory>
 
+using namespace pool;
 
 static const std::string file = "TM.test.pool.root";
 static const std::string container = "container";

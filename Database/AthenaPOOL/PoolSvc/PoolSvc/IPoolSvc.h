@@ -19,9 +19,6 @@
 
 #include <string>
 
-namespace coral {
-   class Context;
-}
 namespace pool {
    class DbType;
 }
@@ -100,7 +97,7 @@ public: // Non-static members
    /// @param contextId [IN] id for PoolSvc persistency service to use for input.
    virtual StatusCode connectCollection(const std::string& connection,
 	   const std::string& collectionName,
-	   unsigned int contextId = IPoolSvc::kInputStream) const = 0;
+	   unsigned int contextId = IPoolSvc::kInputStream) = 0;
 
    /// @return status of check
    /// @param connection [IN] string containing the connection.
@@ -109,7 +106,7 @@ public: // Non-static members
    virtual
    StatusCode checkCollection(const std::string& connection,
            unsigned int contextId,
-           bool noContainer) const = 0;
+           bool noContainer) = 0;
 
    /// @return a shared Token ptr for a container entry.
    /// @param connection [IN] string containing the connection/file name.
@@ -117,7 +114,7 @@ public: // Non-static members
    /// @param ientry [IN] entry number for the token to be returned
    virtual Token* getToken(const std::string& connection,
 	   const std::string& collection,
-	   const unsigned long ientry) const = 0;
+	   const unsigned long ientry) = 0;
 
    /// Connect to a logical database unit; PersistencySvc is chosen according to transaction type (accessmode).
    virtual StatusCode connect(Io::IoFlag type,
@@ -125,27 +122,27 @@ public: // Non-static members
 
    /// Commit data for a given stream and flush buffer.
    /// @param stream [IN] poolStream to be commited.
-   virtual StatusCode commit(unsigned int contextId = IPoolSvc::kInputStream) const = 0;
+   virtual StatusCode commit(unsigned int contextId = IPoolSvc::kInputStream) = 0;
 
    /// Commit data for a given stream and hold buffer.
    /// @param stream [IN] poolStream to be commited.
-   virtual StatusCode commitAndHold(unsigned int contextId = IPoolSvc::kInputStream) const = 0;
+   virtual StatusCode commitAndHold(unsigned int contextId = IPoolSvc::kInputStream) = 0;
 
    /// Disconnect PersistencySvc associated with a stream.
    /// @param stream [IN] poolStream to be disconnected.
-   virtual StatusCode disconnect(unsigned int contextId = IPoolSvc::kInputStream) const = 0;
+   virtual StatusCode disconnect(unsigned int contextId = IPoolSvc::kInputStream) = 0;
 
    /// Disconnect single Database.
    /// @param connection [IN] connection string for Database to be disconnected.
    /// @param contextId [IN] context id of database to be disconnected.
    virtual StatusCode disconnectDb(const std::string& connection,
-	   unsigned int contextId = IPoolSvc::kInputStream) const = 0;
+	   unsigned int contextId = IPoolSvc::kInputStream) = 0;
 
    /// Get POOL attributes - domain
    virtual StatusCode getAttribute(const std::string& optName,
 	   std::string& data,
 	   long tech,
-	   unsigned int contextId = IPoolSvc::kInputStream) const = 0;
+	   unsigned int contextId = IPoolSvc::kInputStream) = 0;
 
    /// Get POOL attributes - db/file, container/collection
    virtual StatusCode getAttribute(const std::string& optName,
@@ -153,13 +150,13 @@ public: // Non-static members
 	   long tech,
 	   const std::string& dbName,
 	   const std::string& contName = "",
-	   unsigned int contextId = IPoolSvc::kInputStream) const = 0;
+	   unsigned int contextId = IPoolSvc::kInputStream) = 0;
 
    /// Set POOL attributes - domain
    virtual StatusCode setAttribute(const std::string& optName,
 	   const std::string& data,
 	   long tech,
-	   unsigned int contextId = IPoolSvc::kOutputStream) const = 0;
+	   unsigned int contextId = IPoolSvc::kOutputStream) = 0;
 
    /// Set POOL attributes - db/file, container/collection
    virtual StatusCode setAttribute(const std::string& optName,
@@ -167,7 +164,7 @@ public: // Non-static members
 	   long tech,
 	   const std::string& dbName,
 	   const std::string& contName = "",
-	   unsigned int contextId = IPoolSvc::kOutputStream) const = 0;
+	   unsigned int contextId = IPoolSvc::kOutputStream) = 0;
 
 };
 
