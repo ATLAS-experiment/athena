@@ -9,6 +9,7 @@
 #define COLUMNAR_TEST_FIXTURES__COLUMNAR_PHYS_LITE_TEST_H
 
 #include <AsgTools/AsgTool.h>
+#include <ColumnarCore/ColumnarDef.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
 #include <ColumnarTestFixtures/Configuration.h>
@@ -34,23 +35,28 @@ namespace columnar
 
   namespace TestUtils
   {
-    class IColumnData;
+    class ColumnReader;
     struct RNTupleBackend;
   }
 
 
   struct ColumnarPhysLiteTest : testing::Test
   {
+    const std::type_info& columnar_mode_type;
     std::unique_ptr<TFile> file;
     TTree *tree = nullptr;
     std::unique_ptr<ROOT::RNTupleReader> rntreader;
     std::unique_ptr<ROOT::Experimental::RNTupleInspector> inspector;
     columnar::TestUtils::RNTupleBackend* rntbackend = nullptr;
-    std::vector<std::shared_ptr<TestUtils::IColumnData>> knownColumns;
-    std::vector<std::shared_ptr<TestUtils::IColumnData>> usedColumns;
+    std::vector<std::shared_ptr<TestUtils::ColumnReader>> knownColumns;
+    std::vector<std::shared_ptr<TestUtils::ColumnReader>> usedColumns;
     std::unordered_map<std::string,const std::vector<ColumnarOffsetType>*> offsetColumns;
 
-    ColumnarPhysLiteTest ();
+    /// @warning Do **not** try to replace this parameter with
+    /// referencing ColumnarMode directly in the source file. This
+    /// construct is meant to make the `ColumnarTestFixturesLib` library
+    /// have no direct dependency on `ColumnarMode`.
+    ColumnarPhysLiteTest (const std::type_info& val_columnar_mode_type = typeid(ColumnarMode));
     ~ColumnarPhysLiteTest ();
 
     /// \brief make a unique tool name to be used in unit tests
@@ -59,7 +65,7 @@ namespace columnar
     /// @brief check whether we have the right mode
     static bool checkMode ();
 
-    void setupKnownColumns (std::span<const TestUtils::TestDefinition> testDefinitions);
+    void setupKnownColumns (std::span<const TestUtils::TestDefinition> testDefinitions, const ColumnVectorHeader& columnHeader);
 
     void setupColumns (const ColumnVectorHeader& columnHeader);
 

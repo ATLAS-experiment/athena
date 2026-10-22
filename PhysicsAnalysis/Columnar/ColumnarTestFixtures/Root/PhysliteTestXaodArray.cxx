@@ -45,17 +45,17 @@ namespace columnar
   {
     namespace
     {
-      struct IColumnReaderXA;
+      struct ColumnReaderXA;
 
       struct ColumnDataXA
       {
         ColumnInfo info;
-        std::shared_ptr<TestUtils::IColumnReaderXA> reader;
+        std::shared_ptr<TestUtils::ColumnReaderXA> reader;
       };
 
-      struct IColumnReaderXA
+      struct ColumnReaderXA
       {
-        virtual ~IColumnReaderXA () = default;
+        virtual ~ColumnReaderXA () = default;
 
         virtual void connect (ColumnDataXA& /*columnData*/, std::unordered_map<std::string,ColumnDataXA>& /*requestedColumns*/) {}
 
@@ -73,7 +73,7 @@ namespace columnar
         [[nodiscard]] virtual BranchPerfData getPerfData (float /*emptyTime*/) = 0;
       };
 
-      struct ColumnDataXAEventInfo final : public IColumnReaderXA, asg::AsgMessaging
+      struct ColumnDataXAEventInfo final : public ColumnReaderXA, asg::AsgMessaging
       {
         std::string m_name {eventRangeColumnName};
         unsigned index = 0;
@@ -116,7 +116,7 @@ namespace columnar
       };
 
       template<typename XAODObjectType>
-      struct ColumnDataXARetrieve final : public IColumnReaderXA, asg::AsgMessaging
+      struct ColumnDataXARetrieve final : public ColumnReaderXA, asg::AsgMessaging
       {
         std::string containerName;
         unsigned index = 0;
@@ -195,7 +195,7 @@ namespace columnar
       };
 
       template<typename T>
-      struct ColumnDataXAAccessor final : public IColumnReaderXA
+      struct ColumnDataXAAccessor final : public ColumnReaderXA
       {
         std::string m_name;
         unsigned index = 0;
@@ -203,7 +203,7 @@ namespace columnar
         std::optional<SG::Decorator<T>> decorator;
         bool isOptional = false;
         bool measureNonAccessForEmpty = false;
-        const IColumnReaderXA *objectReader = nullptr;
+        const ColumnReaderXA *objectReader = nullptr;
         Benchmark benchmarkFirstRetrieve;
         Benchmark benchmarkSecondRetrieve;
 

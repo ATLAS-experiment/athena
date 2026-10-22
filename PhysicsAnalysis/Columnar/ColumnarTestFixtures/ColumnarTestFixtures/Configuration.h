@@ -49,6 +49,21 @@ namespace columnar
       /// whether to use rntuple file as input
       bool isrntuple = false;
 
+      /// @brief the input file to read
+      ///
+      /// If empty, the default `ASG_TEST_FILE_*` environment variable
+      /// for the chosen input format is used.  Environment variables
+      /// in the name (`$VAR`, `${VAR}`) are expanded.
+      std::string inputFile;
+
+      /// @brief get the name of the input file to read
+      ///
+      /// This is @ref inputFile if set (with environment variables
+      /// expanded), otherwise the content of the default
+      /// `ASG_TEST_FILE_*` environment variable for the chosen input
+      /// format.  Throws if neither is available.
+      std::string getInputFileName () const;
+
       /// @brief load configuration overrides from a JSON file
       ///
       /// Only fields present in the JSON are overridden; others keep

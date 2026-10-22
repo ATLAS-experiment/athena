@@ -8,6 +8,7 @@
 #ifndef COLUMNAR_INTERFACES_COLUMNAR_DEF_H
 #define COLUMNAR_INTERFACES_COLUMNAR_DEF_H
 
+#include <string>
 #include <string_view>
 
 namespace columnar

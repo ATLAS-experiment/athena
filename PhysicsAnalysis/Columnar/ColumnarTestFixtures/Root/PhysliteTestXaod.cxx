@@ -18,13 +18,14 @@
 #include <ColumnarTestFixtures/IXAODToolCaller.h>
 #include <ColumnarTestFixtures/PerformanceData.h>
 
-#include <xAODRootAccess/TEvent.h>
+#include <xAODRootAccess/Event.h>
 #include <xAODRootAccess/TStore.h>
 #ifndef XAOD_STANDALONE
 #include <POOLRootAccess/TEvent.h>
 #endif
 
 #include <Rtypes.h>
+#include <TFile.h>
 
 #include <algorithm>
 #include <array>
@@ -61,14 +62,17 @@ namespace columnar
       };
 
 
-      /// @brief event reader using xAODRootAccess (TEvent + TStore)
+      /// @brief event reader using xAODRootAccess (Event + TStore)
+      ///
+      /// The event is either a TEvent or an REvent, depending on whether
+      /// the input file holds a TTree or an RNTuple.
       ///
       /// This is also compiled (though not used) in Athena. That is
       /// just so that the code still gets checked during compilation in
       /// Athena projects.
       struct XAODEventReader final : IEventReader
       {
-        xAOD::TEvent m_event;
+        std::unique_ptr<xAOD::Event> m_event;
         xAOD::TStore m_store;
         Benchmark m_benchmarkGetEntry;
         Benchmark m_benchmarkClear;
@@ -77,26 +81,31 @@ namespace columnar
         StatusCode readFrom(TFile* file) override
         {
           using namespace asg::msgUserCode;
-          ANA_CHECK(m_event.readFrom(file));
+          m_event = xAOD::Event::createAndReadFrom(*file);
+          if (!m_event)
+          {
+            ANA_MSG_ERROR("failed to read events from file: " << file->GetName());
+            return StatusCode::FAILURE;
+          }
           // Print known keys diagnostic
           std::cout << "known container keys:" << std::endl;
           for (auto& [container, key] : knownSgKeys)
           {
             std::cout << std::format("  {} -> 0x{:x}, 0x{:x} -> {}",
-              container, m_event.getHash(container), key, m_event.getName(key)) << std::endl;
+              container, m_event->getHash(container), key, m_event->getName(key)) << std::endl;
           }
           return StatusCode::SUCCESS;
         }
 
         Long64_t getEntries() override
         {
-          return m_event.getEntries();
+          return m_event->getEntries();
         }
 
         StatusCode getEntry(std::uint64_t entry) override
         {
           m_benchmarkGetEntry.startTimer();
-          auto result = m_event.getEntry(entry);
+          auto result = m_event->getEntry(entry);
           m_benchmarkGetEntry.stopTimer();
           return result >= 0 ? StatusCode::SUCCESS : StatusCode::FAILURE;
         }

@@ -6,6 +6,9 @@
 
 #include <ColumnarTestFixtures/Configuration.h>
 
+#include <TString.h>
+#include <TSystem.h>
+
 #include <nlohmann/json.hpp>
 
 #include <cstdlib>
@@ -37,6 +40,25 @@ namespace columnar
         measureNonAccessForEmpty = json["measureNonAccessForEmpty"].get<bool>();
       if (json.contains("isrntuple"))
         isrntuple = json["isrntuple"].get<bool>();
+      if (json.contains ("inputFile"))
+        inputFile = json["inputFile"].get<std::string>();
+    }
+
+    std::string UserConfiguration ::
+    getInputFileName () const
+    {
+      if (!inputFile.empty())
+      {
+        TString fileName = inputFile;
+        if (gSystem->ExpandPathName (fileName))
+          throw std::runtime_error ("failed to expand input file name: " + inputFile);
+        return fileName.Data();
+      }
+      const std::string defaultEnvVar = isrntuple ? "ASG_TEST_FILE_RNTUPLE_LITE_MC" : "ASG_TEST_FILE_LITE_MC";
+      const char *fileName = std::getenv (defaultEnvVar.c_str());
+      if (fileName == nullptr)
+        throw std::runtime_error ("missing " + defaultEnvVar + " (alternatively set \"inputFile\" in the COLUMNAR_TEST_CONFIG file)");
+      return fileName;
     }
 
     UserConfiguration UserConfiguration :: fromEnvironment ()
