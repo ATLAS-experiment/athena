@@ -34,6 +34,16 @@ atlas_add_tpcnv_library( AthenaServicesTest src/test/*.cxx
    PRIVATE_LINK_LIBRARIES AthenaKernel)
 
 # The test(s) of the package:
+atlas_add_component( AthenaServicesMPITest
+   test/MPIHiveLifecycleTestAlg.cxx
+   LINK_LIBRARIES AthenaBaseComps AthenaKernel GaudiKernel )
+
+atlas_add_test( MPIHiveLifecycle
+   SCRIPT test/MPIHiveLifecycle_test.py
+   POST_EXEC_SCRIPT noerror.sh
+   PRIVATE_WORKING_DIRECTORY
+   PROPERTIES TIMEOUT 400 PROCESSORS 4 )
+
 atlas_add_test( AthenaOutputStream_test
    SOURCES test/AthenaOutputStream_test.cxx src/AthenaOutputStream.cxx
    src/OutputStreamSequencerSvc.cxx src/MetaDataSvc.cxx
