@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <AsgServices/AsgServiceConfig.h>
@@ -657,12 +657,17 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
                        << (void const*)this;
 	}
       asg::AsgServiceConfig config_mva_service(mva_service_name.str());
-      ATH_CHECK(config_mva_service.addPrivateTool("ElectronTool",
-                                                  std::move(config_mva_electron)));
-      ATH_CHECK(config_mva_service.addPrivateTool("UnconvertedPhotonTool",
-                                                  std::move(config_mva_unconverted)));
-      ATH_CHECK(config_mva_service.addPrivateTool("ConvertedPhotonTool",
-                                                  std::move(config_mva_converted)));
+      // each tool loads its BDTs at initialize; egammaMVASvc disables missing ones
+      if (m_doElectronMVA) {
+        ATH_CHECK(config_mva_service.addPrivateTool("ElectronTool",
+                                                    std::move(config_mva_electron)));
+      }
+      if (m_doPhotonMVA) {
+        ATH_CHECK(config_mva_service.addPrivateTool("UnconvertedPhotonTool",
+                                                    std::move(config_mva_unconverted)));
+        ATH_CHECK(config_mva_service.addPrivateTool("ConvertedPhotonTool",
+                                                    std::move(config_mva_converted)));
+      }
       // fwd electron MVA tool
       if (m_doFwdCalib) {
 	asg::AsgToolConfig config_mva_fwdelectron(
