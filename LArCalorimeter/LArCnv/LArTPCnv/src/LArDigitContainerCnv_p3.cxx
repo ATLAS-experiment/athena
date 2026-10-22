@@ -93,14 +93,14 @@ LArDigitContainerCnv_p3::transToPers(const LArDigitContainer* trans,
   //Determine whether we are dealing with standard cells or supercells
   const LArOnlineID_Base* idHelper = nullptr;
   const SG::DataProxy* proxy = m_storeGateSvc->proxy(trans);
-  std::string containerName = proxy->name();
-  if (containerName.find("SC")==std::string::npos) {
-    idHelper = m_idHelper;
-    pers->m_this_is_slar = false;
-  }
-  else {
+  if (proxy->name().contains("SC")) {
+    //assume super-cell 
     idHelper = m_idSCHelper;
     pers->m_this_is_slar = true;
+  }
+  else {
+    idHelper = m_idHelper;
+    pers->m_this_is_slar = false;
   }
 
   const unsigned hashMax=idHelper->channelHashMax();
