@@ -6,6 +6,8 @@
 #include "FlavorTagInference/SaltModelGraphConfig.h"
 #include "CxxUtils/checker_macros.h"
 
+#include <onnxruntime_session_options_config_keys.h>
+
 #include <stdexcept>
 #include <tuple>
 #include <set>
@@ -26,6 +28,10 @@ namespace FlavorTagInference {
     session_options.SetLogSeverityLevel(4);
     session_options.SetGraphOptimizationLevel(
       GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
+    // the fused QuickGelu has an AVX-512 kernel, which makes x * sigmoid(x)
+    // (SiLU) depend on the CPU, see https://its.cern.ch/jira/browse/ATLINFR-6129
+    session_options.AddConfigEntry(
+      kOrtSessionOptionsDisableSpecifiedOptimizers, "QuickGeluFusion");
     // this should reduce memory use while slowing things down slightly
     // see
     //
