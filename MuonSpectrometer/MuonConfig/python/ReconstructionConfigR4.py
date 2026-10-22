@@ -181,11 +181,6 @@ def MuonCombinedReconstructionConfigR4(flags):
     #### create the xAOD muons
     result.merge(MuonCreatorAlgCfg(flags, name = "MuonActsCreatorAlg",
                                           TagKeys=MuonTags))
-
-    if flags.Input.isMC:
-        from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonToTruthAssocAlgCfg
-        result.merge(MuonToTruthAssocAlgCfg(flags))
-
     return result
 
 def LRT_MuonCombinedReconstructionConfigR4(flags):
@@ -198,6 +193,7 @@ def LRT_MuonCombinedReconstructionConfigR4(flags):
                                                         LRT_MuonCombinedStacoAlgCfg, \
                                                         LRT_MuonLegacyCaloTagAlgCfg, \
                                                         LRT_MuonSegmentTaggingAlgCfg, \
+                                                        LRT_MuonCombinedFitAlgCfg, \
                                                         MuonCreatorAlgCfg
     from ActsConfig.CaloExtensionBuilderConfig import ActsCaloExtensionBuilderCfg
 
@@ -209,6 +205,10 @@ def LRT_MuonCombinedReconstructionConfigR4(flags):
     
     result.merge(LRT_MuonCombinedStacoAlgCfg(flags))
     MuonTags+=["MuonTagsSTACOLRT"]
+    
+    result.merge(LRT_MuonCombinedFitAlgCfg(flags))
+    MuonTags+=["MuonTagsMuidCoLRT"]
+
 
     if flags.MuonCombined.doCaloTrkMuId:
         result.merge(LRT_MuonLegacyCaloTagAlgCfg(flags))
@@ -219,14 +219,52 @@ def LRT_MuonCombinedReconstructionConfigR4(flags):
     return result
 
 
+def MuonTruthChainCfg(flags):
+    result  = ComponentAccumulator()
+    if not flags.Input.isMC:
+        return result
+
+    from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
+    result.merge(MuonTruthAlgsCfg(flags))
+
+    from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonActsTruthMatchingCfg, MuonToTruthAssocAlgCfg
+    tracks = ["MuonMsTrackParticles"]
+    result.merge(MuonActsTruthMatchingCfg(flags, TrackContainer="MuonMsTracks", 
+                                          ParticleContainer="MuonMsTrackParticles"))
+    if flags.Muon.buildMETrack:
+        tracks+=["MuonMsAtIpTrackParticles"]
+        result.merge(MuonActsTruthMatchingCfg(flags, TrackContainer="MuonMsAtIpTracks", 
+                                                ParticleContainer="MuonMsAtIpTrackParticles"))
+    ### MuidCo track candidates
+    if flags.Reco.EnableTracking:
+        tracks+=["MuonCmbTrackParticles", "InDetTrackParticles"]
+        result.merge(MuonActsTruthMatchingCfg(flags, TrackContainer="MuonCmbTracks",
+                                                ParticleContainer="MuonCmbTrackParticles", 
+                                                isCombined =True))
+        if flags.Muon.buildMETrack:
+            tracks+=["MuonMeTrackParticles"]
+            result.merge(MuonActsTruthMatchingCfg(flags, TrackContainer="MuonMeTracks",
+                                                ParticleContainer="MuonMeTrackParticles"))
+        if flags.Acts.doLargeRadius:
+            tracks+=["MuonCmbTrackParticlesLRT"]
+            result.merge(MuonActsTruthMatchingCfg(flags, TrackContainer="MuonCmbTracksLRT",
+                                                ParticleContainer="MuonCmbTrackParticlesLRT", 
+                                                isCombined =True))
+            if flags.Muon.buildMETrack:
+                tracks+=["MuonMeTrackParticlesLRT"]
+                result.merge(MuonActsTruthMatchingCfg(flags, TrackContainer="MuonMeTracksLRT",
+                                                ParticleContainer="MuonMeTrackParticlesLRT"))
+        
+    result.merge(MuonToTruthAssocAlgCfg(flags, TrackKeys = tracks))
+    if flags.Acts.doLargeRadius:
+        result.merge(MuonToTruthAssocAlgCfg(flags, name = "MUonToTruthAssocAlgLRT",
+                                            TrackKeys= tracks, MuonKey="MuonsLRT"))
+    return result
+
 ### Standard reconstruction chain of phase II
 def MuonReconstructionConfig(flags):
     result = ComponentAccumulator()
 
-    ## Shedule the truth algs
-    if flags.Input.isMC:
-        from MuonTruthAlgsR4.MuonTruthAlgsConfig import MuonTruthAlgsCfg
-        result.merge(MuonTruthAlgsCfg(flags))
 
     ## Prep data creation
     from MuonConfig.MuonDataPrepConfig import xAODUncalibMeasPrepCfg
@@ -252,9 +290,12 @@ def MuonReconstructionConfig(flags):
         result.merge(MsTrkRecoChainConfig(flags))
 
     result.merge(MuonCombinedReconstructionConfigR4(flags))
-    result.merge(LRT_MuonCombinedReconstructionConfigR4(flags)) 
+    if flags.Acts.doLargeRadius:
+        result.merge(LRT_MuonCombinedReconstructionConfigR4(flags)) 
 
     if flags.Output.doWriteAOD or flags.Output.doWriteESD:
         result.merge(StandaloneMuonOutputCfg(flags))
+
+    result.merge(MuonTruthChainCfg(flags))
     
     return result

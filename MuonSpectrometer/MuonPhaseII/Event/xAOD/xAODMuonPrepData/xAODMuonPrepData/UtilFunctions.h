@@ -7,7 +7,8 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 ///
 #include "MuonStationIndex/MuonStationIndex.h"
-#include "xAODMeasurementBase/UncalibratedMeasurement.h"
+#include "xAODMeasurementBase/MeasurementDefs.h"
+#include "xAODMeasurementBase/UncalibratedMeasurementFwd.h"
 #include "xAODMuonPrepData/MuonMeasurementFwd.h"
 #include "xAODMuonPrepData/CombinedMuonStripFwd.h"
 
@@ -28,6 +29,10 @@ namespace xAOD{
     const Acts::Surface& muonSurface(const UncalibratedMeasurement* meas);
     /** @brief Returns the associated identifier from the muon measurement */
     const Identifier& identify(const UncalibratedMeasurement* meas);
+    /** @brief Returns whether the measurement is from a muon detector */
+    bool isMuon(const xAOD::UncalibratedMeasurement* meas);
+    /** @brief Returns whether the measurement is a muon measurement */
+    bool isMuon(const UncalibMeasType type);
     /** @brief Returns whether the measurement is a NSW measurement */
     bool isNSW(const UncalibMeasType aodType);
     /** @brief Returns whether the measurement is a precision hit */
