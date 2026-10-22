@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Asg wrapper around the MissingMassCalculator
@@ -10,10 +10,6 @@
 
 #include "PATInterfaces/CorrectionCode.h"
 #include "AsgTools/IAsgTool.h"
-
-// ROOT includes
-#include "Math/Vector4D.h"
-#include "Math/Vector2D.h"
 
 // EDM Include
 #include "xAODEventInfo/EventInfo.h"
@@ -40,6 +36,12 @@ class IMissingMassTool : public virtual asg::IAsgTool
 				    const xAOD::IParticle* part2,
 				    const xAOD::MissingET* met,
 				    const int & njets)=0;
+
+  virtual CP::CorrectionCode doCollinearApprox(const xAOD::IParticle* part1,
+                                               const xAOD::IParticle* part2,
+                                               const xAOD::MissingET* met,
+                                               const bool kMMCsynchronize,
+                                               double &mass, double &xp1, double &xp2)=0;
 
   virtual double GetFitStatus(const int method)=0;
   virtual double GetFittedMass(const int method)=0;

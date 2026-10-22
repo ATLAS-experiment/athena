@@ -22,8 +22,8 @@
 #include <xAODMissingET/MissingETContainer.h>
 #include <xAODEventInfo/EventInfo.h>
 
-#include <DiTauMassTools/MissingMassTool.h>
-#include "Math/Vector4D.h"
+#include <DiTauMassTools/IMissingMassTool.h>
+#include <DiTauMassTools/HelperFunctions.h>
 
 namespace CP {
   using ROOT::Math::PtEtaPhiMVector;
@@ -44,7 +44,7 @@ namespace CP {
     Gaudi::Property<std::string> m_metTerm {this, "metTerm", "Final", "the name of the MET term to use"};
 
     // the MMC tool
-    ToolHandle<DiTauMassTools::MissingMassTool> m_mmc {this, "mmcTool", "DiTauMassTools::MissingMassTool", "the Missing Mass Calculator tool"};
+    ToolHandle<IMissingMassTool> m_mmc {this, "mmcTool", "DiTauMassTools::MissingMassTool", "the Missing Mass Calculator tool"};
 
     // systematics
     SysListHandle m_systematicsList{this};
