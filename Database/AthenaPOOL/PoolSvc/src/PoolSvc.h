@@ -30,7 +30,7 @@ namespace pool {
    class IDatabase;
    class ISession;
 }
-
+class SessionTool;
 
 /** @class PoolSvc
  *  @brief This class provides the interface to the LCG POOL persistency software.
@@ -115,7 +115,7 @@ public: // Non-static members
    virtual
    StatusCode connectCollection(const std::string& connection,
            const std::string& collectionName,
-           unsigned int contextId = IPoolSvc::kInputStream) const override;
+           unsigned int contextId = IPoolSvc::kInputStream) override;
 
    /// @return status of check
    /// @param connection [IN] string containing the connection.
@@ -124,7 +124,7 @@ public: // Non-static members
    virtual
    StatusCode checkCollection(const std::string& connection,
            unsigned int contextId,
-           bool noContainer) const override;
+           bool noContainer) override;
 
    /// @return a token for a container entry.
    /// @param connection [IN] string containing the connection/file name.
@@ -133,7 +133,7 @@ public: // Non-static members
    virtual
    Token* getToken(const std::string& connection,
 	   const std::string& collection,
-	   const unsigned long ientry) const override;
+	   const unsigned long ientry) override;
 
    /// Connect to a logical database unit; PersistencySvc is chosen according to transaction type (accessmode).
    virtual
@@ -143,31 +143,31 @@ public: // Non-static members
    /// Commit data for a given contextId and flush buffer.
    /// @param contextId [IN] poolStream to be commited.
    virtual
-   StatusCode commit(unsigned int contextId = IPoolSvc::kInputStream) const override;
+   StatusCode commit(unsigned int contextId = IPoolSvc::kInputStream) override;
 
    /// Commit data for a given contextId and hold buffer.
    /// @param contextId [IN] poolStream to be commited.
    virtual
-   StatusCode commitAndHold(unsigned int contextId = IPoolSvc::kInputStream) const override;
+   StatusCode commitAndHold(unsigned int contextId = IPoolSvc::kInputStream) override;
 
    /// Disconnect PersistencySvc associated with a contextId.
    /// @param contextId [IN] poolStream to be disconnected.
    virtual
-   StatusCode disconnect(unsigned int contextId = IPoolSvc::kInputStream) const override;
+   StatusCode disconnect(unsigned int contextId = IPoolSvc::kInputStream) override;
 
    /// Disconnect single Database.
    /// @param connection [IN] connection string for Database to be disconnected.
    /// @param contextId [IN] context id of database to be disconnected.
    virtual
    StatusCode disconnectDb(const std::string& connection,
-	   unsigned int contextId = IPoolSvc::kInputStream) const override;
+	   unsigned int contextId = IPoolSvc::kInputStream) override;
 
    /// Get POOL attributes - domain
    virtual
    StatusCode getAttribute(const std::string& optName,
 	   std::string& data,
 	   long tech,
-	   unsigned int contextId = IPoolSvc::kInputStream) const override;
+	   unsigned int contextId = IPoolSvc::kInputStream) override;
 
    /// Get POOL attributes - db/file, container/collection
    virtual
@@ -176,14 +176,14 @@ public: // Non-static members
 	   long tech,
 	   const std::string& dbName,
 	   const std::string& contName = "",
-	   unsigned int contextId = IPoolSvc::kInputStream) const override;
+	   unsigned int contextId = IPoolSvc::kInputStream) override;
 
    /// Set POOL attributes - domain
    virtual
    StatusCode setAttribute(const std::string& optName,
 	   const std::string& data,
 	   long tech,
-	   unsigned int contextId = IPoolSvc::kOutputStream) const override;
+	   unsigned int contextId = IPoolSvc::kOutputStream) override;
 
    /// Set POOL attributes - db/file, container/collection
    virtual
@@ -192,8 +192,11 @@ public: // Non-static members
 	   long tech,
 	   const std::string& dbName,
 	   const std::string& contName = "",
-	   unsigned int contextId = IPoolSvc::kOutputStream) const override;
+	   unsigned int contextId = IPoolSvc::kOutputStream) override;
 
+   /// Create a new session for a given session name and age limit.
+   StatusCode createSession( const std::string& sessionName, int ageLimit = -1 );
+   
    /// Standard Service Constructor
    using base_class::base_class;
 
@@ -218,9 +221,10 @@ private: // data
    mutable CallMutex                                 m_pool_mut;
  
    bool                                              m_shareCat{false};
-   SmartIF<Gaudi::IFileCatalogMgr>                    m_catalogMgr;
-   SmartIF<Gaudi::IFileCatalog>                       m_catalog;
-   std::vector<pool::ISession*>      m_dbSessionVec;
+   SmartIF<Gaudi::IFileCatalogMgr>                   m_catalogMgr;
+   SmartIF<Gaudi::IFileCatalog>                      m_catalog;
+   std::vector<ToolHandle<SessionTool>>              m_dbSessionVec;
+
    std::vector<CallMutex*>                           m_pers_mut;
    std::map<std::string, unsigned int>               m_inputContextLabel;
    std::map<std::string, unsigned int>               m_outputContextLabel;
@@ -259,9 +263,9 @@ private: // internal helper functions
    StatusCode setupPersistencySvc();
 
    /// Get Database handle
-   std::unique_ptr<pool::IDatabase> getDbHandle(unsigned int contextId, const std::string& dbName) const;
+   std::unique_ptr<pool::IDatabase> getDbHandle(unsigned int contextId, const std::string& dbName);
    /// Get Container handle
-   std::unique_ptr<pool::IContainer> getContainerHandle(pool::IDatabase* dbH, const std::string& contName) const;
+   std::unique_ptr<pool::IContainer> getContainerHandle(pool::IDatabase* dbH, const std::string& contName);
 
    /// Resolve a file using ATLAS_POOLCOND_PATH
    std::string poolCondPath(const std::string& leaf);

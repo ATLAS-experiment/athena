@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "UserSession.h"
+#include "SessionTool.h"
 #include "DatabaseRegistry.h"
 #include "UserDatabase.h"
 #include "DatabaseHandler.h"
@@ -12,37 +12,50 @@
 #include "PersistentDataModel/Placement.h"
 
 
-std::unique_ptr< pool::ISession >
-pool::createSession( Gaudi::IFileCatalog& catalog , int ageLimit )
+SessionTool::SessionTool(const std::string& type,
+                         const std::string& name,
+                         const IInterface* parent)
+  : AthAlgTool(type, name, parent),
+    m_catalog(nullptr),
+    m_ageLimit(-1),
+    m_registry( std::make_unique<pool::DatabaseRegistry>() ),
+    m_transactionType(Io::INVALID)
 {
-   return std::unique_ptr<ISession>(  new pool::UserSession(catalog, ageLimit) );
 }
 
-
-pool::UserSession::UserSession( Gaudi::IFileCatalog& fileCatalog, int ageLimit ):
-  APRMessaging( "APR Session" ),
-  m_catalog( &fileCatalog ),
-  m_ageLimit( ageLimit ),
-  m_registry( 0 ),
-  m_transactionType( Io::INVALID )
+void
+SessionTool::setupFC( Gaudi::IFileCatalog& fileCatalog, int ageLimit )
 {
-  m_registry = new pool::DatabaseRegistry();
+  m_catalog = &fileCatalog;
+  m_ageLimit = ageLimit;
 }
 
-pool::UserSession::~UserSession()
+SessionTool::~SessionTool()
+{
+  closeSession();
+}
+
+void SessionTool::closeSession() 
 {
   // order is important
+  disconnectAll();
+  m_transactionType = Io::INVALID;
   m_technologies.clear();
-  delete m_registry;
+}
+
+StatusCode SessionTool::finalize()
+{
+  closeSession();
+  return AthAlgTool::finalize();
 }
 
 
 void*
-pool::UserSession::readObject( const Token& token, void* object )
+SessionTool::readObject( const Token& token, void* object )
 {
   void* result {};
   if( m_transactionType != Io::INVALID ) {
-    UserDatabase db( *this, token.dbID().toString(), pool::DatabaseSpecification::FID );
+    pool::UserDatabase db( *this, token.dbID().toString(), pool::DatabaseSpecification::FID );
     if ( db.openMode() == Io::INVALID ) {
       db.setTechnology( token.technology() );
       db.connectForRead();
@@ -53,14 +66,14 @@ pool::UserSession::readObject( const Token& token, void* object )
 }
 
 Token*
-pool::UserSession::registerForWrite( const Placement& place,
+SessionTool::registerForWrite( const Placement& place,
                                                      const void* object,
                                                      const RootType& type )
 {
   if( m_transactionType != Io::WRITE && m_transactionType != Io::APPEND ) {
     return 0;
   }
-  UserDatabase db( *this, place.fileName(), pool::DatabaseSpecification::PFN );
+  pool::UserDatabase db( *this, place.fileName(), pool::DatabaseSpecification::PFN );
   if ( db.openMode() == Io::INVALID ) {
     db.setTechnology( place.technology() );
     db.connectForWrite();
@@ -69,15 +82,8 @@ pool::UserSession::registerForWrite( const Placement& place,
 }
 
 
-pool::DatabaseRegistry&
-pool::UserSession::registry()
-{
-  return *m_registry;
-}
-
-
 bool
-pool::UserSession::disconnectAll()
+SessionTool::disconnectAll()
 {
   bool ret = true;
   for( auto& iManager : m_technologies ) {
@@ -86,9 +92,9 @@ pool::UserSession::disconnectAll()
   return ret;
 }
       
-
+// MN: rename?
 bool
-pool::UserSession::start( Io::IoFlag type )
+SessionTool::start( Io::IoFlag type )
 {
   if( m_transactionType != Io::INVALID ) return false;
   m_transactionType = type;
@@ -97,7 +103,7 @@ pool::UserSession::start( Io::IoFlag type )
 
 
 bool
-pool::UserSession::commit()
+SessionTool::commit()
 {
   if( m_transactionType != Io::INVALID ) {
     bool OK = true;
@@ -117,7 +123,7 @@ pool::UserSession::commit()
 
 
 bool
-pool::UserSession::commitAndHold()
+SessionTool::commitAndHold()
 {
   if( m_transactionType != Io::INVALID ) {
     bool OK = true;
@@ -137,31 +143,31 @@ pool::UserSession::commitAndHold()
 
 
 std::unique_ptr<pool::IDatabase>
-pool::UserSession::databaseHandle( const std::string& dbName,
-                                                   DatabaseSpecification::NameType dbNameType )
+SessionTool::databaseHandle( const std::string& dbName,
+                             pool::DatabaseSpecification::NameType dbNameType )
 {
   if( m_transactionType != Io::INVALID ) {
-     return std::make_unique<UserDatabase>( *this, dbName, dbNameType );
+     return std::make_unique<pool::UserDatabase>( *this, dbName, dbNameType );
   }
   return nullptr;
 }
 
 Gaudi::IFileCatalog&
-pool::UserSession::fileCatalog()
+SessionTool::fileCatalog()
 {
   return *m_catalog;
 }
 
 
 pool::IStorageSvc&
-pool::UserSession::getStorageSvc( long technology ) 
+SessionTool::getStorageSvc( long technology ) 
 { 
   return microSessionManager( technology ).getStorageSvc(); 
 }
 
 
 pool::MicroSessionManager&
-pool::UserSession::microSessionManager( long technology )
+SessionTool::microSessionManager( long technology )
 {
   pool::DbType dbType( technology );
   long majorType = dbType.majorType();

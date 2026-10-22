@@ -2,32 +2,25 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef POOLSVC_ISESSION_H
-#define POOLSVC_ISESSION_H
+#ifndef POOLSVC_ISESSIONTOOL_H
+#define POOLSVC_ISESSIONTOOL_H
 
+#include "AthenaBaseComps/AthAlgTool.h"
 #include "PoolSvc/IDatabase.h"
-
 #include "DataModelRoot/RootType.h"
 
 #include <string>
 #include <memory>
 
-class Placement;
-class Token;
-
 namespace Gaudi {
   class IFileCatalog;
 }
-
+class Placement;
+class Token;
 namespace pool {
-
-  // forward declarations
   class MicroSessionManager;
   class IStorageSvc;
-
-  /// Factory method to create a session object
-  class ISession;
-  std::unique_ptr<ISession> createSession( Gaudi::IFileCatalog& catalog, int ageLimit = -1 );
+}
 
   /** @class ISession ISession.h PoolSvc/ISession.h
   *
@@ -36,8 +29,13 @@ namespace pool {
   *  It also provides access to the file catalog and to the technology specific attributes.
   */
 
-  class ISession {
-  public:
+class ISessionTool : virtual public AthAlgTool 
+{
+    public:
+
+    /// Use this FileCatalog and DB ageing value for this session    
+    virtual void setupFC( Gaudi::IFileCatalog& fileCatalog, int ageLimit = -1 ) = 0;
+      
     /// Explicitly disconnects all the databases.
     /// If a transaction is active, then all the changes since the last commit are aborted.
     virtual bool disconnectAll() = 0;
@@ -52,11 +50,11 @@ namespace pool {
     virtual bool commitAndHold() = 0;
 
     /// Returns the transaction type
-    virtual Io::IoFlag type() const = 0;
+    virtual Io::IoFlag openMode() const = 0;
 
     /// Returns a pointer to a database object. The user acquires ownership of that object.
-    virtual std::unique_ptr<IDatabase> databaseHandle( const std::string& dbName,
-                                                       DatabaseSpecification::NameType dbNameType ) = 0;
+    virtual std::unique_ptr<pool::IDatabase> 
+    databaseHandle( const std::string& dbName, pool::DatabaseSpecification::NameType dbNameType ) = 0;
 
     /** Retrieves an object from persistent store and return with type information
     *  The handle to the reflection class is necessary to later delete the object.
@@ -83,13 +81,14 @@ namespace pool {
     virtual Token* registerForWrite( const Placement& place, const void* object, const RootType& type ) = 0;
 
     /// Returns the technology given a technology type.
-    virtual MicroSessionManager& microSessionManager( long technology ) = 0;
+    virtual pool::MicroSessionManager& microSessionManager( long technology ) = 0;
 
     /// Return StorageSvc for a given technology used in this session
-    virtual IStorageSvc& getStorageSvc( long technology ) = 0;
+    virtual pool::IStorageSvc& getStorageSvc( long technology ) = 0;
 
-    /// virtual destructor for the interface
-    virtual ~ISession() = default;
-  };
-}
+    virtual void closeSession() = 0;
+
+    virtual ~ISessionTool() = default;
+};
+
 #endif

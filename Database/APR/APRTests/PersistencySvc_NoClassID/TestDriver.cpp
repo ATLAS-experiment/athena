@@ -3,7 +3,6 @@
 */
 
 #include "TestDriver.h"
-#include "libname.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -15,7 +14,7 @@
 #include "PersistentDataModel/Token.h"
 
 #include "PoolSvc/FileCatalogUtils.h"
-#include "PoolSvc/ISession.h"
+#include "PoolSvc/ISessionTool.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
 
@@ -24,7 +23,7 @@
 #include "MyTestClass.h"
 
 
-pool::TestDriver::TestDriver(const std::string& filename, const std::string& catname):
+TestDriver::TestDriver(const std::string& filename, const std::string& catname):
    m_fileCatalogMgr( Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" ) ),
    m_fileCatalog( m_fileCatalogMgr ),
    m_fileName( filename ),
@@ -38,20 +37,18 @@ pool::TestDriver::TestDriver(const std::string& filename, const std::string& cat
   FileCatalogUtils::addCatalog( *m_fileCatalogMgr, catname, true );
 }
 
-pool::TestDriver::~TestDriver()
+TestDriver::~TestDriver()
 {
   std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
 }
 
 
 void
-pool::TestDriver::write()
+TestDriver::write()
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
-
-  std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::createSession(catalog);
+  auto dbsession = createSession( catalog, "TestSession" );
 
   // Start an update transaction
   if( !dbsession->start( Io::WRITE ) ) {
@@ -86,7 +83,7 @@ pool::TestDriver::write()
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
-
+  dbsession->closeSession();
   // Removing the "cache"
   for ( std::vector< MyTestClass* >::iterator iObject = v_myTestClass.begin();
 	iObject != v_myTestClass.end(); ++iObject ) {
@@ -98,13 +95,11 @@ pool::TestDriver::write()
 
 
 void
-pool::TestDriver::read()
+TestDriver::read()
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
-
-  std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::createSession(catalog);
+  auto dbsession = createSession( catalog, "ReadTestSession" );
 
   // Starting a read transaction
   if( !dbsession->start( Io::READ ) ) {
@@ -130,7 +125,7 @@ pool::TestDriver::read()
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
-
+  dbsession->closeSession();
   for ( std::vector< Token* >::iterator iToken = m_tokens.begin();
 	iToken != m_tokens.end(); ++iToken ) {
     (*iToken)->release();

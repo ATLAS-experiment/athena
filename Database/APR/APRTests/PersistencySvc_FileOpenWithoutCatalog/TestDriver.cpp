@@ -3,7 +3,6 @@
 */
 
 #include "TestDriver.h"
-#include "libname.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -16,7 +15,7 @@
 
 #include "PoolSvc/IContainer.h"
 #include "PoolSvc/FileCatalogUtils.h"
-#include "PoolSvc/ISession.h"
+#include "PoolSvc/ISessionTool.h"
 #include "PoolSvc/ITokenIterator.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -51,9 +50,7 @@ pool::TestDriver::write()
   std::string fid {"E9143E5C-FDDA-8646-9204-2E4BAE14DC00"};
   FileCatalogUtils::registerPFN(catalog, m_fileName, ROOT_StorageType.storageName(), fid);
 
-  std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::createSession(catalog);
-
+  auto dbsession = createSession( catalog, "TestSession" );
   // Start an update transaction
   if( !dbsession->start( Io::WRITE ) ) {
     throw std::runtime_error( "Could not start an update transaction" );
@@ -91,13 +88,13 @@ pool::TestDriver::write()
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
+  dbsession->closeSession();
 
   // Removing the "cache"
   for ( std::vector< SimpleTestClass* >::iterator iObject = v_simpleTestClass.begin();
 	iObject != v_simpleTestClass.end(); ++iObject ) {
     delete *iObject;
   }
-
   // Need the catalog entry when testing double file opening
   catalog.commit();
 }
@@ -108,10 +105,7 @@ pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification:
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
-
-  std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::createSession(catalog);
-
+  auto dbsession = createSession( catalog, "TestSession" );
   // Starting a read transaction
   if( !dbsession->start( Io::READ ) ) {
     throw std::runtime_error( "Could not start a read transaction." );
@@ -162,6 +156,6 @@ pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification:
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
-
+  dbsession->closeSession();
   catalog.commit();
 }

@@ -3,7 +3,6 @@
 */
 
 #include "TestDriver.h"
-#include "libname.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -16,7 +15,7 @@
 
 #include "PoolSvc/IContainer.h"
 #include "PoolSvc/FileCatalogUtils.h"
-#include "PoolSvc/ISession.h"
+#include "PoolSvc/ISessionTool.h"
 #include "PoolSvc/ITokenIterator.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
@@ -50,10 +49,8 @@ void
 pool::TestDriver::write()
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
-
-  std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::createSession(catalog);
   catalog.init();
+  auto dbsession = createSession( catalog, "TestSession" );
 
   // Start an update transaction
   if( !dbsession->start( Io::WRITE ) ) {
@@ -90,7 +87,7 @@ pool::TestDriver::write()
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
-
+  dbsession->closeSession();
   catalog.commit();
 
   // Removing the "cache"
@@ -114,10 +111,8 @@ void
 pool::TestDriver::read()
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
-
-  std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::createSession(catalog);
   catalog.init();
+  auto dbsession = createSession( catalog, "TestSession" );
 
   // Starting a read transaction
   if( !dbsession->start( Io::READ ) ) {
@@ -171,6 +166,7 @@ pool::TestDriver::read()
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
+  dbsession->closeSession();
 
   catalog.commit();
 }

@@ -8,7 +8,7 @@ Committing the transaction.
 ...done
 Reading objects back from the database.
 Creating the persistency service
-PersistencySvc:... WARNING Opening file './DB.FODP.pool.root' which is already registered in the Catalog as 'DB.FODP.pool.root' (GUID E9143E5C-FDDA-8646-9204-2E4BAE14DC00) - this is not supported and may even lead to a crash!
+PoolSvc.Database   WARNING Opening file './DB.FODP.pool.root' which is already registered in the Catalog as 'DB.FODP.pool.root' (GUID E9143E5C-FDDA-8646-9204-2E4BAE14DC00) - this is not supported and may even lead to a crash!
 Container : SimpleTestClass_Container
 100 objects found in the container.
 Committing the transaction.

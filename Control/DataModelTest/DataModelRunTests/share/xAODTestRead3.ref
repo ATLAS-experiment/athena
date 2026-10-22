@@ -1,51 +1,14 @@
-Tue Aug 25 12:10:45 EDT 2026
-Preloading libexcabort.so
-ApplicationMgr     SUCCESS 
-====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
-                                          running on karma on Tue Aug 25 12:10:47 2026
-====================================================================================================================================
 ApplicationMgr        INFO Application Manager Configured successfully
-Py:ComponentAccumulator    INFO Athena job with pid 3662120
-CoreDumpSvc          INFO Handling signals: 11(Segmentation fault) 7(Bus error) 4(Illegal instruction) 6(Aborted) 8(Floating point exception) 14(Alarm clock) 
 AthenaEventLoopMgr   INFO Initializing AthenaEventLoopMgr
 PyComponentMgr       INFO Initializing PyComponentMgr...
 LoadReadDicts        INFO Initializing LoadReadDicts...
-ClassIDSvc           INFO getRegistryEntries: read 14740 CLIDRegistry entries for module ALL
-PoolSvc              INFO Set connectionsvc retry/timeout/IDLE timeout to  'ConnectionRetrialPeriod':300/ 'ConnectionRetrialTimeOut':3600/ 'ConnectionTimeOut':5 seconds with connection cleanup disabled
-PoolSvc              INFO Frontier compression level set to 5
-DBReplicaSvc         INFO Read replica configuration from /home/sss/atlas/rootaccess/build-clang/share/dbreplica.config
-DBReplicaSvc         INFO No specific match for domain found - use default fallback
-DBReplicaSvc         INFO Total of 1 servers found for host karma [atlas_dd ]
-PoolSvc              INFO Successfully setup replica sorting algorithm
-PoolSvc              INFO Setting up FileCatalog and Streams
-PoolSvc              INFO POOL WriteCatalog is file:xAODTestRead3_catalog.xml
-Domain[ROOT_All]     INFO >   Access   DbDomain     NOT_OPEN  [ROOT_All]
-PoolSvc              INFO File is not in Catalog! Attempt to open it anyway.
-xaoddata3.root       INFO ->  Access   DbDatabase   READ      [ROOT_All] 9537AB7C-6D7D-ED65-5325-0FF0FF0FF0FF
-RootDatabase         INFO xaoddata3.root File version:64002
-xaoddata3.root       INFO Database being retired...
-xaoddata3.root       INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 9537AB7C-6D7D-ED65-5325-0FF0FF0FF0FF
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     NOT_OPEN  [ROOT_All]
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All]
-xaoddata3.root       INFO ->  Access   DbDatabase   READ      [ROOT_All] 674886E6-A09F-11F1-86CE-CE324ACF4E4B
-RootDatabase         INFO xaoddata3.root File version:64002
 AthenaEventLoopMgr   INFO Setup EventSelector service EventSelector
 ApplicationMgr       INFO Application Manager Initialized successfully
-xaoddata3.root       INFO Database being retired...
-xaoddata3.root       INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 674886E6-A09F-11F1-86CE-CE324ACF4E4B
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All]
-Domain[ROOT_All]     INFO >   Access   DbDomain     READ      [ROOT_All]
-xaoddata3.root       INFO ->  Access   DbDatabase   READ      [ROOT_All] 674886E6-A09F-11F1-86CE-CE324ACF4E4B
-RootDatabase         INFO xaoddata3.root File version:64002
 ApplicationMgr       INFO Application Manager Started successfully
-EventP...stencySvc   INFO Added successfully Conversion service AthenaPoolCnvSvc
-TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo&TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'mcEventNumber' (id=1 typename=unsigned long) has different type than the branch: ULong64_t  Marking for schema evolution.
 AthenaEventLoopMgr   INFO   ===>>>  start of run 0    <<<===
 AthenaEventLoopMgr   INFO   ===>>>  start processing event #1, run #0 0 events processed so far  <<<===
 xAODTestReadCVec     INFO cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTestReadCVec     INFO Type of aux store: DMTest::CAuxContainer_v1
-TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo&TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dVar1' (id=317 typename=float) has different type than the branch: vector<int>  Marking for schema evolution.
 xAODTestReadCVec     INFO  anInt1 201 aFloat: 400 anInt2: 601 dInt1: 801 dVar1: 901 cEL: cvec[9]
 
 xAODTestReadCVec     INFO  anInt1 202 aFloat: 400.1 anInt2: 602 dInt1: 802 dVar1: 902 cEL: cvec[8]
@@ -84,7 +47,6 @@ xAODTestReadHVec     INFO hvec: 801.5 802.5 803.5 804.5 805.5 806.5 807.5 808.5 
 xAODTestReadHVec     INFO hview: 820.5 819.5 818.5 817.5 816.5 815.5 814.5 813.5 812.5 811.5 810.5 809.5 808.5 807.5 806.5 805.5 804.5 803.5 802.5 801.5
 xAODTe...CVec_copy   INFO copy_cvec aux items: aFloat, anInt, anInt2, cEL, dInt1, dVar1
 xAODTe...CVec_copy   INFO Type of aux store: DMTest::CAuxContainer_v1
-TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo&TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dVar1' (id=317 typename=float) has different type than the branch: vector<int>  Marking for schema evolution.
 xAODTe...CVec_copy   INFO  anInt1 201 aFloat: 400 anInt2: 601 dInt1: 801 dVar1: 901 cEL: cvec[9]
 
 xAODTe...CVec_copy   INFO  anInt1 202 aFloat: 400.1 anInt2: 602 dInt1: 802 dVar1: 902 cEL: cvec[8]
@@ -119,8 +81,6 @@ xAODTestRead_copy    INFO  anInt1 1007 aFloat: 1200.6 anInt2: 1407 dInt1: 967
 xAODTestRead_copy    INFO  anInt1 1008 aFloat: 1200.7 anInt2: 1408 dInt1: 968
 xAODTestRead_copy    INFO copy_cvecWD 1002: 401 402 403 404 405 406 407 408 409 410
 xAODTe...View_copy   INFO copy_cview: 210 209 208 207 206 205 204 203 202 201
-TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo&TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dpInt1' (id=355 typename=unsigned int) has different type than the branch: SG::PackedContainer<unsigned int,allocator<unsigned int> >  Marking for schema evolution.
-TBranc...DynReader   INFO FILE:LINE (TBranchAuxDynReader::BranchInfo&TBranchAuxDynReader::getBranchInfo(const unsigned long&, const SG::AuxStoreInternal&)): attribute 'dpvFloat' (id=356 typename=std::vector<float>) has different type than the branch: SG::PackedContainer<vector<float>,allocator<vector<float> > >  Marking for schema evolution.
 xAODTestReadPVec     INFO  pInt: 1001 pFloat: 0.02 dpInt1: 101
   pvInt: []
   pvFloat: []
@@ -4066,18 +4026,8 @@ xAODTestReadPLinks   INFO   plinkInfo_DLinks: () (ctrig)
 xAODTestReadPLinks   INFO   link: (ctrig:6)  links: (:inv) (cvec:4)
 xAODTestReadPLinks   INFO   decorLink: (:inv) decorVLinks: (cvec:7)
 AthenaEventLoopMgr   INFO   ===>>>  done processing event #20, run #0 20 events processed so far  <<<===
-xaoddata3.root       INFO Database being retired...
-xaoddata3.root       INFO ->  Deaccess DbDatabase   READ      [ROOT_All] 674886E6-A09F-11F1-86CE-CE324ACF4E4B
 ApplicationMgr       INFO Application Manager Stopped successfully
-LoadReadDicts        INFO Finalizing LoadReadDicts...
-Domain[ROOT_All]     INFO >   Deaccess DbDomain     READ      [ROOT_All]
-AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
-AthenaPoolCnvSvc     INFO PerfStats Timing Measurements for AthenaPoolCnvSvc
-AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
-AthenaPoolCnvSvc     INFO PerfStats | cObjR_ALL       |              33 ms |
-AthenaPoolCnvSvc     INFO PerfStats | cObj_ALL        |              75 ms |
-AthenaPoolCnvSvc     INFO PerfStats ----------------------------------------
-PyComponentMgr       INFO Finalizing PyComponentMgr...
+ToolSvc              INFO Removing all tools created by ToolSvc
 ApplicationMgr       INFO Application Manager Finalized successfully
 ApplicationMgr       INFO Application Manager Terminated successfully
 Py:Athena            INFO leaving with code 0: "successful run"

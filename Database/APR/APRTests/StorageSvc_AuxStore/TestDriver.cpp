@@ -6,8 +6,6 @@
 #include "TestDriver.h"
 #include "AuxStoreTest.h"
 
-#include "libname.h"
-
 #include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
 

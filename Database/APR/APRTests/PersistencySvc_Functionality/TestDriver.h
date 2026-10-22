@@ -13,6 +13,7 @@
 #include "TestClassVectors.h"
 #include "TestClassSTLContainers.h"
 #include "TestClassSTLContainersExt.h"
+#include "PoolTestBase.h"
 
 class Token;
 
@@ -24,13 +25,11 @@ namespace Gaudi {
 namespace pool {
   class DbType; 
 
-  class TestDriver {
+  class TestDriver : public PoolTestBase {
   public:
     explicit TestDriver( const std::string& catname = "PersF.catatlog.xml" );
     ~TestDriver();
-    TestDriver(const TestDriver & ) = delete;
-    TestDriver& operator=(const TestDriver & ) = delete;
-    void loadLibraries( const std::vector<std::string>& libraries );
+
     void write( pool::DbType storageType );
     void read();
     void readCollections();

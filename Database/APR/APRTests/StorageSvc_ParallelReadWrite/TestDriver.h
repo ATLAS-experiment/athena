@@ -7,12 +7,13 @@
 
 #include <vector>
 #include <string>
+#include "PoolTestBase.h"
 
-class TestDriver {
+class TestDriver : public PoolTestBase {
 public:
   TestDriver();
   ~TestDriver();
-  void loadLibraries( const std::vector<std::string>& libraries );
+ 
   void testWriting();
   void testParallelReadWrite();
   void testReading();

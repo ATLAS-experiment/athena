@@ -8,20 +8,18 @@
 #include <map>
 #include <string>
 #include "GaudiKernel/SmartIF.h"
+#include "PoolTestBase.h"
 
 namespace Gaudi {
   class IFileCatalog;
   class IFileCatalogMgr;
 }
 
-namespace pool {
-
-  class TestDriver {
+class TestDriver : public PoolTestBase {
   public:
     TestDriver();
     ~TestDriver();
-    TestDriver(const TestDriver & ) = delete;
-    TestDriver& operator=(const TestDriver & ) = delete;
+
     void write();
     void read();
 
@@ -30,8 +28,6 @@ namespace pool {
     SmartIF<Gaudi::IFileCatalog>      m_fileCatalog;
     std::string           m_fileName;
     std::map< std::string, std::string > m_parameters;
-  };
-
-}
+};
 
 #endif

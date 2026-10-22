@@ -3,7 +3,7 @@
 */
 
 #include "UserDatabase.h"
-#include "UserSession.h"
+#include "SessionTool.h"
 #include "DatabaseHandler.h"
 #include "MicroSessionManager.h"
 #include "DatabaseRegistry.h"
@@ -17,13 +17,13 @@
 
 static const std::string& emptyString = "";
 
-pool::UserDatabase::UserDatabase( pool::UserSession& session,
+pool::UserDatabase::UserDatabase( SessionTool& session,
                                   const std::string& name,
                                   const pool::DatabaseSpecification::NameType nameType ):
-  APRMessaging("PersistencySvc::UserDB"),                                                  
+  AthMessaging("PoolSvc.Database"),                                                  
   m_session( session ),
   m_catalog( session.fileCatalog() ),
-  m_transactionType( session.type() ),
+  m_transactionType( session.openMode() ),
   m_registry( session.registry() ),
   m_name( name ),
   m_nameType( nameType ),

@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 #include "GaudiKernel/SmartIF.h"
+#include "PoolTestBase.h"
 
 class Token;
 
@@ -16,15 +17,11 @@ namespace Gaudi {
   class IFileCatalogMgr;
 }
 
-namespace pool {
-
-  class TestDriver {
+class TestDriver : public PoolTestBase {
   public:
     explicit TestDriver(const std::string& filename = "NCI.pool.root", const std::string& catname = "NCI.catatlog.xml" );
     ~TestDriver();
-    TestDriver(const TestDriver & ) = delete;
-    TestDriver& operator=(const TestDriver & ) = delete;
-    void loadLibraries( const std::vector<std::string>& libraries );
+
     void write();
     void read();
   private:
@@ -33,8 +30,6 @@ namespace pool {
     std::string           m_fileName;
     int                   m_events;
     std::vector< Token* > m_tokens;
-  };
-
-}
+};
 
 #endif

@@ -3,7 +3,6 @@
 */
 
 #include "TestDriver.h"
-#include "libname.h"
 
 #include <stdexcept>
 #include <memory>
@@ -13,14 +12,15 @@
 #include "PersistentDataModel/Token.h"
 
 #include "PoolSvc/FileCatalogUtils.h"
-#include "PoolSvc/ISession.h"
+#include "PoolSvc/ISessionTool.h"
 #include "GaudiKernel/Bootstrap.h"
 #include "GaudiKernel/ISvcLocator.h"
 
 #include "StorageSvc/DbType.h"
 
+using namespace pool;
 
-pool::TestDriver::TestDriver( const std::string& catname ):
+TestDriver::TestDriver( const std::string& catname ):
   m_fileCatalogMgr( Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" ) ),
   m_fileCatalog( m_fileCatalogMgr ),
   m_fileName( "PersExtF.pool.root" ),
@@ -35,13 +35,12 @@ pool::TestDriver::TestDriver( const std::string& catname ):
   FileCatalogUtils::addCatalog( *m_fileCatalogMgr, catname, true );
 }
 
-pool::TestDriver::~TestDriver()
+TestDriver::~TestDriver()
 {
   std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
 }
 
-void
-pool::TestDriver::clearCache()
+void TestDriver::clearCache()
 {
   for( auto iToken : m_tokens ) iToken->release();
   m_tokens.clear();
@@ -51,14 +50,11 @@ pool::TestDriver::clearCache()
   Test writing TestClassSTLContainersExt class defined in the TestDictionary
   with multiple writes per commit
   */
-void
-pool::TestDriver::write(pool::DbType storageType)
+void TestDriver::write(pool::DbType storageType)
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
-
-  std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::createSession(catalog);
+  auto dbsession = createSession( catalog, "TestSession" );
 
   // Start an update transaction
   if( !dbsession->start( Io::WRITE ) ) {
@@ -114,19 +110,16 @@ pool::TestDriver::write(pool::DbType storageType)
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
-
+  dbsession->closeSession();
   catalog.commit();
 }
 
 
-void
-pool::TestDriver::read()
+void TestDriver::read()
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
-
-  std::cout << "Creating the persistency service" << std::endl;
-  auto dbsession = pool::createSession(catalog);
+  auto dbsession = createSession( catalog, "TestSession" );
 
   // Starting a read transaction
   if( !dbsession->start( Io::READ ) ) {
@@ -161,6 +154,6 @@ pool::TestDriver::read()
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
-
+  dbsession->closeSession();
   catalog.commit();
 }

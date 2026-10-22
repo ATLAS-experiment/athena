@@ -5,18 +5,18 @@
 #ifndef POOLSVC_USERDATABASE_H
 #define POOLSVC_USERDATABASE_H
 
+#include "AthenaBaseComps/AthMessaging.h"
 #include "PoolSvc/IDatabase.h"
-#include "PoolSvc/ISession.h"
-#include "StorageSvc/DbPrint.h"
-#include "StorageSvc/pool.h"
+#include "DataModelRoot/RootType.h"
 
 namespace Gaudi {
   class IFileCatalog;
 }
+class SessionTool;
+class Token;
 
 namespace pool {
   // forward declarations
-  class UserSession;
   class DatabaseHandler;
   class DatabaseRegistry;
 
@@ -26,11 +26,11 @@ namespace pool {
    *
    */
   class UserDatabase : virtual public IDatabase,
-                       public APRMessaging
+                       public AthMessaging
   {
   public:
     /// Constructor
-    UserDatabase( UserSession& session,
+    UserDatabase( SessionTool& session,
                   const std::string& name,
                   const DatabaseSpecification::NameType nameType );
 
@@ -93,7 +93,7 @@ namespace pool {
                              const std::string& option ) override;
   private:
     /// Reference to the session
-    UserSession&                            m_session;
+    SessionTool&                            m_session;
     /// Reference to the file catalog
     Gaudi::IFileCatalog&                    m_catalog;
     /// Transaction type (read/update)
