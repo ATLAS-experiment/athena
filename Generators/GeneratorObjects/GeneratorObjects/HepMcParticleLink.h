@@ -570,7 +570,7 @@ public:
    * @param sg Target event store.
    * Returns -999 when position is larger than the McEventCollection size
    */
-  static int getEventNumberAtPosition (index_type position, const IProxyDict* sg);
+  static int getEventNumberAtPosition (index_type position, IProxyDict* sg);
 
 
   /**
@@ -591,7 +591,7 @@ public:
    * Returns a vector containing only ExtendedBarCode::UNDEFINED FIXME when no event with the appropriate event_number was found.
    * (Multiple entries in the vector is technically a bug, but can't be fixed until the HepMC3 migration.)
    */
-  static std::vector<index_type> getEventPositionInCollection (index_type index, const IProxyDict* sg);
+  static std::vector<index_type> getEventPositionInCollection (index_type index, IProxyDict* sg);
 
 
   /**
@@ -600,7 +600,7 @@ public:
    * @param sg Target event store.
    * FIXME - need to be able to flag when no event with the appropriate event_number was found.
    */
-  index_type getEventPositionInCollection (const IProxyDict* sg) const;
+  index_type getEventPositionInCollection (IProxyDict* sg) const;
 
 
   /**
@@ -666,7 +666,7 @@ public:
     * May return nullptr if the collection is not found.
     */
    static const McEventCollection*
-   retrieveMcEventCollection (const IProxyDict* sg);
+   retrieveMcEventCollection (IProxyDict* sg);
 
 
   /**
@@ -674,7 +674,7 @@ public:
    * @param sg Target event store.
    * May return nullptr if the collection is not found.
    */
-  static SG::DataProxy* find_proxy (const IProxyDict* sg);
+  static SG::DataProxy* find_proxy (IProxyDict* sg);
 
 
   /**

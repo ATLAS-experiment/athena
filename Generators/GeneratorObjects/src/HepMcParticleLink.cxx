@@ -39,7 +39,7 @@ std::string s_keys[NKEYS] = {"TruthEvent","G4Truth","GEN_AOD","GEN_EVENT","Bkg_T
  * in the s_keys array of the key that worked.  We can that start the
  * search at that position the next time.
  */
-std::atomic<unsigned> s_hint = NKEYS;
+std::atomic<unsigned> s_hint = std::size (s_keys);
 
 
 const unsigned short CPTRMAXMSGCOUNT = 100;
@@ -346,7 +346,8 @@ HepMcParticleLink::index_type HepMcParticleLink::eventIndex() const
   m_extBarcode.eventIndex (event_number, event_position);
   if (event_number == ExtendedBarCode::UNDEFINED) {
     const HepMC::GenEvent* pEvt{};
-    if (const McEventCollection* coll = retrieveMcEventCollection (m_store)) {
+    IProxyDict* sg_nc ATLAS_THREAD_SAFE = m_store;
+    if (const McEventCollection* coll = retrieveMcEventCollection (sg_nc)) {
       if (event_position < coll->size()) {
         pEvt = coll->at (event_position);
       }
@@ -389,7 +390,7 @@ HepMcParticleLink::index_type HepMcParticleLink::eventIndex() const
  *        (first) GenEvent with a given event number
  */
 HepMcParticleLink::index_type
-HepMcParticleLink::getEventPositionInCollection (const IProxyDict* sg) const
+HepMcParticleLink::getEventPositionInCollection (IProxyDict* sg) const
 {
   index_type event_number, position;
   m_extBarcode.eventIndex (event_number, position);
@@ -422,7 +423,7 @@ HepMcParticleLink::getEventPositionInCollection (const EventContext& ctx) const
  *        (first) GenEvent with a given event number
  */
 std::vector<HepMcParticleLink::index_type>
-HepMcParticleLink::getEventPositionInCollection (index_type event_number, const IProxyDict* sg)
+HepMcParticleLink::getEventPositionInCollection (index_type event_number, IProxyDict* sg)
 {
   std::vector<index_type> positions; positions.reserve(1);
   const int int_event_number = static_cast<int>(event_number);
@@ -445,7 +446,7 @@ HepMcParticleLink::getEventPositionInCollection (index_type event_number, const 
  * @brief Return the event number of the GenEvent at the specified
  *        position in the McEventCollection.
  */
-int HepMcParticleLink::getEventNumberAtPosition (index_type position, const IProxyDict* sg)
+int HepMcParticleLink::getEventNumberAtPosition (index_type position, IProxyDict* sg)
 {
   if (const McEventCollection* coll = retrieveMcEventCollection (sg)) {
     if (position < coll->size()) {
@@ -509,7 +510,7 @@ void HepMcParticleLink::setExtendedBarCode (const ExtendedBarCode& extBarcode)
  * May return nullptr if the collection is not found.
  */
 const McEventCollection*
-HepMcParticleLink::retrieveMcEventCollection (const IProxyDict* sg)
+HepMcParticleLink::retrieveMcEventCollection (IProxyDict* sg)
 {
   const McEventCollection* pEvtColl = nullptr;
   SG::DataProxy* proxy = find_proxy (sg);
@@ -528,14 +529,31 @@ HepMcParticleLink::retrieveMcEventCollection (const IProxyDict* sg)
  * @param sg Target event store.
  * May return nullptr if the collection is not found.
  */
-SG::DataProxy* HepMcParticleLink::find_proxy (const IProxyDict* sg)
+SG::DataProxy* HepMcParticleLink::find_proxy (IProxyDict* sg)
 {
   const CLID clid = ClassID_traits<McEventCollection>::ID();
   unsigned int hint_orig = s_hint.load(std::memory_order_relaxed);
-  if (hint_orig >= NKEYS) hint_orig = 0;
+  if (hint_orig >= std::size (s_keys)) hint_orig = 0;
   unsigned int hint = hint_orig;
+
+  // Cache key -> sgkey translation.
+  using sgkey_array_t = std::array<SG::sgkey_t, std::size (s_keys)>;
+  static const sgkey_array_t s_sgkeys =
+    [&]() {
+      sgkey_array_t a;
+      for (size_t i = 0; i < std::size (s_keys); ++i)
+        a[i] = sg->stringToKey (s_keys[i], clid);
+      return a;
+    }();
+
   do {
     SG::DataProxy* proxy = sg->proxy (clid, s_keys[hint]);
+    if (!proxy) {
+      // try with input renamng.
+      SG::DataProxyHolder holder;
+      holder.toTransient (s_sgkeys[hint], sg, true);
+      proxy = holder.proxy();
+    }
     if (proxy) {
       if (hint != s_hint.load(std::memory_order_relaxed)) {
         s_hint.store(hint, std::memory_order_relaxed);
@@ -549,7 +567,7 @@ SG::DataProxy* HepMcParticleLink::find_proxy (const IProxyDict* sg)
       return proxy;
     }
     ++hint;
-    if (hint >= NKEYS) hint = 0;
+    if (hint >= std::size (s_keys)) hint = 0;
   } while (hint != hint_orig);
 
   MsgStream log (Athena::getMessageSvc(), "HepMcParticleLink");
@@ -579,7 +597,7 @@ std::string HepMcParticleLink::getLastEventCollectionName ()
 {
   static const std::string unset =  "CollectionNotSet";
   unsigned idx = s_hint;
-  if (idx < NKEYS) {
+  if (idx < std::size (s_keys)) {
     return s_keys[idx];
   }
   return unset;
