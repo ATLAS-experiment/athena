@@ -1,6 +1,6 @@
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include <iostream>
 
@@ -10,7 +10,6 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "../src/BareDataBucket.h"
 
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"

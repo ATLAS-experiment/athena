@@ -4,6 +4,7 @@
 
 #include "AthenaKernel/StorableConversions.h"
 #include "AthenaKernel/DataBucketBase.h"
+#include "AthenaKernel/TypelessDataBucket.h"
 #include "CxxUtils/FPControl.h"
 #include "CxxUtils/SealDebug.h"
 #include "CxxUtils/SealSignal.h"
@@ -11,7 +12,6 @@
 #include "RootUtils/WithRootErrorHandler.h"
 #include "SGTools/DataProxy.h"
 #include "TrigSerializeResult/StringSerializer.h"
-#include "BareDataBucket.h"
 #include "TBufferFile.h"
 #include "TVirtualCollectionProxy.h"
 #include "TClass.h"
@@ -362,9 +362,14 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const EventContext& ctx,
     }
 
     if ( isxAODInterfaceContainer or isxAODAuxContainer or isTPContainer ) {
-      BareDataBucket* dataBucket = new BareDataBucket( obj, clid, std::move(classDesc) );
       const std::string outputName = m_prefix + key;
-      auto proxyPtr = evtStore()->recordObject( SG::DataObjectSharedPtr<BareDataBucket>( dataBucket ),
+      const SG::BaseInfoBase* bib = getBaseInfo(clid);
+      if(!bib){
+        ATH_MSG_WARNING("No BaseInfoBase for CLID "<< clid << " and name " << outputName);
+      }
+
+      auto dataBucket = new TypelessDataBucket( obj, *bib );
+      auto proxyPtr = evtStore()->recordObject( SG::DataObjectSharedPtr<TypelessDataBucket>( dataBucket ),
                                                 outputName, false, false );
       if ( proxyPtr == nullptr )  {
         ATH_MSG_WARNING( "Recording of object of CLID " << clid << " and name " << outputName << " failed" );
@@ -380,23 +385,12 @@ StatusCode TriggerEDMDeserialiserAlg::deserialise( const EventContext& ctx,
           xAODInterfaceContainer->setStore( DataLink<SG::IConstAuxStore>(previousKey+"Aux.") );
         }
         currentAuxStore = nullptr; // the store will be following, setting it to nullptr assure we catch issue with of missing Aux
-        const SG::BaseInfoBase* bib = getBaseInfo(clid);
-        if(!bib){
-          ATH_MSG_WARNING("No BaseInfoBase for CLID "<< clid << " and name " << outputName); 
-        }
-        xAODInterfaceContainer =
-            bib ? reinterpret_cast<SG::AuxVectorBase*>(
-                      bib->cast(dataBucket->object(),
-                                ClassID_traits<SG::AuxVectorBase>::ID()))
-                : nullptr;
+        xAODInterfaceContainer = dataBucket->cast<SG::AuxVectorBase>();
       } else if (isxAODAuxContainer) {
         // key contains exactly one '.' at the end
         ATH_CHECK( key.find('.') == key.size()-1 );
         ATH_CHECK( currentAuxStore == nullptr and xAODInterfaceContainer != nullptr );
-        const SG::BaseInfoBase* bib = getBaseInfo(clid);
-        SG::IAuxStore* auxHolder =
-            reinterpret_cast<SG::IAuxStore*>(
-                bib->cast(dataBucket->object(), ClassID_traits<SG::IAuxStore>::ID()));
+        SG::IAuxStore* auxHolder = dataBucket->cast<SG::IAuxStore>();
         ATH_CHECK(auxHolder != nullptr);
         auxHolder->toTransient(ctx);
         //coverity[FORWARD_NULL:FALSE]
