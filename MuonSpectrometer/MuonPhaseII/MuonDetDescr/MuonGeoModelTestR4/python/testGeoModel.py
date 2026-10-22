@@ -3,23 +3,28 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
 
+### Directory where the large files are stored
+_baseFilePath = "root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/MuonRecRTT/"
 
 class MuonPhaseIITestDefaults:
     ## Particle gun EVGen file (5 -250) GeV spectrum
-    EVGEN_PG = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_ParticleGun_FourMuon_Pt10to500.root"]
+    EVGEN_PG = [f"{_baseFilePath}/EVNT/DiMuon_Pt2to2000.EVNT.pool.{i}.root" for i in [1,2]]
     ### Geantino file
-    EVGEN_GEANTINO = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/EVGEN_Geantino.pool.root"]
-    ### Hits parsed though full R3 ATLAS layout (Only MS hits saved)
-    HITS_PG_R3 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R3SimHits.pool.root"]
+    EVGEN_GEANTINO = [f"{_baseFilePath}/EVNT/ChargedGeantino_2p5_250_GeV.pool.root"]
+    ### PG from 2-200 GeV (R3 layout)
+    HITS_PG_R3 = [ f"{_baseFilePath}/HITS_PG_R3/{fileName}" for fileName in [
+        "group.det-muon.53099807.EXT0._000005.HITS.pool.root",
+        "group.det-muon.53099807.EXT0._000014.HITS.pool.root",
+        "group.det-muon.53099807.EXT0._000006.HITS.pool.root",
+        "group.det-muon.53099807.EXT0._000020.HITS.pool.root"]]
     ### Hits parsed though full R4 ATLAS layout (Only MS hits saved)
-    HITS_PG_R4 = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonGeomRTT/R4SimHits.pool.root"]
-    ### Hits parsed through the R3 MS-only ATLAS layout    
-    HITS_PG_R3_MSOnly = []
-    ### Hits parsed through the R4 MS-only ATLAS layout
-    HITS_PG_R4_MSOnly = []
+    HITS_PG_R4 = [f"{_baseFilePath}/HITS_PG_R4/{fileName}" for fileName in [
+        "group.det-muon.53099475.EXT0._000003.HITS.pool.root",  
+        "group.det-muon.53099475.EXT0._000015.HITS.pool.root",
+        "group.det-muon.53099475.EXT0._000009.HITS.pool.root",  
+        "group.det-muon.53099475.EXT0._000019.HITS.pool.root"]]
     ### BS file taken in MD3 2025 with a pile-up of >120
-
-    DATA_BS = [f"root://eosatlas.cern.ch//eos/atlas/atlascerngroupdisk/data-art/large-input/MuonRecRTT/{fileName}" for fileName in [
+    DATA_BS = [f"{_baseFilePath}/DATA_BS/{fileName}" for fileName in [
                             "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-11._0001.data",
                             "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-11._0002.data",
                             "data26_13p6TeV.00519268.physics_Main.daq.RAW._lb0178._SFO-12._0001.data",

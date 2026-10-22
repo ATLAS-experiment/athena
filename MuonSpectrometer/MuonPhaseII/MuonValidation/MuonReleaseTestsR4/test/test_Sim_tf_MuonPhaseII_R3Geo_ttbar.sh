@@ -19,10 +19,9 @@ validNTuple="MuonSimHitNtuple.root"
 export ATHENA_PROC_NUMBER=8
 export ATHENA_CORE_NUMBER=8
 
-
-export IN_FILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc21/EVNT/mc21_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8453/EVNT.29328277._003902.pool.root.1"
+export IN_FILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(\",\".join(defaultTestFiles.EVNT)")
 NEVENTS=${1}
-if [ ${NEVENTS} -eq ]; then
+if [ ${NEVENTS} -eq 0 ]; then
    NEVENTS=100
 fi
 
