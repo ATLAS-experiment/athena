@@ -26,7 +26,8 @@ namespace xAOD {
 
 /// @param name Name to use in printed messages
 ///
-Event::Event(std::string_view name)
+Event::Event(std::string_view name,
+             [[maybe_unused]] const EventContext* ctx /* = nullptr*/)
     : TVirtualEvent(),
       Details::IProxyDictBase(),
       asg::AsgMessaging(std::string{name}) {
@@ -34,8 +35,15 @@ Event::Event(std::string_view name)
   // Make sure that the I/O monitoring is active.
   PerfStats::instance();
 
-  // Make this the active event.
-  setActive();
+  if (ctx) {
+#ifndef XAOD_STANDALONE
+    m_ctx = *ctx;
+#endif
+  }
+  else {
+    // Make this the active event.
+    this->setActive();
+  }
 }
 
 Event::~Event() {

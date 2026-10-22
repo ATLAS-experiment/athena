@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file xAODRootAccess/RPyEvent.h
@@ -31,7 +31,7 @@ namespace xAOD::Experimental {
 class RPyEvent : public REvent {
 
  public:
-  using REvent::REvent;
+  RPyEvent() = default;
 
   /// Return the object with a given key as a PyObject.
   PyObject* pyRetrieve(const std::string& key);

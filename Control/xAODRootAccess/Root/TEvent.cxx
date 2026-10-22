@@ -69,7 +69,10 @@ namespace xAOD {
 /// Size of a possible TTreeCache
 static const ::Int_t CACHE_SIZE = -1;
 
-TEvent::TEvent(EAuxMode mode) : Event("xAOD::TEvent"), m_auxMode(mode) {}
+TEvent::TEvent(EAuxMode mode, const EventContext* ctx)
+  : Event("xAOD::TEvent", ctx),
+    m_auxMode(mode)
+{}
 
 TEvent::TEvent(::TFile* file, EAuxMode mode) : TEvent(mode) {
 

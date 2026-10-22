@@ -24,13 +24,15 @@
 
 namespace xAOD {
 
+// When we create these object, set their EventContext to what's current.
+// Don't use the store itself as the context.
+
 class xAODTEvent : public xAOD::TEvent
 {
  public:
   xAODTEvent(EAuxMode mode = kClassAccess)
-    : xAOD::TEvent (mode)
+    : xAOD::TEvent (mode, &Gaudi::Hive::currentContext())
   {
-    m_ctx = Gaudi::Hive::currentContext();
   }
   using TEvent::getInputObject;
 };
@@ -39,8 +41,8 @@ class xAODREvent : public xAOD::Experimental::REvent
 {
  public:
   xAODREvent()
+    : REvent(&Gaudi::Hive::currentContext())
   {
-    m_ctx = Gaudi::Hive::currentContext();
   }
   using REvent::getInputObject;
 };

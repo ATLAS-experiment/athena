@@ -34,7 +34,7 @@ class REvent : public Event {
 
  public:
   /// Default constructor
-  REvent();
+  REvent(const EventContext* ctx = nullptr);
 
   /// Destructor
   virtual ~REvent();

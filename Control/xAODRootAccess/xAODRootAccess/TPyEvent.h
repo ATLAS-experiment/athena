@@ -1,6 +1,6 @@
 // Dear emacs, this is -*- c++ -*-
 //
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 //
 #ifndef XAODROOTACCESS_TPYEVENT_H
 #define XAODROOTACCESS_TPYEVENT_H
@@ -32,7 +32,7 @@ class TPyEvent : public TEvent {
   /// Constructor with an access mode
   ///
   /// It has to be implemented explicitly, as PyROOT is having some issues
-  /// with callin non-default constructors inherited from the base class.
+  /// with calling non-default constructors inherited from the base class.
   ///
   TPyEvent(EAuxMode mode = kClassAccess);
 

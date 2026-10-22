@@ -66,7 +66,9 @@ class Event : public TVirtualEvent,
 
  public:
   /// Constructor with a name
-  Event(std::string_view name);
+  // If ctx is supplied, then remember that as the context corresponding
+  // to this event.  Otherwise, make this the current event store.
+  Event(std::string_view name, const EventContext* ctx = nullptr);
   /// Virtual destructor
   virtual ~Event();
 
