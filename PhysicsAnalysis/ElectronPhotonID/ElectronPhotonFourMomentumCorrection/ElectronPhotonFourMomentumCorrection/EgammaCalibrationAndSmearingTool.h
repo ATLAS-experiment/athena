@@ -298,6 +298,14 @@ class EgammaCalibrationAndSmearingTool
     this, "DoFwdElectronCalibration", false,
       "MVA calibration of the forward electron"};
 
+  Gaudi::Property<bool> m_doElectronMVA{
+    this, "DoElectronMVACalibration", true,
+      "Load the electron MVA calibration (disable if no electrons are calibrated)"};
+
+  Gaudi::Property<bool> m_doPhotonMVA{
+    this, "DoPhotonMVACalibration", true,
+      "Load the photon MVA calibrations (disable if no photons are calibrated)"};
+
   Gaudi::Property<std::string> m_pVtxKey{
     this, "PrimaryVerticesKey", "PrimaryVertices",
       "Name of the primary vertex container"};

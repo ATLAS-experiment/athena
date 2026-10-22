@@ -1,6 +1,6 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 // METSignificance.cxx
 // Implementation file for class METSignificance
@@ -166,6 +166,8 @@ namespace met {
         ATH_CHECK(toolConfig.setProperty("ESModel", m_egESModel));
         ATH_CHECK(toolConfig.setProperty("decorrelationModel", m_egDecorrModel));
         ATH_CHECK(toolConfig.setProperty("useFastSim", m_egUseFastsim ? 1 : 0));
+        // only resolution() is used, which does not need the MVA BDTs
+        ATH_CHECK(toolConfig.setProperty("useMVACalibration", 0));
         ATH_CHECK(toolConfig.makePrivateTool (m_egammaCalibTool));
       }
     }

@@ -118,6 +118,8 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
             0 if self.forceFullSimConfigForP4
             else int( config.dataType() is DataType.FastSim ))
         alg.calibrationAndSmearingTool.decorateEmva = self.decorateEmva
+        # only electrons are calibrated here, so skip loading the photon BDTs
+        alg.calibrationAndSmearingTool.DoPhotonMVACalibration = False
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
