@@ -66,6 +66,23 @@ namespace xAOD{
                 break;
         }
     }
+    bool isMuon(const xAOD::UncalibratedMeasurement* meas) {
+        return meas && isMuon(meas);
+    }
+    bool isMuon(const UncalibMeasType type) {
+        switch (type) {
+            using enum xAOD::UncalibMeasType;
+            case MdtDriftCircleType:
+            case RpcStripType:
+            case TgcStripType:
+            case sTgcStripType:
+            case MMClusterType:
+                return true;
+            default:
+                break;
+        }
+        return false;
+    }
 
     ::Muon::MuonStationIndex::TechnologyIndex toTechnologyIndex(const UncalibMeasType aodType){
         using enum ::Muon::MuonStationIndex::TechnologyIndex;
