@@ -11,6 +11,7 @@
 #include <AsgTools/AsgTool.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
+#include <ColumnarCore/ColumnarDef.h>
 #include <ColumnarTestFixtures/ToolWrapper.h>
 #include <ColumnarTestFixtures/ManualColumnData.h>
 #include <PATInterfaces/ISystematicsTool.h>
@@ -35,7 +36,12 @@ namespace columnar
     std::string makeUniqueName ();
 
     /// @brief check whether we have the right mode
-    static bool checkMode ();
+    /// @warning Do **not** try to replace the template with referencing
+    /// ColumnarMode directly in the source file. This construct is
+    /// meant to make the `ColumnarTestFixturesLib` library have no
+    /// direct dependency on `ColumnarMode`.
+    template<ColumnarModeConcept CM = ColumnarMode>
+    static bool checkMode () { return std::is_same_v<CM,ColumnarModeArray>; }
 
     using ColumnMapType = TestUtils::ColumnMapType;
     using ColumnarTestToolHandle = TestUtils::ColumnarTestToolHandle;

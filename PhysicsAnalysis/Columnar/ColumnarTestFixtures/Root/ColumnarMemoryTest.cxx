@@ -38,14 +38,6 @@ namespace columnar
 
 
 
-  bool ColumnarMemoryTest ::
-  checkMode ()
-  {
-    return std::is_same_v<ColumnarMode,ColumnarModeArray>;
-  }
-
-
-
   namespace TestUtils
   {
     ColumnarTestToolHandle ::

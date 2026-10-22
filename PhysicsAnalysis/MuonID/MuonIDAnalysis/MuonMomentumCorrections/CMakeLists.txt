@@ -47,7 +47,7 @@ foreach (CMODE_NAME CMODE_SUFFIX IN ZIP_LISTS COLUMNAR_MODE_NAME_LIST COLUMNAR_M
    atlas_add_test( gt_ColumnarToolTests${CMODE_SUFFIX}
       SOURCES test/gt_ColumnarToolTests.cxx
       INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-      LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib${CMODE_SUFFIX} MuonMomentumCorrectionsLib${CMODE_SUFFIX}
+      LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib MuonMomentumCorrectionsLib${CMODE_SUFFIX}
       POST_EXEC_SCRIPT noerror.sh )
 
 endforeach()
