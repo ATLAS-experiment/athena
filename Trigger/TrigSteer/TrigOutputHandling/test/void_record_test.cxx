@@ -1,13 +1,14 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include <iostream>
 #include "TestTools/expect.h"
 #include "TestTools/initGaudi.h"
 #include "AthenaKernel/getMessageSvc.h"
+#include "AthenaKernel/TypelessDataBucket.h"
+#include "AthenaKernel/BaseInfo.h"
 #include "GaudiKernel/MsgStream.h"
 #include "StoreGate/StoreGateSvc.h"
-#include "../src/BareDataBucket.h"
 #include "xAODTrigger/TrigCompositeContainer.h"
 #include "xAODTrigger/TrigCompositeAuxContainer.h"
 
@@ -58,17 +59,13 @@ int main() {
 
   SG::BaseInfo<xAOD::TrigCompositeContainer>::baseinfo(); // this is problematic because client code does not know about templates, will have to see in athena if the problem persists
 
-  RootType containerRT = RootType::ByNameNoQuiet( "xAOD::TrigCompositeContainer_v1" );  
-  log << MSG::INFO << containerRT.Name() << endmsg;
-  BareDataBucket containerDataBucket( rawContainerPtr, ClassID_traits<xAOD::TrigCompositeContainer>::ID(), std::move(containerRT) ); 
+  TypelessDataBucket containerDataBucket( rawContainerPtr, SG::BaseInfo<xAOD::TrigCompositeContainer>::baseinfo() );
   
-  RootType storeRT = RootType::ByNameNoQuiet( "xAOD::TrigCompositeAuxContainer_v2" );
-  log << MSG::INFO << storeRT.Name() << endmsg;
-  BareDataBucket storeDataBucket( rawStorePtr, ClassID_traits<xAOD::TrigCompositeAuxContainer>::ID(), std::move(storeRT) ); 
+  TypelessDataBucket storeDataBucket( rawStorePtr, SG::BaseInfo<xAOD::TrigCompositeAuxContainer>::baseinfo() );
   log << MSG::INFO << "recordObject done" << endmsg;
 
-  pStore->recordObject( SG::DataObjectSharedPtr<BareDataBucket>( &containerDataBucket ), "test", false, false );
-  pStore->recordObject( SG::DataObjectSharedPtr<BareDataBucket>( &storeDataBucket ), "testAux.", false, false );
+  pStore->recordObject( SG::DataObjectSharedPtr<TypelessDataBucket>( &containerDataBucket ), "test", false, false );
+  pStore->recordObject( SG::DataObjectSharedPtr<TypelessDataBucket>( &storeDataBucket ), "testAux.", false, false );
 
   log << MSG::INFO << "recordObject done" << endmsg;
 
