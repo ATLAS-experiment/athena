@@ -66,6 +66,8 @@ public:
 
   virtual ~VertexView() = default;
 
+  VertexView& operator=( const VertexView& v) = default;
+
   const void* ptr() const { return m_ptr; } 
   
   float     x() const { return m_vtable->x(m_ptr); }
