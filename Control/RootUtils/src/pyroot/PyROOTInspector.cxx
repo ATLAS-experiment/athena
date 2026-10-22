@@ -27,6 +27,9 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #ifdef ATLAS_HAVE_CPYCPPYY
 #include "CPyCppyy/API.h"
 #endif  // ATLAS_HAVE_CPYCPPYY
+#ifdef ATLAS_HAVE_CPYRT
+#include "cpyrt/API.h"
+#endif  // ATLAS_HAVE_CPYRT
 
 // fixes 'dereferencing type-punned pointer will break strict-aliasing rules'
 #ifdef Py_True
@@ -302,6 +305,20 @@ recurse_pyinspect(PyObject *pyobj,
     hdr = 0;
   }
 #endif  // ATLAS_HAVE_CPYCPPYY
+#ifdef ATLAS_HAVE_CPYRT
+  if (cppjit::cpyrt::Sequence_Check(pyobj)) {
+    if (clsname == "CLHEP::Hep3Vector" ||
+        clsname == "TLorentzVector" ||
+        clsname == "TVector3")
+    {
+      hdr = 0;
+    } else {
+      hdr = 1;
+    }
+  } else {
+    hdr = 0;
+  }
+#endif  // ATLAS_HAVE_CPYRT
 
   TList *members = tcls->GetListOfDataMembers();
   // members can be null for STL containers in root 6.08.
@@ -488,6 +505,17 @@ PyROOTInspector::pyroot_inspect(PyObject* pyobj,
     hdr = 0;
   }
 #endif  // ATLAS_HAVE_CPYCPPYY
+#ifdef ATLAS_HAVE_CPYCRT
+  if (cppjit::cpyrt::Sequence_Check(pyobj)) {
+    if (!strcmp(tcls->GetName(), "CLHEP::Hep3Vector")) {
+      hdr = 0;
+    } else {
+      hdr = 1;
+    }
+  } else {
+    hdr = 0;
+  }
+#endif  // ATLAS_HAVE_CPYRT
 
   TList *members = tcls->GetListOfDataMembers();
   const Int_t nmembers = members->GetEntries();
