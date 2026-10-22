@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # ListSlimming.py - List of collections for slimming from athena 21.2 HION4 and EGAM1ExtraContent.py
 
 #################################################################################
@@ -253,7 +253,10 @@ def HION4ExtraVariablesEventShape():
 #################################################################################
 #HION5
 
-def HION5ExtraVariables():
+def HION5BasicJetVars(JetColl):
+    return HION7BasicJetVars(JetColl)
+
+def HION5ExtraVariables(JetColl):
     variables  = []
     variables += [
         ".".join(["InDetTrackParticles", field]) for field in [
@@ -330,15 +333,13 @@ def HION5ExtraVariables():
             "etcone20.etcone30.etcone40.Loose"
         ]
     ]
+    variables += HION5BasicJetVars(JetColl)
     
 
     return variables
 
 def HION5AllVariables(runnumber):
     variables  = []
-    variables += ["AntiKt4HITrackJets"]
-    variables += ["AntiKt2HIJets"]
-    variables += ["AntiKt4HIJets"]
     variables += ["HIEventShape"]
     variables += ["ForwardElectrons"]
     variables += ["ForwardElectronClusters"]
