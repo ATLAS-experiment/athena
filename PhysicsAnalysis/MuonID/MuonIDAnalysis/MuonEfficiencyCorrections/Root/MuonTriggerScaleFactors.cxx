@@ -27,18 +27,23 @@
 namespace ADD_CMODE(CP) {
     constexpr double muon_barrel_endcap_boundary = 1.05;
 
-    const std::map<unsigned int, int> MuonTriggerScaleFactors::m_runNumber_year = {
-        {284484,2015},
-        {311481,2016},
-        {340453,2017},
-        {364292,2018},
-        {440613,2022},
-        {456749,2023},
-        {486706,2024}
-        //{509849,2025}
+    struct RunYear {
+        unsigned int lastRun{};
+        unsigned int year{};
     };
 
-    const std::map<unsigned short int, std::vector< std::tuple<unsigned int,unsigned int,std::string> > > MuonTriggerScaleFactors::m_year_periods = {
+    constexpr std::array runYears{
+        RunYear{284484, 2015},
+        RunYear{311481, 2016},
+        RunYear{340453, 2017},
+        RunYear{364292, 2018},
+        RunYear{440613, 2022},
+        RunYear{456749, 2023},
+        RunYear{486706, 2024},
+        RunYear{509849, 2025}
+    };
+
+    const std::map<unsigned short int, std::vector< std::tuple<unsigned int,unsigned int,std::string_view> > > MuonTriggerScaleFactors::m_year_periods = {
         {2015, {
             {266904,272531,"AC"},
             {276073,276954,"D"},
@@ -110,16 +115,16 @@ namespace ADD_CMODE(CP) {
             {480188,482221,"M"},
             {482374,484799,"N"},
             {484909,486706,"O"}}
+        },
+        {2025, {
+            {497924,498434,"D"},
+            {498515,499592,"E"},
+            {499618,500348,"F"},
+            {502557,505458,"K"},
+            {506231,507775,"M"},
+            {508160,509452,"O"},
+            {509803,509849,"Q"}}
         }
-        //{2025, {
-        //    {497924,498434,"D"},
-        //    {498515,499592,"E"},
-        //    {499618,500348,"F"},
-        //    {502557,505458,"K"},
-        //    {506231,507775,"M"},
-        //    {508160,509452,"O"},
-        //    {509803,509849,"Q"}}
-        //}
     };
 
     MuonTriggerScaleFactors::MuonTriggerScaleFactors(const std::string& name) :
@@ -144,10 +149,10 @@ namespace ADD_CMODE(CP) {
           else if (year == 2016) fileName = "muontrigger_sf_2016_mc20a_v3.root";
           else if (year == 2017) fileName = "muontrigger_sf_2017_mc20d_v3.root";
           else if (year == 2018) fileName = "muontrigger_sf_2018_mc20e_v3.root";
-          else if (year == 2022) fileName = "muontrigger_sf_2022_mc23a_v3.root";
-          else if (year == 2023) fileName = "muontrigger_sf_2023_mc23d_v3.root";
-          else if (year == 2024) fileName = "muontrigger_sf_2024_mc23e_v1.root";
-          //else if (year == 2025) fileName = "muontrigger_sf_2025_mc23g_v1.root";
+          else if (year == 2022) fileName = "muontrigger_sf_2022_mc23a_v5.root";
+          else if (year == 2023) fileName = "muontrigger_sf_2023_mc23d_v5.root";
+          else if (year == 2024) fileName = "muontrigger_sf_2024_mc23e_v5.root";
+          else if (year == 2025) fileName = "muontrigger_sf_2025_mc23g_v2.root";
           else {
             ATH_MSG_WARNING("There is no SF file for year " << year << " yet");
             return StatusCode::SUCCESS;
@@ -286,7 +291,7 @@ namespace ADD_CMODE(CP) {
 
 
         if (m_campaign.empty()) {
-            constexpr auto years_to_run = std::to_array<int>({2015, 2016, 2017, 2018, 2022, 2023, 2024/*, 2025*/});
+            constexpr auto years_to_run = std::to_array<int>({2015, 2016, 2017, 2018, 2022, 2023, 2024, 2025});
             for (const int &year: years_to_run) {
                 ATH_CHECK(LoadTriggerMap(year));
             }
@@ -303,8 +308,8 @@ namespace ADD_CMODE(CP) {
             ATH_CHECK(LoadTriggerMap(2023));
         } else if (m_campaign.value() == "mc23e") {
             ATH_CHECK(LoadTriggerMap(2024));
-        //} else if (m_campaign.value() == "mc23g") {
-        //    ATH_CHECK(LoadTriggerMap(2025));
+        } else if (m_campaign.value() == "mc23g") {
+            ATH_CHECK(LoadTriggerMap(2025));
         } else {
             ATH_MSG_ERROR("Campaign " << m_campaign.value() << " is not supported. Please choose a valid campaign or leave empty to load all years.");
         }
@@ -468,9 +473,9 @@ namespace ADD_CMODE(CP) {
     return eff_h2->FindFixBin(mu_eta, mu_phi_corr);
   }
 
-    unsigned int MuonTriggerScaleFactors::encodeHistoName(const std::string& period, const std::string& Trigger, bool isData, const std::string& Systematic, bool isBarrel) const {
+    unsigned int MuonTriggerScaleFactors::encodeHistoName(const std::string_view period, const std::string& Trigger, bool isData, const std::string& Systematic, bool isBarrel) const {
         //keep the string as short as possible
-        const std::string histName = period + "_" + Trigger + "_" + (isBarrel ? "b" : "e") + "_" + (isData ? "data" : "mc") + Systematic;
+        const std::string histName = std::string{period} + "_" + Trigger + "_" + (isBarrel ? "b" : "e") + "_" + (isData ? "data" : "mc") + Systematic;
         return std::hash<std::string>()(histName);
     }
 
@@ -479,7 +484,7 @@ namespace ADD_CMODE(CP) {
         return encodeHistoName(getDataPeriod(), Trigger, configuration.isData, Systematic, isBarrel);
 
     }
-    TH1_Ptr MuonTriggerScaleFactors::getEfficiencyHistogram(unsigned int year, const std::string& period, const std::string& trigger, bool isData, const std::string& Systematic, bool isBarrel) const {
+    TH1_Ptr MuonTriggerScaleFactors::getEfficiencyHistogram(unsigned int year, const std::string_view period, const std::string& trigger, bool isData, const std::string& Systematic, bool isBarrel) const {
         EffiHistoIdent Ident = EffiHistoIdent(YearPeriod(year, period), encodeHistoName(period, trigger, isData, Systematic, isBarrel));
         EfficiencyMap::const_iterator Itr = m_efficiencyMap.find(Ident);
 
@@ -801,29 +806,23 @@ namespace ADD_CMODE(CP) {
     }
 
     unsigned int MuonTriggerScaleFactors::getYear(unsigned int run) const {
-      if(m_forceYear != -1){
-	    return m_forceYear;
-      }
+        if(m_forceYear != -1) return m_forceYear;
 
-      int year=2050;
-      auto lower = m_runNumber_year.lower_bound(run);
-      if (lower != m_runNumber_year.end()){
-        year=lower->second;
-      }
-      return year;
+        auto runCheck = RunYear{run,2050};
+        auto lower = std::ranges::lower_bound(runYears, runCheck, [](const auto &s1, const auto &s2) { return s1.lastRun < s2.lastRun; });
+        return (lower != runYears.end()) ? lower->year : runCheck.year;
     }
 
-    const std::string& MuonTriggerScaleFactors::getDataPeriod() const {
-      return getDataPeriod(getRunNumber());
+    const std::string_view MuonTriggerScaleFactors::getDataPeriod() const {
+        return getDataPeriod(getRunNumber());
     }
 
-    const std::string& MuonTriggerScaleFactors::getDataPeriod(unsigned int run) const {
+    const std::string_view MuonTriggerScaleFactors::getDataPeriod(unsigned int run) const {
         return getDataPeriod(run, getYear(run));
     }
 
-    const std::string& MuonTriggerScaleFactors::getDataPeriod(unsigned int runNumber, unsigned year) const {
-        if(!m_forcePeriod.empty())
-            return m_forcePeriod;
+    const std::string_view MuonTriggerScaleFactors::getDataPeriod(unsigned int runNumber, unsigned year) const {
+        if(!m_forcePeriod.empty()) return std::string_view{m_forcePeriod};
 
         auto yit = m_year_periods.find(year);
         if (yit != m_year_periods.end()) {
