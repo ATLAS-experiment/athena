@@ -98,6 +98,65 @@ def HION5Thinning(flags):
     
     return acc
 
+def HION5GlobalAugmentationToolCfg(flags):
+    """Configure the example augmentation tool"""
+    acc = ComponentAccumulator()
+
+    # Configure the augmentation tool
+    # This adds FCalEtA, FCalEtC, ...
+    doTopoClus = True
+    caloClusterKey = "CaloCalTopoClusters"
+    from AthenaConfiguration.Enums import HIMode
+    if flags.Reco.HIMode == HIMode.HI:
+        doTopoClus = False
+        caloClusterKey = ""
+
+    cutLevelNames = ["HILoose", "HITight"]
+    from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
+            InDetTrackSelectionTool_HILoose_Cfg,
+            InDetTrackSelectionTool_HITight_Cfg
+            )
+
+    InDetTrackSelectionTool_HILoose = acc.popToolsAndMerge(
+        InDetTrackSelectionTool_HILoose_Cfg(flags))
+    acc.addPublicTool(InDetTrackSelectionTool_HILoose, primary=False)
+    InDetTrackSelectionTool_HITight = acc.popToolsAndMerge(
+        InDetTrackSelectionTool_HITight_Cfg(flags))
+    acc.addPublicTool(InDetTrackSelectionTool_HITight, primary=False)
+
+
+    augmentation_tool = CompFactory.DerivationFramework.HIGlobalAugmentationTool(name="HION5AugmentationTool",
+                                                                                 nHarmonic=0, # to capture higher-order harmonics for anisotropic flow
+                                                                                 doTopoClusDec = doTopoClus,
+                                                                                 CaloClusterKey = caloClusterKey,
+                                                                                 TrackSelectionTools = [InDetTrackSelectionTool_HILoose, InDetTrackSelectionTool_HITight],
+                                                                                 cutLevels = cutLevelNames
+                                                                                )
+    acc.addPublicTool(augmentation_tool, primary=True)
+
+    return acc
+
+def HION5JetAugmentationToolCfg(flags):
+    """Configure the example augmentation tool"""
+    acc = ComponentAccumulator()
+
+    # Configure the augmentation tool
+    # This adds JvtMediumPassed, JvtTightPassed ...
+    jvtTool = CompFactory.JetVertexTaggerTool(name="JVTToolEMTopo",
+                                              JetContainer="AntiKt4EMTopoJets")
+
+
+    augmentation_tool = CompFactory.DerivationFramework.HIJetAugmentationTool(name="HION5JetAugmentationTool",
+                                                                                 DeltaRJetMatching = 0.3,
+                                                                                 HIJetContainerKey="DFAntiKt4HIJets",
+                                                                                 CaloJetContainerKey = "AntiKt4EMTopoJets",
+                                                                                 JVTToolEMTopo = jvtTool
+                                                                                 )
+    acc.addPublicTool(jvtTool)
+    acc.addPublicTool(augmentation_tool, primary=True)
+
+    return acc
+
 def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
     """Configure the derivation framework driving algorithm (kernel)
     for HION5"""
@@ -162,13 +221,21 @@ def HION5KernelCfg(flags, name="HION5Kernel", **kwargs):
     # Thinning
     thinningTool = acc.getPrimaryAndMerge(HION5Thinning(flags))
 
+    # Augmentation
+    globalAugmentationTool = acc.getPrimaryAndMerge(HION5GlobalAugmentationToolCfg(flags))
+    augmentationTools = [globalAugmentationTool]
+    from AthenaConfiguration.Enums import HIMode
+    if flags.Reco.HIMode != HIMode.HI:
+        jetAugmentationTool = acc.getPrimaryAndMerge(HION5JetAugmentationToolCfg(flags))
+        augmentationTools = [globalAugmentationTool,jetAugmentationTool]
+
     # setup the kernel
     acc.addEventAlgo(
         CompFactory.DerivationFramework.DerivationKernel(
             name,
             SkimmingTools = [skimmingTool],
             ThinningTools = [thinningTool],
-            AugmentationTools = [],
+            AugmentationTools = augmentationTools,
             ),
         sequenceName="HION5Sequence")
 
@@ -248,7 +315,7 @@ def HION5Cfg(flags):
         AllVariables += ListSlimming.HION7AllVarFromFTAG1()
 
     HION5SlimmingHelper.SmartCollections = ListSlimming.HION5SmartCollections()
-    HION5SlimmingHelper.ExtraVariables   = ListSlimming.HION5ExtraVariables()
+    HION5SlimmingHelper.ExtraVariables   = ListSlimming.HION5ExtraVariables(JetColl)
     HION5SlimmingHelper.ExtraVariables   += PhotonsCPDetailedContent
     HION5SlimmingHelper.ExtraVariables   += ExtraElectronShowerShapes
     HION5SlimmingHelper.ExtraVariables   += ExtraElectronGSFVar
