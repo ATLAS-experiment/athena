@@ -407,7 +407,7 @@ namespace MCTesting {
     ge4.set_event_number(event_number4);
     (void)populateFilteredGenEvent(ge4);
 
-    const IProxyDict* sg = SG::CurrentEventStore::store();
+    IProxyDict* sg = SG::CurrentEventStore::store();
 
     //Testing links to the first dummy GenEvent
 
@@ -508,7 +508,7 @@ namespace MCTesting {
     ge4.set_event_number(event_number4);
     (void)populateFilteredGenEvent(ge4);
 
-    const IProxyDict* sg = SG::CurrentEventStore::store();
+    IProxyDict* sg = SG::CurrentEventStore::store();
 
     //Testing links to the second dummy GenEvent
 
@@ -610,7 +610,7 @@ namespace MCTesting {
     ge4.set_event_number(event_number4);
     (void)populateFilteredGenEvent(ge4);
 
-    const IProxyDict* sg = SG::CurrentEventStore::store();
+    IProxyDict* sg = SG::CurrentEventStore::store();
 
     //Testing links to the third dummy GenEvent
 
@@ -720,7 +720,7 @@ namespace MCTesting {
     ge4.set_event_number(event_number4);
     HepMC::ConstGenParticlePtr particle4 = populateFilteredGenEvent(ge4);
 
-    const IProxyDict* sg = SG::CurrentEventStore::store();
+    IProxyDict* sg = SG::CurrentEventStore::store();
 
     // Testing links to the fourth GenEvent - filtered pile-up truth
 
@@ -820,7 +820,7 @@ namespace MCTesting {
     ge4.set_event_number(event_number4);
     (void)populateFilteredGenEvent(ge4);
 
-    const IProxyDict* sg = SG::CurrentEventStore::store();
+    IProxyDict* sg = SG::CurrentEventStore::store();
 
     // Testing Links to delta-rays (barcode=0) - not recorded in McEventCollection
     const int deltaRayBarcode(0);
@@ -940,7 +940,7 @@ namespace MCTesting {
     (void)populateFilteredGenEvent(ge4);
 
     //Testing links to the first dummy GenEvent
-    const IProxyDict* sg = SG::CurrentEventStore::store();
+    IProxyDict* sg = SG::CurrentEventStore::store();
 
     // Links to GenParticles which were not copied to the current McEventCollection
 
@@ -1257,7 +1257,7 @@ namespace MCTesting {
     inputTestDataHandle->push_back(HepMC::newGenEvent(process_id3, event_number3));
 
     //Testing links to the first dummy GenEvent
-    const IProxyDict* sg = SG::CurrentEventStore::store();
+    IProxyDict* sg = SG::CurrentEventStore::store();
 
     // HepMcParticleLink built using a GenParticle pointer and the
     // position of the GenEvent.
