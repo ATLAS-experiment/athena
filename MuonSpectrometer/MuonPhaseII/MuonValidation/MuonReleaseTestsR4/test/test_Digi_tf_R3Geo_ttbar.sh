@@ -14,18 +14,20 @@
 export ATHENA_PROC_NUMBER=8
 export ATHENA_CORE_NUMBER=8
 
-BASE_DIR="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/MuonRecRTT/OverlayTests_R3/"
-HITS_FILE="${BASE_DIR}/601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep/myHits.pool.root"
+NEVENTS=${1}
+if [ ${NEVENTS} -eq 0 ]; then
+   NEVENTS=100
+fi    
 
 
 GEOMODEL_DB_FILE=$(python -c "from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults; print(MuonPhaseIITestDefaults.GEODB_R3)")
 ATLAS_CONDDB_TAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
 ATLAS_GEO_TAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
-
+HITS_FILE=$(python -c "from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults; print(\",\".join(MuonPhaseIITestDefaults.HITS_PG_R3))")
 
 validNTuple="MuonDigitNTuple.root"
 
- Digi_tf.py \
+Digi_tf.py \
         --CA \
         --inputHITSFile ${HITS_FILE} \
         --multithreaded True \

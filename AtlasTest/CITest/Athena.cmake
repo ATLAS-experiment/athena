@@ -452,8 +452,25 @@ atlas_add_citest( ACTS_TriggerC230
 #################################################################################
 atlas_add_citest( MuonR4_Combined
          SCRIPT runR4_MuonCombRecoSPOTTest.sh 1 5
-         PROPERTIES PROCESSOR 1
-)
+         PROPERTIES PROCESSOR 1)
+atlas_add_citest( MuonR4_Data
+         SCRIPT test_MuonR4Reco_spot.sh 1 5
+         PROPERTIES PROCESSOR 1)
+
+atlas_add_citest( MuonR4_DigiR3
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/Digitization_MuonPhaseII.sh R3
+   LOG_IGNORE_PATTERN "WARNING FPE|ROOT PCM"
+   PROPERTIES PROCESSORS 1)
+
+#################################################################################
+#                 Phase II DD2 tests
+#################################################################################
+
+atlas_add_citest(DigReco_phaseII_DD2 
+   SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DigiReco_phaseII_DD2.sh R4
+   LOG_IGNORE_PATTERN "WARNING FPE|ROOT PCM"
+   PROPERTIES PROCESSORS 1)
+
 #################################################################################
 # Trigger
 #################################################################################

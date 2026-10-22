@@ -35,7 +35,11 @@ def MuonGeoModelCfg(flags):
         result.merge(MuonAlignStoreCfg(flags))
         if flags.Common.ProductionStep != ProductionStep.Simulation:
             from MuonGeometryCnv.MuonReadoutGeomCnvCfg import MuonReadoutGeometryCnvAlgCfg
-            result.merge(MuonReadoutGeometryCnvAlgCfg(flags))
+            # For the moment this converter is still needed for some last clients to run in the phase II setup.
+            # The conversion is throwing some warnings but is successfully converting the relevant parts of the geometry.
+            # Since this converter is only needed temporarily and a significant amount of work would be needed to adress the warnings the output level is set to ERROR to avoid spamming the log file with warnings.  
+            from AthenaCommon.Constants import ERROR
+            result.merge(MuonReadoutGeometryCnvAlgCfg(flags, OutputLevel=ERROR))
         return result
     
     result.merge(MuonGeoModelToolCfg(flags))
