@@ -77,11 +77,11 @@ namespace ADD_CMODE(CP) {
             StatusCode LoadTriggerMap(unsigned int year);
 
             //This function is needed during initialization to parse the histograms to the cache
-            unsigned int encodeHistoName(const std::string &period, const std::string& Trigger, bool isData, const std::string& Systematic, bool isBarrel = true) const;
+            unsigned int encodeHistoName(const std::string_view period, const std::string& Trigger, bool isData, const std::string& Systematic, bool isBarrel = true) const;
             //This function is the equivalent during run time to retrieve the histograms from the cache
             unsigned int encodeHistoName(const std::string& Trigger, const TrigMuonEff::Configuration& configuration, const std::string& Systematic, bool isBarrel = true) const;
         protected:
-            virtual std::shared_ptr<TH1> getEfficiencyHistogram(unsigned int year, const std::string& period, const std::string& trigger, bool isData, const std::string& Systematic, bool isBarrel = true) const;
+            virtual std::shared_ptr<TH1> getEfficiencyHistogram(unsigned int year, const std::string_view period, const std::string& trigger, bool isData, const std::string& Systematic, bool isBarrel = true) const;
             virtual std::shared_ptr<TH1> getEfficiencyHistogram(const std::string& trigger, bool isData, const std::string& Systematic, bool isBarrel = true) const;
         private:
             typedef std::pair<unsigned int, std::string> YearPeriod;
@@ -93,11 +93,11 @@ namespace ADD_CMODE(CP) {
             std::string getTriggerCorrespondingToDimuonTrigger(const std::string& trigger) const;
         protected:
 
-            const std::string& getDataPeriod() const;
+            const std::string_view getDataPeriod() const;
             unsigned int getRunNumber() const;
             unsigned int getYear(unsigned int run) const;
-            const std::string& getDataPeriod(unsigned int run) const;
-            const std::string& getDataPeriod(unsigned int runNumber, unsigned int year) const;
+            const std::string_view getDataPeriod(unsigned int run) const;
+            const std::string_view getDataPeriod(unsigned int runNumber, unsigned int year) const;
        private:
             SG::ReadHandleKey<xAOD::EventInfo> m_eventInfo{this, "EventInfoContName", "EventInfo", "event info key"};
 
@@ -117,7 +117,7 @@ namespace ADD_CMODE(CP) {
             Gaudi::Property<std::string> m_campaign {this, "Campaign", "", "the MC campaign to get the scale factors for"};
 
             // subfolder to load from the calibration db
-            Gaudi::Property<std::string> m_calibrationVersion {this, "CalibrationVersion", "250731_SummerUpdate", "the calibration version to use"};
+            Gaudi::Property<std::string> m_calibrationVersion {this, "CalibrationVersion", "261003_FallUpdate", "the calibration version to use"};
             Gaudi::Property<std::string> m_customInputFolder {this, "CustomInputFolder", "", "the custom input folder to use (debugging only)"};
             Gaudi::Property<std::map<unsigned int, std::string>> m_customInputFilePerYear {this, "CustomInputFilePerYear", {}, "the custom input file to use per year (debugging only)"};
             Gaudi::Property<std::string> m_binning {this, "Binning", "fine", "the binning to use"};
@@ -134,8 +134,7 @@ namespace ADD_CMODE(CP) {
             Gaudi::Property<int> m_ReplicaRandomSeed {this, "ReplicaRandomSeed", 12345, "Random seed for toy replica generation."};
 
             // Map connecting run and year:
-            static const std::map<unsigned int, int> m_runNumber_year;
-            static const std::map<unsigned short int, std::vector< std::tuple<unsigned int,unsigned int,std::string> > > m_year_periods;
+            static const std::map<unsigned short int, std::vector< std::tuple<unsigned int,unsigned int,std::string_view> > > m_year_periods;
     };
 
 }
