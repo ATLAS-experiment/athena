@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -12,7 +12,10 @@ def TrackOverlayDecisionAlgCfg(flags, name="TrackOverlayDecisionAlg",  **kwargs)
     acc = ComponentAccumulator()
     kwargs.setdefault("TruthSelectionTool", acc.popToolsAndMerge(InDetTruthSelectionToolTrackOverlayCfg(flags)))
     kwargs.setdefault("MLThreshold", flags.TrackOverlay.MLThreshold)
-    acc.addEventAlgo(CompFactory.TrackOverlayDecisionAlg.TrackOverlayDecisionAlg(name, **kwargs))
+    # Record the ML threshold in the in-file metadata (/TagInfo)
+    from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
+    acc.merge(TagInfoMgrCfg(flags, tagValuePairs={"TrackOverlayMLThreshold": str(kwargs["MLThreshold"])}))
+    acc.addEventAlgo(CompFactory.TrackOverlay.TrackOverlayDecisionAlg(name, **kwargs))
     return acc
 
 def InvertedTrackOverlayDecisionAlgCfg(flags, name="InvertedTrackOverlayDecisionAlg", **kwargs):

@@ -100,6 +100,8 @@ private:
   bool m_saveFitFunc{false};
 
   std::string m_fitFunction;
+  std::string m_fitParameterSetHG;
+  std::string m_fitParameterSetLG;
   size_t m_2ndDerivStep{1};
   size_t m_peak2ndDerivMinSample{};
   size_t m_peak2ndDerivMinTolerance{1};
@@ -137,11 +139,15 @@ private:
   float m_nominalT0HG{};
   float m_nominalT0LG{};
 
-  float m_nominalTau1{};
-  float m_nominalTau2{};
+  float m_nominalTau1HG{};
+  float m_nominalTau2HG{};
+  float m_nominalTau1LG{};
+  float m_nominalTau2LG{};
 
-  bool m_fixTau1{};
-  bool m_fixTau2{};
+  bool m_fixTau1HG{};
+  bool m_fixTau2HG{};
+  bool m_fixTau1LG{};
+  bool m_fixTau2LG{};
 
   float m_defaultFitTMax{};   // user-provided upper limit on samples to be included in fit
   float m_defaultFitTMin{};   // user-provided upper limit on samples to be included in fit
@@ -238,9 +244,13 @@ private:
 
   bool m_initialized{false};
   bool m_initializedFits{false};
-  std::unique_ptr<ZDCFitWrapper> m_defaultFitWrapper{};
-  std::unique_ptr<ZDCPrePulseFitWrapper> m_prePulseFitWrapper{};
-  std::unique_ptr<ZDCPreExpFitWrapper> m_preExpFitWrapper{};
+
+  std::unique_ptr<ZDCFitWrapper> m_defaultFitWrapperHG{};
+  std::unique_ptr<ZDCFitWrapper> m_defaultFitWrapperLG{};
+  std::unique_ptr<ZDCPrePulseFitWrapper> m_prePulseFitWrapperHG{};
+  std::unique_ptr<ZDCPrePulseFitWrapper> m_prePulseFitWrapperLG{};
+  std::unique_ptr<ZDCPreExpFitWrapper> m_preExpFitWrapperHG{};
+  std::unique_ptr<ZDCPreExpFitWrapper> m_preExpFitWrapperLG{};
 
   // Members to keep track of adjustments to time range used in analysis/fit
   //

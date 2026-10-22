@@ -9,11 +9,15 @@
 #include "xAODTruth/TruthParticle.h"
 #include "xAODTruth/TruthPileupEvent.h"
 #include "PathResolver/PathResolver.h"
+#include "StoreGate/WriteDecorHandle.h"
+// ONNX Runtime include(s).
+#include <onnxruntime_cxx_api.h>
 //
 #include "EventBookkeeperTools/FilterReporter.h"
 #include "StoreGate/ReadHandle.h"
 
 #include <Eigen/Core>
+
 
 namespace TrackOverlayDecisionAlg {
     TrackOverlayDecisionAlg::TrackOverlayDecisionAlg( const std::string& name, ISvcLocator* pSvcLocator ) :
@@ -25,6 +29,7 @@ StatusCode TrackOverlayDecisionAlg::initialize()
 {
   ATH_CHECK(m_filterParams.initialize(false));
   ATH_CHECK( m_eventInfoContainerName.initialize() );
+  ATH_CHECK( m_decIsMCOverlayKey.initialize(!m_invertfilter) );
   ATH_CHECK( m_truthParticleName.initialize( (m_pileupSwitch == "HardScatter" or m_pileupSwitch == "All") and not m_truthParticleName.key().empty() ) );
   ATH_CHECK(m_truthSelectionTool.retrieve(EnableTool {not m_truthParticleName.key().empty()} ));
   ATH_CHECK( m_truthEventName.initialize( (m_pileupSwitch == "HardScatter" or m_pileupSwitch == "All") and not m_truthEventName.key().empty() ) );
@@ -250,14 +255,18 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
     else{
       pass = false;
     }
+    if (!m_invertfilter) {
+        SG::WriteDecorHandle<xAOD::EventInfo, char>  decIsMCOverlay(m_decIsMCOverlayKey, ctx);
+        decIsMCOverlay(*pie) = pass;
+    }
 
     if (m_invertfilter) {
-    pass =! pass;
+        pass =! pass;
     }
     filter.setPassed(pass);
-    ATH_MSG_ALWAYS("End TrackOverlayDecisionAlg, difference in filters: "<<(pass ? "found" : "not found")<<"="<<pass<<", invert="<<m_invertfilter);
+    ATH_MSG_DEBUG("End TrackOverlayDecisionAlg, difference in filters: "<<(pass ? "found" : "not found")<<"="<<pass<<", invert="<<m_invertfilter);
     return StatusCode::SUCCESS;
 }
 
 
-}// end namespace TrackOverlayDecisionAlg
+}// namespace TrackOverlay
