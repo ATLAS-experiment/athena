@@ -26,6 +26,7 @@
 #include "AthenaKernel/errorcheck.h"
 
 #include <string>
+#include <sstream>
 #include <cerrno>
 #include <sys/stat.h>
 
@@ -259,8 +260,10 @@ StatusCode RootDatabase::close(Io::IoFlag /* mode */ )  {
          if( byteCount(READ_COUNTER) > 0 ) {
             for( const auto& reader : m_ntupleReaderMap ) {
                if( reader.second->GetMetrics().IsEnabled() ) {
-                  ATH_MSG_INFO("Printing I/O Statistics for " << nam);
-                  reader.second->GetMetrics().Print((msg()).stream());
+                  std::ostringstream metrics;
+                  reader.second->GetMetrics().Print(metrics);
+                  ATH_MSG_INFO("Printing I/O Statistics for " << nam << " : " << reader.first
+                               << "\n" << metrics.str());
                }
             }
          }
@@ -584,8 +587,14 @@ StatusCode RootDatabase::setOption(const DbOption& opt)  {
       // of the underlying class, e.g., RNTupleReader etc.
       else if ( !strcasecmp(n, "RNTUPLE_BUFFERED_WRITE_ENABLED") ) // bool
           return opt.getValue(m_rntBufferedWriteEnabled);
-      else if ( !strcasecmp(n, "RNTUPLE_READER_METRICS_ENABLED") ) // bool
-          return opt.getValue(m_rntReaderMetricsEnabled);
+      else if ( !strcasecmp(n, "RNTUPLE_READER_METRICS_ENABLED") ) { // bool
+          // Input attributes are set after the first read, enable existing readers too
+          StatusCode sc = opt.getValue(m_rntReaderMetricsEnabled);
+          if( sc.isSuccess() && m_rntReaderMetricsEnabled ) {
+             for( auto& reader : m_ntupleReaderMap ) reader.second->EnableMetrics();
+          }
+          return sc;
+      }
       else if ( !strcasecmp(n, "RNTUPLE_WRITER_METRICS_ENABLED") ) // bool
           return opt.getValue(m_rntWriterMetricsEnabled);
       else if ( !strcasecmp(n, "RNTUPLE_UNSPLIT_FIELD_LIST") ) // string

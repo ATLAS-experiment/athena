@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <ranges>
+#include <sstream>
 
 namespace RootStorageSvc {
 
@@ -170,10 +171,11 @@ int RNTupleWriterHelper::commit() {
 void RNTupleWriterHelper::close() {
   // Print metrics if enabled - this can become DEBUG/VERBOSE
   if (m_ntupleWriter->GetMetrics().IsEnabled()) {
-    auto& log = msg(MSG::INFO);
-    log << "Printing I/O Statistics\n";
-    m_ntupleWriter->GetMetrics().Print(log.stream());
-    log << endmsg;
+    // Commit first, pages may be written only on commit
+    m_ntupleWriter->CommitDataset();
+    std::ostringstream metrics;
+    m_ntupleWriter->GetMetrics().Print(metrics);
+    ATH_MSG_INFO("Printing I/O Statistics\n" << metrics.str());
   }
   // delete the generated default fields (RField should delete the default data
   // objects)
