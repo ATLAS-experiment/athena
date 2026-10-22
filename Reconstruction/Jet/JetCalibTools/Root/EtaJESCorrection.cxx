@@ -216,6 +216,8 @@ void EtaJESCorrection::loadSplineHists(const TString & fileName, const std::stri
     if (not pTH1) continue;
     m_etajesFactors[i].reset(pTH1);
     m_etajesFactors[i]->SetDirectory(nullptr);
+    // only bin contents are used; the stored errors would double the memory
+    m_etajesFactors[i]->Sumw2(false);
   }
   tmpF->Close();
 }
