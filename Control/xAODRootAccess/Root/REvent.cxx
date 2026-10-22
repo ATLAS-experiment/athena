@@ -144,7 +144,9 @@ StatusCode getInfoForFieldCreation( const std::string& key, const xAOD::TVirtual
 
 namespace xAOD::Experimental {
 
-REvent::REvent() : Event("xAOD::Experimental::REvent") {}
+REvent::REvent(const EventContext* ctx /* = nullptr*/)
+  : Event("xAOD::Experimental::REvent", ctx)
+{}
 
 REvent::~REvent() {
 

@@ -75,7 +75,7 @@ public:
   };
 
   /// Default constructor
-  TEvent(EAuxMode mode = kClassAccess);
+  TEvent(EAuxMode mode = kClassAccess, const EventContext* ctx = nullptr);
   /// Constructor connecting the object to an input TFile
   TEvent(::TFile* file, EAuxMode mode = kClassAccess);
   /// Constructor connecting the objects to an input TTree/TChain
