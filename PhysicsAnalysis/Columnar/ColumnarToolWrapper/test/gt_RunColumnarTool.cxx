@@ -18,6 +18,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <AsgTools/AsgTool.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
+#include <ColumnarMode/ColumnarMode.h>
 #include <ColumnarToolWrapper/ToolColumnVectorMap.h>
 #include <ColumnarToolWrapper/ColumnarToolHelpers.h>
 
@@ -43,7 +44,7 @@ namespace columnar
   {
     // create the tool via the component library
     asg::AsgToolConfig config;
-    config.setTypeAndName("columnar::SimpleSelectorExampleTool/" + makeUniqueName());
+    config.setTypeAndName(add_cmode("columnar") + "::SimpleSelectorExampleTool/" + makeUniqueName());
     ToolHandle<asg::AsgTool> toolHandle;
     std::shared_ptr<void> cleanup;
     ASSERT_SUCCESS(config.makeTool(toolHandle, cleanup));
