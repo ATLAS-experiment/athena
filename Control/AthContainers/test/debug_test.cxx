@@ -25,6 +25,7 @@
 
 #ifndef XAOD_STANDALONE
 #include "SGTools/TestStore.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF( std::vector<int>, 12345, 0 )
 #endif
@@ -278,7 +279,7 @@ void test6()
 
 #ifndef XAOD_STANDALONE
   std::unique_ptr<SGTest::TestStore> testStore = SGTest::getTestStore();
-  SG::CurrentEventStore::setStore (testStore.get());
+  Atlas::setProxyDictInEventContext( testStore.get() );
   {
     auto vi = std::make_unique<std::vector<int> >();
     vi->assign ({ 1, 2, 3, 4, 5});

@@ -15,8 +15,8 @@
 
 
 #include "AthContainers/exceptions.h"
+#include "AthContainers/CurrentContext.h"
 #include "TestTools/expect_exception.h"
-#include "SGTools/TestStore.h"
 #include "CxxUtils/checker_macros.h"
 #include <concepts>
 #include <type_traits>
@@ -26,6 +26,11 @@
 #include <string>
 #include <sstream>
 #include <print>
+
+#ifndef XAOD_STANDALONE
+#include "SGTools/TestStore.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
+#endif
 
 
 //************************************************************************
@@ -6570,20 +6575,23 @@ void test2_elconversions1()
     v2.push_back (std::make_unique<D>(i));
 
   SGTest::TestStore store;
-  SG::CurrentEventStore::setStore (&store);
+#ifndef XAOD_STANDALONE
+  Atlas::setProxyDictInEventContext( &store );
+#endif
+  const EventContext& ctx = Gaudi::Hive::currentContext();
   store.record (&v1, "v1");
   store.record (&v2, "v2");
 
   std::vector<ElementLink<DataVector<D> > > links;
   for (int i=0; i<5; i++) {
-    links.emplace_back ("v1", i);
-    links.emplace_back ("v2", i);
+    links.emplace_back ("v1", i, ctx);
+    links.emplace_back ("v2", i, ctx);
   }
 
   std::vector<ElementLink<DataVector<D> > > links2;
   for (int i=0; i<5; i++) {
-    links2.emplace_back ("v2", i);
-    links2.emplace_back ("v1", i);
+    links2.emplace_back ("v2", i, ctx);
+    links2.emplace_back ("v1", i, ctx);
   }
 
   ConstDataVector<DataVector<B> > dv (links);
