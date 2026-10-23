@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import TriggerMenuMT.L1.Menu.Menu_Physics_pp_run3_v1_inputs_legacy as Run3
 

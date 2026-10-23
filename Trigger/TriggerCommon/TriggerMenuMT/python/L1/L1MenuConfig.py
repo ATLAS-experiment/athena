@@ -700,10 +700,11 @@ class L1MenuConfig(object):
         # ------------------
         # CTP
         # ------------------
-        self.l1menu.ctp.checkConnectorAvailability(self.l1menu.connectors, self.menuFilesToLoad)
+        self.l1menu.ctp.checkConnectorAvailability(self.l1menu.connectors, self.menuFilesToLoad[0])
 
         # set the ctp monitoring (only now after the menu is defined)
-        self.l1menu.setupCTPMonitoring()
+        if 'run4' not in self.menuName:
+            self.l1menu.setupCTPMonitoring()
 
         # ------------------
         # final consistency check

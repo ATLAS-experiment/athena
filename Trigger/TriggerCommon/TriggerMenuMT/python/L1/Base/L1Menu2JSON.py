@@ -3,11 +3,12 @@
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
+from .L1Menu import L1Menu as L1MenuRun3
+from .L1MenuRun4 import L1MenuRun4
+class L1MenuJSONConverter:
 
-class L1MenuJSONConverter(object):
-
-    def __init__(self, l1menu = None, outputFile = None, bgsOutputFile = None, inputFile = None ):
-        self.menu          = l1menu
+    def __init__(self, l1menu: L1MenuRun3 | L1MenuRun4, outputFile = None, bgsOutputFile = None, inputFile = None ):
+        self.menu: L1MenuRun3 | L1MenuRun4 = l1menu
         self.inputFile     = inputFile
         self.outputFile    = outputFile
         self.bgsOutputFile = bgsOutputFile
@@ -37,42 +38,78 @@ class L1MenuJSONConverter(object):
 
 
     def generateJSON(self):
+        if isinstance(self.menu, L1MenuRun4):
+            return self.generateJSONRun4(self.menu)
+        else:
+            return self.generateJSONRun3(self.menu)
+
+    def generateJSONRun4(self, menu: L1MenuRun4):
         confObj = {
             "filetype": "l1menu",
-            "name": self.menu.menuName,
-            "run": 3,  # will be useful for later (we also record this for Run 1 and 2)
-            "items": self.menu.items.json(),
+            "name": menu.menuName,
+            "run": 4,
+            "items": menu.items.json(),
             "thresholds": {}
         }
 
         # thresholds
         confObj["thresholds"]["internal"] = {
             "type": "internal",
-            "names": [ f"BGRP{bg.internalNumber}" for bg in self.menu.ctp.bunchGroupSet.bunchGroups] + \
-                     [ f"RNDM{i}" for i in range(0,len(self.menu.ctp.random.names)) ],
-            "randoms": { f"RNDM{i}": { "cut" : c } for i,c in enumerate( self.menu.ctp.random.cuts ) }
+            "names": [ f"BGRP{bg.internalNumber}" for bg in menu.ctp.bunchGroupSet.bunchGroups] + \
+                     [ f"RNDM{i}" for i in range(0,len(menu.ctp.random.names)) ],
+            "randoms": { f"RNDM{i}": { "cut" : c } for i,c in enumerate(menu.ctp.random.cuts ) }
         }
+        confObj["thresholds"].update(menu.thresholds.json() )
 
-        # run 3 thresholds
-        confObj["thresholds"].update( self.menu.thresholds.json() )
-
-        # legacy calo thresholds
-        confObj["thresholds"]["legacyCalo"] = self.menu.thresholds.jsonLegacy()
-
-        # topo algorithms
-        confObj["topoAlgorithms"] = self.menu.topoAlgos.json()
+        confObj["global"] = menu.globalAlgos.json()
 
         # board definition
-        confObj["boards"] = self.menu.boards.json()
+        confObj["boards"] = menu.boards.json()
 
         # connectors definition
-        confObj["connectors"] = self.menu.connectors.json()
+        confObj["connectors"] = menu.connectors.json()
 
         # CTP input cabling definition
-        confObj["ctp"] = self.menu.ctp.json()
+        # confObj["ctp"] = menu.ctp.json()
 
         return confObj
 
+    def generateJSONRun3(self, menu: L1MenuRun3):
+        confObj = {
+            "filetype": "l1menu",
+            "name": menu.menuName,
+            "run": 3,  # will be useful for later (we also record this for Run 1 and 2)
+            "items": menu.items.json(),
+            "thresholds": {}
+        }
+
+        # thresholds
+        confObj["thresholds"]["internal"] = {
+            "type": "internal",
+            "names": [ f"BGRP{bg.internalNumber}" for bg in menu.ctp.bunchGroupSet.bunchGroups] + \
+                     [ f"RNDM{i}" for i in range(0,len(menu.ctp.random.names)) ],
+            "randoms": { f"RNDM{i}": { "cut" : c } for i,c in enumerate( menu.ctp.random.cuts ) }
+        }
+
+        # run 3 thresholds
+        confObj["thresholds"].update( menu.thresholds.json() )
+
+        # legacy calo thresholds
+        confObj["thresholds"]["legacyCalo"] = menu.thresholds.jsonLegacy()
+
+        # topo algorithms
+        confObj["topoAlgorithms"] = menu.topoAlgos.json()
+
+        # board definition
+        confObj["boards"] = menu.boards.json()
+
+        # connectors definition
+        confObj["connectors"] = menu.connectors.json()
+
+        # CTP input cabling definition
+        confObj["ctp"] = menu.ctp.json()
+
+        return confObj
 
     def generateJsonBunchgroupset(self):
         confObj = {

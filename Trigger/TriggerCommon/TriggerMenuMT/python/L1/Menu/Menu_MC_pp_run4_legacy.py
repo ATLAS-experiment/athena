@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from TriggerMenuMT.L1.Base.L1MenuFlags import L1MenuFlags
 import TriggerMenuMT.L1.Menu.Menu_MC_pp_run3_v1 as Run3
