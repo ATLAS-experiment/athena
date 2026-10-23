@@ -21,7 +21,7 @@ class FTagScaleFactorTool: public asg::AsgTool,
   StatusCode initialize() override;
 
   CP::CorrectionCode getScaleFactor(const xAOD::IParticle& p, float& sf, const CP::SystematicSet& sys) const override;
-  std::unordered_map<std::string, int> inferWPs(const xAOD::IParticle* p) const override;
+  std::vector<int> inferWPs(const xAOD::IParticle* p) const override;
 
   // systeamtic stuff
   virtual CP::SystematicSet affectingSystematics() const override;
@@ -34,6 +34,7 @@ class FTagScaleFactorTool: public asg::AsgTool,
   Gaudi::Property<std::string> m_obj_container {this, "ObjContainer", "", "object container"};
   Gaudi::Property<std::string> m_pct_Name {this, "PCTName", "", "pseudo-continuous tagger name"};
   Gaudi::Property<float>       m_invalid_sf_value {this, "InvalidSFValue", -1.f, "Value returned for invalid SF"};
+  Gaudi::Property<std::vector<std::string>> m_selected_wps {this, "WorkingPoints", {}, "List of working-point names to evaluate. Optional- leave empty if inferWPs() is not called."};
 
   size_t m_n_sf_bins = 0;
   size_t m_n_pct_bins = 0;
@@ -41,7 +42,7 @@ class FTagScaleFactorTool: public asg::AsgTool,
   std::function<int(const SG::AuxElement&)> m_sf_func{};
   std::function<int(const SG::AuxElement&)> m_pct_func{};
 
-  std::unordered_map<std::string, std::unordered_set<int>> m_wp_bins{};
+  std::vector<std::unordered_set<int>> m_ordered_wp_bins{};
   std::unordered_map<CP::SystematicSet, std::vector<float>> m_sf_systematics{};
 
   std::vector<float> m_sf_values{};
