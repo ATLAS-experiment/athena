@@ -76,12 +76,6 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     from LeptonTaggers.LeptonTaggersConfig import DecoratePLITAlgsCfg
     acc.merge(DecoratePLITAlgsCfg(flags))
 
-    #===================================================
-    # HEAVY FLAVOR CLASSIFICATION FOR ttbar+jets EVENTS
-    #===================================================
-    from DerivationFrameworkMCTruth.HFClassificationCommonConfig import HFClassificationCommonCfg
-    acc.merge(HFClassificationCommonCfg(flags))
-    
     # ============================
     # Define contents of the format
     # =============================
@@ -155,22 +149,16 @@ def PHYSCoreCfg(flags, name_tag='PHYS', StreamName='StreamDAOD_PHYS', TriggerLis
     # Truth extra content
     if flags.Input.isMC:
 
-        from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
-        addTruth3ContentToSlimmerTool(PHYSSlimmingHelper)
-        PHYSSlimmingHelper.AllVariables += ['TruthLHEParticles','InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import addPhysTruthContentToSlimmerTool
+        addPhysTruthContentToSlimmerTool(PHYSSlimmingHelper)
+        PHYSSlimmingHelper.AllVariables += ['InTimeAntiKt4TruthJets','OutOfTimeAntiKt4TruthJets']
         PHYSSlimmingHelper.ExtraVariables += ["Electrons.TruthLink",
                                               "Muons.TruthLink",
                                               "Photons.TruthLink",
-                                              "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt.HFHadronOriginID",
-                                              "TruthHFWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
-                                              "TruthHFWithDecayVertices.incomingParticleLinks.outgoingParticleLinks.uid.status.x.y.z.t",
-                                              "TruthCharm.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status.barcode.polarizationPhi.polarizationTheta",
                                               "TruthPileupParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status.barcode.PVz.pileupEventNumber.parentHadronID"]
 
-        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
-        acc.merge(AddTauAndDownstreamParticlesCfg(flags))
-        PHYSSlimmingHelper.ExtraVariables += ["TruthTausWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
-                                              "TruthTausWithDecayVertices.incomingParticleLinks.outgoingParticleLinks.uid.status.x.y.z.t"]
+        from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddPhysTruthExtrasCfg
+        acc.merge(AddPhysTruthExtrasCfg(flags))
         
         #Truth jet matching variables - largeR
         PHYSSlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets.R10TruthLabel_R22v1_TruthMatch_Jet",

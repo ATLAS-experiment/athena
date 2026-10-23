@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # PhysCommonConfig
 # Contains the configuration for the common physics containers/decorations used in analysis DAODs
@@ -6,7 +6,6 @@
 # Actual configuration is subcontracted to other config files since some of them are very long
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
 from AthenaCommon.Logging import logging
 msg = logging.getLogger('PHYSCommonConfig')
@@ -32,35 +31,11 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     # MC truth
     if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import (
-            AddStandardTruthContentsCfg,
-            AddHFAndDownstreamParticlesCfg,
-            AddMiniTruthCollectionLinksCfg,
-            AddPVCollectionCfg,
-            TruthClassificationAugmentationsCfg)
-        acc.merge(TruthClassificationAugmentationsCfg(flags))
-        from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
-        PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
-            flags,
-            name = "PhysCommonTruthCharmTool"))
-        CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
-        acc.addEventAlgo(CommonAugmentation("PhysCommonTruthCharmKernel",AugmentationTools=[PhysCommonTruthCharmTool]))
-        acc.merge(AddHFAndDownstreamParticlesCfg(flags))
-        acc.merge(AddStandardTruthContentsCfg
-                  (flags,
-                   navInputCollections = ["TruthElectrons",
-                                          "TruthMuons",
-                                          "TruthPhotons",
-                                          "TruthTaus",
-                                          "TruthNeutrinos",
-                                          "TruthBSM",
-                                          "TruthBottom",
-                                          "TruthTop",
-                                          "TruthBoson",
-                                          "TruthCharm",
-                                          "TruthHFWithDecayParticles"]))
+            AddPhysTruthContentsCfg,
+            AddMiniTruthCollectionLinksCfg)
+        acc.merge(AddPhysTruthContentsCfg(flags))
         # Re-point links on reco objects
         acc.merge(AddMiniTruthCollectionLinksCfg(flags))
-        acc.merge(AddPVCollectionCfg(flags))
 
     # InDet, Muon, Egamma common augmentations
     from DerivationFrameworkInDet.InDetCommonConfig import InDetCommonCfg
