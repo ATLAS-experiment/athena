@@ -265,7 +265,6 @@ namespace MC
 #include "AtlasHepMC/GenEvent.h"
 inline void GeVToMeV(HepMC::GenEvent* evt) { for (auto& p: evt->particles()) { p->set_momentum(p->momentum()*1000); p->set_generated_mass(1000* p->generated_mass());}}
 inline void MeVToGeV(HepMC::GenEvent* evt) { for (auto& p: evt->particles()) { p->set_momentum(p->momentum()*1.0/1000); p->set_generated_mass(1.0/1000* p->generated_mass());} }
-
 #endif
 }
 #endif
