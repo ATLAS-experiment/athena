@@ -41,9 +41,9 @@ public:
 
   virtual StatusCode initialize() override;
 
-  virtual bool selectTrack( const TrackView& t ) const;
+  virtual bool selectTrack( const TrackView& t ) const override;
 
-  virtual bool highestPTonly() const { return m_highestPTOnly; }
+  virtual bool highestPTonly() const override { return m_highestPTOnly; }
 
 private:
 

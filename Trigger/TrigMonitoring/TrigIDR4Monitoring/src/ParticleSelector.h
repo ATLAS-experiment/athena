@@ -36,7 +36,7 @@ public:
 
   /// just take the baseclass version ...
 
-  virtual bool selectTrack( const TrackView& t ) const;
+  virtual bool selectTrack( const TrackView& t ) const override;
   
 };
 

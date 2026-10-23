@@ -41,7 +41,7 @@ public:
 
   virtual StatusCode initialize() override;
 
-  bool selectTrack( const TrackView& t ) const;
+  bool selectTrack( const TrackView& t ) const override;
   
   const xAOD::TruthParticle* getParent( const xAOD::TruthParticle* truth, int flav, int depth=0 ) const;
   
