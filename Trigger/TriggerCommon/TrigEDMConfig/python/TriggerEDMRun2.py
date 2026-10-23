@@ -712,12 +712,6 @@ TriggerHLTList = [
     ('TrigPassFlags#HLT_passflags',                                       'BS ESD AODFULL', 'Steer'),
     
     # particles == L2 List
-    ('MuonFeature#HLT',                                                   'BS ESD AODFULL AODSLIM', 'Muon'),
-    ('IsoMuonFeature#HLT',                                                'BS ESD',                 'Muon'),
-    ('TrigMuonClusterFeature#HLT_MuonCluster',                            'BS ESD', 'Muon'),
-    ('CombinedMuonFeature#HLT',                                           'BS ESD AODFULL AODSLIM', 'Muon'),
-    ('TileMuFeature#HLT',                                                 'BS ESD',                 'Muon'),
-    ('TileTrackMuFeature#HLT',                                            'BS ESD',                 'Muon'),
     ('TrigT2MbtsBits#HLT_T2Mbts',                                         'BS ESD AODFULL AODSLIM', 'MinBias'),
     ('TrigSpacePointCounts#HLT_spacepoints',                              'BS ESD AODFULL AODSLIM', 'MinBias'), # ? do we realy need it!
     ('TrigTrtHitCounts#HLT_TrtHitCount',                                  '',                       'MinBias'),
@@ -796,8 +790,6 @@ TriggerHLTList = [
     ('CaloCellContainer#HLT_TrigT2CaloEgammaCells',                       'BS ESD',   'Egamma'), 
     ('CaloCellContainer#HLT_TrigT2CaloTauCells',                          'BS ESD',   'Tau'), 
 
-    ('MuonFeatureDetails#HLT',                                            'BS ESD AODFULL AODSLIM',  'Muon'),
-
     # == EF List
    ('TrigRoiDescriptor#HLT_secondaryRoI_EF',                             'BS ESD AODFULL AODSLIM',                'Steer'),
    ('TrigRoiDescriptor#HLT_TrigJetRec',                                  'BS ESD',                                'Steer'),
@@ -808,11 +800,6 @@ TriggerHLTList = [
    ('CaloClusterContainer#HLT_TrigCaloClusterMaker',                     '',                                      'Calo'),       # Egamma?
    ('CaloClusterContainer#HLT_TrigCaloClusterMaker_slw',                 '',                                      'Calo'),       # Egamma?
    ('CaloClusterContainer#HLT_TrigCaloClusterMaker_topo',                '',                                      'Calo'),       # Egamma?
-   ('TrigMuonEFContainer#HLT_MuonEF',                                    '',                                      'Muon'),
-   ('TrigMuonEFInfoContainer#HLT_MuonEFInfo',                            'BS ESD AODFULL AODSLIM',                'Muon'),
-   ('TrigMuonEFInfoContainer#HLT_eMuonEFInfo',                           'BS ESD',                'Muon'),
-   ('TrigMuonEFInfoContainer#HLT_MuTagIMO_EF',                           'BS ESD',                'Muon'),
-   ('TrigMuonEFIsolationContainer#HLT_MuonEFIsolation',                  'BS ESD',                'Muon'),
    ('egammaContainer#HLT_egamma_Electrons',                              '',                                      'Egamma'),
    ('egammaContainer#HLT_egamma_SC_Electrons',                              '',                                      'Egamma'),
    ('egammaContainer#HLT_egamma',                                        '',                                      'Egamma'),
@@ -1026,13 +1013,6 @@ EDMDetails[ "TrigRoiDescriptor" ]         = {'persistent':"TrigRoiDescriptorColl
 EDMDetails[ "TrigOperationalInfo" ]       = {'persistent':"TrigOperationalInfoCollection_tlp1",   'typealias':'', 'collection':'TrigOperationalInfoCollection' }
 EDMDetails[ "TrigMonEvent" ]              = {'persistent':"TrigMonEventCollection_tlp1",          'typealias':'', 'collection':'TrigMonEventCollection' }
 EDMDetails[ "TrigInDetTrackCollection" ]  = {'persistent':"TrigInDetTrackCollection_tlp2",        'typealias':'InDetTrk' }
-EDMDetails[ "MuonFeature" ]               = {'persistent':"MuonFeatureContainer_p3",            'typealias':'Mu', 'collection':'MuonFeatureContainer'}
-EDMDetails[ "MuonFeatureDetails" ]        = {'persistent':"MuonFeatureDetailsContainer_p2",       'typealias':'MuDetails', 'collection':'MuonFeatureDetailsContainer'}
-EDMDetails[ "IsoMuonFeature" ]            = {'persistent':"IsoMuonFeatureContainer_p3",           'typealias':'IsoMu', 'collection':'IsoMuonFeatureContainer'}
-EDMDetails[ "TrigMuonClusterFeature" ]    = {'persistent':"TrigMuonClusterFeatureContainer_tlp1", 'typealias':'','collection':'TrigMuonClusterFeatureContainer'}
-EDMDetails[ "CombinedMuonFeature" ]       = {'persistent':"CombinedMuonFeatureContainer_p4",      'typealias':'CombMu', 'collection':'CombinedMuonFeatureContainer'}
-EDMDetails[ "TileMuFeature" ]             = {'persistent':"TileMuFeatureContainer_p2",            'typealias':'TileMu', 'collection':'TileMuFeatureContainer'}
-EDMDetails[ "TileTrackMuFeature" ]        = {'persistent':"TileTrackMuFeatureContainer_p3",       'typealias':'TileTrackMu', 'collection':'TileTrackMuFeatureContainer'}
 EDMDetails[ "TrigEMCluster" ]             = {'persistent':"TrigEMClusterContainer_p4",          'typealias':'EMCl', 'collection':"TrigEMClusterContainer"}
 EDMDetails[ "TrigCaloCluster" ]            = {'persistent':"TrigCaloClusterContainer_p3",          'typealias':'CaloCl', 'collection':"TrigCaloClusterContainer"}
 EDMDetails[ "RingerRings" ]               = {'persistent':"RingerRingsContainer_p2",            'typealias':'RiRi', 'collection':"RingerRingsContainer"}
@@ -1058,10 +1038,7 @@ EDMDetails[ "JetCollection" ]             = {'persistent':"JetCollection_tlp6", 
 EDMDetails[ "CaloClusterContainer" ]      = {'persistent':"CaloClusterContainer_p4",              'typealias':'CaloCl' }
 EDMDetails[ "CaloCellLinkContainer" ]     = {'persistent':"CaloCellLinkContainer_p2",             'typealias':'CaloLk' }
 EDMDetails[ "CaloShowerContainer" ]       = {'persistent':"CaloShowerContainer_p2",               'typealias':'CaloSh' }
-EDMDetails[ "CaloTowerContainer" ]        = {'persistent':"CaloTowerContainer_p1",                'typealias':'' }  
-EDMDetails[ "TrigMuonEFContainer" ]       = {'persistent':"TrigMuonEFContainer_p2",              'typealias':'' }
-EDMDetails[ "TrigMuonEFIsolationContainer" ]   = {'persistent':"TrigMuonEFIsolationContainer_p2",'typealias':'' }
-EDMDetails[ "TrigMuonEFInfoContainer" ]   = {'persistent':"TrigMuonEFInfoContainer_tlp2",         'typealias':'AOD' }
+EDMDetails[ "CaloTowerContainer" ]        = {'persistent':"CaloTowerContainer_p1",                'typealias':'' }
 
 EDMDetails[ "egDetailContainer" ]         = {'persistent':"egDetailContainer_p2",                 'typealias':'egDet' }
 EDMDetails[ "egammaContainer" ]           = {'persistent':"egammaContainer_p2",                   'typealias':'eg' }
@@ -1254,7 +1231,7 @@ EDMDetails['xAOD::CMXRoIAuxContainer']                    = {'persistent': "", '
 #
 # Move list of EDM libraries from HLTTriggerGetter.py to TriggerEDM.py
 #
-EDMLibraries = [ 'TrigSteeringEvent', 'TrigMuonEvent',
+EDMLibraries = [ 'TrigSteeringEvent',
                  'TrigCaloEvent',
                  'TrigInDetEvent',
                  'TrigDecisionEvent',
@@ -1262,7 +1239,6 @@ EDMLibraries = [ 'TrigSteeringEvent', 'TrigMuonEvent',
                  'RecTPCnv',
                  'TrigCaloEventTPCnv',
                  'TrigDecisionEventTPCnv',     'TrigInDetEventTPCnv',
-                 'TrigMuonEventTPCnv',
                  'TrigSteeringEventTPCnv',
                  'TrigTopoEventTPCnv',
                  'RecTPCnvDict',

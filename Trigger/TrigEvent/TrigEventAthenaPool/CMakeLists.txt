@@ -18,21 +18,6 @@ atlas_add_poolcnv_library( TrigEventAthenaPoolPoolCnv
          TrigInDetEvent/TrigTrackCountsCollection.h
          TrigInDetEvent/TrigVertexCounts.h
          TrigInDetEvent/TrigVertexCountsCollection.h
-         TrigMuonEvent/MuonFeature.h
-         TrigMuonEvent/MuonFeatureContainer.h TrigMuonEvent/MuonFeatureDetails.h
-         TrigMuonEvent/MuonFeatureDetailsContainer.h
-         TrigMuonEvent/CombinedMuonFeature.h
-         TrigMuonEvent/CombinedMuonFeatureContainer.h
-         TrigMuonEvent/IsoMuonFeature.h TrigMuonEvent/IsoMuonFeatureContainer.h
-         TrigMuonEvent/TrigMuonClusterFeature.h
-         TrigMuonEvent/TrigMuonClusterFeatureContainer.h
-         TrigMuonEvent/TileMuFeature.h TrigMuonEvent/TileMuFeatureContainer.h
-         TrigMuonEvent/TileTrackMuFeature.h
-         TrigMuonEvent/TileTrackMuFeatureContainer.h
-         TrigMuonEvent/TrigMuonEFContainer.h
-         TrigMuonEvent/TrigMuonEFInfoContainer.h
-         TrigMuonEvent/TrigMuonEFIsolationContainer.h
-         TrigMuonEvent/TrigCombDiMuonContainer.h
          TrigCaloEvent/TrigEMCluster.h
          TrigCaloEvent/TrigEMClusterContainer.h TrigCaloEvent/TrigTauCluster.h
          TrigCaloEvent/TrigTauClusterContainer.h
@@ -50,7 +35,4 @@ atlas_add_poolcnv_library( TrigEventAthenaPoolPoolCnv
                   RootConversions TrigCaloEvent
                   TrigCaloEventTPCnv
                   TrigDecisionEvent TrigDecisionEventTPCnv TrigInDetEvent
-                  TrigInDetEventTPCnv
-                  TrigMuonEvent
-                  TrigMuonEventTPCnv )
-
+                  TrigInDetEventTPCnv )
