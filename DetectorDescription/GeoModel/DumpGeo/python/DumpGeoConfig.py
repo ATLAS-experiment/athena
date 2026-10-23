@@ -313,7 +313,11 @@ if __name__=="__main__":
     parser.add_argument("--outFilename", default="",
                         help="Here you can set a custom name for the output '.db' file. It will replace the name that is built with the geometry tag and the list of filtered Detector Managers, if any.", metavar="FILENAME")
     # parser.add_argument("--filterTreeTops", help="Only output the GeoModel Tree Tops specified in the FILTER list; input is a comma-separated list")
-    parser.add_argument("--filterDetManagers", help="Only output the GeoModel Detector Managers specified in the FILTER list; input is a comma-separated list")
+    parser.add_argument("--filterDetManagers", help="Only output the GeoModel Detector Managers specified in the FILTER list; input is a comma-separated list",
+                        nargs="+", default=[])
+    from AthenaConfiguration.DetectorConfigFlags import allDetectors 
+    parser.add_argument("--detectors", help="Setup a subset of detector to enable ", nargs="+", default=[],
+                         choices=allDetectors)
     parser.add_argument("-f", "--forceOverwrite",
                         help="Force to overwrite an existing SQLite output file with the same name, if any", action = 'store_true')
     parser.add_argument("--showTreetopContent",
@@ -328,12 +332,9 @@ if __name__=="__main__":
     # from the geometry tag and the filtered volumes
     if args.outFilename:
         flags.GeoModel.DumpGeo.OutputFileName = args.outFilename
-    if args.filterDetManagers:
-        flags.GeoModel.DumpGeo.FilterDetManagers = [
-            manager.strip()
-            for manager in args.filterDetManagers.split(",")
-            if manager.strip()
-        ]
+    
+    flags.GeoModel.DumpGeo.FilterDetManagers = args.filterDetManagers
+   
     if args.showTreetopContent:
         flags.GeoModel.DumpGeo.ShowTreetopContent = True
     if args.forceOverwrite:
@@ -434,10 +435,10 @@ if __name__=="__main__":
     from AthenaConfiguration.DetectorConfigFlags import setupDetectorFlags
     setupDetectorFlags(
         flags,
-        None,
+        custom_list=args.detectors,
         use_metadata=not dumpgeo_empty_input,
         toggle_geometry=True,
-        keep_beampipe=True
+        keep_beampipe=len(args.detectors) == 0
     )
     _logger.verbose("+ ... Done")
 
