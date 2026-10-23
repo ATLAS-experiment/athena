@@ -98,7 +98,7 @@ StatusCode IDCalibHypoAlg::execute( const EventContext& context ) const
 
       Decision* newDecision = TrigCompositeUtils::newDecisionIn( outputDecisions, previousDecision, TrigCompositeUtils::hypoAlgNodeName(), context);
 
-      ElementLink<xAOD::TrackParticleContainer> trackEL = ElementLink<xAOD::TrackParticleContainer>(*trackContainer, track->index());
+      ElementLink<xAOD::TrackParticleContainer> trackEL = ElementLink<xAOD::TrackParticleContainer>(*trackContainer, track->index(), context);
       ATH_CHECK( trackEL.isValid() );
 
       ATH_CHECK( newDecision->setObjectLink<xAOD::TrackParticleContainer>(TrigCompositeUtils::featureString(), trackEL) );
