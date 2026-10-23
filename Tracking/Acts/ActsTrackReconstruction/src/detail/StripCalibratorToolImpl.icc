@@ -6,6 +6,7 @@
 #ifndef STRIPCALIBRATORTOOLIMPL_ICC
 #define STRIPCALIBRATORTOOLIMPL_ICC
 
+#include "src/detail/TrackStateFlagHelper.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
 #include "SCT_ReadoutGeometry/StripStereoAnnulusDesign.h"
 #include <stdexcept>
@@ -85,7 +86,7 @@ namespace ActsTrk::detail{
      trackState.allocateCalibrated(1);
      trackState.template calibrated<1>() = pos.template cast<double>();
      trackState.template calibratedCovariance<1>() = cov.template cast<double>();
-     if (flags & 1u<<6) {
+     if (testTrackStateFlag(Acts::TrackStateFlag::IsSplitHit, flags)) {
         trackState.typeFlags().setIsSplitHit();
      }
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 //#include <boost/test/tools/old/interface.hpp>
 #undef NDEBUG
@@ -8,6 +8,8 @@
 #include <boost/test/data/test_case.hpp>
 #include <boost/test/unit_test.hpp>
 #include <Acts/EventData/TrackContainer.hpp>
+#include <Acts/EventData/VectorMultiTrajectory.hpp>
+#include <Acts/EventData/VectorTrackContainer.hpp>
 
 #include "ActsEvent/MultiTrajectory.h"
 #include "ActsEvent/TrackSummaryContainer.h"
@@ -52,6 +54,40 @@ BOOST_FIXTURE_TEST_CASE(AllStaticxAODVaraiblesAreKnown, EmptyBackend) {
     BOOST_CHECK( ActsTrk::TrackSummaryContainer::staticVariables.count(name) == 1);
   }
   BOOST_CHECK( m->trackBackend()->getConstStore()->getAuxIDs().size() == ActsTrk::TrackSummaryContainer::staticVariables.size());
+}
+
+BOOST_FIXTURE_TEST_CASE(StaticColumnsAreKnown, EmptyBackend) {
+  using namespace Acts::HashedStringLiteral;
+  // the summary columns which Acts accesses with the keys in TrackProxyCommon
+  for (Acts::HashedString key :
+       {"tipIndex"_hash, "stemIndex"_hash, "nMeasurements"_hash, "nHoles"_hash,
+        "nOutliers"_hash, "nSharedHits"_hash, "nSplitHits"_hash, "chi2"_hash,
+        "ndf"_hash}) {
+    BOOST_CHECK(m->hasColumn_impl(key));
+  }
+}
+
+BOOST_AUTO_TEST_CASE(SplitHitsRoundTrip) {
+  Acts::VectorTrackContainer srcBackend;
+  Acts::VectorMultiTrajectory srcStates;
+  Acts::TrackContainer src(srcBackend, srcStates);
+  auto srcTrack = src.makeTrack();
+  srcTrack.nSplitHits() = 3;
+
+  // Acts copies the optional column only if both backends have it
+  ActsTrk::MutableTrackSummaryContainer xAODBackend;
+  ActsTrk::MutableMultiTrajectory xAODStates;
+  Acts::TrackContainer xAOD(xAODBackend, xAODStates);
+  auto xAODTrack = xAOD.makeTrack();
+  xAODTrack.copyFromWithoutStates(srcTrack);
+  BOOST_CHECK_EQUAL(xAODTrack.nSplitHits(), 3u);
+
+  Acts::VectorTrackContainer dstBackend;
+  Acts::VectorMultiTrajectory dstStates;
+  Acts::TrackContainer dst(dstBackend, dstStates);
+  auto dstTrack = dst.makeTrack();
+  BOOST_CHECK_NO_THROW(dstTrack.copyFromWithoutStates(xAODTrack));
+  BOOST_CHECK_EQUAL(dstTrack.nSplitHits(), 3u);
 }
 
 

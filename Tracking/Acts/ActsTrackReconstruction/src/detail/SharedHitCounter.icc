@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "src/detail/AtlasUncalibSourceLinkAccessor.h"
@@ -57,7 +57,7 @@ inline auto SharedHitCounter::computeSharedHits(typename track_container_t::Trac
   std::size_t nBadTrackMeasurements = 0;
   for (auto state : track.trackStatesReversed()) {
     // filter for state that is a measurement (not hole, outlier etc):
-    if (!state.typeFlags().hasMeasurement())
+    if (!state.typeFlags().isMeasurement())
       continue;
 
     if (!state.hasUncalibratedSourceLink())
@@ -109,9 +109,11 @@ inline auto SharedHitCounter::computeSharedHits(typename track_container_t::Trac
 
     // if removeSharedHits is false, this is the nominal behaviour
     if (!removeSharedHits) {
-      // only count shared hits if the cluster is not split
-      // NOTE: Assumption is that isSplit only depends on cluster not on track
-      if (!firstState.typeFlags().isSplitHit()){
+      // Only count shared hits if neither track uses the cluster as a split hit.
+      // The split decision can depend on the track (e.g. the NN calibrator uses
+      // the track angles), so check both states. A split hit and a shared hit
+      // exclude each other, and setIsSharedHit() clears the split flag.
+      if (!firstState.typeFlags().isSplitHit() && !state.typeFlags().isSplitHit()) {
         if (!firstState.typeFlags().isSharedHit()) {
           firstState.typeFlags().setIsSharedHit();
           firstTrack.nSharedHits()++;

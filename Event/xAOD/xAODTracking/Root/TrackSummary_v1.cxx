@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODTracking/versions/TrackSummary_v1.h"
 
@@ -26,6 +26,8 @@ DEFINE_API(TrackSummary_v1, unsigned int, ndf, setNdf)
 DEFINE_API(TrackSummary_v1, unsigned int, nOutliers, setnOutliers)
 
 DEFINE_API(TrackSummary_v1, unsigned int, nSharedHits, setnSharedHits)
+
+DEFINE_API(TrackSummary_v1, unsigned int, nSplitHits, setnSplitHits)
 
 DEFINE_API(TrackSummary_v1, unsigned int, tipIndex, setTipIndex)
 

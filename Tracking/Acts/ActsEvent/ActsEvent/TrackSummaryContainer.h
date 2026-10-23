@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSEVENT_TRACKSUMMARYCONTAINER_H
 #define ACTSEVENT_TRACKSUMMARYCONTAINER_H
@@ -219,14 +219,13 @@ constexpr bool ActsTrk::TrackSummaryContainer::hasColumn_impl(
     case "cov"_hash:
     case "nMeasurements"_hash:
     case "nHoles"_hash:
-    case "d0"_hash:
     case "chi2"_hash:
     case "ndf"_hash:
     case "nOutliers"_hash:
-    case "hSharedHits"_hash:
+    case "nSharedHits"_hash:
+    case "nSplitHits"_hash:
     case "tipIndex"_hash:
     case "stemIndex"_hash:
-
       return true;
   }
   for (auto& d : m_decorations) {

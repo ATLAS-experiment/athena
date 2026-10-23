@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODTRACKING_VERSIONS_TRACKSUMMARYAUXCONTAINER_V1_H
 #define XAODTRACKING_VERSIONS_TRACKSUMMARYAUXCONTAINER_V1_H
@@ -26,6 +26,7 @@ namespace xAOD {
         std::vector<unsigned int> ndf;
         std::vector<unsigned int> nOutliers;
         std::vector<unsigned int> nSharedHits;
+        std::vector<unsigned int> nSplitHits;
         std::vector<unsigned int> tipIndex;
         std::vector<unsigned int> stemIndex;
         std::vector<unsigned int> surfaceIndex;
