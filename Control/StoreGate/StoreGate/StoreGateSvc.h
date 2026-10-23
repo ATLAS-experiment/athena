@@ -10,7 +10,7 @@
 //FIXME the CLASS_DEF header is not needed here but was added to work around
 //bad include statements in client code: when using CLASS_DEF put the
 //include below in your header file!
-#include "AthenaKernel/CLASS_DEF.h"
+//#include "AthenaKernel/CLASS_DEF.h"
 
 #include "GaudiKernel/Service.h"
 #include "GaudiKernel/SmartIF.h"
@@ -31,10 +31,8 @@
 #include "GaudiKernel/IAlgContextSvc.h"
 
 #include <cstddef>                     // for size_t
-#include <list>
 #include <memory>                     
 #include <mutex>                       
-#include <string>
 #include <sys/types.h>                  // for off_t
 #include <vector>                       
 #include <type_traits>
@@ -46,9 +44,6 @@
 #include <SGTools/StringPool.h> 
 
 // includes used in StoreGateSvc.icc
-#include "GaudiKernel/IClassIDSvc.h"
-#include "AthenaKernel/IResetable.h"
-#include "AthenaKernel/IIOVSvc.h"
 #include "StoreGate/SGIterator.h"
 #include "StoreGate/SGWPtr.h"
 #include "CxxUtils/checker_macros.h"
@@ -261,23 +256,9 @@ public:
   //@{
 
   /// Record an object with a key, overwriting any existing object with same key
-  template <typename T, typename TKEY> 
-  StatusCode overwrite(T* p2BRegistered, const TKEY& key);
-
-  /// Record an object with a key, overwriting any existing object with same key
-  template <typename T, typename TKEY> 
-  StatusCode overwrite(T* p2BRegistered, const TKEY& key, 
-                       bool allowMods, bool noHist=false);
-
-
-  /// Record an object with a key, overwriting any existing object with same key
-  template <typename T, typename TKEY> 
+  template <typename T, KeyConcept TKEY>
   StatusCode overwrite(std::unique_ptr<T> pUnique, const TKEY& key, 
                        bool allowMods, bool noHist=false);
-
-  /// Record an object with a key, overwriting any existing object with same key, take ownership of the unique_ptr obj
-  template <typename T, typename TKEY> 
-  StatusCode overwrite(std::unique_ptr<T> pUnique, const TKEY& key);
 
   /// Create a proxy object using an IOpaqueAddress and a transient key
   StatusCode recordAddress(const std::string& skey,
@@ -289,28 +270,20 @@ public:
                            bool clearAddressFlag=true,
                            const std::vector<CLID>& bases = {});
 
-  /// make a soft link to the object T* already registered (non-const)
-  template <typename T, typename TLINK> 
-  StatusCode symLink (const T* p2BRegistered, TLINK* p2BLinked );
-
-  /// make a soft link to the object T* already registered (const link)
-  template <typename T, typename TLINK> 
-  StatusCode symLink (const T* p2BRegistered, const TLINK* p2BLinked );
-
   /// make a soft link to the object pointed by id/key
+  // You generally should not be using this.  If base class declarations
+  // are im place, then symlinks for valid conversions should be made
+  // automatically.
+  // If you do need to make a symlink explicitly, prefer doing it
+  // via WriteHandle.
   template <KeyConcept TKEY> 
   StatusCode symLink (const CLID id, const TKEY& key, const CLID linkid);
 
-  /// make an alias to a DataObject (provide data type and old key)
-  template <typename T, typename TKEY, typename AKEY>
-  StatusCode setAlias(const T* p2BAliased, const TKEY& key, const AKEY& aliasKey) requires KeyConcept<TKEY> && KeyConcept<AKEY>;
-
   /// make an alias to a DataObject (provide only valid pointer)
+  // You generally should not be using this.
+  // Prefer calling alias() from Read/WriteHandle.
   template <typename T, typename AKEY>
   StatusCode setAlias(const T* p2BAliased, const AKEY& aliasKey) requires KeyConcept<AKEY>;
-
-  /// make an alias to a DataObject (provide valid proxy)
-  StatusCode setAlias(SG::DataProxy* proxy, const std::string& aliasKey);
 
   /// prevent downstream clients from modifying the pointed-at dobj
   StatusCode setConst(const void* pointer);
@@ -323,55 +296,17 @@ public:
   template <typename T>          
   StatusCode removeDataAndProxy(const T* pObject);
 
-  /// @brief swap the content of 2 keys
-  ///  payload A indexed by keyA will now be accessed via keyB and vice versa
-  ///  Note that the swap is invalidated at event boundaries and/or when
-  ///  somebody clear the store.
-  /// @return false if swap failed
-  bool transientSwap( const CLID& id,
-                      const std::string& keyA, const std::string& keyB );
-
   //@}
 
   /////////////////////////////////////////////////////////////////////////
   /// \name Advanced Client Interface: data object access
   //@{
 
-  /// EXPERTS ONLY: like readPrivateCopy this method returns your own private
-  /// copy of a data object of type T and given key, if available and locked.
-  /// The difference is that it will return you also an object in SG transient 
-  /// memory. Since we are taking ownership of it, the object in SG
-  /// will be released after retrievePrivateCopy returns, making
-  /// all cached references to the object potentially invalid and
-  /// obviously preventing it from being written out.
-  /// Sequencing becomes critical. Caveat emptor!
-  ///
-  /// @param key The key to use for the lookup.
-  /// @return null unique_ptr if the object isn't found or if it is unlocked.
-  template <typename T>
-  std::unique_ptr<T> retrieveUniquePrivateCopy (const std::string& key);
-
   /// Retrieve the main @c CLID of the object recorded in @c StoreGate
   /// with the given "key" 
   /// WARNING: slow!
   template<typename TKEY>
   CLID clid( const TKEY& key ) const;
-
-  /// Retrieve all the @c CLID s (including symlinks) of the object recorded in @c StoreGate
-  /// with the given "key" 
-  /// WARNING: slow!
-  template<typename TKEY>
-  std::vector<CLID> clids( const TKEY& key ) const;  
-
-  /** Return the number of instances of an object of type T 
-   * int i = p_store->typeCount<T>();     
-   * Note that this will return the number of proxies in transient memory
-   * only, will not check with proxy providers. */
-  template <typename T>
-  int typeCount() const;
-
-  /** Return the number of instances of type T (input CLID) */
-  int typeCount(const CLID& id) const;
 
   /** Look up a keyed object in TDS by CLID.
    *  returns false if object not available in TDS or persistent stores 
@@ -451,10 +386,6 @@ public:
 
   ///set the hive event slot pointer: used by the event loop mgrs
   static void setSlot(SG::HiveEventSlot* pSlot);
-
-
-  ///set pointer to default event store: used by ActiveStoreSvc
-  void setDefaultStore(SGImplSvc* pStore);                    
 
 
   /////////////////////////////////////////////////////////////////////////
@@ -784,11 +715,6 @@ private:
   template <typename T, typename TKEY> 
   StatusCode record1(DataObject* obj, T* pObject, const TKEY& key, 
                      bool allowMods, bool resetOnly=true, bool noHist=false) requires KeyConcept<TKEY>;
-
-  // Helper for overwrite.
-  template <typename T, typename TKEY> 
-  StatusCode overwrite1(DataObject* obj, T* pObject, const TKEY& key, 
-                        bool allowMods, bool noHist=false) requires KeyConcept<TKEY>;
 
   bool isSymLinked(const CLID& linkID, SG::DataProxy* dp);
 

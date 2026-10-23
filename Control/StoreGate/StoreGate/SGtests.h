@@ -37,13 +37,9 @@ namespace Athena_test
 
   void testReadPrivateCopy(StoreGateSvc& rSG);
 
-  void testRetrievePrivateCopy(StoreGateSvc& rSG);
-
   void testRemove(StoreGateSvc& rSG);
 
   void testClear(StoreGateSvc& rSG);
-
-  void testTransientSwap(StoreGateSvc& rSG);
 
   void testKeys(StoreGateSvc& rSG);
 

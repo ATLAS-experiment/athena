@@ -48,11 +48,6 @@ StoreGateSvc::retrieve(CLID id,
 }
 
 void 
-StoreGateSvc::setDefaultStore(SGImplSvc* pStore) {
-  m_defaultStore = pStore;
-}
-
-void 
 StoreGateSvc::setSlot(SG::HiveEventSlot* pSlot) { 
   currentHiveEventSlot=pSlot;
   if ( 0 != currentHiveEventSlot) {
@@ -319,12 +314,6 @@ StoreGateSvc::accessData(const CLID& id, const std::string& key) const {
   _SGXCALL(accessData, (id, key), 0);
 }
 
-bool
-StoreGateSvc::transientSwap( const CLID& id,
-                             const std::string& keyA, const std::string& keyB ) {
-  _SGXCALL(transientSwap, (id, keyA, keyB), false);
-}
-
 /// type-less recording of an object with a key, allow possibility of
 /// specifying const-access and history record
 StatusCode 
@@ -368,12 +357,6 @@ StoreGateSvc::dump() const {
   std::string nullS = "\n>>>>>>>NO CURRENT STORE<<<<<<<\n";
   _SGXCALL(dump, (), nullS);  
 }
-
-int
-StoreGateSvc::typeCount(const CLID& clid) const{
-  _SGXCALL(typeCount, (clid), -1);
-}
-
 
 
 typename StoreGateSvc::sgkey_t 
