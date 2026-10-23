@@ -28,7 +28,7 @@
 // Physics object EDMs
 #include "xAODJet/JetContainer.h"
 
-namespace met {
+namespace ADD_CMODE(met) {
 
   static const SG::ConstAccessor<std::string> acc_name("name");
   static const SG::ConstAccessor<MissingETBase::Types::bitmask_t> acc_source("source");
@@ -189,15 +189,15 @@ namespace met {
 
     // Building and adding the "Final" MET object to each WP container
     ATH_MSG_VERBOSE( "Building the Final MET object for each MET WP" );
-    ATH_CHECK( met::buildMETSum( "FinalTrk",  metCont_loose.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track)) );
-    ATH_CHECK( met::buildMETSum( "FinalTrk",  metCont_tight.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track)) );
-    ATH_CHECK( met::buildMETSum( "FinalTrk",  metCont_tghtr.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track)) );
-    ATH_CHECK( met::buildMETSum( "FinalTrk",  metCont_tenac.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track)) );
+    ATH_CHECK( buildMETSum( "FinalTrk",  metCont_loose.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track)) );
+    ATH_CHECK( buildMETSum( "FinalTrk",  metCont_tight.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track)) );
+    ATH_CHECK( buildMETSum( "FinalTrk",  metCont_tghtr.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track)) );
+    ATH_CHECK( buildMETSum( "FinalTrk",  metCont_tenac.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::Track)) );
     // CST uses the LCTopo source bitmask even if the clusters are actually at EM scale
-    ATH_CHECK( met::buildMETSum( "FinalClus", metCont_loose.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::LCTopo)) );
-    ATH_CHECK( met::buildMETSum( "FinalClus", metCont_tight.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::LCTopo)) );
-    ATH_CHECK( met::buildMETSum( "FinalClus", metCont_tghtr.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::LCTopo)) );
-    ATH_CHECK( met::buildMETSum( "FinalClus", metCont_tenac.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::LCTopo)) );
+    ATH_CHECK( buildMETSum( "FinalClus", metCont_loose.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::LCTopo)) );
+    ATH_CHECK( buildMETSum( "FinalClus", metCont_tight.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::LCTopo)) );
+    ATH_CHECK( buildMETSum( "FinalClus", metCont_tghtr.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::LCTopo)) );
+    ATH_CHECK( buildMETSum( "FinalClus", metCont_tenac.get(), static_cast<MissingETBase::Types::bitmask_t>(MissingETBase::Source::Signal::LCTopo)) );
 
     //////////////////// SETTING UP OUTPUT ////////////////////
 

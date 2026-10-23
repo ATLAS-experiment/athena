@@ -38,7 +38,7 @@
 #include "JetCalibTools/JetCalibrationTool.h"
 #endif
 
-namespace met {
+namespace ADD_CMODE(met) {
 
   using iplink_t = ElementLink<xAOD::IParticleContainer>;
 
@@ -602,7 +602,7 @@ namespace met {
         return StatusCode::FAILURE;
       }
       const xAOD::TauJet* tau(static_cast<const xAOD::TauJet*>(obj));
-      if (auto *combp4 = dynamic_cast<TauAnalysisTools::TauResolutionTool*>(&*m_tauResolutionTool)) {
+      if (auto *combp4 = dynamic_cast<ADD_CMODE(TauAnalysisTools)::TauResolutionTool*>(&*m_tauResolutionTool)) {
         pt_reso = combp4->getMvaEnergyResolution(*tau);
       }
 
@@ -1083,4 +1083,4 @@ namespace met {
 
   }
 
-} //> end namespace met
+} //> end namespace ADD_CMODE(met)

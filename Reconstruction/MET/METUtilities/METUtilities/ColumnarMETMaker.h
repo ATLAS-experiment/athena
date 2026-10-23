@@ -41,7 +41,7 @@
 
 // Forward declaration
 
-namespace met {
+namespace ADD_CMODE(met) {
 
   // typedefs
   typedef ElementLink<xAOD::IParticleContainer> obj_link_t;
@@ -331,5 +331,5 @@ namespace met {
     void callEvents (columnar::EventContextRange events) const override;
   };
 
-} //> end namespace met
+} //> end namespace ADD_CMODE(met)
 #endif //> !METUTILITIES_MET_METMAKER_H

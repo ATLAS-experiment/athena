@@ -18,7 +18,9 @@
 // For ATLAS_THREAD_SAFE
 #include "CxxUtils/checker_macros.h"
 
-namespace met {
+#include <ColumnarMode/ColumnarMode.h>
+
+namespace ADD_CMODE(met) {
 
   class METNetHandler {
 

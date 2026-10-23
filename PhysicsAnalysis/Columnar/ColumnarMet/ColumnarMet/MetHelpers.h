@@ -60,7 +60,7 @@ namespace columnar
 
       ObjectId<CI> fillMET(ObjectRange<CI,CM> metMap, const std::string& metKey, const MissingETBase::Types::bitmask_t metSource) const {
         xAOD::MissingET *metPtr = nullptr;
-        if (met::fillMET(metPtr, &metMap.getXAODObject(), metKey, metSource).isFailure())
+        if (ADD_CMODE(met)::fillMET(metPtr, &metMap.getXAODObject(), metKey, metSource).isFailure())
           throw std::runtime_error ("failed to fill MET term \"" + metKey + "\"");
         return ObjectId<CI> (*metPtr);}
 
@@ -70,7 +70,7 @@ namespace columnar
         if (iter != metMap.getXAODObject().end() && *iter != nullptr)
           return StatusCode::SUCCESS;
         xAOD::MissingET *metPtr = nullptr;
-        if (met::fillMET(metPtr, &metMap.getXAODObject(), metKey, metSource).isFailure())
+        if (ADD_CMODE(met)::fillMET(metPtr, &metMap.getXAODObject(), metKey, metSource).isFailure())
           return StatusCode::FAILURE;
         return StatusCode::SUCCESS;
       }

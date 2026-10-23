@@ -27,7 +27,7 @@
 
 #include "METUtilities/METSystematicsTool.h"
 
-namespace met {
+namespace ADD_CMODE(met) {
 
   using namespace xAOD;
 

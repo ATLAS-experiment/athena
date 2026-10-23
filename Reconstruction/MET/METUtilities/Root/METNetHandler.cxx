@@ -9,7 +9,7 @@
 #include "METUtilities/METNetHandler.h"
 #include "PathResolver/PathResolver.h"
 
-namespace met {
+namespace ADD_CMODE(met) {
 
   // Dimensions cannot be changed without altering METNet, so it's OK to hard code these for the foreseeable future.
   METNetHandler::METNetHandler(const std::string& modelName) :

@@ -16,7 +16,7 @@
 using std::string;
 using namespace xAOD;
 
-namespace met {
+namespace ADD_CMODE(met) {
 
   //**********************************************************************
 
