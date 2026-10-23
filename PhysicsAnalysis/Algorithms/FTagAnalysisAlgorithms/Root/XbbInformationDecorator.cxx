@@ -8,13 +8,6 @@
 
 namespace CP
 {
-  XbbInformationDecoratorAlg::XbbInformationDecoratorAlg (const std::string& name,
-                                                          ISvcLocator* pSvcLocator)
-    : EL::AnaAlgorithm (name, pSvcLocator)
-  {
-    declareProperty ("selectionTool", m_selectionTool, "Xbb JSON selection tool");
-  }
-
   StatusCode XbbInformationDecoratorAlg::initialize()
   {
     if (m_taggerDecisionDecoration.empty())

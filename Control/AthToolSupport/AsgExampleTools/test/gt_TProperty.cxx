@@ -211,6 +211,14 @@ namespace asg
       ASSERT_EQ ("'alpha/beta'", str);
     }
 
+    TEST (GetStringHelperTest, get_public_toolhandle)
+    {
+      std::string str;
+      ASSERT_SUCCESS (GetStringHelper<PublicToolHandle<AsgTool> >
+                      ::get (PublicToolHandle<AsgTool> ("alpha/beta"), str));
+      ASSERT_EQ ("'alpha/beta'", str);
+    }
+
     TEST (GetStringHelperTest, get_toolhandle_array)
     {
       std::string str;
@@ -338,6 +346,15 @@ namespace asg
       ASSERT_SUCCESS (SetStringHelper<ToolHandle<AsgTool> >
                       ::set ("'alpha/beta'", value));
       ASSERT_EQ ("alpha/beta", value.typeAndName());
+    }
+
+    TEST (SetStringHelperTest, set_public_toolhandle)
+    {
+      PublicToolHandle<AsgTool> value;
+      ASSERT_SUCCESS (SetStringHelper<PublicToolHandle<AsgTool> >
+                      ::set ("'alpha/beta'", value));
+      ASSERT_EQ ("alpha/beta", value.typeAndName());
+      ASSERT_EQ ("ToolSvc", value.parentName());
     }
 
     TEST (SetStringHelperTest, set_toolhandle_array)

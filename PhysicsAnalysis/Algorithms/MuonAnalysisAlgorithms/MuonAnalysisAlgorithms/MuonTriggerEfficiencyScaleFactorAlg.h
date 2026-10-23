@@ -27,8 +27,8 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    MuonTriggerEfficiencyScaleFactorAlg (const std::string& name,
-                                         ISvcLocator* svcLoc = nullptr);
+    using EL::AnaAlgorithm::AnaAlgorithm;
+
     StatusCode initialize () override;
     StatusCode execute (const EventContext& ctx) override;
 
@@ -36,7 +36,8 @@ namespace CP
 
     /// \brief the trigger efficiency scale factor tool
   private:
-    ToolHandle<IMuonTriggerScaleFactors> m_efficiencyScaleFactorTool;
+    PublicToolHandle<IMuonTriggerScaleFactors> m_efficiencyScaleFactorTool{
+      this, "efficiencyScaleFactorTool", "", "trigger efficiency scale factor tool"};
 
     /// \brief the systematics list we run
   private:

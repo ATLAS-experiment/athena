@@ -23,8 +23,7 @@ namespace CP
   class TrigEventSelectionAlg : public EL::AnaAlgorithm
   {
   public:
-    TrigEventSelectionAlg(const std::string &name,
-                          ISvcLocator *svcLoc = nullptr);
+    using EL::AnaAlgorithm::AnaAlgorithm;
 
     virtual StatusCode initialize() final override;
     virtual StatusCode execute(const EventContext& ctx) final override;
@@ -32,7 +31,7 @@ namespace CP
 
   private:
     /// \brief trigger decision tool handle
-    ToolHandle<Trig::ITrigDecisionTool> m_trigDecisionTool;
+    PublicToolHandle<Trig::ITrigDecisionTool> m_trigDecisionTool{this, "tool", "Trig::TrigDecisionTool/TrigDecisionTool", "trigger decision tool"};
 
     /// \brief the EventInfo to decorate
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey {this, "eventInfo", "EventInfo", "the EventInfo to decorate"};

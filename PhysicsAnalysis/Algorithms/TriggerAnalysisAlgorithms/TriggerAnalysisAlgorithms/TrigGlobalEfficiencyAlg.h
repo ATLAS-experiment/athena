@@ -41,7 +41,7 @@ namespace CP
 {
   class TrigGlobalEfficiencyAlg : public EL::AnaAlgorithm {
   public:
-    TrigGlobalEfficiencyAlg(const std::string& name, ISvcLocator* pSvcLocator = nullptr);
+    using EL::AnaAlgorithm::AnaAlgorithm;
 
     virtual StatusCode initialize() final override;
     virtual StatusCode execute(const EventContext& ctx) final override;
@@ -73,7 +73,7 @@ namespace CP
     Gaudi::Property<bool> m_isRun3Geo {this, "isRun3Geo", false, "use Run 3 settings for efficiency correction tools?"};
 
     /// \brief trigger matching tool
-    ToolHandle<Trig::IMatchingTool> m_trigMatchingTool;
+    PublicToolHandle<Trig::IMatchingTool> m_trigMatchingTool{this, "matchingTool", "", "trigger matching tool"};
 
     /// \brief Trigger Global Efficiency Correction Tool handle
     asg::AnaToolHandle<ITrigGlobalEfficiencyCorrectionTool> m_tgecTool;

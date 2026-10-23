@@ -9,13 +9,6 @@
 #include <TriggerAnalysisAlgorithms/TrigChainNameHelpers.h>
 #include <AsgDataHandles/ReadHandle.h>
 
-CP::TrigEventSelectionAlg::TrigEventSelectionAlg(const std::string &name,
-                                             ISvcLocator *svcLoc)
-  : EL::AnaAlgorithm(name, svcLoc),
-    m_trigDecisionTool("Trig::TrigDecisionTool/TrigDecisionTool")
-{
-  declareProperty("tool", m_trigDecisionTool, "trigger decision tool");
-}
 
 StatusCode CP::TrigEventSelectionAlg::initialize()
 {

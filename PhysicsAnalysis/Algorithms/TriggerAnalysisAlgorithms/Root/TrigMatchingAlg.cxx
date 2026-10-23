@@ -12,13 +12,6 @@
 namespace CP
 {
 
-  TrigMatchingAlg::TrigMatchingAlg(const std::string& name,
-                                         ISvcLocator *svcLoc)
-      : EL::AnaAlgorithm(name, svcLoc)
-  {
-    declareProperty("matchingTool", m_trigMatchingTool, "trigger matching tool");
-  }
-
   StatusCode TrigMatchingAlg::initialize()
   {
     if (m_matchingDecoration.empty())

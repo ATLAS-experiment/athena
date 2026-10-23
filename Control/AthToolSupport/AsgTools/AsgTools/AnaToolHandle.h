@@ -316,6 +316,9 @@ namespace asg
     template <class T2>
     typename std::enable_if<std::is_base_of_v<parentType_t, T2>, StatusCode>::type
     setProperty (const std::string& property, const ToolHandle<T2>& value);
+    template <class T2>
+    typename std::enable_if<std::is_base_of_v<parentType_t, T2>, StatusCode>::type
+    setProperty (const std::string& property, const PublicToolHandle<T2>& value);
     template <class T2> StatusCode
     setProperty (const std::string& property, const AnaToolHandle<T2>& value);
     template <class T2>

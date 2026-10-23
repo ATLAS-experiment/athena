@@ -33,7 +33,7 @@ namespace CP
   {
     /// \brief the standard constructor
   public:
-    TrigMatchingAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using EL::AnaAlgorithm::AnaAlgorithm;
 
   public:
     virtual StatusCode initialize() final override;
@@ -41,7 +41,7 @@ namespace CP
 
     /// \brief trigger decision tool handle
   private:
-    ToolHandle<Trig::IMatchingTool> m_trigMatchingTool;
+    PublicToolHandle<Trig::IMatchingTool> m_trigMatchingTool{this, "matchingTool", "", "trigger matching tool"};
 
     /// \brief the systematics list we run
     SysListHandle m_systematicsList {this};

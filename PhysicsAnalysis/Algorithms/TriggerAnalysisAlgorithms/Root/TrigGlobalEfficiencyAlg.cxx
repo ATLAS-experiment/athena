@@ -15,12 +15,6 @@
 
 #include <utility>
 
-CP::TrigGlobalEfficiencyAlg::TrigGlobalEfficiencyAlg(const std::string &name,
-						     ISvcLocator *svcLoc)
-  : EL::AnaAlgorithm(name, svcLoc)
-{
-  declareProperty("matchingTool", m_trigMatchingTool, "trigger matching tool");
-}
 
 template <typename ToolInterface, typename SetToolPropertiesFn>
 StatusCode CP::TrigGlobalEfficiencyAlg::makeEgammaTools(

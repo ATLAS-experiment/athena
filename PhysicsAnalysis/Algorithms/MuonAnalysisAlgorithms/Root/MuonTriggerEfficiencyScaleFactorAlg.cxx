@@ -20,14 +20,6 @@
 
 namespace CP
 {
-
-  MuonTriggerEfficiencyScaleFactorAlg::MuonTriggerEfficiencyScaleFactorAlg(const std::string& name,
-                                         ISvcLocator* svcLoc)
-    : AnaAlgorithm(name, svcLoc)
-  {
-    declareProperty("efficiencyScaleFactorTool", m_efficiencyScaleFactorTool, "trigger efficiency scale factor tool");
-  }
-
   StatusCode MuonTriggerEfficiencyScaleFactorAlg ::
   initialize ()
   {
