@@ -41,8 +41,6 @@ extern "C" {
 #include <cassert>
 
 
-const int nslots = 4;
-
 struct Context_t
 {
   Context_t (int the_slot = 0) : slot (the_slot) {}
@@ -56,14 +54,16 @@ class TestUpdater
 public:
   using Context_t = ::Context_t;
 
-  TestUpdater()
-    : m_p (nullptr),
+  TestUpdater (unsigned nslots = 4)
+    : m_nslots (nslots),
+      m_p (nullptr),
       m_inGrace (0)
   {
   }
 
   TestUpdater (TestUpdater&& other)
-    : m_p (static_cast<T*> (other.m_p)),
+    : m_nslots (other.m_nslots),
+      m_p (static_cast<T*> (other.m_p)),
       m_inGrace (0)
   {
   }
@@ -81,14 +81,14 @@ public:
     std::lock_guard<std::mutex> g (m_mutex);
     if (m_p) m_garbage.push_back (m_p);
     m_p = p.release();
-    m_inGrace = (~(1<<ctx.slot)) & ((1<<nslots)-1);
+    m_inGrace = (~(1<<ctx.slot)) & ((1<<m_nslots)-1);
   }
 
   void discard (std::unique_ptr<T> p)
   {
     std::lock_guard<std::mutex> g (m_mutex);
     m_garbage.push_back (p.release());
-    m_inGrace = ((1<<nslots)-1);
+    m_inGrace = ((1<<m_nslots)-1);
   }
 
   const T& get() const { return *m_p; }
@@ -133,6 +133,7 @@ public:
 
 
 private:
+  unsigned m_nslots;
   mutable std::mutex m_mutex;
   std::atomic<T*> m_p;
   std::vector<T*> m_garbage;
@@ -439,18 +440,25 @@ class test4_Writer
   : public test4_Base
 {
 public:
-  test4_Writer (int slot, TestSet& set, std::vector<int>& keys);
+  test4_Writer (int slot,
+                TestSet& set,
+                std::vector<int>& keys,
+                int* fin);
   void operator()();
 
 private:
   TestSet& m_set;
-  int m_fin = -1;
+  int* m_fin;
 };
 
 
-test4_Writer::test4_Writer (int slot, TestSet& set, std::vector<int>& keys)
+test4_Writer::test4_Writer (int slot,
+                            TestSet& set,
+                            std::vector<int>& keys,
+                            int* fin)
   : test4_Base (slot, keys),
-    m_set (set)
+    m_set (set),
+    m_fin (fin)
 {
 }
 
@@ -468,7 +476,7 @@ void test4_Writer::operator()()
     }
   }
 
-  assert (m_set.insert (&m_fin).second);
+  assert (m_set.insert (m_fin).second);
 }
 
 
@@ -554,9 +562,10 @@ void test4_Reader::operator()()
 
 void test4_iter()
 {
-  TestSet set {TestSet::Updater_t()};
-
   const int nthread = 4;
+
+  TestSet set {TestSet::Updater_t(nthread)};
+
   std::thread threads[nthread];
   start_mutex.lock();
 
@@ -565,10 +574,12 @@ void test4_iter()
     keys.push_back (i);
   }
 
-  threads[0] = std::thread (test4_Writer (0, set, keys));
+  int fin = -1;
+
+  threads[0] = std::thread (test4_Writer (0, set, keys, &fin));
   threads[1] = std::thread (test4_Iterator (1, set, keys));
-  threads[2] = std::thread (test4_Reader (2, set, keys));
-  threads[3] = std::thread (test4_Reader (3, set, keys));
+  for (size_t i = 2; i < nthread; i++)
+    threads[i] = std::thread (test4_Reader (i, set, keys));
 
   // Try to get the threads starting as much at the same time as possible.
   start_mutex.unlock();
