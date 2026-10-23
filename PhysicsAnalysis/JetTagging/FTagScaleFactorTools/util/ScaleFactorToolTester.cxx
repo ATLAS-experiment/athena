@@ -23,7 +23,7 @@ using namespace testSFTool;
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
 
   if (argc < 5) {
-    ANA_MSG_ERROR (  "No right inputs received!" );
+    ANA_MSG_ERROR (  "Usage: <exe> <DAOD> <JsonConfig> <TaggerName> <PCTName> <WP1,WP2,...>" );
     return 1;
   }
 
@@ -33,13 +33,25 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   std::string PCTName = argv[4];
   std::string objContainer = "AntiKt4EMPFlowJets";
 
+  // Parse comma-separated WP list into a vector, e.g. "WP60,WP70,WP77" -> {"WP60","WP70","WP77"}
+  std::vector<std::string> wpList;
+  if (argc > 5) {
+    std::string taggingWPs = argv[5];
+    std::istringstream ss(taggingWPs);
+    std::string token;
+    while (std::getline(ss, token, ',')) {
+      if (!token.empty()) wpList.push_back(token);
+    }
+  }
+
   asg::StandaloneToolHandle<ftag::IFTagScaleFactorTool> sf_tool("ftag::FTagScaleFactorTool/SFToolTest");
   StatusCode sf_code1 = sf_tool.setProperty( "TaggerName", taggerName);
   StatusCode sf_code2 = sf_tool.setProperty( "JsonConfigFile", JsonConfigFile);
   StatusCode sf_code3 = sf_tool.setProperty( "ObjContainer", objContainer);
   StatusCode sf_code4 = sf_tool.setProperty( "PCTName", PCTName);
-  StatusCode sf_code5 = sf_tool.initialize();
-  std::vector<StatusCode> sf_codes = { sf_code1, sf_code2, sf_code3, sf_code4, sf_code5};
+  StatusCode sf_code5 = sf_tool.setProperty( "WorkingPoints",wpList); 
+  StatusCode sf_code6 = sf_tool.initialize();
+  std::vector<StatusCode> sf_codes = { sf_code1, sf_code2, sf_code3, sf_code4, sf_code5, sf_code6};
 
   for(const auto& code : sf_codes) {
     if(code.isFailure()) {
@@ -76,8 +88,10 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
       float pu = SG::ConstAccessor<float>(taggerName+"_pu")(*particle);
       float ptau = SG::ConstAccessor<float>(taggerName+"_ptau")(*particle);
       ANA_MSG_INFO("pb : pc : pl : ptau = " << pb << ", " << pc << ", " << pu << ", " << ptau);
-      std::unordered_map<std::string, int> wp_map = sf_tool->inferWPs(particle);
-      ANA_MSG_INFO("PCT score: " << wp_map[PCTName]);
+      std::vector<int> wp_decision = sf_tool->inferWPs(particle);
+      for (size_t i = 0; i < wpList.size(); ++i) {
+        ANA_MSG_INFO("decision_" << wpList[i] << ": " << wp_decision[i]);
+      }
 
       float sf = 1.0f;
       for (const auto& var : sysSet) {

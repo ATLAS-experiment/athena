@@ -45,12 +45,24 @@ StatusCode ftag::FTagScaleFactorTool::initialize(){
   std::tie(m_n_sf_bins, m_sf_func) = QuantileFactory::quantileFactory(json_config.at("sf_bins"));
   std::tie(m_n_pct_bins, m_pct_func) = QuantileFactory::quantileFactory(json_config.at("pct_bins"));
 
+  // Load all WPs from JSON into a temporary map (string work done once at init).
+  std::unordered_map<std::string, std::unordered_set<int>> all_wp_bins;
   for (const auto& [name, wp_cfg] : json_config.at("working_points").items()) {
     std::unordered_set<int> bins;
-    for (int b : wp_cfg.at("bins")) {
-      bins.insert(b);
+    for (int b : wp_cfg.at("bins")) { bins.insert(b); }
+    all_wp_bins[name] = std::move(bins);
+  }
+
+  // check user selected WP.
+  m_ordered_wp_bins.reserve(m_selected_wps.value().size());
+  for (const auto& wp_name : m_selected_wps.value()) {
+    auto it = all_wp_bins.find(wp_name);
+    if (it == all_wp_bins.end()) {
+      ATH_MSG_ERROR("Working point '" << wp_name
+                    << "' not found in JSON config: " << m_json_config_path);
+      return StatusCode::FAILURE;
     }
-    m_wp_bins[name] = std::move(bins);
+    m_ordered_wp_bins.push_back(std::move(it->second));
   }
 
   if (m_sf_values.size() != m_n_sf_bins * m_n_pct_bins) {
@@ -117,25 +129,25 @@ CP::CorrectionCode ftag::FTagScaleFactorTool::getScaleFactor(const xAOD::IPartic
 
 }
 
-std::unordered_map<std::string, int> ftag::FTagScaleFactorTool::inferWPs(const xAOD::IParticle* p) const
+std::vector<int> ftag::FTagScaleFactorTool::inferWPs(const xAOD::IParticle* p) const
 {
+
+  if (m_ordered_wp_bins.empty()) {
+    ATH_MSG_FATAL("inferWPs() called but 'WorkingPoints' property was not configured");
+    std::abort();
+  }
+
   const SG::AuxElement& el = *p;
   int pct_bin = m_pct_func(el);
 
-  std::unordered_map<std::string, int> result;
+  std::vector<int> result;
+  result.reserve(m_ordered_wp_bins.size());
 
-  for (const auto& [name, bins] : m_wp_bins) {
-    if (bins.find(pct_bin) != bins.end()) {
-      result[name] = 1;
-    } else {
-      result[name] = 0;
-    }
+  for (const auto& bins : m_ordered_wp_bins) {
+    result.push_back(bins.count(pct_bin) ? 1 : 0);
   }
 
-  result[m_pct_Name] = pct_bin;
-
   return result;
-
 }
 
 CP::SystematicSet ftag::FTagScaleFactorTool::affectingSystematics() const

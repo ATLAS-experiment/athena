@@ -24,11 +24,9 @@ class IFTagScaleFactorTool : virtual public CP::IReentrantSystematicsTool {
   public:
   virtual CP::CorrectionCode getScaleFactor(const xAOD::IParticle& p, float& sf, const CP::SystematicSet& sys) const = 0;
 
-  /// @brief Infer the working-point and Continuous quantile of a jet. 
-  ///
-  /// Reutns a map from WP name to bin index: 0 or 1 for fixed-cut 
-  /// working points, and an integr bin quantile for pseudo-continous.
-  virtual std::unordered_map<std::string, int> inferWPs( const xAOD::IParticle* p ) const = 0; 
+  /// @brief Infer the working-point of a jet. 
+  /// Returns a std::vector of 0 and 1 
+  virtual std::vector<int> inferWPs( const xAOD::IParticle* p ) const = 0; 
 
 }; // class IFTagScaleFactorTool
 }
