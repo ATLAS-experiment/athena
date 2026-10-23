@@ -16,7 +16,7 @@
 #include "AthContainers/CurrentContext.h"
 
 // System include(s).
-#include <iostream>
+#include <print>
 #include <cmath>
 #include <type_traits>
 
@@ -25,8 +25,7 @@
    do {                                                                      \
       const bool result = EXP;                                               \
       if( ! result ) {                                                       \
-         std::cerr << "Expression \"" << #EXP << "\" failed the evaluation"  \
-                   << std::endl;                                             \
+        std::println( std::cerr, "Expression \"{}\" failed the evaluation", #EXP ); \
          return 1;                                                           \
       }                                                                      \
    } while( 0 )
@@ -254,8 +253,7 @@ int main() {
    test_copyIDs();
 
    // Tell the user that everything went okay:
-   std::cout << "All tests with xAOD::ShallowAuxContainer succeeded"
-             << std::endl;
+   std::println( "All tests with xAOD::ShallowAuxContainer succeeded" );
 
    // Create a test object that we'll make a copy of later on.
    xAOD::AuxInfoBase origAuxInfo;
@@ -288,7 +286,7 @@ int main() {
    }
 
    // Tell the user that everything went okay:
-   std::cout << "All tests with xAOD::ShallowAuxInfo succeeded" << std::endl;
+   std::println( "All tests with xAOD::ShallowAuxInfo succeeded" );
 
    // Return gracefully:
    return 0;

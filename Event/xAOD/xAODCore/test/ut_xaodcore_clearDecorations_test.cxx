@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ut_xaodcore_clearDecorations_test.cxx 696772 2015-09-25 08:09:13Z krasznaa $
 
 // System include(s):
 #undef NDEBUG
-#include <iostream>
+#include <print>
 
 // Core include(s):
 #include "AthContainers/DataVector.h"
@@ -22,7 +20,7 @@ template< class CONTAINER >
 void printContainer( const CONTAINER& c ) {
 
    for( const auto* obj : c ) {
-      std::cout << *obj << std::endl;
+      std::println( "{}", *obj );
    }
 
    return;
@@ -46,12 +44,12 @@ int main() {
    }
 
    // Print what it looks like now:
-   std::cout << "Container contents at the start:\n" << std::endl;
+   std::println( "Container contents at the start:\n" );
    printContainer( interface );
 
    // Clear the decorations, and see what happens:
    assert (interface.clearDecorations() == false);
-   std::cout << "\nContainer contents after clearDecorations():\n" << std::endl;
+   std::println( "\nContainer contents after clearDecorations():\n" );
    printContainer( interface );
 
    // Lock the container:
@@ -67,12 +65,12 @@ int main() {
    }
 
    // Print what it looks like now:
-   std::cout << "\nContainer contents after decoration:\n" << std::endl;
+   std::println( "\nContainer contents after decoration:\n" );
    printContainer( interface );
 
    // Clear the decorations, and see what happens:
    assert (interface.clearDecorations() == true);
-   std::cout << "\nContainer contents after clearDecorations():\n" << std::endl;
+   std::println( "\nContainer contents after clearDecorations():\n" );
    printContainer( interface );
 
    return 0;

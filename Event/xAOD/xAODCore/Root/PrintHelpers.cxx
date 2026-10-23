@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 // System include(s):
 #include <cstdint>
-#include <iostream>
+#include <print>
+#include <sstream>
 
 // EDM include(s):
 #include "AthContainers/AuxElement.h"
@@ -36,56 +37,35 @@ template <> struct VecPrintType<uint8_t> {
 } // namespace PrintHelpers
 
 
-template< typename T, typename U >
-std::ostream& operator<< ( std::ostream& out, const std::pair< T, U >& p ) {
-  out << "(";
-  out << static_cast<typename PrintHelpers::VecPrintType<T>::type> (p.first);
-  out << ", ";
-  out << static_cast<typename PrintHelpers::VecPrintType<U>::type> (p.second);
-  out << ")";
+std::ostream& operator<< ( std::ostream& out, const SG::AuxElement& obj ) {
+  std::print( out, "{}", xAOD::toString( obj ) );
   return out;
 }
 
-/// Helper operator to pretty-print the values of vectors
-template< typename T >
-std::ostream& operator<< ( std::ostream& out, const std::vector< T >& vec ) {
-
-   out << "[";
-   for( size_t i = 0; i < vec.size(); ++i ) {
-      out << static_cast<typename PrintHelpers::VecPrintType<T>::type> (vec[ i ]);
-      if( i < vec.size() - 1 ) {
-         out << ", ";
-      }
-   }
-   out << "]";
-
-   // Return the same stream:
-   return out;
-}
-
-std::ostream& operator<< ( std::ostream& out, const SG::AuxElement& obj ) {
+std::string xAOD::toString( const SG::AuxElement& obj ) {
+   std::ostringstream out;
 
    // Start off with some basic information:
-   out << "SG::AuxElement\n";
-   out << "   ";
+   std::println( out, "SG::AuxElement" );
+   std::print( out, "   " );
    if( obj.usingStandaloneStore() ) {
-      out << "using standalone store\n";
+      std::println( out, "using standalone store" );
    } else if( obj.usingPrivateStore() ) {
-      out << "using private store\n";
+      std::println( out, "using private store" );
    } else if( obj.container() ) {
-      out << "in container\n";
+      std::println( out, "in container" );
    } else {
       // If there's no auxiliary store, bail now:
-      out << "standalone object, without auxiliary store";
-      return out;
+      std::print( out, "standalone object, without auxiliary store" );
+      return out.str();
    }
 
    // If the container doesn't have an auxiliary store, bail now:
    if( ! obj.container()->getConstStore() ) {
-      return out;
+      return out.str();
    }
 
-   out << "   Variables:";
+   std::print( out, "   Variables:" );
 
    // Get a convenience pointer to the aux type registry:
    SG::AuxTypeRegistry& reg = SG::AuxTypeRegistry::instance();
@@ -102,16 +82,15 @@ std::ostream& operator<< ( std::ostream& out, const SG::AuxElement& obj ) {
 
    for( SG::auxid_t auxid : auxids_v ) {
 
-      out << "\n    - type: " << reg.getTypeName( auxid )
-          << ", \tname: \"" << reg.getName( auxid );
-      out << "\", \tvalue: ";
+     std::print( out, "\n    - type: {}, \tname: \"{}\", \tvalue: ",
+                 reg.getTypeName( auxid ), reg.getName( auxid ) );
 
 /// Helper macro to make the code slightly shorter
 #define PRINTER( TYPE )                                           \
       do {                                                        \
          SG::ConstAccessor< TYPE > acc( auxid );                  \
          if( acc.isAvailable( obj ) ) {                           \
-            out << acc( obj );                                    \
+            std::print( out, "{}", acc( obj ) );                  \
          }                                                        \
       } while( 0 )
 
@@ -121,21 +100,21 @@ std::ostream& operator<< ( std::ostream& out, const SG::AuxElement& obj ) {
         if( *ti == typeid( unsigned int ) ) {
           SG::AtomicConstAccessor<unsigned int> acc( reg.getName( auxid ) );
           if ( acc.isAvailable( obj )) {
-            out << acc (obj);
+            std::print( out, "{}", acc (obj) );
           }
         }
         else {
-          out << "(Unsupported atomic type)\n";
+          std::println( out, "(Unsupported atomic type)\n" );
         }
       } else if( *ti == typeid( int8_t ) ) {
          SG::ConstAccessor< int8_t > acc( auxid );
          if( acc.isAvailable( obj ) ) {
-           out << static_cast< int >( acc( obj ) );
+           std::print( out, "{}", static_cast< int >( acc( obj ) ) );
          }
       } else if( *ti == typeid( uint8_t ) ) {
          SG::ConstAccessor< uint8_t > acc( auxid );
          if( acc.isAvailable( obj ) ) {
-           out << static_cast< int >( acc( obj ) );
+           std::print( out, "{}", static_cast< int >( acc( obj ) ) );
          }
       } else if( *ti == typeid( int16_t ) ) {
          PRINTER( int16_t );
@@ -187,7 +166,7 @@ std::ostream& operator<< ( std::ostream& out, const SG::AuxElement& obj ) {
          using Stringpair_t = std::pair<std::string, std::string>;
          PRINTER( std::vector< Stringpair_t > );
       } else {
-         out << "N/A";
+         std::print( out, "N/A" );
       }
 
 // Get rid of the temporary macro...
@@ -195,7 +174,7 @@ std::ostream& operator<< ( std::ostream& out, const SG::AuxElement& obj ) {
    }
 
    // Return the same stream:
-   return out;
+   return out.str();
 }
 
 namespace xAOD {
@@ -203,7 +182,7 @@ namespace xAOD {
    void dump( const SG::AuxElement& obj ) {
 
       // Do the printout simply using the operator:
-      std::cout << obj << std::endl;
+      std::println( "{}",  obj );
       return;
    }
 

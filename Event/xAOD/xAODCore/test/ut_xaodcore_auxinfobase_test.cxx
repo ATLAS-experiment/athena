@@ -14,8 +14,7 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthContainers/exceptions.h"
 #include "TestTools/expect_exception.h"
-#include <iostream>
-#include <sstream>
+#include <print>
 #include <cassert>
 
 #ifndef XAOD_STANDALONE
@@ -96,7 +95,7 @@ AuxContainerLinkTest::AuxContainerLinkTest()
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
   AuxInfoTest s1;
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
@@ -122,7 +121,7 @@ void test1()
 // Test handling of linked variables.
 void test_linked()
 {
-  std::cout << "test_linked\n";
+  std::println ("test_linked");
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
   AuxContainerLinkTest s;
@@ -159,7 +158,7 @@ void test_linked()
 // Test getCopyIDs()
 void test_copyIDs()
 {
-  std::cout << "test_copyIDs\n";
+  std::println ("test_copyIDs");
   AuxInfoTest s1;
 
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
@@ -186,7 +185,7 @@ void test_copyIDs()
   }
 
   {
-    std::cout << "Expect a warning here (except in standalone):\n";
+    std::println ("Expect a warning here (except in standalone):");
     SG::auxid_set_t out = s1.getCopyIDs (true);
     assert (out == exp);
   }
@@ -196,7 +195,7 @@ void test_copyIDs()
 // Test toTransient.
 void test_toTransient()
 {
-  std::cout << "test_toTransient\n";
+  std::println ("test_toTransient");
 
 #ifndef XAOD_STANDALONE
   SG::AuxTypeRegistry& r = SG::AuxTypeRegistry::instance();
@@ -220,7 +219,7 @@ void test_toTransient()
 
 int main()
 {
-  std::cout << "ut_xaodcore_auxinfobase_test\n";
+  std::println ("ut_xaodcore_auxinfobase_test");
   test1();
   test_linked();
   test_copyIDs();

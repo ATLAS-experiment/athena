@@ -9,7 +9,7 @@
 
 // System include(s):
 #include <map>
-#include <iostream>
+#include <print>
 
 // EDM include(s):
 #include "AthLinks/DataLink.h"
@@ -149,11 +149,10 @@ namespace xAOD {
       // This can happen when we read the input file in standalone
       // mode in branch access mode. That's unfortunately not
       // compatible with using a shallow copy auxiliary store.
-      std::cout << "xAOD::shallowCopyContainer ERROR Couldn't set up "
-                << "DataLink to the original container's auxiliary store"
-                << std::endl;
-      std::cout << "xAOD::shallowCopyContainer ERROR Are you using the "
-                << "xAOD::TEvent::kBranchAccess access mode?" << std::endl;
+      std::println( "xAOD::shallowCopyContainer ERROR Couldn't set up "
+                    "DataLink to the original container's auxiliary store" );
+      std::println(  "xAOD::shallowCopyContainer ERROR Are you using the "
+                     "xAOD::TEvent::kBranchAccess access mode?" );
       return {};
     }
 
@@ -258,12 +257,10 @@ namespace xAOD {
          // This can happen when we read the input file in standalone
          // mode in branch access mode. That's unfortunately not
          // compatible with using a shallow copy auxiliary store.
-         std::cout << "xAOD::shallowCopyObject ERROR Couldn't set up "
-                   << "DataLink to the original object's auxiliary store"
-                   << std::endl;
-         std::cout << "xAOD::shallowCopyObject ERROR Are you using the "
-                   << "xAOD::TEvent::kBranchAccess access mode?"
-                   << std::endl;
+         std::println( "xAOD::shallowCopyObject ERROR Couldn't set up "
+                       "DataLink to the original object's auxiliary store" );
+         std::println ( "xAOD::shallowCopyObject ERROR Are you using the "
+                        "xAOD::TEvent::kBranchAccess access mode?" );
          std::pair< std::unique_ptr<T>, std::unique_ptr<ShallowAuxInfo> > dummy;
          return dummy;
       }

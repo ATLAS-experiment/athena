@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: Utils.cxx 672864 2015-06-05 16:55:45Z ssnyder $
 
 // System include(s):
 #include <cmath>
+#include <format>
+#include <print>
 #include <sstream>
 
 // Local include(s):
@@ -20,7 +22,7 @@ namespace {
    ///
    /// The amount of times measured by the code should be
    /// representable by this structure. (We shouldn't care about
-   /// sub-milisecond times, or longer running periods than a
+   /// sub-millisecond times, or longer running periods than a
    /// few days...)
    ///
    /// @author Attila Krasznahorkay <Attila.Krasznahorkay@cern.ch>
@@ -29,7 +31,7 @@ namespace {
    /// $Date: 2015-06-05 18:55:45 +0200 (Fri, 05 Jun 2015) $
    ///
    struct TimeStruct {
-      int miliseconds; ///< Elapsed milisecods
+      int milliseconds; ///< Elapsed millisecods
       int seconds; ///< Elapsed seconds
       int minutes; ///< Elapsed minutes
       int hours; ///< Elapsed hours
@@ -47,14 +49,14 @@ namespace {
    ///
    TimeStruct timeToStruct( ::Double_t secs ) {
 
-      // Create the structure, fill its miliseconds variable,
+      // Create the structure, fill its milliseconds variable,
       // and reset all the rest:
       TimeStruct result = {
          static_cast< ::Int_t >( std::fmod( secs, 1.0 ) * 1000.0 ),
          0, 0, 0, 0 };
 
       // If the elapsed time was less than a second, finish here:
-      secs -= ( result.miliseconds * 1e-3 );
+      secs -= ( result.milliseconds * 1e-3 );
       if( std::abs( secs ) < 0.5 ) return result;
 
       // Calculate the number of seconds passed, and finish if the
@@ -104,18 +106,18 @@ namespace xAOD {
       // Construct the string:
       std::ostringstream result;
       if( ts.days ) {
-         result << ts.days << "d ";
+         std::print (result, "{}d ", ts.days);
       }
       if( ts.hours || ts.days ) {
-         result << ts.hours << "h ";
+         std::print (result, "{}h ", ts.hours);
       }
       if( ts.minutes || ts.hours || ts.days ) {
-         result << ts.minutes << "m ";
+         std::print (result, "{}m ", ts.minutes);
       }
       if( ts.seconds || ts.minutes || ts.hours || ts.days ) {
-         result << ts.seconds << "s ";
+         std::print (result, "{}s ", ts.seconds);
       }
-      result << ts.miliseconds << "ms";
+      std::print (result, "{}ms", ts.milliseconds);
 
       return result.str();
    }
@@ -128,21 +130,17 @@ namespace xAOD {
    ///
    std::string Utils::sizeToString( ::Long64_t bytes ) {
 
-      std::ostringstream result;
-
       if( std::abs( bytes ) > 1e12 ) {
-         result << ( bytes * 1e-12 ) << " TB";
+         return std::format( "{} TB", bytes * 1e-12 );
       } else if( std::abs( bytes ) > 1e9 ) {
-         result << ( bytes * 1e-9 ) << " GB";
+         return std::format( "{} GB", bytes * 1e-9 );
       } else if( std::abs( bytes ) > 1e6 ) {
-         result << ( bytes * 1e-6 ) << " MB";
+         return std::format( "{} MB", bytes * 1e-6 );
       } else if( std::abs( bytes ) > 1e3 ) {
-         result << ( bytes * 1e-3 ) << " kB";
+         return std::format( "{} kB", bytes * 1e-3 );
       } else {
-         result << bytes << " bytes";
+         return std::format( "{} bytes", bytes );
       }
-
-      return result.str();
    }
 
    /// @param bytespersec The speed expressed in bytes / seconds
@@ -150,21 +148,17 @@ namespace xAOD {
    ///
    std::string Utils::speedToString( ::Double_t bytespersec ) {
 
-      std::ostringstream result;
-
       if( ::fabs( bytespersec ) > 1e12 ) {
-         result << ( bytespersec * 1e-12 ) << " TB/s";
+         return std::format( "{} TB/s", bytespersec * 1e-12 );
       } else if( ::fabs( bytespersec ) > 1e9 ) {
-         result << ( bytespersec * 1e-9 ) << " GB/s";
+         return std::format( "{} GB/s", bytespersec * 1e-9 );
       } else if( ::fabs( bytespersec ) > 1e6 ) {
-         result << ( bytespersec * 1e-6 ) << " MB/s";
+         return std::format( "{} MB/s", bytespersec * 1e-6 );
       } else if( ::fabs( bytespersec ) > 1e3 ) {
-         result << ( bytespersec * 1e-3 ) << " kB/s";
+         return std::format( "{} kB/s", bytespersec * 1e-3 );
       } else {
-         result << bytespersec << " B/s";
+         return std::format( "{} B/s", bytespersec );
       }
-
-      return result.str();
    }
 
 } // namespace D3PDReader

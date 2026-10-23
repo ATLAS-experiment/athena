@@ -15,7 +15,7 @@
 #include "xAODCore/AuxStoreAccessorMacros.h"
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/DataVector.h"
-#include <iostream>
+#include <print>
 #include <cassert>
 
 
@@ -53,7 +53,7 @@ struct ClusterVars : public xAOD::VariableStruct
 
 void test1()
 {
-  std::cout << "test1\n";
+  std::println ("test1");
 
   ClusterContainer cont;
   ClusterAuxContainer store;
@@ -85,7 +85,7 @@ void test1()
 //coverity[UNCAUGHT_EXCEPT]
 int main()
 {
-  std::cout << "xAODCore/ut_xaodcore_variablestruct_test\n";
+  std::println ("xAODCore/ut_xaodcore_variablestruct_test");
   test1();
   return 0;
 }

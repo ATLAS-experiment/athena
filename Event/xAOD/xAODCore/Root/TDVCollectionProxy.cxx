@@ -24,7 +24,7 @@
 // Local include(s):
 #include "xAODCore/tools/TDVCollectionProxy.h"
 
-#include <iostream>
+#include <print>
 using namespace std;
 const bool mn = getenv("MN_DEBUG");
 
@@ -300,7 +300,10 @@ namespace xAOD {
          const std::type_info &elem_typeinfo = dv->dvlinfo_v().elt_tinfo();
          auto ru_type = RootUtils::Type( SG::normalizedTypeinfoName(elem_typeinfo) );
          // copy vector elements into DataVector
-         if(mn) cout << "PROX:  feed, typename=" << ru_type.getTypeName() << "  typesize=" << ru_type.getSize() <<endl;
+         if(mn) {
+            std::println ("PROX:  feed, typename={}  typesize={}",
+                          ru_type.getTypeName(), ru_type.getSize());
+         }
 
          //char *src = reinterpret_cast<char*>( from );
          for(size_t i=0; i<size; i++) {

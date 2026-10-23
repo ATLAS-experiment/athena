@@ -6,7 +6,7 @@
 #define XAODCORE_AUXINFOBASE_ICC
 
 // System include(s):
-#include <iostream>
+#include <print>
 
 // EDM include(s):
 #include "AthContainers/AuxTypeRegistry.h"
@@ -65,9 +65,9 @@ namespace xAOD {
 
       // Check if this variable name was already registered:
       if( m_vecs[ auxid ] ) {
-         std::cout << "WARNING xAOD::AuxInfoBase::regAuxVar "
-                   << "Re-registering variable with name \""
-                   << name << "\"" << std::endl;
+         std::println( "WARNING xAOD::AuxInfoBase::regAuxVar "
+                       "Re-registering variable with name \"{}\"",
+                       name );
          delete m_vecs[ auxid ];
       }
 
