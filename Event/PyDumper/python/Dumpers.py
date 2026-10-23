@@ -3028,191 +3028,6 @@ def dump_TrigSpacePointCounts_nolist (c, f):
     return
 
 
-def dump_MuonFeature (m, f):
-    fprint (f, '  ', m.roiId(), m.saddress(), m.pt(), m.radius(),
-            m.eta(), m.phi(), m.dir_phi(), m.zeta(), m.dir_zeta(), m.beta(),
-            m.sp1_r(), m.sp1_z(), m.sp1_slope(),
-            m.sp2_r(), m.sp2_z(), m.sp2_slope(),
-            m.sp3_r(), m.sp3_z(), m.sp3_slope(),
-            m.br_radius(), m.br_sagitta(), m.ec_alpha(), m.ec_beta(),
-            m.dq_var1(), m.dq_var2(), m.algoId())
-    return
-@nolist
-def dump_MuonFeature_nolist (m, f):
-    dump_MuonFeature (m, f)
-    return
-
-
-def dump_MuonFeatureDetails (m, f):
-    fprint (f, m.extension_capacity(),
-            m.max_rob_capacity(),
-            m.max_csm_capacity(),
-            m.max_lvl1_emu_capacity(),
-            m.max_rpc_hits_capacity(),
-            m.max_tgc_hits_capacity(),
-            m.max_mdt_hits_capacity(),
-            m.id(), m.te_id(), m.error())
-    fprint (f, '\n  ',
-            m.lvl1_id(), m.lumi_block(), m.muondetmask(),
-            m.roi_id(), m.roi_system(), m.roi_subsystem(),
-            m.roi_sector(), m.roi_number(), m.roi_threshold(),
-            daz(m.roi_eta()), daz(m.roi_phi()),
-            m.rpc_pad_error(), m.tgc_rdo_error())
-    fprint (f, '\n  ',
-            m.rpc1_x(), m.rpc1_y(), m.rpc1_z(),
-            m.rpc2_x(), m.rpc2_y(), m.rpc2_z(),
-            m.rpc3_x(), m.rpc3_y(), m.rpc3_z())
-    fprint (f, '\n  ',
-            m.tgc_Mid1_eta(), m.tgc_Mid1_phi(), m.tgc_Mid1_r(), m.tgc_Mid1_z(),
-            m.tgc_Mid2_eta(), m.tgc_Mid2_phi(), m.tgc_Mid2_r(), m.tgc_Mid2_z(),
-            m.tgc_Mid_rho_chi2(), m.tgc_Mid_rho_N(),
-            m.tgc_Mid_phi_chi2(), m.tgc_Mid_phi_N())
-    fprint (f, '\n  ',
-            m.tgc_Inn_eta(),     m.tgc_Inn_phi(),
-            m.tgc_Inn_r(),       m.tgc_Inn_z(),
-            m.tgc_Inn_rho_std(), m.tgc_Inn_rho_N(),
-            m.tgc_Inn_phi_std(), m.tgc_Inn_phi_N(),
-            m.tgc_PT())
-    fprint (f, '\n  ',
-            m.mdt_Inner_slope(),
-            m.mdt_Inner_intercept(),
-            m.mdt_Inner_Z(),
-            m.mdt_Inner_R(),
-            m.mdt_Inner_fit_chi(),
-            m.mdt_Middle_slope(),
-            m.mdt_Middle_intercept(),
-            m.mdt_Middle_Z(),
-            m.mdt_Middle_R(),
-            m.mdt_Middle_fit_chi(),
-            m.mdt_Outer_slope(),
-            m.mdt_Outer_intercept(),
-            m.mdt_Outer_Z(),
-            m.mdt_Outer_R(),
-            m.mdt_Outer_fit_chi())
-    fprint (f, '\n  ',
-            m.Address(), m.Sagitta(), m.Radius(), m.Slope(), m.Intercept(),
-            m.Alpha(), m.Beta(), m.DeltaR(), m.Speed_over_c(),
-            m.PhiMap(), m.Phi(), m.PhiDir(), m.Pt(), m.Charge())
-    fprint (f, '\n  ',
-            m.eta_pivot_lay0(),
-            m.eta_pivot_lay1(),
-            m.eta_low_0_lay0(),
-            m.eta_low_1_lay0(),
-            m.eta_low_0_lay1(),
-            m.eta_low_1_lay1(),
-            m.eta_high_0_lay0(),
-            m.eta_high_1_lay0(),
-            m.eta_high_0_lay1(),
-            m.eta_high_1_lay1(),
-            m.phi_pivot_lay0(),
-            m.phi_pivot_lay1(),
-            m.phi_low_0_lay0(),
-            m.phi_low_1_lay0(),
-            m.phi_low_0_lay1(),
-            m.phi_low_1_lay1(),
-            m.phi_high_0_lay0(),
-            m.phi_high_1_lay0(),
-            m.phi_high_0_lay1(),
-            m.phi_high_1_lay1())
-
-    fprint (f, '\n  ', formatItemUsingLong (list(m.rob_id())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.csm_id())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.csm_size())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.csm_error())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.removed_rob_id())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.removed_csm_id())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.lvl1_emulation())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.pad_hit_onlineId())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.pad_hit_code())))
-    fprint (f, '\n  ', safe_float_vector(m.pad_hit_x()))
-    fprint (f, '\n  ', safe_float_vector(m.pad_hit_y()))
-    fprint (f, '\n  ', safe_float_vector(m.pad_hit_z()))
-    fprint (f, '\n  ', safe_float_vector(m.pad_hit_r()))
-    fprint (f, '\n  ', safe_float_vector(m.pad_hit_p()))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Inn_rho_hit_phi()))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Inn_rho_hit_r()))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Inn_rho_hit_z()))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Inn_rho_hit_width()))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.tgc_Inn_rho_hit_in_seg())))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Inn_phi_hit_phi()))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Inn_phi_hit_r()))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Inn_phi_hit_z()))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Inn_phi_hit_width()))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.tgc_Inn_phi_hit_in_seg())))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Mid_rho_hit_phi()))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Mid_rho_hit_r()))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Mid_rho_hit_z()))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Mid_rho_hit_width()))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.tgc_Mid_rho_hit_in_seg())))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Mid_phi_hit_phi()))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Mid_phi_hit_r()))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Mid_phi_hit_z()))
-    fprint (f, '\n  ', safe_float_vector(m.tgc_Mid_phi_hit_width()))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.tgc_Mid_phi_hit_in_seg())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.mdt_onlineId())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.mdt_offlineId())))
-    fprint (f, '\n  ', safe_float_vector(m.mdt_tube_r()))
-    fprint (f, '\n  ', safe_float_vector(m.mdt_tube_z()))
-    fprint (f, '\n  ', safe_float_vector(m.mdt_tube_residual()))
-    fprint (f, '\n  ', safe_float_vector(m.mdt_tube_time()))
-    fprint (f, '\n  ', safe_float_vector(m.mdt_tube_space()))
-    fprint (f, '\n  ', safe_float_vector(m.mdt_tube_sigma()))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.extension0())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.extension1())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.extension2())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.extension3())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.extension4())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.extension5())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.extension6())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.extension7())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.extension8())))
-    fprint (f, '\n  ', formatItemUsingLong (list(m.extension9())))
-    return
-
-
-def dump_TileMuFeature (m, f):
-    fprint (f, '  ', m.eta(), m.phi(), m.quality(), list(m.enedep()))
-    return
-
-
-def dump_TileTrackMuFeature (m, f):
-    dump_Fourvec (m, f)
-    fprint (f, m.PtTR_Trk(), m.EtaTR_Trk(), m.PhiTR_Trk(), m.Typ_IDTrk())
-    fprint (f, '\n   ', m.pt(), m.eta(), m.phi(), m.m())
-    fprint (f, '\n   ', m.TileMuLink().isValid())
-    if m.TileMuLink().isValid():
-        fprintln (f, m.TileMuLink().dataID(), m.TileMuLink().index())
-    fprint (f, '\n   ', m.IDScanLink().isValid())
-    if m.IDScanLink().isValid():
-        fprintln (f, m.IDScanLink().dataID(), m.IDScanLink().index())
-    return
-
-
-def dump_CombinedMuonFeature (m, f):
-    fprint (f, '  ')
-    dump_Fourvec (m, f)
-    fprint (f, m.pt(), m.eta(), m.phi(), m.m(), m.sigma_pt())
-    if m.IDTrackLink().isValid() and m.IDTrack():
-        fprint (f, '\n  id')
-        dump_TrigInDetTrack (PyTrigInDetTrack(m.IDTrack()), f)
-    if m.muFastTrackLink().isValid() and m.muFastTrack():
-        fprint (f, '\n  fast')
-        dump_MuonFeature (m.muFastTrack(), f)
-    else:
-        fprintln (f, ' ')
-    return
-@nolist
-def dump_CombinedMuonFeature_nolist (m, f):
-    dump_CombinedMuonFeature (m, f)
-    return
-
-
-def dump_TrigMuonEF (m, f):
-    dump_Fourvec (m, f)
-    fprint (f, m.MuonCode(), m.RoINum(), m.charge())
-    return
-
-
 def dump_TileMu (m, f):
     fprint (f, m.eta(), m.phi(), m.quality(), list(m.enedep()))
     return
@@ -3359,44 +3174,6 @@ def dump_MdtTrackSegment (t, f):
     return
 
 
-def dump_IsoMuonFeature (m, f):
-    dump_Fourvec (m, f)
-    fprint (f, '\n      ', m.getEtInnerConeEC(), m.getEtOuterConeEC(), 
-            m.getEtInnerConeHC(), m.getEtOuterConeHC())
-    fprint (f, '\n      ', m.getNTracksCone(), m.getSumPtTracksCone(),
-            m.getPtMuTracksCone())
-    fprint (f, '\n      ', m.getRoiIdMu(), m.getPtMu(), m.getEtaMu(),
-            m.getPhiMu(), m.getLArWeight(), m.getTileWeight())
-    return
-
-
-def dump_TrigMuonEFTrack (t, f):
-    if not t:
-        fprint (f, None)
-        return
-    dump_Fourvec (t, f)
-    fprint (f, t.charge())
-    return
-
-
-def dump_TrigMuonEFInfoTrack (t, f):
-    fprint (f, '\n ', t.MuonType())
-    fprint (f, '\n    spectrometer: ')
-    dump_TrigMuonEFTrack (t.SpectrometerTrack(), f)
-    fprint (f, '\n    extrapolated: ')
-    dump_TrigMuonEFTrack (t.ExtrapolatedTrack(), f)
-    fprint (f, '\n    combined: ')
-    dump_TrigMuonEFTrack (t.CombinedTrack(), f)
-    return
-
-
-def dump_TrigMuonEFInfo (t, f):
-    fprint (f, t.RoINum())
-    for tt in t.TrackContainer():
-        dump_TrigMuonEFInfoTrack (tt, f)
-    return
-
-
 def dump_RingerRings (r, f):
     fprint (f, list(r.rings()))
     return
@@ -3472,12 +3249,6 @@ def dump_ChamberT0s (m, f):
     return
 
 
-def dump_TrigMuonClusterFeature (m, f):
-    dump_Fourvec (m, f)
-    fprint (f, m.getNRoi(), m.getNTRK(), m.getNJet())
-    return
-
-
 def dump_TrigPassBits (b, f):
     fprint (f, [b.isPassing(i) for i in range(b.size())])
     return
@@ -3493,10 +3264,6 @@ def dump_TrigVertexCounts (v, f):
     fprint (f,
             formatItemUsingLong (list(v.vtxNtrks())),
             list(v.vtxTrkPtSqSum()))
-    return
-
-def dump_TrigMuonEFIsolation (m, f):
-    fprint (f, m.sumTrkPtCone02(), m.sumTrkPtCone03(), m.trackPosition())
     return
 
 
@@ -4805,9 +4572,6 @@ dumpspecs = [
     ["TrigRoiDescriptor",                    dump_TrigRoiDescriptor_nolist],
     ["TrigTauCluster",                       dump_TrigTauCluster_nolist],
     ["TrigSpacePointCounts",                 dump_TrigSpacePointCounts_nolist],
-    ["CombinedMuonFeature",                  dump_CombinedMuonFeature_nolist],
-    ["MuonFeature",                          dump_MuonFeature_nolist],
-    ["TrigMuonEFContainer",                  dump_TrigMuonEF],
     ["TileContainer<TileMu>",                dump_TileMu],
     ["CaloShowerContainer",                  dump_CaloShower],
     ["CaloTowerContainer",                   dump_CaloTowerContainer],
@@ -4826,34 +4590,25 @@ dumpspecs = [
     ['AtlasHitsVector<MDTSimHit>',           dump_MDTSimHit],
     ['AtlasHitsVector<RPCSimHit>',           dump_RPCSimHit],
     ['AtlasHitsVector<TGCSimHit>',           dump_TGCSimHit],
-    ["CombinedMuonFeatureContainer",         dump_CombinedMuonFeature],
-    ["MuonFeatureContainer",                 dump_MuonFeature],
     ["TrigEMClusterContainer",               dump_TrigEMCluster],
     ["TrigTauClusterContainer",              dump_TrigTauCluster],
     ["TrigSpacePointCountsCollection",       dump_TrigSpacePointCounts],
     ["TrigTrackCountsCollection",            dump_TrigTrackCounts],
     ["TrigT2MbtsBitsContainer",              dump_TrigT2MbtsBits],
     ["TrigRoiDescriptorCollection",          dump_TrigRoiDescriptor],
-    ["TileMuFeatureContainer",               dump_TileMuFeature],
-    ["TileTrackMuFeatureContainer",          dump_TileTrackMuFeature],
     ["CosmicMuonCollection",                 dump_CosmicMuon],
     ["MdtTrackSegmentCollection",            dump_MdtTrackSegment],
-    ["IsoMuonFeatureContainer",              dump_IsoMuonFeature],
-    ["TrigMuonEFInfoContainer",              dump_TrigMuonEFInfo],
     ["RingerRingsContainer",                 dump_RingerRings],
     ["TrigTrtHitCountsCollection",           dump_TrigTrtHitCounts],
-    ["MuonFeatureDetailsContainer",          dump_MuonFeatureDetails],
     ["TrigRNNOutputContainer",               dump_TrigRNNOutput],
     ["InDet::InDetLowBetaContainer",         dump_InDetLowBetaCandidate],
     ["LArNoisyROSummary",                    dump_LArNoisyROSummary],
     ["SkimDecisionCollection",               dump_SkimDecision],
     ["RawInfoSummaryForTag",                 dump_RawInfoSummaryForTag],
     ["Muon::ChamberT0s",                     dump_ChamberT0s],
-    ["TrigMuonClusterFeatureContainer",      dump_TrigMuonClusterFeature],
     ["TrigPassBitsCollection",               dump_TrigPassBits],
     ["TrigOperationalInfoCollection",        dump_TrigOperationalInfo],
     ["TrigVertexCountsCollection",           dump_TrigVertexCounts],
-    ["TrigMuonEFIsolationContainer",         dump_TrigMuonEFIsolation],
     ["eflowObjectContainer",                 dump_eflowObjectContainer],
     ["TrigPassFlagsCollection",              dump_TrigPassFlags],
     ["TrackParticleAssocs",                  dump_TrackParticleAssocs],
