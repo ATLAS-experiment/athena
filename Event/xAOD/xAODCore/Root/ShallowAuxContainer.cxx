@@ -1,10 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // System include(s):
 #include <iostream>
-#include <sstream>
+#include <format>
+#include <print>
 #include <stdexcept>
 #include <atomic>
 
@@ -324,26 +325,20 @@ namespace xAOD {
       // Get the type of this variable.
       const std::type_info* type = reg.getType( auxid );
       if( type == nullptr ) {
-         std::ostringstream message;
-         message << "Couldn't find the type of auxiliary ID " << auxid;
-         throw std::runtime_error( message.str() );
+         throw std::runtime_error( std::format( "Couldn't find the type of auxiliary ID {}", auxid ) );
       }
 
       // And the allocator type for this variable.
       const std::type_info* allocType = reg.getAllocType( auxid );
       if( allocType == nullptr ) {
-         std::ostringstream message;
-         message << "Couldn't find the allocator type of auxiliary ID " << auxid;
-         throw std::runtime_error( message.str() );
+         throw std::runtime_error( std::format( "Couldn't find the allocator type of auxiliary ID {}", auxid ) );
       }
 
       // Get the vector factory of this variable.
       const SG::IAuxTypeVectorFactory* factory =
          SG::AuxTypeRegistry::instance().getFactory( *type, *allocType );
       if( factory == nullptr ) {
-         std::ostringstream message;
-         message << "Couldn't find a factory for type " << type->name();
-         throw std::runtime_error( message.str() );
+         throw std::runtime_error( std::format( "Couldn't find a factory for type {}", type->name() ) );
       }
 
       // Copy each element of the parent's decoration.
@@ -443,26 +438,20 @@ namespace xAOD {
       // Get the type of this variable:
       const std::type_info* type = reg.getType( auxid );
       if( type == nullptr ) {
-         std::ostringstream message;
-         message << "Couldn't find the type of auxiliary ID " << auxid;
-         throw std::runtime_error( message.str() );
+         throw std::runtime_error( std::format( "Couldn't find the type of auxiliary ID {}", auxid ) );
       }
 
       // And the allocator type for this variable.
       const std::type_info* allocType = reg.getAllocType( auxid );
       if( allocType == nullptr ) {
-         std::ostringstream message;
-         message << "Couldn't find the allocator type of auxiliary ID " << auxid;
-         throw std::runtime_error( message.str() );
+         throw std::runtime_error( std::format( "Couldn't find the allocator type of auxiliary ID {}", auxid ) );
       }
 
       // First let's get the vector factory of this variable:
       const SG::IAuxTypeVectorFactory* factory =
         SG::AuxTypeRegistry::instance().getFactory( *type, *allocType );
       if( factory == nullptr ) {
-         std::ostringstream message;
-         message << "Couldn't find a factory for type " << type->name();
-         throw std::runtime_error( message.str() );
+         throw std::runtime_error( std::format( "Couldn't find a factory for type {}", type->name() ) );
       }
 
       // Copy each element of the parent's decoration:
@@ -548,10 +537,9 @@ namespace xAOD {
       }
 
       // If not, then where did this variable come from?!?
-      std::cerr << "ERROR xAOD::ShallowAuxContainer::getIOData Unknown "
-                << "variable ("
-                << SG::AuxTypeRegistry::instance().getName( auxid )
-                << ") requested" << std::endl;
+      std::println( std::cerr, "ERROR xAOD::ShallowAuxContainer::getIOData Unknown "
+                    "variable ({}) requested",
+                    SG::AuxTypeRegistry::instance().getName( auxid ) );
       return nullptr;
    }
 
@@ -574,10 +562,9 @@ namespace xAOD {
       }
 
       // If not, then where did this variable come from?!?
-      std::cerr << "ERROR xAOD::ShallowAuxContainer::getIOType Unknown "
-                << "variable ("
-                << SG::AuxTypeRegistry::instance().getName( auxid )
-                << ") requested" << std::endl;
+      std::println( std::cerr, "ERROR xAOD::ShallowAuxContainer::getIOType Unknown "
+                    "variable ({}) requested",
+                    SG::AuxTypeRegistry::instance().getName( auxid ) );
       return nullptr;
    }
 

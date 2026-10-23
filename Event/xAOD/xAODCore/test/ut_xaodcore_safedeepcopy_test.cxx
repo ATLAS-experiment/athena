@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ut_xaodcore_safedeepcopy_test.cxx 682039 2015-07-10 09:15:16Z krasznaa $
 
 // System include(s):
 #include <vector>
-#include <iostream>
+#include <print>
 
 // Core include(s):
 #include "AthContainers/AuxElement.h"
@@ -79,13 +77,13 @@ int main() {
    }
 
    // Print their contents:
-   std::cout << "Content of healthyCont:" << std::endl;
+   std::println( "Content of healthyCont:" );
    for( const SG::AuxElement* el : healthyCont ) {
-      std::cout << "  " << *el << std::endl;
+      std::println( "  {}", *el );
    }
-   std::cout << "Content of brokenCont (before breaking):" << std::endl;
+   std::println( "Content of brokenCont (before breaking):" );
    for( const SG::AuxElement* el : brokenCont ) {
-      std::cout << "  " << *el << std::endl;
+      std::println( "  {}", *el );
    }
 
    // And now break one variable in the container:
@@ -106,9 +104,9 @@ int main() {
    }
 
    // Print the content of the copy:
-   std::cout << "Content of copyCont after healthy deep copy:" << std::endl;
+   std::println( "Content of copyCont after healthy deep copy:" );
    for( const SG::AuxElement* el : copyCont ) {
-      std::cout << "  " << *el << std::endl;
+      std::println( "  {}", *el );
    }
 
    // Use the safe copy function to do the same copy:
@@ -120,10 +118,9 @@ int main() {
    }
 
    // Print the content of the copy:
-   std::cout << "Content of copyCont after healthy safe deep copy:"
-             << std::endl;
+   std::println( "Content of copyCont after healthy safe deep copy:" );
    for( const SG::AuxElement* el : copyCont ) {
-      std::cout << "  " << *el << std::endl;
+      std::println( "  {}", *el );
    }
 
    // Make a safe deep copy of the broken container:
@@ -135,10 +132,9 @@ int main() {
    }
 
    // Print the content of the copy:
-   std::cout << "Content of copyCont after broken safe deep copy:"
-             << std::endl;
+   std::println( "Content of copyCont after broken safe deep copy:" );
    for( const SG::AuxElement* el : copyCont ) {
-      std::cout << "  " << *el << std::endl;
+      std::println( "  {}", *el );
    }
 
    // Finally, just as a double-check, make sure that normal deep copying
@@ -152,12 +148,11 @@ int main() {
       brokenAsExpected = true;
    }
    if( ! brokenAsExpected ) {
-      std::cout << "The assignment operator is no longer broken"
-                << std::endl;
+      std::println( "The assignment operator is no longer broken" );
    }
 
    // Tell the user what happened:
-   std::cout << "All tests succeeded!" << std::endl;
+   std::println( "All tests succeeded!" );
 
    // Return gracefully:
    return 0;

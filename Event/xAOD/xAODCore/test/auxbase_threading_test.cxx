@@ -1,4 +1,4 @@
-// Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 // Local include(s).
 #include "xAODCore/AuxContainerBase.h"
@@ -6,6 +6,7 @@
 
 // System include(s).
 #include <memory>
+#include <print>
 #include <thread>
 #include <vector>
 
@@ -86,7 +87,7 @@ void execute() {
 
 int main() {
 
-   std::cout << "xAODCore/auxbase_threading_test\n";
+  std::println ("xAODCore/auxbase_threading_test");
 
    /// The number of threads to use in the test
    static const int THREADS = 4;

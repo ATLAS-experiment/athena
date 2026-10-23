@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: PrintHelpers.h 646509 2015-02-12 16:43:18Z krasznaa $
@@ -9,7 +9,9 @@
 #define XAODCORE_TOOLS_PRINTHELPERS_H
 
 // System include(s):
+#include <concepts>
 #include <iosfwd>
+#include <format>
 
 // Forward declaration(s):
 namespace SG {
@@ -42,6 +44,28 @@ namespace xAOD {
    ///
    void dump( const SG::AuxElement& obj );
 
+   std::string toString ( const SG::AuxElement& obj );
+
 } // namespace xAOD
+
+
+namespace std {
+
+
+// C++23 compatible formatter.
+template <std::derived_from<SG::AuxElement> T>
+struct formatter<T>
+  : public formatter<string_view>
+{
+  template <class FmtContext>
+  FmtContext::iterator format(const T& k, FmtContext& ctx) const
+  {
+    return formatter<string_view>::format( xAOD::toString( k ), ctx );
+  }
+};
+
+
+} // namespace std
+
 
 #endif // XAODCORE_TOOLS_PRINTHELPERS_H

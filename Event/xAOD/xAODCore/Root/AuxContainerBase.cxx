@@ -258,10 +258,9 @@ namespace xAOD {
             }
             return result;
          } else {
-            std::cout << "ERROR xAOD::AuxContainerBase::getData "
-                      << "Unknown variable ("
-                      << SG::AuxTypeRegistry::instance().getName( auxid )
-                      << ") requested" << std::endl;
+            std::println( "ERROR xAOD::AuxContainerBase::getData "
+                          "Unknown variable ({}) requested",
+                          SG::AuxTypeRegistry::instance().getName( auxid ) );
             return nullptr;
          }
       }
@@ -327,10 +326,9 @@ namespace xAOD {
          }
          // If we don't have a dynamic store, complain:
          else {
-           std::cout << "ERROR xAOD::AuxContainerBase::getDecoration "
-                     << "Can't provide variable "
-                     << SG::AuxTypeRegistry::instance().getName( auxid )
-                     << std::endl;
+           std::println( "ERROR xAOD::AuxContainerBase::getDecoration "
+                         "Can't provide variable {}",
+                         SG::AuxTypeRegistry::instance().getName( auxid ) );
            return nullptr;
          }
        }
@@ -504,10 +502,9 @@ namespace xAOD {
             }
             return result;
          } else {
-            std::cout << "ERROR xAOD::AuxContainerBase::getData "
-                      << "Unknown variable ("
-                      << SG::AuxTypeRegistry::instance().getName( auxid )
-                      << ") requested" << std::endl;
+            std::println( "ERROR xAOD::AuxContainerBase::getData "
+                          "Unknown variable ({}) requested",
+                          SG::AuxTypeRegistry::instance().getName( auxid ) );
             return nullptr;
          }
       }
@@ -691,10 +688,9 @@ namespace xAOD {
          if( m_storeIO ) {
             return m_storeIO->getIOData( auxid );
          } else {
-            std::cout << "ERROR xAOD::AuxContainerBase::getIOData "
-                      << "Unknown variable ("
-                      << SG::AuxTypeRegistry::instance().getName( auxid )
-                      << ") requested" << std::endl;
+            std::println( "ERROR xAOD::AuxContainerBase::getIOData "
+                          "Unknown variable ({}) requested",
+                          SG::AuxTypeRegistry::instance().getName( auxid ) );
             return nullptr;
          }
       }

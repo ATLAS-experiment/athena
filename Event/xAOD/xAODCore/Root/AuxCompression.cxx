@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -11,6 +11,7 @@
 
 // System include(s).
 #include <iostream>
+#include <print>
 
 namespace xAOD {
 
@@ -86,8 +87,8 @@ namespace xAOD {
       if( sub && add ) {
          // At this level we don't have a handle to the MsgStream,
          // otherwise it'd be preferred!
-         std::cerr << "xAOD::AuxCompression ERROR Mixing + and - options for "
-                   << "compression attributes" << std::endl;
+        std::println( std::cerr, "xAOD::AuxCompression ERROR Mixing + and - options for "
+                      "compression attributes" );
          continue;  // Ill-defined input, not compressing anything just in case
       }
 

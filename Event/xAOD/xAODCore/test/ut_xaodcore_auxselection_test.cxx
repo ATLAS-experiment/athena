@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id: ut_xaodcore_auxselection_test.cxx 653257 2015-03-11 11:26:15Z krasznaa $
@@ -21,8 +21,7 @@
    do {                                                             \
       const bool result = EXP;                                      \
       if( ! result ) {                                              \
-         std::cerr << "Expression \"" << #EXP                       \
-                   << "\" failed the evaluation" << std::endl;      \
+         std::println( std::cerr, "Expression \"{}\" failed the evaluation", #EXP ); \
          return 1;                                                  \
       }                                                             \
    } while( 0 )

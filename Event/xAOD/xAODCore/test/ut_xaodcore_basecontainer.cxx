@@ -1,5 +1,6 @@
 #include "xAODCore/BaseContainer.h"
 #include "xAODCore/AuxContainerBase.h"
+#include <print>
 
 int main() {
     xAOD::BaseContainer interface;
@@ -22,7 +23,7 @@ int main() {
     AFloat( *obj ) = 1.9;
 
     for ( auto el: interface) {
-       std::cout << AnInt( *el ) << " " << AFloat( *el ) << std::endl;
+       std::println( "{} {}", AnInt( *el ), AFloat( *el ) );
     }
 
 

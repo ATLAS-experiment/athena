@@ -2,10 +2,6 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// $Id: AuxSelection.cxx 653257 2015-03-11 11:26:15Z krasznaa $
-
-
-
 // EDM include(s):
 #include "AthContainers/AuxTypeRegistry.h"
 
@@ -17,6 +13,7 @@
 // System include(s):
 #include <iostream>
 #include <map>
+#include <print>
 
 namespace {
 
@@ -89,8 +86,8 @@ namespace xAOD {
          }
       }
       if( sub && add ) {
-         std::cerr << "xAOD::AuxSelection ERROR Mixing + and - options for "
-                   << "dynamic attributes" << std::endl;
+         std::println( std::cerr, "xAOD::AuxSelection ERROR Mixing + and - options for "
+                       "dynamic attributes" );
          return fullset;  //better safe than sorry
       }
 
@@ -112,9 +109,9 @@ namespace xAOD {
                std::lock_guard<std::mutex> lock (mentionedMutex);
                if( ::mentionedVariableNames.insert( *name_itr ).second ) {
                   // Apparently we didn't complain about this name yet...
-                  std::cerr << "xAOD::AuxSelection WARNING Selected dynamic "
-                            << "Aux atribute \"" << *name_itr
-                            << "\" not found in the registry" << std::endl;
+                 std::println( std::cerr, "xAOD::AuxSelection WARNING Selected dynamic "
+                               "Aux atribute \"{}\" not found in the registry",
+                               *name_itr );
                }
             }
          }

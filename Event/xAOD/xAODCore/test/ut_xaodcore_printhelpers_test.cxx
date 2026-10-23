@@ -1,12 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: ut_xaodcore_printhelpers_test.cxx 646509 2015-02-12 16:43:18Z krasznaa $
 
 // System include(s):
 #include <cstdint>
-#include <iostream>
+#include <print>
 #include <vector>
 
 // EDM include(s):
@@ -27,7 +25,7 @@ int main() {
 
    // Construct a standalone, empty object:
    SG::AuxElement empty;
-   std::cout << empty << std::endl;
+   std::println( "{}", empty );
 
    // Create an object with a private store, and fill it with some variables:
    SG::AuxElement standalone;
@@ -44,7 +42,7 @@ int main() {
    TypeAValue( standalone ) = TypeA{ 5 };
    SG::Accessor< std::vector< TypeA > > VecTypeAValue( "VecTypeAValue" );
    VecTypeAValue( standalone ) = std::vector< TypeA >{ TypeA{ 6 }, TypeA{ 7 } };
-   std::cout << standalone << std::endl;
+   std::println( "{}", standalone );
 
    // Create a vector, and decorate its first element:
    DataVector< SG::AuxElement > vec;
@@ -56,7 +54,7 @@ int main() {
    LongValue( *element ) = 234;
    SG::Accessor< uint32_t > UInt32Value( "UInt32Value" );
    UInt32Value( *element ) = 0x123;
-   std::cout << *element << std::endl;
+   std::println( "{}", *element );
 
    // Finally, do one test with the dump(...) function as well:
    xAOD::dump( standalone );
