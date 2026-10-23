@@ -20,7 +20,7 @@
 #include "xAODMissingET/MissingETComposition.h"
 #include "xAODJet/Jet.h"
 
-namespace met {
+namespace ADD_CMODE(met) {
 
   using namespace xAOD;
 
@@ -40,28 +40,28 @@ namespace met {
     ATH_MSG_VERBOSE (__PRETTY_FUNCTION__ );
 
     if(!m_configSoftTrkFile.empty()){
-      if( !(addAffectingSystematic( softTrkAffSyst::MET_SoftTrk_ScaleUp  , true /*recommended */ ) &&
-            addAffectingSystematic( softTrkAffSyst::MET_SoftTrk_ScaleDown, true /*recommended */ ) &&
-            addAffectingSystematic( softTrkAffSyst::MET_SoftTrk_ResoPara , true /*recommended */ ) &&
-            addAffectingSystematic( softTrkAffSyst::MET_SoftTrk_ResoPerp , true /*recommended */ ) &&
-            addAffectingSystematic( softTrkAffSyst::MET_SoftTrk_ResoCorr , false /*not recommended */) ) ) {
+      if( !(addAffectingSystematic( met::softTrkAffSyst::MET_SoftTrk_ScaleUp  , true /*recommended */ ) &&
+            addAffectingSystematic( met::softTrkAffSyst::MET_SoftTrk_ScaleDown, true /*recommended */ ) &&
+            addAffectingSystematic( met::softTrkAffSyst::MET_SoftTrk_ResoPara , true /*recommended */ ) &&
+            addAffectingSystematic( met::softTrkAffSyst::MET_SoftTrk_ResoPerp , true /*recommended */ ) &&
+            addAffectingSystematic( met::softTrkAffSyst::MET_SoftTrk_ResoCorr , false /*not recommended */) ) ) {
         ATH_MSG_ERROR("failed to properly add softTrk affecting systematics " );
         return StatusCode::FAILURE;
       }
     }
     if(!m_configSoftCaloFile.empty()){
-      if( !(addAffectingSystematic( softCaloAffSyst::MET_SoftCalo_ScaleUp  , true ) &&
-            addAffectingSystematic( softCaloAffSyst::MET_SoftCalo_ScaleDown, true ) &&
-            addAffectingSystematic( softCaloAffSyst::MET_SoftCalo_ResoPara , true ) &&
-            addAffectingSystematic( softCaloAffSyst::MET_SoftCalo_ResoPerp , true ) &&
-            addAffectingSystematic( softCaloAffSyst::MET_SoftCalo_ResoCorr , false )) ) {
+      if( !(addAffectingSystematic( met::softCaloAffSyst::MET_SoftCalo_ScaleUp  , true ) &&
+            addAffectingSystematic( met::softCaloAffSyst::MET_SoftCalo_ScaleDown, true ) &&
+            addAffectingSystematic( met::softCaloAffSyst::MET_SoftCalo_ResoPara , true ) &&
+            addAffectingSystematic( met::softCaloAffSyst::MET_SoftCalo_ResoPerp , true ) &&
+            addAffectingSystematic( met::softCaloAffSyst::MET_SoftCalo_ResoCorr , false )) ) {
         ATH_MSG_ERROR("failed to properly add softCalo affecting systematics " );
         return StatusCode::FAILURE;
       }
     }
     if(!m_configJetTrkFile.empty()){
-      if( !(addAffectingSystematic( jetTrkAffSyst::MET_JetTrk_ScaleUp  , true /*recommended */ ) &&
-            addAffectingSystematic( jetTrkAffSyst::MET_JetTrk_ScaleDown, true /*recommended */ ) ) ){
+      if( !(addAffectingSystematic( met::jetTrkAffSyst::MET_JetTrk_ScaleUp  , true /*recommended */ ) &&
+            addAffectingSystematic( met::jetTrkAffSyst::MET_JetTrk_ScaleDown, true /*recommended */ ) ) ){
         ATH_MSG_ERROR("failed to properly add jetTrk affecting systematics " );
         return StatusCode::FAILURE;
       }
@@ -115,7 +115,7 @@ namespace met {
     std::string histpath = "";
     std::string suffix   = "";
 
-    ATH_CHECK( extractHistoPath(histfile,systpath,histpath,suffix,SOFTCALO) );//properly sets the paths
+    ATH_CHECK( extractHistoPath(histfile,systpath,histpath,suffix,met::SOFTCALO) );//properly sets the paths
 
     TFile infile(histpath.c_str());
     m_calo_resoperp_pthard_njet_mu.reset(dynamic_cast<TH3D*>( infile.Get((systpath+"/resoperp_"+suffix).c_str()) ));
@@ -147,7 +147,7 @@ namespace met {
     std::string configdir = "";
     std::string blank     = "";
 
-    ATH_CHECK( extractHistoPath(histfile,gsystpath, configdir,blank  ,  JETTRK) );//properly sets the paths
+    ATH_CHECK( extractHistoPath(histfile,gsystpath, configdir,blank  ,  met::JETTRK) );//properly sets the paths
 
     TFile infile((configdir).c_str());
 
@@ -173,7 +173,7 @@ namespace met {
     std::string histpath = "";
     std::string suffix    = "";
 
-    ATH_CHECK( extractHistoPath(histfile,psystpath,histpath, suffix, SOFTTRK) );//properly sets the paths
+    ATH_CHECK( extractHistoPath(histfile,psystpath,histpath, suffix, met::SOFTTRK) );//properly sets the paths
 
     TFile infile(histpath.c_str());
 
@@ -211,18 +211,18 @@ namespace met {
     }
     CP::SystematicVariation systVar = *systSet.begin();
     if     ( systVar == CP::SystematicVariation("") )           m_appliedSystEnum = NONE                  ;
-    else if( systVar == softTrkAffSyst::MET_SoftTrk_ScaleUp)    m_appliedSystEnum = MET_SOFTTRK_SCALEUP   ;
-    else if( systVar == softTrkAffSyst::MET_SoftTrk_ScaleDown)  m_appliedSystEnum = MET_SOFTTRK_SCALEDOWN ;
-    else if( systVar == softTrkAffSyst::MET_SoftTrk_ResoPara)   m_appliedSystEnum = MET_SOFTTRK_RESOPARA  ;
-    else if( systVar == softTrkAffSyst::MET_SoftTrk_ResoPerp)   m_appliedSystEnum = MET_SOFTTRK_RESOPERP  ;
-    else if( systVar == softTrkAffSyst::MET_SoftTrk_ResoCorr)   m_appliedSystEnum = MET_SOFTTRK_RESOCORR  ;
-    else if( systVar == softCaloAffSyst::MET_SoftCalo_ScaleUp)   m_appliedSystEnum = MET_SOFTCALO_SCALEUP  ;
-    else if( systVar == softCaloAffSyst::MET_SoftCalo_ScaleDown) m_appliedSystEnum = MET_SOFTCALO_SCALEDOWN;
-    else if( systVar == softCaloAffSyst::MET_SoftCalo_ResoPara)   m_appliedSystEnum = MET_SOFTCALO_RESOPARA  ;
-    else if( systVar == softCaloAffSyst::MET_SoftCalo_ResoPerp)   m_appliedSystEnum = MET_SOFTCALO_RESOPERP  ;
-    else if( systVar == softCaloAffSyst::MET_SoftCalo_ResoCorr)   m_appliedSystEnum = MET_SOFTCALO_RESOCORR  ;
-    else if( systVar == jetTrkAffSyst::MET_JetTrk_ScaleUp)     m_appliedSystEnum = MET_JETTRK_SCALEUP    ;
-    else if( systVar == jetTrkAffSyst::MET_JetTrk_ScaleDown)   m_appliedSystEnum = MET_JETTRK_SCALEDOWN  ;
+    else if( systVar == met::softTrkAffSyst::MET_SoftTrk_ScaleUp)    m_appliedSystEnum = MET_SOFTTRK_SCALEUP   ;
+    else if( systVar == met::softTrkAffSyst::MET_SoftTrk_ScaleDown)  m_appliedSystEnum = MET_SOFTTRK_SCALEDOWN ;
+    else if( systVar == met::softTrkAffSyst::MET_SoftTrk_ResoPara)   m_appliedSystEnum = MET_SOFTTRK_RESOPARA  ;
+    else if( systVar == met::softTrkAffSyst::MET_SoftTrk_ResoPerp)   m_appliedSystEnum = MET_SOFTTRK_RESOPERP  ;
+    else if( systVar == met::softTrkAffSyst::MET_SoftTrk_ResoCorr)   m_appliedSystEnum = MET_SOFTTRK_RESOCORR  ;
+    else if( systVar == met::softCaloAffSyst::MET_SoftCalo_ScaleUp)   m_appliedSystEnum = MET_SOFTCALO_SCALEUP  ;
+    else if( systVar == met::softCaloAffSyst::MET_SoftCalo_ScaleDown) m_appliedSystEnum = MET_SOFTCALO_SCALEDOWN;
+    else if( systVar == met::softCaloAffSyst::MET_SoftCalo_ResoPara)   m_appliedSystEnum = MET_SOFTCALO_RESOPARA  ;
+    else if( systVar == met::softCaloAffSyst::MET_SoftCalo_ResoPerp)   m_appliedSystEnum = MET_SOFTCALO_RESOPERP  ;
+    else if( systVar == met::softCaloAffSyst::MET_SoftCalo_ResoCorr)   m_appliedSystEnum = MET_SOFTCALO_RESOCORR  ;
+    else if( systVar == met::jetTrkAffSyst::MET_JetTrk_ScaleUp)     m_appliedSystEnum = MET_JETTRK_SCALEUP    ;
+    else if( systVar == met::jetTrkAffSyst::MET_JetTrk_ScaleDown)   m_appliedSystEnum = MET_JETTRK_SCALEDOWN  ;
     else{
       ATH_MSG_WARNING("unsupported systematic applied " );
       return StatusCode::FAILURE;
@@ -662,7 +662,7 @@ namespace met {
                                                   std::string & systpath ,
                                                   std::string & histpath,
                                                   std::string & suffix   ,
-                                                  SystType const & type
+                                                  met::SystType const & type
                                                   ){
     ATH_MSG_VERBOSE (__PRETTY_FUNCTION__);
     TEnv reader;
@@ -672,13 +672,13 @@ namespace met {
     if(m_useDevArea) { configpath += "dev/"; }
 
     switch(type){
-    case SOFTCALO   :  configfile += m_configSoftCaloFile.value();
+    case met::SOFTCALO   :  configfile += m_configSoftCaloFile.value();
       configpath  = PathResolverFindCalibFile(m_configPrefix.value()+m_configSoftCaloFile.value());
         break;
-    case SOFTTRK    :  configfile += m_configSoftTrkFile.value();
+    case met::SOFTTRK    :  configfile += m_configSoftTrkFile.value();
       configpath  = PathResolverFindCalibFile(m_configPrefix.value()+m_configSoftTrkFile.value());
         break;
-    case JETTRK :   configfile += m_configJetTrkFile.value();
+    case met::JETTRK :   configfile += m_configJetTrkFile.value();
       configpath = PathResolverFindCalibFile(m_configPrefix.value()+m_configJetTrkFile.value());
       break;
     default     :  configpath = "";
@@ -702,16 +702,16 @@ namespace met {
 
 
     switch(type){
-      case SOFTCALO:
+      case met::SOFTCALO:
         histfile =  reader.GetValue( "Conf.InputFile" , "");
         systpath =  reader.GetValue( "GlobalSyst.sourcedir" , "" );
         break;
-      case SOFTTRK:
+      case met::SOFTTRK:
         histfile = reader.GetValue( "Conf.InputFile" , "");
         systpath = reader.GetValue( "PtHardSyst.sourcedir" , "" );
         suffix   = reader.GetValue( "PtHardSyst.suffix"    , "" );
         break;
-      case JETTRK:
+      case met::JETTRK:
         histfile = reader.GetValue( "JetTrkSyst.InputFile" , "");
         histfile = m_configPrefix + histfile;
         systpath  = "/";

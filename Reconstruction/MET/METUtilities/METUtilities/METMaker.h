@@ -18,6 +18,7 @@
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgTools/ToolHandle.h"
 #include "AsgTools/AsgTool.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 // METInterface includes
 #include "METInterface/IMETMaker.h"
@@ -32,7 +33,7 @@
 
 // Forward declaration
 
-namespace met {
+namespace ADD_CMODE(met) {
 
   // typedefs
   typedef ElementLink<xAOD::IParticleContainer> obj_link_t;
@@ -205,5 +206,5 @@ namespace met {
 
   };
 
-} //> end namespace met
+} //> end namespace ADD_CMODE(met)
 #endif //> !METUTILITIES_MET_METMAKER_H

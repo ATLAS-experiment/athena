@@ -36,7 +36,7 @@
 class IMETMaker;
 class METNetSigHandler;
 
-namespace met {
+namespace ADD_CMODE(met) {
 
   /** METNetSig tool class used to create a missing transverse momentum estimate using a pre-trained neural network.
   * The tool inherits from the same interface as METMaker and so it should be largely interchangable.

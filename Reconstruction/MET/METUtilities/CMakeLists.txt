@@ -26,28 +26,50 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO )
 find_package( onnxruntime )
 find_package( GTest )
 
-# Libraries in the package:
-atlas_add_library( METUtilitiesLib
-   METUtilities/*.h Root/*.cxx
-   PUBLIC_HEADERS METUtilities
-   INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
-   LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools xAODEgamma ColumnarJetLib xAODMissingET
-   xAODJet xAODMuon xAODTau xAODTracking InDetTrackSelectionToolLib PATInterfaces
-   EgammaAnalysisInterfacesLib MuonAnalysisInterfacesLib JetCalibToolsLib ElectronPhotonFourMomentumCorrectionLib TauAnalysisToolsLib
-   METInterface AsgDataHandlesLib JetAnalysisInterfacesLib ColumnarMetLib
-   PRIVATE_LINK_LIBRARIES EventPrimitives FourMomUtils xAODCore PathResolver )
-
-if( NOT XAOD_STANDALONE )
-   atlas_add_component( METUtilities
-      src/*.h src/*.cxx src/components/*.cxx
-      LINK_LIBRARIES GaudiKernel AthenaBaseComps METInterface xAODEgamma
-      xAODMuon xAODTau xAODMissingET xAODJet JetCalibToolsLib ElectronPhotonFourMomentumCorrectionLib MuonSelectorToolsLib TauAnalysisToolsLib
-      TauAnalysisToolsLib METUtilitiesLib  )
+# FIX ME: These settings should come from the Project configuration
+if (COLUMNAR_ANALYSIS)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeArray;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
+elseif (XAOD_STANDALONE)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
 else()
-   atlas_add_component( METUtilities
-      src/components/*.cxx
-      LINK_LIBRARIES METUtilitiesLib  )
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD")
+  SET (COLUMNAR_MODE_SUFFIX_LIST "")
 endif()
+
+foreach (CMODE_NAME CMODE_SUFFIX IN ZIP_LISTS COLUMNAR_MODE_NAME_LIST COLUMNAR_MODE_SUFFIX_LIST)
+
+   # Libraries in the package:
+   atlas_add_library( METUtilitiesLib${CMODE_SUFFIX}
+      METUtilities/*.h Root/*.cxx
+      PUBLIC_HEADERS METUtilities
+      INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS} ${GTEST_INCLUDE_DIRS}
+      LINK_LIBRARIES ${Boost_LIBRARIES} ${ROOT_LIBRARIES} ${ONNXRUNTIME_LIBRARIES} AsgTools xAODEgamma ColumnarJetLib xAODMissingET
+      xAODJet xAODMuon xAODTau xAODTracking InDetTrackSelectionToolLib PATInterfaces
+      EgammaAnalysisInterfacesLib MuonAnalysisInterfacesLib JetCalibToolsLib ElectronPhotonFourMomentumCorrectionLib${CMODE_SUFFIX} TauAnalysisToolsLib${CMODE_SUFFIX}
+      METInterface AsgDataHandlesLib JetAnalysisInterfacesLib ColumnarMetLib
+      PRIVATE_LINK_LIBRARIES EventPrimitives FourMomUtils xAODCore PathResolver )
+
+   if( NOT XAOD_STANDALONE )
+      atlas_add_component( METUtilities${CMODE_SUFFIX}
+         src/*.h src/*.cxx src/components/*.cxx
+         LINK_LIBRARIES GaudiKernel AthenaBaseComps METInterface xAODEgamma
+         xAODMuon xAODTau xAODMissingET xAODJet JetCalibToolsLib ElectronPhotonFourMomentumCorrectionLib${CMODE_SUFFIX} MuonSelectorToolsLib TauAnalysisToolsLib${CMODE_SUFFIX}
+         TauAnalysisToolsLib${CMODE_SUFFIX} METUtilitiesLib  )
+   else()
+      atlas_add_component( METUtilities${CMODE_SUFFIX}
+         src/components/*.cxx
+         LINK_LIBRARIES METUtilitiesLib${CMODE_SUFFIX}  )
+   endif()
+
+   atlas_add_test( gt_ColumnarToolTests${CMODE_SUFFIX}
+      SOURCES test/gt_ColumnarToolTests.cxx
+      INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+      LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib${CMODE_SUFFIX} METUtilitiesLib${CMODE_SUFFIX}
+      POST_EXEC_SCRIPT noerror.sh )
+
+endforeach()
 
 atlas_add_dictionary( METUtilitiesDict
    METUtilities/METUtilitiesDict.h
@@ -92,12 +114,6 @@ if( XAOD_ANALYSIS )
           POST_EXEC_SCRIPT noerror.sh )
   endforeach()
 endif()
-
-atlas_add_test( gt_ColumnarToolTests
-   SOURCES test/gt_ColumnarToolTests.cxx
-   INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-   LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarTestFixturesLib METUtilitiesLib
-   POST_EXEC_SCRIPT noerror.sh )
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py )

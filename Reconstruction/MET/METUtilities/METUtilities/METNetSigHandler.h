@@ -19,7 +19,9 @@
 // ONNX Library
 #include <onnxruntime_cxx_api.h>
 
-namespace met {
+#include <ColumnarMode/ColumnarMode.h>
+
+namespace ADD_CMODE(met) {
 
   class METNetSigHandler {
 

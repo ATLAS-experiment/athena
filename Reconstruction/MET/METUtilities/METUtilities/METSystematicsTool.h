@@ -16,6 +16,8 @@
 #include "AsgTools/PropertyWrapper.h"
 #include "AsgTools/AsgTool.h"
 
+#include "ColumnarMode/ColumnarMode.h"
+
 #include "PATInterfaces/SystematicsTool.h"
 
 #include "TH1.h"
@@ -32,7 +34,7 @@
 #include "boost/thread/tss.hpp"
 #include "gtest/gtest_prod.h"
 
-namespace met {
+namespace ADD_CMODE(met) {
 
   typedef ElementLink<xAOD::IParticleContainer> obj_link_t;
 
@@ -177,7 +179,7 @@ namespace met {
     SG::ReadHandleKey<xAOD::EventInfo> m_EventInfoKey{this, "EventInfo", "EventInfo", ""};
 
     StatusCode addMETAffectingSystematics();
-    StatusCode extractHistoPath(std::string & histfile, std::string & systpath, std::string & configdir, std::string & suffix, SystType const & type);
+    StatusCode extractHistoPath(std::string & histfile, std::string & systpath, std::string & configdir, std::string & suffix, met::SystType const & type);
 
     missingEt calcPtHard(xAOD::MissingETContainer const * const cont) const;
     missingEt variedSoftTerm (missingEt const & softTerms, missingEt const & ptHard, double varPara, double varPerp) const;

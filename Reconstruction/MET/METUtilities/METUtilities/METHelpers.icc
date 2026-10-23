@@ -6,7 +6,7 @@
 
 // Template definitions
 
-namespace met {
+namespace ADD_CMODE(met) {
 
     // Hides these from other code that might include METHelpers.h
   namespace accessors {

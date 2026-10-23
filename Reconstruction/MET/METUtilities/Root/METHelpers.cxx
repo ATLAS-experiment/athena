@@ -28,7 +28,7 @@
 #include "FourMomUtils/xAODP4Helpers.h"
 #include <iostream>
 
-namespace met {
+namespace ADD_CMODE(met) {
   ANA_MSG_SOURCE (msgMET, "METUtilities")
 
   void addGhostMuonsToJets(const xAOD::MuonContainer& muons, xAOD::JetContainer& jets)

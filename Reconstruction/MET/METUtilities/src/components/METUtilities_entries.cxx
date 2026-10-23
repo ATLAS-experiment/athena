@@ -13,15 +13,13 @@
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
 
-using namespace met;
-
-DECLARE_COMPONENT( METMaker )
-DECLARE_COMPONENT( METSystematicsTool )
-DECLARE_COMPONENT( METSignificance )
-DECLARE_COMPONENT( METNet )
-DECLARE_COMPONENT( METNetSig )
-DECLARE_COMPONENT( ColumnarMETMaker )
+DECLARE_COMPONENT( ADD_CMODE(met)::METMaker )
+DECLARE_COMPONENT( ADD_CMODE(met)::METSystematicsTool )
+DECLARE_COMPONENT( ADD_CMODE(met)::METSignificance )
+DECLARE_COMPONENT( ADD_CMODE(met)::METNet )
+DECLARE_COMPONENT( ADD_CMODE(met)::METNetSig )
+DECLARE_COMPONENT( ADD_CMODE(met)::ColumnarMETMaker )
 
 #ifndef XAOD_STANDALONE
-DECLARE_COMPONENT( METMakerAlg )
+DECLARE_COMPONENT( ADD_CMODE(met)::METMakerAlg )
 #endif

@@ -22,6 +22,7 @@
 #include "AsgTools/ToolHandle.h"
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
+#include "ColumnarMode/ColumnarMode.h"
 
 // METInterface includes
 #include "METInterface/IMETSignificance.h"
@@ -36,7 +37,7 @@
 #include "JetCalibTools/IJetCalibrationTool.h"
 #include "TauAnalysisTools/TauResolutionTool.h"
 
-namespace met {
+namespace ADD_CMODE(met) {
 
   // typedefs
   typedef ElementLink<xAOD::IParticleContainer> obj_link_t;
@@ -194,5 +195,5 @@ namespace met {
 
   };
 
-} //> end namespace met
+} //> end namespace ADD_CMODE(met)
 #endif //> !METUTILITIES_MET_METSIGNIFICANCE_H

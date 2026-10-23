@@ -38,7 +38,7 @@ namespace CP {
   class IMuonSelectionTool;
 }
 
-namespace met {
+namespace ADD_CMODE(met) {
   class METMakerAlg : public AthReentrantAlgorithm {
 
   public: 

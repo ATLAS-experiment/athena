@@ -46,7 +46,7 @@
 
 #include <memory>
 
-namespace met {
+namespace ADD_CMODE(met) {
 
   using xAOD::MissingET;
   using xAOD::MissingETContainer;
@@ -1201,4 +1201,4 @@ namespace met {
     return nullptr;
   }
 
-} //> end namespace met
+} //> end namespace ADD_CMODE(met)

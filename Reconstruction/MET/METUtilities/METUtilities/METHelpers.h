@@ -19,6 +19,8 @@
 #include "AsgMessaging/MessageCheck.h"
 #include "AsgMessaging/StatusCode.h"
 
+#include "ColumnarMode/ColumnarMode.h"
+
 #include "xAODBase/IParticle.h"
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/Photon.h"
@@ -31,7 +33,7 @@
 
 
 
-namespace met {
+namespace ADD_CMODE(met) {
 
   ANA_MSG_HEADER (msgMET)
 
