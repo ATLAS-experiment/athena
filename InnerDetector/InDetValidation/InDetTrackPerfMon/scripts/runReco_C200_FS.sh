@@ -40,21 +40,16 @@ while [ $# -ge 1 ];do
 done
 
 ## checking valid inputs
-if [ -z $inputRDO ]; then usage ; fi
-if [ -z $outputAOD ]; then usage ; fi
-
-if [ ! -f $inputRDO ]; then
-    echo "runReco_C200_FS.sh result: 1 ${inputRDO} not found"
-    exit 1
-fi
+if [ -z "$inputRDO" ]; then usage ; fi
+if [ -z "$outputAOD" ]; then usage ; fi
 
 ## running reconstruction
 conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 Reco_tf.py \
     --conditionsTag "default:${conditionsTag}" \
-    --maxEvents ${nEvents} \
-    --inputRDOFile ${inputRDO} \
-    --outputAODFile ${outputAOD} \
+    --maxEvents "$nEvents" \
+    --inputRDOFile "$inputRDO" \
+    --outputAODFile "$outputAOD" \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.athenaLegacyTrackingFlags' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --preExec "flags.Tracking.useITkFTF=True; \
@@ -72,8 +67,8 @@ if [ $rc != 0 -a $rc != 68 ]; then exit $rc; fi
 
 ## check output
 if [ "$skipCheck" == "0" ]; then
-    checkxAOD.py ${outputAOD} > ${outputAOD}.checkxAOD.log
-    checkFile.py ${outputAOD} > ${outputAOD}.checkFile.log
+    checkxAOD.py "$outputAOD" > "$outputAOD.checkxAOD.log"
+    checkFile.py "$outputAOD" > "$outputAOD.checkFile.log"
 fi
 
 exit $rc

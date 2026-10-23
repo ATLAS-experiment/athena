@@ -40,27 +40,22 @@ while [ $# -ge 1 ];do
 done
 
 ## checking valid inputs
-if [ -z $inputRDO ]; then usage ; fi
-if [ -z $outputAOD ]; then usage ; fi
-
-if [ ! -f $inputRDO ]; then
-    echo "runReco_C230_FS.sh result: 1 ${inputRDO} not found"
-    exit 1
-fi
+if [ -z "$inputRDO" ]; then usage ; fi
+if [ -z "$outputAOD" ]; then usage ; fi
 
 ## running reconstruction
 conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 Reco_tf.py \
     --conditionsTag "default:${conditionsTag}" \
-    --maxEvents ${nEvents} \
+    --maxEvents "$nEvents" \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.Gbts; \
                flags.Tracking.doPixelDigitalClustering=True; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=True;" \
-    --inputRDOFile ${inputRDO} \
-    --outputAODFile ${outputAOD}
+    --inputRDOFile "$inputRDO" \
+    --outputAODFile "$outputAOD"
     #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \
 
 rc=$?
@@ -70,8 +65,8 @@ if [ $rc != 0 -a $rc != 68 ]; then exit $rc; fi
 
 ## check output
 if [ "$skipCheck" == "0" ]; then
-    checkxAOD.py ${outputAOD} > ${outputAOD}.checkxAOD.log
-    checkFile.py ${outputAOD} > ${outputAOD}.checkFile.log
+    checkxAOD.py "$outputAOD" > "$outputAOD.checkxAOD.log"
+    checkFile.py "$outputAOD" > "$outputAOD.checkFile.log"
 fi
 
 exit $rc

@@ -43,41 +43,36 @@ while [ $# -ge 1 ];do
 done
 
 ## checking valid inputs
-if [ -z $inputRDO ]; then usage ; fi
-if [ -z $outputAOD ]; then usage ; fi
-
-if [ ! -f $inputRDO ]; then
-    echo "runReco_C000_FS.sh result: 1 ${inputRDO} not found"
-    exit 1
-fi
+if [ -z "$inputRDO" ]; then usage ; fi
+if [ -z "$outputAOD" ]; then usage ; fi
 
 ## running reconstruction
 conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 if [ "$doClusters" == "1" ]; then
   Reco_tf.py --CA \
     --conditionsTag "default:${conditionsTag}" \
-    --maxEvents ${nEvents} \
+    --maxEvents "$nEvents" \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.athenaLegacyTrackingFlags' \
     --postInclude 'InDetConfig.InDetPrepRawDataFormationConfig.ITkInDetToXAODClusterConversionCfg,InDetConfig.SiSpacePointFormationConfig.InDetToXAODSpacePointConversionCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg' \
     --preExec 'flags.Acts.EDM.PersistifyClusters=True;flags.Acts.EDM.PersistifySpacePoints=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet' \
     --steering 'doRAWtoALL' \
-    --inputRDOFile ${inputRDO} \
-    --outputAODFile ${outputAOD}
+    --inputRDOFile "$inputRDO" \
+    --outputAODFile "$outputAOD"
     #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \
 else
   Reco_tf.py --CA \
     --conditionsTag "default:${conditionsTag}" \
-    --maxEvents ${nEvents} \
+    --maxEvents "$nEvents" \
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude,ActsConfig.ActsCIFlags.athenaLegacyTrackingFlags' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --preExec 'flags.Tracking.doPixelDigitalClustering=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet' \
     --steering 'doRAWtoALL' \
-    --inputRDOFile ${inputRDO} \
-    --outputAODFile ${outputAOD}
+    --inputRDOFile "$inputRDO" \
+    --outputAODFile "$outputAOD"
     #--preExec 'flags.Tracking.writeExtendedSi_PRDInfo=True' \
 fi
 
@@ -88,8 +83,8 @@ if [ $rc != 0 -a $rc != 68 ]; then exit $rc; fi
 
 ## check output
 if [ "$skipCheck" == "0" ]; then
-    checkxAOD.py ${outputAOD} > ${outputAOD}.checkxAOD.log
-    checkFile.py ${outputAOD} > ${outputAOD}.checkFile.log
+    checkxAOD.py "$outputAOD" > "$outputAOD.checkxAOD.log"
+    checkFile.py "$outputAOD" > "$outputAOD.checkFile.log"
 fi
 
 exit $rc

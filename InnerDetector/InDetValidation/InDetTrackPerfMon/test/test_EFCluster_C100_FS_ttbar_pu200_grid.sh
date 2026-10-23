@@ -64,16 +64,25 @@ run () {
 }
 
 ## Getting the comma-separated list of input RDOs
-InputRDOfiles=$( getEFTrackSample.py -s ${SampleName} )
-if [ ! -f "${InputRDOfiles}" ]; then
-    echo "art-result: 1 Sample ${SampleName} not found"
-    exit 1
+## Prefer ArtInFile in case of grid ART (where it should be available)
+if [ -n "${ArtInFile}" ]; then
+    # In case ArtInFile is space-separated, convert to comma-separated for runReco
+    echo "ArtInFile: ${ArtInFile}"
+    InputRDOfiles="${ArtInFile// /,}"
+    echo "InputRDOfiles: ${InputRDOfiles}"
+else
+    echo "ArtInFile not set, falling back to getEFTrackSample.py -s ${SampleName}"
+    InputRDOfiles=$( getEFTrackSample.py -s ${SampleName} )
+    if [ ! -f "${InputRDOfiles}" ]; then
+        echo "art-result: 1 Sample ${SampleName} not found"
+        exit 1
+    fi
 fi
 
 ## Track reconstruction step. See runReco_C100_FS.sh --help for list of supported options.
 run "${pipelineName}" \
   runReco_C100_FS.sh \
-    -i ${InputRDOfiles} \
+    -i "${InputRDOfiles}" \
     -o "${OutSampleName}.AOD.pool.root" \
     -c -n 10 \
     "$@"
