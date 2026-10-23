@@ -39,7 +39,7 @@ public:
   /// just take the baseclass version ...
   ///  virtual std::vector<TrackView> selectTracks( const std::vector<TrackView>& tv ); 
   
-  virtual bool selectTrack( const TrackView& t ) const;
+  virtual bool selectTrack( const TrackView& t ) const override;
 
 private:
 
