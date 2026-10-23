@@ -232,8 +232,13 @@ StatusCode EventSelectorAthenaPool::reinit() const {
    }
    while (m_headerIterator == nullptr || m_headerIterator->next() == 0) { // no selected events
       disconnectCollection();
-      ++m_inputCollectionsIterator;
-      m_poolCollection = getCollection();
+      if (m_inputCollectionsIterator == m_inputCollectionsProp.value().end()) {
+        m_poolCollection = nullptr;
+      }
+      else {
+        ++m_inputCollectionsIterator;
+        m_poolCollection = getCollection();
+      }
       if (m_poolCollection) {
          m_headerIterator = m_poolCollection->cursor();
       } else {
@@ -431,9 +436,14 @@ StatusCode EventSelectorAthenaPool::nextHandleFileTransition(IEvtSelector::Conte
             if( rc != StatusCode::SUCCESS ) return rc;
          } else {
             // Open next file from inputCollections list.
-            ++m_inputCollectionsIterator;
-            // Create Collection for input file
-            m_poolCollection = getCollection(true);
+            if (m_inputCollectionsIterator == m_inputCollectionsProp.value().end()) {
+              m_poolCollection = nullptr;
+            }
+            else {
+              ++m_inputCollectionsIterator;
+              // Create Collection for input file
+              m_poolCollection = getCollection(true);
+            }
             if (!m_poolCollection) {
                // Return end iterator
                ctxt = *m_endIter;
