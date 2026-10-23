@@ -870,21 +870,23 @@ bool ZDCDataAnalyzer::FinishEvent()
 void ZDCDataAnalyzer::DoNLcalibModuleSum()
 {
   if (!m_haveIterCalibCorr) return;
-
   
   //loop over both sides; first index in m_iterCalibcorr
   for (int iside:{0,1}){
 
+    unsigned int sideModMask = m_moduleMask>>(4*iside)&0xf;
     // If the module mask is empty for this side, there's nothing to do
-    if ((m_moduleMask>>(4*iside)&0xf) == 0) continue;
+    if (sideModMask == 0) continue;
       
     if (m_calibModuleSum[iside]>0.){ //it's theoretically possible that: one or more modules fired → module mask is nonzero → mask check passes
                                     //but their calibrated amplitudes are so small they sum to essentially zero
 
       //use uncorrected energy first and update in each iteration of the loop over module tuples
+      //
       float totalmoduleE= m_calibModuleSum[iside];
 
       //loop over module tuples
+      //
       for (auto modtuple : m_iterCalibCorr[iside]){
         //get and unpack tuple
         unsigned int modnum = std::get<0>(modtuple);
@@ -910,16 +912,17 @@ void ZDCDataAnalyzer::DoNLcalibModuleSum()
         totalmoduleE= totalmoduleE/CorrFact;
       }
 	  
-      //m_calibModuleSum[iside] = totalmoduleE;
-	    m_NLcalibModuleSum[iside] = totalmoduleE;
-	    m_NLcalibModuleSumErrSq[iside] = 0.; // no error for now
-	  }
-
-    else{
-	    (*m_msgFunc_p)(ZDCMsg::Info,"SUM = 0!!");
-	    m_NLcalibModuleSum[iside] = 0.;
-	    m_NLcalibModuleSumErrSq[iside] = 0.; // no error for now
-	  }
+      m_NLcalibModuleSum[iside] = totalmoduleE;
+      m_NLcalibModuleSumErrSq[iside] = 0.; // no error for now
+    }
+    else {
+      std::ostringstream msg;
+      msg << "Unexpected energy <= 0, value = " << std::fixed << std::setprecision(0) << m_calibModuleSum[iside]
+	  << " with non-zero side module mask, mask = " << sideModMask;
+      (*m_msgFunc_p)(ZDCMsg::Info, msg.str());
+      m_NLcalibModuleSum[iside] = 0.;
+      m_NLcalibModuleSumErrSq[iside] = 0.; // no error for now
+    }
   }
 
 }
