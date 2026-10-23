@@ -123,6 +123,25 @@ private:
 
 }; // class ToolHandle
 
+/// Partial re-implementation of Gaudi's PublicToolHandle class
+///
+/// A ToolHandle that never has a parent, i.e. it refers to a public tool.
+///
+template< class T >
+class PublicToolHandle : public ToolHandle< T > {
+
+public:
+   /// Constructor from a tool name.
+   PublicToolHandle( const std::string& toolname = "" );
+
+   /// Constructor declaring a property
+   template<typename T2>
+   PublicToolHandle (T2 *parent, const std::string& propertyName,
+                     const std::string& toolName,
+                     const std::string& propertyTitle = "");
+
+}; // class PublicToolHandle
+
 /// A convenience operator for printing the values of such objects
 template< class T >
 std::ostream& operator<< ( std::ostream& out,

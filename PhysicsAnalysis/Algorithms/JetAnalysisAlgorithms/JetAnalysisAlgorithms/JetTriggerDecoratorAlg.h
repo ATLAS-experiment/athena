@@ -68,19 +68,10 @@ namespace CP
     Gaudi::Property<float> m_hltDR{this, "hltDR_cut", 0.4,
         "ΔR cone for HLT matching"};
 
-    // PublicToolHandle: TrigDecisionTool is a shared singleton; a private
-    // ToolHandle would try to instantiate a duplicate and fail.
-#ifndef XAOD_STANDALONE
-    // For AthAnalysis and Athena, PublicToolHandle exist
     PublicToolHandle<Trig::TrigDecisionTool> m_trigDecisionTool{
         this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool",
         "trigger decision tool"};
-#else
-    // For AnalysisBase use ToolHandle as PublicToolHandle is not available
-    ToolHandle<Trig::TrigDecisionTool> m_trigDecisionTool{
-        this, "TrigDecisionTool", "Trig::TrigDecisionTool/TrigDecisionTool",
-        "trigger decision tool"};
-#endif
+
     ToolHandle<Trig::ITrigBtagEmulationTool> m_emulationTool
       {this, "trigEmulationTool", "", "Jet trigger emulation tool, to be used for Run 2"};
 

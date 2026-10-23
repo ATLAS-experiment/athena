@@ -30,7 +30,7 @@ namespace CP
 
     /// @brief the calibration tool
   private:
-    ToolHandle<IJetCalibrationTool> m_calibrationTool;
+    PublicToolHandle<IJetCalibrationTool> m_calibrationTool{this, "calibrationTool", "", "The calibration tool we apply"};
 
     /// @brief the systematics list we run
   private:

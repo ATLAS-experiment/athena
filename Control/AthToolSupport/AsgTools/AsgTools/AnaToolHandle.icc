@@ -462,6 +462,18 @@ namespace asg
 
 
   template<typename T> template<typename T2>
+  typename std::enable_if<std::is_base_of_v<parentType_t, T2>, StatusCode>::type
+  AnaToolHandle<T> ::
+  setProperty (const std::string& property,
+               const PublicToolHandle<T2>& value)
+  {
+    // without this the generic overload wins and stringifies the handle
+    return setProperty (property, static_cast<const ToolHandle<T2>&> (value));
+  }
+
+
+
+  template<typename T> template<typename T2>
   StatusCode AnaToolHandle<T> ::
   setProperty (const std::string& property,
                const AnaToolHandle<T2>& value)

@@ -21,8 +21,8 @@ namespace CP
   {
   /// \brief the standard constructor
   public:
-    XbbInformationDecoratorAlg (const std::string& name,
-                                ISvcLocator* pSvcLocator);
+    using EL::AnaAlgorithm::AnaAlgorithm;
+
     virtual StatusCode initialize() override;
     virtual StatusCode execute(const EventContext& ctx) override;
 
@@ -32,7 +32,7 @@ namespace CP
 
   /// \brief the selection tool
   private:
-    ToolHandle<IBTaggingSelectionJsonTool> m_selectionTool;
+    PublicToolHandle<IBTaggingSelectionJsonTool> m_selectionTool{this, "selectionTool", "", "Xbb JSON selection tool"};
 
   /// \brief the jet container we run on
   private:

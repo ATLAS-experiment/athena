@@ -38,6 +38,22 @@ ToolHandle (T2 *parent, const std::string& propertyName,
 }
 
 template< class T >
+PublicToolHandle< T >::PublicToolHandle( const std::string& typeAndName )
+: ToolHandle< T >( typeAndName, nullptr ) {
+
+}
+
+template<typename T> template<typename T2>
+PublicToolHandle<T> ::
+PublicToolHandle (T2 *parent, const std::string& propertyName,
+                  const std::string& toolName,
+                  const std::string& propertyTitle)
+  : PublicToolHandle (toolName)
+{
+  parent->declareProperty (propertyName, *this, propertyTitle);
+}
+
+template< class T >
 T& ToolHandle< T >::operator*() {
 
    // Retrieve the tool pointer if necessary:
@@ -170,6 +186,11 @@ namespace asg
 			     std::string& result) {
         return packStringSingle (value.typeAndName(), result);
       }
+    };
+
+    template<typename T> struct GetStringHelper<PublicToolHandle<T> >
+      : public GetStringHelper<ToolHandle<T> >
+    {
     };
   }
 }
