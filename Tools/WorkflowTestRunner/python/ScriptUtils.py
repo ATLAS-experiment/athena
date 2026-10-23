@@ -103,6 +103,8 @@ def setup_parser() -> ArgumentParser:
                           help="Disable output checks")
     advanced.add_argument("--detailed-comparison", action="store_true", dest="detailed_comparison", default=False,
                           help="Detailed output comparison")
+    advanced.add_argument("--allow-tolerance", action="store_true", dest="allow_tolerance", default=False,
+                          help="Allow tolerance in output comparison")
 
     tests = parser.add_argument_group("tests")
     tests.add_argument("-t", "--test", type=str, dest="test", default=None,
@@ -147,6 +149,7 @@ def get_test_setup(name: str, options: Namespace, log: logging.Logger) -> TestSe
     setup.disable_output_checks = options.disable_output_checks
     setup.custom_threads = options.threads
     setup.detailed_comparison = options.detailed_comparison
+    setup.allow_tolerance = options.allow_tolerance or environ.get("NODE_NAME", "").startswith("aibuild-gpu")
     # not in global setup:
     # options.extra_args
 

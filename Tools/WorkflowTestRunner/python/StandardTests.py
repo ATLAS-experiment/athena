@@ -225,6 +225,8 @@ class DerivationTest(WorkflowTest):
     """Derivations test."""
 
     def __init__(self, ID: str, run: WorkflowRun, type: WorkflowType, steps: list[str], setup: TestSetup, extra_args: str = "") -> None:
+        self.diff_tolerances = "PROCTools/DAOD_diff-tolerances.yaml"
+
         test_def = ID.split("_")
         multithreaded = False
         if test_def[-2] == "MT":

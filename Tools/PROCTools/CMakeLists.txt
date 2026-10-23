@@ -13,4 +13,5 @@ atlas_install_scripts( python/UploadAMITag.py
 
 # Install digest reference files for easy access
 atlas_install_data( data/*.ref
-                    data/*.txt )
+                    data/*.txt
+                    data/*.yaml )
