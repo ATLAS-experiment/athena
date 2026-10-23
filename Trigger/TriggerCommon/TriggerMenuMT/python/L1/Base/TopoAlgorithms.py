@@ -33,8 +33,8 @@ class AlgCategory(Enum):
 
     @staticmethod
     def getAllCategories():
-        return [ AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.MULTI, AlgCategory.LEGACY ]
-            
+        return [ AlgCategory.TOPO, AlgCategory.MUCTPI, AlgCategory.LEGACY, AlgCategory.MULTI ]
+
     @staticmethod
     def getCategoryFromBoardName(boardName):
         if 'muctpi' in boardName.lower():

@@ -12,7 +12,7 @@ log = logging.getLogger(__name__)
 
 class MenuItemsCollection(object):
 
-    splitBunchGroups = False
+    splitBunchGroups = True
 
     def __init__(self):
         self.menuName = ''

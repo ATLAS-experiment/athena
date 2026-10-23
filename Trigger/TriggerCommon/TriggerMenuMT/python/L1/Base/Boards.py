@@ -13,6 +13,7 @@ class BoardType(Enum):
     TOPO = 3
     CTPIN = 4
     MERGER = 5
+    GLOBAL = 6
     def __repr__(self):
         return self.name
     def __str__(self):
@@ -27,6 +28,8 @@ class BoardType(Enum):
             btype = BoardType.TOPO
         elif 'ctpin' in name.lower():            
             btype = BoardType.CTPIN
+        elif 'global' in name.lower():
+            btype = BoardType.GLOBAL
         else:
             raise RuntimeError("No BoardType defined for board %s" % name)
         return btype

@@ -127,7 +127,7 @@ class BunchGroupSet(object):
             for lowestBG in L1MenuFlags.BunchGroupPartitioning():
                 if bunchGroup.internalNumber >= lowestBG:
                     partition += 1
-        bunchGroup.partition = partition
+        bunchGroup.menuPartition = partition
         self.bunchGroups[bunchGroup.internalNumber] = bunchGroup
         return self
 
