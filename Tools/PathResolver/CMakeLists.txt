@@ -12,7 +12,7 @@ atlas_add_library( PathResolver
    Root/*.cxx
    PUBLIC_HEADERS PathResolver
    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CURL_INCLUDE_DIRS}
-   LINK_LIBRARIES AsgTools
+   LINK_LIBRARIES AsgTools AsgMessagingLib
    PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} ${CURL_LIBRARIES} )
 
 atlas_add_dictionary( PathResolverDict
