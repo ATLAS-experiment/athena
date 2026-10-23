@@ -200,8 +200,7 @@ namespace ActsTrk
     for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
       {
         duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer], measurementIndex,
-                                       m_paramEstimationTool[icontainer]->spacePointIndicesFun(),
-                                       [](const ActsTrk::Seed&) -> bool { return false; });
+                                       m_paramEstimationTool[icontainer]->spacePointIndicesFun());
       }
 
     // Get Beam pos and make pSurface
@@ -448,9 +447,9 @@ namespace ActsTrk
     // Function for Estimate Track Parameters
     auto retrieveSurfaceFunction =
        [detectorElementToGeometryIdMapPtr=m_trackingGeometrySvc->surfaceIdMap(),
-        actsTrackingGeometryPtr=m_trackingGeometrySvc->trackingGeometry().get()] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& {
-        const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
-        const xAOD::UncalibratedMeasurement* meas = useTopSp ? sp->measurements().back() : sp->measurements().front();
+        actsTrackingGeometryPtr=m_trackingGeometrySvc->trackingGeometry().get()] (const ActsTrk::Seed& seed) -> const Acts::Surface& {
+        const xAOD::SpacePoint* sp = seed.sp().front();
+        const xAOD::UncalibratedMeasurement* meas = sp->measurements().front();
         const auto geoid_iter = detectorElementToGeometryIdMapPtr->find(ActsTrk::makeDetectorElementKey(meas->type(), meas->identifierHash()));
         if (geoid_iter == detectorElementToGeometryIdMapPtr->end()) {
            throw std::runtime_error("measurement not linked to Acts surface.");
@@ -488,7 +487,6 @@ namespace ActsTrk
         // Get first estimate of parameters from the seed
         const auto& [optTrackParams, estimationStatus] =
           m_paramEstimationTool[typeIndex]->estimateTrackParameters(seed,
-                                                                    /*reverseSearch=*/false,
                                                                     detContext.geometry,
                                                                     detContext.magField,
                                                                     detContext.calib,
@@ -527,8 +525,6 @@ namespace ActsTrk
             }
           }
         }
-
-        // TODO since the second pass is strictly an extension we should have a separate branch stopper which never drops and always extrapolates to the target surface
 
         xAOD::TrackFitter current_fitter = xAOD::KalmanFitter;
         // @TODO introduce additional enums to distinguish Acts CKF from other implementations?

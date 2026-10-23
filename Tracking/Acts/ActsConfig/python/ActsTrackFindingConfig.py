@@ -367,7 +367,8 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
     # Wire parameter estimation and fitter tools like the main Acts path
     if 'TrackParamsEstimationTool' not in kwargs:
         from ActsConfig.ActsTrackParamsEstimationConfig import ActsTrackParamsEstimationToolCfg
-        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(flags)))
+        kwargs.setdefault('TrackParamsEstimationTool', acc.popToolsAndMerge(ActsTrackParamsEstimationToolCfg(
+            flags, parameterEstimationMode=flags.Acts.GNN.ParameterEstimationMode.value)))
 
     # The fitter tool is used in the GNN track finding to fit the track candidates after the GNN has selected the measurements.
     if 'FitterTool' not in kwargs:

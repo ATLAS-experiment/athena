@@ -40,17 +40,15 @@ namespace ActsTrk {
       std::pair<std::optional<Acts::BoundTrackParameters>, EstimationStatus>
       estimateTrackParameters(
 			      const ActsTrk::Seed& seed,
-			      bool reverseSearch,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::MagneticFieldContext& magFieldContext,
 			      const Acts::CalibrationContext& calContext,
-			      std::function<const Acts::Surface&(const ActsTrk::Seed& seed, bool useTopSp)> retrieveSurface) const override;
+			      std::function<const Acts::Surface&(const ActsTrk::Seed& seed)> retrieveSurface) const override;
 
     virtual
       std::pair<std::optional<Acts::BoundTrackParameters>, EstimationStatus>
       estimateTrackParameters(
 			      const ActsTrk::Seed& seed,
-			      bool reverseSearch,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::MagneticFieldContext& magFieldContext,
 			      const Acts::CalibrationContext& calContext,
@@ -58,8 +56,6 @@ namespace ActsTrk {
 			      const Acts::Vector3& bField) const override;
 
     SpacePointIndicesFun_t spacePointIndicesFun() const override;
-
-    bool estimateFromTopSp(bool reverseSearch) const override { return reverseSearch && !m_refitSeeds; }
 
     // *********************************************************************
 
@@ -89,7 +85,7 @@ namespace ActsTrk {
         "3=use 1st 3 SPs separated by more than minDeltaR, starting from the innermost SP, "
         "4=fit all SPs"};
     Gaudi::Property<int> m_bFieldMode{this, "bFieldMode", 0,
-        "B-field mode: 0=B-field at first SP in search order; 1=z-component of B-field; 2=B-field at innermost SP, regardless of search direction"};
+        "B-field mode: 0=B-field at the innermost SP; 1=z-component of B-field at the innermost SP"};
     Gaudi::Property<std::size_t> m_firstSp{this, "firstSp", 0ul,
         "Index of first SP to use"};
     Gaudi::Property<double> m_minDeltaR{this, "minDeltaR", 15 * Acts::UnitConstants::mm,
@@ -109,8 +105,7 @@ namespace ActsTrk {
         const Acts::BoundTrackParameters &initialParameters,
         const Acts::GeometryContext& geometry,
         const Acts::MagneticFieldContext& magField,
-        const Acts::CalibrationContext& calib,
-        const bool paramsAtOutermostSurface) const;
+        const Acts::CalibrationContext& calib) const;
 
     detail::xAODUncalibMeasSurfAcc m_uncalibMeasSurfAcc {};
 

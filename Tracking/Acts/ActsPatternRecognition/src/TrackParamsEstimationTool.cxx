@@ -8,7 +8,6 @@
 #include "Acts/Seeding/EstimateTrackParamsFromSeed.hpp"
 #include "Acts/SpacePointFormation/StripSpacePointCalibration.hpp"
 #include "Acts/EventData/StripSpacePointCalibrationDetails.hpp"
-#include "Acts/EventData/TransformationHelpers.hpp"
 #include "Acts/Utilities/MathHelpers.hpp"
 #include "Acts/Utilities/Result.hpp"
 #include "Acts/Utilities/VectorHelpers.hpp"
@@ -187,6 +186,11 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
     ATH_MSG_DEBUG( "   " << m_spacePointWeightExponent );
     ATH_MSG_DEBUG( "   " << m_refitSeeds );
 
+    if (m_bFieldMode != 0 && m_bFieldMode != 1) {
+      ATH_MSG_FATAL("bFieldMode must be 0 or 1, but is " << m_bFieldMode.value());
+      return StatusCode::FAILURE;
+    }
+
     ATH_CHECK(m_fitterTool.retrieve(EnableTool{m_refitSeeds}));
 
     m_logger = makeActsAthenaLogger(this, "Acts");
@@ -206,21 +210,14 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
   std::pair<std::optional<Acts::BoundTrackParameters>, TrackParamsEstimationTool::EstimationStatus>
   TrackParamsEstimationTool::estimateTrackParameters(
 						     const ActsTrk::Seed& seed,
-						     bool reverseSearch,
 						     const Acts::GeometryContext& geoContext,
 						     const Acts::MagneticFieldContext& magFieldContext,
 						     const Acts::CalibrationContext& calContext,
-						     std::function<const Acts::Surface&(const ActsTrk::Seed& seed, bool useTopSp)> retrieveSurface) const
+						     std::function<const Acts::Surface&(const ActsTrk::Seed& seed)> retrieveSurface) const
   {
-    bool useTopSp = estimateFromTopSp(reverseSearch);
-
     const auto& sp_collection = seed.sp();
     if ( sp_collection.size() < 3 ) return {std::nullopt, kNoSeedRefit};
-    const xAOD::SpacePoint* bottom_sp = (useTopSp && m_bFieldMode != 2) ? sp_collection.back() : sp_collection.front();
-    if (m_parameterEstimationMode == 3 && useTopSp && m_bFieldMode != 2) {
-      // B-field at the first SP used for the estimate in search order
-      bottom_sp = sp_collection.at(sp_collection.size() - m_spacePointIndicesFun(sp_collection, useTopSp)[0] - 1);
-    }
+    const xAOD::SpacePoint* bottom_sp = sp_collection.front();
 
     // Magnetic Field
     ATLASMagneticFieldWrapper magneticField;
@@ -233,11 +230,10 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
     }
 
     // Get the surface
-    const Acts::Surface& surface = retrieveSurface(seed, useTopSp);
+    const Acts::Surface& surface = retrieveSurface(seed);
 
     return estimateTrackParameters(
 				   seed,
-				   reverseSearch,
 				   geoContext,
 				   magFieldContext,
 				   calContext,
@@ -248,23 +244,20 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
   std::pair<std::optional<Acts::BoundTrackParameters>, TrackParamsEstimationTool::EstimationStatus>
   TrackParamsEstimationTool::estimateTrackParameters(
 						     const ActsTrk::Seed& seed,
-						     bool reverseSearch,
 						     const Acts::GeometryContext& geoContext,
 						     const Acts::MagneticFieldContext& magFieldContext,
 						     const Acts::CalibrationContext& calContext,
 						     const Acts::Surface& surface,
 						     const Acts::Vector3& bField) const 
   {
-    bool useTopSp = estimateFromTopSp(reverseSearch);
-
     // Get SPs
     const auto& sp_collection = seed.sp();
     const std::size_t nSp = sp_collection.size();
     if (nSp < 3) return {std::nullopt, kNoSeedRefit};
 
     // Function to extract the values from sp_collection
-    const auto sp_collection_extract = std::views::transform([&sp_collection, useTopSp](std::size_t i) {
-      return sp_collection.at(useTopSp ? sp_collection.size() - i - 1 : i);
+    const auto sp_collection_extract = std::views::transform([&sp_collection](std::size_t i) {
+      return sp_collection.at(i);
     });
 
     // Compute free parameters
@@ -285,7 +278,7 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
         return {std::nullopt, kNoSeedRefit};
       }
     } else {
-      freeParams = estimateTrackParamsFromSeed(m_spacePointIndicesFun(sp_collection, useTopSp) | sp_collection_extract, bField, m_stripCalibrationIterations);
+      freeParams = estimateTrackParamsFromSeed(m_spacePointIndicesFun(sp_collection) | sp_collection_extract, bField, m_stripCalibrationIterations);
     }
 
     if (m_parameterEstimationMode == 1 && nSp > 3ul) {
@@ -295,11 +288,6 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
       const Acts::FreeVector freeParams2 = estimateTrackParamsFromSeed(spacePointIndicesFun2(nSp) | sp_collection_extract, bField, m_stripCalibrationIterations);
       ATH_MSG_DEBUG("update seed p = " << 1.0 / freeParams[Acts::eFreeQOverP] << " to " << 1.0 / freeParams2[Acts::eFreeQOverP]);
       freeParams[Acts::eFreeQOverP] = freeParams2[Acts::eFreeQOverP];
-    }
-
-    if (useTopSp) {
-      // reverse direction so momentum vector pointing outwards
-      freeParams = Acts::reflectFreeParameters(freeParams);
     }
 
     // Convert free params to curvilinear params for extrapolation
@@ -324,7 +312,7 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
         m_extrapolator->propagateToSurface(curvilinearParams, surface, propOptions);
 
     if (!boundParamsResult.ok()) {
-      ATH_MSG_DEBUG("Extrapolation from " << seed.sp().size() << "-SP seed (" << (useTopSp ? "top" : "bottom") << " start) failed - "
+      ATH_MSG_DEBUG("Extrapolation from " << seed.sp().size() << "-SP seed failed - "
                     << (m_allowPropagatorFailure ? "use curvilinear parameters" : "skip seed"));
       if (m_allowPropagatorFailure) {
         // Fallback: use curvilinear parameters instead of failing
@@ -349,12 +337,12 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
       false);
 
     if (!m_refitSeeds) {
-      ATH_MSG_DEBUG("estimateTrackParams from " << seed.sp().size() << "-SP seed (" << (useTopSp ? "top" : "bottom") << " start) succeeded");
+      ATH_MSG_DEBUG("estimateTrackParams from " << seed.sp().size() << "-SP seed succeeded");
       return {boundParams, kNoSeedRefit};
     }
 
-    auto refitResult = doRefit(seed, *boundParams, geoContext, magFieldContext, calContext, reverseSearch);
-    ATH_MSG_DEBUG("Refit " << seed.sp().size() << "-SP seed (" << (reverseSearch ? "top" : "bottom") << " start) " << (refitResult ? "succeeded" : "failed"));
+    auto refitResult = doRefit(seed, *boundParams, geoContext, magFieldContext, calContext);
+    ATH_MSG_DEBUG("Refit " << seed.sp().size() << "-SP seed " << (refitResult ? "succeeded" : "failed"));
     if (refitResult) {
       // The covariance of the refit is too small as an input to the CKF,
       // so use the same crude estimate as for the unfitted seed
@@ -374,7 +362,7 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
     // MinDeltaR
     if (m_parameterEstimationMode == 3) {
       const double minDeltaR = m_minDeltaR;
-      return [minDeltaR](const ActsTrk::SpacePointRange& spacePoints, bool useTopSp) -> std::array<std::size_t, 3> {
+      return [minDeltaR](const ActsTrk::SpacePointRange& spacePoints) -> std::array<std::size_t, 3> {
         const std::size_t nSp = spacePoints.size();
         std::array<std::size_t, 3> indices{};
         std::size_t nSelected = 0;
@@ -394,14 +382,12 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
           else
             return {0, 1, 2};
         }
-        if (useTopSp)
-          return {nSp - indices[2] - 1, nSp - indices[1] - 1, nSp - indices[0] - 1};
         return indices;
       };
     }
     // FirstMiddleLast. The fit of all SPs uses the same SPs to detect duplicate seeds.
     if (m_parameterEstimationMode == 2 || m_parameterEstimationMode == 4) {
-      return [](const ActsTrk::SpacePointRange& spacePoints, bool) -> std::array<std::size_t, 3> {
+      return [](const ActsTrk::SpacePointRange& spacePoints) -> std::array<std::size_t, 3> {
         const std::size_t nSp = spacePoints.size();
         if (nSp > 3ul)
           return {0, nSp / 2ul, nSp - 1};
@@ -410,7 +396,7 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
       };
     } else if (m_firstSp > 0ul) {
       std::size_t firstSp = m_firstSp;
-      return [firstSp](const ActsTrk::SpacePointRange& spacePoints, bool) -> std::array<std::size_t, 3> {
+      return [firstSp](const ActsTrk::SpacePointRange& spacePoints) -> std::array<std::size_t, 3> {
         const std::size_t nSp = spacePoints.size();
         if (nSp > 3ul) {
           std::size_t first = std::min(firstSp, nSp - 3ul);
@@ -419,7 +405,7 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
           return {0, 1, 2};
       };
     } else {
-      return [](const ActsTrk::SpacePointRange&, bool) -> std::array<std::size_t, 3> {
+      return [](const ActsTrk::SpacePointRange&) -> std::array<std::size_t, 3> {
         return {0, 1, 2};
       };
     }
@@ -432,18 +418,10 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
       const Acts::BoundTrackParameters &initialParameters,
       const Acts::GeometryContext& geometry,
       const Acts::MagneticFieldContext& magField,
-      const Acts::CalibrationContext& calib,
-      const bool paramsAtOutermostSurface) const {
+      const Acts::CalibrationContext& calib) const {
     // Perform KF before CKF
-    const Acts::Surface* targetSurface = nullptr;
-    // get the proper surface
-    if (not paramsAtOutermostSurface) {
-      // inner-most surface
-      targetSurface = m_uncalibMeasSurfAcc.get(measurement.sp().front()->measurements().front());
-    } else {
-      // outer-most surface
-      targetSurface = m_uncalibMeasSurfAcc.get(measurement.sp().back()->measurements().back());
-    }
+    // get the inner-most surface
+    const Acts::Surface* targetSurface = m_uncalibMeasSurfAcc.get(measurement.sp().front()->measurements().front());
     if (not targetSurface) {
       ATH_MSG_WARNING("Could not identify the target surface for fitting the provided seed");
       return std::nullopt;
@@ -462,23 +440,16 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
     const auto fittedSeed = fittedSeedCollection->getTrack(0);
 
     // get the track state at the beginning of the track, where we started
-    std::optional<typename decltype(fittedSeed)::ConstTrackStateProxy> trackState {std::nullopt};
-    if (paramsAtOutermostSurface) {
-      trackState = fittedSeed.outermostTrackState();
-    } else {
-      trackState = fittedSeed.innermostTrackState();
-      if (!trackState) {
-        // if the track is not forward linked (fixed by #5666), then we need to search back to the innermost track state
-        for (auto st : fittedSeed.trackStatesReversed()) {
-          trackState = st;
-        }
+    std::optional<typename decltype(fittedSeed)::ConstTrackStateProxy> trackState = fittedSeed.innermostTrackState();
+    if (!trackState) {
+      // if the track is not forward linked (fixed by #5666), then we need to search back to the innermost track state
+      for (auto st : fittedSeed.trackStatesReversed()) {
+        trackState = st;
       }
     }
 
     if (!trackState) {
-      ATH_MSG_VERBOSE("Missing "
-                      << (paramsAtOutermostSurface ? "outermost" : "innermost")
-                      << " track state");
+      ATH_MSG_VERBOSE("Missing innermost track state");
       return std::nullopt;
     }
 

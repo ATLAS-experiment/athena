@@ -78,7 +78,6 @@ namespace ActsTrk {
     Gaudi::Property< std::string > m_monGroupName
       {this, "MonGroupName", "ActsSeedAnalysisAlg"};
 
-    Gaudi::Property< bool > m_useTopSp {this, "useTopSp", false, "Use top SP. By default, use bottom SP."};
     Gaudi::Property< bool > m_usePixel {this, "UsePixel", true, ""};
 
     /** @brief Auxiliary class to access the calibration context.
