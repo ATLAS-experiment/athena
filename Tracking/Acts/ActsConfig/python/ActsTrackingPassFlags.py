@@ -35,7 +35,7 @@ def createActsTrackingPassFlags():
     icf.addFlag("useITkPixel", lambda pcf : pcf.Detector.EnableITkPixel )
     icf.addFlag("useITkStrip", lambda pcf : pcf.Detector.EnableITkStrip )
     icf.addFlag("useITkPixelSeeding", True )
-    icf.addFlag("useITkStripSeeding", False )
+    icf.addFlag("useITkStripSeeding", True )
 
     icf.addFlag("usePrdAssociationTool"     , False)
     icf.addFlag("storeSeparateContainer"    , False)
@@ -59,7 +59,7 @@ def createActsTrackingPassFlags():
         (0.2 * Units.GeV if pcf.Tracking.doLowMu
          else 0.9 * Units.GeV)))
     icf.addFlag("maxPrimaryImpactSeed"      , 5.0 * Units.mm)
-    icf.addFlag("maxZImpactSeed"            , 150.0 * Units.mm)
+    icf.addFlag("maxZImpactSeed"            , 200.0 * Units.mm)
     icf.addFlag("useSeedFilter"             , True)
     icf.addFlag("useHoughVertexFilter"      , False) # experimental, keep False
 
@@ -79,7 +79,7 @@ def createActsTrackingPassFlags():
     icf.addFlag("maxHolesAndOutliers"     , [])
     icf.addFlag("maxPrimaryImpact"        , [5.0 * Units.mm, 5.0 * Units.mm, 10.0 * Units.mm])
     icf.addFlag("maxEMImpact"             , [50.0 * Units.mm])
-    icf.addFlag("maxZImpact"              , [150.0 * Units.mm])
+    icf.addFlag("maxZImpact"              , [200.0 * Units.mm])
 
     # --- general pattern cuts for NewTracking
     icf.addFlag("roadWidth"               , 20.)
@@ -111,7 +111,7 @@ def createActsTrackingPassFlags():
     icf.addFlag("isSecondaryPass", False)
     icf.addFlag("isLargeD0", False)
     icf.addFlag("PixelSeedingStrategy", SeedingStrategy.Gbts, type=SeedingStrategy)
-    icf.addFlag("StripSeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
+    icf.addFlag("StripSeedingStrategy", SeedingStrategy.Gbts, type=SeedingStrategy)
     # Extension used to name the persistified track particle container
     # (InDet{extension}TrackParticles) when storeSeparateContainer is
     # requested. If empty, the pass extension is used.
