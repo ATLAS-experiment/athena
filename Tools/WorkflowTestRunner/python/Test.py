@@ -31,6 +31,7 @@ class TestSetup:
         self.disable_output_checks = False
         self.custom_threads = None
         self.detailed_comparison = False
+        self.allow_tolerance = False
 
     def setup_release(self, reference=None, validation=None) -> None:
         if reference and validation:
@@ -151,6 +152,9 @@ class WorkflowTest:
 
         if not hasattr(self, "skip_performance_checks"):
             self.skip_performance_checks = False
+
+        if not hasattr(self, "diff_tolerances"):
+            self.diff_tolerances = None
 
         self.run = run
         self.type = type

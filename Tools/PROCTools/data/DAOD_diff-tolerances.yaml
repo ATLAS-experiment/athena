@@ -1,0 +1,30 @@
+# formating examples for (rel, abs) tolerance
+# MyBranch: 0.002
+# .*: [0.001, 0.003]
+AntiKt4EMPFlowJetsAuxDyn.GN3V03_ptFromTruthDressedWZJet: [1.0e-4, 1.0e-2]
+AntiKt4EMPFlowJetsAuxDyn\.GN.*: 1.0e-4
+AntiKt4EMPFlowJetsAuxDyn\.QGTransformer_ConstScore: 1.0e-4
+AntiKt4EMPFlowJetsAuxDyn\.bJR4v01_pt: 1.0e-4
+AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn.bJR10v00Ext_mass: [1.0e-4, 2.5e-3]
+AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn.bJR10v00Ext_pt: [1.0e-4, 2.5e-3]
+AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn\.bJR10v01.*: 1.0e-4
+AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn\.GN.*: 1.0e-4
+AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn\.tautauJRv00_leadingSubjet.*: [1.0e-4, 2.5e-3]
+AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn\.tautauJRv00_subleadingSubjet.*: [1.0e-4, 2.5e-3]
+AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn\.tautauJRv00.*: 1.0e-4
+AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn\.TopTransformer.*: 1.0e-4
+AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsAuxDyn\.WTransformer.*: 1.0e-4
+ElectronsAuxDyn\.PLIT.*: 1.0e-4
+ElectronsAuxDyn\.TransformerEnergy: 1.0e-4
+MuonsAuxDyn\.PLIT.*: 1.0e-4
+PhotonsAuxDyn\.TransformerEnergy: 1.0e-4
+TauJets.*\.GNTauScore.*: 1.0e-4
+# PHYSLITE
+AnalysisJetsAuxDyn\.QGTransformer_ConstScore: 1.0e-4
+AnalysisJetsAuxDyn\.GN.*: 1.0e-4
+AnalysisLargeRJetsAuxDyn\.GN.*: 1.0e-4
+AnalysisLargeRJetsAuxDyn\.TopTransformer.*: 1.0e-4
+AnalysisLargeRJetsAuxDyn\.WTransformer.*: 1.0e-4
+AnalysisTauJetsAuxDyn\.GNTauScore.*: 1.0e-4
+AnalysisElectronsAuxDyn\.PLIT.*: 1.0e-4
+AnalysisMuonsAuxDyn\.PLIT.*: 1.0e-4
