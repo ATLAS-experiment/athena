@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Dear emacs, this is -*-c++-*-
@@ -147,7 +147,7 @@ private:
     /// Enum version of used variables
     std::vector<int> m_enum_variables;
     
-    unsigned int m_nOutputs;                  
+    unsigned int m_nOutputs = 0;
     
     /// Multiclass model or not
     bool m_multiClass{};
