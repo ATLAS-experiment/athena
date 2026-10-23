@@ -256,8 +256,8 @@ def MuonTruthChainCfg(flags):
                                                 ParticleContainer="MuonMeTrackParticlesLRT"))
         
     result.merge(MuonToTruthAssocAlgCfg(flags, TrackKeys = tracks))
-    if flags.Acts.doLargeRadius:
-        result.merge(MuonToTruthAssocAlgCfg(flags, name = "MUonToTruthAssocAlgLRT",
+    if flags.Acts.doLargeRadius and flags.Reco.EnableTracking:
+        result.merge(MuonToTruthAssocAlgCfg(flags, name = "MuonToTruthAssocAlgLRT",
                                             TrackKeys= tracks, MuonKey="MuonsLRT"))
     return result
 
