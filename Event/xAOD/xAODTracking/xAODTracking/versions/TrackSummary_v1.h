@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef XAODTRACKING_VERSIONS_TRACKSUMMARY_V1_H
 #define XAODTRACKING_VERSIONS_TRACKSUMMARY_V1_H
@@ -163,6 +163,20 @@ namespace xAOD
      */
     const unsigned int* nSharedHitsPtr() const;
     unsigned int* nSharedHitsPtr();
+
+    /**
+     * access nSplitHits
+     **/
+    unsigned int nSplitHits() const;
+    /**
+     * access set nSplitHits
+     **/
+    void setnSplitHits(unsigned int m);
+    /**
+     * @brief pointers API needed by MTJ
+     */
+    const unsigned int* nSplitHitsPtr() const;
+    unsigned int* nSplitHitsPtr();
 
 
     /**

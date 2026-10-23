@@ -83,11 +83,14 @@ namespace ActsTrk::detail {
                HitSummaryData::EHitSelection hit_selection = (flag.isOutlier()
                                                            ? HitSummaryData::OutlierFlag
                                                            : HitSummaryData::HitFlag);
-               if (flag.isSharedHit()) {
-                  hit_selection = HitSummaryData::EHitSelection(hit_selection | HitSummaryData::SharedHitFlag);
-               }
-               if (flag.isSplitHit()) {
-                  hit_selection = HitSummaryData::EHitSelection(hit_selection | HitSummaryData::SplitHitFlag);
+               // as in the legacy summary, only hits count as shared or split, not outliers
+               if (!flag.isOutlier()) {
+                  if (flag.isSharedHit()) {
+                     hit_selection = HitSummaryData::EHitSelection(hit_selection | HitSummaryData::SharedHitFlag);
+                  }
+                  if (flag.isSplitHit()) {
+                     hit_selection = HitSummaryData::EHitSelection(hit_selection | HitSummaryData::SplitHitFlag);
+                  }
                }
                if (const auto* idDetEl = getActsDetectorElement(state.referenceSurface()); idDetEl != nullptr) {
                   const auto* siDet = dynamic_cast<const InDetDD::SolidStateDetectorElementBase*>(idDetEl->upstreamDetectorElement());

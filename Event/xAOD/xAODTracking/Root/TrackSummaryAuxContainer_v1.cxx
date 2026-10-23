@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "xAODTracking/versions/TrackSummaryAuxContainer_v1.h"
 #include "xAODCore/tools/AuxVariable.h"
@@ -15,6 +15,7 @@ namespace xAOD {
     AUX_VARIABLE(ndf);
     AUX_VARIABLE(nOutliers);
     AUX_VARIABLE(nSharedHits);
+    AUX_VARIABLE(nSplitHits);
     AUX_VARIABLE(tipIndex);
     AUX_VARIABLE(stemIndex);
     AUX_VARIABLE(particleHypothesis);

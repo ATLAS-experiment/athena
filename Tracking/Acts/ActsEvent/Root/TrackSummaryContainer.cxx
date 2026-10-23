@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsEvent/TrackSummaryContainer.h"
 #include <Acts/EventData/Types.hpp>
@@ -12,7 +12,7 @@
 // their compatibility is maintained by the unit tests: AllStaticxAODVariablesAreKnown
 const std::set<std::string> ActsTrk::TrackSummaryContainer::staticVariables = {
     "params", "covParams", "nMeasurements", "nHoles",   "chi2f",
-    "ndf",    "nOutliers", "nSharedHits",   "tipIndex", "stemIndex",
+    "ndf",    "nOutliers", "nSharedHits",   "nSplitHits", "tipIndex", "stemIndex",
     "particleHypothesis", "surfaceIndex"};
 
 using namespace Acts::HashedStringLiteral;
@@ -65,6 +65,8 @@ std::any component_impl(C& container, Acts::HashedString key,
       return container.at(itrack)->nOutliersPtr();
     case "nSharedHits"_hash:
       return container.at(itrack)->nSharedHitsPtr();
+    case "nSplitHits"_hash:
+      return container.at(itrack)->nSplitHitsPtr();
     case "tipIndex"_hash:
       return container.at(itrack)->tipIndexPtr();
     case "stemIndex"_hash:
