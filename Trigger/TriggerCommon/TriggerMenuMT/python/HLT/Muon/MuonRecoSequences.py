@@ -14,7 +14,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from TrigInDetConfig.utils import getFlagsForActiveConfig
 
-from AthenaConfiguration.Enums import BeamType, LHCPeriod
+from AthenaConfiguration.Enums import BeamType, LHCPeriod, Format
 
 from .TrigMuonKeys import muonNames
 muNames = muonNames().getNames('RoI')
@@ -69,21 +69,21 @@ def MuDataPrepViewDataVerifierCfg(flags):
     
     if flags.Detector.GeometrysTGC:
       dataObjects += [( 'sTgcPrepDataCollection_Cache'  , 'StoreGateSvc+' + MuonPrdCacheNames.sTgcCache)]
-      if flags.Input.isMC:
+      if flags.Input.Format is Format.POOL:
         dataObjects += [( 'Muon::STGC_RawDataContainer' , 'StoreGateSvc+sTGCRDO' )]
     
     if flags.Detector.GeometryMM:
       dataObjects += [( 'MMPrepDataCollection_Cache'  , 'StoreGateSvc+' + MuonPrdCacheNames.MmCache)]
-      if flags.Input.isMC:
+      if flags.Input.Format is Format.POOL:
         dataObjects += [( 'Muon::MM_RawDataContainer' , 'StoreGateSvc+MMRDO' )]
 
     if flags.Detector.GeometryCSC:
       dataObjects+=[( 'CscRawDataCollection_Cache' , 'StoreGateSvc+CscRdoCache' )]
-      if flags.Input.isMC:
+      if flags.Input.Format is Format.POOL:
         dataObjects += [( 'CscRawDataContainer' , 'StoreGateSvc+CSCRDO' ),
                         ( 'CscRawDataCollection_Cache' , 'StoreGateSvc+CscRdoCache' )]
     
-    if flags.Input.isMC:
+    if flags.Input.Format is Format.POOL:
         dataObjects += [( 'MdtCsmContainer' , 'StoreGateSvc+MDTCSM' ),
                         *( [( 'RpcPadContainer' , 'StoreGateSvc+RPCPAD' )] if "RPCPAD" in flags.Input.Collections else [] ),
                         *( [( 'xAOD::NRPCRDOContainer' , 'StoreGateSvc+NRPCRDO' )] if flags.Muon.enableNRPC else [] ),
@@ -109,13 +109,13 @@ def muonDecodeCfg(flags, RoIs, inView=True):
       acc.merge(MuDataPrepViewDataVerifierCfg(flags))
     else:
        loadFromSG = []
-       if flags.Input.isMC:
+       if flags.Input.Format is Format.POOL:
          loadFromSG += [( 'MdtCsmContainer' , 'StoreGateSvc+MDTCSM' )]
        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
        acc.merge(SGInputLoaderCfg(flags, loadFromSG))
         
     # Get RPC BS decoder
-    if not flags.Input.isMC:
+    if flags.Input.Format is Format.BS:
       rpcAcc = RpcBytestreamDecodeCfg( flags, name = "RpcRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
       acc.merge( rpcAcc )
       if flags.Muon.enableNRPC:
@@ -124,14 +124,14 @@ def muonDecodeCfg(flags, RoIs, inView=True):
     rpcAcc = RpcRDODecodeCfg( flags, name= "RpcRdoToRpcPrepData_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
     acc.merge( rpcAcc )
     # Get TGC BS decoder
-    if not flags.Input.isMC:
+    if flags.Input.Format is Format.BS:
         tgcAcc = TgcBytestreamDecodeCfg( flags, name="TgcRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
         acc.merge( tgcAcc )
     # Get TGC RDO convertor
     tgcAcc = TgcRDODecodeCfg( flags, name="TgcRdoToTgcPrepData_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
     acc.merge( tgcAcc )
     # Get MDT BS decoder
-    if not flags.Input.isMC:
+    if flags.Input.Format is Format.BS:
         mdtAcc = MdtBytestreamDecodeCfg( flags, name="MdtRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
         acc.merge( mdtAcc )
     # Get MDT RDO convertor
@@ -139,7 +139,7 @@ def muonDecodeCfg(flags, RoIs, inView=True):
     acc.merge( mdtAcc )
     # Get CSC BS decoder
     if flags.Detector.GeometryCSC:
-        if not flags.Input.isMC:
+        if flags.Input.Format is Format.BS:
             cscAcc = CscBytestreamDecodeCfg( flags, name="CscRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding )
             acc.merge( cscAcc )
         # Get CSC RDO convertor
@@ -150,7 +150,7 @@ def muonDecodeCfg(flags, RoIs, inView=True):
         acc.merge( cscAcc )
     #sTGC and MM BS decoder
     if flags.Detector.GeometrysTGC and flags.Detector.GeometryMM:
-      if not flags.Input.isMC:
+      if flags.Input.Format is Format.BS:
         stgcAcc = sTgcBytestreamDecodeCfg(flags, name="sTgcRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding)
         acc.merge( stgcAcc )
         mmAcc = MmBytestreamDecodeCfg(flags, name="MMRawDataProvider_"+RoIs, RoIs = RoIs, DoSeededDecoding = doSeededDecoding)
@@ -512,7 +512,7 @@ def VDVPrecMuTrkCfg(flags, name, suffix):
       MuonL2CBContainer = muNames.L2CBMuons
     dataObjects += [( 'xAOD::L2CombinedMuonContainer', 'StoreGateSvc+'+MuonL2CBContainer)]
 
-  if not flags.Input.isMC:
+  if flags.Input.Format is Format.BS:
     dataObjects += [( 'IDCInDetBSErrContainer' , 'StoreGateSvc+PixelByteStreamErrs' ),
                     ( 'IDCInDetBSErrContainer' , 'StoreGateSvc+SCT_ByteStreamErrs' )]
 
