@@ -81,7 +81,7 @@ StatusCode TrigBjetHypoAlgBase::retrieveObjectFromStoreGate( const EventContext&
   const CONTAINER *Collection = ContainerHandle.get();
 
   for (const auto* obj : *Collection) {
-    ElementLink< CONTAINER > Link = ElementLink< CONTAINER  >(*Collection, obj->index());
+    ElementLink< CONTAINER > Link = ElementLink< CONTAINER  >(*Collection, obj->index(), context);
     ELs.push_back( Link );
   }
 
