@@ -48,10 +48,10 @@ namespace ActsTrk {
       ActsTrk::Seed seed = seeds[iseed];
 
       auto retrieveSurfaceFunction = 
-        [this, &detElements] (const ActsTrk::Seed& seed, bool useTopSp) -> const Acts::Surface& { 
-          const xAOD::SpacePoint* sp = useTopSp ? seed.sp().back() : seed.sp().front();
+        [this, &detElements] (const ActsTrk::Seed& seed) -> const Acts::Surface& { 
+          const xAOD::SpacePoint* sp = seed.sp().front();
           const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(
-                useTopSp ? sp->elementIdList().back() : sp->elementIdList().front());
+                sp->elementIdList().front());
           const Trk::Surface& atlas_surface = element->surface();
           return *m_geometryConvTool->convertSurfaceToActs(atlas_surface);
         };
@@ -59,7 +59,6 @@ namespace ActsTrk {
       const auto& [optTrackParams, estimationStatus] =
         m_paramEstimationTool->estimateTrackParameters(
 						       seed,
-						       /*reverseSearch=*/false,
 						       tgContext,
 						       mfContext,
 						       calContext,

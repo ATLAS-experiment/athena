@@ -251,9 +251,8 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.SeedRefitOutlierChi2Cut', float('inf'))  # OutlierChi2Cut for the seed refit Kalman fitter, applied whenever a seed refit is scheduled. inf == disabled.
     actscf.addFlag('Acts.LrtStripSeedRefit', True)  # Toggle the LRT strip-seed refit (KF on strip seeds before CKF). 
     actscf.addFlag('Acts.stripCalibrationIterations', 1)  # Strip-SP calibration iterations in TrackParamsEstimationTool (all passes). 
-    actscf.addFlag('Acts.parameterEstimationMode', lambda pcf:
-            ParameterEstimationMode.MinDeltaR if pcf.Acts.GNN.Enable else ParameterEstimationMode.FirstMiddleLast,
-            type=ParameterEstimationMode)  # SPs of a seed used in TrackParamsEstimationTool (MinDeltaR for the full GNN chain)
+    actscf.addFlag('Acts.parameterEstimationMode', ParameterEstimationMode.FirstMiddleLast,
+            type=ParameterEstimationMode)  # SPs of a seed used in TrackParamsEstimationTool (the GNN chain uses its own flag)
     actscf.addFlag('Acts.minDeltaRParameterEstimation', 15.0)  # Minimum separation (mm) of the SPs used in TrackParamsEstimationTool for ParameterEstimationMode.MinDeltaR
     actscf.addFlag('Acts.forceTrackOnSeed', True) # force track to use the seed measurements; steer from the outside if a setup needs it disabled
     actscf.addFlag('Acts.PixelNNCalibrationModelsFolder', 'ITkPixelClusterization/nn-01-01-01/') # location of models for pixel ONNX files, extpected content of the foder are: number.onnx, pos1.onnx, pos2.onnx, pos3.onnx
@@ -313,5 +312,6 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.GNN.RelaxCentralHoleSel", False)
     actscf.addFlag("Acts.GNN.RelaxMeasurementSel", True)
     actscf.addFlag("Acts.GNN.OfflineZ0Sel", False)
+    actscf.addFlag("Acts.GNN.ParameterEstimationMode", ParameterEstimationMode.All, type=ParameterEstimationMode)  # SPs of a GNN seed used in TrackParamsEstimationTool
 
     return actscf

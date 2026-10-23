@@ -36,26 +36,23 @@ namespace ActsTrk {
       std::pair<std::optional<Acts::BoundTrackParameters>, EstimationStatus>
       estimateTrackParameters(
 			      const ActsTrk::Seed& seed,
-			      bool reverseSearch,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::MagneticFieldContext& magFieldContext,
 			      const Acts::CalibrationContext& calContext,
-			      std::function<const Acts::Surface&(const ActsTrk::Seed& seed, bool useTopSp)> retrieveSurface) const = 0;
+			      std::function<const Acts::Surface&(const ActsTrk::Seed& seed)> retrieveSurface) const = 0;
 
     virtual
       std::pair<std::optional<Acts::BoundTrackParameters>, EstimationStatus>
       estimateTrackParameters(
             const ActsTrk::Seed& seed,
-            bool reverseSearch,
             const Acts::GeometryContext& geoContext,
             const Acts::MagneticFieldContext& magFieldContext,
             const Acts::CalibrationContext& calContext,
             const Acts::Surface& surface,
             const Acts::Vector3& bField) const = 0;
 
-    using SpacePointIndicesFun_t = std::function<std::array<std::size_t, 3>(const ActsTrk::SpacePointRange&, bool)>;
+    using SpacePointIndicesFun_t = std::function<std::array<std::size_t, 3>(const ActsTrk::SpacePointRange&)>;
     virtual SpacePointIndicesFun_t spacePointIndicesFun() const = 0;
-    virtual bool estimateFromTopSp(bool reverseSearch) const = 0;
 
   };
   

@@ -27,15 +27,13 @@ namespace ActsTrk::detail {
                                        const ActsTrk::SeedContainer &seeds,
                                        const MeasurementIndex& measurementIndex) {
     addSeeds(typeIndex, seeds, measurementIndex,
-             [](const ActsTrk::SpacePointRange&, bool) -> std::array<std::size_t, 3> { return {0, 1, 2}; },
-             [](const ActsTrk::Seed&) -> bool { return false; });
+             [](const ActsTrk::SpacePointRange&) -> std::array<std::size_t, 3> { return {0, 1, 2}; });
   }
 
   void DuplicateSeedDetector::addSeeds(std::size_t typeIndex,
                                        const ActsTrk::SeedContainer &seeds,
                                        const MeasurementIndex& measurementIndex,
-                                       SpacePointIndicesFun_t spacePointIndicesFun,
-                                       UseTopSpFun_t useTopSpFun) {
+                                       SpacePointIndicesFun_t spacePointIndicesFun) {
     if (m_disabled)
       return;
     if (!(typeIndex < m_seedOffset.size()))
@@ -45,10 +43,9 @@ namespace ActsTrk::detail {
 
     for (const ActsTrk::Seed seed : seeds) {
       std::size_t nSP = 0;
-      bool useTopSp = useTopSpFun(seed);
       const auto& sps = seed.sp();
-      for (std::size_t isp : spacePointIndicesFun(sps, useTopSp)) {
-        const xAOD::SpacePoint *sp = sps.at(useTopSp ? sps.size() - isp - 1 : isp);
+      for (std::size_t isp : spacePointIndicesFun(sps)) {
+        const xAOD::SpacePoint *sp = sps.at(isp);
         const std::vector<const xAOD::UncalibratedMeasurement *> &els = sp->measurements();
         for (const xAOD::UncalibratedMeasurement *meas : els) {
           std::size_t hitIndex = measurementIndex.index(*meas);

@@ -20,8 +20,7 @@ namespace ActsTrk::detail {
   class DuplicateSeedDetector {
   public:
     using index_t = unsigned int;
-    using SpacePointIndicesFun_t = std::function<std::array<std::size_t, 3>(const ActsTrk::SpacePointRange&, bool)>; // copied from ITrackParamsEstimationTool
-    using UseTopSpFun_t = std::function<bool(const ActsTrk::Seed&)>;
+    using SpacePointIndicesFun_t = std::function<std::array<std::size_t, 3>(const ActsTrk::SpacePointRange&)>; // copied from ITrackParamsEstimationTool
 
     DuplicateSeedDetector(std::size_t numSeeds, index_t measOffset, bool enabled);
     DuplicateSeedDetector(const DuplicateSeedDetector &) = delete;
@@ -33,7 +32,7 @@ namespace ActsTrk::detail {
     // add seeds from an associated measurements collection.
     void addSeeds(std::size_t typeIndex, const ActsTrk::SeedContainer &seeds, const MeasurementIndex &measurementIndex);
     void addSeeds(std::size_t typeIndex, const ActsTrk::SeedContainer &seeds, const MeasurementIndex &measurementIndex,
-                  SpacePointIndicesFun_t spacePointIndicesFun, UseTopSpFun_t useTopSpFun);
+                  SpacePointIndicesFun_t spacePointIndicesFun);
     inline void newTrajectory();
     inline void addMeasurement(const xAOD::UncalibratedMeasurement* sl, const MeasurementIndex &measurementIndex);
 
