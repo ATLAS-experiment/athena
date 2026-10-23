@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -18,6 +18,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <AsgTools/AsgComponentFactories.h>
 #include <ColumnarToolWrapperPython/PythonToolHandle.h>
 #include <ColumnarExampleTools/SimpleSelectorExampleTool.h>
+#include <ColumnarMode/ColumnarMode.h>
 #include <gtest/gtest.h>
 #include <gtest/gtest-spi.h>
 #include <mutex>
@@ -30,6 +31,8 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 namespace columnar
 {
+  static_assert (std::is_same_v<ColumnarMode,ColumnarModeArray>, "this test is only defined for array mode");
+
   namespace
   {
     /// \brief make a unique tool name to be used in unit tests
@@ -42,17 +45,13 @@ namespace columnar
 
   TEST (PythonToolHandleTest, baseUse)
   {
-    // this test is only used in Array mode
-    if (!std::is_same_v<columnar::ColumnarMode,columnar::ColumnarModeArray>)
-      GTEST_SKIP() << "Skipping as not in Columnar mode";
-
     // at some point we need to have a better handling of tool factories
     // in AnalysisBase, but for now this does what I need.
     static std::once_flag onceFlag;
     std::call_once (onceFlag, []()
     {
       using namespace asg::msgUserCode;
-      ANA_CHECK_THROW (asg::registerToolFactory<SimpleSelectorExampleTool> ("columnar::SimpleSelectorExampleTool"));
+      ANA_CHECK_THROW (asg::registerToolFactory<ADD_CMODE(columnar)::SimpleSelectorExampleTool> (add_cmode("columnar") + "::SimpleSelectorExampleTool"));
     });
 
 
@@ -60,7 +59,7 @@ namespace columnar
     PythonToolHandle toolHandle;
 
     // set the type and name of the tool
-    toolHandle.setTypeAndName ("columnar::SimpleSelectorExampleTool/" + makeUniqueName());
+    toolHandle.setTypeAndName (add_cmode("columnar") + "::SimpleSelectorExampleTool/" + makeUniqueName());
 
     // if we had properties we could set them here
     // toolHandle.setProperty ("Property", "Value");

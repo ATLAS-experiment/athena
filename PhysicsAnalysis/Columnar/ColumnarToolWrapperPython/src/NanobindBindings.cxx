@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -195,8 +195,7 @@ void clear_printer() {
 NB_MODULE(python_tool_handle, module) {
     module.doc() = "Nanobind bindings for PythonToolHandle";
 
-    if (!std::is_same_v<columnar::ColumnarMode,columnar::ColumnarModeArray>)
-        throw nb::import_error("This module can only be used in columnar access mode. Try setting up a ColumnarAnalysis release instead.");
+    static_assert(std::is_same_v<columnar::ColumnarMode,columnar::ColumnarModeArray>, "this module is only defined for array mode");
 
     module.attr("numberOfEventsName") = &columnar::eventRangeColumnName;
     module.attr("eventRangeColumnName") = &columnar::eventRangeColumnName;

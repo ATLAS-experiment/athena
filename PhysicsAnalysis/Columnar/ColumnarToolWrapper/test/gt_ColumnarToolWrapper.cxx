@@ -26,11 +26,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 namespace columnar
 {
-  // Type aliases for ColumnarModeArray (hardcoded for this test)
-  using MyTool = ColumnarTool<ColumnarModeArray>;
-  template<typename CT> using MyAccessor = AccessorTemplate<ParticleDef,CT,ColumnAccessMode::input,ColumnarModeArray>;
-  template<typename CT> using MyDecorator = AccessorTemplate<ParticleDef,CT,ColumnAccessMode::output,ColumnarModeArray>;
-  template<typename CT> using MyUpdater = AccessorTemplate<ParticleDef,CT,ColumnAccessMode::update,ColumnarModeArray>;
+  static_assert (std::is_same_v<ColumnarMode,ColumnarModeArray>, "this test is only defined for array mode");
 
 
   // ==========================================================================
@@ -39,10 +35,10 @@ namespace columnar
 
   TEST (ColumnVectorWrapperTest, SingleTool_BasicColumns)
   {
-    MyTool tool;
-    MyAccessor<ObjectColumn> particlesHandle{tool, "particles"};  // Creates offset column
-    MyAccessor<float> ptAcc{tool, "pt"};
-    MyAccessor<float> etaAcc{tool, "eta"};
+    ColumnarTool<> tool;
+    ParticleAccessor<ObjectColumn> particlesHandle{tool, "particles"};  // Creates offset column
+    ParticleAccessor<float> ptAcc{tool, "pt"};
+    ParticleAccessor<float> etaAcc{tool, "eta"};
 
     ColumnVectorHeader header;
     ToolColumnVectorMap wrapper{header, tool};
@@ -66,9 +62,9 @@ namespace columnar
 
   TEST (ColumnVectorWrapperTest, SingleTool_OffsetColumns)
   {
-    MyTool tool;
-    MyAccessor<ObjectColumn> particlesHandle{tool, "Particles"};
-    MyAccessor<float> ptAcc{tool, "pt"};
+    ColumnarTool<> tool;
+    ParticleAccessor<ObjectColumn> particlesHandle{tool, "Particles"};
+    ParticleAccessor<float> ptAcc{tool, "pt"};
 
     ColumnVectorHeader header;
     ToolColumnVectorMap wrapper{header, tool};
@@ -90,13 +86,13 @@ namespace columnar
   TEST (ColumnVectorWrapperTest, MultiTool_SharedColumn)
   {
     // Two tools with the same column name should get the same index
-    MyTool tool1;
-    MyAccessor<ObjectColumn> particlesHandle1{tool1, "particles"};  // Creates offset column
-    MyAccessor<float> pt1{tool1, "pt"};
+    ColumnarTool<> tool1;
+    ParticleAccessor<ObjectColumn> particlesHandle1{tool1, "particles"};  // Creates offset column
+    ParticleAccessor<float> pt1{tool1, "pt"};
 
-    MyTool tool2;
-    MyAccessor<ObjectColumn> particlesHandle2{tool2, "particles"};  // Same offset column
-    MyAccessor<float> pt2{tool2, "pt"};
+    ColumnarTool<> tool2;
+    ParticleAccessor<ObjectColumn> particlesHandle2{tool2, "particles"};  // Same offset column
+    ParticleAccessor<float> pt2{tool2, "pt"};
 
     ColumnVectorHeader header;
     ToolColumnVectorMap wrapper1{header, tool1};
@@ -110,9 +106,9 @@ namespace columnar
     std::size_t numColumns = header.numColumns();
 
     // Create a third tool with a different column
-    MyTool tool3;
-    MyAccessor<ObjectColumn> particlesHandle3{tool3, "particles"};  // Same offset column
-    MyAccessor<float> eta3{tool3, "eta"};
+    ColumnarTool<> tool3;
+    ParticleAccessor<ObjectColumn> particlesHandle3{tool3, "particles"};  // Same offset column
+    ParticleAccessor<float> eta3{tool3, "eta"};
     ToolColumnVectorMap wrapper3{header, tool3};
 
     // Should have added one new column (particles.eta)
@@ -123,13 +119,13 @@ namespace columnar
   TEST (ColumnVectorWrapperTest, MultiTool_AccessModePromotion)
   {
     // Tool1 has input column, Tool2 has update for same column -> promotes to read-write
-    MyTool tool1;
-    MyAccessor<ObjectColumn> particlesHandle1{tool1, "particles"};
-    MyAccessor<float> ptInput{tool1, "pt"};
+    ColumnarTool<> tool1;
+    ParticleAccessor<ObjectColumn> particlesHandle1{tool1, "particles"};
+    ParticleAccessor<float> ptInput{tool1, "pt"};
 
-    MyTool tool2;
-    MyAccessor<ObjectColumn> particlesHandle2{tool2, "particles"};
-    MyUpdater<float> ptUpdate{tool2, "pt"};
+    ColumnarTool<> tool2;
+    ParticleAccessor<ObjectColumn> particlesHandle2{tool2, "particles"};
+    AccessorTemplate<ParticleDef,float,ColumnAccessMode::update> ptUpdate{tool2, "pt"};
 
     ColumnVectorHeader header;
     ToolColumnVectorMap wrapper1{header, tool1};
@@ -147,13 +143,13 @@ namespace columnar
   TEST (ColumnVectorWrapperTest, MultiTool_OutputConflict)
   {
     // Tool1 has input, Tool2 has output for same column -> should throw error
-    MyTool tool1;
-    MyAccessor<ObjectColumn> particlesHandle1{tool1, "particles"};
-    MyAccessor<float> ptInput{tool1, "pt"};
+    ColumnarTool<> tool1;
+    ParticleAccessor<ObjectColumn> particlesHandle1{tool1, "particles"};
+    ParticleAccessor<float> ptInput{tool1, "pt"};
 
-    MyTool tool2;
-    MyAccessor<ObjectColumn> particlesHandle2{tool2, "particles"};
-    MyDecorator<float> ptOutput{tool2, "pt"};
+    ColumnarTool<> tool2;
+    ParticleAccessor<ObjectColumn> particlesHandle2{tool2, "particles"};
+    ParticleDecorator<float> ptOutput{tool2, "pt"};
 
     ColumnVectorHeader header;
     ToolColumnVectorMap wrapper1{header, tool1};
@@ -166,13 +162,13 @@ namespace columnar
   TEST (ColumnVectorWrapperTest, MultiTool_DisjointColumns)
   {
     // Two tools with completely different columns -> all columns created
-    MyTool tool1;
-    MyAccessor<ObjectColumn> particlesHandle1{tool1, "particles"};
-    MyAccessor<float> pt1{tool1, "pt"};
+    ColumnarTool<> tool1;
+    ParticleAccessor<ObjectColumn> particlesHandle1{tool1, "particles"};
+    ParticleAccessor<float> pt1{tool1, "pt"};
 
-    MyTool tool2;
-    MyAccessor<ObjectColumn> particlesHandle2{tool2, "particles"};  // Same offset
-    MyAccessor<float> eta2{tool2, "eta"};
+    ColumnarTool<> tool2;
+    ParticleAccessor<ObjectColumn> particlesHandle2{tool2, "particles"};  // Same offset
+    ParticleAccessor<float> eta2{tool2, "eta"};
 
     ColumnVectorHeader header;
     std::size_t initialColumns = header.numColumns();
@@ -197,13 +193,13 @@ namespace columnar
   TEST (ColumnVectorWrapperTest, MultiTool_OutputThenInput)
   {
     // Tool1 has output, Tool2 has input for same column -> should work (output stays output)
-    MyTool tool1;
-    MyAccessor<ObjectColumn> particlesHandle1{tool1, "particles"};
-    MyDecorator<float> ptOutput{tool1, "pt"};
+    ColumnarTool<> tool1;
+    ParticleAccessor<ObjectColumn> particlesHandle1{tool1, "particles"};
+    ParticleDecorator<float> ptOutput{tool1, "pt"};
 
-    MyTool tool2;
-    MyAccessor<ObjectColumn> particlesHandle2{tool2, "particles"};
-    MyAccessor<float> ptInput{tool2, "pt"};
+    ColumnarTool<> tool2;
+    ParticleAccessor<ObjectColumn> particlesHandle2{tool2, "particles"};
+    ParticleAccessor<float> ptInput{tool2, "pt"};
 
     ColumnVectorHeader header;
     ToolColumnVectorMap wrapper1{header, tool1};

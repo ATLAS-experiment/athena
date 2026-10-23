@@ -1,22 +1,54 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # @author Nils Krumnack
 # @author Matthew Feickert
 # @author Giordon Stark
 #
 # Notes:
-#   This package (ColumnarToolWrapperPython) should compile in any project, but
-#   the runtime code depends on being in a columnar-based project (e.g.
-#   ColumnarAnalysis).
+#   This package (ColumnarToolWrapperPython) is only built if
+#   ColumnarModeArray is one of the columnar modes of the project, and
+#   it is then built for that mode only.
 
 atlas_subdir( ColumnarToolWrapperPython )
 
-# Add the shared library:
+# FIX ME: These settings should come from the Project configuration
+if (COLUMNAR_ANALYSIS)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeArray;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
+elseif (XAOD_STANDALONE)
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD;ColumnarModeArray")
+  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
+else()
+  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD")
+  SET (COLUMNAR_MODE_SUFFIX_LIST "")
+endif()
+
+# For now this package only supports ColumnarModeArray, so I look up
+# the suffix for that mode and skip the package if it isn't available.
+# If at some point we need to support other modes as well (e.g. a
+# future RDF mode), this could either become a loop over the modes or
+# be split into separate packages per mode. That is left for later.
+list(FIND COLUMNAR_MODE_NAME_LIST ColumnarModeArray idx)
+if(idx LESS 0)
+  message ("Skipping ColumnarToolWrapperPython, ColumnarModeArray is not available")
+  return()
+endif()
+# COLUMNAR_MODE_SUFFIX_LIST may be a single-element list consisting of
+# an empty string. This protects against that.
+list(LENGTH COLUMNAR_MODE_SUFFIX_LIST suffix_len)
+if(idx LESS suffix_len)
+  list(GET COLUMNAR_MODE_SUFFIX_LIST ${idx} CMODE_SUFFIX)
+else()
+  set(CMODE_SUFFIX "")
+endif()
+
+# Add the shared library. This doesn't depend on the columnar mode
+# itself, so don't add ColumnarModeLib here.
 atlas_add_library (ColumnarToolWrapperPythonLib
 ColumnarToolWrapperPython/*.h
   INTERFACE
   PUBLIC_HEADERS ColumnarToolWrapperPython
-  LINK_LIBRARIES ColumnarToolWrapperLib ColumnarModeLib PATInterfaces)
+  LINK_LIBRARIES ColumnarToolWrapperLib PATInterfaces)
 
 find_package( GTest )
 
@@ -24,7 +56,7 @@ if (XAOD_STANDALONE)
   atlas_add_test( gt_PythonToolHandle
     SOURCES test/gt_PythonToolHandle.cxx
     INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-    LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperPythonLib AsgTestingLib ColumnarExampleToolsLib
+    LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperPythonLib AsgTestingLib ColumnarExampleToolsLib${CMODE_SUFFIX}
     POST_EXEC_SCRIPT noerror.sh )
 
   #atlas_add_test( ColumnarToolWrapperPython_import
@@ -121,7 +153,7 @@ target_include_directories(
   PRIVATE
   "${CMAKE_CURRENT_SOURCE_DIR}/ColumnarToolWrapperPython"
 )
-target_link_libraries(python_tool_handle PRIVATE ColumnarToolWrapperPythonLib ColumnarCoreLib CxxUtils Python::Python)
+target_link_libraries(python_tool_handle PRIVATE ColumnarToolWrapperPythonLib ColumnarCoreLib ColumnarModeLib${CMODE_SUFFIX} CxxUtils Python::Python)
 
 # ATLAS CMake needs to be told about the Python libraries at link time.
 # This is NOT required for normal CMake.
