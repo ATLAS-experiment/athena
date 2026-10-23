@@ -16,10 +16,16 @@ atlas_add_library( Resplot
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    NO_PUBLIC_HEADERS
    LINK_LIBRARIES ${ROOT_LIBRARIES} )
- 
-target_include_directories( Resplot PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Resplot> )
 
+atlas_get_package_dir(pkgDir)
+ 
+target_include_directories(Resplot PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Resplot>
+    $<BUILD_INTERFACE:${CMAKE_INCLUDE_OUTPUT_DIRECTORY}>
+    $<INSTALL_INTERFACE:src/${pkgDir}/Resplot> 
+    $<INSTALL_INTERFACE:include> )
+
+  
 # try this ... 
 atlas_install_generic( Resplot/Resplot
    DESTINATION include
