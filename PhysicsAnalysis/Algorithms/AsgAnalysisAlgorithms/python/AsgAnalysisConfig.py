@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # AnaAlgorithm import(s):
+import re
 import warnings
 from enum import Enum
 
@@ -79,6 +80,13 @@ class CommonServicesConfig (ConfigBlock) :
         """Return the instance name for this block"""
         return '' # no instance name, this is a singleton
 
+    @staticmethod
+    def _ensureNominalAllowed (userRegex) :
+        """Make sure the systematics regex also accepts the nominal."""
+        if re.fullmatch (userRegex, '') is not None:
+            return userRegex
+        return f"(?:{userRegex})|^$"
+
     def makeAlgs (self, config) :
 
         sysService = config.createService( 'CP::SystematicsSvc', 'SystematicsSvc' )
@@ -118,7 +126,7 @@ class CommonServicesConfig (ConfigBlock) :
                 if len(requested_categories):
                     sysService.systematicsRegex = "^(?=.*(" + "|".join(sorted(requested_categories)) + ")|$).*"
             if self.filterSystematics is not None:
-                sysService.systematicsRegex = self.filterSystematics
+                sysService.systematicsRegex = self._ensureNominalAllowed(self.filterSystematics)
         config.createService( 'CP::SelectionNameSvc', 'SelectionNameSvc')
 
         if self.systematicsHistogram is not None:
