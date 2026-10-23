@@ -20,11 +20,30 @@ namespace MC
 {
  namespace Pythia8
  {
-   /// @brief  To be understood
+  /// @brief Match selected Pythia status codes for hardest-subprocess and later-stage particles:
+  ///   21: incoming particle of the hardest subprocess
+  ///   22: intermediate hardest-subprocess particle (intended to have preserved mass)
+  ///   52: outgoing final-state-shower recoiler copy with changed momentum
+  ///   62: outgoing subprocess particle with primordial kT included
+  /// These exact comparisons match positive codes only. Pythia uses positive status
+  /// for entries remaining in the event record and negative status for entries no
+  /// longer remaining (decayed, branched, fragmented, etc.).
+  /// @see https://pythia.org/latest-manual/ParticleProperties.html#Particle-Status-Codes
   template <class T> inline bool isConditionA(const T& p) { return p->status() == 62 || p->status() == 52 || p->status() == 21 || p->status() == 22;}
 
+  /// @brief Match an outgoing particle of the hardest subprocess:
+  ///   23: outgoing particle of the hardest subprocess
+  /// This exact comparison matches the positive code only; see the sign convention above.
+  /// @see https://pythia.org/latest-manual/ParticleProperties.html#Particle-Status-Codes
   template <class T> inline bool isConditionB(const T& p) { return p->status() == 23;}
 
+  /// @brief Match positive statuses 31-39, the Pythia range for subsequent-subprocess particles:
+  ///   31: incoming particle
+  ///   32: intermediate particle (intended to have preserved mass)
+  ///   33: outgoing particle
+  ///   34: incoming particle that has already scattered
+  /// The manual does not assign individual meanings to statuses 35-39.
+  /// @see https://pythia.org/latest-manual/ParticleProperties.html#Particle-Status-Codes
   template <class T> inline bool isConditionC(const T& p) { return p->status() > 30 && p->status() < 40;}
  }
 
