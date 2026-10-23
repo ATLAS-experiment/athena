@@ -11,6 +11,7 @@
 #include <string>
 #include "TruthUtils/TruthClasses.h"
 namespace MCTruthPartClassifier {
+/// @brief Convert a hadron ParticleType to a ParticleOrigin (JPsi if a c-cbar meson has a J/psi mother).
 inline ParticleOrigin convHadronTypeToOrig(ParticleType pType, int motherPDG)
 {
   if (pType == CCbarMesonPart && abs(motherPDG) == MC::JPSI) return JPsi;
@@ -27,6 +28,7 @@ inline ParticleOrigin convHadronTypeToOrig(ParticleType pType, int motherPDG)
   return NonDefined;
 }
 
+/// @brief Classify a hadron by PDG ID into a ParticleOrigin (NonDefined if none applies).
 inline ParticleOrigin defHadronType(int pdg) {
   if (abs(pdg) == MC::JPSI) return JPsi;
   if (MC::isBBbarMeson(pdg)) return BBbarMeson;
@@ -42,6 +44,7 @@ inline ParticleOrigin defHadronType(int pdg) {
   return NonDefined;
 }
 
+/// @brief Classify a hadron by PDG ID into a ParticleType (Unknown if none applies).
 inline ParticleType defTypeOfHadron(int pdg) {
   if (MC::isBBbarMeson(pdg)) return BBbarMesonPart;
   if (MC::isCCbarMeson(pdg)) return CCbarMesonPart;
@@ -57,6 +60,7 @@ inline ParticleType defTypeOfHadron(int pdg) {
 }
 
 
+/// @brief Classify an electron (Unknown/Iso/NonIso/Bkg) from its origin; prompt electrons are always Iso.
 inline ParticleType defTypeOfElectron(ParticleOrigin EleOrig, bool isPrompt) {
 
   if (EleOrig == NonDefined)
@@ -76,6 +80,7 @@ inline ParticleType defTypeOfElectron(ParticleOrigin EleOrig, bool isPrompt) {
 }
 
 
+/// @brief Classify a muon (Unknown/Iso/NonIso/Bkg) from its origin; prompt muons are always Iso.
 inline ParticleType defTypeOfMuon(ParticleOrigin MuOrig, bool isPrompt) {
 
   if (MuOrig == NonDefined) return UnknownMuon;
@@ -94,6 +99,7 @@ inline ParticleType defTypeOfMuon(ParticleOrigin MuOrig, bool isPrompt) {
   return BkgMuon;
 }
 
+/// @brief Classify a tau (Unknown/Iso/NonIso/Bkg) from its origin.
 inline ParticleType defTypeOfTau(ParticleOrigin TauOrig) {
   if (TauOrig == NonDefined) return UnknownTau;
 
@@ -111,6 +117,7 @@ inline ParticleType defTypeOfTau(ParticleOrigin TauOrig) {
 }
 
 
+/// @brief Classify a photon (Unknown/Iso/NonIso/Bkg) from its origin.
 inline ParticleType defTypeOfPhoton(ParticleOrigin PhotOrig)
 {
   if (PhotOrig == NonDefined) return UnknownPhoton;
@@ -127,6 +134,7 @@ inline ParticleType defTypeOfPhoton(ParticleOrigin PhotOrig)
   return BkgPhoton;
 }
 
+/// @brief Determine a jet's origin from its mother particles (BSM/Higgs first, then top > Z > W > QCD).
 template <class T> ParticleOrigin defJetOrig(const T& allJetMothers) {
   ParticleOrigin partOrig = NonDefined;
   for (const auto& it: allJetMothers) {
@@ -144,8 +152,11 @@ template <class T> ParticleOrigin defJetOrig(const T& allJetMothers) {
   }
   return partOrig;
 }
+  /// Bit positions of the particle classification word built by defOrigOfParticle().
   enum MCTC_bits : unsigned int { HadTau=0, Tau, hadron, frombsm, uncat, isbsm, isgeant, stable, totalBits };
 
+/// @brief Classify a particle into a bit-word (see MCTC_bits).
+/// @return the word and the parent hadron (nullptr if none)
 template <class T> std::tuple<unsigned int, T> defOrigOfParticle(T thePart) {
 
   T parent_hadron_ptr = nullptr;
@@ -176,6 +187,9 @@ template <class T> std::tuple<unsigned int, T> defOrigOfParticle(T thePart) {
   return std::make_tuple(outputvalue,parent_hadron_ptr);
 }
 
+/// @brief Tell whether a particle is prompt, from the word returned by defOrigOfParticle().
+/// @param allow_prompt_tau_decays count products of prompt tau decays as prompt
+/// @return 1 prompt, 0 non-prompt, -1 uncategorised
 inline int isPrompt(const unsigned int classify, bool allow_prompt_tau_decays = true) {
     std::bitset<MCTC_bits::totalBits> res(classify);
     if (res.test(MCTC_bits::uncat)) return -1;
@@ -184,6 +198,8 @@ inline int isPrompt(const unsigned int classify, bool allow_prompt_tau_decays = 
     return !res.test(MCTC_bits::hadron);
   }
 
+/// @brief Determine the outcome of a simulated electron from its end vertex
+/// (NonInteract, ElectrMagInter, NuclInteraction or UnknownOutCome).
 template <class T> ParticleOutCome defOutComeOfElectron(T thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
   auto EndVert = MC::findSimulatedEndVertex(thePart);
@@ -208,6 +224,8 @@ template <class T> ParticleOutCome defOutComeOfElectron(T thePart) {
   return PartOutCome;
 }
 
+/// @brief Determine the outcome of a simulated muon from its end vertex
+/// (NonInteract, DecaytoElectron, NuclInteraction or UnknownOutCome).
 template <class T> ParticleOutCome defOutComeOfMuon(T thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
   auto EndVert = MC::findSimulatedEndVertex(thePart);
@@ -234,6 +252,8 @@ template <class T> ParticleOutCome defOutComeOfMuon(T thePart) {
 
   return PartOutCome;
 }
+/// @brief Determine the outcome of a simulated tau from its decay products
+/// (NonInteract, NuclInteraction, DecaytoElectron/Muon, One/Three/FiveProng or UnknownOutCome).
 template <class T> ParticleOutCome defOutComeOfTau(T thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
   auto EndVert = MC::findSimulatedEndVertex(thePart);
@@ -262,6 +282,8 @@ template <class T> ParticleOutCome defOutComeOfTau(T thePart) {
   return PartOutCome;
 }
 
+/// @brief Determine the outcome of a simulated photon from its end vertex
+/// (UnConverted, Converted, NuclInteraction or UnknownOutCome).
 template <class T> ParticleOutCome defOutComeOfPhoton(T thePart) {
   ParticleOutCome PartOutCome = UnknownOutCome;
   auto EndVert = MC::findSimulatedEndVertex(thePart);
