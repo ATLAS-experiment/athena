@@ -1,8 +1,6 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file ViewVectorBase.icc
  * @author scott snyder <snyder@bnl.gov>
@@ -12,6 +10,7 @@
 
 
 #include "AthContainers/AuxElement.h"
+#include "AthContainers/CurrentContext.h"
 #include "CxxUtils/checker_macros.h"
 #include <type_traits>
 
@@ -87,8 +86,7 @@ template <class DV>
 void
 ViewVectorBase::doToPersistent1 (DV& v, const std::true_type&)
 {
-  IProxyDict* store = SG::CurrentEventStore::store();
-  std::vector<ElementLink<DV> > elv = SG::dataVectorAsELV (v, store);
+  std::vector<ElementLink<DV> > elv = SG::dataVectorAsELV (v, Gaudi::Hive::currentContext());
   m_persKey.clear();
   m_persIndex.clear();
   m_persKey.reserve (elv.size());
@@ -173,11 +171,11 @@ void ViewVectorBase::doToTransient2 (DV& v, const std::true_type&)
     }
   }
   v.clear (SG::VIEW_ELEMENTS);
-  IProxyDict* store = SG::CurrentEventStore::store();
+  const EventContext& ctx = Gaudi::Hive::currentContext();
 
   assert (m_persKey.size() == m_persIndex.size());
   for (size_t i = 0; i < m_persKey.size(); i++) {
-    ElementLink<DV> el (m_persKey[i], m_persIndex[i], store);
+    ElementLink<DV> el (m_persKey[i], m_persIndex[i], ctx);
     // FIXME: const_cast
     typename DV::value_type p ATLAS_THREAD_SAFE = const_cast<typename DV::value_type> (*el);
     v.push_back (p);

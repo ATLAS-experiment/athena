@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file ViewVectorBase.h
@@ -16,7 +16,6 @@
 
 
 #include "AthContainers/dataVectorAsELV.h"
-#include "AthContainers/tools/CurrentEventStore.h"
 #include "AthLinks/ElementLinkBase.h"
 #include "SGCore/sgkey_t.h"
 #include <vector>

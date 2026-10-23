@@ -9,6 +9,11 @@
  */
 
 
+#ifndef XAOD_STANDALONE
+#include "AthenaKernel/proxyDictFromEventContext.h"
+#endif
+
+
 namespace SG::detail {
 
 
@@ -85,12 +90,14 @@ inline
 auto PackedLinkVectorHelperBase::storeFromSpan ([[maybe_unused]] DataLinkBase_span& links)
   -> IProxyDict*
 {
-#ifndef XAOD_STANDALONE
+#ifdef XAOD_STANDALONE
+  return xAOD::TActiveEvent::event();
+#else
   if (links.size() > 1) {
     return links[1].source();
   }
+  return Atlas::proxyDictFromEventContext();
 #endif
-  return CurrentEventStore::store();
 }
 
 

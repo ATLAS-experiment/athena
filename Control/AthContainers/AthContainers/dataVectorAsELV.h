@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -18,20 +18,15 @@
 
 
 #include "AthContainers/AuxVectorData.h"
+#include "AthContainers/CurrentContext.h"
 #include "AthContainers/OwnershipPolicy.h"
 #include "AthContainers/exceptions.h"
-#include "AthContainers/tools/CurrentEventStore.h"
 #include "AthContainersInterfaces/AuxStore_traits.h"
 #include "AthLinks/ElementLink.h"
 #include <vector>
 
 
 namespace SG {
-
-
-#ifdef XAOD_STANDALONE
-using AthContainers::IProxyDict;
-#endif // XAOD_STANDALONE
 
 
 /**
@@ -43,7 +38,7 @@ template <class DV>
 void dataVectorViewAsELV (const std::true_type&,
                           const DV& v,
                           std::vector<ElementLink<DV> >& ret,
-                          IProxyDict* store)
+                          const EventContext& ctx)
 {
   const DV* last_d = nullptr;
   const SG::AuxVectorData* last_b = nullptr;
@@ -55,7 +50,7 @@ void dataVectorViewAsELV (const std::true_type&,
     }
     if (!last_d)
       throw SG::ExcDVToELV ("Element not in a container");
-    ret.emplace_back (*last_d, elt->index(), store);
+    ret.emplace_back (*last_d, elt->index(), ctx);
   }
 }
 
@@ -71,7 +66,7 @@ template <class DV>
 void dataVectorViewAsELV (const std::false_type&,
                           const DV&,
                           std::vector<ElementLink<DV> >&,
-                          IProxyDict*)
+                          const EventContext&)
 {
   throw SG::ExcDVToELV ("Element in view container does not derive from AuxElement.");
 }
@@ -89,23 +84,21 @@ void dataVectorViewAsELV (const std::false_type&,
  */
 template <class DV>
 std::vector<ElementLink<DV> >
-dataVectorAsELV (const DV& v, IProxyDict* store = 0)
+dataVectorAsELV (const DV& v, const EventContext& ctx = Gaudi::Hive::currentContext())
 {
   std::vector<ElementLink<DV> > ret;
   size_t sz = v.size();
   ret.reserve (sz);
-
-  if (!store) store = SG::CurrentEventStore::store();
 
   if (v.ownPolicy() == SG::OWN_ELEMENTS) {
     // Could hoist the sgkey lookup.
     // But this will probably not be a common case, so don't do that
     // unless it's needed.
     for (size_t i = 0; i < sz; i++)
-      ret.emplace_back (v, i, store);
+      ret.emplace_back (v, i, ctx);
   }
   else {
-    dataVectorViewAsELV (typename AuxStore_traits<DV>::flag(), v, ret, store);
+    dataVectorViewAsELV (typename AuxStore_traits<DV>::flag(), v, ret, ctx);
   }
   
   return ret;

@@ -17,7 +17,6 @@
 #include "AthContainers/PackedLinkImpl.h"
 #include "AthContainers/AuxVectorData.h"
 #include "AthContainersInterfaces/IAuxTypeVector.h"
-#include "AthContainers/tools/CurrentEventStore.h"
 #include "AthLinks/ElementLink.h"
 #include "AthLinks/DataLink.h"
 #include "CxxUtils/span.h"
@@ -25,6 +24,18 @@
 #include <ranges>
 #include <variant>
 #include <utility>
+
+
+#ifdef XAOD_STANDALONE
+#include "xAODRootAccessInterfaces/TVirtualEvent.h"
+#include "xAODRootAccessInterfaces/TActiveEvent.h"
+
+namespace AthContainers {
+using IProxyDict = xAOD::TVirtualEvent;
+}
+#else
+#include "AthenaKernel/IProxyDict.h"
+#endif
 
 
 namespace SG::detail {
