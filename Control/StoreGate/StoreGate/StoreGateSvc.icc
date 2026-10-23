@@ -151,46 +151,6 @@ requires KeyConcept<TKEY>
 }
 
 
-//-------------------------------------------------------------------
-
-
-template <typename T, typename TKEY> 
-StatusCode StoreGateSvc::overwrite1(DataObject* obj, T* pObject,
-                                    const TKEY& key, 
-                                    bool allowMods, bool noHist)
-requires KeyConcept<TKEY>
-{
-  if (m_storeID == StoreID::EVENT_STORE && currentSlot() != nullptr) {
-    rememberBadRecord (ClassID_traits<T>::ID(), key);
-  }
-
-  // make sure the BaseInfo(Base) structure is initialized
-  SG::BaseInfo<T>::baseinfo();
-
-  // If s_isConst is set for this type, then we want to automatically
-  // make it const when recorded.
-  if (ClassID_traits<T>::s_isConst) allowMods = false;
-
-  StatusCode sc = this->currentStore()->typeless_overwrite(ClassID_traits<T>::ID(),
-                                                           obj, key, 
-                                                           pObject, allowMods,  noHist,
-                                                           &typeid(T));
-#ifndef NDEBUG
-  if (sc.isSuccess()) {
-    SG_MSG_DEBUG("overwrite: Recorded object @{} with key {} of type {} (CLID {})\n"
-                 " in DataObject @{}\n"
-                 " object {}modifiable when retrieved",
-                 static_cast<void*>(pObject),
-                 static_cast<std::string>(key),
-                 ClassID_traits<T>::typeName(),
-                 ClassID_traits<T>::ID() ,
-                 static_cast<void*>(obj),
-                 (allowMods ? "" : "not "));
-  }
-#endif
-  return sc;
-}
-
 //////////////////////////////////////////////////////////////////
 // Retrieve the default object (with no key) as a const pointer
 //////////////////////////////////////////////////////////////////
@@ -483,13 +443,6 @@ requires KeyConcept<TKEY>
   return nullptr;
 }
 
-template <typename T>
-int StoreGateSvc::typeCount() const
-{
-  return typeCount(ClassID_traits<T>::ID());
-}
-
-
 template <typename T, typename TKEY> 
 bool 
 StoreGateSvc::contains(const TKEY& key) const 
@@ -559,36 +512,41 @@ StatusCode StoreGateSvc::record(std::unique_ptr<T> pUnique, const TKEY& key,
                   allowMods, resetOnly, noHist);
 }
 
-template <typename T, typename TKEY> 
-StatusCode StoreGateSvc::overwrite(T* p2BRegistered, const TKEY& key)
-{
-  const bool ALLOWMODS(true);
-  return overwrite(p2BRegistered, key, ALLOWMODS); //SG takes ownership
-}
-
-template <typename T, typename TKEY> 
-StatusCode 
-StoreGateSvc::overwrite(T* pObject, const TKEY& key, 
-                        bool allowMods, bool noHist) 
-{
-  return overwrite1 (SG::asStorable<T>(pObject), pObject, key,
-                     allowMods, noHist);
-}
-
-template <typename T, typename TKEY> 
-StatusCode StoreGateSvc::overwrite(std::unique_ptr<T> pUnique, const TKEY& key)
-{
-  const bool ALLOWMODS(true);
-  return overwrite(std::move(pUnique), key, ALLOWMODS); //allow mods by default
-}
-
-template <typename T, typename TKEY> 
-StatusCode StoreGateSvc::overwrite(std::unique_ptr<T> pUnique, const TKEY& key, 
+template <typename T, KeyConcept TKEY>
+StatusCode StoreGateSvc::overwrite(std::unique_ptr<T> pUnique, const TKEY& key,
                                    bool allowMods, bool noHist)
 {
-  T* ptr = pUnique.get();
-  return overwrite1 (SG::asStorable<T>(std::move(pUnique)), ptr, key,
-                     allowMods, noHist);
+  T* pObject = pUnique.get();
+  DataObject* obj = SG::asStorable<T>(std::move(pUnique));
+
+  if (m_storeID == StoreID::EVENT_STORE && currentSlot() != nullptr) {
+    rememberBadRecord (ClassID_traits<T>::ID(), key);
+  }
+
+  // make sure the BaseInfo(Base) structure is initialized
+  SG::BaseInfo<T>::baseinfo();
+
+  // If s_isConst is set for this type, then we want to automatically
+  // make it const when recorded.
+  if (ClassID_traits<T>::s_isConst) allowMods = false;
+
+  StatusCode sc = this->currentStore()->typeless_overwrite(ClassID_traits<T>::ID(),
+                                                           obj, key,
+                                                           pObject, allowMods,  noHist,
+                                                           &typeid(T));
+#ifndef NDEBUG
+  if (sc.isSuccess()) {
+    SG_MSG_DEBUG(
+                 "overwrite: Recorded object @" << pObject
+                 << " with key " << (std::string)key
+                 << " of type "  << ClassID_traits<T>::typeName()
+                 << "(CLID " << ClassID_traits<T>::ID()
+                 << ")\n in DataObject @" << obj
+                 << "\n object " << (allowMods ? "" : "not ")
+                 << "modifiable when retrieved");
+  }
+#endif
+  return sc;
 }
 
 template <typename T, typename AKEY>
@@ -597,43 +555,10 @@ requires KeyConcept<AKEY>
 {
   _SGXCALL(setAlias, (pObject, aKey), StatusCode::FAILURE);
 }
-//-------------------------------------------------------------------
-template <typename T, typename TKEY, typename AKEY>
-StatusCode 
-StoreGateSvc::setAlias(const T* /*dummy*/,
-                       const TKEY& key, const AKEY& aKey)
-requires KeyConcept<TKEY> && KeyConcept<AKEY>
-{
-  _SGXCALL(setAlias, (ClassID_traits<T>::ID(), key, aKey), StatusCode::FAILURE);
-}
-
-inline
-StatusCode
-StoreGateSvc::setAlias(SG::DataProxy* proxy, const std::string& aliasKey)
-{
-  _SGXCALL(setAlias, (proxy, aliasKey), StatusCode::FAILURE);
-}
 
 //////////////////////////////////////////////////////////////////
 // Make a soft link to the object with key: return non_const link
 //////////////////////////////////////////////////////////////////
-template <typename T, typename TLINK> 
-StatusCode 
-StoreGateSvc::symLink(const T* pObject, TLINK* /*dummy*/)
-{
-  _SGXCALL(symLink, (pObject, ClassID_traits<TLINK>::ID()), StatusCode::FAILURE);
-}
-
-//////////////////////////////////////////////////////////////////
-// Make a soft link to the object with key: set const link
-//////////////////////////////////////////////////////////////////
-template <typename T, typename TLINK> 
-StatusCode 
-StoreGateSvc::symLink(const T* pObject, const TLINK* /*dummy*/)
-{
-  _SGXCALL(symLink, (pObject, ClassID_traits<TLINK>::ID()), StatusCode::FAILURE);
-}
-
 template <KeyConcept TKEY> 
 StatusCode 
 StoreGateSvc::symLink(const CLID id, const TKEY& key, const CLID linkid)
@@ -656,21 +581,6 @@ StoreGateSvc::removeDataAndProxy(const T* pObject)  {
   _SGXCALL(removeDataAndProxy, (pObject), StatusCode::FAILURE);
 }
 
-template <typename T>
-std::unique_ptr<T> 
-StoreGateSvc::retrieveUniquePrivateCopy (const std::string& key)
-{
-  CLID clid = ClassID_traits<T>::ID();
-  DataObject* obj = this->currentStore()->typeless_retrievePrivateCopy(clid, key);
-  std::unique_ptr<T> ret (SG::Storable_cast<T>(obj));
-  if (DataBucketBase* dbb = dynamic_cast<DataBucketBase*> (obj)) 
-  {
-    dbb->relinquish();
-  }
-  obj->release();
-  return ret;
-}
-
 //////////////////////////////////////////////////////////////////
 // Retrieve the @c CLID of a given "key" 
 // WARNING: slow!
@@ -680,18 +590,6 @@ CLID
 StoreGateSvc::clid( const TKEY& key ) const
 {
   _SGXCALL(clid, (key), CLID_NULL);
-}
-
-//////////////////////////////////////////////////////////////////
-// Retrieve the @c CLID s of a given "key" 
-// WARNING: slow!
-//////////////////////////////////////////////////////////////////
-template<typename TKEY>
-std::vector<CLID> 
-StoreGateSvc::clids( const TKEY& key ) const
-{
-  std::vector<CLID> nullV;
-  _SGXCALL(clids, (key), nullV);
 }
 
 ///////////////////////////////////////////////////////////////////////////

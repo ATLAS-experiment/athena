@@ -137,20 +137,11 @@ public:
                            bool clearAddressFlag=true,
                            const std::vector<CLID>& bases = {});
 
-  /// make a soft link to the object T* already registered
-  StatusCode symLink (const void* p2BRegistered, CLID linkID );
-
   /// make a soft link to the object pointed by id/key
   StatusCode symLink (const CLID id, const std::string& key, const CLID linkid);
 
-  /// make an alias to a DataObject (provide data type and old key)
-  StatusCode setAlias(CLID clid, const std::string& key, const std::string& aliasKey);
-
   /// make an alias to a DataObject (provide only valid pointer)
   StatusCode setAlias(const void* p2BAliased, const std::string& aliasKey);
-
-  /// make an alias to a DataObject (provide valid proxy)
-  StatusCode setAlias(SG::DataProxy* proxy, const std::string& aliasKey);
 
   /// prevent downstream clients from modifying the pointed-at dobj
   StatusCode setConst(const void* pointer);
@@ -161,36 +152,16 @@ public:
   /// Remove pObject and its proxy no matter what.       
   StatusCode removeDataAndProxy(const void* pObject);
 
-  /// @brief swap the content of 2 keys
-  ///  payload A indexed by keyA will now be accessed via keyB and vice versa
-  ///  Note that the swap is invalidated at event boundaries and/or when
-  ///  somebody clear the store.
-  /// @return false if swap failed
-  bool transientSwap( const CLID& id,
-                      const std::string& keyA, const std::string& keyB );
-
   //@}
 
   /////////////////////////////////////////////////////////////////////////
   /// \name Advanced Client Interface: data object access
   //@{
 
-  DataObject*
-  typeless_retrievePrivateCopy (const CLID clid, const std::string& key);
-
-
   /// Retrieve the main @c CLID of the object recorded in @c StoreGate
   /// with the given "key" 
   /// WARNING: slow!
   CLID clid( const std::string& key ) const;
-
-  /// Retrieve all the @c CLID s (including symlinks) of the object recorded in @c StoreGate
-  /// with the given "key" 
-  /// WARNING: slow!
-  std::vector<CLID> clids( const std::string& key ) const;  
-
-  /** Return the number of instances of type T (input CLID) */
-  int typeCount(const CLID& id) const;
 
   /** Look up a keyed object in TDS by CLID.
    *  returns false if object not available in TDS or persistent stores 

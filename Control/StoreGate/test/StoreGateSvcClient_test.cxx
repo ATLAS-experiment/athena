@@ -148,7 +148,7 @@ void test_DVL_conversions1 (StoreGateSvc& sg)
   assert (contb == contd);
 
   CONTA* conta = nullptr;
-  assert (sg.symLink (contd, conta).isSuccess());
+  assert (sg.symLink (ClassID_traits<CONTD>::ID(), "contd", ClassID_traits<CONTA>::ID()).isSuccess());
   assert (sg.retrieve (conta, "contd").isSuccess());
   assert (conta->size() == 10);
   typename CONTA::iterator it = conta->begin();
@@ -285,7 +285,6 @@ int main ATLAS_NOT_THREAD_SAFE () {
   testRetrieve(*pStore);
   testTryRetrieve(*pStore);
   testSymLink(*pStore);
-  testRetrievePrivateCopy(*pStore);
   testRemove(*pStore);
   testCreate(*pStore);
 #ifdef FOLDERS_ASDOBJ
@@ -300,8 +299,6 @@ int main ATLAS_NOT_THREAD_SAFE () {
   test_symlink2 (*pStore);
   test_symlink3 (*pStore);
   pStore->clearStore(/*force=*/true).ignore();
-
-  testTransientSwap(*pStore);
 
   pStore->clearStore(/*force=*/true).ignore();
 

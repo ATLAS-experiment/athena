@@ -556,17 +556,6 @@ SGImplSvc::store() const
 //////////////////////////////////////////////////////////////////
 // Make a soft link to the object with key
 //////////////////////////////////////////////////////////////////
-StatusCode SGImplSvc::symLink(const void* pObject, CLID linkID)
-{
-  lock_t lock (m_mutex);
-  SG::DataProxy* dp(proxy(pObject));
-
-  // if symLink already exists, just return success      
-  return isSymLinked(linkID,dp) ?
-    StatusCode::SUCCESS :
-    addSymLink(linkID,dp);
-}
-
 StatusCode SGImplSvc::symLink(const CLID id, const std::string& key, const CLID linkID)
 {
   lock_t lock (m_mutex);
@@ -623,38 +612,6 @@ StatusCode SGImplSvc::setAlias(const void* pObject, const std::string& aliasKey)
 }
 
 
-StatusCode SGImplSvc::setAlias(CLID clid,
-                               const std::string& key, const std::string& aKey)
-{
-  lock_t lock (m_mutex);
-
-  SG::DataProxy* dp(0); 
-  dp = proxy(clid, key);
-  if (0 == dp) {
-    error() << "setAlias: problem setting alias " 
-          << std::string(aKey) << '\n'
-          << "DataObject does not exist, record before setting alias."
-          << endmsg;
-    return StatusCode::FAILURE;
-  }
-
-  StatusCode sc = addAlias(aKey, dp);
-  if (sc.isFailure()) {
-    error() << "setAlias: problem setting alias " 
-          << (std::string)aKey << '\n'
-          << "DataObject does not exist, record before setting alias."
-          << endmsg;
-    return StatusCode::FAILURE;
-  }
-
-  return StatusCode::SUCCESS;
-}
-
-StatusCode SGImplSvc::setAlias(SG::DataProxy* proxy, const std::string& aliasKey)
-{
-  return addAlias( aliasKey, proxy );
-}
-
 StatusCode
 SGImplSvc::addAlias(const std::string& aliasKey, DataProxy* proxy)
 {
@@ -666,13 +623,6 @@ SGImplSvc::addAlias(const std::string& aliasKey, DataProxy* proxy)
   // add key to proxy and to ProxyStore
   return m_pStore->addAlias(aliasKey, proxy);
 }
-
-int SGImplSvc::typeCount(const CLID& id) const
-{
-  lock_t lock (m_mutex);
-  return m_pStore->typeCount(id);
-}  
-
 
 bool 
 SGImplSvc::contains(const CLID id, const std::string& key) const
@@ -957,32 +907,6 @@ SGImplSvc::accessData(const CLID& id, const string& key) const
   lock_t lock (m_mutex);
   DataProxy* theProxy(proxy(id, key, true));
   return (0 == theProxy) ? 0 : theProxy->accessData();
-}
-
-bool
-SGImplSvc::transientSwap( const CLID& id,
-                          const std::string& keyA, const std::string& keyB )
-{
-  lock_t lock (m_mutex);
-  const bool checkValid = true;
-  DataProxy* a = proxy( id, keyA, checkValid );
-  DataProxy* b = proxy( id, keyB, checkValid );
-  if ( 0 == a || 0 == b ) { return false; }
-  DataObject* objA = a->accessData();
-  DataObject* objB = b->accessData();
-
-  if ( 0 == objA || 0 == objB ) { return false; }
-  // prevent 'accidental' release of DataObjects...
-  const unsigned int refCntA = objA->addRef(); 
-  const unsigned int refCntB = objB->addRef();
-  // in case swap is being specialized for DataObjects 
-  using std::swap;
-  swap( objA, objB );
-  a->setObject( objA );
-  b->setObject( objB );
-  // and then restore old ref-count;
-  return ( (refCntA-1) == objA->release() && 
-           (refCntB-1) == objB->release() );
 }
 
 StatusCode
@@ -1462,22 +1386,6 @@ bool SGImplSvc::tryELRemap (sgkey_t sgkey_in, size_t index_in,
 }
 
 
-DataObject* SGImplSvc::typeless_retrievePrivateCopy (const CLID clid,
-                                                     const std::string& key)
-{
-  lock_t lock (m_mutex);
-  DataObject* obj = nullptr;
-  SG::DataProxy* dp = proxy (clid, key);
-  //we do not want anyone to mess up with our copy hence we release it immediately.
-  if (dp && dp->isValid()) {
-    obj = dp->object();
-    obj->addRef();
-    clearProxyPayload (dp);
-  }
-  return obj;
-}
-
-
 CLID SGImplSvc::clid( const std::string& key ) const
 {
   lock_t lock (m_mutex);
@@ -1491,23 +1399,6 @@ CLID SGImplSvc::clid( const std::string& key ) const
   }
 
   return CLID_NULL;
-}
-
-
-std::vector<CLID> SGImplSvc::clids( const std::string& key ) const
-{
-  lock_t lock (m_mutex);
-  std::vector<CLID> clids;
-  SG::DataStore::ConstStoreIterator s_iter, s_end;
-  store()->tRange(s_iter, s_end).ignore();
-  
-  for ( ; s_iter != s_end; ++s_iter ) {
-    if ( s_iter->second.find( key ) != s_iter->second.end() ) {
-      clids.push_back(s_iter->first);
-    }
-  }
-  
-  return clids;
 }
 
 

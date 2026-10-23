@@ -217,8 +217,6 @@ namespace Athena_test
 
     /// cpFoo CLID is 8101 : check it
     assert (8101 == rSG.clid("cpFoo"));
-    vector<CLID> ids(rSG.clids("cpFoo"));
-    assert(1 == ids.size());
     
     SillyKey key("silly");
     sc = rSG.record(new Foo(4), key);  assert (sc.isSuccess());
@@ -256,15 +254,12 @@ namespace Athena_test
 
     /// Test overwriting.
     sc = rSG.record(new Foo(101), "ow");  assert (sc.isSuccess());
-    sc = rSG.overwrite(new Foo(102), "ow");  assert (sc.isSuccess());
-    sc = rSG.overwrite(make_unique<Foo>(103), "ow");  assert (sc.isSuccess());
+    sc = rSG.overwrite(make_unique<Foo>(102), "ow", true);  assert (sc.isSuccess());
+    sc = rSG.overwrite(make_unique<Foo>(103), "ow", true);  assert (sc.isSuccess());
 
     sc = rSG.record(new Foo(104), "ow2", LOCKED);  assert (sc.isSuccess());
-    sc = rSG.overwrite(new Foo(105), "ow2", LOCKED);  assert (sc.isSuccess());
+    sc = rSG.overwrite(make_unique<Foo>(105), "ow2", LOCKED);  assert (sc.isSuccess());
     sc = rSG.overwrite(make_unique<Foo>(106), "ow2", LOCKED);  assert (sc.isSuccess());
-
-    /// 14 Foo objects recorded above : check it
-    assert(rSG.typeCount<Foo>() == 14);
 
     checkCLIDs (rSG, expCLIDs);
 
@@ -310,12 +305,10 @@ namespace Athena_test
   void testSymLink(::StoreGateSvc& rSG) 
   {  
     const Foo *cFoo;
-    Foo *noFoo(0);
-    Base* bDum(0);
 
     std::println ("*** StoreGateSvcClient_test symlinks BEGINS ***");
     SGASSERTERROR(rSG.retrieve(cFoo).isSuccess());
-    SGASSERTERROR(rSG.symLink(cFoo, bDum).isSuccess());
+    SGASSERTERROR(rSG.symLink(ClassID_traits<Foo>::ID(), "xxx", ClassID_traits<Base>::ID()).isSuccess());
 
 #ifdef TEST_BOOST_CONCEPT_CHECK
     NotThere* notDum;
@@ -323,17 +316,18 @@ namespace Athena_test
     rSG.symLink(cFoo, notDum);
 #endif
 
-    SGASSERTERROR(rSG.symLink(noFoo, bDum).isSuccess());
+    SGASSERTERROR(rSG.symLink(ClassID_traits<Foo>::ID(), "noFoo", ClassID_traits<Base>::ID()).isSuccess());
 
 
     assert(rSG.symLink(ClassID_traits<Foo>::ID(), 
 		       "UnLocked", 
 		       ClassID_traits<Base>::ID()).isSuccess()); 
     //let's check we got all clids for "UnLocked"
-    vector<CLID> unids(rSG.clids("UnLocked"));
+    DataProxy* dp = rSG.proxy (ClassID_traits<Foo>::ID(), "UnLocked");
+    vector<CLID> unids = dp->transientID();
     assert (1 == count(unids.begin(), unids.end(), ClassID_traits<Foo>::ID()));
     assert (1 == count(unids.begin(), unids.end(), ClassID_traits<Base>::ID()));
-    assert (2 == rSG.clids("UnLocked").size());
+    assert (2 == unids.size());
 
     Base* pB;
     assert(rSG.retrieve(pB, "UnLocked").isSuccess());
@@ -423,7 +417,7 @@ namespace Athena_test
 
     assert (dp->refCount() == 4);
 
-    assert (sg.symLink (d1, (B1*)0).isSuccess());
+    assert (sg.symLink (ClassID_traits<D1>::ID(), "d1", ClassID_traits<B1>::ID()).isSuccess());
     // Refcount should be the same.
     assert (dp->refCount() == 4);
 
@@ -643,17 +637,6 @@ namespace Athena_test {
   }
 
 
-  void testRetrievePrivateCopy(::StoreGateSvc& rSG) {
-    cout << "*** StoreGateSvcClient_test retrievePrivateCopy BEGINS ***" <<endl;
-    const Foo *cFoo(0);
-    assert(rSG.retrieve<Foo>(cFoo,"silly").isSuccess());
-    std::unique_ptr<Foo> apFoo(rSG.retrieveUniquePrivateCopy<Foo>("silly"));
-    assert(cFoo == apFoo.get());
-    SGASSERTERROR(rSG.retrieve(cFoo, "silly").isSuccess());
-    cout << "*** StoreGateSvcClient_test retrievePrivateCopy OK ***" <<endl;
-  }
-
-
   void testClear(::StoreGateSvc& rSG) {
 
     assert(rSG.record(new Foo, "LockReset", LOCKED, RESET).isSuccess());
@@ -661,39 +644,14 @@ namespace Athena_test {
     assert(rSG.record(new Foo, "LockDelete", LOCKED, DELETE).isSuccess());
     assert(rSG.record(new Foo, "UnLockDelete", !LOCKED, DELETE).isSuccess());
     Bar* pBar = new Bar();
-    Base* bDum(0);
     assert(rSG.record(pBar, "aBar", LOCKED, DELETE).isSuccess());
-    assert(rSG.symLink(pBar, bDum).isSuccess());
+    assert(rSG.symLink(ClassID_traits<Bar>::ID(), "aBar", ClassID_traits<Base>::ID()).isSuccess());
 
 
     rSG.clearStore(true).ignore();
     rSG.clearStore().ignore();
     // cppcheck-suppress memleak; pBar not really leaked
  }
-
-  void testTransientSwap(::StoreGateSvc& rSG) 
-  {  
-    cout << "\n*** StoreGateSvcClient_test transientSwap BEGINS ***" << endl;
-    Foo* pFoo1 = new Foo(1);    
-    //    cout << "pFoo1=" << hex << pFoo1 << dec << endl;
-    assert(rSG.record(pFoo1, "pSwapFoo1").isSuccess());
-    assert(pFoo1->i() == 1);
-    pFoo1 = 0;
-
-    Foo* pFoo2 = new Foo(2);
-    //    cout << "p2Foo2=" << hex << pFoo2 << dec << endl;
-    assert(rSG.record(pFoo2, "pSwapFoo2").isSuccess());
-    assert(pFoo2->i() == 2);
-    pFoo2 = 0;
-
-    assert(rSG.transientSwap( 8101, "pSwapFoo1", "pSwapFoo2" ));
-    assert(rSG.retrieve( pFoo1, "pSwapFoo1" ).isSuccess());
-    assert(rSG.retrieve( pFoo2, "pSwapFoo2" ).isSuccess());
-    assert(pFoo1->i() == 2);
-    assert(pFoo2->i() == 1);
-
-    cout << "*** StoreGateSvcClient_test transientSwap OK ***\n\n" <<endl;
-  }
 
   void testKeys(::StoreGateSvc& rSG) {
 

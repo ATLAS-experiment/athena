@@ -1,18 +1,18 @@
 
 
-Initializing Gaudi ApplicationMgr using job opts /afs/cern.ch/user/s/ssnyder/atlas-work3/build-x86_64-el9-gcc15-opt/x86_64-el9-gcc15-opt/jobOptions/StoreGate/StoreGate_jobOptions.txt
-JobOptionsSvc         INFO # =======> /afs/cern.ch/user/s/ssnyder/atlas-work3/build-x86_64-el9-gcc15-opt/x86_64-el9-gcc15-opt/jobOptions/StoreGate/StoreGate_jobOptions.txt
+Initializing Gaudi ApplicationMgr using job opts /home/sss/atlas/dvtest/build/joboptions/StoreGate/StoreGate_jobOptions.txt
+JobOptionsSvc         INFO # =======> /home/sss/atlas/dvtest/build/joboptions/StoreGate/StoreGate_jobOptions.txt
 JobOptionsSvc         INFO # (1,1): ApplicationMgr.ExtSvc += ["StoreGateSvc/DetectorStore", "StoreGateSvc/HistoryStore"]
 JobOptionsSvc         INFO # (4,1): AuditorSvc.Auditors += ["AlgContextAuditor"]
 JobOptionsSvc         INFO # (5,1): StoreGateSvc.OutputLevel = 1
-JobOptionsSvc         INFO Job options successfully read in from /afs/cern.ch/user/s/ssnyder/atlas-work3/build-x86_64-el9-gcc15-opt/x86_64-el9-gcc15-opt/jobOptions/StoreGate/StoreGate_jobOptions.txt
+JobOptionsSvc         INFO Job options successfully read in from /home/sss/atlas/dvtest/build/joboptions/StoreGate/StoreGate_jobOptions.txt
 ApplicationMgr     SUCCESS 
 ====================================================================================================================================
-                                                   Welcome to ApplicationMgr (GaudiCoreSvc v40r4)
-                                          running on lxplus953.cern.ch on Tue Sep 22 20:14:59 2026
+                                                   Welcome to ApplicationMgr (GaudiCoreSvc v27r1p99)
+                                          running on karma on Wed Sep 30 13:17:25 2026
 ====================================================================================================================================
 ApplicationMgr        INFO Application Manager Configured successfully
-ClassIDSvc            INFO getRegistryEntries: read 895 CLIDRegistry entries for module ALL
+ClassIDSvc            INFO getRegistryEntries: read 454 CLIDRegistry entries for module ALL
 EventLoopMgr          INFO Unable to locate service "EventSelector": No events will be processed from external input.
 ApplicationMgr        INFO Application Manager Initialized successfully
 ApplicationMgr Ready
@@ -24,100 +24,100 @@ StoreGateSvc_Impl    DEBUG Property update for OutputLevel : new value = 1
 StoreGateSvc_Impl  VERBOSE Initializing StoreGateSvc_Impl
 StoreGateSvc_Impl    DEBUG Service base class initialized successfully
 *** StoreGateSvcClient_test record BEGINS ***
-StoreGateSvc         DEBUG Recorded object @0x50eb920 with key pFoo1 of type Foo (CLID 8101)
- in DataObject @0x50ebdc0
+StoreGateSvc         DEBUG Recorded object @0x19b8f030 with key pFoo1 of type Foo (CLID 8101)
+ in DataObject @0x19b8f6f0
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
 StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key pFoo1 and clid 8101
- Pre-existing valid DataProxy @0x4a39830 found in Store for key pFoo1 with clid 8101
-ClassIDSvc            INFO getRegistryEntries: read 901 CLIDRegistry entries for module ALL
-StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x50eb120
- recorded with key pFoo1 of type Foo (CLID 8101) in DataObject @0x50ebfe0
+ Pre-existing valid DataProxy @0x1941bc10 found in Store for key pFoo1 with clid 8101
+ClassIDSvc            INFO getRegistryEntries: read 849 CLIDRegistry entries for module ALL
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x19b8fb30
+ recorded with key pFoo1 of type Foo (CLID 8101) in DataObject @0x19b8ff70
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
 StoreGateSvc_Impl  WARNING record_impl: failed for key=pFoo2, type Foo (CLID 8101)
- object @0x50eb920 already in store with key=pFoo1. Will not record a duplicate!
+ object @0x19b8f030 already in store with key=pFoo1. Will not record a duplicate!
 <<---Error Message Ends-------
-StoreGateSvc         DEBUG Recorded object @0x5115be0 with key pFoo2 of type Foo (CLID 8101)
- in DataObject @0x50fda80
+StoreGateSvc         DEBUG Recorded object @0x19b9f1d0 with key pFoo2 of type Foo (CLID 8101)
+ in DataObject @0x19ba40f0
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x5115c50 with key cpFoo of type Foo (CLID 8101)
- in DataObject @0x50fc810
+StoreGateSvc         DEBUG Recorded object @0x19b9f130 with key cpFoo of type Foo (CLID 8101)
+ in DataObject @0x19ba3f80
  object not modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x5115c30 with key silly of type Foo (CLID 8101)
- in DataObject @0x5115d80
+StoreGateSvc         DEBUG Recorded object @0x19b8f8c0 with key silly of type Foo (CLID 8101)
+ in DataObject @0x19ba2590
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
 StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
- Pre-existing valid DataProxy @0x4af7020 found in Store for key silly with clid 8101
-StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x5115ba0
- recorded with key silly of type Foo (CLID 8101) in DataObject @0x5111210
+ Pre-existing valid DataProxy @0x19ba5080 found in Store for key silly with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x19b8f910
+ recorded with key silly of type Foo (CLID 8101) in DataObject @0x19ba0ca0
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
 StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
- Pre-existing valid DataProxy @0x4af7020 found in Store for key silly with clid 8101
-StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x50ea950
- recorded with key silly of type Foo (CLID 8101) in DataObject @0x5111290
+ Pre-existing valid DataProxy @0x19ba5080 found in Store for key silly with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x19bb7400
+ recorded with key silly of type Foo (CLID 8101) in DataObject @0x19b9fad0
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
 StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
- Pre-existing valid DataProxy @0x4af7020 found in Store for key silly with clid 8101
-StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x51139b0
- recorded with key silly of type Foo (CLID 8101) in DataObject @0x5112b10
+ Pre-existing valid DataProxy @0x19ba5080 found in Store for key silly with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x19ba34b0
+ recorded with key silly of type Foo (CLID 8101) in DataObject @0x19b9fa80
 <<---Error Message Ends-------
-StoreGateSvc         DEBUG Recorded object @0x5114210 with key UnLocked of type Foo (CLID 8101)
- in DataObject @0x5112c00
+StoreGateSvc         DEBUG Recorded object @0x19ba1ac0 with key UnLocked of type Foo (CLID 8101)
+ in DataObject @0x19b9f9f0
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x5114360 with key Locked of type Foo (CLID 8101)
- in DataObject @0x51145f0
+StoreGateSvc         DEBUG Recorded object @0x19ba0290 with key Locked of type Foo (CLID 8101)
+ in DataObject @0x19ba1dd0
  object not modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x5115bc0 with key LockedReset of type Foo (CLID 8101)
- in DataObject @0x510dd40
+StoreGateSvc         DEBUG Recorded object @0x19b9f9d0 with key LockedReset of type Foo (CLID 8101)
+ in DataObject @0x19ba51b0
  object not modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x5112920 with key UnLockedReset of type Foo (CLID 8101)
- in DataObject @0x510deb0
+StoreGateSvc         DEBUG Recorded object @0x19bb7420 with key UnLockedReset of type Foo (CLID 8101)
+ in DataObject @0x19ba17a0
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x5112820 with key LockedDelete of type Foo (CLID 8101)
- in DataObject @0x510f820
+StoreGateSvc         DEBUG Recorded object @0x19ba0bb0 with key LockedDelete of type Foo (CLID 8101)
+ in DataObject @0x19ba0bd0
  object not modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x51127c0 with key UnLockedDelete of type Foo (CLID 8101)
- in DataObject @0x510f8a0
+StoreGateSvc         DEBUG Recorded object @0x19ba2fc0 with key UnLockedDelete of type Foo (CLID 8101)
+ in DataObject @0x19ba2fe0
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x5111100 with key Const of type Foo (CLID 8101)
- in DataObject @0x510c4c0
+StoreGateSvc         DEBUG Recorded object @0x19ba4a00 with key Const of type Foo (CLID 8101)
+ in DataObject @0x19ba4a20
  object not modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x5111040 with key Const2 of type Foo (CLID 8101)
- in DataObject @0x51090e0
+StoreGateSvc         DEBUG Recorded object @0x19ba63e0 with key Const2 of type Foo (CLID 8101)
+ in DataObject @0x19ba6400
  object not modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
 StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key Const and clid 8101
- Pre-existing valid DataProxy @0x50ec9e0 found in Store for key Const with clid 8101
-StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x5110e80
- recorded with key Const of type Foo (CLID 8101) in DataObject @0x510aa50
+ Pre-existing valid DataProxy @0x19ba6270 found in Store for key Const with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x19ba7de0
+ recorded with key Const of type Foo (CLID 8101) in DataObject @0x19ba7e00
 <<---Error Message Ends-------
-StoreGateSvc         DEBUG Recorded object @0x5110e10 with key ow of type Foo (CLID 8101)
- in DataObject @0x510aad0
+StoreGateSvc         DEBUG Recorded object @0x19ba0f10 with key ow of type Foo (CLID 8101)
+ in DataObject @0x19ba3fd0
  object modifiable when retrieved
-StoreGateSvc         DEBUG overwrite: Recorded object @0x51105d0 with key ow of type Foo (CLID 8101)
- in DataObject @0x510c440
+StoreGateSvc         DEBUG overwrite: Recorded object @0x19ba97a0 with key ow of type Foo(CLID 8101)
+ in DataObject @0x19ba97c0
  object modifiable when retrieved
-StoreGateSvc         DEBUG overwrite: Recorded object @0x5110e10 with key ow of type Foo (CLID 8101)
- in DataObject @0x510aad0
+StoreGateSvc         DEBUG overwrite: Recorded object @0x19bab190 with key ow of type Foo(CLID 8101)
+ in DataObject @0x19ba3fd0
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x51105d0 with key ow2 of type Foo (CLID 8101)
- in DataObject @0x510c440
+StoreGateSvc         DEBUG Recorded object @0x19ba97a0 with key ow2 of type Foo (CLID 8101)
+ in DataObject @0x19ba97c0
  object not modifiable when retrieved
-StoreGateSvc         DEBUG overwrite: Recorded object @0x5114310 with key ow2 of type Foo (CLID 8101)
- in DataObject @0x51042b0
+StoreGateSvc         DEBUG overwrite: Recorded object @0x19bab170 with key ow2 of type Foo(CLID 8101)
+ in DataObject @0x19ba9810
  object not modifiable when retrieved
-StoreGateSvc         DEBUG overwrite: Recorded object @0x510f440 with key ow2 of type Foo (CLID 8101)
- in DataObject @0x510c440
+StoreGateSvc         DEBUG overwrite: Recorded object @0x19ba97a0 with key ow2 of type Foo(CLID 8101)
+ in DataObject @0x19ba97c0
  object not modifiable when retrieved
 *** StoreGateSvcClient_test records OK ***
 
@@ -194,13 +194,6 @@ StoreGateSvc       WARNING retrieve(const): No valid proxy for object modSully o
 *** StoreGateSvcClient_test symlinks OK ***
 
 
-*** StoreGateSvcClient_test retrievePrivateCopy BEGINS ***
-StoreGateSvc         DEBUG Retrieved const pointer to object silly of type Foo (CLID 8101)
-Now we expect to see an error message:
-----Error Message Starts--->>
-StoreGateSvc       WARNING retrieve(const): No valid proxy for object silly of type Foo (CLID 8101)
-<<---Error Message Ends-------
-*** StoreGateSvcClient_test retrievePrivateCopy OK ***
 *** StoreGateSvcClient_test remove BEGINS ***
 Now we expect to see an error message:
 ----Error Message Starts--->>
@@ -212,37 +205,37 @@ Now we expect to see an error message:
 StoreGateSvc       WARNING retrieve(non-const): No valid proxy for object  of type Foo (CLID 8101)
  Try to use a const retrieve
 <<---Error Message Ends-------
-StoreGateSvc         DEBUG Recorded object @0x510f490 with key pFooKey of type Foo (CLID 8101)
- in DataObject @0x5115d80
+StoreGateSvc         DEBUG Recorded object @0x19bacb20 with key pFooKey of type Foo (CLID 8101)
+ in DataObject @0x19ba09a0
  object modifiable when retrieved
  Now we expect to see an error for invalid proxy >>> 
 StoreGateSvc       WARNING retrieve(non-const): No valid proxy for object pFooKey of type Foo (CLID 8101)
  Try to use a const retrieve
  end of error >>>>>>>>>>>>> 
-StoreGateSvc         DEBUG Recorded object @0x510f4f0 with key pFooKey of type Foo (CLID 8101)
- in DataObject @0x5115d80
+StoreGateSvc         DEBUG Recorded object @0x19bacb40 with key pFooKey of type Foo (CLID 8101)
+ in DataObject @0x19ba1b50
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x510f420 with key pFooKey of type Foo (CLID 8101)
- in DataObject @0x5115d80
+StoreGateSvc         DEBUG Recorded object @0x19b5d3c0 with key pFooKey of type Foo (CLID 8101)
+ in DataObject @0x19ba1b50
  object modifiable when retrieved
 *** StoreGateSvcClient_test removes OK ***
 
 
 
 *** StoreGateSvcClient_test testCreate BEGINS ***
-StoreGateSvc         DEBUG Recorded object @0x510f650 with key pCreateFooDefault of type Foo (CLID 8101)
- in DataObject @0x5115d80
+StoreGateSvc         DEBUG Recorded object @0x19b8fd20 with key pCreateFooDefault of type Foo (CLID 8101)
+ in DataObject @0x19ba1b50
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x510f490 with key pCreateFoo1 of type Foo (CLID 8101)
- in DataObject @0x5105c20
+StoreGateSvc         DEBUG Recorded object @0x19bacb40 with key pCreateFoo1 of type Foo (CLID 8101)
+ in DataObject @0x19ba3540
  object modifiable when retrieved
 Now we expect to see an error message:
 ----Error Message Starts--->>
 StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key pCreateFoo1 and clid 8101
- Pre-existing valid DataProxy @0x50ecfd0 found in Store for key pCreateFoo1 with clid 8101
-StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x5115320
- recorded with key pCreateFoo1 of type Foo (CLID 8101) in DataObject @0x5107580
-StoreGateSvc         ERROR create: problem recording created object @0x5115320 using key pCreateFoo1
+ Pre-existing valid DataProxy @0x19bae420 found in Store for key pCreateFoo1 with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x19bae5e0
+ recorded with key pCreateFoo1 of type Foo (CLID 8101) in DataObject @0x19bae600
+StoreGateSvc         ERROR create: problem recording created object @0x19bae5e0 using key pCreateFoo1
 <<---Error Message Ends-------
 StoreGateSvc         DEBUG Retrieved non-const pointer to object pCreateFoo1 of type Foo (CLID 8101)
 *** StoreGateSvcClient_test testCreate OK ***
@@ -253,38 +246,38 @@ Testing dump:
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<< Data Store Dump >>>>>>>>>>>>>>> 
 StoreGateSvc_Impl: SGImplSvc()::dump() which is NOT LOADED 
 StoreGateSvc_Impl: Found 1 proxy for ClassID 8100 (Base): 
-StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data:  0x5112c00 --- key: UnLocked
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x19b9f9f0 --- key: UnLocked
 StoreGateSvc_Impl: Found 16 proxies for ClassID 8101 (Foo): 
-StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data:  0x510c4c0 --- key: Const
-StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data:  0x51090e0 --- key: Const2
-StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data:  0x51145f0 --- key: Locked
-StoreGateSvc_Impl: flags: (valid  , locked  , DELETE) --- data:  0x510f820 --- key: LockedDelete
-StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data:  0x510dd40 --- key: LockedReset
-StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data:  0x5112c00 --- key: UnLocked
-StoreGateSvc_Impl: flags: (valid  , UNLOCKED, DELETE) --- data:  0x510f8a0 --- key: UnLockedDelete
-StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data:  0x510deb0 --- key: UnLockedReset
-StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data:  0x50fc810 --- key: cpFoo
-StoreGateSvc_Impl: flags: (valid  , UNLOCKED, DELETE) --- data:  0x510aad0 --- key: ow
-StoreGateSvc_Impl: flags: (valid  , locked  , DELETE) --- data:  0x510c440 --- key: ow2
-StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data:  0x5105c20 --- key: pCreateFoo1
-StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data:  0x5115d80 --- key: pCreateFooDefault
-StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data:  0x50ebdc0 --- key: pFoo1
-StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data:  0x50fda80 --- key: pFoo2
-StoreGateSvc_Impl: flags: (INVALID, UNLOCKED, reset ) --- data:        0x0 --- key: silly
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x19ba4a20 --- key: Const
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x19ba6400 --- key: Const2
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x19ba1dd0 --- key: Locked
+StoreGateSvc_Impl: flags: (valid  , locked  , DELETE) --- data: 0x19ba0bd0 --- key: LockedDelete
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x19ba51b0 --- key: LockedReset
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x19b9f9f0 --- key: UnLocked
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, DELETE) --- data: 0x19ba2fe0 --- key: UnLockedDelete
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x19ba17a0 --- key: UnLockedReset
+StoreGateSvc_Impl: flags: (valid  , locked  , reset ) --- data: 0x19ba3f80 --- key: cpFoo
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, DELETE) --- data: 0x19ba3fd0 --- key: ow
+StoreGateSvc_Impl: flags: (valid  , locked  , DELETE) --- data: 0x19ba97c0 --- key: ow2
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x19ba3540 --- key: pCreateFoo1
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x19ba1b50 --- key: pCreateFooDefault
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x19b8f6f0 --- key: pFoo1
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x19ba40f0 --- key: pFoo2
+StoreGateSvc_Impl: flags: (valid  , UNLOCKED, reset ) --- data: 0x19ba2590 --- key: silly
 StoreGateSvc_Impl: <<<<<<<<<<<<<<<<<<<<<<<<<>>>>>>>>>>>>>>>>>>>>>>>> 
 
 <<--------
 StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=true
-StoreGateSvc         DEBUG Recorded object @0x5114980 with key d1 of type D1 (CLID 8112)
- in DataObject @0x510aa50
+StoreGateSvc         DEBUG Recorded object @0x19ba2ae0 with key d1 of type D1 (CLID 8112)
+ in DataObject @0x19ba97c0
  object modifiable when retrieved
 StoreGateSvc         DEBUG Retrieved non-const pointer to object d1 of type B1 (CLID 8111)
-0x50ea7c0
-0x50e6ff0 StoreGateSvc
+0x19b8e730
+0x19b8b540 StoreGateSvc
 StoreGateSvc         DEBUG Retrieved non-const pointer to object d1Alias of type D1 (CLID 8112)
 StoreGateSvc         DEBUG Retrieved non-const pointer to object d1AnotherAlias of type D1 (CLID 8112)
-StoreGateSvc         DEBUG Recorded object @0x5115600 with key d2 of type D1 (CLID 8112)
- in DataObject @0x50eb5f0
+StoreGateSvc         DEBUG Recorded object @0x19b9ff00 with key d2 of type D1 (CLID 8112)
+ in DataObject @0x19b8ff70
  object modifiable when retrieved
 StoreGateSvc         DEBUG Retrieved non-const pointer to object d2 of type D1 (CLID 8112)
 StoreGateSvc         DEBUG Retrieved non-const pointer to object d1Alias of type D1 (CLID 8112)
@@ -297,73 +290,61 @@ StoreGateSvc         DEBUG Retrieved non-const pointer to object dd of type D1 (
 StoreGateSvc         DEBUG Retrieved non-const pointer to object dd of type B1 (CLID 8111)
 StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=true
 
-*** StoreGateSvcClient_test transientSwap BEGINS ***
-StoreGateSvc         DEBUG Recorded object @0x5112040 with key pSwapFoo1 of type Foo (CLID 8101)
- in DataObject @0x50eb5f0
- object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x510ebe0 with key pSwapFoo2 of type Foo (CLID 8101)
- in DataObject @0x5114230
- object modifiable when retrieved
-StoreGateSvc         DEBUG Retrieved non-const pointer to object pSwapFoo1 of type Foo (CLID 8101)
-StoreGateSvc         DEBUG Retrieved non-const pointer to object pSwapFoo2 of type Foo (CLID 8101)
-*** StoreGateSvcClient_test transientSwap OK ***
-
-
-
 StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=true
 *** test_DVL_conversions
-StoreGateSvc         DEBUG Recorded object @0x5113170 with key contd of type CV (CLID 82734625)
- in DataObject @0x50fcb90
+StoreGateSvc         DEBUG Recorded object @0x17e64bf0 with key contd of type CV (CLID 82734625)
+ in DataObject @0x19ba15a0
  object modifiable when retrieved
 StoreGateSvc         DEBUG Retrieved non-const pointer to object contd of type DataVector<C> (CLID 82734623)
 StoreGateSvc         DEBUG Retrieved non-const pointer to object contd of type DataVector<B> (CLID 82734621)
 StoreGateSvc         DEBUG Retrieved non-const pointer to object contd of type DataVector<A> (CLID 82734619)
 StoreGateSvc         DEBUG Retrieved non-const pointer to object contd of type DataVector<A> (CLID 82734619)
 *** test_const_DVL
-StoreGateSvc         DEBUG Recorded object @0x5103010 with key dvl of type CV (CLID 82734625)
- in DataObject @0x50dea00
+StoreGateSvc         DEBUG Recorded object @0x19ba0d40 with key dvl of type CV (CLID 82734625)
+ in DataObject @0x19ba10a0
  object not modifiable when retrieved
 StoreGateSvc       WARNING retrieve(non-const): No valid proxy for object dvl of type CV (CLID 82734625)
  Try to use a const retrieve
 StoreGateSvc         DEBUG Retrieved const pointer to object dvl of type CV (CLID 82734625)
-StoreGateSvc         DEBUG Recorded object @0x50ffc30 with key dvl2 of type CV (CLID 82734625)
- in DataObject @0x50de950
+StoreGateSvc         DEBUG Recorded object @0x19ba2630 with key dvl2 of type CV (CLID 82734625)
+ in DataObject @0x19ba0ff0
  object not modifiable when retrieved
 StoreGateSvc         DEBUG Retrieved const pointer to object dvl2 of type CV (CLID 82734625)
 *** test_copy_conversions
-StoreGateSvc         DEBUG Recorded object @0x5115be0 with key x of type Athena_test::X (CLID 82734627)
- in DataObject @0x5114100
+StoreGateSvc         DEBUG Recorded object @0x19b9f1f0 with key x of type Athena_test::X (CLID 82734627)
+ in DataObject @0x19b9fb20
  object modifiable when retrieved
+SG::DataProxy_cast WARNING Request for a non-const object via copying conversion; requested CLID = 82734628, proxy primary ID is 82734627
 StoreGateSvc         DEBUG Retrieved const pointer to object x of type Athena_test::Y (CLID 82734628)
 StoreGateSvc       WARNING retrieve(const): No valid proxy for object x of type Athena_test::A (CLID 82734609)
 
 *** StoreGateSvcClient_test Keys BEGINS ***
 StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=false
-StoreGateSvc         DEBUG Recorded object @0x5112040 with key LockReset of type Foo (CLID 8101)
- in DataObject @0x5114100
+StoreGateSvc         DEBUG Recorded object @0x19b9f1b0 with key LockReset of type Foo (CLID 8101)
+ in DataObject @0x19b9fb20
  object not modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x50fe7a0 with key UnLockReset of type Foo (CLID 8101)
- in DataObject @0x50fe930
+StoreGateSvc         DEBUG Recorded object @0x19ba0290 with key UnLockReset of type Foo (CLID 8101)
+ in DataObject @0x19ba2fd0
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x50ea950 with key LockDelete of type Foo (CLID 8101)
- in DataObject @0x50fd140
+StoreGateSvc         DEBUG Recorded object @0x19b8f910 with key LockDelete of type Foo (CLID 8101)
+ in DataObject @0x19ba4a60
  object not modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x5115be0 with key UnLockDelete of type Foo (CLID 8101)
- in DataObject @0x50fcc10
+StoreGateSvc         DEBUG Recorded object @0x19b8ea30 with key UnLockDelete of type Foo (CLID 8101)
+ in DataObject @0x19b8fdc0
  object modifiable when retrieved
 StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=false
 StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=true
-StoreGateSvc         DEBUG Recorded object @0x23ea5f0 with key LockReset of type Foo (CLID 8101)
- in DataObject @0x50fcc60
+StoreGateSvc         DEBUG Recorded object @0x19ba67d0 with key LockReset of type Foo (CLID 8101)
+ in DataObject @0x19ba2f80
  object not modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x50fd030 with key UnLockReset of type Foo (CLID 8101)
- in DataObject @0x50fd140
+StoreGateSvc         DEBUG Recorded object @0x17e6b4d0 with key UnLockReset of type Foo (CLID 8101)
+ in DataObject @0x19b9fbc0
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x51143c0 with key LockDelete of type Foo (CLID 8101)
- in DataObject @0x50fe930
+StoreGateSvc         DEBUG Recorded object @0x19b8e8c0 with key LockDelete of type Foo (CLID 8101)
+ in DataObject @0x19ba4a10
  object not modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x50fd0b0 with key UnLockDelete of type Foo (CLID 8101)
- in DataObject @0x50fc6f0
+StoreGateSvc         DEBUG Recorded object @0x19b9f1b0 with key UnLockDelete of type Foo (CLID 8101)
+ in DataObject @0x19b9fa80
  object modifiable when retrieved
 StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=false
 StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=true
@@ -371,26 +352,26 @@ StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=true
 *** StoreGateSvcClient_test Keys ENDS ***
 
 *** StoreGateSvcClient_test retrieveAux BEGINS ***
-StoreGateSvc         DEBUG Recorded object @0x48eade0 with key BVec of type TestVector<BX> (CLID 82735621)
- in DataObject @0x50eba00
+StoreGateSvc         DEBUG Recorded object @0x19ba6e50 with key BVec of type TestVector<BX> (CLID 82735621)
+ in DataObject @0x19b9fbc0
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x5101f80 with key BVecAux. of type TestAuxStore (CLID 125030194)
- in DataObject @0x5114d10
+StoreGateSvc         DEBUG Recorded object @0x19ba9c90 with key BVecAux. of type TestAuxStore (CLID 125030194)
+ in DataObject @0x19bb75a0
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x4b831d0 with key CVec of type TestVector<BX> (CLID 82735621)
- in DataObject @0x5113fb0
+StoreGateSvc         DEBUG Recorded object @0x19ba6c40 with key CVec of type TestVector<BX> (CLID 82735621)
+ in DataObject @0x19ba2f80
  object not modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x50fea10 with key CVecAux. of type TestAuxStore (CLID 125030194)
- in DataObject @0x5113320
+StoreGateSvc         DEBUG Recorded object @0x19ba83f0 with key CVecAux. of type TestAuxStore (CLID 125030194)
+ in DataObject @0x19ba5a50
  object not modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x4b76650 with key ErrorVec of type TestVector<BX> (CLID 82735621)
- in DataObject @0x5114100
+StoreGateSvc         DEBUG Recorded object @0x19ba5520 with key ErrorVec of type TestVector<BX> (CLID 82735621)
+ in DataObject @0x19ba4a60
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x4b761a0 with key BBVec of type TestVector<BBX> (CLID 125040193)
- in DataObject @0x50fcd90
+StoreGateSvc         DEBUG Recorded object @0x19ba5420 with key BBVec of type TestVector<BBX> (CLID 125040193)
+ in DataObject @0x19bb18a0
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x50fe8c0 with key BBVecAux. of type TestAuxStore (CLID 125030194)
- in DataObject @0x50eb810
+StoreGateSvc         DEBUG Recorded object @0x19ba82a0 with key BBVecAux. of type TestAuxStore (CLID 125030194)
+ in DataObject @0x19ba63a0
  object modifiable when retrieved
 StoreGateSvc_Impl  VERBOSE called associateAux_impl for key BVec
 StoreGateSvc         DEBUG Retrieved non-const pointer to object BVec of type TestVector<BX> (CLID 82735621)
@@ -400,11 +381,11 @@ StoreGateSvc_Impl  VERBOSE called associateAux_impl for key CVec
 StoreGateSvc         DEBUG Retrieved const pointer to object CVec of type TestVector<BX> (CLID 82735621)
 StoreGateSvc_Impl  VERBOSE called associateAux_impl for key ErrorVec
 StoreGateSvc         DEBUG Retrieved const pointer to object ErrorVec of type TestVector<BX> (CLID 82735621)
-StoreGateSvc         DEBUG Recorded object @0x5114c00 with key BStand of type BX (CLID 82835621)
- in DataObject @0x50fd190
+StoreGateSvc         DEBUG Recorded object @0x19ba9790 with key BStand of type BX (CLID 82835621)
+ in DataObject @0x19bb3b40
  object modifiable when retrieved
-StoreGateSvc         DEBUG Recorded object @0x50fd220 with key BStandAux. of type TestAuxStore (CLID 125030194)
- in DataObject @0x5102060
+StoreGateSvc         DEBUG Recorded object @0x19ba6a40 with key BStandAux. of type TestAuxStore (CLID 125030194)
+ in DataObject @0x19bb18f0
  object modifiable when retrieved
 StoreGateSvc_Impl  VERBOSE called associateAux_impl for key BStand
 StoreGateSvc         DEBUG Retrieved non-const pointer to object BStand of type BX (CLID 82835621)
@@ -413,8 +394,8 @@ StoreGateSvc         DEBUG Retrieved non-const pointer to object BStand of type 
 
 
 *** StoreGateSvcClient_test testBoundReset BEGINS ***
-StoreGateSvc         DEBUG overwrite: Recorded object @0x5114b60 with key testBoundReset of type int (CLID 244260744)
- in DataObject @0x5112ae0
+StoreGateSvc         DEBUG overwrite: Recorded object @0x19bb4d80 with key testBoundReset of type int(CLID 244260744)
+ in DataObject @0x19bb4da0
  object modifiable when retrieved
 
 *** StoreGateSvcClient_test testBoundReset OK ***
@@ -424,13 +405,13 @@ StoreGateSvc         DEBUG overwrite: Recorded object @0x5114b60 with key testBo
 *** StoreGateSvcClient_test testRecordObject BEGINS ***
 >>> test duplicate record1
 StoreGateSvc_Impl  WARNING  setupProxy:: error setting up proxy for key obj101 and clid 8101
- Pre-existing valid DataProxy @0x50fea80 found in Store for key obj101 with clid 8101
-StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x50fd430
- recorded with key obj101 of type Foo (CLID 8101) in DataObject @0x50fc6a0
+ Pre-existing valid DataProxy @0x19ba7c20 found in Store for key obj101 with clid 8101
+StoreGateSvc_Impl  WARNING record_impl: Problem setting up the proxy for object @0x19ba8520
+ recorded with key obj101 of type Foo (CLID 8101) in DataObject @0x19ba8540
 <<< test duplicate record1
 >>> test duplicate record2
 StoreGateSvc_Impl  WARNING record_impl: failed for key=obj999, type Foo (CLID 8101)
- object @0x50febb0 already in store with key=obj101. Will not record a duplicate!
+ object @0x19bb4d60 already in store with key=obj101. Will not record a duplicate!
 <<< test duplicate record2
 >>> test duplicate error
 StoreGateSvc_Impl    ERROR SGImplSvc::recordObject: existing object found with 8101 [Foo] obj101 but neither clid 543543 [] nor key obj101xxx match.
@@ -444,12 +425,12 @@ StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=false
 
 *** StoreGateSvcClient_test testWriteAux OK ***
 *** test_lock
-StoreGateSvc         DEBUG Recorded object @0x50fccd0 with key lockable1 of type Lockable (CLID 82734636)
- in DataObject @0x50eb810
+StoreGateSvc         DEBUG Recorded object @0x19b8e8c0 with key lockable1 of type Lockable (CLID 82734636)
+ in DataObject @0x19bb3b40
  object modifiable when retrieved
 StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=false
-StoreGateSvc         DEBUG Recorded object @0x51144f0 with key lockable1 of type Lockable (CLID 82734636)
- in DataObject @0x50eb810
+StoreGateSvc         DEBUG Recorded object @0x19ba4e20 with key lockable1 of type Lockable (CLID 82734636)
+ in DataObject @0x19bb3b40
  object modifiable when retrieved
 StoreGateSvc       VERBOSE Finalizing StoreGateSvc
 StoreGateSvc_Impl  VERBOSE Finalizing StoreGateSvc_Impl
@@ -458,42 +439,42 @@ StoreGateSvc_Impl    DEBUG Clearing store with forceRemove=true
 Now we expect to see an error message:
 ----Error Message Starts--->>
 DetectorStore_Impl WARNING  setupProxy:: error setting up proxy for key pFoo1 and clid 8101
- Pre-existing valid DataProxy @0x51000f0 found in Store for key pFoo1 with clid 8101
-DetectorStore_Impl WARNING record_impl: Problem setting up the proxy for object @0x50fc6f0
- recorded with key pFoo1 of type Foo (CLID 8101) in DataObject @0x5113320
+ Pre-existing valid DataProxy @0x19ba80e0 found in Store for key pFoo1 with clid 8101
+DetectorStore_Impl WARNING record_impl: Problem setting up the proxy for object @0x19ba33b0
+ recorded with key pFoo1 of type Foo (CLID 8101) in DataObject @0x19bb18f0
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
 DetectorStore_Impl WARNING record_impl: failed for key=pFoo2, type Foo (CLID 8101)
- object @0x5115170 already in store with key=pFoo1. Will not record a duplicate!
+ object @0x19b8ea30 already in store with key=pFoo1. Will not record a duplicate!
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
 DetectorStore_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
- Pre-existing valid DataProxy @0x50ebc70 found in Store for key silly with clid 8101
-DetectorStore_Impl WARNING record_impl: Problem setting up the proxy for object @0x50fd030
- recorded with key silly of type Foo (CLID 8101) in DataObject @0x50ebfe0
+ Pre-existing valid DataProxy @0x19ba0a60 found in Store for key silly with clid 8101
+DetectorStore_Impl WARNING record_impl: Problem setting up the proxy for object @0x17e6c750
+ recorded with key silly of type Foo (CLID 8101) in DataObject @0x19b9fbc0
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
 DetectorStore_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
- Pre-existing valid DataProxy @0x50ebc70 found in Store for key silly with clid 8101
-DetectorStore_Impl WARNING record_impl: Problem setting up the proxy for object @0x5114420
- recorded with key silly of type Foo (CLID 8101) in DataObject @0x50eb5f0
+ Pre-existing valid DataProxy @0x19ba0a60 found in Store for key silly with clid 8101
+DetectorStore_Impl WARNING record_impl: Problem setting up the proxy for object @0x19ba9ec0
+ recorded with key silly of type Foo (CLID 8101) in DataObject @0x19baa080
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
 DetectorStore_Impl WARNING  setupProxy:: error setting up proxy for key silly and clid 8101
- Pre-existing valid DataProxy @0x50ebc70 found in Store for key silly with clid 8101
-DetectorStore_Impl WARNING record_impl: Problem setting up the proxy for object @0x5115ce0
- recorded with key silly of type Foo (CLID 8101) in DataObject @0x50fc6a0
+ Pre-existing valid DataProxy @0x19ba0a60 found in Store for key silly with clid 8101
+DetectorStore_Impl WARNING record_impl: Problem setting up the proxy for object @0x19ba2100
+ recorded with key silly of type Foo (CLID 8101) in DataObject @0x19b9f9d0
 <<---Error Message Ends-------
 Now we expect to see an error message:
 ----Error Message Starts--->>
 DetectorStore_Impl WARNING  setupProxy:: error setting up proxy for key Const and clid 8101
- Pre-existing valid DataProxy @0x50fe340 found in Store for key Const with clid 8101
-DetectorStore_Impl WARNING record_impl: Problem setting up the proxy for object @0x5113e10
- recorded with key Const of type Foo (CLID 8101) in DataObject @0x5113e30
+ Pre-existing valid DataProxy @0x19ba9610 found in Store for key Const with clid 8101
+DetectorStore_Impl WARNING record_impl: Problem setting up the proxy for object @0x19ba6600
+ recorded with key Const of type Foo (CLID 8101) in DataObject @0x19bb1850
 <<---Error Message Ends-------
 IOVSvc                INFO No IOVSvcTool associated with store "StoreGateSvc"
 IOVSvc.IOVSvcTo...    INFO IOVRanges will be checked at every Event
