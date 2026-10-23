@@ -13,7 +13,7 @@ ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=110
                         -DLCG_VERSION_POSTFIX="_ATLAS_7"
                         -DCMAKE_CUDA_STANDARD=20 # See: ATLINFR-6204
                         -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v41r0.000/Gaudi-v41r0.000.tar.gz;URL_MD5;e3a0a34c35b026b047e1209d66e87e1f"
-                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/releases/download/v48.1.0/acts-v48.1.0.tar.gz;URL_HASH;SHA256=29f7434dcdae60c0d029e3135b56ee1f866ec3894ddfd05920f9f0bb2c5b0da5"
+                        -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/releases/download/v48.3.0/acts-v48.3.0.tar.gz;URL_HASH;SHA256=df50eee0789079acaa64fa8b1d8333428d77e1d9f2ab653c0c45f6e457fffa4a"
                         -DATLAS_ACTS_BUILD_TRACCC=TRUE
                         -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.32.0/GeoModel-6.32.0.tar.bz2;URL_MD5;9dde6676e54b17d4357f0217e1750a33"
                         -DATLAS_VECMEM_SOURCE="URL;http://cern.ch/atlas-software-dist-eos/externals/vecmem/v1.28.0.tar.gz;https://github.com/acts-project/vecmem/archive/refs/tags/v1.28.0.tar.gz;URL_MD5;054e3f8407fe710dae9f0c47d8089c0d"
