@@ -50,7 +50,7 @@ namespace CP
     Gaudi::Property<bool> m_noL1 {this, "noL1", false, "whether to not require L1 decision"};
 
     /// \brief the accessors for \ref m_selectionDecoration and \ref m_trigList combination
-    std::vector<SG::Decorator<bool>> m_selectionAccessors;
+    std::vector<SG::Decorator<char>> m_selectionAccessors;
 
     /// \brief the filter reporter params
     FilterReporterParams m_filterParams {this, "TriggerEventSelection", "trigger event selection"};
