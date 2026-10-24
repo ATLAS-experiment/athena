@@ -116,4 +116,4 @@ class LeptonSFCalculatorBlock(ConfigBlock):
 
         alg.event_leptonSF = f'leptonSF_{self.lepton_postfix}_%SYS%'
 
-        config.addOutputVar('EventInfo', alg.event_leptonSF, f'weight_leptonSF_{self.lepton_postfix}')
+        config.addOutputVar('EventInfo', alg.event_leptonSF, f'weight_leptonSF_{self.lepton_postfix}', auxType='float')

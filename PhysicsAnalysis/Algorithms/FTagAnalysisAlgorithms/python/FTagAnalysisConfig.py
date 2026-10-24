@@ -92,11 +92,11 @@ class FTagConfig (ConfigBlock):
         if 'Continuous' in self.btagWP:
             alg.quantileDecoration = 'ftag_quantile_' + selectionName
             alg.jets = config.readName (self.containerName)
-            config.addOutputVar (self.containerName, 'ftag_quantile_' + selectionName, selectionName + '_quantile', noSys=True)
+            config.addOutputVar (self.containerName, 'ftag_quantile_' + selectionName, selectionName + '_quantile', noSys=True, auxType="int")
         else:
             alg.selectionDecoration = 'ftag_select_' + selectionName + ',as_char'
             alg.particles = config.readName (self.containerName)
-            config.addOutputVar (self.containerName, 'ftag_select_' + selectionName, 'select_' + selectionName, noSys=True)
+            config.addOutputVar (self.containerName, 'ftag_select_' + selectionName, 'select_' + selectionName, noSys=True, auxType="char")
             config.addSelection (self.containerName, selectionName, alg.selectionDecoration, comesFrom='ftag')
 
         # Save the b-tagging score
@@ -115,7 +115,7 @@ class FTagConfig (ConfigBlock):
             alg.selectionTool.readFromBTaggingObject = self.readFromBTaggingObject
             alg.selectionTool.useCTagging = self.useCTagging
             alg.selectionTool.MinPt = 0.
-            config.addOutputVar(self.containerName, alg.taggerWeightDecoration, alg.taggerWeightDecoration, noSys=True)
+            config.addOutputVar(self.containerName, alg.taggerWeightDecoration, alg.taggerWeightDecoration, noSys=True, auxType="float")
 
         # Save the per-flavour probabilities or additional custom variables
         if self.saveScores == 'All' or self.saveCustomVariables:

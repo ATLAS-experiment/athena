@@ -543,12 +543,12 @@ class GeneratorAnalysisBlock (ConfigBlock):
         alg = config.createAlgorithm( 'CP::PMGTruthWeightAlg', 'PMGTruthWeightAlg' )
         config.addPrivateTool( 'truthWeightTool', 'PMGTools::PMGTruthWeightTool' )
         alg.decoration = 'generatorWeight_%SYS%'
-        config.addOutputVar ('EventInfo', 'generatorWeight_%SYS%', 'weight_mc')
+        config.addOutputVar ('EventInfo', 'generatorWeight_%SYS%', 'weight_mc', auxType='float')
 
         if self.detailedPDFinfo:
             alg = config.createAlgorithm( 'CP::PDFinfoAlg', 'PDFinfoAlg', reentrant=True )
             for var in ["PDFID1","PDFID2","PDGID1","PDGID2","Q","X1","X2","XF1","XF2"]:
-                config.addOutputVar ('EventInfo', var, 'PDFinfo_' + var, noSys=True)
+                config.addOutputVar ('EventInfo', var, 'PDFinfo_' + var, noSys=True, auxType='int' if var in ["PDFID1","PDFID2","PDGID1","PDGID2"] else 'float')
 
         if self.doPDFReweighting:
             generatorInfo = config.flags.Input.GeneratorsInfo
@@ -660,7 +660,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
             alg.decoration = 'prodFracWeight_%SYS%'
             alg.TruthParticleContainer = self.truthParticleContainer
             alg.sysTruthWeightTool.ShowerGenerator = DSID
-            config.addOutputVar ('EventInfo', 'prodFracWeight_%SYS%', 'weight_HF_prod_frac')
+            config.addOutputVar ('EventInfo', 'prodFracWeight_%SYS%', 'weight_HF_prod_frac', auxType='float')
 
 class PtEtaSelectionBlock (ConfigBlock):
     """the ConfigBlock for a pt-eta selection"""
@@ -938,7 +938,7 @@ class IFFLeptonDecorationBlock (ConfigBlock):
         alg.particles = particles
 
         # write the decoration only once to the output
-        config.addOutputVar(self.containerName, alg.decoration, alg.decoration.split("_%SYS%")[0], noSys=True)
+        config.addOutputVar(self.containerName, alg.decoration, alg.decoration.split("_%SYS%")[0], noSys=True, auxType="int")
 
 
 class MCTCLeptonDecorationBlock (ConfigBlock):
@@ -968,10 +968,10 @@ class MCTCLeptonDecorationBlock (ConfigBlock):
         alg.particles = particles
         alg.preselection = selection
         alg.affectingSystematicsFilter = '.*'
-        config.addOutputVar (self.containerName, "MCTC_isPrompt", f"{self.prefix}isPrompt", noSys=True)
-        config.addOutputVar (self.containerName, "MCTC_fromHadron", f"{self.prefix}fromHadron", noSys=True)
-        config.addOutputVar (self.containerName, "MCTC_fromBSM", f"{self.prefix}fromBSM", noSys=True)
-        config.addOutputVar (self.containerName, "MCTC_fromTau", f"{self.prefix}fromTau", noSys=True)
+        config.addOutputVar (self.containerName, "MCTC_isPrompt", f"{self.prefix}isPrompt", noSys=True, auxType="int")
+        config.addOutputVar (self.containerName, "MCTC_fromHadron", f"{self.prefix}fromHadron", noSys=True, auxType="int")
+        config.addOutputVar (self.containerName, "MCTC_fromBSM", f"{self.prefix}fromBSM", noSys=True, auxType="int")
+        config.addOutputVar (self.containerName, "MCTC_fromTau", f"{self.prefix}fromTau", noSys=True, auxType="int")
 
 
 class PerEventSFBlock (ConfigBlock):
@@ -1006,7 +1006,7 @@ class PerEventSFBlock (ConfigBlock):
         alg.scaleFactorOutputDecoration = self.eventSF
 
         config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration,
-                            alg.scaleFactorOutputDecoration.split("_%SYS%")[0])
+                            alg.scaleFactorOutputDecoration.split("_%SYS%")[0], auxType="float")
 
 
 class SelectionDecorationBlock (ConfigBlock):
@@ -1040,4 +1040,4 @@ class SelectionDecorationBlock (ConfigBlock):
                 alg.preselection = config.getFullSelection (originContainerName,
                                                             selectionName)
                 config.addOutputVar(
-                    originContainerName, selectionDecoration, selectionName)
+                    originContainerName, selectionDecoration, selectionName, auxType="char")

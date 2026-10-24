@@ -60,24 +60,24 @@ class SSVWeightsAlgConfig(ConfigBlock):
         alg.nFMethod = self.nFMethod
         alg.OutputVariableSize = self.OutputVariableSize
 
-        config.addOutputVar('EventInfo', 'SSV_weight_%SYS%', 'SSV_weight')
+        config.addOutputVar('EventInfo', 'SSV_weight_%SYS%', 'SSV_weight', auxType="float")
 
         if alg.OutputVariableSize in ["extended", "additional", "all"] : 
-            config.addOutputVar('EventInfo', 'P_eff_%SYS%', 'P_eff')
-            config.addOutputVar('EventInfo', 'P_ineff_%SYS%', 'P_ineff')
-            config.addOutputVar('EventInfo', 'P_fake_%SYS%', 'P_fake')
+            config.addOutputVar('EventInfo', 'P_eff_%SYS%', 'P_eff', auxType="float")
+            config.addOutputVar('EventInfo', 'P_ineff_%SYS%', 'P_ineff', auxType="float")
+            config.addOutputVar('EventInfo', 'P_fake_%SYS%', 'P_fake', auxType="float")
 
         if alg.OutputVariableSize in ["additional", "all"] : 
-            config.addOutputVar('EventInfo', 'N_matched_%SYS%', 'N_matched')
-            config.addOutputVar('EventInfo', 'N_missed_%SYS%', 'N_missed')
-            config.addOutputVar('EventInfo', 'N_fake_%SYS%', 'N_fake')
-            config.addOutputVar('EventInfo', 'number_of_bjets_%SYS%', 'number_of_bjets')
-            config.addOutputVar('EventInfo', 'number_of_accepted_Bhadrons_%SYS%', 'number_of_accepted_Bhadrons')
-            config.addOutputVar('EventInfo', 'number_of_good_SSVs_%SYS%', 'number_of_good_SSVs')
+            config.addOutputVar('EventInfo', 'N_matched_%SYS%', 'N_matched', auxType="int")
+            config.addOutputVar('EventInfo', 'N_missed_%SYS%', 'N_missed', auxType="int")
+            config.addOutputVar('EventInfo', 'N_fake_%SYS%', 'N_fake', auxType="int")
+            config.addOutputVar('EventInfo', 'number_of_bjets_%SYS%', 'number_of_bjets', auxType="int")
+            config.addOutputVar('EventInfo', 'number_of_accepted_Bhadrons_%SYS%', 'number_of_accepted_Bhadrons', auxType="int")
+            config.addOutputVar('EventInfo', 'number_of_good_SSVs_%SYS%', 'number_of_good_SSVs', auxType="int")
 
         if alg.OutputVariableSize == "all": 
-            config.addOutputVar('EventInfo', 'P_ineff_bjet_based_%SYS%', 'P_ineff_bjet_based')
-            config.addOutputVar('EventInfo', 'P_ineff_pt_eta_based_%SYS%', 'P_ineff_pt_eta_based')
-            config.addOutputVar('EventInfo', 'P_fake_pileup_bjet_based_%SYS%', 'P_fake_pileup_bjet_based')
-            config.addOutputVar('EventInfo', 'P_fake_pileup_based_linearfit_%SYS%', 'P_fake_pileup_based_linearfit')
-            config.addOutputVar('EventInfo', 'P_fake_pileup_based_binned_%SYS%', 'P_fake_pileup_based_binned')
+            config.addOutputVar('EventInfo', 'P_ineff_bjet_based_%SYS%', 'P_ineff_bjet_based', auxType="float")
+            config.addOutputVar('EventInfo', 'P_ineff_pt_eta_based_%SYS%', 'P_ineff_pt_eta_based', auxType="float")
+            config.addOutputVar('EventInfo', 'P_fake_pileup_bjet_based_%SYS%', 'P_fake_pileup_bjet_based', auxType="float")
+            config.addOutputVar('EventInfo', 'P_fake_pileup_based_linearfit_%SYS%', 'P_fake_pileup_based_linearfit', auxType="float")
+            config.addOutputVar('EventInfo', 'P_fake_pileup_based_binned_%SYS%', 'P_fake_pileup_based_binned', auxType="float")

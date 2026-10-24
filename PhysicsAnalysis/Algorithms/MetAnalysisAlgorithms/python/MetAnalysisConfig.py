@@ -171,8 +171,8 @@ class MetAnalysisConfig (ConfigBlock):
 
         # met/phi are decorated on every term by the maker alg (for the NN path
         # directly via evaluateNNMET), so they are output on both paths.
-        config.addOutputVar (self.containerName, 'met', 'met')
-        config.addOutputVar (self.containerName, 'phi', 'phi')
+        config.addOutputVar (self.containerName, 'met', 'met', auxType='float')
+        config.addOutputVar (self.containerName, 'phi', 'phi', auxType='float')
         config.addOutputVar (self.containerName, 'name', 'name', noSys=True, enabled=False)
 
         # The NN path writes the Final term directly (a builder sum would clobber
@@ -181,7 +181,7 @@ class MetAnalysisConfig (ConfigBlock):
         if self.useNN:
             return
 
-        config.addOutputVar (self.containerName, 'sumet', 'sumet')
+        config.addOutputVar (self.containerName, 'sumet', 'sumet', auxType='float')
 
         # Set up the met builder algorithm:
         alg = config.createAlgorithm( 'CP::MetBuilderAlg', 'MetBuilderAlg' )
@@ -234,11 +234,11 @@ class MetAnalysisConfig (ConfigBlock):
             alg.significanceTool.EgammaUseFastsim = (config.dataType() is DataType.FastSim)
             alg.significanceTool.TauTESConfig = self.tauTESConfig
             alg.met = config.readName (self.containerName)
-            config.addOutputVar (self.containerName, 'significance_%SYS%', 'significance')
+            config.addOutputVar (self.containerName, 'significance_%SYS%', 'significance', auxType='float')
             if self.addExtraSignificanceVars:
                 alg.sigDirectionalDecoration = "sigDirectional_%SYS%"
                 alg.METOverSqrtSumETDecoration = "METOverSqrtSumET_%SYS%"
                 alg.METOverSqrtHTDecoration = "METOverSqrtHT_%SYS%"
-                config.addOutputVar (self.containerName, 'sigDirectional_%SYS%', 'sigDirectional')
-                config.addOutputVar (self.containerName, 'METOverSqrtSumET_%SYS%', 'METOverSqrtSumET')
-                config.addOutputVar (self.containerName, 'METOverSqrtHT_%SYS%', 'METOverSqrtHT')
+                config.addOutputVar (self.containerName, 'sigDirectional_%SYS%', 'sigDirectional', auxType='float')
+                config.addOutputVar (self.containerName, 'METOverSqrtSumET_%SYS%', 'METOverSqrtSumET', auxType='float')
+                config.addOutputVar (self.containerName, 'METOverSqrtHT_%SYS%', 'METOverSqrtHT', auxType='float')

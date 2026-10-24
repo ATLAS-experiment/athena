@@ -155,7 +155,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
                                           'PhotonEgammaCaloClusterEtaAlg',
                                            reentrant=True )
             alg.particles = config.readName(self.containerName)
-            config.addOutputVar (self.containerName, 'caloEta2', 'caloEta2', noSys=True)
+            config.addOutputVar (self.containerName, 'caloEta2', 'caloEta2', noSys=True, auxType='float')
 
         # Set up a shallow copy to decorate
         if config.wantCopy (self.containerName) :
@@ -321,17 +321,17 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
         alg.particles = config.readName (self.containerName)
 
-        config.addOutputVar (self.containerName, 'pt', 'pt')
-        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
-        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
-        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
+        config.addOutputVar (self.containerName, 'pt', 'pt', auxType='float')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e', auxType='float')
         if self.splitCalibrationAndSmearing or not (config.isPhyslite() and not self.recalibratePhyslite) :
-            config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True)
+            config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True, auxType='float')
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
-            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
-            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
+            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True, auxType='int')
+            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True, auxType='int')
 
 
 class PhotonWorkingPointSelectionConfig (ConfigBlock) :
@@ -586,7 +586,7 @@ class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             if self.saveDetailedSF:
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                     'id_effSF' + postfix)
+                                     'id_effSF' + postfix, auxType='float')
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the ISO photon efficiency correction algorithm:
@@ -611,7 +611,7 @@ class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             if self.saveDetailedSF:
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                     'isol_effSF' + postfix)
+                                     'isol_effSF' + postfix, auxType='float')
             sfList += [alg.scaleFactorDecoration]
 
         doCombEffSF = not self.noEffSFForID or not self.noEffSFForIso
@@ -621,7 +621,7 @@ class PhotonWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.particles = config.readName (self.containerName)
             alg.inScaleFactors = sfList
             alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
-            config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix)
+            config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix, auxType='float')
 
 
 @groupBlocks

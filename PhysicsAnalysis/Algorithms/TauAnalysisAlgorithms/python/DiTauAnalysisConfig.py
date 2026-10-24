@@ -62,20 +62,20 @@ class DiTauCalibrationConfig (ConfigBlock):
         if self.decorateTruth and self.rerunTruthMatching and config.dataType() is not DataType.Data:
             # in the case of the ditau, the DiTauTruthMatchingTool decorates directly the reco ditau with truth information.
             # So information can be written directly out without any additional algorithm 
-            config.addOutputVar (self.containerName, 'TruthVisLeadPt', 'TruthVisLeadPt', noSys=True) 
-            config.addOutputVar (self.containerName, 'TruthVisLeadEta', 'TruthVisLeadEta', noSys=True) 
-            config.addOutputVar (self.containerName, 'TruthVisLeadPhi', 'TruthVisLeadPhi', noSys=True)
-            config.addOutputVar (self.containerName, 'TruthVisLeadM', 'TruthVisLeadM', noSys=True)
-            config.addOutputVar (self.containerName, 'TruthLeadPdgID', 'TruthLeadPdgID', noSys=True)
-            config.addOutputVar (self.containerName, 'TruthVisSubleadPt', 'TruthVisSubleadPt', noSys=True)
-            config.addOutputVar (self.containerName, 'TruthVisSubleadEta', 'TruthVisSubleadEta', noSys=True)
-            config.addOutputVar (self.containerName, 'TruthVisSubleadPhi', 'TruthVisSubleadPhi', noSys=True)
-            config.addOutputVar (self.containerName, 'TruthVisSubleadM', 'TruthVisSubleadM', noSys=True)
-            config.addOutputVar (self.containerName, 'TruthSubleadPdgID', 'TruthSubleadPdgID', noSys=True)
-            config.addOutputVar (self.containerName, 'TruthVisDeltaR', 'TruthVisDeltaR', noSys=True)
-            config.addOutputVar (self.containerName, 'TruthVisMass', 'TruthVisMass', noSys=True)
-            config.addOutputVar (self.containerName, 'IsTruthMatched', 'IsTruthMatched', noSys=True)
-            config.addOutputVar (self.containerName, 'IsTruthHadronic', 'IsTruthHadronic', noSys=True)
+            config.addOutputVar (self.containerName, 'TruthVisLeadPt', 'TruthVisLeadPt', noSys=True, auxType='float')
+            config.addOutputVar (self.containerName, 'TruthVisLeadEta', 'TruthVisLeadEta', noSys=True, auxType='float')
+            config.addOutputVar (self.containerName, 'TruthVisLeadPhi', 'TruthVisLeadPhi', noSys=True, auxType='float')
+            config.addOutputVar (self.containerName, 'TruthVisLeadM', 'TruthVisLeadM', noSys=True, auxType='float')
+            config.addOutputVar (self.containerName, 'TruthLeadPdgID', 'TruthLeadPdgID', noSys=True, auxType='int')
+            config.addOutputVar (self.containerName, 'TruthVisSubleadPt', 'TruthVisSubleadPt', noSys=True, auxType='float')
+            config.addOutputVar (self.containerName, 'TruthVisSubleadEta', 'TruthVisSubleadEta', noSys=True, auxType='float')
+            config.addOutputVar (self.containerName, 'TruthVisSubleadPhi', 'TruthVisSubleadPhi', noSys=True, auxType='float')
+            config.addOutputVar (self.containerName, 'TruthVisSubleadM', 'TruthVisSubleadM', noSys=True, auxType='float')
+            config.addOutputVar (self.containerName, 'TruthSubleadPdgID', 'TruthSubleadPdgID', noSys=True, auxType='int')
+            config.addOutputVar (self.containerName, 'TruthVisDeltaR', 'TruthVisDeltaR', noSys=True, auxType='float')
+            config.addOutputVar (self.containerName, 'TruthVisMass', 'TruthVisMass', noSys=True, auxType='float')
+            config.addOutputVar (self.containerName, 'IsTruthMatched', 'IsTruthMatched', noSys=True, auxType='char')
+            config.addOutputVar (self.containerName, 'IsTruthHadronic', 'IsTruthHadronic', noSys=True, auxType='char')
 
         # Decorate extra variables
         if self.decorateExtraVariables:
@@ -83,20 +83,20 @@ class DiTauCalibrationConfig (ConfigBlock):
                                          'DiTauExtraVariablesAlg',
                                          reentrant=True )
            alg.ditaus = config.readName (self.containerName)
-           config.addOutputVar (self.containerName, 'omniScore', 'omniScore', noSys=True)
-           config.addOutputVar (self.containerName, 'nSubjets', 'nSubjets', noSys=True) 
-           config.addOutputVar (self.containerName, 'leadSubjetPt', 'leadSubjetPt', noSys=True)
-           config.addOutputVar (self.containerName, 'leadSubjetEta', 'leadSubjetEta', noSys=True)
-           config.addOutputVar (self.containerName, 'leadSubjetPhi', 'leadSubjetPhi', noSys=True)
-           config.addOutputVar (self.containerName, 'leadSubjetE', 'leadSubjetE', noSys=True)
-           config.addOutputVar (self.containerName, 'leadSubjetNTracks', 'leadSubjetNTracks', noSys=True)
-           config.addOutputVar (self.containerName, 'leadSubjetCharge', 'leadSubjetCharge', noSys=True)
-           config.addOutputVar (self.containerName, 'subleadSubjetPt', 'subleadSubjetPt', noSys=True)
-           config.addOutputVar (self.containerName, 'subleadSubjetEta', 'subleadSubjetEta', noSys=True)
-           config.addOutputVar (self.containerName, 'subleadSubjetPhi', 'subleadSubjetPhi', noSys=True)
-           config.addOutputVar (self.containerName, 'subleadSubjetE', 'subleadSubjetE', noSys=True)
-           config.addOutputVar (self.containerName, 'subleadSubjetNTracks', 'subleadSubjetNTracks', noSys=True)
-           config.addOutputVar (self.containerName, 'subleadSubjetCharge', 'subleadSubjetCharge', noSys=True)
+           config.addOutputVar (self.containerName, 'omniScore', 'omniScore', noSys=True, auxType='float')
+           config.addOutputVar (self.containerName, 'nSubjets', 'nSubjets', noSys=True, auxType='float')
+           config.addOutputVar (self.containerName, 'leadSubjetPt', 'leadSubjetPt', noSys=True, auxType='float')
+           config.addOutputVar (self.containerName, 'leadSubjetEta', 'leadSubjetEta', noSys=True, auxType='float')
+           config.addOutputVar (self.containerName, 'leadSubjetPhi', 'leadSubjetPhi', noSys=True, auxType='float')
+           config.addOutputVar (self.containerName, 'leadSubjetE', 'leadSubjetE', noSys=True, auxType='float')
+           config.addOutputVar (self.containerName, 'leadSubjetNTracks', 'leadSubjetNTracks', noSys=True, auxType='int')
+           config.addOutputVar (self.containerName, 'leadSubjetCharge', 'leadSubjetCharge', noSys=True, auxType='int')
+           config.addOutputVar (self.containerName, 'subleadSubjetPt', 'subleadSubjetPt', noSys=True, auxType='float')
+           config.addOutputVar (self.containerName, 'subleadSubjetEta', 'subleadSubjetEta', noSys=True, auxType='float')
+           config.addOutputVar (self.containerName, 'subleadSubjetPhi', 'subleadSubjetPhi', noSys=True, auxType='float')
+           config.addOutputVar (self.containerName, 'subleadSubjetE', 'subleadSubjetE', noSys=True, auxType='float')
+           config.addOutputVar (self.containerName, 'subleadSubjetNTracks', 'subleadSubjetNTracks', noSys=True, auxType='int')
+           config.addOutputVar (self.containerName, 'subleadSubjetCharge', 'subleadSubjetCharge', noSys=True, auxType='int')
 
         # Set up the tau 4-momentum smearing algorithm:
         alg = config.createAlgorithm( 'CP::DiTauSmearingAlg', 'DiTauSmearingAlg' )
@@ -106,10 +106,10 @@ class DiTauCalibrationConfig (ConfigBlock):
         alg.preselection = config.getPreselection (self.containerName, '')
 
         # Save base kinematic ditau variables in output
-        config.addOutputVar (self.containerName, 'pt', 'pt')
-        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
-        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
-        config.addOutputVar (self.containerName, 'm', 'm', noSys=True)
+        config.addOutputVar (self.containerName, 'pt', 'pt', auxType='float')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'm', 'm', noSys=True, auxType='float')
 
 
 

@@ -274,7 +274,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                 config.addOutputVar (self.electrons.split('.')[0],
                                     outputLabel + '_%SYS%',
                                     outputName if not self.forceOROutputFlagName else "select_" + self.forceOROutputFlagName,
-                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection, auxType='char')
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -291,7 +291,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                 config.addOutputVar (self.photons.split('.')[0],
                                     outputLabel + '_%SYS%',
                                     outputName if not self.forceOROutputFlagName else "select_" + self.forceOROutputFlagName,
-                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection, auxType='char')
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -308,7 +308,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                 config.addOutputVar (self.muons.split('.')[0],
                                     outputLabel + '_%SYS%',
                                     outputName if not self.forceOROutputFlagName else "select_" + self.forceOROutputFlagName,
-                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection, auxType='char')
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -325,7 +325,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                 config.addOutputVar (self.taus.split('.')[0],
                                     outputLabel + '_%SYS%',
                                     outputName if not self.forceOROutputFlagName else "select_" + self.forceOROutputFlagName,
-                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection, auxType='char')
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -342,7 +342,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                 config.addOutputVar (self.jets.split('.')[0],
                                     outputLabel + '_%SYS%',
                                     outputName if not self.forceOROutputFlagName else "select_" + self.forceOROutputFlagName,
-                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection, auxType='char')
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 
@@ -359,7 +359,7 @@ class OverlapAnalysisConfig (ConfigBlock):
                 config.addOutputVar (self.fatJets.split('.')[0],
                                     outputLabel + '_%SYS%',
                                     outputName if not self.forceOROutputFlagName else "select_" + self.forceOROutputFlagName,
-                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection)
+                                    noSys=self.nominalOnly or self.nominalOnlyUnifiedSelection, auxType='char')
             if self.nominalOnlyUnifiedSelection:
                 alg.preselection = 'unifiedSelectForOR'
 

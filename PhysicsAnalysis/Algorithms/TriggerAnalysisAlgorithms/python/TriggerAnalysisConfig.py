@@ -190,7 +190,7 @@ class TriggerAnalysisBlock (ConfigBlock):
             alg.prescaleDecoration = self.prescaleDecoration
             if self.prescaleTriggersFormula != '':
                 alg.triggersFormula = self.prescaleTriggersFormula
-                config.addOutputVar("EventInfo", alg.prescaleDecoration, alg.prescaleDecoration, noSys=True)
+                config.addOutputVar("EventInfo", alg.prescaleDecoration, alg.prescaleDecoration, noSys=True, auxType='float')
             else:
                 alg.triggers = prescale_triggers
                 alg.triggersAll = prescale_triggersAll
@@ -203,6 +203,7 @@ class TriggerAnalysisBlock (ConfigBlock):
                         alg.prescaleDecoration + "_" + trigger,
                         alg.prescaleDecoration + "_" + trigger,
                         noSys=True,
+                        auxType='float',
                     )
 
         return

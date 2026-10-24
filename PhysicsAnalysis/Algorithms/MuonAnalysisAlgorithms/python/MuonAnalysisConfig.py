@@ -160,18 +160,18 @@ class MuonMomentumCalibrationConfig (ConfigBlock):
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
         alg.particles = config.readName (self.containerName)
 
-        config.addOutputVar (self.containerName, 'pt', 'pt')
-        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
-        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
-        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
-        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
+        config.addOutputVar (self.containerName, 'pt', 'pt', auxType='float')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e', auxType='float')
+        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True, auxType='float')
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
-            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True)
-            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True)
-        
-        config.addOutputVar (self.containerName, 'muonType', 'muonType', noSys=True, enabled=self.writeColumnarToolVariables)
+            config.addOutputVar (self.containerName, "truthType", "truth_type", noSys=True, auxType='int')
+            config.addOutputVar (self.containerName, "truthOrigin", "truth_origin", noSys=True, auxType='int')
+
+        config.addOutputVar (self.containerName, 'muonType', 'muonType', noSys=True, enabled=self.writeColumnarToolVariables, auxType='uint16')
 
 
 class MuonIPCalibrationConfig (ConfigBlock) :
@@ -211,11 +211,11 @@ class MuonIPCalibrationConfig (ConfigBlock) :
                 InDetTrackCalibrationConfig.makeTrackSmearingTool(config, alg)
             alg.particles = config.readName (self.containerName)
 
-            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0')
-            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig')
-            config.addOutputVar (self.containerName, 'z0_%SYS%', 'z0')
-            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta')
-            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig')
+            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0', auxType='float')
+            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig', auxType='float')
+            config.addOutputVar (self.containerName, 'z0_%SYS%', 'z0', auxType='float')
+            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta', auxType='float')
+            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig', auxType='float')
 
 
 class MuonWorkingPointSelectionConfig (ConfigBlock) :
@@ -335,7 +335,7 @@ class MuonWorkingPointSelectionConfig (ConfigBlock) :
                              alg.selectionDecoration,
                              preselection=self.addSelectionToPreselection)
         if self.quality == 'HighPt':
-            config.addOutputVar (self.containerName, 'is_bad' + postfix, 'is_bad' + postfix)
+            config.addOutputVar (self.containerName, 'is_bad' + postfix, 'is_bad' + postfix, auxType='char')
 
         # Set up the isolation calculation algorithm:
         if self.isolation != 'NonIso' :
@@ -472,7 +472,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
                 alg.preselection = config.getPreselection (self.containerName, self.selectionName)
                 if self.saveDetailedSF:
                     config.addOutputVar (self.containerName, sfDecoration,
-                                         prefix + '_effSF' + postfix)
+                                         prefix + '_effSF' + postfix, auxType='float')
                 sfList += [sfDecoration]
 
         if config.dataType() is not DataType.Data and not self.noEffSF and self.saveCombinedSF:
@@ -481,7 +481,7 @@ class MuonWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.particles = config.readName (self.containerName)
             alg.inScaleFactors = sfList
             alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
-            config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix)
+            config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix, auxType='float')
 
 class MuonTriggerAnalysisSFBlock (ConfigBlock):
 
@@ -635,11 +635,11 @@ class MuonTriggerAnalysisSFBlock (ConfigBlock):
                 alg.muons = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, '')
                 if self.saveSF:
-                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f"{self.prefixSF}_{trig_short}")
+                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f"{self.prefixSF}_{trig_short}", auxType='float')
                 if self.saveEff:
-                    config.addOutputVar (self.containerName, alg.mcEfficiencyDecoration, f"{self.prefixEff}_{trig_short}")
+                    config.addOutputVar (self.containerName, alg.mcEfficiencyDecoration, f"{self.prefixEff}_{trig_short}", auxType='float')
                 if self.saveEffData:
-                    config.addOutputVar (self.containerName, alg.dataEfficiencyDecoration, f"{self.prefixEffData}_{trig_short}")
+                    config.addOutputVar (self.containerName, alg.dataEfficiencyDecoration, f"{self.prefixEffData}_{trig_short}", auxType='float')
 
 
 class MuonLRTMergedConfig (ConfigBlock) :

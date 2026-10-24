@@ -253,7 +253,7 @@ class FTagJetSFBlock(ConfigBlock):
                 alg.jets = config.readName(jetContainer)
                 if(self.savePerJetSF):
                     config.addOutputVar (jetContainer, alg.scaleFactorDecoration,
-                                         selectionName + '_' + chain_out + '_eff')
+                                         selectionName + '_' + chain_out + '_eff', auxType="float")
 
         # Set up the efficiency calculation algorithm:
         # Always compute regular FTAG SF
@@ -273,7 +273,7 @@ class FTagJetSFBlock(ConfigBlock):
         alg.jets = config.readName(jetContainer)
         if(self.savePerJetSF):
             config.addOutputVar (jetContainer, alg.scaleFactorDecoration,
-                                 selectionName + '_eff')
+                                 selectionName + '_eff', auxType="float")
 
 
 class FTagEventSFBlock(ConfigBlock):
@@ -369,7 +369,7 @@ class FTagEventSFBlock(ConfigBlock):
             alg.scaleFactorOutputDecoration = 'ftag_effSF' + postfix2 + '_%SYS%'
 
             config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration,
-                                'weight_ftag_effSF' + postfix2)
+                                'weight_ftag_effSF' + postfix2, auxType="float")
 
 
 @groupBlocks
