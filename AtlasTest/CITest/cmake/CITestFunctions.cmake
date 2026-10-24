@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Function to setup CI tests. Acccepts the same arguments as
 # atlas_add_test and sets some suitable defaults:
@@ -15,13 +15,18 @@
 
 function( atlas_add_citest testName )
    # Look for possible extra arguments:
-   cmake_parse_arguments( ARG "" "POST_EXEC_SCRIPT" "DEPENDS_SUCCESS" ${ARGN} )
+   cmake_parse_arguments( ARG "" "PRE_EXEC_SCRIPT;POST_EXEC_SCRIPT" "DEPENDS_SUCCESS" ${ARGN} )
 
    # define private working directory (cleaned in PRE_EXEC_SCRIPT)
    set( CI_WORKDIR "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/ciTestRun/${testName}" )
    file( MAKE_DIRECTORY "${CI_WORKDIR}" )
 
-   # configure post-processing:
+   # configure pre/post-processing:
+   if( ARG_PRE_EXEC_SCRIPT )
+      set( CI_PRE_EXEC_SCRIPT ${ARG_PRE_EXEC_SCRIPT} )
+   else()
+      set( CI_PRE_EXEC_SCRIPT "true" )  # shell builtin always returning success
+   endif()
    if( ARG_POST_EXEC_SCRIPT )
       set( CI_POST_EXEC_SCRIPT ${ARG_POST_EXEC_SCRIPT} )
    else()
@@ -38,7 +43,7 @@ function( atlas_add_citest testName )
       PROPERTIES WORKING_DIRECTORY ${CI_WORKDIR}
       PROPERTIES TIMEOUT 3600
       PROPERTIES FIXTURES_SETUP CITest_${testName}_fixture
-      PRE_EXEC_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${testName}_citest_pre.sh
+      PRE_EXEC_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${testName}_citest_pre.sh || exit $?"
       POST_EXEC_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${testName}_citest_post.sh
       ${ARG_UNPARSED_ARGUMENTS} )
 
