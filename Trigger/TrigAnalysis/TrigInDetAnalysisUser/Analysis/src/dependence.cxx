@@ -38,7 +38,9 @@ int usage( const std::string& err_msg="", int status=0 ) {
   
   s << "Usage: " << name << "\t [OPTIONS] \n\n"; 
   s << "\t" << " plots comparison histograms"; 
+# ifdef USE_DATE_TIME_STAMP
   s << " - compiled on " << __DATE__ << " at " << __TIME__ << "\n\n";
+# endif
   s << "Options: \n";
   s << "    -c,  --config   value \t configure which histograms to plot from config file,\n\n";
   s << "    -f,  --fit            \t fit a pol2 to the efficiencies\n\n";

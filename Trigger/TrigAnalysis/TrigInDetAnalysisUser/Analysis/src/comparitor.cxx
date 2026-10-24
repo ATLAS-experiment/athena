@@ -546,7 +546,9 @@ int usage(const std::string& name, int status, const std::string& err_msg="" ) {
   std::ostream& s = std::cout;
   s << "Usage: " << name << "\t [OPTIONS]  test.root reference.root    chain1 chain2 chain2 ...\n\n"; 
   s << "\t" << " plots comparison histograms"; 
+# ifdef USE_DATE_TIME_STAMP
   s << " - compiled on " << __DATE__ << " at " << __TIME__ << "\n\n";
+# endif
   s << "Options: \n";
   s << "    -c,  --config       value \t configure which histograms to plot from config file,\n\n";
   s << "    -t,  --tag          value \t appends tag 'value' to the end of output plot names, \n";

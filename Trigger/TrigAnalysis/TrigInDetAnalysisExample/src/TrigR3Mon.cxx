@@ -44,8 +44,10 @@ TrigR3Mon::TrigR3Mon( const std::string & name, ISvcLocator* pSvcLocator)
      m_requireDecision(false),
      m_filter_on_roi(false)
 {
+# ifdef USE_DATE_TIME_STAMP   
   msg(MSG::INFO) << "TrigR3Mon::TrigR3Mon() compiled: " << __DATE__ << " " << __TIME__ << endmsg;
-
+# endif
+  
   declareProperty( "SliceTag",   m_sliceTag = "" );
 
   declareProperty( "pTCut",   m_pTCut   = 0 );
