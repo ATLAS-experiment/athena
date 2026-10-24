@@ -145,10 +145,10 @@ size_t AnalysisConfig_Ntuple::get_jets( Trig::FeatureContainer::combination_cons
 
 
 void AnalysisConfig_Ntuple::loop() {
-
+#ifdef USE_DATE_TIME_STAMP
   m_provider->msg(MSG::INFO) << "[91;1m" << "AnalysisConfig_Ntuple::loop() for " << m_analysisInstanceName 
 			     << " compiled " << __DATE__ << " " << __TIME__ << "\t: " << date() << "[m" << endmsg;
-
+#endif
   m_provider->msg(MSG::ERROR) << "[91;1m" << "This should no longer be called" << m_analysisInstanceName << endmsg; 
 
 }

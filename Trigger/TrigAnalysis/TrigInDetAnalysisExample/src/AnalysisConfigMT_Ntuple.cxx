@@ -96,9 +96,10 @@ std::set<std::string> AnalysisConfigMT_Ntuple::get_configured_chains() {
 
 void AnalysisConfigMT_Ntuple::loop() {
 
+#ifdef USE_DATE_TIME_STAMP  
         m_provider->msg(MSG::DEBUG) << "[91;1m" << "AnalysisConfigMT_Ntuple::loop() for " << m_analysisInstanceName 
 				   << " compiled " << __DATE__ << " " << __TIME__ << "\t: " << date() << "[m" << endmsg;
-
+#endif
 
 	bool foundOffline = false;
 
