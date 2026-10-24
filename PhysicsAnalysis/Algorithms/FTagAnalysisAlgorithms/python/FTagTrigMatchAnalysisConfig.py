@@ -86,6 +86,6 @@ class FTagJetTrigMatchingBlock(ConfigBlock):
                     noSys = False
 
                 config.addOutputVar (jetContainer, alg.matchingDecoration,
-                                     'ftag_jetTrigMatching_' + chain_out, noSys=noSys)
+                                     'ftag_jetTrigMatching_' + chain_out, noSys=noSys, auxType="char")
                 config.addOutputVar (jetContainer, alg.bTagMatchingDecoration,
-                                     'ftag_bTagTrigMatching_' + chain_out, noSys=noSys)
+                                     'ftag_bTagTrigMatching_' + chain_out, noSys=noSys, auxType="char")

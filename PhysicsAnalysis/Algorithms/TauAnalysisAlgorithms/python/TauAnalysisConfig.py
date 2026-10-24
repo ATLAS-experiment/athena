@@ -154,16 +154,16 @@ class TauCalibrationConfig (ConfigBlock):
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
         alg.particles = config.readName (self.containerName)
 
-        config.addOutputVar (self.containerName, 'pt', 'pt')
-        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
-        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
-        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
-        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
+        config.addOutputVar (self.containerName, 'pt', 'pt', auxType='float')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e', auxType='float')
+        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True, auxType='float')
         config.addOutputVar (self.containerName, 'NNDecayMode', 'NNDecayMode', noSys=True, auxType='int')
         config.addOutputVar (self.containerName, 'passTATTauMuonOLR', 'passTATTauMuonOLR', noSys=True, auxType='char')
-        config.addOutputVar (self.containerName, 'TESCompatibility', 'TESCompatibility')  
+        config.addOutputVar (self.containerName, 'TESCompatibility', 'TESCompatibility', auxType='char')
         if self.decorateExtraVariables:
-            config.addOutputVar (self.containerName, 'nTracksCharged', 'nTracksCharged', noSys=True)
+            config.addOutputVar (self.containerName, 'nTracksCharged', 'nTracksCharged', noSys=True, auxType='int')
 
 
 class TauWorkingPointSelectionConfig (ConfigBlock) :
@@ -451,7 +451,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             if self.saveDetailedSF:
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                     'Reco_effSF' + postfix)
+                                     'Reco_effSF' + postfix, auxType='float')
             sfList += [alg.scaleFactorDecoration]
 
 
@@ -483,7 +483,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                 alg.preselection = config.getPreselection (self.containerName, self.selectionName)
                 if self.saveDetailedSF:
                     config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                         'ID_effSF' + postfix)
+                                         'ID_effSF' + postfix, auxType='float')
                 sfList += [alg.scaleFactorDecoration]
 
             # TauEfficiencyCorrectionTool for eVeto both on true tau and fake tau, use only in case eVeto is requested in TauSelectionTool
@@ -523,7 +523,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                     alg.preselection = config.getPreselection (self.containerName, self.selectionName)
                     if self.saveDetailedSF:
                         config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                             'EvetoFakeTau_effSF' + postfix)
+                                             'EvetoFakeTau_effSF' + postfix, auxType='float')
                     sfList += [alg.scaleFactorDecoration]
 
                 # correction for true tau
@@ -542,7 +542,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                 alg.preselection = config.getPreselection (self.containerName, self.selectionName)
                 if self.saveDetailedSF:
                     config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                         'EvetoTrueTau_effSF' + postfix)
+                                         'EvetoTrueTau_effSF' + postfix, auxType='float')
                 sfList += [alg.scaleFactorDecoration]
 
             if self.saveCombinedSF:
@@ -552,7 +552,7 @@ class TauWorkingPointEfficiencyConfig (ConfigBlock) :
                 alg.inScaleFactors = sfList
                 alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
                 config.addOutputVar (self.containerName, alg.outScaleFactor,
-                                     'effSF' + postfix)
+                                     'effSF' + postfix, auxType='float')
 
                 
 class EXPERIMENTAL_TauCombineMuonRemovalConfig (ConfigBlock) :
@@ -669,7 +669,7 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
                 alg.outOfValidityDeco = f"bad_eff_tautrig_{chain_out}"
                 alg.taus = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, self.tauID)
-                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f"{self.prefixSF}_{chain_out}")
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f"{self.prefixSF}_{chain_out}", auxType='float')
 
 @groupBlocks
 def TauWorkingPoint(seq):

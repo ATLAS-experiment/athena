@@ -53,7 +53,7 @@ class XbbConfig (ConfigBlock):
 
         alg.taggerDecisionDecoration = 'xbb_select_' + selectionName
         alg.jets = config.readName (self.containerName)
-        config.addOutputVar (self.containerName, 'xbb_select_' + selectionName, selectionName + '_select', noSys=True)
+        config.addOutputVar (self.containerName, 'xbb_select_' + selectionName, selectionName + '_select', noSys=True, auxType="int")
 
         if not self.noEffSF and config.dataType() != DataType.Data:
             alg = config.createAlgorithm( 'CP::XbbEfficiencyAlg',
@@ -79,4 +79,4 @@ class XbbConfig (ConfigBlock):
 
             alg.scaleFactorDecoration = 'xbb_effSF_' + selectionName + '_%SYS%'
             alg.jets = config.readName (self.containerName)
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, selectionName + '_effSF')
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, selectionName + '_effSF', auxType="float")

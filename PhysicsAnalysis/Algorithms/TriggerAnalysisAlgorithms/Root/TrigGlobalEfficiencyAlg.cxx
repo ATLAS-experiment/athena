@@ -186,7 +186,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
 
   // create the individual trigger-matching decorators
   for(const std::string& trig : m_separateMatchingTriggers) {
-    m_separateMatchingDecorators.emplace(trig, SysWriteDecorHandle<bool>("triggerMatch_"+sanitizeTriggerChainName(trig)+m_separateMatchingDecorSuffix+"_%SYS%", this));
+    m_separateMatchingDecorators.emplace(trig, SysWriteDecorHandle<char>("triggerMatch_"+sanitizeTriggerChainName(trig)+m_separateMatchingDecorSuffix+"_%SYS%", this));
     ANA_CHECK(m_separateMatchingDecorators.at(trig).initialize(m_systematicsList, m_eventInfoHandle));
 
     m_separateMatchingFlags[trig] = false;

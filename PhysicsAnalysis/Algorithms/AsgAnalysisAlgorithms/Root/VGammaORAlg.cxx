@@ -31,7 +31,7 @@ namespace CP {
     bool in_vgamma_overlap;
     ANA_CHECK(m_vgammaORTool->inOverlap(in_vgamma_overlap));
 
-    SG::WriteDecorHandle<xAOD::EventInfo, bool> dec(m_inOverlapKey, ctx);
+    SG::WriteDecorHandle<xAOD::EventInfo, char> dec(m_inOverlapKey, ctx);
     dec(*evtInfo) = in_vgamma_overlap;
 
     if (!m_noFilter.value()) {

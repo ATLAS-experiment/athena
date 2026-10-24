@@ -98,7 +98,7 @@ namespace CP
 
     /// \brief store separate trigger matching flags for each trigger
     Gaudi::Property<std::vector<std::string>> m_separateMatchingTriggers {this, "separateMatchingTriggers", {}, "triggers to store individual trigger matching flags for"};
-    std::unordered_map<std::string, SysWriteDecorHandle<bool>> m_separateMatchingDecorators;
+    std::unordered_map<std::string, SysWriteDecorHandle<char>> m_separateMatchingDecorators;
     std::unordered_map<std::string, bool> m_separateMatchingFlags;
 
     /// \brief separate chain matching decorator suffix

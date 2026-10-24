@@ -150,7 +150,7 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
                                           'ElectronEgammaCaloClusterEtaAlg',
                                            reentrant=True )
             alg.particles = config.readName(self.containerName)
-            config.addOutputVar (self.containerName, 'caloEta2', 'caloEta2', noSys=True)
+            config.addOutputVar (self.containerName, 'caloEta2', 'caloEta2', noSys=True, auxType='float')
 
         if self.decorateSamplingPattern:
             config.createAlgorithm( 'CP::EgammaSamplingPatternDecoratorAlg', 'EgammaSamplingPatternDecoratorAlg' )
@@ -275,13 +275,13 @@ class ElectronMomentumCalibrationConfig (ConfigBlock) :
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'EnergyDecorator' )
         alg.particles = config.readName(self.containerName)
 
-        config.addOutputVar (self.containerName, 'pt', 'pt')
-        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
-        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
-        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
-        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True)
+        config.addOutputVar (self.containerName, 'pt', 'pt', auxType='float')
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e', auxType='float')
+        config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True, auxType='float')
         if self.splitCalibrationAndSmearing or not (config.isPhyslite() and not self.recalibratePhyslite) :
-            config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True)
+            config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True, auxType='float')
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
@@ -330,11 +330,11 @@ class ElectronIPCalibrationConfig (ConfigBlock) :
                 InDetTrackCalibrationConfig.makeTrackSmearingTool(config, alg)
             alg.particles = config.readName (self.containerName)
 
-            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0')
-            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig')
-            config.addOutputVar (self.containerName, 'z0_%SYS%', 'z0')
-            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta')
-            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig')
+            config.addOutputVar (self.containerName, 'd0_%SYS%', 'd0', auxType='float')
+            config.addOutputVar (self.containerName, 'd0sig_%SYS%', 'd0sig', auxType='float')
+            config.addOutputVar (self.containerName, 'z0_%SYS%', 'z0', auxType='float')
+            config.addOutputVar (self.containerName, 'z0sintheta_%SYS%', 'z0sintheta', auxType='float')
+            config.addOutputVar (self.containerName, 'z0sinthetasig_%SYS%', 'z0sinthetasig', auxType='float')
 
 
 class ElectronWorkingPointSelectionConfig (ConfigBlock) :
@@ -790,7 +790,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             if self.saveDetailedSF:
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                     'reco_effSF' + postfix)
+                                     'reco_effSF' + postfix, auxType='float')
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the ID electron efficiency correction algorithm:
@@ -820,7 +820,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             if self.saveDetailedSF:
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                     'id_effSF' + postfix)
+                                     'id_effSF' + postfix, auxType='float')
             sfList += [alg.scaleFactorDecoration]
 
         # Set up the ISO electron efficiency correction algorithm:
@@ -897,7 +897,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             if self.saveDetailedSF:
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                     'ecids_effSF' + postfix)
+                                     'ecids_effSF' + postfix, auxType='float')
             sfList += [alg.scaleFactorDecoration]
 
         if self.addChargeMisIDSF and config.dataType() is not DataType.Data and not self.noEffSF and config.geometry() >= LHCPeriod.Run3:
@@ -939,7 +939,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.preselection = config.getPreselection (self.containerName, self.selectionName)
             if self.saveDetailedSF:
                 config.addOutputVar (self.containerName, alg.scaleFactorDecoration,
-                                     'charge_misid_effSF' + postfix)
+                                     'charge_misid_effSF' + postfix, auxType='float')
             sfList += [alg.scaleFactorDecoration]
 
         if config.dataType() is not DataType.Data and not self.noEffSF and self.saveCombinedSF:
@@ -948,7 +948,7 @@ class ElectronWorkingPointEfficiencyConfig (ConfigBlock) :
             alg.particles = config.readName (self.containerName)
             alg.inScaleFactors = sfList
             alg.outScaleFactor = 'effSF' + postfix + '_%SYS%'
-            config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix)
+            config.addOutputVar (self.containerName, alg.outScaleFactor, 'effSF' + postfix, auxType='float')
 
 class ElectronTriggerAnalysisSFBlock (ConfigBlock):
 
@@ -1112,7 +1112,7 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
                     alg.outOfValidityDeco = f"bad_eff_ele{deco}_{label}"
                     alg.electrons = config.readName (self.containerName)
                     alg.preselection = config.getPreselection (self.containerName, "")
-                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f"{deco}_{label}")
+                    config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f"{deco}_{label}", auxType='float')
 
 
 class ElectronLRTMergedConfig (ConfigBlock) :

@@ -403,4 +403,4 @@ class OutputAnalysisConfig (ConfigBlock):
         alg.selectionDecoration =  f'{selectionDecoration},as_char'
         alg.particles = config.readName (containerName)
         alg.preselection = config.getFullSelection (containerName, selectionName)
-        config.addOutputVar (containerName, selectionDecoration, self.selectionFlagPrefix + '_' + selectionName)
+        config.addOutputVar (containerName, selectionDecoration, self.selectionFlagPrefix + '_' + selectionName, auxType='char')

@@ -25,5 +25,5 @@ class PhotonExtraVariablesBlock(ConfigBlock):
         alg.photons = config.readName(self.containerName)
         alg.affectingSystematicsFilter = '.*'
 
-        config.addOutputVar(self.containerName, 'conversionType_%SYS%', 'conversionType', noSys=True)
-        config.addOutputVar(self.containerName, 'caloEta2_%SYS%', 'caloEta2', noSys=True)
+        config.addOutputVar(self.containerName, 'conversionType_%SYS%', 'conversionType', noSys=True, auxType='int')
+        config.addOutputVar(self.containerName, 'caloEta2_%SYS%', 'caloEta2', noSys=True, auxType='float')

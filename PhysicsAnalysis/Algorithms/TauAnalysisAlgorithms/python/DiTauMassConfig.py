@@ -132,28 +132,28 @@ class DiTauMassBlock(ConfigBlock):
     alg.doMLNU3P       = self.doMLNU3P
     alg.doCollinearApprox = self.doCollinearApprox 
 
-    config.addOutputVar('EventInfo', 'mmc_fit_status_%SYS%',  self.algName + 'mmc_fit_status')
-    config.addOutputVar('EventInfo', 'mmc_mlm_mass_%SYS%',    self.algName + 'mmc_mlm_mass')
+    config.addOutputVar('EventInfo', 'mmc_fit_status_%SYS%',  self.algName + 'mmc_fit_status', auxType='int')
+    config.addOutputVar('EventInfo', 'mmc_mlm_mass_%SYS%',    self.algName + 'mmc_mlm_mass', auxType='double')
     if self.doMAXW:
-      config.addOutputVar('EventInfo', 'mmc_maxw_mass_%SYS%',   self.algName + 'mmc_maxw_mass')
+      config.addOutputVar('EventInfo', 'mmc_maxw_mass_%SYS%',   self.algName + 'mmc_maxw_mass', auxType='double')
     if self.doMLNU3P:
-      config.addOutputVar('EventInfo', 'mmc_mlnu3p_mass_%SYS%', self.algName + 'mmc_mlnu3p_mass')
+      config.addOutputVar('EventInfo', 'mmc_mlnu3p_mass_%SYS%', self.algName + 'mmc_mlnu3p_mass', auxType='double')
 
     if self.saveExtraVariables:
       if self.doMLNU3P:
-        config.addOutputVar('EventInfo', 'mmc_mlnu3p_res_4vect_%SYS%',  self.algName + 'mmc_mlnu3p_res_4vect')
-        config.addOutputVar('EventInfo', 'mmc_mlnu3p_nu1_4vect_%SYS%',  self.algName + 'mmc_mlnu3p_nu1_4vect')
-        config.addOutputVar('EventInfo', 'mmc_mlnu3p_nu2_4vect_%SYS%',  self.algName + 'mmc_mlnu3p_nu2_4vect')
-        config.addOutputVar('EventInfo', 'mmc_mlnu3p_tau1_4vect_%SYS%', self.algName + 'mmc_mlnu3p_tau1_4vect')
-        config.addOutputVar('EventInfo', 'mmc_mlnu3p_tau2_4vect_%SYS%', self.algName + 'mmc_mlnu3p_tau2_4vect')
+        config.addOutputVar('EventInfo', 'mmc_mlnu3p_res_4vect_%SYS%',  self.algName + 'mmc_mlnu3p_res_4vect', auxType='PtEtaPhiMVector')
+        config.addOutputVar('EventInfo', 'mmc_mlnu3p_nu1_4vect_%SYS%',  self.algName + 'mmc_mlnu3p_nu1_4vect', auxType='PtEtaPhiMVector')
+        config.addOutputVar('EventInfo', 'mmc_mlnu3p_nu2_4vect_%SYS%',  self.algName + 'mmc_mlnu3p_nu2_4vect', auxType='PtEtaPhiMVector')
+        config.addOutputVar('EventInfo', 'mmc_mlnu3p_tau1_4vect_%SYS%', self.algName + 'mmc_mlnu3p_tau1_4vect', auxType='PtEtaPhiMVector')
+        config.addOutputVar('EventInfo', 'mmc_mlnu3p_tau2_4vect_%SYS%', self.algName + 'mmc_mlnu3p_tau2_4vect', auxType='PtEtaPhiMVector')
       if self.doMAXW:
-        config.addOutputVar('EventInfo', 'mmc_maxw_res_4vect_%SYS%',    self.algName + 'mmc_maxw_res_4vect')
-        config.addOutputVar('EventInfo', 'mmc_maxw_nu1_4vect_%SYS%',    self.algName + 'mmc_maxw_nu1_4vect')
-        config.addOutputVar('EventInfo', 'mmc_maxw_nu2_4vect_%SYS%',    self.algName + 'mmc_maxw_nu2_4vect')
-        config.addOutputVar('EventInfo', 'mmc_maxw_tau1_4vect_%SYS%',   self.algName + 'mmc_maxw_tau1_4vect')
-        config.addOutputVar('EventInfo', 'mmc_maxw_tau2_4vect_%SYS%',   self.algName + 'mmc_maxw_tau2_4vect')
+        config.addOutputVar('EventInfo', 'mmc_maxw_res_4vect_%SYS%',    self.algName + 'mmc_maxw_res_4vect', auxType='PtEtaPhiMVector')
+        config.addOutputVar('EventInfo', 'mmc_maxw_nu1_4vect_%SYS%',    self.algName + 'mmc_maxw_nu1_4vect', auxType='PtEtaPhiMVector')
+        config.addOutputVar('EventInfo', 'mmc_maxw_nu2_4vect_%SYS%',    self.algName + 'mmc_maxw_nu2_4vect', auxType='PtEtaPhiMVector')
+        config.addOutputVar('EventInfo', 'mmc_maxw_tau1_4vect_%SYS%',   self.algName + 'mmc_maxw_tau1_4vect', auxType='PtEtaPhiMVector')
+        config.addOutputVar('EventInfo', 'mmc_maxw_tau2_4vect_%SYS%',   self.algName + 'mmc_maxw_tau2_4vect', auxType='PtEtaPhiMVector')
       if self.doCollinearApprox:
-        config.addOutputVar('EventInfo', 'coll_approx_mass_%SYS%', self.algName + 'coll_approx_mass')
-        config.addOutputVar('EventInfo', 'coll_approx_x0_%SYS%', self.algName + 'coll_approx_x0')
-        config.addOutputVar('EventInfo', 'coll_approx_x1_%SYS%', self.algName + 'coll_approx_x1')
+        config.addOutputVar('EventInfo', 'coll_approx_mass_%SYS%', self.algName + 'coll_approx_mass', auxType='double')
+        config.addOutputVar('EventInfo', 'coll_approx_x0_%SYS%', self.algName + 'coll_approx_x0', auxType='double')
+        config.addOutputVar('EventInfo', 'coll_approx_x1_%SYS%', self.algName + 'coll_approx_x1', auxType='double')
 

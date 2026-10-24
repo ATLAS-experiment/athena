@@ -63,4 +63,4 @@ class FakeBkgBlock(ConfigBlock):
         alg.FakeTool.TightDecoration = 'TightForFakeBkgCalculation,as_char'
 
         alg.FakeToolOutput = 'FakeToolOutput_' + self.setupName + '_%SYS%'
-        config.addOutputVar('EventInfo', alg.FakeToolOutput, 'weight_fake_' + self.setupName, noSys=True)
+        config.addOutputVar('EventInfo', alg.FakeToolOutput, 'weight_fake_' + self.setupName, noSys=True, auxType='float')

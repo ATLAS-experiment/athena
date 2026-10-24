@@ -175,9 +175,9 @@ class PreJetAnalysisConfig (ConfigBlock) :
                 alg.declareDecorations = ['GN2Xv01_phbb', 'GN2Xv01_phcc',
                                           'GN2Xv01_pqcd', 'GN2Xv01_ptop']
 
-        config.addOutputVar (self.containerName, 'pt', 'pt')
-        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True)
-        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
+        config.addOutputVar (self.containerName, 'pt', 'pt', auxType="float")
+        config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True, auxType="float")
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True, auxType="float")
         config.addOutputVar (self.containerName, 'charge', 'charge', noSys=True, enabled=False)
 
 
@@ -518,7 +518,7 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 alg.skipBadEfficiency = False
                 alg.jets = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, '')
-                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'jvtEfficiency')
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'jvtEfficiency', auxType="float")
             config.addSelection (self.containerName, 'baselineJvt', 'jvt_selection,as_char', preselection=False)
 
         if self.runFJvtSelection :
@@ -553,14 +553,14 @@ class SmallRJetAnalysisConfig (ConfigBlock) :
                 alg.skipBadEfficiency = False
                 alg.jets = config.readName (self.containerName)
                 alg.preselection = config.getPreselection (self.containerName, '')
-                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'fjvtEfficiency')
+                config.addOutputVar (self.containerName, alg.scaleFactorDecoration, 'fjvtEfficiency', auxType="float")
             config.addSelection (self.containerName, 'baselineFJvt', 'fjvt_selection,as_char', preselection=False)
 
         # Additional decorations
         alg = config.createAlgorithm( 'CP::AsgEnergyDecoratorAlg', 'AsgEnergyDecoratorAlg' )
         alg.particles = config.readName (self.containerName)
 
-        config.addOutputVar (self.containerName, 'e_%SYS%', 'e')
+        config.addOutputVar (self.containerName, 'e_%SYS%', 'e', auxType="float")
 
 
 class RScanJetAnalysisConfig (ConfigBlock) :
@@ -928,7 +928,7 @@ class LargeRJetAnalysisConfig (ConfigBlock) :
             config.addSelection (self.containerName, '', alg.selectionDecoration,
                                  preselection=True)
 
-        config.addOutputVar (self.containerName, 'm', 'm')
+        config.addOutputVar (self.containerName, 'm', 'm', auxType="float")
 
 class _JvtWorkingPointBase (ConfigBlock) :
     """common base for the Jvt and fJvt working point config blocks
@@ -1023,7 +1023,7 @@ class _JvtWorkingPointEfficiencyBase (_JvtWorkingPointBase) :
             alg.jets = config.readName (self.containerName)
             alg.preselection = config.getPreselection (self.containerName, '')
 
-            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f'{self._prefix}Efficiency{suffix}')
+            config.addOutputVar (self.containerName, alg.scaleFactorDecoration, f'{self._prefix}Efficiency{suffix}', auxType="float")
 
 
 class _JvtWorkingPointEventEfficiencyBase (_JvtWorkingPointBase) :
@@ -1054,7 +1054,7 @@ class _JvtWorkingPointEventEfficiencyBase (_JvtWorkingPointBase) :
             alg.scaleFactorOutputDecoration = f'{self._prefix}_effSF{suffix}_%SYS%'
             alg.particles = config.readName (self.containerName)
 
-            config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_{self._prefix}_effSF{suffix}')
+            config.addOutputVar('EventInfo', alg.scaleFactorOutputDecoration, f'weight_{self._prefix}_effSF{suffix}', auxType="float")
 
 
 class _NNJvtParameters :

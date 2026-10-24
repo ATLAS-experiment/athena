@@ -127,16 +127,16 @@ class JetTriggerMatchingBlock (ConfigBlock):
 
             decorations = []
             if self.runL1Matching:
-                decorations += [('L1Et', 'L1et'), ('L1Eta', 'L1eta'),
-                                ('L1Phi', 'L1phi'), ('L1DR', 'L1dr'),
-                                ('L1Threshold', 'L1thresholds')]
+                decorations += [('L1Et', 'L1et', 'float'), ('L1Eta', 'L1eta', 'float'),
+                                ('L1Phi', 'L1phi', 'float'), ('L1DR', 'L1dr', 'float'),
+                                ('L1Threshold', 'L1thresholds', 'vector_int')]
             if self.runHLTMatching:
-                decorations += [('HLTPt', 'HLTpt'), ('HLTEta', 'HLTeta'),
-                                ('HLTPhi', 'HLTphi'), ('HLTDR', 'HLTdr'),
-                                ('HLTThreshold', 'HLTthresholds')]
-            for prop, var in decorations:
+                decorations += [('HLTPt', 'HLTpt', 'float'), ('HLTEta', 'HLTeta', 'float'),
+                                ('HLTPhi', 'HLTphi', 'float'), ('HLTDR', 'HLTdr', 'float'),
+                                ('HLTThreshold', 'HLTthresholds', 'vector_int')]
+            for prop, var, auxType in decorations:
                 outputName = "match_" + chain_out + "_" + var
                 setattr(alg, prop, outputName + "_%SYS%")
                 config.addOutputVar (self.containerName,
                                      outputName + "_%SYS%",
-                                     outputName, noSys=True)
+                                     outputName, noSys=True, auxType=auxType)

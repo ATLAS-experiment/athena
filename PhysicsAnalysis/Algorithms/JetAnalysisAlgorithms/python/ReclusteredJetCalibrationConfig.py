@@ -38,8 +38,8 @@ class ReclusteredJetCalibrationBlock(ConfigBlock):
         alg.reclusteredJetsOut = config.copyName(self.containerName)
         alg.smallRJets = config.readName(self.jetInput)
 
-        config.addOutputVar(self.containerName, 'pt', 'pt')
-        config.addOutputVar(self.containerName, 'eta', 'eta')
-        config.addOutputVar(self.containerName, 'phi', 'phi')
-        config.addOutputVar(self.containerName, 'm', 'm')
+        config.addOutputVar(self.containerName, 'pt', 'pt', auxType="float")
+        config.addOutputVar(self.containerName, 'eta', 'eta', auxType="float")
+        config.addOutputVar(self.containerName, 'phi', 'phi', auxType="float")
+        config.addOutputVar(self.containerName, 'm', 'm', auxType="float")
 

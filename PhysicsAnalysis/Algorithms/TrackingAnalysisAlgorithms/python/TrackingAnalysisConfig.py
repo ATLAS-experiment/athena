@@ -209,13 +209,13 @@ class InDetTrackCalibrationConfig (ConfigBlock):
         alg = config.createAlgorithm( 'CP::InDetTrackExtraVarDecoratorAlg', 'ExtraVarDecorator' )
         alg.inDetTracks = config.readName(self.containerName)
 
-        config.addOutputVar (self.containerName, 'pt_%SYS%', 'pt')
-        config.addOutputVar (self.containerName, 'eta_%SYS%', 'eta', noSys=True)
-        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True)
-        config.addOutputVar (self.containerName, 'charge_%SYS%', 'charge', noSys=True)
-        config.addOutputVar (self.containerName, 'qOverP', 'qOverP')
-        config.addOutputVar (self.containerName, 'd0', 'd0')
-        config.addOutputVar (self.containerName, 'z0', 'z0')
+        config.addOutputVar (self.containerName, 'pt_%SYS%', 'pt', auxType='float')
+        config.addOutputVar (self.containerName, 'eta_%SYS%', 'eta', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'charge_%SYS%', 'charge', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'qOverP', 'qOverP', auxType='float')
+        config.addOutputVar (self.containerName, 'd0', 'd0', auxType='float')
+        config.addOutputVar (self.containerName, 'z0', 'z0', auxType='float')
         config.addOutputVar (self.containerName, 'vz', 'vz', noSys=True, auxType='float')
 
         # decorate track summary information on the reconstructed object:
