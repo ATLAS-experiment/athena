@@ -98,24 +98,24 @@ atlas_add_citest( RecoRun3Data_Bulk_Checks
 atlas_add_citest( RecoRun3Data_Express
     SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a x964 -e '--maxEvents 25 --inputBSFile=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/Tier0ChainTests/TCT_Run3/data26_13p6TeV.00517465.express_express.merge.RAW._lb0821._SFO-ALL._0001.1 --conditionsTag CONDBR2-ES1PA-2026-01 ' --no-output-checks
   )
-  
-atlas_add_citest( ZdcRec_ZDCCalib 
+
+atlas_add_citest( ZdcRec_ZDCCalib
     SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data23_hi.00463427.calibration_ZDCCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
   )
-  
+
 atlas_add_citest( ZdcRec_ZDCCalib24
   SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data24_hi.00488915.calibration_ZDCCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
 )
 
-atlas_add_citest( ZdcRec_ZDCLEDCalib 
+atlas_add_citest( ZdcRec_ZDCLEDCalib
   SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data23_hi.00463427.calibration_ZDCLEDCalib.daq.RAW._lb0000._SFO-19._0001.data --evtMax=10
 )
 
-atlas_add_citest( ZdcRec_ZDCInjCalib 
+atlas_add_citest( ZdcRec_ZDCInjCalib
     SCRIPT python -m ZdcRec.ZdcRecConfig --filesInput=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ZdcRec/data24_hicomm.00488824.calibration_ZDCInjCalib.daq.RAW._lb0000._SFO-11._0001.data --evtMax=10
   )
 
-atlas_add_citest( RecoRun3Data_Cosmics 
+atlas_add_citest( RecoRun3Data_Cosmics
    SCRIPT RunWorkflowTests_Run3.py --CI -r -w DataReco -a q450 -e '--maxEvents 25  --preExec="all:flags.Exec.FPE=500;" --conditionsTag CONDBR2-BLKPA-2022-17' --no-output-checks)
 
 atlas_add_citest( RecoRun3Data_Calib
@@ -136,6 +136,22 @@ atlas_add_citest( RecoRun3Data_Overlay
 atlas_add_citest( RecoRun4MC
    SCRIPT RunWorkflowTests_Run4.py --CI -r -w MCReco -e '--maxEvents 5 --preInclude="Campaigns.MC23PhaseIINoPileUp" --inputHITSFile=../../SimulationRun4FullSim/run_s3761/myHITS.pool.root' # go two levels up as the test runs in a subfolder
    DEPENDS_SUCCESS SimulationRun4FullSim )
+
+#################################################################################
+# GPU aided reconstruction workflows
+#################################################################################
+
+atlas_add_citest( RecoRun4Data_NVIDIA_GPU
+   PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
+   PROPERTIES SKIP_RETURN_CODE 2
+   SCRIPT athena.py RecExRecoTest/FullReco_RDO_Run4_GPU.py Device.Backend=DeviceBackend.CUDA
+   LOG_IGNORE_PATTERN "PathResolver.*ERROR Locating dev file|ActsPriVxFinderAlg.*ERROR Variance of|ActsPriVxFinderAlg.*ERROR sumVarZ|FPE INVALID in.*ActsPriVxFinderAlg" )
+
+atlas_add_citest( RecoRun4Data_AMD_GPU
+   PRE_EXEC_SCRIPT "amd-check.sh || exit 2"
+   PROPERTIES SKIP_RETURN_CODE 2
+   SCRIPT athena.py RecExRecoTest/FullReco_RDO_Run4_GPU.py Device.Backend=DeviceBackend.HIPAMD
+   LOG_IGNORE_PATTERN "PathResolver.*ERROR Locating dev file|ActsPriVxFinderAlg.*ERROR Variance of|ActsPriVxFinderAlg.*ERROR sumVarZ|FPE INVALID in.*ActsPriVxFinderAlg" )
 
 #################################################################################
 # Standard Derivation  workflows
@@ -345,7 +361,7 @@ atlas_add_citest( DataQuality_Run3Data_AODtoHIST
 atlas_add_citest( EgammaART
    SCRIPT ut_egammaARTJob_test.sh )
 
-# Test running egamma from RAW 
+# Test running egamma from RAW
 atlas_add_citest( EgammaRAW
    SCRIPT ut_egamma_fromRAW.sh)
 
@@ -362,7 +378,7 @@ atlas_add_citest( ActsConfiguration
 
 atlas_add_citest( ActsExtendedTruth
    SCRIPT ActsExtendedTruth.sh )
- 
+
 atlas_add_citest( ACTS_Propagation_ITk
    SCRIPT ActsITkTest.py )
 
@@ -380,23 +396,23 @@ atlas_add_citest( ACTS_Propagation_ITk_Muon_Gen3
 
 atlas_add_citest( ACTS_Propagation_ID
    SCRIPT ActsExtrapolationAlgTest.py )
- 
+
 atlas_add_citest( ACTS_Workflow
    SCRIPT ActsWorkflow.sh )
 
 atlas_add_citest( Athena_Tracking_Workflow_Legacy
    SCRIPT AthenaTrackingWorkflowLegacy.sh )
- 
+
 atlas_add_citest( ACTS_Workflow_Legacy
    SCRIPT ActsWorkflowLegacy.sh )
 
 atlas_add_citest( ACTS_Workflow_Cached
    SCRIPT ActsWorkflowCached.sh )
- 
+
 atlas_add_citest( ACTS_Workflow_HeavyIons
    SCRIPT ActsWorkflowHeavyIons.sh )
 
-atlas_add_citest( ACTS_ActsPersistifyEDM 
+atlas_add_citest( ACTS_ActsPersistifyEDM
    SCRIPT ActsPersistifyEDM.sh )
 
 atlas_add_citest( ACTS_WorkflowWithScoreBasedAmbiguity
@@ -431,7 +447,7 @@ atlas_add_citest( ACTS_ActsBenchmarkTrackingWithSpot
  atlas_add_citest( ACTS_ActsBenchmarkWithSpotHeavyIons
    SCRIPT ActsBenchmarkWithSpotHeavyIons.sh  8 50
    PROPERTIES PROCESSOR 8 )
- 
+
 atlas_add_citest( ACTS_ActsAnalogueClustering
   SCRIPT ActsAnalogueClustering.sh )
 
@@ -507,7 +523,7 @@ atlas_add_citest( EFTracking_FPGATrackSim_CI
   SCRIPT FPGATrackSim_CI.sh
    LOG_IGNORE_PATTERN "FPGATrackSimProto.*ERROR Propagation reached the step count limit.*|FPGATrackSimProto.*ERROR.*Propagation failed: PropagatorError.*|WARNING FPE.*FPGATrackSimProtoTackFitAlg.*|.*WARNING FPE INVALID.*ResolvedProtoTrackToAltTrackParticleCnvAlg.*|.*ERROR.*No start volume resolved.*|.*WARNING ERROR message limit.*|.*ERROR \|" )
 
-atlas_add_citest (TrigInDetValidationMenu 
+atlas_add_citest (TrigInDetValidationMenu
                SCRIPT TrigInDetValidation_menu_test.py )
 
 #################################################################################

@@ -1,9 +1,12 @@
 #!/usr/bin/bash
 #
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Pre-exec script used for all CI tests
 #
+
+# user-defined pre-processing script:
+@CI_PRE_EXEC_SCRIPT@
 
 branch=${gitlabTargetBranch:-${AtlasBuildBranch}}
 if [ -n "${branch}" ]; then
