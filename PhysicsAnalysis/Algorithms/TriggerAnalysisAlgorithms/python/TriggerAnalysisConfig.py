@@ -133,7 +133,7 @@ class TriggerAnalysisBlock (ConfigBlock):
 
         for t in self.triggerChainsForSelection :
             t = sanitizeTriggerChainName(t)
-            config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True)
+            config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True, auxType='char')
 
         # for decoration, make sure we only get the triggers not already in the selection list
         triggerChainsForDeco = list(set(self.triggerChainsForDecoration) - set(self.triggerChainsForSelection))
@@ -147,7 +147,7 @@ class TriggerAnalysisBlock (ConfigBlock):
 
             for t in triggerChainsForDeco :
                 t = sanitizeTriggerChainName(t)
-                config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True)
+                config.addOutputVar ('EventInfo', 'trigPassed_' + t, 'trigPassed_' + t, noSys=True, auxType='char')
 
         # Calculate trigger prescales
         if (self.prescaleLumiCalcFiles or self.prescaleLumiCalcFilesPerYear) and (

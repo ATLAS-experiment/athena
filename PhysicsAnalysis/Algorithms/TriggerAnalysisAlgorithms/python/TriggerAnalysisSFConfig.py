@@ -229,7 +229,7 @@ class TriggerAnalysisSFBlock(ConfigBlock):
 
         for trig in triggerMatchingChains:
             var = f'triggerMatch_{sanitizeTriggerChainName(trig)}{alg.separateMatchingDecorationSuffix}'
-            config.addOutputVar('EventInfo', f'{var}_%SYS%', var, noSys=False)
+            config.addOutputVar('EventInfo', f'{var}_%SYS%', var, noSys=False, auxType="char")
 
         return
 
