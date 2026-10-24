@@ -9,6 +9,7 @@ class EventLoopCPRunScript(CPBaseRunner):
         self.logger.info("EventLoopCPRunScript initialized")
         self.addCustomArguments()
         self.algSeq = None
+        self.outputStreams = []
         # Avoid putting call to parse_args() here! Otherwise it is hard to retrieve the parser infos
 
     def addCustomArguments(self):
@@ -36,9 +37,14 @@ class EventLoopCPRunScript(CPBaseRunner):
         configAccumulator = ConfigAccumulator(flags=self.flags,
                                               algSeq=algSeq,
                                               noSystematics=self.args.no_systematics)
+        # EventLoop writes histograms to its histogram file whatever their stream,
+        # so they should not request the tree stream ANALYSIS
+        import ROOT
+        configAccumulator.setDefaultHistogramStream(ROOT.EL.Job.histogramStreamName)
         self.logger.info("Configuring algorithms")
         configSeq.fullConfigure(configAccumulator)
         self.algSeq = algSeq
+        self.outputStreams = configAccumulator.outputStreams()
         self.modifyAlgSequence()
         return algSeq
 
@@ -112,6 +118,22 @@ class EventLoopCPRunScript(CPBaseRunner):
             shutil.move(str(histfilePath), str(currentDir / f"hist-{self.outputName}.root"))
         else:
             self.logger.warning(f"Histogram file {histfilePath} does not exist or merging, skipping move.")
+        # move the other output stream files, named as in AthenaCPRunScript; taken from disk as
+        # the streams are only known in the job process, which the exec driver forks off
+        for streamDir in sorted(workDir.glob('data-*')):
+            stream = streamDir.name.removeprefix('data-')
+            if stream == 'ANALYSIS':
+                continue
+            streamSymlink = streamDir / f'{self.outputName}.root'
+            streamPath = streamSymlink.resolve()
+            target = currentDir / f"{self.outputName}_{stream.removeprefix('ANALYSIS_')}.root"
+            if streamPath.exists():
+                self.logger.info(f"Moving {streamPath} to {target}")
+                if streamSymlink.is_symlink():
+                    streamSymlink.unlink()
+                shutil.move(str(streamPath), str(target))
+            else:
+                self.logger.warning(f"Root file {streamPath} does not exist, skipping move.")
 
         newHistFile = currentDir / f"hist-{self.outputName}.root"
         # rename merged hist-ntuple to output_name.root
@@ -167,10 +189,15 @@ class EventLoopCPRunScript(CPBaseRunner):
 
         for alg in self.makeAlgSequence():
             self.job.algsAdd(alg)
+        # Every requested output stream not going to the histogram file gets its own file: the
+        # default tree stream ANALYSIS only if something writes to it, plus e.g. the streams of
+        # Output.splitBySelection
+        histStreams = {ROOT.EL.Job.histogramStreamName}
         if self.args.merge_output_files:
             self.job.options().setString(ROOT.EL.Job.optStreamAliases, "ANALYSIS=" + ROOT.EL.Job.histogramStreamName)
-        else:
-            self.job.outputAdd(ROOT.EL.OutputStream('ANALYSIS'))
+            histStreams.add('ANALYSIS')
+        for stream in [stream for stream in self.outputStreams if stream not in histStreams]:
+            self.job.outputAdd(ROOT.EL.OutputStream(stream))
 
         if self.args.run_perf_stat:
             self.job.options().setBool(ROOT.EL.Job.optXAODPerfStats, 1)

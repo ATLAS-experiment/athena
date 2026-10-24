@@ -11,6 +11,10 @@
 // Framework include(s):
 #include "AnaAlgorithm/AnaAlgorithm.h"
 #include <AsgTools/PropertyWrapper.h>
+#include <SelectionHelpers/SysReadSelectionHandle.h>
+#include <SystematicsHandles/SysListHandle.h>
+#include <SystematicsHandles/SysReadHandle.h>
+#include <xAODEventInfo/EventInfo.h>
 
 // Forward declaration(s):
 class TTree;
@@ -40,6 +44,8 @@ namespace CP {
       /// @name Functions inherited from @c EL::AnaAlgorithm
       /// @{
 
+      /// Function initialising the algorithm
+      StatusCode initialize() override;
       /// Function executed once per event
       StatusCode execute(const EventContext& ctx) override;
 
@@ -51,6 +57,15 @@ namespace CP {
 
       /// The name of the output tree to write
      Gaudi::Property<std::string> m_treeName {this, "TreeName", "physics", "Name of the tree to write"};
+
+      /// The systematics list we run
+      SysListHandle m_systematicsList {this};
+      /// The EventInfo to read the event selection from
+      SysReadHandle<xAOD::EventInfo> m_eventInfoHandle {
+         this, "eventInfo", "EventInfo", "the EventInfo container to read"};
+      /// Only fill events passing this selection for at least one systematic
+      SysReadSelectionHandle m_eventSelection {
+         this, "EventSelection", "", "the event selection to require (empty: fill all events)"};
 
       /// @}
 

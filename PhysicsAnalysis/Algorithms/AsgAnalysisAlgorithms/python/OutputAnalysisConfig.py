@@ -52,6 +52,11 @@ class OutputAnalysisConfig (ConfigBlock):
             info="name of the output TTree (or RNTuple) to save.")
         self.addOption ('streamName', 'ANALYSIS', type=str,
             info="name of the output stream to save the tree in.")
+        self.addOption ('splitBySelection', False, type=bool,
+            info="write one tree per `EventSelection` instead of a single tree, each in "
+            "its own stream `<streamName>_<selectionName>` (i.e. its own output file) and "
+            "filled with the events passing that selection for at least one systematic. "
+            "With a single selection nothing changes.")
         self.addOption ('metTermName', 'Final', type=str,
             info="the name of the MET term to save, turning the MET "
             "container into a single object.")
@@ -99,11 +104,11 @@ class OutputAnalysisConfig (ConfigBlock):
     def branchSortOrder (rule):
         return rule.split('->')[1].strip()
 
-    def createOutputAlgs (self, config, name, vars, nonContainers):
+    def createOutputAlgs (self, config, name, vars, nonContainers, streamName):
         """A helper function to create output algorithm"""
         alg = config.createAlgorithm('CP::AsgxAODNTupleMakerAlg', name)
         alg.TreeName = self.treeName
-        alg.RootStreamName = self.streamName
+        alg.RootStreamName = streamName
         alg.NonContainers = list(nonContainers)
         branchList = list(vars)
         branchList.sort(key=self.branchSortOrder)
@@ -320,43 +325,65 @@ class OutputAnalysisConfig (ConfigBlock):
             allBranches |= userTruthMetVars
             allBranches |= autoTruthMetVars
 
+        selections = []
+        if self.splitBySelection:
+            # sub-selections are not regions, same as in EventSelectionMerger
+            selections = [selection for selection in config.getContainerMeta('EventInfo', 'eventSelectionNames', failOnMiss=True)
+                          if not selection.startswith('pass_SUB')]
+        # one (algorithm name suffix, stream, event selection) per output tree;
+        # with a single selection, keep the single tree as without splitting
+        outputs = [('', self.streamName, '')]
+        if len(selections) > 1:
+            outputs = []
+            for selection in selections:
+                name = selection.removeprefix('pass_').removesuffix('_%SYS%')
+                outputs.append((f'_{name}', f'{self.streamName}_{name}', f'{selection},as_char'))
+        for _, streamName, _ in outputs:
+            config.requestOutputStream(streamName)
+
         # Create the output algorithm based on outputFormat
         if self.outputFormat == 'RNTuple':
-            alg = config.createAlgorithm('CP::RNtupleTreeMakerAlg', 'RNtupleMaker')
-            alg.TreeName = self.treeName
-            alg.RootStreamName = self.streamName
-            alg.OutputStreamName = self.streamName
-            alg.NonContainers = list(nonContainers)
-            alg.ApproxZippedClusterSize = self.RNTupleApproxZippedClusterSize
-            alg.MaxUnzippedClusterSize = self.RNTupleMaxUnzippedClusterSize
-
             branchList = list(allBranches)
             branchList.sort(key=self.branchSortOrder)
             branchList_nosys = [branch for branch in branchList if "%SYS%" not in branch]
             branchList_sys = [branch for branch in branchList if "%SYS%" in branch]
-            alg.Branches = branchList_nosys + branchList_sys
+
+            for suffix, streamName, eventSelection in outputs:
+                alg = config.createAlgorithm('CP::RNtupleTreeMakerAlg', 'RNtupleMaker' + suffix)
+                alg.TreeName = self.treeName
+                alg.RootStreamName = streamName
+                alg.OutputStreamName = streamName
+                alg.NonContainers = list(nonContainers)
+                alg.ApproxZippedClusterSize = self.RNTupleApproxZippedClusterSize
+                alg.MaxUnzippedClusterSize = self.RNTupleMaxUnzippedClusterSize
+                alg.Branches = branchList_nosys + branchList_sys
+                if eventSelection:
+                    alg.EventSelection = eventSelection
 
             return
 
-        # Add an ntuple dumper algorithm:
-        treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' )
-        treeMaker.TreeName = self.treeName
-        treeMaker.RootStreamName = self.streamName
-        # the auto-flush setting still needs to be figured out
-        #treeMaker.TreeAutoFlush = 0
+        for suffix, streamName, eventSelection in outputs:
+            # Add an ntuple dumper algorithm:
+            treeMaker = config.createAlgorithm( 'CP::TreeMakerAlg', 'TreeMaker' + suffix )
+            treeMaker.TreeName = self.treeName
+            treeMaker.RootStreamName = streamName
+            # the auto-flush setting still needs to be figured out
+            #treeMaker.TreeAutoFlush = 0
 
-        if branchVars or autoVars:
-            self.createOutputAlgs(config, 'NTupleMaker', branchVars | autoVars, nonContainers)
+            if branchVars or autoVars:
+                self.createOutputAlgs(config, 'NTupleMaker' + suffix, branchVars | autoVars, nonContainers, streamName)
 
-        if metVars or autoMetVars:
-            self.createOutputAlgs(config, 'MetNTupleMaker', userMetVars | autoMetVars, nonContainers)
+            if metVars or autoMetVars:
+                self.createOutputAlgs(config, 'MetNTupleMaker' + suffix, userMetVars | autoMetVars, nonContainers, streamName)
 
-        if config.dataType() is not DataType.Data and (truthMetVars or autoTruthMetVars):
-            self.createOutputAlgs(config, 'TruthMetNTupleMaker', userTruthMetVars | autoTruthMetVars, nonContainers)
+            if config.dataType() is not DataType.Data and (truthMetVars or autoTruthMetVars):
+                self.createOutputAlgs(config, 'TruthMetNTupleMaker' + suffix, userTruthMetVars | autoTruthMetVars, nonContainers, streamName)
 
-        treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' )
-        treeFiller.TreeName = self.treeName
-        treeFiller.RootStreamName = self.streamName
+            treeFiller = config.createAlgorithm( 'CP::TreeFillerAlg', 'TreeFiller' + suffix )
+            treeFiller.TreeName = self.treeName
+            treeFiller.RootStreamName = streamName
+            if eventSelection:
+                treeFiller.EventSelection = eventSelection
 
 
 

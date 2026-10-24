@@ -6,6 +6,10 @@
 
 #include "AnaAlgorithm/AnaAlgorithm.h"
 #include "AsgTools/PropertyWrapper.h"
+#include "SelectionHelpers/SysReadSelectionHandle.h"
+#include "SystematicsHandles/SysListHandle.h"
+#include "SystematicsHandles/SysReadHandle.h"
+#include "xAODEventInfo/EventInfo.h"
 
 // RNTuple include(s):
 #include <ROOT/RNTupleModel.hxx>
@@ -69,6 +73,15 @@ namespace CP {
       /// Service handle for systematics
       ServiceHandle<ISystematicsSvc> m_systematicsService {
          this, "SystematicsSvc", "SystematicsSvc", "Systematics service"};
+
+      /// The systematics list for the event selection
+      SysListHandle m_systematicsList {this};
+      /// The EventInfo to read the event selection from
+      SysReadHandle<xAOD::EventInfo> m_eventInfoHandle {
+         this, "eventInfo", "EventInfo", "the EventInfo container to read"};
+      /// Only fill events passing this selection for at least one systematic
+      SysReadSelectionHandle m_eventSelection {
+         this, "EventSelection", "", "the event selection to require (empty: fill all events)"};
 
       /// @name Variables used for RNTuple
       /// @{

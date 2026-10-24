@@ -316,6 +316,7 @@ class ConfigAccumulator :
         self._noSysSuffix = noSysSuffix
         self._algPostfix = ''
         self._defaultHistogramStream = 'ANALYSIS'
+        self._outputStreams = []
         self._containerConfig = {}
         self._outputContainers = {}
         self._algorithms = {}
@@ -401,7 +402,22 @@ class ConfigAccumulator :
         As an advanced option this is not directly exposed by the constructor,
         but can be set by the user if needed before configuring the job."""
         self._defaultHistogramStream = streamName
-    
+
+    def requestOutputStream(self, streamName=None):
+        """request an output stream for the algorithms of a block to write to
+
+        Falls back to the default histogram stream if no stream is given, and
+        records the stream so the job runner can declare an output file for it.
+        Returns the name of the stream to set as the algorithms' RootStreamName."""
+        streamName = streamName or self._defaultHistogramStream
+        if streamName not in self._outputStreams:
+            self._outputStreams.append(streamName)
+        return streamName
+
+    def outputStreams(self):
+        """the output streams requested during the configuration, in request order"""
+        return list(self._outputStreams)
+
     def algPostfix (self) :
         """the current postfix to be appended to algorithm names
         
