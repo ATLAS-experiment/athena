@@ -18,6 +18,7 @@
 // Framework includes
 #include <xAODEgamma/ElectronContainer.h>
 #include <xAODMuon/MuonContainer.h>
+#include <xAODTau/TauJetContainer.h>
 #include <xAODTruth/TruthParticleContainer.h>
 #include <xAODEventInfo/EventInfo.h>
 
@@ -57,6 +58,12 @@ namespace CP {
       CP::SysReadSelectionHandle m_muonSelection {
         this, "muonSelection", "", "the selection on the input muons"
       };
+      CP::SysReadHandle<xAOD::TauJetContainer> m_tausHandle {
+        this, "taus", "", "the tau container to use"
+      };
+      CP::SysReadSelectionHandle m_tauSelection {
+        this, "tauSelection", "", "the selection on the input taus"
+      };
       CP::SysReadHandle<xAOD::TruthParticleContainer> m_electronsTruthHandle {
         this, "truthElectrons", "", "the truth electron container to use"
       };
@@ -68,6 +75,12 @@ namespace CP {
       };
       CP::SysReadSelectionHandle m_muonTruthSelection {
         this, "truthMuonSelection", "", "the selection on the input muons"
+      };
+      CP::SysReadHandle<xAOD::TruthParticleContainer> m_tausTruthHandle {
+        this, "truthTaus", "", "the truth tau container to use"
+      };
+      CP::SysReadSelectionHandle m_tauTruthSelection {
+        this, "truthTauSelection", "", "the selection on the input truth taus"
       };
       CP::SysReadHandle<xAOD::EventInfo> m_eventInfoHandle {
         this, "eventInfo", "EventInfo", "the EventInfo container to read selection decisions from"

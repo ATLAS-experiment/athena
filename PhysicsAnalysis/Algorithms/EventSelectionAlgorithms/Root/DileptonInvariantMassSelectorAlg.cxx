@@ -20,6 +20,8 @@ namespace CP {
     ANA_CHECK(m_electronSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
     ANA_CHECK(m_muonsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_muonSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_tausHandle.initialize(m_systematicsList, SG::AllowEmpty));
+    ANA_CHECK(m_tauSelection.initialize(m_systematicsList, m_tausHandle, SG::AllowEmpty));
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
 
     ANA_CHECK(m_preselection.initialize(m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
@@ -53,71 +55,91 @@ namespace CP {
       // retrieve the electron container
       const xAOD::IParticleContainer *electrons = nullptr;
       if (m_electronsHandle)
-	ANA_CHECK(m_electronsHandle.retrieve(electrons, sys, ctx));
+        ANA_CHECK(m_electronsHandle.retrieve(electrons, sys, ctx));
       // retrieve the electron container
       const xAOD::IParticleContainer *muons = nullptr;
       if (m_muonsHandle)
-	ANA_CHECK(m_muonsHandle.retrieve(muons, sys, ctx));
+        ANA_CHECK(m_muonsHandle.retrieve(muons, sys, ctx));
+      // retrieve the tau container
+      const xAOD::IParticleContainer *taus = nullptr;
+      if (m_tausHandle)
+        ANA_CHECK(m_tausHandle.retrieve(taus, sys, ctx));
 
       // apply the requested selection
       PtEtaPhiEVector lepton0, lepton1;
       int total_leptons = 0;
       bool isfilled0(false), isfilled1(false);
       if (m_electronsHandle) {
-	for (const xAOD::IParticle *el : *electrons) {
-	  if (!m_electronSelection || m_electronSelection.getBool(*el, sys)) {
-	    total_leptons++;
-	    if (!isfilled0){
-          if (m_useDressedProperties)
-            lepton0.SetCoordinates(acc_pt_dressed(*el),
-                                   acc_eta_dressed(*el),
-                                   acc_phi_dressed(*el),
-                                   acc_e_dressed(*el));
-          else
-            lepton0.SetCoordinates(el->pt(), el->eta(), el->phi(), el->e());
-	      isfilled0 = true;
-	    } else if (!isfilled1){
-          if (m_useDressedProperties)
-            lepton1.SetCoordinates(acc_pt_dressed(*el),
-                                   acc_eta_dressed(*el),
-                                   acc_phi_dressed(*el),
-                                   acc_e_dressed(*el));
-          else
-            lepton1.SetCoordinates(el->pt(), el->eta(), el->phi(), el->e());
-	      isfilled1 = true;
-	    } else {
-	      break;
-	    }
-	  }
-	}
+        for (const xAOD::IParticle *el : *electrons) {
+          if (!m_electronSelection || m_electronSelection.getBool(*el, sys)) {
+            total_leptons++;
+            if (!isfilled0){
+              if (m_useDressedProperties)
+                lepton0.SetCoordinates(acc_pt_dressed(*el),
+                                        acc_eta_dressed(*el),
+                                        acc_phi_dressed(*el),
+                                        acc_e_dressed(*el));
+              else
+                lepton0.SetCoordinates(el->pt(), el->eta(), el->phi(), el->e());
+              isfilled0 = true;
+            } else if (!isfilled1){
+              if (m_useDressedProperties)
+                lepton1.SetCoordinates(acc_pt_dressed(*el),
+                                        acc_eta_dressed(*el),
+                                        acc_phi_dressed(*el),
+                                        acc_e_dressed(*el));
+              else
+                lepton1.SetCoordinates(el->pt(), el->eta(), el->phi(), el->e());
+              isfilled1 = true;
+            } else {
+              break;
+            }
+          }
+        }
       }
       if (m_muonsHandle) {
-	for (const xAOD::IParticle *mu : *muons) {
-	  if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
-	    total_leptons++;
-	    if (!isfilled0){
-          if (m_useDressedProperties)
-            lepton0.SetCoordinates(acc_pt_dressed(*mu),
-                                   acc_eta_dressed(*mu),
-                                   acc_phi_dressed(*mu),
-                                   acc_e_dressed(*mu));
-          else
-            lepton0.SetCoordinates(mu->pt(), mu->eta(), mu->phi(), mu->e());
-	      isfilled0 = true;
-	    } else if (!isfilled1){
-          if (m_useDressedProperties)
-            lepton1.SetCoordinates(acc_pt_dressed(*mu),
-                                   acc_eta_dressed(*mu),
-                                   acc_phi_dressed(*mu),
-                                   acc_e_dressed(*mu));
-          else
-            lepton1.SetCoordinates(mu->pt(), mu->eta(), mu->phi(), mu->e());
-	      isfilled1 = true;
-	    } else {
-	      break;
-	    }
-	  }
-	}
+        for (const xAOD::IParticle *mu : *muons) {
+          if (!m_muonSelection || m_muonSelection.getBool(*mu, sys)) {
+            total_leptons++;
+            if (!isfilled0){
+              if (m_useDressedProperties)
+                lepton0.SetCoordinates(acc_pt_dressed(*mu),
+                                        acc_eta_dressed(*mu),
+                                        acc_phi_dressed(*mu),
+                                        acc_e_dressed(*mu));
+              else
+                lepton0.SetCoordinates(mu->pt(), mu->eta(), mu->phi(), mu->e());
+              isfilled0 = true;
+            } else if (!isfilled1){
+              if (m_useDressedProperties)
+                lepton1.SetCoordinates(acc_pt_dressed(*mu),
+                                        acc_eta_dressed(*mu),
+                                        acc_phi_dressed(*mu),
+                                        acc_e_dressed(*mu));
+              else
+                lepton1.SetCoordinates(mu->pt(), mu->eta(), mu->phi(), mu->e());
+              isfilled1 = true;
+            } else {
+              break;
+            }
+          }
+        }
+      }
+      if (m_tausHandle) {
+        for (const xAOD::IParticle *tau : *taus) {
+          if (!m_tauSelection || m_tauSelection.getBool(*tau, sys)) {
+            total_leptons++;
+            if (!isfilled0){
+              lepton0.SetCoordinates(tau->pt(), tau->eta(), tau->phi(), tau->e());
+              isfilled0 = true;
+            } else if (!isfilled1){
+              lepton1.SetCoordinates(tau->pt(), tau->eta(), tau->phi(), tau->e());
+              isfilled1 = true;
+            } else {
+              break;
+            }
+          }
+        }
       }
 
       if (total_leptons != 2){
