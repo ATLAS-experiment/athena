@@ -50,6 +50,7 @@
 
 #include "ReadCards.h"
 #include "utils.h"
+#include "datetimestamp.h"
 
 #include "RoiFilter.h"
 
@@ -543,10 +544,8 @@ int main(int argc, char** argv)
   ///        the config file, and then override them with command 
   ///        line arguments later? Theres only one way to find out...
   
-# ifdef USE_DATE_TIME_STAMP
-  std::cout << "$0 :: compiled " << __DATE__ << " " << __TIME__ << std::endl; 
-# endif
-  
+  std::cout << argv[0] << " :: installed " << datetimestamp(usage) << std::endl; 
+
   /// get a filename from the command line if present
 
   std::string histofilename("");

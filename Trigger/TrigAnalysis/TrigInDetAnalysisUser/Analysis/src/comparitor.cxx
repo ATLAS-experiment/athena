@@ -55,8 +55,10 @@
 
 #include "default_panels.h"
 
-#include "TError.h"
+#include "datetimestamp.h"
 
+
+#include "TError.h"
 
 const std::string reset  = "\033[0m";
 const std::string black  = "\033[0;30m";
@@ -539,16 +541,14 @@ TH1F* d0rebin( TH1F* h ) {
 }
 
 
-
-
 int usage(const std::string& name, int status, const std::string& err_msg="" ) { 
   if ( err_msg != "" ) std::cerr << err_msg << "\n" << std::endl;
   std::ostream& s = std::cout;
   s << "Usage: " << name << "\t [OPTIONS]  test.root reference.root    chain1 chain2 chain2 ...\n\n"; 
-  s << "\t" << " plots comparison histograms"; 
-# ifdef USE_DATE_TIME_STAMP
-  s << " - compiled on " << __DATE__ << " at " << __TIME__ << "\n\n";
-# endif
+  s << "\t" << " plots comparison histograms";
+
+  s << " - installed " << datetimestamp(usage) << "\n\n";
+
   s << "Options: \n";
   s << "    -c,  --config       value \t configure which histograms to plot from config file,\n\n";
   s << "    -t,  --tag          value \t appends tag 'value' to the end of output plot names, \n";
@@ -981,6 +981,8 @@ int main(int argc, char** argv) {
   std::cout << "\n comparitor is off ...\n";
 
   if ( argc<4 ) return usage(argv[0], -1, "too few arguments");
+
+  std::cout << " installed " << datetimestamp(usage) << "\n";
 
   /// control stuff
   
