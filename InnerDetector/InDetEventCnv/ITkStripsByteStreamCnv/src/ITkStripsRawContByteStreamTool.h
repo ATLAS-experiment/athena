@@ -11,6 +11,7 @@
 
 #include "ByteStreamCnvSvcBase/FullEventAssembler.h"
 #include "ByteStreamCnvSvcBase/IByteStreamCnvSvc.h"
+#include "ByteStreamCnvSvcBase/IByteStreamEventAccess.h"
 
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
@@ -61,7 +62,8 @@ ITkStripsRawContByteStreamTool : public extends<AthAlgTool, ISCTRawContByteStrea
  private:
   ServiceHandle<IByteStreamCnvSvc> m_byteStreamCnvSvc
   { this, "ByteStreamCnvSvc", "ByteStreamCnvSvc" };
-
+  ServiceHandle<IByteStreamEventAccess> m_byteStreamEventAccess
+  {this, "ByteStreamEventAccess", "ByteStreamCnvSvc"};
   /** Algorithm Tool to decode ROB bytestream data into RDO. */ 
   ToolHandle<IITkStripsRodEncoder> m_encoder{this, "Encoder", "ITkStripsRodEncoder", "ITkStrips ROD Encoder for RDO to BS conversion"};
 
