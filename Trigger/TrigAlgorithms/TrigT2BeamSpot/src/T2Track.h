@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**********************************************************************************
  * @project: HLT, PESA algorithms
@@ -22,9 +22,8 @@
 // Amg::error
 #include "EventPrimitives/EventPrimitivesHelpers.h"
 #include <string>
-#include <vector>
 #include <cmath>
-#include <iostream>
+#include <iosfwd>
 #include "TMath.h"
 
 namespace PESA {
@@ -47,7 +46,7 @@ namespace PESA {
         }
         m_Phi = trackPars->parameters()[Trk::phi0];
         float theta = trackPars->parameters()[Trk::theta];
-        m_Eta = -log(tan(0.5*theta));
+        m_Eta = -std::log(std::tan(0.5*theta));
         float qOverP = trackPars->parameters()[Trk::qOverP];
         m_Pt = std::abs(std::sin(theta)/qOverP)/Gaudi::Units::GeV;
 
@@ -113,20 +112,20 @@ namespace PESA {
     static double trackChi2Prob(int ndf, double chi2);
 
     // Data members
-    double m_Pt;
-    double m_Eta;
-    double m_Phi;
-    double m_Z0;
-    double m_D0;
-    double m_Z0err;
-    double m_D0err;
-    double m_NDF;
-    double m_Qual;
-    double m_Chi2Prob;
-    int    m_SiHits;
-    int    m_PIXHits;
-    int    m_SCTHits;
-    int    m_TRTHits;
+    double m_Pt{};
+    double m_Eta{};
+    double m_Phi{};
+    double m_Z0{};
+    double m_D0{};
+    double m_Z0err{};
+    double m_D0err{};
+    double m_NDF{};
+    double m_Qual{};
+    double m_Chi2Prob{};
+    int    m_SiHits{};
+    int    m_PIXHits{};
+    int    m_SCTHits{};
+    int    m_TRTHits{};
   };
 
   std::ostream& operator<<( std::ostream& os, const T2Track& track );

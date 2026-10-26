@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**********************************************************************************
@@ -21,7 +21,7 @@
 #define TRIGT2BEAMSPOT_T2BEAMSPOT_H
 
 
-#include <iostream>
+#include <iosfwd>
 
 namespace InDet { class BeamSpotData; }
 
@@ -48,16 +48,16 @@ namespace PESA
 
   private:
     // Data members
-    unsigned m_status ;
-    double   m_posX   ;
-    double   m_posY   ;
-    double   m_posZ   ; 
-    double   m_sigmaX ;
-    double   m_sigmaY ;
-    double   m_sigmaZ ;
-    double   m_tiltX  ;
-    double   m_tiltY  ;
-    double   m_sigmaXY;
+    unsigned m_status{} ;
+    double   m_posX{}   ;
+    double   m_posY{}   ;
+    double   m_posZ{}   ; 
+    double   m_sigmaX{} ;
+    double   m_sigmaY{} ;
+    double   m_sigmaZ{} ;
+    double   m_tiltX{}  ;
+    double   m_tiltY{}  ;
+    double   m_sigmaXY{};
   };
 
 
