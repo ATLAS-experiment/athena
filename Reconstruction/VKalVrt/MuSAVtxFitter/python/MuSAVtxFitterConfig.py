@@ -92,14 +92,20 @@ def MuSAVtxJPsiValidationAlgCfg(flags, name="MuSAVtxJPsiValidationAlg", **kwargs
         VertexPointEstimator = vpest,  # Default: not explicitly set
         useMCPCuts = False  # Default: m_mcpCuts = true
     )
-    
     acc.addPublicTool(jpsiFinderTool)
     kwargs.setdefault("JpsiFinderTool", jpsiFinderTool)
 
     kwargs.setdefault("MuonContainer", "StdWithLRTMuons")
     kwargs.setdefault("EventInfo", "EventInfo")
     kwargs.setdefault("JPsiMuonContainer", "JPsiMuons")
-    kwargs.setdefault("JPsiVertexContainer", "JPsiVertices") 
+    kwargs.setdefault("JPsiVertexContainer", "JPsiVertices")
+
+
+    from TrigDecisionTool.TrigDecisionToolConfig import TrigDecisionToolCfg
+    kwargs.setdefault("TrigDecisionTool", acc.getPrimaryAndMerge(TrigDecisionToolCfg(flags)))
+    
+    from TriggerMatchingTool.TriggerMatchingToolConfig import TriggerMatchingToolCfg
+    kwargs.setdefault("TrigMatchingTool", acc.getPrimaryAndMerge(TriggerMatchingToolCfg(flags)))
 
     acc.addEventAlgo(CompFactory.Rec.MuSAVtxJPsiValidationAlg(name, **kwargs))
 
