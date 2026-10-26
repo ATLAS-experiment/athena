@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # TRUTH1.py - format containing extended common ATLAS truth record
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -9,10 +9,9 @@ def TRUTH1Cfg(flags):
     acc = ComponentAccumulator()
 
     # Add translator from EVGEN input to xAOD-like truth
-    # Add all the particle derivation tools
-    # This sets up its own common kernel and adds the common tools to it
-    from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddStandardTruthContentsCfg
-    acc.merge(AddStandardTruthContentsCfg(flags))
+    # Add the truth content of DAOD_PHYS, as in TRUTH3
+    from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTruthDerivationContentsCfg
+    acc.merge(AddTruthDerivationContentsCfg(flags))
 
     #==============================================================================
     # HEAVY FLAVOR DECORATIONS (ttbar)
@@ -72,14 +71,16 @@ def TRUTH1Cfg(flags):
                                           'TruthLabelTQuarksFinal',
                                           'TruthLabelTausFinal',
                                           'TruthLabelWBosons',
-                                          'TruthLabelZBosons']
+                                          'TruthLabelZBosons',
+                                          'TruthTausWithDecayParticles',
+                                          'TruthTausWithDecayVertices']
     # Custom extra variables -- won't be overridden by the call below, just added to. Full lists for completeness.
     TRUTH1SlimmingHelper.ExtraVariables = ["AntiKtVR30Rmax4Rmin02TruthChargedJets.GhostHBosonsCount.GhostHBosonsPt.GhostBHadronsFinalCount.GhostBHadronsFinalPt.GhostCHadronsFinalCount.HadronConeExclTruthLabelID.PartonTruthLabelID.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal.constituentLinks",
                                            "AntiKt4TruthDressedWZJets.GhostCHadronsFinalCount.GhostBHadronsFinalCount.pt.HadronConeExclTruthLabelID.PartonTruthLabelID.ConeExclBHadronsFinal.ConeExclCHadronsFinal.ConeExclTausFinal.constituentLinks"]
 
     # Add standard content
-    from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
-    addTruth3ContentToSlimmerTool(TRUTH1SlimmingHelper)
+    from DerivationFrameworkMCTruth.MCTruthCommonConfig import addPhysTruthContentToSlimmerTool
+    addPhysTruthContentToSlimmerTool(TRUTH1SlimmingHelper)
     
     # Generate item list and create stream 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg

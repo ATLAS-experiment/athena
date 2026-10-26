@@ -178,7 +178,7 @@ def PostJetMCTruthAugmentationsCfg(flags, **kwargs):
 
     return(acc)
 
-# This adds the entirety of TRUTH3
+# Standard truth content (truth collections, truth jets and MET, navigation)
 def AddStandardTruthContentsCfg(flags,
                                 decorationDressing='dressedPhoton',
                                 includeTausInDressingPhotonRemoval=False,
@@ -330,6 +330,56 @@ def AddHFAndDownstreamParticlesCfg(flags, **kwargs):
         AugmentationTools = [DFCommonHFAndDecaysTool] ))
     return acc
 
+
+# Truth collections with navigation decorations in DAOD_PHYS
+PhysTruthNavigationCollections = ["TruthElectrons",
+                                  "TruthMuons",
+                                  "TruthPhotons",
+                                  "TruthTaus",
+                                  "TruthNeutrinos",
+                                  "TruthBSM",
+                                  "TruthBottom",
+                                  "TruthTop",
+                                  "TruthBoson",
+                                  "TruthCharm",
+                                  "TruthHFWithDecayParticles"]
+
+# Expects xAOD truth: on EVNT input, schedule HepMCtoXAODTruthCfg before it
+def AddPhysTruthContentsCfg(flags):
+    """Truth augmentations of DAOD_PHYS that need only the truth record"""
+    acc = ComponentAccumulator()
+    acc.merge(TruthClassificationAugmentationsCfg(flags))
+    from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
+    PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
+        flags,
+        name = "PhysCommonTruthCharmTool"))
+    CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
+    acc.addEventAlgo(CommonAugmentation("PhysCommonTruthCharmKernel",AugmentationTools=[PhysCommonTruthCharmTool]))
+    acc.merge(AddHFAndDownstreamParticlesCfg(flags))
+    acc.merge(AddStandardTruthContentsCfg(flags, navInputCollections = PhysTruthNavigationCollections))
+    acc.merge(AddPVCollectionCfg(flags))
+    return acc
+
+def AddPhysTruthExtrasCfg(flags):
+    """Truth content that DAOD_PHYS adds to AddPhysTruthContentsCfg: HF classification,
+    Higgs truth categories, tau decay collections"""
+    acc = ComponentAccumulator()
+    from DerivationFrameworkMCTruth.HFClassificationCommonConfig import HFClassificationCommonCfg
+    acc.merge(HFClassificationCommonCfg(flags))
+    from DerivationFrameworkHiggs.TruthCategoriesConfig import TruthCategoriesDecoratorCfg
+    acc.merge(TruthCategoriesDecoratorCfg(flags))
+    acc.merge(AddTauAndDownstreamParticlesCfg(flags))
+    return acc
+
+def AddTruthDerivationContentsCfg(flags):
+    """Truth content of DAOD_PHYS for the truth derivations (TRUTH1, TRUTH3)"""
+    acc = ComponentAccumulator()
+    # The HepMC->xAOD conversion must run before the truth augmentations
+    # (merged again in AddStandardTruthContentsCfg, it is scheduled once)
+    acc.merge(HepMCtoXAODTruthCfg(flags))
+    acc.merge(AddPhysTruthContentsCfg(flags))
+    acc.merge(AddPhysTruthExtrasCfg(flags))
+    return acc
 
 # Add a one-vertex-per event "primary vertex" container
 def AddPVCollectionCfg(flags):
@@ -523,4 +573,23 @@ def addTruth3ContentToSlimmerTool(slimmer, reduced=False):
         "TruthBosonsWithDecayVertices.barcode.id.x.y.z.t.prodVtxLink.decayVtxLink.incomingParticleLinks.outgoingParticleLinks.uid.status",
         "TruthBSMWithDecayParticles.barcode.Classification.classifierParticleOrigin.classifierParticleOutCome.classifierParticleType.decayVtxLink.e.m.pdgId.prodVtxLink.px.py.pz.status.uid",
         "TruthBSMWithDecayVertices.barcode.id.incomingParticleLinks.outgoingParticleLinks.t.x.y.z.uid"
+    ]
+
+
+# Truth slimming of DAOD_PHYS that needs only the truth record
+def addPhysTruthContentToSlimmerTool(slimmer):
+    addTruth3ContentToSlimmerTool(slimmer)
+    slimmer.AllVariables += ['TruthLHEParticles']
+    slimmer.ExtraVariables += [
+        "AntiKt4TruthDressedWZJets.IsoFixedCone5Pt.HFHadronOriginID",
+        # Truth large-R jets: PHYS gets these from the smart slimming of the reco UFO large-R jets
+        # (AntiKt10UFOCSSKSoftDropBeta100Zcut10JetsCPContent.py), which TRUTH3 does not have
+        "AntiKt10TruthSoftDropBeta100Zcut10Jets.pt.eta.phi.m.Parent.numConstit.D2.Tau1_wta.Tau2_wta.Tau3_wta.Qw.GhostCHadronsFinalCount.GhostBHadronsFinalCount",
+        "AntiKt10TruthJets.pt.eta.phi.m.numConstit.Split12.Split23.GhostCHadronsFinalCount.GhostBHadronsFinalCount",
+        "TruthPrimaryVertices.t.x.y.z",
+        "TruthHFWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
+        "TruthHFWithDecayVertices.incomingParticleLinks.outgoingParticleLinks.uid.status.x.y.z.t",
+        "TruthCharm.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status.barcode.polarizationPhi.polarizationTheta",
+        "TruthTausWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
+        "TruthTausWithDecayVertices.incomingParticleLinks.outgoingParticleLinks.uid.status.x.y.z.t"
     ]

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # TRUTH3.py - format containing standard common ATLAS truth record
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -9,10 +9,9 @@ def TRUTH3Cfg(flags):
     acc = ComponentAccumulator()
 
     # Add translator from EVGEN input to xAOD-like truth
-    # Add all the particle derivation tools
-    # This sets up its own common kernel and adds the common tools to it
-    from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddStandardTruthContentsCfg
-    acc.merge(AddStandardTruthContentsCfg(flags))
+    # Add the truth content of DAOD_PHYS
+    from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTruthDerivationContentsCfg
+    acc.merge(AddTruthDerivationContentsCfg(flags))
 
     #==============================================================================
     # Set up slimming content list
@@ -44,17 +43,14 @@ def TRUTH3Cfg(flags):
                                               }
 
     # Add EventInfo
-    TRUTH3SlimmingHelper.AllVariables = [ 'EventInfo',
-                                          'TruthLHEParticles']
+    TRUTH3SlimmingHelper.AllVariables = [ 'EventInfo' ]
 
     # Add TruthTau collections
-    from DerivationFrameworkMCTruth.MCTruthCommonConfig import AddTauAndDownstreamParticlesCfg
-    acc.merge(AddTauAndDownstreamParticlesCfg(flags))
     TRUTH3SlimmingHelper.AllVariables += ['TruthTausWithDecayParticles','TruthTausWithDecayVertices']
 
     # Add standard content
-    from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
-    addTruth3ContentToSlimmerTool(TRUTH3SlimmingHelper)
+    from DerivationFrameworkMCTruth.MCTruthCommonConfig import addPhysTruthContentToSlimmerTool
+    addPhysTruthContentToSlimmerTool(TRUTH3SlimmingHelper)
         
     # Generate item list and create stream 
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
