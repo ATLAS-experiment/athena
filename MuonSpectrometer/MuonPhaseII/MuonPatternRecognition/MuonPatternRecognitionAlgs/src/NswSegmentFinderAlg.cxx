@@ -502,7 +502,8 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
                                            const HitLayVec& hitLayers,                                          
                                            const HoughMaximum& max,
                                            const Amg::Vector3D& beamSpotPos,
-                                           UsedHitMarker_t& usedHits) const {
+                                           UsedHitMarker_t& usedHits,
+                                           bool usePad) const {
 
     //go through the  layers and build seeds from the combinations of hits 
     //starting from the outermost layers with 2D measurements (excluding pads)
@@ -525,7 +526,7 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
         const auto* prdSec = static_cast<const xAOD::sTgcMeasurement*>(sp->secondaryMeasurement());
         //we know we have a 2D spacepoint can be: pad, strip+pad, strip+wire, wire+pad and we dont want pads appearing in this seeding stage
         bool hasPad = prdSec ? prdSec->channelType()==sTgcIdHelper::sTgcChannelTypes::Pad : prdPrim->channelType()==sTgcIdHelper::sTgcChannelTypes::Pad;
-        if(hasPad){
+        if(hasPad && !usePad){
             ATH_MSG_VERBOSE("Ignoring the 2D pad measurement for seeding because of pads: "<<m_idHelperSvc->toString(sp->identify()));
             return false;
         }
@@ -844,7 +845,7 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
 
     //Start from outermost sTgc layers with combined 2D measurements
     ATH_MSG_VERBOSE("Start building seed from sTgc outermost layers");
-    processSeedsAndSegments(buildSegmentsFromSTGC(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits), "sTgc segment seeds");    
+    processSeedsAndSegments(buildSegmentsFromSTGC(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, false), "sTgc segment seeds");    
 
     //continue with the combinatorial seeding for the strip measurements
     if(m_doOnlyMMCombinatorics){
@@ -857,6 +858,8 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
         ATH_MSG_VERBOSE("Start building combinatoric seeds from Micromegas and sTgc hits");
         processSeedsAndSegments(buildSegmentsFromMM(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, true), "MM combinatoric segment seeds");
         processSeedsAndSegments(buildSegmentsFromMM(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, false), "MM and STGC combinatoric segment seeds");
+
+        processSeedsAndSegments(buildSegmentsFromSTGC(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, true), "sTgc segment seeds using strip+pads");    
 
     }   
     

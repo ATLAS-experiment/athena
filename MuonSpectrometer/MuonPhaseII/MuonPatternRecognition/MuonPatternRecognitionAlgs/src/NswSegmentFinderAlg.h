@@ -192,13 +192,15 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
          *  @param ctx: The reference to the event context
          *  @param max: Refrence to the eta maximum from which the segment seed is constructed
          *  @param beamSpotPos: The beamspot position in the sector's frame to be used to constrain the hits selection
-         *  @param usedHits: Refrence to the book keeper of which of the hits on the extension was already used */
+         *  @param usedHits: Refrence to the book keeper of which of the hits on the extension was already used
+         *  @param usePad: Boolean to indicate whether to use pad hits for the segment building */
         std::pair<SegmentSeedVec_t, SegmentVec_t> buildSegmentsFromSTGC(const EventContext& ctx,
                                                                         const ActsTrk::GeometryContext &gctx,
                                                                         const HitLayVec& hitLayers,                                                                     
                                                                         const HoughMaximum& max,
                                                                         const Amg::Vector3D& beamSpotPos,
-                                                                        UsedHitMarker_t& usedHits) const;
+                                                                        UsedHitMarker_t& usedHits,
+                                                                        bool usePad) const;
         /** @brief Fit the segment seeds
          * @param ctx The reference to the event context
          * @param gctx The reference to the Geometry Context

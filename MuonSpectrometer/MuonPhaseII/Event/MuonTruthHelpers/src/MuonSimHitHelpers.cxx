@@ -11,6 +11,8 @@
 #include <MuonSpacePoint/CalibratedSpacePoint.h>
 #include <MuonPatternEvent/Segment.h>
 #include <AthLinks/ElementLink.h>
+#include <xAODMuonPrepData/sTgcMeasurement.h>
+#include <xAODMuonPrepData/CombinedMuonStrip.h>
 
 namespace {
     using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
@@ -36,7 +38,7 @@ namespace MuonR4 {
     }
 
     std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const xAOD::MuonSegment& segment) {
-        
+
         static const SG::ConstAccessor<SimHitLinkVec_t> acc_simLink{"simHitLinks"};
         static const SG::ConstAccessor<PrdLinkVec_t> acc_prdLink{"prdLinks"};
         std::unordered_set<const xAOD::MuonSimHit*> hits{};
@@ -56,12 +58,23 @@ namespace MuonR4 {
                 if (!prdHit) {
                     continue;
                 }
-                const xAOD::MuonSimHit* hit = getTruthMatchedHit(*prdHit);
-                if (hit){
-                    hits.insert(hit);
+
+                std::vector<const xAOD::MuonMeasurement*> prds{prdHit};
+
+                // The segment links the eta & phi prds of a gas gap through a combined strip
+                // This is necessary e.g for sTGC as the simHitLink decoration takes places on the original prd container, whereas CombinedMuonStrip is built later in the segment conversion
+                if (const auto* cmb = dynamic_cast<const xAOD::CombinedMuonStrip*>(prdHit)) {
+                    prds = {cmb->primaryStrip(), cmb->secondaryStrip()};
+                }
+
+                for (const xAOD::MuonMeasurement* prd : prds) {
+                    const xAOD::MuonSimHit* hit = prd ? getTruthMatchedHit(*prd) : nullptr;
+                    if (hit) {
+                        hits.insert(hit);
+                    }
                 }
             }
-        }      
+        }
         return hits;
     }
 
