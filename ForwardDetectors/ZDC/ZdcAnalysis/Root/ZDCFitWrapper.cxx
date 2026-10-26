@@ -115,7 +115,7 @@ const std::map<std::string, std::vector<ZDCFitWrapper::FitParameter>> ZDCFitExpF
     }
   };
 
-const ZDCFitWrapper::FitParameter& ZDCFitWrapper::GetParameterDescr(std::string name)
+const ZDCFitWrapper::FitParameter& ZDCFitWrapper::GetParameterDescr(const std::string & name)
 {
   auto iter = std::find_if(m_parameterSet.begin(), m_parameterSet.end(),
 			   [name](const FitParameter& parDesc){return parDesc.name() == name;});
@@ -137,7 +137,7 @@ void ZDCFitWrapper::LoadDefaultParameterSet(const std::vector<FitParameter>& par
   // Loop over passed descriptors
   //
   unsigned parIndex = 0;
-  for (auto parDescr : parameterSet) {
+  for (const auto & parDescr : parameterSet) {
     //
     // Load the settings for this parameter in the TF1
     //
@@ -166,7 +166,7 @@ void ZDCFitWrapper::OverrideParameterSet(const std::vector<FitParameter>& overPa
 
   // Loop over the provided parameter descriptors
   //
-  for (auto parDescr : overParamSet) {
+  for (const auto & parDescr : overParamSet) {
     std::string inputName = parDescr.name();
 
     // Fit the parameter name in the current list
@@ -225,7 +225,7 @@ void ZDCFitWrapper::Initialize(float initialAmp, float initialT0, float ampMin, 
       //
       // Yes, use parameter descriptors to initialize the TF1
       //
-      auto fitparDescr = m_parameterSet[ipar];
+      const auto & fitparDescr = m_parameterSet[ipar];
       
       if (!fitparDescr.fixed()) {
 	tf1_p->SetParameter(ipar, fitparDescr.defaultValue());
@@ -280,7 +280,7 @@ void ZDCFitWrapper::ConstrainFit()
     auto tf1_p = GetWrapperTF1(); 
 
     for (unsigned int ipar = 2; ipar < m_parameterSet.size(); ipar++) {
-      auto fitparDescr = m_parameterSet[ipar];
+      const auto & fitparDescr = m_parameterSet[ipar];
       
       if (!fitparDescr.fixed() && fitparDescr.constrainFixed()) {
 	tf1_p->FixParameter(ipar, fitparDescr.constrainValue());
@@ -296,7 +296,7 @@ void ZDCFitWrapper::UnconstrainFit()
     auto tf1_p = GetWrapperTF1();
     
     for (unsigned int ipar = 2; ipar < m_parameterSet.size(); ipar++) {
-      auto fitparDescr = m_parameterSet[ipar];
+      const auto & fitparDescr = m_parameterSet[ipar];
       
       if (!fitparDescr.fixed() && fitparDescr.constrainFixed()) {
 	tf1_p->ReleaseParameter(ipar);
@@ -516,7 +516,7 @@ ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::st
 }
 
 
-ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::string& tag, std::string paramSet, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2) :
+ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::string& tag, const std::string & paramSet, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2) :
   ZDCFitWrapper(std::make_shared<TF1>(("ExpFermiVariableTausInduct" + tag).c_str(), ZDCFermiExpFitInduct, tmin, tmax, 10),
 		s_ConfigParamMap.at("default"))
 {
@@ -537,7 +537,7 @@ ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::st
     FitParameter tau1Descr = GetParameterDescr("tau1");
     if (fixTau1) tau1Descr.setFixed(tau1);
     else tau1Descr.setDefaultValue(tau1);
-    overRideParams.push_back(tau1Descr);
+    overRideParams.push_back(std::move(tau1Descr));
   }
 
   auto tau2Iter = std::find_if(overRideParams.begin(), overRideParams.end(), [](const FitParameter& parDesc){return parDesc.name() == "tau2";});
@@ -548,7 +548,7 @@ ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::st
   else {
     FitParameter tau2Descr = GetParameterDescr("tau2");
     if (fixTau2) tau2Descr.setFixed(tau2);
-    else tau2Descr.setDefaultValue(tau2);    
+    else tau2Descr.setDefaultValue(std::move(tau2));    
     overRideParams.push_back(tau2Descr);
   }
 
@@ -1128,7 +1128,7 @@ ZDCFitExpFermiInductPreExp::ZDCFitExpFermiInductPreExp(const std::string& tag, f
   
 }
 
-ZDCFitExpFermiInductPreExp::ZDCFitExpFermiInductPreExp(const std::string& tag, std::string paramSet, float tmin, float tmax, float tau1, float tau2) :
+ZDCFitExpFermiInductPreExp::ZDCFitExpFermiInductPreExp(const std::string& tag, const std::string & paramSet, float tmin, float tmax, float tau1, float tau2) :
   ZDCPreExpFitWrapper(std::make_shared<TF1>(("ExpFermiInductPreExp" + tag).c_str(), this, tmin, tmax, 10), s_ConfigParamMap.at("default")),
   m_tau1(tau1), m_tau2(tau2)
 {
@@ -1267,7 +1267,7 @@ ZDCFitExpFermiInductPrePulse::ZDCFitExpFermiInductPrePulse(const std::string& ta
   GetWrapperTF1()->FixParameter(8, 0.02);
 }
 
-ZDCFitExpFermiInductPrePulse::ZDCFitExpFermiInductPrePulse(const std::string& tag, std::string paramSet, float tmin, float tmax, float tau1, float tau2) :
+ZDCFitExpFermiInductPrePulse::ZDCFitExpFermiInductPrePulse(const std::string& tag, const std::string & paramSet, float tmin, float tmax, float tau1, float tau2) :
   ZDCPrePulseFitWrapper(std::make_shared<TF1>(("ExpFermiInductPrePulse" + tag).c_str(), this, tmin, tmax, 9), s_ConfigParamMap.at("default")),  
   m_tau1(tau1), m_tau2(tau2)
 {
