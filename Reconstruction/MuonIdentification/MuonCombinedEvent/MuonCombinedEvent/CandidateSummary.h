@@ -10,9 +10,6 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "xAODTracking/TrackParticle.h"
 
-class TrigMuonEFTrack;
-class MuonFeature;
-
 namespace Muon {
     class MuonSegment;
 }

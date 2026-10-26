@@ -68,11 +68,6 @@ StatusCode TrigSerializeConvHelper::initialize(){
   m_oldEDMmap[ "TrigRoiDescriptor" ]         = "TrigRoiDescriptorCollection_tlp1";
   m_oldEDMmap[ "TrigOperationalInfo" ]       = "TrigOperationalInfoCollection_tlp1";
   m_oldEDMmap[ "TrigInDetTrackCollection" ]  = "TrigInDetTrackCollection_tlp1";
-  m_oldEDMmap[ "MuonFeature" ]               = "MuonFeatureContainer_tlp1";
-  m_oldEDMmap[ "IsoMuonFeature" ]            = "IsoMuonFeatureContainer_tlp1";
-  m_oldEDMmap[ "CombinedMuonFeature" ]       = "CombinedMuonFeatureContainer_tlp1";
-  m_oldEDMmap[ "TileMuFeature" ]             = "TileMuFeatureContainer_tlp1";
-  m_oldEDMmap[ "TileTrackMuFeature" ]        = "TileTrackMuFeatureContainer_tlp1";
   m_oldEDMmap[ "TrigEMCluster" ]             = "TrigEMClusterContainer_tlp1";
   //m_oldEDMmap[ "TrigEMCluster" ]             = "TrigEMClusterContainer_tlp2";
   m_oldEDMmap[ "RingerRings" ]               = "RingerRingsContainer_tlp1";
@@ -91,8 +86,6 @@ StatusCode TrigSerializeConvHelper::initialize(){
   m_oldEDMmap[ "CaloClusterContainer" ]      = "CaloClusterContainer_p4";
   m_oldEDMmap[ "CaloShowerContainer" ]       = "CaloShowerContainer_p2";
   //m_oldEDMmap[ "CaloTowerContainer" ]        = "CaloTowerContainer_p1";
-  m_oldEDMmap[ "TrigMuonEFContainer" ]       = "TrigMuonEFContainer_tlp1";
-  m_oldEDMmap[ "TrigMuonEFInfoContainer" ]   = "TrigMuonEFInfoContainer_tlp1";
   m_oldEDMmap[ "egDetailContainer" ]         = "egDetailContainer_p1";
   m_oldEDMmap[ "egammaContainer" ]           = "egammaContainer_p1";
   m_oldEDMmap[ "Analysis::TauJetContainer" ] = "TauJetContainer_p3";

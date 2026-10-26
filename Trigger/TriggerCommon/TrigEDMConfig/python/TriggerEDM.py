@@ -548,6 +548,16 @@ def getClassesToIgnore(flags):
         l.append("1142962358")  # TrigEFBjetContainer
         l.append("243892660")   # TrigMonEvent (CostMon)
         l.append("253562967")   # TrigMonConfig (CostMon)
+        l.append("1500")        # MuonFeature
+        l.append("1501")        # CombinedMuonFeature
+        l.append("1503")        # TileMuFeature
+        l.append("77762301")    # TileTrackMuFeature
+        l.append("110010498")   # IsoMuonFeature
+        l.append("233283613")   # TrigMuonClusterFeature
+        l.append("262323491")   # MuonFeatureDetails
+        l.append("1173853172")  # TrigMuonEFInfoContainer
+        l.append("1175295175")  # TrigMuonEFIsolationContainer
+        l.append("1314529658")  # MuonSegmentCombinationCollection
     return l
 
 

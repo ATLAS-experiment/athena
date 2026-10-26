@@ -92,8 +92,6 @@ namespace TrigDec {
     DECLARE_ATTACHED_CONTAINER(TrigInDetTrack, TrigInDetTrackCollection)
     DECLARE_ATTACHED_CONTAINER(TrigVertex, TrigVertexCollection)
     DECLARE_ATTACHED_CONTAINER(CaloCluster, CaloClusterContainer)
-    DECLARE_ATTACHED_CONTAINER(TrigMuonEF, TrigMuonEFContainer)
-    DECLARE_ATTACHED_CONTAINER(TrigMuonEFInfo, TrigMuonEFInfoContainer)
     DECLARE_ATTACHED_CONTAINER(CaloShower, CaloShowerContainer)
     DECLARE_ATTACHED_CONTAINER(egamma, egammaContainer)
     DECLARE_ATTACHED_CONTAINER_NAMESPACE(Rec, TrackParticle, TrackParticleContainer)
