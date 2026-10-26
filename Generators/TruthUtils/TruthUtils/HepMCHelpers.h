@@ -79,7 +79,7 @@ namespace MC
   /// @brief Identify if the particle could interact with the detector during the simulation, e.g. not a neutrino or WIMP
   template <class T> inline bool isSimInteracting(const T& p) { return isGenStable<T>(p) && isInteracting<T>(p);}
 
-  /// @brief Identify if particle is satble or decayed in simulation. + a pathological case of decayed particle w/o end vertex.
+  /// @brief Identify if particle is stable or decayed in simulation. + a pathological case of decayed particle w/o end vertex.
   /// The decayed particles w/o end vertex might occur in case of simulation of long lived particles in Geant stripped off the decay products.
   /// I.e. those particles should be re-decayed later.
   template <class T> inline bool isStableOrSimDecayed(const T& p) {
@@ -182,7 +182,7 @@ namespace MC
   }
 
   /// @brief Function to classify the vertex as hard scattering vertex.
-  /// AV: This is MCtruthClassifier legacy. Note that this function willnot capture some cases of the HardScattering vertices.
+  /// AV: This is MCtruthClassifier legacy. Note that this function will not capture some cases of the HardScattering vertices.
   /// The function should be improved in the future.
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */
   template <class T> bool isHardScatteringVertex(T pVert) {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /* Author: Andrii Verbytskyi andrii.verbytskyi@mpp.mpg.de */
 
@@ -43,7 +43,7 @@ namespace HepMC {
   /// @brief Constant defining the barcode threshold for regenerated particles, i.e. particles surviving an interaction
   constexpr int SIM_STATUS_INCREMENT = 100000;
 
-  /// @brief Constant definiting the status threshold for simulated particles, eg. can be used to separate generator event record entries from simulated particles
+  /// @brief Constant defining the status threshold for simulated particles, eg. can be used to separate generator event record entries from simulated particles
   constexpr int SIM_STATUS_THRESHOLD = 20000;
 
   /// @brief Special Forward transport Geant process for vertices
@@ -172,7 +172,7 @@ namespace HepMC {
     /// @brief Method to establish if a particle (or barcode) was created during the simulation (only to be used in legacy TP converters)
     template <class T> inline bool is_simulation_particle(const T& p){ return (barcode(p)>SIM_BARCODE_THRESHOLD);}
 
-    /// @brief Method to establish if a particle (or barcode) is a new seondary created during the simulation (only to be used in legacy TP converters)
+    /// @brief Method to establish if a particle (or barcode) is a new secondary created during the simulation (only to be used in legacy TP converters)
     template <class T> inline bool is_sim_secondary(const T& p){ return (barcode(p)%SIM_REGENERATION_INCREMENT > SIM_BARCODE_THRESHOLD); }
 
     /// @brief Method to return how many interactions a particle has undergone during simulation (only to be used in legacy TP converters).
@@ -231,7 +231,7 @@ namespace HepMC {
     /// @brief Method to establish if a particle was created during the simulation based on the status value
     template <class T> inline bool is_simulation_particle(const T& p){ return (status(p)>SIM_STATUS_THRESHOLD);}
 
-    /// @brief Method to establish if a particle is a new seondary created during the simulation based on the status value
+    /// @brief Method to establish if a particle is a new secondary created during the simulation based on the status value
     template <class T> inline bool is_sim_secondary(const T& p){ return (status(p)%SIM_STATUS_INCREMENT > SIM_STATUS_THRESHOLD); }
 
     /// @brief Method to return how many interactions a particle has undergone during simulation based on the status value
@@ -280,7 +280,7 @@ namespace HepMC {
       const int generations2 = generations(p2);
       if (generations1 == generations2) { return false; } // if the id values don't match and the particles have the same generation number then they cannot be the same particle.
       if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T1>>>, TrackRecord>) {
-        // No choice, but to get the descendents of p2
+        // No choice, but to get the descendants of p2
         constexpr int descendents = 1;
         std::deque<int> history2 = simulation_history( p2, descendents );
         if (std::find(history2.begin(),history2.end(), id1) == history2.end()) { return false; }
