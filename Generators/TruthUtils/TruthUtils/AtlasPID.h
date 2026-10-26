@@ -46,7 +46,7 @@ static const std::array<int,TABLESIZE> triple_charge = {
 };
 
 //Note: The PDG rules assign the range 51-60 for generic DM, with explicit spins defined for 51-55.
-// To keep the rest of this range consistent within ATLAS, 56, 57 and 58 are assigned spins 0, +1/2, +1 (respectively) as seen in arXiv:2504.10597v2
+// To keep the rest of this range consistent within ATLAS, 56, 57 and 58 are assigned spins 0, +1/2, +1 (respectively) as seen in https://arxiv.org/abs/2504.10597v2
 static const std::array<int,TABLESIZE> double_spin = {
   +0, +1, +1, +1, +1, +1, +1, +1, +1, +0,
   +0, +1, +1, +1, +1, +1, +1, +1, +1, +0,
@@ -102,7 +102,7 @@ static const int LEPTOQUARK = 42;
 /// PDG Ids for Mavtop madgraph UFO model found under DarkX. The
 /// mavtop is a vector-like top partner with coupling to a dark photon.
 /// Theory paper: https://arxiv.org/abs/1904.05893
-/// Pheno paper: https://arxiv.org/pdf/2112.08425
+/// Pheno paper: https://arxiv.org/abs/2112.08425
 static const int DARKPHOTON = 60000;
 static const int MAVTOP = 60001;
 
@@ -151,7 +151,7 @@ static const int HELIUM =  1000020040;
 
 /// PDG rule 8:
 /// The pomeron and odderon trajectories and a generic reggeon trajectory
-/// of states in QCD areassigned codes 990, 9990, and 110 respectively
+/// of states in QCD are assigned codes 990, 9990, and 110 respectively
 static const int POMERON = 990;
 static const int ODDERON = 9990;
 static const int REGGEON = 110;
@@ -159,7 +159,7 @@ static const int REGGEON = 110;
 /// PDG rule 10:
 /// Codes 81–100 are reserved for generator-specific pseudoparticles and concepts.
 /// Codes 901–930, 1901–1930, 2901–2930, and 3901–3930 are for additional components
-/// of Standard Modelparton distribution functions, where the latter three ranges are intended
+/// of Standard Model parton distribution functions, where the latter three ranges are intended
 /// to distinguish left/right/ longitudinal components. Codes 998 and 999 are reserved for GEANT tracking purposes.
 static const int GEANTINOPLUS = 998;
 static const int GEANTINO0 = 999;
@@ -271,11 +271,7 @@ template <> inline bool isMeson(const DecodedPID& p){
 }
 template <> inline bool isMeson(const int& p){ auto value_digits = DecodedPID(p); return isMeson(value_digits);}
 
-/// Is this a heavy-flavour quarkonium meson?
-///
-/// @note Original by LHCb in Rivet analysis LHCB_2016_I1504058
-///
-/// @note phi = s,sbar is not considered quarkonium
+/// APID states with s,sbar are not considered quarkonium
 template <class T> inline bool isQuarkonium(const T& p){return isQuarkonium(p->pdg_id());}
 template <> inline bool isQuarkonium(const DecodedPID& p) {
   if (!isMeson(p)) return false; //< all quarkonia are mesons
@@ -361,7 +357,7 @@ template <> inline bool isHadron(const int& p){ auto value_digits = DecodedPID(p
 
 /// PDG rule 8:
 /// The pomeron and odderon trajectories and a generic reggeon trajectory
-/// of states in QCD areassigned codes 990, 9990, and 110 respectively
+/// of states in QCD are assigned codes 990, 9990, and 110 respectively
 template <class T> inline bool isTrajectory(const T& p){return isTrajectory(p->pdg_id());}
 template <> inline bool isTrajectory(const int& p){ return std::abs(p) == POMERON || std::abs(p) == ODDERON || std::abs(p) == REGGEON; }
 
@@ -409,7 +405,7 @@ template <class T> inline bool isResonance(const T& p) { return isZ(p) || isW(p)
 /// “One-of-a-kind” exotic particles are assigned numbers in the range
 /// 41–80. The subrange 61-80 can be used for new heavier fermions in
 /// generic models, where partners to the SM fermions would have codes
-/// oﬀset by 60. If required, however, other assignments could be
+/// offset by 60. If required, however, other assignments could be
 /// made.
 template <class T> inline bool isLeptoQuark(const T& p){return isLeptoQuark(p->pdg_id());}
 template <> inline bool isLeptoQuark(const int& p){ return std::abs(p) == LEPTOQUARK; }
@@ -549,17 +545,17 @@ inline bool isExcited(const DecodedPID& p) {
 template <> inline bool isExcited(const int& p){ auto value_digits = DecodedPID(p); return isExcited(value_digits);}
 
 /// PDG rule 11g:
-/// Within several scenarios of new physics, it is possible to have colored particles suﬃciently long-lived for color-singlet hadronic
+/// Within several scenarios of new physics, it is possible to have colored particles sufficiently long-lived for color-singlet hadronic
 /// states to form around them. In the context of supersymmetric scenarios, these states are called R-hadrons, since they carry odd
-/// R- parity. R-hadron codes, deﬁned here, should be viewed as templates for corresponding codes also in other scenarios, for any
-/// long-lived particle that is either an unﬂavored color octet or a ﬂavored color triplet. The R-hadron code is obtained by combining
+/// R- parity. R-hadron codes, defined here, should be viewed as templates for corresponding codes also in other scenarios, for any
+/// long-lived particle that is either an unflavored color octet or a flavored color triplet. The R-hadron code is obtained by combining
 /// the SUSY particle code with a code for the light degrees of freedom, with as many intermediate zeros removed from the former
 /// as required to make place for the latter at the end. (To exemplify, a sparticle n00000n˜q combined with quarks q1 and q2
-/// obtains code n00n˜qnq1 nq2 nJ .) Speciﬁcally, the new-particle spin decouples in the limit of large masses, so that the ﬁnal nJ
-/// digit is deﬁned by the spin state of the light-quark system alone. An appropriate number of nq digits is used to deﬁne the
+/// obtains code n00n˜qnq1 nq2 nJ .) Specifically, the new-particle spin decouples in the limit of large masses, so that the final nJ
+/// digit is defined by the spin state of the light-quark system alone. An appropriate number of nq digits is used to define the
 /// ordinary-quark content.  As usual, 9 rather than 21 is used to denote a gluon/gluino in composite states. The sign of the hadron
-/// agrees with that of the constituent new particle (a color triplet) where there is a distinct new antiparticle, and else is deﬁned as
-/// for normal hadrons. Particle names are R with the ﬂavor content as lower index.
+/// agrees with that of the constituent new particle (a color triplet) where there is a distinct new antiparticle, and else is defined as
+/// for normal hadrons. Particle names are R with the flavor content as lower index.
 
 /// APID: Definition of R-Glueballs: 100099X (X=1,3), 100999Y (Y=1,5)
 /// APID: NB In the current numbering scheme, some states with 2
@@ -654,12 +650,12 @@ template <> inline bool isMonopole(const int& p){ auto value_digits = DecodedPID
 
 /// PDG rule 11j:
 /// The nature of Dark Matter (DM) is not known, and therefore a definitive
-/// classificationis too early. Candidates within specific scenarios are
+/// classification is too early. Candidates within specific scenarios are
 /// classified therein, such as 1000022 for the lightest neutralino.
 /// Generic fundamental states can be given temporary codes in the range 51 - 60,
 /// with 51, 52 and 53 reserved for spin 0, 1/2 and 1 ones (this could also be an axion state).
 /// Generic mediators of s-channel DM pair creation of annihilation can be given
-/// codes 54 and 55 for spin 0 or 1 ones. Separate antiparticles, with negativecodes,
+/// codes 54 and 55 for spin 0 or 1 ones. Separate antiparticles, with negative codes,
 /// may or may not exist. More elaborate new scenarios should be constructed with n= 5 and nr = 9.
 template <class T> inline bool isDM(const T& p){return isDM(p->pdg_id());}
 template <> inline bool isDM(const int& p){
@@ -686,7 +682,7 @@ template <> inline bool isHiddenValley(const int& p){ auto value_digits = Decode
 /// or +/-200XXYY0, where the charge is XX/YY.
 /// The case of +/-200XXYY0 is legacy, see https://gitlab.cern.ch/atlas/athena/-/merge_requests/25862
 /// Note that no other quantum numbers besides the charge are considered for these generic multi-charged particles (e.g. isSUSY() is false for them).
-/// Such a model was used in previous Run-1 (1301.5272,1504.04188) and Run-2 (1812.03673,2303.13613) ATLAS searches.
+/// Such a model was used in previous Run-1 (https://arxiv.org/abs/1301.5272, https://arxiv.org/abs/1504.04188) and Run-2 (https://arxiv.org/abs/1812.03673, https://arxiv.org/abs/2303.13613) ATLAS searches.
 template <class T> inline bool isGenericMultichargedParticle(const T& p){return isGenericMultichargedParticle(p->pdg_id());}
 template <> inline bool isGenericMultichargedParticle(const DecodedPID& p){return (p.ndigits() == 8 && (p(0) == 1 || p(0) == 2) && p(1) == 0 && p(2) == 0 && p(7) == 0);}
 template <> inline bool isGenericMultichargedParticle(const int& p){ auto value_digits = DecodedPID(p); return isGenericMultichargedParticle(value_digits);}
@@ -880,7 +876,7 @@ template <class T> inline bool isTransportable(const T& p){return isTransportabl
 template <> inline bool isTransportable(const DecodedPID& p){ return isPhoton(p.pid()) || isGeantino(p.pid()) || isHadron(p) || isLepton(p.pid()) || p.pid() == DARKPHOTON;}
 template <> inline bool isTransportable(const int& p){ auto value_digits = DecodedPID(p); return isTransportable(value_digits);}
 
-/// Av: we implement here an ATLAS-sepcific convention: all particles which are 99xxxxx are fine.
+/// Av: we implement here an ATLAS-specific convention: all particles which are 99xxxxx are fine.
 template <class T> inline bool isValid(const T& p){return isValid(p->pdg_id());}
 template <> inline bool isValid(const DecodedPID& p){
   return p.pid() !=0 && ( isQuark(p) || isLepton(p) || isBoson(p) || isGlueball(p) ||

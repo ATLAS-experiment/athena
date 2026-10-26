@@ -70,7 +70,7 @@ public:
             }
         }
 
-        // Now begin interating through particles to try to find loops
+        // Now begin iterating through particles to try to find loops
         size_t minincycle = m_evt->particles_size();
         for (;;) {
             // Number of particles still unknown in the current iteration
