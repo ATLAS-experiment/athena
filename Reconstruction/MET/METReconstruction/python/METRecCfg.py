@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Configure all MET algorithms for standard reconstruction
 def METCfg(inputFlags):
@@ -34,7 +34,7 @@ def METCfg(inputFlags):
 
     # "Normal" MET collections
     from METReconstruction.METAssociatorCfg import METAssociatorCfg
-    from METUtilities.METMakerConfig import getMETMakerAlg
+    from METUtilities.METMakerConfig import METMakerCfg
     metDefs = ['AntiKt4EMTopo','AntiKt4LCTopo']
     if inputFlags.MET.DoPFlow:
        metDefs.append('AntiKt4EMPFlow')
@@ -46,7 +46,7 @@ def METCfg(inputFlags):
         outputList.append('xAOD::MissingETContainer#MET_Core_'+metDef)
         outputList.append('xAOD::MissingETAuxContainer#MET_Core_'+metDef+'Aux.')
         # Build reference MET
-        result.addEventAlgo(getMETMakerAlg(metDef))
+        result.merge(METMakerCfg(inputFlags, metDef))
         outputList.append('xAOD::MissingETContainer#MET_Reference_'+metDef)
         outputList.append('xAOD::MissingETAuxContainer#MET_Reference_'+metDef+'Aux.-ConstitObjectLinks.-ConstitObjectWeights')
 
