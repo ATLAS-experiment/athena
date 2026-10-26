@@ -294,7 +294,7 @@ namespace xAODMaker {
             if (pdfInfo) {
               xTruthEvent->setPdfInfoParameter(pdfInfo->parton_id[0], xAOD::TruthEvent::PDGID1);
               xTruthEvent->setPdfInfoParameter(pdfInfo->parton_id[1], xAOD::TruthEvent::PDGID2);
-              xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id[1], xAOD::TruthEvent::PDFID1);
+              xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id[0], xAOD::TruthEvent::PDFID1);
               xTruthEvent->setPdfInfoParameter(pdfInfo->pdf_id[1], xAOD::TruthEvent::PDFID2);
 
               xTruthEvent->setPdfInfoParameter((float)pdfInfo->x[0], xAOD::TruthEvent::X1);
