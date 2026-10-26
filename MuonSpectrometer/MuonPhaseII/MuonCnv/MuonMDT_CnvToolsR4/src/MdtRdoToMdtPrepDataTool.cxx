@@ -141,7 +141,7 @@ namespace MuonR4{
             <<", tdc: "<<digit[1]->tdc()<<", adc: "<<digit[1]->adc());
         MdtCalibInput mdtCalib1st = MdtCalibInput{*digit[0], *m_detMgrR4, *cache.gctx};
         MdtCalibInput mdtCalib2nd = MdtCalibInput{*digit[1], *m_detMgrR4, *cache.gctx};
-                
+        const MuonGMR4::MdtReadoutElement* descriptor = mdtCalib1st.decriptor();
         const MdtCalibTwinOutput twinCalib = m_calibrationTool->calibrateTwinTubes(ctx, 
                                                                                    std::move(mdtCalib1st), 
                                                                                    std::move(mdtCalib2nd));
@@ -158,7 +158,7 @@ namespace MuonR4{
         cov(0, 0) = Acts::square(twinCalib.uncertPrimaryR());
         cov(1, 1) = Acts::square(twinCalib.sigmaZ() );
         const MdtIdHelper& id_helper = m_idHelperSvc->mdtIdHelper();         
-        const MuonGMR4::MdtReadoutElement* descriptor = mdtCalib1st.decriptor();
+        
         xAOD::MdtTwinDriftCircle* dc = cache.prdTwinContainer->push_back(std::make_unique<xAOD::MdtTwinDriftCircle>());
 
         const Identifier id = twinCalib.primaryID();
