@@ -273,45 +273,43 @@ StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf,std::vector<float>&
     return StatusCode::FAILURE;
   }
 
-  std::vector<Analysis::CalibrationDataVariables>* vars = new std::vector<Analysis::CalibrationDataVariables>(0);
+  std::vector<Analysis::CalibrationDataVariables> vars;
   for(unsigned int i =0; i<pt.size(); i++){
     Analysis::CalibrationDataVariables vars_appo;
     ANA_CHECK(fillVariables(pt.at(i), eta.at(i), tagw.at(i), vars_appo));
-    vars->push_back(vars_appo);
+    vars.push_back(vars_appo);
   }
 
   ANA_CHECK(setJets(trfinf,flav, vars));
-  delete vars;
   return StatusCode::SUCCESS;
 }
 
 StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf,const xAOD::JetContainer& jets){
   ANA_CHECK_SET_TYPE (StatusCode);
   std::vector<int> flav;
-  std::vector<Analysis::CalibrationDataVariables>* vars = new std::vector<Analysis::CalibrationDataVariables>(0);
+  std::vector<Analysis::CalibrationDataVariables> vars;
   for(const auto jet : jets) {
     Analysis::CalibrationDataVariables vars_appo;
     ANA_CHECK(fillVariables(*jet, vars_appo));
-    vars->push_back(vars_appo);
+    vars.push_back(vars_appo);
     flav.push_back(jetFlavourLabel(*jet));
   }
 
   ANA_CHECK(setJets(trfinf,flav, vars));
-  delete vars;
   flav.clear();
   return StatusCode::SUCCESS;
 }
 
-StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf,std::vector<int>& flav, std::vector<Analysis::CalibrationDataVariables>* vars){
-  if(flav.size()!=vars->size()){
+StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf,std::vector<int>& flav, const std::vector<Analysis::CalibrationDataVariables>& vars){
+  if(flav.size()!=vars.size()){
     ATH_MSG_ERROR( "Vector of CalibrationDataVariables and flavour should have same size" );
     return StatusCode::FAILURE;
   }
   trfinf.jets.clear();
-  for(unsigned int i =0; i<vars->size(); i++){
+  for(unsigned int i =0; i<vars.size(); i++){
     jetVariable jetVar_appo;
     jetVar_appo.flav=flav.at(i);
-    jetVar_appo.vars=vars->at(i);
+    jetVar_appo.vars=vars.at(i);
     trfinf.jets.push_back(jetVar_appo);
 
   }
@@ -328,7 +326,7 @@ StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const std::vector<
   }
 
   std::vector<int> flav;
-  std::vector<Analysis::CalibrationDataVariables>* vars = new std::vector<Analysis::CalibrationDataVariables>(0);
+  std::vector<Analysis::CalibrationDataVariables> vars;
   for(unsigned int i =0; i<tagw.size(); i++){
     Analysis::CalibrationDataVariables vars_appo;
       
@@ -337,7 +335,7 @@ StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const std::vector<
     float eta = node_feat.at(i)[2];
 
     ANA_CHECK(fillVariables(pt, eta, tagw.at(i), vars_appo));
-    vars->push_back(vars_appo);    
+    vars.push_back(vars_appo);    
     flav.push_back(node_feat.at(i)[0]);
   }
 
@@ -349,11 +347,11 @@ StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const std::vector<
 StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const xAOD::JetContainer& jets, const std::vector<std::vector<float>>& node_feat){
   ANA_CHECK_SET_TYPE (StatusCode);
   std::vector<int> flav;
-  std::vector<Analysis::CalibrationDataVariables>* vars = new std::vector<Analysis::CalibrationDataVariables>(0);
+  std::vector<Analysis::CalibrationDataVariables> vars;
   for(const auto jet : jets) {
     Analysis::CalibrationDataVariables vars_appo;
     ANA_CHECK(fillVariables(*jet, vars_appo));
-    vars->push_back(vars_appo);
+    vars.push_back(vars_appo);
     flav.push_back(jetFlavourLabel(*jet));
   }
 
@@ -365,23 +363,23 @@ StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf, const xAOD::JetCon
 // sets node_feat which will be used by the onnx tool
 // node_feat contains feats for all the jets as it will be used by the GNN.
 // trfinf.jets contains only the jets we care about for TT. eg. the leading2 jets if taggingStrategy == Leading2SignalJets
-StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf,std::vector<int>& flav, const std::vector<Analysis::CalibrationDataVariables>* vars, const std::vector<std::vector<float>>& node_feat){
-  if(flav.size()!=vars->size()){
+StatusCode BTaggingTruthTaggingTool::setJets(TRFinfo &trfinf,std::vector<int>& flav, const std::vector<Analysis::CalibrationDataVariables>& vars, const std::vector<std::vector<float>>& node_feat){
+  if(flav.size()!=vars.size()){
     ATH_MSG_ERROR( "Vector of CalibrationDataVariables and flavour should have same size" );
     return StatusCode::FAILURE;
   }
   trfinf.jets.clear();
 
   if (m_njetsTagStrategy == -1){
-    trfinf.njets = vars->size();
+    trfinf.njets = vars.size();
   } else {
-    trfinf.njets = std::min(static_cast<unsigned int>(m_njetsTagStrategy), static_cast<unsigned int>(vars->size()));
+    trfinf.njets = std::min(static_cast<unsigned int>(m_njetsTagStrategy), static_cast<unsigned int>(vars.size()));
   }
 
   for(unsigned int i =0; i<trfinf.njets; i++){
     jetVariable jetVar_appo;
     jetVar_appo.flav=flav.at(i);
-    jetVar_appo.vars=vars->at(i);
+    jetVar_appo.vars=vars.at(i);
     trfinf.jets.push_back(jetVar_appo);
   }
   trfinf.node_feat = node_feat;

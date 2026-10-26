@@ -149,12 +149,12 @@ class BTaggingTruthTaggingTool: public asg::AsgTool,
   // set the jets in the event (pass same jets that satisfy kinematic criteria for b-tagging in pT and eta)
   StatusCode setJets(TRFinfo &trfinf,std::vector<float>& pt, std::vector<float>& eta, std::vector<int>& flav, std::vector<float>& tagw);
   StatusCode setJets(TRFinfo &trfinf,const xAOD::JetContainer& jets);
-  StatusCode setJets(TRFinfo &trfinf,std::vector<int>& flav, std::vector<Analysis::CalibrationDataVariables>* vars);
+  StatusCode setJets(TRFinfo &trfinf,std::vector<int>& flav, const std::vector<Analysis::CalibrationDataVariables>& vars);
 
   // overloaded with node_feat that is used by onnx tool
   StatusCode setJets(TRFinfo &trfinf, const std::vector<std::vector<float>>& node_feat, std::vector<float>& tagw);
   StatusCode setJets(TRFinfo &trfinf, const xAOD::JetContainer& jets, const std::vector<std::vector<float>>& node_feat);
-  StatusCode setJets(TRFinfo &trfinf,std::vector<int>& flav, const std::vector<Analysis::CalibrationDataVariables>* vars, const std::vector<std::vector<float>>& node_feat);
+  StatusCode setJets(TRFinfo &trfinf,std::vector<int>& flav, const std::vector<Analysis::CalibrationDataVariables>& vars, const std::vector<std::vector<float>>& node_feat);
             
   // get truth tagging weights
   // for one single systematic (including "Nominal")
