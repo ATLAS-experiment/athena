@@ -4277,6 +4277,18 @@ double egammaEnergyCorrectionTool::getMaterialNonLinearity(
   double DeltaX = getDeltaX(cl_eta, imat, var) -
                   getDeltaX(cl_eta, imat, egEnergyCorr::Scale::Nominal);
 
+  // The result below is zero outside the crack if DeltaX is zero (i.e. for
+  // all variations not changing the material), and inside the crack for all
+  // but the MatID variations: skip the expensive look-ups in these cases
+  if (isInCrack(cl_eta)) {
+    if (imat != egEnergyCorr::MatID ||
+        (var != egEnergyCorr::Scale::MatIDUp &&
+         var != egEnergyCorr::Scale::MatIDDown))
+      return 0.;
+  } else if (DeltaX == 0.) {
+    return 0.;
+  }
+
   // calculate scale change per unit added material
 
   // G.Unal 21.08.2019 new code called for release 21 sensivitities
