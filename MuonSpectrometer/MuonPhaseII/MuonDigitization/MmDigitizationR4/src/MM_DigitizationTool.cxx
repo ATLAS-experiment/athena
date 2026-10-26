@@ -391,25 +391,26 @@ namespace MuonR4 {
                 // VMM Simulation
                 // Combine all strips (for this VMM) into a single VMM-level object
                 MM_ElectronicsToolInput stripDigitOutputAllHits = combinedStripResponseAllHits(ctx, std::move(elecHitsPerLayer));
-
+                const auto stripAllHitsDigitId = stripDigitOutputAllHits.digitID();
                 // Create Electronics Output with peak or threshold finding setting
                 MM_DigitToolOutput electronicsOutputForReadout{m_vmmReadoutMode == "peak" ? 
                         m_ElectronicsResponseSimulation->getPeakResponseFrom(std::move(stripDigitOutputAllHits)) : 
                         m_ElectronicsResponseSimulation->getThresholdResponseFrom(std::move(stripDigitOutputAllHits))};
+                //stripDigitOutputAllHits has been moved now, don't use it again
                 if (!electronicsOutputForReadout.isValid()) {
                     ATH_MSG_DEBUG(__func__ << "() : " << __LINE__
                             << " there is no electronics response (peak or threshold finding mode) even though there is a strip response.");
                 }
-
+                
                 for (unsigned int firedCh = 0; firedCh < electronicsOutputForReadout.stripPos().size(); ++firedCh) {
 
                     const int channel = electronicsOutputForReadout.stripPos()[firedCh];
                     double time = electronicsOutputForReadout.stripTime()[firedCh];
                     double charge = electronicsOutputForReadout.stripCharge()[firedCh];
                     bool isValid{false};
-                    const Identifier digitID = idHelper.channelID(stripDigitOutputAllHits.digitID(),
-                                                                  idHelper.multilayer(stripDigitOutputAllHits.digitID()),
-                                                                  idHelper.gasGap(stripDigitOutputAllHits.digitID()),
+                    const Identifier digitID = idHelper.channelID(stripAllHitsDigitId,
+                                                                  idHelper.multilayer(stripAllHitsDigitId),
+                                                                  idHelper.gasGap(stripAllHitsDigitId),
                                                                   channel, isValid);
 
                     if (!isValid) {
