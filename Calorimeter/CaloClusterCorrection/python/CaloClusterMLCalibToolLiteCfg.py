@@ -3,17 +3,34 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthOnnxComps.OnnxRuntimeInferenceConfig import OnnxRuntimeInferenceToolCfg
+from AthenaConfiguration.Enums import LHCPeriod
 from PathResolver import PathResolver
 import yaml
 
 
+def getMLCalibrationConfig(flags):
+    # MC23 is the default
+    config_file = "CaloClusterCorrection/config_hgm_mc23.yaml"
+
+    if flags.Input.isMC:
+        # MC simulation: check campaign
+        if flags.Input.MCCampaign.value.startswith("mc20"):
+            config_file = "CaloClusterCorrection/config_hgm_mc20.yaml"
+
+    else:
+        # Real data: check LHC run period
+        if flags.GeoModel.Run == LHCPeriod.Run2:
+            config_file = "CaloClusterCorrection/config_hgm_mc20.yaml"
+
+    return config_file
+
 def CaloClusterMLCalibToolLiteCfg(
     flags,
     name="CaloClusterMLCalibToolLite",
-    config_file="CaloClusterCorrection/config_hgm_mc20.yaml",
+    config_file=None,
 ):
-    if flags.Input.MCCampaign.value.startswith("mc23"):
-        config_file = "CaloClusterCorrection/config_hgm_mc23.yaml"
+    if config_file is None:
+        config_file = getMLCalibrationConfig(flags)
 
     with open(PathResolver.FindCalibFile(config_file)) as f:
         config = yaml.safe_load(f)
@@ -38,4 +55,3 @@ def CaloClusterMLCalibToolLiteCfg(
     ca.setPrivateTools(CaloClusterMLCalibToolLite)
 
     return ca
-
