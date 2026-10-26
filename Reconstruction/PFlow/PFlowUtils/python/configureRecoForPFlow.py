@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 def configureRecoForPFlowCfg(cfgFlags):
 
@@ -40,10 +40,8 @@ def configureRecoForPFlowCfg(cfgFlags):
     from METReconstruction.METAssociatorCfg import METAssociatorCfg
     cfg.merge(METAssociatorCfg(cfgFlags, 'AntiKt4EMPFlow'))
 
-    from METUtilities.METMakerConfig import getMETMakerAlg
-    metCA=ComponentAccumulator()    
-    metCA.addEventAlgo(getMETMakerAlg('AntiKt4EMPFlow'))
-    cfg.merge(metCA)
+    from METUtilities.METMakerConfig import METMakerCfg
+    cfg.merge(METMakerCfg(cfgFlags, 'AntiKt4EMPFlow'))
 
     return cfg
 

@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 def JetEfficiencyMonitoringConfig(flags):
     '''Function to configure LVL1 JetEfficiency algorithm in the monitoring system.'''
@@ -31,10 +31,8 @@ def JetEfficiencyMonitoringConfig(flags):
         result.merge(PFGlobalFlowElementLinkingCfg(flags))
         from METReconstruction.METAssociatorCfg import METAssociatorCfg
         result.merge(METAssociatorCfg(flags, 'AntiKt4EMPFlow'))
-        from METUtilities.METMakerConfig import getMETMakerAlg
-        metCA=ComponentAccumulator()
-        metCA.addEventAlgo(getMETMakerAlg('AntiKt4EMPFlow'))
-        result.merge(metCA)
+        from METUtilities.METMakerConfig import METMakerCfg
+        result.merge(METMakerCfg(flags, 'AntiKt4EMPFlow'))
     ###########################################################################
     
     # make the athena monitoring helper

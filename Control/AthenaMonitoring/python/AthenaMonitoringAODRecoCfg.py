@@ -58,7 +58,7 @@ def AthenaMonitoringAODRecoCfg(flags):
         if jet_collections & met_jet_collections and flags.DQ.DataType not in (DQDataType.HeavyIon, DQDataType.Cosmics):
             info('Scheduling rebuild of standard MET')
             from METReconstruction.METAssociatorCfg import METAssociatorCfg
-            from METUtilities.METMakerConfig import getMETMakerAlg
+            from METUtilities.METMakerConfig import METMakerCfg
             for container in jet_collections & met_jet_collections:
                 if container == 'AntiKt4EMPFlow':
                     # build links between FlowElements and electrons, photons, muons and taus                    
@@ -66,7 +66,7 @@ def AthenaMonitoringAODRecoCfg(flags):
                     from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
                     result.merge(PFGlobalFlowElementLinkingCfg(flags))
                 result.merge(METAssociatorCfg(flags, container))
-                result.addEventAlgo(getMETMakerAlg(container))
+                result.merge(METMakerCfg(flags, container))
             from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
             result.merge(CaloNoiseCondAlgCfg(flags)) # Prereq for Calo MET
             from METReconstruction.METCalo_Cfg import METCalo_Cfg
