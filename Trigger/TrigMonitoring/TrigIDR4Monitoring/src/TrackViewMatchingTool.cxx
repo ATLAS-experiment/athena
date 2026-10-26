@@ -11,9 +11,7 @@
 #include "TBestMatch.h"
 #include "OfflineTruthMatcher.h"
 
-/// in a different merge request, so can uncomment later,
-/// once it is in the release to avoid a conflict
-// #include "MsgMacros.h"
+#include "MsgMacros.h"
 
 template<typename T, typename R>
 IDTPM2::TMatchingTool<T,R>::TMatchingTool( const std::string& type,
@@ -26,7 +24,7 @@ IDTPM2::TMatchingTool<T,R>::TMatchingTool( const std::string& type,
 template<typename T, typename R>
 StatusCode IDTPM2::TMatchingTool<T,R>::initialize() {
 
-  //    MY_MSG_DEBUG <<  "TMatchingTool: type=" << m_matcherType << endmsg;
+    MY_MSG_DEBUG <<  "TMatchingTool: type=" << m_matcherType << endmsg;
 
     if      ( m_matcherType == "DeltaR"   )        m_matcher = std::make_unique<TDeltaRMatcher<T,R>>(          "DeltaRMatcher",          require_set(m_dr)    );
     else if ( m_matcherType == "DeltaPhi" )        m_matcher = std::make_unique<TDeltaPhiMatcher<T,R>>(        "DeltaPhiMatcher",        require_set(m_dphi)  );
@@ -41,7 +39,7 @@ StatusCode IDTPM2::TMatchingTool<T,R>::initialize() {
       m_matcher = std::make_unique<TDeltaRMatcher<T,R>>( "DeltaRMatcher", dr );
     }
     else {
-      //    MY_MSG_FATAL <<  "Unknown matcher type: " << m_matcherType  << endmsg;
+        MY_MSG_FATAL <<  "Unknown matcher type: " << m_matcherType  << endmsg;
         return StatusCode::FAILURE;
     }
     

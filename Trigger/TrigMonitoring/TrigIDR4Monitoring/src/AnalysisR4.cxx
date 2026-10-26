@@ -16,14 +16,13 @@
 #include "TrigInDetAnalysisExample/ChainString.h"
 #include "TrackView.h"
 
-// #include "Tier0.h"
+#include "Tier0.h"
 #include "Resolutions.h"
 #include "Efficiencies.h"
-// these are coming soon !!...
-// #include "VertexPlots.h"
+#include "VertexPlots.h"
 #include "TrackParameters.h"
-// #include "SiHitPlots.h"
-// #include "TRTPlots.h"
+#include "SiHitPlots.h"
+#include "TRTPlots.h"
 
 #include <cmath>
 #include <iostream>
@@ -33,13 +32,13 @@ IDTPM2::AnalysisR4::AnalysisR4(const std::string& name)
   : m_name(name), m_monTool(0)
 {
   /// register the different plotters ... 
-  //  registerCreator( "Tier0",           &IPlotBase::create<Tier0> );
-  //  registerCreator( "Vertices",        &IPlotBase::create<VertexPlots> );
+  registerCreator( "Tier0",           &IPlotBase::create<Tier0> );
+  registerCreator( "Vertices",        &IPlotBase::create<VertexPlots> );
   registerCreator( "Resolutions",     &IPlotBase::create<Resolutions> );
   registerCreator( "Efficiencies",    &IPlotBase::create<Efficiencies> );
   registerCreator( "TrackParameters", &IPlotBase::create<TrackParameters> );
-  // registerCreator( "SiHits",          &IPlotBase::create<SiHitPlots> );
-  // registerCreator( "TRTHits",         &IPlotBase::create<TRTPlots> );
+  registerCreator( "SiHits",          &IPlotBase::create<SiHitPlots> );
+  registerCreator( "TRTHits",         &IPlotBase::create<TRTPlots> );
 }
 
 

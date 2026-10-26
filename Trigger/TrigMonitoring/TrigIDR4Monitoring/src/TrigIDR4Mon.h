@@ -5,37 +5,36 @@
  **     @author  mark sutton
  **     @date    Tue  29 Sep 2025 09:08:26 GMT
  **
- **     Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ **     Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
-#ifndef TRIGIDMONITORING_TRIGIDR4MON_H
-#define TRIGIDMONITORING_TRIGIDR4MON_H
+#ifndef TRIGIDR4MONITORING_TRIGIDR4MON_H
+#define TRIGIDR4MONITORING_TRIGIDR4MON_H
 
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 #include "AthenaMonitoring/AthMonitorAlgorithm.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
-#include <string>
-
 #include "TrigInDetAnalysis/TrackFilter.h"
-#include "TrigInDetAnalysis/TIDARoiDescriptor.h"
-#include "TrigInDetAnalysis/TIDDirectory.h"
-#include "TrigInDetAnalysis/Efficiency1D.h"
-
-#include "TrigInDetAnalysisUtils/Filter_Track.h"
-#include "TrigInDetAnalysisUtils/Filter_RoiSelector.h"
 #include "TrigInDetAnalysisUtils/Associator_BestMatch.h"
 #include "TrigInDetAnalysisUtils/TrackMatchDeltaR.h"
 #include "TrigInDetAnalysisUtils/TrackMatchDeltaRCosmic.h"
 
-#include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/VertexContainer.h"
+#include "xAODEgamma/ElectronContainer.h"
+#include "xAODMuon/MuonContainer.h"
+#include "xAODTau/TauJetContainer.h"
+
+#include "TrackAnalysis.h"
+#include "MsgMacros.h"
+
+#include <string>
+
 
 
 class TrigIDR4Mon : public AthMonitorAlgorithm {
-
 
 public:
 
@@ -44,7 +43,8 @@ public:
   virtual ~TrigIDR4Mon();
 
   virtual StatusCode initialize() override;
-  virtual StatusCode fillHistograms(const EventContext &context) const override;
+  virtual StatusCode fillHistograms(const EventContext &context) const override { return execute(context); }
+  virtual StatusCode execute(const EventContext &context) const;
   virtual StatusCode finalize() override;
 
   virtual StatusCode bookHistograms();
@@ -53,116 +53,69 @@ public:
 
 protected:
 
-  // track selector cuts
+  /// class structure items
+  
+  ToolHandleArray<IDTPM2::TrackAnalysis> m_monTools { this, "MonTools", {} }; 
 
-  // test tracks
-  double  m_pTCut;
-  double  m_etaCut;
-  double  m_d0Cut;
-  double  m_z0Cut;
+  std::vector<IDTPM2::TrackAnalysis*> m_tools;
 
-  int  m_siHits; // total number of si hits
-  int m_pixHits; // pixel hits
-  int m_sctHits; // sct hits
-
-  int   m_trtHits; // high threshold hits
-  int m_strawHits; // total number of straws
-
-  // reference tracks
-  double  m_tauEtCutOffline;
-  double  m_doTauThreeProng;
-  double  m_pTCutOffline;
-  double  m_etaCutOffline;
-  double  m_d0CutOffline;
-  double  m_mind0CutOffline;
-  double  m_z0CutOffline;
-
-  int m_siHitsOffline; // total number of si hits
-  int m_pixHitsOffline; // pixel hits
-  int m_sctHitsOffline; // sct hits
-  int m_blayerHitsOffline;
-
-  int m_pixHolesOffline; // pixel holes
-  int m_sctHolesOffline;  // sct holes
-  int m_siHolesOffline;   // total pix+sct holes
-
-  int   m_trtHitsOffline; // high threshold hits
-  int m_strawHitsOffline; // total number of straws
-
-  // matching parameters
-  double m_matchR;   // for DeltaR matcher
-  double m_matchPhi; // for DeltaPhi matcher
+  /// analysis configuration informstion
+  
+  std::string m_chain; // trigger chain
+  
+  std::vector<std::string> m_chainNames;
+  std::string              m_releaseMetaData;
 
   ToolHandle<Trig::TrigDecisionTool> m_tdt;
 
-  std::vector<TrackFilter*>  m_filters;
-  std::vector<TrackAssociator*>                 m_associators;
-
-  /// do we need this ??? why not the base class ???
-  //  std::vector<T_AnalysisConfig<AthReentrantAlgorithm>*>   m_sequences;
-
-  std::vector<std::string> m_chainNames;
-  std::vector<std::string> m_ntupleChainNames;
-  std::string              m_releaseMetaData;
-
-  bool m_buildNtuple;
-
-  std::string m_analysis_config;
-  std::string m_outputFileName;
-
-  bool        m_genericFlag;
-
-  bool        m_initialisePerRun;
-  bool        m_firstRun;
-
-  //pdgId
-  int m_selectTruthPdgId;
-
-  int m_selectParentTruthPdgId;
-
-  /// kepp events even if they fail the requested trigger chains
-  bool  m_keepAllEvents;
-
-  /// if an ntple file open?
-  bool m_fileopen;
-
-  /// use only the highest pt tracks
-  bool m_useHighestPT;
-
-  /// if performing the vertex analysis, the index of the 
-  /// offline vertex to look for
-  int m_vtxIndex;
-
-  /// also run purity analyses
-  bool m_runPurity;
-
-  /// determine whether this should be treated as a shifter chain
-  bool m_shifter;
-
   /// additional string for the histogram directory
+
+  /// turn this into a new style property
   std::string  m_sliceTag;
 
-  /// do we want basic, or rigorous roi track containment
-  bool         m_containTracks;
+private:
 
-  bool         m_legacy;
+  /// stuff to allow dynamic registration of ReadHandleKeys only for
+  /// collections that are actually needed
+  
+  template<typename T, typename U> 
+  StatusCode initializeKey( std::unique_ptr<SG::ReadHandleKey<T>>& rhkey, const std::string& key, const U& value ) {
+    if ( rhkey==0 ) {
+      MY_MSG_INFO << "registering: " << value << endmsg; 
+      rhkey.reset( new SG::ReadHandleKey<T>{ this, key, value, "" } ); 
+      return rhkey->initialize();
+    }
+    return StatusCode::SUCCESS;
+  }
+  
+  StatusCode initializeKeys( std::string keyvalue ) {
 
-  /// ntuple building variables
+    size_t pos = keyvalue.find(":");
+    if ( pos!=std::string::npos ) keyvalue.resize( pos ); 
+    
+    ATH_CHECK( initializeKey( m_trackKeys, "TrackParticleKeys", "InDetTrackParticles" ) );
+    ATH_CHECK( initializeKey(   m_vtxKeys,        "VertexKeys",     "PrimaryVertices" ) );
+    
+    if ( keyvalue=="TruthParticles" ) return initializeKey( m_truthKeys,    "TruthParticleKeys",  keyvalue );    
+    if ( keyvalue=="Electrons"      ) return initializeKey( m_electronKeys, "ElectronKeys",       keyvalue ); 
+    if ( keyvalue=="Muons"          ) return initializeKey( m_muonKeys,     "MuonKeys",           keyvalue ); 
+    if ( keyvalue=="TauJets"        ) return initializeKey( m_tauJetKeys,   "TauJetKeys",         keyvalue ); 
 
-  double       m_fiducial_radius;
+    return StatusCode::SUCCESS;
+  }
 
-  bool         m_requireDecision;
-
-  bool         m_filter_on_roi;
-
-  ToolHandleArray<GenericMonitoringTool> m_monTools { this, "MonTools", {} }; // insane configuration paradigm ?
-
-  SG::ReadHandleKeyArray<xAOD::TrackParticleContainer> m_trackdummykeys{ this, "OfflineTrackCollections", {"InDetTrackParticles"}, "" };  
-
-  SG::ReadHandleKeyArray<xAOD::VertexContainer> m_vtxdummykeys{ this, "OfflineVertexCollections", {"PrimaryVertices"}, "" }; 
+private:
+  
+  std::unique_ptr<SG::ReadHandleKey<xAOD::TrackParticleContainer>> m_trackKeys = 0;
+  std::unique_ptr<SG::ReadHandleKey<xAOD::TruthParticleContainer>> m_truthKeys = 0;
+  std::unique_ptr<SG::ReadHandleKey<xAOD::VertexContainer>>          m_vtxKeys = 0;
+  
+  std::unique_ptr<SG::ReadHandleKey<xAOD::ElectronContainer>>   m_electronKeys = 0;
+  std::unique_ptr<SG::ReadHandleKey<xAOD::MuonContainer>>           m_muonKeys = 0;
+  std::unique_ptr<SG::ReadHandleKey<xAOD::TauJetContainer>>       m_tauJetKeys = 0;
 
 };
 
 
 
-#endif //  TRIGIDMONITORING_TRIGIDR4MON_H
+#endif //  TRIGIDR4MONITORING_TRIGIDR4MON_H
