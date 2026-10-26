@@ -66,6 +66,13 @@ namespace MuonR4{
         bool operator()(const xAOD::IParticle* a,
                         const xAOD::IParticle* b) const;
     }; 
+    /** @brief Auxiliary class to rank segments by quality: more precision hits first, then
+     *         more phi layers, more trigger eta layers, lower chi2/nDoF (NaN last) and finally
+     *         the container index for a stable order */
+    struct SegmentQualitySorter{
+        bool operator()(const xAOD::MuonSegment* a,
+                        const xAOD::MuonSegment* b) const;
+    };
 
 }
 

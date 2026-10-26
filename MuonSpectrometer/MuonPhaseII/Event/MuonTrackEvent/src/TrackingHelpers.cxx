@@ -10,6 +10,9 @@
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 
+#include <algorithm>
+#include <cmath>
+
 namespace{
   using PrdLink_t = ElementLink<xAOD::UncalibratedMeasurementContainer>;
   using PrdLinkVec_t = std::vector<PrdLink_t>;
@@ -129,5 +132,26 @@ namespace MuonR4{
         }
         const float dPhi = xAOD::P4Helpers::deltaPhi(a, b);
         return dPhi < 0.;
+    }
+    bool SegmentQualitySorter::operator()(const xAOD::MuonSegment* a,
+                                          const xAOD::MuonSegment* b) const {
+        if (a->nPrecisionHits() != b->nPrecisionHits()) {
+            return a->nPrecisionHits() > b->nPrecisionHits();
+        }
+        if (a->nPhiLayers() != b->nPhiLayers()) {
+            return a->nPhiLayers() > b->nPhiLayers();
+        }
+        if (a->nTrigEtaLayers() != b->nTrigEtaLayers()) {
+            return a->nTrigEtaLayers() > b->nTrigEtaLayers();
+        }
+        const float chi2A = a->chiSquared() / std::max(1.f, a->numberDoF());
+        const float chi2B = b->chiSquared() / std::max(1.f, b->numberDoF());
+        if (std::isnan(chi2A) != std::isnan(chi2B)) {
+            return std::isnan(chi2B);
+        }
+        if (chi2A != chi2B && !std::isnan(chi2A)) {
+            return chi2A < chi2B;
+        }
+        return a->index() < b->index();
     }
 }

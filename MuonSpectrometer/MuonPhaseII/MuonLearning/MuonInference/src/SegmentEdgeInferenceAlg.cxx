@@ -11,10 +11,12 @@
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "Acts/Utilities/Helpers.hpp"
 #include <algorithm>
+#include <bit>
 #include <cmath>
 #include <limits>
 #include <memory>
 #include <numeric>
+#include <sstream>
 #include <unordered_set>
 #include <utility>
 
@@ -116,6 +118,7 @@ TruthRegion regionOf(double absEta) {
 StatusCode SegmentEdgeInferenceAlg::initialize() {
   ATH_CHECK(m_segmentKey.initialize());
   ATH_CHECK(m_pairGateDecorKey.initialize());
+  ATH_CHECK(m_componentScoreDecorKey.initialize());
   ATH_CHECK(m_filteredSegmentKey.initialize(!m_filteredSegmentKey.empty()));
   ATH_CHECK(m_edgeClassifier.retrieve());
   m_truthDiagEnabled = m_edgeClassifier->enableTruthDiagnostics();
@@ -253,12 +256,28 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
     thresholdedNodes += !nodeEdges.empty();
   }
 
+  std::vector<Muon::MuonStationIndex::LayerIndex> nodeLayer(graph.nNodes);
+  for (std::size_t node = 0; node < graph.nNodes; ++node) {
+    nodeLayer[node] = Muon::MuonStationIndex::toLayerIndex(graph.segments[node]->chamberIndex());
+  }
+  const unsigned int maxEdgesPerLayer = m_maxEdgesPerNodePerLayer.value();
   std::unordered_map<std::uint64_t, unsigned char> nominations;
   nominations.reserve(thresholdPairs);
-  for (std::vector<WeightedEdge>& nodeEdges : edgesByNode) {
+  for (std::size_t node = 0; node < graph.nNodes; ++node) {
+    std::vector<WeightedEdge>& nodeEdges = edgesByNode[node];
     std::sort(nodeEdges.begin(), nodeEdges.end(), betterWeightedEdge);
-    if (m_maxEdgesPerNode.value() != 0 &&
-        nodeEdges.size() > m_maxEdgesPerNode.value()) {
+    if (maxEdgesPerLayer != 0) {
+      // Best edges towards each layer: a segment keeps its partner in every neighbouring
+      // layer, and same-layer edges do not compete with cross-layer ones.
+      std::array<unsigned int, Acts::toUnderlying(Muon::MuonStationIndex::LayerIndex::LayerIndexMax) + 1> taken{};
+      std::erase_if(nodeEdges, [&](const WeightedEdge& edge) {
+        const auto [first, second] = unpackPairKey(edge.first);
+        const std::size_t other = first == node ? second : first;
+        const auto layer = static_cast<std::size_t>(Acts::toUnderlying(nodeLayer[other]) + 1);
+        return taken[layer]++ >= maxEdgesPerLayer;
+      });
+    } else if (m_maxEdgesPerNode.value() != 0 &&
+               nodeEdges.size() > m_maxEdgesPerNode.value()) {
       nodeEdges.resize(m_maxEdgesPerNode.value());
     }
     for (const WeightedEdge& edge : nodeEdges) {
@@ -334,6 +353,63 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
                                            selectedPairKeys.end()};
   std::sort(selectedPairs.begin(), selectedPairs.end());
 
+  // Truth diagnostics only: true cross-layer edges above threshold that the selection keeps,
+  // barrel / endcap (by the first endpoint's chamber)
+  if (truthDiag) {
+    for (const auto& [key, probability] : pairProbability) {
+      if (probability < m_pairGateThreshold.value()) continue;
+      const auto [first, second] = unpackPairKey(key);
+      if (first >= graph.nNodes || second >= graph.nNodes) continue;
+      if (nodeTruthId[first] < 0 || nodeTruthId[first] != nodeTruthId[second]) continue;
+      if (nodeLayer[first] == nodeLayer[second]) continue;
+      const std::size_t region =
+          Muon::MuonStationIndex::isBarrel(graph.segments[first]->chamberIndex()) ? 0 : 1;
+      ++m_sumTrueCrossLayerEdges[region];
+      if (selectedPairKeys.contains(key)) ++m_sumTrueCrossLayerSelected[region];
+    }
+  }
+
+  // Truth diagnostics only: best selected-edge score per node, so that the
+  // strongest edge holding a component together is a max over its nodes.
+  std::vector<float> nodeBestSelectedScore;
+  if (truthDiag) {
+    nodeBestSelectedScore.assign(graph.nNodes, -1.f);
+    for (const std::uint64_t key : selectedPairs) {
+      const auto found = pairProbability.find(key);
+      if (found == pairProbability.end()) continue;
+      const auto [first, second] = unpackPairKey(key);
+      nodeBestSelectedScore[first] = std::max(nodeBestSelectedScore[first], found->second);
+      nodeBestSelectedScore[second] = std::max(nodeBestSelectedScore[second], found->second);
+    }
+  }
+
+  // Innermost-layer anchoring with an anchor cap: rank the inner candidates by
+  // their strongest selected edge towards another layer, i.e. by how firmly
+  // the model links them outwards. Same-chamber alternatives otherwise all
+  // launch seeds built from the same outer segments.
+  const auto layerOf = [&graph](std::size_t node) {
+    return Muon::MuonStationIndex::toLayerIndex(graph.segments[node]->chamberIndex());
+  };
+  std::vector<float> nodeBestCrossLayerScore;
+  std::vector<unsigned int> nodeCrossLayerEdges;  // truth diagnostics only
+  {
+    nodeBestCrossLayerScore.assign(graph.nNodes, -1.f);
+    if (truthDiag) nodeCrossLayerEdges.assign(graph.nNodes, 0);
+    for (const std::uint64_t key : selectedPairs) {
+      const auto [first, second] = unpackPairKey(key);
+      if (layerOf(first) == layerOf(second)) continue;
+      const auto found = pairProbability.find(key);
+      if (found == pairProbability.end()) continue;
+      nodeBestCrossLayerScore[first] = std::max(nodeBestCrossLayerScore[first], found->second);
+      nodeBestCrossLayerScore[second] = std::max(nodeBestCrossLayerScore[second], found->second);
+      if (truthDiag) {
+        ++nodeCrossLayerEdges[first];
+        ++nodeCrossLayerEdges[second];
+      }
+    }
+  }
+
+
   DisjointSet components{graph.nNodes};
   std::vector<bool> activeNode(graph.nNodes, false);
   for (const std::uint64_t key : selectedPairs) {
@@ -363,6 +439,8 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
 
   xAOD::ContainerDecorator<xAOD::MuonSegmentContainer, std::vector<unsigned>>
       decor{m_pairGateDecorKey, ctx};
+  xAOD::ContainerDecorator<xAOD::MuonSegmentContainer, std::vector<float>>
+      scoreDecor{m_componentScoreDecorKey, ctx};
 
   std::vector<std::uint8_t> keptNode(graph.nNodes, false);
   std::vector<std::uint8_t> nodeDropReason;
@@ -374,6 +452,9 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
   // segments landed in, and whether any of those components were mixed
   std::unordered_map<int32_t, std::unordered_set<unsigned>> muonComponents;
   std::unordered_map<int32_t, bool> muonEverMixed;
+  // D8: weak clean components and, per truth muon, the number of strong multi-layer components
+  std::vector<int32_t> weakCleanMuons;
+  std::unordered_map<int32_t, unsigned int> strongComponentsPerMuon;
   const auto sizeBin = [](std::size_t size) -> std::size_t {
     if (size <= 4) return size - 2;  // 2, 3, 4 -> 0, 1, 2
     if (size < 10) return 3;         // 5-9
@@ -457,6 +538,18 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
         return layerRadialRank(Muon::MuonStationIndex::toLayerIndex(
                    graph.segments[node]->chamberIndex())) != bestRank;
       });
+      // Rank the inner anchors (strongest cross-layer edge first, segment quality as
+      // tie-break) and cap them.
+      if (m_seedAnchorsPerComponent.value() != 0) {
+        std::ranges::sort(rankedNodes, [&](std::size_t first, std::size_t second) {
+          const int order = InferenceUtils::compareFloatDescending(
+              nodeBestCrossLayerScore[first], nodeBestCrossLayerScore[second]);
+          return order != 0 ? order < 0 : isBetterNode(first, second);
+        });
+        if (rankedNodes.size() > m_seedAnchorsPerComponent.value()) {
+          rankedNodes.resize(m_seedAnchorsPerComponent.value());
+        }
+      }
     } else {
       std::ranges::sort(rankedNodes, isBetterNode);
       const std::size_t nAnchors = m_seedAnchorsPerComponent.value() == 0
@@ -469,13 +562,21 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
       ++rejectedComponents;
       continue;
     }
-    std::ranges::sort(rankedNodes);
+    // rankedNodes stays in rank order (best anchor first): the decoration
+    // carries the rank so that the seeder can try anchors best-first.
 
     const unsigned componentId = nextComponentId++;
+    float componentCrossScore = -1.f;
+    for (const std::size_t node : rawNodes) {
+      componentCrossScore = std::max(componentCrossScore, nodeBestCrossLayerScore[node]);
+    }
     for (const std::size_t node : retained) {
-      const bool isAnchor = Acts::rangeContainsValue(rankedNodes, node);
+      scoreDecor(*graph.segments[node]) = {componentCrossScore, nodeBestCrossLayerScore[node]};
+      const auto anchorIt = std::ranges::find(rankedNodes, node);
+      const bool isAnchor = anchorIt != rankedNodes.end();
       decor(*graph.segments[node]) = {
-          componentId, static_cast<unsigned int>(isAnchor)};
+          componentId,
+          isAnchor ? static_cast<unsigned int>(anchorIt - rankedNodes.begin()) + 1 : 0u};
       keptNode[node] = true;
     }
     retainedNodes += retained.size();
@@ -492,6 +593,48 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
                                   : componentTruthIds.size() == 1 ? 0 : 1;  // clean/mixed/bkgOnly
       ++m_groupPurity.componentsByOutcome[outcome];
       ++m_groupPurity.componentSizeHist[sizeBin(retained.size())];
+
+      // Component descriptors that a component-level cut could use: the
+      // strongest selected edge among the nodes that formed it (before the
+      // chamber dedup), its retained size and its number of distinct layers.
+      float strongest = -1.f;
+      for (const std::size_t node : rawNodes) {
+        strongest = std::max(strongest, nodeBestSelectedScore[node]);
+      }
+      const std::size_t scoreBin = strongest < 0.05f ? 0 : strongest < 0.1f ? 1
+                                 : strongest < 0.3f ? 2 : strongest < 0.5f ? 3 : 4;
+      std::uint32_t layerMask = 0;
+      for (const std::size_t node : retained) {
+        // +1 so that LayerUnknown (-1) maps onto bit 0
+        layerMask |= 1u << (Acts::toUnderlying(Muon::MuonStationIndex::toLayerIndex(
+                                graph.segments[node]->chamberIndex())) + 1);
+      }
+      const std::size_t layerBin =
+          std::min<std::size_t>(std::popcount(layerMask), GroupPurityCounters::kLayerBins) - 1;
+      ++m_groupPurity.scoreByOutcome[outcome * GroupPurityCounters::kScoreBins + scoreBin];
+      ++m_groupPurity.sizeByOutcome[outcome * GroupPurityCounters::kSizeBins + sizeBin(retained.size())];
+      ++m_groupPurity.layersByOutcome[outcome * GroupPurityCounters::kLayerBins + layerBin];
+
+      // Components that can seed (>= 2 layers)
+      if (std::popcount(layerMask) >= 2) {
+        float crossScore = -1.f;
+        unsigned int crossEdges = 0;
+        for (const std::size_t node : rawNodes) {
+          crossScore = std::max(crossScore, nodeBestCrossLayerScore[node]);
+          crossEdges += nodeCrossLayerEdges[node];
+        }
+        crossEdges /= 2;
+        const std::size_t crossBin = crossScore < 0.05f ? 0 : crossScore < 0.1f ? 1 : crossScore < 0.3f ? 2
+                                   : crossScore < 0.5f ? 3 : crossScore < 0.8f ? 4 : 5;
+        ++m_groupPurity.crossScoreByOutcome[outcome * GroupPurityCounters::kCrossScoreBins + crossBin];
+        ++m_groupPurity.crossEdgesByOutcome[outcome * GroupPurityCounters::kCrossEdgeBins +
+                                            std::min<std::size_t>(crossEdges, 3)];
+        if (crossScore < 0.05f) {
+          if (outcome == 0) weakCleanMuons.push_back(*componentTruthIds.begin());
+        } else {
+          for (const int32_t id : componentTruthIds) ++strongComponentsPerMuon[id];
+        }
+      }
       const bool mixed = componentTruthIds.size() >= 2;
       if (mixed) {
         m_groupPurity.mixedComponentSegments += retained.size();
@@ -524,6 +667,9 @@ StatusCode SegmentEdgeInferenceAlg::execute(const EventContext& ctx) const {
     classifyLostTruthSegments(*segments, graph, pairProbability, thresholded,
                               keptNode, nodeDropReason);
     classifyGroupPurity(muonComponents, muonEverMixed, truthIdToAbsEta);
+    for (const int32_t id : weakCleanMuons) {
+      ++(strongComponentsPerMuon[id] > 0 ? m_groupPurity.weakCleanWithOther : m_groupPurity.weakCleanAlone);
+    }
   }
 
   if (!m_filteredSegmentKey.empty()) {
@@ -787,6 +933,8 @@ void SegmentEdgeInferenceAlg::classifyGroupPurity(
 }
 
 StatusCode SegmentEdgeInferenceAlg::finalize() {
+  // The job-summed counters are only filled, and the summaries only built, at DEBUG level.
+  if (!msgLvl(MSG::DEBUG)) return StatusCode::SUCCESS;
   ATH_MSG_DEBUG(
       "SegmentEdgeInferenceAlg post-ONNX selection summary (job-summed): "
       << "graphNodes=" << m_sumGraphNodes
@@ -796,6 +944,7 @@ StatusCode SegmentEdgeInferenceAlg::finalize() {
       << ", oneSidedTopKPairs(rejected by RequireMutualTopKEdges="
       << m_requireMutualTopKEdges.value() << ")=" << m_sumOneSidedTopKPairs
       << " (MaxEdgesPerNode=" << m_maxEdgesPerNode.value()
+      << ", MaxEdgesPerNodePerLayer=" << m_maxEdgesPerNodePerLayer.value() << " (0 = global top-K)"
       << "; a thresholded edge is dropped here purely by rank, "
          "independent of PairGateThreshold)"
       << ", orphanRecoveryPairs=" << m_sumOrphanRecoveryPairs
@@ -809,6 +958,9 @@ StatusCode SegmentEdgeInferenceAlg::finalize() {
       << ", retainedNodes=" << m_sumRetainedNodes);
 
   if (m_truthDiagEnabled) {
+    ATH_MSG_DEBUG("True cross-layer edges above PairGateThreshold kept by the selection, selected/total: barrel="
+                  << m_sumTrueCrossLayerSelected[0] << "/" << m_sumTrueCrossLayerEdges[0]
+                  << ", endcap=" << m_sumTrueCrossLayerSelected[1] << "/" << m_sumTrueCrossLayerEdges[1]);
     ATH_MSG_DEBUG(
         "SegmentEdgeInferenceAlg truth-vs-background funnel (job-summed; "
         "truth segment = getTruthMatchedParticle(seg) != nullptr, matching "
@@ -887,6 +1039,34 @@ StatusCode SegmentEdgeInferenceAlg::finalize() {
         << m_groupPurity.componentSizeHist[0].load() << "/" << m_groupPurity.componentSizeHist[1].load() << "/"
         << m_groupPurity.componentSizeHist[2].load() << "/" << m_groupPurity.componentSizeHist[3].load() << "/"
         << m_groupPurity.componentSizeHist[4].load() << "/" << m_groupPurity.componentSizeHist[5].load());
+
+    // Kept components per outcome, binned by a candidate component-level cut variable.
+    const auto printByOutcome = [&](const char* label, const auto& counters, std::size_t nBins) {
+      constexpr std::array<const char*, 3> outcomes{"clean", "mixed", "bkgOnly"};
+      std::stringstream sstr{};
+      for (std::size_t outcome = 0; outcome < outcomes.size(); ++outcome) {
+        sstr << " " << outcomes[outcome] << "=";
+        for (std::size_t bin = 0; bin < nBins; ++bin) {
+          sstr << (bin ? "/" : "") << counters[outcome * nBins + bin].load();
+        }
+      }
+      ATH_MSG_DEBUG("  kept components by " << label << ":" << sstr.str());
+    };
+    printByOutcome("strongest selected-edge score (<0.05/0.05-0.1/0.1-0.3/0.3-0.5/>=0.5)",
+                   m_groupPurity.scoreByOutcome, GroupPurityCounters::kScoreBins);
+    printByOutcome("retained segments (2/3/4/5-9/10-19/20+)",
+                   m_groupPurity.sizeByOutcome, GroupPurityCounters::kSizeBins);
+    printByOutcome("distinct layers (1/2/3/4+)",
+                   m_groupPurity.layersByOutcome, GroupPurityCounters::kLayerBins);
+    printByOutcome("strongest selected cross-layer edge, components with >=2 layers "
+                   "(<0.05/0.05-0.1/0.1-0.3/0.3-0.5/0.5-0.8/>=0.8)",
+                   m_groupPurity.crossScoreByOutcome, GroupPurityCounters::kCrossScoreBins);
+    printByOutcome("number of selected cross-layer edges, components with >=2 layers (0/1/2/3+)",
+                   m_groupPurity.crossEdgesByOutcome, GroupPurityCounters::kCrossEdgeBins);
+    ATH_MSG_DEBUG("  D8 clean components with >=2 layers and strongest cross-layer edge < 0.05: "
+                  << "their muon has another component with >=2 layers and a stronger edge="
+                  << m_groupPurity.weakCleanWithOther.load()
+                  << ", it is the muon's only such component=" << m_groupPurity.weakCleanAlone.load());
 
     const std::uint64_t worstMixed = m_groupPurity.worstMixedPacked.load();
     ATH_MSG_DEBUG("  worst mixed component this job: "

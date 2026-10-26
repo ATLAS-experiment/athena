@@ -5,6 +5,7 @@
 #define MUONINFERENCE_INFERENCEUTILS_H
 
 #include "AthOnnxComps/OnnxRuntimeSessionToolCUDA.h"
+#include "MuonTrackEvent/TrackingHelpers.h"
 #include "xAODMuon/MuonSegment.h"
 
 #include <algorithm>
@@ -56,31 +57,9 @@ inline int compareFloatDescending(float first, float second) {
   return 0;
 }
 
-/** @brief Common quality ordering for segment representatives.
- *
- * Higher hit/layer counts are preferred, followed by lower reduced chi2 and
- * finally the stable container index. Keeping this comparator here prevents
- * graph construction and component ranking from acquiring different
- * tie-break rules.
- */
-struct SegmentQualityOrder {
-  bool operator()(const xAOD::MuonSegment* first,
-                  const xAOD::MuonSegment* second) const {
-    if (first->nPrecisionHits() != second->nPrecisionHits()) {
-      return first->nPrecisionHits() > second->nPrecisionHits();
-    }
-    if (first->nPhiLayers() != second->nPhiLayers()) {
-      return first->nPhiLayers() > second->nPhiLayers();
-    }
-    if (first->nTrigEtaLayers() != second->nTrigEtaLayers()) {
-      return first->nTrigEtaLayers() > second->nTrigEtaLayers();
-    }
-    const int chi2Order = compareFloat(reducedChi2(*first),
-                                       reducedChi2(*second));
-    if (chi2Order != 0) return chi2Order < 0;
-    return first->index() < second->index();
-  }
-};
+/// Common quality ordering for segment representatives, shared with MlMsTrackSeeder so that
+/// graph construction, component ranking and seeding use the same tie-break rules.
+using SegmentQualityOrder = MuonR4::SegmentQualitySorter;
 
 }  // namespace MuonML::InferenceUtils
 
