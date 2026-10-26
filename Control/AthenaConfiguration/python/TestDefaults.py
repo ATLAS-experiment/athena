@@ -63,7 +63,7 @@ class defaultTestFiles:
     AOD_RUN2_MC = [f"{d}/CampaignInputs/mc20/AOD/mc20_13TeV.410470.PhPy8EG_A14_ttbar_hdamp258p75_nonallhad.recon.AOD.e6337_s3681_r13145/1000events.AOD.27121237._002005.pool.root.1"]
     AOD_RUN3_DATA = [f"{d}/CampaignInputs/data22/AOD/data22_13p6TeV.00431906.physics_Main.merge.AOD.r13928_p5279/1000events.AOD.30220215._001367.pool.root.1"]
     AOD_RUN3_MC = [f"{d}/CampaignInputs/mc23/AOD/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4162_r14622/1000events.AOD.33799166._000073.pool.root.1"]
-    AOD_RUN4_MC = [f"{d}/PhaseIIUpgrade/AOD/ATLAS-P2-RUN4-05-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8481_s4676_r17687/AOD.51454445._021552.pool.root.1"]
+    AOD_RUN4_MC = [f"{d}/PhaseIIUpgrade/AOD/ATLAS-P2-RUN4-05-00-00/mc21_14TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8481_s4676_r17869/AOD.52577261._000060.pool.root.1"]
 
     # Files for dedicated detector setups
     RAW_RUN1_DATA11_HI =[f"{d}/RecJobTransformTests/data11_hi.00193321.physics_HardProbes.merge.RAW._lb0050._SFO-9._0002.1"]
