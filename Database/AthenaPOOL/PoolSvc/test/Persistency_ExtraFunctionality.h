@@ -7,33 +7,28 @@
 
 #include <vector>
 #include <string>
-#include "GaudiKernel/SmartIF.h"
 #include "TestClassSTLContainersExt.h"
-#include "PoolTestBase.h"
+
+#include "PersTestBase.h"
 
 class Token;
-
-namespace Gaudi {
-  class IFileCatalog;
-  class IFileCatalogMgr;
-}
 
 namespace pool {
   class DbType; 
 }
 
-class TestDriver : public PoolTestBase {
+class TestDriver : public PersTestBase {
   public:
     explicit TestDriver( const std::string& catname = "PersExtF.catatlog.xml" );
-    ~TestDriver();
   
+    int execute();
+    void runTestForStorageType(const pool::DbType& storageType);
+
     void write( pool::DbType storageType );
     void read();
     void clearCache();
 
   private:
-    SmartIF<Gaudi::IFileCatalogMgr>   m_fileCatalogMgr;
-    SmartIF<Gaudi::IFileCatalog>      m_fileCatalog;
     std::string           m_fileName;
     int                   m_eventsToCommitAndHold;
     int                   m_events;

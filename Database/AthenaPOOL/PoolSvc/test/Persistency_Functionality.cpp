@@ -1,49 +1,82 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-#include "TestDriver.h"
-
-#include <stdexcept>
-#include <memory>
-#include <filesystem>
-
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
 #include "PoolSvc/IContainer.h"
-#include "PoolSvc/FileCatalogUtils.h"
 #include "PoolSvc/ISessionTool.h"
 #include "PoolSvc/ITokenIterator.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
-
 #include "StorageSvc/DbType.h"
 
+#include "Persistency_Functionality.h"
 
-pool::TestDriver::TestDriver( const std::string& catname ):
-  m_fileCatalogMgr( Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" ) ),
-  m_fileCatalog( m_fileCatalogMgr ),
+#include <stdexcept>
+#include <memory>
+
+
+int main( )
+{
+   try {
+      TestDriver driver;
+      return driver.execute();
+   } catch ( std::exception& e ) {
+      std::cerr << e.what() << std::endl;
+      return 1;
+   }
+}
+
+
+
+TestDriver::TestDriver( const std::string& catname ):
+  PersTestBase( "Persistency_Functionality",catname ),
   m_fileName1( "PersF.pool1.root" ),
   m_fileName2( "PersF.pool2.root" ),
   m_events( 100 ),
   m_eventsToCommitAndHold( 10 )
+{ }
+
+
+int TestDriver::execute()
 {
-  std::cout << "[OVAL] Creating a file catalog" << std::endl;
-  if ( ! m_fileCatalog.isValid() ) {
-    throw std::runtime_error( "Could not create a file catalog" );
-  }
-  std::filesystem::remove( {catname} );
-  FileCatalogUtils::addCatalog( *m_fileCatalogMgr, catname, true );
+   ATH_MSG_INFO("Starting test");
+
+   loadLibraries( {"test_TestDictionaryDict"} );
+   runTestForStorageType(pool::ROOTKEY_StorageType);
+   ATH_MSG_INFO("--------------------------------");
+   runTestForStorageType(pool::ROOTTREE_StorageType);
+   ATH_MSG_INFO("--------------------------------");
+   runTestForStorageType(pool::ROOTTREEINDEX_StorageType);
+   ATH_MSG_INFO("--------------------------------");
+   runTestForStorageType(pool::ROOTRNTUPLE_StorageType);
+
+   ATH_MSG_INFO("Exiting...");
+   return  0;
 }
 
-pool::TestDriver::~TestDriver()
+void TestDriver::runTestForStorageType(const pool::DbType& storageType)
 {
-  std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
+    ATH_MSG_INFO("Writing objects in the database using " << storageType.storageName() << " storage type.");
+    write(storageType);
+    ATH_MSG_INFO( "...done" );
+
+    ATH_MSG_INFO("Reading the objects back from the database.");
+    read();
+    ATH_MSG_INFO( "...done" );
+
+    ATH_MSG_INFO("Clearing the tokens.");
+    clearCache();
+    ATH_MSG_INFO( "...done" );
+
+    ATH_MSG_INFO("Reading the objects back from the database as implicit collections.");
+    readCollections();
+    ATH_MSG_INFO( "...done" );
 }
+
+
 
 void
-pool::TestDriver::clearCache()
+TestDriver::clearCache()
 {
   for( auto iToken : m_tokens ) iToken->release();
   m_tokens.clear();
@@ -53,7 +86,7 @@ pool::TestDriver::clearCache()
   Test writing of several classes defined in the TestDictionary
   */
 void
-pool::TestDriver::write(pool::DbType storageType)
+TestDriver::write(pool::DbType storageType)
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
@@ -96,7 +129,7 @@ pool::TestDriver::write(pool::DbType storageType)
   std::vector< TestClassSTLContainers* > v_testClassSTLContainers;
   std::vector< TestClassVectors* > v_testClassVectors;
 
-  std::cout << "Writing " << m_events << " objects of each type" << std::endl;
+  ATH_MSG_INFO("Writing " << m_events << " objects of each type");
   for ( int i = 0; i < m_events; ++i ) {
     ///////////////////////////////////////////////////////////
     SimpleTestClass* object_SimpleTestClass = new SimpleTestClass();
@@ -177,7 +210,7 @@ pool::TestDriver::write(pool::DbType storageType)
   }
 
   // Committing the transaction
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO("Committing the transaction.");
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
@@ -187,7 +220,7 @@ pool::TestDriver::write(pool::DbType storageType)
 
 
 void
-pool::TestDriver::read()
+TestDriver::read()
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
@@ -198,7 +231,7 @@ pool::TestDriver::read()
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
-  std::cout << "Reading back the objects." << std::endl;
+  ATH_MSG_INFO("Reading back the objects.");
   const unsigned int numberOfTypes = m_tokens.size() / m_events;
   for ( int i = 0; i < m_events; ++i ) {
     int j = 0;
@@ -274,7 +307,7 @@ pool::TestDriver::read()
   }
 
   // Committing the transaction
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
@@ -284,7 +317,7 @@ pool::TestDriver::read()
 
 
 void
-pool::TestDriver::readCollections()
+TestDriver::readCollections()
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
@@ -310,7 +343,7 @@ pool::TestDriver::readCollections()
     if ( ! container ) {
       throw std::runtime_error( "Could not retrieve the container" );
     }
-    std::cout << "Container : " << container->name() << std::endl;
+    ATH_MSG_INFO( "Container : " << container->name() );
     pool::ITokenIterator* tokenIterator = container->tokens();
     if ( ! tokenIterator ) {
       throw std::runtime_error( "Could not obtain a token iterator" );
@@ -328,14 +361,14 @@ pool::TestDriver::readCollections()
       throw std::runtime_error( "Unexpected number of objects in that container." );
     }
     else {
-      std::cout << numberOfObjects << " objects found in the container." << std::endl;
+      ATH_MSG_INFO( numberOfObjects << " objects found in the container." );
     }
 
     delete tokenIterator;
     delete container;
   }
 
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
@@ -345,7 +378,7 @@ pool::TestDriver::readCollections()
 
 
 void
-pool::TestDriver::readFileSizes()
+TestDriver::readFileSizes()
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
@@ -357,7 +390,7 @@ pool::TestDriver::readFileSizes()
   }
 
   // Committing
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }

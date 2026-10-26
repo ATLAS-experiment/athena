@@ -1,34 +1,30 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TESTDRIVER_H
-#define TESTDRIVER_H
+#ifndef TEST_SESSION_FUNCTIONALITY_H
+#define TEST_SESSION_FUNCTIONALITY_H
 
-#include <vector>
-#include <string>
-#include "GaudiKernel/SmartIF.h"
+#include "PersTestBase.h"
+
 #include "SimpleTestClass.h"
 #include "TestClassPrimitives.h"
 #include "TestClassVectors.h"
 #include "TestClassSTLContainers.h"
 #include "TestClassSTLContainersExt.h"
-#include "PoolTestBase.h"
 
 class Token;
 
-namespace Gaudi {
-  class IFileCatalog;
-  class IFileCatalogMgr;
-}
-
 namespace pool {
   class DbType; 
+}
 
-  class TestDriver : public PoolTestBase {
+class TestDriver : public PersTestBase {
   public:
     explicit TestDriver( const std::string& catname = "PersF.catatlog.xml" );
-    ~TestDriver();
+
+    int execute();
+    void runTestForStorageType(const pool::DbType& storageType);
 
     void write( pool::DbType storageType );
     void read();
@@ -37,8 +33,6 @@ namespace pool {
     void readFileSizes();
 
   private:
-    SmartIF<Gaudi::IFileCatalogMgr>   m_fileCatalogMgr;
-    SmartIF<Gaudi::IFileCatalog>      m_fileCatalog;
     std::string           m_fileName1;
     std::string           m_fileName2;
     int                   m_events;
@@ -48,8 +42,7 @@ namespace pool {
     std::vector< TestClassPrimitives >        m_testClassPrimitives;
     std::vector< TestClassVectors >           m_testClassVectors;
     std::vector< TestClassSTLContainers >     m_testClassSTLContainers;
-  };
-
-}
+};
 
 #endif
+

@@ -1,0 +1,18 @@
+FileCatalogOper...    INFO Creating FileCatalog
+FileCatalogOper...    INFO Starting test
+FileCatalogOper...    INFO Loading shared libraries:
+FileCatalogOper...    INFO  - loading library test_TestDictionaryDict
+FileCatalogOper...    INFO Writing objects in the database.
+FileCatalogOper...    INFO Creating the persistency service
+FileCatalogOper...    INFO Writing 100 objects
+FileCatalogOper...    INFO Committing the transaction.
+FileCatalogOper...    INFO ...done
+FileCatalogOper...    INFO Adding LFNs in the file catalog.
+FileCatalogOper...    INFO ...done
+FileCatalogOper...    INFO Reading the objects back from the database.
+FileCatalogOper...    INFO Creating the persistency service
+FileCatalogOper...    INFO PFN1 = FCO.pool1.root
+FileCatalogOper...    INFO Committing the transaction.
+FileCatalogOper...    INFO ...done
+FileCatalogOper...    INFO Exiting...
+FileCatalogOper...    INFO Test finished. Number of floating tokens : 0

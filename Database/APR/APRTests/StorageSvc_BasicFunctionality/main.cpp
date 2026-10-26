@@ -33,10 +33,8 @@ int main( int, char** )
    try {
       std::cout << "[OVAL] Creating the test driver." << std::endl;
       TestDriver driver;
-      std::cout << "[OVAL] Loading the shared libraries." << std::endl;
-      std::vector< std::string > libraries;
-      libraries.push_back( "test_TestDictionaryDict" );
-      driver.loadLibraries( libraries );
+      driver.loadLibraries( {"test_APRTestDictionary"} );
+
       std::cout << std::endl;
       testTechnology( driver, pool::ROOTTREE_StorageType, false );
       std::cout << std::endl;

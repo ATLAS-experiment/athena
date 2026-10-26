@@ -1,0 +1,24 @@
+FileOpenWithout...    INFO Creating FileCatalog
+FileOpenWithout...    INFO Starting test
+FileOpenWithout...    INFO Loading shared libraries:
+FileOpenWithout...    INFO  - loading library test_TestDictionaryDict
+FileOpenWithout...    INFO Writing objects in the database.
+FileOpenWithout...    INFO Creating the persistency service
+FileOpenWithout...    INFO Writing 100 objects.
+FileOpenWithout...    INFO Committing the transaction.
+FileOpenWithout...    INFO ...done
+FileOpenWithout...    INFO Reading the objects back from the database.
+FileOpenWithout...    INFO Creating the persistency service
+FileOpenWithout...    INFO Container : SimpleTestClass_Container
+FileOpenWithout...    INFO 100 objects found in the container.
+FileOpenWithout...    INFO Committing the transaction.
+FileOpenWithout...    INFO ...done
+FileOpenWithout...    INFO Trying to read the same file using a different path - should generate a warning.
+FileOpenWithout...    INFO Creating the persistency service
+PoolSvc.Database   WARNING Opening file './DB.FOWC.pool.root' which is already registered in the Catalog as 'DB.FOWC.pool.root' (GUID E9143E5C-FDDA-8646-9204-2E4BAE14DC00) - this is not supported and may even lead to a crash!
+FileOpenWithout...    INFO Container : SimpleTestClass_Container
+FileOpenWithout...    INFO 100 objects found in the container.
+FileOpenWithout...    INFO Committing the transaction.
+FileOpenWithout...    INFO ...done
+FileOpenWithout...    INFO Exiting...
+FileOpenWithout...    INFO Test finished. Number of floating tokens : 0

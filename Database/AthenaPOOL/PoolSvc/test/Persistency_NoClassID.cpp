@@ -1,47 +1,58 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-#include "TestDriver.h"
-
-#include <stdexcept>
-#include <iostream>
-#include <sstream>
-#include <memory>
-#include <filesystem>
-
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
 #include "PoolSvc/FileCatalogUtils.h"
 #include "PoolSvc/ISessionTool.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
-
 #include "StorageSvc/DbType.h"
 
+#include "Persistency_NoClassID.h"
 #include "MyTestClass.h"
 
+#include <stdexcept>
+#include <iostream>
+#include <sstream>
+#include <memory>
 
-TestDriver::TestDriver(const std::string& filename, const std::string& catname):
-   m_fileCatalogMgr( Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" ) ),
-   m_fileCatalog( m_fileCatalogMgr ),
-   m_fileName( filename ),
-   m_events( 100 )
+
+int main( )
 {
-  std::cout << "[OVAL] Creating a file catalog" << std::endl;
-  if ( ! m_fileCatalog.isValid() ) {
-    throw std::runtime_error( "Could not create a file catalog" );
-  }
-  std::filesystem::remove( {catname} );
-  FileCatalogUtils::addCatalog( *m_fileCatalogMgr, catname, true );
+   try {
+      TestDriver driver( "NCI.pool.root", "NCI.catalog.xml" );
+      return driver.execute();
+   } catch ( std::exception& e ) {
+      std::cerr << e.what() << std::endl;
+      return 1;
+   }
 }
 
-TestDriver::~TestDriver()
-{
-  std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
-}
 
+
+TestDriver::TestDriver(const std::string& filename, const std::string& catname)
+  : PersTestBase( "Persistency_NoClassID", catname ),
+    m_fileName( filename ),
+    m_events( 100 )
+{ }
+
+
+int TestDriver::execute()
+{
+   ATH_MSG_INFO( "Starting test" );
+   loadLibraries( {"test_TestDictionaryDict"} );
+
+   ATH_MSG_INFO( "Writing objects in the database." );
+   write();
+   ATH_MSG_INFO( "...done" );
+
+   ATH_MSG_INFO( "Reading the objects back from the database." );
+   read();
+   ATH_MSG_INFO( "...done" );
+
+   ATH_MSG_INFO( "Exiting..." );
+   return 0;
+}
 
 void
 TestDriver::write()
@@ -65,7 +76,7 @@ TestDriver::write()
   placementHint_MyTestClass.setTechnology( pool::ROOTKEY_StorageType.type() );
 
   std::vector< MyTestClass* > v_myTestClass;
-  std::cout << "Writing " << m_events << " objects" << std::endl;
+  ATH_MSG_INFO( "Writing " << m_events << " objects" );
   for ( int i = 0; i < m_events; ++i ) {
     MyTestClass* object_MyTestClass = new MyTestClass();
     v_myTestClass.push_back( object_MyTestClass );
@@ -79,7 +90,7 @@ TestDriver::write()
     m_tokens.push_back( token_MyTestClass );
   }
 
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
@@ -106,7 +117,7 @@ TestDriver::read()
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
-  std::cout << "Reading back the objects." << std::endl;
+  ATH_MSG_INFO( "Reading back the objects." );
   for ( int i = 0; i < m_events; ++i ) {
     void* data_myTestClass = dbsession->readObject( *( m_tokens[ i ] ) );
     if ( data_myTestClass == 0 ) {
@@ -121,7 +132,7 @@ TestDriver::read()
     delete object_myTestClass;
   }
 
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }

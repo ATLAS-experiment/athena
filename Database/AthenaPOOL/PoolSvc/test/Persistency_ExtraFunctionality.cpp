@@ -1,44 +1,72 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-#include "TestDriver.h"
-
-#include <stdexcept>
-#include <memory>
-#include <filesystem>
-
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
 #include "PoolSvc/FileCatalogUtils.h"
 #include "PoolSvc/ISessionTool.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
-
 #include "StorageSvc/DbType.h"
+
+#include "Persistency_ExtraFunctionality.h"
+
+#include <stdexcept>
+#include <memory>
 
 using namespace pool;
 
-TestDriver::TestDriver( const std::string& catname ):
-  m_fileCatalogMgr( Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" ) ),
-  m_fileCatalog( m_fileCatalogMgr ),
-  m_fileName( "PersExtF.pool.root" ),
-  m_eventsToCommitAndHold( 10 ),
-  m_events( 100 )
+int main( )
 {
-  std::cout << "[OVAL] Creating a file catalog" << std::endl;
-  if ( ! m_fileCatalog.isValid() ) {
-    throw std::runtime_error( "Could not create a file catalog" );
-  }
-  std::filesystem::remove( {catname} );
-  FileCatalogUtils::addCatalog( *m_fileCatalogMgr, catname, true );
+   try {
+      TestDriver driver;
+      return driver.execute();
+   } catch ( std::exception& e ) {
+      std::cerr << e.what() << std::endl;
+      return 1;
+   }
 }
 
-TestDriver::~TestDriver()
+
+TestDriver::TestDriver( const std::string& catname )
+  : PersTestBase( "Persistency_ExtraFunctionality", catname ),
+    m_fileName( "PersExtF.pool.root" ),
+    m_eventsToCommitAndHold( 10 ),
+    m_events( 100 )
+{ }
+
+
+/* Run Extra Fiunctionality test for TTree and Tkey based Storage Services onlu (no RNTuple) */
+int TestDriver::execute()
 {
-  std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
+   ATH_MSG_INFO( "Starting test" );
+
+   loadLibraries( {"test_TestDictionaryDict"} );
+   runTestForStorageType(pool::ROOTKEY_StorageType);
+   ATH_MSG_INFO( "-------------------------------------" );
+   runTestForStorageType(pool::ROOTTREE_StorageType);
+   ATH_MSG_INFO( "-------------------------------------" );
+   runTestForStorageType(pool::ROOTTREEINDEX_StorageType);
+
+   ATH_MSG_INFO( "Exiting..." );
+   return 0;
 }
+
+
+void TestDriver::runTestForStorageType(const pool::DbType& storageType)
+{
+   ATH_MSG_INFO( "Writing objects in the database using " << storageType.storageName() << " storage type." );
+   write(storageType);
+   ATH_MSG_INFO( "...done" );
+
+   ATH_MSG_INFO( "Reading the objects back from the database." );
+   read();
+   ATH_MSG_INFO( "...done" );
+
+   ATH_MSG_INFO( "Clearing the tokens." );
+   clearCache();
+   ATH_MSG_INFO( "...done" );
+}
+
 
 void TestDriver::clearCache()
 {
@@ -72,7 +100,7 @@ void TestDriver::write(pool::DbType storageType)
 
   std::vector< TestClassSTLContainersExt* > v_testClassSTLContainersExt;
 
-  std::cout << "Writing " << m_events << " TestClassSTLContainersExt objects" << std::endl;
+  ATH_MSG_INFO( "Writing " << m_events << " TestClassSTLContainersExt objects" );
   for( int i = 0; i < m_events; ++i ) {
        TestClassSTLContainersExt* object_TestClassSTLContainersExt = new TestClassSTLContainersExt();
        v_testClassSTLContainersExt.push_back( object_TestClassSTLContainersExt );
@@ -94,7 +122,7 @@ void TestDriver::write(pool::DbType storageType)
     }
   }
   // Finally, commit at the end
-  std::cout << "Finished writing, committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Finished writing, committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
@@ -106,7 +134,7 @@ void TestDriver::write(pool::DbType storageType)
     throw std::runtime_error( "Could not start an update transaction" );
   }
   // Committing the transaction
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
@@ -126,7 +154,7 @@ void TestDriver::read()
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
-  std::cout << "Reading back the objects." << std::endl;
+  ATH_MSG_INFO( "Reading back the objects." );
   for( int i = 0; i < m_events; ++i ) {
     const Token& token = *( m_tokens.at(i) );
     Guid STLContainersExtClassID;
@@ -150,7 +178,7 @@ void TestDriver::read()
   }
 
   // Committing the transaction
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }

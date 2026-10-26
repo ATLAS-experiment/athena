@@ -2,8 +2,6 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TestDriver.h"
-
 #include <stdexcept>
 #include <iostream>
 #include <filesystem>
@@ -17,38 +15,58 @@
 #include "PoolSvc/FileCatalogUtils.h"
 #include "PoolSvc/ISessionTool.h"
 #include "PoolSvc/ITokenIterator.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
 
 #include "StorageSvc/DbType.h"
 
+#include "FileOpenWithoutCatalog.h"
 
-pool::TestDriver::TestDriver(const std::string& filename, const std::string& catname):
-   m_fileName( filename ),
-   m_fileCatalogMgr( Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" ) ),
-   m_fileCatalog( m_fileCatalogMgr )
-{
-  std::cout << "[OVAL] Creating a file catalog" << std::endl;
-  if ( ! m_fileCatalog.isValid() ) {
-    throw std::runtime_error( "Could not create a file catalog" );
-  }
-  std::filesystem::remove( {catname} );
-  FileCatalogUtils::addCatalog( *m_fileCatalogMgr, catname, true );
-}
 
-pool::TestDriver::~TestDriver()
+int main( )
 {
-  std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
+   try {
+      TestDriver driver("DB.FOWC.pool.root", "FOWC.catalog.xml");
+      return driver.execute();
+   } catch ( std::exception& e ) {
+      std::cerr << e.what() << std::endl;
+      return 1;
+   }
 }
 
 
-void
-pool::TestDriver::write()
+TestDriver::TestDriver(const std::string& filename, const std::string& catname)
+  : PersTestBase( "FileOpenWithoutCatalog", catname ),
+    m_fileName( filename )
+{ }
+
+
+int TestDriver::execute()
+{
+  ATH_MSG_INFO( "Starting test" );
+  loadLibraries( {"test_TestDictionaryDict"} );
+
+  ATH_MSG_INFO( "Writing objects in the database." );
+  write();
+  ATH_MSG_INFO( "...done" );
+
+  ATH_MSG_INFO( "Reading the objects back from the database." );
+  read( m_fileName );
+  ATH_MSG_INFO( "...done" );
+
+  ATH_MSG_INFO( "Trying to read the same file using a different path - should generate a warning." );
+  read( std::string("./") + m_fileName );
+  ATH_MSG_INFO( "...done" );
+
+  ATH_MSG_INFO( "Exiting..." );
+  return 0;
+}
+
+
+void TestDriver::write()
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
   std::string fid {"E9143E5C-FDDA-8646-9204-2E4BAE14DC00"};
-  FileCatalogUtils::registerPFN(catalog, m_fileName, ROOT_StorageType.storageName(), fid);
+  FileCatalogUtils::registerPFN(catalog, m_fileName, pool::ROOT_StorageType.storageName(), fid);
 
   auto dbsession = createSession( catalog, "TestSession" );
   // Start an update transaction
@@ -67,7 +85,7 @@ pool::TestDriver::write()
 
   std::vector< SimpleTestClass* > v_simpleTestClass;
 
-  std::cout << "Writing 100 objects." << std::endl;
+  ATH_MSG_INFO( "Writing 100 objects." );
   for ( int i = 0; i < 100; ++i ) {
     SimpleTestClass* object_SimpleTestClass = new SimpleTestClass();
     v_simpleTestClass.push_back( object_SimpleTestClass );
@@ -84,7 +102,7 @@ pool::TestDriver::write()
 
 
   // Committing the transaction
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
@@ -100,8 +118,7 @@ pool::TestDriver::write()
 }
 
 
-void
-pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification::NameType nameType)
+void TestDriver::read(const std::string& fileName, pool::DatabaseSpecification::NameType nameType)
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
@@ -127,7 +144,7 @@ pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification:
     if ( ! container ) {
       throw std::runtime_error( "Could not retrieve the container" );
     }
-    std::cout << "Container : " << container->name() << std::endl;
+    ATH_MSG_INFO( "Container : " << container->name() );
     pool::ITokenIterator* tokenIterator = container->tokens();
     if ( ! tokenIterator ) {
       throw std::runtime_error( "Could not obtain a token iterator" );
@@ -145,14 +162,14 @@ pool::TestDriver::read(const std::string& fileName, pool::DatabaseSpecification:
       throw std::runtime_error( "Unexpected number of objects in that container." );
     }
     else {
-      std::cout << numberOfObjects << " objects found in the container." << std::endl;
+      ATH_MSG_INFO( numberOfObjects << " objects found in the container." );
     }
 
     delete tokenIterator;
     delete container;
   }
 
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }

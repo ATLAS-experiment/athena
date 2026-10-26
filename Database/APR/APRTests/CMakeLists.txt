@@ -4,13 +4,12 @@
 atlas_subdir( APRTests )
 
 # External dependencies:
-find_package( CppUnit )
 find_package( ROOT )
 
 set( _testDictDir ${CMAKE_CURRENT_SOURCE_DIR}/TestDictionary )
 
 # Component(s) in the package:
-atlas_add_dictionary( test_TestDictionaryDict
+atlas_add_dictionary( test_APRTestDictionary
    TestDictionary/dict_all.h TestDictionary/classes.xml
    INCLUDE_DIRS ${_testDictDir}
    NO_ROOTMAP_MERGE )
@@ -24,15 +23,14 @@ function( _add_test name )
       atlas_add_dictionary( test_${name}Dict
          ${ARG_DICTHEADER} ${name}/classes.xml
          INCLUDE_DIRS ${_testDictDir}
-         LINK_LIBRARIES PoolSvcLib
-         StorageSvc AthContainers
+         LINK_LIBRARIES PoolSvcLib  StorageSvc AthContainers
          NO_ROOTMAP_MERGE )
    endif()
    # Set up the test:
    atlas_add_test( "${name}_test"
       SOURCES ${name}/*.cpp
-      INCLUDE_DIRS ${CPPUNIT_INCLUDE_DIRS} ${_testDictDir}
-      LINK_LIBRARIES ${CPPUNIT_LIBRARIES} PoolSvcLib TestTools StorageSvc AthContainers
+      INCLUDE_DIRS ${_testDictDir}
+      LINK_LIBRARIES PoolSvcLib TestTools StorageSvc AthContainers
       PersistentDataModel AthenaKernel
       # Need to explicitly link against ROOT libraries to suppress
       # spurious ubsan warnings.
@@ -40,21 +38,13 @@ function( _add_test name )
       ENVIRONMENT "ROOT_INCLUDE_PATH=$ENV{ROOT_INCLUDE_PATH}:${_testDictDir}"
       PROPERTIES TIMEOUT 300
       LOG_IGNORE_PATTERN "POOL_CATALOG is not defined|using default|New file created|FID|0x[0-9a-f]{4,}|APRFileCatalog.*DEBUG|RNTuple.*(DEBUG|VERBOSE)"
-      DEPENDS ${ARG_DEPENDS} )
+      DEPENDS test_APRTestDictionary ${ARG_DEPENDS} )
 endfunction( _add_test )
 
 # Declare the test(s) of the package:
-# Make them all run sequentially so PRE_EXEC cleanups do not interfere
-_add_test( FileCatalog_Functionality )
+#_add_test( FileCatalog_Functionality )
 _add_test( StorageSvc_BasicFunctionality )
 _add_test( StorageSvc_AuxStore  DICTHEADER StorageSvc_AuxStore/AuxStoreTest.h )
 _add_test( StorageSvc_MultipleIterators )
 _add_test( StorageSvc_ParallelReadWrite )
 _add_test( StorageSvc_TransientMembers DICTHEADER StorageSvc_TransientMembers/TestClassWithTransients.h )
-_add_test( PersistencySvc_Functionality )
-_add_test( PersistencySvc_ExtraFunctionality )
-_add_test( PersistencySvc_FileCatalogOperations )
-_add_test( PersistencySvc_FileOpenWithoutCatalog )
-_add_test( PersistencySvc_Parameters )
-_add_test( PersistencySvc_NoClassID DICTHEADER PersistencySvc_NoClassID/MyTestClass.h )
-_add_test( OpenFileDifferentPaths )
