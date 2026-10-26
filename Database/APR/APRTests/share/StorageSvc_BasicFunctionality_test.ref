@@ -1,6 +1,5 @@
 [OVAL] Creating the test driver.
-[OVAL] Loading the shared libraries.
-Loading library test_TestDictionaryDict
+Loading library test_APRTestDictionary
 
 [OVAL] Testing StorageSvc functionality for ROOT_Tree storage technology
 [OVAL] Testing the writing operations

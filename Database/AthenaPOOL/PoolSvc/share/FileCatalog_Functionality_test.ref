@@ -1,0 +1,11 @@
+TEST --> testregisterFile
+Registering PFN: pfn:test1 of type: root/tree FID assigned by the FC: 29D1CA4C-CEDB-11F1-B92C-FA163E8D02B5
+Registering PFN: pfn:test2 of type: root/tree FID assigned by the FC: 29D1CF6A-CEDB-11F1-B92C-FA163E8D02B5
+Registering PFN: pfn:test3 of type: root/tree FID assigned by the FC: 29D1D078-CEDB-11F1-B92C-FA163E8D02B5
+XMLCatalog            INFO File 'mycatalog.xml' does not exist. New file created.
+committed
+
+
+OK (2 tests)
+
+

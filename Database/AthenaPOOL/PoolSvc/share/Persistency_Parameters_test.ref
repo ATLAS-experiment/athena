@@ -1,0 +1,14 @@
+Persistency_Par...    INFO Creating FileCatalog
+Persistency_Par...    INFO Starting test
+Persistency_Par...    INFO Loading shared libraries:
+Persistency_Par...    INFO  - loading library test_TestDictionaryDict
+Persistency_Par...    INFO Writing parameters in the database.
+Persistency_Par...    INFO Creating the persistency service
+Committing the transaction.
+Persistency_Par...    INFO ...done
+Persistency_Par...    INFO Reading the parameters back from the database.
+Persistency_Par...    INFO Creating the persistency service
+Committing the transaction.
+Persistency_Par...    INFO ...done
+Persistency_Par...    INFO Exiting...
+Persistency_Par...    INFO Test finished. Number of floating tokens : 0

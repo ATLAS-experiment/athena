@@ -1,0 +1,89 @@
+Persistency_Fun...    INFO Creating FileCatalog
+Persistency_Fun...    INFO Starting test
+Persistency_Fun...    INFO Loading shared libraries:
+Persistency_Fun...    INFO  - loading library test_TestDictionaryDict
+Persistency_Fun...    INFO Writing objects in the database using ROOT_Key storage type.
+Persistency_Fun...    INFO Creating the persistency service
+Persistency_Fun...    INFO Writing 100 objects of each type
+Persistency_Fun...    INFO Committing the transaction.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO Reading the objects back from the database.
+Persistency_Fun...    INFO Creating the persistency service
+Persistency_Fun...    INFO Reading back the objects.
+Persistency_Fun...    INFO Committing the transaction.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO Clearing the tokens.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO Reading the objects back from the database as implicit collections.
+Persistency_Fun...    INFO Creating the persistency service
+Persistency_Fun...    INFO Container : SimpleTestClass_Container
+Persistency_Fun...    INFO 100 objects found in the container.
+Persistency_Fun...    INFO Container : TestClassPrimitives_Container
+Persistency_Fun...    INFO 100 objects found in the container.
+Persistency_Fun...    INFO Committing the transaction.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO --------------------------------
+Persistency_Fun...    INFO Writing objects in the database using ROOT_Tree storage type.
+Persistency_Fun...    INFO Creating the persistency service
+Persistency_Fun...    INFO Writing 100 objects of each type
+Persistency_Fun...    INFO Committing the transaction.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO Reading the objects back from the database.
+Persistency_Fun...    INFO Creating the persistency service
+Persistency_Fun...    INFO Reading back the objects.
+Persistency_Fun...    INFO Committing the transaction.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO Clearing the tokens.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO Reading the objects back from the database as implicit collections.
+Persistency_Fun...    INFO Creating the persistency service
+Persistency_Fun...    INFO Container : SimpleTestClass_Container
+Persistency_Fun...    INFO 100 objects found in the container.
+Persistency_Fun...    INFO Container : TestClassPrimitives_Container
+Persistency_Fun...    INFO 100 objects found in the container.
+Persistency_Fun...    INFO Committing the transaction.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO --------------------------------
+Persistency_Fun...    INFO Writing objects in the database using ROOT_TreeIndex storage type.
+Persistency_Fun...    INFO Creating the persistency service
+Persistency_Fun...    INFO Writing 100 objects of each type
+Persistency_Fun...    INFO Committing the transaction.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO Reading the objects back from the database.
+Persistency_Fun...    INFO Creating the persistency service
+Persistency_Fun...    INFO Reading back the objects.
+Persistency_Fun...    INFO Committing the transaction.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO Clearing the tokens.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO Reading the objects back from the database as implicit collections.
+Persistency_Fun...    INFO Creating the persistency service
+Persistency_Fun...    INFO Container : SimpleTestClass_Container
+Persistency_Fun...    INFO 100 objects found in the container.
+Persistency_Fun...    INFO Container : TestClassPrimitives_Container
+Persistency_Fun...    INFO 100 objects found in the container.
+Persistency_Fun...    INFO Committing the transaction.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO --------------------------------
+Persistency_Fun...    INFO Writing objects in the database using ROOT_RNTuple storage type.
+Persistency_Fun...    INFO Creating the persistency service
+Persistency_Fun...    INFO Writing 100 objects of each type
+Persistency_Fun...    INFO Committing the transaction.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO Reading the objects back from the database.
+Persistency_Fun...    INFO Creating the persistency service
+Persistency_Fun...    INFO Reading back the objects.
+Persistency_Fun...    INFO Committing the transaction.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO Clearing the tokens.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO Reading the objects back from the database as implicit collections.
+Persistency_Fun...    INFO Creating the persistency service
+Persistency_Fun...    INFO Container : SimpleTestClass_Container
+Persistency_Fun...    INFO 100 objects found in the container.
+Persistency_Fun...    INFO Container : TestClassPrimitives_Container
+Persistency_Fun...    INFO 100 objects found in the container.
+Persistency_Fun...    INFO Committing the transaction.
+Persistency_Fun...    INFO ...done
+Persistency_Fun...    INFO Exiting...
+Persistency_Fun...    INFO Test finished. Number of floating tokens : 0

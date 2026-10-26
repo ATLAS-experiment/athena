@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TESTDRIVER_H
@@ -7,9 +7,9 @@
 
 #include <vector>
 #include <string>
-#include "PoolTestBase.h"
+#include "TestBase.h"
 
-class TestDriver : public PoolTestBase {
+class TestDriver : public TestBase {
 public:
   TestDriver();
   ~TestDriver();

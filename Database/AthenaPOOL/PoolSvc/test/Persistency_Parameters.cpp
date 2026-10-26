@@ -1,43 +1,55 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+#include "PersistentDataModel/Token.h"
+#include "PoolSvc/FileCatalogUtils.h"
+#include "PoolSvc/ISessionTool.h"
+#include "StorageSvc/DbType.h"
 
-#include "TestDriver.h"
+#include "Persistency_Parameters.h"
+
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
 #include <memory>
-#include <filesystem>
 
-#include "PersistentDataModel/Token.h"
-#include "PoolSvc/FileCatalogUtils.h"
-#include "PoolSvc/ISessionTool.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
-#include "StorageSvc/DbType.h"
 
-using namespace pool;
 
-TestDriver::TestDriver():
-  m_fileCatalogMgr( Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" ) ),
-  m_fileCatalog( m_fileCatalogMgr ),
-  m_fileName( "PAR.pool.root" ),
-  m_parameters()
+int main( )
 {
-  
-  std::cout << "[OVAL] Creating a file catalog" << std::endl;
-  if ( ! m_fileCatalog.isValid() ) {
-    throw std::runtime_error( "Could not create a file catalog" );
-  }
-  const std::string catname = "PAR.catalog.xml";
-  std::filesystem::remove( {catname} );
-  FileCatalogUtils::addCatalog( *m_fileCatalogMgr, catname, true );
+   try {
+      TestDriver driver( "PAR.pool.root", "" );
+      return driver.execute();
+   } catch ( std::exception& e ) {
+      std::cerr << e.what() << std::endl;
+      return 1;
+   }
 }
 
-TestDriver::~TestDriver()
+TestDriver::TestDriver(const std::string& filename, const std::string& catname)
+  : PersTestBase( "Persistency_Parameters", catname ),
+    m_fileName( filename ),
+    m_parameters()
+{ }
+
+
+int TestDriver::execute()
 {
-  std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
+   ATH_MSG_INFO( "Starting test" );
+   loadLibraries( {"test_TestDictionaryDict"} );
+
+   ATH_MSG_INFO( "Writing parameters in the database." );
+   write();
+   ATH_MSG_INFO( "...done" );
+
+   ATH_MSG_INFO( "Reading the parameters back from the database." );
+   read();
+   ATH_MSG_INFO( "...done" );
+
+   ATH_MSG_INFO( "Exiting..." );
+   return 0;
 }
+
 
 void
 TestDriver::write()

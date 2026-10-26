@@ -1,0 +1,16 @@
+Persistency_NoC...    INFO Creating FileCatalog
+Persistency_NoC...    INFO Starting test
+Persistency_NoC...    INFO Loading shared libraries:
+Persistency_NoC...    INFO  - loading library test_TestDictionaryDict
+Persistency_NoC...    INFO Writing objects in the database.
+Persistency_NoC...    INFO Creating the persistency service
+Persistency_NoC...    INFO Writing 100 objects
+Persistency_NoC...    INFO Committing the transaction.
+Persistency_NoC...    INFO ...done
+Persistency_NoC...    INFO Reading the objects back from the database.
+Persistency_NoC...    INFO Creating the persistency service
+Persistency_NoC...    INFO Reading back the objects.
+Persistency_NoC...    INFO Committing the transaction.
+Persistency_NoC...    INFO ...done
+Persistency_NoC...    INFO Exiting...
+Persistency_NoC...    INFO Test finished. Number of floating tokens : 0

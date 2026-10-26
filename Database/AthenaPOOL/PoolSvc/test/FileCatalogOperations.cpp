@@ -2,14 +2,6 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TestDriver.h"
-
-#include <stdexcept>
-#include <iostream>
-#include <sstream>
-#include <memory>
-#include <filesystem>
-
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
@@ -17,36 +9,62 @@
 #include "PoolSvc/FileCatalogUtils.h"
 #include "PoolSvc/ISessionTool.h"
 #include "PoolSvc/ITokenIterator.h"
-#include "GaudiKernel/Bootstrap.h"
-#include "GaudiKernel/ISvcLocator.h"
-
 #include "StorageSvc/DbType.h"
 
+#include "FileCatalogOperations.h"
 
-pool::TestDriver::TestDriver( const std::string& catname ):
-  m_fileCatalogMgr( Gaudi::svcLocator()->service<Gaudi::IFileCatalogMgr>( "Gaudi::MultiFileCatalog" ) ),
-  m_fileCatalog( m_fileCatalogMgr ),
-  m_fileName1( "FCO.pool1.root" ),
-  m_lfn1( "lfn1" ),
-  m_fileName2( "FCO.pool2.root" ),
-  m_lfn2( "lfn2" ),
-  m_fileName3( "FCO.pool3.root" ),
-  m_lfn3( "lfn3" ),
-  m_events( 100 )
-{
-  std::cout << "[OVAL] Creating a file catalog" << std::endl;
-  std::filesystem::remove( {catname} );
-  FileCatalogUtils::addCatalog( *m_fileCatalogMgr, catname, true );
-}
+#include <stdexcept>
+#include <iostream>
+#include <sstream>
+#include <memory>
 
-pool::TestDriver::~TestDriver()
+
+int main( )
 {
-  std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
+   try {
+      TestDriver driver;
+      return driver.execute();
+   } catch ( std::exception& e ) {
+      std::cerr << e.what() << std::endl;
+      return 1;
+   }
 }
 
 
-void
-pool::TestDriver::write()
+TestDriver::TestDriver( const std::string& catname )
+  : PersTestBase( "FileCatalogOperations", catname ),
+    m_fileName1( "FCO.pool1.root" ),
+    m_lfn1( "lfn1" ),
+    m_fileName2( "FCO.pool2.root" ),
+    m_lfn2( "lfn2" ),
+    m_fileName3( "FCO.pool3.root" ),
+    m_lfn3( "lfn3" ),
+    m_events( 100 )
+{ }
+
+
+int TestDriver::execute()
+{
+  ATH_MSG_INFO("Starting test");
+  loadLibraries( {"test_TestDictionaryDict"} );
+
+  ATH_MSG_INFO("Writing objects in the database.");
+  write();
+  ATH_MSG_INFO("...done");
+
+  ATH_MSG_INFO("Adding LFNs in the file catalog.");
+  addlfns();
+  ATH_MSG_INFO("...done");
+
+  ATH_MSG_INFO("Reading the objects back from the database.");
+  read();
+  ATH_MSG_INFO("...done");
+
+  ATH_MSG_INFO("Exiting...");
+  return 0;
+}
+
+void TestDriver::write()
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
@@ -67,7 +85,7 @@ pool::TestDriver::write()
   placementHint_SimpleTestClass.setTechnology( pool::ROOTKEY_StorageType.type() );
 
   std::vector< SimpleTestClass* > v_simpleTestClass;
-  std::cout << "Writing " << m_events << " objects" << std::endl;
+  ATH_MSG_INFO( "Writing " << m_events << " objects" );
   for ( int i = 0; i < m_events; ++i ) {
 
     ///////////////////////////////////////////////////////////
@@ -83,7 +101,7 @@ pool::TestDriver::write()
     token_SimpleTestClass->release();
   }
 
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
@@ -99,16 +117,15 @@ pool::TestDriver::write()
 }
 
 
-void
-pool::TestDriver::addlfns()
+void TestDriver::addlfns()
 {
   m_fileCatalog->init(); 
   m_fileCatalog->registerLFN( m_fileCatalog->lookupPFN(m_fileName1), m_lfn1 );
   m_fileCatalog->commit();
 }
 
-void
-pool::TestDriver::read()
+
+void TestDriver::read()
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
@@ -125,9 +142,9 @@ pool::TestDriver::read()
   }
 
   const std::string& pfn = db->pfn();
-  std::cout << "PFN1 = " << pfn << std::endl;
+  ATH_MSG_INFO( "PFN1 = " << pfn );
   const std::string& fid = db->fid();
-  std::cout << "FID1 = " << fid << std::endl;
+  ATH_MSG_INFO( "FID1 = " << fid );
 
   db->connectForRead(); // will open db in read mode.
 
@@ -162,7 +179,7 @@ pool::TestDriver::read()
   delete tokenIterator;
   delete container;
 
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }

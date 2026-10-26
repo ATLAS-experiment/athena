@@ -1,0 +1,47 @@
+Persistency_Ext...    INFO Creating FileCatalog
+Persistency_Ext...    INFO Starting test
+Persistency_Ext...    INFO Loading shared libraries:
+Persistency_Ext...    INFO  - loading library test_TestDictionaryDict
+Persistency_Ext...    INFO Writing objects in the database using ROOT_Key storage type.
+Persistency_Ext...    INFO Creating the persistency service
+Persistency_Ext...    INFO Writing 100 TestClassSTLContainersExt objects
+Persistency_Ext...    INFO Finished writing, committing the transaction.
+Persistency_Ext...    INFO Committing the transaction.
+Persistency_Ext...    INFO ...done
+Persistency_Ext...    INFO Reading the objects back from the database.
+Persistency_Ext...    INFO Creating the persistency service
+Persistency_Ext...    INFO Reading back the objects.
+Persistency_Ext...    INFO Committing the transaction.
+Persistency_Ext...    INFO ...done
+Persistency_Ext...    INFO Clearing the tokens.
+Persistency_Ext...    INFO ...done
+Persistency_Ext...    INFO -------------------------------------
+Persistency_Ext...    INFO Writing objects in the database using ROOT_Tree storage type.
+Persistency_Ext...    INFO Creating the persistency service
+Persistency_Ext...    INFO Writing 100 TestClassSTLContainersExt objects
+Persistency_Ext...    INFO Finished writing, committing the transaction.
+Persistency_Ext...    INFO Committing the transaction.
+Persistency_Ext...    INFO ...done
+Persistency_Ext...    INFO Reading the objects back from the database.
+Persistency_Ext...    INFO Creating the persistency service
+Persistency_Ext...    INFO Reading back the objects.
+Persistency_Ext...    INFO Committing the transaction.
+Persistency_Ext...    INFO ...done
+Persistency_Ext...    INFO Clearing the tokens.
+Persistency_Ext...    INFO ...done
+Persistency_Ext...    INFO -------------------------------------
+Persistency_Ext...    INFO Writing objects in the database using ROOT_TreeIndex storage type.
+Persistency_Ext...    INFO Creating the persistency service
+Persistency_Ext...    INFO Writing 100 TestClassSTLContainersExt objects
+Persistency_Ext...    INFO Finished writing, committing the transaction.
+Persistency_Ext...    INFO Committing the transaction.
+Persistency_Ext...    INFO ...done
+Persistency_Ext...    INFO Reading the objects back from the database.
+Persistency_Ext...    INFO Creating the persistency service
+Persistency_Ext...    INFO Reading back the objects.
+Persistency_Ext...    INFO Committing the transaction.
+Persistency_Ext...    INFO ...done
+Persistency_Ext...    INFO Clearing the tokens.
+Persistency_Ext...    INFO ...done
+Persistency_Ext...    INFO Exiting...
+Persistency_Ext...    INFO Test finished. Number of floating tokens : 0

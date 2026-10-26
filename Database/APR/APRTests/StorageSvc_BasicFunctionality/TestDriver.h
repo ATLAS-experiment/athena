@@ -1,17 +1,17 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TESTDRIVER_H
 #define TESTDRIVER_H
 
 #include "StorageSvc/DbType.h"
-#include "PoolTestBase.h"
+#include "TestBase.h"
 
 #include <vector>
 #include <string>
 
-class TestDriver : public PoolTestBase {
+class TestDriver : public TestBase {
 public:
   TestDriver();
   ~TestDriver();

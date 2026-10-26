@@ -1,36 +1,27 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef TESTDRIVER_H
-#define TESTDRIVER_H
+#ifndef FILECATALOGOPERATIONS_H
+#define FILECATALOGOPERATIONS_H
 
-#include <vector>
 #include <string>
-#include "GaudiKernel/SmartIF.h"
 #include "SimpleTestClass.h"
-#include "PoolTestBase.h"
+#include "PersTestBase.h"
 
 class Token;
 
-namespace Gaudi {
-  class IFileCatalog;
-  class IFileCatalogMgr;
-}
-
-namespace pool {
-
-  class TestDriver : public PoolTestBase {
+class TestDriver : public PersTestBase {
   public:
     explicit TestDriver( const std::string& catname = "FCO.catatlog.xml" );
-    ~TestDriver();
+
+    int execute();
 
     void write();
     void addlfns();
     void read();
+  
   private:
-    SmartIF<Gaudi::IFileCatalogMgr>   m_fileCatalogMgr;
-    SmartIF<Gaudi::IFileCatalog>      m_fileCatalog;
     std::string           m_fileName1;
     std::string           m_lfn1;
     std::string           m_fileName2;
@@ -38,8 +29,6 @@ namespace pool {
     std::string           m_fileName3;
     std::string           m_lfn3;
     int                   m_events;
-  };
-
-}
+};
 
 #endif

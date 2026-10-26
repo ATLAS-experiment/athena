@@ -1,11 +1,8 @@
 [OVAL] Creating the test driver.
-[OVAL] Loading the shared libraries.
-Loading library test_TestDictionaryDict
+Loading library test_APRTestDictionary
 [OVAL] Testing the writing operations
-RootDatabase.open Success pool_test.root File version:60602
 [OVAL] ...done
 [OVAL] Testing the parallel iterators in the same container
-RootDatabase.open Success pool_test.root File version:60602
 Closing the session
 [OVAL] ...done
 [OVAL] Number of floating tokens : 0
