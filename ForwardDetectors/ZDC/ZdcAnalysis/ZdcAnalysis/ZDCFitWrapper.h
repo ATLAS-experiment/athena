@@ -126,7 +126,7 @@ public:
 
   bool HaveParameterSet() const {return m_haveParameterSet;}
   void OverrideParameterSet(const std::vector<FitParameter>& parameterSet);
-  const FitParameter& GetParameterDescr(std::string name); 
+  const FitParameter& GetParameterDescr(const std::string & name); 
   
   void Initialize(float initialAmp, float initialT0, float ampMin, float ampMax);
   void Initialize(float initialAmp, float initialT0, float ampMin, float ampMax, float fitTmin, float fitTmax, float fitTRef);
@@ -246,7 +246,7 @@ public:
   ZDCPreExpFitWrapper(std::shared_ptr<TF1> wrapperTF1, const std::vector<FitParameter>& defaultParamSet) :
     ZDCFitWrapper(wrapperTF1, defaultParamSet)
     {
-      auto tauParamDescr = GetParameterDescr("tauexp");
+      const auto & tauParamDescr = GetParameterDescr("tauexp");
       m_defaultTau = tauParamDescr.defaultValue();
       m_fixTau = tauParamDescr.fixed();
     }
@@ -418,7 +418,7 @@ public:
 
   ZDCFitExpFermiVariableTausInduct(const std::string& tag, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2);
 
-  ZDCFitExpFermiVariableTausInduct(const std::string& tag, std::string paramSet, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2);
+  ZDCFitExpFermiVariableTausInduct(const std::string& tag, const std::string & paramSet, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2);
 
   virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
   virtual void SetT0FitLimits(float tMin, float tMax) override;
@@ -1000,7 +1000,7 @@ class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiInductPreExp : public ZDCPreExpFitWrap
 public:
   ZDCFitExpFermiInductPreExp(const std::string& tag, float tmin, float tmax, float tau1, float tau2,
 			   float defExpTau, float fixExpTau);
-  ZDCFitExpFermiInductPreExp(const std::string& tag, std::string overRideParams, float tmin, float tmax,
+  ZDCFitExpFermiInductPreExp(const std::string& tag, const std::string & overRideParams, float tmin, float tmax,
 			     float tau1, float tau2);
   ~ZDCFitExpFermiInductPreExp() {}
 
@@ -1129,7 +1129,7 @@ class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiInductPrePulse : public ZDCPrePulseFit
 
 public:
   ZDCFitExpFermiInductPrePulse(const std::string& tag, float tmin, float tmax, float tau1, float tau2);
-  ZDCFitExpFermiInductPrePulse(const std::string& tag, std::string overRideParams, float tmin, float tmax,
+  ZDCFitExpFermiInductPrePulse(const std::string& tag, const std::string & overRideParams, float tmin, float tmax,
 			       float tau1, float tau2);
 
   ~ZDCFitExpFermiInductPrePulse() {}
