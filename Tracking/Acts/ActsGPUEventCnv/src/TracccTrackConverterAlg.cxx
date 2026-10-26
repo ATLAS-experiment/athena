@@ -251,10 +251,6 @@ StatusCode TracccTrackConverterAlg::execute(const EventContext& ctx) const
     auto stripMeasMap = SG::makeHandle(m_inputMeasToStripClKey, ctx);
     ATH_CHECK(stripMeasMap.isValid());
 
-    if(stripMeasMap->size() == 0 || pixelMeasMap->size() == 0){
-        ATH_MSG_FATAL("Maps relating traccc measurements to xAOD cluster containers are empty!!");
-        return StatusCode::FAILURE;
-    }
 
     // ---- Retrieve DEVICE resident traccc tracks and track states ----
     auto tracks = SG::makeHandle(m_inputTracksKey, ctx);
@@ -276,6 +272,14 @@ StatusCode TracccTrackConverterAlg::execute(const EventContext& ctx) const
     ATH_MSG_DEBUG("Read " << traccc_tracks.tracks.size() << " tracks from device.");
     m_nTracksIn += traccc_tracks.tracks.size();
 
+    if(stripMeasMap->size() == 0 || pixelMeasMap->size() == 0){
+        ATH_MSG_DEBUG("Maps relating traccc measurements to xAOD cluster containers are empty!!");
+        if(traccc_tracks.tracks.size() > 0){
+            ATH_MSG_ERROR("Traccc tracks exist but mapping to xAOD clusters is empty, cannot convert tracks to ACTS");
+            return StatusCode::FAILURE;
+        }
+    }
+
     // -- Write HOST resident ACTS track container ----
     Acts::VectorTrackContainer trackBackend;
     Acts::VectorMultiTrajectory trackStateBackend;
@@ -294,9 +298,7 @@ StatusCode TracccTrackConverterAlg::execute(const EventContext& ctx) const
         const traccc::edm::track track = traccc_tracks.tracks.at(i);
 
         const auto fitOutcome = track.fit_outcome();
-        if (fitOutcome == traccc::track_fit_outcome::FAILURE_NON_POSITIVE_NDF ||
-            fitOutcome == traccc::track_fit_outcome::FAILURE_NOT_ALL_SMOOTHED ||
-            fitOutcome == traccc::track_fit_outcome::UNKNOWN) {
+        if (fitOutcome != traccc::track_fit_outcome::SUCCESS) {
             ATH_MSG_DEBUG("Skipping track " << i << ": fit outcome "
                                             << static_cast<int>(fitOutcome));
             ++nExcludedFitOutcome;
@@ -442,8 +444,8 @@ StatusCode TracccTrackConverterAlg::finalize()
 {
     ATH_MSG_DEBUG("Finalizing.");
 
-    ATH_MSG_DEBUG("Received " << m_nTracksIn << " tracks, wrote " << m_nTracksOut);
-    ATH_MSG_DEBUG("Excluded: "
+    ATH_MSG_INFO("Received " << m_nTracksIn << " tracks, wrote " << m_nTracksOut);
+    ATH_MSG_INFO("Excluded: "
                             << m_nExcludedFitOutcome << " (fit outcome), "
                             << m_nExcludedNoState << " (no state), "
                             << m_nExcludedBadNdf << " (bad ndf), "
