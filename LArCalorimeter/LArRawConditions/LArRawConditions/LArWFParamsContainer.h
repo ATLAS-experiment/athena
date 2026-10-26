@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* author : Marcello Fanti */
@@ -26,10 +26,10 @@
 class LArWFParamsContainer : public DataVector<LArWFParams> {
 
  public:
-  
-  LArWFParamsContainer() : DataVector<LArWFParams> () {};
 
-  virtual ~LArWFParamsContainer() {};
+  using DataVector<LArWFParams>::DataVector;
+
+  virtual ~LArWFParamsContainer() = default;
 
   virtual StatusCode initialize();
 
