@@ -49,19 +49,43 @@ class TempInterface
 public:
   TempInterface (size_t size) : m_size (size) {}
   TempInterface (size_t size, SG::auxid_t auxid, void* ptr) :
-    m_size (size)
+    m_size (size), m_ptr (ptr)
   {
     setCache (auxid, ptr);
   }
 
   using AuxVectorData::setStore;
 
+  void setSize (size_t size) { m_size = size; }
+  const void* ptr() const { return m_ptr; }
+
   size_t size_v() const override { return m_size; }
   size_t capacity_v() const override { return m_size; }
 
 private:
   size_t m_size;
+  const void* m_ptr = nullptr;
 };
+
+
+/// Get a @c TempInterface pointing at the given payload
+///
+/// A new object is only created when the payload moves in memory.
+/// Creating one for every copy allocates and zeroes a new cache array
+/// sized by the auxid, which is very expensive when many
+/// (e.g. systematics dependent) variables exist.
+///
+SG::AuxVectorData& getTempInterface (std::unique_ptr<SG::AuxVectorData>& iface,
+                                     size_t size, SG::auxid_t auxid, void* ptr)
+{
+  auto* tmp = static_cast<TempInterface*> (iface.get());
+  if (tmp && tmp->ptr() == ptr) {
+    tmp->setSize (size);
+  } else {
+    iface = std::make_unique<TempInterface> (size, auxid, ptr);
+  }
+  return *iface;
+}
 
 
 } // anonymous namespace
@@ -736,7 +760,8 @@ namespace CP
       }
 
       // Copy it into the output variable.
-      TempInterface dstiface (m_data->size(), m_acc->auxid(), m_data->toPtr());
+      SG::AuxVectorData& dstiface =
+        getTempInterface (m_dstIface, m_data->size(), m_acc->auxid(), m_data->toPtr());
       m_factory->copy( m_acc->auxid(), dstiface, 0,
                       *element.container(), element.index(), 1 );
 
@@ -827,7 +852,8 @@ namespace CP
       }
 
       // Copy it into the output variable.
-      TempInterface dstiface (m_data->size(), m_acc->auxid(), m_data->toPtr());
+      SG::AuxVectorData& dstiface =
+        getTempInterface (m_dstIface, m_data->size(), m_acc->auxid(), m_data->toPtr());
       m_factory->copy( m_acc->auxid(), dstiface, index,
                       *element.container(), element.index(), 1 );
 

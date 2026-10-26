@@ -28,6 +28,7 @@
 // EDM include(s):
 #include "AthContainersInterfaces/IAuxTypeVector.h"
 #include "AthContainers/AuxElement.h"
+#include "AthContainers/AuxVectorData.h"
 
 // Forward declaration(s):
 class TClass;
@@ -275,6 +276,9 @@ namespace CP
       std::unique_ptr< SG::IAuxTypeVector > m_data;
       /// Helper variable, pointing at the object to be written
       void* m_dataPtr = nullptr;
+      /// Interface to @c m_data used as the destination of the copy, kept
+      /// between calls as its cache is expensive to set up
+      std::unique_ptr< SG::AuxVectorData > m_dstIface;
 
     }; // class ElementBranchProcessor
 
@@ -327,6 +331,9 @@ namespace CP
       std::unique_ptr< SG::IAuxTypeVector > m_data;
       /// Helper variable, pointing at the object to be written
       void* m_dataPtr = nullptr;
+      /// Interface to @c m_data used as the destination of the copy, kept
+      /// between calls as its cache is expensive to set up
+      std::unique_ptr< SG::AuxVectorData > m_dstIface;
 
     }; // class ContainerBranchProcessor
 
