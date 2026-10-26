@@ -1,0 +1,284 @@
+{
+    "Electrons": {
+        "SliceTag": "HLT/TRIDT/Electrons/Expert",
+        "useDecorations": false,
+        "Chains": [
+            "HLT_e.*idperf.*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",
+            "HLT_e.*idperf.*:key=HLT_IDTrack_Electron_IDTrig",
+            "HLT_e.*:key=HLT_IDTrack_Electron_IDTrig:extra=el_tag:te=0",
+            "HLT_e.*:key=HLT_IDTrack_Electron_IDTrig:extra=el_probe:te=1"
+        ],
+        "Reference": "Electrons:Tight",
+        "MinTagPT": 14000,
+        "MinTagMass": 75,
+        "MaxTagMass": 105,
+        "Matcher": {
+            "MatcherType": "DeltaR",
+            "DeltaR": 0.05
+        },
+        "RefSelector": {
+            "minPt": 1000,
+            "minEta": -2.5,
+            "maxEta": 2.5,
+            "maxD0": 4.0,
+            "UseOfflineTool": true,
+            "minET": 14000,
+            "minETovpt": 0.8,
+            "InDetSelector": {
+                "minNPixelHits": 2,
+                "maxNPixelHoles": 1,
+                "minNSctHits": 3
+            }
+        },
+        "TestSelector": {
+            "UseOfflineTool": false
+        }
+    },
+    "Muons": {
+        "SliceTag": "HLT/TRIDT/Muons/Expert",
+        "useDecorations": false,
+        "Chains": [
+            "HLT_mu.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon",
+            "HLT_mu.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon",
+            "HLT_mu.*_mu14.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_tag:te=0",
+            "HLT_mu.*_mu14.*_idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_probe:te=1",
+            "HLT_mu.*_mu14.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu1_tag:te=0",
+            "HLT_mu.*_mu14.*_idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu1_probe:te=1"
+        ],
+        "Reference": "Muons:Medium",
+        "MinTagPT": 14000,
+        "MinTagMass": 75,
+        "MaxTagMass": 105,
+        "Matcher": {
+            "MatcherType": "DeltaR",
+            "DeltaR": 0.05
+        },
+        "RefSelector": {
+            "minPt": 1000,
+            "minEta": -2.5,
+            "maxEta": 2.5,
+            "maxD0": 4.0,
+            "UseOfflineTool": true,
+            "minET": 14000,
+            "minETovpt": 0,
+            "InDetSelector": {
+                "minNPixelHits": 2,
+                "maxNPixelHoles": 1,
+                "minNSctHits": 3
+            }
+        },
+        "TestSelector": {
+            "UseOfflineTool": false
+        }
+    },
+    "Bjets": {
+        "SliceTag": "HLT/TRIDT/Bjets/Expert",
+        "useDecorations": false,
+        "Chains": [
+            "HLT_j.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper:vtx=HLT_IDVertex_JetSuper",
+            "HLT_j.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
+            "HLT_j180.*dis.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper:vtx=HLT_IDVertex_JetSuper",
+            "HLT_j180.*dis.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS"
+        ],
+        "Reference": "InDetTrackParticles",
+        "Matcher": {
+            "MatcherType": "DeltaRZ",
+            "DeltaEta": 0.05,
+            "DeltaPhi": 0.05,
+            "DeltaZed": 2.0
+        },
+        "RefSelector": {
+            "minPt": 1000,
+            "minEta": -2.5,
+            "maxEta": 2.5,
+            "maxD0": 4.0,
+            "UseOfflineTool": true,
+            "minETovpt": 0,
+            "InDetSelector": {
+                "minNPixelHits": 2,
+                "maxNPixelHoles": 1,
+                "minNSctHits": 3
+            }
+        },
+        "TestSelector": {
+            "UseOfflineTool": false
+        }
+    },
+    "Offline": {
+        "SliceTag": "HLT/TRIDT/Offline/Expert",
+        "useDecorations": false,
+        "Chains": [
+            "InDetTrackParticles"
+        ],
+        "Reference": "TruthParticles",
+        "Matcher": {
+            "MatcherType": "DeltaR",
+            "DeltaR": 0.05
+        },
+        "RefSelector": {
+            "minPt": 1000,
+            "minEta": -2.5,
+            "maxEta": 2.5,
+            "maxD0": 4.0,
+            "UseOfflineTool": false,
+            "minETovpt": 0,
+            "InDetSelector": {
+                "minNPixelHits": 2,
+                "maxNPixelHoles": 1,
+                "minNSctHits": 3
+            },
+            "TruthSelector": {}
+        },
+        "TestSelector": {
+            "UseOfflineTool": false
+        }
+    },
+    "MuonTruth": {
+        "SliceTag": "HLT/TRIDT/MuonTruth/Expert",
+        "useDecorations": false,
+        "Chains": [
+            "HLT_mu.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_tag",
+            "HLT_mu.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=mu_probe",
+            "HLT_mu.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu1_tag",
+            "HLT_mu.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=mu1_probe"
+        ],
+        "Reference": "TruthParticles",
+        "MinTagPT": 14000,
+        "MinTagMass": 75,
+        "MaxTagMass": 105,
+        "ReferencePdgIdTag": 13,
+        "Matcher": {
+            "MatcherType": "DeltaR",
+            "DeltaR": 0.05
+        },
+        "RefSelector": {
+            "minPt": 10000.0,
+            "minEta": -2.5,
+            "maxEta": 2.5,
+            "maxD0": 4.0,
+            "UseOfflineTool": false,
+            "PdgId": 13,
+            "InDetSelector": {
+                "minNPixelHits": -1,
+                "maxNPixelHoles": -1,
+                "minNSctHits": -1
+            },
+            "TruthSelector": {}
+        },
+        "TestSelector": {
+            "UseOfflineTool": false
+        }
+    },
+    "ElectronTruth": {
+        "SliceTag": "HLT/TRIDT/ElectronTruth/Expert",
+        "useDecorations": false,
+        "Chains": [
+            "HLT_e.*idperf.*:key=HLT_IDTrack_Electron_FTF:roi=HLT_Roi_FastElectron",
+            "HLT_e.*idperf.*:key=HLT_IDTrack_Electron_IDTrig",
+            "HLT_e.*_idperf.*:key=HLT_IDTrack_Electron_IDTrig:extra=el_tag",
+            "HLT_e.*_idperf.*:key=HLT_IDTrack_Electron_IDTrig:extra=el_probe"
+        ],
+        "Reference": "TruthParticles",
+        "ReferencePdgIdTag": 11,
+        "MinTagPT": 14000,
+        "MinTagMass": 75,
+        "MaxTagMass": 105,
+        "Matcher": {
+            "MatcherType": "DeltaR",
+            "DeltaR": 0.05
+        },
+        "RefSelector": {
+            "minPt": 10000.0,
+            "minEta": -2.5,
+            "maxEta": 2.5,
+            "maxD0": 4.0,
+            "UseOfflineTool": false,
+            "PdgId": 11,
+            "InDetSelector": {
+                "minNPixelHits": -1,
+                "maxNPixelHoles": -1,
+                "minNSctHits": -1
+            },
+            "TruthSelector": {}
+        },
+        "TestSelector": {
+            "UseOfflineTool": false
+        }
+    },
+    "TauTruth": {
+        "SliceTag": "HLT/TRIDT/TauTruth/Expert",
+        "useDecorations": false,
+        "Chains": [
+            "HLT_tau.*idperf.*tracktwoMVA_.*:key=HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore",
+            "HLT_tau.*idperf.*tracktwoMVA_.*:key=HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso",
+            "HLT_tau.*idperf.*tracktwoMVA_.*:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso",
+            "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore:te=1",
+            "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso:te=1",
+            "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso:te=1",
+            "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=tau1_tag:te=0",
+            "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_TauCore_FTF:roi=HLT_Roi_TauCore:extra=tau1_probe:te=1",
+            "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_Muon_FTF:roi=HLT_Roi_L2SAMuon:extra=tau0_tag:te=0",
+            "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_TauIso_FTF:roi=HLT_Roi_TauIso:extra=tau0_probe:te=1",
+            "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_Muon_IDTrig:roi=HLT_Roi_L2SAMuon:extra=tau_tag:te=0",
+            "HLT_mu.*tau.*idperf.*:key=HLT_IDTrack_Tau_IDTrig:roi=HLT_Roi_TauIso:extra=tau_probe:te=1"
+        ],
+        "Reference": "TruthParticles",
+        "ReferencePdgIdTag": 11,
+        "MinTagPT": 14000,
+        "MinTagMass": 75,
+        "MaxTagMass": 105,
+        "Matcher": {
+            "MatcherType": "DeltaR",
+            "DeltaR": 0.05
+        },
+        "RefSelector": {
+            "minPt": 10000.0,
+            "minEta": -2.5,
+            "maxEta": 2.5,
+            "maxD0": 4.0,
+            "UseOfflineTool": false,
+            "FromPdgId": 15,
+            "InDetSelector": {
+                "minNPixelHits": -1,
+                "maxNPixelHoles": -1,
+                "minNSctHits": -1
+            },
+            "TruthSelector": {}
+        },
+        "TestSelector": {
+            "UseOfflineTool": false
+        }
+    },
+    "BjetTruth": {
+        "SliceTag": "HLT/TRIDT/BjetTruth/Expert",
+        "useDecorations": false,
+        "Chains": [
+            "HLT_j.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper:vtx=HLT_IDVertex_JetSuper",
+            "HLT_j.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS",
+            "HLT_j180.*dis.*:key=HLT_IDTrack_JetSuper_FTF:roi=HLT_Roi_JetSuper:vtx=HLT_IDVertex_JetSuper",
+            "HLT_j180.*dis.*:key=HLT_IDTrack_FS_FTF:roi=HLT_FSRoI:vtx=HLT_IDVertex_FS"
+        ],
+        "Reference": "TruthParticles",
+        "Matcher": {
+            "MatcherType": "DeltaR",
+            "DeltaR": 0.05
+        },
+        "RefSelector": {
+            "minPt": 1000,
+            "minEta": -2.5,
+            "maxEta": 2.5,
+            "maxD0": 4.0,
+            "UseOfflineTool": false,
+            "minETovpt": 0,
+            "InDetSelector": {
+                "minNPixelHits": -1,
+                "maxNPixelHoles": -1,
+                "minNSctHits": -1
+            },
+            "TruthSelector": {}
+        },
+        "TestSelector": {
+            "UseOfflineTool": false
+        }
+    }
+}
