@@ -50,12 +50,15 @@ namespace MuonML {
         const std::unordered_map<std::int32_t, double>& truthIdToAbsEta) const;
 
     SG::ReadHandleKey<xAOD::MuonSegmentContainer> m_segmentKey{this, "SegmentKey", "MsSegments"};
-    /**
-     * Per-segment payload consumed by MlMsTrackSeeder: [componentId, isSeedAnchor]
-     * Empty means that the segment was rejected by the ML preselection.
-     */
+    /// Per-segment payload consumed by MlMsTrackSeeder: [componentId, anchorRank + 1]
+    /// Empty means that the segment was rejected by the ML preselection.
     SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_pairGateDecorKey{
         this, "PairGateDecoration", "MsSegments.mlTrackComponent"};
+    /// Per-segment ML scores for MlMsTrackSeeder: [strongest selected cross-layer edge of the
+    /// segment's component, strongest selected cross-layer edge of the segment itself]
+    /// (-1 if none). Written for the segments of kept components.
+    SG::WriteDecorHandleKey<xAOD::MuonSegmentContainer> m_componentScoreDecorKey{
+        this, "ComponentScoreDecoration", "MsSegments.mlComponentScore"};
     SG::WriteHandleKey<ConstDataVector<xAOD::MuonSegmentContainer>> m_filteredSegmentKey{
         this, "FilteredSegmentKey", "",
         "Optional VIEW container containing only segments incident to a "
@@ -66,6 +69,11 @@ namespace MuonML {
     Gaudi::Property<unsigned int> m_maxEdgesPerNode{
         this, "MaxEdgesPerNode", 2,
         "Keep at most this many highest-score neighbours per segment when forming the ML path graph; zero keeps all"};
+    Gaudi::Property<unsigned int> m_maxEdgesPerNodePerLayer{
+        this, "MaxEdgesPerNodePerLayer", 0,
+        "If > 0, each segment nominates its this-many highest-score edges towards EACH layer (Inner, "
+        "Middle, Outer, Extended, ...) instead of its MaxEdgesPerNode best edges overall; zero keeps "
+        "the global top-K"};
     Gaudi::Property<bool> m_useDegreeCappedComponents{
         this, "UseDegreeCappedComponents", false,
         "Use a global greedy degree cap instead of the mutual top-K path graph"};
@@ -80,7 +88,8 @@ namespace MuonML {
         "Number of highest-score segments that may seed each ML component; zero keeps every retained segment"};
     Gaudi::Property<bool> m_anchorInnermostLayer{
         this, "AnchorInnermostLayer", false,
-        "Restrict seed anchors to inner segment(s)."};
+        "Restrict seed anchors to inner segment(s); with SeedAnchorsPerComponent > 0 keep only "
+        "the inner segment(s) with the strongest selected edge towards another layer"};
     Gaudi::Property<bool> m_keepBestSegmentPerChamber{
         this, "KeepBestSegmentPerChamber", true,
         "Keep only the ML-best segment in each chamber within a component"};
@@ -119,6 +128,10 @@ namespace MuonML {
     mutable std::atomic<std::size_t> m_sumRetainedBkgSegments{0};
     mutable std::atomic<std::size_t> m_sumTrueEdgesTotal{0};
     mutable std::atomic<std::size_t> m_sumTrueEdgesPassed{0};
+    /// True cross-layer edges above PairGateThreshold, total and kept by the selection; barrel / endcap
+    /// Every element is a std::atomic, updated only with atomic increments.
+    mutable std::array<std::atomic<std::size_t>, 2> m_sumTrueCrossLayerEdges ATLAS_THREAD_SAFE{};
+    mutable std::array<std::atomic<std::size_t>, 2> m_sumTrueCrossLayerSelected ATLAS_THREAD_SAFE{};
     mutable std::atomic<std::size_t> m_sumBkgEdgesTotal{0};
     mutable std::atomic<std::size_t> m_sumBkgEdgesPassed{0};
 
@@ -148,8 +161,21 @@ namespace MuonML {
     struct GroupPurityCounters {
       static constexpr std::size_t kSizeBins = 6;  // 2, 3, 4, 5-9, 10-19, 20+
       static constexpr std::size_t kColumns = 4;   // all, barrel, transition, endcap
+      static constexpr std::size_t kScoreBins = 5; // <0.05, 0.05-0.1, 0.1-0.3, 0.3-0.5, >=0.5
+      static constexpr std::size_t kLayerBins = 4; // 1, 2, 3, 4+ distinct layers
       std::array<std::atomic<std::size_t>, 3> componentsByOutcome{};  //!< clean / mixed / bkgOnly
       std::array<std::atomic<std::size_t>, kSizeBins> componentSizeHist{};
+      /// Kept components split by outcome (clean / mixed / bkgOnly), index = outcome * nBins + bin
+      std::array<std::atomic<std::size_t>, 3 * kScoreBins> scoreByOutcome{};   //!< strongest selected edge
+      std::array<std::atomic<std::size_t>, 3 * kSizeBins> sizeByOutcome{};     //!< retained segments
+      std::array<std::atomic<std::size_t>, 3 * kLayerBins> layersByOutcome{};  //!< distinct LayerIndex
+      /// Components spanning >= 2 layers (the only ones that can seed), per outcome:
+      static constexpr std::size_t kCrossScoreBins = 6;  // <0.05, 0.05-0.1, 0.1-0.3, 0.3-0.5, 0.5-0.8, >=0.8
+      static constexpr std::size_t kCrossEdgeBins = 4;   // 0, 1, 2, 3+ selected cross-layer edges
+      std::array<std::atomic<std::size_t>, 3 * kCrossScoreBins> crossScoreByOutcome{};  //!< strongest cross-layer edge
+      std::array<std::atomic<std::size_t>, 3 * kCrossEdgeBins> crossEdgesByOutcome{};   //!< number of cross-layer edges
+      std::atomic<std::size_t> weakCleanWithOther{0};
+      std::atomic<std::size_t> weakCleanAlone{0};
       std::atomic<std::size_t> mixedComponentSegments{0};
       std::array<std::atomic<std::size_t>, kColumns * 3> muonOutcome{};  //!< clean/mixed/fragmented, per column
       std::atomic<std::uint64_t> worstMixedPacked{0};
