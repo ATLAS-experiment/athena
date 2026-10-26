@@ -31,6 +31,8 @@
 #include "CoolApplication/Application.h"
 #include "CoralBase/AttributeListException.h"
 
+#include "CrestApi/CrestLogger.h"
+
 ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 // coverity[+UNNECESSARY_STRING_COPY]
 
@@ -79,9 +81,9 @@ public:
 
       if (f1.fail() || f2.fail()) {
         if(f1.fail())
-          std::cerr<<"COOL output file problem"<<std::endl;
+          std::cerr<<"COOL output file problem. The folder: \""<<m_folder<<"\", the timestamp: "<< vkey<<std::endl;
         else
-	  std::cerr<<"CREST output file problem"<<std::endl;
+	  std::cerr<<"CREST output file problem. The folder: \""<<m_folder<<"\", the timestamp: "<< vkey<<std::endl;
         return;
       }
       bool result=true;
@@ -99,26 +101,41 @@ public:
       std::cout<<"-----------------------------------------------------------"<<std::endl;
       if(result)
 	    std::cout<<"The folder \""<<m_folder<<"\" is the same in COOL and CREST at timestamp: "<< vkey<<std::endl;
-      else{
-	    if(!f2.fail()){
-		f2.seekg(0, std::ifstream::beg);    
-		std::string line;
-		while (std::getline(f2, line)) {
-		    if (line.starts_with("\"data_array\"") ) {
-			size_t pos = line.find(":");
+      else{  
+	    bool reqUnswer=true;  
+	    if(!f2.fail() && !f1.fail()){
+		f2.seekg(0, std::ifstream::beg);
+	        f1.seekg(0, std::ifstream::beg);	
+		std::string line1,line2;
+		while (std::getline(f1, line1)) {
+                    if (line1.starts_with("\"data_array\"") ) {
+			break;
+                    }
+                }
+		while (std::getline(f2, line2)) {
+		    if (line2.starts_with("\"data_array\"") ) {
+			if(line2==line1){
+			    std::cout<<"WARNING in CREST: The folder \""<<m_folder<<"\" has the same only data in COOL and CREST for timestamp: "<< vkey<<std::endl;
+			    reqUnswer=false;
+			    break;
+                        }
+			size_t pos = line2.find(":");
 		        if(pos>0){
-			   std::string line2 = line.substr(pos+1);
-			   if(line2.size()<=5){
-			      std::cerr<<"ERROR in Crest. CREST output has no data"<<std::endl;
-			      return;
+			   std::string lineTmp = line2.substr(pos+1);
+			   if(lineTmp.size()<=5){
+			      std::cerr<<"ERROR in Crest. CREST output has no data. The folder: \""<<m_folder<<"\", the timestamp: "<< vkey<<std::endl;
+			      reqUnswer=false;
+                              break;
 			   }
 			}	
     		    }	
     		}
-	    }  
-	    std::cout<<"The folder \""<<m_folder<<"\" is different in COOL and CREST at timestamp: "<<vkey<<std::endl;
-	    std::cout<<"To check differences use the following command:"<<std::endl;
-	    std::cout<<"diff "<<p1<<" "<<p2<<std::endl;
+	    }
+	    if(reqUnswer){  
+	    	std::cout<<"The folder \""<<m_folder<<"\" is different in COOL and CREST at timestamp: "<<vkey<<std::endl;
+	    	std::cout<<"To check differences use the following command:"<<std::endl;
+	    	std::cout<<"diff "<<p1<<" "<<p2<<std::endl;
+	    }
      }
     }
   }
@@ -180,6 +197,7 @@ int main(int argc, char ** argv)
 	( "folder,f", boost::program_options::value<std::string>(), "name of Folder" )
         ( "timestamp,t", boost::program_options::value<std::vector<uint64_t>>()->multitoken(), "Time of data. Support multiple space separated values. Example: -t 1715204691957781740 1725204691957781740" )
 	( "tag,T",  boost::program_options::value<std::string>(), "name of Tag")
+	( "debug,d", "Debug mode")
 	( "head,H", boost::program_options::bool_switch()->default_value(false), "Use HEAD tag" );
 
     boost::program_options::variables_map arguments;
@@ -251,6 +269,9 @@ int main(int argc, char ** argv)
     }
     if (arguments.count("tag")) {
       tag = arguments["tag"].as<std::string>();
+    }
+    if (arguments.count("debug")) {
+      Crest::Logger::setLogLevel(Crest::LogLevel::DEBUG);
     }
 
     if (arguments.count("head"))
