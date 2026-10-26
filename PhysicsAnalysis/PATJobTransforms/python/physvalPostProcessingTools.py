@@ -1,6 +1,7 @@
 # Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 
 import ROOT
+import re
 import yaml
 import logging
 
@@ -43,6 +44,78 @@ def ensure_directory_exists(root_file, path):
             current.mkdir(part)
         current.cd(part)
         current = ROOT.gDirectory
+
+### --- HELPER --- ###
+_FIELD = re.compile(r"\{(\w+)\}")
+
+def histogram_paths(directory, prefix=""):
+    """Return the path of every histogram below a directory."""
+    paths = []
+    for key in directory.GetListOfKeys():
+        path = f"{prefix}/{key.GetName()}" if prefix else key.GetName()
+        # only the directories are read, so the histograms stay on disk
+        stored = ROOT.TClass.GetClass(key.GetClassName())
+        if stored.InheritsFrom(ROOT.TDirectory.Class()):
+            paths += histogram_paths(key.ReadObj(), path)
+        elif stored.InheritsFrom(ROOT.TH1.Class()):
+            paths.append(path)
+    return paths
+
+def pattern_to_regex(pattern):
+    """Turn a pattern with {field} placeholders into a regex with one group per field."""
+    regex, seen, pos = "", set(), 0
+    for field in _FIELD.finditer(pattern):
+        name = field.group(1)
+        regex += re.escape(pattern[pos:field.start()])
+        regex += f"(?P={name})" if name in seen else f"(?P<{name}>[^/]+)"
+        seen.add(name)
+        pos = field.end()
+    return re.compile(regex + re.escape(pattern[pos:]))
+
+def fill_fields(value, fields):
+    """Substitute the {field} placeholders of one fragment value."""
+    if not isinstance(value, str):
+        return value
+    return _FIELD.sub(lambda field: fields[field.group(1)], value)
+
+def empty_input(root_file, fragment, fields):
+    """Return the first of the named fragment inputs that exists but has no entries."""
+    for field in [fields] if isinstance(fields, str) else fields:
+        histo = root_file.Get(fragment[field])
+        if histo and histo.InheritsFrom(ROOT.TH1.Class()) and not histo.GetEntries():
+            return fragment[field]
+    return None
+
+def expand_fragments(fragments, root_file):
+    """Resolve the for_each patterns of a domain against the histograms in a file.
+
+    A fragment without for_each is kept as it is. One with for_each is repeated
+    once per histogram matching the pattern, with its {field} placeholders filled
+    in from the match. skip_if_empty names the inputs that a repetition needs to
+    be non-empty, which is how the selections a sample does not fill are dropped.
+    """
+    paths = None
+    expanded = []
+    for fragment in fragments:
+        pattern = fragment.get("for_each")
+        if pattern is None:
+            expanded.append(fragment)
+            continue
+        if paths is None:
+            paths = histogram_paths(root_file)
+        matches = [match.groupdict() for match in map(pattern_to_regex(pattern).fullmatch, paths) if match]
+        if not matches:
+            logging.info(f"No histogram matches '{pattern}', nothing to expand")
+        for fields in sorted(matches, key=lambda match: sorted(match.items())):
+            entry = {key: fill_fields(value, fields) for key, value in fragment.items()
+                     if key not in ("for_each", "skip_if_empty")}
+            required = fragment.get("skip_if_empty")
+            empty = empty_input(root_file, entry, required) if required else None
+            if empty:
+                logging.info(f"'{empty}' is empty, skipping '{entry['output']}'")
+                continue
+            expanded.append(entry)
+    return expanded
 
 class ConfigManager:
     def __init__(self):

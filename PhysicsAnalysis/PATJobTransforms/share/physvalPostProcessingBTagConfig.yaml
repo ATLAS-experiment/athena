@@ -1,34 +1,37 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# ROC curve: b-jet efficiency (true positive rate) on the x-axis vs. light-jet rejection (inverse of false positive rate) on the y-axis.
-# It tells how well a tagger can separate b-jets (signal) from light-flavor jets (background).
+# The entries below are templated: for_each names a histogram pattern and the entry is
+# repeated once per histogram matching it, with the {fields} filled in from the match.
+# The taggers, jet collections and working points therefore follow what the
+# reconstruction actually wrote, which differs between Run 3 and Run 4.
+
+# ROC curve: b-jet efficiency (true positive rate) on the x-axis vs. background rejection
+# (inverse of false positive rate) on the y-axis.
+# It tells how well a tagger can separate b-jets (signal) from the background flavour.
 roc_curves:
   # Signal: b-jets, Background: u/light-jets (main b vs light ROC)
-  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_u_matched_weight", output: "BTag/ROC/GN2v01"}
-  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN3EPCLV01_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN3EPCLV01_u_matched_weight", output: "BTag/ROC/GN3EPCLV01"}
+  - {for_each: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_u_matched_weight", signal: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_b_matched_weight", background: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_u_matched_weight", output: "BTag/ROC/{collection}/{tagger}_uVsb", skip_if_empty: [signal, background]}
 
-  # Signal: b-jets, Background: Charm (c) jets (c vs b rejection ROC)
-  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_c_matched_weight", output: "BTag/ROC/GN2v01_cVsb"}
-  - {signal: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN3EPCLV01_b_matched_weight", background: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN3EPCLV01_c_matched_weight", output: "BTag/ROC/GN3EPCLV01_cVsb"}
+  # Signal: b-jets, Background: charm (c) jets
+  - {for_each: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_c_matched_weight", signal: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_b_matched_weight", background: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_c_matched_weight", output: "BTag/ROC/{collection}/{tagger}_cVsb", skip_if_empty: [signal, background]}
+
+  # Signal: b-jets, Background: hadronically decaying taus
+  - {for_each: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_tau_matched_weight", signal: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_b_matched_weight", background: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_tau_matched_weight", output: "BTag/ROC/{collection}/{tagger}_tauVsb", skip_if_empty: [signal, background]}
 
 efficiencies:
-  # GN2v01 and GN3EPCLV01 tagger efficiencies (Lxy)
-  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_b_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Lxy_b", output: "BTag/Efficiency/eff_vs_Lxy_GN2v01_b-jets_70_WP"}
-  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN3EPCLV01_b_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Lxy_b", output: "BTag/Efficiency/eff_vs_Lxy_GN3EPCLV01_b-jets_70_WP"}
-  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_c_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Lxy_c", output: "BTag/Efficiency/eff_vs_Lxy_GN2v01_c-jets_70_WP"}
-  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN3EPCLV01_c_70_matched_Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_truth_Lxy_c", output: "BTag/Efficiency/eff_vs_Lxy_GN3EPCLV01_c-jets_70_WP"}
+  # b and c tagging efficiency against the truth decay length of the hadron
+  - {for_each: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_b_{wp}_matched_Lxy", numerator: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_b_{wp}_matched_Lxy", denominator: "BTag/{collection}/BTag_{collection}_truth_Lxy_b", output: "BTag/Efficiency/{collection}/eff_vs_Lxy_{tagger}_b-jets_{wp}_WP"}
+  - {for_each: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_c_{wp}_matched_Lxy", numerator: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_c_{wp}_matched_Lxy", denominator: "BTag/{collection}/BTag_{collection}_truth_Lxy_c", output: "BTag/Efficiency/{collection}/eff_vs_Lxy_{tagger}_c-jets_{wp}_WP"}
 
+  # light jets have no truth decay length, their mistag rate is monitored against the SV1 one
+  - {for_each: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_u_{wp}_matched_SV1Lxy", numerator: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_u_{wp}_matched_SV1Lxy", denominator: "BTag/{collection}/BTag_{collection}_sv1_Lxy_u", output: "BTag/Efficiency/{collection}/eff_vs_SV1Lxy_{tagger}_u-jets_{wp}_WP"}
 
-  # light-jet mistag rates vs SV1 Lxy, as a check of SV1
-  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_u_70_matched_SV1Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_sv1_Lxy_u", output: "BTag/Efficiency/eff_vs_SV1Lxy_GN2v01_u-jets_70_WP"}
-  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN3EPCLV01_u_70_matched_SV1Lxy", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_sv1_Lxy_u", output: "BTag/Efficiency/eff_vs_SV1Lxy_GN3EPCLV01_u-jets_70_WP"}
-
-  # GN2v01 and GN3EPCLV01 tagger efficiencies vs pt_ttbar
-  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_b_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_pt_ttbar_b", output: "BTag/Efficiency/eff_vs_pt_ttbar_GN2v01_b-jets_70_WP"}
-  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN3EPCLV01_b_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_pt_ttbar_b", output: "BTag/Efficiency/eff_vs_pt_ttbar_GN3EPCLV01_b-jets_70_WP"}
-  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_c_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_pt_ttbar_c", output: "BTag/Efficiency/eff_vs_pt_ttbar_GN2v01_c-jets_70_WP"}
-  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN3EPCLV01_c_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_pt_ttbar_c", output: "BTag/Efficiency/eff_vs_pt_ttbar_GN3EPCLV01_c-jets_70_WP"}
-  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN2v01_u_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_pt_ttbar_u", output: "BTag/Efficiency/eff_vs_pt_ttbar_GN2v01_u-jets_70_WP"}
-  - {numerator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_tagger_GN3EPCLV01_u_70_matched_pt_ttbar", denominator: "BTag/AntiKt4EMPFlowJets/BTag_AntiKt4EMPFlowJets_jet_pt_ttbar_u", output: "BTag/Efficiency/eff_vs_pt_ttbar_GN3EPCLV01_u-jets_70_WP"}
-
-
+  # Tagging efficiency against the jet pt, in the ttbar and in the Zprime jet selection.
+  # A sample fills only one of the two, so the entries of the other one are skipped.
+  # Taus are left out here since there is no jet_pt_<selection>_tau denominator.
+  - {for_each: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_b_{wp}_matched_pt_ttbar", numerator: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_b_{wp}_matched_pt_ttbar", denominator: "BTag/{collection}/BTag_{collection}_jet_pt_ttbar_b", output: "BTag/Efficiency/{collection}/eff_vs_pt_ttbar_{tagger}_b-jets_{wp}_WP", skip_if_empty: denominator}
+  - {for_each: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_c_{wp}_matched_pt_ttbar", numerator: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_c_{wp}_matched_pt_ttbar", denominator: "BTag/{collection}/BTag_{collection}_jet_pt_ttbar_c", output: "BTag/Efficiency/{collection}/eff_vs_pt_ttbar_{tagger}_c-jets_{wp}_WP", skip_if_empty: denominator}
+  - {for_each: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_u_{wp}_matched_pt_ttbar", numerator: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_u_{wp}_matched_pt_ttbar", denominator: "BTag/{collection}/BTag_{collection}_jet_pt_ttbar_u", output: "BTag/Efficiency/{collection}/eff_vs_pt_ttbar_{tagger}_u-jets_{wp}_WP", skip_if_empty: denominator}
+  - {for_each: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_b_{wp}_matched_pt_Zprime", numerator: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_b_{wp}_matched_pt_Zprime", denominator: "BTag/{collection}/BTag_{collection}_jet_pt_Zprime_b", output: "BTag/Efficiency/{collection}/eff_vs_pt_Zprime_{tagger}_b-jets_{wp}_WP", skip_if_empty: denominator}
+  - {for_each: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_c_{wp}_matched_pt_Zprime", numerator: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_c_{wp}_matched_pt_Zprime", denominator: "BTag/{collection}/BTag_{collection}_jet_pt_Zprime_c", output: "BTag/Efficiency/{collection}/eff_vs_pt_Zprime_{tagger}_c-jets_{wp}_WP", skip_if_empty: denominator}
+  - {for_each: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_u_{wp}_matched_pt_Zprime", numerator: "BTag/{collection}/BTag_{collection}_tagger_{tagger}_u_{wp}_matched_pt_Zprime", denominator: "BTag/{collection}/BTag_{collection}_jet_pt_Zprime_u", output: "BTag/Efficiency/{collection}/eff_vs_pt_Zprime_{tagger}_u-jets_{wp}_WP", skip_if_empty: denominator}

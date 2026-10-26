@@ -16,7 +16,8 @@ from PATJobTransforms.physvalPostProcessingTools import (
     HistogramAddition,
     HistogramBlackList,
     ResolutionComputation,
-    ROCCurveComputation
+    ROCCurveComputation,
+    expand_fragments
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -49,28 +50,30 @@ def create_output_file(input_file, output_file):
         logging.error(f"Failed to create output file: {e}")
         return None
 
+OPERATION_KEYS = ("rebinning", "resolutions", "projections", "efficiencies", "adding_histograms",
+                  "adjustments", "roc_curves", "blacklist", "rebinning_later")
+
 def process_domain(root_file, domain_config, domain):
     logging.info(f"For domain: '{domain}'")
 
-    for rebin in domain_config.get("rebinning", []): RebinningOperation.from_yaml(rebin)(root_file)
-    actions = []
-    if "resolutions" in domain_config:
-        for res in domain_config["resolutions"]: actions.append(lambda res=res: ResolutionComputation.from_yaml(res)(root_file))
-    if "projections" in domain_config:
-        for proj in domain_config["projections"]: actions.append(lambda proj=proj: ProjectionComputation.from_yaml(proj)(root_file))
-    if "efficiencies" in domain_config:
-        for eff in domain_config["efficiencies"]: actions.append(lambda eff=eff: EfficiencyComputation.from_yaml(eff)(root_file))
-    if "adding_histograms" in domain_config:
-        for add in domain_config["adding_histograms"]: actions.append(lambda add=add: HistogramAddition.from_yaml(add)(root_file))
-    if "adjustments" in domain_config:
-        for adj in domain_config["adjustments"]: actions.append(lambda adj=adj: HistogramAdjustment.from_yaml(adj)(root_file))
-    if "roc_curves" in domain_config:
-        for roc in domain_config["roc_curves"]: actions.append(lambda roc=roc: ROCCurveComputation.from_yaml(roc)(root_file))
-    for action in actions: action()
-    for list in domain_config.get("blacklist", []): HistogramBlackList.from_yaml(list)(root_file)
+    operations = {key: expand_fragments(domain_config.get(key, []), root_file) for key in OPERATION_KEYS}
+    templated = any("for_each" in fragment for fragments in domain_config.values() for fragment in fragments)
+    if templated and not any(operations.values()):
+        logging.error(f"No histogram of domain '{domain}' matched any for_each pattern")
 
-    for rebin in domain_config.get("rebinning_later", []): RebinningOperation.from_yaml(rebin)(root_file)
-    
+    for rebin in operations["rebinning"]: RebinningOperation.from_yaml(rebin)(root_file)
+    actions = []
+    for res in operations["resolutions"]: actions.append(lambda res=res: ResolutionComputation.from_yaml(res)(root_file))
+    for proj in operations["projections"]: actions.append(lambda proj=proj: ProjectionComputation.from_yaml(proj)(root_file))
+    for eff in operations["efficiencies"]: actions.append(lambda eff=eff: EfficiencyComputation.from_yaml(eff)(root_file))
+    for add in operations["adding_histograms"]: actions.append(lambda add=add: HistogramAddition.from_yaml(add)(root_file))
+    for adj in operations["adjustments"]: actions.append(lambda adj=adj: HistogramAdjustment.from_yaml(adj)(root_file))
+    for roc in operations["roc_curves"]: actions.append(lambda roc=roc: ROCCurveComputation.from_yaml(roc)(root_file))
+    for action in actions: action()
+    for list in operations["blacklist"]: HistogramBlackList.from_yaml(list)(root_file)
+
+    for rebin in operations["rebinning_later"]: RebinningOperation.from_yaml(rebin)(root_file)
+
     logging.info(f"Finished post processing for domain: '{domain}'")
 
 def main():
