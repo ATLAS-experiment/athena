@@ -10,6 +10,7 @@
 
 #include "ITkStripCabling/IITkStripCablingTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/EventContext.h"
 
 #include "ITkStripDataRateMonTool.h"
 
@@ -52,7 +53,7 @@ ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{
    * @param vecRDOs Vector containing the RDOs to be coverted to vector of 32 bit words.
    */
   virtual void fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& robID, 
-                       const std::vector<const SCT_RDORawData*>& vecRDOs) const override;
+                       const std::vector<const SCT_RDORawData*>& vecRDOs, const uint8_t& bcid, const uint8_t& l0tag ) const override;
   
 
  private:
@@ -68,9 +69,6 @@ ITkStripsRodEncoder : public extends<AthAlgTool, IITkStripsRodEncoder>{
    * @param groupSize Group size info from the RDO.
    * @param strip Strip number info from the RDO.
    */
-  
-  mutable std::atomic<uint8_t> m_bcid = 0;
-  mutable std::atomic<uint8_t> m_l0tag = 0;
 
   bool isNear(const int& eta_mod, bool isBarrel = false) const{
     if (isBarrel){

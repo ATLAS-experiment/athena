@@ -5,7 +5,7 @@
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
     flags = initConfigFlags()
-    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ITkStrip/v2/data_test.00242020.EventStorage_StreamBSFileOutput.daq.RAW._lb0010._Athena._0001.data"]
+    flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/ITkStrip/v3/data_test.00242020.EventStorage_StreamBSFileOutput.daq.RAW._lb0003._Athena._0001.data"]
     from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
     flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
     flags.Input.isMC = True

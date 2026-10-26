@@ -26,6 +26,7 @@ ITkStripsRawContByteStreamTool::ITkStripsRawContByteStreamTool(const std::string
 StatusCode 
 ITkStripsRawContByteStreamTool::initialize() {
   ATH_CHECK( m_byteStreamCnvSvc.retrieve() );
+  ATH_CHECK( m_byteStreamEventAccess.retrieve() );
   // Retrieve ID mapping
   ATH_CHECK(m_cabling.retrieve());
   ATH_MSG_DEBUG("Retrieved service " << m_cabling);
@@ -88,10 +89,17 @@ ITkStripsRawContByteStreamTool::convert(const SCT_RDO_Container* itkStripsRDOCon
     }
   }  // End loop over collections
 
+  RawEventWrite* re = m_byteStreamEventAccess->getRawEvent();
+  if (re == nullptr) {
+    ATH_MSG_ERROR("RawEventWrite is null");
+    return StatusCode::FAILURE;
+  }
+  const uint8_t bcid  = static_cast<uint8_t>(re->bc_id());
+  const uint8_t  l0tag = static_cast<uint8_t>(re->lvl1_id());
   // Now encode data for each ROD in turn
   for (const auto& rodToRDOs : rdoMap) {
     rod = fullEventAssembler->getRodData(rodToRDOs.first); // Get ROD data address
-    m_encoder->fillROD(*rod, rodToRDOs.first, rodToRDOs.second); // Encode ROD data
+    m_encoder->fillROD(*rod, rodToRDOs.first, rodToRDOs.second, bcid, l0tag); // Encode ROD data
   }
   return StatusCode::SUCCESS;
 }

@@ -99,7 +99,6 @@ StatusCode ITkStripsRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE
     ATH_MSG_DEBUG(" 16-bit word: " << std::bitset<16>(word16) << " " << (uint32_t)i << " " << total_bytes );
     
     if(i==total_bytes-2) ATH_MSG_DEBUG("nClusters found (this): " << (uint32_t)nclusters);
-    
     ATH_MSG_DEBUG("Check: " << nPacket << " Packets: " << packetSize/4 << " isHCCHeader: " << (uint32_t)isHCCHeader << " " << nPacket);
     
     if(psize != 0 && nPacket != 0){
@@ -297,33 +296,38 @@ StatusCode ITkStripsRodDecoder::processHccHeader(const uint16_t hccword1,
     ATH_MSG_DEBUG("disk     : " << std::bitset<16>((hccword1 >> 9) & 0x7) << " " << std::bitset<8>(disk));
     uint8_t inout  = ((hccword1 >> 8) & 0x1);
     ATH_MSG_DEBUG("inout    : " << std::bitset<16>((hccword1 >> 8) & 0x1) << " " << std::bitset<8>(inout));
-    uint8_t petal  = ((hccword1 >> 7) & 0x1);
-    ATH_MSG_DEBUG("petal    : " << std::bitset<16>((hccword1 >> 7) & 0x1) << " " << std::bitset<8>(petal));        
-    uint8_t phimod = hccword1 & 0x7F;
-    ATH_MSG_DEBUG("phimod   : " << std::bitset<16>(hccword1 & 0x7F) << " " << std::bitset<8>(phimod));
+    uint8_t phi_petal  = ((hccword1 >> 7) & 0x1);
+    ATH_MSG_DEBUG("phi petal: " << std::bitset<16>((hccword1 >> 7) & 0x1) << " " << std::bitset<8>(phi_petal));
+    uint8_t phihcc = hccword1 & 0x7F;
+    ATH_MSG_DEBUG("phihcc   : " << std::bitset<16>(hccword1 & 0x7F) << " " << std::bitset<8>(phihcc));
     uint8_t hccnum = word8 & 0x80;
     ATH_MSG_DEBUG("hccnum   : " << std::bitset<16>(word8 & 0x80) << " " << std::bitset<8>(hccnum));
-    uint8_t etamod = word8 & 0x3F;
-    ATH_MSG_DEBUG("etamod   : " << std::bitset<16>(word8 & 0x3F) << " " << std::bitset<8>(etamod));        
+    uint8_t eta_amod = word8 & 0x3F;
+    ATH_MSG_DEBUG("eta amod: " << std::bitset<16>(word8 & 0x3F) << " " << std::bitset<8>(eta_amod));
 
     bool isbarrel = (barrel != 0x0);
     bool issideA  = (side   != 0x0);
     bool isinout  = (inout  == 0x1);
-    bool ispetal  = (petal  == 0x1);
+    bool ispetal  = (barrel == 0x0);
     uint8_t hccN  = (hccnum == 0x80) ? 2 : 1;
 
+    uint8_t phi_mod = (!isbarrel && eta_amod > 9) ? 2 * phihcc + phi_petal : phihcc;
+    int eta_module = isbarrel ? (issideA ? static_cast<int>(eta_amod) : -static_cast<int>(eta_amod)) : static_cast<int>(eta_amod);
+
     ATH_MSG_DEBUG("isBarrel: " << isbarrel << " isSideA: " << issideA << " disk: " << (uint32_t)disk);
-    ATH_MSG_DEBUG("isInOut: " << isinout << " isPetal: " << ispetal << " phimod: " << (uint32_t)phimod);
-    ATH_MSG_DEBUG("HCCNum: " << (uint32_t)hccN << " etamod: " << (uint32_t)etamod);
+    ATH_MSG_DEBUG("isInOut: " << isinout << " isPetal: " << ispetal << " phimod: " << (uint32_t)phi_mod);
+    ATH_MSG_DEBUG("HCCNum: " << (uint32_t)hccN << " etamod: " << (int)eta_module);
 
     int barrel_ec = isbarrel ? 0 : (issideA ? 2 : -2);
 
-    const Identifier waferID = m_itkStripsID -> wafer_id(barrel_ec, disk, phimod, etamod, inout);
+    const Identifier waferID = m_itkStripsID -> wafer_id(barrel_ec, disk, phi_mod, eta_module, inout);
     const IdentifierHash offlinehash = m_itkStripsID -> wafer_hash(waferID);
     data.setCollection(m_itkStripsID, offlinehash, rdoIDCont, dataItemsPool, errs);
 
     data.side = inout;
-    ATH_MSG_DEBUG("hccheader " << isbarrel << " " << issideA << " " << (uint32_t)disk << " " << (uint32_t)inout << " " << (uint32_t)phimod << " " << (uint32_t)etamod << " " << (uint32_t)hccN );
+    
+    ATH_MSG_DEBUG("hccheader " << isbarrel << " " << issideA << " " << (uint32_t)disk << " "
+                  << (uint32_t)inout << " " << (uint32_t)phi_mod << " " << (uint32_t)eta_module << " " << (uint32_t)hccN );
   }  
   else isHCCHeader++;
 
@@ -353,7 +357,8 @@ StatusCode ITkStripsRodDecoder::processHeader(const uint16_t word16,
   uint8_t bcid_low  = (word16 >> 1)  & 0x7;   // bits [3:1]
   uint8_t bcid_xor  = word16 & 0x1;           // bits [0]
 
-  ATH_MSG_DEBUG("l0tag: " << (uint32_t)l0tag << " bcid_low: " << (uint32_t)bcid_low << " bcid_xor: " << (uint32_t)bcid_xor << " type: " << (uint32_t)type << " word16: " << std::bitset<16>(word16));
+  ATH_MSG_DEBUG("l0tag: " << (uint32_t)l0tag << " bcid_low: " << (uint32_t)bcid_low << " bcid_xor: " << (uint32_t)bcid_xor
+                << " type: " << (uint32_t)type << " word16: " << std::bitset<16>(word16));
   
   if (type == 0x01) {  // PR Header
     constexpr bool breakHere{false};
@@ -363,7 +368,7 @@ StatusCode ITkStripsRodDecoder::processHeader(const uint16_t word16,
   } else {
     ATH_MSG_WARNING("Unexpected packet type (not PR): 0x" << std::hex << int(type));
     return sc;
-  }        
+  }
 
   // Create the last RDO of the previous link if any
   if (data.isStripValid()) {
@@ -462,25 +467,33 @@ StatusCode ITkStripsRodDecoder::processHits(const uint16_t word16,
   if(thirdhit) {
     addr = address+3;
     stripN3 = 2*addr + (isSecondRow ? 1 : 0);
-  }
+  } 
 
+  ATH_MSG_DEBUG("Consecutive strips: " << (uint32_t)stripN1 << " " << (uint32_t)stripN2 << " " << (uint32_t)stripN3);
+  const std::array<bool, 4> hits_n = {true , static_cast<bool>(firsthit),
+                                      static_cast<bool>(secondhit),
+                                      static_cast<bool>(thirdhit)};
   //int strip_logical_channel = 2*address + (isSecondRow ? 1 : 0); // May be needed later
-  data.strip = nchip * 128 + address;
 
-  ATH_MSG_DEBUG("abcclusters " << (uint32_t)nchip << " " << (uint32_t)data.strip << " " << (uint32_t)(stripN1) << " " << (uint32_t)(stripN2) << " " << (uint32_t)(stripN3)); 
+  for (int i = 0; i < 4; i++){
+    if (!hits_n[i]){
+      continue;
+    }
+    data.strip = nchip * 128 + (address + i);
 
-  data.groupSize = 1;
-  if (thirdhit) data.groupSize = 4;
-  else if (secondhit) data.groupSize = 3;
-  else if (firsthit) data.groupSize = 2;
+    ATH_MSG_DEBUG("abcclusters " << (uint32_t)nchip << " " << (uint32_t)data.strip);
 
-  const int rdoMade = makeRDO(data, cache, dataItemsPool);
-  if (rdoMade == -1) {
-      hasError = true;
-      ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
-  } else {
-    data.setSaved(rdoMade);
+    data.groupSize = 1;
+
+    const int rdoMade = makeRDO(data, cache, dataItemsPool);
+    if (rdoMade == -1) {
+        hasError = true;
+        ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
+    } else {
+      data.setSaved(rdoMade);
+    }
   }
+
   return sc;
 }
 

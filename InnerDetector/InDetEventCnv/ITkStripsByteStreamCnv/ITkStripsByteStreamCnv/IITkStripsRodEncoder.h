@@ -38,7 +38,9 @@ class IITkStripsRodEncoder : virtual public IAlgTool
 
   /** Convert method */
   virtual void fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& robID, 
-                       const std::vector<const SCT_RDORawData*>& vecRDOs) const = 0;
+                       const std::vector<const SCT_RDORawData*>& vecRDOs,
+                       const uint8_t& bcid,
+                       const uint8_t& l0tag) const = 0;
 }; 
 
 #endif 

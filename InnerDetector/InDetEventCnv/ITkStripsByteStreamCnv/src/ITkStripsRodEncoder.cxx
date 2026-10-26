@@ -40,7 +40,7 @@ namespace { // Anonymous namespace
     return rodLink;
   }
   uint32_t
-  hccKey(int barrelEC, uint8_t side, uint8_t disk, uint8_t phi_mod, int eta_mod, uint8_t eta_group){
+  hccKey(int barrelEC, uint8_t side, uint8_t disk, uint8_t phi_mod, int eta_mod, uint8_t eta_group, int chip){
     
     uint32_t hcckey = 0, mask = 1;
     uint8_t  sideAC = 0;
@@ -62,21 +62,29 @@ namespace { // Anonymous namespace
     if(side==1) hcckey = hcckey | (mask << 16);
 
     //Set the petal bit (0 for barrel)
-    if(barrelEC!=0) hcckey = hcckey | (mask << 15);
-    
+    if(barrelEC!=0 && eta_group > 2 && (phi_mod & 1)) {
+      hcckey = hcckey | (mask << 15);   // S0, S1
+    }
+
     //Set the phi module number
+    if (barrelEC!=0 && eta_group > 2) {
+      phi_mod = static_cast<uint8_t>(std::floor(phi_mod / 2)); // R3, R4, R5
+    }
+
     hcckey = hcckey | (phi_mod<<8);
 
     //Set the HCC number    
     if(disk<2 && barrelEC==0) {
       hasTwoHccs = true;
-    }else if(eta_group!=2 && barrelEC!=0){
+    }else if(barrelEC!=0){
       hasTwoHccs = true;
     }
         
     eta_mod = std::abs(eta_mod);
     //This is to get the right Hcc number (1 or 2) per module algorithmically could try to improve this in the future
-    if ( hasTwoHccs && ( ((eta_mod-1)/2.0 >= 2*eta_group+1  && barrelEC==0) || ((((eta_mod/2.0 >= 2*eta_group+1) && eta_mod<=7) || ((eta_mod/2.0 >= 2*eta_group) && (eta_mod>=10 && eta_mod<=13))) && barrelEC!=0))){
+    if ( hasTwoHccs &&
+      ( ((eta_mod-1)/2.0 >= 2*eta_group+1  && barrelEC==0) ||
+      ((((eta_mod/2.0 >= 2*eta_group+1) && eta_mod<=7) || ((eta_mod/2.0 >= 2*eta_group) && (eta_mod>=10 && eta_mod<=13)) || (eta_group == 2 && chip > 5))  && barrelEC!=0))){
        hcckey = hcckey | (mask << 7);
     }
     
@@ -110,6 +118,7 @@ ITkStripsRodEncoder::initialize() {
   if (not m_dataRateMonTool.empty())
       ATH_CHECK(m_dataRateMonTool.retrieve());
   
+  
   ATH_MSG_DEBUG("Initialization was successful");
   return StatusCode::SUCCESS;
 }
@@ -118,9 +127,9 @@ ITkStripsRodEncoder::initialize() {
 
 void
 ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& robID,
-                             const std::vector<const SCT_RDORawData*>& vecRDOs) const {
+                             const std::vector<const SCT_RDORawData*>& vecRDOs, 
+                             const uint8_t& bcid, const uint8_t& l0tag) const {
   //code to be filled here
-
   std::unordered_map<uint32_t, std::vector<std::bitset<256>>> allStripData;
   std::unordered_map<uint32_t, IdentifierHash> keyToHash;  
 
@@ -133,7 +142,10 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& r
     uint8_t disk = getDiskLayer(rdo);
     uint8_t phi_mod = getPhiModule(rdo);
     uint16_t strip_max = getStripMax(rdo);
-    
+    int strip = getStrip(rdo);
+    uint8_t chips_per_module = (strip_max + 1) / 128;
+    int chip = static_cast<int>(std::floor(strip / 128));
+
     if (strip_max == 0xFFFF){
       //To do: Implement workaround
       const Identifier rdoID{rdo->identify()};
@@ -158,12 +170,16 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& r
       else if(eta_mod>13) eta_group = static_cast<uint8_t>(std::floor((eta_mod-6)/2));      
     }    
 
-    uint8_t chips_per_module = (strip_max + 1) / 128;
-    uint32_t key = hccKey(barrelEC, side, disk, phi_mod, eta_mod, eta_group);
-
+    uint32_t key = hccKey(barrelEC, side, disk, phi_mod, eta_mod, eta_group, chip);
+    
     offlineHash = m_itkStripsID->wafer_hash(offlineID(rdo));
     keyToHash.insert({key,offlineHash});
-    ATH_MSG_DEBUG("barrel: "<< barrelEC<<" sideAC: " << (uint32_t)sideAC << " disk: "<<(uint32_t)disk << " side: " << (uint32_t)side <<" phi_mod: "<<(uint32_t)phi_mod << " eta_mod: " << eta_mod << " eta group: "<<(uint32_t)eta_group << " chips per module: " << (uint32_t)chips_per_module << " " << (uint32_t)robID << " " << (uint32_t)m_itkStripsID->wafer_hash(offlineID(rdo)));
+    
+    ATH_MSG_DEBUG("barrel: "<< barrelEC<<" sideAC: " << (uint32_t)sideAC 
+                  << " disk: "<<(uint32_t)disk << " side: " << (uint32_t)side 
+                  <<" phi_mod: "<<(uint32_t)phi_mod << " eta_mod: " << eta_mod 
+                  << " eta group: "<<(uint32_t)eta_group << " chips per module: " << (uint32_t)chips_per_module 
+                  << " " << (uint32_t)robID << " " << (uint32_t)m_itkStripsID->wafer_hash(offlineID(rdo)));
     ATH_MSG_DEBUG("key: " << std::bitset<32>(key));
     auto& StripData = allStripData[key];
 
@@ -172,8 +188,6 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& r
     }
      
     //Populate the bitset for each chip with active strips
-    int strip = getStrip(rdo);
-    int chip = static_cast<int>(std::floor(strip / 128));
     int strip_position = strip % 128;
     int strip_logical_channel = 2*strip_position + (isNear(eta_mod, barrelEC == 0)? 0 : 1);
 
@@ -189,7 +203,6 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& r
 
   //Iterate over processed strip data and find clusters
   for (const auto& [key, StripData] : allStripData) {
-    
     uint16_t ichannel = 0;
     uint16_t size = 1;
     int ptype = 1;
@@ -214,8 +227,8 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& r
         ++ichannel;
         continue;
       } 
-      uint32_t hccKey = (keyRecorded) ? 0 : key;        
-      encodeData(clusters, ichannel, vec8Data, ptype, m_l0tag , m_bcid, hccKey, size);
+      uint32_t hccKey = (keyRecorded) ? 0xFFFFFFFF : key;        
+      encodeData(clusters, ichannel, vec8Data, ptype, l0tag , bcid, hccKey, size);
       keyRecorded = true;      
       ++ichannel;++size;
     }
@@ -240,15 +253,12 @@ ITkStripsRodEncoder::fillROD(std::vector<uint32_t>& vec32Data, const uint32_t& r
     
     ATH_MSG_DEBUG("vec8Data size: " << vec8Data.size() << " size: " << size-1);
     packFragments(vec8Data,vec32Data);
+
     if (not m_dataRateMonTool.empty()) {
       m_dataRateMonTool->fill(keyToHash[key], vec32Data, allStripData[key]);
     }
     vec32Data.clear();
   }
-
-  //Update BCID and L0Tag counters
-  m_bcid = (m_bcid + 1) & 0x7F;
-  m_l0tag = (m_l0tag + 1) & 0x7F;
 
   ATH_MSG_DEBUG("vec8Data size: " << vec8Data.size());
 
@@ -265,7 +275,7 @@ ITkStripsRodEncoder::encodeData(const std::vector<uint16_t>& clusters, const uin
                                 int ptyp, uint8_t l0tag, uint8_t bc_count, uint32_t hccKey, uint16_t& size) const {
 
 
-  if(hccKey!=0){
+  if(hccKey!=0xFFFFFFFF){
     ATH_MSG_DEBUG("hccKey: " << std::bitset<32>(hccKey));
     ATH_MSG_DEBUG("hccKey 8-bit word-4: "<<std::bitset<8>(hccKey));        
     ATH_MSG_DEBUG("hccKey 8-bit word-3: "<<std::bitset<8>(hccKey>>24));
@@ -503,6 +513,7 @@ uint16_t
 ITkStripsRodEncoder::getHeaderPhysicsPacket(int typ, uint8_t l0tag, uint8_t bc_cout) const {
   uint8_t bcid_low = bc_cout & 0x7; // BCID[2:0]
   bool bc_parity = getParity_8bits(bc_cout);
+
   //TYPE (4 bits) + FlagBit (1 bit) + L0tag (7 bits) + BCID (3 bits) + Parity (1 bit)
   const uint16_t Header{static_cast<uint16_t>(((uint8_t)typ << 12) | (0x1 << 11) | (l0tag & 0x7f) << 4 | (bcid_low) << 1 | bc_parity)};
   return Header;
