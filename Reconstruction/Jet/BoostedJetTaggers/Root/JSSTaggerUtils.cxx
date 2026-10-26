@@ -1165,6 +1165,17 @@ StatusCode JSSTaggerUtils::GetPolarisationScore(const xAOD::JetContainer& jets) 
       decConstScore_phi2(*jet) = scores.at(5);
       decConstScore_cosT(*jet) = scores.at(6);
     }
+    // binary classification + regression
+    else if(scores.size() == 8){
+      decConstScore_wl(*jet) = scores.at(0);
+      decConstScore_pT1(*jet) = scores.at(1);
+      decConstScore_eta1(*jet) = scores.at(2);
+      decConstScore_phi1(*jet) = scores.at(3);
+      decConstScore_pT2(*jet) = scores.at(4);
+      decConstScore_eta2(*jet) = scores.at(5);
+      decConstScore_phi2(*jet) = scores.at(6);
+      decConstScore_cosT(*jet) = scores.at(7);
+    }
     // multiclass + regression
     else if(scores.size() == 12){
       decConstScore_qg(*jet) = scores.at(0);
