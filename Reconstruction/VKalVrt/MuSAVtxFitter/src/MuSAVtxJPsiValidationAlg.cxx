@@ -55,6 +55,14 @@ StatusCode MuSAVtxJPsiValidationAlg::initialize() {
     ATH_CHECK(m_JPsiFinderTool.retrieve());
     ATH_MSG_DEBUG("Retrieved J/Psi finder tool: " << m_JPsiFinderTool);
 
+    ATH_CHECK(m_tdt.retrieve(DisableTool{m_triggerChains.empty()}));
+    ATH_CHECK(m_matchTool.retrieve(DisableTool{m_triggerChains.empty()}));
+
+    for(const std::string& chain : m_triggerChains) {
+      m_trigDecorKeys.emplace_back(m_JPsiVertexContainer, std::format("muonsMathced_{:}", chain));
+    }
+    ATH_CHECK(m_trigDecorKeys.initialize());
+
     ATH_MSG_DEBUG("Initialization successful");
 
     return StatusCode::SUCCESS;
@@ -91,8 +99,16 @@ StatusCode MuSAVtxJPsiValidationAlg::execute(const EventContext& ctx) {
         ATH_MSG_DEBUG("Found " << jpsiVtxs->size() << " J/Psi candidates");
   }
 
+  // Create all trigger decor handles once, outside the vertex loop
+  std::vector<SG::WriteDecorHandle<xAOD::VertexContainer, char>> decors;
+  decors.reserve(m_trigDecorKeys.size());
+  for (const auto& key : m_trigDecorKeys){
+    decors.emplace_back(key, ctx);
+  }
+  
   for (const xAOD::Vertex* vtx : *jpsiVtxs) {
     const auto& links = vtx->trackParticleLinks();
+    std::vector<char> isTriggerMatched(m_triggerChains.size(), 0);
     if (links.size() == 2) {
       const xAOD::TrackParticle* tp1 = links[0].isValid() ? *links[0] : nullptr;
       const xAOD::TrackParticle* tp2 = links[1].isValid() ? *links[1] : nullptr;
@@ -110,6 +126,18 @@ StatusCode MuSAVtxJPsiValidationAlg::execute(const EventContext& ctx) {
 
       if (mu1) JPsiMuonContainer->push_back(new xAOD::Muon(*mu1));
       if (mu2) JPsiMuonContainer->push_back(new xAOD::Muon(*mu2));
+      
+      if(mu1 && mu2) {
+        for(size_t iChain = 0; iChain < m_triggerChains.size(); ++iChain) {
+          const std::string& chain = m_triggerChains[iChain];
+          if (m_tdt->isPassed(chain)) {
+              // Check for matching muons
+              bool matched = m_matchTool->match(std::vector<const xAOD::IParticle*>{mu1, mu2}, chain, m_dR);
+              ATH_MSG_DEBUG("Trigger chain " << chain << " matched: " << (matched ? "Yes" : "No"));
+              isTriggerMatched[iChain] = matched;
+          }
+        }
+      }
     }
 
     // vertices right out of JPsiFinder have vxTrackAtVertex decorators that can't be saved to container
@@ -122,6 +150,11 @@ StatusCode MuSAVtxJPsiValidationAlg::execute(const EventContext& ctx) {
     newVtx->setCovariance(vtx->covariance());
     newVtx->setFitQuality(vtx->chiSquared(), vtx->numberDoF());
     newVtx->setVertexType(vtx->vertexType());
+
+    //add trigger matching decorations to the new vertex
+    for (size_t iChain = 0; iChain < m_triggerChains.size(); ++iChain) {
+        decors[iChain](*newVtx) = isTriggerMatched[iChain];
+    }
 
     // copy track particle links
     for (const auto& link : vtx->trackParticleLinks()) {
