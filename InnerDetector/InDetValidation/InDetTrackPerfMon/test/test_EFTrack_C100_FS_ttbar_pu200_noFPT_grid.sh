@@ -3,6 +3,8 @@
 # art-type: grid
 # art-memory: 6144
 # art-include: main/Athena
+# art-input: valid1.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8586_s4680_r17880
+# art-input-nfiles: 1
 # art-output: IDTPM.*.root
 # art-output: *.json
 # art-output: *.xml
