@@ -6,30 +6,13 @@ set to `$TRITON_URL` with port set to `$TRITON_PORT` as used below.
 
 ## Setting up the backend
 
-The backend can be setup on the EF tracking testbed using the following instructions. First, pull
-the image with:
+To run the server, all that is needed is:
 
-```bash
-apptainer pull --disable-cache <PATH_TO_EOS>/traccc-aas.sif \
-    docker://milescb/traccc-aas:send_cell_buffer_traccc_v1.6.0_triton26.06
+```sh
+tritonserver --model-repository=${WorkDir_DIR:-$Athena_DIR}/data/TracccTritonBackend/models
 ```
 
-You'll need to get the `ITk` geometry files, which is possible by being a memeber of the 
-`atlas-tdaq-phase2-EFTracking-developers` e-group. To mount these files in the image run:
-
-```bash
-# needed for proper mounting from eos
-mkdir -p /tmp/$USER/itk-geo
-cp /eos/project/a/atlas-eftracking/GPU/ITk_data/FinalReport/* /tmp/$USER/itk-geo/
-
-# launch the container
-apptainer run --nv \
-    --bind /tmp/$USER/itk-geo:/traccc/itk-geometry:ro \
-    <PATH_TO_EOS>/traccc-aas.sif bash
-```
-
-Once in the container, run `tritonserver --model-repository=/traccc-aaS/traccc-aaS/backend/models/`. 
-If things have worked properly, you should see in the output somewhere
+A successful start ends with the below somewhere in the output
 
 ```
 +------------+---------+--------+
@@ -38,6 +21,8 @@ If things have worked properly, you should see in the output somewhere
 | traccc-gpu | 1       | READY  |
 +------------+---------+--------+
 ```
+
+For more details, the backend is build from the `Trigger/EFTracking/TracccTritonBackend` package.
 
 ## Running the client
 

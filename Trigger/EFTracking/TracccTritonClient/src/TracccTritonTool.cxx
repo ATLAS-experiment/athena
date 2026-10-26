@@ -4,6 +4,8 @@
 
 #include "TracccTritonTool.h"
 
+#include "AthenaKernel/ExtendedEventContext.h"
+
 #include <chrono>
 
 TracccTritonTool::TracccTritonTool(const std::string& type, const std::string& name, const IInterface* parent)
@@ -20,6 +22,7 @@ StatusCode TracccTritonTool::initialize() {
 }
 
 StatusCode TracccTritonTool::getTracks(
+    const EventContext& ctx,
     std::vector<uint8_t>& cellBytes,
     TracccTritonResult& result
 ) const {
@@ -29,6 +32,20 @@ StatusCode TracccTritonTool::getTracks(
     inputData["CELLS"] = std::make_pair(
         std::vector<int64_t>{static_cast<int64_t>(cellBytes.size())},
         cellBytes);
+
+    // The IOV the server looks the event's conditions up for: run,
+    // lumiblock, time stamp [s], time stamp ns offset, conditions run (the
+    // MC override of the run number)
+    const EventIDBase& eventID = ctx.eventID();
+    std::vector<int64_t> iov{
+        eventID.run_number(), eventID.lumi_block(), eventID.time_stamp(),
+        eventID.time_stamp_ns_offset(),
+        Atlas::getExtendedEventContext(ctx).conditionsRun()};
+    ATH_MSG_DEBUG("Sending event IOV run " << iov[0] << " lb " << iov[1]
+                  << " time stamp " << iov[2] << "." << iov[3]
+                  << " conditions run " << iov[4]);
+    inputData["EVENT_IOV"] = std::make_pair(
+        std::vector<int64_t>{static_cast<int64_t>(iov.size())}, std::move(iov));
 
     // Every output is one serialized traccc EDM collection
     AthInfer::OutputDataMap outputData;

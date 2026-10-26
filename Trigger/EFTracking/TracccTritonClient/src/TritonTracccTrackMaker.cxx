@@ -54,7 +54,7 @@ StatusCode TritonTracccTrackMaker::execute(const EventContext& ctx) const
     // Run the reconstruction on the server
     auto traccc_start = std::chrono::high_resolution_clock::now();
     TracccTritonResult result;
-    ATH_CHECK(m_tracccTrackingTool->getTracks(cells_buffer, result));
+    ATH_CHECK(m_tracccTrackingTool->getTracks(ctx, cells_buffer, result));
     auto traccc_end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> traccc_time = traccc_end - traccc_start;
     ATH_MSG_INFO("Traccc total inference time: " << traccc_time.count() << " ms");

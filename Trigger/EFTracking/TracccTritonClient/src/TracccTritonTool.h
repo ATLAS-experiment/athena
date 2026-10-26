@@ -27,11 +27,13 @@ public:
 
     /**
      * @brief Reconstruct the tracks of one event on the server.
+     * @param ctx event context for IOV sennding
      * @param cellBytes serialized traccc silicon_cell_collection, forwarded to
      * the server as a single UINT8 tensor.
      * @param result the serialized collections the server returned
      */
     virtual StatusCode getTracks(
+        const EventContext& ctx,
         std::vector<uint8_t>& cellBytes,
         TracccTritonResult& result) const override;
 

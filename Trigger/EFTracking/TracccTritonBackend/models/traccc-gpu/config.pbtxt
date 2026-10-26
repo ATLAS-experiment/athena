@@ -1,0 +1,48 @@
+
+backend: "traccc"
+max_batch_size: 0
+
+input [
+  {
+    name: "CELLS"
+    data_type: TYPE_UINT8
+    dims: [ -1 ]
+  },
+  {
+    name: "EVENT_IOV"
+    data_type: TYPE_INT64
+    dims: [ 5 ]
+  }
+]
+
+# Every output is one traccc EDM collection, serialized with
+# TracccTritonClient/TracccEdmSerialization.h
+output [
+  {
+    name: "MEASUREMENTS"
+    data_type: TYPE_UINT8
+    dims: [ -1 ]
+  },
+  {
+    name: "CLUSTERS"
+    data_type: TYPE_UINT8
+    dims: [ -1 ]
+  },
+  {
+    name: "TRACKS"
+    data_type: TYPE_UINT8
+    dims: [ -1 ]
+  },
+  {
+    name: "TRACK_STATES"
+    data_type: TYPE_UINT8
+    dims: [ -1 ]
+  }
+]
+
+instance_group [
+  {
+    count: 1
+    kind: KIND_GPU
+  }
+]
