@@ -261,7 +261,7 @@ namespace MC
     return EndVert;
   }
 
-  /// @brief Function to find the stable particle descendants of the given vertex..
+  /// @brief Function to find the stable particle descendants of the given vertex.
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/
   template <class V> auto findFinalStateParticles(V theVert) -> decltype(theVert->particles_out()) {
     if (!theVert) return {};
@@ -280,10 +280,19 @@ namespace MC
     }
     return finalStatePart;
   }
-#if !defined(XAOD_ANALYSIS)
-#include "AtlasHepMC/GenEvent.h"
-inline void GeVToMeV(HepMC::GenEvent* evt) { for (auto& p: evt->particles()) { p->set_momentum(p->momentum()*1000); p->set_generated_mass(1000* p->generated_mass());}}
-inline void MeVToGeV(HepMC::GenEvent* evt) { for (auto& p: evt->particles()) { p->set_momentum(p->momentum()*1.0/1000); p->set_generated_mass(1.0/1000* p->generated_mass());} }
-#endif
+  /// @brief Scales the momentum four-vector and generated mass of every particle
+  /// in the event by a factor of 1000. Does *not* change the GenEvent::Units.
+  /// Meant to be used to fix bugged events. Use GenEvent::set_units to change units in correct events. 
+  /// @param evt Pointer to the event whose particle quantities are to be scaled.
+  template <typename E>
+  inline void GeVToMeV(E* evt) { for (auto& p: evt->particles()) { p->set_momentum(p->momentum()*1000); p->set_generated_mass(1000* p->generated_mass());} }
+
+  /// @brief Scales the momentum four-vector and generated mass of every particle
+  /// in the event by a factor of 1.0/1000. Does *not* change the GenEvent::Units.
+  /// Meant to be used to fix bugged events. Use GenEvent::set_units to change units in correct events. 
+  /// @param evt Pointer to the event whose particle quantities are to be scaled.
+  template <typename E>
+  inline void MeVToGeV(E* evt) { for (auto& p: evt->particles()) { p->set_momentum(p->momentum()*1.0/1000); p->set_generated_mass(1.0/1000* p->generated_mass());} }
+
 }
 #endif
