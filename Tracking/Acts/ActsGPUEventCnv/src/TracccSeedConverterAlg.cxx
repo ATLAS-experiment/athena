@@ -129,7 +129,7 @@ StatusCode TracccSeedConverterAlg::finalize()
 {
     ATH_MSG_DEBUG("Finalizing.");
 
-    ATH_MSG_DEBUG("Received " << m_nSP << " spacepoints and " << m_nSeeds << " seeds.");
+    ATH_MSG_INFO("Received " << m_nSP << " spacepoints and " << m_nSeeds << " seeds.");
 
     ATH_MSG_DEBUG("Successfully finalized");
     return StatusCode::SUCCESS;
