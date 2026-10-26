@@ -25,7 +25,10 @@
 #include "Acts/Utilities/AxisDefinitions.hpp"
 #include "Acts/Utilities/AxisSpec.hpp"
 #include <cstddef>
+#include <cstdint>
 #include <format>
+#include <limits>
+#include <optional>
 #include <ranges>
 
 #include "Acts/Geometry/VolumeResizeStrategy.hpp"
@@ -48,6 +51,18 @@ using AttachmentStrategy = Acts::VolumeAttachmentStrategy;
 using ResizeStrategy = Acts::VolumeResizeStrategy;
 using namespace ActsTrk::detail::GeoVolIds;
 
+
+/// Convert a {max0, max1} bin count property into a neighbor window without a floor
+std::optional<Acts::SurfaceArray::NeighborWindow> toNeighborWindow(
+    const std::vector<unsigned int>& maxBins) {
+  constexpr unsigned int limit = std::numeric_limits<std::uint8_t>::max();
+  if (maxBins.size() != 2 || maxBins[0] > limit || maxBins[1] > limit) {
+    return std::nullopt;
+  }
+  return Acts::SurfaceArray::NeighborWindow{
+      {0, 0},
+      {static_cast<std::uint8_t>(maxBins[0]), static_cast<std::uint8_t>(maxBins[1])}};
+}
 
 // Helper struct to keep ProtoLayer and its associated surfaces together
 struct LayerData {
@@ -105,18 +120,17 @@ std::vector<LayerData> mergeLayers(const Acts::GeometryContext& gctx,
 
 void addStripBarrelLayer(
     Acts::BlueprintNode& parent, std::size_t ilayer,
-    const std::vector<std::shared_ptr<Acts::Surface>>& surfaces) {
+    const std::vector<std::shared_ptr<Acts::Surface>>& surfaces,
+    const Acts::SurfaceArrayNavigationPolicy::Config& surfaceArrayConfig) {
   using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
   using enum Acts::CylinderVolumeBounds::Face;
   using enum Acts::AxisDirection;
 
-  auto addLayer = [ilayer, &surfaces](auto& node) {
+  auto addLayer = [ilayer, &surfaces, &surfaceArrayConfig](auto& node) {
     node.addLayer(std::format("Strip_Brl_{:}", ilayer), [&](auto& layer) {
       layer.setNavigationPolicyFactory(
           Acts::NavigationPolicyFactory{}
-              .add<Acts::SurfaceArrayNavigationPolicy>(
-                  Acts::SurfaceArrayNavigationPolicy::Config{
-                      .layerType = Cylinder, .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+              .add<Acts::SurfaceArrayNavigationPolicy>(surfaceArrayConfig)
               .add<Acts::CylinderNavigationPolicy>()
               .asUniquePtr());
 
@@ -157,7 +171,8 @@ void addStripBarrelLayer(
 
 void addStripEndcapLayer(
     Acts::BlueprintNode& parent, const std::string& name,
-    const std::vector<std::shared_ptr<Acts::Surface>>& surfaces, int bec) {
+    const std::vector<std::shared_ptr<Acts::Surface>>& surfaces, int bec,
+    const Acts::SurfaceArrayNavigationPolicy::Config& surfaceArrayConfig) {
   using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
   using enum Acts::CylinderVolumeBounds::Face;
   using enum Acts::AxisDirection;
@@ -174,12 +189,10 @@ void addStripEndcapLayer(
                       AxisSpec::DeferredEquidistant(50, AxisPhi),
                       materialName);
 
-    mat.addLayer(name, [&surfaces](auto& layer) {
+    mat.addLayer(name, [&surfaces, &surfaceArrayConfig](auto& layer) {
       layer.setNavigationPolicyFactory(
           Acts::NavigationPolicyFactory{}
-              .add<Acts::SurfaceArrayNavigationPolicy>(
-                  Acts::SurfaceArrayNavigationPolicy::Config{.layerType = Disc,
-                                                             .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+              .add<Acts::SurfaceArrayNavigationPolicy>(surfaceArrayConfig)
               .add<Acts::CylinderNavigationPolicy>()
               .asUniquePtr());
 
@@ -196,6 +209,23 @@ void addStripEndcapLayer(
 namespace ActsTrk {
 
 StatusCode ItkBlueprintNodeBuilder::initialize() {
+  for (const Gaudi::Property<std::vector<unsigned int>>* window :
+       {&m_itkPixelInnerBarrelNeighborWindow, &m_itkPixelInnerEndcapNeighborWindow,
+        &m_itkPixelOuterBarrelNeighborWindow, &m_itkPixelOuterEndcapNeighborWindow,
+        &m_itkStripBarrelNeighborWindow, &m_itkStripEndcapNeighborWindow}) {
+    if (!toNeighborWindow(window->value()).has_value()) {
+      ATH_MSG_FATAL((*window)
+                    << " must hold two bin counts of at most "
+                    << static_cast<unsigned int>(std::numeric_limits<std::uint8_t>::max()));
+      return StatusCode::FAILURE;
+    }
+  }
+  if (m_surfaceArrayOverfill.value() > std::numeric_limits<std::uint8_t>::max()) {
+    ATH_MSG_FATAL(m_surfaceArrayOverfill
+                  << " exceeds " << static_cast<unsigned int>(std::numeric_limits<std::uint8_t>::max()));
+    return StatusCode::FAILURE;
+  }
+
   // Retrieve the detector managers from the detector store for enabled systems
   if (m_buildPixel) {
     ATH_CHECK(detStore()->retrieve(m_itkPixelMgr, "ITkPixel"));
@@ -205,6 +235,18 @@ StatusCode ItkBlueprintNodeBuilder::initialize() {
   }
   m_elementStore = std::make_shared<ActsElementVector>();
   return StatusCode::SUCCESS;
+}
+
+Acts::SurfaceArrayNavigationPolicy::Config
+ItkBlueprintNodeBuilder::surfaceArrayConfig(
+    Acts::SurfaceArrayNavigationPolicy::LayerType layerType,
+    const Gaudi::Property<std::vector<unsigned int>>& neighborWindow) const {
+  return Acts::SurfaceArrayNavigationPolicy::Config{
+      .layerType = layerType,
+      .bins = {0, 0},
+      .numberOfBinsFactor = 5.0,
+      .neighborWindow = *toNeighborWindow(neighborWindow.value()),
+      .overfill = static_cast<std::uint8_t>(m_surfaceArrayOverfill.value())};
 }
 
 std::shared_ptr<Acts::BlueprintNode>
@@ -393,10 +435,8 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
         auto& layer = node.addLayer(std::format("InnerPixel_Brl_{}", ilayer));
         layer.setNavigationPolicyFactory(
             Acts::NavigationPolicyFactory{}
-                .add<Acts::SurfaceArrayNavigationPolicy>(
-                    Acts::SurfaceArrayNavigationPolicy::Config{
-                        .layerType = Cylinder,
-                        .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+                .add<Acts::SurfaceArrayNavigationPolicy>(surfaceArrayConfig(
+                    Cylinder, m_itkPixelInnerBarrelNeighborWindow))
                 .add<Acts::CylinderNavigationPolicy>()
                 .asUniquePtr());
         layer.setSurfaces(surfaces);
@@ -504,15 +544,13 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
         pl.protoLayer.medium(AxisZ);
         auto layerName = std::format("InnerPixel_{}EC_{}", key, s);
 
-        auto addLayer = [&layerName, &pl](auto& parent) {
+        auto addLayer = [this, &layerName, &pl](auto& parent) {
           auto& layer = parent.addLayer(layerName);
 
           layer.setNavigationPolicyFactory(
               Acts::NavigationPolicyFactory{}
-                  .add<Acts::SurfaceArrayNavigationPolicy>(
-                      Acts::SurfaceArrayNavigationPolicy::Config{
-                          .layerType = Disc,
-                          .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+                  .add<Acts::SurfaceArrayNavigationPolicy>(surfaceArrayConfig(
+                      Disc, m_itkPixelInnerEndcapNeighborWindow))
                   .add<Acts::CylinderNavigationPolicy>()
                   .asUniquePtr());
 
@@ -620,10 +658,8 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
         auto& layer = node.addLayer(std::format("OuterPixel_Brl_{:}", ilayer));
         layer.setNavigationPolicyFactory(
             Acts::NavigationPolicyFactory{}
-                .add<Acts::SurfaceArrayNavigationPolicy>(
-                    Acts::SurfaceArrayNavigationPolicy::Config{
-                        .layerType = Cylinder,
-                        .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+                .add<Acts::SurfaceArrayNavigationPolicy>(surfaceArrayConfig(
+                    Cylinder, m_itkPixelOuterBarrelNeighborWindow))
                 .add<Acts::CylinderNavigationPolicy>()
                 .asUniquePtr());
         layer.setSurfaces(surfaces);
@@ -653,14 +689,15 @@ void ItkBlueprintNodeBuilder::buildItkPixelBlueprintNode(
       }
     }
 
-    constexpr static auto addEndcapLayer = [](auto& parent, const auto& name,
-                                              const auto& surfaces) {
-      parent.addLayer(name, [&surfaces](auto& layer) {
+    const auto endcapSurfaceArrayConfig =
+        surfaceArrayConfig(Disc, m_itkPixelOuterEndcapNeighborWindow);
+    auto addEndcapLayer = [&endcapSurfaceArrayConfig](
+                              auto& parent, const auto& name,
+                              const auto& surfaces) {
+      parent.addLayer(name, [&surfaces, &endcapSurfaceArrayConfig](auto& layer) {
         layer.setNavigationPolicyFactory(
             Acts::NavigationPolicyFactory{}
-                .add<Acts::SurfaceArrayNavigationPolicy>(
-                    Acts::SurfaceArrayNavigationPolicy::Config{
-                        .layerType = Disc, .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+                .add<Acts::SurfaceArrayNavigationPolicy>(endcapSurfaceArrayConfig)
                 .add<Acts::CylinderNavigationPolicy>()
                 .asUniquePtr());
 
@@ -865,7 +902,9 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
             for (const auto& [ilayer, surfaces] : layers) {
               ATH_MSG_DEBUG("- Layer " << ilayer << " has " << surfaces.size()
                                        << " surfaces");
-              addStripBarrelLayer(barrel, ilayer, surfaces);
+              addStripBarrelLayer(
+                  barrel, ilayer, surfaces,
+                  surfaceArrayConfig(Cylinder, m_itkStripBarrelNeighborWindow));
             }
           });
     });
@@ -901,13 +940,16 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
                   return std::abs(pl_a.min(AxisZ)) < std::abs(pl_b.min(AxisZ));
                 });
 
-      stripContainer.withGeometryIdentifier([&sorted_layers, bec,
-                                             &s](auto& geoId) {
+      const auto endcapSurfaceArrayConfig =
+          surfaceArrayConfig(Disc, m_itkStripEndcapNeighborWindow);
+      stripContainer.withGeometryIdentifier([&sorted_layers, bec, &s,
+                                             &endcapSurfaceArrayConfig](auto& geoId) {
         geoId.setAllVolumeIdsTo(s_stripVolumeId + std::floor(bec / 2))
             .incrementLayerIds(1);
 
         geoId.addCylinderContainer(
-            std::format("Strip_{:}_EC", s), AxisZ, [&sorted_layers, &s, bec](auto& ec) {
+            std::format("Strip_{:}_EC", s), AxisZ,
+            [&sorted_layers, &s, bec, &endcapSurfaceArrayConfig](auto& ec) {
               // Collapse inter-disk gaps; material kept on outward discs only
               // (see addStripEndcapLayer), so it stays at the smaller-|z| side.
               ec.setAttachmentStrategy(bec > 0 ? AttachmentStrategy::Second
@@ -923,7 +965,8 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
               for (size_t i = 0; i < sorted_layers.size(); ++i) {
                 const auto& surfaces = sorted_layers[i];
                 auto layerName = std::format("Strip_{:}EC_{:}", s, i);
-                addStripEndcapLayer(ec, layerName, surfaces, bec);
+                addStripEndcapLayer(ec, layerName, surfaces, bec,
+                                    endcapSurfaceArrayConfig);
               }
             });
       });
