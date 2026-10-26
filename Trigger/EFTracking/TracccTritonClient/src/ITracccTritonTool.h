@@ -5,6 +5,7 @@
 #ifndef ITracccTritonTool_H
 #define ITracccTritonTool_H
 
+#include "GaudiKernel/EventContext.h"
 #include "GaudiKernel/IAlgTool.h"
 #include <cstdint>
 #include <vector>
@@ -29,12 +30,15 @@ public:
 
     /**
      * @brief Reconstruct the tracks of one event.
+     * @param ctx the event; its IOV is sent along so the server can look
+     *        up the event's conditions
      * @param cellBytes serialized traccc silicon_cell_collection, sent to the
      *        server as a single UINT8 tensor
      * @param result the serialized collections the server returns
      * @return StatusCode indicating success or failure
      */
     virtual StatusCode getTracks(
+        const EventContext& ctx,
         std::vector<uint8_t>& cellBytes,
         TracccTritonResult& result
     ) const = 0;

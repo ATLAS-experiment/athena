@@ -134,8 +134,8 @@ def TritonTracccTrackMakerCfg(flags, name="TritonTracccTrackMaker", **kwargs):
     # Traccc detector description needed by the conversions
     geo_id_mapping_name = "TracccGeometryIdMapping"
     host_detector_name = "TracccHostDetectorGeometry"
-    from ActsGPUGeometry.ActsGPUGeometryConfig import JSONDeviceDetectorDescriptionProviderSvcCfg
-    acc.merge(JSONDeviceDetectorDescriptionProviderSvcCfg(flags,
+    from ActsGPUGeometry.ActsGPUGeometryConfig import DeviceDetectorDescriptionCondAlgCfg
+    acc.merge(DeviceDetectorDescriptionCondAlgCfg(flags,
         HostConditionsObjectName="TracccHostCondConfig",
         HostDigitizationObjectName="TracccHostDigitizationConfig",
         DeviceConditionsObjectName="TracccDeviceCondConfig",
@@ -193,7 +193,6 @@ def TritonTracccTrackMakerCfg(flags, name="TritonTracccTrackMaker", **kwargs):
         name=f"{prefix}TritonTrackConverterAlg",
         HostMR=acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)),
         CopyProviderTool=acc.popToolsAndMerge(HostCopyToolCfg(flags)),
-        GeoIdMapping=geo_id_mapping_name,
         HostDetectorName=host_detector_name,
         InputPixelClusters=pixel_key,
         InputStripClusters=strip_key,
