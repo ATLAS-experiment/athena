@@ -251,14 +251,10 @@ void IDTPM2::Tier0::execute( const TrackAnalysisStore& collections ) const {
     return;
   }
 
-  int itrack = 0;
-
   for ( const TrackView* reference : refTracks) {
     
     if ( !reference ) continue; /// shouldn;t ever happen
 
-    itrack++;
-    
     /// fil the number of offline tracks
     m_hchain->Fill( 2.5, 1 );
     
@@ -272,18 +268,12 @@ void IDTPM2::Tier0::execute( const TrackAnalysisStore& collections ) const {
     double referenceDZ0  = reference->dz0();
     double referenceDD0  = reference->dd0();
 
-    //    std::cout << itrack << "\tpt: " << referencePT << "\t" << referenceEta << " " << referenceZ0 << std::endl;
-
     // Find matched tracks
     const TrackView*  test = matcher->matched(reference);
 
-    //    std::cout << "SUTT matched pointers: " << reference << "\t" << test << std::endl;
-    
     float     eff_weight = 0;
     if (test) eff_weight = 1;
 
-    //    std::cout << "\t efficiency calculation: " << test << "\tweight: " << eff_weight << std::endl;
-    
     m_htotal_efficiency->Fill(0.5, eff_weight );
 
     m_hpTeff->Fill( std::fabs(referencePT), eff_weight );

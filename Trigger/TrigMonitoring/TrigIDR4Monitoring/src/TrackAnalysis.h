@@ -64,14 +64,14 @@ public :
   /// Destructor
   virtual ~TrackAnalysis();
   
-  virtual StatusCode initialize();
+  virtual StatusCode initialize() override;
   virtual StatusCode bookHistograms();
   virtual StatusCode fillHistograms( const EventContext& context ) const;
   virtual StatusCode procHistograms() { return StatusCode::SUCCESS; } /// finalise histograms in stop()
   virtual StatusCode proc();
 
   
-  virtual StatusCode finalize() { return procHistograms(); } /// finalise histograms in stop()
+  virtual StatusCode finalize() override { return procHistograms(); } /// finalise histograms in stop()
   // virtual StatusCode finalize() { return proc(); }
 
   bool execute( const EventContext& context ) const;

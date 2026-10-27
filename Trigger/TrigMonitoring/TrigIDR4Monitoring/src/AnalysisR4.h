@@ -36,11 +36,11 @@ public:
 
   AnalysisR4(const std::string& name);
   
-  virtual void initialise();
+  void initialise();
 
-  virtual void execute( TrackAnalysisStore& collections ) const;
+  void execute( TrackAnalysisStore& collections ) const;
 
-  virtual void finalize();
+  void finalize();
 
   const std::string& name() const { return m_name; }
   
