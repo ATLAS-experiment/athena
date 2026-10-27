@@ -83,6 +83,10 @@ def VP1AlgCfg(flags, name="VP1AlgCA", **kwargs):
     result = ComponentAccumulator()
 
     kwargs.setdefault("AtlasRelease", getATLASVersion())
+    if kwargs.get("EmptyInput", False):
+        # Disable the default tool handle: the framework also retrieves tools
+        # after initialize(), even when VP1 skips its explicit retrieval.
+        kwargs.setdefault("ExtrapolatorTool", "")
     the_alg = CompFactory.VP1Alg(name="VP1EventDisplayAlg", **kwargs)
     result.addEventAlgo(the_alg, primary=True)
     return result
@@ -229,7 +233,6 @@ def SetupVP1():
         from AthenaConfiguration.TestDefaults import defaultGeometryTags
 
         vp1_empty_input = True
-        vp1config.setdefault("EmptyInput", vp1_empty_input)
 
         # NB Must set e.g. ConfigFlags.Input.Runparse_args() Number and
         # ConfigFlags.Input.TimeStamp before calling the
@@ -284,6 +287,8 @@ def SetupVP1():
                 import sys
                 sys.exit(1)
     
+    vp1config.setdefault("EmptyInput", vp1_empty_input)
+
     # Set the online flag if we are running at P1
     if args.online:
         flags.Common.isOnline = args.online
