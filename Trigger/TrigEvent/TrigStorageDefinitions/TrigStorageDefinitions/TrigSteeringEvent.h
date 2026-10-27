@@ -34,7 +34,6 @@ namespace LVL1 {
 
 HLT_BEGIN_TYPE_REGISTRATION
   HLT_REGISTER_TYPE(class TrigRoiDescriptor,class TrigRoiDescriptor,class TrigRoiDescriptorCollection)
-  HLT_REGISTER_TYPE(class TrigSuperRoi,class TrigSuperRoi,class TrigSuperRoiCollection)
   HLT_REGISTER_TYPE(class TrigPassBits,class TrigPassBits,class  TrigPassBitsCollection)
   HLT_REGISTER_TYPE(class TrigPassFlags,class TrigPassFlags,class  TrigPassFlagsCollection)
   HLT_REGISTER_TYPE(class TrigRoiDescriptor,class TrigRoiDescriptorCollection,class TrigRoiDescriptorCollection)

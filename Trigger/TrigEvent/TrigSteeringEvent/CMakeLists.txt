@@ -13,14 +13,14 @@ if( XAOD_STANDALONE )
 elseif( XAOD_ANALYSIS )
    atlas_add_library( TrigSteeringEvent
       TrigSteeringEvent/*.h Root/*.cxx src/HLTExtraData.cxx src/*Result.cxx
-      src/StringSerializer.cxx src/*Info.cxx src/TrigSuperRoi.cxx
+      src/StringSerializer.cxx src/*Info.cxx
       PUBLIC_HEADERS TrigSteeringEvent
       LINK_LIBRARIES AthContainers AsgMessagingLib AthenaKernel RoiDescriptor
       xAODCore GaudiKernel TrigConfHLTData )
 
    atlas_add_dictionary( TrigSteeringEventDict
       TrigSteeringEvent/TrigSteeringEventDict.h TrigSteeringEvent/selection.xml
-      DATA_LINKS TrigRoiDescriptor TrigSuperRoi
+      DATA_LINKS TrigRoiDescriptor
       ELEMENT_LINKS TrigRoiDescriptorCollection
       LINK_LIBRARIES TrigSteeringEvent )
 else()
@@ -37,7 +37,7 @@ else()
 
    atlas_add_dictionary( TrigSteeringEventDict
       TrigSteeringEvent/TrigSteeringEventDict.h TrigSteeringEvent/selection.xml
-      DATA_LINKS TrigRoiDescriptor TrigSuperRoi
+      DATA_LINKS TrigRoiDescriptor
       ELEMENT_LINKS TrigRoiDescriptorCollection
       LINK_LIBRARIES TrigSteeringEvent )
 
@@ -48,11 +48,9 @@ else()
 
    atlas_add_sercnv_library( TrigSteeringEventSerCnv
       FILES TrigSteeringEvent/TrigRoiDescriptor.h
-      TrigSteeringEvent/TrigSuperRoi.h
       TrigSteeringEvent/TrigPassFlags.h
       TrigSteeringEvent/TrigPassFlagsCollection.h
       TrigSteeringEvent/TrigRoiDescriptorCollection.h
-      TrigSteeringEvent/TrigSuperRoiCollection.h
       TrigSteeringEvent/TrigOperationalInfo.h
       TrigSteeringEvent/TrigOperationalInfoCollection.h
       TrigSteeringEvent/TrigPassBits.h
