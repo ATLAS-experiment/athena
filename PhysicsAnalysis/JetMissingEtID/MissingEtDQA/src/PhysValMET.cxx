@@ -11,7 +11,6 @@
 
 // PhysVal includes
 #include "PhysValMET.h"
-
 // FrameWork includes
 #include "GaudiKernel/IToolSvc.h"
 #include "xAODMissingET/versions/MissingETBase.h" 
@@ -35,10 +34,13 @@
 #include "PATCore/AcceptData.h"
 #include "METUtilities/METHelpers.h"
 #include "AthContainers/Decorator.h"
+
+// Root includes
+#include "TH1.h"
+
 // STL includes
 #include <cmath>
-#include <map>
-#include <vector>
+
 
 using namespace xAOD;
 
@@ -622,7 +624,7 @@ namespace MissingEtDQA {
 
     const xAOD::PhotonContainer* photons = nullptr;
     ATH_CHECK( evtStore()->retrieve(photons,m_gammaColl) );
-    if (!electrons) {
+    if (!photons) {
       ATH_MSG_ERROR ( "Failed to retrieve Photon container. Exiting." );
       return StatusCode::FAILURE;
     }
@@ -1179,15 +1181,20 @@ namespace MissingEtDQA {
       }
 
       //Fill MET significance
-      if( (*met_Reb)["FinalClus"]->sumet() != 0) (m_MET_Significance_Reb[type]).at(0)->Fill((*met_Reb)["FinalClus"]->met()/sqrt((*met_Reb)["FinalClus"]->sumet()*1000.), weight);
-      if( (*met_Reb)["FinalTrk"]->sumet() != 0) (m_MET_Significance_Reb[type]).at(1)->Fill((*met_Reb)["FinalTrk"]->met()/sqrt((*met_Reb)["FinalTrk"]->sumet()*1000.), weight);
+      
+      if(const auto sumet = (*met_Reb)["FinalClus"]->sumet(); sumet > 0){ 
+        (m_MET_Significance_Reb[type]).at(0)->Fill((*met_Reb)["FinalClus"]->met()/std::sqrt(sumet * 1000.), weight);
+      }
+      if(const auto sumet = (*met_Reb)["FinalTrk"]->sumet(); sumet > 0){
+       (m_MET_Significance_Reb[type]).at(1)->Fill((*met_Reb)["FinalTrk"]->met()/std::sqrt(sumet * 1000.), weight);
+      }
 
       TLorentzVector target_tlv;
       if(m_doMETRefPlots){
         //Fill MET Significance
         ATH_MSG_INFO( "  MET_significance:" );
-        if( (*met_Ref)["FinalClus"]->sumet() != 0) (m_MET_Significance_Ref[type]).at(0)->Fill((*met_Ref)["FinalClus"]->met()/sqrt((*met_Ref)["FinalClus"]->sumet()*1000.), weight);
-        if( (*met_Ref)["FinalTrk"]->sumet() != 0) (m_MET_Significance_Ref[type]).at(1)->Fill((*met_Ref)["FinalTrk"]->met()/sqrt((*met_Ref)["FinalTrk"]->sumet()*1000.), weight);
+        if( (*met_Ref)["FinalClus"]->sumet() > 0) (m_MET_Significance_Ref[type]).at(0)->Fill((*met_Ref)["FinalClus"]->met()/sqrt((*met_Ref)["FinalClus"]->sumet()*1000.), weight);
+        if( (*met_Ref)["FinalTrk"]->sumet() > 0) (m_MET_Significance_Ref[type]).at(1)->Fill((*met_Ref)["FinalTrk"]->met()/sqrt((*met_Ref)["FinalTrk"]->sumet()*1000.), weight);
         
         //Fill Diff histograms
         for(const auto it : *met_Ref) {
