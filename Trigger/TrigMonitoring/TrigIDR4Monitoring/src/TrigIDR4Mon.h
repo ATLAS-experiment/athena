@@ -44,7 +44,7 @@ public:
 
   virtual StatusCode initialize() override;
   virtual StatusCode fillHistograms(const EventContext &context) const override { return execute(context); }
-  virtual StatusCode execute(const EventContext &context) const;
+  virtual StatusCode execute(const EventContext &context) const override;
   virtual StatusCode finalize() override;
 
   virtual StatusCode bookHistograms();
