@@ -66,10 +66,10 @@ class Sample(EvgenConfig):
 
         # Set up base Pythia8 for showering
         from Superchic_i.SuperChicConfig import SuperChicPythia8BaseCfg
-        sampleConfig = SuperChicPythia8BaseCfg(
+        sampleConfig.merge(SuperChicPythia8BaseCfg(
             flags,
             Commands=Commands
-        )
+        ))
 
         # Add multi lepton filter
         from GeneratorFilters.GeneratorFiltersConfig import xAODMultiLeptonFilterCommonCfg

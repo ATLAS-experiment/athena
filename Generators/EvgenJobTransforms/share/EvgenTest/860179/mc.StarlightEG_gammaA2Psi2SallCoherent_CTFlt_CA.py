@@ -18,7 +18,7 @@ class Sample(EvgenConfig):
             "nmbRapidityBins 200", #Bins n y
             "productionMode 2", #(1=2-phot,2=vmeson(narrow),3=vmeson(wide))
             "prodParticleId 444011", #Channel of interest
-            "beamBreakupMode 5", #Controls the nuclear breakup
+            "beamBreakupMode 5" #Controls the nuclear breakup
         ]
 
         # Set up Starlight with vector meson decays from EvtGen
@@ -31,7 +31,7 @@ class Sample(EvgenConfig):
             flags,
             NTracks=1,
             Ptcut=900.,
-            Etacut=2.6,
+            Etacut=2.6
         ))
 
         return sampleConfig
