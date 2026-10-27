@@ -222,13 +222,11 @@ class ModelState : public BackendModel {
     std::vector<int64_t> m_inputCellsNbShape;
 
     size_t m_totalInstanceCount = 1;
-
-    bool m_shapeInitialized;
 };
 
 //! Also possible problems in this function!
 ModelState::ModelState(TRITONBACKEND_Model* triton_model)
-    : BackendModel(triton_model), m_shapeInitialized(false)
+    : BackendModel(triton_model)
 {
   // Validate that the model's configuration matches what is supported
   // by this backend.
