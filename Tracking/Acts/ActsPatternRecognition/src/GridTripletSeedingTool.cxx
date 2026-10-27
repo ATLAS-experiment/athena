@@ -108,6 +108,7 @@ StatusCode GridTripletSeedingTool::initialize() {
   ATH_MSG_DEBUG("   " << m_zAlign);
   ATH_MSG_DEBUG("   " << m_rAlign);
   ATH_MSG_DEBUG("   " << m_sigmaError);
+  ATH_MSG_DEBUG("   " << m_spacePointVarianceScale);
 
   ATH_MSG_DEBUG(" * Used by seed filter config:");
   ATH_MSG_DEBUG("   " << m_deltaRMin);
@@ -147,6 +148,11 @@ StatusCode GridTripletSeedingTool::initialize() {
   // the cut needs the strip details
   if (m_doubletStripCalibrationCut && !m_useDetailedDoubleMeasurementInfo) {
     ATH_MSG_ERROR("doubletStripCalibrationCut needs "
+                  "useDetailedDoubleMeasurementInfo");
+    return StatusCode::FAILURE;
+  }
+  if (m_stripCalibrationTolerance > 0 && !m_useDetailedDoubleMeasurementInfo) {
+    ATH_MSG_ERROR("stripCalibrationTolerance needs "
                   "useDetailedDoubleMeasurementInfo");
     return StatusCode::FAILURE;
   }
@@ -289,6 +295,10 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_bottomDoubletFinderCfg.cotThetaMax = m_cotThetaMax;
   m_bottomDoubletFinderCfg.minPt = m_minPt;
   m_bottomDoubletFinderCfg.helixCutTolerance = 1.;
+  if (m_stripCalibrationTolerance > 0) {
+    m_bottomDoubletFinderCfg.stripCalibrationTolerance =
+        m_stripCalibrationTolerance.value();
+  }
   m_topDoubletFinderCfg = m_bottomDoubletFinderCfg;  // copy the bottom cuts
   m_topDoubletFinderCfg.candidateDirection = Acts::Direction::Forward();
   m_topDoubletFinderCfg.deltaRMin = m_deltaRMinTopSP;
@@ -605,8 +615,10 @@ StatusCode GridTripletSeedingTool::createSeedsImpl(
                                static_cast<float>(sp->y() - beamSpotPos[1])};
       newSp.zr() = std::array<float, 2>{static_cast<float>(sp->z()),
                                         selectedSpacePointsR[spIndex]};
-      newSp.varianceZ() = static_cast<float>(sp->varianceZ());
-      newSp.varianceR() = static_cast<float>(sp->varianceR());
+      newSp.varianceZ() =
+          m_spacePointVarianceScale * static_cast<float>(sp->varianceZ());
+      newSp.varianceR() =
+          m_spacePointVarianceScale * static_cast<float>(sp->varianceR());
 
       if (m_useDetailedDoubleMeasurementInfo) {
         const Eigen::Vector3f innerStripHalfVector =

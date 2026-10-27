@@ -511,18 +511,16 @@ namespace ActsTrk
         ++event_stat[category_i][kNTotalSeeds];  // also updated for duplicate seeds
         ++event_stat[category_i][kNUsedSeeds];
 
-        if (estimationStatus != ITrackParamsEstimationTool::kNoSeedRefit) {
-          if (estimationStatus == ITrackParamsEstimationTool::kSeedRefitFailed) {
-            ++event_stat[category_i][kNSeedRefitFailure];
-          } else {
-            // Check pTmin requirement
-            const auto &cutSet = getCuts(etaInitial);
-            if (optTrackParams->transverseMomentum() < cutSet.ptMin * m_seedRefitPtMinFactor) {
-              ATH_MSG_VERBOSE("min pt requirement not satisfied after param refinement: pt min is " << cutSet.ptMin << " but Refined params have pt of " << optTrackParams->transverseMomentum());
-              ++event_stat[category_i][kNRejectedRefinedSeeds];
-              if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
-              continue;
-            }
+        if (estimationStatus == ITrackParamsEstimationTool::kSeedRefitFailed) {
+          ++event_stat[category_i][kNSeedRefitFailure];
+        } else if (m_seedPtMinFactor > 0) {
+          // Check pTmin requirement on the parameters that start the CKF (refit or estimate)
+          const auto &cutSet = getCuts(etaInitial);
+          if (optTrackParams->transverseMomentum() < cutSet.ptMin * m_seedPtMinFactor) {
+            ATH_MSG_VERBOSE("min pt requirement not satisfied by the seed parameters: pt min is " << cutSet.ptMin << " but the seed parameters have pt of " << optTrackParams->transverseMomentum());
+            ++event_stat[category_i][kNRejectedSeedParams];
+            if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
+            continue;
           }
         }
 

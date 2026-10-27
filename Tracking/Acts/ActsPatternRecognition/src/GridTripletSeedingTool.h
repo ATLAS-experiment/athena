@@ -276,6 +276,10 @@ protected:
   Gaudi::Property<float> m_rAlign{this, "rAlign", 0 * Acts::UnitConstants::mm,
                                   ""};
   Gaudi::Property<float> m_sigmaError{this, "sigmaError", 5, ""};
+  Gaudi::Property<float> m_spacePointVarianceScale{
+      this, "spacePointVarianceScale", 1.,
+      "scale factor applied to the space point varianceR and varianceZ before "
+      "they enter the triplet compatibility check"};
 
   // Seed filter properties
   Gaudi::Property<float> m_impactWeightFactor{
@@ -406,6 +410,11 @@ protected:
   Gaudi::Property<float> m_doubletStripCalibrationTolerance{
       this, "doubletStripCalibrationTolerance", 2.,
       "strip calibration doublet cut tolerance [half strip lengths]"};
+  Gaudi::Property<float> m_stripCalibrationTolerance{
+      this, "stripCalibrationTolerance", -1.,
+      "if positive, ACTS calibrates both strip SPs of a doublet against their "
+      "chord with this tolerance [half strip lengths] and uses the calibrated "
+      "positions for the doublet. Negative values disable it"};
 
   Gaudi::Property<int> m_stateVectorReserveSize{
       this, "stateVectorReserveSize", 500,

@@ -114,7 +114,7 @@ namespace ActsTrk {
     Gaudi::Property<bool> m_inflateCovarianceTwoWay{this, "inflateCovarianceTwoWay", false, "inflate covariance matrix at the beginning of two-way track finding"};
     Gaudi::Property<double> m_twoWayinflateCovarianceFactor{this, "twoWayinflateCovarianceFactor", 1.0, "factor to multiply the initial covariance matrix at the beginning of two-way track finding"};
     Gaudi::Property<double> m_branchStopperPtMinFactor{this, "branchStopperPtMinFactor", 1.0, "factor to multiply ptMin cut when used in the branch stopper"};
-    Gaudi::Property<double> m_seedRefitPtMinFactor{this, "seedRefitPtMinFactor", 1.0, "factor to multiply ptMin cut when used in the seed refit"};
+    Gaudi::Property<double> m_seedPtMinFactor{this, "seedPtMinFactor", 0.0, "if positive, factor to multiply ptMin cut when applied to the seed parameters (refit or estimate), disabled otherwise"};
     Gaudi::Property<double> m_branchStopperAbsEtaMaxExtra{this, "branchStopperAbsEtaMaxExtra", 0.0, "increase absEtaMax cut when used in the branch stopper"};
     Gaudi::Property<double> m_branchStopperMeasCutReduce{this, "branchStopperMeasCutReduce", 2, "how much to reduce the minMeas requirement for the branch stopper"};
     Gaudi::Property<double> m_branchStopperAbsEtaMeasCut{this, "branchStopperAbsEtaMeasCut", 1.2, "the minimum |eta| to apply the reduction to the minMeas requirement for the branch stopper"};
@@ -174,7 +174,7 @@ namespace ActsTrk {
       kNNoEstimatedParams,
       kNOutputTracks,
       kNSeedRefitFailure,
-      kNRejectedRefinedSeeds,
+      kNRejectedSeedParams,
       kNSelectedTracks,
       kNStoppedTracksMaxHoles,
       kMultipleBranches,

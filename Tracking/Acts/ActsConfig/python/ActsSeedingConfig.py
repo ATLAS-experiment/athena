@@ -179,8 +179,11 @@ def ActsLargeRadiusStripSeedingToolCfg(flags,
     ## separation exceeds what a track with |d0| < impactMax can produce
     kwargs.setdefault("doubletDPhiCut", True)
     kwargs.setdefault("doubletDPhiCap", 0.10)
+    ## calibrate the strip doublets against their chord in ACTS, the doublet
+    ## then uses the calibrated positions
+    kwargs.setdefault("stripCalibrationTolerance", 1.75)
     ## strip calibration doublet cut, with the doublet chord as direction
-    kwargs.setdefault("doubletStripCalibrationCut", True)
+    kwargs.setdefault("doubletStripCalibrationCut", False)
     kwargs.setdefault("doubletStripCalibrationTolerance", 2.)
     ## deltaRMax only affects the grid phi-bin width (the doublet finders use
     ## deltaRMin/MaxTopSP/BottomSP); the bins widen with the impact-parameter
@@ -199,7 +202,10 @@ def ActsLargeRadiusStripSeedingToolCfg(flags,
     kwargs.setdefault("deltaZMax", 850. * ActsUnits.mm)
     kwargs.setdefault("cotThetaMax", 5.0)
     kwargs.setdefault("maxSeedsPerSpM", 1)
-    kwargs.setdefault("maxStripDeltaCotTheta", 0.3)
+    kwargs.setdefault("maxStripDeltaCotTheta", 0.1)
+    ## the strip space point variances are an SCT constant inflated x8; halving
+    ## them in the triplet cotTheta check drops 12% of the LRT seeds
+    kwargs.setdefault("spacePointVarianceScale", 0.5)
     kwargs.setdefault("absDeltaEtaWeightFactor", 10.)
     kwargs.setdefault("absDeltaEtaMinImpact", 2.)
     kwargs.setdefault("zBinEdges", [-3000., -2500, -1400., -910., -500., -250.,

@@ -67,7 +67,7 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_maxSharedHits);
     ATH_MSG_DEBUG("   " << m_maxChi2);
     ATH_MSG_DEBUG("   " << m_branchStopperPtMinFactor);
-    ATH_MSG_DEBUG("   " << m_seedRefitPtMinFactor);
+    ATH_MSG_DEBUG("   " << m_seedPtMinFactor);
     ATH_MSG_DEBUG("   " << m_branchStopperAbsEtaMaxExtra);
     ATH_MSG_DEBUG("   " << m_branchStopperMeasCutReduce);
     ATH_MSG_DEBUG("   " << m_branchStopperAbsEtaMeasCut);
@@ -635,7 +635,7 @@ namespace ActsTrk {
                                           std::make_pair(kNoTrack, "Cannot find track"),
                                           std::make_pair(kNDuplicateSeeds, "Duplicate seeds"),
                                           std::make_pair(kNNoEstimatedParams, "Initial param estimation failed"),
-                                          std::make_pair(kNRejectedRefinedSeeds, "Rejected refined parameters"),
+                                          std::make_pair(kNRejectedSeedParams, "Rejected seed parameters"),
                                           std::make_pair(kNSeedRefitFailure, "Seed refit Kalman fit failure"),
                                           std::make_pair(kNOutputTracks, "CKF tracks"),
                                           std::make_pair(kNSelectedTracks, "selected tracks"),
@@ -735,7 +735,7 @@ namespace ActsTrk {
                                                                                       }, // failed seeds i.e. seeds which are not duplicates but did not produce a track
                                                                                       std::vector<TableUtils::SummandDefinition>{TableUtils::defineSummand(kNTotalSeeds, 1)}),
                                                       TableUtils::defineSimpleRatio("duplication / seeds", kNDuplicateSeeds, kNTotalSeeds),
-                                                      TableUtils::defineSimpleRatio("Rejected refined params / seeds", kNRejectedRefinedSeeds, kNTotalSeeds),
+                                                      TableUtils::defineSimpleRatio("Rejected seed params / seeds", kNRejectedSeedParams, kNTotalSeeds),
                                                       TableUtils::defineSimpleRatio("selected / CKF tracks", kNSelectedTracks, kNOutputTracks),
                                                       TableUtils::defineSimpleRatio("selected tracks / used seeds", kNSelectedTracks, kNUsedSeeds),
                                                       TableUtils::defineSimpleRatio("resolved / selected tracks", kNResolvedTracks, kNSelectedTracks),
