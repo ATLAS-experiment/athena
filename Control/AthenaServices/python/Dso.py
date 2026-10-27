@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @file: AthenaServices/python/Dso.py
 # @purpose: simple interface to the rootmap files to easily locate reflex
@@ -49,11 +49,6 @@ _cpp_builtins = (
     'long long',
     'long long int',
     'unsigned long long',
-    'longlong',
-
-    # no clue from where this one comes from, who's requesting it nor who
-    # got the alien naming scheme idea...
-    'ulonglong',
 
     'float',
     'double',
