@@ -50,3 +50,8 @@ find_package( VP1AlgsEnvironment )
 atlas_add_test( VP1PhaseIIConfig
    SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/VP1PhaseIIConfig_test.py
    POST_EXEC_SCRIPT noerror.sh )
+
+# Configuration regression tests do not start the VP1 GUI or event loop.
+atlas_add_test( VP1AlgConfig
+   SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/VP1AlgConfig_test.py
+   POST_EXEC_SCRIPT noerror.sh )
