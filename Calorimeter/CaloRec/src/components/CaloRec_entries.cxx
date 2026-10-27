@@ -7,7 +7,6 @@
 #include "../CaloClusterMomentsMaker.h"
 #include "../CaloClusterMomentsMaker_DigiHSTruth.h"
 #include "../CaloCell2ClusterMapper.h"
-#include "../CaloCellContainerCorrectorTool.h"
 #include "../CaloCellContainerCheckerTool.h"
 #include "../CaloCellContainerFinalizerTool.h"
 #include "../CaloCellMaker.h"
@@ -65,7 +64,6 @@ DECLARE_COMPONENT( CaloTopoClusterSplitter )
 DECLARE_COMPONENT( CaloClusterCopier )
 DECLARE_COMPONENT( CaloClusterMomentsMaker )
 DECLARE_COMPONENT( CaloClusterMomentsMaker_DigiHSTruth )
-DECLARE_COMPONENT( CaloCellContainerCorrectorTool )
 DECLARE_COMPONENT( CaloCellContainerCheckerTool )
 DECLARE_COMPONENT( CaloCellContainerFinalizerTool )
 
