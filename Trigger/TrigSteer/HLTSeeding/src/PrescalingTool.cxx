@@ -37,7 +37,7 @@ StatusCode PrescalingTool::initialize() {
                       << "This is OK for testing but do not use this in production");
    }
    m_prescaleForUnknownChain = { m_keepUnknownChains.value(), (m_keepUnknownChains.value() ? 1.0 : -1.0) };
-   m_costChainID = HLT::Identifier("HLT_noalg_CostMonDS_L1All");
+   m_costChainID = HLT::Identifier("EF_noalg_CostMonDS_L1All");
    return StatusCode::SUCCESS;
 }
 

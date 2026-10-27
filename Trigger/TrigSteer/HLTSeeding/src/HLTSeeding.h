@@ -62,7 +62,7 @@ private:
     this, "DoCostMonitoring", false, "Enables start-of-event cost monitoring behavior."};
 
   Gaudi::Property<std::string> m_costMonitoringChain{
-    this, "CostMonitoringChain", "HLT_noalg_CostMonDS_L1All",
+    this, "CostMonitoringChain", "EF_noalg_CostMonDS_L1All",
     "Name of the chain which should enable HLT cost monitoring."};
   /// @}
 

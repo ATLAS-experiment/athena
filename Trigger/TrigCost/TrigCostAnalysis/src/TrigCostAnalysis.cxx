@@ -255,9 +255,12 @@ StatusCode TrigCostAnalysis::execute(const EventContext& ctx) {
 
   // Skip empty events, where only cost chain was active
   bool skipMonitoringThisEvent = false;
-  if ((seededChains.size() == 1 && seededChains.count(TrigConf::HLTUtils::string2hash("HLT_noalg_CostMonDS_L1All")))
-    || (seededChains.size() == 2 && seededChains.count(TrigConf::HLTUtils::string2hash("HLT_noalg_CostMonDS_L1All")) && seededChains.count(TrigConf::HLTUtils::string2hash("HLT_noalg_L1All"))) ){
-    skipMonitoringThisEvent = true;
+  if (seededChains.size() <= 2) {
+    const bool costChain = seededChains.count(TrigConf::HLTUtils::string2hash("HLT_noalg_CostMonDS_L1All")) || seededChains.count(TrigConf::HLTUtils::string2hash("EF_noalg_CostMonDS_L1All"));
+    const bool l1Streamer = seededChains.count(TrigConf::HLTUtils::string2hash("HLT_noalg_L1All")) || seededChains.count(TrigConf::HLTUtils::string2hash("EF_noalg_L1All"));
+    if ((seededChains.size() == 1 && costChain) || (seededChains.size() == 2 && costChain && l1Streamer) ){
+      skipMonitoringThisEvent = true;
+    }
   }
 
   for (auto id : seededChains){

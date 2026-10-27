@@ -227,7 +227,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.CostMonitoring.doCostMonitoring', True,
                   help='enable cost monitoring')
 
-    flags.addFlag('Trigger.CostMonitoring.chain', 'HLT_noalg_CostMonDS_L1All',
+    flags.addFlag('Trigger.CostMonitoring.chain', 'EF_noalg_CostMonDS_L1All',
                   help='Cost monitoring chain name')
 
     flags.addFlag('Trigger.CostMonitoring.outputCollection', 'HLT_TrigCostContainer',
