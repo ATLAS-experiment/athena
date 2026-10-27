@@ -192,3 +192,19 @@ def BTaggingExpertContent(flags: AthConfigFlags, jetcol: str) -> list[str]:
     # See https://ftag.docs.cern.ch/reco_algs/taggers/overview/ for additional
     # expert-level variables that are intentionally omitted here.
     return standard_content + extended_content
+
+
+def TauGhostLabelContent(tau_collection: str = "TauJets") -> list[str]:
+    """Return the ghost truth labels of taus, the same as saved for small-R jets."""
+    label_values = ["ID", "Pt", "Lxy", "DR", "PdgId", "Barcode"]
+    ghosts = ["BHadronsFinal", "CHadronsFinal", "TausFinal"]
+
+    tau_aux = [f"HadronGhostTruthLabel{value}" for value in label_values]
+    tau_aux += [
+        "HadronGhostExtendedTruthLabelID",
+        "PartonTruthLabelID",
+        "PartonTruthLabelEnergy",
+    ]
+    tau_aux += [f"Ghost{ghost}{suffix}" for ghost in ghosts for suffix in ["Count", "Pt"]]
+
+    return [".".join([tau_collection] + tau_aux)]

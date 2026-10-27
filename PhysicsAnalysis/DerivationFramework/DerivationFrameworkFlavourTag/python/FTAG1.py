@@ -17,6 +17,7 @@ from AthenaConfiguration.Enums import LHCPeriod, MetadataCategory
 
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 from DerivationFrameworkEGamma.ElectronsCPDetailedContent import ElectronsCPDetailedContent
+from DerivationFrameworkFlavourTag.BTaggingContent import TauGhostLabelContent
 from DerivationFrameworkFlavourTag.FtagBaseContent import (
     add_common_augmentation,
     add_baseline_slimming_allvariables,
@@ -44,6 +45,7 @@ from InDetConfig.InDetPoolReadConfig import InDetPoolReadCfg
 from JetRecConfig.JetRecConfig import JetRecCfg
 from JetRecConfig.StandardSmallRJets import AntiKt4LCTopo
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+from ParticleJetTools.TauGhostLabelConfig import TauGhostLabelCfg
 from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
 
 if TYPE_CHECKING:
@@ -173,6 +175,7 @@ def FTAG1CoreCfg(
 
     if tau_as_smart_collection:
         ftag1_slimming_helper.SmartCollections += ["TauJets"]
+        ftag1_slimming_helper.ExtraVariables += TauGhostLabelContent()
     else:
         ftag1_slimming_helper.AllVariables += [
             "TauJets",
@@ -322,12 +325,15 @@ def FTAG1CoreCfg(
 
 
 def FTAG1ExtraContentCfg(flags: AthConfigFlags) -> ComponentAccumulator:
-    """Configure extra reconstructed jet content for FTAG1."""
+    """Configure extra reconstructed jet and tau truth label content for FTAG1."""
     acc = ComponentAccumulator()
 
     jet_list = [AntiKt4LCTopo]
     for jet_def in jet_list:
         acc.merge(JetRecCfg(flags, jet_def))
+
+    # The tau seed jets are not in the AOD, so the taus get their own ghost labels
+    acc.merge(TauGhostLabelCfg(flags))
 
     # Variable-R EMPFlow jets (low-pT-wide, shrinking to 0.4) + soft-lepton association
     acc.merge(VRFtagJetsCfg(flags))

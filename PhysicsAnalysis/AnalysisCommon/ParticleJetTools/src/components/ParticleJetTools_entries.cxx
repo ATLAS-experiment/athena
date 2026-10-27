@@ -22,6 +22,8 @@
 // excluded together as a pair — both are derivation-only.
 #include "../TruthVertexDecoratorAlg.h"
 #include "../JetTruthVertexSummaryDecoratorAlg.h"
+#include "../TauSeedJetAlg.h"
+#include "../TauSeedJetLabelCopyAlg.h"
 #endif
 
 using namespace Analysis;
@@ -47,5 +49,7 @@ DECLARE_COMPONENT( TruthParentDecoratorAlg )
 #ifndef GENERATIONBASE
 DECLARE_COMPONENT( ParticleJetTools::TruthVertexDecoratorAlg )
 DECLARE_COMPONENT( ParticleJetTools::JetTruthVertexSummaryDecoratorAlg )
+DECLARE_COMPONENT( ParticleJetTools::TauSeedJetAlg )
+DECLARE_COMPONENT( ParticleJetTools::TauSeedJetLabelCopyAlg )
 #endif
 DECLARE_COMPONENT( FtagLargeRJetTruthLabelTool )
