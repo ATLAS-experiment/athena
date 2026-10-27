@@ -16,6 +16,14 @@ find_package( yampl )
 find_package( valgrind ) # Note that there is no VALGRIND_LIBRARIES variable.
 
 # Component(s) in the package:
+atlas_add_library( AthenaHiveEventLoopMgrLib
+   AthenaServices/*.h src/lib/*.cxx
+   PUBLIC_HEADERS AthenaServices
+   INCLUDE_DIRS ${TBB_INCLUDE_DIRS}
+   LINK_LIBRARIES AthenaBaseComps AthenaKernel EventInfo GaudiKernel ${TBB_LIBRARIES}
+   PRIVATE_LINK_LIBRARIES StoreGateLib PersistentDataModel xAODEventInfo
+                          EventInfoUtils )
+
 atlas_add_component( AthenaServices
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS  ${Python_INCLUDE_DIRS}
@@ -23,7 +31,7 @@ atlas_add_component( AthenaServices
    ${VALGRIND_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS}
    LINK_LIBRARIES ${Python_LIBRARIES} ${ROOT_LIBRARIES} ${TBB_LIBRARIES} ${UUID_LIBRARIES}
    ${YAMPL_LIBRARIES} bmpi3::bmpi3 ${CLHEP_LIBRARIES} ${EIGEN_LIBRARIES}
-   AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils SQLiteDBSvcLib
+   AthenaHiveEventLoopMgrLib AthenaBaseComps AthenaKernel RootUtilsPyROOT CxxUtils SQLiteDBSvcLib
    AthContainers AthContainersInterfaces DataModelRoot SGTools SGCoreLib
    StoreGateLib PersistentDataModel EventInfo xAODCore
    xAODEventInfo EventInfoUtils GaudiKernel RootAuxDynIOHeaders )
