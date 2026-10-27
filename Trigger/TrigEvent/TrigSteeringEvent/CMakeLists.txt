@@ -51,8 +51,6 @@ else()
       TrigSteeringEvent/TrigPassFlags.h
       TrigSteeringEvent/TrigPassFlagsCollection.h
       TrigSteeringEvent/TrigRoiDescriptorCollection.h
-      TrigSteeringEvent/TrigOperationalInfo.h
-      TrigSteeringEvent/TrigOperationalInfoCollection.h
       TrigSteeringEvent/TrigPassBits.h
       TrigSteeringEvent/TrigPassBitsCollection.h
       TrigT1Interfaces/RecJetRoI.h
@@ -90,11 +88,6 @@ atlas_add_test( TrigPassBits_test
    POST_EXEC_SCRIPT noerror.sh )
 
 if( NOT XAOD_STANDALONE AND NOT XAOD_ANALYSIS )
-   atlas_add_test( Operators_test
-      SOURCES test/Operators_test.cxx
-      LINK_LIBRARIES AthenaKernel GaudiKernel TrigSteeringEvent
-      POST_EXEC_SCRIPT noerror.sh )
-
    atlas_add_test( Truncation_test
       SOURCES test/Truncation_test.cxx
       LINK_LIBRARIES AthenaKernel GaudiKernel TrigSteeringEvent

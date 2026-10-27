@@ -17,8 +17,7 @@ atlas_add_poolcnv_library( TrigSteeringEventAthenaPoolPoolCnv
    TrigSteeringEvent/TrigRoiDescriptorCollection.h
    TrigSteeringEvent/TrigPassBits.h TrigSteeringEvent/TrigPassBitsCollection.h
    TrigSteeringEvent/TrigPassFlags.h TrigSteeringEvent/TrigPassFlagsCollection.h
-   TrigSteeringEvent/GenericResult.h TrigSteeringEvent/TrigOperationalInfo.h
-   TrigSteeringEvent/TrigOperationalInfoCollection.h
+   TrigSteeringEvent/GenericResult.h
    ${extra_headers}
    TYPES_WITH_NAMESPACE HLT::HLTResult LVL1CTP::Lvl1Result
    LINK_LIBRARIES AthenaPoolUtilities GaudiKernel TrigSteeringEvent

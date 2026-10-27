@@ -4,7 +4,6 @@
 
 #ifndef XAOD_ANALYSIS
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
-#include "TrigSteeringEvent/TrigOperationalInfoCollection.h"
 #include "TrigSteeringEvent/TrigPassBitsCollection.h"
 #include "TrigSteeringEvent/TrigPassFlagsCollection.h"
 #include "TrigT1Interfaces/RecEmTauRoI.h"

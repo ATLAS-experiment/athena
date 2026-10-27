@@ -3178,12 +3178,6 @@ def dump_TrigPassBits (b, f):
     return
 
 
-def dump_TrigOperationalInfo (b, f):
-    p = b.infos()
-    fprint (f, [str(s) for s in p.first], list(p.second))
-    return
-
-
 def dump_TrigVertexCounts (v, f):
     fprint (f,
             formatItemUsingLong (list(v.vtxNtrks())),
@@ -4522,7 +4516,6 @@ dumpspecs = [
     ["RawInfoSummaryForTag",                 dump_RawInfoSummaryForTag],
     ["Muon::ChamberT0s",                     dump_ChamberT0s],
     ["TrigPassBitsCollection",               dump_TrigPassBits],
-    ["TrigOperationalInfoCollection",        dump_TrigOperationalInfo],
     ["TrigVertexCountsCollection",           dump_TrigVertexCounts],
     ["eflowObjectContainer",                 dump_eflowObjectContainer],
     ["TrigPassFlagsCollection",              dump_TrigPassFlags],

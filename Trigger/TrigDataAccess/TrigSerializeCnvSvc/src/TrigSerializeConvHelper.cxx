@@ -66,7 +66,6 @@ StatusCode TrigSerializeConvHelper::initialize(){
   }
   
   m_oldEDMmap[ "TrigRoiDescriptor" ]         = "TrigRoiDescriptorCollection_tlp1";
-  m_oldEDMmap[ "TrigOperationalInfo" ]       = "TrigOperationalInfoCollection_tlp1";
   m_oldEDMmap[ "TrigInDetTrackCollection" ]  = "TrigInDetTrackCollection_tlp1";
   m_oldEDMmap[ "TrigElectronContainer" ]     = "TrigElectronContainer_tlp2";
   m_oldEDMmap[ "TrigPhotonContainer" ]       = "TrigPhotonContainer_tlp2";

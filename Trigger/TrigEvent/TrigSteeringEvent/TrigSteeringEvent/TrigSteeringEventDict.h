@@ -14,7 +14,6 @@
 #include "TrigSteeringEvent/Lvl1Item.h"
 #include "TrigSteeringEvent/Enums.h"
 #include "TrigSteeringEvent/OnlineErrorCode.h"
-#include "TrigSteeringEvent/TrigOperationalInfoCollection.h"
 #include "TrigSteeringEvent/TrigPassBitsCollection.h"
 #include "TrigSteeringEvent/TrigPassFlagsCollection.h"
 #include "TrigSteeringEvent/StringSerializer.h"
@@ -28,8 +27,6 @@ namespace TrigSteeringEventDict {
   std::vector<TrigRoiDescriptor*> troi_vec;
   std::vector<const TrigRoiDescriptor*> troi_const_vec;
   ElementLink<TrigRoiDescriptorCollection> troi_el;
-
-  TrigOperationalInfoCollection toi;
 
   std::vector<LVL1CTP::Lvl1Item*> l1_vec;
   std::vector<const LVL1CTP::Lvl1Item*> l1_const_vec;
