@@ -62,6 +62,9 @@ protected:
       std::unique_ptr<upcXEvent>  // upcEvent or upcXEvent depending on the process
   >                m_event{};
 
+  // beam energy dropped to LHE file (symmetrical beams only)
+  DoubleProperty m_beam_energy{this,"beamEnergy", 2.51e+03};
+
   unsigned int m_beam1Z{0};
   unsigned int m_beam1A{0};
   unsigned int m_beam2Z{0};
@@ -88,7 +91,6 @@ protected:
   double       m_interferenceStrength{0.};
   bool         m_coherentProduction{false};
   double       m_incoherentFactor{0.};
-  double       m_bford{0.};
   double       m_maxPtInterference{0.};
   int          m_nmbPtBinsInterference{0};
   double       m_ptBinWidthInterference{0.};

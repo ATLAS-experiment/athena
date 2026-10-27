@@ -258,14 +258,8 @@ Starlight_i::starlight2lhef()
     lheStream << "File generated using Starlight \n";
     lheStream << "-->\n";
     
-    float beam_energy=0.;
-    // run-3 beam energy (allowing approximate value of 2877 for gamma of the beams)
-    if(m_beam1Gamma>2870 && m_beam1Gamma<2880) beam_energy = 2.68e+03;
-    // run-2 beam energy
-    else beam_energy = 2.51e+03;
-    
     lheStream << "<init>\n";
-    lheStream << "  13  -13  "<<beam_energy<<"  "<<beam_energy<<"  0  0  0  0  3  1\n";
+    lheStream << "  13  -13  "<<m_beam_energy<<"  "<<m_beam_energy<<"  0  0  0  0  3  1\n";
     lheStream << "  1.000000e+00  0.000000e+00  1.000000e+00   9999\n";
     lheStream << "</init>\n";
 

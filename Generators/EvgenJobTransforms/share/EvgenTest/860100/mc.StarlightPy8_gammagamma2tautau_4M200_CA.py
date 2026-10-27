@@ -26,7 +26,7 @@ class Sample(EvgenConfig):
             "maxEta 5", #Maximum pseudorapidity
             "productionMode 1", #(1=2-phot,2=vmeson(narrow),3=vmeson(wide))
             "prodParticleId 15", #Channel of interest
-            "beamBreakupMode 5", #Controls the nuclear breakup
+            "beamBreakupMode 5" #Controls the nuclear breakup
         ]
 
         from Starlight_i.StarlightConfig import Starlight_Pythia8_Common_Cfg
@@ -55,7 +55,7 @@ class Sample(EvgenConfig):
             flags,
             NTracks=1,
             Ptcut=3000.,
-            Etacut=2.6,
+            Etacut=2.6
         ))
 
         return sampleConfig
