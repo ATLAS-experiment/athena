@@ -8,7 +8,7 @@
 #define F_TAG_ANALYSIS_ALGORITHMS_XBB_INFORMATION_DECORATOR_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
-#include <FTagAnalysisInterfaces/IBTaggingSelectionJsonTool.h>
+#include <FTagAnalysisInterfaces/IBTaggingLargeRSelectionJsonTool.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
 #include <SystematicsHandles/SysListHandle.h>
@@ -32,7 +32,7 @@ namespace CP
 
   /// \brief the selection tool
   private:
-    PublicToolHandle<IBTaggingSelectionJsonTool> m_selectionTool{this, "selectionTool", "", "Xbb JSON selection tool"};
+    PublicToolHandle<IBTaggingLargeRSelectionJsonTool> m_selectionTool{this, "selectionTool", "", "Xbb JSON selection tool"};
 
   /// \brief the jet container we run on
   private:

@@ -2,11 +2,11 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef CPBTAGGINGEFFICIENCYJSONTOOL_H
-#define CPBTAGGINGEFFICIENCYJSONTOOL_H
+#ifndef CPBTAGGINGLARGEREFFICIENCYJSONTOOL_H
+#define CPBTAGGINGLARGEREFFICIENCYJSONTOOL_H
 
-#include "FTagAnalysisInterfaces/IBTaggingEfficiencyJsonTool.h"
-#include "FTagAnalysisInterfaces/IBTaggingSelectionJsonTool.h"
+#include "FTagAnalysisInterfaces/IBTaggingLargeREfficiencyJsonTool.h"
+#include "FTagAnalysisInterfaces/IBTaggingLargeRSelectionJsonTool.h"
 #include "AsgTools/AsgTool.h"
 #include <AsgTools/PropertyWrapper.h>
 #include "AsgTools/ToolHandle.h"
@@ -22,15 +22,15 @@
 #include <vector>
 using json = nlohmann::ordered_json;
 
-class BTaggingEfficiencyJsonTool: public asg::AsgTool,
-                                  virtual public IBTaggingEfficiencyJsonTool 
+class BTaggingLargeREfficiencyJsonTool: public asg::AsgTool,
+                                        virtual public IBTaggingLargeREfficiencyJsonTool
 {
   // creates a proper constructor for athena
-  ASG_TOOL_CLASS2 (BTaggingEfficiencyJsonTool, IBTaggingEfficiencyJsonTool, CP::IReentrantSystematicsTool )
+  ASG_TOOL_CLASS2 (BTaggingLargeREfficiencyJsonTool, IBTaggingLargeREfficiencyJsonTool, CP::IReentrantSystematicsTool )
 
   public:
-  BTaggingEfficiencyJsonTool( const std::string& name );
-  virtual ~BTaggingEfficiencyJsonTool();
+  BTaggingLargeREfficiencyJsonTool( const std::string& name );
+  virtual ~BTaggingLargeREfficiencyJsonTool();
   StatusCode initialize() override;
 
   virtual CP::CorrectionCode getScaleFactor( const xAOD::Jet& jet, float& scalefactor, const CP::SystematicSet& sys) const override;
@@ -56,8 +56,8 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   std::map<int, std::string> m_labelMap;
   std::map<int, std::string> m_labelMapMCMC;
 
-  /// Access to a BTaggingSelectionJsonTool 
-  ToolHandle<IBTaggingSelectionJsonTool> m_selTool;
+  /// Access to a BTaggingLargeRSelectionJsonTool 
+  ToolHandle<IBTaggingLargeRSelectionJsonTool> m_selTool;
   
   // enumaration class to assign integers to different binning variables to speed up the tools performance
   enum class varType {
@@ -92,7 +92,7 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
       virtual ~BoundsHandler() = default;
 
       bool isJetWithinBounds(const xAOD::Jet& jet,
-                             const BTaggingEfficiencyJsonTool& tool) const;
+                             const BTaggingLargeREfficiencyJsonTool& tool) const;
       
       // Two handlers i.e. N-dimensional bins overlap if their bounds overlap
       // for every variable. As soon as one variable has non overlapping bounds the bins are disjoint
@@ -200,7 +200,7 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
       float m_MCMCSF = std::numeric_limits<float>::lowest();
   };
 
-  // Declare them also here so one can use the operator<< within the BTaggingEfficiencyJsonTool
+  // Declare them also here so one can use the operator<< within the BTaggingLargeREfficiencyJsonTool
   friend std::ostream& operator<<(std::ostream& os, const BoundsHandler& handler);
   friend std::ostream& operator<<(std::ostream& os, const MCMCHandler& handler);
 
@@ -232,4 +232,4 @@ class BTaggingEfficiencyJsonTool: public asg::AsgTool,
   float getJetQuantity( const xAOD::Jet& jet, const varType vType ) const;
 };
 
-#endif
+#endif // CPBTAGGINGLARGEREFFICIENCYJSONTOOL_H

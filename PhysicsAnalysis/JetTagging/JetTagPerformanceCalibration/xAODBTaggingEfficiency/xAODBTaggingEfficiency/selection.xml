@@ -3,6 +3,6 @@
   <class name="BTaggingSelectionTool" />
   <class name="BTaggingTruthTaggingTool" />
   <class name="BTaggingEigenVectorRecompositionTool" />
-  <class name="BTaggingSelectionJsonTool" />
-  <class name="BTaggingEfficiencyJsonTool" />
+  <class name="BTaggingLargeRSelectionJsonTool" />
+  <class name="BTaggingLargeREfficiencyJsonTool" />
 </lcgdict>

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-// Instantiate BTaggingSelectionJsonTool for every working point shipped in an
+// Instantiate BTaggingLargeRSelectionJsonTool for every working point shipped in an
 // Xbb calibration JSON and assert that each one initialises cleanly. The JSON is
 // structured as tagger -> jetAuthor -> { "meta", <OP>, <OP>, ... }; the test
 // walks that structure and, for every (tagger, jetAuthor, OP) tuple, builds the
@@ -10,7 +10,7 @@
 // failure (including a bin-count inconsistency caught by loadBinConfig()) makes
 // it return non-zero.
 //
-// Usage: BTaggingSelectionJsonInstantiationTester <json_path> [--allow-bin-mismatch]
+// Usage: BTaggingLargeRSelectionJsonInstantiationTester <json_path> [--allow-bin-mismatch]
 //   <json_path> is resolved with PathResolverFindCalibFile (an absolute path is
 //   returned as-is), e.g.
 //   xAODBTaggingEfficiency/13And13p6TeV/MC20And23_2025-03-17_GN2Xv01-noSF_v1.json
@@ -18,7 +18,7 @@
 //   downgrades a bin-count inconsistency from an init failure to a warning, so a
 //   known-malformed JSON can be swept without an error exit.
 
-#include "FTagAnalysisInterfaces/IBTaggingSelectionJsonTool.h"
+#include "FTagAnalysisInterfaces/IBTaggingLargeRSelectionJsonTool.h"
 #include "AsgTools/StandaloneToolHandle.h"
 #include "PathResolver/PathResolver.h"
 
@@ -34,9 +34,9 @@ class GaudiException { public: const char* what() const { return ""; } };
 #include "POOLRootAccess/TEvent.h"
 #endif
 
-ANA_MSG_HEADER(testBTaggingSelectionJsonInstantiationTester)
-ANA_MSG_SOURCE(testBTaggingSelectionJsonInstantiationTester, "BTaggingSelectionJsonInstantiationTester")
-using namespace testBTaggingSelectionJsonInstantiationTester;
+ANA_MSG_HEADER(testBTaggingLargeRSelectionJsonInstantiationTester)
+ANA_MSG_SOURCE(testBTaggingLargeRSelectionJsonInstantiationTester, "BTaggingLargeRSelectionJsonInstantiationTester")
+using namespace testBTaggingLargeRSelectionJsonInstantiationTester;
 
 int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
     // Change type returned by the ANA_CHECK function in case of error 
@@ -96,8 +96,8 @@ int main ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
                 if (op == "meta") continue;
                 ++nTuples;
 
-                asg::StandaloneToolHandle<IBTaggingSelectionJsonTool> tool(
-                    "BTaggingSelectionJsonTool/XbbInst_" + tagger + "_" +
+                asg::StandaloneToolHandle<IBTaggingLargeRSelectionJsonTool> tool(
+                    "BTaggingLargeRSelectionJsonTool/XbbInst_" + tagger + "_" +
                     jetAuthor + "_" + op);
 
                 try {

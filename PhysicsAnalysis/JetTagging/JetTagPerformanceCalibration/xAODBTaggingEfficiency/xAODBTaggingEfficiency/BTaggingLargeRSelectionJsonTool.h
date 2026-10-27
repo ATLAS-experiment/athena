@@ -2,22 +2,22 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef CPBTAGGINGSELECTIONJSONTOOL_H
-#define CPBTAGGINGSELECTIONJSONTOOL_H
+#ifndef CPBTAGGINGLARGERSELECTIONJSONTOOL_H
+#define CPBTAGGINGLARGERSELECTIONJSONTOOL_H
 
-#include "FTagAnalysisInterfaces/IBTaggingSelectionJsonTool.h"
+#include "FTagAnalysisInterfaces/IBTaggingLargeRSelectionJsonTool.h"
 #include "AsgTools/AsgTool.h"
 #include <AsgTools/PropertyWrapper.h>
 #include <nlohmann/json.hpp>
 using json = nlohmann::ordered_json;
 
-class BTaggingSelectionJsonTool: public asg::AsgTool,
-                                 public virtual IBTaggingSelectionJsonTool {
+class BTaggingLargeRSelectionJsonTool: public asg::AsgTool,
+                                 public virtual IBTaggingLargeRSelectionJsonTool {
 
-  ASG_TOOL_CLASS( BTaggingSelectionJsonTool, IBTaggingSelectionJsonTool )
+  ASG_TOOL_CLASS( BTaggingLargeRSelectionJsonTool, IBTaggingLargeRSelectionJsonTool )
 
 public:
-  BTaggingSelectionJsonTool(const std::string& name);
+  BTaggingLargeRSelectionJsonTool(const std::string& name);
   StatusCode initialize() override;
 
   virtual int accept(const xAOD::Jet& jet) const override;
@@ -81,4 +81,4 @@ private:
   float getJetPtInGeV(const xAOD::Jet& jet) const;
 };
 
-#endif // CPBTAGGINGSELECTIONJSONTOOL_H
+#endif // CPBTAGGINGLARGERSELECTIONJSONTOOL_H

@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "FTagAnalysisInterfaces/IBTaggingSelectionJsonTool.h"
-#include "FTagAnalysisInterfaces/IBTaggingEfficiencyJsonTool.h"
+#include "FTagAnalysisInterfaces/IBTaggingLargeRSelectionJsonTool.h"
+#include "FTagAnalysisInterfaces/IBTaggingLargeREfficiencyJsonTool.h"
 #include "xAODJet/JetContainer.h"
 #include <AsgTools/StandaloneToolHandle.h>
 
@@ -24,9 +24,9 @@ using TEVENT = POOL::TEvent;
 #include "PATInterfaces/SystematicVariation.h"
 #include "TFile.h"
 
-ANA_MSG_HEADER(testBTaggingJsonToolTester)
-ANA_MSG_SOURCE(testBTaggingJsonToolTester, "BTaggingJsonToolTester")
-using namespace testBTaggingJsonToolTester;
+ANA_MSG_HEADER(testBTaggingLargeRJsonToolTester)
+ANA_MSG_SOURCE(testBTaggingLargeRJsonToolTester, "BTaggingLargeRJsonToolTester")
+using namespace testBTaggingLargeRJsonToolTester;
 
 bool containNoSF(const std::string& str) {
   std::string target = "nosf";
@@ -70,7 +70,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   std::string mcGenerator = (argc > 5) ? argv[5] : "";
   std::string JetCollection = "AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets";
 
-  asg::StandaloneToolHandle<IBTaggingSelectionJsonTool> selTool("BTaggingSelectionJsonTool/BTagSelTest");
+  asg::StandaloneToolHandle<IBTaggingLargeRSelectionJsonTool> selTool("BTaggingLargeRSelectionJsonTool/BTagSelTest");
   ANA_CHECK(selTool.setProperty( "MaxEta", 2.5 ));
   ANA_CHECK(selTool.setProperty( "MinPt", 0. ));
   ANA_CHECK(selTool.setProperty( "OutputName", OutputName ));
@@ -80,7 +80,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   ANA_CHECK(selTool.setProperty( "OutputLevel", MSG::ERROR));
   ANA_CHECK(selTool.initialize());
 
-  asg::StandaloneToolHandle<IBTaggingEfficiencyJsonTool> effTool("BTaggingEfficiencyJsonTool/BTagEffTest");
+  asg::StandaloneToolHandle<IBTaggingLargeREfficiencyJsonTool> effTool("BTaggingLargeREfficiencyJsonTool/BTagEffTest");
   CP::SystematicSet sysSet;
   if (!containNoSF(JsonConfigFile)) {
     ANA_CHECK(effTool.setProperty( "MaxEta", 2.5 ));

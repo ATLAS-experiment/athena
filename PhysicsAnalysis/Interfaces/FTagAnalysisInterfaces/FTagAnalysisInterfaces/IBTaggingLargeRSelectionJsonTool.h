@@ -1,24 +1,24 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
-/// class IBTaggingSelectionJsonTool
+/// class IBTaggingLargeRSelectionJsonTool
 ///
 /// Interface for the tool that use a large-R as input and returns if it is 
 /// Xbb-tagged or not 
 ///
 ///////////////////////////////////////////////////////////////////
 
-#ifndef CPIBTAGGINGSELECTIONJSONTOOL_H
-#define CPIBTAGGINGSELECTIONJSONTOOL_H
+#ifndef CPIBTAGGINGLARGERSELECTIONJSONTOOL_H
+#define CPIBTAGGINGLARGERSELECTIONJSONTOOL_H
 
 #include "AsgTools/IAsgTool.h"
 #include "xAODJet/Jet.h"
 
-class IBTaggingSelectionJsonTool : virtual public asg::IAsgTool {
+class IBTaggingLargeRSelectionJsonTool : virtual public asg::IAsgTool {
 
-    ASG_TOOL_INTERFACE( IBTagSelectionJsonTool )
+    ASG_TOOL_INTERFACE( IBTagLargeRSelectionJsonTool )
 
     public:
     virtual int accept( const xAOD::Jet& jet ) const = 0;
@@ -28,4 +28,4 @@ class IBTaggingSelectionJsonTool : virtual public asg::IAsgTool {
     virtual double getTaggerDiscriminant ( const xAOD::Jet& jet ) const = 0;
 
   };
-#endif // CPIBTAGGINGSELECTIONJSONTOOL_H
+#endif // CPIBTAGGINGLARGESELECTIONJSONTOOL_H
