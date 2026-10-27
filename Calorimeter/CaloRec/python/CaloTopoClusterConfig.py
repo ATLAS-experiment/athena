@@ -21,8 +21,10 @@ def CaloCalibHitDecoratorTool(flags, name="CaloCalibClusterDecoratorTool", **kwa
 
     TruthAttributerTool = CompFactory.CaloCalibClusterTruthAttributerTool
     truth_tool = TruthAttributerTool("CaloCalibClusterTruthAttributerTool")
+    truth_tool.storeFullTruthEnergy = False
     DecoratorTool = CompFactory.CaloCalibClusterDecoratorTool
     decoratorTool = DecoratorTool(name,TruthAttributerTool=truth_tool,**kwargs,ExtraInputs =  {('CaloCellContainer','StoreGateSvc+AllCalo')})
+    truth_tool.useCellWeights = True
     return decoratorTool
 
 def CaloCalibHitDecoratorFullEnergyTool(flags, name="CaloCalibClusterDecoratorTool_Full", **kwargs):
@@ -33,9 +35,11 @@ def CaloCalibHitDecoratorFullEnergyTool(flags, name="CaloCalibClusterDecoratorTo
     )
     TruthAttributerTool = CompFactory.CaloCalibClusterTruthAttributerTool
     truth_tool = TruthAttributerTool("CaloCalibClusterTruthAttributerTool")
+    truth_tool.storeFullTruthEnergy = True
+
     DecoratorTool = CompFactory.CaloCalibClusterDecoratorTool
     decoratorTool = DecoratorTool(name, TruthAttributerTool=truth_tool, **kwargs,ExtraInputs =  {('CaloCellContainer','StoreGateSvc+AllCalo')})
-
+    truth_tool.useCellWeights = True
     return decoratorTool
 
 
@@ -703,7 +707,7 @@ def CaloTopoClusterConfigTest(flags=None):
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
 
-    topoAcc = CaloTopoClusterCfg(flags)
+    topoAcc = CaloTopoClusterCfg(flags, clustersname = "CaloCalTopoClustersNew")
     #topoAcc = CaloTopoClusterCfg(flags)
     topoAlg = topoAcc.getPrimary()
     topoAlg.ClustersOutputName = "CaloCalTopoClustersNew"
