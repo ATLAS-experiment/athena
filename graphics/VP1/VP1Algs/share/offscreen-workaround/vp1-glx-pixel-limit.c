@@ -64,7 +64,7 @@ static __GLXextFuncPtr resolve(resolver_fn fn, const GLubyte *name)
     return result;
 }
 
-__GLXextFuncPtr glXGetProcAddress(const GLubyte *name)
+static __GLXextFuncPtr shimGetProcAddress(const GLubyte *name)
 {
     resolver_fn fn = atomic_load(&resolver_real);
     if (!fn) {
@@ -74,7 +74,7 @@ __GLXextFuncPtr glXGetProcAddress(const GLubyte *name)
     return resolve(fn, name);
 }
 
-__GLXextFuncPtr glXGetProcAddressARB(const GLubyte *name)
+static __GLXextFuncPtr shimGetProcAddressARB(const GLubyte *name)
 {
     resolver_fn fn = atomic_load(&resolver_arb_real);
     if (!fn) {
@@ -84,7 +84,10 @@ __GLXextFuncPtr glXGetProcAddressARB(const GLubyte *name)
     return resolve(fn, name);
 }
 
-/* Coin resolves GLX entry points using a private dlopen handle. Intercept
+/* Keep resolver wrappers private: exporting the GLX resolver names causes
+ * dlsym(RTLD_DEFAULT, ...) and driver-internal lookups to find this shim,
+ * caching our own wrapper as the real resolver and recursing indefinitely.
+ * Coin resolves GLX entry points using a private dlopen handle. Intercept
  * those resolver lookups as well as ordinary linked GLX calls. */
 void *dlsym(void *handle, const char *name)
 {
@@ -94,13 +97,13 @@ void *dlsym(void *handle, const char *name)
         attribute_fn attr = (attribute_fn)original_dlsym()(handle, "glXGetFBConfigAttrib");
         if (attr && attr != glXGetFBConfigAttrib) atomic_store(&attribute_real, attr);
         atomic_store(&resolver_real, (resolver_fn)result);
-        return (void *)glXGetProcAddress;
+        return (void *)shimGetProcAddress;
     }
     if (strcmp(name, "glXGetProcAddressARB") == 0) {
         attribute_fn attr = (attribute_fn)original_dlsym()(handle, "glXGetFBConfigAttrib");
         if (attr && attr != glXGetFBConfigAttrib) atomic_store(&attribute_real, attr);
         atomic_store(&resolver_arb_real, (resolver_fn)result);
-        return (void *)glXGetProcAddressARB;
+        return (void *)shimGetProcAddressARB;
     }
     return result;
 }

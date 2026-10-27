@@ -62,3 +62,8 @@ atlas_add_test( VP1AlgConfig
 atlas_add_test( VP1SnapshotWorkaround
    SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/VP1SnapshotWorkaround_test.py
    POST_EXEC_SCRIPT noerror.sh )
+
+# Exercise private-handle and RTLD_DEFAULT GLX lookups without an X server.
+atlas_add_test( VP1GLXShim
+   SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/VP1GLXShim_test.py
+   POST_EXEC_SCRIPT noerror.sh )
