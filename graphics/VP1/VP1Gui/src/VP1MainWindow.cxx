@@ -44,6 +44,8 @@
 
 
 #include <QMessageBox>
+#include <QImageWriter>
+#include <QFileInfo>
 #include <QInputDialog>
 #include <QLabel>
 #include <QCloseEvent>
@@ -86,6 +88,35 @@
 #include <iostream>
 
 namespace {
+
+bool saveSnapshot(QWidget *parent, const QPixmap& snapshot, const QString& filename)
+{
+    QString error;
+    if (snapshot.isNull()) {
+        error = QStringLiteral("VP1 could not render the snapshot. No image was saved.\n\n"
+                               "Offscreen OpenGL rendering may be unavailable on this display. "
+                               "Check the terminal for Coin/GLX errors.");
+    } else {
+        QImageWriter writer(filename);
+        if (!writer.write(snapshot.toImage())) {
+            error = QStringLiteral("Could not write the snapshot:\n%1").arg(writer.errorString());
+        } else {
+            const QFileInfo output(filename);
+            if (!output.isFile() || output.size() == 0)
+                error = QStringLiteral("The image writer reported success, but no non-empty output file was found.");
+        }
+    }
+    if (error.isEmpty())
+        return true;
+
+    const QString message = error + QStringLiteral("\n\nOutput file: ") + filename;
+    VP1Msg::message(QStringLiteral("ERROR - Snapshot failed: ") + message);
+    QMessageBox dialog(QMessageBox::Critical, QStringLiteral("Snapshot failed"), message,
+                       QMessageBox::Ok, parent);
+    dialog.setTextFormat(Qt::PlainText);
+    dialog.exec();
+    return false;
+}
 
 QString eventTimeUTC(unsigned timestamp)
 {
@@ -1304,18 +1335,14 @@ void VP1MainWindow::saveAllCurrentChannels()
 //		VP1Msg::messageDebug("channel info: " + info);
 
 		QPixmap snap = widg->getSnapshot();
-		if (snap.isNull()) {
-			VP1Msg::message("ERROR! - No snapshot produced!");
-			return;
-		}
-
 		QString tabfilename = filename + "_" + QString::number(nT) + "_" + channelname + ".png";
 
 		if (!(tabfilename.endsWith(".png",Qt::CaseInsensitive)||tabfilename.endsWith(".bmp",Qt::CaseInsensitive)))
 			tabfilename += ".png";
 
 
-		snap.save(tabfilename);
+		if (!saveSnapshot(this, snap, tabfilename))
+			return;
 
 		tab_save_files << tabfilename;
 	}
@@ -1404,10 +1431,9 @@ QString VP1MainWindow::request_saveChannelSnapshot(const QString& xLabel)
 	VP1Msg::messageVerbose("calling snapshot");
 	QPixmap pm = m_tabmanager->selectedChannelWidget()->getSnapshot();
 
-	if (pm.isNull())
+	if (!saveSnapshot(this, pm, filename))
 		return QString();
 
-	pm.save(filename);
 	return filename;
 }
 
