@@ -38,23 +38,18 @@ StatusCode TauSmearingTool::initialize()
         ATH_MSG_ERROR("unknown campaign (mc20|mc23):" << m_sCampaign);
         return StatusCode::FAILURE;
       }
-
-      if(m_useFastSim) {
-        ATH_MSG_WARNING("No fast-sim recommendation for tau smearing is available, using full sim");
-      }
-
-     
+    
       if(m_useGNTau){
         if (m_sCampaign=="mc23") {
-          m_sInputFilePath = sDirectory+"TES_TrueHadTau_GNTau_mc23_v0.root";
+          m_sInputFilePath = m_useFastSim ? sDirectory+"TES_TrueHadTau_GNTau_mc23_v0_incl_AF3.root" : sDirectory+"TES_TrueHadTau_GNTau_mc23_v0.root";
         } else {
-          m_sInputFilePath = sDirectory+"TES_TrueHadTau_GNTau_mc20_v0.root";  
+          m_sInputFilePath = m_useFastSim ? sDirectory+"TES_TrueHadTau_GNTau_mc20_v0_incl_AF3.root" : sDirectory+"TES_TrueHadTau_GNTau_mc20_v0.root";  
         }  
       } else { 
         if (m_sCampaign=="mc23") {
-          m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc23_v3.root";
+          m_sInputFilePath = m_useFastSim ? sDirectory+"TES_TrueHadTau_RNN_mc23_v3_incl_AF3.root" : sDirectory+"TES_TrueHadTau_RNN_mc23_v3.root";
         } else {
-          m_sInputFilePath = sDirectory+"TES_TrueHadTau_RNN_mc20_v2.root";
+          m_sInputFilePath = m_useFastSim ? sDirectory+"TES_TrueHadTau_RNN_mc20_v2_incl_AF3.root" : sDirectory+"TES_TrueHadTau_RNN_mc20_v2.root";
         }
       }
 
