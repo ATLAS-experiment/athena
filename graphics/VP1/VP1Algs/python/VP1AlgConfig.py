@@ -251,7 +251,7 @@ def SetupVP1():
       elif args.phaseII:
         _logger.verbose("Phase-II mode!")
         from Campaigns.Utils import Campaign
-        from AthenaConfiguration.TestDefaults import defaultGeometryTags
+        from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
         vp1_empty_input = True
         flags.Input.ProjectName = "mc21_14TeV"
         flags.Input.RunNumbers = [601229]
@@ -259,7 +259,7 @@ def SetupVP1():
         flags.Input.TypedCollections = []
 
         # set default CondDB and Geometry version
-        flags.IOVDb.GlobalTag = "OFLCOND-MC16-SDR-15"
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
         flags.Input.isMC = True
         flags.Input.MCCampaign = Campaign.Unknown
         flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
