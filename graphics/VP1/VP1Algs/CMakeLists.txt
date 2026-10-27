@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1Algs )
@@ -45,3 +45,8 @@ set( VP1AlgsEnvironment_DIR ${CMAKE_CURRENT_BINARY_DIR}
 find_package( VP1AlgsEnvironment )
 # message( "VP1PLUGINPATH has been set to: " $ENV{VP1PLUGINPATH} )
 
+
+# Check Phase-II defaults without starting geometry or the VP1 GUI.
+atlas_add_test( VP1PhaseIIConfig
+   SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/VP1PhaseIIConfig_test.py
+   POST_EXEC_SCRIPT noerror.sh )
