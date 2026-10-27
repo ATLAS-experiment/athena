@@ -1,4 +1,4 @@
-# Copyright (C) 2026 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """Activate the temporary shim before importing Athena or loading Coin."""
 
 import os
