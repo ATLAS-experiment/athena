@@ -175,7 +175,8 @@ def TauTrackRNNCfg(flags):
     TrackRNN = CompFactory.tauRecTools.TrackRNN
     _RNN = TrackRNN(name = _name + "_TrackRNN",
                     InputWeightsPath = flags.Tau.tauRNNTrackClassConfig,
-                    calibFolder = flags.Tau.tauRecToolsCVMFSPath )
+                    calibFolder = flags.Tau.tauRecToolsCVMFSPath,
+                    removeDuplicateChargedTracks = flags.Tau.removeDuplicateChargedTracks)
 
     result.setPrivateTools(_RNN)
     return result

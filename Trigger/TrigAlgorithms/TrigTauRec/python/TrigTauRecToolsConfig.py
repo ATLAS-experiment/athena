@@ -41,6 +41,7 @@ def trigTauTrackFinderCfg(flags, name='', TrackParticlesContainer=''):
         Key_trackPartInputContainer     = TrackParticlesContainer,
         maxDeltaZ0wrtLeadTrk            = 0.75*mm,
         TrackToVertexIPEstimator        = AtlasTrackToVertexIPEstimator,
+        removeDuplicateCoreTracks       = True,
     ))
 
     return acc

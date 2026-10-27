@@ -31,9 +31,10 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.SeedMinPt", 0.0*Units.GeV)
     tau_cfg.addFlag("Tau.SeedMaxEta", lambda prevFlags: 2.5 if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else 4.0)
     tau_cfg.addFlag("Tau.MaxNTracks", -1)
-    tau_cfg.addFlag("Tau.RemoveDupeCoreTracks", True)
+    tau_cfg.addFlag("Tau.RemoveDupeCoreTracks", lambda prevFlags: True if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else False) # For Run4, the duplication of core tracks won't be performed, but instead the charged track duplication with be done after the RNN track classifier 
     tau_cfg.addFlag("Tau.useGhostTracks", True)
     tau_cfg.addFlag("Tau.ghostTrackDR", 0.25)
+    tau_cfg.addFlag("Tau.removeDuplicateChargedTracks", lambda prevFlags: False if prevFlags.GeoModel.Run <= LHCPeriod.Run3 else True) # For Run4, the duplication of charged tracks with be done after the RNN track classifier
     tau_cfg.addFlag("Tau.shotPtCut_1Photon", [430.*Units.MeV, 300.*Units.MeV, 9999999.*Units.MeV, 330.*Units.MeV, 350.*Units.MeV])
     tau_cfg.addFlag("Tau.shotPtCut_2Photons", [10000.*Units.MeV, 10000.*Units.MeV, 9999999.*Units.MeV, 10000.*Units.MeV, 10000.*Units.MeV])
     tau_cfg.addFlag("Tau.Pi0ScoreConfig", "TauPi0BDTWeights.root")
