@@ -1062,16 +1062,23 @@ class athenaExecutor(scriptExecutor):
                 if k in self.conf._argdict:
                     self._onlyMP = True
 
+
         # Check the consistency of parallel configuration: CLI flags + evnironment.
-        if ((('multithreaded' in self.conf._argdict and self.conf._argdict['multithreaded'].value) or ('multiprocess' in self.conf._argdict and self.conf._argdict['multiprocess'].value)) and
+        if (('multiprocess' in self.conf._argdict and self.conf._argdict['multiprocess'].value) and
             ('ATHENA_CORE_NUMBER' not in os.environ)):
-            # At least one of the parallel command-line flags has been provided but ATHENA_CORE_NUMBER environment has not been set
-            msg.warning('either --multithreaded or --multiprocess argument used but ATHENA_CORE_NUMBER environment not set. Athena will continue in Serial mode')
+            raise ValueError('--multiprocess argument used but ATHENA_CORE_NUMBER environment variable not set. Please check your configuration!')
+            
+        
         else:
             # Try to detect AthenaMT mode, number of threads and number of concurrent events
             if not self._disableMT:
-                self._athenaMT, self._athenaConcurrentEvents = detectAthenaMTThreads(self.conf.argdict, self.name, legacyThreadingRelease)
-
+                if ('multithreaded' in self.conf._argdict and self.conf._argdict['multithreaded'].value) and ('ATHENA_CORE_NUMBER' not in os.environ):
+                    msg.warning('--multithreaded argument used but ATHENA_CORE_NUMBER environment variable not set. Athena will continue in MT mode with 1 thread')
+                    self._athenaMT = 1
+                    self._athenaConcurrentEvents = 1
+                else:
+                    self._athenaMT, self._athenaConcurrentEvents = detectAthenaMTThreads(self.conf.argdict, self.name, legacyThreadingRelease)
+                
             # Try to detect AthenaMP mode and number of workers
             if not self._disableMP:
                 self._athenaMP = detectAthenaMPProcs(self.conf.argdict, self.name, legacyThreadingRelease)
