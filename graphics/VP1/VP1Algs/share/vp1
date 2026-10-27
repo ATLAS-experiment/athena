@@ -3,6 +3,9 @@
 
 # Simple wrapper to call actual VP1AlgConfig.SetupVP1() function
 
+from VP1Algs.VP1SnapshotWorkaround import enableSnapshotWorkaround
+enableSnapshotWorkaround()
+
 intro_text = r"""
 ******************************************
 

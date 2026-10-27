@@ -18,6 +18,8 @@ atlas_add_component( VP1Algs
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( share/vp1 )
+atlas_install_generic( share/offscreen-workaround/*
+   DESTINATION share/VP1Algs/offscreen-workaround )
 atlas_install_scripts( share/clear-bash-hash-table-vp1 )
 
 #----------------------------------------------------------
@@ -54,4 +56,9 @@ atlas_add_test( VP1PhaseIIConfig
 # Configuration regression tests do not start the VP1 GUI or event loop.
 atlas_add_test( VP1AlgConfig
    SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/VP1AlgConfig_test.py
+   POST_EXEC_SCRIPT noerror.sh )
+
+# The snapshot workaround must activate before Athena imports or GL loading.
+atlas_add_test( VP1SnapshotWorkaround
+   SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/VP1SnapshotWorkaround_test.py
    POST_EXEC_SCRIPT noerror.sh )
