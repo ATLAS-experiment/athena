@@ -40,16 +40,14 @@
   <TDirectory name="/">
    <TDirectory name="BTag">
     <TDirectory name="AntiKt4EMPFlowJets">
-     <TDirectory name="other_histograms">
-      <TDirectory name="histos">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_global_nTracks" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_global_nPrimVtx" type="TH1F" plotopts="" tests="KS"/>
-       <hist1D name="BTag_AntiKt4EMPFlowJets_global_nTracksPrimVtx" type="TH1F" plotopts="" tests="KS"/>
-      </TDirectory>
+     <TDirectory name="global">
+      <hist1D name="BTag_AntiKt4EMPFlowJets_global_nJets" type="TH1F" plotopts="" tests="KS"/>
+      <hist1D name="BTag_AntiKt4EMPFlowJets_global_nTracks" type="TH1F" plotopts="" tests="KS"/>
+      <hist1D name="BTag_AntiKt4EMPFlowJets_global_nPrimVtx" type="TH1F" plotopts="" tests="KS"/>
+      <hist1D name="BTag_AntiKt4EMPFlowJets_global_nTracksPrimVtx" type="TH1F" plotopts="" tests="KS"/>
      </TDirectory>
      <TDirectory name="jet">
-      <TDirectory name="jet">
-       <hist1D name="BTag_AntiKt4EMPFlowJets_global_nJets" type="TH1F" plotopts="" tests="KS"/>
+      <TDirectory name="inclusive">
        <hist1D name="BTag_AntiKt4EMPFlowJets_jet_pt_ttbar" type="TH1F" plotopts="" tests="KS"/>
        <hist1D name="BTag_AntiKt4EMPFlowJets_jet_eta" type="TH1F" plotopts="" tests="KS"/>
       </TDirectory>
