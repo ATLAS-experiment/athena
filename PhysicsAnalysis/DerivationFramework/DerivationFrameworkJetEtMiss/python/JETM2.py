@@ -172,28 +172,6 @@ def JETM2Cfg(flags):
         })
     JETM2SlimmingHelper.AllVariables += ["FEAssociationMap"]
     
-    JETM2SlimmingHelper.AppendToDictionary.update({'CSSKGNeutralParticleFlowObjects': 'xAOD::FlowElementContainer',
-                                                   'CSSKGNeutralParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
-                                                   'CSSKGChargedParticleFlowObjects': 'xAOD::FlowElementContainer',
-                                                   'CSSKGChargedParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
-                                                   'CHSGlobalClusterMLCorrectedNeutralParticleFlowObjects': 'xAOD::FlowElementContainer',
-                                                   'CHSGlobalClusterMLCorrectedNeutralParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
-                                                   'CHSGlobalClusterMLCorrectedChargedParticleFlowObjects': 'xAOD::FlowElementContainer',
-                                                   'CHSGlobalClusterMLCorrectedChargedParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
-                                                   'GlobalClusterMLCorrectedChargedParticleFlowObjects': 'xAOD::FlowElementContainer',
-                                                   'GlobalClusterMLCorrectedChargedParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
-                                                   'GlobalClusterMLCorrectedNeutralParticleFlowObjects': 'xAOD::FlowElementContainer',
-                                                   'GlobalClusterMLCorrectedNeutralParticleFlowObjectsAux': 'xAOD::ShallowAuxContainer',
-                                                   'UFO': 'xAOD::FlowElementContainer',
-                                                   'UFOAux': 'xAOD::FlowElementAuxContainer',
-                                                   'Kt4UFOCSSKEventShape': 'xAOD::EventShape',
-                                                   'Kt4UFOCSSKEventShapeAux': 'xAOD::EventShapeAuxInfo',
-                                                   'Kt4UFOCSSKNeutEventShape': 'xAOD::EventShape',
-                                                   'Kt4UFOCSSKNeutEventShapeAux': 'xAOD::EventShapeAuxInfo',
-                                                   'AntiKt4EMTopoNoPtCutJets': 'xAOD::JetContainer',
-                                                   'AntiKt4EMTopoNoPtCutJetsAux': 'xAOD::JetAuxContainer',
-                                                   })
-
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addOriginCorrectedClustersToSlimmingTool
     addOriginCorrectedClustersToSlimmingTool(JETM2SlimmingHelper,writeLC=True,writeEM=True)
 
@@ -203,9 +181,6 @@ def JETM2Cfg(flags):
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import addTruth3ContentToSlimmerTool
         addTruth3ContentToSlimmerTool(JETM2SlimmingHelper)
 
-        JETM2SlimmingHelper.AppendToDictionary.update({'TruthParticles': 'xAOD::TruthParticleContainer',
-                                                       'TruthParticlesAux': 'xAOD::TruthParticleAuxContainer'})
-        
         JETM2SlimmingHelper.AllVariables += ["TruthTopQuarkWithDecayParticles","TruthTopQuarkWithDecayVertices","TruthHFWithDecayParticles",
                                              "AntiKt4TruthJets", "InTimeAntiKt4TruthJets", "OutOfTimeAntiKt4TruthJets",
                                              "TruthParticles", "TruthVertices","TruthEvents"]
