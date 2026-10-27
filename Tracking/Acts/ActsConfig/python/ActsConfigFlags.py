@@ -249,7 +249,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.branchStopperMeasCutReduce', 2)
     actscf.addFlag('Acts.branchStopperAbsEtaMeasCut', 1.2)
     actscf.addFlag('Acts.SeedRefitOutlierChi2Cut', float('inf'))  # OutlierChi2Cut for the seed refit Kalman fitter, applied whenever a seed refit is scheduled. inf == disabled.
-    actscf.addFlag('Acts.LrtStripSeedRefit', True)  # Toggle the LRT strip-seed refit (KF on strip seeds before CKF). 
+    actscf.addFlag('Acts.LrtStripSeedRefit', False)  # Toggle the LRT strip-seed refit (KF on strip seeds before CKF). 
     actscf.addFlag('Acts.stripCalibrationIterations', 1)  # Strip-SP calibration iterations in TrackParamsEstimationTool (all passes). 
     actscf.addFlag('Acts.parameterEstimationMode', ParameterEstimationMode.FirstMiddleLast,
             type=ParameterEstimationMode)  # SPs of a seed used in TrackParamsEstimationTool (the GNN chain uses its own flag)

@@ -232,6 +232,9 @@ def createActsLargeRadiusTrackingPassFlags():
     icf.maxSctHoles        = [1]
     icf.maxDoubleHoles     = [0]
 
+    icf.Xi2maxSigma        = [5.]
+    icf.Xi2maxNoAddSigma   = [50.**0.5]
+
     icf.maxZImpactSeed     = 500.0 * Units.mm
     icf.maxPrimaryImpactSeed = 300.0 * Units.mm
     icf.minPTSeed          = lambda pcf : (
@@ -243,6 +246,7 @@ def createActsLargeRadiusTrackingPassFlags():
     # --- seeding
     icf.useITkPixelSeeding       = False
     icf.useITkStripSeeding       = True
+    icf.StripSeedingStrategy     = SeedingStrategy.GridTriplet
     icf.maxdImpactSSSSeeds       = [300.0 * Units.mm]
 
     icf.doBremRecoverySi = False
