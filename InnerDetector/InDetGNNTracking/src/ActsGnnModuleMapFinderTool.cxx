@@ -9,12 +9,13 @@
 #include "ActsInterop/Logger.h"
 
 #include "ActsPlugins/Gnn/CudaTrackBuilding.hpp"
+#include "ActsPlugins/Gnn/DWalkTrackBuilding.hpp"
+#include "ActsPlugins/Gnn/EdgeLayerConnector.hpp"
 #include "ActsPlugins/Gnn/GnnPipeline.hpp"
 #include "ActsPlugins/Gnn/ModuleMapCuda.hpp"
 #include "ActsPlugins/Gnn/OnnxEdgeClassifier.hpp"
 #include "ActsPlugins/Gnn/TensorRTEdgeClassifier.hpp"
 #include "ActsPlugins/Gnn/TorchEdgeClassifier.hpp"
-#include "ActsPlugins/Gnn/EdgeLayerConnector.hpp"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "TrkPrepRawData/PrepRawData.h"
@@ -89,19 +90,29 @@ StatusCode InDet::ActsGnnModuleMapFinderTool::initialize() {
 
   // 3. Track builder
   std::shared_ptr<ActsPlugins::TrackBuildingBase> tb;
-  ATH_MSG_INFO("Configure CC&JunctionRemoval as graph segmentation algorithm");
-  if( m_useEdgeLayerConnector ) {
+  if (m_trackBuilder == "junctionremoval") {
+    ATH_MSG_INFO("Configure CC&JunctionRemoval as graph segmentation algorithm");
+    ActsPlugins::CudaTrackBuilding::Config tbCfg;
+    tbCfg.doJunctionRemoval = true;
+    tb = std::make_shared<ActsPlugins::CudaTrackBuilding>(
+        tbCfg, m_logger->cloneWithSuffix("CC&JR"));
+  } else if (m_trackBuilder == "edgelayerconnector") {
+    ATH_MSG_INFO("Configure EdgeLayerConnector as graph segmentation algorithm");
     ActsPlugins::EdgeLayerConnector::Config tbCfg;
     tbCfg.maxHitsPerTrack = m_elcMaxHitsPerTrack;
     tbCfg.blockSize = 512;
     tbCfg.weightsCut = m_edgeCut;
     tb = std::make_shared<ActsPlugins::EdgeLayerConnector>(
         tbCfg, m_logger->cloneWithSuffix("ELC"));
+  } else if (m_trackBuilder == "dwalk") {
+    ATH_MSG_INFO("Configure D-WALK as graph segmentation algorithm");
+    ActsPlugins::DWalkTrackBuilding::Config tbCfg;
+    tbCfg.minCandidateSize = m_minCandidateMeasurements;
+    tb = std::make_shared<ActsPlugins::DWalkTrackBuilding>(
+        tbCfg, m_logger->cloneWithSuffix("D-WALK"));
   } else {
-    ActsPlugins::CudaTrackBuilding::Config tbCfg;
-    tbCfg.doJunctionRemoval = true;
-    tb = std::make_shared<ActsPlugins::CudaTrackBuilding>(
-        tbCfg, m_logger->cloneWithSuffix("CC&JR"));
+    ATH_MSG_ERROR("Unknown graph segmentation algorithm: " << m_trackBuilder);
+    return StatusCode::FAILURE;
   }
 
   // 4. Assemble pipeline

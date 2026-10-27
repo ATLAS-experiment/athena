@@ -13,6 +13,12 @@ class GNNTrackFinderToolType(FlagEnum):
     ActsPipeline = "ActsPipeline"
 
 
+class ActsGNNTrackBuilderType(FlagEnum):
+    JunctionRemoval = "junctionremoval"
+    EdgeLayerConnector = "edgelayerconnector"
+    DWalk = "dwalk"
+
+
 def createGNNTrackingConfigFlags():
     """Create flags for configuring the GNN tracking."""
     icf = AthConfigFlags()
@@ -61,11 +67,21 @@ def createGNNTrackingConfigFlags():
     # ACTS GNN Pipeline Tool
     icf.addFlag("Tracking.GNN.ActsPipeline.moduleMapPath", "")
     icf.addFlag("Tracking.GNN.ActsPipeline.gnnPath", "")
-    icf.addFlag("Tracking.GNN.ActsPipeline.edgeCut", 0.5)
+    icf.addFlag(
+        "Tracking.GNN.ActsPipeline.trackBuilder",
+        ActsGNNTrackBuilderType.JunctionRemoval,
+        type=ActsGNNTrackBuilderType,
+    )
+    icf.addFlag(
+        "Tracking.GNN.ActsPipeline.edgeCut",
+        lambda prevFlags: 0.01
+        if prevFlags.Tracking.GNN.ActsPipeline.trackBuilder
+        == ActsGNNTrackBuilderType.DWalk
+        else 0.5,
+    )
     icf.addFlag("Tracking.GNN.ActsPipeline.numTrtContexts", 1)
     icf.addFlag("Tracking.GNN.ActsPipeline.minCandidateMeasurements", 3)
     icf.addFlag("Tracking.GNN.ActsPipeline.saveEdgeScore", False)
-    icf.addFlag("Tracking.GNN.ActsPipeline.useEdgeLayerConnector", False)
     icf.addFlag("Tracking.GNN.ActsPipeline.elcMaxHitsPerTrack", 30)
 
     return icf

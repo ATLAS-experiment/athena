@@ -65,6 +65,13 @@ MMG expect a path without the 2 suffix.
 
 For example, `module_map_path` can be `/path/to/modulemaps/merged_ttbar_plus_singles_mmg1.3.0_cleaned_mean_rms_replaced_thr5_tol1e-10_float` (without `*.doublets.root` and `*.triplets.root` at the end).
 
+The graph segmentation algorithm is selected with
+`flags.Tracking.GNN.ActsPipeline.trackBuilder`. The available values are
+`JunctionRemoval`, `EdgeLayerConnector`, and `DWalk` from
+`ActsGNNTrackBuilderType`. The edge-classifier cut defaults to `0.01` for
+D-WALK and `0.5` for the other builders, and can still be overridden with
+`flags.Tracking.GNN.ActsPipeline.edgeCut`.
+
 ```bash
     conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
@@ -76,6 +83,8 @@ For example, `module_map_path` can be `/path/to/modulemaps/merged_ttbar_plus_sin
             'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
             'InDetGNNTracking.InDetGNNTrackingFlags.gnnActsPipelineValidation' \
         --preExec "flags.ITk.doEndcapEtaNeighbour=True; \
+            from InDetGNNTracking.InDetGNNTrackingConfigFlags import ActsGNNTrackBuilderType; \
+            flags.Tracking.GNN.ActsPipeline.trackBuilder=ActsGNNTrackBuilderType.DWalk; \
             flags.Tracking.GNN.ActsPipeline.moduleMapPath=\"${module_map_path}\"; \
             flags.Tracking.GNN.ActsPipeline.gnnPath=\"${gnn_model_path}\"; \
             flags.Tracking.GNN.ActsPipeline.saveEdgeScore = True" \
