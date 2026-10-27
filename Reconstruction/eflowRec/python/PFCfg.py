@@ -185,7 +185,7 @@ def getPFUnifiedRecoverSplitShowersSubtractionOnlyTool(inputFlags,toolName):
 
 
 
-def getPFUnifiedMomentCalculatorTool(inputFlags):
+def getPFUnifiedMomentCalculatorTool(inputFlags, momentsToCalculateList = None):
     result=ComponentAccumulator()
     PFMomentCalculatorToolFactory = CompFactory.PFUnifiedMomentCalculatorTool
 
@@ -193,6 +193,9 @@ def getPFUnifiedMomentCalculatorTool(inputFlags):
 
     from CaloRec.CaloTopoClusterConfig import getTopoMoments
     PFClusterMomentsMaker = result.popToolsAndMerge(getTopoMoments(inputFlags))
+    #the offline configuration takes the default moment list, the HLT passes its own
+    if momentsToCalculateList:
+        PFClusterMomentsMaker.MomentsNames = momentsToCalculateList
     PFMomentCalculatorTool.CaloClusterMomentsMaker = PFClusterMomentsMaker
 
     PFClusterCollectionTool = CompFactory.PFClusterCollectionTool

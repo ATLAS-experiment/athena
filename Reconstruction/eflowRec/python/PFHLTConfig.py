@@ -319,6 +319,13 @@ def getHLTPFMomentCalculatorTool(inputFlags):
     else:
         MomentsNames = ["CENTER_MAG"]
 
+    if inputFlags.Trigger.Jet.PFlowUnifiedChain:
+        from eflowRec.PFCfg import getPFUnifiedMomentCalculatorTool
+        PFMomentCalculatorTool = result.popToolsAndMerge(
+            getPFUnifiedMomentCalculatorTool(inputFlags, MomentsNames))
+        result.setPrivateTools(PFMomentCalculatorTool)
+        return result
+
     PFMomentCalculatorTool = CompFactory.PFMomentCalculatorTool("PFMomentCalculatorTool")
 
     from CaloRec.CaloTopoClusterConfig import getTopoMoments
@@ -377,17 +384,59 @@ def PFCfg(inputFlags, tracktype="", clustersin=None, calclustersin=None, tracksi
     monTool_matching.HistPath = 'PFTrackClusterMatchingTool_1'
     PFTrackClusterMatchingTool_1.MonTool_ClusterMatching = monTool_matching
 
-    cellSubtractionTool = getHLTPFCellLevelSubtractionTool(
-        inputFlags,
-        "PFCellLevelSubtractionTool",
-    )
-    cellSubtractionTool.PFTrackClusterMatchingTool=PFTrackClusterMatchingTool_1
+    # Trigger.Jet.PFlowUnifiedChain selects which chain the HLT runs: the older combined chain
+    # (default), or the unified matching/subtraction tools that offline uses.
+    if inputFlags.Trigger.Jet.PFlowUnifiedChain:
+        from eflowRec.PFCfg import (getPFUnifiedCellLevelMatchingTool,
+                                    getPFUnifiedCellLevelSubtractionOnlyTool,
+                                    getPFUnifiedRecoverSplitShowersMatchingTool,
+                                    getPFUnifiedRecoverSplitShowersSubtractionOnlyTool)
 
-    recoverSplitShowersTool = getHLTPFRecoverSplitShowersTool(
-        inputFlags,
-        "PFRecoverSplitShowersTool",
-    )
-    recoverSplitShowersTool.PFTrackClusterMatchingTool = PFTrackClusterMatchingTool_1
+        cellMatchingTool = getPFUnifiedCellLevelMatchingTool(
+            inputFlags,
+            "PFUnifiedCellLevelMatchingTool",
+        )
+        cellMatchingTool.PFTrackClusterMatchingTool = PFTrackClusterMatchingTool_1
+
+        recoverSplitShowersMatchingTool = getPFUnifiedRecoverSplitShowersMatchingTool(
+            inputFlags,
+            "PFUnifiedRecoverSplitShowersMatchingTool",
+        )
+        recoverSplitShowersMatchingTool.PFTrackClusterMatchingTool = PFTrackClusterMatchingTool_1
+
+        # the split-shower stages are run unconditionally, as in the combined chain
+        toolListArgs = dict(
+            useUnified = True,
+            UnifiedBaseTools = [
+                cellMatchingTool,
+                getPFUnifiedCellLevelSubtractionOnlyTool(inputFlags, "PFUnifiedCellLevelSubtractionOnlyTool"),
+                recoverSplitShowersMatchingTool,
+                getPFUnifiedRecoverSplitShowersSubtractionOnlyTool(inputFlags, "PFUnifiedRecoverSplitShowersSubtractionOnlyTool"),
+                result.popToolsAndMerge(getHLTPFMomentCalculatorTool(inputFlags)),
+            ],
+        )
+    else:
+        cellSubtractionTool = getHLTPFCellLevelSubtractionTool(
+            inputFlags,
+            "PFCellLevelSubtractionTool",
+        )
+        cellSubtractionTool.PFTrackClusterMatchingTool=PFTrackClusterMatchingTool_1
+
+        recoverSplitShowersTool = getHLTPFRecoverSplitShowersTool(
+            inputFlags,
+            "PFRecoverSplitShowersTool",
+        )
+        recoverSplitShowersTool.PFTrackClusterMatchingTool = PFTrackClusterMatchingTool_1
+
+        toolListArgs = dict(
+            SubtractionToolList = [
+                cellSubtractionTool,
+                recoverSplitShowersTool,
+            ],
+            BaseToolList = [
+                result.popToolsAndMerge(getHLTPFMomentCalculatorTool(inputFlags)),
+            ],
+        )
 
     result.addEventAlgo(
         CompFactory.PFAlgorithm(
@@ -398,18 +447,12 @@ def PFCfg(inputFlags, tracktype="", clustersin=None, calclustersin=None, tracksi
                 calclustersin,
                 "PFClusterSelectorTool",
             ),
-            SubtractionToolList = [
-                cellSubtractionTool,
-                recoverSplitShowersTool,
-            ],
-            BaseToolList = [
-                result.popToolsAndMerge(getHLTPFMomentCalculatorTool(inputFlags)),
-            ],
             MonTool = PFOnlineMon.getMonTool_PFAlgorithm(inputFlags),
             eflowRecTracksInputName = PFTrackSelector.eflowRecTracksOutputName,
             eflowRecClustersOutputName = f"eflowRecClusters_{tracktype}",
             PFCaloClustersOutputName = f"PFCaloCluster_{tracktype}",
             eflowCaloObjectsOutputName = f"eflowCaloObjects_{tracktype}",
+            **toolListArgs,
         ),
         seqname
     )
