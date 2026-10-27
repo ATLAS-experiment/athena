@@ -15,6 +15,9 @@
 
 #ifdef ATHSIMULATION_USE_ADEPT
 #include "FTFP_BERT_ATL_AdePT.hh"
+#endif
+
+#ifdef ATHSIMULATION_USE_G4HEPEM
 #include "FTFP_BERT_ATL_HepEm.hh"
 #endif
 
@@ -39,6 +42,8 @@ AtlasPhysListFactory::AtlasPhysListFactory()
       "FTFP_BERT_ATL_HP", //(transportation of neutrons below 20 MeV is more accurate)
 #ifdef ATHSIMULATION_USE_ADEPT
       "FTFP_BERT_ATL_AdePT", // (Offload of e/g tracks to AdePT on GPU)
+#endif
+#ifdef ATHSIMULATION_USE_G4HEPEM
       "FTFP_BERT_ATL_HepEm", // (Offload of e/g tracks to G4HepEm on CPU)
 #endif
 #ifdef ATHSIMULATION_USE_CELER
@@ -88,6 +93,8 @@ AtlasPhysListFactory::GetReferencePhysList(const G4String& name)
   else if (name=="FTFP_BERT_ATL_HP")            {p = new FTFP_BERT_ATL_HP(m_verbose);}
 #ifdef ATHSIMULATION_USE_ADEPT
   else if (name=="FTFP_BERT_ATL_AdePT")         {p = new FTFP_BERT_ATL_AdePT(m_verbose, m_multipleStepsInMSCTransport);}
+#endif
+#ifdef ATHSIMULATION_USE_G4HEPEM
   else if (name=="FTFP_BERT_ATL_HepEm")         {p = new FTFP_BERT_ATL_HepEm(m_verbose, m_multipleStepsInMSCTransport);}
 #endif
 #ifdef ATHSIMULATION_USE_CELER
