@@ -109,7 +109,7 @@ def getNNs(flags):
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         ak4_nns = ["BTagging/20260308/GN2HL/antikt4emtopo/network.onnx"]
     else:
-        caldir = 'BTagging/20231205/GN2v01/antikt4empflow'
+        caldir = 'BTagging/20261022/GN2v01/antikt4empflow'
         ak4_nns = [f'{caldir}/network_fold{n}.onnx' for n in range(4)]
 
     # We can save our results to the jet container, rather than the b-tagging container
@@ -119,15 +119,15 @@ def getNNs(flags):
     # Note also, reco tests failing due to leptonID missing, so for now don't run taggers unless derivation
     # https://gitlab.cern.ch/atlas/athena/-/merge_requests/77764#note_9063625
     gn3pflowmuons_paths = [
-        "BTagging/20250213/GN3PflowMuonsV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow
+        "BTagging/20261022/GN3PflowMuonsV00/antikt4empflow/network.onnx", # Tracks+Muons+PFlow
     ] if isRun3Derivation(flags) else []
     gn3v01_paths = [
-        "BTagging/20260805/GN3EPCLV01/antikt4empflow/network.onnx", # Electrons+Pflow+Charge+Muons
+        "BTagging/20261022/GN3EPCLV01/antikt4empflow/network.onnx", # Electrons+Pflow+Charge+Muons
     ] if isRun3Derivation(flags) else []
     # Trained on the poor man's impact parameters, so it needs its own
     # entry below rather than joining gn3_paths
     gn3v03_paths = [
-        "BTagging/20260922/GN3V03/antikt4empflow/network.onnx", # Electrons+Pflow+Charge+Muons
+        "BTagging/20261022/GN3V03/antikt4empflow/network.onnx", # Electrons+Pflow+Charge+Muons
     ] if isRun3Derivation(flags) else []
     # Combine the paths for the GN3PflowMuonsV00 and GN3v01 models
     gn3_paths = gn3pflowmuons_paths + gn3v01_paths
@@ -138,10 +138,10 @@ def getNNs(flags):
     
     lrj_paths = [
              "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
-             "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx",
-             "BTagging/20250310/GN2XTauV00/antikt10ufo/network.onnx",
-             "BTagging/20250912/GN3XPV01/antikt10ufo/network.onnx",
-             "BTagging/20260803/tautauJRv00/antikt10ufo/network.onnx",
+             "BTagging/20261022/GN2Xv02/antikt10ufo/network.onnx",
+             "BTagging/20261022/GN2XTauV00/antikt10ufo/network.onnx",
+             "BTagging/20261022/GN3XPV01/antikt10ufo/network.onnx",
+             "BTagging/20261022/tautauJRv00/antikt10ufo/network.onnx",
              "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20260513.onnx", # bJR10v00Ext
              "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20260513.onnx" # bJR10v01
     ]

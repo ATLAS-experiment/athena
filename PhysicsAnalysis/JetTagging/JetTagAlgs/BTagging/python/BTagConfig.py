@@ -42,7 +42,7 @@ def GetTaggerTrainingMap(flags, jet_col):
             "BTagging/20230307/gn2v00/antiktvr30rmax4rmin02track/network.onnx",
         ],
         "HLT_AntiKt4EMPFlowJets_subresjesgscIS_ftf_TLA": [
-            "BTagging/20231205/GN2v01/antikt4empflow/network_fold0.onnx", # fold 0 of the GN2v01 (safe for HLT jets)
+            "BTagging/20261022/GN2v01/antikt4empflow/network_fold0.onnx", # fold 0 of the GN2v01 (safe for HLT jets)
         ],
         "AntiKt4EMPFlowByVertex": [ # ByVertex added 
             #"BTagging/20231205/GN2v01/antikt4empflow/network_fold0.onnx",
