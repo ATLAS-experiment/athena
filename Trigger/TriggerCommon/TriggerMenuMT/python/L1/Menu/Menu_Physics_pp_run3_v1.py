@@ -1,9 +1,9 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 # Run this file in order to print out the empty slots
 
-from TriggerMenuMT.L1.Base.L1MenuFlags import L1MenuFlags
-from TriggerMenuMT.L1.Menu.MenuCommon import print_available, RequiredL1Items, defineCommonL1Flags
+from ..Base.L1MenuFlags import L1MenuFlags
+from .MenuCommon import print_available, RequiredL1Items, defineCommonL1Flags
 
 def defineMenu():
 

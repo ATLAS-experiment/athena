@@ -1,5 +1,7 @@
 # Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
 
+from __future__ import annotations
+
 __all__ = ['Logic', 'Not']
 
 from copy import copy
@@ -8,7 +10,8 @@ from enum import Enum
 from AthenaCommon.Logging import logging
 log = logging.getLogger(__name__)
 
-class LogicType( Enum ):
+
+class LogicType(Enum):
     NONE = ('')
     AND = ('&')
     OR = ('|')
@@ -16,8 +19,8 @@ class LogicType( Enum ):
     THRESHOLD = ('T')
     INTERNAL = ('I')
 
-    def __init__(self, opSymbol):
-        self.opSymbol = opSymbol
+    def __init__(self, opSymbol: str):
+        self.opSymbol: str = opSymbol
 
     def __str__(self):
         return self.opSymbol
@@ -25,42 +28,49 @@ class LogicType( Enum ):
     def __repr__(self):
         return self.name
 
+
 class Logic:
 
     __slots__ = ['logicType', 'subConditions']
 
     @staticmethod
-    def Not(x):
+    def Not(x: Logic) -> Logic:
         a = Logic()
         a.logicType = LogicType.NOT
         a.subConditions.append(x)
         return a
 
     @staticmethod
-    def stripBunchGroups(theLogic) -> tuple['Logic', list[str]]:
+    def stripBunchGroups(theLogic: Logic) -> tuple[Logic, list[str]]:
         subConds: list['Logic'] = []
         bunchGroups: list[str] = []
         for sc in theLogic.subConditions:
             if sc.logicType is LogicType.INTERNAL and sc.name().startswith('BGRP'):
                 bunchGroups.append(sc.name())
             else:
-                subConds.append( sc )
+                subConds.append(sc)
 
-        if len(subConds)>1:
+        if len(subConds) > 1:
             theLogic.subConditions = subConds
             return (theLogic, bunchGroups)
 
-        if len(subConds)==1:
+        if len(subConds) == 1:
             return (subConds[0], bunchGroups)
-        
+
         raise RuntimeError("Item with logic '%s' has only internal triggers defined" % theLogic)
 
-    def __init__(self, logicType = LogicType.NONE):
-        self.logicType = logicType
-        self.subConditions = [] # holds Logic instances
+    def __init__(self, logicType: LogicType = LogicType.NONE):
+        self.logicType: LogicType = logicType
+        self.subConditions: list[Logic] = []  # holds Logic instances
 
-    def __or__(self, x):
-        newLogic = Logic( logicType = LogicType.OR )
+    def name(self) -> str:
+        """Jut the symbol for the logic type, e.g. '&' for AND, '|' for OR, '!' for NOT
+        Will be overridden in derived classes to return the name of the threshold or internal trigger
+        """
+        return self.logicType.opSymbol
+
+    def __or__(self, x: Logic) -> Logic:
+        newLogic = Logic(logicType=LogicType.OR)
 
         if self.logicType is LogicType.OR:
             newLogic.subConditions += copy(self.subConditions)
@@ -73,9 +83,9 @@ class Logic:
             newLogic.subConditions += [copy(x)]
 
         return newLogic
-    
-    def __and__(self, x):
-        newLogic = Logic( logicType = LogicType.AND )
+
+    def __and__(self, x: Logic) -> Logic:
+        newLogic = Logic(logicType=LogicType.AND)
 
         if self.logicType is LogicType.AND:
             newLogic.subConditions += copy(self.subConditions)
@@ -89,7 +99,7 @@ class Logic:
 
         return newLogic
 
-    def __not__(self, x):
+    def __not__(self, x: Logic) -> Logic:
         if self.logicType is LogicType.NONE:
             self.logicType = LogicType.NOT
         if self.logicType is LogicType.NOT:
@@ -105,17 +115,17 @@ class Logic:
             return ''
 
         if self.logicType is LogicType.NOT:
-            if len(self.subConditions)==1:
+            if len(self.subConditions) == 1:
                 if self.subConditions[0].logicType is LogicType.NONE:
-                    return '!'+str(self.subConditions[0])
+                    return '!' + str(self.subConditions[0])
                 else:
-                    return '!('+str(self.subConditions[0]) + ')'
+                    return '!(' + str(self.subConditions[0]) + ')'
             log.error('Logic NOT must have exactly one element but has %i', len(self.subConditions))
             return ''
 
         if self.logicType in (LogicType.AND, LogicType.OR):
             s = ''
-            if len(self.subConditions)<=1:
+            if len(self.subConditions) <= 1:
                 log.error('Logic AND/OR must have more than one sub element but has %i: %r', len(self.subConditions), self.subConditions)
                 return ''
             else:
@@ -129,7 +139,12 @@ class Logic:
             return s
         return ''
 
-    def thresholdNames(self, include_bgrp=False) -> list[str]:
+    def __lt__(self, other):
+        if not isinstance(other, Logic):
+            return NotImplemented
+        return self.name() < other.name()
+
+    def thresholdNames(self, include_bgrp: bool = False) -> list[str]:
         """List of names of thresholds in this logic
 
         Args:
@@ -140,13 +155,14 @@ class Logic:
         """
         names: set[str] = set()
         for sc in self.subConditions:
-            names.update( sc.thresholdNames(include_bgrp) )
+            names.update(sc.thresholdNames(include_bgrp))
         return sorted(list(names))
 
-    def conditions(self, include_internal=False):
-        cond = set([])
+    def conditions(self, include_internal: bool = False) -> list[Logic]:
+        """Sorted list of names of conditions in this logic"""
+        cond: set[Logic] = set([])
         for sc in self.subConditions:
-            cond.update( sc.conditions(include_internal) )
+            cond.update(sc.conditions(include_internal))
         return sorted(list(cond))
 
     def normalize(self):
@@ -154,7 +170,7 @@ class Logic:
             mylogic = self.logicType
             newconditions = []
             for c in self.subConditions:
-                if c.logicType == mylogic: # X&(A&B) or X|(A|B) 
+                if c.logicType == mylogic:  # X&(A&B) or X|(A|B)
                     # expand it to X&A&B or X|A|B
                     c.normalize()
                     newconditions.extend(c.subConditions)
@@ -163,7 +179,5 @@ class Logic:
             self.subConditions = newconditions
 
 
-def Not(x):
+def Not(x: Logic) -> Logic:
     return Logic.Not(x)
-
-

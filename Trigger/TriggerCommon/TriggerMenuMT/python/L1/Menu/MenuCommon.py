@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
-from TriggerMenuMT.L1.Base.Limits import Limits
+from ..Base.Limits import Limits
 
 def print_available(L1MenuFlags):
     import logging
