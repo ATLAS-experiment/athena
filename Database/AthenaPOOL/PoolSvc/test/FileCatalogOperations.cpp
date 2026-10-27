@@ -71,7 +71,7 @@ void TestDriver::write()
   auto dbsession = createSession( catalog, "TestSession" );
 
   // Start an update transaction
-  if( !dbsession->start( Io::WRITE ) ) {
+  if( !dbsession->startTransaction( Io::WRITE ) ) {
     throw std::runtime_error( "Could not start an update transaction" );
   }
 
@@ -132,7 +132,7 @@ void TestDriver::read()
   auto dbsession = createSession( catalog, "TestSession" );
 
   // Starting a read transaction
-  if( !dbsession->start( Io::READ ) ) {
+  if( !dbsession->startTransaction( Io::READ ) ) {
     throw std::runtime_error( "Could not start a read transaction." );
   }
 

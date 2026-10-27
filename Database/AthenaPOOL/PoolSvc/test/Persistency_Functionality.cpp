@@ -93,7 +93,7 @@ TestDriver::write(pool::DbType storageType)
   auto dbsession = createSession( catalog, "TestSession" );
 
   // Start an update transaction
-  if( !dbsession->start( Io::WRITE ) ) {
+  if( !dbsession->startTransaction( Io::WRITE ) ) {
     throw std::runtime_error( "Could not start an update transaction" );
   }
 
@@ -205,7 +205,7 @@ TestDriver::write(pool::DbType storageType)
   v_testClassVectors.clear();
 
   // Start an update transaction
-  if( !dbsession->start( Io::WRITE ) ) {
+  if( !dbsession->startTransaction( Io::WRITE ) ) {
     throw std::runtime_error( "Could not start an update transaction" );
   }
 
@@ -227,7 +227,7 @@ TestDriver::read()
   auto dbsession = createSession( catalog, "TestSession" );
 
   // Starting a read transaction
-  if( !dbsession->start( Io::READ ) ) {
+  if( !dbsession->startTransaction( Io::READ ) ) {
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
@@ -324,7 +324,7 @@ TestDriver::readCollections()
   auto dbsession = createSession( catalog, "TestSession" );
 
   // Starting a read transaction
-  if( !dbsession->start( Io::READ ) ) {
+  if( !dbsession->startTransaction( Io::READ ) ) {
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
@@ -385,7 +385,7 @@ TestDriver::readFileSizes()
   auto dbsession = createSession( catalog, "TestSession" );
 
   // Starting a read transaction
-  if( !dbsession->start( Io::READ ) ) {
+  if( !dbsession->startTransaction( Io::READ ) ) {
     throw std::runtime_error( "Could not start a read transaction." );
   }
 

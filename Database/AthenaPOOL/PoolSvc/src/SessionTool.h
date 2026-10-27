@@ -69,7 +69,7 @@ class SessionTool : public ISessionTool
     virtual bool disconnectAll() override final;
 
     /// Starts a new transaction. Returns the success of the operation
-    virtual bool start( Io::IoFlag type = Io::READ ) override final;
+    virtual bool startTransaction( Io::IoFlag type = Io::READ ) override final;
 
     /// Commits the transaction.
     virtual bool commit() override final;

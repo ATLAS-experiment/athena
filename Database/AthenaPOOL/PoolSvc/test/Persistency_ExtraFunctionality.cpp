@@ -85,7 +85,7 @@ void TestDriver::write(pool::DbType storageType)
   auto dbsession = createSession( catalog, "TestSession" );
 
   // Start an update transaction
-  if( !dbsession->start( Io::WRITE ) ) {
+  if( !dbsession->startTransaction( Io::WRITE ) ) {
     throw std::runtime_error( "Could not start an update transaction" );
   }
 
@@ -130,7 +130,7 @@ void TestDriver::write(pool::DbType storageType)
   v_testClassSTLContainersExt.clear();
 
   // Start an update transaction
-  if( !dbsession->start( Io::WRITE ) ) {
+  if( !dbsession->startTransaction( Io::WRITE ) ) {
     throw std::runtime_error( "Could not start an update transaction" );
   }
   // Committing the transaction
@@ -150,7 +150,7 @@ void TestDriver::read()
   auto dbsession = createSession( catalog, "TestSession" );
 
   // Starting a read transaction
-  if( !dbsession->start( Io::READ ) ) {
+  if( !dbsession->startTransaction( Io::READ ) ) {
     throw std::runtime_error( "Could not start a read transaction." );
   }
 

@@ -502,7 +502,7 @@ StatusCode PoolSvc::connect(Io::IoFlag type, unsigned int contextId) {
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
    auto& session = m_dbSessionVec[contextId];
    // Connect to a logical database using the pre-defined technology and dbID
-   if( session->openMode() == Io::INVALID && !session->start(type) ) {
+   if( session->openMode() == Io::INVALID && !session->startTransaction(type) ) {
       ATH_MSG_ERROR("connect failed session = " << session << " type = " << type);
       return StatusCode::FAILURE;
    }
@@ -828,7 +828,7 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
    if (sesH->openMode() == Io::INVALID) {
       Io::IoFlag transMode = Io::READ;
       ATH_MSG_DEBUG("Start transaction, type = " << transMode);
-      if (!sesH->start(transMode)) {
+      if (!sesH->startTransaction(transMode)) {
          ATH_MSG_WARNING("Failed to start transaction, type = " << transMode);
          return nullptr;
       }

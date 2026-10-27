@@ -94,7 +94,7 @@ SessionTool::disconnectAll()
       
 // MN: rename?
 bool
-SessionTool::start( Io::IoFlag type )
+SessionTool::startTransaction( Io::IoFlag type )
 {
   if( m_transactionType != Io::INVALID ) return false;
   m_transactionType = type;

@@ -41,7 +41,7 @@ class ISessionTool : virtual public AthAlgTool
     virtual bool disconnectAll() = 0;
 
     /// Starts a new transaction. Returns the success of the operation
-    virtual bool start( Io::IoFlag type = Io::READ ) = 0;
+    virtual bool startTransaction( Io::IoFlag type = Io::READ ) = 0;
 
     /// Commits the transaction.
     virtual bool commit() = 0;
