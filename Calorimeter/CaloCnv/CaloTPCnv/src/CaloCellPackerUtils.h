@@ -18,9 +18,6 @@
 #define CALOCELLPACKERUTILS_H
 
 
-#include "GaudiKernel/Kernel.h"  // For LIKELY
-
-
 namespace CaloCellPackerUtils {
 
 

@@ -3,7 +3,6 @@
 */
 
 
-#include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/Message.h"
 #include "LoggedMessageSvc.h"

@@ -23,7 +23,6 @@
 #include <string>
 
 // Framework include files
-#include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/GenericAddress.h"
 #include "GaudiKernel/StatusCode.h"
 

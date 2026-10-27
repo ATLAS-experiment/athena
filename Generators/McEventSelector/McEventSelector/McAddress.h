@@ -20,7 +20,6 @@
 #include <cstdint>
 
 // Framework include files
-#include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/GenericAddress.h"
 
 
