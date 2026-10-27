@@ -8,7 +8,7 @@
 #define F_TAG_ANALYSIS_ALGORITHMS__Xbb_EFFICIENCY_ALG_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
-#include <FTagAnalysisInterfaces/IBTaggingEfficiencyJsonTool.h>
+#include <FTagAnalysisInterfaces/IBTaggingLargeREfficiencyJsonTool.h>
 #include <SelectionHelpers/OutOfValidityHelper.h>
 #include <SelectionHelpers/SysReadSelectionHandle.h>
 #include <SystematicsHandles/SysReadHandle.h>
@@ -19,7 +19,7 @@
 
 namespace CP
 {
-  /// \brief an algorithm for calling \ref IBTaggingEfficiencyJsonTool
+  /// \brief an algorithm for calling \ref IBTaggingLargeREfficiencyJsonTool
   class XbbEfficiencyAlg final : public EL::AnaAlgorithm
   {
   /// \brief the standard constructor
@@ -30,7 +30,7 @@ namespace CP
 
     /// \brief the efficiency json tool
     private:
-    ToolHandle<IBTaggingEfficiencyJsonTool> m_efficiencyTool {this, "efficiencyTool", "BTaggingEfficiencyJsonTool", "the calibration tool we apply"};
+    ToolHandle<IBTaggingLargeREfficiencyJsonTool> m_efficiencyTool {this, "efficiencyTool", "BTaggingLargeREfficiencyJsonTool", "the calibration tool we apply"};
     /// \brief the systematics list we run
     private:
     SysListHandle m_systematicsList {this};

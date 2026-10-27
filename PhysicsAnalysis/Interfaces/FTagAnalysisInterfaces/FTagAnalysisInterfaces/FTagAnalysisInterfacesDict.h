@@ -16,8 +16,8 @@
 #include "FTagAnalysisInterfaces/IBTaggingSelectionTool.h"
 #include "FTagAnalysisInterfaces/IBTaggingTruthTaggingTool.h"
 #include "FTagAnalysisInterfaces/IBTaggingEigenVectorRecompositionTool.h"
-#include "FTagAnalysisInterfaces/IBTaggingSelectionJsonTool.h"
-#include "FTagAnalysisInterfaces/IBTaggingEfficiencyJsonTool.h"
+#include "FTagAnalysisInterfaces/IBTaggingLargeRSelectionJsonTool.h"
+#include "FTagAnalysisInterfaces/IBTaggingLargeREfficiencyJsonTool.h"
 #include "FTagAnalysisInterfaces/IFTagScaleFactorTool.h"
 
 #endif // FTAGANALYSISINTERFACES_FTAGANALYSISINTERFACESDICT_H

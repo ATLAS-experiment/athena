@@ -36,7 +36,7 @@ class XbbConfig (ConfigBlock):
         
         # Create selection tool as public so it can be shared as the efficiency tool also needs the selection tool
         # Must be created before the algorithm so the tool is initialized first
-        btagSelectionTool = config.createPublicTool( "BTaggingSelectionJsonTool", f"XbbLargeRJetSelectionJsonTool_{jetContainer}_{selectionName}")
+        btagSelectionTool = config.createPublicTool( "BTaggingLargeRSelectionJsonTool", f"XbbLargeRJetSelectionJsonTool_{jetContainer}_{selectionName}")
         # Get type/name tool as this is what is passed to initialize tool for AnalysisBase 
         btagSelectionToolTypeName = f"{btagSelectionTool.getType()}/{btagSelectionTool.getName()}"
         
@@ -58,7 +58,7 @@ class XbbConfig (ConfigBlock):
         if not self.noEffSF and config.dataType() != DataType.Data:
             alg = config.createAlgorithm( 'CP::XbbEfficiencyAlg',
                                          'XbbSFAlg' )
-            config.addPrivateTool('efficiencyTool', 'BTaggingEfficiencyJsonTool' )
+            config.addPrivateTool('efficiencyTool', 'BTaggingLargeREfficiencyJsonTool' )
             alg.efficiencyTool.MaxEta = 4.5
             alg.efficiencyTool.MinPt = 0.
             alg.efficiencyTool.OutputName = self.Xbbtagger

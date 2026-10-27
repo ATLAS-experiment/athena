@@ -4,10 +4,10 @@
 
 #include "PathResolver/PathResolver.h"
 #include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
-#include "xAODBTaggingEfficiency/BTaggingEfficiencyJsonTool.h"
+#include "xAODBTaggingEfficiency/BTaggingLargeREfficiencyJsonTool.h"
 #include <fstream>
 
-BTaggingEfficiencyJsonTool::BTaggingEfficiencyJsonTool ( const std::string &name ) :
+BTaggingLargeREfficiencyJsonTool::BTaggingLargeREfficiencyJsonTool ( const std::string &name ) :
   asg::AsgTool ( name )
 {
   m_initialised = false;
@@ -15,10 +15,10 @@ BTaggingEfficiencyJsonTool::BTaggingEfficiencyJsonTool ( const std::string &name
   declareProperty("btagSelectionJsonTool", m_selTool, "Xbb JSON selection tool");
 }
 
-BTaggingEfficiencyJsonTool::~BTaggingEfficiencyJsonTool() {
+BTaggingLargeREfficiencyJsonTool::~BTaggingLargeREfficiencyJsonTool() {
 }
 
-StatusCode BTaggingEfficiencyJsonTool::initialize()
+StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
 { 
   if (m_minPt > 0.){ 
     // Convert MeV cut to GeV as in the JSON files numbers are in GeV 
@@ -232,10 +232,10 @@ StatusCode BTaggingEfficiencyJsonTool::initialize()
   return StatusCode::SUCCESS;
 }
 
-CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& jet, float& sf, const CP::SystematicSet& sys ) const 
+CP::CorrectionCode BTaggingLargeREfficiencyJsonTool::getScaleFactor( const xAOD::Jet& jet, float& sf, const CP::SystematicSet& sys ) const 
 {
   if (! m_initialised) {
-    throw std::runtime_error("BTaggingEfficiencyJsonTool has not been initialised.");
+    throw std::runtime_error("BTaggingLargeREfficiencyJsonTool has not been initialised.");
   }
 
   sf = 1.0;
@@ -289,10 +289,10 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getScaleFactor( const xAOD::Jet& 
   return worstCorrectionCode;
 }
 
-CP::CorrectionCode BTaggingEfficiencyJsonTool::getMCToMCCorr( const xAOD::Jet& jet, float& corr ) const 
+CP::CorrectionCode BTaggingLargeREfficiencyJsonTool::getMCToMCCorr( const xAOD::Jet& jet, float& corr ) const 
 {
   if (! m_initialised) {
-    throw std::runtime_error("BTaggingEfficiencyJsonTool has not been initialised.");
+    throw std::runtime_error("BTaggingLargeREfficiencyJsonTool has not been initialised.");
   }
 
   corr = 1.0;
@@ -342,7 +342,7 @@ CP::CorrectionCode BTaggingEfficiencyJsonTool::getMCToMCCorr( const xAOD::Jet& j
   return CP::CorrectionCode::OutOfValidityRange;
 }
 
-float BTaggingEfficiencyJsonTool::getSFSys( const std::string& labelString, size_t bin_index ) const
+float BTaggingLargeREfficiencyJsonTool::getSFSys( const std::string& labelString, size_t bin_index ) const
 {
   float result = 0.0;
   const auto& systematics = m_sfSysMap.at(labelString);
@@ -353,7 +353,7 @@ float BTaggingEfficiencyJsonTool::getSFSys( const std::string& labelString, size
   return std::sqrt(result);
 }
 
-float BTaggingEfficiencyJsonTool::getJetMassInGeV(const xAOD::Jet& jet) const
+float BTaggingLargeREfficiencyJsonTool::getJetMassInGeV(const xAOD::Jet& jet) const
 {   
     // Convert mass from MeV to GeV 
     if (!m_massAcc) {
@@ -366,7 +366,7 @@ float BTaggingEfficiencyJsonTool::getJetMassInGeV(const xAOD::Jet& jet) const
     return (*m_massAcc)(jet) * BTaggingToolUtil::MeVToGeV;
 }
 
-float BTaggingEfficiencyJsonTool::getJetPtInGeV( const xAOD::Jet& jet ) const
+float BTaggingLargeREfficiencyJsonTool::getJetPtInGeV( const xAOD::Jet& jet ) const
 { 
   // Convert pT from MeV to GeV 
   if (!m_ptAcc) {
@@ -381,7 +381,7 @@ float BTaggingEfficiencyJsonTool::getJetPtInGeV( const xAOD::Jet& jet ) const
   return (*m_ptAcc)(jet) * BTaggingToolUtil::MeVToGeV;
 }
 
-float BTaggingEfficiencyJsonTool::getJetQuantity(const xAOD::Jet& jet, varType vType) const {
+float BTaggingLargeREfficiencyJsonTool::getJetQuantity(const xAOD::Jet& jet, varType vType) const {
   if (vType == varType::pT) { 
     return getJetPtInGeV(jet); 
   } else if (vType == varType::mass) {
@@ -392,18 +392,18 @@ float BTaggingEfficiencyJsonTool::getJetQuantity(const xAOD::Jet& jet, varType v
     return std::abs(jet.eta());
   } else { 
     ATH_MSG_ERROR("Unsupported jet variable quantity requested: '" << getVariableName(vType) << "'");
-    throw std::runtime_error("BTaggingEfficiencyJsonTool::getJetQuantity unsupported jet variable: '" + getVariableName(vType) + "'");
+    throw std::runtime_error("BTaggingLargeREfficiencyJsonTool::getJetQuantity unsupported jet variable: '" + getVariableName(vType) + "'");
   }
 }
 
 // Two half-open intervals [low, high) overlap if each one starts before the other ends.
 // Touching edges (upper = other lower) are not considered overlapping.
-bool BTaggingEfficiencyJsonTool::BoundsHandler::varBounds::overlaps(const varBounds& o) const {
+bool BTaggingLargeREfficiencyJsonTool::BoundsHandler::varBounds::overlaps(const varBounds& o) const {
   const bool endsBeforeOther = upperBound < o.lowerBound || approxEqual(upperBound, o.lowerBound, varEps);
   const bool otherEndsBefore = o.upperBound < lowerBound || approxEqual(o.upperBound, lowerBound, varEps);
   return !endsBeforeOther && !otherEndsBefore;
 }
-bool BTaggingEfficiencyJsonTool::BoundsHandler::varBounds::operator<(const varBounds& o) const {
+bool BTaggingLargeREfficiencyJsonTool::BoundsHandler::varBounds::operator<(const varBounds& o) const {
   if (!approxEqual(lowerBound, o.lowerBound, varEps)) return lowerBound < o.lowerBound;
   if (!approxEqual(upperBound, o.upperBound, varEps)) return upperBound < o.upperBound;
   // Both upper and lower bounds are equal within tolerance
@@ -411,11 +411,11 @@ bool BTaggingEfficiencyJsonTool::BoundsHandler::varBounds::operator<(const varBo
 }
 // Define an ordering of varBounds compare first lowerBound then upperBound
 // within tolerance
-bool BTaggingEfficiencyJsonTool::BoundsHandler::varBounds::operator==(const varBounds& o) const {
+bool BTaggingLargeREfficiencyJsonTool::BoundsHandler::varBounds::operator==(const varBounds& o) const {
   return approxEqual(lowerBound, o.lowerBound, varEps) && approxEqual(upperBound, o.upperBound, varEps);
 }
 
-BTaggingEfficiencyJsonTool::BoundsHandler::BoundsHandler(
+BTaggingLargeREfficiencyJsonTool::BoundsHandler::BoundsHandler(
     const json& jsonConfig, const std::vector<varType>& vTypes, const size_t nExtraValues)
 {
   // Make sure the vector of variable provided is not empty
@@ -465,7 +465,7 @@ BTaggingEfficiencyJsonTool::BoundsHandler::BoundsHandler(
   }
 }
 
-BTaggingEfficiencyJsonTool::MCMCHandler::MCMCHandler(
+BTaggingLargeREfficiencyJsonTool::MCMCHandler::MCMCHandler(
     const json& jsonConfig, const std::vector<varType>& vTypes)
   // The bounds are loaded by the parent class, the json config should have one extra entry and should contain the MC-MC SF
   // e.g. jsonConfig = [[250, 500], [50, 100], {"SF": 0.9}] for varNames={"pT", "mass"}
@@ -487,8 +487,8 @@ BTaggingEfficiencyJsonTool::MCMCHandler::MCMCHandler(
   m_MCMCSF = mcmcEntry["SF"].get<float>();
 }
 
-bool BTaggingEfficiencyJsonTool::BoundsHandler::isJetWithinBounds(
-    const xAOD::Jet& jet, const BTaggingEfficiencyJsonTool& tool) const
+bool BTaggingLargeREfficiencyJsonTool::BoundsHandler::isJetWithinBounds(
+    const xAOD::Jet& jet, const BTaggingLargeREfficiencyJsonTool& tool) const
 {
   // Loop over all variables e.g. pT, eta etc
   for (const auto& [vType, bounds] : m_varBinBounds) {
@@ -508,7 +508,7 @@ bool BTaggingEfficiencyJsonTool::BoundsHandler::isJetWithinBounds(
   return true;
 }
 
-BTaggingEfficiencyJsonTool::varType BTaggingEfficiencyJsonTool::getVariableType(const std::string& varName)
+BTaggingLargeREfficiencyJsonTool::varType BTaggingLargeREfficiencyJsonTool::getVariableType(const std::string& varName)
 {
   if (varName == "pT") {
     return varType::pT;
@@ -519,12 +519,12 @@ BTaggingEfficiencyJsonTool::varType BTaggingEfficiencyJsonTool::getVariableType(
   } else if (varName == "abseta") {
     return varType::abseta;
   } else {
-    throw std::runtime_error("Variable '" + varName + "' not defined in BTaggingEfficiencyJsonTool.");
+    throw std::runtime_error("Variable '" + varName + "' not defined in BTaggingLargeREfficiencyJsonTool.");
     return varType::unknown;
   }
 }
 
-std::string BTaggingEfficiencyJsonTool::getVariableName(varType vType)
+std::string BTaggingLargeREfficiencyJsonTool::getVariableName(varType vType)
 {
   if (vType == varType::pT) {
     return "pT";
@@ -535,12 +535,12 @@ std::string BTaggingEfficiencyJsonTool::getVariableName(varType vType)
   } else if (vType == varType::abseta) {
     return "abseta";
   } else {
-    throw std::runtime_error("Variable type " + std::to_string(static_cast<int>(vType)) + " not defined in BTaggingEfficiencyJsonTool.");
+    throw std::runtime_error("Variable type " + std::to_string(static_cast<int>(vType)) + " not defined in BTaggingLargeREfficiencyJsonTool.");
     return "unknown";
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const BTaggingEfficiencyJsonTool::BoundsHandler& handler){
+std::ostream& operator<<(std::ostream& os, const BTaggingLargeREfficiencyJsonTool::BoundsHandler& handler){
   // Add the list of variables with lower and upper bounds
   // e.g. "pT: [250, 500], mass: [50, 100]"
   // The separator ", " is only added between entries, not after the last one
@@ -548,24 +548,24 @@ std::ostream& operator<<(std::ostream& os, const BTaggingEfficiencyJsonTool::Bou
   for (const auto& [vType, bounds] : handler.m_varBinBounds) {
     if (!first) os << ", ";
     first = false;
-    os << BTaggingEfficiencyJsonTool::getVariableName(vType) << ": [" << bounds.lowerBound << ", " << bounds.upperBound << "]";
+    os << BTaggingLargeREfficiencyJsonTool::getVariableName(vType) << ": [" << bounds.lowerBound << ", " << bounds.upperBound << "]";
   }
   return os;
 }
 
-std::ostream& operator<<(std::ostream& os, const BTaggingEfficiencyJsonTool::MCMCHandler& handler){
+std::ostream& operator<<(std::ostream& os, const BTaggingLargeREfficiencyJsonTool::MCMCHandler& handler){
   // Return
   // MCMCHandler(var1: [minVar1, maxVar1], var2: [minVar2, maxVar2], ... , SF: sfValue)
   // e.g. MCMCHandler(pT: [250, 500], abseta[0., 2.0], SF: 0.9)
   os << "MCMCHandler(";
   // Add the list of variables with lower and upper bounds
-  os << dynamic_cast<const BTaggingEfficiencyJsonTool::BoundsHandler&>(handler);
+  os << dynamic_cast<const BTaggingLargeREfficiencyJsonTool::BoundsHandler&>(handler);
   // Finally add the MC-MC SF value
   os << ", SF: " << handler.m_MCMCSF << ")";
   return os;
 }
 
-bool BTaggingEfficiencyJsonTool::BoundsHandler::operator<(const BoundsHandler& o) const {
+bool BTaggingLargeREfficiencyJsonTool::BoundsHandler::operator<(const BoundsHandler& o) const {
   // Ordering of handlers loop over variables as stored in the map
   // and let the first variable whose bounds differ decide of the ordering
 
@@ -588,7 +588,7 @@ bool BTaggingEfficiencyJsonTool::BoundsHandler::operator<(const BoundsHandler& o
   return false;  // all bounds equal
 }
 
-bool BTaggingEfficiencyJsonTool::BoundsHandler::overlaps(const BoundsHandler& o) const {
+bool BTaggingLargeREfficiencyJsonTool::BoundsHandler::overlaps(const BoundsHandler& o) const {
   // Two handlers that are N-dimensional bins overlap if
   // for every variable their bounds overlap
   // If for one variable there is no overlapping bounds then the bins are not overlapping
@@ -613,7 +613,7 @@ bool BTaggingEfficiencyJsonTool::BoundsHandler::overlaps(const BoundsHandler& o)
   return true;  
 }
 
-StatusCode BTaggingEfficiencyJsonTool::calcSystematicVariation(const CP::SystematicSet& systConfig, sysData& sys) const
+StatusCode BTaggingLargeREfficiencyJsonTool::calcSystematicVariation(const CP::SystematicSet& systConfig, sysData& sys) const
 {
   CP::SystematicVariation syst = systConfig.getSystematicByBaseName("BTagging_Xbb_SYST");
   sys.xbb_syst = syst.parameter();
@@ -621,7 +621,7 @@ StatusCode BTaggingEfficiencyJsonTool::calcSystematicVariation(const CP::Systema
   return StatusCode::SUCCESS;
 }
 
-CP::SystematicSet BTaggingEfficiencyJsonTool::affectingSystematics() const
+CP::SystematicSet BTaggingLargeREfficiencyJsonTool::affectingSystematics() const
 {
   CP::SystematicSet affectingSystematics;
   affectingSystematics.insert(CP::SystematicVariation("BTagging_Xbb_SYST", 1));
@@ -630,7 +630,7 @@ CP::SystematicSet BTaggingEfficiencyJsonTool::affectingSystematics() const
   return affectingSystematics;
 }
 
-CP::SystematicSet BTaggingEfficiencyJsonTool::recommendedSystematics() const
+CP::SystematicSet BTaggingLargeREfficiencyJsonTool::recommendedSystematics() const
 {
     return affectingSystematics();
 }

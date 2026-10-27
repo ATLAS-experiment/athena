@@ -44,14 +44,14 @@ atlas_add_executable(
 )
 
 atlas_add_executable(
-  BTaggingJsonToolsTester
-  util/BTaggingJsonToolsTester.cxx
+  BTaggingLargeRJsonToolsTester
+  util/BTaggingLargeRJsonToolsTester.cxx
   LINK_LIBRARIES xAODRootAccess AsgTools FTagAnalysisInterfacesLib
 )
 
 atlas_add_executable(
-  BTaggingSelectionJsonInstantiationTester
-  util/BTaggingSelectionJsonInstantiationTester.cxx
+  BTaggingLargeRSelectionJsonInstantiationTester
+  util/BTaggingLargeRSelectionJsonInstantiationTester.cxx
   LINK_LIBRARIES xAODRootAccess AsgTools FTagAnalysisInterfacesLib PathResolver
 )
 
@@ -99,9 +99,9 @@ target_link_libraries( BTaggingToolsExample
   PRIVATE ${XAOD_ACCESS_LIB} )
 target_link_libraries( BTaggingEfficiencyToolTester
   PRIVATE ${XAOD_ACCESS_LIB} )
-target_link_libraries( BTaggingJsonToolsTester
+target_link_libraries( BTaggingLargeRJsonToolsTester
   PRIVATE ${XAOD_ACCESS_LIB} )
-target_link_libraries( BTaggingSelectionJsonInstantiationTester
+target_link_libraries( BTaggingLargeRSelectionJsonInstantiationTester
   PRIVATE ${XAOD_ACCESS_LIB} )
 target_link_libraries( BTaggingEigenVectorRecompositionToolTester
   PRIVATE ${XAOD_ACCESS_LIB} )
@@ -235,44 +235,44 @@ atlas_add_test(
 
 # Large-R jet CI tests 
 atlas_add_test(
-  ut_BTaggingJsonToolsTest_Run2And3_GN3XPV01_hbb_bjr_FlatMassQCDEff_0p4
-  SCRIPT BTaggingJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XBB_LATEST_JSON_RUN2And3} GN3XPV01_hbb_bjr FlatMassQCDEff_0p4 
+  ut_BTaggingLargeRJsonToolsTest_Run2And3_GN3XPV01_hbb_bjr_FlatMassQCDEff_0p4
+  SCRIPT BTaggingLargeRJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XBB_LATEST_JSON_RUN2And3} GN3XPV01_hbb_bjr FlatMassQCDEff_0p4 
   POST_EXEC_SCRIPT noerror.sh
   LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
 )
 atlas_add_test(
-  ut_BTaggingJsonToolsTest_Run2And3_GN3XPV01_hbb_bjr_FlatMassQCDEff_0p6 
-  SCRIPT BTaggingJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XBB_LATEST_JSON_RUN2And3} GN3XPV01_hbb_bjr FlatMassQCDEff_0p6 
+  ut_BTaggingLargeRJsonToolsTest_Run2And3_GN3XPV01_hbb_bjr_FlatMassQCDEff_0p6 
+  SCRIPT BTaggingLargeRJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XBB_LATEST_JSON_RUN2And3} GN3XPV01_hbb_bjr FlatMassQCDEff_0p6 
   POST_EXEC_SCRIPT noerror.sh
   LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
 )
 atlas_add_test(
-  ut_BTaggingJsonToolsTest_Run2_GN3XPV01_hcc_bjr_FlatMassQCDEff_0p17
-  SCRIPT BTaggingJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XCC_LATEST_JSON_RUN2} GN3XPV01_hcc_bjr FlatMassQCDEff_0p17 
+  ut_BTaggingLargeRJsonToolsTest_Run2_GN3XPV01_hcc_bjr_FlatMassQCDEff_0p17
+  SCRIPT BTaggingLargeRJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XCC_LATEST_JSON_RUN2} GN3XPV01_hcc_bjr FlatMassQCDEff_0p17 
   POST_EXEC_SCRIPT noerror.sh
   LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
 )
 atlas_add_test(
-  ut_BTaggingJsonToolsTest_Run3_GN3XPV01_hcc_bjr_FlatMassQCDEff_0p17 
-  SCRIPT BTaggingJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XCC_LATEST_JSON_RUN3} GN3XPV01_hcc_bjr FlatMassQCDEff_0p17 
+  ut_BTaggingLargeRJsonToolsTest_Run3_GN3XPV01_hcc_bjr_FlatMassQCDEff_0p17 
+  SCRIPT BTaggingLargeRJsonToolsTester ${FTAG_INPUT_RUN3_DAOD} ${FTAG_XCC_LATEST_JSON_RUN3} GN3XPV01_hcc_bjr FlatMassQCDEff_0p17 
   POST_EXEC_SCRIPT noerror.sh
   LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
 )
 atlas_add_test(
-  ut_BTaggingSelectionJsonInstantiation_Xbb_Run2And3
-  SCRIPT BTaggingSelectionJsonInstantiationTester ${FTAG_XBB_LATEST_JSON_RUN2And3}
+  ut_BTaggingLargeRSelectionJsonInstantiation_Xbb_Run2And3
+  SCRIPT BTaggingLargeRSelectionJsonInstantiationTester ${FTAG_XBB_LATEST_JSON_RUN2And3}
   POST_EXEC_SCRIPT noerror.sh
   LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
 )
 atlas_add_test(
-  ut_BTaggingSelectionJsonInstantiation_Xcc_Run2
-  SCRIPT BTaggingSelectionJsonInstantiationTester ${FTAG_XCC_LATEST_JSON_RUN2}
+  ut_BTaggingLargeRSelectionJsonInstantiation_Xcc_Run2
+  SCRIPT BTaggingLargeRSelectionJsonInstantiationTester ${FTAG_XCC_LATEST_JSON_RUN2}
   POST_EXEC_SCRIPT noerror.sh
   LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
 )
 atlas_add_test(
-  ut_BTaggingSelectionJsonInstantiation_Xcc_Run3
-  SCRIPT BTaggingSelectionJsonInstantiationTester ${FTAG_XCC_LATEST_JSON_RUN3}
+  ut_BTaggingLargeRSelectionJsonInstantiation_Xcc_Run3
+  SCRIPT BTaggingLargeRSelectionJsonInstantiationTester ${FTAG_XCC_LATEST_JSON_RUN3}
   POST_EXEC_SCRIPT noerror.sh
   LOG_IGNORE_PATTERN "^PathResolver +ERROR Locating dev file"
 )

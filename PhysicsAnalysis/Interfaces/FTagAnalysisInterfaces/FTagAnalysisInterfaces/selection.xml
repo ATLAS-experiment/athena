@@ -4,7 +4,7 @@
   <class name="IBTaggingSelectionTool" />
   <class name="IBTaggingTruthTaggingTool" />
   <class name="IBTaggingEigenVectorRecompositionTool" />
-  <class name="IBTaggingSelectionJsonTool" />
-  <class name="IBTaggingEfficiencyJsonTool" />
+  <class name="IBTaggingLargeRSelectionJsonTool" />
+  <class name="IBTaggingLargeREfficiencyJsonTool" />
   <class name="ftag::IFTagScaleFactorTool" />
 </lcgdict>

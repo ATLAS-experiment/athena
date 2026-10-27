@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "xAODBTaggingEfficiency/BTaggingSelectionJsonTool.h"
+#include "xAODBTaggingEfficiency/BTaggingLargeRSelectionJsonTool.h"
 #include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 #include "PathResolver/PathResolver.h"
 
@@ -11,13 +11,13 @@
 #include <algorithm>  //std::max
 #include <limits> //std::numeric_limits
 
-BTaggingSelectionJsonTool::BTaggingSelectionJsonTool(const std::string& name)
+BTaggingLargeRSelectionJsonTool::BTaggingLargeRSelectionJsonTool(const std::string& name)
   : asg::AsgTool(name)
 {
     m_initialised = false;
 }
 
-StatusCode BTaggingSelectionJsonTool::initialize() {
+StatusCode BTaggingLargeRSelectionJsonTool::initialize() {
     m_initialised = true;
 
     if (m_minPt > 0.){ 
@@ -112,7 +112,7 @@ StatusCode BTaggingSelectionJsonTool::initialize() {
     return StatusCode::SUCCESS;
 }
 
-StatusCode BTaggingSelectionJsonTool::loadBinConfig(const json& pT_mass_2d_cutvalue, BinConfig& config) const
+StatusCode BTaggingLargeRSelectionJsonTool::loadBinConfig(const json& pT_mass_2d_cutvalue, BinConfig& config) const
 {
     // pTbins defines the bin edges, so there must be exactly one fewer pT bin (WP entry) than
     // there are edges. The pT_mass_2d_cutvalue dict holds the "pTbins" edge list plus one entry
@@ -174,7 +174,7 @@ StatusCode BTaggingSelectionJsonTool::loadBinConfig(const json& pT_mass_2d_cutva
 }
 
 
-std::vector<BTaggingSelectionJsonTool::FractionAccessor> BTaggingSelectionJsonTool::loadFractionValues(const json &meta) const
+std::vector<BTaggingLargeRSelectionJsonTool::FractionAccessor> BTaggingLargeRSelectionJsonTool::loadFractionValues(const json &meta) const
 {
     std::string taggerName;
     if (meta.contains("TaggerName")) {
@@ -186,7 +186,7 @@ std::vector<BTaggingSelectionJsonTool::FractionAccessor> BTaggingSelectionJsonTo
     }
 
     std::string target = meta["TaggingTarget"];
-    std::vector<BTaggingSelectionJsonTool::FractionAccessor> fractionAccessors;
+    std::vector<BTaggingLargeRSelectionJsonTool::FractionAccessor> fractionAccessors;
 
     // Pre-load fraction values
     for (const json& outclass : meta["categories"]) {
@@ -200,7 +200,7 @@ std::vector<BTaggingSelectionJsonTool::FractionAccessor> BTaggingSelectionJsonTo
     return fractionAccessors;
 }
 
-double BTaggingSelectionJsonTool::getTaggerDiscriminantInternal(const xAOD::Jet& jet, const std::vector<FractionAccessor>& fractionAccessors) const
+double BTaggingLargeRSelectionJsonTool::getTaggerDiscriminantInternal(const xAOD::Jet& jet, const std::vector<FractionAccessor>& fractionAccessors) const
 {
     float numerator = 0.;
     float denominator = 0.;
@@ -223,19 +223,19 @@ double BTaggingSelectionJsonTool::getTaggerDiscriminantInternal(const xAOD::Jet&
     return tagger_discriminant;    
 }
 
-double BTaggingSelectionJsonTool::getTaggerDiscriminant(const xAOD::Jet& jet) const
+double BTaggingLargeRSelectionJsonTool::getTaggerDiscriminant(const xAOD::Jet& jet) const
 {
     return getTaggerDiscriminantInternal(jet, m_fractionAccessors);
 }
 
-double BTaggingSelectionJsonTool::getVetoDiscriminant(const xAOD::Jet& jet) const
+double BTaggingLargeRSelectionJsonTool::getVetoDiscriminant(const xAOD::Jet& jet) const
 {
     return getTaggerDiscriminantInternal(jet, m_vetoFractionAccessors);
 }
 
-int BTaggingSelectionJsonTool::accept(const xAOD::Jet& jet) const
+int BTaggingLargeRSelectionJsonTool::accept(const xAOD::Jet& jet) const
 {
-    if (!m_initialised) throw std::runtime_error("BTaggingSelectionJsonTool has not been initialised.");
+    if (!m_initialised) throw std::runtime_error("BTaggingLargeRSelectionJsonTool has not been initialised.");
 
     double pt = getJetPtInGeV(jet);
     double eta = jet.eta();
@@ -281,9 +281,9 @@ int BTaggingSelectionJsonTool::accept(const xAOD::Jet& jet) const
 }
 
 // the following function is only for Xbb calibration team, for physics analyses, please use the one above.
-int BTaggingSelectionJsonTool::acceptOnlyForXbbCalibrationUsage(double pt, double eta, double mass, double tagger_discriminant) const
+int BTaggingLargeRSelectionJsonTool::acceptOnlyForXbbCalibrationUsage(double pt, double eta, double mass, double tagger_discriminant) const
 {
-    if (!m_initialised) throw std::runtime_error("BTaggingSelectionJsonTool has not been initialised.");
+    if (!m_initialised) throw std::runtime_error("BTaggingLargeRSelectionJsonTool has not been initialised.");
 
     int index = 0;
     if (std::abs(eta) > m_maxEta || pt < m_minPt) return index;
@@ -300,7 +300,7 @@ int BTaggingSelectionJsonTool::acceptOnlyForXbbCalibrationUsage(double pt, doubl
     return index;
 }
 
-int BTaggingSelectionJsonTool::findBin(const std::vector<float>& bins, float value) const
+int BTaggingLargeRSelectionJsonTool::findBin(const std::vector<float>& bins, float value) const
 {
     for (size_t i = 0; i < bins.size() - 1; i++) {
         if ((std::min(bins[i], bins[i + 1]) <= value && value < std::max(bins[i], bins[i + 1]))) {
@@ -310,7 +310,7 @@ int BTaggingSelectionJsonTool::findBin(const std::vector<float>& bins, float val
     return -1;
 }
 
-float BTaggingSelectionJsonTool::getJetMassInGeV(const xAOD::Jet& jet) const
+float BTaggingLargeRSelectionJsonTool::getJetMassInGeV(const xAOD::Jet& jet) const
 {   
     // Convert mass from MeV to GeV 
     if (!m_massAcc) {
@@ -323,7 +323,7 @@ float BTaggingSelectionJsonTool::getJetMassInGeV(const xAOD::Jet& jet) const
     return (*m_massAcc)(jet) * BTaggingToolUtil::MeVToGeV;
 }
 
-float BTaggingSelectionJsonTool::getJetPtInGeV(const xAOD::Jet& jet) const
+float BTaggingLargeRSelectionJsonTool::getJetPtInGeV(const xAOD::Jet& jet) const
 {   
     // Convert pT from MeV to GeV 
     if (!m_ptAcc) {
