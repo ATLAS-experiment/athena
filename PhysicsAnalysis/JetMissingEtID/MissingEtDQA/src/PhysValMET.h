@@ -9,9 +9,6 @@
 #ifndef MISSINGETDQA_PHYSVALMET_H
 #define MISSINGETDQA_PHYSVALMET_H 1
 
-// STL includes
-#include <string>
-
 // FrameWork includes
 #include "GaudiKernel/ServiceHandle.h"
 
@@ -26,11 +23,15 @@
 #include "TauAnalysisTools/ITauSelectionTool.h"
 
 #include "AsgTools/ToolHandle.h"
+// STL includes
+#include <string>
+#include <map>
+#include <vector>
 
-// Root includes
-#include "TH1.h"
 
 // Forward declaration
+class TH1D;
+class TH2D;
 class IMETMaker;
 class IAsgElectronLikelihoodTool;
 class IAsgPhotonIsEMSelector;
