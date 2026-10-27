@@ -59,7 +59,10 @@ StatusCode PFAlgorithm::execute(const EventContext& ctx) const{
   xAOD::CaloClusterContainer& theCaloClusterContainerReference = *(caloClustersWriteHandle.ptr());
   ATH_CHECK(m_IPFClusterSelectorTool->execute(theEFlowRecClusterContainerReference, theCaloClusterContainerReference));
 
-  // Explicitly start/stop the timer around the subtraction tool calls
+  // Explicitly start/stop the timer around the subtraction tool calls.
+  // In the unified chain matching, subtraction and the remaining stages are all
+  // entries in one tool list, so TIME_subtract covers that whole list rather
+  // than the charged shower subtraction alone.
   t_subtract.start();
   /* Run the SubtractionTools */
 
@@ -74,8 +77,9 @@ StatusCode PFAlgorithm::execute(const EventContext& ctx) const{
     for (const auto& thisIPFUnifiedBaseTool : m_IPFUnifiedBaseTools){
       ATH_CHECK(thisIPFUnifiedBaseTool->processPFlowData(ctx, data));
     }
+    t_subtract.stop();
   }
-  
+
   else{
     for (auto thisIPFSubtractionTool : m_IPFSubtractionTools){
       thisIPFSubtractionTool->execute(
@@ -86,27 +90,27 @@ StatusCode PFAlgorithm::execute(const EventContext& ctx) const{
     }
     t_subtract.stop();
 
-    if (msgLvl(MSG::DEBUG)) {
-      for (auto thisEFTrack : localEFlowRecTrackContainer) {
-        msg() << "This efRecTrack has E,pt,eta and phi of " << thisEFTrack->getTrack()->e() << ", "
-              << thisEFTrack->getTrack()->pt() << ", " << thisEFTrack->getTrack()->eta() << " and "
-              << thisEFTrack->getTrack()->phi() << endmsg;
-      }
-
-      for (auto thisEFCluster : *(eflowRecClustersWriteHandle.ptr())) {
-        msg() << "This efRecCluster has E,pt,eta and phi of " << thisEFCluster->getCluster()->e() << ","
-              << thisEFCluster->getCluster()->pt() << ", " << thisEFCluster->getCluster()->eta() << " and "
-              << thisEFCluster->getCluster()->phi() << endmsg;
-      }
-    }
-
-    N_efrClusters = theEFlowRecClusterContainerReference.size();
-
     /* Run the other AglTools */
     for (auto thisIPFBaseTool :  m_IPFBaseTools){
       ATH_CHECK(thisIPFBaseTool->execute(ctx, *theElowCaloObjectContainer));
     }
   }
+
+  if (msgLvl(MSG::DEBUG)) {
+    for (auto thisEFTrack : localEFlowRecTrackContainer) {
+      msg() << "This efRecTrack has E,pt,eta and phi of " << thisEFTrack->getTrack()->e() << ", "
+            << thisEFTrack->getTrack()->pt() << ", " << thisEFTrack->getTrack()->eta() << " and "
+            << thisEFTrack->getTrack()->phi() << endmsg;
+    }
+
+    for (auto thisEFCluster : *(eflowRecClustersWriteHandle.ptr())) {
+      msg() << "This efRecCluster has E,pt,eta and phi of " << thisEFCluster->getCluster()->e() << ","
+            << thisEFCluster->getCluster()->pt() << ", " << thisEFCluster->getCluster()->eta() << " and "
+            << thisEFCluster->getCluster()->phi() << endmsg;
+    }
+  }
+
+  N_efrClusters = theEFlowRecClusterContainerReference.size();
 
   auto mon = Monitored::Group(m_monTool, t_exec, t_subtract, N_efrClusters);
   return StatusCode::SUCCESS;
@@ -141,10 +145,25 @@ void PFAlgorithm::printTools() {
 		    << std::resetiosflags(std::ios_base::right) << std::setw(36) << std::setfill('.')
 		    << std::setiosflags(std::ios_base::left) << thisIPFBaseTool->type() << std::setfill('.')
                     << thisIPFBaseTool->name() << std::setfill(' '));
-  }  
+  }
   ATH_MSG_VERBOSE(" ");
   ATH_MSG_VERBOSE("------------------------------------");
-  
-  
+
+  ATH_MSG_VERBOSE(" ");
+  ATH_MSG_VERBOSE("List of IPFUnifiedBase tools in execution sequence:");
+  ATH_MSG_VERBOSE("------------------------------------");
+  ATH_MSG_VERBOSE(" ");
+  unsigned int unifiedToolCtr = 0;
+  for (const auto& thisIPFUnifiedBaseTool : m_IPFUnifiedBaseTools){
+    unifiedToolCtr++;
+    ATH_MSG_VERBOSE(std::setw(2) << std::setiosflags(std::ios_base::right) << unifiedToolCtr << ".) "
+		    << std::resetiosflags(std::ios_base::right) << std::setw(36) << std::setfill('.')
+		    << std::setiosflags(std::ios_base::left) << thisIPFUnifiedBaseTool->type() << std::setfill('.')
+                    << thisIPFUnifiedBaseTool->name() << std::setfill(' '));
+  }
+  ATH_MSG_VERBOSE(" ");
+  ATH_MSG_VERBOSE("------------------------------------");
+
+
 }
 
