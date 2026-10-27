@@ -558,21 +558,21 @@ def addTruth3ContentToSlimmerTool(slimmer, reduced=False):
         "AntiKt10TruthSoftDropBeta100Zcut10Jets.pt.eta.phi.m.Tau1_wta.Tau2_wta.Tau3_wta.D2.numConstit",
         "TruthEvents.Q.XF1.XF2.PDGID1.PDGID2.PDFID1.PDFID2.X1.X2.crossSection",
         "MET_Truth.mpx.mpy.sumet.name.source",
-        "TruthElectrons.prodVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.ptcone30.etcone20.classifierParticleOrigin.Classification.barcode.status.classifierParticleType.classifierParticleOutCome.polarizationPhi.polarizationTheta.e_dressed.pt_dressed.eta_dressed.phi_dressed.nPhotons_dressed.uid",
-        "TruthMuons.m.px.py.pz.e.pdgId.barcode.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.e_dressed.pt_dressed.eta_dressed.phi_dressed.nPhotons_dressed.ptcone30.etcone20.decayVtxLink.prodVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid",
-        "TruthPhotons.m.px.py.pz.e.pdgId.barcode.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.ptcone20.etcone20.etcone40.prodVtxLink.decayVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid",
-        "TruthTaus.prodVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.classifierParticleOrigin.Classification.pt_vis.eta_vis.phi_vis.m_vis.barcode.status.classifierParticleType.classifierParticleOutCome.originalTruthParticle.polarizationPhi.polarizationTheta.pt_vis_dressed.eta_vis_dressed.phi_vis_dressed.m_vis_dressed.nPhotons_dressed.numCharged.numChargedPion.numNeutral.numNeutralPion.IsHadronicTau.pt_invis.eta_invis.phi_invis.m_invis.pt_vis_neutral.eta_vis_neutral.phi_vis_neutral.m_vis_neutral.DecayModeVector.decay_vertex_x.decay_vertex_y.decay_vertex_z.prod_vertex_x.prod_vertex_y.prod_vertex_z.uid",
-        "TruthNeutrinos.m.px.py.pz.e.pdgId.barcode.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.prodVtxLink.decayVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid",
-        "TruthBSM.barcode.childLinks.Classification.classifierParticleOrigin.classifierParticleOutCome.classifierParticleType.decayVtxLink.e.m.parentLinks.pdgId.polarizationPhi.polarizationTheta.prodVtxLink.px.py.pz.status",
-        "TruthBottom.m.px.py.pz.e.pdgId.barcode.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.prodVtxLink.decayVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid",
-        "TruthTop.m.px.py.pz.e.pdgId.barcode.status.prodVtxLink.decayVtxLink.parentLinks.childLinks.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.polarizationPhi.polarizationTheta.uid",
-        "TruthBoson.m.px.py.pz.e.pdgId.barcode.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.prodVtxLink.decayVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid",
-        "TruthForwardProtons.m.px.py.pz.e.pdgId.barcode.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.prodVtxLink.decayVtxLink.polarizationPhi.polarizationTheta.uid",
-        "BornLeptons.prodVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.classifierParticleOrigin.Classification.barcode.status.classifierParticleType.classifierParticleOutCome.polarizationPhi.polarizationTheta.uid",
-        "TruthBosonsWithDecayParticles.m.px.py.pz.e.pdgId.barcode.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.barcode.id.x.y.z.t.prodVtxLink.decayVtxLink.incomingParticleLinks.outgoingParticleLinks.uid",
-        "TruthBosonsWithDecayVertices.barcode.id.x.y.z.t.prodVtxLink.decayVtxLink.incomingParticleLinks.outgoingParticleLinks.uid.status",
-        "TruthBSMWithDecayParticles.barcode.Classification.classifierParticleOrigin.classifierParticleOutCome.classifierParticleType.decayVtxLink.e.m.pdgId.prodVtxLink.px.py.pz.status.uid",
-        "TruthBSMWithDecayVertices.barcode.id.incomingParticleLinks.outgoingParticleLinks.t.x.y.z.uid"
+        "TruthElectrons.prodVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.ptcone30.etcone20.classifierParticleOrigin.Classification.status.classifierParticleType.classifierParticleOutCome.polarizationPhi.polarizationTheta.e_dressed.pt_dressed.eta_dressed.phi_dressed.nPhotons_dressed.uid",
+        "TruthMuons.m.px.py.pz.e.pdgId.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.e_dressed.pt_dressed.eta_dressed.phi_dressed.nPhotons_dressed.ptcone30.etcone20.decayVtxLink.prodVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid",
+        "TruthPhotons.m.px.py.pz.e.pdgId.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.ptcone20.etcone20.etcone40.prodVtxLink.decayVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid",
+        "TruthTaus.prodVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.classifierParticleOrigin.Classification.pt_vis.eta_vis.phi_vis.m_vis.status.classifierParticleType.classifierParticleOutCome.originalTruthParticle.polarizationPhi.polarizationTheta.pt_vis_dressed.eta_vis_dressed.phi_vis_dressed.m_vis_dressed.nPhotons_dressed.numCharged.numChargedPion.numNeutral.numNeutralPion.IsHadronicTau.pt_invis.eta_invis.phi_invis.m_invis.pt_vis_neutral.eta_vis_neutral.phi_vis_neutral.m_vis_neutral.DecayModeVector.decay_vertex_x.decay_vertex_y.decay_vertex_z.prod_vertex_x.prod_vertex_y.prod_vertex_z.uid",
+        "TruthNeutrinos.m.px.py.pz.e.pdgId.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.prodVtxLink.decayVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid",
+        "TruthBSM.childLinks.Classification.classifierParticleOrigin.classifierParticleOutCome.classifierParticleType.decayVtxLink.e.m.parentLinks.pdgId.polarizationPhi.polarizationTheta.prodVtxLink.px.py.pz.status.uid",
+        "TruthBottom.m.px.py.pz.e.pdgId.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.prodVtxLink.decayVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid",
+        "TruthTop.m.px.py.pz.e.pdgId.status.prodVtxLink.decayVtxLink.parentLinks.childLinks.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.polarizationPhi.polarizationTheta.uid",
+        "TruthBoson.m.px.py.pz.e.pdgId.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.prodVtxLink.decayVtxLink.parentLinks.childLinks.polarizationPhi.polarizationTheta.uid",
+        "TruthForwardProtons.m.px.py.pz.e.pdgId.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.prodVtxLink.decayVtxLink.polarizationPhi.polarizationTheta.uid",
+        "BornLeptons.prodVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.classifierParticleOrigin.Classification.status.classifierParticleType.classifierParticleOutCome.polarizationPhi.polarizationTheta.uid",
+        "TruthBosonsWithDecayParticles.m.px.py.pz.e.pdgId.status.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.Classification.id.x.y.z.t.prodVtxLink.decayVtxLink.incomingParticleLinks.outgoingParticleLinks.uid",
+        "TruthBosonsWithDecayVertices.id.x.y.z.t.prodVtxLink.decayVtxLink.incomingParticleLinks.outgoingParticleLinks.uid.status",
+        "TruthBSMWithDecayParticles.Classification.classifierParticleOrigin.classifierParticleOutCome.classifierParticleType.decayVtxLink.e.m.pdgId.prodVtxLink.px.py.pz.status.uid",
+        "TruthBSMWithDecayVertices.id.incomingParticleLinks.outgoingParticleLinks.t.x.y.z.uid"
     ]
 
 
@@ -589,7 +589,7 @@ def addPhysTruthContentToSlimmerTool(slimmer):
         "TruthPrimaryVertices.t.x.y.z",
         "TruthHFWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
         "TruthHFWithDecayVertices.incomingParticleLinks.outgoingParticleLinks.uid.status.x.y.z.t",
-        "TruthCharm.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status.barcode.polarizationPhi.polarizationTheta",
+        "TruthCharm.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.parentLinks.childLinks.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status.polarizationPhi.polarizationTheta",
         "TruthTausWithDecayParticles.prodVtxLink.prodVtxLink.prodVtxLink.decayVtxLink.decayVtxLink.decayVtxLink.m.px.py.pz.e.pdgId.Classification.uid.classifierParticleOrigin.classifierParticleType.classifierParticleOutCome.status",
         "TruthTausWithDecayVertices.incomingParticleLinks.outgoingParticleLinks.uid.status.x.y.z.t"
     ]
