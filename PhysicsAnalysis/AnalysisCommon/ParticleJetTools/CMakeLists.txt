@@ -33,9 +33,10 @@ elseif( GENERATIONBASE )
    # truth vertex decorator algs (TruthVertexDecoratorAlg uses
    # InDet::InDetTrackTruthOriginTool, JetTruthVertexSummaryDecoratorAlg is
    # paired with it) are skipped here. They are derivation-only — AthGeneration
-   # does not run derivations.
+   # does not run derivations. The same holds for the tau seed jet algs.
    file( GLOB _src_files RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} src/*.cxx )
-   list( REMOVE_ITEM _src_files src/TruthVertexDecoratorAlg.cxx src/JetTruthVertexSummaryDecoratorAlg.cxx )
+   list( REMOVE_ITEM _src_files src/TruthVertexDecoratorAlg.cxx src/JetTruthVertexSummaryDecoratorAlg.cxx
+      src/TauSeedJetAlg.cxx src/TauSeedJetLabelCopyAlg.cxx )
    atlas_add_library( ParticleJetToolsLib
       ParticleJetTools/*.h Root/*.cxx ${_src_files}
       PUBLIC_HEADERS ParticleJetTools
@@ -57,7 +58,7 @@ else()
           AsgDataHandlesLib AsgTools AthContainers AthenaBaseComps EventPrimitives
           JetInterface JetRecLib MCTruthClassifierLib
           xAODBase xAODEventInfo xAODJet xAODTruth
-          TruthClassificationLib InDetTrackSystematicsToolsLib
+          TruthClassificationLib InDetTrackSystematicsToolsLib xAODTau
           ${FASTJETCONTRIB_LIBRARIES}
           ${FASTJET_LIBRARIES}
       INCLUDE_DIRS
@@ -75,6 +76,8 @@ if( NOT XAOD_STANDALONE )
     atlas_add_component( ParticleJetTools
       src/TruthVertexDecoratorAlg.cxx
       src/JetTruthVertexSummaryDecoratorAlg.cxx
+      src/TauSeedJetAlg.cxx
+      src/TauSeedJetLabelCopyAlg.cxx
       src/components/*.cxx
       LINK_LIBRARIES ParticleJetToolsLib )
   endif()
