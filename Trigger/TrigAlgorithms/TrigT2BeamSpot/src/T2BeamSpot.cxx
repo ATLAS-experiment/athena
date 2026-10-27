@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //
@@ -8,6 +8,7 @@
 
 #include "T2BeamSpot.h"
 #include "BeamSpotConditionsData/BeamSpotData.h"
+#include <iostream>
 
 namespace PESA
 {
@@ -30,16 +31,7 @@ namespace PESA
   }
 
   T2BeamSpot::T2BeamSpot( const InDet::BeamSpotData* beamspotdata)
-    : m_status ( 0  )
-      , m_posX   ( 0. )
-      , m_posY   ( 0. )
-      , m_posZ   ( 0. )
-      , m_sigmaX ( 0. )
-      , m_sigmaY ( 0. )
-      , m_sigmaZ ( 0. )
-      , m_tiltX  ( 0. )
-      , m_tiltY  ( 0. )
-      , m_sigmaXY( 0. ){
+  {
      if(beamspotdata == nullptr) return;
      m_status   = beamspotdata->beamStatus();
      m_posX     = beamspotdata->beamPos().x();
