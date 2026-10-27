@@ -2,8 +2,8 @@
 #
 # Run this file in order to print out the empty slots
 
-from TriggerMenuMT.L1.Base.L1MenuFlags import L1MenuFlags
-from TriggerMenuMT.L1.Menu.MenuCommon import print_available, RequiredL1Items, defineCommonL1Flags
+from ..Base.L1MenuFlags import L1MenuFlags
+from .MenuCommon import print_available, RequiredL1Items, defineCommonL1Flags
 
 def defineMenu():
     # We do not use physics menu in Run4 development at the moment

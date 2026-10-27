@@ -234,7 +234,8 @@ class L1MenuConfig(object):
         menuToLoadReq = self.menuFullName
         # Extract the menu name, independent of menu prescale sets
         if menuToLoadReq.endswith('prescale'):
-            menuToLoadReq = re.match(r'\w*_v\d*',self.menuFullName).group(0)
+            if (m:=re.match(r'\w*_v\d*',self.menuFullName)) is not None:
+                menuToLoadReq = m.group(0)
             log.info(f'Base menu name {menuToLoadReq} extracted from {self.menuFullName}')
         from .Menu.MenuMapping import menuMap
         if menuToLoadReq in menuMap:
@@ -717,7 +718,7 @@ class L1MenuConfig(object):
 
         # check that only the minimal set of legacy and detector thresholds is used
         if 'pp' in self.l1menu.menuName:
-           self.l1menu.checkLegacyThresholds()   
+            self.l1menu.checkLegacyThresholds()   
 
         # check for the topo multiplicity algorithms and CTP inputs
         # TOPO1
@@ -783,9 +784,6 @@ class L1MenuConfig(object):
             else:
                 log.warning('Cannot find item %s to set the prescale', it_name )
 
-
-    def configureCTP(self):
-        self.l1menu.ctp.addMonCounters()
 
     # remove prescale suffixes
     def _getMenuBaseName(self, menuName):

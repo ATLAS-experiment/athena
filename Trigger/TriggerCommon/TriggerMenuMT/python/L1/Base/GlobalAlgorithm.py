@@ -8,8 +8,8 @@ from typing import TYPE_CHECKING, Self
 from AthenaCommon.Logging import logging
 
 if TYPE_CHECKING:
-    from TriggerMenuMT.L1.Base.Thresholds import MenuThresholdsCollection
-    from TriggerMenuMT.L1.Base.Typing import JSONType
+    from .Thresholds import MenuThresholdsCollection
+    from .Typing import JSONType
 
 log = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ class VarParam:
     are loaded into registers in the firmware through the IPBUS.
     If the Global algorithms will be described this way needs to be decided, but for now we keep this concept.
     """
-    def __init__(self, name, selection, value: JSONType):
+    def __init__(self, name: str, selection, value: JSONType):
         self.name = name
         self.selection = int(selection)
         self.value: JSONType = value
@@ -82,7 +82,7 @@ class FixedParam:
     """Concept of a fixed parameter of a global algorithm was carried over from the old L1Topo configuration. Changing this type of parameters requires a rebuild of the firmware. This is because these parameters determine the firmware layout.
     If the Global algorithms will be described this way needs to be decided, but for now we keep this concept.
     """
-    def __init__(self, name, value):
+    def __init__(self, name: str, value):
         self.name = name
         self.value: JSONType
         from L1TopoHardware.L1TopoHardware import HardwareConstrainedParameter

@@ -15,7 +15,7 @@ from .TriggerTypeDef import TT
 class ItemDef_run4:
     
     @staticmethod
-    def registerItems(d, menuName):
+    def registerItems(d, menuName: str):
         if "run4" not in menuName:
             return
 

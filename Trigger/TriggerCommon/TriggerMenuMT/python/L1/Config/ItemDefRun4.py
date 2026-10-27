@@ -6,10 +6,10 @@
 #
 
 from AthenaCommon.Logging import logging
-from TriggerMenuMT.L1.Base.L1MenuRun4 import MenuMetaInfo
 log = logging.getLogger(__name__)
 
 # The trigger types
+from ..Base.L1MenuRun4 import MenuMetaInfo
 from ..Base.Items import MenuItem
 from .TriggerTypeDef import TT
 from .ItemDef import ItemDef as ItemDefRun3

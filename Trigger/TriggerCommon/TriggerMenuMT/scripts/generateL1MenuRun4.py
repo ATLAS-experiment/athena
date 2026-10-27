@@ -39,10 +39,13 @@ def main():
 
     # L1 menu generation
     log.info("Generating L1 menu %s", flags.Trigger.triggerMenuSetup)
-    l1cfg = L1MenuConfig(flags)
+    try:
+        l1cfg = L1MenuConfig(flags)
+    except (ModuleNotFoundError, RuntimeError) as ex:
+        log.error("Exception during menu generation: %s", ex)
+        return 1
     l1cfg.writeJSON(outputFile=getL1MenuFileName(flags),
                     bgsOutputFile=getBunchGroupSetFileName(flags))
-
     return 0
 
 
