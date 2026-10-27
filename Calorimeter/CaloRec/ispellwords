@@ -316,10 +316,7 @@ CaloDepthTool
 bool
 bla
 Ambreesh's
-CaloCellContainerCorrectorTool
-CaloCellContaineCorrectorTool
 TowerBuilders
-CaloCellContaienrFromClusterTool
 InputTowerContainerName
 theCaloCellContainerFinalizerTool
 compactCaloCell
@@ -1185,7 +1182,6 @@ processConstantsFromDB
 SeedThresholdOnEt
 infos
 AbsE
-theCaloCellContainerCorrectorTool
 EMOnly
 emonly
 MaxAxisAngle
