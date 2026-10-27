@@ -1,12 +1,8 @@
 #
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-
-writeOutput = True
-doTruth = True
-
 
 def TracccTritonToolCfg(flags, name="TracccTritonTool", **kwargs):
     """Set up a TracccTritonTool tool and return"""
@@ -25,124 +21,26 @@ def TracccTritonToolCfg(flags, name="TracccTritonTool", **kwargs):
     return acc
 
 
-def addTruthClusterAssociations(acc, flags, prefix="", pixelKey=None, stripKey=None):
-    from ActsConfig.ActsTruthConfig import (
-        ActsPixelClusterToTruthAssociationAlgCfg,
-        ActsStripClusterToTruthAssociationAlgCfg,
-        ActsTruthParticleHitCountAlgCfg,
-    )
-    acc.merge(ActsPixelClusterToTruthAssociationAlgCfg(
-        flags,
-        name=f"{prefix}PixelClusterToTruthAssociationAlg",
-        InputTruthParticleLinks="xAODTruthLinks",
-        AssociationMapOut=f"{prefix}PixelClustersToTruthParticles",
-        Measurements=pixelKey,
-    ))
-    acc.merge(ActsStripClusterToTruthAssociationAlgCfg(
-        flags,
-        name=f"{prefix}StripClusterToTruthAssociationAlg",
-        InputTruthParticleLinks="xAODTruthLinks",
-        AssociationMapOut=f"{prefix}StripClustersToTruthParticles",
-        Measurements=stripKey,
-    ))
-    acc.merge(ActsTruthParticleHitCountAlgCfg(
-        flags,
-        name=f"{prefix}TruthParticleHitCountAlg",
-        MeasurementAssocKeys=[f"{prefix}PixelClustersToTruthParticles",
-                              f"{prefix}StripClustersToTruthParticles"],
-        TruthParticleHitCountsOut=f"{prefix}TruthParticleHitCounts",
-    ))
-    return acc
-
-
-def addTrackTruthDecorations(acc, flags, prefix, tracks_key):
-
-    from ActsConfig.ActsTruthConfig import (
-        ActsTrackToTruthAssociationAlgCfg,
-        ActsTrackFindingValidationAlgCfg,
-        ActsTrackParticleTruthDecorationAlgCfg,
-    )
-
-    # Track to truth association
-    acc.merge(ActsTrackToTruthAssociationAlgCfg(
-        flags,
-        name=f"{prefix}TrackToTruthAssociationAlg",
-        PixelClustersToTruthAssociationMap=f"{prefix}PixelClustersToTruthParticles",
-        StripClustersToTruthAssociationMap=f"{prefix}StripClustersToTruthParticles",
-        ACTSTracksLocation=tracks_key,
-        AssociationMapOut=f"{tracks_key}ToTruthParticleAssociation",
-    ))
-
-    # Validation
-    acc.merge(ActsTrackFindingValidationAlgCfg(
-        flags,
-        name=f"{prefix}TrackFindingValidationAlg",
-        TrackToTruthAssociationMap=f"{tracks_key}ToTruthParticleAssociation",
-        TruthParticleHitCounts=f"{prefix}TruthParticleHitCounts",
-    ))
-
-    # Decoration
-    acc.merge(ActsTrackParticleTruthDecorationAlgCfg(
-        flags,
-        name=f"{prefix}TrackParticleTruthDecorationAlg",
-        TrackToTruthAssociationMaps=[
-            f"{tracks_key}ToTruthParticleAssociation"],
-        TrackParticleContainerName=f"{prefix}TrackParticles",
-        TruthParticleHitCounts=f"{prefix}TruthParticleHitCounts",
-        ComputeTrackRecoEfficiency=True,
-    ))
-
-    return acc
-
-
 def TritonTracccTrackMakerCfg(flags, name="TritonTracccTrackMaker", **kwargs):
     """Set up traccc-as-a-service tracking: the cells of each event are sent
     to the server, and the traccc collections it returns are converted with
-    the same algorithms as the local device chain"""
+    the same algorithms as the local device chain.
+
+    Scheduled by ITkActsDeviceTrackRecoCfg for the primary pass with
+    flags.Acts.Device.tritonMode = DeviceTritonMode.Client, which also adds
+    the PRD association and truth"""
     acc = ComponentAccumulator()
 
-    prefix = "Traccc"
-    track_container_name = f'{prefix}Tracks'
-    track_particles_name = f"{prefix}TrackParticles"
-
-    # Keys of the traccc collections returned by the server, and of their conversions.
+    # Keys of the traccc collections returned by the server
     cells_key = "TracccCells"
     measurements_key = "TracccTritonMeasurements"
     clusters_key = "TracccTritonClusters"
     traccc_tracks_key = "TracccTritonTracks"
-    pixel_key = f"{prefix}PixelClusters"
-    strip_key = f"{prefix}StripClusters"
-    meas_to_pixel_sp_key = f"{prefix}MeasToPixelSP"
-    meas_to_strip_cl_key = f"{prefix}MeasToStripCl"
 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
-    acc.merge(ActsTrackingGeometrySvcCfg(flags))
-
-    # Pixel and strip geometry
-    from PixelGeoModelXml.ITkPixelGeoModelConfig import ITkPixelReadoutGeometryCfg
-    acc.merge(ITkPixelReadoutGeometryCfg(flags))
-    from StripGeoModelXml.ITkStripGeoModelConfig import ITkStripReadoutGeometryCfg
-    acc.merge(ITkStripReadoutGeometryCfg(flags))
-
-    try:
-        if flags.Tracking.ActiveConfig.extension != "Acts":
-            raise RuntimeError(f"wrong tracking pass: {flags.Tracking.ActiveConfig.extension}")
-    except AttributeError:
-        flags = flags.cloneAndReplace("Tracking.ActiveConfig",
-                                      "Tracking.ITkActsPass")
-
-    # Traccc detector description needed by the conversions
-    geo_id_mapping_name = "TracccGeometryIdMapping"
-    host_detector_name = "TracccHostDetectorGeometry"
-    from ActsGPUGeometry.ActsGPUGeometryConfig import DeviceDetectorDescriptionCondAlgCfg
-    acc.merge(DeviceDetectorDescriptionCondAlgCfg(flags,
-        HostConditionsObjectName="TracccHostCondConfig",
-        HostDigitizationObjectName="TracccHostDigitizationConfig",
-        DeviceConditionsObjectName="TracccDeviceCondConfig",
-        DeviceDigitizationObjectName="TracccDeviceDigitizationConfig",
-        GeoIdMappingObjectName=geo_id_mapping_name,
-        HostDetectorName=host_detector_name,
-    ))
+    # Create RoI for secondary passes (e.g. LargeD0) to reuse
+    from ActsConfig.ActsRegionsOfInterestConfig import ActsRegionsOfInterestCreatorAlgCfg
+    acc.merge(ActsRegionsOfInterestCreatorAlgCfg(flags,
+        name=f"{flags.Tracking.ActiveConfig.extension}RegionsOfInterestCreatorAlg"))
 
     # All traccc collections on the client live in host memory
     from AthDeviceComps.AthDeviceCompsConfig import HostCopyToolCfg, HostMemoryResourceToolCfg
@@ -174,78 +72,36 @@ def TritonTracccTrackMakerCfg(flags, name="TritonTracccTrackMaker", **kwargs):
         TracccTrackConverterAlgCfg,
     )
     acc.merge(TracccMeasurementConverterAlgCfg(flags,
-        name=f"{prefix}TritonMeasurementConverterAlg",
         HostMR=acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)),
         CopyProviderTool=acc.popToolsAndMerge(HostCopyToolCfg(flags)),
         InputMeasurements=measurements_key,
         InputClusters=clusters_key,
         InputCells=cells_key,
-        ConvertClustersWithCells=doTruth,
-        GeoIdMapping=geo_id_mapping_name,
-        OutputPixelClusters=pixel_key,
-        OutputPixelSpacePoints=f"{prefix}PixelSpacePoints",
-        OutputMeasToPixelSP=meas_to_pixel_sp_key,
-        OutputMeasToStripCl=meas_to_strip_cl_key,
-        OutputStripClusters=strip_key,
+        ConvertClustersWithCells=flags.Tracking.doTruth,
+        OutputPixelClusters="ITkPixelClusters",
+        OutputPixelSpacePoints="ITkPixelSpacePoints",
+        OutputMeasToPixelSP="ITkTracccMeasToPixelSP",
+        OutputMeasToStripCl="ITkTracccMeasToStripCl",
+        OutputStripClusters="ITkStripClusters",
     ))
+
+    if flags.Tracking.ActiveConfig.useITkStripSeeding or (flags.Acts.SpacePoints.doStrip and not flags.Tracking.ActiveConfig.isSecondaryPass):
+        from ActsConfig.ActsSpacePointFormationConfig import ActsStripSpacePointFormationAlgCfg
+        acc.merge(ActsStripSpacePointFormationAlgCfg(flags,
+            name=f"{flags.Tracking.ActiveConfig.extension}StripSpacePointFormationAlg",
+            StripClusters="ITkStripClusters",
+            StripSpacePoints="ITkStripSpacePoints",
+            StripOverlapSpacePoints="ITkStripOverlapSpacePoints"))
 
     acc.merge(TracccTrackConverterAlgCfg(flags,
-        name=f"{prefix}TritonTrackConverterAlg",
         HostMR=acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)),
         CopyProviderTool=acc.popToolsAndMerge(HostCopyToolCfg(flags)),
-        HostDetectorName=host_detector_name,
-        InputPixelClusters=pixel_key,
-        InputStripClusters=strip_key,
-        InputMeasToPixelSP=meas_to_pixel_sp_key,
-        InputMeasToStripCl=meas_to_strip_cl_key,
+        InputPixelClusters="ITkPixelClusters",
+        InputStripClusters="ITkStripClusters",
+        InputMeasToPixelSP="ITkTracccMeasToPixelSP",
+        InputMeasToStripCl="ITkTracccMeasToStripCl",
         InputTracks=traccc_tracks_key,
-        OutputTracks=track_container_name,
+        OutputTracks=f"{flags.Tracking.ActiveConfig.extension}Tracks",
     ))
-
-    ################################################################################
-    # Convert ActsTrk::TrackContainer to xAOD::TrackParticleContainer
-
-    from ActsConfig.ActsEventCnvConfig import ActsTrackToTrackParticleCnvAlgCfg
-    acc.merge(ActsTrackToTrackParticleCnvAlgCfg(flags,
-        name=f"{prefix}TrackToTrackParticleCnvAlg",
-        ACTSTracksLocation=[track_container_name],
-        TrackParticlesOutKey=track_particles_name))
-
-    # if doTruth:
-    if doTruth:
-        addTruthClusterAssociations(
-            acc, flags, prefix=prefix, pixelKey=pixel_key, stripKey=strip_key)
-        addTrackTruthDecorations(acc, flags, prefix, track_container_name)
-
-
-    if writeOutput:
-
-        # Adding the output to the AOD file
-        inputList = []
-
-        inputList.append("xAOD::TruthParticleContainer#*")
-        inputList.append("xAOD::TruthParticleAuxContainer#*")
-        inputList.append("xAOD::TrackJacobianContainer#*")
-        inputList.append("xAOD::TrackJacobianAuxContainer#*")
-        inputList.append("xAOD::TrackMeasurementContainer#*")
-        inputList.append("xAOD::TrackMeasurementAuxContainer#*")
-        inputList.append("xAOD::TrackSurfaceContainer#*")
-        inputList.append("xAOD::TrackSurfaceAuxContainer#*")
-        inputList.append("xAOD::TrackParticleContainer#*")
-        inputList.append("xAOD::TrackParticleAuxContainer#*")
-
-        if doTruth:
-            inputList.append(f"xAOD::PixelClusterContainer#{pixel_key}")
-            inputList.append(f"xAOD::StripClusterContainer#{strip_key}")
-            inputList.append(f"xAOD::PixelClusterAuxContainer#{pixel_key}Aux.")
-            inputList.append(f"xAOD::StripClusterAuxContainer#{strip_key}Aux.")
-        else:
-            inputList.append("xAOD::PixelClusterContainer#*")
-            inputList.append("xAOD::StripClusterContainer#*")
-            inputList.append("xAOD::PixelClusterAuxContainer#*")
-            inputList.append("xAOD::StripClusterAuxContainer#*")
-
-        from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
-        acc.merge(OutputStreamCfg(flags, 'AOD', ItemList=inputList))
 
     return acc

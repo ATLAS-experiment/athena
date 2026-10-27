@@ -10,10 +10,20 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.MainServicesConfig import MainServicesCfg
 from AthCUDAServices.CUDAConfigFlags import CUDAStream
 from AthDeviceComps.DeviceConfigFlags import DeviceBackend
-from TracccTritonBackend.TracccTritonBackendConfig import (
-    DEFAULT_SEQUENCE_NAME,
-    STOREGATE_KEYS,
-)
+from ActsConfig.ActsConfigFlags import DeviceTritonMode
+from InDetConfig.ITkActsDeviceTrackRecoConfig import ITkActsDeviceTrackRecoCfg
+
+# Name of the AthSequencer that holds the per-request device chain
+DEFAULT_SEQUENCE_NAME = "TracccDeviceRecoSeq"
+
+# The store keys the C++ side has to name for itself, as used by
+# ITkActsDeviceTrackRecoCfg
+STOREGATE_KEYS = {
+    "cells": "TracccCellCollection",
+    "measurements": "TracccMeasurementCollection",
+    "clusters": "TracccClusterCollection",
+    "tracks": "TracccTrackCollection",
+}
 
 
 def bootstrap(nSlots: int = 1,
@@ -26,8 +36,7 @@ def bootstrap(nSlots: int = 1,
     @param sequenceName name of the AthSequencer holding the device chain; the
            C++ TracccTritonRunner looks this up and executes it per request
     @return the StoreGate keys the C++ side needs, as configured above.
-            TracccTritonInitializer copies these into its Config, so the names
-            live only in TracccTritonBackendConfig and cannot drift.
+            TracccTritonInitializer copies these into its Config.
     """
 
     if nSlots < 1:
@@ -43,6 +52,7 @@ def bootstrap(nSlots: int = 1,
     flags.Acts.Device.doSpacePointFormation = True
     flags.Acts.Device.doSeeding = True
     flags.Acts.Device.doTrackReconstruction = True
+    flags.Acts.Device.tritonMode = DeviceTritonMode.Server
     flags.CUDA.Stream = CUDAStream.PerEvent
 
     # The device detector description is converted from the ACTS Gen3 tracking geometry
@@ -77,10 +87,18 @@ def bootstrap(nSlots: int = 1,
         CompFactory.SG.HiveMgrSvc("EventDataSvc", NSlots=nSlots), create=True
     )
 
-    from TracccTritonBackend.TracccTritonBackendConfig import (
-        TracccTritonDeviceRecoCfg,
-    )
-    acc.merge(TracccTritonDeviceRecoCfg(flags, sequenceName=sequenceName))
+    # The full sequency the runner uses
+    acc.addSequence(CompFactory.AthSequencer(
+        sequenceName,
+        Sequential=True,
+        IgnoreFilterPassed=True,
+        StopOverride=True,
+    ))
+    # Same cuts as the primary pass of the client's job
+    passFlags = flags.cloneAndReplace(
+        "Tracking.ActiveConfig",
+        f"Tracking.{flags.Tracking.ITkPrimaryPassConfig.value}Pass")
+    acc.merge(ITkActsDeviceTrackRecoCfg(passFlags), sequenceName=sequenceName)
 
     # SG::getNSlots() caches the number of event slots the first time it is
     # called, and gives 1 if EventDataSvc cannot be retrieved yet. With

@@ -89,7 +89,7 @@ struct TracccTritonRunner::Impl {
     const std::size_t slot;
     std::size_t eventCounter = 0;
 
-    /// The AthSequencer configured by TracccTritonDeviceRecoCfg
+    /// The AthSequencer configured by TracccTritonBootstrap.bootstrap()
     SmartIF<IAlgorithm> chain;
     SmartIF<IAlgorithm> condChain;
     SmartIF<IAlgExecStateSvc> algExecStates;

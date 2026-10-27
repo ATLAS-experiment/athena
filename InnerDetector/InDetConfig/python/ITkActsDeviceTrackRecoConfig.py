@@ -3,6 +3,8 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.Enums import FlagEnum
 
 from ActsGPUGeometry.ActsGPUGeometryConfig import DeviceDetectorDescriptionCondAlgCfg
+from ActsConfig.ActsConfigFlags import DeviceTritonMode
+from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import DeviceClusterizationAlgCfg
 
 class DataLocation(FlagEnum):
     HOST   = "host"    # Athena objects on CPU
@@ -11,13 +13,42 @@ class DataLocation(FlagEnum):
 def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
     acc = ComponentAccumulator()
 
+    tritonMode = flags.Acts.Device.tritonMode
+    doDeviceSteps = (flags.Acts.Device.doClusterization,
+                     flags.Acts.Device.doSeeding,
+                     flags.Acts.Device.doTrackReconstruction)
+    if tritonMode is DeviceTritonMode.Server and not all(doDeviceSteps):
+        raise ValueError("Acts.Device.tritonMode=Server runs the full chain on "
+            "the device: Acts.Device.doClusterization, doSeeding and "
+            "doTrackReconstruction must all be True.")
+    if tritonMode is DeviceTritonMode.Client and any(doDeviceSteps):
+        raise ValueError("Acts.Device.tritonMode=Client sends the event to the "
+            "Triton server instead of running on the device: "
+            "Acts.Device.doClusterization, doSeeding and doTrackReconstruction "
+            "must all be False.")
+
     # Bring up shared device infrastructure once, upfront
     print(f"Setting up GPU algorithms with {flags.Device.Backend.value} backend")
 
     acc.merge(DeviceDetectorDescriptionCondAlgCfg(flags))
 
+    if tritonMode is DeviceTritonMode.Client:
+        from TracccTritonClient.TracccTritonClientConfig import TritonTracccTrackMakerCfg
+        acc.merge(TritonTracccTrackMakerCfg(flags))
+        acc.merge(ITkActsDeviceTrackRecoPostProcessingCfg(flags, previousExtension=previousExtension))
+        return acc
+
     # --- Clusterization ---
-    if flags.Acts.Device.doClusterization:
+    if flags.Acts.Device.doClusterization and tritonMode is DeviceTritonMode.Server:
+        # The cells are recorded by the Triton backend from the client request
+        acc.merge(DeviceClusterizationAlgCfg(flags,
+            InputTracccCells="TracccCellCollection",
+            OutputTracccMeasurements="TracccMeasurementCollection",
+            OutputTracccClusters="TracccClusterCollection",
+            RetrieveClusterCells=True))
+        clustersLocation = DataLocation.DEVICE
+
+    elif flags.Acts.Device.doClusterization:
 
         #TODO: remove this once MC is fixed
         if not flags.Tracking.doPixelDigitalClustering:
@@ -51,7 +82,6 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
                 ))
 
         # setup traccc clusterization
-        from ActsGPUDataPreparation.ActsGPUDataPreparationConfig import DeviceClusterizationAlgCfg
         acc.merge(DeviceClusterizationAlgCfg(flags,
             InputTracccCells="TracccCellCollection",
             OutputTracccMeasurements="TracccMeasurementCollection",
@@ -172,7 +202,11 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
             InputTracccDetectorGeometry="TracccDeviceDetectorGeometry",
             OutputTracccTracks="TracccTrackCollection",
         ))
-            
+
+        # The Triton backend returns the raw tracks to be converted by the client
+        if tritonMode is DeviceTritonMode.Server:
+            return acc
+
         if clustersLocation is not DataLocation.DEVICE:
             acc.merge(TracccMeasurementConverterAlgCfg(flags,
                 InputMeasurements="TracccMeasurementCollection",
@@ -267,6 +301,14 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
             from ActsConfig.ActsTrackFindingConfig import ActsAmbiguityResolutionCfg
             acc.merge(ActsAmbiguityResolutionCfg(flags))
 
+    acc.merge(ITkActsDeviceTrackRecoPostProcessingCfg(flags, previousExtension=previousExtension))
+    return acc
+
+
+def ITkActsDeviceTrackRecoPostProcessingCfg(flags, *, previousExtension=None):
+    """PRD association and truth for the tracks of the primary pass, once
+    they are converted back to the host."""
+    acc = ComponentAccumulator()
 
     # PRD association
     from ActsConfig.ActsPrdAssociationConfig import ActsPrdAssociationAlgCfg

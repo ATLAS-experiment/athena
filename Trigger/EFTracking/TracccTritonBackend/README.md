@@ -12,7 +12,7 @@ CELLS (uint8 tensor) + EVENT_IOV (int64 tensor)
   -> conditions (AthCondSeq: beamspot, field) for the event's IOV
   -> ActsTrk::DeviceClusterizationAlg
   -> ActsTrk::DeviceSPFormationAlg
-  -> ActsTrk::DeviceTripletSeedingAlg
+  -> ActsTrk::DeviceTripletSeedingAlg (or ActsTrk::DeviceGBTSSeedingAlg)
   -> ActsTrk::DeviceTrkParamEstimationAlg
   -> ActsTrk::DeviceTrackFindingAlg
 MEASUREMENTS / CLUSTERS / TRACKS / TRACK_STATES (uint8 tensors)
@@ -28,10 +28,11 @@ and write to StoreGate and depend on provider tools and DetectorStore services.
 The initializer `TracccTritonInitializer::initialize()` at server intialization:
 
 1. embeds a Python interpreter (`Py_Initialize()`, once per process) and calls
-   `TracccTritonBootstrap.bootstrap()`, which builds the same
-   `ComponentAccumulator` a normal athena job would get from
-   `TracccTritonDeviceRecoCfg`, then drives it through
-   `ApplicationMgr.configure()` + `initialize()` + `start()`;
+   `TracccTritonBootstrap.bootstrap()`, which schedules the device chain of the
+   offline primary pass, `InDetConfig.ITkActsDeviceTrackRecoConfig.ITkActsDeviceTrackRecoCfg`,
+   with `flags.Acts.Device.tritonMode = DeviceTritonMode.Server` (no RDO conversion, no
+   conversion back to the host) inside the AthSequencer the runner executes, then
+   drives it through `ApplicationMgr.configure()` + `initialize()` + `start()`;
 2. fetches the resulting application manager from C++ via
    `Gaudi::createApplicationMgr()`, again returning the same process-wide
    singleton Python just configured,
@@ -67,6 +68,12 @@ To run the server, all that is needed is:
 
 ```sh
 tritonserver --model-repository=${WorkDir_DIR:-$Athena_DIR}/data/TracccTritonBackend/models
+```
+
+Flags of the embedded job can be overridden from the server environment, `;`-separated, e.g.
+
+```sh
+export TRACCC_TRITON_FLAGS="Acts.Device.seedingStrategy=SeedingStrategy.Gbts"
 ```
 
 A successful start ends with
