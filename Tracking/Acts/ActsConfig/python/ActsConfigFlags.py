@@ -197,6 +197,9 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.Particles.doAnalysis', lambda pcf: pcf.Acts.doAnalysis)
     actscf.addFlag('Acts.storeTrackStateInfo', False)
     actscf.addFlag('Acts.doTruthInspection', False)
+    # Truth match probability from the truth-linked measurements only (measurements without truth particle weigh 1
+    # and cannot be the best match); by default it is computed the legacy way
+    actscf.addFlag('Acts.truthLinkedFakeRate', False)
     # Save Trk::Track link for combined muon reconstruction, temporary
     actscf.addFlag('Acts.doxAODToTrkConversion', True)
 

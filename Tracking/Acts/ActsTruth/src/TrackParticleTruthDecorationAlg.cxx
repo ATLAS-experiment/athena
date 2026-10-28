@@ -124,6 +124,11 @@ namespace ActsTrk
                                       (*the_track_truth_association.second).at(optional_track->index()),
                                      event_stat);
          
+      // the match probability is also meaningful without a matching truth particle (legacy truth matching)
+      float_decor[kMatchingProbability](*track_particle) = truth_match.m_matchProbability;
+      float_decor[kHitPurity](*track_particle) = truth_match.m_hitPurity;
+      float_decor[kHitEfficiency](*track_particle) = truth_match.m_hitEfficiency;
+
       const xAOD::TruthParticle* truth_particle = truthParticleToLink(truth_match.m_truthParticle);
       if (!truth_particle) {
          continue;
@@ -136,9 +141,6 @@ namespace ActsTrk
       type = truthClass.first;
       origin = truthClass.second;
       classification = std::get<0>(MCTruthPartClassifier::defOrigOfParticle(truth_particle));
-      float_decor[kMatchingProbability](*track_particle) = truth_match.m_matchProbability;
-      float_decor[kHitPurity](*track_particle) = truth_match.m_hitPurity;
-      float_decor[kHitEfficiency](*track_particle) = truth_match.m_hitEfficiency;
       int_decor[kTruthType](*track_particle) = type;
       int_decor[kTruthOrigin](*track_particle) = origin;
       truthClass_decor(*track_particle) = classification;

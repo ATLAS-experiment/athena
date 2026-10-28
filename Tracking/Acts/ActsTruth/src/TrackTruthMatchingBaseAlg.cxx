@@ -211,7 +211,8 @@ namespace ActsTrk
 
        double total_sum=weightedCountSum(total_counts, m_weights.value() );
        double total_sum_for_prob=weightedCountSum(total_counts, m_weightsForProb.value() );
-       double noise_sum=noiseCorrection(noise_counts, m_weightsForProb.value() );
+       // measurements without truth particle keep their full weight unless only truth-linked measurements count
+       double noise_sum= m_truthLinkedFakeRate.value() ? noiseCorrection(noise_counts, m_weightsForProb.value() ) : 0.;
        double total_sum_for_prob_nonoise=total_sum_for_prob;
        total_sum_for_prob += noise_sum;
 
@@ -247,10 +248,19 @@ namespace ActsTrk
          }
        }
 
+       // as in the legacy matching, the measurements without truth particle form one pseudo particle which can be the
+       // best match, unless only truth-linked measurements count
+       float noise_match_prob = 0.f;
+       if (!m_truthLinkedFakeRate.value() && total_sum_for_prob>0.) {
+          noise_match_prob = weightedCountSum(noise_counts, m_weightsForProb.value() ) / total_sum_for_prob;
+       }
+       const bool noise_is_best_match = noise_match_prob > best_match_prob[0];
+
        if (best_match_i_nonoise[0] != best_match_i[0]) {
           ++event_stat.m_nTruthParticleNonoiseMismatches;
        }
-       if (best_match_i[0] < track_hit_counts.countsPerTruthParticle().size()
+       if (   !noise_is_best_match
+           && best_match_i[0] < track_hit_counts.countsPerTruthParticle().size()
            && track_hit_counts.countsPerTruthParticle()[ best_match_i[0] ].first) {
           ret.m_truthParticle  = track_hit_counts.countsPerTruthParticle()[ best_match_i[0] ].first;
           ret.m_matchProbability = best_match_prob[0];
@@ -302,7 +312,10 @@ namespace ActsTrk
           // could use eta of track but not available to the algorithm
 
           ++event_stat.m_nTracksWithoutAssociatedTruthParticle;
-          if (!track_hit_counts.countsPerTruthParticle().empty()) {
+          if (noise_is_best_match) {
+             ret.m_matchProbability = noise_match_prob;
+          }
+          else if (!track_hit_counts.countsPerTruthParticle().empty()) {
              THROW_EXCEPTION("Failed to select best matching truth particle out of " << track_hit_counts.countsPerTruthParticle().size()
                            << ". This should not happen." );
           }
