@@ -163,6 +163,7 @@ def createActsLegacyTrackingPassFlags():
     icf.maxZImpactSeed = 200. * Units.mm
     icf.PixelSeedingStrategy = SeedingStrategy.GridTriplet
     icf.useITkStripSeeding = True
+    icf.StripSeedingStrategy = SeedingStrategy.GridTriplet
     icf.minPixel = [1]
     icf.maxHoles = [2]
     # Chi2 cut used together with 2 max. holes
@@ -176,6 +177,7 @@ def createActsHeavyIonTrackingPassFlags():
     icf = createActsTrackingPassFlags()
     icf.extension = "ActsHeavyIon"
     icf.useITkStripSeeding = True
+    icf.StripSeedingStrategy = SeedingStrategy.GridTriplet
     icf.maxPrimaryImpact = [5.0 * Units.mm]
     icf.minPT            = lambda pcf : (
         [0.4 *Units.GeV * pcf.BField.configuredSolenoidFieldScale])
@@ -263,6 +265,7 @@ def createActsConversionTrackingPassFlags():
     icf.usePrdAssociationTool   = True
     icf.useITkPixelSeeding = False
     icf.useITkStripSeeding = True
+    icf.StripSeedingStrategy = SeedingStrategy.GridTriplet
 
     icf.etaBins                 = [-1.0,4.0]
     icf.minPT                   = lambda pcf: (
@@ -301,6 +304,7 @@ def createActsLowPtTrackingPassFlags():
         [0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale])
     icf.minPTSeed          = lambda pcf : (
         0.4 * Units.GeV * pcf.BField.configuredSolenoidFieldScale)
+    icf.useITkStripSeeding = False
     icf.doBremRecoverySi   = False
 
     return icf
