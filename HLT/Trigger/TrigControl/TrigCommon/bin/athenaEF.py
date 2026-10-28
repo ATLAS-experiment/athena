@@ -1340,6 +1340,8 @@ def main():
                   help='TDAQ partition name (defaults to TDAQ_PARTITION environment variable)')
    g.add_argument('--webdaq-base', metavar='URL', default=None,
                   help='WEBDAQ base URL (defaults to TDAQ_WEBDAQ_BASE environment variable)')
+   g.add_argument('--application-name', metavar='NAME', default=os.environ.get('TDAQ_APPLICATION_NAME', 'athenaEF'),
+                  help='Application name for OH/ERS. Defaults to TDAQ_APPLICATION_NAME environment variable, else athenaEF)')
 
    ## Online Histogramming
    g = parser.add_argument_group('Online Histogramming')
@@ -1350,6 +1352,8 @@ def main():
    g = parser.add_argument_group('Expert')
    parser.expert_groups.append(g)
    (args, unparsed_args) = parser.parse_known_args()
+   # ERS reads the application name from the environment, setting here to enforce consistency
+   os.environ['TDAQ_APPLICATION_NAME'] = args.application_name
    check_args(parser, args)
 
    # set ROOT to batch mode (ATR-21890)
@@ -1414,6 +1418,7 @@ def main():
 
    overrides.set('AvalancheSchedulerSvc.ThreadPoolSize', args.threads)
    overrides.set('EventDataSvc.NSlots', args.concurrent_events)
+   overrides.set('DataFlowConfig.DF_ApplicationName', args.application_name)
 
    ef_files = args.file if args.file else []
    if ef_files:
