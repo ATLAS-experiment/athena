@@ -113,7 +113,7 @@ StatusCode TrigEgammaFastElectronReAlgo::execute(const EventContext& ctx) const
   //JTB Should only be 1 cluster in each RoI 
 
   const xAOD::TrigEMCluster *emCluster=(*clusterCont->begin());
-  ElementLink<xAOD::TrigEMClusterContainer> clusEL=ElementLink<xAOD::TrigEMClusterContainer> (*clusterCont,0);
+  ElementLink<xAOD::TrigEMClusterContainer> clusEL=ElementLink<xAOD::TrigEMClusterContainer> (*clusterCont,0, ctx);
 
   // copy relevant quantities to local variables
   calo_eta = emCluster->eta();
@@ -151,7 +151,7 @@ StatusCode TrigEgammaFastElectronReAlgo::execute(const EventContext& ctx) const
   // Make Dummy Electron
   xAOD::TrigElectron* trigDummyElec = new xAOD::TrigElectron();
 
-  ElementLink<xAOD::TrackParticleContainer> trackDummyEL = ElementLink<xAOD::TrackParticleContainer> (*tracks, 0);
+  ElementLink<xAOD::TrackParticleContainer> trackDummyEL = ElementLink<xAOD::TrackParticleContainer> (*tracks, 0, ctx);
      
   trigDummyElecColl->push_back(trigDummyElec);
   trigDummyElec->init( 0, 0, 0,  0, clusEL, trackDummyEL);
@@ -193,7 +193,7 @@ StatusCode TrigEgammaFastElectronReAlgo::execute(const EventContext& ctx) const
 
         xAOD::TrigElectron* trigElec = new xAOD::TrigElectron();
         trigElecColl->push_back(trigElec);
-        ElementLink<xAOD::TrackParticleContainer> trackEL = ElementLink<xAOD::TrackParticleContainer> (*tracks, track_index);
+        ElementLink<xAOD::TrackParticleContainer> trackEL = ElementLink<xAOD::TrackParticleContainer> (*tracks, track_index, ctx);
         trigElec->init(  roiDescriptor->roiWord(),
                     etaAtCalo, phiAtCalo,  etoverpt,        
                     clusEL,
@@ -255,7 +255,7 @@ StatusCode TrigEgammaFastElectronReAlgo::execute(const EventContext& ctx) const
         assume cluster quantities give better estimate of transverse energy
         (probably a safe assumption for large pT) and that track parameters
         at perigee give better estimates of angular quantities */
-      ElementLink<xAOD::TrackParticleContainer> trackEL = ElementLink<xAOD::TrackParticleContainer> (*tracks, track_index);
+      ElementLink<xAOD::TrackParticleContainer> trackEL = ElementLink<xAOD::TrackParticleContainer> (*tracks, track_index, ctx);
       ATH_MSG_DEBUG("pT of trackEL: "<<(*trackEL)->pt());     
 
       ATH_MSG_DEBUG("REGTEST: TrigElectron: cluster index = " << clusEL.index() <<

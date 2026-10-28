@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ********************************************************************
@@ -579,7 +579,7 @@ StatusCode muComb::execute(const EventContext& ctx) const
      muonCB->setStrategy(usealgo);
 
      // Save SA muon EL into CB muon
-     ElementLink<xAOD::L2StandAloneMuonContainer> muonSAEL(*muonColl, i_muonSA);
+     ElementLink<xAOD::L2StandAloneMuonContainer> muonSAEL(*muonColl, i_muonSA, ctx);
      muonCB->setMuSATrackLink(muonSAEL);
 
      // check muonSA pt != 0
@@ -801,7 +801,7 @@ StatusCode muComb::execute(const EventContext& ctx) const
      }
 
      //Save EL to ID trk into CB muon
-     ElementLink<xAOD::TrackParticleContainer> idtrkEL(*idTrackParticles, matched_trk_idx);
+     ElementLink<xAOD::TrackParticleContainer> idtrkEL(*idTrackParticles, matched_trk_idx, ctx);
      muonCB->setIdTrackLink(idtrkEL);
 
      double pt_id        = muonCB->idTrack()->pt();
