@@ -312,12 +312,9 @@ namespace ActsTrk
           // could use eta of track but not available to the algorithm
 
           ++event_stat.m_nTracksWithoutAssociatedTruthParticle;
+
           if (noise_is_best_match) {
              ret.m_matchProbability = noise_match_prob;
-          }
-          else if (!track_hit_counts.countsPerTruthParticle().empty()) {
-             THROW_EXCEPTION("Failed to select best matching truth particle out of " << track_hit_counts.countsPerTruthParticle().size()
-                           << ". This should not happen." );
           }
        }
        return ret;
