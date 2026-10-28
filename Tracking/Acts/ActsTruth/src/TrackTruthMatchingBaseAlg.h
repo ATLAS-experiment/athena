@@ -156,6 +156,14 @@ namespace ActsTrk
         {this, "CountWeights", std::vector<float>(s_NMeasurementTypes,1.f), 
          "Weights applied to the counts per measurement type for weighted sums"
          " which are used to compute hit efficiencies and purities." };
+      Gaudi::Property<bool> m_truthLinkedFakeRate
+        {this, "TruthLinkedFakeRate", false, "Compute the match probability from the truth-linked measurements only:"
+                                             " measurements without truth particle weigh 1 and cannot be the best match, so a"
+                                             " track made only of them has probability 0. By default the probability is"
+                                             " computed the way the legacy truth matching does (DetailedTrackTruthBuilder,"
+                                             " TruthMatchRatio): measurements without truth particle keep their full weight and"
+                                             " together compete for the best match as one pseudo particle; if it wins, the"
+                                             " probability is their weighted fraction and there is no matching truth particle." };
       Gaudi::Property<std::vector<float>> m_statEtaBins
         {this, "StatisticEtaBins", {-4, -2.6, -2, 0, 2., 2.6, 4}, "Gather statistics separately for these eta bins."};
      Gaudi::Property<std::vector<float>> m_statPtBins

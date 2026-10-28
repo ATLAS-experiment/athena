@@ -220,6 +220,7 @@ def ActsTrackParticleTruthDecorationAlgCfg(flags,
     kwargs.setdefault('TruthParticleHitCounts','TruthParticleHitCounts')
     # weights used for computing the matching probability and identifying the best match
     setDefaultTruthMatchingArgs(kwargs)
+    kwargs.setdefault('TruthLinkedFakeRate', flags.Acts.truthLinkedFakeRate)
     kwargs.setdefault('ComputeTrackRecoEfficiency',False)
 
     if 'TruthSelectionTool' not in kwargs:
@@ -248,6 +249,7 @@ def ActsTrackFindingValidationAlgCfg(flags,
     kwargs.setdefault('TruthParticleHitCounts','TruthParticleHitCounts')
     kwargs.setdefault('TrackToTruthAssociationMap','ActsTracksToTruthParticles')
     setDefaultTruthMatchingArgs(kwargs)
+    kwargs.setdefault('TruthLinkedFakeRate', flags.Acts.truthLinkedFakeRate)
     kwargs.setdefault('ComputeTrackRecoEfficiency',True)
     
     if 'TruthSelectionTool' not in kwargs:
