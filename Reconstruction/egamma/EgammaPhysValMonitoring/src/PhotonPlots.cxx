@@ -17,19 +17,23 @@ PhotonPlots::PhotonPlots(PlotBase* pParent, const std::string& sDir, const std::
 											 m_oShowerShapesAllPlots(this, "All/ShowerShapesPlots/", sParticleType  +" Photon"),
 											 m_oShowerShapesAll10GeVPlots(this, "All/ShowerShapes10GeVPlots/", sParticleType  +" Photon"),
 											 m_oPhotonConversionAllPlots(this, "All/PhotonConversionPlots/", sParticleType  +" Photon"),
+											 m_oIsolationAllPlots(this, "All/IsolationPlots/", "All Reco " + sParticleType + " Photon"),
 											 // truth-matchint "Iso" requirement
 											 m_oKinIsoPlots(this, "Iso/KinPlots/", "Reco " + sParticleType +" Photon"),
 											 m_oShowerShapesIsoPlots(this, "Iso/ShowerShapesPlots/", sParticleType  +" Photon"),
 											 m_oShowerShapesIso10GeVPlots(this, "Iso/ShowerShapes10GeVPlots/", sParticleType  +" Photon"),      
 											 m_oPhotonConversionIsoPlots(this, "Iso/PhotonConversionPlots/", sParticleType  +" Photon"),
+											 m_oIsolationIsoPlots(this, "Iso/IsolationPlots/", "Truth matched Reco " + sParticleType + " Photon"),
 											 m_oKinIsoUncPlots(this, "Iso/KinPlotsUnc/", "Reco " + sParticleType +" Photon"),
 											 m_oKinIsoConvPlots(this, "Iso/KinPlotsConv/", "Reco " + sParticleType +" Photon"),
 											 //
 											 m_oKinIsoLoosePlots(this, "IsoLoose/KinPlots/", "Reco " + sParticleType +" Photon"),
+											 m_oIsolationIsoLoosePlots(this, "IsoLoose/IsolationPlots/", "Truth matched Loose " + sParticleType + " Photon"),
 											 m_oKinIsoLooseUncPlots(this, "IsoLoose/KinPlotsUnc/", "Reco " + sParticleType +" Photon"),
 											 m_oKinIsoLooseConvPlots(this, "IsoLoose/KinPlotsConv/", "Reco " + sParticleType +" Photon"),
 											 //
 											 m_oKinIsoTightPlots(this, "IsoTight/KinPlots/", "Reco " + sParticleType +" Photon"),
+											 m_oIsolationIsoTightPlots(this, "IsoTight/IsolationPlots/", "Truth matched Tight " + sParticleType + " Photon"),
 											 m_oKinIsoTightUncPlots(this, "IsoTight/KinPlotsUnc/", "Reco " + sParticleType +" Photon"),
 											 m_oKinIsoTightConvPlots(this, "IsoTight/KinPlotsConv/", "Reco " + sParticleType +" Photon"),
 											 m_sParticleType(sParticleType),
@@ -45,6 +49,7 @@ void PhotonPlots::initializePlots(){
   void PhotonPlots::fill(const xAOD::Photon& photon, const xAOD::EventInfo& eventInfo, bool isPrompt) {
   m_oKinAllPlots.fill(photon,eventInfo);
   m_oShowerShapesAllPlots.fill(photon,eventInfo);
+  m_oIsolationAllPlots.fill(photon,eventInfo);
   if (photon.pt() > 10 * Gaudi::Units::GeV) {
     m_oShowerShapesAll10GeVPlots.fill(photon,eventInfo);
   }
@@ -53,6 +58,7 @@ void PhotonPlots::initializePlots(){
   if(!isPrompt) return;
 
   m_oKinIsoPlots.fill(photon,eventInfo);
+  m_oIsolationIsoPlots.fill(photon,eventInfo);
   m_oShowerShapesIsoPlots.fill(photon,eventInfo);
   if (photon.pt() > 10 * Gaudi::Units::GeV) {
     m_oShowerShapesIso10GeVPlots.fill(photon,eventInfo);
@@ -67,6 +73,7 @@ void PhotonPlots::initializePlots(){
   photon.passSelection(val_loose, "Loose");
   if(val_loose) {
     m_oKinIsoLoosePlots.fill(photon,eventInfo);
+    m_oIsolationIsoLoosePlots.fill(photon,eventInfo);
     if (!xAOD::EgammaHelpers::isConvertedPhoton(&photon)) m_oKinIsoLooseUncPlots.fill(photon,eventInfo);
     else m_oKinIsoLooseConvPlots.fill(photon,eventInfo);
   }
@@ -76,6 +83,7 @@ void PhotonPlots::initializePlots(){
   photon.passSelection(val_tight, "Tight");
   if(val_tight) {
     m_oKinIsoTightPlots.fill(photon,eventInfo);
+    m_oIsolationIsoTightPlots.fill(photon,eventInfo);
     if (!xAOD::EgammaHelpers::isConvertedPhoton(&photon)) m_oKinIsoTightUncPlots.fill(photon,eventInfo);
     else m_oKinIsoTightConvPlots.fill(photon,eventInfo);
   }  

@@ -25,16 +25,20 @@ class PhotonPlots:public PlotBase {
       Egamma::ShowerShapesPlots       m_oShowerShapesAllPlots;
       Egamma::ShowerShapesPlots       m_oShowerShapesAll10GeVPlots;
       Egamma::PhotonConversionPlots   m_oPhotonConversionAllPlots;
+      Egamma::IsolationPlots          m_oIsolationAllPlots;
       Egamma::KinematicsPlots         m_oKinIsoPlots;
       Egamma::ShowerShapesPlots       m_oShowerShapesIsoPlots;
       Egamma::ShowerShapesPlots       m_oShowerShapesIso10GeVPlots;
       Egamma::PhotonConversionPlots   m_oPhotonConversionIsoPlots;
+      Egamma::IsolationPlots          m_oIsolationIsoPlots;
       Egamma::KinematicsPlots         m_oKinIsoUncPlots;
       Egamma::KinematicsPlots         m_oKinIsoConvPlots;
       Egamma::KinematicsPlots         m_oKinIsoLoosePlots;
+      Egamma::IsolationPlots          m_oIsolationIsoLoosePlots;
       Egamma::KinematicsPlots         m_oKinIsoLooseUncPlots;
       Egamma::KinematicsPlots         m_oKinIsoLooseConvPlots;
       Egamma::KinematicsPlots         m_oKinIsoTightPlots;
+      Egamma::IsolationPlots          m_oIsolationIsoTightPlots;
       Egamma::KinematicsPlots         m_oKinIsoTightUncPlots;
       Egamma::KinematicsPlots         m_oKinIsoTightConvPlots;
       
