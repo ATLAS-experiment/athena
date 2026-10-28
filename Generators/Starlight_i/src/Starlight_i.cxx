@@ -259,7 +259,7 @@ Starlight_i::starlight2lhef()
     lheStream << "-->\n";
     
     lheStream << "<init>\n";
-    lheStream << "  13  -13  "<<m_beam_energy<<"  "<<m_beam_energy<<"  0  0  0  0  3  1\n";
+    lheStream << "  13  -13  "<<m_beam_energy.value()<<"  "<<m_beam_energy.value()<<"  0  0  0  0  3  1\n";
     lheStream << "  1.000000e+00  0.000000e+00  1.000000e+00   9999\n";
     lheStream << "</init>\n";
 
@@ -554,7 +554,7 @@ bool Starlight_i::prepare_params_file()
     configFile << "AXION_MASS = " << m_axionMass << std::endl;
     configFile << "N_EVENTS = " << m_nmbEventsTot << std::endl;
     configFile << "PROD_PID = " << m_prodParticleId << std::endl;
-    configFile << "RND_SEED = " << m_randomSeed << std::endl;
+    configFile << "RND_SEED = " << m_randomSeed.value() << std::endl;
     configFile << "BREAKUP_MODE = " << m_beamBreakupMode << std::endl;
     configFile << "INTERFERENCE = " << m_interferenceEnabled << std::endl;
     configFile << "IF_STRENGTH = " << m_interferenceStrength << std::endl;
