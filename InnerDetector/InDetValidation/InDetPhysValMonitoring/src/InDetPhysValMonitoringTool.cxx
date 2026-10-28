@@ -385,7 +385,7 @@ InDetPhysValMonitoringTool::fillHistograms(const EventContext& ctx) {
       ATH_MSG_DEBUG("Number of vertices retrieved for this event " << vertices->size());
       //Find the HS vertex following the user-configured strategy
       if (m_hardScatterSelectionTool.empty()) {
-        for (const auto& vertex : *vertices){
+        for (const xAOD::Vertex* vertex : *vertices){
           if(vertex->vertexType()==xAOD::VxType::PriVtx){
             primaryvertex = vertex;
             break;
