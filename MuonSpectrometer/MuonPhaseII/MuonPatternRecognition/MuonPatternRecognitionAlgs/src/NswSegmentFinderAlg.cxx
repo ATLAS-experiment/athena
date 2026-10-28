@@ -558,7 +558,7 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
                     }
                      //test if this selection of the hits from the two layers is aligned with the beam spot 
                     const Amg::Vector3D beamSpotHitDir{(beamSpotPos - hit1->localPosition()).unit()};
-                    const Amg::Vector3D seedDir{(hit2->localPosition() - hit1->localPosition()).unit()};                 
+                    const Amg::Vector3D seedDir{(hit2->localPosition() - hit1->localPosition()).unit()};
                     const double cosAngle = beamSpotHitDir.dot(seedDir);
                     //accept the deflection of direction with a tolerance of 1 deg                    
                     if(std::abs(cosAngle) < thetaWindowCut){                        
@@ -585,9 +585,9 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
                     auto extendedHits = extendHits(seedPosZ0, seedDir, extensionLayers, usedExtensionHits);
                     std::ranges::move(extendedHits, std::back_inserter(seedHits));
 
-                    //make seed 
+                    const Amg::Vector3D seedBeamspotDir{(hit2->localPosition() - beamSpotPos).unit()};
                     auto seed = std::make_unique<SegmentSeed>(houghTanBeta(seedDir), seedPosZ0.y(),
-                                                         houghTanAlpha(seedDir), seedPosZ0.x(),
+                                                         houghTanAlpha(seedBeamspotDir), seedPosZ0.x(),
                                                          seedHits.size(), std::move(seedHits),
                                                          max.parentBucket());
             
@@ -846,7 +846,7 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
     //Start from outermost sTgc layers with combined 2D measurements
     ATH_MSG_VERBOSE("Start building seed from sTgc outermost layers");
     processSeedsAndSegments(buildSegmentsFromSTGC(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, false), "sTgc segment seeds");    
-
+    
     //continue with the combinatorial seeding for the strip measurements
     if(m_doOnlyMMCombinatorics){
 
@@ -858,7 +858,6 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
         ATH_MSG_VERBOSE("Start building combinatoric seeds from Micromegas and sTgc hits");
         processSeedsAndSegments(buildSegmentsFromMM(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, true), "MM combinatoric segment seeds");
         processSeedsAndSegments(buildSegmentsFromMM(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, false), "MM and STGC combinatoric segment seeds");
-
         processSeedsAndSegments(buildSegmentsFromSTGC(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, true), "sTgc segment seeds using strip+pads");    
 
     }   
