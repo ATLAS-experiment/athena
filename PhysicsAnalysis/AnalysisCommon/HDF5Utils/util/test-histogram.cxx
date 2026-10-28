@@ -299,6 +299,19 @@ void run_tests() {
       {"low","high"}};
     h5h::write_hist_to_group(out_file, h, "err3", lbl);
   }, "non-empty labels for continuous axis in list");
+
+  // Test 4 — case 6: AxisOverrideMap key with no matching axis
+  expect_throw([&]{
+    using cat_ax = bh::axis::category<int>;
+    auto h = bh::make_histogram(cat_ax({0,1}, "flavor"));
+    std::unordered_map<std::string,
+                       std::vector<std::string>> m{
+      {"flavor",  {"a","b"}},
+      {"flavr",   {"c","d"}},
+      {"flavor2", {"e","f"}}
+    };
+    h5h::write_hist_to_group(out_file, h, "err4", m);
+  }, "AxisOverrideMap key with no matching axis");
 }
 
 int main(int, char*[]) {

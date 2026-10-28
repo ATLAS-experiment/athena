@@ -175,11 +175,13 @@ namespace H5Utils::hist::detail {
 
   // String-keyed map of per-axis label overrides.
   // at(axis_name) returns the label info; find/end used for existence
-  // check.
+  // check; begin/end used to validate every key was matched.
   template<typename M>
   concept AxisOverrideMap = requires(const M& m) {
     m.at(std::declval<const std::string&>());
     m.find(std::declval<const std::string&>()) != m.end();
+    m.begin();
+    m.end();
   };
 
   // General axis override match
@@ -347,10 +349,15 @@ namespace H5Utils::hist::detail {
   std::vector<Axis> get_axes(const Hist& hist, const Labels& labels)
   {
     std::vector<Axis> axes;
+    std::set<std::string> remaining_keys;
+    for (const auto& [key, val] : labels) {
+      remaining_keys.insert(key);
+    }
     hist.for_each_axis([&](const auto& bh_ax) {
       const std::string& name = get_axis_name(bh_ax.metadata());
       auto it = labels.find(name);
       if (it != labels.end()) {
+        remaining_keys.erase(name);
         if constexpr (ContinuousAxis<std::decay_t<decltype(bh_ax)>>) {
           throw std::invalid_argument(std::format(
             "axis '{}' is continuous (regular/variable) and cannot "
@@ -366,6 +373,16 @@ namespace H5Utils::hist::detail {
         axes.push_back(read_one_axis(bh_ax, bh_ax.metadata()));
       }
     });
+    if (!remaining_keys.empty()) {
+      std::string key_list;
+      for (const auto& key : remaining_keys) {
+        if (!key_list.empty()) key_list += ", ";
+        key_list += key;
+      }
+      throw std::invalid_argument(std::format(
+        "label map key(s) do not match any axis in the histogram: "
+        "{}", key_list));
+    }
     return axes;
   }
 
@@ -478,29 +495,26 @@ namespace H5Utils::hist::detail {
   }
 }
 
-namespace H5Utils::hist {
+// main hist writing function, this should be all anyone needs to
+// call
+template <typename T>
+void H5Utils::hist::detail::write_hist_to_group_fn::operator()(
+  H5::Group& parent_group,
+  const T& hist,
+  const std::string& name) const
+{
+  write_hist_impl(
+    parent_group, hist, name, get_axes(hist));
+}
 
-  // main hist writing function, this should be all anyone needs to
-  // call
-  template <typename T>
-  void write_hist_to_group(
-    H5::Group& parent_group,
-    const T& hist,
-    const std::string& name)
-  {
-    detail::write_hist_impl(
-      parent_group, hist, name, detail::get_axes(hist));
-  }
-
-  // Overload with external label override (positional list or name map).
-  template <typename T, detail::AxisOverrides Labels>
-  void write_hist_to_group(
-    H5::Group& parent_group,
-    const T& hist,
-    const std::string& name,
-    const Labels& labels)
-  {
-    detail::write_hist_impl(
-      parent_group, hist, name, detail::get_axes(hist, labels));
-  }
+// Overload with external label override (positional list or name map).
+template <typename T, typename Labels>
+void H5Utils::hist::detail::write_hist_to_group_fn::operator()(
+  H5::Group& parent_group,
+  const T& hist,
+  const std::string& name,
+  const Labels& labels) const
+{
+  write_hist_impl(
+    parent_group, hist, name, get_axes(hist, labels));
 }
