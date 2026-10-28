@@ -62,8 +62,9 @@ protected:
       std::unique_ptr<upcXEvent>  // upcEvent or upcXEvent depending on the process
   >                m_event{};
 
-  // beam energy dropped to LHE file (symmetrical beams only)
-  DoubleProperty m_beam_energy{this,"beamEnergy", 2.51e+03};
+  // beam energy dropped to LHE file (GeV)
+  DoubleProperty m_beam1_energy{this,"beam1Energy", 2.51e+03};
+  DoubleProperty m_beam2_energy{this,"beam2Energy", 2.51e+03};
 
   unsigned int m_beam1Z{0};
   unsigned int m_beam1A{0};

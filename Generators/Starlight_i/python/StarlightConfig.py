@@ -46,18 +46,20 @@ def StarlightBaseCfg(flags, name="Starlight_i", safety=1., **kwargs):
     # to lhe file, else events are generated one by one and `maxevents` is not utilised
     kwargs.setdefault("maxevents", _get_nevents(flags, safety))
 
-    kwargs.setdefault("beamEnergy", flags.Beam.Energy/GeV)
+    kwargs.setdefault("beam1Energy", flags.Beam.Energy/GeV)
+    kwargs.setdefault("beam2Energy", flags.Beam.Energy/GeV)
 
     # Gamma calculation for Pb208
     # Gamma = E(Pb208) / (m(Pb208) in a.u. * atomic mass unit in GeV)
-    gamma = 208*flags.Beam.Energy/GeV / (207.9766359 * 0.931494)
+    gamma1 = 208 * kwargs['beam1Energy'] / (207.9766359 * 0.931494)
+    gamma2 = 208 * kwargs['beam2Energy'] / (207.9766359 * 0.931494)
 
     # Basic initialize parameters
     base_init = [
         "beam1Z 82", "beam1A 208", #Z,A of projectile 
         "beam2Z 82", "beam2A 208", #Z,A of target
-        f"beam1Gamma {int(gamma)}",
-        f"beam2Gamma {int(gamma)}",
+        f"beam1Gamma {int(gamma1)}",
+        f"beam2Gamma {int(gamma2)}",
         "maxW -1", #Max value of w
         "minW -1", #Min value of w
         "nmbWBins 400", #Bins n w
