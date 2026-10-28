@@ -59,7 +59,7 @@ StatusCode MuSAVtxJPsiValidationAlg::initialize() {
     ATH_CHECK(m_matchTool.retrieve(DisableTool{m_triggerChains.empty()}));
 
     for(const std::string& chain : m_triggerChains) {
-      m_trigDecorKeys.emplace_back(m_JPsiVertexContainer, std::format("muonsMathced_{:}", chain));
+      m_trigDecorKeys.emplace_back(m_JPsiVertexContainer, std::format("muonsMatched_{:}", chain));
     }
     ATH_CHECK(m_trigDecorKeys.initialize());
 
@@ -70,7 +70,7 @@ StatusCode MuSAVtxJPsiValidationAlg::initialize() {
 
 StatusCode MuSAVtxJPsiValidationAlg::execute(const EventContext& ctx) {
     
-
+  ATH_MSG_DEBUG("Executing MuSAVtxJPsiValidationAlg for event");
   SG::ReadHandle<xAOD::MuonContainer> muonContainer(m_muonContainer, ctx);
   ATH_CHECK(muonContainer.isValid());
 
@@ -103,6 +103,7 @@ StatusCode MuSAVtxJPsiValidationAlg::execute(const EventContext& ctx) {
   std::vector<SG::WriteDecorHandle<xAOD::VertexContainer, char>> decors;
   decors.reserve(m_trigDecorKeys.size());
   for (const auto& key : m_trigDecorKeys){
+    ATH_MSG_DEBUG("Creating WriteDecorHandle for key: " << key.key());
     decors.emplace_back(key, ctx);
   }
   
