@@ -3,8 +3,8 @@
 */
 
 #include "PathResolver/PathResolver.h"
-#include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 #include "xAODBTaggingEfficiency/BTaggingLargeREfficiencyJsonTool.h"
+#include <functional>
 #include <fstream>
 
 BTaggingLargeREfficiencyJsonTool::BTaggingLargeREfficiencyJsonTool ( const std::string &name ) :
@@ -22,7 +22,7 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
 { 
   if (m_minPt > 0.){ 
     // Convert MeV cut to GeV as in the JSON files numbers are in GeV 
-    m_minPt = m_minPt * BTaggingToolUtil::MeVToGeV; 
+    m_minPt = BTaggingToolUtil::MeVToGeV( m_minPt ); 
   }
 
   // Retrieve selection tool 
@@ -131,6 +131,10 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
     return StatusCode::FAILURE;
   }
 
+  // Getter of the jet quantities used by the handlers to check if the jet falls into their bounds
+  const BTaggingBoundsHandler::JetQuantityGetter funcGetJetQuantity =
+    std::bind_front(&BTaggingLargeREfficiencyJsonTool::getJetQuantity, this);
+
   if (json_config_OP.contains("mc_mc")) {
     // Get the MC-MC json configuration related config
     const auto &json_config_OPMCMC = json_config_OP["mc_mc"];
@@ -139,22 +143,11 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
       ATH_MSG_ERROR("JSON contains mc-to-mc corrections but no 'labelMappingMCMC'.");
       return StatusCode::FAILURE;
     }
-    if (!json_config_OPMCMC.contains("binsVariables")) {
-      ATH_MSG_ERROR("No binning variables defined for mc-to-mc corrections in JSON.");
-      return StatusCode::FAILURE;
-    }
     if (!json_config_OPMCMC.contains("corrections")){
       ATH_MSG_ERROR("No mc-to-mc corrections in JSON.");
       return StatusCode::FAILURE;
     }
 
-    const auto &varNames = json_config_OPMCMC["binsVariables"].get<std::vector<std::string>>();
-    std::vector<varType> vTypes;
-    vTypes.reserve(varNames.size());
-    for (const auto& name : varNames) {
-      const varType vType = getVariableType(name);
-      vTypes.push_back(vType);
-    }
     if (!m_mcGenerator.value().empty()) {
       // JSON file contains mc-to-mc corrections and user provided the mc generator
       // Hence retrieving relevant MC-MC information from the JSON file
@@ -181,13 +174,13 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
             ATH_MSG_ERROR("No mc-to-mc corrections for generator '" << m_mcGenerator.value() << "' and label " << labelStringMCMC);
             return StatusCode::FAILURE;
           }
-          
+
           for (const auto& entry : mcmcAtLabel[m_mcGenerator.value()]) {
             try {
-              m_mcmcHandlers[labelStringMCMC].push_back(MCMCHandler(entry, vTypes));
+              m_mcmcHandlers[labelStringMCMC].push_back(LargeRMCMCHandler(entry, funcGetJetQuantity));
               // // Useful for debugging
               // // Get the latest handler that was just added 
-              // const MCMCHandler &handler = m_mcmcHandlers[labelStringMCMC][ m_mcmcHandlers[labelStringMCMC].size() -1 ];
+              // const LargeRMCMCHandler &handler = m_mcmcHandlers[labelStringMCMC][ m_mcmcHandlers[labelStringMCMC].size() -1 ];
               // // Then print its content 
               // std::cout << "labelStringMCMC=" << labelStringMCMC << ": " << handler.to_string() << std::endl;
             } catch (const std::exception& e) {
@@ -213,7 +206,7 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
 
   // Now check there is no overlapping bins for MCMChandlers
   try {
-    BoundsHandler::checkOverlaps("mc-to-mc corrections of generator '" + m_mcGenerator.value() + "'", m_mcmcHandlers);
+    BTaggingBoundsHandler::checkOverlaps("mc-to-mc corrections of generator '" + m_mcGenerator.value() + "'", m_mcmcHandlers);
   } catch (const std::exception& e) {
     ATH_MSG_ERROR(e.what());
     return StatusCode::FAILURE;
@@ -324,7 +317,7 @@ CP::CorrectionCode BTaggingLargeREfficiencyJsonTool::getMCToMCCorr( const xAOD::
 
   // Loop over all MC-MC handlers and find the one where the jet if falling into
   for (const auto& handler : handlerIt->second) {
-    if (handler.isJetWithinBounds(jet, *this)) {
+    if (handler.isJetWithinBounds(jet)) {
       // // Useful for debugging
       // // Print jet truth label pT mass and eta and the corresponding handler
       // std::cout << "jet(label=" << label 
@@ -357,20 +350,20 @@ float BTaggingLargeREfficiencyJsonTool::getJetMassInGeV(const xAOD::Jet& jet) co
 {   
     // Convert mass from MeV to GeV 
     if (!m_massAcc) {
-      return jet.m() * BTaggingToolUtil::MeVToGeV;
+      return BTaggingToolUtil::MeVToGeV( jet.m() );
     }
     if (!m_massAcc->isAvailable(jet)) {
         ATH_MSG_ERROR("Decorated mass '" << SG::AuxTypeRegistry::instance().getName( m_massAcc->auxid() ) << "' not available on jet. Cannot proceed.");
         throw std::runtime_error("Decorated mass not available on jet.");
     }
-    return (*m_massAcc)(jet) * BTaggingToolUtil::MeVToGeV;
+    return BTaggingToolUtil::MeVToGeV( (*m_massAcc)(jet) );
 }
 
 float BTaggingLargeREfficiencyJsonTool::getJetPtInGeV( const xAOD::Jet& jet ) const
 { 
   // Convert pT from MeV to GeV 
   if (!m_ptAcc) {
-    return jet.pt() * BTaggingToolUtil::MeVToGeV;
+    return BTaggingToolUtil::MeVToGeV( jet.pt() );
   }
 
   if (!m_ptAcc->isAvailable(jet)) {
@@ -378,107 +371,44 @@ float BTaggingLargeREfficiencyJsonTool::getJetPtInGeV( const xAOD::Jet& jet ) co
     throw std::runtime_error("Decorated pT not available on jet.");
   }
 
-  return (*m_ptAcc)(jet) * BTaggingToolUtil::MeVToGeV;
+  return BTaggingToolUtil::MeVToGeV( (*m_ptAcc)(jet) );
 }
 
-float BTaggingLargeREfficiencyJsonTool::getJetQuantity(const xAOD::Jet& jet, varType vType) const {
-  if (vType == varType::pT) { 
+float BTaggingLargeREfficiencyJsonTool::getJetQuantity(const xAOD::Jet& jet, const BTaggingToolUtil::varType vType) const {
+  if (vType == BTaggingToolUtil::varType::pT) { 
     return getJetPtInGeV(jet); 
-  } else if (vType == varType::mass) {
+  } else if (vType == BTaggingToolUtil::varType::mass) {
     return getJetMassInGeV(jet);
-  }  else if (vType == varType::eta) {
+  }  else if (vType == BTaggingToolUtil::varType::eta) {
     return jet.eta();
-  } else if (vType == varType::abseta) {
+  } else if (vType == BTaggingToolUtil::varType::abseta) {
     return std::abs(jet.eta());
   } else { 
-    ATH_MSG_ERROR("Unsupported jet variable quantity requested: '" << getVariableName(vType) << "'");
-    throw std::runtime_error("BTaggingLargeREfficiencyJsonTool::getJetQuantity unsupported jet variable: '" + getVariableName(vType) + "'");
+    ATH_MSG_ERROR("Unsupported jet variable quantity requested: '" << BTaggingToolUtil::getVariableName(vType) << "'");
+    throw std::runtime_error("BTaggingLargeREfficiencyJsonTool::getJetQuantity unsupported jet variable: '" + BTaggingToolUtil::getVariableName(vType) + "'");
   }
 }
 
-// Two half-open intervals [low, high) overlap if each one starts before the other ends.
-// Touching edges (upper = other lower) are not considered overlapping.
-bool BTaggingLargeREfficiencyJsonTool::BoundsHandler::varBounds::overlaps(const varBounds& o) const {
-  const bool endsBeforeOther = upperBound < o.lowerBound || approxEqual(upperBound, o.lowerBound, varEps);
-  const bool otherEndsBefore = o.upperBound < lowerBound || approxEqual(o.upperBound, lowerBound, varEps);
-  return !endsBeforeOther && !otherEndsBefore;
-}
-bool BTaggingLargeREfficiencyJsonTool::BoundsHandler::varBounds::operator<(const varBounds& o) const {
-  if (!approxEqual(lowerBound, o.lowerBound, varEps)) return lowerBound < o.lowerBound;
-  if (!approxEqual(upperBound, o.upperBound, varEps)) return upperBound < o.upperBound;
-  // Both upper and lower bounds are equal within tolerance
-  return false;
-}
-// Define an ordering of varBounds compare first lowerBound then upperBound
-// within tolerance
-bool BTaggingLargeREfficiencyJsonTool::BoundsHandler::varBounds::operator==(const varBounds& o) const {
-  return approxEqual(lowerBound, o.lowerBound, varEps) && approxEqual(upperBound, o.upperBound, varEps);
-}
-
-BTaggingLargeREfficiencyJsonTool::BoundsHandler::BoundsHandler(
-    const json& jsonConfig, const std::vector<varType>& vTypes, const size_t nExtraValues)
-{
-  // Make sure the vector of variable provided is not empty
-  if (vTypes.empty()){
-    throw std::runtime_error(
-      "empty list of bin variables");
-  }
-
-  // The entry should be a list starting with one [low, high] range per variable in varNames
-  // followed by nExtraValues values handled by the child class
-  // NB: it's possible to pass all additional information with only one extra value 
-  // that is itself a JSON list and can hold several fields e.g. the SF and its uncertainty.
-  // varNames={"pT", "mass"}, nExtraValues=1 and entry = [[250, 500], [50, 100], {"SF": 0.9, "SF_uncert_1": 0.1, "SF_uncert_2": 0.03}]
-  if (!jsonConfig.is_array() || jsonConfig.size() != vTypes.size() + nExtraValues) {
-    throw std::runtime_error(
-      "Bin config must contain " + std::to_string(vTypes.size()) +
-      " [low, high] ranges followed by " + std::to_string(nExtraValues) + " value(s): jsonConfig=" + jsonConfig.dump());
-  }
-
-  // Loop over variables and retrieve corresponding min and max values
-  for (size_t v = 0; v < vTypes.size(); ++v) {
-    const auto& range = jsonConfig[v];
-    if (!range.is_array() || range.size() != 2) {
-      throw std::runtime_error(
-        "Bin range for variable '" + getVariableName(vTypes[v]) + "' must be [low, high]");
-    }
-    varBounds vBounds;
-    vBounds.lowerBound = BTaggingToolUtil::getExtendedFloat(range[0]);
-    vBounds.upperBound = BTaggingToolUtil::getExtendedFloat(range[1]);
-
-    // Make sure that lowerBounds and upperBounds are not NaNs 
-    if (!std::isfinite(vBounds.lowerBound)){ 
-      throw std::runtime_error("Bin issue lower bound is not a finite number for jsonConfig=" + jsonConfig.dump());
-    }
-    if (!std::isfinite(vBounds.upperBound)){
-      throw std::runtime_error("Bin issue upper bound is not a finite number for jsonConfig=" + jsonConfig.dump());
-    }
-
-    // Let's make sure that lowerBound < upperBound
-    if (vBounds.lowerBound >= vBounds.upperBound){
-      throw std::runtime_error(
-        "Bin issue, the min value >= max value for varName='" + getVariableName(vTypes[v]) + "': min=" + std::to_string(vBounds.lowerBound)+ ", max=" + std::to_string(vBounds.upperBound) + " for jsonConfig=" + jsonConfig.dump());
-    }
-
-    // Finally add the varBounds to the map of variable bounds
-    m_varBinBounds[vTypes[v]] = vBounds;
-  }
-}
-
-BTaggingLargeREfficiencyJsonTool::MCMCHandler::MCMCHandler(
-    const json& jsonConfig, const std::vector<varType>& vTypes)
-  // The bounds are loaded by the parent class, the json config should have one extra entry and should contain the MC-MC SF
-  // e.g. jsonConfig = [[250, 500], [50, 100], {"SF": 0.9}] for varNames={"pT", "mass"}
-  : BoundsHandler(jsonConfig, vTypes)
+BTaggingLargeREfficiencyJsonTool::LargeRMCMCHandler::LargeRMCMCHandler(
+    const json& jsonConfig, JetQuantityGetter funcGetJetQuantity)
+  // The bounds are loaded by the parent class, the json config should have an entry called content that should contain the MC-MC SF
+  // e.g. jsonConfig = { "binVariables": {"pT": [250, 300 ] , "mass": [50 , 75]}, "content":  {"SF": 0.9, uncerts:{ "SF_uncert_1": 0.1, "SF_uncert_2": 0.03}} }
+  : BTaggingBoundsHandler(jsonConfig, funcGetJetQuantity)
 { 
-  // Get last entry 
-  const auto & mcmcEntry = jsonConfig.back(); 
-  // The last entry should be a JSON with the SF 
-  if (!mcmcEntry.is_object()) {
-    throw std::runtime_error("mc-to-mc last entry in jsonConfig is not an object for jsonConfig=" + mcmcEntry.dump());
+
+  // Check that the jsonConfig contains the entry "content" 
+  if (!jsonConfig.contains("content")){
+    throw std::runtime_error("mc-to-mc jsonConfig does not contains the entry content for jsonConfig=" + jsonConfig.dump());
   }
 
-  // Check if the last entry contains the SF and that's a number 
+  // Get the entry 
+  const auto & mcmcEntry = jsonConfig["content"]; 
+  // The last entry should be an object that contains the MC-MC SF 
+  if (!mcmcEntry.is_object()) {
+    throw std::runtime_error("mc-to-mc the mcmcEntry=" + mcmcEntry.dump() + " in jsonConfig is not an object for jsonConfig=" + jsonConfig.dump());
+  }
+
+  // Check if mcmcEntry contains the SF and that's a number 
   if (!mcmcEntry.contains("SF") || !mcmcEntry["SF"].is_number()){
      throw std::runtime_error("mc-to-mc mcmcEntry is not containing a scale factor for jsonConfig=" + jsonConfig.dump());
   }
@@ -487,130 +417,16 @@ BTaggingLargeREfficiencyJsonTool::MCMCHandler::MCMCHandler(
   m_MCMCSF = mcmcEntry["SF"].get<float>();
 }
 
-bool BTaggingLargeREfficiencyJsonTool::BoundsHandler::isJetWithinBounds(
-    const xAOD::Jet& jet, const BTaggingLargeREfficiencyJsonTool& tool) const
-{
-  // Loop over all variables e.g. pT, eta etc
-  for (const auto& [vType, bounds] : m_varBinBounds) {
-    // For each variable get the corresponding jet value
-    // e.g. get the jet pT if the variable is pT
-    const float value = tool.getJetQuantity(jet, vType);
-    // Check if the jet value is within the lower and upper bound defined for the bin
-    // e.g. check if jet pT is within pTmin and pTmax
-    // If not within those bounds then the jet is not falling in the bin
-    // thus return false
-    if (value < bounds.lowerBound || value >= bounds.upperBound) {
-      return false;
-    }
-  }
-  // If reaching this point it means the jet is falling into the bin
-  // Hence returning true
-  return true;
-}
-
-BTaggingLargeREfficiencyJsonTool::varType BTaggingLargeREfficiencyJsonTool::getVariableType(const std::string& varName)
-{
-  if (varName == "pT") {
-    return varType::pT;
-  } else if (varName == "mass") {
-    return varType::mass;
-  } else if (varName == "eta") {
-    return varType::eta;
-  } else if (varName == "abseta") {
-    return varType::abseta;
-  } else {
-    throw std::runtime_error("Variable '" + varName + "' not defined in BTaggingLargeREfficiencyJsonTool.");
-    return varType::unknown;
-  }
-}
-
-std::string BTaggingLargeREfficiencyJsonTool::getVariableName(varType vType)
-{
-  if (vType == varType::pT) {
-    return "pT";
-  } else if (vType == varType::mass) {
-    return "mass";
-  } else if (vType == varType::eta) {
-    return "eta";
-  } else if (vType == varType::abseta) {
-    return "abseta";
-  } else {
-    throw std::runtime_error("Variable type " + std::to_string(static_cast<int>(vType)) + " not defined in BTaggingLargeREfficiencyJsonTool.");
-    return "unknown";
-  }
-}
-
-std::ostream& operator<<(std::ostream& os, const BTaggingLargeREfficiencyJsonTool::BoundsHandler& handler){
-  // Add the list of variables with lower and upper bounds
-  // e.g. "pT: [250, 500], mass: [50, 100]"
-  // The separator ", " is only added between entries, not after the last one
-  bool first = true;
-  for (const auto& [vType, bounds] : handler.m_varBinBounds) {
-    if (!first) os << ", ";
-    first = false;
-    os << BTaggingLargeREfficiencyJsonTool::getVariableName(vType) << ": [" << bounds.lowerBound << ", " << bounds.upperBound << "]";
-  }
-  return os;
-}
-
-std::ostream& operator<<(std::ostream& os, const BTaggingLargeREfficiencyJsonTool::MCMCHandler& handler){
+std::ostream& operator<<(std::ostream& os, const BTaggingLargeREfficiencyJsonTool::LargeRMCMCHandler& handler){
   // Return
-  // MCMCHandler(var1: [minVar1, maxVar1], var2: [minVar2, maxVar2], ... , SF: sfValue)
-  // e.g. MCMCHandler(pT: [250, 500], abseta[0., 2.0], SF: 0.9)
-  os << "MCMCHandler(";
+  // LargeRMCMCHandler(var1: [minVar1, maxVar1], var2: [minVar2, maxVar2], ... , SF: sfValue)
+  // e.g. LargeRMCMCHandler(pT: [250, 500], abseta[0., 2.0], SF: 0.9)
+  os << "LargeRMCMCHandler(";
   // Add the list of variables with lower and upper bounds
-  os << dynamic_cast<const BTaggingLargeREfficiencyJsonTool::BoundsHandler&>(handler);
+  os << dynamic_cast<const BTaggingBoundsHandler&>(handler);
   // Finally add the MC-MC SF value
   os << ", SF: " << handler.m_MCMCSF << ")";
   return os;
-}
-
-bool BTaggingLargeREfficiencyJsonTool::BoundsHandler::operator<(const BoundsHandler& o) const {
-  // Ordering of handlers loop over variables as stored in the map
-  // and let the first variable whose bounds differ decide of the ordering
-
-  // Make sure maps have the same size
-  if (m_varBinBounds.size() != o.m_varBinBounds.size()) {
-    throw std::logic_error("Cannot compare handlers with a different number of variables");
-  }
-  // Loop over the different variables bounds and compare
-  for (const auto& [vType, vBounds1] : m_varBinBounds) {
-    // Make sure the other handler has the same variable
-    const auto it = o.m_varBinBounds.find(vType);
-    if (it == o.m_varBinBounds.end()) {
-      throw std::logic_error("Cannot compare handlers: variable '" + getVariableName(vType) +
-                             "' missing in the other handler");
-    }
-    const varBounds& vBounds2 = it->second;
-    // First variable whose bounds differ decides the ordering
-    if (!(vBounds1 == vBounds2)) return vBounds1 < vBounds2;
-  }
-  return false;  // all bounds equal
-}
-
-bool BTaggingLargeREfficiencyJsonTool::BoundsHandler::overlaps(const BoundsHandler& o) const {
-  // Two handlers that are N-dimensional bins overlap if
-  // for every variable their bounds overlap
-  // If for one variable there is no overlapping bounds then the bins are not overlapping
-
-  // Make sure maps have the same size
-  if (m_varBinBounds.size() != o.m_varBinBounds.size()) {
-    throw std::logic_error("Cannot check overlap of handlers with a different number of variables");
-  }
-  // Loop over the different variables bounds and check the overlap
-  for (const auto& [vType, vBounds1] : m_varBinBounds) {
-    // Make sure the other handler has the same variable
-    const auto it = o.m_varBinBounds.find(vType);
-    if (it == o.m_varBinBounds.end()) {
-      throw std::logic_error("Cannot check overlap of handlers: variable '" + getVariableName(vType) +
-                             "' missing in the other handler");
-    }
-    // If bounds do not overlap for one variable then bins do not overlap
-    if (!vBounds1.overlaps(it->second)) return false;
-  }
-  // Bounds overlap for all variables
-  // so handlers have some overlap
-  return true;  
 }
 
 StatusCode BTaggingLargeREfficiencyJsonTool::calcSystematicVariation(const CP::SystematicSet& systConfig, sysData& sys) const
