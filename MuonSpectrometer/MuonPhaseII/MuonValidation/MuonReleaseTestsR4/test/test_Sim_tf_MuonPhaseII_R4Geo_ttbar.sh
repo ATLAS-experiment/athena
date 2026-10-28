@@ -20,14 +20,13 @@ export ATHENA_PROC_NUMBER=8
 export ATHENA_CORE_NUMBER=8
 
 
-export IN_FILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(\",\".join(defaultTestFiles.EVNT)")
+export IN_FILE=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(\",\".join(defaultTestFiles.EVNT))")
 NEVENTS=${1}
 if [ ${NEVENTS} -eq 0 ]; then
    NEVENTS=100
 fi
 
 Sim_tf.py \
-      --CA True \
       --multithreaded True \
       --geometrySQLite True \
       --geometrySQLiteFullPath "${GEOMODEL_DB_FILE}" \
