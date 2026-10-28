@@ -38,7 +38,7 @@ class eflowTrackCaloPoints {
   eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, const Trk::TrackParameters*> & trackParameters,
   std::map<CaloCell_ID::CaloSample,const Trk::TrackParameters*>& tileTrackParamaters);
   //Constructor when using Acts data structures  
-  eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, const Acts::BoundTrackParameters&> & trackParameters, const Acts::GeometryContext& gctx);
+  eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, const Acts::BoundTrackParameters*> & trackParameters, const Acts::GeometryContext& gctx);
 
   eflowTrackCaloPoints() : m_isEM1Barrel(false), m_isEM2Barrel(false)  {}
   ~eflowTrackCaloPoints();
@@ -72,7 +72,7 @@ class eflowTrackCaloPoints {
   void copyEtaPhi(eflowCalo::LAYER fromLay, eflowCalo::LAYER toLay);
 
   static Amg::Vector3D parToPosition(const Trk::TrackParameters* extrapolatedParameters);
-  static Amg::Vector3D parToPosition(const Acts::BoundTrackParameters& extrapolatedParameters, const Acts::GeometryContext& gctx);
+  static Amg::Vector3D parToPosition(const Acts::BoundTrackParameters* extrapolatedParameters, const Acts::GeometryContext& gctx);
 
   bool m_isEM1Barrel;
   bool m_isEM2Barrel;

@@ -6,8 +6,10 @@
 #include "eflowTrackExtrapolatorBaseAlgTool.h"
 
 #include "ActsEvent/ContextUtility.h"
+#include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "CaloGeoHelpers/CaloSampling.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
 
@@ -34,8 +36,8 @@ private:
 
     SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_extensionReadDecorKey{this, "ExtensionDecoration", "InDetTrackParticles.caloExtensionLink"};
 
-    //Map each identifier volume and layer pair onto a calorimeter sampling layer.
-    std::map<std::pair<std::size_t, std::size_t>, std::string> m_caloVolumeLayerMap;
+    //Map geometry identifier to calo sampling layer enum
+    std::map<Acts::GeometryIdentifier, CaloSampling::CaloSample> m_geoIdCaloSampleMap;
 
 };
 #endif
