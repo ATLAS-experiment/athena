@@ -281,55 +281,10 @@
 
     "TAGGER": {
         
-        "GN2v01": {
-            "_comment": "pb, pc, pu and ptau",
-            "title": "GN2v01",
-            "xtitle": "GN2v01 px",
-            "ytitle": "Jets",
-            "path":  {"ART": "bTagging", "PHYSVAL": "tagger"},
-            "xbins": 100,
-            "xmin": 0,
-            "xmax": 1,
-            "forEach": ["pb", "pc", "pu", "ptau"],
-            "forEachTruthType": ["U", "B", "C", "TAU", "DATA"],
-            "type": "TH1D",
-            "forData": "true"
-        },
-
-        "GN2HLv01": {
-            "_comment": "pb, pc, pu and ptau",
-            "title": "GN2HLv01",
-            "xtitle": "GN2HLv01 px",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "tagger"},
-            "xbins": 100,
-            "xmin": 0,
-            "xmax": 1,
-            "forEach": ["pb", "pc", "pu", "ptau"],
-            "forEachTruthType": ["U", "B", "C", "TAU", "DATA"],
-            "type": "TH1D",
-            "forData": "true"
-        },
-
-        "GN3EPCLV01": {
-            "_comment": "pb, pc, pu and ptau",
-            "title": "GN3EPCLV01",
-            "xtitle": "GN3EPCLV01 px",
-            "ytitle": "Jets",
-            "path":  {"PHYSVAL": "tagger"},
-            "xbins": 100,
-            "xmin": 0,
-            "xmax": 1,
-            "forEach": ["pb", "pc", "pu", "ptau"],
-            "forEachTruthType": ["U", "B", "C", "TAU", "DATA"],
-            "type": "TH1D",
-            "forData": "true"
-        },
-
-        "GN3V03": {
-            "_comment": "pb, pc, pu and ptau",
-            "title": "GN3V03",
-            "xtitle": "GN3V03 px",
+        "probability": {
+            "_comment": "pb, pc, pu and ptau of every small-R tagger",
+            "title": "probability",
+            "xtitle": "probability",
             "ytitle": "Jets",
             "path":  {"PHYSVAL": "tagger"},
             "xbins": 100,

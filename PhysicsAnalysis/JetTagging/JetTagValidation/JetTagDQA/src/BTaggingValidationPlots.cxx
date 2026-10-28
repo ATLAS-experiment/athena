@@ -693,7 +693,8 @@ namespace JetTagDQA{
     // tagger
     for (SmallRTagger& tagger : m_smallRTaggers) {
       for (const std::string& output : smallROutputs) {
-        tagger.probabilities[output] = bookHistogram(tagger.label + "_" + output, tagger.label + "_" + output, m_sParticleType);
+        tagger.probabilities[output] =
+          bookHistogram(tagger.label + "_" + output, "probability_" + output, m_sParticleType, tagger.label);
       }
     }
 
