@@ -33,6 +33,7 @@ def getLumicalcDict():
 
     # 2024
     GRLDict['GRL2024'] = ['GoodRunsLists/data24_13p6TeV/20260127/ilumicalc_histograms_None_473235-486706_OflLumi-Run3-008.root']
+    GRLDict['GRL2024_prompt'] = ['GoodRunsLists/data24_13p6TeV/20241118/ilumicalc_histograms_None_473235-486706_OflLumi-Run3-005.root']
 
     # 2023
     GRLDict['GRL2023'] = ['GoodRunsLists/data23_13p6TeV/20250321/ilumicalc_histograms_None_451587-456749_OflLumi-Run3-004.root']
@@ -75,6 +76,7 @@ def getActualMuDict():
 
     # 2024
     GRLDict['GRL2024'] = ['GoodRunsLists/data24_13p6TeV/20260127/purw.actualMu.root']
+    GRLDict['GRL2024_prompt'] = ['GoodRunsLists/data24_13p6TeV/20241118/purw.actualMu.root']
 
     # 2023
     GRLDict['GRL2023'] = ['GoodRunsLists/data23_13p6TeV/20250321/purw.actualMu.root']
