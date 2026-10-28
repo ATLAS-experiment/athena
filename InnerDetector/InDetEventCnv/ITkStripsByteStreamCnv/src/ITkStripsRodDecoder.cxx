@@ -149,21 +149,6 @@ StatusCode ITkStripsRodDecoder::fillCollection(const OFFLINE_FRAGMENTS_NAMESPACE
     }
   }
 
-  // Create the last RDO of the last link of the event
-  if (data.isStripValid()) {
-     if (not data.isSaved()) {
-        ATH_MSG_DEBUG("Strip is not saved");
-        const int rdoMade{makeRDO(data, cache, dataItemsPool)};
-        if (rdoMade == -1) {
-           sc = StatusCode::RECOVERABLE;
-           ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
-        }
-        else {
-           data.setSaved(rdoMade);
-        }
-     }
-  }
-
   for (auto& [hash, rdoColl] : data.rdoCollMap) {
     if (rdoColl==nullptr) continue; // nullptr means the collection is already filled.
 
@@ -339,8 +324,8 @@ StatusCode ITkStripsRodDecoder::processHeader(const uint16_t word16,
                                               const uint32_t robID,
                                               SharedData& data,
                                               SCT_RDO_Container& /*rdoIDCont*/,
-                                              DataPool<SCT3_RawData>* dataItemsPool,
-                                              CacheHelper& cache,
+                                              DataPool<SCT3_RawData>* /*dataItemsPool*/,
+                                              CacheHelper& /*cache*/,
                                               SCT_RodDecoderErrorsHelper& errs,
                                               bool& hasError,
                                               bool& breakNow,
@@ -368,21 +353,6 @@ StatusCode ITkStripsRodDecoder::processHeader(const uint16_t word16,
   } else {
     ATH_MSG_WARNING("Unexpected packet type (not PR): 0x" << std::hex << int(type));
     return sc;
-  }
-
-  // Create the last RDO of the previous link if any
-  if (data.isStripValid()) {
-     if (not data.isSaved()) {
-
-        const int rdoMade{makeRDO(data, cache, dataItemsPool)};
-        if (rdoMade == -1) {
-           hasError = true;
-           ATH_CHECK(addSingleError(data.linkIDHash, SCT_ByteStreamErrors::ByteStreamParseError, errs));
-        }
-        else {
-           data.setSaved(rdoMade);
-        }
-     }
   }
 
   // Everything is set to default for a new hunt of RDO
