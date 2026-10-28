@@ -10,13 +10,14 @@
 #include "Acts/EventData/TrackContainer.hpp"
 #include "Acts/EventData/TrackProxy.hpp"
 #include "Acts/Propagator/SympyStepper.hpp"
+#include "Acts/Propagator/MultiStepperLoop.hpp"
 #include "Acts/Propagator/Navigator.hpp"
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/TrackFinding/TrackSelector.hpp"
 
 namespace ActsTrk::detail {
-  
+
   // container used during the reconstructions
   using RecoTrackContainer = Acts::TrackContainer<Acts::VectorTrackContainer,
                                                   Acts::VectorMultiTrajectory>;
@@ -33,21 +34,35 @@ namespace ActsTrk::detail {
   using CKF = Acts::CombinatorialKalmanFilter<Propagator, RecoTrackContainer>;
   using Extrapolator = Propagator;
 
+  using BremStepper = Acts::MultiStepperLoop<Stepper>;
+  using BremPropagator = Acts::Propagator<BremStepper, Navigator>;
+  using BremCKF = Acts::CombinatorialKalmanFilter<BremPropagator, RecoTrackContainer>;
+
   // Small holder class to keep CKF and related objects.
   // Keep a unique_ptr<CKF_pimpl> in TrackFindingAlg, so we don't have to expose the
   // Acts class definitions in TrackFindingAlg.h.
   // ActsTrk::TrackFindingAlg::CKF_pimpl inherits from CKF_config to prevent -Wsubobject-linkage warning.
-  struct CKF_config {
+  struct baseCKF_config {
     // Extrapolator
     Extrapolator extrapolator;
-    // CKF algorithm
-    CKF ckf;
-    // CKF configuration
-    Acts::CombinatorialKalmanFilterExtensions<RecoTrackContainer> ckfExtensions;
     // Track selection
     Acts::TrackSelector trackSelector;
   };
-  
+
+  struct CKF_config : public baseCKF_config {
+      // Nominal CKF algorithm
+      CKF ckf;
+      // CKF configuration
+      Acts::CombinatorialKalmanFilterExtensions<RecoTrackContainer> ckfExtensions;
+  };
+
+  struct bremCKF_config : public baseCKF_config {
+      // GSF-enhanced CKF algorithm
+      BremCKF ckf;
+      // CKF configuration
+      Acts::CombinatorialKalmanFilterExtensions<RecoTrackContainer> ckfExtensions;
+  };
+
 } // namespace ActsTrk::detail
 
 #endif

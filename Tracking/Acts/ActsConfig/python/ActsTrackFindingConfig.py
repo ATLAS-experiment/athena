@@ -69,7 +69,7 @@ def ActsMainTrackFindingAlgCfg(flags,
         # 2 for negative endcap
         # 25 for positive endcap
         kwargs.setdefault('EndOfTheWorldVolumeIds', [2, 25])
-    
+
     acc.merge( ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags) )
     kwargs.setdefault("ActsVolumeIdToDetectorElementCollectionMapKey", "VolumeIdToDetectorElementCollectionMap")
 
@@ -99,12 +99,12 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     # Ambi strategy 0 means do the ambiguity resolution outside the track finding.
     kwargs.setdefault("ambiStrategy", flags.Acts.AmbiguitySolverMode.value)
-    
+
     if (not flags.Acts.doAmbiguityResolution) :
         kwargs.setdefault("MaximumSharedHits", 3)
         kwargs.setdefault("MaximumIterations", 10000)
         kwargs.setdefault("NMeasurementsMin", 7)
-    
+
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
     # The LRT second pass carries the whole inward leg, where the hits run out
     # at the displaced origin. Measured on the other passes it is a ~1% effect.
@@ -130,6 +130,21 @@ def ActsMainTrackFindingAlgCfg(flags,
         # cut on the pT of the LRT strip seed parameters, from the KF prefit or the calibrated estimate
         kwargs.setdefault("seedPtMinFactor", 0.9)
 
+    doBremRecovery = kwargs.setdefault(
+        "doBremRecovery",
+        flags.Acts.doBremRecovery
+        and flags.Tracking.ActiveConfig.doBremRecoverySi
+        and flags.Tracking.doCaloSeededBrem)
+    if doBremRecovery:
+        from InDetConfig.InDetCaloClusterROISelectorConfig import (
+            ITkCaloClusterROIPhiRZContainerMakerCfg,
+        )
+        acc.merge(ITkCaloClusterROIPhiRZContainerMakerCfg(flags))
+        kwargs.setdefault("phiWidthROI", flags.Acts.phiWidthROI)
+        kwargs.setdefault("etaWidthROI", flags.Acts.etaWidthROI)
+        kwargs.setdefault("bremMaxComponents", flags.Acts.GsfMaxComponents)
+        kwargs.setdefault("bremWeightCutoff", flags.Acts.GsfWeightCutoff)
+        kwargs.setdefault("bremMergeMethod", flags.Acts.GsfComponentMergeMethod)
     # Loosen the requirement on the minimum number of measurements on track candidate
     # during track finding for tracks above a certain eta
     kwargs.setdefault("branchStopperMeasCutReduce", flags.Acts.branchStopperMeasCutReduce)
@@ -182,7 +197,7 @@ def ActsMainTrackFindingAlgCfg(flags,
             "TrackStatePrinter",
             acc.popToolsAndMerge(ActsTrackStatePrinterToolCfg(flags)),
         )
- 
+
     if 'PixelCalibrator' not in kwargs:
         from AthenaConfiguration.Enums import BeamType
 
@@ -205,7 +220,7 @@ def ActsMainTrackFindingAlgCfg(flags,
                 acc.popToolsAndMerge(ActsStripCalibrationToolCfg(flags))
             )
 
-        
+
     if flags.Acts.doMonitoring and 'MonTool' not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsTrackFindingMonitoringToolCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(
@@ -225,7 +240,7 @@ def ActsTrackFindingCfg(flags,
     if not flags.Tracking.ActiveConfig.isSecondaryPass:
         dataPrepPrefix = ''
     pixelClusters = f'ITk{dataPrepPrefix}PixelClusters'
-    stripClusters = f'ITk{dataPrepPrefix}StripClusters'    
+    stripClusters = f'ITk{dataPrepPrefix}StripClusters'
     hgtdClusters = f'{dataPrepPrefix}HGTD_Clusters'
     # If cache is activated the keys have "_Cached" as postfix
     if flags.Acts.useCache:
@@ -350,7 +365,7 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
     # This is added in the seeding step of the CKF chain...
     from BeamSpotConditions.BeamSpotConditionsConfig import BeamSpotCondAlgCfg
     acc.merge(BeamSpotCondAlgCfg(flags))
-    
+
     # Adopt standard convention
     kwargs.setdefault('ACTSTracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
 
@@ -374,8 +389,8 @@ def ActsTrackFindingGNNCfg(flags, **kwargs) -> ComponentAccumulator:
     # The fitter tool is used in the GNN track finding to fit the track candidates after the GNN has selected the measurements.
     if 'FitterTool' not in kwargs:
         from ActsConfig.ActsTrackFittingConfig import ActsFitterCfg
-        kwargs.setdefault('FitterTool', acc.popToolsAndMerge(ActsFitterCfg(flags, 
-                                                                           ReverseFilteringPt=0, 
+        kwargs.setdefault('FitterTool', acc.popToolsAndMerge(ActsFitterCfg(flags,
+                                                                           ReverseFilteringPt=0,
                                                                            OutlierChi2Cut=float('inf'))))
 
     from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
@@ -444,7 +459,7 @@ def ActsAmbiguityResolutionCfg(flags,
     kwargs.setdefault('TracksLocation', f"{flags.Tracking.ActiveConfig.extension}Tracks")
     kwargs.setdefault('ResolvedTracksLocation', f"{flags.Tracking.ActiveConfig.extension}ResolvedTracks")
     from ActsConfig.ActsConfigFlags import AmbiguitySolverStrategy
-            
+
     if flags.Acts.AmbiguitySolverStrategy is AmbiguitySolverStrategy.ScoreBased:
         acc.merge(ActsMainScoreBasedAmbiguityResolutionAlgCfg(flags,
                                                     name=f"{flags.Tracking.ActiveConfig.extension}ScoreBasedAmbiguityResolutionAlg",
@@ -475,5 +490,3 @@ def ActsAmbiguityResolutionCfg(flags,
                                    extensions=[prefix]))
 
     return acc
-
-

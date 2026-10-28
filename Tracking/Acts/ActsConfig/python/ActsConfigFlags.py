@@ -41,14 +41,14 @@ class PixelErrorStrategy(FlagEnum):
 # These errors will be used during track finding
 # PITCH : assign the pitch as cluster error
 # WIDTH : use the cluster width as cluster error
-# TUNED : use an error 1.05 x pitch for 1strip clusters, a 0.27 x width for 2strip clusters and width for >=3strip clusters 
+# TUNED : use an error 1.05 x pitch for 1strip clusters, a 0.27 x width for 2strip clusters and width for >=3strip clusters
 class StripClusteringErrorMode(FlagEnum):
     PITCH = 0
     WIDTH = 1
     TUNED = 2
 
 # Define the Strip cluster calibration error strategy modes (the errors that will be used for filtering)
-# CLUSTERING : Use directly the clustering errors 
+# CLUSTERING : Use directly the clustering errors
 # PITCH  : if we used broad clusters during clustering (so the error is the cluster width) rescale it by the number of pixels
 #          to assign the pitch as error to the cluster
 class StripErrorStrategy(FlagEnum):
@@ -125,7 +125,7 @@ class ParameterEstimationMode(FlagEnum):
 
 def createActsConfigFlags():
     actscf = AthConfigFlags()
-    
+
     # General Flags
     actscf.addFlag('Acts.EDM.PersistifyClusters', lambda pcf: pcf.Acts.EDM.PersistifySpacePoints and not pcf.Tracking.StoreSlimmedDataPreparation)
     actscf.addFlag('Acts.EDM.PersistifySpacePoints', lambda pcf: pcf.Tracking.StoreSlimmedDataPreparation)
@@ -135,14 +135,14 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.useCache', False)
     # special persistifications
     actscf.addFlag('Acts.EDM.SlimContent', lambda pcf: pcf.Tracking.StoreSlimmedDataPreparation)
-    
+
     # Scheduling
     from InDetConfig.ITkActsHelpers import primaryPassUsesActs
     actscf.addFlag('Acts.doITkConversion', lambda pcf: (
         pcf.Detector.EnableCalo and primaryPassUsesActs(pcf)))
     actscf.addFlag('Acts.doLargeRadius', True)
     actscf.addFlag('Acts.doLowPt', False)
-    
+
     # Geometry Flags
 
     # MaterialSource can be:
@@ -208,7 +208,7 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.Clusters.RetrieveChargeInformation", True)
     actscf.addFlag("Acts.Clusters.StripClusteringErrorMode", StripClusteringErrorMode.PITCH,type=StripClusteringErrorMode)
     actscf.addFlag("Acts.Clusters.UsePixelBroadErrors", False)
-    
+
     # SpacePoint
     actscf.addFlag('Acts.SpacePoints.useBeamSpotConstraintStrips', True)
     actscf.addFlag('Acts.SpacePoints.doPixel', lambda pcf: pcf.Detector.EnableITkPixel)
@@ -229,16 +229,16 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.Gbts.dumpGbtsGeometry", False)
     actscf.addFlag("Acts.Gbts.geometryDump", 'gbts_layer_geometry.txt') # for gbts training tool
 
-    # GBTS Training 
+    # GBTS Training
     ## Connection table settings
-    actscf.addFlag("Acts.Gbts.Training.enable", False) 
-    actscf.addFlag("Acts.Gbts.Training.outputConnectionTable", "gbts_connection_table.txt") 
-    actscf.addFlag("Acts.Gbts.Training.doSymmetrization", False) 
-    actscf.addFlag("Acts.Gbts.Training.useOldFormatting", False) 
-    actscf.addFlag("Acts.Gbts.Training.probThreshold", -1.0) 
+    actscf.addFlag("Acts.Gbts.Training.enable", False)
+    actscf.addFlag("Acts.Gbts.Training.outputConnectionTable", "gbts_connection_table.txt")
+    actscf.addFlag("Acts.Gbts.Training.doSymmetrization", False)
+    actscf.addFlag("Acts.Gbts.Training.useOldFormatting", False)
+    actscf.addFlag("Acts.Gbts.Training.probThreshold", -1.0)
     ## truth track builder tool
-    actscf.addFlag("Acts.Gbts.Training.usePixelClusters", True) 
-    actscf.addFlag("Acts.Gbts.Training.useStripClusters", True) 
+    actscf.addFlag("Acts.Gbts.Training.usePixelClusters", True)
+    actscf.addFlag("Acts.Gbts.Training.useStripClusters", True)
 
     # Track finding
     actscf.addFlag('Acts.PixelCalibrationStrategy', PixelCalibrationStrategy.Uncalibrated, type=PixelCalibrationStrategy)
@@ -252,8 +252,8 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.branchStopperMeasCutReduce', 2)
     actscf.addFlag('Acts.branchStopperAbsEtaMeasCut', 1.2)
     actscf.addFlag('Acts.SeedRefitOutlierChi2Cut', float('inf'))  # OutlierChi2Cut for the seed refit Kalman fitter, applied whenever a seed refit is scheduled. inf == disabled.
-    actscf.addFlag('Acts.LrtStripSeedRefit', False)  # Toggle the LRT strip-seed refit (KF on strip seeds before CKF). 
-    actscf.addFlag('Acts.stripCalibrationIterations', 1)  # Strip-SP calibration iterations in TrackParamsEstimationTool (all passes). 
+    actscf.addFlag('Acts.LrtStripSeedRefit', False)  # Toggle the LRT strip-seed refit (KF on strip seeds before CKF).
+    actscf.addFlag('Acts.stripCalibrationIterations', 1)  # Strip-SP calibration iterations in TrackParamsEstimationTool (all passes).
     actscf.addFlag('Acts.parameterEstimationMode', ParameterEstimationMode.FirstMiddleLast,
             type=ParameterEstimationMode)  # SPs of a seed used in TrackParamsEstimationTool (the GNN chain uses its own flag)
     actscf.addFlag('Acts.minDeltaRParameterEstimation', 15.0)  # Minimum separation (mm) of the SPs used in TrackParamsEstimationTool for ParameterEstimationMode.MinDeltaR
@@ -263,15 +263,18 @@ def createActsConfigFlags():
                                                                        # this flag is used only if PixelCalibrationStrategy is one of the NN strategies
     actscf.addFlag('Acts.refitSeeds', False) # refit seeds for CKF initial parameters
     actscf.addFlag('Acts.initialVarInflation', [1., 1., 1., 1., 1., 1.]) # inflate variances after track parameter estimation
+    actscf.addFlag('Acts.doBremRecovery', False)
+    actscf.addFlag('Acts.phiWidthROI', lambda pcf: pcf.Tracking.phiWidthBrem)
+    actscf.addFlag('Acts.etaWidthROI', lambda pcf: pcf.Tracking.etaWidthBrem)
 
-    # Ambiguity resolution    
+    # Ambiguity resolution
     actscf.addFlag('Acts.doAmbiguityResolution', False)
     actscf.addFlag('Acts.AmbiguitySolverStrategy', AmbiguitySolverStrategy.Greedy, type=AmbiguitySolverStrategy)  # Define Ambiguity Solver Strategy
     actscf.addFlag('Acts.AmbiguitySolverMode', lambda pcf: AmbiguitySolverMode.OUTSIDE_TF if pcf.Acts.doAmbiguityResolution else AmbiguitySolverMode.DURING_TF, type=AmbiguitySolverMode)
-    
+
     # Calibrations
     actscf.addFlag('Acts.OnTrackCalibration.performCovarianceCalibration', True) # perform calibration of covariance during on track analogue cluster calibration
-    
+
     # Track fitting
     actscf.addFlag('Acts.writeTrackCollection', False) # save to file (ESD, AOD) the Resolved and Refitted track collections
     actscf.addFlag('Acts.fitFromPRD', False) # Acts.writeTrackCollection needs to be True for either cases. If Acts.fitFromPRD is False, fit from ROT; else, fit from PRD
@@ -283,6 +286,7 @@ def createActsConfigFlags():
                    pcf.GeoModel.Run >= LHCPeriod.Run4) # Refit ACTS tracks using ACTS GSF
     actscf.addFlag("Acts.GsfMaxComponents", 12)
     actscf.addFlag("Acts.GsfComponentMergeMethod", 'MaxWeight')
+    actscf.addFlag("Acts.GsfWeightCutoff", 1e-4)
     actscf.addFlag("Acts.GsfDirectNavigation", lambda pcf:
                    pcf.GeoModel.Run >= LHCPeriod.Run4)
     actscf.addFlag("Acts.GsfOutlierChi2Cut", 1e4) # Effectively no cut. Compatible with legacy

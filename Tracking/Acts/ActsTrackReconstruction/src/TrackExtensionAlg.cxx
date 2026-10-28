@@ -97,10 +97,13 @@ namespace ActsTrk{
     trackSelectorCfg.cutSets[0].maxChi2 = 25.;
 
     detail::CKF_config ckfConfig{
-        std::move(extrapolator),
+        {
+            std::move(extrapolator),
+            Acts::TrackSelector{trackSelectorCfg}
+        },
         detail::CKF{std::move(propagator), m_logger->cloneWithSuffix("CKF")},
-        {},
-        Acts::TrackSelector{trackSelectorCfg}};
+        {}
+    };
 
     m_ckfConfig = std::make_unique<detail::CKF_config>(std::move(ckfConfig));
     return StatusCode::SUCCESS;
@@ -125,19 +128,19 @@ namespace ActsTrk{
     // Get Beam pos and make pSurface
     const InDet::BeamSpotData* beamSpotData{};
     ATH_CHECK(SG::get(beamSpotData, m_beamSpotKey, context));
-    
+
     // Beam Spot Position
     Acts::Vector3 beamPos( beamSpotData->beamPos().x() * Acts::UnitConstants::mm,
                            beamSpotData->beamPos().y() * Acts::UnitConstants::mm,
                            0 );
-    
+
     // Construct a perigee surface as the target surface
     std::shared_ptr<Acts::PerigeeSurface> perigeeSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(beamPos);
 
     const Acts::GeometryContext tgContext{m_ctxProvider.getGeometryContext(context)};
     const Acts::MagneticFieldContext mfContext{m_ctxProvider.getMagneticFieldContext(context)};
     const Acts::CalibrationContext calContext{m_ctxProvider.getCalibrationContext(context)};
-   
+
     detail::xAODUncalibMeasSurfAcc surfAcc{m_trackingGeometrySvc.get()};
 
     SG::ReadHandle<xAOD::PixelClusterContainer> pixelClustersHandle = SG::makeHandle(m_pixelClusters, context);
@@ -171,7 +174,7 @@ namespace ActsTrk{
                       plainOptions,
                       perigeeSurface.get());
 
-    options.targetSurface = perigeeSurface.get();                  
+    options.targetSurface = perigeeSurface.get();
 
     auto calibrator = detail::OnTrackCalibrator<detail::RecoTrackStateContainer>(
        context,
@@ -179,7 +182,7 @@ namespace ActsTrk{
        m_pixelCalibTool,
        m_stripCalibTool,
        m_hgtdCalibTool);
-    
+
     DefaultTrackStateCreator defaultTrackStateCreator{};
     defaultTrackStateCreator.sourceLinkAccessor = slAccessorDelegate;
     defaultTrackStateCreator.calibrator.template connect<&detail::OnTrackCalibrator<detail::RecoTrackStateContainer>::calibrate>(&calibrator);
@@ -194,7 +197,7 @@ namespace ActsTrk{
         ATH_MSG_DEBUG("truth: eta: " << truthParticle->eta() << " phi: " << truthParticle->phi() << " pt: " << truthParticle->pt());
       }
     }
-   
+
     ATH_MSG_DEBUG("Size of proto tracks collection " << protoTracksHandle->size());
     for (const ActsTrk::ProtoTrack& protoTrack : *protoTracksHandle) {
       if(protoTrack.measurements.empty()) continue;
@@ -212,8 +215,8 @@ namespace ActsTrk{
         continue;
       }
 
-      Acts::BoundTrackParameters parametersAtRefSurface( trackProxy.referenceSurface().getSharedPtr(), 
-                                                          trackProxy.parameters(), 
+      Acts::BoundTrackParameters parametersAtRefSurface( trackProxy.referenceSurface().getSharedPtr(),
+                                                          trackProxy.parameters(),
                                                           trackProxy.covariance(),
                                                           trackProxy.particleHypothesis());
 
@@ -246,7 +249,7 @@ namespace ActsTrk{
     Acts::ConstVectorTrackContainer ctback( std::move(tback) );
     Acts::ConstVectorMultiTrajectory ctsBack( std::move(tsBack) );
     std::unique_ptr< ActsTrk::TrackContainer > ctrackContainer = std::make_unique< ActsTrk::TrackContainer >( std::move(ctback), std::move(ctsBack) );
-    
+
     SG::WriteHandle<ActsTrk::TrackContainer> trackContainerHandle = SG::makeHandle( m_trackContainerKey, context );
     ATH_CHECK(trackContainerHandle.record(std::move(ctrackContainer)));
 

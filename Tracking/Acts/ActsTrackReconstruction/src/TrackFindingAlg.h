@@ -90,6 +90,26 @@ namespace ActsTrk
                                                Acts::VectorTrackContainer&& originalTrackBackend,
                                                Acts::VectorMultiTrajectory&& originalTrackStateBackend) const;
 
+    template <typename TrackFinderOptionsType>
+    StatusCode runTrackFinder(const DetectorContextHolder& detContext,
+                            const Acts::Surface& pSurface,
+                            const Acts::TrackExtrapolationStrategy& extrapolationStrategy,
+                            detail::SharedHitCounter &sharedHits,
+                            detail::RecoTrackContainer &actsTracksContainer,
+                            const detail::MeasurementIndex& measurementIndex,
+                            detail::RecoTrackContainer& tracksContainerTemp,
+                            detail::DuplicateSeedDetector& duplicateSeedDetector,
+                            std::vector<int>* destiny,
+                            EventStats& event_stat,
+                            std::size_t& ntracks,
+                            std::size_t iseed,
+                            std::size_t category_i,
+                            const char *seedType,
+                            std::optional<std::vector<unsigned int>>& trackCategories,
+                            const TrackFinderOptionsType& options,
+                            const TrackFinderOptionsType& secondOptions,
+                            const Acts::BoundTrackParameters &seedParameters) const;
+
   private:
     // Tool Handles
     ToolHandleArray<ActsTrk::ITrackParamsEstimationTool> m_paramEstimationTool{this, "TrackParamsEstimationTool", {}, "Track Param Estimation from Seeds (one tool per seed type)"};
@@ -103,6 +123,8 @@ namespace ActsTrk
     SG::ReadCondHandleKey<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap> m_volumeIdToDetectorElementCollMapKey
       {this, "ActsVolumeIdToDetectorElementCollectionMapKey", "ActsVolumeIdToDetectorElementCollectionMap",
        "Map which associates Acts geometry volume IDs to detector element collections."};
+    SG::ReadHandleKey<ROIPhiRZContainer> m_caloClusterROIKey{this, "EMROIPhiRZContainer", "ITkCaloClusterROIPhiRZ0GeV", "Name of the calo cluster ROIs in Phi,R,Z parameterization"};
+
 
     SG::ReadHandleKeyArray<InDet::SiDetectorElementStatus> m_detElStatus
       {this, "DetElStatus", {}, "Keys for detector element status conditions data."};
@@ -172,7 +194,8 @@ namespace ActsTrk
                EventStats &event_stat,
                std::vector<int>* destiny,
                const Acts::PerigeeSurface& pSurface,
-               std::optional<std::vector<unsigned int>>& trackCategories) const;
+               std::optional<std::vector<unsigned int>>& trackCategories,
+               const ROIPhiRZContainer *caloClusterROIs) const;
 
     // Create tracks from one seed's CKF result, appending to tracksContainer
     void storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,
@@ -181,6 +204,7 @@ namespace ActsTrk
                        const detail::MeasurementIndex &measurementIndex) const;
 
     using TrackFindingBaseAlg::CKF_pimpl;
+    using TrackFindingBaseAlg::bremCKF_pimpl;
 
     enum DestinyType : int {UNKNOWN=0, SUCCEED, DUPLICATE, FAILURE};
 

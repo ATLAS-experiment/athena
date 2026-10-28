@@ -14,6 +14,7 @@
 #include "ActsGeometryInterfaces/IGeometryRealmConvTool.h"
 #include "ActsToolInterfaces/ITrackParamsEstimationTool.h"
 #include "src/TrackStatePrinterTool.h"
+#include "ActsGeometry/ATLASMagneticFieldWrapper.h"
 
 // ACTS
 #include "Acts/EventData/ProxyAccessor.hpp"
@@ -26,6 +27,7 @@
 
 // Athena
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
+#include "TrkCaloClusterROI/ROIPhiRZContainer.h"
 
 // Handle Keys
 #include "src/detail/Definitions.h"
@@ -50,6 +52,8 @@ namespace ActsTrk {
 
   protected:
     using TrackFinderOptions = Acts::CombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
+    using BremTrackFinderOptions = Acts::BremCombinatorialKalmanFilterOptions<detail::RecoTrackContainer>;
+    using TrackFinderResult = Acts::Result<std::vector<TrackContainer::TrackProxy>>;
 
     struct MeasurementSelectorConfig {
        // (measurement, outlier) chi2 cuts for each eta bin and measurement dimension (index 0 not used)
@@ -69,16 +73,30 @@ namespace ActsTrk {
       std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector;
     };
 
+    struct TrackFindingBremOptions {
+            BremTrackFinderOptions options;
+            BremTrackFinderOptions secondOptions;
+            std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector;
+        };
+
     // Access Acts::CombinatorialKalmanFilter etc using "pointer to implementation"
     // so we don't have to instantiate the heavily templated classes in the header.
     // To maintain const-correctness, only use this via the accessor functions.
     struct CKF_pimpl;
-
     CKF_pimpl &trackFinder();
     const CKF_pimpl &trackFinder() const;
-
     std::unique_ptr<CKF_pimpl> m_trackFinder;
+    std::unique_ptr<CKF_pimpl> getTrackFindingFunction(std::shared_ptr<const Acts::TrackingGeometry>, Acts::TrackSelector::EtaBinnedConfig);
 
+    struct bremCKF_pimpl;
+    bremCKF_pimpl &bremTrackFinder();
+    const bremCKF_pimpl &bremTrackFinder() const;
+    std::unique_ptr<bremCKF_pimpl> m_bremTrackFinder;
+    std::unique_ptr<bremCKF_pimpl> getBremTrackFindingFunction(std::shared_ptr<const Acts::TrackingGeometry>, Acts::TrackSelector::EtaBinnedConfig);
+
+    // Check if track seed is compatible with calo ROI
+    bool hasMatchingCaloROI(const Acts::GeometryContext &geoCtx,
+        const std::optional<Acts::BoundTrackParameters> &boundParams, const ROIPhiRZContainer &caloClusterROIs) const;
 
     // Tool Handles
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring tool"};
@@ -118,6 +136,12 @@ namespace ActsTrk {
     Gaudi::Property<double> m_branchStopperAbsEtaMaxExtra{this, "branchStopperAbsEtaMaxExtra", 0.0, "increase absEtaMax cut when used in the branch stopper"};
     Gaudi::Property<double> m_branchStopperMeasCutReduce{this, "branchStopperMeasCutReduce", 2, "how much to reduce the minMeas requirement for the branch stopper"};
     Gaudi::Property<double> m_branchStopperAbsEtaMeasCut{this, "branchStopperAbsEtaMeasCut", 1.2, "the minimum |eta| to apply the reduction to the minMeas requirement for the branch stopper"};
+    Gaudi::Property<bool> m_doBremRecovery{this, "doBremRecovery", false, "Enable brem recovery for track seeds compatible with a calorimeter ROI"};
+    Gaudi::Property<double> m_phiWidthROI{this, "phiWidthROI", 0.3, "phi width for matching tracks to calo ROIs"};
+    Gaudi::Property<double> m_etaWidthROI{this, "etaWidthROI", 0.3, "eta width for matching tracks to calo ROIs"};
+    Gaudi::Property<std::size_t> m_bremMaxComponents{this, "bremMaxComponents", 12, "Maximum number of components which the GSF should handle"};
+    Gaudi::Property<double> m_bremWeightCutoff{this, "bremWeightCutoff", 1e-4, "When to discard GSF components"};
+    Gaudi::Property<std::string> m_bremMergeMethod{this, "bremMergeMethod", "MaxWeight", "How to reduce the states that are stored in the multi trajectory {Mean, MaxWeight}"};
 
     // Acts::TrackSelector cuts
     // Use max double, because mergeConfdb2.py doesn't like std::numeric_limits<double>::infinity() (produces bad Python "inf.0")
@@ -217,6 +241,11 @@ namespace ActsTrk {
                                                  const detail::TrackFindingMeasurements &measurements,
                                                  const Acts::PerigeeSurface* pSurface) const;
 
+    TrackFindingBremOptions getBremOptions(const EventContext &ctx,
+                                                 const DetectorContextHolder &detContext,
+                                                 const detail::TrackFindingMeasurements &measurements,
+                                                 const Acts::PerigeeSurface* pSurface) const;
+
     /**
      * @brief Take the array of handle keys and for each key retrieve containers, then append them to the output vector.
      *
@@ -244,25 +273,17 @@ namespace ActsTrk {
 
     using TrkProxy = detail::RecoTrackContainer::TrackProxy;
 
-    /**
-     * @brief Perform two-way track finding
-     *
-     * @param addTrack Function or lambda which adds newly found track to container
-     * @param trackProxy Track proxy object
-     * @param tracksContainerTemp Track proxy container
-     * @param options Fit options
-     * @param tgContext Geometry context
-     * @param seedType Seed type (only used for warnings/debug printouts)
-     * @param iseed Seed number (only used for warnings/debug printouts)
-     * @param itrack Track number (only used for warnings/debug printouts)
-     *
-     * @return Number of found tracks
-     */
-    std::vector<typename detail::RecoTrackContainer::TrackProxy>
-    doTwoWayTrackFinding(const detail::RecoTrackStateContainerProxy& firstMeasurement,
-                         const TrkProxy &trackProxy,
-                         detail::RecoTrackContainer &tracksContainerTemp,
-                         const TrackFinderOptions &options) const;
+    void inflateCovarianceTwoWay(Acts::BoundTrackParameters &secondInitialParameters) const;
+
+    Acts::Result<std::vector<TrkProxy> > findTracksCKF(const Acts::BoundTrackParameters &seedParameters,
+                                                        const TrackFinderOptions& options,
+                                                        detail::RecoTrackContainer& tracksContainerTemp,
+                                                        detail::RecoTrackContainer::TrackProxy &rootBranch) const;
+
+    Acts::Result<std::vector<TrkProxy> > findTracksCKF(const Acts::BoundTrackParameters &seedParameters,
+                                                        const BremTrackFinderOptions& options,
+                                                        detail::RecoTrackContainer& tracksContainerTemp,
+                                                        detail::RecoTrackContainer::TrackProxy &rootBranch) const;
 
     static xAOD::UncalibMeasType measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState);
 
@@ -320,6 +341,12 @@ namespace ActsTrk {
 
     /// logging instance
     std::unique_ptr<const Acts::Logger> m_logger;
+
+    const Acts::Logger &bremLogger() const
+    {
+      return *m_bremLogger;
+    }
+    std::unique_ptr<const Acts::Logger> m_bremLogger;
 
     // statistics
     void initStatTables();
