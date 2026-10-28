@@ -260,6 +260,9 @@ public:
 
 
   void fillAttribute(GenEvent* e) {
+    // Clear the maps before filling them, so that keys from an earlier fill are not kept.
+    m_particleBC.clear();
+    m_vertexBC.clear();
     const auto eventAttributes = e->attributes(); // this makes a copy
     const auto barcodeAttributeIt = eventAttributes.find(HepMCStr::barcode);
     const bool hasBarcodeAttribute = barcodeAttributeIt != eventAttributes.end();
