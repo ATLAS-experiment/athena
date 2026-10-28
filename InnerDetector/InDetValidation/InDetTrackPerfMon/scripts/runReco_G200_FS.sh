@@ -68,6 +68,7 @@ run Reco_tf.py \
                flags.Acts.Device.doSeeding=True; \
                flags.Acts.Device.doTrackReconstruction=True; \
                flags.Tracking.doPixelDigitalClustering=True; \
+               flags.Tracking.ITkActsPass.useITkStripSeeding=False; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Acts.Device.seedingStrategy=SeedingStrategy.GridTriplet; \

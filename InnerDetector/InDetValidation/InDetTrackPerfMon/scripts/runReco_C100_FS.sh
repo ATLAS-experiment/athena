@@ -57,6 +57,7 @@ if [ "$doClusters" == "1" ]; then
     --preExec "flags.Acts.EDM.PersistifyClusters=True; \
                flags.Acts.EDM.PersistifySpacePoints=True; \
                flags.Tracking.doPixelDigitalClustering=True; \
+               flags.Tracking.ITkActsPass.useITkStripSeeding=False; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet" \
@@ -69,6 +70,7 @@ else
     --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
     --preExec "flags.Tracking.doPixelDigitalClustering=True; \
+               flags.Tracking.ITkActsPass.useITkStripSeeding=False; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet" \

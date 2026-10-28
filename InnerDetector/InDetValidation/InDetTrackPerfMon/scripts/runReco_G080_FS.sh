@@ -64,6 +64,7 @@ run Reco_tf.py \
                flags.Acts.doLargeRadius=False; \
                flags.Acts.Device.doClusterization=True; \
                flags.Tracking.doPixelDigitalClustering=True; \
+               flags.Tracking.ITkActsPass.useITkStripSeeding=False; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=${storeTrackSeeds}; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.Gbts; \
