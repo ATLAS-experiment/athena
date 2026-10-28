@@ -12,6 +12,7 @@
 #include "AsgTools/AsgTool.h"
 #include "AsgTools/PropertyWrapper.h"
 #include <AsgDataHandles/ReadHandleKey.h>
+#include "AsgDataHandles/ReadDecorHandleKey.h"
 #include "PATInterfaces/CorrectionTool.h"
 
 #include <xAODEventInfo/EventInfo.h>
@@ -110,6 +111,8 @@ namespace InDet {
     Gaudi::Property<std::vector<unsigned int>> m_runNumberBounds{this, "runNumberBounds", {}, "Run number boundaries: {lower0, upper0, upper1, ...}. May be omitted when only one calibration file is configured."};
 
     SG::ReadHandleKey<xAOD::EventInfo> m_evtInfoKey{this, "EvtInfo", "EventInfo", "EventInfo name"};
+    SG::ReadDecorHandleKey<xAOD::EventInfo> m_randomRunNumberKey{this, "RandomRunNumber",
+      m_evtInfoKey, "RandomRunNumber", "Random run number decoration from the pileup reweighting"};
 
   }; // class InDetTrackBiasingTool
 
