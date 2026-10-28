@@ -151,6 +151,7 @@ def createITkFastTrackingPassFlags():
     deactivateActsComponents(icf)
     activateAthenaComponents(icf)
     icf.extension = ""
+    icf.useITkStripSeeding = False
     icf.Xi2max = [9.]
     icf.Xi2maxNoAdd = [25.]
     return icf
