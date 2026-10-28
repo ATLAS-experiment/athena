@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GBlockBuilder.h"
@@ -108,7 +108,7 @@ namespace LVL1
       block->setdPhi(dPhi);
       block->setEt(et);
       block->setArea(area);
-      block->setSeedTowerLink({m_towersKey.key(), seedTower->index()});
+      block->setSeedTowerLink({m_towersKey.key(), seedTower->index(), ctx});
       block->setTowerLinks(links);
     }
 
