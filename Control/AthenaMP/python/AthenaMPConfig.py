@@ -252,7 +252,7 @@ if __name__=="__main__":
     flags.Concurrency.NumProcs=2
 
     cfg = MainServicesCfg(flags)
-    from AthenaPoolCnvSvc.PoolReadConfig import EventSelectorAthenaPoolCfg
+    from EventSelectorAthenaPool.EventSelectorAthenaPoolConfig import EventSelectorAthenaPoolCfg
     cfg.merge(EventSelectorAthenaPoolCfg(flags))
     cfg.run()
     # -----------------  Example with input file --------------

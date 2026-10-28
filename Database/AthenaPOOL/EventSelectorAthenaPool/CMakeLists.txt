@@ -19,6 +19,10 @@ atlas_add_component( EventSelectorAthenaPool
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Tests:
+atlas_add_test( EventSelectorConfig_test
+                SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/EventSelectorConfig_test.py
+                POST_EXEC_SCRIPT noerror.sh )
+
 atlas_add_test( CondProxyProviderConfig_test
                 SCRIPT python -m EventSelectorAthenaPool.CondProxyProviderConfig
                 LOG_SELECT_PATTERN "ComponentAccumulator|^---|^CondProxyProvider" )
