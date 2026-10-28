@@ -22,7 +22,7 @@ StatusCode BTaggingLargeRSelectionJsonTool::initialize() {
 
     if (m_minPt > 0.){ 
         // Convert MeV cut to GeV as in the JSON files numbers are in GeV 
-        m_minPt = m_minPt * BTaggingToolUtil::MeVToGeV; 
+        m_minPt = BTaggingToolUtil::MeVToGeV( m_minPt ); 
     }
 
     std::string pathToJsonConfigFile = PathResolverFindCalibFile(m_json_config_path);
@@ -314,24 +314,24 @@ float BTaggingLargeRSelectionJsonTool::getJetMassInGeV(const xAOD::Jet& jet) con
 {   
     // Convert mass from MeV to GeV 
     if (!m_massAcc) {
-        return jet.m() * BTaggingToolUtil::MeVToGeV;
+        return BTaggingToolUtil::MeVToGeV( jet.m() );
     }
     if (!m_massAcc->isAvailable(jet)) {
         ATH_MSG_ERROR("Decorated mass '" << SG::AuxTypeRegistry::instance().getName( m_massAcc->auxid() ) << "' not available on jet. Cannot proceed.");
         throw std::runtime_error("Decorated mass not available on jet.");
     }
-    return (*m_massAcc)(jet) * BTaggingToolUtil::MeVToGeV;
+    return BTaggingToolUtil::MeVToGeV( (*m_massAcc)(jet) );
 }
 
 float BTaggingLargeRSelectionJsonTool::getJetPtInGeV(const xAOD::Jet& jet) const
 {   
     // Convert pT from MeV to GeV 
     if (!m_ptAcc) {
-        return jet.pt() * BTaggingToolUtil::MeVToGeV;
+        return BTaggingToolUtil::MeVToGeV( jet.pt() ) ;
     }
     if (!m_ptAcc->isAvailable(jet)) {
         ATH_MSG_ERROR("Decorated pT '" << SG::AuxTypeRegistry::instance().getName( m_ptAcc->auxid() ) << "' not available on jet. Cannot proceed.");
         throw std::runtime_error("Decorated pT not available on jet.");
     }
-    return (*m_ptAcc)(jet) * BTaggingToolUtil::MeVToGeV;
+    return BTaggingToolUtil::MeVToGeV( (*m_ptAcc)(jet) );
 }
