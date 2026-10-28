@@ -489,8 +489,6 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
     classification = Truth::Type::CHadronDecay;
     return StatusCode::SUCCESS;
   }
-  // TODO:: There is a comment in the example code about J/psi but there is a
-  // separate origin code for that: `MCTruthPartClassifier::JPsi == 28.` --> this might not be in all samples/generators?
 
 
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -508,6 +506,7 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
       MCTruthPartClassifier::SUSY,
       MCTruthPartClassifier::DiBoson,
       MCTruthPartClassifier::CCbarMeson, // PromptQuarkoniumDecay
+      MCTruthPartClassifier::JPsi,
       MCTruthPartClassifier::BBbarMeson,
       MCTruthPartClassifier::HeavyBoson,
       MCTruthPartClassifier::MultiBoson
@@ -745,6 +744,7 @@ bool TruthClassificationTool::hasCHadronOrigin(int origin) const {
   static const std::set<int> c_hadrons({
     MCTruthPartClassifier::CharmedMeson,
     MCTruthPartClassifier::CCbarMeson,
+    MCTruthPartClassifier::JPsi,
     MCTruthPartClassifier::CharmedBaryon,
   });
   return c_hadrons.contains(origin);
