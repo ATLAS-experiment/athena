@@ -139,6 +139,11 @@ def fromRunArgs(runArgs):
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
 
+    # Always apply AODFix when running an AOD-to-DAOD derivation.
+    if "StreamAOD" in flags.Input.ProcessingTags:
+        from RecJobTransforms.AODFixConfig import AODFixCfg
+        cfg.merge(AODFixCfg(flags))
+
     # Ensure proper metadata propagation for EVNT->DAOD_TRUTHx
     if (allowedInputTypes[idx]=='EVNT'):
        from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
