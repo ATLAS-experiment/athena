@@ -50,228 +50,136 @@ private:
     int m_detailLevel{10};
     float m_cutMinTruthRecoRadialDiff = 0.1;
     ///truth type
-    TH1* m_vx_type_truth{};
-    TH1* m_vx_x_diff{};
-    TH1* m_vx_x_diff_pull{};
-    TH1* m_vx_y_diff{};
-    TH1* m_vx_y_diff_pull{};
-    TH1* m_vx_z_diff{};
-    TH1* m_vx_z_diff_pull{};
+    TH1* m_vx_type_truth = nullptr;
+    TH1* m_vx_x_diff = nullptr;
+    TH1* m_vx_x_diff_pull = nullptr;
+    TH1* m_vx_y_diff = nullptr;
+    TH1* m_vx_y_diff_pull = nullptr;
+    TH1* m_vx_z_diff = nullptr;
+    TH1* m_vx_z_diff_pull = nullptr;
 
     ///vertex time
-    TH1* m_vx_time_diff{};
-    TH1* m_vx_time_diff_pull{};
+    TH1* m_vx_time_diff = nullptr;
+    TH1* m_vx_time_diff_pull = nullptr;
 
     ///hardscatter classification
-    TH1* m_vx_hs_classification{};
+    TH1* m_vx_hs_classification = nullptr;
     ///vertex reco efficiency
-    TProfile* m_vx_nReco_vs_nTruth_inclusive;
-    TProfile* m_vx_nReco_vs_nTruth_matched;
-    TProfile* m_vx_nReco_vs_nTruth_merged;
-    TProfile* m_vx_nReco_vs_nTruth_split;
-    TProfile* m_vx_nReco_vs_nTruth_fake;
-    TProfile* m_vx_nReco_vs_nTruth_dummy;
-    TProfile* m_vx_nReco_vs_nTruth_clean;
-    TProfile* m_vx_nReco_vs_nTruth_lowpu;
-    TProfile* m_vx_nReco_vs_nTruth_highpu;
-    TProfile* m_vx_nReco_vs_nTruth_hssplit;
-    TProfile* m_vx_nReco_vs_nTruth_none;
+    TProfile* m_vx_nReco_vs_nTruth_inclusive = nullptr;
+    TProfile* m_vx_nReco_vs_nTruth_matched = nullptr;
+    TProfile* m_vx_nReco_vs_nTruth_merged = nullptr;
+    TProfile* m_vx_nReco_vs_nTruth_split = nullptr;
+    TProfile* m_vx_nReco_vs_nTruth_fake = nullptr;
+    TProfile* m_vx_nReco_vs_nTruth_dummy = nullptr;
+    TProfile* m_vx_nReco_vs_nTruth_clean = nullptr;
+    TProfile* m_vx_nReco_vs_nTruth_lowpu = nullptr;
+    TProfile* m_vx_nReco_vs_nTruth_highpu = nullptr;
+    TProfile* m_vx_nReco_vs_nTruth_hssplit = nullptr;
+    TProfile* m_vx_nReco_vs_nTruth_none = nullptr;
     // HS vertex reconstruction efficiency vs PU
-    TEfficiency* m_vx_hs_reco_eff;
+    TEfficiency* m_vx_hs_reco_eff = nullptr;
     // HS vertex selection efficiency vs PU
-    TEfficiency* m_vx_hs_sel_eff;
+    TEfficiency* m_vx_hs_sel_eff = nullptr;
     // HS vertex selection efficiency vs nReco vertices
-    TEfficiency* m_vx_hs_sel_eff_vs_nReco;
+    TEfficiency* m_vx_hs_sel_eff_vs_nReco = nullptr;
     // HS vertex reconstruction and selection efficiency vs PU
-    TEfficiency* m_vx_hs_reco_sel_eff;
+    TEfficiency* m_vx_hs_reco_sel_eff = nullptr;
     // HS vertex selection efficiency vs PU (distance based)
-    TEfficiency* m_vx_hs_sel_eff_dist;
+    TEfficiency* m_vx_hs_sel_eff_dist = nullptr;
     // HS vertex selection efficiency vs PU (actualInteractionsPerCrossing)
-    TEfficiency* m_vx_hs_sel_eff_mu;  
+    TEfficiency* m_vx_hs_sel_eff_mu = nullptr;
     // HS vertex selection efficiency vs nReco vertices (distance based)
-    TEfficiency* m_vx_hs_sel_eff_dist_vs_nReco;
+    TEfficiency* m_vx_hs_sel_eff_dist_vs_nReco = nullptr;
     // HS vertex reconstruction efficiency vs n truth vertices
-    TEfficiency* m_vx_hs_reco_eff_vs_ntruth;
+    TEfficiency* m_vx_hs_reco_eff_vs_ntruth = nullptr;
     // HS vertex selection efficiency vs PU (actualInteractionsPerCrossing)
-    TEfficiency* m_vx_hs_reco_eff_mu;
+    TEfficiency* m_vx_hs_reco_eff_mu = nullptr;
     // HS vertex selection efficiency vs n truth vertices
-    TEfficiency* m_vx_hs_sel_eff_vs_ntruth;
+    TEfficiency* m_vx_hs_sel_eff_vs_ntruth = nullptr;
     // HS vertex reconstruction and selection efficiency vs n truth vertices
-    TEfficiency* m_vx_hs_reco_sel_eff_vs_ntruth;
+    TEfficiency* m_vx_hs_reco_sel_eff_vs_ntruth = nullptr;
 
 
     // For reco (covariance) resolutions:
-    TProfile* m_vx_hs_reco_long_reso;
-    TProfile* m_vx_hs_reco_trans_reso;
+    TProfile* m_vx_hs_reco_long_reso = nullptr;
+    TProfile* m_vx_hs_reco_trans_reso = nullptr;
 
     // For reco-truth resolutions:
     IDPVM::ResolutionHelper m_resolutionHelper{};
     IDPVM::ResolutionHelper::methods m_resolutionMethod = IDPVM::ResolutionHelper::iterRMS_convergence;
 
-    TH2* m_resHelper_PUdensity_hsVxTruthLong;
-    TH1* m_resolution_vs_PUdensity_hsVxTruthLong;
-    TH1* m_resmean_vs_PUdensity_hsVxTruthLong;
-    TH2* m_resHelper_PUdensity_hsVxTruthTransv;
-    TH1* m_resolution_vs_PUdensity_hsVxTruthTransv;
-    TH1* m_resmean_vs_PUdensity_hsVxTruthTransv;
-    TH2* m_resHelper_mu_hsVxTruthLong;
-    TH1* m_resolution_vs_mu_hsVxTruthLong;
-    TH1* m_resmean_vs_mu_hsVxTruthLong;
+    TH2* m_resHelper_PUdensity_hsVxTruthLong = nullptr;
+    TH1* m_resolution_vs_PUdensity_hsVxTruthLong = nullptr;
+    TH1* m_resmean_vs_PUdensity_hsVxTruthLong = nullptr;
+    TH2* m_resHelper_PUdensity_hsVxTruthTransv = nullptr;
+    TH1* m_resolution_vs_PUdensity_hsVxTruthTransv = nullptr;
+    TH1* m_resmean_vs_PUdensity_hsVxTruthTransv = nullptr;
+    TH2* m_resHelper_mu_hsVxTruthLong = nullptr;
+    TH1* m_resolution_vs_mu_hsVxTruthLong = nullptr;
+    TH1* m_resmean_vs_mu_hsVxTruthLong = nullptr;
 
-    TH1* m_vx_hs_z_pull;
-    TH1* m_vx_hs_y_pull;
-    TH1* m_vx_hs_x_pull;
-    TH1* m_vx_all_z_pull;
-    TH1* m_vx_all_y_pull;
-    TH1* m_vx_all_x_pull;
+    TH1* m_vx_hs_z_pull = nullptr;
+    TH1* m_vx_hs_y_pull = nullptr;
+    TH1* m_vx_hs_x_pull = nullptr;
+    TH1* m_vx_all_z_pull = nullptr;
+    TH1* m_vx_all_y_pull = nullptr;
+    TH1* m_vx_all_x_pull = nullptr;
     
-    TH1* m_vx_hs_z_res;
-    TH1* m_vx_hs_y_res;
-    TH1* m_vx_hs_x_res;
-    TH1* m_vx_all_z_res;
-    TH1* m_vx_all_y_res;
-    TH1* m_vx_all_x_res;
+    TH1* m_vx_hs_z_res = nullptr;
+    TH1* m_vx_hs_y_res = nullptr;
+    TH1* m_vx_hs_x_res = nullptr;
+    TH1* m_vx_all_z_res = nullptr;
+    TH1* m_vx_all_y_res = nullptr;
+    TH1* m_vx_all_x_res = nullptr;
 
-    TH2* m_vx_all_truth_z_res_vs_PU;
-    TH2* m_vx_all_truth_x_res_vs_PU;
-    TH2* m_vx_all_truth_y_res_vs_PU;
-    TH2* m_vx_all_truth_z_pull_vs_PU;
-    TH2* m_vx_all_truth_x_pull_vs_PU;
-    TH2* m_vx_all_truth_y_pull_vs_PU;
+    TH2* m_vx_all_truth_z_res_vs_PU = nullptr;
+    TH2* m_vx_all_truth_x_res_vs_PU = nullptr;
+    TH2* m_vx_all_truth_y_res_vs_PU = nullptr;
+    TH2* m_vx_all_truth_z_pull_vs_PU = nullptr;
+    TH2* m_vx_all_truth_x_pull_vs_PU = nullptr;
+    TH2* m_vx_all_truth_y_pull_vs_PU = nullptr;
 
-    TH2* m_vx_all_truth_z_res_vs_nTrk;
-    TH2* m_vx_all_truth_x_res_vs_nTrk;
-    TH2* m_vx_all_truth_y_res_vs_nTrk;
-    TH2* m_vx_all_truth_z_pull_vs_nTrk;
-    TH2* m_vx_all_truth_x_pull_vs_nTrk;
-    TH2* m_vx_all_truth_y_pull_vs_nTrk;
+    TH2* m_vx_all_truth_z_res_vs_nTrk = nullptr;
+    TH2* m_vx_all_truth_x_res_vs_nTrk = nullptr;
+    TH2* m_vx_all_truth_y_res_vs_nTrk = nullptr;
+    TH2* m_vx_all_truth_z_pull_vs_nTrk = nullptr;
+    TH2* m_vx_all_truth_x_pull_vs_nTrk = nullptr;
+    TH2* m_vx_all_truth_y_pull_vs_nTrk = nullptr;
 
-    TH2* m_vx_hs_truth_z_res_vs_PU;
-    TH2* m_vx_hs_truth_x_res_vs_PU;
-    TH2* m_vx_hs_truth_y_res_vs_PU;
-    TH2* m_vx_hs_truth_z_pull_vs_PU;
-    TH2* m_vx_hs_truth_x_pull_vs_PU;
-    TH2* m_vx_hs_truth_y_pull_vs_PU;
+    TH2* m_vx_hs_truth_z_res_vs_PU = nullptr;
+    TH2* m_vx_hs_truth_x_res_vs_PU = nullptr;
+    TH2* m_vx_hs_truth_y_res_vs_PU = nullptr;
+    TH2* m_vx_hs_truth_z_pull_vs_PU = nullptr;
+    TH2* m_vx_hs_truth_x_pull_vs_PU = nullptr;
+    TH2* m_vx_hs_truth_y_pull_vs_PU = nullptr;
 
-    TH2* m_vx_hs_truth_z_res_vs_nTrk;
-    TH2* m_vx_hs_truth_x_res_vs_nTrk;
-    TH2* m_vx_hs_truth_y_res_vs_nTrk;
-    TH2* m_vx_hs_truth_z_pull_vs_nTrk;
-    TH2* m_vx_hs_truth_x_pull_vs_nTrk;
-    TH2* m_vx_hs_truth_y_pull_vs_nTrk;
+    TH2* m_vx_hs_truth_z_res_vs_nTrk = nullptr;
+    TH2* m_vx_hs_truth_x_res_vs_nTrk = nullptr;
+    TH2* m_vx_hs_truth_y_res_vs_nTrk = nullptr;
+    TH2* m_vx_hs_truth_z_pull_vs_nTrk = nullptr;
+    TH2* m_vx_hs_truth_x_pull_vs_nTrk = nullptr;
+    TH2* m_vx_hs_truth_y_pull_vs_nTrk = nullptr;
+
     // New Histograms for Expert Plots for observables for different vertex classifications
-    TH1* m_vx_ntracks_matched;
-    TH1* m_vx_ntracks_merged;
-    TH1* m_vx_ntracks_split;
-    TH1* m_vx_ntracks_HS_matched;
-    TH1* m_vx_ntracks_HS_merged;
-    TH1* m_vx_ntracks_HS_split;
-    TH1* m_vx_ntracks_ALL_matched;
-    TH1* m_vx_ntracks_ALL_merged;
-    TH1* m_vx_ntracks_ALL_split;
-    TH1* m_vx_sumpT_matched;
-    TH1* m_vx_sumpT_merged;
-    TH1* m_vx_sumpT_split;
-    TH1* m_vx_sumpT_HS_matched;
-    TH1* m_vx_sumpT_HS_merged;
-    TH1* m_vx_sumpT_HS_split;
-    
-    TH1* m_vx_z_asym_matched;
-    TH1* m_vx_z_asym_merged;
-    TH1* m_vx_z_asym_split;
-    TH1* m_vx_z_asym_HS_matched;
-    TH1* m_vx_z_asym_HS_merged;
-    TH1* m_vx_z_asym_HS_split;
-    TH1* m_vx_z_asym_weighted_matched;
-    TH1* m_vx_z_asym_weighted_merged;
-    TH1* m_vx_z_asym_weighted_split;
-    TH1* m_vx_z_asym_weighted_HS_matched;
-    TH1* m_vx_z_asym_weighted_HS_merged;
-    TH1* m_vx_z_asym_weighted_HS_split;
-    
-    TH1* m_vx_track_weight_matched;
-    TH1* m_vx_track_weight_merged;
-    TH1* m_vx_track_weight_split;
-    TH1* m_vx_track_weight_HS_matched;
-    TH1* m_vx_track_weight_HS_merged;
-    TH1* m_vx_track_weight_HS_split;
-
-    TH1* m_vx_normalised_track_weight_matched;
-    TH1* m_vx_normalised_track_weight_merged;
-    TH1* m_vx_normalised_track_weight_split;
-    TH1* m_vx_normalised_track_weight_HS_matched;
-    TH1* m_vx_normalised_track_weight_HS_merged;
-    TH1* m_vx_normalised_track_weight_HS_split;
-
-    TH1* m_vx_chi2Over_ndf_matched;
-    TH1* m_vx_chi2Over_ndf_merged;
-    TH1* m_vx_chi2Over_ndf_split;
-    TH1* m_vx_chi2Over_ndf_HS_matched;
-    TH1* m_vx_chi2Over_ndf_HS_merged;
-    TH1* m_vx_chi2Over_ndf_HS_split;
-
-    TH1* m_vx_z0_skewness_matched;
-    TH1* m_vx_z0_skewness_merged;
-    TH1* m_vx_z0_skewness_split;
-    TH1* m_vx_z0_skewness_HS_matched;
-    TH1* m_vx_z0_skewness_HS_merged;
-    TH1* m_vx_z0_skewness_HS_split;
-    TH1* m_vx_z0_kurtosis_matched;
-    TH1* m_vx_z0_kurtosis_merged;
-    TH1* m_vx_z0_kurtosis_split;
-    TH1* m_vx_z0_kurtosis_HS_matched;
-    TH1* m_vx_z0_kurtosis_HS_merged;
-    TH1* m_vx_z0_kurtosis_HS_split;
-
-    // ALL Vertices
-    TH1* m_vx_sumpT_ALL_matched;
-    TH1* m_vx_sumpT_ALL_merged;
-    TH1* m_vx_sumpT_ALL_split;
-    
-    TH1* m_vx_z_asym_ALL_matched;
-    TH1* m_vx_z_asym_ALL_merged;
-    TH1* m_vx_z_asym_ALL_split;
-    TH1* m_vx_z_asym_weighted_ALL_matched;
-    TH1* m_vx_z_asym_weighted_ALL_merged;
-    TH1* m_vx_z_asym_weighted_ALL_split;
-    TH1* m_vx_track_weight_ALL_matched;
-    TH1* m_vx_track_weight_ALL_merged;
-    TH1* m_vx_track_weight_ALL_split;
-    TH1* m_vx_normalised_track_weight_ALL_matched;
-    TH1* m_vx_normalised_track_weight_ALL_merged;
-    TH1* m_vx_normalised_track_weight_ALL_split;
-
-    TH1* m_vx_chi2Over_ndf_ALL_matched;
-    TH1* m_vx_chi2Over_ndf_ALL_merged;
-    TH1* m_vx_chi2Over_ndf_ALL_split;
-
-    TH1* m_vx_z0_skewness_ALL_matched;
-    TH1* m_vx_z0_skewness_ALL_merged;
-    TH1* m_vx_z0_skewness_ALL_split;
-    TH1* m_vx_z0_kurtosis_ALL_matched;
-    TH1* m_vx_z0_kurtosis_ALL_merged;
-    TH1* m_vx_z0_kurtosis_ALL_split;
-
-    TH1* m_vx_nVertices_ALL_matched;
-    TH1* m_vx_nVertices_ALL_merged;
-    TH1* m_vx_nVertices_ALL_split;
-    TH1* m_vx_nVertices_ALL_fake;
-    TH1* m_vx_nVertices_HS_matched;
-    TH1* m_vx_nVertices_HS_merged;
-    TH1* m_vx_nVertices_HS_split;
-    TH1* m_vx_nVertices_HS_fake;
-    TH1* m_vx_nVertices_matched;
-    TH1* m_vx_nVertices_merged;
-    TH1* m_vx_nVertices_split;
-    TH1* m_vx_nVertices_fake;
+    using TH1_map = std::map<int, std::map<InDetVertexTruthMatchUtils::VertexMatchType, TH1*>>;
+    TH1_map m_vx_ntracks{};
+    TH1_map m_vx_sumpT{};
+    TH1_map m_vx_z_asym{};
+    TH1_map m_vx_z_asym_weighted{};
+    TH1_map m_vx_track_weight{};
+    TH1_map m_vx_normalised_track_weight{};
+    TH1_map m_vx_chi2Over_ndf{};
+    TH1_map m_vx_z0_skewness{};
+    TH1_map m_vx_z0_kurtosis{};
+    TH1_map m_vx_nVertices{};
 
     // delta z plot
-    TH1* m_vx_all_dz;
-    TH1* m_vx_hs_mindz;
+    TH1* m_vx_all_dz = nullptr;
+    TH1* m_vx_hs_mindz = nullptr;
     
-    TH1* m_vx_PUdensity;
-    TH1* m_vx_nTruth;
-    TH2* m_vx_nTruth_vs_PUdensity;
+    TH1* m_vx_PUdensity = nullptr;
+    TH1* m_vx_nTruth = nullptr;
+    TH2* m_vx_nTruth_vs_PUdensity = nullptr;
 
     ///@}
 private:
