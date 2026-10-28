@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -55,14 +55,4 @@ def AthenaPoolCnvSvcCfg(flags, **kwargs):
     acc.addService(service)
     acc.addService(CompFactory.EvtPersistencySvc("EventPersistencySvc",
                                                  CnvServices=[service.getFullJobOptName()]))
-    return acc
-
-
-def AthenaPoolAddressProviderSvcCfg(flags, **kwargs):
-    acc = ComponentAccumulator()
-    acc.addService(CompFactory.StoreGateSvc("MetaDataStore"))
-
-    service = CompFactory.AthenaPoolAddressProviderSvc(**kwargs)
-    acc.addService(service)
-    acc.addService(CompFactory.ProxyProviderSvc(ProviderNames=[service.getFullJobOptName()]))
     return acc
