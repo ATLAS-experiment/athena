@@ -60,7 +60,7 @@ eflowTrackCaloPoints::eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, cons
 
   }
 
-eflowTrackCaloPoints::eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, const Acts::BoundTrackParameters&> & trackParameters,
+eflowTrackCaloPoints::eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, const Acts::BoundTrackParameters*> & trackParameters,
   const Acts::GeometryContext& gctx) :
   m_isEM1Barrel(trackParameters.begin()->first == eflowCalo::EMB1){
     for (auto keyValuePair : trackParameters) {
@@ -110,6 +110,6 @@ Amg::Vector3D eflowTrackCaloPoints::parToPosition(const Trk::TrackParameters* tr
   return (trackPars != nullptr) ? trackPars->position() : m_nullVector;
 }
 
-Amg::Vector3D eflowTrackCaloPoints::parToPosition(const Acts::BoundTrackParameters& trackPars, const Acts::GeometryContext& gctx) {
-  return trackPars.position(gctx);
+Amg::Vector3D eflowTrackCaloPoints::parToPosition(const Acts::BoundTrackParameters* trackPars, const Acts::GeometryContext& gctx) {
+  return trackPars->position(gctx);
 }
