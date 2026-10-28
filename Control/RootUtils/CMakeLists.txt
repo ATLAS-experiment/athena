@@ -8,7 +8,7 @@ find_package( Boost COMPONENTS thread )
 find_package( Python COMPONENTS Development )
 find_package( ROOT
    COMPONENTS RIO Hist Tree Core MathCore ROOTTPython
-   OPTIONAL_COMPONENTS CPyCppyy )
+   OPTIONAL_COMPONENTS CPyCppyy cpyrt )
 
 set( ROOT_LIBRARIES_PYROOT ${ROOT_LIBRARIES} )
 unset( ROOT_FOUND )
@@ -31,6 +31,9 @@ add_dependencies( RootUtils RootUtilsDictGen )
 set( PYROOT_DEFS )
 if( TARGET ROOT::CPyCppyy )
    set( PYROOT_DEFS PRIVATE_DEFINITIONS ATLAS_HAVE_CPYCPPYY )
+endif()
+if( TARGET ROOT::cpyrt )
+   set( PYROOT_DEFS PRIVATE_DEFINITIONS ATLAS_HAVE_CPYRT )
 endif()
 atlas_add_library( RootUtilsPyROOT
    src/pyroot/*.cxx

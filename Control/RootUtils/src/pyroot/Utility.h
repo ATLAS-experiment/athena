@@ -19,10 +19,15 @@
 #include "TClass.h"
 
 
-#ifdef ATLAS_HAVE_CPYCPPYY
+#if defined(ATLAS_HAVE_CPYCPPYY)
 #include "CPyCppyy/PyException.h"
 namespace RootUtils {
   using PyException = CPyCppyy::PyException;
+}
+#elif defined(ATLAS_HAVE_CPYRT)
+#include "cpyrt/PyException.h"
+namespace RootUtils {
+using PyException = cppjit::cpyrt::PyException;
 }
 #else
 #include <exception>
