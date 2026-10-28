@@ -16,6 +16,8 @@
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
 #include "Acts/TrackFitting/MbfSmoother.hpp"
+#include "Acts/TrackFitting/GsfMixtureReduction.hpp"
+#include "Acts/TrackFitting/BetheHeitlerApprox.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsInterop/Logger.h"
 #include "ActsCalibrators/SourceLinkHash.h"
@@ -27,11 +29,13 @@
 
 #include "ActsEvent/ExpectedHitUtils.h"
 #include "ActsEvent/TrackContainerUtils.h"
+#include "detail/Definitions.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/detail/SharedHitCounter.h"
 
 // STL
 #include <Acts/Propagator/StandardAborters.hpp>
+#include <optional>
 #include <sstream>
 #include <functional>
 #include <stdexcept>
@@ -40,7 +44,7 @@
 #include <variant>
 
 namespace {
- 
+
   static std::optional<ActsTrk::detail::RecoTrackStateContainerProxy> getFirstMeasurementFromTrack(typename ActsTrk::detail::RecoTrackContainer::TrackProxy trackProxy) {
     std::optional<ActsTrk::detail::RecoTrackStateContainerProxy> firstMeasurement {std::nullopt};
     for (auto st : trackProxy.trackStatesReversed()) {
@@ -61,6 +65,7 @@ namespace {
 namespace ActsTrk
 {
   struct TrackFindingBaseAlg::CKF_pimpl : public detail::CKF_config {};
+  struct TrackFindingBaseAlg::bremCKF_pimpl : public detail::bremCKF_config {};
 
   TrackFindingAlg::TrackFindingAlg(const std::string &name, ISvcLocator *pSvcLocator)
     : TrackFindingBaseAlg(name, pSvcLocator) {}
@@ -87,6 +92,7 @@ namespace ActsTrk
     ATH_CHECK(m_volumeIdToDetectorElementCollMapKey.initialize());
     ATH_CHECK(m_detElStatus.initialize());
     ATH_CHECK(m_beamSpotKey.initialize());
+    ATH_CHECK(m_caloClusterROIKey.initialize(m_doBremRecovery.value()));
 
     m_storeDestinies = not m_seedDestiny.empty();
     ATH_CHECK(m_seedDestiny.initialize(m_storeDestinies));
@@ -135,6 +141,17 @@ namespace ActsTrk
     // ================================================== //
     // ===================== INPUTS ===================== //
     // ================================================== //
+    //
+    // CALO CLUSTER ROIS
+    const ROIPhiRZContainer* caloClusterROIs = nullptr;
+    if (m_doBremRecovery) {
+      SG::ReadHandle<ROIPhiRZContainer> caloClusterROIsHandle{m_caloClusterROIKey, ctx};
+      if (!caloClusterROIsHandle.isValid()) {
+        ATH_MSG_FATAL("Failed to read ROIPhiRZContainer with key " << m_caloClusterROIKey.key());
+        return StatusCode::FAILURE;
+      }
+      caloClusterROIs = caloClusterROIsHandle.cptr();
+    }
 
     // SEED TRIPLETS
     std::vector<const ActsTrk::SeedContainer *> seedContainers;
@@ -227,7 +244,7 @@ namespace ActsTrk
     Acts::VectorTrackContainer actsTrackBackend;
     Acts::VectorMultiTrajectory actsTrackStateBackend;
     {
-      std::lock_guard<std::mutex> lock( m_mutex );      
+      std::lock_guard<std::mutex> lock( m_mutex );
       actsTrackBackend.reserve(m_nTrackReserve);
       actsTrackStateBackend.reserve(m_nTrackStateReserve);
     }
@@ -268,7 +285,8 @@ namespace ActsTrk
                              event_stat,
                              m_storeDestinies ? destinies.at(icontainer).get() : nullptr,
                              *pSurface.get(),
-                             trackCategories));
+                             trackCategories,
+                             caloClusterROIs));
       }
 
     ATH_MSG_DEBUG("    \\__ Created " << actsTracksContainer.size() << " tracks");
@@ -300,8 +318,8 @@ namespace ActsTrk
         m_nTrackStateReserve = static_cast<std::size_t>( std::ceil(m_memorySafetyMargin * actsTrackStateBackend.size()) );
       }
     }
-    
-    // handle the ambiguity    
+
+    // handle the ambiguity
     // we potentially need to short list the track candidates and make some copies
     if (not m_ambi) {
       copyStats(event_stat);
@@ -393,13 +411,17 @@ namespace ActsTrk
                               EventStats &event_stat,
                               std::vector<int>* destiny,
                               const Acts::PerigeeSurface& pSurface,
-                              std::optional<std::vector<unsigned int>>& trackCategories) const
+                              std::optional<std::vector<unsigned int>>& trackCategories,
+                              const ROIPhiRZContainer *caloClusterROIs) const
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
     auto [options, secondOptions, measurementSelector] = getDefaultOptions(ctx, detContext, measurements, &pSurface);
+    std::optional<TrackFindingBremOptions> bremOptions;
+    if (m_doBremRecovery){
+        bremOptions = getBremOptions(ctx, detContext, measurements, &pSurface);
+    }
 
-    // ActsTrk::MutableTrackContainer tracksContainerTemp;
     Acts::VectorTrackContainer trackBackend;
     Acts::VectorMultiTrajectory trackStateBackend;
     detail::RecoTrackContainer tracksContainerTemp(trackBackend, trackStateBackend);
@@ -410,6 +432,7 @@ namespace ActsTrk
 
     std::size_t category_i = 0;
     const auto &trackSelectorCfg = trackFinder().trackSelector.config();
+
     auto stopBranchProxy = [&](const detail::RecoTrackContainer::TrackProxy &track,
                                const detail::RecoTrackContainer::TrackStateProxy &trackState) -> BranchStopperResult {
       return stopBranch(track, trackState, trackSelectorCfg, detContext.geometry, measurementIndex, typeIndex, event_stat[category_i]);
@@ -429,6 +452,13 @@ namespace ActsTrk
     };
     if (m_doSecondPassBranchStopper) {
       secondOptions.extensions.branchStopper.connect(stopSecondBranchProxy);
+    }
+
+    if (m_doBremRecovery){
+        bremOptions.value().options.extensions.branchStopper.connect(stopBranchProxy);
+        if (m_doSecondPassBranchStopper) {
+            bremOptions.value().secondOptions.extensions.branchStopper.connect(stopSecondBranchProxy);
+        }
     }
 
     Acts::PropagatorOptions<detail::Stepper::Options, detail::Navigator::Options,
@@ -524,146 +554,66 @@ namespace ActsTrk
           }
         }
 
-        xAOD::TrackFitter current_fitter = xAOD::KalmanFitter;
+        // TODO since the second pass is strictly an extension we should have a separate branch stopper which never drops and always extrapolates to the target surface
+
         // @TODO introduce additional enums to distinguish Acts CKF from other implementations?
+        //
 
         auto measurementRangesForced =
             m_forceTrackOnSeed ? measurements.createMeasurementRangesForced(seed, measurementIndex)
                                : std::unique_ptr<ActsTrk::detail::MeasurementRangeListFlat>();
         measurementSelector->setMeasurementRangesForced(measurementRangesForced.get());
+        if (bremOptions.has_value()) {
+            bremOptions.value().measurementSelector->setMeasurementRangesForced(measurementRangesForced.get());
+        }
         if (measurementRangesForced)
           event_stat[category_i][kNForcedSeedMeasurements] += measurementRangesForced->size();
 
-        // Get the Acts tracks, given this seed
-        Acts::Result<std::vector<TrkProxy> > result =
-          trackFinder().ckf.findTracks(*optTrackParams, options, tracksContainerTemp);
-
-        // The result for this seed
-        if (not result.ok()) {
-          ATH_MSG_WARNING("Track finding failed for " << seedType << " seed " << iseed << " with error" << result.error());
-          if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
-          continue;
-        }
-        auto &tracksForSeed = result.value();
-
-
-
         std::size_t ntracks = 0ul;
+        // Get the Acts tracks, given this seed
+        ATH_CHECK(runTrackFinder<TrackFinderOptions>(
+            detContext,
+            pSurface,
+            extrapolationStrategy,
+            sharedHits,
+            actsTracksContainer,
+            measurementIndex,
+            tracksContainerTemp,
+            duplicateSeedDetector,
+            destiny,
+            event_stat,
+            ntracks,
+            iseed,
+            category_i,
+            seedType,
+            trackCategories,
+            options,
+            secondOptions,
+            *optTrackParams));
 
-        // loop on the tracks we have just found from the seed
-        std::size_t nfirst = 0;
-        for (TrkProxy &firstTrack : tracksForSeed) {
-          ActsTrk::TrackContainerUtils::setFitterType(firstTrack,current_fitter);
-          // smoothing
-          auto smoothingResult = Acts::smoothTrack(detContext.geometry, firstTrack, logger(), Acts::MbfSmoother());
-          if (!smoothingResult.ok()) {
-            ATH_MSG_DEBUG("Smoothing for seed "
-                          << iseed << " and first track " << firstTrack.index()
-                          << " failed with error " << smoothingResult.error());
-            continue;
-          }
 
-          // if no two way, just add the track and move on
-          if (not m_doTwoWay) {
-            // add the track to the collection
-            ATH_CHECK( addTrack(detContext,
-                                firstTrack,
-                                pSurface,
-                                extrapolationStrategy,
-                                sharedHits,
-                                actsTracksContainer,
-                                measurementIndex,
-                                tracksContainerTemp,
-                                duplicateSeedDetector,
-                                destiny,
-                                event_stat,
-                                ntracks,
-                                iseed,
-                                category_i,
-                                seedType,
-                                trackCategories) );
-            ++nfirst;
-            continue;
-          }
-
-          // TWO WAY STARTS HERE
-          // We need the first measurement of the track
-          std::optional<detail::RecoTrackStateContainerProxy> firstMeas = getFirstMeasurementFromTrack(firstTrack);
-          // we are supposed to find a measurement
-          if (not firstMeas.has_value()) {
-            ATH_MSG_ERROR("Could not retrieve first measurement from track proxy. Is it ill-formed?");
-            return StatusCode::FAILURE;
-          }
-          detail::RecoTrackStateContainerProxy& firstMeasurement = firstMeas.value();
-
-          // Get the tracks from the second track finding
-          std::vector<typename detail::RecoTrackContainer::TrackProxy> secondTracksForSeed =
-            doTwoWayTrackFinding(firstMeasurement,
-                                 firstTrack,
-                                 tracksContainerTemp,
-                                 secondOptions);
-
-          if ( secondTracksForSeed.empty() ) {
-            ATH_MSG_DEBUG("No viable result from second track finding for " << seedType << " seed " << iseed << " track " << nfirst);
-            ++event_stat[category_i][kNoSecond];
-            ATH_CHECK( addTrack(detContext,
-                                firstTrack,
-                                pSurface,
-                                extrapolationStrategy,
-                                sharedHits,
-                                actsTracksContainer,
-                                measurementIndex,
-                                tracksContainerTemp,
-                                duplicateSeedDetector,
-                                destiny,
-                                event_stat,
-                                ntracks,
-                                iseed,
-                                category_i,
-                                seedType,
-                                trackCategories) );
-          }
-
-          // need to add tracks here
-          // do the stiching
-          // store the original previous state to restore it later
-          auto originalFirstMeasurementPrevious = firstMeasurement.previous();
-          for (auto &secondTrack : secondTracksForSeed) {
-            secondTrack.reverseTrackStates(true);
-
-            firstMeasurement.previous() = secondTrack.outermostTrackState().index();
-            secondTrack.tipIndex() = firstTrack.tipIndex();
-
-            // The second pass extrapolates to the perigee, and only the
-            // perigee holds every measurement once. Do not smooth the stitched
-            // track: the second pass starts from the smoothed first pass, so a
-            // smoother counts the first pass twice.
-
-            // Add track to collection
-            ATH_CHECK( addTrack(detContext,
-                                secondTrack,
-                                pSurface,
-                                extrapolationStrategy,
-                                sharedHits,
-                                actsTracksContainer,
-                                measurementIndex,
-                                tracksContainerTemp,
-                                duplicateSeedDetector,
-                                destiny,
-                                event_stat,
-                                ntracks,
-                                iseed,
-                                category_i,
-                                seedType,
-                                trackCategories) );
-          } // loop on tracks
-
-          // finish the stiching
-          // restore the original previous state for the first track
-          firstMeasurement.previous() = originalFirstMeasurementPrevious;
-
-          nfirst++;
-        } // loop on tracks from seed
+            // If nominal track finder produces no tracks, and seed matches a calo ROI, run gsf-enhanced track finding
+        if (ntracks == 0 && caloClusterROIs != nullptr && hasMatchingCaloROI(detContext.geometry, optTrackParams, *caloClusterROIs)){
+            ATH_CHECK(runTrackFinder<BremTrackFinderOptions>(
+                detContext,
+                pSurface,
+                extrapolationStrategy,
+                sharedHits,
+                actsTracksContainer,
+                measurementIndex,
+                tracksContainerTemp,
+                duplicateSeedDetector,
+                destiny,
+                event_stat,
+                ntracks,
+                iseed,
+                category_i,
+                seedType,
+                trackCategories,
+                bremOptions.value().options,
+                bremOptions.value().secondOptions,
+                *optTrackParams));
+        }
 
         if (m_storeDestinies) {
           if (ntracks == 0) {
@@ -673,10 +623,11 @@ namespace ActsTrk
           }
         }
 
-        if (ntracks == 0) {
-          ATH_MSG_DEBUG("Track finding found no track candidates for " << seedType << " seed " << iseed);
-          ++event_stat[category_i][kNoTrack];
-        } else if (ntracks >= 2) {
+        if (ntracks == 0){
+            ATH_MSG_DEBUG("Track finding found no track candidates for " << seedType << " seed " << iseed);
+            ++event_stat[category_i][kNoTrack];
+        }
+        else if (ntracks >= 2){
           ++event_stat[category_i][kMultipleBranches];
         }
 
@@ -740,7 +691,7 @@ namespace ActsTrk
             return;
           }
           ++counter.n_detector_elements;
-         
+
           if (!det_el_status->isGood( acts_detector_element->identifyHash() )) {
             ActsTrk::detail::MeasurementRange old_range = measurements.markSurfaceInsensitive(surface_ptr->geometryId());
             if (!old_range.empty()) {
@@ -755,7 +706,7 @@ namespace ActsTrk
             }
             ++counter.n_disabled_detector_elements;
           }
-          
+
         }, true /*only sensitive surfaces*/);
       }
       else {
@@ -816,7 +767,7 @@ struct Collector {
     if(detElem != nullptr) {
       detail::addToExpectedLayerPattern(*result, *detElem);
     }
-    
+
 
     return Acts::Result<void>::success();
   }
@@ -907,17 +858,17 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
   {
 
     std::array<unsigned int, 4> expectedLayerPattern{};
-
+    bool bremTrack = ActsTrk::TrackContainerUtils::fitterType(track) == xAOD::GaussianSumFilter;
     // if the the perigeeSurface was not hit (in particular the case for the inside-out pass,
     // the track has no reference surface and the extrapolation to the perigee has not been done
     // yet.
     if (not track.hasReferenceSurface()) {
-      auto extrapolationResult =
-        extrapolateTrackToReferenceSurface(detContext, track,
-                                          pSurface,
-                                          trackFinder().extrapolator,
-                                          extrapolationStrategy,
-                                          expectedLayerPattern);
+        auto extrapolationResult =
+          extrapolateTrackToReferenceSurface(detContext, track,
+                                            pSurface,
+                                            trackFinder().extrapolator,
+                                            extrapolationStrategy,
+                                            expectedLayerPattern);
 
       if (not extrapolationResult.ok()) {
         ATH_MSG_WARNING("Extrapolation for seed "
@@ -957,13 +908,14 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     ++ntracks;
     ++event_stat[category_i][kNOutputTracks];
 
-    if ( not trackFinder().trackSelector.isValidTrack(track) or
-         not selectCountsFinal(track)) {
-      ATH_MSG_DEBUG("Track " << ntracks << " from " << seedType << " seed " << iseed << " failed track selection");
-      if ( m_trackStatePrinter.isSet() ) {
+    bool validTrack = (bremTrack) ? bremTrackFinder().trackSelector.isValidTrack(track) : trackFinder().trackSelector.isValidTrack(track);
+
+    if ( not validTrack or not selectCountsFinal(track)) {
+    ATH_MSG_DEBUG("Track " << ntracks << " from " << seedType << " seed " << iseed << " failed track selection");
+    if ( m_trackStatePrinter.isSet() ) {
         m_trackStatePrinter->printTrack(detContext.geometry, tracksContainerTemp, track, measurementIndex, true);
-      }
-      return StatusCode::SUCCESS;
+    }
+    return StatusCode::SUCCESS;
     }
 
     ++event_stat[category_i][kNSelectedTracks];
@@ -1041,4 +993,164 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     return StatusCode::SUCCESS;
   }
 
+  template <typename TrackFinderOptionsType>
+  StatusCode TrackFindingAlg::runTrackFinder(const DetectorContextHolder& detContext,
+                                      const Acts::Surface& pSurface,
+                                      const Acts::TrackExtrapolationStrategy& extrapolationStrategy,
+                                      detail::SharedHitCounter &sharedHits,
+                                      detail::RecoTrackContainer &actsTracksContainer,
+                                      const detail::MeasurementIndex& measurementIndex,
+                                      detail::RecoTrackContainer& tracksContainerTemp,
+                                      detail::DuplicateSeedDetector& duplicateSeedDetector,
+                                      std::vector<int>* destiny,
+                                      EventStats& event_stat,
+                                      std::size_t& ntracks,
+                                      std::size_t iseed,
+                                      std::size_t category_i,
+                                      const char *seedType,
+                                      std::optional<std::vector<unsigned int>>& trackCategories,
+                                      const TrackFinderOptionsType& options,
+                                      const TrackFinderOptionsType& secondOptions,
+                                      const Acts::BoundTrackParameters &seedParameters) const
+  {
+
+      xAOD::TrackFitter current_fitter;
+      if constexpr (std::is_same_v<TrackFinderOptionsType, TrackFinderOptions>){
+          current_fitter = xAOD::KalmanFitter;
+      }
+      else {
+          current_fitter = xAOD::GaussianSumFilter;
+      }
+
+      ATH_MSG_DEBUG("Running track finding for " << seedType << " seed " << iseed << ".");
+
+      auto rootBranch = tracksContainerTemp.makeTrack();
+      Acts::Result<std::vector<TrkProxy> > result = findTracksCKF(seedParameters, options, tracksContainerTemp, rootBranch);
+
+      if (not result.ok()){
+          ATH_MSG_WARNING("Track finding failed for " << seedType << " seed " << iseed << " with error" << result.error());
+          if (m_storeDestinies) destiny->at(iseed) = DestinyType::FAILURE;
+          return StatusCode::SUCCESS;
+      }
+
+      auto &tracksForSeed = result.value();
+
+      std::size_t nfirst = 0;
+      for (TrkProxy &firstTrack : tracksForSeed){
+        ActsTrk::TrackContainerUtils::setFitterType(firstTrack,current_fitter);
+        auto smoothingResult = Acts::smoothTrack(detContext.geometry, firstTrack, logger(), Acts::MbfSmoother());
+        if (!smoothingResult.ok()){
+            ATH_MSG_DEBUG("Smoothing for seed "
+                        << iseed << " and first track " << firstTrack.index()
+                        << " failed with error " << smoothingResult.error());
+            continue;
+        }
+        if (not m_doTwoWay){
+            ATH_CHECK( addTrack(detContext,
+                                firstTrack,
+                                pSurface,
+                                extrapolationStrategy,
+                                sharedHits,
+                                actsTracksContainer,
+                                measurementIndex,
+                                tracksContainerTemp,
+                                duplicateSeedDetector,
+                                destiny,
+                                event_stat,
+                                ntracks,
+                                iseed,
+                                category_i,
+                                seedType,
+                                trackCategories) );
+            ++nfirst;
+            continue;
+        }
+
+        // TWO WAY STARTS HERE
+        // We need the first measurement of the track
+        std::optional<detail::RecoTrackStateContainerProxy> firstMeas = getFirstMeasurementFromTrack(firstTrack);
+        // we are supposed to find a measurement
+        if (not firstMeas.has_value()) {
+            ATH_MSG_ERROR("First measurement for seed " << iseed << " and first track " << firstTrack.index() << "failed.");
+            continue;
+        }
+        detail::RecoTrackStateContainerProxy& firstMeasurement = firstMeas.value();
+
+        // Get the tracks from the second track finding
+        std::vector<typename detail::RecoTrackContainer::TrackProxy> secondTracksForSeed;
+        // Create initial parameters for the propagation
+        Acts::BoundTrackParameters secondInitialParameters = firstTrack.createParametersFromState(detail::RecoConstTrackStateContainerProxy{firstMeasurement});
+        if (secondInitialParameters.referenceSurface().insideBounds(secondInitialParameters.localPosition())){ // #3751
+            if (m_inflateCovarianceTwoWay){
+                inflateCovarianceTwoWay(secondInitialParameters);
+            }
+            auto secondRootBranch = tracksContainerTemp.makeTrack();
+            secondRootBranch.copyFromWithoutStates(firstTrack); // #3634
+
+            // perform track finding
+            auto secondResult = findTracksCKF(secondInitialParameters, secondOptions, tracksContainerTemp, secondRootBranch);
+            if (secondResult.ok()){
+                secondTracksForSeed = std::move(secondResult.value());
+            }
+        }
+
+        if ( secondTracksForSeed.empty() ) {
+            ATH_MSG_DEBUG("No viable result from second track finding for " << seedType << " seed " << iseed << " track " << nfirst);
+            ++event_stat[category_i][kNoSecond];
+            ATH_CHECK( addTrack(detContext,
+                                firstTrack,
+                                pSurface,
+                                extrapolationStrategy,
+                                sharedHits,
+                                actsTracksContainer,
+                                measurementIndex,
+                                tracksContainerTemp,
+                                duplicateSeedDetector,
+                                destiny,
+                                event_stat,
+                                ntracks,
+                                iseed,
+                                category_i,
+                                seedType,
+                                trackCategories) );
+        }
+
+        // need to add tracks here
+        // do the stiching
+        // store the original previous state to restore it later
+        auto originalFirstMeasurementPrevious = firstMeasurement.previous();
+        for (auto &secondTrack : secondTracksForSeed) {
+            secondTrack.reverseTrackStates(true);
+
+            firstMeasurement.previous() = secondTrack.outermostTrackState().index();
+            secondTrack.tipIndex() = firstTrack.tipIndex();
+
+            // Add track to collection
+            ATH_CHECK( addTrack(detContext,
+                                secondTrack,
+                                pSurface,
+                                extrapolationStrategy,
+                                sharedHits,
+                                actsTracksContainer,
+                                measurementIndex,
+                                tracksContainerTemp,
+                                duplicateSeedDetector,
+                                destiny,
+                                event_stat,
+                                ntracks,
+                                iseed,
+                                category_i,
+                                seedType,
+                                trackCategories) );
+        } // loop on tracks
+
+        // finish the stiching
+        // restore the original previous state for the first track
+        firstMeasurement.previous() = originalFirstMeasurementPrevious;
+
+        nfirst++;
+    } // loop on tracks from seed
+
+      return StatusCode::SUCCESS;
+  }
 } // namespace

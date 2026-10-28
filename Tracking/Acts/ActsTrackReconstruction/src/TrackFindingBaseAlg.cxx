@@ -12,6 +12,7 @@
 #include "src/detail/TrackFindingMeasurements.h"
 #include "ActsInterop/TableUtils.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
+#include "Acts/TrackFitting/GsfMixtureReduction.hpp"
 
 #include "ActsEvent/TrackContainerUtils.h"
 
@@ -24,6 +25,11 @@ namespace ActsTrk {
 
   TrackFindingBaseAlg::CKF_pimpl &TrackFindingBaseAlg::trackFinder() { return *m_trackFinder; }
   const TrackFindingBaseAlg::CKF_pimpl &TrackFindingBaseAlg::trackFinder() const { return *m_trackFinder; }
+
+  struct TrackFindingBaseAlg::bremCKF_pimpl : public detail::bremCKF_config {};
+
+  TrackFindingBaseAlg::bremCKF_pimpl &TrackFindingBaseAlg::bremTrackFinder() { return *m_bremTrackFinder; }
+  const TrackFindingBaseAlg::bremCKF_pimpl &TrackFindingBaseAlg::bremTrackFinder() const { return *m_bremTrackFinder; }
 
   TrackFindingBaseAlg::TrackFindingBaseAlg(const std::string &name, ISvcLocator *pSvcLocator) : AthReentrantAlgorithm(name, pSvcLocator) {}
 
@@ -72,8 +78,15 @@ namespace ActsTrk {
     ATH_MSG_DEBUG("   " << m_branchStopperMeasCutReduce);
     ATH_MSG_DEBUG("   " << m_branchStopperAbsEtaMeasCut);
     ATH_MSG_DEBUG("   " << m_endOfWorldVolumeIds);
+    ATH_MSG_DEBUG("   " << m_doBremRecovery);
+    ATH_MSG_DEBUG("   " << m_phiWidthROI);
+    ATH_MSG_DEBUG("   " << m_etaWidthROI);
+    ATH_MSG_DEBUG("   " << m_bremMaxComponents);
+    ATH_MSG_DEBUG("   " << m_bremWeightCutoff);
+    ATH_MSG_DEBUG("   " << m_bremMergeMethod);
 
     m_logger = makeActsAthenaLogger(this, "Acts");
+    m_bremLogger = makeActsAthenaLogger(this, "BremActs");
 
     // Read and Write handles
     ATH_CHECK(m_trackContainerKey.initialize());
@@ -87,7 +100,9 @@ namespace ActsTrk {
     ATH_CHECK(m_stripCalibTool.retrieve(EnableTool{not m_stripCalibTool.empty()}));
     ATH_CHECK(m_hgtdCalibTool.retrieve(EnableTool{not m_hgtdCalibTool.empty()}));
 
-    auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
+    // auto magneticField = std::make_shared<ATLASMagneticFieldWrapper>();
+    // duplicated so that multi stepper owns different instance of magnetic field than single stepper
+    // auto magField = std::make_shared<ATLASMagneticFieldWrapper>();
     auto trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
 
     if(trackingGeometry->geometryVersion() == Acts::TrackingGeometry::GeometryVersion::Gen3) {
@@ -107,17 +122,6 @@ namespace ActsTrk {
          }
       }
     }
-
-    detail::Stepper stepper(std::move(magneticField));
-    detail::Navigator::Config config{std::move(trackingGeometry)};
-    config.resolvePassive = false;
-    config.resolveMaterial = true;
-    config.resolveSensitive = true;
-    detail::Navigator navigator(std::move(config), logger().cloneWithSuffix("Navigator"));
-    detail::Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
-
-    // Using the CKF propagator as extrapolator
-    detail::Extrapolator extrapolator = propagator;
 
     // m_etaBins (from flags.Tracking.ActiveConfig.etaBins) includes a dummy first and last bin, which we ignore
     std::vector<double> absEtaEdges;
@@ -176,15 +180,11 @@ namespace ActsTrk {
     // initializer measurement selector and connect it to the delegates of the track finder optins
     ATH_CHECK(initializeMeasurementSelector());
 
-    detail::CKF_config ckfConfig{
-        std::move(extrapolator),
-        detail::CKF{std::move(propagator), logger().cloneWithSuffix("CKF")},
-        {},
-        Acts::TrackSelector{trackSelectorCfg}};
-
-    m_trackFinder = std::make_unique<CKF_pimpl>(std::move(ckfConfig));
-
+    m_trackFinder = getTrackFindingFunction(trackingGeometry, trackSelectorCfg);
     trackFinder().ckfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<detail::RecoTrackStateContainer>>();
+
+    m_bremTrackFinder = getBremTrackFindingFunction(trackingGeometry, trackSelectorCfg);
+    bremTrackFinder().ckfExtensions.updater.connect<&ActsTrk::detail::FitterHelperFunctions::gainMatrixUpdate<detail::RecoTrackStateContainer>>();
 
     initStatTables();
 
@@ -224,6 +224,70 @@ namespace ActsTrk {
     return measurementSelector;
   }
 
+  std::unique_ptr<TrackFindingBaseAlg::CKF_pimpl> TrackFindingBaseAlg::getTrackFindingFunction(std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry,
+                                                                                               Acts::TrackSelector::EtaBinnedConfig trackSelectorCfg)
+  {
+    auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
+
+    detail::Stepper stepper(std::move(magneticField));
+    detail::Navigator::Config config(trackingGeometry);
+    config.resolvePassive = false;
+    config.resolveMaterial = true;
+    config.resolveSensitive = true;
+    detail::Navigator navigator(config, logger().cloneWithSuffix("Navigator"));
+    detail::Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
+
+    detail::Extrapolator extrapolator = propagator;
+
+    detail::CKF_config ckfConfig{
+        {
+            std::move(extrapolator),
+            Acts::TrackSelector{trackSelectorCfg}
+        },
+        detail::CKF{std::move(propagator), logger().cloneWithSuffix("CKF")},
+        {}
+    };
+
+    return std::make_unique<CKF_pimpl>(std::move(ckfConfig));
+  };
+
+    std::unique_ptr<TrackFindingBaseAlg::bremCKF_pimpl> TrackFindingBaseAlg::getBremTrackFindingFunction(std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry,
+                                                                                                         Acts::TrackSelector::EtaBinnedConfig trackSelectorCfg)
+    {
+      auto magneticField = std::make_unique<ATLASMagneticFieldWrapper>();
+      auto bremMagneticField = std::make_unique<ATLASMagneticFieldWrapper>();
+
+      detail::BremStepper bremStepper(std::move(magneticField));
+      detail::Navigator::Config bremConfig{trackingGeometry};
+      bremConfig.resolvePassive = false;
+      bremConfig.resolveMaterial = true;
+      bremConfig.resolveSensitive = true;
+      detail::Navigator bremNavigator(bremConfig, bremLogger().cloneWithSuffix("BremNavigator"));
+      detail::BremPropagator bremPropagator(std::move(bremStepper), std::move(bremNavigator), bremLogger().cloneWithSuffix("BremProp"));
+
+      detail::Stepper stepper(std::move(bremMagneticField));
+      detail::Navigator::Config config(trackingGeometry);
+      config.resolvePassive = false;
+      config.resolveMaterial = true;
+      config.resolveSensitive = true;
+      detail::Navigator navigator(config, logger().cloneWithSuffix("Navigator"));
+      detail::Propagator propagator(std::move(stepper), std::move(navigator), logger().cloneWithSuffix("Prop"));
+
+      detail::Extrapolator extrapolator = propagator;
+
+      detail::bremCKF_config bremCkfConfig{
+          {
+              std::move(extrapolator),
+              Acts::TrackSelector{trackSelectorCfg}
+          },
+          detail::BremCKF{std::move(bremPropagator), bremLogger().cloneWithSuffix("BremCKF")},
+          {}
+      };
+
+      return std::make_unique<bremCKF_pimpl>(std::move(bremCkfConfig));
+    };
+
+
   TrackFindingBaseAlg::TrackFindingDefaultOptions TrackFindingBaseAlg::getDefaultOptions(
       const EventContext &ctx,
       const DetectorContextHolder &detContext,
@@ -255,6 +319,60 @@ namespace ActsTrk {
     return {std::move(options), std::move(secondOptions), std::move(measurementSelector)};
   };
 
+  TrackFindingBaseAlg::TrackFindingBremOptions TrackFindingBaseAlg::getBremOptions(
+        const EventContext &ctx,
+        const DetectorContextHolder &detContext,
+        const detail::TrackFindingMeasurements &measurements,
+        const Acts::PerigeeSurface* pSurface) const {
+      Acts::PropagatorPlainOptions plainOptions{detContext.geometry, detContext.magField};
+      plainOptions.maxSteps = m_maxPropagationStep;
+      plainOptions.direction = Acts::Direction::Forward();
+      plainOptions.endOfWorldVolumeIds = m_endOfWorldVolumeIds;
+
+      // Set the CombinatorialKalmanFilter options
+      BremTrackFinderOptions options(detContext.geometry, detContext.magField, detContext.calib,
+                                 bremTrackFinder().ckfExtensions, plainOptions, pSurface);
+      options.recordMaterialStates = m_recordMaterialStates;
+
+      options.maxComponents = m_bremMaxComponents;
+      options.weightCutoff = m_bremWeightCutoff;
+
+      options.extensions.mixtureReducer.connect<&Acts::reduceMixtureWithKLDistance>();
+      options.betheHeitlerApprox = std::make_shared<Acts::PolynomialBetheHeitlerApprox>(Acts::makeDefaultBetheHeitlerApprox());
+
+      std::unique_ptr<ActsTrk::IMeasurementSelector> measurementSelector = setMeasurementSelector(ctx, measurements, options);
+
+      Acts::PropagatorPlainOptions plainSecondOptions{detContext.geometry, detContext.magField};
+      plainSecondOptions.maxSteps = m_maxPropagationStep;
+      plainSecondOptions.direction = plainOptions.direction.invert();
+      plainSecondOptions.endOfWorldVolumeIds = m_endOfWorldVolumeIds;
+
+      BremTrackFinderOptions secondOptions(detContext.geometry, detContext.magField, detContext.calib,
+                                       options.extensions, plainSecondOptions, pSurface);
+      secondOptions.targetSurface = pSurface;
+      secondOptions.skipPrePropagationUpdate = true;
+      secondOptions.recordMaterialStates = m_recordMaterialStates;
+
+      secondOptions.maxComponents = m_bremMaxComponents;
+      secondOptions.weightCutoff = m_bremWeightCutoff;
+
+      secondOptions.betheHeitlerApprox = std::make_shared<Acts::PolynomialBetheHeitlerApprox>(Acts::makeDefaultBetheHeitlerApprox());
+
+      if (m_bremMergeMethod == "MaxWeight"){
+          options.mergeMethod = Acts::ComponentMergeMethod::eMaxWeight;
+          secondOptions.mergeMethod = Acts::ComponentMergeMethod::eMaxWeight;
+      }
+      else if (m_bremMergeMethod == "Mean"){
+          options.mergeMethod = Acts::ComponentMergeMethod::eMean;
+          secondOptions.mergeMethod = Acts::ComponentMergeMethod::eMean;
+      }
+      else {
+          throw std::runtime_error("Unknown option for GSF component merge method: " + m_bremMergeMethod.value());
+      }
+
+      return {std::move(options), std::move(secondOptions), std::move(measurementSelector)};
+    };
+
   const Acts::TrackSelector::Config& TrackFindingBaseAlg::getCuts (double eta) const {
     const auto &trackSelectorCfg = trackFinder().trackSelector.config();
     // return the last bin for |eta|>=4 or nan
@@ -263,21 +381,24 @@ namespace ActsTrk {
                                                                     : trackSelectorCfg.getCuts(eta);
   };
 
-  std::vector<typename detail::RecoTrackContainer::TrackProxy>
-  TrackFindingBaseAlg::doTwoWayTrackFinding(const detail::RecoTrackStateContainerProxy& firstMeasurement,
-                                            const TrkProxy &trackProxy,
-                                            detail::RecoTrackContainer &tracksContainerTemp,
-                                            const TrackFinderOptions &options) const {
-    if (not m_doTwoWay) return {};
+  Acts::Result<std::vector<detail::RecoTrackContainer::TrackProxy> > TrackFindingBaseAlg::findTracksCKF(const Acts::BoundTrackParameters &seedParameters,
+                                                      const TrackFinderOptions& options,
+                                                      detail::RecoTrackContainer& tracksContainerTemp,
+                                                      detail::RecoTrackContainer::TrackProxy &rootBranch) const
+  {
+      return trackFinder().ckf.findTracks(seedParameters, options, tracksContainerTemp, rootBranch);
+  }
 
-    // Create initial parameters for the propagation
-    Acts::BoundTrackParameters secondInitialParameters = trackProxy.createParametersFromState(detail::RecoConstTrackStateContainerProxy{firstMeasurement});
-    if (!secondInitialParameters.referenceSurface().insideBounds(secondInitialParameters.localPosition())) {  // #3751
-      return {};
-    }
+  Acts::Result<std::vector<detail::RecoTrackContainer::TrackProxy> > TrackFindingBaseAlg::findTracksCKF(const Acts::BoundTrackParameters &seedParameters,
+                                                      const BremTrackFinderOptions& options,
+                                                      detail::RecoTrackContainer& tracksContainerTemp,
+                                                      detail::RecoTrackContainer::TrackProxy &rootBranch) const
+  {
+      const Acts::BoundTrackParameters elTrackParameters = seedParameters.withParticleHypothesis(Acts::ParticleHypothesis::electron());
+      return bremTrackFinder().ckf.findTracks(elTrackParameters, options, tracksContainerTemp, rootBranch);
+  }
 
-    // First, inflate the covariance matrix if configured
-    if (m_inflateCovarianceTwoWay) {
+  void TrackFindingBaseAlg::inflateCovarianceTwoWay(Acts::BoundTrackParameters &secondInitialParameters) const {
       ATH_MSG_DEBUG("Inflating covariance matrix for second track finding with factor = " << m_twoWayinflateCovarianceFactor.value());
       ATH_MSG_VERBOSE("Original parameters before inflation: \n" << secondInitialParameters);
 
@@ -289,26 +410,13 @@ namespace ActsTrk {
 
       Acts::BoundTrackParameters newParams(
           std::static_pointer_cast<const Acts::Surface>(std::move(surfacePtr)),
-          secondInitialParameters.parameters(), 
+          secondInitialParameters.parameters(),
           std::make_optional(inflatedCovariance),
           secondInitialParameters.particleHypothesis());
       secondInitialParameters = std::move(newParams);
-      
+
       ATH_MSG_VERBOSE("Inflated covariance matrix : \n" << secondInitialParameters.covariance().value());
-    }
-
-    auto rootBranch = tracksContainerTemp.makeTrack();
-    rootBranch.copyFromWithoutStates(trackProxy);  // #3534
-
-    // perform track finding
-    auto secondResult =
-      trackFinder().ckf.findTracks(secondInitialParameters, options, tracksContainerTemp, rootBranch);
-    if (not secondResult.ok()) {
-      return {};
-    }
-    return secondResult.value();
   }
-
   xAOD::UncalibMeasType TrackFindingBaseAlg::measurementType (const detail::RecoTrackContainer::TrackStateProxy &trackState) {
     if (trackState.hasReferenceSurface()) {
       if (const auto *actsDetElem = dynamic_cast<const ISurfacePlacement*>(trackState.referenceSurface().surfacePlacement())) {
@@ -491,7 +599,7 @@ namespace ActsTrk {
       }
     }
   }
-  
+
   void TrackFindingBaseAlg::checkCounts(const detail::RecoTrackContainer::TrackProxy &track) const {
     // This check will fail if there are other types (HGTD, MS?) of hits, holes, or outliers.
     // The check can be removed when it is no longer appropriate.
@@ -517,7 +625,7 @@ namespace ActsTrk {
 
   std::array<bool, 3> TrackFindingBaseAlg::selectCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const {
     bool enoughMeasurements = true, tooManyHoles = false, tooManyOutliers = false;
-    const auto &trackSelectorCfg = trackFinder().trackSelector.config();
+    const auto &trackSelectorCfg = (ActsTrk::TrackContainerUtils::fitterType(track) == xAOD::GaussianSumFilter) ? bremTrackFinder().trackSelector.config() : trackFinder().trackSelector.config();
     std::size_t etaBin = (std::abs(eta) < trackSelectorCfg.absEtaEdges.front())   ? 0
                          : (std::abs(eta) >= trackSelectorCfg.absEtaEdges.back()) ? trackSelectorCfg.absEtaEdges.size() - 1
                                                                                   : trackSelectorCfg.binIndex(eta);
@@ -839,6 +947,19 @@ namespace ActsTrk {
     double eta = -std::log(std::tan(0.5 * track.theta()));
     auto [enoughMeasurementsPS, tooManyHolesPS, tooManyOutliersPS] = selectCounts(track, eta);
     return enoughMeasurementsPS && !tooManyHolesPS && !tooManyOutliersPS;
+  }
+
+  bool TrackFindingBaseAlg::hasMatchingCaloROI(const Acts::GeometryContext &geoCtx,
+      const std::optional<Acts::BoundTrackParameters> &boundParams, const ROIPhiRZContainer &caloClusterROIs
+  ) const
+  {
+    assert(m_doBremRecovery && "brem recovery must be turned on");
+    double phi = boundParams->phi();
+    double eta = Acts::AngleHelpers::etaFromTheta(boundParams->theta());
+    const Acts::Vector3 pos = boundParams->position(geoCtx);
+    double radius = pos.perp();
+    double z = boundParams->position(geoCtx).z();
+    return caloClusterROIs.hasMatchingROI(phi, eta, radius, z, m_phiWidthROI, m_etaWidthROI);
   }
 
 }  // namespace ActsTrk
