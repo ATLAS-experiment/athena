@@ -770,7 +770,7 @@ namespace Trk {
     double *dofInfoA = new double[nDoF];//int 
   
     if (sizeof(unsigned long long) != sizeof(double))      
-      ATH_MSG_ERROR("Module Identifiers will not be saved.  sizeof(double)!=sizeof(ulonglong)");
+      ATH_MSG_ERROR("Module Identifiers will not be saved.  sizeof(double)!=sizeof(unsigned long long)");
     else{      
       
       DataVector<AlignPar>* alignPars = m_alignModuleTool->alignParList1D();

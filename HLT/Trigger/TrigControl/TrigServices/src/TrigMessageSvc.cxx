@@ -5,7 +5,6 @@
 #include "GaudiKernel/IAppMgrUI.h"
 #include "GaudiKernel/IIncidentSvc.h"
 #include "GaudiKernel/ITHistSvc.h"
-#include "GaudiKernel/Kernel.h"
 #include "GaudiKernel/Message.h"
 #include "GaudiKernel/StatusCode.h"
 #include "GaudiKernel/System.h"

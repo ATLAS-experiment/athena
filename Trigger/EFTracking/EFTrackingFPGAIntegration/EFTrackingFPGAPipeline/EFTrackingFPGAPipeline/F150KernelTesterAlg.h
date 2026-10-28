@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
    */
 
 
@@ -94,7 +94,7 @@ namespace EFTrackingFPGAIntegration
 
             mutable std::atomic<cl_ulong> m_IO_kernelTime{0};       //!< Time for kernel execution
             mutable std::atomic<cl_ulong> m_SE_kernelTime{0};  //!< Sum for the average time of the kernel execution
-            mutable std::atomic<ulonglong> m_numEvents{0}; //!< Number of events for the average time of the kernel execution
+            mutable std::atomic<unsigned long long> m_numEvents{0}; //!< Number of events for the average time of the kernel execution
             // For IP access through XRT
             xrt::device m_xrt_accelerator;
 

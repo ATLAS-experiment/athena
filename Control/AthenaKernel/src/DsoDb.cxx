@@ -121,9 +121,6 @@ namespace {
       "long long",
       "long long int",
       "unsigned long long",
-      "longlong",
-      
-      "ulonglong",
 
       "float",
       "double",

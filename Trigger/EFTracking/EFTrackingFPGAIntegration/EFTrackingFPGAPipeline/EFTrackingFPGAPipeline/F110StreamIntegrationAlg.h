@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+    Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -70,7 +70,7 @@ namespace EFTrackingFPGAIntegration
         Gaudi::Property<std::string> m_stripLUTFilePath{this, "StripLUTFilePath", "", "Path to the strip LUT"}; 
 
         // to save information
-        mutable std::atomic<ulonglong> m_numEvents{0};          //!< Number of events processed
+        mutable std::atomic<unsigned long long> m_numEvents{0}; //!< Number of events processed
         mutable std::atomic<cl_ulong> m_pixelInputTime{0};      //!< Time for pixel input buffer write
         mutable std::atomic<cl_ulong> m_stripInputTime{0};      //!< Time for strip input buffer write
 

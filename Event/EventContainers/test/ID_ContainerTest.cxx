@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // This is a test cxx file for IdentifiableContainer. 
@@ -142,14 +142,14 @@ int ID_ContainerTest::execute(EventContainers::Mode){
     int hfmax = m_ncollections;
 //    int m_nhits = 100;
 
-    longlong startOfUserTime    = System::userTime( System::microSec );
-    longlong startOfKernelTime  = System::kernelTime   ( System::microSec );
-    longlong startOfElapsedTime = System::ellapsedTime ( System::microSec );
+    long long startOfUserTime    = System::userTime( System::microSec );
+    long long startOfKernelTime  = System::kernelTime   ( System::microSec );
+    long long startOfElapsedTime = System::ellapsedTime ( System::microSec );
     m_container->cleanup(); 
     /// following lines could be platform dependent!
-    longlong deltaUser    = System::userTime    ( System::microSec ) - startOfUserTime   ;
-    longlong deltaKernel  = System::kernelTime  ( System::microSec ) - startOfKernelTime ;
-    longlong deltaElapsed = System::ellapsedTime( System::microSec ) - startOfElapsedTime ;
+    long long deltaUser    = System::userTime    ( System::microSec ) - startOfUserTime   ;
+    long long deltaKernel  = System::kernelTime  ( System::microSec ) - startOfKernelTime ;
+    long long deltaElapsed = System::ellapsedTime( System::microSec ) - startOfElapsedTime ;
 
     std::cout << "Container cleanup: user, kernel, elapsed " 
 	      << deltaUser << " " 

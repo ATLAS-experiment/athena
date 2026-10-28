@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # @file:    checkTP.py
 # @purpose: dump the layout of a class (data members and bases)
@@ -32,7 +32,7 @@ _cpp_builtins = (
     'short',     'unsigned short',
     'int',       'unsigned int',
     'long',      'unsigned long',
-    'long long', 'unsigned long long', 'ulonglong',
+    'long long', 'unsigned long long',
     'float',
     'double',
     'bool',

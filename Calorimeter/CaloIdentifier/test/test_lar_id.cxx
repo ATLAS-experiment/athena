@@ -33,9 +33,9 @@ check_lar_neighbour_timing(IdDictMgr& idd)
 
     LArEM_ID em_id;
 
-    longlong startOfUserTime    = System::userTime( System::microSec );
-    longlong startOfKernelTime  = System::kernelTime   ( System::microSec );
-    longlong startOfElapsedTime = System::ellapsedTime ( System::microSec );
+    long long startOfUserTime    = System::userTime( System::microSec );
+    long long startOfKernelTime  = System::kernelTime   ( System::microSec );
+    long long startOfElapsedTime = System::ellapsedTime ( System::microSec );
 
     if(em_id.initialize_from_dictionary (idd)) {
 	std::cout << "check_lar_neighbour_timing - cannot init from dict" << std::endl;
@@ -44,11 +44,11 @@ check_lar_neighbour_timing(IdDictMgr& idd)
     std::cout << "Timing for init from dictionary " << std::endl;
     
     /// following lines could be platform dependent!
-    longlong deltaUser    = System::userTime    ( System::microSec ) - startOfUserTime   ;
+    long long deltaUser    = System::userTime    ( System::microSec ) - startOfUserTime   ;
     ///
-    longlong deltaKernel  = System::kernelTime  ( System::microSec ) - startOfKernelTime ;
+    long long deltaKernel  = System::kernelTime  ( System::microSec ) - startOfKernelTime ;
     ///
-    longlong deltaElapsed = System::ellapsedTime( System::microSec ) - startOfElapsedTime ;
+    long long deltaElapsed = System::ellapsedTime( System::microSec ) - startOfElapsedTime ;
 
     std::cout << "tries, user, kernel, elapsed " 
 	      << deltaUser << " " 
@@ -921,9 +921,9 @@ check_lar_timing(IdDictMgr& idd)
 
     LArEM_ID em_id;
 
-    longlong startOfUserTime    = System::userTime( System::microSec );
-    longlong startOfKernelTime  = System::kernelTime   ( System::microSec );
-    longlong startOfElapsedTime = System::ellapsedTime ( System::microSec );
+    long long startOfUserTime    = System::userTime( System::microSec );
+    long long startOfKernelTime  = System::kernelTime   ( System::microSec );
+    long long startOfElapsedTime = System::ellapsedTime ( System::microSec );
 
     if(em_id.initialize_from_dictionary (idd)) {
 	std::cout << "check_lar_timing - cannot init from dict" << std::endl;
@@ -932,11 +932,11 @@ check_lar_timing(IdDictMgr& idd)
     std::cout << "Timing for init from dictionary " << std::endl;
     
     /// following lines could be platform dependent!
-    longlong deltaUser    = System::userTime    ( System::microSec ) - startOfUserTime   ;
+    long long deltaUser    = System::userTime    ( System::microSec ) - startOfUserTime   ;
     ///
-    longlong deltaKernel  = System::kernelTime  ( System::microSec ) - startOfKernelTime ;
+    long long deltaKernel  = System::kernelTime  ( System::microSec ) - startOfKernelTime ;
     ///
-    longlong deltaElapsed = System::ellapsedTime( System::microSec ) - startOfElapsedTime ;
+    long long deltaElapsed = System::ellapsedTime( System::microSec ) - startOfElapsedTime ;
 
     std::cout << "tries, user, kernel, elapsed " 
 	      << deltaUser << " " 
@@ -1796,9 +1796,9 @@ int main (int argc, char* argv[])
     if (argc < 2) return (1);  
   
 
-    longlong startOfUserTime    = System::userTime( System::microSec );
-    longlong startOfKernelTime  = System::kernelTime   ( System::microSec );
-    longlong startOfElapsedTime = System::ellapsedTime ( System::microSec );
+    long long startOfUserTime    = System::userTime( System::microSec );
+    long long startOfKernelTime  = System::kernelTime   ( System::microSec );
+    long long startOfElapsedTime = System::ellapsedTime ( System::microSec );
 
 
 
@@ -1828,11 +1828,11 @@ int main (int argc, char* argv[])
     std::cout << "Timing for parsing dictionaries " << std::endl;
     
     /// following lines could be platform dependent!
-    longlong deltaUser    = System::userTime    ( System::microSec ) - startOfUserTime   ;
+    long long deltaUser    = System::userTime    ( System::microSec ) - startOfUserTime   ;
     ///
-    longlong deltaKernel  = System::kernelTime  ( System::microSec ) - startOfKernelTime ;
+    long long deltaKernel  = System::kernelTime  ( System::microSec ) - startOfKernelTime ;
     ///
-    longlong deltaElapsed = System::ellapsedTime( System::microSec ) - startOfElapsedTime ;
+    long long deltaElapsed = System::ellapsedTime( System::microSec ) - startOfElapsedTime ;
 
     std::cout << "tries, user, kernel, elapsed " 
 	      << deltaUser << " " 

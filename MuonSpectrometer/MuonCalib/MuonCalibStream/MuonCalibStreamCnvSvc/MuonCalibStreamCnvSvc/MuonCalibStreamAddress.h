@@ -9,7 +9,6 @@
 
 // Framework include files
 #include "GaudiKernel/GenericAddress.h"
-#include "GaudiKernel/Kernel.h"
 
 class MuonCalibStreamAddress : public GenericAddress {
 public:
