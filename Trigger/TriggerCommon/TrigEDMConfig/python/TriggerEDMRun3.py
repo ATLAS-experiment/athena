@@ -904,8 +904,8 @@ TriggerHLTListRun3 = [
 
 
     ## event info
-    ('xAOD::TrigCompositeContainer#HLT_TCEventInfo_jet',                                 'BS ESD AODFULL', 'Jet' ),
-    ('xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_jetAux.JetDensityEMPFlow.AvgMu.NumPV',         'BS ESD AODFULL', 'Jet'    ),
+    ('xAOD::TrigCompositeContainer#HLT_TCEventInfo_jet',                                 'BS ESD AODFULL AODSLIM', 'Jet' ),
+    ('xAOD::TrigCompositeAuxContainer#HLT_TCEventInfo_jetAux.JetDensityEMPFlow.AvgMu.NumPV',         'BS ESD AODFULL AODSLIM', 'Jet'    ),
 
      # VR track jets
     ('xAOD::JetContainer#HLT_AntiKtVR30Rmax4Rmin02PV0TrackJets',                'BS ESD AODFULL AODSLIM', 'Jet'),
