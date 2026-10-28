@@ -446,9 +446,10 @@ def bjet(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfigFl
   flags.phiHalfWidth    = 0.4
   flags.zedHalfWidth    = 10.0
   flags.minPT  = processEtaDepSettings(flags.minPT,[0.8*Units.GeV])
-  flags.Xi2max = tsetter(flags.Xi2max,12.)
   if recoMode == "Acts":
     flags.Xi2maxSigma = [math.sqrt(12.)]
+  else:
+    flags.Xi2max = tsetter(flags.Xi2max,12.)
   return flags
 
 @signatureActions
@@ -638,11 +639,12 @@ def cosmics(flags: AthConfigFlags, instanceName: str, recoMode: str) -> AthConfi
   flags.maxPixelHoles       = tsetter(flags.maxPixelHoles,3)
   flags.maxPrimaryImpact    = tsetter(flags.maxPrimaryImpact, 1000.*Units.mm)
 
-  flags.Xi2max         = tsetter(flags.Xi2max,        60.)
-  flags.Xi2maxNoAdd    = tsetter(flags.Xi2maxNoAdd,   100.)
   if recoMode == "Acts":
     flags.Xi2maxSigma      = [math.sqrt(60.)]
     flags.Xi2maxNoAddSigma = [10.]
+  else:
+    flags.Xi2max         = tsetter(flags.Xi2max,        60.)
+    flags.Xi2maxNoAdd    = tsetter(flags.Xi2maxNoAdd,   100.)    
   flags.maxDoubleHoles = tsetter(flags.maxDoubleHoles,1)
   
   flags.nWeightedClustersMin = 8

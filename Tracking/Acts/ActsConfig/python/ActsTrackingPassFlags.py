@@ -84,10 +84,6 @@ def createActsTrackingPassFlags():
     # --- general pattern cuts for NewTracking
     icf.addFlag("roadWidth"               , 20.)
 
-    # Chi2 cuts of the Athena track finder. The ACTS measurement selection does not use them, but the
-    # Athena passes which derive from these flags do.
-    icf.addFlag("Xi2max"                  , [50.])
-    icf.addFlag("Xi2maxNoAdd"             , [100.])
     # Chi2 cuts of the ACTS measurement selection (measurement, outlier) in sigma of a 1D Gaussian.
     # The track finding converts them to the same p-value for each measurement dimension.
     icf.addFlag("Xi2maxSigma"             , [7.])
