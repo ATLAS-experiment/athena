@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1GeometrySystems/VolumeHandle.h"
@@ -11,7 +11,6 @@
 
 #include "VP1Base/VP1ExtraSepLayerHelper.h"
 #include "VP1Base/VP1Msg.h"
-// #include "VP1Base/VP1QtInventorUtils.h"
 #include "VP1Utils/VP1LinAlgUtils.h"
 #include "VP1HEPVis/nodes/SoTransparency.h"
 #include "VP1HEPVis/nodes/SoPolyhedron.h"
@@ -152,6 +151,7 @@ void VolumeHandle::initialiseChildren()
     matr.multRight(m_d->accumTrans);
     m_children.push_back(new VolumeHandle(m_d->commondata,this,av.getVolume(),ichild++,(isInMuonChamber()?MUONCHAMBERCHILD:NONMUONCHAMBER),matr));
     //std::cout << "initialised: " << av.getName() << " - " << m_children.back()->getName().toStdString() << " - " << m_children.back() << std::endl;
+
     av.next();
   }
 
@@ -182,6 +182,46 @@ bool VolumeHandle::hasName(const std::string& n) const
 {
   return m_d->pV->getLogVol()->getName() == n;
 }
+
+
+//____________________________________________________________________
+QString VolumeHandle::getNameTag() const
+{
+  GeoPVConstLink parent_pV;
+
+  if (m_parent) {
+    parent_pV = m_parent->geoPVConstLink();
+  } else {
+    parent_pV = m_d->commondata->geoPVConstLinkOfTreeTopsMother();
+  }
+
+  GeoVolumeCursor av(parent_pV);
+  int i = 0;
+
+  while (!av.atEnd()) {
+    if (m_childNumber == i && m_d->pV == av.getVolume()) {
+      return QString::fromStdString(av.getName());
+    }
+    av.next();
+    ++i;
+  }
+
+  return QString();
+}
+
+
+//____________________________________________________________________
+QString VolumeHandle::getDisplayName() const
+{
+  const QString logicalName = getName();
+  const QString nameTag = getNameTag();
+
+  if (!nameTag.isEmpty() && nameTag != logicalName)
+    return nameTag + " (" + logicalName + ")";
+
+  return logicalName;
+}
+
 
 //____________________________________________________________________
 SoMaterial * VolumeHandle::material()
@@ -346,20 +386,21 @@ void VolumeHandle::Imp::detach()
   }
 }
 
-//____________________________________________________________________
-void VolumeHandle::setState( const VP1GeoFlags::VOLSTATE& state )
+
+
+void VolumeHandle::setState( const VP1GeoFlags::VOLSTATE& state, bool autoExpandEther )
 {
   if (m_state==state)
     return;
 
-  //Mark muon chamber as dirty.
+  // Mark muon chamber as dirty.
   if (isInMuonChamber()) {
     VolumeHandle *tp = topLevelParent();
     if (tp->m_muonChamberState == MUONCHAMBER)
       tp->m_muonChamberState = MUONCHAMBER_DIRTY;
   }
 
-  //Update state flag and presence in GUI lists:
+  // Update state flag and presence in GUI lists:
   VP1GeoFlags::VOLSTATE oldstate = m_state;
   m_state = state;
   if (oldstate==VP1GeoFlags::ZAPPED)
@@ -367,37 +408,79 @@ void VolumeHandle::setState( const VP1GeoFlags::VOLSTATE& state )
   else if (state==VP1GeoFlags::ZAPPED)
     m_d->commondata->addZappedVolumeToGui(this);
 
-  //Only thing left is visibility updates (i.e. attachment to 3D scenegraph).
-
-  if (haveParentsNotExpanded()) {
-    //No visibility updates necessary
-    assert(!m_d->isattached);
+  if (!autoExpandEther) {
+    if (haveParentsNotExpanded())
+      return;
+    if (state==VP1GeoFlags::CONTRACTED) {
+      m_d->attach(this);
+      detachAllContractedChildren();
+    } else if (state==VP1GeoFlags::EXPANDED) {
+      if (oldstate==VP1GeoFlags::CONTRACTED)
+        m_d->detach();
+      attachAllContractedChildren();
+    } else {
+      assert(state==VP1GeoFlags::ZAPPED);
+      if (oldstate==VP1GeoFlags::CONTRACTED)
+        m_d->detach();
+      else
+        detachAllContractedChildren();
+    }
     return;
   }
 
-  //We might need visibility updates. Which ones depend on the
-  //particular change of state:
+  // Visibility updates. Ether volumes are automatically expanded so that
+  // the first non-ether descendants become visible.
 
   if (state==VP1GeoFlags::CONTRACTED) {
-    // VP1GeoFlags::EXPANDED/VP1GeoFlags::ZAPPED -> VP1GeoFlags::CONTRACTED: Show this and hide all children.
-    m_d->attach(this);
-    detachAllContractedChildren();
+    for (auto d=childrenBegin(); d!=childrenEnd(); d++) {
+      if ((*d)->isEther())
+        (*d)->setState(VP1GeoFlags::CONTRACTED);
+    }
+
+    if (!isEther()) {
+      m_d->attach(this);
+      detachAllContractedChildren();
+    } else {
+      bool otherThanEther = false;
+      VolumeHandle *p = parent();
+      while (p) {
+        if (!p->isEther()) {
+          otherThanEther = true;
+          break;
+        }
+        p = p->parent();
+      }
+
+      if (!otherThanEther)
+        return;
+
+      m_d->attach(this);
+      detachAllContractedChildren();
+
+      p = parent();
+      if (p)
+        p->setState(VP1GeoFlags::CONTRACTED);
+    }
   } else if (state==VP1GeoFlags::EXPANDED) {
-    // VP1GeoFlags::CONTRACTED -> VP1GeoFlags::EXPANDED: Hide this. Allow children to be shown.
-    // VP1GeoFlags::ZAPPED -> VP1GeoFlags::EXPANDED: Allow children to be shown.
     if (oldstate==VP1GeoFlags::CONTRACTED)
       m_d->detach();
+
     attachAllContractedChildren();
+
+    for (auto d=childrenBegin(); d!=childrenEnd(); d++) {
+      if ((*d)->isEther())
+        (*d)->setState(VP1GeoFlags::EXPANDED);
+    }
   } else {
     assert(state==VP1GeoFlags::ZAPPED);
-    // VP1GeoFlags::CONTRACTED -> VP1GeoFlags::ZAPPED: Hide this.
-    // VP1GeoFlags::EXPANDED -> VP1GeoFlags::ZAPPED: Hide all children.
+
     if (oldstate==VP1GeoFlags::CONTRACTED)
       m_d->detach();
     else
       detachAllContractedChildren();
   }
 }
+
 
 //____________________________________________________________________
 void VolumeHandle::contractDaughtersRecursively()
@@ -511,7 +594,18 @@ const GeoMaterial * VolumeHandle::geoMaterial() const {
 //____________________________________________________________________
 bool VolumeHandle::isEther() const
 {
-  return !isMuonChamber() && QString(geoMaterial()->getName().c_str()).endsWith("Ether");
+  // NOTE:
+  // * the special::Ether is the old 'special' material used for assembly volumes in Pixel
+  // * the special::HyperUranium is the new 'special' material assigned by GeoModelXML
+  //   to the 'AssemblyLV' volumes created out of assembly volumes; those are the ones that are
+  //   used, for example, in ITkStrip
+  const QString materialName = QString(geoMaterial()->getName().c_str());
+  if (getName() == "AssemblyLV") {
+	  VP1Msg::messageDebug("AssemblyLV material: " + materialName);
+  }
+  return !isMuonChamber() &&
+         (materialName.endsWith("Ether") ||
+          materialName.endsWith("HyperUranium"));
 }
 
 //____________________________________________________________________

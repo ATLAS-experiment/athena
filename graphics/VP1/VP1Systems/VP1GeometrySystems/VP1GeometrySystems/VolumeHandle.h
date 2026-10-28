@@ -44,6 +44,8 @@ public:
 
   //Information for printout:
   QString getName() const;
+  QString getNameTag() const;
+  QString getDisplayName() const;
   int copyNumber() const;//Returns -1 if doesnt have a valid copy number (because volume is not replicated), -2 in case of error.
   quint32 hashID() const;//For vp1 persistification
 
@@ -76,7 +78,8 @@ public:
   //  void ensureVisibleInTreeWidget();
 
   inline VP1GeoFlags::VOLSTATE state() const;
-  void setState( const VP1GeoFlags::VOLSTATE& state );
+  // Selection filters disable ether propagation to preserve explicit child states.
+  void setState( const VP1GeoFlags::VOLSTATE& state, bool autoExpandEther = true );
   void reset();//Set state of volume and all daughters to contracted
   bool isAttached() const;
   void contractDaughtersRecursively();

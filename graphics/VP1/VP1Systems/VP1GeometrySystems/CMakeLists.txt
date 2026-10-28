@@ -12,6 +12,12 @@ if( APPLE )
   find_package(OpenGL)
 endif()
 
+# Headless visibility regression tests; no detector geometry or GUI is started.
+atlas_add_test( ITkSelection
+   SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/ITkSelection_test.py
+          --compiler ${CMAKE_CXX_COMPILER}
+   POST_EXEC_SCRIPT noerror.sh )
+
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Generate UI files automatically:

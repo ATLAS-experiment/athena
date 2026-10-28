@@ -89,6 +89,7 @@
 #include <QMessageBox>
 #include <QFileInfo>
 
+#include <initializer_list>
 #include <map>
 #include <ranges>
 
@@ -286,6 +287,7 @@ public:
   void showPixelModules(VolumeHandle*);
   void showITkPixelModules(VolumeHandle*, bool brl, bool ecA, bool ecC);
   void showITkStripModules(VolumeHandle*, bool brl, bool ecA, bool ecC);
+  bool selectITkComponent(VolumeHandle*, bool isPixel, bool pixelModules, bool pixelServices, bool pixelSupports, bool stripSensors, bool stripElectronics, bool stripServices, bool stripSupports, unsigned inheritedCategory = 0);
   void showSCTBarrelModules(VolumeHandle*);
   void showSCTEndcapModules(VolumeHandle*);
 
@@ -410,6 +412,7 @@ QWidget * VP1GeometrySystem::buildController()
   connect(m_d->controller,SIGNAL(autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptPixelsOrSCT(bool,bool,bool,bool,bool,bool)));
   connect(m_d->controller,SIGNAL(autoAdaptMuonNSW(bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptMuonNSW(bool, bool,bool,bool,bool,bool)));
   connect(m_d->controller,SIGNAL(autoAdaptHGTD(bool,bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptHGTD(bool,bool,bool,bool,bool,bool,bool)));
+  connect(m_d->controller,SIGNAL(autoAdaptITk(bool,bool,bool,bool,bool,bool,bool,bool)),this,SLOT(autoAdaptITk(bool,bool,bool,bool,bool,bool,bool,bool)));
   connect(m_d->controller,SIGNAL(resetSubSystems(VP1GeoFlags::SubSystemFlags)),this,SLOT(resetSubSystems(VP1GeoFlags::SubSystemFlags)));
 
   connect(m_d->controller,SIGNAL(labelsChanged(int)),this,SLOT(setLabels(int)));
@@ -2566,6 +2569,58 @@ void VP1GeometrySystem::autoAdaptHGTD(bool reset, bool modules, bool supportStru
 
 
 
+void VP1GeometrySystem::autoAdaptITk(bool reset, bool pixelModules, bool pixelServices, bool pixelSupports, bool stripSensors, bool stripElectronics, bool stripServices, bool stripSupports)
+{
+  VP1Msg::messageDebug("VP1GeometrySystem::autoAdaptITk()");
+
+  #ifndef BUILDVP1LIGHT
+    if (!VP1JobConfigInfo::hasITkGeometry())
+      return;
+  #endif
+
+  bool save = m_d->sceneroot->enableNotify(false);
+  m_d->phisectormanager->largeChangesBegin();
+
+  const VP1GeoFlags::SubSystemFlag flags[] = { VP1GeoFlags::ITkPixel, VP1GeoFlags::ITkStrip };
+  for (VP1GeoFlags::SubSystemFlag subSysFlag : flags) {
+    Imp::SubSystemInfo* subsys(0);
+    for (Imp::SubSystemInfo*si : m_d->subsysInfoList) {
+      if (si->flag == subSysFlag) {
+        subsys = si;
+        break;
+      }
+    }
+    if (!subsys) {
+      message("autoAdaptITk Error: Could not find subsystem");
+      continue;
+    }
+    if (!subsys->isbuilt) {
+      VP1Msg::messageDebug("autoAdaptITk: Aborting since subsystem geometry not built yet");
+      continue;
+    }
+
+    bool isPixel(subSysFlag==VP1GeoFlags::ITkPixel);
+    VolumeHandle::VolumeHandleListItr it(subsys->vollist.begin()),itE(subsys->vollist.end());
+    for (;it!=itE;++it) {
+      (*it)->initialiseChildren();
+      if (reset) {
+        (*it)->reset();
+        (*it)->setState(VP1GeoFlags::EXPANDED);
+      } else {
+        m_d->selectITkComponent(*it, isPixel, pixelModules, pixelServices, pixelSupports, stripSensors, stripElectronics, stripServices, stripSupports);
+      }
+    }
+  }
+
+  m_d->phisectormanager->updateRepresentationsOfVolsAroundZAxis();
+  m_d->phisectormanager->largeChangesEnd();
+
+  if (save) {
+    m_d->sceneroot->enableNotify(true);
+    m_d->sceneroot->touch();
+  }
+}
+
 //_____________________________________________________________________________________
 void VP1GeometrySystem::Imp::showPixelModules(VolumeHandle* h)
 {
@@ -2745,6 +2800,84 @@ void VP1GeometrySystem::Imp::showITkStripModules(VolumeHandle* h, bool brl, bool
     } else
       (*it)->setState(VP1GeoFlags::ZAPPED);
   }
+}
+
+namespace {
+bool itkNameIsOneOf(const QString& name, std::initializer_list<const char*> candidates)
+{
+  for (const char* candidate : candidates) {
+    if (name==candidate)
+      return true;
+  }
+  return false;
+}
+
+bool itkNameStartsWithOneOf(const QString& name, std::initializer_list<const char*> prefixes)
+{
+  for (const char* prefix : prefixes) {
+    if (name.startsWith(prefix))
+      return true;
+  }
+  return false;
+}
+}
+
+bool VP1GeometrySystem::Imp::selectITkComponent(VolumeHandle* h, bool isPixel, bool pixelModules, bool pixelServices, bool pixelSupports, bool stripSensors, bool stripElectronics, bool stripServices, bool stripSupports, unsigned inheritedCategory)
+{
+  // Classify both logical volumes and named XML assembly placements.
+  // Bits: Pixel modules/services/supports; Strip sensors/electronics/services/supports.
+  unsigned category = 0;
+  const QString names[] = {h->getName(), h->getNameTag()};
+  for (const QString& name : names) {
+    if (isPixel) {
+      if (name.endsWith("_Sensor") || name.endsWith("_Chip") || name.endsWith("_Bonding") || name.endsWith("_DeadVolume"))
+        category |= 1;
+      if (name.contains("Svc") || name.contains("Service") || name.contains("Cooling") || name.contains("Pigtail") || name.contains("Flex") || name.contains("BusTape") || name.endsWith("_Cell") || name.startsWith("Pixel__ModuleSvc"))
+        category |= 2;
+      if (name.contains("Support") || name.contains("HalfShell") || name.contains("HalfRing") || name.contains("CarbonFoam") || name.contains("FaceSheet") || name.contains("Longeron") || name.contains("QuarterShell") || name.contains("Stave") || itkNameIsOneOf(name, {"IPTvol", "ISTvol", "FrontSupportFacing", "FrontSupportCore", "RearSupport"}))
+        category |= 4;
+    } else {
+      if (name.startsWith("BRLSensor") || name.startsWith("ECSensor"))
+        category |= 1;
+      if (name.contains("Hybrid") || name.contains("DCDC") || name.contains("Bus") || itkNameIsOneOf(name, {"StaveSignalSS", "StaveGround"}))
+        category |= 2;
+      if (name.startsWith("SV") || name.contains("Service"))
+        category |= 4;
+      if (name.contains("Support") || name.contains("Stave") || name.contains("Petal") || name.contains("Core") || name.contains("Flange") || name.contains("Interlink") || name.contains("Wheel") || name.contains("Shell") || name.contains("Brace") || name.contains("Tube") || name.contains("Cyl") || name.contains("Hat") || name.contains("Bulkhead") || name.contains("Rail") || name.contains("Blade") || name.contains("Lock") || name.contains("Mount") || name.contains("Face") || name.contains("EOS") || itkNameStartsWithOneOf(name, {"StripB_", "OC", "EC_", "Ztube", "StiffDisc"}))
+        category |= 8;
+    }
+
+  }
+  // Specific sensor/electronics categories take precedence over broad supports.
+  if (isPixel) {
+    if (category & 1) category = 1;
+    else if (category & 2) category = 2;
+  } else {
+    if (category & 1) category = 1;
+    else if (category & 2) category = 2;
+    else if (category & 4) category = 4;
+  }
+  if (!category)
+    category = inheritedCategory;
+  const unsigned selected = isPixel
+    ? (pixelModules ? 1u : 0u) | (pixelServices ? 2u : 0u) | (pixelSupports ? 4u : 0u)
+    : (stripSensors ? 1u : 0u) | (stripElectronics ? 2u : 0u) |
+      (stripServices ? 4u : 0u) | (stripSupports ? 8u : 0u);
+
+  // Hide the old representation before assigning child states bottom-up.
+  h->setState(VP1GeoFlags::ZAPPED, false);
+  if (h->nChildren() && !h->childrenAreInitialised())
+    h->initialiseChildren();
+  bool showChildren = false;
+  for (auto it=h->childrenBegin(); it!=h->childrenEnd(); ++it) {
+    if (selectITkComponent(*it, isPixel, pixelModules, pixelServices, pixelSupports,
+                           stripSensors, stripElectronics, stripServices, stripSupports, category))
+      showChildren = true;
+  }
+  const bool showThis = !h->isEther() && (category & selected);
+  h->setState(showChildren ? VP1GeoFlags::EXPANDED :
+              showThis ? VP1GeoFlags::CONTRACTED : VP1GeoFlags::ZAPPED, false);
+  return showChildren || showThis;
 }
 
 //_____________________________________________________________________________________
