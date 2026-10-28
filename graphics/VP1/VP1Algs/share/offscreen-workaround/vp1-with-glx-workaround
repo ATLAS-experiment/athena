@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Opt-in, process-local workaround. Keep the C source beside this script.
+set -euo pipefail
+fail() { printf 'vp1 GLX workaround: %s\n' "$*" >&2; exit 1; }
+[[ $(uname -s) == Linux ]] || fail 'run this inside the Linux environment where VP1 runs.'
+case $(uname -m) in aarch64|x86_64) ;; *) fail 'supported architectures: aarch64, x86_64.' ;; esac
+command -v vp1 >/dev/null || fail 'vp1 is unavailable; set up Athena and your VP1 build first.'
+compiler=${CC:-cc}
+command -v "$compiler" >/dev/null || fail 'a C compiler is required (set CC to its executable).'
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+source_file=$script_dir/vp1-glx-pixel-limit.c
+[[ -r $source_file ]] || fail "missing source: $source_file"
+umask 077
+cache=${VP1_GLX_WORKAROUND_CACHE_DIR:-${XDG_CACHE_HOME:-$HOME/.cache}/vp1-glx-workaround}
+mkdir -p -- "$cache"
+# Build for the current Linux architecture; reuse only an identical source.
+key=$(cksum < "$source_file" | awk '{print $1 "-" $2}')
+library=$cache/pixel-limit-$(uname -m)-$key.so
+if [[ ! -s $library ]]; then
+    temporary=$(mktemp -d "$cache/build.XXXXXXXX")
+    trap 'rm -rf -- "$temporary"' EXIT
+    "$compiler" -std=c11 -shared -fPIC -O2 -Wall -Wextra -Werror \
+        -o "$temporary/shim.so" "$source_file" -ldl ||
+        fail 'compilation failed; check the compiler and OpenGL/X11 development headers.'
+    mv -f -- "$temporary/shim.so" "$library"
+    rm -rf -- "$temporary"
+    trap - EXIT
+fi
+printf '[vp1-glx-workaround] enabled for this VP1 process\n' >&2
+if [[ ${1:-} == --vp1-exec ]]; then
+    shift
+else
+    set -- vp1 "$@"
+fi
+exec env LD_PRELOAD="$library${LD_PRELOAD:+:$LD_PRELOAD}" "$@"

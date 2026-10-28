@@ -124,6 +124,10 @@ def SetupVP1():
     # Add VP1-specific arguments here, but remember you can also directly pass flags in form <flagName>=<value>.
     group = parser.add_argument_group("VP1 specific")
     group.add_argument(
+        "--fix-snapshots", action="store_true",
+        help="Enable the temporary Linux GLX zero pixel-limit workaround (requires a C compiler).",
+    )
+    group.add_argument(
         "Filename",
         nargs='?',
         help="Input file to pass to VP1 (i.e. vp1 myESD.pool.root as an alternative to vp1 --filesInput=[])",

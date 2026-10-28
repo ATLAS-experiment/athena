@@ -13,6 +13,8 @@
 //                                                         //
 /////////////////////////////////////////////////////////////
 
+#include <unistd.h>
+
 #include "VP1Base/VP1QtInventorUtils.h"
 #include "VP1Base/VP1ExaminerViewer.h"
 #include "VP1Base/VP1Msg.h"
@@ -513,7 +515,17 @@ QImage VP1QtInventorUtils::renderToImage(VP1ExaminerViewer *ra, int pixels_x, in
         tmppath += "vp1tmpfileXXXXXX.rgb";
         std::string stmppath = tmppath.toStdString();
         int tmpfd = mkstemps (stmppath.data(), 4);
+        if (tmpfd < 0) {
+            VP1Msg::message("ERROR - Snapshot: could not create a temporary image file in " + QDir::tempPath());
+            return QImage();
+        }
         FILE* tmpf = fdopen (tmpfd, "w");
+        if (!tmpf) {
+            close(tmpfd);
+            QFile::remove(QString::fromStdString(stmppath));
+            VP1Msg::message("ERROR - Snapshot: could not open the temporary image stream.");
+            return QImage();
+        }
 	QString tmpfile (stmppath.c_str());
 
 	// declare a new renderer with the viewport created above
@@ -539,8 +551,11 @@ QImage VP1QtInventorUtils::renderToImage(VP1ExaminerViewer *ra, int pixels_x, in
 	// render the scenegraph
 	// if fails, delete the renderer and return an empty image
 	if (!myRenderer->render(root)) {
+        VP1Msg::message("ERROR - Snapshot: Coin offscreen scene rendering failed. "
+                        "Check GLX support on this display; restart with COIN_DEBUG_GLGLUE=1 for diagnostics.");
 		delete myRenderer;
 		fclose (tmpf);
+        QFile::remove(tmpfile);
 		return QImage();
 	}
 	VP1Msg::messageVerbose("rendered the scenegraph");
@@ -550,8 +565,10 @@ QImage VP1QtInventorUtils::renderToImage(VP1ExaminerViewer *ra, int pixels_x, in
 	if (rootOverlay) {
 		bool okOver = myRenderer->render(rootOverlay);
 		if ( !okOver) {
+            VP1Msg::message("ERROR - Snapshot: Coin offscreen overlay rendering failed.");
 			delete myRenderer;
 			fclose (tmpf);
+            QFile::remove(tmpfile);
 			return QImage();
 		}
 		else {
@@ -562,6 +579,7 @@ QImage VP1QtInventorUtils::renderToImage(VP1ExaminerViewer *ra, int pixels_x, in
 	// write the rendered image to the temp file
 	// if fails, remove the temp file and return an empty image
 	if (!myRenderer->writeToRGB(tmpf)) {
+        VP1Msg::message("ERROR - Snapshot: Coin could not write the temporary RGB image.");
                 fclose (tmpf);
 		if (QFile::exists(tmpfile))
 			QFile(tmpfile).remove();
@@ -576,6 +594,9 @@ QImage VP1QtInventorUtils::renderToImage(VP1ExaminerViewer *ra, int pixels_x, in
 
 	// get the rendered image from the temp file as a Qt QImage instance
 	QImage im(imageFromRGBFile(tmpfile));
+	if (im.isNull()) {
+		VP1Msg::message("ERROR - Snapshot: could not decode the temporary RGB image.");
+	}
 
 	// delete the temp file
 	if (QFile::exists(tmpfile))
