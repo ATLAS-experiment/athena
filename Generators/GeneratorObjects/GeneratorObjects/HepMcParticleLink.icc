@@ -454,7 +454,7 @@ HepMcParticleLink::HepMcParticleLink (barcode_type uid,
                                       uint32_t eventIndex /*= 0*/,
                                       PositionFlag positionFlag /*= IS_EVENTNUM*/,
                                       UniqueIDFlag uniqueIDFlag /*= IS_ID*/,
-                                      IProxyDict* sg /*= SG::CurrentEventStore::store()*/)
+                                      IProxyDict* sg)
   : m_store (sg),
     m_extBarcode (uid, eventIndex, positionFlag, uniqueIDFlag)
 {
@@ -477,7 +477,7 @@ HepMcParticleLink::HepMcParticleLink (barcode_type uid,
                                       uint32_t eventIndex,
                                       PositionFlag positionFlag,
                                       UniqueIDFlag uniqueIDFlag,
-                                      const EventContext& ctx)
+                                      const EventContext& ctx /*= Gaudi::Hive::currentContext()*/)
   : HepMcParticleLink (uid, eventIndex, positionFlag, uniqueIDFlag,
                        Atlas::proxyDictFromEventContext(ctx))
 {
@@ -499,7 +499,7 @@ inline
 HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                                       uint32_t eventIndex,
                                       PositionFlag positionFlag,
-                                      const EventContext& ctx)
+                                      const EventContext& ctx /*= Gaudi::Hive::currentContext()*/)
   : HepMcParticleLink (part, eventIndex, positionFlag,
                        Atlas::proxyDictFromEventContext(ctx))
 {

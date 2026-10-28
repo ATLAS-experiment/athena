@@ -13,9 +13,9 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenEvent.h"
 #include "AthenaKernel/getMessageSvc.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "AthenaKernel/IProxyDict.h"
 #include "GaudiKernel/MsgStream.h"
-#include "SGTools/CurrentEventStore.h"
 #include "SGTools/DataProxy.h"
 #include <sstream>
 #include <cassert>
@@ -144,7 +144,7 @@ void HepMcParticleLink::ExtendedBarCode::print (MsgStream& os) const
 HepMcParticleLink::HepMcParticleLink (const HepMC::ConstGenParticlePtr& part,
                                       uint32_t eventIndex,
                                       PositionFlag positionFlag /*= IS_EVENTNUM*/,
-                                      IProxyDict* sg /*= SG::CurrentEventStore::store()*/)
+                                      IProxyDict* sg)
   : m_store (sg),
     m_ptr (part),
     m_extBarcode((nullptr != part) ? HepMC::uniqueID(part) : 0, eventIndex, positionFlag, IS_ID)
@@ -196,7 +196,7 @@ HepMC::ConstGenParticlePtr HepMcParticleLink::cptr() const
   }
   IProxyDict* sg = m_store;
   if (!sg) {
-    sg = SG::CurrentEventStore::store();
+    sg = Atlas::proxyDictFromEventContext();
   }
   if (const McEventCollection* pEvtColl = retrieveMcEventCollection(sg)) {
     const HepMC::GenEvent *pEvt = nullptr;
@@ -499,7 +499,7 @@ HepMcParticleLink HepMcParticleLink::getRedirectedLink(const HepMcParticleLink& 
 void HepMcParticleLink::setExtendedBarCode (const ExtendedBarCode& extBarcode)
 {
   m_extBarcode = extBarcode;
-  m_store = SG::CurrentEventStore::store();
+  m_store = Atlas::proxyDictFromEventContext();
   m_ptr.reset();
 }
 
