@@ -124,8 +124,13 @@ def activateAthenaComponents(icf):
     icf.doAthenaSeed = True
     icf.doAthenaTrack = True
     icf.doAthenaAmbiguityResolution = True
+
     icf.addFlag("nHolesMax", icf.maxHoles)
     icf.addFlag("nHolesGapMax", icf.maxHoles)
+    # Chi2 cuts of the Athena track finder. The ACTS measurement selection does not use them, but the
+    # Athena passes which derive from these flags do.
+    icf.addFlag("Xi2max"                  , [50.])
+    icf.addFlag("Xi2maxNoAdd"             , [100.])
 
 def deactivateActsComponents(icf):
     icf.doActsCluster = False
