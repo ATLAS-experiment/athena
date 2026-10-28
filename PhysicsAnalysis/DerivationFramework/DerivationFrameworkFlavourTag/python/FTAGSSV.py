@@ -17,8 +17,11 @@ from DerivationFrameworkPhys.TriggerListsHelper import TriggerListsHelper
 from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
 
 from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
+from AsgAnalysisAlgorithms.PileupReweightingAlgConfig import PileupReweightingAlgCfg
 from InDetTrackSystematicsTools.InDetTrackSystematicsToolsConfig import (
-    TrackSystematicsAlgCfg
+    InDetTrackBiasingCalibKwargs,
+    TrackSmearingAlgCfg,
+    TrackSystematicsAlgCfg,
 )
 from NewVrtSecInclusiveTool.NewVrtSecInclusiveAlgConfig import (
     NewVrtSecInclusiveAlgTightCfg
@@ -35,6 +38,7 @@ def _get_NVSI_track_systematics_list() -> list[str]:
     """Return the list of track systematics to be considered for NVSI"""
     track_systematics = [
         "_TRK_EFF_LOOSE_GLOBAL",
+        "_TRK_BIAS_NOMINAL",
         "_TRK_BIAS_D0_WM",
         "_TRK_BIAS_QOVERP_SAGITTA_WM",
         "_TRK_BIAS_Z0_WM",
@@ -87,21 +91,39 @@ def FTAGSSVExtraContentCfg(
         # verify that tracking systematics tool works -> track systematics tool can not be scheduled for MC campaigns without existing tracking systematics recommendations
         track_sys_accs = []
         try:
+            # the track biasing needs the RandomRunNumber from the pileup reweighting
+            prw_acc = PileupReweightingAlgCfg(flags)
             for suffix in track_systematics:
+                syst = suffix[1:]
                 varied_track_container = f"{track_collection}{suffix}"
-                # build list of tuples of (suffix, varied track container name, TrackSystematicsAlg to be run)
-                track_sys_accs.append(
-                    (
-                        suffix,
-                        varied_track_container,
-                        TrackSystematicsAlgCfg(
-                            flags,
-                            name=f"InDetTrackSystematicsAlg{suffix}",
-                            InputTrackContainer=track_collection,
-                            OutputTrackContainer=varied_track_container,
-                        ),
+                # efficiency and fake rate systematics drop tracks, resolution and bias systematics smear or shift them
+                if syst.startswith(("TRK_EFF_", "TRK_FAKE_RATE_")):
+                    track_sys_acc = TrackSystematicsAlgCfg(
+                        flags,
+                        name=f"InDetTrackSystematicsAlg{suffix}",
+                        InputTrackContainer=track_collection,
+                        OutputTrackContainer=varied_track_container,
+                        SystematicVariationSTD=syst,
                     )
-                )
+                # all track biases applied, each TRK_BIAS_* variation removes one of them again
+                elif suffix == "_TRK_BIAS_NOMINAL":
+                    track_sys_acc = TrackSmearingAlgCfg(
+                        flags,
+                        syst="",
+                        input_tracks=track_collection,
+                        output_tracks=varied_track_container,
+                        bias_kwargs=InDetTrackBiasingCalibKwargs(flags),
+                    )
+                else:
+                    track_sys_acc = TrackSmearingAlgCfg(
+                        flags,
+                        syst=syst,
+                        input_tracks=track_collection,
+                        output_tracks=varied_track_container,
+                        strict_mode=True,
+                    )
+                # build list of tuples of (suffix, varied track container name, track systematics alg to be run)
+                track_sys_accs.append((suffix, varied_track_container, track_sys_acc))
         # the tracking systematics tool can not be configured -> skip the tracking systematics
         except ValueError as err:
             logFTAGSSV.info(
@@ -110,6 +132,7 @@ def FTAGSSVExtraContentCfg(
             )
         # the tracking systematics tool can be configured -> proceed as planned
         else:
+            acc.merge(prw_acc)
             #retrieve the tuples
             for suffix, varied_track_container, track_sys_acc in track_sys_accs:
                 # apply the tracking systematics              

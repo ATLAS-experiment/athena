@@ -3,6 +3,7 @@
 */
 
 #include "InDetTrackSystematicsTools/InDetTrackBiasingTool.h"
+#include "AsgDataHandles/ReadDecorHandle.h"
 #include "AsgDataHandles/ReadHandle.h"
 #include "PathResolver/PathResolver.h"
 
@@ -48,6 +49,7 @@ namespace InDet {
     ATH_CHECK( initHistograms() );
 
     ATH_CHECK(m_evtInfoKey.initialize());
+    ATH_CHECK(m_randomRunNumberKey.initialize(m_isMC.value()));
 
     ATH_CHECK( InDetTrackSystematicsTool::initialize() );
 
@@ -84,8 +86,8 @@ namespace InDet {
 
     // determine which run number to use
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_evtInfoKey);
-    static const SG::Accessor<unsigned int> randomRunNumber("RandomRunNumber");
-    auto runNumber = randomRunNumber(*eventInfo);
+    SG::ReadDecorHandle<xAOD::EventInfo, unsigned int> randomRunNumber(m_randomRunNumberKey);
+    const unsigned int runNumber = randomRunNumber(*eventInfo);
 
     if (runNumber <= 0) {
       ATH_MSG_WARNING( "Run number not set." );
