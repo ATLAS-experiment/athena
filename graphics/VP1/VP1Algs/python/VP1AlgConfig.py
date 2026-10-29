@@ -92,6 +92,45 @@ def VP1AlgCfg(flags, name="VP1AlgCA", **kwargs):
     return result
 
 
+def MuonRdoToDigitCfg(flags):
+    """Decode only muon RDO containers present in the input metadata.
+
+    Keep existing digits rather than scheduling a second writer for their keys.
+    Missing detector inputs must not prevent displaying the other collections.
+    """
+    from AthenaCommon.Logging import logging
+
+    log = logging.getLogger("VP1")
+    cfg = ComponentAccumulator()
+    collections = set(flags.Input.TypedCollections)
+    prefix = flags.Overlay.BkgPrefix if flags.Common.isOverlay else ""
+    conversions = (
+        ("MDT", "MdtCsmContainer", "MDTCSM", "MdtDigitContainer", "MDT_DIGITS",
+         "MdtRdoToMdtDigitCfg"),
+        ("MM", "Muon::MM_RawDataContainer", "MMRDO", "MmDigitContainer", "MM_DIGITS",
+         "MM_RdoToDigitCfg"),
+        ("sTGC", "Muon::STGC_RawDataContainer", "sTGCRDO", "sTgcDigitContainer", "sTGC_DIGITS",
+         "STGC_RdoToDigitCfg"),
+    )
+    for detector, rdo_type, rdo_key, digit_type, digit_key, converter in conversions:
+        rdo = f"{rdo_type}#{prefix}{rdo_key}"
+        digits = f"{digit_type}#{prefix}{digit_key}"
+        if digits in collections:
+            log.info("Using existing %s digits from %s; RDO conversion is unnecessary",
+                     detector, prefix + digit_key)
+            continue
+        if rdo not in collections:
+            log.debug("Input has no %s; skipping %s RDO-to-digit conversion. "
+                        "Other VP1 collections remain available.", rdo, detector)
+            continue
+
+        from MuonConfig import MuonByteStreamCnvTestConfig
+
+        cfg.merge(getattr(MuonByteStreamCnvTestConfig, converter)(flags))
+        log.info("Configured %s RDO-to-digit conversion from %s", detector, prefix + rdo_key)
+    return cfg
+
+
 def SetupVP1():
     from AthenaConfiguration.Enums import Format
     from AthenaCommon.Logging import logging
@@ -400,22 +439,7 @@ def SetupVP1():
     if args.live or args.livelocal:
         setup_live_mode(args, vp1config)
 
-    #TODO: This needs to be conditional: if RDOs are there, then add this algo...
-    _logger.verbose("+ About to setup Muon RDOs to Digits...")
-    # Add MDT RDO to digit config
-    from MuonConfig.MuonByteStreamCnvTestConfig import MdtRdoToMdtDigitCfg
-    cfg.merge(MdtRdoToMdtDigitCfg(flags))
-    _logger.verbose("+ MdtRdoToMdtDigitCfg added.")
-    # Add MM RDO to digit config
-    from MuonConfig.MuonByteStreamCnvTestConfig import MM_RdoToDigitCfg
-    cfg.merge(MM_RdoToDigitCfg(flags))
-    _logger.verbose("+ MM_RdoToDigitCfg added.")
-    # Add sTGC RDO to digit config
-    from MuonConfig.MuonByteStreamCnvTestConfig import STGC_RdoToDigitCfg
-    cfg.merge(STGC_RdoToDigitCfg(flags))
-    _logger.verbose("+ STGC_RdoToDigitCfg added.")
-    
-    _logger.verbose("+ ...Done")
+    cfg.merge(MuonRdoToDigitCfg(flags))
 
     # configure VP1
     cfg.merge(VP1AlgCfg(flags, **vp1config))
