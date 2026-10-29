@@ -15,6 +15,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "VP1RawDataSystems/VP1RawDataSystem.h"
+#include <QVariant>
 #include "VP1RawDataSystems/VP1RawDataSysController.h"
 #include "VP1RawDataSystems/VP1RawDataColl_PixelRDO.h"
 #include "VP1RawDataSystems/VP1RawDataColl_SCT_RDO.h"
@@ -79,10 +80,12 @@ public:
 //_____________________________________________________________________________________
 VP1RawDataSystem::VP1RawDataSystem()
   : IVP13DSystemSimple("RawHits",
-		       "System showing Raw Data (RDO's, BCM hits, ...)",
+		       "System showing raw data and digits (RDOs, muon digits, BCM hits, ...)",
 		       "Thomas.Kittelmann@cern.ch, Riccardo.Maria.Bianchi@cern.ch"),
     m_d(new Imp(this))
 {
+  // Keep "RawHits" as the persistent identity and controller-tab name.
+  setProperty("vp1SystemLabel", "RawHits and Digits");
 }
 
 //____________________________________________________________________
