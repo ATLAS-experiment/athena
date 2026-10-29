@@ -6,15 +6,19 @@ atlas_subdir( ActsTruth )
 # External dependencies:
 find_package( Acts COMPONENTS Core )
 
+# extclude src/TruthTrajectory.cxx from ActsTruth since it is needed in ActsTruthLib
+file(GLOB COMPONENT_SRC src/*.cxx)
+list(FILTER COMPONENT_SRC EXCLUDE REGEX "src/TruthTrajectory.cxx")
+
 atlas_add_library(ActsTruthLib
-                  ActsTruth/*.h ActsTruth/*.icc
+                  ActsTruth/*.h ActsTruth/*.icc src/TruthTrajectory.cxx
                   INTERFACE
                   PUBLIC_HEADERS ActsTruth
                   LINK_LIBRARIES ActsInteropLib )
 
 
 atlas_add_component( ActsTruth
-                     src/*.h src/*.cxx
+                     ${COMPONENT_SRC}
                      src/components/*.cxx
                      LINK_LIBRARIES
                         ActsEventLib

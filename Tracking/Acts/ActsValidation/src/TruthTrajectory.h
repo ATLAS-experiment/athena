@@ -1,0 +1,59 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
+
+#include "src/TrackFindingAlg.h"
+#include "src/AmbiguityResolutionAlg.h"
+#include "src/ScoreBasedAmbiguityResolutionAlg.h"
+#include "src/ReFitterAlg.h"
+#include "src/ProtoTrackCreationAndFitAlg.h"
+#include "src/TrackExtensionAlg.h"
+#include "src/ProtoTrackReportingAlg.h"
+#include "src/HGTDTrackExtensionAlg.h"
+#include "src/HGTDTruthTrackDecorationAlg.h"
+#include "src/TrackFindingGNNAlg.h"
+
+// Tools
+#include "src/ITkAnalogueClusteringTool.h"
+#include "src/ITkNNClusterCalibratorTool.h"
+#include "src/ITkTruthClusterSplittingTool.h"
+#include "src/ITkStripCalibrationTool.h"
+#include "src/TrackStatePrinterTool.h"
+#include "src/KalmanFitterTool.h"
+#include "src/GaussianSumFitterTool.h"
+#include "src/GlobalChiSquareFitterTool.h"
+#include "src/RandomProtoTrackCreatorTool.h"
+#include "src/TruthGuidedProtoTrackCreatorTool.h"
+#include "src/TrackMonitorTool.h"
+#include "src/TrackStateCompNT.h"
+
+#include "src/SeedConverter.h"
+
+// Algs
+DECLARE_COMPONENT( ActsTrk::TrackFindingAlg )
+DECLARE_COMPONENT( ActsTrk::TrackFindingBaseAlg )
+DECLARE_COMPONENT( ActsTrk::ReFitterAlg )
+DECLARE_COMPONENT( ActsTrk::AmbiguityResolutionAlg )
+DECLARE_COMPONENT( ActsTrk::ScoreBasedAmbiguityResolutionAlg )
+DECLARE_COMPONENT( ActsTrk::ProtoTrackCreationAndFitAlg )
+DECLARE_COMPONENT( ActsTrk::TrackExtensionAlg )
+DECLARE_COMPONENT( ActsTrk::ProtoTrackReportingAlg )
+DECLARE_COMPONENT( ActsTrk::HGTDTrackExtensionAlg)
+DECLARE_COMPONENT( ActsTrk::HGTDTruthTrackDecorationAlg )
+DECLARE_COMPONENT( ActsTrk::TrackFindingGNNAlg )
+
+// Tools
+DECLARE_COMPONENT( ActsTrk::ITkAnalogueClusteringTool )
+DECLARE_COMPONENT( ActsTrk::ITkNNClusterCalibratorTool )
+DECLARE_COMPONENT( ActsTrk::ITkTruthClusterSplittingTool )
+DECLARE_COMPONENT( ActsTrk::ITkStripCalibrationTool )
+DECLARE_COMPONENT( ActsTrk::TrackStatePrinterTool )
+DECLARE_COMPONENT( ActsTrk::KalmanFitterTool )
+DECLARE_COMPONENT( ActsTrk::GaussianSumFitterTool )
+DECLARE_COMPONENT( ActsTrk::GlobalChiSquareFitterTool )
+DECLARE_COMPONENT( ActsTrk::RandomProtoTrackCreatorTool )
+DECLARE_COMPONENT( ActsTrk::TruthGuidedProtoTrackCreatorTool )
+
+DECLARE_COMPONENT( ActsTrk::TrackMonitorTool )
+DECLARE_COMPONENT( ActsTrk::TrackStateCompNT )
+DECLARE_COMPONENT( ActsTrk::SeedConverter )
