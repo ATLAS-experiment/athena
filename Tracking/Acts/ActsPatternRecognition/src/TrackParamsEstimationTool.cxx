@@ -271,14 +271,14 @@ Acts::Result<Acts::FreeVector> estimateTrackParamsFromAllSpacePoints(
         return {std::nullopt, kNoSeedRefit};
       }
       freeParams = *freeParamsResult;
-      // The fit cannot resolve the curvature of a straight seed, and a zero
-      // q/p gives NaN in the covariance transport
-      if (freeParams[Acts::eFreeQOverP] == 0) {
-        ATH_MSG_DEBUG("Fit of " << nSp << "-SP seed did not resolve the curvature - skip seed");
-        return {std::nullopt, kNoSeedRefit};
-      }
     } else {
       freeParams = estimateTrackParamsFromSeed(m_spacePointIndicesFun(sp_collection) | sp_collection_extract, bField, m_stripCalibrationIterations);
+    }
+    // The fit cannot resolve the curvature of a straight seed, and a zero
+    // q/p gives NaN in the covariance transport
+    if (freeParams[Acts::eFreeQOverP] == 0) {
+       ATH_MSG_DEBUG("Fit of " << nSp << "-SP seed did not resolve the curvature - skip seed");
+       return {std::nullopt, kNoSeedRefit};
     }
 
     if (m_parameterEstimationMode == 1 && nSp > 3ul) {
