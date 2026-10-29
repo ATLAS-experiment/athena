@@ -92,7 +92,7 @@ private:
       "Output xAOD pixel cluster container"};
   SG::WriteHandleKey<xAOD::SpacePointContainer> m_outputPixelSpacePointsKey{
       this, "OutputPixelSpacePoints", "ITkTracccPixelSpacepoints",
-      "Output xAOD pixel space point container"};
+      "Output xAOD pixel space point container, not written if empty!"};
   SG::WriteHandleKey<std::vector<unsigned int>> m_outputMeasToPixelSPKey{
       this, "OutputMeasToPixelSP", "ITkTracccMeasToPixelSP",
       "Output mapping from traccc measurement index to pixel spacepoint index"};
