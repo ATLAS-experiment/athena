@@ -1,14 +1,24 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 
 float BTaggingToolUtil::getExtendedFloat(const nlohmann::json& config) {
-  if (config.is_string() && config.get<std::string>() == "inf") {
+  if (config.is_string() && (config.get<std::string>() == "inf" || config.get<std::string>() == "+inf")) {
+    // Positive infinity: it is greater than every finite float
     return std::numeric_limits<float>::infinity();
   } else if (config.is_string() && config.get<std::string>() == "-inf") {
+    // Negative infinity: it is lower than every finite float
     return -std::numeric_limits<float>::infinity();
+  }
+  else if (config.is_string() && (config.get<std::string>() == "fmax" || config.get<std::string>() == "+fmax")) {
+    // Largest finite positive float number
+    return std::numeric_limits<float>::max();
+  }
+  else if (config.is_string() && config.get<std::string>() == "-fmax") {
+    // Lowest finite negative float number possible 
+    return std::numeric_limits<float>::lowest();
   }
 
   return config.get<float>();
