@@ -20,6 +20,7 @@
 #include "accel/TrackingManagerConstructor.hh"
 #include <accel/TrackingManagerIntegration.hh>
 #include <accel/SetupOptions.hh>
+#include <celeritas/Units.hh>
 
 #include "FTFP_BERT_ATL_Celer.hh"
 
@@ -46,18 +47,23 @@ FTFP_BERT_ATL_Celer::FTFP_BERT_ATL_Celer(G4int ver)
   opts.make_along_step = celeritas::CartMapFieldAlongStepFactory([] {
     celeritas::CartMapFieldGridParams params;
 
-    params.x.min = -15000;  // grid min in mm
-    params.x.max = 15000;   // grid max in mm
+    // Grid extents are in Geant4 units: converted by MakeCartMapFieldInput
+    params.x.min = -15000 * CLHEP::mm;
+    params.x.max = 15000 * CLHEP::mm;
     params.x.num = 64;      // number of grid points
 
-    params.y.min = -15000;
-    params.y.max = 15000;
+    params.y.min = -15000 * CLHEP::mm;
+    params.y.max = 15000 * CLHEP::mm;
     params.y.num = 64;
-    
-    params.z.min = -25000;
-    params.z.max = 25000;
+
+    params.z.min = -23500 * CLHEP::mm;
+    params.z.max = 23500 * CLHEP::mm; 
     params.z.num = 128;
-    return celeritas::MakeCartMapFieldInput(params);
+
+    auto input =  celeritas::MakeCartMapFieldInput(params);
+    input.driver_options.delta_intersection = 1e-3 * celeritas::units::millimeter;
+
+    return input;
   });
 
   opts.ignore_processes = {"CoulombScat"};
