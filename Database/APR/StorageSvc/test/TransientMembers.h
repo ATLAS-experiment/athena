@@ -5,17 +5,15 @@
 #ifndef TESTDRIVER_H
 #define TESTDRIVER_H
 
-#include <vector>
-#include <string>
 #include "TestBase.h"
 
 class TestDriver : public TestBase {
 public:
-  TestDriver();
-  ~TestDriver();
- 
+  using  TestBase::TestBase;
+  
+  int execute();
+
   void testWriting();
-  void testParallelReadWrite();
   void testReading();
 };
 

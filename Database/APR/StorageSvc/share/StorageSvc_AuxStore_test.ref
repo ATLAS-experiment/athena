@@ -1,0 +1,459 @@
+AuxStoreTest                               INFO Created the test driver
+AuxStoreTest                               INFO Loading shared libraries:
+AuxStoreTest                               INFO  - loading library test_StorageTestDictionary
+AuxStoreTest                               INFO Testing writing, using ROOT_Tree storage type.
+AuxStoreTest                               INFO createStorageSvc
+AuxStoreTest                               INFO startSession
+AuxStoreTest                               INFO Session connect
+AuxStoreTest                               INFO Creating objects
+AuxStoreTest                               INFO Creating Shape
+AuxStoreTest                               INFO Writing objects
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Deleting written data objects
+AuxStoreTest                               INFO Disconnecting StorageSvc
+AuxStoreTest                               INFO Ending Session
+AuxStoreTest                               INFO Releasing StorageSvc
+AuxStoreTest                               INFO  ...done
+AuxStoreTest                               INFO  Testing the reading operations
+AuxStoreTest                               INFO 0: 0   : 0  : withdict[0]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 1   : 2  : withdict[1]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 2   : 4  : withdict[2]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 3   : 6  : withdict[3]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 4   : 8  : withdict[4]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 5   : 10  : withdict[5]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 6   : 12  : withdict[6]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 7   : 14  : withdict[7]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 8   : 16  : withdict[8]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 9   : 18  : withdict[9]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 1000   : 5000  : withdict[0]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 1001   : 5002  : withdict[1]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 1002   : 5004  : withdict[2]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 1003   : 5006  : withdict[3]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 1004   : 5008  : withdict[4]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 1005   : 5010  : withdict[5]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 1006   : 5012  : withdict[6]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 1007   : 5014  : withdict[7]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 1008   : 5016  : withdict[8]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 1009   : 5018  : withdict[9]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 2000   : 10000  : withdict[0]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 2001   : 10002  : withdict[1]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 2002   : 10004  : withdict[2]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 2003   : 10006  : withdict[3]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 2004   : 10008  : withdict[4]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 2005   : 10010  : withdict[5]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 2006   : 10012  : withdict[6]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 2007   : 10014  : withdict[7]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 2008   : 10016  : withdict[8]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 2009   : 10018  : withdict[9]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 3000   : 15000  : withdict[0]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 3001   : 15002  : withdict[1]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 3002   : 15004  : withdict[2]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 3003   : 15006  : withdict[3]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 3004   : 15008  : withdict[4]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 3005   : 15010  : withdict[5]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 3006   : 15012  : withdict[6]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 3007   : 15014  : withdict[7]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 3008   : 15016  : withdict[8]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 3009   : 15018  : withdict[9]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 4000   : 20000  : withdict[0]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 4001   : 20002  : withdict[1]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 4002   : 20004  : withdict[2]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 4003   : 20006  : withdict[3]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 4004   : 20008  : withdict[4]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 4005   : 20010  : withdict[5]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 4006   : 20012  : withdict[6]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 4007   : 20014  : withdict[7]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 4008   : 20016  : withdict[8]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 4009   : 20018  : withdict[9]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 5000   : 25000  : withdict[0]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 5001   : 25002  : withdict[1]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 5002   : 25004  : withdict[2]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 5003   : 25006  : withdict[3]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 5004   : 25008  : withdict[4]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 5005   : 25010  : withdict[5]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 5006   : 25012  : withdict[6]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 5007   : 25014  : withdict[7]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 5008   : 25016  : withdict[8]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 5009   : 25018  : withdict[9]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 6000   : 30000  : withdict[0]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 6001   : 30002  : withdict[1]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 6002   : 30004  : withdict[2]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 6003   : 30006  : withdict[3]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 6004   : 30008  : withdict[4]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 6005   : 30010  : withdict[5]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 6006   : 30012  : withdict[6]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 6007   : 30014  : withdict[7]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 6008   : 30016  : withdict[8]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 6009   : 30018  : withdict[9]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 7000   : 35000  : withdict[0]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 7001   : 35002  : withdict[1]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 7002   : 35004  : withdict[2]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 7003   : 35006  : withdict[3]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 7004   : 35008  : withdict[4]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 7005   : 35010  : withdict[5]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 7006   : 35012  : withdict[6]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 7007   : 35014  : withdict[7]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 7008   : 35016  : withdict[8]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 7009   : 35018  : withdict[9]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 8000   : 40000  : withdict[0]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 8001   : 40002  : withdict[1]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 8002   : 40004  : withdict[2]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 8003   : 40006  : withdict[3]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 8004   : 40008  : withdict[4]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 8005   : 40010  : withdict[5]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 8006   : 40012  : withdict[6]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 8007   : 40014  : withdict[7]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 8008   : 40016  : withdict[8]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 8009   : 40018  : withdict[9]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 9000   : 45000  : withdict[0]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 9001   : 45002  : withdict[1]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 9002   : 45004  : withdict[2]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 9003   : 45006  : withdict[3]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 9004   : 45008  : withdict[4]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 9005   : 45010  : withdict[5]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 9006   : 45012  : withdict[6]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 9007   : 45014  : withdict[7]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 9008   : 45016  : withdict[8]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 9009   : 45018  : withdict[9]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO Objects read: 10
+AuxStoreTest                               INFO Closing the session
+AuxStoreTest                               INFO  ...done
+AuxStoreTest                               INFO ----------------------------------------------------------------------------------------------------
+AuxStoreTest                               INFO Testing writing, using ROOT_RNTuple storage type.
+AuxStoreTest                               INFO createStorageSvc
+AuxStoreTest                               INFO startSession
+AuxStoreTest                               INFO Session connect
+AuxStoreTest                               INFO Creating objects
+AuxStoreTest                               INFO Creating Shape
+AuxStoreTest                               INFO Writing objects
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Committing transaction
+AuxStoreTest                               INFO Deleting written data objects
+AuxStoreTest                               INFO Disconnecting StorageSvc
+AuxStoreTest                               INFO Ending Session
+AuxStoreTest                               INFO Releasing StorageSvc
+AuxStoreTest                               INFO  ...done
+AuxStoreTest                               INFO  Testing the reading operations
+AuxStoreTest                               INFO 0: 0   : 0  : withdict[0]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 1   : 2  : withdict[1]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 2   : 4  : withdict[2]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 3   : 6  : withdict[3]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 4   : 8  : withdict[4]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 5   : 10  : withdict[5]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 6   : 12  : withdict[6]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 7   : 14  : withdict[7]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 8   : 16  : withdict[8]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 9   : 18  : withdict[9]:  val=0
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 1000   : 5000  : withdict[0]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 1001   : 5002  : withdict[1]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 1002   : 5004  : withdict[2]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 1003   : 5006  : withdict[3]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 1004   : 5008  : withdict[4]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 1005   : 5010  : withdict[5]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 1006   : 5012  : withdict[6]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 1007   : 5014  : withdict[7]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 1008   : 5016  : withdict[8]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 1009   : 5018  : withdict[9]:  val=1
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 2000   : 10000  : withdict[0]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 2001   : 10002  : withdict[1]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 2002   : 10004  : withdict[2]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 2003   : 10006  : withdict[3]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 2004   : 10008  : withdict[4]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 2005   : 10010  : withdict[5]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 2006   : 10012  : withdict[6]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 2007   : 10014  : withdict[7]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 2008   : 10016  : withdict[8]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 2009   : 10018  : withdict[9]:  val=2
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 3000   : 15000  : withdict[0]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 3001   : 15002  : withdict[1]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 3002   : 15004  : withdict[2]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 3003   : 15006  : withdict[3]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 3004   : 15008  : withdict[4]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 3005   : 15010  : withdict[5]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 3006   : 15012  : withdict[6]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 3007   : 15014  : withdict[7]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 3008   : 15016  : withdict[8]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 3009   : 15018  : withdict[9]:  val=3
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 4000   : 20000  : withdict[0]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 4001   : 20002  : withdict[1]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 4002   : 20004  : withdict[2]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 4003   : 20006  : withdict[3]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 4004   : 20008  : withdict[4]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 4005   : 20010  : withdict[5]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 4006   : 20012  : withdict[6]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 4007   : 20014  : withdict[7]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 4008   : 20016  : withdict[8]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 4009   : 20018  : withdict[9]:  val=4
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 5000   : 25000  : withdict[0]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 5001   : 25002  : withdict[1]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 5002   : 25004  : withdict[2]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 5003   : 25006  : withdict[3]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 5004   : 25008  : withdict[4]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 5005   : 25010  : withdict[5]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 5006   : 25012  : withdict[6]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 5007   : 25014  : withdict[7]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 5008   : 25016  : withdict[8]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 5009   : 25018  : withdict[9]:  val=5
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 6000   : 30000  : withdict[0]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 6001   : 30002  : withdict[1]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 6002   : 30004  : withdict[2]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 6003   : 30006  : withdict[3]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 6004   : 30008  : withdict[4]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 6005   : 30010  : withdict[5]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 6006   : 30012  : withdict[6]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 6007   : 30014  : withdict[7]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 6008   : 30016  : withdict[8]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 6009   : 30018  : withdict[9]:  val=6
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 7000   : 35000  : withdict[0]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 7001   : 35002  : withdict[1]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 7002   : 35004  : withdict[2]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 7003   : 35006  : withdict[3]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 7004   : 35008  : withdict[4]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 7005   : 35010  : withdict[5]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 7006   : 35012  : withdict[6]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 7007   : 35014  : withdict[7]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 7008   : 35016  : withdict[8]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 7009   : 35018  : withdict[9]:  val=7
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 8000   : 40000  : withdict[0]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 8001   : 40002  : withdict[1]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 8002   : 40004  : withdict[2]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 8003   : 40006  : withdict[3]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 8004   : 40008  : withdict[4]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 8005   : 40010  : withdict[5]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 8006   : 40012  : withdict[6]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 8007   : 40014  : withdict[7]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 8008   : 40016  : withdict[8]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 8009   : 40018  : withdict[9]:  val=8
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 0: 9000   : 45000  : withdict[0]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 1: 9001   : 45002  : withdict[1]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 2: 9002   : 45004  : withdict[2]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 3: 9003   : 45006  : withdict[3]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 4: 9004   : 45008  : withdict[4]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 5: 9005   : 45010  : withdict[5]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 6: 9006   : 45012  : withdict[6]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 7: 9007   : 45014  : withdict[7]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 8: 9008   : 45016  : withdict[8]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO 9: 9009   : 45018  : withdict[9]:  val=9
+AuxStoreTest                               INFO  
+AuxStoreTest                               INFO Objects read: 10
+AuxStoreTest                               INFO Closing the session
+AuxStoreTest                               INFO  ...done
+AuxStoreTest                               INFO Number of floating tokens : 0

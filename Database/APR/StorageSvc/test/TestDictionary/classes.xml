@@ -1,0 +1,18 @@
+<lcgdict>
+  <class name="SimpleTestClass" id="4E1F4DBB-1973-1974-1999-204F37331A01"/>
+
+  <class name="TestClassWithTransients" id="A1111111-B111-C111-D111-E22111111121">
+    <field name="transientData" transient="true"/>
+    <field name="transientPointer" transient="true"/>
+    <field name="transientObject" transient="true"/>
+    <field name="transientIntArray" transient="true"/>
+    <field name="transientObjectArray" transient="true"/>
+  </class>
+
+  <class name="APRTest::AuxStore" id="A2222222-B111-C111-D111-E22134511111">
+    <field name="m_extra_store" transient="true"/>
+  </class>
+  <class name="APRTest::AClassWithDict" >  </class>
+  <class name="std::vector<APRTest::AClassWithDict>" id="A2222222-B111-C111-D111-E22134533333">  </class>
+
+</lcgdict>

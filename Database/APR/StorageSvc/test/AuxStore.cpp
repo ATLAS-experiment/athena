@@ -3,7 +3,7 @@
 */
 
 #undef NDEBUG
-#include "TestDriver.h"
+#include "AuxStore.h"
 #include "AuxStoreTest.h"
 
 #include "PersistentDataModel/Guid.h"
@@ -18,16 +18,14 @@
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/DbOption.h"
-#include "StorageSvc/pool.h"
-#include "StorageSvc/DbPrint.h"
 #include "GaudiKernel/StatusCode.h"
 
 #include <stdexcept>
 #include <iostream>
-#include <sstream>
 #include <memory>
 
 #include "AthContainers/AuxTypeRegistry.h"
+#include "AthenaKernel/errorcheck.h"
 
 using namespace pool;
 
@@ -45,39 +43,69 @@ public:
 using APRTest::AClassWithDict;
 
 
-TestDriver::TestDriver(const std::string& filename, DbType storage_type)
-   : m_fileName(filename),
-     m_storageType(storage_type)
+int main( )
 {
-   DbPrintLvl::setLevel( MSG::INFO );
+   try {
+      TestDriver driver("AuxStoreTest");
+      return driver.execute();
+   } 
+   catch( std::exception& e ) {
+      std::cerr << e.what() << std::endl;
+      return 1;
+   }
 }
 
 
-TestDriver::~TestDriver()
+
+int TestDriver::execute() 
 {
-   std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
+   errorcheck::ReportMessage::hideFunctionNames (true);
+
+   runTestForStorageType("AUX.pool_test.root", pool::ROOTTREE_StorageType);
+   ATH_MSG_INFO( std::string(100,'-') );
+   runTestForStorageType("AUX.rntuple_test.root", pool::ROOTRNTUPLE_StorageType);
+   
+   return 0;
 }
+
+void TestDriver::runTestForStorageType(const std::string& filename, const pool::DbType& storageType)
+{
+   m_fileName = filename;
+   m_storageType = storageType;
+
+   // hardcode here in case we only test reading, remember to keep in sync with classes.xml
+   std::string testTypeID = "A2222222-B111-C111-D111-E22134511111";
+
+   ATH_MSG_INFO("Testing writing, using " << storageType.storageName() << " storage type.");
+   std::string id = testWriting();
+   assert(testTypeID == id);
+   ATH_MSG_INFO(" ...done");
+
+   ATH_MSG_INFO(" Testing the reading operations");
+   testReading(testTypeID);
+   ATH_MSG_INFO(" ...done");
+}
+
 
 
 inline int getVal1(int objn, int idx) { return objn*1000 + idx; }
 inline int getVal2(int objn, int idx) { return objn*5000 + (idx<<1); }
 
 
-
 std::string TestDriver::testWriting()
 {
-   std::cout << "createStorageSvc" << std::endl;
+   ATH_MSG_INFO("createStorageSvc");
    IStorageSvc* storSvc = createStorageSvc("StorageSvc");
    if ( ! storSvc ) {
       throw std::runtime_error( "Could not create a StorageSvc object" );
    }
    storSvc->addRef();
-   std::cout << "startSession" << std::endl;
+   ATH_MSG_INFO("startSession");
    if( !storSvc->startSession( Io::WRITE, m_storageType.type() ).isSuccess() ) {
       throw std::runtime_error( "Could not start a session." );
    }
 
-   std::cout << "Session connect" << std::endl;
+   ATH_MSG_INFO("Session connect");
    FileDescriptor fd( m_fileName, m_fileName );
    if ( ! ( storSvc->connect( Io::WRITE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
@@ -93,7 +121,7 @@ std::string TestDriver::testWriting()
    SG::auxid_t dict_type = SG::AuxTypeRegistry::instance().getAuxID<AClassWithDict>("withdict");
    SG::auxid_t nodict_type = SG::AuxTypeRegistry::instance().getAuxID<TestClassNoDict>("nodict");
 
-   std::cout << "Creating objects" << std::endl;
+   ATH_MSG_INFO("Creating objects");
    std::vector<APRTest::AuxStore*>  objs;
    for( int objn=0; objn <nObjects; objn++ ) {
       APRTest::AuxStore   *object = new APRTest::AuxStore();
@@ -115,11 +143,11 @@ std::string TestDriver::testWriting()
       } 
       objs.push_back( object );
    }
-   //std::cout << "****  m_data offset=" << (char*)&(objs[0]->m_data) - (char*)objs[0] << std::endl;
+   //ATH_MSG_INFO("****  m_data offset=" << (char*)&(objs[0]->m_data) - (char*)objs[0]);
 
    
    // Creating the persistent shape.
-   std::cout << "Creating Shape" << std::endl;
+   ATH_MSG_INFO("Creating Shape");
    // Retrieve the dictionary
    RootType testtype ( "APRTest::AuxStore" );
    if ( ! testtype ) {
@@ -133,14 +161,14 @@ std::string TestDriver::testWriting()
    std::string testTypeID = shape->shapeID().toString();
 
    // Writing the objects.
-   std::cout << "Writing objects" << std::endl;
+   ATH_MSG_INFO("Writing objects");
    for( int objn=0; objn <nObjects; objn++ ) {
       Token* token;
       if( ! ( storSvc->allocate( fd, container, m_storageType.type(),
                                  objs[objn], shape, token ).isSuccess() ) ) {
          throw std::runtime_error( "Could not write an object" );
       }
-      std::cout << "Committing transaction" << std::endl;
+      ATH_MSG_INFO("Committing transaction");
       if( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
          throw std::runtime_error( "Commit ERROR" );
       }
@@ -148,25 +176,25 @@ std::string TestDriver::testWriting()
    }
 
    // Closing the transaction.
-   std::cout << "Committing transaction" << std::endl;
+   ATH_MSG_INFO("Committing transaction");
    if ( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
       throw std::runtime_error( "Could not end a transaction." );
    }
 
 // Clearing the cache
-   std::cout << "Deleting written data objects" << std::endl;
+   ATH_MSG_INFO("Deleting written data objects");
    for( int objn=0; objn <nObjects; objn++ ) 
       delete objs[objn];
    
-   std::cout << "Disconnecting StorageSvc" << std::endl;
+   ATH_MSG_INFO("Disconnecting StorageSvc");
    if ( ! ( storSvc->disconnect( fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not disconnect." );
    }
-   std::cout << "Ending Session" << std::endl;
+   ATH_MSG_INFO("Ending Session");
    if ( ! ( storSvc->endSession().isSuccess() ) ) {
       throw std::runtime_error( "Could not end correctly the session." );
    }
-   std::cout << "Releasing StorageSvc" << std::endl;
+   ATH_MSG_INFO("Releasing StorageSvc");
    storSvc->release();
 
    return testTypeID;
@@ -252,11 +280,11 @@ TestDriver::testReading(const std::string& testTypeID)
       auto wd_vect = reinterpret_cast<AClassWithDict const*>( object->getData(dict_type) );
       assert (object->size() == intN);
       for( int i=0; i<intN; i++ ) {
-         std::cout << i << ": " << i1[i] << "   : " << i2[i]
-              << "  : withdict["<<i<<"]:  val=" << wd_vect[i]._val;
+         ATH_MSG_INFO("" << i  << ": " << i1[i] << "   : " << i2[i]
+              << "  : withdict[" <<i<< "]:  val=" << wd_vect[i]._val);
          if( test_nodict )
-            std::cout << "  : nodict[]:  val=" << nodict[i]._val ;
-         std::cout << std::endl;
+            ATH_MSG_INFO("  : nodict[]:  val=" << nodict[i]._val );
+         ATH_MSG_INFO(" ");
          if( i1[i] != getVal1(iObject, i) || i2[i] != getVal2(iObject,i) )
             throw std::runtime_error( "Objects AUX data read different from objects written" );
       }
@@ -266,7 +294,7 @@ TestDriver::testReading(const std::string& testTypeID)
     }
     objectToken->release();
   }
-  std::cout << "Objects read: " << iObject << std::endl;
+  ATH_MSG_INFO("Objects read: " << iObject);
   if ( iObject != nObjects ) {
     throw std::runtime_error( "Objects read different from objects written" );
   }
@@ -277,7 +305,7 @@ TestDriver::testReading(const std::string& testTypeID)
   }
   delete fd;
 
-  std::cout << "Closing the session" << std::endl;
+  ATH_MSG_INFO("Closing the session");
   if ( ! ( storSvc->endSession().isSuccess() ) ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }

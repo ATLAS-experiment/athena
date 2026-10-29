@@ -2,9 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TestDriver.h"
+#include "TransientMembers.h"
 #include "TestClassWithTransients.h"
-#include "TestClassTransient.h"
 
 #include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
@@ -31,13 +30,38 @@ static const std::string container = "container";
 static const int nObjects = 100;
 
 
-TestDriver::TestDriver()
+class TestClassTransient {
+public:
+  TestClassTransient() : data(0) {}
+  virtual ~TestClassTransient() {};
+  int data;
+};
+
+
+int main( )
 {
+   try {
+      TestDriver driver("TransientMembersTest");
+      return driver.execute();
+   } catch ( std::exception& e ) {
+      std::cerr << e.what() << std::endl;
+      return 1;
+   }
 }
 
-TestDriver::~TestDriver()
+
+int TestDriver::execute()
 {
-   std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
+  ATH_MSG_INFO("Testing the writing operations");
+  testWriting();
+  ATH_MSG_INFO(" ...done");
+
+  ATH_MSG_INFO(" Testing the reading operations");
+  testReading();
+  ATH_MSG_INFO(" ...done");
+  
+  ATH_MSG_INFO(" Exiting...");
+  return 0;
 }
 
 
@@ -228,7 +252,7 @@ TestDriver::testReading()
     throw std::runtime_error( "Could not disconnect." );
   }
 
-  std::cout << "Closing the session" << std::endl;
+  ATH_MSG_INFO("Closing the session");
   if ( ! ( storSvc->endSession().isSuccess() ) ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }
