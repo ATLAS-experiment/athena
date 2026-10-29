@@ -126,6 +126,10 @@ def ActsTrackToTrackParticleCnvToolCfg(flags,
     kwargs.setdefault('FirstAndLastParameterOnly',True)
     kwargs.setdefault('ComputeExpectedLayerPattern',True)
 
+    if flags.Acts.useHGTDClusterInTrackFinding :
+        # if HGTD clusters are added to tracks by the CKF pass decorate track particle with time and HGTD hit counts
+        # and if export monitoring plots are enabled also add mean time and chi2 of all HGTD clusters on track
+        kwargs.setdefault('HgtdDecorationLevel',200 if flags.PhysVal.IDPVM.doExpertOutput else 1)
 
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
     kwargs.setdefault('ExtrapolationTool', acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)) )
