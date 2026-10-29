@@ -56,7 +56,7 @@ def ActsHgtdClusterToTruthAssociationAlgCfg(flags,
 
     kwargs.setdefault('InputTruthParticleLinks', 'xAODTruthLinks')
     kwargs.setdefault('SimData', 'HGTD_SDO_Map')
-    kwargs.setdefault('DepositedEnergyMin', 600) # @TODO revise ? From PRD_MultiTruthBuilder.h; should be 1/10 of threshold
+    kwargs.setdefault('DepositedEnergyMin', 0.) # original inherited value from strips of 600 MeV was too high
     kwargs.setdefault('Measurements', 'HGTD_Clusters')
     kwargs.setdefault('AssociationMapOut', 'HgtdClustersToTruthParticles')
     
