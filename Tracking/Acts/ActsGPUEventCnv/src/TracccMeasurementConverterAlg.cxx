@@ -29,7 +29,8 @@ StatusCode TracccMeasurementConverterAlg::initialize()
     ATH_CHECK(m_inputCellsKey.initialize(m_convertClustersWithCells));
 
     ATH_CHECK(m_outputPixelKey.initialize());
-    ATH_CHECK(m_outputPixelSpacePointsKey.initialize());
+    // pixel spacepoints are not needed when seeds are not converted on host
+    ATH_CHECK(m_outputPixelSpacePointsKey.initialize(!m_outputPixelSpacePointsKey.empty()));
     ATH_CHECK(m_outputMeasToPixelSPKey.initialize());
     ATH_CHECK(m_outputMeasToStripClKey.initialize());
     ATH_CHECK(m_outputStripKey.initialize());
@@ -214,8 +215,11 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
   // ---- Create output containers ----
   auto [pixel_cont, pixel_aux] =
     makeOutputContainer<xAOD::PixelCluster, xAOD::PixelClusterAuxContainer>(ctx, n_pixels);
+
+  const bool writeSpacePoints = !m_outputPixelSpacePointsKey.empty();
+  
   auto [pixel_spacepoint_cont, pixel_spacepoint_aux] =
-    makeOutputContainer<xAOD::SpacePoint, xAOD::SpacePointAuxContainer>(ctx, n_pixels);
+    makeOutputContainer<xAOD::SpacePoint, xAOD::SpacePointAuxContainer>(ctx, writeSpacePoints ? n_pixels : 0);
   auto [strip_cont, strip_aux] =
     makeOutputContainer<xAOD::StripCluster, xAOD::StripClusterAuxContainer>(ctx, n_strips);
 
@@ -240,8 +244,6 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
     // ---- Pixel ----
     if (meas.dimensions() == 2u) {
       xAOD::PixelCluster* xaod_pcl = *pixItr;
-      xAOD::SpacePoint* xaod_sp = *spItr;
-      ++spItr;
       ++pixItr;
 
       // once seeding will come into play, we will need to keep track of the
@@ -322,25 +324,31 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
 
       }
 
-      // Using width to scale the cluster covariance for space points.
-      // Read width back from the cluster so that this works with and without cells
-      // only works if 'diameter' strategy is set to channel1 in traccc
-      const float width_phiRZ = xaod_pcl->widthInEta();
-      float covTerm = width_phiRZ * width_phiRZ * (1/12.0f);
+      if(writeSpacePoints) {
+        xAOD::SpacePoint* xaod_sp = *spItr;
+        ++spItr;
 
-      const float localVarEta = xaod_pcl->localCovariance<2>()(1, 1);
-      if( covTerm < localVarEta )
-          covTerm = localVarEta;
+        // Using width to scale the cluster covariance for space points.
+        // Read width back from the cluster so that this works with and without cells
+        // only works if 'diameter' strategy is set to channel1 in traccc
+        const float width_phiRZ = xaod_pcl->widthInEta();
+        float covTerm = width_phiRZ * width_phiRZ * (1/12.0f);
 
-      const Amg::Transform3D& Tp = pDE->surface().transform();
-      float const cov_z =
-          6.f * covTerm *
-          static_cast<float>(Tp(0, 2) * Tp(0, 2) + Tp(1, 2) * Tp(1, 2));
-      float const cov_r = 6.f * covTerm *
-                          static_cast<float>(Tp(2, 2) * Tp(2, 2));
-      xaod_sp->setSpacePoint(xaod_pcl->identifierHash(),
-                              xaod_pcl->globalPosition(), cov_r, cov_z,
-                              {xaod_pcl});
+        const float localVarEta = xaod_pcl->localCovariance<2>()(1, 1);
+        if( covTerm < localVarEta )
+            covTerm = localVarEta;
+
+        const Amg::Transform3D& Tp = pDE->surface().transform();
+        float const cov_z =
+            6.f * covTerm *
+            static_cast<float>(Tp(0, 2) * Tp(0, 2) + Tp(1, 2) * Tp(1, 2));
+        float const cov_r = 6.f * covTerm *
+                            static_cast<float>(Tp(2, 2) * Tp(2, 2));
+        xaod_sp->setSpacePoint(xaod_pcl->identifierHash(),
+                                xaod_pcl->globalPosition(), cov_r, cov_z,
+                                {xaod_pcl});
+      }
+
       ++pixel_idx;
 
     // ---- Strip ----
@@ -441,9 +449,11 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
                                                            ctx};
   ATH_CHECK(pixelHandle.record(std::move(pixel_cont), std::move(pixel_aux)));
 
-  SG::WriteHandle<xAOD::SpacePointContainer> spacePointHandle{m_outputPixelSpacePointsKey,
+  if(writeSpacePoints) {
+    SG::WriteHandle<xAOD::SpacePointContainer> spacePointHandle{m_outputPixelSpacePointsKey,
                                                               ctx};
-  ATH_CHECK(spacePointHandle.record(std::move(pixel_spacepoint_cont), std::move(pixel_spacepoint_aux)));
+    ATH_CHECK(spacePointHandle.record(std::move(pixel_spacepoint_cont), std::move(pixel_spacepoint_aux)));
+  }
 
   SG::WriteHandle<std::vector<unsigned int>> measToPixelSPHandle{m_outputMeasToPixelSPKey, ctx};
   ATH_CHECK(measToPixelSPHandle.record(std::make_unique<std::vector<unsigned int>>(std::move(measToPixelSP))));
