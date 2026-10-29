@@ -12,21 +12,21 @@
 
 #include <exception>
 
-pool::TokenIterator::TokenIterator( FileDescriptor& fileDescriptor,
-                                                    const std::string& containerName) :
+TokenIterator::TokenIterator( pool::FileDescriptor& fileDescriptor,
+                              const std::string& containerName) :
   m_container( nullptr ), m_refToken ( nullptr )
 {
-   DbDatabase dbH( fileDescriptor.dbc()->handle() );
+   pool::DbDatabase dbH( fileDescriptor.dbc()->handle() );
    if ( dbH.isValid() )  {
       m_refToken = new Token(dbH.cntToken(containerName));
-      m_container = new DbContainer(m_refToken->technology());
+      m_container = new pool::DbContainer(m_refToken->technology());
    }
    if( !dbH.isValid() || !m_container->open(dbH, m_refToken->contID(), 0, m_refToken->technology(), Io::READ).isSuccess() ) {
       throw std::runtime_error( "Selection from " + fileDescriptor.PFN() + "(" + containerName + ") failed (APR: \" TokenIterator::TokenIterator() \" from \" PersistencySvc \")" );
    }
 }
 
-pool::TokenIterator::~TokenIterator()
+TokenIterator::~TokenIterator()
 {
   delete m_container; m_container = nullptr;
   m_refToken->release(); m_refToken = nullptr;
@@ -34,7 +34,7 @@ pool::TokenIterator::~TokenIterator()
 
 
 Token*
-pool::TokenIterator::next()
+TokenIterator::next()
 {
   Token::OID_t linkH(m_refToken->oid());
   if( !m_container->next(linkH).isSuccess() ) return nullptr;
@@ -45,14 +45,14 @@ pool::TokenIterator::next()
 
 
 std::size_t
-pool::TokenIterator::size()
+TokenIterator::size()
 {
   return m_container->size();
 }
 
 
 bool
-pool::TokenIterator::seek(std::size_t position)
+TokenIterator::seek(std::size_t position)
 {
   if( position >= size() ) return false;
   // go to position-1, so that the next call to next() will return the Token at <position>

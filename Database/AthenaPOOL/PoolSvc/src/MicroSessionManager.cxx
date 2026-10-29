@@ -15,21 +15,21 @@
 
 #include <exception>
 
-pool::MicroSessionManager::MicroSessionManager(pool::DatabaseRegistry& registry, long technology) :
+MicroSessionManager::MicroSessionManager(DatabaseRegistry& registry, long technology) :
   m_registry( registry ),
   m_storageSvc( 0 ),
   m_inSession( false ),
   m_technology( technology ),
   m_databaseHandlers()
 {
-  m_storageSvc = createStorageSvc("StorageSvc");
+  m_storageSvc = pool::createStorageSvc("StorageSvc");
   if ( ! m_storageSvc ) {
     throw std::runtime_error( "Could not create a StorageSvc object (APR: \" MicroSessionManager::MicroSessionManager \" from \" PersistencySvc \"" );
   }
 }
 
 
-pool::MicroSessionManager::~MicroSessionManager()
+MicroSessionManager::~MicroSessionManager()
 {
   this->disconnectAll();
   m_storageSvc->release();
@@ -37,7 +37,7 @@ pool::MicroSessionManager::~MicroSessionManager()
 
 
 bool
-pool::MicroSessionManager::connect( Io::IoFlag mode, int ageLimit )
+MicroSessionManager::connect( Io::IoFlag mode, int ageLimit )
 {
   if( !m_inSession ) {
     m_inSession = m_storageSvc->startSession(mode, m_technology, ageLimit).isSuccess();
@@ -46,8 +46,8 @@ pool::MicroSessionManager::connect( Io::IoFlag mode, int ageLimit )
 }
 
 
-pool::DatabaseHandler*
-pool::MicroSessionManager::connect( Io::IoFlag mode,
+DatabaseHandler*
+MicroSessionManager::connect( Io::IoFlag mode,
                                     const std::string& fid,
                                     const std::string& pfn )
 {
@@ -61,9 +61,9 @@ pool::MicroSessionManager::connect( Io::IoFlag mode,
     }
   }
 
-  pool::DatabaseHandler* db = 0;
+  DatabaseHandler* db = 0;
   try {
-    db = new pool::DatabaseHandler( *m_storageSvc, m_technology, fid, pfn, mode );
+    db = new DatabaseHandler( *m_storageSvc, m_technology, fid, pfn, mode );
     m_registry.registerDatabaseHandler( db );
     m_databaseHandlers.insert( db );
   } catch( const std::runtime_error& /* error */) {
@@ -82,9 +82,9 @@ pool::MicroSessionManager::connect( Io::IoFlag mode,
 
 
 void
-pool::MicroSessionManager::disconnect( pool::DatabaseHandler* database )
+MicroSessionManager::disconnect( DatabaseHandler* database )
 {
-  std::set< pool::DatabaseHandler* >::iterator idb = m_databaseHandlers.find( database );
+  std::set< DatabaseHandler* >::iterator idb = m_databaseHandlers.find( database );
   if ( idb != m_databaseHandlers.end() ) {
     m_registry.deregisterDatabaseHandler( *idb );
     delete *idb;
@@ -98,10 +98,10 @@ pool::MicroSessionManager::disconnect( pool::DatabaseHandler* database )
 
 
 bool
-pool::MicroSessionManager::disconnectAll()
+MicroSessionManager::disconnectAll()
 {
   bool ret = true;
-  for ( std::set< pool::DatabaseHandler* >::iterator idb = m_databaseHandlers.begin();
+  for ( std::set< DatabaseHandler* >::iterator idb = m_databaseHandlers.begin();
         idb != m_databaseHandlers.end(); ++idb ) {
     m_registry.deregisterDatabaseHandler( *idb );
     ret = (*idb)->disconnectTransaction();
@@ -117,7 +117,7 @@ pool::MicroSessionManager::disconnectAll()
 }
 
 std::string
-pool::MicroSessionManager::fidForPfn( const std::string& pfn )
+MicroSessionManager::fidForPfn( const std::string& pfn )
 {
   if ( m_databaseHandlers.empty() ) {
     Io::IoFlag mode = Io::READ;
@@ -132,7 +132,7 @@ pool::MicroSessionManager::fidForPfn( const std::string& pfn )
   fd.setFID( fd.FID().substr(0,24) + "0FF0FF0FF0FF" );
   if( m_storageSvc->existsConnection(fd).isSuccess() ) {
     if ( m_storageSvc->connect(Io::READ, fd).isSuccess() ) {
-      DbDatabase dbH( fd.dbc()->handle() );
+      pool::DbDatabase dbH( fd.dbc()->handle() );
       if ( ! dbH.param( "FID", fid ).isSuccess() ) fid = "";
       m_storageSvc->disconnect( fd ).ignore();
     }
@@ -147,7 +147,7 @@ pool::MicroSessionManager::fidForPfn( const std::string& pfn )
 }
 
 bool
-pool::MicroSessionManager::attributeOfType( const std::string& attributeName,
+MicroSessionManager::attributeOfType( const std::string& attributeName,
                                                             void* data,
                                                             const std::type_info& typeInfo,
                                                             const std::string& option )
@@ -161,7 +161,7 @@ pool::MicroSessionManager::attributeOfType( const std::string& attributeName,
 }
 
 bool
-pool::MicroSessionManager::setAttributeOfType( const std::string& attributeName,
+MicroSessionManager::setAttributeOfType( const std::string& attributeName,
                                                                const void* data,
                                                                const std::type_info& typeInfo,
                                                                const std::string& option )

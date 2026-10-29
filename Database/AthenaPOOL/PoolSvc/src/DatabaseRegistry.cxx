@@ -6,17 +6,17 @@
 #include "DatabaseRegistry.h"
 #include "DatabaseHandler.h"
 
-pool::DatabaseRegistry::DatabaseRegistry()
+DatabaseRegistry::DatabaseRegistry()
 {}
 
 
-pool::DatabaseRegistry::~DatabaseRegistry()
+DatabaseRegistry::~DatabaseRegistry()
 {}
 
-std::set< pool::DatabaseHandler* >::iterator
-pool::DatabaseRegistry::registerDbHandler( pool::DatabaseHandler* dbHandler )
+std::set< DatabaseHandler* >::iterator
+DatabaseRegistry::registerDbHandler( DatabaseHandler* dbHandler )
 {
-  std::set< pool::DatabaseHandler* >::iterator iDatabase = m_databases.find( dbHandler );
+  std::set< DatabaseHandler* >::iterator iDatabase = m_databases.find( dbHandler );
   if ( iDatabase == m_databases.end() ) {
     iDatabase = m_databases.insert( dbHandler ).first;
     m_fidToDb.insert( std::make_pair( dbHandler->fid(), dbHandler ) );
@@ -28,17 +28,17 @@ pool::DatabaseRegistry::registerDbHandler( pool::DatabaseHandler* dbHandler )
 }
 
 void
-pool::DatabaseRegistry::registerDatabaseHandler( pool::DatabaseHandler* dbHandler )
+DatabaseRegistry::registerDatabaseHandler( DatabaseHandler* dbHandler )
 {
   this->registerDbHandler( dbHandler );
 }
 
 
 void
-pool::DatabaseRegistry::registerDatabaseHandler( pool::DatabaseHandler* dbHandler,
+DatabaseRegistry::registerDatabaseHandler( DatabaseHandler* dbHandler,
                                                                  const std::string& lfn )
 {
-  std::set< pool::DatabaseHandler* >::iterator iDatabase = this->registerDbHandler( dbHandler );
+  std::set< DatabaseHandler* >::iterator iDatabase = this->registerDbHandler( dbHandler );
   const std::string& fid = (*iDatabase)->fid();
   m_fidToLfns.find( fid )->second.insert( lfn );
   m_lfnToDb.insert ( std::make_pair( lfn, *iDatabase ) );
@@ -46,9 +46,9 @@ pool::DatabaseRegistry::registerDatabaseHandler( pool::DatabaseHandler* dbHandle
 
 
 void
-pool::DatabaseRegistry::deregisterDatabaseHandler( pool::DatabaseHandler* dbHandler )
+DatabaseRegistry::deregisterDatabaseHandler( DatabaseHandler* dbHandler )
 {
-  std::set< pool::DatabaseHandler* >::iterator idb = m_databases.find( dbHandler );
+  std::set< DatabaseHandler* >::iterator idb = m_databases.find( dbHandler );
   if ( idb != m_databases.end() ) {
     m_fidToDb.erase( (*idb)->fid() );
     m_pfnToDb.erase( (*idb)->pfn() );

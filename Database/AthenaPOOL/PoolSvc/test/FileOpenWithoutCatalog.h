@@ -6,7 +6,6 @@
 #define FILEOPENWITHOUTCATALOG_H
 
 #include "SimpleTestClass.h"
-#include "PoolSvc/IDatabase.h"
 #include "PersTestBase.h"
 
 #include <vector>
@@ -21,7 +20,7 @@ class TestDriver : public PersTestBase {
     void write();
      // read back using possibly a different path and name type
      void read(const std::string& fileName = "",  // by default use the name used for writing
-              pool::DatabaseSpecification::NameType nameType = pool::DatabaseSpecification::PFN);
+               Database::Specification::NameType nameType = Database::Specification::PFN);
 
     std::string           m_fileName;
 

@@ -5,7 +5,7 @@
 #include "PersistentDataModel/Token.h"
 
 #include "PoolSvc/FileCatalogUtils.h"
-#include "PoolSvc/ISessionTool.h"
+#include "../src/SessionTool.h"
 #include "StorageSvc/DbType.h"
 
 #include "Persistency_NoClassID.h"

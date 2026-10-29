@@ -3,7 +3,7 @@
 */
 #include "PersistentDataModel/Token.h"
 #include "PoolSvc/FileCatalogUtils.h"
-#include "PoolSvc/ISessionTool.h"
+#include "../src/SessionTool.h"
 #include "StorageSvc/DbType.h"
 
 #include "Persistency_Parameters.h"
@@ -64,7 +64,7 @@ TestDriver::write()
   }
 
   // Opening again a database
-  auto db = dbsession->databaseHandle( m_fileName, pool::DatabaseSpecification::PFN );
+  auto db = dbsession->databaseHandle( m_fileName, Database::Specification::PFN );
   if ( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -73,7 +73,7 @@ TestDriver::write()
   db->connectForWrite();
 
   // Committing the transaction
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }
@@ -95,7 +95,7 @@ TestDriver::read()
   }
 
   // Opening the database for reading
-  auto db = dbsession->databaseHandle( m_fileName, pool::DatabaseSpecification::PFN );
+  auto db = dbsession->databaseHandle( m_fileName, Database::Specification::PFN );
   if( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -103,7 +103,7 @@ TestDriver::read()
   db->connectForRead();
 
   // Committing the transaction
-  std::cout << "Committing the transaction." << std::endl;
+  ATH_MSG_INFO( "Committing the transaction." );
   if( !dbsession->commit() ) {
     throw std::runtime_error( "Could not commit the transaction." );
   }

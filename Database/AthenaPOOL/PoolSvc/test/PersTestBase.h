@@ -8,7 +8,7 @@
 
 #include "AthenaBaseComps/AthMessaging.h"
 
-#include "PoolSvc/ISessionTool.h"
+#include "../src/SessionTool.h"
 #include "PoolSvc/FileCatalogUtils.h"
 
 #include <string>
@@ -30,7 +30,7 @@ public:
   /// load local dictionary libraries for the test
   void loadLibraries( const std::vector<std::string>& libraries );
   /// create a session tool for the test with @sessionName, attach the catalog to it
-  ToolHandle<ISessionTool> createSession( Gaudi::IFileCatalog& fileCatalog, const std::string& sessionName );
+  ToolHandle<SessionTool> createSession( Gaudi::IFileCatalog& fileCatalog, const std::string& sessionName );
 };
 
 #endif
