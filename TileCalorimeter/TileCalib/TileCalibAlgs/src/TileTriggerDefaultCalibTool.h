@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECALIBALG_TILETRIGGERDEFAULTCALIBTOOL_H
@@ -47,15 +47,15 @@ class TileTriggerDefaultCalibTool : public AthAlgTool, virtual public ITileCalib
  private:
 
   // jobOptions
-  std::string m_ntupleID;
-  int m_maxNTT;
-  unsigned int m_nevpmt;
+  Gaudi::Property<std::string> m_ntupleID{this, "NtupleID", "h3000"};
+  Gaudi::Property<int> m_maxNTT{this, "MaxNTriggerTowers", 7200};
+  Gaudi::Property<unsigned int> m_nevpmt{this, "NumEventPerPMT", 195}; // changed from 200 to 195
 
   // Tools / storegate info
-  const CaloLVL1_ID* m_TT_ID;
-  const TileHWID* m_tileHWID;
-  const TileID*   m_tileID;
-  const TileCablingService* m_tileCablingService;
+  const CaloLVL1_ID* m_TT_ID{nullptr};
+  const TileHWID* m_tileHWID{nullptr};
+  const TileID*   m_tileID{nullptr};
+  const TileCablingService* m_tileCablingService{nullptr};
   ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,  //!< main Tile Calibration tool
     "TileCondToolEmscale", "TileCondToolEmscale", "Tile em scale tool"};
   SG::ReadHandleKey<TileDQstatus> m_dqStatusKey{this,
@@ -94,15 +94,15 @@ class TileTriggerDefaultCalibTool : public AthAlgTool, virtual public ITileCalib
   float (*m_rmsTileL1Calo)[Tile::MAX_DRAWER][Tile::MAX_CHAN];
 
   // CISpar parameters
-  float 	m_charge;
-  unsigned int	m_ipmt;
-  unsigned int	m_ipmtCount;
-  unsigned int	m_ipmtOld;
+  float 	m_charge{0};
+  unsigned int	m_ipmt{0};
+  unsigned int	m_ipmtCount{0};
+  unsigned int	m_ipmtOld{0};
 
-  float m_DACvalue;
+  float m_DACvalue{0};
 
   // Events
-  int   m_nEvtGlobal;
+  int   m_nEvtGlobal{0};
 
 };
 

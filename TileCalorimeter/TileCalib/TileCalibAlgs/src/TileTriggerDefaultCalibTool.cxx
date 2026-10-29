@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileTriggerDefaultCalibTool.h"
@@ -36,22 +36,9 @@ T square(T x) { return x*x; }
 
 TileTriggerDefaultCalibTool::TileTriggerDefaultCalibTool(const std::string& type, const std::string& name,const IInterface* pParent):
   AthAlgTool(type, name, pParent)
-  , m_TT_ID(nullptr)
-  , m_tileHWID(nullptr)
-  , m_tileID(nullptr)
-  , m_tileCablingService(nullptr)
-  , m_charge(0)
-  , m_ipmt(0)
-  , m_ipmtCount(0)
-  , m_ipmtOld(0)
-  , m_DACvalue(0)
-  , m_nEvtGlobal(0)
 {
   declareInterface<ITileCalibTool>( this );
-  declareProperty("MaxNTriggerTowers", m_maxNTT=7200);
-  declareProperty("NtupleID", m_ntupleID="h3000");
-  declareProperty("NumEventPerPMT", m_nevpmt=195); // changed from 200 to 195
-  
+
   m_meanTile = new float[Tile::MAX_ROS][Tile::MAX_DRAWER][Tile::MAX_CHAN]();
   m_rmsTile = new float[Tile::MAX_ROS][Tile::MAX_DRAWER][Tile::MAX_CHAN]();
   m_meanTileDAC = new float[Tile::MAX_ROS][Tile::MAX_DRAWER][Tile::MAX_CHAN]();
@@ -431,7 +418,7 @@ StatusCode TileTriggerDefaultCalibTool::writeNtuple(int runNumber, int runType, 
 {
   ATH_MSG_INFO ( "writeNtuple(" << runNumber << "," << runType << "," << rootFile << ")" );
 
-  TTree *t = new TTree(m_ntupleID.c_str(), "TileCalib-Ntuple");
+  TTree *t = new TTree(m_ntupleID.value().c_str(), "TileCalib-Ntuple");
   TString ind = TString::Format("[%d][%d][%d]",Tile::MAX_ROS,Tile::MAX_DRAWER,Tile::MAX_CHAN);
 
   t->Branch("meanTile",m_meanTile,ind.Format("meanTile%s/F",(const char *)ind));

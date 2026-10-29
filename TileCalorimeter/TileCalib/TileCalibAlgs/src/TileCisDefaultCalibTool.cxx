@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -33,44 +33,9 @@
 TileCisDefaultCalibTool::TileCisDefaultCalibTool(const std::string& type, const std::string& name,
     const IInterface* pParent)
     : AthAlgTool(type, name, pParent)
-  , m_tileHWID(nullptr)
-  , m_cabling(nullptr)
   , m_cablingSvc("TileCablingSvc", name)
-  , m_scanMap(nullptr)
-  , m_scanMapRMS(nullptr)
-  , m_tileInfo(nullptr)
 {
   declareInterface<ITileCalibTool>(this);
-
-  declareProperty("NtupleID", m_ntupleID = "h3000");
-
-  declareProperty("removePed", m_removePed = true);
-  declareProperty("useSmallCap", m_useSmallCap = false);
-  declareProperty("phaseMin", m_phaseMin = -10);
-  declareProperty("phaseMax", m_phaseMax = 300);
-
-  declareProperty("maxPed", m_maxPed = 45.);
-
-  declareProperty("chargeMinHi", m_chargeMinHi = 0.5);
-  declareProperty("chargeMaxHi", m_chargeMaxHi = 12.5);
-  declareProperty("chargeMinLo", m_chargeMinLo = 31.5);
-  declareProperty("chargeMaxLo", m_chargeMaxLo = 800.0);
-
-  declareProperty("linfitMinHi", m_linfitMinHi = 3.0);
-  declareProperty("linfitMaxHi", m_linfitMaxHi = 10.0);
-  declareProperty("linfitMinLo", m_linfitMinLo = 300.0);
-  declareProperty("linfitMaxLo", m_linfitMaxLo = 700.0);
-
-  declareProperty("linfitMinHiDemo", m_linfitMinHiDemo = 6.0);
-  declareProperty("linfitMaxHiDemo", m_linfitMaxHiDemo = 20.0);
-  declareProperty("linfitMinLoDemo", m_linfitMinLoDemo = 300.0);
-  declareProperty("linfitMaxLoDemo", m_linfitMaxLoDemo = 700.0);
-
-  declareProperty("doSampleChecking", m_doSampleChecking = true); // do sample checking by default
-  declareProperty("TileDQstatus", m_dqStatusKey = "TileDQstatus");
-  declareProperty("TileInfoName", m_infoName = "TileInfo");
-
-  declareProperty("FragIDsDemonstrators", m_fragIDsDemonstrators, "List of Tile frag IDs of demonstrators, which have different CIS circuits than the legacy ones");
 
   // Initialize arrays for results
   m_calib = new float[Tile::MAX_ROS][Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_GAIN]();
@@ -116,13 +81,13 @@ StatusCode TileCisDefaultCalibTool::initialize() {
 
   if (runPeriod==3) {
     if ( m_fragIDsDemonstrators.empty()) {
-      m_fragIDsDemonstrators.push_back (0x10d);  // LBA14 is demonstrator in RUN3
+      m_fragIDsDemonstrators.value().push_back (0x10d);  // LBA14 is demonstrator in RUN3
     }
   }
 
   if ( not m_fragIDsDemonstrators.empty() ) {
 
-    std::sort(m_fragIDsDemonstrators.begin(),m_fragIDsDemonstrators.end());
+    std::sort(m_fragIDsDemonstrators.value().begin(),m_fragIDsDemonstrators.value().end());
 
     std::ostringstream os;
     for (int fragID : m_fragIDsDemonstrators) {
@@ -799,7 +764,7 @@ StatusCode TileCisDefaultCalibTool::writeNtuple(int runNumber, int runType, TFil
 
   ATH_MSG_INFO( "writeNtuple(" << runNumber << "," << runType << "," << rootFile << ")" );
 
-  TTree *t = new TTree(m_ntupleID.c_str(), "TileCalib-Ntuple");
+  TTree *t = new TTree(m_ntupleID.value().c_str(), "TileCalib-Ntuple");
   t->Branch("RunNumber", &runNumber, "runNo/I");
   t->Branch("calib", *m_calib, "calib[5][64][48][2]/F");
   t->Branch("qflag", *m_qflag, "qflag[5][64][48][2]/I");

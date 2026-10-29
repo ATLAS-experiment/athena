@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECALIBALG_TILECISDEFAULTCALIBTOOL_H
@@ -88,55 +88,56 @@ class TileCisDefaultCalibTool: public AthAlgTool
     TAdcDoubleMap m_MeanSqMap;
 
     // Tools / storegate info
-    const TileHWID* m_tileHWID;
-    const TileCablingService* m_cabling;
+    const TileHWID* m_tileHWID{nullptr};
+    const TileCablingService* m_cabling{nullptr};
     ServiceHandle<TileCablingSvc> m_cablingSvc;
     ToolHandle<ITileStuckBitsProbsTool> m_stuckBitsProbs{this,
       "StuckBitsProbsTool","","Tile stuck bits probabilities tool"};
 
-    SG::ReadHandleKey<TileDQstatus> m_dqStatusKey;
+    SG::ReadHandleKey<TileDQstatus> m_dqStatusKey{this, "TileDQstatus", "TileDQstatus"};
     SG::ReadHandleKey<TileDigitsContainer> m_digitsContainerKey{this,
       "TileDigitsContainer", "TileDigitsCnt", "Tile digits container"};
     SG::ReadHandleKey<TileRawChannelContainer> m_rawChannelContainerKey{this,
       "TileRawChannelContainer", "TileRawChannelFit", "Tile raw channel container"};
     // jobOptions
     std::string m_rawChannelContainerName;
-    std::string m_ntupleID;
+    Gaudi::Property<std::string> m_ntupleID{this, "NtupleID", "h3000"};
     std::string m_DigitsContainerName;
     // whether or not to use small capacitor, by default no
-    bool m_useSmallCap;
+    Gaudi::Property<bool> m_useSmallCap{this, "useSmallCap", false};
 
     // remove pedestal events: should only be necessary for runs where
     // pedestal triggers are mixed with CIS triggers
-    bool m_removePed;
+    Gaudi::Property<bool> m_removePed{this, "removePed", true};
 
     // expected maximal ped to set overflow limit (mostly needed for low gain)
-    double m_maxPed;
+    Gaudi::Property<double> m_maxPed{this, "maxPed", 45.};
 
     // phase range for calibration, by default use full range
-    double m_phaseMin;
-    double m_phaseMax;
+    Gaudi::Property<double> m_phaseMin{this, "phaseMin", -10};
+    Gaudi::Property<double> m_phaseMax{this, "phaseMax", 300};
 
     // Maximum charge (gain-dependent) for filling dac map: not equivalent to charge range used in linear fit
     // by default, fill low gain up to 800 pC, high gain up to 12.5 pC (25 pC for demonstrator)
-    double m_chargeMaxHi;
-    double m_chargeMinHi;
-    double m_chargeMaxLo;
-    double m_chargeMinLo;
+    Gaudi::Property<double> m_chargeMaxHi{this, "chargeMaxHi", 12.5};
+    Gaudi::Property<double> m_chargeMinHi{this, "chargeMinHi", 0.5};
+    Gaudi::Property<double> m_chargeMaxLo{this, "chargeMaxLo", 800.0};
+    Gaudi::Property<double> m_chargeMinLo{this, "chargeMinLo", 31.5};
 
     // Range for linear fits: by default do high gain fit from 3-10 pC, and low gain from 300 - 700 pC
-    double m_linfitMaxHi;
-    double m_linfitMinHi;
-    double m_linfitMaxLo;
-    double m_linfitMinLo;
+    Gaudi::Property<double> m_linfitMaxHi{this, "linfitMaxHi", 10.0};
+    Gaudi::Property<double> m_linfitMinHi{this, "linfitMinHi", 3.0};
+    Gaudi::Property<double> m_linfitMaxLo{this, "linfitMaxLo", 700.0};
+    Gaudi::Property<double> m_linfitMinLo{this, "linfitMinLo", 300.0};
 
     // Range for linear fits for demonstrator: by default do high gain fit from 6-20 pC, and low gain from 300 - 700 pC
-    double m_linfitMaxHiDemo;
-    double m_linfitMinHiDemo;
-    double m_linfitMaxLoDemo;
-    double m_linfitMinLoDemo;
+    Gaudi::Property<double> m_linfitMaxHiDemo{this, "linfitMaxHiDemo", 20.0};
+    Gaudi::Property<double> m_linfitMinHiDemo{this, "linfitMinHiDemo", 6.0};
+    Gaudi::Property<double> m_linfitMaxLoDemo{this, "linfitMaxLoDemo", 700.0};
+    Gaudi::Property<double> m_linfitMinLoDemo{this, "linfitMinLoDemo", 300.0};
 
-    bool m_doSampleChecking;
+    // do sample checking by default
+    Gaudi::Property<bool> m_doSampleChecking{this, "doSampleChecking", true};
 
     using Tile = TileCalibUtils;
     // Results
@@ -162,8 +163,8 @@ class TileCisDefaultCalibTool: public AthAlgTool
     // used to count the number of injection samples analyzed for odd bit behavior
     int (*m_numSamp)[Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_GAIN];
 
-    TMap* m_scanMap;
-    TMap* m_scanMapRMS;
+    TMap* m_scanMap{nullptr};
+    TMap* m_scanMapRMS{nullptr};
 
     double m_defaultCalib[4] = {0., 0., 0., 0.};
     double m_dac2Charge[4] = {0., 0., 0., 0.};
@@ -172,11 +173,12 @@ class TileCisDefaultCalibTool: public AthAlgTool
     double m_linfitMin[4] = {0., 0., 0., 0.};
     double m_linfitMax[4] = {0., 0., 0., 0.};
     double m_maxAmp[4] = {0., 0., 0., 0.};
-    std::vector<int> m_fragIDsDemonstrators;
+    Gaudi::Property<std::vector<int>> m_fragIDsDemonstrators{this, "FragIDsDemonstrators", {},
+      "List of Tile frag IDs of demonstrators, which have different CIS circuits than the legacy ones"};
 
     // TileInfo
-    std::string m_infoName;
-    const TileInfo* m_tileInfo;
+    Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo"};
+    const TileInfo* m_tileInfo{nullptr};
     
     // Functions
     inline int chanIsConnected(int ros, int chan) {

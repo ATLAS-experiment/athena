@@ -91,40 +91,41 @@ class TileRawChNoiseCalibAlg: public AthAlgorithm {
     }
 
     // If data should be put in calib mode
-    bool m_calibMode;
+    Gaudi::Property<bool> m_calibMode{this, "CalibMode", true};
 
-    bool m_doFit;
-    bool m_doFixed;
-    bool m_doOpt;
-    bool m_doDsp;
-    bool m_doOF1;
-    bool m_doMF;
-    bool m_saveHist;
-    bool m_invertChanRatio;
+    Gaudi::Property<bool> m_doFit{this, "doFit", true};
+    Gaudi::Property<bool> m_doFixed{this, "doFixed", true};
+    Gaudi::Property<bool> m_doOpt{this, "doOpt", true};
+    Gaudi::Property<bool> m_doDsp{this, "doDsp", true};
+    Gaudi::Property<bool> m_doOF1{this, "doOF1", true};
+    Gaudi::Property<bool> m_doMF{this, "doMF", true};
+    Gaudi::Property<bool> m_saveHist{this, "SaveHist", false, "write all histograms to output file"};
+    Gaudi::Property<bool> m_invertChanRatio{this, "InvertChanRatio", true,
+      "swap two sigmas and invert ratio if it is above 1.0 (channel fit only)"};
 
-    int m_UseforCells;
+    Gaudi::Property<int> m_UseforCells{this, "UseforCells", 2, "Fit=0, Fixed=1,  Opt=2, Dsp=3, OF1=4, MF=5"};
 
-    bool m_maskBadChannels;
+    Gaudi::Property<bool> m_maskBadChannels{this, "MaskBadChannels", true};
 
     // by default we use channels
-    bool m_usePMT;
+    Gaudi::Property<bool> m_usePMT{this, "UsePMT", false};
 
     bool m_fillidx;
 
     // Tools / storegate info
-    TileBeamElemContByteStreamCnv* m_beamCnv;
-    const TileCablingService* m_cabling;
+    TileBeamElemContByteStreamCnv* m_beamCnv{nullptr};
+    const TileCablingService* m_cabling{nullptr};
     // Identifiers
-    const TileID* m_tileID;
-    const TileHWID* m_tileHWID;
+    const TileID* m_tileID{nullptr};
+    const TileHWID* m_tileHWID{nullptr};
     ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
       "TileCondToolEmscale", "TileCondToolEmscale", "Tile em scale tool"};
     ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
       "TileBadChanTool", "TileBadChanTool", "Tile bad channel tool"};
-    SG::ReadHandleKey<TileDQstatus> m_dqStatusKey;
+    SG::ReadHandleKey<TileDQstatus> m_dqStatusKey{this, "TileDQstatus", "TileDQstatus"};
     ToolHandle<TileCondIdTransforms> m_tileIdTrans{this,
       "TileCondIdTransforms", "TileCondIdTransforms", "Tile Id transforms tool"};
-    const uint32_t* m_cispar;
+    const uint32_t* m_cispar{nullptr};
 
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,
       "EventInfo", "EventInfo", "EventInfo key"};
@@ -150,14 +151,14 @@ class TileRawChNoiseCalibAlg: public AthAlgorithm {
     // jobOptions
 
     // Name of ntuple and file
-    std::string m_ntupleID;
-    std::string m_file;
-    int64_t m_treeSize;
+    Gaudi::Property<std::string> m_ntupleID{this, "NtupleID", "RawCh_NoiseCalib"};
+    Gaudi::Property<std::string> m_file{this, "FileNamePrefix", "RawCh_NoiseCalib"};
+    Gaudi::Property<int64_t> m_treeSize{this, "TreeSize", 16000000000LL};
     //unsigned int m_nDrawers;
 
     // Container Parameters
-    std::string m_digitsContainer;
-    std::string m_beamElemContainer;
+    Gaudi::Property<std::string> m_digitsContainer{this, "TileDigitsContainer", "TileDigitsCnt"};
+    Gaudi::Property<std::string> m_beamElemContainer{this, "TileBeamElemContainer", "TileBeamElemCnt"};
     std::string m_fixedRawChannelContainer;
     std::string m_fitRawChannelContainer;
     std::string m_optRawChannelContainer;
@@ -178,15 +179,15 @@ class TileRawChNoiseCalibAlg: public AthAlgorithm {
     uint8_t (*m_channel)[Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_GAIN];
     bool (*m_gain)[Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_GAIN];
     // Trigger items
-    int m_time;
-    int m_year;
-    int m_month;
-    int m_day;
-    int m_yday;
-    int m_hour;
-    int m_min;
-    int m_run;
-    int m_trigType;
+    int m_time{0};
+    int m_year{0};
+    int m_month{0};
+    int m_day{0};
+    int m_yday{0};
+    int m_hour{0};
+    int m_min{0};
+    Gaudi::Property<int> m_run{this, "RunNumber", 0};
+    int m_trigType{0};
     //int m_nsamples;
 
     // RawCh items

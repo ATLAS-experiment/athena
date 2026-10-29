@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileTopCalibAlg.h"
@@ -15,14 +15,7 @@
 
 TileTopCalibAlg::TileTopCalibAlg(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_runNumber(0)
-  , m_runType(0)
-  , m_fileName("TileCalibNtuple.root")
-  , m_rootFile(nullptr)
 {
-  declareProperty("RunNumber", m_runNumber=0);
-  declareProperty("RunType", m_runType=0);
-  declareProperty("FileName",m_fileName="TileCalibNtuple.root");
 }
 
 /**
@@ -39,15 +32,15 @@ StatusCode TileTopCalibAlg::initialize()
 {
   ATH_MSG_DEBUG ( "in initialize()" );
  
-  ATH_MSG_DEBUG ( "Run number set to " << m_runNumber );
-  ATH_MSG_DEBUG ( "Run type set to " << m_runType );
-  ATH_MSG_DEBUG ( "Output file set to " << m_fileName );
+  ATH_MSG_DEBUG ( "Run number set to " << m_runNumber.value() );
+  ATH_MSG_DEBUG ( "Run type set to " << m_runType.value() );
+  ATH_MSG_DEBUG ( "Output file set to " << m_fileName.value() );
   ATH_MSG_DEBUG (  "starting to retrieve list " << m_tileCalibToolList );
   ATH_CHECK( m_tileCalibToolList.retrieve() );
   ATH_MSG_DEBUG (  m_tileCalibToolList << "retrieved");
   
   // Create output root file, one file for all tools
-  m_rootFile = new TFile(m_fileName.c_str(), "recreate");
+  m_rootFile = new TFile(m_fileName.value().c_str(), "recreate");
 
   ToolHandleArray< ITileCalibTool >::iterator itTool = m_tileCalibToolList.begin();
   ToolHandleArray< ITileCalibTool >::iterator  itToolEnd = m_tileCalibToolList.end();

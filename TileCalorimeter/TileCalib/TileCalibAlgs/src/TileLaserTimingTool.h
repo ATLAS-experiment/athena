@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECALIBALG_TILELASERTIMINGTOOL_H
@@ -254,26 +254,26 @@ class TileLaserTimingTool: public AthAlgTool, virtual public ITileCalibTool {
       "TileDigitsContainer", "TileDigitsCnt", "Tile digits container"};
 
     // Tools info
-    const TileHWID* m_tileHWID;
-    const TileCablingService* m_cabling;
+    const TileHWID* m_tileHWID{nullptr};
+    const TileCablingService* m_cabling{nullptr};
     ToolHandle<TileCondToolTiming> m_tileToolTiming{this,
       "TileCondToolTiming", "TileCondToolTiming", "Tile timing tool"};
 
     // jobOptions
     std::string m_rawChannelContainerName;
     std::string m_digitsContainerName;
-    std::string m_ntupleID;
-    double m_fiberLightSpeed = 0.0;
-    unsigned m_nSamples;
+    Gaudi::Property<std::string> m_ntupleID{this, "NtupleID", "h3000"};
+    Gaudi::Property<double> m_fiberLightSpeed{this, "FiberLightSpeed", 0.0};
+    Gaudi::Property<unsigned> m_nSamples{this, "NSamples", 9};
     // low limit for energy when adding samples to pulse shape
-    double m_eneLowLimitPulseShape;
+    Gaudi::Property<double> m_eneLowLimitPulseShape{this, "EneLowLimitPulseShape", 0.000001};
     // the reference drawer nr
-    unsigned int m_refDrawer;
-    bool m_useMeanChannelOffset;
+    Gaudi::Property<unsigned int> m_refDrawer{this, "ReferenceDrawer", 39};
+    Gaudi::Property<bool> m_useMeanChannelOffset{this, "UseMeanChannelOffset", true};
     // max allowed abs value for time diff
-    float m_maxTimeDiff;
+    Gaudi::Property<float> m_maxTimeDiff{this, "MaxTimeDiff", 10000.};
     // if PMT0 or digi0 should be used as reference to dskew settings
-    bool m_usePMT0AsDskewRef;
+    Gaudi::Property<bool> m_usePMT0AsDskewRef{this, "UsePMT0AsDskewRef", true};
 
     // the tag for the registered cond objects, default ""
     std::string m_IOVTag;
@@ -281,9 +281,9 @@ class TileLaserTimingTool: public AthAlgTool, virtual public ITileCalibTool {
     // help vars
 
     /** number of laser events */
-    int m_nevts;
+    int m_nevts{0};
 
-    TF1* m_gaussf;
+    TF1* m_gaussf{nullptr};
 
 #ifdef TileLaserTimingMonPulse
     // Mon data

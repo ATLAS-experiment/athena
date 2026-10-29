@@ -32,34 +32,7 @@
 TileInfoDump::TileInfoDump(const std::string& name, ISvcLocator* pSvcLocator)
     : AthAlgorithm(name, pSvcLocator)
     , m_thistSvc("THistSvc", name)
-    , m_tileHWID(nullptr)
-    , m_tileID(nullptr)
-    , m_h_badCellA(nullptr)
-    , m_h_badCellBC(nullptr)
-    , m_h_badCellD(nullptr)
-    , m_h_badCellGap(nullptr)
-    , m_h_badCell(nullptr)
-    , m_tileInfo(nullptr)
-
 {
-  declareProperty("AthenaIsOnline", m_isOnline = false, "Availability of COOL folders depends on Athena mode");
-  declareProperty("PrintEmscale", m_printEmscale = false, "Switch on calibration chain printout");
-  declareProperty("PrintEmscaleOnl", m_printEmscaleOnl = false, "Switch on online calibration chain printout");
-  declareProperty("PrintLaser", m_printLaser = false, "Switch on all laser constants printout");
-  declareProperty("PrintIntegrator", m_printIntegrator = false, "Switch on integrator printout");
-  declareProperty("PrintPedestals", m_printPedestals = false, "Switch on Pedstals print out");
-  declareProperty("PrintTimingCorrections", m_printTimingCorrections = false, "Switch on Timing Corrections print out");
-  declareProperty("PrintPulseShapes", m_printPulseShapes = false, "Switch on Pulse Shape print out");
-  declareProperty("PrintOfcsCool", m_printOfcsCool = false, "Switch on OFC print out");
-  declareProperty("PrintPulseShapesStep", m_printPulseShapesStep = 0.5, "Time step (ns) of PulseShapes print out");
-  declareProperty("PrintBadChannels", m_printBadChannels = false, "Switch on Bad Channels print out");
-  declareProperty("PrintBadCells", m_printBadCells = false, "Switch on Bad Cells print out");
-  declareProperty("PrintMuID", m_printMuID = false, "Switch on MuID threshold print out");
-  declareProperty("Print1gNoise", m_print1gNoise = false, "Switch on 1g noise print out");
-  declareProperty("PrintOfcRos", m_printOfcRos = 0, "Print OFC for this ros (0 by default)");
-  declareProperty("PrintOfcDrawer", m_printOfcDrawer = 0, "Print OFC for this drawer (0 by default)");
-  declareProperty("PrintOfcChannel", m_printOfcChannel = 0, "Print OFC for this channel (0 by default)");
-  declareProperty("TileInfoName", m_infoName = "TileInfo");
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
@@ -120,7 +93,7 @@ StatusCode TileInfoDump::initialize() {
   CHECK( m_thistSvc.retrieve() );
 
   //=== Get TileInfo and set max ADC counts
-  CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
+  CHECK( detStore()->retrieve(m_tileInfo, m_infoName.value()) );
   m_i_ADCmax = m_tileInfo->ADCmax();
 
   //--- Histogram initialization
@@ -855,7 +828,7 @@ void TileInfoDump::printMuID() {
 void TileInfoDump::printOfcs() {
   MsgStream log(msgSvc(), name());
 
-  ATH_MSG_INFO("OFC will be printed for ros " << m_printOfcRos << ", drawer " << m_printOfcDrawer << ", channel " << m_printOfcChannel);
+  ATH_MSG_INFO("OFC will be printed for ros " << m_printOfcRos.value() << ", drawer " << m_printOfcDrawer.value() << ", channel " << m_printOfcChannel.value());
 
   //=== dump default channel only
   unsigned int gain = 0;

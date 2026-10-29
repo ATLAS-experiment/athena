@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -46,25 +46,25 @@ class TileExpertDump: public AthAlgorithm {
 
   private:
 
-    TileEmscaleCalibOptions m_emExpertOptions;
-    bool m_OflCisFitLin;
-    bool m_OflCisFitNln;
-    bool m_OflLasLin;
-    bool m_OflLasNln;
-    bool m_OflLasPart;
-    bool m_OflCes;
-    bool m_OflEms;
-    bool m_OflLasLinPisa;
-    bool m_OflLasNlnPisa;
-    bool m_OflMinbias;
-    bool m_OnlCisLin;
-    bool m_OnlLasLin;
-    bool m_OnlCes;
-    bool m_OnlEms;
+    TileEmscaleCalibOptions m_emExpertOptions{0};
+    Gaudi::Property<bool> m_OflCisFitLin{this, "useOflCisFitLin", false, "Use calibration of OflCisFitLin"};
+    Gaudi::Property<bool> m_OflCisFitNln{this, "useOflCisFitNln", false, "Use calibration of OflCisFitNln"};
+    Gaudi::Property<bool> m_OflLasLin{this, "useOflLasLin", false, "Use calibration of OflLasLin"};
+    Gaudi::Property<bool> m_OflLasNln{this, "useOflLasNln", false, "Use calibration of OflLasNln"};
+    Gaudi::Property<bool> m_OflLasPart{this, "useOflLasPart", false, "Use calibration of OflLasPart"};
+    Gaudi::Property<bool> m_OflCes{this, "useOflCes", false, "Use calibration of OflCes"};
+    Gaudi::Property<bool> m_OflEms{this, "useOflEms", false, "Use calibration of OflEms"};
+    Gaudi::Property<bool> m_OflLasLinPisa{this, "useOflLasLinPisa", false, "Use calibration of OflLasLinPisa"};
+    Gaudi::Property<bool> m_OflLasNlnPisa{this, "useOflLasNlnPisa", false, "Use calibration of OflLasNlnPisa"};
+    Gaudi::Property<bool> m_OflMinbias{this, "useOflMinbias", false, "Use calibration of OflMinbias"};
+    Gaudi::Property<bool> m_OnlCisLin{this, "useOnlCisLin", false, "Use calibration of OnlCisLin"};
+    Gaudi::Property<bool> m_OnlLasLin{this, "useOnlLasLin", false, "Use calibration of OnlLasLin"};
+    Gaudi::Property<bool> m_OnlCes{this, "useOnlCes", false, "Use calibration of OnlCes"};
+    Gaudi::Property<bool> m_OnlEms{this, "useOnlEms", false, "Use calibration of OnlEms"};
     void printExpertEmscale();
     void printExpertEmscaleOnl();
-    bool m_printExpertEmscale;
-    bool m_printExpertEmscaleOnl;
+    Gaudi::Property<bool> m_printExpertEmscale{this, "PrintExpertEmscale", false, "Switch on expert calibration chain printout"};
+    Gaudi::Property<bool> m_printExpertEmscaleOnl{this, "PrintExpertEmscaleOnl", false, "Switch on expert onl calibration chain printout"};
 
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,
       "EventInfo", "EventInfo", "EventInfo key"};
@@ -73,11 +73,11 @@ class TileExpertDump: public AthAlgorithm {
     ToolHandle<TileExpertToolEmscale> m_tileExpertToolEmscale{this,
       "TileExpertToolEmscale","TileExpertToolEmscale", "Tile expert tool em scale"};
 
-    const TileHWID* m_tileHWID;
+    const TileHWID* m_tileHWID{nullptr};
 
     //=== TileInfo
-    std::string m_infoName;
-    const TileInfo* m_tileInfo;
+    Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo"};
+    const TileInfo* m_tileInfo{nullptr};
     int m_i_ADCmax = 0;
 };
 

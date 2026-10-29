@@ -42,41 +42,7 @@
 
 TileDigiNoiseCalibAlg::TileDigiNoiseCalibAlg(const std::string& name, ISvcLocator* pSvcLocator)
     : AthAlgorithm(name, pSvcLocator)
-  , m_beamCnv(nullptr)
-  , m_cabling(nullptr)
-  , m_tileOFCorrelation(nullptr)
-  , m_tileID(nullptr)
-  , m_tileHWID(nullptr)
-  , m_cispar(nullptr)
-//  , m_nDrawers(0)
-  , m_time(0)
-  , m_year(0)
-  , m_month(0)
-  , m_day(0)
-  , m_yday(0)
-  , m_hour(0)
-  , m_min(0)
-  , m_trigType(0)
 {
-  declareProperty("TileBeamElemContainer", m_beamElemContainer = "TileBeamElemCnt");
-  /*  declareProperty("TileRawChannelContainerFlat", m_flatRawChannelContainer = "TileRawChannelFlat");
-   declareProperty("TileRawChannelContainerFit", m_fitRawChannelContainer = ""); // don't create
-   declareProperty("TileRawChannelContainerOpt", m_optRawChannelContainer = ""); // by default */
-  declareProperty("TileRawChannelContainerDsp", m_dspRawChannelContainer = "TileRawChannelCnt");
-  declareProperty("CalibMode", m_calibMode = true);
-  declareProperty("usePMT", m_usePMT = false);
-  declareProperty("RunNumber", m_run = 0);
-  declareProperty("FileNamePrefix", m_file = "Digi_NoiseCalib");
-  declareProperty("NtupleID", m_ntupleID = "Digi_NoiseCalib");
-  declareProperty("TreeSize", m_treeSize = 16000000000LL);
-  declareProperty("NSamples", m_nSamples = 7);
-  declareProperty("DoAvgCorr", m_doAvgCorr = false);
-  declareProperty("DoRobustCov", m_doRobustCov = false);
-  declareProperty("TileDQstatus", m_dqStatusKey = "TileDQstatus");
-
-  m_run = 0;
-  m_evtNr = -1;
-
   m_sumPed2 = new double[Tile::MAX_ROS][Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_GAIN]();
   m_sumRms2 = new double[Tile::MAX_ROS][Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_GAIN]();
   m_meanAmp = new double[Tile::MAX_ROS][Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_GAIN]();
@@ -163,8 +129,8 @@ StatusCode TileDigiNoiseCalibAlg::FirstEvt_initialize() {
   m_tileOFCorrelation = new TileOFCorrelation();
   m_tileOFCorrelation->SetCorrelationZero(msg(), m_nSamples);
 
-  ATH_MSG_INFO( "calibMode " << m_calibMode );
-  ATH_MSG_INFO( "number of samples " << m_nSamples );
+  ATH_MSG_INFO( "calibMode " << m_calibMode.value() );
+  ATH_MSG_INFO( "number of samples " << m_nSamples.value() );
 
   // set event number to 0 before first event
   m_evtNr = 0;
@@ -249,18 +215,18 @@ StatusCode TileDigiNoiseCalibAlg::finalize() {
     ATH_MSG_WARNING( "Unknown trigger type " << m_trigType );
     trig_str = "Unk";
   }
-  sStr << m_file << "_" << m_run << "_" << trig_str << ".root";
+  sStr << m_file.value() << "_" << m_run.value() << "_" << trig_str << ".root";
   m_file = sStr.str();
-  ATH_MSG_INFO( "Writing calibrations to file " << m_file );
+  ATH_MSG_INFO( "Writing calibrations to file " << m_file.value() );
 
   // Create output file: for now creating file for just this
   // algorithm; want to add to ntuple file eventually??
-  TFile* fout = new TFile(m_file.c_str(), "recreate");
+  TFile* fout = new TFile(m_file.value().c_str(), "recreate");
 
   // Create tree with branches
-  TTree* t = new TTree(m_ntupleID.c_str(), "TileCalib-Ntuple");
+  TTree* t = new TTree(m_ntupleID.value().c_str(), "TileCalib-Ntuple");
 
-  t->Branch("RunNumber", &m_run, "RunNumber/I");
+  t->Branch("RunNumber", &m_run.value(), "RunNumber/I");
   t->Branch("TrigType", &m_trigType, "TrigType/I");
   t->Branch("Time", &m_time, "Time/I");
   t->Branch("Year", &m_year, "Year/I");
@@ -269,7 +235,7 @@ StatusCode TileDigiNoiseCalibAlg::finalize() {
   t->Branch("YDay", &m_yday, "YDay/I");
   t->Branch("Hour", &m_hour, "Hour/I");
   t->Branch("Min", &m_min, "Min/I");
-  t->Branch("nSamples", &m_nSamples, "nSamples/I");
+  t->Branch("nSamples", &m_nSamples.value(), "nSamples/I");
   t->Branch("nEvt", &m_evtNr, "nEvt/I"); // events processed
   t->Branch("ros", *m_ros, "ros[5][64][48][2]/b");
   t->Branch("drawer", *m_drawer, "drawer[5][64][48][2]/b");
@@ -475,9 +441,9 @@ StatusCode TileDigiNoiseCalibAlg::fillDigits (const TileDQstatus* theDQstatus) {
 
         // Fill event-by-event correlation values
         if (m_doAvgCorr)
-          m_tileOFCorrelation->RunningCorrelation(vdigits, ros - 1, drawer, chan, gain, msg(), false, m_nSamples, 100);
+          m_tileOFCorrelation->RunningCorrelation(vdigits, ros - 1, drawer, chan, gain, msg(), false, m_nSamples.value(), 100);
         else
-          m_tileOFCorrelation->Sum(vdigits, ros - 1, drawer, chan, gain, msg(), false, m_nSamples, m_doRobustCov);
+          m_tileOFCorrelation->Sum(vdigits, ros - 1, drawer, chan, gain, msg(), false, m_nSamples.value(), m_doRobustCov);
 
       } // loop over channels
 

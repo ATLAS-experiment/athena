@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena includes
@@ -121,23 +121,9 @@ float const TileLaserTimingTool::s_fiberLength[2][48] = {{167.1,167.1,178.7,178.
 
 TileLaserTimingTool::TileLaserTimingTool(const std::string& type, const std::string& name, const IInterface* pParent)
   : AthAlgTool(type, name, pParent)
-  , m_tileHWID(nullptr)
-  , m_cabling(nullptr)
-  , m_nevts(0)
-  , m_gaussf(nullptr)
 {
 
   declareInterface<ITileCalibTool>( this );
-
-  declareProperty("NtupleID", m_ntupleID = "h3000");
-  declareProperty("FiberLightSpeed", m_fiberLightSpeed);
-  declareProperty("NSamples", m_nSamples = 9);
-  declareProperty("EneLowLimitPulseShape", m_eneLowLimitPulseShape = 0.000001);
-  declareProperty("ReferenceDrawer", m_refDrawer = 39);
-
-  declareProperty("UseMeanChannelOffset", m_useMeanChannelOffset = true);
-  declareProperty("MaxTimeDiff", m_maxTimeDiff = 10000.);
-  declareProperty("UsePMT0AsDskewRef", m_usePMT0AsDskewRef = true);
 
 #ifdef TileLaserTimingMonPulse
   // create mon histos
@@ -450,7 +436,7 @@ StatusCode TileLaserTimingTool::execute() {
                 std::vector<float> sample = digits->samples();
                 if(sample.size() != m_nSamples) {
                   ATH_MSG_ERROR( " sample size mismatch for drawer:" << drawerIdStr(frag)
-                                 <<" in:" << sample.size() << " expected:" << m_nSamples );
+                                 <<" in:" << sample.size() << " expected:" << m_nSamples.value() );
                 } else {
                   for (unsigned jsample = 0; jsample < m_nSamples; ++jsample) {
                     f_SampleTime = ((float) jsample) * 25.;
@@ -775,7 +761,7 @@ StatusCode TileLaserTimingTool::writeNtuple(int runNumber, int runType, TFile* r
   ATH_MSG_INFO( "writeNtuple(" << runNumber << "," << runType << "," << rootFile << ")" );
 
   // Write a tree with all arrays
-  TTree *t = new TTree(m_ntupleID.c_str(), "TileLaserTimingNtuple");
+  TTree *t = new TTree(m_ntupleID.value().c_str(), "TileLaserTimingNtuple");
   t->Branch("DrawerOffset", m_DrawerOffset, "DrawerOffset[5][64]/F"); // float m_DrawerOffset[s_NRos][64];
   t->Branch("DrawerOffsetError", m_DrawerOffsetError, "DrawerOffsetError[5][64]/F"); // float m_DrawerOffsetError[NROS][64];
 
