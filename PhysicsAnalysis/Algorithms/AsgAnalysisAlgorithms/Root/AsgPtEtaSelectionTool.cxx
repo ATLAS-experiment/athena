@@ -249,10 +249,10 @@ namespace CP
       }
 
       if (m_minEtaCutIndex >= 0) {
-        accept.setCutResult (m_minEtaCutIndex, absEta > m_minEta);
+        accept.setCutResult (m_minEtaCutIndex, absEta >= m_minEta);
       }
       if (m_maxEtaCutIndex >= 0) {
-        accept.setCutResult (m_maxEtaCutIndex, absEta <= m_maxEta);
+        accept.setCutResult (m_maxEtaCutIndex, absEta < m_maxEta);
       }
       if (m_etaGapCutIndex >= 0) {
         accept.setCutResult (m_etaGapCutIndex, (absEta < m_etaGapLow ||
@@ -284,10 +284,10 @@ namespace CP
       }
 
       if (m_minRapidityCutIndex >= 0) {
-        accept.setCutResult (m_minRapidityCutIndex, absRapidity > m_minRapidity);
+        accept.setCutResult (m_minRapidityCutIndex, absRapidity >= m_minRapidity);
       }
       if (m_maxRapidityCutIndex >= 0) {
-        accept.setCutResult (m_maxRapidityCutIndex, absRapidity <= m_maxRapidity);
+        accept.setCutResult (m_maxRapidityCutIndex, absRapidity < m_maxRapidity);
       }
     }
 
