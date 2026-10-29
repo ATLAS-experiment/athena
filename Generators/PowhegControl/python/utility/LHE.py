@@ -348,7 +348,7 @@ def gg4l_emu2all(input_event):
                     IDUP = -channels_pdgIds[channels[idx]][0]
                 output_line = "".join("".join(tokens[:2])+str(IDUP)+"".join(tokens[3:]))            
                 
-            if abs(IDUP) == 13: #this is the muon part
+            elif abs(IDUP) == 13: #this is the muon part
                 if not is_event_changed:
                     idx = np.searchsorted(cumulative, np.random.uniform())
                     is_event_changed = True
