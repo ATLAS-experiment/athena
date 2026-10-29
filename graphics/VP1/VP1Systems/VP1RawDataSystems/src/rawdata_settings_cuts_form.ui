@@ -275,6 +275,16 @@
       </attribute>
       <layout class="QVBoxLayout" name="layout_MDTCuts">
        <item>
+        <widget class="QCheckBox" name="checkBox_mdtExcludeMasked">
+         <property name="text">
+          <string>Exclude masked digits</string>
+         </property>
+         <property name="toolTip">
+          <string>Hide MDT digits whose stored isMasked flag is true. Uncheck to include both masked and unmasked digits.</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="group_mdtAllowedADC">
          <property name="title">
           <string>ADC amplitude [counts]</string>

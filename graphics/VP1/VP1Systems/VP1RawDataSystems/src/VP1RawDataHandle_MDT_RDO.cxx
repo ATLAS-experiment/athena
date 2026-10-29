@@ -51,6 +51,7 @@ QStringList VP1RawDataHandle_MDT_RDO::clicked(bool verbose) const
   // ll << "   is a valid digit: "+ m_data->is_valid(idhelper);
   ll << "   adc: " + QString::number(m_data->adc());
   ll << "   tdc: " + QString::number(m_data->tdc());
+  ll << "   isMasked: " + QString(isMasked() ? "true" : "false");
   if (verbose)
   {
     if (idhelper)
@@ -109,4 +110,9 @@ double VP1RawDataHandle_MDT_RDO::amplitude() const
 double VP1RawDataHandle_MDT_RDO::time() const
 {
   return m_data->tdc();
+}
+
+bool VP1RawDataHandle_MDT_RDO::isMasked() const
+{
+  return m_data->isMasked();
 }

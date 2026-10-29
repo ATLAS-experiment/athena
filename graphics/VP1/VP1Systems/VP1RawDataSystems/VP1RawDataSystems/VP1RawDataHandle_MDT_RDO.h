@@ -33,6 +33,7 @@ public:
   QStringList clicked(bool verbose) const;
 
   // Values in native digit units (MDT ADC/TDC counts; MM/sTGC digit charge and ns).
+  bool isMasked() const;
   double amplitude() const;
   double time() const;
 

@@ -46,6 +46,7 @@ public:
   bool last_trtRequireHT = false;
   VP1Interval last_trtAllowedToT;
   unsigned last_lucidMinQDC = 0U;
+  bool last_mdtExcludeMasked = false;
   VP1Interval last_mdtAllowedADC;
   VP1Interval last_mdtAllowedTDC;
   VP1Interval last_mmAllowedCharge;
@@ -179,6 +180,9 @@ VP1RawDataSysController::VP1RawDataSysController(IVP1System * sys)
   connect(m_d->ui_cuts.checkBox_stgcAllowedTimeMax, &QCheckBox::toggled,
           m_d->ui_cuts.spinBox_stgcAllowedTimeMax, &QDoubleSpinBox::setEnabled);
 
+  addUpdateSlot(SLOT(possibleChange_mdtExcludeMasked()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_mdtExcludeMasked);
+
   initLastVars();
 }
 
@@ -192,7 +196,7 @@ VP1RawDataSysController::~VP1RawDataSysController()
 //____________________________________________________________________
 int VP1RawDataSysController::currentSettingsVersion() const
 {
-  return 2;
+  return 3;
 }
 
 //____________________________________________________________________
@@ -243,13 +247,14 @@ void VP1RawDataSysController::actualSaveSettings(VP1Serialise&s) const
   s.save(m_d->ui_cuts.spinBox_stgcAllowedTimeMin);
   s.save(m_d->ui_cuts.checkBox_stgcAllowedTimeMax);
   s.save(m_d->ui_cuts.spinBox_stgcAllowedTimeMax);
+  s.save(m_d->ui_cuts.checkBox_mdtExcludeMasked);//Version 3+
 
 }
 
 //____________________________________________________________________
 void VP1RawDataSysController::actualRestoreSettings(VP1Deserialise& s)
 {
-  if (s.version()<0||s.version()>2) {
+  if (s.version()<0||s.version()>3) {
     message("Warning: State data in .vp1 file has unsupported version ("+str(s.version())+")");
     return;
   }
@@ -314,6 +319,11 @@ void VP1RawDataSysController::actualRestoreSettings(VP1Deserialise& s)
     m_d->ui_cuts.checkBox_stgcAllowedTimeMin->setChecked(false);
     m_d->ui_cuts.checkBox_stgcAllowedTimeMax->setChecked(false);
   }
+  if (s.version() >= 3)
+    s.restore(m_d->ui_cuts.checkBox_mdtExcludeMasked);
+  else
+    m_d->ui_cuts.checkBox_mdtExcludeMasked->setChecked(false);
+
   // Deserialisation blocks checkbox signals, so synchronize the fields explicitly.
   m_d->ui_cuts.spinBox_mdtAllowedADCMin->setEnabled(m_d->ui_cuts.checkBox_mdtAllowedADCMin->isChecked());
   m_d->ui_cuts.spinBox_mdtAllowedADCMax->setEnabled(m_d->ui_cuts.checkBox_mdtAllowedADCMax->isChecked());
@@ -492,3 +502,10 @@ POSSIBLECHANGE_IMP(mmAllowedCharge)
 POSSIBLECHANGE_IMP(mmAllowedTime)
 POSSIBLECHANGE_IMP(stgcAllowedCharge)
 POSSIBLECHANGE_IMP(stgcAllowedTime)
+
+bool VP1RawDataSysController::mdtExcludeMasked() const
+{
+  return m_d->ui_cuts.checkBox_mdtExcludeMasked->isChecked();
+}
+
+POSSIBLECHANGE_IMP(mdtExcludeMasked)

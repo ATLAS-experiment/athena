@@ -35,6 +35,7 @@ QStringList VP1RawDataColl_MDT_RDO::availableCollections(IVP1System*sys)
 //____________________________________________________________________
 class VP1RawDataColl_MDT_RDO::Imp {
 public:
+  bool excludeMasked = false;
   VP1Interval mdtAllowedADC;
   VP1Interval mdtAllowedTDC;
 
@@ -51,6 +52,9 @@ VP1RawDataColl_MDT_RDO::VP1RawDataColl_MDT_RDO(VP1RawDataCommonData*common,const
   connect(common->controller(), SIGNAL(mdtAllowedTDCChanged(const VP1Interval&)),
           this, SLOT(setMdtAllowedTDC(const VP1Interval&)));
   setMdtAllowedTDC(common->controller()->mdtAllowedTDC());
+  connect(common->controller(), SIGNAL(mdtExcludeMaskedChanged(bool)),
+          this, SLOT(setMdtExcludeMasked(bool)));
+  setMdtExcludeMasked(common->controller()->mdtExcludeMasked());
 }
 
 //____________________________________________________________________
@@ -115,7 +119,8 @@ bool VP1RawDataColl_MDT_RDO::load() {
 bool VP1RawDataColl_MDT_RDO::cut(VP1RawDataHandleBase* handle)
 {
   const auto* digit = static_cast<const VP1RawDataHandle_MDT_RDO*>(handle);
-  return m_d->mdtAllowedADC.contains(digit->amplitude()) &&
+  return (!m_d->excludeMasked || !digit->isMasked()) &&
+         m_d->mdtAllowedADC.contains(digit->amplitude()) &&
          m_d->mdtAllowedTDC.contains(digit->time());
 }
 
@@ -133,4 +138,15 @@ void VP1RawDataColl_MDT_RDO::setMdtAllowedTDC(const VP1Interval& range)
     return;
   m_d->mdtAllowedTDC = range;
   recheckCutStatusOfAllHandles();
+}
+
+void VP1RawDataColl_MDT_RDO::setMdtExcludeMasked(bool exclude)
+{
+  if (m_d->excludeMasked == exclude)
+    return;
+  m_d->excludeMasked = exclude;
+  if (exclude)
+    recheckCutStatusOfAllVisibleHandles();
+  else
+    recheckCutStatusOfAllNotVisibleHandles();
 }

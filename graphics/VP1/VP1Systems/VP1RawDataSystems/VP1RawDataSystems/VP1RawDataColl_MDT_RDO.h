@@ -42,6 +42,7 @@ public:
   bool cut(VP1RawDataHandleBase*);
 
 public Q_SLOTS:
+  void setMdtExcludeMasked(bool);
   void setMdtAllowedADC(const VP1Interval&);
   void setMdtAllowedTDC(const VP1Interval&);
 

@@ -63,6 +63,7 @@ public:
   unsigned lucidMinQDC() const;
 
   // Inclusive muon digit ranges; unchecked bounds are unrestricted.
+  bool mdtExcludeMasked() const;
   VP1Interval mdtAllowedADC() const;
   VP1Interval mdtAllowedTDC() const;
   VP1Interval mmAllowedCharge() const;
@@ -89,6 +90,7 @@ signals:
   void trtRequireHTChanged(bool);
   void trtAllowedToTChanged(const VP1Interval&);//nano-seconds
   void lucidMinQDCChanged(unsigned);
+  void mdtExcludeMaskedChanged(bool);
   void mdtAllowedADCChanged(const VP1Interval&);
   void mdtAllowedTDCChanged(const VP1Interval&);
   void mmAllowedChargeChanged(const VP1Interval&);
@@ -115,6 +117,7 @@ private Q_SLOTS:
   void possibleChange_trtRequireHT();
   void possibleChange_trtAllowedToT();
   void possibleChange_lucidMinQDC();
+  void possibleChange_mdtExcludeMasked();
   void possibleChange_mdtAllowedADC();
   void possibleChange_mdtAllowedTDC();
   void possibleChange_mmAllowedCharge();
