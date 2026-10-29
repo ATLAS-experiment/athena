@@ -32,6 +32,10 @@ public:
   virtual ~VP1RawDataHandle_MDT_RDO();
   QStringList clicked(bool verbose) const;
 
+  // Values in native digit units (MDT ADC/TDC counts; MM/sTGC digit charge and ns).
+  double amplitude() const;
+  double time() const;
+
 protected:
   SoNode * buildShape();
   SoTransform * buildTransform();

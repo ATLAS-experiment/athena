@@ -124,3 +124,13 @@ const MuonGM::MMReadoutElement * VP1RawDataHandle_MM_RDO::element() const
     return 0;
   return detmgr->getMMReadoutElement(m_data->identify());
 }
+
+double VP1RawDataHandle_MM_RDO::amplitude() const
+{
+  return m_data->stripResponseCharge();
+}
+
+double VP1RawDataHandle_MM_RDO::time() const
+{
+  return m_data->stripResponseTime();
+}

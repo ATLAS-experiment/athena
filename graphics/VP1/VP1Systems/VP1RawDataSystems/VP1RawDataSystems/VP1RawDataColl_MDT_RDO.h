@@ -41,6 +41,10 @@ public:
 
   bool cut(VP1RawDataHandleBase*);
 
+public Q_SLOTS:
+  void setMdtAllowedADC(const VP1Interval&);
+  void setMdtAllowedTDC(const VP1Interval&);
+
 protected:
   void assignDefaultMaterial(SoMaterial*) const;
   bool load();

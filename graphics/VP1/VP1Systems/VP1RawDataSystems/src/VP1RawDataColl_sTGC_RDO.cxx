@@ -35,13 +35,23 @@ QStringList VP1RawDataColl_sTGC_RDO::availableCollections(IVP1System*sys)
 //____________________________________________________________________
 class VP1RawDataColl_sTGC_RDO::Imp {
 public:
+  VP1Interval stgcAllowedCharge;
+  VP1Interval stgcAllowedTime;
+
 };
 
 
 //____________________________________________________________________
 VP1RawDataColl_sTGC_RDO::VP1RawDataColl_sTGC_RDO(VP1RawDataCommonData*common,const QString& key)
   : VP1RawDataCollBase(common,key), m_d(new Imp)
-{}
+{
+  connect(common->controller(), SIGNAL(stgcAllowedChargeChanged(const VP1Interval&)),
+          this, SLOT(setStgcAllowedCharge(const VP1Interval&)));
+  setStgcAllowedCharge(common->controller()->stgcAllowedCharge());
+  connect(common->controller(), SIGNAL(stgcAllowedTimeChanged(const VP1Interval&)),
+          this, SLOT(setStgcAllowedTime(const VP1Interval&)));
+  setStgcAllowedTime(common->controller()->stgcAllowedTime());
+}
 
 //____________________________________________________________________
 VP1RawDataColl_sTGC_RDO::~VP1RawDataColl_sTGC_RDO()
@@ -103,8 +113,25 @@ bool VP1RawDataColl_sTGC_RDO::load() {
 }
 
 //____________________________________________________________________
-bool VP1RawDataColl_sTGC_RDO::cut(VP1RawDataHandleBase*)
+bool VP1RawDataColl_sTGC_RDO::cut(VP1RawDataHandleBase* handle)
 {
-  VP1Msg::message("cut returning 'true'...");
-  return true;
+  const auto* digit = static_cast<const VP1RawDataHandle_sTGC_RDO*>(handle);
+  return m_d->stgcAllowedCharge.contains(digit->amplitude()) &&
+         m_d->stgcAllowedTime.contains(digit->time());
+}
+
+void VP1RawDataColl_sTGC_RDO::setStgcAllowedCharge(const VP1Interval& range)
+{
+  if (m_d->stgcAllowedCharge == range)
+    return;
+  m_d->stgcAllowedCharge = range;
+  recheckCutStatusOfAllHandles();
+}
+
+void VP1RawDataColl_sTGC_RDO::setStgcAllowedTime(const VP1Interval& range)
+{
+  if (m_d->stgcAllowedTime == range)
+    return;
+  m_d->stgcAllowedTime = range;
+  recheckCutStatusOfAllHandles();
 }

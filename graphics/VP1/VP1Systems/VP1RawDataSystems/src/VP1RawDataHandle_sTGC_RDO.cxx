@@ -174,3 +174,13 @@ const MuonGM::sTgcReadoutElement * VP1RawDataHandle_sTGC_RDO::element() const
     return 0;
   return detmgr->getsTgcReadoutElement(m_data->identify());
 }
+
+double VP1RawDataHandle_sTGC_RDO::amplitude() const
+{
+  return m_data->charge();
+}
+
+double VP1RawDataHandle_sTGC_RDO::time() const
+{
+  return m_data->time();
+}

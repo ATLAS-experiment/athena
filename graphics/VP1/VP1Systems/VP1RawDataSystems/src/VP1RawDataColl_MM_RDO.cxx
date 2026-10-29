@@ -35,13 +35,23 @@ QStringList VP1RawDataColl_MM_RDO::availableCollections(IVP1System*sys)
 //____________________________________________________________________
 class VP1RawDataColl_MM_RDO::Imp {
 public:
+  VP1Interval mmAllowedCharge;
+  VP1Interval mmAllowedTime;
+
 };
 
 
 //____________________________________________________________________
 VP1RawDataColl_MM_RDO::VP1RawDataColl_MM_RDO(VP1RawDataCommonData*common,const QString& key)
   : VP1RawDataCollBase(common,key), m_d(new Imp)
-{}
+{
+  connect(common->controller(), SIGNAL(mmAllowedChargeChanged(const VP1Interval&)),
+          this, SLOT(setMmAllowedCharge(const VP1Interval&)));
+  setMmAllowedCharge(common->controller()->mmAllowedCharge());
+  connect(common->controller(), SIGNAL(mmAllowedTimeChanged(const VP1Interval&)),
+          this, SLOT(setMmAllowedTime(const VP1Interval&)));
+  setMmAllowedTime(common->controller()->mmAllowedTime());
+}
 
 //____________________________________________________________________
 VP1RawDataColl_MM_RDO::~VP1RawDataColl_MM_RDO()
@@ -102,8 +112,25 @@ bool VP1RawDataColl_MM_RDO::load() {
 }
 
 //____________________________________________________________________
-bool VP1RawDataColl_MM_RDO::cut(VP1RawDataHandleBase*)
+bool VP1RawDataColl_MM_RDO::cut(VP1RawDataHandleBase* handle)
 {
-  VP1Msg::message("cut returning 'true'...");
-  return true;
+  const auto* digit = static_cast<const VP1RawDataHandle_MM_RDO*>(handle);
+  return m_d->mmAllowedCharge.contains(digit->amplitude()) &&
+         m_d->mmAllowedTime.contains(digit->time());
+}
+
+void VP1RawDataColl_MM_RDO::setMmAllowedCharge(const VP1Interval& range)
+{
+  if (m_d->mmAllowedCharge == range)
+    return;
+  m_d->mmAllowedCharge = range;
+  recheckCutStatusOfAllHandles();
+}
+
+void VP1RawDataColl_MM_RDO::setMmAllowedTime(const VP1Interval& range)
+{
+  if (m_d->mmAllowedTime == range)
+    return;
+  m_d->mmAllowedTime = range;
+  recheckCutStatusOfAllHandles();
 }

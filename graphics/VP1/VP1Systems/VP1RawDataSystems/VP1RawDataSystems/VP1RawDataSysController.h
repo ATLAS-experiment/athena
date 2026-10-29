@@ -62,6 +62,15 @@ public:
   VP1Interval trtAllowedToT() const;
   unsigned lucidMinQDC() const;
 
+  // Inclusive muon digit ranges; unchecked bounds are unrestricted.
+  VP1Interval mdtAllowedADC() const;
+  VP1Interval mdtAllowedTDC() const;
+  VP1Interval mmAllowedCharge() const;
+  VP1Interval mmAllowedTime() const;
+  VP1Interval stgcAllowedCharge() const;
+  VP1Interval stgcAllowedTime() const;
+
+
   //Display options:
   bool showVolumeOutLines() const;
   bool useSpecialTRTHTMaterial() const;
@@ -80,6 +89,13 @@ signals:
   void trtRequireHTChanged(bool);
   void trtAllowedToTChanged(const VP1Interval&);//nano-seconds
   void lucidMinQDCChanged(unsigned);
+  void mdtAllowedADCChanged(const VP1Interval&);
+  void mdtAllowedTDCChanged(const VP1Interval&);
+  void mmAllowedChargeChanged(const VP1Interval&);
+  void mmAllowedTimeChanged(const VP1Interval&);
+  void stgcAllowedChargeChanged(const VP1Interval&);
+  void stgcAllowedTimeChanged(const VP1Interval&);
+
 
 private:
 
@@ -99,6 +115,13 @@ private Q_SLOTS:
   void possibleChange_trtRequireHT();
   void possibleChange_trtAllowedToT();
   void possibleChange_lucidMinQDC();
+  void possibleChange_mdtAllowedADC();
+  void possibleChange_mdtAllowedTDC();
+  void possibleChange_mmAllowedCharge();
+  void possibleChange_mmAllowedTime();
+  void possibleChange_stgcAllowedCharge();
+  void possibleChange_stgcAllowedTime();
+
 };
 
 #endif

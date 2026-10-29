@@ -100,3 +100,13 @@ const MuonGM::MdtReadoutElement * VP1RawDataHandle_MDT_RDO::element() const
     return 0;
   return detmgr->getMdtReadoutElement(m_data->identify());
 }
+
+double VP1RawDataHandle_MDT_RDO::amplitude() const
+{
+  return m_data->adc();
+}
+
+double VP1RawDataHandle_MDT_RDO::time() const
+{
+  return m_data->tdc();
+}

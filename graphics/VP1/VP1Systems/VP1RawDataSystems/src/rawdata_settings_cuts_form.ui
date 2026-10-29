@@ -268,6 +268,415 @@
     </widget>
    </item>
    <item>
+    <widget class="QTabWidget" name="muonCutsTabs">
+     <widget class="QWidget" name="tab_MDTCuts">
+      <attribute name="title">
+       <string>MDT digits</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="layout_MDTCuts">
+       <item>
+        <widget class="QGroupBox" name="group_mdtAllowedADC">
+         <property name="title">
+          <string>ADC amplitude [counts]</string>
+         </property>
+         <property name="toolTip">
+          <string>Inclusive bounds. Unchecked bounds are unrestricted. If minimum exceeds maximum, no digits pass. Values are compared directly with the stored digit fields.</string>
+         </property>
+         <layout class="QGridLayout" name="layout_mdtAllowedADC">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="checkBox_mdtAllowedADCMin">
+            <property name="text">
+             <string>Minimum</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_mdtAllowedADCMin">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>0</number>
+            </property>
+            <property name="minimum">
+             <double>0.000</double>
+            </property>
+            <property name="maximum">
+             <double>32767.000</double>
+            </property>
+            <property name="value">
+             <double>0.000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="checkBox_mdtAllowedADCMax">
+            <property name="text">
+             <string>Maximum</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_mdtAllowedADCMax">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>0</number>
+            </property>
+            <property name="minimum">
+             <double>0.000</double>
+            </property>
+            <property name="maximum">
+             <double>32767.000</double>
+            </property>
+            <property name="value">
+             <double>32767.000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="group_mdtAllowedTDC">
+         <property name="title">
+          <string>TDC time [counts]</string>
+         </property>
+         <property name="toolTip">
+          <string>Inclusive bounds. Unchecked bounds are unrestricted. If minimum exceeds maximum, no digits pass. Values are compared directly with the stored digit fields.</string>
+         </property>
+         <layout class="QGridLayout" name="layout_mdtAllowedTDC">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="checkBox_mdtAllowedTDCMin">
+            <property name="text">
+             <string>Minimum</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_mdtAllowedTDCMin">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>0</number>
+            </property>
+            <property name="minimum">
+             <double>-32768.000</double>
+            </property>
+            <property name="maximum">
+             <double>32767.000</double>
+            </property>
+            <property name="value">
+             <double>0.000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="checkBox_mdtAllowedTDCMax">
+            <property name="text">
+             <string>Maximum</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_mdtAllowedTDCMax">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>0</number>
+            </property>
+            <property name="minimum">
+             <double>-32768.000</double>
+            </property>
+            <property name="maximum">
+             <double>32767.000</double>
+            </property>
+            <property name="value">
+             <double>32767.000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_MMCuts">
+      <attribute name="title">
+       <string>MM digits</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="layout_MMCuts">
+       <item>
+        <widget class="QGroupBox" name="group_mmAllowedCharge">
+         <property name="title">
+          <string>Strip charge [electrons]</string>
+         </property>
+         <property name="toolTip">
+          <string>Inclusive bounds. Unchecked bounds are unrestricted. If minimum exceeds maximum, no digits pass. Values are compared directly with the stored digit fields.</string>
+         </property>
+         <layout class="QGridLayout" name="layout_mmAllowedCharge">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="checkBox_mmAllowedChargeMin">
+            <property name="text">
+             <string>Minimum</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_mmAllowedChargeMin">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000000.000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000000.000</double>
+            </property>
+            <property name="value">
+             <double>0.000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="checkBox_mmAllowedChargeMax">
+            <property name="text">
+             <string>Maximum</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_mmAllowedChargeMax">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000000.000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000000.000</double>
+            </property>
+            <property name="value">
+             <double>1000.000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="group_mmAllowedTime">
+         <property name="title">
+          <string>Strip response time [ns]</string>
+         </property>
+         <property name="toolTip">
+          <string>Inclusive bounds. Unchecked bounds are unrestricted. If minimum exceeds maximum, no digits pass. Values are compared directly with the stored digit fields.</string>
+         </property>
+         <layout class="QGridLayout" name="layout_mmAllowedTime">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="checkBox_mmAllowedTimeMin">
+            <property name="text">
+             <string>Minimum</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_mmAllowedTimeMin">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000</double>
+            </property>
+            <property name="value">
+             <double>0.000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="checkBox_mmAllowedTimeMax">
+            <property name="text">
+             <string>Maximum</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_mmAllowedTimeMax">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000</double>
+            </property>
+            <property name="value">
+             <double>1000.000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_sTGCCuts">
+      <attribute name="title">
+       <string>sTGC digits</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="layout_sTGCCuts">
+       <item>
+        <widget class="QGroupBox" name="group_stgcAllowedCharge">
+         <property name="title">
+          <string>Charge [digit units]</string>
+         </property>
+         <property name="toolTip">
+          <string>Inclusive bounds. Unchecked bounds are unrestricted. If minimum exceeds maximum, no digits pass. Values are compared directly with the stored digit fields.</string>
+         </property>
+         <layout class="QGridLayout" name="layout_stgcAllowedCharge">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="checkBox_stgcAllowedChargeMin">
+            <property name="text">
+             <string>Minimum</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_stgcAllowedChargeMin">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000000.000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000000.000</double>
+            </property>
+            <property name="value">
+             <double>0.000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="checkBox_stgcAllowedChargeMax">
+            <property name="text">
+             <string>Maximum</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_stgcAllowedChargeMax">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000000.000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000000.000</double>
+            </property>
+            <property name="value">
+             <double>1000.000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="group_stgcAllowedTime">
+         <property name="title">
+          <string>Time [ns]</string>
+         </property>
+         <property name="toolTip">
+          <string>Inclusive bounds. Unchecked bounds are unrestricted. If minimum exceeds maximum, no digits pass. Values are compared directly with the stored digit fields.</string>
+         </property>
+         <layout class="QGridLayout" name="layout_stgcAllowedTime">
+          <item row="0" column="0">
+           <widget class="QCheckBox" name="checkBox_stgcAllowedTimeMin">
+            <property name="text">
+             <string>Minimum</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_stgcAllowedTimeMin">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000</double>
+            </property>
+            <property name="value">
+             <double>0.000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="checkBox_stgcAllowedTimeMax">
+            <property name="text">
+             <string>Maximum</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spinBox_stgcAllowedTimeMax">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>-1000000000.000</double>
+            </property>
+            <property name="maximum">
+             <double>1000000000.000</double>
+            </property>
+            <property name="value">
+             <double>1000.000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" >
      <property name="spacing" >
       <number>0</number>
