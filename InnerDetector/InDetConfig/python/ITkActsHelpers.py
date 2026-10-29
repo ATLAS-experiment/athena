@@ -22,7 +22,9 @@ def isProductionPass(flags) -> bool:
     return not isValidationPass(flags)
 
 def primaryPassUsesDevice(flags) -> bool:
-    return (flags.Acts.Device.doClusterization or
+    from ActsConfig.ActsConfigFlags import DeviceTritonMode
+    return (flags.Acts.Device.tritonMode is DeviceTritonMode.Client or
+            flags.Acts.Device.doClusterization or
             flags.Acts.Device.doSpacePointFormation or
             flags.Acts.Device.doSeeding or
             flags.Acts.Device.doTrackReconstruction)

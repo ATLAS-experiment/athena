@@ -9,6 +9,12 @@ class SeedingStrategy(FlagEnum):
     F150 = "F150"
     Gnn = "Gnn"
 
+# Role of the device chain in traccc-as-a-service (Triton)
+class DeviceTritonMode(FlagEnum):
+    Off = "Off"        # normal device chain
+    Server = "Server"  # device algorithms only: cells in, traccc tracks out
+    Client = "Client"  # RDO to cells, Triton request, host conversions
+
 class AmbiguitySolverStrategy(FlagEnum):
     Greedy = "GreedySolver"
     ScoreBased = "ScoreBasedAmbiguitySolver"
@@ -304,6 +310,7 @@ def createActsConfigFlags():
     actscf.addFlag("Acts.Device.seedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
     actscf.addFlag("Acts.Device.doTrackReconstruction", False)
     actscf.addFlag("Acts.Device.doLargeRadiusPass", False)
+    actscf.addFlag("Acts.Device.tritonMode", DeviceTritonMode.Off, type=DeviceTritonMode)
 
     # GNN specific flags (scoped)
     actscf.addFlag("Acts.GNN.Enable", False)

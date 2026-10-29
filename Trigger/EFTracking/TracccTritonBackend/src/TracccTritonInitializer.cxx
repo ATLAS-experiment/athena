@@ -36,7 +36,7 @@
 namespace triton { namespace backend { namespace traccc {
 
 // TracccTritonBootstrap.bootstrap() brings up the embedded Athena application
-// with the device chain configured by TracccTritonDeviceRecoCfg, scheduled
+// with the device chain of ITkActsDeviceTrackRecoCfg (Acts.Device.tritonMode=Server), scheduled
 // inside an AthSequencer
 namespace {
     void promoteSelfToGlobal() {

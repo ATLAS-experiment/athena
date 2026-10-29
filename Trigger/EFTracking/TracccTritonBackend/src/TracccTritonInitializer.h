@@ -34,7 +34,8 @@ namespace triton { namespace backend { namespace traccc {
 /// The python configuration schedules them inside a single @c AthSequencer
 /// named @c Config::sequenceName, which is what @c TracccTritonRunner
 /// executes; the composition and ordering of the chain therefore live
-/// entirely in @c TracccTritonDeviceRecoCfg.
+/// in @c ITkActsDeviceTrackRecoCfg, run by @c TracccTritonBootstrap.bootstrap()
+/// with @c Acts.Device.tritonMode=Server.
 class TracccTritonInitializer {
 public:
     /// @brief Construction parameters, normally read from the model config,
