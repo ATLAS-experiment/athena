@@ -4,7 +4,7 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 import ROOT
 
 
-def PoolReadCfg(flags,allowAODFix=True):
+def PoolReadCfg(flags):
     """
     Creates a ComponentAccumulator instance containing the
     athena services required for POOL file reading
@@ -37,17 +37,6 @@ def PoolReadCfg(flags,allowAODFix=True):
     from EventSelectorAthenaPool.EventSelectorAthenaPoolConfig import EventSelectorAthenaPoolCfg
     result.merge(EventSelectorAthenaPoolCfg(flags))
     evSel = result.getService("EventSelector")
-
-    if allowAODFix:
-        #Schedule a (potential) AODFix ...
-        processingTags=flags.Input.ProcessingTags
-        if "StreamAOD" in processingTags:
-            try:
-                from RecJobTransforms.AODFixConfig import AODFixCfg
-                result.merge(AODFixCfg(flags))
-            except ImportError:
-                #Looks like running on AthSimulation or AthAnalysis ... ignore AODFix
-                pass
 
     result.setAppProperty("EvtSel", evSel.getFullJobOptName())
 
