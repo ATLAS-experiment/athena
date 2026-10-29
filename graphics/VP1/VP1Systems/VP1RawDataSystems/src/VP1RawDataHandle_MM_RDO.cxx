@@ -45,28 +45,23 @@ VP1RawDataHandle_MM_RDO::~VP1RawDataHandle_MM_RDO()
 //____________________________________________________________________
 QStringList VP1RawDataHandle_MM_RDO::clicked(bool verbose) const
 {
-  static const MmIdHelper * idhelper = VP1DetInfo::mmIDHelper();
-  const MuonGM::MMReadoutElement * elem = element();
-
   QStringList ll;
   ll << " ===> MM Digit data";
-  // ll << "   is a valid digit: "+ m_data->is_valid(idhelper);
   ll << "   stripResponseTime: " + QString::number(m_data->stripResponseTime());
   ll << "   stripResponseCharge: " + QString::number(m_data->stripResponseCharge());
-  if (verbose)
-  {
-    if (idhelper)
-    {
-      // Fixme: We should have common identify -> QStringList method in VP1DetInfo!!
-      Identifier id(m_data->identify());
-
-      Amg::Vector3D globalPos;
-      double length = 0, angle = 0;
-      int channel = idhelper->channel(id);
-      const MuonGM::MuonChannelDesign *design = elem->getDesign(id);
-      elem->stripGlobalPosition(id, globalPos);
-      length = design->channelLength(channel);
-      angle = design->stereoAngle();
+  if (verbose) {
+    const MmIdHelper* idhelper = VP1DetInfo::mmIDHelper();
+    const MuonGM::MMReadoutElement* elem = element();
+    const Identifier id = m_data->identify();
+    const MuonGM::MuonChannelDesign* design = elem ? elem->getDesign(id) : nullptr;
+    if (idhelper && design) {
+      const int channel = idhelper->channel(id);
+      const double length = design->channelLength(channel);
+      const double angle = design->stereoAngle();
+      ll << "   Strip length [mm]: " + QString::number(length / Gaudi::Units::mm);
+      ll << "   Stereo angle [deg]: " + QString::number(angle / Gaudi::Units::degree);
+    } else {
+      ll << "   Strip geometry unavailable";
     }
   }
   return ll;

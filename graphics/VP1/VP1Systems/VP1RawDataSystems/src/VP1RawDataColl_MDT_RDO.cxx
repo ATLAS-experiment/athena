@@ -102,7 +102,7 @@ bool VP1RawDataColl_MDT_RDO::load() {
 }
 
 //____________________________________________________________________
-bool VP1RawDataColl_MDT_RDO::cut(VP1RawDataHandleBase* handle)
+bool VP1RawDataColl_MDT_RDO::cut(VP1RawDataHandleBase*)
 {
   VP1Msg::message("cut returning 'true'...");
   return true;
