@@ -23,8 +23,9 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
         acc.merge(HGamNNVertexCfg(flags)) 
 
     from DerivationFrameworkTau.TauCommonConfig import AddTauMassDecoratorCfg
-    # overwrite the tau mass from 0 to the reconstructed visible mass. Needs to be done before "AddStandardTruthContentsCfg"  
-    acc.merge(AddTauMassDecoratorCfg(flags, TauContainerName="TauJets"))
+    # overwrite the tau mass from 0 to the reconstructed visible mass. Needs to be done before "AddStandardTruthContentsCfg"
+    if flags.Tau.Tau_isAvailable:
+        acc.merge(AddTauMassDecoratorCfg(flags, TauContainerName="TauJets"))
     if flags.Tau.TauEleRM_isAvailable:
         acc.merge(AddTauMassDecoratorCfg(flags, TauContainerName="TauJets_EleRM"))
 
