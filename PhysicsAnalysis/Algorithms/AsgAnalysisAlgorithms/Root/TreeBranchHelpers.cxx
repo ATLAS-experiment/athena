@@ -398,10 +398,16 @@ namespace CP
       {
         if (typeName == "char")
           SG::ConstAccessor<char> {nominalAuxName};
+        else if (typeName == "string")
+          SG::ConstAccessor<std::string> {nominalAuxName};
         else if (typeName == "float")
           SG::ConstAccessor<float> {nominalAuxName};
         else if (typeName == "double")
           SG::ConstAccessor<double> {nominalAuxName};
+        else if (typeName == "short")
+          SG::ConstAccessor<short> {nominalAuxName};
+        else if (typeName == "unsigned_short")
+          SG::ConstAccessor<unsigned short> {nominalAuxName};
         else if (typeName == "int")
           SG::ConstAccessor<int> {nominalAuxName};
         else if (typeName == "unsigned" || typeName == "unsigned_int")
@@ -430,6 +436,8 @@ namespace CP
           SG::ConstAccessor<std::uint64_t> {nominalAuxName};
         else if (typeName == "vector_float")
           SG::ConstAccessor<std::vector<float>> {nominalAuxName};
+        else if (typeName == "vector_double")
+          SG::ConstAccessor<std::vector<double>> {nominalAuxName};
         else if (typeName == "vector_uint8")
           SG::ConstAccessor<std::vector<std::uint8_t>> {nominalAuxName};
         else if (typeName == "vector_int")
