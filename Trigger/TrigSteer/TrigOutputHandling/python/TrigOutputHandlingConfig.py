@@ -80,7 +80,7 @@ def TriggerEDMSerialiserToolCfg(flags, name="Serialiser"):
    # Create and return a serialiser tool object
    serialiser = TriggerEDMSerialiserTool(name)
 
-   from TrigEDMConfig.TriggerEDMRun3 import tpMap
+   from TrigEDMConfig.TriggerEDM import tpMap
    tpTool = CompFactory.TrigSerTPTool()
    tpTool.TPMap = tpMap()
    serialiser.TPTool = tpTool
