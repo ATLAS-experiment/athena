@@ -12,7 +12,7 @@
 #['name', 'chainParts'=[], 'stream', 'groups', 'merging'=[], 'topoStartFrom'=False],
 
 ## needs to be commented in once chains are moved to this menu
-#from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp # only temporarily commented!
+from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from .SignatureDicts import ChainStore
 
 PhysicsStream='Main'
@@ -112,7 +112,9 @@ def setupMenu():
 
     chains['Combined'] = []
 
-    chains['Monitor'] = []
+    chains['Monitor'] = [
+        ChainProp(name='EF_noalg_CostMonDS_L1All', l1SeedThresholds=['FSNOSEED'], stream=['CostMonitoring'], groups=['PS:NoBulkMCProd', 'Primary:CostAndRate', 'RATE:Monitoring', 'BW:Other'])
+    ]
 
     chains['Calib'] += []
 
