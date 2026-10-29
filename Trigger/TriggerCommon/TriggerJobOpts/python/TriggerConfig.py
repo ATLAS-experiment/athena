@@ -735,18 +735,18 @@ def triggerRunCfg( flags, menu=None ):
     viewMakers = collectViewMakers( HLTSteps )
 
     # Add HLT Navigation to EDM list
-    # TODO: DO NOT directly modify TriggerHLTListRun3
-    from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3, addHLTNavigationToEDMList
-    __log.info( "Number of EDM items before adding navigation: %d", len(TriggerHLTListRun3))
-    addHLTNavigationToEDMList(flags, TriggerHLTListRun3, decObj, decObjHypoOut)
-    __log.info( "Number of EDM items after adding navigation: %d", len(TriggerHLTListRun3))
-
-    # Add Extra to EDM list
-    # TODO: DO NOT directly modify TriggerHLTListRun3
-    if flags.Trigger.ExtraEDMList:
-        from TrigEDMConfig.TriggerEDM import _addExtraCollectionsToEDMList
-        __log.info( "Adding extra collections to EDM: %s", str(flags.Trigger.ExtraEDMList))
-        _addExtraCollectionsToEDMList(TriggerHLTListRun3, flags.Trigger.ExtraEDMList)
+    # TODO: DO NOT directly modify TriggerHLTListRun3/4
+    from TrigEDMConfig.TriggerEDM import addHLTNavigationToEDMList
+    if flags.Trigger.EDMVersion == 3:
+        from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3
+        __log.info( "Number of Run3 EDM items before adding navigation: %d", len(TriggerHLTListRun3))
+        addHLTNavigationToEDMList(flags, TriggerHLTListRun3, decObj, decObjHypoOut)
+        __log.info( "Number of Run3 EDM items after adding navigation: %d", len(TriggerHLTListRun3))
+    elif flags.Trigger.EDMVersion >= 4:
+        from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4
+        __log.info( "Number of Run4 EDM items before adding navigation: %d", len(TriggerHLTListRun4))
+        addHLTNavigationToEDMList(flags, TriggerHLTListRun4, decObj, decObjHypoOut)
+        __log.info( "Number of Run4 EDM items after adding navigation: %d", len(TriggerHLTListRun4))
 
     # Configure output writing
     outputAcc, edmSet = triggerOutputCfg( flags, hypos )

@@ -84,7 +84,7 @@ getRawTriggerEDMList(flags, runVersion=-1)
 -> Retrieves a copy of the Trigger EDM content for the given LHC Run (`runVersion`). If `runVersion=-1` then the Run version is inferred from the input flags.
 
 ```py
-testEDMList(edm_list, error_on_edmdetails = True)
+testEDMList(edm_list, check_edmdetails_for_version=-1)
 ```
 -> Checks the validity and ordering of a list of EDM entries, such as
 - EDM entry length.
@@ -93,6 +93,7 @@ testEDMList(edm_list, error_on_edmdetails = True)
 - Valid EDM targets
 - Duplicates
 - `AllowTruncation` entries appear at end of list.
+- Relevance of each EDMDetails entry if `check_edmdetails_for_version` set.
 
 Used in EDM unit testing and when adding new EDM via
 `Trigger.ExtraEDMList` flag on the fly.

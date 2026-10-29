@@ -8,8 +8,9 @@
 # ***********************************************************************************
 
 from TrigEDMConfig.TriggerEDMRun2 import TriggerResultsList,TriggerLvl1List,TriggerHLTList,EDMDetails,EDMLibraries
-from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,EDMDetailsRun3,getSafeEDMInsertPosition,getRun3LowMuEDM
-from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4
+from TrigEDMConfig.TriggerEDMRun3 import TriggerHLTListRun3,varToRemoveFromAODSLIM,EDMDetailsRun3,getRun3LowMuEDM
+from TrigEDMConfig.TriggerEDMRun4 import TriggerHLTListRun4,EDMDetailsRun4
+from TrigEDMConfig.TriggerEDMProtoRun4 import TriggerHLTListProtoRun4
 from TrigEDMConfig.TriggerEDMDefs import allowTruncation
 from CLIDComps.clidGenerator import clidGenerator
 from collections import defaultdict
@@ -61,11 +62,11 @@ def recordable(arg):
         if "Aux" in name and not name[-1] != ".":
             raise RuntimeError( f"The collection name {name} is Aux but the name does not end with the '.'" )
 
-    #TODO Remove TriggerHLTListRun3 once full Trigger EDM Run 4 list defined.
-    for entry in TriggerHLTListRun3 + TriggerHLTListRun4:
+    #TODO Remove TriggerHLTListProtoRun4 once fully migrated to Run 4.
+    for entry in TriggerHLTListProtoRun4 + TriggerHLTListRun4:
         if entry[0].split( "#" )[1] == name:
             return arg
-    msg = "The collection name {0} is not declared to be stored by HLT. Add it to TriggerEDMRun4.py".format( name )
+    msg = "The collection name {0} is not declared to be stored by HLT. Add it to TriggerEDMRun4.py or TriggerHLTListProtoRun4.py".format( name )
     log.error("ERROR in recordable() - see following stack trace.")
     raise RuntimeError( msg )
 
@@ -121,7 +122,7 @@ def _addExtraCollectionsToEDMList(edmList, extraList):
                 edmList.insert(existing_item_nr[0] , (combName, newTargets, signature))
             log.info("updated item in Trigger EDM: {}".format(edmList[existing_item_nr[0]]))
 
-    if testEDMList(edmList, error_on_edmdetails=False):
+    if testEDMList(edmList):
         log.error("edmList contains inconsistencies!")
 
 def getRawTriggerEDMList(flags, runVersion=-1):
@@ -140,19 +141,19 @@ def getRawTriggerEDMList(flags, runVersion=-1):
             _addExtraCollectionsToEDMList(edmListCopy, LowMuEDM)
     elif runVersion == 4:
         edm4ListCopy = TriggerHLTListRun4.copy()
-        edm3ListCopy = TriggerHLTListRun3.copy()
-        log.debug("Removing duplicated item between TriggerHLTListRun3 and TriggerHLTListRun4.")
-        for i in range(len(edm3ListCopy)-1, -1, -1): # Back iterate by index, we might be removing as we go
+        edm4protoListCopy = TriggerHLTListProtoRun4.copy()
+        log.debug("Removing duplicated item between TriggerHLTListProtoRun4 and TriggerHLTListRun4.")
+        for i in range(len(edm4protoListCopy)-1, -1, -1): # Back iterate by index, we might be removing as we go
             for r4item in edm4ListCopy:
-                if edm3ListCopy[i][0] == r4item[0]:
-                    del edm3ListCopy[i]
-                    log.debug(f"- Dupe: {r4item} is removed from TriggerHLTListRun3 to be updated by TriggerHLTListRun4")
+                if edm4protoListCopy[i][0] == r4item[0]:
+                    del edm4protoListCopy[i]
+                    log.error(f"- Dupe: {r4item} appears in both TriggerHLTListProtoRun4.py and TriggerHLTListRun4.py - please resolve the duplication.")
                     break
-        lenPreMerge = len(edm3ListCopy)
-        edm4ListCopy.extend(edm3ListCopy)
+        lenPreMerge = len(edm4ListCopy)
+        edm4ListCopy.extend(edm4protoListCopy)
         lenPostMerge = len(edm4ListCopy)
         edmListCopy = edm4ListCopy
-        log.info(f"Added TriggerHLTListRun4 to TriggerHLTListRun3. EDM entries {lenPreMerge} -> {lenPostMerge}")
+        log.info(f"Added TriggerHLTListProtoRun4 to TriggerHLTListRun4. EDM entries {lenPreMerge} -> {lenPostMerge}")
     else:
         errMsg="ERROR the getRawTriggerEDMList function supports runs 3 and 4."
         log.error(errMsg)
@@ -297,7 +298,6 @@ def getRun3BSList(flags, keys):
     Returns list of tuples (typename#key, [keys], [properties]).
     """
 
-    from TrigEDMConfig.TriggerEDMRun3 import persistent
     keys = set(keys[:])
     collections = []
     _HLTList = getRawTriggerEDMList(flags, 3)
@@ -314,6 +314,66 @@ def getRun3BSList(flags, keys):
 
     return collections
 
+# Run3/Run4 fn added as simply appending new HLT Nav entries to start of list
+# during runtime appears to cause Deserialisation issues (ATR-29945).
+# Appending new entries towards end is safer.
+def getSafeEDMInsertPosition(edm_list):
+  """
+  Need to avoid inserting new runtime EDM entries at end of list
+  as 'allowTruncation' items need to be at end of list for correct
+  serialisation.
+  Function returns one position before
+  first 'allowTruncation' EDM item. If there is no 'allowTruncation'
+  EDM item, the position returned is the length of the list, i.e. the next
+  index in the list.
+  """
+
+  insert_idx = len(edm_list)
+
+  # start at end of list
+  for i,entry in enumerate(reversed(edm_list)):
+      if len(entry) < 4 or allowTruncation not in entry[3]:
+          insert_idx -= i
+          return insert_idx
+  return insert_idx
+
+
+def addHLTNavigationToEDMList(flags, edmList, allDecisions, hypoDecisions):
+    """
+    Extend TriggerHLTListi Run3/Run4 with HLT Navigation objects
+    """
+
+    # TODO: "EF" for Run 4.
+
+    # HLTNav_* object list is built dynamically during job configuration, here we only define its output targets
+    HLTNavEDMTargets = ''
+
+    insert_idx = getSafeEDMInsertPosition(edmList)
+
+    if not flags.Trigger.doOnlineNavigationCompactification:
+        # If we are not compacting the online EDM, then we must write out all of the individual collections
+        # ESD is added for MC support
+        HLTNavEDMTargets = 'BS ESD'
+
+    for decisionCollection in allDecisions:
+        dynamic = '.-' # Exclude dynamic
+        if decisionCollection in hypoDecisions:
+            # Include dynamic
+            dynamic = '.remap_linkColIndices.remap_linkColKeys'
+            if 'PEBInfoWriter' in decisionCollection:
+                dynamic += '.PEBROBList.PEBSubDetList'
+        typeName = 'xAOD::TrigCompositeContainer#{:s}'.format(decisionCollection)
+        typeNameAux = 'xAOD::TrigCompositeAuxContainer#{:s}Aux{:s}'.format(decisionCollection, dynamic)
+
+        # Cost monitoring only requires a sub-set of the navigation collections.
+        # (And CANNOT use any slimmed/merged collection, as the container names are important)
+        thisCollectionHLTNavEDMTargets = HLTNavEDMTargets
+        if decisionCollection.startswith("HLTNav_FStep") or decisionCollection == "HLTNav_Summary" or decisionCollection.startswith("HLTNav_L1"):
+            thisCollectionHLTNavEDMTargets += ' CostMonDS'
+
+        edmList[insert_idx:insert_idx] = [
+            (typeName,    thisCollectionHLTNavEDMTargets, 'Steer'),
+            (typeNameAux, thisCollectionHLTNavEDMTargets, 'Steer')]
 
 def _getRun3TrigObjList(destination, trigEDMList):
     """
@@ -622,7 +682,37 @@ def isCLIDDefined(cgen,typename):
   c = cgen.genClidFromName(typename)
   return (cgen.getNameFromClid(c) is not None)
 
-def testEDMList(edm_list, error_on_edmdetails = True):
+def persistent( transient ):
+    """
+    Retrieve persistent EDM class, for xAOD it is the actual class version
+
+    If absent assumes v1
+    """
+
+    #TODO drop EDMDetailsRun3 once migrated HLT reco to Run 4
+    _EDMDetails = EDMDetailsRun3 | EDMDetailsRun4
+
+    if transient in _EDMDetails and 'persistent' in _EDMDetails[transient]:
+        return _EDMDetails[transient]['persistent']
+    return transient
+
+
+def tpMap():
+    """
+    List
+    """
+    l = {}
+
+    #TODO drop EDMDetailsRun3 once migrated HLT reco to Run 4
+    _EDMDetails = EDMDetailsRun3 | EDMDetailsRun4
+    for tr in _EDMDetails:
+        if "xAOD" in tr:
+            continue
+        l[tr] = persistent(tr)
+    return l
+
+
+def testEDMList(edm_list, check_edmdetails_for_version=-1):
     """
     Checks EDM list entries for serialization and configuration compliance.
     """
@@ -746,14 +836,20 @@ def testEDMList(edm_list, error_on_edmdetails = True):
         return_code = 1
 
     #check EDMDetails
-    for EDMDetail in EDMDetailsRun3:
-        if EDMDetail not in serializable_names_no_label:
-            msg = "EDMDetail for " + EDMDetail + " does not correspond to any name in TriggerList"
-            if error_on_edmdetails:
+    if check_edmdetails_for_version > 0:
+        EDMDetailList = []
+        if check_edmdetails_for_version == 3:
+            EDMDetailList = EDMDetailsRun3
+        elif check_edmdetails_for_version >= 4:
+            EDMDetailList = EDMDetailsRun4
+        else: log.warning("No EDMDetails for EDM version %d. Skipping EDMDetails check.", check_edmdetails_for_version)
+
+        for EDMDetail in EDMDetailList:
+            if EDMDetail not in serializable_names_no_label:
+                msg = "EDMDetail for " + EDMDetail + " does not correspond to any name in TriggerList"
                 log.error(msg)
                 return_code = 1
-            else:
-                log.warning(msg)
+    else: log.debug("Skipping EDMDetails check.")
 
     return return_code
 

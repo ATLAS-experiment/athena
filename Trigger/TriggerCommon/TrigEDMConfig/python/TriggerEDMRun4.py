@@ -82,14 +82,6 @@ TriggerHLTListRun4 = [
 
     ('CaloCellContainer#SeedLessFS',  'ESD AODFULL', 'Calo'), 
     
-    # Egamma - R4 Rate Estimations
-    ('xAOD::TrigEMClusterContainer#HLT_FastCaloEMClusters',           'BS ESD AODFULL', 'Egamma', [InViews('EMCaloViews')]),
-    ('xAOD::TrigEMClusterAuxContainer#HLT_FastCaloEMClustersAux.',    'BS ESD AODFULL', 'Egamma'),
-    ('xAOD::TrigRingerRingsContainer#HLT_FastCaloRinger',             'BS ESD AODFULL', 'Egamma', [InViews('EMCaloViews')]), #Ringer
-    ('xAOD::TrigRingerRingsAuxContainer#HLT_FastCaloRingerAux.',      'BS ESD AODFULL', 'Egamma'), #Ringer
-    
-    # L1 Calo inputs, note we are giving extended EDM targets
-    ("CaloCellContainer#SCell",                                'ESD AODFULL', 'L1'),
     # Placeholder output collections from GlobalSimulation
     ('std::vector<float>#L1_eFEXeta', 'ESD AODFULL', 'L1'),
     ('std::vector<float>#L1_eFEXphi', 'ESD AODFULL', 'L1'),
@@ -159,9 +151,6 @@ TriggerHLTListRun4 = [
     ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersEM',                       'BS ESD AODFULL', 'Tau', [InViews('tauCaloEMMVAViews')]),   
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersEMAux.nCells',      'BS ESD AODFULL', 'Tau'),
 
-    ('xAOD::JetContainer#HLT_jet_seed',                                         '', 'Tau', [InViews('tauCaloLCMVAViews'), InViews('tauCaloEMMVAViews')]),
-    ('xAOD::JetAuxContainer#HLT_jet_seedAux.',                                  '', 'Tau'),
-
     ('xAOD::TrackParticleContainer#HLT_IDTrack_TauCoreEM_FTF',                  'BS ESD AODFULL', 'Tau', [InViews('tauFastTrackCoreEMViews')]),
     ('xAOD::TrackParticleAuxContainer#HLT_IDTrack_TauCoreEM_FTFAux.',           'BS ESD AODFULL', 'Tau'),
 
@@ -183,3 +172,15 @@ TriggerHLTListRun4 = [
 
 
 ]
+
+#-------------------------------------------------------------------------------
+# EDM details list to store the transient-persistent version
+#-------------------------------------------------------------------------------
+EDMDetailsRun4 = {}
+
+# xAOD versions are auto-detected at serialisation, but T/P classes need to specify P version here
+EDMDetailsRun4[ "TrigRoiDescriptorCollection" ]     = {'persistent':"TrigRoiDescriptorCollection_p3"}
+EDMDetailsRun4[ "Muon::NSW_TrigRawDataContainer" ]  = {'persistent':"Muon::NSW_TrigRawDataContainer_p1"}
+
+EDMDetailsRun4[ "xAOD::TrigDecisionAuxInfo" ]         = {'parent':"xAOD::TrigDecision"}
+EDMDetailsRun4[ "xAOD::CaloClusterTrigAuxContainer" ] = {'parent':"xAOD::CaloClusterContainer"}

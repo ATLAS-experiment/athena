@@ -5,7 +5,8 @@ from TrigEDMConfig.TriggerEDM import testEDMList, getRawTriggerEDMList
 
 def main():
 
-  return testEDMList(getRawTriggerEDMList(flags=None,runVersion=4))
+  runVersion = 4
+  return testEDMList(getRawTriggerEDMList(flags=None,runVersion=runVersion),check_edmdetails_for_version=runVersion)
 
 if __name__ == "__main__":
   import sys
