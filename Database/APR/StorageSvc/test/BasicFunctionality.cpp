@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TestDriver.h"
+#include "BasicFunctionality.h"
 #include "SimpleTestClass.h"
 
 #include "PersistentDataModel/Guid.h"
@@ -24,33 +24,68 @@
 #include <sstream>
 #include <memory>
 
-using namespace std;
 using namespace pool;
 
-TestDriver::TestDriver()
-{ }
-
-
-TestDriver::~TestDriver()
+int main( )
 {
-   std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
+   try {
+      TestDriver driver("BasicFunctionalityTest");
+      return driver.execute();
+   } catch ( std::exception& e ) {
+      std::cerr << e.what() << std::endl;
+      return 1;
+   }
 }
+
+
+void TestDriver::testTechnology( const pool::DbType& tech, bool commit_every_row )
+{
+   m_storageType = tech;
+   m_commitEveryRow = commit_every_row;
+
+   ATH_MSG_INFO(" Testing StorageSvc functionality for " << tech.storageName()
+             << " storage technology");
+   ATH_MSG_INFO(" Testing the writing operations");
+   testWriting();
+   ATH_MSG_INFO(" ...done");
+
+   ATH_MSG_INFO(" Testing the reading operations");
+   testReading();
+   ATH_MSG_INFO(" ...done");
+}
+
+
+int TestDriver::execute()
+{ 
+   testTechnology( pool::ROOTTREE_StorageType, false );
+   ATH_MSG_INFO( std::string(100,'-') );
+   testTechnology( pool::ROOTKEY_StorageType, false );
+   ATH_MSG_INFO( std::string(100,'-') );
+   testTechnology( pool::ROOTTREEINDEX_StorageType, false );
+   ATH_MSG_INFO( std::string(100,'-') );
+   testTechnology( pool::ROOTRNTUPLE_StorageType, true );
+
+   ATH_MSG_INFO(" Exiting...");
+   return 0;
+}
+
+
 
 void
 TestDriver::testWriting()
 {
-   cout << "createStorageSvc" << endl;
+   ATH_MSG_INFO("createStorageSvc");
    pool::IStorageSvc* storSvc = pool::createStorageSvc("StorageSvc");
    if ( ! storSvc ) {
       throw std::runtime_error( "Could not create a StorageSvc object" );
    }
    storSvc->addRef();
-   cout << "startSession" << endl;
+   ATH_MSG_INFO("startSession");
    if( !storSvc->startSession(Io::WRITE, m_storageType.type()).isSuccess() ) {
       throw std::runtime_error( "Could not start a session." );
    }
 
-   cout << "Session connect" << endl;
+   ATH_MSG_INFO("Session connect");
    pool::FileDescriptor fd( m_filename, m_filename );
    if ( ! ( storSvc->connect( Io::WRITE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
@@ -250,9 +285,9 @@ TestDriver::testReading()
         }
 
         if (ptr == originalPtr) {
-           cout << "Read back string: " << str << endl;
+           ATH_MSG_INFO("Read back string: " << str);
         } else {
-           cout << "Read back string: " << *reinterpret_cast<std::string*>(ptr) << endl;
+           ATH_MSG_INFO("Read back string: " << *reinterpret_cast<std::string*>(ptr));
         }
 
      }
@@ -265,7 +300,7 @@ TestDriver::testReading()
   }
   delete fd;
 
-  std::cout << "Closing the session" << std::endl;
+  ATH_MSG_INFO("Closing the session");
   if( !storSvc->endSession().isSuccess() ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }

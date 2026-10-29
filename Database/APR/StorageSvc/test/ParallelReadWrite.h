@@ -11,11 +11,13 @@
 
 class TestDriver : public TestBase {
 public:
-  TestDriver();
-  ~TestDriver();
+  using TestBase::TestBase;
 
+  int execute();
+ 
   void testWriting();
-  void testReadingParallelSameContainer();
+  void testParallelReadWrite();
+  void testReading();
 };
 
 #endif

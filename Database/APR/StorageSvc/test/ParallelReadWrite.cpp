@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TestDriver.h"
+#include "ParallelReadWrite.h"
 #include "SimpleTestClass.h"
 
 #include "PersistentDataModel/Guid.h"
@@ -17,7 +17,6 @@
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbType.h"
-#include "StorageSvc/pool.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -32,15 +31,33 @@ static const std::string container = "container";
 static const int nObjects = 100;
 
 
-TestDriver::TestDriver()
+int main( )
 {
+   try {
+      TestDriver driver("ParallelReadWriteTest");
+      return driver.execute();
+   } catch ( std::exception& e ) {
+      std::cerr << e.what() << std::endl;
+      return 1;
+   }
 }
 
-TestDriver::~TestDriver()
-{
-   std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
-}
 
+int TestDriver::execute() 
+{
+   ATH_MSG_INFO("] Testing the writing operations");
+   testWriting();
+   ATH_MSG_INFO("] ...done");
+
+   ATH_MSG_INFO("] Testing the parrallel reading and writing operations");
+   testParallelReadWrite();
+   ATH_MSG_INFO("] ...done");
+
+   ATH_MSG_INFO("] Testing the reading operations");
+   testReading();
+
+   return 0;
+}
 
 void
 TestDriver::testWriting()
@@ -242,7 +259,7 @@ TestDriver::testParallelReadWrite()
     throw std::runtime_error( "Could not disconnect." );
   }
 
-  std::cout << "Closing the session" << std::endl;
+  ATH_MSG_INFO("Closing the session");
   if( !storSvc->endSession().isSuccess() ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }
@@ -331,7 +348,7 @@ TestDriver::testReading()
     throw std::runtime_error( "Could not disconnect." );
   }
 
-  std::cout << "Closing the session" << std::endl;
+  ATH_MSG_INFO("Closing the session");
   if( !storSvc->endSession().isSuccess() ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }

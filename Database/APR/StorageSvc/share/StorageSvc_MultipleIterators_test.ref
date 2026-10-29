@@ -1,0 +1,10 @@
+MultipleIteratorsTest                      INFO Created the test driver
+MultipleIteratorsTest                      INFO Loading shared libraries:
+MultipleIteratorsTest                      INFO  - loading library test_StorageTestDictionary
+MultipleIteratorsTest                      INFO  Testing the writing operations
+MultipleIteratorsTest                      INFO  ...done
+MultipleIteratorsTest                      INFO  Testing the parallel iterators in the same container
+MultipleIteratorsTest                      INFO Closing the session
+MultipleIteratorsTest                      INFO  ...done
+MultipleIteratorsTest                      INFO  Exiting...
+MultipleIteratorsTest                      INFO Number of floating tokens : 0

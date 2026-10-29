@@ -13,11 +13,15 @@
 
 class TestDriver : public TestBase {
 public:
-  TestDriver();
-  ~TestDriver();
+  using TestBase::TestBase;
+
+  int execute();
+
+private:
+  void testTechnology( const pool::DbType& tech, bool commit_every_row );
   void testWriting();
   void testReading();
-
+  
   // default values for this test
   std::string           m_filename      = "BF.pool_test.root";
   std::string           m_objContainerName = "MyObjContainer";

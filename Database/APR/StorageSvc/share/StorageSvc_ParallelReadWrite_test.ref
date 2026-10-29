@@ -1,0 +1,11 @@
+ParallelReadWriteTest                      INFO Created the test driver
+ParallelReadWriteTest                      INFO Loading shared libraries:
+ParallelReadWriteTest                      INFO  - loading library test_StorageTestDictionary
+ParallelReadWriteTest                      INFO ] Testing the writing operations
+ParallelReadWriteTest                      INFO ] ...done
+ParallelReadWriteTest                      INFO ] Testing the parrallel reading and writing operations
+ParallelReadWriteTest                      INFO Closing the session
+ParallelReadWriteTest                      INFO ] ...done
+ParallelReadWriteTest                      INFO ] Testing the reading operations
+ParallelReadWriteTest                      INFO Closing the session
+ParallelReadWriteTest                      INFO Number of floating tokens : 0

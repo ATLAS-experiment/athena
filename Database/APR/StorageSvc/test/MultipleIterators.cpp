@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "TestDriver.h"
+#include "MultipleIterators.h"
 #include "SimpleTestClass.h"
 
 #include "PersistentDataModel/Guid.h"
@@ -19,6 +19,8 @@
 #include "StorageSvc/DbType.h"
 #include "StorageSvc/pool.h"
 
+#include "AthenaKernel/getMessageSvc.h"
+
 #include <stdexcept>
 #include <iostream>
 #include <sstream>
@@ -31,13 +33,31 @@ static const std::string container = "container";
 static const int nObjects = 100;
 
 
-TestDriver::TestDriver()
+int main( )
 {
+   try {
+      TestDriver driver("MultipleIteratorsTest");
+      return driver.execute();
+   } catch ( std::exception& e ) {
+      std::cerr << e.what() << std::endl;
+      return 1;
+   }
 }
 
-TestDriver::~TestDriver()
+
+
+int TestDriver::execute() 
 {
-   std::cout << "[OVAL] Number of floating tokens : " << Token::numInstances() << std::endl;
+    ATH_MSG_INFO(" Testing the writing operations");
+    testWriting();
+    ATH_MSG_INFO(" ...done");
+
+    ATH_MSG_INFO(" Testing the parallel iterators in the same container");
+    testReadingParallelSameContainer();
+    ATH_MSG_INFO(" ...done");
+
+    ATH_MSG_INFO(" Exiting...");
+    return 0;
 }
 
 
@@ -273,7 +293,7 @@ TestDriver::testReadingParallelSameContainer()
   }
   delete fd;
 
-  std::cout << "Closing the session" << std::endl;
+  ATH_MSG_INFO("Closing the session");
   if ( ! ( storSvc->endSession().isSuccess() ) ) {
     throw std::runtime_error( "Could not end correctly the session." );
   }

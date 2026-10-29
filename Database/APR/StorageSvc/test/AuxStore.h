@@ -13,8 +13,10 @@
 class TestDriver : public TestBase {
 
 public:
-   TestDriver(const std::string& filename, pool::DbType storage_type);
-   ~TestDriver();
+   using TestBase::TestBase;
+
+   int execute();
+   void runTestForStorageType(const std::string& filename, const pool::DbType& storageType);
 
    std::string testWriting();
    void testReading(const std::string& testTypeID);

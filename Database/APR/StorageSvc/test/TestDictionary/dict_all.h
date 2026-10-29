@@ -6,5 +6,7 @@
 #define DICT_ALL_H
 
 #include "SimpleTestClass.h"
+#include "TestClassWithTransients.h"
+#include "AuxStoreTest.h"
 
 #endif

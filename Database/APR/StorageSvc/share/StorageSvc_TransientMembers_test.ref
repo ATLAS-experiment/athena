@@ -1,0 +1,10 @@
+TransientMembersTest                       INFO Created the test driver
+TransientMembersTest                       INFO Loading shared libraries:
+TransientMembersTest                       INFO  - loading library test_StorageTestDictionary
+TransientMembersTest                       INFO Testing the writing operations
+TransientMembersTest                       INFO  ...done
+TransientMembersTest                       INFO  Testing the reading operations
+TransientMembersTest                       INFO Closing the session
+TransientMembersTest                       INFO  ...done
+TransientMembersTest                       INFO  Exiting...
+TransientMembersTest                       INFO Number of floating tokens : 0
