@@ -919,6 +919,9 @@ class IFFLeptonDecorationBlock (ConfigBlock):
         self.addOption ('decoration', 'IFFClass_%SYS%', type=str,
             info="the name of the decoration set by the IFF "
             "`TruthClassificationTool`.")
+        self.addOption ('useDerivationClassification', False, type=bool,
+            info="whether to switch the inputs to the IFF tools from the reconstruction-step "
+            "ones to the derivation-step ones, which might be more up to date.")
         # Always skip on data
         self.setOptionValue('skipOnData', True)
 
@@ -934,6 +937,7 @@ class IFFLeptonDecorationBlock (ConfigBlock):
         config.addPrivateTool( 'tool', 'TruthClassificationTool')
         # label charge-flipped electrons as such
         alg.tool.separateChargeFlipElectrons = self.separateChargeFlipElectrons
+        alg.tool.useTruthParticleDecorations = self.useDerivationClassification
         alg.decoration = self.decoration
         alg.particles = particles
 
