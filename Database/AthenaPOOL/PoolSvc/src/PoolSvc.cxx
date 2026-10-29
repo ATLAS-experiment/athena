@@ -22,10 +22,10 @@
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
-#include "PoolSvc/ISessionTool.h"
-#include "PoolSvc/IDatabase.h"
-#include "PoolSvc/IContainer.h"
-#include "PoolSvc/ITokenIterator.h"
+#include "SessionTool.h"
+#include "Database.h"
+#include "Container.h"
+#include "TokenIterator.h"
 #include "PoolSvc/FileCatalogUtils.h"
 #include "SessionTool.h"
 
@@ -347,7 +347,7 @@ pool::FileDescriptor PoolSvc::getInputFileDescriptor(unsigned int contextId,
       contextId = IPoolSvc::kInputStream;
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
+   std::unique_ptr<Database> dbH = getDbHandle(contextId, connection);
    if (!dbH) {
       throw std::runtime_error("Could not retrieve a database handle to '" + connection + "'");
    }
@@ -402,7 +402,7 @@ StatusCode PoolSvc::connectCollection(const std::string& connection,
    }
 
    // Check whether Collection Container exists.
-   std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
+   std::unique_ptr<Database> dbH = getDbHandle(contextId, connection);
    if( !dbH ) {
       ATH_MSG_INFO("connectCollection(): Failed to get Database Handle for: " << connection);
       return StatusCode::FAILURE;
@@ -440,7 +440,7 @@ StatusCode PoolSvc::checkCollection(const std::string& connection,
 		unsigned int contextId,
                 bool noContainer) {
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
+   std::unique_ptr<Database> dbH = getDbHandle(contextId, connection);
    if (dbH != nullptr && !dbH->fid().empty()) {
       if (noContainer) {
          return(StatusCode::SUCCESS); // no events
@@ -453,7 +453,7 @@ StatusCode PoolSvc::checkCollection(const std::string& connection,
    return(StatusCode::FAILURE);
 }
 //__________________________________________________________________________
-void PoolSvc::patchCatalog(const std::string& pfn, pool::IDatabase& dbH) const {
+void PoolSvc::patchCatalog(const std::string& pfn, Database& dbH) const {
    std::scoped_lock lock(m_pool_mut);
    dbH.setTechnology(pool::ROOT_StorageType.type());
    std::string fid = dbH.fid();
@@ -465,18 +465,18 @@ Token* PoolSvc::getToken(const std::string& connection,
 	                      const std::string& collection,
 	                      const unsigned long ientry) {
    std::lock_guard<CallMutex> lock(*m_pers_mut[IPoolSvc::kInputStream]);
-   std::unique_ptr<pool::IDatabase> dbH = getDbHandle(IPoolSvc::kInputStream, connection);
+   std::unique_ptr<Database> dbH = getDbHandle(IPoolSvc::kInputStream, connection);
    if (dbH == nullptr) {
       return(nullptr);
    }
    if (dbH->openMode() == Io::INVALID) {
       dbH->connectForRead();
    }
-   std::unique_ptr<pool::IContainer> contH = getContainerHandle(dbH.get(), collection);
+   std::unique_ptr<Container> contH = getContainerHandle(dbH.get(), collection);
    if (contH == nullptr) {
       return(nullptr);
    }
-   auto tokenIter = std::unique_ptr<pool::ITokenIterator>(contH->tokens());
+   auto tokenIter = std::unique_ptr<TokenIterator>(contH->tokens());
    // the Token returned by the iterator has the refCount already increased
    return tokenIter->seek(ientry)? tokenIter->next() : nullptr;
 }
@@ -565,7 +565,7 @@ StatusCode PoolSvc::disconnectDb(const std::string& connection, unsigned int con
       return (StatusCode::SUCCESS);
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, connection);
+   std::unique_ptr<Database> dbH = getDbHandle(contextId, connection);
    if (dbH == nullptr) {
       ATH_MSG_ERROR("Failed to get Session/DatabaseHandle.");
       return(StatusCode::FAILURE);
@@ -611,7 +611,7 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
 		const std::string& contName,
 		unsigned int contextId) {
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, dbName);
+   std::unique_ptr<Database> dbH = getDbHandle(contextId, dbName);
    if (dbH == nullptr) {
       ATH_MSG_DEBUG("getAttribute: Failed to get Session/DatabaseHandle to get POOL property.");
       return(StatusCode::FAILURE);
@@ -641,7 +641,7 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
       }
       ATH_MSG_INFO("Database (" << dbH->pfn() << ") attribute [" << optName << "]" << ": " << oss.str());
    } else {
-      std::unique_ptr<pool::IContainer> contH = getContainerHandle(dbH.get(), contName);
+      std::unique_ptr<Container> contH = getContainerHandle(dbH.get(), contName);
       if (contH == nullptr) {
          ATH_MSG_DEBUG("Failed to get ContainerHandle to get POOL property.");
          return(StatusCode::FAILURE);
@@ -699,7 +699,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
       contextId = IPoolSvc::kOutputStream;
    }
    ContextLock lock(contextId, m_pool_mut, m_pers_mut);
-   std::unique_ptr<pool::IDatabase> dbH = getDbHandle(contextId, dbName);
+   std::unique_ptr<Database> dbH = getDbHandle(contextId, dbName);
    if (dbH == nullptr) {
       ATH_MSG_DEBUG("Failed to get Session/DatabaseHandle to set POOL property.");
       return(StatusCode::FAILURE);
@@ -732,7 +732,7 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
          return(StatusCode::FAILURE);
       }
    } else {
-      std::unique_ptr<pool::IContainer> contH = getContainerHandle(dbH.get(), contName);
+      std::unique_ptr<Container> contH = getContainerHandle(dbH.get(), contName);
       if (contH == nullptr) {
          ATH_MSG_DEBUG("Failed to get ContainerHandle to set POOL property.");
          return(StatusCode::FAILURE);
@@ -815,7 +815,7 @@ bool PoolSvc::createCatalog() {
 PoolSvc::~PoolSvc() {
 }
 //__________________________________________________________________________
-std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, const std::string& dbName) {
+std::unique_ptr<Database> PoolSvc::getDbHandle(unsigned int contextId, const std::string& dbName) {
    if (contextId >= m_dbSessionVec.size()) {
       ATH_MSG_WARNING("getDbHandle: Using default input Stream instead of id = " << contextId);
       contextId = IPoolSvc::kInputStream;
@@ -834,17 +834,17 @@ std::unique_ptr<pool::IDatabase> PoolSvc::getDbHandle(unsigned int contextId, co
       }
    }
    if (dbName.starts_with("PFN:")) {
-      return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::PFN);
+      return sesH->databaseHandle(dbName.substr(4), Database::Specification::PFN);
    } else if (dbName.starts_with("LFN:")) {
-      return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::LFN);
+      return sesH->databaseHandle(dbName.substr(4), Database::Specification::LFN);
    } else if (dbName.starts_with("FID:")) {
-      return sesH->databaseHandle(dbName.substr(4), pool::DatabaseSpecification::FID);
+      return sesH->databaseHandle(dbName.substr(4), Database::Specification::FID);
    }
-   return sesH->databaseHandle(dbName, pool::DatabaseSpecification::PFN);
+   return sesH->databaseHandle(dbName, Database::Specification::PFN);
 }
 //__________________________________________________________________________
-std::unique_ptr<pool::IContainer> PoolSvc::getContainerHandle(pool::IDatabase* dbH, const std::string& contName) {
-   pool::IContainer* contH = nullptr;
+std::unique_ptr<Container> PoolSvc::getContainerHandle(Database* dbH, const std::string& contName) {
+   Container* contH = nullptr;
    if (dbH == nullptr) {
       ATH_MSG_DEBUG("No DatabaseHandle to get Container.");
       return(nullptr);
@@ -854,7 +854,7 @@ std::unique_ptr<pool::IContainer> PoolSvc::getContainerHandle(pool::IDatabase* d
    } else {
       contH = dbH->containerHandle(contName);
    }
-   return(std::unique_ptr<pool::IContainer>(contH));
+   return(std::unique_ptr<Container>(contH));
 }
 //__________________________________________________________________________
 std::string PoolSvc::poolCondPath(const std::string& leaf) {

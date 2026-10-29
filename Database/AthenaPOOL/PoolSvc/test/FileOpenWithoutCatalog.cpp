@@ -11,10 +11,10 @@
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
-#include "PoolSvc/IContainer.h"
+#include "../src/Container.h"
 #include "PoolSvc/FileCatalogUtils.h"
-#include "PoolSvc/ISessionTool.h"
-#include "PoolSvc/ITokenIterator.h"
+#include "../src/SessionTool.h"
+#include "../src/TokenIterator.h"
 
 #include "StorageSvc/DbType.h"
 
@@ -118,7 +118,7 @@ void TestDriver::write()
 }
 
 
-void TestDriver::read(const std::string& fileName, pool::DatabaseSpecification::NameType nameType)
+void TestDriver::read(const std::string& fileName, Database::Specification::NameType nameType)
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();
@@ -140,12 +140,12 @@ void TestDriver::read(const std::string& fileName, pool::DatabaseSpecification::
   std::vector< std::string > containers = db->containers();
   for ( std::vector< std::string >::const_iterator iContainer = containers.begin();
 	iContainer != containers.end(); ++iContainer ) {
-    pool::IContainer* container = db->containerHandle( *iContainer );
+    Container* container = db->containerHandle( *iContainer );
     if ( ! container ) {
       throw std::runtime_error( "Could not retrieve the container" );
     }
     ATH_MSG_INFO( "Container : " << container->name() );
-    pool::ITokenIterator* tokenIterator = container->tokens();
+    TokenIterator* tokenIterator = container->tokens();
     if ( ! tokenIterator ) {
       throw std::runtime_error( "Could not obtain a token iterator" );
     }

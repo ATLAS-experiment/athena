@@ -5,56 +5,51 @@
 #ifndef POOLSVC_CONTAINER_H
 #define POOLSVC_CONTAINER_H
 
-// includes
-#include "PoolSvc/IContainer.h"
+#include <string>
+#include <typeinfo>
 
 namespace pool {
-
-  // forward declarations
   class FileDescriptor;
-
-  /** @class Container
-   *
-   *  Container is an implementation of the IContainer interface
-   *
-   */
-  
-  class Container : virtual public IContainer {
-  public:
-    Container( FileDescriptor& fileDescriptor, const std::string& name );
-    
-    /// destructor
-    virtual ~Container() = default;
-
-    /// Returns the name of this container
-    virtual const std::string& name() const override final { return m_name; }
-
-    /** Starts an iteration over the tokens in the container.
-     *  Returns a token iterator whose ownership is passed to the user.
-     */
-    virtual ITokenIterator* tokens() override;
-
-    /// The method returning the attribute data given a name
-    virtual
-    bool attributeOfType( const std::string& attributeName,
-                          void* data,
-                          const std::type_info& typeInfo,
-                          const std::string& option ) override;
-
-    /// The method setting the attribute data given a name
-    virtual
-    bool setAttributeOfType( const std::string& attributeName,
-                             const void* data,
-                             const std::type_info& typeInfo,
-                             const std::string& option ) override;
-
-  private:
-    /// The name of the container
-    std::string m_name;
-
-    /// Reference to file descriptor of the parent database
-    FileDescriptor& m_fileDescriptor;
-  };
 }
+
+class TokenIterator;
+
+/** @class Container
+ */
+
+class Container final {
+public:
+  Container( pool::FileDescriptor& fileDescriptor, const std::string& name );
+  
+  /// destructor
+  ~Container() = default;
+
+  /// Returns the name of this container
+  const std::string& name() const { return m_name; }
+
+  /** Starts an iteration over the tokens in the container.
+   *  Returns a token iterator whose ownership is passed to the user.
+   */
+  TokenIterator* tokens();
+
+  /// The method returning the attribute data given a name
+  bool attributeOfType( const std::string& attributeName,
+                        void* data,
+                        const std::type_info& typeInfo,
+                        const std::string& option );
+
+  /// The method setting the attribute data given a name
+  bool setAttributeOfType( const std::string& attributeName,
+                           const void* data,
+                           const std::type_info& typeInfo,
+                           const std::string& option );
+
+private:
+  /// The name of the container
+  std::string m_name;
+
+  /// Reference to file descriptor of the parent database
+  pool::FileDescriptor& m_fileDescriptor;
+};
 
 #endif

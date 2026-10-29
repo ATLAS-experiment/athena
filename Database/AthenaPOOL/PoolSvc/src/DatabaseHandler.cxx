@@ -16,11 +16,11 @@
 #include <exception>
 #include <memory>
 
-pool::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& storageSvc,
-                                                        long technology,
-                                                        const std::string& fid,
-                                                        const std::string& pfn,
-                                                        Io::IoFlag accessmode ):
+DatabaseHandler::DatabaseHandler( pool::IStorageSvc& storageSvc,
+                                  long technology,
+                                  const std::string& fid,
+                                  const std::string& pfn,
+                                  Io::IoFlag accessmode ):
   m_storageSvc( storageSvc ),
   m_fileDescriptor( fid, pfn ),
   m_technology( technology ),
@@ -31,7 +31,7 @@ pool::DatabaseHandler::DatabaseHandler( pool::IStorageSvc& storageSvc,
   }
 }
 
-pool::DatabaseHandler::~DatabaseHandler()
+DatabaseHandler::~DatabaseHandler()
 {
    Io::IoFlag mode = Io::INVALID;
    if( m_storageSvc.openMode(m_fileDescriptor, mode).isSuccess() ) {
@@ -41,32 +41,32 @@ pool::DatabaseHandler::~DatabaseHandler()
 
 
 bool
-pool::DatabaseHandler::commitTransaction()
+DatabaseHandler::commitTransaction()
 {
-   return m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_COMMIT ).isSuccess() &&
-          m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_FLUSH ).isSuccess();
+   return m_storageSvc.endTransaction( m_fileDescriptor, pool::Transaction::TRANSACT_COMMIT ).isSuccess() &&
+          m_storageSvc.endTransaction( m_fileDescriptor, pool::Transaction::TRANSACT_FLUSH ).isSuccess();
 }
 
 
 bool
-pool::DatabaseHandler::commitAndHoldTransaction()
+DatabaseHandler::commitAndHoldTransaction()
 {
-   return m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_COMMIT ).isSuccess();
+   return m_storageSvc.endTransaction( m_fileDescriptor, pool::Transaction::TRANSACT_COMMIT ).isSuccess();
 }
 
 
 bool
-pool::DatabaseHandler::disconnectTransaction()
+DatabaseHandler::disconnectTransaction()
 {
    return ( m_storageSvc.disconnect( m_fileDescriptor ).isSuccess() );
 }
 
 std::vector< std::string >
-pool::DatabaseHandler::containers()
+DatabaseHandler::containers()
 {
    std::vector< std::string > result;
    std::vector<const Token*> containerTokens;
-   DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
+   pool::DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
    if( !dbH.containers(containerTokens, false).isSuccess() ) {
     return result;
    }
@@ -78,15 +78,15 @@ pool::DatabaseHandler::containers()
    return result;
 }
 
-pool::IContainer*
-pool::DatabaseHandler::container( const std::string& containerName )
+Container*
+DatabaseHandler::container( const std::string& containerName )
 {
    // Check the existence of a given container.
    std::vector< std::string > allContainers = this->containers();
    for ( std::vector< std::string >::const_iterator iName = allContainers.begin();
          iName != allContainers.end(); ++iName ) {
       if ( *iName == containerName ) {
-         return new pool::Container( m_fileDescriptor, containerName );
+         return new Container( m_fileDescriptor, containerName );
       }
    }
    return 0;
@@ -94,35 +94,35 @@ pool::DatabaseHandler::container( const std::string& containerName )
 
 
 const std::string&
-pool::DatabaseHandler::pfn() const
+DatabaseHandler::pfn() const
 {
   return m_fileDescriptor.PFN();
 }
 
 
 const std::string&
-pool::DatabaseHandler::fid() const
+DatabaseHandler::fid() const
 {
   return m_fileDescriptor.FID();
 }
 
 
 long
-pool::DatabaseHandler::technology() const
+DatabaseHandler::technology() const
 {
   return m_technology;
 }
 
 
 Io::IoFlag
-pool::DatabaseHandler::accessMode() const
+DatabaseHandler::accessMode() const
 {
   return m_accessMode;
 }
 
 
 Token*
-pool::DatabaseHandler::writeObject( const std::string& containerName,
+DatabaseHandler::writeObject( const std::string& containerName,
                                                     long minorTechnology,
                                                     const void* object,
                                                     const RootType& type )
@@ -132,7 +132,7 @@ pool::DatabaseHandler::writeObject( const std::string& containerName,
 
   // Get the persistent shape.
   const pool::Shape* shape = nullptr;
-  Guid guid = DbReflex::guid(type);
+  Guid guid = pool::DbReflex::guid(type);
   if( !m_storageSvc.getShape( m_fileDescriptor, guid, shape ).isSuccess() ) {
      shape = m_storageSvc.createShape( guid );
   }
@@ -151,7 +151,7 @@ pool::DatabaseHandler::writeObject( const std::string& containerName,
 
 
 void*
-pool::DatabaseHandler::readObject( const Token& token, void* object )
+DatabaseHandler::readObject( const Token& token, void* object )
 {
   void* result( object );
 
@@ -169,26 +169,26 @@ pool::DatabaseHandler::readObject( const Token& token, void* object )
 
 
 bool
-pool::DatabaseHandler::attribute( const std::string& attributeName,
+DatabaseHandler::attribute( const std::string& attributeName,
                                                   void* data,
                                                   const std::type_info& typeInfo,
                                                   const std::string& option )
 {
   pool::DbOption databaseOption( attributeName, option );
-  DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
+  pool::DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
   if( !dbH.getOption(databaseOption).isSuccess() ) return false;
   return databaseOption.i_getValue(typeInfo, data).isSuccess();
 }
 
 
 bool
-pool::DatabaseHandler::setAttribute( const std::string& attributeName,
+DatabaseHandler::setAttribute( const std::string& attributeName,
                                                      const void* data,
                                                      const std::type_info& typeInfo,
                                                      const std::string& option )
 {
   pool::DbOption databaseOption( attributeName, option );
   if( !databaseOption.i_setValue( typeInfo, const_cast<void*>( data ) ).isSuccess() ) return false;
-  DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
+  pool::DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
   return dbH.setOption(databaseOption).isSuccess();
   }

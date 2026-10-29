@@ -5,10 +5,10 @@
 #include "PersistentDataModel/Placement.h"
 #include "PersistentDataModel/Token.h"
 
-#include "PoolSvc/IContainer.h"
+#include "../src/Container.h"
 #include "PoolSvc/FileCatalogUtils.h"
-#include "PoolSvc/ISessionTool.h"
-#include "PoolSvc/ITokenIterator.h"
+#include "../src/SessionTool.h"
+#include "../src/TokenIterator.h"
 #include "StorageSvc/DbType.h"
 
 #include "FileCatalogOperations.h"
@@ -136,7 +136,7 @@ void TestDriver::read()
     throw std::runtime_error( "Could not start a read transaction." );
   }
 
-  auto db = dbsession->databaseHandle( m_lfn1, pool::DatabaseSpecification::LFN );
+  auto db = dbsession->databaseHandle( m_lfn1, Database::Specification::LFN );
   if ( ! db ) {
     throw std::runtime_error( "Could not retrieve a database handle" );
   }
@@ -148,12 +148,12 @@ void TestDriver::read()
 
   db->connectForRead(); // will open db in read mode.
 
-  pool::IContainer* container = db->containerHandle( "SimpleTestClass_Container" );
+  Container* container = db->containerHandle( "SimpleTestClass_Container" );
   if ( ! container ) {
     throw std::runtime_error( "Could not retrieve the container" );
   }
 
-  pool::ITokenIterator* tokenIterator = container->tokens();
+  TokenIterator* tokenIterator = container->tokens();
   if ( ! tokenIterator ) {
     throw std::runtime_error( "Could not obtain a token iterator" );
   }

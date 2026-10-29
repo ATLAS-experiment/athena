@@ -73,7 +73,7 @@ public: // Non-static members
    /// @param contextId [IN] id of the input context.
    /// @param connection [IN] file name, optionally prefixed with PFN:, LFN: or FID:
    virtual pool::FileDescriptor getInputFileDescriptor(unsigned int contextId,
-                                                        const std::string& connection) = 0;
+                                                       const std::string& connection) = 0;
 
    /// @return void
    /// @param shareCat [IN] bool to share the file catalog.

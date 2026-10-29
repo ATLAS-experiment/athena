@@ -6,7 +6,7 @@
 #include "AthenaKernel/getMessageSvc.h"
 
 #include "DataModelRoot/RootType.h"
-#include "PoolSvc/ISessionTool.h"
+#include "../src/SessionTool.h"
 #include "PoolSvc/FileCatalogUtils.h"
 #include "PersistentDataModel/Token.h"
 
@@ -47,11 +47,11 @@ void PersTestBase::loadLibraries( const std::vector<std::string>& libraries )
 
 
 // Sessions created here as Tools (and managed by the ToolSvc) need to be closed by hand with closeSession() to cleanup everything
-ToolHandle<ISessionTool>
+ToolHandle<SessionTool>
 PersTestBase::createSession( Gaudi::IFileCatalog& catalog, const std::string& sessionName )
 {
   ATH_MSG_INFO( "Creating the persistency service" );
-  auto dbsession = ToolHandle<ISessionTool>("SessionTool/" + sessionName, Gaudi::svcLocator()->service("ToolSvc"));
+  auto dbsession = ToolHandle<SessionTool>("SessionTool/" + sessionName, Gaudi::svcLocator()->service("ToolSvc"));
   if( !dbsession.retrieve().isSuccess() ) {
     throw std::runtime_error( "Could not create DB Session" );
   }

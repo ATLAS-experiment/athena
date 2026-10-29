@@ -25,12 +25,9 @@
 #include <memory>
 
 // Forward declarations
-namespace pool {
-   class IContainer;
-   class IDatabase;
-   class ISession;
-}
 class SessionTool;
+class Database;
+class Container;
 
 /** @class PoolSvc
  *  @brief This class provides the interface to the LCG POOL persistency software.
@@ -257,15 +254,15 @@ private: // internal helper functions
 
    // Set up m_catalogMgr/m_catalog. Returns false on failure.
    bool createCatalog();
-   void patchCatalog(const std::string& pfn, pool::IDatabase& dbH) const;
+   void patchCatalog(const std::string& pfn, Database& dbH) const;
 
    // setup persistency
    StatusCode setupPersistencySvc();
 
    /// Get Database handle
-   std::unique_ptr<pool::IDatabase> getDbHandle(unsigned int contextId, const std::string& dbName);
+   std::unique_ptr<Database> getDbHandle(unsigned int contextId, const std::string& dbName);
    /// Get Container handle
-   std::unique_ptr<pool::IContainer> getContainerHandle(pool::IDatabase* dbH, const std::string& contName);
+   std::unique_ptr<Container> getContainerHandle(Database* dbH, const std::string& contName);
 
    /// Resolve a file using ATLAS_POOLCOND_PATH
    std::string poolCondPath(const std::string& leaf);

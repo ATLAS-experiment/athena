@@ -4,9 +4,11 @@
 
 #include "SessionTool.h"
 #include "DatabaseRegistry.h"
-#include "UserDatabase.h"
+#include "Database.h"
 #include "DatabaseHandler.h"
 #include "MicroSessionManager.h"
+
+#include "StorageSvc/DbType.h"
 
 #include "PersistentDataModel/Token.h"
 #include "PersistentDataModel/Placement.h"
@@ -18,7 +20,7 @@ SessionTool::SessionTool(const std::string& type,
   : AthAlgTool(type, name, parent),
     m_catalog(nullptr),
     m_ageLimit(-1),
-    m_registry( std::make_unique<pool::DatabaseRegistry>() ),
+    m_registry( std::make_unique<DatabaseRegistry>() ),
     m_transactionType(Io::INVALID)
 {
 }
@@ -55,7 +57,7 @@ SessionTool::readObject( const Token& token, void* object )
 {
   void* result {};
   if( m_transactionType != Io::INVALID ) {
-    pool::UserDatabase db( *this, token.dbID().toString(), pool::DatabaseSpecification::FID );
+    Database db( *this, token.dbID().toString(), Database::Specification::FID );
     if ( db.openMode() == Io::INVALID ) {
       db.setTechnology( token.technology() );
       db.connectForRead();
@@ -67,13 +69,13 @@ SessionTool::readObject( const Token& token, void* object )
 
 Token*
 SessionTool::registerForWrite( const Placement& place,
-                                                     const void* object,
-                                                     const RootType& type )
+                               const void* object,
+                               const RootType& type )
 {
   if( m_transactionType != Io::WRITE && m_transactionType != Io::APPEND ) {
     return 0;
   }
-  pool::UserDatabase db( *this, place.fileName(), pool::DatabaseSpecification::PFN );
+  Database db( *this, place.fileName(), Database::Specification::PFN );
   if ( db.openMode() == Io::INVALID ) {
     db.setTechnology( place.technology() );
     db.connectForWrite();
@@ -142,12 +144,12 @@ SessionTool::commitAndHold()
 
 
 
-std::unique_ptr<pool::IDatabase>
+std::unique_ptr<Database>
 SessionTool::databaseHandle( const std::string& dbName,
-                             pool::DatabaseSpecification::NameType dbNameType )
+                             Database::Specification::NameType dbNameType )
 {
   if( m_transactionType != Io::INVALID ) {
-     return std::make_unique<pool::UserDatabase>( *this, dbName, dbNameType );
+     return std::make_unique<Database>( *this, dbName, dbNameType );
   }
   return nullptr;
 }
@@ -158,15 +160,7 @@ SessionTool::fileCatalog()
   return *m_catalog;
 }
 
-
-pool::IStorageSvc&
-SessionTool::getStorageSvc( long technology ) 
-{ 
-  return microSessionManager( technology ).getStorageSvc(); 
-}
-
-
-pool::MicroSessionManager&
+MicroSessionManager&
 SessionTool::microSessionManager( long technology )
 {
   pool::DbType dbType( technology );
@@ -177,7 +171,7 @@ SessionTool::microSessionManager( long technology )
     return *(iManager->second);
   }
   // Technology does not exist. Create the new session.
-  auto mgr = new pool::MicroSessionManager( *m_registry, majorType );
+  auto mgr = new MicroSessionManager( *m_registry, majorType );
   m_technologies.insert( std::make_pair( majorType, mgr ) );
   mgr->connect( m_transactionType, m_ageLimit );
   return *mgr;
