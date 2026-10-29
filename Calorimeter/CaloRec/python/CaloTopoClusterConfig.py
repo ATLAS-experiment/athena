@@ -707,7 +707,7 @@ def CaloTopoClusterConfigTest(flags=None):
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     cfg.merge(PoolReadCfg(flags))
 
-    topoAcc = CaloTopoClusterCfg(flags, clustersname = "CaloCalTopoClustersNew")
+    topoAcc = CaloTopoClusterCfg(flags)
     #topoAcc = CaloTopoClusterCfg(flags)
     topoAlg = topoAcc.getPrimary()
     topoAlg.ClustersOutputName = "CaloCalTopoClustersNew"
