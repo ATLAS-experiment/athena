@@ -1002,8 +1002,8 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
             # currently recommended versions
             version_Run2 = "2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v3"
             map_Run2 = f"ElectronEfficiencyCorrection/{version_Run2}/map1.txt"
-            version_Run3 = "2015_2025/rel22.2/2025_Run3_Consolidated_Recommendation_v4"
-            map_Run3 = f"ElectronEfficiencyCorrection/{version_Run3}/map2.txt"
+            version_Run3 = "2015_2025/rel22.2/2026_Run3_Consolidated_Trigger_Recommendation_v1"
+            map_Run3 = f"ElectronEfficiencyCorrection/{version_Run3}/map1.txt"
 
             version = version_Run2 if config.geometry() is LHCPeriod.Run2 else version_Run3
             # Dictionary from TrigGlobalEfficiencyCorrection/MapKeys.cfg
@@ -1098,7 +1098,7 @@ class ElectronTriggerAnalysisSFBlock (ConfigBlock):
 
                     # Reproduce config from TrigGlobalEfficiencyAlg
                     alg.efficiencyCorrectionTool.MapFilePath = map_Run3 if config.geometry() is LHCPeriod.Run3 else map_Run2
-                    alg.efficiencyCorrectionTool.IdKey = self.electronID.replace("LH","")
+                    alg.efficiencyCorrectionTool.IdKey = self.electronID.replace("LH","") if config.geometry() is LHCPeriod.Run2 else self.electronID
                     alg.efficiencyCorrectionTool.IsoKey = self.electronIsol
                     alg.efficiencyCorrectionTool.TriggerKey = (
                         ("Eff_" if deco == self.prefixEff else "") + conf)
