@@ -233,7 +233,9 @@ public:
     // Set worker ID > 0 to avoid mother process behavior in stop()
     jobOptSvc->set("DataFlowConfig.DF_WorkerId", std::to_string(worker_id));
     jobOptSvc->set("DataFlowConfig.DF_Pid", std::to_string(worker_pid));
-    jobOptSvc->set("DataFlowConfig.DF_ApplicationName", "athenaEF");
+    // athenaEF.py sets this before initialize() (fallback only)
+    if (!jobOptSvc->has("DataFlowConfig.DF_ApplicationName"))
+      jobOptSvc->set("DataFlowConfig.DF_ApplicationName", "athenaEF");
     
     std::cout << "TrigServicesHelper: Set DataFlowConfig properties (WorkerId=" 
               << worker_id << ", Pid=" << worker_pid << ")" << std::endl;
