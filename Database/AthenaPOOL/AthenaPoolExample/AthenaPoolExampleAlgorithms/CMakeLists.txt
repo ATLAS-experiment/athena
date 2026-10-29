@@ -15,7 +15,7 @@ atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 # Test(s) in the package:
 # ---------------------------
-set( TEST_IGNORE_STR "Warning in <TFile::Init>: no StreamerInfo found|BYTES_READ|READ_CALLS|XMLCatalog +INFO|Found address:|DEBUG setAttribute|DEBUG Failed to find TTree:.*to set POOL property|DEBUG.*failed process POOL.*attributes.|metadataItemList|Creating branch for new dynamic|Cache alignment|DEBUG setting xAOD::FileMetaData::productionRelease|Deaccess DbContainer|RootDatabase +DEBUG I/O| Skipping$|^StorageSvc +INFO|INFO DataHeader|DEBUG --->(Reading|Adding) (Assoc|Shape)|DEBUG ---->ClassID:|DB=.*CNT=.*CLID|\\bFID\\b|\\bGUID\\b|index_ref Initial basket size|::getBranchInfo" )
+set( TEST_IGNORE_STR "^Py:AutoConfigFlags|^Py:MetaReader|Warning in <TFile::Init>: no StreamerInfo found|BYTES_READ|READ_CALLS|XMLCatalog +INFO|Found address:|DEBUG setAttribute|DEBUG Failed to find TTree:.*to set POOL property|DEBUG.*failed process POOL.*attributes.|metadataItemList|Creating branch for new dynamic|Cache alignment|DEBUG setting xAOD::FileMetaData::productionRelease|Deaccess DbContainer|RootDatabase +DEBUG I/O| Skipping$|^StorageSvc +INFO|INFO DataHeader|DEBUG --->(Reading|Adding) (Assoc|Shape)|DEBUG ---->ClassID:|DB=.*CNT=.*CLID|\\bFID\\b|\\bGUID\\b|index_ref Initial basket size|::getBranchInfo" )
 
 # Write 'Hits', with multistreamand
 atlas_add_test( AthenaPoolExample_Write
