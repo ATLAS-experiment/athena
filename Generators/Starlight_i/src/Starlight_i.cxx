@@ -22,6 +22,7 @@
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "HepMC3/GenCrossSection.h"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Vector/LorentzVector.h"
@@ -107,7 +108,7 @@ StatusCode Starlight_i::callGenerator()
 
     // get particle vector from m_event whether it is upcEvent or upcXEvent
     const std::vector<starlightParticle>* particleCollection = std::visit(
-      [](auto& evt) { return evt->getParticles(); }, m_event
+      [](auto& _evt) { return _evt->getParticles(); }, m_event
     );
 
     // update event counter
@@ -162,7 +163,7 @@ Starlight_i::fillEvt(HepMC::GenEvent* evt)
 
     // get all final particles
     const std::vector<starlightParticle>* particleCollection = std::visit(
-      [](auto& evt) { return evt->getParticles(); }, m_event
+      [](auto& _evt) { return _evt->getParticles(); }, m_event
     );
 
     // Loop on all final particles and
@@ -235,6 +236,16 @@ Starlight_i::fillEvt(HepMC::GenEvent* evt)
       }
     ATH_MSG_DEBUG( "Saved " << ipart << " tracks "  );
 
+    // Add beam particles
+    int beam1pid = 1000000000 + m_beam1Z*10000 + m_beam1A*10;
+    int beam2pid = 1000000000 + m_beam2Z*10000 + m_beam2A*10;
+
+    HepMC::GenParticlePtr b1 = std::make_shared<HepMC::GenParticle>(HepMC::FourVector(0, 0,  m_beam1_energy.value(), m_beam1_energy.value()), beam1pid, 4);
+    HepMC::GenParticlePtr b2 = std::make_shared<HepMC::GenParticle>(HepMC::FourVector(0, 0, -m_beam2_energy.value(), m_beam2_energy.value()), beam2pid, 4);
+
+    v1->add_particle_in(b1);
+    v1->add_particle_in(b2);
+
     // Conversion GeV -> MeV to ensure correct units
     evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
 
@@ -259,7 +270,7 @@ Starlight_i::starlight2lhef()
     lheStream << "-->\n";
     
     lheStream << "<init>\n";
-    lheStream << "  13  -13  "<<m_beam_energy.value()<<"  "<<m_beam_energy.value()<<"  0  0  0  0  3  1\n";
+    lheStream << "  13  -13  "<<m_beam1_energy.value()<<"  "<<m_beam2_energy.value()<<"  0  0  0  0  3  1\n";
     lheStream << "  1.000000e+00  0.000000e+00  1.000000e+00   9999\n";
     lheStream << "</init>\n";
 
@@ -280,7 +291,7 @@ Starlight_i::starlight2lhef()
 
       // get particle vector from m_event whether it is upcEvent or upcXEvent
       const std::vector<starlightParticle>* particleCollection = std::visit(
-        [](auto& evt) { return evt->getParticles(); }, uevent
+        [](auto& _evt) { return _evt->getParticles(); }, uevent
       );
   
       int ipart = 0;
