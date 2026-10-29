@@ -36,12 +36,12 @@ timeout 10800 AtlasG4_tf.py  \
   --maxEvents 500 \
   --multithreaded \
   --simulator 'AtlasG4_QS' \
-  --preInclude 'AtlasG4Tf:Campaigns.MC23PhaseIISimulation,SimulationConfig.disableFrozenShowersFCalOnly' \
+  --preInclude 'AtlasG4Tf:Campaigns.MC23PhaseIISimulation' \
   --conditionsTag "${conditionsTag}" \
   --geometryVersion "default:${geometryTag}" \
   --postExec 'with open("ConfigSimCA.pkl", "wb") as f: cfg.store(f)' \
   --physicsList 'FTFP_BERT_ATL_Celer' \
-  --preExec 'flags.Sim.G4Commands+=[ "/celer/maxNumTracks 262144", "/celer/maxInitializers 524288", "/celer/secondaryStackFactor 2", "/celer/maxNumSteps 100", "/celer/device/stackSize 32192", "/celer/device/heapSize 104857600" ]; flags.GeoModel.EMECStandard=True' \
+  --preExec 'flags.Sim.G4Commands+=[ "/celer/autoFlush 32768", "/celer/maxNumTracks 262144", "/celer/maxInitializers 1048576", "/celer/secondaryStackFactor 2", "/celer/maxNumSteps 500", "/celer/device/stackSize 32192", "/celer/device/heapSize 104857600" ]; flags.GeoModel.EMECStandard=True' \
   --postInclude 'PyJobTransforms.UseFrontier' \
   --imf False \
   --inputEVNTFile $INPUT \
