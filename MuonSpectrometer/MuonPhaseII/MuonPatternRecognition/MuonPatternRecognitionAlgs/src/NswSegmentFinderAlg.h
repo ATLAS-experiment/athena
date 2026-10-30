@@ -164,11 +164,13 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
          *  @param initialSeed: Reference to the hit quadruplet that may form a seed
          *  @param bMatrix: Kernel matrix calculated from the layer configuration to construct the seed
          *  @param max: Refrence to the eta maximum from which the segment seed is constructed
+         *  @param gctx: Reference to the geometry context
          *  @param extensionLayers: Reference to the hits on the remaining layers of the detector
          *  @param usedHits: Refrence to the book keeper of which of the hits on the extension was already used */
         std::unique_ptr<SegmentSeed> constructCombinatorialSeed(const InitialSeed_t& initialSeed,
                                                                 const AmgSymMatrix(2)& bMatrix,
                                                                 const HoughMaximum& max,
+                                                                const ActsTrk::GeometryContext& gctx,
                                                                 const HitLaySpan_t& extensionLayers,
                                                                 const UsedHitSpan_t& usedHits) const;
         /** @brief Build the final segment seed from strip like measurements using the combinatorial seeding for MicroMegas (or strip measurements) logic
@@ -304,6 +306,9 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         //reject also hits from the seed even if it does not lead to succesful segment
         BooleanProperty m_markHitsFromSeed{this, "markHitsFromSeed", true};
 
+        //skip stgc seed from the same multilayer
+        BooleanProperty m_skipSameMultilayer{this, "skipSameMultilayer", true};
+
         //flag to use only MM layers for the estimation of the initial seed of the combinatorics
         BooleanProperty m_doOnlyMMCombinatorics{this, "doOnlyMMCombinatorics", false};
 
@@ -323,7 +328,7 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         DoubleProperty m_maxdYWindow{this, "maxdYWindow", 2.*Gaudi::Units::cm};  
 
         //maximum tanAlpha for the seed quality check
-        DoubleProperty m_maxTanAlpha{this, "maxTanAlpha", 0.2};
+        DoubleProperty m_maxTanAlpha{this, "maxTanAlpha", 0.4};
 
         //dump statistics for the seeds per sector
         BooleanProperty m_dumpSeedStatistics{this, "dumpStatistics", true};
