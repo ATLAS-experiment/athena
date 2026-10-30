@@ -55,6 +55,12 @@ def PixelClusterizationCfg(flags, name = "InDetPixelClusterization", **kwargs):
         kwargs.setdefault("gangedAmbiguitiesFinder", acc.popToolsAndMerge(
             PixelGangedAmbiguitiesFinderCfg(flags)))
 
+    if flags.TrackOverlay.isTrackOverlaySeq and flags.TrackOverlay.doRoISiOverlay:
+        # merged signal + pileup RDOs inside calo RoIs, signal-only RDOs elsewhere
+        from TrackOverlayRec.TrackOverlayRoIConfig import (
+            TrackOverlayRoISiRDOMergerAlgCfg, RoIPixelRDOs)
+        acc.merge(TrackOverlayRoISiRDOMergerAlgCfg(flags))
+        kwargs.setdefault("DataObjectName", RoIPixelRDOs)
     kwargs.setdefault("DataObjectName", prefix + "PixelRDOs")
     kwargs.setdefault("ClustersName", "PixelClusters")
 
@@ -153,6 +159,12 @@ def SCTClusterizationCfg(flags, name="InDetSCT_Clusterization", **kwargs):
         kwargs.setdefault("clusteringTool", acc.popToolsAndMerge(
             SCT_ClusteringToolCfg(flags)))
 
+    if flags.TrackOverlay.isTrackOverlaySeq and flags.TrackOverlay.doRoISiOverlay:
+        # merged signal + pileup RDOs inside calo RoIs, signal-only RDOs elsewhere
+        from TrackOverlayRec.TrackOverlayRoIConfig import (
+            TrackOverlayRoISiRDOMergerAlgCfg, RoISCT_RDOs)
+        acc.merge(TrackOverlayRoISiRDOMergerAlgCfg(flags))
+        kwargs.setdefault("DataObjectName", RoISCT_RDOs)
     kwargs.setdefault("DataObjectName", prefix + "SCT_RDOs")
     kwargs.setdefault("ClustersName", 'SCT_Clusters')
 

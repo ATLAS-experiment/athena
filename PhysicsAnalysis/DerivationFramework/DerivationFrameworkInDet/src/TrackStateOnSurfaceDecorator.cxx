@@ -883,6 +883,15 @@ namespace DerivationFramework {
     }
 
     unsigned int xaodIndex = offsets->at( contIndex.collHash() ) + contIndex.objIndex();
+    // The PRD may not belong to the container the xAOD PRDs were built from
+    // (e.g. Bkg_ clusters on track-overlay tracks), so check that the index
+    // is in range and points to the same measurement before linking.
+    if( xaodIndex >= xaodPrdCont->size() ||
+        (*xaodPrdCont)[xaodIndex]->identifier() != prd->identify().get_compact() ){
+      ATH_MSG_DEBUG("No matching xAOD PRD for " << prd->identify() << " at index " << xaodIndex
+                    << " (container size " << xaodPrdCont->size() << "), not linking");
+      return {};
+    }
     ElementLink< xAOD::TrackMeasurementValidationContainer > el( *xaodPrdCont, xaodIndex );
     el.toPersistent();
 
