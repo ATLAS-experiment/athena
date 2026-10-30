@@ -41,7 +41,7 @@ def timeBurnerCfg(flags):
 
 
 def timeBurnerProcessingCfg(flags):
-    # Variant of TimeBurner for dataflow tests: Landau-distributed CPU burn with non-zero AcceptFraction
+    # Variant of TimeBurner for dataflow tests. Defaults to no time burned and reject-all.
     inputMaker = CompFactory.InputMakerForRoI("IM_TimeBurnerProcessing",
                                               RoITool=CompFactory.ViewCreatorInitialROITool(),
                                               RoIs="TimeBurnerProcessingInputRoIs",
@@ -52,12 +52,6 @@ def timeBurnerProcessingCfg(flags):
     selAcc.addHypoAlgo(
         TimeBurnerCfg(flags,
                       name="TimeBurnerProcessingHypo",
-                      TimeDistribution="landau",
-                      LandauMPV=105.0,
-                      LandauSigma=66.0,
-                      BurnCPU=True,
-                      AcceptFraction=0.10,
-                      MaxTimeMs=450000.0,
         )
     )
 
