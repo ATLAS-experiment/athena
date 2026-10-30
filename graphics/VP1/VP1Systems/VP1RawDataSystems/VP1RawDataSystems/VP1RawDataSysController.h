@@ -63,6 +63,13 @@ public:
   unsigned lucidMinQDC() const;
 
   // Inclusive muon digit ranges; unchecked bounds are unrestricted.
+  bool rpcShowEta() const;
+  bool rpcShowPhi() const;
+  bool rpcShowPrimarySide() const;
+  bool rpcShowOppositeSide() const;
+  bool rpcKeepMissingToT() const;
+  VP1Interval rpcAllowedTime() const;
+  VP1Interval rpcAllowedToT() const;
   bool tgcShowStrips() const;
   bool tgcShowWires() const;
   bool tgcShowPrevious() const;
@@ -104,6 +111,13 @@ signals:
   void trtRequireHTChanged(bool);
   void trtAllowedToTChanged(const VP1Interval&);//nano-seconds
   void lucidMinQDCChanged(unsigned);
+  void rpcShowEtaChanged(bool);
+  void rpcShowPhiChanged(bool);
+  void rpcShowPrimarySideChanged(bool);
+  void rpcShowOppositeSideChanged(bool);
+  void rpcKeepMissingToTChanged(bool);
+  void rpcAllowedTimeChanged(const VP1Interval&);
+  void rpcAllowedToTChanged(const VP1Interval&);
   void tgcShowStripsChanged(bool);
   void tgcShowWiresChanged(bool);
   void tgcShowPreviousChanged(bool);
@@ -145,6 +159,13 @@ private Q_SLOTS:
   void possibleChange_trtRequireHT();
   void possibleChange_trtAllowedToT();
   void possibleChange_lucidMinQDC();
+  void possibleChange_rpcShowEta();
+  void possibleChange_rpcShowPhi();
+  void possibleChange_rpcShowPrimarySide();
+  void possibleChange_rpcShowOppositeSide();
+  void possibleChange_rpcKeepMissingToT();
+  void possibleChange_rpcAllowedTime();
+  void possibleChange_rpcAllowedToT();
   void possibleChange_tgcShowStrips();
   void possibleChange_tgcShowWires();
   void possibleChange_tgcShowPrevious();

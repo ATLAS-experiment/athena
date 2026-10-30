@@ -93,3 +93,13 @@ SoTransform* VP1RawDataHandle_RPC_Digit::buildTransform()
   transform.translation() = elem->stripPos(id);
   return VP1LinAlgUtils::toSoTransform(transform);
 }
+
+bool VP1RawDataHandle_RPC_Digit::measuresPhi() const
+{
+  const auto* helper = VP1DetInfo::rpcIDHelper();
+  return helper && helper->valid(m_data->identify()) && helper->measuresPhi(m_data->identify());
+}
+
+bool VP1RawDataHandle_RPC_Digit::oppositeSide() const { return m_data->stripSide(); }
+double VP1RawDataHandle_RPC_Digit::time() const { return m_data->time() / Gaudi::Units::ns; }
+double VP1RawDataHandle_RPC_Digit::timeOverThreshold() const { return m_data->ToT() / Gaudi::Units::ns; }

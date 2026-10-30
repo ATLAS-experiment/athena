@@ -50,3 +50,9 @@ if( CMAKE_CXX_CPPCHECK )
    set_property( TARGET VP1RawDataSystems_RpcDigitClick
       APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
 endif()
+
+# Selection/range policy, including legacy digits without ToT measurements.
+atlas_add_test( RpcDigitCuts
+                SOURCES test/RpcDigitCuts_test.cxx
+                LINK_LIBRARIES VP1Base
+                POST_EXEC_SCRIPT nopost.sh )

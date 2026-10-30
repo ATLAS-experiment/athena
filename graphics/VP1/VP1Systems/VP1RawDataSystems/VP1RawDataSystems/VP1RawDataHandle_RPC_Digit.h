@@ -12,6 +12,10 @@ namespace MuonGM { class RpcReadoutElement; }
 class VP1RawDataHandle_RPC_Digit : public VP1RawDataHandleBase {
 public:
   VP1RawDataHandle_RPC_Digit(VP1RawDataCollBase*, const RpcDigit*);
+  bool measuresPhi() const;
+  bool oppositeSide() const;
+  double time() const;
+  double timeOverThreshold() const;
   QStringList clicked(bool verbose) const override;
 protected:
   SoNode* buildShape() override;

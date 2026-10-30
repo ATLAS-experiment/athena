@@ -3,6 +3,9 @@
 */
 
 #include "VP1RawDataSystems/VP1RawDataColl_RPC_Digit.h"
+#include "VP1RawDataSystems/VP1RawDataCommonData.h"
+#include "VP1RawDataSystems/VP1RawDataSysController.h"
+#include "RpcDigitCuts.h"
 #include "VP1RawDataSystems/VP1RawDataHandle_RPC_Digit.h"
 #include "VP1Utils/VP1SGContentsHelper.h"
 #include "VP1Utils/VP1JobConfigInfo.h"
@@ -19,8 +22,32 @@ QStringList VP1RawDataColl_RPC_Digit::availableCollections(IVP1System* sys)
 
 VP1RawDataColl_RPC_Digit::VP1RawDataColl_RPC_Digit(
     VP1RawDataCommonData* common, const QString& key)
-  : VP1RawDataCollBase(common, key)
-{}
+  : VP1RawDataCollBase(common, key), m_cuts(std::make_unique<RpcDigitCuts>())
+{
+  connect(common->controller(), &VP1RawDataSysController::rpcShowEtaChanged,
+          this, &VP1RawDataColl_RPC_Digit::setRpcShowEta);
+  setRpcShowEta(common->controller()->rpcShowEta());
+  connect(common->controller(), &VP1RawDataSysController::rpcShowPhiChanged,
+          this, &VP1RawDataColl_RPC_Digit::setRpcShowPhi);
+  setRpcShowPhi(common->controller()->rpcShowPhi());
+  connect(common->controller(), &VP1RawDataSysController::rpcShowPrimarySideChanged,
+          this, &VP1RawDataColl_RPC_Digit::setRpcShowPrimarySide);
+  setRpcShowPrimarySide(common->controller()->rpcShowPrimarySide());
+  connect(common->controller(), &VP1RawDataSysController::rpcShowOppositeSideChanged,
+          this, &VP1RawDataColl_RPC_Digit::setRpcShowOppositeSide);
+  setRpcShowOppositeSide(common->controller()->rpcShowOppositeSide());
+  connect(common->controller(), &VP1RawDataSysController::rpcKeepMissingToTChanged,
+          this, &VP1RawDataColl_RPC_Digit::setRpcKeepMissingToT);
+  setRpcKeepMissingToT(common->controller()->rpcKeepMissingToT());
+  connect(common->controller(), &VP1RawDataSysController::rpcAllowedTimeChanged,
+          this, &VP1RawDataColl_RPC_Digit::setRpcAllowedTime);
+  setRpcAllowedTime(common->controller()->rpcAllowedTime());
+  connect(common->controller(), &VP1RawDataSysController::rpcAllowedToTChanged,
+          this, &VP1RawDataColl_RPC_Digit::setRpcAllowedToT);
+  setRpcAllowedToT(common->controller()->rpcAllowedToT());
+}
+
+VP1RawDataColl_RPC_Digit::~VP1RawDataColl_RPC_Digit() = default;
 
 void VP1RawDataColl_RPC_Digit::assignDefaultMaterial(SoMaterial* material) const
 {
@@ -61,8 +88,79 @@ bool VP1RawDataColl_RPC_Digit::load()
   return true;
 }
 
-bool VP1RawDataColl_RPC_Digit::cut(VP1RawDataHandleBase*)
+bool VP1RawDataColl_RPC_Digit::cut(VP1RawDataHandleBase* handle)
 {
-  // Shared eta/phi cuts are applied by the base class at the strip centre.
-  return true;
+  const auto* digit = static_cast<const VP1RawDataHandle_RPC_Digit*>(handle);
+  return m_cuts->accepts(digit->measuresPhi(), digit->time(), digit->timeOverThreshold(), digit->oppositeSide());
+}
+
+void VP1RawDataColl_RPC_Digit::setRpcShowEta(bool enabled)
+{
+  if (m_cuts->showEta == enabled)
+    return;
+  m_cuts->showEta = enabled;
+  if (enabled)
+    recheckCutStatusOfAllNotVisibleHandles();
+  else
+    recheckCutStatusOfAllVisibleHandles();
+}
+
+void VP1RawDataColl_RPC_Digit::setRpcShowPhi(bool enabled)
+{
+  if (m_cuts->showPhi == enabled)
+    return;
+  m_cuts->showPhi = enabled;
+  if (enabled)
+    recheckCutStatusOfAllNotVisibleHandles();
+  else
+    recheckCutStatusOfAllVisibleHandles();
+}
+
+void VP1RawDataColl_RPC_Digit::setRpcShowPrimarySide(bool enabled)
+{
+  if (m_cuts->showPrimarySide == enabled)
+    return;
+  m_cuts->showPrimarySide = enabled;
+  if (enabled)
+    recheckCutStatusOfAllNotVisibleHandles();
+  else
+    recheckCutStatusOfAllVisibleHandles();
+}
+
+void VP1RawDataColl_RPC_Digit::setRpcShowOppositeSide(bool enabled)
+{
+  if (m_cuts->showOppositeSide == enabled)
+    return;
+  m_cuts->showOppositeSide = enabled;
+  if (enabled)
+    recheckCutStatusOfAllNotVisibleHandles();
+  else
+    recheckCutStatusOfAllVisibleHandles();
+}
+
+void VP1RawDataColl_RPC_Digit::setRpcKeepMissingToT(bool enabled)
+{
+  if (m_cuts->keepMissingToT == enabled)
+    return;
+  m_cuts->keepMissingToT = enabled;
+  if (enabled)
+    recheckCutStatusOfAllNotVisibleHandles();
+  else
+    recheckCutStatusOfAllVisibleHandles();
+}
+
+void VP1RawDataColl_RPC_Digit::setRpcAllowedTime(const VP1Interval& range)
+{
+  if (m_cuts->timeRange == range)
+    return;
+  m_cuts->timeRange = range;
+  recheckCutStatusOfAllHandles();
+}
+
+void VP1RawDataColl_RPC_Digit::setRpcAllowedToT(const VP1Interval& range)
+{
+  if (m_cuts->totRange == range)
+    return;
+  m_cuts->totRange = range;
+  recheckCutStatusOfAllHandles();
 }

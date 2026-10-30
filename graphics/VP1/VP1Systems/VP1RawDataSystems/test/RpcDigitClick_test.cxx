@@ -32,7 +32,7 @@ bool includes(const QStringList& lines, const QString& text)
 const RpcIdHelper* VP1DetInfo::rpcIDHelper() { return testHelper; }
 const MuonGM::MuonDetectorManager* VP1DetInfo::muonDetMgr() { return nullptr; }
 
-int main()
+int runTests()
 {
   IdDictParser parser;
   parser.register_external_entity("MuonSpectrometer", "IdDictMuonSpectrometer_R.09.02.xml");
@@ -76,4 +76,14 @@ int main()
   check(includes(invalidHandle.clicked(true), "Decoded identifier unavailable"), "Invalid identifier handled");
   check(includes(invalidHandle.clicked(false), "Time [ns]: -5"), "Negative digit time retained");
   return 0;
+}
+
+int main()
+{
+  try {
+    return runTests();
+  } catch (const std::exception& error) {
+    std::cerr << error.what() << '\n';
+    return 1;
+  }
 }

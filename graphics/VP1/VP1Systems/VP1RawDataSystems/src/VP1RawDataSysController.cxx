@@ -51,6 +51,13 @@ public:
   bool last_trtRequireHT = false;
   VP1Interval last_trtAllowedToT;
   unsigned last_lucidMinQDC = 0U;
+  bool last_rpcShowEta = true;
+  bool last_rpcShowPhi = true;
+  bool last_rpcShowPrimarySide = true;
+  bool last_rpcShowOppositeSide = true;
+  bool last_rpcKeepMissingToT = true;
+  VP1Interval last_rpcAllowedTime;
+  VP1Interval last_rpcAllowedToT;
   bool last_tgcShowStrips = true;
   bool last_tgcShowWires = true;
   bool last_tgcShowPrevious = true;
@@ -215,6 +222,35 @@ VP1RawDataSysController::VP1RawDataSysController(IVP1System * sys)
   addUpdateSlot(SLOT(possibleChange_mdtExcludeMasked()));
   connectToLastUpdateSlot(m_d->ui_cuts.checkBox_mdtExcludeMasked);
 
+  addUpdateSlot(SLOT(possibleChange_rpcShowEta()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_rpcShowEta);
+  addUpdateSlot(SLOT(possibleChange_rpcShowPhi()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_rpcShowPhi);
+  addUpdateSlot(SLOT(possibleChange_rpcShowPrimarySide()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_rpcShowPrimarySide);
+  addUpdateSlot(SLOT(possibleChange_rpcShowOppositeSide()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_rpcShowOppositeSide);
+  addUpdateSlot(SLOT(possibleChange_rpcKeepMissingToT()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_rpcKeepMissingToT);
+  addUpdateSlot(SLOT(possibleChange_rpcAllowedTime()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_rpcAllowedTimeMin);
+  connectToLastUpdateSlot(m_d->ui_cuts.spinBox_rpcAllowedTimeMin);
+  connect(m_d->ui_cuts.checkBox_rpcAllowedTimeMin, &QCheckBox::toggled,
+          m_d->ui_cuts.spinBox_rpcAllowedTimeMin, &QDoubleSpinBox::setEnabled);
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_rpcAllowedTimeMax);
+  connectToLastUpdateSlot(m_d->ui_cuts.spinBox_rpcAllowedTimeMax);
+  connect(m_d->ui_cuts.checkBox_rpcAllowedTimeMax, &QCheckBox::toggled,
+          m_d->ui_cuts.spinBox_rpcAllowedTimeMax, &QDoubleSpinBox::setEnabled);
+  addUpdateSlot(SLOT(possibleChange_rpcAllowedToT()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_rpcAllowedToTMin);
+  connectToLastUpdateSlot(m_d->ui_cuts.spinBox_rpcAllowedToTMin);
+  connect(m_d->ui_cuts.checkBox_rpcAllowedToTMin, &QCheckBox::toggled,
+          m_d->ui_cuts.spinBox_rpcAllowedToTMin, &QDoubleSpinBox::setEnabled);
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_rpcAllowedToTMax);
+  connectToLastUpdateSlot(m_d->ui_cuts.spinBox_rpcAllowedToTMax);
+  connect(m_d->ui_cuts.checkBox_rpcAllowedToTMax, &QCheckBox::toggled,
+          m_d->ui_cuts.spinBox_rpcAllowedToTMax, &QDoubleSpinBox::setEnabled);
+
   addUpdateSlot(SLOT(possibleChange_tgcShowStrips()));
   connectToLastUpdateSlot(m_d->ui_cuts.checkBox_tgcShowStrips);
   addUpdateSlot(SLOT(possibleChange_tgcShowWires()));
@@ -255,7 +291,7 @@ VP1RawDataSysController::~VP1RawDataSysController()
 //____________________________________________________________________
 int VP1RawDataSysController::currentSettingsVersion() const
 {
-  return 5;
+  return 6;
 }
 
 //____________________________________________________________________
@@ -322,6 +358,21 @@ void VP1RawDataSysController::actualSaveSettings(VP1Serialise&s) const
   s.save(m_d->ui_cuts.checkBox_tgcShowNextNext);
   s.save(m_d->ui_cuts.checkBox_tgcShowUndefined);
   s.save(m_d->ui_cuts.checkBox_tgcShowUnknown);
+  // Version 6: RPC view, side, time and optional ToT selections.
+  s.save(m_d->ui_cuts.checkBox_rpcShowEta);
+  s.save(m_d->ui_cuts.checkBox_rpcShowPhi);
+  s.save(m_d->ui_cuts.checkBox_rpcShowPrimarySide);
+  s.save(m_d->ui_cuts.checkBox_rpcShowOppositeSide);
+  s.save(m_d->ui_cuts.checkBox_rpcKeepMissingToT);
+  s.save(m_d->ui_cuts.checkBox_rpcAllowedTimeMin);
+  s.save(m_d->ui_cuts.spinBox_rpcAllowedTimeMin);
+  s.save(m_d->ui_cuts.checkBox_rpcAllowedTimeMax);
+  s.save(m_d->ui_cuts.spinBox_rpcAllowedTimeMax);
+  s.save(m_d->ui_cuts.checkBox_rpcAllowedToTMin);
+  s.save(m_d->ui_cuts.spinBox_rpcAllowedToTMin);
+  s.save(m_d->ui_cuts.checkBox_rpcAllowedToTMax);
+  s.save(m_d->ui_cuts.spinBox_rpcAllowedToTMax);
+
 
 
 
@@ -330,7 +381,7 @@ void VP1RawDataSysController::actualSaveSettings(VP1Serialise&s) const
 //____________________________________________________________________
 void VP1RawDataSysController::actualRestoreSettings(VP1Deserialise& s)
 {
-  if (s.version()<0||s.version()>5) {
+  if (s.version()<0||s.version()>6) {
     message("Warning: State data in .vp1 file has unsupported version ("+str(s.version())+")");
     return;
   }
@@ -434,7 +485,37 @@ void VP1RawDataSysController::actualRestoreSettings(VP1Deserialise& s)
     m_d->ui_cuts.checkBox_tgcShowUnknown->setChecked(true);
   }
 
+  if (s.version() >= 6) {
+    s.restore(m_d->ui_cuts.checkBox_rpcShowEta);
+    s.restore(m_d->ui_cuts.checkBox_rpcShowPhi);
+    s.restore(m_d->ui_cuts.checkBox_rpcShowPrimarySide);
+    s.restore(m_d->ui_cuts.checkBox_rpcShowOppositeSide);
+    s.restore(m_d->ui_cuts.checkBox_rpcKeepMissingToT);
+    s.restore(m_d->ui_cuts.checkBox_rpcAllowedTimeMin);
+    s.restore(m_d->ui_cuts.spinBox_rpcAllowedTimeMin);
+    s.restore(m_d->ui_cuts.checkBox_rpcAllowedTimeMax);
+    s.restore(m_d->ui_cuts.spinBox_rpcAllowedTimeMax);
+    s.restore(m_d->ui_cuts.checkBox_rpcAllowedToTMin);
+    s.restore(m_d->ui_cuts.spinBox_rpcAllowedToTMin);
+    s.restore(m_d->ui_cuts.checkBox_rpcAllowedToTMax);
+    s.restore(m_d->ui_cuts.spinBox_rpcAllowedToTMax);
+  } else {
+    m_d->ui_cuts.checkBox_rpcShowEta->setChecked(true);
+    m_d->ui_cuts.checkBox_rpcShowPhi->setChecked(true);
+    m_d->ui_cuts.checkBox_rpcShowPrimarySide->setChecked(true);
+    m_d->ui_cuts.checkBox_rpcShowOppositeSide->setChecked(true);
+    m_d->ui_cuts.checkBox_rpcKeepMissingToT->setChecked(true);
+    m_d->ui_cuts.checkBox_rpcAllowedTimeMin->setChecked(false);
+    m_d->ui_cuts.checkBox_rpcAllowedTimeMax->setChecked(false);
+    m_d->ui_cuts.checkBox_rpcAllowedToTMin->setChecked(false);
+    m_d->ui_cuts.checkBox_rpcAllowedToTMax->setChecked(false);
+  }
+
   // Deserialisation blocks checkbox signals, so synchronize the fields explicitly.
+  m_d->ui_cuts.spinBox_rpcAllowedTimeMin->setEnabled(m_d->ui_cuts.checkBox_rpcAllowedTimeMin->isChecked());
+  m_d->ui_cuts.spinBox_rpcAllowedTimeMax->setEnabled(m_d->ui_cuts.checkBox_rpcAllowedTimeMax->isChecked());
+  m_d->ui_cuts.spinBox_rpcAllowedToTMin->setEnabled(m_d->ui_cuts.checkBox_rpcAllowedToTMin->isChecked());
+  m_d->ui_cuts.spinBox_rpcAllowedToTMax->setEnabled(m_d->ui_cuts.checkBox_rpcAllowedToTMax->isChecked());
   m_d->ui_cuts.spinBox_mdtAllowedADCMin->setEnabled(m_d->ui_cuts.checkBox_mdtAllowedADCMin->isChecked());
   m_d->ui_cuts.spinBox_mdtAllowedADCMax->setEnabled(m_d->ui_cuts.checkBox_mdtAllowedADCMax->isChecked());
   m_d->ui_cuts.spinBox_mdtAllowedTDCMin->setEnabled(m_d->ui_cuts.checkBox_mdtAllowedTDCMin->isChecked());
@@ -710,3 +791,54 @@ bool VP1RawDataSysController::tgcShowUnknown() const
 }
 
 POSSIBLECHANGE_IMP(tgcShowUnknown)
+
+bool VP1RawDataSysController::rpcShowEta() const
+{
+  return m_d->ui_cuts.checkBox_rpcShowEta->isChecked();
+}
+
+POSSIBLECHANGE_IMP(rpcShowEta)
+
+bool VP1RawDataSysController::rpcShowPhi() const
+{
+  return m_d->ui_cuts.checkBox_rpcShowPhi->isChecked();
+}
+
+POSSIBLECHANGE_IMP(rpcShowPhi)
+
+bool VP1RawDataSysController::rpcShowPrimarySide() const
+{
+  return m_d->ui_cuts.checkBox_rpcShowPrimarySide->isChecked();
+}
+
+POSSIBLECHANGE_IMP(rpcShowPrimarySide)
+
+bool VP1RawDataSysController::rpcShowOppositeSide() const
+{
+  return m_d->ui_cuts.checkBox_rpcShowOppositeSide->isChecked();
+}
+
+POSSIBLECHANGE_IMP(rpcShowOppositeSide)
+
+bool VP1RawDataSysController::rpcKeepMissingToT() const
+{
+  return m_d->ui_cuts.checkBox_rpcKeepMissingToT->isChecked();
+}
+
+POSSIBLECHANGE_IMP(rpcKeepMissingToT)
+
+VP1Interval VP1RawDataSysController::rpcAllowedTime() const
+{
+  return muonDigitRange(m_d->ui_cuts.checkBox_rpcAllowedTimeMin, m_d->ui_cuts.spinBox_rpcAllowedTimeMin,
+                        m_d->ui_cuts.checkBox_rpcAllowedTimeMax, m_d->ui_cuts.spinBox_rpcAllowedTimeMax);
+}
+
+POSSIBLECHANGE_IMP(rpcAllowedTime)
+
+VP1Interval VP1RawDataSysController::rpcAllowedToT() const
+{
+  return muonDigitRange(m_d->ui_cuts.checkBox_rpcAllowedToTMin, m_d->ui_cuts.spinBox_rpcAllowedToTMin,
+                        m_d->ui_cuts.checkBox_rpcAllowedToTMax, m_d->ui_cuts.spinBox_rpcAllowedToTMax);
+}
+
+POSSIBLECHANGE_IMP(rpcAllowedToT)
