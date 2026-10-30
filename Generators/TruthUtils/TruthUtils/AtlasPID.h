@@ -8,10 +8,18 @@
 #include <algorithm>
 #include <array>
 #include <cstdlib>
+#include <cstddef>
 /** Implementation of classification functions according to PDG2022.
  *  https://pdg.lbl.gov/2023/reviews/rpp2022-rev-monte-carlo-numbering.pdf
  * This code is also available at https://gitlab.cern.ch/averbyts/atlaspid
  */
+
+constexpr std::array<int, 9> MIN_DIGIT = {1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000};
+constexpr std::array<int, 9> MAX_DIGIT = {9, 99, 999, 9999, 99999, 999999, 9999999,99999999, 999999999};
+template <typename... Ns>
+constexpr bool hasAllowedNumberOfDigits(int p, Ns... digits) {
+    return ((std::abs(p) >= MIN_DIGIT[digits - 1] && std::abs(p) <= MAX_DIGIT[digits - 1]) || ...);
+}
 
 class DecodedPID: public std::pair<int,std::vector<int>> {
 public:
@@ -232,12 +240,12 @@ template <> inline bool isFourthGeneration(const int& p) {return std::abs(p) == 
 /// APID: states with fourth generation quarks are not diquarks
 template <class T> inline bool isDiquark(const T& p){return isDiquark(p->pdg_id());}
 template <> inline bool isDiquark(const DecodedPID& p){
-  if ( p.ndigits() == 4 && p(0) >= p(1) && p(1) !=0 && p(2) == 0 && (p.last() == 1 || p.last() == 3)
+  if ( p.ndigits() == 4 && p(0) >= p(1) && p(1) != 0 && p(2) == 0 && (p.last() == 1 || p.last() == 3)
        && p.max_digit(2,4) < QUARK_LIMIT
        ) return true;
   return false;
 }
-template <> inline bool isDiquark(const int& p){ auto value_digits = DecodedPID(p); return isDiquark(value_digits);}
+template <> inline bool isDiquark(const int& p){ if (!hasAllowedNumberOfDigits(p,4)) return false;  auto value_digits = DecodedPID(p); return isDiquark(value_digits);}
 
 ///Table 43.1
 /// PDG rule 5a:
@@ -315,7 +323,7 @@ template <> inline bool isBaryon(const DecodedPID& p){
   }
   return false;
 }
-template <> inline bool isBaryon(const int& p){ auto value_digits = DecodedPID(p); return isBaryon(value_digits);}
+template <> inline bool isBaryon(const int& p){if (!hasAllowedNumberOfDigits(p,4,5,6)) return false;   auto value_digits = DecodedPID(p); return isBaryon(value_digits);}
 
 /// PDG rule 14
 ///The 9-digit tetra-quark codes are ±1nrnLnq1nq20nq3nq4nJ. For the particle q1q2 is a diquark and
@@ -332,7 +340,7 @@ template <> inline bool isTetraquark(const DecodedPID& p){
           ( p(3) >= p(4) && p(6) >= p(7) ) && ( ( p(3) > p(6) ) || ( p(3) == p(6) && (p(4) >= p(7))))
           );
 }
-template <> inline bool isTetraquark(const int& p){ auto value_digits = DecodedPID(p); return isTetraquark(value_digits);}
+template <> inline bool isTetraquark(const int& p){ if (!hasAllowedNumberOfDigits(p,9)) return false; auto value_digits = DecodedPID(p); return isTetraquark(value_digits);}
 
 /// PDG rule 15
 ///The 9-digit penta-quark codes are ±1nrnLnq1nq2nq3nq4nq5nJ, sorted
@@ -347,7 +355,7 @@ template <> inline bool isPentaquark(const DecodedPID& p){
           p.max_digit(1,6) < QUARK_LIMIT && p.min_digit(1,6) > 0 && // ignore 4th generation (anti-)quarks
           ( p(3) >= p(4) && p(4) >= p(5) && p(5) >= p(6)) );
 }
-template <> inline bool isPentaquark(const int& p){ auto value_digits = DecodedPID(p); return isPentaquark(value_digits);}
+template <> inline bool isPentaquark(const int& p){ if (!hasAllowedNumberOfDigits(p,9)) return false; auto value_digits = DecodedPID(p); return isPentaquark(value_digits);}
 
 // APID Mesons, Baryons, Tetraquarks and Pentaquarks are Hadrons
 template <class T> inline bool isHadron(const T& p){return isHadron(p->pdg_id());}
@@ -410,9 +418,9 @@ template <class T> inline bool isResonance(const T& p) { return isZ(p) || isW(p)
 template <class T> inline bool isLeptoQuark(const T& p){return isLeptoQuark(p->pdg_id());}
 template <> inline bool isLeptoQuark(const int& p){ return std::abs(p) == LEPTOQUARK; }
 
-template <class T> inline bool isPythia8Specific(const T& p){return isPythia8Specific(p->pdg_id());}
+template <class T> inline bool isPythia8Specific(const T& p){ return isPythia8Specific(p->pdg_id());}
 template <> inline bool isPythia8Specific(const DecodedPID& p){ return (p.ndigits() == 7 && p(0) == 9 && p(1) == 9);}
-template <> inline bool isPythia8Specific(const int& p){ auto value_digits = DecodedPID(p); return isPythia8Specific(value_digits);}
+template <> inline bool isPythia8Specific(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false;  auto value_digits = DecodedPID(p); return isPythia8Specific(value_digits);}
 
 /// PDG Rule 12:
 /// APID: Helper function for right-handed neutrino states
@@ -447,7 +455,7 @@ template <> inline bool isGlueball(const DecodedPID& p) {
     ( ( p.ndigits() == 3 && p(0) == COMPOSITEGLUON && p(1) == COMPOSITEGLUON && (p.last() == 1 || p.last() == 5) ) ||
       ( p.ndigits() == 4 && p(0) == COMPOSITEGLUON && p(1) == COMPOSITEGLUON && p(2) == COMPOSITEGLUON &&  (p.last() == 3 || p.last() == 7) )  );
 }
-template <> inline bool isGlueball(const int& p) {  auto value_digits = DecodedPID(p); return isGlueball(value_digits); }
+template <> inline bool isGlueball(const int& p) {  if (!hasAllowedNumberOfDigits(p,3,4)) return false; auto value_digits = DecodedPID(p); return isGlueball(value_digits); }
 
 
 /// PDG rule 11d
@@ -461,7 +469,7 @@ template <class T> inline bool isSquark(const T& p) { return isSquark(p->pdg_id(
 template <> inline bool isSquark(const DecodedPID& p){
   auto pp = p.shift(1); return (p.ndigits() == 7 && (p(0) == 1 || p(0) == 2) && isSMQuark(pp));
 }
-template <> inline bool isSquark(const int& p){ auto value_digits = DecodedPID(p); return isSquark(value_digits);}
+template <> inline bool isSquark(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false;  auto value_digits = DecodedPID(p); return isSquark(value_digits);}
 
 
 // APID: Super-partners of left-handed standard model quarks only
@@ -469,7 +477,7 @@ template <class T> inline bool isSquarkLH(const T& p) { return isSquarkLH(p->pdg
 template <> inline bool isSquarkLH(const DecodedPID& p){
   auto pp = p.shift(1); return (p.ndigits() == 7 && p(0) == 1 && isSMQuark(pp));
 }
-template <> inline bool isSquarkLH(const int& p){ auto value_digits = DecodedPID(p); return isSquarkLH(value_digits);}
+template <> inline bool isSquarkLH(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false;  auto value_digits = DecodedPID(p); return isSquarkLH(value_digits);}
 
 
 // APID: Super-partners of right-handed standard model quarks only
@@ -477,7 +485,7 @@ template <class T> inline bool isSquarkRH(const T& p) { return isSquarkRH(p->pdg
 template <> inline bool isSquarkRH(const DecodedPID& p){
   auto pp = p.shift(1); return (p.ndigits() == 7 && p(0) == 2 && isSMQuark(pp));
 }
-template <> inline bool isSquarkRH(const int& p){ auto value_digits = DecodedPID(p); return isSquarkRH(value_digits);}
+template <> inline bool isSquarkRH(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false;  auto value_digits = DecodedPID(p); return isSquarkRH(value_digits);}
 
 
 // APID: Super-partners of standard model leptons only
@@ -491,7 +499,7 @@ template <class T> inline bool isSleptonLH(const T& p) { return isSleptonLH(p->p
 template <> inline bool isSleptonLH(const DecodedPID& p){
   auto pp = p.shift(1); return (p.ndigits() == 7 && p(0) == 1 && isSMLepton(pp));
 }
-template <> inline bool isSleptonLH(const int& p){ auto value_digits = DecodedPID(p); return isSleptonLH(value_digits);}
+template <> inline bool isSleptonLH(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false;  auto value_digits = DecodedPID(p); return isSleptonLH(value_digits);}
 
 
 // APID: Super-partners of right-handed standard model leptons only
@@ -531,7 +539,7 @@ inline bool isTechnicolor(const DecodedPID& p) {
           (isQuark(pp) || isLepton(pp) || isBoson(pp) || isGlueball(pp) ||
            isDiquark(pp) || isHadron(pp)));
 }
-template <> inline bool isTechnicolor(const int& p){ auto value_digits = DecodedPID(p); return isTechnicolor(value_digits);}
+template <> inline bool isTechnicolor(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false;  auto value_digits = DecodedPID(p); return isTechnicolor(value_digits);}
 
 /// PDG rule 11f
 /// Excited (composite) quarks and leptons are identified by setting n= 4 and nr= 0
@@ -542,7 +550,7 @@ inline bool isExcited(const DecodedPID& p) {
   return (p.ndigits() == 7 && (p(0) == 4 && p(1) == 0) &&
           (isLepton(pp) || isQuark(pp)));
 }
-template <> inline bool isExcited(const int& p){ auto value_digits = DecodedPID(p); return isExcited(value_digits);}
+template <> inline bool isExcited(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false;  auto value_digits = DecodedPID(p); return isExcited(value_digits);}
 
 /// PDG rule 11g:
 /// Within several scenarios of new physics, it is possible to have colored particles sufficiently long-lived for color-singlet hadronic
@@ -569,7 +577,7 @@ template <> inline bool isRGlueball(const DecodedPID& p) {
     ( ( pp.ndigits() == 3 && pp(0) == COMPOSITEGLUON && pp(1) == COMPOSITEGLUON && (pp.last() == 1 || pp.last() == 3) ) ||
       ( pp.ndigits() == 4 && pp(0) == COMPOSITEGLUON && pp(1) == COMPOSITEGLUON && pp(2) == COMPOSITEGLUON && (pp.last() == 1 || pp.last() == 5) )  );
 }
-template <> inline bool isRGlueball(const int& p) {  auto value_digits = DecodedPID(p);  return isRGlueball(value_digits); }
+template <> inline bool isRGlueball(const int& p) { if (!hasAllowedNumberOfDigits(p,7)) return false;  auto value_digits = DecodedPID(p);  return isRGlueball(value_digits); }
 
 // APID Define R-Mesons as gluino-quark-antiquark and squark-antiquark bound states (ignore 4th generation squarks/quarks)
 // NB Current models only allow gluino-quark-antiquark, stop-antiquark and sbottom-antiquark states
@@ -584,7 +592,7 @@ template <> inline bool isRMeson(const DecodedPID& p) {
           (pp.ndigits() == 3 && pp.min_digit(1,3) > 0 && pp.max_digit(1,3) < QUARK_LIMIT && pp(1) <= pp(0) && pp.last() == 2)
           );
 }
-template <> inline bool isRMeson(const int& p) { auto value_digits = DecodedPID(p); return isRMeson(value_digits); }
+template <> inline bool isRMeson(const int& p) { if (!hasAllowedNumberOfDigits(p,7)) return false; auto value_digits = DecodedPID(p); return isRMeson(value_digits); }
 
 // APID Define R-Baryons as gluino-quark-quark-quark and squark-quark-quark bound states (ignore 4th generation squarks/quarks)
 // NB Current models only allow gluino-quark-quark-quark, stop-quark-quark and sbottom-quark-quark states
@@ -599,7 +607,7 @@ template <> inline bool isRBaryon(const DecodedPID& p) {
           (pp.ndigits() == 4 && pp.min_digit(1,4) > 0 && pp.max_digit(1,4) < QUARK_LIMIT && pp(1) <= pp(0) && pp(2) <= pp(1) && (pp.last() == 1 || pp.last() == 3))
           );
 }
-template <> inline bool isRBaryon(const int& p) { auto value_digits = DecodedPID(p); return isRBaryon(value_digits); }
+template <> inline bool isRBaryon(const int& p) { if (!hasAllowedNumberOfDigits(p,7)) return false; auto value_digits = DecodedPID(p); return isRBaryon(value_digits); }
 
 
 template <class T> inline bool isRHadron(const T& p) { return isRHadron(p->pdg_id()); }
@@ -636,7 +644,7 @@ template <> inline bool isSUSY(const int& p){ auto value_digits = DecodedPID(p);
 /// two nnr digits preserved in the combined code.
 template <class T> inline bool isKK(const T& p){return isKK(p->pdg_id());}
 template <> inline bool isKK(const DecodedPID& p){return (p.ndigits() == 7 && (p(0) == 5 || p(0) == 6 ) && (p(1) != 9) );}
-template <> inline bool isKK(const int& p){ auto value_digits = DecodedPID(p); return isKK(value_digits);}
+template <> inline bool isKK(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false; auto value_digits = DecodedPID(p); return isKK(value_digits);}
 
 /// PDG rule 11i
 /// Magnetic monopoles and dyons are assumed to have one unit of Dirac monopole charge
@@ -646,7 +654,7 @@ template <> inline bool isKK(const int& p){ auto value_digits = DecodedPID(p); r
 /// now no spin information is provided.
 template <class T> inline bool isMonopole(const T& p){return isMonopole(p->pdg_id());}
 template <> inline bool isMonopole(const DecodedPID& p){return (p.ndigits() == 7 && p(0) == 4 && p(1) == 1  && (p(2) == 1 || p(2) == 2 ) && p(6) == 0);}
-template <> inline bool isMonopole(const int& p){ auto value_digits = DecodedPID(p); return isMonopole(value_digits);}
+template <> inline bool isMonopole(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false; auto value_digits = DecodedPID(p); return isMonopole(value_digits);}
 
 /// PDG rule 11j:
 /// The nature of Dark Matter (DM) is not known, and therefore a definitive
@@ -675,7 +683,7 @@ inline bool isHiddenValley(const DecodedPID& p) {
           (isQuark(pp) || isLepton(pp) || isBoson(pp) || isGlueball(pp) ||
            isDiquark(pp) || isHadron(pp)));
 }
-template <> inline bool isHiddenValley(const int& p){ auto value_digits = DecodedPID(p); return isHiddenValley(value_digits);}
+template <> inline bool isHiddenValley(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false;  auto value_digits = DecodedPID(p); return isHiddenValley(value_digits);}
 
 /// In addition, there is a need to identify ”Q-ball” and similar very exotic (multi-charged) particles which may have large, non-integer charge.
 /// These particles are assigned the ad-hoc numbering +/-100XXXY0, where the charge is XXX.Y.
@@ -685,7 +693,7 @@ template <> inline bool isHiddenValley(const int& p){ auto value_digits = Decode
 /// Such a model was used in previous Run-1 (https://arxiv.org/abs/1301.5272, https://arxiv.org/abs/1504.04188) and Run-2 (https://arxiv.org/abs/1812.03673, https://arxiv.org/abs/2303.13613) ATLAS searches.
 template <class T> inline bool isGenericMultichargedParticle(const T& p){return isGenericMultichargedParticle(p->pdg_id());}
 template <> inline bool isGenericMultichargedParticle(const DecodedPID& p){return (p.ndigits() == 8 && (p(0) == 1 || p(0) == 2) && p(1) == 0 && p(2) == 0 && p(7) == 0);}
-template <> inline bool isGenericMultichargedParticle(const int& p){ auto value_digits = DecodedPID(p); return isGenericMultichargedParticle(value_digits);}
+template <> inline bool isGenericMultichargedParticle(const int& p){if (!hasAllowedNumberOfDigits(p,8)) return false;  auto value_digits = DecodedPID(p); return isGenericMultichargedParticle(value_digits);}
 
 /// PDG rule 16
 /// Nuclear codes are given as 10-digit numbers ±10LZZZAAAI.
@@ -705,11 +713,12 @@ template <class T> inline bool isNucleus(const T& p){return isNucleus(p->pdg_id(
 template <> inline bool isNucleus(const DecodedPID& p){
   if (std::abs(p.pid()) == PROTON) return true;
   if (p.ndigits() != 10) return false;
+  if (p(0) != 1 ||  p(1) != 0 ) return false;
   // charge should always be less than or equal to baryon number
   // the following line is A >= Z
   const int A = p(8) + 10*p(7) + 100*p(6);
   const int Z = p(5) + 10*p(4) + 100*p(3);
-  return ( A >= Z &&  p(0) == 1 &&  p(1) == 0 );
+  return ( A >= Z );
 }
 template <> inline bool isNucleus(const int& p){ auto value_digits = DecodedPID(p); return isNucleus(value_digits);}
 
