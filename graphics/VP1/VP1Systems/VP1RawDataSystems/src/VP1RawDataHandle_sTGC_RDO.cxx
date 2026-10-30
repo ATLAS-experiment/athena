@@ -45,24 +45,53 @@ VP1RawDataHandle_sTGC_RDO::~VP1RawDataHandle_sTGC_RDO()
 //____________________________________________________________________
 QStringList VP1RawDataHandle_sTGC_RDO::clicked(bool verbose) const
 {
-  static const sTgcIdHelper * idhelper = VP1DetInfo::stgcIDHelper();
-
+  const Identifier id = m_data->identify();
+  const sTgcIdHelper* idhelper = VP1DetInfo::stgcIDHelper();
+  const bool valid = idhelper && m_data->is_valid(idhelper);
   QStringList ll;
   ll << " ===> sTGC Digit data";
-  ll << "   type: "+ QString::fromStdString(m_channelTypeStr);
-  ll << "   is_valid(idhelper): " + QString::number(m_data->is_valid(idhelper));
+  ll << "   Identifier: " + QString::fromStdString(id.getString());
+  if (valid) {
+    const int type = idhelper->channelType(id);
+    const QString typeName = type == sTgcIdHelper::Pad ? "PAD" :
+                             type == sTgcIdHelper::Strip ? "STRIP" : "WIRE";
+    ll << "   type: " + typeName;
+  } else {
+    ll << "   type: unavailable";
+  }
+  ll << "   is_valid(idhelper): " + (idhelper ? QString::number(valid) : QString("unavailable"));
+  ll << "   bcTag: " + QString::number(m_data->bcTag());
   ll << "   charge: " + QString::number(m_data->charge());
   ll << "   charge_6bit: " + QString::number(m_data->charge_6bit());
   ll << "   charge_10bit: " + QString::number(m_data->charge_10bit());
   ll << "   time: " + QString::number(m_data->time());
   ll << "   isDead: " + QString::number(m_data->isDead());
   ll << "   isPileup: " + QString::number(m_data->isPileup());
-  if (verbose)
-  {
-    if (idhelper)
-    {
-      // Fixme: We should have common identify -> QStringList method in VP1DetInfo!!
-      Identifier id(m_data->identify());
+  if (verbose) {
+    if (valid) {
+      ll << "   Station name: " + QString::fromStdString(idhelper->stationNameString(id));
+      ll << "   Station eta index: " + QString::number(idhelper->stationEta(id));
+      ll << "   Station phi index: " + QString::number(idhelper->stationPhi(id));
+      ll << "   Multilayer: " + QString::number(idhelper->multilayer(id));
+      ll << "   Gas gap: " + QString::number(idhelper->gasGap(id));
+      ll << "   Channel type index: " + QString::number(idhelper->channelType(id));
+      ll << "   Channel: " + QString::number(idhelper->channel(id));
+      if (idhelper->channelType(id) == sTgcIdHelper::Pad) {
+        ll << "   Pad eta index: " + QString::number(idhelper->padEta(id));
+        ll << "   Pad phi index: " + QString::number(idhelper->padPhi(id));
+      }
+    } else {
+      ll << "   Decoded identifier unavailable";
+    }
+    const MuonGM::sTgcReadoutElement* elem = valid ? element() : nullptr;
+    Amg::Vector3D position = Amg::Vector3D::Zero();
+    if (elem && elem->stripGlobalPosition(id, position)) {
+      ll << QString("   Global position [mm] (x, y, z): (%1, %2, %3)")
+                .arg(position.x() / Gaudi::Units::mm, 0, 'g', 10)
+                .arg(position.y() / Gaudi::Units::mm, 0, 'g', 10)
+                .arg(position.z() / Gaudi::Units::mm, 0, 'g', 10);
+    } else {
+      ll << "   Global position unavailable";
     }
   }
   return ll;

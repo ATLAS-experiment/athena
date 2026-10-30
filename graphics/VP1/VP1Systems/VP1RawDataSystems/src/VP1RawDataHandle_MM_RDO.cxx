@@ -45,23 +45,43 @@ VP1RawDataHandle_MM_RDO::~VP1RawDataHandle_MM_RDO()
 //____________________________________________________________________
 QStringList VP1RawDataHandle_MM_RDO::clicked(bool verbose) const
 {
+  const Identifier id = m_data->identify();
   QStringList ll;
   ll << " ===> MM Digit data";
+  ll << "   Identifier: " + QString::fromStdString(id.getString());
   ll << "   stripResponseTime: " + QString::number(m_data->stripResponseTime());
   ll << "   stripResponseCharge: " + QString::number(m_data->stripResponseCharge());
   if (verbose) {
     const MmIdHelper* idhelper = VP1DetInfo::mmIDHelper();
-    const MuonGM::MMReadoutElement* elem = element();
-    const Identifier id = m_data->identify();
+    const bool valid = idhelper && idhelper->valid(id);
+    if (valid) {
+      ll << "   Station name: " + QString::fromStdString(idhelper->stationNameString(id));
+      ll << "   Station eta index: " + QString::number(idhelper->stationEta(id));
+      ll << "   Station phi index: " + QString::number(idhelper->stationPhi(id));
+      ll << "   Multilayer: " + QString::number(idhelper->multilayer(id));
+      ll << "   Gas gap: " + QString::number(idhelper->gasGap(id));
+      ll << "   Channel: " + QString::number(idhelper->channel(id));
+    } else {
+      ll << "   Decoded identifier unavailable";
+    }
+    const MuonGM::MMReadoutElement* elem = valid ? element() : nullptr;
     const MuonGM::MuonChannelDesign* design = elem ? elem->getDesign(id) : nullptr;
-    if (idhelper && design) {
-      const int channel = idhelper->channel(id);
-      const double length = design->channelLength(channel);
+    if (design) {
+      const double length = design->channelLength(idhelper->channel(id));
       const double angle = design->stereoAngle();
       ll << "   Strip length [mm]: " + QString::number(length / Gaudi::Units::mm);
       ll << "   Stereo angle [deg]: " + QString::number(angle / Gaudi::Units::degree);
     } else {
       ll << "   Strip geometry unavailable";
+    }
+    Amg::Vector3D position = Amg::Vector3D::Zero();
+    if (elem && elem->stripGlobalPosition(id, position)) {
+      ll << QString("   Global position [mm] (x, y, z): (%1, %2, %3)")
+                .arg(position.x() / Gaudi::Units::mm, 0, 'g', 10)
+                .arg(position.y() / Gaudi::Units::mm, 0, 'g', 10)
+                .arg(position.z() / Gaudi::Units::mm, 0, 'g', 10);
+    } else {
+      ll << "   Global position unavailable";
     }
   }
   return ll;

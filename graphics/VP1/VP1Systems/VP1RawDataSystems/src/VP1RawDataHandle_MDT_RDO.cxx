@@ -43,27 +43,37 @@ VP1RawDataHandle_MDT_RDO::~VP1RawDataHandle_MDT_RDO()
 //____________________________________________________________________
 QStringList VP1RawDataHandle_MDT_RDO::clicked(bool verbose) const
 {
-  static const MdtIdHelper * idhelper = VP1DetInfo::mdtIDHelper();
-  const MuonGM::MdtReadoutElement * elem = element();
-
+  const Identifier id = m_data->identify();
   QStringList ll;
   ll << " ===> MDT Digit data";
-  // ll << "   is a valid digit: "+ m_data->is_valid(idhelper);
+  ll << "   Identifier: " + QString::fromStdString(id.getString());
   ll << "   adc: " + QString::number(m_data->adc());
   ll << "   tdc: " + QString::number(m_data->tdc());
   ll << "   isMasked: " + QString(isMasked() ? "true" : "false");
-  if (verbose)
-  {
-    if (idhelper && elem)
-    {
-      // Fixme: We should have common identify -> QStringList method in VP1DetInfo!!
-      Identifier id(m_data->identify());
-
-      ll << "Is Barrel: " << QString::number(elem->barrel());
-      /// Returns whether the chamber is in the endcap
-      ll << "Is Endcap: " << QString::number(elem->endcap());
-      ll << "   Tube position x [mm]: " +
-                QString::number(elem->tubePos(id)[Amg::x] / Gaudi::Units::mm);
+  if (verbose) {
+    const MdtIdHelper* idhelper = VP1DetInfo::mdtIDHelper();
+    const bool valid = idhelper && idhelper->valid(id);
+    if (valid) {
+      ll << "   Station name: " + QString::fromStdString(idhelper->stationNameString(id));
+      ll << "   Station eta index: " + QString::number(idhelper->stationEta(id));
+      ll << "   Station phi index: " + QString::number(idhelper->stationPhi(id));
+      ll << "   Multilayer: " + QString::number(idhelper->multilayer(id));
+      ll << "   Tube layer: " + QString::number(idhelper->tubeLayer(id));
+      ll << "   Tube: " + QString::number(idhelper->tube(id));
+    } else {
+      ll << "   Decoded identifier unavailable";
+    }
+    const MuonGM::MdtReadoutElement* elem = valid ? element() : nullptr;
+    if (elem) {
+      ll << "   Is Barrel: " + QString::number(elem->barrel());
+      ll << "   Is Endcap: " + QString::number(elem->endcap());
+      const Amg::Vector3D position = elem->tubePos(id);
+      ll << QString("   Global position [mm] (x, y, z): (%1, %2, %3)")
+                .arg(position.x() / Gaudi::Units::mm, 0, 'g', 10)
+                .arg(position.y() / Gaudi::Units::mm, 0, 'g', 10)
+                .arg(position.z() / Gaudi::Units::mm, 0, 'g', 10);
+    } else {
+      ll << "   Global position unavailable";
     }
   }
   return ll;
