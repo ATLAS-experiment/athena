@@ -13,6 +13,8 @@ namespace MuonGM { class TgcReadoutElement; }
 class VP1RawDataHandle_TGC_Digit : public VP1RawDataHandleBase {
 public:
   VP1RawDataHandle_TGC_Digit(VP1RawDataCollBase*, const TgcDigit*);
+  bool isStrip() const;
+  unsigned bcTag() const;
   QStringList clicked(bool verbose) const override;
 protected:
   SoNode* buildShape() override;

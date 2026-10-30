@@ -103,3 +103,14 @@ SoTransform* VP1RawDataHandle_TGC_Digit::buildTransform()
   transform.translation() = elem->channelPos(id);
   return VP1LinAlgUtils::toSoTransform(transform);
 }
+
+bool VP1RawDataHandle_TGC_Digit::isStrip() const
+{
+  const auto* helper = VP1DetInfo::tgcIDHelper();
+  return helper && helper->valid(m_data->identify()) && helper->isStrip(m_data->identify());
+}
+
+unsigned VP1RawDataHandle_TGC_Digit::bcTag() const
+{
+  return m_data->bcTag();
+}

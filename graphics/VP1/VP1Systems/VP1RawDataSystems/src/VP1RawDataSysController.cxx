@@ -51,6 +51,14 @@ public:
   bool last_trtRequireHT = false;
   VP1Interval last_trtAllowedToT;
   unsigned last_lucidMinQDC = 0U;
+  bool last_tgcShowStrips = true;
+  bool last_tgcShowWires = true;
+  bool last_tgcShowPrevious = true;
+  bool last_tgcShowCurrent = true;
+  bool last_tgcShowNext = true;
+  bool last_tgcShowNextNext = true;
+  bool last_tgcShowUndefined = true;
+  bool last_tgcShowUnknown = true;
   bool last_mdtExcludeMasked = false;
   bool last_stgcShowPads = true;
   bool last_stgcShowStrips = true;
@@ -207,6 +215,22 @@ VP1RawDataSysController::VP1RawDataSysController(IVP1System * sys)
   addUpdateSlot(SLOT(possibleChange_mdtExcludeMasked()));
   connectToLastUpdateSlot(m_d->ui_cuts.checkBox_mdtExcludeMasked);
 
+  addUpdateSlot(SLOT(possibleChange_tgcShowStrips()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_tgcShowStrips);
+  addUpdateSlot(SLOT(possibleChange_tgcShowWires()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_tgcShowWires);
+  addUpdateSlot(SLOT(possibleChange_tgcShowPrevious()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_tgcShowPrevious);
+  addUpdateSlot(SLOT(possibleChange_tgcShowCurrent()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_tgcShowCurrent);
+  addUpdateSlot(SLOT(possibleChange_tgcShowNext()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_tgcShowNext);
+  addUpdateSlot(SLOT(possibleChange_tgcShowNextNext()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_tgcShowNextNext);
+  addUpdateSlot(SLOT(possibleChange_tgcShowUndefined()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_tgcShowUndefined);
+  addUpdateSlot(SLOT(possibleChange_tgcShowUnknown()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_tgcShowUnknown);
   addUpdateSlot(SLOT(possibleChange_stgcShowPads()));
   connectToLastUpdateSlot(m_d->ui_cuts.checkBox_stgcShowPads);
   addUpdateSlot(SLOT(possibleChange_stgcShowStrips()));
@@ -231,7 +255,7 @@ VP1RawDataSysController::~VP1RawDataSysController()
 //____________________________________________________________________
 int VP1RawDataSysController::currentSettingsVersion() const
 {
-  return 4;
+  return 5;
 }
 
 //____________________________________________________________________
@@ -289,6 +313,16 @@ void VP1RawDataSysController::actualSaveSettings(VP1Serialise&s) const
   s.save(m_d->ui_cuts.checkBox_stgcShowWires);
   s.save(m_d->ui_cuts.checkBox_stgcExcludeDead);
   s.save(m_d->ui_cuts.checkBox_stgcExcludePileup);
+  // Version 5: TGC channel types and bunch crossings.
+  s.save(m_d->ui_cuts.checkBox_tgcShowStrips);
+  s.save(m_d->ui_cuts.checkBox_tgcShowWires);
+  s.save(m_d->ui_cuts.checkBox_tgcShowPrevious);
+  s.save(m_d->ui_cuts.checkBox_tgcShowCurrent);
+  s.save(m_d->ui_cuts.checkBox_tgcShowNext);
+  s.save(m_d->ui_cuts.checkBox_tgcShowNextNext);
+  s.save(m_d->ui_cuts.checkBox_tgcShowUndefined);
+  s.save(m_d->ui_cuts.checkBox_tgcShowUnknown);
+
 
 
 }
@@ -296,7 +330,7 @@ void VP1RawDataSysController::actualSaveSettings(VP1Serialise&s) const
 //____________________________________________________________________
 void VP1RawDataSysController::actualRestoreSettings(VP1Deserialise& s)
 {
-  if (s.version()<0||s.version()>4) {
+  if (s.version()<0||s.version()>5) {
     message("Warning: State data in .vp1 file has unsupported version ("+str(s.version())+")");
     return;
   }
@@ -378,6 +412,26 @@ void VP1RawDataSysController::actualRestoreSettings(VP1Deserialise& s)
     m_d->ui_cuts.checkBox_stgcShowWires->setChecked(true);
     m_d->ui_cuts.checkBox_stgcExcludeDead->setChecked(false);
     m_d->ui_cuts.checkBox_stgcExcludePileup->setChecked(false);
+  }
+
+  if (s.version() >= 5) {
+    s.restore(m_d->ui_cuts.checkBox_tgcShowStrips);
+    s.restore(m_d->ui_cuts.checkBox_tgcShowWires);
+    s.restore(m_d->ui_cuts.checkBox_tgcShowPrevious);
+    s.restore(m_d->ui_cuts.checkBox_tgcShowCurrent);
+    s.restore(m_d->ui_cuts.checkBox_tgcShowNext);
+    s.restore(m_d->ui_cuts.checkBox_tgcShowNextNext);
+    s.restore(m_d->ui_cuts.checkBox_tgcShowUndefined);
+    s.restore(m_d->ui_cuts.checkBox_tgcShowUnknown);
+  } else {
+    m_d->ui_cuts.checkBox_tgcShowStrips->setChecked(true);
+    m_d->ui_cuts.checkBox_tgcShowWires->setChecked(true);
+    m_d->ui_cuts.checkBox_tgcShowPrevious->setChecked(true);
+    m_d->ui_cuts.checkBox_tgcShowCurrent->setChecked(true);
+    m_d->ui_cuts.checkBox_tgcShowNext->setChecked(true);
+    m_d->ui_cuts.checkBox_tgcShowNextNext->setChecked(true);
+    m_d->ui_cuts.checkBox_tgcShowUndefined->setChecked(true);
+    m_d->ui_cuts.checkBox_tgcShowUnknown->setChecked(true);
   }
 
   // Deserialisation blocks checkbox signals, so synchronize the fields explicitly.
@@ -600,3 +654,59 @@ bool VP1RawDataSysController::stgcExcludePileup() const
 }
 
 POSSIBLECHANGE_IMP(stgcExcludePileup)
+
+bool VP1RawDataSysController::tgcShowStrips() const
+{
+  return m_d->ui_cuts.checkBox_tgcShowStrips->isChecked();
+}
+
+POSSIBLECHANGE_IMP(tgcShowStrips)
+
+bool VP1RawDataSysController::tgcShowWires() const
+{
+  return m_d->ui_cuts.checkBox_tgcShowWires->isChecked();
+}
+
+POSSIBLECHANGE_IMP(tgcShowWires)
+
+bool VP1RawDataSysController::tgcShowPrevious() const
+{
+  return m_d->ui_cuts.checkBox_tgcShowPrevious->isChecked();
+}
+
+POSSIBLECHANGE_IMP(tgcShowPrevious)
+
+bool VP1RawDataSysController::tgcShowCurrent() const
+{
+  return m_d->ui_cuts.checkBox_tgcShowCurrent->isChecked();
+}
+
+POSSIBLECHANGE_IMP(tgcShowCurrent)
+
+bool VP1RawDataSysController::tgcShowNext() const
+{
+  return m_d->ui_cuts.checkBox_tgcShowNext->isChecked();
+}
+
+POSSIBLECHANGE_IMP(tgcShowNext)
+
+bool VP1RawDataSysController::tgcShowNextNext() const
+{
+  return m_d->ui_cuts.checkBox_tgcShowNextNext->isChecked();
+}
+
+POSSIBLECHANGE_IMP(tgcShowNextNext)
+
+bool VP1RawDataSysController::tgcShowUndefined() const
+{
+  return m_d->ui_cuts.checkBox_tgcShowUndefined->isChecked();
+}
+
+POSSIBLECHANGE_IMP(tgcShowUndefined)
+
+bool VP1RawDataSysController::tgcShowUnknown() const
+{
+  return m_d->ui_cuts.checkBox_tgcShowUnknown->isChecked();
+}
+
+POSSIBLECHANGE_IMP(tgcShowUnknown)

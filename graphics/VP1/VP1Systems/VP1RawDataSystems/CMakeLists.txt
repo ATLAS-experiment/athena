@@ -32,3 +32,9 @@ if( CMAKE_CXX_CPPCHECK )
    set_property( TARGET VP1RawDataSystems
       APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
 endif()
+
+# The cut policy test runs without a GUI or OpenGL context.
+atlas_add_test( TgcDigitCuts
+                SOURCES test/TgcDigitCuts_test.cxx
+                LINK_LIBRARIES MuonDigitContainer
+                POST_EXEC_SCRIPT nopost.sh )

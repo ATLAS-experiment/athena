@@ -63,6 +63,14 @@ public:
   unsigned lucidMinQDC() const;
 
   // Inclusive muon digit ranges; unchecked bounds are unrestricted.
+  bool tgcShowStrips() const;
+  bool tgcShowWires() const;
+  bool tgcShowPrevious() const;
+  bool tgcShowCurrent() const;
+  bool tgcShowNext() const;
+  bool tgcShowNextNext() const;
+  bool tgcShowUndefined() const;
+  bool tgcShowUnknown() const;
   bool mdtExcludeMasked() const;
   bool stgcShowPads() const;
   bool stgcShowStrips() const;
@@ -96,6 +104,14 @@ signals:
   void trtRequireHTChanged(bool);
   void trtAllowedToTChanged(const VP1Interval&);//nano-seconds
   void lucidMinQDCChanged(unsigned);
+  void tgcShowStripsChanged(bool);
+  void tgcShowWiresChanged(bool);
+  void tgcShowPreviousChanged(bool);
+  void tgcShowCurrentChanged(bool);
+  void tgcShowNextChanged(bool);
+  void tgcShowNextNextChanged(bool);
+  void tgcShowUndefinedChanged(bool);
+  void tgcShowUnknownChanged(bool);
   void mdtExcludeMaskedChanged(bool);
   void stgcShowPadsChanged(bool);
   void stgcShowStripsChanged(bool);
@@ -129,6 +145,14 @@ private Q_SLOTS:
   void possibleChange_trtRequireHT();
   void possibleChange_trtAllowedToT();
   void possibleChange_lucidMinQDC();
+  void possibleChange_tgcShowStrips();
+  void possibleChange_tgcShowWires();
+  void possibleChange_tgcShowPrevious();
+  void possibleChange_tgcShowCurrent();
+  void possibleChange_tgcShowNext();
+  void possibleChange_tgcShowNextNext();
+  void possibleChange_tgcShowUndefined();
+  void possibleChange_tgcShowUnknown();
   void possibleChange_mdtExcludeMasked();
   void possibleChange_stgcShowPads();
   void possibleChange_stgcShowStrips();

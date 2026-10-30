@@ -797,7 +797,128 @@
            </item>
           </layout>
          </widget>
+        <widget class="QWidget" name="tab_tgcDigits">
+         <attribute name="title">
+          <string>TGC digits</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="tgcDigitsLayout">
+          <property name="alignment">
+           <set>Qt::AlignTop</set>
+          </property>
+          <item>
+           <widget class="QGroupBox" name="groupBox_tgcChannelTypes">
+            <property name="title">
+             <string>Channel types</string>
+            </property>
+            <layout class="QVBoxLayout" name="tgcChannelTypesLayout">
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowStrips">
+               <property name="text">
+                <string>Strips</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowWires">
+               <property name="text">
+                <string>Wire gangs</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox_tgcBunchCrossings">
+            <property name="title">
+             <string>Bunch crossings</string>
+            </property>
+            <layout class="QVBoxLayout" name="tgcBunchCrossingsLayout">
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowPrevious">
+               <property name="text">
+                <string>Previous</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowCurrent">
+               <property name="text">
+                <string>Current</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowNext">
+               <property name="text">
+                <string>Next</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowNextNext">
+               <property name="text">
+                <string>Next-next</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowUndefined">
+               <property name="text">
+                <string>Undefined</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowUnknown">
+               <property name="text">
+                <string>Unknown BC tags</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <spacer name="tgcBottomSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>0</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </widget>
+</widget>
        </item>
        <item>
         <spacer name="cutsBottomSpacer">
