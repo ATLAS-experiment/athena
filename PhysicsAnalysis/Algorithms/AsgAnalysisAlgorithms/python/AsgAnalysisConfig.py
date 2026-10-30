@@ -92,7 +92,7 @@ class CommonServicesConfig (ConfigBlock) :
         sysService = config.createService( 'CP::SystematicsSvc', 'SystematicsSvc' )
 
         # Setup stream name
-        streamName = self.streamName or config.defaultHistogramStream()
+        streamName = config.requestOutputStream(self.streamName)
 
         # Handle all possible configuration options for systematics
         if self.runSystematics is False:
@@ -518,7 +518,7 @@ class GeneratorAnalysisBlock (ConfigBlock):
         log = logging.getLogger('GeneratorAnalysis')
 
         # Setup stream name
-        streamName = self.streamName or config.defaultHistogramStream()
+        streamName = config.requestOutputStream(self.streamName)
 
         if self.runNumber is None:
             self.runNumber = config.runNumber()
@@ -763,7 +763,7 @@ class ObjectCutFlowBlock (ConfigBlock):
         return self.containerName + '_' + self.selectionName
 
     def makeAlgs (self, config) :
-        streamName = self.streamName or config.defaultHistogramStream()
+        streamName = config.requestOutputStream(self.streamName)
 
         alg = config.createAlgorithm( 'CP::ObjectCutFlowHistAlg', 'CutFlowDumperAlg' )
         alg.RootStreamName = streamName
@@ -806,7 +806,7 @@ class EventCutFlowBlock (ConfigBlock):
             return
 
         # Setup stream name
-        streamName = self.streamName or config.defaultHistogramStream()
+        streamName = config.requestOutputStream(self.streamName)
 
         postfix = ('_' + self.selectionName) if self.selectionName else ''
 

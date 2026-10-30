@@ -10,6 +10,7 @@ class AthenaCPRunScript(CPBaseRunner):
         self._cfg = None
         self.addCustomArguments()
         self.configSeq = None
+        self.outputStreams = []
         # Avoid putting call to parse_args() here! Otherwise it is hard to retrieve the parser infos
 
     @property
@@ -47,6 +48,7 @@ class AthenaCPRunScript(CPBaseRunner):
         self.logger.info("Configuring algorithms")
         configSeq.fullConfigure(configAccumulator)
         self.configSeq = configSeq
+        self.outputStreams = configAccumulator.outputStreams()
         self.modifyAlgSequence()
         return configAccumulator.CA
 
@@ -80,15 +82,22 @@ class AthenaCPRunScript(CPBaseRunner):
         from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
         self.cfg.merge(CutFlowSvcCfg(self.flags))
 
-        outputFile = f"ANALYSIS DATAFILE='{self.outputName}.root' OPT='RECREATE'"
         from AthenaConfiguration.ComponentFactory import CompFactory
-        self.cfg.addService(CompFactory.THistSvc(Output=[outputFile]))
         if not self.args.merge_output_files:
             outputFileHist = f"ANALYSIS_HIST DATAFILE='hist-{self.outputName}.root' OPT='RECREATE'"
             self.cfg.addService(CompFactory.THistSvc(Output=[outputFileHist]))
 
         # Make the main analysis configuration
         self.cfg.merge(self.makeAlgSequence())
+
+        # Every requested output stream gets its own file: the default tree stream ANALYSIS
+        # only if something writes to it, plus e.g. the streams of Output.splitBySelection
+        for stream in self.outputStreams:
+            if stream == 'ANALYSIS_HIST' and not self.args.merge_output_files:
+                continue  # declared above
+            suffix = '' if stream == 'ANALYSIS' else '_' + stream.removeprefix('ANALYSIS_')
+            self.cfg.addService(CompFactory.THistSvc(Output=[
+                f"{stream} DATAFILE='{self.outputName}{suffix}.root' OPT='RECREATE'"]))
 
         # Performance monitoring and profiling:
         if self.flags.PerfMon.doFastMonMT or self.flags.PerfMon.doFullMonMT:

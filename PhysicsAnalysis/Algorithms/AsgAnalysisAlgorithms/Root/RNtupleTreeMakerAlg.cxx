@@ -65,10 +65,13 @@ namespace CP {
          return StatusCode::FAILURE;
       }
       ATH_CHECK( m_systematicsService.retrieve() );
+      ATH_CHECK( m_eventInfoHandle.initialize( m_systematicsList ) );
+      ATH_CHECK( m_eventSelection.initialize( m_systematicsList, m_eventInfoHandle, SG::AllowEmpty ) );
+      ATH_CHECK( m_systematicsList.initialize() );
       return StatusCode::SUCCESS;
    }
 
-   StatusCode RNtupleTreeMakerAlg::execute(const EventContext& /*ctx*/) {
+   StatusCode RNtupleTreeMakerAlg::execute(const EventContext& ctx) {
       if( ! m_isInitialized ) {
          m_model = ROOT::RNTupleModel::Create();
          if ( !m_model ) {
@@ -123,6 +126,22 @@ namespace CP {
          }
 
          m_isInitialized = true;
+      }
+
+      // Skip the event if it fails the selection for every systematic
+      if( m_eventSelection ) {
+         bool passed = false;
+         for( const auto& sys : m_systematicsList.systematicsVector() ) {
+            const xAOD::EventInfo* evtInfo = nullptr;
+            ATH_CHECK( m_eventInfoHandle.retrieve( evtInfo, sys, ctx ) );
+            if( m_eventSelection.getBool( *evtInfo, sys ) ) {
+               passed = true;
+               break;
+            }
+         }
+         if( ! passed ) {
+            return StatusCode::SUCCESS;
+         }
       }
 
       ATH_CHECK( m_processorList.process( *(evtStore()) ) );
