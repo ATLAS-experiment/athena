@@ -38,3 +38,15 @@ atlas_add_test( TgcDigitCuts
                 SOURCES test/TgcDigitCuts_test.cxx
                 LINK_LIBRARIES MuonDigitContainer
                 POST_EXEC_SCRIPT nopost.sh )
+
+# Real RPC identifiers and click output, without a GUI or OpenGL context.
+atlas_add_test( RpcDigitClick
+                SOURCES test/RpcDigitClick_test.cxx
+                LINK_LIBRARIES VP1RawDataSystems VP1Utils MuonDigitContainer
+                               IdDictParser IdDict MuonIdHelpersLib
+                POST_EXEC_SCRIPT nopost.sh )
+
+if( CMAKE_CXX_CPPCHECK )
+   set_property( TARGET VP1RawDataSystems_RpcDigitClick
+      APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+endif()

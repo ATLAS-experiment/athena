@@ -113,6 +113,8 @@ def MuonRdoToDigitCfg(flags):
          "STGC_RdoToDigitCfg"),
         ("TGC", "TgcRdoContainer", "TGCRDO", "TgcDigitContainer", "TGC_DIGITS",
          "TgcRdoToTgcDigitCfg"),
+        ("RPC", "RpcPadContainer", "RPCPAD", "RpcDigitContainer", "RPC_DIGITS",
+         "RpcRdoToRpcDigitCfg"),
     )
     for detector, rdo_type, rdo_key, digit_type, digit_key, converter in conversions:
         rdo = f"{rdo_type}#{prefix}{rdo_key}"
@@ -121,15 +123,25 @@ def MuonRdoToDigitCfg(flags):
             log.info("Using existing %s digits from %s; RDO conversion is unnecessary",
                      detector, prefix + digit_key)
             continue
-        if rdo not in collections:
+        nrpc_rdo = f"xAOD::NRPCRDOContainer#{prefix}NRPCRDO"
+        has_nrpc = detector == "RPC" and nrpc_rdo in collections
+        if rdo not in collections and not has_nrpc:
             log.debug("Input has no %s; skipping %s RDO-to-digit conversion. "
                         "Other VP1 collections remain available.", rdo, detector)
             continue
 
         from MuonConfig import MuonByteStreamCnvTestConfig
 
-        cfg.merge(getattr(MuonByteStreamCnvTestConfig, converter)(flags))
-        log.info("Configured %s RDO-to-digit conversion from %s", detector, prefix + rdo_key)
+        kwargs = {}
+        if detector == "RPC":
+            # Select inputs explicitly: do not infer legacy presence from isMC
+            # or the number of xAOD data/auxiliary metadata entries.
+            kwargs.update(DecodeLegacyRDO=rdo in collections, DecodeNrpcRDO=has_nrpc)
+        cfg.merge(getattr(MuonByteStreamCnvTestConfig, converter)(flags, **kwargs))
+        inputs = [prefix + rdo_key] if rdo in collections else []
+        if has_nrpc:
+            inputs.append(prefix + "NRPCRDO")
+        log.info("Configured %s RDO-to-digit conversion from %s", detector, ", ".join(inputs))
     return cfg
 
 
