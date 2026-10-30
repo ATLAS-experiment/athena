@@ -5,6 +5,8 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 
 def InDetTrackPRD_AssociationCfg(flags, name='InDetTrackPRD_Association', **kwargs):
     acc = ComponentAccumulator()
+    doTrackOverlay = flags.TrackOverlay.isTrackOverlaySeq
+    prefix = 'TrackOverlay_' if doTrackOverlay else ''
 
     if kwargs.get('TracksName', None) is None :
         raise Exception('Not TracksName argument provided')
@@ -21,7 +23,7 @@ def InDetTrackPRD_AssociationCfg(flags, name='InDetTrackPRD_Association', **kwar
                           flags.Tracking.ActiveConfig.extension)
 
     acc.addEventAlgo(
-        CompFactory.InDet.InDetTrackPRD_Association(name, **kwargs))
+        CompFactory.InDet.InDetTrackPRD_Association(prefix + name, **kwargs))
     return acc
 
 def ITkTrackPRD_AssociationCfg(flags, name='ITkTrackPRD_Association', **kwargs):

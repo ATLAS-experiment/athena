@@ -12,7 +12,9 @@ atlas_add_component( TrackOverlayRec
                      src/components/*.cxx
                      INCLUDE_DIRS ${ONNXRUNTIME_INCLUDE_DIRS}
                      LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES}
-                       EventBookkeeperToolsLib InDetPhysValMonitoringLib PathResolver AthOnnxruntimeServiceLib)
+                       EventBookkeeperToolsLib InDetPhysValMonitoringLib PathResolver AthOnnxruntimeServiceLib AthAllocators FourMomUtils
+                       AthContainers IRegionSelector InDetIdentifier InDetPrepRawData InDetRawData StoreGateLib
+                       TrigSteeringEvent TrkRIO_OnTrack TrkTrack xAODCaloEvent xAODEventInfo)
 
 # Install python modules
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )

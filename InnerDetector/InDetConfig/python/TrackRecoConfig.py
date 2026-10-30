@@ -346,6 +346,24 @@ def StoreTrackSeparateContainerCfg(flags, TrackContainer="",
     return result, TrackContainer
 
 
+def TrackOverlayResolvedTracksName(flags):
+    """Name of the ambiguity-resolved Si track collection of the track overlay primary pass"""
+    ResolvedTracks = "ResolvedTracks"
+    # save resolved track name for final merged track collection
+    if flags.Tracking.ActiveConfig.storeSeparateContainer:
+        ResolvedTracks = flags.Overlay.SigPrefix + ResolvedTracks
+    return ResolvedTracks
+
+
+def TrackOverlayRoIRemovedTracksName(flags):
+    """Pileup tracks re-found by the track overlay primary pass inside the RoIs of the
+    RoI-limited Si overlay. They are not written out, but later passes treat their clusters
+    as used, as the corresponding pileup tracks do in MC overlay."""
+    if not (flags.TrackOverlay.isTrackOverlaySeq and flags.TrackOverlay.doRoISiOverlay):
+        return None
+    return TrackOverlayResolvedTracksName(flags) + "RemovedPileup"
+
+
 # Returns CA + ClusterSplitProbContainer
 def BackTrackingRecoCfg(flags,
                         InputCombinedInDetTracks=None,
@@ -408,9 +426,8 @@ def TrackRecoPassCfg(flags, extension="",
     # for track overlay, save resolved track name for final merged track collection
     # Only add Sig_ prefix for primary pass (where we merge signal+pileup)
     # Non-primary passes process signal only, so no prefix needed
-    if (doTrackOverlay and extension == '' and
-        flags.Tracking.ActiveConfig.storeSeparateContainer):
-        ResolvedTracks = flags.Overlay.SigPrefix + ResolvedTracks
+    if doTrackOverlay and extension == '':
+        ResolvedTracks = TrackOverlayResolvedTracksName(flags)
 
     # Tweak to match old config key
     if "LargeD0" in extension:
@@ -449,22 +466,34 @@ def TrackRecoPassCfg(flags, extension="",
     # First add TrackSummary to pileup tracks
     # Then merge and run TRT extension on combined collection
     if doTrackOverlay and extension == '':
-        # Add TrackSummary to pileup tracks
+        # Add TrackSummary to all pileup tracks
         from InDetConfig.AddTrackSummaryAlgConfig import AddTrackSummaryAlgCfg
         result.merge(AddTrackSummaryAlgCfg(
            flags,
            name="AddSummaryToPileupTracks",
            InputTrackCollection="Bkg_CombinedInDetTracks",
            OutputTrackCollection="Bkg_CombinedInDetTracksWithSummary",
-           MinPt=flags.Tracking.ActiveConfig.minPT,
-           MaxAbsEta=2.2,
         ))
+        # Drop re-finds pileup particles as they are already counted in Bkg_CombinedInDetTracks
+        SignalTracksForMerge = ResolvedTracks
+        if flags.TrackOverlay.doRoISiOverlay:
+            from TrackOverlayRec.TrackOverlayRoIConfig import (
+                TrackOverlaySignalTrackFilterAlgCfg)
+            SignalTracksForMerge = ResolvedTracks + "Filtered"
+            RemovedTracks = TrackOverlayRoIRemovedTracksName(flags)
+            result.merge(TrackOverlaySignalTrackFilterAlgCfg(
+                flags,
+                InputTracks=ResolvedTracks,
+                OutputTracks=SignalTracksForMerge,
+                RemovedTracks=RemovedTracks))
+            # later Si passes treat their clusters as used
+            InputExtendedInDetTracks += [RemovedTracks]
         # Merge signal + pileup Si tracks
         from TrkConfig.TrkTrackCollectionMergerConfig import TrackCollectionMergerAlgCfg
         result.merge(TrackCollectionMergerAlgCfg(
             flags,
             name="MergeSignalPileupBeforeTRTExtension",
-            InputCombinedTracks=[ResolvedTracks, "Bkg_CombinedInDetTracksWithSummary"],
+            InputCombinedTracks=[SignalTracksForMerge, "Bkg_CombinedInDetTracksWithSummary"],
             OutputCombinedTracks="MergedSiTracks",
             AssociationMapName="PRDtoTrackMapMergedSiTracks"))
         
@@ -912,9 +941,13 @@ def InDetTrackRecoCfg(flags):
             if flags.Tracking.doTRTSegments:
                 from InDetConfig.TRTSegmentFindingConfig import (
                     TRTSegmentFindingCfg)
+                # With RoI-limited Si overlay the removed pileup tracks also mask their
+                # hits for back-tracking
+                RemovedTracks = TrackOverlayRoIRemovedTracksName(current_flags)
                 result.merge(TRTSegmentFindingCfg(
                     current_flags,
-                    InputCollections=InputCombinedInDetTracks))
+                    InputCollections=InputCombinedInDetTracks,
+                    ExtraAssociationTracks=[RemovedTracks] if RemovedTracks else None))
 
             # ---------------------------------------
             # --- BackTracking

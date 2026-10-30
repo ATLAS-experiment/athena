@@ -1,5 +1,5 @@
 /*
- *  *   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+ *  *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  *   *   */
 //
 #include <fstream>
@@ -18,14 +18,14 @@
 #include "xAODTruth/TruthPileupEvent.h"
 #include "xAODTruth/TruthPileupEventAuxContainer.h"
 #include "PathResolver/PathResolver.h"
-
+#include "StoreGate/WriteDecorHandle.h"
 // ONNX Runtime include(s).
 #include <onnxruntime_cxx_api.h>
 //
 #include "TrackOverlayDecisionAlg.h"
 #include "EventBookkeeperTools/FilterReporter.h"
 
-namespace TrackOverlayDecisionAlg {
+namespace TrackOverlay {
     TrackOverlayDecisionAlg::TrackOverlayDecisionAlg( const std::string& name, ISvcLocator* pSvcLocator ) :
      ::AthReentrantAlgorithm( name, pSvcLocator )
     {
@@ -35,6 +35,7 @@ StatusCode TrackOverlayDecisionAlg::initialize()
 {
   ATH_CHECK(m_filterParams.initialize(false));
   ATH_CHECK( m_eventInfoContainerName.initialize() );
+  ATH_CHECK( m_decIsMCOverlayKey.initialize(!m_invertfilter) );
   ATH_CHECK( m_truthParticleName.initialize( (m_pileupSwitch == "HardScatter" or m_pileupSwitch == "All") and not m_truthParticleName.key().empty() ) );
   ATH_CHECK(m_truthSelectionTool.retrieve(EnableTool {not m_truthParticleName.key().empty()} ));
   ATH_CHECK( m_truthEventName.initialize( (m_pileupSwitch == "HardScatter" or m_pileupSwitch == "All") and not m_truthEventName.key().empty() ) );
@@ -132,7 +133,6 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
     float eventPySum = 0.0;
     float eventPt = 0.0;
     float puEvents = 0.0;
-
     std::vector<float> pxValues, pyValues, pzValues, eValues, etaValues, phiValues, ptValues;
     float truthMultiplicity = 0.0;
     const int truthParticles = truthParticlesVec.size();
@@ -184,6 +184,9 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
             if (deltaPhi > M_PI) {
                 deltaPhi -= 2.0 * M_PI;
             }
+	    else if (deltaPhi < -M_PI) {
+	        deltaPhi += 2.0 * M_PI;
+	    }
             float distances = std::sqrt(deltaEta * deltaEta + deltaPhi * deltaPhi);
             if (distances < 0.05){
                 multiplicity_0p05++;
@@ -237,7 +240,6 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
     predictions.push_back(prediction);
     }//for i
     float threshold = m_MLthreshold;
-    ATH_MSG_ALWAYS("ML threshold:" << threshold);
     int badTracks = 0;
     for (float prediction : predictions) {
        if (prediction > threshold) {
@@ -255,14 +257,18 @@ StatusCode TrackOverlayDecisionAlg::execute(const EventContext &ctx) const
     else{
       pass = false;
     }
+    if (!m_invertfilter) {
+        SG::WriteDecorHandle<xAOD::EventInfo, char>  decIsMCOverlay(m_decIsMCOverlayKey, ctx);
+        decIsMCOverlay(*pie) = pass;
+    }
 
     if (m_invertfilter) {
-    pass =! pass;
+        pass =! pass;
     }
     filter.setPassed(pass);
-    ATH_MSG_ALWAYS("End TrackOverlayDecisionAlg, difference in filters: "<<(pass ? "found" : "not found")<<"="<<pass<<", invert="<<m_invertfilter);
+    ATH_MSG_DEBUG("End TrackOverlayDecisionAlg, difference in filters: "<<(pass ? "found" : "not found")<<"="<<pass<<", invert="<<m_invertfilter);
     return StatusCode::SUCCESS;
 }
 
 
-}// end namespace TrackOverlayDecisionAlg
+}// namespace TrackOverlay
