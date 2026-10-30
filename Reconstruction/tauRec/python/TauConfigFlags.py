@@ -121,6 +121,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.TauEleRM_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets_EleRM" in prevFlags.Input.TypedCollections)
     # helper for derivations, used in PHYSVAL monitoring
     tau_cfg.addFlag("Tau.TauMuonRM_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets_MuonRM" in prevFlags.Input.TypedCollections)
+    tau_cfg.addFlag("Tau.Tau_isAvailable", lambda prevFlags : "xAOD::TauJetContainer#TauJets" in prevFlags.Input.TypedCollections)
 
     return tau_cfg
 
