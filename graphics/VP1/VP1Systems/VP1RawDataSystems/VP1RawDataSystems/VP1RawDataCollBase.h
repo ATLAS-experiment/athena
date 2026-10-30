@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -71,6 +71,8 @@ private Q_SLOTS:
   void collVisibilityChanged(bool);
 
 private:
+  void reportVisibleCount() const;
+
   VP1RawDataCommonData * m_common;
   class Imp;
   Imp * m_d;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,6 +22,8 @@
 
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "EventPrimitives/EventPrimitives.h"
+
+#include <algorithm>
 
 //____________________________________________________________________
 class VP1RawDataCollBase::Imp {
@@ -205,6 +207,7 @@ void VP1RawDataCollBase::recheckCutStatusOfAllHandles()
       systemBase()->updateGUI();//since called from ::actualLoad<..>(..)
   }
   largeChangesEnd();
+  reportVisibleCount();
 }
 
 //____________________________________________________________________
@@ -222,6 +225,7 @@ void VP1RawDataCollBase::recheckCutStatusOfAllVisibleHandles()
       recheckCutStatus(*it);
   }
   largeChangesEnd();
+  reportVisibleCount();
 }
 
 //____________________________________________________________________
@@ -236,10 +240,26 @@ void VP1RawDataCollBase::recheckCutStatusOfAllNotVisibleHandles()
       recheckCutStatus(*it);
   }
   largeChangesEnd();
+  reportVisibleCount();
 }
 
 //____________________________________________________________________
 std::vector<VP1RawDataHandleBase*>& VP1RawDataCollBase::getHandles()
 {
   return m_d->handles;
+}
+
+//____________________________________________________________________
+void VP1RawDataCollBase::reportVisibleCount() const
+{
+  if (!visible())
+    return;
+  const auto visibleCount = std::count_if(m_d->handles.cbegin(), m_d->handles.cend(),
+                                        [](const VP1RawDataHandleBase* handle) {
+                                          return handle->visible();
+                                        });
+  message(QString("Collection '%1': %2 / %3 visible")
+              .arg(text())
+              .arg(static_cast<qulonglong>(visibleCount))
+              .arg(static_cast<qulonglong>(m_d->handles.size())));
 }
