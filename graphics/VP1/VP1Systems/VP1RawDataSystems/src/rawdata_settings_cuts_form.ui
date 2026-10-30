@@ -1,3 +1,4 @@
+<!-- Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration -->
 <ui version="4.0" >
  <class>RawDataSysSettingsCutsForm</class>
  <widget class="QWidget" name="RawDataSysSettingsCutsForm" >
