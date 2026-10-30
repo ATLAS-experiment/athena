@@ -66,6 +66,18 @@ namespace {
                chType == sTgcIdHelper::Wire ? "W" : "P";
     }
 
+    inline int multilayer(const MuonR4::SpacePoint& sp,
+                      const Muon::IMuonIdHelperSvc& idHelperSvc) {
+        const Identifier id = sp.identify();
+        if (idHelperSvc.issTgc(id)) {
+            return idHelperSvc.stgcIdHelper().multilayer(id);
+        }
+        if (idHelperSvc.isMM(id)) {
+            return idHelperSvc.mmIdHelper().multilayer(id);
+        }
+        return 0;   // not an NSW measurement
+    }
+
     //local struct to encapsulate hit candidates data (e.g for seed extension)
     struct HitCandidate {
         double minPull{std::numeric_limits<float>::max()};
@@ -344,6 +356,7 @@ std::unique_ptr<SegmentSeed>
     NswSegmentFinderAlg::constructCombinatorialSeed(const InitialSeed_t& initialSeed,
                                                     const AmgSymMatrix(2)& bMatrix,
                                                     const HoughMaximum& max,
+                                                    const ActsTrk::GeometryContext& gctx,
                                                     const HitLaySpan_t& extensionLayers,
                                                     const UsedHitSpan_t& usedHits) const {
     bool allValid = std::any_of(initialSeed.begin(), initialSeed.end(), 
@@ -383,18 +396,31 @@ std::unique_ptr<SegmentSeed>
     double interceptY = segPos.y();
 
     //seed quality check - we expect the tanAlpha not to be too big which would mean big deflection along the strip layers
+    //we also set a cut using the beamspot for the tan alpha
     if(std::abs(tanAlpha) > m_maxTanAlpha){
         ATH_MSG_VERBOSE("Seed Rejection: Invalid seed - tanAlpha "<<tanAlpha<<" above threshold "<<m_maxTanAlpha);
         return nullptr;
     }
-
+    const Amg::Vector3D beamSpotPos = max.msSector()->globalToLocalTransform(gctx).translation();
+    Amg::Vector3D bsDir{(segPos - beamSpotPos).unit()};
+    if (bsDir.dot(direction) < 0.) {
+        bsDir = -bsDir;
+    }
+    const double tanAlphaBS = houghTanAlpha(bsDir);
+    const double cosAngle = bsDir.dot(direction);
+    double thetaWindowCut{std::cos(2*m_windowTheta)};
+                    //accept the deflection of direction with a tolerance of 1 deg                    
+    if(std::abs(cosAngle) < thetaWindowCut){  
+        ATH_MSG_VERBOSE("Seed Rejection: Not aggrement with beam spot direction");                      
+        return nullptr;                        
+    }             
 
     // extend the seed to the segment -- include hits from the other layers too
     auto extendedHits = extendHits(segPos, direction, extensionLayers, usedHits);
     HitVec hits{initialSeed.begin(),initialSeed.end()};
     std::ranges::move(extendedHits, std::back_inserter(hits));
 
-    return std::make_unique<SegmentSeed>(tanBeta, interceptY, tanAlpha,
+    return std::make_unique<SegmentSeed>(tanBeta, interceptY, tanAlphaBS,
                                          interceptX, hits.size(),
                                          std::move(hits), max.parentBucket());
 }
@@ -545,6 +571,16 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
                 return std::make_pair(std::move(seeds), std::move(segments));
             }
 
+            //we might request to have hits from the two different multilayers for better lever arm
+            if(m_skipSameMultilayer){
+                const int ml1 = multilayer(*hitLayers[layIdx1].front(), *m_idHelperSvc);
+                const int ml2 = multilayer(*hitLayers[layIdx2].front(), *m_idHelperSvc);
+                if(ml1 == ml2){
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<"Skip sTGC seeding because the two hits are in the same multilayer");
+                    return std::make_pair(std::move(seeds),std::move(segments));
+                }           
+            }
+
             //check if we have 2D measurements on these layers that are unused (excluding the pads)
             for(std::size_t hitIdx1 = 0; hitIdx1 < hitLayers[layIdx1].size(); ++hitIdx1) {
                 const SpacePoint* hit1 = hitLayers[layIdx1][hitIdx1];
@@ -586,6 +622,7 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
                     std::ranges::move(extendedHits, std::back_inserter(seedHits));
 
                     const Amg::Vector3D seedBeamspotDir{(hit2->localPosition() - beamSpotPos).unit()};
+                    //
                     auto seed = std::make_unique<SegmentSeed>(houghTanBeta(seedDir), seedPosZ0.y(),
                                                          houghTanAlpha(seedBeamspotDir), seedPosZ0.x(),
                                                          seedHits.size(), std::move(seedHits),
@@ -707,7 +744,7 @@ NswSegmentFinderAlg::buildSegmentsFromMM(const EventContext& ctx,
                     // we have made sure to have hits from all the four layers -
                     // start by 4 hits for the seed and try to build the extended seed for the combinatorics found
                     for (auto &combinatoricHits : preLimSeeds) {
-                        auto seed = constructCombinatorialSeed(combinatoricHits, bMatrix, max, extensionLayers, usedExtensionHits);
+                        auto seed = constructCombinatorialSeed(combinatoricHits, bMatrix, max, gctx, extensionLayers, usedExtensionHits);
                         if(!seed){
                             continue;
                         }
