@@ -1,0 +1,12 @@
+# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+
+from AthenaCommon.BeamFlags import jobproperties as bf
+bf.Beam.numberOfCollisions.set_Value_and_Lock(20.0)
+
+from AthenaCommon.Resilience import protectedInclude
+protectedInclude('LArConfiguration/LArConfigRun2Old.py')
+
+from CaloTools.CaloNoiseFlags import jobproperties;
+jobproperties.CaloNoiseFlags.FixedLuminosity.set_Value_and_Lock(0.)
+
+protectedInclude('PyJobTransforms/HepMcParticleLinkVerbosity.py')
