@@ -54,7 +54,7 @@ QStringList VP1RawDataHandle_MDT_RDO::clicked(bool verbose) const
   ll << "   isMasked: " + QString(isMasked() ? "true" : "false");
   if (verbose)
   {
-    if (idhelper)
+    if (idhelper && elem)
     {
       // Fixme: We should have common identify -> QStringList method in VP1DetInfo!!
       Identifier id(m_data->identify());
@@ -62,8 +62,8 @@ QStringList VP1RawDataHandle_MDT_RDO::clicked(bool verbose) const
       ll << "Is Barrel: " << QString::number(elem->barrel());
       /// Returns whether the chamber is in the endcap
       ll << "Is Endcap: " << QString::number(elem->endcap());
-      // ll << "Tube position :" << elem->tubePos(id).position[Amg::x];
-      std::cout << "tubePos x: " << elem->tubePos(id)[Amg::x] << std::endl;
+      ll << "   Tube position x [mm]: " +
+                QString::number(elem->tubePos(id)[Amg::x] / Gaudi::Units::mm);
     }
   }
   return ll;
