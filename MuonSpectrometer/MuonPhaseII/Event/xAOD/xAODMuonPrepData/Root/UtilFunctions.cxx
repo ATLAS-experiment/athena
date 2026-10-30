@@ -69,19 +69,14 @@ namespace xAOD{
     bool isMuon(const xAOD::UncalibratedMeasurement* meas) {
         return meas && isMuon(meas);
     }
+    std::span<const UncalibMeasType> muonMeasurementTypes() {
+        using enum xAOD::UncalibMeasType;
+        constexpr std::array<UncalibMeasType, 5> muonTypes{
+            MdtDriftCircleType, RpcStripType, TgcStripType, sTgcStripType, MMClusterType};
+        return muonTypes;
+    }
     bool isMuon(const UncalibMeasType type) {
-        switch (type) {
-            using enum xAOD::UncalibMeasType;
-            case MdtDriftCircleType:
-            case RpcStripType:
-            case TgcStripType:
-            case sTgcStripType:
-            case MMClusterType:
-                return true;
-            default:
-                break;
-        }
-        return false;
+        return Acts::rangeContainsValue(muonMeasurementTypes(), type);
     }
 
     ::Muon::MuonStationIndex::TechnologyIndex toTechnologyIndex(const UncalibMeasType aodType){

@@ -12,6 +12,7 @@
 #include "xAODMuonPrepData/MuonMeasurementFwd.h"
 #include "xAODMuonPrepData/CombinedMuonStripFwd.h"
 
+#include <span>
 
 namespace ActsTrk {
     class GeometryContext;
@@ -29,6 +30,8 @@ namespace xAOD{
     const Acts::Surface& muonSurface(const UncalibratedMeasurement* meas);
     /** @brief Returns the associated identifier from the muon measurement */
     const Identifier& identify(const UncalibratedMeasurement* meas);
+    /** @brief Returns a view on all the defined muon measurement types */
+    std::span<const UncalibMeasType> muonMeasurementTypes();
     /** @brief Returns whether the measurement is from a muon detector */
     bool isMuon(const xAOD::UncalibratedMeasurement* meas);
     /** @brief Returns whether the measurement is a muon measurement */
