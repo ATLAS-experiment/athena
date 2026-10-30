@@ -71,8 +71,8 @@ namespace xAOD{
     }
     std::span<const UncalibMeasType> muonMeasurementTypes() {
         using enum xAOD::UncalibMeasType;
-        constexpr std::array<UncalibMeasType, 5> muonTypes{
-            MdtDriftCircleType, RpcStripType, TgcStripType, sTgcStripType, MMClusterType};
+        static constexpr std::array<UncalibMeasType, 5> muonTypes{
+	  MdtDriftCircleType, RpcStripType, TgcStripType, sTgcStripType, MMClusterType};
         return muonTypes;
     }
     bool isMuon(const UncalibMeasType type) {
