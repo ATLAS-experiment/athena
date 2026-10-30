@@ -150,6 +150,15 @@ private:
   bool m_fixTau1LG{};
   bool m_fixTau2LG{};
 
+  //
+  // These two members are an unfortunately necessary temporary addition. Ultimately, constraints
+  //   on the pulse model parameters should be better handled in a uniform way.
+  //
+  float m_inductPeriodHG{0};
+  float m_inductPeriodLG{0};
+  float m_inductbIHG{-1};
+  float m_inductbILG{-1};
+
   float m_defaultFitTMax{};   // user-provided upper limit on samples to be included in fit
   float m_defaultFitTMin{};   // user-provided upper limit on samples to be included in fit
 
@@ -466,19 +475,24 @@ private:
   
   void FillHistogram(bool refitLG)
   {
+
     if (!m_useDelayed) {
       if (!refitLG) {
+	const std::vector<bool>&  useSample_ref =  useLowGain() ? m_useSampleLG : m_useSampleHG;
+
 	// Set the data and errors in the histogram object
 	//
 	for (size_t isample = 0; isample < m_NSamplesAna; isample++) {
 	  m_fitHist->SetBinContent(isample + 1, m_samplesSub[isample]);
-	  m_fitHist->SetBinError(isample + 1, m_samplesNoise[isample]);
+	  if (useSample_ref[isample]) m_fitHist->SetBinError(isample + 1, m_samplesNoise[isample]);
+	  else m_fitHist->SetBinError(isample + 1, 0);
 	}
       }
       else {
 	for (size_t isample = 0; isample < m_NSamplesAna; isample++) {
 	  m_fitHistLGRefit->SetBinContent(isample + 1, m_samplesLGRefit[isample]);
-	  m_fitHistLGRefit->SetBinError(isample + 1, m_samplesNoiseLGRefit[isample]);
+	  if (m_useSampleLG[isample]) m_fitHistLGRefit->SetBinError(isample + 1, m_samplesNoise[isample]);
+	  else m_fitHistLGRefit->SetBinError(isample + 1, 0);
 	}
       }
     }
