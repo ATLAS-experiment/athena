@@ -33,27 +33,29 @@ namespace ActsTrk{
         public:
             /** @brief Constructor taking the pointer to the ID track used
              *         for the extrapolations */
-            CaloExtension(const xAOD::TrackParticle* track);
+            explicit CaloExtension(const xAOD::TrackParticle* track);
             /*** @brief Returns the associated ID track particle */
             const xAOD::TrackParticle* track() const;
-            /** @brief Number of extensions stored in the instance */
+            /** @brief Number of cached parameters*/
             std::size_t size() const;
-            /** @brief  */
+            /** @brief Returns whether there are not stored parameters */
             bool empty() const;
             /** @brief Returns the extension parameters associated with the n-th extension */
             const Acts::BoundTrackParameters& parameters(const std::size_t parIdx) const;
             /** @brief Returns the set of parameters that are associated with a given
              *         calo sampling */
-            auto caloParameters(const CaloSampling::CaloSample s) const {
+            std::vector<Acts::BoundTrackParameters> 
+               caloParameters(const CaloSampling::CaloSample s) const {
                 using namespace ActsTrk::detail::GeoVolIds;
                 constexpr std::array caloIds{s_caloEnvelopeID, s_caloBarrelId,
                                              s_caloEndcapAId, s_caloEndcapCId};
-                return std::ranges::filter_view(m_parameters, 
-                  [&](const Acts::BoundTrackParameters& pars){
+                std::vector<Acts::BoundTrackParameters> result{};
+                std::ranges::copy_if(m_parameters, std::back_inserter(result),[&](const Acts::BoundTrackParameters& pars){
                     const Acts::GeometryIdentifier id = pars.referenceSurface().geometryId();
                     return id.layer() == static_cast<std::size_t>(s) && 
-                            Acts::rangeContainsValue(caloIds, id.volume());
+                            Acts::rangeContainsValue(caloIds, id.volume()); 
                 });
+                return result;
             }
             /** @brief Abrivation of the calo cluster vector */
             using ClusterVec_t = std::vector<const xAOD::CaloCluster*>;

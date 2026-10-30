@@ -62,17 +62,6 @@ namespace ActsTrk{
         ATH_CHECK(m_extensionDecorKey.initialize());
         ATH_CHECK(m_caloDetDescrMgrKey.initialize(m_clusterSelector.isEnabled()));
         ATH_CHECK(m_caloExtensionKey.initialize());
-
-        // Here we extract the geometry identifiers of the 4 calo volumes in the ACTS geometry
-        // It seems more robust to do the matching with the volume name, since the geometry ID
-        // can change if details of the geometry change.
-        std::vector<std::pair<std::string, CaloSample>> volIndexNames{};
-        for (std::size_t id = 0 ; id < Acts::toUnderlying(CaloSample::Unknown); ++id){
-            const auto smpId = static_cast<CaloSample>(id);
-            volIndexNames.emplace_back(std::make_pair(CaloSampling::getSamplingName(smpId), smpId));
-            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - "<<volIndexNames.back().first<<" -> "
-                <<volIndexNames.back().second);
-        }
         return StatusCode::SUCCESS;
     }
     CaloExtensionAlg::SortedCluster_t 
@@ -181,6 +170,22 @@ namespace ActsTrk{
             auto extension = propagateToCaloExit(ctx, track);
             if (!extension) {
                 continue;
+            }
+            if (msgLvl(MSG::VERBOSE)) {
+                std::stringstream sstr{};
+                for (unsigned s = 0; s < CaloSampling::getNumberOfSamplings(); ++s) {
+                    const auto sample = static_cast<CaloSampling::CaloSample>(s);
+                    auto samplePars = extension->caloParameters(sample);
+                    if (samplePars.empty()) {
+                        continue;
+                    }
+                    sstr<<"Calo layer: "<<CaloSampling::getSamplingName(sample)<<" nSamples: "<<samplePars.size()<<"\n";
+                    for (const Acts::BoundTrackParameters& pars : samplePars) {
+                        sstr<<" --- "<<pars.referenceSurface().geometryId()
+                                     <<", "<<Amg::toString(pars.parameters())<<"\n";
+                    }
+                }
+                ATH_MSG_VERBOSE(__func__<<"() Parameters per calorimeter layer \n\n"<<sstr.str());
             }
             // Loop over the neighbour bins corresponding to the track eta, phi
             // and match the clusters in that bin to the track
