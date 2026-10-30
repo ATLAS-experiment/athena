@@ -151,13 +151,26 @@ StatusCode NavigationDAODTesterAlgv2::execute(const EventContext& ctx) const {
         }
         ATH_MSG_DEBUG("Passing " << chain);
 
-        // DR=0.2 for chains with any tau leg, 0.1 otherwise. This follows the
-        // convention used when the TrigMatch branches are created at DAOD
-        // production time (see DerivationFrameworkPhys/PhysCommonConfig.py).
+        // dR of the R3 matching. The TrigMatch_<chain> reference was produced
+        // per trigger list (DerivationFrameworkPhys/PhysCommonConfig.py): 0.2
+        // for the Tau list (tau, di-tau, tau+xe), 0.1 for the NoTau list,
+        // which also holds the e+tau and mu+tau chains. By default
+        // (DRThresholdFromRun2Lists) the same rule is used here: a chain is in
+        // the Tau list iff it has a tau leg and no e/mu/g leg. Otherwise the
+        // previous rule: 0.2 for any chain with a tau leg. With that rule the
+        // R3 matching accepts, for lepton+tau chains, objects in the 0.1-0.2
+        // annulus that the Run 2 reference never considered: mostly "R3
+        // matched, R2 reference EMPTY" warnings, and "R3 found at least one
+        // match but R2 found none" errors when the reference holds only
+        // thinned objects.
         const bool hasTau = std::find(ChainNameParseSignature.begin(),
                                       ChainNameParseSignature.end(),
                                       "tau") != ChainNameParseSignature.end();
-        const double drThreshold = hasTau ? 0.2 : 0.1;
+        const bool hasEMuG = std::any_of(ChainNameParseSignature.begin(),
+                                         ChainNameParseSignature.end(),
+                                         [](const std::string& s) { return s == "e" || s == "mu" || s == "g"; });
+        const bool tauListChain = hasTau && !hasEMuG;
+        const double drThreshold = (m_drFromRun2Lists ? tauListChain : hasTau) ? 0.2 : 0.1;
 
         // Retrieve the TrigMatch container (used for the R2 match and for the
         // DEBUG dump below).
@@ -179,6 +192,14 @@ StatusCode NavigationDAODTesterAlgv2::execute(const EventContext& ctx) const {
                 }
             }
             continue;
+        }
+
+        // Rerun-only event: the chain passed only in rerun (resurrected
+        // decision, accepted above) and has a TrigMatch reference to compare
+        // with. Counted for the summary.
+        if (!m_tdt->isPassed(chain, TrigDefs::Physics)) {
+            std::lock_guard<std::mutex> lock(m_failingChainsMutex);
+            m_rerunOnlyChains[chain] += 1;
         }
 
         // nomucomb-family chains: the derivation stored the R2 matches
@@ -239,7 +260,7 @@ StatusCode NavigationDAODTesterAlgv2::execute(const EventContext& ctx) const {
 
                 for (const xAOD::IParticle* p : **(handleItr->second)) {
                     const bool passR2 = matchLinearisedR2(r2MatchedPool, {p});
-                    const bool passR3 = m_matchingTool->match(*p, chain, drThreshold, false);
+                    const bool passR3 = m_matchingTool->match(*p, chain, drThreshold, m_r3MatchingRerun);
 
                     anyPassR2 |= passR2;
                     anyPassR3 |= passR3;
@@ -346,11 +367,11 @@ StatusCode NavigationDAODTesterAlgv2::execute(const EventContext& ctx) const {
             }
 
             // R3: full combination matching via buildCombinations (DR-based,
-            //     0.2 for tau chains, 0.1 otherwise).
+            //     drThreshold chosen above per DRThresholdFromRun2Lists).
             // R2: single full-combination match against the pre-stored TrigMatch
             //     container using pointer/shallow equality (configured on the
             //     MatchFromCompositeTool; its DR/rerun arguments are ignored).
-            bool passR3 = m_matchingTool->match(particles, chain, drThreshold, false);
+            bool passR3 = m_matchingTool->match(particles, chain, drThreshold, m_r3MatchingRerun);
             bool passR2 = m_matchFromCompositeTool->match(particles, chain);
 
             anyPassR2 |= passR2;
@@ -361,7 +382,7 @@ StatusCode NavigationDAODTesterAlgv2::execute(const EventContext& ctx) const {
                 ATH_MSG_ERROR("R2 passes but R3 fails for chain " << chain
                               << " - R3 conversion may be missing trigger information");
                 for (const auto& p : particles) {
-                    bool r3 = m_matchingTool->match(*p, chain, drThreshold, false);
+                    bool r3 = m_matchingTool->match(*p, chain, drThreshold, m_r3MatchingRerun);
                     bool r2 = m_matchFromCompositeTool->match(*p, chain);
                     ATH_MSG_ERROR("  Particle pT=" << p->pt() << " eta=" << p->eta() << " phi=" << p->phi()
                                   << " R2:" << r2 << " R3:" << r3);
@@ -378,7 +399,7 @@ StatusCode NavigationDAODTesterAlgv2::execute(const EventContext& ctx) const {
                 ATH_MSG_DEBUG("R3 passes but R2 fails (expected) for chain " << chain);
                 if (msgLvl(MSG::DEBUG)) {
                     for (const auto& p : particles) {
-                        bool r3 = m_matchingTool->match(*p, chain, drThreshold, false);
+                        bool r3 = m_matchingTool->match(*p, chain, drThreshold, m_r3MatchingRerun);
                         bool r2 = m_matchFromCompositeTool->match(*p, chain);
                         ATH_MSG_DEBUG("  Particle pT=" << p->pt() << " eta=" << p->eta() << " phi=" << p->phi()
                                       << " R2:" << r2 << " R3:" << r3);
@@ -391,7 +412,7 @@ StatusCode NavigationDAODTesterAlgv2::execute(const EventContext& ctx) const {
                 if (msgLvl(MSG::DEBUG)) {
                     ATH_MSG_DEBUG("R2/R3 match for chain " << chain << " passR2: " << passR2 << " passR3: " << passR3);
                     for (const auto& p : particles) {
-                        bool r3 = m_matchingTool->match(*p, chain, drThreshold, false);
+                        bool r3 = m_matchingTool->match(*p, chain, drThreshold, m_r3MatchingRerun);
                         bool r2 = m_matchFromCompositeTool->match(*p, chain);
                         ATH_MSG_DEBUG("  Particle pT=" << p->pt() << " eta=" << p->eta() << " phi=" << p->phi()
                                       << " R2:" << r2 << " R3:" << r3);
@@ -523,6 +544,19 @@ StatusCode NavigationDAODTesterAlgv2::finalize() {
     });
     for (const auto& chain : sortedEmpty) {
         ATH_MSG_INFO("Unverifiable (empty R2) chain: " << chain.first << " count: " << chain.second);
+    }
+
+    // Chains tested in events where they passed only in rerun (prescaled or
+    // disabled chains). Informational; these events are compared with the R3
+    // matching in rerun mode when R3MatchingRerun is true.
+    ATH_MSG_INFO("Chains with rerun-only events (R3MatchingRerun=" << (m_r3MatchingRerun ? "true" : "false")
+                 << "): " << m_rerunOnlyChains.size());
+    std::vector<std::pair<std::string, int>> sortedRerun(m_rerunOnlyChains.begin(), m_rerunOnlyChains.end());
+    std::sort(sortedRerun.begin(), sortedRerun.end(), [](const auto& a, const auto& b) {
+        return a.second > b.second;
+    });
+    for (const auto& chain : sortedRerun) {
+        ATH_MSG_INFO("Rerun-only chain: " << chain.first << " events: " << chain.second);
     }
 
     return StatusCode::SUCCESS;

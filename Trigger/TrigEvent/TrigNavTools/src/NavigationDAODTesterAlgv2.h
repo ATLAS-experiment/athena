@@ -98,6 +98,29 @@ private:
         this, "PrintSubfeatures", false,
         "When true, print subfeatures (lower-pT objects from Run2->Run3 conversion) for each passing chain"};
 
+    Gaudi::Property<bool> m_r3MatchingRerun{
+        this, "R3MatchingRerun", true,
+        "Pass rerun=true to the R3 matching, i.e. also accept chains whose "
+        "decision is only resurrected (prescaled or disabled chains evaluated "
+        "in rerun). This must match how the R2 reference was produced: the "
+        "DerivationFramework TriggerMatchingTool writes the TrigMatch_<chain> "
+        "containers with Rerun=true. With false, every rerun-only event of a "
+        "prescaled chain shows up as 'R2 passes, R3 fails' although the "
+        "converted navigation holds the matching objects."};
+
+    Gaudi::Property<bool> m_drFromRun2Lists{
+        this, "DRThresholdFromRun2Lists", true,
+        "Choose the R3 matching dR as the Run 2 TrigMatch production did, per "
+        "trigger list (DerivationFrameworkPhys/PhysCommonConfig.py): 0.2 only "
+        "for chains of the Tau list, i.e. chains with a tau leg and no e/mu/g "
+        "leg (tau, di-tau, tau+xe), 0.1 for every chain of the NoTau list, "
+        "which includes the e+tau and mu+tau chains. Exact for the TriggerAPI "
+        "lists and the run2ExtraMatching*.txt files; chains added through "
+        "flags.Trigger.derivationsExtraChains are routed by the substring 'tau' "
+        "in their name instead. With false: 0.2 for any chain with a tau leg, "
+        "0.1 otherwise (the previous rule, which lets the R3 matching accept "
+        "lepton+tau objects the Run 2 reference never considered)."};
+
     Gaudi::Property<bool> m_dumpFeaturesWithoutR2{
         this, "DumpFeaturesWithoutR2", false,
         "Diagnostic: when the TrigMatch_<chain> container is absent (e.g. when "
@@ -113,6 +136,10 @@ private:
     /// the navigation conversion, so such events cannot indicate a conversion
     /// defect - there is nothing to compare against. Counted separately.
     mutable std::map<std::string, int> m_emptyR2Chains ATLAS_THREAD_SAFE;
+    /// Events with a TrigMatch reference in which the chain passed only in
+    /// rerun (resurrected decision, not after prescale). Informational: shows
+    /// how much of the comparison relies on rerun decisions.
+    mutable std::map<std::string, int> m_rerunOnlyChains ATLAS_THREAD_SAFE;
     mutable std::mutex m_failingChainsMutex;
 
     // Helper methods
