@@ -462,28 +462,31 @@ class EventSelectionConfig(ConfigBlock):
                 ],
             },
             'MLL': {
-                'info': 'Cut on the dilepton invariant mass',
+                'info': 'Cut on the light dilepton invariant mass (optionally including taus with `include_taus`)',
                 'args': [
                     {'name': 'sign',   'type': 'sign'},
                     {'name': 'refMLL', 'type': 'float'},
+                    {'name': 'include_taus', 'type': 'flag', 'optional': True},
                 ],
             },
             'MLLWINDOW': {
-                'info': 'Require the dilepton invariant mass inside (or, with `veto`, '
-                        'outside) a mass window',
+                'info': 'Require the light dilepton invariant mass inside (or, with `veto`, '
+                        'outside) a mass window (optionally including taus with `include_taus`)',
                 'args': [
                     {'name': 'lowMLL',  'type': 'float'},
                     {'name': 'highMLL', 'type': 'float'},
                     {'name': 'veto',    'type': 'flag', 'optional': True},
+                    {'name': 'include_taus', 'type': 'flag', 'optional': True},
                 ],
             },
             'MLL_OSSF': {
-                'info': 'Require the opposite-sign same-flavour dilepton invariant mass '
-                        'inside (or, with `veto`, outside) a mass window',
+                'info': 'Require the opposite-sign same-flavour light dilepton invariant mass '
+                        'inside (or, with `veto`, outside) a mass window (optionally including taus with `include_taus`)',
                 'args': [
                     {'name': 'lowMll',  'type': 'float'},
                     {'name': 'highMll', 'type': 'float'},
                     {'name': 'veto',    'type': 'flag', 'optional': True},
+                    {'name': 'include_taus', 'type': 'flag', 'optional': True},
                 ],
             },
             'OS': {
@@ -1051,6 +1054,12 @@ class EventSelectionConfig(ConfigBlock):
             (self.muons, ('muons', 'muonSelection'),
              ('truthMuons', 'truthMuonSelection')),
         ))
+        if args['include_taus']:
+            self._require_inputs("taus")
+            self._configure_leptons(alg, config, (
+                (self.taus, ('taus', 'tauSelection'),
+                    ('truthTaus', 'truthTauSelection')),
+            ))
         alg.sign = self.check_sign(args['sign'])
         alg.refMLL = self.check_float(args['refMLL'])
         self._finish_selector(alg, config, thisalg)
@@ -1066,6 +1075,12 @@ class EventSelectionConfig(ConfigBlock):
             (self.muons, ('muons', 'muonSelection'),
              ('truthMuons', 'truthMuonSelection')),
         ))
+        if args['include_taus']:
+            self._require_inputs("taus")
+            self._configure_leptons(alg, config, (
+                (self.taus, ('taus', 'tauSelection'),
+                    ('truthTaus', 'truthTauSelection')),
+            ))
         alg.lowMLL = self.check_float(args['lowMLL'])
         alg.highMLL = self.check_float(args['highMLL'])
         alg.vetoMode = args['veto']
@@ -1104,6 +1119,12 @@ class EventSelectionConfig(ConfigBlock):
             (self.muons, ('muons', 'muonSelection'),
              ('truthMuons', 'truthMuonSelection')),
         ))
+        if args['include_taus']:
+            self._require_inputs("taus")
+            self._configure_leptons(alg, config, (
+                (self.taus, ('taus', 'tauSelection'),
+                    ('truthTaus', 'truthTauSelection')),
+            ))
         alg.lowMll = self.check_float(args['lowMll'])
         alg.highMll = self.check_float(args['highMll'])
         alg.vetoMode = args['veto']

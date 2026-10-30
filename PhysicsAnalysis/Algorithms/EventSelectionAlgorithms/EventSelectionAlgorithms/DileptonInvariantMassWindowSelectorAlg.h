@@ -71,6 +71,16 @@ namespace CP {
         this, "muonSelection", "", "the selection on the input muons"
       };
 
+      /// \brief the taus handle
+      CP::SysReadHandle<xAOD::IParticleContainer> m_tausHandle {
+        this, "taus", "", "the tau container to use"
+      };
+
+      /// \brief the taus selection
+      CP::SysReadSelectionHandle m_tauSelection {
+        this, "tauSelection", "", "the selection on the input taus"
+      };
+
       /// \brief the event info handle
       CP::SysReadHandle<xAOD::EventInfo> m_eventInfoHandle {
         this, "eventInfo", "EventInfo", "the EventInfo container to read selection decisions from"

@@ -16,10 +16,14 @@ namespace CP {
     ANA_CHECK(m_electronSelection.initialize(m_systematicsList, m_electronsHandle, SG::AllowEmpty));
     ANA_CHECK(m_muonsHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_muonSelection.initialize(m_systematicsList, m_muonsHandle, SG::AllowEmpty));
+    ANA_CHECK(m_tausHandle.initialize(m_systematicsList, SG::AllowEmpty));
+    ANA_CHECK(m_tauSelection.initialize(m_systematicsList, m_tausHandle, SG::AllowEmpty));
     ANA_CHECK(m_electronsTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_electronTruthSelection.initialize(m_systematicsList, m_electronsTruthHandle, SG::AllowEmpty));
     ANA_CHECK(m_muonsTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
     ANA_CHECK(m_muonTruthSelection.initialize(m_systematicsList, m_muonsTruthHandle, SG::AllowEmpty));
+    ANA_CHECK(m_tausTruthHandle.initialize(m_systematicsList, SG::AllowEmpty));
+    ANA_CHECK(m_tauTruthSelection.initialize(m_systematicsList, m_tausTruthHandle, SG::AllowEmpty));
     ANA_CHECK(m_eventInfoHandle.initialize(m_systematicsList));
     ANA_CHECK(m_preselection.initialize(m_systematicsList, m_eventInfoHandle, SG::AllowEmpty));
     ANA_CHECK(m_decoration.initialize(m_systematicsList, m_eventInfoHandle));
@@ -100,6 +104,21 @@ namespace CP {
         }
       }
 
+      if (m_tausHandle && !decision) {
+        const xAOD::TauJetContainer *taus = nullptr;
+        ANA_CHECK(m_tausHandle.retrieve(taus, sys, ctx));
+        for (size_t i = 0; i < taus->size() && !decision; ++i) {
+          const xAOD::TauJet* t0 = (*taus)[i];
+          if (m_tauSelection && !m_tauSelection.getBool(*t0, sys)) continue;
+          for (size_t j = i + 1; j < taus->size() && !decision; ++j) {
+            const xAOD::TauJet* t1 = (*taus)[j];
+            if (m_tauSelection && !m_tauSelection.getBool(*t1, sys)) continue;
+            if (t0->charge() == t1->charge()) continue;
+            decision = inWindow(mll_reco(t0, t1));
+          }
+        }
+      }
+
       if (m_electronsTruthHandle && !decision) {
         const xAOD::TruthParticleContainer *truthElectrons = nullptr;
         ANA_CHECK(m_electronsTruthHandle.retrieve(truthElectrons, sys, ctx));
@@ -126,6 +145,21 @@ namespace CP {
             if (m_muonTruthSelection && !m_muonTruthSelection.getBool(*m1, sys)) continue;
             if (m0->charge() == m1->charge()) continue;
             decision = inWindow(mll_truth(m0, m1, m_useDressedProperties));
+          }
+        }
+      }
+
+      if (m_tausTruthHandle && !decision) {
+        const xAOD::TruthParticleContainer *truthTaus = nullptr;
+        ANA_CHECK(m_tausTruthHandle.retrieve(truthTaus, sys, ctx));
+        for (size_t i = 0; i < truthTaus->size() && !decision; ++i) {
+          const xAOD::TruthParticle* t0 = (*truthTaus)[i];
+          if (m_tauTruthSelection && !m_tauTruthSelection.getBool(*t0, sys)) continue;
+          for (size_t j = i + 1; j < truthTaus->size() && !decision; ++j) {
+            const xAOD::TruthParticle* t1 = (*truthTaus)[j];
+            if (m_tauTruthSelection && !m_tauTruthSelection.getBool(*t1, sys)) continue;
+            if (t0->charge() == t1->charge()) continue;
+            decision = inWindow(mll_truth(t0, t1, false));
           }
         }
       }
