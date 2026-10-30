@@ -25,6 +25,11 @@
 
 #include "GaudiKernel/SystemOfUnits.h"
 
+#include <QCursor>
+#include <QDialog>
+#include <QGuiApplication>
+#include <QScreen>
+
 #include <cmath>
 
 
@@ -73,7 +78,20 @@ VP1RawDataSysController::VP1RawDataSysController(IVP1System * sys)
 
   initDialog(m_d->ui_display, m_d->ui.pushButton_settings_display);
   initDialog(m_d->ui_int, m_d->ui.pushButton_settings_interactions);
-  initDialog(m_d->ui_cuts, m_d->ui.pushButton_settings_cuts);
+  // Keep long cut forms usable on small screens and with large desktop fonts.
+  auto cutsDialog = std::make_unique<QDialog>(nullptr, Qt::WindowStaysOnTopHint);
+  m_d->ui_cuts.setupUi(cutsDialog.get());
+  cutsDialog->setSizeGripEnabled(true);
+  cutsDialog->setMinimumSize(320, 240);
+  m_d->ui_cuts.cutsContentLayout->setAlignment(Qt::AlignTop);
+  QScreen* screen = QGuiApplication::screenAt(QCursor::pos());
+  if (!screen)
+    screen = QGuiApplication::primaryScreen();
+  const QSize preferredSize(520, 640);
+  cutsDialog->resize(screen ? preferredSize.boundedTo(screen->availableGeometry().size() * 0.85)
+                            : preferredSize);
+  initDialog(std::move(cutsDialog), m_d->ui.pushButton_settings_cuts,
+             m_d->ui_cuts.pushButton_close);
 
   m_d->ui_display.widget_drawOptions->setLineWidths(1.5);
   m_d->ui_display.widget_drawOptions->setPointSizes(2.5);
