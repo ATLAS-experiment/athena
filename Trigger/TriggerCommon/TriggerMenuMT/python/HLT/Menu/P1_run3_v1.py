@@ -456,9 +456,6 @@ def addHighMuP1Signatures(chains):
         ChainProp(name='HLT_noalg_eb_L1jXE100',   l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', 'RATE:EnhancedBias', 'RATE:EnhancedBiasHigh', 'BW:Detector']+SupportPhIGroup ),
         ChainProp(name='HLT_noalg_eb_L1jJ500',   l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', 'RATE:EnhancedBias', 'RATE:EnhancedBiasHigh', 'BW:Detector']+SupportPhIGroup ),
         ChainProp(name='HLT_noalg_eb_L1jXE500',   l1SeedThresholds=['FSNOSEED'], stream=['EnhancedBias'], groups=['PS:NoBulkMCProd', 'RATE:EnhancedBias', 'RATE:EnhancedBiasHigh', 'BW:Detector']+SupportPhIGroup ),
-        #Beam splashes
-        ChainProp(name='HLT_noalg_L1eEM22A', l1SeedThresholds=['FSNOSEED'], stream=['MinBias','express'], groups=['RATE:MinBias', 'BW:MinBias']+SupportPhIGroup,monGroups=['detMon']),
-        ChainProp(name='HLT_noalg_L1eEM22C', l1SeedThresholds=['FSNOSEED'], stream=['MinBias','express'], groups=['RATE:MinBias', 'BW:MinBias']+SupportPhIGroup,monGroups=['detMon']),
         #Beam splash backup
         ChainProp(name='HLT_noalg_mb_L1eEM18', l1SeedThresholds=['FSNOSEED'], stream=['MinBias','express'], groups=['RATE:MinBias', 'BW:MinBias']+SupportPhIGroup,monGroups=['detMon']),
 

@@ -240,8 +240,6 @@ class MonitorDef:
                     "L1_ADVAET", "L1_ADVAEL", "L1_ADBDTT", "L1_ADBDTL",
                     "L1_ARTEMISL", "L1_ARTEMIST",
                     #
-                    # splash items
-                    "L1_eEM22A", "L1_eEM22C",
                 ]
 
         else: # HI L1 menu

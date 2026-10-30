@@ -18,7 +18,7 @@ class TopoAlgoDefMultiplicity:
             'eEM5', 'eEM7', 'eEM9', 'eEM10L', 
         ]
         emThresholds_2bits = [
-            'eEM12L', 'eEM15', 'eEM18',  'eEM18L', 'eEM18M', 'eEM22M',
+            'eEM8L', 'eEM12L', 'eEM15', 'eEM18',  'eEM18L', 'eEM18M', 'eEM22L', 'eEM22M',
             'eEM24L', 
             'eEM22A', 'eEM22C',
             'eEM12',
