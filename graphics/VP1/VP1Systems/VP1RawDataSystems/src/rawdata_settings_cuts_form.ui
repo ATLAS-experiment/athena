@@ -555,6 +555,68 @@
       </attribute>
       <layout class="QVBoxLayout" name="layout_sTGCCuts">
        <item>
+        <widget class="QGroupBox" name="group_stgcChannelTypes">
+         <property name="title">
+          <string>Channel types</string>
+         </property>
+         <property name="toolTip">
+          <string>Show the selected channel types. Uncheck all three to hide all sTGC digits.</string>
+         </property>
+         <layout class="QHBoxLayout" name="layout_stgcChannelTypes">
+          <item>
+           <widget class="QCheckBox" name="checkBox_stgcShowPads">
+            <property name="text">
+             <string>Pads</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_stgcShowStrips">
+            <property name="text">
+             <string>Strips</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_stgcShowWires">
+            <property name="text">
+             <string>Wire groups</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_stgcExcludeDead">
+         <property name="text">
+          <string>Exclude dead digits</string>
+         </property>
+         <property name="toolTip">
+          <string>Filter using the status flag stored in the digit, without changing it.</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="checkBox_stgcExcludePileup">
+         <property name="text">
+          <string>Exclude pileup digits</string>
+         </property>
+         <property name="toolTip">
+          <string>Filter using the status flag stored in the digit, without changing it.</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QGroupBox" name="group_stgcAllowedCharge">
          <property name="title">
           <string>Charge [digit units]</string>

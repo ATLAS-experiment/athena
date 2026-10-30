@@ -35,6 +35,12 @@ QStringList VP1RawDataColl_sTGC_RDO::availableCollections(IVP1System*sys)
 //____________________________________________________________________
 class VP1RawDataColl_sTGC_RDO::Imp {
 public:
+  bool stgcShowPads = true;
+  bool stgcShowStrips = true;
+  bool stgcShowWires = true;
+  bool stgcExcludeDead = false;
+  bool stgcExcludePileup = false;
+
   VP1Interval stgcAllowedCharge;
   VP1Interval stgcAllowedTime;
 
@@ -51,6 +57,22 @@ VP1RawDataColl_sTGC_RDO::VP1RawDataColl_sTGC_RDO(VP1RawDataCommonData*common,con
   connect(common->controller(), SIGNAL(stgcAllowedTimeChanged(const VP1Interval&)),
           this, SLOT(setStgcAllowedTime(const VP1Interval&)));
   setStgcAllowedTime(common->controller()->stgcAllowedTime());
+  connect(common->controller(), SIGNAL(stgcShowPadsChanged(bool)),
+          this, SLOT(setStgcShowPads(bool)));
+  setStgcShowPads(common->controller()->stgcShowPads());
+  connect(common->controller(), SIGNAL(stgcShowStripsChanged(bool)),
+          this, SLOT(setStgcShowStrips(bool)));
+  setStgcShowStrips(common->controller()->stgcShowStrips());
+  connect(common->controller(), SIGNAL(stgcShowWiresChanged(bool)),
+          this, SLOT(setStgcShowWires(bool)));
+  setStgcShowWires(common->controller()->stgcShowWires());
+  connect(common->controller(), SIGNAL(stgcExcludeDeadChanged(bool)),
+          this, SLOT(setStgcExcludeDead(bool)));
+  setStgcExcludeDead(common->controller()->stgcExcludeDead());
+  connect(common->controller(), SIGNAL(stgcExcludePileupChanged(bool)),
+          this, SLOT(setStgcExcludePileup(bool)));
+  setStgcExcludePileup(common->controller()->stgcExcludePileup());
+
 }
 
 //____________________________________________________________________
@@ -116,6 +138,18 @@ bool VP1RawDataColl_sTGC_RDO::load() {
 bool VP1RawDataColl_sTGC_RDO::cut(VP1RawDataHandleBase* handle)
 {
   const auto* digit = static_cast<const VP1RawDataHandle_sTGC_RDO*>(handle);
+  if ((m_d->stgcExcludeDead && digit->isDead()) ||
+      (m_d->stgcExcludePileup && digit->isPileup()))
+    return false;
+  if (!m_d->stgcShowPads && !m_d->stgcShowStrips && !m_d->stgcShowWires)
+    return false;
+  if (!(m_d->stgcShowPads && m_d->stgcShowStrips && m_d->stgcShowWires)) {
+    const int type = digit->channelType();
+    if (!((type == sTgcIdHelper::Pad && m_d->stgcShowPads) ||
+          (type == sTgcIdHelper::Strip && m_d->stgcShowStrips) ||
+          (type == sTgcIdHelper::Wire && m_d->stgcShowWires)))
+      return false;
+  }
   return m_d->stgcAllowedCharge.contains(digit->amplitude()) &&
          m_d->stgcAllowedTime.contains(digit->time());
 }
@@ -133,5 +167,45 @@ void VP1RawDataColl_sTGC_RDO::setStgcAllowedTime(const VP1Interval& range)
   if (m_d->stgcAllowedTime == range)
     return;
   m_d->stgcAllowedTime = range;
+  recheckCutStatusOfAllHandles();
+}
+
+void VP1RawDataColl_sTGC_RDO::setStgcShowPads(bool enabled)
+{
+  if (m_d->stgcShowPads == enabled)
+    return;
+  m_d->stgcShowPads = enabled;
+  recheckCutStatusOfAllHandles();
+}
+
+void VP1RawDataColl_sTGC_RDO::setStgcShowStrips(bool enabled)
+{
+  if (m_d->stgcShowStrips == enabled)
+    return;
+  m_d->stgcShowStrips = enabled;
+  recheckCutStatusOfAllHandles();
+}
+
+void VP1RawDataColl_sTGC_RDO::setStgcShowWires(bool enabled)
+{
+  if (m_d->stgcShowWires == enabled)
+    return;
+  m_d->stgcShowWires = enabled;
+  recheckCutStatusOfAllHandles();
+}
+
+void VP1RawDataColl_sTGC_RDO::setStgcExcludeDead(bool enabled)
+{
+  if (m_d->stgcExcludeDead == enabled)
+    return;
+  m_d->stgcExcludeDead = enabled;
+  recheckCutStatusOfAllHandles();
+}
+
+void VP1RawDataColl_sTGC_RDO::setStgcExcludePileup(bool enabled)
+{
+  if (m_d->stgcExcludePileup == enabled)
+    return;
+  m_d->stgcExcludePileup = enabled;
   recheckCutStatusOfAllHandles();
 }

@@ -30,6 +30,10 @@ public:
   QStringList clicked(bool verbose) const;
 
   // Values in native digit units (MDT ADC/TDC counts; MM/sTGC digit charge and ns).
+  // Decode from the identifier, independently of whether a shape has been built.
+  int channelType() const;
+  bool isDead() const;
+  bool isPileup() const;
   double amplitude() const;
   double time() const;
 

@@ -184,3 +184,19 @@ double VP1RawDataHandle_sTGC_RDO::time() const
 {
   return m_data->time();
 }
+
+int VP1RawDataHandle_sTGC_RDO::channelType() const
+{
+  const sTgcIdHelper* helper = VP1DetInfo::stgcIDHelper();
+  return helper ? helper->channelType(m_data->identify()) : -1;
+}
+
+bool VP1RawDataHandle_sTGC_RDO::isDead() const
+{
+  return m_data->isDead();
+}
+
+bool VP1RawDataHandle_sTGC_RDO::isPileup() const
+{
+  return m_data->isPileup();
+}

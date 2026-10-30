@@ -41,6 +41,12 @@ public:
   bool cut(VP1RawDataHandleBase*);
 
 public Q_SLOTS:
+  void setStgcShowPads(bool);
+  void setStgcShowStrips(bool);
+  void setStgcShowWires(bool);
+  void setStgcExcludeDead(bool);
+  void setStgcExcludePileup(bool);
+
   void setStgcAllowedCharge(const VP1Interval&);
   void setStgcAllowedTime(const VP1Interval&);
 

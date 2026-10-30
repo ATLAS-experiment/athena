@@ -64,6 +64,12 @@ public:
 
   // Inclusive muon digit ranges; unchecked bounds are unrestricted.
   bool mdtExcludeMasked() const;
+  bool stgcShowPads() const;
+  bool stgcShowStrips() const;
+  bool stgcShowWires() const;
+  bool stgcExcludeDead() const;
+  bool stgcExcludePileup() const;
+
   VP1Interval mdtAllowedADC() const;
   VP1Interval mdtAllowedTDC() const;
   VP1Interval mmAllowedCharge() const;
@@ -91,6 +97,12 @@ signals:
   void trtAllowedToTChanged(const VP1Interval&);//nano-seconds
   void lucidMinQDCChanged(unsigned);
   void mdtExcludeMaskedChanged(bool);
+  void stgcShowPadsChanged(bool);
+  void stgcShowStripsChanged(bool);
+  void stgcShowWiresChanged(bool);
+  void stgcExcludeDeadChanged(bool);
+  void stgcExcludePileupChanged(bool);
+
   void mdtAllowedADCChanged(const VP1Interval&);
   void mdtAllowedTDCChanged(const VP1Interval&);
   void mmAllowedChargeChanged(const VP1Interval&);
@@ -118,6 +130,12 @@ private Q_SLOTS:
   void possibleChange_trtAllowedToT();
   void possibleChange_lucidMinQDC();
   void possibleChange_mdtExcludeMasked();
+  void possibleChange_stgcShowPads();
+  void possibleChange_stgcShowStrips();
+  void possibleChange_stgcShowWires();
+  void possibleChange_stgcExcludeDead();
+  void possibleChange_stgcExcludePileup();
+
   void possibleChange_mdtAllowedADC();
   void possibleChange_mdtAllowedTDC();
   void possibleChange_mmAllowedCharge();

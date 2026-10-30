@@ -47,6 +47,12 @@ public:
   VP1Interval last_trtAllowedToT;
   unsigned last_lucidMinQDC = 0U;
   bool last_mdtExcludeMasked = false;
+  bool last_stgcShowPads = true;
+  bool last_stgcShowStrips = true;
+  bool last_stgcShowWires = true;
+  bool last_stgcExcludeDead = false;
+  bool last_stgcExcludePileup = false;
+
   VP1Interval last_mdtAllowedADC;
   VP1Interval last_mdtAllowedTDC;
   VP1Interval last_mmAllowedCharge;
@@ -183,6 +189,17 @@ VP1RawDataSysController::VP1RawDataSysController(IVP1System * sys)
   addUpdateSlot(SLOT(possibleChange_mdtExcludeMasked()));
   connectToLastUpdateSlot(m_d->ui_cuts.checkBox_mdtExcludeMasked);
 
+  addUpdateSlot(SLOT(possibleChange_stgcShowPads()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_stgcShowPads);
+  addUpdateSlot(SLOT(possibleChange_stgcShowStrips()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_stgcShowStrips);
+  addUpdateSlot(SLOT(possibleChange_stgcShowWires()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_stgcShowWires);
+  addUpdateSlot(SLOT(possibleChange_stgcExcludeDead()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_stgcExcludeDead);
+  addUpdateSlot(SLOT(possibleChange_stgcExcludePileup()));
+  connectToLastUpdateSlot(m_d->ui_cuts.checkBox_stgcExcludePileup);
+
   initLastVars();
 }
 
@@ -196,7 +213,7 @@ VP1RawDataSysController::~VP1RawDataSysController()
 //____________________________________________________________________
 int VP1RawDataSysController::currentSettingsVersion() const
 {
-  return 3;
+  return 4;
 }
 
 //____________________________________________________________________
@@ -248,13 +265,20 @@ void VP1RawDataSysController::actualSaveSettings(VP1Serialise&s) const
   s.save(m_d->ui_cuts.checkBox_stgcAllowedTimeMax);
   s.save(m_d->ui_cuts.spinBox_stgcAllowedTimeMax);
   s.save(m_d->ui_cuts.checkBox_mdtExcludeMasked);//Version 3+
+  // Version 4: sTGC channel types and status.
+  s.save(m_d->ui_cuts.checkBox_stgcShowPads);
+  s.save(m_d->ui_cuts.checkBox_stgcShowStrips);
+  s.save(m_d->ui_cuts.checkBox_stgcShowWires);
+  s.save(m_d->ui_cuts.checkBox_stgcExcludeDead);
+  s.save(m_d->ui_cuts.checkBox_stgcExcludePileup);
+
 
 }
 
 //____________________________________________________________________
 void VP1RawDataSysController::actualRestoreSettings(VP1Deserialise& s)
 {
-  if (s.version()<0||s.version()>3) {
+  if (s.version()<0||s.version()>4) {
     message("Warning: State data in .vp1 file has unsupported version ("+str(s.version())+")");
     return;
   }
@@ -323,6 +347,20 @@ void VP1RawDataSysController::actualRestoreSettings(VP1Deserialise& s)
     s.restore(m_d->ui_cuts.checkBox_mdtExcludeMasked);
   else
     m_d->ui_cuts.checkBox_mdtExcludeMasked->setChecked(false);
+
+  if (s.version() >= 4) {
+    s.restore(m_d->ui_cuts.checkBox_stgcShowPads);
+    s.restore(m_d->ui_cuts.checkBox_stgcShowStrips);
+    s.restore(m_d->ui_cuts.checkBox_stgcShowWires);
+    s.restore(m_d->ui_cuts.checkBox_stgcExcludeDead);
+    s.restore(m_d->ui_cuts.checkBox_stgcExcludePileup);
+  } else {
+    m_d->ui_cuts.checkBox_stgcShowPads->setChecked(true);
+    m_d->ui_cuts.checkBox_stgcShowStrips->setChecked(true);
+    m_d->ui_cuts.checkBox_stgcShowWires->setChecked(true);
+    m_d->ui_cuts.checkBox_stgcExcludeDead->setChecked(false);
+    m_d->ui_cuts.checkBox_stgcExcludePileup->setChecked(false);
+  }
 
   // Deserialisation blocks checkbox signals, so synchronize the fields explicitly.
   m_d->ui_cuts.spinBox_mdtAllowedADCMin->setEnabled(m_d->ui_cuts.checkBox_mdtAllowedADCMin->isChecked());
@@ -509,3 +547,38 @@ bool VP1RawDataSysController::mdtExcludeMasked() const
 }
 
 POSSIBLECHANGE_IMP(mdtExcludeMasked)
+
+bool VP1RawDataSysController::stgcShowPads() const
+{
+  return m_d->ui_cuts.checkBox_stgcShowPads->isChecked();
+}
+
+POSSIBLECHANGE_IMP(stgcShowPads)
+
+bool VP1RawDataSysController::stgcShowStrips() const
+{
+  return m_d->ui_cuts.checkBox_stgcShowStrips->isChecked();
+}
+
+POSSIBLECHANGE_IMP(stgcShowStrips)
+
+bool VP1RawDataSysController::stgcShowWires() const
+{
+  return m_d->ui_cuts.checkBox_stgcShowWires->isChecked();
+}
+
+POSSIBLECHANGE_IMP(stgcShowWires)
+
+bool VP1RawDataSysController::stgcExcludeDead() const
+{
+  return m_d->ui_cuts.checkBox_stgcExcludeDead->isChecked();
+}
+
+POSSIBLECHANGE_IMP(stgcExcludeDead)
+
+bool VP1RawDataSysController::stgcExcludePileup() const
+{
+  return m_d->ui_cuts.checkBox_stgcExcludePileup->isChecked();
+}
+
+POSSIBLECHANGE_IMP(stgcExcludePileup)
