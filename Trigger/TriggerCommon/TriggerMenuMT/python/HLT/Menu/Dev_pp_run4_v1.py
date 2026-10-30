@@ -58,7 +58,7 @@ def getDevSignatures():
     chains['Streaming'] = []
     
     chains['Monitor'] = [
-        ChainProp(name='EF_timeburnerprocessing_L1All', l1SeedThresholds=['FSNOSEED'], stream=['Main'], groups=['PS:NoHLTRepro','RATE:Monitoring','BW:Other']+DevGroup),
+        ChainProp(name='EF_timeburnerprocessing_L1All', l1SeedThresholds=['FSNOSEED'], stream=['DISCARD'], groups=['PS:NoHLTRepro','RATE:DISCARD','BW:DISCARD']+DevGroup),
     ]
 
     return chains

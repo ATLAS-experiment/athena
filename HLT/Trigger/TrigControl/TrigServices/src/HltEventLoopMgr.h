@@ -239,7 +239,7 @@ private:
     this, "HardTimeout", 10*60*1000/*=10min*/, "Hard event processing timeout in milliseconds"};
 
   Gaudi::Property<float> m_softTimeoutFraction{
-    this, "SoftTimeoutFraction", 0.8, "Fraction of the hard timeout to be set as the soft timeout"};
+    this, "SoftTimeoutFraction", 0.95, "Fraction of the hard timeout to be set as the soft timeout"};
 
   Gaudi::Property<unsigned int> m_timeoutThreadIntervalMs{
     this, "TimeoutThreadIntervalMs", 1000, "How often the timeout thread checks for soft timeout, in milliseconds"};
