@@ -60,11 +60,8 @@ def MuSAVtxJPsiValidationAlgCfg(flags, name="MuSAVtxJPsiValidationAlg", **kwargs
     from TrkConfig.TrkVKalVrtFitterConfig import TrkVKalVrtFitterCfg
     vkalvrt = acc.popToolsAndMerge(TrkVKalVrtFitterCfg(flags))
     
-    from TrkConfig.AtlasExtrapolatorConfig import AtlasExtrapolatorCfg
-    extrapolator = acc.popToolsAndMerge(AtlasExtrapolatorCfg(flags))
-    
-    from InDetConfig.InDetTrackSelectorToolConfig import InDetTrackSelectorToolCfg
-    trackselect = acc.popToolsAndMerge(InDetTrackSelectorToolCfg(flags, Extrapolator=extrapolator))
+    from InDetConfig.InDetTrackSelectorToolConfig import BPHY_InDetDetailedTrackSelectorToolCfg
+    trackselect = acc.popToolsAndMerge(BPHY_InDetDetailedTrackSelectorToolCfg(flags))
     acc.addPublicTool(trackselect)
     
     from InDetConfig.InDetConversionFinderToolsConfig import BPHY_VertexPointEstimatorCfg
