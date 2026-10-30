@@ -611,10 +611,15 @@ HepMC::GenParticlePtr ISF::InputConverter::findShadowParticle(const HepMC::Const
     abort();
   }
   // TODO in the future switch to using an Attribute which stores the shadow GenParticlePtr directly.
-  const int shadowId = genParticle->attribute<HepMC3::IntAttribute>(HepMCStr::ShadowParticleId)->value();
-  for (auto& shadowParticle : shadowGenEvent->particles()) {
-    if (shadowParticle->id() == shadowId && matchedGenParticles(genParticle, shadowParticle) ) { return shadowParticle; }
-  }
+  const auto shadowIdattr = genParticle->attribute<HepMC3::IntAttribute>(HepMCStr::ShadowParticleId);
+  // AV: We check that attribute exists, otherwise return default. Only particles intended to be passed to the simulation have ShadowParticleId attributes. (TruthPreselectionTool.cxx)
+  if (!shadowIdattr) return  std::make_shared<HepMC::GenParticle>();
+  const std::size_t shadowId = static_cast<std::size_t>(shadowIdattr->value());
+  // AV: We take the particle that corresponds to the id.
+  if (shadowId < 1 || shadowId > shadowGenEvent->particles().size()) return  std::make_shared<HepMC::GenParticle>();
+  auto shadowParticle = shadowGenEvent->particles()[shadowId - 1];
+  // AV: We check that the particle matches.
+  if (matchedGenParticles(genParticle, shadowParticle)) return shadowParticle;
   return std::make_shared<HepMC::GenParticle>();
 }
 
