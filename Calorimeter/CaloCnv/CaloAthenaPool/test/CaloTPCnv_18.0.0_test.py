@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaPoolUtilities.TPCnvTestConfig import TPCnvTest
@@ -29,7 +29,6 @@ if __name__ == "__main__":
         'MuonClusterCollection@10',
         'Tau1P3PCellEM012ClusterContainer@10',
         'Tau1P3PCellCluster@10',
-        'HLT_TrigT2Calo@10',
         'HLT_TrigCaloClusterMaker_slw@10',
         'LArClusterEMSofte@10',
         'LArClusterEM7_11Nocorr@10',

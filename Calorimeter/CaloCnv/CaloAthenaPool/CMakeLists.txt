@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( CaloAthenaPool )
@@ -22,7 +22,7 @@ find_package( AthenaPoolUtilitiesTest )
 # Set up the tests if possible:
 if( ATHENAPOOLUTILITIESTEST_FOUND )
   set( CALOATHENAPOOL_REFERENCE_TAG
-       CaloAthenaPoolReference-01-00-00 )
+       CaloAthenaPoolReference-01-00-01 )
   run_tpcnv_test( CaloTPCnv_14.5.0   AOD-14.5.0-full
                    REFERENCE_TAG ${CALOATHENAPOOL_REFERENCE_TAG} )
   run_tpcnv_test( CaloTPCnv_15.1.0   AOD-15.1.0-full
