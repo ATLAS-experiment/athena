@@ -111,6 +111,8 @@ def MuonRdoToDigitCfg(flags):
          "MM_RdoToDigitCfg"),
         ("sTGC", "Muon::STGC_RawDataContainer", "sTGCRDO", "sTgcDigitContainer", "sTGC_DIGITS",
          "STGC_RdoToDigitCfg"),
+        ("TGC", "TgcRdoContainer", "TGCRDO", "TgcDigitContainer", "TGC_DIGITS",
+         "TgcRdoToTgcDigitCfg"),
     )
     for detector, rdo_type, rdo_key, digit_type, digit_key, converter in conversions:
         rdo = f"{rdo_type}#{prefix}{rdo_key}"

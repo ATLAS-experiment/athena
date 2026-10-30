@@ -12,11 +12,12 @@ from VP1Algs.VP1AlgConfig import MuonRdoToDigitCfg
 
 
 class MuonRdoToDigitConfigTest(unittest.TestCase):
-    converters = ("MdtRdoToMdtDigitCfg", "MM_RdoToDigitCfg", "STGC_RdoToDigitCfg")
+    converters = ("MdtRdoToMdtDigitCfg", "MM_RdoToDigitCfg", "STGC_RdoToDigitCfg",
+                  "TgcRdoToTgcDigitCfg")
     rdos = ("MdtCsmContainer#MDTCSM", "Muon::MM_RawDataContainer#MMRDO",
-            "Muon::STGC_RawDataContainer#sTGCRDO")
+            "Muon::STGC_RawDataContainer#sTGCRDO", "TgcRdoContainer#TGCRDO")
     digits = ("MdtDigitContainer#MDT_DIGITS", "MmDigitContainer#MM_DIGITS",
-              "sTgcDigitContainer#sTGC_DIGITS")
+              "sTgcDigitContainer#sTGC_DIGITS", "TgcDigitContainer#TGC_DIGITS")
 
     def configure(self, collections, overlay=False):
         flags = initConfigFlags()
@@ -42,7 +43,7 @@ class MuonRdoToDigitConfigTest(unittest.TestCase):
         factories, log = self.configure(["MDTSimHitCollection#MDT_Hits"])
         for factory in factories:
             factory.assert_not_called()
-        self.assertEqual(log.debug.call_count, 3)
+        self.assertEqual(log.debug.call_count, 4)
         log.warning.assert_not_called()
 
     def test_empty_input_schedules_no_conversion(self):
@@ -51,12 +52,12 @@ class MuonRdoToDigitConfigTest(unittest.TestCase):
             factory.assert_not_called()
 
     def test_each_detector_is_independent(self):
-        for detector in range(3):
+        for detector in range(len(self.converters)):
             with self.subTest(detector=detector):
                 factories, log = self.configure([self.rdos[detector]])
                 for index, factory in enumerate(factories):
                     self.assertEqual(factory.call_count, int(index == detector))
-                self.assertEqual(log.debug.call_count, 2)
+                self.assertEqual(log.debug.call_count, 3)
                 log.warning.assert_not_called()
 
     def test_all_rdos_schedule_all_converters(self):
