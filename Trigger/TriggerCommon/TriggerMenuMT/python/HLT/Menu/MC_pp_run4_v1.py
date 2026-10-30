@@ -167,6 +167,7 @@ def addMCSignatures(chains):
         ChainProp(name='EF_e20_lhtight_ivarloose_L1ZAFB-25DPHI-eEM18M', l1SeedThresholds=['eEM18M'], groups=PrimaryPhIGroup+SingleElectronGroup),
 
         # multi electron
+        ChainProp(name='EF_2e12_lhvloose_L12eEM8L', groups=PrimaryPhIGroup+MultiElectronGroup), # ATR-33121 looser L1 / 5e34 studies
         ChainProp(name='EF_2e17_lhvloose_L12eEM18M', groups=PrimaryPhIGroup+MultiElectronGroup),
         ChainProp(name='EF_2e18_lhvloose_L12eEM18M', groups=PrimaryPhIGroup+MultiElectronGroup),
         ChainProp(name='EF_2e20_lhvloose_L12eEM18M', groups=PrimaryPhIGroup+MultiElectronGroup),
@@ -186,12 +187,20 @@ def addMCSignatures(chains):
 
         # multi photon
         ChainProp(name='EF_2g20_tight_icaloloose_L12eEM18M', groups=PrimaryPhIGroup+MultiPhotonGroup),
+        ChainProp(name='EF_2g20_tight_icaloloose_L12eEM8L', groups=PrimaryPhIGroup+MultiPhotonGroup), # ATR-33121 looser L1 / 5e34 studies
         ChainProp(name='EF_2g22_tight_L12eEM18M', groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='EF_g35_medium_g25_medium_L12eEM24L', l1SeedThresholds=['eEM24L','eEM24L'], groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='EF_g45_medium_g20_medium_L1eEM40L_2eEM18L', l1SeedThresholds=['eEM40L', 'eEM18L'], groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='EF_2g50_loose_L12eEM24L', groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='EF_2g25_loose_g15_loose_L12eEM24L', l1SeedThresholds=['eEM24L','eEM12L'], groups=PrimaryPhIGroup+MultiPhotonGroup),
         ChainProp(name='EF_2g25_medium_L12eEM24L', l1SeedThresholds=['eEM24L'], groups=PrimaryPhIGroup+MultiPhotonGroup),
+        ChainProp(name='EF_2g10_loose_L12eEM10L', l1SeedThresholds=['eEM10L'], groups=PrimaryPhIGroup+MultiPhotonGroup), # ATR-33084 TLA Studies
+        ChainProp(name='EF_2g10_tight_L12eEM10L', l1SeedThresholds=['eEM10L'], groups=PrimaryPhIGroup+MultiPhotonGroup), # ATR-33084 TLA Studies
+        ChainProp(name='EF_2g8_loose_L12eEM8L', l1SeedThresholds=['eEM8L'], groups=PrimaryPhIGroup+MultiPhotonGroup), # ATR-33084 TLA Studies
+        ChainProp(name='EF_2g8_tight_L12eEM8L', l1SeedThresholds=['eEM8L'], groups=PrimaryPhIGroup+MultiPhotonGroup), # ATR-33084 TLA Studies
+        ChainProp(name='EF_2g10_loose_L12eEM12L', l1SeedThresholds=['eEM12L'], groups=PrimaryPhIGroup+MultiPhotonGroup), # ATR-33084 TLA Studies
+        ChainProp(name='EF_2g10_tight_L12eEM12L', l1SeedThresholds=['eEM12L'], groups=PrimaryPhIGroup+MultiPhotonGroup), # ATR-33084 TLA Studies
+
         # low-mass diphoton
         ChainProp(name='EF_2g15_tight_25dphiAA_invmAA80_L1DPHI-M70-2eEM15M', l1SeedThresholds=['eEM15'], groups=PrimaryPhIGroup+MultiPhotonGroup),
 
@@ -235,6 +244,14 @@ def addMCSignatures(chains):
         # Phase-II Single egamma
         ChainProp(name='EF_e20_lhtight_ivarloose_L1eEM20M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']),
         ChainProp(name='EF_e22_lhtight_ivarloose_L1eEM22M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']),
+        ChainProp(name='EF_e22_lhtight_ivarloose_L1eEM22L', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']), # ATR-33121 looser L1 / 5e34 studies 
+        ChainProp(name='EF_e22_lhtight_L1eEM22L', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']), # ATR-33121 looser L1 / 5e34 studies 
+        ChainProp(name='EF_e22_lhmedium_ivarloose_L1eEM22L', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']), # ATR-33121 looser L1 / 5e34 studies 
+        ChainProp(name='EF_e22_lhmedium_L1eEM22L', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']), # ATR-33121 looser L1 / 5e34 studies 
+        ChainProp(name='EF_e22_lhloose_ivarloose_L1eEM22L', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']), # ATR-33121 looser L1 / 5e34 studies 
+        ChainProp(name='EF_e22_lhloose_L1eEM22L', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']), # ATR-33121 looser L1 / 5e34 studies 
+
+
         ChainProp(name='EF_e24_lhtight_ivarloose_L1eEM24M', groups=PrimaryPhIGroup+SingleElectronGroup, monGroups=['egammaMon:online','egammaMon:shifter_tp','caloMon:t0']),
         ChainProp(name='EF_g110_loose_L1eEM22M', groups=PrimaryPhIGroup+SinglePhotonGroup),
         # Phase-II Multi egamma
@@ -280,6 +297,8 @@ def addMCSignatures(chains):
         ChainProp(name='EF_tau40_mediumGNTau_tau35_mediumGNTau_03dRAB_L1cTAU35M_2cTAU30M_2jJ55_3jJ50', l1SeedThresholds=['cTAU35M','cTAU30M'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:t0']),
         ChainProp(name='EF_tau80_mediumGNTau_tau35_mediumGNTau_03dRAB30_L1eTAU80_2cTAU30M_DR-eTAU30eTAU20', l1SeedThresholds=['eTAU80','cTAU30M'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:online','tauMon:shifter']), 
         ChainProp(name='EF_tau80_mediumGNTau_tau60_mediumGNTau_03dRAB_L1eTAU80_2eTAU60', l1SeedThresholds=['eTAU80', 'eTAU60'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:t0']),
+        ChainProp(name='EF_tau40_mediumGNTau_tau30_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M', l1SeedThresholds=['cTAU30M','cTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:online','tauMon:shifter']), # ATR-33121 looser L1 / 5e34 studies 
+        ChainProp(name='EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M', l1SeedThresholds=['cTAU30M','cTAU20M'], groups=PrimaryPhIGroup+MultiTauGroup, monGroups=['tauMon:online','tauMon:shifter']), # ATR-33121 looser L1 / 5e34 studies 
 
         # tau LLP
         ChainProp(name='EF_tau180_mediumRNN_tracktwoLLP_L1eTAU120', groups=PrimaryPhIGroup+SingleTauGroup, monGroups=['tauMon:shifter']),
@@ -552,6 +571,7 @@ def addMCSignatures(chains):
         #-- dimuon primary triggers
         ChainProp(name='EF_2mu10_bJpsimumu_L12MU8F', groups=BphysicsGroup+PrimaryL1MuGroup),
         ChainProp(name='EF_2mu10_bUpsimumu_L12MU8F', groups=BphysicsGroup+PrimaryL1MuGroup),
+        ChainProp(name='EF_2mu10_bUpsimumu_L12MU5VF', groups=BphysicsGroup+PrimaryL1MuGroup), # ATR-33121 looser L1 / 5e34 studies 
 
         #-- RCP multiple candidate
         ChainProp(name='EF_mu10_l2mt_mu4_l2mt_bJpsimumu_L1MU10BOM', l1SeedThresholds=['MU10BOM']*2, groups=BphysicsGroup+PrimaryL1MuGroup),
@@ -661,6 +681,7 @@ def addMCSignatures(chains):
 
         # Electron+Muon
         ChainProp(name='EF_e7_lhmedium_L1eEM5_mu24_L1MU14FCH',l1SeedThresholds=['eEM5','MU14FCH'], groups=PrimaryPhIGroup+EgammaMuonGroup),
+        ChainProp(name='EF_e10_lhloose_mu12_L1eEM8L_MU5VF',l1SeedThresholds=['eEM8L','MU5VF'], groups=PrimaryPhIGroup+EgammaMuonGroup), # ATR-33121 looser L1 / 5e34 studies
         ChainProp(name='EF_e17_lhloose_mu14_L1eEM18L_MU8F', l1SeedThresholds=['eEM18L','MU8F'], groups=PrimaryPhIGroup+EgammaMuonGroup),
         ChainProp(name='EF_e12_lhloose_L1eEM10L_2mu10_L12MU8F', l1SeedThresholds=['eEM10L','MU8F'], groups=PrimaryPhIGroup+EgammaMuonGroup),
         ChainProp(name='EF_2e12_lhloose_mu10_L12eEM10L_MU8F', l1SeedThresholds=['eEM10L','MU8F'], groups=PrimaryPhIGroup+EgammaMuonGroup),
@@ -790,9 +811,9 @@ def addMCSignatures(chains):
         # HL-LHC TDR inspired chains
         ChainProp(name='EF_e10_lhloose_mu12_L1eEM10L_MU5VF', l1SeedThresholds=['eEM10L','MU5VF'], groups=PrimaryPhIGroup+EgammaMuonGroup),
         ChainProp(name='EF_e7_lhloose_mu20_L1MU12FCH', l1SeedThresholds=['eEM7','MU12FCH'], groups=PrimaryPhIGroup+EgammaMuonGroup),
-        ChainProp(name='EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel2c20XX1c20bgtwo85XX1c20gntau90_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['PROBEeTAU12']+5*['FSNOSEED'], groups=PrimaryPhIGroup+MuonTauGroup),
+        ChainProp(name='EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel2c20XX1c20bgtwo85XX1c20gntau90_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['PROBEeTAU12']+5*['FSNOSEED'], groups=PrimaryPhIGroup+TauBJetGroup),
         # without presel
-        ChainProp(name='EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['PROBEeTAU12']+5*['FSNOSEED'], groups=PrimaryPhIGroup+MuonTauGroup),
+        ChainProp(name='EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['PROBEeTAU12']+5*['FSNOSEED'], groups=PrimaryPhIGroup+TauBJetGroup), 
     ]
 
     chainsMC['Streaming'] += [

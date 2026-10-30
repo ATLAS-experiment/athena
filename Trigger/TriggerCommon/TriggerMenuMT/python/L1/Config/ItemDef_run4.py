@@ -34,3 +34,9 @@ class ItemDef_run4:
         MenuItem('L1_3jJ70'         ).setLogic( d.jJ70.x(3)             & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2jJ70_jXE80'   ).setLogic( d.jJ70.x(2) & d.jXE80   & physcond).setTriggerType(TT.calo)
         MenuItem('L1_2MU12FCH'      ).setLogic( d.MU12FCH.x(2)          & physcond).setTriggerType(TT.muon)
+
+        MenuItem('L1_2eEM8L'         ).setLogic( d.eEM8L.x(2)           & physcond).setTriggerType(TT.calo)     
+        MenuItem('L1_eEM22L'         ).setLogic( d.eEM22L               & physcond).setTriggerType(TT.calo)
+
+        MenuItem('L1_eEM8L_MU5VF'    ).setLogic( d.eEM8L & d.MU5VF      & physcond).setTriggerType(TT.calo)
+
