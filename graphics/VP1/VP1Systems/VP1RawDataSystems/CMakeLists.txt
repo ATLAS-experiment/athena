@@ -56,3 +56,12 @@ atlas_add_test( RpcDigitCuts
                 SOURCES test/RpcDigitCuts_test.cxx
                 LINK_LIBRARIES VP1Base
                 POST_EXEC_SCRIPT nopost.sh )
+
+# Qt built with -reduce-relocations requires -fPIC even for executables.
+# POSITION_INDEPENDENT_CODE would select -fPIE for these test executables,
+# which does not satisfy Qt's x86_64 preprocessor check.
+if( CMAKE_CXX_COMPILE_OPTIONS_PIC )
+   foreach( test_target VP1RawDataSystems_RpcDigitClick VP1RawDataSystems_RpcDigitCuts )
+      target_compile_options( ${test_target} PRIVATE ${CMAKE_CXX_COMPILE_OPTIONS_PIC} )
+   endforeach()
+endif()
