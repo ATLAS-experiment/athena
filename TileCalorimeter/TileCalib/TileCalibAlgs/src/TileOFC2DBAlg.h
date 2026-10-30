@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TileCalibAlgs_TileOFC2DBAlg_h
@@ -23,6 +23,7 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "AthenaKernel/IOVTime.h"
 
 //=== IOVDbTest includes
 #include "RegistrationServices/IIOVRegistrationSvc.h"
@@ -51,14 +52,14 @@ class TileOFC2DBAlg: public AthAlgorithm {
       "EventInfo", "EventInfo", "EventInfo key"};
 
     //===  properties
-    UnsignedIntegerProperty m_runIOVSince;
-    UnsignedIntegerProperty m_runIOVUntil;
-    UnsignedIntegerProperty m_lbnIOVSince;
-    UnsignedIntegerProperty m_lbnIOVUntil;
-    UnsignedIntegerProperty m_maxChan;
-    bool m_of2;
-    bool m_fixedPhases;
-    std::string m_runType;
+    Gaudi::Property<unsigned int> m_runIOVSince{this, "RunIOVSince", IOVTime::MINRUN};
+    Gaudi::Property<unsigned int> m_runIOVUntil{this, "RunIOVUntil", IOVTime::MAXRUN};
+    Gaudi::Property<unsigned int> m_lbnIOVSince{this, "LbnIOVSince", IOVTime::MINEVENT};
+    Gaudi::Property<unsigned int> m_lbnIOVUntil{this, "LbnIOVUntil", IOVTime::MAXEVENT};
+    Gaudi::Property<unsigned int> m_maxChan{this, "MaxChan", 1, "Number of channels for which OFCs will be created with fixed phases"};
+    Gaudi::Property<bool> m_of2{this, "OF2", true, "true => OF2, false => OF1"};
+    Gaudi::Property<bool> m_fixedPhases{this, "FixedPhases", true, "calculate OFCs for fixed phases"};
+    Gaudi::Property<std::string> m_runType{this, "RunType", "PHY", "PHY or LAS"};
 
     //=== non-property members
     ServiceHandle<IIOVRegistrationSvc> m_regSvc;
@@ -70,11 +71,11 @@ class TileOFC2DBAlg: public AthAlgorithm {
     //=== store all folders to be registered
     std::set<std::string> m_folders;
 
-    int m_nFixedPhases;
-    double m_phaseStep;
-    std::vector<std::string> m_modules;
+    Gaudi::Property<int> m_nFixedPhases{this, "FixedPhasesNumber", 100};
+    Gaudi::Property<double> m_phaseStep{this, "PhaseStep", 0.5};
+    Gaudi::Property<std::vector<std::string>> m_modules{this, "Modules", {"AUX01"}, "Modules for which OFC should be stored in DB"};
     std::vector<unsigned int> m_drawerIdxs;
-    bool m_creatAllModules;
+    Gaudi::Property<bool> m_creatAllModules{this, "CreateAllModules", true, "All missing modules is written to DB with zero size (empty)"};
 };
 
 #endif //TileCalibAlgs_TileOFC2DBAlg_h

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //=== Event Info
@@ -23,21 +23,7 @@
 TileOFC2DBAlg::TileOFC2DBAlg(const std::string& name, ISvcLocator* pSvcLocator)
     : AthAlgorithm(name, pSvcLocator)
     , m_regSvc("IOVRegistrationSvc", name)
-
 {
-  declareProperty("OF2",                m_of2            = true,"true => OF2, false => OF1");
-  declareProperty("RunIOVSince",        m_runIOVSince    = IOVTime::MINRUN );
-  declareProperty("RunIOVUntil",        m_runIOVUntil    = IOVTime::MAXRUN );
-  declareProperty("LbnIOVSince",        m_lbnIOVSince    = IOVTime::MINEVENT );
-  declareProperty("LbnIOVUntil",        m_lbnIOVUntil    = IOVTime::MAXEVENT );
-  declareProperty("FixedPhases",        m_fixedPhases    = true, "calculate OFCs for fixed phases" );
-  declareProperty("RunType",            m_runType        = "PHY", "PHY or LAS");
-
-  declareProperty("FixedPhasesNumber",   m_nFixedPhases   = 100);
-  declareProperty("PhaseStep",          m_phaseStep      = 0.5);
-  declareProperty("MaxChan",            m_maxChan        = 1, "Number of channels for which OFCs will be created with fixed phases");
-  declareProperty("Modules",            m_modules        = {"AUX01"}, "Modules for which OFC should be stored in DB");
-  declareProperty("CreateAllModules",   m_creatAllModules = true, "All missing modules is written to DB with zero size (empty)");
 }
   
 TileOFC2DBAlg::~TileOFC2DBAlg() {
@@ -47,7 +33,7 @@ TileOFC2DBAlg::~TileOFC2DBAlg() {
 //____________________________________________________________________________
 StatusCode TileOFC2DBAlg::initialize() {
 
-  ATH_MSG_INFO( "Initializing for " << m_runType );
+  ATH_MSG_INFO( "Initializing for " << m_runType.value() );
 
   //=== EventInfo key
   ATH_CHECK( m_eventInfoKey.initialize() );
@@ -105,8 +91,8 @@ StatusCode TileOFC2DBAlg::execute(const EventContext& ctx) {
 
   //=== build COOL folder name based on ???????
   std::string folder("/TILE/ONL01/FILTER/");
-  if (m_of2) folder += "OF2/" + m_runType;
-  else       folder += "OF1/" + m_runType;
+  if (m_of2) folder += "OF2/" + m_runType.value();
+  else       folder += "OF1/" + m_runType.value();
   m_folders.insert(folder);
 
   //=== create the folder layout
@@ -123,9 +109,9 @@ StatusCode TileOFC2DBAlg::execute(const EventContext& ctx) {
 
   // ---------- create fixed phases
   if (m_fixedPhases) {
-    ATH_MSG_DEBUG( "Fixed phases: " << m_fixedPhases 
-                   << ", number of fixed phases: " << m_nFixedPhases
-                   << ", phase step: " << m_phaseStep);
+    ATH_MSG_DEBUG( "Fixed phases: " << m_fixedPhases.value() 
+                   << ", number of fixed phases: " << m_nFixedPhases.value()
+                   << ", phase step: " << m_phaseStep.value());
 
     std::vector<float> phases;
     phases.reserve(m_nFixedPhases * 2 + 1);

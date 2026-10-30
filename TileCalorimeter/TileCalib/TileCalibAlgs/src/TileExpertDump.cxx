@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena includes
@@ -25,28 +25,7 @@
 
 TileExpertDump::TileExpertDump(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_emExpertOptions(0)
-  , m_tileHWID(nullptr)
-  , m_tileInfo(nullptr)
 {
-  declareProperty("PrintExpertEmscale"     , m_printExpertEmscale=false      ,"Switch on expert calibration chain printout");
-  declareProperty("PrintExpertEmscaleOnl"  , m_printExpertEmscaleOnl=false   ,"Switch on expert onl calibration chain printout");
-
-  declareProperty("useOflCisFitLin" , m_OflCisFitLin  = false, "Use calibration of OflCisFitLin");
-  declareProperty("useOflCisFitNln" , m_OflCisFitNln  = false, "Use calibration of OflCisFitNln");
-  declareProperty("useOflLasLin"    , m_OflLasLin     = false, "Use calibration of OflLasLin");
-  declareProperty("useOflLasNln"    , m_OflLasNln     = false, "Use calibration of OflLasNln");
-  declareProperty("useOflLasPart"   , m_OflLasPart    = false, "Use calibration of OflLasPart");
-  declareProperty("useOflCes"       , m_OflCes        = false, "Use calibration of OflCes");
-  declareProperty("useOflEms"       , m_OflEms        = false, "Use calibration of OflEms");
-  declareProperty("useOflLasLinPisa", m_OflLasLinPisa = false, "Use calibration of OflLasLinPisa");
-  declareProperty("useOflLasNlnPisa", m_OflLasNlnPisa = false, "Use calibration of OflLasNlnPisa");
-  declareProperty("useOflMinbias"   , m_OflMinbias    = false, "Use calibration of OflMinbias");
-  declareProperty("useOnlCisLin"    , m_OnlCisLin     = false, "Use calibration of OnlCisLin");
-  declareProperty("useOnlLasLin"    , m_OnlLasLin     = false, "Use calibration of OnlLasLin");
-  declareProperty("useOnlCes"       , m_OnlCes        = false, "Use calibration of OnlCes");
-  declareProperty("useOnlEms"       , m_OnlEms        = false, "Use calibration of OnlEms");
-  declareProperty("TileInfoName", m_infoName = "TileInfo");
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
@@ -74,7 +53,7 @@ StatusCode TileExpertDump::initialize() {
   m_tileExpertToolEmscale->setEmOptions(m_emExpertOptions);
 
   //=== Get TileInfo and set max ADC counts
-  CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
+  CHECK( detStore()->retrieve(m_tileInfo, m_infoName.value()) );
   m_i_ADCmax = m_tileInfo->ADCmax();
 
   return StatusCode::SUCCESS;

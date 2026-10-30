@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECALIBALGS_TILELASERCALIBALG_H
@@ -43,8 +43,8 @@ class TileLaserCalibAlg: public AthAlgorithm {
     // Name of the output ROOT file
     // Trees names are defined in the respective tools (Default,...)
 
-    TFile* m_outfile;
-    std::string m_fileName;
+    TFile* m_outfile{nullptr};
+    Gaudi::Property<std::string> m_fileName{this, "FileName", "LaserCalib.root"};
 
     //Run number and type
     // Type is defined as follows:
@@ -54,8 +54,8 @@ class TileLaserCalibAlg: public AthAlgorithm {
     // 2  : Cosmics
     // 15 : Test
 
-    int m_runNo;
-    int m_runType;
+    int m_runNo{0};
+    int m_runType{0};
 
 };
 

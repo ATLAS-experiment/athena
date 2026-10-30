@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileLaserLinearityCalibTool.h"
@@ -32,27 +32,9 @@
 /**********************************************************/
 
 TileLaserLinearityCalibTool::TileLaserLinearityCalibTool(const std::string& type, const std::string& name,const IInterface* pParent):
-  AthAlgTool(type, name, pParent),
-  m_tileHWID (nullptr),
-  m_cabling (nullptr),
-  m_toolRunNo(0),
-  m_ADC_problem(0),
-  m_las_filter(0),
-  m_las_requ_amp(0),
-  m_hrate(0),
-  m_flow(0),
-  m_head_temp(0),
-  m_las_time(0),
-  m_PMT1_ADC_prev(),
-  m_PMT2_ADC_prev(),
-  m_first_filter(0),
-  m_last_evt_filter(0),
-  m_n_same_filt_evts(0),
-  m_complete_turn(0)
+  AthAlgTool(type, name, pParent)
 {
   declareInterface<ITileCalibTool>( this );
-  declareProperty("toolNtuple", m_toolNtuple="h3000");
-  declareProperty("TileDQstatus", m_dqStatusKey = "TileDQstatus");
 
 // creating multi-dim arrays on the heap and initialize all elements to zeros
   m_LG_PMT = new double[NFILTERS][NPMTS]();
@@ -598,7 +580,7 @@ StatusCode TileLaserLinearityCalibTool::writeNtuple(int runNumber, int runType, 
 
   m_toolRunNo = runNumber;
 
-  TTree *t = new TTree(m_toolNtuple.c_str(), "TileLaserCalib-Ntuple");
+  TTree *t = new TTree(m_toolNtuple.value().c_str(), "TileLaserCalib-Ntuple");
   t->Branch("RunNumber",&m_toolRunNo, "runNo/I");
   t->Branch("ADC_status",&m_ADC_problem, "ADC/I");
   t->Branch("RequestedAmp",&m_las_requ_amp, "requamp/D");

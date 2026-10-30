@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILETOPCALIBALG_H
@@ -38,17 +38,17 @@ class TileTopCalibAlg : public AthAlgorithm
   /**
    * Run number
    */
-  int m_runNumber;
+  Gaudi::Property<int> m_runNumber{this, "RunNumber", 0};
 
   /**
    * Run type
    */
-  int m_runType;
+  Gaudi::Property<int> m_runType{this, "RunType", 0};
 
   /**
    * Name of output file with ntuples
    */
-  std::string m_fileName;
+  Gaudi::Property<std::string> m_fileName{this, "FileName", "TileCalibNtuple.root"};
 
   /**
    * Vector of algtools to call
@@ -59,7 +59,7 @@ class TileTopCalibAlg : public AthAlgorithm
   /**
    * Pointer to the ROOT file
    */
-  TFile *m_rootFile;
+  TFile *m_rootFile{nullptr};
 
 };
 

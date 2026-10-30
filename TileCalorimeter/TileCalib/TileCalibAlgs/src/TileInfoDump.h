@@ -55,44 +55,44 @@ class TileInfoDump: public AthAlgorithm {
     StatusCode finalize();
 
   private:
-    bool m_isOnline;
+    Gaudi::Property<bool> m_isOnline{this, "AthenaIsOnline", false, "Availability of COOL folders depends on Athena mode"};
 
     void printEmscale();
-    bool m_printEmscale;
+    Gaudi::Property<bool> m_printEmscale{this, "PrintEmscale", false, "Switch on calibration chain printout"};
 
     void printEmscaleOnl();
-    bool m_printEmscaleOnl;
+    Gaudi::Property<bool> m_printEmscaleOnl{this, "PrintEmscaleOnl", false, "Switch on online calibration chain printout"};
 
     void printLaser();
-    bool m_printLaser;
+    Gaudi::Property<bool> m_printLaser{this, "PrintLaser", false, "Switch on all laser constants printout"};
 
     void printIntegrator();
-    bool m_printIntegrator;
+    Gaudi::Property<bool> m_printIntegrator{this, "PrintIntegrator", false, "Switch on integrator printout"};
 
     void printPedestals();
-    bool m_printPedestals;
+    Gaudi::Property<bool> m_printPedestals{this, "PrintPedestals", false, "Switch on Pedstals print out"};
 
     void printTimingCorrections();
-    bool m_printTimingCorrections;
+    Gaudi::Property<bool> m_printTimingCorrections{this, "PrintTimingCorrections", false, "Switch on Timing Corrections print out"};
 
     void printPulseShapes();
-    bool m_printPulseShapes;
-    float m_printPulseShapesStep;
+    Gaudi::Property<bool> m_printPulseShapes{this, "PrintPulseShapes", false, "Switch on Pulse Shape print out"};
+    Gaudi::Property<float> m_printPulseShapesStep{this, "PrintPulseShapesStep", 0.5, "Time step (ns) of PulseShapes print out"};
 
     void printBadChannels(const EventContext& ctx);
-    bool m_printBadChannels;
+    Gaudi::Property<bool> m_printBadChannels{this, "PrintBadChannels", false, "Switch on Bad Channels print out"};
 
     void printBadCells(const EventContext& ctx);
-    bool m_printBadCells;
+    Gaudi::Property<bool> m_printBadCells{this, "PrintBadCells", false, "Switch on Bad Cells print out"};
 
     void printOfcs();
-    bool m_printOfcsCool;
+    Gaudi::Property<bool> m_printOfcsCool{this, "PrintOfcsCool", false, "Switch on OFC print out"};
 
     void printMuID();
-    bool m_printMuID;
+    Gaudi::Property<bool> m_printMuID{this, "PrintMuID", false, "Switch on MuID threshold print out"};
 
     void print1gNoise();
-    bool m_print1gNoise;
+    Gaudi::Property<bool> m_print1gNoise{this, "Print1gNoise", false, "Switch on 1g noise print out"};
 
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,
       "EventInfo", "EventInfo", "EventInfo key"};
@@ -122,24 +122,24 @@ class TileInfoDump: public AthAlgorithm {
     //=== a handle on the Hist/TTree registration service 
     ServiceHandle<ITHistSvc> m_thistSvc;
 
-    const TileHWID* m_tileHWID;
-    const TileID* m_tileID;
+    const TileHWID* m_tileHWID{nullptr};
+    const TileID* m_tileID{nullptr};
     SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,
 	"CaloDetDescrManager", "CaloDetDescrManager", "SG Key for CaloDetDescrManager in the Condition Store" };
 
-    TH2F* m_h_badCellA;
-    TH2F* m_h_badCellBC;
-    TH2F* m_h_badCellD;
-    TH2F* m_h_badCellGap;
-    TH2F* m_h_badCell;
+    TH2F* m_h_badCellA{nullptr};
+    TH2F* m_h_badCellBC{nullptr};
+    TH2F* m_h_badCellD{nullptr};
+    TH2F* m_h_badCellGap{nullptr};
+    TH2F* m_h_badCell{nullptr};
 
-    unsigned int m_printOfcRos;
-    unsigned int m_printOfcDrawer;
-    unsigned int m_printOfcChannel;
+    Gaudi::Property<unsigned int> m_printOfcRos{this, "PrintOfcRos", 0, "Print OFC for this ros (0 by default)"};
+    Gaudi::Property<unsigned int> m_printOfcDrawer{this, "PrintOfcDrawer", 0, "Print OFC for this drawer (0 by default)"};
+    Gaudi::Property<unsigned int> m_printOfcChannel{this, "PrintOfcChannel", 0, "Print OFC for this channel (0 by default)"};
 
     //=== TileInfo
-    std::string m_infoName;
-    const TileInfo* m_tileInfo;
+    Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo"};
+    const TileInfo* m_tileInfo{nullptr};
     int m_i_ADCmax = 0;
 };
 

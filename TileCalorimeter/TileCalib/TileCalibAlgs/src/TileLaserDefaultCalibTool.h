@@ -63,16 +63,16 @@ class TileLaserDefaultCalibTool : public AthAlgTool, virtual public ITileCalibTo
  private:
 
   // Name of ntuple of the Tool
-  std::string m_toolNtuple;
+  Gaudi::Property<std::string> m_toolNtuple{this, "toolNtuple", "h3000"};
 
   std::string m_rawChannelContainerName;
   std::string m_laserContainerName;
 	
-  bool m_pisaMethod2;
-  bool m_isLaserCalib;
+  Gaudi::Property<bool> m_pisaMethod2{this, "pisaMethod2", true};
+  bool m_isLaserCalib{false};
   
-  const TileHWID* m_tileHWID;    
-  const TileCablingService* m_cabling;
+  const TileHWID* m_tileHWID{nullptr};
+  const TileCablingService* m_cabling{nullptr};
   ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
     "TileCondToolEmscale", "TileCondToolEmscale", "Tile em scale tool"};
   ToolHandle<ITileBadChanTool> m_tileBadChanTool{this,
@@ -80,7 +80,7 @@ class TileLaserDefaultCalibTool : public AthAlgTool, virtual public ITileCalibTo
   ToolHandle<ITileStuckBitsProbsTool> m_stuckBitsProbs{this,
     "StuckBitsProbsTool", "", "Tile stuck bits probabilities tool"};
 
-  SG::ReadHandleKey<TileDQstatus> m_dqStatusKey;
+  SG::ReadHandleKey<TileDQstatus> m_dqStatusKey{this, "TileDQstatus", "TileDQstatus"};
   SG::ReadHandleKey<TileRawChannelContainer> m_rawChannelContainerKey{this,
       "TileRawChannelContainer", "TileRawChannelOpt2", "Tile raw channel container"};
   SG::ReadHandleKey<TileLaserObject> m_laserContainerKey{this,
@@ -95,14 +95,14 @@ class TileLaserDefaultCalibTool : public AthAlgTool, virtual public ITileCalibTo
   // http://atlas-tile-laser.web.cern.ch/
   //
 
-  int m_toolRunNo;                   // The run number
-  int m_ADC_problem;                 // Expert tag for LastROD problem noticfication
-  int m_las_filter;                  // Filter wheel position
-  float m_las_requ_amp;             // Requested amplitude
-  float m_hrate;                    // Humidity rate (in %)
-  float m_flow;                     // Gas flow in diodes box (in L/h)
-  float m_head_temp;                // Temperature of the LASER head
-  float m_las_time;                 // Event time
+  int m_toolRunNo{0};                // The run number
+  int m_ADC_problem{0};              // Expert tag for LastROD problem noticfication
+  int m_las_filter{0};               // Filter wheel position
+  float m_las_requ_amp{0};          // Requested amplitude
+  float m_hrate{0};                 // Humidity rate (in %)
+  float m_flow{0};                  // Gas flow in diodes box (in L/h)
+  float m_head_temp{0};             // Temperature of the LASER head
+  float m_las_time{0};              // Event time
 
   // LASERII
   float (*m_ratio_LASERII)[NGAINS][NPARTITIONS][NDRAWERS][NCHANNELS][NGAINS];       // Calib coefficients computed for this run (for all diodes, PMTs, phocal, CIS)
@@ -153,14 +153,14 @@ class TileLaserDefaultCalibTool : public AthAlgTool, virtual public ITileCalibTo
 
 
   // LASERI
-  float m_PMT[NPMTS];                                // Mean value for box PMTs
-  float m_PMT_S[NPMTS];                              // Corresponding RMS
-  float m_diode[NDIODES_LASER1];                     // Mean value for box Photodiodes
-  float m_diode_S[NDIODES_LASER1];                   // Corresponding RMS
-  float m_diode_Ped[NDIODES_LASER1];                 // Corresponding pedestal values
-  float m_diode_Alpha[NDIODES_LASER1];               // Corresponding alpha peaks
-  float m_diode_SPed[NDIODES_LASER1];                // Sigma of pedestals
-  float m_diode_SAlpha[NDIODES_LASER1];              // RMS of alpha spectra
+  float m_PMT[NPMTS]{};                              // Mean value for box PMTs
+  float m_PMT_S[NPMTS]{};                            // Corresponding RMS
+  float m_diode[NDIODES_LASER1]{};                   // Mean value for box Photodiodes
+  float m_diode_S[NDIODES_LASER1]{};                 // Corresponding RMS
+  float m_diode_Ped[NDIODES_LASER1]{};               // Corresponding pedestal values
+  float m_diode_Alpha[NDIODES_LASER1]{};             // Corresponding alpha peaks
+  float m_diode_SPed[NDIODES_LASER1]{};              // Sigma of pedestals
+  float m_diode_SAlpha[NDIODES_LASER1]{};            // RMS of alpha spectra
   float (*m_ratio)[NPARTITIONS][NDRAWERS][NCHANNELS][NGAINS];       // Calib coefficients computed for this run (for all diodes)
   float (*m_ratio_S)[NPARTITIONS][NDRAWERS][NCHANNELS][NGAINS];     // Corresponding RMS
   float (*m_ratio_good)[NPARTITIONS][NDRAWERS][NCHANNELS][NGAINS];       // Calib coefficients computed for this run (for all diodes)
@@ -174,8 +174,8 @@ class TileLaserDefaultCalibTool : public AthAlgTool, virtual public ITileCalibTo
   float (*m_diode_ratio_sigma_high)[NDIODES];
 
 
-  RunningStat* m_rs_diode_signal[NDIODES_LASER1];
-  RunningStat* m_rs_PMT_signal[NPMTS];
+  RunningStat* m_rs_diode_signal[NDIODES_LASER1]{};
+  RunningStat* m_rs_PMT_signal[NPMTS]{};
   RunningStat* (*m_rs_ratio)[NPARTITIONS][NDRAWERS][NCHANNELS][NGAINS];
   RunningStat* (*m_rs_ratio_good)[NPARTITIONS][NDRAWERS][NCHANNELS][NGAINS];
   RunningStat* (*m_rs_pmt_ratios)[NDRAWERS][NCHANNELS][NGAINS]; 
@@ -200,11 +200,11 @@ class TileLaserDefaultCalibTool : public AthAlgTool, virtual public ITileCalibTo
   float  (*m_HVSet)[NDRAWERS][NCHANNELS]; 
 
   // Local results - not sent to ROOTuple
-  int m_PMT1_ADC_prev;
-  int m_PMT2_ADC_prev;
+  int m_PMT1_ADC_prev{0};
+  int m_PMT2_ADC_prev{0};
 
-  bool m_LASERII;
-  long long m_evtNr;
+  bool m_LASERII{false};
+  long long m_evtNr{0};
   int m_have_pedestals{0};
   int m_have_alpha{0};
   int m_have_led{0};

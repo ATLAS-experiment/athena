@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILEDIGINOISECALIBALG_H
@@ -74,20 +74,20 @@ class TileDigiNoiseCalibAlg: public AthAlgorithm {
     }
 
     // If data should be put in calib mode
-    bool m_calibMode;
+    Gaudi::Property<bool> m_calibMode{this, "CalibMode", true};
 
     // by default we use channels
-    bool m_usePMT;
+    Gaudi::Property<bool> m_usePMT{this, "usePMT", false};
 
     // Toggle usage of average correlation calcualtion or rigorous
     // Default: Rigorous
-    bool m_doAvgCorr;
+    Gaudi::Property<bool> m_doAvgCorr{this, "DoAvgCorr", false};
     
     // Toggle usage of robust method to calculate covariance matrix or standard method    
     // Default: use standard                                                              
-    bool m_doRobustCov;
+    Gaudi::Property<bool> m_doRobustCov{this, "DoRobustCov", false};
 
-    SG::ReadHandleKey<TileDQstatus> m_dqStatusKey;
+    SG::ReadHandleKey<TileDQstatus> m_dqStatusKey{this, "TileDQstatus", "TileDQstatus"};
     SG::ReadHandleKey<TileDigitsContainer> m_digitsContainerKey{this,
       "TileDigitsContainer", "TileDigitsCnt", "Tile digits container"};
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,
@@ -96,30 +96,26 @@ class TileDigiNoiseCalibAlg: public AthAlgorithm {
   // Tools / storegate info
     ToolHandle<TileRawChannelBuilderFlatFilter> m_adderFilterAlgTool{this,
       "TileAdderFlatFilter","TileRawChannelBuilderFlatFilter/TileAdderFlatFilter","Tile adder flat filter"};
-    TileBeamElemContByteStreamCnv* m_beamCnv;
-    const TileCablingService* m_cabling;
-    TileOFCorrelation* m_tileOFCorrelation;
+    TileBeamElemContByteStreamCnv* m_beamCnv{nullptr};
+    const TileCablingService* m_cabling{nullptr};
+    TileOFCorrelation* m_tileOFCorrelation{nullptr};
 
     // Identifiers
-    const TileID* m_tileID;
-    const TileHWID* m_tileHWID;
+    const TileID* m_tileID{nullptr};
+    const TileHWID* m_tileHWID{nullptr};
 
-    const uint32_t* m_cispar;
+    const uint32_t* m_cispar{nullptr};
 
     // Name of ntuple and file
-    std::string m_ntupleID;
-    std::string m_file;
-    int64_t m_treeSize;
-    int m_nSamples;
-//    unsigned int m_nDrawers;
+    Gaudi::Property<std::string> m_ntupleID{this, "NtupleID", "Digi_NoiseCalib"};
+    Gaudi::Property<std::string> m_file{this, "FileNamePrefix", "Digi_NoiseCalib"};
+    Gaudi::Property<int64_t> m_treeSize{this, "TreeSize", 16000000000LL};
+    Gaudi::Property<int> m_nSamples{this, "NSamples", 7};
 
     // Container Parameters
     std::string m_digitsContainer;
-    std::string m_beamElemContainer;
-    /*  std::string m_flatRawChannelContainer;
-     std::string m_fitRawChannelContainer;
-     std::string m_optRawChannelContainer;*/
-    std::string m_dspRawChannelContainer;
+    Gaudi::Property<std::string> m_beamElemContainer{this, "TileBeamElemContainer", "TileBeamElemCnt"};
+    Gaudi::Property<std::string> m_dspRawChannelContainer{this, "TileRawChannelContainerDsp", "TileRawChannelCnt"};
 
     using Tile = TileCalibUtils;
 
@@ -129,19 +125,19 @@ class TileDigiNoiseCalibAlg: public AthAlgorithm {
     double (*m_meanAmp_ij)[Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_CHAN][Tile::MAX_GAIN];
 
     // event number
-    int m_evtNr;
+    int m_evtNr{-1};
     int (*m_evt)[Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_GAIN];
 
     // Trigger items
-    int m_time;
-    int m_year;
-    int m_month;
-    int m_day;
-    int m_yday;
-    int m_hour;
-    int m_min;
-    int m_run;
-    int m_trigType;
+    int m_time{0};
+    int m_year{0};
+    int m_month{0};
+    int m_day{0};
+    int m_yday{0};
+    int m_hour{0};
+    int m_min{0};
+    Gaudi::Property<int> m_run{this, "RunNumber", 0};
+    int m_trigType{0};
     uint8_t (*m_ros)[Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_GAIN];
     uint8_t (*m_drawer)[Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_GAIN];
     uint8_t (*m_channel)[Tile::MAX_DRAWER][Tile::MAX_CHAN][Tile::MAX_GAIN];

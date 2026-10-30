@@ -50,42 +50,8 @@
 
 TileRawChNoiseCalibAlg::TileRawChNoiseCalibAlg(const std::string& name, ISvcLocator* pSvcLocator)
  : AthAlgorithm(name,pSvcLocator)
-  , m_beamCnv(nullptr)
-  , m_cabling(nullptr)
-  , m_tileID(nullptr)
-  , m_tileHWID(nullptr)
-  , m_cispar(nullptr)
   //, m_nDrawers(0)
-  , m_time(0)
-  , m_year(0)
-  , m_month(0)
-  , m_day(0)
-  , m_yday(0)
-  , m_hour(0)
-  , m_min(0)
-  , m_run(0)
-  , m_trigType(0)
 {
-
-  declareProperty("TileDigitsContainer", m_digitsContainer = "TileDigitsCnt");    
-  declareProperty("TileBeamElemContainer", m_beamElemContainer = "TileBeamElemCnt");
-  declareProperty("doFit" , m_doFit  = true);
-  declareProperty("doFixed", m_doFixed = true); 
-  declareProperty("doOpt" , m_doOpt  = true); 
-  declareProperty("doDsp" , m_doDsp  = true); 
-  declareProperty("doOF1" , m_doOF1  = true); 
-  declareProperty("doMF" , m_doMF  = true); 
-  declareProperty("SaveHist", m_saveHist = false); // write all histograms to output file
-  declareProperty("InvertChanRatio", m_invertChanRatio = true); // swap two sigmas and invert ratio if it is above 1.0 (channel fit only)
-  declareProperty("MaskBadChannels",m_maskBadChannels = true);
-  declareProperty("UseforCells" , m_UseforCells  = 2); // Fit=0, Fixed=1,  Opt=2, Dsp=3, OF1=4, MF=5
-  declareProperty("CalibMode", m_calibMode = true);  
-  declareProperty("UsePMT", m_usePMT = false);  
-  declareProperty("RunNumber", m_run=0);
-  declareProperty("FileNamePrefix", m_file="RawCh_NoiseCalib");
-  declareProperty("NtupleID", m_ntupleID="RawCh_NoiseCalib");
-  declareProperty("TreeSize", m_treeSize = 16000000000LL);
-  declareProperty("TileDQstatus", m_dqStatusKey = "TileDQstatus");
 
   m_evtNr=-1;
 
@@ -281,7 +247,7 @@ StatusCode TileRawChNoiseCalibAlg::FirstEvt_initialize() {
 
   CHECK( detStore()->retrieve(m_tileHWID) );
 
-  ATH_MSG_INFO( "calibMode " << m_calibMode  );
+  ATH_MSG_INFO( "calibMode " << m_calibMode.value()  );
 
 
   // set event number to 0 before first event
@@ -326,7 +292,7 @@ StatusCode TileRawChNoiseCalibAlg::execute(const EventContext& ctx) {
 
     bool calibMode  = (dqStatus->calibMode() == 1);
     if ( calibMode != m_calibMode ) {
-      ATH_MSG_INFO( "Overwriting calib mode [" << m_calibMode << "] by one from data: " << calibMode );
+      ATH_MSG_INFO( "Overwriting calib mode [" << m_calibMode.value() << "] by one from data: " << calibMode );
       m_calibMode = calibMode;
     }
 
@@ -381,7 +347,7 @@ StatusCode TileRawChNoiseCalibAlg::finalize() {
   } else if (m_UseforCells == 5) {
     if (m_doMF) finalCell();
   } else {
-    ATH_MSG_WARNING( "unknown rawchannel type used for cells" << m_UseforCells );
+    ATH_MSG_WARNING( "unknown rawchannel type used for cells" << m_UseforCells.value() );
   }
 
   std::ostringstream sStr;
@@ -396,18 +362,18 @@ StatusCode TileRawChNoiseCalibAlg::finalize() {
     trig_str = "Unk";
   }
 
-  sStr << m_file << "_" << m_run  << "_" << trig_str << ".root";
+  sStr << m_file.value() << "_" << m_run.value()  << "_" << trig_str << ".root";
   m_file = sStr.str();
-  ATH_MSG_INFO( "Writing calibrations to file " << m_file );
+  ATH_MSG_INFO( "Writing calibrations to file " << m_file.value() );
 
   // Create output file: for now creating file for just this
   // algorithm; want to add to ntuple file eventually??
-  TFile* fout = new TFile(m_file.c_str(), "recreate");
+  TFile* fout = new TFile(m_file.value().c_str(), "recreate");
 
   // Create tree with branches
-  TTree* t = new TTree(m_ntupleID.c_str(), "Tile_RC_NoiseCalib-Ntuple");
+  TTree* t = new TTree(m_ntupleID.value().c_str(), "Tile_RC_NoiseCalib-Ntuple");
 
-  t->Branch("RunNumber", &m_run, "RunNumber/I");
+  t->Branch("RunNumber", &m_run.value(), "RunNumber/I");
   t->Branch("TrigType", &m_trigType, "TrigType/I");
   t->Branch("Time", &m_time, "Time/I");
   t->Branch("Year", &m_year, "Year/I");

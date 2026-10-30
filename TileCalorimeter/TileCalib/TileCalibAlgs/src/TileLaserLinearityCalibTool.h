@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECALIBALG_TILELASERLINEARITYCALIBTOOL_H
@@ -56,19 +56,19 @@ class TileLaserLinearityCalibTool : public AthAlgTool, virtual public ITileCalib
  private:
 
   // Name of ntuple of the Tool
-  std::string m_toolNtuple;
+  Gaudi::Property<std::string> m_toolNtuple{this, "toolNtuple", "h3000"};
 
   std::string m_rawChannelContainerName;
   std::string m_laserContainerName;
-  SG::ReadHandleKey<TileDQstatus> m_dqStatusKey;
+  SG::ReadHandleKey<TileDQstatus> m_dqStatusKey{this, "TileDQstatus", "TileDQstatus"};
 
   SG::ReadHandleKey<TileRawChannelContainer> m_rawChannelContainerKey{this,
       "TileRawChannelContainer", "TileRawChannelOpt2", "Input Tile raw channel container"};
   SG::ReadHandleKey<TileLaserObject> m_laserContainerKey{this,
       "TileLaserObject", "TileLaserObject", "Input Tile laser object"};
 
-  const TileHWID* m_tileHWID;    
-  const TileCablingService* m_cabling;
+  const TileHWID* m_tileHWID{nullptr};
+  const TileCablingService* m_cabling{nullptr};
   ToolHandle<TileCondToolEmscale>  m_tileToolEmscale{this,
     "TileCondToolEmscale", "TileCondToolEmscale", "Tile em scale tool"};
 
@@ -81,14 +81,14 @@ class TileLaserLinearityCalibTool : public AthAlgTool, virtual public ITileCalib
   // Here we are working on linearity runs, it explains the [8] in the arrays
   // we store one value per filter position
 
-  int m_toolRunNo;                   // The run number
-  int m_ADC_problem;                 // Expert tag for LastROD problem noticfication
-  int m_las_filter;                  // Filter wheel position
-  double m_las_requ_amp;             // Requested amplitude
-  double m_hrate;                    // Humidity rate (in %)
-  double m_flow;                     // Gas flow in diodes box (in L/h)
-  double m_head_temp;                // Temperature of the LASER head
-  double m_las_time;                 // Event time
+  int m_toolRunNo{0};                // The run number
+  int m_ADC_problem{0};              // Expert tag for LastROD problem noticfication
+  int m_las_filter{0};               // Filter wheel position
+  double m_las_requ_amp{0};          // Requested amplitude
+  double m_hrate{0};                 // Humidity rate (in %)
+  double m_flow{0};                  // Gas flow in diodes box (in L/h)
+  double m_head_temp{0};             // Temperature of the LASER head
+  double m_las_time{0};              // Event time
   double (*m_LG_PMT)[NPMTS];                // Mean value for box PMTs
   double (*m_LG_PMT_S)[NPMTS];              // Corresponding RMS
   double (*m_LG_diode)[NDIODES];              // Mean value for box Photodiodes
@@ -112,15 +112,15 @@ class TileLaserLinearityCalibTool : public AthAlgTool, virtual public ITileCalib
  
   // Local results - not sent to ROOTuple
 
-  int m_PMT1_ADC_prev[2];
-  int m_PMT2_ADC_prev[2];
+  int m_PMT1_ADC_prev[2]{};
+  int m_PMT2_ADC_prev[2]{};
 
-  int m_first_filter;      // Value of the first filter position
+  int m_first_filter{0};   // Value of the first filter position
 
-  int m_last_evt_filter;   // Filter position of the previous event
-  int m_n_same_filt_evts;  // How many events in a row with the same filter setting
+  int m_last_evt_filter{0}; // Filter position of the previous event
+  int m_n_same_filt_evts{0}; // How many events in a row with the same filter setting
 
-  bool m_complete_turn;
+  bool m_complete_turn{false};
 
   RunningStat* (*m_HG_diode_signal)[NDIODES];
   RunningStat* (*m_HG_PMT_signal)[NPMTS];

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
@@ -31,13 +31,7 @@
 TileLaserCalibAlg::TileLaserCalibAlg(const std::string& name, ISvcLocator* pSvcLocator)
     : AthAlgorithm(name, pSvcLocator)
   , m_RobSvc("ROBDataProviderSvc" , name)
-  , m_outfile(nullptr)
-  , m_fileName("LaserCalib.root")
-  , m_runNo(0)
-  , m_runType(0)
 {
-
-  declareProperty("FileName", m_fileName);
 }
 
 TileLaserCalibAlg::~TileLaserCalibAlg() {
@@ -112,7 +106,7 @@ StatusCode TileLaserCalibAlg::finalize() {
   ATH_MSG_INFO( "Finalizing TileLaserCalibAlg" );
 
   // Writing the corresponding ROOTfile
-  m_outfile = new TFile(m_fileName.c_str(), "recreate");
+  m_outfile = new TFile(m_fileName.value().c_str(), "recreate");
 
   /** Take the map of corrections from the tools */
 
