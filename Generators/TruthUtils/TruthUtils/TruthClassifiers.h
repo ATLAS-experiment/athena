@@ -134,7 +134,7 @@ inline ParticleType defTypeOfPhoton(ParticleOrigin PhotOrig)
   return BkgPhoton;
 }
 
-/// @brief Determine a jet's origin from its mother particles (BSM/Higgs first, then top > Z > W > QCD).
+/// @brief Determine a jet's origin from its mother particles (Higgs/BSM mothers return immediately; otherwise the last matching top, Z or W mother wins, with W not overriding top, and QCD only if none of them was found).
 template <class T> ParticleOrigin defJetOrig(const T& allJetMothers) {
   ParticleOrigin partOrig = NonDefined;
   for (const auto& it: allJetMothers) {

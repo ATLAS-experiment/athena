@@ -44,9 +44,9 @@ public:
     }
 
     /// Function that does the work to identify loops
-    /// Pass the event of interest. 'force' allows the event to be re-searched even if it was previously.
+    /// Pass the event of interest. 'force' allows the event to be re-searched even if it was previously searched.
     int findLoops(const Evt* evt, bool force) {
-        // If the event is empty, return -1 (an error code, basically)
+        // If no event is passed, return -1 (an error code, basically)
         if (!evt) return -1;
         // If we have already indexed the event and are not forced to do it again, return
         if (evt == m_evt &&  !force) return 0;
@@ -104,7 +104,7 @@ public:
             }
             // If the number of unknown particles has not changed, we are done iterating
             if (minincycle == unknown) break;
-            // If the number of unknown particles has changed, update at iterate again
+            // If the number of unknown particles has changed, update and iterate again
             minincycle = std::min(minincycle, unknown);
         } // Outer loop - iterate until all particles have been dealt with
 

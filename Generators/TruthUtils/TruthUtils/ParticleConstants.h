@@ -8,7 +8,7 @@
 /// @file ParticleConstants.h
 ///
 /// A number of `constexpr` particle constants to avoid hardcoding them
-/// directly in various places.  This is not meant ot be a complete list
+/// directly in various places.  This is not meant to be a complete list
 /// of everything that could be needed, please look that up from the PDG
 /// database, this is just for numbers that would otherwise have to be
 /// hard-coded because it can't (practically) do that lookup.
@@ -52,7 +52,7 @@ namespace ParticleConstants
     /// the mass of the D0 meson (in MeV)
     constexpr double DZeroMassInMeV = 1864.8;
 
-    // the mass of the J/psi meson (in MeV)
+    /// the mass of the J/psi meson (in MeV)
     constexpr double JpsiMassInMeV = 3096.916;
 
     /// the mass of the neutral B0 meson (in MeV)
@@ -106,7 +106,7 @@ namespace ParticleConstants
     /// the mass of the D0 meson (in MeV)
     constexpr double DZeroMassInMeV = 1864.84;
 
-    // the mass of the J/psi meson (in MeV)
+    /// the mass of the J/psi meson (in MeV)
     constexpr double JpsiMassInMeV = 3096.900;
 
     /// the mass of the neutral B0 meson (in MeV)
@@ -114,6 +114,8 @@ namespace ParticleConstants
 
     /// the mass of the charged B meson (in MeV)
     constexpr double BPlusMassInMeV = 5279.41;
+    /// the mass of the Bs meson (in MeV)
+    constexpr double BsMassInMeV = 5366.93;
 
     /// the mass of the neutron (in MeV)
     constexpr double neutronMassInMeV = 939.5654205;

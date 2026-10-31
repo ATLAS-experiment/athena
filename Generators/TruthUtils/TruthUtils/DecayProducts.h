@@ -8,8 +8,9 @@
 #include <algorithm>
 #include <map>
 #include <vector>
-/// @brief A class that allows for a fast calculation of the flavours of the descendants of
-/// a vertex, particle, or a set of particles
+/// @brief A class that allows for a fast counting of the flavours of the decay products of
+/// a particle, the outgoing particles of a vertex, or the members of a set of particles
+/// (pd: counts by signed PDG ID, apd: by absolute PDG ID)
 template <class T> class DecayBase {
 public:
     void count(const int c) { m_pids[c]++; m_apids[std::abs(c)]++; m_size++;}

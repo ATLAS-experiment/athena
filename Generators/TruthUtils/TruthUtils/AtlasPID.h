@@ -59,7 +59,9 @@ static const std::array<int,TABLESIZE> double_spin = {
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0,
   +0, +0, +0, +0, +0, +0, +0, +0, +0, +0
 };
-
+/// PDG Rule 1:
+/// Particles are given positive numbers, antiparticles negative numbers. The PDG convention
+/// for mesons is used, so that K+ and B+ are particles.
 
 static const int DQUARK = 1;
 static const int UQUARK = 2;
@@ -67,6 +69,8 @@ static const int SQUARK = 3;
 static const int CQUARK = 4;
 static const int BQUARK = 5;
 static const int TQUARK = 6;
+/// PDG Rule 11a:
+/// The standard fourth generation of fermions is included by analogy with the first three.
 static const int BPRIME = 7; // 4th Generation quark
 static const int TPRIME = 8; // 4th Generation quark
 static const int QUARK_LIMIT = BPRIME; // Quark pdg_ids less than this are considered in (R-)Hadrons and Diquarks
@@ -129,6 +133,8 @@ static const int LAMBDAB0 = 5122;
 static const int PSI2S = 20443;
 
 /// PDG Rule 12:
+/// Occasionally program authors add their own states. To avoid confusion, these should be
+/// flagged by setting nnr = 99.
 /// Generator defined PDG ID values for right handed neutrinos and
 /// corresponding W+ boson from a Left-Right symmetric Standard Model
 /// extension. (Defined for some MadGraph+Pythia8 samples and
@@ -243,7 +249,13 @@ template <> inline bool isDiquark(const int& p){ auto value_digits = DecodedPID(
 /// PDG rule 5a:
 /// The numbers specifying the meson’s quark content conform to the convention
 /// nq1= 0 and nq2 >= nq3. The special case K0L is the sole exception to this rule.
-/// PDG rule 5C:
+/// PDG rule 5b:
+/// The quark numbers of flavorless, light (u, d, s) mesons are: 11 for the member of the
+/// isotriplet (pi0, rho0, ...), 22 for the lighter isosinglet (eta, omega, ...), and 33 for the heavier
+/// isosinglet (eta', phi, ...). Since isosinglet mesons are often large mixtures of u ubar + d dbar and s sbar
+/// states, 22 and 33 are assigned by mass and do not necessarily specify the dominant
+/// quark composition.
+/// PDG rule 5c:
 /// The special numbers 310 and 130 are given to the K0S and K0L respectively.
 /// APID: The special code K0 is used when a generator uses K0S/K0L
 /// APID: states with fourth generation quarks are not mesons
@@ -271,7 +283,7 @@ template <> inline bool isMeson(const DecodedPID& p){
 }
 template <> inline bool isMeson(const int& p){ auto value_digits = DecodedPID(p); return isMeson(value_digits);}
 
-/// APID states with s,sbar are not considered quarkonium
+/// APID: states with s,sbar are not considered quarkonium
 template <class T> inline bool isQuarkonium(const T& p){return isQuarkonium(p->pdg_id());}
 template <> inline bool isQuarkonium(const DecodedPID& p) {
   if (!isMeson(p)) return false; //< all quarkonia are mesons
@@ -414,7 +426,9 @@ template <class T> inline bool isPythia8Specific(const T& p){return isPythia8Spe
 template <> inline bool isPythia8Specific(const DecodedPID& p){ return (p.ndigits() == 7 && p(0) == 9 && p(1) == 9);}
 template <> inline bool isPythia8Specific(const int& p){ auto value_digits = DecodedPID(p); return isPythia8Specific(value_digits);}
 
-/// PDG Rule 12:
+/// PDG rule 12:
+/// Occasionally program authors add their own states. To avoid confusion, these should be
+/// flagged by setting nnr = 99.
 /// APID: Helper function for right-handed neutrino states
 /// These are generator defined PDG ID values for right handed
 /// neutrinos. (Defined for some MadGraph+Pythia8 samples and
@@ -439,6 +453,9 @@ template <> inline bool isGenSpecific(const int& p){
 template <class T> inline bool isGeantino(const T& p){return isGeantino(p->pdg_id());}
 template <> inline bool isGeantino(const int& p){ return (std::abs(p) ==  GEANTINO0 || std::abs(p) ==  GEANTINOPLUS);}
 
+/// PDG rule 7:
+/// The gluon, when considered as a gauge boson, has official number 21. In codes for glueballs,
+/// however, 9 is used to allow a notation in close analogy with that of hadrons.
 /// APID: Definition of Glueballs: SM glueballs 99X (X=1,5), 999Y (Y=3,7)
 template <class T> inline bool isGlueball(const T& p) { return isGlueball(p->pdg_id()); }
 template <> inline bool isGlueball(const DecodedPID& p) {
@@ -876,7 +893,7 @@ template <class T> inline bool isTransportable(const T& p){return isTransportabl
 template <> inline bool isTransportable(const DecodedPID& p){ return isPhoton(p.pid()) || isGeantino(p.pid()) || isHadron(p) || isLepton(p.pid()) || p.pid() == DARKPHOTON;}
 template <> inline bool isTransportable(const int& p){ auto value_digits = DecodedPID(p); return isTransportable(value_digits);}
 
-/// Av: we implement here an ATLAS-specific convention: all particles which are 99xxxxx are fine.
+/// AV: we implement here an ATLAS-specific convention: all particles which are 99xxxxx are fine.
 template <class T> inline bool isValid(const T& p){return isValid(p->pdg_id());}
 template <> inline bool isValid(const DecodedPID& p){
   return p.pid() !=0 && ( isQuark(p) || isLepton(p) || isBoson(p) || isGlueball(p) ||
@@ -973,7 +990,7 @@ template <> inline bool isWeaklyDecayingBHadron(const DecodedPID& p){ return isW
 // APID: This function selects C-Hadrons which predominantly decay weakly. (Commonly used definition in GeneratorFilters package.)
 // 4[1-3]1 L = J = 0, S = 0
 // 4[1-4][1-3]2 J = 1/2, n_r = 0, n_L =0
-// NB Omitting pid = 4322 (Xi'_C+) a this undergoes an EM rather than
+// NB Omitting pid = 4322 (Xi'_C+) as this undergoes an EM rather than
 // weak decay.  (There was an old version of Herwig that decayed it
 // weakly, but this was fixed in Herwig 7.)
 template <class T> inline bool isWeaklyDecayingCHadron(const T& p) {return isWeaklyDecayingCHadron(p->pdg_id());}
@@ -985,7 +1002,7 @@ template <> inline bool isWeaklyDecayingCHadron(const int& p) {
            pid == 4122  || // Lambda_c+
            pid == 4132  || // Xi_c0
            pid == 4232  || // Xi_c+
-           pid == 4212  || // Xi_c0
+           pid == 4212  || // Sigma_c+
            pid == 4332  || // Omega_c0
            pid == 4412  || // Xi_cc+
            pid == 4422  || // Xi_cc++

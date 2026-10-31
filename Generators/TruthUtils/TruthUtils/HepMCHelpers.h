@@ -49,7 +49,7 @@ namespace MC
 
 #include "AtlasPID.h"
 
-  /// @brief Identify if the particle with given PDG ID would not interact with the detector, i.e. not a neutrino or WIMP
+  /// @brief Identify if the particle with given PDG ID would interact with the detector, i.e. not a neutrino or WIMP
   template <class T> inline bool isInteracting(const T& p) { return isStrongInteracting<T>(p) || isEMInteracting<T>(p) || isGeantino<T>(p); }
 
   /// @brief Identify if the particle with given PDG ID would produce ID tracks but not shower in the detector if stable
@@ -70,7 +70,7 @@ namespace MC
   /// @brief Identify if the particle is physical, i.e. is stable or decayed
   template <class T> inline bool isPhysical(const T& p) { return isStable<T>(p) || isDecayed<T>(p); }
 
-  /// @brief Determine if the particle is stable at the generator (not det-sim) level,
+  /// @brief Determine if the particle is stable at the generator (not det-sim) level.
   template <class T> inline bool isGenStable(const T& p) { return isStable<T>(p) && !HepMC::is_simulation_particle<T>(p);}
 
   /// @brief Identify if the particle is considered stable at the post-detector-sim stage
@@ -90,7 +90,7 @@ namespace MC
   /// @brief Identify a photon with zero energy. Probably a workaround for a generator bug.
   template <class T> inline bool isZeroEnergyPhoton(const T&  p) { return isPhoton<T>(p) && p->e() == 0;}
 
-  /// @brief Identify a special non-interacting particles.
+  /// @brief Identify special non-interacting particles.
   template <class T> inline bool isSpecialNonInteracting(const T& p) {
     const int apid = std::abs(p->pdg_id());
     if (apid == NU_E || apid == NU_MU || apid == NU_TAU) return true; //< neutrinos
@@ -101,7 +101,7 @@ namespace MC
   }
 
   /// @brief Function to get a mother of particle. MCTruthClassifier legacy.
-  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */
+  /** This can be used for HepMC3::GenParticlePtr, HepMC3::ConstGenParticlePtr or xAOD::TruthParticle* */
   template <class T> T findMother(T thePart) {
     auto partOriVert = thePart->production_vertex();
     if (!partOriVert) return nullptr;
@@ -132,8 +132,8 @@ namespace MC
     return theMoth;
   }
 
-  /// @brief Function to find a particle in container
-  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */
+  /// @brief Function to find in the container the particle that p descends from in the simulation (see HepMC::is_sim_descendant).
+  /** This can be used for HepMC3::GenParticlePtr, HepMC3::ConstGenParticlePtr or xAOD::TruthParticle* */
   template <class C, class T> T findMatching(C TruthContainer, T p) {
     T ptrPart = nullptr;
     if (!p) return ptrPart;
@@ -182,7 +182,7 @@ namespace MC
   }
 
   /// @brief Function to classify the vertex as hard scattering vertex.
-  /// AV: This is MCtruthClassifier legacy. Note that this function will not capture some cases of the HardScattering vertices.
+  /// AV: This is MCTruthClassifier legacy. Note that this function will not capture some cases of the HardScattering vertices.
   /// The function should be improved in the future.
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */
   template <class T> bool isHardScatteringVertex(T pVert) {
@@ -207,10 +207,10 @@ namespace MC
     return false;
 }
 
-  /// @brief Function to classify the particle.
-  /// AV: This is MCtruthClassifier legacy.
+  /// @brief Function to check if the particle is a hadron or descends from one; sets the parent hadron, fromTau and fromBSM.
+  /// AV: This is MCTruthClassifier legacy.
   /// The function should be improved in the future.
-  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex* */
+  /** This can be used for HepMC3::GenParticlePtr, HepMC3::ConstGenParticlePtr or xAOD::TruthParticle* */
     template <class T, class U> bool isFromHadron(T p, U& hadron, bool &fromTau, bool &fromBSM) {
     if (isHadron(p)&&!isBeam(p))  return true; // trivial case
     auto vtx = p->production_vertex();
@@ -234,7 +234,7 @@ namespace MC
 
   /// @brief Function to find the end vertex of a particle.
   /// This algorithm allows for 1->1 decays.
-  /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/
+  /** This can be used for HepMC3::GenParticlePtr, HepMC3::ConstGenParticlePtr or xAOD::TruthParticle* */
   template <class T> auto findSimulatedEndVertex(T thePart) -> decltype(thePart->end_vertex()) {
      decltype(thePart->end_vertex()) EndVert = thePart->end_vertex();
      decltype(thePart->end_vertex()) pVert(nullptr);
@@ -261,7 +261,7 @@ namespace MC
     return EndVert;
   }
 
-  /// @brief Function to find the stable particle descendants of the given vertex.
+  /// @brief Function to find the descendants of the given vertex: its outgoing particles and, recursively, the products of those that decayed (not only the stable ones).
   /** This can be used for HepMC3::GenVertexPtr, HepMC3::ConstGenVertexPtr or xAOD::TruthVertex*  and particle counterparts*/
   template <class V> auto findFinalStateParticles(V theVert) -> decltype(theVert->particles_out()) {
     if (!theVert) return {};
