@@ -3,6 +3,10 @@
 */
 
 #include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
+#include <limits>
+#include <stdexcept>
+#include <cmath> //std::abs
+#include <algorithm> //std::max
 
 float BTaggingToolUtil::getExtendedFloat(const nlohmann::json& config) {
   if (config.is_string() && (config.get<std::string>() == "inf" || config.get<std::string>() == "+inf")) {
@@ -54,7 +58,7 @@ BTaggingToolUtil::varType BTaggingToolUtil::getVariableType(const std::string& v
     return varType::abseta;
   } else {
     throw std::runtime_error("Variable '" + varName + "' not defined in BTaggingToolUtil.");
-    return varType::unknown;
+    
   }
 }
 
@@ -70,7 +74,7 @@ std::string BTaggingToolUtil::getVariableName(const varType vType)
     return "abseta";
   } else {
     throw std::runtime_error("Variable type " + std::to_string(static_cast<int>(vType)) + " not defined in BTaggingToolUtil.");
-    return "unknown";
+    
   }
 }
 

@@ -6,6 +6,7 @@
 #include "xAODBTaggingEfficiency/BTaggingLargeREfficiencyJsonTool.h"
 #include <functional>
 #include <fstream>
+using json = nlohmann::ordered_json;
 
 BTaggingLargeREfficiencyJsonTool::BTaggingLargeREfficiencyJsonTool ( const std::string &name ) :
   asg::AsgTool ( name )
@@ -393,7 +394,7 @@ BTaggingLargeREfficiencyJsonTool::LargeRMCMCHandler::LargeRMCMCHandler(
     const json& jsonConfig, JetQuantityGetter funcGetJetQuantity)
   // The bounds are loaded by the parent class, the json config should have an entry called content that should contain the MC-MC SF
   // e.g. jsonConfig = { "binVariables": {"pT": [250, 300 ] , "mass": [50 , 75]}, "content":  {"SF": 0.9, uncerts:{ "SF_uncert_1": 0.1, "SF_uncert_2": 0.03}} }
-  : BTaggingBoundsHandler(jsonConfig, funcGetJetQuantity)
+  : BTaggingBoundsHandler(jsonConfig, std::move(funcGetJetQuantity))
 { 
 
   // Check that the jsonConfig contains the entry "content" 
