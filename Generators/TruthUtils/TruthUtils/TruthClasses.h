@@ -216,7 +216,7 @@ namespace MCTruthPartClassifier {
       "OtherBSM",
       "MultiBoson"};
 
-      /** the vector of particle out come */
+      /** the vector of particle outcome */
       std::vector<std::string> sParticleOutCome{
       "NonDefinedOutCome",
       "UnknownOutCome",
