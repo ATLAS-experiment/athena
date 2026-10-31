@@ -21,7 +21,6 @@ _onnx_to_triton_map = {
     "BTagging/20250310/GN2XTauV00/antikt10ufo/network.onnx"          : "BTagging_network_e8d5e9a3059b",
     "BTagging/20250912/GN3XPV01/antikt10ufo/network.onnx"            : "BTagging_network_08105bb8c1d6",
     "BTagging/20260805/GN3EPCLV01/antikt4empflow/network.onnx"       : "BTagging_network_c87686aa79c5",
-    # "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx"           : "BTagging_network_9f8aadb82b76", # This model is commented out because at the time of submitting, it did not work on Triton. The code falls back to direct ONNX reading
     "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx"  : "JetCalibTools_bbJESJMS_calibFactor_80138d800ac5",
     "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" : "JetCalibTools_bbJESJMS_calibFactor_fefb85f452f9",
 }
@@ -447,11 +446,7 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
         "SV1HL": {},
 
         # Large-R jet taggers
-        "gn2xv00": {"X"},
-        "gn2xv01": {"X"},
-        "gn2xwithmassv00": {"X"},
         "GN2Xv02": {"X", "L"},
-        "GN2Xv00": {"X"},
         "GN2XTauV00": {"X", "L"},
         "GN3XV00": {"X"},
         "GN3XPV01": {"X"},

@@ -512,7 +512,7 @@ def PHYSLITECfg(flags):
         'Kt4EMPFlowEventShape.Density',
         'Kt4EMPFlowNeutEventShape.Density',
         'TauTracks.flagSet.trackLinks',
-        'AnalysisLargeRJets.pt.eta.phi.m.numConstit.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.DetectorY.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2.R10TruthLabel_R22v1.R10TruthLabel_R21Precision_2022v1.GhostBHadronsFinalCount.GhostCHadronsFinalCount.GN2Xv01_phbb.GN2Xv01_phcc.GN2Xv01_ptop.GN2Xv01_pqcd',
+        'AnalysisLargeRJets.pt.eta.phi.m.numConstit.JetConstitScaleMomentum_pt.JetConstitScaleMomentum_eta.JetConstitScaleMomentum_phi.JetConstitScaleMomentum_m.DetectorEta.DetectorY.ECF1.ECF2.ECF3.Tau1_wta.Tau2_wta.Tau3_wta.Split12.Split23.Qw.D2.C2.R10TruthLabel_R22v1.R10TruthLabel_R21Precision_2022v1.GhostBHadronsFinalCount.GhostCHadronsFinalCount.bJR10v01_pt.bJR10v01_mass.GN3XPV01_phbb.GN3XPV01_phcc.GN3XPV01_phtautauhad.GN3XPV01_pqcdbb.GN3XPV01_pqcdbx.GN3XPV01_pqcdcx.GN3XPV01_pqcdll.GN3XPV01_ptop.GN3XPV01_pWqq',
     ]
 
     # Output stream    

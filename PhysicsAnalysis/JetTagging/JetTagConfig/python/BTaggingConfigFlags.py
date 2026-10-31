@@ -137,7 +137,6 @@ def getNNs(flags):
     ] if isRun3Derivation(flags) else []
     
     lrj_paths = [
-             "BTagging/20230705/gn2xv01/antikt10ufo/network.onnx",
              "BTagging/20261022/GN2Xv02/antikt10ufo/network.onnx",
              "BTagging/20261022/GN2XTauV00/antikt10ufo/network.onnx",
              "BTagging/20261022/GN3XPV01/antikt10ufo/network.onnx",

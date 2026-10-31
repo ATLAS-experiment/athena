@@ -12,6 +12,11 @@ from AthenaConfiguration.Enums import LHCPeriod
 import re
 import warnings
 
+# FTAG decorations on the UFO large-R jets, used by the Xbb calibration (GN3XPV01_hbb_bjr)
+_largeRJetFTagDecorations = ['bJR10v01_pt', 'bJR10v01_mass'] + [
+    f'GN3XPV01_p{flavour}' for flavour in
+    ['hbb', 'hcc', 'htautauhad', 'qcdbb', 'qcdbx', 'qcdcx', 'qcdll', 'top', 'Wqq']]
+
 
 def _resolveJetCollectionName(jetCollection):
     """Map the PHYSLITE jet collection aliases onto the actual collection names."""
@@ -159,10 +164,8 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg.decorator.SuppressOutputDependence=True
             if self.jetCollection == 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets' :
                 extraInputs = [
-                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.GN2Xv01_phbb"),
-                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.GN2Xv01_phcc"),
-                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.GN2Xv01_pqcd"),
-                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.GN2Xv01_ptop")]
+                    ( 'xAOD::JetContainer' , f"StoreGateSvc+{self.jetCollection}.{decoration}")
+                    for decoration in _largeRJetFTagDecorations]
                 config.setExtraInputs (extraInputs)
 
         # Set up shallow copy if needed and not yet done
@@ -172,8 +175,7 @@ class PreJetAnalysisConfig (ConfigBlock) :
             alg.output = config.copyName (self.containerName)
             alg.outputType = 'xAOD::JetContainer'
             if self.jetCollection == 'AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets' :
-                alg.declareDecorations = ['GN2Xv01_phbb', 'GN2Xv01_phcc',
-                                          'GN2Xv01_pqcd', 'GN2Xv01_ptop']
+                alg.declareDecorations = _largeRJetFTagDecorations
 
         config.addOutputVar (self.containerName, 'pt', 'pt', auxType="float")
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True, auxType="float")

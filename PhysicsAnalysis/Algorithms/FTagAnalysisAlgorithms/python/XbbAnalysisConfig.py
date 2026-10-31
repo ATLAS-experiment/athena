@@ -15,7 +15,7 @@ class XbbConfig (ConfigBlock):
                         meta={'role':'containerRef'})
         self.addOption('XbbWP', 'FlatMassQCDEff_0p25', type=str,
                        info="the Xbb tagging WP." )
-        self.addOption('Xbbtagger', 'GN2Xv01', type=str,
+        self.addOption('Xbbtagger', 'GN3XPV01_hbb_bjr', type=str,
                        info="the output name of the Xbb tagger - should match the first level key of the calibration json file." )
         self.addOption('calibFile', None, type=str,
                        info="path to a Xbb JSON calibration file.")
