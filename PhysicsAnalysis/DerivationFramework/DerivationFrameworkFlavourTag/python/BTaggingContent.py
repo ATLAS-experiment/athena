@@ -92,7 +92,6 @@ def BTaggingLargeRContent(flags: AthConfigFlags, jetcol: str) -> list[str]:
     jet_content = _get_variable_list(collection=jetcol, aux_list=large_r_jet_truth_aux)
 
     xbb_aux_vars: list[str] = []
-    xbb_aux_vars += _get_large_r_discriminant_vars(name="GN2Xv01", extra_flavours=[])
     xbb_aux_vars += _get_large_r_discriminant_vars(name="GN2Xv02", extra_flavours=[])
     xbb_aux_vars += _get_large_r_discriminant_vars(
         name="GN2XTauV00",

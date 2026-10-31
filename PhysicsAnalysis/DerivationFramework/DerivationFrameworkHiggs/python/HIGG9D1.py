@@ -517,7 +517,7 @@ def HIGG9D1Cfg(flags):
 
     # FTAG Xbb extra content
     extraList = []
-    for tagger in ["GN2Xv01", "GN2Xv02"]:
+    for tagger in ["GN2Xv02"]:
         for score in ["phbb", "phcc", "ptop", "pqcd"]:
             extraList.append(f"{tagger}_{score}")
     HIGG9D1SlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraList)]

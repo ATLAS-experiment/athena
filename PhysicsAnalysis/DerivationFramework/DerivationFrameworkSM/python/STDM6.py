@@ -267,13 +267,6 @@ def STDM6CoreCfg(flags, name_tag='STDM6', StreamName='StreamDAOD_STDM6', Trigger
                                             "AntiKt10UFOCSSKJets.NumTrkPt1000.TrackWidthPt1000.GhostMuonSegmentCount.EnergyPerSampling.GhostTrack"]
 
 
-    # FTAG Xbb extra content
-    extraList = []
-    for tagger in ["GN2Xv00", "GN2XWithMassv00", "GN2Xv01"]:
-        for score in ["phbb", "phcc", "ptop", "pqcd"]:
-            extraList.append(f"{tagger}_{score}")
-    STDM6SlimmingHelper.ExtraVariables += ["AntiKt10UFOCSSKSoftDropBeta100Zcut10Jets." + ".".join(extraList)]
- 
     # Truth extra content
     # ---> extetnding deafult PHYS conttents with:
     #      - AntiKt4EMTTopoJets 

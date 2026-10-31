@@ -22,11 +22,18 @@ LineNumber,VariableName,Type,Description
 21,Split23,vector<float>,Kt distance between subjets during merging
 22,Qw,vector<float>,Qw (minimum pair-wise invariant mass) observable for top jet tagging
 23,constituentLinks,vector<vector<ElementLink<DataVector<xAOD::IParticle> > > >,Link from large-radius jets to constituents (e.g. UFOs)
-24,GN2Xv01_phbb,vector<float>,Probability that the jet is higgs -> bb (maintained by the flavor tagging group)
-25,GN2Xv01_ptop,vector<float>,Probability that the jet is top (maintained by the flavor tagging group)
-26,GN2Xv01_pqcd,vector<float>,Probability that the jet is QCD (maintained by the flavor tagging group)
-27,GN2Xv01_phcc,vector<float>,Probability that the jet is higgs -> cc (maintained by the flavor tagging group)
-28,GhostBHadronsFinalCount,vector<int>,Number of ghost-associated b-hadrons
-29,GhostCHadronsFinalCount,vector<int>,Number of ghost-associated c-hadrons
-30,R10TruthLabel_R21Precision_2022v1,vector<int>,Large-R jet truth label (top/W/Z/Higgs/QCD) following R21 recommendations
-31,R10TruthLabel_R22v1,vector<int>,Large-R jet truth label (top/W/Z/Higgs/QCD) following preliminary R22 recommendations
+24,bJR10v01_pt,vector<float>,Jet pT after the bJR10v01 bb-jet energy and mass regression (maintained by the flavor tagging group)
+25,bJR10v01_mass,vector<float>,Jet mass after the bJR10v01 bb-jet energy and mass regression (maintained by the flavor tagging group)
+26,GN3XPV01_phbb,vector<float>,Probability that the jet is higgs -> bb (maintained by the flavor tagging group)
+27,GN3XPV01_phcc,vector<float>,Probability that the jet is higgs -> cc (maintained by the flavor tagging group)
+28,GN3XPV01_phtautauhad,vector<float>,Probability that the jet is higgs -> hadronic tautau (maintained by the flavor tagging group)
+29,GN3XPV01_pqcdbb,vector<float>,Probability that the jet is QCD with at least two b-hadrons (maintained by the flavor tagging group)
+30,GN3XPV01_pqcdbx,vector<float>,Probability that the jet is QCD with exactly one b-hadron (maintained by the flavor tagging group)
+31,GN3XPV01_pqcdcx,vector<float>,Probability that the jet is QCD with c-hadrons and no b-hadron (maintained by the flavor tagging group)
+32,GN3XPV01_pqcdll,vector<float>,Probability that the jet is QCD without heavy-flavour hadrons (maintained by the flavor tagging group)
+33,GN3XPV01_ptop,vector<float>,Probability that the jet is top (maintained by the flavor tagging group)
+34,GN3XPV01_pWqq,vector<float>,Probability that the jet is W -> qq (maintained by the flavor tagging group)
+35,GhostBHadronsFinalCount,vector<int>,Number of ghost-associated b-hadrons
+36,GhostCHadronsFinalCount,vector<int>,Number of ghost-associated c-hadrons
+37,R10TruthLabel_R21Precision_2022v1,vector<int>,Large-R jet truth label (top/W/Z/Higgs/QCD) following R21 recommendations
+38,R10TruthLabel_R22v1,vector<int>,Large-R jet truth label (top/W/Z/Higgs/QCD) following preliminary R22 recommendations
