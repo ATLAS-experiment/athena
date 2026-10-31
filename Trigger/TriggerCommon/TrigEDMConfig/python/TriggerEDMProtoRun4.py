@@ -968,10 +968,10 @@ TriggerHLTListProtoRun4 = [
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersFSAux.nCells', 'BS ESD', 'Calo'),
 
     # tau
-    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLC',                             'BS ESD AODFULL', 'Tau', [InViews('tauCaloMVAViews')]),
+    ('xAOD::CaloClusterContainer#HLT_TopoCaloClustersLC',                             'BS ESD AODFULL', 'Tau', [InViews('tauCaloMVAViews'), InViews('tauCaloLCMVAViews')]),
     ('xAOD::CaloClusterTrigAuxContainer#HLT_TopoCaloClustersLCAux.nCells.CENTER_MAG', 'BS ESD AODFULL', 'Tau'),
 
-    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloMVAOnly',                      'BS ESD AODFULL',         'Tau', [InViews('tauCaloMVAViews')]),
+    ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloMVAOnly',                      'BS ESD AODFULL',         'Tau', [InViews('tauCaloMVAViews'), InViews('tauCaloLCMVAViews')]),
     ('xAOD::TauJetAuxContainer#HLT_TrigTauRecMerged_CaloMVAOnlyAux.',               'BS ESD AODFULL',         'Tau'),
 
     ('xAOD::TauJetContainer#HLT_TrigTauRecMerged_CaloHits',                                        'BS ESD AODFULL', 'Tau', [InViews('tauCaloHits_HitZViews')]),
