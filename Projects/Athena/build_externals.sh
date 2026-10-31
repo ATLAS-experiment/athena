@@ -10,7 +10,7 @@ ATLAS_PROJECT_DIR=$(cd $(dirname ${BASH_SOURCE[0]}) && pwd)
 ATLAS_EXT_PROJECT_NAME="AthenaExternals"
 ATLAS_BUILDTYPE="Release"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=110
-                        -DLCG_VERSION_POSTFIX="_ATLAS_7"
+                        -DLCG_VERSION_POSTFIX="_ATLAS_9"
                         -DCMAKE_CUDA_STANDARD=20 # See: ATLINFR-6204
                         -DATLAS_GAUDI_SOURCE="URL;https://gitlab.cern.ch/atlas/Gaudi/-/archive/v41r0.000/Gaudi-v41r0.000.tar.gz;URL_MD5;e3a0a34c35b026b047e1209d66e87e1f"
                         -DATLAS_ACTS_SOURCE="URL;https://github.com/acts-project/acts/releases/download/v48.3.0/acts-v48.3.0.tar.gz;URL_HASH;SHA256=df50eee0789079acaa64fa8b1d8333428d77e1d9f2ab653c0c45f6e457fffa4a"
