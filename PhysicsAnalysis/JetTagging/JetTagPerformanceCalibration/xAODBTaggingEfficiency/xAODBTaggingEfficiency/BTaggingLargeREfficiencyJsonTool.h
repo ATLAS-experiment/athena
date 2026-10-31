@@ -19,10 +19,11 @@
 #include <map>
 #include <ostream>
 #include <sstream>
-#include <stdexcept>
 #include <string>
 #include <vector>
-using json = nlohmann::ordered_json;
+#include <memory>
+
+
 
 class BTaggingLargeREfficiencyJsonTool: public asg::AsgTool,
                                         virtual public IBTaggingLargeREfficiencyJsonTool
@@ -54,7 +55,7 @@ class BTaggingLargeREfficiencyJsonTool: public asg::AsgTool,
   Gaudi::Property<float> m_minPt {this, "MinPt", -1 /*MeV*/, "Minimum jet pT cut (in MeV)"};
   Gaudi::Property<float> m_maxEta {this, "MaxEta", 2.5, "Maximum jet eta cut"};
  
-  json m_json_config;
+  nlohmann::ordered_json m_json_config;
   std::map<int, std::string> m_labelMap;
   std::map<int, std::string> m_labelMapMCMC;
 
@@ -63,7 +64,7 @@ class BTaggingLargeREfficiencyJsonTool: public asg::AsgTool,
   
   class LargeRMCMCHandler : public BTaggingBoundsHandler {
     public:
-      LargeRMCMCHandler(const json& jsonConfig, JetQuantityGetter funcGetJetQuantity);
+      LargeRMCMCHandler(const nlohmann::ordered_json& jsonConfig, JetQuantityGetter funcGetJetQuantity);
       // Prevent handler from being copied forcing passing them by (const) references or using pointers.
       // It ensures that the code is efficient memory wise as no duplicate can be created 
       // The handlers should only be stored in vectors or maps and used directly basically 

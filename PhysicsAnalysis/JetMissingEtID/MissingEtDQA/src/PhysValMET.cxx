@@ -168,6 +168,7 @@ namespace MissingEtDQA {
     if (m_detailLevel >= 10) {
 
       //loop through jet types
+      const std::string metRebuiltPrefix{"MET_Rebuilt_"};
       for (const auto& jet_type : m_jet_types){
         //define variables
         std::string name_met;
@@ -175,7 +176,7 @@ namespace MissingEtDQA {
         std::string dir;
 
         //Create and Register histograms for Rebuilt
-        std::vector <std::string> met_type = {"MET_Rebuilt_"};
+        std::vector <std::string> met_type = {metRebuiltPrefix};
         ATH_MSG_DEBUG("****STARTING****");
 
         //loop through EMPFlow and EMTopo
@@ -485,6 +486,8 @@ namespace MissingEtDQA {
     }
 
     //Jets
+    const std::string finalClusStr{"FinalClus"};
+    const std::string finalTrkStr{"FinalTrk"};
     for (std::size_t i = 0; i < m_jet_types.size(); ++i) {
       const auto& jet_type = m_jet_types.at(i);
       const auto& jetKey = m_jetKeys.at(i);
@@ -579,7 +582,7 @@ namespace MissingEtDQA {
 
       if((*met)["PVSoftTrk"]) trksource = (*met)["PVSoftTrk"]->source();
 
-      if( met::buildMETSum("FinalTrk", met.get(), trksource).isFailure() ) {
+      if( met::buildMETSum(finalTrkStr, met.get(), trksource).isFailure() ) {
         ATH_MSG_ERROR("Building MET FinalTrk sum failed.");
         return StatusCode::FAILURE;
       }
@@ -590,7 +593,7 @@ namespace MissingEtDQA {
       ATH_MSG_INFO("Starting SoftClus for  MET rebuild");
 
       if((*met)["SoftClus"]) clsource = (*met)["SoftClus"]->source();
-      if( met::buildMETSum("FinalClus", met.get(), clsource).isFailure() )
+      if( met::buildMETSum(finalClusStr, met.get(), clsource).isFailure() )
       {
         ATH_MSG_ERROR("Building MET FinalClus sum failed.");
         return StatusCode::FAILURE;
@@ -685,10 +688,10 @@ namespace MissingEtDQA {
 
       //Fill dPhi for Met Reb
       //For leading and subleading jets
-      (m_MET_dPhi[met_name]).at(0)->Fill( P4Helpers::deltaPhi( (*met)["FinalClus"]->phi(),leadPhi ), weight );
-      (m_MET_dPhi[met_name]).at(1)->Fill( P4Helpers::deltaPhi( (*met)["FinalClus"]->phi(), subleadPhi ), weight );
-      (m_MET_dPhi[met_name]).at(3)->Fill( P4Helpers::deltaPhi( (*met)["FinalTrk"]->phi(), leadPhi ), weight );
-      (m_MET_dPhi[met_name]).at(4)->Fill( P4Helpers::deltaPhi( (*met)["FinalTrk"]->phi(), subleadPhi ), weight );
+      (m_MET_dPhi[met_name]).at(0)->Fill( P4Helpers::deltaPhi( (*met)[finalClusStr]->phi(),leadPhi ), weight );
+      (m_MET_dPhi[met_name]).at(1)->Fill( P4Helpers::deltaPhi( (*met)[finalClusStr]->phi(), subleadPhi ), weight );
+      (m_MET_dPhi[met_name]).at(3)->Fill( P4Helpers::deltaPhi( (*met)[finalTrkStr]->phi(), leadPhi ), weight );
+      (m_MET_dPhi[met_name]).at(4)->Fill( P4Helpers::deltaPhi( (*met)[finalTrkStr]->phi(), subleadPhi ), weight );
   
       leadPt = 0.; leadPhi = 0.;
 
@@ -714,15 +717,15 @@ namespace MissingEtDQA {
 
       //Fill dPhi for MET Reb
       //for leading lepton
-      (m_MET_dPhi[met_name]).at(2)->Fill( -remainder( leadPhi - (*met)["FinalClus"]->phi(), 2*M_PI ), weight );
-      (m_MET_dPhi[met_name]).at(5)->Fill( -remainder( leadPhi - (*met)["FinalTrk"]->phi(), 2*M_PI ), weight );
+      (m_MET_dPhi[met_name]).at(2)->Fill( -remainder( leadPhi - (*met)[finalClusStr]->phi(), 2*M_PI ), weight );
+      (m_MET_dPhi[met_name]).at(5)->Fill( -remainder( leadPhi - (*met)[finalTrkStr]->phi(), 2*M_PI ), weight );
 
       //Fill Correlation Histos
       //for each fill for MET of FinalTrk/FinalClus vs particle (muon, electron, gamma, tau, jet)
       for(const auto it : *met) {
         std::string name = it->name();
 
-        if (name == "FinalTrk" || name == "FinalClus") {
+        if (name == finalTrkStr || name == finalClusStr) {
           continue;
         }
 
@@ -734,12 +737,12 @@ namespace MissingEtDQA {
         int index = it_index->second;
 
         if(name == "PVSoftTrk")
-          (m_MET_CorrFinalTrk[met_name]).at(5)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalTrk"]->met()/1000., weight);
+          (m_MET_CorrFinalTrk[met_name]).at(5)->Fill((*met)[name.c_str()]->met()/1000.,(*met)[finalTrkStr]->met()/1000., weight);
         else if(name == "SoftClus")
-          (m_MET_CorrFinalClus[met_name]).at(5)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalClus"]->met()/1000., weight);
+          (m_MET_CorrFinalClus[met_name]).at(5)->Fill((*met)[name.c_str()]->met()/1000.,(*met)[finalClusStr]->met()/1000., weight);
         else {
-          (m_MET_CorrFinalTrk[met_name]).at(index)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalTrk"]->met()/1000., weight);
-          (m_MET_CorrFinalClus[met_name]).at(index)->Fill((*met)[name.c_str()]->met()/1000.,(*met)["FinalClus"]->met()/1000., weight);
+          (m_MET_CorrFinalTrk[met_name]).at(index)->Fill((*met)[name.c_str()]->met()/1000.,(*met)[finalTrkStr]->met()/1000., weight);
+          (m_MET_CorrFinalClus[met_name]).at(index)->Fill((*met)[name.c_str()]->met()/1000.,(*met)[finalClusStr]->met()/1000., weight);
         }
       }
 
@@ -747,15 +750,15 @@ namespace MissingEtDQA {
       if(m_doTruth){
         ATH_MSG_DEBUG( "  Resolution:" );
         //Fill Rebuilt plots
-        (m_MET_Resolution[met_name]).at(0)->Fill(((*met)["FinalClus"]->mpx()-(*met_Truth)["NonInt"]->mpx())/1000., weight);
-        (m_MET_Resolution[met_name]).at(1)->Fill(((*met)["FinalClus"]->mpy()-(*met_Truth)["NonInt"]->mpy())/1000., weight);
-        (m_MET_Resolution[met_name]).at(2)->Fill(((*met)["FinalTrk"]->mpx()-(*met_Truth)["NonInt"]->mpx())/1000., weight);
-        (m_MET_Resolution[met_name]).at(3)->Fill(((*met)["FinalTrk"]->mpy()-(*met_Truth)["NonInt"]->mpy())/1000., weight);
+        (m_MET_Resolution[met_name]).at(0)->Fill(((*met)[finalClusStr]->mpx()-(*met_Truth)["NonInt"]->mpx())/1000., weight);
+        (m_MET_Resolution[met_name]).at(1)->Fill(((*met)[finalClusStr]->mpy()-(*met_Truth)["NonInt"]->mpy())/1000., weight);
+        (m_MET_Resolution[met_name]).at(2)->Fill(((*met)[finalTrkStr]->mpx()-(*met_Truth)["NonInt"]->mpx())/1000., weight);
+        (m_MET_Resolution[met_name]).at(3)->Fill(((*met)[finalTrkStr]->mpy()-(*met_Truth)["NonInt"]->mpy())/1000., weight);
       }
 
       //Fill significance
-      if( (*met)["FinalClus"]->sumet() != 0) (m_MET_Significance[met_name]).at(0)->Fill((*met)["FinalClus"]->met()/sqrt((*met)["FinalClus"]->sumet()*1000.), weight);
-      if( (*met)["FinalTrk"]->sumet() != 0) (m_MET_Significance[met_name]).at(1)->Fill((*met)["FinalTrk"]->met()/sqrt((*met)["FinalTrk"]->sumet()*1000.), weight);
+      if( (*met)[finalClusStr]->sumet() > 0) (m_MET_Significance[met_name]).at(0)->Fill((*met)[finalClusStr]->met()/std::sqrt((*met)[finalClusStr]->sumet()*1000.), weight);
+      if( (*met)[finalTrkStr]->sumet() > 0) (m_MET_Significance[met_name]).at(1)->Fill((*met)[finalTrkStr]->met()/std::sqrt((*met)[finalTrkStr]->sumet()*1000.), weight);
 
       TLorentzVector target_tlv;
 
@@ -837,12 +840,12 @@ namespace MissingEtDQA {
           clsource = (*metCalo)["SoftClus"]->source();
         }
 
-        if (met::buildMETSum("FinalClus", metCalo, clsource).isFailure()) {
+        if (met::buildMETSum(finalClusStr, metCalo, clsource).isFailure()) {
           ATH_MSG_ERROR("Building MET FinalClus sum failed.");
           return StatusCode::FAILURE;
         }
 
-        auto* finalClus = (*metCalo)["FinalClus"];
+        auto* finalClus = (*metCalo)[finalClusStr];
         if (finalClus) {
           m_MET_Calo->Fill(finalClus->met() / 1000., weight);
           m_MET_Calo_x->Fill(finalClus->mpx() / 1000., weight);
