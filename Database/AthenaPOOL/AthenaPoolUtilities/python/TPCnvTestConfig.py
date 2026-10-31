@@ -53,6 +53,7 @@ def TPCnvTest(infile, keys, useGeoModelSvc=False, useIOVDbSvc=False, doPixel=Fal
     acc = MainServicesCfg(flags)
     acc.setAppProperty('PrintAlgsSequence', False, overwrite=True)
     acc.merge(PoolReadCfg(flags))
+    _ = flags.Input.ProcessingTags # Trigger metadata reading before runtime ROOT error handling (ATEAM-1196)...
     if useIOVDbSvc:
         acc.merge(IOVDbSvcCfg(flags))
     if useGeoModelSvc:
