@@ -16,7 +16,6 @@
 // EDM include(s):
 #include "AthContainers/AuxElement.h"
 #include "AthContainers/AuxVectorBase.h"
-#include "AthContainers/AuxVectorData.h"
 
 // ROOT include(s):
 #include <ROOT/RNTupleModel.hxx>
@@ -78,7 +77,6 @@ namespace CP {
          const SG::IAuxTypeVectorFactory* m_factory = nullptr;
          std::shared_ptr<void> m_field;
          void* m_dataPtr = nullptr;
-         std::unique_ptr< SG::AuxVectorData > m_dstIface;
       };
 
       class ContainerFieldProcessor: public TreeBranchHelpers::IComponentProcessor {
@@ -115,7 +113,6 @@ namespace CP {
          // In RNTuple, "model" will give you a shared pointer of the primitive type you requested. This request is made in run-time.
          // That is why unlike ttree, we need an operator that takes lambda function to do the resize in the run time.
          FieldOps m_ops;
-         std::unique_ptr< SG::AuxVectorData > m_dstIface;
       };
 
 

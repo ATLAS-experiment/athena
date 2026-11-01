@@ -29,32 +29,15 @@ namespace {
     // Mirroring TempInterface from TreeBranchHelpers.cxx
     class TempInterface : public SG::AuxVectorData {
     public:
-        TempInterface( size_t size, SG::auxid_t auxid, void* ptr ) : m_size(size), m_ptr(ptr) {
+        TempInterface( size_t size, SG::auxid_t auxid, void* ptr ) : m_size(size) {
             setCache( auxid, ptr );
         }
         using AuxVectorData::setStore;
-        void setSize( size_t size ) { m_size = size; }
-        const void* ptr() const { return m_ptr; }
         size_t size_v() const override { return m_size; }
         size_t capacity_v() const override { return m_size; }
     private:
         size_t m_size;
-        const void* m_ptr = nullptr;
     };
-
-    // Mirroring getTempInterface from TreeBranchHelpers.cxx: only create a new
-    // TempInterface when the payload moves in memory, as setting up its cache
-    // (sized by the auxid) is very expensive when many variables exist
-    SG::AuxVectorData& getTempInterface( std::unique_ptr<SG::AuxVectorData>& iface,
-                                         size_t size, SG::auxid_t auxid, void* ptr ) {
-        auto* tmp = static_cast<TempInterface*>( iface.get() );
-        if( tmp && tmp->ptr() == ptr ) {
-            tmp->setSize( size );
-        } else {
-            iface = std::make_unique<TempInterface>( size, auxid, ptr );
-        }
-        return *iface;
-    }
 
     // Helper to abstract .data() access, as std::vector<bool> does not support it
     template<typename T>
@@ -311,7 +294,7 @@ namespace CP {
     StatusCode ElementFieldProcessor::process( const SG::AuxElement& element, MsgStream& /*msg*/ ) {
         // Use High-Level copy via TempInterface
         // copy( auxid, dst_container, dst_index, src_container, src_index, n )
-        SG::AuxVectorData& dstiface = getTempInterface( m_dstIface, 1, m_acc->auxid(), m_dataPtr );
+        TempInterface dstiface( 1, m_acc->auxid(), m_dataPtr );
         m_factory->copy( m_acc->auxid(), dstiface, 0, *element.container(), element.index(), 1 );
         return StatusCode::SUCCESS;
     }
@@ -376,7 +359,7 @@ namespace CP {
         }
 
         try {
-            SG::AuxVectorData& dstiface = getTempInterface( m_dstIface, index + 1, m_acc->auxid(), rawDataPtr );
+            TempInterface dstiface( index + 1, m_acc->auxid(), rawDataPtr );
             m_factory->copy( m_acc->auxid(), dstiface, index, *element.container(), element.index(), 1 );
         } catch( ... ) {
             msg << MSG::ERROR << "Failed to copy data for " << m_fieldName << endmsg;
