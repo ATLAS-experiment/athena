@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef AtlasPhysListFactory_h
@@ -7,6 +7,10 @@
 
 #include "G4VModularPhysicsList.hh"
 #include "globals.hh"
+
+#ifdef ATHSIMULATION_USE_G4HEPEM
+#include "G4PhysicsLists/G4HepEmOptions.h"
+#endif
 
 class AtlasPhysListFactory
 {
@@ -29,13 +33,17 @@ public:
   // list of avalable base Phys Lists
 
   inline void SetVerbose(G4int val) { m_verbose = val; }
-  inline void SetMultipleStepsInMSCTransport(G4bool val) { m_multipleStepsInMSCTransport = val; }
+#ifdef ATHSIMULATION_USE_G4HEPEM
+  inline void SetHepEmOptions(const G4HepEmOptions& val) { m_hepEmOptions = val; }
+#endif
 
 private:
 
   G4String m_defName;  
   G4int m_verbose;
-  G4bool m_multipleStepsInMSCTransport{false};
+#ifdef ATHSIMULATION_USE_G4HEPEM
+  G4HepEmOptions m_hepEmOptions{};
+#endif
   std::vector<G4String> m_listnames;
 };
 

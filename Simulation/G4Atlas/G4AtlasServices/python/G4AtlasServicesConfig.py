@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -38,7 +38,6 @@ def PhysicsListSvcCfg(flags, name="PhysicsListSvc", **kwargs):
         kwargs.setdefault("NeutronTimeCut", flags.Sim.NeutronTimeCut)
     kwargs.setdefault("NeutronEnergyCut", flags.Sim.NeutronEnergyCut)
     kwargs.setdefault("ApplyEMCuts", flags.Sim.ApplyEMCuts)
-    kwargs.setdefault("MultipleStepsInMSCTransport", flags.Sim.MultipleStepsInMSCTransport)
     kwargs.setdefault("QuietMode", flags.Exec.QuietMode)
 
     #fast simulation constructor tool

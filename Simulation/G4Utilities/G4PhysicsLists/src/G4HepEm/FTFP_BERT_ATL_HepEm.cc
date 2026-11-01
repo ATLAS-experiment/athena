@@ -58,7 +58,7 @@
 
 #include <iomanip>   
 
-FTFP_BERT_ATL_HepEm::FTFP_BERT_ATL_HepEm(G4int ver, G4bool multipleStepsInMSCTransport)
+FTFP_BERT_ATL_HepEm::FTFP_BERT_ATL_HepEm(G4int ver, const G4HepEmOptions& hepEmOptions)
 {
   if(ver > 0) {
     G4cout << "<<< Geant4 Physics List simulation engine: FTFP_BERT_ATL_HepEm"<<G4endl;
@@ -84,7 +84,7 @@ FTFP_BERT_ATL_HepEm::FTFP_BERT_ATL_HepEm(G4int ver, G4bool multipleStepsInMSCTra
 
 
   // EM Physics
-  RegisterPhysics( new G4EmStandardPhysics_HepEm(ver, "G4EmStandard_HepEm", multipleStepsInMSCTransport));
+  RegisterPhysics( new G4EmStandardPhysics_HepEm(ver, "G4EmStandard_HepEm", hepEmOptions));
 
   // Synchroton Radiation & GN Physics
  RegisterPhysics( new G4EmExtraPhysics(ver) );

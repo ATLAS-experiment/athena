@@ -64,6 +64,8 @@
 #include "G4VPhysicsConstructor.hh"
 #include "globals.hh"
 
+#include "G4PhysicsLists/G4HepEmOptions.h"
+
 class AdePTTrackingManager;
 class AdePTConfiguration;
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
@@ -72,7 +74,7 @@ class G4EmStandardPhysics_AdePT : public G4VPhysicsConstructor
 {
 public:
 
-  explicit G4EmStandardPhysics_AdePT(G4int ver=1, const G4String& name="G4EmStandard_AdePT", G4bool multipleStepsInMSCTransport=false);
+  explicit G4EmStandardPhysics_AdePT(G4int ver=1, const G4String& name="G4EmStandard_AdePT", const G4HepEmOptions& hepEmOptions={});
 
   G4EmStandardPhysics_AdePT(const G4EmStandardPhysics_AdePT&) = delete;
   G4EmStandardPhysics_AdePT& operator=(const G4EmStandardPhysics_AdePT&) = delete;
@@ -85,7 +87,7 @@ public:
 private:
   AdePTTrackingManager *fTrackingManager;
   AdePTConfiguration *fAdePTConfiguration;
-  G4bool fMultipleStepsInMSCTransport;
+  G4HepEmOptions fHepEmOptions;
 };
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

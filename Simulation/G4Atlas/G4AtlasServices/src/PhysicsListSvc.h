@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef G4ATLASTOOLS_PHYSICSLISTSVC_H
@@ -19,6 +19,7 @@ class G4VUserPhysicsList;
 
 // STL library
 #include <string>
+#include <vector>
 
 class PhysicsListSvc : public extends<AthService, IPhysicsListSvc>
 {
@@ -67,6 +68,10 @@ private:
   Gaudi::Property<int> m_emNumberOfBinsPerDecade{this, "EMNumberOfBinsPerDecade", -1, "Number of bins per Energy decade. Used for both DeDx and for the Lambda binning."};     ///!< Number of bins per Energy decade. Used for both DeDx and for the Lambda binning.
   Gaudi::Property<bool> m_applyEMCuts{this, "ApplyEMCuts", true, "Apply cuts EM flag in Geant4"};                ///!< Switch for the G4 "apply cuts" EM physics flag
   Gaudi::Property<bool> m_multipleStepsInMSCTransport{this, "MultipleStepsInMSCTransport", false, "Allow multiple MSC+transportation steps in G4HepEm, including the G4HepEm configuration used by AdePT"};
+  Gaudi::Property<std::vector<std::string>> m_hepEmWoodcockTrackingRegions{this, "HepEmWoodcockTrackingRegions", {"EMEC", "EMB"}, "G4Regions where G4HepEm (and AdePT) apply Woodcock tracking of photons"};
+  Gaudi::Property<bool> m_hepEmMSCPositronCorrection{this, "HepEmMSCPositronCorrection", true, "Apply the e+ correction to theta0 in the G4HepEm (and AdePT) Urban MSC"};
+  Gaudi::Property<bool> m_hepEmEnergyLossFluctuation{this, "HepEmEnergyLossFluctuation", true, "Enable e-/e+ energy loss fluctuation in G4HepEm (and AdePT) in all regions"};
+  Gaudi::Property<std::vector<std::string>> m_hepEmNoELossFluctRegions{this, "HepEmNoELossFluctRegions", {}, "G4Regions where G4HepEm (and AdePT) e-/e+ energy loss fluctuation is disabled"};
   Gaudi::Property<bool> m_quietMode{this, "QuietMode", false, ""};
   Gaudi::Property<bool> m_unstableAntiNeutrons{this, "UnstableAntiNeutrons",false,"Bugfix for ATLASSIM-6634 until we switch to using Geant4 11"};
 };
