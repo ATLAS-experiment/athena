@@ -77,7 +77,7 @@ namespace CP
 
     /// \brief the accessors for \ref m_selectionDecoration and \ref m_trigList combination
   private:
-    std::unordered_map<std::string, SG::ConstAccessor<bool>> m_selectionAccessors;
+    std::unordered_map<std::string, SG::ConstAccessor<char>> m_selectionAccessors;
   };
 }
 
