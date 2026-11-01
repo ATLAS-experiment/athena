@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PhysicsListSvc.h"
@@ -16,6 +16,9 @@
 #include "CLHEP/Units/PhysicalConstants.h"
 
 #include "G4PhysicsLists/AtlasPhysListFactory.h"
+#ifdef ATHSIMULATION_USE_G4HEPEM
+#include "G4PhysicsLists/G4HepEmOptions.h"
+#endif
 
 #include <limits>
 
@@ -57,7 +60,15 @@ void PhysicsListSvc::CreatePhysicsList()
       Atlasfactory.SetVerbose(0); // HACK
       G4HadronicProcessStore::Instance()->SetVerbose(0);
     }
-    Atlasfactory.SetMultipleStepsInMSCTransport(m_multipleStepsInMSCTransport);
+#ifdef ATHSIMULATION_USE_G4HEPEM
+    G4HepEmOptions hepEmOptions;
+    hepEmOptions.multipleStepsInMSCTransport = m_multipleStepsInMSCTransport;
+    hepEmOptions.woodcockTrackingRegions = m_hepEmWoodcockTrackingRegions;
+    hepEmOptions.mscPositronCorrection = m_hepEmMSCPositronCorrection;
+    hepEmOptions.energyLossFluctuation = m_hepEmEnergyLossFluctuation;
+    hepEmOptions.noEnergyLossFluctuationRegions = m_hepEmNoELossFluctRegions;
+    Atlasfactory.SetHepEmOptions(hepEmOptions);
+#endif
     if (factory.IsReferencePhysList(m_physicsListName.value()))
     {
       ATH_MSG_INFO("Creating Geant4 PhysicsList: " << m_physicsListName.value());

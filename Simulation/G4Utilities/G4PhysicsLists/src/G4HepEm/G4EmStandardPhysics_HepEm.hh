@@ -64,13 +64,15 @@
 #include "G4VPhysicsConstructor.hh"
 #include "globals.hh"
 
+#include "G4PhysicsLists/G4HepEmOptions.h"
+
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
 class G4EmStandardPhysics_HepEm : public G4VPhysicsConstructor
 {
 public:
 
-  explicit G4EmStandardPhysics_HepEm(G4int ver=1, const G4String& name="G4EmStandard_HepEm", G4bool multipleStepsInMSCTransport=false);
+  explicit G4EmStandardPhysics_HepEm(G4int ver=1, const G4String& name="G4EmStandard_HepEm", const G4HepEmOptions& hepEmOptions={});
 
   ~G4EmStandardPhysics_HepEm() override;
 
@@ -78,7 +80,7 @@ public:
   void ConstructProcess() override;
 
 private:
-  G4bool fMultipleStepsInMSCTransport;
+  G4HepEmOptions fHepEmOptions;
 
 };
 

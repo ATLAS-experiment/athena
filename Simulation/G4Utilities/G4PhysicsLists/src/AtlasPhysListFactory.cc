@@ -92,10 +92,10 @@ AtlasPhysListFactory::GetReferencePhysList(const G4String& name)
   else if (name=="FTFP_BERT_ATL_chipsXS")       {p = new FTFP_BERT_ATL_chipsXS(m_verbose);}
   else if (name=="FTFP_BERT_ATL_HP")            {p = new FTFP_BERT_ATL_HP(m_verbose);}
 #ifdef ATHSIMULATION_USE_ADEPT
-  else if (name=="FTFP_BERT_ATL_AdePT")         {p = new FTFP_BERT_ATL_AdePT(m_verbose, m_multipleStepsInMSCTransport);}
+  else if (name=="FTFP_BERT_ATL_AdePT")         {p = new FTFP_BERT_ATL_AdePT(m_verbose, m_hepEmOptions);}
 #endif
 #ifdef ATHSIMULATION_USE_G4HEPEM
-  else if (name=="FTFP_BERT_ATL_HepEm")         {p = new FTFP_BERT_ATL_HepEm(m_verbose, m_multipleStepsInMSCTransport);}
+  else if (name=="FTFP_BERT_ATL_HepEm")         {p = new FTFP_BERT_ATL_HepEm(m_verbose, m_hepEmOptions);}
 #endif
 #ifdef ATHSIMULATION_USE_CELER
   else if (name=="FTFP_BERT_ATL_Celer")         {p = new FTFP_BERT_ATL_Celer(m_verbose);}

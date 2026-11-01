@@ -65,6 +65,7 @@
 #include "G4HepEmTrackingManager.hh"
 #include "G4HepEmConfig.hh"
 #include "G4HepEmParameters.hh"
+#include "G4HepEmOptionsHelper.hh"
 
 #include "G4SystemOfUnits.hh"
 #include "G4ParticleDefinition.hh"
@@ -113,9 +114,9 @@ G4_DECLARE_PHYSCONSTR_FACTORY(G4EmStandardPhysics_HepEm);
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
-G4EmStandardPhysics_HepEm::G4EmStandardPhysics_HepEm(G4int ver, const G4String& name, G4bool multipleStepsInMSCTransport)
+G4EmStandardPhysics_HepEm::G4EmStandardPhysics_HepEm(G4int ver, const G4String& name, const G4HepEmOptions& hepEmOptions)
   : G4VPhysicsConstructor(name),
-    fMultipleStepsInMSCTransport(multipleStepsInMSCTransport)
+    fHepEmOptions(hepEmOptions)
 {
   SetVerboseLevel(ver);
   G4EmParameters* param = G4EmParameters::Instance();
@@ -173,23 +174,9 @@ void G4EmStandardPhysics_HepEm::ConstructProcess()
   G4HepEmTrackingManager* trackingManager = new G4HepEmTrackingManager(verboseLevel);
 
   G4HepEmConfig* config = trackingManager->GetConfig();
-  // Apply Woodcock tracking of photons in the EMEC and EMB
-  config->SetWoodcockTrackingRegion("EMEC");
-  config->SetWoodcockTrackingRegion("EMB");
-  // Disable the e+ correction to the \theta0 in the Urban MSC
-  // NOTE: this should be set explicitely here only when using g4-10.6
-  //       (as the e+ correction to theta0 is turend off in the ATLAS version)
-  //       but g4-11.x has the flag to control this. 
-  //      G4HepEmParameters* hepEmPars = config->GetG4HepEmParameters(); 
-  //      hepEmPars->fIsMSCPositronCor = false;
-
-  // Turning off energy loss fluctuation for e-/e+
-  // config->SetEnergyLossFluctuation(false);
-  // (also possible for a given region: e.g. config->SetEnergyLossFluctuation(false, "EMEC");
-
-  // Configure whether G4HepEm may make multiple steps in the combined MSC+transportation.
-  // Keeping this disabled preserves the previous ATLAS physics validation behavior.
-  config->SetMultipleStepsInMSCWithTransportation(fMultipleStepsInMSCTransport);
+  // Apply the Woodcock tracking regions, e+ MSC correction, energy loss
+  // fluctuation and MSC+transportation settings (from the PhysicsListSvc properties)
+  ApplyG4HepEmOptions(*config, fHepEmOptions);
 
   // Attach the tracking manager to e-/e+ and gamma
   G4Electron::Definition()->SetTrackingManager(trackingManager);
