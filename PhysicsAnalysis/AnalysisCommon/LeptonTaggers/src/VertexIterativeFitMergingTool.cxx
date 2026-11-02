@@ -234,7 +234,7 @@ bool Prompt::VertexIterativeFitMergingTool::mergeIteratively2TrackVtxs(
 )
 {
   /*
-     This function merges iterively vertexes with this algorithm:
+     This function merges iteratively vertexes with this algorithm:
      o) Sort 2-track vertexes by sum of track pT
      o) Select the vertex with the highest sum of track pT as the seed vertex
      - Sort all other vertexes by the distance to the seed vertex
@@ -246,10 +246,18 @@ bool Prompt::VertexIterativeFitMergingTool::mergeIteratively2TrackVtxs(
      - Resort remaining tracks by the distance to the seed vertex and repeat
      o) Remove the 2-track vertexes that were merged from the global list and repeat
      */
-
+  /*
+   fit2TrackVertexes() only returns a vector of owning pointers. It does 
+   not populate resultExtra.vtxsInitPassed, so a call to this function the first time
+   (without lepton) has empty resultExtra.vtxsInitPassed; testing vtxsInitPassed.size() means 
+   that vertices without the lepton would never be merged.
+  */
   // Only 0 or 1 2-track vertices - add the vertex to not merged list and return
-  if(result.vtxsInitPassed.size() < 2) {
-    result.vtxsInitPassedNotMerged = std::move(initVtxs);
+  if(initVtxs.size() < 2) {
+    for (auto & vtx: initVtxs){
+      result.vtxsInitPassedNotMerged.push_back(std::move(vtx));
+    }
+    initVtxs.clear();
 
     ATH_MSG_DEBUG(name() << "::mergeIteratively2TrackVtxs - too few vertexes: nothing more to do");
 
@@ -262,10 +270,6 @@ bool Prompt::VertexIterativeFitMergingTool::mergeIteratively2TrackVtxs(
   std::vector<TwoTrackVtx> vtxs2Track;
 
   for(std::unique_ptr<xAOD::Vertex> &vtx: initVtxs) {
-    if(vtx->nTrackParticles() != 2) {
-      ATH_MSG_WARNING("mergeIteratively2TrackVtxs - wrong number of tracks: " << vtx->nTrackParticles());
-      continue;
-    }
 
     if(vtx->nTrackParticles() !=2 ) {
       ATH_MSG_WARNING("mergeIteratively2TrackVtxs - vertex does not contain 2 TrackParticles: ntrack=" << vtx->nTrackParticles());
