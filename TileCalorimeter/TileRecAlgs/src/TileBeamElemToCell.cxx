@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -45,12 +45,7 @@
 //
 TileBeamElemToCell::TileBeamElemToCell(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_tileTBID(0)
-  , m_tileHWID(0)
-  , m_tileInfo(0)
-  , m_tileMgr(0)
 {
-  declareProperty("TileInfoName", m_infoName = "TileInfo");                     // name of TileInfo store
 }
 
 TileBeamElemToCell::~TileBeamElemToCell()
@@ -67,7 +62,7 @@ StatusCode TileBeamElemToCell::initialize()
   CHECK( detStore()->retrieve(m_tileMgr) );
   CHECK( detStore()->retrieve(m_tileTBID) );
   CHECK( detStore()->retrieve(m_tileHWID) );
-  CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
+  CHECK( detStore()->retrieve(m_tileInfo, m_infoName.value()) );
 
   ATH_CHECK( m_beamElemContainerKey.initialize() );
   ATH_CHECK( m_cellContainerKey.initialize() );

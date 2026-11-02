@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -73,9 +73,9 @@ class TileCellToTTL1: public AthAlgorithm {
 
 
 
-    const TileID* m_tileID;
-    const CaloLVL1_ID* m_TT_ID;
-    const TileCablingService* m_tileCablingService;
+    const TileID* m_tileID{nullptr};
+    const CaloLVL1_ID* m_TT_ID{nullptr};
+    const TileCablingService* m_tileCablingService{nullptr};
 
 };
 

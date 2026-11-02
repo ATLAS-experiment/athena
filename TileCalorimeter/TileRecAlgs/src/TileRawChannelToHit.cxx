@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -22,7 +22,6 @@
 #include "TileIdentifier/TileHWID.h"
 #include "TileIdentifier/TileFragHash.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
-#include "TileConditions/TileCondToolEmscale.h"
 #include "TileConditions/TileInfo.h"
 #include "TileSimEvent/TileHit.h"
 #include "TileEvent/TileRawChannel.h"
@@ -45,11 +44,7 @@
 //
 TileRawChannelToHit::TileRawChannelToHit(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_tileToolEmscale("TileCondToolEmscale")
 {
-  declareProperty("UseSamplFract", m_useSamplFract = false);  // if true energy in TileHit is the as it is coming from G4 simulation
-                                                              // and by default it is equal to final - TileCell energy
-  declareProperty("TileCondToolEmscale"    , m_tileToolEmscale);
 }
 
 TileRawChannelToHit::~TileRawChannelToHit()

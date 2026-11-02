@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -31,6 +31,7 @@
 #include "TileEvent/TileRawChannelContainer.h"
 #include "TileSimEvent/TileHitVector.h"
 #include "TileConditions/TileSamplingFraction.h"
+#include "TileConditions/TileCondToolEmscale.h"
 
 // Atlas includes
 #include "AthenaBaseComps/AthAlgorithm.h"
@@ -50,7 +51,6 @@ class TileID;
 class TileHWID;
 class TileHit;
 class TileCablingService;
-class TileCondToolEmscale;
 
 
 class TileRawChannelToHit: public AthAlgorithm {
@@ -83,12 +83,15 @@ class TileRawChannelToHit: public AthAlgorithm {
         "TileSamplingFraction", "TileSamplingFraction", "Input Tile sampling fraction"};
 
     std::string m_infoName;
-    bool m_useSamplFract;
+    // if true energy in TileHit is the as it is coming from G4 simulation
+    // and by default it is equal to final - TileCell energy
+    Gaudi::Property<bool> m_useSamplFract{this, "UseSamplFract", false, "Take sampling fraction into account for TileHit energy"};
 
     const TileID* m_tileID{nullptr};
     const TileHWID* m_tileHWID{nullptr};
 
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale; //!< main Tile Calibration tool
+    ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this, "TileCondToolEmscale",
+        "TileCondToolEmscale", "Tile EM scale calibration tool"}; //!< main Tile Calibration tool
 };
 
 #endif // TILERECALGS_TILERAWCHANNELTOHIT_H

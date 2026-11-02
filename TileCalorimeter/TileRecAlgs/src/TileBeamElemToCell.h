@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -89,12 +89,12 @@ class TileBeamElemToCell: public AthAlgorithm {
                                                              "TileTBCellCnt", "Output Calo cell container key"};
 
 
-    std::string m_infoName;
+    Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo", "Name of TileInfo store"};
 
-    const TileTBID* m_tileTBID;
-    const TileHWID* m_tileHWID;
-    const TileInfo* m_tileInfo;
-    const TileDetDescrManager* m_tileMgr;
+    const TileTBID* m_tileTBID{nullptr};
+    const TileHWID* m_tileHWID{nullptr};
+    const TileInfo* m_tileInfo{nullptr};
+    const TileDetDescrManager* m_tileMgr{nullptr};
 
 //    std::vector<TileCell *> m_allCells;
 

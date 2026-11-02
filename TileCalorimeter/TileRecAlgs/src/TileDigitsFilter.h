@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -85,7 +85,7 @@ class TileDigitsFilter: public AthReentrantAlgorithm {
     Gaudi::Property<int> m_highGainThreashold{this,
         "HighGainThereshold", 10, "High gain threshold to keep digits"}; // keep signals above ~128(106) MeV in A,BC(D) samplings
 
-    const TileHWID* m_tileHWID;
+    const TileHWID* m_tileHWID{nullptr};
 
     /**
      * @brief Name of Tile cabling service
