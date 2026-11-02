@@ -11,7 +11,7 @@ ATLAS_EXT_PROJECT_NAME="VP1LightExternals"
 ATLAS_BUILDTYPE="Release"
 ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=110
                         -DLCG_VERSION_POSTFIX="_ATLAS_9"
-                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.32.0/GeoModel-6.32.0.tar.bz2;URL_MD5;9dde6676e54b17d4357f0217e1750a33")
+                        -DATLAS_GEOMODEL_SOURCE="URL;https://gitlab.cern.ch/GeoModelDev/GeoModel/-/archive/6.33.0/GeoModel-6.33.0.tar.bz2;URL_MD5;ae3706a0a617f04fd9260efb4800cd5f")
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.
