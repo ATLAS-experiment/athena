@@ -53,6 +53,24 @@ private:
       this, "MinG4TrackTruthSegments", 2,
       "Require a G4/HepMC track id to appear in at least this many reco segments"};
 
+  /// Segments sharing a G4/HepMC id are chained into one label only when they are
+  /// this close; ids repeat across pile-up collisions when pile-up truth is not stored
+  Gaudi::Property<double> m_g4LabelMaxDeltaEta{
+      this, "G4LabelMaxDeltaEta", 0.5,
+      "Max |delta eta| of segment positions to chain segments sharing a G4/HepMC id"};
+  Gaudi::Property<int> m_g4LabelMaxDeltaSector{
+      this, "G4LabelMaxDeltaSector", 1,
+      "Max sector distance to chain segments sharing a G4/HepMC id"};
+  Gaudi::Property<double> m_g4LabelMaxEnergyGain{
+      this, "G4LabelMaxEnergyGain", 20.,
+      "Max sim-hit kinetic energy gain [MeV] from the earlier to the later segment to chain them; "
+      "a muon only loses energy. Negative disables"};
+
+  /// Labels on fewer distinct chamberIndex values are reset to background
+  Gaudi::Property<unsigned int> m_minLabelChambers{
+      this, "MinLabelChambers", 2,
+      "Minimum number of distinct chamberIndex values a truth label must span; otherwise its segments are background"};
+
   ActsTrk::GeoContextReadKey_t m_geoCtxKey{
       this, "AlignmentKey", "ActsAlignment", "Geometry alignment context"};
 
@@ -78,6 +96,9 @@ private:
       m_tree.newVector<float>("segment_chiSquared")};
   MuonVal::VectorBranch<float>& m_segment_numberDoF{
       m_tree.newVector<float>("segment_numberDoF")};
+  /// Number of segments sharing this segment's (sector, chamberIndex, etaIndex),
+  MuonVal::VectorBranch<uint16_t>& m_segment_bucketMultiplicity{
+      m_tree.newVector<uint16_t>("segment_bucketMultiplicity")};
 
   // NEW: reco eta/phi derived from the segment direction (always filled)
   MuonVal::VectorBranch<float>& m_segmentRecoEta{
