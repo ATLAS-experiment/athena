@@ -38,7 +38,7 @@ StatusCode VertexTimeAlg::initialize() {
   ATH_CHECK(m_trackTime_key.initialize());
   ATH_CHECK(m_trackTimeRes_key.initialize());
   const std::string weightFile {
-      PathResolver::find_file("TMVA.VBFinv.mu200.Step3p1.8var.weights.xml", "DATAPATH")
+      PathResolver::find_file("TMVA.VBFinv.mu200.R25.200t_d4.8var.weights.xml", "DATAPATH")
   };
   // Initialize the BDT
   for (auto& bdt : m_BDT) {

@@ -98,7 +98,7 @@ private:
   };
 
   Gaudi::Property<float> m_bdt_cutvalue {
-    this, "BDTCutValue", 0.2f ,
+    this, "BDTCutValue", -0.07f ,
     "The BDT output has to be above this value for the cluster to be accepted as HS"
   };
 
