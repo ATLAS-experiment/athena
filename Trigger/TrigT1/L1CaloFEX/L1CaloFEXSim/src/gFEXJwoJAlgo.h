@@ -49,6 +49,7 @@ namespace LVL1 {
 
     SG::ReadHandleKey<TrigConf::L1Menu> m_l1MenuKey{this, "L1TriggerMenu", "DetectorStore+L1TriggerMenu","Name of the L1Menu object to read configuration from"};
 
+    Gaudi::Property<bool> m_isMC{this, "IsMC", false, "MC has no FW version: use the rho-subtracted MET and the original SumEt (not EtFast)"};
 
     void gBlockAB(const gTowersType & twrs, gTowersType & gBlkSum, gTowersType & hasSeed, int seedThreshold) const;
 
