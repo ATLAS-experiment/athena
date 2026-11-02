@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef COPYTRUTHJETPARTICLES_H
@@ -9,6 +9,7 @@
 #include "JetInterface/IJetExecuteTool.h"
 #include "AsgDataHandles/ReadDecorHandleKeyArray.h"
 #include "xAODTruth/TruthParticleContainer.h"
+#include "xAODTruth/TruthEventContainer.h"
 #include "AthContainers/ConstDataVector.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteHandleKey.h"
@@ -48,7 +49,7 @@ private:
   ToolHandle<IMCTruthClassifier> m_classif{this, "MCTruthClassifier", ""};
 
   /// Key for input truth event
-  SG::ReadHandleKey<xAOD::TruthParticleContainer> m_truthParticleKey{this, "TruthParticleKey", "TruthParticles", "SG Key for input truth particle container"};
+  SG::ReadHandleKey<xAOD::TruthEventContainer> m_truthEventKey{this, "TruthEventKey", "TruthEvents", "SG Key for input truth event container"};
 
   /// Name of the decoration to be used for identifying FSR (dressing) photons
   SG::ReadDecorHandleKeyArray<xAOD::TruthParticleContainer> m_dressingNames{this, "DressingDecorationNames", {},  "Name of the dressed photon decoration (if one should be used)"};
