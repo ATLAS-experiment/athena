@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration */
 
 #include "CaloTopoTowerFromClusterCalibrator.h"
 #include "CaloTopoClusterFromTowerHelpers.h"
@@ -23,7 +23,6 @@ CaloTopoTowerFromClusterCalibrator::CaloTopoTowerFromClusterCalibrator(const std
   : AthAlgTool(type,name,pParent)
 { 
   declareInterface<CaloTowerCollectionProcessor>(this);
-  declareProperty("OrderClusterByPt",    m_orderByPt,           "Order clusters by calibrated Pt (input)");
 }
 
 StatusCode CaloTopoTowerFromClusterCalibrator::execute(const EventContext& /*ctx*/,

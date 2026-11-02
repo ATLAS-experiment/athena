@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -27,7 +27,6 @@
 #include "CaloUtils/CaloBadCellHelper.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
 #include "CaloEvent/CaloCell.h"
-#include "CaloEvent/CaloCellContainer.h"
 #include "CaloEvent/CaloPrefetch.h"
 #include "AthAllocators/ArenaPoolAllocator.h"
 #include "AthAllocators/ArenaHandle.h"
@@ -52,128 +51,9 @@ CaloTopoClusterMaker::CaloTopoClusterMaker(const std::string& type,
 					   const std::string& name,
 					   const IInterface* parent)
   
-  : AthAlgTool(type, name, parent),
-    m_calo_id(nullptr),
-    m_cellsKey(""),
-    m_subcaloUsed(),
-    m_cellThresholdOnEorAbsEinSigma    (    0.),
-    m_neighborThresholdOnEorAbsEinSigma(    3.),
-    m_seedThresholdOnEorAbsEinSigma    (    6.),
-    m_seedThresholdOnTAbs              (  12.5*ns),
-    m_timeCutUpperLimit                (    20.),
-    m_xtalkDeltaT                      (  15.*ns),
-    m_xtalk2Eratio1                    ( 4.),
-    m_xtalk2Eratio2                    ( 25.),
-    m_xtalk3Eratio                     ( 10.),
-    m_xtalkEtaEratio                   (4.),
-    m_xtalk2DEratio                    (4.),
-    m_neighborOption                   ("super3D"),
-    m_nOption                          (LArNeighbours::super3D),
-    m_restrictHECIWandFCalNeighbors    (false),
-    m_restrictPSNeighbors              (false),
-    m_seedCutsInAbsE                   (false),
-    m_neighborCutsInAbsE               (true),
-    m_cellCutsInAbsE                   (true),
-    m_clusterCutsInAbsE                (true),
-    m_clusterEtorAbsEtCut              (    0.*MeV),
-    m_twogaussiannoise                 (false),
-    m_treatL1PredictedCellsAsGood      (true),
-    m_seedCutsInT                      (false),
-    m_cutOOTseed                       (false),
-    m_useTimeCutUpperLimit             (false),
-    m_xtalkEM2                         (false),
-    m_xtalkEM2D                        (false),
-    m_xtalkEM2n                        (false),
-    m_xtalkEM3                         (false),
-    m_xtalkEMEta                       (false),
-    m_minSampling                      (0),
-    m_maxSampling                      (0),
-    m_hashMin                          (999999),
-    m_hashMax                          (0),
-    m_clusterSize                      ()
+  : AthAlgTool(type, name, parent)
 {
   declareInterface<CaloClusterCollectionProcessor> (this);
-  // Name(s) of Cell Containers
-  declareProperty("CellsName",m_cellsKey);
-  
-  // Name(s) of Calorimeters to consider
-  declareProperty("CalorimeterNames",m_caloNames);
-
-  // Name(s) of Calorimeter Samplings to consider for seeds
-  declareProperty("SeedSamplingNames",m_samplingNames);
-
-  // Energy thresholds (in units of noise Sigma) 
-  declareProperty("SeedThresholdOnEorAbsEinSigma",
-		  m_seedThresholdOnEorAbsEinSigma);
-  declareProperty("NeighborThresholdOnEorAbsEinSigma",
-		  m_neighborThresholdOnEorAbsEinSigma);
-  declareProperty("CellThresholdOnEorAbsEinSigma",
-		  m_cellThresholdOnEorAbsEinSigma);
-
-  // Seed and cluster cuts are in E or Abs E
-  declareProperty("SeedCutsInAbsE",m_seedCutsInAbsE);
-
-  // Time thresholds (in abs. val.)
-  declareProperty("SeedThresholdOnTAbs",m_seedThresholdOnTAbs);
-
-  // Significance upper limit for applying time cut
-  declareProperty("TimeCutUpperLimit",m_timeCutUpperLimit);
-
-  //do Seed cuts on Time              
-  declareProperty("SeedCutsInT",m_seedCutsInT);
-  //exclude out-of-time seeds from neighbouring and cell stage              
-  declareProperty("CutOOTseed",m_cutOOTseed);
-  //do not apply time cut on cells of large significance
-  declareProperty("UseTimeCutUpperLimit",m_useTimeCutUpperLimit);
-  //relax time window (if timing is used) in EM2 when xTalk is present
-  declareProperty("XTalkEM2",m_xtalkEM2);
-  //relax time window (if timing is used) in EM2 when xTalk is present for all 2D neighbirs
-  declareProperty("XTalkEM2D",m_xtalkEM2D);
-  //relax time window (if timing is used) in EM2 Eta directionwhen xTalk is present
-  declareProperty("XTalkEMEta",m_xtalkEMEta);
-  //relax time window (if timing is used) in EM2 when xTalk is present also for 2nd phi neighbors (if XTalkEM2 is also set)
-  declareProperty("XTalkEM2n",m_xtalkEM2n);
-  //relax time window (if timing is used) in EM3 when xTalk is present for layer 3 neighbor of high energy layer 2 cells
-  declareProperty("XTalkEM3",m_xtalkEM3);
-  //delta T to add to upper time threshold for EM2 cells affected by xtalk
-  declareProperty("XTalkDeltaT",m_xtalkDeltaT);
-  //Eratio for first phi neighbor in layer2
-  declareProperty("XTalk2Eratio1",m_xtalk2Eratio1);
-  //Eratio for second phi neighbor in layer2
-  declareProperty("XTalk2Eratio2",m_xtalk2Eratio2);
-  //Eratio for previous sampling neighbor in layer 3
-  declareProperty("XTalk3Eratio",m_xtalk3Eratio);
-  //Eratio for cross-talk in eta layer 2
-  declareProperty("XTalkEtaEratio",m_xtalkEtaEratio);
-  //Eratio for cross-talk in all 2D layer 2 neighbors
-  declareProperty("XTalk2DEratio",m_xtalk2DEratio);
-
-  // Neighbor cuts are in E or Abs E
-  declareProperty("NeighborCutsInAbsE",m_neighborCutsInAbsE);
-
-  // Cell cuts are in E or Abs E
-  declareProperty("CellCutsInAbsE",m_cellCutsInAbsE);
-
-  // Neighbor Option
-  declareProperty("NeighborOption",m_neighborOption);
-
-  // Restrict HEC IW and FCal Neighbors
-  declareProperty("RestrictHECIWandFCalNeighbors",m_restrictHECIWandFCalNeighbors);
-
-  // Restrict PS Neighbors
-  declareProperty("RestrictPSNeighbors",m_restrictPSNeighbors);
-
-  //Cluster cuts are in E_t or Abs E_t 
-  declareProperty("ClusterCutsInAbsEt",m_clusterCutsInAbsE);
-  
-  // Cluster E_t or Abs E_t cut
-  declareProperty("ClusterEtorAbsEtCut",m_clusterEtorAbsEtCut);
-
-  // use 2-gaussian noise for Tile
-  declareProperty("TwoGaussianNoise",m_twogaussiannoise);
-
-  // Treat bad cells with dead OTX if predicted from L1 as good
-  declareProperty("TreatL1PredictedCellsAsGood",m_treatL1PredictedCellsAsGood);
 }
 
 //#############################################################################

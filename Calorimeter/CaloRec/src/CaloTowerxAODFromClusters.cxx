@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -17,9 +17,7 @@
 
 CaloTowerxAODFromClusters::CaloTowerxAODFromClusters(const std::string& name,ISvcLocator* pSvcLocator)
   : CaloTowerxAODAlgoBase(name,pSvcLocator)
-  , m_inputClusterContainerKey("CaloCalTopoClusters")
 {
-  declareProperty("InputClusterContainer", m_inputClusterContainerKey );
 }
 
 CaloTowerxAODFromClusters::~CaloTowerxAODFromClusters()

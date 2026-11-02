@@ -34,7 +34,6 @@
 //---------------
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
-#include "CaloEvent/CaloClusterCellLinkContainer.h"
 
 #include "CaloUtils/CaloClusterSignalState.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
@@ -49,37 +48,8 @@
 CaloClusterMaker::CaloClusterMaker(const std::string& name, 
 				   ISvcLocator* pSvcLocator) 
   : AthReentrantAlgorithm(name, pSvcLocator)
-  , m_clusterOutput("")
-  , m_clusterCellLinkOutput("")
-  , m_clusterMakerTools(this)
-  , m_clusterCorrectionTools(this)
   , m_chrono("ChronoStatSvc", name)
-  , m_saveSignalState(true)
-  , m_chronoTools(false)
 {
-
-  // Name of Cluster Container to be registered in TDS
-  declareProperty("ClustersOutputName",m_clusterOutput);  
-  declareProperty("ClusterCellLinkOutputName",m_clusterCellLinkOutput);  
-  
-  // Name(s) of Cluster Maker Tools
-  declareProperty("ClusterMakerTools",m_clusterMakerTools);
-
-  // Name(s) of Cluster Correction Tools
-  declareProperty("ClusterCorrectionTools",m_clusterCorrectionTools);
-
-  // Name(s) of Cluster Correction Tools (even field) to trigger the
-  // recording of the current cluster container in StoreGate before
-  // its execution and the corresponding container name(s) (odd
-  // fields). This property and KeepEachCorrection are mutually
-  // exclusive
-  //declareProperty("KeepCorrectionToolAndContainerNames",  m_keepCorrectionToolAndContainerNames);
-
-  // save uncalibrated cluster signal state 
-  declareProperty("SaveUncalibratedSignalState",m_saveSignalState);
-
-  //Make Chrono Auditors for Cluster maker and correction tools
-  declareProperty("ChronoTools", m_chronoTools);
 }
 
 //###############################################################################

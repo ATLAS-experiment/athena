@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///============================================================
@@ -40,9 +40,13 @@
 
 #include "CaloEvent/CaloClusterContainer.h"
 #include "CaloEvent/CaloCell2ClusterMap.h"
+#include "CaloEvent/CaloCellContainer.h"
+#include "CaloEvent/CaloTowerContainer.h"
 
 #include "CaloConditions/CaloNoise.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
 
 
 class CaloTopoTowerAlg : public AthReentrantAlgorithm
@@ -66,29 +70,29 @@ class CaloTopoTowerAlg : public AthReentrantAlgorithm
 
 private:
   // Container name strings
-  SG::ReadHandleKey<CaloCell2ClusterMap> m_cellToClusterMapKey;
-  SG::ReadHandleKey<CaloCellContainer> m_cellContainerKey;
-  SG::ReadHandleKey<CaloTowerContainer> m_towerContainerKey;
-  SG::WriteHandleKey<CaloTowerContainer> m_newTowerContainerKey;
+  SG::ReadHandleKey<CaloCell2ClusterMap> m_cellToClusterMapKey{this, "Cell2ClusterMapName", "CaloCell2TopoCluster"};
+  SG::ReadHandleKey<CaloCellContainer> m_cellContainerKey{this, "CellContainerName", "AllCalo"};
+  SG::ReadHandleKey<CaloTowerContainer> m_towerContainerKey{this, "InputTowerContainerName", "CmbTower"};
+  SG::WriteHandleKey<CaloTowerContainer> m_newTowerContainerKey{this, "OutputTowerContainerName", "TopoTower"};
 
   // Selection criteria
-  double m_minimumCellEnergy;
-  double m_minimumClusterEnergy;
-  bool   m_useCellWeights;
-   
+  Gaudi::Property<double> m_minimumCellEnergy{this, "MinimumCellEnergy", -1000000000.0};
+  Gaudi::Property<double> m_minimumClusterEnergy{this, "MinimumClusterEnergy", -1000000000.0};
+  Gaudi::Property<bool> m_useCellWeights{this, "useCellWeight", true};
+
   /** @brief Key of the CaloNoise Conditions data object. Typical values 
       are '"electronicNoise', 'pileupNoise', or '"totalNoise' (default) */
   SG::ReadCondHandleKey<CaloNoise> m_noiseCDOKey{this,"CaloNoiseKey","totalNoise","SG Key of CaloNoise data object"};
 
-  float m_cellESignificanceThreshold; 
+  Gaudi::Property<float> m_cellESignificanceThreshold{this, "CellEnergySignificance", -1.f};
  
   // Type definitions 
   typedef Navigable<CaloClusterContainer>           nav_t;
     
   // List of calorimeters from which to use cells
-  std::vector<std::string> m_includedCalos;
+  Gaudi::Property<std::vector<std::string>> m_includedCalos{this, "IncludedCalos", {}};
   std::vector<CaloCell_ID::SUBCALO> m_caloIndices;
-  bool m_caloSelection;
+  bool m_caloSelection{false};
   
 };
 #endif

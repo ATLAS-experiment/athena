@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOREC_CALOTOPOTOWERALGORITHM_H
@@ -27,10 +27,15 @@
 #include "CaloUtils/CaloTopoTowerBuilderToolBase.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloEvent/CaloCell2ClusterMap.h"
+#include "CaloEvent/CaloCellContainer.h"
+#include "CaloEvent/CaloClusterContainer.h"
+#include "CaloEvent/CaloTowerContainer.h"
+#include "CaloEvent/CaloTopoTowerContainer.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
 #include <string>
 #include <vector>
 
-class CaloTopoTowerContainer;
 class ICaloTopoTowerBuilderToolBase;
 
 class CaloTopoTowerAlgorithm : public AthReentrantAlgorithm
@@ -58,11 +63,11 @@ class CaloTopoTowerAlgorithm : public AthReentrantAlgorithm
   ////////////////
 
   // link output container
-  bool m_genericLink;
+  Gaudi::Property<bool> m_genericLink{this, "GenericLinked", true};
 
   // tool collection
   std::vector<std::string> m_toolNames;
-  ToolHandleArray<ICaloTopoTowerBuilderToolBase> m_ptools;
+  ToolHandleArray<ICaloTopoTowerBuilderToolBase> m_ptools{this, "TowerBuilderTools", {}};
 
   /////////////////////////
   // Stores and Services //
@@ -74,28 +79,28 @@ class CaloTopoTowerAlgorithm : public AthReentrantAlgorithm
   //////////////////////////////////////////
   // CaloTopoTowerContainer variables
   // Container name strings
-  SG::ReadHandleKey<CaloCellContainer> m_cellContainerKey;
-  SG::ReadHandleKey<CaloClusterContainer> m_clusterKey;
-  SG::ReadHandleKey<CaloCell2ClusterMap> m_cellToClusterMapKey;
-  SG::ReadHandleKey<CaloTowerContainer> m_towerContainerKey;
-  SG::WriteHandleKey<CaloTopoTowerContainer> m_newTowerContainerKey;
+  SG::ReadHandleKey<CaloCellContainer> m_cellContainerKey{this, "CellContainerName", "AllCalo"};
+  SG::ReadHandleKey<CaloClusterContainer> m_clusterKey{this, "ClusterContainerName", "CaloTopoClusters"};
+  SG::ReadHandleKey<CaloCell2ClusterMap> m_cellToClusterMapKey{this, "Cell2ClusterMapName", "CaloCell2TopoCluster"};
+  SG::ReadHandleKey<CaloTowerContainer> m_towerContainerKey{this, "InputTowerContainerName", "CmbTower"};
+  SG::WriteHandleKey<CaloTopoTowerContainer> m_newTowerContainerKey{this, "OutputTowerContainerName", "TopoTower"};
 
   // Selection criteria
-  double m_minimumCellEnergy;
-  double m_minimumClusterEnergy;
-  bool   m_useCellWeights;
+  Gaudi::Property<double> m_minimumCellEnergy{this, "MinimumCellEnergy", -1000000000.0};
+  Gaudi::Property<double> m_minimumClusterEnergy{this, "MinimumClusterEnergy", -1000000000.0};
+  Gaudi::Property<bool>   m_useCellWeights{this, "useCellWeight", true};
 
   // Noise tool stuff
-  float m_noiseSigma;
-  float m_cellESignificanceThreshold;
+  Gaudi::Property<float> m_noiseSigma{this, "DefaultNoiseSigma", 10.0};
+  Gaudi::Property<float> m_cellESignificanceThreshold{this, "CellEnergySignificance", -1.f};
 
   // Type definitions
   //  typedef Navigable<CaloClusterContainer>           nav_t;
 
   // List of calorimeters from which to use cells
-  std::vector<std::string> m_includedCalos;
+  Gaudi::Property<std::vector<std::string>> m_includedCalos{this, "IncludedCalos", {}};
   std::vector<CaloCell_ID::SUBCALO> m_caloIndices;
-  bool m_caloSelection;
+  bool m_caloSelection{false};
 
   //END CaloTopoTowerContainer variables
   ////////////////////////////////////////////////

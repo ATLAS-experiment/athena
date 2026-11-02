@@ -94,17 +94,7 @@ namespace {
 
 CaloTopoClusterTowerMerger::CaloTopoClusterTowerMerger(const std::string& name,ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name,pSvcLocator)
-  , m_clusterContainerKey("CaloCalTopoCluster")
-  , m_towerContainerKey("CaloCalFwdTopoTower")
-  , m_topoSignalContainerKey("CaloCalTopoSignal")
-  , m_cellLinkContainerKey("")
-  , m_clusterRange(3.2)
 {
-  declareProperty("TopoClusterContainerKey",m_clusterContainerKey,   "Topo-cluster container key"                                    );
-  declareProperty("TopoTowerContainerKey",  m_towerContainerKey,     "Topo-tower container key"                                      );
-  declareProperty("TopoSignalContainerKey", m_topoSignalContainerKey,"Topo-signal container key"                                     ); 
-  declareProperty("TopoSignalCellLinksKey", m_cellLinkContainerKey,  "Topo-signal cell links key"                                    ); 
-  declareProperty("TopoClusterRange",       m_clusterRange,          "Rapidity range for using topo-clusters in combined signal mode");
 }
 
 CaloTopoClusterTowerMerger::~CaloTopoClusterTowerMerger()
@@ -113,7 +103,7 @@ CaloTopoClusterTowerMerger::~CaloTopoClusterTowerMerger()
 StatusCode CaloTopoClusterTowerMerger::initialize()
 {
   if ( m_clusterRange <= 0. ) {
-    ATH_MSG_ERROR( CaloRec::Helpers::fmtMsg("Invalid topo-cluster range |y| < %6.3f - algorithm non-functional",m_clusterRange) );
+    ATH_MSG_ERROR( CaloRec::Helpers::fmtMsg("Invalid topo-cluster range |y| < %6.3f - algorithm non-functional",m_clusterRange.value()) );
     return StatusCode::FAILURE;
   }
 
@@ -123,7 +113,7 @@ StatusCode CaloTopoClusterTowerMerger::initialize()
   ATH_CHECK( m_topoSignalContainerKey.initialize() );   // topo-signal (topo-cluster+topo-tower) output key
   ATH_CHECK( m_cellLinkContainerKey.initialize()   );   // cell link container key (ESD only)
  
-  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("Topo_cluster with |y| < %.2f will be merged with topo-towers with |y| > %.2f",m_clusterRange,m_clusterRange) );
+  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("Topo_cluster with |y| < %.2f will be merged with topo-towers with |y| > %.2f",m_clusterRange.value(),m_clusterRange.value()) );
 
   return StatusCode::SUCCESS;
 }

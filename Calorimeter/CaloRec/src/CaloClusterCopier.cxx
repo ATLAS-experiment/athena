@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -28,15 +28,9 @@ CREATED:  Sep 2005
 CaloClusterCopier::CaloClusterCopier(const std::string& type, 
 				   const std::string& name,
 				   const IInterface* parent):
-  AthAlgTool(type, name, parent),
-  m_clustersKey(""),
-  m_copyCells(true),m_useClusterPosition(false),m_etCut(-1.), m_clusterSize(xAOD::CaloCluster_v1::CSize_Unknown)
+  AthAlgTool(type, name, parent)
 { 
   declareInterface<CaloClusterCollectionProcessor> (this);
-  declareProperty("ClustersName",m_clustersKey);
-  declareProperty("CopyCells",m_copyCells);
-  declareProperty("UseClusterPosition",m_useClusterPosition);
-  declareProperty("etCut",m_etCut);
 }
 
 // -------------------------------------------------------------

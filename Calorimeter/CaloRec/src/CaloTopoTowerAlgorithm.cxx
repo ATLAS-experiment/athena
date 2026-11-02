@@ -1,13 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "CaloEvent/CaloTowerSeg.h"
-#include "CaloEvent/CaloTowerContainer.h"
-#include "CaloEvent/CaloCellContainer.h"
-#include "CaloEvent/CaloClusterContainer.h"
-#include "CaloEvent/CaloTopoTowerContainer.h"
 #include "CaloTopoTowerAlgorithm.h"
 
 #include <string>
@@ -17,46 +13,7 @@
 CaloTopoTowerAlgorithm::CaloTopoTowerAlgorithm(const std::string& name, 
 				       ISvcLocator* pSvcLocator) 
   : AthReentrantAlgorithm(name,pSvcLocator)
-  , m_genericLink(true) 
-  , m_ptools( this )
-  , m_cellContainerKey("AllCalo")
-  , m_clusterKey("CaloTopoClusters")
-  , m_cellToClusterMapKey("CaloCell2TopoCluster")
-  , m_towerContainerKey("CmbTower")
-  , m_newTowerContainerKey("TopoTower")
-  , m_caloSelection(false)
 {
-  // tool names
-  //declareProperty("TowerBuilderTools",m_toolNames);
-  declareProperty("TowerBuilderTools",m_ptools);
-  // output data
-  //declareProperty("TowerContainerName",m_towerContainerName);
-  // linkable
-  declareProperty("GenericLinked",m_genericLink);
-
-  /////////////////////////////////////////////
-  //Item From CaloTopoTowerAlg
-  declareProperty("Cell2ClusterMapName",    m_cellToClusterMapKey);
-  declareProperty("CellContainerName"  ,    m_cellContainerKey);
-  declareProperty("ClusterContainerName",   m_clusterKey);
-  declareProperty("InputTowerContainerName" ,    m_towerContainerKey);
-  declareProperty("OutputTowerContainerName",    m_newTowerContainerKey);
-
-  // Declare configurable properties of the algorithm
-  declareProperty("MinimumCellEnergy",      m_minimumCellEnergy    = -1000000000.0);
-  declareProperty("MinimumClusterEnergy",   m_minimumClusterEnergy = -1000000000.0);
-
-  // Noise Tool stuff
-  declareProperty("DefaultNoiseSigma",      m_noiseSigma           = 10.0);
-  declareProperty("CellEnergySignificance", m_cellESignificanceThreshold = -1);
-
-  // Calo from which to use cells
-  declareProperty("IncludedCalos",          m_includedCalos);
-  declareProperty("useCellWeight",          m_useCellWeights=true);
-  
-  //END Item From CaloTopoTowerAlg 
-  ////////////////////////////////////////////////////
-
 }
 
 CaloTopoTowerAlgorithm::~CaloTopoTowerAlgorithm()

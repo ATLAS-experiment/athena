@@ -1,5 +1,5 @@
 // -*- c++ -*- 
-/* Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration */
 #ifndef CALOREC_CALOTOPOTOWERFROMCLUSTERMAKER_H
 #define CALOREC_CALOTOPOTOWERFROMCLUSTERMAKER_H
 
@@ -65,24 +65,24 @@ private:
   SG::ReadCondHandleKey<CaloTowerGeometry>      m_towerGeoKey{this,"TowerGeometry","CaloTowerGeometry"};
   SG::ReadCondHandleKey<CaloDetDescrManager>    m_caloMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
 
-  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterContainerKey;                      ///< Topo-cluster container key
-  SG::ReadHandleKey<CaloCellContainer>          m_cellContainerKey;                         ///< Calorimeter cell container
-  bool                                          m_orderByPt = { false  };                   ///< Orders cluster container by @f$ p_{\text{T}} @f$, default @c true
-  bool                                          m_prepareLCW = { false  };                  ///< Prepare LCW calibration, default is @c false
-  bool                                          m_useCellsFromClusters = { true  };         ///< Use cells from topo-clusters if @c true, else use all cells, default is @c true
-  bool                                          m_applyCellEnergyThreshold = { false  };    ///< Apply cell energy threshold, default is @c false 
-  bool                                          m_doCellIndexCheck = { false  };            ///< Check cell hash index consistency if @c true (default @c false)
-  bool                                          m_buildCombinedSignal = { false  };         ///< Build topo-clusters within given @f$ y @f$ range, else topo-towers
-  double                                        m_energyThreshold;                          ///< Cell energy threshold, default is set in @c m_energyThresholdDef
-  double                                        m_clusterRange;                             ///< Range where topo-clusters are used when <tt>m_buildCombinedSignal = true</tt>
-  bool                                          m_removeSamplingData = { true };            ///< Remove sampling data for towers
+  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterContainerKey{this, "CaloTopoClusterContainerKey", "CaloTopoClusters", "SG Key for CaloClusterContainer (input)"}; ///< Topo-cluster container key
+  SG::ReadHandleKey<CaloCellContainer>          m_cellContainerKey{this, "CaloCellContainerKey", "AllCalo", "SG Key for CaloCellContainer (input)"}; ///< Calorimeter cell container
+  Gaudi::Property<bool>                         m_orderByPt{this, "OrderClusterByPt", false, "Turn on/off pT-ordering of CaloClusterContainer (output)"}; ///< Orders cluster container by @f$ p_{\text{T}} @f$, default @c true
+  Gaudi::Property<bool>                         m_prepareLCW{this, "PrepareLCW", false, "Prepare data structure to apply LCW"}; ///< Prepare LCW calibration, default is @c false
+  Gaudi::Property<bool>                         m_useCellsFromClusters{this, "BuildTopoTowers", true, "Turn on/off topo-tower formation"}; ///< Use cells from topo-clusters if @c true, else use all cells, default is @c true
+  Gaudi::Property<bool>                         m_applyCellEnergyThreshold{this, "ApplyCellEnergyThreshold", false, "Turn on/off cell energy thresholds"}; ///< Apply cell energy threshold, default is @c false 
+  Gaudi::Property<bool>                         m_doCellIndexCheck{this, "DoCellIndexCheck", false, "Check cell hash indices for consistency"}; ///< Check cell hash index consistency if @c true (default @c false)
+  Gaudi::Property<bool>                         m_buildCombinedSignal{this, "BuildCombinedTopoSignal", false, "Build topo-clusters and topo-towers"}; ///< Build topo-clusters within given @f$ y @f$ range, else topo-towers
+  Gaudi::Property<double>                       m_energyThreshold{this, "CellEnergyThreshold", m_energyThresholdDef-1., "Energy threshold for cells filled in clusters"}; ///< Cell energy threshold, default is set in @c m_energyThresholdDef
+  Gaudi::Property<double>                       m_clusterRange{this, "TopoClusterRange", m_clusterRangeDef, "Rapidity range for using topo-clusters in combined signal mode"}; ///< Range where topo-clusters are used when <tt>m_buildCombinedSignal = true</tt>
+  Gaudi::Property<bool>                         m_removeSamplingData{this, "RemoveSamplingData", true, "Remove the associated sampling data"}; ///< Remove sampling data for towers
   /// @}
 
   /// @name Constants and parameters
   /// @{
   //uint_t             m_numberOfCells;          ///< Number of cells (highest cell index + 1)
   //uint_t             m_maxCellHash;            ///< Maximum hash index of cell ( number of cells - 1)
-  uint_t             m_numberOfSamplings;      ///< Number of samplings
+  uint_t             m_numberOfSamplings{static_cast<uint_t>(CaloSampling::Unknown)}; ///< Number of samplings
   //uint_t             m_numberOfTowers;         ///< Number of towers
   static const double      m_energyThresholdDef;     ///< Default energy threshold
   static const double      m_clusterRangeDef;        ///< Default cluster @f$ y @f$ range
@@ -133,7 +133,7 @@ private:
   ///@name Excluded samplings
   ///@{
   std::vector<CaloSampling::CaloSample>                       m_excludedSamplings;         ///< List of excluded samplings (@c CaloSampling::CaloSample enumerators)
-  std::vector<std::string>                                    m_excludedSamplingsName;     ///< List of excluded samplings (human-readable names)
+  Gaudi::Property<std::vector<std::string>>                   m_excludedSamplingsName{this, "ExcludedSamplings", {}, "Excluded samplings by name"}; ///< List of excluded samplings (human-readable names)
   std::bitset< _CALOTOPOTOWERFROMCLUSTERMAKER_BITSET_SIZE >   m_excludedSamplingsPattern;  ///< Bit pattern indicates if sampling is excluded
   ///@}
 

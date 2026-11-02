@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -24,6 +24,8 @@ class CaloCell_ID;
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "CaloEvent/CaloCell2ClusterMap.h"
 #include "CaloEvent/CaloClusterContainer.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
 
 class CaloCell2ClusterMapper : public AthReentrantAlgorithm
 {
@@ -41,14 +43,14 @@ class CaloCell2ClusterMapper : public AthReentrantAlgorithm
    * @brief Name of the CaloCell2ClusterMap in StoreGate.
    *
    * the map can be retrieved with this key from StoreGate.  */
-  SG::WriteHandleKey<CaloCell2ClusterMap> m_mapOutputKey;
+  SG::WriteHandleKey<CaloCell2ClusterMap> m_mapOutputKey{this, "MapOutputName", ""};
 
   /**
    * @brief Name of the CaloClusterContainer to use.
    *
    * the map is filled with all CaloCell objects which are member of
    * at least one CaloCluster in this CaloClusterContainer.  */
-  SG::ReadHandleKey<CaloClusterContainer> m_clusterKey;
+  SG::ReadHandleKey<CaloClusterContainer> m_clusterKey{this, "ClustersName", ""};
   
 };
 #endif // CALOREC_CALOCELL2CLUSTERMAPPER_H

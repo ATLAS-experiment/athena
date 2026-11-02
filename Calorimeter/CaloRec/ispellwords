@@ -1062,7 +1062,6 @@ CaloCellContainerMerger
 CaloClusterMoment
 Delmastro
 LArDigit
-declareProperty
 neighborThreshold
 CaloTopoTmpHashCell
 AddSamplingCells

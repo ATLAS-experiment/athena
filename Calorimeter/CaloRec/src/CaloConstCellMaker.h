@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -21,8 +21,9 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "CaloEvent/CaloConstCellContainer.h"
+#include "CaloInterface/ICaloConstCellMakerTool.h"
+#include "StoreGate/WriteHandleKey.h"
 class IChronoStatSvc;
-class ICaloConstCellMakerTool;
 
 
 /**
@@ -53,13 +54,13 @@ public:
 
 private:
   /// Property: Will the new CellContainer will own its cells (default no)?
-  int m_ownPolicy;
+  Gaudi::Property<int> m_ownPolicy{this, "OwnPolicy", static_cast<int>(SG::VIEW_ELEMENTS), "Will the new container own its cells?  Default is no."};
 
   /// Property: List of tools to run.
-  ToolHandleArray<ICaloConstCellMakerTool> m_caloCellMakerTools;
+  ToolHandleArray<ICaloConstCellMakerTool> m_caloCellMakerTools{this, "CaloCellMakerTools", {}, "List of tools to run."};
   
   /// Property: Output container key.
-  SG::WriteHandleKey<CaloConstCellContainer> m_caloCellsOutputKey;
+  SG::WriteHandleKey<CaloConstCellContainer> m_caloCellsOutputKey{this, "CaloCellsOutputName", "", "Output container name."};
 
   /// For timekeeping.
   ServiceHandle<IChronoStatSvc> m_chrono;

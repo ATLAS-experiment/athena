@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -44,6 +44,8 @@ class Identifier;
 
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
 
+#include "CLHEP/Units/SystemOfUnits.h"
+
 class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterCollectionProcessor
 {
  public:    
@@ -58,7 +60,7 @@ class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterColl
 
  private: 
   
-  const CaloCell_ID* m_calo_id;
+  const CaloCell_ID* m_calo_id{nullptr};
 
   /**
    * @brief type of neighbor relations to use.
@@ -84,8 +86,8 @@ class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterColl
    *      are connected in this case.
    *
    * The default setting is "super3D".  */
-  std::string m_neighborOption;                  
-  LArNeighbours::neighbourOption m_nOption;      
+  Gaudi::Property<std::string> m_neighborOption{this, "NeighborOption", "super3D"};
+  LArNeighbours::neighbourOption m_nOption{LArNeighbours::super3D};
 
   /**
    * @brief if set to true limit the neighbors in HEC IW and FCal2&3.
@@ -96,7 +98,7 @@ class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterColl
    * those cells. If this property is set to true the 2d neighbors of
    * these cells are not used - only the next sampling neighbors are
    * probed. */
-  bool m_restrictHECIWandFCalNeighbors;
+  Gaudi::Property<bool> m_restrictHECIWandFCalNeighbors{this, "RestrictHECIWandFCalNeighbors", false};
                                                  
   /**
    * @brief local maxima need at least this number of neighbors to
@@ -105,14 +107,14 @@ class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterColl
    * each cell above the energy cut having at least this many
    * neighbors in the parent cluster and only neighbors with smaller
    * energy seed a split cluster. */
-  int m_nCells;                                 
+  Gaudi::Property<int> m_nCells{this, "NumberOfCellsCut", 4};
                                                 
   /**
    * @brief local maxima need at least this energy content
    *
    * potential seed cells have to pass this cut on the energy
    * content. */
-  float m_minEnergy;                           
+  Gaudi::Property<float> m_minEnergy{this, "EnergyCut", 500*CLHEP::MeV};
 
   /**
    * @brief share cells at the border between two local maxima
@@ -132,7 +134,7 @@ class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterColl
    * cells are included in the normal clustering and the cluster with
    * the largest E for the current seed cells gets the current border
    * cell. */
-  bool m_shareBorderCells;                           
+  Gaudi::Property<bool> m_shareBorderCells{this, "ShareBorderCells", false};
 
   /**
    * @brief typical em shower scale to use for distance criteria in
@@ -146,7 +148,7 @@ class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterColl
    * showers. The exact choice of this property is not critical but
    * should roughly match the Moliere radius in the LArEM since here
    * the sharing of cells has the biggest use case. */
-  float m_emShowerScale;
+  Gaudi::Property<float> m_emShowerScale{this, "EMShowerScale", 5*CLHEP::cm};
 
   /** 
    * @brief vector of names of the calorimeter samplings to consider.
@@ -161,7 +163,7 @@ class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterColl
    * each of its cells (for the purpose of local maxima search) to
    * 0. They are still counted in the neighbor criteria but don't make
    * local maxima any more ... */
-  std::vector<std::string>  m_samplingNames;         
+  Gaudi::Property<std::vector<std::string>> m_samplingNames{this, "SamplingNames", {}};
 
   /** 
    * @brief actual set of samplings to be used
@@ -175,14 +177,14 @@ class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterColl
    *
    * This is needed to adjust the range of the vector<bool> for a quick 
    * lookup if a cell belongs to a valid sampling or not. */
-  int m_minSampling;
+  int m_minSampling{0};
 
   /** 
    * @brief largest valid sampling found 
    *
    * This is needed to adjust the range of the vector<bool> for a quick 
    * lookup if a cell belongs to a valid sampling or not. */
-  int m_maxSampling;
+  int m_maxSampling{0};
 
   /** 
    * @brief flag for all samplings - true for used ones, false for excluded ones
@@ -198,7 +200,7 @@ class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterColl
    * Samplings in this list will be considered for local maxima only
    * if no local max in the primary list is overlapping. By default this
    * list is empty  */
-  std::vector<std::string>  m_secondarySamplingNames;         
+  Gaudi::Property<std::vector<std::string>> m_secondarySamplingNames{this, "SecondarySamplingNames", {}};
 
   /** 
    * @brief actual set of secondary samplings to be used
@@ -212,14 +214,14 @@ class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterColl
    *
    * This is needed to adjust the range of the vector<bool> for a quick 
    * lookup if a cell belongs to a valid secondary sampling or not. */
-  int m_minSecondarySampling;
+  int m_minSecondarySampling{0};
 
   /** 
    * @brief largest valid secondary sampling found 
    *
    * This is needed to adjust the range of the vector<bool> for a quick 
    * lookup if a cell belongs to a valid secondary sampling or not. */
-  int m_maxSecondarySampling;
+  int m_maxSecondarySampling{0};
 
   /** 
    * @brief flag for all secondary samplings - true for used ones,
@@ -232,12 +234,12 @@ class CaloTopoClusterSplitter: public AthAlgTool, virtual public CaloClusterColl
   /**
    * @brief if set to true treat cells with a dead OTX which can be
    * predicted by L1 trigger info as good instead of bad cells */
-  bool m_treatL1PredictedCellsAsGood;
+  Gaudi::Property<bool> m_treatL1PredictedCellsAsGood{this, "TreatL1PredictedCellsAsGood", true};
   
   /**
    * @brief if set to true, splitter only looks at absolute 
    * value of Energy in order to identify potential seed cells */
-  bool m_absOpt;
+  Gaudi::Property<bool> m_absOpt{this, "WeightingOfNegClusters", false};
 
 
   IdentifierHash m_hashMin;

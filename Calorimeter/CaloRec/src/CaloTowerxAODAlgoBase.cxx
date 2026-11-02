@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloTowerxAODAlgoBase.h"
@@ -13,14 +13,7 @@
 #include "CaloIdentifier/CaloCell_ID.h"
 
 CaloTowerxAODAlgoBase::CaloTowerxAODAlgoBase(const std::string& name,ISvcLocator* pSvcLocator)
-    : AthReentrantAlgorithm(name,pSvcLocator),
-    m_caloTowerContainerKey("CmbTowers") {
-  declareProperty("CaloTowerContainer", m_caloTowerContainerKey,"Output xAOD::CaloTowerContainer");
-  declareProperty("minEta",m_minEta=-5,"Tower-grid: lower eta boundary");
-  declareProperty("maxEta",m_maxEta=5,"Tower-grid: upper eta boundary");
-  declareProperty("nEta",m_nEtaBins=100,"Tower-grid: number of phi bins");
-  declareProperty("nPhi",m_nPhiBins=64,"Tower-grid: number of phi bins");
-  declareProperty("doCrossChecks",m_doxCheck=false,"Turn on internal checks (debugging)");
+    : AthReentrantAlgorithm(name,pSvcLocator) {
 }
 
 CaloTowerxAODAlgoBase::~CaloTowerxAODAlgoBase()

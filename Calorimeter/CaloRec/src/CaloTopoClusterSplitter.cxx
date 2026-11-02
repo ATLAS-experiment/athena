@@ -48,45 +48,9 @@ CaloTopoClusterSplitter::CaloTopoClusterSplitter(const std::string& type,
 						 const std::string& name,
 						 const IInterface* parent)
   
-  : AthAlgTool(type, name, parent),
-    m_calo_id(nullptr),
-    m_neighborOption("super3D"),
-    m_nOption(LArNeighbours::super3D),
-    m_restrictHECIWandFCalNeighbors(false),
-    m_nCells(4),
-    m_minEnergy(500*MeV),
-    m_shareBorderCells(false),
-    m_emShowerScale(5*cm),
-    m_minSampling (0),
-    m_maxSampling (0),
-    m_minSecondarySampling (0),
-    m_maxSecondarySampling (0),
-    m_treatL1PredictedCellsAsGood      (true),
-    m_absOpt      (false)
+  : AthAlgTool(type, name, parent)
 {
   declareInterface<CaloClusterCollectionProcessor> (this);
-  // Neighbor Option
-  declareProperty("NeighborOption",m_neighborOption);
-  // Restrict HEC IW and FCal Neighbors
-  declareProperty("RestrictHECIWandFCalNeighbors",m_restrictHECIWandFCalNeighbors);
-  // minimal number of cells around a local max
-  declareProperty("NumberOfCellsCut",m_nCells);
-  // minimal energy for a local max
-  declareProperty("EnergyCut",m_minEnergy);
-  // Name(s) of Calorimeter Samplings to consider for local maxima
-  declareProperty("SamplingNames",m_samplingNames);
-  // Name(s) of secondary Calorimeter Samplings to consider for local maxima
-  // if no maximum in a primary sampling is overlapping
-  declareProperty("SecondarySamplingNames",m_secondarySamplingNames);
-  // Whether or not to share cells at the boundary between two clusters
-  declareProperty("ShareBorderCells",m_shareBorderCells);
-  // Typical em shower distance for which the energy density should drop to 1/e
-  declareProperty("EMShowerScale",m_emShowerScale);
-  
-  // Treat bad cells with dead OTX if predicted from L1 as good
-  declareProperty("TreatL1PredictedCellsAsGood",m_treatL1PredictedCellsAsGood);
-  // Use weighting of neg. clusters option?
-  declareProperty("WeightingOfNegClusters",m_absOpt);  
 }
 
 //###############################################################################
@@ -116,8 +80,8 @@ StatusCode CaloTopoClusterSplitter::initialize()
 		 << m_neighborOption << " is selected!" << endmsg;
 
   //--- check sampling names to use
-  std::vector<std::string>::iterator samplingIter = m_samplingNames.begin(); 
-  std::vector<std::string>::iterator samplingIterEnd = m_samplingNames.end(); 
+  std::vector<std::string>::const_iterator samplingIter = m_samplingNames.begin(); 
+  std::vector<std::string>::const_iterator samplingIterEnd = m_samplingNames.end(); 
   for(; samplingIter!=samplingIterEnd; ++samplingIter) { 
     if ( *samplingIter == "PreSamplerB" ) 
       m_validSamplings.insert(CaloCell_ID::PreSamplerB);

@@ -14,15 +14,9 @@
 CaloClusterSnapshot::CaloClusterSnapshot(const std::string& type, 
 				   const std::string& name,
 				   const IInterface* parent):
-  AthAlgTool(type, name, parent),
-  m_outputKey("")
+  AthAlgTool(type, name, parent)
 { 
   declareInterface<CaloClusterCollectionProcessor> (this);
-  declareProperty("OutputName",m_outputKey);
-  declareProperty("CellLinkName",m_cellLinkOutputKey);
-  declareProperty("SetCrossLinks",m_setCrossLinks=false);
-  declareProperty("FinalClusterContainerName", m_finalContName);
-  
 }
 
 // -------------------------------------------------------------

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -30,6 +30,7 @@ Updated:  May 5, 2004    (Sven Menke)
 
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "StoreGate/ReadHandleKey.h"
 
 class CaloClusterCopier : public AthAlgTool, virtual public CaloClusterCollectionProcessor {
  public:
@@ -50,11 +51,11 @@ class CaloClusterCopier : public AthAlgTool, virtual public CaloClusterCollectio
 
  private:
   // properties 
-  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clustersKey;
-  bool m_copyCells;
-  bool m_useClusterPosition;
-  float m_etCut;
-  xAOD::CaloCluster::ClusterSize m_clusterSize;
+  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clustersKey{this, "ClustersName", ""};
+  Gaudi::Property<bool> m_copyCells{this, "CopyCells", true};
+  Gaudi::Property<bool> m_useClusterPosition{this, "UseClusterPosition", false};
+  Gaudi::Property<float> m_etCut{this, "etCut", -1.};
+  xAOD::CaloCluster::ClusterSize m_clusterSize{xAOD::CaloCluster_v1::CSize_Unknown};
   
 };
 

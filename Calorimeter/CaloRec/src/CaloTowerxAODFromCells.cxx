@@ -1,12 +1,11 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
 #include "CaloTowerxAODFromCells.h"
 
 #include "CaloEvent/CaloCell.h"
-#include "CaloEvent/CaloCellContainer.h"
 
 
 #include "xAODCaloEvent/CaloTowerContainer.h"
@@ -17,12 +16,7 @@
 
 CaloTowerxAODFromCells::CaloTowerxAODFromCells(const std::string& name,ISvcLocator* pSvcLocator)
   : CaloTowerxAODAlgoBase(name,pSvcLocator)
-  , m_inputCellContainerKey("AllCalo")
-  , m_cellThresholdE(std::numeric_limits<float>::min())
-  , m_filterCells(false)
 {
-  declareProperty("InputCellContainer", m_inputCellContainerKey);
-  declareProperty("CellEnergyThreshold", m_cellThresholdE);
 }
 
 CaloTowerxAODFromCells::~CaloTowerxAODFromCells()

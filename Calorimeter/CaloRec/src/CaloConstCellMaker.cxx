@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -12,7 +12,6 @@
 
 
 #include "CaloConstCellMaker.h"
-#include "CaloInterface/ICaloConstCellMakerTool.h"
 
 #include "AthenaKernel/Chrono.h"
 #include "AthenaKernel/errorcheck.h"
@@ -32,16 +31,8 @@ using CLHEP::second;
 CaloConstCellMaker::CaloConstCellMaker (const std::string& name,
                                         ISvcLocator* pSvcLocator)
   : AthReentrantAlgorithm(name, pSvcLocator),
-    m_caloCellMakerTools(this),
-    m_caloCellsOutputKey(""),
     m_chrono("ChronoStatSvc", name)
 {
-  declareProperty("OwnPolicy", m_ownPolicy = static_cast<int>(SG::VIEW_ELEMENTS),
-                  "Will the new container own its cells?  Default is no.");
-  declareProperty("CaloCellMakerTools", m_caloCellMakerTools,
-                  "List of tools to run.");
-  declareProperty("CaloCellsOutputName", m_caloCellsOutputKey,
-                  "Output container name.");
 }
 
 
@@ -79,7 +70,7 @@ StatusCode CaloConstCellMaker::execute (const EventContext& ctx) const
   // Create empty container.
 
   SG::WriteHandle<CaloConstCellContainer> theContainer( m_caloCellsOutputKey, ctx);
-  ATH_CHECK( theContainer.record (std::make_unique<CaloConstCellContainer>(static_cast<SG::OwnershipPolicy>(m_ownPolicy))) );
+  ATH_CHECK( theContainer.record (std::make_unique<CaloConstCellContainer>(static_cast<SG::OwnershipPolicy>(m_ownPolicy.value()))) );
 
   // Loop on tools.
   // Note that finalization and checks are also done with tools.
