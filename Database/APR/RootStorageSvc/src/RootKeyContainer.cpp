@@ -124,7 +124,7 @@ StatusCode RootKeyContainer::next(Token::OID_t& linkH) {
 } 
 
 // Interface Implementation: Find entry in container
-StatusCode RootKeyContainer::load( void** ptr, ShapeH shape,
+StatusCode RootKeyContainer::load( void** ptr, const Shape* shape,
                                    const Token::OID_t& linkH,
                                    Token::OID_t& oid,
                                    bool any_next)
@@ -151,7 +151,7 @@ StatusCode RootKeyContainer::load( void** ptr, ShapeH shape,
   return sc;
 }
 
-StatusCode RootKeyContainer::loadObject( void** ptr, ShapeH shape,
+StatusCode RootKeyContainer::loadObject( void** ptr, const Shape* shape,
                                        Token::OID_t&   oid )
 {
    char txt[64];

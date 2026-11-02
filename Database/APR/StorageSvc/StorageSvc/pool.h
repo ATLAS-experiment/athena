@@ -17,7 +17,6 @@
 
 // STL include files
 #include <string>
-#include <utility>
 
 /* namespace pool
  *

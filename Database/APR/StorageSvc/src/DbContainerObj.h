@@ -24,8 +24,6 @@
  */
 namespace pool  {
 
-  typedef const class Shape        *ShapeH;
-
   /** @class DbContainerObj DbContainerObj.h src/DbContainerObj.h
     *
     * Description:
@@ -106,13 +104,13 @@ namespace pool  {
     //@{
 
     /// Store object in location
-    StatusCode store(const void* object, DbContainer& cntH, ShapeH shape);
+    StatusCode store(const void* object, DbContainer& cntH, const Shape* shape);
 
     /// In place allocation of object location
-    StatusCode allocate(DbContainer& cntH, const void* object, ShapeH shape, Token::OID_t& oid);
+    StatusCode allocate(DbContainer& cntH, const void* object, const Shape* shape, Token::OID_t& oid);
 
     /// Select object in the container identified by its handle
-    StatusCode load( void** ptr, ShapeH shape,
+    StatusCode load( void** ptr, const Shape* shape,
                      const Token::OID_t& linkH,
                      Token::OID_t&       oid,
                      bool          any_next);

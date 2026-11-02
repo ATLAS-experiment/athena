@@ -117,7 +117,7 @@ std::string DbStorageSvc::getContName(FileDescriptor& refDB, Token& persToken) c
 /// Retrieve persistent shape from Storage manager.
 StatusCode DbStorageSvc::getShape( FileDescriptor&       fDesc,
                                    const Guid&           objType,
-                                   ShapeH&               shape)
+                                   const Shape*&         shape)
 {
   shape = 0;
   if ( /*0 != &fDesc &&*/ m_domH.isValid() )   {
@@ -149,7 +149,7 @@ StatusCode DbStorageSvc::getShape( FileDescriptor&       fDesc,
 }
 
 /// Create a persistent shape.
-ShapeH DbStorageSvc::createShape( const Guid& shapeID )
+const Shape* DbStorageSvc::createShape( const Guid& shapeID )
 {
   const DbTypeInfo* typ_info = nullptr;
   if( DbTransform::getShape(shapeID, typ_info).isSuccess() ) {
@@ -170,7 +170,7 @@ StatusCode DbStorageSvc::allocate( FileDescriptor&       fDesc,
                                    const string&         refCont,
                                    int                   technology,
                                    const void*           object,
-                                   ShapeH                shape,
+                                   const Shape*          shape,
                                    Token*&               refpToken)
 {
    StatusCode sc = StatusCode::FAILURE;
@@ -209,7 +209,7 @@ StatusCode DbStorageSvc::allocate( FileDescriptor&       fDesc,
 /// Read a persistent object from the medium.
 StatusCode DbStorageSvc::read( const FileDescriptor& fDesc,
                                const Token&          token,
-                               ShapeH                shape,
+                               const Shape*          shape,
                                void**                object)
 {
 

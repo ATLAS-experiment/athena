@@ -573,7 +573,7 @@ std::string DbDatabaseObj::cntName(Token& token) const {
   return "";
 }
 
-StatusCode DbDatabaseObj::read(const Token& token, ShapeH shape, void** object)
+StatusCode DbDatabaseObj::read(const Token& token, const Shape* shape, void** object)
 {
    if( 0 == m_info ) open().ignore();
    if( 0 != m_info ) {

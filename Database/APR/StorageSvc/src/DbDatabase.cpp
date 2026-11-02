@@ -146,7 +146,7 @@ StatusCode DbDatabase::makeLink(Token* pToken, Token::OID_t& refLink)
 {  return isValid() ? ptr()->makeLink(pToken, refLink) : StatusCode::FAILURE;         }
 
 /// read an object referenced by the token
-StatusCode DbDatabase::read(const Token& token, ShapeH shape, void** object)
+StatusCode DbDatabase::read(const Token& token, const Shape* shape, void** object)
 {  return isValid() ? ptr()->read(token, shape, object) : StatusCode::FAILURE;  }
 
 /// Access local container token (if container exists)

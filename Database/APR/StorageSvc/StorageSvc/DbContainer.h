@@ -32,8 +32,7 @@ namespace pool  {
   class DbTypeInfo;
   class DbContainerObj;
   class DbOption;
-
-  typedef const class Shape        *ShapeH;
+  class Shape;
 
   /** @class DbContainer DbContainer.h StorageSvc/DbContainer.h
     *
@@ -142,9 +141,9 @@ namespace pool  {
       */
     //@{
     /// In place allocation of object location
-    StatusCode allocate(const void* object, ShapeH shape, Token::OID_t& oid);
+    StatusCode allocate(const void* object, const Shape* shape, Token::OID_t& oid);
     /// Select object in the container identified by its handle
-    StatusCode load(void** ptr, ShapeH shape, const Token::OID_t& lH);
+    StatusCode load(void** ptr, const Shape* shape, const Token::OID_t& lH);
     //@}
 
     /** Access objects by handle directly.

@@ -55,7 +55,7 @@ namespace pool {
         *
         * @return Status code indicating success or failure.
         */
-      virtual StatusCode loadObject( void** ptr, ShapeH shape, 
+      virtual StatusCode loadObject( void** ptr, const Shape* shape, 
                                    Token::OID_t& oid) override;
       
       /// Commit single entry to container
