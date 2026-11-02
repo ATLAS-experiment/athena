@@ -28,8 +28,7 @@ namespace pool    {
   class DbDatabase;
   class DbContainer;
   class DbOption;
-
-  typedef const class Shape        *ShapeH;
+  class Shape;
 
   /** @class IDbContainer IDbContainer.h StorageSvc/IDbContainer.h 
     *
@@ -60,11 +59,11 @@ namespace pool    {
     /// Store object in location
     virtual StatusCode store(const void* object,
                              DbContainer&  cntH,
-                             ShapeH shape) = 0;
+                             const Shape* shape) = 0;
     /// In place allocation of object location
     virtual StatusCode allocate(DbContainer& cntH,
                                 const void* object,
-                                ShapeH shape,
+                                const Shape* shape,
                                 Token::OID_t& oid) = 0;
 
     /// Number of next record in the container (=size if no delete is allowed)
@@ -95,7 +94,7 @@ namespace pool    {
       *                          will differ from the preferred oid.
       * @return Status code indicating success or failure.
       */
-    virtual StatusCode load( void** ptr, ShapeH shape,
+    virtual StatusCode load( void** ptr, const Shape* shape,
                            const Token::OID_t& lnkH,
                            Token::OID_t&       oid,
                            bool                any_next=false) = 0;

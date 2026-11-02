@@ -135,7 +135,7 @@ namespace pool    {
     StatusCode transAct(Transaction::Action action);
 
     /// read an object referenced by the token
-    StatusCode read(const Token& token, ShapeH shape, void** object);
+    StatusCode read(const Token& token, const Shape* shape, void** object);
     /// Retrieve container name from link container (using token oid, rather than contID)
     std::string cntName(Token& token) const;
     /// Add association link to link container

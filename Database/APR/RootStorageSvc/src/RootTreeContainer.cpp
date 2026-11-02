@@ -235,7 +235,7 @@ StatusCode RootTreeContainer::writeObject( ActionList::value_type& action )
 
 
 StatusCode
-RootTreeContainer::loadObject(void** obj_p, ShapeH /*shape*/, Token::OID_t& oid)
+RootTreeContainer::loadObject(void** obj_p, const Shape* /*shape*/, Token::OID_t& oid)
 {
   auto evt_id = oid.second;
   if( evt_id < 0 || (uint64_t)evt_id >= size() ) {

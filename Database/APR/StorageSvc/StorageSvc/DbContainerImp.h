@@ -115,11 +115,11 @@ namespace pool    {
     /// Store object in location
     virtual StatusCode store(      const void* object,
                                  DbContainer&  cntH,
-                                 ShapeH shape) override;
+                                 const Shape* shape) override;
     /// In place allocation of object location
     virtual StatusCode allocate(DbContainer& cntH,
                               const void* object,
-                              ShapeH shape,
+                              const Shape* shape,
                               Token::OID_t& oid) override;
     /// Fetch next object address to set token
     virtual StatusCode next(Token::OID_t& linkH) override;
@@ -134,7 +134,7 @@ namespace pool    {
       *                          will differ from the preferred oid.
       * @return Status code indicating success or failure.
       */
-    virtual StatusCode load( void** ptr, ShapeH shape,
+    virtual StatusCode load( void** ptr, const Shape* shape,
                            const Token::OID_t& lnkH,
                            Token::OID_t&       oid,
                            bool                any_next) override;
@@ -146,7 +146,7 @@ namespace pool    {
       *
       * @return Status code indicating success or failure.
       */
-    virtual StatusCode loadObject(void** ptr, ShapeH shape, Token::OID_t& oid) = 0;
+    virtual StatusCode loadObject(void** ptr, const Shape* shape, Token::OID_t& oid) = 0;
 
   };
 }       // End namespace pool

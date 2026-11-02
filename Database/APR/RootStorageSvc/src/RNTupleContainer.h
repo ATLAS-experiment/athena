@@ -147,7 +147,7 @@ class RNTupleContainer : public pool::DbContainerImp
    *
    *  @return Status code indicating success or failure.
    */
-  virtual StatusCode loadObject(void** ptr, pool::ShapeH shape,
+  virtual StatusCode loadObject(void** ptr, const pool::Shape* shape,
                                 Token::OID_t& oid) override final;
 
   /// Commit single entry to container
@@ -163,7 +163,7 @@ class RNTupleContainer : public pool::DbContainerImp
   /// Store object in location
   virtual StatusCode store(const void* object,
                                  pool::DbContainer& cntH,
-                                 pool::ShapeH shape) override final;
+                                 const pool::Shape* shape) override final;
 
  private:
   /// Init a field description for an object (i.e. find TClass etc.)

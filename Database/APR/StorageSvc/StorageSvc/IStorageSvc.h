@@ -24,8 +24,7 @@ namespace pool  {
   // Forward declarations
   class FileDescriptor;
   class DbOption;
-
-  typedef const class Shape*  ShapeH;
+  class Shape;
 
   /** @class IStorageSvc IStorageSvc.h StorageSvc/IStorageSvc.h
     *
@@ -72,7 +71,7 @@ namespace pool  {
       * @param   refCont   [IN] Reference to container name 
       * @param   technology[IN] Specialised sub-technology
       * @param   object    [IN] Pointer to persistent data object.
-      * @param   shapeH    [IN] Handle to persistent type information
+      * @param   shape     [IN] Persistent type information
       * @param   refpTok  [OUT] Reference to location for storing the
       *                         pointer of the persistent object token.
       *
@@ -82,7 +81,7 @@ namespace pool  {
                                   const std::string&    refCont,
                                   int                   technology,
                                   const void*           object,
-                                  ShapeH                shapeH,
+                                  const Shape*          shape,
                                   Token*&               refpTok) = 0;
 
 
@@ -92,30 +91,27 @@ namespace pool  {
       * @param   refDB     [IN] Reference to Database descriptor 
       * @param   pToken    [IN] Reference to persistent token information.
       * @param   object   [OUT] Pointer to persistent data pointer.
-      * @param   shapeH    [IN] Desired object shape to be read
+      * @param   shape     [IN] Desired object shape to be read
       * @return                 StatusCode code indicating success or failure.
       */
     virtual StatusCode read(      const FileDescriptor& refDB,
                                   const Token&          pToken,
-                                  ShapeH                shapeH,
+                                  const Shape*          shape,
                                   void**                object) = 0;
 
-    /// Retrieve persistent shape from Storage manager.
-    /** The persistent shape is saved at write time to a Database.
-      * To match the transient shape of an object to the persistent shape of 
-      * the data at the time the data were written should allow for schema
-      * evolution and object transformation(s).
+    /** Retrieve persistent shape from Storage manager.
+      * The persistent shape is saved at write time to a Database.
+      * It should match the transient type shape when reading
       *
       * @param   refDB     [IN] Reference to Database descriptor 
       * @param   objType   [IN] Shape identifier.
-      * @param   shapeH   [OUT] Handle to persistent mapping of a given
-      *                         object type.
+      * @param   shape    [OUT] Persistent shpae of a given object type.
       *
       * @return                 StatusCode code indicating success or failure.
       */
     virtual StatusCode getShape(  FileDescriptor&       refDB,
                                   const Guid&           objType,
-                                  ShapeH&               shapeH) = 0;
+                                  const Shape*&         shape) = 0;
 
     /// Create a Shape representation based on a ShapeID
     /**
@@ -123,7 +119,7 @@ namespace pool  {
       *
       * @return            Handle to persistent mapping of a given object type.
       */
-    virtual ShapeH     createShape( const Guid& shapeID ) = 0;
+    virtual const Shape* createShape( const Guid& shapeID ) = 0;
 
     /// Start a new Database Session.
     /** The Database session handles Databases of one given type. This

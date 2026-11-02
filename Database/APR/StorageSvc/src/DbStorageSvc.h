@@ -87,7 +87,7 @@ namespace pool  {
       * @param   refCont   [IN] Reference to container name 
       * @param   technology[IN] Specialised sub-technology
       * @param   object    [IN] Pointer to persistent data object.
-      * @param   shapeH    [IN] Handle to persistent type information
+      * @param   shape     [IN] Persistent type information
       * @param   refpTok  [OUT] Reference to location for storing the
       *                         pointer of the persistent object token.
       *
@@ -97,7 +97,7 @@ namespace pool  {
                                  const std::string&    refCont,
                                  int                   technology,
                                  const void*           object,
-                                 ShapeH                shapeH,
+                                 const Shape*          shape,
                                  Token*&               refpTok) override final;
 
     /// Read a persistent object from the medium.
@@ -106,12 +106,12 @@ namespace pool  {
       * @param   refDB     [IN] Reference to Database descriptor 
       * @param   persToken [IN] Reference to persistent token information.
       * @param   object   [OUT] Pointer to persistent data pointer.
-      * @param   shapeH    [IN] Desired object shape to be read
+      * @param   shape     [IN] Desired object shape to be read
       * @return                 StatusCode code indicating success or failure.
       */
     virtual StatusCode read(     const FileDescriptor& refDB,
                                  const Token&          persToken,
-                                 ShapeH                shapeH,
+                                 const Shape*          shape,
                                  void**                object) override final;
 
     /// Get container name for object
@@ -131,14 +131,13 @@ namespace pool  {
       *
       * @param   refDB     [IN] Reference to Database descriptor 
       * @param   objType   [IN] Shape identifier.
-      * @param   shapeH   [OUT] Handle to persistent mapping of a given
-      *                         object type.
+      * @param   shape    [OUT] Persistent shape of a given object type.
       *
       * @return                 StatusCode code indicating success or failure.
       */
     virtual StatusCode getShape(  FileDescriptor&       refDB,
                                   const Guid&           objType,
-                                  ShapeH&               shapeH) override final;
+                                  const Shape*&         shape) override final;
 
     /// Create a Shape representation based on a ShapeID
     /**
@@ -146,7 +145,7 @@ namespace pool  {
       *
       * @return            Handle to persistent mapping of a given object type.
       */
-    virtual ShapeH     createShape( const Guid& shapeID ) override final;
+    virtual const Shape* createShape( const Guid& shapeID ) override final;
 
     /// Start a new Database Session.
     /** The Database session handles Databases of one given type. This

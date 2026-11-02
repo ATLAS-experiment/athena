@@ -88,11 +88,11 @@ namespace pool  {
       *
       * @return Status code indicating success or failure.
       */
-    virtual StatusCode loadObject( void** ptr, ShapeH shape,
+    virtual StatusCode loadObject( void** ptr, const Shape* shape,
                                    Token::OID_t& oid) override;
 
     /// Interface Implementation: Find entry in container
-    virtual StatusCode load( void** ptr, ShapeH shape,
+    virtual StatusCode load( void** ptr, const Shape* shape,
                              const Token::OID_t& linkH,
                              Token::OID_t& oid,
                              bool          any_next) override;

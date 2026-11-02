@@ -41,7 +41,7 @@ namespace pool  {
   class DbContainerObj;
   class DbOption;
   class DbTypeInfo;
-  typedef const class Shape        *ShapeH;
+  class Shape;
 
   /** @class DbDatabase DbDatabase.h StorageSvc/DbDatabase.h
    *
@@ -171,7 +171,7 @@ namespace pool  {
     StatusCode param(const std::string& nam, std::string& val) const;
 
     /// read an object referenced by the token
-    StatusCode read(const Token& token, ShapeH shape, void** object);
+    StatusCode read(const Token& token, const Shape* shape, void** object);
     /// Retrieve container name from link container (using token oid, rather than contID)
     std::string cntName(Token& token) const;
     /// Add association link to link container

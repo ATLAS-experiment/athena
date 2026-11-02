@@ -55,14 +55,14 @@ StatusCode DbContainerImp::close()   {
 }
 
 /// In place allocation of raw memory for the transient object
-StatusCode DbContainerImp::store(const void* object, DbContainer& cntH, ShapeH shape)  {
+StatusCode DbContainerImp::store(const void* object, DbContainer& cntH, const Shape* shape)  {
   Token::OID_t objLink(cntH.token()->oid().first, nextRecordId());
   DbAction action( object, shape, objLink );
   return writeObject( action );
 }
 
 /// In place allocation of raw memory for the transient object
-StatusCode DbContainerImp::allocate(DbContainer& cntH, const void* object, ShapeH shape, Token::OID_t& oid) {
+StatusCode DbContainerImp::allocate(DbContainer& cntH, const void* object, const Shape* shape, Token::OID_t& oid) {
   if ( object )  {
     oid.first  = cntH.token()->oid().first;
     oid.second = nextRecordId();
@@ -113,7 +113,7 @@ StatusCode DbContainerImp::next(Token::OID_t& linkH) {
 } 
 
 // Read object (oid) from a container container (linkH)
-StatusCode DbContainerImp::load( void** ptr, ShapeH shape,
+StatusCode DbContainerImp::load( void** ptr, const Shape* shape,
                                const Token::OID_t& linkH, Token::OID_t& oid,
                                bool any_next )
 {

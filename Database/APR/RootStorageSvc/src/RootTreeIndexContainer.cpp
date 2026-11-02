@@ -81,7 +81,7 @@ StatusCode RootTreeIndexContainer::writeObject(ActionList::value_type& action)
 }
 
 
-StatusCode RootTreeIndexContainer::loadObject(void** ptr, ShapeH shape, Token::OID_t& oid)
+StatusCode RootTreeIndexContainer::loadObject(void** ptr, const Shape* shape, Token::OID_t& oid)
 {
    if( (oid.second >> 32) > 0 ) {
       if( m_firstRead ) {

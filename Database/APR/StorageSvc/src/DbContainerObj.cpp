@@ -202,7 +202,7 @@ StatusCode DbContainerObj::getOption(DbOption& refOpt) {
 /// Store object in location
 StatusCode DbContainerObj::store(const void* object,
                                DbContainer& cntH,
-                               ShapeH shape)
+                               const Shape* shape)
 {
   if ( !isReadOnly() && hasAccess() )  {
     m_dbH.setAge(0);
@@ -214,7 +214,7 @@ StatusCode DbContainerObj::store(const void* object,
 /// In place allocation of raw memory
 StatusCode DbContainerObj::allocate(DbContainer& cntH,
                                   const void* object,
-                                  ShapeH shape,
+                                  const Shape* shape,
                                   Token::OID_t& oid)
 {
   if ( isReadOnly() ) {
@@ -236,7 +236,7 @@ const DbTypeInfo* DbContainerObj::objectShape(const Guid& guid) {
 }
 
 /// Select object in the container identified by its handle
-StatusCode DbContainerObj::load( void** ptr, ShapeH shape,
+StatusCode DbContainerObj::load( void** ptr, const Shape* shape,
                                const Token::OID_t& linkH, 
                                Token::OID_t& oid,
                                bool any_next)
