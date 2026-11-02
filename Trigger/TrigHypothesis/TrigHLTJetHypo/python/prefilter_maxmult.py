@@ -11,7 +11,7 @@ import re
 logger = logging.getLogger( __name__)
 logger.setLevel(DEBUG)
 
-pattern = r'^MAXMULT(?P<end>\d+)(?P<eta>[jacfi]*)$'
+pattern = r'^MAXMULT(?P<end>\d+)(?P<eta>[jacf]*)$'
 rgx = re.compile(pattern)
 
 etaRangeAbbrev = {
@@ -20,7 +20,6 @@ etaRangeAbbrev = {
     "c":"0eta240", 
     "C":"0eta210", 
     "f":"320eta490",
-    "i":"0eta400", # ITk acceptance (Run 4)
 }
 
 def prefilter_maxmult(pf_string):

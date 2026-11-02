@@ -29,12 +29,12 @@ flags.Input.Files = []
 flags.lock()
 
 HITZ_CHAINS = [
-    'EF_j0_pf_ftf_preselHZ87MAXMULT30iXX4i20_L13jJ40',
-    'EF_j0_pf_ftf_preselHZ99MAXMULT30iXX4i20_L13jJ40',
-    'EF_j0_pf_ftf_preselHZ118MAXMULT30iXX4i20_L13jJ40',
-    'EF_j0_pf_ftf_preselHZ145MAXMULT20iXX6i20_L14jJ40',
-    'EF_j0_pf_ftf_preselHZ167MAXMULT20iXX6i20_L14jJ40',
-    'EF_j0_pf_ftf_preselHZ196MAXMULT20iXX6i20_L14jJ40',
+    'EF_j0_pf_ftf_preselHZ128MAXMULT30cXX4c20_L13jJ40',
+    'EF_j0_pf_ftf_preselHZ104MAXMULT30cXX4c20_L13jJ40',
+    'EF_j0_pf_ftf_preselHZ91MAXMULT30cXX4c20_L13jJ40',
+    'EF_j0_pf_ftf_preselHZ208MAXMULT20cXX6c20_L14jJ40',
+    'EF_j0_pf_ftf_preselHZ177MAXMULT20cXX6c20_L14jJ40',
+    'EF_j0_pf_ftf_preselHZ152MAXMULT20cXX6c20_L14jJ40',
 ]
 
 DIPZ_CHAINS = [

@@ -7,7 +7,7 @@ from TrigHLTJetHypo.make_treevec import make_treevec
 
 import re
 
-pattern_hitz = r'^HZ(?P<WP>\d+)XX(?P<N>\d+)i(?P<ptlo>\d*)'
+pattern_hitz = r'^HZ(?P<WP>\d+)XX(?P<N>\d+)c(?P<ptlo>\d*)'
 rgx_pattern = re.compile(pattern_hitz)
 
 
@@ -24,14 +24,9 @@ def get_kin_args_from_matchdict(groupdict):
                     '')  # will be assigned default value
     condargs.append(('pt', vals))
 
-    # HitZ counts jets over the full ITk acceptance, |eta| < 4.0 (region 'i'
-    # in the chain name): the hit pipeline tags to 4.0, the working points
-    # were scanned at 4.0, and the regression is flat in |eta| out to the edge
-    # of the detector. The 2.4 of the DIPZ scenario is a Run-3 tracking limit
-    # that does not apply here.
     vals = defaults('eta',
                     '', # will be assigned default value
-                    '400')
+                    '240')
     condargs.append(('eta', vals))
 
     return condargs

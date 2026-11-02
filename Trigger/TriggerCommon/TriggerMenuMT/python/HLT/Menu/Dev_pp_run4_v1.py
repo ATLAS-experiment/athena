@@ -37,28 +37,25 @@ def getDevSignatures():
         ChainProp(name='EF_tau20_mediumGNTau_em_L1eTAU12', groups=SupportPhIGroup+SingleTauGroup+DevGroup, monGroups=['tauMon:online', 'tauMon:shifter']), 
     ]
     
-    # Hit-based per-jet z regression (HitZ) preselection. Working points from a
-    # likelihood scan on the HitZV01 outputs, scored as the hypo does (best
-    # n-subset of the passing jets); larger number = looser cut.
+    # Hit-based per-jet z regression (HitZ) preselection. Working points give
+    # 90/85/80% signal on the HitZV01 outputs at |eta|<2.4, scored as the hypo
+    # does (best n-subset of the passing jets); larger number = looser cut.
     # The preselection-only chains measure efficiency and rate, the last one
     # replaces the calorimeter preselection of an existing multi-b chain.
-    # The HitZ selection counts jets in region 'i', the ITk acceptance |eta|<4.0
-    # the regression was trained and scanned in, and MAXMULT keeps only the
-    # leading 30 (20 for six jets) of those jets so the hypo's combinations
-    # stay bounded at mu=200.
-    # Legs taken from existing chains keep their own eta.
+    # MAXMULT keeps only the leading 30 (20 for six jets) central jets so the
+    # hypo's combinations stay bounded at mu=200.
     chains['Jet'] = [
-        ChainProp(name='EF_j0_pf_ftf_preselHZ87MAXMULT30iXX4i20_L13jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
-        ChainProp(name='EF_j0_pf_ftf_preselHZ99MAXMULT30iXX4i20_L13jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
-        ChainProp(name='EF_j0_pf_ftf_preselHZ118MAXMULT30iXX4i20_L13jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='EF_j0_pf_ftf_preselHZ128MAXMULT30cXX4c20_L13jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='EF_j0_pf_ftf_preselHZ104MAXMULT30cXX4c20_L13jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='EF_j0_pf_ftf_preselHZ91MAXMULT30cXX4c20_L13jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
         # the likelihood discriminates much better at high jet multiplicity
-        ChainProp(name='EF_j0_pf_ftf_preselHZ145MAXMULT20iXX6i20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
-        ChainProp(name='EF_j0_pf_ftf_preselHZ167MAXMULT20iXX6i20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
-        ChainProp(name='EF_j0_pf_ftf_preselHZ196MAXMULT20iXX6i20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='EF_j0_pf_ftf_preselHZ208MAXMULT20cXX6c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='EF_j0_pf_ftf_preselHZ177MAXMULT20cXX6c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
+        ChainProp(name='EF_j0_pf_ftf_preselHZ152MAXMULT20cXX6c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=MultiJetGroup+DevGroup),
     ]
     
     chains['Bjet'] = [
-        ChainProp(name='EF_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_3j20c_020jvt_bgn282_pf_ftf_preselHZ99MAXMULT30iXX2c20XX2c20_L13jJ40', l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup+DevGroup),
+        ChainProp(name='EF_j75c_020jvt_j50c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_3j20c_020jvt_bgn282_pf_ftf_preselHZ104MAXMULT30cXX2c20XX2c20_L13jJ40', l1SeedThresholds=['FSNOSEED']*5, groups=MultiBjetGroup+DevGroup),
     ]
     
     chains['MET'] = []

@@ -82,18 +82,15 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False, doHitZS
 
     # Get from the last chainPart in order to avoid to specify preselection for every leg
     #TODO: add protection for cases where the preselection is not specified in the last chainPart
-    presel_matched = re.match(r'presel(?P<cut>(VETOMULT)?\d?\d?(H?Z[\d\D]+)?[jacfi]\d?(HT)?[\d\D]+)', trkpresel)
+    presel_matched = re.match(r'presel(?P<cut>(VETOMULT)?\d?\d?(H?Z[\d\D]+)?[jacf]\d?(HT)?[\d\D]+)', trkpresel)
     assert presel_matched is not None, "Impossible to match preselection pattern for self.trkpresel=\'{0}\'.".format(trkpresel)
     presel_cut_str = presel_matched.groupdict()['cut'] #This is the cut string you want to parse. For example 'presel2j50XXj40'
     
     # HitZ has to be tested first, the DIPZ pattern also matches HZ
     usingHITZ = bool(re.match(r'.*HZ', presel_cut_str))
     usingDIPZ = bool(re.match(r'.*Z', presel_cut_str)) and not usingHITZ # Need to determine if there's DIPZ leg anywhere to enforce central jets across all calopresel legs
-    # DIPZ needs every leg central (c, |eta|<2.4). HitZ counts its jets over the
-    # ITk acceptance (i, |eta|<4.0) on its own, so the other legs keep their eta
-    zRegion = 'i' if usingHITZ else 'c'
     if usingDIPZ or usingHITZ:
-        findSel = re.finditer(r'(?P<nJet>\d?[jacfi])(?P<ptcut>\d+)', presel_cut_str)
+        findSel = re.finditer(r'(?P<nJet>\d?[jacf])(?P<ptcut>\d+)', presel_cut_str)
         findAllJets=[]
         findAllPts=[]
         for match in findSel:
@@ -103,9 +100,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False, doHitZS
         nAllJets = sum(int(i[:-1]) for i in findAllJets)
         nCentralJets = sum(int(i[:-1]) if 'c' in i else 0 for i in findAllJets)
         ptCut = min(int(i) for i in findAllPts)
-        if usingHITZ:
-            nCentralJets = nAllJets
-        assert nAllJets == nCentralJets, "Your preselection has a DIPZ part but not only central jets were required. This isn't currently supported. Please investigate."
+        assert nAllJets == nCentralJets, "Your preselection has a DIPZ or HitZ part but not only central jets were required. This isn't currently supported. Please investigate."
 
     preselCommonJetParts = dict(JetChainParts_Default)
     
@@ -132,17 +127,17 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False, doHitZS
         taumatches = r'(?P<tauid>(gntau|uht1tau))(?P<tauwp>\d\d)' if hasTauSel else ""
 
         pattern_to_test = r'(?P<veto>(VETOMULT))?' # veto flag #TODO veto pt as well
-        pattern_to_test += r'(?P<mult>\d*)?(?P<region>[jacfi])' # jet multiplicity and region and ptlow
+        pattern_to_test += r'(?P<mult>\d*)?(?P<region>[jacf])' # jet multiplicity and region and ptlow
         pattern_to_test += r'(?P<scenario>(HT))?(?P<cut>\d+)?' # scenario string # could be made more general
         pattern_to_test += bmatches
         pattern_to_test += taumatches
         pattern_to_test += r'emf(?P<emfc>\d+)' if hascalSel else ''
-        if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)(?P<dipzwp>\d+)?(?P<prefilt>(MAXMULT\d+[jacfi]?)?)'
-        if hasHITZsel: pattern_to_test = r'(?P<scenario>HZ)(?P<dipzwp>\d+)?(?P<prefilt>(MAXMULT\d+[jacfi]?)?)'
+        if hasDIPZsel: pattern_to_test = r'(?P<scenario>Z)(?P<dipzwp>\d+)?(?P<prefilt>(MAXMULT\d+[jacf]?)?)'
+        if hasHITZsel: pattern_to_test = r'(?P<scenario>HZ)(?P<dipzwp>\d+)?(?P<prefilt>(MAXMULT\d+[jacf]?)?)'
         matched = re.match(pattern_to_test, p)
         assert matched is not None, "Impossible to extract preselection cut for \'{0}\' substring. Please investigate.".format(p)
         cut_dict = matched.groupdict()
-        if hasZsel: cut_dict['region'] = zRegion
+        if hasZsel: cut_dict['region'] = 'c'
         if hasZsel: cut_dict['cut'] = ptCut
 
 
@@ -178,7 +173,7 @@ def _preselJetHypoToolFromDict(flags, mainChainDict, doTaggingSel=False, doHitZS
             threshold='0'
             chainPartName=f'j0_{hyposcenario}'
         elif scenario in ("Z", "HZ"):
-            hyposcenario=f'{scenario}{dipzwp}XX{nCentralJets}{zRegion}{cut}'
+            hyposcenario=f'{scenario}{dipzwp}XX{nCentralJets}c{cut}'
             prefilt = cut_dict['prefilt']   
             if prefilt != '': prefilters.append(prefilt)
             threshold='0'
