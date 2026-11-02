@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -30,6 +30,8 @@
 // Tile includes
 //#include "TileEvent/TileRawChannelContainer.h"
 #include "TileEvent/TileTTL1Container.h"
+#include "TileConditions/ITileBadChanTool.h"
+#include "TileConditions/TileCondToolEmscale.h"
 
 // Atlas includes
 #include "AthenaBaseComps/AthAlgorithm.h"
@@ -45,8 +47,6 @@ class TileHWID;
 class TileInfo;
 class CaloLVL1_ID;
 class TileCablingService;
-class ITileBadChanTool;
-class TileCondToolEmscale;
 class TileRawChannelContainer;
 
 #include <string>
@@ -73,21 +73,24 @@ class TileRawChannelToTTL1: public AthAlgorithm {
     SG::WriteHandleKey<TileTTL1Container> m_ttl1ContainerKey{this,"TileTTL1Container",
                                                              "TileTTL1Container","Output Tile TTL1 container key"};
 
-    std::string m_infoName;        // name of TileInfo object in TES
-    bool m_constantTTL1shape; // true by default, so only gets ttl1 shape once at initialization, with phase=0 for all towers.
+    Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo", "Name of TileInfo object in TES"};
+    // true by default, so only gets ttl1 shape once at initialization, with phase=0 for all towers.
+    Gaudi::Property<bool> m_constantTTL1shape{this, "TileConstantTTL1Shape", true, "Use constant TTL1 shape (phase=0 for all towers)"};
 
-    const TileID* m_tileID;
-    const TileHWID* m_tileHWID;
-    const TileInfo* m_tileInfo;
-    const CaloLVL1_ID* m_TT_ID;
+    const TileID* m_tileID{nullptr};
+    const TileHWID* m_tileHWID{nullptr};
+    const TileInfo* m_tileInfo{nullptr};
+    const CaloLVL1_ID* m_TT_ID{nullptr};
 
     std::vector<double> m_TTL1Shape;
-    double m_phase;
-    int m_nSamp;
-    int m_iTrig;
+    double m_phase{0};
+    int m_nSamp{0};
+    int m_iTrig{0};
 
-    ToolHandle<ITileBadChanTool> m_tileBadChanTool; //!< Tile Bad Channel tool
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale; //!< main Tile Calibration tool
+    ToolHandle<ITileBadChanTool> m_tileBadChanTool{this, "TileBadChanTool",
+        "TileBadChanTool", "Tile bad channel tool"}; //!< Tile Bad Channel tool
+    ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this, "TileCondToolEmscale",
+        "TileCondToolEmscale", "Tile EM scale calibration tool"}; //!< main Tile Calibration tool
 };
 
 #endif // TILERECALGS_TILERAWCHANNELTOTTL1_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -67,10 +67,10 @@ private:
                                                               "Input Calo cell container 2 key"};
 
 
-    const TileID* m_tileID;
+    const TileID* m_tileID{nullptr};
   
-    bool m_dumpCells;
-    bool m_sortFlag;
+    Gaudi::Property<bool> m_dumpCells{this, "DumpCells", false, "Dump all cells"};
+    Gaudi::Property<bool> m_sortFlag{this, "SortFlag", false, "Sort cells by energy before comparison"};
 };
 
 #endif // TILERECALGS_TILECELLVERIFY_H

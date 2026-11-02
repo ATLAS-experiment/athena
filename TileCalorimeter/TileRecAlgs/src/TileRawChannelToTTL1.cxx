@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -36,8 +36,6 @@
 #include "TileIdentifier/TileFragHash.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
 #include "TileCalibBlobObjs/TileBchPrbs.h"
-#include "TileConditions/ITileBadChanTool.h"
-#include "TileConditions/TileCondToolEmscale.h"
 #include "TileConditions/TileInfo.h"
 #include "TileEvent/TileRawChannelContainer.h"
 
@@ -63,20 +61,7 @@ using namespace CLHEP;
 //
 TileRawChannelToTTL1::TileRawChannelToTTL1(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_tileID(0)
-  , m_tileHWID(0)
-  , m_tileInfo(0)
-  , m_TT_ID(0)
-  , m_phase(0)
-  , m_nSamp(0)
-  , m_iTrig(0)
-  , m_tileBadChanTool("TileBadChanTool")
-  , m_tileToolEmscale("TileCondToolEmscale")
 {
-  declareProperty("TileInfoName", m_infoName = "TileInfo");
-  declareProperty("TileConstantTTL1Shape", m_constantTTL1shape = true);
-  declareProperty("TileBadChanTool", m_tileBadChanTool);
-  declareProperty("TileCondToolEmscale", m_tileToolEmscale);
 }
 
 TileRawChannelToTTL1::~TileRawChannelToTTL1() {
@@ -99,7 +84,7 @@ StatusCode TileRawChannelToTTL1::initialize() {
   //=== get TileCondToolEmscale
   CHECK( m_tileToolEmscale.retrieve() );
 
-  CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
+  CHECK( detStore()->retrieve(m_tileInfo, m_infoName.value()) );
 
 
   // Here get already TTL1 Shapes, so as not to perform this on every execute:

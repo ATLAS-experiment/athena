@@ -40,11 +40,7 @@
 //
 TileCellToTTL1::TileCellToTTL1(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_tileID(0)
-  , m_TT_ID(0)
-  , m_tileCablingService(0)
 {
-
 }
 
 TileCellToTTL1::~TileCellToTTL1() {

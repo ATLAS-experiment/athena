@@ -34,111 +34,7 @@ static std::string drwname(int id) {
 
 TileCellSelector::TileCellSelector(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_counter(0)
-  , m_accept(0)
-  , m_minCell(0)
-  , m_maxCell(0)
-  , m_minChan(0)
-  , m_maxChan(0)
-  , m_jump(0)
-  , m_const(0)
-  , m_overLG(0)
-  , m_overHG(0)
-  , m_underLG(0)
-  , m_underHG(0)
-  , m_dqerr(0)
-  , m_dmuerr(0)
-  , m_warnerr(0)
-  , m_tileID(0)
-  , m_tileHWID(0)
-  , m_cabling(0)
-  , m_runNum(0)
-  , m_lumiBlock(0)
-  , m_evtNum(0)
-  , m_evtBCID(0)
-  , m_tileFlag(0)
-  , m_tileError(0)
-  , m_readCells(true)
-  , m_readRawChannels(true)
-  , m_readDigits(true)
-  , m_tileInfo(0)
 {
-
-  declareProperty( "MinEnergyCell", m_minEneCell = -5000.);   // cut on cell energy
-  declareProperty( "MaxEnergyCell", m_maxEneCell = 1000000.); // cut on cell energy
-  declareProperty( "PtnEnergyCell", m_ptnEneCell =      101); // cell energy pattern, accept events only below min (+1), between min-max (+10), above max (+100)
-  declareProperty( "MinEnergyChan", m_minEneChan[0] =  -5000.);  // cut on channel energy
-  declareProperty( "MaxEnergyChan", m_maxEneChan[0] = 500000.);  // cut on channel energy
-  declareProperty( "PtnEnergyChan", m_ptnEneChan[0] =     101);  // channel energy pattern
-  declareProperty( "MinEnergyGap",  m_minEneChan[1] = -10000.);  // cut on channel energy
-  declareProperty( "MaxEnergyGap",  m_maxEneChan[1] = 500000.);  // cut on channel energy
-  declareProperty( "PtnEnergyGap",  m_ptnEneChan[1] =     101);  // channel energy pattern
-  declareProperty( "MinEnergyMBTS", m_minEneChan[2] = -10000.);  // cut on channel energy
-  declareProperty( "MaxEnergyMBTS", m_maxEneChan[2] = 500000.);  // cut on channel energy
-  declareProperty( "PtnEnergyMBTS", m_ptnEneChan[2] =     101);  // channel energy pattern
-
-  declareProperty( "MinTimeCell", m_minTimeCell = -100.);  // cut on cell time
-  declareProperty( "MaxTimeCell", m_maxTimeCell =  100.);  // cut on cell time
-  declareProperty( "PtnTimeCell", m_ptnTimeCell =  10);  // cell time pattern, accept events only below min (+1), between min-max (+10), above max (+100)
-  declareProperty( "MinTimeChan", m_minTimeChan[0] = -100.);  // cut on channel time
-  declareProperty( "MaxTimeChan", m_maxTimeChan[0] =  100.);  // cut on channel time
-  declareProperty( "PtnTimeChan", m_ptnTimeChan[0] =  10);  // channel time pattern
-  declareProperty( "MinTimeGap",  m_minTimeChan[1] = -100.);  // cut on channel time
-  declareProperty( "MaxTimeGap",  m_maxTimeChan[1] =  100.);  // cut on channel time
-  declareProperty( "PtnTimeGap",  m_ptnTimeChan[1] =  10);  // channel time pattern
-  declareProperty( "MinTimeMBTS", m_minTimeChan[2] = -100.);  // cut on channel time
-  declareProperty( "MaxTimeMBTS", m_maxTimeChan[2] =  100.);  // cut on channel time
-  declareProperty( "PtnTimeMBTS", m_ptnTimeChan[2] =  10);  // channel time pattern
-
-  declareProperty( "SelectGain",  m_selectGain = 2); // 0 - select LG only,  1 - HG only, 2 - both gains
-  m_skipGain[TileID::LOWGAIN] = false;
-  m_skipGain[TileID::HIGHGAIN] = false;
-
-  // pattern - decimal number with up to 5 digits
-  // only values 1(=true) and 0(=false) for every digit are used
-  // digit 0 set to 1  - accept event if value < min
-  // digit 1 set to 1  - accept event if min < value < max
-  // digit 2 set to 1  - accept event if value > max
-  // digit 3 set to 1  - accept ene only if quality is good
-  //                     or accept time if time != 0
-  // digit 4 set to 1  - accept ene only if quality is bad
-  //                     or accept time if time == 0
-
-  declareProperty( "SecondMaxLevel",m_secondMaxLevel = 0.3);  // sample below max should be above (max-min)*m_secondMax
-  declareProperty( "JumpDeltaHG",  m_jumpDeltaHG = 50.0); // minimal jump in high gain
-  declareProperty( "JumpDeltaLG",  m_jumpDeltaLG = 10.0); // minimal jump in low gain
-  declareProperty( "PedDetlaHG",   m_pedDeltaHG  =  4.1); // max variation of "const" value in high gain
-  declareProperty( "PedDetlaLG",   m_pedDeltaLG  =  4.1); // max variation of "const" value in low gain
-  declareProperty( "ConstLength",  m_constLength = 6);    // min number of consecutive samples of the same value
-  declareProperty( "MinBadDMU",    m_minBadDMU = 4);      // min number of bad DMUs to accept event
-  declareProperty( "MaxBadDMU",    m_maxBadDMU = 15);     // max number of bad DMUs to accept event
-  declareProperty( "MinBadMB",     m_minBadMB = 4);       // min number of bad motherboards in a drawer to accept event
-  declareProperty( "SkipEmpty",    m_skipEmpty = true);   // ignore empty channels in selection or not
-  declareProperty( "SkipMasked",   m_skipMasked = true);  // ignore masked channels in selection or not
-  declareProperty( "SkipMBTS",     m_skipMBTS = true);    // ignore MBTS channels in selection or not
-  declareProperty( "CheckDCS",     m_checkDCS = true);    // additional check for DCS status
-  declareProperty( "DrawerToDump", m_drawer);             // for which drawer all channels should be printed
-  declareProperty( "DrawerToCheck",m_drawerToCheck);      // for which drawer all checks should be performed
-  declareProperty( "ChannelToCheck",m_chanToCheck);       // for which channels all checks should be performed
-
-  declareProperty( "CheckJumps",   m_checkJumps = true);   // global flag which allows to swithc on/off all checks in digits
-  declareProperty( "CheckDMUs",    m_checkDMUs  = true);   // global flag which allows to swithc on/off DMU checks
-  declareProperty( "CheckOverLG"  ,m_checkOverLG = true);  // select events with overflow in low gain
-  declareProperty( "CheckOverHG",  m_checkOverHG = false); // select events with overflow in high gain
-  declareProperty( "CheckUnderLG", m_checkUnderLG = false); // select events with underflow in low gain
-  declareProperty( "CheckUnderHG", m_checkUnderHG = false); // select events with underflow in high gain
-  declareProperty( "OverflowLG",   m_overflowLG  = -0.1);   // threshold for overflow in low gain  (smaller than ADCmax by this value)
-  declareProperty( "OverflowHG",   m_overflowHG  = -1.1);   // threshold for overflow in high gain (smaller than ADCmax by this value)
-  declareProperty( "UnderflowLG",  m_underflowLG = 0.1);    // threshold for underflow in low gain
-  declareProperty( "UnderflowHG",  m_underflowHG = 2.1);    // threshold for underflow in high gain
-
-  declareProperty( "CheckWarning", m_checkWarning = false); // select events with warning status in TileCal status word
-  declareProperty( "CheckError",   m_checkError = false);   // select events with error status in TileCal status word
-  declareProperty( "PrintOnly",    m_printOnly = false);    // only print acccepted events, but do not accept anything
-
-  declareProperty( "MaxVerboseCnt",m_maxVerboseCnt=20); // max number of verbose output lines about drawer off
-
-  declareProperty("TileInfoName", m_infoName = "TileInfo");
 }
 
 
@@ -156,7 +52,7 @@ StatusCode TileCellSelector::initialize() {
   ATH_CHECK(detStore()->retrieve(m_tileID, "TileID"));
   ATH_CHECK(detStore()->retrieve(m_tileHWID, "TileHWID"));
 
-  ATH_CHECK(detStore()->retrieve(m_tileInfo, m_infoName));
+  ATH_CHECK(detStore()->retrieve(m_tileInfo, m_infoName.value()));
   m_ADCmaxMinusEps = m_tileInfo->ADCmax() - 0.01;
   m_ADCmaskValueMinusEps = m_tileInfo->ADCmaskValue() - 0.01;  // indicates channels which were masked in background dataset
 
@@ -186,10 +82,10 @@ StatusCode TileCellSelector::initialize() {
 
   if (m_overflowLG < 0) m_overflowLG += m_tileInfo->ADCmax();
   if (m_overflowHG < 0) m_overflowHG += m_tileInfo->ADCmax();
-  ATH_MSG_INFO( "OverflowLG " << m_overflowLG);
-  ATH_MSG_INFO( "OverflowHG " << m_overflowHG);
-  ATH_MSG_INFO( "UnderflowLG " << m_underflowLG);
-  ATH_MSG_INFO( "UnderflowHG " << m_underflowHG);
+  ATH_MSG_INFO( "OverflowLG " << m_overflowLG.value());
+  ATH_MSG_INFO( "OverflowHG " << m_overflowHG.value());
+  ATH_MSG_INFO( "UnderflowLG " << m_underflowLG.value());
+  ATH_MSG_INFO( "UnderflowHG " << m_underflowHG.value());
 
   ATH_MSG_INFO( "SkipEmpty " << ((m_skipEmpty) ? "true" : "false"));
   ATH_MSG_INFO( "SkipMasked " << ((m_skipMasked) ? "true" : "false"));
@@ -202,43 +98,43 @@ StatusCode TileCellSelector::initialize() {
   m_readDigits = !m_digitsContainerKey.key().empty();
 
   if (m_readCells) {
-    ATH_MSG_INFO( "MinEnergyCell < " << m_minEneCell);
-    ATH_MSG_INFO( "MaxEnergyCell > " << m_maxEneCell);
-    ATH_MSG_INFO( "PtnEnergyCell = " << m_ptnEneCell);
-    ATH_MSG_INFO( "MinTimeCell < " << m_minTimeCell);
-    ATH_MSG_INFO( "MaxTimeCell > " << m_maxTimeCell);
-    ATH_MSG_INFO( "PtnTimeCell = " << m_ptnTimeCell);
+    ATH_MSG_INFO( "MinEnergyCell < " << m_minEneCell.value());
+    ATH_MSG_INFO( "MaxEnergyCell > " << m_maxEneCell.value());
+    ATH_MSG_INFO( "PtnEnergyCell = " << m_ptnEneCell.value());
+    ATH_MSG_INFO( "MinTimeCell < " << m_minTimeCell.value());
+    ATH_MSG_INFO( "MaxTimeCell > " << m_maxTimeCell.value());
+    ATH_MSG_INFO( "PtnTimeCell = " << m_ptnTimeCell.value());
     
     ATH_CHECK( m_cellContainerKey.initialize() );
   }
 
   if (m_readCells || m_readRawChannels) {
-    ATH_MSG_INFO( "MinEnergyChan < " << m_minEneChan[0]);
-    ATH_MSG_INFO( "MaxEnergyChan > " << m_maxEneChan[0]);
-    ATH_MSG_INFO( "PtnEnergyChan = " << m_ptnEneChan[0]);
-    ATH_MSG_INFO( "MinEnergyGap  < " << m_minEneChan[1]);
-    ATH_MSG_INFO( "MaxEnergyGap  > " << m_maxEneChan[1]);
-    ATH_MSG_INFO( "PtnEnergyGap  = " << m_ptnEneChan[1]);
-    ATH_MSG_INFO( "MinTimeChan < " << m_minTimeChan[0]);
-    ATH_MSG_INFO( "MaxTimeChan > " << m_maxTimeChan[0]);
-    ATH_MSG_INFO( "PtnTimeChan = " << m_ptnTimeChan[0]);
-    ATH_MSG_INFO( "MinTimeGap  < " << m_minTimeChan[1]);
-    ATH_MSG_INFO( "MaxTimeGap  > " << m_maxTimeChan[1]);
-    ATH_MSG_INFO( "PtnTimeGap  = " << m_ptnTimeChan[1]);
+    ATH_MSG_INFO( "MinEnergyChan < " << m_minEneChan[0].value());
+    ATH_MSG_INFO( "MaxEnergyChan > " << m_maxEneChan[0].value());
+    ATH_MSG_INFO( "PtnEnergyChan = " << m_ptnEneChan[0].value());
+    ATH_MSG_INFO( "MinEnergyGap  < " << m_minEneChan[1].value());
+    ATH_MSG_INFO( "MaxEnergyGap  > " << m_maxEneChan[1].value());
+    ATH_MSG_INFO( "PtnEnergyGap  = " << m_ptnEneChan[1].value());
+    ATH_MSG_INFO( "MinTimeChan < " << m_minTimeChan[0].value());
+    ATH_MSG_INFO( "MaxTimeChan > " << m_maxTimeChan[0].value());
+    ATH_MSG_INFO( "PtnTimeChan = " << m_ptnTimeChan[0].value());
+    ATH_MSG_INFO( "MinTimeGap  < " << m_minTimeChan[1].value());
+    ATH_MSG_INFO( "MaxTimeGap  > " << m_maxTimeChan[1].value());
+    ATH_MSG_INFO( "PtnTimeGap  = " << m_ptnTimeChan[1].value());
   }
 
   if (m_readRawChannels) {
-    ATH_MSG_INFO( "MinEnergyMBTS < " << m_minEneChan[2]);
-    ATH_MSG_INFO( "MaxEnergyMBTS > " << m_maxEneChan[2]);
-    ATH_MSG_INFO( "PtnEnergyMBTS = " << m_ptnEneChan[2]);
-    ATH_MSG_INFO( "MinTimeMBTS < " << m_minTimeChan[2]);
-    ATH_MSG_INFO( "MaxTimeMBTS > " << m_maxTimeChan[2]);
-    ATH_MSG_INFO( "PtnTimeMBTS = " << m_ptnTimeChan[2]);
+    ATH_MSG_INFO( "MinEnergyMBTS < " << m_minEneChan[2].value());
+    ATH_MSG_INFO( "MaxEnergyMBTS > " << m_maxEneChan[2].value());
+    ATH_MSG_INFO( "PtnEnergyMBTS = " << m_ptnEneChan[2].value());
+    ATH_MSG_INFO( "MinTimeMBTS < " << m_minTimeChan[2].value());
+    ATH_MSG_INFO( "MaxTimeMBTS > " << m_maxTimeChan[2].value());
+    ATH_MSG_INFO( "PtnTimeMBTS = " << m_ptnTimeChan[2].value());
 
     ATH_CHECK( m_rawChannelContainerKey.initialize() );
   }
 
-  switch (m_selectGain) {
+  switch (m_selectGain.value()) {
     case 0:
       ATH_MSG_INFO( "Select Low gain channels only");
       m_skipGain[TileID::LOWGAIN] = false;
@@ -256,11 +152,11 @@ StatusCode TileCellSelector::initialize() {
 
   if (!m_digitsContainerKey.key().empty()) {
     if (m_checkJumps) {
-      ATH_MSG_INFO( "JumpDeltaHG " << m_jumpDeltaHG);
-      ATH_MSG_INFO( "JumpDeltaLG " << m_jumpDeltaLG);
-      ATH_MSG_INFO( "PedDetlaHG " << m_pedDeltaHG);
-      ATH_MSG_INFO( "PedDetlaLG " << m_pedDeltaLG);
-      ATH_MSG_INFO( "ConstLength " << m_constLength);
+      ATH_MSG_INFO( "JumpDeltaHG " << m_jumpDeltaHG.value());
+      ATH_MSG_INFO( "JumpDeltaLG " << m_jumpDeltaLG.value());
+      ATH_MSG_INFO( "PedDetlaHG " << m_pedDeltaHG.value());
+      ATH_MSG_INFO( "PedDetlaLG " << m_pedDeltaLG.value());
+      ATH_MSG_INFO( "ConstLength " << m_constLength.value());
     }
 
     ATH_CHECK( m_digitsContainerKey.initialize() );
@@ -269,34 +165,34 @@ StatusCode TileCellSelector::initialize() {
 
   if (!m_rawChannelContainerKey.key().empty()) {
     if (m_checkDMUs) {
-      ATH_MSG_INFO( "MinBadDMU " << m_minBadDMU);
-      ATH_MSG_INFO( "MaxBadDMU " << m_maxBadDMU);
-      ATH_MSG_INFO( "MinBadMB " << m_minBadMB);
+      ATH_MSG_INFO( "MinBadDMU " << m_minBadDMU.value());
+      ATH_MSG_INFO( "MaxBadDMU " << m_maxBadDMU.value());
+      ATH_MSG_INFO( "MinBadMB " << m_minBadMB.value());
     } else {
       m_minBadDMU = 99;
       m_maxBadDMU = -1;
       m_minBadMB = 99;
     }
-    ATH_MSG_INFO( "MaxVerboseCnt " << m_maxVerboseCnt);
+    ATH_MSG_INFO( "MaxVerboseCnt " << m_maxVerboseCnt.value());
   }
 
   ATH_MSG_INFO( "CheckWarning " << ((m_checkWarning)? "true" : "false"));
   ATH_MSG_INFO( "CheckError " << ((m_checkError) ? "true" : "false"));
   ATH_MSG_INFO( "PrintOnly " << ((m_printOnly) ? "true" : "false"));
 
-  if (m_drawer.size()>0) {
+  if (m_drawer.value().size()>0) {
     msg(MSG::INFO) << "Drawers which will be always printed:" << MSG::hex;
     for (int frag: m_drawer) msg(MSG::INFO) << " 0x" << frag;
     msg(MSG::INFO) << MSG::dec << endmsg;
   }
 
-  if (m_drawerToCheck.size()>0) {
+  if (m_drawerToCheck.value().size()>0) {
     msg(MSG::INFO) << "Only those drawers will be checked:" << MSG::hex;
     for (int frag: m_drawerToCheck) msg(MSG::INFO) << " 0x" << frag;
     msg(MSG::INFO) << MSG::dec << endmsg;
   }
 
-  if (m_chanToCheck.size()>0) {
+  if (m_chanToCheck.value().size()>0) {
     msg(MSG::INFO) << "Only those channels will be checked:";
     for (int ch: m_chanToCheck) msg(MSG::INFO) << " " << ch;
     msg(MSG::INFO) << endmsg;
@@ -332,18 +228,18 @@ StatusCode TileCellSelector::initialize() {
 
   m_chanToSkip.clear();
   m_drawerToSkip.clear();
-  if (m_drawerToCheck.size()>0 || m_chanToCheck.size()>0 ) {
-    if (m_drawerToCheck.size()==0) {
-      m_drawerToCheck.resize(256);
-      auto itr = m_drawerToCheck.begin();
+  if (m_drawerToCheck.value().size()>0 || m_chanToCheck.value().size()>0 ) {
+    if (m_drawerToCheck.value().size()==0) {
+      m_drawerToCheck.value().resize(256);
+      auto itr = m_drawerToCheck.value().begin();
       for (int frag : {0x100,0x200,0x300,0x400}) {
         auto itr1 = itr+64;
         std::iota(itr, itr1, frag);
         itr = itr1;
       }
-    } else if (m_chanToCheck.size()==0) {
-      m_chanToCheck.resize(48);
-      std::iota(m_chanToCheck.begin(), m_chanToCheck.end(), 0);
+    } else if (m_chanToCheck.value().size()==0) {
+      m_chanToCheck.value().resize(48);
+      std::iota(m_chanToCheck.value().begin(), m_chanToCheck.value().end(), 0);
     }
     m_chanToSkip.resize(1+TileHWID::NOT_VALID_HASH,true);
     m_drawerToSkip.resize(1+TileCalibUtils::getDrawerIdx(4,63),true);
@@ -426,8 +322,8 @@ StatusCode TileCellSelector::execute(const EventContext& ctx) {
 
   IdContext chan_context = m_tileHWID->channel_context();
   IdentifierHash hash;
-  for (size_t i=0; i<m_drawer.size(); ++i) {
-    HWIdentifier drawer_id = m_tileHWID->drawer_id(m_drawer[i]);
+  for (size_t i=0; i<m_drawer.value().size(); ++i) {
+    HWIdentifier drawer_id = m_tileHWID->drawer_id(m_drawer.value()[i]);
     HWIdentifier ch_id = m_tileHWID->channel_id(drawer_id,0);
     m_tileHWID->get_hash(ch_id, hash, &chan_context);
     auto itr = m_chanSel.begin() + hash;
@@ -1165,7 +1061,7 @@ StatusCode TileCellSelector::execute(const EventContext& ctx) {
             ATH_MSG_VERBOSE( nevtnum.str()
                              << "   enabling messages about drawer 0x" << std::hex 
                              << rawChannelCollection->identify()
-                             << std::dec << " being bad after " << m_maxVerboseCnt << " good events");
+                             << std::dec << " being bad after " << m_maxVerboseCnt.value() << " good events");
           }
         }
 

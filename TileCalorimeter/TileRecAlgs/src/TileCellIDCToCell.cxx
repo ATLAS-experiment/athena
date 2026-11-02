@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -40,13 +40,7 @@
 //
 TileCellIDCToCell::TileCellIDCToCell(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_tileID(0)
-  , m_tileInfo(0)
-  , m_tileMgr(0)
 {
-  declareProperty("TileCellIDC", m_cellIDC = "TileCellIDC");                    // Name of input container
-  declareProperty("TileCellContainer", m_cellContainer = "TileCellContainer");        // Name of output container
-  declareProperty("TileInfoName", m_infoName = "TileInfo");                  // name of TileInfo store
 }
 
 TileCellIDCToCell::~TileCellIDCToCell()
@@ -62,7 +56,7 @@ StatusCode TileCellIDCToCell::initialize()
   // retrieve Tile detector manager, TileID helper and TileIfno from det store
   CHECK( detStore()->retrieve(m_tileMgr) );
   CHECK( detStore()->retrieve(m_tileID) );
-  CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
+  CHECK( detStore()->retrieve(m_tileInfo, m_infoName.value()) );
 
   ATH_MSG_INFO( "TileCellIDCToCell initialization completed" );
 
@@ -88,9 +82,9 @@ StatusCode TileCellIDCToCell::execute(const EventContext& /*ctx*/)
   //**
   const TileCellIDC* inputCells;
 
-  if (evtStore()->retrieve(inputCells, m_cellIDC).isFailure() ) {
+  if (evtStore()->retrieve(inputCells, m_cellIDC.value()).isFailure() ) {
 
-    ATH_MSG_WARNING( " Could not find container " << m_cellIDC );
+    ATH_MSG_WARNING( " Could not find container " << m_cellIDC.value() );
     ATH_MSG_WARNING( " creating empty cell container " );
 
   } else {
@@ -125,14 +119,14 @@ StatusCode TileCellIDCToCell::execute(const EventContext& /*ctx*/)
   
   /* Register the set of TileCells to the event store. */
 
-  CHECK( evtStore()->record(cells, m_cellContainer, false ) );
+  CHECK( evtStore()->record(cells, m_cellContainer.value(), false ) );
 
   // Execution completed.
   ATH_MSG_DEBUG( "TileCellIDCToCell execution completed." );
   ATH_MSG_DEBUG( " nCell=" << nCell << " eneTot=" << eCellTot );
 
   ATH_MSG_VERBOSE( "TileCell container registered to the TES with name"
-      << m_cellContainer );
+      << m_cellContainer.value() );
 
   return StatusCode::SUCCESS;
 }

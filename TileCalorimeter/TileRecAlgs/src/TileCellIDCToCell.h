@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -54,13 +54,13 @@ class TileCellIDCToCell: public AthAlgorithm {
     StatusCode finalize();
 
   private:
-    std::string m_cellIDC;
-    std::string m_cellContainer;
-    std::string m_infoName;
+    Gaudi::Property<std::string> m_cellIDC{this, "TileCellIDC", "TileCellIDC", "Name of input container"};
+    Gaudi::Property<std::string> m_cellContainer{this, "TileCellContainer", "TileCellContainer", "Name of output container"};
+    Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo", "Name of TileInfo store"};
 
-    const TileID* m_tileID;
-    const TileInfo* m_tileInfo;
-    const TileDetDescrManager* m_tileMgr;
+    const TileID* m_tileID{nullptr};
+    const TileInfo* m_tileInfo{nullptr};
+    const TileDetDescrManager* m_tileMgr{nullptr};
 };
 
 #endif // TILERECALGS_TILECELLIDCTOCELL_H
