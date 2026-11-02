@@ -73,9 +73,15 @@ def main(args):
         "IncludeG4TrackTruth": includeG4TrackTruth,
         "MinG4TrackTruthSegments": minG4TrackTruthSegments,
     }
+    if getattr(args, "debugTruthLabels", False):
+        from AthenaCommon.Constants import DEBUG
+        dumper_kwargs["OutputLevel"] = DEBUG
 
     if do_ml_bucket_filter:
-        cfg.merge(MuonSegmentDumpCfg(flags, SpacePointKeys=["FilteredMlBuckets"],
+        spKeys = ["FilteredMlBuckets"]
+        if flags.Detector.GeometryMM or flags.Detector.GeometrysTGC:
+            spKeys += ["NswSpacePoints"]
+        cfg.merge(MuonSegmentDumpCfg(flags, SpacePointKeys=spKeys,
                                      **dumper_kwargs))
     else:
         cfg.merge(MuonSegmentDumpCfg(flags, **dumper_kwargs))
@@ -106,6 +112,8 @@ if __name__ == "__main__":
                         help="Use sim-hit HepMC/G4 track identifiers for unmatched segment labels.")
     parser.add_argument("--minG4TrackTruthSegments", type=int, default=2,
                         help="Minimum number of reco segments that must share the same G4/HepMC id.")
+    parser.add_argument("--debugTruthLabels", action="store_true", default=False,
+                        help="Run the segment dumper at DEBUG: prints G4 truth keys spanning both detector sides.")
 
 
     args = parser.parse_args()
