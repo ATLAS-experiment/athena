@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -25,6 +25,7 @@
 
 #include "VP1HEPVis/nodes/SoCons.h"
 #include "VP1HEPVis/nodes/SoGenericBox.h"
+#include "VP1HEPVis/nodes/SoOutlineColour.h"
 #include "VP1HEPVis/nodes/SoLAr.h"
 #include "VP1HEPVis/nodes/SoPcons.h"
 #include "VP1HEPVis/nodes/SoPolyhedron.h"
@@ -318,6 +319,7 @@ void VP1HEPVisUtils::initAllCustomClasses()
 {
   SoCons::initClass();
   SoGenericBox::initClass();
+  SoOutlineColour::initClass();
   SoLAr::initClass();
   SoPcons::initClass();
   SoPolyhedron::initClass();

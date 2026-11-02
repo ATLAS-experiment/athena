@@ -11,6 +11,7 @@
 #include "GeoModelKernel/GeoShapeShift.h"
 
 #include "VP1HEPVis/nodes/SoGenericBox.h"
+#include "VP1HEPVis/nodes/SoOutlineColour.h"
 #include "VP1HEPVis/nodes/SoTubs.h"
 #include "VP1HEPVis/nodes/SoPcons.h"
 #include "VP1HEPVis/nodes/SoTessellated.h"
@@ -33,6 +34,7 @@ public:
   PhiSectorManager* phisectormanager = nullptr;
   VP1GeoFlags::SubSystemFlag subsysflag{};
   SoMaterial * topMaterial = nullptr;
+  SoOutlineColour* outlineColour = nullptr;
   MatVisAttributes *matVisAttributes = nullptr;
   VolVisAttributes *volVisAttributes = nullptr;
   ZappedVolumeListModel * zappedvolumelistmodel = nullptr;
@@ -44,7 +46,8 @@ VolumeHandleSharedData::VolumeHandleSharedData(GeoSysController * controller,
 					       VP1GeoFlags::SubSystemFlag flag,std::map<SoSeparator*,VolumeHandle*>* sonodesep2volhandle,
 					       const GeoPVConstLink& motherpV,PhiSectorManager*psm, SoMaterial * topMaterial,
 					       MatVisAttributes *matVisAttributes,VolVisAttributes *volVisAttributes,
-					       ZappedVolumeListModel * zappedvolumelistmodel, VP1GeoTreeView * volbrowser, SoSeparator* textSep )
+					       ZappedVolumeListModel * zappedvolumelistmodel, VP1GeoTreeView * volbrowser, SoSeparator* textSep,
+                                               std::optional<SbColor> outlineColour )
   : m_d(new Imp), m_volumebrowser(volbrowser), m_textSep(textSep)
 {
   m_d->ref = 0;
@@ -54,6 +57,12 @@ VolumeHandleSharedData::VolumeHandleSharedData(GeoSysController * controller,
   m_d->phisectormanager = psm;
   m_d->subsysflag = flag;
   m_d->topMaterial = topMaterial;
+  if (outlineColour) {
+    SoOutlineColour::initClass();
+    m_d->outlineColour = new SoOutlineColour;
+    m_d->outlineColour->ref();
+    m_d->outlineColour->colour = *outlineColour;
+  }
   m_d->matVisAttributes = matVisAttributes;
   m_d->volVisAttributes = volVisAttributes;
   m_d->zappedvolumelistmodel = zappedvolumelistmodel;
@@ -72,6 +81,8 @@ VolumeHandleSharedData::~VolumeHandleSharedData()
     if (it2->second)
       it2->second->unref();
   }
+  if (m_d->outlineColour)
+    m_d->outlineColour->unref();
   delete m_d; m_d=0;
 }
 
@@ -130,6 +141,9 @@ void VolumeHandleSharedData::registerNodeSepForVolumeHandle(SoSeparator*n,Volume
 {
   assert(m_d->sonodesep2volhandle->find(n)==m_d->sonodesep2volhandle->end());
   (*(m_d->sonodesep2volhandle))[n]=vh;
+  // The volume separator scopes this optional colour to its own geometry.
+  if (m_d->outlineColour)
+    n->insertChild(m_d->outlineColour, 0);
   setShowVolumeOutlines(n,m_d->controller->showVolumeOutLines());
 }
 
@@ -138,7 +152,11 @@ void VolumeHandleSharedData::setShowVolumeOutlines(SoGroup*nodegroup,bool showvo
 {
   for (int i = 0; i<nodegroup->getNumChildren();++i) {
     SoNode * n = nodegroup->getChild(i);
-    if (n->getTypeId().isDerivedFrom(SoGenericBox::getClassTypeId())) {
+    if (n->getTypeId().isDerivedFrom(SoOutlineColour::getClassTypeId())) {
+      auto* colour = static_cast<SoOutlineColour*>(n);
+      if (colour->enabled.getValue() != showvol)
+        colour->enabled = showvol;
+    } else if (n->getTypeId().isDerivedFrom(SoGenericBox::getClassTypeId())) {
       if (static_cast<SoGenericBox*>(n)->drawEdgeLines.getValue()!=showvol)
         static_cast<SoGenericBox*>(n)->drawEdgeLines.setValue(showvol);
     } else if (n->getTypeId().isDerivedFrom(SoTubs::getClassTypeId())) {

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1GeometrySystems )
@@ -95,3 +95,9 @@ if( UNIX AND NOT APPLE )
     PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} GeoModelUtilities GeoModelExamplesLib VP1HEPVis VP1Utils Qt5::Gui Qt5::Sql )
 endif()
 endif()
+
+# Palette regression test requires no GUI or OpenGL context.
+atlas_add_test( OutlineColourPalette
+   SOURCES test/OutlineColourPalette_test.cxx
+   LINK_LIBRARIES VP1GeometrySystems
+   POST_EXEC_SCRIPT nopost.sh )

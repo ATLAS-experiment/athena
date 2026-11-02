@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -13,6 +13,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include "VP1HEPVis/nodes/SoGenericBox.h"
+#include "VP1HEPVis/nodes/SoOutlineColour.h"
 
 #include <Inventor/SbBox.h>
 #include <Inventor/actions/SoPickAction.h>
@@ -122,11 +123,18 @@ void SoGenericBox::generatePrimitives(SoAction *action) {
 
     if (drawEdgeLines.getValue()) {
 
-      const bool disableLighting(forceEdgeLinesInBaseColour.getValue()&&glIsEnabled(GL_LIGHTING));
+      SbColor outlineColour;
+      const bool customColour = SoOutlineColour::get(state, outlineColour);
+      // Preserve Coin's colour/material state, including GL_COLOR_MATERIAL.
+      if (customColour)
+        glPushAttrib(GL_CURRENT_BIT | GL_LIGHTING_BIT);
+      const bool disableLighting((customColour || forceEdgeLinesInBaseColour.getValue()) && glIsEnabled(GL_LIGHTING));
       const bool transparencyOn = glIsEnabled(GL_BLEND);
 
       if (disableLighting) glDisable(GL_LIGHTING);
       if (transparencyOn) glDisable(GL_BLEND);
+      if (customColour)
+        glColor3fv(outlineColour.getValue());
 #define trdV(i) glVertex3fv(static_cast<const GLfloat*>(&m_points[i*3]));
       glBegin(GL_LINE_STRIP);
       trdV(0)trdV(1)trdV(2)trdV(3)trdV(0)trdV(4)trdV(5)trdV(6)trdV(7)trdV(4)
@@ -140,6 +148,8 @@ void SoGenericBox::generatePrimitives(SoAction *action) {
 
       if (disableLighting) glEnable(GL_LIGHTING);
       if (transparencyOn) glEnable(GL_BLEND);
+      if (customColour)
+        glPopAttrib();
     }
   }
 

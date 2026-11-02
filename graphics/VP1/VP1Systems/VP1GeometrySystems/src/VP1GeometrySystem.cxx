@@ -1143,7 +1143,8 @@ void VP1GeometrySystem::Imp::buildSystem(SubSystemInfo* si)
 		  }
 		  VolumeHandleSharedData* volhandle_subsysdata = new VolumeHandleSharedData(controller,si->flag,&sonodesep2volhandle,it->pV,phisectormanager,
 				  m,matVisAttributes,volVisAttributes,
-				  controller->zappedVolumeListModel(),controller->volumeTreeBrowser(), m_textSep);
+				  controller->zappedVolumeListModel(),controller->volumeTreeBrowser(), m_textSep,
+                                  detVisAttributes->outlineColour(it->volname));
 		  SbMatrix matr;
 		  VP1LinAlgUtils::transformToMatrix(it->xf,matr);
 		  VolumeHandle * vh = new VolumeHandle(volhandle_subsysdata,0,it->pV,ichild++,VolumeHandle::NONMUONCHAMBER,matr);
@@ -1166,7 +1167,8 @@ void VP1GeometrySystem::Imp::buildSystem(SubSystemInfo* si)
 
 		  VolumeHandleSharedData* volhandle_subsysdata = new VolumeHandleSharedData(controller,si->flag,&sonodesep2volhandle,it->pV,phisectormanager,
 				  mat_top,matVisAttributes,volVisAttributes,
-				  controller->zappedVolumeListModel(),controller->volumeTreeBrowser(),m_textSep);
+				  controller->zappedVolumeListModel(),controller->volumeTreeBrowser(),m_textSep,
+                                  detVisAttributes->outlineColour(si->matname));
 		  volhandle_subsysdata->ref();
 
 		  const bool hasMuonChambers=si->hasMuonChambers();

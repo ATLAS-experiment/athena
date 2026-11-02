@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VOLUMEHANDLESHAREDDATA_H
@@ -10,6 +10,8 @@
 
 #include "VP1GeometrySystems/VP1GeoFlags.h"
 #include <map>
+#include <optional>
+#include <Inventor/SbColor.h>
 class SoNode;
 class SoGroup;
 class SoSeparator;
@@ -27,7 +29,8 @@ public:
   VolumeHandleSharedData(GeoSysController * controller,VP1GeoFlags::SubSystemFlag,std::map<SoSeparator*,VolumeHandle*>* sonodesep2volhandle,
 			 const GeoPVConstLink& motherpV,PhiSectorManager*,
 			 SoMaterial * topMaterial,MatVisAttributes *,VolVisAttributes *,
-			 ZappedVolumeListModel *, VP1GeoTreeView *, SoSeparator*);
+			 ZappedVolumeListModel *, VP1GeoTreeView *, SoSeparator*,
+                         std::optional<SbColor> outlineColour = std::nullopt);
   ~VolumeHandleSharedData();
   void ref();
   void unref();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ////////////////////////////////////////////////////////////////
@@ -19,6 +19,7 @@
 ////////////////////////////////////////////////////////////////
 
 #include <VP1HEPVis/nodes/SoPolyhedron.h>
+#include "VP1HEPVis/nodes/SoOutlineColour.h"
 
 #include <Inventor/SbBox.h>
 #include <Inventor/actions/SoAction.h>
@@ -198,6 +199,30 @@ void SoPolyhedron::generatePrimitives(
      glDrawArrays(GL_TRIANGLES, 0, m_vcount);  //comment it if u use I-Method
      glDisableClientState(GL_VERTEX_ARRAY);
      glDisableClientState(GL_NORMAL_ARRAY);
+
+     // Boolean chamber envelopes (e.g. TGC endcap stations) use this renderer.
+     // Draw actual polyhedron edges, excluding invisible triangulation seams,
+     // only when the palette supplies a colour and Show outlines is enabled.
+     SbColor outlineColour;
+     if (SoOutlineColour::get(state, outlineColour)) {
+       glPushAttrib(GL_ENABLE_BIT | GL_CURRENT_BIT | GL_LIGHTING_BIT);
+       glDisable(GL_LIGHTING);
+       glDisable(GL_BLEND);
+       glColor3fv(outlineColour.getValue());
+       HVPoint3D start, end;
+       int edgeFlag = 0;
+       bool more;
+       glBegin(GL_LINES);
+       do {
+         more = m_polyhedron->GetNextEdge(start, end, edgeFlag);
+         if (edgeFlag > 0) {
+           glVertex3d(start[0], start[1], start[2]);
+           glVertex3d(end[0], end[1], end[2]);
+         }
+       } while (more);
+       glEnd();
+       glPopAttrib();
+     }
     }
    }  //End of comment for return to old method */
   } else {//lala
