@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ParticleJetTools/CopyTruthJetParticles.h"
@@ -34,7 +34,7 @@ CopyTruthJetParticles::CopyTruthJetParticles(const std::string& name)
 
 StatusCode CopyTruthJetParticles::initialize() {
 
-  ATH_CHECK(m_truthParticleKey.initialize());
+  ATH_CHECK(m_truthEventKey.initialize());
   ATH_CHECK(m_outTruthPartKey.initialize());
   ATH_CHECK(m_dressingNames.initialize());
 
@@ -167,20 +167,25 @@ int CopyTruthJetParticles::execute() const {
   std::vector<const xAOD::TruthParticle*> promptLeptons;
   promptLeptons.reserve(10);
 
-  // Retrieve the xAOD truth objects
-  auto truthParticles = SG::makeHandle(m_truthParticleKey);
-  if ( !truthParticles.isValid() ) {
-    ATH_MSG_ERROR("Failed to retrieve truth particle container " << m_truthParticleKey.key());
+  auto truthEvents = SG::makeHandle(m_truthEventKey);
+  if ( !truthEvents.isValid() ) {
+    ATH_MSG_ERROR("Failed to retrieve truth event container " << m_truthEventKey.key());
     return 1;
   }
-  
+
   // Classify particles for tagging and add to the TruthParticleContainer
   std::unique_ptr<ConstDataVector<xAOD::TruthParticleContainer> > ptruth(new ConstDataVector<xAOD::TruthParticleContainer>(SG::VIEW_ELEMENTS));
   std::map<const xAOD::TruthParticle*,unsigned int> tc_results;
   tc_results.clear();
   size_t numCopied = 0;
 
-  for (const xAOD::TruthParticle* tp : *truthParticles) {
+  const xAOD::TruthEvent* hsevt = truthEvents->front();
+  if(!hsevt) {
+    ATH_MSG_ERROR("Null pointer received for first truth event!");
+    return 1;
+  }
+  for (size_t itp(0); itp<hsevt->nTruthParticles(); ++itp) {
+    const xAOD::TruthParticle* tp = hsevt->truthParticle(itp);
     if(!tp) continue;
     if (tp->pt() < m_ptmin)
         continue;
@@ -194,7 +199,8 @@ int CopyTruthJetParticles::execute() const {
     }
   }
 
-  for (const xAOD::TruthParticle* tp : *truthParticles) {
+  for (size_t itp(0); itp<hsevt->nTruthParticles(); ++itp) {
+    const xAOD::TruthParticle* tp = hsevt->truthParticle(itp);
     if(!tp) continue;
     if (tp->pt() < m_ptmin)
         continue;
