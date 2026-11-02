@@ -1,11 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef VP1GEOMETRYSYSTEMS_GEOVISATTRIBUTES_H
 #define VP1GEOMETRYSYSTEMS_GEOVISATTRIBUTES_H
 
 #include <string>
+#include <optional>
+#include <Inventor/SbColor.h>
 #include <QByteArray>
 #include <QMap>
 #include <QString>
@@ -28,6 +30,9 @@ class VisAttributes {
   // Fetch a material
   SoMaterial *get(const std::string & name) const;
 
+  // Optional outline colour; absence preserves the inherited material colour.
+  std::optional<SbColor> outlineColour(const std::string& name) const;
+
   //Override transparencies of materials (will multiply current transparencies):
   void overrideTransparencies(float transpfact);
 
@@ -38,6 +43,8 @@ class VisAttributes {
 
   // Add a material
   void add(const std::string & name, SoMaterial *);
+
+  void setOutlineColour(const std::string& name, const SbColor&);
 
   // set SoMaterial color from RGB values
   void setColorFromRGB(SoMaterial* mat, const std::string& type, const int r, const int g, const int b);

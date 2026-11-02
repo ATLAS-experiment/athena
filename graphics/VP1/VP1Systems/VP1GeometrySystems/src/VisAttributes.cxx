@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1GeometrySystems/VisAttributes.h"
@@ -14,6 +14,8 @@
 
 class VisAttributes::Imp {
 public:
+  std::map<std::string, SbColor> outlineColours;
+
   // The material map is here:
   std::map< std::string, SoMaterial *> _map;
 
@@ -108,6 +110,17 @@ VisAttributes::~VisAttributes() {
     (*m).second->unref();
 
   delete m_d;
+}
+
+std::optional<SbColor> VisAttributes::outlineColour(const std::string& name) const
+{
+  const auto it = m_d->outlineColours.find(name);
+  return it == m_d->outlineColours.end() ? std::nullopt : std::optional<SbColor>(it->second);
+}
+
+void VisAttributes::setOutlineColour(const std::string& name, const SbColor& colour)
+{
+  m_d->outlineColours.insert_or_assign(name, colour);
 }
 
 SoMaterial *VisAttributes::get (const std::string & name) const {
@@ -262,6 +275,8 @@ DetVisAttributes::DetVisAttributes() {
       material->specularColor.setValue(0,0,0);
       material->shininess.setValue(0.2);
       add("TGC",material);
+      // Light pink edges contrast with the dark-purple chamber faces.
+      setOutlineColour("TGC", SbColor(1.0f, 0.6f, 0.85f));
     }
 
     {
