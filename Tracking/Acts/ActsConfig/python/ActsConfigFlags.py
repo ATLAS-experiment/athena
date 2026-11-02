@@ -269,7 +269,7 @@ def createActsConfigFlags():
                                                                        # this flag is used only if PixelCalibrationStrategy is one of the NN strategies
     actscf.addFlag('Acts.refitSeeds', False) # refit seeds for CKF initial parameters
     actscf.addFlag('Acts.initialVarInflation', [1., 1., 1., 1., 1., 1.]) # inflate variances after track parameter estimation
-    actscf.addFlag('Acts.doBremRecovery', False)
+    actscf.addFlag('Acts.doBremRecovery', True)
     actscf.addFlag('Acts.phiWidthROI', lambda pcf: pcf.Tracking.phiWidthBrem)
     actscf.addFlag('Acts.etaWidthROI', lambda pcf: pcf.Tracking.etaWidthBrem)
 

@@ -117,6 +117,9 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("branchStopperPtMinFactor", 0.9)
     kwargs.setdefault("branchStopperAbsEtaMaxExtra", 0.1)
 
+    # no calorimeter ROIs are scheduled for the brem recovery in this configuration
+    kwargs.setdefault("doBremRecovery", False)
+
     # Loosen the requirement on the minimum number of measurements on track candidate
     # during track finding for tracks above a certain eta
     kwargs.setdefault("branchStopperMeasCutReduce", flags.Acts.branchStopperMeasCutReduce)
