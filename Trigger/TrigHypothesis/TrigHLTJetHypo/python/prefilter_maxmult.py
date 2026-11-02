@@ -19,7 +19,7 @@ etaRangeAbbrev = {
     "a":"0eta490", 
     "c":"0eta240", 
     "C":"0eta210", 
-    "f":"320eta490",
+    "f":"320eta490"
 }
 
 def prefilter_maxmult(pf_string):
