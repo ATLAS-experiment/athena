@@ -1,4 +1,4 @@
-/* Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration */
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
 
@@ -51,28 +51,8 @@ CaloTopoTowerFromClusterMaker::CaloTopoTowerFromClusterMaker(const std::string& 
 							     const std::string& name,
 							     const IInterface* pParent)
   : AthAlgTool(type,name,pParent)
-  , m_clusterContainerKey("CaloTopoClusters")
-  , m_cellContainerKey("AllCalo")
-  , m_energyThreshold(m_energyThresholdDef-1.)
-  , m_clusterRange(m_clusterRangeDef)
-    //  , m_numberOfCells(0)
-    //  , m_maxCellHash(0)
-  , m_numberOfSamplings(static_cast<uint_t>(CaloSampling::Unknown))
-    //  , m_numberOfTowers(0)
 {
   declareInterface<CaloTowerCollectionProcessor>(this);
-  declareProperty("CaloCellContainerKey",        m_cellContainerKey,                                                                  "SG Key for CaloCellContainer (input)");
-  declareProperty("BuildTopoTowers",             m_useCellsFromClusters,                                                              "Turn on/off topo-tower formation");
-  declareProperty("CaloTopoClusterContainerKey", m_clusterContainerKey,                                                               "SG Key for CaloClusterContainer (input)");
-  declareProperty("OrderClusterByPt",            m_orderByPt,                                                                         "Turn on/off pT-ordering of CaloClusterContainer (output)");
-  declareProperty("ApplyCellEnergyThreshold",    m_applyCellEnergyThreshold,                                                          "Turn on/off cell energy thresholds");
-  declareProperty("CellEnergyThreshold",         m_energyThreshold,                                                                   "Energy threshold for cells filled in clusters");
-  declareProperty("PrepareLCW",                  m_prepareLCW,                                                                        "Prepare data structure to apply LCW");
-  declareProperty("ExcludedSamplings",           m_excludedSamplingsName,                                                             "Excluded samplings by name");
-  declareProperty("DoCellIndexCheck",            m_doCellIndexCheck,                                                                  "Check cell hash indices for consistency");
-  declareProperty("BuildCombinedTopoSignal",     m_buildCombinedSignal,                                                               "Build topo-clusters and topo-towers");
-  declareProperty("TopoClusterRange",            m_clusterRange,                                                                      "Rapidity range for using topo-clusters in combined signal mode");
-  declareProperty("RemoveSamplingData",          m_removeSamplingData,                                                                "Remove the associated sampling data");
 }
 
 StatusCode CaloTopoTowerFromClusterMaker::initialize()
@@ -155,24 +135,24 @@ StatusCode CaloTopoTowerFromClusterMaker::initialize()
     m_excludedSamplings.resize(nex);
     m_excludedSamplingsPattern.reset();
     for ( size_t i(0); i<nex; ++i ) {
-      m_excludedSamplings[i] = CaloRec::Lookup::getSamplingId(m_excludedSamplingsName.at(i));
+      m_excludedSamplings[i] = CaloRec::Lookup::getSamplingId(m_excludedSamplingsName.value().at(i));
       m_excludedSamplingsPattern.set(i);
       ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("CaloSampling \042%10.10s\042 has id %2zu (name in lookup table \042%10.10s\042)",
-					      m_excludedSamplingsName.at(i).c_str(),(size_t)m_excludedSamplings.at(i),CaloRec::Lookup::getSamplingName(m_excludedSamplings.at(i)).c_str()) );
+					      m_excludedSamplingsName.value().at(i).c_str(),(size_t)m_excludedSamplings.at(i),CaloRec::Lookup::getSamplingName(m_excludedSamplings.at(i)).c_str()) );
     }
   }
 
   ATH_MSG_INFO("Other properties:");
   std::map<bool,std::string> blu { { true, "true" }, { false, "false" } };
-  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("PrepareLCW ................. %s",             blu[m_prepareLCW].c_str())               ); 
-  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("BuildTopoTowers ............ %s",             blu[m_useCellsFromClusters].c_str())     );
-  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("ApplyCellEnergyThreshold ... %s",             blu[m_applyCellEnergyThreshold].c_str()) );
-  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("OrderClusterByPt ........... %s",             blu[m_orderByPt].c_str())                );
-  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("DoCellIndexCheck ........... %s",             blu[m_doCellIndexCheck].c_str())         );
-  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("BuildCombinedTopoSignal .... %s",             blu[m_buildCombinedSignal].c_str())      );
-  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("TopoClusterRange ........... %.2f",           m_clusterRange)                          );
+  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("PrepareLCW ................. %s",             blu[m_prepareLCW.value()].c_str())               ); 
+  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("BuildTopoTowers ............ %s",             blu[m_useCellsFromClusters.value()].c_str())     );
+  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("ApplyCellEnergyThreshold ... %s",             blu[m_applyCellEnergyThreshold.value()].c_str()) );
+  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("OrderClusterByPt ........... %s",             blu[m_orderByPt.value()].c_str())                );
+  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("DoCellIndexCheck ........... %s",             blu[m_doCellIndexCheck.value()].c_str())         );
+  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("BuildCombinedTopoSignal .... %s",             blu[m_buildCombinedSignal.value()].c_str())      );
+  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("TopoClusterRange ........... %.2f",           m_clusterRange.value())                          );
   ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("ExcludedSamplings .......... %zu (number of)",m_excludedSamplingsName.size())          );
-  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("RemoveSamplingData ......... %s",             blu[m_removeSamplingData].c_str())       );
+  ATH_MSG_INFO( CaloRec::Helpers::fmtMsg("RemoveSamplingData ......... %s",             blu[m_removeSamplingData.value()].c_str())       );
 
   return StatusCode::SUCCESS;
 }

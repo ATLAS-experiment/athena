@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///============================================================
@@ -20,9 +20,7 @@
 ///============================================================
 
 #include "CaloIdentifier/CaloCell_ID.h"
-#include "CaloEvent/CaloTowerContainer.h"
 #include "CaloEvent/CaloCell2ClusterMap.h"
-#include "CaloEvent/CaloCellContainer.h"
 #include "CaloTopoTowerAlg.h"
 #include <string>
 
@@ -30,31 +28,8 @@
 /// DEFAULT CONSTRUCTOR
 ///==============================================
 CaloTopoTowerAlg::CaloTopoTowerAlg(const std::string& name,ISvcLocator* pSvcLocator):
-   AthReentrantAlgorithm(name, pSvcLocator),
-   m_cellToClusterMapKey("CaloCell2TopoCluster"),
-   m_cellContainerKey("AllCalo"),
-   m_towerContainerKey("CmbTower"),
-   m_newTowerContainerKey("TopoTower"),
-   m_caloSelection(false)
-{ 
-
-  // Containers needed for this algorithm
-  declareProperty("Cell2ClusterMapName",    m_cellToClusterMapKey);
-  declareProperty("CellContainerName"  ,    m_cellContainerKey);
-  declareProperty("InputTowerContainerName" ,    m_towerContainerKey);
-  declareProperty("OutputTowerContainerName",    m_newTowerContainerKey );
-  
-  // Declare configurable properties of the algorithm
-  declareProperty("MinimumCellEnergy",      m_minimumCellEnergy    = -1000000000.0);  
-  declareProperty("MinimumClusterEnergy",   m_minimumClusterEnergy = -1000000000.0);  
-
-  declareProperty("CellEnergySignificance", m_cellESignificanceThreshold = -1);
-  
-  // Calo from which to use cells
-  declareProperty("IncludedCalos",          m_includedCalos);
-
-  declareProperty("useCellWeight",          m_useCellWeights=true);
-
+   AthReentrantAlgorithm(name, pSvcLocator)
+{
 }
 
 ///==============================================

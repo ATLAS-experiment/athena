@@ -40,6 +40,8 @@ class CaloCell_ID;
 #include "CaloInterface/ILArHVFraction.h"
 #include "CaloConditions/CaloNoise.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "CLHEP/Units/SystemOfUnits.h"
 
 #include <string>
 #include <vector>
@@ -65,7 +67,7 @@ class CaloClusterMomentsMaker_DigiHSTruth: public AthAlgTool, virtual public Cal
    *
    * This is the list of desired names of moments given in the
    * jobOptions.*/
-  std::vector<std::string>  m_momentsNames; 
+  Gaudi::Property<std::vector<std::string>> m_momentsNames{this, "MomentsNames", {}};
 
   /** 
    * @brief set of moments which will be calculated.
@@ -75,11 +77,11 @@ class CaloClusterMomentsMaker_DigiHSTruth: public AthAlgTool, virtual public Cal
    * valid moment names (m_validNames). */
   std::vector<xAOD::CaloCluster::MomentType> m_validMoments;
 
-  const CaloCell_ID* m_calo_id;
+  const CaloCell_ID* m_calo_id{nullptr};
 
   /** @brief the maximal allowed deviation from the
    * IP-to-ClusterCenter-axis. */
-  double m_maxAxisAngle; 
+  Gaudi::Property<double> m_maxAxisAngle{this, "MaxAxisAngle", 20*CLHEP::deg};
 
   /**
    * @brief the minimal \f$r\f$ in the definition of the Lateral moment
@@ -87,7 +89,7 @@ class CaloClusterMomentsMaker_DigiHSTruth: public AthAlgTool, virtual public Cal
    * This defines the minimal distance the two leading cells might
    * have before this value is used instead of their real distance in
    * the normalization of the LATERAL moment. */
-  double m_minRLateral;  
+  Gaudi::Property<double> m_minRLateral{this, "MinRLateral", 4*CLHEP::cm};
 
   /**
    * @brief the minimal \f$\lambda\f$ in the definition of the
@@ -97,7 +99,7 @@ class CaloClusterMomentsMaker_DigiHSTruth: public AthAlgTool, virtual public Cal
    * cluster center the two leading cells might have before this value
    * is used instead of their real distance in the normalization of
    * the LONGITUDINAL moment. */
-  double m_minLLongitudinal;
+  Gaudi::Property<double> m_minLLongitudinal{this, "MinLLongitudinal", 10*CLHEP::cm};
 
   /**
    * @brief the minimal cell quality in the LAr for declaring a cell bad
@@ -105,23 +107,23 @@ class CaloClusterMomentsMaker_DigiHSTruth: public AthAlgTool, virtual public Cal
    * This defines the minimal quality (large values mean worse shape)
    * a cell needs to exceed in order to be considered as not
    * compatible with a normal ionization signal. */
-  double m_minBadLArQuality;
+  Gaudi::Property<double> m_minBadLArQuality{this, "MinBadLArQuality", 4000};
 
   /// Set to true if significance moments are need
-  bool m_calculateSignificance;
+  bool m_calculateSignificance{false};
 
   /// Set to true if cluster isolation is to be calculated
-  bool m_calculateIsolation;
+  bool m_calculateIsolation{false};
 
   /// Set to true to calculate E and N of cells affected by LAr HV corrections
-  bool m_calculateLArHVFraction;
+  bool m_calculateLArHVFraction{false};
 
   /**
    * @brief if set to true use 2-gaussian noise description for
    * TileCal  */
-  bool m_twoGaussianNoise;
+  Gaudi::Property<bool> m_twoGaussianNoise{this, "TwoGaussianNoise", false};
 
-  ToolHandle<CaloDepthTool> m_caloDepthTool;
+  ToolHandle<CaloDepthTool> m_caloDepthTool{"CaloDepthTool", this};
 
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{
     this,
@@ -134,14 +136,14 @@ class CaloClusterMomentsMaker_DigiHSTruth: public AthAlgTool, virtual public Cal
  /** @brief Key of the CaloNoise Conditions data object. Typical values 
      are '"electronicNoise', 'pileupNoise', or '"totalNoise' (default) */
   SG::ReadCondHandleKey<CaloNoise> m_noiseCDOKey{this,"CaloNoiseKey","totalNoise","SG Key of CaloNoise data object"};
-  ToolHandle<ILArHVFraction> m_larHVFraction;
+  ToolHandle<ILArHVFraction> m_larHVFraction{this, "LArHVFraction", "LArHVFraction", "Tool Handle for LArHVFraction"};
 
   /// Not used anymore (with xAOD), but required when configured from COOL.
-  std::string m_momentsNamesAOD;
+  Gaudi::Property<std::string> m_momentsNamesAOD{this, "AODMomentsNames", ""};
   /**
  *    * @brief if set to true use abs E value of cells to calculate 
  *       * cluster moments */
-   bool m_absOpt;
+   Gaudi::Property<bool> m_absOpt{this, "WeightingOfNegClusters", false};
 
   /**
    * @brief Retrieve second moment of cell times and store as moment */
@@ -149,7 +151,7 @@ class CaloClusterMomentsMaker_DigiHSTruth: public AthAlgTool, virtual public Cal
 
   /**
    * @brief Transition from outer to inner wheel in EME2 */
-  double m_etaInnerWheel = { 2.52 };
+  Gaudi::Property<double> m_etaInnerWheel{this, "EMECAbsEtaWheelTransition", 2.52};
 
   Gaudi::Property<bool> m_useGPUCriteria {this, "UseGPUCriteria", false, "Adopt a set of criteria that is consistent with the GPU implementation."};
 };

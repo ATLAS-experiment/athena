@@ -37,7 +37,6 @@
 //---------------
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
-#include "CaloEvent/CaloClusterCellLinkContainer.h"
 #include "CaloEvent/CaloCellClusterWeights.h"
 
 #include "CaloUtils/CaloClusterSignalState.h"
@@ -55,34 +54,8 @@
 CaloTopoTowerMaker::CaloTopoTowerMaker(const std::string& name, 
 				   ISvcLocator* pSvcLocator) 
   : AthReentrantAlgorithm(name, pSvcLocator)
-  , m_towerOutput("")
-  , m_towerCellLinkOutput("")
-  , m_towerMakerTool(this)
-  , m_towerCorrectionTools(this)
-  , m_towerCalibratorTool(this)
   , m_chrono("ChronoStatSvc", name)
 {
-  // Name of Cluster Container to be registered in TDS
-  declareProperty("TowersOutputName",m_towerOutput);  
-  declareProperty("TowerCellLinkOutputName",m_towerCellLinkOutput);  
-  
-  // Name(s) of Cluster Maker Tools
-  declareProperty("TowerMakerTool",m_towerMakerTool);
-
-  // Name(s) of Cluster Correction Tools
-  declareProperty("TowerCorrectionTools",m_towerCorrectionTools);
-
-  // Tower calibrator tool
-  declareProperty("TowerCalibratorTool",m_towerCalibratorTool);
-
-  // save uncalibrated cluster signal state 
-  declareProperty("SaveUncalibratedSignalState",m_saveSignalState);
-
-  //Make Chrono Auditors for Cluster maker and correction tools
-  declareProperty("ChronoTools", m_chronoTools);
-
-  // apply LCW calibration for towers
-  declareProperty("UseLCWCalibration",m_useLCWCalibration);
 }
 
 //###############################################################################

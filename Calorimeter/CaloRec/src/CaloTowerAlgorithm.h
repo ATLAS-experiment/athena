@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOREC_CALOTOWERALGORITHM_H
@@ -23,13 +23,14 @@
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "CaloUtils/CaloTowerBuilderToolBase.h"
+#include "CaloEvent/CaloTowerContainer.h"
+#include "StoreGate/WriteHandleKey.h"
 
 #include <string>
 #include <vector>
 #include <map>
 
 class IChronoStatSvc;
-class CaloTowerContainer;
 class ICaloTowerBuilderToolBase;
 
 class CaloTowerAlgorithm: public AthReentrantAlgorithm {
@@ -57,21 +58,22 @@ class CaloTowerAlgorithm: public AthReentrantAlgorithm {
 
     // ChronoStatSvc
     ServiceHandle<IChronoStatSvc> m_chrono;
-    bool m_doChronoStat;
+    Gaudi::Property<bool> m_doChronoStat{this, "EnableChronoStat", true};
 
     // tower grid specs
-    unsigned int m_nEtaTowers;
-    unsigned int m_nPhiTowers;
-    double m_minEta, m_maxEta;
+    Gaudi::Property<unsigned int> m_nEtaTowers{this, "NumberOfEtaTowers", 50};
+    Gaudi::Property<unsigned int> m_nPhiTowers{this, "NumberOfPhiTowers", 64};
+    Gaudi::Property<double> m_minEta{this, "EtaMin", -2.5};
+    Gaudi::Property<double> m_maxEta{this, "EtaMax", 2.5};
 
     // link output container
-    bool m_genericLink;
+    Gaudi::Property<bool> m_genericLink{this, "GenericLinked", true};
 
     // tool collection
     std::vector<std::string> m_toolNames;
-    ToolHandleArray<ICaloTowerBuilderToolBase> m_ptools;
+    ToolHandleArray<ICaloTowerBuilderToolBase> m_ptools{this, "TowerBuilderTools", {}};
     // output tower container name
-    SG::WriteHandleKey<CaloTowerContainer> m_towerContainerKey;
+    SG::WriteHandleKey<CaloTowerContainer> m_towerContainerKey{this, "TowerContainerName", ""};
 
     /////////////////////////
     // Stores and Services //

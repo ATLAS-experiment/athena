@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -51,11 +51,11 @@ private:
 
   ///@name Algorithm properties
   ///@{
-  rhandlekey_t  m_clusterContainerKey;    ///< Input topo-cluster container
-  rhandlekey_t  m_towerContainerKey;      ///< Input topo-tower container
-  whandlekey_t  m_topoSignalContainerKey; ///< Output merged container
-  lhandlekey_t  m_cellLinkContainerKey;   ///< Output cell links for merged container
-  double        m_clusterRange;           ///< Rapidity range for topo-clusters 
+  rhandlekey_t  m_clusterContainerKey{this, "TopoClusterContainerKey", "CaloCalTopoCluster", "Topo-cluster container key"}; ///< Input topo-cluster container
+  rhandlekey_t  m_towerContainerKey{this, "TopoTowerContainerKey", "CaloCalFwdTopoTower", "Topo-tower container key"}; ///< Input topo-tower container
+  whandlekey_t  m_topoSignalContainerKey{this, "TopoSignalContainerKey", "CaloCalTopoSignal", "Topo-signal container key"}; ///< Output merged container
+  lhandlekey_t  m_cellLinkContainerKey{this, "TopoSignalCellLinksKey", "", "Topo-signal cell links key"}; ///< Output cell links for merged container
+  Gaudi::Property<double> m_clusterRange{this, "TopoClusterRange", 3.2, "Rapidity range for using topo-clusters in combined signal mode"}; ///< Rapidity range for topo-clusters 
   ///@}
 
   ///@name Helpers

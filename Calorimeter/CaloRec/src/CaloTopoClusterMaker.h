@@ -1,6 +1,6 @@
 //Dear emacs, this is -*-c++-*-
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOTOPOCLUSTERMAKER_H
@@ -40,6 +40,9 @@
 #include "CaloConditions/CaloNoise.h"
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "StoreGate/ReadHandleKey.h"
+#include "CaloEvent/CaloCellContainer.h"
+#include "CLHEP/Units/SystemOfUnits.h"
 
 class Identifier; 
 class CaloDetDescrElement;
@@ -62,12 +65,12 @@ private:
   
   inline bool passCellTimeCut(const CaloCell*, const CaloCellContainer*) const;
   
-  const CaloCell_ID* m_calo_id;
+  const CaloCell_ID* m_calo_id{nullptr};
   
   /** 
    * @brief vector of names of the cell containers to use as input.
    */
-  SG::ReadHandleKey<CaloCellContainer> m_cellsKey;
+  SG::ReadHandleKey<CaloCellContainer> m_cellsKey{this, "CellsName", ""};
 
   /** 
    * @brief vector of names of the calorimeters to consider.
@@ -78,14 +81,14 @@ private:
    * as input for the cluster maker.  This property is used in order
    * to ignore a certain subsystem (e.g. for LAREM only clusters
    * specify only LAREM in the jobOptions).  */
-  std::vector<std::string>  m_caloNames;         
+  Gaudi::Property<std::vector<std::string>> m_caloNames{this, "CalorimeterNames", {}};
 
   /** 
    * @brief Flag which subdetectors are to be used.
    *
    * This is initialized according to the names given in the property
    * m_caloNames.  */
-  bool m_subcaloUsed[CaloCell_ID::NSUBCALO];
+  bool m_subcaloUsed[CaloCell_ID::NSUBCALO]{};
 
   /** 
    * @brief all cells have to satisfy \f$|E| > N_{\rm cell}\,\sigma\f$
@@ -103,7 +106,7 @@ private:
    * cell will be reached) usually determines in which cluster the
    * cell will end up in. The cell cut should be lower or equal to the
    * neighbor cut.  */
-  float m_cellThresholdOnEorAbsEinSigma;            
+  Gaudi::Property<float> m_cellThresholdOnEorAbsEinSigma{this, "CellThresholdOnEorAbsEinSigma", 0.};
 
   /** 
    * @brief cells with \f$|E| > N_{\rm neighbor}\,\sigma\f$ extend the cluster
@@ -114,7 +117,7 @@ private:
    * neighbor of two other cells passing this cut from different
    * clusters, the two clusters are merged. The neighbor cut should be
    * lower or equal to the seed cut.  */
-  float m_neighborThresholdOnEorAbsEinSigma;  
+  Gaudi::Property<float> m_neighborThresholdOnEorAbsEinSigma{this, "NeighborThresholdOnEorAbsEinSigma", 3.};
 
   /** 
    * @brief cells with \f$|E| > N_{\rm seed}\,\sigma\f$ start a cluster
@@ -124,41 +127,41 @@ private:
    * the accumulation of cells inside the clusters it can happen that
    * clusters are merged if a cell passing the neighbor threshold
    * would be included in both clusters.  */
-  float m_seedThresholdOnEorAbsEinSigma;         
+  Gaudi::Property<float> m_seedThresholdOnEorAbsEinSigma{this, "SeedThresholdOnEorAbsEinSigma", 6.};
 
 
   /**                                                                                                             
    * threshold used for timing cut on seed cells. Implemented as |seed_cell_time|<m_seedThresholdOnTAbs. No such cut on neighbouring cells.*/
-  float m_seedThresholdOnTAbs;
+  Gaudi::Property<float> m_seedThresholdOnTAbs{this, "SeedThresholdOnTAbs", 12.5*CLHEP::ns};
   
   /**                                                                                                             
    * upper limit on the energy significance, for applying the cell time cut */
-  float m_timeCutUpperLimit;
+  Gaudi::Property<float> m_timeCutUpperLimit{this, "TimeCutUpperLimit", 20.};
 
 
   /**                                                                                                             
    * additional max. delta t added to the upper limit time window in case of xtalk in EM2 should be accounted for */
-  float m_xtalkDeltaT;
+  Gaudi::Property<float> m_xtalkDeltaT{this, "XTalkDeltaT", 15.*CLHEP::ns};
 
    /**
     *  cut on Eneighbor/E to revover out of time cell close to energetic first phi neighbor cell */
-   float m_xtalk2Eratio1;
+   Gaudi::Property<float> m_xtalk2Eratio1{this, "XTalk2Eratio1", 4.};
 
    /**
     *  cut on Eneighbor/E to revover out of time cell close to energetic second phi neighbor cell */
-   float m_xtalk2Eratio2;
+   Gaudi::Property<float> m_xtalk2Eratio2{this, "XTalk2Eratio2", 25.};
 
    /**
     *  cut on Eneighbor/E to revover out of time layer 3cell close to energetic previous sampling neighbor */
-   float m_xtalk3Eratio;
+   Gaudi::Property<float> m_xtalk3Eratio{this, "XTalk3Eratio", 10.};
 
    /**
     *  cut on Eneighbor/E to revover out of time layer 2 cell close in eta to energetic neighor cell */
-   float m_xtalkEtaEratio;
+   Gaudi::Property<float> m_xtalkEtaEratio{this, "XTalkEtaEratio", 4.};
 
    /**
      * cut on Eneighbor/E to remove out of time layer layer2 all 2D neighbors */
-   float m_xtalk2DEratio;
+   Gaudi::Property<float> m_xtalk2DEratio{this, "XTalk2DEratio", 4.};
 
 
   /** @brief Key of the CaloNoise Conditions data object. Typical values 
@@ -193,8 +196,8 @@ private:
    *      are connected in this case.
    *
    * The default setting is "super3D".  */
-  std::string m_neighborOption;                  
-  LArNeighbours::neighbourOption m_nOption;      
+  Gaudi::Property<std::string> m_neighborOption{this, "NeighborOption", "super3D"};
+  LArNeighbours::neighbourOption m_nOption{LArNeighbours::super3D};
 
   /**
    * @brief if set to true limit the neighbors in HEC IW and FCal2&3.
@@ -205,7 +208,7 @@ private:
    * those cells. If this property is set to true the 2d neighbors of
    * these cells are not used - only the next sampling neighbors are
    * probed. */
-  bool m_restrictHECIWandFCalNeighbors;
+  Gaudi::Property<bool> m_restrictHECIWandFCalNeighbors{this, "RestrictHECIWandFCalNeighbors", false};
                                                  
   /**
    * @brief if set to true limit the neighbors in presampler Barrel and Endcap.
@@ -214,7 +217,7 @@ private:
    * samples. With this option set to true the presampler cells do not
    * expand the cluster in the presampler layer.  Only the next
    * sampling is used as valid neighbor source. */
-  bool m_restrictPSNeighbors;
+  Gaudi::Property<bool> m_restrictPSNeighbors{this, "RestrictPSNeighbors", false};
                                                  
   /**
    * @brief if set to true seed cuts are on \f$|E|\f$ and \f$|E|_\perp\f$.
@@ -224,7 +227,7 @@ private:
    * energy and absolute transverse energy if this is set to true. If
    * set to false the cuts will be on energy and transverse energy
    * instead.  */
-  bool m_seedCutsInAbsE;                         
+  Gaudi::Property<bool> m_seedCutsInAbsE{this, "SeedCutsInAbsE", false};
                                                  
   /**
    * @brief if set to true neighbor cuts are on \f$|E|\f$ and \f$|E|_\perp\f$.
@@ -232,7 +235,7 @@ private:
    * The neighbor cuts will be on absolute energy and absolute
    * transverse energy if this is set to true. If set to false the
    * cuts will be on energy and transverse energy instead.  */
-  bool m_neighborCutsInAbsE;                         
+  Gaudi::Property<bool> m_neighborCutsInAbsE{this, "NeighborCutsInAbsE", true};
                                                  
   /**
    * @brief if set to true cell cuts are on \f$|E|\f$ and \f$|E|_\perp\f$.
@@ -240,7 +243,7 @@ private:
    * The cell cuts will be on absolute energy and absolute transverse
    * energy if this is set to true. If set to false the cuts will be
    * on energy and transverse energy instead.  */
-  bool m_cellCutsInAbsE;                         
+  Gaudi::Property<bool> m_cellCutsInAbsE{this, "CellCutsInAbsE", true};
                                                  
   /**
    * @brief if set to true final cluster cuts are on \f$|E|_\perp\f$. 
@@ -248,7 +251,7 @@ private:
    * The final cluster cuts will be on absolute transverse energy
    * if this is set to true. If set to false the cuts will be on
    * transverse energy instead.  */
-  bool m_clusterCutsInAbsE;
+  Gaudi::Property<bool> m_clusterCutsInAbsE{this, "ClusterCutsInAbsEt", true};
   
   /**
    * @brief \f$E_\perp\f$ cut on the final cluster. 
@@ -256,58 +259,58 @@ private:
    * The final cluster has to pass this cut (which is on \f$E_\perp\f$
    * or \f$|E|_\perp\f$ of the cluster depending on the above switch)
    * in order to be inserted into the CaloClusterContainer.  */
-  float m_clusterEtorAbsEtCut;                   
+  Gaudi::Property<float> m_clusterEtorAbsEtCut{this, "ClusterEtorAbsEtCut", 0.*CLHEP::MeV};
                                                  
   /**
    * @brief if set to true use 2-gaussian noise description for 
    * TileCal  */
-  bool m_twogaussiannoise;
+  Gaudi::Property<bool> m_twogaussiannoise{this, "TwoGaussianNoise", false};
                                                  
   /**
    * @brief if set to true treat cells with a dead OTX which can be
    * predicted by L1 trigger info as good instead of bad cells */
-  bool m_treatL1PredictedCellsAsGood;
+  Gaudi::Property<bool> m_treatL1PredictedCellsAsGood{this, "TreatL1PredictedCellsAsGood", true};
 
   /**                                                                                              
    * if set to true, time cut is applied to seed cells, no cut otherwise 
    */
-  bool m_seedCutsInT;                                      
+  Gaudi::Property<bool> m_seedCutsInT{this, "SeedCutsInT", false};
 
   /**                                                                                              
    * if set to true, seed cells failing the time cut are also excluded from cluster at all 
    */
-  bool m_cutOOTseed;
+  Gaudi::Property<bool> m_cutOOTseed{this, "CutOOTseed", false};
 
   /**                                                                                              
    * if set to true, the time cut is not applied on cell of large significance
    */
-  bool m_useTimeCutUpperLimit;
+  Gaudi::Property<bool> m_useTimeCutUpperLimit{this, "UseTimeCutUpperLimit", false};
 
   /**                                                                                              
    * if set to true, the time window is softened in the EMB2 and EME2_OW due to xtalk from direct neighbour cells in phi
    */
-  bool m_xtalkEM2;
+  Gaudi::Property<bool> m_xtalkEM2{this, "XTalkEM2", false};
 
   /**
     * if set to true, the time window is softened in the EMB2 and EME2_OW due to xtalk from  all 2D neighors
     */
-   bool m_xtalkEM2D;
+   Gaudi::Property<bool> m_xtalkEM2D{this, "XTalkEM2D", false};
 
   /**                                                                                              
    * if set to true (together with m_xtalkEM2) we also extend the time window for 2nd phi neighbors
    */
-  bool m_xtalkEM2n;
+  Gaudi::Property<bool> m_xtalkEM2n{this, "XTalkEM2n", false};
 
   /**                                                                                              
    * if set to true  we extend the time window for direct layer 3 neighbors of high energy layer 2 cells
    */
-  bool m_xtalkEM3;
+  Gaudi::Property<bool> m_xtalkEM3{this, "XTalkEM3", false};
 
   /**
    
     * if set to true, the time window is softened in the EMB2 and EME2_OW due to xtalk from direct neighbour cells in eta
     */
-  bool m_xtalkEMEta;
+  Gaudi::Property<bool> m_xtalkEMEta{this, "XTalkEMEta", false};
 
 
   /** 
@@ -320,7 +323,7 @@ private:
    * incorporated in the topo clusters (both on the neighbor and the
    * cell level) they can therefore even expand a cluster but not seed
    * one ...*/
-  std::vector<std::string>  m_samplingNames;         
+  Gaudi::Property<std::vector<std::string>> m_samplingNames{this, "SeedSamplingNames", {}};
 
   /** 
    * @brief actual set of samplings to be used for seeds
@@ -335,7 +338,7 @@ private:
    * This is needed to adjust the range of the vector<bool> for a
    * quick lookup if a cell belongs to a valid sampling for seeds or
    * not. */
-  int m_minSampling;
+  int m_minSampling{0};
 
   /** 
    * @brief largest valid seed sampling found 
@@ -343,7 +346,7 @@ private:
    * This is needed to adjust the range of the vector<bool> for a
    * quick lookup if a cell belongs to a valid sampling for seeds or
    * not. */
-  int m_maxSampling;
+  int m_maxSampling{0};
 
   /** 
    * @brief flag for all samplings - true for used ones, false for excluded ones
@@ -352,12 +355,12 @@ private:
    * belongs to a sampling that should be used for seeds. */
   std::vector<bool> m_useSampling;
 
-  IdentifierHash m_hashMin;
-  IdentifierHash m_hashMax;
+  IdentifierHash m_hashMin{999999};
+  IdentifierHash m_hashMax{0};
 
 
   /// Cluster size enum. Set based on energy cut jobO
-  xAOD::CaloCluster::ClusterSize m_clusterSize;
+  xAOD::CaloCluster::ClusterSize m_clusterSize{};
   
   Gaudi::Property<bool> m_useGPUCriteria {this, "UseGPUCriteria", false, "Adopt a set of criteria that is consistent with the GPU implementation."};
 };

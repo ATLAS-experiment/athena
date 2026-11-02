@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,7 +9,6 @@
 #include "AthenaKernel/errorcheck.h"
 
 #include "CaloEvent/CaloTowerSeg.h"
-#include "CaloEvent/CaloTowerContainer.h"
 #include "CaloTowerAlgorithm.h"
 
 #include <string>
@@ -20,29 +19,7 @@ CaloTowerAlgorithm::CaloTowerAlgorithm(const std::string& name,
 				       ISvcLocator* pSvcLocator) 
   : AthReentrantAlgorithm(name,pSvcLocator)
   , m_chrono("ChronoStatSvc", name)
-  , m_doChronoStat(true)
-  , m_nEtaTowers(50)
-  , m_nPhiTowers(64)
-  , m_minEta(-2.5)
-  , m_maxEta(2.5)
-  , m_genericLink(true) 
-  , m_ptools( this )
-  , m_towerContainerKey("")
 {
-  // chrono
-  declareProperty("EnableChronoStat", m_doChronoStat);
-  // tool names
-  //declareProperty("TowerBuilderTools",m_toolNames);
-  declareProperty("TowerBuilderTools",m_ptools);
-  // output data
-  declareProperty("TowerContainerName",m_towerContainerKey);
-  // tower grid
-  declareProperty("NumberOfEtaTowers",m_nEtaTowers);
-  declareProperty("NumberOfPhiTowers",m_nPhiTowers);
-  declareProperty("EtaMin",m_minEta);
-  declareProperty("EtaMax",m_maxEta);
-  // linkable
-  declareProperty("GenericLinked",m_genericLink);
 }
 
 CaloTowerAlgorithm::~CaloTowerAlgorithm()

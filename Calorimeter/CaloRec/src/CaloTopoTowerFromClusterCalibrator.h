@@ -1,5 +1,5 @@
 // -*- c++ -*- 
-/* Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration */
+/* Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration */
 #ifndef CALOREC_CALOTOPOTOWERFROMCLUSTERCALIBRATOR_H
 #define CALOREC_CALOTOPOTOWERFROMCLUSTERCALIBRATOR_H
 
@@ -30,7 +30,7 @@ private:
 
   /// @name Tool properties
   /// @{
-  bool m_orderByPt = { false };            ///< Turn on pT ordering if @c true
+  Gaudi::Property<bool> m_orderByPt{this, "OrderClusterByPt", false, "Order clusters by calibrated Pt (input)"}; ///< Turn on pT ordering if @c true
   /// @}
 };
 /// @class CaloTopoTowerFromClusterCalibrator

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -30,10 +30,11 @@
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloTowerCollectionProcessor.h"
 #include "CaloEvent/CaloCellClusterWeights.h"
+#include "CaloEvent/CaloClusterCellLinkContainer.h"
+#include "StoreGate/WriteHandleKey.h"
 
 #include "CaloIdentifier/CaloCell_ID.h"
 
-class CaloClusterCellLinkContainer;
 class IChronoStatSvc;
 
 class CaloTopoTowerMaker : public AthReentrantAlgorithm
@@ -59,30 +60,30 @@ class CaloTopoTowerMaker : public AthReentrantAlgorithm
   
   /** @brief the name of the key in StoreGate for the output
       CaloClusterContainer */
-  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_towerOutput;
+  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_towerOutput{this, "TowersOutputName", ""};
 
   /** @brief the name of the key in StoreGate for the output
       CaloClusterCellLinkContainer */
-  SG::WriteHandleKey<CaloClusterCellLinkContainer> m_towerCellLinkOutput;
+  SG::WriteHandleKey<CaloClusterCellLinkContainer> m_towerCellLinkOutput{this, "TowerCellLinkOutputName", ""};
 
   /// @brief Tower makers
   /// 
   /// This tool is the tower maker. It fills 
   /// a @c xAOD::CaloClusterContainer with clusters representing 
   /// towers and also retuns the LCW cell weights if configured. 
-  ToolHandle<CaloTowerCollectionProcessor>  m_towerMakerTool;
+  ToolHandle<CaloTowerCollectionProcessor>  m_towerMakerTool{this, "TowerMakerTool", ""};
 
   /// @brief Tower (cluster) moment makers
   /// 
   /// The tools in this list calculate cluster moments for towers after those
   /// are filled. The tools are the as the ones used for topo-clusters.
   /// Any number of tools can be scheduled. 
-  ToolHandleArray<CaloClusterCollectionProcessor> m_towerCorrectionTools; 
+  ToolHandleArray<CaloClusterCollectionProcessor> m_towerCorrectionTools{this, "TowerCorrectionTools", {}};
 
   /// @brief Tower calibrator(s)
   ///
   /// This tool provides the (optional) LCW calibration.
-  ToolHandle<CaloTowerCollectionProcessor> m_towerCalibratorTool;
+  ToolHandle<CaloTowerCollectionProcessor> m_towerCalibratorTool{this, "TowerCalibratorTool", ""};
 
   /// Handle to the ChronoStatSvc
   ServiceHandle<IChronoStatSvc> m_chrono;
@@ -98,13 +99,13 @@ class CaloTopoTowerMaker : public AthReentrantAlgorithm
    * the first @c CaloClusterCorrectionTool is invoked. Is a configurable 
    * property with default value @c true.
    */
-  bool m_saveSignalState   = { true  };
+  Gaudi::Property<bool> m_saveSignalState{this, "SaveUncalibratedSignalState", true};
 
   ///Use ChronotStatSvc to monitor each tool
-  bool m_chronoTools       = { false };
+  Gaudi::Property<bool> m_chronoTools{this, "ChronoTools", false};
 
   /// @brief Use LCW calibration for topo-towers (default is @c true)
-  bool m_useLCWCalibration = { true  };
+  Gaudi::Property<bool> m_useLCWCalibration{this, "UseLCWCalibration", true};
 
 
   /// Identifier helper

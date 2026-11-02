@@ -1,20 +1,22 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOREC_CALOTOWERXAODFROMCELLS_H
 #define CALOREC_CALOTOWERXAODFROMCELLS_H
 
 #include "CaloTowerxAODAlgoBase.h"
+#include "CaloEvent/CaloCellContainer.h"
+#include "StoreGate/ReadHandleKey.h"
 
 
 #include <string>
 #include <vector>
+#include <limits>
 
 
-class CaloCellContainer;
 
 class CaloTowerxAODFromCells : public CaloTowerxAODAlgoBase
 {
@@ -41,11 +43,11 @@ private:
 
   /// @name Algorithm properties
   /// @{
-  SG::ReadHandleKey<CaloCellContainer> m_inputCellContainerKey;
-  double      m_cellThresholdE;       ///< @brief Cell energy threshold (only for @b FilteredCell mode)
+  SG::ReadHandleKey<CaloCellContainer> m_inputCellContainerKey{this, "InputCellContainer", "AllCalo"};
+  Gaudi::Property<double> m_cellThresholdE{this, "CellEnergyThreshold", std::numeric_limits<float>::min()}; ///< @brief Cell energy threshold (only for @b FilteredCell mode)
   /// @}
 
-  bool  m_filterCells;
+  bool  m_filterCells{false};
 
 };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -9,6 +9,7 @@
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
 #include "CaloEvent/CaloClusterCellLinkContainer.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "StoreGate/WriteHandleKey.h"
 
 class CaloClusterSnapshot : public AthAlgTool, virtual public CaloClusterCollectionProcessor {
  public:
@@ -26,12 +27,12 @@ class CaloClusterSnapshot : public AthAlgTool, virtual public CaloClusterCollect
 
  private:
   // properties 
-  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_outputKey;
-  SG::WriteHandleKey<CaloClusterCellLinkContainer> m_cellLinkOutputKey;
+  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_outputKey{this, "OutputName", ""};
+  SG::WriteHandleKey<CaloClusterCellLinkContainer> m_cellLinkOutputKey{this, "CellLinkName", ""};
 
-  bool m_setCrossLinks;
+  Gaudi::Property<bool> m_setCrossLinks{this, "SetCrossLinks", false};
 
-  std::string m_finalContName;
+  Gaudi::Property<std::string> m_finalContName{this, "FinalClusterContainerName", ""};
   
 };
 

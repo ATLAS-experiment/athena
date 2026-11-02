@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -41,16 +41,8 @@
 //###############################################################################
 CaloCell2ClusterMapper::CaloCell2ClusterMapper(const std::string& name, 
 					       ISvcLocator* pSvcLocator) 
-  : AthReentrantAlgorithm(name, pSvcLocator),
-    m_mapOutputKey(""),
-    m_clusterKey("")
+  : AthReentrantAlgorithm(name, pSvcLocator)
 {
-
-  // Name of Cell2Cluster Map to be registered in TDS
-  declareProperty("MapOutputName",m_mapOutputKey);  
-  
-  // Name of CaloClusterContainer to use as input
-  declareProperty("ClustersName",m_clusterKey);
 }
 
 //###############################################################################

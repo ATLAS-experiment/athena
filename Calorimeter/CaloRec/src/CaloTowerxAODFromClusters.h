@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOREC_CALOTOWERXAODFROMCLUSTERS_H
@@ -9,6 +9,7 @@
 
 #include "CaloTowerxAODAlgoBase.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
+#include "StoreGate/ReadHandleKey.h"
 
 class CaloTowerxAODFromClusters : public CaloTowerxAODAlgoBase
 {
@@ -35,7 +36,7 @@ private:
 
   /// @name Algorithm properties
   /// @{
-  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_inputClusterContainerKey;
+  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_inputClusterContainerKey{this, "InputClusterContainer", "CaloCalTopoClusters"};
   /// @}
 
 };

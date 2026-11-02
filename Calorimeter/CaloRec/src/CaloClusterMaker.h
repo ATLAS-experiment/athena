@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -29,9 +29,11 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
 
+#include "CaloEvent/CaloClusterCellLinkContainer.h"
+
+#include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 
-class CaloClusterCellLinkContainer;
 class IChronoStatSvc;
 
 class CaloClusterMaker : public AthReentrantAlgorithm
@@ -58,11 +60,11 @@ class CaloClusterMaker : public AthReentrantAlgorithm
   
   /** @brief the name of the key in StoreGate for the output
       CaloClusterContainer */
-  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_clusterOutput;
+  SG::WriteHandleKey<xAOD::CaloClusterContainer> m_clusterOutput{this, "ClustersOutputName", ""};
 
   /** @brief the name of the key in StoreGate for the output
       CaloClusterCellLinkContainer */
-  SG::WriteHandleKey<CaloClusterCellLinkContainer> m_clusterCellLinkOutput;
+  SG::WriteHandleKey<CaloClusterCellLinkContainer> m_clusterCellLinkOutput{this, "ClusterCellLinkOutputName", ""};
 
   /**
    * @brief a list of names for tools to make clusters
@@ -70,7 +72,7 @@ class CaloClusterMaker : public AthReentrantAlgorithm
    * the tools in this list are executed one after the other on the
    * entire CaloClusterContainer.  */
   //std::vector<std::string> m_clusterMakerNames;     
-  ToolHandleArray<CaloClusterCollectionProcessor>  m_clusterMakerTools;
+  ToolHandleArray<CaloClusterCollectionProcessor>  m_clusterMakerTools{this, "ClusterMakerTools", {}};
 
   /** @brief the actual list of tools corresponding to above names */
   //std::vector<CaloClusterCollectionProcessor*>  m_clusterMakerPointers;
@@ -81,7 +83,7 @@ class CaloClusterMaker : public AthReentrantAlgorithm
    * the tools in this list are executed after all maker tools are done
    * and run one after each other on each cluster in the container.  */
   //std::vector<std::string> m_clusterCorrectionNames; 
-  ToolHandleArray<CaloClusterCollectionProcessor> m_clusterCorrectionTools; 
+  ToolHandleArray<CaloClusterCollectionProcessor> m_clusterCorrectionTools{this, "ClusterCorrectionTools", {}};
 
   //Handle to the ChronoStatSvc
   ServiceHandle<IChronoStatSvc> m_chrono;
@@ -91,10 +93,10 @@ class CaloClusterMaker : public AthReentrantAlgorithm
    * the first @c CaloClusterCorrectionTool is invoked. Is a configurable 
    * property with default value @c true.
    */
-  bool m_saveSignalState;
+  Gaudi::Property<bool> m_saveSignalState{this, "SaveUncalibratedSignalState", true};
 
   ///Use ChronotStatSvc to monitor each tool
-  bool m_chronoTools;
+  Gaudi::Property<bool> m_chronoTools{this, "ChronoTools", false};
 
   
   /** @brief If @p true, writes some trigger-specific decorations.

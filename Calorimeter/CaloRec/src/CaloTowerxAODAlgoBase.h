@@ -1,7 +1,7 @@
 // -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOREC_CALOTOWERXAODALGOBASE_H
@@ -12,6 +12,7 @@
 #include "xAODCaloEvent/CaloTowerContainer.h"
 #include "xAODCaloEvent/CaloTowerAuxContainer.h"
 #include "StoreGate/WriteHandle.h"
+#include "StoreGate/WriteHandleKey.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "CxxUtils/CachedValue.h"
@@ -37,12 +38,12 @@ protected:
 
   /// @name Algorithm properties
   /// @{
-  SG::WriteHandleKey<xAOD::CaloTowerContainer> m_caloTowerContainerKey;///< @brief Handle to @c xAOD::CaloTowerContainer
-  float      m_minEta;                   ///< @brief Tower-grid: lower eta boundary
-  float      m_maxEta;                   ///< @brief Tower-grid: upper eta boundary
-  int        m_nEtaBins;                 ///< @brief Tower-grid: number of phi bins
-  int        m_nPhiBins;                 ///< @brief Tower-grid: number of phi bins
-  bool       m_doxCheck;                 ///< @brief Turn on internal checks (debugging)
+  SG::WriteHandleKey<xAOD::CaloTowerContainer> m_caloTowerContainerKey{this, "CaloTowerContainer", "CmbTowers", "Output xAOD::CaloTowerContainer"}; ///< @brief Handle to @c xAOD::CaloTowerContainer
+  Gaudi::Property<float> m_minEta{this, "minEta", -5, "Tower-grid: lower eta boundary"}; ///< @brief Tower-grid: lower eta boundary
+  Gaudi::Property<float> m_maxEta{this, "maxEta", 5, "Tower-grid: upper eta boundary"}; ///< @brief Tower-grid: upper eta boundary
+  Gaudi::Property<int> m_nEtaBins{this, "nEta", 100, "Tower-grid: number of phi bins"}; ///< @brief Tower-grid: number of phi bins
+  Gaudi::Property<int> m_nPhiBins{this, "nPhi", 64, "Tower-grid: number of phi bins"}; ///< @brief Tower-grid: number of phi bins
+  Gaudi::Property<bool> m_doxCheck{this, "doCrossChecks", false, "Turn on internal checks (debugging)"}; ///< @brief Turn on internal checks (debugging)
   /// @}
 
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey { this

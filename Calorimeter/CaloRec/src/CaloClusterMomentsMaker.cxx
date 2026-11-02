@@ -122,41 +122,9 @@ namespace {
 CaloClusterMomentsMaker::CaloClusterMomentsMaker(const std::string& type, 
 						 const std::string& name,
 						 const IInterface* parent)
-  : AthAlgTool(type, name, parent),
-    m_calo_id(nullptr),
-    m_maxAxisAngle(20*deg), 
-    m_minRLateral(4*cm), 
-    m_minLLongitudinal(10*cm),
-    m_minBadLArQuality(4000),
-    m_calculateSignificance(false),
-    m_calculateIsolation(false),
-    m_calculateLArHVFraction(false),
-    m_twoGaussianNoise(false),
-    m_caloDepthTool("CaloDepthTool",this),
-    m_larHVFraction("LArHVFraction",this),
-    m_absOpt(false) 
+  : AthAlgTool(type, name, parent)
 {
   declareInterface<CaloClusterCollectionProcessor> (this);
-  // Name(s) of Moments to calculate
-  declareProperty("MomentsNames",m_momentsNames);
-
-  // Maximum allowed angle between shower axis and the vector pointing
-  // to the shower center from the IP in degrees. This property is needed
-  // to protect against cases where all significant cells are in one sampling
-  // and the shower axis can thus not be defined.
-  declareProperty("MaxAxisAngle",m_maxAxisAngle);
-  declareProperty("MinRLateral",m_minRLateral);
-  declareProperty("MinLLongitudinal",m_minLLongitudinal);
-  declareProperty("MinBadLArQuality",m_minBadLArQuality);
-  // Use 2-gaussian noise for Tile
-  declareProperty("TwoGaussianNoise",m_twoGaussianNoise);
-  declareProperty("LArHVFraction",m_larHVFraction,"Tool Handle for LArHVFraction");
-  // Not used anymore (with xAOD), but required when configured from  COOL.
-  declareProperty("AODMomentsNames",m_momentsNamesAOD);
-  // Use weighting of neg. clusters option?
-  declareProperty("WeightingOfNegClusters", m_absOpt);
-  // Set eta boundary for transition from outer to inner wheel in EME2
-  declareProperty("EMECAbsEtaWheelTransition",m_etaInnerWheel);
 }
 
 //###############################################################################
