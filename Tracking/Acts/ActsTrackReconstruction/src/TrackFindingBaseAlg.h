@@ -136,7 +136,7 @@ namespace ActsTrk {
     Gaudi::Property<double> m_branchStopperAbsEtaMaxExtra{this, "branchStopperAbsEtaMaxExtra", 0.0, "increase absEtaMax cut when used in the branch stopper"};
     Gaudi::Property<double> m_branchStopperMeasCutReduce{this, "branchStopperMeasCutReduce", 2, "how much to reduce the minMeas requirement for the branch stopper"};
     Gaudi::Property<double> m_branchStopperAbsEtaMeasCut{this, "branchStopperAbsEtaMeasCut", 1.2, "the minimum |eta| to apply the reduction to the minMeas requirement for the branch stopper"};
-    Gaudi::Property<bool> m_doBremRecovery{this, "doBremRecovery", false, "Enable brem recovery for track seeds compatible with a calorimeter ROI"};
+    Gaudi::Property<bool> m_doBremRecovery{this, "doBremRecovery", true, "Enable brem recovery for track seeds compatible with a calorimeter ROI"};
     Gaudi::Property<double> m_phiWidthROI{this, "phiWidthROI", 0.3, "phi width for matching tracks to calo ROIs"};
     Gaudi::Property<double> m_etaWidthROI{this, "etaWidthROI", 0.3, "eta width for matching tracks to calo ROIs"};
     Gaudi::Property<std::size_t> m_bremMaxComponents{this, "bremMaxComponents", 12, "Maximum number of components which the GSF should handle"};
@@ -208,6 +208,9 @@ namespace ActsTrk {
       kNTotalSharedHits,
       kNForcedSeedMeasurements,
       kNResolvedTracks,
+      kNBremSeeds,
+      kNBremTracks,
+      kNBremSelectedTracks,
       kNStat
     };
 

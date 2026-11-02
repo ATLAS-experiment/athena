@@ -594,6 +594,7 @@ namespace ActsTrk
 
             // If nominal track finder produces no tracks, and seed matches a calo ROI, run gsf-enhanced track finding
         if (ntracks == 0 && caloClusterROIs != nullptr && hasMatchingCaloROI(detContext.geometry, optTrackParams, *caloClusterROIs)){
+            ++event_stat[category_i][kNBremSeeds];
             ATH_CHECK(runTrackFinder<BremTrackFinderOptions>(
                 detContext,
                 pSurface,
@@ -907,6 +908,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
 
     ++ntracks;
     ++event_stat[category_i][kNOutputTracks];
+    if (bremTrack) ++event_stat[category_i][kNBremTracks];
 
     bool validTrack = (bremTrack) ? bremTrackFinder().trackSelector.isValidTrack(track) : trackFinder().trackSelector.isValidTrack(track);
 
@@ -919,6 +921,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
     }
 
     ++event_stat[category_i][kNSelectedTracks];
+    if (bremTrack) ++event_stat[category_i][kNBremSelectedTracks];
 
     // Fill the track infos into the duplicate seed detector
     if (m_skipDuplicateSeeds) {
@@ -1038,7 +1041,11 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
       std::size_t nfirst = 0;
       for (TrkProxy &firstTrack : tracksForSeed){
         ActsTrk::TrackContainerUtils::setFitterType(firstTrack,current_fitter);
-        auto smoothingResult = Acts::smoothTrack(detContext.geometry, firstTrack, logger(), Acts::MbfSmoother());
+        // The brem track states are merged Gaussian mixtures, which the Kalman
+        // smoother cannot handle consistently, so brem tracks are not smoothed
+        constexpr bool isBremTrackFinding = !std::is_same_v<TrackFinderOptionsType, TrackFinderOptions>;
+        auto smoothingResult = isBremTrackFinding ? Acts::Result<void>::success()
+                                                  : Acts::smoothTrack(detContext.geometry, firstTrack, logger(), Acts::MbfSmoother());
         if (!smoothingResult.ok()){
             ATH_MSG_DEBUG("Smoothing for seed "
                         << iseed << " and first track " << firstTrack.index()
@@ -1079,9 +1086,13 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
         // Get the tracks from the second track finding
         std::vector<typename detail::RecoTrackContainer::TrackProxy> secondTracksForSeed;
         // Create initial parameters for the propagation
-        Acts::BoundTrackParameters secondInitialParameters = firstTrack.createParametersFromState(detail::RecoConstTrackStateContainerProxy{firstMeasurement});
+        // Without smoothing, the brem second pass starts from the seed parameters
+        Acts::BoundTrackParameters secondInitialParameters = isBremTrackFinding
+            ? seedParameters
+            : firstTrack.createParametersFromState(detail::RecoConstTrackStateContainerProxy{firstMeasurement});
         if (secondInitialParameters.referenceSurface().insideBounds(secondInitialParameters.localPosition())){ // #3751
-            if (m_inflateCovarianceTwoWay){
+            // the seed parameters are not a smoothed state and are not inflated
+            if (m_inflateCovarianceTwoWay && not isBremTrackFinding){
                 inflateCovarianceTwoWay(secondInitialParameters);
             }
             auto secondRootBranch = tracksContainerTemp.makeTrack();

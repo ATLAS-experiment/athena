@@ -754,7 +754,10 @@ namespace ActsTrk {
                                           std::make_pair(kNStoppedTracksMinPt, "Stopped tracks below pT cut"),
                                           std::make_pair(kNStoppedTracksMaxEta, "Stopped tracks above max eta"),
                                           std::make_pair(kNTotalSharedHits, "Total shared hits"),
-                                          std::make_pair(kNForcedSeedMeasurements, "Total forced measurements")
+                                          std::make_pair(kNForcedSeedMeasurements, "Total forced measurements"),
+                                          std::make_pair(kNBremSeeds, "Brem recovery seeds"),
+                                          std::make_pair(kNBremTracks, "Brem CKF tracks"),
+                                          std::make_pair(kNBremSelectedTracks, "Brem selected tracks")
                                       });
       assert(stat_labels.size() == kNStat);
       std::vector<std::string> categories;
@@ -851,7 +854,8 @@ namespace ActsTrk {
                                                       TableUtils::defineSimpleRatio("branched tracks / used seeds", kMultipleBranches, kNUsedSeeds),
                                                       TableUtils::defineSimpleRatio("no 2nd CKF / CKF tracks", kNoSecond, kNOutputTracks),
                                                       TableUtils::defineSimpleRatio("shared hits / CKF tracks", kNTotalSharedHits, kNOutputTracks),
-                                                      TableUtils::defineSimpleRatio("forced measurements / used seeds", kNForcedSeedMeasurements, kNUsedSeeds)});
+                                                      TableUtils::defineSimpleRatio("forced measurements / used seeds", kNForcedSeedMeasurements, kNUsedSeeds),
+                                                      TableUtils::defineSimpleRatio("brem selected / brem seeds", kNBremSelectedTracks, kNBremSeeds)});
 
       std::vector<float> ratio = TableUtils::computeRatios(ratio_def,
                                                            nSeedCollections() + 1,
