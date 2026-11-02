@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -274,6 +274,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
 
         gFEX = CompFactory.LVL1.gFEXDriver('gFEXDriver')    
         gFEX.gFEXSysSimTool = CompFactory.LVL1.gFEXSysSim('gFEXSysSimTool')
+        gFEX.gFEXSysSimTool.gFEXSimTool = CompFactory.LVL1.gFEXSim(gFEXJwoJAlgoTool=CompFactory.LVL1.gFEXJwoJAlgo(IsMC=flags.Input.isMC))
         acc.addEventAlgo(gFEXInputs)
         acc.addEventAlgo(gFEXInputs50)
         acc.addEventAlgo(gFEX)

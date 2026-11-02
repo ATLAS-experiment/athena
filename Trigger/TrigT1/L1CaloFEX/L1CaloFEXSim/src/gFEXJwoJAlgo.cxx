@@ -50,8 +50,9 @@ std::vector<std::unique_ptr<gFEXJwoJTOB>> gFEXJwoJAlgo::jwojAlgo(const EventCont
 
   std::string fwVersion = myDBTool->get_FWVersion();
   int major = std::stoi(fwVersion);
-  bool SumETfast = (major >= 1);
-  bool metRho = (major >= 2);
+
+  bool SumETfast = !m_isMC && (major >= 1);
+  bool metRho = m_isMC || (major >= 2);
 
   // Retrieve the L1 menu configuration
   SG::ReadHandle<TrigConf::L1Menu> l1Menu (m_l1MenuKey, ctx);
