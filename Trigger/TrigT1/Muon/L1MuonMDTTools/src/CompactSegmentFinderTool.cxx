@@ -40,6 +40,7 @@
 
 #include "CompactSegmentFinderTool.h"
 #include "L1MuonMDTTools/Segment.h"
+#include "CxxUtils/trapping_fp.h"
 
 namespace L1Muon::L1MDT {
 
@@ -197,7 +198,10 @@ namespace L1Muon::L1MDT {
       const std::vector<const xAOD::MdtDriftCircle*>& driftCircles,
       const ActsTrk::GeometryContext& gctx,
       float m,
-      std::vector<HitInfo>& hitInfos) const {
+      std::vector<HitInfo>& hitInfos) const
+  {
+    // Tell clang that FP operations may trap.
+    CXXUTILS_TRAPPING_FP;
 
     // Reset and pre-allocate the output hit container
     hitInfos.clear();
