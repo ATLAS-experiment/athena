@@ -7,6 +7,10 @@
 #include "TrigStorageDefinitions/EDM_TypeInformation.h"
 #include "Navigation/NavigationDefaults.h"
 
+#include "CaloEvent/CaloCellContainer.h"
+#include "CaloEvent/CaloCellLinkContainer.h"
+#include "CaloEvent/CaloClusterContainer.h"
+#include "CaloEvent/CaloTowerContainer.h"
 
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloClusterAuxContainer.h"
@@ -48,24 +52,12 @@
 
 
 HLT_BEGIN_TYPE_REGISTRATION
-  HLT_REGISTER_TYPE(class TrigEMCluster, class TrigEMCluster,class TrigEMClusterContainer)
-  HLT_REGISTER_TYPE(class TrigCaloCluster, class TrigCaloCluster,class TrigCaloClusterContainer)
-  HLT_REGISTER_TYPE(class TrigTauCluster, class TrigTauCluster,class TrigTauClusterContainer)
-  HLT_REGISTER_TYPE(class TrigTauClusterDetails,class TrigTauClusterDetails,class TrigTauClusterDetailsContainer)
-  HLT_REGISTER_TYPE(class RingerRings, class RingerRings,class RingerRingsContainer)  
-  HLT_REGISTER_TYPE(class TrigT2MbtsBits,class TrigT2MbtsBits,class TrigT2MbtsBitsContainer)
-  HLT_REGISTER_TYPE(class TrigT2ZdcSignals,class TrigT2ZdcSignals,class TrigT2ZdcSignalsContainer)
   //EF
-  HLT_REGISTER_TYPE(class TrigRNNOutput, class TrigRNNOutput,class TrigRNNOutputContainer)
   HLT_REGISTER_TYPE(class CaloCell,class  CaloCellContainer,class CaloCellContainer )
   HLT_REGISTER_TYPE(class CaloCellLink,class  CaloCellLinkContainer,class CaloCellLinkContainer )
   HLT_REGISTER_TYPE(class CaloCluster, class CaloClusterContainer, class CaloClusterContainer )
   HLT_REGISTER_TYPE(class CaloClusterCellLink, class CaloClusterCellLinkContainer, class CaloClusterCellLinkContainer)
-  HLT_REGISTER_TYPE(class CaloShower, class  CaloShowerContainer,class CaloShowerContainer )
   HLT_REGISTER_TYPE(class CaloTower, class  CaloTowerContainer, class CaloTowerContainer )
-
-  HLT_REGISTER_TYPE(class CaloTopoTower, class CaloTopoTowerContainer, class CaloTopoTowerContainer )
-  HLT_REGISTER_TYPE(class cannot_implement_this, class CaloCell2ClusterMap, class CaloCell2ClusterMap )
 
   // xAOD
   HLT_REGISTER_TYPE(xAOD::CaloCluster, xAOD::CaloClusterContainer, xAOD::CaloClusterContainer, xAOD::CaloClusterTrigAuxContainer)

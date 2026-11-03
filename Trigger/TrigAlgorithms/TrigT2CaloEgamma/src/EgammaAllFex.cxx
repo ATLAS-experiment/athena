@@ -14,7 +14,6 @@
 
 #include "CaloIdentifier/LArEM_ID.h"
 
-//#include "TrigCaloEvent/TrigEMCluster.h"
 #include "xAODTrigCalo/TrigEMCluster.h"
 #include "CaloGeoHelpers/CaloSampling.h"
 

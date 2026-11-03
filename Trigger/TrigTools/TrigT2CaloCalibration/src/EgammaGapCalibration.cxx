@@ -16,7 +16,6 @@
 // ********************************************************************
 
 #include "EgammaGapCalibration.h"
-//#include "TrigCaloEvent/TrigEMCluster.h"
 #include "xAODTrigCalo/TrigEMCluster.h"
 #include "GaudiKernel/MsgStream.h"
 #include "CaloGeoHelpers/CaloSampling.h"

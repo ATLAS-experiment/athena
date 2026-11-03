@@ -68,15 +68,9 @@ StatusCode TrigSerializeConvHelper::initialize(){
   m_oldEDMmap[ "TrigRoiDescriptor" ]         = "TrigRoiDescriptorCollection_tlp1";
   m_oldEDMmap[ "TrigOperationalInfo" ]       = "TrigOperationalInfoCollection_tlp1";
   m_oldEDMmap[ "TrigInDetTrackCollection" ]  = "TrigInDetTrackCollection_tlp1";
-  m_oldEDMmap[ "TrigEMCluster" ]             = "TrigEMClusterContainer_tlp1";
-  //m_oldEDMmap[ "TrigEMCluster" ]             = "TrigEMClusterContainer_tlp2";
-  m_oldEDMmap[ "RingerRings" ]               = "RingerRingsContainer_tlp1";
-  m_oldEDMmap[ "TrigTauCluster" ]            = "TrigTauClusterContainer_tlp1";
-  m_oldEDMmap[ "TrigTauClusterDetails" ]     = "TrigTauClusterDetailsContainer_tlp1";
   m_oldEDMmap[ "TrigElectronContainer" ]     = "TrigElectronContainer_tlp2";
   m_oldEDMmap[ "TrigPhotonContainer" ]       = "TrigPhotonContainer_tlp2";
   m_oldEDMmap[ "TrigMissingET" ]             = "TrigMissingETContainer_tlp1";
-  m_oldEDMmap[ "TrigT2MbtsBits" ]            = "TrigT2MbtsBitsContainer_tlp1";
   m_oldEDMmap[ "TrigSpacePointCounts" ]      = "TrigSpacePointCountsCollection_tlp1";
   m_oldEDMmap[ "TrigTrtHitCounts" ]          = "TrigTrtHitCountsCollection_tlp1";
   m_oldEDMmap[ "CosmicMuonCollection" ]      = "CosmicMuonCollection_tlp1";
