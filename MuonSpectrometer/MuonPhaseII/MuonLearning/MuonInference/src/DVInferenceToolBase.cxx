@@ -248,6 +248,9 @@ StatusCode DVInferenceToolBase::inferEvent(const EventContext& ctx,
 
   result.probability = probabilityFromOutput(graphData.graph->dataTensor.back(), result.rawOutput);
   result.valid = std::isfinite(result.probability);
+  ATH_MSG_VERBOSE( std::setprecision(std::numeric_limits<float>::max_digits10)
+        << "DVDUMP OUT evt=" << ctx.eventID().event_number()
+        << " raw=" << result.rawOutput << " score=" << result.probability);
   ATH_MSG_DEBUG("DV event classifier: N=" << result.nNodes
                 << " (muon=" << result.nMuonNodes << ", calo=" << result.nCaloNodes
                 << "), E=" << result.nEdges
@@ -348,10 +351,12 @@ StatusCode DVInferenceToolBase::buildGraph(const EventContext& ctx,
   }
 
   const std::size_t nMuonNodes = nodes.size();
+  std::size_t nTowersInContainer{0u};
 
   if (!m_towerKey.empty() && nMuonNodes > 0u) {
     const CaloTowerContainer* towers{nullptr};
     ATH_CHECK(SG::get(towers, m_towerKey, ctx));
+    nTowersInContainer = towers->size();
 
     nodes.reserve(nodes.size() + towers->size());
     for (const CaloTower* tower : *towers) {
@@ -399,6 +404,17 @@ StatusCode DVInferenceToolBase::buildGraph(const EventContext& ctx,
   const std::size_t nNodes = nodes.size();
   graphData.spacePointsInBucket.push_back(static_cast<int64_t>(nMuonNodes));
   graphData.spacePointsInBucket.push_back(static_cast<int64_t>(nCaloNodes));
+
+  // Machine-readable graph dump (DVDUMP lines) for parity checks; VERBOSE only.
+  const bool dumpGraph = msgLvl(MSG::VERBOSE);
+  if (dumpGraph) {
+    ATH_MSG_VERBOSE("DVDUMP GRAPH evt=" << ctx.eventID().event_number()
+                    << " segKey=" << m_segmentKey.key()
+                    << " towerKey=" << m_towerKey.key()
+                    << " nSegments=" << (segments ? segments->size() : 0u)
+                    << " nTowers=" << nTowersInContainer
+                    << " nMuon=" << nMuonNodes << " nCalo=" << nCaloNodes);
+  }
 
   if (nNodes == 0u) {
     ATH_MSG_WARNING("No muon segment or calo tower nodes found. Skipping DV inference.");
@@ -530,6 +546,31 @@ StatusCode DVInferenceToolBase::buildGraph(const EventContext& ctx,
                     << edgeAttr[e * kEdgeFeatureCount + 2] << ", "
                     << edgeAttr[e * kEdgeFeatureCount + 3] << ", "
                     << edgeAttr[e * kEdgeFeatureCount + 4] << "]");
+    }
+  }
+
+  if (dumpGraph) {
+    const auto evt = ctx.eventID().event_number();
+    for (std::size_t i = 0; i < nNodes; ++i) {
+      std::ostringstream row;
+      row << std::setprecision(std::numeric_limits<float>::max_digits10)
+          << "DVDUMP NODE evt=" << evt << " i=" << i
+          << " kind=" << (nodes[i].kind == NodeKind::Muon ? "muon" : "calo")
+          << " sector=" << nodes[i].sector << " eta=" << nodes[i].eta << " phi=" << nodes[i].phi << " x=";
+      for (std::size_t f = 0; f < kNodeFeatureCount; ++f) {
+        row << (f ? "," : "") << graphData.featureLeaves[i * kNodeFeatureCount + f];
+      }
+      ATH_MSG_VERBOSE(row.str());
+    }
+    for (std::size_t e = 0; e < nEdges; ++e) {
+      std::ostringstream row;
+      row << std::setprecision(std::numeric_limits<float>::max_digits10)
+          << "DVDUMP EDGE evt=" << evt << " e=" << e
+          << " src=" << graphData.srcEdges[e] << " dst=" << graphData.desEdges[e] << " attr=";
+      for (std::size_t f = 0; f < kEdgeFeatureCount; ++f) {
+        row << (f ? "," : "") << edgeAttr[e * kEdgeFeatureCount + f];
+      }
+      ATH_MSG_VERBOSE(row.str());
     }
   }
 

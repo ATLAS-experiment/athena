@@ -59,11 +59,14 @@ if __name__ == "__main__":
                         help="Do not schedule CaloRecoCfg/CaloTowerMakerCfg. Use only when TowerContainerKey already exists in the input/event store.")
     parser.add_argument("--debug", action="store_true", default=False,
                         help="Set the DV tool and algorithm OutputLevel to DEBUG and dump the first graph entries")
+    parser.add_argument("--dump-graph", action="store_true", default=False,
+                        help="Set the DV tool and algorithm OutputLevel to VERBOSE: full DVDUMP graph/score lines for parity checks")
     parser.add_argument("--debug-nodes", type=int, default=5)
     parser.add_argument("--debug-edges", type=int, default=10)
     parser.add_argument("--print-every-event", action="store_true", default=False)
-    parser.add_argument("--decorate-event-info", action="store_true", default=False, 
-                        help="Enable optional EventInfo DV decorations for validation/debug output")
+    parser.add_argument("--doTruthMuonVertexDump", action="store_true", default=False,
+                        help="Also run the TruthMuonVertexDumperAlg (MuonVertexDump tree in --outRootFile), "
+                             "e.g. to apply the DV training truth-vertex selection offline")
     parser.set_defaults(nEvents=10)
     parser.set_defaults(inputFile=MuonPhaseIITestDefaults.RDO_R4)
     parser.set_defaults(defaultGeoFile="RUN4")
@@ -91,9 +94,12 @@ if __name__ == "__main__":
 
     from MuonInference.InferenceConfig import DisplacedVertexInferenceAlgCfg
 
-    output_level = 2 if args.debug else 3
+    output_level = 1 if args.dump_graph else 2 if args.debug else 3
+    # Same space-point inputs as the trigger (MuonRecoSequences); the filtered-bucket mode sets its own key
+    sp_kwargs = {} if args.use_filtered_buckets_for_dv_graph else {"SpacePointKeys": ["MuonSpacePoints", "NswSpacePoints"]}
     cfg.merge(DisplacedVertexInferenceAlgCfg(
         flags,
+        **sp_kwargs,
         ModelPath=args.model_path,
         SegmentKey=args.segment_key,
         TowerContainerKey=args.tower_container_key,
@@ -116,7 +122,12 @@ if __name__ == "__main__":
         DebugDumpFirstNNodes=args.debug_nodes if args.debug else 0,
         DebugDumpFirstNEdges=args.debug_edges if args.debug else 0,
         PrintEveryEvent=args.print_every_event,
-        DecorateEventInfo=args.decorate_event_info,
     ))
+
+    if args.doTruthMuonVertexDump:
+        from MuonConfig.MuonConfigUtils import setupHistSvcCfg
+        cfg.merge(setupHistSvcCfg(flags, outFile=args.outRootFile, outStream="MuonBucketDump"))
+        from MuonBucketDump.MuonBucketDumpConfig import TruthMuonVertexDumpCfg
+        cfg.merge(TruthMuonVertexDumpCfg(flags))
 
     executeTest(cfg)
