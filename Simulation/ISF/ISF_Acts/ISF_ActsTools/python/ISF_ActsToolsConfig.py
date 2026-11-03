@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
   ComponentAccumulator tool configuration for ISF_ActsTools
 """
@@ -51,8 +51,29 @@ def ActsFatrasWriteHandlerCfg(flags, name="ActsFatrasWriteHandler", **kwargs):
     acc.setPrivateTools(CompFactory.ActsFatrasWriteHandler(name=name, **kwargs))
     return acc
 
-def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", **kwargs):
-    """Return ISF_FatrasSimHitCreatorID configured with ComponentAccumulator"""
+def ActsFatrasRefineMaterialToolCfg(flags, name="ActsFatrasRefineMaterialTool", **kwargs):
+    """Refinement visitor assigning silicon material to sensitive surfaces"""
+    acc = ComponentAccumulator()
+    acc.setPrivateTools(CompFactory.ISF.ActsFatrasRefineMaterialTool(name, **kwargs))
+    return acc
+
+def ActsFatrasTrackingGeometrySvcCfg(flags, name="ActsFatrasTrackingGeometrySvc", **kwargs):
+    """Dedicated TrackingGeometrySvc instance for ActsFatras with refined geometry 
+    (Si assigned on sensitive surfaces)."""
+    acc = ComponentAccumulator()
+    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+    svcAcc = ActsTrackingGeometrySvcCfg(flags, name=name, **kwargs)
+    svc = svcAcc.getPrimary()
+    svc.RefinementTools += [acc.popToolsAndMerge(ActsFatrasRefineMaterialToolCfg(flags))]
+    acc.addService(acc.getPrimaryAndMerge(svcAcc), primary=True)
+    return acc
+
+def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", RefineMaterial=None, **kwargs):
+    """Return ISF_FatrasSimHitCreatorID configured with ComponentAccumulator
+
+    RefineMaterial: True/False to (not) assign Si to the sensitive surfaces of
+    the tracking geometry used by ActsFatras.
+    """
     acc = ComponentAccumulator()
     mlog = logging.getLogger(name)
     mlog.info('Start configuration ISF_ActsFatraSimTool')
@@ -70,6 +91,17 @@ def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", **kwargs):
     # Ensure GeoIDSvc is configured
     from ISF_Services.ISF_ServicesCoreConfig import ATLFAST_GeoIDSvcCfg
     kwargs.setdefault("GeoIDSvc", acc.getPrimaryAndMerge(ATLFAST_GeoIDSvcCfg(flags)))
+
+    # Tracking geometry: with Si assigment or the standard one 
+    if "TrackingGeometrySvc" not in kwargs:
+        useRefine = RefineMaterial
+        if useRefine:
+            mlog.info('Assign Si to sensitive surfaces: ON (ActsFatrasTrackingGeometrySvc)')
+            kwargs["TrackingGeometrySvc"] = acc.getPrimaryAndMerge(ActsFatrasTrackingGeometrySvcCfg(flags))
+        else:
+            mlog.info('Assign Si to sensitive surfaces: OFF (standard ActsTrackingGeometrySvc)')
+            from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+            kwargs["TrackingGeometrySvc"] = acc.getPrimaryAndMerge(ActsTrackingGeometrySvcCfg(flags))
 
     from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
     kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)))
