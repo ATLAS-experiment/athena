@@ -55,10 +55,6 @@ void DbDatabase::switchPtr(DbDatabaseObj* obj) {
   }
 }
 
-/// Check if Database exisst within scope of domain
-bool DbDatabase::exist(DbDomain& dH, const string& n) const 
-{  return dH.isValid() ? dH.existsDbase(n) : false;                     }
-
 /// Open Database
 StatusCode DbDatabase::open(DbDomain&       domH,
                             const string&   pfn, 

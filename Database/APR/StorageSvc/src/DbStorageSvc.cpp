@@ -247,18 +247,6 @@ StatusCode DbStorageSvc::startSession(Io::IoFlag accessmode, int technology, int
   return StatusCode::FAILURE;
 }
 
-/// Check the existence of a logical Database unit.
-StatusCode DbStorageSvc::existsConnection(const FileDescriptor& fDesc) {
-  DbDatabase dbH = m_domH.find(fDesc.FID());
-  if ( dbH.isValid() )  {  // Already connected to database ...
-    return StatusCode::SUCCESS;
-  }
-  if( m_domH.existsDbase(fDesc.PFN()) ) {
-    return StatusCode::SUCCESS;
-  }
-  return StatusCode::FAILURE;
-}
-
 /// Connect to a logical Database unit.
 StatusCode DbStorageSvc::connect(Io::IoFlag mod, FileDescriptor& fDesc) {
   StatusCode sc = StatusCode::FAILURE;

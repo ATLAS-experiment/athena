@@ -18,7 +18,6 @@ namespace pool {
 
 class SessionTool;
 class DatabaseHandler;
-class DatabaseRegistry;
 class Container;
 class Token;
 
@@ -104,8 +103,6 @@ private:
   Gaudi::IFileCatalog&                    m_catalog;
   /// Transaction type (read/update)
   Io::IoFlag                              m_transactionType;
-  /// Reference to the database registry
-  DatabaseRegistry&                       m_registry;
   /// The database name
   std::string                             m_name;
   /// The database name spacification

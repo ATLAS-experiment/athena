@@ -7,10 +7,10 @@
 #include <algorithm>
 #include <exception>
 
-void FileCatalogUtils::
-getFirstPFN( const Gaudi::IFileCatalog& fc,
-             const std::string& fid, std::string& pfn, std::string& tech )
-{
+void FileCatalogUtils::getFirstPFN( const Gaudi::IFileCatalog& fc,
+                                    const std::string& fid,
+                                    std::string& pfn,
+                                    std::string& tech ) {
    Gaudi::IFileCatalog::Files pfns_techs;
    fc.getPFN( fid, pfns_techs );
    if( pfns_techs.empty() ) {
@@ -22,11 +22,10 @@ getFirstPFN( const Gaudi::IFileCatalog& fc,
    }
 }
 
-
-void FileCatalogUtils::
-lookupFileByPFN( const Gaudi::IFileCatalog& fc,
-                  const std::string& pfn, std::string& fid, std::string& tech )
-{
+void FileCatalogUtils::lookupFileByPFN( const Gaudi::IFileCatalog& fc,
+                                        const std::string& pfn,
+                                        std::string& fid,
+                                        std::string& tech ) {
    fid = fc.lookupPFN( pfn );
    tech.clear();
    if( !fid.empty() ) {
@@ -39,11 +38,10 @@ lookupFileByPFN( const Gaudi::IFileCatalog& fc,
    }
 }
 
-
-void FileCatalogUtils::
-registerPFN( Gaudi::IFileCatalog& fc,
-             const std::string& pfn, const std::string& ftype, std::string& fid )
-{
+void FileCatalogUtils::registerPFN( Gaudi::IFileCatalog& fc,
+                                    const std::string& pfn,
+                                    const std::string& ftype,
+                                    std::string& fid ) {
    if( fc.existsPFN(pfn) ) {
       throw std::runtime_error("PFN '" + pfn + "' already registered (APR: \" registerPFN \" from \" FileCatalog \")");
    }
@@ -51,10 +49,9 @@ registerPFN( Gaudi::IFileCatalog& fc,
    fc.registerPFN(fid, pfn, ftype);
 }
 
-
-std::string FileCatalogUtils::
-addCatalog( Gaudi::IFileCatalogMgr& mgr, const std::string& connect, bool forWriting )
-{
+std::string FileCatalogUtils::addCatalog( Gaudi::IFileCatalogMgr& mgr,
+                                          const std::string& connect,
+                                          bool forWriting ) {
    std::string url;
    if( connect.empty() ) {
       url = "file:PoolFileCatalog.xml";

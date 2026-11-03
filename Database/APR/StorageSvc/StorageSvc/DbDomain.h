@@ -92,8 +92,6 @@ namespace pool    {
     StatusCode close();
     /// Access to access mode
     Io::IoFlag openMode() const;
-    /// Check if Database exists within the domain
-    bool existsDbase(const std::string& db_name);
     /// Find Database in domain
     const DbDatabaseObj* find(const std::string& db_name) const;
           DbDatabaseObj* find(const std::string& db_name);

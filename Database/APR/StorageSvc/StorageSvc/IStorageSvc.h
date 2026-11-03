@@ -150,16 +150,6 @@ namespace pool  {
       */
     virtual StatusCode endSession() = 0;
 
-    /// Check the existence of a logical Database unit.
-    /** 
-      * @param    refDB   [I/O] Descriptor of the Database to be opened. 
-      *                         On successful return the Database handle is
-      *                         valid.
-      *
-      * @return                 StatusCode code indicating success or failure.
-      */
-    virtual StatusCode existsConnection(const FileDescriptor& refDB) = 0;
-
     /// Connect to a logical Database unit.
     /** A connection is equivalent to the triple (OCISession, OCIServer, 
       * OCISvcCtx) in ORACLE, a login to a datasource using ODBC, or a 

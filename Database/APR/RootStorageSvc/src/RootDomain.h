@@ -58,13 +58,6 @@ namespace pool  {
     /// Standard destructor
     virtual ~RootDomain();
 
-    /// Check for Database existence
-    /** @param nam      [IN]  Name of the database to be checked.
-      *
-      * @return Boolean value indicating the database existence.
-      */
-    virtual bool existsDbase(const std::string& nam);
-
     /// Set domain specific options
     /** @param type     [IN]  Specific database type (Including minor type)
       * @param refOpt   [IN]  Reference to option object

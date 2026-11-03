@@ -110,10 +110,6 @@ const DbDatabaseObj* DbDomain::find(const string& db_name) const
 DbDatabaseObj* DbDomain::find(const string& db_name) 
 {  return isValid() ? ptr()->find(db_name) : 0;                         }
 
-/// Check if Database exists within the domain
-bool DbDomain::existsDbase(const string& nam)
-{  return isValid() ? ptr()->existsDbase(nam) : false;                  }
-
 /// Access implementation internals
 IDbDomain* DbDomain::info()
 {  return isValid() ? ptr()->info() : 0;                                }

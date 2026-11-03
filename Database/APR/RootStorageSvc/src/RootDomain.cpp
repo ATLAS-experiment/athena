@@ -40,11 +40,6 @@ RootDomain::RootDomain() :
 RootDomain::~RootDomain()   {
 }
 
-/// Check for Database existence
-bool RootDomain::existsDbase(const std::string& nam)  {
-  return RootDatabase::exists(nam);
-}
-
 /// Set domain specific options
 StatusCode RootDomain::setOption(const DbOption& opt)  {
   const char* n = opt.name().c_str();

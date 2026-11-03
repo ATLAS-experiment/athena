@@ -58,9 +58,6 @@ DbDomainObj::~DbDomainObj()  {
       << " [" << type().storageName() << "]" );
 }
 
-bool DbDomainObj::existsDbase( const string& name)
-{  return (m_info) ? m_info->existsDbase( name ) : false;               }
-
 StatusCode DbDomainObj::open(Io::IoFlag mod) {
   setMode(mod);
   //  return m_info ? m_info->open(session(),name(),mode()) : FAILURE;
