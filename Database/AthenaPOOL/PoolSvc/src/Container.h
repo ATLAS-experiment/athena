@@ -20,7 +20,7 @@ class TokenIterator;
 class Container final {
 public:
   Container( pool::FileDescriptor& fileDescriptor, const std::string& name );
-  
+
   /// destructor
   ~Container() = default;
 

@@ -27,16 +27,11 @@ public:
   TokenIterator( const TokenIterator& ) = delete;
   TokenIterator& operator=( const TokenIterator& ) = delete;
 
-  /** 
+  /**
   * @brief Advances tne iterator and returns a pointer to next token.
   * @returns Shared Token ptr (refCount+1) if not at the end, nullptr otherwise.
   */
   Token* next();
-
-  /**
-  * @brief Return the size of the collection.
-  */
-  std::size_t size();
 
   /**
   * @brief Seek to a given position in the collection

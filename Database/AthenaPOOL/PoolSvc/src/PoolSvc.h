@@ -193,7 +193,7 @@ public: // Non-static members
 
    /// Create a new session for a given session name and age limit.
    StatusCode createSession( const std::string& sessionName, int ageLimit = -1 );
-   
+ 
    /// Standard Service Constructor
    using base_class::base_class;
 
@@ -216,7 +216,7 @@ private: // data
    };
 
    mutable CallMutex                                 m_pool_mut;
- 
+
    bool                                              m_shareCat{false};
    SmartIF<Gaudi::IFileCatalogMgr>                   m_catalogMgr;
    SmartIF<Gaudi::IFileCatalog>                      m_catalog;
@@ -246,7 +246,7 @@ private: // properties
 
    /// AttemptCatalogPatch, option to create catalog: default = false.
    Gaudi::Property<bool> m_attemptCatalogPatch{this,"AttemptCatalogPatch",true};
- 
+
 
 private: // internal helper functions
    // delete all Persistency Services, Catalog, Mutexes and Indexes

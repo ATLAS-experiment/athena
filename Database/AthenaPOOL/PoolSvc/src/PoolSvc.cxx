@@ -8,7 +8,6 @@
  **/
 
 #include "PoolSvc.h"
-#include "MicroSessionManager.h"
 
 #include "GaudiKernel/IIoComponentMgr.h"
 #include "GaudiKernel/ConcurrencyFlags.h"
@@ -76,7 +75,7 @@ StatusCode PoolSvc::initialize() {
    if (!allGood) {
       return(StatusCode::FAILURE);
    }
- 
+
    MSG::Level athLvl = msg().level();
    ATH_MSG_DEBUG("OutputLevel is " << (int)athLvl);
    pool::DbPrintLvl::setLevel(athLvl);
@@ -137,7 +136,7 @@ StatusCode PoolSvc::setupPersistencySvc() {
    ATH_CHECK( createSession("ReadSession") ); // Add Read Session
    m_pers_mut.push_back(new CallMutex);
    const bool& atttibuteValue = true;
-   if (!m_dbSessionVec[IPoolSvc::kInputStream]->microSessionManager(pool::ROOT_StorageType.type()).setAttributeOfType("ENABLE_THREADSAFETY", static_cast<const void*>(&atttibuteValue), typeid(bool), "")) {
+   if (!m_dbSessionVec[IPoolSvc::kInputStream]->setAttributeOfType(pool::ROOT_StorageType.type(), "ENABLE_THREADSAFETY", static_cast<const void*>(&atttibuteValue), typeid(bool), "")) {
       ATH_MSG_FATAL("Failed to enable thread safety in ROOT via PersistencySvc.");
       return(StatusCode::FAILURE);
    }
@@ -156,7 +155,7 @@ StatusCode PoolSvc::start() {
    // Switiching on ROOT implicit multi threading for AthenaMT
    if (m_useROOTIMT && Gaudi::Concurrency::ConcurrencyFlags::numThreads() > 1) {
       const int& atttibuteValue = Gaudi::Concurrency::ConcurrencyFlags::numThreads() - 1;
-      if (!m_dbSessionVec[IPoolSvc::kInputStream]->microSessionManager(pool::ROOT_StorageType.type()).setAttributeOfType("ENABLE_IMPLICITMT", static_cast<const void*>(&atttibuteValue), typeid(int), "")) {
+      if (!m_dbSessionVec[IPoolSvc::kInputStream]->setAttributeOfType(pool::ROOT_StorageType.type(), "ENABLE_IMPLICITMT", static_cast<const void*>(&atttibuteValue), typeid(int), "")) {
          ATH_MSG_FATAL("Failed to enable implicit multithreading in ROOT via PersistencySvc.");
          return(StatusCode::FAILURE);
       }
@@ -549,7 +548,7 @@ StatusCode PoolSvc::disconnect(unsigned int contextId) {
       if( !commit(contextId).isSuccess() ) {
          ATH_MSG_ERROR("disconnect failed to commit " << session);
          return StatusCode::FAILURE;
-      }  
+      }
       if( session->disconnectAll() ) {
          ATH_MSG_DEBUG("Disconnected PersistencySvc session");
       } else {
@@ -591,13 +590,13 @@ StatusCode PoolSvc::getAttribute(const std::string& optName,
    std::ostringstream oss;
    if (data == "DbLonglong") {
       long long int attr_data;
-      oss << std::dec << sesH->microSessionManager(tech).attributeOfType(optName, static_cast<void*>(&attr_data), typeid(long long int), "");
+      oss << std::dec << sesH->attributeOfType(tech, optName, static_cast<void*>(&attr_data), typeid(long long int), "");
    } else if (data == "double") {
       double attr_data;
-      oss << std::dec << sesH->microSessionManager(tech).attributeOfType(optName, static_cast<void*>(&attr_data), typeid(double), "");
+      oss << std::dec << sesH->attributeOfType(tech, optName, static_cast<void*>(&attr_data), typeid(double), "");
    } else {
       int attr_data;
-      oss << std::dec << sesH->microSessionManager(tech).attributeOfType(optName, static_cast<void*>(&attr_data), typeid(int), "");
+      oss << std::dec << sesH->attributeOfType(tech, optName, static_cast<void*>(&attr_data), typeid(int), "");
    }
    data = oss.str();
    ATH_MSG_INFO("Domain attribute [" << optName << "]" << ": " << data);
@@ -674,13 +673,13 @@ StatusCode PoolSvc::setAttribute(const std::string& optName,
    auto& sesH = m_dbSessionVec[contextId];
    if (data[data.size() - 1] == 'L') {
       const long long int& atttibuteValue = atoll(data.c_str());
-      if (!sesH->microSessionManager(tech).setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(long long int), "")) {
+      if (!sesH->setAttributeOfType(tech, optName, static_cast<const void*>(&atttibuteValue), typeid(long long int), "")) {
          ATH_MSG_DEBUG("Failed to set POOL property, " << optName << " to " << data);
          return(StatusCode::FAILURE);
       }
    } else {
       const int& atttibuteValue = atoi(data.c_str());
-      if (!sesH->microSessionManager(tech).setAttributeOfType(optName, static_cast<const void*>(&atttibuteValue), typeid(int), "")) {
+      if (!sesH->setAttributeOfType(tech, optName, static_cast<const void*>(&atttibuteValue), typeid(int), "")) {
          ATH_MSG_DEBUG("Failed to set POOL property, " << optName << " to " << data);
          return(StatusCode::FAILURE);
       }

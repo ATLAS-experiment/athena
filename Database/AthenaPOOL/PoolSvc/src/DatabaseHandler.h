@@ -22,7 +22,7 @@ class Token;
 class Container;
 
 /** @class DatabaseHandler
- * 
+ *
  * DatabaseHandler is a class taking care of the micro-connections
  * and the micro transactions for a given database.
  * It also gives access to the underlying containers.
@@ -97,9 +97,9 @@ private:
   /// File descriptor for this database
   pool::FileDescriptor    m_fileDescriptor;
   /// Technology identifier
-  long              m_technology;
+  long                    m_technology;
   /// Current access mode
-  Io::IoFlag        m_accessMode;
+  Io::IoFlag              m_accessMode;
 };
 
 #endif
