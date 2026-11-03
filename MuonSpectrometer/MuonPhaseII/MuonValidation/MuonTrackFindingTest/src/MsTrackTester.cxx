@@ -224,7 +224,7 @@ namespace MuonValR4 {
                     std::vector<const xAOD::MuonSimHit*> allHits{};
                     for (const xAOD::MuonSegment* seg : getTruthSegments(p)){
                         auto hits = getMatchingSimHits(*seg);
-                        allHits.insert(allHits.end(), hits.begin(), hits.end());
+                        allHits.insert_range(allHits.end(),getMatchingSimHits(*seg));
                     }
                     if (allHits.empty()) {
                         return 0.;

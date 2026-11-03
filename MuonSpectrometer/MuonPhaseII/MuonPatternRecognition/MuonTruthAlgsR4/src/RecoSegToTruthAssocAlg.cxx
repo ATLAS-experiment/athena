@@ -15,10 +15,10 @@ namespace {
     using TruthLink_t = ElementLink<xAOD::TruthParticleContainer>;
     using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
     
-    unsigned countMatches(const std::unordered_set<const xAOD::MuonSimHit*>& recoHits,
-                          const std::unordered_set<const xAOD::MuonSimHit*>& truthHits){
+    unsigned countMatches(const std::vector<const xAOD::MuonSimHit*>& recoHits,
+                          const std::vector<const xAOD::MuonSimHit*>& truthHits){
         return std::ranges::count_if(recoHits, [&truthHits](const xAOD::MuonSimHit* recoHit){
-            return truthHits.count(recoHit);
+            return std::ranges::contains(truthHits, recoHit);
         });
     }
 }

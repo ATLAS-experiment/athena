@@ -33,11 +33,12 @@ namespace MuonValR4{
     virtual StatusCode execute(const EventContext& ctx) override;
     virtual StatusCode finalize() override;
 
+    using simHitSet = std::vector<const xAOD::MuonSimHit*>;
+    using TruthParticleMap = std::map<const xAOD::TruthParticle*, std::vector<simHitSet>>;
+
   private:
     /** Enum for measurement types */
     enum class measType {Prec, NonPrec, Phi, nTypes};
-    using simHitSet = std::unordered_set<const xAOD::MuonSimHit*>;
-    using TruthParticleMap = std::map<const xAOD::TruthParticle*, std::vector<simHitSet>>;
     /** @brief Fill the truth particle map
      *  @param truthSegments: Pointer to the truth segments
      *  @param roiCollection: Pointer to the RoI collection, needed to match truth particles to RoIs in seeded reco

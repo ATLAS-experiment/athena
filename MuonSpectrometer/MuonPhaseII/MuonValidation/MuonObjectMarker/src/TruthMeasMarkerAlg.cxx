@@ -89,7 +89,6 @@ namespace MuonR4 {
         
         for (const xAOD::MuonSegment* segment : *segContainer) {
             const auto truthHits{getMatchingSimHits(*segment)};
-            
             SegLink_t segLink{m_segKey.key(), segment->index(), ctx};
             for (const xAOD::MuonSimHit* simHit : truthHits) {
                 for (const xAOD::MuonMeasurement* prd : fetchPrd(simHit)) {

@@ -1,18 +1,20 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <MuonTruthHelpers/MuonSimHitHelpers.h>
-#include <xAODMuon/MuonSegmentContainer.h>
-#include <xAODMuonSimHit/MuonSimHitContainer.h>
-#include <xAODTruth/TruthParticleContainer.h>
-#include <xAODMeasurementBase/UncalibratedMeasurementContainer.h>
-#include <MuonSpacePoint/SpacePoint.h>
-#include <MuonSpacePoint/CalibratedSpacePoint.h>
-#include <MuonPatternEvent/Segment.h>
-#include <AthLinks/ElementLink.h>
-#include <xAODMuonPrepData/sTgcMeasurement.h>
-#include <xAODMuonPrepData/CombinedMuonStrip.h>
+#include "MuonTruthHelpers/MuonSimHitHelpers.h"
+
+#include "xAODMuon/MuonSegmentContainer.h"
+#include "xAODMuonSimHit/MuonSimHitContainer.h"
+#include "xAODTruth/TruthParticleContainer.h"
+#include "xAODMeasurementBase/UncalibratedMeasurementContainer.h"
+#include "MuonSpacePoint/SpacePoint.h"
+#include "MuonSpacePoint/CalibratedSpacePoint.h"
+#include "MuonPatternEvent/Segment.h"
+#include "AthLinks/ElementLink.h"
+#include "xAODMuonPrepData/CombinedMuonStrip.h"
+
+#include <ranges>
 
 namespace {
     using SegLink_t = ElementLink<xAOD::MuonSegmentContainer>;
@@ -23,12 +25,33 @@ namespace {
     using SimHitLinkVec_t = std::vector<SimHitLink_t>;
     using SegLinkVec_t = std::vector<SegLink_t>;
 
+    inline 
+    void appendHit(const xAOD::MuonMeasurement* prdHit,
+                   std::vector<const xAOD::MuonSimHit*>& appendTo) {
+        if (!prdHit) {
+            return;
+        }
+        const xAOD::MuonSimHit* hit = MuonR4::getTruthMatchedHit(*prdHit);
+        if (hit && !std::ranges::contains(appendTo, hit)) {
+            appendTo.push_back(hit);
+        }
+    }
+
+    template <typename T>
+    std::vector<typename T::element_type*> stripSmartPointer(const std::vector<T>& vec){
+        std::vector<typename T::element_type*> ret{};
+        ret.reserve(vec.size());
+        std::ranges::transform(vec, std::back_inserter(ret), [](const T& obj){
+            return obj.get();
+        });
+        return ret;
+    }
 }
 
 namespace MuonR4 {
     const xAOD::MuonSimHit* getTruthMatchedHit(const xAOD::MuonMeasurement& prdHit) {
         static const SG::ConstAccessor<SimHitLink_t> acc("simHitLink");
-        if (acc.isAvailable(prdHit)){
+        if (acc.isAvailable(prdHit)) {
             const SimHitLink_t& link{acc(prdHit)};
             if (link.isValid()) {
                 return (*link);
@@ -37,16 +60,16 @@ namespace MuonR4 {
         return nullptr;
     }
 
-    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const xAOD::MuonSegment& segment) {
+    std::vector<const xAOD::MuonSimHit*> getMatchingSimHits(const xAOD::MuonSegment& segment) {
 
         static const SG::ConstAccessor<SimHitLinkVec_t> acc_simLink{"simHitLinks"};
         static const SG::ConstAccessor<PrdLinkVec_t> acc_prdLink{"prdLinks"};
-        std::unordered_set<const xAOD::MuonSimHit*> hits{};
+        std::vector<const xAOD::MuonSimHit*> hits{};
         if (acc_simLink.isAvailable(segment)){
             hits.reserve(acc_simLink(segment).size());
             for (const SimHitLink_t& link : acc_simLink(segment)) {
                 if (link.isValid()) {
-                    hits.insert(*link);
+                    hits.emplace_back(*link);
                 }
             }
         } else if (acc_prdLink.isAvailable(segment)){
@@ -58,70 +81,45 @@ namespace MuonR4 {
                 if (!prdHit) {
                     continue;
                 }
-
-                std::vector<const xAOD::MuonMeasurement*> prds{prdHit};
-
-                // The segment links the eta & phi prds of a gas gap through a combined strip
-                // This is necessary e.g for sTGC as the simHitLink decoration takes places on the original prd container, whereas CombinedMuonStrip is built later in the segment conversion
-                if (const auto* cmb = dynamic_cast<const xAOD::CombinedMuonStrip*>(prdHit)) {
-                    prds = {cmb->primaryStrip(), cmb->secondaryStrip()};
+                /// Combined muon strips don't have a truth link
+                if (prdHit->numDimensions() == 0){
+                    const auto* cmb = static_cast<const xAOD::CombinedMuonStrip*>(prdHit);
+                    appendHit(cmb->primaryStrip(), hits);
+                    appendHit(cmb->secondaryStrip(), hits);
+                    continue;
                 }
-
-                for (const xAOD::MuonMeasurement* prd : prds) {
-                    const xAOD::MuonSimHit* hit = prd ? getTruthMatchedHit(*prd) : nullptr;
-                    if (hit) {
-                        hits.insert(hit);
-                    }
-                }
+                appendHit(prdHit, hits);
             }
         }
         return hits;
     }
 
-    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const std::vector<const SpacePoint*>& spacePoints) {
-        std::unordered_set<const xAOD::MuonSimHit*> hits{};
+    std::vector<const xAOD::MuonSimHit*> getMatchingSimHits(std::span<const SpacePoint* const> spacePoints) {
+        std::vector<const xAOD::MuonSimHit*> hits{};
         for (const SpacePoint* sp : spacePoints) {
-            const xAOD::MuonSimHit* primHit{getTruthMatchedHit(*sp->primaryMeasurement())};
-            const xAOD::MuonSimHit* secHit{sp->dimension() == 2 ? getTruthMatchedHit(*sp->secondaryMeasurement()) : nullptr};
-            if(primHit){
-                hits.insert(primHit);
-            }
-            if (secHit && secHit != primHit) {
-                hits.insert(secHit);
-            }
+            appendHit(sp->primaryMeasurement(), hits);
+            appendHit(sp->secondaryMeasurement(), hits);
         }
         return hits;
     }
 
-    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const std::vector<const CalibratedSpacePoint*>& measurements) {
-        std::unordered_set<const xAOD::MuonSimHit*> hits{};
+    std::vector<const xAOD::MuonSimHit*> getMatchingSimHits(std::span<const CalibratedSpacePoint* const> measurements) {
+        std::vector<const xAOD::MuonSimHit*> hits{};
         for (const CalibratedSpacePoint* meas : measurements) {
             const SpacePoint* sp = meas->spacePoint();
             if (!sp) continue;
-            const xAOD::MuonSimHit* primHit{getTruthMatchedHit(*sp->primaryMeasurement())};
-            const xAOD::MuonSimHit* secHit{sp->dimension() == 2 ? getTruthMatchedHit(*sp->secondaryMeasurement()) : nullptr};
-            if(primHit){
-                hits.insert(primHit);
-            }
-            if (secHit && secHit != primHit) {
-                hits.insert(secHit);
-            }
+            hits.insert_range(hits.end(), getMatchingSimHits(std::array{sp}));
         }
         return hits;
     }
-    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const Segment& segment) {
-        std::vector<const CalibratedSpacePoint*> calibSps{};
-        calibSps.reserve(segment.measurements().size());
-        std::ranges::transform(segment.measurements(), std::back_inserter(calibSps), [](const auto& meas){return meas.get();});
-        return getMatchingSimHits(calibSps);
+    std::vector<const xAOD::MuonSimHit*> getMatchingSimHits(const Segment& segment) {
+        const auto measurements = stripSmartPointer(segment.measurements());
+        return getMatchingSimHits(measurements);
     }
-    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const SpacePointBucket& bucket) {
-        std::vector<const SpacePoint*> spacePoints{};
-        spacePoints.reserve(bucket.size());
-        std::ranges::transform(bucket, std::back_inserter(spacePoints), [](const SpacePointBucket::value_type& sp){return sp.get();});
-        return getMatchingSimHits(spacePoints);
+    std::vector<const xAOD::MuonSimHit*> getMatchingSimHits(const SpacePointBucket& bucket) {
+        return getMatchingSimHits(stripSmartPointer(bucket));
     }
-    std::unordered_set<const xAOD::MuonSimHit*> getMatchingSimHits(const SegmentSeed& seed) {
+    std::vector<const xAOD::MuonSimHit*> getMatchingSimHits(const SegmentSeed& seed) {
         return getMatchingSimHits(seed.getHitsInMax());
     }
     const xAOD::TruthParticle* getTruthMatchedParticle(const xAOD::MuonSegment& segment){
@@ -133,7 +131,8 @@ namespace MuonR4 {
                 return *link;
             }
         }
-        return nullptr;
+        const xAOD::MuonSegment* truthSeg = getMatchedTruthSegment(segment);
+        return truthSeg != nullptr ? getTruthMatchedParticle(*truthSeg) : nullptr;
     }
     const xAOD::MuonSegment* getMatchedTruthSegment(const xAOD::MuonSegment& segment) {
         static const SG::ConstAccessor<SegLink_t> acc{"truthSegmentLink"};

@@ -29,16 +29,15 @@ namespace MuonValR4 {
     using namespace MuonVal;
     using StIndex = Muon::MuonStationIndex::StIndex;
     constexpr std::size_t s_nStations {Acts::toUnderlying(StIndex::StIndexMax)};
-    using simHitSet = std::unordered_set<const xAOD::MuonSimHit*>;
-    using TruthParticleMap = std::map<const xAOD::TruthParticle*, std::vector<simHitSet>>;
+    using TruthParticleMap = MuonFastRecoTester::TruthParticleMap;
     std::optional<std::size_t> isTruthMatched (const xAOD::MuonMeasurement& meas,
                                                const TruthParticleMap& truthHits) {
         const xAOD::MuonSimHit* hit {getTruthMatchedHit(meas)};
         if (!hit) return std::nullopt;
         std::size_t idx{0};
         for (const auto& [tp, truthHitSets] : truthHits) {
-            for (const simHitSet& truthHitSet : truthHitSets) {
-                if (truthHitSet.count(hit)) {
+            for (const auto& truthHitSet : truthHitSets) {
+                if (std::ranges::contains(truthHitSet, hit)) {
                     if (tp) return idx;
                     else return truthHits.size(); // Pileup muon
                 }
