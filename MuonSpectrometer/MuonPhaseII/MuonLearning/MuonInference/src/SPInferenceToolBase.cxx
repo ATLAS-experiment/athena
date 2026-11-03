@@ -10,6 +10,8 @@
 #include "Acts/Utilities/MathHelpers.hpp"
 #include "AthOnnxComps/OnnxRuntimeSessionToolCUDA.h"
 #include <span>
+#include <algorithm>
+#include <ranges>
 
 namespace {
     template <typename T>
@@ -167,8 +169,7 @@ namespace MuonML{
             m_graphFeatures.fillInData(mlBucket, graphData);
         }
 
-        graphData.srcEdges.insert(graphData.srcEdges.end(), std::make_move_iterator(graphData.desEdges.begin()),
-                                    std::make_move_iterator(graphData.desEdges.end()));
+        std::ranges::move(graphData.desEdges, std::back_inserter(graphData.srcEdges));
 
         ATH_MSG_DEBUG("Features:"<<m_graphFeatures.featureNames());
         ATH_MSG_DEBUG(formatNodeFeatures(graphData.featureLeaves, m_graphFeatures.numFeatures()));

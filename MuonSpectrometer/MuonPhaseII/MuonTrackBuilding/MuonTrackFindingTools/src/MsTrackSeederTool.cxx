@@ -20,6 +20,7 @@
 #include "FourMomUtils/P4Helpers.h"
 #include "CxxUtils/trapping_fp.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include <algorithm>
 
 namespace {
     using namespace Acts::UnitLiterals;
@@ -719,8 +720,7 @@ namespace MuonR4{
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Found in total "<<trackSeeds.size()<<" before overlap removal");
         // outputSeeds
         trackSeeds = resolveOverlaps(std::move(trackSeeds));
-        outputSeeds.insert(outputSeeds.end(), std::make_move_iterator(trackSeeds.begin()),
-                                              std::make_move_iterator(trackSeeds.end()));
+        std::ranges::move(trackSeeds, std::back_inserter(outputSeeds));
         return StatusCode::SUCCESS;
     }
 

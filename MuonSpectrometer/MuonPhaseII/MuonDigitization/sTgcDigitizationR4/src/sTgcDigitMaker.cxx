@@ -17,6 +17,8 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
+#include <ranges>
 
 namespace MuonR4{
 //---------------------------------------------------
@@ -250,18 +252,14 @@ sTgcDigitVec sTgcDigitMaker::executeDigi(const DigiConditions& condContainers,
     ATH_MSG_WARNING("Only digitize strip response !");
     return stripDigits;
   }
-  allDigits.insert(allDigits.end(),
-                   std::make_move_iterator(stripDigits.begin()), 
-                   std::make_move_iterator(stripDigits.end()));
+  std::ranges::move(stripDigits, std::back_inserter(allDigits));
 
   //##################################################################################
   //######################################### pad readout ############################
   //##################################################################################
   sTgcDigitVec padDigits = processPadDigitization(digiInput);
 
-  allDigits.insert(allDigits.end(), 
-                   std::make_move_iterator(padDigits.begin()),
-                   std::make_move_iterator(padDigits.end()));
+  std::ranges::move(padDigits, std::back_inserter(allDigits));
 
   if(m_digitMode == digitMode::StripsAndPads) {
     ATH_MSG_WARNING("Only digitize strip/pad response !");
@@ -272,9 +270,7 @@ sTgcDigitVec sTgcDigitMaker::executeDigi(const DigiConditions& condContainers,
   //######################################### wire readout ###########################
   //##################################################################################
   sTgcDigitVec wireDigits = processWireDigitization(digiInput);
-  allDigits.insert(allDigits.end(), 
-                   std::make_move_iterator(wireDigits.begin()),
-                   std::make_move_iterator(wireDigits.end()));
+  std::ranges::move(wireDigits, std::back_inserter(allDigits));
 
   return allDigits;
 }

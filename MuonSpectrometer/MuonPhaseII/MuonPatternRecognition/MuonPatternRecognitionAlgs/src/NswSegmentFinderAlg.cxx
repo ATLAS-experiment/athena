@@ -21,6 +21,7 @@
 
 #include "Acts/Seeding/CombinatorialSeedSolver.hpp"
 
+#include <algorithm>
 #include <ranges>
 #include <format>
 
@@ -515,9 +516,7 @@ void NswSegmentFinderAlg::resolveAmbiguities(const ActsTrk::GeometryContext& gct
     segmentCandidates.clear();
     for (auto& [chamber, resolveMe] : segmentsPerChamber) {    
             SegmentVec_t resolvedSegments = m_ambiSolver->resolveAmbiguity(gctx, std::move(resolveMe));        
-            segmentCandidates.insert(segmentCandidates.end(), 
-                                     std::make_move_iterator(resolvedSegments.begin()),
-                                     std::make_move_iterator(resolvedSegments.end()));
+            std::ranges::move(resolvedSegments, std::back_inserter(segmentCandidates));
     }
 
 }

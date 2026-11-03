@@ -20,6 +20,8 @@ CXXUTILS_TRAPPING_FP;
 
 
 #include <format>
+#include <algorithm>
+#include <ranges>
 
 #include <xAODMuonPrepData/sTgcMeasurement.h>
 #include <xAODMuonPrepData/MdtDriftCircle.h>
@@ -545,9 +547,7 @@ namespace MuonR4::SegmentFit{
         /** No extra hit has been found */
         if (!recovCandidates) {
             ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__<<": No space point candidates for recovery were found");
-            toRecover.measurements.insert(toRecover.measurements.end(), 
-                                          std::make_move_iterator(candidateHits.begin()),
-                                          std::make_move_iterator(candidateHits.end()));
+            std::ranges::move(candidateHits, std::back_inserter(toRecover.measurements));
             eraseWrongHits(toRecover);
             return toRecover.nDoF > 0;
         }

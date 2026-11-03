@@ -19,6 +19,7 @@
 #include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Surfaces/TrapezoidBounds.hpp"
 
+#include <algorithm>
 #include <ranges>
 
 namespace MuonGMR4 {
@@ -119,8 +120,7 @@ namespace MuonGMR4 {
         const Acts::Transform3& trf{volume.localToGlobalTransform(tgContext)};
         for (const Acts::OrientedSurface& boundary : bounds.orientedSurfaces(trf)) {
             std::vector<Amg::Vector3D> corners = cornerPoints(tgContext, *boundary.surface, nSegments);
-            edges.insert(edges.end(), std::make_move_iterator(corners.begin()), 
-                                      std::make_move_iterator(corners.end()));
+            std::ranges::move(corners, std::back_inserter(edges));
         }
         auto [begin, end] = std::ranges::unique(edges, [](const Amg::Vector3D& a, const Amg::Vector3D& b) {
                                                         return (a - b).mag2() < Acts::s_onSurfaceTolerance;

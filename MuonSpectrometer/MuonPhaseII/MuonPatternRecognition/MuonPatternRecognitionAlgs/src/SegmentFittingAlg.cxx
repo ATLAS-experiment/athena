@@ -18,6 +18,7 @@
 #include "Acts/Definitions/Units.hpp"
 
 #include <format>
+#include <algorithm>
 
 using namespace Acts;
 using namespace Acts::UnitLiterals;
@@ -182,13 +183,11 @@ namespace MuonR4 {
                       })) {
                 m_visionTool->visualizeSeed(ctx, *seed, "Failed fit");
             }
-            allSegments.insert(allSegments.end(), std::make_move_iterator(segments.begin()),
-                                                  std::make_move_iterator(segments.end()));
+            std::ranges::move(segments, std::back_inserter(allSegments));
         }
         resolveAmbiguities(*gctx, allSegments);
-        writeSegments->insert(writeSegments->end(),
-                                  std::make_move_iterator(allSegments.begin()),
-                                  std::make_move_iterator(allSegments.end()));
+        writeSegments->insert(writeSegments->end(), std::make_move_iterator(allSegments.begin()),
+                              std::make_move_iterator(allSegments.end()));
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Found in total "<<writeSegments->size()<<" segments. ");
         return StatusCode::SUCCESS; 
     }
@@ -340,9 +339,7 @@ namespace MuonR4 {
             SegmentVec_t resolvedSegments = m_ambiSolver->resolveAmbiguity(gctx, std::move(resolveMe));
             ATH_MSG_DEBUG("resolveAmbiguities()  - "<<resolvedSegments.size()<<"/"<<nBefore
                 <<" segments survived ambiguity solving in "<<chamber->identString()<<".");
-            segmentCandidates.insert(segmentCandidates.end(), 
-                                     std::make_move_iterator(resolvedSegments.begin()),
-                                     std::make_move_iterator(resolvedSegments.end()));
+            std::ranges::move(resolvedSegments, std::back_inserter(segmentCandidates));
         }
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Ambiguity solving done "<<segmentCandidates.size()<<" survived.");
     }
@@ -510,4 +507,3 @@ std::optional<SpacePointPerLayerSplitter::HitVec> SegmentFittingAlg::makeBimBirR
 
 
 }
-

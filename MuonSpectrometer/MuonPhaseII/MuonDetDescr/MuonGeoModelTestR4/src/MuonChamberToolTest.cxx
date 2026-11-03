@@ -40,6 +40,7 @@
 #include "MuonVisualizationHelpersR4/FileHelpers.h"
 
 #include <format>
+#include <algorithm>
 
 using namespace Acts::UnitLiterals;
 using namespace Muon::MuonStationIndex;
@@ -260,8 +261,7 @@ namespace MuonGMR4 {
         const Acts::Transform3& trf{volume.localToGlobalTransform(gctx.context())};
         for (const Acts::OrientedSurface& boundary : bounds.orientedSurfaces(trf)) {
             std::vector<Amg::Vector3D> corners = cornerPoints(gctx, *boundary.surface);
-            edges.insert(edges.end(), std::make_move_iterator(corners.begin()), 
-                                      std::make_move_iterator(corners.end()));
+            std::ranges::move(corners, std::back_inserter(edges));
         }
         auto [begin, end] = std::ranges::unique(edges, [](const Amg::Vector3D& a, const Amg::Vector3D& b) {
                                                         return (a - b).mag2() < 1._mm;
@@ -939,4 +939,3 @@ namespace MuonGMR4 {
 
     }
 }
-
