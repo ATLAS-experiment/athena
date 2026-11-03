@@ -16,6 +16,7 @@
 #include "MuonPatternEvent/SegmentFitterEventData.h"
 #include "MuonTruthHelpers/MuonSimHitHelpers.h"
 #include "TruthUtils/HepMCHelpers.h"
+#include "TruthUtils/MagicNumbers.h"
 
 #include <algorithm>
 #include <cmath>
@@ -93,7 +94,7 @@ G4KeyCounts_t collectG4Keys(const xAOD::MuonSegment& segment) {
   G4KeyCounts_t g4Keys{};
   for (const xAOD::MuonSimHit* hit : MuonR4::getMatchingSimHits(segment)) {
     const xAOD::MuonSimHit& simHit{*hit};
-    if (std::abs(simHit.pdgId()) != 13) {
+    if (!MC::isMuon(hit)) {
       continue;
     }
 
@@ -253,7 +254,7 @@ void printCrossSideG4Keys(MsgStream& msg, const EventContext& ctx,
       msg << MSG::DEBUG << "  segment z=" << seg->position().z() << " sector=" << seg->sector()
           << " chamberIndex=" << static_cast<int>(seg->chamberIndex()) << endmsg;
       for (const xAOD::MuonSimHit* hit : MuonR4::getMatchingSimHits(*seg)) {
-        if (std::abs(hit->pdgId()) != 13) {
+        if (!MC::isMuon(hit)) {
           continue;
         }
         const HepMcParticleLink& link = hit->genParticleLink();

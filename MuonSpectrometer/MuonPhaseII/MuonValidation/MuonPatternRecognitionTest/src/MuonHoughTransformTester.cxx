@@ -177,7 +177,7 @@ namespace MuonValR4 {
             }
             /** Find the segment that matches best to the seed */
             std::vector<std::pair<const xAOD::MuonSegment*, std::size_t>> segCounts{};
-            std::unordered_set<const xAOD::MuonSimHit* > matchedHits = getMatchingSimHits(*seed);
+            std::vector<const xAOD::MuonSimHit*> matchedHits = getMatchingSimHits(*seed);
             for (const xAOD::MuonSimHit* hit : matchedHits) {
                 const xAOD::MuonSegment* truthSeg = getMatchedTruthSegment(*hit);
                 if (!truthSeg) {

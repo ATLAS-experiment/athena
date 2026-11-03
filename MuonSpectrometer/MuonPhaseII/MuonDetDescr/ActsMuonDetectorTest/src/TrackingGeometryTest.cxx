@@ -174,9 +174,8 @@ namespace MuonValR4 {
 
             std::vector<std::pair<const xAOD::MuonSegment*, std::vector<const xAOD::MuonSimHit*>>> muonSegmentWithSimHits;
             for(const xAOD::MuonSegment* seg: MuonR4::getTruthSegments(*truthParticle)) {
-                auto unordedHits = MuonR4::getMatchingSimHits(*seg);
-                std::vector<const xAOD::MuonSimHit*> muonSimHits{unordedHits.begin(), unordedHits.end()};           
-                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Segment at : "<<Amg::toString(seg->position())<<" with Sim Hits: "<<unordedHits.size());
+                std::vector<const xAOD::MuonSimHit*> muonSimHits{MuonR4::getMatchingSimHits(*seg)};           
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Segment at : "<<Amg::toString(seg->position())<<" with Sim Hits: "<<muonSimHits.size());
                 muonSegmentWithSimHits.emplace_back(seg,std::move(muonSimHits));
             }
             if (muonSegmentWithSimHits.empty()) {

@@ -22,7 +22,7 @@ using namespace Acts::UnitLiterals;
 using namespace MuonR4::SegmentFit;
 namespace {
     using IdSet_t = std::unordered_set<Identifier>;
-    unsigned int countMatched(const std::unordered_set<const xAOD::MuonSimHit*>& simHits,
+    unsigned int countMatched(const std::vector<const xAOD::MuonSimHit*>& simHits,
                               const IdSet_t& matchIds) {
         return std::ranges::count_if(simHits, [&matchIds](const xAOD::MuonSimHit* hit) {
                                 return matchIds.count(hit->identify());
@@ -110,18 +110,14 @@ namespace MuonR4{
         std::vector<const xAOD::MuonSegment*> bkgSegments{};
 
         for (const xAOD::MuonSegment* segment : *segments){
-            std::unordered_set<const xAOD::MuonSimHit*> simHits = getMatchingSimHits(*segment);
+            std::vector<const xAOD::MuonSimHit*> simHits = getMatchingSimHits(*segment);
             ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Reconstructed truth segment "
                           <<SegmentFit::toString(SegmentFit::localSegmentPars(*segment))
                           <<", chamberId: "<<Muon::MuonStationIndex::chName(segment->chamberIndex())
                           <<", phi: "<<segment->sector()<<", nPrecHits: "<<segment->nPrecisionHits()
                           <<", nDoF: "<<segment->numberDoF()<<" sim hits: "<<simHits.size());
             if (msgLvl(MSG::VERBOSE)){
-                std::vector<const xAOD::MuonSimHit*> sortedHits{simHits.begin(), simHits.end()};
-                std::ranges::sort(sortedHits, [](const xAOD::MuonSimHit* a, const xAOD::MuonSimHit* b){
-                    return a->identify() < b->identify();
-                });
-                for (const xAOD::MuonSimHit* hit: sortedHits) {
+                for (const xAOD::MuonSimHit* hit: simHits) {
                     ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Associated sim hit: "<<m_idHelperSvc->toString(hit->identify())
                            <<", locPos: "<<Amg::toString(xAOD::toEigen(hit->localPosition()))
                            <<", locDir: "<<Amg::toString(xAOD::toEigen(hit->localDirection())) 

@@ -21,10 +21,8 @@ namespace{
         sstr<<segment.chamberIndex()<<(segment.etaIndex() > 0 ? 'A' : 'C') << segment.sector()
             <<" @"<<Amg::toString(segment.position())<<",dir: "<<Amg::toString(segment.direction())
             <<", pT: "<<acc_pt(segment);
-        auto hitSet = MuonR4::getMatchingSimHits(segment);
-        sstr<<", hits: "<<hitSet.size()<<std::endl;
-        std::vector<const xAOD::MuonSimHit*> hits{hitSet.begin(), hitSet.end()};
-        std::ranges::sort(hits, [](const auto* a, const auto* b){ return a->identify() < b->identify(); });
+        std::vector<const xAOD::MuonSimHit*> hits{MuonR4::getMatchingSimHits(segment)};
+        sstr<<", hits: "<<hits.size()<<std::endl;
         for (const xAOD::MuonSimHit* hit : hits){
             sstr<<"       --- "<<idHelperSvc->toString(hit->identify())<<", pdgId:"<<hit->pdgId()
                 <<", e: "<<hit->kineticEnergy()<<", link: "<<hit->genParticleLink()<<std::endl;
@@ -65,7 +63,7 @@ namespace MuonR4 {
             if (truth == nullptr) {
                 const auto simHits = getMatchingSimHits(*segment);
                 ATH_CHECK(!simHits.empty());
-                const int trackId = (*simHits.begin())->genParticleLink().id();
+                const int trackId = simHits.front()->genParticleLink().id();
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - No associated truth particle found. Rely on track id:"<<trackId);
                 bkgParticles[trackId].push_back(segment);
                 continue;

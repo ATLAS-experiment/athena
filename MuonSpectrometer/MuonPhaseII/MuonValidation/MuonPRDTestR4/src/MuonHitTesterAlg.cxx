@@ -84,15 +84,12 @@ namespace MuonValR4 {
             if (m_truthSegs) {
                 m_tree.addBranch(std::make_shared<MuonVal::GenericAuxEleBranch<xAOD::MuonSegment, std::vector<unsigned short>>>(m_tree,
                     std::format("{:}_matched{:}Hits", m_truthSegs->name(), type),
-                    [this, testerBr, type](const xAOD::MuonSegment&seg) -> std::vector<unsigned short>{
-                        const auto hitSet = MuonR4::getMatchingSimHits(seg);
-                        std::vector<const xAOD::MuonSimHit*> sortedHits{};
-                        std::ranges::copy_if(hitSet, std::back_inserter(sortedHits), [this, type] (const xAOD::MuonSimHit* hit){
-                            return m_detMgr->getReadoutElement(hit->identify())->detectorType() == type;
+                    [this, testerBr, type](const xAOD::MuonSegment&seg) -> std::vector<unsigned short> {
+                        std::vector<const xAOD::MuonSimHit*> sortedHits{MuonR4::getMatchingSimHits(seg)};
+                        auto[begin, end] = std::ranges::remove_if(sortedHits, [this, type] (const xAOD::MuonSimHit* hit){
+                            return m_detMgr->getReadoutElement(hit->identify())->detectorType() != type;
                         });
-                        std::ranges::sort(sortedHits, [](const xAOD::MuonSimHit* a, const xAOD::MuonSimHit* b){
-                                return a->identify() < b->identify();
-                        });
+                        sortedHits.erase(begin, end);
                         std::vector<unsigned short> matchIds{};
                         std::ranges::transform(sortedHits, std::back_inserter(matchIds), [testerBr](const xAOD::MuonSimHit* hit){
                             return testerBr->push_back(*hit);

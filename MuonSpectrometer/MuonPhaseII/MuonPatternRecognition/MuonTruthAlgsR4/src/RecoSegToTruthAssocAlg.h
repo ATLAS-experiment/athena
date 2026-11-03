@@ -30,7 +30,7 @@ namespace MuonR4{
                 /** @brief segment pointer of interest */
                 const xAOD::MuonSegment* segment{nullptr};
                 /** @brief list of associated sim hits */
-                std::unordered_set<const xAOD::MuonSimHit*> hits{};
+                std::vector<const xAOD::MuonSimHit*> hits{};
             };
             using SegWithTruthVec_t = std::vector<SegmentWithTruth>;
             /** @brief Loops over the segment container and fetches the segments with truth matched hits */
