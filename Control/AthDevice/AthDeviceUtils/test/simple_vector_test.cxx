@@ -32,23 +32,25 @@ BOOST_AUTO_TEST_CASE(HostToDevice) {
     dv.back()->setFloatVar(i * 0.1f);
   }
 
-  // Set up a dummy VecMem container.
-  AthDeviceUtilsTest::SimpleVecMemObjectContainer::host soa{m_mrs->mainMR()};
-  soa.resize(dv.size());
+  // Set up the target VecMem container/buffer.
+  AthDeviceUtilsTest::SimpleVecMemObjectContainer::buffer soa;
 
   // Set up a copier object.
   static const AthDevice::SoACopy copier(AthDevice::SoAColumn<1>{"floatVar"},
                                          AthDevice::SoAColumn<0>{"intVar"});
 
   // Copy the data from the xAOD container to the VecMem container.
-  auto soaData = vecmem::get_data(soa);
-  copier(dv, soaData, EventContext{}, *m_mrs, *m_copies);
+  copier(dv, soa, EventContext{}, *m_mrs, *m_copies);
+
+  // Set up an object to investigate the VecMem container with.
+  const AthDeviceUtilsTest::SimpleVecMemObjectContainer::const_device soaDevice{
+      soa};
 
   // Compare their contents.
-  BOOST_TEST(soa.size() == dv.size());
+  BOOST_TEST(soaDevice.size() == dv.size());
   for (size_t i = 0; i < dv.size(); ++i) {
-    BOOST_TEST(soa[i].get<0>() == dv[i]->intVar());
-    BOOST_TEST(soa[i].get<1>() == dv[i]->floatVar());
+    BOOST_TEST(soaDevice[i].get<0>() == dv[i]->intVar());
+    BOOST_TEST(soaDevice[i].get<1>() == dv[i]->floatVar());
   }
 }
 
@@ -72,8 +74,7 @@ BOOST_AUTO_TEST_CASE(DeviceToHost) {
                                          AthDevice::SoAColumn<1>{"floatVar"});
 
   // Copy the data from the VecMem container to the xAOD container.
-  auto soaData = vecmem::get_data(soa);
-  copier(soaData, dv, EventContext{}, *m_mrs, *m_copies);
+  copier(vecmem::get_data(soa), dv, EventContext{}, *m_mrs, *m_copies);
 
   // Compare their contents.
   BOOST_TEST(soa.size() == dv.size());

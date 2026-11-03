@@ -11,14 +11,21 @@ namespace AthDeviceUtilsTest {
 /// @{
 
 template <typename BASE>
-struct SimpleVecMemObject : public BASE {
+struct VecMemObject : public BASE {
   using BASE::BASE;
   using BASE::operator=;
 };
 
 using SimpleVecMemObjectContainer =
-    vecmem::edm::container<SimpleVecMemObject, vecmem::edm::type::vector<int>,
+    vecmem::edm::container<VecMemObject, vecmem::edm::type::vector<int>,
                            vecmem::edm::type::vector<float>>;
+
+using JaggedVecMemObjectContainer =
+    vecmem::edm::container<VecMemObject, vecmem::edm::type::vector<int>,
+                           vecmem::edm::type::vector<float>,
+                           vecmem::edm::type::jagged_vector<unsigned int>,
+                           vecmem::edm::type::scalar<float>,
+                           vecmem::edm::type::jagged_vector<double>>;
 
 /// @}
 

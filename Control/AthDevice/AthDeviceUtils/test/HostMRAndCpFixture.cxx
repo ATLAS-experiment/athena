@@ -3,13 +3,16 @@
 // Local include(s).
 #include "HostMRAndCpFixture.h"
 
+// Framework include(s).
+#include "GaudiKernel/System.h"
+
 // Boost include(s).
 #include <boost/test/unit_test.hpp>
 
 namespace AthDeviceUtilsTest {
 
 HostMRAndCpFixture::HostMRAndCpFixture()
-    : Athena_test::InitGaudi("HostMRAndCp_jobOptions.txt"),
+    : Athena_test::InitGaudi(System::getEnv("ATHDEVICEUTILS_TEST_JOBOPTIONS")),
       m_mrs("AthDevice::MemoryResourcesAdaptorTool/HostMemoryResources"),
       m_copies("AthDevice::CopiesAdaptorTool/HostCopies") {
 

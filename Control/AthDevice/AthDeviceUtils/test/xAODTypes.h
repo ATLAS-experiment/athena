@@ -27,6 +27,25 @@ class SimplexAODObject : public SG::AuxElement {
 
 };  // class SimplexAODObject
 
+class JaggedxAODObject : public SimplexAODObject {
+
+ public:
+  // Inherit the base class's constructor(s).
+  using SimplexAODObject::SimplexAODObject;
+
+  /// @name Accessor function(s)
+  /// @{
+
+  const std::vector<unsigned int>& unsignedVectorVar() const;
+  void setUnsignedVectorVar(const std::vector<unsigned int>& value);
+
+  const std::vector<double>& doubleVectorVar() const;
+  void setDoubleVectorVar(const std::vector<double>& value);
+
+  /// @}
+
+};  // class JaggedxAODObject
+
 }  // namespace AthDeviceUtilsTest
 
 #endif  // ATHDEVICEUTILS_XAODTYPES_H

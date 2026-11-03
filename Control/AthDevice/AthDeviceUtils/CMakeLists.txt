@@ -22,5 +22,15 @@ atlas_add_test(simple_vector_test
            test/xAODTypes.*
    LINK_LIBRARIES AthDeviceUtilsLib xAODCore TestTools
                   Boost::unit_test_framework
-   ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share"
+   ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share;ATHDEVICEUTILS_TEST_JOBOPTIONS=HostMRAndCp_jobOptions.txt"
+   POST_EXEC_SCRIPT noerror.sh)
+
+atlas_add_test(jagged_vector_test
+   SOURCES test/jagged_vector_test.cxx
+           test/HostMRAndCpFixture.*
+           test/VecMemTypes.h
+           test/xAODTypes.*
+   LINK_LIBRARIES AthDeviceUtilsLib xAODCore TestTools
+                  Boost::unit_test_framework
+   ENVIRONMENT "JOBOPTSEARCHPATH=${CMAKE_CURRENT_SOURCE_DIR}/share;ATHDEVICEUTILS_TEST_JOBOPTIONS=HostAndDeviceMRAndCp_jobOptions.txt"
    POST_EXEC_SCRIPT noerror.sh)

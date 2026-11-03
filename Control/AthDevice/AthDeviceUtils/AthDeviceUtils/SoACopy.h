@@ -13,6 +13,7 @@
 #include "GaudiKernel/EventContext.h"
 
 // VecMem include(s).
+#include <vecmem/edm/buffer.hpp>
 #include <vecmem/edm/view.hpp>
 
 // System include(s).
@@ -40,7 +41,7 @@ class SoACopy {
   ///
   template <typename SCHEMA>
   void operator()(const SG::AuxVectorBase& input,
-                  vecmem::edm::view<SCHEMA>& output, const EventContext& ctx,
+                  vecmem::edm::buffer<SCHEMA>& output, const EventContext& ctx,
                   const IMemoryResourcesTool& mrs,
                   const ICopiesTool& copies) const;
 
