@@ -34,5 +34,6 @@ find_package( nlox )
 find_package( Lhapdf )
 find_package( Recola )
 find_package( OpenLoops )
+find_package( ggxy )
 
 

@@ -21,6 +21,7 @@ from .ggF_HH import ggF_HH
 from .ggF_HH_SMEFT import ggF_HH_SMEFT
 from .ggF_HH_quartic import ggF_HH_quartic
 from .ggF_HZ import ggF_HZ
+from .HHJ import HHJ
 from .Hj import Hj
 from .Hj_MiNNLO import Hj_MiNNLO
 from .Hjj import Hjj
