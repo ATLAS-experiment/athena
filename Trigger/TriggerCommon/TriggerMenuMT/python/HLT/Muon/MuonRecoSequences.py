@@ -803,9 +803,10 @@ def MlMuonDVtxRecoSequenceCfg(flags):
         acc.merge(MuonSegmentFittingAlgCfg(flags, name = "MuonSegmentFittingAlgMlVtx",
                                                     OutSegmentContainer=segmentContainers[-1]))
         
-    from MuonSegmentCnv.MuonSegmentCnvConfig import xAODSegmentCnvAlgCfg
+    from MuonSegmentCnv.MuonSegmentCnvConfig import xAODSegmentCnvAlgCfg, xAODSegmentCnvToolCfg
     acc.merge(xAODSegmentCnvAlgCfg(flags, name = "MuonR4xAODSegmentCnvAlgMlVtx", 
-                                          InSegmentKeys = segmentContainers))
+                                          InSegmentKeys = segmentContainers,
+                                          SegmentCnvTool = acc.popToolsAndMerge(xAODSegmentCnvToolCfg(flags, estimateHoles = False))))
 
     from MuonInference.InferenceConfig import DisplacedVertexInferenceToolCfg
     from TriggerMenuMT.HLT.CommonSequences.FullScanDefs import fs_towers

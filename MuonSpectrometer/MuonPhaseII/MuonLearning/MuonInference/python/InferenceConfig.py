@@ -244,8 +244,33 @@ def DisplacedVertexInferenceAlgCfg(flags, name="DisplacedVertexInferenceAlg", **
                 InferenceTools=[bucket_tool],
             )
         )
+        filtered_keys = [filtered_bucket_key]
+
+        ## TODO: Train a separate NSW bucket model
+        # NSW space points are produced in a separate container
+        if flags.Detector.GeometryMM or flags.Detector.GeometrysTGC:
+            nsw_filtered_bucket_key = f"Nsw{filtered_bucket_key}"
+            nsw_bucket_filter_kwargs = dict(bucket_filter_kwargs)
+            nsw_bucket_filter_kwargs.update(
+                ReadSpacePoints="NswSpacePoints",
+                WriteSpacePointKey=nsw_filtered_bucket_key,
+            )
+            nsw_bucket_tool = result.popToolsAndMerge(
+                GraphBucketFilterToolCfg(
+                    flags, "NswGraphBucketFilterTool", **nsw_bucket_filter_kwargs
+                )
+            )
+            result.merge(
+                GraphInferenceAlgCfg(
+                    flags,
+                    name="DVNswBucketPrefilterAlg",
+                    InferenceTools=[nsw_bucket_tool],
+                )
+            )
+            filtered_keys.append(nsw_filtered_bucket_key)
+
         if use_filtered_buckets_for_dv_graph:
-            tool_kwargs.setdefault("SpacePointKeys", [filtered_bucket_key])
+            tool_kwargs.setdefault("SpacePointKeys", filtered_keys)
         tool_kwargs.setdefault("UseBucketSegmentSelection", True)
 
     if "InferenceTool" not in kwargs:
