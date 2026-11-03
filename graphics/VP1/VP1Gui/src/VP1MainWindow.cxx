@@ -95,7 +95,11 @@ bool saveSnapshot(QWidget *parent, const QPixmap& snapshot, const QString& filen
     if (snapshot.isNull()) {
         error = QStringLiteral("VP1 could not render the snapshot. No image was saved.\n\n"
                                "Offscreen OpenGL rendering may be unavailable on this display. "
-                               "Check the terminal for Coin/GLX errors.");
+                               "Check the terminal for Coin/GLX errors.\n\n"
+                               "Try restarting VP1 with --fix-snapshots (for example, vp1 --fix-snapshots) "
+                               "to enable the temporary workaround for remote offscreen rendering.\n\n"
+                               "Usage and requirements are documented in the Athena source repository: "
+                               "graphics/VP1/README.md, section \"Temporary workaround for remote snapshot rendering\".");
     } else {
         QImageWriter writer(filename);
         if (!writer.write(snapshot.toImage())) {

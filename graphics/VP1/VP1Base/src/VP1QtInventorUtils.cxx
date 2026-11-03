@@ -552,7 +552,11 @@ QImage VP1QtInventorUtils::renderToImage(VP1ExaminerViewer *ra, int pixels_x, in
 	// if fails, delete the renderer and return an empty image
 	if (!myRenderer->render(root)) {
         VP1Msg::message("ERROR - Snapshot: Coin offscreen scene rendering failed. "
-                        "Check GLX support on this display; restart with COIN_DEBUG_GLGLUE=1 for diagnostics.");
+                        "Try restarting VP1 with --fix-snapshots (for example, vp1 --fix-snapshots) "
+                        "to enable the temporary workaround for remote offscreen rendering. "
+                        "Usage and requirements are documented in the Athena source repository: "
+                        "graphics/VP1/README.md, section \"Temporary workaround for remote snapshot rendering\". "
+                        "Restart with COIN_DEBUG_GLGLUE=1 for diagnostics.");
 		delete myRenderer;
 		fclose (tmpf);
         QFile::remove(tmpfile);
@@ -565,7 +569,11 @@ QImage VP1QtInventorUtils::renderToImage(VP1ExaminerViewer *ra, int pixels_x, in
 	if (rootOverlay) {
 		bool okOver = myRenderer->render(rootOverlay);
 		if ( !okOver) {
-            VP1Msg::message("ERROR - Snapshot: Coin offscreen overlay rendering failed.");
+            VP1Msg::message("ERROR - Snapshot: Coin offscreen overlay rendering failed. "
+                            "Try restarting VP1 with --fix-snapshots (for example, vp1 --fix-snapshots) "
+                            "to enable the temporary workaround for remote offscreen rendering.\n\n"
+                            "Usage and requirements are documented in the Athena source repository: "
+                            "graphics/VP1/README.md, section \"Temporary workaround for remote snapshot rendering\".");
 			delete myRenderer;
 			fclose (tmpf);
             QFile::remove(tmpfile);
