@@ -12,6 +12,8 @@
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include <limits>
 #include <cassert>
+#include <algorithm>
+#include <ranges>
 
 #ifndef SIMULATIONBASE
 #include "Acts/Utilities/Helpers.hpp"
@@ -35,9 +37,7 @@ namespace {
               class ReadOutEleReturnType> 
             void insert(std::vector<ReadOutEleType*>&& eleStore,
                         std::vector<ReadOutEleReturnType*>& returnVec) {
-        returnVec.insert(returnVec.end(), 
-                        std::make_move_iterator(eleStore.begin()),
-                        std::make_move_iterator(eleStore.end()));
+        std::ranges::move(eleStore, std::back_inserter(returnVec));
     }
 #ifndef SIMULATIONBASE
     inline unsigned msSectorIdHash(const ChIndex chIndex, const int sector, const int side) {

@@ -7,6 +7,8 @@
 #include "TruthUtils/HepMCHelpers.h"
 #include "CLHEP/Random/RandGaussZiggurat.h"
 #include "GaudiKernel/PhysicalConstants.h"
+#include <algorithm>
+#include <ranges>
 
 namespace {
     using ChVec_t = std::vector<std::uint16_t>;
@@ -442,9 +444,8 @@ namespace MuonR4 {
           premerged.emplace_back(std::move(mergedHit));
       }    
     } // end of time-ordering and hit merging loop
-    std::copy_if(std::make_move_iterator(premerged.begin()),
-                 std::make_move_iterator(premerged.end()),
-                 std::back_inserter(savedDigits), passNeigbourLogic);
+    std::ranges::move(premerged | std::views::filter(passNeigbourLogic),
+                      std::back_inserter(savedDigits));
     return savedDigits;
   }
 }
