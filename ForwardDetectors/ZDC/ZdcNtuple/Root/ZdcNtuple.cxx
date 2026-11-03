@@ -1170,7 +1170,7 @@ void ZdcNtuple::processMCEventCollection(){
   for (unsigned int cntr = 0; cntr < mcEventCollection->size(); ++cntr){
     const HepMC::GenEvent *genEvt = (*mcEventCollection)[cntr];
     for (const auto &vertex : genEvt->vertices()){
-      for (const auto &particle : vertex->particles_in()){
+      for (const auto &particle : vertex->particles_out()){
         t_ZdcTruthParticlePosx.push_back(vertex->position().x());
         t_ZdcTruthParticlePosy.push_back(vertex->position().y());
         t_ZdcTruthParticlePosz.push_back(vertex->position().z());
