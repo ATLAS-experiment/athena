@@ -30,7 +30,7 @@ def main():
     elif options.simulation:
         if not options.workflow or options.workflow is WorkflowType.FullSim:
             ami_tag = "s4006" if not options.ami_tag else options.ami_tag
-            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, options.extra_args + " --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' --geometryVersion 'default:ATLAS-R3S-2021-03-02-00'"))
+            tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.FullSim, ["EVNTtoHITS"], setup, "--conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' " + options.extra_args))
         if options.workflow is WorkflowType.AF3:
             ami_tag = "a913" if not options.ami_tag else options.ami_tag
             tests_to_run.append(SimulationTest(ami_tag, run, WorkflowType.AF3, ["EVNTtoHITS"], setup, options.extra_args))
@@ -43,13 +43,13 @@ def main():
     elif options.overlay:
         if not options.workflow or options.workflow is WorkflowType.MCOverlay:
             ami_tag = "d1759" if not options.ami_tag else options.ami_tag
-            tests_to_run.append(OverlayTest(ami_tag, run, WorkflowType.MCOverlay, ["Overlay"], setup, options.extra_args + " --runNumber 601229 --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08'"))
+            tests_to_run.append(OverlayTest(ami_tag, run, WorkflowType.MCOverlay, ["Overlay"], setup, "--runNumber 601229 --conditionsTag 'default:OFLCOND-MC23-SDR-RUN3-08' " + options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.DataOverlay:
             ami_tag = "d2029" if not options.ami_tag else options.ami_tag
-            tests_to_run.append(DataOverlayTest(ami_tag, run, WorkflowType.DataOverlay, ["Overlay"], setup, options.extra_args + " --runNumber 601229 --postInclude \"default:PyJobTransforms.UseFrontier\""))
+            tests_to_run.append(DataOverlayTest(ami_tag, run, WorkflowType.DataOverlay, ["Overlay"], setup, "--runNumber 601229 --postInclude \"default:PyJobTransforms.UseFrontier\" " + options.extra_args))
         if not options.workflow or options.workflow is WorkflowType.DataOverlayChain:
             ami_tag = "d2030" if not options.ami_tag else options.ami_tag
-            tests_to_run.append(DataOverlayTest(ami_tag, run, WorkflowType.DataOverlayChain, ["EVNTtoRDO"], setup, options.extra_args + " --runNumber 603398 --postInclude \"default:PyJobTransforms.UseFrontier\""))
+            tests_to_run.append(DataOverlayTest(ami_tag, run, WorkflowType.DataOverlayChain, ["EVNTtoRDO"], setup, "--runNumber 603398 --postInclude \"default:PyJobTransforms.UseFrontier\" " + options.extra_args))
     elif options.pileup:
         if setup.parallel_execution:
             log.error("Parallel execution not supported for pile-up workflow")
