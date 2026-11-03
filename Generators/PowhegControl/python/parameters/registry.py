@@ -311,6 +311,7 @@ class Registry(metaclass=Singleton):
         self.add_default("kappa_ght", 1.0, description="multiplicative kappa-factor of the Higgs-top coupling. ONLY USED FOR REWEIGHTING.")
         self.add_default("kappa_ghw", 1.0, description="multiplicative kappa-factor of the Higgs-W coupling. ONLY USED FOR REWEIGHTING.")
         self.add_default("kappa_ghz", 1.0, description="multiplicative kappa-factor of the Higgs-Z coupling. ONLY USED FOR REWEIGHTING.")
+        self.add_default("kl", 1.0, description="HHJ: modifier of the trilinear Higgs self-coupling")
         self.add_default("kt2minqed", 0.8, description="kt2_rad_min for photon radiation from leptons. [<0: use 0.8]")
         self.add_default("ktmerging", -1, description="[-1:use Powheg default]")
         self.add_default("Lambda", 1.0, description="ggF_HH_SMEFT: EFT counting mass Scale (in TeV)")
