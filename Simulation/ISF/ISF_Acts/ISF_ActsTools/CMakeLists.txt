@@ -15,7 +15,8 @@ atlas_add_component( ISF_ActsTools
                      LINK_LIBRARIES Acts::Core Acts::Fatras AthenaBaseComps CxxUtils
                      TrkTrack ISF_Event AthenaKernel AtlasDetDescr GeoPrimitives
                      GaudiKernel GeneratorObjects ISF_Event StoreGateLib
-                     GeoModelUtilities ActsInteropLib ActsGeometryLib TruthUtils
+                     GeoModelUtilities ActsInteropLib ActsGeometryLib
+                     ActsGeometryInterfacesLib InDetReadoutGeometry ReadoutGeometryBase TruthUtils
                      ISF_InterfacesLib Acts::PluginJson ActsEventLib
                      InDetSimEvent)
 
