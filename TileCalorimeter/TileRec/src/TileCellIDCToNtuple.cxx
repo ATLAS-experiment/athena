@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -37,15 +37,7 @@ const int max_chan=5216;
 // Constructor & deconstructor
 TileCellIDCToNtuple::TileCellIDCToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
    : AthAlgorithm(name, pSvcLocator)
-   , m_ntuplePtr(0)
-   , m_ntupleID("h90")
-   , m_ntupleLoc("/FILE1/TileRec")
-   , m_cellContainer("TileCellIDC")
-   , m_tileID(0)
 {
-  declareProperty("TileCellIDC", m_cellContainer);    
-  declareProperty("NTupleLoc", m_ntupleLoc);
-  declareProperty("NTupleID", m_ntupleID);
 }
 
 TileCellIDCToNtuple::~TileCellIDCToNtuple()
@@ -61,7 +53,7 @@ StatusCode TileCellIDCToNtuple::initialize()
 
   CHECK( detStore()->retrieve(m_tileID) );
 
-  m_ntupleLoc="/NTUPLES" + m_ntupleLoc;
+  m_ntupleLoc="/NTUPLES" + m_ntupleLoc.value();
 
   SmartDataPtr<NTuple::Directory> DirPtr(ntupleSvc(), m_ntupleLoc);
   if(!DirPtr) DirPtr=ntupleSvc()->createDirectory(m_ntupleLoc);
@@ -98,7 +90,7 @@ StatusCode TileCellIDCToNtuple::execute(const EventContext& /*ctx*/)
 {
   // step1: read Cells from TDS
   const TileCellIDC* CellCnt;
-  CHECK( evtStore()->retrieve(CellCnt, m_cellContainer) );
+  CHECK( evtStore()->retrieve(CellCnt, m_cellContainer.value()) );
 
   // step2: to fill items in ntuple
   SelectAllObject<TileCellIDC> selCells(CellCnt);

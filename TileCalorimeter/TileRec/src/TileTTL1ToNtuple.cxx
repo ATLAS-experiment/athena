@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -34,20 +34,7 @@
 
 TileTTL1ToNtuple::TileTTL1ToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_ntuplePtr(0)
-  , m_ntupleID("h130")
-  , m_ntupleLoc("/FILE1/TileRec")
-  , m_ttl1Container("TileTTL1Cnt")
-  , m_TT_ID(0)
-  , m_tileTBID(0)
 {
-  declareProperty("TileTTL1Container", m_ttl1Container);    
-  declareProperty("NTupleLoc", m_ntupleLoc);
-  declareProperty("NTupleID", m_ntupleID);
-  declareProperty("CommitNtuple", m_commitNtuple = true);
-  declareProperty("MaxLength", m_maxLength = 2048);
-  declareProperty("NSamples", m_nSamples = 7);
-
 }
 
 TileTTL1ToNtuple::~TileTTL1ToNtuple()
@@ -68,7 +55,7 @@ StatusCode TileTTL1ToNtuple::initialize()
   CHECK( detStore()->retrieve(m_TT_ID) );
   CHECK( detStore()->retrieve(m_tileTBID) );
 
-  m_ntupleLoc="/NTUPLES" + m_ntupleLoc;
+  m_ntupleLoc="/NTUPLES" + m_ntupleLoc.value();
 
   SmartDataPtr<NTuple::Directory> DirPtr(ntupleSvc(), m_ntupleLoc);
   if(!DirPtr) DirPtr=ntupleSvc()->createDirectory(m_ntupleLoc);
@@ -80,7 +67,7 @@ StatusCode TileTTL1ToNtuple::initialize()
                                     CLID_ColumnWiseTuple, "TileTTL1-Ntuple");
   if(!m_ntuplePtr) {
     
-    std::string ntupleCompleteID=m_ntupleLoc+"/"+m_ntupleID;
+    std::string ntupleCompleteID=m_ntupleLoc.value()+"/"+m_ntupleID.value();
 
     NTuplePtr nt(ntupleSvc(),ntupleCompleteID);
     if (!nt) {
@@ -93,11 +80,11 @@ StatusCode TileTTL1ToNtuple::initialize()
     }
   }
 
-  CHECK( m_ntuplePtr->addItem("TileTTL1/nttl1",m_nchan,0,m_maxLength) );
+  CHECK( m_ntuplePtr->addItem("TileTTL1/nttl1",m_nchan,0,m_maxLength.value()) );
   CHECK( m_ntuplePtr->addItem("TileTTL1/side",m_nchan,m_side,-1,1) );
   CHECK( m_ntuplePtr->addItem("TileTTL1/eta",m_nchan,m_eta,0,15) );
   CHECK( m_ntuplePtr->addItem("TileTTL1/phi",m_nchan,m_phi,0,63) );
-  CHECK( m_ntuplePtr->addItem("TileTTL1/samples",m_maxLength,m_nSamples,m_samples) );
+  CHECK( m_ntuplePtr->addItem("TileTTL1/samples",m_maxLength.value(),m_nSamples.value(),m_samples) );
 
   ATH_MSG_INFO( "Initialization completed" );
   return StatusCode::SUCCESS;
@@ -112,7 +99,7 @@ StatusCode TileTTL1ToNtuple::execute(const EventContext& /*ctx*/)
 
   // step1: read TileTTL1s from TDS
   const TileTTL1Container* TTL1Cnt = nullptr; 
-  CHECK( evtStore()->retrieve(TTL1Cnt, m_ttl1Container) );
+  CHECK( evtStore()->retrieve(TTL1Cnt, m_ttl1Container.value()) );
 
   // step2: put items in ntuple
   TileTTL1Container::const_iterator it=TTL1Cnt->begin();
@@ -123,7 +110,7 @@ StatusCode TileTTL1ToNtuple::execute(const EventContext& /*ctx*/)
 
     if (m_nchan >= m_maxLength) {
       ATH_MSG_DEBUG( "Number of ttl1s exceeds maximum ("
-          << m_maxLength << "), ignore all the rest");
+          << m_maxLength.value() << "), ignore all the rest");
       break;
     }
 

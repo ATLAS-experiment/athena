@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -47,9 +47,9 @@ public:
     StatusCode finalize();
 
 private:
-    NTuple::Tuple* m_ntuplePtr;
-    std::string m_ntupleID;
-    std::string m_ntupleLoc;
+    NTuple::Tuple* m_ntuplePtr{nullptr};
+    Gaudi::Property<std::string> m_ntupleID{this, "NTupleID", "h90", "ID of ntuple"};
+    Gaudi::Property<std::string> m_ntupleLoc{this, "NTupleLoc", "/FILE1/TileRec", "pathname of ntuple file"};
 
     NTuple::Item<int> m_nchan;
     NTuple::Item<double> m_tolE;
@@ -65,8 +65,8 @@ private:
     NTuple::Array<int> m_eta;
     NTuple::Array<int> m_phi;
     
-    std::string m_cellContainer;
-    const TileID*   m_tileID;
+    Gaudi::Property<std::string> m_cellContainer{this, "TileCellIDC", "TileCellIDC", "key value of Cells in TDS"};
+    const TileID*   m_tileID{nullptr};
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -48,11 +48,11 @@ public:
     StatusCode finalize();
   
 private:
-    NTuple::Tuple* m_ntuplePtr;
-    std::string m_ntupleID;
-    std::string m_ntupleLoc;
-    bool m_commitNtuple;
-    int  m_maxLength;
+    NTuple::Tuple* m_ntuplePtr{nullptr};
+    Gaudi::Property<std::string> m_ntupleID{this, "NTupleID", "h32", "ID of ntuple"};
+    Gaudi::Property<std::string> m_ntupleLoc{this, "NTupleLoc", "/FILE1/TileRec", "Pathname of ntuple file"};
+    Gaudi::Property<bool> m_commitNtuple{this, "CommitNtuple", true, "Commit ntuple in execute"};
+    Gaudi::Property<int>  m_maxLength{this, "MaxLength", 4999, "Maximum number of hits in ntuple"};
   
     NTuple::Item<int> m_nchan;
     NTuple::Item<double> m_tolE;
@@ -72,9 +72,9 @@ private:
     NTuple::Array<int> m_eta;
     NTuple::Array<int> m_phi;
   
-    std::string    m_hitVector;
+    Gaudi::Property<std::string> m_hitVector{this, "TileHitVector", "TileHitVec", "Key value of HitVector"};
     
-    const TileID*   m_tileID;
+    const TileID*   m_tileID{nullptr};
 };
 
 #endif

@@ -22,13 +22,9 @@
 #include "TileIdentifier/TileHWID.h"
 #include "TileCalibBlobObjs/TileCalibUtils.h"
 #include "TileConditions/TileCablingService.h"
-#include "TileConditions/ITileBadChanTool.h"
 #include "TileConditions/TileInfo.h"
 #include "TileDetDescr/TileDetDescrManager.h"
-#include "TileConditions/TileCondToolEmscale.h"
-#include "TileEvent/TileDigitsContainer.h"
 #include "TileEvent/TileRawChannelContainer.h"
-#include "TileEvent/TileContainer.h"
 #include "TileEvent/TileLaserObject.h"
 #include "TileEvent/TileMuonReceiverContainer.h"
 #include "TileByteStream/TileHid2RESrcID.h"
@@ -109,96 +105,9 @@ s1.c_str()
 
 TileAANtuple::TileAANtuple(const std::string& name, ISvcLocator* pSvcLocator)
 : AthAlgorithm(name, pSvcLocator)
-, m_evTime(0)
-, m_run(0)
-, m_evt(0)
-, m_lumiBlock(0)
-, m_HHMMSS(0)
-, m_dateTime()
-, m_trigType(0)
-, m_dspFlags(0)
-, m_l1ID()
-, m_l1Type()
-, m_evBCID()
-, m_evType()
-, m_cispar()
-, m_las_version(0)
-, m_las_BCID(0)
-, m_las_Filt(0)
-, m_las_ReqAmp(0)
-, m_las_MeasAmp(0)
-, m_las_Temperature(0)
 , m_arrays (std::make_unique<Arrays>())
-, m_qdctimeout(0)
-, m_tdctimeout(0)
-, m_daqtype(0)
-, m_nBadDr(0)
-, m_nBadHV(0)
-, m_nBadDCS(0)
-, m_nBadDB(0)
-, m_nBadTotal(0)
-, m_rchUnit(TileRawChannelUnit::MegaElectronVolts)
-, m_dspUnit(TileRawChannelUnit::ADCcounts)
-, m_ntuplePtr(0)
-, m_DCSntuplePtr(0)
 , m_thistSvc("THistSvc", name)
-, m_tileID(0)
-, m_tileHWID(0)
-, m_cabling(0)
-, m_tileMgr(0)
-, m_tileBadChanTool("TileBadChanTool")
-, m_tileToolEmscale("TileCondToolEmscale")
-, m_l2Builder()
-, m_sumEt_xx()
-, m_sumEz_xx()
-, m_sumE_xx()
-, m_sumEt_yy()
-, m_sumEz_yy()
-, m_sumE_yy()
-, m_sumEt_zz()
-, m_sumEz_zz()
-, m_sumE_zz()
-, m_bad()
 {
-  declareProperty("TileCondToolEmscale", m_tileToolEmscale);
-  declareProperty("TileDigitsContainer", m_digitsContainerKey = "TileDigitsCnt");
-  declareProperty("TileDigitsContainerFlt", m_fltDigitsContainerKey = "" /* "TileDigitsFlt" */);
-  declareProperty("TileBeamElemContainer", m_beamElemContainerKey = "TileBeamElemCnt");
-  declareProperty("TileRawChannelContainer", m_rawChannelContainerKey = "TileRawChannelCnt");
-  declareProperty("TileRawChannelContainerFit", m_fitRawChannelContainerKey = "");      //
-  declareProperty("TileRawChannelContainerFitCool", m_fitcRawChannelContainerKey = ""); // don't create
-  declareProperty("TileRawChannelContainerOpt", m_optRawChannelContainerKey = "");      // by default
-  declareProperty("TileRawChannelContainerQIE", m_qieRawChannelContainerKey = "");      // processed QIE data
-  declareProperty("TileRawChannelContainerOF1", m_of1RawChannelContainerKey = "");      //
-  declareProperty("TileRawChannelContainerDsp", m_dspRawChannelContainerKey = "");      //
-  declareProperty("TileRawChannelContainerMF", m_mfRawChannelContainerKey = "");      //
-  declareProperty("TileRawChannelContainerWiener", m_wienerRawChannelContainerKey = "");//
-  declareProperty("TileMuRcvRawChannelContainer", m_tileMuRcvRawChannelContainerKey = "MuRcvRawChCnt");// TMDB
-  declareProperty("TileMuRcvDigitsContainer", m_tileMuRcvDigitsContainerKey = "MuRcvDigitsCnt");// TMDB
-  declareProperty("TileMuRcvContainer", m_tileMuRcvContainerKey = "TileMuRcvCnt");// TMDB
-  declareProperty("TileLaserObject", m_laserObjectKey = "" /* "TileLaserObj" */);       //
-  declareProperty("TileL2Cnt", m_l2CntKey = "TileL2Cnt");
-  declareProperty("CalibrateEnergy", m_calibrateEnergy = true);
-  declareProperty("UseDspUnits", m_useDspUnits = false);
-  declareProperty("OfflineUnits", m_finalUnit = TileRawChannelUnit::MegaElectronVolts);
-  declareProperty("CalibMode", m_calibMode = false);
-  declareProperty("CompareMode", m_compareMode = false);
-  declareProperty("BSInput", m_bsInput = true);
-  declareProperty("PMTOrder", m_pmtOrder = false);
-
-  declareProperty("StreamName", m_streamName = "AANT");
-  declareProperty("NTupleID", m_ntupleID = "h2000");
-  declareProperty("TreeSize", m_treeSize = 16000000000LL);
-  
-  declareProperty("CheckDCS",m_checkDCS = false);
-  declareProperty("DCSBranches",m_DCSBranches = 111111111);
-
-  declareProperty("SkipEvents", m_skipEvents = 0);
-  declareProperty("NSamples", m_nSamples=7);
-  declareProperty("Reduced", m_reduced=false);
-  declareProperty("CompressionSettings", m_compressSettings = -1);
-
-  m_evtNr = -1;
 }
 
 TileAANtuple::~TileAANtuple() {
@@ -305,10 +214,10 @@ StatusCode TileAANtuple::ntuple_initialize(const EventContext& ctx,
     m_useDspUnits = false;
   }
   
-  ATH_MSG_INFO( "calibMode " << m_calibMode );
-  ATH_MSG_INFO( "calibrateEnergy " << m_calibrateEnergy );
-  ATH_MSG_INFO( "offlineUnits " << m_finalUnit );
-  ATH_MSG_INFO( "useDspUnits " << m_useDspUnits );
+  ATH_MSG_INFO( "calibMode " << m_calibMode.value() );
+  ATH_MSG_INFO( "calibrateEnergy " << m_calibrateEnergy.value() );
+  ATH_MSG_INFO( "offlineUnits " << m_finalUnit.value() );
+  ATH_MSG_INFO( "useDspUnits " << m_useDspUnits.value() );
   
   // set event number to 0 before first event
   m_evtNr = 0;
@@ -674,7 +583,7 @@ TileAANtuple::storeRawChannels(const EventContext& ctx
     if (m_useDspUnits) { // calibrate a-la online
       m_rchUnit = m_dspUnit;
     } else { // convert to final units
-      m_rchUnit = (TileRawChannelUnit::UNIT)m_finalUnit;
+      m_rchUnit = (TileRawChannelUnit::UNIT)m_finalUnit.value();
     }
   } else {
     m_rchUnit = rChUnit;
@@ -871,7 +780,7 @@ TileAANtuple::storeMFRawChannels(const EventContext& ctx
     if (m_useDspUnits) { // calibrate a-la online
       m_rchUnit = m_dspUnit;
     } else { // convert to final units
-      m_rchUnit = (TileRawChannelUnit::UNIT)m_finalUnit;
+      m_rchUnit = (TileRawChannelUnit::UNIT)m_finalUnit.value();
     }
   } else {
     m_rchUnit = rChUnit;
@@ -1338,7 +1247,7 @@ StatusCode TileAANtuple::storeTMDBDigits(const EventContext& ctx) {
           int siz = sampleVec.size();
 
           if (siz > m_nSamples) {
-            ATH_MSG_VERBOSE( "TMDB ONLY " << m_nSamples << " digits saved to ntuple instead of " << siz);
+            ATH_MSG_VERBOSE( "TMDB ONLY " << m_nSamples.value() << " digits saved to ntuple instead of " << siz);
             siz = m_nSamples;
           }
 
@@ -1453,27 +1362,27 @@ TileAANtuple::initNTuple(const EventContext& ctx) {
     for (std::string& file : files) {
       TFile* outFile = (TFile*) m_fileMgr->fptr(file);
       if (outFile) {
-	ATH_MSG_INFO("Changing compressing settings to " << m_compressSettings << " for file: " << file);
-	outFile->SetCompressionSettings(m_compressSettings);
+	ATH_MSG_INFO("Changing compressing settings to " << m_compressSettings.value() << " for file: " << file);
+	outFile->SetCompressionSettings(m_compressSettings.value());
       }
     }
   }
 
-  if (m_ntupleID.size() > 0) {
+  if (m_ntupleID.value().size() > 0) {
     
-    std::string ntupleID = m_ntupleID + "_map";
+    std::string ntupleID = m_ntupleID.value() + "_map";
     
     TTree* ntuplePtr = new TTree(ntupleID.c_str(), "TileCal-CellMap");
-    if(m_thistSvc->regTree("/" + m_streamName + "/" + ntupleID, ntuplePtr).isFailure()) {
+    if(m_thistSvc->regTree("/" + m_streamName.value() + "/" + ntupleID, ntuplePtr).isFailure()) {
       ATH_MSG_ERROR( "Problem registering TileRec CellMap Tree" );
     }
     
     fillCellMap(ntuplePtr, ctx);
     
     //Ntuple creation
-    m_ntuplePtr = new TTree(m_ntupleID.c_str(), "TileCal-Ntuple");
+    m_ntuplePtr = new TTree(m_ntupleID.value().c_str(), "TileCal-Ntuple");
     m_ntuplePtr->SetMaxTreeSize(m_treeSize);
-    if (m_thistSvc->regTree("/" + m_streamName + "/" + m_ntupleID, m_ntuplePtr).isFailure()) {
+    if (m_thistSvc->regTree("/" + m_streamName.value() + "/" + m_ntupleID.value(), m_ntuplePtr).isFailure()) {
       ATH_MSG_ERROR( "Problem registering TileRec Tree");
     }
     
@@ -1493,7 +1402,7 @@ TileAANtuple::initNTuple(const EventContext& ctx) {
   if (m_checkDCS) {
     std::string ntupleDCS = "Tile_DCS";
     m_DCSntuplePtr = new TTree(ntupleDCS.c_str(), "TileCal-DCS data");
-    if (m_thistSvc->regTree("/" + m_streamName + "/" + ntupleDCS, m_DCSntuplePtr).isFailure()) {
+    if (m_thistSvc->regTree("/" + m_streamName.value() + "/" + ntupleDCS, m_DCSntuplePtr).isFailure()) {
       ATH_MSG_ERROR( "Problem registering TileRec DCS Tree");
     }
     DCS_addBranch();
@@ -1904,7 +1813,7 @@ void TileAANtuple::DIGI_addBranch(void)
           
         } else {
           
-          std::string samples = "[4][64][48][" + std::to_string(m_nSamples) + "]/S";
+          std::string samples = "[4][64][48][" + std::to_string(m_nSamples.value()) + "]/S";
 
           if (!m_fltDigitsContainerKey.empty()) {
             if (!m_digitsContainerKey.empty()) { // should use different names for two containers
@@ -2013,7 +1922,7 @@ void TileAANtuple::DIGI_addBranch(void)
     }
     
     if (!m_mfRawChannelContainerKey.empty()) {
-      std::string f_samples = "[4][64][48][" + std::to_string(m_nSamples) + "]/F";
+      std::string f_samples = "[4][64][48][" + std::to_string(m_nSamples.value()) + "]/F";
       m_ntuplePtr->Branch(NAME2("eMF",f_suf),        &(m_arrays->m_eMF[is]),            NAME3("eMF",f_suf,f_samples)); // float
       m_ntuplePtr->Branch(NAME2("tMF",f_suf),        &(m_arrays->m_tMF[is]),            NAME3("tMF",f_suf,f_samples)); // float
       m_ntuplePtr->Branch(NAME2("chi2MF",f_suf),     m_arrays->m_chi2MF[ir],         NAME3("chi2MF",f_suf,"[4][64][48]/F")); // float
@@ -2189,7 +2098,7 @@ void TileAANtuple::TMDB_addBranch(void)
   }
 
   if (!m_tileMuRcvDigitsContainerKey.empty()) {
-    m_ntuplePtr->Branch("sampleTMDB", &(m_arrays->m_sampleTMDB[0]), NAME3("sampleTMDB[4][64][8][",std::to_string(m_nSamples),"]/b")); // unsigned char m_arrays->m_sampleTMDB[N_ROS][N_MODULES][N_TMDBCHANS][N_SAMPLES] 
+    m_ntuplePtr->Branch("sampleTMDB", &(m_arrays->m_sampleTMDB[0]), NAME3("sampleTMDB[4][64][8][",std::to_string(m_nSamples.value()),"]/b")); // unsigned char m_arrays->m_sampleTMDB[N_ROS][N_MODULES][N_TMDBCHANS][N_SAMPLES] 
   }
 
   if (!m_tileMuRcvContainerKey.empty()) {

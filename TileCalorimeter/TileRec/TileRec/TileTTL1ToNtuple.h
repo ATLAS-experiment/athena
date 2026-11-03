@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -48,12 +48,12 @@ public:
     StatusCode finalize();
 
 private:
-    NTuple::Tuple* m_ntuplePtr;
-    std::string m_ntupleID;
-    std::string m_ntupleLoc;
-    bool m_commitNtuple;
-    int  m_maxLength;
-    int  m_nSamples;
+    NTuple::Tuple* m_ntuplePtr{nullptr};
+    Gaudi::Property<std::string> m_ntupleID{this, "NTupleID", "h130", "ID of ntuple"};
+    Gaudi::Property<std::string> m_ntupleLoc{this, "NTupleLoc", "/FILE1/TileRec", "pathname of ntuple file"};
+    Gaudi::Property<bool> m_commitNtuple{this, "CommitNtuple", true, "Commit ntuple in execute"};
+    Gaudi::Property<int> m_maxLength{this, "MaxLength", 2048, "Maximum number of TTL1s in ntuple"};
+    Gaudi::Property<int> m_nSamples{this, "NSamples", 7, "Number of samples"};
 
     NTuple::Item<int> m_nchan;
 
@@ -63,10 +63,10 @@ private:
     
     NTuple::Matrix<float> m_samples;
 
-    std::string m_ttl1Container;
+    Gaudi::Property<std::string> m_ttl1Container{this, "TileTTL1Container", "TileTTL1Cnt", "key value of TileTTL1 in TDS"};
 
-    const CaloLVL1_ID* m_TT_ID;
-    const TileTBID*    m_tileTBID;
+    const CaloLVL1_ID* m_TT_ID{nullptr};
+    const TileTBID*    m_tileTBID{nullptr};
 };
 
 #endif

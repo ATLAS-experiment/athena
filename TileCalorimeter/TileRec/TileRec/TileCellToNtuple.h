@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -48,10 +48,10 @@ public:
     StatusCode finalize();
 
 private:
-    NTuple::Tuple* m_ntuplePtr;
-    std::string m_ntupleID;
-    std::string m_ntupleLoc;
-    bool m_scinCells;
+    NTuple::Tuple* m_ntuplePtr{nullptr};
+    Gaudi::Property<std::string> m_ntupleID{this, "NTupleID", "h110", "ID of ntuple"};
+    Gaudi::Property<std::string> m_ntupleLoc{this, "NTupleLoc", "/FILE1/TileRec", "pathname of ntuple file"};
+    Gaudi::Property<bool> m_scinCells{this, "ScinCells", true, "Read scintillator (MBTS) cells from TileCellContainer"};
 
     NTuple::Item<int> m_nchan;
     NTuple::Item<double> m_tolE;
@@ -71,10 +71,10 @@ private:
     NTuple::Array<int> m_channel;
     NTuple::Array<int> m_module;
 
-    std::string m_cellContainer;
+    Gaudi::Property<std::string> m_cellContainer{this, "TileCellContainer", "MBTSContainer", "key value of Cells in TDS"}; // "TileCellContainerKey";
 
-    const TileID*   m_tileID;
-    const TileTBID*   m_tileTBID;
+    const TileID*   m_tileID{nullptr};
+    const TileTBID*   m_tileTBID{nullptr};
 };
 
 #endif

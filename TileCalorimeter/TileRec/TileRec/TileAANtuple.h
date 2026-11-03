@@ -48,11 +48,15 @@
 #include "TileConditions/TileCablingSvc.h"
 #include "TileIdentifier/TileRawChannelUnit.h"
 #include "TileEvent/TileLaserObject.h"
+#include "TileEvent/TileDigitsContainer.h"
+#include "TileEvent/TileContainer.h"
 #include "TileEvent/TileMuonReceiverContainer.h"
 #include "TileEvent/TileRawChannelContainer.h"
 #include "TileEvent/TileDQstatus.h"
 #include "TileEvent/TileBeamElemContainer.h"
 #include "TileConditions/ITileDCSTool.h"
+#include "TileConditions/ITileBadChanTool.h"
+#include "TileConditions/TileCondToolEmscale.h"
 #include "TileByteStream/TileHid2RESrcID.h"
 
 // Athena includes
@@ -87,8 +91,6 @@ class TileHWID;
 class TileInfo;
 class TileDetDescrManager;
 class TileBeamElemContByteStreamCnv;
-class ITileBadChanTool;
-class TileCondToolEmscale;
 class TileL2Builder;
 class ITHistSvc;
 
@@ -184,34 +186,34 @@ class TileAANtuple : public AthAlgorithm {
         return 1; //error
     }
 
-    int m_evtNr;           //!< event counter
+    int m_evtNr{-1};           //!< event counter
 
     // Trigger items
-    int m_evTime;         //!< event time
-    int m_run;            //!< run number
-    int m_evt;            //!< event number in a run
-    int m_lumiBlock;      //!< lumiblock number in a run
-    int m_HHMMSS;         //!< event time in HH:MM:SS
-    char m_dateTime[32];  //!< event date and time
-    int m_trigType;       //!< trigger type (1=Phys, 2=Laser, 4=Ped, 8=CIS)
-    uint32_t m_dspFlags;       //!< DSP flags from BS
+    int m_evTime{0};         //!< event time
+    int m_run{0};            //!< run number
+    int m_evt{0};            //!< event number in a run
+    int m_lumiBlock{0};      //!< lumiblock number in a run
+    int m_HHMMSS{0};         //!< event time in HH:MM:SS
+    char m_dateTime[32]{};  //!< event date and time
+    int m_trigType{0};       //!< trigger type (1=Phys, 2=Laser, 4=Ped, 8=CIS)
+    uint32_t m_dspFlags{0};       //!< DSP flags from BS
 
-    int m_l1ID[N_RODS];   //!< Level1 ID   from ROD header
-    int m_l1Type[N_RODS]; //!< Level1 Type from ROD header
-    int m_evBCID[N_RODS]; //!< Event  BCID from ROD header
-    int m_evType[N_RODS]; //!< Event  Type from ROD header
+    int m_l1ID[N_RODS]{};   //!< Level1 ID   from ROD header
+    int m_l1Type[N_RODS]{}; //!< Level1 Type from ROD header
+    int m_evBCID[N_RODS]{}; //!< Event  BCID from ROD header
+    int m_evType[N_RODS]{}; //!< Event  Type from ROD header
 
     // Cispar
-    uint32_t m_cispar[N_CISPAR];
+    uint32_t m_cispar[N_CISPAR]{};
 
     // Laser items
-    int m_las_version;
-    int m_las_BCID;
+    int m_las_version{0};
+    int m_las_BCID{0};
 
-    int m_las_Filt;
-    float m_las_ReqAmp;
-    float m_las_MeasAmp;
-    float m_las_Temperature;
+    int m_las_Filt{0};
+    float m_las_ReqAmp{0};
+    float m_las_MeasAmp{0};
+    float m_las_Temperature{0};
 
     struct Arrays {
       // LASERI
@@ -336,61 +338,61 @@ class TileAANtuple : public AthAlgorithm {
     };
     std::unique_ptr<Arrays> m_arrays;
 
-    bool m_qdctimeout;
-    bool m_tdctimeout;
-    int m_daqtype;
-    int m_nBadDr;
-    int m_nBadHV;
-    int m_nBadDCS;
-    int m_nBadDB;
-    int m_nBadTotal;
+    bool m_qdctimeout{false};
+    bool m_tdctimeout{false};
+    int m_daqtype{0};
+    int m_nBadDr{0};
+    int m_nBadHV{0};
+    int m_nBadDCS{0};
+    int m_nBadDB{0};
+    int m_nBadTotal{0};
     
-    int m_nSamples=0; //!<number of samples
-    bool m_reduced;
-    int m_compressSettings;
+    Gaudi::Property<int> m_nSamples{this, "NSamples", 7, "Number of samples"}; //!<number of samples
+    Gaudi::Property<bool> m_reduced{this, "Reduced", false, "Reduced ntuple content"};
+    Gaudi::Property<int> m_compressSettings{this, "CompressionSettings", -1, "ROOT compression settings for output file (negative: do not change)"};
 
     // jobOptions parameters - container names
-    SG::ReadHandleKey<TileDigitsContainer> m_digitsContainerKey;
-    SG::ReadHandleKey<TileDigitsContainer> m_fltDigitsContainerKey;
-    SG::ReadHandleKey<TileBeamElemContainer> m_beamElemContainerKey;
-    SG::ReadHandleKey<TileRawChannelContainer> m_rawChannelContainerKey;
-    SG::ReadHandleKey<TileRawChannelContainer> m_fitRawChannelContainerKey;
-    SG::ReadHandleKey<TileRawChannelContainer> m_fitcRawChannelContainerKey;
-    SG::ReadHandleKey<TileRawChannelContainer> m_optRawChannelContainerKey;
-    SG::ReadHandleKey<TileRawChannelContainer> m_qieRawChannelContainerKey;
-    SG::ReadHandleKey<TileRawChannelContainer> m_dspRawChannelContainerKey;
-    SG::ReadHandleKey<TileRawChannelContainer> m_mfRawChannelContainerKey;
-    SG::ReadHandleKey<TileRawChannelContainer> m_of1RawChannelContainerKey;
-    SG::ReadHandleKey<TileRawChannelContainer> m_wienerRawChannelContainerKey;
-    SG::ReadHandleKey<TileLaserObject> m_laserObjectKey;
-    SG::ReadHandleKey<TileRawChannelContainer> m_tileMuRcvRawChannelContainerKey; // TMDB
-    SG::ReadHandleKey<TileDigitsContainer> m_tileMuRcvDigitsContainerKey; // TMDB
-    SG::ReadHandleKey<TileMuonReceiverContainer> m_tileMuRcvContainerKey; // TMDB
-    SG::ReadHandleKey<TileL2Container> m_l2CntKey;
+    SG::ReadHandleKey<TileDigitsContainer> m_digitsContainerKey{this, "TileDigitsContainer", "TileDigitsCnt", "Input Tile digits container key"};
+    SG::ReadHandleKey<TileDigitsContainer> m_fltDigitsContainerKey{this, "TileDigitsContainerFlt", "", "Input Tile filtered digits container key"};
+    SG::ReadHandleKey<TileBeamElemContainer> m_beamElemContainerKey{this, "TileBeamElemContainer", "TileBeamElemCnt", "Input Tile beam elements container key"};
+    SG::ReadHandleKey<TileRawChannelContainer> m_rawChannelContainerKey{this, "TileRawChannelContainer", "TileRawChannelCnt", "Input Tile raw channel container key"};
+    SG::ReadHandleKey<TileRawChannelContainer> m_fitRawChannelContainerKey{this, "TileRawChannelContainerFit", "", "Input Tile raw channel container key (Fit method)"};
+    SG::ReadHandleKey<TileRawChannelContainer> m_fitcRawChannelContainerKey{this, "TileRawChannelContainerFitCool", "", "Input Tile raw channel container key (Fit method with COOL pulse shape)"};
+    SG::ReadHandleKey<TileRawChannelContainer> m_optRawChannelContainerKey{this, "TileRawChannelContainerOpt", "", "Input Tile raw channel container key (Opt filter)"};
+    SG::ReadHandleKey<TileRawChannelContainer> m_qieRawChannelContainerKey{this, "TileRawChannelContainerQIE", "", "Input Tile raw channel container key (processed QIE data)"};
+    SG::ReadHandleKey<TileRawChannelContainer> m_dspRawChannelContainerKey{this, "TileRawChannelContainerDsp", "", "Input Tile raw channel container key (DSP)"};
+    SG::ReadHandleKey<TileRawChannelContainer> m_mfRawChannelContainerKey{this, "TileRawChannelContainerMF", "", "Input Tile raw channel container key (MF method)"};
+    SG::ReadHandleKey<TileRawChannelContainer> m_of1RawChannelContainerKey{this, "TileRawChannelContainerOF1", "", "Input Tile raw channel container key (OF1 method)"};
+    SG::ReadHandleKey<TileRawChannelContainer> m_wienerRawChannelContainerKey{this, "TileRawChannelContainerWiener", "", "Input Tile raw channel container key (Wiener filter)"};
+    SG::ReadHandleKey<TileLaserObject> m_laserObjectKey{this, "TileLaserObject", "", "Input Tile laser object key"};
+    SG::ReadHandleKey<TileRawChannelContainer> m_tileMuRcvRawChannelContainerKey{this, "TileMuRcvRawChannelContainer", "MuRcvRawChCnt", "Input TMDB raw channel container key"}; // TMDB
+    SG::ReadHandleKey<TileDigitsContainer> m_tileMuRcvDigitsContainerKey{this, "TileMuRcvDigitsContainer", "MuRcvDigitsCnt", "Input TMDB digits container key"}; // TMDB
+    SG::ReadHandleKey<TileMuonReceiverContainer> m_tileMuRcvContainerKey{this, "TileMuRcvContainer", "TileMuRcvCnt", "Input TMDB container key"}; // TMDB
+    SG::ReadHandleKey<TileL2Container> m_l2CntKey{this, "TileL2Cnt", "TileL2Cnt", "Input Tile L2 container key"};
 
    // other jobOptions parameters
-    bool m_calibrateEnergy; //!< convert energy to new units or use amplitude from RawChannel directly
-    bool m_useDspUnits; //!< true if energy should be converted to units used in DSP
-    bool m_bsInput;    //!< true if bytestream file is used
-    bool m_pmtOrder;   //!< change channel ordering to pmt ordering in ntuple
-    int m_finalUnit;  //!< calibrate everything to this level
-    bool m_calibMode;  //!< If data should be put in calib mode
-    bool m_compareMode;  //!< If two sets of data should be compared (e.g. frag4 and frag5)
-    bool m_checkDCS;   //!< if false, do not use TileDCS at all
-    int m_DCSBranches;   //!< mask like 110101 - which DCS branches to fill
+    Gaudi::Property<bool> m_calibrateEnergy{this, "CalibrateEnergy", true, "Convert energy to new units or use amplitude from RawChannel directly"}; //!< convert energy to new units or use amplitude from RawChannel directly
+    Gaudi::Property<bool> m_useDspUnits{this, "UseDspUnits", false, "Convert energy to units used in DSP"}; //!< true if energy should be converted to units used in DSP
+    Gaudi::Property<bool> m_bsInput{this, "BSInput", true, "Bytestream file is used as input"};    //!< true if bytestream file is used
+    Gaudi::Property<bool> m_pmtOrder{this, "PMTOrder", false, "Change channel ordering to PMT ordering in ntuple"};   //!< change channel ordering to pmt ordering in ntuple
+    Gaudi::Property<int> m_finalUnit{this, "OfflineUnits", TileRawChannelUnit::MegaElectronVolts, "Calibrate everything to this level"};  //!< calibrate everything to this level
+    Gaudi::Property<bool> m_calibMode{this, "CalibMode", false, "If data should be put in calib mode"};  //!< If data should be put in calib mode
+    Gaudi::Property<bool> m_compareMode{this, "CompareMode", false, "If two sets of data should be compared (e.g. frag4 and frag5)"};  //!< If two sets of data should be compared (e.g. frag4 and frag5)
+    Gaudi::Property<bool> m_checkDCS{this, "CheckDCS", false, "If false, do not use TileDCS at all"};   //!< if false, do not use TileDCS at all
+    Gaudi::Property<int> m_DCSBranches{this, "DCSBranches", 111111111, "Mask like 110101 - which DCS branches to fill"};   //!< mask like 110101 - which DCS branches to fill
     
     // energy units
-    TileRawChannelUnit::UNIT m_rchUnit;  //!< Unit for TileRawChannels (ADC, pCb, MeV)
-    TileRawChannelUnit::UNIT m_dspUnit;  //!< Unit for TileRawChannels in DSP
+    TileRawChannelUnit::UNIT m_rchUnit{TileRawChannelUnit::MegaElectronVolts};  //!< Unit for TileRawChannels (ADC, pCb, MeV)
+    TileRawChannelUnit::UNIT m_dspUnit{TileRawChannelUnit::ADCcounts};  //!< Unit for TileRawChannels in DSP
 
     // NTuple parameters
-    std::string m_streamName;
-    std::string m_ntupleID;
-    int64_t m_treeSize;
+    Gaudi::Property<std::string> m_streamName{this, "StreamName", "AANT", "Name of output stream for ntuple"};
+    Gaudi::Property<std::string> m_ntupleID{this, "NTupleID", "h2000", "ID of ntuple"};
+    Gaudi::Property<int64_t> m_treeSize{this, "TreeSize", 16000000000LL, "Max size of ROOT tree"};
 
     // The ntuple
-    TTree* m_ntuplePtr;
-    TTree* m_DCSntuplePtr;
+    TTree* m_ntuplePtr{nullptr};
+    TTree* m_DCSntuplePtr{nullptr};
 
     // handle to THistSvc
     ServiceHandle<ITHistSvc> m_thistSvc;
@@ -398,33 +400,34 @@ class TileAANtuple : public AthAlgorithm {
        "FileMgr", "FileMgr", "The File manager service" };
 
     // Identifiers
-    const TileID* m_tileID;
-    const TileHWID* m_tileHWID;
+    const TileID* m_tileID{nullptr};
+    const TileHWID* m_tileHWID{nullptr};
 
     // Various tools
-    const TileCablingService* m_cabling;  //!< cabling tool
-    const TileDetDescrManager* m_tileMgr; //!< Pointer to TileDetDescrManager
+    const TileCablingService* m_cabling{nullptr};  //!< cabling tool
+    const TileDetDescrManager* m_tileMgr{nullptr}; //!< Pointer to TileDetDescrManager
 
-    ToolHandle<ITileBadChanTool> m_tileBadChanTool; //!< Tile Bad Channel tool
+    ToolHandle<ITileBadChanTool> m_tileBadChanTool{"TileBadChanTool"}; //!< Tile Bad Channel tool
 
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale; //!< main Tile Calibration tool
+    ToolHandle<TileCondToolEmscale> m_tileToolEmscale{this,
+       "TileCondToolEmscale", "TileCondToolEmscale", "Tile EM scale calibration tool"}; //!< main Tile Calibration tool
 
     ToolHandle<ITileDCSTool> m_tileDCS{this, "TileDCSTool", "TileDCSTool", "Tile DCS tool"};
 
     // variables to check SumEt in frag5
     ToolHandle<TileL2Builder> m_l2Builder;  //<! Pointer to TileL2Builder
-    float m_sumEt_xx[N_DRAWERS]; //!< Sum Et recalculated offline using DSP raw channels
-    float m_sumEz_xx[N_DRAWERS]; //!< Sum Ez recalculated offline using DSP raw channels
-    float m_sumE_xx[N_DRAWERS];  //!< Sum E  recalculated offline using DSP raw channels
-    float m_sumEt_yy[N_DRAWERS]; //!< Sum Et calcualted inside DSP
-    float m_sumEz_yy[N_DRAWERS]; //!< Sum Ez calcualted inside DSP
-    float m_sumE_yy[N_DRAWERS];  //!< Sum E  calcualted inside DSP
-    float m_sumEt_zz[N_DRAWERS]; //!< Sum Et recalculated offline using offline OF
-    float m_sumEz_zz[N_DRAWERS]; //!< Sum Ez recalculated offline using offline OF
-    float m_sumE_zz[N_DRAWERS];  //!< Sum E  recalculated offline using offline OF
-    bool m_bad[N_ROS][N_MODULES][N_CHANS];
+    float m_sumEt_xx[N_DRAWERS]{}; //!< Sum Et recalculated offline using DSP raw channels
+    float m_sumEz_xx[N_DRAWERS]{}; //!< Sum Ez recalculated offline using DSP raw channels
+    float m_sumE_xx[N_DRAWERS]{};  //!< Sum E  recalculated offline using DSP raw channels
+    float m_sumEt_yy[N_DRAWERS]{}; //!< Sum Et calcualted inside DSP
+    float m_sumEz_yy[N_DRAWERS]{}; //!< Sum Ez calcualted inside DSP
+    float m_sumE_yy[N_DRAWERS]{};  //!< Sum E  calcualted inside DSP
+    float m_sumEt_zz[N_DRAWERS]{}; //!< Sum Et recalculated offline using offline OF
+    float m_sumEz_zz[N_DRAWERS]{}; //!< Sum Ez recalculated offline using offline OF
+    float m_sumE_zz[N_DRAWERS]{};  //!< Sum E  recalculated offline using offline OF
+    bool m_bad[N_ROS][N_MODULES][N_CHANS]{};
 
-    int m_skipEvents;
+    Gaudi::Property<int> m_skipEvents{this, "SkipEvents", 0, "Number of events to skip before filling ntuple"};
 
     std::vector<uint32_t> m_ROBID;
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -37,15 +37,7 @@ const int max_chan=99999;
 // Constructor & deconstructor
 TileTBHitToNtuple::TileTBHitToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_ntuplePtr(0)
-  , m_ntupleID("h31")
-  , m_ntupleLoc("/FILE1/TileRec")
-  , m_hitContainer("TileTBHits") //name of hit vector for ancillary detectors
-  , m_tileTBID(0)
 {
-  declareProperty("TileHitContainer", m_hitContainer);    
-  declareProperty("NTupleLoc", m_ntupleLoc);
-  declareProperty("NTupleID", m_ntupleID);
 }
 
 TileTBHitToNtuple::~TileTBHitToNtuple()
@@ -62,7 +54,7 @@ StatusCode TileTBHitToNtuple::initialize()
 
   CHECK( detStore()->retrieve(m_tileTBID) );
 
-  m_ntupleLoc="/NTUPLES" + m_ntupleLoc;
+  m_ntupleLoc="/NTUPLES" + m_ntupleLoc.value();
 
   SmartDataPtr<NTuple::Directory> DirPtr(ntupleSvc(), m_ntupleLoc);
   if (!DirPtr) DirPtr = ntupleSvc()->createDirectory(m_ntupleLoc);
@@ -104,7 +96,7 @@ StatusCode TileTBHitToNtuple::execute(const EventContext& /*ctx*/)
 
   // step1: read Hit for ancillary
   const TileHitVector* HitCnt = nullptr; 
-  CHECK( evtStore()->retrieve(HitCnt, m_hitContainer) );
+  CHECK( evtStore()->retrieve(HitCnt, m_hitContainer.value()) );
 
   m_nchan=0;
   m_tolE=0.0;
