@@ -136,6 +136,7 @@ namespace MuonR4{
                     calibInput.setTrackDirection(locToGlob.linear() * dirInChamb,
                                                  std::abs(dirInChamb.phi() - 90._degree) > 1.e-7 );
                     calibInput.setTimeOfFlight(timeOfArrival);
+                    const auto magnitude = closestApproach.mag();
                     calibInput.setClosestApproach(std::move(closestApproach));
                     ATH_MSG_VERBOSE("Parse hit calibration "<<m_idHelperSvc->toString(dc->identify())<<", "<<calibInput);
                     MdtCalibOutput calibOutput = m_mdtCalibrationTool->calibrate(ctx, calibInput);
@@ -158,7 +159,7 @@ namespace MuonR4{
                     calibSP->setTimeMeasurement(ActsTrk::timeToActs(dc->tdc() * IMdtCalibrationTool::tdcBinSize - 
                                                                     calibOutput.tubeT0() - fastToF - calibOutput.signalPropagationTime()));
                     ATH_MSG_VERBOSE("Mdt time Meas: " << ActsTrk::timeToAthena(calibSP->time()) 
-                                  << ", ToF / fastToF: " << fastToF << " / " << closestApproach.mag() * c_inv
+                                  << ", ToF / fastToF: " << fastToF << " / " << magnitude * c_inv
                                   << ", tubeT0: " << calibOutput.tubeT0() << ", Signal Prop Time: " << calibOutput.signalPropagationTime());
                 } else {
                     auto* dc = static_cast<const xAOD::MdtTwinDriftCircle*>(spacePoint->primaryMeasurement());
