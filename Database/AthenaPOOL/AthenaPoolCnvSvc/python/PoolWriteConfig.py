@@ -88,6 +88,10 @@ def PoolWriteCfg(flags):
     # RNTuple output: different compression for some formats, TTree keeps the defaults above
     # Stream : [compression algorithm, compression level]
     rntupleCompression = {
+        "EVNT"           : [5, 9],
+        "HITS"           : [5, 9],
+        "RDO"            : [5, 9],
+        "AOD"            : [5, 9],
         "DAOD_PHYS"      : [5, 9],
         "DAOD_PHYSLITE"  : [5, 9],
     }
