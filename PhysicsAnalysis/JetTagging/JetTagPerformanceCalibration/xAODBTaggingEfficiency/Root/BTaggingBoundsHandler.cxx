@@ -122,17 +122,24 @@ bool BTaggingBoundsHandler::isJetWithinBounds(const xAOD::Jet& jet) const
   return true;
 }
 
-std::ostream& operator<<(std::ostream& os, const BTaggingBoundsHandler& handler){
+std::string BTaggingBoundsHandler::onlyBounds_to_string() const { 
+  std::ostringstream os;
   // Add the list of variables with lower and upper bounds
   // e.g. "pT: [250, 500], mass: [50, 100]"
   // The separator ", " is only added between entries, not after the last one
   bool first = true;
-  for (const auto& [vType, bounds] : handler.m_varBinBounds) {
+  for (const auto& [vType, bounds] : m_varBinBounds) {
     if (!first) os << ", ";
     first = false;
     os << BTaggingToolUtil::getVariableName(vType) << ": [" << bounds.lowerBound << ", " << bounds.upperBound << "]";
   }
-  return os;
+  return os.str();
+}
+
+std::string BTaggingBoundsHandler::to_string() const{
+  std::ostringstream os;
+  os << "BTaggingBoundsHandler(" << onlyBounds_to_string() << ")";
+  return os.str();
 }
 
 bool BTaggingBoundsHandler::operator<(const BTaggingBoundsHandler& o) const {

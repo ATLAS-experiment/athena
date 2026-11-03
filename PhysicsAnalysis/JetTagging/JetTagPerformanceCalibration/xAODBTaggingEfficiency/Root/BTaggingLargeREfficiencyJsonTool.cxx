@@ -176,20 +176,33 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
             return StatusCode::FAILURE;
           }
 
+          // Vector of MC-MC handler that will be filled in the loop below 
+          std::vector<LargeRMCMCHandler> tmpVecLargeRMCMCHandler; 
           for (const auto& entry : mcmcAtLabel[m_mcGenerator.value()]) {
             try {
-              m_mcmcHandlers[labelStringMCMC].push_back(LargeRMCMCHandler(entry, funcGetJetQuantity));
+              tmpVecLargeRMCMCHandler.push_back(LargeRMCMCHandler(entry, funcGetJetQuantity));
               // // Useful for debugging
               // // Get the latest handler that was just added 
-              // const LargeRMCMCHandler &handler = m_mcmcHandlers[labelStringMCMC][ m_mcmcHandlers[labelStringMCMC].size() -1 ];
+              // const LargeRMCMCHandler &handler = tmpVecLargeRMCMCHandler[tmpVecLargeRMCMCHandler.size() -1];
               // // Then print its content 
-              // std::cout << "labelStringMCMC=" << labelStringMCMC << ": " << handler.to_string() << std::endl;
+              // std::cout << "labelStringMCMC=" << labelStringMCMC << ": " << handler << std::endl;
             } catch (const std::exception& e) {
               ATH_MSG_ERROR("Malformed mc-to-mc correction for label " << labelStringMCMC
                             << " and generator '" << m_mcGenerator.value() << "': " << e.what());
               return StatusCode::FAILURE;
             }
           }
+
+          const std::string context = "MC-MC GridBoundsHandler initialization for label='" + labelStringMCMC + "' and generator='" + m_mcGenerator.value() + "'";
+          // Finally add the grid of handlers to the map of MC-MC handlers
+          // If any exception is thrown return failure 
+          try { 
+            m_mcmcHandlers.emplace(labelStringMCMC, BTaggingGridBoundsHandler<LargeRMCMCHandler>(context, tmpVecLargeRMCMCHandler));
+          } catch (const std::exception& e) {
+            ATH_MSG_ERROR(e.what());
+            return StatusCode::FAILURE;
+          }
+
         } else {
           ATH_MSG_ERROR("mc-to-mc corrections incomplete for jet with truthLabel: " << labelStringMCMC << ".");
           return StatusCode::FAILURE;
@@ -204,15 +217,8 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
     // No mc-to-mc corrections present in the given json file.
     ATH_MSG_WARNING("No mc-to-mc corrections present in json.");
   }
-
-  // Now check there is no overlapping bins for MCMChandlers
-  try {
-    BTaggingBoundsHandler::checkOverlaps("mc-to-mc corrections of generator '" + m_mcGenerator.value() + "'", m_mcmcHandlers);
-  } catch (const std::exception& e) {
-    ATH_MSG_ERROR(e.what());
-    return StatusCode::FAILURE;
-  }
   
+
   m_currentSys = nullptr;
   m_sysCache.initialize(affectingSystematics(),
                    [this](const CP::SystematicSet& systConfig, sysData& sys)
@@ -316,24 +322,20 @@ CP::CorrectionCode BTaggingLargeREfficiencyJsonTool::getMCToMCCorr( const xAOD::
     return CP::CorrectionCode::Ok; 
   }
 
-  // Loop over all MC-MC handlers and find the one where the jet if falling into
-  for (const auto& handler : handlerIt->second) {
-    if (handler.isJetWithinBounds(jet)) {
-      // // Useful for debugging
-      // // Print jet truth label pT mass and eta and the corresponding handler
-      // std::cout << "jet(label=" << label 
-      //   << ", pT=" << getJetQuantity(jet, "pT") 
-      //   << ", mass=" << getJetQuantity(jet, "mass") 
-      //   << ", abseta=" << getJetQuantity(jet, "abseta") << "): "
-      //   << handler << std::endl;
-      
-      corr = handler.getScaleFactor();
-      return CP::CorrectionCode::Ok;
-    }
+  // Retrieve the pointer to the hander in which the jet is falling 
+  // if the jet is outside of the range then handler will be a null pointer
+  const LargeRMCMCHandler * handler = handlerIt->second.getHandlerPtr(jet);
+  if (!handler){
+    ATH_MSG_WARNING("Jet outside mc-to-mc binning for label " << label << ". Returning correction of 1.");
+    return CP::CorrectionCode::OutOfValidityRange;
   }
 
-  ATH_MSG_WARNING("Jet outside mc-to-mc binning for label " << label << ". Returning correction of 1.");
-  return CP::CorrectionCode::OutOfValidityRange;
+  // To print the handler content 
+  // std::cout << "handler=" << handler->to_string() << std::endl;
+
+  // Retrieve the corresponding MC-MC scale factor 
+  corr = handler->getScaleFactor();
+  return CP::CorrectionCode::Ok;
 }
 
 float BTaggingLargeREfficiencyJsonTool::getSFSys( const std::string& labelString, size_t bin_index ) const
@@ -376,7 +378,7 @@ float BTaggingLargeREfficiencyJsonTool::getJetPtInGeV( const xAOD::Jet& jet ) co
 }
 
 float BTaggingLargeREfficiencyJsonTool::getJetQuantity(const xAOD::Jet& jet, const BTaggingToolUtil::varType vType) const {
-  if (vType == BTaggingToolUtil::varType::pT) { 
+  if (vType == BTaggingToolUtil::varType::pT) {
     return getJetPtInGeV(jet); 
   } else if (vType == BTaggingToolUtil::varType::mass) {
     return getJetMassInGeV(jet);
@@ -404,7 +406,7 @@ BTaggingLargeREfficiencyJsonTool::LargeRMCMCHandler::LargeRMCMCHandler(
 
   // Get the entry 
   const auto & mcmcEntry = jsonConfig["content"]; 
-  // The last entry should be an object that contains the MC-MC SF 
+  // The mcmcEntry should be an object that contains the MC-MC SF 
   if (!mcmcEntry.is_object()) {
     throw std::runtime_error("mc-to-mc the mcmcEntry=" + mcmcEntry.dump() + " in jsonConfig is not an object for jsonConfig=" + jsonConfig.dump());
   }
@@ -418,16 +420,16 @@ BTaggingLargeREfficiencyJsonTool::LargeRMCMCHandler::LargeRMCMCHandler(
   m_MCMCSF = mcmcEntry["SF"].get<float>();
 }
 
-std::ostream& operator<<(std::ostream& os, const BTaggingLargeREfficiencyJsonTool::LargeRMCMCHandler& handler){
-  // Return
+std::string BTaggingLargeREfficiencyJsonTool::LargeRMCMCHandler::to_string() const {
+  std::ostringstream os;
   // LargeRMCMCHandler(var1: [minVar1, maxVar1], var2: [minVar2, maxVar2], ... , SF: sfValue)
   // e.g. LargeRMCMCHandler(pT: [250, 500], abseta[0., 2.0], SF: 0.9)
   os << "LargeRMCMCHandler(";
   // Add the list of variables with lower and upper bounds
-  os << dynamic_cast<const BTaggingBoundsHandler&>(handler);
+  os << onlyBounds_to_string();
   // Finally add the MC-MC SF value
-  os << ", SF: " << handler.m_MCMCSF << ")";
-  return os;
+  os << ", SF: " << m_MCMCSF << ")";
+  return os.str();
 }
 
 StatusCode BTaggingLargeREfficiencyJsonTool::calcSystematicVariation(const CP::SystematicSet& systConfig, sysData& sys) const

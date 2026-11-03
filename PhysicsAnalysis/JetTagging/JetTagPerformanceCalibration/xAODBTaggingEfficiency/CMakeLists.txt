@@ -83,10 +83,18 @@ atlas_add_executable(
   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODJet xAODBTagging PATInterfaces FTagAnalysisInterfacesLib
 )
 
+atlas_add_executable(
+  BTaggingGridBoundsHandlerTester
+  util/BTaggingGridBoundsHandlerTester.cxx
+  INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+  LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools xAODJet xAODBTagging xAODBTaggingEfficiencyLib PATInterfaces FTagAnalysisInterfacesLib
+)
+
 if( XAOD_STANDALONE )
   set(XAOD_ACCESS_LIB xAODRootAccess)
 else()
   set(XAOD_ACCESS_LIB POOLRootAccessLib)
+  
   atlas_add_executable( BTaggingTruthTaggingTester
     util/BTaggingTruthTaggingTester.cxx
     LINK_LIBRARIES AsgTools xAODBTaggingEfficiencyLib POOLRootAccessLib AthAnalysisBaseCompsLib xAODEventInfo xAODRootAccess AsgMessagingLib FTagAnalysisInterfacesLib )
@@ -106,6 +114,8 @@ target_link_libraries( BTaggingLargeRSelectionJsonInstantiationTester
 target_link_libraries( BTaggingEigenVectorRecompositionToolTester
   PRIVATE ${XAOD_ACCESS_LIB} )
 target_link_libraries( BTaggingSystematicStrategyComparison
+  PRIVATE ${XAOD_ACCESS_LIB} )
+target_link_libraries( BTaggingGridBoundsHandlerTester
   PRIVATE ${XAOD_ACCESS_LIB} )
 
 unset(XAOD_ACCESS_LIB)
@@ -127,6 +137,11 @@ set(FTAG_XCC_LATEST_JSON_RUN3 dev/xAODBTaggingEfficiency/13p6TeV/MC23_2026-08-13
 
 # Test for Athena, AthAnalysis and AnalysisBase
 
+atlas_add_test(
+  ut_BTaggingGridBoundsHandlerTester
+  SCRIPT BTaggingGridBoundsHandlerTester
+  POST_EXEC_SCRIPT noerror.sh
+)
 # Small-R jets CI tests
 atlas_add_test(
   ut_BTaggingToolsExample
