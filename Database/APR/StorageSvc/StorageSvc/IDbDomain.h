@@ -43,13 +43,6 @@ namespace pool    {
   public:
     virtual ~IDbDomain()   { }
     
-    /// Check for existence of a domain within a session
-    /** @param nam  [IN] name of the database in question
-      *
-      * @return boolean value indicating the accessability of the database.
-      */
-    virtual bool existsDbase(const std::string& nam) = 0;
-
     /// Set domain specific options
     /** @param refOpt   [IN]  Reference to option object
       *

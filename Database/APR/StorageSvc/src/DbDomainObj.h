@@ -55,8 +55,6 @@ namespace pool    {
     void       setAgeLimit(int value)   {    m_maxAge = value;  }
     /// Access the maximal age limit
     int        ageLimit()  const        {    return m_maxAge;   }
-    /// Check for Database existence within domain
-    bool existsDbase(const std::string& nam);
     /// Open domain with possible change of access mode
     StatusCode open(Io::IoFlag mode);
     /// Open domain in default access mode
