@@ -687,11 +687,11 @@ namespace MissingEtDQA {
       }
 
       //Fill dPhi for Met Reb
-      //For leading and subleading jets
-      (m_MET_dPhi[met_name]).at(0)->Fill( P4Helpers::deltaPhi( (*met)[finalClusStr]->phi(),leadPhi ), weight );
-      (m_MET_dPhi[met_name]).at(1)->Fill( P4Helpers::deltaPhi( (*met)[finalClusStr]->phi(), subleadPhi ), weight );
-      (m_MET_dPhi[met_name]).at(3)->Fill( P4Helpers::deltaPhi( (*met)[finalTrkStr]->phi(), leadPhi ), weight );
-      (m_MET_dPhi[met_name]).at(4)->Fill( P4Helpers::deltaPhi( (*met)[finalTrkStr]->phi(), subleadPhi ), weight );
+      //For leading and subleading jets; histogram is booked for positive values only, so std::abs
+      (m_MET_dPhi[met_name]).at(0)->Fill( std::abs(P4Helpers::deltaPhi( (*met)[finalClusStr]->phi(),leadPhi )), weight );
+      (m_MET_dPhi[met_name]).at(1)->Fill( std::abs(P4Helpers::deltaPhi( (*met)[finalClusStr]->phi(), subleadPhi )), weight );
+      (m_MET_dPhi[met_name]).at(3)->Fill( std::abs(P4Helpers::deltaPhi( (*met)[finalTrkStr]->phi(), leadPhi )), weight );
+      (m_MET_dPhi[met_name]).at(4)->Fill( std::abs(P4Helpers::deltaPhi( (*met)[finalTrkStr]->phi(), subleadPhi )), weight );
   
       leadPt = 0.; leadPhi = 0.;
 
@@ -717,8 +717,8 @@ namespace MissingEtDQA {
 
       //Fill dPhi for MET Reb
       //for leading lepton
-      (m_MET_dPhi[met_name]).at(2)->Fill( -remainder( leadPhi - (*met)[finalClusStr]->phi(), 2*M_PI ), weight );
-      (m_MET_dPhi[met_name]).at(5)->Fill( -remainder( leadPhi - (*met)[finalTrkStr]->phi(), 2*M_PI ), weight );
+      (m_MET_dPhi[met_name]).at(2)->Fill( std::abs(remainder( leadPhi - (*met)[finalClusStr]->phi(), 2*M_PI )), weight );
+      (m_MET_dPhi[met_name]).at(5)->Fill( std::abs(remainder( leadPhi - (*met)[finalTrkStr]->phi(), 2*M_PI )), weight );
 
       //Fill Correlation Histos
       //for each fill for MET of FinalTrk/FinalClus vs particle (muon, electron, gamma, tau, jet)
@@ -749,11 +749,16 @@ namespace MissingEtDQA {
       // Fill Resolution histos
       if(m_doTruth){
         ATH_MSG_DEBUG( "  Resolution:" );
+        const auto * pNonInt = (*met_Truth)["NonInt"];
+        if (! pNonInt){
+          ATH_MSG_ERROR("MET_Truth is missing NonInt");
+          return StatusCode::FAILURE;
+        }
         //Fill Rebuilt plots
-        (m_MET_Resolution[met_name]).at(0)->Fill(((*met)[finalClusStr]->mpx()-(*met_Truth)["NonInt"]->mpx())/1000., weight);
-        (m_MET_Resolution[met_name]).at(1)->Fill(((*met)[finalClusStr]->mpy()-(*met_Truth)["NonInt"]->mpy())/1000., weight);
-        (m_MET_Resolution[met_name]).at(2)->Fill(((*met)[finalTrkStr]->mpx()-(*met_Truth)["NonInt"]->mpx())/1000., weight);
-        (m_MET_Resolution[met_name]).at(3)->Fill(((*met)[finalTrkStr]->mpy()-(*met_Truth)["NonInt"]->mpy())/1000., weight);
+        (m_MET_Resolution[met_name]).at(0)->Fill(((*met)[finalClusStr]->mpx() - pNonInt->mpx())/1000., weight);
+        (m_MET_Resolution[met_name]).at(1)->Fill(((*met)[finalClusStr]->mpy() - pNonInt->mpy())/1000., weight);
+        (m_MET_Resolution[met_name]).at(2)->Fill(((*met)[finalTrkStr]->mpx() - pNonInt->mpx())/1000., weight);
+        (m_MET_Resolution[met_name]).at(3)->Fill(((*met)[finalTrkStr]->mpy() - pNonInt->mpy())/1000., weight);
       }
 
       //Fill significance
@@ -916,17 +921,21 @@ namespace MissingEtDQA {
       }
   
       int nBins = (m_MET[met_name]).at(7)->GetNbinsX();
+      const auto histCumu = m_MET_Cumu[met_name];
       for(int i=1;i<=nBins;i++){
         //For MET Cumu
-        double err;
-        (m_MET_Cumu[met_name]).at(0)->SetBinContent(i, (m_MET[met_name]).at(8)->IntegralAndError(i,nBins+1,err));
-        (m_MET_Cumu[met_name]).at(0)->SetBinError(i, err);
-        (m_MET_Cumu[met_name]).at(1)->SetBinContent(i, (m_MET[met_name]).at(7)->IntegralAndError(i,nBins+1,err));
-        (m_MET_Cumu[met_name]).at(1)->SetBinError(i, err);
+        double err{};
+        histCumu.at(0)->SetBinContent(i, (m_MET[met_name]).at(8)->IntegralAndError(i,nBins+1,err));
+        histCumu.at(0)->SetBinError(i, err);
+        histCumu.at(1)->SetBinContent(i, (m_MET[met_name]).at(7)->IntegralAndError(i,nBins+1,err));
+        histCumu.at(1)->SetBinError(i, err);
       }
       //For MET Cumu
       for(std::vector<TH1D*>::size_type i = 0; i < (m_MET_Cumu[met_name]).size(); ++i) {
-        m_MET_Cumu[met_name].at(i)->Scale(1./(m_MET_Cumu[met_name]).at(i)->GetBinContent(1));
+        const double tot = histCumu.at(i)->GetBinContent(1);
+        if (std::isfinite(tot) && tot != 0.0){
+          histCumu.at(i)->Scale(1./tot);
+        }
       }
   
     }
@@ -941,9 +950,7 @@ namespace MissingEtDQA {
     return StatusCode::SUCCESS;
   }
   
-  /////////////////////////////////////////////////////////////////// 
-  // Const methods: 
-  ///////////////////////////////////////////////////////////////////
+
 
   /////////////////////////////////////////////////////////////////// 
   // Non-const methods: 
