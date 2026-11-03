@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -116,38 +116,33 @@ void SbPolyhedrizeAction::handlePara(const GeoPara *para)
 
 void SbPolyhedrizeAction::handlePcon(const GeoPcon *pcon)
 {
-  double *z = new double[pcon->getNPlanes ()];
-  double *rmn = new double[pcon->getNPlanes ()];
-  double *rmx = new double[pcon->getNPlanes ()];
-
-  for (unsigned s = 0; s < pcon->getNPlanes (); s++) {
+  const auto nPlanes = pcon->getNPlanes();
+  std::vector<double> z(nPlanes);
+  std::vector<double> rmn(nPlanes);
+  std::vector<double> rmx(nPlanes);
+  
+  for (unsigned s = 0; s < nPlanes; s++) {
     z[s] = pcon->getZPlane (s);
     rmn[s] = pcon->getRMinPlane (s);
     rmx[s] = pcon->getRMaxPlane (s);
   }
-  m_polyhedron = std::make_unique<SbPolyhedronPcon> (pcon->getSPhi(), pcon->getDPhi(), pcon->getNPlanes (), z, rmn, rmx);
+  m_polyhedron = std::make_unique<SbPolyhedronPcon> (pcon->getSPhi(), pcon->getDPhi(), nPlanes, z.data(), rmn.data(), rmx.data());
   
-  delete[]z;
-  delete[]rmn;
-  delete[]rmx;
 }
 
 void SbPolyhedrizeAction::handlePgon(const GeoPgon *pgon)
 {
-  double *z   = new double[pgon->getNPlanes ()];
-  double *rmn = new double[pgon->getNPlanes ()];
-  double *rmx = new double[pgon->getNPlanes ()];
-
-  for (unsigned s = 0; s < pgon->getNPlanes (); s++) {
+  const auto nPlanes = pgon->getNPlanes();
+  std::vector<double> z(nPlanes);
+  std::vector<double> rmn(nPlanes);
+  std::vector<double> rmx(nPlanes);
+  
+  for (unsigned s = 0; s < nPlanes; s++) {
     z[s]   = pgon->getZPlane (s);
     rmn[s] = pgon->getRMinPlane (s);
     rmx[s] = pgon->getRMaxPlane (s);
   }
-  m_polyhedron = std::make_unique<SbPolyhedronPgon> (pgon->getSPhi(), pgon->getDPhi(), pgon->getNSides(), pgon->getNPlanes (), z, rmn, rmx);
-  
-  delete[]z;
-  delete[]rmn;
-  delete[]rmx;
+  m_polyhedron = std::make_unique<SbPolyhedronPgon> (pgon->getSPhi(), pgon->getDPhi(), pgon->getNSides(), nPlanes, z.data(), rmn.data(), rmx.data());
 }
 
 void SbPolyhedrizeAction::handleTrap(const GeoTrap *trap)
@@ -244,7 +239,7 @@ void SbPolyhedrizeAction::handleTessellatedSolid(const GeoTessellatedSolid *tess
   }
 
   // ______ Create Polyhedron itself ______
-  SbPolyhedronArbitrary* polyhedron=  new SbPolyhedronArbitrary(vertexList.size(),tessellated->getNumberOfFacets());
+  auto polyhedron=  std::make_unique<SbPolyhedronArbitrary>(vertexList.size(),tessellated->getNumberOfFacets());
 
   // add vertices from the list
   for(size_t vertexInd=0;  vertexInd<vertexList.size(); ++vertexInd) {
@@ -265,7 +260,7 @@ void SbPolyhedrizeAction::handleTessellatedSolid(const GeoTessellatedSolid *tess
   }
 
   polyhedron->Finalize();
-  m_polyhedron.reset(polyhedron);
+  m_polyhedron = std::move(polyhedron);
 }
 
 void SbPolyhedrizeAction::handleGenericTrap(const GeoGenericTrap *gentrap)
@@ -277,10 +272,10 @@ void SbPolyhedrizeAction::handleGenericTrap(const GeoGenericTrap *gentrap)
   m_polyhedron = std::make_unique<SbPolyhedronGenericTrap>(gentrap->getZHalfLength(),vertices);
 }
 
-SbPolyhedron * SbPolyhedrizeAction::getPolyhedron()
+std::unique_ptr<SbPolyhedron> SbPolyhedrizeAction::getPolyhedron()
 {
  //transfer ownership via raw ptr
-  return m_polyhedron.release();
+  return std::move(m_polyhedron);
 }
 
 

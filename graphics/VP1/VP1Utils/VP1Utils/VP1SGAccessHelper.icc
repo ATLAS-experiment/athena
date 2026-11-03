@@ -25,27 +25,18 @@ inline const T* VP1SGAccessHelper::retrieve( const QString& key ) const
     return 0;
   }
 
-  const T* t(0);
-  bool exception = true;
-  // StatusCode sc;
+  const T* t{};
   try {
     t = storeGate()->retrieve<const T>(key.toStdString());
-    exception = false;
   } catch (const std::runtime_error& e) {
-    exception = true;
-    t = 0;
-  }
-  if (exception ) {
     message("ERROR: Exception thrown during call to StoreGateSvc::retrieve(..) with key="+key);
-    // sc.isFailure();//To make sure it is checked.
-    return 0;
+    return nullptr;
   }
   if (!t) {
     message("ERROR: Failed StoreGateSvc::retrieve(..) with key="+key+" claimed to be succesful, but resulted in NULL pointer.");
-    return 0;
+    return nullptr;
   }
-  if (VP1Msg::verbose())
-    messageVerbose("Succesfully retrieved collection "+key);
+  if (VP1Msg::verbose()) messageVerbose("Succesfully retrieved collection "+key);
   return t;
 }
 
@@ -69,22 +60,17 @@ inline bool VP1SGAccessHelper::retrieve(SG::ConstIterator<T>& begin, SG::ConstIt
     return false;
   }
 
-  bool exception = true;
-  StatusCode sc;
+  bool ok{true};
   try {
-    sc = storeGate()->retrieve(begin,end);
-    exception = false;
+    ok = storeGate()->retrieve(begin,end).isSuccess();
   } catch (const std::runtime_error& e) {
-    exception = true;
-  }
-  if (exception) {
     QString str("ERROR: Exception thrown during call to StoreGateSvc::retrieve(SG::ConstIterator<"
 		+QString(typeid(T).name())+">,SG::ConstIterator<"+QString(typeid(T).name())+">)"); 
     silent ? messageVerbose(str) : message(str);
-    sc.isFailure();//To make sure it is checked.
     return false;
   }
-  if (sc.isFailure()) {
+  
+  if (not ok) {
     QString str( "ERROR: Failed StoreGateSvc::retrieve(SG::ConstIterator<"
 		 +QString(typeid(T).name())+">,SG::ConstIterator<"
 		 +QString(typeid(T).name())+">)");
