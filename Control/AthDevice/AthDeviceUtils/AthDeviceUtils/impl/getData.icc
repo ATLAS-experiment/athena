@@ -11,6 +11,63 @@ vecmem::data::vector_view<T> getData(CxxUtils::span<T> data) {
           data.data()};
 }
 
+template <typename T, typename ALLOCATOR>
+vecmem::data::jagged_vector_data<const T> getData(
+    CxxUtils::span<const std::vector<T, ALLOCATOR>> data) {
+
+  // Get the size of the "outer vector".
+  const std::size_t size = data.size();
+
+  // Construct the object to be returned.
+  assert(std::pmr::get_default_resource() != nullptr);
+  vecmem::data::jagged_vector_data<const T> result(
+      vecmem::details::narrow_size<
+          typename vecmem::data::jagged_vector_data<const T>::size_type>(size),
+      *(std::pmr::get_default_resource()));
+
+  // Helper local type definition(s).
+  using value_type =
+      typename vecmem::data::jagged_vector_data<const T>::value_type;
+  using size_type = typename value_type::size_type;
+
+  // Fill the result object with information.
+  for (std::size_t i = 0; i < size; ++i) {
+    result.host_ptr()[i] =
+        value_type(static_cast<size_type>(data[i].size()), data[i].data());
+  }
+
+  // Return the created object.
+  return result;
+}
+
+template <typename T, typename ALLOCATOR>
+vecmem::data::jagged_vector_data<T> getData(
+    CxxUtils::span<std::vector<T, ALLOCATOR>> data) {
+
+  // Get the size of the "outer vector".
+  const std::size_t size = data.size();
+
+  // Construct the object to be returned.
+  assert(std::pmr::get_default_resource() != nullptr);
+  vecmem::data::jagged_vector_data<T> result(
+      vecmem::details::narrow_size<
+          typename vecmem::data::jagged_vector_data<T>::size_type>(size),
+      *(std::pmr::get_default_resource()));
+
+  // Helper local type definition(s).
+  using value_type = typename vecmem::data::jagged_vector_data<T>::value_type;
+  using size_type = typename value_type::size_type;
+
+  // Fill the result object with information.
+  for (std::size_t i = 0; i < size; ++i) {
+    result.host_ptr()[i] =
+        value_type(static_cast<size_type>(data[i].size()), data[i].data());
+  }
+
+  // Return the created object.
+  return result;
+}
+
 }  // namespace AthDevice::Details
 
 #endif  // ATHDEVICEUTILS_DETAILS_GETDATA_ICC

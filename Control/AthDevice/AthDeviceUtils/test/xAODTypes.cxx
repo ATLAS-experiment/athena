@@ -12,4 +12,9 @@ AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(SimplexAODObject, int, intVar, setIntVar)
 AUXSTORE_PRIMITIVE_SETTER_AND_GETTER(SimplexAODObject, float, floatVar,
                                      setFloatVar)
 
+AUXSTORE_OBJECT_SETTER_AND_GETTER(JaggedxAODObject, std::vector<unsigned int>,
+                                  unsignedVectorVar, setUnsignedVectorVar)
+AUXSTORE_OBJECT_SETTER_AND_GETTER(JaggedxAODObject, std::vector<double>,
+                                  doubleVectorVar, setDoubleVectorVar)
+
 }  // namespace AthDeviceUtilsTest

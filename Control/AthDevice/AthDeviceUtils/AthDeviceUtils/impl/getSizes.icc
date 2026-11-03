@@ -1,0 +1,106 @@
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+#ifndef ATHDEVICEUTILS_DETAILS_GETSIZES_ICC
+#define ATHDEVICEUTILS_DETAILS_GETSIZES_ICC
+
+// Local include(s).
+#include "AthDeviceUtils/details/AccessorTuple.h"
+
+// VecMem include(s).
+#include <vecmem/edm/details/schema_traits.hpp>
+
+// System include(s).
+#include <stdexcept>
+
+namespace AthDevice::Details {
+
+/// Technical base class for @c GetSizesImpl
+template <typename T>
+struct GetSizesImpl {};
+
+/// Class helping with implementing @c AthDevice::Details::getSizes
+///
+/// It allows us to iterate through the xAOD columns, and find the first jagged
+/// vector that we could take the size(s) from. It has to be a struct and not
+/// simply a function, because we need to give two parameter packs to it.
+/// Without either of them appearing in a function parameter.
+///
+template <typename... VARTYPES>
+struct GetSizesImpl<vecmem::edm::schema<VARTYPES...>> {
+
+  template <std::size_t INDEX, Concepts::SoAColumn... COLUMNS,
+            typename ACCESSOR_TUPLE>
+  static std::vector<std::size_t> get(const SG::AuxVectorBase& input,
+                                      ACCESSOR_TUPLE& accessors) {
+
+    static_assert(INDEX < sizeof...(COLUMNS), "Index out of bounds!");
+    static_assert(vecmem::edm::details::has_jagged_vector<
+                      vecmem::edm::schema<VARTYPES...>>::value,
+                  "No jagged vector found in schema!");
+
+    // Get the xAOD column accessor, and the index of the VecMem column.
+    const auto& acc = std::get<INDEX>(accessors);
+    constexpr std::size_t index =
+        std::tuple_element_t<INDEX, std::tuple<COLUMNS...>>::index;
+
+    if constexpr (vecmem::edm::type::details::is_jagged_vector_v<
+                      std::tuple_element_t<index, std::tuple<VARTYPES...>>>) {
+
+      // Construct the vector of sizes for this jagged vector column.
+      std::vector<std::size_t> result;
+      const auto dataSpan = acc.getDataSpan(input);
+      result.reserve(dataSpan.size());
+      for (const auto& vec : dataSpan) {
+        result.push_back(vec.size());
+      }
+
+      // In debug mode make sure that all the other jagged vector columns would
+      // have the exact same sizes.
+      auto nextSizes = [&]() -> std::vector<std::size_t> {
+        if constexpr (INDEX + 1 < sizeof...(COLUMNS)) {
+          return get<INDEX + 1, COLUMNS...>(input, accessors);
+        } else {
+          return {};
+        }
+      }();
+      assert([&]() {
+        const std::vector<std::size_t> sizes = nextSizes();
+        return (std::equal(result.begin(), result.end(), sizes.begin(),
+                           sizes.end()) ||
+                sizes.empty());
+      }());
+
+      // Return the sizes.
+      return result;
+
+    } else if constexpr (INDEX + 1 < sizeof...(COLUMNS)) {
+      // If we didn't find a jagged vector yet, continue.
+      return get<INDEX + 1, COLUMNS...>(input, accessors);
+    }
+
+    // Getting here is an error, unless we are debugging the code.
+#ifdef NDEBUG
+    throw std::logic_error("No jagged vector found in schema!?!");
+#else
+    return {};
+#endif
+  }
+};
+
+template <typename SCHEMA, Concepts::SoAColumn... COLUMNS>
+std::vector<std::size_t> getSizes(const SG::AuxVectorBase& input,
+                                  const std::tuple<COLUMNS...>& columns) {
+
+  // Construct the tuple of xAOD accessors.
+  static const auto accessors =
+      Details::AccessorTuple<SCHEMA>::get_const(columns);
+  static_assert(
+      std::tuple_size_v<decltype(accessors)> == sizeof...(COLUMNS),
+      "Number of accessors does not match number of column definitions.");
+
+  // Get the answer with the help of the GetSizesImpl class.
+  return GetSizesImpl<SCHEMA>::template get<0, COLUMNS...>(input, accessors);
+}
+
+}  // namespace AthDevice::Details
+
+#endif  // ATHDEVICEUTILS_DETAILS_GETSIZES_ICC
