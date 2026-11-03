@@ -67,3 +67,8 @@ atlas_add_test( VP1SnapshotWorkaround
 atlas_add_test( VP1GLXShim
    SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/VP1GLXShim_test.py
    POST_EXEC_SCRIPT noerror.sh )
+
+# Missing muon RDOs must not prevent viewing HITS or partial detector inputs.
+atlas_add_test( VP1MuonRdoToDigitConfig
+   SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/VP1MuonRdoToDigitConfig_test.py
+   POST_EXEC_SCRIPT noerror.sh )

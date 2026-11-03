@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////
@@ -22,6 +22,7 @@
 #include <QLabel>
 #include <QSpacerItem>
 #include <QVBoxLayout>
+#include <QVariant>
 
 
 //_____________________________________________________________________________________________________________
@@ -75,7 +76,9 @@ QWidget * VP1ControllerHelper::compositionController( const QList<IVP1System*>& 
   //Add checkboxes for switching systems on/off
   for (int i = 0; i < system2switchable.count(); ++i) {
     QCheckBox * checkBox = new QCheckBox(tab_general);
-    checkBox->setText(system2switchable.at(i).first->name());
+    // A General-tab label may differ from the persistent system name.
+    const QString label = system2switchable.at(i).first->property("vp1SystemLabel").toString();
+    checkBox->setText(label.isEmpty() ? system2switchable.at(i).first->name() : label);
     QString info(system2switchable.at(i).first->information());
     if (!info.isEmpty())
       checkBox->setToolTip(info);

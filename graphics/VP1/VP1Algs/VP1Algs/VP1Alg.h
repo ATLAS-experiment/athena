@@ -93,7 +93,7 @@ class VP1Alg: public AthAlgorithm,
   std::string m_initialCruiseMode;//"NONE", "EVENT", "TAB", "BOTH".
   unsigned m_initialCruiseSeconds;
 
-  bool m_noGui;//For testing job-options in RTT
+  bool m_noGui;//For testing job-options in tests and for batch-mode
 
   // Properties for multiple input files (mf)
   bool m_mfOn;                        // Flag to turn multiple files ON/OFF. Default OFF

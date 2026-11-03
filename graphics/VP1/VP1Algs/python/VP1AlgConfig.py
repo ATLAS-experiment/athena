@@ -92,6 +92,45 @@ def VP1AlgCfg(flags, name="VP1AlgCA", **kwargs):
     return result
 
 
+def MuonRdoToDigitCfg(flags):
+    """Decode only muon RDO containers present in the input metadata.
+
+    Keep existing digits rather than scheduling a second writer for their keys.
+    Missing detector inputs must not prevent displaying the other collections.
+    """
+    from AthenaCommon.Logging import logging
+
+    log = logging.getLogger("VP1")
+    cfg = ComponentAccumulator()
+    collections = set(flags.Input.TypedCollections)
+    prefix = flags.Overlay.BkgPrefix if flags.Common.isOverlay else ""
+    conversions = (
+        ("MDT", "MdtCsmContainer", "MDTCSM", "MdtDigitContainer", "MDT_DIGITS",
+         "MdtRdoToMdtDigitCfg"),
+        ("MM", "Muon::MM_RawDataContainer", "MMRDO", "MmDigitContainer", "MM_DIGITS",
+         "MM_RdoToDigitCfg"),
+        ("sTGC", "Muon::STGC_RawDataContainer", "sTGCRDO", "sTgcDigitContainer", "sTGC_DIGITS",
+         "STGC_RdoToDigitCfg"),
+    )
+    for detector, rdo_type, rdo_key, digit_type, digit_key, converter in conversions:
+        rdo = f"{rdo_type}#{prefix}{rdo_key}"
+        digits = f"{digit_type}#{prefix}{digit_key}"
+        if digits in collections:
+            log.info("Using existing %s digits from %s; RDO conversion is unnecessary",
+                     detector, prefix + digit_key)
+            continue
+        if rdo not in collections:
+            log.debug("Input has no %s; skipping %s RDO-to-digit conversion. "
+                        "Other VP1 collections remain available.", rdo, detector)
+            continue
+
+        from MuonConfig import MuonByteStreamCnvTestConfig
+
+        cfg.merge(getattr(MuonByteStreamCnvTestConfig, converter)(flags))
+        log.info("Configured %s RDO-to-digit conversion from %s", detector, prefix + rdo_key)
+    return cfg
+
+
 def SetupVP1():
     from AthenaConfiguration.Enums import Format
     from AthenaCommon.Logging import logging
@@ -105,7 +144,6 @@ def SetupVP1():
 
     flags = initConfigFlags()
     flags.Concurrency.NumThreads = 0
-
     # ^ VP1 will not work with the scheduler, since its condition/data dependencies are not known in advance
     # More in details: the scheduler needs to know BEFORE the event, what the dependencies of each Alg are.
     # So for VP1, no dependencies are declared, which means the conditions data is not there.
@@ -322,9 +360,9 @@ def SetupVP1():
 
     # DEBUG -- inspect the flags
     flags.dump()
-    # flags._loadDynaFlags('GeoModel')
-    # flags._loadDynaFlags('Detector')
-    # flags.dump('Detector.(Geometry|Enable)', True)
+    # flags._loadDynaFlags('GeoModel') # for debug
+    # flags._loadDynaFlags('Detector') # for debug
+    # flags.dump('Detector.(Geometry|Enable)', True) # for debug
 
     # ++++ Now we setup the actual configuration ++++
 
@@ -400,6 +438,8 @@ def SetupVP1():
 
     if args.live or args.livelocal:
         setup_live_mode(args, vp1config)
+
+    cfg.merge(MuonRdoToDigitCfg(flags))
 
     # configure VP1
     cfg.merge(VP1AlgCfg(flags, **vp1config))
