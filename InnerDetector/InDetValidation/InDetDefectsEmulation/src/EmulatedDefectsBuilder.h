@@ -153,7 +153,7 @@ namespace EmulatedDefectsBuilder {
       }
 
       auto [key_start,key_end ] = key_range;
-      if (key_end < key_start) {
+      if (T_ModuleHelper::makeBaseKey(key_end) < T_ModuleHelper::makeBaseKey(key_start)) {
          std::swap(key_start,key_end);
       }
       if (helper.getRow(key_end)+1u==helper.rowsPerCircuit()) {
@@ -211,28 +211,29 @@ namespace EmulatedDefectsBuilder {
          inserted_something=true;
       }
 
+      auto base_key_end=T_ModuleHelper::makeBaseKey(key_end);
       // remove all keys which are included in the range up to end_key
       // if end_key is included in a range, then do not insert
       while (iter != module_defects.begin()) {
          --iter; // go to the key which is larger than key_start
 
          // if that key is larger or equal to key_end then stop.
-         if (T_ModuleHelper::makeBaseKey(*iter) >= key_end) {
+         if (T_ModuleHelper::makeBaseKey(*iter) >= base_key_end) {
 
             // if key_end is included in a range or connected or equal to iter
             // then iter marks already an extended range, otherwise key_end needs to be inserted.
             // (prev key can be smaller than key_end if key_end is extended towards the beginning of the next column
             // and/or prev key extend to above the last r
-            if (is_range || T_ModuleHelper::makeBaseKey(*iter) == key_end ||  makePrevKey(helper,*iter)  <= key_end) {
+            if (is_range || T_ModuleHelper::makeBaseKey(*iter) == base_key_end ||  makePrevKey(helper,*iter)  <= base_key_end) {
                // if the end key and iter are connected but not the same, and the end key not included in a range with
                // a higher defect type, then treat as inserted.
-               inserted_something |= ( T_ModuleHelper::makeBaseKey(*iter) > key_end ) && (!is_range || defect_type_key_component > helper.getDefectTypeComponent(*iter)) ;
+               inserted_something |= ( T_ModuleHelper::makeBaseKey(*iter) > base_key_end ) && (!is_range || defect_type_key_component > helper.getDefectTypeComponent(*iter)) ;
                // if iter is the start of a range than it is replaced by a new range start, so needs to be erased
                if (T_ModuleHelper::isRangeKey(*iter)) {
                   module_defects.erase(iter);
                }
                else {
-                  if (T_ModuleHelper::makeBaseKey(*iter) == key_end) {
+                  if (T_ModuleHelper::makeBaseKey(*iter) == base_key_end) {
                      if ( defect_type_key_component > helper.getDefectTypeComponent(*iter)) {
                         *iter = (*iter & (~T_ModuleHelper::TYPE_MASK)) |  defect_type_key_component;
                      }
