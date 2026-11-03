@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -41,16 +41,7 @@
 // Constructor 
 TileMuonReceiverDecisionToNtuple::TileMuonReceiverDecisionToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_ntuplePtr(0)
-  , m_ntupleID("TileMuRcvNt") // usualy it is a number hxxx, but here we use a name
-  , m_ntupleLoc("/FILE1")
-  , m_TileMuRcvContainer("TileMuRcvCnt")
 {
-    declareProperty("TileMuonReceiverContainer" , m_TileMuRcvContainer); 
-    declareProperty("NTupleLoc"                 , m_ntupleLoc);
-    declareProperty("NTupleID"                  , m_ntupleID);
-    declareProperty("NDecisionBits"             , m_nBits=4);
-    declareProperty("NMaxTrigInputs"            , m_nMaxTrigInputs=128);
 }
 
 
@@ -67,7 +58,7 @@ StatusCode TileMuonReceiverDecisionToNtuple::initialize()
 { 
   ATH_MSG_INFO( "TileMuonReceiverDecisionToNtuple::initialize begins" );
 
-  m_ntupleLoc="/NTUPLES" + m_ntupleLoc;
+  m_ntupleLoc="/NTUPLES" + m_ntupleLoc.value();
 
   SmartDataPtr<NTuple::Directory> DirPtr(ntupleSvc(), m_ntupleLoc);
 
@@ -105,7 +96,7 @@ StatusCode TileMuonReceiverDecisionToNtuple::initialize()
   //                              - id mod and part                                         | id is a convoluted number combining part and mod eg 356 part:3 mod:56 -> NTuple::Array for ech qty
   //
 
-  CHECK (  m_ntuplePtr->addItem("TileMuRcv/nTrigInputs"        , m_nTrigInput,0,m_nMaxTrigInputs) );
+  CHECK (  m_ntuplePtr->addItem("TileMuRcv/nTrigInputs"        , m_nTrigInput,0,m_nMaxTrigInputs.value()) );
   CHECK (  m_ntuplePtr->addItem("TileMuRcv/trigThr_Hi_D5andD6" , m_thershold_hi_d5andd6)          );
   CHECK (  m_ntuplePtr->addItem("TileMuRcv/trigThr_Lo_D5andD6" , m_thershold_lo_d5andd6)          );
   CHECK (  m_ntuplePtr->addItem("TileMuRcv/trigThr_Hi_D6"      , m_thershold_hi_d6)               );
@@ -132,7 +123,7 @@ StatusCode TileMuonReceiverDecisionToNtuple::execute(const EventContext& /*ctx*/
   // step1: read container and declare temporary vectors
   //
   const TileMuonReceiverContainer *TileMuRcvCnt = nullptr;
-  CHECK( evtStore()->retrieve(TileMuRcvCnt, m_TileMuRcvContainer) );
+  CHECK( evtStore()->retrieve(TileMuRcvCnt, m_TileMuRcvContainer.value()) );
 
   // step2: to fill items in ntuple
   //
@@ -174,7 +165,7 @@ StatusCode TileMuonReceiverDecisionToNtuple::execute(const EventContext& /*ctx*/
   for(; it != end; ++it) {
 
     if (m_nTrigInput >= m_nMaxTrigInputs) {
-      ATH_MSG_WARNING(" Number of input objects exceeds max size = " << m_nMaxTrigInputs);
+      ATH_MSG_WARNING(" Number of input objects exceeds max size = " << m_nMaxTrigInputs.value());
       break;
     }
     

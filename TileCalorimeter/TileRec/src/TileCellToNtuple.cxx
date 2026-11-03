@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -40,18 +40,7 @@ const int max_chan=5216;
 // Constructor & deconstructor
 TileCellToNtuple::TileCellToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_ntuplePtr(0)
-  , m_ntupleID("h110")
-  , m_ntupleLoc("/FILE1/TileRec")
-  , m_scinCells(true)
-  , m_cellContainer("MBTSContainer") // "TileCellContainerKey";
-  , m_tileID(0)
-  , m_tileTBID(0)
 {
-  declareProperty("TileCellContainer", m_cellContainer);    
-  declareProperty("NTupleLoc", m_ntupleLoc);
-  declareProperty("NTupleID", m_ntupleID);
-  declareProperty("ScinCells", m_scinCells);
 }
 
 TileCellToNtuple::~TileCellToNtuple()
@@ -67,7 +56,7 @@ StatusCode TileCellToNtuple::initialize()
   CHECK( detStore()->retrieve(m_tileID) );
   CHECK( detStore()->retrieve(m_tileTBID) );
 
-  m_ntupleLoc="/NTUPLES" + m_ntupleLoc;
+  m_ntupleLoc="/NTUPLES" + m_ntupleLoc.value();
 
   SmartDataPtr<NTuple::Directory> DirPtr(ntupleSvc(), m_ntupleLoc);
   if(!DirPtr) DirPtr = ntupleSvc()->createDirectory(m_ntupleLoc);
@@ -117,7 +106,7 @@ StatusCode TileCellToNtuple::execute(const EventContext& /*ctx*/)
 
     // step1: read Cells from TDS
     const TileCellContainer* CellCnt = nullptr;
-    CHECK( evtStore()->retrieve(CellCnt, m_cellContainer) );
+    CHECK( evtStore()->retrieve(CellCnt, m_cellContainer.value()) );
 
     // step2: to fill items in ntuple
     TileCellContainer::const_iterator it = CellCnt->begin();
@@ -146,7 +135,7 @@ StatusCode TileCellToNtuple::execute(const EventContext& /*ctx*/)
 
     // step1: read Cells from TDS
     const CaloCellContainer* CellCnt = nullptr;
-    CHECK( evtStore()->retrieve(CellCnt, m_cellContainer) );
+    CHECK( evtStore()->retrieve(CellCnt, m_cellContainer.value()) );
 
     // step2: to fill items in ntuple
     CaloCellContainer::const_iterator it = CellCnt->beginConstCalo(CaloCell_ID::TILE);

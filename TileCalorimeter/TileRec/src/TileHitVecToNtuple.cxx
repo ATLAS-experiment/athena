@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -33,18 +33,7 @@
 
 TileHitVecToNtuple::TileHitVecToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_ntuplePtr(0)
-  , m_ntupleID("h32")
-  , m_ntupleLoc("/FILE1/TileRec")
-  , m_hitVector("TileHitVec")
-  , m_tileID(0)
 {
-  declareProperty("TileHitVector", m_hitVector);
-  declareProperty("NTupleLoc", m_ntupleLoc);
-  declareProperty("NTupleID", m_ntupleID);
-  declareProperty("CommitNtuple", m_commitNtuple = true);
-  declareProperty("MaxLength", m_maxLength = 4999);
-  
 }
 
 TileHitVecToNtuple::~TileHitVecToNtuple()
@@ -64,7 +53,7 @@ StatusCode TileHitVecToNtuple::initialize()
   
   CHECK( detStore()->retrieve(m_tileID) );
   
-  m_ntupleLoc="/NTUPLES" + m_ntupleLoc;
+  m_ntupleLoc="/NTUPLES" + m_ntupleLoc.value();
   
   SmartDataPtr<NTuple::Directory> DirPtr(ntupleSvc(), m_ntupleLoc);
   if(!DirPtr) DirPtr=ntupleSvc()->createDirectory(m_ntupleLoc);
@@ -91,7 +80,7 @@ StatusCode TileHitVecToNtuple::initialize()
 
   }
   
-  CHECK( m_ntuplePtr->addItem("TileHit/nhit",m_nchan,0,m_maxLength) );
+  CHECK( m_ntuplePtr->addItem("TileHit/nhit",m_nchan,0,m_maxLength.value()) );
   CHECK( m_ntuplePtr->addItem("TileHit/totalE",m_tolE) );
   CHECK( m_ntuplePtr->addItem("TileHit/totalE05",m_tolE0) );
   CHECK( m_ntuplePtr->addItem("TileHit/totalE5",m_tolE1) );
@@ -122,7 +111,7 @@ StatusCode TileHitVecToNtuple::execute(const EventContext& /*ctx*/)
   
   // step1: read TileHits from TDS
   const TileHitVector * inputHits = nullptr;
-  CHECK( evtStore()->retrieve(inputHits, m_hitVector) );
+  CHECK( evtStore()->retrieve(inputHits, m_hitVector.value()) );
   
   m_nchan = 0;
   m_tolE = 0.0;
@@ -187,7 +176,7 @@ StatusCode TileHitVecToNtuple::execute(const EventContext& /*ctx*/)
 
     ++n_hit;
     if (m_nchan >= m_maxLength) {
-      ATH_MSG_DEBUG( "Number of hits exceeds maximum (" << m_maxLength
+      ATH_MSG_DEBUG( "Number of hits exceeds maximum (" << m_maxLength.value()
           << "), ignore all the rest" );
       break;
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //********************************************************************************************************
@@ -49,12 +49,12 @@ public:
     StatusCode finalize();
 
 private:
-    NTuple::Tuple* m_ntuplePtr;
-    std::string    m_ntupleID;
-    std::string    m_ntupleLoc;
+    NTuple::Tuple* m_ntuplePtr{nullptr};
+    Gaudi::Property<std::string> m_ntupleID{this, "NTupleID", "TileMuRcvNt", "ID of ntuple"}; // usualy it is a number hxxx, but here we use a name
+    Gaudi::Property<std::string> m_ntupleLoc{this, "NTupleLoc", "/FILE1", "pathname of ntuple file"};
 
-    int m_nMaxTrigInputs; 
-    int m_nBits;          
+    Gaudi::Property<int> m_nMaxTrigInputs{this, "NMaxTrigInputs", 128, "Maximum number of trigger inputs"};
+    Gaudi::Property<int> m_nBits{this, "NDecisionBits", 4, "Number of decision bits"};
 //    int m_nTrigInput;
     
     NTuple::Item<int>     m_nTrigInput;    
@@ -79,7 +79,8 @@ private:
     //const TileTBID*   m_tileTBID;
     //const TileID*     m_tileID;
 
-    std::string m_TileMuRcvContainer;
+    Gaudi::Property<std::string> m_TileMuRcvContainer{this, "TileMuonReceiverContainer", "TileMuRcvCnt",
+                                                      "key value of Tilecal decision for the tile-d L1Muon Trigger in TDS"};
     std::string m_TileMuRcvContainer_dbg;
 };
 
