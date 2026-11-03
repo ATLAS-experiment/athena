@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1Utils/SoVisualizeAction.h"
@@ -133,11 +133,10 @@ void SoVisualizeAction::handleShape(const GeoShape *shape)
     // We don't recognize it.  Try to polyhedrize it!
     SbPolyhedrizeAction a;
     shape->exec(&a);
-    const SbPolyhedron *poly =a.getPolyhedron();
+    auto poly = a.getPolyhedron();
     if (poly) {
       //SoPolyhedron takes ownership of poly
-      SoPolyhedron *myPoly = new SoPolyhedron(poly);
-      m_shape=myPoly;
+      m_shape=new SoPolyhedron(poly.release());
     }
 #ifndef BUILDVP1LIGHT
   }

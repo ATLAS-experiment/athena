@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ---------------------------------------------------------------------//
@@ -56,7 +56,7 @@ class SbPolyhedrizeAction : public GeoShapeAction
 
       virtual void handleGenericTrap (const GeoGenericTrap *gentrap);
       
-      SbPolyhedron * getPolyhedron();
+      std::unique_ptr<SbPolyhedron> getPolyhedron();
 
 
   private:
