@@ -797,7 +797,347 @@
            </item>
           </layout>
          </widget>
+        <widget class="QWidget" name="tab_tgcDigits">
+         <attribute name="title">
+          <string>TGC digits</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="tgcDigitsLayout">
+          <property name="alignment">
+           <set>Qt::AlignTop</set>
+          </property>
+          <item>
+           <widget class="QGroupBox" name="groupBox_tgcChannelTypes">
+            <property name="title">
+             <string>Channel types</string>
+            </property>
+            <layout class="QVBoxLayout" name="tgcChannelTypesLayout">
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowStrips">
+               <property name="text">
+                <string>Strips</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowWires">
+               <property name="text">
+                <string>Wire gangs</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="groupBox_tgcBunchCrossings">
+            <property name="title">
+             <string>Bunch crossings</string>
+            </property>
+            <layout class="QVBoxLayout" name="tgcBunchCrossingsLayout">
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowPrevious">
+               <property name="text">
+                <string>Previous</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowCurrent">
+               <property name="text">
+                <string>Current</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowNext">
+               <property name="text">
+                <string>Next</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowNextNext">
+               <property name="text">
+                <string>Next-next</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowUndefined">
+               <property name="text">
+                <string>Undefined</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_tgcShowUnknown">
+               <property name="text">
+                <string>Unknown BC tags</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <spacer name="tgcBottomSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>0</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </widget>
+<widget class="QWidget" name="tab_rpcDigits">
+         <attribute name="title">
+          <string>RPC digits</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="rpcDigitsLayout">
+          <item>
+           <widget class="QGroupBox" name="group_rpcShowEta">
+            <property name="title">
+             <string>Strip views</string>
+            </property>
+            <layout class="QVBoxLayout" name="layout_rpcShowEta">
+             <item>
+              <widget class="QCheckBox" name="checkBox_rpcShowEta">
+               <property name="text">
+                <string>Eta strips</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_rpcShowPhi">
+               <property name="text">
+                <string>Phi strips</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="group_rpcShowPrimarySide">
+            <property name="title">
+             <string>Readout sides</string>
+            </property>
+            <layout class="QVBoxLayout" name="layout_rpcShowPrimarySide">
+             <item>
+              <widget class="QCheckBox" name="checkBox_rpcShowPrimarySide">
+               <property name="text">
+                <string>Primary side (stripSide = false)</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="checkBox_rpcShowOppositeSide">
+               <property name="text">
+                <string>Opposite side (stripSide = true)</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBox_rpcKeepMissingToT">
+            <property name="text">
+             <string>Keep digits without ToT</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+            <property name="toolTip">
+             <string>Negative ToT means no measurement (typically legacy RPC digits). While checked, these digits bypass the ToT range, but all other cuts still apply. Uncheck to require a ToT measurement. An inverted range rejects all digits.</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="group_rpcAllowedTime">
+            <property name="title">
+             <string>Time [ns]</string>
+            </property>
+            <property name="toolTip">
+             <string>Inclusive bounds. Unchecked bounds are unrestricted. If minimum exceeds maximum, no digits pass. Values are compared directly with the stored digit fields.</string>
+            </property>
+            <layout class="QGridLayout" name="layout_rpcAllowedTime">
+             <item row="0" column="0">
+              <widget class="QCheckBox" name="checkBox_rpcAllowedTimeMin">
+               <property name="text">
+                <string>Minimum</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="spinBox_rpcAllowedTimeMin">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-1000000000.000</double>
+               </property>
+               <property name="maximum">
+                <double>1000000000.000</double>
+               </property>
+               <property name="value">
+                <double>0.000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="checkBox_rpcAllowedTimeMax">
+               <property name="text">
+                <string>Maximum</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="spinBox_rpcAllowedTimeMax">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>-1000000000.000</double>
+               </property>
+               <property name="maximum">
+                <double>1000000000.000</double>
+               </property>
+               <property name="value">
+                <double>1000.000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QGroupBox" name="group_rpcAllowedToT">
+            <property name="title">
+             <string>Time over threshold [ns]</string>
+            </property>
+            <property name="toolTip">
+             <string>Inclusive bounds. Unchecked bounds are unrestricted. If minimum exceeds maximum, no digits pass. Values are compared directly with the stored digit fields.</string>
+            </property>
+            <layout class="QGridLayout" name="layout_rpcAllowedToT">
+             <item row="0" column="0">
+              <widget class="QCheckBox" name="checkBox_rpcAllowedToTMin">
+               <property name="text">
+                <string>Minimum</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QDoubleSpinBox" name="spinBox_rpcAllowedToTMin">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>0.000</double>
+               </property>
+               <property name="maximum">
+                <double>1000000000.000</double>
+               </property>
+               <property name="value">
+                <double>0.000</double>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="checkBox_rpcAllowedToTMax">
+               <property name="text">
+                <string>Maximum</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QDoubleSpinBox" name="spinBox_rpcAllowedToTMax">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
+               <property name="decimals">
+                <number>3</number>
+               </property>
+               <property name="minimum">
+                <double>0.000</double>
+               </property>
+               <property name="maximum">
+                <double>1000000000.000</double>
+               </property>
+               <property name="value">
+                <double>1000.000</double>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <spacer name="rpcBottomSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+</widget>
        </item>
        <item>
         <spacer name="cutsBottomSpacer">

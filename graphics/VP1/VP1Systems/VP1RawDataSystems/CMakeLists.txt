@@ -32,3 +32,36 @@ if( CMAKE_CXX_CPPCHECK )
    set_property( TARGET VP1RawDataSystems
       APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
 endif()
+
+# The cut policy test runs without a GUI or OpenGL context.
+atlas_add_test( TgcDigitCuts
+                SOURCES test/TgcDigitCuts_test.cxx
+                LINK_LIBRARIES MuonDigitContainer
+                POST_EXEC_SCRIPT nopost.sh )
+
+# Real RPC identifiers and click output, without a GUI or OpenGL context.
+atlas_add_test( RpcDigitClick
+                SOURCES test/RpcDigitClick_test.cxx
+                LINK_LIBRARIES VP1RawDataSystems VP1Utils MuonDigitContainer
+                               IdDictParser IdDict MuonIdHelpersLib
+                POST_EXEC_SCRIPT nopost.sh )
+
+if( CMAKE_CXX_CPPCHECK )
+   set_property( TARGET VP1RawDataSystems_RpcDigitClick
+      APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+endif()
+
+# Selection/range policy, including legacy digits without ToT measurements.
+atlas_add_test( RpcDigitCuts
+                SOURCES test/RpcDigitCuts_test.cxx
+                LINK_LIBRARIES VP1Base
+                POST_EXEC_SCRIPT nopost.sh )
+
+# Qt built with -reduce-relocations requires -fPIC even for executables.
+# POSITION_INDEPENDENT_CODE would select -fPIE for these test executables,
+# which does not satisfy Qt's x86_64 preprocessor check.
+if( CMAKE_CXX_COMPILE_OPTIONS_PIC )
+   foreach( test_target VP1RawDataSystems_RpcDigitClick VP1RawDataSystems_RpcDigitCuts )
+      target_compile_options( ${test_target} PRIVATE ${CMAKE_CXX_COMPILE_OPTIONS_PIC} )
+   endforeach()
+endif()
