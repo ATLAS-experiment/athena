@@ -33,6 +33,9 @@
 // The getJetQuantity function is used to retrieve the jet values to compare to the bounds
 
 class BTaggingBoundsHandler {
+  // The grid needs the bounds of the handlers to build its look-up table
+  template<class handlerClass> friend class BTaggingGridHandler;
+
   public:
     // Function returning the value of a given variable for a jet e.g. the jet pT in GeV
     using JetQuantityGetter = std::function<float(const xAOD::Jet&, BTaggingToolUtil::varType)>;
@@ -56,15 +59,14 @@ class BTaggingBoundsHandler {
     bool overlaps(const BTaggingBoundsHandler& o) const;
 
     // For printing the list of variables with lower and upper bounds
-    // e.g. "pT: [250, 500], mass: [50, 100]"
-    friend std::ostream& operator<<(std::ostream& os, const BTaggingBoundsHandler& handler);
+    // e.g. "BTaggingBoundsHandler(pT: [250, 500], mass: [50, 100])"
+    friend std::ostream& operator<<(std::ostream& os, const BTaggingBoundsHandler& handler) { return (os << handler.to_string()); }
     // To get the content of the handler as a string
     // Use the operator << function
-    virtual std::string to_string() const {
-      std::ostringstream oss;
-      oss << *this;
-      return oss.str();
-    }
+    virtual std::string to_string() const;
+    // To get only the bounds as string 
+    // e.g. "pT: [250, 500], mass: [50, 100]"
+    std::string onlyBounds_to_string() const;
 
     // Check that the handlers i.e. N-dimensional bins of a set are disjoint
     template<class handlerClass>
@@ -77,15 +79,7 @@ class BTaggingBoundsHandler {
         }
       }
     }
-
-    // Check that, for each key of the map, the handlers of the associated set are disjoint
-    template<class handlerClass>
-    static void checkOverlaps(const std::string& context, const std::map<std::string, std::vector<handlerClass>>& handlersMap) {
-      for (const auto& [key, handlers] : handlersMap) {
-        checkOverlaps(context + " for label " + key, handlers);
-      }
-    }
-
+    
     protected:
       // Function used to retrieve the jet values to compare to the bounds
       JetQuantityGetter m_funcGetJetQuantity;
@@ -126,8 +120,6 @@ class BTaggingBoundsHandler {
       // if neither is less than the other then handlers are equal
       bool operator==(const BTaggingBoundsHandler& o) const { return !(*this < o) && !(*this > o); }
       bool operator!=(const BTaggingBoundsHandler& o) const { return !(*this == o); }
-      
-      
 };
 
 #endif // BTAGGINGBOUNDSHANDLER_H

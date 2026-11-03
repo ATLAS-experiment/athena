@@ -13,6 +13,7 @@
 #include "PATInterfaces/SystematicsCache.h"
 #include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 #include "xAODBTaggingEfficiency/BTaggingBoundsHandler.h"
+#include "xAODBTaggingEfficiency/BTaggingGridBoundsHandler.h"
 #include <nlohmann/json.hpp>
 #include <cmath>
 #include <limits>
@@ -77,18 +78,10 @@ class BTaggingLargeREfficiencyJsonTool: public asg::AsgTool,
       float getScaleFactor() const { return m_MCMCSF; }
 
       // For printing the content of a handler
-      friend std::ostream& operator<<(std::ostream& os, const LargeRMCMCHandler& handler);
-      virtual std::string to_string() const override {
-        std::ostringstream oss;
-        oss << *this;
-        return oss.str();
-      }
+      virtual std::string to_string() const override;
     private:
       float m_MCMCSF = std::numeric_limits<float>::lowest();
   };
-
-  // Declare it also here so one can use the operator<< within the BTaggingLargeREfficiencyJsonTool
-  friend std::ostream& operator<<(std::ostream& os, const LargeRMCMCHandler& handler);
 
   // SF maps
   std::map<std::string, std::vector<float>> m_sfMap;
@@ -97,7 +90,7 @@ class BTaggingLargeREfficiencyJsonTool: public asg::AsgTool,
   
   // mc-to-mc correction maps
   std::map<std::string, std::string> m_mcReference;
-  std::map<std::string, std::vector<LargeRMCMCHandler>> m_mcmcHandlers;
+  std::map<std::string, BTaggingGridBoundsHandler<LargeRMCMCHandler>> m_mcmcHandlers;
 
   std::unique_ptr<SG::ConstAccessor<int>> m_truthLabelAcc;
   std::unique_ptr<SG::ConstAccessor<float>> m_massAcc;
