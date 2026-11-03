@@ -1,6 +1,6 @@
 #!/bin/bash
 # art-description: Run-3 AOD to FTAG NTUP_PHYSVAL and output plots via dcube, on MC23 single lep ttbar with pile-up
-# art-input: mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4162_r14622
+# art-input: mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.AOD.e8514_s4618_r17610
 # art-input-nfiles: 1
 # art-type: grid
 # art-include: main/Athena
