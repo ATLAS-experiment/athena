@@ -21,7 +21,7 @@ def MuonLoosenedNonCalibratedSelectionToolCfg(flags, name="MuonLoosenedNonCalibr
 def MuonSelectionToolCfg(flags, name="MuonSelectionTool", **kwargs):
     """Configure the muon selection tool"""
     acc = ComponentAccumulator()
-    if flags.Muon.scheduleActsReco:
+    if flags.hasFlag("Muon.scheduleActsReco") and flags.Muon.scheduleActsReco:
         acc.setPrivateTools(CompFactory.CP.MuonPhaseIISelectionTool(name))
         return acc
 
