@@ -14,26 +14,23 @@ namespace pool {
   class IStorageSvc;
 }
 
-class DatabaseRegistry;
+class SessionTool;
 class DatabaseHandler;
 
 /** @class MicroSessionManager
- * 
+ *
  * MicroSessionManager is a class taking care of starting
  * sessions for a given major technology and managing
  * the individual database connections.
  *
  */
 
-class MicroSessionManager {
+class MicroSessionManager final {
 public:
   /// Constructor
-  MicroSessionManager( DatabaseRegistry& registry, long technology );
+  MicroSessionManager( SessionTool& sessionTool, long technology, int ageLimit );
   /// Destructor
-  virtual ~MicroSessionManager();
-
-  /// Connects to the storage service
-  bool connect( Io::IoFlag transType, int ageLimit );
+  ~MicroSessionManager();
 
   /// Connects to a database.
   DatabaseHandler* connect( Io::IoFlag transType,
@@ -49,22 +46,19 @@ public:
   /// Fetches the FID by trying to temporatily connect to a database.
   std::string fidForPfn( const std::string& pfn );
 
-  virtual
   bool attributeOfType( const std::string& attributeName,
                         void* data,
                         const std::type_info& typeInfo,
                         const std::string& option );
 
-  virtual
   bool setAttributeOfType( const std::string& attributeName,
                            const void* data,
                            const std::type_info& typeInfo,
                            const std::string& option );
 
 private:
-  DatabaseRegistry&          m_registry;
+  SessionTool&               m_sessionTool;
   pool::IStorageSvc*         m_storageSvc;
-  bool                       m_inSession;
   long                       m_technology;
   std::set<DatabaseHandler*> m_databaseHandlers;
 };
