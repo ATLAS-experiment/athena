@@ -73,7 +73,6 @@ class TrigTauMonAlgBuilder:
   #=============================================
   # Setup for L1Calo monitoring
   #=============================================
-  do_alternative_eTAU_monitoring = False # Run the L1 monitoring again, for the Alt (heuristic) eTAU simulation
 
   def __init__(self, helper):
     from AthenaCommon.Logging import logging
@@ -127,8 +126,6 @@ class TrigTauMonAlgBuilder:
       self.activate_truth = False
       self.logger.debug('Using default monitoring configuration for collisions')
       
-    if self.helper.flags.DQ.Environment == "tier0":
-      self.do_alternative_eTAU_monitoring = True
     # We don't have any configuration specific for Cosmics or HI (the HLT Tau Monitoring is disabled for this one)
     # If we did, we could specify it here
 
@@ -413,24 +410,6 @@ class TrigTauMonAlgBuilder:
       path = f'{self.base_path}/OnlineOnlyVars'
       for trigger in self.L1_items:
         self.bookL1Vars(self.mon_alg_L1_no_offline, path, trigger)
-
-    if self.do_alternative_eTAU_monitoring:
-      self.mon_alg_L1_alt = self._configureAlgorithm(CompFactory.TrigTauMonitorL1Algorithm, 'TrigTauMonAlgL1eTAUAlt')
-      self.mon_alg_L1_alt.Phase1L1eTauRoIKey = 'L1_eTauRoIAltSim' # Use alternative RoIs (with heuristic eTAU algorithm simulation)
-      self.mon_alg_L1_alt.SelectL1ByETOnly = True # We don't have threshold patterns for the Alt RoIs, so we match by ET only
-      self.mon_alg_L1_alt.RequireOfflineTaus = False
-      self.mon_alg_L1_alt.Phase1L1eTauxRoIKey = ''
-
-      l1_items = [item for item in self.L1_items if 'eTAU' in item and not self.getTriggerInfo(item).isL1TauIsolated()] # Only non-isolated eTAU items
-      self.mon_alg_L1_alt.TriggerList = l1_items
-
-      self.logger.info('  |- Booking all histograms')
-      path = f'{self.base_path}/L1eTAUAlt'
-      for trigger in l1_items:
-        for p in ('1P', '3P'):
-          self.bookL1EffHistograms(self.mon_alg_L1_alt, path, trigger, n_prong=p)
-        self.bookL1Vars(self.mon_alg_L1_alt, path, trigger)
-
 
   def bookHLTEffHistograms(self, mon_alg, base_path, trigger, n_prong):
     mon_group_name = f'{trigger}_HLT_Efficiency_{n_prong}'
