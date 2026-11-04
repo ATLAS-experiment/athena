@@ -40,6 +40,14 @@ def RDOtoTracccCellConverterAlgCfg(flags,
     kwargs.setdefault("GeoIdMappingObjectName",     "TracccGeometryIdMapping")
     kwargs.setdefault("CPUCellSorting", not flags.Acts.Device.doCellSorting)
     kwargs.setdefault("UsePixelToTForCellActivation", not flags.Tracking.doPixelDigitalClustering)
+
+     # Configure RegSelTools if using ROI-seeded processing
+    if kwargs.get("RoIs"):
+        from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg, regSelTool_ITkStrip_Cfg
+        kwargs.setdefault('RegSelToolPixel', acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags)))
+        kwargs.setdefault('RegSelToolSCT', acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags)))
+
+
     acc.addEventAlgo(
         CompFactory.ActsTrk.RDOtoTracccCellConverterAlg(name, **kwargs))
     return acc

@@ -7,7 +7,6 @@ from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import FlagEnum
 
-
 class DataLocation(FlagEnum):
     HOST   = "host"    # Athena objects on CPU
     DEVICE = "device"  # Traccc buffers on GPU
@@ -77,6 +76,8 @@ class AccelTrackTrigSequence(InnerTrackerTrigSequence):
         from ActsGPUEventCnv.ActsGPUEventCnvConfig import RDOtoTracccCellConverterAlgCfg
         ca.merge(RDOtoTracccCellConverterAlgCfg(self.flags,
             name=f"RDOtoTracccCellConverterAlg_{self.signature}",
+            RoIs=self.rois,
+            isRoI_Seeded= (False if self.signature == "fullScan" else True),
             TracccCells = "TracccCellCollection",
             ))
 
@@ -111,7 +112,7 @@ class AccelTrackTrigSequence(InnerTrackerTrigSequence):
 
         from ActsConfig.ActsConfigFlags import SeedingStrategy
 
-        if self.flags.Acts.Device.seedingStrategy in [SeedingStrategy.Gbts,SeedingStrategy.GbtsFtf]:
+        if self.flags.Acts.Device.seedingStrategy is SeedingStrategy.Gbts:
             from ActsGPUPatternRecognition.ActsGPUPatternRecognitionConfig import DeviceGBTSSeedingAlgCfg
             ca.merge(DeviceGBTSSeedingAlgCfg(self.flags,
                 name=f"DeviceGBTSSeedingAlg_{self.signature}",
@@ -333,6 +334,7 @@ class AccelTrackTrigSequence(InnerTrackerTrigSequence):
 
     return ca
 
+
   def f100(self) -> ComponentAccumulator:
     import EFTrackConfig.F100Config as F100Config
     from TrigInDetConfig.ActsTrigSequence import ActsTrigSequence
@@ -426,6 +428,7 @@ class AccelTrackTrigSequence(InnerTrackerTrigSequence):
         pass
       case _:
         pass
+
 
     return ca
 
