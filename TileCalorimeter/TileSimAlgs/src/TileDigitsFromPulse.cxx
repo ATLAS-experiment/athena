@@ -254,7 +254,7 @@ StatusCode TileDigitsFromPulse::initialize() {
 	for (int ros = 1; ros < 5; ++ros) { // initialize the vector of PU amplitudes
 	  for (int drawer = 0; drawer < 64; ++drawer){
 	    for (int channel = 0; channel < 48; ++channel) {
-	      addPileUp(m_inTimeAmp, 1, ros, drawer, channel); // Initialized for HG, for LG  use the same divided by the HG/LG ratio
+	      addPileUp(m_inTimeAmp, m_ootAmp, 1, ros, drawer, channel); // Initialized for HG, for LG  use the same divided by the HG/LG ratio
 	    }
 	  }
 	}
@@ -332,6 +332,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 			for (int channel = 0; channel < 48; ++channel) {
 
 				if (!m_simQIE && !m_simPulseChain) { //3-in-1 or FENICS is simulated below
+					double ootAmp = m_ootAmp;
 
 					if(m_PhaseII){
 						ATH_MSG_VERBOSE("executing FENICS code");
@@ -357,7 +358,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 							n_inTimeAmp = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
 
 							if (m_random->Rndm() >= m_pileUpFraction){
-							        m_ootAmp = 0; //Set oot amplitude to 0 if no pile-up.
+							        ootAmp = 0; //Set oot amplitude to 0 if no pile-up.
 							}
 							tFit = m_random->Gaus(0., m_gausC2C); //C2C phase variation
 							double deformatedTime = m_random->Gaus(m_imperfectionMean, m_imperfectionRms); //Widening of pulseshape
@@ -368,7 +369,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 							m_PUAmp[ros-1][drawer][channel].assign(m_nPul, 0.0);
 							
 							// Fill amplitudes (including pile-up) for HG
-							addPileUp(n_inTimeAmp, gain, ros, drawer, channel);
+							addPileUp(n_inTimeAmp, ootAmp, gain, ros, drawer, channel);
 
 						} else {
 							double deformatedTime = m_random->Gaus(m_imperfectionMean, m_imperfectionRms); //Widening of pulseshape
@@ -432,7 +433,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						auto rawChannel = std::make_unique<TileRawChannel>(digit->adc_HWID(),
 												     n_inTimeAmp,
 												     tFit,
-												     m_ootAmp,
+												     ootAmp,
 												     m_ootOffset);
 						  
 						ATH_CHECK( rawChannelContainer->push_back(std::move(rawChannel)) );
@@ -450,7 +451,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						auto rawChannel = std::make_unique<TileRawChannel>(digit->adc_HWID(),
 												     n_inTimeAmp,
 												     tFit,
-												     m_ootAmp,
+												     ootAmp,
 												     m_ootOffset);
 
 						ATH_CHECK( rawChannelContainer->push_back(std::move(rawChannel)) );
@@ -697,7 +698,7 @@ bool TileDigitsFromPulse::makeDist(TFile*& file, std::vector<std::vector<TH1F*>>
 	return kTRUE;
 }
 
-void TileDigitsFromPulse::addPileUp(double &n_inTimeAmp, int gain, int ros, int drawer, int channel) {
+void TileDigitsFromPulse::addPileUp(double &n_inTimeAmp, double ootAmp, int gain, int ros, int drawer, int channel) {
         //Pileup samples
         double amp_1;
         double amp_2;
@@ -743,8 +744,8 @@ void TileDigitsFromPulse::addPileUp(double &n_inTimeAmp, int gain, int ros, int 
                                         ATH_MSG_VERBOSE("Final amplitudes for pulse " << m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] << " " << m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i]);
                                 }
                                 else{
-                                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp;
-                                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp;
+                                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] = m_useOotADist ? m_ootDist->GetRandom() : ootAmp;
+                                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] = m_useOotADist ? m_ootDist->GetRandom() : ootAmp;
                                 }
 
 				if(m_simPulseChain){ // Special treatment for pulse-chain simulation, add in-time pulses when initializing true-amp vector
