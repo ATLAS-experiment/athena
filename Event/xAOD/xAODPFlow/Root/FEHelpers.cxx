@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: Bill Balunas <bill.balunas@cern.ch>
@@ -37,8 +37,9 @@ namespace FEHelpers {
     float clusterPhi = theFourVector.Phi();
 
     if (radius > 1.0 && centerMag > 1e-3){
-      EtaVertexCorrection = (-vertexToCorrectTo.Z()/cosh(clusterEta) + (vertexToCorrectTo.X()*cos(clusterPhi) + vertexToCorrectTo.Y()*sin(clusterPhi))*tanh(clusterEta))/radius;
-      PhiVertexCorrection = (vertexToCorrectTo.X()*sin(clusterPhi) - vertexToCorrectTo.Y()*cos(clusterPhi))/radius;
+      EtaVertexCorrection = (-vertexToCorrectTo.Z() + (vertexToCorrectTo.X()*cos(clusterPhi) + vertexToCorrectTo.Y()*sin(clusterPhi))*sinh(clusterEta))/centerMag;
+      const float invRadius = 1.0f / radius;
+      PhiVertexCorrection = (vertexToCorrectTo.X()*sin(clusterPhi) - vertexToCorrectTo.Y()*cos(clusterPhi))*invRadius;
     }
 
     float etaVertexCorrected = clusterEta + EtaVertexCorrection;
