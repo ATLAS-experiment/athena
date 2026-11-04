@@ -318,7 +318,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 
 	std::vector<float> samples(m_nSamples);
 
-	double Rndm[16]; // Can't use variable size array,
+	std::vector<double> Rndm(m_nSamples);
 	double Rndm_dG[1]; // uniform random number for the double gaussian
 
 	ATH_MSG_DEBUG("Starting loop");
@@ -399,7 +399,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 							double Hfn1 = m_tileToolNoiseSample->getHfn1(drawerIdx, channel, gain, ctx);
 							double Hfn2 = m_tileToolNoiseSample->getHfn2(drawerIdx, channel, gain, ctx);
 							double Norm = m_tileToolNoiseSample->getHfnNorm(drawerIdx, channel, gain, ctx);
-							RandGaussQ::shootArray(rndmEngine, samples.size(), Rndm, 0.0, 1.0);
+							RandGaussQ::shootArray(rndmEngine, samples.size(), Rndm.data(), 0.0, 1.0);
 							RandFlat::shootArray(rndmEngine, 1, Rndm_dG, 0.0, 1.0);
 							for (unsigned int js = 0; js < samples.size(); ++js) {
 								//using the same gaussian(sigma) for all samples in one channel in one event
