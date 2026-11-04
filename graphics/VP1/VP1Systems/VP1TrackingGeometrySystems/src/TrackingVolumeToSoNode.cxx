@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////////////////////
@@ -141,10 +141,11 @@ SoNode*  TrackingVolumeToSoNode::translateTrackingVolume(const Trk::TrackingVolu
     double y1   = tvolDTrdBounds->halflengthY1();
     double y2   = tvolDTrdBounds->halflengthY2();
     double z    = tvolDTrdBounds->halflengthZ();
-    Trk::TrapezoidVolumeBounds* trBoundA = new Trk::TrapezoidVolumeBounds(minX,medX,z,y1);
-    Trk::TrapezoidVolumeBounds* trBoundB = new Trk::TrapezoidVolumeBounds(medX,maxX,z,y2);
-    const GeoShape* trdA = getShapeFromBounds( trBoundA );
-    const GeoShape* trdB = getShapeFromBounds( trBoundB );
+    auto trBoundA = std::make_unique<Trk::TrapezoidVolumeBounds>(minX,medX,z,y1);
+    auto trBoundB = std::make_unique<Trk::TrapezoidVolumeBounds>(medX,maxX,z,y2);
+    //note: could use  GeoTrd c'tor directly here, would be more efficient
+    const GeoShape* trdA = getShapeFromBounds( trBoundA.get());
+    const GeoShape* trdB = getShapeFromBounds( trBoundB.get() );
     const GeoShapeShift* shiftA = new GeoShapeShift(trdA,GeoTrf::TranslateY3D(-y1)*GeoTrf::RotateX3D(-90*CLHEP::deg)*GeoTrf::RotateZ3D(-90*CLHEP::deg));
     const GeoShapeShift* shiftB = new GeoShapeShift(trdB,GeoTrf::TranslateY3D(+y2)*GeoTrf::RotateX3D(-90*CLHEP::deg)*GeoTrf::RotateZ3D(-90*CLHEP::deg));
     const GeoShapeUnion* dtrd   = new GeoShapeUnion(shiftA,shiftB); 
