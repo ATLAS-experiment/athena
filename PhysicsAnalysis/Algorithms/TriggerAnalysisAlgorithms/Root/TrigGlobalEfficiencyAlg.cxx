@@ -112,7 +112,7 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
       ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2025/rel22.2/2026_Run3_Consolidated_Trigger_Recommendation_v1", electronLegsPerKey));
     }
     else {
-      ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2018/rel21.2/Precision_Summer2020_v1", electronLegsPerKey));
+      ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestElectronMapKeys(triggerCombination, "2015_2025/rel22.2/2025_Run2Rel22_Recommendation_v3", electronLegsPerKey));
     }
     ANA_CHECK(TrigGlobalEfficiencyCorrectionTool::suggestPhotonMapKeys(triggerCombination, "2015_2018/rel21.2/Summer2020_Rec_v1", photonLegsPerKey));
   }
@@ -132,7 +132,8 @@ StatusCode CP::TrigGlobalEfficiencyAlg::initialize()
                               [this](asg::AsgToolConfig& config) -> StatusCode {
                                 ANA_CHECK(config.setProperty("MapFilePath", std::string("ElectronEfficiencyCorrection/2015_2025/rel22.2/") +
                                                         (m_isRun3Geo ? "2026_Run3_Consolidated_Trigger_Recommendation_v1/map1.txt" : "2025_Run2Rel22_Recommendation_v3/map1.txt")));
-                                ANA_CHECK(config.setProperty("IdKey", m_electronID.value()));
+                                ANA_CHECK(config.setProperty("IdKey", m_isRun3Geo ? m_electronID.value()
+                                                        : m_electronID.value().substr(0, m_electronID.value().find("LH"))));
                                 ANA_CHECK(config.setProperty("IsoKey", m_electronIsol.value()));
                                 ANA_CHECK(config.setProperty("CorrelationModel", "TOTAL"));
                                 return StatusCode::SUCCESS;
