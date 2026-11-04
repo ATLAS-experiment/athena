@@ -25,12 +25,31 @@ StatusCode RDOtoTracccCellConverterAlg::initialize()
   ATH_CHECK(detStore()->retrieve(m_pixelManager, m_pixelManagerKey));
   ATH_CHECK(detStore()->retrieve(m_stripManager, m_stripManagerKey));
 
+
+  if (m_roiSeeded) {
+    ATH_CHECK(m_roiCollectionKey.initialize() );
+    ATH_CHECK(m_regionSelectorPixel.retrieve());
+    ATH_MSG_INFO("Initializing Region Selector Tool Pixel");
+    ATH_CHECK(m_regionSelectorSCT.retrieve());
+    ATH_MSG_INFO("Initializing Region Selector Tool SCT");
+
+  }else{
+    m_regionSelectorPixel.disable();
+    m_regionSelectorSCT.disable();
+    ATH_CHECK( m_roiCollectionKey.initialize(false) );
+    ATH_MSG_INFO("Region Selector Tools disabled");
+  }
+
   return StatusCode::SUCCESS;
 }
 
 StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
 {
   using size_type = traccc::edm::silicon_cell_collection::buffer::size_type;
+  std::vector<const InDetRawDataCollection<PixelRDORawData>*> pixColls;
+  std::vector<const InDetRawDataCollection<SCT_RDORawData>*>  stripColls;
+  
+  size_type nPix = 0, nStrip = 0;
 
   // ---- 0. Init
   auto pixelRDOHandle = SG::makeHandle(m_pixelRDOKey, ctx);
@@ -38,25 +57,71 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
   auto stripRDOHandle = SG::makeHandle(m_stripRDOKey, ctx);
   ATH_CHECK(stripRDOHandle.isValid());
 
-  // ---- 1. Count Pixel and Strip hits: creating the traccc SoA requires
-  // knowing their size upon creation.
-
-  size_type nPix = 0, nStrip = 0;
-
-  for (const auto* coll : *pixelRDOHandle) {
-    if (coll) {
-      nPix += coll->size();
+  // ---- 1. Select collections and count hits (the only place RoI vs. full-event differs)
+  
+  //reserve for performance 
+  pixColls.reserve(pixelRDOHandle->size());
+  stripColls.reserve(stripRDOHandle->size());
+  
+  if (!m_roiSeeded) {
+    for (const auto* c : *pixelRDOHandle){
+      if (c) {
+        pixColls.push_back(c);
+        nPix += c->size();
+      }
+    }for (const auto* c : *stripRDOHandle) {
+      if (c) {
+        stripColls.push_back(c);
+        for (const SCT_RDORawData* rdo : *c) {
+          // Check type in debug build otherwise assume it is correct
+          assert(dynamic_cast<const SCT3_RawData*>(rdo) != nullptr);
+          const SCT3_RawData* raw3 = static_cast<const SCT3_RawData*>(rdo);
+          
+          std::bitset<3> timePattern(raw3->getTimeBin());
+          if (!m_common.passTiming(timePattern)){
+              ATH_MSG_DEBUG("Strip failed timing check");
+              continue;
+          }
+          nStrip += rdo->getGroupSize();
+        }
+      }
     }
-  }
-  for (const auto* coll : *stripRDOHandle) {
-    if (coll) {
-      for (const SCT_RDORawData* rdo : *coll) {
-        //Check type in debug build otherwise assume it is correct
-        assert(dynamic_cast<const SCT3_RawData*>(rdo)!=nullptr);
-        const SCT3_RawData* raw3 = static_cast<const SCT3_RawData*>(rdo);
+  } else {
+    SG::ReadHandle<TrigRoiDescriptorCollection> rois(m_roiCollectionKey, ctx);
+    ATH_CHECK(rois.isValid());
 
+    std::vector<IdentifierHash> pixIds, sctIds, tmp;
+
+    // Accumulate module hashes over ALL RoIs
+    for (const TrigRoiDescriptor* roi : *rois) {
+      tmp.clear();
+      m_regionSelectorPixel->lookup(ctx)->HashIDList(*roi, tmp);
+      pixIds.insert(pixIds.end(), tmp.begin(), tmp.end());
+
+      tmp.clear();
+      m_regionSelectorSCT->lookup(ctx)->HashIDList(*roi, tmp);
+      sctIds.insert(sctIds.end(), tmp.begin(), tmp.end());
+    }
+
+    // Remove duplicate modules coming from overlapping RoIs
+    std::sort(pixIds.begin(), pixIds.end());
+    pixIds.erase(std::unique(pixIds.begin(), pixIds.end()), pixIds.end());
+    std::sort(sctIds.begin(), sctIds.end());
+    sctIds.erase(std::unique(sctIds.begin(), sctIds.end()), sctIds.end());
+
+    for (auto h : pixIds) if (auto* c = pixelRDOHandle->indexFindPtr(h)) {
+      pixColls.push_back(c);
+      nPix += c->size();
+    }
+    for (auto h : sctIds) if (auto* c = stripRDOHandle->indexFindPtr(h)) {
+      stripColls.push_back(c);
+      for (const SCT_RDORawData* rdo : *c) {
+        // Check type in debug build otherwise assume it is correct
+        assert(dynamic_cast<const SCT3_RawData*>(rdo) != nullptr);
+        const SCT3_RawData* raw3 = static_cast<const SCT3_RawData*>(rdo);
+        
         std::bitset<3> timePattern(raw3->getTimeBin());
-        if (!m_common.passTiming(timePattern)) {
+        if (!m_common.passTiming(timePattern))  {
             ATH_MSG_DEBUG("Strip failed timing check");
             continue;
         }
@@ -93,9 +158,8 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
   unsigned int current_det_cond_idx = -1;
 
   // Convert Pixel RDOs
-  for (const auto* coll : *pixelRDOHandle) {
-
-    for (const PixelRDORawData* rdo : *coll) {
+  for (const auto* c : pixColls) {
+    for (const PixelRDORawData* rdo : *c) {
       const Identifier rdoId = rdo->identify();
       const InDetDD::SiDetectorElement* el =
           m_pixelManager->getDetectorElement(rdoId);
@@ -139,8 +203,8 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
   }
 
   // Convert Strip RDOs
-  for (const auto* coll : *stripRDOHandle) {
-    for (const SCT_RDORawData* rdo : *coll) {
+  for (const auto* c : stripColls) {
+    for (const SCT_RDORawData* rdo : *c) {
       //Check type in debug build otherwise assume it is correct
       assert(dynamic_cast<const SCT3_RawData*>(rdo)!=nullptr);
       const SCT3_RawData* raw3 = static_cast<const SCT3_RawData*>(rdo);
@@ -152,7 +216,7 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
       }
 
       const Identifier rdoId = rdo->identify();
-      const InDetDD::SiDetectorElement* el =
+      const InDetDD::SiDetectorElement* el = 
           m_stripManager->getDetectorElement(rdoId);
       if (!el) continue;
       const Identifier modId = el->identify();
@@ -175,28 +239,16 @@ StatusCode RDOtoTracccCellConverterAlg::execute(const EventContext& ctx) const
         current_det_cond_idx = det_cond_idx_opt.value();
       }
 
-      if (m_common.m_stripID->barrel_ec(modId) == 0) {
-        for (int i = 0; i < rdo->getGroupSize(); ++i) {
-          
-          traccc::edm::silicon_cell cell = cells.at(cell_index++);
-          cell.channel0() = static_cast<uint32_t>(cellId.phiIndex() + i);
-          cell.channel1() = 0;
-          cell.module_index() = current_det_cond_idx;
-          cell.activation() = 1.;
-          cell.time() = 0;
-           
-        }
-      } else {
-        for (int i = 0; i < rdo->getGroupSize(); ++i) {
-          
-          traccc::edm::silicon_cell cell = cells.at(cell_index++);
-          cell.channel0() = 0;
-          cell.channel1() = static_cast<uint32_t>(cellId.phiIndex() + i);
-          cell.module_index() = current_det_cond_idx;
-          cell.activation() = 1.;
-          cell.time() = 0;
-          
-        }
+      const bool barrel = (m_common.m_stripID->barrel_ec(modId) == 0);
+
+      for (int i = 0; i < rdo->getGroupSize(); ++i) {
+        const uint32_t strip = static_cast<uint32_t>(cellId.phiIndex() + i);
+        traccc::edm::silicon_cell cell = cells.at(cell_index++);
+        cell.channel0() = barrel ? strip : 0;
+        cell.channel1() = barrel ? 0 : strip;
+        cell.module_index() = current_det_cond_idx;
+        cell.activation() = 1.f;
+        cell.time() = 0;
       }
     }
   }

@@ -14,6 +14,9 @@
 #include "RDOtoTracccCellConverterCommons.h"
 #include <Gaudi/Property.h>
 
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
+#include "IRegionSelector/IRegSelTool.h"
+
 namespace ActsTrk {
 
 /*! Converts Pixel and Strip RDO container into Traccc cells, the input to the
@@ -41,6 +44,7 @@ public:
 private:
   RDOtoTracccCellConverterCommons m_common{*this};
 
+
   SG::ReadHandleKey<PixelRDO_Container> m_pixelRDOKey{
       this, "PixelRDO", "ITkPixelRDOs"};
   SG::ReadHandleKey<SCT_RDO_Container> m_stripRDOKey{
@@ -53,6 +57,16 @@ private:
   const InDetDD::PixelDetectorManager* m_pixelManager{nullptr};
   const InDetDD::SCT_DetectorManager*  m_stripManager{nullptr};
 
+  BooleanProperty m_roiSeeded{this, "isRoI_Seeded", false, "Use RoI"}; //todo take it as argument see isRoI_Seeded
+
+  SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{
+    this, "RoIs", "", "RoIs to read in"};
+  
+  ToolHandle<IRegSelTool> m_regionSelectorPixel {
+    this, "RegSelToolPixel", "RegSelTool/RegSelTool_Pixel", "Region Selection Input Tool Pixel"};
+        
+  ToolHandle<IRegSelTool> m_regionSelectorSCT {
+    this, "RegSelToolSCT", "RegSelTool/RegSelTool_SCT", "Region Selection Input Tool SCT"};
 };
 
 } // namespace ActsTrk

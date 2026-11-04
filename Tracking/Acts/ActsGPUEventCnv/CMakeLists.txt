@@ -32,6 +32,7 @@ set( _libraries
   AthDeviceInterfacesLib
   PixelReadoutGeometryLib
   SCT_ReadoutGeometry
+  TrigSteeringEvent
 )
 
 set( _definitions
