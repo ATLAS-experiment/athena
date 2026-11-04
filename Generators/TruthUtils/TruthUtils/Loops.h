@@ -98,7 +98,7 @@ public:
                     // If the production vertex of a particle exclusively has particles not
                     // in loops, then this particle cannot be in a loop either
                     bool goodi = true;
-                    for (auto& pi: ev->particles_in()) goodi = goodi && (incycle[pi] == -1);
+                    for (auto& pi: pv->particles_in()) goodi = goodi && (incycle[pi] == -1);
                     if (goodi) incycle[p] = -1;
                 }
             }
