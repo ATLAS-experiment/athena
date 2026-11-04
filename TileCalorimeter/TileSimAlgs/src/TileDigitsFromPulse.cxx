@@ -798,13 +798,11 @@ void TileDigitsFromPulse::addPileUpSample(int gain, int ros, int drawer, int cha
 	double amp = 0;
 	double mu = 0; //Interaction per bunch crossing for PU simulation
 
-	auto random = std::make_unique<TRandom3>(m_seed);
-
-	mu=random->Poisson(m_avgMuForPU);
+	mu=m_random->Poisson(m_avgMuForPU);
 
 	if(gain == 1){
 		for (int imu = 0; imu<mu; imu++){
-			if (random->Rndm() < m_pileUpFraction){
+			if (m_random->Rndm() < m_pileUpFraction){
 				amp = m_pileup_AmpDists[ros-1][channel]->GetRandom();
 			}
 			else{
