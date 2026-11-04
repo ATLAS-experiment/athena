@@ -26,5 +26,7 @@ atlas_install_python_modules( python/*.py )
 
 # Test(s) in the package.
 atlas_add_test( LinearTransformExample
+   PRE_EXEC_SCRIPT "amd-check.sh || exit 2"
    SCRIPT athena.py --threads=1 AthExHIP/LinearTransformExampleConfig.py
-   POST_EXEC_SCRIPT noerror.sh)
+   POST_EXEC_SCRIPT noerror.sh
+   PROPERTIES SKIP_RETURN_CODE 2 )
