@@ -410,7 +410,16 @@ protected:
     TF1* theTF1 = GetWrapperTF1RawPtr();
     theTF1->SetNpx(20);
     m_tFuncMax = getInductFuncTimeMax(theTF1);
-    m_funcMax = GetWrapperTF1()->Eval(m_tFuncMax);
+    if (std::isnan(m_tFuncMax)) {
+      m_tFuncMax = -100; 
+      m_funcMax = 0;
+    }
+    else {
+      m_funcMax = GetWrapperTF1()->Eval(m_tFuncMax);
+      if (std::isnan(m_funcMax)) {
+	m_funcMax = 0;
+      }
+    }
     theTF1->SetNpx(1000);
   }
   
@@ -979,7 +988,7 @@ class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiInductPreExp : public ZDCPreExpFitWrap
 
   float m_tFuncMax;
   float m_funcMax;
-
+  
   std::shared_ptr<TF1> m_expFermiInductFunc{0};
   std::shared_ptr<TF1> m_expFermiPreFunc{0};
 
@@ -995,7 +1004,11 @@ class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiInductPreExp : public ZDCPreExpFitWrap
     else {
       m_tFuncMax = tsubtr + t0;
       m_funcMax = m_expFermiInductFunc->Eval(tsubtr);
+      if (std::isnan(m_funcMax)) {
+	m_funcMax = 0;
+      }
     }
+    m_expFermiInductFunc->SetNpx(1000);
   }
 
 public:
@@ -1018,7 +1031,10 @@ public:
 
   virtual float GetAmplitude() const override {
     if (finalized()) return m_funcMax;
-    return m_expFermiInductFunc->Eval(getInductFuncTimeMax(m_expFermiInductFunc.get()));
+    float timeMax = getInductFuncTimeMax(m_expFermiInductFunc.get());
+    if (std::isnan(timeMax)) return 0;
+
+    return m_expFermiInductFunc->Eval(timeMax);
   }
   
   virtual float GetAmpError() const override {return GetWrapperTF1()->GetParError(0); }
@@ -1028,8 +1044,11 @@ public:
 
   virtual float GetTime() const override {
     if (finalized()) return m_tFuncMax;
+    
     double timeMax = getInductFuncTimeMax(m_expFermiInductFunc.get());
-    if (std::isnan(timeMax)) return -100;
+    if (std::isnan(timeMax)) {
+      return -100;
+    }
     else return + GetWrapperTF1()->GetParameter(1);
   }
 
@@ -1063,7 +1082,12 @@ public:
     double tRef = GetTMinAdjust();
     double expPre = expAmp * (std::exp(-maxTime/expTau - bexpSqrt*maxTime*maxTime) - std::exp(-tRef/expTau - bexpSqrt*tRef*tRef));
 
-    return expPre / (amp + expPre);
+    if (amp + expPre > 0) {
+      return expPre / (amp + expPre);
+    }
+    else {
+      return -1;
+    }
   }
 
   virtual double operator() (const double *x, const double *p) override
@@ -1127,6 +1151,9 @@ class ATLAS_NOT_THREAD_SAFE ZDCFitExpFermiInductPrePulse : public ZDCPrePulseFit
       
     m_tFuncMax = tsubtr + t0;
     m_funcMax = m_expFermiInductFunc->Eval(tsubtr);
+    if (std::isnan(m_funcMax)) {
+      m_funcMax = 0;
+    }
   }
 
 public:
@@ -1207,7 +1234,8 @@ public:
     double deltaTPre = maxTime - preT0;
     double background = preAmp * m_preNorm * m_expFermiInductFunc->operator()(deltaTPre);
 
-    return background / (amp + background);
+    if (amp + background > 1e-6) return background / (amp + background);
+    else return -1;
   }
 
   virtual double operator() (const double *x, const double *p) override
@@ -1692,8 +1720,8 @@ double getInductFuncTimeMax(const TF1* theTF1)
   double corrT0 = fitT0;
   if (tau2 > tau1) corrT0 += tau1 * std::log(tau2 / tau1 - 1.0);
   
-  double deltaT = theTF1->GetParameter(5)/4;
-  double tmin = corrT0 - deltaT;
+  double deltaT = std::max<double>(tau2, theTF1->GetParameter(5)/2);
+  double tmin = corrT0 - deltaT/2;
   double tmax = corrT0 + deltaT;
   
   return theTF1->GetMaximumX(tmin, tmax, 1e-5, 20, false);

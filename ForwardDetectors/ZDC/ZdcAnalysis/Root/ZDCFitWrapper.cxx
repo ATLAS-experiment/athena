@@ -67,9 +67,9 @@ const std::map<std::string, std::vector<ZDCFitWrapper::FitParameter>> ZDCFitExpF
     {"default",
      {{{"A", 1000, false, 2, 5000, 50, false, 0}},
       {{"T0", 40, false,  0, 100, 1, false, 0}},
-      {{"Aexp", 0, false,  0.5, 3, 0.05, false, 0}},  
+      {{"Aexp", 0, false,  0, 4000, 0.05, false, 0}},  
       {{"tauexp", 0, false,  3.5, 8, 0.25, false, 0}}, 
-      {{"bsqrtexp", 0, false,  -50, 50, 1, true, 0}}, 
+      {{"bsqrtexp", 0, false,  -0.001, 0.001, 0.0001, true, 0}}, 
       {{"C", 0, false,  -50, 50, 1, true, 0}},
       {{"period",  13.5,  true,  0, 0, 0, false, 0}}, 
       {{"IndA", 0.2, false,  -2, 2, 0.1, false, 0}}, 
@@ -82,7 +82,7 @@ const std::map<std::string, std::vector<ZDCFitWrapper::FitParameter>> ZDCFitExpF
       {{"IndA",     0.1,  false,  -0.1, 0.4, 0.05, true, 0}}, 
       {{"IndB",     0.2,   false,  -0.1, 0.4, 0.05, false, 0}}, 
       {{"bI",     -0.05,   true,  -0.15, 0.15, 0.025, false, 0}}, 
-      {{"C", 0, false,  -50, 50, 1, false, 0}},
+      {{"C", 0, false,  -200, 200, 1, false, 0}},
      }
     },
     {"PbPb2025LG",
@@ -108,7 +108,7 @@ const std::map<std::string, std::vector<ZDCFitWrapper::FitParameter>> ZDCFitExpF
     {"default",
      {{{"A", 1000, false, 2, 5000, 50, false, 0}},
       {{"T0", 40, false,  0, 100, 1, false, 0}},
-      {{"Apre", 0, false,  0.5, 3, 0.05, false, 0}},  
+      {{"Apre", 0, false,  0, 4000, 0.05, false, 0}},  
       {{"T0pre", 0, false,  3.5, 8, 0.25, false, 0}},  
       {{"C", 0, false,  -50, 50, 1, true, 0}},
       {{"period",  13.5,  true,  0, 0, 0, false, 0}}, 
@@ -1290,7 +1290,7 @@ ZDCFitExpFermiInductPrePulse::ZDCFitExpFermiInductPrePulse(const std::string& ta
   std::string funcNameRefFunc = "ExpFermiInductPrePulseRefFunc" + tag;
   std::string funcNamePreFunc = "ExpFermiInductPrePulsePreFunc" + tag;
 
-  m_expFermiInductFunc = std::make_shared<TF1>(funcNameRefFunc.c_str(), ZDCFermiExpFitInduct, tmin, tmax, 9);
+  m_expFermiInductFunc = std::make_shared<TF1>(funcNameRefFunc.c_str(), ZDCFermiExpFitInduct, tmin, tmax, 10);
   m_expFermiInductFunc->SetParameter(0, 1);
   m_expFermiInductFunc->SetParameter(1, 0);
   m_expFermiInductFunc->SetParameter(2, m_tau1);
@@ -1369,7 +1369,7 @@ ZDCFitExpFermiInductPrePulse::ZDCFitExpFermiInductPrePulse(const std::string& ta
 
   // Make the base function that we use
   //
-  m_expFermiInductFunc = std::make_shared<TF1>(funcNameRefFunc.c_str(), ZDCFermiExpFitInduct, tmin, tmax, 9);
+  m_expFermiInductFunc = std::make_shared<TF1>(funcNameRefFunc.c_str(), ZDCFermiExpFitInduct, tmin, tmax, 10);
   m_expFermiInductFunc->SetParameter(0, 1);
   m_expFermiInductFunc->SetParameter(1, 0);
   m_expFermiInductFunc->SetParameter(2, m_tau1);
