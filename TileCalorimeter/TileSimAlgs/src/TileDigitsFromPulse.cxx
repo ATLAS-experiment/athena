@@ -529,6 +529,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						    }
 						  }
 
+						  m_tsg->setPulseShape(m_ps[gain]);
 						  if (gain == 1) {
 						    ped = m_chanPed
 						      ? m_tileToolNoiseSample->getPed(drawerIdx, channel, gain,
