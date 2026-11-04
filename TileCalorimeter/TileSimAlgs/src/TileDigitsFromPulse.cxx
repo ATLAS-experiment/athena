@@ -293,27 +293,25 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 
 	double tFit = 0, ped = 100; //Settings for simulation 
 
-	TF1 *pdf = new TF1();
-	TF1 *pdf_PhaseI = new TF1();
-	TF1 *pdf_lo = new TF1();
-	TF1 *pdf_hi = new TF1();
-	if (!m_simQIE) {
-		
-
+	TF1* pdf = nullptr;
+	std::unique_ptr<TF1> pdf_PhaseI;
+	std::unique_ptr<TF1> pdf_lo;
+	std::unique_ptr<TF1> pdf_hi;
+	if (!m_simQIE && m_gaussNoise) {
 	  	if(m_PhaseII){
 		  Double_t sigma_lo = 1; //Noise value obtained from ATL-COM-TILECAL-2020-031
-	    	pdf_lo = new TF1("pdf_lo","(1/(sqrt(2*pi)*[0])) * (exp(-0.5*(x/[0])**2)/(sqrt(2*pi)*[0]))", -100, 100);
+			pdf_lo = std::make_unique<TF1>("pdf_lo","(1/(sqrt(2*pi)*[0])) * (exp(-0.5*(x/[0])**2)/(sqrt(2*pi)*[0]))", -100, 100);
 			pdf_lo->SetParameter(0,sigma_lo);
 
 			Double_t sigma_hi = 2.5; //Noise value obtained from ATL-COM-TILECAL-2020-031
-			pdf_hi = new TF1("pdf_hi","(1/(sqrt(2*pi)*[0])) * (exp(-0.5*(x/[0])**2)/(sqrt(2*pi)*[0]))", -100, 100);
+			pdf_hi = std::make_unique<TF1>("pdf_hi","(1/(sqrt(2*pi)*[0])) * (exp(-0.5*(x/[0])**2)/(sqrt(2*pi)*[0]))", -100, 100);
 			pdf_hi->SetParameter(0,sigma_hi);
 		}
 	  	else{
 			//Noise pdf for general noise. Maybe use as a member and put in init.
 			//pdf = new TF1("pdf", "[0] * (Gaus(x,0,[1]) + [2] * Gaus(x,0,[3]))", -100., 100.); //Root goes not like "Gaus"		
 
-	    	pdf_PhaseI = new TF1("pdf_PhaseI", "[0] * (exp(-0.5*(x/[1])**2)/(sqrt(2*pi)*[1]) + [2] *exp(-0.5*(x/[3])**2)/(sqrt(2*pi)*[3]))", -100., 100.);
+			pdf_PhaseI = std::make_unique<TF1>("pdf_PhaseI", "[0] * (exp(-0.5*(x/[1])**2)/(sqrt(2*pi)*[1]) + [2] *exp(-0.5*(x/[3])**2)/(sqrt(2*pi)*[3]))", -100., 100.);
 	    	pdf_PhaseI->SetParameters(m_GNAmpOne, m_GNSigmaOne, m_GNAmpTwo, m_GNSigmaTwo);
 	  	}
 	}
@@ -384,10 +382,10 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						}
 
 						if(m_PhaseII && m_gaussNoise){
-							pdf = (gain==1) ? pdf_hi : pdf_lo;
+							pdf = (gain==1) ? pdf_hi.get() : pdf_lo.get();
 						}
 						else if(m_gaussNoise){
-							pdf = pdf_PhaseI;
+							pdf = pdf_PhaseI.get();
 						}
 
 						m_tsg->setPulseShape(m_ps[gain]);
@@ -525,9 +523,9 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						  // PDF logic for noise
 						  if (m_gaussNoise) {
 						    if (m_PhaseII) {
-						      pdf = (gain == 1) ? pdf_hi : pdf_lo;
+						      pdf = (gain == 1) ? pdf_hi.get() : pdf_lo.get();
 						    } else {
-						      pdf = pdf_PhaseI;
+						      pdf = pdf_PhaseI.get();
 						    }
 						  }
 
@@ -620,13 +618,6 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 
         SG::WriteHandle<TileDigitsContainer> digitsCnt(m_digitsContainerKey, ctx);
         ATH_CHECK( digitsCnt.record(std::move(digitsContainer)) );
-
-	if (!m_simQIE) {
-		//delete pdf;
-		delete pdf_PhaseI;
-		delete pdf_hi;
-		delete pdf_lo;
-	}
 
 	ATH_MSG_DEBUG("Execution completed");
 
