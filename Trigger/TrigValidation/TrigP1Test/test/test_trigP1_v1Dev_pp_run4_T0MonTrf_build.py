@@ -6,30 +6,26 @@
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
-from TrigValTools.TrigValSteering.Common import find_file
-from TrigP1Test.TrigP1TestSteps import filterBS
 from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Specify trigger menu once here:
 triggermenu = 'Dev_pp_run4_v1_HLTReprocessing_prescale'
 
-# HLT step (BS->BS)
-hlt = ExecStep.ExecStep()
-hlt.type = 'athenaEF'
-hlt.job_options = 'TriggerJobOpts.runHLT'
-hlt.forks = 1
+# HLT BS_RDO->RAW
+hlt = ExecStep.ExecStep('BSRDOtoRAW')
+hlt.type = 'Trig_reco_tf'
 hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.input = 'data'
 hlt.max_events = 50
-hlt.flags = [f'Trigger.triggerMenuSetup="{triggermenu}"',
-             'Trigger.doLVL1=True',
-             'Trigger.EDMVersion=4']
-hlt.args = '-o output'
-
-# Extract the physics_Main stream out of the BS file with many streams
-filter_bs = filterBS('Main')
+hlt.args = f'--preExec="Trigger.triggerMenuSetup=\'{triggermenu}\' Trigger.doLVL1=True Trigger.EDMVersion=4 Trigger.CTP.UseEDMxAOD=False Trigger.CTP.UseRoibROB=True"'
+hlt.args += ' --prodSysBSRDO True'
+hlt.args += ' --outputBSFile=RAW.pool.root'
+hlt.args += ' --outputHIST_HLTMONFile=hltmon.root'
+hlt.args += ' --outputDRAW_TRIGCOSTFile=TRIGCOST.pool.root'
+hlt.args += ' --outputNTUP_TRIGCOSTFile=cost.ntup.root'
+hlt.args += ' --runNumber 500306'  # RunNumber is set by Panda, but ignored by Trf to avoid changes from !48070
 
 # BS->AOD reco step
 recoPreExec = ' '.join([
@@ -58,23 +54,40 @@ recoPreExec = ' '.join([
   "flags.Trigger.CTP.UseRoibROB=True;",
 ])
 
-reco = ExecStep.ExecStep('DataReco')
-reco.type = 'Reco_tf'
+reco = ExecStep.ExecStep('Tier0Reco')
+reco.type = 'Trig_reco_tf'
 reco.threads = 4
 reco.concurrent_events = 4
 reco.input = ''
 reco.explicit_input = True
 reco.max_events = 50
-reco.args = '--inputBSFile=' + find_file('data*.physics_Main.*.data')  # output of the previous step
+reco.args = '--inputBSFile=RAW.pool.root'  # output of the previous step
 reco.args += ' --outputAODFile=AOD.pool.root'
+reco.args += ' --outputNTUP_TRIGRATEFile=rate.ntup.root'
 reco.args += ' --outputHISTFile=ExampleMonitorOutput.root'
 reco.args += f' --conditionsTag="{defaultConditionsTags.RUN3_DATA25}" --geometryVersion=\'ATLAS-R3S-2021-03-02-00\''
 reco.args += ' --preExec="{:s}"'.format(recoPreExec)
 
+#====================================================================================================
+# Merging NTUP_TRIGRATE/COST
+recomergecost = ExecStep.ExecStep('Tier0MergeCost')
+recomergecost.type = 'other'
+recomergecost.executable = 'NTUPMerge_tf.py'
+recomergecost.input = ''
+recomergecost.args = '--inputNTUP_TRIGCOSTFile="cost.ntup.root" --outputNTUP_TRIGCOST_MRGFile="cost.ntup.merge.root"'
+
+recomergerate = ExecStep.ExecStep('Tier0MergeRate')
+recomergerate.type = 'other'
+recomergerate.executable = 'NTUPMerge_tf.py'
+recomergerate.input = ''
+recomergerate.args = '--inputNTUP_TRIGRATEFile="rate.ntup.root" --outputNTUP_TRIGRATE_MRGFile="rate.ntup.merge.root"'
+
+#====================================================================================================
+
 # The full test
 test = Test.Test()
 test.art_type = 'build'
-test.exec_steps = [hlt, filter_bs, reco]
+test.exec_steps = [hlt, reco, recomergecost, recomergerate]
 test.check_steps = CheckSteps.default_check_steps(test)
 add_analysis_steps(test)
 
