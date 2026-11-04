@@ -117,7 +117,6 @@ bool VP1RawDataColl_sTGC_RDO::load() {
   for (const sTgcDigitCollection* coll : *container) {
     /// Iterate on the digits of the collection
     for (const sTgcDigit* digit : *coll) {
-      const Identifier digitId{digit->identify()};
 
       // example from Johannes
       /*
@@ -130,7 +129,6 @@ bool VP1RawDataColl_sTGC_RDO::load() {
     }
   }
 
-  //   recheckCutStatusOfAllHandles();
   return true;
 }
 

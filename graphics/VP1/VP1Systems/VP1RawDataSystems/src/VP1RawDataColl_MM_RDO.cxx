@@ -95,7 +95,6 @@ bool VP1RawDataColl_MM_RDO::load() {
   for (const MmDigitCollection* coll : *container) {
     /// Iterate on the digits of the collection
     for (const MmDigit* digit : *coll) {
-      const Identifier digitId{digit->identify()};
 
       // example from Johannes
       /*
