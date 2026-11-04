@@ -1,10 +1,10 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibT0/T0MTHistos.h"
 
-#include <cmath>
+
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "CxxUtils/checker_macros.h"
@@ -16,6 +16,8 @@
 #include "TRandom3.h"
 #include "list"
 #include "boost/thread/tss.hpp"
+#include <cmath>
+#include <cstdio>
 
 namespace MuonCalib {
 
@@ -66,9 +68,9 @@ namespace MuonCalib {
 #endif
         char buf[100];
         if (hname == nullptr)
-            snprintf(buf, 100, "t_spec_%d", id);
+            std::snprintf(buf, 100, "t_spec_%d", id);
         else
-            snprintf(buf, 100, "t_spec_%s", hname);
+            std::snprintf(buf, 100, "t_spec_%s", hname);
 #ifndef NDEBUG
         if (log.level() <= MSG::VERBOSE) log << MSG::VERBOSE << "directory=" << gDirectory->GetName() << endmsg;
 #endif
@@ -79,7 +81,7 @@ namespace MuonCalib {
             if (log.level() <= MSG::VERBOSE) log << MSG::VERBOSE << "T0MTHistos::Initialize: debug directory created" << endmsg;
 #endif
             TDirectory *cwd = gDirectory;
-            snprintf(buf, 100, "t0_tmax_dir_%d", id);
+            std::snprintf(buf, 100, "t0_tmax_dir_%d", id);
             m_dir = gDirectory->mkdir(buf, buf);
             cwd->cd();
         } else {
@@ -92,7 +94,7 @@ namespace MuonCalib {
     //////////////////////////////////
     // SetTSpec(int id, TH1F *spec)	//
     //////////////////////////////////
-    void T0MTHistos::SetTSpec(int id, TH1F *spec, const T0MTSettings *settings, bool copy_spec) {
+    void T0MTHistos::SetTSpec(int id, TH1F* spec, const T0MTSettings *settings, bool copy_spec) {
         m_settings = settings;
         TDirectory *cwd = gDirectory;
         if (copy_spec)
@@ -102,7 +104,7 @@ namespace MuonCalib {
         m_id = id;
         if (settings->DrawDebugGraphs()) {
             char buffer[100];
-            snprintf(buffer, 100, "t0_tmax_dir_%d", id);
+            std::snprintf(buffer, 100, "t0_tmax_dir_%d", id);
             m_dir = gDirectory->mkdir(buffer, buffer);
             cwd->cd();
         }
@@ -169,7 +171,7 @@ namespace MuonCalib {
         }
         // create function object
         char buffer[100];
-        snprintf(buffer, 100, "mt_tmax_fermi");
+        std::snprintf(buffer, 100, "mt_tmax_fermi");
         if (!m_tmax_fermi) {
             m_tmax_fermi = std::make_unique<TF1>(buffer, mt_tmax_fermi, rec.GetFitRangeMin(), rec.GetFitRangeMax(), N_TMAX_FIT_PAR);
             // set parameter names
@@ -244,7 +246,7 @@ namespace MuonCalib {
         // create function class
         char buffer[100];
         //	sprintf(buffer,"mt_t0_fermi_%d", m_id);
-        snprintf(buffer, 100, "mt_t0_fermi");
+        std::snprintf(buffer, 100, "mt_t0_fermi");
         m_t0_fermi = std::make_unique<TF1>(buffer, mt_t0_fermi, rec.GetFitRangeMin(), rec.GetFitRangeMax(), N_T0_FIT_PAR);
         // set parameter names
         m_t0_fermi->SetParName(T0_PAR_NR_T0, "t_{0}");
@@ -303,7 +305,7 @@ namespace MuonCalib {
         }
         // create scrambled histogram
         char scramhistname[100];
-        snprintf(scramhistname, 100, "%s_scram", m_time->GetName());
+        std::snprintf(scramhistname, 100, "%s_scram", m_time->GetName());
         std::unique_ptr<TH1F> scramhist = std::make_unique<TH1F>(scramhistname, "scrambled histogram", m_time->GetSize() - 2,
                                                                  m_time->GetXaxis()->GetXmin(), m_time->GetXaxis()->GetXmax());
 
@@ -325,7 +327,7 @@ namespace MuonCalib {
             return false;
         }
         char scrambuffer[100];
-        snprintf(scrambuffer, 100, "scrammt_t0_fermi");
+        std::snprintf(scrambuffer, 100, "scrammt_t0_fermi");
         std::unique_ptr<TF1> scramm_t0_fermi = std::make_unique<TF1>();
         m_t0_fermi->Copy(*scramm_t0_fermi);
         scramm_t0_fermi->SetName(scrambuffer);

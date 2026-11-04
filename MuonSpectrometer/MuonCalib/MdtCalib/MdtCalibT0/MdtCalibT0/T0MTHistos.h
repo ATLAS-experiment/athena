@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //   T0MTHistos.h
@@ -13,16 +13,16 @@
 #ifndef T0MTHISTOS_H
 #define T0MTHISTOS_H
 
-// c - c++
-#include <iostream>
-
-// root
-#include "TF1.h"
-#include "TH1.h"
-class TDirectory;
 
 // this
 #include "T0MTSettings.h"
+// root
+#include "TF1.h"
+#include "TH1.h"
+#include <memory>
+class TDirectory;
+
+
 
 namespace MuonCalib {
 
@@ -76,7 +76,7 @@ namespace MuonCalib {
             @param id tube id
             @param spec Pointer to an existing spectrum
         */
-        void SetTSpec(int id, TH1F *spec, const T0MTSettings *settings, bool copy_spec = true);
+        void SetTSpec(int id, TH1F* spec, const T0MTSettings *settings, bool copy_spec = true);
 
         /** fill drift time spectrum
             @param t drift time

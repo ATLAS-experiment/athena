@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibRt/RtCalibrationCurved.h"
@@ -108,7 +108,7 @@ RtCalibrationCurved::MdtCalibOutputPtr RtCalibrationCurved::analyseSegments(cons
         for (unsigned int l = 0; l < k->hitsOnTrack(); l++) {
             double rr = (k->mdtHOT())[l]->driftRadius();
             double dd = (k->mdtHOT())[l]->signedDistanceToTrack();
-            if (m_residuals_final) m_residuals_initial_all->Fill(std::abs(dd), std::abs(rr) - std::abs(dd));
+            if (m_residuals_initial_all) m_residuals_initial_all->Fill(std::abs(dd), std::abs(rr) - std::abs(dd));
             m_driftTime_initial->Fill(rr, dd);
         }
     }
@@ -367,7 +367,7 @@ bool RtCalibrationCurved::handleSegment(MuonCalibSegment &seg) {
     // refit the segments //
     CurvedLine track;
 
-    if (!m_tracker->fit(seg, hit_selection, track)) { return true; }
+    if (!m_tracker->fit(seg, std::move(hit_selection), track)) { return true; }
 
     if (std::isnan(track.chi2())) { return true; }
 

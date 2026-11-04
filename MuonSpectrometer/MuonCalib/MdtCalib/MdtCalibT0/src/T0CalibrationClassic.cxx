@@ -1,14 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibT0/T0CalibrationClassic.h"
 
-#include <algorithm>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <format>
+
 
 #include "MdtCalibT0/T0CalibrationOutput.h"
 #include "MuonCalibEventBase/MuonCalibSegment.h"
@@ -16,6 +12,12 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TMinuit.h"
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <vector>
+#include <format>
+#include <stdexcept>
 
 namespace MuonCalib {
 
@@ -462,12 +464,11 @@ namespace MuonCalib {
         //
         float noise(0);
         int numOfBins(10), numOfBinsOffset(3);
-        int imin, imax;
+        int imin{}, imax{};
         if (minDerivBin > numOfBins + numOfBinsOffset) {
             imin = minDerivBin - numOfBins - numOfBinsOffset;
             imax = minDerivBin - numOfBinsOffset;
         } else {
-            imin = 0;
             if (minDerivBin > numOfBinsOffset) {
                 imax = minDerivBin - numOfBinsOffset;
             } else {
@@ -479,8 +480,10 @@ namespace MuonCalib {
             noise += hnew->GetBinContent(i);
             icount++;
         }
-
-        noise = noise / (float)(icount);
+        if (icount == 0)[[unlikely]]{
+          throw std::runtime_error("denominator icount is zero." );
+        }
+        noise = noise / static_cast<float>(icount);
         if (log.level() <= MSG::DEBUG) log << MSG::DEBUG << " noise is " << noise << endmsg;
         //
         // =================== Normalization =========================================
