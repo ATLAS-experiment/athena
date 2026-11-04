@@ -15,3 +15,7 @@ Derivation_tf.py \
     --validationFlags doExample,doMET,doEgamma,doInDet,doTau,doJet,doBtag,doMuon,doTopoCluster,doPFlow_FlowElements,doLLPSecVtx,doDiTau \
     --format NTUP_PHYSVAL \
     --maxEvents 10
+
+NTUPMerge_tf.py \
+    --inputNTUP_PHYSVALFile "NTUP_PHYSVAL.root" \
+    --outputNTUP_PHYSVAL_MRGFile "NTUP_MERGE_PHYSVAL.root"
