@@ -26,7 +26,6 @@
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloEvent/CaloCell.h"
 #include "xAODCaloEvent/CaloCluster.h"
-#include "CaloEvent/CaloClusterContainer.h"
 
 #include "CxxUtils/fpcompare.h"
 #include "CxxUtils/phihelper.h"

@@ -12,7 +12,6 @@
  */
 
 #include "CaloUtils/CaloClusterProcessor.h"
-#include "CaloEvent/CaloClusterContainer.h"
 
 
 /**

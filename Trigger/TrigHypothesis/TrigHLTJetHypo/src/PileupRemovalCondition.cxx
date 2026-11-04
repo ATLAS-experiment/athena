@@ -6,7 +6,6 @@
 #include "./ITrigJetHypoInfoCollector.h"
 #include "TrigHLTJetHypo/TrigHLTJetHypoUtils/IJet.h"
 #include "xAODCaloEvent/CaloCluster.h"
-#include "CaloEvent/CaloClusterContainer.h"
 #include <sstream>
 #include <cmath>
 #include <TLorentzVector.h>

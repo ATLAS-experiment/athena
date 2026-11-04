@@ -18,7 +18,6 @@
 
 #include "CaloClusterMomentsMaker_DigiHSTruth.h"
 #include "CaloEvent/CaloCell.h"
-#include "CaloEvent/CaloCluster.h"
 #include "CaloGeoHelpers/proxim.h"
 #include "CaloEvent/CaloPrefetch.h"
 #include "CaloGeoHelpers/CaloPhiRange.h"

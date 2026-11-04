@@ -37,7 +37,6 @@ Updated:  March, 2005    (MB)
 
 // include header files
 #include "CaloTopoEMlayers.h"
-#include "CaloEvent/CaloCluster.h"
 
 
 // -------------------------------------------------------------

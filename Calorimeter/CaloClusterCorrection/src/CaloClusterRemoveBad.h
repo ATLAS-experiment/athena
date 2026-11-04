@@ -20,7 +20,6 @@ Base class: CaloClusterProcessor
 
 // INCLUDE HEADER FILES:
 #include "CaloUtils/CaloClusterProcessor.h"
-#include "CaloEvent/CaloCluster.h"
 
 class CaloClusterRemoveBad : public CaloClusterProcessor
 {

@@ -24,7 +24,6 @@ PURPOSE:  - Compute simple cell weights for Sliding Window
 // include header files
 #include "CaloComputeSWcellWeights.h"
 #include "CaloEvent/CaloCell.h"
-#include "CaloEvent/CaloClusterContainer.h"
 //#include "CaloDetDescr/CaloDetDescrElement.h"
 //#include "CaloDetDescr/CaloDetDescrManager.h"
 //#include "CaloIdentifier/CaloCell_ID.h"

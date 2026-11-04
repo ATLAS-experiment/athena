@@ -10,7 +10,7 @@ find_package( CLHEP )
 atlas_add_library( CaloUtilsLib CaloUtils/*.h CaloUtils/*.icc src/*.h src/*.cxx
    PUBLIC_HEADERS CaloUtils
    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS}
-   LINK_LIBRARIES AthenaBaseComps AthenaKernel CaloConditions CaloDetDescrLib CaloEvent CaloGeoHelpers CaloIdentifier CaloInterfaceLib CxxUtils FourMom GaudiKernel Navigation StoreGateLib xAODCaloEvent AthLinks
+   LINK_LIBRARIES AthenaBaseComps AthenaKernel CaloConditions CaloDetDescrLib CaloGeoHelpers CaloIdentifier CaloInterfaceLib CxxUtils FourMom GaudiKernel Navigation StoreGateLib xAODCaloEvent AthLinks
    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} Identifier SGTools )
 
 atlas_add_dictionary( CaloUtilsDict

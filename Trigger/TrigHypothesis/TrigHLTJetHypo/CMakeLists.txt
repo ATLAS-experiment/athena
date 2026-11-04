@@ -14,7 +14,7 @@ atlas_add_library( TrigHLTJetHypoLib
                    PUBLIC_HEADERS TrigHLTJetHypo
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
                    LINK_LIBRARIES AthenaMonitoringKernelLib DecisionHandlingLib GaudiKernel xAODBTagging xAODJet FourMomUtils
-                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps DecisionHandlingLib TrigCompositeUtilsLib TrigSteeringEvent xAODEventInfo xAODTrigger CaloEvent TrigBjetHypoLib )
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} AthenaBaseComps DecisionHandlingLib TrigCompositeUtilsLib TrigSteeringEvent xAODEventInfo xAODTrigger TrigBjetHypoLib )
 
 atlas_add_component( TrigHLTJetHypo
                      src/components/*.cxx
