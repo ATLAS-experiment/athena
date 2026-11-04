@@ -561,7 +561,8 @@ namespace ADD_CMODE(CP)
         constexpr unsigned int last_run_18 = 370000;
         constexpr unsigned int last_run_22 = 440613;
         constexpr unsigned int last_run_23 = 461002;
-	constexpr unsigned int last_run_24 = 486894;
+	// 2024 ends with the 5.36 TeV pp reference (488xxx) and Pb+Pb runs, last run 490223 (MC 488000/488600 are Data24 too)
+	constexpr unsigned int last_run_24 = 490223;
 	constexpr unsigned int last_run_25 = 509891;
 	constexpr unsigned int last_run_26 = 524099;
 
