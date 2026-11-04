@@ -12,7 +12,6 @@
 
 #include "CaloGeoHelpers/proxim.h"
 #include "CaloEvent/CaloRecoStatus.h"
-#include "CaloEvent/CaloCluster.h"
 
 #include "CaloClusterCellWeightCalib.h"
 

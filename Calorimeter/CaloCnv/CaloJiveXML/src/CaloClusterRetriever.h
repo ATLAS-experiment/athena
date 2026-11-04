@@ -6,7 +6,6 @@
 #define JIVEXML_CALOCLUSTERRETRIEVER_H
 
 
-#include "CaloEvent/CaloClusterContainer.h"
 #include "JiveXML/IDataRetriever.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"

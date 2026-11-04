@@ -5,7 +5,6 @@
 // include header files
 #include "CaloClusterRemoveBad.h"
 #include "CaloEvent/CaloCell.h"
-#include "CaloEvent/CaloClusterContainer.h"
 #include "GaudiKernel/MsgStream.h"
 #include "AthContainers/DataVector.h"
 

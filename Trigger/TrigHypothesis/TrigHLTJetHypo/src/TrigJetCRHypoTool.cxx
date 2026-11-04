@@ -27,7 +27,6 @@
 #include "CxxUtils/phihelper.h"
 #include "FourMomUtils/xAODP4Helpers.h"
 #include "xAODCaloEvent/CaloCluster.h"
-#include "CaloEvent/CaloClusterContainer.h"
 using namespace TrigCompositeUtils;
 
 TrigJetCRHypoTool::TrigJetCRHypoTool(const std::string& type,

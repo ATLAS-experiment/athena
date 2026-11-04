@@ -10,7 +10,6 @@
 
 
 #include "CaloUtils/CaloClusterProcessor.h"
-#include "CaloEvent/CaloCluster.h"
 
 /**
  * @file   CaloClusterLogPos.h

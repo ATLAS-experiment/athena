@@ -13,7 +13,7 @@ atlas_add_library( CaloClusterCorrectionLib
                    PUBLIC_HEADERS CaloClusterCorrection
                    PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES AthenaKernel CaloConditions CaloEvent CaloInterfaceLib CaloUtilsLib CxxUtils GaudiKernel LArRecConditions StoreGateLib TileConditionsLib xAODCaloEvent AthOnnxInterfaces
+                   LINK_LIBRARIES AthenaKernel CaloConditions CaloInterfaceLib CaloUtilsLib CxxUtils GaudiKernel LArRecConditions StoreGateLib TileConditionsLib xAODCaloEvent AthOnnxInterfaces
                    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthContainers AthenaBaseComps CaloDetDescrLib CaloGeoHelpers CaloIdentifier PathResolver)
 
 atlas_add_component( CaloClusterCorrection

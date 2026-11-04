@@ -4,7 +4,6 @@
 
 #include "PFClusterWidthDecorator.h"
 
-#include "CaloEvent/CaloCluster.h"
 
 PFClusterWidthDecorator::PFClusterWidthDecorator(const std::string& name, ISvcLocator* pSvcLocator) :
   AthReentrantAlgorithm(name, pSvcLocator)
