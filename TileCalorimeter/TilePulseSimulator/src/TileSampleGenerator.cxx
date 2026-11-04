@@ -78,9 +78,9 @@ void TileSampleGenerator::fillNSamples(double t0, double pedestal, double amp_it
         vector<int> t(nAmp);
         vector<float> amp_pu_out(nAmp);
         int x = (nAmp-1)/2 + nSamples;
-        double amp_total = pedestal;
 
 	for (int i = 0; i < nSamples; i++) { //Loop over output samples
+		double amp_total = pedestal;
 
 		if (m_DEBUG)
 			cout << "sample to compute: " << i << "  " << amp_total << std::endl;
