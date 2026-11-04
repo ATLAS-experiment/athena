@@ -376,7 +376,7 @@ namespace MissingEtDQA {
             v_MET_Kinematic_pt.push_back( new  TH1D((name_met + "_Kinematic_" + it+"_pt").c_str(), ("MET_Kinematic_pt " + hist_title +"; p_{T} [GeV]; Entries / 3 GeV").c_str(), nbinpxy, 0, 300));
             v_MET_Kinematic_eta.push_back( new  TH1D((name_met + "_Kinematic_" + it +"_eta").c_str(), ("MET_Kinematic_eta " + hist_title +"; #eta ; Entries / 0.1").c_str(), 100, -5, 5) );
             v_MET_Kinematic_phi.push_back( new  TH1D((name_met + "_Kinematic_" + it +"_phi").c_str(), ("MET_Kinematic_phi " + hist_title +"; #Phi ; Entries / 0.1").c_str(), nbinphi, -binphi, binphi) );
-            v_MET_multi.push_back( new  TH1D((name_met + "_Multi_" + it).c_str(), ("MET_multi " + hist_title +"; Multiplicity; Entries").c_str(), 20,-0.5,20.5) );
+            v_MET_multi.push_back( new  TH1D((name_met + "_Multi_" + it).c_str(), ("MET_multi " + hist_title +"; Multiplicity; Entries").c_str(), 21,-0.5,20.5) );
             m_dir_met.push_back("MET/" + name_met + "/Kinematics/" + it + "/");                                      
           }
 
@@ -603,11 +603,20 @@ namespace MissingEtDQA {
 
       // Get elements with OR and JVT applied
       // We are getting the particles out of METMaker
-      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*(*met)["RefEle"]);
-      std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(*(*met)["RefGamma"]);
-      std::vector<const xAOD::TauJet*> ta_elems = met::getMETElements<xAOD::TauJet>(*(*met)["RefTau"]);
-      std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(*(*met)["RefMuons"]);
-      std::vector<const xAOD::Jet*> jet_elems = met::getMETElements<xAOD::Jet>(*(*met)["RefJet"]);
+      auto * pEl = (*met)["RefEle"];
+      auto * pGamma = (*met)["RefGamma"];
+      auto * pTau = (*met)["RefTau"];
+      auto * pMuons = (*met)["RefMuons"];
+      auto * pJet = (*met)["RefJet"];
+      if (not (pEl and pGamma and pTau and pMuons and pJet))[[unlikely]]{
+        ATH_MSG_ERROR("Null pointer among particle types");
+        return StatusCode::FAILURE;
+      }
+      std::vector<const xAOD::Electron*> el_elems = met::getMETElements<xAOD::Electron>(*pEl);
+      std::vector<const xAOD::Photon*> ph_elems = met::getMETElements<xAOD::Photon>(*pGamma);
+      std::vector<const xAOD::TauJet*> ta_elems = met::getMETElements<xAOD::TauJet>(*pTau);
+      std::vector<const xAOD::Muon*> mu_elems = met::getMETElements<xAOD::Muon>(*pMuons);
+      std::vector<const xAOD::Jet*> jet_elems = met::getMETElements<xAOD::Jet>(*pJet);
 
       //For difference histograms we need the jets to have JVT applied without OR.
       //To do this a jets will be fed into a new METMaker with no other particles. This will apply JVT without considering OR with other particles.
@@ -685,13 +694,17 @@ namespace MissingEtDQA {
           subleadPhi = (*jet_itr)->phi();
         }
       }
-
-      //Fill dPhi for Met Reb
-      //For leading and subleading jets; histogram is booked for positive values only, so std::abs
-      (m_MET_dPhi[met_name]).at(0)->Fill( std::abs(P4Helpers::deltaPhi( (*met)[finalClusStr]->phi(),leadPhi )), weight );
-      (m_MET_dPhi[met_name]).at(1)->Fill( std::abs(P4Helpers::deltaPhi( (*met)[finalClusStr]->phi(), subleadPhi )), weight );
-      (m_MET_dPhi[met_name]).at(3)->Fill( std::abs(P4Helpers::deltaPhi( (*met)[finalTrkStr]->phi(), leadPhi )), weight );
-      (m_MET_dPhi[met_name]).at(4)->Fill( std::abs(P4Helpers::deltaPhi( (*met)[finalTrkStr]->phi(), subleadPhi )), weight );
+      if (const auto pPair = m_MET_dPhi.find(met_name); pPair != m_MET_dPhi.end())[[likely]]{
+        const auto & phiVec = pPair->second;
+        //Fill dPhi for Met Reb
+        //For leading and subleading jets; histogram is booked for positive values only, so std::abs
+        phiVec.at(0)->Fill( std::abs(P4Helpers::deltaPhi( (*met)[finalClusStr]->phi(),leadPhi )), weight );
+        phiVec.at(1)->Fill( std::abs(P4Helpers::deltaPhi( (*met)[finalClusStr]->phi(), subleadPhi )), weight );
+        phiVec.at(3)->Fill( std::abs(P4Helpers::deltaPhi( (*met)[finalTrkStr]->phi(), leadPhi )), weight );
+        phiVec.at(4)->Fill( std::abs(P4Helpers::deltaPhi( (*met)[finalTrkStr]->phi(), subleadPhi )), weight );
+      } else {
+        ATH_MSG_WARNING("{} is missing from m_MET_dPhi", met_name);
+      }
   
       leadPt = 0.; leadPhi = 0.;
 
@@ -714,12 +727,15 @@ namespace MissingEtDQA {
           leadPhi = (*electron_itr)->phi();
         }
       }
-
-      //Fill dPhi for MET Reb
-      //for leading lepton
-      (m_MET_dPhi[met_name]).at(2)->Fill( std::abs(remainder( leadPhi - (*met)[finalClusStr]->phi(), 2*M_PI )), weight );
-      (m_MET_dPhi[met_name]).at(5)->Fill( std::abs(remainder( leadPhi - (*met)[finalTrkStr]->phi(), 2*M_PI )), weight );
-
+      if (const auto pPair = m_MET_dPhi.find(met_name); pPair!= m_MET_dPhi.end())[[likely]]{
+        //Fill dPhi for MET Reb
+        //for leading lepton
+        const auto & phiVec = pPair->second;
+        phiVec.at(2)->Fill( std::abs(remainder( leadPhi - (*met)[finalClusStr]->phi(), 2*M_PI )), weight );
+        phiVec.at(5)->Fill( std::abs(remainder( leadPhi - (*met)[finalTrkStr]->phi(), 2*M_PI )), weight );
+      } else {
+        ATH_MSG_WARNING("{} is missing from m_MET_dPhi", met_name);
+      }
       //Fill Correlation Histos
       //for each fill for MET of FinalTrk/FinalClus vs particle (muon, electron, gamma, tau, jet)
       for(const auto it : *met) {
@@ -807,15 +823,21 @@ namespace MissingEtDQA {
       std::vector<std::vector<const xAOD::IParticle*>> particle_groups = {
         toIParticles(el_elems), toIParticles(ph_elems), toIParticles(ta_elems), toIParticles(mu_elems), toIParticles(jet_elems) };
       for(unsigned int index = 0; index<5; index++){
+        auto * pPt = m_MET_Kinematic_pt[met_name].at(index);
+        auto * pEta = m_MET_Kinematic_eta[met_name].at(index);
+        auto * pPhi = m_MET_Kinematic_phi[met_name].at(index);
+        auto * pMulti = m_MET_multi[met_name].at(index);
+        //if any one of these pointers is invalid, do not dereference any of them
+        if (not (pPt and pEta and pPhi and pMulti))[[unlikely]] continue;
         for(const auto p : particle_groups[index]){
-          (m_MET_Kinematic_pt[met_name]).at(index)->Fill((p->pt())/1000., weight);
-          (m_MET_Kinematic_eta[met_name]).at(index)->Fill(p->eta(), weight);
-          (m_MET_Kinematic_phi[met_name]).at(index)->Fill(p->phi(), weight);
+          pPt->Fill((p->pt())/1000., weight);
+          pEta->Fill(p->eta(), weight);
+          pPhi->Fill(p->phi(), weight);
         }
 
         //Fill Multiplicity Histos for Kinematic histos
         //these are the number of each particle in the event saved in the histo
-        (m_MET_multi[met_name]).at(index)->Fill(particle_groups[index].size(), weight);
+        pMulti->Fill(particle_groups[index].size(), weight);
       }
 
       //EMTopo
