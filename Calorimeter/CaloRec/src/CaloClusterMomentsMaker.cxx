@@ -18,8 +18,6 @@
 
 #include "CaloClusterMomentsMaker.h"
 #include "CaloEvent/CaloCell.h"
-#include "CaloEvent/CaloClusterContainer.h"
-#include "CaloEvent/CaloCluster.h"
 #include "CaloGeoHelpers/proxim.h"
 #include "CaloEvent/CaloPrefetch.h"
 #include "CaloInterface/ILArHVFraction.h"

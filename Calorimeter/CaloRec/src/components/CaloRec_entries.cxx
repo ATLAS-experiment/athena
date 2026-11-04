@@ -1,12 +1,10 @@
 #include "../CaloTowerAlgorithm.h"
-#include "../CaloTopoTowerAlgorithm.h"
 #include "../CaloClusterMaker.h"
 #include "../CaloTopoClusterMaker.h"
 #include "../CaloTopoClusterSplitter.h"
 #include "../CaloClusterCopier.h"
 #include "../CaloClusterMomentsMaker.h"
 #include "../CaloClusterMomentsMaker_DigiHSTruth.h"
-#include "../CaloCell2ClusterMapper.h"
 #include "../CaloCellContainerCheckerTool.h"
 #include "../CaloCellContainerFinalizerTool.h"
 #include "../CaloCellMaker.h"
@@ -14,7 +12,6 @@
 //#include "CaloRec/CaloClusterCellSlimmer.h" Really obsolete AFAIK (commissioning legacy)
 #include "../CaloClusterCorrDBWriter.h"
 #include "../CaloClusterCorrDumper.h"
-#include "../CaloTopoTowerAlg.h"
 #include "../Blob2ToolConstants.h"
 #include "../CaloCellFastCopyTool.h"
 #include "../CaloCellContCopyTool.h"
@@ -45,16 +42,13 @@
 
 
 DECLARE_COMPONENT( CaloTowerAlgorithm )
-DECLARE_COMPONENT( CaloTopoTowerAlgorithm )
 DECLARE_COMPONENT( CaloClusterMaker )
-DECLARE_COMPONENT( CaloCell2ClusterMapper )
 DECLARE_COMPONENT( CaloCellMaker )
 DECLARE_COMPONENT( CaloConstCellMaker )
 
 //DECLARE_COMPONENT( CaloClusterCellSlimmer )
 DECLARE_COMPONENT( CaloClusterCorrDBWriter )
 DECLARE_COMPONENT( CaloClusterCorrDumper )
-DECLARE_COMPONENT( CaloTopoTowerAlg )
 
 DECLARE_COMPONENT( CaloTowerxAODFromCells )
 DECLARE_COMPONENT( CaloTowerxAODFromClusters )
