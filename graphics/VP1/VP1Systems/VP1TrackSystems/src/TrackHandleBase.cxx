@@ -409,7 +409,7 @@ void TrackHandleBase::ensureInitTSOSs(std::unique_ptr<std::vector<AssociatedObje
     //FIXME: likewise check that we don't have a bad measurement, material effect, ...
     if (ascObjNeedDistToNext&&trackParam) {
       ascObjNeedDistToNext->setDistToNextPar((trackParam->position()-ascObjNeedDistToNext->approxCenter()).mag());
-      ascObjNeedDistToNext = nullptr;
+      //ascObjNeedDistToNext value will be overwritten below
     }
     VP1Msg::messageVerbose("Adding TSOS at index:"+QString::number(parindex));
     ascObjNeedDistToNext = m_d->addTSOS(*tsos_iter,parindex++);
@@ -1016,7 +1016,6 @@ void TrackHandleBase::Imp::ensureInitPointsRaw()
           unsafeparts = true;
           continue;
         }
-        trackParam->position();//test
         points_raw->push_back( trackParam->position() );
         if (!firstmomentum) {
             firstmomentum = new Amg::Vector3D(trackParam->momentum());

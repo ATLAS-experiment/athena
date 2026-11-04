@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -238,7 +238,7 @@ void TrackCollHandle_TruthTracks::Imp::addHitCollections(std::map<SimBarCode,Sim
 	if ( itHitList == hitLists.end() ) {
 	  SimHitList l;
 	  l.push_back(std::pair<double,SimHitHandleBase*>(handle->hitTime(),handle));
-	  hitLists[trackID] = l;
+	  hitLists[trackID] = std::move(l);
 	} else {
 	  itHitList->second.emplace_back(handle->hitTime(),handle);
 	}
@@ -461,7 +461,7 @@ bool TrackCollHandle_TruthTracks::load()
 	continue;
     }
     m_d->possiblyUpdateGUI();
-    addTrackHandle( new TrackHandle_TruthTrack( this, itGenPart->first, SimHitList(), p ) );
+    addTrackHandle( new TrackHandle_TruthTrack( this, itGenPart->first, SimHitList(), std::move(p) ) );
   }
 
   //Maybe we need to show measurements, etc.:
@@ -587,7 +587,7 @@ void TrackCollHandle_TruthTracks::Imp::createSecondaryHitLists(const SimBarCode&
 //       theclass->messageVerbose("Ignoring secondary with barCode 0, since it seems to be the only sim. hit. by this track.");//Fixme: We could do something with posStart/posEnd?//fixme: update text to reflect 5
      //FIXME: use this!:      delete *(list.begin());
     } else {
-      outHandleLists.insert(list);
+      outHandleLists.insert(std::move(list));
     }
   }
 

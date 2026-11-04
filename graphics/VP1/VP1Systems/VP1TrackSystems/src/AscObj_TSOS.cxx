@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -289,12 +289,13 @@ double AscObj_TSOS::deviationFromMeasurement(const bool& absolute)
     const Trk::TrackParameters* trackParams = m_tsos->trackParameters();
     const Trk::TrackParameters * meas = dynamic_cast<const Trk::TrackParameters *>(trackParams);
     const Trk::AtaStraightLine * atas = dynamic_cast<const Trk::AtaStraightLine *>(meas);
-    if (not atas) return std::nan("");
+    if (!atas) return std::nan("");
     const Amg::Vector2D& localposMeas = atas->localPosition();
     paramValue = std::abs(localposMeas[Trk::locR]);
 
     if (!absolute)
     {
+      if (!meas) return std::nan("");
       const AmgSymMatrix(5) covmat = *(meas->covariance());
       sigma = sqrt( covmat(0,0) );
     }
