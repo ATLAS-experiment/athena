@@ -96,7 +96,7 @@ namespace MC
     if (apid == NU_E || apid == NU_MU || apid == NU_TAU) return true; //< neutrinos
     if (apid == 1000022 || apid == 1000024 || apid == 5100022) return true; // SUSY & KK photon and Z partners
     if (apid == GRAVITON || apid == 1000039 || apid == 5000039) return true; //< gravitons: standard, SUSY and KK
-    if (apid == 9000001 || apid == 9000002 || apid == 9000003 || apid == 9000004 || apid == 9000005 || apid == 9000006) return true; //< exotic particles from monotop model
+    if (isMonotopModel<int>(apid)) return true; //< invisible states of the monotop model (https://arxiv.org/abs/1106.6199); also covers its coloured mediators
     return false;
   }
 
