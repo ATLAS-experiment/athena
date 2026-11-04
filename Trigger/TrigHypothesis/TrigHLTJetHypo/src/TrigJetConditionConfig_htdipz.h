@@ -34,7 +34,10 @@ public extends<AthAlgTool, ITrigJetConditionConfig> {
   Gaudi::Property<std::string> 
     m_decName_z{this, "decName_z", {}, "dipz z accessor"};
   Gaudi::Property<std::string>
-    m_decName_negLogSigma2{ this, "decName_sigma", {}, "dipz sigma accessor"};
+    m_decName_sigma{ this, "decName_sigma", {}, "dipz sigma accessor"};
+  Gaudi::Property<bool> m_sigmaIsStdDev{
+    this, "sigmaIsStdDev", false,
+    "sigma decoration is the standard deviation rather than -2*log(sigma)"};
   Gaudi::Property<std::string>
     m_min{this, "min", {}, "min HT"};
   Gaudi::Property<std::string>

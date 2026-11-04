@@ -14,7 +14,7 @@ from TrigEDMConfig.TriggerEDM import recordable
 
 # Hypo tool generators
 from TrigHLTJetHypo.TrigJetHypoToolConfig import trigJetHypoToolFromDict
-from .JetPresel import caloPreselJetHypoToolFromDict, roiPreselJetHypoToolFromDict
+from .JetPresel import caloPreselJetHypoToolFromDict, roiPreselJetHypoToolFromDict, hitZPreselJetHypoToolFromDict
 from TrigCaloRec.TrigCaloRecConfig import jetmetTopoClusteringCfg, jetmetTopoClusteringCfg_LC, HICaloTowerCfg
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from TrigGenericAlgs.TrigGenericAlgsConfig import TrigEventInfoRecorderAlgCfg
@@ -130,6 +130,7 @@ class JetHypoAlgType(Enum):
     CALOPRESEL = 1
     ROIPRESEL = 2
     PASSTHROUGH = 3
+    HITZPRESEL = 4
 
 def jetSelectionCfg(flags, jetDefStr, jetsIn, hypoType=JetHypoAlgType.STANDARD):
     """constructs CA with hypo alg given arguments """
@@ -143,6 +144,9 @@ def jetSelectionCfg(flags, jetDefStr, jetsIn, hypoType=JetHypoAlgType.STANDARD):
             hypo = CompFactory.TrigJetHypoAlg(hyponame, Jets=jetsIn, DoPresel=True)
         elif hypoType==JetHypoAlgType.ROIPRESEL:
             hyponame = f"TrigJetHypoAlg_{jetDefStr}_roipresel"
+            hypo = CompFactory.TrigJetHypoAlg(hyponame, Jets=jetsIn, DoPresel=True)
+        elif hypoType==JetHypoAlgType.HITZPRESEL:
+            hyponame = f"TrigJetHypoAlg_{jetDefStr}_hitzpresel"
             hypo = CompFactory.TrigJetHypoAlg(hyponame, Jets=jetsIn, DoPresel=True)
         else:
             hyponame = f"TrigJetHypoAlg_{jetDefStr}"
@@ -161,6 +165,8 @@ def selName(recoSequenceName, hypoType=JetHypoAlgType.STANDARD):
             selname += "_calopresel"
         elif hypoType==JetHypoAlgType.ROIPRESEL:
             selname += "_roipresel"
+        elif hypoType==JetHypoAlgType.HITZPRESEL:
+            selname += "_hitzpresel"
     return selname
 
 
@@ -173,6 +179,7 @@ def hypoToolGenerator(hypoType):
         JetHypoAlgType.PASSTHROUGH: trigStreamerHypoTool,
         JetHypoAlgType.CALOPRESEL:  caloPreselJetHypoToolFromDict,
         JetHypoAlgType.ROIPRESEL:   roiPreselJetHypoToolFromDict,
+        JetHypoAlgType.HITZPRESEL:  hitZPreselJetHypoToolFromDict,
     }[hypoType]
     
 
@@ -413,3 +420,18 @@ def jetRoIHitZRecoCfg(flags, preselJetDef):
         DecorDeps=getDecorList(hitzJetDef),
     ))
     return reco, filtered_jetsIn
+
+# HitZ preselection on the super-RoI hits, before any tracking
+@AccumulatorCache
+def jetRoIHitZSelCfg(flags, preselJetDef):
+    jetDefStr = jetDefToString(preselJetDef)+'_roihitz'
+    reco, filtered_jetsIn = jetRoIHitZRecoCfg(flags, preselJetDef)
+    hypoType = JetHypoAlgType.HITZPRESEL
+    selAcc = SelectionCA(selName(reco.name, hypoType=hypoType))
+    selAcc.mergeReco(reco)
+    selAcc.mergeHypo(jetSelectionCfg(flags, jetDefStr=jetDefStr, jetsIn=filtered_jetsIn, hypoType=hypoType))
+    return selAcc, hypoType
+
+def jetRoIHitZHypoMenuSequenceGenCfg(flags, jetDef):
+    selAcc, hypoType = jetRoIHitZSelCfg(flags, jetDef)
+    return MenuSequence(flags, selAcc, HypoToolGen=hypoToolGenerator(hypoType))

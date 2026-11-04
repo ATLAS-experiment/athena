@@ -34,7 +34,7 @@ DZ_HIT_TO_VERTEX = 180
 
 # HitZ runs before the menu's JetViewAlg, so it applies its own acceptance
 MIN_JET_PT = 20e3
-MAX_ABS_JET_ETA = 4.0
+MAX_ABS_JET_ETA = 2.4
 
 # Map the MDN output names onto the (z, sigma) pair the menu side expects
 Z_DECOR = 'HitZ_z0'

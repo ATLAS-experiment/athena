@@ -114,10 +114,7 @@ std::vector<std::size_t> JetGroupProduct::next(const Collector& collector){
 					   m_jg2elemjgs);
     if (elem_indices.empty()) {continue;}
 
-    if (std::find(m_seenIndices.begin(),
-		  m_seenIndices.end(),
-		  elem_indices) == m_seenIndices.end()){
-      m_seenIndices.push_back(elem_indices);
+    if (m_seenIndices.insert(elem_indices).second) {
       return elem_indices;
     }
   }		       
