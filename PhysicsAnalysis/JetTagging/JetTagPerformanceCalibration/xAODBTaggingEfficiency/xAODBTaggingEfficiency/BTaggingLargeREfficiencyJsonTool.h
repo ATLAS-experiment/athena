@@ -75,12 +75,13 @@ class BTaggingLargeREfficiencyJsonTool: public asg::AsgTool,
       LargeRMCMCHandler& operator=(const LargeRMCMCHandler&) = delete;
       virtual ~LargeRMCMCHandler() = default;
 
-      float getScaleFactor() const { return m_MCMCSF; }
+      float getScaleFactor(const bool isTagged ) const ;
 
       // For printing the content of a handler
       virtual std::string to_string() const override;
     private:
       float m_MCMCSF = std::numeric_limits<float>::lowest();
+      float m_MCEff  = std::numeric_limits<float>::lowest();
   };
 
   // SF maps
