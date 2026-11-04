@@ -714,11 +714,6 @@ TriggerHLTList = [
     # particles == L2 List
     ('TrigSpacePointCounts#HLT_spacepoints',                              'BS ESD AODFULL AODSLIM', 'MinBias'), # ? do we realy need it!
     ('TrigTrtHitCounts#HLT_TrtHitCount',                                  '',                       'MinBias'),
-    ('TrigMissingET#HLT_T2MissingET',                                     '', 'MET'),
-    ('TrigMissingET#HLT_L2JetEtSum',                                      '', 'MET'),
-    ('TrigMissingET#HLT_L2MissingET_FEB',                                 '', 'MET'),
-    ('ElectronMuonTopoInfo#HLT_EgMuTopoFEX',                              '',                       'Combined'),        # Muon? Egamma? Combined?
-    ('ElectronMuonTopoInfo#HLT_L2_PhotonMuonTopoFEX',                     '',                       'Combined'),        # Muon? Egamma? Combined?
 
     # tracking == L2 List
    ('TrigInDetTrackCollection#HLT',                                      'BS ESD',                  'ID'),      # category?
@@ -782,23 +777,6 @@ TriggerHLTList = [
    ('TrigPassBits#HLT_passbits',                                         'BS ESD AODFULL AODSLIM',                'Steer'),
    ('TrigPassFlags#HLT_passflags',                                       'BS ESD AODFULL AODSLIM',                'Steer'),
    ('TrigPassFlags#HLT_isEM',                                            'BS ESD AODFULL AODSLIM',                'Steer'),
-   ('CaloClusterContainer#HLT',                                          '',                                      'Calo'),       # Egamma?
-   ('CaloClusterContainer#HLT_TrigCaloClusterMaker',                     '',                                      'Calo'),       # Egamma?
-   ('CaloClusterContainer#HLT_TrigCaloClusterMaker_slw',                 '',                                      'Calo'),       # Egamma?
-   ('CaloClusterContainer#HLT_TrigCaloClusterMaker_topo',                '',                                      'Calo'),       # Egamma?
-   ('egammaContainer#HLT_egamma_Electrons',                              '',                                      'Egamma'),
-   ('egammaContainer#HLT_egamma_SC_Electrons',                              '',                                      'Egamma'),
-   ('egammaContainer#HLT_egamma',                                        '',                                      'Egamma'),
-   ('egammaContainer#HLT_egamma_Photons',                                '',                                      'Egamma'),
-   ('egammaContainer#HLT_egamma_SC_Photons',                                '',                                      'Egamma'),
-   ('TrigMissingET#HLT_TrigEFMissingET',                                 '',                'MET'),
-   ('TrigMissingET#HLT_TrigEFMissingET_noiseSupp',                       '',                'MET'),
-   ('TrigMissingET#HLT_TrigEFMissingET_FEB',                             '',                'MET'),
-   ('TrigMissingET#HLT_TrigEFMissingET_topocl',                          '',                'MET'),
-   ('TrigMissingET#HLT_TrigEFMissingET_topocl_PS',                       '',                'MET'),
-   ('TrigMissingET#HLT_EFJetEtSum',                                      '',                'MET'),
-   ('ElectronMuonTopoInfo#HLT_EF_PhotonMuonTopoFEX',                     '',               			  'Combined'),    #   Combined?
-   ('ElectronMuonTopoInfo#HLT_EF_EgMuTopoFEX',                           '',             		          'Combined'),     #  Combined?
    ('Rec::TrackParticleContainer#HLT_InDetTrigParticleCreation_Bjet_EFID',             '',           'Bjet'),
    ('Rec::TrackParticleContainer#HLT_InDetTrigParticleCreation_Bphysics_EFID',         '',           'Bphys'),
    ('Rec::TrackParticleContainer#HLT_InDetTrigParticleCreationIOTRT_CosmicsN_EFID',    '',           'Cosmics'),
@@ -819,28 +797,10 @@ TriggerHLTList = [
    ('Rec::TrackParticleContainer#HLT_InDetTrigParticleCreation_MuonIso_EFID',          '',           'Muon'),
 
     # == EF List
-    ('Analysis::TauDetailsContainer#HLT_TrigTauDetailsMerged',            '',  'Tau'),
-    ('Analysis::TauDetailsContainer#HLT_TrigTauExtraDetailsMerged',       '',  'Tau'),
-    ('Analysis::TauDetailsContainer#HLT_TrigTauDetailsCalo',              '',  'Tau'),
-    
-    # == EF List
     ('TrigTrackCounts#HLT',                                               '',                        'MinBias'),
     ('TrigTrackCounts#HLT_trackcounts',                                   'BS ESD AODFULL AODSLIM',  'MinBias'), #? this is the CMS trigger obj
     ('TrigVertexCounts#HLT_vertexcounts',                                 'BS ESD AODFULL AODSLIM',  'MinBias'),
-    ('Analysis::TauJetContainer#HLT_TrigTauRecMerged',                    '',  'Tau'),
-    ('Analysis::TauJetContainer#HLT_TrigTauRecCalo',                      '',  'Tau'),
-    ('JetCollection#HLT',                                                 '',                        'Jet'),
-    ('JetKeyDescriptor#HLT_TrigJetKeyMap',                                '',                        'Jet'),        # ESD AODFULL AODSLIM'),
-    ('JetMomentMap#HLT_TrigJetRecMomentMap',                              '',                        'Jet'),        #  # ESD AODFULL AODSLIM'),
-    ('JetCollection#HLT_TrigJetRec',                                      '',                        'Jet'),
-    ('JetCollection#HLT_TrigCosmicJetRec',                                '',                        'Cosmics'),
-    ('JetCollection#HLT_TrigTauJet',                                      '',                        'Tau'),
-    ('egDetailContainer#HLT_egamma_Electrons',                            '',                        'Egamma'),
-    ('egDetailContainer#HLT_egamma_SC_Electrons',                            '',                        'Egamma'),
-    ('egDetailContainer#HLT_egamma',                                      '',                        'Egamma'),
-    ('egDetailContainer#HLT_egamma_Photons',                              '',                        'Egamma'),
-    ('egDetailContainer#HLT_egamma_SC_Photons',                              '',                        'Egamma'),
-    ('TrackCollection#TrigFastTrackFinder_Tau',                           '', 'Tau'), 
+    ('TrackCollection#TrigFastTrackFinder_Tau',                           '', 'Tau'),
     ('TrackCollection#HLT_InDetTrigTrackSlimmer_Bjet_EFID',               'ESD',                     'Bjet'),
     ('TrackCollection#HLT_InDetTrigTrackSlimmer_Bphysics_EFID',           'ESD',                     'Bphys'),
     ('TrackCollection#HLT_InDetTrigTrackSlimmer_CosmicsN_EFID',           'ESD',                     'Cosmics'),
@@ -997,43 +957,21 @@ EDMDetails = {}
 
 EDMDetails[ "TrigRoiDescriptor" ]         = {'persistent':"TrigRoiDescriptorCollection_p3",     'typealias':'Roi', 'collection':'TrigRoiDescriptorCollection' }
 EDMDetails[ "TrigOperationalInfo" ]       = {'persistent':"TrigOperationalInfoCollection_tlp1",   'typealias':'', 'collection':'TrigOperationalInfoCollection' }
-EDMDetails[ "TrigMonEvent" ]              = {'persistent':"TrigMonEventCollection_tlp1",          'typealias':'', 'collection':'TrigMonEventCollection' }
 EDMDetails[ "TrigInDetTrackCollection" ]  = {'persistent':"TrigInDetTrackCollection_tlp2",        'typealias':'InDetTrk' }
-EDMDetails[ "TrigT2Jet" ]                 = {'persistent':"TrigT2JetContainer_p3",              'typealias':'T2Jet', 'collection':'TrigT2JetContainer'}
-EDMDetails[ "TrigTau" ]                   = {'persistent':"TrigTauContainer_p3",                'typealias':'tau', 'collection':'TrigTauContainer'}
-EDMDetails[ "TrigL2BjetContainer" ]       = {'persistent':"TrigL2BjetContainer_p3",             'typealias':'AOD' }
-EDMDetails[ "TrigMissingET" ]             = {'persistent':"TrigMissingETContainer_p3",          'typealias':'MET', 'collection':'TrigMissingETContainer'}
+
 EDMDetails[ "TrigSpacePointCounts" ]      = {'persistent':"TrigSpacePointCountsCollection_p4",  'typealias':'AOD', 'collection':'TrigSpacePointCountsCollection'}
 EDMDetails[ "TrigTrtHitCounts" ]          = {'persistent':"TrigTrtHitCountsCollection_p2",      'typealias':'AOD', 'collection':'TrigTrtHitCountsCollection'}
 EDMDetails[ "TrigVertexCollection" ]      = {'persistent':"TrigVertexCollection_tlp1",            'typealias':'AOD'}
-EDMDetails[ "TrigL2BphysContainer" ]      = {'persistent':"TrigL2BphysContainer_tlp1",            'typealias':'L2Bphys', 'collection':'TrigL2BphysContainer'}
-EDMDetails[ "TrigEFBphysContainer" ]      = {'persistent':"TrigEFBphysContainer_tlp1",            'typealias':'AOD', 'collection':'TrigEFBphysContainer'}
-EDMDetails[ "TrigEFBjetContainer" ]       = {'persistent':"TrigEFBjetContainer_tlp2",             'typealias':'AOD' }
-
-EDMDetails[ "JetKeyDescriptor" ]          = {'persistent':"JetKeyDescriptorCollection_p1",        'typealias':'AOD', 'collection':'JetKeyDescriptorCollection' }
-EDMDetails[ "JetMomentMap" ]              = {'persistent':"JetMomentMapCollection_p6",            'typealias':'AOD', 'collection':'JetMomentMapCollection' }
-EDMDetails[ "JetCollection" ]             = {'persistent':"JetCollection_tlp6",                   'typealias':'JetColl' }
-
-EDMDetails[ "CaloClusterContainer" ]      = {'persistent':"CaloClusterContainer_p4",              'typealias':'CaloCl' }
-EDMDetails[ "CaloCellLinkContainer" ]     = {'persistent':"CaloCellLinkContainer_p2",             'typealias':'CaloLk' }
-EDMDetails[ "CaloShowerContainer" ]       = {'persistent':"CaloShowerContainer_p2",               'typealias':'CaloSh' }
-EDMDetails[ "CaloTowerContainer" ]        = {'persistent':"CaloTowerContainer_p1",                'typealias':'' }
-
-EDMDetails[ "egDetailContainer" ]         = {'persistent':"egDetailContainer_p2",                 'typealias':'egDet' }
-EDMDetails[ "egammaContainer" ]           = {'persistent':"egammaContainer_p2",                   'typealias':'eg' }
-EDMDetails[ "Analysis::TauJetContainer" ] = {'persistent':"TauJetContainer_p4",                   'typealias':'AOD' }
 
 EDMDetails[ "TrigTrackCounts" ]           = {'persistent':"TrigTrackCountsCollection_tlp1",       'typealias':'TrkCount', 'collection':'TrigTrackCountsCollection'}
 EDMDetails[ "TrigVertexCounts" ]           = {'persistent':"TrigVertexCountsCollection_tlp1",     'typealias':'VtxCount', 'collection':'TrigVertexCountsCollection'}
 EDMDetails[ "TrackCollection" ]           = { 'persistent':"Trk::TrackCollection_tlp2",           'typealias':'AOD' }
 EDMDetails[ "Rec::TrackParticleContainer" ]   = {'persistent':"Rec::TrackParticleContainer_tlp1", 'typealias':'' }
 
-EDMDetails[ "Analysis::TauDetailsContainer" ] ={'persistent':"TauDetailsContainer_tlp2",          'typealias':'AOD' }
 EDMDetails[ "VxContainer" ]               = {'persistent':"Trk::VxContainer_tlp2",                'typealias':'' }
 EDMDetails[ "CaloCellContainer" ]         = {'persistent':"CaloCompactCellContainer" }
 EDMDetails[ "TrigPassBits" ]              = {'persistent':"TrigPassBitsCollection_p1",            'typealias':'AOD', 'collection':'TrigPassBitsCollection' }
 EDMDetails[ "TrigPassFlags" ]             = {'persistent':"TrigPassFlagsCollection_p1",           'typealias':'', 'collection':'TrigPassFlagsCollection' }
-EDMDetails[ "ElectronMuonTopoInfo" ]      = {'persistent':"ElectronMuonTopoInfoContainer_p1",     'typealias':'AOD', 'collection':"ElectronMuonTopoInfoContainer"}
 EDMDetails[ "TrigComposite" ]             = {'persistent':"TrigCompositeContainer_p1",            'typealias':'Comp', 'collection':'TrigCompositeContainer'}
 EDMDetails["TrigDec::TrigDecision"]               = {'persistent':"",               'typealias':'' }
 EDMDetails["HLT::HLTResult"]                      = {'persistent':"",               'typealias':'' }
@@ -1212,11 +1150,9 @@ EDMDetails['xAOD::CMXRoIAuxContainer']                    = {'persistent': "", '
 EDMLibraries = [ 'TrigSteeringEvent',
                  'TrigInDetEvent',
                  'TrigDecisionEvent',
-                 'TrigTopoEvent',
                  'RecTPCnv',
                  'TrigDecisionEventTPCnv',     'TrigInDetEventTPCnv',
                  'TrigSteeringEventTPCnv',
-                 'TrigTopoEventTPCnv',
                  'RecTPCnvDict',
                  'OLD_RecTPCnvDict',
                  'xAODCaloEvent', 'xAODEgamma', 'xAODTracking', 'xAODMuon', 'xAODTau', 'xAODJet',
