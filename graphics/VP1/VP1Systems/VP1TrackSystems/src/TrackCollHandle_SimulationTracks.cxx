@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -165,7 +165,7 @@ void TrackCollHandle_SimulationTracks::Imp::addHitCollections(std::map<SimBarCod
 	  if ( itHitList == hitLists.end() ) {
 	    SimHitList l;
 	    l.push_back(std::pair<double,SimHitHandleBase*>(handle->hitTime(),handle));
-	    hitLists[trackID] = l;
+	    hitLists[trackID] = std::move(l);
 	  } else {
 	    itHitList->second.emplace_back(handle->hitTime(),handle);
 	  }

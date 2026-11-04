@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,8 +19,7 @@
 #include "AtlasHepMC/GenVertex.h"
 
 // Eigen migration
-//#include "TrkEventPrimitives/GlobalPosition.h"
-//#include "TrkEventPrimitives/GlobalMomentum.h"
+
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GeoPrimitives/AmgStringHelpers.h"
 
@@ -30,14 +29,14 @@
 #include <Inventor/nodes/SoVertexProperty.h>
 #include "MuonRecHelperTools/MuonEDMPrinterTool.h"
 
-#include <string> // for C++11 to_string features
+#include <string> 
 
 
 //____________________________________________________________________
 class AscObj_TruthPoint::Imp {
 public:
   Imp(HepMC::ConstGenVertexPtr  v, HepMC::ConstGenParticlePtr p)
-    : genVertex(v), genParticle(p), simhit(nullptr) {}
+    : genVertex(std::move(v)), genParticle(std::move(p)), simhit(nullptr) {}
   Imp(SimHitHandleBase*s)
     : genVertex(nullptr), genParticle(nullptr), simhit(s) {}
   HepMC::ConstGenVertexPtr genVertex;
@@ -48,7 +47,7 @@ public:
 
 //____________________________________________________________________
 AscObj_TruthPoint::AscObj_TruthPoint(TrackHandleBase*th, HepMC::ConstGenVertexPtr v, HepMC::ConstGenParticlePtr p)
-  : AssociatedObjectHandleBase(th), m_d(new Imp(v,p))
+  : AssociatedObjectHandleBase(th), m_d(new Imp(std::move(v),std::move(p)))
 {
 }
 

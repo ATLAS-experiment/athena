@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-202 6 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -32,7 +32,7 @@ public:
     : theclass(tc),
       simBarCode(sbc),
       simHitList(shl),
-      genParticle(p),
+      genParticle(std::move(p)),
       ascObjVis(false),
       ascObjs(nullptr),
       trkTrack(nullptr) {}
@@ -130,7 +130,7 @@ TrackHandle_TruthTrack::TrackHandle_TruthTrack( TrackCollHandleBase* ch,
 						const SimBarCode& simBarCode,
 						const SimHitList& simHitList,
 						HepMC::ConstGenParticlePtr genPart )
-  : TrackHandleBase(ch), m_d(new Imp(this,simBarCode,simHitList,genPart))
+  : TrackHandleBase(ch), m_d(new Imp(this,simBarCode,simHitList,std::move(genPart)))
 {
   if (VP1Msg::verbose()) {
     //Check genparticle barcode is same as in simBarCode. (and event index in parent_event())
@@ -317,10 +317,10 @@ void TrackHandle_TruthTrack::Imp::ensureInitAscObjs()
   }
   ascObjs->reserve((vprod?1:0)+(vend?1:simHitList.size()));
   if (vprod)
-    ascObjs->push_back(new AscObj_TruthPoint(theclass,vprod,genParticle));
+    ascObjs->push_back(new AscObj_TruthPoint(theclass,std::move(vprod),genParticle));
 
   if (vend) {
-    ascObjs->push_back(new AscObj_TruthPoint(theclass,vend,genParticle));
+    ascObjs->push_back(new AscObj_TruthPoint(theclass,std::move(vend),genParticle));
   } else {
     SimHitList::const_iterator it, itE(simHitList.end());
     for ( it = simHitList.begin(); it != itE; ++it )

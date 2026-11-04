@@ -60,7 +60,10 @@ TrackHandle_TrackContainer::provide_pathInfoPoints() {
   auto trackContainerCollHandle =
       dynamic_cast<const TrackCollHandle_TrackContainer*>(collHandle());
   auto points = new std::vector<Amg::Vector3D>;
-
+  if (!trackContainerCollHandle)[[unlikely]]{
+    VP1Msg::messageDebug("TrackHandle_TrackContainer::momentum: bad cast.");
+    return points;
+  }
   auto ctx = trackContainerCollHandle->common()->geometryContext().context();
   for (auto trackstate : m_trackStates) {
     if (trackstate.hasSmoothed() && trackstate.hasReferenceSurface()) {

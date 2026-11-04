@@ -313,15 +313,13 @@ bool TrackPropagationHelper::makePointsCharged( std::vector<Amg::Vector3D >& poi
 
         messageVerbose("Extrap value:"+str((extrapolator)));
         messageVerbose("trackParam:"+str((trackParam)));
-        const Trk::TrackParameters*  trackPar = extrapolator->extrapolate(ctx,
-                                                                          *trackParam,
-                                                                          **bSurfsIt,
-                                                                          Trk::alongMomentum,true,hypo).release(); // change this to extrapolate current param to surface.
+        const auto  trackPar = extrapolator->extrapolate(ctx, *trackParam, **bSurfsIt,
+           Trk::alongMomentum,true,hypo); // change this to extrapolate current param to surface.
 
         if (trackPar){
           messageVerbose("Extrapolation succeeded");
 
-          if (!m_d->addPointsBetweenParameters_Charged(points,track,trackParam,trackPar,extrapolator,hypo))
+          if (!m_d->addPointsBetweenParameters_Charged(points,track,trackParam,trackPar.get(),extrapolator,hypo))
             messageDebug("WARNING: Problems encountered adding point(s) between track parameters in extending to Volume");
         }
       }
@@ -426,7 +424,7 @@ bool TrackPropagationHelper::Imp::makePointsCharged_SinglePar( std::vector<Amg::
     Amg::Vector3D p(temppars->position());
     points.push_back(p);
     prevpars = temppars;
-    temppars = nullptr;
+    //temppars is overwritten on the next loop
     if (!startoutsideID && outsideIDVolume(p)) {
       if (prevpars!=par)
   delete prevpars;
