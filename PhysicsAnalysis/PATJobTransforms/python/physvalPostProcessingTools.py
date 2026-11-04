@@ -52,11 +52,14 @@ def histogram_paths(directory, prefix=""):
     """Return the path of every histogram below a directory."""
     paths = []
     for key in directory.GetListOfKeys():
-        path = f"{prefix}/{key.GetName()}" if prefix else key.GetName()
+        name = key.GetName()
+        path = f"{prefix}/{name}" if prefix else name
         # only the directories are read, so the histograms stay on disk
         stored = ROOT.TClass.GetClass(key.GetClassName())
         if stored.InheritsFrom(ROOT.TDirectory.Class()):
-            paths += histogram_paths(key.ReadObj(), path)
+            subdir = directory.Get(name)
+            if subdir:
+                paths.extend(histogram_paths(subdir, path))
         elif stored.InheritsFrom(ROOT.TH1.Class()):
             paths.append(path)
     return paths
@@ -197,6 +200,7 @@ class EfficiencyComputation:
 
         if not ROOT.TEfficiency.CheckConsistency(num, den):
             logging.warning("Inconsistency detected between numerator and denominator histograms.")
+            logging.warning(f"num={self.numerator} denom={self.denominator}")
             logging.info("Attempting to fix...")
             for i in range(1, num.GetNbinsX() + 1):
                 num_val = num.GetBinContent(i)
