@@ -1,7 +1,7 @@
 //Dear emacs, this is -*-c++-*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaBaseComps/AthAlgorithm.h"
@@ -15,7 +15,7 @@
 class CaloCellDumper: public AthAlgorithm {
 
  public:
-  CaloCellDumper(const std::string& name, ISvcLocator * pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
 
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) override;
