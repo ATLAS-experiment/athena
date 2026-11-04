@@ -334,7 +334,8 @@ CP::CorrectionCode BTaggingLargeREfficiencyJsonTool::getMCToMCCorr( const xAOD::
   // std::cout << "handler=" << handler->to_string() << std::endl;
 
   // Retrieve the corresponding MC-MC scale factor 
-  corr = handler->getScaleFactor();
+  const bool isTagged = (m_selTool->accept(jet) == 1);
+  corr = handler->getScaleFactor(isTagged);
   return CP::CorrectionCode::Ok;
 }
 
@@ -418,6 +419,33 @@ BTaggingLargeREfficiencyJsonTool::LargeRMCMCHandler::LargeRMCMCHandler(
 
   // Retrieve the MC-MC scale factor
   m_MCMCSF = mcmcEntry["SF"].get<float>();
+
+  // Checks for the monte-carlo efficiency, which is important for the inefficiency scale factors
+  if (!mcmcEntry.contains("mcEff") || !mcmcEntry["mcEff"].is_number()){
+    throw std::runtime_error("mc-to-mc mcmcEntry is not containing an MC efficiency (mcEff) for jsonConfig=" + jsonConfig.dump());
+  }
+  
+  // Retrieve the tagging efficiency of the alternative MC sample being processed 
+  m_MCEff = mcmcEntry["mcEff"].get<float>();
+
+  if (m_MCEff <= 0.f || m_MCEff >= 1.f) {
+    throw std::runtime_error("mc-to-mc mcEff=" + std::to_string(m_MCEff) + " is not in (0, 1) for jsonConfig=" + jsonConfig.dump());
+  }  
+  
+  // SF*mcEff > 1 would give a negative inefficiency scale factor
+  if (m_MCMCSF * m_MCEff > 1.f) {
+    throw std::runtime_error("mc-to-mc SF*mcEff > 1 gives a negative inefficiency scale factor for jsonConfig=" + jsonConfig.dump());
+  }
+
+}
+
+float BTaggingLargeREfficiencyJsonTool::LargeRMCMCHandler::getScaleFactor(const bool isTagged) const
+{
+  if (isTagged) {
+    return m_MCMCSF; // return mc-mc correction for tagged jets
+  } else {
+    return (1.f - m_MCMCSF * m_MCEff) / (1.f - m_MCEff); // return mc-mc inefficiency correction for untagged jets
+  }
 }
 
 std::string BTaggingLargeREfficiencyJsonTool::LargeRMCMCHandler::to_string() const {
@@ -428,7 +456,7 @@ std::string BTaggingLargeREfficiencyJsonTool::LargeRMCMCHandler::to_string() con
   // Add the list of variables with lower and upper bounds
   os << onlyBounds_to_string();
   // Finally add the MC-MC SF value
-  os << ", SF: " << m_MCMCSF << ")";
+  os << ", SF: " << m_MCMCSF << ", mcEff: " << m_MCEff << ")";
   return os.str();
 }
 
