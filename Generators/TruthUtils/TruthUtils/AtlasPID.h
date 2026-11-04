@@ -434,6 +434,17 @@ template <class T> inline bool isPythia8Specific(const T& p){ return isPythia8Sp
 template <> inline bool isPythia8Specific(const DecodedPID& p){ return (p.ndigits() == 7 && p(0) == 9 && p(1) == 9);}
 template <> inline bool isPythia8Specific(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false;  auto value_digits = DecodedPID(p); return isPythia8Specific(value_digits);}
 
+/// APID: exotic particles of the monotop model, 9000001-9000006. They are not flagged with nnr = 99 (see PDG rule 12).
+/// Model: J. Andrea, B. Fuks, F. Maltoni, "Monotops at the LHC", Phys. Rev. D 84 (2011) 074025, https://arxiv.org/abs/1106.6199
+/// FeynRules model page: https://feynrules.irmp.ucl.ac.be/wiki/Monotops (monotops_UFO.tgz).
+/// Codes as in the UFO particles.py: 9000001 smet (neutral scalar, invisible), 9000002 vmet (neutral vector, invisible),
+/// 9000003 fmet (neutral fermion, invisible), 9000004 phic (scalar, charge 2/3), 9000005 vc (vector, charge 2/3),
+/// 9000006 tphic (scalar, charge -1/3). The three colour-triplet states are the resonant-production mediators.
+/// (The UFO also uses 9000007-9000011 for ghosts; those are not covered here.)
+template <class T> inline bool isMonotopModel(const T& p){return isMonotopModel(p->pdg_id());}
+template <> inline bool isMonotopModel(const int& p){ auto sp = std::abs(p); return sp >= 9000001 && sp <= 9000006; }
+template <> inline bool isMonotopModel(const DecodedPID& p){ return isMonotopModel(p.pid()); }
+
 /// PDG rule 12:
 /// Occasionally program authors add their own states. To avoid confusion, these should be
 /// flagged by setting nnr = 99.
@@ -908,7 +919,8 @@ template <> inline bool isValid(const DecodedPID& p){
   return p.pid() !=0 && ( isQuark(p) || isLepton(p) || isBoson(p) || isGlueball(p) ||
                          isTrajectory(p.pid()) || isGenSpecific(p.pid()) || isDiquark(p) ||
                          isBSM(p) || isHadron(p) || isNucleus(p) || isGeantino(p.pid()) ||
-                         isPythia8Specific(p) ); }
+                         isPythia8Specific(p) ||
+                         isMonotopModel(p) ); }
 template <> inline bool isValid(const int& p){ if (!p) return false; if (std::abs(p) < 42) return true;
   if (isGenSpecific(p)) return true;
   auto value_digits = DecodedPID(p); return isValid(value_digits);
