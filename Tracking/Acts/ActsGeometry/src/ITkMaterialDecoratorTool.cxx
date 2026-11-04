@@ -8,12 +8,16 @@
 #include "PathResolver/PathResolver.h"
 
 #include "ActsPlugins/Root/RootMaterialDecorator.hpp"
-#include "ActsPlugins/Json/JsonMaterialDecorator.hpp"
+#include "ActsGeometry/MaterialMapJson.h"
 
 namespace ActsTrk {
 ITkMaterialDecoratorTool::~ITkMaterialDecoratorTool() = default;
 void ITkMaterialDecoratorTool::visitSurface(Acts::Surface& surface) {
-  m_matDecorator->decorate(surface);
+  if (m_rootMaterialDecorator) {
+    m_rootMaterialDecorator->decorate(surface);
+  } else {
+    m_material.apply(surface);
+  }
 }
 StatusCode ITkMaterialDecoratorTool::initialize() {
   std::string fullPath = PathResolverFindCalibFile(
@@ -33,17 +37,16 @@ StatusCode ITkMaterialDecoratorTool::initialize() {
   if (fullPath.ends_with(".root")) {
     ActsPlugins::RootMaterialDecorator::Config decoratorConfig;
     decoratorConfig.fileName = std::move(fullPath);
-    m_matDecorator = std::make_unique<ActsPlugins::RootMaterialDecorator>(
+    m_rootMaterialDecorator = std::make_unique<ActsPlugins::RootMaterialDecorator>(
         decoratorConfig, level);
   } else {
-    Acts::MaterialMapJsonConverter::Config converterConfig;
-    m_matDecorator = std::make_unique<Acts::JsonMaterialDecorator>(
-        converterConfig, fullPath, level);
+    m_material = readMaterialMapJson(fullPath, level);
   }
   return StatusCode::SUCCESS;
 }
 StatusCode ITkMaterialDecoratorTool::finalize() {
-  m_matDecorator.reset();
+  m_rootMaterialDecorator.reset();
+  m_material = {};
   return StatusCode::SUCCESS;
 }
 }  // namespace ActsTrk

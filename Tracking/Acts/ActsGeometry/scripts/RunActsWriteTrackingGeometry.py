@@ -88,7 +88,7 @@ from ActsConfig.ActsGeometryConfig import ActsWriteTrackingGeometryCfg
 cfg.merge(ActsWriteTrackingGeometryCfg(flags, name="ActsWriteTrackingGeometry"))
 if args.dumpMaterialJson:
     from ActsConfig.ActsMaterialConfig import MaterialJsonDumpCfg
-    cfg.merge(MaterialJsonDumpCfg(flags, FileName="material-maps"))
+    cfg.merge(MaterialJsonDumpCfg(flags))
 
 
 cfg.printConfig(withDetails=True, summariseProps=True)

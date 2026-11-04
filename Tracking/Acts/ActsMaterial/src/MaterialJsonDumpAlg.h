@@ -8,17 +8,14 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
 #include "GaudiKernel/ServiceHandle.h"
-#include "AsgTools/ToolHandle.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
-#include "ActsMaterial/IMaterialDumperTool.h"
 
 namespace ActsTrk {
     /// @class MaterialJsonDumpAlg
     ///
     /// @brief Dumps the material already assigned to the tracking geometry
     /// (e.g. loaded on the surfaces by the ITkMaterialDecoratorTool from a
-    /// Root or Json material map) through the material dumper tool, which is
-    /// the same one the material mapping uses at its end.
+    /// Root or Json material map) through the ACTS versioned material JSON codec.
     ///
     /// No material tracks and no event loop are needed: the material is
     /// collected from the geometry and dumped once, in finalize().
@@ -31,8 +28,9 @@ namespace ActsTrk {
             virtual StatusCode finalize() override;
 
         private:
-            /// The material dumper, shared with the material mapping
-            ToolHandle<IMaterialDumperTool> m_materialDumper{this, "MaterialDumper", "", "The material dumper tool"};
+            Gaudi::Property<std::string> m_fileName{this, "FileName", "material-maps.json.zst", "Material map output filename"};
+            Gaudi::Property<int> m_compressionLevel{this, "CompressionLevel", 9, "Zstd compression level"};
+            Gaudi::Property<int> m_materialFractionBits{this, "MaterialFractionBits", 23, "Retained material float fraction bits (0-23; 23 is lossless)"};
 
             /// The tracking geometry service holding the decorated geometry
             ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc", "The ACTS geometry service"};

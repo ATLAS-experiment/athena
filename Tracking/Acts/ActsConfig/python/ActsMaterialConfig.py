@@ -60,33 +60,10 @@ def MaterialTrackReaderCfg(configFlags, name="MaterialTrackReader", **kwargs) :
 
   return acc
 
-def RootMaterialWriterToolCfg(configFlags, name="RootMaterialWriterTool", **kwargs):
-  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-  from AthenaConfiguration.ComponentFactory import CompFactory
-  acc = ComponentAccumulator()
-  acc.setPrivateTools(CompFactory.ActsTrk.RootMaterialWriterTool(name, **kwargs))
-  return acc
-
-def JsonMaterialWriterToolCfg(configFlags, name="JsonMaterialWriterTool", **kwargs):
-  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-  from AthenaConfiguration.ComponentFactory import CompFactory
-  acc = ComponentAccumulator()
-  acc.setPrivateTools(CompFactory.ActsTrk.JsonMaterialWriterTool(name, **kwargs))
-  return acc
-
-def MaterialDumperToolCfg(configFlags, name="MaterialDumperTool", **kwargs):
-  from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
-  from AthenaConfiguration.ComponentFactory import CompFactory
-  acc = ComponentAccumulator()
-  acc.setPrivateTools(CompFactory.ActsTrk.MaterialDumperTool(name, **kwargs))
-  return acc
-
 def MaterialMappingCfg(configFlags,
                        name="MaterialMapping",
                        StoreTracks=False,
                        StoreSurfInfo=False,
-                       WriteJsonMaterialMap=True,
-                       WriteRootMaterialMap=False,
                        OutputMappedMaterialTracks="OuputMappedMaterialTracks",
                        OutputUnmappedMaterialTracks="OutputUnmappedMaterialTracks",
                        **kwargs) :
@@ -102,14 +79,6 @@ def MaterialMappingCfg(configFlags,
   acc.merge(AtlasFieldCacheCondAlgCfg(configFlags))
   from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
   acc.merge(ActsGeometryContextAlgCfg(configFlags))
-
-  mapwriters = []
-  if WriteRootMaterialMap:
-      mapwriters += [acc.popToolsAndMerge(RootMaterialWriterToolCfg(configFlags))]
-  if WriteJsonMaterialMap:
-      mapwriters += [acc.popToolsAndMerge(JsonMaterialWriterToolCfg(configFlags))]
-  # The mapped maps are dumped by the material dumper, which owns the writers
-  kwargs.setdefault("MaterialDumper", acc.popToolsAndMerge(MaterialDumperToolCfg(configFlags, MaterialMapWriters=mapwriters)))
 
   kwargs.setdefault("MappedMaterialTrackCollectionKey", OutputMappedMaterialTracks)
   kwargs.setdefault("UnmappedMaterialTrackCollectionKey", OutputUnmappedMaterialTracks)
@@ -136,11 +105,12 @@ def MaterialMappingCfg(configFlags,
 
 def MaterialJsonDumpCfg(configFlags,
                         name="MaterialJsonDump",
-                        FileName="material-maps",
+                        FileName="material-maps.json.zst",
                         **kwargs) :
   """Dump the material assigned to the tracking geometry (e.g. loaded from a
-  Root material map by the ITkMaterialDecoratorTool) with the Json material
-  writer. FileName is the output base name, without extension."""
+  Root material map by the ITkMaterialDecoratorTool) with the ACTS material
+  JSON codec. FileName includes the extension and defaults to .json.zst.
+  Codec options can be supplied through kwargs."""
   from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
   from AthenaConfiguration.ComponentFactory import CompFactory
   acc = ComponentAccumulator()
@@ -153,9 +123,7 @@ def MaterialJsonDumpCfg(configFlags,
   from ActsAlignmentAlgs.AlignmentAlgsConfig import ActsGeometryContextAlgCfg
   acc.merge(ActsGeometryContextAlgCfg(configFlags))
 
-  # Same dumper as the material mapping, here with only the Json writer
-  mapwriters = [acc.popToolsAndMerge(JsonMaterialWriterToolCfg(configFlags, FileName=FileName))]
-  kwargs.setdefault("MaterialDumper", acc.popToolsAndMerge(MaterialDumperToolCfg(configFlags, MaterialMapWriters=mapwriters)))
+  kwargs.setdefault("FileName", FileName)
 
   acc.addEventAlgo(CompFactory.ActsTrk.MaterialJsonDumpAlg(name, **kwargs), primary = True)
 
@@ -189,4 +157,3 @@ def MaterialValidationCfg(configFlags,
 
 
   return acc
-

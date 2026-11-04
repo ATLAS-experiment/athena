@@ -11,10 +11,8 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
-#include "AsgTools/ToolHandle.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsGeometry/RecordedMaterialTrackCollection.h"
-#include "ActsMaterial/IMaterialDumperTool.h"
 #include "Acts/Material/MaterialMapper.hpp"
 
 namespace ActsTrk {
@@ -22,8 +20,7 @@ namespace ActsTrk {
     ///
     /// @brief Reads the MaterialTracks and produces the material maps
     /// for the Tracking Geometry.
-    /// The output map is stored in a ROOT file, json, etc.
-    /// depending on the configured writers.
+    /// The output map is stored with the ACTS versioned material JSON codec.
 
     class MaterialMapping : public AthReentrantAlgorithm  {
         public:
@@ -35,8 +32,9 @@ namespace ActsTrk {
 
         private:
 
-            /// The material dumper the produced maps are handed to
-            ToolHandle<IMaterialDumperTool> m_materialDumper{this, "MaterialDumper", "", "The material dumper tool"};
+            Gaudi::Property<std::string> m_fileName{this, "FileName", "material-maps.json.zst", "Material map output filename"};
+            Gaudi::Property<int> m_compressionLevel{this, "CompressionLevel", 9, "Zstd compression level"};
+            Gaudi::Property<int> m_materialFractionBits{this, "MaterialFractionBits", 23, "Retained material float fraction bits (0-23; 23 is lossless)"};
 
             /// The material mapper from the ACTS core components
             std::shared_ptr<Acts::MaterialMapper> m_materialMapper;

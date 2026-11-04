@@ -152,7 +152,7 @@ def createActsConfigFlags():
     # Geometry Flags
 
     # MaterialSource can be:
-    # a path to a local JSON file
+    # a path to a JSON or CBOR material map, optionally zstd compressed
     # 'Default' : material map source is evaluated from the geometry tag
     # 'None'    : no material map is provided
     actscf.addFlag('Acts.TrackingGeometry.MaterialSource', 'Default')

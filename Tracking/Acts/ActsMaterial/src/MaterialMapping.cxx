@@ -6,6 +6,7 @@
 #include "GaudiKernel/IInterface.h"
 #include "ActsInterop/Logger.h"
 #include "Acts/Geometry/TrackingGeometry.hpp"
+#include "ActsPlugins/Json/TrackingGeometryMaterialJsonConverter.hpp"
 #include "Acts/Material/IntersectionMaterialAssigner.hpp"
 #include "Acts/Material/BinnedSurfaceMaterialAccumulator.hpp"
 #include "Acts/Material/TrackingGeometryMaterial.hpp"
@@ -25,7 +26,10 @@ StatusCode ActsTrk::MaterialMapping::initialize()
 
     ATH_CHECK(m_trackingGeometrySvc.retrieve());
 
-    ATH_CHECK(m_materialDumper.retrieve());
+    if (m_materialFractionBits.value() < 0 || m_materialFractionBits.value() > 23) {
+        ATH_MSG_ERROR("MaterialFractionBits must be between 0 and 23");
+        return StatusCode::FAILURE;
+    }
 
     // Retrieve the material surfaces
     std::vector<const Acts::Surface*> materialSurfaces = {};
@@ -71,8 +75,11 @@ StatusCode ActsTrk::MaterialMapping::finalize()
     const ActsTrk::GeometryContext& geoContext{m_trackingGeometrySvc->getNominalContext()};
     Acts::TrackingGeometryMaterial detectorMaterial = m_materialMapper->finalizeMaps(*m_mappingState, geoContext.context());
 
-    // Dump the maps through the material writers
-    m_materialDumper->dumpMaterial(geoContext, detectorMaterial);
+    Acts::TrackingGeometryMaterialJsonConverter::Options options;
+    options.compressionLevel = m_compressionLevel.value();
+    options.materialFractionBits = m_materialFractionBits.value();
+    ATH_MSG_INFO("Writing material map to '" << m_fileName.value() << "'");
+    Acts::TrackingGeometryMaterialJsonConverter{}.toFile(detectorMaterial, m_fileName.value(), options);
 
     return StatusCode::SUCCESS;
 }
