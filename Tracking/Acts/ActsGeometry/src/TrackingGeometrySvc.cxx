@@ -41,8 +41,8 @@
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Geometry/PassiveLayerBuilder.hpp"
 #include <ActsPlugins/Detray/DetrayGeometryConverter.hpp>
-#include <ActsPlugins/Json/JsonMaterialDecorator.hpp>
-#include <ActsPlugins/Json/MaterialMapJsonConverter.hpp>
+#include "ActsGeometry/MaterialMapJson.h"
+#include "Acts/Material/IMaterialDecorator.hpp"
 #include <detray/geometry/surface.hpp>
 #include <detray/geometry/tracking_volume.hpp>
 #include <detray/utils/consistency_checker.hpp>
@@ -83,6 +83,28 @@
 using namespace Acts::UnitLiterals;
 
 namespace {
+  // Local adapter for the Gen1 builder, which still decorates during geometry
+  // construction. Remove when that builder accepts material assignments directly.
+  class Gen1MaterialDecorator final : public Acts::IMaterialDecorator {
+   public:
+    explicit Gen1MaterialDecorator(Acts::TrackingGeometryMaterial material)
+        : m_material(std::move(material)) {
+      if (!m_material.keyedSurfaces.empty()) {
+        throw std::invalid_argument(
+            "Cannot apply a keyed material map to Gen1 geometry: stable material "
+            "keys require Gen3 material designators.");
+      }
+    }
+    void decorate(Acts::Surface& surface) const override {
+      m_material.apply(surface);
+    }
+    void decorate(Acts::TrackingVolume& volume) const override {
+      m_material.apply(volume);
+    }
+   private:
+    Acts::TrackingGeometryMaterial m_material;
+  };
+
   /// Build a ViewConfigFunc selecting one of three configurations per geometry
   /// object, replacing the deprecated three-ViewConfig visualize() overload.
   Acts::ViewConfigFunc viewConfigFunc(const Acts::ViewConfig& volumeCfg,
@@ -326,8 +348,6 @@ StatusCode TrackingGeometrySvc::initialize() {
   tgbConfig.trackingVolumeHelper = cylinderVolumeHelper;
 
   if (m_useMaterialMap) {
-    std::shared_ptr<const Acts::IMaterialDecorator> matDeco = nullptr;
-
     std::string matFileFullPath = PathResolverFindCalibFile(m_materialMapCalibFolder.value()+"/"+m_materialMapInputFileBase.value());
     if (matFileFullPath.empty()) {
       ATH_MSG_ERROR( "Material Map Input File " << m_materialMapCalibFolder.value() << "/" << m_materialMapInputFileBase.value() << " not found.");
@@ -335,14 +355,9 @@ StatusCode TrackingGeometrySvc::initialize() {
     }
     ATH_MSG_INFO("Configured to use material input: " << matFileFullPath);
 
-    if (matFileFullPath.find(".json") != std::string::npos) {
-      // Set up the converter first
-      Acts::MaterialMapJsonConverter::Config jsonGeoConvConfig;
-      // Set up the json-based decorator
-      matDeco = std::make_shared<const Acts::JsonMaterialDecorator>(
-	   jsonGeoConvConfig, matFileFullPath, ActsTrk::actsLevelVector(msg().level()));
-    }
-    tgbConfig.materialDecorator = std::move(matDeco);
+    tgbConfig.materialDecorator = std::make_shared<Gen1MaterialDecorator>(
+        ActsTrk::readMaterialMapJson(
+            matFileFullPath, ActsTrk::actsLevelVector(msg().level())));
   }
 
   std::array<double, 2> sctECEnvelopeZ{20_mm, 20_mm};

@@ -141,7 +141,8 @@ def ActsTrackingGeometrySvcCfg(flags,
       actsTrackingGeometrySvc.MaterialMapInputFile = \
         "material-maps-" + flags.GeoModel.AtlasVersion + "-" + extension + ".json"
 
-  elif flags.Acts.TrackingGeometry.MaterialSource.find(".json") != -1:
+  elif flags.Acts.TrackingGeometry.MaterialSource.endswith(
+      (".json", ".cbor", ".json.zst", ".cbor.zst")):
     actsTrackingGeometrySvc.UseMaterialMap = True
     actsTrackingGeometrySvc.MaterialMapCalibFolder = flags.Acts.TrackingGeometry.MaterialCalibrationFolder
     actsTrackingGeometrySvc.MaterialMapInputFile = flags.Acts.TrackingGeometry.MaterialSource

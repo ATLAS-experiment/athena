@@ -4,6 +4,8 @@
 
 #include "MaterialJsonDumpAlg.h"
 #include "Acts/Geometry/TrackingGeometry.hpp"
+#include "ActsPlugins/Json/TrackingGeometryMaterialJsonConverter.hpp"
+#include "Acts/Material/TrackingGeometryMaterial.hpp"
 
 ActsTrk::MaterialJsonDumpAlg::MaterialJsonDumpAlg(const std::string& name, ISvcLocator* pSvcLocator)
     : AthReentrantAlgorithm(name, pSvcLocator)
@@ -12,7 +14,10 @@ ActsTrk::MaterialJsonDumpAlg::MaterialJsonDumpAlg(const std::string& name, ISvcL
 StatusCode ActsTrk::MaterialJsonDumpAlg::initialize()
 {
     ATH_CHECK(m_trackingGeometrySvc.retrieve());
-    ATH_CHECK(m_materialDumper.retrieve());
+    if (m_materialFractionBits.value() < 0 || m_materialFractionBits.value() > 23) {
+        ATH_MSG_ERROR("MaterialFractionBits must be between 0 and 23");
+        return StatusCode::FAILURE;
+    }
     return StatusCode::SUCCESS;
 }
 
@@ -29,7 +34,12 @@ StatusCode ActsTrk::MaterialJsonDumpAlg::finalize()
         return StatusCode::FAILURE;
     }
 
-    m_materialDumper->dumpGeometryMaterial(m_trackingGeometrySvc->getNominalContext(), *trackingGeometry);
+    Acts::TrackingGeometryMaterialJsonConverter::Options options;
+    options.compressionLevel = m_compressionLevel.value();
+    options.materialFractionBits = m_materialFractionBits.value();
+    ATH_MSG_INFO("Writing material map to '" << m_fileName.value() << "'");
+    Acts::TrackingGeometryMaterialJsonConverter{}.toFile(
+        Acts::TrackingGeometryMaterial::fromGeometry(*trackingGeometry), m_fileName.value(), options);
 
     return StatusCode::SUCCESS;
 }
