@@ -8,8 +8,6 @@
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "TrigSteeringEvent/HLTResult.h"
-#include "TrigSteeringEvent/TrigSuperRoi.h"
-#include "TrigSteeringEvent/TrigSuperRoiCollection.h"
 #include "TrigSteeringEvent/HLTExtraData.h"
 #include "TrigSteeringEvent/GenericResult.h"
 #include "TrigSteeringEvent/Lvl1Result.h"
@@ -30,10 +28,6 @@ namespace TrigSteeringEventDict {
   std::vector<TrigRoiDescriptor*> troi_vec;
   std::vector<const TrigRoiDescriptor*> troi_const_vec;
   ElementLink<TrigRoiDescriptorCollection> troi_el;
-
-  TrigSuperRoiCollection tsroi;
-  std::vector<TrigSuperRoi*> tsroi_vec;
-  std::vector<const TrigSuperRoi*> tsroi_const_vec;
 
   TrigOperationalInfoCollection toi;
 
