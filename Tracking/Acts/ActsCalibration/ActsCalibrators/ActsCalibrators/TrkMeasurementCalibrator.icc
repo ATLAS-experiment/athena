@@ -16,8 +16,8 @@
 namespace ActsTrk::detail {
 
   template <Acts::TrackStateProxyConcept proxy_t>
-  void TrkMeasurementCalibrator::calibrate(const Acts::GeometryContext& /*gctx*/,
-                                           const Acts::CalibrationContext& /*cctx*/,
+  void TrkMeasurementCalibrator::calibrate(const Acts::GeometryContext& /*tgContext*/,
+                                           const Acts::CalibrationContext& /*calContext*/,
                                            const Acts::SourceLink& sl,
                                            proxy_t trackState) const {
     const Trk::MeasurementBase* sourceLink = unpack(sl);

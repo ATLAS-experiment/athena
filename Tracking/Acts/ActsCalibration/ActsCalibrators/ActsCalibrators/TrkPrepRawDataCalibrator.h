@@ -27,26 +27,26 @@ namespace ActsTrk::detail {
                                   const Trk::IRIO_OnTrackCreator* rotCreator);
          /** @brief Calibrator delegate implementation to calibrate the ActsTrk fit from Trk::PrepRawData objects
           *  @tparam trajectory_t: Tepmlate parameter of the underlying MultTrajectory container backend
-          *  @param gctx: Geometry context to access the alignment of the surface
-          *  @param cctx: Calibration context to access the calibration constants from the conditions store
+          *  @param tgContext: Geometry context to access the alignment of the surface
+          *  @param calContext: Calibration context to access the calibration constants from the conditions store
           *  @param sl: Reference to the packed SourceLink (a.k.a Trk::MeasurementBase)
           *  @param trackState: Reference to the multi trajectory track state to fill */
          template <Acts::TrackStateProxyConcept proxy_t>
-         void calibrate(const Acts::GeometryContext &gctx,
-                        const Acts::CalibrationContext & cctx,
+         void calibrate(const Acts::GeometryContext& tgContext,
+                        const Acts::CalibrationContext& calContext,
                         const Acts::SourceLink& sl,
                         proxy_t trackState) const;
          /** @brief Create a Track Raw Input object (ROT) from the source link
           *         to the PRD measurement and the predicted track parameters of the track state.
           *  @tparam trajectory_t: Tepmlate parameter of the underlying MultTrajectory container backend
-          *  @param gctx: Geometry context to access the alignment of the surface
-          *  @param cctx: Calibration context to access the calibration constants from the conditions store
+          *  @param tgContext: Geometry context to access the alignment of the surface
+          *  @param calContext: Calibration context to access the calibration constants from the conditions store
           *  @param sl: Reference to the packed SourceLink (a.k.a Trk::PrepRawData)
           *  @param trackState: Reference to the multi trajectory track state to read
           *                     the predicted parameters from.  */
          template <Acts::TrackStateProxyConcept proxy_t>
-            std::unique_ptr<Trk::RIO_OnTrack> createROT(const Acts::GeometryContext &gctx,
-                                                        const Acts::CalibrationContext & cctx,
+            std::unique_ptr<Trk::RIO_OnTrack> createROT(const Acts::GeometryContext& tgContext,
+                                                        const Acts::CalibrationContext& calContext,
                                                         const Acts::SourceLink& sl,
                                                         const proxy_t& trackState) const;
          /** @brief Unpack the prepraw data measurement from the source link

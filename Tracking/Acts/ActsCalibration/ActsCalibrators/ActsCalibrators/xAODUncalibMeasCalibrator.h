@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef ACTSCALIBRATION_DETAIL_XAODUNCALIBMEASCALIBRATOR_H
 #define ACTSCALIBRATION_DETAIL_XAODUNCALIBMEASCALIBRATOR_H
@@ -31,45 +31,58 @@ namespace ActsTrk::detail{
           template <auto Callable, typename Type>
               void connect(const xAOD::UncalibMeasType type, const Type* instance) {
                 assert(instance);
-                m_calibrators[static_cast<int>(type)].connect<Callable>(instance);
+                m_calibrators[Acts::toUnderlying(type)].connect<Callable>(instance);
           }
           /** @brief: Interface method for the Acts fitter to calibrate the trajectory track states from the source link
            *          The source link is unpacked to access the measurement type and then to forward the calibration to the
            *          registered calibrator. If no calibrator has been connected, then the invalidCalib method is called which
            *          is throwing an exception.
-           *  @param gctx: Geometry context passed to access the global alignment
-           *  @param cctx: Calibration context which is a wrapped Gaudi::EventContext* to retrieve
+           *  @param tgContext: Geometry context passed to access the global alignment
+           *  @param calContext: Calibration context which is a wrapped Gaudi::EventContext* to retrieve
            *               extra information from store gate
            *  @param sl: Reference to the source link having the calibrated measurement packed
            *  @param trackState: Proxy to the track state into which the calibrated measurement parameters
            *                     are copied. */
-          void calibrate(const Acts::GeometryContext& gctx,
-                         const Acts::CalibrationContext& cctx,
+          void calibrate(const Acts::GeometryContext& tgContext,
+                         const Acts::CalibrationContext& calContext,
                          const Acts::SourceLink& sl,
                          const MutableTrackStateBackend::TrackStateProxy trackState) const;
+
+          /** @brief Pass through calibration. The parameters of the measurement are not updated using information
+            *        from the trajectory estimate. Muon measurements never include timing information.
+            * @param tgContext: Geometry context passed to access the global alignment
+            * @param calContext: Calibration context which is a wrapped Gaudi::EventContext* to retrieve
+            *              extra information from store gate
+            * @param sl: Reference to the source link having the calibrated measurement packed
+            * @param trackState: Proxy to the track state into which the calibrated measurement parameters
+            *                    are copied. */
+          void passThrough(const Acts::GeometryContext& tgContext,
+                           const Acts::CalibrationContext& calContext,
+                           const Acts::SourceLink& sl,
+                          MutableTrackStateBackend::TrackStateProxy trackState) const;
         private:
             /** @brief Delegate method that's assigned during the construction phase of this class.
              *         If called, the method throws an exception reminding the user that he needs to
              *         connect a calibrator with the requested measruement type.
-             *  @param gctx: Geometry context passed to access the global alignment
-             *  @param cctx: Calibration context which is a wrapped Gaudi::EventContext* to retrieve
+             *  @param tgContext: Geometry context passed to access the global alignment
+             *  @param calContext: Calibration context which is a wrapped Gaudi::EventContext* to retrieve
              *               extra information from store gate
              *  @param sl: Reference to the source link having the calibrated measurement packed
              *  @param trackState: Proxy to the track state into which the calibrated measurement parameters
              *                     are copied. */
-            void invalidCalibrator(const Acts::GeometryContext& gctx,
-                                   const Acts::CalibrationContext& cctx,
+            void invalidCalibrator(const Acts::GeometryContext& tgContext,
+                                   const Acts::CalibrationContext& calContext,
                                    const Acts::SourceLink& sl,
                                    MutableTrackStateBackend::TrackStateProxy trackState) const;
             /** @brief Delegate method for the Auxiliary measurements. 
-             *  @param gctx: Geometry context passed to access the global alignment
-             *  @param cctx: Calibration context which is a wrapped Gaudi::EventContext* to retrieve
+             *  @param tgContext: Geometry context passed to access the global alignment
+             *  @param calContext: Calibration context which is a wrapped Gaudi::EventContext* to retrieve
              *               extra information from store gate
              *  @param sl: Reference to the source link having the calibrated measurement packed
              *  @param trackState: Proxy to the track state into which the calibrated measurement parameters
              *                     are copied. */
-            void auxillaryCalibrator(const Acts::GeometryContext& gctx,
-                                     const Acts::CalibrationContext& cctx,
+            void auxillaryCalibrator(const Acts::GeometryContext& tgContext,
+                                     const Acts::CalibrationContext& calContext,
                                      const Acts::SourceLink& sl,
                                      MutableTrackStateBackend::TrackStateProxy trackState) const;
             /** @brief Abrivation for the calibrator delegate. The signature of all delegates should

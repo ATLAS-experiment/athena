@@ -25,13 +25,13 @@ namespace ActsTrk::detail {
       /** @brief Calibrator delegate implementation to calibrate the ActsTrk fit from 
        *         Trk::MeasurementBase objects
        *  @tparam trajectory_t: Tepmlate parameter of the underlying MultTrajectory container backend
-       *  @param gctx: Geometry context to access the alignment of the surface
-       *  @param cctx: Calibration context to access the calibration constants from the conditions store
+       *  @param tgContext: Geometry context to access the alignment of the surface
+       *  @param calContext: Calibration context to access the calibration constants from the conditions store
        *  @param sl: Reference to the packed SourceLink
        *  @param trackState: Reference to the multi trajectory track state to fill */
       template <Acts::TrackStateProxyConcept proxy_t>
-      void calibrate(const Acts::GeometryContext &gctx,
-                     const Acts::CalibrationContext & cctx,
+      void calibrate(const Acts::GeometryContext& tgContext,
+                     const Acts::CalibrationContext& calContext,
                      const Acts::SourceLink& sl,
                      proxy_t trackState) const;
   };

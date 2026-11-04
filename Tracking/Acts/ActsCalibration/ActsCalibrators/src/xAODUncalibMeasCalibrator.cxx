@@ -1,8 +1,11 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
+#include "ActsInterop/UnitConverters.h"
 #include "xAODAuxiliaryMeasurement/AuxiliaryMeasurement.h"
+#include "xAODMuonPrepData/MuonMeasurement.h"
+
 #include "GeoModelKernel/throwExcept.h"
 
 namespace ActsTrk::detail{
@@ -19,15 +22,63 @@ namespace ActsTrk::detail{
         connect<&xAODUncalibMeasCalibrator::auxillaryCalibrator>(xAOD::UncalibMeasType::Other, this);
     }
 
-    void xAODUncalibMeasCalibrator::invalidCalibrator(const Acts::GeometryContext& /*gctx*/,
-                                                      const Acts::CalibrationContext& /*cctx*/,
+    void xAODUncalibMeasCalibrator::invalidCalibrator(const Acts::GeometryContext& /*tgContext*/,
+                                                      const Acts::CalibrationContext& /*calContext*/,
                                                       const Acts::SourceLink& sl,
                                                       MutableTrackStateBackend::TrackStateProxy /*trackState*/) const {
         THROW_EXCEPTION("Calibrator is not configured for measurement type "<<unpack(sl)->type());
     }
 
-    void xAODUncalibMeasCalibrator::auxillaryCalibrator(const Acts::GeometryContext& /*gctx*/,
-                                                        const Acts::CalibrationContext& /*cctx*/,
+    void xAODUncalibMeasCalibrator::passThrough(const Acts::GeometryContext& tgContext,
+                                                const Acts::CalibrationContext& calContext,
+                                                const Acts::SourceLink& sl,
+                                                MutableTrackStateBackend::TrackStateProxy trackState) const{
+        const xAOD::UncalibratedMeasurement* meas = unpack(sl);
+        Acts::SourceLink fillSl{sl};
+        assert(meas != nullptr);
+        switch(meas->type()) {
+            using enum xAOD::UncalibMeasType;
+            case PixelClusterType: {
+                setState<2>(ProjectorType::e2DimNoTime, meas->localPosition<2>(), meas->localCovariance<2>(), fillSl, trackState);
+                break;
+            } case StripClusterType:{
+                auto projector = trackState.referenceSurface().bounds().type() == Acts::SurfaceBounds::eAnnulus ? 
+                                  ProjectorType::e1DimRotNoTime : ProjectorType::e1DimNoTime;
+                setState<1>(projector, meas->localPosition<1>(), meas->localCovariance<1>(), fillSl, trackState);
+                break;
+            } case MdtDriftCircleType:
+              case MMClusterType: {
+                setState<1>(ProjectorType::e1DimNoTime, meas->localPosition<1>(), meas->localCovariance<1>(), fillSl, trackState);
+                break;
+            } case RpcStripType:
+              case TgcStripType:
+              case sTgcStripType: {
+                if (meas->numDimensions() == 2 || 
+                    meas->numDimensions() == 0) {
+                    setState<2>(ProjectorType::e2DimNoTime, meas->localPosition<2>(), meas->localCovariance<2>(), fillSl, trackState);
+                } else {
+                  const auto* mMeas = static_cast<const xAOD::MuonMeasurement*>(meas);
+                  auto projector = mMeas->measuresPhi() ?  ProjectorType::e1DimRotNoTime : ProjectorType::e1DimNoTime;
+                  setState<1>(projector, meas->localPosition<1>(), meas->localCovariance<1>(), fillSl, trackState);
+                }
+                break;
+            } case HGTDClusterType: {
+                xAOD::MeasVector<3> pos = meas->localPosition<3>();
+                xAOD::MeasMatrix<3> cov = meas->localCovariance<3>();
+                pos[2] = ActsTrk::timeToActs(pos[2]);
+                cov(2,2) = ActsTrk::timeCovToActs(cov(2, 2));
+                setState<3>(ProjectorType::e2DimWithTime, pos, cov, fillSl, trackState);
+                break;
+            } case Other :{
+                auxillaryCalibrator(tgContext, calContext, sl, trackState);
+                break;
+            } default:
+                THROW_EXCEPTION("Unsupported type "<<meas->type())
+        }
+    }
+
+    void xAODUncalibMeasCalibrator::auxillaryCalibrator(const Acts::GeometryContext& /*tgContext*/,
+                                                        const Acts::CalibrationContext& /*calContext*/,
                                                         const Acts::SourceLink& sl,
                                                         MutableTrackStateBackend::TrackStateProxy trackState) const {
         const xAOD::UncalibratedMeasurement* meas = unpack(sl);
@@ -52,15 +103,15 @@ namespace ActsTrk::detail{
         }
 
     }
-    void xAODUncalibMeasCalibrator::calibrate(const Acts::GeometryContext &gctx,
-                                              const Acts::CalibrationContext & cctx,
+    void xAODUncalibMeasCalibrator::calibrate(const Acts::GeometryContext &tgContext,
+                                              const Acts::CalibrationContext& calContext,
                                               const Acts::SourceLink& sl,
                                               const MutableTrackStateBackend::TrackStateProxy trackState) const {
         const xAOD::UncalibratedMeasurement* meas = unpack(sl);
         assert(meas->type() != xAOD::UncalibMeasType::nTypes);
         
         const CalibDelegate& delegate = m_calibrators[Acts::toUnderlying(meas->type())];
-        delegate(gctx, cctx, sl, trackState);
+        delegate(tgContext, calContext, sl, trackState);
     }
 
 }

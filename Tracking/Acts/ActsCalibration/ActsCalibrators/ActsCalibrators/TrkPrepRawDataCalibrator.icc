@@ -8,7 +8,7 @@ namespace ActsTrk::detail {
     template <Acts::TrackStateProxyConcept proxy_t>
     std::unique_ptr<Trk::RIO_OnTrack> 
         TrkPrepRawDataCalibrator::createROT(const Acts::GeometryContext &/*tgContext*/,
-                                            const Acts::CalibrationContext & cctx,
+                                            const Acts::CalibrationContext& calContext,
                                             const Acts::SourceLink& sl,
                                             const proxy_t& trackState) const {
 
@@ -20,7 +20,7 @@ namespace ActsTrk::detail {
                                                  Acts::ParticleHypothesis::pion()};
       // Check that the conversion tool is set
       assert(m_convTool != nullptr);
-      const EventContext* ctx = cctx.get<const EventContext*>();
+      const EventContext* ctx = calContext.get<const EventContext*>();
       const auto trkParam = m_convTool->convertTrackParametersToTrk(*ctx, actsParam);
       
       /// Check that the ROT creator has been defined
@@ -28,16 +28,16 @@ namespace ActsTrk::detail {
       return std::unique_ptr<Trk::RIO_OnTrack>{m_rotCreator->correct(*prd, *trkParam, *ctx)};
     }
     template <Acts::TrackStateProxyConcept proxy_t>
-    inline void TrkPrepRawDataCalibrator::calibrate(const Acts::GeometryContext &gctx,
-                                                    const Acts::CalibrationContext& cctx,
+    inline void TrkPrepRawDataCalibrator::calibrate(const Acts::GeometryContext& tgContext,
+                                                    const Acts::CalibrationContext& calContext,
                                                     const Acts::SourceLink& sl,
                                                     proxy_t trackState) const {
         /// Calibrate the measurement
-        auto rot = createROT(gctx, cctx, sl, trackState);
+        auto rot = createROT(tgContext, calContext, sl, trackState);
         /// Ensure that the rot is actually created.
         assert(rot);
         /// copy the rot information onto the track state
-        m_rotCalib.calibrate(gctx, cctx, m_rotCalib.pack(rot.get()), trackState);
+        m_rotCalib.calibrate(tgContext, calContext, m_rotCalib.pack(rot.get()), trackState);
         /// Overwrite the source link as the ROT leaves scope at the end of the method & is deleted
         trackState.setUncalibratedSourceLink(pack(unpack(sl)));
     }
