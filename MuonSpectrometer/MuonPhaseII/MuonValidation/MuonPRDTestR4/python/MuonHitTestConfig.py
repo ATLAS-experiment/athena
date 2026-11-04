@@ -69,6 +69,16 @@ def MuonPileUpTestCfg(flags, name="MuonDigiTester", outFile="DigiTest.root", **k
     kwargs.setdefault("dumpDigits", True)
     return MuonHitTesterCfg(flags, name = name, outFile = outFile, **kwargs)
 
+def MuonRecoTestCfg(flags, name="MuonRecoTester", outFile="RecoTest.root", **kwargs):
+    kwargs.setdefault("MdtSimHitKey", "MDT_SDO")
+    kwargs.setdefault("RpcSimHitKey", "RPC_SDO")
+    kwargs.setdefault("TgcSimHitKey", "TGC_SDO")
+    kwargs.setdefault("MmSimHitKey", "MM_SDO")
+    kwargs.setdefault("sTgcSimHitKey", "sTGC_SDO")
+    kwargs.setdefault("dumpPrds", True)
+    kwargs.setdefault("dumpSpacePoints", True)
+    return MuonHitTesterCfg(flags, name = name, outFile = outFile, **kwargs)
+
 
 if __name__=="__main__":
     from MuonGeoModelTestR4.testGeoModel import setupGeoR4TestCfg, SetupArgParser, MuonPhaseIITestDefaults
