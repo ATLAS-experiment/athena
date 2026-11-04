@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef RTCALIBRATIONOUTPUT_H
@@ -21,7 +21,7 @@ namespace MuonCalib {
     class RtCalibrationOutput : public IMdtCalibrationOutput {
     public:
         RtCalibrationOutput(std::shared_ptr<const IRtRelation> rt_rel, std::shared_ptr<const RtFullInfo> fi) :
-            IMdtCalibrationOutput("RtCalibrationOutput"), m_rtRelation(rt_rel), m_fullInfo(fi) {}
+            IMdtCalibrationOutput("RtCalibrationOutput"), m_rtRelation(std::move(rt_rel)), m_fullInfo(std::move(fi)) {}
         virtual ~RtCalibrationOutput() = default;
         /** access to private attributes */
         std::shared_ptr<const IRtRelation> rt() const { return m_rtRelation; }
@@ -30,7 +30,7 @@ namespace MuonCalib {
     private:
         // pointer to a IRtRelation instance
         std::shared_ptr<const IRtRelation> m_rtRelation;
-        /** additonal info for validation */
+        /** additional info for validation */
         std::shared_ptr<const RtFullInfo> m_fullInfo;
     };
 }  // namespace MuonCalib

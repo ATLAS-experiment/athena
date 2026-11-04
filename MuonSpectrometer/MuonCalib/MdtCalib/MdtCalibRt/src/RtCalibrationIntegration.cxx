@@ -140,9 +140,18 @@ bool RtCalibrationIntegration::analyse() {
         tspec->Fill(k.first, 1.0);
         tspec_ml[static_cast<unsigned int>(k.second)]->Fill(k.first, 1.0);
     }
-    drift_time_spec.SetTSpec(1, tspec.get(), &t0_setting, false);
-    drift_time_spec_ml[0].SetTSpec(2, tspec_ml[0].get(), &t0_setting, false);
-    drift_time_spec_ml[1].SetTSpec(3, tspec_ml[1].get(), &t0_setting, false);
+    //save these before releasing
+    auto n0 = tspec_ml[0]->GetEntries();
+    auto n1 = tspec_ml[1]->GetEntries();
+    //
+    //detach from ROOT ownership, we are about to transfer these:
+    tspec->SetDirectory(nullptr);
+    for (auto& hist : tspec_ml) {
+      hist->SetDirectory(nullptr);
+    }
+    drift_time_spec.SetTSpec(1, tspec.release(), &t0_setting, false);
+    drift_time_spec_ml[0].SetTSpec(2, tspec_ml[0].release(), &t0_setting, false);
+    drift_time_spec_ml[1].SetTSpec(3, tspec_ml[1].release(), &t0_setting, false);
 
     // t0 and tmax fits //
 
@@ -198,15 +207,22 @@ bool RtCalibrationIntegration::analyse() {
     std::vector<SamplePoint> add_fit_point;  // additional r-t points for r(t_max)
     add_fit_point.push_back(SamplePoint(tmax, m_r_max, 1.0));
     RtParabolicExtrapolation rt_extrapolated;
-    RtRelationLookUp tmp_rt(rt_extrapolated.getRtWithParabolicExtrapolation(*m_rt, m_lower_extrapolation_radius,
-                                                                            m_upper_extrapolation_radius, m_r_max, add_fit_point));
-    std::shared_ptr<IRtRelation> rt_new = std::make_shared<RtRelationLookUp>(tmp_rt);
+   
+    auto rt_new = std::make_shared<RtRelationLookUp>(
+      rt_extrapolated.getRtWithParabolicExtrapolation(
+        *m_rt,
+        m_lower_extrapolation_radius,
+        m_upper_extrapolation_radius,
+        m_r_max,
+        add_fit_point
+      )
+    );
 
     //////////////////////////////////////////////////
     // Get length difference between multilayers    //
     //////////////////////////////////////////////////
-
-    if (tspec_ml[0]->GetEntries() >= 10000 && tspec_ml[0]->GetEntries() > 10000) {
+    //was a typo here previously, so only n0 was tested (twice)
+    if (n0 >= 10000 && n1> 10000) {
         bool fit_ok(true);
         std::array<float, 2> b{}, tmax{}, T{};
         for (unsigned int i = 0; i < 2; i++) {

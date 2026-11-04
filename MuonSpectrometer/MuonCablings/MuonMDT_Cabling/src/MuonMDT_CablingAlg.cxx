@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonMDT_CablingAlg.h"
 
-#include <fstream>
-#include <map>
+
 #include "AthenaPoolUtilities/AthenaAttributeList.h"
 #include "AthenaPoolUtilities/CondAttrListCollection.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
@@ -18,7 +17,8 @@
 
 #include <CoralBase/Blob.h>
 #include <CoralUtilities/blobaccess.h>
-
+#include <fstream>
+#include <map>
 
 using DataSource = MuonMDT_CablingMap::DataSource;
 
@@ -136,6 +136,8 @@ StatusCode MuonMDT_CablingAlg::loadCablingSchema(const EventContext& ctx, SG::Wr
         ATH_MSG_INFO("Found a round 3 setup. Will add the cabling for BIS78 manually");
         const int BIS_stat = m_idHelperSvc->mdtIdHelper().stationNameIndex("BIS");
         constexpr int eta_index = 7;
+        const std::string zeroStr{"0"};
+        const std::string emptyStr{""};
         for (unsigned int sector = 1; sector <= 8; ++sector) {
             int is_biy{0}, tdcId{0};
             auto increment_tdc = [&is_biy, &tdcId]() {
@@ -148,6 +150,7 @@ StatusCode MuonMDT_CablingAlg::loadCablingSchema(const EventContext& ctx, SG::Wr
             };
             constexpr int tubesPerCsm = 54;  /// That translates to 54 tubes per layer per CSM
             bool added_tdc = true;
+            std::vector<std::string> db_coding{std::to_string(tdcId), zeroStr, emptyStr};
             while (added_tdc) {
                 added_tdc = false;
                 for (int ml = 1; ml <= 2; ++ml) {
@@ -179,7 +182,7 @@ StatusCode MuonMDT_CablingAlg::loadCablingSchema(const EventContext& ctx, SG::Wr
                                                                       << m_idHelperSvc->mdtIdHelper().tubeMax(layer_id) << " tdcId: "
                                                                       << tdcId << " is_Biy: " << is_biy << " first_tube: " << first_tube);
 
-                    std::vector<std::string> db_coding{std::to_string(tdcId), "0", std::to_string(tube_coding)};
+                    db_coding[2] = std::to_string(tube_coding);
                     if (extractLayerInfo(db_coding, bis78_data)) {
                         ATH_MSG_VERBOSE("Adding new mezzanine stationName: "
                                         << m_idHelperSvc->mdtIdHelper().stationNameString(bis78_data.stationIndex) << " " << bis78_data);

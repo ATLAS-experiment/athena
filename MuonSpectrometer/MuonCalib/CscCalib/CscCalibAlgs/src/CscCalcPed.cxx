@@ -458,7 +458,7 @@ namespace MuonCalib {
             //Test for threshold breach... 
             size_t sampCnt = 0;
            
-           
+            assert(stripHash>=0 && stripHash<m_ampHists.size());
             for(const auto & thisSample: samples)
             {
               m_ampHists[stripHash]->Fill(thisSample);

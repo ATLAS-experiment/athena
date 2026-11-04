@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibRt/AdaptiveResidualSmoothing.h"
@@ -29,10 +29,9 @@ void AdaptiveResidualSmoothing::addResidual(const double radius, const double re
     CLHEP::HepVector point(2);
     point[0] = radius;
     point[1] = residual;
-    DataPoint residual_point(point, 0);
 
     // store the data point //
-    m_residual_point.push_back(residual_point);
+    m_residual_point.emplace_back(std::move(point), 0);
 
     return;
 }
@@ -77,7 +76,7 @@ bool AdaptiveResidualSmoothing::addResidualsFromSegment(MuonCalibSegment &seg, b
         if (!m_cfitter.fit(seg, selection, curved_track)) return false;
         if (curved_track.chi2PerDegreesOfFreedom() > 50) { return false; }
     } else {
-        if (!m_sfitter.fit(seg, selection, straight_track)) return false;
+        if (!m_sfitter.fit(seg, std::move(selection), straight_track)) return false;
         if (straight_track.chi2PerDegreesOfFreedom() > 50) { return false; }
     }
 

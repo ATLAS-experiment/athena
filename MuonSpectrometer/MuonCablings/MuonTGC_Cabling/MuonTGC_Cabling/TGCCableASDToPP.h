@@ -5,13 +5,15 @@
 #ifndef MUONTGC_CABLING_TGCCABLEASDTOPP_H
 #define MUONTGC_CABLING_TGCCABLEASDTOPP_H
 
-#include <array>
-#include <string>
-#include <vector>
+
 
 #include "MuonTGC_Cabling/TGCCable.h"
 #include "MuonTGC_Cabling/TGCDatabaseASDToPP.h"
 #include "MuonTGC_Cabling/TGCId.h"
+#include <array>
+#include <string>
+#include <vector>
+#include <string_view>
 
 namespace MuonTGC_Cabling {
 
@@ -35,14 +37,14 @@ class TGCCableASDToPP : public TGCCable {
 
     std::vector<std::vector<int> > getUpdateInfo(
         const int side, const int sector,
-        const std::vector<std::string>& diffFile, const std::string& blockname);
+        const std::vector<std::string>& diffFile, std::string_view blockname);
 
     TGCDatabaseASDToPP* getDatabase(const TGCId::SideType side, const TGCId::RegionType region,
                                     const int sector, const TGCId::ModuleType module) const;
 
     void updateIndividualDatabase(
         const int side, const int sector,
-        const std::vector<std::string>& diffFile, const std::string& blockname,
+        const std::vector<std::string>& diffFile, std::string_view blockname,
         std::shared_ptr<TGCDatabaseASDToPP>& database);
 
    private:

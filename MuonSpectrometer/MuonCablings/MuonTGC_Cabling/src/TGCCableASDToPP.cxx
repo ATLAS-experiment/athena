@@ -132,8 +132,7 @@ void TGCCableASDToPP::updateDatabase(const std::string& diffFile) {
 
 std::vector<std::vector<int>> TGCCableASDToPP::getUpdateInfo(
     const int side, const int sector, const std::vector<std::string>& diffFile,
-
-    const std::string& blockname) {
+    std::string_view blockname) {
     // clear info
     std::vector<std::vector<int>> info{};
 
@@ -149,7 +148,7 @@ std::vector<std::vector<int>> TGCCableASDToPP::getUpdateInfo(
         if (firstl == '/' || firstl == '*') {
             continue;
         }
-        if (buf.compare(0, blockname.size(), blockname) == 0) {
+        if (std::string_view{buf}.starts_with(blockname)) {
             std::istringstream line(buf);
             std::string temp;
             line >> temp >> size;
@@ -170,7 +169,7 @@ std::vector<std::vector<int>> TGCCableASDToPP::getUpdateInfo(
         }
         std::istringstream line(buf);
         std::vector<int> entry;
-        int t_side, t_sector;
+        int t_side{}, t_sector{};
         line >> t_side;
         line >> t_sector;
         bool isOK = false;
@@ -386,7 +385,7 @@ std::unique_ptr<TGCChannelId> TGCCableASDToPP::getChannelOut(
 
 void TGCCableASDToPP::updateIndividualDatabase(
     const int side, const int sector, const std::vector<std::string>& diffFile,
-    const std::string& blockname,
+    std::string_view blockname,
     std::shared_ptr<TGCDatabaseASDToPP>& database) {
     if (!database) {
         return;

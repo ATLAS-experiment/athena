@@ -1,13 +1,10 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtCalibT0/T0CalibrationMT.h"
 
-#include <algorithm>
-#include <iostream>
-#include <string>
-#include <vector>
+
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
@@ -26,6 +23,10 @@
 #include "TH1.h"
 #include "TH1F.h"
 #include "TH2F.h"
+#include <algorithm>
+#include <iostream>
+#include <string>
+#include <vector>
 
 namespace MuonCalib {
 
@@ -34,7 +35,7 @@ namespace MuonCalib {
                                      const std::vector<int> &sort_by,
                                      const std::vector<int> &adc_sort_by) :
         IMdtCalibration(name),
-        m_settings(settings),
+        m_settings(std::move(settings)),
         m_converged(false),
         m_name(name),
         m_currentItnum(0),
@@ -293,8 +294,9 @@ namespace MuonCalib {
         const T0CalibrationOutput *t0Input = dynamic_cast<const T0CalibrationOutput *>(calib_in);
         if (!calib_in || !t0Input) return;
         m_result = t0Input->GetMap();
+        const std::string impStr{"T0CalibrationMT"};
         for (auto & it : m_result)
-            it.second->setImplementation("T0CalibrationMT");
+            it.second->setImplementation(impStr);
     }
 
     bool T0CalibrationMT::converged() const { return m_converged; }
