@@ -97,21 +97,16 @@ bool VP1RawDataColl_MDT_RDO::load() {
     std::cout << "Could not find MdtDigitContainer called " << container.name()
               << " in store " << container.store() << std::endl;
   }
-  //  ATH_MSG_DEBUG("Found MdtDigitContainer called " << container.name() << " in store " << container.store());
 
   // Iterate on the collections
   for (const MdtDigitCollection* coll : *container) {
     /// Iterate on the digits of the collection
     for (const MdtDigit* digit : *coll) {
-      const Identifier digitId{digit->identify()};
-
-
       if (digit)
         addHandle(new VP1RawDataHandle_MDT_RDO(this, digit));
     }
   }
 
-  //   recheckCutStatusOfAllHandles();
   return true;
 }
 
