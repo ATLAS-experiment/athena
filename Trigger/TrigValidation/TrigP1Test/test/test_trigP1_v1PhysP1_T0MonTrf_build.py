@@ -20,7 +20,7 @@ hlt.threads = 4
 hlt.concurrent_events = 4
 hlt.input = 'data'
 hlt.max_events = 50
-hlt.args = f'--preExec="Trigger.triggerMenuSetup=\'{triggermenu}\' Trigger.doLVL1=True Trigger.CTP.UseEDMxAOD=False Trigger.CTP.UseRoibROB=True"'
+hlt.args = f'--preExec="Trigger.triggerMenuSetup=\'{triggermenu}\' Trigger.doLVL1=True Trigger.CTP.UseEDMxAOD=False Trigger.CTP.UseRoibROB=True Trigger.CostMonitoring.chain=\'HLT_noalg_CostMonDS_L1All\'"'
 hlt.args += ' --prodSysBSRDO True'
 hlt.args += ' --outputBSFile=RAW.pool.root'
 hlt.args += ' --outputHIST_HLTMONFile=hltmon.root'
