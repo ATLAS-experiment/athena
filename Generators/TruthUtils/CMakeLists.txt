@@ -26,6 +26,18 @@ atlas_add_test( AtlasPIDTest
                 LINK_LIBRARIES TruthUtils
                 ENVIRONMENT "REFERENCE_FILE=${CMAKE_CURRENT_SOURCE_DIR}/share/AtlasPIDTest.ref"
                 POST_EXEC_SCRIPT noerror.sh )
+if( NOT XAOD_STANDALONE )                
+  atlas_add_test( MagicNumbersTest
+                  SOURCES
+                  test/testMagicNumbers.cxx
+                  LINK_LIBRARIES TruthUtils CxxUtils
+                  POST_EXEC_SCRIPT noerror.sh )
+  atlas_add_test( HepMCHelpersTest
+                  SOURCES
+                  test/testHepMCHelpers.cxx
+                  LINK_LIBRARIES TruthUtils CxxUtils
+                  POST_EXEC_SCRIPT noerror.sh )
+endif()                
 atlas_add_executable( pdgInfo
                 test/pdgInfo.cxx
                 LINK_LIBRARIES TruthUtils )
