@@ -12,7 +12,7 @@ def JetCommonCfg(ConfigFlags):
     """Main config for jet reconstruction and decorations"""
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Jets')
     acc.merge(StandardJetsInDerivCfg(ConfigFlags))
     if "McEventCollection#GEN_EVENT" not in ConfigFlags.Input.TypedCollections:
         acc.merge(AddBadBatmanCfg(ConfigFlags))
@@ -31,7 +31,7 @@ def StandardJetsInDerivCfg(ConfigFlags):
     from JetRecConfig.JetRecConfig import JetRecCfg
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Jets')
     jetList = [AntiKt4EMTopo_deriv, AntiKt4EMPFlow_deriv,
                AntiKtVR30Rmax4Rmin02PV0Track,
                AntiKt10UFOCSSKSoftDrop_deriv]
@@ -45,7 +45,7 @@ def AddBadBatmanCfg(ConfigFlags):
     """Add bad batman decoration for events with large EMEC-IW noise"""
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Jets')
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     from DerivationFrameworkJetEtMiss.JetToolConfig import BadBatmanToolCfg
     badBatmanTool = acc.getPrimaryAndMerge(BadBatmanToolCfg(ConfigFlags))
@@ -58,7 +58,7 @@ def AddDistanceInTrainCfg(ConfigFlags):
     from DerivationFrameworkJetEtMiss.JetToolConfig import DistanceInTrainToolCfg
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Jets')
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     distanceInTrainTool = acc.getPrimaryAndMerge(DistanceInTrainToolCfg(ConfigFlags))
     acc.addEventAlgo(CommonAugmentation("DistanceInTrainAugmentation", AugmentationTools = [distanceInTrainTool]))
@@ -72,7 +72,7 @@ def AddNeutralEventShapeCfg(ConfigFlags):
     from JetRecConfig.JetInputConfig import buildEventShapeAlg
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Jets')
     #New rho definition using only neutral PFOs
     acc.addEventAlgo(getConstitPJGAlg(cst.GPFlow, suffix='Neut'))
     acc.addEventAlgo(buildEventShapeAlg(cst.GPFlow, '', suffix = 'Neut' ))
@@ -81,6 +81,7 @@ def AddNeutralEventShapeCfg(ConfigFlags):
 
 def AddJvtDecorationAlgCfg(ConfigFlags, algName = "JvtPassDecorAlg", jetContainer='AntiKt4EMPFlow', **kwargs):
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Jets')
     # Decorate if jet passed JVT criteria
     from JetJvtEfficiency.JetJvtEfficiencyToolConfig import getJvtSelToolCfg
 
@@ -95,6 +96,7 @@ def AddEventCleanFlagsCfg(ConfigFlags, workingPoints = ['Loose', 'Tight', 'Loose
     """Add event cleaning flags"""
 
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Jets')
     acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName="JvtPassDecorAlg_EMTopo", jetContainer='AntiKt4EMTopo'))
     acc.merge(AddJvtDecorationAlgCfg(ConfigFlags, algName="JvtPassDecorAlg", jetContainer='AntiKt4EMPFlow'))
 

@@ -17,7 +17,7 @@ def EGammaCommonCfg(flags):
     """Main config method for e-gamma decorations"""
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('EGamma')
     includeFwdElectrons = "ForwardElectrons" in flags.Input.Collections
     
     # ====================================================================

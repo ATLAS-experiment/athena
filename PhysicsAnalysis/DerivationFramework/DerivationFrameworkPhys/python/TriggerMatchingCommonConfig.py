@@ -72,7 +72,7 @@ def TriggerMatchingCommonRun2Cfg(flags, name, **kwargs):
     """Configure the common trigger matching for run 2 DAODs using the run 2 analysis formalism (matching happens during derivation)"""
 
     acc = ComponentAccumulator()
- 
+    acc.flagPerfmonDomain('Trigger') 
     # Create trigger matching decorations
     from DerivationFrameworkTrigger.TriggerMatchingToolConfig import TriggerMatchingToolCfg
     PhysCommonTriggerMatchingTool = acc.getPrimaryAndMerge(TriggerMatchingToolCfg(flags, name=name, **kwargs))
@@ -87,7 +87,7 @@ def TriggerMatchingCommonRun2ToRun3Cfg(flags, **kwargs):
     """Covert run 2 trigger navigation data these data into the run 3 formalism (matching happens from DAOD)"""
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Trigger')
     if not flags.Trigger.doEDMVersionConversion:
         return(acc)
 
@@ -115,7 +115,7 @@ def TriggerMatchingCommonRun3Cfg(flags, **kwargs):
     triggerList = kwargs['TriggerList']
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Trigger')
     # Run 3 trigger navigation slimming proposal for in-DAOD trigger matching.
     from TrigNavSlimmingMT.TrigNavSlimmingMTConfig import TrigNavSlimmingMTDerivationCfg
     acc.merge(TrigNavSlimmingMTDerivationCfg(flags,chainsFilter=triggerList))

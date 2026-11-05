@@ -217,6 +217,7 @@ def VRFtagJetsCfg(
     No in-athena GNN is run here.
     """
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('FTag')
     acc.merge(JetRecCfg(flags, AntiKtVR20Rmax10Rmin4EMPFlow))
     acc.merge(FTagMuonAssociationCfg(flags, jetCollection=jetCollection))
     acc.merge(FTagElectronAssociationCfg(flags, jetCollection=jetCollection))

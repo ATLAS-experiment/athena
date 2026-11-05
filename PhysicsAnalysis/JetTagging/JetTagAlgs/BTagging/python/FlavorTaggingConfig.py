@@ -155,6 +155,7 @@ def _FlavorTaggingChainCfg(
     support = supportCollection or JetCollection
 
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('FTag')
     if fast:
         acc.merge(
             _fastCfg(

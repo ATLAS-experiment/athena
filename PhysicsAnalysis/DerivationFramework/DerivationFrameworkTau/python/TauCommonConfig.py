@@ -29,7 +29,7 @@ def AddTauAugmentationCfg(flags, wp="GNTauVeryLoose", **kwargs):
     kwargs.setdefault("TauContainerName", "TauJets")
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Tau')
     # tau selection relies on RNN electron veto, we must decorate the fixed eveto WPs before applying tau selection
     acc.merge(AddTauIDDecorationCfg(flags, TauContainerName=kwargs["TauContainerName"]))
 
@@ -68,7 +68,7 @@ def AddTauMassDecoratorCfg(flags, **kwargs):
     kwargs.setdefault("prefix",           kwargs['TauContainerName'])
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Tau')
     #Rename existing decorations in input file, such that we can create new ones.
     from SGComps.AddressRemappingConfig import InputRenameCfg
     acc.merge(InputRenameCfg("xAOD::TauJetContainer", kwargs['TauContainerName'], "old_"+kwargs['TauContainerName']))
@@ -90,7 +90,7 @@ def AddTauIDDecorationCfg(flags, **kwargs):
     #kwargs.setdefault("prefix",           kwargs['TauContainerName'])
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Tau')
     import tauRec.TauToolHolder as tauTools
     tools = []
     doEvetoWP = False
@@ -191,7 +191,7 @@ def AddTauTESCompatibilityDecorationCfg(flags, **kwargs):
     """Decorate taus with a flag to check if Calo and MVA TES are compatible """
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Tau')
     from TauAnalysisTools.TauAnalysisToolsConfig import TauResolutionToolCfg 
 
     tauResolutionTool = acc.popToolsAndMerge(TauResolutionToolCfg(flags,"TauResolutionToolCfg"))
@@ -219,7 +219,7 @@ def AddTauIDDisplacedDecorationCfg(flags, **kwargs):
     flags_TauLRT = flags.cloneAndReplace("Tau.ActiveConfig", "Tau.TauLRT")
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Tau')
     scoreNames = []
 
     import tauRec.TauToolHolder as tauTools
@@ -256,6 +256,7 @@ def AddMuonRemovalTauAODReRecoAlgCfg(flags, **kwargs):
     """Configure the MuonRM AOD tau building"""
 
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Tau')
     inputTauJets = kwargs.setdefault("Key_tauContainer", "TauJets")
     kwargs.setdefault("Key_tauOutputContainer", "TauJets_MuonRM")
     kwargs.setdefault("Key_pi0OutputContainer", "TauFinalPi0s_MuonRM")
@@ -319,6 +320,7 @@ def TauThinningCfg(flags, name, **kwargs):
     """configure tau thinning"""
 
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Tau')
     TauThinningTool = CompFactory.DerivationFramework.TauThinningTool
     acc.addPublicTool(TauThinningTool(name, **kwargs), primary=True)
     return acc

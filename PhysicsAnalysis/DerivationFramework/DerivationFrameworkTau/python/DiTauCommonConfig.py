@@ -8,7 +8,7 @@ def AddDiTauLowPtCfg(flags, **kwargs):
     """Configure the low-pt di-tau building"""
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Tau')
     from JetRecConfig.JetRecConfig import JetRecCfg
     from JetRecConfig.StandardLargeRJets import AntiKt10LCTopo_tau
     acc.merge(JetRecCfg(flags,AntiKt10LCTopo_tau))
@@ -23,7 +23,7 @@ def AddDiTauIDDecorationCfg(flags, **kwargs):
     """Decorate ditau ID scores """
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Tau')
     import DiTauRec.DiTauToolsConfig as DiTauTools
 
     diTauOnnxScoreCalculator = acc.popToolsAndMerge(DiTauTools.DiTauOnnxScoreCalculatorCfg(
@@ -64,7 +64,7 @@ def AddDiTauChargeDecoratorCfg(flags, **kwargs):
     kwargs.setdefault("prefix",           kwargs['DiTauContainerName'])
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Tau')
     DiTauChargeDecorator = CompFactory.DerivationFramework.DiTauChargeDecorator
     DiTauChargeDecoratorKernel = CompFactory.DerivationFramework.CommonAugmentation
 

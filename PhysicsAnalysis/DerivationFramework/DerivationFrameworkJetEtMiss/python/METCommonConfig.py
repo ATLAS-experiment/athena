@@ -15,7 +15,7 @@ def METCommonCfg(ConfigFlags):
     from METReconstruction.METAssociatorCfg import METAssociatorCfg
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('MET')
     metDefs = ['AntiKt4EMTopo']
     if ConfigFlags.MET.DoPFlow:
         metDefs.append('AntiKt4EMPFlow')
@@ -89,6 +89,7 @@ def METRemappingCfg(ConfigFlags):
     from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator, CompFactory
 
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('MET')
     acc.addEventAlgo(CompFactory.DerivationFramework.METRemappingAlg('AnalysisMETRemappingAlg'))
 
     return acc
