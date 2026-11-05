@@ -92,7 +92,7 @@ std::unique_ptr<BTaggingGridBoundsHandler<BTaggingBoundsHandler>> getGriBoundsHa
   // If any exception is thrown return failure 
   bool errorFound = false;
   try { 
-    gridBoundHandlerPtr = std::make_unique<BTaggingGridBoundsHandler<BTaggingBoundsHandler>>(context, vecBoundsHandlers);
+    gridBoundHandlerPtr = std::make_unique<BTaggingGridBoundsHandler<BTaggingBoundsHandler>>(context, std::move(vecBoundsHandlers));
   } catch (const std::exception& e) {
     // Error found 
     errorFound = true;

@@ -3,6 +3,7 @@
 */
 
 #include "xAODBTaggingEfficiency/BTaggingBoundsHandler.h"
+#include <nlohmann/json.hpp>
 
 // Two half-open intervals [low, high) overlap if each one starts before the other ends.
 // Touching edges (upper = other lower) are not considered overlapping.

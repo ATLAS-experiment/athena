@@ -197,7 +197,7 @@ StatusCode BTaggingLargeREfficiencyJsonTool::initialize()
           // Finally add the grid of handlers to the map of MC-MC handlers
           // If any exception is thrown return failure 
           try { 
-            m_mcmcHandlers.emplace(labelStringMCMC, BTaggingGridBoundsHandler<LargeRMCMCHandler>(context, tmpVecLargeRMCMCHandler));
+            m_mcmcHandlers.emplace(labelStringMCMC, BTaggingGridBoundsHandler<LargeRMCMCHandler>(context, std::move(tmpVecLargeRMCMCHandler)));
           } catch (const std::exception& e) {
             ATH_MSG_ERROR(e.what());
             return StatusCode::FAILURE;

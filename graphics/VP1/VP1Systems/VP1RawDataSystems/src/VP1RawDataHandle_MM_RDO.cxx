@@ -109,7 +109,13 @@ SoNode * VP1RawDataHandle_MM_RDO::buildShape()
   int channel = idhelper->channel(id);
 
   Amg::Vector2D locPos;
-  elem->stripPosition(id, locPos);
+  if (!elem->stripPosition(id, locPos))[[unlikely]]{
+    VP1Msg::messageDebug(
+        "stripPosition reported an error. Returning without building the shape for MM "
+        "digits...");
+    SoNode* node = common()->nodeManager()->getShapeNode_Point();
+    return node;
+  }
 
   striplength = design->channelLength(channel);
   stripWidth = design->inputWidth;

@@ -7,7 +7,7 @@
 
 #include "xAODBTaggingEfficiency/BTaggingToolUtil.h"
 #include "xAODJet/Jet.h"
-#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <cmath>
 #include <functional>
 #include <limits>

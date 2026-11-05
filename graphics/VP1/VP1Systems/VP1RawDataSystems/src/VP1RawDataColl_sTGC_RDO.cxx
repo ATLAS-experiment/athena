@@ -117,6 +117,8 @@ bool VP1RawDataColl_sTGC_RDO::load() {
   for (const sTgcDigitCollection* coll : *container) {
     /// Iterate on the digits of the collection
     for (const sTgcDigit* digit : *coll) {
+      if (!digit)[[unlikely]] continue;
+      const Identifier digitId{digit->identify()};
 
       // example from Johannes
       /*
@@ -124,8 +126,7 @@ bool VP1RawDataColl_sTGC_RDO::load() {
       const Amg::Vector3D tubePos = mdtReadoutElement->tubePos(digitId);
       */
 
-      if (digit)
-        addHandle(new VP1RawDataHandle_sTGC_RDO(this, digit));
+      addHandle(new VP1RawDataHandle_sTGC_RDO(this, digit));
     }
   }
 

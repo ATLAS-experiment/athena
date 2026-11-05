@@ -102,8 +102,9 @@ bool VP1RawDataColl_MDT_RDO::load() {
   for (const MdtDigitCollection* coll : *container) {
     /// Iterate on the digits of the collection
     for (const MdtDigit* digit : *coll) {
-      if (digit)
-        addHandle(new VP1RawDataHandle_MDT_RDO(this, digit));
+      if (!digit)[[unlikely]] continue;
+      const Identifier digitId{digit->identify()};
+      addHandle(new VP1RawDataHandle_MDT_RDO(this, digit));
     }
   }
 
