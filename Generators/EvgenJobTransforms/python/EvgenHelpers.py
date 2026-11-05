@@ -5,6 +5,7 @@ import re
 import gzip
 import shutil
 import tarfile
+from enum import Enum
 
 from AthenaCommon.Logging import logging
 
@@ -260,3 +261,23 @@ def _get_nevents(flags, safety):
     )
 
     return int(base_events * sf)
+
+
+class BeamType(Enum):
+    """Helper class for storing the information
+    on beam type: (Z, A, atomic mass in u).
+    Masses are taken from AME2020 atomic mass evaluation
+    (DOI: 10.1088/1674-1137/abddaf).
+    """
+    
+    PROTON = (1, 1, 1.00782503190)   # 1H
+    OXYGEN = (8, 16, 15.9949146193)  # 16O
+    NEON = (10, 20, 19.9924401753)   # 20Ne
+    XENON = (54, 129, 128.904780857) # 129Xe
+    LEAD = (82, 208, 207.976652)     # 208Pb
+ 
+    def __init__(self, Z, A, atomic_mass):
+        self.Z = Z
+        self.A = A
+        self.atomic_mass = atomic_mass # For STARlight
+
