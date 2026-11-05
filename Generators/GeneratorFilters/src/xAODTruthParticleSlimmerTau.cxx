@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -105,7 +105,7 @@ StatusCode xAODTruthParticleSlimmerTau::execute(const EventContext& ctx)
 
   for (unsigned int iPart = 0; iPart < nParticles; ++iPart)
   {
-    ElementLink<xAOD::TruthParticleContainer> eltp(*xTruthParticleContainer, iPart);
+    ElementLink<xAOD::TruthParticleContainer> eltp(*xTruthParticleContainer, iPart, ctx);
     const xAOD::TruthParticle *theParticle = (*xTruthParticleContainer)[iPart];
              
     int my_uniqueID = HepMC::uniqueID(theParticle);
