@@ -7,6 +7,7 @@ def PFlowCommonCfg(ConfigFlags):
     """Main config for PFlow decorations """
 
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('PFlow')
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
     from DerivationFrameworkJetEtMiss.JetToolConfig import PFlowAugmentationToolCfg
     PFlowAugTool = acc.getPrimaryAndMerge(PFlowAugmentationToolCfg(ConfigFlags))

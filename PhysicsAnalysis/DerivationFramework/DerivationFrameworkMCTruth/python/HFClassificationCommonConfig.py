@@ -18,6 +18,7 @@ def DFCommonMatchingToolCfg(flags, variation, **kwargs):
   #################################
 
   acc = ComponentAccumulator()
+  acc.flagPerfmonDomain('Truth')
   # Configure the tool that matches each truth particle to the closest jet.
   # Parameters:
   #  -m_jetPtCut:  Cut on the pt of the jets.
@@ -44,6 +45,7 @@ def DFCommonMatchingToolJ25Cfg(flags, **kwargs):
 
 def DFCommonHadronOriginClassifierCfg(flags, **kwargs):
   acc = ComponentAccumulator()
+  acc.flagPerfmonDomain('Truth')
   ##################################
   ##### HF Hadrons Origin Tool #####
   ##################################
@@ -58,6 +60,7 @@ def DFCommonHadronOriginClassifierCfg(flags, **kwargs):
 
 def DFCommonClassifyAndCalculateHFToolCfg(flags, variation, **kwargs):
   acc = ComponentAccumulator()
+  acc.flagPerfmonDomain('Truth')
   ##################################
   ##### HF Classification Tool #####
   ##################################
@@ -111,6 +114,7 @@ def ClassifyAndCalculateHFAugmentationCfg(flags, mc_channel_number, variation, *
   """Configure and add the tools to compute and add the HF classifier in the derivation"""
 
   acc = ComponentAccumulator()
+  acc.flagPerfmonDomain('Truth')
   ClassifyAndCalculateHFAugmentationTool = CompFactory.DerivationFramework.ClassifyAndCalculateHFAugmentation(name = "DFCommonClassifyAndCalculateHFAugmentation"+variation)
 
   #################################
@@ -145,7 +149,7 @@ def HFClassificationCommonCfg(flags):
     """HF Classification configuration."""
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Truth')
     #Check the the DSID of the considered sample is in the list of ttbar samples.
     mc_channel_number = int(flags.Input.MCChannelNumber)
     if mc_channel_number > 0:

@@ -10,6 +10,7 @@ from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthDecayColl
 
 def TruthMetaDataWriterCfg(flags, name):
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     theTruthMetaDataWriter =  CompFactory.DerivationFramework.TruthMetaDataWriter(name)
     acc.addPublicTool(theTruthMetaDataWriter)
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
@@ -19,7 +20,7 @@ def TruthMetaDataWriterCfg(flags, name):
 def HepMCtoXAODTruthCfg(flags):
     """Conversion of HepMC to xAOD truth"""
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Truth')
     # Only run for MC input
     if flags.Input.isMC is False and flags.Overlay.DataOverlay is False:
         raise RuntimeError("Common MC truth building requested for non-MC input")
@@ -65,7 +66,7 @@ def HepMCtoXAODTruthCfg(flags):
 def AddTruthJetsCfg(flags):
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Truth')
     from JetRecConfig.StandardSmallRJets import AntiKt4Truth,AntiKt4TruthWZ,AntiKt4TruthDressedWZ,AntiKtVRTruthCharged
     from JetRecConfig.StandardLargeRJets import AntiKt10TruthSoftDrop
     from JetRecConfig.JetRecConfig import JetRecCfg
@@ -86,7 +87,7 @@ def AddTruthJetsCfg(flags):
 def AddTruthMETCfg(flags):
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Truth')
     # Only do this if the truth MET is not present
     # This should handle EVNT correctly without an explicit check
     if ( "MissingETContainer#MET_Truth") not in flags.Input.TypedCollections:
@@ -99,7 +100,7 @@ def AddTruthMETCfg(flags):
 def TruthClassificationAugmentationsCfg(flags, **kwargs):
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Truth')
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthClassificationToolCfg
     acc.addEventAlgo(CompFactory.DerivationFramework.CommonAugmentation(name ="MCTruthClassificationKernel",
                                                                         AugmentationTools = [ acc.addPublicTool(acc.popToolsAndMerge(DFCommonTruthClassificationToolCfg(flags))) ]))
@@ -110,7 +111,7 @@ def TruthClassificationAugmentationsCfg(flags, **kwargs):
 def PreJetMCTruthAugmentationsCfg(flags, **kwargs):
 
     acc = TruthClassificationAugmentationsCfg(flags)
-
+    acc.flagPerfmonDomain('Truth')
     augmentationToolsList = []
 
     # These augmentations do *not* require truth jets at all
@@ -145,7 +146,7 @@ def PreJetMCTruthAugmentationsCfg(flags, **kwargs):
 def PostJetMCTruthAugmentationsCfg(flags, **kwargs):
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Truth')
     # Tau collections are built separately
     # truth tau matching needs truth jets, truth electrons and truth muons
     from DerivationFrameworkTau.TauTruthCommonConfig import TauTruthToolsCfg
@@ -186,7 +187,7 @@ def AddStandardTruthContentsCfg(flags,
                                 prefix=''):
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Truth')
     # Schedule HepMC->xAOD truth conversion
     acc.merge(HepMCtoXAODTruthCfg(flags))
 
@@ -226,6 +227,7 @@ def AddParentAndDownstreamParticlesCfg(flags,
                                        rejectHadronChildren=False):
     """Configure tools for adding immediate parents and descendants"""
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     collection_name=collection_prefix+'WithDecay' if collection_prefix is not None else 'Truth'+prefix+'WithDecay'
     # Set up a tool to keep the W/Z/H bosons and all downstream particles
     collection_maker = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(flags,
@@ -348,6 +350,7 @@ PhysTruthNavigationCollections = ["TruthElectrons",
 def AddPhysTruthContentsCfg(flags):
     """Truth augmentations of DAOD_PHYS that need only the truth record"""
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     acc.merge(TruthClassificationAugmentationsCfg(flags))
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import DFCommonTruthCharmToolCfg
     PhysCommonTruthCharmTool = acc.getPrimaryAndMerge(DFCommonTruthCharmToolCfg(
@@ -364,6 +367,7 @@ def AddPhysTruthExtrasCfg(flags):
     """Truth content that DAOD_PHYS adds to AddPhysTruthContentsCfg: HF classification,
     Higgs truth categories, tau decay collections"""
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     from DerivationFrameworkMCTruth.HFClassificationCommonConfig import HFClassificationCommonCfg
     acc.merge(HFClassificationCommonCfg(flags))
     from DerivationFrameworkHiggs.TruthCategoriesConfig import TruthCategoriesDecoratorCfg
@@ -374,6 +378,7 @@ def AddPhysTruthExtrasCfg(flags):
 def AddTruthDerivationContentsCfg(flags):
     """Truth content of DAOD_PHYS for the truth derivations (TRUTH1, TRUTH3)"""
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     # The HepMC->xAOD conversion must run before the truth augmentations
     # (merged again in AddStandardTruthContentsCfg, it is scheduled once)
     acc.merge(HepMCtoXAODTruthCfg(flags))
@@ -385,6 +390,7 @@ def AddTruthDerivationContentsCfg(flags):
 def AddPVCollectionCfg(flags):
     """Add a one-vertex-per event "primary vertex" container"""
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     # Set up a tool to keep the primary vertices
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthPVCollectionMakerCfg
     DFCommonTruthPVCollTool = acc.getPrimaryAndMerge(TruthPVCollectionMakerCfg(
@@ -401,6 +407,7 @@ def AddPVCollectionCfg(flags):
 def AddTruthCollectionNavigationDecorationsCfg(flags, TruthCollections=[], prefix=''):
     """Tool to add navigation decorations on the truth collections"""
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     if len(TruthCollections) > 0:
         # Set up a tool to add the navigation decorations
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthNavigationDecoratorCfg
@@ -416,6 +423,7 @@ def AddTruthCollectionNavigationDecorationsCfg(flags, TruthCollections=[], prefi
 def AddBSMAndDownstreamParticlesCfg(flags, generations=-1):
     """Add BSM particles and their downstream particles in a special collection"""
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     # Set up a tool to keep the taus and all downstream particles
     collection_name = "TruthBSMWithDecay"
     DFCommonBSMAndDecaysTool = acc.getPrimaryAndMerge(TruthDecayCollectionMakerCfg(flags,
@@ -433,6 +441,7 @@ def AddBSMAndDownstreamParticlesCfg(flags, generations=-1):
 def AddBornLeptonCollectionCfg(flags):
     """Add born leptons as a mini collection"""
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     # Set up a tool to keep the taus and all downstream particles
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthBornLeptonCollectionMakerCfg
     DFCommonBornLeptonCollTool = acc.getPrimaryAndMerge(TruthBornLeptonCollectionMakerCfg(flags,
@@ -446,6 +455,7 @@ def AddLargeRJetD2Cfg(flags):
     """Add large-R jet D2 variable"""
     #Extra classifier for D2 variable
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import TruthD2DecoratorCfg
     theTruthD2Decorator = acc.getPrimaryAndMerge(TruthD2DecoratorCfg(flags,
                                                                      name            = "TruthD2Decorator",
@@ -459,6 +469,7 @@ def AddLargeRJetD2Cfg(flags):
 def DFCommonTruthEDDecoratorCfg(flags, name="DFCommonTruthEDDecorator", **kwargs):
     """Truth energy density decorator"""
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     kwargs.setdefault("EventInfoName", "EventInfo")
     kwargs.setdefault("EventShapeKeys", ["TruthIsoCentralEventShape","TruthIsoForwardEventShape"])
     suffix = kwargs.pop("DecorationSuffix", "_rho")
@@ -471,6 +482,7 @@ def DFCommonTruthEDDecoratorCfg(flags, name="DFCommonTruthEDDecorator", **kwargs
 def DFCommonTruthCentralEDAlgCfg(flags):
     """ """
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     from EventShapeTools.EventDensityConfig import configEventDensityTool
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst
     DFCommonTruthCentralEDTool = configEventDensityTool("DFCommonTruthCentralEDTool",
@@ -487,6 +499,7 @@ def DFCommonTruthCentralEDAlgCfg(flags):
 def DFCommonTruthForwardEDAlgCfg(flags):
     """ """
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     from EventShapeTools.EventDensityConfig import configEventDensityTool
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst
     DFCommonTruthForwardEDTool = configEventDensityTool("DFCommonTruthForwardEDTool",
@@ -504,6 +517,7 @@ def DFCommonTruthForwardEDAlgCfg(flags):
 def AddTruthEnergyDensityCfg(flags):
     """Truth energy density tools"""
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     # Algorithms for the energy density - needed only if e/gamma hasn't set things up already
     acc.merge(DFCommonTruthCentralEDAlgCfg(flags))
     acc.merge(DFCommonTruthForwardEDAlgCfg(flags))
@@ -519,6 +533,7 @@ def AddTruthEnergyDensityCfg(flags):
 def AddMiniTruthCollectionLinksCfg(flags, **kwargs):
     """Tool to move pointers to new mini truth collections"""
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     kwargs.setdefault("doElectrons",True)
     kwargs.setdefault("doPhotons",True)
     kwargs.setdefault("doMuons",True)

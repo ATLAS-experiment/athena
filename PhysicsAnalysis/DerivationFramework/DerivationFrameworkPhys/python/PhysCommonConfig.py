@@ -14,6 +14,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     """Configure the common augmentation"""
     acc = ComponentAccumulator()
 
+    acc.flagPerfmonDomain('ID')
     from TrkConfig.VertexFindingFlags import VertexSortingSetup
     if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.PVNNSorting:
         from DerivationFrameworkPhys.DerivationPrimaryVertexConfig import PVNNVertexCfg
@@ -22,6 +23,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
         from DerivationFrameworkPhys.DerivationPrimaryVertexConfig import HGamNNVertexCfg
         acc.merge(HGamNNVertexCfg(flags)) 
 
+    acc.flagPerfmonDomain('Tau')
     from DerivationFrameworkTau.TauCommonConfig import AddTauMassDecoratorCfg
     # overwrite the tau mass from 0 to the reconstructed visible mass. Needs to be done before "AddStandardTruthContentsCfg"
     if flags.Tau.Tau_isAvailable:
@@ -30,6 +32,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
         acc.merge(AddTauMassDecoratorCfg(flags, TauContainerName="TauJets_EleRM"))
 
     # MC truth
+    acc.flagPerfmonDomain('Truth')
     if flags.Input.isMC:
         from DerivationFrameworkMCTruth.MCTruthCommonConfig import (
             AddPhysTruthContentsCfg,
@@ -44,6 +47,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     from DerivationFrameworkEGamma.EGammaCommonConfig import EGammaCommonCfg
     # TODO: need to find the new flags equivalent for the missing settings below, then we can
     # drop these kwargs and do everything via the flags
+    acc.flagPerfmonDomain('ID')
     acc.merge(InDetCommonCfg(flags,
                              DoVertexFinding = flags.Tracking.doVertexFinding,
                              AddPseudoTracks = flags.Tracking.doPseudoTracking,
@@ -51,7 +55,9 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
                              DoR3LargeD0 = flags.Tracking.doLargeD0,
                              StoreSeparateLargeD0Container = flags.Tracking.storeSeparateLargeD0Container,
                              MergeLRT = False)) 
+    acc.flagPerfmonDomain('Muon')
     acc.merge(MuonsCommonCfg(flags))
+    acc.flagPerfmonDomain('EGamma')
     acc.merge(EGammaCommonCfg(flags))
     # Jets, di-taus, tau decorations, flavour tagging, MET association
     from DerivationFrameworkJetEtMiss.JetCommonConfig import JetCommonCfg
@@ -59,11 +65,13 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     from DerivationFrameworkTau.DiTauCommonConfig import (AddDiTauLowPtCfg, AddDiTauChargeDecoratorCfg, AddDiTauIDDecorationCfg)
     from DerivationFrameworkJetEtMiss.METCommonConfig import METCommonCfg 
     from DerivationFrameworkJetEtMiss.METCommonConfig import HadRecoilMETCfg
+    acc.flagPerfmonDomain('Jets')
     acc.merge(JetCommonCfg(flags))
     #We also need to build links between the newly created jet constituents (GlobalFE)
     #and electrons,photons,muons and taus
     from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg    
     acc.merge(PFGlobalFlowElementLinkingCfg(flags))
+    acc.flagPerfmonDomain('Tau')
     acc.merge(AddDiTauLowPtCfg(flags))
     acc.merge(AddMuonRemovalTauAODReRecoAlgCfg(flags))
     # eVeto WP and DeepSet ID for taus and muon-subtracted taus
@@ -81,6 +89,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
     # ditau Charge
     acc.merge(AddDiTauChargeDecoratorCfg(flags, DiTauContainerName="DiTauJets"))
     acc.merge(AddDiTauChargeDecoratorCfg(flags, DiTauContainerName="DiTauJetsLowPt"))
+    acc.flagPerfmonDomain('FTag')
     if flags.Reco.EnableBTagging:
         from BTagging.FlavorTaggingConfig import FlavorTaggingCfg
         acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMPFlowJets"))
@@ -92,7 +101,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
             acc.merge(NewVrtSecInclusiveAlgTightCfg(flags))
         if flags.GeoModel.Run >= LHCPeriod.Run4:
             acc.merge(FlavorTaggingCfg(flags, "AntiKt4EMTopoJets"))
-
+    acc.flagPerfmonDomain('MET')
     acc.merge(METCommonCfg(flags))
     acc.merge(HadRecoilMETCfg(flags))
 
@@ -104,6 +113,7 @@ def PhysCommonAugmentationsCfg(flags,**kwargs):
         LargeRJetNeutralFELinksDecorKey=""))
     
     # Trigger matching and postprocessing
+    acc.flagPerfmonDomain('Trigger')
     if flags.Reco.EnableTrigger or flags.Trigger.triggerConfig == 'INFILE':
         from JetTagDerivationUtils.TrigBTagCopierConfig import TrigBTagCopierAlgCfg
         acc.merge(TrigBTagCopierAlgCfg(flags))

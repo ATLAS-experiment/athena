@@ -16,6 +16,7 @@ def MuonsCommonCfg(flags, suff=""):
     Container = "Muons"+suff
 
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Muon')
     #====================================================================
     # MCP GROUP TOOLS
     #====================================================================

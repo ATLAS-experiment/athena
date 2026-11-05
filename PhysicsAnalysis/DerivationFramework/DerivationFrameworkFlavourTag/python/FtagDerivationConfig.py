@@ -23,7 +23,7 @@ def HLTJetFTagDecorationCfg(
 ) -> ComponentAccumulator:
     """Configure HLT jet flavour-label decoration."""
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('FTag')
     jet_decoration_alg = CompFactory.JetDecorationAlg(
         name=name,
         JetContainer=jet_container,

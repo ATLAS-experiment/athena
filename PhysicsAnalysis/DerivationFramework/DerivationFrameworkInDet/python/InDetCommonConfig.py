@@ -17,6 +17,7 @@ def InDetCommonCfg(flags, **kwargs):
     """Main config for common ID track decorations"""
 
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('ID')
     CommonAugmentation = CompFactory.DerivationFramework.CommonAugmentation
 
     have_PV_container = (

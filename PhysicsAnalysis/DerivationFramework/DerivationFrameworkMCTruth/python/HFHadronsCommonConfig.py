@@ -12,7 +12,7 @@ from DerivationFrameworkMCTruth.HFDSIDList import DSIDList
 def HFHadronsCommonCfg(flags):
     """Heavy flavour decorations config"""
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Truth')
     if flags.Input.MCChannelNumber > 0 and flags.Input.MCChannelNumber in DSIDList:
         from DerivationFrameworkMCTruth.TruthDerivationToolsConfig import HadronOriginDecoratorCfg
         DFCommonhadronorigindecorator = acc.getPrimaryAndMerge(HadronOriginDecoratorCfg(flags,

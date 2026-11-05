@@ -19,6 +19,7 @@ def DFCommonTauTruthMatchingToolCfg(flags, name = "DFCommonTauTruthMatchingTool"
 def TauTruthMatchingWrapperCfg(flags, cont, **kwargs):
     """Configure the tau truth matching wrapper"""
     acc = ComponentAccumulator()
+    acc.flagPerfmonDomain('Truth')
     name = "DFCommon"+cont+"TruthMatchingWrapper"
     DFCommonTauTruthMatchingTool = acc.addPublicTool(acc.popToolsAndMerge(
         DFCommonTauTruthMatchingToolCfg(flags)))
@@ -33,7 +34,7 @@ def TauTruthToolsCfg(flags):
     """Configure tau truth making and matching"""
 
     acc = ComponentAccumulator()
-
+    acc.flagPerfmonDomain('Truth')
     # Ensure that we are running on MC
     if not flags.Input.isMC and not flags.Overlay.DataOverlay:
         # FIXME If this happens it indicates an issue with the configuration in the caller, so better to throw an exception?!
