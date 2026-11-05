@@ -7,9 +7,10 @@ from GeneratorConfig.GeneratorSettingsSemantics import (
     GeneratorSettingsPrecedence,
 )
 from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
-from EvgenJobTransforms.EvgenHelpers import _get_nevents
+from EvgenJobTransforms.EvgenHelpers import _get_nevents, BeamType
 from Pythia8_i.Pythia8Config import Pythia8_A14_NNPDF23LO_Common_Cfg
 from AthenaCommon.SystemOfUnits import GeV
+
 
 # Get logger
 from AthenaCommon.Logging import logging
@@ -42,22 +43,27 @@ def StarlightBaseCfg(flags, name="Starlight_i", safety=1., **kwargs):
     # By default write output directly to HepMC
     kwargs.setdefault("lheOutput", False)
 
-    # If lhe output is requested `maxevents` determines the number of events written 
-    # to lhe file, else events are generated one by one and `maxevents` is not utilised
+    # If LHE output is requested `maxevents` determines the number of events written 
+    # to LHE file, else events are generated one by one and `maxevents` is not utilised
     kwargs.setdefault("maxevents", _get_nevents(flags, safety))
 
+    # By default symmetric LEAD beams are assumed.
+    beam1 = kwargs.pop("beam1", BeamType.LEAD)
+    beam2 = kwargs.pop("beam2", BeamType.LEAD)
+
+    # Default beam energy is 1/2 of centre of mass energy from `--ecmEnergy` flag. 
     kwargs.setdefault("beam1Energy", flags.Beam.Energy/GeV)
     kwargs.setdefault("beam2Energy", flags.Beam.Energy/GeV)
 
-    # Gamma calculation for Pb208
-    # Gamma = E(Pb208) / (m(Pb208) in a.u. * atomic mass unit in GeV)
-    gamma1 = 208 * kwargs['beam1Energy'] / (207.9766359 * 0.931494)
-    gamma2 = 208 * kwargs['beam2Energy'] / (207.9766359 * 0.931494)
+    # Gamma calculation
+    # Gamma = E(ion) / (m(ion) in a.u. * atomic mass unit in GeV)
+    gamma1 = beam1.A * kwargs['beam1Energy'] / (beam1.atomic_mass * 0.93149410242)
+    gamma2 = beam2.A * kwargs['beam2Energy'] / (beam2.atomic_mass * 0.93149410242)
 
     # Basic initialize parameters
     base_init = [
-        "beam1Z 82", "beam1A 208", #Z,A of projectile 
-        "beam2Z 82", "beam2A 208", #Z,A of target
+        f"beam1Z {beam1.Z}", f"beam1A {beam1.A}", #Z,A of projectile 
+        f"beam2Z {beam2.Z}", f"beam2A {beam2.A}", #Z,A of target
         f"beam1Gamma {int(gamma1)}",
         f"beam2Gamma {int(gamma2)}",
         "maxW -1", #Max value of w
@@ -167,3 +173,4 @@ def Starlight_EvtGen_Common_Cfg(flags, **kwargs):
     ))
 
     return ca
+

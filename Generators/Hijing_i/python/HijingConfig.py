@@ -7,6 +7,7 @@ from GeneratorConfig.GeneratorSettingsSemantics import (
     GeneratorSettingsPrecedence
 )
 from GeneratorConfig.Sequences import EvgenSequence, EvgenSequenceFactory
+from EvgenJobTransforms.EvgenHelpers import BeamType
 from AthenaCommon.SystemOfUnits import GeV
 
 # Get logger
@@ -36,12 +37,17 @@ def HijingBaseCfg(flags, name="Hijing", **kwargs):
     and returns a CA instance.
     """
 
+    # By default LEAD beams are assumed.
+    projecBeam = kwargs.pop("projecBeam", BeamType.LEAD)
+    targetBeam = kwargs.pop("targetBeam", BeamType.LEAD)
+
     # Basic initialize parameters
     base_init = [f"efrm {2*flags.Beam.Energy/GeV}",
         "frame CMS",
-        "proj A",   "targ A",
-        "iap 208",  "iat 208",
-        "izp 82",   "izt 82",
+        f"proj {'P' if projecBeam is BeamType.PROTON else 'A'}",
+        f"targ {'P' if targetBeam is BeamType.PROTON else 'A'}",
+        f"izp {projecBeam.Z}",   f"izt {targetBeam.Z}",
+        f"iap {projecBeam.A}",   f"iat {targetBeam.A}"
     ]
 
     # Get user initialize parameters
