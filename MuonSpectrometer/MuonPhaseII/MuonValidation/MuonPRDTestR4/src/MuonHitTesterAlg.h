@@ -88,6 +88,10 @@ namespace MuonValR4 {
             Gaudi::Property<bool> m_writeRpcPrds{this, "dumpRpcPrds", true};
             Gaudi::Property<bool> m_writeTgcPrds{this, "dumpTgcPrds", true};
             Gaudi::Property<bool> m_writeMmPrds{this, "dumpMmPrds", true};
+            Gaudi::Property<bool> m_writeStgcPrds{ this, "dumpStgcPrds", true}; 
+            Gaudi::Property<bool> m_writeStgcStripNumbers{ this, "writeStgcStripNumbers", true};
+            Gaudi::Property<bool> m_writeStgcStripCharges{ this, "writeStgcStripCharges", true};
+            Gaudi::Property<bool> m_writeStgcStripTimes{ this, "writeStgcStripTimes", true};
             /**
              *  @brief Prd collection names
              */
@@ -96,6 +100,9 @@ namespace MuonValR4 {
             Gaudi::Property<std::string> m_rpcPrdKey{this, "RpcPrdKey", "xRpcMeasurements"};
             Gaudi::Property<std::string> m_tgcPrdKey{this, "TgcPrdKey", "xTgcStrips"};
             Gaudi::Property<std::string> m_mmPrdKey{this, "MmPrdKey", "xAODMMClusters"};
+            Gaudi::Property<std::string> m_stgcStripPrdKey{ this, "StgcStripPrdKey", "xAODsTgcStrips"};
+            Gaudi::Property<std::string> m_stgcWirePrdKey{ this, "StgcWirePrdKey", "xAODsTgcWires"};
+            Gaudi::Property<std::string> m_stgcPadPrdKey{ this, "StgcPadPrdKey", "xAODsTgcPads"};
             /**
              *  @brief Toggle whether the spacepoint collections shall be tested
              * */

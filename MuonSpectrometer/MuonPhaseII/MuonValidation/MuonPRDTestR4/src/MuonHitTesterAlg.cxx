@@ -20,6 +20,8 @@
 #include "MuonPRDTestR4/RpcMeasurementVariables.h"
 #include "MuonPRDTestR4/TgcStripVariables.h"
 #include "MuonPRDTestR4/MmClusterVariables.h"
+#include "MuonPRDTestR4/StgcPrdVariables.h"
+
 
 #include "MuonPRDTestR4/SpacePointTesterModule.h"
 
@@ -153,6 +155,9 @@ namespace MuonValR4 {
         }
         if (m_writeMmPrds) {
             m_tree.addBranch(std::make_shared<MmClusterVariables>(m_tree, m_mmPrdKey, msgLevel()));
+        }
+        if (m_writeStgcPrds) {
+            m_tree.addBranch(std::make_shared<StgcPrdVariables>( m_tree, m_stgcStripPrdKey, m_stgcWirePrdKey, m_stgcPadPrdKey, m_writeStgcStripNumbers, m_writeStgcStripCharges, m_writeStgcStripTimes, msgLevel())); 
         }
         return StatusCode::SUCCESS;
     }
