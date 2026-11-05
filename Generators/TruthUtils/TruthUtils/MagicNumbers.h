@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <deque>
 #include <type_traits>
+#include <ranges>
 #if !defined(XAOD_STANDALONE)
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenParticle.h"
@@ -128,36 +129,37 @@ namespace HepMC {
   }
 
   /// @brief Function to calculate all the descendants(direction=1)/ancestors(direction=-1) of the particle.
-  template <class T> inline void get_particle_history(const T& p, std::deque<int>& out, const int direction = 0) {
+  template <class T> inline void get_particle_history(const T& p, std::vector<int>& out, const int direction = 0) {
+    out.insert(out.begin(), uniqueID(p));
     if (direction < 0) {
       if (p->status()>SIM_STATUS_INCREMENT) {
         auto pv = p->production_vertex();
         if (pv) {
           for (auto pa: pv->particles_in()) {
             if (!pa || pa->pdg_id() != p->pdg_id()) continue;
-            out.push_front(uniqueID(p));
-            get_particle_history(pa, out, -1);
+            get_particle_history(pa, out, direction);
             break;
           }
         }
       }
     }
     if (direction > 0) {
-      if (p->status()>SIM_STATUS_INCREMENT) {
-        auto pv = p->end_vertex();
-        if (pv) {
-          for (auto pa: pv->particles_out()) {
-            if (!pa || pa->pdg_id() != p->pdg_id()) continue;
-            out.push_back(uniqueID(p));
-            get_particle_history(pa, out, 1);
-            break;
-          }
+      auto pv = p->end_vertex();
+      if (pv) {
+        for (auto pa: pv->particles_out()) {
+          if (!pa || pa->pdg_id() != p->pdg_id()) continue;
+          get_particle_history(pa, out, direction);
+          break;
         }
       }
     }
   }
   /// @brief Function to calculate all the descendants(direction=1)/ancestors(direction=-1) of the particle.
-  template <class T> inline std::deque<int> simulation_history(const T& p, const int direction ) { std::deque<int> res; res.push_back(uniqueID(p)); get_particle_history(p, res, direction); return res;}
+  template <class T> inline std::vector<int> simulation_history(const T& p, const int direction ) { 
+      std::vector<int> res;
+      get_particle_history(p, res, direction); 
+      return res;
+  }
 
   namespace BarcodeBased {
     /// @brief Method to establish if a particle (or barcode) corresponds to truth-suppressed pile-up
@@ -251,14 +253,16 @@ namespace HepMC {
       if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T1>>>, TrackRecord>) {
         // No choice, but to get the history of one of the particles:
         const int direction = (generations2 > generations1) ? -1 : 1;
-        std::deque<int> history2 = simulation_history( p2, direction );
-        if (std::find(history2.begin(),history2.end(), id1) == history2.end()) { return false; }
+        if (!std::ranges::contains(simulation_history( p2, direction ), id1)) { 
+          return false; 
+        }
       }
       else {
         // No choice, but to get the history of one of the particles:
         const int direction = (generations1 > generations2) ? -1 : 1;
-        std::deque<int> history1 = simulation_history( p1, direction );
-        if (std::find(history1.begin(),history1.end(), id2) == history1.end()) { return false; }
+        if (!std::ranges::contains(simulation_history( p1, direction ), id2)) { 
+          return false; 
+        }
       }
       return true;
     }
@@ -282,14 +286,12 @@ namespace HepMC {
       if constexpr (std::is_same_v<std::remove_const_t<remove_smart_pointer_t<std::remove_pointer_t<T1>>>, TrackRecord>) {
         // No choice, but to get the descendants of p2
         constexpr int descendents = 1;
-        std::deque<int> history2 = simulation_history( p2, descendents );
-        if (std::find(history2.begin(),history2.end(), id1) == history2.end()) { return false; }
+        if (!std::ranges::contains(simulation_history( p2, descendents ), id1)) { return false; }
        }
       else {
         // No choice, but to get the history of p1
         constexpr int ancestors = -1;
-        std::deque<int> history1 = simulation_history( p1, ancestors );
-        if (std::find(history1.begin(),history1.end(), id2) == history1.end()) { return false; }
+        if (!std::ranges::contains(simulation_history( p1, ancestors ), id2)) { return false; }
       }
       return true;
     }

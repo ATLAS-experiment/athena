@@ -76,7 +76,7 @@ namespace Muon {
         nphiHitsPerChamberLayer.resize(toInt(PhiIndex::PhiIndexMax));
         
         ATH_MSG_DEBUG("addHitCounts: unique ID " << HepMC::uniqueID(truthParticle));
-        auto truthParticleHistory = HepMC::simulation_history(&truthParticle, -1); // Returns a list of unique IDs
+        auto truthParticleHistory = HepMC::simulation_history(&truthParticle, 1); // Returns a list of unique IDs
         // loop over detector technologies
         for (SG::ReadHandle<PRD_MultiTruthCollection>& col : m_PRD_TruthNames.makeHandles(ctx)) {
             ATH_CHECK(col.isPresent());
