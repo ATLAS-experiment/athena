@@ -91,6 +91,14 @@ def PoolReadCfg(flags):
             evSel.RunNumber = flags.Input.RunNumbers[0]
             evSel.FirstLB = flags.Input.LumiBlockNumbers[0]
             evSel.InitialTimeStamp = flags.Input.TimeStamps[0]
+        elif flags.Common.isOverlay and flags.Common.ProductionStep == ProductionStep.FastChain:
+            # FastChain MC overlay builds the Geant4 geometry in initialize, so IOVDbSvc needs
+            # the run/LB/time of the background RDO already then to apply the alignment.
+            # Event IDs are still taken from the background RDOs (no EvtIdModifierSvc).
+            evSel.OverrideRunNumber = True
+            evSel.RunNumber = flags.Input.RunNumbers[0]
+            evSel.FirstLB = flags.Input.LumiBlockNumbers[0] if flags.Input.LumiBlockNumbers else 1
+            evSel.InitialTimeStamp = flags.IOVDb.RunToTimestampDict.get(flags.Input.RunNumbers[0], 1)
 
         # In case of MC overlay RDOs are primary input
         evSel.SkipEvents = skipEventsSecondary
