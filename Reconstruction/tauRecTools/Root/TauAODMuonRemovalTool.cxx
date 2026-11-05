@@ -52,7 +52,7 @@ StatusCode TauAODMuonRemovalTool::executeTool(xAOD::TauJet& tau,
     //set link to the removed lepton
     for (auto muon : removed_muons_set ){
         ElementLink<xAOD::MuonContainer> link;
-        link.toContainedElement(*muon_container, muon);
+        link.toContainedElement(*muon_container, muon, ctx);
         acc_removed_muons(tau).push_back(link);
     }
     //notify the runner alg that the tau was modified

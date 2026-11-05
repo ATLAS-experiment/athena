@@ -70,7 +70,7 @@ StatusCode TauShotFinder::executeTool(xAOD::TauJet& tau,
     xAOD::CaloCluster* shotCluster = createShotCluster(cell, phiNeigCell, *cellContainer, &shotClusterContainer);
    
     ElementLink<xAOD::CaloClusterContainer> clusElementLink;
-    clusElementLink.toContainedElement( shotClusterContainer, shotCluster );
+    clusElementLink.toContainedElement( shotClusterContainer, shotCluster, ctx );
     shot->setClusterLink( clusElementLink );
    
     // -- Calculate the four momentum
@@ -116,7 +116,7 @@ StatusCode TauShotFinder::executeTool(xAOD::TauJet& tau,
 
     // Add Element link to the shot PFO container
     ElementLink<xAOD::PFOContainer> PFOElementLink;
-    PFOElementLink.toContainedElement(shotPFOContainer, shot);
+    PFOElementLink.toContainedElement(shotPFOContainer, shot, ctx);
     tau.addShotPFOLink(PFOElementLink);
     
     // Remove used cells from list

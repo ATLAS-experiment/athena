@@ -11,7 +11,7 @@ TauPi0Selector::TauPi0Selector(const std::string& name) :
 
 
 StatusCode TauPi0Selector::executeTool(xAOD::TauJet& pTau,
-				       const EventContext& /*ctx*/,
+				       const EventContext& ctx,
 				       xAOD::PFOContainer& neutralPFOContainer) const {
 
   // Clear vector of cell-based pi0 PFO Links. Required when rerunning on xAOD level.
@@ -67,7 +67,7 @@ StatusCode TauPi0Selector::executeTool(xAOD::TauJet& pTau,
       nRecoPi0s += 2;
     }
 
-    pTau.addProtoPi0PFOLink(ElementLink< xAOD::PFOContainer > (neutralPFO, neutralPFOContainer));
+    pTau.addProtoPi0PFOLink(ElementLink< xAOD::PFOContainer > (neutralPFO, neutralPFOContainer, ctx));
   }
 
   // Set Proto Decay Mode based on the number charged tracks and pi0s

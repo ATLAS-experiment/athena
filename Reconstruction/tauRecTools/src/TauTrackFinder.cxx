@@ -165,7 +165,7 @@ StatusCode TauTrackFinder::executeTool(xAOD::TauJet& pTau,
     tauTrackCon.push_back(track);
 
     ElementLink<xAOD::TrackParticleContainer> linkToTrackParticle;
-    linkToTrackParticle.toContainedElement(*static_cast<const xAOD::TrackParticleContainer*>(trackParticle->container()), trackParticle);
+    linkToTrackParticle.toContainedElement(*static_cast<const xAOD::TrackParticleContainer*>(trackParticle->container()), trackParticle, ctx);
     if (foundLRTCont && isLargeD0Track(trackParticle)){//Check LRT track and link to container
       track->setFlag(xAOD::TauJetParameters::TauTrackFlag::LargeRadiusTrack, true);
     }
@@ -182,7 +182,7 @@ StatusCode TauTrackFinder::executeTool(xAOD::TauJet& pTau,
     track->setFlag(xAOD::TauJetParameters::TauTrackFlag::unclassified, true);
     
     ElementLink<xAOD::TauTrackContainer> linkToTauTrack;
-    linkToTauTrack.toContainedElement(tauTrackCon, track);
+    linkToTauTrack.toContainedElement(tauTrackCon, track, ctx);
     pTau.addTauTrackLink(linkToTauTrack);
 
     ATH_MSG_VERBOSE(name() << " added core track nr: " << i
@@ -203,7 +203,7 @@ StatusCode TauTrackFinder::executeTool(xAOD::TauJet& pTau,
     tauTrackCon.push_back(track);
 
     ElementLink<xAOD::TrackParticleContainer> linkToTrackParticle;
-    linkToTrackParticle.toContainedElement(*static_cast<const xAOD::TrackParticleContainer*>(trackParticle->container()), trackParticle);
+    linkToTrackParticle.toContainedElement(*static_cast<const xAOD::TrackParticleContainer*>(trackParticle->container()), trackParticle, ctx);
     if (foundLRTCont && isLargeD0Track(trackParticle)){//Check LRT track and link to container
       track->setFlag(xAOD::TauJetParameters::TauTrackFlag::LargeRadiusTrack, true);
     }
@@ -221,7 +221,7 @@ StatusCode TauTrackFinder::executeTool(xAOD::TauJet& pTau,
     track->setFlag(xAOD::TauJetParameters::TauTrackFlag::unclassified, true);
 
     ElementLink<xAOD::TauTrackContainer> linkToTauTrack;
-    linkToTauTrack.toContainedElement(tauTrackCon, track);
+    linkToTauTrack.toContainedElement(tauTrackCon, track, ctx);
     pTau.addTauTrackLink(linkToTauTrack);
   }
 
@@ -241,11 +241,11 @@ StatusCode TauTrackFinder::executeTool(xAOD::TauJet& pTau,
 
     ElementLink<xAOD::TrackParticleContainer> linkToTrackParticle;
     if (foundLRTCont && isLargeD0Track(trackParticle)){//Check LRT track and link to container
-      linkToTrackParticle.toContainedElement(*static_cast<const xAOD::TrackParticleContainer*>(trackParticle->container()), trackParticle);
+      linkToTrackParticle.toContainedElement(*static_cast<const xAOD::TrackParticleContainer*>(trackParticle->container()), trackParticle, ctx);
       track->setFlag(xAOD::TauJetParameters::TauTrackFlag::LargeRadiusTrack, true); 
     }
     else {
-      linkToTrackParticle.toContainedElement(*static_cast<const xAOD::TrackParticleContainer*>(trackParticle->container()), trackParticle);
+      linkToTrackParticle.toContainedElement(*static_cast<const xAOD::TrackParticleContainer*>(trackParticle->container()), trackParticle, ctx);
       track->setFlag(xAOD::TauJetParameters::TauTrackFlag::LargeRadiusTrack, false);
     }
     track->addTrackLink(linkToTrackParticle);
@@ -257,7 +257,7 @@ StatusCode TauTrackFinder::executeTool(xAOD::TauJet& pTau,
     track->setFlag(xAOD::TauJetParameters::TauTrackFlag::unclassified, true);
 
     ElementLink<xAOD::TauTrackContainer> linkToTauTrack;
-    linkToTauTrack.toContainedElement(tauTrackCon, track);
+    linkToTauTrack.toContainedElement(tauTrackCon, track, ctx);
     pTau.addTauTrackLink(linkToTauTrack);
   }
 

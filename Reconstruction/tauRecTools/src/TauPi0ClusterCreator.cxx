@@ -18,7 +18,7 @@ TauPi0ClusterCreator::TauPi0ClusterCreator(const std::string& name) :
 
 
 StatusCode TauPi0ClusterCreator::executeTool(xAOD::TauJet& tau,
-					     const EventContext& /*ctx*/,
+					     const EventContext& ctx,
 					     xAOD::PFOContainer& neutralPFOContainer,
 					     xAOD::PFOContainer& hadronicPFOContainer,
 					     const xAOD::CaloClusterContainer& pi0ClusterContainer) const {
@@ -86,7 +86,7 @@ StatusCode TauPi0ClusterCreator::executeTool(xAOD::TauJet& tau,
     
     // Add the link to the tau candidate 
     ElementLink<xAOD::PFOContainer> PFOElementLink;
-    PFOElementLink.toContainedElement(neutralPFOContainer, neutralPFO);
+    PFOElementLink.toContainedElement(neutralPFOContainer, neutralPFO, ctx);
     tau.addProtoNeutralPFOLink(PFOElementLink);
 
     ATH_CHECK(configureNeutralPFO(*cluster, pi0ClusterContainer, tau, shotPFOs, shotToClusterMap, *neutralPFO));
@@ -133,7 +133,7 @@ StatusCode TauPi0ClusterCreator::executeTool(xAOD::TauJet& tau,
     
     // Add element link from tau to hadronic PFO
     ElementLink<xAOD::PFOContainer> PFOElementLink;
-    PFOElementLink.toContainedElement( hadronicPFOContainer, hadronicPFO );
+    PFOElementLink.toContainedElement( hadronicPFOContainer, hadronicPFO, ctx );
     tau.addHadronicPFOLink( PFOElementLink );
     
     ATH_CHECK(configureHadronicPFO(vertexedCluster, clusterEnergyHad, *hadronicPFO));
