@@ -95,6 +95,8 @@ bool VP1RawDataColl_MM_RDO::load() {
   for (const MmDigitCollection* coll : *container) {
     /// Iterate on the digits of the collection
     for (const MmDigit* digit : *coll) {
+      if (!digit)[[unlikely]] continue;
+      const Identifier digitId{digit->identify()};
 
       // example from Johannes
       /*
@@ -102,8 +104,7 @@ bool VP1RawDataColl_MM_RDO::load() {
       const Amg::Vector3D tubePos = mdtReadoutElement->tubePos(digitId);
       */
 
-      if (digit)
-        addHandle(new VP1RawDataHandle_MM_RDO(this, digit));
+      addHandle(new VP1RawDataHandle_MM_RDO(this, digit));
     }
   }
 

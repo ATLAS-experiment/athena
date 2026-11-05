@@ -40,9 +40,10 @@ int runTests()
   RpcIdHelper helper;
   check(helper.initialize_from_dictionary(dictionary) == 0, "RPC identifier dictionary");
   testHelper = &helper;
+  const std::string bmlStr{"BML"};
   for (int phi = 0; phi < 2; ++phi) {
     bool valid = false;
-    const Identifier id = helper.channelID("BML", 1, 1, 1, 1, 1, 1, phi, 1, valid);
+    const Identifier id = helper.channelID(bmlStr, 1, 1, 1, 1, 1, 1, phi, 1, valid);
     check(valid, "RPC test identifier");
     for (bool side : {false, true}) {
       for (float tot : {-1.f, 0.f, 7.25f}) {

@@ -26,7 +26,7 @@ class BTaggingGridBoundsHandler {
   public:
     // Takes the ownership of the handlers as they can't be copied
     // Throws if the handlers don't have the same variables or if they overlap
-    BTaggingGridBoundsHandler(const std::string & context, std::vector<handlerClass>& handlers);
+    BTaggingGridBoundsHandler(const std::string & context, std::vector<handlerClass>&& handlers);
 
     // Prevent grid handler from being copied forcing passing them by (const) references or using pointers
     // It ensures that the code is efficient memory wise as no duplicate can be created
@@ -46,7 +46,7 @@ class BTaggingGridBoundsHandler {
 };
 
 template<class handlerClass>
-BTaggingGridBoundsHandler<handlerClass>::BTaggingGridBoundsHandler(const std::string & context, std::vector<handlerClass>& handlers)
+BTaggingGridBoundsHandler<handlerClass>::BTaggingGridBoundsHandler(const std::string & context, std::vector<handlerClass>&& handlers)
   : m_handlers(std::move(handlers))
 {
   // If the 
