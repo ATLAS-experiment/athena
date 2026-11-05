@@ -52,7 +52,16 @@ namespace Muon {
             ATH_CHECK(SG::get(truthContainer,key, ctx));
  
             for (const xAOD::TruthParticle* truth : *truthContainer) {
-                if (!MC::isStable(truth) || !m_pdgIds.value().count(truth->absPdgId()) || truth->pt() < m_pt) continue;
+                if (!MC::isStable(truth) || 
+                    !m_pdgIds.value().count(truth->absPdgId()) || 
+                    truth->pt() < m_pt) {
+                    continue;
+                }
+                const auto history = HepMC::simulation_history(truth, -1);
+                /** Reject decay states that are after an FSR decay */
+                if (history.size() > 1) {
+                    continue;
+                }
                 xAOD::TruthParticle* truthParticle = muonTruthContainer->push_back(std::make_unique<xAOD::TruthParticle>());
                 truthParticle->setPdgId(truth->pdgId());
                 truthParticle->setUid(HepMC::uniqueID(truth));
@@ -62,15 +71,15 @@ namespace Muon {
                 truthParticle->setPz(truth->pz());
                 truthParticle->setE(truth->e());
                 truthParticle->setM(truth->m());
-                if (truth->hasProdVtx()) truthParticle->setProdVtxLink(truth->prodVtxLink());
-
+                truthParticle->setProdVtxLink(truth->prodVtxLink());
+                truthParticle->setDecayVtxLink(truth->decayVtxLink());
                 TruthLink_t itruthLink(*truthContainer, truth->index(), ctx);
                 itruthLink.toPersistent();
                 truthLink(*truthParticle) = itruthLink;
                 ATH_MSG_DEBUG("Found stable muon: " << truth->pt() << " eta " << truth->eta() << " phi " << truth->phi() << " mass "
                               << truth->m() << " unique ID " << HepMC::uniqueID(truth) << " HepMC::uniqueID(truthParticle) "
                               << HepMC::uniqueID(truthParticle) << " HepMC::uniqueID(*itruthLink) " << HepMC::uniqueID(*itruthLink) << " "
-                              << itruthLink);
+                              << itruthLink<<", history: "<<history);
                 int iType{0}, iOrigin{0};
                 unsigned int iClassification{0};
 
