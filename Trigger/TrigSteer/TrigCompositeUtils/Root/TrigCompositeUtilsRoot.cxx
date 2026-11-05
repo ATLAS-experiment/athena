@@ -128,12 +128,12 @@ namespace TrigCompositeUtils {
     return ElementLink<DecisionContainer>(*container, d->index(), ctx);
   }
 #else // Analysis or Standalone
-  ElementLink<DecisionContainer> decisionToElementLink(const Decision* d, const EventContext&) {
+  ElementLink<DecisionContainer> decisionToElementLink(const Decision* d, const EventContext& ctx) {
     const DecisionContainer* container = dynamic_cast<const DecisionContainer*>( d->container() );
     if( ! container ) {
       throw std::runtime_error("TrigCompositeUtils::convertToElementLink Using convertToElementLink(d) requires that the Decision d is already in a container");
     }
-    return ElementLink<DecisionContainer>(*container, d->index());
+    return ElementLink<DecisionContainer>(*container, d->index(), ctx);
   }
 #endif
 
