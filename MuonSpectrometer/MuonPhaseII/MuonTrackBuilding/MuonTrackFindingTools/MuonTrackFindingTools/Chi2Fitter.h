@@ -20,15 +20,18 @@
 #include "Acts/Material/Interactions.hpp"
 #include "Acts/Propagator/DirectNavigator.hpp"
 #include "Acts/Propagator/PropagatorOptions.hpp"
+#include "Acts/Propagator/PropagatorState.hpp"
 #include "Acts/Propagator/StandardAborters.hpp"
 #include "Acts/Propagator/detail/PointwiseMaterialInteraction.hpp"
-#include "Acts/TrackFitting/GlobalChiSquareFitterError.hpp"
+#include "Chi2FitterError.h"
 #include "Acts/TrackFitting/detail/VoidFitterComponents.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
 #include "Acts/Utilities/Delegate.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/Result.hpp"
 #include "Acts/Utilities/TrackHelpers.hpp"
+#include "Acts/Definitions/Units.hpp"
+#include "Acts/Utilities/MathHelpers.hpp"
 
 #include <functional>
 #include <limits>
@@ -37,6 +40,7 @@
 #include <unordered_map>
 
 using namespace Acts;
+using namespace Acts::UnitLiterals;
 namespace MuonExperimental {
 
 /// Forward declaration
@@ -44,15 +48,6 @@ struct Gx2fSystem;
 /// @addtogroup track_fitting
 /// @{
 
-namespace Gx2fConstants {
-constexpr std::string_view gx2fnUpdateColumn = "Gx2fnUpdateColumn";
-
-// Mask for the track states. We don't need Predicted and Filtered
-constexpr TrackStatePropMask trackStateMask = TrackStatePropMask::Smoothed |
-                                              TrackStatePropMask::Jacobian |
-                                              TrackStatePropMask::Calibrated;
-
-}  // namespace Gx2fConstants
 
 /// @brief A container to store material properties for each material surface
 ///
@@ -239,9 +234,6 @@ struct Gx2FitterExtensions {
       Delegate<void(const GeometryContext&, const CalibrationContext&,
                     const SourceLink&, TrackStateProxy)>;
 
-  /// Type alias for outlier finder delegate to identify measurement outliers
-  using OutlierFinder = Delegate<bool(ConstTrackStateProxy)>;
-
   /// Type alias of a delegate to retrieve the measured energy loss at a given
   /// surface e.g. from accumulating the calorimeter cell energies around the
   /// trajectory
@@ -265,23 +257,17 @@ struct Gx2FitterExtensions {
   /// to calibrate measurements using track information, this could be
   /// e.g. sagging for wires, module deformations, etc.
   Calibrator calibrator;
-
-  /// Determines whether a measurement is supposed to be considered as an
-  /// outlier
-  OutlierFinder outlierFinder;
-
-  /// Retrieves the associated surface from a source link
+/// Retrieves the associated surface from a source link
   SourceLinkSurfaceAccessor surfaceAccessor;
 
   /// Default constructor which connects the default void components
   Gx2FitterExtensions() {
     calibrator.template connect<&Acts::detail::voidFitterCalibrator<traj_t>>();
-    outlierFinder.template connect<&Acts::detail::voidOutlierFinder<traj_t>>();
     surfaceAccessor.connect<&Acts::detail::voidSurfaceAccessor>();
-    elossAccumulator
-        .connect<&Gx2fMaterialProperties::ELossAtSurface::invalidELoss>();
+    elossAccumulator.connect<&Gx2fMaterialProperties::ELossAtSurface::invalidELoss>();
   }
 };
+
 
 /// Combined options for the Global-Chi-Square fitter.
 ///
@@ -295,22 +281,16 @@ struct Gx2FitterOptions {
   /// @param cctx The calibration context for this fit
   /// @param extensions_ The KF extensions
   /// @param pOptions The plain propagator options
-  /// @param rSurface The reference surface for the fit to be expressed at
-  /// @param mScattering Whether to include multiple scattering
-  /// @param eLoss Whether to include energy loss
-  /// @param freeToBoundCorrection_ Correction for non-linearity effect during transform from free to bound
-  /// @param nUpdateMax_ Max number of iterations for updating the parameters
-  /// @param relChi2changeCutOff_ Check for convergence (abort condition). Set to 0 to skip.
   Gx2FitterOptions(const GeometryContext& gctx,
                    const MagneticFieldContext& mctx,
-                   std::reference_wrapper<const CalibrationContext> cctx,
+                   const CalibrationContext& cctx,
                    Gx2FitterExtensions<traj_t> extensions_,
                    const PropagatorPlainOptions& pOptions)
-      : geoContext(gctx),
-        magFieldContext(mctx),
-        calibrationContext(cctx),
-        extensions(std::move(extensions_)),
-        propagatorPlainOptions(pOptions){}
+      : geoContext{gctx},
+        magFieldContext{mctx},
+        calibrationContext{cctx},
+        extensions{std::move(extensions_)},
+        propagatorPlainOptions{pOptions}{}
 
 
   /// Context object for the geometry
@@ -352,10 +332,21 @@ struct Gx2FitterOptions {
   FreeToBoundCorrection freeToBoundCorrection{false};
 
   /// Max number of iterations during the fit (abort condition)
-  std::size_t nUpdateMax = 5;
+  std::uint32_t nUpdateMax = 5;
 
   /// Check for convergence (abort condition). Set to 0 to skip.
   double relChi2changeCutOff = 1e-5;
+  /// Convergence criterion on the reduced chi2. The fit 
+  /// is covnerged if the reduced chi2 falls below the threshold
+  double goodChi2{0.1};
+  /// Cut on the minimal momentum. If the momentum falls below
+  /// the threshold the fit is aborted
+  double momentumCutOff{100._MeV};
+  
+  /// Abort the fit if one of its propagations reverses the direction in more
+  /// than this number of consecutive steps (back and forth across a surface
+  /// without progress). Set to 0 to skip.
+  std::uint32_t maxDirectionFlips{10};
 };
 
 /// Result container for a global chi-square fit.
@@ -387,19 +378,13 @@ struct Gx2FitterResult {
   std::size_t lastTrackIndex = Acts::kTrackIndexInvalid;
 
   /// Counter for states with non-outlier measurements
-  std::size_t measurementStates{0ul};
+  std::uint32_t measurementStates{0ul};
 
   /// Counter for measurements holes
   /// A hole correspond to a surface with an associated detector element with no
   /// associated measurement. Holes are only taken into account if they are
   /// between the first and last measurements.
   std::size_t measurementHoles{0ul};
-
-  /// Counter for handled states
-  std::size_t processedStates{0ul};
-
-  /// Counter for handled measurements
-  std::size_t processedMeasurements{0ul};
 
   /// Index of the next material parameter
   std::vector<std::size_t> materialParamIndices{eBoundSize};
@@ -410,8 +395,14 @@ struct Gx2FitterResult {
   /// Measurement surfaces without hits
   std::vector<const Surface*> missedActiveSurfaces;
 
-  /// Count how many surfaces have been hit
-  std::size_t surfaceCount = 0;
+  /// Protection against wiggling propagators
+  /// Signed path length after the previous step
+  double lastPathLength = 0.;
+  /// Signed length of the previous step
+  double lastStepLength = 0.;
+  /// Number of consecutive steps that reversed the direction
+  std::uint32_t nDirectionFlips = 0;
+
 };
 
 /// @brief A container to manage all properties of a gx2f system
@@ -590,7 +581,6 @@ void fillGx2fSystem(
   geoIdVector.reserve(track.nTrackStates());
   std::vector<double> qOverPderiv;
 
-  bool foundELoss{false};
   for (const auto& trackState : track.trackStates()) {
     // Get and store geoId for the current surface
     const GeometryIdentifier geoId = trackState.referenceSurface().geometryId();
@@ -644,7 +634,6 @@ void fillGx2fSystem(
       }
       if (materialMapId->second.energyLoss().isValid()) {
         ACTS_VERBOSE("The material surface carries energy loss");
-        foundELoss = true;
       }
       const std::size_t deltaPosition =
           materialParamIndices.at(geoIdVector.size());
@@ -652,15 +641,21 @@ void fillGx2fSystem(
 
       materialMapId->second.contributionToGx2fSums(
           extendedSystem, trackState.smoothed()[eBoundTheta], deltaPosition,
-          logger);
+          logger());
 
-      // after material surfaces, the measurements depend on the updated qoverp
-      // we need to scale the jacobian term for the qoverp row
-      if (foundELoss) {
+      // After an energy loss, the q/p of the state changes as
+      // (q/p)' = g(q/p, E). By the chain rule, the q/p row of *every*
+      // accumulated Jacobian (the one of the start parameters and the ones of
+      // all previous material surfaces) needs to be scaled by d(q/p)'/d(q/p),
+      // such that the sensitivity of the later measurements to an upstream
+      // parameter is propagated through this loss. The Jacobian of the current
+      // surface is appended afterwards and starts from the updated q/p.
+      if (materialMapId->second.energyLoss().isValid()) {
         ACTS_DEBUG("    Update Jacobian for q/p after material surface "
                    << geoId << " with ratio " << materialMapId->second.qOverPratio());
-        jacobianFromStart.front().row(eBoundQOverP) *=
-            materialMapId->second.qOverPratio();
+        for (auto& jac : jacobianFromStart) {
+          jac.row(eBoundQOverP) *= materialMapId->second.qOverPratio();
+        }
       }
       // Add for this material a new Jacobian, starting from this surface.
       jacobianFromStart.emplace_back(BoundMatrix::Identity());
@@ -730,17 +725,25 @@ class Gx2Fitter {
                          getDefaultLogger("Gx2Fitter", Logging::INFO))
       : m_propagator(pPropagator), m_logger{std::move(log)} {}
 
- private:
+  /// Name of the column storing the number of iterations needed to converge 
+  static constexpr std::string_view s_gx2fnUpdateColumn ="Gx2fnUpdateColumn";
+  /// Name of the column storing the theta scattering angles
+  static constexpr std::string_view s_gx2fThetaScatteringColumn = "Gx2fThetaScatteringColumn";
+  /// Name of the column storing the phi scattering angles
+  static constexpr std::string_view s_gx2fPhiScatteringColumn = "Gx2fPhiScatteringColumn";
+  /// Name of the column storing the energy loss 
+  static constexpr std::string_view s_gx2fEnergyLossColumn = "Gx2fEnergyLossColumn";
+  private:
+
+/// Mask for the track states. We don't need Predicted and Filtered
+  static constexpr TrackStatePropMask s_trackStateMask = TrackStatePropMask::Smoothed |
+                                              TrackStatePropMask::Jacobian |
+                                              TrackStatePropMask::Calibrated;
   /// The propagator for the transport and material update
   propagator_t m_propagator;
 
   /// The logger instance
   std::unique_ptr<const Logger> m_logger;
-  std::unique_ptr<const Logger> m_actorLogger{
-      m_logger->cloneWithSuffix("Actor")};
-  std::unique_ptr<const Logger> m_addToSumLogger{
-      m_logger->cloneWithSuffix("AddToSum")};
-
   const Logger& logger() const { return *m_logger; }
 
   /// @brief Propagator Actor plugin for the GX2F
@@ -761,32 +764,11 @@ class Gx2Fitter {
     /// Allows retrieving measurements for a surface
     const std::unordered_map<const Surface*, SourceLink>* inputMeasurements{};
 
-    /// Whether to consider multiple scattering.
-    bool doMultipleScattering = false;
+      /// Switch to toggle whether material effects should be taken into account
+    bool doMaterial{false};
 
-    /// Whether to consider energy loss.
-    bool doEnergyLoss = false;
-
-    double scatteringCutOff = 0.;
-    /// Cutoff value on the energy loss to fine tune the number of energy loss
-    /// parameters
-    /// in the fit
-    double elossCutOff = 0.;
-
-    /// Whether to include non-linear correction during global to local
-    /// transformation
-    FreeToBoundCorrection freeToBoundCorrection;
-    /// The logger instance
-    const Logger* actorLogger{nullptr};
-
-    /// Logger helper
-    const Logger& logger() const { return *actorLogger; }
-
-    Gx2FitterExtensions<traj_t> extensions;
-
-    /// Calibration context for the fit
-    const CalibrationContext* calibrationContext{nullptr};
-
+    /// Pointer to the fit options steering the fit 
+    const Gx2FitterOptions<traj_t>* options{nullptr};
     /// Start parameters of the track fit. The hypothesis is needed
     /// to estimate the material effects
     const BoundTrackParameters* startParameters = nullptr;
@@ -805,9 +787,36 @@ class Gx2Fitter {
               typename navigator_t>
     Result<void> act(propagator_state_t& state, const stepper_t& stepper,
                      const navigator_t& navigator, result_type& result,
-                     const Logger& /*logger*/) const {
+                     const Logger& logger) const {
       assert(result.fittedStates && "No MultiTrajectory set");
+      assert(result.options && "No options are set");
 
+      
+      
+      if (stepper.absoluteMomentum(state.stepping) < options->momentumCutOff) {
+      ACTS_DEBUG("Absolute momentum "
+                 << stepper.absoluteMomentum(state.stepping)
+                 << " below the cut-off of " << options->momentumCutOff
+                 << ". Abort the propagation.");
+      return Result<void>::failure(
+          GlobalChiSquareFitterError::MomentumBelowCutOff);
+    }
+    if (options->maxDirectionFlips > 0 && state.stage == Acts::PropagatorStage::postStep) {
+       const double stepLength = state.pathLength - result.lastPathLength;
+      result.lastPathLength = state.pathLength;
+      result.nDirectionFlips = stepLength * result.lastStepLength < 0.
+                                 ? result.nDirectionFlips + 1
+                                 : 0;
+      result.lastStepLength = stepLength;
+
+      if (result.nDirectionFlips > options->maxDirectionFlips) {
+        ACTS_DEBUG("The last " << result.nDirectionFlips
+                             << " steps reversed the direction of the "
+                                "previous step. Abort the propagation.");
+        return Result<void>::failure(GlobalChiSquareFitterError::DirectionFlipLimitReached);
+      }
+    }
+      
       // Check if we can stop to propagate
       if (result.measurementStates == inputMeasurements->size()) {
         ACTS_DEBUG("Actor: finish: All measurements have been found.");
@@ -834,7 +843,6 @@ class Gx2Fitter {
         return Result<void>::success();
       }
 
-      ++result.surfaceCount;
       const GeometryIdentifier geoId = surface->geometryId();
       ACTS_DEBUG("Surface "
                  << geoId << ", " << surface->bounds() << " detected. "
@@ -842,29 +850,24 @@ class Gx2Fitter {
                  << ", has material: "
                  << (surface->hasMaterial() ? "yes" : "no"));
 
-      auto matFillResult = fillMaterialMap(state, stepper, navigator, result);
+      auto matFillResult = fillMaterialMap(state, stepper, navigator, result, logger);
       if (!matFillResult.ok()) {
         return matFillResult.error();
       }
 
-      auto trackStateResult = makeTrackState(state, stepper, navigator, result);
+      auto trackStateResult = makeTrackState(state, stepper, navigator, result, logger);
       if (!trackStateResult.ok()) {
         return trackStateResult.error();
       }
       // Here we handle all measurements
       if (auto sourceLinkIt = inputMeasurements->find(surface);
           sourceLinkIt != inputMeasurements->end()) {
-        // We count the processed measurement
-        ++result.processedMeasurements;
 
         result.lastMeasurementIndex = result.lastTrackIndex;
 
         // TODO check for outlier first
         // We count the state with measurement
         ++result.measurementStates;
-
-        // We count the processed state
-        ++result.processedStates;
 
         // Update the number of holes count only when encountering a
         // measurement
@@ -877,12 +880,25 @@ class Gx2Fitter {
       return Result<void>::success();
     }
 
+    /// Create a track state on the current surface if it is sensitive or 
+    /// carries material. If the surface has a non-zero energy loss value,
+    /// the momentum is corrected accordingly
+    /// @tparam propagator_state_t 
+    /// @tparam stepper_t 
+    /// @tparam navigator_t 
+    /// @param state 
+    /// @param stepper 
+    /// @param navigator 
+    /// @param result 
+    /// @param logger 
+    /// @return  
     template <typename propagator_state_t, typename stepper_t,
               typename navigator_t>
     Result<void> makeTrackState(propagator_state_t& state,
                                 const stepper_t& stepper,
                                 const navigator_t& navigator,
-                                result_type& result) const {
+                                result_type& result,
+                                const Logger& logger) const {
       const Surface* surface = navigator.currentSurface(state.navigation);
 
       const GeometryIdentifier geoId = surface->geometryId();
@@ -904,7 +920,7 @@ class Gx2Fitter {
       // Add a <trackStateMask> TrackState entry multi trajectory. This
       // allocates storage for all components, which we will set later.
       TrackStateProxy_t trackStateProxy = fittedStates.makeTrackState(
-          Gx2fConstants::trackStateMask, result.lastTrackIndex);
+          s_trackStateMask, result.lastTrackIndex);
 
       result.lastTrackIndex = trackStateProxy.index();
 
@@ -913,7 +929,7 @@ class Gx2Fitter {
 
       // Transport the covariance to the surface
       auto transportRes = stepper.transportToBound(
-          state.stepping, *surface, freeToBoundCorrection);
+          state.stepping, *surface, options->freeToBoundCorrection);
       if (!transportRes.ok()) {
         return transportRes.error();
       }
@@ -944,8 +960,16 @@ class Gx2Fitter {
                      << boundParams.parameters().transpose());
 
         materialItr->second.updateTrackParameters(boundParams);
-        ACTS_VERBOSE("        boundParams after the update: "
-                     << boundParams.parameters().transpose());
+#ifdef ACTIVATE_LATER
+        if (options->doEnergyLoss){
+          trackStateProxy.template component<double>(Acts::hashString(s_gx2fEnergyLossColumn)) = materialItr->second.lostEnergy();
+        }
+        if (options->doMultipleScattering){
+          trackStateProxy.template component<double>(Acts::hashString(s_gx2fThetaScatteringColumn)) = materialItr->second.deltaTheta();
+          trackStateProxy.template component<double>(Acts::hashString(s_gx2fPhiScatteringColumn)) = materialItr->second.deltaPhi();
+        }
+#endif       
+        ACTS_DEBUG("        boundParams after the update: "<< boundParams.parameters().transpose());
 
         stepper.update(state.stepping,
                        transformBoundToFreeParameters(
@@ -969,8 +993,8 @@ class Gx2Fitter {
 
       // We have smoothed parameters, so calibrate the uncalibrated input
       // measurement
-      extensions.calibrator(state.geoContext, *calibrationContext,
-                            sourceLinkIt->second, trackStateProxy);
+      options->extensions.calibrator(state.geoContext, options->calibrationContext,
+                                     sourceLinkIt->second, trackStateProxy);
 
       return Result<void>::success();
     }
@@ -983,14 +1007,15 @@ class Gx2Fitter {
     /// @param stepper The stepper in use
     /// @param navigator The navigator in use
     /// @param result is the mutable result state object
-
+    /// @param logger: The ACTS logging object
     template <typename propagator_state_t, typename stepper_t,
               typename navigator_t>
     Result<void> fillMaterialMap(propagator_state_t& state,
                                  const stepper_t& stepper,
                                  const navigator_t& navigator,
-                                 result_type& result) const {
-      if (!doMultipleScattering && !doEnergyLoss) {
+                                 result_type& result,
+                                 const Logger& logger) const {
+      if ((!options->doMultipleScattering && !options->doEnergyLoss) || !doMaterial) {
         ACTS_DEBUG(
             __func__
             << " | "
@@ -1061,9 +1086,9 @@ class Gx2Fitter {
         ACTS_VERBOSE("        Material slab is not valid.");
       }
 
-      if (doEnergyLoss) {
-        eLoss = extensions.elossAccumulator(
-            state.geoContext, *calibrationContext,
+      if (options->doEnergyLoss) {
+        eLoss = options->extensions.elossAccumulator(
+            state.geoContext, options->calibrationContext,
             stepper.position(state.stepping), stepper.direction(state.stepping),
             *surface);
         /// There is measurement of the energy loss but the surface material
@@ -1094,14 +1119,14 @@ class Gx2Fitter {
       /// Accumulate the material across surfaces
       scatterer += result.accScatterer;
       eLoss += result.accEloss;
-      if (scatterer.sigma() < scatteringCutOff) {
+      if (scatterer.sigma() < options->scatteringCutOff) {
         result.accScatterer = std::move(scatterer);
         scatterer = ScatteringAtSurface{};
       } else {
         result.accScatterer = ScatteringAtSurface{};
       }
 
-      if (eLoss.lostEnergy() < elossCutOff) {
+      if (eLoss.lostEnergy() < options->elossCutOff) {
         result.accEloss = std::move(eLoss);
         eLoss = ELossAtSurface{};
       } else {
@@ -1189,11 +1214,22 @@ class Gx2Fitter {
     // new track and delete it after updating the parameters. However, if we
     // would work on the externally provided track container, it would be
     // difficult to remove the correct track, if it contains more than one.
-    typename track_container_t::TrackContainerBackend trackContainerTempBackend;
-    traj_t trajectoryTempBackend;
-    TrackContainer trackContainerTemp{trackContainerTempBackend,
-                                      trajectoryTempBackend};
-
+    using traj_backend_t = typename track_container_t::TrackContainerBackend;
+    traj_t tempTrajectory{};
+    traj_backend_t tempTrajBackend{};
+    TrackContainer trackContainerTemp{tempTrajBackend, tempTrajectory};
+#ifdef ACTIVATE_LATER
+    if (gx2fOptions.doMultipleScattering) {
+      trackContainerTemp.trackStateContainer().template addColumn<double>(s_gx2fThetaScatteringColumn);
+      trackContainerTemp.trackStateContainer().template addColumn<double>(s_gx2fPhiScatteringColumn);
+    }
+    if (gx2fOptions.doEnergyLoss) {
+      trackContainerTemp.trackStateContainer().template addColumn<double>(s_gx2fEnergyLossColumn);
+    }
+#endif
+    trackContainerTemp.template addColumn<std::uint32_t>(s_gx2fnUpdateColumn);
+    
+    
     // Create an index of the 'tip' of the track stored in multitrajectory. It
     // is needed outside the update loop. It will be updated with each iteration
     // and used for the final track
@@ -1230,15 +1266,8 @@ class Gx2Fitter {
 
       auto& gx2fActor = propagatorOptions.actorList.template get<GX2FActor>();
       gx2fActor.inputMeasurements = &inputMeasurements;
-      if (gx2fOptions.includeMaterialInIter) {
-        gx2fActor.doMultipleScattering = gx2fOptions.doMultipleScattering;
-        gx2fActor.doEnergyLoss = gx2fOptions.doEnergyLoss;
-        gx2fActor.scatteringCutOff = gx2fOptions.scatteringCutOff;
-        gx2fActor.elossCutOff = gx2fOptions.elossCutOff;
-      }
-      gx2fActor.extensions = gx2fOptions.extensions;
-      gx2fActor.calibrationContext = &gx2fOptions.calibrationContext.get();
-      gx2fActor.actorLogger = m_actorLogger.get();
+      gx2fActor.options= &gx2fOptions;
+      gx2fActor.doMaterial = gx2fOptions.includeMaterialInIter;
       gx2fActor.startParameters = &params;
 
       auto propagatorState = m_propagator.makeState(propagatorOptions);
@@ -1252,7 +1281,7 @@ class Gx2Fitter {
       }
 
       auto& r = propagatorState.template get<Gx2FitterResult<traj_t>>();
-      r.fittedStates = &trajectoryTempBackend;
+      r.fittedStates = &trackContainerTemp.trackStateContainer();
       r.materialMap = std::move(materialMap);
 
       // Clear the track container. It could be more performant to update the
@@ -1287,7 +1316,7 @@ class Gx2Fitter {
       if (tipIndex == kInvalid) {
         ACTS_INFO("Did not find any measurements in nUpdate "
                   << nUpdate + 1 << "/" << gx2fOptions.nUpdateMax);
-        return Experimental::GlobalChiSquareFitterError::NotEnoughMeasurements;
+        return GlobalChiSquareFitterError::NotEnoughMeasurements;
       }
 
       track.tipIndex() = tipIndex;
@@ -1304,8 +1333,7 @@ class Gx2Fitter {
       std::vector<GeometryIdentifier> geoIdVector;
 
       fillGx2fSystem(track, extendedSystem, materialMap,
-                     gx2fResult.materialParamIndices, geoIdVector,
-                     *m_addToSumLogger);
+                     gx2fResult.materialParamIndices, geoIdVector, logger());
 
       chi2sum = extendedSystem.chi2();
 
@@ -1325,7 +1353,7 @@ class Gx2Fitter {
         ACTS_INFO("Not enough measurements. Require "
                   << extendedSystem.findRequiredNdf() + 1 << ", but only "
                   << extendedSystem.ndf() << " could be used.");
-        return Experimental::GlobalChiSquareFitterError::NotEnoughMeasurements;
+        return GlobalChiSquareFitterError::NotEnoughMeasurements;
       }
 
       Eigen::VectorXd deltaParamsExtended =
@@ -1340,14 +1368,16 @@ class Gx2Fitter {
                    << "oldChi2sum = " << oldChi2sum << "\n"
                    << "chi2sum = " << extendedSystem.chi2());
 
-      if ((gx2fOptions.relChi2changeCutOff != 0) && (nUpdate > 0) &&
-          (std::abs(extendedSystem.chi2() / oldChi2sum - 1) <
-           gx2fOptions.relChi2changeCutOff)) {
-        ACTS_DEBUG("Abort with relChi2changeCutOff after "
-                   << nUpdate + 1 << "/" << gx2fOptions.nUpdateMax
-                   << " iterations.");
-        updateGx2fCovarianceParams(fullCovariancePredicted, extendedSystem);
-        break;
+      if (nUpdate > 0){
+        const double redChi2 = extendedSystem.chi2() / std::max(extendedSystem.ndf(), 1ul);
+        if (redChi2 < gx2fOptions.goodChi2 || 
+            std::abs(extendedSystem.chi2() / oldChi2sum - 1) < gx2fOptions.relChi2changeCutOff) {
+          ACTS_DEBUG("Abort with relChi2changeCutOff after "
+                     << nUpdate + 1 << "/" << gx2fOptions.nUpdateMax
+                     << " iterations.");
+          updateGx2fCovarianceParams(fullCovariancePredicted, extendedSystem);
+          break;
+        }
       }
 
       if (extendedSystem.chi2() > oldChi2sum + 1e-5) {
@@ -1365,7 +1395,7 @@ class Gx2Fitter {
         if (gx2fOptions.nUpdateMax > 5) {
           ACTS_INFO("Did not converge in " << gx2fOptions.nUpdateMax
                                            << " updates.");
-          return Experimental::GlobalChiSquareFitterError::DidNotConverge;
+          return GlobalChiSquareFitterError::DidNotConverge;
         }
 
         updateGx2fCovarianceParams(fullCovariancePredicted, extendedSystem);
@@ -1405,14 +1435,10 @@ class Gx2Fitter {
 
       auto& gx2fActor = propagatorOptions.actorList.template get<GX2FActor>();
       gx2fActor.inputMeasurements = &inputMeasurements;
-      gx2fActor.doMultipleScattering = gx2fOptions.doMultipleScattering;
-      gx2fActor.doEnergyLoss = gx2fOptions.doEnergyLoss;
-      gx2fActor.extensions = gx2fOptions.extensions;
-      gx2fActor.calibrationContext = &gx2fOptions.calibrationContext.get();
-      gx2fActor.actorLogger = m_actorLogger.get();
+      gx2fActor.doMaterial = true;
+      gx2fActor.options = &gx2fOptions;
       gx2fActor.startParameters = &params;
-      gx2fActor.scatteringCutOff = gx2fOptions.scatteringCutOff;
-      gx2fActor.elossCutOff = gx2fOptions.elossCutOff;
+     
 
       auto propagatorState = m_propagator.makeState(propagatorOptions);
 
@@ -1425,7 +1451,7 @@ class Gx2Fitter {
       }
 
       auto& r = propagatorState.template get<Gx2FitterResult<traj_t>>();
-      r.fittedStates = &trajectoryTempBackend;
+      r.fittedStates = &trackContainerTemp.trackStateContainer();
       r.materialMap = std::move(materialMap);
 
       // Clear the track container. It could be more performant to update the
@@ -1457,7 +1483,7 @@ class Gx2Fitter {
       // only happens during the first iteration, due to bad initial parameters.
       if (tipIndex == kInvalid) {
         ACTS_INFO("Did not find any measurements in material fit.");
-        return Experimental::GlobalChiSquareFitterError::NotEnoughMeasurements;
+        return GlobalChiSquareFitterError::NotEnoughMeasurements;
       }
 
       track.tipIndex() = tipIndex;
@@ -1474,8 +1500,7 @@ class Gx2Fitter {
       std::vector<GeometryIdentifier> geoIdVector;
 
       fillGx2fSystem(track, extendedSystem, materialMap,
-                     gx2fResult.materialParamIndices, geoIdVector,
-                     *m_addToSumLogger);
+                     gx2fResult.materialParamIndices, geoIdVector, logger());
 
       chi2sum = extendedSystem.chi2();
 
@@ -1492,7 +1517,7 @@ class Gx2Fitter {
         ACTS_INFO("Not enough measurements. Require "
                   << extendedSystem.findRequiredNdf() + 1 << ", but only "
                   << extendedSystem.ndf() << " could be used.");
-        return Experimental::GlobalChiSquareFitterError::NotEnoughMeasurements;
+        return GlobalChiSquareFitterError::NotEnoughMeasurements;
       }
 
       Eigen::VectorXd deltaParamsExtended =
@@ -1531,99 +1556,32 @@ class Gx2Fitter {
     }
     ACTS_VERBOSE("Final covariance:\n" << fullCovariancePredicted);
 
-    // Propagate again with the final covariance matrix. This is necessary to
-    // obtain the propagated covariance for each state.
-    // We also need to recheck the result and find the tipIndex, because at this
-    // step, we will not ignore the boundary checks for measurement surfaces. We
-    // want to create trackstates only on surfaces, that we actually hit.
-    if (false && gx2fOptions.nUpdateMax > 0) {
-      ACTS_VERBOSE("Propagate with the final covariance.");
-      // update covariance
-      params.covariance() = fullCovariancePredicted;
-
-      // set up the propagator
-      PropagatorOptions propagatorOptions{gx2fOptions.propagatorPlainOptions};
-      auto& gx2fActor = propagatorOptions.actorList.template get<GX2FActor>();
-      gx2fActor.inputMeasurements = &inputMeasurements;
-      gx2fActor.doMultipleScattering = gx2fOptions.doMultipleScattering;
-      gx2fActor.doEnergyLoss = gx2fOptions.doEnergyLoss;
-      gx2fActor.extensions = gx2fOptions.extensions;
-      gx2fActor.calibrationContext = &gx2fOptions.calibrationContext.get();
-      gx2fActor.actorLogger = m_actorLogger.get();
-      gx2fActor.startParameters = &params;
-
-      auto propagatorState = m_propagator.makeState(propagatorOptions);
-
-      auto propagatorInitResult =
-          m_propagator.initialize(propagatorState, params, nullptr);
-      if (!propagatorInitResult.ok()) {
-        ACTS_DEBUG("Propagation initialization failed: "
-                   << propagatorInitResult.error());
-        return propagatorInitResult.error();
-      }
-
-      auto& r = propagatorState.template get<Gx2FitterResult<traj_t>>();
-      r.fittedStates = &trackContainer.trackStateContainer();
-      r.materialMap = std::move(materialMap);
-
-      // Run the fitter
-      auto propagationResult = m_propagator.propagate(propagatorState);
-
-      auto result =
-          m_propagator.makeResult(std::move(propagatorState), propagationResult,
-                                  propagatorOptions, false);
-
-      if (!result.ok()) {
-        ACTS_DEBUG("Propagation failed: " << result.error());
-        return result.error();
-      }
-
-      auto& propRes = *result;
-      GX2FResult gx2fResult = std::move(propRes.template get<GX2FResult>());
-      materialMap = std::move(gx2fResult.materialMap);
-
-      if (tipIndex != gx2fResult.lastMeasurementIndex) {
-        ACTS_INFO("Final fit used unreachable measurements.");
-        tipIndex = gx2fResult.lastMeasurementIndex;
-
-        // It could happen, that no measurements were found. Then the track
-        // would be empty and the following operations would be invalid.
-        if (tipIndex == kInvalid) {
-          ACTS_INFO("Did not find any measurements in final propagation.");
-          return Experimental::GlobalChiSquareFitterError::
-              NotEnoughMeasurements;
-        }
-      }
-    }
-
-    if (!trackContainer.hasColumn(
-            Acts::hashString(Gx2fConstants::gx2fnUpdateColumn))) {
-      trackContainer.template addColumn<std::uint32_t>("Gx2fnUpdateColumn");
-    }
-
-    // Prepare track for return
-    auto track = trackContainer.makeTrack();
-    track.tipIndex() = tipIndex;
-    track.parameters() = params.parameters();
-    track.covariance() = fullCovariancePredicted;
-    track.setReferenceSurface(params.referenceSurface().getSharedPtr());
-
-    if (trackContainer.hasColumn(
-            Acts::hashString(Gx2fConstants::gx2fnUpdateColumn))) {
+    // Prepare track for return on the temporary container
+    {
+      auto track = trackContainerTemp.makeTrack();
+      track.tipIndex() = tipIndex;
+      track.parameters() = params.parameters();
+      track.covariance() = fullCovariancePredicted;
+      track.setReferenceSurface(params.referenceSurface().getSharedPtr());
       ACTS_DEBUG("Add nUpdate to track");
-      track.template component<std::uint32_t>("Gx2fnUpdateColumn") =
-          static_cast<std::uint32_t>(nUpdate);
+      track.template component<std::uint32_t>(s_gx2fnUpdateColumn) = nUpdate;
+      // TODO write test for calculateTrackQuantities
+      calculateTrackQuantities(track);
+
+      // Set the chi2sum for the track summary manually, since we don't calculate
+      // it for each state
+      track.chi2() = chi2sum;
+
+      track.linkForward();
     }
+    ACTS_DEBUG("Copy track to the output. Tracks in temporary container "
+            <<trackContainerTemp.size());
+    trackContainer.ensureDynamicColumns(trackContainerTemp);
+    auto track  = trackContainer.makeTrack();
 
-    // TODO write test for calculateTrackQuantities
-    calculateTrackQuantities(track);
-
-    // Set the chi2sum for the track summary manually, since we don't calculate
-    // it for each state
-    track.chi2() = chi2sum;
-
-    track.linkForward();
-
+    track.copyFrom(trackContainerTemp.getTrack(trackContainerTemp.size() - 1u));
+    
+    ACTS_DEBUG("Fit completed");
     // Return the converted Track
     return track;
   }

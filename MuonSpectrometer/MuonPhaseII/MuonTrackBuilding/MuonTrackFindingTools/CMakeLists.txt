@@ -11,7 +11,7 @@ find_package( Acts COMPONENTS Core )
 
 
 atlas_add_library( MuonTrackFindingToolsLib
-                   Root/Chi2Fitter.cxx 
+                   Root/Chi2Fitter.cxx Root/Chi2FitterError.cxx 
                    LINK_LIBRARIES Acts::Core
                    PUBLIC_HEADERS MuonTrackFindingTools )
 atlas_add_component( MuonTrackFindingTools

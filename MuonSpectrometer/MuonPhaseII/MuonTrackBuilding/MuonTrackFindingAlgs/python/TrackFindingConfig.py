@@ -24,25 +24,23 @@ def MSTrackFitterCfg(flags, name="MSTrackFitTool", **kwargs):
     from MuonSpacePointCalibrator.CalibrationConfig import MuonSpacePointCalibratorCfg, \
                                                           TruthSpacePointCalibratorCfg
     from ActsConfig.ActsConfigFlags import TrackFitterType
-    kwargs.setdefault("fitterKind", flags.Muon.TrackFitterType)
-    kwargs.setdefault("OutlierChi2Cut", 200000)
     if False and flags.Input.isMC:
         kwargs.setdefault("MuonCalibrationTool", result.popToolsAndMerge(TruthSpacePointCalibratorCfg(flags)))
     kwargs.setdefault("MuonCalibrationTool", result.popToolsAndMerge(MuonSpacePointCalibratorCfg(flags)))
    
-    if kwargs["fitterKind"] == TrackFitterType.GlobalChiSquareFitter:
-        kwargs.setdefault("IncludeScattering", flags.Acts.TrackingGeometry.MuonPassiveMaterial)
-        kwargs.setdefault("IncludeELoss",  flags.Acts.TrackingGeometry.MuonPassiveMaterial)
-        kwargs.setdefault("MaxPropagationStep", 1000000)
-        kwargs.setdefault("MaxSurfacesPerNavStep", 10000000)
-        kwargs.setdefault("DoFreeToBoundCorrection", True)
-        kwargs.setdefault("MaxIterations", 30)
-    elif kwargs["fitterKind"] == TrackFitterType.KalmanFitter:
+    if flags.Muon.TrackFitterType == TrackFitterType.GlobalChiSquareFitter:
+        kwargs.setdefault("doScattering", flags.Acts.TrackingGeometry.MuonPassiveMaterial)
+        kwargs.setdefault("doEnergyLoss",  flags.Acts.TrackingGeometry.MuonPassiveMaterial)
+        kwargs.setdefault("maxSteps", 1000000)
+        kwargs.setdefault("maxSurfaces", 10000000)
+        kwargs.setdefault("nIterMax", 30)
+        the_tool = CompFactory.MuonR4.FitterTool(name, **kwargs)
+        result.setPrivateTools(the_tool)
+    elif flags.Muon.TrackFitterType == TrackFitterType.KalmanFitter:
         kwargs.setdefault("UseDirectNavigation", False)
-   
-
-    fitTool = result.popToolsAndMerge(ActsFitterCfg(flags, name=name, **kwargs))
-    result.setPrivateTools(fitTool)
+        kwargs.setdefault("fitterKind", flags.Muon.TrackFitterType)
+        fitTool = result.popToolsAndMerge(ActsFitterCfg(flags, name=name, **kwargs))
+        result.setPrivateTools(fitTool)
     return result
 
 def TrackSummaryToolCfg(flags, name="MuonTrackSummaryTool", **kwargs) :

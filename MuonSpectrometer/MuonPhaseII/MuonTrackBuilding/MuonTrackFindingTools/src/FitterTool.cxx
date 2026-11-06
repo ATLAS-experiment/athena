@@ -20,6 +20,11 @@ namespace MuonR4 {
         for (const xAOD::UncalibMeasType type : xAOD::muonMeasurementTypes()) {
             m_uncalibMeasCalibrator.connect<&MuonR4::ISpacePointCalibrator::calibrateSourceLink>(type, m_muonCalibrator.get());
         }
+        for (const xAOD::UncalibMeasType type : {xAOD::UncalibMeasType::PixelClusterType,
+                                                 xAOD::UncalibMeasType::StripClusterType,
+                                                 xAOD::UncalibMeasType::HGTDClusterType}) {
+            m_uncalibMeasCalibrator.connect<&ActsTrk::detail::xAODUncalibMeasCalibrator::passThrough>(type, &m_uncalibMeasCalibrator);
+        }
         
         m_extensions.surfaceAccessor.connect<&ActsTrk::detail::xAODUncalibMeasSurfAcc::operator()>(&m_unalibMeasSurfAcc);
         m_extensions.calibrator.connect<&ActsTrk::detail::xAODUncalibMeasCalibrator::calibrate>(&m_uncalibMeasCalibrator);
@@ -81,14 +86,20 @@ namespace MuonR4 {
 
         Acts::PropagatorPlainOptions propagationOption{tgContext, mfContext};
         propagationOption.maxSteps = m_doMaxSteps;
+        propagationOption.pathLimit = m_maxPathLength;
         propagationOption.maxTargetSkipping = m_maxSurfaces;
-    
+        propagationOption.stepping.stepSizeCutOff  = m_minStepSize;
+
         Gx2FitterOptions_t options{tgContext, mfContext, calContext, 
                                     m_extensions, std::move(propagationOption)}; 
                                     
         options.doMultipleScattering = m_doScattering;
         options.doEnergyLoss = m_doEnergyLoss;
         options.nUpdateMax = m_maxIter;
+        options.momentumCutOff = m_momentumCutOff;
+        options.maxDirectionFlips = m_maxSurfFlicker;
+        options.goodChi2 = m_redChiSqCutOff;
+        options.relChi2changeCutOff = m_relChiSqConvergence;
         auto tracks = std::make_unique<ActsTrk::MutableTrackContainer>(ActsTrk::MutableTrackBackend{},
                                                                        ActsTrk::MutableTrackStateBackend{});
 

@@ -25,10 +25,12 @@
 #include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Propagator/StraightLineStepper.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
-
+#include "Acts/Definitions/Units.hpp"
 
 ////
 #include "MuonTrackFindingTools/Chi2Fitter.h"
+
+using namespace Acts::UnitLiterals;
 
 namespace MuonR4 {
     class FitterTool : public extends<AthAlgTool, ActsTrk::IFitterTool> {
@@ -92,6 +94,19 @@ namespace MuonR4 {
             Gaudi::Property<bool> m_doEnergyLoss{this, "doEnergyLoss" , false};
             /** @brief Increase the nuissances by introducing scattering angles */
             Gaudi::Property<bool> m_doScattering{this, "doScattering" , false};
+            /** @brief Define the minimal momentum that can be fitted */
+            Gaudi::Property<double> m_momentumCutOff{this, "momentumCutOff", 50._MeV};
+            /** @brief The maximum length that the propagator is allowed to run  */
+            Gaudi::Property<double> m_maxPathLength{this, "maxPathLength", 100._m};
+            /** @brief Define the minimal step-size that the propagator can take */
+            Gaudi::Property<double> m_minStepSize{this, "minStepSize", 10._um};
+            /** @brief Maximum number of attempts that the propagator is allowed to 
+             *         flicker the directions to approach a surface */
+            Gaudi::Property<unsigned> m_maxSurfFlicker{this, "maxSurfaceFlicker", 50};
+            /** @brief Cutoff on the reduced chi2 to accept the fit as converged */
+            Gaudi::Property<double> m_redChiSqCutOff{this, "RedChiSqCutOff", 0.1};
+            /** @brief Convergence criterion on the relative change in chi2 */
+            Gaudi::Property<double> m_relChiSqConvergence{this, "RelChiSqConvergence" , 1.e-5};
             /** @brief Tracking geometry service */
             ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", 
                                                                                 "ActsTrackingGeometrySvc"};
@@ -102,16 +117,11 @@ namespace MuonR4 {
             ActsTrk::detail::xAODUncalibMeasSurfAcc m_unalibMeasSurfAcc{};
             /** @brief Calibrator for the uncalibrated xAOD::UnCalibratedMeasurement objects */
             ActsTrk::detail::xAODUncalibMeasCalibrator m_uncalibMeasCalibrator{};
-
+            /** @brief Configured extension to connect the calibrator and the surface accessor*/
             Gx2FitterExtension_t m_extensions{};
-            
-            using Fitter_t = std::variant<std::monostate,
-                                         StraightFitter_t, 
-                                         CurvedFitter_t>;
+            /** @brief Specify the fitter type to be used (Curved or Straight line fit) */
+            using Fitter_t = std::variant<std::monostate, StraightFitter_t, CurvedFitter_t>;
             Fitter_t m_fitter{};
-
-
-
 
     };
 }

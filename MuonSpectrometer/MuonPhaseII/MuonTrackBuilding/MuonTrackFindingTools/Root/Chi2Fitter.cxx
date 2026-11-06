@@ -84,9 +84,15 @@ void Gx2fMaterialProperties::updateTrackParameters(
     //  we are gonna need them for the bVecror and aMatrix for measurements
     //  after material surfaces the residuals of which depend on the updated q/p
     //  value after the energy loss
-    m_qOverPderiv = trackPars.charge() / Acts::square(pAfter);
-    m_qOverPratio =
-        Acts::square(trackPars.parameters()[eBoundQOverP] / qOverPBefore);
+    // With omega = q/p and E = sqrt(p^2 + m^2):
+    //   d(omega')/d(E_lost)  = q * E' / p'^3
+    //   d(omega')/d(omega)   = (p / p')^3 * (E' / E)
+    // which reduce to q/p'^2 and (omega'/omega)^2 for m -> 0.
+    const double pBefore = std::abs(1. / qOverPBefore);
+    const double eBefore = fastHypot(hypot.mass(), pBefore);
+    m_qOverPderiv = trackPars.charge() * nextE / (pAfter * pAfter * pAfter);
+    m_qOverPratio = (pBefore * pBefore * pBefore) /
+                    (pAfter * pAfter * pAfter) * (nextE / eBefore);
   }
 }
 
@@ -137,9 +143,9 @@ void Gx2fMaterialProperties::contributionToGx2fSums(
     extendedSystem.chi2() += Acts::square(
         (m_lostEnergy - m_eloss.lostEnergy()) / m_eloss.lostSigma());
     // The energy loss constraint to require only positive energy loss for the
-    // free parameter
+    // free parameter: N * eps^2 * Theta(-eps), as in the write-up
     constexpr double Nepsilon = Acts::square(1. / 10._keV);
-    if (m_lostEnergy < 10._keV) {
+    if (m_lostEnergy < 0.) {
       ACTS_VERBOSE(
           "Add penalty term to the chi2 to push the energy loss above zero");
       extendedSystem.chi2() += Nepsilon * Acts::square(m_lostEnergy);
