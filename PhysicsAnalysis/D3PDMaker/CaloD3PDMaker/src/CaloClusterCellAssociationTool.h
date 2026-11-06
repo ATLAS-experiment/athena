@@ -18,7 +18,6 @@
 
 #include "D3PDMakerUtils/MultiAssociationTool.h"
 #include "xAODCaloEvent/CaloCluster.h"
-#include "CaloEvent/CaloCluster.h"
 #include "CaloEvent/CaloCell.h"
 
 
@@ -30,10 +29,10 @@ namespace D3PD {
  * @brief Associate from a CaloCluster to CaloCell
  */
 class CaloClusterCellAssociationTool
-  : public MultiAssociationTool<Types<CaloCluster, xAOD::CaloCluster>, CaloCell>
+  : public MultiAssociationTool<Types< xAOD::CaloCluster>, CaloCell>
 {
 public:
-  typedef MultiAssociationTool<Types<CaloCluster, xAOD::CaloCluster>, CaloCell> Base;
+  typedef MultiAssociationTool<Types< xAOD::CaloCluster>, CaloCell> Base;
 
 
   /**
@@ -45,16 +44,6 @@ public:
   CaloClusterCellAssociationTool (const std::string& type,
                                   const std::string& name,
                                   const IInterface* parent);
-
-
-  /**
-   * @brief Return the target object.
-   * @param p The source object for the association.
-   *
-   * Return the target of the association, or 0.
-   */
-
-  virtual StatusCode reset (const CaloCluster& p);
 
 
   /**

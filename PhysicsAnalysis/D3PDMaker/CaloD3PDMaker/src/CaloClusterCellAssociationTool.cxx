@@ -43,25 +43,6 @@ CaloClusterCellAssociationTool::CaloClusterCellAssociationTool
  *
  * Return the target of the association, or 0.
  */
-StatusCode CaloClusterCellAssociationTool::reset (const CaloCluster& p)
-{
-  m_icell = 0;
-  m_cells.clear();
-
-  // Protect against missing cells.
-  if (p.isCellLinkValid())
-    m_cells.assign (p.cell_begin(), p.cell_end());
-
-  return StatusCode::SUCCESS;
-}
-
-
-/**
- * @brief Return the target object.
- * @param p The source object for the association.
- *
- * Return the target of the association, or 0.
- */
 StatusCode CaloClusterCellAssociationTool::reset (const xAOD::CaloCluster& p)
 {
   m_icell = 0;

@@ -12,7 +12,6 @@
 
 
 #include "ClusterEMSamplingFillerTool.h"
-#include "CaloEvent/CaloCluster.h"
 #include "AthenaKernel/errorcheck.h"
 #include <sstream>
 
@@ -85,21 +84,6 @@ StatusCode ClusterEMSamplingFillerTool::book()
     }
   }
  
-  return StatusCode::SUCCESS;
-}
-
-
-/**
- * @brief Fill one block --- type-safe version.
- * @param p The input object.
- *
- * This is called once per object.  The caller
- * is responsible for arranging that all the pointers for booked variables
- * are set appropriately upon entry.
- */
-StatusCode ClusterEMSamplingFillerTool::fill (const CaloCluster& p)
-{
-  CHECK( fillT (p) );
   return StatusCode::SUCCESS;
 }
 

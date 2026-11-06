@@ -12,13 +12,13 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "CaloConditions/CaloNoise.h"
 #include "StoreGate/ReadCondHandleKey.h"
+#include "xAODCaloEvent/CaloCluster.h"
 
 #include <TRandom.h>
 
 class TFile;
 class TTree;
 class CaloCell_ID;
-class CaloCluster;
 class IToolSvc;
 class LArDigitContainer;
 class ILArPedestal;

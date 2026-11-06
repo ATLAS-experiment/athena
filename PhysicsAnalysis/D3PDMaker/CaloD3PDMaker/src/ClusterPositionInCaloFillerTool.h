@@ -18,7 +18,6 @@
 #include "D3PDMakerUtils/BlockFillerTool.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "CaloUtils/CaloCellDetPos.h"
-class CaloCluster;
 class CaloCellDetPos;
 
 namespace D3PD {
@@ -28,10 +27,10 @@ namespace D3PD {
  * @brief Block filler tool for eta/phi positions in calo coordinate from a CaloCluster.
  */
 class ClusterPositionInCaloFillerTool
-  : public BlockFillerTool<Types<CaloCluster, xAOD::CaloCluster> >
+  : public BlockFillerTool< xAOD::CaloCluster >
 {
 public:
-  typedef BlockFillerTool<Types<CaloCluster, xAOD::CaloCluster> > Base;
+  typedef BlockFillerTool< xAOD::CaloCluster > Base;
 
   /**
    * @brief Standard Gaudi tool constructor.
@@ -47,17 +46,6 @@ public:
 
   /// Book variables for this block.
   virtual StatusCode book() final;
-
-
-  /**
-   * @brief Fill one block --- type-safe version.
-   * @param p The input object.
-   *
-   * This is called once per object.  The caller
-   * is responsible for arranging that all the pointers for booked variables
-   * are set appropriately upon entry.
-   */
-  virtual StatusCode fill (const CaloCluster& p) override;
 
 
   /**
