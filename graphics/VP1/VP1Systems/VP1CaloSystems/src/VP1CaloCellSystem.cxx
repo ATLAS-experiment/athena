@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1CaloSystems/VP1CaloCellSystem.h"
@@ -650,16 +650,16 @@ void VP1CaloCellSystem::buildEventSceneGraph(StoreGateSvc* sg, SoSeparator *root
 					tagThinned = *firstKey;
 				else if((*firstKey).find("IIC")!=std::string::npos)
 					tagIIC = *firstKey;
-				else if(tagFirstOther=="")
+				else if(tagFirstOther.empty())
 					tagFirstOther = *firstKey;
 			}
 
-			if(tagFirstOther!="")
-				strLArDigitKeys = tagFirstOther;
-			else if(tagThinned!="")
-				strLArDigitKeys = tagThinned;
+			if(!tagFirstOther.empty())
+				strLArDigitKeys = std::move(tagFirstOther);
+			else if(!tagThinned.empty())
+				strLArDigitKeys = std::move(tagThinned);
 			else
-				strLArDigitKeys = tagIIC;
+				strLArDigitKeys = std::move(tagIIC);
 
 			QString mess = QString("Retrieving LArDigitContainer with the key ") + QString(strLArDigitKeys.c_str());
 			messageDebug(mess);

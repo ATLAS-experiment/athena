@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1CaloSystems/VP1MbtsHelper.h"
@@ -255,16 +255,16 @@ void VP1MbtsHelper::systemcreate(StoreGateSvc* detstore)
   scinInfo1->dy1 = trd1->getYHalfLength1();
   scinInfo1->dy2 = trd1->getYHalfLength2();
   scinInfo1->dz = trd1->getZHalfLength();
-  scinInfo1->aTransforms = aTransforms1;
-  scinInfo1->cTransforms = cTransforms1;
+  scinInfo1->aTransforms = std::move(aTransforms1);
+  scinInfo1->cTransforms = std::move(cTransforms1);
 
   scinInfo2->dx1 = trd2->getXHalfLength1();
   scinInfo2->dx2 = trd2->getXHalfLength2();
   scinInfo2->dy1 = trd2->getYHalfLength1();
   scinInfo2->dy2 = trd2->getYHalfLength2();
   scinInfo2->dz = trd2->getZHalfLength();
-  scinInfo2->aTransforms = aTransforms2;
-  scinInfo2->cTransforms = cTransforms2;
+  scinInfo2->aTransforms = std::move(aTransforms2);
+  scinInfo2->cTransforms = std::move(cTransforms2);
 
 
   m_clockwork->scinInfoMap[0] = scinInfo1;
