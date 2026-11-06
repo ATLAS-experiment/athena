@@ -188,6 +188,8 @@ namespace SG {
       }
       m_dictSvc = svc.operator->();
     }
+
+    m_dv_rules.add ("DataVector<$T, $B>", "DataVector<$T>");
   }
 
   PyProxyMgr::~PyProxyMgr()
@@ -207,6 +209,26 @@ namespace SG {
 	  ++i ) {
       delete i->second; i->second = 0;
     }
+  }
+
+
+  /// Extract a string from a python object and interpret it as a type name,
+  /// performing any needed massaging.
+  std::string PyProxyMgr::typename_from_python (PyObject* tp) const
+  {
+    std::string tpstr = RootUtils::PyGetString(tp).first;
+
+    // Remove defaulted template arguments; i.e., std::allocator from
+    // STL containers.
+    std::string tn = TClassEdit::ShortType(tpstr.c_str(),
+                                           TClassEdit::kDropAllDefault);
+
+    // With cppjit, the second template argument of DataVector doesn't
+    // get removed.  Remove it here, else we won't be able to find the clid.
+    if (tn.starts_with ("DataVector<")) {
+      tn = CxxUtils::ClassName::applyRules (tn, m_dv_rules);
+    }
+    return tn;
   }
 
 } //< end namespace SG

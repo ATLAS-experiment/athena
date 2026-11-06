@@ -20,6 +20,7 @@
 #include "AthenaKernel/IDictLoaderSvc.h"
 #include "AthenaKernel/DataBucketBase.h"
 #include "AthenaKernel/BaseInfo.h"
+#include "CxxUtils/ClassName.h"
 
 #include "RootUtils/PyAthenaGILStateEnsure.h"
 
@@ -277,18 +278,7 @@ namespace SG {
     CLID clid(PyObject* tp)
     {
       CLID id = CLID_NULL;
-      // FIXME: get rid of this massaging when/if ROOT finally
-      // standardize on keeping the std:: namespace...
-      std::string tpstr = RootUtils::PyGetString(tp).first;
-      std::string tn;
-      {
-        // Protect against data race inside TClassEdit.
-        // https://github.com/root-project/root/issues/10353
-        // Should be fixed in root 6.26.02.
-        R__WRITE_LOCKGUARD(ROOT::gCoreMutex);
-        tn = TClassEdit::ShortType(tpstr.c_str(),
-                                   TClassEdit::kDropAllDefault);
-      }
+      std::string tn = typename_from_python (tp);
       m_clidSvc->getIDOfTypeName(tn, id).ignore();
       if ( id == CLID_NULL ) {
         // try an alias...
@@ -309,18 +299,7 @@ namespace SG {
     CLID clid_from_tid (PyObject* tp)
     {
       CLID id = CLID_NULL;
-      // FIXME: get rid of this massaging when/if ROOT finally
-      // standardize on keeping the std:: namespace...
-      std::string tpstr = RootUtils::PyGetString(tp).first;
-      std::string tn;
-      {
-        // Protect against data race inside TClassEdit.
-        // https://github.com/root-project/root/issues/10353
-        // Should be fixed in root 6.26.02.
-        R__WRITE_LOCKGUARD(ROOT::gCoreMutex);
-        tn = TClassEdit::ShortType(tpstr.c_str(),
-                                   TClassEdit::kDropAllDefault);
-      }
+      std::string tn = typename_from_python (tp);
       m_clidSvc->getIDOfTypeInfoName(tn, id).ignore();
       if ( id == CLID_NULL ) {
         // try an alias...
@@ -398,6 +377,10 @@ namespace SG {
       }
       return m_aliases;
     }
+
+    std::string typename_from_python (PyObject* tp) const;
+
+    CxxUtils::ClassName::Rules m_dv_rules;
 
   }; //> class PyProxyMgr
 
