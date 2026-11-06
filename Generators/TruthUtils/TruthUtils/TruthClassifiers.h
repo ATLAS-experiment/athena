@@ -103,7 +103,7 @@ inline ParticleType defTypeOfMuon(ParticleOrigin MuOrig, bool isPrompt) {
 inline ParticleType defTypeOfTau(ParticleOrigin TauOrig) {
   if (TauOrig == NonDefined) return UnknownTau;
 
-  if (TauOrig == WBoson || TauOrig == ZBoson || TauOrig == top || TauOrig == SingleMuon || TauOrig == Higgs ||
+  if (TauOrig == WBoson || TauOrig == ZBoson || TauOrig == top || TauOrig == SingleTau || TauOrig == Higgs ||
       TauOrig == HiggsMSSM || TauOrig == HeavyBoson || TauOrig == WBosonLRSM || TauOrig == NuREle || TauOrig == NuRMu ||
       TauOrig == NuRTau || TauOrig == SUSY || TauOrig == DiBoson || TauOrig == ZorHeavyBoson || TauOrig == OtherBSM ||
       TauOrig == MultiBoson)
