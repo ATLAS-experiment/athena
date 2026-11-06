@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
 #
 # File: CaloRec/python/CaloThinCellsByClusterAlg_test.py
 # Author: scott snyder
@@ -31,8 +31,8 @@ def make_calo_cells (mgr):
 
 
 def make_clusters (mgr, ccc, hashes, ctx):
-    clc = ROOT.xAOD.CaloClusterContainer()
     clc_store = ROOT.xAOD.CaloClusterAuxContainer()
+    clc = ROOT.xAOD.CaloClusterContainer()
     clc.setStore (clc_store)
     cellLinks = ROOT.CaloClusterCellLinkContainer()
     ids = ROOT.vector(ROOT.IdentifierHash)()
@@ -131,11 +131,6 @@ def testCfg (flags):
 
     result.addEventAlgo (CheckThinningAlg ('CheckThinningAlg'))
     return result
-
-
-# Work around issue with cling in root 6.20.06 getting confused
-# by forward declarations.
-ROOT.xAOD.CaloClusterContainer_v1
 
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
