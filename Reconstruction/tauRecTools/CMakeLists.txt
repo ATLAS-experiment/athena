@@ -48,7 +48,7 @@ if( NOT XAOD_STANDALONE )
       INCLUDE_DIRS ${Boost_INCLUDE_DIRS}
       LINK_LIBRARIES ${Boost_LIBRARIES} AsgTools AsgMessagingLib xAODBase
       xAODCaloEvent xAODJet xAODPFlow xAODTau FourMomUtils tauRecToolsLib PFlowUtilsLib
-      FlavorTagInference ActsGeometryInterfacesLib ${extra_private_libs} )
+      FlavorTagInference ActsToolInterfacesLib ActsGeometryInterfacesLib ${extra_private_libs} )
 else()
    atlas_add_component( tauRecTools
       src/components/*.cxx

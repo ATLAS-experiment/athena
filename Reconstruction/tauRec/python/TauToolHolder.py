@@ -119,21 +119,37 @@ def TauTrackCaloExtrapolatorCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauTrackCaloExtrapolator'
 
-    from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
+    if flags.Tau.useACTSExtrapolator:
 
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg 
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg 
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+        from ActsConfig.CaloExtensionBuilderConfig import ActsCaloExtensionBuilderCfg
 
-    TauTrackCaloExtrapolator = CompFactory.getComp("TauTrackCaloExtrapolator")
-    TauTrackCaloExtrapolator = TauTrackCaloExtrapolator(name = _name,
-                                    ParticleCaloExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)),
-                                    tauParticleCache = getParticleCache(flags), # only returns a string
-                                    ExtrapOnlyChargedTracks = False if flags.GeoModel.Run <= LHCPeriod.Run3 else True,
-                                    ExtrapolationTool = result.popToolsAndMerge(ActsExtrapolationToolCfg(flags,MaxSteps=10000)),
-                                    useACTSExtrapolator = True if (flags.Tau.useACTSExtrapolator and flags.GeoModel.Run > LHCPeriod.Run3) else False,
-    )
-    result.merge(ActsTrackingGeometrySvcCfg(flags))
-    result.setPrivateTools(TauTrackCaloExtrapolator)
+        TauTrackCaloExtrapolator = CompFactory.getComp("TauTrackCaloExtrapolator")
+        TauTrackCaloExtrapolator = TauTrackCaloExtrapolator(name = _name,
+                                        ParticleCaloExtensionTool = None,
+                                        tauParticleCache = None,
+                                        ExtrapOnlyChargedTracks = False if flags.GeoModel.Run <= LHCPeriod.Run3 else True,
+                                        ExtrapolationTool = result.popToolsAndMerge(ActsExtrapolationToolCfg(flags,MaxSteps=10000)),
+                                        useACTSExtrapolator = True,)
+
+        result.merge(ActsCaloExtensionBuilderCfg(flags))
+        result.merge(ActsTrackingGeometrySvcCfg(flags))
+        result.setPrivateTools(TauTrackCaloExtrapolator)
+    else: 
+
+        from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
+
+        TauTrackCaloExtrapolator = CompFactory.getComp("TauTrackCaloExtrapolator")
+        TauTrackCaloExtrapolator = TauTrackCaloExtrapolator(name = _name,
+                                        ParticleCaloExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)),
+                                        tauParticleCache = getParticleCache(flags), # only returns a string
+                                        ExtrapOnlyChargedTracks = False if flags.GeoModel.Run <= LHCPeriod.Run3 else True,
+                                        ExtrapolationTool = None,
+                                        useACTSExtrapolator = False,)
+
+
+        result.setPrivateTools(TauTrackCaloExtrapolator)
     return result
 
 
@@ -245,20 +261,37 @@ def ElectronVetoVarsCfg(flags):
     result = ComponentAccumulator()
     _name = flags.Tau.ActiveConfig.prefix + 'TauElectronVetoVars'
     
-    from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg
+    if flags.Tau.useACTSExtrapolator:
 
-    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
-    from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+        from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+        from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
+        from ActsConfig.CaloExtensionBuilderConfig import ActsCaloExtensionBuilderCfg
 
-    TauElectronVetoVariables = CompFactory.getComp("TauElectronVetoVariables")
-    TauElectronVetoVariables = TauElectronVetoVariables(name = _name,
-                                                        VertexCorrection = flags.Tau.doVertexCorrection,
-                                                        ParticleCaloExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)),
-                                                        tauEVParticleCache = getParticleCache(flags),
-                                                        ExtrapolationTool = result.popToolsAndMerge(ActsExtrapolationToolCfg(flags,MaxSteps=10000)),
-                                                        useACTSExtrapolator = False,)
-    result.merge(ActsTrackingGeometrySvcCfg(flags))
-    result.setPrivateTools(TauElectronVetoVariables)
+        TauElectronVetoVariables = CompFactory.getComp("TauElectronVetoVariables")
+        TauElectronVetoVariables = TauElectronVetoVariables(name = _name,
+                                                            VertexCorrection = flags.Tau.doVertexCorrection,
+                                                            ParticleCaloExtensionTool = None,
+                                                            tauEVParticleCache = None,
+                                                            ExtrapolationTool = result.popToolsAndMerge(ActsExtrapolationToolCfg(flags,MaxSteps=10000)),
+                                                            useACTSExtrapolator = True,)
+      
+        result.merge(ActsCaloExtensionBuilderCfg(flags))
+        result.merge(ActsTrackingGeometrySvcCfg(flags)) 
+        result.setPrivateTools(TauElectronVetoVariables)
+    
+    else:    
+
+        from TrackToCalo.TrackToCaloConfig import ParticleCaloExtensionToolCfg 
+
+        TauElectronVetoVariables = CompFactory.getComp("TauElectronVetoVariables")
+        TauElectronVetoVariables = TauElectronVetoVariables(name = _name,
+                                                            VertexCorrection = flags.Tau.doVertexCorrection,
+                                                            ParticleCaloExtensionTool = result.popToolsAndMerge(ParticleCaloExtensionToolCfg(flags)),
+                                                            tauEVParticleCache = getParticleCache(flags),
+                                                            ExtrapolationTool = None,
+                                                            useACTSExtrapolator = False,)
+        result.setPrivateTools(TauElectronVetoVariables)
+        
     return result
 
 #########################################################################

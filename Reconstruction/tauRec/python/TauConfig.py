@@ -413,10 +413,9 @@ def TauConfigTest(flags=None):
         from tauRec.ConfigurationHelpers import StandaloneTauRecoFlags
         StandaloneTauRecoFlags(flags)
 
-        #temporary extra setting if we use ACTS based track-calo extrapolation in Run4
         if flags.Tau.useACTSExtrapolator and flags.GeoModel.Run > LHCPeriod.Run3:
             flags.Acts.TrackingGeometry.UseBlueprint = True 
-            flags.Reco.EnableHGTDExtension = False
+            flags.Reco.EnableHGTDExtension = True
 
         flags.lock()
    
