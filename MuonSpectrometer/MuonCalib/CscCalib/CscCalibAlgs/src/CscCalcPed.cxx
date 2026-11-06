@@ -458,7 +458,7 @@ namespace MuonCalib {
             //Test for threshold breach... 
             size_t sampCnt = 0;
            
-            assert(stripHash>=0 && stripHash<m_ampHists.size());
+            assert(stripHash>=0 && stripHash<static_cast<int>(m_ampHists.size()));
             for(const auto & thisSample: samples)
             {
               m_ampHists[stripHash]->Fill(thisSample);
@@ -474,7 +474,7 @@ namespace MuonCalib {
               }//end if(m_doBitHists)
 
               if(m_doOnlineDbFile){//m_doF001){
-                //test if any samples are obvoe the online threshold
+                //test if any samples are above the online threshold
                 if (thisSample > m_onlineThresholds[stripHash] ){
                   m_onlineThresholdFailureCount[stripHash]++;
                   ATH_MSG_VERBOSE("StripHash: " << stripHash  << 
