@@ -28,6 +28,7 @@
 #include "IFastSimDedicatedSD.h"
 
 #include "GaudiKernel/ConcurrencyFlags.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 #undef _TRACE_FSM_
 #undef _TRACE_DOIT_
@@ -373,10 +374,10 @@ std::unique_ptr<const HepMC::GenEvent> LArFastShower::GetGenEvent(const G4FastTr
   ge->add_vertex(gv);
 
   // input particle (status=4) is always required by HepMC.
-  // make it a dummy geantino with 4-mom=0. pdg_id=999.
+  // make it a dummy geantino with 4-mom=0. pdg_id=999 (MC::GEANTINO0).
   HepMC::GenParticlePtr gpi = HepMC::newGenParticlePtr(
       HepMC::FourVector(0.,0.,0.,0.),
-      999, 4 );
+      MC::GEANTINO0, 4 );
   gv->add_particle_in(std::move(gpi));
 
   // output particle (status=1) is the FourVector of the shower.

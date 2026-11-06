@@ -31,6 +31,7 @@
 // AtlasDetDescr
 #include "AtlasDetDescr/AtlasRegion.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 #include <iostream>
@@ -169,10 +170,9 @@ ISF::ISFParticle* iFatras::TransportTool::process( const ISF::ISFParticle& isp, 
 
   std::vector<Trk::HitInfo>*     hitVector = nullptr;    // hit or no hit collection
 
-  int  absPdg = abs(isp.pdgCode());
-  bool photon         = (absPdg == 22);
-  bool geantino       = (absPdg == 999);
-  bool neutrino       = (absPdg == 12) || (absPdg == 14) || (absPdg == 16);
+  bool photon         = MC::isPhoton(isp.pdgCode());
+  bool geantino       = (std::abs(isp.pdgCode()) == MC::GEANTINO0); // neutral geantino only (not GEANTINOPLUS)
+  bool neutrino       = MC::isSMNeutrino(isp.pdgCode());
   bool charged        = photon || geantino ? false : (isp.charge()*isp.charge() > 0) ;
 
   // particle Hypothesis for the extrapolation
@@ -180,7 +180,7 @@ ISF::ISFParticle* iFatras::TransportTool::process( const ISF::ISFParticle& isp, 
   Trk::ParticleHypothesis pHypothesis = m_pdgToParticleHypothesis.convert(isp.pdgCode(),isp.charge());
 
   // geantinos not handled by PdgToParticleHypothesis - fix there
-  if ( absPdg == 999 ) pHypothesis = Trk::geantino;
+  if ( geantino ) pHypothesis = Trk::geantino;
 
   // chose the filter & extrapolator
   const Trk::ITimedExtrapolator* processor = &(*m_extrapolator);
@@ -256,7 +256,7 @@ ISF::ISFParticle* iFatras::TransportTool::process( const ISF::ISFParticle& isp, 
   if (matLimit) {
     pathLim=Trk::PathLimit( matLimit->dMax,matLimit->process);
     pathLim.updateMat(matLimit->dCollected,13.,0.);          // arbitrary Z choice : update MaterialPathInfo
-  } else if (absPdg!=999 && pHypothesis<99) { // need to resample
+  } else if (!geantino && pHypothesis<99) { // need to resample
     pathLim = m_samplingTool->sampleProcess(m_randomEngine, isp.momentum().mag(),isp.charge(),pHypothesis);
   }
 

@@ -13,7 +13,7 @@ atlas_add_library( MCTruthBaseLib
                    NO_PUBLIC_HEADERS
                    INCLUDE_DIRS ${GEANT4_INCLUDE_DIRS}
                    LINK_LIBRARIES ${GEANT4_LIBRARIES} AthenaBaseComps GaudiKernel G4AtlasToolsLib ISF_InterfacesLib TrackRecordLib
-                   PRIVATE_LINK_LIBRARIES G4AtlasInterfaces MCTruth
+                   PRIVATE_LINK_LIBRARIES G4AtlasInterfaces MCTruth TruthUtils
                    AtlasDetDescr ISF_Geant4Event
                  )
 set_target_properties( MCTruthBaseLib PROPERTIES INTERPROCEDURAL_OPTIMIZATION ${ATLAS_GEANT4_USE_LTO} )

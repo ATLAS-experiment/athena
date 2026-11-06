@@ -11,6 +11,7 @@
 #include "TrkGeometry/TrackingGeometry.h"
 #include "TrkParameters/TrackParameters.h"
 #include "TrkEventPrimitives/PdgToParticleHypothesis.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 /** Constructor **/
@@ -98,7 +99,7 @@ ISF::ISFParticle* ISF::TrkExtrapolator::extrapolate( const ISF::ISFParticle &par
   
   Trk::ParticleHypothesis particleHypo = 
        m_pdgToParticleHypothesis->convert(particle.pdgCode(),particle.charge());
-  if ( absPdg == 999 ) particleHypo = Trk::geantino;
+  if ( absPdg == MC::GEANTINO0 ) particleHypo = Trk::geantino;
   
   // extrapolate to calorimeter entry
   const Trk::TrackParameters* extrapolatedPars = m_extrapolator->extrapolateToVolume(ctx,

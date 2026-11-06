@@ -9,6 +9,7 @@
 #include <AthenaBaseComps/AthReentrantAlgorithm.h>
 #include <GeneratorObjects/McEventCollection.h>
 #include <InDetSimEvent/TRTUncompressedHitCollection.h>
+#include "TruthUtils/HepMCHelpers.h"
 
 class McEventCollectionFilter : public AthReentrantAlgorithm
 {
@@ -26,7 +27,7 @@ private:
   Gaudi::Property<bool> m_keepElectronsLinkedToTRTHits {this, "KeepElectronsLinkedToTRTHits", false, "Keep electrons linked to TRT hits"};
   SG::ReadHandleKey<TRTUncompressedHitCollection> m_inputTRTHitsKey {this, "InputTRTHits", "TRTUncompressedHitsOLD", "Input TRT hits name"};
 
-  Gaudi::Property<int> m_pileUpParticlePDGID {this, "PileUpParticlePDGID", 999, "Pile-up particle PDG ID (defaults to geantino)"};
+  Gaudi::Property<int> m_pileUpParticlePDGID {this, "PileUpParticlePDGID", MC::GEANTINO0, "Pile-up particle PDG ID (defaults to geantino)"};
 };
 
 #endif

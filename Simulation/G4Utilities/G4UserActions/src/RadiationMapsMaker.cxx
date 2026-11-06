@@ -52,6 +52,7 @@
 #include "G4VSensitiveDetector.hh"
 #include "Randomize.hh"
 #include "PathResolver/PathResolver.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace G4UA{
 
@@ -579,7 +580,7 @@ namespace G4UA{
       pdgid=9; // particles not protons treated as protons for NIEL 
 
     } else if (aStep->GetTrack()->GetDefinition()==G4Geantino::Definition()) {
-      pdgid = 999; // geantinos are used for volume calculation
+      pdgid = MC::GEANTINO0; // geantinos are used for volume calculation
     } else if (!aStep->GetTrack()->GetDefinition()->GetPDGCharge()) return; // Not one of those and not a primary?
 
     if ( pdgid == 10 && aStep->GetTrack()->GetKineticEnergy() > 10 ) {
@@ -593,7 +594,7 @@ namespace G4UA{
 
     if ( pdgid == 0 || pdgid == 3 || /* spectra */ 
 	 pdgid == 1 || pdgid == 2 || pdgid == 4 || pdgid == 5 || pdgid == 6 || pdgid == 7 || pdgid == 8 || pdgid == 9 || /* NIEL & h20*/
-	 aStep->GetTotalEnergyDeposit() > 0 || pdgid == 999) {
+	 aStep->GetTotalEnergyDeposit() > 0 || pdgid == MC::GEANTINO0) {
       
       double charge =  aStep->GetTrack()->GetDefinition()->GetPDGCharge();
 
@@ -853,7 +854,7 @@ namespace G4UA{
 	}
 	// TID & EION
 	if ( goodMaterial && vBinZoom >=0 ) {
-	  if ( pdgid == 999 ) {
+	  if ( pdgid == MC::GEANTINO0 ) {
 	    m_maps.m_rz_tid [vBinZoom] += rr*dl;
 	    m_maps.m_rz_eion[vBinZoom] += rho*rr*dl;
 	    for (size_t ie=0;ie<theMaterial->GetNumberOfElements();ie++ ) {
@@ -887,7 +888,7 @@ namespace G4UA{
 	    }
 	}
 	if ( goodMaterial && vBinFull >=0 ) {
-	  if ( pdgid == 999 ) {
+	  if ( pdgid == MC::GEANTINO0 ) {
 	    m_maps.m_full_rz_tid [vBinFull] += rr*dl;
 	    m_maps.m_full_rz_eion[vBinFull] += rho*rr*dl;
 	    for (size_t ie=0;ie<theMaterial->GetNumberOfElements();ie++ ) {
@@ -921,7 +922,7 @@ namespace G4UA{
 	    }
 	}
 	if ( goodMaterial && vBin3d >=0 ) {
-	  if ( pdgid == 999 ) {
+	  if ( pdgid == MC::GEANTINO0 ) {
 	    m_maps.m_3d_tid [vBin3d] += rr*dl;
 	    m_maps.m_3d_eion[vBin3d] += rho*rr*dl;
 	  }
@@ -1065,7 +1066,7 @@ namespace G4UA{
 	
 	if (!m_config.materials.empty()) {
 	  // need volume fraction only if particular materials are selected
-	  if ( (eKin > 1 && (pdgid == 6 || pdgid == 7)) || pdgid == 999) {
+	  if ( (eKin > 1 && (pdgid == 6 || pdgid == 7)) || pdgid == MC::GEANTINO0) {
 	    // count all neutron > 1 MeV track lengths weighted by r
 	    // to get norm for volume per bin. High energetic
 	    // neutrons are used because they travel far enough to

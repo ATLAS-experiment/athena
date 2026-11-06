@@ -397,10 +397,10 @@ void ISF::InputConverter::ISF_to_G4Event(
 const G4ParticleDefinition* ISF::InputConverter::getG4ParticleDefinition(int pdgcode) const
 {
   /// Special cases for Geantinos
-  if (pdgcode==998) {
+  if (pdgcode==MC::GEANTINOPLUS) {
     return G4ChargedGeantino::Definition();
   }
-  if (pdgcode==999) {
+  if (pdgcode==MC::GEANTINO0) {
     return G4Geantino::GeantinoDefinition();
   }
   /// Standard particles

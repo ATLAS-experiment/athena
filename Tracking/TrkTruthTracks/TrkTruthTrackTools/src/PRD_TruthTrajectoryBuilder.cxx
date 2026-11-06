@@ -15,6 +15,7 @@
 // HepMC
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/GenVertex.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 /** Constructor **/
@@ -96,7 +97,7 @@ std::map<HepMC::ConstGenParticlePtr, Trk::PRD_TruthTrajectory > Trk::PRD_TruthTr
             // apply the min pT cut 
             if ( curGenP->momentum().perp() < m_minPt ) continue;
             // skip geantinos if required
-            if (!m_geantinos && std::abs(curGenP->pdg_id())==999) continue;
+            if (!m_geantinos && std::abs(curGenP->pdg_id()) == MC::GEANTINO0) continue;
             // get the associated PRD from the provider
             const Trk::PrepRawData* prd = m_idHelper->is_indet(curIdentifier) ?
                 m_idPrdProvider->prdFromIdentifier(curIdentifier,ndof) : m_msPrdProvider->prdFromIdentifier(curIdentifier,ndof);

@@ -60,6 +60,7 @@
 #include <cmath>
 #include <functional>
 #include <iostream>
+#include "TruthUtils/HepMCHelpers.h"
 
 ISF_HitAnalysis::ISF_HitAnalysis(const std::string& name, ISvcLocator* pSvcLocator)
 : AthAlgorithm(name, pSvcLocator)
@@ -1328,7 +1329,7 @@ std::vector<Trk::HitInfo>* ISF_HitAnalysis::caloHits(const HepMC::GenParticle& p
  ATH_MSG_DEBUG ("particle hypothesis "<< pHypothesis );
 
  // geantinos not handled by PdgToParticleHypothesis - fix there
- if( pdgId == 999 ) pHypothesis = Trk::geantino;
+ if( pdgId == MC::GEANTINO0 ) pHypothesis = Trk::geantino;
 
  auto   vtx = part.production_vertex();
  Amg::Vector3D pos(0.,0.,0.);    // default
