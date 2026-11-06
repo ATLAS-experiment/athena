@@ -10,6 +10,7 @@
 #include "TFitter.h"
 #include "TList.h"
 #include "TMinuit.h"
+#include "Math/MinimizerOptions.h"
 #include "ZdcAnalysis/ZDCMsg.h"
 
 #include <algorithm>
@@ -26,7 +27,7 @@ template<typename T> T Sqr(T in) {return in*in;}
 //
 // List of allowed JSON configuration parameters
 //
-//  For each parameter we have name, JSON value type, whether it can be set per channel, and whether it is required
+//  For each parameter we have name, JSON value type, size, whether it can be set per channel, and whether it is required
 //
 //  if the type is -1, then there's no value, the presence of the parameter itself is a boolean -- i.e. enabling  
 //
@@ -40,6 +41,8 @@ const ZDCJSONConfig::JSONParamList ZDCPulseAnalyzer::JSONConfigParams = {
     {"nominalPedestal", {JSON::value_t::number_integer, 1, false, true}},
     {"fitFunction", {JSON::value_t::string, 1, true, true}},
     {"fitParameterSet", {JSON::value_t::string, 1, false, false}},
+    {"fitParameterSetHG", {JSON::value_t::string, 1, false, false}},
+    {"fitParameterSetLG", {JSON::value_t::string, 1, false, false}},
     {"peakSample", {JSON::value_t::number_integer, 1, true, true}},
     {"peakTolerance", {JSON::value_t::number_integer, 1, true, false}},
     {"quietFits", {JSON::value_t::boolean, 1, false, false}},
@@ -61,6 +64,10 @@ const ZDCJSONConfig::JSONParamList ZDCPulseAnalyzer::JSONConfigParams = {
     {"fixTau2HG", {JSON::value_t::boolean, 1, true, false}},
     {"nominalTau1LG", {JSON::value_t::number_float, 1, true, false}},
     {"nominalTau2LG", {JSON::value_t::number_float, 1, true, false}},
+    {"InductbIHG", {JSON::value_t::number_float, 1, true, false}},
+    {"InductbILG", {JSON::value_t::number_float, 1, true, false}},
+    {"InductPeriodHG", {JSON::value_t::number_float, 1, true, false}},
+    {"InductPeriodLG", {JSON::value_t::number_float, 1, true, false}},
     {"fixTau1LG", {JSON::value_t::boolean, 1, true, false}},
     {"fixTau2LG", {JSON::value_t::boolean, 1, true, false}},
     {"T0CutsHG", {JSON::value_t::array, 2, true, true}},
@@ -232,6 +239,7 @@ ZDCPulseAnalyzer::ZDCPulseAnalyzer(ZDCMsg::MessageFunctionPtr msgFunc_p, const J
   }
 
   reset();
+  ROOT::Math::MinimizerOptions::SetDefaultMaxIterations(2000);
 }
 
 void ZDCPulseAnalyzer::enableDelayed(float deltaT, float pedestalShift, bool fixedBaseline)
@@ -285,6 +293,11 @@ void ZDCPulseAnalyzer::setDefaults()
   m_fixTau1LG = false;
   m_fixTau2LG = false;
 
+  m_inductPeriodLG = 0;
+  m_inductPeriodHG = 0;
+  m_inductbILG = -1;
+  m_inductbIHG = -1;
+  
   m_HGOverflowADC  = 3500;
   m_HGUnderflowADC = 1;
   m_LGOverflowADC  = 3900;
@@ -448,11 +461,14 @@ void ZDCPulseAnalyzer::reset(bool repass)
 
   if (m_initializedFits) {
     m_defaultFitWrapperHG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
-    m_prePulseFitWrapperHG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
-    m_preExpFitWrapperHG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
     m_defaultFitWrapperLG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
-    m_prePulseFitWrapperLG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
-    m_preExpFitWrapperLG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
+
+    if (m_doPrePulseCheck) {
+      m_prePulseFitWrapperHG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
+      m_preExpFitWrapperHG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
+      m_prePulseFitWrapperLG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
+      m_preExpFitWrapperLG->SetT0Range(m_defaultT0Min, m_defaultT0Max);
+    }
   }
 
   // -----------------------
@@ -864,11 +880,15 @@ void ZDCPulseAnalyzer::SetupFitFunctions()
       }
     }
     else {
-      m_defaultFitWrapperHG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausInduct(tagHG, m_fitParameterSetHG, m_tmin, m_tmax, m_fixTau1HG, m_fixTau2HG,
-												  m_nominalTau1HG, m_nominalTau2HG));
-      m_defaultFitWrapperLG = std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausInduct(tagLG, m_fitParameterSetLG, m_tmin, m_tmax, m_fixTau1LG, m_fixTau2LG,
-												  m_nominalTau1LG, m_nominalTau2LG));
-
+      //
+      // We have parameter set, use in constructing the fit wrapper
+      //
+      m_defaultFitWrapperHG =
+	std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausInduct(tagHG, m_fitParameterSetHG, m_tmin, m_tmax, m_fixTau1HG, m_fixTau2HG,
+									    m_nominalTau1HG, m_nominalTau2HG, m_inductPeriodHG, m_inductbIHG));
+      m_defaultFitWrapperLG =
+	std::unique_ptr<ZDCFitWrapper>(new ZDCFitExpFermiVariableTausInduct(tagLG, m_fitParameterSetLG, m_tmin, m_tmax, m_fixTau1LG, m_fixTau2LG,
+									    m_nominalTau1LG, m_nominalTau2LG, m_inductPeriodLG, m_inductbILG));
       if (m_doPrePulseCheck) {
 	m_preExpFitWrapperHG = std::unique_ptr<ZDCFitExpFermiInductPreExp>(new ZDCFitExpFermiInductPreExp(tagHG, m_fitParameterSetHG, m_tmin, m_tmax, m_nominalTau1HG, m_nominalTau2HG));
 	m_preExpFitWrapperLG = std::unique_ptr<ZDCFitExpFermiInductPreExp>(new ZDCFitExpFermiInductPreExp(tagLG, m_fitParameterSetLG, m_tmin, m_tmax, m_nominalTau1LG, m_nominalTau2HG));
@@ -908,9 +928,11 @@ void ZDCPulseAnalyzer::SetupFitFunctions()
     (*m_msgFunc_p)(ZDCMsg::Fatal, "Wrong fit function type: " + m_fitFunction);
   }
 
-  m_prePulseFitWrapperHG->SetPrePulseT0Range(prePulseTMin, prePulseTMax);
-  m_prePulseFitWrapperLG->SetPrePulseT0Range(prePulseTMin, prePulseTMax);
-
+  if (m_doPrePulseCheck) {
+    m_prePulseFitWrapperHG->SetPrePulseT0Range(prePulseTMin, prePulseTMax);
+    m_prePulseFitWrapperLG->SetPrePulseT0Range(prePulseTMin, prePulseTMax);
+  }
+  
   m_initializedFits = true;
 }
 
@@ -1093,23 +1115,27 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
     }
 
     if (m_useSampleHG[isample]) {
+      bool skipOverflowCheck = false;
+	
       if (m_enablePreExcl) {
 	if (ADCHG > m_preExclHGADCThresh && isample < m_maxSamplesPreExcl) {
 	  m_useSampleHG[isample] = false;
-	  continue;
+	  m_ExcludeEarly = true;
+	  skipOverflowCheck = true;
 	}
       }
 
       if (m_enablePostExcl) {
 	if (ADCHG > m_postExclHGADCThresh && isample >= m_NSamplesAna - m_maxSamplesPostExcl) {
 	  m_useSampleHG[isample] = false;
-	  continue;
+	  m_ExcludeLate = true;
+	  skipOverflowCheck = true;
 	}
       }
 
       // If we get here, we've passed the above filters on the sample
       //
-      if (ADCHG > m_HGOverflowADC) {
+      if (!skipOverflowCheck && ADCHG > m_HGOverflowADC) {
 	m_HGOverflow = true;
 	
 	if (isample == m_preSampleIdx) m_PSHGOverUnderflow = true;
@@ -1137,22 +1163,23 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
     // Now the low gain sample
     //
     if (m_useSampleLG[isample]) {
+      bool skipOverflowCheck = false;
+      
       if (m_enablePreExcl) {
 	if (ADCLG > m_preExclLGADCThresh && isample <= m_maxSamplesPreExcl) {
 	  m_useSampleLG[isample] = false;
-	  continue;
+	  skipOverflowCheck = true;
 	}
       }
       
       if (m_enablePostExcl) {
 	if (ADCLG > m_postExclLGADCThresh && isample >= m_NSamplesAna - m_maxSamplesPostExcl) {
 	  m_useSampleLG[isample] = false;
-	  m_ExcludeLate = true;
-	  continue;
+	  skipOverflowCheck = true;
 	}
       }
 
-      if (ADCLG > m_LGOverflowADC) {
+      if (!skipOverflowCheck && ADCLG > m_LGOverflowADC) {
 	m_LGOverflow = true;
 	m_fail = true;
 	m_amplitude = m_LGOverflowADC * m_gainFactorLG; // Give a vale here even though we know it's wrong because
@@ -1198,21 +1225,21 @@ bool ZDCPulseAnalyzer::ScanAndSubtractSamples()
   // See if we can still use high gain even in the case of HG overflow if the overflow results from
   //   the first few samples or the last few samples
   //
-  if (m_HGOverflow && !m_HGUnderflow) {
-    if (m_lastHGOverFlowSample < 2 && m_lastHGOverFlowSample > -1) {
-      m_HGOverflow = false;
-      m_minSampleEvt = m_lastHGOverFlowSample + 1;
-      m_adjTimeRangeEvent = true;
-      m_backToHG_pre = true;
-      m_ExcludeEarly = true;
-    }
-    else if (m_firstHGOverFlowSample < static_cast<int>(m_NSamplesAna) && m_firstHGOverFlowSample >= static_cast<int>(m_NSamplesAna - 2) ) {
-      m_maxSampleEvt = m_firstHGOverFlowSample - 1;
-      m_HGOverflow = false;
-      m_adjTimeRangeEvent = true;
-      m_ExcludeLate = true;
-    }
-  }
+  // if (m_HGOverflow && !m_HGUnderflow) {
+  //   if (m_lastHGOverFlowSample < 2 && m_lastHGOverFlowSample > -1) {
+  //     m_HGOverflow = false;
+  //     m_minSampleEvt = m_lastHGOverFlowSample + 1;
+  //     m_adjTimeRangeEvent = true;
+  //     m_backToHG_pre = true;
+  //     m_ExcludeEarly = true;
+  //   }
+  //   else if (m_firstHGOverFlowSample < static_cast<int>(m_NSamplesAna) && m_firstHGOverFlowSample >= static_cast<int>(m_NSamplesAna - 2) ) {
+  //     m_maxSampleEvt = m_firstHGOverFlowSample - 1;
+  //     m_HGOverflow = false;
+  //     m_adjTimeRangeEvent = true;
+  //     m_ExcludeLate = true;
+  //   }
+  // }
 
   return true;
 }
@@ -1366,7 +1393,7 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   //
   bool haveFirst = false;
   unsigned int lastUsed = 0;
-  
+
   for (unsigned int sample = preSampleIdx; sample < nSamples; sample++) {
     if (useSample[sample]) {
       //
@@ -1381,7 +1408,7 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
       }
     }
   }
-
+  
   if (lastUsed < m_maxSampleEvt) m_maxSampleEvt = lastUsed;
 
   // Check to see whether we've changed the range of samples used in the analysis
@@ -1403,9 +1430,9 @@ bool ZDCPulseAnalyzer::AnalyzeData(size_t nSamples, size_t preSampleIdx,
   m_usedPresampIdx = m_minSampleEvt;
   m_preSample = samples[m_usedPresampIdx];
 
-  // std::ostringstream pedMessage;
-  // pedMessage << "Pedestal index = " << m_usedPresampIdx << ", value = " << m_preSample;
-  // (*m_msgFunc_p)(ZDCMsg::Verbose, pedMessage.str().c_str());
+  std::ostringstream pedMessage;
+  pedMessage << "Pedestal index = " << m_usedPresampIdx << ", value = " << m_preSample;
+  (*m_msgFunc_p)(ZDCMsg::Verbose, pedMessage.str().c_str());
 
   m_samplesSub = samples;
   m_samplesNoise = samplesNoise;
@@ -1808,8 +1835,8 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
   }
   
   if (m_adjTimeRangeEvent) {
-    m_fitTMin = std::max(m_fitTMin, m_deltaTSample * m_minSampleEvt - m_deltaTSample);
-    m_fitTMax = std::min(m_fitTMax, m_deltaTSample * m_maxSampleEvt + m_deltaTSample);
+    m_fitTMin = std::max<float>(m_fitTMin, m_deltaTSample * m_minSampleEvt - m_deltaTSample/2.);
+    m_fitTMax = std::min<float>(m_fitTMax, m_deltaTSample * m_maxSampleEvt + m_deltaTSample/2.);
 
     float fitTReference = m_deltaTSample * m_usedPresampIdx;
 
@@ -1841,7 +1868,7 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
   // If the first fit failed, also check the EDM. If sufficiently small, the failure is almost surely due
   //   to parameter limits and we just accept the result
   //
-  if (fitStatus != 0 && result_ptr->Edm() > 0.001) 
+  if (fitStatus != 0 && result_ptr->Edm() > 0.01) 
     {
     //
     // We contstrain the fit and try again
@@ -1851,11 +1878,10 @@ void ZDCPulseAnalyzer::DoFit(bool refitLG)
     TFitResultPtr constrFitResult_ptr = hist_p->Fit(fitWrapper->GetWrapperTF1RawPtr(), options.c_str(), "", m_fitTMin, m_fitTMax);
     fitWrapper->UnconstrainFit();
 
-    if ((int) constrFitResult_ptr != 0) {
+    if ((int) constrFitResult_ptr != 0 && constrFitResult_ptr->Edm() > 0.1) {
       //
-      // Even the constrained fit failed, so we quit.
+      // Even the constrained fit failed. Check the edm
       //
-      fitFailed = true;
     }
     else {
       // Now we try the fit again with the constraint removed
@@ -2419,6 +2445,11 @@ void ZDCPulseAnalyzer::dumpConfiguration() const    // setting
 	     << m_T0CutLowLG << ", " << m_T0CutHighLG << "]";
   (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
 
+  ostrStream <<"Induct parameters: period HG, LG = " << m_inductPeriodHG << ", " << m_inductPeriodLG
+	     << ", bI HG, LG = " <<  m_inductbIHG << ", " << m_inductbILG << std::endl;
+  (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
+
+  
   ostrStream << "HGOverflowADC = " << m_HGOverflowADC << ",  HGUnderflowADC = " << m_HGUnderflowADC
 	     << ",  LGOverflowADC = "<< m_LGOverflowADC;
   (*m_msgFunc_p)(ZDCMsg::Info, ostrStream.str()); ostrStream.str(""); ostrStream.clear();
@@ -2779,14 +2810,14 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
     else if (key == "nominalPedestal") m_pedestal = value;
     else if (key == "fitFunction") m_fitFunction = value;
     else if (key == "fitParameterSet") {
-      if (value.size() < 2) {
-	m_fitParameterSetHG = value;
-	m_fitParameterSetLG = value;
-      }
-      else {
-	m_fitParameterSetHG = value[0];
-	m_fitParameterSetLG = value[1];
-      }
+      m_fitParameterSetHG = value;
+      m_fitParameterSetLG = value;
+    }
+    else if (key == "fitParameterSetHG") {
+      m_fitParameterSetHG = value;
+    }
+    else if (key == "fitParameterSetLG") {
+      m_fitParameterSetLG = value;
     }
     else if (key == "peakSample") m_peak2ndDerivMinSample = value;
     else if (key == "peakTolerance") m_peak2ndDerivMinTolerance = value;
@@ -2831,6 +2862,10 @@ std::pair<bool, std::string> ZDCPulseAnalyzer::ConfigFromJSON(const JSON& config
       m_T0CutHighLG = value[1];
       m_initializedFits = false;
     }
+    else if (key == "InductbIHG") m_inductbIHG = value;
+    else if (key == "InductbILG") m_inductbILG = value;
+    else if (key == "InductPeriodHG") m_inductPeriodHG = value;
+    else if (key == "InductPeriodLG") m_inductPeriodLG = value;
     else if (key == "chisqDivAmpCutHG") m_chisqDivAmpCutHG = value;
     else if (key == "chisqDivAmpCutLG") m_chisqDivAmpCutLG = value;
     else if (key == "chisqDivAmpOffsetHG") m_chisqDivAmpOffsetHG = value;

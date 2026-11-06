@@ -418,7 +418,8 @@ public:
 
   ZDCFitExpFermiVariableTausInduct(const std::string& tag, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2);
 
-  ZDCFitExpFermiVariableTausInduct(const std::string& tag, std::string paramSet, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2);
+  ZDCFitExpFermiVariableTausInduct(const std::string& tag, std::string paramSet, float tmin, float tmax, bool fixTau1, bool fixTau2,
+				   float tau1, float tau2, float period, float bI);
 
   virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
   virtual void SetT0FitLimits(float tMin, float tMax) override;
@@ -1001,7 +1002,7 @@ public:
   ZDCFitExpFermiInductPreExp(const std::string& tag, float tmin, float tmax, float tau1, float tau2,
 			   float defExpTau, float fixExpTau);
   ZDCFitExpFermiInductPreExp(const std::string& tag, std::string overRideParams, float tmin, float tmax,
-			     float tau1, float tau2);
+			     float tau1, float tau2, float period = 0, float bI = -1);
   ~ZDCFitExpFermiInductPreExp() {}
 
   virtual void DoInitialize(float initialAmp, float initialT0, float ampMin, float ampMax) override;
@@ -1691,11 +1692,11 @@ double getInductFuncTimeMax(const TF1* theTF1)
   double corrT0 = fitT0;
   if (tau2 > tau1) corrT0 += tau1 * std::log(tau2 / tau1 - 1.0);
   
-  double deltaT = theTF1->GetParameter(5)/8;
+  double deltaT = theTF1->GetParameter(5)/4;
   double tmin = corrT0 - deltaT;
   double tmax = corrT0 + deltaT;
   
-  return theTF1->GetMaximumX(tmin, tmax, 1e-4, 20, false);
+  return theTF1->GetMaximumX(tmin, tmax, 1e-5, 20, false);
 }
 
 
@@ -1779,16 +1780,17 @@ double ZDCFermiExpFitInduct(const double* xvec, const double* pvec)
   double twoPiOverPeriod = 2.0*M_PI/period;
 
   double deltaT = t - t0;
-  double norm = 1, expTerm = 1, fermiTerm = 1, inductTerm = 1;
+  double deltaTInduct = deltaT;
+  double expTerm = 1, fermiTerm = 1, inductTerm = 1;
   
   if (deltaT > 0) {
-    inductTerm = (1.0 + exp(-bI*deltaT)*(Acos*std::cos(deltaT*twoPiOverPeriod) +
-					   Bsin*std::sin(deltaT*twoPiOverPeriod)))/(1+Acos);
+    inductTerm = (1.0 + exp(-bI*deltaTInduct)*(Acos*std::cos(deltaTInduct*twoPiOverPeriod) +
+					       Bsin*std::sin(deltaTInduct*twoPiOverPeriod)));
     expTerm = delta + std::exp(-deltaT / tau2)*inductTerm;
   }
   if (deltaT/tau1 < 7) fermiTerm = 1. / (1. + std::exp(-deltaT / tau1));
 
-  return amp * expTerm * fermiTerm * inductTerm/ norm + C; 
+  return amp * expTerm * fermiTerm + C; 
 }
 
 #endif

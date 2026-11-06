@@ -30,18 +30,26 @@ const std::map<std::string, std::vector<ZDCFitWrapper::FitParameter>> ZDCFitExpF
      }
     },
     {"PbPb2025",
-     {{{"tau2", 0, false,  5, 8, 0.25, false, 0}},  // adjust the range
-      {{"period",  13.5,  true,  0, 0, 0, false, 0}}, 
-      {{"IndA",     0.1,  false,  -0.5, 2, 0.1, true, 0}}, 
-      {{"IndB",     0.2,   false,  -0.5, 2, 0.1, false, 0}}, 
-      {{"bI",     -0.02,   true,  -0.5, 0.5, 0.025, true, -0.02}}, 
+     {{{"tau2", 0, false,  4, 7.5, 0.25, false, 0}},  // adjust the range
+      {{"period",  13,  true,  0, 0, 0, false, 0}}, 
+      {{"IndA",   -0.07,  false,  -0.1, 0.4, 0.025, true, 0.}}, 
+      {{"IndB",     0.1,   false,  -0.1, 0.4, 0.025, false, 0}}, 
+      {{"bI",     -0.025,   false,  -0.15, 0.05, 0.025, true, -0.03}}, 
+      {{"C",        0, false,  -50, 50, 1, false, 0}},      }
+    },
+    {"PbPb2025LG",
+     {{{"tau2",    6, false,  5, 8, 0.25, false, 0}},  // adjust the range
+      {{"period",  14,  true,  10, 16, 1, false, 0}}, 
+      {{"IndA",    0.1,  false,  -0.1, 0.75, 0.1, true, 0}}, 
+      {{"IndB",    0.1,  false,  -0.25, 0.75, 0.1, false, 0}}, 
+      {{"bI",     -0.02,   false,  -0.2, 0.2, 0.025, false, 0}},
      }
     },
     {"PbPb2025FreeInduct",
-     {{{"period",  13,     false,  10, 30, 1, true, 13}}, 
-      {{"IndA",     0.25,  false,  -1, 2, 0.1, true, 0}}, 
-      {{"IndB",     0.8,   false,  -1, 2, 0.1, false, 0}}, 
-      {{"bI",     -0.025,  false,  -0.5, 0.5, 0, false, 0}},
+     {{{"period",  13,     false,  11, 20, 1, true, 13}}, 
+      {{"IndA",     0.25,  false,  -0.05, 0.5, 0.1, true, 0}}, 
+      {{"IndB",     0.2,   false,  -0.2, 0.5, 0.1, false, 0}}, 
+      {{"bI",     -0.025,  false,  -0.3, 0.3, 0, false, 0}},
      }
     },
     {"PbPb2024",
@@ -70,17 +78,27 @@ const std::map<std::string, std::vector<ZDCFitWrapper::FitParameter>> ZDCFitExpF
      }
     },
     {"PbPb2025",
-     {{{"period",  13.5,  true,  0, 0, 0, false, 0}}, 
-      {{"IndA",     0.1,  false,  -0.5, 2, 0.1, true, 0}}, 
-      {{"IndB",     0.2,   false,  -0.5, 2, 0.1, false, 0}}, 
-      {{"bI",     -0.02,   true,  -0.5, 0.5, 0.025, true, -0.02}}, 
+     {{{"period",  13,  true,  0, 0, 0, false, 0}}, 
+      {{"IndA",     0.1,  false,  -0.1, 0.4, 0.05, true, 0}}, 
+      {{"IndB",     0.2,   false,  -0.1, 0.4, 0.05, false, 0}}, 
+      {{"bI",     -0.05,   true,  -0.15, 0.15, 0.025, false, 0}}, 
+      {{"C", 0, false,  -50, 50, 1, false, 0}},
+     }
+    },
+    {"PbPb2025LG",
+     {{{"period",  13,  true,  0, 0, 0, false, 0}}, 
+      {{"IndA",     0.1,  false,  -0.1, 2, 0.1, true, 0}}, 
+      {{"IndB",     0.2,   false,  -0.1, 2, 0.1, false, 0}}, 
+      {{"bI",     -0.04,   true,  -0.1, 0., 0.025, true, -0.02}},
+      {{"C",        0, false,  -200, 200, 1, false, 0}},  
      }
     },
     {"PbPb2025FreeInduct",
      {{{"period",  13,     false,  10, 30, 1, true, 13}}, 
-      {{"IndA",     0.25,  false,  -1, 2, 0.1, true, 0}}, 
-      {{"IndB",     0.8,   false,  -1, 2, 0.1, false, 0}}, 
+      {{"IndA",     0.,  false,  -0.1, 0.25, 0.1, true, 0}}, 
+      {{"IndB",     0.1,   false,  -0.1, 0.5, 0.1, false, 0}}, 
       {{"bI",     -0.025,  false,  -0.5, 0.5, 0, false, 0}},
+      {{"C",        0, false,  -200, 200, 1, false, 0}},  
      }
     }
   };
@@ -100,16 +118,23 @@ const std::map<std::string, std::vector<ZDCFitWrapper::FitParameter>> ZDCFitExpF
      }
     },
     {"PbPb2025",
-     {{{"period",  13.5,  true,  0, 0, 0, false, 0}}, 
-      {{"IndA",     0.1,  false,  -0.5, 2, 0.1, true, 0}}, 
-      {{"IndB",     0.2,   false,  -0.5, 2, 0.1, false, 0}}, 
-      {{"bI",     -0.02,   true,  -0.5, 0.5, 0.025, true, -0.02}}, 
+     {{{"period",  13,  true,  0, 0, 0, false, 0}}, 
+      {{"IndA",     0.1,  false,  -0.25, 0.25, 0.1, true, 0}}, 
+      {{"IndB",     0.2,   false,  -0.25, 0.25, 0.1, false, 0}}, 
+      {{"bI",     -0.05,   true,  -0.5, 0.5, 0.025, true, -0.02}}, 
+     }
+    },
+    {"PbPb2025LG",
+     {{{"period",  13,  true,  0, 0, 0, false, 0}}, 
+      {{"IndA",     0.1,  false,  -0.25, 0.5, 0.1, true, 0}}, 
+      {{"IndB",     0.2,   false,  -0.25, 0.5, 0.1, false, 0}}, 
+      {{"bI",     -0.04,   false,  -0.5, 0.5, 0.025, true, -0.02}}, 
      }
     },
     {"PbPb2025FreeInduct",
      {{{"period",  13,     false,  10, 30, 1, true, 13}}, 
-      {{"IndA",     0.25,  false,  -1, 2, 0.1, true, 0}}, 
-      {{"IndB",     0.8,   false,  -1, 2, 0.1, false, 0}}, 
+      {{"IndA",     0.1,  false,  -0.25, 0.5, 0.1, true, 0}}, 
+      {{"IndB",     0.2,   false,  -0.25, 0.1, 0.1, false, 0}}, 
       {{"bI",     -0.025,  false,  -0.5, 0.5, 0, false, 0}},
      }
     }
@@ -505,7 +530,7 @@ ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::st
   theTF1->FixParameter(5, 16);
   //  theTF1->SetParLimits(9, 0, 0.05);
 
-  
+  theTF1->SetNpx(1000);
   FixDelta(0.015);
   
   if (m_fixTau1) theTF1->FixParameter(2, m_tau1);
@@ -516,7 +541,7 @@ ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::st
 }
 
 
-ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::string& tag, std::string paramSet, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2) :
+ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::string& tag, std::string paramSet, float tmin, float tmax, bool fixTau1, bool fixTau2, float tau1, float tau2, float period = 0, float bI = -1) :
   ZDCFitWrapper(std::make_shared<TF1>(("ExpFermiVariableTausInduct" + tag).c_str(), ZDCFermiExpFitInduct, tmin, tmax, 10),
 		s_ConfigParamMap.at("default"))
 {
@@ -550,6 +575,30 @@ ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::st
     if (fixTau2) tau2Descr.setFixed(tau2);
     else tau2Descr.setDefaultValue(tau2);    
     overRideParams.push_back(tau2Descr);
+  }
+
+  if (period > 0) {
+    auto periodIter = std::find_if(overRideParams.begin(), overRideParams.end(), [](const FitParameter& parDesc){return parDesc.name() == "period";});
+    if (periodIter != overRideParams.end()) {
+      periodIter->setFixed(period);
+    }
+    else {
+      FitParameter periodDescr = GetParameterDescr("period");
+      periodDescr.setFixed(period);
+      overRideParams.push_back(periodDescr);
+    }
+  }
+  
+  if (bI > -1) {
+    auto bIIter = std::find_if(overRideParams.begin(), overRideParams.end(), [](const FitParameter& parDesc){return parDesc.name() == "bI";});
+    if (bIIter != overRideParams.end()) {
+      bIIter->setFixed(bI);
+    }
+    else {
+      FitParameter bIDescr = GetParameterDescr("bI");
+      bIDescr.setFixed(bI);
+      overRideParams.push_back(bIDescr);
+    }
   }
 
   OverrideParameterSet(overRideParams);
@@ -1128,7 +1177,7 @@ ZDCFitExpFermiInductPreExp::ZDCFitExpFermiInductPreExp(const std::string& tag, f
   
 }
 
-ZDCFitExpFermiInductPreExp::ZDCFitExpFermiInductPreExp(const std::string& tag, std::string paramSet, float tmin, float tmax, float tau1, float tau2) :
+ZDCFitExpFermiInductPreExp::ZDCFitExpFermiInductPreExp(const std::string& tag, std::string paramSet, float tmin, float tmax, float tau1, float tau2, float period, float bI) :
   ZDCPreExpFitWrapper(std::make_shared<TF1>(("ExpFermiInductPreExp" + tag).c_str(), this, tmin, tmax, 10), s_ConfigParamMap.at("default")),
   m_tau1(tau1), m_tau2(tau2)
 {
@@ -1136,6 +1185,33 @@ ZDCFitExpFermiInductPreExp::ZDCFitExpFermiInductPreExp(const std::string& tag, s
   if (iter == s_ConfigParamMap.end()) throw std::runtime_error("ZDCFitExpFermiVariableTausInduct:: invalid parameter set identifier: " + paramSet);
 
   std::vector<ZDCFitWrapper::FitParameter> overRideParams = iter->second;
+
+  // Handle the JSON-based tau settings (this is ugly and temporary until we get the more general parameter overriding implemented)
+  //
+
+  if (period > 0) {
+    auto periodIter = std::find_if(overRideParams.begin(), overRideParams.end(), [](const FitParameter& parDesc){return parDesc.name() == "period";});
+    if (periodIter != overRideParams.end()) {
+      periodIter->setFixed(period);
+    }
+    else {
+      FitParameter periodDescr = GetParameterDescr("period");
+      periodDescr.setFixed(period);
+      overRideParams.push_back(periodDescr);
+    }
+  }
+  
+  if (bI > 0) {
+    auto bIIter = std::find_if(overRideParams.begin(), overRideParams.end(), [](const FitParameter& parDesc){return parDesc.name() == "bI";});
+    if (bIIter != overRideParams.end()) {
+      bIIter->setFixed(bI);
+    }
+    else {
+      FitParameter bIDescr = GetParameterDescr("bI");
+      bIDescr.setFixed(bI);
+      overRideParams.push_back(bIDescr);
+    }
+  }
 
   OverrideParameterSet(overRideParams);
 
@@ -1152,7 +1228,7 @@ ZDCFitExpFermiInductPreExp::ZDCFitExpFermiInductPreExp(const std::string& tag, s
   m_expFermiInductFunc->SetParameter(2, m_tau1); // tau1 is fixed
   m_expFermiInductFunc->SetParameter(3, m_tau2); // tau2 is fixed
   m_expFermiInductFunc->SetParameter(4, 0);      // the constant term will be handled directly not here
-  m_expFermiInductFunc->SetParameter(5, 14); // the period will be fixed
+  m_expFermiInductFunc->SetParameter(5, 14);  
   m_expFermiInductFunc->SetParameter(6, 0.25);  // A will be varied as part of the fit
   m_expFermiInductFunc->SetParameter(7, 0.5);  // B will be varied as part of the fit
   m_expFermiInductFunc->SetParameter(8, 0.18);
