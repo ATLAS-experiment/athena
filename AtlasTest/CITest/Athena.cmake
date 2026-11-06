@@ -20,8 +20,7 @@ atlas_add_citest( FastChain
 
 atlas_add_citest( SimulationRun3AF3
    SCRIPT RunWorkflowTests_Run3.py --CI -s -w AF3 --threads 0 -e '--maxEvents 20' --run-only
-   LOG_IGNORE_PATTERN "WARNING FPE"  # ignore FPEs from Geant4
-   PROPERTIES PROCESSORS 1 )
+   LOG_IGNORE_PATTERN "WARNING FPE" ) # ignore FPEs from Geant4
 
 atlas_add_citest( SimulationRun3AF3Checks
    SCRIPT RunWorkflowTests_Run3.py --CI -s -w AF3 --checks-only --output-path ../SimulationRun3AF3
@@ -407,12 +406,10 @@ atlas_add_citest( ACTS_ActsDumpGeometryIdentifiers
    SCRIPT ActsDumpGeometryIdentifiers.sh )
 
 atlas_add_citest( ACTS_ActsBenchmarkTrackingWithSpot
-   SCRIPT ActsBenchmarkWithSpot.sh 1 1
-   PROPERTIES PROCESSORS 1 )
+   SCRIPT ActsBenchmarkWithSpot.sh 1 1 )
 
 atlas_add_citest( ACTS_ActsBenchmarkWithSpotHeavyIons
-   SCRIPT ActsBenchmarkWithSpotHeavyIons.sh 1 1
-   PROPERTIES PROCESSORS 1 )
+   SCRIPT ActsBenchmarkWithSpotHeavyIons.sh 1 1 )
 
 atlas_add_citest( ACTS_ActsAnalogueClustering
   SCRIPT ActsAnalogueClustering.sh )
@@ -427,16 +424,14 @@ atlas_add_citest( ACTS_CheckObjectCounts_Workflow
 #                 Muon Phase II CI tests
 #################################################################################
 atlas_add_citest( MuonR4_Combined
-         SCRIPT runR4_MuonCombRecoSPOTTest.sh 1 5
-         PROPERTIES PROCESSORS 1)
+         SCRIPT runR4_MuonCombRecoSPOTTest.sh 1 5 )
+
 atlas_add_citest( MuonR4_Data
-         SCRIPT test_MuonR4Reco_spot.sh 1 5
-         PROPERTIES PROCESSORS 1)
+         SCRIPT test_MuonR4Reco_spot.sh 1 5 )
 
 atlas_add_citest( MuonR4_DigiR3
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/Digitization_MuonPhaseII.sh R3
-   LOG_IGNORE_PATTERN "WARNING FPE|ROOT PCM"
-   PROPERTIES PROCESSORS 1)
+   LOG_IGNORE_PATTERN "WARNING FPE|ROOT PCM" )
 
 #################################################################################
 #                 Phase II DD2 tests
@@ -444,8 +439,7 @@ atlas_add_citest( MuonR4_DigiR3
 
 atlas_add_citest(DigReco_phaseII_DD2 
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/DigiReco_phaseII_DD2.sh R4
-   LOG_IGNORE_PATTERN "WARNING FPE|ROOT PCM"
-   PROPERTIES PROCESSORS 1)
+   LOG_IGNORE_PATTERN "WARNING FPE|ROOT PCM" )
 
 #################################################################################
 # Trigger
