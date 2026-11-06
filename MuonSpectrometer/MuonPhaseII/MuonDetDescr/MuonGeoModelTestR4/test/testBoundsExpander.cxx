@@ -1,5 +1,6 @@
-
-
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
 #include "GeoModelHelpers/TransformSorter.h"
@@ -9,6 +10,8 @@
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Surfaces/TrapezoidBounds.hpp"
+#include "Acts/Geometry/CuboidVolumeBounds.hpp"
+#include "Acts/Geometry/Volume.hpp"
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Utilities/Enumerate.hpp"
 
@@ -18,14 +21,14 @@
 
 #include <stdlib.h>
 
-std::ostream& operator<<(std::ostream& ostr, const std::vector<Amg::Vector3D>& vectors) {
+std::ostream& operator<<(std::ostream& ostr, std::span<const Amg::Vector3D> vectors) {
     for (const auto& [idx, v] : Acts::enumerate(vectors)) {
         ostr<<" * "<<(idx+1)<<") - "<<Amg::toString(v)<<std::endl;
     }
     return ostr;
 }
 
-constexpr Acts::Logging::Level lvl = Acts::Logging::Level::DEBUG;
+constexpr Acts::Logging::Level lvl = Acts::Logging::Level::VERBOSE;
 using namespace Acts::UnitLiterals;
 
 bool checkVertices(const Acts::GeometryContext&tgContext, 
@@ -130,14 +133,91 @@ bool testRectangleVertices(const Acts::Logger& logger) {
     return true;
 }
 
+bool testExpander(const MuonGMR4::CylinderBoundsExpander& expander, 
+                  const std::array<double, 4>& expectations,
+                  const Acts::Logger& logger) {
+    bool retCode{true};
+    if (std::abs(expander.rMin() - expectations[0]) > Acts::s_transformEquivalentTolerance) {
+        ACTS_ERROR(__func__<<"() "<<__LINE__<<" - Wrong minimal r detected: "<<expander.rMin()<<", expected: "<<expectations[0]);
+        retCode = false;
+    } if (std::abs(expander.rMax() - expectations[1]) > Acts::s_transformEquivalentTolerance){
+        ACTS_ERROR(__func__<<"() "<<__LINE__<<" - Wrong maximal r detected: "<<expander.rMax()<<", expected: "<<expectations[1]);
+        retCode = false;
+    } if (std::abs(expander.zMin() - expectations[2]) > Acts::s_transformEquivalentTolerance){
+         ACTS_ERROR(__func__<<"() "<<__LINE__<<" - Wrong minmal z detected: "<<expander.zMin()<<", expected: "<<expectations[2]);
+           retCode = false;
+    } if (std::abs(expander.zMax() - expectations[3]) > Acts::s_transformEquivalentTolerance){
+        ACTS_ERROR(__func__<<"() "<<__LINE__<<" - Wrong maximal z detected: "<<expander.zMax()<<", expected: "<<expectations[3]);
+        retCode = false;
+    }
+    return retCode;
+}
+
+Acts::Transform3 volumePos(const double phi, const double r) {
+    return Amg::getRotateZ3D(phi) * 
+           Amg::getTranslateX3D(r)*
+           Amg::getRotateY3D(90._degree)*
+           Amg::getRotateZ3D(90._degree);
+}
+
+
+bool testCylinderExpander(const Acts::Logger& logger) {
+    /// simple volume 50 cm away from the center
+    
+    constexpr double width = 75._cm;
+    constexpr double length = 2._m;
+    constexpr double height = 50._cm;
+    constexpr double volDist = 2._m;
+    std::shared_ptr<Acts::VolumeBounds> bounds = std::make_shared<Acts::CuboidVolumeBounds>(width, length, height);
+    const Acts::GeometryContext tgContext = Acts::GeometryContext::dangerouslyDefaultConstruct();
+    bool retCode{true};
+    {
+        MuonGMR4::CylinderBoundsExpander expander{logger.clone()};
+        /// Expand the cylinder to enclose the cylinder 2m away
+        
+        expander.expand(tgContext, Acts::Volume{volumePos(0._degree, volDist),bounds});
+        if (!testExpander(expander, std::array{volDist - height, Acts::fastHypot(volDist+height, width), -length, length}, logger)){
+            retCode = false;
+        }
+        /// Insert another volume at half R at one 1m distance
+        expander.expand(tgContext, Acts::Volume{volumePos(270._degree, 0.5*volDist),bounds});
+        if (!testExpander(expander, std::array{0.5*volDist - height, Acts::fastHypot(volDist+height, width), -length, length}, logger)){
+            retCode = false;
+        }
+    }
+    /// Position the box with the edge on the minimal cylinder radius
+    {
+        MuonGMR4::CylinderBoundsExpander expander{logger.clone()};
+        expander.expand(tgContext, Acts::Volume{volumePos(0._degree, volDist) *
+                                                Amg::getTranslateX3D(width),bounds});
+        if (!testExpander(expander, std::array{volDist - height, Acts::fastHypot(volDist+height, 2.*width), -length, length}, logger)){
+            retCode = false;
+        }
+    }
+    /// Position the box way outside
+    {
+        MuonGMR4::CylinderBoundsExpander expander{logger.clone()};
+        expander.expand(tgContext, Acts::Volume{volumePos(0._degree, volDist) *
+                                                Amg::getTranslateX3D(2.*width),bounds});
+        if (!testExpander(expander, std::array{Acts::fastHypot(volDist - height, width), 
+                                               Acts::fastHypot(volDist+height, 3.*width), -length, length}, logger)){
+            retCode = false;
+        }
+    }
+    ACTS_INFO(__func__<<"() "<<__LINE__<<" - test result: "<<retCode);
+    return retCode;
+}
+
 
 
 int main () {
     int retCode = EXIT_SUCCESS;
     if (!testTrapezoidVertices(*Acts::getDefaultLogger("TrapezoidVertexTest" , lvl))){
         retCode = EXIT_FAILURE;
-    }
-    if (!testRectangleVertices(*Acts::getDefaultLogger("RecTangleVertexTest", lvl))) {
+    } if (!testRectangleVertices(*Acts::getDefaultLogger("RecTangleVertexTest", lvl))) {
+        retCode = EXIT_FAILURE;
+    } 
+    if (!testCylinderExpander(*Acts::getDefaultLogger("CylinderExpanderTest", lvl))) {
         retCode = EXIT_FAILURE;
     }
 

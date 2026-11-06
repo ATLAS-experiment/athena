@@ -17,9 +17,11 @@
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Geometry/Volume.hpp"
 #include "Acts/Surfaces/detail/PlanarHelper.hpp"
+#include "ActsInterop/Logger.h"
 
 #include "GeoModelHelpers/TransformToStringConverter.h"
 #include "GeoModelKernel/GeoDefinitions.h"
+
 
 #include "MuonReadoutGeometryR4/TrapezoidBoundsExpander.h"
 
@@ -61,7 +63,7 @@ template <typename ReObjType>
                                        const double margin) const 
          requires (Acts::PointerConcept<ReObjType>){
       const Acts::GeometryContext tgContext{gctx.context()};
-      TrapezoidBoundsExpander expandBounds{toCenter};
+      TrapezoidBoundsExpander expandBounds{toCenter, makeActsAthenaLogger(this, name())};
       expandBounds.setMargin(margin);
       ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Construct a new bounding box from "<<typeid(ReObjType).name()
                   <<" spanning over "<<constituents.size()<<" elements, align trf: "
@@ -217,7 +219,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
             const Acts::Transform3 toChambCentre = refEle->globalToLocalTransform(gctx);
             ATH_MSG_DEBUG(__func__<<" () "<<__LINE__<<" - New chamber candidate "<<m_idHelperSvc->toStringChamber(refEle->identify()));
             const auto[chamberCentre, chamberBox, planeBounds] = boundingBox(gctx, detEles, toChambCentre, volBoundSet, 
-                                                                              surfBoundSet, 0.1*Gaudi::Units::cm);
+                                                                              surfBoundSet, 0.1*Gaudi::Units::mm);
             chamberArgs chambArgs{};
             chambArgs.detEles = std::move(detEles);
             chambArgs.bounds = chamberBox;
@@ -244,7 +246,7 @@ StatusCode ChamberAssembleTool::buildReadOutElements(MuonDetectorManager &mgr) {
 
          const Acts::Transform3 toCenter = sectorArgs.chambers.front()->globalToLocalTransform(gctx);
          const auto [envelopeCentre, envelopeBox, envelopePlane] = boundingBox(gctx, sectorArgs.chambers, toCenter, 
-                                                                               volBoundSet, surfBoundSet, 2.* Gaudi::Units::cm);
+                                                                               volBoundSet, surfBoundSet, 0.1* Gaudi::Units::mm);
 
          sectorArgs.bounds = envelopeBox;
          sectorArgs.localToGlobalTrf = make_intrusive<GeoAlignableTransform>(toCenter.inverse() * envelopeCentre);

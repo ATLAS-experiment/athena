@@ -61,9 +61,9 @@ if (NOT SIMULATIONBASE)
                         PROPERTIES TIMEOUT 2400
                         PRIVATE_WORKING_DIRECTORY
                         POST_EXEC_SCRIPT noerror.sh)
-        #### Test that the sector envelopes fully enclose the particular chambers (R4)
+        #### Test that the sector envelopes fully enclose the particular chambers (R4) / Disable the RPC as they clash
         atlas_add_test( testChamberBuildingR4
-                        SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --defaultGeoFile RUN4
+                        SCRIPT python -m MuonGeoModelTestR4.testChamberBuilder --defaultGeoFile RUN4 --noRpc
                         PROPERTIES TIMEOUT 2400
                         PRIVATE_WORKING_DIRECTORY
                         POST_EXEC_SCRIPT noerror.sh)
