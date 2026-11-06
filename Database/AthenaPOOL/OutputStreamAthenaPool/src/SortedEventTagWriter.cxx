@@ -72,6 +72,7 @@ StatusCode SortedEventTagWriter::finalize()
     return true;
   };
   const bool sorted =
+    // cppcheck-suppress internalAstError; avoid cppcheck parse warning
     sortAs.operator()<int>() || sortAs.operator()<unsigned int>() ||
     sortAs.operator()<long>() || sortAs.operator()<unsigned long>() ||
     sortAs.operator()<long long>() || sortAs.operator()<unsigned long long>() ||
