@@ -27,7 +27,7 @@ class StatusCode;
 namespace pool  {
 
   // Forward declarations
-  class IDbContainer;
+  class ITechContainer;
   class DbDatabase;
   class DbTypeInfo;
   class DbContainerObj;
@@ -82,8 +82,8 @@ namespace pool  {
     /// Access to the Database the container resides in
     DbDatabase& containedIn();
     /// Let the implementation access the internals
-    const IDbContainer* info()  const;
-    IDbContainer* info();
+    const ITechContainer* info()  const;
+    ITechContainer* info();
     /// Retrieve persistent type information by name
     const DbTypeInfo* objectShape(const Guid& nam);
     /// Access the token of the container object

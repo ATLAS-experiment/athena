@@ -120,7 +120,7 @@ RootTreeContainer::BranchDesc::BranchDesc( TClass* cl, TBranch* b, TLeaf* l, voi
 
 
 RootTreeContainer::RootTreeContainer(const std::string& name) :
-   DbContainerImp(name),
+   TechContainerBase(name),
    m_tree(nullptr), m_type(0), m_dbH(POOL_StorageType),
    m_rootDb(nullptr), m_branchName(), m_ioBytes(0), m_treeFillMode(false),
    m_isDirty(false)
@@ -134,7 +134,7 @@ RootTreeContainer::~RootTreeContainer()   {
 
 uint64_t RootTreeContainer::size()    {
   if (m_tree == nullptr) return 0;
-  auto s = DbContainerImp::size();
+  auto s = TechContainerBase::size();
   if( isBranchContainer() ) {
      TBranch * pBranch = m_tree->GetBranch(m_branchName.c_str());
      if (pBranch == nullptr) return 0;
@@ -342,7 +342,7 @@ StatusCode RootTreeContainer::close()   {
   m_branches.clear();
   m_rootDb = nullptr;
   m_tree = nullptr;
-  return DbContainerImp::close();
+  return TechContainerBase::close();
 }
 
 
@@ -377,7 +377,7 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
             ATH_MSG_DEBUG("Branch container '" << m_branchName << "'");
          }
       }
-      IDbDatabase* idb = dbH.info();
+      ITechDatabase* idb = dbH.info();
       m_rootDb = dynamic_cast<RootDatabase*>(idb);
       if (m_rootDb)
          m_tree = m_rootDb->file()->Get<TTree>(treeName.c_str());
@@ -588,7 +588,7 @@ StatusCode RootTreeContainer::checkAccess(DbDatabase& dbH,
                                         const std::string& nam) const
 {
    if ( dbH.isValid() )    {
-      IDbDatabase* idb = dbH.info();
+      ITechDatabase* idb = dbH.info();
       auto rootDb = dynamic_cast<RootDatabase*>(idb);
       if (rootDb && rootDb->file()->Get<TTree>(nam.c_str())) {
          return SUCCESS;
@@ -936,7 +936,7 @@ StatusCode RootTreeContainer::setOption(const DbOption& opt)  {
 StatusCode RootTreeContainer::transAct(Transaction::Action action)
 {
    // execure action on the base class first
-   StatusCode status = DbContainerImp::transAct(action);
+   StatusCode status = TechContainerBase::transAct(action);
    if( !status.isSuccess() ) return status;
    if( action != Transaction::TRANSACT_FLUSH ) return SUCCESS;
    if( !m_tree ) return FAILURE;

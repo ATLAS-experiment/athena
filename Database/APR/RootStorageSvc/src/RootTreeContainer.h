@@ -15,7 +15,7 @@
 
 // Framework include files
 #include "StorageSvc/DbDatabase.h"
-#include "StorageSvc/DbContainerImp.h"
+#include "StorageSvc/TechContainerBase.h"
 
 #include <map>
 #include <string>
@@ -58,7 +58,7 @@ namespace pool  {
     *
     * @author  M.Frank M.Nowak
     */
-  class RootTreeContainer : public DbContainerImp
+  class RootTreeContainer : public TechContainerBase
   {
   protected:
 

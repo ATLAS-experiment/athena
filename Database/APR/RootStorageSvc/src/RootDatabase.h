@@ -14,7 +14,7 @@
 // Framework include files
 #include "AthenaKernel/SlotSpecificObj.h"
 #include "GaudiKernel/SmartIF.h"
-#include "StorageSvc/IDbDatabase.h"
+#include "StorageSvc/ITechDatabase.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbPrint.h"
 
@@ -56,7 +56,7 @@ namespace pool  {
     * @date    1/8/2002
     * @version 1.0
     */
-   class RootDatabase : public IDbDatabase, public APRMessaging
+   class RootDatabase : virtual public ITechDatabase, public APRMessaging
    {
   public:
     enum { READ_COUNTER = 0, WRITE_COUNTER = 1, OTHER_COUNTER = 2 };

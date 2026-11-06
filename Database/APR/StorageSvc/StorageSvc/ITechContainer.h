@@ -30,20 +30,17 @@ namespace pool    {
   class DbOption;
   class Shape;
 
-  /** @class IDbContainer IDbContainer.h StorageSvc/IDbContainer.h 
+  /** @class ITechContainer ITechContainer.h StorageSvc/ITechContainer.h 
     *
     * Description:
-    *
-    * Interface to the implementation specific part of a container object
-    * objects.
+    * Interface to the technology specific implementation of the Container object.
     *
     * @author  M.Frank
-    * @version 1.0
     */
-  class IDbContainer    {
+  class ITechContainer    {
   protected:
     /// Destructor (called only by sub-classes)
-    virtual ~IDbContainer()   {     }
+    virtual ~ITechContainer() = default;
 
   public:
     /// Release the technology specific implementation

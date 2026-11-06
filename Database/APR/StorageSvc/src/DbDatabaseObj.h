@@ -74,7 +74,7 @@ namespace pool    {
     /// Handle to the parameter container
     DbContainer                   m_params;
     /// Technology dependent implementation block
-    IDbDatabase*                  m_info;
+    ITechDatabase*                m_info;
     /// Map containing all links
     LinkMap                       m_linkMap;
     /// Random access array containing all links
@@ -115,8 +115,8 @@ namespace pool    {
     /// Access the size of the database: May be undefined for some technologies
     long long int size() const;
     /// Access to technology dependent implementation
-    IDbDatabase* info()               {  return m_info;         }
-    const IDbDatabase* info() const   {  return m_info;         }
+    ITechDatabase* info()               {  return m_info;         }
+    const ITechDatabase* info() const   {  return m_info;         }
     /// Access to domain handle (CONST)
     DbDomain& domain()                {  return m_dom;          }
     const DbDomain& domain() const    {  return m_dom;          }
@@ -152,7 +152,7 @@ namespace pool    {
     const Token* cntToken(const std::string& cntName);
     /// Allow access to all known containers
     StatusCode containers(std::vector<const Token*>& conts, bool intern);
-    StatusCode containers(std::vector<IDbContainer*>& conts, bool intern);
+    StatusCode containers(std::vector<ITechContainer*>& conts, bool intern);
     /// Add a persistent parameter to the file
     StatusCode addParam(const std::string& nam, const std::string& val);
     /// Retrieve existing parameter by name

@@ -30,7 +30,7 @@ StatusCode RootTreeIndexContainer::open( DbDatabase& dbH,
                                        const DbTypeInfo* info,
                                        Io::IoFlag mod)
 {
-   auto db = static_cast<const RootDatabase*>( dbH.info() );
+   auto db = dynamic_cast<const RootDatabase*>( dbH.info() );
    m_indexBump = db? db->currentIndexMasterID() : 0;
    return  RootTreeContainer::open( dbH, nam, info, mod );
 }
@@ -43,7 +43,7 @@ uint64_t RootTreeIndexContainer::nextRecordId()
    if (m_indexBranch == nullptr ) {
       s += RootTreeContainer::nextRecordId();
    } else {
-      s += std::max(m_index_entries + DbContainerImp::size(), RootTreeContainer::nextRecordId());
+      s += std::max(m_index_entries + TechContainerBase::size(), RootTreeContainer::nextRecordId());
    }
    return s + m_indexBump;
 }

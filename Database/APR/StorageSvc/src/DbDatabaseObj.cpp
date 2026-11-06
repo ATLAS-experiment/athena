@@ -22,8 +22,8 @@
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbOption.h"
-#include "StorageSvc/IDbDatabase.h"
-#include "StorageSvc/IDbContainer.h"
+#include "StorageSvc/ITechDatabase.h"
+#include "StorageSvc/ITechContainer.h"
 
 #include "CxxUtils/MD5.h"
 
@@ -52,7 +52,7 @@ DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
                               const std::string&   pfn,
                               const std::string&   fid,
                               Io::IoFlag    mod)
-: Base(fid, mod, dom.type(), dom.db()),
+: Base(fid, mod, dom.type(), dom.techFactory()),
   APRMessaging( pfn ),
   m_dom(dom), m_info(0), m_string_t(0), m_logon(pfn), m_fileAge(0)
 {
@@ -63,7 +63,7 @@ DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
   tok->oid().first  = INVALID;
   tok->oid().second = INVALID;
   m_token = tok.release();
-  if ( 0 == db() )    {
+  if( !techFactory() ) {
     ATH_MSG_ERROR("->  Access   DbDatabase   " << accessMode(mode())
                   << " [" << type().storageName() << "] " << name()
                   << " impossible." << endmsg
@@ -266,8 +266,8 @@ StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
 
 // Open Database object
 StatusCode DbDatabaseObj::open()   {
-  if ( !m_info && m_dom.isValid() && db() )    {
-    m_info = db()->createDatabase();
+  if ( !m_info && m_dom.isValid() && techFactory() )    {
+    m_info = techFactory()->createDatabase();
     if ( m_info->open( DbDatabase(this), m_logon, mode() ).isSuccess() )    {
       // Age open databases. Aging is only effective
       // for read-only databases. Otherwise no aging
@@ -635,7 +635,7 @@ StatusCode DbDatabaseObj::containers(std::vector<const Token*>& conts, bool with
 }
 
 /// Allow access to all known containers
-StatusCode DbDatabaseObj::containers(std::vector<IDbContainer*>& conts, bool with_internals)  {
+StatusCode DbDatabaseObj::containers(std::vector<ITechContainer*>& conts, bool with_internals)  {
   conts.clear();
   if ( 0 == m_info ) open().ignore();
   if ( 0 != m_info )    {

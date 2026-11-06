@@ -21,6 +21,7 @@
 
 class Token;
 class StatusCode;
+class ITechFactory;
 
 /*
  *  POOL namespace declaration
@@ -28,8 +29,7 @@ class StatusCode;
 namespace pool    {
 
   // Forward declarations
-  class IDbDomain;
-  class IOODatabase;
+  class ITechDomain;
   class DbDomainObj;
   class DbDatabaseObj;
   class DbSession;
@@ -87,7 +87,7 @@ namespace pool    {
       *
       * @return StatusCode code indicating success or failure.
       */
-    StatusCode open(IOODatabase* imp, const DbType& technology, Io::IoFlag mod = Io::READ);
+    StatusCode open(ITechFactory* imp, const DbType& technology, Io::IoFlag mod = Io::READ);
     /// Close domain
     StatusCode close();
     /// Access to access mode
@@ -108,8 +108,8 @@ namespace pool    {
     /// Access the maximal age limit
     int ageLimit()  const;
     /// Let the implementation access the internals
-    IDbDomain* info();
-    const IDbDomain* info() const;
+    ITechDomain* info();
+    const ITechDomain* info() const;
 
     /// Set domain specific options
     /** @param refOpt   [IN]  Reference to option object
@@ -126,8 +126,8 @@ namespace pool    {
     StatusCode getOption(DbOption& refOpt) const;
 
     /// Allow access to the Database implementation
-    IOODatabase* db();
-    const IOODatabase* db()   const;
+    ITechFactory* techFactory();
+    const ITechFactory* techFactory()   const;
   };
 }       // End namespace pool
 #endif  // POOL_DBDOMAIN_H

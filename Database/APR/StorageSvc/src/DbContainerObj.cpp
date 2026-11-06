@@ -15,10 +15,9 @@
 
 // Framework include files
 #include "DbContainerObj.h"
-#include "StorageSvc/IDbContainer.h"
+#include "StorageSvc/ITechContainer.h"
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/DbTypeInfo.h"
-#include "StorageSvc/DbContainer.h"
 #include "GaudiKernel/StatusCode.h"
 
 #include <memory>
@@ -42,13 +41,13 @@ DbContainerObj::DbContainerObj( DbDatabase&       dbH,
                                 const string&     nam, 
                                 const DbType&     dbtyp,
                                 Io::IoFlag      mod)   
-: DbAccessObjBase(nam, mod, dbtyp, dbH.db()),
+: DbAccessObjBase(nam, mod, dbtyp, dbH.techFactory()),
   APRMessaging( dbH.logon() ),
   m_info(0), m_tokH(0)
 {
   m_isOpen    = false;
 
-  if ( 0 != db() && dbtyp == dbH.type() )   {
+  if ( techFactory() && dbtyp == dbH.type() )   {
     if ( dbH.isValid() )  {
       if ( dbH.add( name(), this).isSuccess() )    {
         m_dbH  = dbH;
@@ -111,7 +110,7 @@ uint64_t DbContainerObj::size()   {
 StatusCode DbContainerObj::open(const DbTypeInfo* typ)   {
   if ( !m_isOpen )    {
     if ( 0 == m_info )  {
-      m_info = db()->createContainer(name(), type());
+      m_info = techFactory()->createContainer(name(), type());
     }
     if ( 0 != m_info && 0 != typ && database().isValid() )  {
       StatusCode sc = info()->open(database(), name(), typ, mode());
@@ -151,7 +150,7 @@ StatusCode DbContainerObj::open(const DbTypeInfo* typ)   {
 /// Check if we can access the container
 StatusCode DbContainerObj::checkAccess() {
   StatusCode result = StatusCode::FAILURE;
-  auto container = db()->createContainer(name(), type());
+  auto container = techFactory()->createContainer(name(), type());
   if( database().isValid() && container ) {
     result = container->checkAccess(database(), name());
   }

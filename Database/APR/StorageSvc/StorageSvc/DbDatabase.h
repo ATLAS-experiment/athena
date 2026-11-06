@@ -24,6 +24,7 @@
 #include <map>
 
 class StatusCode;
+class ITechFactory;
 
 /*
  *  POOL namespace declaration
@@ -31,9 +32,8 @@ class StatusCode;
 namespace pool  {
 
   // Forward declarations
-  class IOODatabase;
-  class IDbDatabase;
-  class IDbContainer;
+  class ITechDatabase;
+  class ITechContainer;
   class DbDomain;
   class DbDatabase;
   class DbDatabaseObj;
@@ -116,8 +116,8 @@ namespace pool  {
     /// Access the size of the database: May be undefined for some technologies
     long long int size() const;
     /// Allow access to the Database implementation
-    IOODatabase* db();
-    const IOODatabase* db()   const;
+    ITechFactory* techFactory();
+    const ITechFactory* techFactory()   const;
     /// Add domain to session
     StatusCode add(const std::string& name, DbContainerObj* cnt);
     /// Find domain in session
@@ -188,10 +188,10 @@ namespace pool  {
     const Token* cntToken(const std::string& cntName);
     /// Allow access to all known containers
     StatusCode containers(std::vector<const Token*>& conts, bool intern=false);
-    StatusCode containers(std::vector<IDbContainer*>& conts, bool intern=false);
+    StatusCode containers(std::vector<ITechContainer*>& conts, bool intern=false);
     /// Let the implementation access the internals
-    IDbDatabase* info();
-    const IDbDatabase* info()  const;
+    ITechDatabase* info();
+    const ITechDatabase* info()  const;
     /// Update database age
     void setAge(int value);
     /// Access age value

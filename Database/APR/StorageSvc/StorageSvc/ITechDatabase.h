@@ -28,19 +28,16 @@ namespace pool    {
   class DbDatabase;
   class DbContainer;
 
-  /** @class IDbDatabase IDbDatabase.h StorageSvc/IDbDatabase.h
-    *
-    * IDbDatabase interface
+  /** @class ITechDatabase ITechDatabase.h StorageSvc/ITechDatabase.h
     *
     * Description:
-    * Interface to the implementation specific part of a Database object
+    * Interface to the technology specific implementation of a Database object
     *
     * @author  M.Frank
-    * @version 1.0
     */
-  class IDbDatabase    {
+  class ITechDatabase    {
   public:
-    virtual ~IDbDatabase()   { }
+    virtual ~ITechDatabase() = default;
 
     /// Access the size of the database: May be undefined for some technologies
     virtual long long int size()  const = 0;
