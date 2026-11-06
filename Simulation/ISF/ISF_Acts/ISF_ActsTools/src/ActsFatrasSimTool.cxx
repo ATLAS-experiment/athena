@@ -192,7 +192,7 @@ StatusCode ISF::ActsFatrasSimTool::simulateVector(
       std::vector<ActsFatras::Hit> particle_hits;
       if (itr->numberOfHits() > 0) {
         std::copy(hits.begin(), hits.begin()+itr->numberOfHits(), std::back_inserter(particle_hits));
-        m_ActsFatrasWriteHandler->createHits(*isfp, m_trackingGeometry,particle_hits,m_pixelSiHits,m_sctSiHits);
+        m_ActsFatrasWriteHandler->createHits(*isfp, m_trackingGeometry, particle_hits, m_siHits);
       }
       // Process secondaries
       auto isKilled = !itr->isAlive();

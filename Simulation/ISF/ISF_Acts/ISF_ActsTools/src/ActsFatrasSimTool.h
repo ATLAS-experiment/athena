@@ -239,14 +239,11 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
             McEventCollection* mcEventCollection, McEventCollection *shadowTruth=nullptr) override;
   virtual StatusCode setupEvent(const EventContext&) override {
     ATH_CHECK(m_truthRecordSvc->initializeTruthCollection());
-    m_pixelSiHits.Clear();
-    m_sctSiHits.Clear();
+    // one collection per ActsFatrasWriteHandler::HitCollectionIndex
+    m_siHits.assign(ActsFatrasWriteHandler::NCollections, SiHitCollection{});
     return StatusCode::SUCCESS; };
   virtual StatusCode releaseEvent(const EventContext& ctx) override {
-    std::vector<SiHitCollection> hitcolls;
-    hitcolls.push_back(m_pixelSiHits);
-    hitcolls.push_back(m_sctSiHits);
-    ATH_CHECK(m_ActsFatrasWriteHandler->WriteHits(hitcolls,ctx));
+    ATH_CHECK(m_ActsFatrasWriteHandler->WriteHits(m_siHits,ctx));
     ATH_CHECK(m_truthRecordSvc->releaseEvent());
     return StatusCode::SUCCESS; };
   virtual ISF::SimulationFlavor simFlavor() const override{
@@ -255,9 +252,9 @@ class ActsFatrasSimTool : public BaseSimulatorTool {
   /** @brief Context provider for geometry, magnetic field and calibration contexts */
   ActsTrk::ContextUtility m_ctxProvider{this};
 
-  // For sihit creation
-  SiHitCollection m_pixelSiHits;
-  SiHitCollection m_sctSiHits;
+  // For sihit creation: Pixel, SCT, HGTD, PLR
+  // (indexed by ActsFatrasWriteHandler::HitCollectionIndex)
+  std::vector<SiHitCollection> m_siHits = std::vector<SiHitCollection>(ActsFatrasWriteHandler::NCollections);
   // Templated tool retrieval
   template <class T>
   StatusCode retrieveTool(ToolHandle<T>& thandle) {

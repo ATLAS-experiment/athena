@@ -8,45 +8,43 @@ from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.Logging import logging
 from ISF_Algorithms.CollectionMergerConfig import CollectionMergerCfg
 
+def _fatrasHitCollections(flags):
+    """(write-handler property, bare collection name, CollectionMerger input
+    property, merge region) of every SiHit collection ActsFatras can write,
+    for the detectors enabled in this job. Same names as the Geant4 SDs."""
+    colls = []
+    if flags.Detector.EnableITkPixel:
+        colls.append(("PixelCollectionName", "ITkPixelHits", "ITkPixelHits", "ITk"))
+    elif flags.Detector.EnablePixel:
+        colls.append(("PixelCollectionName", "PixelHits", "PixelHits", "ID"))
+    if flags.Detector.EnableITkStrip:
+        colls.append(("SCTCollectionName", "ITkStripHits", "ITkStripHits", "ITk"))
+    elif flags.Detector.EnableSCT:
+        colls.append(("SCTCollectionName", "SCT_Hits", "SCTHits", "ID"))
+    if flags.Detector.EnableHGTD:
+        colls.append(("HGTDCollectionName", "HGTD_Hits", "HGTDHits", "HGTD"))
+    if flags.Detector.EnablePLR:
+        colls.append(("PLRCollectionName", "PLR_Hits", "PLRHits", "ITk"))
+    return colls
+
+FatrasHitsSuffix = "_Fatras"
+
 def ActsFatrasWriteHandlerCfg(flags, name="ActsFatrasWriteHandler", **kwargs):
     """Return ActsFatrasWriteHandler configured with ComponentAccumulator"""
     acc = ComponentAccumulator()
     mlog = logging.getLogger(name)
     mlog.info('Start configuration ActsFatrasWriteHandler')
-    
-    if flags.Detector.EnablePixel:
-      bare_collection_name = "PixelHits"
-      merger_input_property = "PixelHits"
-      region = "ID"
-    if flags.Detector.EnableITkPixel:
-      bare_collection_name = "ITkPixelHits"
-      merger_input_property = "ITkPixelHits"
-      region = "ITk"
-    mergeable_collection_suffix = "_Fatras"
-    acc_pixel, pixel_hits_collection_name = CollectionMergerCfg(flags,
-                                                      bare_collection_name,
-                                                      mergeable_collection_suffix,
-                                                      merger_input_property,
-                                                      region)
-    acc.merge(acc_pixel)
 
-    if flags.Detector.EnableSCT:
-      bare_collection_name = "SCT_Hits"
-      merger_input_property = "SCTHits"
-      region = "ID"
-    if flags.Detector.EnableITkPixel:
-      bare_collection_name = "ITkStripHits"
-      merger_input_property = "ITkStripHits"
-      region = "ITk"
-    acc_sct, sct_hits_collection_name = CollectionMergerCfg(flags,
-                                                      bare_collection_name,
-                                                      mergeable_collection_suffix,
-                                                      merger_input_property,
-                                                      region)
-    acc.merge(acc_sct)
-
-    kwargs.setdefault("PixelCollectionName", pixel_hits_collection_name)
-    kwargs.setdefault("SCTCollectionName", sct_hits_collection_name)
+    # Collections not listed here keep an empty name, i.e. are not written
+    for prop, bare_collection_name, merger_input_property, region in _fatrasHitCollections(flags):
+        acc_coll, hits_collection_name = CollectionMergerCfg(flags,
+                                                             bare_collection_name,
+                                                             FatrasHitsSuffix,
+                                                             merger_input_property,
+                                                             region)
+        acc.merge(acc_coll)
+        kwargs.setdefault(prop, hits_collection_name)
+        mlog.info('%s = %s', prop, hits_collection_name)
 
     acc.setPrivateTools(CompFactory.ActsFatrasWriteHandler(name=name, **kwargs))
     return acc
@@ -107,19 +105,11 @@ def ActsFatrasSimToolCfg(flags, name="ISF_ActsFatrasSimTool", RefineMaterial=Non
     kwargs.setdefault("ExtrapolationTool", acc.popToolsAndMerge(ActsExtrapolationToolCfg(flags)))
 
     kwargs.setdefault("ActsFatrasWriteHandler", acc.popToolsAndMerge(ActsFatrasWriteHandlerCfg(flags)))
-    writtenContainers =[]
-    if flags.Detector.EnablePixel:
-        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ID', True)):
-            writtenContainers += [("SiHitCollection", "PixelHits_Fatras")]
-    if flags.Detector.EnableSCT:
-        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ID', True)):
-           writtenContainers += [("SiHitCollection", "SCT_Hits_Fatras")]
-    if flags.Detector.EnableITkPixel:
-        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ITk', True)):
-            writtenContainers += [("SiHitCollection", "ITkPixelHits_Fatras")]
-    if flags.Detector.EnableITkStrip:
-        if (flags.Sim.ISFRun and flags.Sim.ISF.HITSMergingRequired.get('ITk', True)):
-           writtenContainers += [("SiHitCollection", "ITkStripHits_Fatras")]
+    writtenContainers = []
+    if flags.Sim.ISFRun:
+        for _, bare_collection_name, _, region in _fatrasHitCollections(flags):
+            if flags.Sim.ISF.HITSMergingRequired.get(region, True):
+                writtenContainers += [("SiHitCollection", bare_collection_name + FatrasHitsSuffix)]
     kwargs.setdefault("ExtraOutputs", writtenContainers)
     acc.setPrivateTools(CompFactory.ISF.ActsFatrasSimTool(name, **kwargs))
     return acc
