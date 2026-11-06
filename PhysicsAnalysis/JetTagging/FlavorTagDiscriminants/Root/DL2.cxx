@@ -38,8 +38,8 @@ namespace FlavorTagDiscriminants {
     }
 
     auto [vj, ds] = dataprep::createBvarGetters(inputs);
-    m_varsFromJet = vj;
-    m_dataDependencyNames += ds;
+    m_varsFromJet = std::move(vj);
+    m_dataDependencyNames += std::move(ds);
     
     for (auto config : tracks_configs){
       m_tracksLoaders.push_back(std::make_shared<TracksLoader>(config, options));
@@ -47,14 +47,14 @@ namespace FlavorTagDiscriminants {
 
     auto [decorators, dd, rd] = dataprep::createDecorators(
       graph_config, options);
-    m_dataDependencyNames += dd;
-    m_decorators = decorators;
+    m_dataDependencyNames += std::move(dd);
+    m_decorators = std::move(decorators);
 
     auto [track_validity, is_defaults, ipdd, rc] = dataprep::createIpChecker(
       graph_config, options);
-    m_invalid_track_checker = track_validity;
-    m_is_defaults = is_defaults;
-    m_dataDependencyNames += ipdd;
+    m_invalid_track_checker = std::move(track_validity);
+    m_is_defaults = std::move(is_defaults);
+    m_dataDependencyNames += std::move(ipdd);
 
     // Update dependencies and used remap from the tracks loaders.
     for (const auto& loader : m_tracksLoaders){
@@ -69,6 +69,9 @@ namespace FlavorTagDiscriminants {
 
   void DL2::decorate(const xAOD::IParticle& i_jet) const {
     auto jet = dynamic_cast<const xAOD::Jet*>(&i_jet);
+    if (!jet)[[unlikely]]{
+      throw std::runtime_error("DL2::decorate: dynamic cast failed.");
+    };
     decorate(*jet);
   }
   void DL2::decorateWithDefaults(const SG::AuxElement& jet) const {
@@ -95,7 +98,7 @@ namespace FlavorTagDiscriminants {
       // Note, you can hack in more variables to `cleaned` here.
 
       // put the cleaned inputs into the node structure
-      nodes[m_input_node_name] =  cleaned;
+      nodes[m_input_node_name] =  std::move(cleaned);
     }
 
     // add track sequences, check if any are invalid
@@ -105,7 +108,7 @@ namespace FlavorTagDiscriminants {
     for (const auto& loader : m_tracksLoaders){
       std::map<std::string, std::vector<double>> feats;
       std::tie(invalid, feats) = loader->getDL2Data(jet, m_invalid_track_checker);
-      seqs[loader->getName()] = feats;
+      seqs[loader->getName()] = std::move(feats);
     }
 
     for (const auto& def: m_is_defaults) {
