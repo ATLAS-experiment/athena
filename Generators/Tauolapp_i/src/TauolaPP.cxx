@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeneratorObjects/McEventCollection.h"
@@ -129,7 +129,9 @@ StatusCode TauolaPP::execute(const EventContext& ctx) {
       t_event->undecayTaus();
     // decay taus
       t_event->decayTaus();
-    // t_event->getEvent()->print();
+      HepMC::fillBarcodesAttribute(evt);
+  // added conversion GeV ->  MeV to ensure correct units
+      evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
   }
 
   return StatusCode::SUCCESS;
