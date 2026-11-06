@@ -15,7 +15,7 @@
 
 // Framework include files
 #include "StorageSvc/DbDatabase.h"
-#include "StorageSvc/DbContainerImp.h"
+#include "StorageSvc/TechContainerBase.h"
 
 // Forward declarations
 class StatusCode;
@@ -42,7 +42,7 @@ namespace pool  {
     * @date    1/8/2002
     * @version 1.0
     */
-  class RootKeyContainer : public DbContainerImp {
+  class RootKeyContainer : public TechContainerBase {
     /// Reference to the root tree object
     TDirectory*        m_dir;
     /// Parent Database handle

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //====================================================================
@@ -11,7 +11,7 @@
 #ifndef POOL_ROOTDOMAIN_H
 #define POOL_ROOTDOMAIN_H 1
 
-#include "StorageSvc/IDbDomain.h"
+#include "StorageSvc/ITechDomain.h"
 
 class StatusCode;
 
@@ -34,7 +34,7 @@ namespace pool  {
     * @date    1/8/2002
     * @version 1.0
     */
-  class RootDomain : public IDbDomain  {
+  class RootDomain : virtual public ITechDomain  {
   protected:
     /// Default compression level
     int m_defCompression;

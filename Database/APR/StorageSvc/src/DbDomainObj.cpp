@@ -18,8 +18,8 @@
 
 // Framework include files
 #include "StorageSvc/pool.h"
-#include "StorageSvc/IDbDomain.h"
-#include "StorageSvc/IOODatabase.h"
+#include "StorageSvc/ITechDomain.h"
+#include "StorageSvc/ITechFactory.h"
 
 #include "GaudiKernel/StatusCode.h"
 #include "AthenaKernel/errorcheck.h"
@@ -32,19 +32,19 @@ using namespace std;
 using namespace pool;
 
 /// Constructor
-DbDomainObj::DbDomainObj(IOODatabase* imp, const DbType& typ, Io::IoFlag mode)
+DbDomainObj::DbDomainObj(ITechFactory* imp, const DbType& typ, Io::IoFlag mode)
 : Base("Domain["+typ.storageName()+"]", mode, typ, imp),
   APRMessaging(name()),
   m_maxAge(2),
   m_info(0)
 {
-  if ( 0 == db() )    {
+  if( !techFactory() ) {
     ATH_MSG_ERROR( ">   Access   DbDomain     " << accessMode(mode)
         << " " << name() << " (UNKNOWN) impossible." << " [" << typ.storageName() << "]" );
     throw std::runtime_error("POOL::DbDomain: Unknown storage type requested: " + typ.storageName());
     return;
   }
-  m_info = db()->createDomain();
+  m_info = techFactory()->createDomain();
   ATH_MSG_INFO( ">   Access   DbDomain     "
         << accessMode(mode) << " [" << type().storageName() << "]" );
 }

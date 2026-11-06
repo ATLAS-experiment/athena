@@ -10,6 +10,9 @@
 #include "StorageSvc/IStorageSvc.h"
 #include "StorageSvc/DbPrint.h"
 
+
+class ITechFactory;
+
 /*
  *   POOL namespace declaration
  */
@@ -17,7 +20,6 @@ namespace pool  {
 
   // Forward declarations
   class DbOption;
-  class IOODatabase;
 
   /** @class DbStorageSvc DbStorageSvc.h StorageSvc/DbStorageSvc.h
     *
@@ -48,7 +50,7 @@ namespace pool  {
     /// Technology type
     DbType              m_type;
     /// Loaded StorageSvc implementation type (for m_type)
-    IOODatabase*        m_implementation;
+    ITechFactory*        m_implementation;
 
   public:
 
@@ -276,7 +278,7 @@ namespace pool  {
 
   private:
     /// Access technology implementations
-    IOODatabase* db();
+    ITechFactory* getTechFactory();
 
   };
 }       // End namespace pool

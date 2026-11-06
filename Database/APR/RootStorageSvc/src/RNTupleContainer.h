@@ -11,7 +11,7 @@
 
 // Framework include files
 #include "StorageSvc/DbColumn.h"
-#include "StorageSvc/DbContainerImp.h"
+#include "StorageSvc/TechContainerBase.h"
 #include "StorageSvc/DbDatabase.h"
 
 #include "RootAuxDynIO/IRootAuxDynIO.h"
@@ -36,7 +36,7 @@ namespace pool { class RootDatabase; }
  * RNTUPLE specific implementation of Database Container.
  */
 
-class RNTupleContainer : public pool::DbContainerImp
+class RNTupleContainer : public pool::TechContainerBase
 {
   /// Definition of a field info structure
   struct FieldDesc : public pool::DbColumn

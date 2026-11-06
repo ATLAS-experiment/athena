@@ -14,7 +14,7 @@
 /// Framework include files
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/pool.h"
-#include "StorageSvc/IDbContainer.h"
+#include "StorageSvc/ITechContainer.h"
 #include "StorageSvc/DbPrint.h"
 #include "GaudiKernel/StatusCode.h"
 
@@ -29,9 +29,9 @@
 namespace pool    {
 
   // Forward declarations
-  class IDbContainer;
+  class ITechContainer;
 
-  /** @class DbContainerImp DbContainerImp.h StorageSvc/DbContainerImp.h
+  /** @class TechContainerBase TechContainerBase.h StorageSvc/TechContainerBase.h
     *
     *  "Generic" Container implementation
     *
@@ -42,7 +42,7 @@ namespace pool    {
     *  @author  M.Frank
     *  @version 1.0
     */
-  class DbContainerImp : virtual public IDbContainer, public APRMessaging
+  class TechContainerBase : virtual public ITechContainer, public APRMessaging
   {
   protected:
 
@@ -73,7 +73,7 @@ namespace pool    {
     std::string           m_name;
 
     /// Standard destructor
-    virtual ~DbContainerImp() = default;
+    virtual ~TechContainerBase() = default;
     /// Commit single entry to container
     virtual StatusCode writeObject(ActionList::value_type& /* entry */)  
     { return StatusCode::FAILURE;                                                   }
@@ -81,7 +81,7 @@ namespace pool    {
     virtual StatusCode commitTransaction();
 
   public:
-    explicit DbContainerImp(const std::string& name);
+    explicit TechContainerBase(const std::string& name);
     /// Release instance (Abstract interfaces do not expose destructor!)
     virtual void release() override                    { delete this;           }
     /// Size of the container

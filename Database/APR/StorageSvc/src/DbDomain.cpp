@@ -27,7 +27,7 @@ DbDomain::DbDomain(DbDomainObj* dom)   {
   if ( dom ) setType(dom->type());
 }
 
-StatusCode DbDomain::open(IOODatabase* imp, const DbType& typ, Io::IoFlag mod)  {
+StatusCode DbDomain::open(ITechFactory* imp, const DbType& typ, Io::IoFlag mod)  {
   if ( !isValid() ) {
     DbDomainObj* dom = new DbDomainObj(imp, typ.majorType(), mod);
     switchPtr(dom);
@@ -115,18 +115,18 @@ bool DbDomain::existsDbase(const string& nam)
 {  return isValid() ? ptr()->existsDbase(nam) : false;                  }
 
 /// Access implementation internals
-IDbDomain* DbDomain::info()
+ITechDomain* DbDomain::info()
 {  return isValid() ? ptr()->info() : 0;                                }
 
-const IDbDomain* DbDomain::info()   const
+const ITechDomain* DbDomain::info()   const
 {  return isValid() ? ptr()->info() : 0;                                }
 
 /// Allow access to the Database implementation
-IOODatabase* DbDomain::db()
-{  return isValid() ? ptr()->db() : 0;                                  }
+ITechFactory* DbDomain::techFactory()
+{  return isValid() ? ptr()->techFactory() : 0;                         }
 
-const IOODatabase* DbDomain::db()  const
-{  return isValid() ? ptr()->db() : 0;                                  }
+const ITechFactory* DbDomain::techFactory()  const
+{  return isValid() ? ptr()->techFactory() : 0;                         }
 
 /// Increase the age of all open databases
 StatusCode DbDomain::ageOpenDbs()

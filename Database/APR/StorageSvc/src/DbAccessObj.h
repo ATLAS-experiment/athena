@@ -15,7 +15,7 @@
 // Framework include files
 #include "StorageSvc/pool.h"
 #include "StorageSvc/DbType.h"
-#include "StorageSvc/IOODatabase.h"
+#include "StorageSvc/ITechFactory.h"
 #include "GaudiKernel/StatusCode.h"
 
 // STL include files
@@ -57,15 +57,15 @@ class DbAccessObjBase {
     /// Database type
     DbType                m_type;
     /// Pointer to specific pool implementation
-    IOODatabase*          m_pool;
+    ITechFactory*         m_factory;
 
   public:
     /// Constructor with initializing arguments
-    DbAccessObjBase(const std::string& n, Io::IoFlag m, const DbType& t, IOODatabase* s=0)
-    : m_refCount(0), m_mode(m), m_name(n), m_type(t), m_pool(s)
-    { if( m_pool )  m_pool->addRef(); }
+    DbAccessObjBase(const std::string& n, Io::IoFlag m, const DbType& t, ITechFactory* s=0)
+    : m_refCount(0), m_mode(m), m_name(n), m_type(t), m_factory(s)
+    { if( m_factory )  m_factory->addRef(); }
     /// Standard destructor
-    virtual ~DbAccessObjBase()        {      releasePtr( m_pool );    }
+    virtual ~DbAccessObjBase()        {      releasePtr( m_factory );    }
     /// Access the instance name
     const std::string& name()  const  {      return m_name;           }
     /// Access the instance name
@@ -77,8 +77,8 @@ class DbAccessObjBase {
     // Inline functions
     const DbType& type()  const       {      return m_type;           }
     /// Allow access to the Database implementation
-    const IOODatabase* db()   const   {      return m_pool;           }
-    IOODatabase* db()                 {      return m_pool;           }
+    const ITechFactory* techFactory() const {      return m_factory;  }
+    ITechFactory* techFactory()       {      return m_factory;        }
     /// Access reference counter
     int refCount()   const            {      return m_refCount;       }
     /// Add reference count

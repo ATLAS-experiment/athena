@@ -191,7 +191,7 @@ StatusCode DbDatabase::containers(vector<const Token*>& conts,bool with_internal
 {  return isValid() ? ptr()->containers(conts,with_internal) : StatusCode::FAILURE;   }
 
 /// Allow access to all known containers
-StatusCode DbDatabase::containers(vector<IDbContainer*>& conts,bool with_internal)
+StatusCode DbDatabase::containers(vector<ITechContainer*>& conts,bool with_internal)
 {  return isValid() ? ptr()->containers(conts,with_internal) : StatusCode::FAILURE;   }
 
 /// Add a persistent parameter to the file
@@ -207,18 +207,18 @@ const Token* DbDatabase::token() const
 {  return isValid() ? ptr()->token() : 0;                               }
 
 /// Access implementation internals
-IDbDatabase* DbDatabase::info()
+ITechDatabase* DbDatabase::info()
 {  return isValid() ? ptr()->info() : 0;                                }
 
-const IDbDatabase* DbDatabase::info()   const
+const ITechDatabase* DbDatabase::info()   const
 {  return isValid() ? ptr()->info() : 0;                                }
 
 /// Allow access to the Database implementation
-IOODatabase* DbDatabase::db()
-{  return isValid() ? ptr()->db() : 0;                                  }
+ITechFactory* DbDatabase::techFactory()
+{  return isValid() ? ptr()->techFactory() : 0;                         }
 
-const IOODatabase* DbDatabase::db()    const
-{  return isValid() ? ptr()->db() : 0;                                  }
+const ITechFactory* DbDatabase::techFactory()    const
+{  return isValid() ? ptr()->techFactory() : 0;                         }
 
 /// Update database age
 void DbDatabase::setAge(int value)

@@ -141,11 +141,11 @@ const Token* DbContainer::token() const {
 }
 
 /// Access implementation internals
-const IDbContainer* DbContainer::info() const {
+const ITechContainer* DbContainer::info() const {
   // Be sure to use the const version of info() to avoid checker warnings.
   return isValid() ? std::as_const(*m_ptr).info() : 0;
 }
-IDbContainer* DbContainer::info() {
+ITechContainer* DbContainer::info() {
   return isValid() ? m_ptr->info() : 0;
 }
 

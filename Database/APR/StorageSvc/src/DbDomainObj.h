@@ -17,16 +17,17 @@
 #include "StorageSvc/DbPrint.h"
 #include "DbAccessObj.h"
 
+class ITechFactory;
+
 /*
  *  POOL namespace declaration
  */
 namespace pool    {
 
   // Forward declarations
-  class IOODatabase;
   class DbDatabaseObj;
   class DbOption;
-  class IDbDomain;
+  class ITechDomain;
 
   /** Db objects: DbDomainObj
 
@@ -42,15 +43,15 @@ namespace pool    {
     /// Maximal age of files allowed.
     int             m_maxAge;
     /// Technology dependent stuff
-    IDbDomain*      m_info;
+    ITechDomain*      m_info;
   public:
     /// Constructor
-    DbDomainObj(IOODatabase* imp, const DbType& typ, Io::IoFlag mode = Io::READ);
+    DbDomainObj(ITechFactory* imp, const DbType& typ, Io::IoFlag mode = Io::READ);
     /// Standard destructor
     virtual ~DbDomainObj();
     /// Access to technology dependent implementation
-    IDbDomain* info()                   {    return m_info;     }
-    const IDbDomain* info() const       {    return m_info;     }
+    ITechDomain* info()                 {    return m_info;     }
+    const ITechDomain* info() const     {    return m_info;     }
     /// Set the maximal allowed age limit for files in this domain
     void       setAgeLimit(int value)   {    m_maxAge = value;  }
     /// Access the maximal age limit

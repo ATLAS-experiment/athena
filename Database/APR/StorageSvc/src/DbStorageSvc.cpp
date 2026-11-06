@@ -22,7 +22,7 @@
 #include "StorageSvc/DbConnection.h"
 #include "DbDatabaseObj.h"
 #include "StorageSvc/FileDescriptor.h"
-#include "StorageSvc/IOODatabase.h"
+#include "StorageSvc/ITechFactory.h"
 
 #include "Gaudi/PluginService.h"
 
@@ -239,7 +239,7 @@ StatusCode DbStorageSvc::read( const FileDescriptor& fDesc,
 /// Start a new Database Session.
 StatusCode DbStorageSvc::startSession(Io::IoFlag accessmode, int technology, int ageLimit) {
   m_type   = DbType(technology).majorType();
-  if( m_domH.open(db(), m_type, accessmode).isSuccess() )  {
+  if( m_domH.open(getTechFactory(), m_type, accessmode).isSuccess() )  {
       m_domH.setAgeLimit(ageLimit==-1 ? m_ageLimit : ageLimit);
       return StatusCode::SUCCESS;
   }
@@ -314,10 +314,10 @@ StatusCode DbStorageSvc::endTransaction(FileDescriptor& refDB, Transaction::Acti
 }
 
 /// Access technology implementations
-IOODatabase* DbStorageSvc::db() {
+ITechFactory* DbStorageSvc::getTechFactory() {
   if( !m_implementation ) {
     const std::string &nam = m_type.storageName();
-    m_implementation = Gaudi::PluginService::Factory<IOODatabase*()>::create(nam).release();
+    m_implementation = Gaudi::PluginService::Factory<ITechFactory*()>::create(nam).release();
     if( !m_implementation ) {
       ATH_MSG_FATAL( "Failed to load plugin for " << nam << " storage type" );
     }

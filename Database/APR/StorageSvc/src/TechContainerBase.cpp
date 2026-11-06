@@ -12,7 +12,7 @@
 
 /// Framework include files
 #include "StorageSvc/DbContainer.h"
-#include "StorageSvc/DbContainerImp.h"
+#include "StorageSvc/TechContainerBase.h"
 #include "GaudiKernel/StatusCode.h"
 #include "AthenaKernel/errorcheck.h"
 
@@ -22,47 +22,47 @@ using namespace std;
 using namespace pool;
 
 /// Standard Constructor
-DbContainerImp::DbContainerImp(const std::string& name) :
+TechContainerBase::TechContainerBase(const std::string& name) :
   APRMessaging(name),
   m_size(0), m_name("UNKNOWN")
 {
 }
 
 /// Size of the container
-uint64_t DbContainerImp::size()  {
+uint64_t TechContainerBase::size()  {
   return m_size;
 }
 
 /// Number of next record in the container (=size if no delete is allowed)
-uint64_t DbContainerImp::nextRecordId()   {
+uint64_t TechContainerBase::nextRecordId()   {
   return size();
 }
 
 /// Access options
-StatusCode DbContainerImp::getOption(DbOption& /* opt */) {
+StatusCode TechContainerBase::getOption(DbOption& /* opt */) {
   return StatusCode::FAILURE;
 }
 
 /// Set options
-StatusCode DbContainerImp::setOption(const DbOption& /* opt */) {
+StatusCode TechContainerBase::setOption(const DbOption& /* opt */) {
   return StatusCode::SUCCESS;
 }
 
 /// Close the container and deallocate resources
-StatusCode DbContainerImp::close()   {
+StatusCode TechContainerBase::close()   {
   m_size = 0;
   return StatusCode::SUCCESS;
 }
 
 /// In place allocation of raw memory for the transient object
-StatusCode DbContainerImp::store(const void* object, DbContainer& cntH, const Shape* shape)  {
+StatusCode TechContainerBase::store(const void* object, DbContainer& cntH, const Shape* shape)  {
   Token::OID_t objLink(cntH.token()->oid().first, nextRecordId());
   DbAction action( object, shape, objLink );
   return writeObject( action );
 }
 
 /// In place allocation of raw memory for the transient object
-StatusCode DbContainerImp::allocate(DbContainer& cntH, const void* object, const Shape* shape, Token::OID_t& oid) {
+StatusCode TechContainerBase::allocate(DbContainer& cntH, const void* object, const Shape* shape, Token::OID_t& oid) {
   if ( object )  {
     oid.first  = cntH.token()->oid().first;
     oid.second = nextRecordId();
@@ -73,11 +73,11 @@ StatusCode DbContainerImp::allocate(DbContainer& cntH, const void* object, const
     m_size++;
     return StatusCode::SUCCESS;
   }
-  throw std::runtime_error("DbContainerImp::allocate failed: null object pointer");
+  throw std::runtime_error("TechContainerBase::allocate failed: null object pointer");
 }
 
 /// Execute object modification requests during a transaction
-StatusCode DbContainerImp::commitTransaction() {
+StatusCode TechContainerBase::commitTransaction() {
   StatusCode iret   = StatusCode::SUCCESS;
   StatusCode status = StatusCode::SUCCESS;
   ActionList::iterator i = m_writeStack.begin();
@@ -94,7 +94,7 @@ StatusCode DbContainerImp::commitTransaction() {
 
 
 /// Execute Database Transaction action
-StatusCode DbContainerImp::transAct(Transaction::Action action)
+StatusCode TechContainerBase::transAct(Transaction::Action action)
 {
   if( action==Transaction::TRANSACT_COMMIT || action==Transaction::TRANSACT_FLUSH ) {
     CHECK( commitTransaction() );
@@ -104,7 +104,7 @@ StatusCode DbContainerImp::transAct(Transaction::Action action)
 }
 
 // Fetch next object address to set token
-StatusCode DbContainerImp::next(Token::OID_t& linkH) {
+StatusCode TechContainerBase::next(Token::OID_t& linkH) {
    linkH.second++;
    if( linkH.second >= 0 && static_cast<uint64_t>(linkH.second)  < size() )  {
       return StatusCode::SUCCESS;
@@ -113,7 +113,7 @@ StatusCode DbContainerImp::next(Token::OID_t& linkH) {
 } 
 
 // Read object (oid) from a container container (linkH)
-StatusCode DbContainerImp::load( void** ptr, const Shape* shape,
+StatusCode TechContainerBase::load( void** ptr, const Shape* shape,
                                const Token::OID_t& linkH, Token::OID_t& oid,
                                bool any_next )
 {

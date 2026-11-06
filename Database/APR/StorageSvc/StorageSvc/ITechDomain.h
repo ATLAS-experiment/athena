@@ -1,17 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-// $Id: IDbDomain.h 726071 2016-02-25 09:23:05Z krasznaa $
-//
-//  Package    : pool/StorageSvc (The pool framework)
-//
-//  @author      M.Frank
-//
-//====================================================================
-#ifndef POOL_IDBDOMAIN_H
-#define POOL_IDBDOMAIN_H
+#ifndef POOL_ITECHDOMAIN_H
+#define POOL_ITECHDOMAIN_H
 
 // Framework include files
 #include "StorageSvc/pool.h"
@@ -30,18 +21,14 @@ namespace pool    {
 
   /** @class IDbDomain IDbDomain.h StorageSvc/IDbDomain.h
     * 
-    * IDbDomain interface
-    *
     * Description:
-    * Interface to the implementation specific part of a 
-    * Database domain object.
+    * Interface to the technology specific implementation of the Database Domain object
     *
     * @author  M.Frank
-    * @version 1.0
     */
-  class IDbDomain   {
+  class ITechDomain   {
   public:
-    virtual ~IDbDomain()   { }
+    virtual ~ITechDomain() = default;
     
     /// Check for existence of a domain within a session
     /** @param nam  [IN] name of the database in question

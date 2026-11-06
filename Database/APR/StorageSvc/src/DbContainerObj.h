@@ -43,7 +43,7 @@ namespace pool  {
   class DbContainerObj : public  DbAccessObjBase, public APRMessaging {
   private:
     /// Pointer to interface of the technology dependent part
-    IDbContainer*                 m_info;
+    ITechContainer*               m_info;
     /// Container token
     const Token*                  m_tokH;
     /// Handle to hosting Database
@@ -69,8 +69,8 @@ namespace pool  {
     /// Standard destructor
     virtual ~DbContainerObj();
     /// Access to internals
-    const IDbContainer* info()  const       {  return m_info;         }
-    IDbContainer* info()                    {  return m_info;         }
+    const ITechContainer* info()  const       {  return m_info;         }
+    ITechContainer* info()                    {  return m_info;         }
     /// Retrieve persistent type information by name
     const DbTypeInfo* objectShape(const Guid& nam);
     /// Handle to Database (CONST)

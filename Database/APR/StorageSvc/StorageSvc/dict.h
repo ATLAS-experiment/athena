@@ -4,10 +4,6 @@
 
 // Package pool/StorageSvc - interfaces
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/IOODatabase.h"
-#include "StorageSvc/IDbContainer.h"
-#include "StorageSvc/IDbDatabase.h"
-#include "StorageSvc/IDbDomain.h"
 #include "StorageSvc/FileDescriptor.h"
 
 // Package pool/StorageSvc - implementation

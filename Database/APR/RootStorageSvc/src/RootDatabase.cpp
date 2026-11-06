@@ -11,7 +11,6 @@
 //====================================================================
 #include "RootDatabase.h"
 #include "RootTreeContainer.h"
-#include "StorageSvc/IOODatabase.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbDomain.h"
@@ -889,7 +888,7 @@ StatusCode RootDatabase::transAct(Transaction::Action action)
 
    if( !m_indexMaster.empty() ) {
       ATH_MSG_DEBUG("Synchronizing indexes to master: " <<  m_indexMaster << " in " << m_file->GetName());
-      std::vector<IDbContainer*> containers;
+      std::vector<ITechContainer*> containers;
       CHECK( m_dbH.containers(containers) );
       m_indexMasterID = 0;
       if( m_indexMaster == "*" ) {

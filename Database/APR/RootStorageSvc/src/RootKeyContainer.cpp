@@ -38,7 +38,7 @@ constexpr const static auto SUCCESS = StatusCode::SUCCESS;
 constexpr const static auto FAILURE = StatusCode::FAILURE;
 
 RootKeyContainer::RootKeyContainer(const std::string& name) :
-  DbContainerImp(name),
+  TechContainerBase(name),
   m_dir(0),
   m_dbH(POOL_StorageType),
   m_rootDb(0),
@@ -64,7 +64,7 @@ uint64_t RootKeyContainer::nextRecordId()    {
         ::sscanf(k->GetName(), "_pool_valid_%08u", &s1);
         ++s1;
       }
-      auto s2 = DbContainerImp::size(); // Number of objects on commit stack
+      auto s2 = TechContainerBase::size(); // Number of objects on commit stack
       return s1+s2;
     }
   }
@@ -78,7 +78,7 @@ uint64_t RootKeyContainer::size()    {
       // Number of committed objects
       auto s1 = list->GetSize();
       // Number of objects on commit write stack
-      auto s2 = DbContainerImp::size();
+      auto s2 = TechContainerBase::size();
       return s1+s2;
     }
   }
@@ -89,7 +89,7 @@ uint64_t RootKeyContainer::size()    {
 StatusCode RootKeyContainer::transAct(Transaction::Action action) 
 {
    // execure action on the base class first
-   CHECK( DbContainerImp::transAct(action) );
+   CHECK( TechContainerBase::transAct(action) );
    if( action == Transaction::TRANSACT_FLUSH ) {
      if( !m_dir ) return FAILURE;
      m_dir->SaveSelf();
@@ -100,7 +100,7 @@ StatusCode RootKeyContainer::transAct(Transaction::Action action)
 // Fetch next object address to set token
 StatusCode RootKeyContainer::next(Token::OID_t& linkH) {
   char txt[64];
-  const long long int stk_size = DbContainerImp::size();
+  const long long int stk_size = TechContainerBase::size();
   const long long int cnt_size = nextRecordId()-stk_size;
   for(int j=linkH.second; j < cnt_size; ++j) {
     ++linkH.second;
@@ -233,7 +233,7 @@ StatusCode RootKeyContainer::close()   {
   m_dbH = DbDatabase(POOL_StorageType);
   m_rootDb = 0;
   m_dir = 0;
-  return DbContainerImp::close();
+  return TechContainerBase::close();
 }
 
 StatusCode RootKeyContainer::open(DbDatabase&           dbH,
@@ -270,7 +270,7 @@ StatusCode RootKeyContainer::open(DbDatabase&           dbH,
                                                      : std::move(sanitisedName);
     size_t idx1     = 0, idx2 = nam.find('/',1);
     TDirectory::TContext dirCtxt(0);
-    IDbDatabase* idb = dbH.info();
+    ITechDatabase* idb = dbH.info();
     m_rootDb = dynamic_cast<RootDatabase*>(idb);
     if (!m_rootDb) {
       m_dir = 0;
@@ -321,7 +321,7 @@ StatusCode RootKeyContainer::checkAccess(DbDatabase& dbH,
                                          const std::string& dir_nam) const
 {
   if ( dbH.isValid() )    {
-    IDbDatabase* idb = dbH.info();
+    ITechDatabase* idb = dbH.info();
     auto rootDb = dynamic_cast<RootDatabase*>(idb);
     if (rootDb && rootDb->file()->Get<TDirectory>(dir_nam.c_str())) {
       return SUCCESS;

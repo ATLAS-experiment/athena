@@ -55,7 +55,7 @@ const std::string RNTupleContainer::FieldDesc::typeName() {
 
 /// Standard constructor
 RNTupleContainer::RNTupleContainer(const std::string& name) :
-   DbContainerImp(name),
+   TechContainerBase(name),
    m_dbH(pool::POOL_StorageType), m_rootDb(nullptr),
    m_ioBytes(0), m_isDirty(false),
    m_index(0), m_indexSize(0), m_indexBump(0), m_indexMulti( getpid() )
@@ -66,7 +66,7 @@ RNTupleContainer::RNTupleContainer(const std::string& name) :
 RNTupleContainer::~RNTupleContainer() { close().ignore(); }
 
 uint64_t RNTupleContainer::size() {
-  auto s = DbContainerImp::size();
+  auto s = TechContainerBase::size();
   if( m_ntupleReader ) s += m_ntupleReader->GetNEntries();
   if( m_ntupleWriter ) s += m_ntupleWriter->size();
   return s;
@@ -178,7 +178,7 @@ StatusCode RNTupleContainer::checkAccess(DbDatabase& dbH,
                                          const std::string& nam) const
 {
    if ( dbH.isValid() )    {
-      IDbDatabase* idb = dbH.info();
+      ITechDatabase* idb = dbH.info();
       auto rootDb = dynamic_cast<RootDatabase*>(idb);
       if (rootDb && rootDb->file()->Get<ROOT::RNTuple>(nam.c_str())) {
          return StatusCode::SUCCESS;
@@ -225,7 +225,7 @@ uint64_t RNTupleContainer::nextRecordId()
 {
    uint64_t  s = m_indexMulti;
    s = s << 32;
-   s += m_indexSize + DbContainerImp::size();
+   s += m_indexSize + TechContainerBase::size();
    return s + m_indexBump;
 }
 
@@ -414,7 +414,7 @@ StatusCode RNTupleContainer::setOption(const DbOption& opt) {
 /// Execute transaction action
 StatusCode RNTupleContainer::transAct(Transaction::Action action) {
   // Execute action on the base class first
-  StatusCode sc = DbContainerImp::transAct(action);
+  StatusCode sc = TechContainerBase::transAct(action);
 
   for (auto& desc : m_fieldDescs) {
     desc.rows_written = 0;
@@ -425,7 +425,7 @@ StatusCode RNTupleContainer::transAct(Transaction::Action action) {
 
 /// Store object in location
 StatusCode RNTupleContainer::store(const void* object, DbContainer& cntH, const Shape* shape) {
-  StatusCode status = DbContainerImp::store(object, cntH, shape);
+  StatusCode status = TechContainerBase::store(object, cntH, shape);
   clearDirty();
   return status;
 }
@@ -435,5 +435,5 @@ StatusCode RNTupleContainer::close() {
   m_dbH = DbDatabase(pool::POOL_StorageType);
   m_fieldDescs.clear();
   m_rootDb = nullptr;
-  return DbContainerImp::close();
+  return TechContainerBase::close();
 }
