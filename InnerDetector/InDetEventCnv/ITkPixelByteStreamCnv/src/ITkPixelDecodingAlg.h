@@ -8,8 +8,13 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaBaseComps/AthMessaging.h"
 #include "GaudiKernel/MsgStream.h"
+#include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "StoreGate/WriteHandleKey.h"
+#include "StoreGate/UpdateHandleKey.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
+#include "IRegionSelector/IRegSelTool.h"
+#include "TrigSteeringEvent/TrigRoiDescriptorCollection.h"
 #include "InDetIdentifier/PixelID.h"
 #include "Identifier/Identifier.h"
 #include "InDetRawData/PixelRDO_Container.h"
@@ -48,7 +53,19 @@ class ITkPixelDecodingAlg : public AthReentrantAlgorithm
     SG::ReadCondHandleKey<ITkPixelCablingData> m_pixelCablingKey{this, "PixelCablingKey", "ITkPixelCablingData", "Cond Key of Pixel Cabling"};
 
     SG::WriteHandleKey<PixelRDO_Container> m_pixelRDOKey{this,    "pixelRDOKey", "ITkPixelRDOs", "StoreGate Key of Pixel RDOs"};
-    
+
+    /** Boolean to determine if the algorithm should be run in RoI seeded mode. */
+    Gaudi::Property<bool> m_roiSeeded{this, "isRoI_Seeded", false, "Use RoI"};
+
+    /** Region Selector tool, used when running RoI seeded. */
+    ToolHandle<IRegSelTool> m_regionSelector{this, "RegSelTool", "RegSelTool/RegSel_ITkPixel"};
+
+    /** Read handle for Trigger ROI descriptor collection, used when running RoI seeded. */
+    SG::ReadHandleKey<TrigRoiDescriptorCollection> m_roiCollectionKey{this, "RoIs", "", "RoIs to read in"};
+
+    /** Update handle for an external Pixel RDO cache, shared between separate RoI views. */
+    SG::UpdateHandleKey<PixelRDO_Cache> m_pixelRDOCacheKey{this, "RDOCacheKey", "", "Optional external cache"};
+
     std::vector<uint32_t> m_sourceIDs;
 
     const PixelID* m_idHelper{};

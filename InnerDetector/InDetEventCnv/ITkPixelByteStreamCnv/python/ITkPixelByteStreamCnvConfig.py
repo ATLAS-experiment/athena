@@ -52,6 +52,24 @@ def ITkPixelDecodingAlgCfg(flags, name = "ITkPixelDecodingAlg", **kwargs) -> Com
 
     return acc
 
+
+def TrigITkPixelDecodingAlgCfg(flags, suffix, RoIs) -> ComponentAccumulator:
+    """ Configures the ITk pixel raw data decoding with trigger (RoI-seeded, cached) args """
+    acc = ComponentAccumulator()
+
+    from RegionSelector.RegSelToolConfig import regSelTool_ITkPixel_Cfg
+    regSelTool = acc.popToolsAndMerge(regSelTool_ITkPixel_Cfg(flags))
+
+    trigargs = {
+        'RegSelTool' : regSelTool,
+        'RoIs' : RoIs,
+        'isRoI_Seeded' : True,
+        'RDOCacheKey' : flags.Trigger.ITkTracking.PixRDOCacheKey,
+    }
+
+    acc.merge(ITkPixelDecodingAlgCfg(flags, name="ITkPixelDecodingAlg"+suffix, **trigargs))
+    return acc
+
 def ITkPixelDecodingPhaseIIRDOAlgCfg(flags,
                                     name = "ITkPixelDecodingPhaseIIRDOAlg",
                                     nRDOs = 1300000,

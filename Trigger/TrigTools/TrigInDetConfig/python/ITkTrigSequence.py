@@ -59,7 +59,7 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
 
     self.log.info(f"DataPrep signature: {self.signature} rois: {self.rois} inview: {self.inView}")
 
-    if not self.inView:
+    if not self.inView and self.flags.Input.Format != Format.BS:
       from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
       loadRDOs = [( 'PixelRDO_Container' , 'StoreGateSvc+ITkPixelRDOs' ),
                   ( 'SCT_RDO_Container' , 'StoreGateSvc+ITkStripRDOs' ),
@@ -67,13 +67,18 @@ class ITkTrigSequence(InnerTrackerTrigSequence):
       acc.merge(SGInputLoaderCfg(self.flags, Load=loadRDOs))
 
     if self.flags.Input.Format == Format.BS:
+      # Decoding runs RoI-seeded, writing into a cache shared between the
+      # independent RoI views that may each call dataPreparation() for
+      # their own signature within the same event. The algorithm instances
+      # are named per-signature to avoid being merged into a single
+      # scheduling node shared (and potentially stalled) across unrelated views.
       if self.flags.Detector.EnableITkPixel:
-        from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingAlgCfg
-        acc.merge( ITkPixelDecodingAlgCfg(self.flags) )
+        from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import TrigITkPixelDecodingAlgCfg
+        acc.merge( TrigITkPixelDecodingAlgCfg(self.flags, suffix=signature, RoIs=self.rois) )
 
       if self.flags.Detector.EnableITkStrip:
-        from ITkStripsByteStreamCnv.ITkStripByteStreamCnvConfig import ITkStripRawDataProviderCfg
-        acc.merge(ITkStripRawDataProviderCfg(self.flags))
+        from ITkStripsByteStreamCnv.ITkStripByteStreamCnvConfig import TrigITkStripRawDataProviderCfg
+        acc.merge(TrigITkStripRawDataProviderCfg(self.flags, suffix=signature, RoIs=self.rois))
 
     #Clusterisation
     from InDetConfig.InDetPrepRawDataFormationConfig import ITkTrigPixelClusterizationCfg, ITkTrigStripClusterizationCfg
