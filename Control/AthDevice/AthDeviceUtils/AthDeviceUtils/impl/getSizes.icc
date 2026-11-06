@@ -61,7 +61,7 @@ struct GetSizesImpl<vecmem::edm::schema<VARTYPES...>> {
         } else {
           return {};
         }
-      }();
+      };
       assert([&]() {
         const std::vector<std::size_t> sizes = nextSizes();
         return (std::equal(result.begin(), result.end(), sizes.begin(),
