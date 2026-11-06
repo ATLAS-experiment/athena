@@ -4,19 +4,19 @@
 #ifndef MUONGEOMODELTESTR4_MUONCHAMBERTOOLTEST_H
 #define MUONGEOMODELTESTR4_MUONCHAMBERTOOLTEST_H
 
-#include <AthenaBaseComps/AthReentrantAlgorithm.h>
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 
-#include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include <MuonReadoutGeometryR4/Chamber.h>
-#include <MuonReadoutGeometryR4/MdtReadoutElement.h>
-#include <MuonReadoutGeometryR4/RpcReadoutElement.h>
-#include <MuonReadoutGeometryR4/TgcReadoutElement.h>
-#include <MuonReadoutGeometryR4/sTgcReadoutElement.h>
-#include <MuonReadoutGeometryR4/MmReadoutElement.h>
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+#include "MuonReadoutGeometryR4/Chamber.h"
+#include "MuonReadoutGeometryR4/MdtReadoutElement.h"
+#include "MuonReadoutGeometryR4/RpcReadoutElement.h"
+#include "MuonReadoutGeometryR4/TgcReadoutElement.h"
+#include "MuonReadoutGeometryR4/sTgcReadoutElement.h"
+#include "MuonReadoutGeometryR4/MmReadoutElement.h"
 
-#include <ActsGeometryInterfaces/GeometryContext.h>
-#include <ActsGeometryInterfaces/ITrackingGeometrySvc.h>
-#include <StoreGate/ReadCondHandleKey.h>
+#include "ActsGeometryInterfaces/GeometryContext.h"
+#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
+#include "StoreGate/ReadCondHandleKey.h"
 
 
 #include "Acts/Surfaces/Surface.hpp"
@@ -38,30 +38,44 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         bool isReEntrant() const override final {return false;}   
     
     private:
-        /** @brief Returns the  edge points from a trapezoidal / cuboid /diamond volume */
-        std::vector<Amg::Vector3D> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::Volume& volume) const;
-        std::vector<Amg::Vector3D> cornerPoints(const ActsTrk::GeometryContext& gctx, const Acts::Surface& surface) const;
         
-        void saveEnvelope(const ActsTrk::GeometryContext& gctx,
+        void saveEnvelope(const Acts::GeometryContext& tgContext,
                           const std::string& envName,
                           const Acts::Volume& envelopeVol,
                           const std::vector<const Acts::Surface*>& assocSurfaces,
-                          const std::vector<const Acts::Volume*>& subVolumes={}) const;
+                          const std::vector<const Acts::Volume*>& subVolumes) const;
 
-        StatusCode checkPortals(const ActsTrk::GeometryContext& gctx,
+        StatusCode checkPortals(const Acts::GeometryContext& gctx,
                                 const Acts::TrackingVolume& volume) const;
-                                
+        /** @brief Checks whether all / none of the surfaces are contained in the volume
+         *         The method is called to ensure that all surfaces are within the envelope
+         *         to which they are attributed or that no surface from a neighbouring volume
+         *         is expanding into the volume of interest 
+         *  @param tgContext: The Geometry context to position the volume and the surfaces
+         *  @param volume: The volume providing the bounds and the refernce frame
+         *  @param surfaces: The amount of surfaces to count        
+         *  @param badSurfaces: Vector where all surfaces that are not fully contained or 
+         *                      overlap with the volume are appended to
+         *  @param sameVolume: The surfaces are actually atributed to the volume and
+         *                      are required to be constrained */
+        StatusCode checkSurfaceVolumeBounds(const Acts::GeometryContext& tgContext,
+                                            const Acts::TrackingVolume& volume,
+                                            Acts::TrackingVolume::SurfaceRange surfaces,
+                                            std::vector<const Acts::Surface*>& badSurfaces,
+                                            const bool sameVolume) const;
         /** @brief Check whether the chamber envelopes are consistent */
         StatusCode checkChambers(const ActsTrk::GeometryContext& gctx) const;
         /** @brief Check envelopes */
         StatusCode checkEnvelopes(const ActsTrk::GeometryContext& gctx) const;
-        /** @brief Check tracking geometry volumes */
-        StatusCode checkTrackingGeometry(const ActsTrk::GeometryContext& gctx, 
-                                         const Acts::TrackingGeometry& trackingGeometry) const;
+
         /** @brief Checks whether the readout elements of an enevelope are completely embedded into the envelope */
         StatusCode allReadoutInEnvelope(const ActsTrk::GeometryContext& ctx,
-                                        const Chamber& envelope) const; 
-        
+                                        const Chamber& envelope) const;
+ 
+        /** @brief Check the consistency of the tracking volumes */
+        StatusCode checkTrackingVolume(const Acts::GeometryContext& tgContext,
+                                        const Acts::TrackingVolume& volume) const; 
+                          
         /** @brief Checks whether the point is inside of an envelope object, i.e.
          *         the spectrometer sector or the chamber
          *  @param gctx: Geometry context carrying the aligned local -> global transfors
@@ -75,6 +89,7 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
                                 const Amg::Vector3D& point,
                                 const std::string& descr,
                                 const Identifier& channelId) const;
+
         /** @brief Checks whether the edge points from a trapezoid/cuboid/diamond form a volume
          *         overlapping with the given volume
          *  @param gctx: Geometry context carrying all alignment & global transformations
@@ -133,8 +148,6 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         StatusCode testReadoutEle(const ActsTrk::GeometryContext& gctx,
                                   const MmReadoutElement& readOutEle,
                                   const Acts::Volume& boundVol) const;
-
-
 
         ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc", 
                                                 "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};

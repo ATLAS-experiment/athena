@@ -5,11 +5,11 @@
 #ifndef ACTSMUONDETECTOR_MUONBLUEPRINTNODEBUILDER_H
 #define ACTSMUONDETECTOR_MUONBLUEPRINTNODEBUILDER_H
 
-#include <AthenaBaseComps/AthAlgTool.h>
+#include "AthenaBaseComps/AthAlgTool.h"
 
-#include <MuonReadoutGeometryR4/MuonDetectorManager.h>
-#include <MuonStationIndex/MuonStationIndex.h>
-#include <ActsGeometryInterfaces/IBlueprintNodeBuilder.h>
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+#include "MuonStationIndex/MuonStationIndex.h"
+#include "ActsGeometryInterfaces/IBlueprintNodeBuilder.h"
 
 #include "Acts/Utilities/BoundFactory.hpp"
 #include "Acts/Surfaces/PlanarBounds.hpp"
@@ -20,34 +20,28 @@
 
 namespace MuonGMR4 {
   class Chamber;
+  class CylinderBoundsExpander;
 }
 
 namespace Acts {
   class GeometryContext;
-  class StaticBlueprintNode;
-  class MaterialDesignatorBlueprintNode;
-
 }  // namespace Acts
 
 
 namespace ActsTrk {
 
-
-/** Helper class to build a Blueprint node of the muon system. 
- *  It builds the whole muon system for PhaseII adding it to the Blueprint as a node.
- */
+/** @brief The MuonBlueprintNodeBuilder translates the Muon Readout geometry into the 
+ *         Acts TrackingGeometry using the blueprint construction schema. Surfaces are
+ *         packed into alignable volumes having the same size as the surrounding chamber 
+ *         and then shipped to the BluePrintNode construction via StaticBluePrintNodes */
 class MuonBlueprintNodeBuilder : public extends<AthAlgTool, IBlueprintNodeBuilder> {
 public:
   /** @brief Abrivation of the blueprint node ptr base class */
-  using blueprintNodePtr = std::shared_ptr<Acts::BlueprintNode>;
-  /** @brief Abrivation of the blue print node pointer */
-  using staticNodePtr = std::shared_ptr<Acts::StaticBlueprintNode>;
-  /** @brief Abrivation of the material node pointer */
-  using materialNodePtr = std::shared_ptr<Acts::MaterialDesignatorBlueprintNode>;
+  using BlueprintNodePtr_t = std::shared_ptr<Acts::BlueprintNode>;
   /** @brief Abrivation of the surface pointer*/
-  using surfacePtr = std::shared_ptr<Acts::Surface>;
+  using SurfacePtr_t = std::shared_ptr<Acts::Surface>;
   /** @brief Abrivate the vector pair of blue print nodes and associated active surfaces */
-  using BluePrintSurfPairs_t = std::pair<std::vector<blueprintNodePtr>, std::vector<surfacePtr>>;
+  using BluePrintSurfPairs_t = std::pair<std::vector<BlueprintNodePtr_t>, std::vector<SurfacePtr_t>>;
   /** @brief Abrivation of the container holding all chambers */
   using MuonChamberSet = MuonGMR4::MuonDetectorManager::MuonChamberSet;
   /** @brief Abrivation of the container holding all ms sectors */
@@ -79,8 +73,9 @@ public:
   /** @brief Build the Muon Blueprint Node
     *  @param gctx Geometry context
     *  @param childNode The blueprint node as child of this node (for Muon System it should be Calo or Itk).*/
-  std::shared_ptr<Acts::BlueprintNode> buildBlueprintNode(const Acts::GeometryContext& gctx,
-                                              std::shared_ptr<Acts::BlueprintNode>&& childNode) override;
+  std::shared_ptr<Acts::BlueprintNode> 
+          buildBlueprintNode(const Acts::GeometryContext& tgContext,
+                             std::shared_ptr<Acts::BlueprintNode>&& childNode) override;
                                 
 private:
   /** @brief the Detector manager */
@@ -132,10 +127,13 @@ private:
   /** @brief Prepare a binned material which is associated to the surface
    *  @param type: The surface type on which the material is mapped (Plane, Disc, Cylinder)
    *  @param nBins1: Number of bins in the local0 direction
-   *  @param nBins2: Number of bins in the complementary direction */
+   *  @param nBins2: Number of bins in the complementary direction
+   *  @param surfaceName: Name of the material surface that is used to identify the mapped
+   *                      material from the persiftified database file with the corresponding surface  */
   std::shared_ptr<Acts::ISurfaceMaterial> preparePassiveMaterial(const Acts::SurfaceBounds& bounds,
-                                                          const std::size_t nBins1,
-                                                          const std::size_t nBins2) const;
+                                                                 const std::size_t nBins1,
+                                                                 const std::size_t nBins2,
+                                                                 const std::string_view surfaceName) const;
 
   std::pair<std::size_t, std::size_t> getMaterialBins(const Muon::MuonStationIndex::ChIndex chIdx) const;
   
@@ -154,22 +152,21 @@ private:
                std::is_same_v<T, MuonGMR4::SpectrometerSector>);
 
   /** @brief Construct and return the surfaces for the passive material description (e.g cylinders for barrel/ discs for endcaps)
-   *  @param gctx The geometry context
+   *  @param tgContext The geometry context
    *  @param elementsPerStation The elements (chambers or sectors) grouped per station to which we want to assign passive material
    * This function uses the elements of the station to construct the surfaces and define their bounds */
   template <typename ElementSet_t>
-   std::vector<surfacePtr> getPassiveMaterialSurfaces(const Acts::GeometryContext& gctx,
-                                                     const std::unordered_map<unsigned int, ElementSet_t>& elementsPerStation) const;
+  std::vector<SurfacePtr_t> getPassiveMaterialSurfaces(const Acts::GeometryContext& tgContext,
+                                                       std::vector<std::pair<unsigned, ElementSet_t>>&& elementsPerStation) const;
     
   
   /** @brief Get the active material for a given element representing the chamber/sector
    *  @param element The element for which to get the active material
    *  @return The active surface material */
     template<typename T>    
-    std::shared_ptr<const Acts::ISurfaceMaterial>
-    getActiveMaterial(const T& element) const
-      requires (std::is_same_v<T, MuonGMR4::Chamber> ||
-              std::is_same_v<T, MuonGMR4::SpectrometerSector>);
+    std::shared_ptr<const Acts::ISurfaceMaterial> getActiveMaterial(const T& element) const
+                                        requires (std::is_same_v<T, MuonGMR4::Chamber> ||
+                                                  std::is_same_v<T, MuonGMR4::SpectrometerSector>);
 
   /** @brief Check if the chamber is in this node
     * @param element The element to check (chamber or sector)
@@ -185,36 +182,34 @@ private:
                 std::is_same_v<T, MuonGMR4::SpectrometerSector>);
 
   /** @brief Build subnodes for the muon system node
-   *  @param gctx The geometry context
+   *  @param tgContext The geometry context
    *  @param elements The name of the stations to include
    *  @param side The side (A, C or Both)
    *  @param id The geometry identifier of this node
    *  @param boundsFactory The factory for volume bounds
-   *  @param passiveStationIds The ids with the chamber indices we want to put passive material surfaces on
-   */
-  staticNodePtr buildMuonNode(const Acts::GeometryContext& gctx,
-                              const EnvelopeSet_t& elements,
-                              const std::string& name,
-                              const Acts::GeometryIdentifier& id,
-                              Acts::VolumeBoundFactory& boundsFactory,
-                              const std::vector<ChIdx>& passiveStationIds = {}) const;
-
-  /** @brief Build a static or a material node for a chamber that corresponds to a single blueprint node (e.g for a single MDT multilayer)
-   *  @param chamberNode The blueprint node out of which the variant node will be built
-   *  @return A variant holding either a static node or material node depending on wether the assignment of active material is enabled
-   */
-  std::variant<staticNodePtr, materialNodePtr> buildChamberNode(const blueprintNodePtr& chamberNode) const;
-
+   *  @param passiveStationIds The ids with the chamber indices we want to put passive material surfaces on */
+  BlueprintNodePtr_t buildMuonNode(const Acts::GeometryContext& tgContext,
+                                   const EnvelopeSet_t& elements,
+                                   const std::string& name,
+                                   const Acts::GeometryIdentifier& id,
+                                   Acts::VolumeBoundFactory& boundsFactory,
+                                   const std::vector<ChIdx>& passiveStationIds = {}) const;
   /** @brief Build a static or a material node for a chamber that corresponds to a single blueprint node (e.g for a single MDT multilayer)
    *  @param innerStructure The inner structure of the chamber that corresponds to the children nodes
    *  @param element The element representing the chamber/sector for which the node is built
    *  @param vol The tracking volume associated to the chamber/sector
-   *  @return A variant holding either a static node or material node depending on wether the assignment of active material is enabled
-   */
+   *  @return A variant holding either a static node or material node depending on wether the assignment of active material is enabled */
   template<typename T>
-  std::variant<staticNodePtr, materialNodePtr> buildChamberNode(const T& element, 
-                                                                std::unique_ptr<Acts::TrackingVolume>& vol,
-                                                                const std::vector<blueprintNodePtr>& innerStructure) const;
+      std::shared_ptr<Acts::BlueprintNode> buildChamberNode(const T& element, 
+                                                            std::unique_ptr<Acts::TrackingVolume>& vol,
+                                                            std::vector<BlueprintNodePtr_t>&& innerStructure) const;
+
+
+  /** @brief Abrivate the vector of links between the constructed BluePrintNode pointer and 
+   *         the MuonChamber from which it was built */
+  using ChamberNodePair_t = std::pair<const MuonGMR4::Chamber*, BlueprintNodePtr_t>;
+  using EnvelopeNodeVec_t = std::vector<ChamberNodePair_t>;
+  
 
   /** @brief Helper function determining whether a readout element is BIS78 */
   bool isBIS78(const MuonGMR4::MuonReadoutElement* element) const;
