@@ -24,6 +24,7 @@
 #include "GeneratorObjects/McEventCollection.h"
 
 #include "TestTools/initGaudi.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 void compare (const HepMcParticleLink& p1,
               const HepMcParticleLink& p2)
@@ -79,7 +80,7 @@ void populateFilteredGenEvent(HepMC::GenEvent & ge, std::vector<HepMC::GenPartic
 {
   //.......Create new particle (geantino) to link  hits from pileup
   HepMC::GenParticlePtr genPart=HepMC::newGenParticlePtr();
-  genPart->set_pdg_id(999); //Geantino
+  genPart->set_pdg_id(MC::GEANTINO0); //Geantino
   genPart->set_status(1); //!< set decay status
   HepMC::suggest_barcode(genPart, HepMC::SUPPRESSED_PILEUP_BARCODE);
 

@@ -14,7 +14,7 @@ atlas_add_component( ParticleDecayer
                      src/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS  ${CLHEP_INCLUDE_DIRS} 
-                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaKernel GeneratorModulesLib GeneratorObjects )
+                     LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib TruthUtils AthenaKernel GeneratorModulesLib GeneratorObjects )
 
 # Install files from the package:
 atlas_install_joboptions( share/*.py )

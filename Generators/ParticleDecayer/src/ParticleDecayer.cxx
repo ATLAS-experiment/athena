@@ -25,6 +25,7 @@
 #include "GeneratorObjects/McEventCollection.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include <cmath> //M_PI
+#include "TruthUtils/HepMCHelpers.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //function to generate a lifetime (actually decay-length) according to the proper lifetime of the particle particle 
@@ -229,7 +230,7 @@ ParticleDecayer::ParticleDecayer(const std::string& name, ISvcLocator* pSvcLocat
   declareProperty("LJType",                m_LJType = 1); //1 = one dark photon per LeptonJet, 2 = two dark photons per LeptonJet
   declareProperty("ScalarPDGID",           m_scalarPDGID); //new PDG ID of the scalar 
   declareProperty("ScalarMass",            m_scalarMass); //new mass of the scalar in MeV
-  declareProperty("ParticleID",            m_particleID = 999); //PDG ID of the geantino
+  declareProperty("ParticleID",            m_particleID = MC::GEANTINO0); //PDG ID of the geantino
   declareProperty("ParticleMass",          m_particleMass = 400); //new mass of the dark photon in MeV (default 400 MeV)
   declareProperty("ParticleLifeTime",      m_particleLifeTime = 0); //ctau of the dark photon in mm (default prompt)
   declareProperty("ParticlePolarization",  m_particlePolarization = 0); //polarization of the dark photon (default 0 : isotropic decay, -1 : transverse, 1 : longitudinal)

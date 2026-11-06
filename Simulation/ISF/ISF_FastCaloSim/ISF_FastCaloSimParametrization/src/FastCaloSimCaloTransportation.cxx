@@ -75,7 +75,7 @@ std::vector<G4FieldTrack> FastCaloSimCaloTransportation::transport(const TFCSTru
   ATH_MSG_DEBUG ("particle hypothesis "<< pHypothesis);
 
   // geantinos not handled by PdgToParticleHypothesis - fix there
-  if (pdgId == 999) pHypothesis = Trk::geantino;
+  if (pdgId == MC::GEANTINO0) pHypothesis = Trk::geantino;
 
   Amg::Vector3D pos = Amg::Vector3D(truth->vertex().X(), truth->vertex().Y(), truth->vertex().Z());
 

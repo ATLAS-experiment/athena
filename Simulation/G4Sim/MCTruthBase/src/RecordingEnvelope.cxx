@@ -15,6 +15,7 @@
 #include "G4TransportationManager.hh"
 #include "G4VPhysicalVolume.hh"
 #include "G4VSolid.hh"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 RecordingEnvelope::RecordingEnvelope(const std::string& envelopeVolumeName, const std::string& trackRecordCollectionName):
@@ -68,7 +69,7 @@ void RecordingEnvelope::BeginOfEvent(TrackRecordCollection* trackRecordCollectio
 void RecordingEnvelope::AddTrackRecord(const G4Step* aStep)
 {
   const std::string pname = aStep->GetTrack()->GetDefinition()->GetParticleName();
-  const int pdgcode = (pname=="geantino") ? 999 : aStep->GetTrack()->GetDefinition()->GetPDGEncoding();
+  const int pdgcode = (pname=="geantino") ? MC::GEANTINO0 : aStep->GetTrack()->GetDefinition()->GetPDGEncoding();
   TrackHelper trHelp(aStep->GetTrack());
   const int barcode = trHelp.GetBarcode();
   const int status = trHelp.GetStatus();

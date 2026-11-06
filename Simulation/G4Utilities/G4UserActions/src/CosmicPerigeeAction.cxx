@@ -12,6 +12,7 @@
 #include "G4MuonPlus.hh"
 #include "G4MuonMinus.hh"
 #include "G4Step.hh"
+#include "TruthUtils/HepMCHelpers.h"
 
 namespace G4UA
 {
@@ -107,8 +108,8 @@ namespace G4UA
     double time       = theStep->GetGlobalTime();
     G4VPhysicalVolume *preVol = theStep->GetPhysicalVolume();
 
-    if (aStep->GetTrack()->GetDefinition() == G4Geantino::Definition() ) pdgcode=999;
-    if (aStep->GetTrack()->GetDefinition() == G4ChargedGeantino::Definition() ) pdgcode=998;
+    if (aStep->GetTrack()->GetDefinition() == G4Geantino::Definition() ) pdgcode=MC::GEANTINO0;
+    if (aStep->GetTrack()->GetDefinition() == G4ChargedGeantino::Definition() ) pdgcode=MC::GEANTINOPLUS;
 
     // Create the TimedTrackRecord
     TrackHelper trHelp(aStep->GetTrack());

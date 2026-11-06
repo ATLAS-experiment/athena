@@ -14,6 +14,7 @@
 #include "G4ChargedGeantino.hh"
 
 #include "GeoPrimitives/CLHEPtoEigenConverter.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 //comment the following line if you want hit information print out
 //#define CSCG4_DEBUG
@@ -216,7 +217,7 @@ G4bool CSCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
       else if (particle=="anti_sigma-") lundcode=27;
       else if (particle=="anti_sigma+") lundcode=29;
       else if (particle=="deuteron") lundcode=45;
-      else if (particle=="geantino") lundcode=999;
+      else if (particle=="geantino") lundcode=MC::GEANTINO0;
       else lundcode=0;
 
       /** record global time */

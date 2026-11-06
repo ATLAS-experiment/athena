@@ -22,6 +22,7 @@
 // STL headers
 #include <cmath>
 #include <memory>
+#include "TruthUtils/HepMCHelpers.h"
 
 TrackFastSimSD::TrackFastSimSD(const std::string& name, const std::string& outputCollectionName, const int SD_type)
   : G4VSensitiveDetector( name )
@@ -50,8 +51,8 @@ G4bool TrackFastSimSD::ProcessHits(G4Step* aStep,G4TouchableHistory* )
 
   // PDG Code
   int pdgcode = (track->GetDefinition())?track->GetDefinition()->GetPDGEncoding():0;
-  if (track->GetDefinition() == G4Geantino::Definition() ) pdgcode=999;
-  if (track->GetDefinition() == G4ChargedGeantino::Definition() ) pdgcode=998;
+  if (track->GetDefinition() == G4Geantino::Definition() ) pdgcode=MC::GEANTINO0;
+  if (track->GetDefinition() == G4ChargedGeantino::Definition() ) pdgcode=MC::GEANTINOPLUS;
 
   // Position and Momentum
   G4ThreeVector pos=postStep->GetPosition();

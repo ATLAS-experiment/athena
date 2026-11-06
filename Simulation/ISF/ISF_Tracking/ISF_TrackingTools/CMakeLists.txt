@@ -7,4 +7,4 @@ atlas_subdir( ISF_TrackingTools )
 atlas_add_component( ISF_TrackingTools
                      src/*.cxx
                      src/components/*.cxx
-                     LINK_LIBRARIES GaudiKernel AthenaBaseComps CxxUtils ISF_Event ISF_TrackingInterfacesLib TrkDetDescrInterfaces TrkGeometry TrkEventPrimitives TrkParameters TrkExInterfaces )
+                     LINK_LIBRARIES GaudiKernel AthenaBaseComps CxxUtils ISF_Event ISF_TrackingInterfacesLib TrkDetDescrInterfaces TrkGeometry TrkEventPrimitives TrkParameters TrkExInterfaces TruthUtils )

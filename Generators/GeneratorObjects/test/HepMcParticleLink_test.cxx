@@ -35,6 +35,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include "AthenaKernel/proxyDictFromEventContext.h"
 #include "GeneratorObjects/McEventCollection.h"
 #include "GeneratorObjects/HepMcParticleLink.h"
+#include "TruthUtils/HepMCHelpers.h"
 
 
 namespace MCTesting {
@@ -211,7 +212,7 @@ namespace MCTesting {
   {
     //.......Create new particle (geantino) to link  hits from pileup
     HepMC::GenParticlePtr genPart=HepMC::newGenParticlePtr();
-    genPart->set_pdg_id(999); //Geantino
+    genPart->set_pdg_id(MC::GEANTINO0); //Geantino
     genPart->set_status(1); //!< set decay status
     HepMC::suggest_barcode(genPart, std::numeric_limits<int32_t>::max() );
 

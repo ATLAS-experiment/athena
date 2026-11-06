@@ -306,7 +306,7 @@ StatusCode MergeMcEventCollTool::processFirstSubEvent(const McEventCollection *p
 bool MergeMcEventCollTool::isTruthFiltertedMcEventCollection(const McEventCollection *pMcEvtColl) const {
   const HepMC::GenEvent* currentBackgroundEvent = *(pMcEvtColl->begin());
   if (currentBackgroundEvent->particles().size()!=1) return false;
-  if (currentBackgroundEvent->particles().at(0)->pdg_id()==999) return true;
+  if (currentBackgroundEvent->particles().at(0)->pdg_id()==MC::GEANTINO0) return true;
   return false;
 }
 
