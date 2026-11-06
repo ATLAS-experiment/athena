@@ -28,3 +28,8 @@ atlas_add_test( TrigCaloDataAccessSvc
                 PRIVATE_WORKING_DIRECTORY
                 PROPERTIES TIMEOUT 1200
                 POST_EXEC_SCRIPT noerror.sh )
+atlas_add_test( TestLArDecoder
+                SCRIPT python -m TrigT2CaloCommon.testLArDecoder
+                PRIVATE_WORKING_DIRECTORY
+                PROPERTIES TIMEOUT 1200
+                POST_EXEC_SCRIPT noerror.sh )
