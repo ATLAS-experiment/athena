@@ -12,6 +12,11 @@ endif()
 # External dependencies.
 find_package( traccc )
 
+# Disable UBSAN for the package. Since "HIP linking" is not happy with it.
+# (GCC and Clang do UBSAN a bit differently. As much as I understand...)
+string(REPLACE "-fsanitize=undefined" ""
+   CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG}")
+
 # Set up the build of the example library.
 atlas_add_component( AthExHIP
    src/*.h src/*.cxx src/*.hip src/components/*.cxx
