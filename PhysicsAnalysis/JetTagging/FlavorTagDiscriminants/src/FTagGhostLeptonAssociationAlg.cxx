@@ -90,10 +90,11 @@ namespace {
                 continue;
             track_to_lepton_map.insert({track, lepton->index()});
         }
+        const std::string ghostTrackStr{"GhostTrack"};
         for (auto jet : *jets.get()) {
             IPLV leptons_in_jet;
             std::vector<const xAOD::TrackParticle*> jet_tracks;    
-            jet_tracks = jet->getAssociatedObjects<const xAOD::TrackParticle>("GhostTrack");
+            jet_tracks = jet->getAssociatedObjects<const xAOD::TrackParticle>(ghostTrackStr);
             for (const auto& track : jet_tracks) {
                 // Find all leptons associated with this track
                 auto range = track_to_lepton_map.equal_range(track);
@@ -102,7 +103,7 @@ namespace {
                     leptons_in_jet.push_back(ElementLink<IPC>(*leptons.get(), lepton_index));
                 }
             }
-            leptons_out(*jet) = leptons_in_jet;
+            leptons_out(*jet) = std::move(leptons_in_jet);
         }
     }
 }

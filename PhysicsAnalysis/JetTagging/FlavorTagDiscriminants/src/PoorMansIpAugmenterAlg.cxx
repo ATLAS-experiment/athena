@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -292,8 +292,8 @@ namespace FlavorTagDiscriminants {
       std::vector<float> out_vec_mom(
         momentum.data(), momentum.data() + momentum.size());
 
-      decor_track_pos (*trk) = out_vec_pos;
-      decor_track_mom (*trk) = out_vec_mom;
+      decor_track_pos (*trk) = std::move(out_vec_pos);
+      decor_track_mom (*trk) = std::move(out_vec_mom);
 
       // all tracks are valid for now, but downstream code requires
       // this decoration.
