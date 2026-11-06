@@ -13,16 +13,19 @@ class Sample(EvgenConfig):
     def setupProcess(self, flags):
 
         Initialize = [
-            "bmin 12", # impact parameter bigger than 12 fm
-            "ihpr2 4 0", # turn OFF jet quenching
+            "bmin 0", "bmax 12", # simulation of minimum-bias events
+            "ihpr2 4 0", # turns OFF jet quenching
             "ihpr2 12 2", # Jan24,06 turns ON decays charm and  bottom but not pi0, lambda, ... 
             "ihpr2 21 1" # turns ON retaining of particle history - truth information
         ]
 
+        from EvgenJobTransforms.EvgenHelpers import BeamType
         from Hijing_i.HijingConfig import HijingBaseCfg
         sampleConfig = HijingBaseCfg(
             flags,
             Initialize=Initialize,
+            projecBeam=BeamType.OXYGEN,
+            targetBeam=BeamType.OXYGEN,
             McEventKey="HIJING_EVENT"
         )
 
@@ -31,9 +34,10 @@ class Sample(EvgenConfig):
             flags,
             McTruthKey="HIJING_EVENT",
             McFlowKey="GEN_EVENT",
-            FlowFunctionName="jjia_minbias_new",
+            FlowFunctionName="OO_eta_indep",
             FlowImplementation="exact",
             RandomizePhi=0
         ))
 
         return sampleConfig
+
