@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "VP1CaloSystems/VP1CaloCells.h"
@@ -230,7 +230,7 @@ std::vector<std::string> VP1CC_LArEMB::ToString(const CaloCell_ID*, const std::s
   result.push_back(msg2.str());
   result.push_back(msg3.str());
 
-  result.push_back(stars);
+  result.push_back(std::move(stars));
   return result;
 }
 
@@ -311,7 +311,7 @@ std::vector<std::string> VP1CC_LArEMECHEC::ToString(const CaloCell_ID*  calo_id,
   result.push_back(msg2.str());
   result.push_back(msg3.str());
 
-  result.push_back(stars);
+  result.push_back(std::move(stars));
   return result;
 }
 
@@ -407,7 +407,7 @@ std::vector<std::string> VP1CC_LArFCAL::ToString(const CaloCell_ID*, const std::
   result.push_back(msg2.str());
   result.push_back(msg3.str());
 
-  result.push_back(stars);
+  result.push_back(std::move(stars));
   return result;
 }
 
@@ -567,7 +567,7 @@ std::vector<std::string> VP1CC_TileBarEc::ToString(const CaloCell_ID*, const std
   result.push_back(msg3.str());
   result.push_back(msg4.str());
 
-  result.push_back(stars);
+  result.push_back(std::move(stars));
   return result;
 }
 
@@ -837,7 +837,7 @@ std::vector<std::string> VP1CC_TileCrack::ToString(const CaloCell_ID*  calo_id, 
   result.push_back(msg.str());
   result.push_back(msg1.str());
 
-  result.push_back(stars);
+  result.push_back(std::move(stars));
   return result;
 }
 
@@ -1068,6 +1068,6 @@ std::vector<std::string> VP1Mbts::ToString()
   result.push_back(msg1.str());
   result.push_back(msg2.str());
 
-  result.push_back(stars);
+  result.push_back(std::move(stars));
   return result;
 }
