@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -856,10 +856,8 @@ void IParticleCollHandle_Jet::resetCachedValuesCuts()
 void IParticleCollHandle_Jet::dumpToJSON( std::ofstream& str) const {
   str << "\""<<name().toLatin1().data()<<"\":{";
   
-  unsigned int num=0;
   for (auto handle : getHandlesList() ) {
     if (handle->visible()) {
-      if (num) str <<",\n";
       handle->dumpToJSON(str);
     }
   }

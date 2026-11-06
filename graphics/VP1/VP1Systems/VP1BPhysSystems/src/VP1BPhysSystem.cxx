@@ -1021,8 +1021,8 @@ const Trk::Track* VP1BPhysSystem::getTrack(const Rec::TrackParticle* trackpartic
 const Trk::Track* VP1BPhysSystem::getRefittedTrack(const Amg::Vector3D& position, const Amg::Vector3D& momentum, double charge) {
 
 
-	const Amg::Vector3D& pos(std::move(position));
-	const Amg::Vector3D& mom(std::move(momentum));
+	const Amg::Vector3D& pos(position);
+	const Amg::Vector3D& mom(momentum);
 
 	// init the error matrix
 	AmgSymMatrix(5) covMtxP;
@@ -1034,7 +1034,9 @@ const Trk::Track* VP1BPhysSystem::getRefittedTrack(const Amg::Vector3D& position
 	//creates parameter base for the new track
 	const Trk::TrackParameters* p = dynamic_cast<const Trk::TrackParameters* >(measuredPerigee);
 
-  //TODO: check parameters safety
+  if (!p)[[unlikely]]{
+    throw std::runtime_error("VP1BPhysSystem::getRefittedTrack: dynamic cast failed");
+  }
 
   //creates a vector of TracksStates on surface
 	auto trackStateOnSurfaces = std::make_unique<Trk::TrackStates>();
