@@ -979,6 +979,8 @@ template <class T> inline bool isTopBaryon(const T& p) { return  leadingQuark(p)
 // APID: This function selects B-Hadrons which predominantly decay weakly. (Commonly used definition in GeneratorFilters package.)
 // 5[1-4]1 L = J = 0, S = 0
 // 5[1-5][1-4]2 J = 1/2, n_r = 0, n_L =0
+// Sigma_b (5112, 5212, 5222) decay strongly and the primed Xi'_bc (5412, 5422) and Omega'_bc (5432) states decay
+// electromagnetically, so they are not included.
 template <class T> inline bool isWeaklyDecayingBHadron(const T& p) {return isWeaklyDecayingBHadron(p->pdg_id());}
 template <> inline bool isWeaklyDecayingBHadron(const int& p) {
   const int pid = std::abs(p);
@@ -989,16 +991,10 @@ template <> inline bool isWeaklyDecayingBHadron(const int& p) {
            pid == 5122  || // Lambda_b0
            pid == 5132  || // Xi_b-
            pid == 5232  || // Xi_b0
-           pid == 5112  || // Sigma_b-
-           pid == 5212  || // Sigma_b0
-           pid == 5222  || // Sigma_b+
            pid == 5332  || // Omega_b-
            pid == 5142  || // Xi_bc0
            pid == 5242  || // Xi_bc+
-           pid == 5412  || // Xi'_bc0
-           pid == 5422  || // Xi'_bc+
            pid == 5342  || // Omega_bc0
-           pid == 5432  || // Omega'_bc0
            pid == 5442  || // Omega_bcc+
            pid == 5512  || // Xi_bb-
            pid == 5522  || // Xi_bb0
