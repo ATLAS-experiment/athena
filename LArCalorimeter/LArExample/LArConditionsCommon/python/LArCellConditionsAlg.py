@@ -436,7 +436,7 @@ class LArCellConditionsAlg(PyAthena.Alg):
                 eta=self.offlineID.eta(id)
                 phi=self.offlineID.phi(id)
 
-                if subcalo is self.offlineID.LAREM:
+                if subcalo == self.offlineID.LAREM:
                     if abs(side)==1:
                         oflName+="[EMB"
                     elif abs(side)==2:
@@ -445,9 +445,9 @@ class LArCellConditionsAlg(PyAthena.Alg):
                         oflName+="[EMECIW"
                     else:
                         oflName+="[UNKNOWN"
-                elif subcalo is self.offlineID.LARHEC:
+                elif subcalo == self.offlineID.LARHEC:
                     oflName+="[HEC"
-                elif subcalo is self.offlineID.LARFCAL:
+                elif subcalo == self.offlineID.LARFCAL:
                     oflName+="[FCAL"
                 else:
                     oflName+="[UNKNOWN"
