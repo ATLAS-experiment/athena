@@ -15,7 +15,7 @@ def TrackOverlayDecisionAlgCfg(flags, name="TrackOverlayDecisionAlg",  **kwargs)
     # Record the ML threshold in the in-file metadata (/TagInfo)
     from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
     acc.merge(TagInfoMgrCfg(flags, tagValuePairs={"TrackOverlayMLThreshold": str(kwargs["MLThreshold"])}))
-    acc.addEventAlgo(CompFactory.TrackOverlay.TrackOverlayDecisionAlg(name, **kwargs))
+    acc.addEventAlgo(CompFactory.TrackOverlayDecisionAlg.TrackOverlayDecisionAlg(name, **kwargs))
     return acc
 
 def InvertedTrackOverlayDecisionAlgCfg(flags, name="InvertedTrackOverlayDecisionAlg", **kwargs):
