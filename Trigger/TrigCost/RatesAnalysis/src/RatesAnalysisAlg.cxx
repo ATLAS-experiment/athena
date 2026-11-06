@@ -547,7 +547,7 @@ StatusCode RatesAnalysisAlg::populateTriggers() {
 	std::string lvlSubdir = "";
         if (trigger.second->getName().find("L1") == 0){
           lvlSubdir = "Rate_ChainL1_HLT/";
-        } else if (trigger.second->getName().find("HLT") == 0) {
+        } else if (trigger.second->getName().starts_with("HLT") || trigger.second->getName().starts_with("EF")) {
           lvlSubdir = "Rate_ChainHLT_HLT/";
         }
         trigger.second->setDataName("data"+m_histogramSuffix);
