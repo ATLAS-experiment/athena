@@ -10,6 +10,13 @@
     <AlgTool class="GlobalJet1AlgTool" name="GlobalJet1AlgTool">
       <child class="GlobalCellTowerAlgTool" name="GlobalCellTowerAlgTool" slot="in0"/>
     </AlgTool>
+    <AlgTool class="GlobalJet_TagAlgTool" name="GlobalJet_TagAlgTool">
+      <child class="GlobalJet1AlgTool" name="GlobalJet1AlgTool" slot="in0"/>
+    </AlgTool>
+    <AlgTool class="GlobalMETAlgTool" name="GlobalMETAlgTool">
+      <child class="GlobalCellTowerAlgTool" name="GlobalCellTowerAlgTool" slot="in0"/>
+      <child class="GlobalJet1AlgTool" name="GlobalJet1AlgTool" slot="in1"/>
+    </AlgTool>
   </TOBWriters>
   <!-- TIP Writers-->
   <TIPWriters>

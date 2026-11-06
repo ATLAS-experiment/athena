@@ -77,6 +77,9 @@ read_handles = {
     'Egamma1BDTAlgTool': {'in0': 'LArNeighborhoodTOBContainerKey'},
     'GlobalCellTowerAlgTool': {'in0': 'GlobalLArCellsKey'},
     'GlobalJet1AlgTool': {'in0': 'GlobalCellTowersKey'},
+    'GlobalJet_TagAlgTool': {'in0': 'GlobalJet1JetsKey'},
+    'GlobalMETAlgTool': {'in0': 'GlobalCellTowersKey', 
+                         'in1': 'GlobalJet1JetsKey'},
     'eEmMultAlgTool': {'in0': 'eEmTOBs'},
     'eEmEg1BDTMultAlgTool': {'in0': 'eEmEg1BDTTOBContainerKey'},
     'CommonMultAlgTool': {'in0': 'CommonTOBsKey'},
@@ -88,10 +91,12 @@ write_handles = {
     'Egamma1BDTAlgTool': 'eEmEg1BDTTOBContainerKey',
     'GlobalCellTowerAlgTool': 'GlobalCellTowersKey',
     'GlobalJet1AlgTool': 'GlobalJet1JetsKey',
+    'GlobalJet_TagAlgTool': 'GlobalJet_TagJetsKey',
+    'GlobalMETAlgTool': 'GlobalMETKey',
 }
 
 def GlobalSimulationAlgCfg(flags,
-                           dump=False,
+                           dump=True,
                            fn=None,
                            algName='GlobalSimTestAlg',
                            OutputLevel=Constants.INFO):

@@ -15,6 +15,7 @@
 
 #include "../GlobalSimComponents/IGlobalSimAlgTool.h"
 #include "../IO/CommonTOBContainer.h"
+#include "../IO/Jet1TOB.h"
 #include "../Utilities/IDataCollector.h"
 
 
@@ -60,8 +61,8 @@ namespace GlobalSim {
 	"GlobalCellTowers",
 	"Key to the container of generic TOBS containing the cell towers"};
     
-    /** @brief Write key for the output Jet1Jets as a GenericTobContainer */
-    SG::WriteHandleKey<IOBitwise::CommonTOBContainer>
+    /** @brief Write key for the output Jet1Jets as a Jet1TOBContainer */
+    SG::WriteHandleKey<IOBitwise::Jet1TOBContainer>
     m_gblJet1JetsContainerKey {
         this,
 	"GlobalJet1JetsKey",

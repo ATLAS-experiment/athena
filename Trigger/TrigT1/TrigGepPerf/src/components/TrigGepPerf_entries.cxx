@@ -14,6 +14,9 @@ DECLARE_COMPONENT( GepJetAlg )
 #include "../GepMETAlg.h"
 DECLARE_COMPONENT( GepMETAlg )
 
+#include "../TotalMETAlg.h"
+DECLARE_COMPONENT( TotalMETAlg )
+
 #include "../GepMETPufitAlg.h"
 DECLARE_COMPONENT( GepMETPufitAlg )
 

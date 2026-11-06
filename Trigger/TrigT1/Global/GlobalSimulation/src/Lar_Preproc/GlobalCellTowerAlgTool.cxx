@@ -8,6 +8,7 @@
 #include "../IO/CommonTOB.h"
 
 #include <bitset>
+#include <cmath>
 
 
 namespace GlobalSim {
@@ -49,9 +50,10 @@ namespace GlobalSim {
     auto & towerEnergies = *pTowerEnergies;
     for (const GlobalSim::GlobalLArCell* cell : gblLArCells) {
 
-        // Compute eta and phi indices (binning in steps of 0.1)
+        // Compute eta index (binning in steps of 0.1) and phi index (GEP tower grid, pi/32 bins counted from phi = 0)
         int eta_index = static_cast<int>(std::floor(cell->eta() * 10)) + 49;
-        int phi_index = static_cast<int>(std::floor(cell->phi() * 10)) + 32;
+        const double phi02pi = (cell->phi() < 0) ? cell->phi() + 2 * M_PI : cell->phi();
+        int phi_index = static_cast<int>(std::floor(phi02pi / (2 * M_PI / nPhi))) % nPhi;
 
         // Ensure indices are within bounds
         if (eta_index < 0 || eta_index >= nEta || phi_index < 0 || phi_index >= nPhi) continue;

@@ -6,6 +6,8 @@
 
 #include "GlobalSimulation/Tower.h"
 #include "GlobalSimulation/JET1Jet.h"
+#include "GlobalSimulation/jet_tag_output.h"
+#include "GlobalSimulation/met_output.h"
 
 
 
