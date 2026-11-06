@@ -254,7 +254,7 @@ StatusCode TileDigitsFromPulse::initialize() {
 	for (int ros = 1; ros < 5; ++ros) { // initialize the vector of PU amplitudes
 	  for (int drawer = 0; drawer < 64; ++drawer){
 	    for (int channel = 0; channel < 48; ++channel) {
-	      addPileUp(m_inTimeAmp, 1, ros, drawer, channel); // Initialized for HG, for LG  use the same divided by the HG/LG ratio
+	      addPileUp(m_inTimeAmp, m_ootAmp, 1, ros, drawer, channel); // Initialized for HG, for LG  use the same divided by the HG/LG ratio
 	    }
 	  }
 	}
@@ -293,34 +293,32 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 
 	double tFit = 0, ped = 100; //Settings for simulation 
 
-	TF1 *pdf = new TF1();
-	TF1 *pdf_PhaseI = new TF1();
-	TF1 *pdf_lo = new TF1();
-	TF1 *pdf_hi = new TF1();
-	if (!m_simQIE) {
-		
-
+	TF1* pdf = nullptr;
+	std::unique_ptr<TF1> pdf_PhaseI;
+	std::unique_ptr<TF1> pdf_lo;
+	std::unique_ptr<TF1> pdf_hi;
+	if (!m_simQIE && m_gaussNoise) {
 	  	if(m_PhaseII){
 		  Double_t sigma_lo = 1; //Noise value obtained from ATL-COM-TILECAL-2020-031
-	    	pdf_lo = new TF1("pdf_lo","(1/(sqrt(2*pi)*[0])) * (exp(-0.5*(x/[0])**2)/(sqrt(2*pi)*[0]))", -100, 100);
+			pdf_lo = std::make_unique<TF1>("pdf_lo","(1/(sqrt(2*pi)*[0])) * (exp(-0.5*(x/[0])**2)/(sqrt(2*pi)*[0]))", -100, 100);
 			pdf_lo->SetParameter(0,sigma_lo);
 
 			Double_t sigma_hi = 2.5; //Noise value obtained from ATL-COM-TILECAL-2020-031
-			pdf_hi = new TF1("pdf_hi","(1/(sqrt(2*pi)*[0])) * (exp(-0.5*(x/[0])**2)/(sqrt(2*pi)*[0]))", -100, 100);
+			pdf_hi = std::make_unique<TF1>("pdf_hi","(1/(sqrt(2*pi)*[0])) * (exp(-0.5*(x/[0])**2)/(sqrt(2*pi)*[0]))", -100, 100);
 			pdf_hi->SetParameter(0,sigma_hi);
 		}
 	  	else{
 			//Noise pdf for general noise. Maybe use as a member and put in init.
 			//pdf = new TF1("pdf", "[0] * (Gaus(x,0,[1]) + [2] * Gaus(x,0,[3]))", -100., 100.); //Root goes not like "Gaus"		
 
-	    	pdf_PhaseI = new TF1("pdf_PhaseI", "[0] * (exp(-0.5*(x/[1])**2)/(sqrt(2*pi)*[1]) + [2] *exp(-0.5*(x/[3])**2)/(sqrt(2*pi)*[3]))", -100., 100.);
+			pdf_PhaseI = std::make_unique<TF1>("pdf_PhaseI", "[0] * (exp(-0.5*(x/[1])**2)/(sqrt(2*pi)*[1]) + [2] *exp(-0.5*(x/[3])**2)/(sqrt(2*pi)*[3]))", -100., 100.);
 	    	pdf_PhaseI->SetParameters(m_GNAmpOne, m_GNSigmaOne, m_GNAmpTwo, m_GNSigmaTwo);
 	  	}
 	}
 
 	std::vector<float> samples(m_nSamples);
 
-	double Rndm[16]; // Can't use variable size array,
+	std::vector<double> Rndm(m_nSamples);
 	double Rndm_dG[1]; // uniform random number for the double gaussian
 
 	ATH_MSG_DEBUG("Starting loop");
@@ -334,6 +332,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 			for (int channel = 0; channel < 48; ++channel) {
 
 				if (!m_simQIE && !m_simPulseChain) { //3-in-1 or FENICS is simulated below
+					double ootAmp = m_ootAmp;
 
 					if(m_PhaseII){
 						ATH_MSG_VERBOSE("executing FENICS code");
@@ -359,7 +358,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 							n_inTimeAmp = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
 
 							if (m_random->Rndm() >= m_pileUpFraction){
-							        m_ootAmp = 0; //Set oot amplitude to 0 if no pile-up.
+							        ootAmp = 0; //Set oot amplitude to 0 if no pile-up.
 							}
 							tFit = m_random->Gaus(0., m_gausC2C); //C2C phase variation
 							double deformatedTime = m_random->Gaus(m_imperfectionMean, m_imperfectionRms); //Widening of pulseshape
@@ -370,7 +369,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 							m_PUAmp[ros-1][drawer][channel].assign(m_nPul, 0.0);
 							
 							// Fill amplitudes (including pile-up) for HG
-							addPileUp(n_inTimeAmp, gain, ros, drawer, channel);
+							addPileUp(n_inTimeAmp, ootAmp, gain, ros, drawer, channel);
 
 						} else {
 							double deformatedTime = m_random->Gaus(m_imperfectionMean, m_imperfectionRms); //Widening of pulseshape
@@ -384,10 +383,10 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						}
 
 						if(m_PhaseII && m_gaussNoise){
-							pdf = (gain==1) ? pdf_hi : pdf_lo;
+							pdf = (gain==1) ? pdf_hi.get() : pdf_lo.get();
 						}
 						else if(m_gaussNoise){
-							pdf = pdf_PhaseI;
+							pdf = pdf_PhaseI.get();
 						}
 
 						m_tsg->setPulseShape(m_ps[gain]);
@@ -401,7 +400,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 							double Hfn1 = m_tileToolNoiseSample->getHfn1(drawerIdx, channel, gain, ctx);
 							double Hfn2 = m_tileToolNoiseSample->getHfn2(drawerIdx, channel, gain, ctx);
 							double Norm = m_tileToolNoiseSample->getHfnNorm(drawerIdx, channel, gain, ctx);
-							RandGaussQ::shootArray(rndmEngine, samples.size(), Rndm, 0.0, 1.0);
+							RandGaussQ::shootArray(rndmEngine, samples.size(), Rndm.data(), 0.0, 1.0);
 							RandFlat::shootArray(rndmEngine, 1, Rndm_dG, 0.0, 1.0);
 							for (unsigned int js = 0; js < samples.size(); ++js) {
 								//using the same gaussian(sigma) for all samples in one channel in one event
@@ -434,7 +433,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						auto rawChannel = std::make_unique<TileRawChannel>(digit->adc_HWID(),
 												     n_inTimeAmp,
 												     tFit,
-												     m_ootAmp,
+												     ootAmp,
 												     m_ootOffset);
 						  
 						ATH_CHECK( rawChannelContainer->push_back(std::move(rawChannel)) );
@@ -452,7 +451,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						auto rawChannel = std::make_unique<TileRawChannel>(digit->adc_HWID(),
 												     n_inTimeAmp,
 												     tFit,
-												     m_ootAmp,
+												     ootAmp,
 												     m_ootOffset);
 
 						ATH_CHECK( rawChannelContainer->push_back(std::move(rawChannel)) );
@@ -525,12 +524,13 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						  // PDF logic for noise
 						  if (m_gaussNoise) {
 						    if (m_PhaseII) {
-						      pdf = (gain == 1) ? pdf_hi : pdf_lo;
+						      pdf = (gain == 1) ? pdf_hi.get() : pdf_lo.get();
 						    } else {
-						      pdf = pdf_PhaseI;
+						      pdf = pdf_PhaseI.get();
 						    }
 						  }
 
+						  m_tsg->setPulseShape(m_ps[gain]);
 						  if (gain == 1) {
 						    ped = m_chanPed
 						      ? m_tileToolNoiseSample->getPed(drawerIdx, channel, gain,
@@ -621,13 +621,6 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
         SG::WriteHandle<TileDigitsContainer> digitsCnt(m_digitsContainerKey, ctx);
         ATH_CHECK( digitsCnt.record(std::move(digitsContainer)) );
 
-	if (!m_simQIE) {
-		//delete pdf;
-		delete pdf_PhaseI;
-		delete pdf_hi;
-		delete pdf_lo;
-	}
-
 	ATH_MSG_DEBUG("Execution completed");
 
 	return StatusCode::SUCCESS;
@@ -705,7 +698,7 @@ bool TileDigitsFromPulse::makeDist(TFile*& file, std::vector<std::vector<TH1F*>>
 	return kTRUE;
 }
 
-void TileDigitsFromPulse::addPileUp(double &n_inTimeAmp, int gain, int ros, int drawer, int channel) {
+void TileDigitsFromPulse::addPileUp(double &n_inTimeAmp, double ootAmp, int gain, int ros, int drawer, int channel) {
         //Pileup samples
         double amp_1;
         double amp_2;
@@ -751,8 +744,8 @@ void TileDigitsFromPulse::addPileUp(double &n_inTimeAmp, int gain, int ros, int 
                                         ATH_MSG_VERBOSE("Final amplitudes for pulse " << m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] << " " << m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i]);
                                 }
                                 else{
-                                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp;
-                                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp;
+                                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff + i] = m_useOotADist ? m_ootDist->GetRandom() : ootAmp;
+                                        m_PUAmp[ros-1][drawer][channel][m_nPul_eff - i] = m_useOotADist ? m_ootDist->GetRandom() : ootAmp;
                                 }
 
 				if(m_simPulseChain){ // Special treatment for pulse-chain simulation, add in-time pulses when initializing true-amp vector
@@ -798,13 +791,11 @@ void TileDigitsFromPulse::addPileUpSample(int gain, int ros, int drawer, int cha
 	double amp = 0;
 	double mu = 0; //Interaction per bunch crossing for PU simulation
 
-	auto random = std::make_unique<TRandom3>(m_seed);
-
-	mu=random->Poisson(m_avgMuForPU);
+	mu=m_random->Poisson(m_avgMuForPU);
 
 	if(gain == 1){
 		for (int imu = 0; imu<mu; imu++){
-			if (random->Rndm() < m_pileUpFraction){
+			if (m_random->Rndm() < m_pileUpFraction){
 				amp = m_pileup_AmpDists[ros-1][channel]->GetRandom();
 			}
 			else{

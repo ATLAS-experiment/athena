@@ -191,7 +191,7 @@ private:
     bool makeDist(TFile*& file, TH1F*& hist, const std::string& fileName, const std::string& histName="h_Eopt_hi"); //!< Method to read distribution from file
     bool makeDist(TFile*& file, std::vector<std::vector<TH1F*>>& hists, const std::string& fileName);
 
-    void addPileUp(double &n_inTimeAmp, int gain, int ros, int drawer, int channel); //!< Fill vector with pile-up amplitudes
+    void addPileUp(double &n_inTimeAmp, double ootAmp, int gain, int ros, int drawer, int channel); //!< Fill vector with pile-up amplitudes
     void addPileUpSample(int gain, int ros, int drawer, int channel); //!< Fill only a BC with pile-up amplitude
 
     float m_sample_tru = 0;
