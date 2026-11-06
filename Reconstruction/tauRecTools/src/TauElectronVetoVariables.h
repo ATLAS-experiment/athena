@@ -9,9 +9,9 @@
 
 #include "TrkCaloExtension/CaloExtensionCollection.h"
 
+#include "ActsEvent/ContextUtility.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
-#include "AthenaBaseComps/AthAlgTool.h"
 
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -58,8 +58,13 @@ private:
   Gaudi::Property<bool> m_useACTSExtrapolator{this, "useACTSExtrapolator", false};
   ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool {this, "ExtrapolationTool", "ExtrapolationTool", "Tool to run propagation in an ACTS tracking geometry" };
   ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+  SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_extensionReadDecorKey{this, "ExtensionDecoration", "InDetTrackParticles.caloExtensionLink"};
 
-  std::map<unsigned int, std::string> m_caloNameGeoIDMap;
+  /** The ContextUtility will give us access to the Acts geometry context */
+  ActsTrk::ContextUtility m_ctxProvider{this};
+
+  //Map each identifier volume and layer pair onto a calorimeter sampling layer.
+  std::map<std::pair<std::size_t, std::size_t>, std::string> m_caloVolumeLayerMap; 
 
 
 };
