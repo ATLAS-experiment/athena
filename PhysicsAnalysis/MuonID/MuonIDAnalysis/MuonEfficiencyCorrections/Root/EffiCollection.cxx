@@ -58,7 +58,7 @@ namespace ADD_CMODE(CP) {
                 m_lrt_central_eff = m_central_eff;
             }
             if (m_ref_tool.lowPtTransition() > 0 ) {
-                if (m_ref_tool.filename_LRTLowPt() != m_ref_tool.filename_LRTCentral()) {
+                if (m_ref_tool.filename_LRTLowPt() == m_ref_tool.filename_LRTCentral()) {
                     m_lrt_lowpt_central_eff = m_lrt_central_eff;
                 }
                 else if (m_ref_tool.filename_LRTLowPt() == m_ref_tool.filename_LowPt()) {
