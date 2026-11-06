@@ -623,15 +623,16 @@ class TauTriggerAnalysisSFBlock (ConfigBlock):
         if config.dataType() is not DataType.Data:
             log = logging.getLogger('TauTriggerAnalysisSF')
 
-            # Temporary skip all MC campaigns apart from MC23a when using GNTau until SFs are available
-            if( self.useGNTau and config.campaign() is not Campaign.MC23a ):
-                log.warning("Tau trigger scale factors are only available for MC23a when using GNTau offline ID")
+            # Temporary skip all MC campaigns apart from MC23a/d/e when using GNTau until SFs are available
+            if( not ( self.useGNTau and ( (config.campaign() is Campaign.MC23a) or (config.campaign() is Campaign.MC23d) or (config.campaign() is Campaign.MC23e) ) ) ):
+                log.warning("Tau trigger scale factors are only available for MC23a/d/e when using GNTau offline ID")
                 return 
 
-            # Temporary skip for MC23e until SFs are available
-            if config.campaign() is Campaign.MC23e:
-                log.warning("Tau trigger scale factors are not available yet for MC23e")
+            # Temporary skip for MC23e when using RNN until SFs are available
+            if ( (not self.useGNTau) and (config.campaign() is Campaign.MC23e) ):
+                log.warning("Tau trigger scale factors are not available yet for MC23e when using RNN offline ID")
                 return
+            
             # Temporary skip for MC23g until SFs are available
             if config.campaign() is Campaign.MC23g:
                 log.warning("Tau trigger scale factors are not available yet for MC23g")

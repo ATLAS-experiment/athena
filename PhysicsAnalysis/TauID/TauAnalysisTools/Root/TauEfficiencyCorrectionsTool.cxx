@@ -367,8 +367,14 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
 
       std::string trigFold = m_useGNTau ? "GNTau" : "RNN";
 
-      if(m_useGNTau && m_sCampaign!="mc23a")
-	ATH_MSG_WARNING("TauTrigger recommendations using offline GNTau ID are ONLY available for 2022 datasets. In all other cases the tool is retrieving the offline RNN ID based recommendations, which are NOT recommended to use");        
+      // Warning message for using GNTau offline ID on Run2
+      if(m_useGNTau && m_sCampaign=="mc20")
+	ATH_MSG_WARNING("TauTrigger recommendations using offline GNTau ID are ONLY available for 2022-2024, not for Run2. The tool is retrieving the offline RNN ID based recommendations, which are NOT recommended to use");        
+
+      // Warning message for using RNN offline ID on 2024
+      if(!m_useGNTau &&  m_sCampaign=="mc23e")
+	ATH_MSG_WARNING("TauTrigger recommendations using offline RNN ID are NOT available for 2024. The tool is retrieving the offline GNTau ID based recommendations, which are NOT recommended to use");       
+
 
       if (m_sInputFilePathTriggerHadTau.empty()) {
         // Determine the input file name from the given trigger name.
@@ -382,13 +388,21 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
           }
 	} else if(m_sCampaign=="mc23d"){
           if (m_sTriggerName.value().find("mediumRNN_tracktwoMVA") != std::string::npos) {
-            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN/Trigger_TrueHadTau_data2023"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/"+trigFold+"/Trigger_TrueHadTau_data2023"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
           }
           else {
             ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported for " << m_sCampaign << " campaign. Please fix \"TriggerName\" property. In case of doubt please consult with TauTrigger coordinators");
             return StatusCode::FAILURE;
           }
-        } else if(m_sCampaign=="mc20"){
+        } else if(m_sCampaign=="mc23e"){
+          if (m_sTriggerName.value().find("mediumRNN_tracktwoMVA") != std::string::npos) {
+            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/GNTau/Trigger_TrueHadTau_data2024"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+          }
+          else {
+            ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported for " << m_sCampaign << " campaign. Please fix \"TriggerName\" property. In case of doubt please consult with TauTrigger coordinators");
+            return StatusCode::FAILURE;
+          }
+	} else if(m_sCampaign=="mc20"){
           if (m_sTriggerName.value().find("tracktwoEF") != std::string::npos) {
 	    // check explicitly tau160 as the root file for this trigger was renamed 	  
             if (m_sTriggerName.value().find("tau160") != std::string::npos) { 		  
