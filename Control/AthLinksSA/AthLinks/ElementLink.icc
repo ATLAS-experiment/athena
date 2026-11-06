@@ -256,6 +256,14 @@ bool ElementLink< STORABLE >::toContainedElement( BaseConstReference container,
    return true;
 }
 
+template< typename STORABLE >
+bool ElementLink< STORABLE >::toContainedElement( BaseConstReference container,
+                                                  ElementType element,
+                                                  const EventContext&) {
+  return toContainedElement( container, element );
+}
+
+
 /// This function can be used to set the link to point to a new element inside
 /// the container that it already points to. The function is slow, as it needs
 /// to find the index of the element inside the container.
