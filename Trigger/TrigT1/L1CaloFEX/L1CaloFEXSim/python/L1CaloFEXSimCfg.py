@@ -183,6 +183,7 @@ def L1CaloFEXSimCfg(flags, eFexTowerInputs = ["L1_eFexDataTowers","L1_eFexEmulat
 
         acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts","TRIGGER_OFL" if flags.Input.isMC else "TRIGGER_ONL",className="CondAttrListCollection"))
         eFEXInputs.NoiseCutsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexNoiseCuts"
+        if flags.Input.isMC: eFEXInputs.NoiseCutsBeginTimestamp=0 # MC jobs should apply noise cuts according to what is in the conditions DB
         acc.merge(addFolders(flags,"/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib","TRIGGER_OFL" if flags.Input.isMC else "TRIGGER_ONL",className="CondAttrListCollection")) # dmCorr from DB!
         eFEX.eFEXSysSimTool.eFEXSimTool.eFEXFPGATool.eFEXegAlgoTool.DMCorrectionsKey = "/TRIGGER/L1Calo/V1/Calibration/EfexEnergyCalib"
 
