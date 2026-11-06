@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name.
 atlas_subdir( xAODPFlow )
@@ -13,7 +13,7 @@ atlas_add_library( xAODPFlow
    PUBLIC_HEADERS xAODPFlow
    INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} AthContainers AthLinks xAODBase
-   xAODCaloEvent xAODCore xAODTracking )
+   xAODCaloEvent xAODCore xAODTracking CxxUtils )
 
 atlas_add_xaod_smart_pointer_dicts(
       INPUT xAODPFlow/selection.xml

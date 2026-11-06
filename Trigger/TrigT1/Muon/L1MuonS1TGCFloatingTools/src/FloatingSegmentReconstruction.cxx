@@ -5,6 +5,7 @@
 #include "FloatingSegmentReconstruction.h"
 
 #include "FourMomUtils/xAODP4Helpers.h"
+#include "CxxUtils/trapping_fp.h"
 
 #include <algorithm>
 #include <array>
@@ -408,6 +409,8 @@ void pruneLocalCandidateBins(std::vector<CandidatePair>& pairs,
   std::vector<CandidatePair> retained;
   retained.reserve(pairs.size());
   for (const CandidatePair& pair : pairs) {
+    // Tell clang that FP operations may trap.
+    CXXUTILS_TRAPPING_FP;
     const float phi = static_cast<float>(
         xAOD::P4Helpers::deltaPhi(pair.position.strip->phi, 0.));
     const int etaBin = static_cast<int>(std::floor(

@@ -6,6 +6,7 @@
 
 #include "xAODPFlow/FEHelpers.h"
 #include "xAODPFlow/PFODefs.h"
+#include "CxxUtils/trapping_fp.h"
 #include <array>
 
 namespace FEHelpers {
@@ -37,6 +38,8 @@ namespace FEHelpers {
     float clusterPhi = theFourVector.Phi();
 
     if (radius > 1.0 && centerMag > 1e-3){
+      // Tell clang that FP operations may trap.
+      CXXUTILS_TRAPPING_FP;
       EtaVertexCorrection = (-vertexToCorrectTo.Z() + (vertexToCorrectTo.X()*cos(clusterPhi) + vertexToCorrectTo.Y()*sin(clusterPhi))*sinh(clusterEta))/centerMag;
       const float invRadius = 1.0f / radius;
       PhiVertexCorrection = (vertexToCorrectTo.X()*sin(clusterPhi) - vertexToCorrectTo.Y()*cos(clusterPhi))*invRadius;

@@ -116,6 +116,8 @@ namespace L1Muon::L1MDT {
 
 
   int LegendreSegmentFinderTool::findBin(float value, float min, float binSize, int nBins) const {
+    // Tell clang that FP operations may trap.
+    CXXUTILS_TRAPPING_FP;
     const int bin = static_cast<int>(std::floor((value - min) / binSize));
     if (bin < 0 || bin >= nBins) return -1;
     return bin;
