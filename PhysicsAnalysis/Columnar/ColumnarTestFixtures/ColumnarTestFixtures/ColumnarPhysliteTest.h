@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -42,6 +42,7 @@ namespace columnar
 
   struct ColumnarPhysLiteTest : testing::Test
   {
+    // cppcheck-suppress uninitMemberVarNoCtor; false positive
     const std::type_info& columnar_mode_type;
     std::unique_ptr<TFile> file;
     TTree *tree = nullptr;
