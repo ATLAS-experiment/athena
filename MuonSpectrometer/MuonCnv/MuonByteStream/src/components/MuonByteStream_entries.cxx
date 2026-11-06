@@ -1,5 +1,8 @@
+/*
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+*/
 #include "../MuonCacheCreator.h"
-#include "MuonByteStream/MuonRawDataProvider.h"
+#include "../MuonRawDataProvider.h"
 #include "MuonByteStream/CscRdoContByteStreamCnv.h"
 #include "MuonByteStream/MdtCsmContByteStreamCnv.h"
 #include "MuonByteStream/RpcPadContByteStreamCnv.h"

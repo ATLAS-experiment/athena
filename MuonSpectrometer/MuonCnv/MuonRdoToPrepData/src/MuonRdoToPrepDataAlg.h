@@ -24,7 +24,7 @@
 
 class MuonRdoToPrepDataAlg : public AthReentrantAlgorithm {
 public:
-    MuonRdoToPrepDataAlg(const std::string& name, ISvcLocator* pSvcLocator);
+    using AthReentrantAlgorithm::AthReentrantAlgorithm;
 
     StatusCode initialize() override final;
     StatusCode execute(const EventContext& ctx) const override final;
