@@ -82,7 +82,7 @@ if __name__=="__main__":
         cfg.merge(LegacyMuonRecoChainCfg(flags))
 
 
-    cfg.merge(MsTrackTesterCfg(flags, outFile = args.outRootFile))
+    cfg.merge(MsTrackTesterCfg(flags, outFile = args.outRootFile, scheduleLegacy=not args.noLegacyChain))
 
     cfg.merge(setupHistSvcCfg(flags,outFile=args.outRootFile,
                                     outStream="MuonEtaHoughTransformTest"))
