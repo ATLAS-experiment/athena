@@ -226,7 +226,7 @@ def main():
 Now finalize the merge:
  1) git status and resolve any remaining conflicts
     Note: "--theirs" is {args.source}, "--ours" is {args.target}
- 2) git commit OR git merge --continue
+ 2) git merge --continue (until all conflicts are resolved)
  3) git push origin
  4) ./Build/AtlasBuildScripts/prepare_release_notes.py --sweep -t GITLAB_TOKEN
 """)
