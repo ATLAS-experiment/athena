@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -607,8 +607,11 @@ void IParticleHandle_Jet::Imp::rerandomiseMaterial()
 	double r,g,b;
 	bool ok;
 	while (true) {
+	  //coverity[DC.WEAK_CRYPTO]
 		r = (rand() / static_cast<double>(RAND_MAX));
+		//coverity[DC.WEAK_CRYPTO]
 		g = (rand() / static_cast<double>(RAND_MAX));
+		//coverity[DC.WEAK_CRYPTO]
 		b = (rand() / static_cast<double>(RAND_MAX));
 		ok = true;
 		//For now we make sure that we avoid black and red. This should be updated from bgd and highlight col automatically! (fixme).
