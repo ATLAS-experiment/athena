@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -327,25 +327,25 @@ void InDetProjHelper::clipPath( const std::vector<Amg::Vector3D >& path,
   //Special case: If exactly one of the four parts is enabled, we already have our result:
   if ( ( (enabled_brlA?1:0) + (enabled_brlC?1:0) + (enabled_ecA?1:0) + (enabled_ecC?1:0) ) == 1 ) {
     if (enabled_brlA) {
-      resulting_subpaths_barrelA = paths_clipped;
+      resulting_subpaths_barrelA = std::move(paths_clipped);
       if (VP1Msg::verbose())
 	messageVerbose("clipPath(..) only brlA enabled. Returning.");
       return;
     }
     if (enabled_brlC) {
-      resulting_subpaths_barrelC = paths_clipped;
+      resulting_subpaths_barrelC = std::move(paths_clipped);
       if (VP1Msg::verbose())
 	messageVerbose("clipPath(..) only brlC enabled. Returning.");
       return;
     }
     if (enabled_ecA) {
-      resulting_subpaths_endcapA = paths_clipped;
+      resulting_subpaths_endcapA = std::move(paths_clipped);
       if (VP1Msg::verbose())
 	messageVerbose("clipPath(..) only ecA enabled. Returning.");
       return;
     }
     if (enabled_ecC) {
-      resulting_subpaths_endcapC = paths_clipped;
+      resulting_subpaths_endcapC = std::move(paths_clipped);
       if (VP1Msg::verbose())
 	messageVerbose("clipPath(..) only ecC enabled. Returning.");
       return;
@@ -732,7 +732,7 @@ void InDetProjHelper::Imp::clipPathToHollowCylinder( const std::vector<Amg::Vect
   }
   if (!v.empty()) {
 //	  theclass->messageDebug("v not empty");
-    out.insert(v);
+    out.insert(std::move(v));
   }
 }
 
@@ -747,18 +747,17 @@ void InDetProjHelper::Imp::projectPathToInfiniteCylinder( const std::vector<Amg:
     if ( it->x()==0.0 && it->y()==0.0 ) {
       theclass->message("ERROR: Point has x==0 and y==0. Ambiguous projection of point.");
 
-//      it->setX(1.0);
+
       it->x() = 1.0;
     }
     s = r / sqrt( it->x()*it->x()+it->y()*it->y() );
 
-//    it->setX(it->x()*s);
-//    it->setY(it->y()*s);
+
     it->x() = it->x()*s;
     it->y() = it->y()*s;
 
   }
-  outset.insert(out);
+  outset.insert(std::move(out));
 }
 
 //____________________________________________________________________
@@ -771,7 +770,7 @@ void InDetProjHelper::Imp::projectPathToZPlane( const std::vector<Amg::Vector3D 
 //    it->setZ(z);
     it->z() = z;
   }
-  outset.insert(out);
+  outset.insert(std::move(out));
 }
 
 
@@ -790,9 +789,7 @@ void InDetProjHelper::transformECPointToZPlane_specialZtoR( Amg::Vector3D& p,
     }
     const double r = planeRBegin + (fabs(p.z())-endcapZBegin)/squeezeFactor;
     const double s = r / sqrt( p.x()*p.x()+p.y()*p.y() );
-//    p.setX(p.x()*s);
-//    p.setY(p.y()*s);
-//    p.setZ(planeZ);
+
     p.x() = p.x()*s;
     p.y() = p.y()*s;
     p.z() = planeZ;
@@ -811,7 +808,7 @@ void InDetProjHelper::Imp::projectPathToZPlane_specialZtoR( const std::vector<Am
 							  endcap_zasr_innerradius,
 							  endcap_zasr_endcapz_begin,
 							  endcap_zasr_squeezefact);
-  outset.insert(out);
+  outset.insert(std::move(out));
 }
 
 //____________________________________________________________________
