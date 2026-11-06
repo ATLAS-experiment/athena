@@ -1019,7 +1019,6 @@ template <> inline bool isWeaklyDecayingCHadron(const int& p) {
            pid == 4122  || // Lambda_c+
            pid == 4132  || // Xi_c0
            pid == 4232  || // Xi_c+
-           pid == 4212  || // Sigma_c+
            pid == 4332  || // Omega_c0
            pid == 4412  || // Xi_cc+
            pid == 4422  || // Xi_cc++
