@@ -27,14 +27,13 @@
 #include "VP1HEPVis/nodes/SoGenericBox.h"
 
 #include "CLHEP/Units/SystemOfUnits.h"
-#include "CaloEvent/CaloCluster.h"
-#include "CaloEvent/CaloClusterContainer.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
 
 //_____________________________________________________________________________________
 QList<VP1CaloClusterCollection*> VP1CaloClusterCollection::createCollections(IVP1System*sys,CaloClusterSysController*controller)
 {
   QList<VP1CaloClusterCollection*> cols;
-  for (const QString& key : VP1SGContentsHelper(sys).getKeys<CaloClusterContainer>()) {
+  for (const QString& key : VP1SGContentsHelper(sys).getKeys<xAOD::CaloClusterContainer>()) {
     VP1CaloClusterCollection * col = new VP1CaloClusterCollection(key,sys,controller);
     col->init();
     cols << col;
@@ -69,7 +68,7 @@ public:
 
   class ClusterHandle {
   public:
-    ClusterHandle(const CaloCluster* c) : m_attached(false), m_cluster(c), m_genericBox(0)
+    ClusterHandle(const xAOD::CaloCluster* c) : m_attached(false), m_cluster(c), m_genericBox(0)
     {
       m_transverseEnergy = sin(2*atan(exp(-fabs(eta()))))*energy();
     }
@@ -114,12 +113,12 @@ public:
     double transverseEnergy() const { return m_transverseEnergy; }
     double energy() const { return m_cluster->e(); }
     double energyForLengthAndCuts(const VP1CaloClusterCollection::Imp * d) { return d->considerTransverseEnergies ? transverseEnergy() : energy(); }
-    const CaloCluster* cluster() const { return m_cluster; }
+    const xAOD::CaloCluster* cluster() const { return m_cluster; }
     bool attached() const { return m_attached; }
   private:
     bool m_attached;
     double m_transverseEnergy;
-    const CaloCluster* m_cluster;
+    const xAOD::CaloCluster* m_cluster;
     SoGenericBox* m_genericBox;
   };
   bool cut(ClusterHandle* c) {
@@ -260,7 +259,7 @@ double VP1CaloClusterCollection::highestVisibleClusterEnergy() const
 bool VP1CaloClusterCollection::load()
 {
   //Get collection:
-  const CaloClusterContainer *theClusterCollection(0);
+  const xAOD::CaloClusterContainer *theClusterCollection(0);
   if (!VP1SGAccessHelper(systemBase()).retrieve(theClusterCollection,m_d->key))
     return false;
 
@@ -270,7 +269,7 @@ bool VP1CaloClusterCollection::load()
   m_d->sephelper = new VP1ExtraSepLayerHelper(sep);
   largeChangesBegin();
   int i(0);
-  CaloClusterContainer::const_iterator it(theClusterCollection->begin()),itE(theClusterCollection->end());
+  xAOD::CaloClusterContainer::const_iterator it(theClusterCollection->begin()),itE(theClusterCollection->end());
   for ( ; it != itE; ++it) {
     if (i++%40==0)
       systemBase()->updateGUI();
@@ -288,7 +287,7 @@ bool VP1CaloClusterCollection::load()
 QStringList VP1CaloClusterCollection::infoOnClicked(SoPath* pickedPath)
 {
   SoNode * pickedNode = pickedPath->getNodeFromTail(0);
-  const CaloCluster*cluster(0);
+  const xAOD::CaloCluster*cluster(0);
   Imp::ClusterHandle*clusterHandle(0);
   if (pickedNode->getTypeId()==SoGenericBox::getClassTypeId()) {
     for (Imp::ClusterHandle*c : m_d->clusters) {
@@ -311,7 +310,7 @@ QStringList VP1CaloClusterCollection::infoOnClicked(SoPath* pickedPath)
     l << "  Transverse Energy [GeV]: "+str(clusterHandle->transverseEnergy()/CLHEP::GeV);
     if (m_d->controller->printVerboseInfoOnClick()) {
       l << "(no verbose information available)";
-      //   l << "  Lambda_center [CLHEP::cm]: "+str(cluster->getMoment(CaloClusterMoment::CENTER_LAMBDA).getValue()/CLHEP::cm);
+      //   l << "  Lambda_center [CLHEP::cm]: "+str(cluster->getMoment(xAOD::CaloClusterMoment::CENTER_LAMBDA).getValue()/CLHEP::cm);
     }
   }
   if (m_d->controller->zoomOnClick()) {

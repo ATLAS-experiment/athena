@@ -7,7 +7,7 @@
 #include "TBEvent/TBEventInfo.h"
 #include "TBEvent/TBTrack.h"
 #include "LArG4TBSimEvent/LArG4H6FrontHitCollection.h"
-#include "CaloEvent/CaloClusterContainer.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
 #include "PathResolver/PathResolver.h"
 #include <fstream>
 #include <string>
@@ -151,13 +151,13 @@ StatusCode TBBeamQualityMC::execute(const EventContext& ctx) {
   }
 
   if(m_check_clus) { // Rejected if no good cluster
-     const CaloClusterContainer* cc = nullptr;
+     const xAOD::CaloClusterContainer* cc = nullptr;
      ATH_CHECK( evtStore()->retrieve(cc,m_clusterCollName) );
      bool haveit=false;
-     for (const CaloCluster * theCluster : *cc) {
-           double cL = theCluster->getMomentValue(CaloClusterMoment::CENTER_LAMBDA);
-           double eD = theCluster->getMomentValue(CaloClusterMoment::FIRST_ENG_DENS);
-           unsigned int cSize = theCluster->getClusterSize();
+     for (const xAOD::CaloCluster * theCluster : *cc) {
+           double cL = theCluster->getMomentValue(xAOD::CaloCluster::CENTER_LAMBDA);
+           double eD = theCluster->getMomentValue(xAOD::CaloCluster::FIRST_ENG_DENS);
+           unsigned int cSize = theCluster->clusterSize();
            if(cL != 0 && eD > 0. && cSize > 1) {
               haveit = true;
               break;

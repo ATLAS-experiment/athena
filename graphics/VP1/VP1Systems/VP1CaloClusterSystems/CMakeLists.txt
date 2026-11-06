@@ -23,7 +23,7 @@ atlas_add_library( VP1CaloClusterSystems VP1CaloClusterSystems/*.h src/*.h src/*
                    PRIVATE_INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
                    LINK_LIBRARIES VP1Base GL
-                   PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} ${CLHEP_LIBRARIES} CaloEvent VP1HEPVis VP1Utils )
+                   PRIVATE_LINK_LIBRARIES ${COIN3D_LIBRARIES} ${CLHEP_LIBRARIES} xAODCaloEvent VP1HEPVis VP1Utils )
 
 # Enable Qt support for cppcheck:
 if( CMAKE_CXX_CPPCHECK )

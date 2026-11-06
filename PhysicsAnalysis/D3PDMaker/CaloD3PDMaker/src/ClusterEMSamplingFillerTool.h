@@ -20,8 +20,6 @@
 #include "xAODCaloEvent/CaloCluster.h"
 #include <vector>
 #include <algorithm>
-class CaloCluster;
-
 
 namespace D3PD {
 
@@ -30,10 +28,10 @@ namespace D3PD {
  * @brief Block filler tool for EM samplings from a CaloCluster.
  */
 class ClusterEMSamplingFillerTool
-  : public BlockFillerTool<Types<CaloCluster, xAOD::CaloCluster> >
+  : public BlockFillerTool< xAOD::CaloCluster >
 {
 public:
-  typedef BlockFillerTool<Types<CaloCluster, xAOD::CaloCluster> > Base;
+  typedef BlockFillerTool< xAOD::CaloCluster > Base;
 
 
   /**
@@ -49,17 +47,6 @@ public:
 
   /// Book variables for this block.
   virtual StatusCode book() override;
-
-
-  /**
-   * @brief Fill one block --- type-safe version.
-   * @param p The input object.
-   *
-   * This is called once per object.  The caller
-   * is responsible for arranging that all the pointers for booked variables
-   * are set appropriately upon entry.
-   */
-  virtual StatusCode fill (const CaloCluster& p) override;
 
 
   /**

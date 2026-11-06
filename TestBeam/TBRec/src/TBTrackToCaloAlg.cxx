@@ -23,8 +23,7 @@
 
 //#include "TrackToCalo/ImpactInCalo.h"
 
-#include "CaloEvent/CaloCluster.h"
-#include "CaloEvent/CaloClusterContainer.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
 #include "CaloGeoHelpers/CaloPhiRange.h"
 #include "CaloUtils/CaloCellList.h"
 #include "CaloEvent/CaloCell.h"
@@ -446,7 +445,7 @@ void TBTrackToCaloAlg::CompareImpactWithCluster()
 
   // loop on clusters
   
-  const CaloClusterContainer* cluster_container = nullptr;
+  const xAOD::CaloClusterContainer* cluster_container = nullptr;
   sc1=evtStore()->retrieve(cluster_container,m_cluster_container);
   
   const ImpactInCaloCollection* impact_collection;
@@ -458,8 +457,8 @@ void TBTrackToCaloAlg::CompareImpactWithCluster()
     impact_iterator f_imp = impact_collection->begin();
     impact_iterator l_imp = impact_collection->end();
 
-    for (const CaloCluster* cluster : *cluster_container) {
-      double hecluster = cluster->energy()/GeV;
+    for (const xAOD::CaloCluster* cluster : *cluster_container) {
+      double hecluster = cluster->e()/GeV;
       double heta = cluster->eta();
       double hphi = cluster->phi();
 

@@ -13,7 +13,6 @@
 
 #include "ClusterSamplingFillerTool.h"
 #include "CaloUtils/CaloCellDetPos.h"
-#include "CaloEvent/CaloCluster.h"
 #include "AthenaKernel/errorcheck.h"
 #include <sstream>
 #include <algorithm>
@@ -152,36 +151,6 @@ StatusCode ClusterSamplingFillerTool::book()
  
   return StatusCode::SUCCESS;
 }
-
-
-/**
- * @brief Fill one block --- type-safe version.
- * @param p The input object.
- *
- * This is called once per object.  The caller
- * is responsible for arranging that all the pointers for booked variables
- * are set appropriately upon entry.
- */
-StatusCode ClusterSamplingFillerTool::fill (const CaloCluster& p)
-{
-  std::vector<double> eSamp;
-  p.getEInSamples(eSamp);
-
-  std::vector<double> etaSamp;
-  p.getEtaInSamples(etaSamp);
-
-  std::vector<double> phiSamp;
-  p.getPhiInSamples(phiSamp);
-
-  CHECK( fillEtamax(p) );
-  CHECK( fillSamplings (eSamp, etaSamp, phiSamp) );
-
-  if(m_writeRecoStatus)
-    *m_RecoStatus= p.getRecoStatus().getStatusWord();
-
-  return StatusCode::SUCCESS;
-}
-
 
 /**
  * @brief Fill one block --- type-safe version.

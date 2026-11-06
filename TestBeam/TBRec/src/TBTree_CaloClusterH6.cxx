@@ -22,8 +22,7 @@
 #include "CaloGeoHelpers/CaloSampling.h"
 #include "CaloEvent/CaloCell.h"
 #include "CaloEvent/CaloCellContainer.h"
-#include "CaloEvent/CaloCluster.h"
-#include "CaloEvent/CaloClusterContainer.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
 
 #include "LArRawEvent/LArDigitContainer.h"
 #include "LArElecCalib/ILArPedestal.h"
@@ -562,7 +561,7 @@ StatusCode TBTree_CaloClusterH6::execute(const EventContext& ctx)
 
   // Reject hadrons in 10 GeV electron beam
   if (m_useEMTBCluster && fabs(m_beamMom-10.) < 0.5) {
-    const CaloClusterContainer* clusterContainer = nullptr;
+    const xAOD::CaloClusterContainer* clusterContainer = nullptr;
     sc = evtStore()->retrieve(clusterContainer, "EMTBClusters");
     if (sc.isFailure()) {
       ATH_MSG_ERROR
@@ -572,9 +571,9 @@ StatusCode TBTree_CaloClusterH6::execute(const EventContext& ctx)
       return sc;
     }
     if ( clusterContainer->size()== 1) {
-      CaloClusterContainer::const_iterator it_clu = clusterContainer->begin();
-      const CaloCluster* cluster = (*it_clu);
-      float e = (float)cluster->energy();
+      xAOD::CaloClusterContainer::const_iterator it_clu = clusterContainer->begin();
+      const xAOD::CaloCluster* cluster = (*it_clu);
+      float e = (float)cluster->e();
       float ecut = 6000;
       if ( m_yTable < -100) ecut = 4000;
       if (e < ecut) {
@@ -585,7 +584,7 @@ StatusCode TBTree_CaloClusterH6::execute(const EventContext& ctx)
   }
   // Reject muons in 40 GeV pion beam
   if (m_useEMTBCluster && fabs(m_beamMom-40.) < 0.5) {
-    const CaloClusterContainer* clusterContainer = nullptr;
+    const xAOD::CaloClusterContainer* clusterContainer = nullptr;
     sc = evtStore()->retrieve(clusterContainer, "EMTBClusters");
     if (sc.isFailure()) {
       ATH_MSG_ERROR
@@ -595,9 +594,9 @@ StatusCode TBTree_CaloClusterH6::execute(const EventContext& ctx)
       return sc;
     }
     if ( clusterContainer->size()== 1) {
-      CaloClusterContainer::const_iterator it_clu = clusterContainer->begin();
-      const CaloCluster* cluster = (*it_clu);
-      float e = (float)cluster->energy();
+      xAOD::CaloClusterContainer::const_iterator it_clu = clusterContainer->begin();
+      const xAOD::CaloCluster* cluster = (*it_clu);
+      float e = (float)cluster->e();
       float ecut = 9000;
       //if ( m_yTable < -100) ecut = 4000;
       if (e < ecut) {
@@ -607,7 +606,7 @@ StatusCode TBTree_CaloClusterH6::execute(const EventContext& ctx)
     }
   }
   // Clusters
-  const CaloClusterContainer* clusterContainer = nullptr;
+  const xAOD::CaloClusterContainer* clusterContainer = nullptr;
   sc = evtStore()->retrieve(clusterContainer, m_clusterContainerName);
   if (sc.isFailure()) {
     ATH_MSG_ERROR
@@ -629,23 +628,23 @@ StatusCode TBTree_CaloClusterH6::execute(const EventContext& ctx)
 
   int clu_ind = 0;
   float eAbsTotal = 0.;
-  for (const CaloCluster* cluster : *clusterContainer) {
-    m_nCells += cluster->getNumberOfCells();
-    m_nCellCluster->push_back((int)cluster->getNumberOfCells());
-    m_eCluster->push_back((float)cluster->energy());
+  for (const xAOD::CaloCluster* cluster : *clusterContainer) {
+    m_nCells += cluster->numberCells();
+    m_nCellCluster->push_back((int)cluster->numberCells());
+    m_eCluster->push_back((float)cluster->e());
     m_etaCluster->push_back((float)cluster->eta());
     m_phiCluster->push_back((float)cluster->phi());
-    m_eTotal += (float)cluster->energy();
-    eAbsTotal += fabs((float)cluster->energy());
-    m_etaTotal += fabs((float)cluster->energy())*(float)cluster->eta();
-    m_phiTotal += fabs((float)cluster->energy())*(float)cluster->phi();
+    m_eTotal += (float)cluster->e();
+    eAbsTotal += fabs((float)cluster->e());
+    m_etaTotal += fabs((float)cluster->e())*(float)cluster->eta();
+    m_phiTotal += fabs((float)cluster->e())*(float)cluster->phi();
     //m_cell_energy->reserve(m_nCells);
     //if (m_addGain) m_cell_gain->reserve(m_nCells);
     //if (m_addTime) m_cell_time->reserve(m_nCells);
     //if (m_addQuality) m_cell_quality->reserve(m_nCells);
     
     // Loop through cluster cells
-    CaloCluster::cell_iterator itc=cluster->cell_begin();
+    xAOD::CaloCluster::const_cell_iterator itc=cluster->cell_begin();
     for (; itc!=cluster->cell_end(); itc++) {
       const CaloCell* cell = (*itc);
       const Identifier id = cell->ID();
@@ -693,67 +692,24 @@ StatusCode TBTree_CaloClusterH6::execute(const EventContext& ctx)
       float eng_frac_core = -9999;
       float m1_dens = -9999;
       float m2_dens = -9999;
-      CaloCluster::moment_iterator it_mom=cluster->beginMoment(false);
-      for (; it_mom != cluster->endMoment(false); ++it_mom) {
-	switch ( it_mom.getMomentType() ) {
-	case CaloClusterMoment::FIRST_ETA:
-	  m1_eta = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::FIRST_PHI:
-	  m1_phi = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::SECOND_R:
-	  m2_r = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::SECOND_LAMBDA:
-	  m2_lambda = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::DELTA_PHI:
-	  delta_phi = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::DELTA_THETA:
-	  delta_theta = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::DELTA_ALPHA:
-	  delta_alpha = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::CENTER_X:
-	  center_x = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::CENTER_Y:
-	  center_y = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::CENTER_Z:
-	  center_z = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::CENTER_LAMBDA:
-	  center_lambda = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::LATERAL:
-	  lateral = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::LONGITUDINAL:
-	  longitudinal = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::ENG_FRAC_EM:
-	  eng_frac_em = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::ENG_FRAC_MAX:
-	  eng_frac_max = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::ENG_FRAC_CORE:
-	  eng_frac_core = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::FIRST_ENG_DENS:
-	  m1_dens = it_mom.getMoment().getValue();
-	  break;
-	case CaloClusterMoment::SECOND_ENG_DENS:
-	  m2_dens = it_mom.getMoment().getValue();
-	  break;
-	default:
-	  break;
-	}
-      }
+      m1_eta = cluster->getMomentValue(xAOD::CaloCluster::FIRST_ETA);
+      m1_phi = cluster->getMomentValue(xAOD::CaloCluster::FIRST_PHI);
+      m2_r = cluster->getMomentValue(xAOD::CaloCluster::SECOND_R);
+      m2_lambda = cluster->getMomentValue(xAOD::CaloCluster::SECOND_LAMBDA);
+      delta_phi = cluster->getMomentValue(xAOD::CaloCluster::DELTA_PHI);
+      delta_theta = cluster->getMomentValue(xAOD::CaloCluster::DELTA_THETA);
+      delta_alpha = cluster->getMomentValue(xAOD::CaloCluster::DELTA_ALPHA);
+      center_x = cluster->getMomentValue(xAOD::CaloCluster::CENTER_X);
+      center_y = cluster->getMomentValue(xAOD::CaloCluster::CENTER_Y);
+      center_z = cluster->getMomentValue(xAOD::CaloCluster::CENTER_Z);
+      center_lambda = cluster->getMomentValue(xAOD::CaloCluster::CENTER_LAMBDA);
+      lateral = cluster->getMomentValue(xAOD::CaloCluster::LATERAL);
+      longitudinal = cluster->getMomentValue(xAOD::CaloCluster::LONGITUDINAL);
+      eng_frac_em = cluster->getMomentValue(xAOD::CaloCluster::ENG_FRAC_EM);
+      eng_frac_max = cluster->getMomentValue(xAOD::CaloCluster::ENG_FRAC_MAX);
+      eng_frac_core = cluster->getMomentValue(xAOD::CaloCluster::ENG_FRAC_CORE);
+      m1_dens = cluster->getMomentValue(xAOD::CaloCluster::FIRST_ENG_DENS);
+      m2_dens = cluster->getMomentValue(xAOD::CaloCluster::SECOND_ENG_DENS);
       m_m1_eta->push_back(m1_eta);
       m_m1_phi->push_back(m1_phi);
       m_m2_r->push_back(m2_r);
