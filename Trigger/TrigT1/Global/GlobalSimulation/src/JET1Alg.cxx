@@ -28,7 +28,7 @@ namespace GlobalSim {
 
         std::vector<WTATrigObj> input_towers;
         for(size_t i = 0; i < nTowers; i++){
-            Object<Tower> tower( *towers->at(i) );
+            Object<v3::Tower> tower( *towers->at(i) );
             WTATrigObj this_tower(tower.ptt.bits().to_ulong(), tower.eta.bits().to_ulong(), tower.phi.bits().to_ulong(), 0, i);
             input_towers.push_back(this_tower);
         }

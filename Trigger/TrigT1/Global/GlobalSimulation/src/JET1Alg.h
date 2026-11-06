@@ -32,7 +32,7 @@ namespace GlobalSim {
     private:
 
         /** @brief Key for the Input cell towers. Name of property is taken from TeamGate */
-        SG::ReadHandleKey<xAOD::BaseContainer> m_inputTowersKey{this, "topoc_pu_type", "GlobalSim_CellTowers", "type=Tower; Key for the topoc_pu_type input"};
+        SG::ReadHandleKey<xAOD::BaseContainer> m_inputTowersKey{this, "topoc_pu_type", "GlobalSim_CellTowers", "type=TowerV3; Key for the tower input (v3 encoding)"};
 
         /** @brief Key for the output jets. Name of property is taken from TeamGate */
         SG::WriteHandleKey<xAOD::BaseContainer> m_outputKey{this, "main_output", "GlobalSim_JET1Jets", "type=JET1Jet; Key for the output container"};

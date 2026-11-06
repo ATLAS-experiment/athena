@@ -26,7 +26,9 @@ atlas_add_component (GlobalSimulation
    src/Hypothesis/*.h src/Hypothesis/*.cxx
    src/IO/*.h src/IO/*.cxx
    src/Jet1/*.h src/Jet1/*.cxx
+   src/Jet_Tag/*.h src/Jet_Tag/*.cxx
    src/Lar_Preproc/*.h src/Lar_Preproc/*.cxx
+   src/MET/*.h src/MET/*.cxx
    src/PU1/*.h src/PU1/*.cxx
    src/Utilities/*.h src/Utilities/*.cxx
    src/*.cxx
@@ -37,7 +39,7 @@ atlas_add_component (GlobalSimulation
    CaloIdentifier
    L1TopoSimulationLib
    TrigConfData
-   TrigGepPerfLib # For JET1(WTAConeJet), use TGP headers
+   TrigGepPerfLib # For JET1 (WTAConeJet), Jet_Tag and MET, use TGP headers
    L1TopoEvent
    L1TopoInterfaces
    AthenaBaseComps

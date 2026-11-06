@@ -1,5 +1,6 @@
 # Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 
+import math
 from enum import Enum
 
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -56,8 +57,9 @@ def GepJetAlgCfg(
 
 
 # JetTaggerLRJ seed / constituent source options. These mirror the C++ enums
-# Gep::JetTaggerSeedSource and Gep::JetTaggerConstSource (JetTaggerLRJMaker.h);
-# keep the string values in sync with them.
+# Gep::JetTaggerSeedSource (src/JetTaggerLRJJetMaker.h) and
+# Gep::JetTaggerConstSource (TrigGepPerf/JetTaggerLRJMaker.h); keep the string
+# values in sync with them.
 class _StrEnum(Enum):
     @classmethod
     def to_list(cls):
@@ -80,10 +82,11 @@ class LRJConstSourceType(_StrEnum):
 # GepJetTaggerLRJAlgCfg. Keyed by GepJetAlg property name.
 #   2 = BasicV2    (reclusters jets, no substructure, seed-opt disabled)
 #   3 = AdvancedV3 (tower-level granularity, full substructure)
+# Note: digitization presets now forced to be within the same 98 x 64 tower grid. 
 # ---------------------------------------------------------------------------
 _LRJ_PRESETS = {
     2: {
-        'LRJDSearch':                  0.001,  # rMergeCut (seed-pos-opt effectively disabled)
+        'LRJDSearch':                  0.001,  # midpointSearchDistance (seed-pos-opt effectively disabled)
         'LRJMaxObjectsConsidered':     8,
         'LRJEtaBitLength':             10,
         'LRJPhiBitLength':             9,
@@ -144,17 +147,19 @@ def GepJetTaggerLRJAlgCfg(flags, name, **kwargs):
     kwargs.setdefault('LRJSubjetEtThresholdGeV', 25.0)
     kwargs.setdefault('LRJMinEtSeedPosOptCutGeV', 25.0)
     kwargs.setdefault('LRJSeedEtCutGeV', 5.0)                # reserved; not yet applied
-    kwargs.setdefault('LRJConstEtCutGeV', 2.0)               # reserved; not yet applied
+    kwargs.setdefault('LRJConstEtCutGeV', 2.0)               # applied when loading constituents
 
     # ---- digitization: physical ranges ----
-    kwargs.setdefault('LRJPhiMin', -3.2)
-    kwargs.setdefault('LRJPhiMax', 3.2)
+    # Phi indices count from phi = 0: index 0 = [0, pi/32), centred at pi/64
+    kwargs.setdefault('LRJPhiMin', math.pi / 64)
+    kwargs.setdefault('LRJPhiMax', math.pi / 64 + 2 * math.pi)
     kwargs.setdefault('LRJEtaMin', -4.85)
     kwargs.setdefault('LRJEtaMax', 4.95)
     kwargs.setdefault('LRJEtMin', 0.0)
-    kwargs.setdefault('LRJEtMax', 1024.0)
+    kwargs.setdefault('LRJEtMax', 2048.0)
     kwargs.setdefault('LRJMassApproxMax', 512.0)
     kwargs.setdefault('LRJInputEtToGeV', 1.0e-3)
+    kwargs.setdefault('LRJInputJetTOBEncoding', False)       # input jets on the tower grid, not the jet TOB eta/phi codes
 
     # ---- output toggles ----
     kwargs.setdefault('LRJWriteSubstructure', True)
