@@ -45,7 +45,7 @@ def ITkStripRawDataProviderToolCfg(flags, name="ITkStripRawDataProviderTool", **
     acc.setPrivateTools(CompFactory.ITkStripRawDataProviderTool(name, **kwargs))
     return acc
 
-def ITkStripRawDataProviderCfg(flags, **kwargs):
+def ITkStripRawDataProviderCfg(flags, suffix="", **kwargs):
     """ Configures the main algorithm for ITk raw data decoding """
     acc = ComponentAccumulator()    
     kwargs.setdefault("ProviderTool", acc.popToolsAndMerge(ITkStripRawDataProviderToolCfg(flags)))
@@ -55,7 +55,27 @@ def ITkStripRawDataProviderCfg(flags, **kwargs):
         kwargs.setdefault("LVL1IDKey", f"{flags.Overlay.BkgPrefix}ITkStripLVL1ID")
         kwargs.setdefault("BCIDKey", f"{flags.Overlay.BkgPrefix}ITkStripBCID")
 
-    acc.addEventAlgo(CompFactory.ITkStripRawDataProvider(name="ITkStripRawDataProvider",**kwargs))
+    acc.addEventAlgo(CompFactory.ITkStripRawDataProvider(name="ITkStripRawDataProvider"+suffix,**kwargs))
+    return acc
+
+
+def TrigITkStripRawDataProviderCfg(flags, suffix, RoIs):
+    """ Configures the ITk strip raw data decoding with trigger (RoI-seeded, cached) args """
+    acc = ComponentAccumulator()
+
+    from RegionSelector.RegSelToolConfig import regSelTool_ITkStrip_Cfg
+    regSelTool = acc.popToolsAndMerge(regSelTool_ITkStrip_Cfg(flags))
+
+    trigargs = {
+        'RegSelTool' : regSelTool,
+        'RoIs' : RoIs,
+        'isRoI_Seeded' : True,
+        'RDOCacheKey' : flags.Trigger.ITkTracking.SCTRDOCacheKey,
+        'BSErrCacheKey' : flags.Trigger.ITkTracking.SCTBSErrCacheKey,
+        'StoreInDetTimeCollections' : False,
+    }
+
+    acc.merge(ITkStripRawDataProviderCfg(flags, suffix=suffix, **trigargs))
     return acc
 
 def ITkStripsEventFlagWriterCfg(flags, **kwargs):

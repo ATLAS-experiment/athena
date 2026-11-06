@@ -4,6 +4,7 @@
 
 #include "ITkPixelDecodingAlg.h"
 #include "StoreGate/ReadHandle.h"
+#include "StoreGate/UpdateHandle.h"
 #include "eformat/ROBFragment.h"
 
 #define ENABLE_TIMING = true;
@@ -33,12 +34,24 @@ StatusCode ITkPixelDecodingAlg::initialize()
 
     ATH_CHECK(m_pixelRDOKey.initialize());
 
-    //this should go into the cabling likely...
-    for (size_t hash = 0; hash < m_idHelper->wafer_hash_max(); hash++){
-        m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b00 );
-        m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b10 );
-        m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b01 );
-        m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b11 );
+    ATH_CHECK(m_pixelRDOCacheKey.initialize(!m_pixelRDOCacheKey.key().empty()));
+
+    if (m_roiSeeded.value()) {
+        // Don't need the full list of source IDs if running RoI-seeded
+        ATH_CHECK(m_roiCollectionKey.initialize());
+        ATH_CHECK(m_regionSelector.retrieve());
+    }
+    else {
+        ATH_CHECK(m_roiCollectionKey.initialize(false));
+        m_regionSelector.disable();
+
+        //this should go into the cabling likely...
+        for (size_t hash = 0; hash < m_idHelper->wafer_hash_max(); hash++){
+            m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b00 );
+            m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b10 );
+            m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b01 );
+            m_sourceIDs.push_back(m_idHelper->wafer_id(hash).get_identifier32().get_compact() | 0b11 );
+        }
     }
 
     return StatusCode::SUCCESS;
@@ -53,8 +66,20 @@ StatusCode ITkPixelDecodingAlg::execute(const EventContext& ctx) const
     SG::ReadCondHandle<ITkPixelCablingData> cablingData(m_pixelCablingKey, ctx);
     const ITkPixelCablingData* cabling = *cablingData;
 
-    //Instantiate the output. RN using the old pixel RDO, nothing fancier than that
-    std::unique_ptr<PixelRDO_Container> rdoCont = std::make_unique<PixelRDO_Container>(m_idHelper->wafer_hash_max());
+    //Instantiate the output container, either standalone or backed by an external
+    //cache shared between the various RoI views that may run this algorithm within
+    //the same event (e.g. in the trigger).
+    bool externalCache = !m_pixelRDOCacheKey.key().empty();
+    std::unique_ptr<PixelRDO_Container> rdoCont;
+    if (!externalCache) {
+        rdoCont = std::make_unique<PixelRDO_Container>(m_idHelper->wafer_hash_max());
+    }
+    else {
+        SG::UpdateHandle<PixelRDO_Cache> rdoCache(m_pixelRDOCacheKey, ctx);
+        ATH_CHECK(rdoCache.isValid());
+        rdoCont = std::make_unique<PixelRDO_Container>(rdoCache.ptr());
+        ATH_MSG_DEBUG("Created container using external cache " << m_pixelRDOCacheKey.key());
+    }
 
     //Instantiate the decoder. Doing this once per event is fine and MT-safe
     //It needs a "callback" that implements methods required by concepts. This is
@@ -68,9 +93,26 @@ StatusCode ITkPixelDecodingAlg::execute(const EventContext& ctx) const
     PixelCallbacks::RDOCallback cb(rdoCont.get(), m_idHelper, msg());
     DecCore<PixelCallbacks::RDOCallback> core(fmt, cb);
     
-    //Invoke ROBDataProviderService, fetch the concerned ROBs.
+    //Invoke ROBDataProviderService, fetch the concerned ROBs. If running RoI-seeded,
+    //only fetch the ROBs overlapping the RoIs; otherwise fetch everything.
     std::vector<const eformat::ROBFragment<const uint32_t*>*> ROBs;
-    m_robDataProviderSvc->getROBData(ctx, cabling->sourceIDs(), ROBs);
+    if (!m_roiSeeded.value()) {
+        m_robDataProviderSvc->getROBData(ctx, cabling->sourceIDs(), ROBs);
+    }
+    else {
+        std::vector<uint32_t> listOfROBs;
+        SG::ReadHandle<TrigRoiDescriptorCollection> roiCollection(m_roiCollectionKey, ctx);
+        ATH_CHECK(roiCollection.isValid());
+        TrigRoiDescriptor superRoI; // Add all RoIs to a super-RoI
+        superRoI.reserve(roiCollection->size());
+        superRoI.setComposite(true);
+        superRoI.manageConstituents(false);
+        for (const TrigRoiDescriptor* roi : *roiCollection) {
+            superRoI.push_back(roi);
+        }
+        m_regionSelector->lookup(ctx)->ROBIDList(superRoI, listOfROBs);
+        m_robDataProviderSvc->getROBData(ctx, listOfROBs, ROBs);
+    }
     ATH_MSG_DEBUG("Retrieved " << ROBs.size() << " fragments");
 
     //The ROB/ROD payload contains a chain of [FE header 0] [FE data 0] ... [FE header N] [FE data N]
