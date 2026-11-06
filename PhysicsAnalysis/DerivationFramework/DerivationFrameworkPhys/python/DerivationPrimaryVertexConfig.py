@@ -13,8 +13,9 @@ def PVNNVertexCfg(flags):
     acc.merge(InputRenameCfg("xAOD::VertexContainer", "PrimaryVertices", "PrimaryVertices_initial"))
     acc.merge(InputRenameCfg("xAOD::VertexAuxContainer", "PrimaryVerticesAux.", "PrimaryVertices_initialAux."))
 
-    from DerivationFrameworkPhys.PVNNVertexConfig import CustomJetsCfg
-    acc.merge(CustomJetsCfg(flags))
+    if flags.Tracking.PriVertex.PVNN.useJets:
+        from DerivationFrameworkPhys.PVNNVertexConfig import CustomJetsCfg
+        acc.merge(CustomJetsCfg(flags))
 
     ## Hard-scatter vertex selection
     from InDetConfig.InDetPVNNSelectionConfig import PVNNSequenceCfg
