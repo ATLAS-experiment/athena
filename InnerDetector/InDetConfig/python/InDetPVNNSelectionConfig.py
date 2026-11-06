@@ -30,12 +30,16 @@ def PVNNSelectionAlgCfg(flags, input, minPt):
     cfg = ComponentAccumulator()
 
     selectionTool = None
-    jetContainer =  (
-        "AntiKt4EMTopoCustomVtxPVNNJets" 
-        if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.PVNNSorting 
-        else "AntiKt4EMTopoJets"
-    )
-    if input in ["Electrons", "Photons", jetContainer]:
+
+    inputGap = ["Electrons", "Photons"]
+    if flags.Tracking.PriVertex.PVNN.useJets:
+        jetContainer =  (
+            "AntiKt4EMTopoCustomVtxPVNNJets"
+            if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.PVNNSorting
+            else "AntiKt4EMTopoJets"
+        )
+        inputGap += [jetContainer]
+    if input in inputGap:
         selectionTool = cfg.popToolsAndMerge(
             AsgPtEtaSelectionToolGapCfg(flags, minPt = minPt))
     elif input in ["Muons"]:
@@ -70,22 +74,23 @@ def PVNNOverlapRemovalToolCfg(flags, name="PVNN_OverlapRemovalToolCfg", **kwargs
 
     kwargs.setdefault("EleEleORT", CompFactory.ORUtils.EleEleOverlapTool(**subtool_kwargs))
     kwargs.setdefault("EleMuORT", CompFactory.ORUtils.EleMuSharedTrkOverlapTool(**subtool_kwargs))
-    kwargs.setdefault("EleJetORT", CompFactory.ORUtils.EleJetOverlapTool(**subtool_kwargs))
-    kwargs.setdefault(
-        "MuJetORT",
-        CompFactory.ORUtils.MuJetOverlapTool(
-            PVContainerName=(
-                "PrimaryVertices_initial" 
-                if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.PVNNSorting 
-                else "PrimaryVertices"
-            ),
-            AllowNoPV=True,
-            **subtool_kwargs
-        )
-    )
     kwargs.setdefault("PhoEleORT", CompFactory.ORUtils.DeltaROverlapTool(**subtool_kwargs))
     kwargs.setdefault("PhoMuORT", CompFactory.ORUtils.DeltaROverlapTool(**subtool_kwargs))
-    kwargs.setdefault("PhoJetORT", CompFactory.ORUtils.DeltaROverlapTool(**subtool_kwargs))
+
+    if flags.Tracking.PriVertex.PVNN.useJets:
+        kwargs.setdefault("EleJetORT", CompFactory.ORUtils.EleJetOverlapTool(**subtool_kwargs))
+        kwargs.setdefault("PhoJetORT", CompFactory.ORUtils.DeltaROverlapTool(**subtool_kwargs))
+        kwargs.setdefault(
+            "MuJetORT", CompFactory.ORUtils.MuJetOverlapTool(
+                PVContainerName=(
+                    "PrimaryVertices_initial"
+                    if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.PVNNSorting
+                    else "PrimaryVertices"
+                ),
+                AllowNoPV=True,
+                **subtool_kwargs
+            ))
+
  
     cfg.setPrivateTools(CompFactory.ORUtils.OverlapRemovalTool(name, **kwargs))
     return cfg
@@ -107,8 +112,6 @@ def PVNNOverlapRemovalAlgCfg(flags, name="PVNN_OverlapRemovalAlg",
     kwargs["ExtraInputs"] = list(extraInputs)
 
     overlap_outputs = [
-        ("SG::AuxVectorBase", f"StoreGateSvc+{overlapInputNames['jets']}.passesOR"),
-        ("xAOD::IParticleContainer", f"StoreGateSvc+{overlapInputNames['jets']}.passesOR"),
         ("SG::AuxVectorBase", f"StoreGateSvc+{overlapInputNames['electrons']}.passesOR"),
         ("xAOD::IParticleContainer", f"StoreGateSvc+{overlapInputNames['electrons']}.passesOR"),
         ("SG::AuxVectorBase", f"StoreGateSvc+{overlapInputNames['muons']}.passesOR"),
@@ -116,17 +119,23 @@ def PVNNOverlapRemovalAlgCfg(flags, name="PVNN_OverlapRemovalAlg",
         ("SG::AuxVectorBase", f"StoreGateSvc+{overlapInputNames['photons']}.passesOR"),
         ("xAOD::IParticleContainer", f"StoreGateSvc+{overlapInputNames['photons']}.passesOR"),
     ]
+    if flags.Tracking.PriVertex.PVNN.useJets:
+        overlap_outputs += [
+            ("SG::AuxVectorBase", f"StoreGateSvc+{overlapInputNames['jets']}.passesOR"),
+            ("xAOD::IParticleContainer", f"StoreGateSvc+{overlapInputNames['jets']}.passesOR")
+        ]
 
     kwargs.setdefault("overlapTool", cfg.popToolsAndMerge(PVNNOverlapRemovalToolCfg(flags)))
     
     cfg.addEventAlgo(CompFactory.CP.OverlapRemovalAlg(name, ExtraOutputs=overlap_outputs, **kwargs))
 
     or_container_types = {
-        "jets": ["xAOD::JetContainer", "xAOD::IParticleContainer"],
         "electrons": ["xAOD::ElectronContainer", "xAOD::IParticleContainer"],
         "muons": ["xAOD::MuonContainer", "xAOD::IParticleContainer"],
         "photons": ["xAOD::PhotonContainer", "xAOD::EgammaContainer", "xAOD::IParticleContainer"],
     }
+    if flags.Tracking.PriVertex.PVNN.useJets:
+        or_container_types["jets"] = ["xAOD::JetContainer", "xAOD::IParticleContainer"]
 
     for obj in overlapInputNames:
         output_name = overlapOutputNames[obj]
@@ -173,9 +182,13 @@ def PVNNVertexDecoratorAlgCfg(flags, name="PVNN_VertexDecoratorAlg", **kwargs):
             PVNN_TTVAToolCfg(flags)))
 
     vertex_extra_inputs = set(kwargs.get("ExtraInputs", set()))
-    for cont in ["electronsIn", "muonsIn", "photonsIn", "jetsIn"]:
+    containers = ["electronsIn", "muonsIn", "photonsIn"]
+    if flags.Tracking.PriVertex.PVNN.useJets:
+        containers += ["jetsIn"]
+    for cont in containers:
         if cont in kwargs:
             vertex_extra_inputs.add(("xAOD::IParticleContainer", f"StoreGateSvc+{kwargs[cont]}"))
+
     if "photonsIn" in kwargs:
         photons_key = kwargs["photonsIn"]
         vertex_extra_inputs.update({
@@ -197,22 +210,22 @@ def PVNNSequenceCfg(flags, doOverlapRemoval=True):
     cfg.addService(selectionSvc)
 
     inputCollections = {
-        "jets": (
-            "AntiKt4EMTopoCustomVtxPVNNJets" 
-            if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.PVNNSorting 
-            else "AntiKt4EMTopoJets"
-        ),
         "electrons": "Electrons",
         "muons": "Muons",
         "photons": "Photons",
     }
-
     ptThresholds = {
-        "jets": 15000,
         "electrons": 4500,
         "muons": 3000,
         "photons": 10000,
     }
+    if flags.Tracking.PriVertex.PVNN.useJets:
+        inputCollections["jets"] = (
+            "AntiKt4EMTopoCustomVtxPVNNJets"
+            if flags.Tracking.PriVertex.sortingSetup is VertexSortingSetup.PVNNSorting
+            else "AntiKt4EMTopoJets"
+        )
+        ptThresholds["jets"] = 15000
 
     for obj in inputCollections:
         cfg.merge(PVNNSelectionAlgCfg(flags, input = inputCollections[obj],
@@ -225,9 +238,10 @@ def PVNNSequenceCfg(flags, doOverlapRemoval=True):
         overlapOutputNames = {
             "muons": f'{inputCollections["muons"]}_OR',
             "electrons": f'{inputCollections["electrons"]}_OR',
-            "photons": f'{inputCollections["photons"]}_OR',
-            "jets": f'{inputCollections["jets"]}_OR',
+            "photons": f'{inputCollections["photons"]}_OR'
         }
+        if flags.Tracking.PriVertex.PVNN.useJets:
+            overlapOutputNames["jets"] = f'{inputCollections["jets"]}_OR'
         cfg.merge(PVNNOverlapRemovalAlgCfg(flags, overlapInputNames = inputCollections,
                                             overlapOutputNames = overlapOutputNames))
     else:
@@ -262,7 +276,8 @@ def PVNNSequenceCfg(flags, doOverlapRemoval=True):
             electronsIn=overlapOutputNames["electrons"],
             muonsIn=overlapOutputNames["muons"],
             photonsIn=overlapOutputNames["photons"],
-            jetsIn=overlapOutputNames["jets"],
+            jetsIn=(overlapOutputNames["jets"]
+                    if flags.Tracking.PriVertex.PVNN.useJets else ""),
         )
     )
 
@@ -285,10 +300,11 @@ if __name__ == "__main__":
     from AthenaPoolCnvSvc.PoolReadConfig import PoolReadCfg
     top_acc.merge(PoolReadCfg(flags))
 
-    from InDetPhysValMonitoring.addRecoJetsConfig import (
-        AddRecoJetsIfNotExistingCfg)
-    top_acc.merge(AddRecoJetsIfNotExistingCfg(
-        flags, "AntiKt4EMTopoJets"))
+    if flags.Tracking.PriVertex.PVNN.useJets:
+        from InDetPhysValMonitoring.addRecoJetsConfig import (
+            AddRecoJetsIfNotExistingCfg)
+        top_acc.merge(AddRecoJetsIfNotExistingCfg(
+            flags, "AntiKt4EMTopoJets"))
 
     top_acc.merge(PVNNSequenceCfg(flags))
     from AthenaCommon.Constants import DEBUG

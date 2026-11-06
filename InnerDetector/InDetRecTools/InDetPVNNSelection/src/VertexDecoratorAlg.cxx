@@ -16,11 +16,6 @@
 
 namespace InDetPVNNSelection
 {
-  VertexDecoratorAlg ::VertexDecoratorAlg(const std::string &name,
-                                          ISvcLocator *pSvcLocator)
-      : AthHistogramAlgorithm (name, pSvcLocator)
-  {
-  }
 
   StatusCode VertexDecoratorAlg ::initialize()
   {
@@ -29,36 +24,10 @@ namespace InDetPVNNSelection
     ATH_CHECK(m_photonsInKey.initialize());
     ATH_CHECK(m_electronsInKey.initialize());
     ATH_CHECK(m_muonsInKey.initialize());
-    ATH_CHECK(m_jetsInKey.initialize());
     ATH_CHECK(m_multiPhotonsOutKey.initialize());
-
-    const std::string baseName = m_vertexInKey.key();
-
-    // WriteHandleKeys
-    m_photonLinksKey = baseName + ".photonLinks";
-    m_jetLinksKey = baseName + ".jetLinks";
-    m_electronLinksKey = baseName + ".electronLinks";
-    m_muonLinksKey = baseName + ".muonLinks";
-    m_mDecor_ntrk = baseName + "." + m_mDecor_ntrk.key();
-    m_mDecor_sumPt = baseName + "." + m_mDecor_sumPt.key();
-    m_mDecor_chi2Over_ndf = baseName + "." + m_mDecor_chi2Over_ndf.key();
-    m_mDecor_z_asym = baseName + "." + m_mDecor_z_asym.key();
-    m_mDecor_weighted_z_asym = baseName + "." + m_mDecor_weighted_z_asym.key();
-    m_mDecor_weighted_z_kurt = baseName + "." + m_mDecor_weighted_z_kurt.key();
-    m_mDecor_z_skew = baseName + "." + m_mDecor_z_skew.key();
-    m_mDecor_photon_deltaz = baseName + "." + m_mDecor_photon_deltaz.key();
-    m_mDecor_photon_deltaPhi = baseName + "." + m_mDecor_photon_deltaPhi.key();
-    m_mDecor_actualInterPerXing = baseName + "." + m_mDecor_actualInterPerXing.key();
-    m_multiPhotonLinksKey = baseName + ".multiPhotonLinks";
-    m_mDecor_pvnnScore = baseName + "." + m_mDecor_pvnnScore.key();
-    m_mDecor_nElectrons = baseName + "." + m_mDecor_nElectrons.key();
-    m_mDecor_nMuons = baseName + "." + m_mDecor_nMuons.key();
-    m_mDecor_nPhotons = baseName + "." + m_mDecor_nPhotons.key();
-    m_mDecor_nJets = baseName + "." + m_mDecor_nJets.key();
 
     ATH_CHECK(m_multiPhotonLinksKey.initialize());
     ATH_CHECK(m_photonLinksKey.initialize());
-    ATH_CHECK(m_jetLinksKey.initialize());
     ATH_CHECK(m_electronLinksKey.initialize());
     ATH_CHECK(m_muonLinksKey.initialize());
     ATH_CHECK(m_mDecor_ntrk.initialize());
@@ -74,22 +43,19 @@ namespace InDetPVNNSelection
     ATH_CHECK(m_mDecor_pvnnScore.initialize());
     ATH_CHECK(m_mDecor_nElectrons.initialize());
     ATH_CHECK(m_mDecor_nMuons.initialize());
-    ATH_CHECK(m_mDecor_nJets.initialize());
     ATH_CHECK(m_mDecor_nPhotons.initialize());
 
+    if(!m_jetsInKey.empty()){
+      ATH_CHECK(m_jetsInKey.initialize());
+    }
+    ATH_CHECK(m_jetLinksKey.initialize());
+    ATH_CHECK(m_mDecor_nJets.initialize());
+
     // ReadHandleKeys
-    m_deltaZKey = baseName + ".deltaZ";
-    m_deltaPhiKey = baseName + ".deltaPhi";
     ATH_CHECK(m_deltaZKey.initialize());
     ATH_CHECK(m_deltaPhiKey.initialize());
 
     // additional ReadHandleKeys to declare dependencies to the scheduler
-    std::string photonBaseName = m_photonsInKey.key();
-
-    m_caloPointingZKey = photonBaseName + ".caloPointingZ";
-    m_zCommonKey = photonBaseName + ".zCommon";
-    m_zCommonErrorKey = photonBaseName + ".zCommonError";
-
     ATH_CHECK(m_caloPointingZKey.initialize());
     ATH_CHECK(m_zCommonKey.initialize());
     ATH_CHECK(m_zCommonErrorKey.initialize());
@@ -113,8 +79,6 @@ namespace InDetPVNNSelection
     ATH_CHECK(electronsIn.isValid());
     SG::ReadHandle<xAOD::MuonContainer> muonsIn(m_muonsInKey, ctx);
     ATH_CHECK(muonsIn.isValid());
-    SG::ReadHandle<xAOD::JetContainer> jetsIn(m_jetsInKey, ctx);
-    ATH_CHECK(jetsIn.isValid());
     SG::ReadHandle<xAOD::EventInfo> eventInfo(m_eventInKey,ctx);
     ATH_CHECK(eventInfo.isValid());
 
@@ -131,7 +95,7 @@ namespace InDetPVNNSelection
     SG::ReadDecorHandle<xAOD::PhotonContainer, float> acc_zCommonError(m_zCommonErrorKey, ctx);
 
     SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_pvnnScore(m_mDecor_pvnnScore,ctx);
-    
+
     // Decorations needed by the PVNNTool
     SG::WriteDecorHandle<xAOD::VertexContainer, int> dec_ntrk(m_mDecor_ntrk, ctx);
     SG::WriteDecorHandle<xAOD::VertexContainer, float> dec_sumPt(m_mDecor_sumPt,ctx);
@@ -260,43 +224,48 @@ namespace InDetPVNNSelection
     ATH_CHECK(mpHandle.record(std::move(mpCont), std::move(mpAux)));
 
     std::map< const xAOD::Vertex*, std::vector<ElementLink<xAOD::JetContainer>> > jetsInVertex;
-    std::map< const xAOD::Jet*, std::map< const xAOD::Vertex*, int> > jetVertexPt;
+    if(!m_jetsInKey.empty()){
+      SG::ReadHandle<xAOD::JetContainer> jetsIn(m_jetsInKey, ctx);
+      ATH_CHECK(jetsIn.isValid());
 
-    // initialize jet-vertex map 
-    for(const xAOD::Vertex *vertex : *vertices){
-      jetsInVertex[vertex] = {};
-      for(const xAOD::Jet *jet : *jetsIn){
-        jetVertexPt[jet][vertex] = 0;
-      }
-    }
+      std::map< const xAOD::Jet*, std::map< const xAOD::Vertex*, int> > jetVertexPt;
 
-    // pre-fill the jet-vertex map
-    for(const xAOD::Jet* jet : *jetsIn){
-
-      // for each jet, calculate the track pT associated to each vertex
-      std::vector<const xAOD::TrackParticle*> ghostTracks = jet->getAssociatedObjects<xAOD::TrackParticle >(xAOD::JetAttribute::GhostTrack);
-      for(const xAOD::TrackParticle* jtrk : ghostTracks){
-        if( !jtrk ) continue;
-        auto jetTrackVertex = m_trkVtxAssociationTool->getUniqueMatchVertexLink(*jtrk, *vertices);
-        if(jetTrackVertex) jetVertexPt[jet][*jetTrackVertex] += jtrk->pt();
+      // initialize jet-vertex map
+      for(const xAOD::Vertex *vertex : *vertices){
+	jetsInVertex[vertex] = {};
+	for(const xAOD::Jet *jet : *jetsIn){
+	  jetVertexPt[jet][vertex] = 0;
+	}
       }
 
-      // find vertex with the largest fraction of jet track pt
-      float maxPtFrac = -1;
-      const xAOD::Vertex* uniqueVertexAddress = nullptr;
-      for (const xAOD::Vertex *vertex : *vertices) {
-        if (vertex->vertexType() == xAOD::VxType::NoVtx) continue;
-        if(jetVertexPt[jet][vertex] > maxPtFrac){
-          maxPtFrac = jetVertexPt[jet][vertex];
-          uniqueVertexAddress = vertex;
-        }
-      }
+      // pre-fill the jet-vertex map
+      for(const xAOD::Jet* jet : *jetsIn){
 
-      // add jet to that vertex's vector of links
-      ElementLink<xAOD::JetContainer> jetLink;
-      jetLink.setElement(jet);
-      jetLink.setStorableObject(*jetsIn.ptr(), true, ctx);
-      jetsInVertex[uniqueVertexAddress].push_back(jetLink);
+	// for each jet, calculate the track pT associated to each vertex
+	std::vector<const xAOD::TrackParticle*> ghostTracks = jet->getAssociatedObjects<xAOD::TrackParticle >(xAOD::JetAttribute::GhostTrack);
+	for(const xAOD::TrackParticle* jtrk : ghostTracks){
+	  if( !jtrk ) continue;
+	  auto jetTrackVertex = m_trkVtxAssociationTool->getUniqueMatchVertexLink(*jtrk, *vertices);
+	  if(jetTrackVertex) jetVertexPt[jet][*jetTrackVertex] += jtrk->pt();
+	}
+
+	// find vertex with the largest fraction of jet track pt
+	float maxPtFrac = -1;
+	const xAOD::Vertex* uniqueVertexAddress = nullptr;
+	for (const xAOD::Vertex *vertex : *vertices) {
+	  if (vertex->vertexType() == xAOD::VxType::NoVtx) continue;
+	  if(jetVertexPt[jet][vertex] > maxPtFrac){
+	    maxPtFrac = jetVertexPt[jet][vertex];
+	    uniqueVertexAddress = vertex;
+	  }
+	}
+
+	// add jet to that vertex's vector of links
+	ElementLink<xAOD::JetContainer> jetLink;
+	jetLink.setElement(jet);
+	jetLink.setStorableObject(*jetsIn.ptr(), true, ctx);
+	jetsInVertex[uniqueVertexAddress].push_back(jetLink);
+      }
     }
 
     for (const xAOD::Vertex *vertex : *vertices)
@@ -467,8 +436,13 @@ namespace InDetPVNNSelection
       dec_multiPhotonLinks(*vertex) = std::move(mpLinks);
 
       // for jets, use prefilled map
-      dec_jetLinks(*vertex) = jetsInVertex[vertex];
-      dec_nJets(*vertex) = countValid(jetsInVertex[vertex]);
+      if(!m_jetsInKey.empty()){
+        dec_jetLinks(*vertex) = jetsInVertex[vertex];
+        dec_nJets(*vertex) = countValid(jetsInVertex[vertex]);
+      }
+      else{
+        dec_nJets(*vertex) = 0;
+      }
 
       std::vector<ElementLink<xAOD::MuonContainer>> muonLinks;
       for(const xAOD::Muon* muon : *muonsIn){

@@ -64,7 +64,8 @@ def createPriVertexingFlags():
 
     # string to store the type of sorting algorithm to separate signal and pile-up vertices.
     flags.addFlag("sortingSetup", VertexSortingSetup.SumPt2Sorting, type=VertexSortingSetup)
-    flags.addFlag("PVNN.nnFile", "InDetGNNHardScatterSelection/v2.0/network.onnx")
+    flags.addFlag("PVNN.nnFile", "InDetGNNHardScatterSelection/v2.4.1/network.onnx")
+    flags.addFlag("PVNN.useJets", True)
     flags.addFlag("useBeamConstraint", lambda pcf:
                   not(pcf.Tracking.PrimaryPassConfig in [
                       PrimaryPassConfig.VtxLumi,
