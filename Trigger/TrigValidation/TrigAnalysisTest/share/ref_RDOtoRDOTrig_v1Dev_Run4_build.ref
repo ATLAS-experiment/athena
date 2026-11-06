@@ -8,47 +8,47 @@ EF_10j35_pf_ftf_presel7j30_L14jJ40:
   eventCount: 6
 EF_2e5_lhvloose_L1eEM5_bBeeM6000_L1All:
   stepCounts:
-    0: 11
-    1: 11
-    2: 11
+    0: 9
+    1: 9
+    2: 9
     3: 8
     4: 8
     5: 8
   stepFeatures:
-    0: 40
-    1: 40
-    2: 160
-    3: 28
-    4: 28
-    5: 28
+    0: 30
+    1: 30
+    2: 117
+    3: 25
+    4: 25
+    5: 25
   eventCount: 0
 EF_2e5_lhvloose_bBeeM6000_L1BKeePrimary:
   stepCounts:
-    0: 11
-    1: 11
-    2: 11
+    0: 9
+    1: 9
+    2: 9
     3: 8
     4: 8
     5: 8
   stepFeatures:
-    0: 40
-    1: 40
-    2: 160
-    3: 28
-    4: 28
-    5: 28
+    0: 30
+    1: 30
+    2: 117
+    3: 25
+    4: 25
+    5: 25
   eventCount: 0
 EF_2g10_loose_L12eEM10L:
   stepCounts:
-    0: 2
+    0: 3
     1: 2
     2: 2
     3: 1
   stepFeatures:
-    0: 6
-    1: 5
-    2: 4
-    3: 2
+    0: 9
+    1: 6
+    2: 5
+    3: 3
   eventCount: 1
 EF_2g10_loose_L12eEM12L:
   stepCounts:
@@ -57,10 +57,10 @@ EF_2g10_loose_L12eEM12L:
     2: 1
     3: 1
   stepFeatures:
-    0: 5
-    1: 3
-    2: 2
-    3: 2
+    0: 6
+    1: 4
+    2: 3
+    3: 3
   eventCount: 1
 EF_2g10_loose_L1eEM9_mu20_L1MU14FCH:
   stepCounts:
@@ -69,7 +69,7 @@ EF_2g10_loose_L1eEM9_mu20_L1MU14FCH:
     2: 2
     3: 2
   stepFeatures:
-    0: 31
+    0: 30
     1: 9
     2: 8
     3: 7
@@ -81,7 +81,7 @@ leg000_EF_2g10_loose_L1eEM9_mu20_L1MU14FCH:
     2: 2
     3: 2
   stepFeatures:
-    0: 24
+    0: 23
     1: 6
     2: 5
     3: 5
@@ -100,37 +100,43 @@ leg001_EF_2g10_loose_L1eEM9_mu20_L1MU14FCH:
   eventCount: 0
 EF_2g10_tight_L12eEM10L:
   stepCounts:
-    0: 2
+    0: 3
     1: 1
+    2: 1
   stepFeatures:
-    0: 4
-    1: 2
+    0: 7
+    1: 3
+    2: 2
   eventCount: 0
 EF_2g10_tight_L12eEM12L:
   stepCounts:
     0: 1
     1: 1
+    2: 1
   stepFeatures:
-    0: 2
-    1: 2
+    0: 3
+    1: 3
+    2: 2
   eventCount: 0
 EF_2g15_tight_25dphiAA_invmAA80_L1DPHI-M70-2eEM15M:
   stepCounts:
-    0: 12
-    1: 3
+    0: 10
+    1: 2
     2: 2
   stepFeatures:
-    0: 36
-    1: 8
+    0: 28
+    1: 5
     2: 4
   eventCount: 0
 EF_2g20_tight_icaloloose_L12eEM10L:
   stepCounts:
     0: 1
     1: 1
+    2: 1
   stepFeatures:
-    0: 2
-    1: 2
+    0: 3
+    1: 3
+    2: 2
   eventCount: 0
 EF_2g20_tight_icaloloose_L12eEM18M:
   stepCounts:
@@ -144,9 +150,11 @@ EF_2g20_tight_icaloloose_L12eEM8L:
   stepCounts:
     0: 1
     1: 1
+    2: 1
   stepFeatures:
-    0: 2
-    1: 2
+    0: 3
+    1: 3
+    2: 2
   eventCount: 0
 EF_2g20_tight_icaloloose_noringer_L12eEM18M:
   stepCounts:
@@ -180,57 +188,83 @@ EF_2g23_tight_icaloloose_L12eEM10L:
   stepCounts:
     0: 1
     1: 1
+    2: 1
   stepFeatures:
-    0: 2
-    1: 2
+    0: 3
+    1: 3
+    2: 2
   eventCount: 0
 EF_2g25_loose_g15_loose_L12eEM24L:
   stepCounts:
     0: 1
     1: 1
+    2: 1
+    3: 1
   stepFeatures:
-    0: 3
-    1: 3
-  eventCount: 0
+    0: 4
+    1: 4
+    2: 3
+    3: 3
+  eventCount: 1
 leg000_EF_2g25_loose_g15_loose_L12eEM24L:
   stepCounts:
     0: 1
     1: 1
+    2: 1
+    3: 1
   stepFeatures:
-    0: 3
-    1: 3
+    0: 4
+    1: 4
+    2: 3
+    3: 3
   eventCount: 0
 leg001_EF_2g25_loose_g15_loose_L12eEM24L:
   stepCounts:
     0: 1
     1: 1
+    2: 1
+    3: 1
   stepFeatures:
-    0: 3
-    1: 3
+    0: 4
+    1: 4
+    2: 3
+    3: 3
   eventCount: 0
 EF_2g25_loose_noringer_g15_loose_noringer_L12eEM24L:
   stepCounts:
     0: 1
     1: 1
+    2: 1
+    3: 1
   stepFeatures:
-    0: 3
-    1: 3
-  eventCount: 0
+    0: 4
+    1: 4
+    2: 3
+    3: 3
+  eventCount: 1
 leg000_EF_2g25_loose_noringer_g15_loose_noringer_L12eEM24L:
   stepCounts:
     0: 1
     1: 1
+    2: 1
+    3: 1
   stepFeatures:
-    0: 3
-    1: 3
+    0: 4
+    1: 4
+    2: 3
+    3: 3
   eventCount: 0
 leg001_EF_2g25_loose_noringer_g15_loose_noringer_L12eEM24L:
   stepCounts:
     0: 1
     1: 1
+    2: 1
+    3: 1
   stepFeatures:
-    0: 3
-    1: 3
+    0: 4
+    1: 4
+    2: 3
+    3: 3
   eventCount: 0
 EF_2g25_medium_L12eEM24L:
   stepCounts:
@@ -238,9 +272,9 @@ EF_2g25_medium_L12eEM24L:
     1: 1
     2: 1
   stepFeatures:
-    0: 5
-    1: 3
-    2: 2
+    0: 6
+    1: 4
+    2: 3
   eventCount: 0
 EF_2g25_medium_noringer_L12eEM24L:
   stepCounts:
@@ -248,9 +282,9 @@ EF_2g25_medium_noringer_L12eEM24L:
     1: 1
     2: 1
   stepFeatures:
-    0: 5
-    1: 3
-    2: 2
+    0: 6
+    1: 4
+    2: 3
   eventCount: 0
 EF_2g50_loose_L12eEM24L:
   stepCounts:
@@ -270,21 +304,25 @@ EF_2g50_loose_noringer_L12eEM24L:
   eventCount: 0
 EF_2g8_loose_L12eEM8L:
   stepCounts:
-    0: 2
-    1: 2
-    2: 2
+    0: 5
+    1: 3
+    2: 3
     3: 1
   stepFeatures:
-    0: 7
-    1: 7
-    2: 6
-    3: 2
+    0: 13
+    1: 9
+    2: 10
+    3: 3
   eventCount: 1
 EF_2g8_tight_L12eEM8L:
   stepCounts:
-    0: 2
-  stepFeatures:
     0: 5
+    1: 1
+    2: 1
+  stepFeatures:
+    0: 11
+    1: 2
+    2: 3
   eventCount: 0
 EF_2j235c_j115c_pf_ftf_presel2j180XXj80_L1jJ160:
   stepCounts:
@@ -1330,17 +1368,17 @@ EF_e17_lhmedium_ivarloose_tau25_mediumGNTau_03dRAB_L1eEM18M_2cTAU20M_4jJ30:
     9: 4
     10: 4
   stepFeatures:
-    0: 33
-    1: 33
-    2: 40
-    3: 33
-    4: 33
-    5: 33
-    6: 17
-    7: 14
-    8: 14
-    9: 14
-    10: 14
+    0: 30
+    1: 30
+    2: 37
+    3: 30
+    4: 30
+    5: 30
+    6: 16
+    7: 13
+    8: 13
+    9: 13
+    10: 13
   eventCount: 0
 leg000_EF_e17_lhmedium_ivarloose_tau25_mediumGNTau_03dRAB_L1eEM18M_2cTAU20M_4jJ30:
   stepCounts:
@@ -1382,17 +1420,17 @@ leg001_EF_e17_lhmedium_ivarloose_tau25_mediumGNTau_03dRAB_L1eEM18M_2cTAU20M_4jJ3
     9: 4
     10: 4
   stepFeatures:
-    0: 25
-    1: 25
-    2: 25
-    3: 25
-    4: 25
-    5: 25
-    6: 12
-    7: 10
-    8: 10
-    9: 10
-    10: 10
+    0: 22
+    1: 22
+    2: 22
+    3: 22
+    4: 22
+    5: 22
+    6: 11
+    7: 9
+    8: 9
+    9: 9
+    10: 9
   eventCount: 0
 EF_e17_lhmedium_tau25_mediumGNTau_xe50_cell_03dRAB_L1eEM18M_2cTAU20M_jXE70:
   stepCounts:
@@ -1404,13 +1442,13 @@ EF_e17_lhmedium_tau25_mediumGNTau_xe50_cell_03dRAB_L1eEM18M_2cTAU20M_jXE70:
     5: 8
     6: 5
   stepFeatures:
-    0: 41
-    1: 41
-    2: 48
-    3: 41
-    4: 41
-    5: 41
-    6: 22
+    0: 38
+    1: 38
+    2: 45
+    3: 38
+    4: 38
+    5: 38
+    6: 21
   eventCount: 0
 leg000_EF_e17_lhmedium_tau25_mediumGNTau_xe50_cell_03dRAB_L1eEM18M_2cTAU20M_jXE70:
   stepCounts:
@@ -1440,13 +1478,13 @@ leg001_EF_e17_lhmedium_tau25_mediumGNTau_xe50_cell_03dRAB_L1eEM18M_2cTAU20M_jXE7
     5: 8
     6: 5
   stepFeatures:
-    0: 25
-    1: 25
-    2: 25
-    3: 25
-    4: 25
-    5: 25
-    6: 12
+    0: 22
+    1: 22
+    2: 22
+    3: 22
+    4: 22
+    5: 22
+    6: 11
   eventCount: 0
 leg002_EF_e17_lhmedium_tau25_mediumGNTau_xe50_cell_03dRAB_L1eEM18M_2cTAU20M_jXE70:
   stepCounts:
@@ -1493,21 +1531,21 @@ EF_e20_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM18M:
     8: 5
     9: 5
     10: 5
-    11: 2
+    11: 1
   stepFeatures:
-    0: 51
-    1: 51
-    2: 58
-    3: 51
-    4: 51
-    5: 51
-    6: 30
-    7: 29
-    8: 29
-    9: 29
-    10: 29
-    11: 4
-  eventCount: 2
+    0: 49
+    1: 49
+    2: 56
+    3: 49
+    4: 49
+    5: 49
+    6: 28
+    7: 28
+    8: 28
+    9: 28
+    10: 28
+    11: 2
+  eventCount: 1
 leg000_EF_e20_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM18M:
   stepCounts:
     0: 8
@@ -1521,7 +1559,7 @@ leg000_EF_e20_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM18M:
     8: 5
     9: 5
     10: 5
-    11: 2
+    11: 1
   stepFeatures:
     0: 8
     1: 8
@@ -1534,7 +1572,7 @@ leg000_EF_e20_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM18M:
     8: 5
     9: 5
     10: 5
-    11: 2
+    11: 1
   eventCount: 0
 leg001_EF_e20_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM18M:
   stepCounts:
@@ -1549,20 +1587,20 @@ leg001_EF_e20_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM18M:
     8: 5
     9: 5
     10: 5
-    11: 2
+    11: 1
   stepFeatures:
-    0: 43
-    1: 43
-    2: 43
-    3: 43
-    4: 43
-    5: 43
-    6: 25
-    7: 24
-    8: 24
-    9: 24
-    10: 24
-    11: 2
+    0: 41
+    1: 41
+    2: 41
+    3: 41
+    4: 41
+    5: 41
+    6: 23
+    7: 23
+    8: 23
+    9: 23
+    10: 23
+    11: 1
   eventCount: 0
 EF_e20_lhtight_ivarloose_L1ZAFB-25DPHI-eEM18M:
   stepCounts:
@@ -1699,21 +1737,21 @@ EF_e22_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM22M:
     8: 4
     9: 4
     10: 4
-    11: 2
+    11: 1
   stepFeatures:
-    0: 51
-    1: 51
-    2: 58
-    3: 44
-    4: 44
-    5: 44
-    6: 23
-    7: 22
-    8: 22
-    9: 22
-    10: 22
-    11: 4
-  eventCount: 2
+    0: 49
+    1: 49
+    2: 56
+    3: 42
+    4: 42
+    5: 42
+    6: 21
+    7: 21
+    8: 21
+    9: 21
+    10: 21
+    11: 2
+  eventCount: 1
 leg000_EF_e22_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM22M:
   stepCounts:
     0: 8
@@ -1727,7 +1765,7 @@ leg000_EF_e22_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM22M:
     8: 4
     9: 4
     10: 4
-    11: 2
+    11: 1
   stepFeatures:
     0: 8
     1: 8
@@ -1740,7 +1778,7 @@ leg000_EF_e22_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM22M:
     8: 4
     9: 4
     10: 4
-    11: 2
+    11: 1
   eventCount: 0
 leg001_EF_e22_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM22M:
   stepCounts:
@@ -1755,20 +1793,20 @@ leg001_EF_e22_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM22M:
     8: 4
     9: 4
     10: 4
-    11: 2
+    11: 1
   stepFeatures:
-    0: 43
-    1: 43
-    2: 43
-    3: 37
-    4: 37
-    5: 37
-    6: 19
-    7: 18
-    8: 18
-    9: 18
-    10: 18
-    11: 2
+    0: 41
+    1: 41
+    2: 41
+    3: 35
+    4: 35
+    5: 35
+    6: 17
+    7: 17
+    8: 17
+    9: 17
+    10: 17
+    11: 1
   eventCount: 0
 EF_e22_lhtight_L1eEM22L:
   stepCounts:
@@ -1857,18 +1895,18 @@ EF_e22_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM22M:
     10: 4
     11: 4
   stepFeatures:
-    0: 67
-    1: 67
-    2: 69
-    3: 53
-    4: 53
-    5: 53
-    6: 41
-    7: 20
-    8: 20
-    9: 20
-    10: 20
-    11: 20
+    0: 60
+    1: 60
+    2: 62
+    3: 47
+    4: 47
+    5: 47
+    6: 35
+    7: 16
+    8: 16
+    9: 17
+    10: 17
+    11: 17
   eventCount: 4
 leg000_EF_e22_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM22M:
   stepCounts:
@@ -1913,18 +1951,18 @@ leg001_EF_e22_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM22M:
     10: 4
     11: 4
   stepFeatures:
-    0: 61
-    1: 61
-    2: 61
-    3: 48
-    4: 48
-    5: 48
-    6: 37
-    7: 16
-    8: 16
-    9: 16
-    10: 16
-    11: 16
+    0: 54
+    1: 54
+    2: 54
+    3: 42
+    4: 42
+    5: 42
+    6: 31
+    7: 12
+    8: 12
+    9: 13
+    10: 13
+    11: 13
   eventCount: 0
 EF_e24_lhmedium_g12_loose_g12_loose_02dRAB_02dRAC_02dRBC_L1eEM24L_3eEM12L:
   stepCounts:
@@ -1935,12 +1973,12 @@ EF_e24_lhmedium_g12_loose_g12_loose_02dRAB_02dRAC_02dRBC_L1eEM24L_3eEM12L:
     4: 1
     5: 1
   stepFeatures:
-    0: 4
-    1: 4
-    2: 5
-    3: 3
-    4: 5
-    5: 5
+    0: 5
+    1: 5
+    2: 6
+    3: 4
+    4: 7
+    5: 7
   eventCount: 0
 leg000_EF_e24_lhmedium_g12_loose_g12_loose_02dRAB_02dRAC_02dRBC_L1eEM24L_3eEM12L:
   stepCounts:
@@ -1967,12 +2005,12 @@ leg001_EF_e24_lhmedium_g12_loose_g12_loose_02dRAB_02dRAC_02dRBC_L1eEM24L_3eEM12L
     4: 1
     5: 1
   stepFeatures:
-    0: 3
-    1: 3
-    2: 2
-    3: 2
-    4: 2
-    5: 2
+    0: 4
+    1: 4
+    2: 3
+    3: 3
+    4: 3
+    5: 3
   eventCount: 0
 leg002_EF_e24_lhmedium_g12_loose_g12_loose_02dRAB_02dRAC_02dRBC_L1eEM24L_3eEM12L:
   stepCounts:
@@ -1983,12 +2021,12 @@ leg002_EF_e24_lhmedium_g12_loose_g12_loose_02dRAB_02dRAC_02dRBC_L1eEM24L_3eEM12L
     4: 1
     5: 1
   stepFeatures:
-    0: 3
-    1: 3
-    2: 2
-    3: 2
-    4: 2
-    5: 2
+    0: 4
+    1: 4
+    2: 3
+    3: 3
+    4: 3
+    5: 3
   eventCount: 0
 EF_e24_lhmedium_g25_medium_02dRAB_L12eEM24L:
   stepCounts:
@@ -1999,9 +2037,9 @@ EF_e24_lhmedium_g25_medium_02dRAB_L12eEM24L:
     4: 1
     5: 1
   stepFeatures:
-    0: 4
-    1: 4
-    2: 5
+    0: 5
+    1: 5
+    2: 6
     3: 2
     4: 2
     5: 2
@@ -2031,9 +2069,9 @@ leg001_EF_e24_lhmedium_g25_medium_02dRAB_L12eEM24L:
     4: 1
     5: 1
   stepFeatures:
-    0: 3
-    1: 3
-    2: 2
+    0: 4
+    1: 4
+    2: 3
     3: 1
     4: 1
     5: 1
@@ -2051,21 +2089,21 @@ EF_e24_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM26M:
     8: 4
     9: 4
     10: 4
-    11: 2
+    11: 1
   stepFeatures:
-    0: 31
-    1: 31
-    2: 33
-    3: 31
-    4: 31
-    5: 31
-    6: 23
-    7: 22
-    8: 22
-    9: 22
-    10: 22
-    11: 4
-  eventCount: 2
+    0: 29
+    1: 29
+    2: 31
+    3: 29
+    4: 29
+    5: 29
+    6: 21
+    7: 21
+    8: 21
+    9: 21
+    10: 21
+    11: 2
+  eventCount: 1
 leg000_EF_e24_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM26M:
   stepCounts:
     0: 5
@@ -2079,7 +2117,7 @@ leg000_EF_e24_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM26M:
     8: 4
     9: 4
     10: 4
-    11: 2
+    11: 1
   stepFeatures:
     0: 5
     1: 5
@@ -2092,7 +2130,7 @@ leg000_EF_e24_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM26M:
     8: 4
     9: 4
     10: 4
-    11: 2
+    11: 1
   eventCount: 0
 leg001_EF_e24_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM26M:
   stepCounts:
@@ -2107,20 +2145,20 @@ leg001_EF_e24_lhmedium_ivarloose_tau20_mediumGNTau_03dRAB_L1eEM26M:
     8: 4
     9: 4
     10: 4
-    11: 2
+    11: 1
   stepFeatures:
-    0: 26
-    1: 26
-    2: 26
-    3: 26
-    4: 26
-    5: 26
-    6: 19
-    7: 18
-    8: 18
-    9: 18
-    10: 18
-    11: 2
+    0: 24
+    1: 24
+    2: 24
+    3: 24
+    4: 24
+    5: 24
+    6: 17
+    7: 17
+    8: 17
+    9: 17
+    10: 17
+    11: 1
   eventCount: 0
 EF_e24_lhtight_ivarloose_L1eEM24M:
   stepCounts:
@@ -2148,14 +2186,16 @@ EF_e25_mergedtight_g35_medium_90invmAB_02dRAB_L12eEM24L:
     3: 1
     4: 1
     5: 1
+    6: 1
   stepFeatures:
-    0: 8
-    1: 5
-    2: 14
-    3: 3
-    4: 3
-    5: 3
-  eventCount: 0
+    0: 10
+    1: 7
+    2: 17
+    3: 4
+    4: 4
+    5: 4
+    6: 2
+  eventCount: 1
 leg000_EF_e25_mergedtight_g35_medium_90invmAB_02dRAB_L12eEM24L:
   stepCounts:
     0: 2
@@ -2164,13 +2204,15 @@ leg000_EF_e25_mergedtight_g35_medium_90invmAB_02dRAB_L12eEM24L:
     3: 1
     4: 1
     5: 1
+    6: 1
   stepFeatures:
-    0: 4
-    1: 3
-    2: 13
-    3: 2
-    4: 2
-    5: 2
+    0: 5
+    1: 4
+    2: 16
+    3: 3
+    4: 3
+    5: 3
+    6: 1
   eventCount: 0
 leg001_EF_e25_mergedtight_g35_medium_90invmAB_02dRAB_L12eEM24L:
   stepCounts:
@@ -2180,13 +2222,15 @@ leg001_EF_e25_mergedtight_g35_medium_90invmAB_02dRAB_L12eEM24L:
     3: 1
     4: 1
     5: 1
+    6: 1
   stepFeatures:
-    0: 4
-    1: 2
+    0: 5
+    1: 3
     2: 1
     3: 1
     4: 1
     5: 1
+    6: 1
   eventCount: 0
 EF_e26_idperf_loose_L1eEM26M:
   stepCounts:
@@ -2296,13 +2340,13 @@ EF_e26_lhtight_e14_etcut_probe_50invmAB130_L1eEM26M:
     9: 4
     10: 4
   stepFeatures:
-    0: 22
-    1: 22
-    2: 22
-    3: 22
-    4: 22
-    5: 22
-    6: 22
+    0: 21
+    1: 21
+    2: 21
+    3: 21
+    4: 21
+    5: 21
+    6: 21
     7: 19
     8: 19
     9: 72
@@ -2348,13 +2392,13 @@ leg001_EF_e26_lhtight_e14_etcut_probe_50invmAB130_L1eEM26M:
     9: 4
     10: 4
   stepFeatures:
-    0: 18
-    1: 18
-    2: 18
-    3: 18
-    4: 18
-    5: 18
-    6: 18
+    0: 17
+    1: 17
+    2: 17
+    3: 17
+    4: 17
+    5: 17
+    6: 17
     7: 15
     8: 15
     9: 68
@@ -2370,13 +2414,13 @@ EF_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1eEM26M:
     5: 4
     6: 4
   stepFeatures:
-    0: 22
-    1: 22
-    2: 22
-    3: 22
-    4: 22
-    5: 22
-    6: 22
+    0: 21
+    1: 21
+    2: 21
+    3: 21
+    4: 21
+    5: 21
+    6: 21
   eventCount: 0
 leg000_EF_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1eEM26M:
   stepCounts:
@@ -2406,13 +2450,13 @@ leg001_EF_e26_lhtight_e14_idperf_tight_nogsf_probe_50invmAB130_L1eEM26M:
     5: 4
     6: 4
   stepFeatures:
-    0: 18
-    1: 18
-    2: 18
-    3: 18
-    4: 18
-    5: 18
-    6: 18
+    0: 17
+    1: 17
+    2: 17
+    3: 17
+    4: 17
+    5: 17
+    6: 17
   eventCount: 0
 EF_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1eEM26M:
   stepCounts:
@@ -2424,13 +2468,13 @@ EF_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1eEM26M:
     5: 4
     6: 4
   stepFeatures:
-    0: 22
-    1: 22
-    2: 22
-    3: 22
-    4: 22
-    5: 22
-    6: 22
+    0: 21
+    1: 21
+    2: 21
+    3: 21
+    4: 21
+    5: 21
+    6: 21
   eventCount: 0
 leg000_EF_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1eEM26M:
   stepCounts:
@@ -2460,13 +2504,13 @@ leg001_EF_e26_lhtight_e14_idperf_tight_probe_50invmAB130_L1eEM26M:
     5: 4
     6: 4
   stepFeatures:
-    0: 18
-    1: 18
-    2: 18
-    3: 18
-    4: 18
-    5: 18
-    6: 18
+    0: 17
+    1: 17
+    2: 17
+    3: 17
+    4: 17
+    5: 17
+    6: 17
   eventCount: 0
 EF_e26_lhtight_ivarloose_L1eEM26M:
   stepCounts:
@@ -2609,18 +2653,18 @@ EF_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM26M:
     10: 4
     11: 4
   stepFeatures:
-    0: 41
-    1: 41
-    2: 41
-    3: 41
-    4: 41
-    5: 41
-    6: 41
-    7: 20
-    8: 20
-    9: 20
-    10: 20
-    11: 20
+    0: 35
+    1: 35
+    2: 35
+    3: 35
+    4: 35
+    5: 35
+    6: 35
+    7: 16
+    8: 16
+    9: 17
+    10: 17
+    11: 17
   eventCount: 4
 leg000_EF_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM26M:
   stepCounts:
@@ -2665,18 +2709,18 @@ leg001_EF_e26_lhtight_ivarloose_e5_idperf_loose_lrtloose_probe_L1eEM26M:
     10: 4
     11: 4
   stepFeatures:
-    0: 37
-    1: 37
-    2: 37
-    3: 37
-    4: 37
-    5: 37
-    6: 37
-    7: 16
-    8: 16
-    9: 16
-    10: 16
-    11: 16
+    0: 31
+    1: 31
+    2: 31
+    3: 31
+    4: 31
+    5: 31
+    6: 31
+    7: 12
+    8: 12
+    9: 13
+    10: 13
+    11: 13
   eventCount: 0
 EF_e26_lhtight_ivarloose_tau25_mediumGNTau_probe_L1cTAU20M_03dRAB_L1eEM26M:
   stepCounts:
@@ -2692,17 +2736,17 @@ EF_e26_lhtight_ivarloose_tau25_mediumGNTau_probe_L1cTAU20M_03dRAB_L1eEM26M:
     9: 3
     10: 3
   stepFeatures:
-    0: 12
-    1: 12
-    2: 12
-    3: 12
-    4: 12
-    5: 12
-    6: 12
-    7: 10
-    8: 10
-    9: 10
-    10: 10
+    0: 11
+    1: 11
+    2: 11
+    3: 11
+    4: 11
+    5: 11
+    6: 11
+    7: 9
+    8: 9
+    9: 9
+    10: 9
   eventCount: 0
 leg000_EF_e26_lhtight_ivarloose_tau25_mediumGNTau_probe_L1cTAU20M_03dRAB_L1eEM26M:
   stepCounts:
@@ -2744,17 +2788,17 @@ leg001_EF_e26_lhtight_ivarloose_tau25_mediumGNTau_probe_L1cTAU20M_03dRAB_L1eEM26
     9: 3
     10: 3
   stepFeatures:
-    0: 8
-    1: 8
-    2: 8
-    3: 8
-    4: 8
-    5: 8
-    6: 8
-    7: 7
-    8: 7
-    9: 7
-    10: 7
+    0: 7
+    1: 7
+    2: 7
+    3: 7
+    4: 7
+    5: 7
+    6: 7
+    7: 6
+    8: 6
+    9: 6
+    10: 6
   eventCount: 0
 EF_e28_idperf_loose_L1eEM28M:
   stepCounts:
@@ -2819,9 +2863,9 @@ EF_e30_lhloose_nopix_lrtmedium_probe_g25_medium_L1eEM24L:
     4: 1
     5: 1
   stepFeatures:
-    0: 17
-    1: 16
-    2: 16
+    0: 18
+    1: 17
+    2: 17
     3: 12
     4: 2
     5: 2
@@ -2851,9 +2895,9 @@ leg001_EF_e30_lhloose_nopix_lrtmedium_probe_g25_medium_L1eEM24L:
     4: 1
     5: 1
   stepFeatures:
-    0: 9
-    1: 8
-    2: 8
+    0: 10
+    1: 9
+    2: 9
     3: 5
     4: 1
     5: 1
@@ -2878,15 +2922,15 @@ EF_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L:
     7: 5
     8: 5
   stepFeatures:
-    0: 101
-    1: 100
-    2: 86
-    3: 56
-    4: 25
-    5: 25
-    6: 25
-    7: 25
-    8: 25
+    0: 89
+    1: 88
+    2: 75
+    3: 48
+    4: 21
+    5: 21
+    6: 22
+    7: 22
+    8: 22
   eventCount: 5
 leg000_EF_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L:
   stepCounts:
@@ -2900,15 +2944,15 @@ leg000_EF_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L:
     7: 5
     8: 5
   stepFeatures:
-    0: 89
-    1: 89
-    2: 76
-    3: 51
-    4: 20
-    5: 20
-    6: 20
-    7: 20
-    8: 20
+    0: 76
+    1: 76
+    2: 64
+    3: 43
+    4: 16
+    5: 16
+    6: 17
+    7: 17
+    8: 17
   eventCount: 0
 leg001_EF_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L:
   stepCounts:
@@ -2922,9 +2966,9 @@ leg001_EF_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L:
     7: 5
     8: 5
   stepFeatures:
-    0: 12
-    1: 11
-    2: 10
+    0: 13
+    1: 12
+    2: 11
     3: 5
     4: 5
     5: 5
@@ -2934,275 +2978,275 @@ leg001_EF_e5_idperf_loose_lrtloose_probe_g25_medium_L1eEM24L:
   eventCount: 0
 EF_e5_idperf_tight_L1eEM5:
   stepCounts:
-    0: 16
-    1: 16
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+    4: 14
+  stepFeatures:
+    0: 32
+    1: 32
+    2: 29
+    3: 29
+    4: 29
+  eventCount: 14
+EF_e5_idperf_tight_nogsf_L1eEM5:
+  stepCounts:
+    0: 14
+    1: 14
+    2: 14
+    3: 14
+  stepFeatures:
+    0: 32
+    1: 32
+    2: 29
+    3: 29
+  eventCount: 14
+EF_e5_lhvloose_L1eEM5_bBeeM6000_L1All:
+  stepCounts:
+    0: 15
+    1: 15
     2: 15
     3: 15
     4: 15
+    5: 15
   stepFeatures:
-    0: 41
-    1: 41
-    2: 33
-    3: 33
-    4: 33
-  eventCount: 15
-EF_e5_idperf_tight_nogsf_L1eEM5:
-  stepCounts:
-    0: 16
-    1: 16
-    2: 15
-    3: 15
-  stepFeatures:
-    0: 41
-    1: 41
-    2: 33
-    3: 33
-  eventCount: 15
-EF_e5_lhvloose_L1eEM5_bBeeM6000_L1All:
-  stepCounts:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
-    4: 16
-    5: 16
-  stepFeatures:
-    0: 45
-    1: 45
-    2: 174
-    3: 36
-    4: 36
-    5: 36
+    0: 36
+    1: 36
+    2: 139
+    3: 32
+    4: 32
+    5: 32
   eventCount: 0
 EF_e5_lhvloose_L1eEM5_e3_lhvloose_L1eEM5_bBeeM6000_L1All:
   stepCounts:
-    0: 11
-    1: 11
-    2: 11
-    3: 11
-    4: 11
-    5: 11
+    0: 9
+    1: 9
+    2: 9
+    3: 8
+    4: 8
+    5: 8
   stepFeatures:
-    0: 40
-    1: 40
-    2: 160
-    3: 43
-    4: 43
-    5: 43
+    0: 30
+    1: 30
+    2: 117
+    3: 30
+    4: 30
+    5: 30
   eventCount: 0
 leg000_EF_e5_lhvloose_L1eEM5_e3_lhvloose_L1eEM5_bBeeM6000_L1All:
   stepCounts:
-    0: 11
-    1: 11
-    2: 11
-    3: 11
-    4: 11
-    5: 11
+    0: 9
+    1: 9
+    2: 9
+    3: 8
+    4: 8
+    5: 8
   stepFeatures:
-    0: 40
-    1: 40
-    2: 160
-    3: 31
-    4: 31
-    5: 31
+    0: 30
+    1: 30
+    2: 117
+    3: 25
+    4: 25
+    5: 25
   eventCount: 0
 leg001_EF_e5_lhvloose_L1eEM5_e3_lhvloose_L1eEM5_bBeeM6000_L1All:
   stepCounts:
-    0: 11
-    1: 11
-    2: 11
-    3: 11
-    4: 11
-    5: 11
+    0: 9
+    1: 9
+    2: 9
+    3: 8
+    4: 8
+    5: 8
   stepFeatures:
-    0: 40
-    1: 40
-    2: 160
-    3: 43
-    4: 43
-    5: 43
+    0: 30
+    1: 30
+    2: 117
+    3: 30
+    4: 30
+    5: 30
   eventCount: 0
 EF_e5_lhvloose_bBeeM6000_L1BKeePrimary:
   stepCounts:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
-    4: 16
-    5: 16
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+    4: 15
+    5: 15
   stepFeatures:
-    0: 45
-    1: 45
-    2: 174
-    3: 36
-    4: 36
-    5: 36
+    0: 36
+    1: 36
+    2: 139
+    3: 32
+    4: 32
+    5: 32
   eventCount: 0
 EF_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary:
   stepCounts:
-    0: 11
-    1: 11
-    2: 11
-    3: 11
-    4: 11
-    5: 11
+    0: 9
+    1: 9
+    2: 9
+    3: 8
+    4: 8
+    5: 8
   stepFeatures:
-    0: 40
-    1: 40
-    2: 160
-    3: 43
-    4: 43
-    5: 43
+    0: 30
+    1: 30
+    2: 117
+    3: 30
+    4: 30
+    5: 30
   eventCount: 0
 leg000_EF_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary:
   stepCounts:
-    0: 11
-    1: 11
-    2: 11
-    3: 11
-    4: 11
-    5: 11
+    0: 9
+    1: 9
+    2: 9
+    3: 8
+    4: 8
+    5: 8
   stepFeatures:
-    0: 40
-    1: 40
-    2: 160
-    3: 31
-    4: 31
-    5: 31
+    0: 30
+    1: 30
+    2: 117
+    3: 25
+    4: 25
+    5: 25
   eventCount: 0
 leg001_EF_e5_lhvloose_e3_lhvloose_bBeeM6000_L1BKeePrimary:
   stepCounts:
-    0: 11
-    1: 11
-    2: 11
-    3: 11
-    4: 11
-    5: 11
+    0: 9
+    1: 9
+    2: 9
+    3: 8
+    4: 8
+    5: 8
   stepFeatures:
-    0: 40
-    1: 40
-    2: 160
-    3: 43
-    4: 43
-    5: 43
+    0: 30
+    1: 30
+    2: 117
+    3: 30
+    4: 30
+    5: 30
   eventCount: 0
 EF_e5_lhvloose_j70_j50a_j0_DJMASS1000j50_xe50_tcpufit_L1jMJJ-500-NFF:
   stepCounts:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
-    4: 16
-    5: 16
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+    4: 15
+    5: 15
     6: 8
     7: 1
   stepFeatures:
-    0: 109
-    1: 109
-    2: 238
-    3: 100
-    4: 100
-    5: 100
+    0: 96
+    1: 96
+    2: 199
+    3: 92
+    4: 92
+    5: 92
     6: 42
     7: 7
   eventCount: 1
 leg000_EF_e5_lhvloose_j70_j50a_j0_DJMASS1000j50_xe50_tcpufit_L1jMJJ-500-NFF:
   stepCounts:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
-    4: 16
-    5: 16
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+    4: 15
+    5: 15
     6: 8
     7: 1
   stepFeatures:
-    0: 45
-    1: 45
-    2: 174
-    3: 36
-    4: 36
-    5: 36
+    0: 36
+    1: 36
+    2: 139
+    3: 32
+    4: 32
+    5: 32
     6: 10
     7: 1
   eventCount: 0
 leg001_EF_e5_lhvloose_j70_j50a_j0_DJMASS1000j50_xe50_tcpufit_L1jMJJ-500-NFF:
   stepCounts:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
-    4: 16
-    5: 16
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+    4: 15
+    5: 15
     6: 8
     7: 1
   stepFeatures:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
-    4: 16
-    5: 16
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+    4: 15
+    5: 15
     6: 8
     7: 3
   eventCount: 0
 leg002_EF_e5_lhvloose_j70_j50a_j0_DJMASS1000j50_xe50_tcpufit_L1jMJJ-500-NFF:
   stepCounts:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
-    4: 16
-    5: 16
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+    4: 15
+    5: 15
     6: 8
     7: 1
   stepFeatures:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
-    4: 16
-    5: 16
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+    4: 15
+    5: 15
     6: 8
     7: 5
   eventCount: 0
 leg003_EF_e5_lhvloose_j70_j50a_j0_DJMASS1000j50_xe50_tcpufit_L1jMJJ-500-NFF:
   stepCounts:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
-    4: 16
-    5: 16
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+    4: 15
+    5: 15
     6: 8
     7: 1
   stepFeatures:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
-    4: 16
-    5: 16
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+    4: 15
+    5: 15
     6: 8
     7: 2
   eventCount: 0
 leg004_EF_e5_lhvloose_j70_j50a_j0_DJMASS1000j50_xe50_tcpufit_L1jMJJ-500-NFF:
   stepCounts:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
-    4: 16
-    5: 16
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+    4: 15
+    5: 15
     6: 8
     7: 1
   stepFeatures:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
-    4: 16
-    5: 16
+    0: 15
+    1: 15
+    2: 15
+    3: 15
+    4: 15
+    5: 15
     6: 8
     7: 1
   eventCount: 0
@@ -3216,13 +3260,13 @@ EF_e5_nopid_L1eEM5:
     5: 20
     6: 20
   stepFeatures:
-    0: 188
-    1: 188
-    2: 974
-    3: 241
-    4: 241
-    5: 241
-    6: 183
+    0: 156
+    1: 156
+    2: 800
+    3: 210
+    4: 210
+    5: 210
+    6: 164
   eventCount: 20
 EF_e60_lhmedium_L1eEM26M:
   stepCounts:
@@ -3306,9 +3350,9 @@ EF_e7_lhloose_mu20_L1MU12FCH:
     5: 3
     6: 1
   stepFeatures:
-    0: 9
-    1: 9
-    2: 28
+    0: 8
+    1: 8
+    2: 21
     3: 7
     4: 7
     5: 7
@@ -3324,9 +3368,9 @@ leg000_EF_e7_lhloose_mu20_L1MU12FCH:
     5: 3
     6: 1
   stepFeatures:
-    0: 5
-    1: 5
-    2: 24
+    0: 4
+    1: 4
+    2: 17
     3: 4
     4: 4
     5: 4
@@ -3359,9 +3403,9 @@ EF_e7_lhmedium_L1eEM5_mu24_L1MU14FCH:
     4: 2
     5: 2
   stepFeatures:
-    0: 15
-    1: 15
-    2: 13
+    0: 13
+    1: 13
+    2: 10
     3: 4
     4: 4
     5: 4
@@ -3375,9 +3419,9 @@ leg000_EF_e7_lhmedium_L1eEM5_mu24_L1MU14FCH:
     4: 2
     5: 2
   stepFeatures:
-    0: 10
-    1: 10
-    2: 10
+    0: 8
+    1: 8
+    2: 7
     3: 2
     4: 2
     5: 2
@@ -3874,18 +3918,18 @@ EF_g25_loose_tau12_mediumGNTau_03dRAB_L1eEM26M:
     5: 5
     6: 5
     7: 5
-    8: 2
+    8: 1
   stepFeatures:
-    0: 39
-    1: 39
-    2: 39
-    3: 32
-    4: 32
-    5: 32
-    6: 32
-    7: 32
-    8: 4
-  eventCount: 2
+    0: 36
+    1: 36
+    2: 36
+    3: 30
+    4: 30
+    5: 30
+    6: 30
+    7: 30
+    8: 2
+  eventCount: 1
 leg000_EF_g25_loose_tau12_mediumGNTau_03dRAB_L1eEM26M:
   stepCounts:
     0: 6
@@ -3896,7 +3940,7 @@ leg000_EF_g25_loose_tau12_mediumGNTau_03dRAB_L1eEM26M:
     5: 5
     6: 5
     7: 5
-    8: 2
+    8: 1
   stepFeatures:
     0: 8
     1: 8
@@ -3906,7 +3950,7 @@ leg000_EF_g25_loose_tau12_mediumGNTau_03dRAB_L1eEM26M:
     5: 6
     6: 6
     7: 6
-    8: 2
+    8: 1
   eventCount: 0
 leg001_EF_g25_loose_tau12_mediumGNTau_03dRAB_L1eEM26M:
   stepCounts:
@@ -3918,17 +3962,17 @@ leg001_EF_g25_loose_tau12_mediumGNTau_03dRAB_L1eEM26M:
     5: 5
     6: 5
     7: 5
-    8: 2
+    8: 1
   stepFeatures:
-    0: 31
-    1: 31
-    2: 31
-    3: 26
-    4: 26
-    5: 26
-    6: 26
-    7: 26
-    8: 2
+    0: 28
+    1: 28
+    2: 28
+    3: 24
+    4: 24
+    5: 24
+    6: 24
+    7: 24
+    8: 1
   eventCount: 0
 EF_g25_loose_tau15_mediumGNTau_03dRAB_L1eEM26M:
   stepCounts:
@@ -3940,18 +3984,18 @@ EF_g25_loose_tau15_mediumGNTau_03dRAB_L1eEM26M:
     5: 5
     6: 5
     7: 5
-    8: 2
+    8: 1
   stepFeatures:
-    0: 39
-    1: 39
-    2: 39
-    3: 32
-    4: 32
-    5: 32
-    6: 32
-    7: 32
-    8: 4
-  eventCount: 2
+    0: 36
+    1: 36
+    2: 36
+    3: 30
+    4: 30
+    5: 30
+    6: 30
+    7: 30
+    8: 2
+  eventCount: 1
 leg000_EF_g25_loose_tau15_mediumGNTau_03dRAB_L1eEM26M:
   stepCounts:
     0: 6
@@ -3962,7 +4006,7 @@ leg000_EF_g25_loose_tau15_mediumGNTau_03dRAB_L1eEM26M:
     5: 5
     6: 5
     7: 5
-    8: 2
+    8: 1
   stepFeatures:
     0: 8
     1: 8
@@ -3972,7 +4016,7 @@ leg000_EF_g25_loose_tau15_mediumGNTau_03dRAB_L1eEM26M:
     5: 6
     6: 6
     7: 6
-    8: 2
+    8: 1
   eventCount: 0
 leg001_EF_g25_loose_tau15_mediumGNTau_03dRAB_L1eEM26M:
   stepCounts:
@@ -3984,17 +4028,17 @@ leg001_EF_g25_loose_tau15_mediumGNTau_03dRAB_L1eEM26M:
     5: 5
     6: 5
     7: 5
-    8: 2
+    8: 1
   stepFeatures:
-    0: 31
-    1: 31
-    2: 31
-    3: 26
-    4: 26
-    5: 26
-    6: 26
-    7: 26
-    8: 2
+    0: 28
+    1: 28
+    2: 28
+    3: 24
+    4: 24
+    5: 24
+    6: 24
+    7: 24
+    8: 1
   eventCount: 0
 EF_g25_loose_tau18_mediumGNTau_03dRAB_L1eEM26M:
   stepCounts:
@@ -4006,18 +4050,18 @@ EF_g25_loose_tau18_mediumGNTau_03dRAB_L1eEM26M:
     5: 5
     6: 5
     7: 5
-    8: 2
+    8: 1
   stepFeatures:
-    0: 39
-    1: 39
-    2: 39
-    3: 32
-    4: 31
-    5: 31
-    6: 31
-    7: 31
-    8: 4
-  eventCount: 2
+    0: 36
+    1: 36
+    2: 36
+    3: 30
+    4: 30
+    5: 30
+    6: 30
+    7: 30
+    8: 2
+  eventCount: 1
 leg000_EF_g25_loose_tau18_mediumGNTau_03dRAB_L1eEM26M:
   stepCounts:
     0: 6
@@ -4028,7 +4072,7 @@ leg000_EF_g25_loose_tau18_mediumGNTau_03dRAB_L1eEM26M:
     5: 5
     6: 5
     7: 5
-    8: 2
+    8: 1
   stepFeatures:
     0: 8
     1: 8
@@ -4038,7 +4082,7 @@ leg000_EF_g25_loose_tau18_mediumGNTau_03dRAB_L1eEM26M:
     5: 6
     6: 6
     7: 6
-    8: 2
+    8: 1
   eventCount: 0
 leg001_EF_g25_loose_tau18_mediumGNTau_03dRAB_L1eEM26M:
   stepCounts:
@@ -4050,17 +4094,17 @@ leg001_EF_g25_loose_tau18_mediumGNTau_03dRAB_L1eEM26M:
     5: 5
     6: 5
     7: 5
-    8: 2
+    8: 1
   stepFeatures:
-    0: 31
-    1: 31
-    2: 31
-    3: 26
-    4: 25
-    5: 25
-    6: 25
-    7: 25
-    8: 2
+    0: 28
+    1: 28
+    2: 28
+    3: 24
+    4: 24
+    5: 24
+    6: 24
+    7: 24
+    8: 1
   eventCount: 0
 EF_g25_loose_tau20_mediumGNTau_03dRAB_L1eEM26M:
   stepCounts:
@@ -4072,18 +4116,18 @@ EF_g25_loose_tau20_mediumGNTau_03dRAB_L1eEM26M:
     5: 5
     6: 5
     7: 5
-    8: 2
+    8: 1
   stepFeatures:
-    0: 39
-    1: 39
-    2: 39
-    3: 32
-    4: 31
-    5: 31
-    6: 31
-    7: 31
-    8: 4
-  eventCount: 2
+    0: 36
+    1: 36
+    2: 36
+    3: 30
+    4: 30
+    5: 30
+    6: 30
+    7: 30
+    8: 2
+  eventCount: 1
 leg000_EF_g25_loose_tau20_mediumGNTau_03dRAB_L1eEM26M:
   stepCounts:
     0: 6
@@ -4094,7 +4138,7 @@ leg000_EF_g25_loose_tau20_mediumGNTau_03dRAB_L1eEM26M:
     5: 5
     6: 5
     7: 5
-    8: 2
+    8: 1
   stepFeatures:
     0: 8
     1: 8
@@ -4104,7 +4148,7 @@ leg000_EF_g25_loose_tau20_mediumGNTau_03dRAB_L1eEM26M:
     5: 6
     6: 6
     7: 6
-    8: 2
+    8: 1
   eventCount: 0
 leg001_EF_g25_loose_tau20_mediumGNTau_03dRAB_L1eEM26M:
   stepCounts:
@@ -4116,17 +4160,17 @@ leg001_EF_g25_loose_tau20_mediumGNTau_03dRAB_L1eEM26M:
     5: 5
     6: 5
     7: 5
-    8: 2
+    8: 1
   stepFeatures:
-    0: 31
-    1: 31
-    2: 31
-    3: 26
-    4: 25
-    5: 25
-    6: 25
-    7: 25
-    8: 2
+    0: 28
+    1: 28
+    2: 28
+    3: 24
+    4: 24
+    5: 24
+    6: 24
+    7: 24
+    8: 1
   eventCount: 0
 EF_g25_medium_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM26M:
   stepCounts:
@@ -4246,8 +4290,8 @@ EF_g25_medium_L1eEM18L_mu24_L1MU14FCH:
     1: 3
     2: 2
   stepFeatures:
-    0: 9
-    1: 9
+    0: 10
+    1: 10
     2: 5
   eventCount: 0
 leg000_EF_g25_medium_L1eEM18L_mu24_L1MU14FCH:
@@ -4256,8 +4300,8 @@ leg000_EF_g25_medium_L1eEM18L_mu24_L1MU14FCH:
     1: 3
     2: 2
   stepFeatures:
-    0: 5
-    1: 5
+    0: 6
+    1: 6
     2: 2
   eventCount: 0
 leg001_EF_g25_medium_L1eEM18L_mu24_L1MU14FCH:
@@ -4381,14 +4425,14 @@ EF_g25_medium_tau25_dikaonmass_tracktwoMVA_50invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 39
-    1: 39
-    2: 39
-    3: 31
-    4: 26
-    5: 26
-    6: 26
-    7: 26
+    0: 36
+    1: 36
+    2: 36
+    3: 29
+    4: 25
+    5: 25
+    6: 25
+    7: 25
   eventCount: 0
 leg000_EF_g25_medium_tau25_dikaonmass_tracktwoMVA_50invmAB_L1eEM26M:
   stepCounts:
@@ -4421,14 +4465,14 @@ leg001_EF_g25_medium_tau25_dikaonmass_tracktwoMVA_50invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 31
-    1: 31
-    2: 31
-    3: 26
-    4: 21
-    5: 21
-    6: 21
-    7: 21
+    0: 28
+    1: 28
+    2: 28
+    3: 24
+    4: 20
+    5: 20
+    6: 20
+    7: 20
   eventCount: 0
 EF_g25_medium_tau25_dipion1_tracktwoMVA_50invmAB_L1eEM26M:
   stepCounts:
@@ -4441,14 +4485,14 @@ EF_g25_medium_tau25_dipion1_tracktwoMVA_50invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 39
-    1: 39
-    2: 39
-    3: 31
-    4: 26
-    5: 26
-    6: 26
-    7: 26
+    0: 36
+    1: 36
+    2: 36
+    3: 29
+    4: 25
+    5: 25
+    6: 25
+    7: 25
   eventCount: 0
 leg000_EF_g25_medium_tau25_dipion1_tracktwoMVA_50invmAB_L1eEM26M:
   stepCounts:
@@ -4481,14 +4525,14 @@ leg001_EF_g25_medium_tau25_dipion1_tracktwoMVA_50invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 31
-    1: 31
-    2: 31
-    3: 26
-    4: 21
-    5: 21
-    6: 21
-    7: 21
+    0: 28
+    1: 28
+    2: 28
+    3: 24
+    4: 20
+    5: 20
+    6: 20
+    7: 20
   eventCount: 0
 EF_g25_medium_tau25_dipion2_tracktwoMVA_50invmAB_L1eEM26M:
   stepCounts:
@@ -4501,14 +4545,14 @@ EF_g25_medium_tau25_dipion2_tracktwoMVA_50invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 39
-    1: 39
-    2: 39
-    3: 31
-    4: 26
-    5: 26
-    6: 26
-    7: 26
+    0: 36
+    1: 36
+    2: 36
+    3: 29
+    4: 25
+    5: 25
+    6: 25
+    7: 25
   eventCount: 0
 leg000_EF_g25_medium_tau25_dipion2_tracktwoMVA_50invmAB_L1eEM26M:
   stepCounts:
@@ -4541,14 +4585,14 @@ leg001_EF_g25_medium_tau25_dipion2_tracktwoMVA_50invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 31
-    1: 31
-    2: 31
-    3: 26
-    4: 21
-    5: 21
-    6: 21
-    7: 21
+    0: 28
+    1: 28
+    2: 28
+    3: 24
+    4: 20
+    5: 20
+    6: 20
+    7: 20
   eventCount: 0
 EF_g25_medium_tau25_kaonpi1_tracktwoMVA_50invmAB_L1eEM26M:
   stepCounts:
@@ -4561,14 +4605,14 @@ EF_g25_medium_tau25_kaonpi1_tracktwoMVA_50invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 39
-    1: 39
-    2: 39
-    3: 31
-    4: 26
-    5: 26
-    6: 26
-    7: 26
+    0: 36
+    1: 36
+    2: 36
+    3: 29
+    4: 25
+    5: 25
+    6: 25
+    7: 25
   eventCount: 0
 leg000_EF_g25_medium_tau25_kaonpi1_tracktwoMVA_50invmAB_L1eEM26M:
   stepCounts:
@@ -4601,14 +4645,14 @@ leg001_EF_g25_medium_tau25_kaonpi1_tracktwoMVA_50invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 31
-    1: 31
-    2: 31
-    3: 26
-    4: 21
-    5: 21
-    6: 21
-    7: 21
+    0: 28
+    1: 28
+    2: 28
+    3: 24
+    4: 20
+    5: 20
+    6: 20
+    7: 20
   eventCount: 0
 EF_g25_medium_tau25_kaonpi2_tracktwoMVA_50invmAB_L1eEM26M:
   stepCounts:
@@ -4621,14 +4665,14 @@ EF_g25_medium_tau25_kaonpi2_tracktwoMVA_50invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 39
-    1: 39
-    2: 39
-    3: 31
-    4: 26
-    5: 26
-    6: 26
-    7: 26
+    0: 36
+    1: 36
+    2: 36
+    3: 29
+    4: 25
+    5: 25
+    6: 25
+    7: 25
   eventCount: 0
 leg000_EF_g25_medium_tau25_kaonpi2_tracktwoMVA_50invmAB_L1eEM26M:
   stepCounts:
@@ -4661,14 +4705,14 @@ leg001_EF_g25_medium_tau25_kaonpi2_tracktwoMVA_50invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 31
-    1: 31
-    2: 31
-    3: 26
-    4: 21
-    5: 21
-    6: 21
-    7: 21
+    0: 28
+    1: 28
+    2: 28
+    3: 24
+    4: 20
+    5: 20
+    6: 20
+    7: 20
   eventCount: 0
 EF_g25_medium_tau25_singlepion_tracktwoMVA_50invmAB_L1eEM26M:
   stepCounts:
@@ -4681,14 +4725,14 @@ EF_g25_medium_tau25_singlepion_tracktwoMVA_50invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 39
-    1: 39
-    2: 39
-    3: 31
-    4: 26
-    5: 26
-    6: 26
-    7: 26
+    0: 36
+    1: 36
+    2: 36
+    3: 29
+    4: 25
+    5: 25
+    6: 25
+    7: 25
   eventCount: 0
 leg000_EF_g25_medium_tau25_singlepion_tracktwoMVA_50invmAB_L1eEM26M:
   stepCounts:
@@ -4721,14 +4765,14 @@ leg001_EF_g25_medium_tau25_singlepion_tracktwoMVA_50invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 31
-    1: 31
-    2: 31
-    3: 26
-    4: 21
-    5: 21
-    6: 21
-    7: 21
+    0: 28
+    1: 28
+    2: 28
+    3: 24
+    4: 20
+    5: 20
+    6: 20
+    7: 20
   eventCount: 0
 EF_g25_tight_icaloloose_2j35_0eta290_020jvt_bgn277_2j35a_pf_ftf_presel2a20bgtwo90XX2a20_L1eEM26M:
   stepCounts:
@@ -5002,9 +5046,9 @@ EF_g35_medium_g25_medium_L12eEM24L:
     1: 1
     2: 1
   stepFeatures:
-    0: 5
-    1: 3
-    2: 2
+    0: 6
+    1: 4
+    2: 3
   eventCount: 0
 leg000_EF_g35_medium_g25_medium_L12eEM24L:
   stepCounts:
@@ -5012,8 +5056,8 @@ leg000_EF_g35_medium_g25_medium_L12eEM24L:
     1: 1
     2: 1
   stepFeatures:
-    0: 4
-    1: 2
+    0: 5
+    1: 3
     2: 1
   eventCount: 0
 leg001_EF_g35_medium_g25_medium_L12eEM24L:
@@ -5022,9 +5066,9 @@ leg001_EF_g35_medium_g25_medium_L12eEM24L:
     1: 1
     2: 1
   stepFeatures:
-    0: 5
-    1: 3
-    2: 2
+    0: 6
+    1: 4
+    2: 3
   eventCount: 0
 EF_g35_medium_noringer_g25_medium_noringer_L12eEM24L:
   stepCounts:
@@ -5032,9 +5076,9 @@ EF_g35_medium_noringer_g25_medium_noringer_L12eEM24L:
     1: 1
     2: 1
   stepFeatures:
-    0: 5
-    1: 3
-    2: 2
+    0: 6
+    1: 4
+    2: 3
   eventCount: 0
 leg000_EF_g35_medium_noringer_g25_medium_noringer_L12eEM24L:
   stepCounts:
@@ -5042,8 +5086,8 @@ leg000_EF_g35_medium_noringer_g25_medium_noringer_L12eEM24L:
     1: 1
     2: 1
   stepFeatures:
-    0: 4
-    1: 2
+    0: 5
+    1: 3
     2: 1
   eventCount: 0
 leg001_EF_g35_medium_noringer_g25_medium_noringer_L12eEM24L:
@@ -5052,9 +5096,9 @@ leg001_EF_g35_medium_noringer_g25_medium_noringer_L12eEM24L:
     1: 1
     2: 1
   stepFeatures:
-    0: 5
-    1: 3
-    2: 2
+    0: 6
+    1: 4
+    2: 3
   eventCount: 0
 EF_g35_medium_tau25_dipion3_tracktwoMVA_60invmAB_L1eEM26M:
   stepCounts:
@@ -5067,14 +5111,14 @@ EF_g35_medium_tau25_dipion3_tracktwoMVA_60invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 38
-    1: 38
-    2: 37
-    3: 31
-    4: 26
-    5: 26
-    6: 26
-    7: 26
+    0: 35
+    1: 35
+    2: 34
+    3: 29
+    4: 25
+    5: 25
+    6: 25
+    7: 25
   eventCount: 0
 leg000_EF_g35_medium_tau25_dipion3_tracktwoMVA_60invmAB_L1eEM26M:
   stepCounts:
@@ -5107,14 +5151,14 @@ leg001_EF_g35_medium_tau25_dipion3_tracktwoMVA_60invmAB_L1eEM26M:
     6: 5
     7: 5
   stepFeatures:
-    0: 31
-    1: 31
-    2: 31
-    3: 26
-    4: 21
-    5: 21
-    6: 21
-    7: 21
+    0: 28
+    1: 28
+    2: 28
+    3: 24
+    4: 20
+    5: 20
+    6: 20
+    7: 20
   eventCount: 0
 EF_g35_tight_icalotight_mu15noL1_mu2noL1_L1eEM28M:
   stepCounts:
@@ -5219,16 +5263,16 @@ EF_g40_loose_L1eEM24L_mu40_msonly_L1MU14FCH:
     0: 1
     1: 1
   stepFeatures:
-    0: 3
-    1: 3
+    0: 4
+    1: 4
   eventCount: 0
 leg000_EF_g40_loose_L1eEM24L_mu40_msonly_L1MU14FCH:
   stepCounts:
     0: 1
     1: 1
   stepFeatures:
-    0: 2
-    1: 2
+    0: 3
+    1: 3
   eventCount: 0
 leg001_EF_g40_loose_L1eEM24L_mu40_msonly_L1MU14FCH:
   stepCounts:
@@ -5243,16 +5287,16 @@ EF_g40_loose_L1eEM24L_mu40_msonly_L1MU18VFCH:
     0: 1
     1: 1
   stepFeatures:
-    0: 3
-    1: 3
+    0: 4
+    1: 4
   eventCount: 0
 leg000_EF_g40_loose_L1eEM24L_mu40_msonly_L1MU18VFCH:
   stepCounts:
     0: 1
     1: 1
   stepFeatures:
-    0: 2
-    1: 2
+    0: 3
+    1: 3
   eventCount: 0
 leg001_EF_g40_loose_L1eEM24L_mu40_msonly_L1MU18VFCH:
   stepCounts:
@@ -5310,9 +5354,9 @@ EF_g45_medium_g20_medium_L1eEM40L_2eEM18L:
     1: 1
     2: 1
   stepFeatures:
-    0: 5
-    1: 3
-    2: 2
+    0: 6
+    1: 4
+    2: 3
   eventCount: 0
 leg000_EF_g45_medium_g20_medium_L1eEM40L_2eEM18L:
   stepCounts:
@@ -5330,9 +5374,9 @@ leg001_EF_g45_medium_g20_medium_L1eEM40L_2eEM18L:
     1: 1
     2: 1
   stepFeatures:
-    0: 5
-    1: 3
-    2: 2
+    0: 6
+    1: 4
+    2: 3
   eventCount: 0
 EF_g45_medium_noringer_g20_medium_noringer_L1eEM40L_2eEM18L:
   stepCounts:
@@ -5340,9 +5384,9 @@ EF_g45_medium_noringer_g20_medium_noringer_L1eEM40L_2eEM18L:
     1: 1
     2: 1
   stepFeatures:
-    0: 7
-    1: 3
-    2: 2
+    0: 8
+    1: 4
+    2: 3
   eventCount: 0
 leg000_EF_g45_medium_noringer_g20_medium_noringer_L1eEM40L_2eEM18L:
   stepCounts:
@@ -5360,9 +5404,9 @@ leg001_EF_g45_medium_noringer_g20_medium_noringer_L1eEM40L_2eEM18L:
     1: 1
     2: 1
   stepFeatures:
-    0: 7
-    1: 3
-    2: 2
+    0: 8
+    1: 4
+    2: 3
   eventCount: 0
 EF_g5_nopid_L1eEM5:
   stepCounts:
@@ -5371,10 +5415,10 @@ EF_g5_nopid_L1eEM5:
     2: 20
     3: 20
   stepFeatures:
-    0: 188
-    1: 188
-    2: 241
-    3: 221
+    0: 156
+    1: 156
+    2: 211
+    3: 196
   eventCount: 20
 EF_g85_tight_3j50_pf_ftf_L1eEM26M:
   stepCounts:
@@ -7094,11 +7138,11 @@ EF_mu10_ivarloose_tau35_mediumGNTau_03dRAB_L1MU5VF_cTAU30M:
     7: 6
     8: 6
   stepFeatures:
-    0: 31
-    1: 26
-    2: 26
-    3: 25
-    4: 17
+    0: 30
+    1: 25
+    2: 25
+    3: 24
+    4: 16
     5: 14
     6: 14
     7: 14
@@ -7138,11 +7182,11 @@ leg001_EF_mu10_ivarloose_tau35_mediumGNTau_03dRAB_L1MU5VF_cTAU30M:
     7: 6
     8: 6
   stepFeatures:
-    0: 20
-    1: 17
-    2: 17
-    3: 17
-    4: 11
+    0: 19
+    1: 16
+    2: 16
+    3: 16
+    4: 10
     5: 8
     6: 8
     7: 8
@@ -7830,11 +7874,11 @@ EF_mu14_ivarloose_tau25_mediumGNTau_03dRAB_L1MU8F_cTAU20M_3jJ30:
     7: 6
     8: 6
   stepFeatures:
-    0: 37
-    1: 30
-    2: 30
-    3: 29
-    4: 23
+    0: 36
+    1: 29
+    2: 29
+    3: 28
+    4: 22
     5: 20
     6: 20
     7: 20
@@ -7874,11 +7918,11 @@ leg001_EF_mu14_ivarloose_tau25_mediumGNTau_03dRAB_L1MU8F_cTAU20M_3jJ30:
     7: 6
     8: 6
   stepFeatures:
-    0: 26
-    1: 22
-    2: 22
-    3: 22
-    4: 17
+    0: 25
+    1: 21
+    2: 21
+    3: 21
+    4: 16
     5: 14
     6: 14
     7: 14
@@ -7896,11 +7940,11 @@ EF_mu14_ivarloose_tau35_mediumGNTau_03dRAB_L1MU8F_cTAU30M:
     7: 6
     8: 6
   stepFeatures:
-    0: 29
-    1: 24
-    2: 24
-    3: 23
-    4: 17
+    0: 28
+    1: 23
+    2: 23
+    3: 22
+    4: 16
     5: 14
     6: 14
     7: 14
@@ -7940,11 +7984,11 @@ leg001_EF_mu14_ivarloose_tau35_mediumGNTau_03dRAB_L1MU8F_cTAU30M:
     7: 6
     8: 6
   stepFeatures:
-    0: 19
-    1: 16
-    2: 16
-    3: 16
-    4: 11
+    0: 18
+    1: 15
+    2: 15
+    3: 15
+    4: 10
     5: 8
     6: 8
     7: 8
@@ -7991,10 +8035,10 @@ EF_mu14_tau25_mediumGNTau_xe50_cell_03dRAB_L1MU8F_cTAU20M_jXE70:
     6: 2
     7: 2
   stepFeatures:
-    0: 47
-    1: 37
-    2: 37
-    3: 36
+    0: 46
+    1: 36
+    2: 36
+    3: 35
     4: 9
     5: 9
     6: 9
@@ -8031,10 +8075,10 @@ leg001_EF_mu14_tau25_mediumGNTau_xe50_cell_03dRAB_L1MU8F_cTAU20M_jXE70:
     6: 2
     7: 2
   stepFeatures:
-    0: 26
-    1: 22
-    2: 22
-    3: 22
+    0: 25
+    1: 21
+    2: 21
+    3: 21
     4: 5
     5: 5
     6: 5
@@ -8499,11 +8543,11 @@ EF_mu24_ivarmedium_tau25_idperf_probe_L1cTAU20M_03dRAB_L1MU14FCH:
     8: 4
     9: 4
   stepFeatures:
-    0: 26
-    1: 26
-    2: 16
-    3: 15
-    4: 15
+    0: 25
+    1: 25
+    2: 15
+    3: 14
+    4: 14
     5: 13
     6: 13
     7: 13
@@ -8547,11 +8591,11 @@ leg001_EF_mu24_ivarmedium_tau25_idperf_probe_L1cTAU20M_03dRAB_L1MU14FCH:
     8: 4
     9: 4
   stepFeatures:
-    0: 19
-    1: 19
-    2: 11
-    3: 11
-    4: 11
+    0: 18
+    1: 18
+    2: 10
+    3: 10
+    4: 10
     5: 9
     6: 9
     7: 9
@@ -8570,11 +8614,11 @@ EF_mu24_ivarmedium_tau25_mediumGNTau_probe_L1eTAU20_03dRAB_L1MU14FCH:
     7: 4
     8: 4
   stepFeatures:
-    0: 31
-    1: 31
-    2: 19
-    3: 18
-    4: 18
+    0: 29
+    1: 29
+    2: 18
+    3: 17
+    4: 17
     5: 16
     6: 16
     7: 16
@@ -8614,11 +8658,11 @@ leg001_EF_mu24_ivarmedium_tau25_mediumGNTau_probe_L1eTAU20_03dRAB_L1MU14FCH:
     7: 4
     8: 4
   stepFeatures:
-    0: 24
-    1: 24
-    2: 14
-    3: 14
-    4: 14
+    0: 22
+    1: 22
+    2: 13
+    3: 13
+    4: 13
     5: 12
     6: 12
     7: 12
@@ -8928,7 +8972,7 @@ EF_tau0_ptonly_em_L1eTAU12:
   stepCounts:
     0: 19
   stepFeatures:
-    0: 90
+    0: 79
   eventCount: 19
 EF_tau100_mediumRNN_tracktwoLLP_tau80_mediumRNN_tracktwoLLP_03dRAB_L1eTAU80_2eTAU60:
   stepCounts:
@@ -9074,11 +9118,11 @@ EF_tau20_idperf_L1eTAU12:
     3: 19
     4: 19
   stepFeatures:
-    0: 83
-    1: 83
-    2: 83
-    3: 83
-    4: 83
+    0: 77
+    1: 77
+    2: 77
+    3: 77
+    4: 77
   eventCount: 19
 EF_tau20_idperf_em_L1eTAU12:
   stepCounts:
@@ -9088,11 +9132,11 @@ EF_tau20_idperf_em_L1eTAU12:
     3: 19
     4: 19
   stepFeatures:
-    0: 90
-    1: 90
-    2: 90
-    3: 90
-    4: 90
+    0: 79
+    1: 79
+    2: 79
+    3: 79
+    4: 79
   eventCount: 19
 EF_tau20_mediumGNTauDev1_L1cTAU20M:
   stepCounts:
@@ -9102,10 +9146,10 @@ EF_tau20_mediumGNTauDev1_L1cTAU20M:
     3: 19
     4: 7
   stepFeatures:
-    0: 50
-    1: 50
-    2: 50
-    3: 50
+    0: 46
+    1: 46
+    2: 46
+    3: 46
     4: 7
   eventCount: 7
 EF_tau20_mediumGNTau_L1cTAU20M:
@@ -9116,10 +9160,10 @@ EF_tau20_mediumGNTau_L1cTAU20M:
     3: 19
     4: 7
   stepFeatures:
-    0: 50
-    1: 50
-    2: 50
-    3: 50
+    0: 46
+    1: 46
+    2: 46
+    3: 46
     4: 7
   eventCount: 7
 EF_tau20_mediumGNTau_em_L1eTAU12:
@@ -9130,10 +9174,10 @@ EF_tau20_mediumGNTau_em_L1eTAU12:
     3: 19
     4: 9
   stepFeatures:
-    0: 90
-    1: 90
-    2: 90
-    3: 90
+    0: 79
+    1: 79
+    2: 79
+    3: 79
     4: 9
   eventCount: 9
 EF_tau20_perf_L1cTAU20M:
@@ -9144,11 +9188,11 @@ EF_tau20_perf_L1cTAU20M:
     3: 19
     4: 14
   stepFeatures:
-    0: 50
-    1: 50
-    2: 50
-    3: 50
-    4: 25
+    0: 46
+    1: 46
+    2: 46
+    3: 46
+    4: 23
   eventCount: 14
 EF_tau20_perf_em_L1eTAU12:
   stepCounts:
@@ -9156,14 +9200,14 @@ EF_tau20_perf_em_L1eTAU12:
     1: 19
     2: 19
     3: 19
-    4: 18
+    4: 16
   stepFeatures:
-    0: 90
-    1: 90
-    2: 90
-    3: 90
-    4: 47
-  eventCount: 18
+    0: 79
+    1: 79
+    2: 79
+    3: 79
+    4: 37
+  eventCount: 16
 EF_tau25_idperf_L1cTAU20M:
   stepCounts:
     0: 17
@@ -9172,11 +9216,11 @@ EF_tau25_idperf_L1cTAU20M:
     3: 17
     4: 17
   stepFeatures:
-    0: 45
-    1: 45
-    2: 45
-    3: 45
-    4: 45
+    0: 42
+    1: 42
+    2: 42
+    3: 42
+    4: 42
   eventCount: 17
 ? EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_L1jJ85p0ETA21_3jJ40p0ETA25
 : stepCounts:
@@ -9189,14 +9233,14 @@ EF_tau25_idperf_L1cTAU20M:
     6: 15
     7: 6
   stepFeatures:
-    0: 109
-    1: 265
-    2: 267
-    3: 485
-    4: 485
-    5: 485
-    6: 485
-    7: 167
+    0: 98
+    1: 255
+    2: 258
+    3: 481
+    4: 481
+    5: 481
+    6: 481
+    7: 166
   eventCount: 6
 ? leg000_EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_L1jJ85p0ETA21_3jJ40p0ETA25
 : stepCounts:
@@ -9209,14 +9253,14 @@ EF_tau25_idperf_L1cTAU20M:
     6: 15
     7: 6
   stepFeatures:
-    0: 90
-    1: 82
-    2: 76
-    3: 64
-    4: 64
-    5: 64
-    6: 64
-    7: 7
+    0: 79
+    1: 72
+    2: 67
+    3: 60
+    4: 60
+    5: 60
+    6: 60
+    7: 6
   eventCount: 0
 ? leg001_EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_L1jJ85p0ETA21_3jJ40p0ETA25
 : stepCounts:
@@ -9329,7 +9373,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 109
+    0: 98
     1: 8
     2: 20
     3: 23
@@ -9349,7 +9393,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 90
+    0: 79
     1: 7
     2: 7
     3: 7
@@ -9469,7 +9513,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 109
+    0: 98
     1: 8
     2: 20
     3: 23
@@ -9489,7 +9533,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 90
+    0: 79
     1: 7
     2: 7
     3: 7
@@ -9609,7 +9653,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 109
+    0: 98
     1: 8
     2: 20
     3: 23
@@ -9629,7 +9673,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 90
+    0: 79
     1: 7
     2: 7
     3: 7
@@ -9749,7 +9793,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 109
+    0: 98
     1: 8
     2: 20
     3: 23
@@ -9769,7 +9813,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 90
+    0: 79
     1: 7
     2: 7
     3: 7
@@ -9889,7 +9933,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 109
+    0: 98
     1: 8
     2: 20
     3: 23
@@ -9909,7 +9953,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 90
+    0: 79
     1: 7
     2: 7
     3: 7
@@ -10029,7 +10073,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 109
+    0: 98
     1: 8
     2: 20
     3: 23
@@ -10049,7 +10093,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 90
+    0: 79
     1: 7
     2: 7
     3: 7
@@ -10169,7 +10213,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 109
+    0: 98
     1: 8
     2: 20
     3: 23
@@ -10189,7 +10233,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 90
+    0: 79
     1: 7
     2: 7
     3: 7
@@ -10309,7 +10353,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 109
+    0: 98
     1: 8
     2: 20
     3: 23
@@ -10329,7 +10373,7 @@ EF_tau25_idperf_L1cTAU20M:
     6: 1
     7: 1
   stepFeatures:
-    0: 90
+    0: 79
     1: 7
     2: 7
     3: 7
@@ -10449,14 +10493,14 @@ EF_tau25_idperf_L1cTAU20M:
     6: 2
     7: 2
   stepFeatures:
-    0: 109
+    0: 98
     1: 14
     2: 32
     3: 37
-    4: 72
-    5: 72
-    6: 72
-    7: 72
+    4: 73
+    5: 73
+    6: 73
+    7: 73
   eventCount: 0
 ? leg000_EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel2c20XX1c20bgtwo85XX1c20gntau90_L13jJ40
 : stepCounts:
@@ -10469,14 +10513,14 @@ EF_tau25_idperf_L1cTAU20M:
     6: 2
     7: 2
   stepFeatures:
-    0: 90
+    0: 79
     1: 12
     2: 12
     3: 12
-    4: 11
-    5: 11
-    6: 11
-    7: 11
+    4: 12
+    5: 12
+    6: 12
+    7: 12
   eventCount: 0
 ? leg001_EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel2c20XX1c20bgtwo85XX1c20gntau90_L13jJ40
 : stepCounts:
@@ -10589,14 +10633,14 @@ EF_tau25_idperf_L1cTAU20M:
     6: 2
     7: 2
   stepFeatures:
-    0: 109
+    0: 98
     1: 14
     2: 32
     3: 37
-    4: 72
-    5: 72
-    6: 72
-    7: 72
+    4: 73
+    5: 73
+    6: 73
+    7: 73
   eventCount: 0
 ? leg000_EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel2c20XX1c20bgtwo85XX1c20gntau90_L1jJ85p0ETA21_3jJ40p0ETA25
 : stepCounts:
@@ -10609,14 +10653,14 @@ EF_tau25_idperf_L1cTAU20M:
     6: 2
     7: 2
   stepFeatures:
-    0: 90
+    0: 79
     1: 12
     2: 12
     3: 12
-    4: 11
-    5: 11
-    6: 11
-    7: 11
+    4: 12
+    5: 12
+    6: 12
+    7: 12
   eventCount: 0
 ? leg001_EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel2c20XX1c20bgtwo85XX1c20gntau90_L1jJ85p0ETA21_3jJ40p0ETA25
 : stepCounts:
@@ -10730,14 +10774,14 @@ EF_tau25_idperf_L1cTAU20M:
     7: 9
     8: 2
   stepFeatures:
-    0: 109
-    1: 60
-    2: 169
-    3: 177
-    4: 318
-    5: 318
-    6: 318
-    7: 318
+    0: 98
+    1: 54
+    2: 163
+    3: 171
+    4: 316
+    5: 316
+    6: 316
+    7: 316
     8: 66
   eventCount: 2
 ? leg000_EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel3c20XX1c20bgtwo85_L13jJ40
@@ -10752,14 +10796,14 @@ EF_tau25_idperf_L1cTAU20M:
     7: 9
     8: 2
   stepFeatures:
-    0: 90
-    1: 50
-    2: 50
-    3: 48
-    4: 40
-    5: 40
-    6: 40
-    7: 40
+    0: 79
+    1: 44
+    2: 44
+    3: 42
+    4: 38
+    5: 38
+    6: 38
+    7: 38
     8: 2
   eventCount: 0
 ? leg001_EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel3c20XX1c20bgtwo85_L13jJ40
@@ -10884,14 +10928,14 @@ EF_tau25_idperf_L1cTAU20M:
     7: 9
     8: 2
   stepFeatures:
-    0: 109
-    1: 60
-    2: 169
-    3: 177
-    4: 318
-    5: 318
-    6: 318
-    7: 318
+    0: 98
+    1: 54
+    2: 163
+    3: 171
+    4: 316
+    5: 316
+    6: 316
+    7: 316
     8: 66
   eventCount: 2
 ? leg000_EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel3c20XX1c20bgtwo85_L1jJ85p0ETA21_3jJ40p0ETA25
@@ -10906,14 +10950,14 @@ EF_tau25_idperf_L1cTAU20M:
     7: 9
     8: 2
   stepFeatures:
-    0: 90
-    1: 50
-    2: 50
-    3: 48
-    4: 40
-    5: 40
-    6: 40
-    7: 40
+    0: 79
+    1: 44
+    2: 44
+    3: 42
+    4: 38
+    5: 38
+    6: 38
+    7: 38
     8: 2
   eventCount: 0
 ? leg001_EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_presel3c20XX1c20bgtwo85_L1jJ85p0ETA21_3jJ40p0ETA25
@@ -11028,399 +11072,399 @@ EF_tau25_idperf_L1cTAU20M:
   eventCount: 0
 EF_tau25_mediumGNTau_tau20_mediumGNTau_03dRAB_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
   stepCounts:
+    0: 1
+    1: 1
+    2: 1
+    3: 1
+  stepFeatures:
+    0: 12
+    1: 17
+    2: 17
+    3: 17
+  eventCount: 0
+leg000_EF_tau25_mediumGNTau_tau20_mediumGNTau_03dRAB_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+    3: 1
+  stepFeatures:
+    0: 7
+    1: 7
+    2: 7
+    3: 7
+  eventCount: 0
+leg001_EF_tau25_mediumGNTau_tau20_mediumGNTau_03dRAB_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+    3: 1
+  stepFeatures:
+    0: 7
+    1: 7
+    2: 7
+    3: 7
+  eventCount: 0
+leg002_EF_tau25_mediumGNTau_tau20_mediumGNTau_03dRAB_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+    3: 1
+  stepFeatures:
+    0: 3
+    1: 3
+    2: 3
+    3: 3
+  eventCount: 0
+leg003_EF_tau25_mediumGNTau_tau20_mediumGNTau_03dRAB_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+    3: 1
+  stepFeatures:
+    0: 5
+    1: 5
+    2: 5
+    3: 5
+  eventCount: 0
+leg004_EF_tau25_mediumGNTau_tau20_mediumGNTau_03dRAB_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
+  stepCounts:
+    0: 1
+    1: 1
+    2: 1
+    3: 1
+  stepFeatures:
     0: 2
     1: 2
     2: 2
     3: 2
+  eventCount: 0
+EF_tau30_mediumGNTau_tau20_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M:
+  stepCounts:
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 21
+    0: 39
+    1: 39
+    2: 39
+    3: 39
+  eventCount: 0
+leg000_EF_tau30_mediumGNTau_tau20_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M:
+  stepCounts:
+    0: 12
+    1: 12
+    2: 12
+    3: 12
+  stepFeatures:
+    0: 29
     1: 29
     2: 29
     3: 29
   eventCount: 0
-leg000_EF_tau25_mediumGNTau_tau20_mediumGNTau_03dRAB_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
-  stepCounts:
-    0: 2
-    1: 2
-    2: 2
-    3: 2
-  stepFeatures:
-    0: 10
-    1: 10
-    2: 10
-    3: 10
-  eventCount: 0
-leg001_EF_tau25_mediumGNTau_tau20_mediumGNTau_03dRAB_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
-  stepCounts:
-    0: 2
-    1: 2
-    2: 2
-    3: 2
-  stepFeatures:
-    0: 10
-    1: 10
-    2: 10
-    3: 10
-  eventCount: 0
-leg002_EF_tau25_mediumGNTau_tau20_mediumGNTau_03dRAB_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
-  stepCounts:
-    0: 2
-    1: 2
-    2: 2
-    3: 2
-  stepFeatures:
-    0: 4
-    1: 4
-    2: 4
-    3: 4
-  eventCount: 0
-leg003_EF_tau25_mediumGNTau_tau20_mediumGNTau_03dRAB_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
-  stepCounts:
-    0: 2
-    1: 2
-    2: 2
-    3: 2
-  stepFeatures:
-    0: 11
-    1: 11
-    2: 11
-    3: 11
-  eventCount: 0
-leg004_EF_tau25_mediumGNTau_tau20_mediumGNTau_03dRAB_j70_j50a_j0_DJMASS900j50_L1jMJJ-500-NFF:
-  stepCounts:
-    0: 2
-    1: 2
-    2: 2
-    3: 2
-  stepFeatures:
-    0: 4
-    1: 4
-    2: 4
-    3: 4
-  eventCount: 0
-EF_tau30_mediumGNTau_tau20_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M:
-  stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
-  stepFeatures:
-    0: 44
-    1: 44
-    2: 44
-    3: 44
-  eventCount: 0
-leg000_EF_tau30_mediumGNTau_tau20_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M:
-  stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
-  stepFeatures:
-    0: 32
-    1: 32
-    2: 32
-    3: 32
-  eventCount: 0
 leg001_EF_tau30_mediumGNTau_tau20_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 44
-    1: 44
-    2: 44
-    3: 44
+    0: 39
+    1: 39
+    2: 39
+    3: 39
   eventCount: 0
 EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB28_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 41
-    1: 41
-    2: 41
-    3: 41
+    0: 37
+    1: 37
+    2: 37
+    3: 37
   eventCount: 0
 leg000_EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB28_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 28
-    1: 28
-    2: 28
-    3: 28
+    0: 25
+    1: 25
+    2: 25
+    3: 25
   eventCount: 0
 leg001_EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB28_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 41
-    1: 41
-    2: 41
-    3: 41
+    0: 37
+    1: 37
+    2: 37
+    3: 37
   eventCount: 0
 EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 41
-    1: 41
-    2: 41
-    3: 41
+    0: 37
+    1: 37
+    2: 37
+    3: 37
   eventCount: 0
 leg000_EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 28
-    1: 28
-    2: 28
-    3: 28
+    0: 25
+    1: 25
+    2: 25
+    3: 25
   eventCount: 0
 leg001_EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20-jJ55:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 41
-    1: 41
-    2: 41
-    3: 41
+    0: 37
+    1: 37
+    2: 37
+    3: 37
   eventCount: 0
 EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 41
-    1: 41
-    2: 41
-    3: 41
+    0: 37
+    1: 37
+    2: 37
+    3: 37
   eventCount: 0
 leg000_EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 28
-    1: 28
-    2: 28
-    3: 28
+    0: 25
+    1: 25
+    2: 25
+    3: 25
   eventCount: 0
 leg001_EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 41
-    1: 41
-    2: 41
-    3: 41
+    0: 37
+    1: 37
+    2: 37
+    3: 37
   eventCount: 0
 EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 41
-    1: 41
-    2: 41
-    3: 41
+    0: 37
+    1: 37
+    2: 37
+    3: 37
   eventCount: 0
 leg000_EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 28
-    1: 28
-    2: 28
-    3: 28
+    0: 25
+    1: 25
+    2: 25
+    3: 25
   eventCount: 0
 leg001_EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB_L1cTAU30M_2cTAU20M_4jJ30p0ETA25:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 41
-    1: 41
-    2: 41
-    3: 41
+    0: 37
+    1: 37
+    2: 37
+    3: 37
   eventCount: 0
 EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB_L1eTAU28M_2eTAU20M:
   stepCounts:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
+    0: 14
+    1: 14
+    2: 14
+    3: 14
   stepFeatures:
-    0: 57
-    1: 57
-    2: 57
-    3: 57
+    0: 51
+    1: 51
+    2: 51
+    3: 51
   eventCount: 0
 leg000_EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB_L1eTAU28M_2eTAU20M:
   stepCounts:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
+    0: 14
+    1: 14
+    2: 14
+    3: 14
   stepFeatures:
-    0: 38
-    1: 38
-    2: 38
-    3: 38
+    0: 36
+    1: 36
+    2: 36
+    3: 36
   eventCount: 0
 leg001_EF_tau35_mediumGNTau_tau25_mediumGNTau_03dRAB_L1eTAU28M_2eTAU20M:
   stepCounts:
-    0: 16
-    1: 16
-    2: 16
-    3: 16
+    0: 14
+    1: 14
+    2: 14
+    3: 14
   stepFeatures:
-    0: 57
-    1: 57
-    2: 57
-    3: 57
+    0: 51
+    1: 51
+    2: 51
+    3: 51
   eventCount: 0
 EF_tau40_mediumGNTau_tau30_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 37
-    1: 37
-    2: 37
-    3: 37
+    0: 34
+    1: 34
+    2: 34
+    3: 34
   eventCount: 0
 leg000_EF_tau40_mediumGNTau_tau30_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 26
-    1: 26
-    2: 26
-    3: 26
+    0: 24
+    1: 24
+    2: 24
+    3: 24
   eventCount: 0
 leg001_EF_tau40_mediumGNTau_tau30_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M_DR-eTAU30eTAU20:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 37
-    1: 37
-    2: 37
-    3: 37
+    0: 34
+    1: 34
+    2: 34
+    3: 34
   eventCount: 0
 EF_tau40_mediumGNTau_tau30_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 37
-    1: 37
-    2: 37
-    3: 37
+    0: 34
+    1: 34
+    2: 34
+    3: 34
   eventCount: 0
 leg000_EF_tau40_mediumGNTau_tau30_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 26
-    1: 26
-    2: 26
-    3: 26
+    0: 24
+    1: 24
+    2: 24
+    3: 24
   eventCount: 0
 leg001_EF_tau40_mediumGNTau_tau30_mediumGNTau_03dRAB30_L1cTAU30M_2cTAU20M:
   stepCounts:
-    0: 13
-    1: 13
-    2: 13
-    3: 13
+    0: 12
+    1: 12
+    2: 12
+    3: 12
   stepFeatures:
-    0: 37
-    1: 37
-    2: 37
-    3: 37
+    0: 34
+    1: 34
+    2: 34
+    3: 34
   eventCount: 0
 EF_tau40_mediumGNTau_tau35_mediumGNTau_03dRAB_L1cTAU35M_2cTAU30M_2jJ55_3jJ50:
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
-    3: 9
+    0: 8
+    1: 8
+    2: 8
+    3: 8
   stepFeatures:
-    0: 24
-    1: 24
-    2: 24
-    3: 24
+    0: 21
+    1: 21
+    2: 21
+    3: 21
   eventCount: 0
 leg000_EF_tau40_mediumGNTau_tau35_mediumGNTau_03dRAB_L1cTAU35M_2cTAU30M_2jJ55_3jJ50:
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
-    3: 9
+    0: 8
+    1: 8
+    2: 8
+    3: 8
   stepFeatures:
-    0: 22
-    1: 22
-    2: 22
-    3: 22
+    0: 20
+    1: 20
+    2: 20
+    3: 20
   eventCount: 0
 leg001_EF_tau40_mediumGNTau_tau35_mediumGNTau_03dRAB_L1cTAU35M_2cTAU30M_2jJ55_3jJ50:
   stepCounts:
-    0: 9
-    1: 9
-    2: 9
-    3: 9
+    0: 8
+    1: 8
+    2: 8
+    3: 8
   stepFeatures:
-    0: 24
-    1: 24
-    2: 24
-    3: 24
+    0: 21
+    1: 21
+    2: 21
+    3: 21
   eventCount: 0
 EF_tau50_mediumGNTau_xe80_pfopufit_xe50_cell_L1gXEJWOJ100:
   stepCounts:
@@ -11653,10 +11697,10 @@ EF_tau60_mediumGNTau_tau25_mediumGNTau_xe50_cell_03dRAB_L1eTAU60_2cTAU20M_jXE80:
     2: 4
     3: 4
   stepFeatures:
-    0: 23
-    1: 23
-    2: 23
-    3: 23
+    0: 22
+    1: 22
+    2: 22
+    3: 22
   eventCount: 0
 leg000_EF_tau60_mediumGNTau_tau25_mediumGNTau_xe50_cell_03dRAB_L1eTAU60_2cTAU20M_jXE80:
   stepCounts:
@@ -11677,10 +11721,10 @@ leg001_EF_tau60_mediumGNTau_tau25_mediumGNTau_xe50_cell_03dRAB_L1eTAU60_2cTAU20M
     2: 4
     3: 4
   stepFeatures:
-    0: 12
-    1: 12
-    2: 12
-    3: 12
+    0: 11
+    1: 11
+    2: 11
+    3: 11
   eventCount: 0
 leg002_EF_tau60_mediumGNTau_tau25_mediumGNTau_xe50_cell_03dRAB_L1eTAU60_2cTAU20M_jXE80:
   stepCounts:
@@ -11715,10 +11759,10 @@ EF_tau80_mediumGNTau_tau35_mediumGNTau_03dRAB30_L1eTAU80_2cTAU30M_DR-eTAU30eTAU2
     2: 7
     3: 7
   stepFeatures:
-    0: 24
-    1: 24
-    2: 24
-    3: 24
+    0: 23
+    1: 23
+    2: 23
+    3: 23
   eventCount: 0
 leg000_EF_tau80_mediumGNTau_tau35_mediumGNTau_03dRAB30_L1eTAU80_2cTAU30M_DR-eTAU30eTAU20:
   stepCounts:
@@ -11739,10 +11783,10 @@ leg001_EF_tau80_mediumGNTau_tau35_mediumGNTau_03dRAB30_L1eTAU80_2cTAU30M_DR-eTAU
     2: 7
     3: 7
   stepFeatures:
-    0: 15
-    1: 15
-    2: 15
-    3: 15
+    0: 14
+    1: 14
+    2: 14
+    3: 14
   eventCount: 0
 EF_tau80_mediumGNTau_tau60_mediumGNTau_03dRAB_L1eTAU80_2eTAU60:
   stepCounts:
