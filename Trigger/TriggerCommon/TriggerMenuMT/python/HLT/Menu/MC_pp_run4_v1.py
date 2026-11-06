@@ -448,7 +448,114 @@ def addMCSignatures(chains):
         ChainProp(name='EF_j0_HT940XX0eta240_pf_ftf_preselcHT450_L1HT150-jJ50s5pETA32', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
         ChainProp(name='EF_j0_HT1000XX0eta240_pf_ftf_preselcHT450_L1HT150-jJ50s5pETA32', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
         ChainProp(name='EF_j90_j90a_j0_DJMASS1000j50dphi200x400deta_L1jMJJ-500-NFF', l1SeedThresholds=['FSNOSEED']*3,stream=['VBFDelayed'],groups=PrimaryPhIGroup+MultiJetGroup),
-        ChainProp(name='EF_j100_j100a_j0_DJMASS1000j50dphi200x400deta_L1jMJJ-500-NFF', l1SeedThresholds=['FSNOSEED']*3,stream=['VBFDelayed'],groups=PrimaryPhIGroup+MultiJetGroup), 
+        ChainProp(name='EF_j100_j100a_j0_DJMASS1000j50dphi200x400deta_L1jMJJ-500-NFF', l1SeedThresholds=['FSNOSEED']*3,stream=['VBFDelayed'],groups=PrimaryPhIGroup+MultiJetGroup),
+
+        # ATR-33148
+        ## Support triggers for large-R eta intercalibration - central
+        ChainProp(name='EF_j85C_a10sd_cssk_pf_jes_ftf_preselj50_L1jJ50', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j110C_a10sd_cssk_pf_jes_ftf_preselj80_L1jJ60', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j175C_a10sd_cssk_pf_jes_ftf_preselj140_L1jJ70', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j260C_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ125', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j360C_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j400C_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j420C_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j460C_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j480C_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+
+        # NOTE with ITk we may not need the "C" selection 
+        # current reco will have |eta| < 3.2
+        ChainProp(name='EF_j85_a10sd_cssk_pf_jes_ftf_preselj50_L1jJ50', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j110_a10sd_cssk_pf_jes_ftf_preselj80_L1jJ60', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j175_a10sd_cssk_pf_jes_ftf_preselj140_L1jJ70', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j260_a10sd_cssk_pf_jes_ftf_preselj200_L1jJ125', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j360_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j400_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j420_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j480_a10sd_cssk_pf_jes_ftf_preselj225_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+
+        ## Support triggers for small-R eta intercalibration - central
+        ChainProp(name='EF_j0_perf_pf_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j15_pf_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j25_pf_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j35_pf_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j45_pf_ftf_preselj20_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j60_pf_ftf_preselj50_L1jJ50', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j85_pf_ftf_preselj50_L1jJ50', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j110_pf_ftf_preselj80_L1jJ60', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j175_pf_ftf_preselj140_L1jJ70', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j260_pf_ftf_preselj200_L1jJ125', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+
+        # with JVT/nnJvt
+        ChainProp(name='HLT_j25_nnJvtv1_pf_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='HLT_j35_nnJvtv1_pf_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='HLT_j45_nnJvtv1_pf_ftf_preselj20_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='HLT_j25_020jvt_pf_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='HLT_j35_020jvt_pf_ftf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='HLT_j45_020jvt_pf_ftf_preselj20_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+
+        ## Support triggers for small-R EMTopo eta intercalibration - central
+        ChainProp(name='EF_j0_perf_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j15_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j25_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j35_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j45_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j60_L1jJ50', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j85_L1jJ50', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j200_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+
+        ## Support triggers for small-R eta intercalibration - forward
+        ChainProp(name='EF_j15f_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j25f_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j35f_L1RD0_FILLED', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j45f_L1jJ40p30ETA49', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j60f_L1jJ50p30ETA49', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j85f_L1jJ50p30ETA49', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j110f_L1jJ60p30ETA49', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j175f_L1jJ70p30ETA49', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j280f_L1jJ125p30ETA49', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j300f_L1jJ125p30ETA49', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j230f_L1jJ125p30ETA49', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j240f_L1jJ125p30ETA49', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j260f_L1jJ125p30ETA49', l1SeedThresholds=['FSNOSEED'], groups=SupportPhIGroup+SingleJetGroup),
+
+        ## Delayed jets triggers 
+
+        # Single-Jet
+        ChainProp(name='EF_j200_2timing15_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j200_3timeSig15_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j250_2timing15_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j250_3timeSig15_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j450_2timing15_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
+        ChainProp(name='EF_j450_3timeSig15_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+SingleJetGroup),
+
+        # Multi-Jet
+        ChainProp(name='EF_2j45_2j55_3timeSig15_L14jJ40', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_2j100_2timeSig15_L1jJ70', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_j220_j150_2timing15_L1jJ160', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+MultiJetGroup),
+
+        ## Multi-jet with DIPz and nnJvt
+        # Multijet TLA triggers
+        ChainProp(name='EF_6j20c_nnJvtv1_pf_ftf_preselZ142MAXMULT10cXX5c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_6j20c_nnJvtv1_pf_ftf_preselZ182MAXMULT10cXX6c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_6j20c_nnJvtv1_pf_ftf_preselZ197MAXMULT10cXX6c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_6j20c_020jvt_pf_ftf_preselZ142MAXMULT10cXX5c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_6j20c_020jvt_pf_ftf_preselZ182MAXMULT10cXX6c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_6j20c_020jvt_pf_ftf_preselZ197MAXMULT10cXX6c20_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+
+        # Multijet with JVT and nnJvt
+        ChainProp(name='EF_6j35c_nnJvtv1_pf_ftf_presel6c25_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_6j45c_nnJvtv1_pf_ftf_presel6c25_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_6j35c_020jvt_pf_ftf_presel6c25_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_6j45c_020jvt_pf_ftf_presel6c25_L14jJ40', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+
+        ## TLA dijet and multi-jet
+        ChainProp(name='EF_j20_pf_ftf_preselj100_L1jJ70', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_j20_j20_pf_ftf_preselj100XX2j45_PhysicsTLA_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['FSNOSEED']*2, groups=PrimaryPhIGroup+MultiJetGroup, stream=["TLA"]),
+        ChainProp(name='EF_j20_pf_ftf_preselj180_L1jJ160', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_j20_pf_ftf_preselj140_L1jJ125', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_j20_pf_ftf_preselj160_L1jJ140', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+        ChainProp(name='EF_j20_pf_ftf_preselcHT450_L1HT190-jJ40s5pETA21', l1SeedThresholds=['FSNOSEED'], groups=PrimaryPhIGroup+MultiJetGroup),
+
     ]
 
     chainsMC['Bjet'] = [
@@ -812,6 +919,31 @@ def addMCSignatures(chains):
         ChainProp(name='EF_e10_lhloose_mu12_L1eEM10L_MU5VF', l1SeedThresholds=['eEM10L','MU5VF'], groups=PrimaryPhIGroup+EgammaMuonGroup),
         ChainProp(name='EF_e7_lhloose_mu20_L1MU12FCH', l1SeedThresholds=['eEM7','MU12FCH'], groups=PrimaryPhIGroup+EgammaMuonGroup),
         ChainProp(name='EF_tau25_mediumGNTau_probe_L1eTAU12_j65c_020jvt_j40c_020jvt_j25c_020jvt_j20c_020jvt_SHARED_j20c_020jvt_bgn285_pf_ftf_L1jJ85p0ETA21_3jJ40p0ETA25', l1SeedThresholds=['PROBEeTAU12']+5*['FSNOSEED'], groups=PrimaryPhIGroup+TauBJetGroup), 
+
+
+
+        ## Extra TLA-related chains
+
+        ChainProp(name='EF_g35_tight_3j25_pf_ftf_L1eEM26M', l1SeedThresholds=['eEM26M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='EF_g35_tight_noiso_3j25_pf_ftf_L1eEM26M', l1SeedThresholds=['eEM26M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='EF_g35_tight_3j25_pf_ftf_L1eEM28M', l1SeedThresholds=['eEM28M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='EF_g35_tight_noiso_3j25_pf_ftf_L1eEM28M', l1SeedThresholds=['eEM28M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+
+        ChainProp(name='EF_g40_tight_3j25_pf_ftf_L1eEM26M', l1SeedThresholds=['eEM26M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='EF_g40_tight_noiso_3j25_pf_ftf_L1eEM26M', l1SeedThresholds=['eEM26M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='EF_g40_tight_3j25_pf_ftf_L1eEM28M', l1SeedThresholds=['eEM28M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='EF_g40_tight_noiso_3j25_pf_ftf_L1eEM28M', l1SeedThresholds=['eEM28M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+
+        ChainProp(name='EF_g45_tight_3j25_pf_ftf_L1eEM26M', l1SeedThresholds=['eEM26M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='EF_g45_tight_noiso_3j25_pf_ftf_L1eEM26M', l1SeedThresholds=['eEM26M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='EF_g45_tight_3j25_pf_ftf_L1eEM28M', l1SeedThresholds=['eEM28M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='EF_g45_tight_noiso_3j25_pf_ftf_L1eEM28M', l1SeedThresholds=['eEM28M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+
+        ChainProp(name='EF_g60_tight_3j25_pf_ftf_L1eEM26M', l1SeedThresholds=['eEM26M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='EF_g60_tight_noiso_3j25_pf_ftf_L1eEM26M', l1SeedThresholds=['eEM26M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='EF_g60_tight_3j25_pf_ftf_L1eEM28M', l1SeedThresholds=['eEM28M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+        ChainProp(name='EF_g60_tight_noiso_3j25_pf_ftf_L1eEM28M', l1SeedThresholds=['eEM28M','FSNOSEED'], groups=PrimaryPhIGroup+EgammaJetGroup),
+
     ]
 
     chainsMC['Streaming'] += [

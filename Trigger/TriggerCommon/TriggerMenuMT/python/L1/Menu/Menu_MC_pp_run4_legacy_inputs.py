@@ -16,6 +16,7 @@ def defineInputsMenu():
         'eTAU140': 'eTAU120',
         'eTAU35' : 'eTAU28M',
         'jJ90' : 'jJ70',
+        'jJ90p30ETA49' : 'jJ70p30ETA49',
     }
     remapThresholds(L1MenuFlags)
 
