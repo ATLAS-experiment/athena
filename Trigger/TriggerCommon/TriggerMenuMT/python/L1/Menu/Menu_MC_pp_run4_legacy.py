@@ -38,6 +38,7 @@ def defineMenu():
     try_add("L1_eTAU120")           # Remapped from eTAU140
     try_add("L1_eTAU28M_2eTAU20M")  # Remapped from eTAU35_2eTAU20M
     try_add("L1_jJ70")              # Remapped from jJ90
+    try_add("L1_jJ70p30ETA49")              # Remapped from jJ90p30ETA49
     try_add("L1_3jJ70")             # Remapped from 3jJ90
     try_add("L1_2jJ70_jXE80")
     try_add("L1_HT150-jJ50s5pETA32")    

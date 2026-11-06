@@ -889,6 +889,7 @@ class ItemDef:
         MenuItem('L1_jJ90_UNPAIRED_NONISO'    ).setLogic( d.jJ90 & unpaired_nonisocond).setTriggerType(TT.calo)
         MenuItem('L1_jJ90_2jJ80p0ETA25_3jJ40p0ETA25').setLogic( d.jJ90 & d.jJ800ETA25.x(2) & d.jJ400ETA25.x(3) & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ90p30ETA49'  ).setLogic( d.jJ9030ETA49  & physcond).setTriggerType(TT.calo)
+        MenuItem('L1_jJ70p30ETA49'  ).setLogic( d.jJ7030ETA49  & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ125'         ).setLogic( d.jJ125        & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ125p30ETA49' ).setLogic( d.jJ12530ETA49 & physcond).setTriggerType(TT.calo)
         MenuItem('L1_jJ140'         ).setLogic( d.jJ140        & physcond).setTriggerType(TT.calo)

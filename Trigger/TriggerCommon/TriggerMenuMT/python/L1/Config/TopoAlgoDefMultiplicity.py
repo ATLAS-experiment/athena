@@ -126,7 +126,7 @@ class TopoAlgoDefMultiplicity:
         ]
         jJThresholds_2bits = [ 
             'jJ70', # prospective Run 4 L1 item, ATDAQPPES-19
-            'jJ70p0ETA23', 'jJ80', 'jJ80p0ETA25', 'jJ85p0ETA21',
+            'jJ70p0ETA23', 'jJ80', 'jJ80p0ETA25', 'jJ85p0ETA21', 'jJ70p30ETA49',
             'jJ90', 'jJ125',
             'jJ140', 'jJ160', 'jJ180', 'jJ500',
 
