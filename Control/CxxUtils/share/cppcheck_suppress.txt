@@ -8,6 +8,10 @@
 *:/cvmfs/sft-nightlies.cern.ch/lcg/*
 *:/cvmfs/sft.cern.ch/lcg/*
 
+# Do not check protobuf generated code.
+*:*.pb.h
+*:*.pb.cc
+
 # It's common to use assert with side-effects in unit tests. Don't warn about those.
 assignmentInAssert:*/test/*
 assertWithSideEffect:*/test/*
