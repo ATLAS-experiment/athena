@@ -1,5 +1,5 @@
 /*
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/TracksLoader.h"
@@ -23,18 +23,18 @@ namespace FlavorTagInference {
       BTagTrackIpAccessor aug(options.track_prefix);
       switch(config) {
         case ConstituentsSortOrder::ABS_D0_SIGNIFICANCE_DESCENDING:
-          return [aug](const Tp* tp, const Jet&) {
-            return std::abs(aug.d0(*tp) / aug.d0Uncertainty(*tp));
+          return [a = std::move(aug)](const Tp* tp, const Jet&) {
+            return std::abs(a.d0(*tp) / a.d0Uncertainty(*tp));
           };
         case ConstituentsSortOrder::D0_SIGNIFICANCE_DESCENDING:
-          return [aug](const Tp* tp, const Jet& j) {
-            return aug.getSignedIp(*tp, j).ip3d_signed_d0_significance;
+          return [a = std::move(aug)](const Tp* tp, const Jet& j) {
+            return a.getSignedIp(*tp, j).ip3d_signed_d0_significance;
           };
         case ConstituentsSortOrder::PT_DESCENDING:
           return [](const Tp* tp, const Jet&) {return tp->pt();};
         case ConstituentsSortOrder::ABS_D0_DESCENDING:
-          return [aug](const Tp* tp, const Jet&) {
-            return std::abs(aug.d0(*tp));
+          return [a = std::move(aug)](const Tp* tp, const Jet&) {
+            return std::abs(a.d0(*tp));
           };
 
         default: {
@@ -86,14 +86,14 @@ namespace FlavorTagInference {
           // <= 1 pix holes
         case ConstituentsSelection::IP3D_2018:
           return {
-            [=](const Tp* tp) {
+            [=, a = std::move(aug)](const Tp* tp) {
               // from the track selector tool
               if (std::abs(tp->eta()) > 2.5) return false;
               double n_module_shared = (pix_shared(*tp) + sct_shared(*tp) / 2);
               if (n_module_shared > 1) return false;
               if (tp->pt() <= 1e3) return false;
-              if (std::abs(aug.d0(*tp)) >= 1.0) return false;
-              if (std::abs(aug.z0SinTheta(*tp)) >= 1.5) return false;
+              if (std::abs(a.d0(*tp)) >= 1.0) return false;
+              if (std::abs(a.z0SinTheta(*tp)) >= 1.5) return false;
               if (pix_hits(*tp) + pix_dead(*tp) + sct_hits(*tp) + sct_dead(*tp) < 7) return false;
               if ((pix_holes(*tp) + sct_holes(*tp)) > 2) return false;
               if (pix_holes(*tp) > 1) return false;
@@ -108,12 +108,12 @@ namespace FlavorTagInference {
           // No cuts for si hits, si holes and pix holes - only reconstruction selection is applied
         case ConstituentsSelection::DIPS_TIGHT_UPGRADE:
           return {
-            [=](const Tp* tp) {
+            [=, a = std::move(aug)](const Tp* tp) {
               // from the track selector tool
               if (std::abs(tp->eta()) > 4.0) return false;
               if (tp->pt() <= 1e3) return false;
-              if (std::abs(aug.d0(*tp)) >= 1.0) return false;
-              if (std::abs(aug.z0SinTheta(*tp)) >= 1.5) return false;
+              if (std::abs(a.d0(*tp)) >= 1.0) return false;
+              if (std::abs(a.z0SinTheta(*tp)) >= 1.5) return false;
               return true;
             }, data_deps
           };
@@ -125,12 +125,12 @@ namespace FlavorTagInference {
           // No cuts for si hits, si holes and pix holes - only reconstruction selection is applied
         case ConstituentsSelection::DIPS_LOOSE_UPGRADE:
           return {
-            [=](const Tp* tp) {
+            [=, a = std::move(aug)](const Tp* tp) {
               // from the track selector tool
               if (std::abs(tp->eta()) > 4.0) return false;
               if (tp->pt() <= 0.5e3) return false;
-              if (std::abs(aug.d0(*tp)) >= 3.5) return false;
-              if (std::abs(aug.z0SinTheta(*tp)) >= 5.0) return false;
+              if (std::abs(a.d0(*tp)) >= 3.5) return false;
+              if (std::abs(a.z0SinTheta(*tp)) >= 5.0) return false;
               const xAOD::ParametersCovMatrix_t cov = tp->definingParametersCovMatrix();
               if (std::sqrt(cov(2, 2)) > 65504) return false;
               if (std::sqrt(cov(3, 3)) > 65504) return false;
@@ -147,14 +147,14 @@ namespace FlavorTagInference {
           // <= 1 pix holes
         case ConstituentsSelection::DIPS_LOOSE_202102:
           return {
-            [=](const Tp* tp) {
+            [=, a = std::move(aug)](const Tp* tp) {
               // from the track selector tool
               if (std::abs(tp->eta()) > 2.5) return false;
               double n_module_shared = (pix_shared(*tp) + sct_shared(*tp) / 2);
               if (n_module_shared > 1) return false;
               if (tp->pt() <= 0.5e3) return false;
-              if (std::abs(aug.d0(*tp)) >= 3.5) return false;
-              if (std::abs(aug.z0SinTheta(*tp)) >= 5.0) return false;
+              if (std::abs(a.d0(*tp)) >= 3.5) return false;
+              if (std::abs(a.z0SinTheta(*tp)) >= 5.0) return false;
               if (pix_hits(*tp) + pix_dead(*tp) + sct_hits(*tp) + sct_dead(*tp) < 7) return false;
               if ((pix_holes(*tp) + sct_holes(*tp)) > 2) return false;
               if (pix_holes(*tp) > 1) return false;
@@ -179,14 +179,14 @@ namespace FlavorTagInference {
         // https://twiki.cern.ch/twiki/bin/view/AtlasProtected/TrackingCPRecsRun2R22#Selection_Criteria
         case ConstituentsSelection::R22_DEFAULT:
           return {
-            [=](const Tp* tp) {
+            [=, a = std::move(aug)](const Tp* tp) {
               // from the track selector tool
               if (std::abs(tp->eta()) > 2.5) return false;
               double n_module_shared = (pix_shared(*tp) + sct_shared(*tp) / 2);
               if (n_module_shared > 1) return false;
               if (tp->pt() <= 0.5e3) return false;
-              if (std::abs(aug.d0(*tp)) >= 3.5) return false;
-              if (std::abs(aug.z0SinTheta(*tp)) >= 5.0) return false;
+              if (std::abs(a.d0(*tp)) >= 3.5) return false;
+              if (std::abs(a.z0SinTheta(*tp)) >= 5.0) return false;
               if (pix_hits(*tp) + pix_dead(*tp) + sct_hits(*tp) + sct_dead(*tp) < 8) return false;
               if ((pix_holes(*tp) + sct_holes(*tp)) > 2) return false;
               if (pix_holes(*tp) > 1) return false;
@@ -197,12 +197,12 @@ namespace FlavorTagInference {
         // and loosens the d0 cut
         case ConstituentsSelection::R22_LOOSE:
           return {
-            [=](const Tp* tp) {
+            [=, a = std::move(aug)](const Tp* tp) {
               // from the track selector tool
               if (std::abs(tp->eta()) > 2.5) return false;
               if (tp->pt() <= 0.5e3) return false;
-              if (std::abs(aug.d0(*tp)) >= 5.0) return false;
-              if (std::abs(aug.z0SinTheta(*tp)) >= 5.0) return false;
+              if (std::abs(a.d0(*tp)) >= 5.0) return false;
+              if (std::abs(a.z0SinTheta(*tp)) >= 5.0) return false;
               if (pix_hits(*tp) + pix_dead(*tp) + sct_hits(*tp) + sct_dead(*tp) < 8) return false;
               if ((pix_holes(*tp) + sct_holes(*tp)) > 2) return false;
               if (pix_holes(*tp) > 1) return false;
@@ -219,7 +219,7 @@ namespace FlavorTagInference {
     // start by defining the raw functions, there's a factory
     // function below to convert the configuration enums to a
     // std::function
-    Tracks negativeIpOnly(BTagTrackIpAccessor& aug, const Tracks& tracks, const xAOD::IParticle& j) 
+    Tracks negativeIpOnly(const BTagTrackIpAccessor& aug, const Tracks& tracks, const xAOD::IParticle& j) 
     {
         Tracks filtered;
         // we want to reverse the order of the tracks as part of the
@@ -309,7 +309,7 @@ namespace FlavorTagInference {
                 link_dec = options.remap_scalar.at(link_dec);
             }
             m_linkDecorator = std::make_unique<LinkDec>(link_dec);
-            m_deps.bTagOutputs.insert(link_dec);
+            m_deps.bTagOutputs.insert(std::move(link_dec));
         }
     }
 
