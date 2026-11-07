@@ -316,8 +316,18 @@ def SyncCopyToolCfg(flags, **kwargs):
     # Create an accumulator to hold the configuration.
     result = ComponentAccumulator()
 
-    # Create the tool in a simple way.
-    result.setPrivateTools(CompFactory.AthCUDA.CopyTool(**kwargs))
+    # Create the tool itself.
+    tool = CompFactory.AthCUDA.CopyTool(**kwargs)
+
+    # Put monitoring on top of it, if requested.
+    if flags.Device.Memory.Monitor:
+        monitorTool = CompFactory.AthDevice.MonitoredCopyTool(
+            'CUDASyncCopyMonitorTool', CopyTool=tool)
+        tool = monitorTool
+        pass
+
+    # Add the "final" tool to the CA.
+    result.setPrivateTools(tool)
 
     # Return the CA.
     return result
@@ -331,11 +341,19 @@ def AsyncCopyToolCfg(flags, **kwargs):
     result = ComponentAccumulator()
 
     # Create the tool. Attaching a stream tool to it.
-    copyTool = CompFactory.AthCUDA.AsyncCopyTool(**kwargs)
-    streamTool = StreamToolCfg(flags, **kwargs)
-    copyTool.StreamTool = streamTool.getPrimary()
-    result.merge(streamTool)
-    result.setPrivateTools(copyTool)
+    kwargs.setdefault("StreamTool",
+                      result.popToolsAndMerge(StreamToolCfg(flags, **kwargs)))
+    tool = CompFactory.AthCUDA.AsyncCopyTool(**kwargs)
+
+    # Put monitoring on top of it, if requested.
+    if flags.Device.Memory.Monitor:
+        monitorTool = CompFactory.AthDevice.MonitoredCopyTool(
+            'CUDAASyncCopyMonitorTool', CopyTool=tool)
+        tool = monitorTool
+        pass
+
+    # Add the "final" tool to the CA.
+    result.setPrivateTools(tool)
 
     # Return the CA.
     return result

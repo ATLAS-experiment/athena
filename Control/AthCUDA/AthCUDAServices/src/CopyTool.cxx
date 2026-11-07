@@ -12,4 +12,9 @@ std::shared_ptr<const vecmem::copy> CopyTool::copy(const EventContext&) const {
   return m_copy;
 }
 
+std::string_view CopyTool::flavor() const {
+
+  return "CUDA (Synchronous)";
+}
+
 }  // namespace AthCUDA

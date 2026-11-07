@@ -45,8 +45,12 @@ class IMemoryMonitorSvc : virtual public IService {
 
   /// Notify the service that a memory copy has been made
   virtual void memoryCopied(const std::string& component,
+                            const std::string& flavor,
                             vecmem::copy::type::copy_type type,
                             std::size_t bytes) = 0;
+  /// Notify the service that a memset operation has been made
+  virtual void memorySet(const std::string& component,
+                         const std::string& flavor, std::size_t bytes) = 0;
 
   /// @}
 

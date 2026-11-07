@@ -12,6 +12,7 @@
 
 // System include(s).
 #include <memory>
+#include <string_view>
 
 namespace AthDevice {
 
@@ -29,6 +30,9 @@ class ICopyProvider {
   ///
   virtual std::shared_ptr<const vecmem::copy> copy(
       const EventContext& ctx) const = 0;
+
+  /// Name/identifier for the copy type/flavour
+  virtual std::string_view flavor() const = 0;
 
 };  // class ICopyProvider
 

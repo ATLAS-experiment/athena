@@ -38,6 +38,9 @@ class AsyncCopyTool : public extends<AthAlgTool, AthDevice::ICopyTool> {
   virtual std::shared_ptr<const vecmem::copy> copy(
       const EventContext& ctx) const override;
 
+  /// Name/identifier for the copy type/flavour
+  virtual std::string_view flavor() const override;
+
   /// @}
 
  private:

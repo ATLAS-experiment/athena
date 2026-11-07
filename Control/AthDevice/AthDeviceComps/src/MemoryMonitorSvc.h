@@ -48,8 +48,13 @@ class MemoryMonitorSvc : public extends<AthService, IMemoryMonitorSvc> {
 
   /// Notify the service that a memory copy has been made
   virtual void memoryCopied(const std::string& component,
+                            const std::string& flavor,
                             vecmem::copy::type::copy_type type,
                             std::size_t bytes) override;
+
+  /// Notify the service that a memset operation has been made
+  virtual void memorySet(const std::string& component,
+                         const std::string& flavor, std::size_t bytes) override;
 
   /// @}
 
@@ -87,12 +92,16 @@ class MemoryMonitorSvc : public extends<AthService, IMemoryMonitorSvc> {
   struct MemoryCopyKey {
     /// Athena component making the memory copy
     std::string component;
+    /// Name/identifier for the copy type/flavour
+    std::string flavor;
     /// Type of the memory copy
     vecmem::copy::type::copy_type type;
 
     /// Comparison operator, to make the type usable as a key in a map
     bool operator<(const MemoryCopyKey& other) const {
-      if (component != other.component) {
+      if (flavor != other.flavor) {
+        return flavor < other.flavor;
+      } else if (component != other.component) {
         return component < other.component;
       } else {
         return type < other.type;
@@ -104,6 +113,28 @@ class MemoryMonitorSvc : public extends<AthService, IMemoryMonitorSvc> {
   std::map<MemoryCopyKey, std::size_t> m_copies;
   /// Mutex for @c m_copies
   std::mutex m_copiesMutex;
+
+  /// Key used in the memory set monitoring map
+  struct MemorySetKey {
+    /// Athena component making the memory copy
+    std::string component;
+    /// Name/identifier for the copy type/flavour
+    std::string flavor;
+
+    /// Comparison operator, to make the type usable as a key in a map
+    bool operator<(const MemorySetKey& other) const {
+      if (flavor != other.flavor) {
+        return flavor < other.flavor;
+      } else {
+        return component < other.component;
+      }
+    }
+  };
+
+  /// All the memory fills
+  std::map<MemorySetKey, std::size_t> m_memsets;
+  /// Mutex for @c m_memsets
+  std::mutex m_memsetsMutex;
 
   /// @}
 

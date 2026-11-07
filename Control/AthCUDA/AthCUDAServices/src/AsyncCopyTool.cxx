@@ -27,4 +27,9 @@ std::shared_ptr<const vecmem::copy> AsyncCopyTool::copy(
       m_streamTool->stream(ctx));
 }
 
+std::string_view AsyncCopyTool::flavor() const {
+
+  return "CUDA (Asynchronous)";
+}
+
 }  // namespace AthCUDA

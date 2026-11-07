@@ -15,8 +15,18 @@ def HostCopyToolCfg(flags, **kwargs):
     # Create an accumulator to hold the configuration.
     result = ComponentAccumulator()
 
-    # Create the tool in a simple way.
-    result.setPrivateTools(CompFactory.AthDevice.HostCopyTool(**kwargs))
+    # Create the tool itself.
+    tool = CompFactory.AthDevice.HostCopyTool(**kwargs)
+
+    # Put monitoring on top of it, if requested.
+    if flags.Device.Memory.Monitor:
+        monitorTool = CompFactory.AthDevice.MonitoredCopyTool(
+            'CopyMonitorTool', CopyTool=tool)
+        tool = monitorTool
+        pass
+
+    # Add the "final" tool to the CA.
+    result.setPrivateTools(tool)
 
     # Return the CA.
     return result
