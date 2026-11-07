@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "FlavorTagInference/GNN.h"
@@ -47,19 +47,17 @@ namespace FlavorTagInference {
 
   GNN::GNN(ISaltModelPtr util, const GNNOptions& o):
     m_saltModel(util),
-    m_dataLoader(util, o)
+    m_dataLoader(std::move(util), o)
   {
     // Retrieve the configuration for the model outputs.
     OutputConfig gnn_output_config = m_saltModel->getOutputConfig();
 
     // Create the output decorators.
     auto [dd, rd] = createDecorators(gnn_output_config, m_dataLoader.ftag_options);
-    m_dataLoader.data_dependency_names += dd;
+    m_dataLoader.data_dependency_names += std::move(dd);
 
     // Update dependencies and used remap from the constituents loaders.
-    for (const auto& loader : m_dataLoader.vectorVarLoaders) {
-      auto loader_name = loader.first;
-      auto constituent_loader = loader.second;
+    for (const auto& [loader_name, constituent_loader] : m_dataLoader.vectorVarLoaders) {
       m_dataLoader.data_dependency_names += constituent_loader->getDependencies();
       std::set<std::string> used_remap = constituent_loader->getUsedRemap();
       rd.merge(used_remap);
@@ -162,7 +160,7 @@ namespace FlavorTagInference {
       for (const auto& dec: m_decorators.jetVecInt) {
         const auto& floats = out_vf.at(dec.first);
         std::vector<int> ints(floats.begin(), floats.end());
-        dec.second(i_jet) = ints;
+        dec.second(i_jet) = std::move(ints);
       }
       for (size_t idx = 0; idx < m_decorators.jetVecTruncFloat.size(); ++idx) {
         const auto& dec = m_decorators.jetVecTruncFloat[idx];
@@ -174,7 +172,7 @@ namespace FlavorTagInference {
         for (size_t i = 0; i < floats.size(); ++i) {
           truncated[i] = FPCompressionUtils::truncateToFloat(floats[i] * scale, E, M);
         }
-        dec.second(i_jet) = truncated;
+        dec.second(i_jet) = std::move(truncated);
       }
 
     }

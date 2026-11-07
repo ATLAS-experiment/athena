@@ -61,9 +61,8 @@ namespace FlavorTagInference {
             salt_model_data.gnn_inputs.insert({scalarInputName, scalar_inputs});
 
             //load vector inputs.
-            for (auto loader : vectorVarLoaders) {
-                std::string input_name = loader.first;
-                Inputs input_data = loader.second->getData(*p);
+            for (const auto &[input_name, pLoader]  : vectorVarLoaders) {
+                Inputs input_data = pLoader->getData(*p);
 
                 salt_model_data.gnn_inputs.insert({input_name, input_data});
                 salt_model_data.num_inputs += input_data.first.size();

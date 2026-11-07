@@ -84,7 +84,7 @@ namespace {
     private:
       F m_getter;
     public:
-      CustomSeqGetter(F getter): m_getter(getter) {}
+      CustomSeqGetter(F getter): m_getter(std::move(getter)) {}
       
       std::vector<double>
       operator()(const xAOD::IParticle& jet, const std::vector<const Const*>& constituents) const {
@@ -147,57 +147,57 @@ namespace {
       name == "IP3D_signed_d0_significance" ||
       name == "lifetimeSignedD0Significance"
       ) {
-      return CustomSeqGetter<Tp>([a](const Tp& tp, const Jet& j){
-        return a.getSignedIp(tp, j).ip3d_signed_d0_significance;
+      return CustomSeqGetter<Tp>([b = std::move(a)](const Tp& tp, const Jet& j){
+        return b.getSignedIp(tp, j).ip3d_signed_d0_significance;
       });
     }
     if (
       name == "IP3D_signed_z0_significance" ||
       name == "lifetimeSignedZ0SinThetaSignificance"
       ) {
-      return CustomSeqGetter<Tp>([a](const Tp& tp, const Jet& j){
-        return a.getSignedIp(tp, j).ip3d_signed_z0_sin_theta_significance;
+      return CustomSeqGetter<Tp>([b = std::move(a)](const Tp& tp, const Jet& j){
+        return b.getSignedIp(tp, j).ip3d_signed_z0_sin_theta_significance;
       });
     }
     if (name == "IP2D_signed_d0") {
-      return CustomSeqGetter<Tp>([a](const Tp& tp, const Jet& j){
-        return a.getSignedIp(tp, j).ip2d_signed_d0;
+      return CustomSeqGetter<Tp>([b = std::move(a)](const Tp& tp, const Jet& j){
+        return b.getSignedIp(tp, j).ip2d_signed_d0;
       });
     }
     if (
       name == "IP3D_signed_d0" ||
       name == "lifetimeSignedD0"
       ) {
-      return CustomSeqGetter<Tp>([a](const Tp& tp, const Jet& j){
-        return a.getSignedIp(tp, j).ip3d_signed_d0;
+      return CustomSeqGetter<Tp>([b = std::move(a)](const Tp& tp, const Jet& j){
+        return b.getSignedIp(tp, j).ip3d_signed_d0;
       });
     }
     if (
       name == "IP3D_signed_z0" ||
       name == "lifetimeSignedZ0SinTheta"
       ) {
-      return CustomSeqGetter<Tp>([a](const Tp& tp, const Jet& j){
-        return a.getSignedIp(tp, j).ip3d_signed_z0_sin_theta;
+      return CustomSeqGetter<Tp>([b = std::move(a)](const Tp& tp, const Jet& j){
+        return b.getSignedIp(tp, j).ip3d_signed_z0_sin_theta;
       });
     }
     if (name == "d0" || name == "btagIp_d0") {
-      return CustomSeqGetter<Tp>([a](const Tp& tp, const Jet&){
-        return a.d0(tp);
+      return CustomSeqGetter<Tp>([b = std::move(a)](const Tp& tp, const Jet&){
+        return b.d0(tp);
       });
     }
     if (name == "z0SinTheta" || name == "btagIp_z0SinTheta") {
-      return CustomSeqGetter<Tp>([a](const Tp& tp, const Jet&){
-        return a.z0SinTheta(tp);
+      return CustomSeqGetter<Tp>([b = std::move(a)](const Tp& tp, const Jet&){
+        return b.z0SinTheta(tp);
       });
     }
     if (name == "d0Uncertainty") {
-      return CustomSeqGetter<Tp>([a](const Tp& tp, const Jet&){
-        return a.d0Uncertainty(tp);
+      return CustomSeqGetter<Tp>([b = std::move(a)](const Tp& tp, const Jet&){
+        return b.d0Uncertainty(tp);
       });
     }
     if (name == "z0SinThetaUncertainty") {
-      return CustomSeqGetter<Tp>([a](const Tp& tp, const Jet&){
-        return a.z0SinThetaUncertainty(tp);
+      return CustomSeqGetter<Tp>([b = std::move(a)](const Tp& tp, const Jet&){
+        return b.z0SinThetaUncertainty(tp);
       });
     }
     return std::nullopt;
@@ -290,7 +290,7 @@ namespace {
       return CustomSeqGetter<Tp>([sct_hits, sct_dead](const Tp& tp, const Jet&) {
         return sct_hits(tp) + sct_dead(tp);
       });
-      }
+    }
     if (name == "numberOfInnermostPixelLayerHits21p9") {
       SG::ConstAccessor<unsigned char> barrel_hits("numberOfInnermostPixelLayerHits");
       SG::ConstAccessor<unsigned char> endcap_hits("numberOfInnermostPixelLayerEndcapHits");
@@ -559,8 +559,7 @@ namespace {
     }
     auto track_getter_no_ipdep = getterFromTracksNoIpDep(name);
     if (track_getter_no_ipdep) {
-      auto f = *track_getter_no_ipdep;
-      return CustomSeqGetter<El>([f](const El& p, const Jet& j) -> double {
+      return CustomSeqGetter<El>([f = *track_getter_no_ipdep](const El& p, const Jet& j) -> double {
         return f(j, {p.trackParticle()})[0];
       });
     }
@@ -593,16 +592,14 @@ namespace {
 
     auto track_getter_no_ipdep = getterFromTracksNoIpDep(name);
     if ( track_getter_no_ipdep ) {
-      auto f = *track_getter_no_ipdep;
-      return CustomSeqGetter<Mu>([f](const Mu& p, const Jet& j) -> double {
+      return CustomSeqGetter<Mu>([f = *track_getter_no_ipdep](const Mu& p, const Jet& j) -> double {
         return f(j, {p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle)})[0];
       });
     }
     
     auto track_getter_ipdep = getterFromTracksWithIpDep(name, prefix);
     if ( track_getter_ipdep ) {
-      auto f = *track_getter_ipdep;
-      return CustomSeqGetter<Mu>([f](const Mu& p, const Jet& j) -> double {
+      return CustomSeqGetter<Mu>([f = *track_getter_ipdep](const Mu& p, const Jet& j) -> double {
         return f(j, {p.trackParticle(xAOD::Muon::InnerDetectorTrackParticle)})[0];
       });
     }
@@ -613,8 +610,7 @@ namespace {
       auto extracted_name = name.substr(0, name.size() - suffix.size());
       auto primary_track_getter = getterFromTracksNoIpDep(extracted_name);
       if ( primary_track_getter ) {
-        auto f = *primary_track_getter;
-        return CustomSeqGetter<Mu>([f](const Mu& p, const Jet& j) -> double {
+        return CustomSeqGetter<Mu>([f = *primary_track_getter](const Mu& p, const Jet& j) -> double {
           return f(j, {p.trackParticle(xAOD::Muon::Primary)})[0];
         });
       }
@@ -752,8 +748,8 @@ namespace {
     std::function<std::pair<std::string, double>(const xAOD::IParticle&)>
     namedCustomJetGetter(const std::string& name) {
       auto getter = customJetGetter(name);
-      return [name, getter](const xAOD::IParticle& j) {
-        return std::make_pair(name, getter(j));
+      return [name, g = std::move(getter)](const xAOD::IParticle& j) {
+        return std::make_pair(name, g(j));
       };
     }
 
@@ -845,7 +841,7 @@ namespace {
     SeqGetter<T>::getNamedCustomSeqGetter(const std::string& name, const std::string& prefix) {
       auto [getter, deps] = buildCustomSeqGetter<T>(name, prefix);
       return {
-        [n=name, g=getter](const xAOD::IParticle& j, const std::vector<const T*>& t) {
+        [n=name, g=std::move(getter)](const xAOD::IParticle& j, const std::vector<const T*>& t) {
           return std::make_pair(n, g(j, t));
         },
         deps
@@ -886,7 +882,7 @@ namespace {
         auto [seqGetter, seq_deps] = seqFromConsituents(input_cfg, options);
 
         if(input_cfg.flip_sign){
-          auto seqGetter_flip=[g=seqGetter](const xAOD::IParticle&jet, const Const& constituents){
+          auto seqGetter_flip=[g=std::move(seqGetter)](const xAOD::IParticle&jet, const Const& constituents){
             auto [n,v] = g(jet,constituents);
             std::for_each(v.begin(), v.end(), [](double &n){ n=-1.0*n; });
             return std::make_pair(n,v);
@@ -894,7 +890,7 @@ namespace {
           m_sequence_getters.push_back(seqGetter_flip);
         }
         else{
-          m_sequence_getters.push_back(seqGetter);
+          m_sequence_getters.push_back(std::move(seqGetter));
         }
         m_deps.merge(seq_deps);
         if (auto h = remap.extract(input_cfg.name)){
