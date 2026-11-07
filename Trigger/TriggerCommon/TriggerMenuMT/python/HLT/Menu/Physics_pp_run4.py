@@ -1,10 +1,7 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
-# Physics_pp_run4_v1.py menu for Phase-II development
-# contains some for the Run-3 (2022) primaries
-# as well as chain from the TDR studies
-# (https://gitlab.cern.ch/atlas/athena/-/blob/21.0/Trigger/TriggerCommon/TriggerMenu/python/menu/MC_PhaseII.py) 
+# Physics_pp_run4.py menu for Phase-II development
 #------------------------------------------------------------------------#
 
 # This defines the input format of the chain and it's properties with the defaults set

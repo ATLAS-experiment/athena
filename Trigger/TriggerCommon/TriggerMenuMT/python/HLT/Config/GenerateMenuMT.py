@@ -1,7 +1,6 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-from typing import Optional
-import importlib, re, string
+import importlib, string
 
 from TriggerMenuMT.HLT.Config.Utility.HLTMenuConfig import HLTMenuConfig
 
@@ -89,6 +88,7 @@ class GenerateMenuMT(metaclass=Singleton):
     """Singleton class for the Trigger Menu"""
     def __init__(self):
         self.base_menu_name: str = ''
+        self.prescale_set_name: str | None = None
 
         self.chainsInMenu = {}  # signature : [chains]
 
@@ -347,9 +347,12 @@ class GenerateMenuMT(metaclass=Singleton):
         """
         == Returns the list of chain names that are in the menu
         """
-
-        self.base_menu_name = re.match(r'\w*_v\d*', flags.Trigger.triggerMenuSetup).group(0)
+        
         log.info(f'Menu name: {flags.Trigger.triggerMenuSetup}')
+
+        # Get the base menu name (without prescale set suffix)
+        from TriggerMenuMT.HLT.Config.Utility.MenuPrescaleSet import AutoPrescaleSetGen
+        self.base_menu_name, self.prescale_set_name = AutoPrescaleSetGen.split_menu_name(flags.Trigger.triggerMenuSetup)
         log.debug('Base menu name: %s', self.base_menu_name)
         
         # Generate the list of chains from the basic menu (terminated in a version number)
@@ -585,29 +588,18 @@ class GenerateMenuMT(metaclass=Singleton):
 
         return chainConfigs 
 
-    def generatePrescales(self, flags, prescale_set: Optional[str] = '__auto__'):
+    def generatePrescales(self, flags):
         '''Add prescales for disabling items (e.g. MC production)'''
+        log.info(f'Generating automatic prescale set: {self.prescale_set_name}')
 
-        menu_name = flags.Trigger.triggerMenuSetup
-        if prescale_set == '__auto__':
-            if menu_name.endswith('_prescale'):
-                # Get the prescale set name from the Menu
-                prescale_set = menu_name.removeprefix(f'{self.base_menu_name}_').removesuffix('_prescale')
-            else:
-                prescale_set = None
-
-        if prescale_set:
+        if self.prescale_set_name is not None:
             from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import menu_prescale_set_gens
-            if prescale_set not in menu_prescale_set_gens:
-                raise RuntimeError(f'Unknown menu prescale set for menu {flags.Trigger.triggerMenuSetup}')
-
-            gen = menu_prescale_set_gens[prescale_set]
+            gen = menu_prescale_set_gens[self.prescale_set_name]
         else:
             from TriggerMenuMT.HLT.Config.Utility.MenuPrescaleSet import AutoPrescaleSetGen
             gen = AutoPrescaleSetGen()
 
         # Generate prescale set
-        log.info(f'Generating automatic prescale set: {prescale_set}')
         ps_set = gen.generate(flags, store=True)
         self.L1Prescales = ps_set.l1_prescales
         self.HLTPrescales = ps_set.hlt_prescales

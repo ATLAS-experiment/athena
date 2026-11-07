@@ -492,10 +492,10 @@ atlas_add_citest(DigReco_phaseII_DD2
 #################################################################################
 
 atlas_add_citest( TriggerMC
-   SCRIPT test_trigAna_RDOtoRDOTrig_v1Dev_Run4_build.py )
+   SCRIPT test_trigAna_RDOtoRDOTrig_Dev_Run4_build.py )
 
 atlas_add_citest( TriggerMC_Acts
-   SCRIPT test_trig_mc_v1Dev_Run4_Acts_build.py )
+   SCRIPT test_trig_mc_Dev_Run4_Acts_build.py )
 
 atlas_add_citest( TriggerMC_HI
    SCRIPT test_trig_mc_v1DevHI_build.py

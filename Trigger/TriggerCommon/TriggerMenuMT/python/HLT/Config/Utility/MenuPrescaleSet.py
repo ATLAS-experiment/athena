@@ -1,6 +1,6 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-from typing import Optional, Callable, Any
+from typing import Callable, Any
 from dataclasses import dataclass, field
 
 from AthenaCommon.Logging import logging
@@ -29,20 +29,20 @@ class AutoPrescaleSetGen:
     for data-taking), located at: https://gitlab.cern.ch/atlas-trigger-menu/TrigMenuRulebook/
     '''
 
-    enable_chains: Optional[list[str]] = None
+    enable_chains: list[str] | None = None
     disable_chains: list[str] = field(default_factory=list)
     chain_prescales: dict[str, float] = field(default_factory=dict)
 
-    enable_groups: Optional[list[str]] = None
+    enable_groups: list[str] | None = None
     disable_groups: list[str] = field(default_factory=list)
     group_prescales: dict[str, float] = field(default_factory=dict)
 
-    enable_l1_triggers: Optional[list[str]] = None
+    enable_l1_triggers: list[str] | None = None
     disable_l1_triggers: list[str] = field(default_factory=list)
     l1_trigger_prescales: dict[str, float] = field(default_factory=dict)
     disable_unused_l1_triggers: bool = False
 
-    custom_rules: Optional[Callable[[AutoPrescaleSet, dict[str, dict[str, Any]]], AutoPrescaleSet]] = None
+    custom_rules: Callable[[AutoPrescaleSet, dict[str, dict[str, Any]]], AutoPrescaleSet] | None = None
 
     def __post_init__(self):
         if self.enable_chains is not None: self.enable_chains = set(self.enable_chains)
@@ -152,3 +152,22 @@ class AutoPrescaleSetGen:
 
         return ps_set
 
+
+    @staticmethod
+    def split_menu_name(menu_name: str) -> tuple[str, str | None]:
+        '''Split a menu name into the base menu name, and the automatic prescale set name.'''
+
+        # Get the base menu name (without prescale set suffix)
+        if menu_name.endswith('_prescale'):
+            base_menu_name = menu_name.removesuffix('_prescale')
+
+            # Find which prescale is being used
+            from TriggerMenuMT.HLT.Menu.MenuPrescaleConfig import menu_prescale_set_gens
+            for prescale_set in menu_prescale_set_gens:
+                if base_menu_name.endswith(f'_{prescale_set}'):
+                    base_menu_name = base_menu_name.removesuffix(f'_{prescale_set}')
+                    return base_menu_name, prescale_set
+            else:
+                raise RuntimeError(f'Unknown menu prescale set for menu {menu_name}')
+        
+        return menu_name, None

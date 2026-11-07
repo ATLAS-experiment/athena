@@ -11,7 +11,7 @@ from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 preExec = ';'.join([
-  'flags.Trigger.triggerMenuSetup=\'Dev_pp_run4_v1_TriggerValidation_prescale\'',
+  'flags.Trigger.triggerMenuSetup=\'Dev_pp_run4_TriggerValidation_prescale\'',
   'flags.Trigger.AODEDMSet=\'AODFULL\'',
 ])
 
@@ -36,9 +36,9 @@ test.check_steps = CheckSteps.default_check_steps(test)
 
 # Add a step comparing counts against a reference
 chaindump = test.get_step("ChainDump")
-chaindump.args = '--json --yaml ref_RDOtoRDOTrig_v1Dev_Run4_build.new'
+chaindump.args = '--json --yaml ref_RDOtoRDOTrig_Dev_Run4_build.new'
 refcomp = CheckSteps.ChainCompStep("CountRefComp")
-refcomp.input_file = 'ref_RDOtoRDOTrig_v1Dev_Run4_build.new'
+refcomp.input_file = 'ref_RDOtoRDOTrig_Dev_Run4_build.new'
 refcomp.args += ' --patch'
 refcomp.reference_from_release = True # installed from TrigAnalysisTest/share
 refcomp.required = True # Final exit code depends on this step

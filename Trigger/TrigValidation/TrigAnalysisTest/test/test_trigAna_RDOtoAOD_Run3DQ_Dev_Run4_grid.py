@@ -26,7 +26,7 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, CheckSteps
 
 preExec = ';'.join([
-  'flags.Trigger.triggerMenuSetup=\'Dev_pp_run4_v1_TriggerValidation_prescale\'',
+  'flags.Trigger.triggerMenuSetup=\'Dev_pp_run4_TriggerValidation_prescale\'',
   'flags.Trigger.AODEDMSet=\'ESD\'',
 ])
 
@@ -51,7 +51,7 @@ dq.input = ''
 # very bad scaling vs number of threads, the more threads, the slower... (ATR-29610)
 dq.args = '--threads=2'
 dq.args += ' --dqOffByDefault'
-dq.args += ' Input.Files="[\'AOD.pool.root\']" DQ.Steering.doHLTMon=True Trigger.triggerMenuSetup=\'Dev_pp_run4_v1_TriggerValidation_prescale\''
+dq.args += ' Input.Files="[\'AOD.pool.root\']" DQ.Steering.doHLTMon=True Trigger.triggerMenuSetup=\'Dev_pp_run4_TriggerValidation_prescale\''
 
 test = Test.Test()
 test.art_type = 'grid'

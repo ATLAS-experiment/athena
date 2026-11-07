@@ -515,8 +515,8 @@ def main():
     )
     parser.add_argument(
         '-j','--config-json',
-        default='GlobalSimulation/L0GlobalTestMenuv1_Khoo.json',
-        help='The input json config (L0 menu prototype)'
+        default='GlobalSimulation/L0GlobalTestMenu_Khoo.json',
+        help='The input json config (L1 menu prototype)'
     )
     parser.add_argument(
         '--ignore-menu-items',

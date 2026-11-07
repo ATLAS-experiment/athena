@@ -38,7 +38,7 @@ ex.job_options = 'TriggerJobOpts/runHLT.py'
 ex.threads = 1 
 ex.input = ''
 ex.args += '--filesInput created.BS'
-ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run4_v1"', 'Trigger.doLVL1=True', 'Trigger.EDMVersion=4',
+ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run4"', 'Trigger.doLVL1=True', 'Trigger.EDMVersion=4',
             f'IOVDb.GlobalTag="{defaultConditionsTags.RUN4_MC}"',
             f'GeoModel.AtlasVersion="{geotag}"', 'GeoModel.Align.Dynamic=False',
             'Input.isMC=True',
