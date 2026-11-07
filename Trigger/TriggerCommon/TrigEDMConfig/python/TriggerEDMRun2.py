@@ -711,7 +711,6 @@ TriggerHLTList = [
     
     # particles == L2 List
     ('TrigSpacePointCounts#HLT_spacepoints',                              'BS ESD AODFULL AODSLIM', 'MinBias'), # ? do we realy need it!
-    ('TrigTrtHitCounts#HLT_TrtHitCount',                                  '',                       'MinBias'),
 
     # tracking == L2 List
    ('TrigInDetTrackCollection#HLT',                                      'BS ESD',                  'ID'),      # category?
@@ -954,7 +953,6 @@ EDMDetails[ "TrigRoiDescriptor" ]         = {'persistent':"TrigRoiDescriptorColl
 EDMDetails[ "TrigInDetTrackCollection" ]  = {'persistent':"TrigInDetTrackCollection_tlp2",        'typealias':'InDetTrk' }
 
 EDMDetails[ "TrigSpacePointCounts" ]      = {'persistent':"TrigSpacePointCountsCollection_p4",  'typealias':'AOD', 'collection':'TrigSpacePointCountsCollection'}
-EDMDetails[ "TrigTrtHitCounts" ]          = {'persistent':"TrigTrtHitCountsCollection_p2",      'typealias':'AOD', 'collection':'TrigTrtHitCountsCollection'}
 EDMDetails[ "TrigVertexCollection" ]      = {'persistent':"TrigVertexCollection_tlp1",            'typealias':'AOD'}
 
 EDMDetails[ "TrigTrackCounts" ]           = {'persistent':"TrigTrackCountsCollection_tlp1",       'typealias':'TrkCount', 'collection':'TrigTrackCountsCollection'}

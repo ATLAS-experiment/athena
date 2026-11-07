@@ -18,7 +18,7 @@ atlas_add_library( TrigInDetEvent
 atlas_generate_cliddb( TrigInDetEvent )
 
 atlas_add_sercnv_library( TrigInDetEventSerCnv
-                          FILES TrigInDetEvent/TrigInDetTrack.h TrigInDetEvent/TrigInDetTrackCollection.h TrigInDetEvent/TrigInDetTrackFitPar.h TrigInDetEvent/TrigVertex.h TrigInDetEvent/TrigVertexCollection.h TrigInDetEvent/TrigTrackCounts.h TrigInDetEvent/TrigTrackCountsCollection.h TrigInDetEvent/TrigVertexCounts.h TrigInDetEvent/TrigVertexCountsCollection.h TrigInDetEvent/TrigHisto1D.h TrigInDetEvent/TrigHisto2D.h TrigInDetEvent/TrigSpacePointCounts.h TrigInDetEvent/TrigSpacePointCountsCollection.h TrigInDetEvent/TrigTrtHitCounts.h TrigInDetEvent/TrigTrtHitCountsCollection.h TrkTrack/TrackCollection.h TrkTrack/TrackExtensionMap.h VxVertex/VxContainer.h TrkSegment/SegmentCollection.h Particle/TrackParticleContainer.h
+                          FILES TrigInDetEvent/TrigInDetTrack.h TrigInDetEvent/TrigInDetTrackCollection.h TrigInDetEvent/TrigInDetTrackFitPar.h TrigInDetEvent/TrigVertex.h TrigInDetEvent/TrigVertexCollection.h TrigInDetEvent/TrigTrackCounts.h TrigInDetEvent/TrigTrackCountsCollection.h TrigInDetEvent/TrigVertexCounts.h TrigInDetEvent/TrigVertexCountsCollection.h TrigInDetEvent/TrigHisto1D.h TrigInDetEvent/TrigHisto2D.h TrigInDetEvent/TrigSpacePointCounts.h TrigInDetEvent/TrigSpacePointCountsCollection.h TrkTrack/TrackCollection.h TrkTrack/TrackExtensionMap.h VxVertex/VxContainer.h TrkSegment/SegmentCollection.h Particle/TrackParticleContainer.h
                           TYPES_WITH_NAMESPACE Rec::TrackParticleContainer Trk::SegmentCollection
                           LINK_LIBRARIES TrigInDetEvent TrigSerializeCnvSvcLib )
 
@@ -31,5 +31,5 @@ atlas_add_dictionary( TrigInDetEventDict
                       TrigInDetEvent/TrigInDetEventDict.h
                       TrigInDetEvent/selection.xml
                       LINK_LIBRARIES TrigInDetEvent
-                      DATA_LINKS TrigTrackCounts TrigVertexCounts TrigSpacePointCounts TrigTrtHitCounts TrigVertexCollection
+                      DATA_LINKS TrigTrackCounts TrigVertexCounts TrigSpacePointCounts TrigVertexCollection
                       ELEMENT_LINKS TrigInDetTrackCollection )

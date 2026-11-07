@@ -37,13 +37,6 @@
 #include "TrigInDetEventTPCnv/TrigSpacePointCountsCollection_p1.h"
 #include "TrigInDetEventTPCnv/TrigSpacePointCountsCollection_tlp1.h"
 
-#include "TrigInDetEventTPCnv/TrigTrtHitCounts_p1.h"
-#include "TrigInDetEventTPCnv/TrigTrtHitCountsCollection_p1.h"
-#include "TrigInDetEventTPCnv/TrigTrtHitCountsCollection_tlp1.h"
-
-#include "TrigInDetEventTPCnv/TrigTrtHitCounts_p2.h"
-#include "TrigInDetEventTPCnv/TrigTrtHitCountsCollection_p2.h"
-
 #include "TrigInDetEventTPCnv/TrigTrackCounts_p1.h"   
 #include "TrigInDetEventTPCnv/TrigTrackCounts_p2.h"
 #include "TrigInDetEventTPCnv/TrigTrackCountsCollection_p1.h"    
@@ -78,8 +71,6 @@ struct dummy_TrigInDetEventTPCnvDict
   std::vector<TrigSpacePointCounts_p2>        m_dummySpacePointCounts_p2;
   std::vector<TrigSpacePointCounts_p3>        m_dummySpacePointCounts_p3;
   std::vector<TrigSpacePointCounts_p4>        m_dummySpacePointCounts_p4;
-  std::vector<TrigTrtHitCounts_p1>            m_dummyTrtHitCounts_p1;
-  std::vector<TrigTrtHitCounts_p2>            m_dummyTrtHitCounts_p2;
   std::vector<TrigTrackCounts_p1>             m_dummyTrackCounts_p1;
   std::vector<TrigTrackCounts_p2>             m_dummyTrackCounts_p2;
   std::vector<TrigVertexCounts_p1>            m_dummyVertexCounts_p1;

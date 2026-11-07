@@ -52,18 +52,6 @@
 #include "TrigInDetEventTPCnv/TrigSpacePointCountsCnv_p2.h"
 #include "TrigInDetEventTPCnv/TrigSpacePointCountsCnv_p4.h"
 
-#include "TrigInDetEventTPCnv/TrigTrtHitCounts_p1.h"
-#include "TrigInDetEventTPCnv/TrigTrtHitCountsCollection_p1.h"
-#include "TrigInDetEventTPCnv/TrigTrtHitCountsCollectionCnv_p1.h"
-#include "TrigInDetEventTPCnv/TrigTrtHitCountsCollection_tlp1.h"
-#include "TrigInDetEventTPCnv/TrigTrtHitCountsCollectionCnv_tlp1.h"
-#include "TrigInDetEventTPCnv/TrigTrtHitCountsCnv_p1.h" 
-
-#include "TrigInDetEventTPCnv/TrigTrtHitCountsCnv_p2.h" 
-#include "TrigInDetEventTPCnv/TrigTrtHitCounts_p2.h"
-#include "TrigInDetEventTPCnv/TrigTrtHitCountsCollection_p2.h"
-#include "TrigInDetEventTPCnv/TrigTrtHitCountsCollectionCnv_p2.h"
-
 #include "TrigInDetEventTPCnv/TrigTrackCounts_p1.h"   
 #include "TrigInDetEventTPCnv/TrigTrackCounts_p2.h"
 #include "TrigInDetEventTPCnv/TrigTrackCountsCollection_p1.h"    
@@ -186,26 +174,6 @@ DECLARE_TPCNV_FACTORY(TrigVertexCountsCollectionCnv_tlp1,
                       TrigVertexCountsCollection_tlp1,
                       Athena::TPCnvVers::Current)
  
-DECLARE_TPCNV_FACTORY(TrigTrtHitCountsCnv_p1,
-                      TrigTrtHitCounts,
-                      TrigTrtHitCounts_p1,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigTrtHitCountsCollectionCnv_p1,
-                      TrigTrtHitCountsCollection,
-                      TrigTrtHitCountsCollection_p1,
-                      Athena::TPCnvVers::Old)
-                      
-DECLARE_TPCNV_FACTORY(TrigTrtHitCountsCollectionCnv_tlp1,
-                      TrigTrtHitCountsCollection,
-                      TrigTrtHitCountsCollection_tlp1,
-                      Athena::TPCnvVers::Old)
-                      
-DECLARE_TPCNV_FACTORY(TrigTrtHitCountsCollectionCnv_p2,
-                      TrigTrtHitCountsCollection,
-                      TrigTrtHitCountsCollection_p2,
-                      Athena::TPCnvVers::Current)
-                      
 DECLARE_TPCNV_FACTORY(TrigVertexCollectionCnv_tlp1,
                       TrigVertexCollection,
                       TrigVertexCollection_tlp1,

@@ -71,7 +71,6 @@ StatusCode TrigSerializeConvHelper::initialize(){
   m_oldEDMmap[ "TrigPhotonContainer" ]       = "TrigPhotonContainer_tlp2";
   m_oldEDMmap[ "TrigMissingET" ]             = "TrigMissingETContainer_tlp1";
   m_oldEDMmap[ "TrigSpacePointCounts" ]      = "TrigSpacePointCountsCollection_tlp1";
-  m_oldEDMmap[ "TrigTrtHitCounts" ]          = "TrigTrtHitCountsCollection_tlp1";
   m_oldEDMmap[ "CosmicMuonCollection" ]      = "CosmicMuonCollection_tlp1";
   m_oldEDMmap[ "MdtTrackSegmentCollection" ] = "MdtTrackSegmentCollection_tlp1";
   m_oldEDMmap[ "TrigVertexCollection" ]      = "TrigVertexCollection_tlp1";

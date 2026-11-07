@@ -16,8 +16,6 @@
 #include "TrigInDetEvent/TrigHisto2DContainer.h"
 #include "TrigInDetEvent/TrigSpacePointCounts.h"
 #include "TrigInDetEvent/TrigSpacePointCountsCollection.h"
-#include "TrigInDetEvent/TrigTrtHitCounts.h"
-#include "TrigInDetEvent/TrigTrtHitCountsCollection.h"
 #include "TrigInDetEvent/TrigTrackCounts.h"
 #include "TrigInDetEvent/TrigTrackCountsCollection.h"
 #include "TrigInDetEvent/TrigVertexCounts.h"
@@ -32,8 +30,6 @@ void dummyTriggerForTVCollTypedef(TrigVertexCollection a,
 				  DataVector<TrigSpacePointCountsCollection> f,
 				  DataVector<TrigTrackCounts> g,
 				  DataVector<TrigTrackCountsCollection> h,
-				  DataVector<TrigTrtHitCounts> k,
-				  DataVector<TrigTrtHitCountsCollection> l,
                                   DataVector<TrigHisto1D> m,
                                   DataVector<TrigHisto1DContainer> n,
                                   DataVector<TrigHisto2D> o,
@@ -48,8 +44,6 @@ void dummyTriggerForTVCollTypedef(TrigVertexCollection a,
   DataVector<TrigSpacePointCountsCollection> ff = f;
   DataVector<TrigTrackCounts> gg = g;
   DataVector<TrigTrackCountsCollection> hh = h;
-  DataVector<TrigTrtHitCounts> kk = k;
-  DataVector<TrigTrtHitCountsCollection> ll = l;
   DataVector<TrigHisto1D> mm = m; 
   DataVector<TrigHisto1DContainer> nn = n;
   DataVector<TrigHisto2D> oo = o;                                          
