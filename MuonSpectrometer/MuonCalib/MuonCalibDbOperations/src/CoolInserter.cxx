@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // this
@@ -29,9 +29,9 @@
 // c - c++
 #include <typeinfo>
 
-#include "exception"
-#include "iostream"
-#include "sstream"
+#include <exception>
+#include <iostream>
+#include <sstream>
 #include "zlib.h"
 
 namespace MuonCalib {
@@ -233,7 +233,11 @@ namespace MuonCalib {
                     blob.resize(dest_len);
                     Bytef *p = static_cast<Bytef *>(blob.startingAddress());
 
-                    compress(p, &dest_len, reinterpret_cast<const Bytef *>(m_data_string.str().c_str()), m_data_string.str().size());
+                    int rc = compress(p, &dest_len, reinterpret_cast<const Bytef *>(m_data_string.str().c_str()), m_data_string.str().size());
+                    if (rc != Z_OK){
+                      ATH_MSG_FATAL("Compression failed");
+                      return false;
+                    }
                     blob.resize(dest_len);
                 } else {
                     it.second["data"].data<cool::String16M>() = m_data_string.str();
@@ -302,7 +306,11 @@ namespace MuonCalib {
                     blob.resize(dest_len);
                     Bytef *p = static_cast<Bytef *>(blob.startingAddress());
 
-                    compress(p, &dest_len, reinterpret_cast<const Bytef *>(data_column.str().c_str()), data_column.str().size());
+                    int rc = compress(p, &dest_len, reinterpret_cast<const Bytef *>(data_column.str().c_str()), data_column.str().size());
+                    if (rc != Z_OK){
+                      ATH_MSG_FATAL("Compression failed");
+                      return false;
+                    }
                     blob.resize(dest_len);
                 } else {
                     it.second["data"].data<cool::String16M>() = data_column.str();
