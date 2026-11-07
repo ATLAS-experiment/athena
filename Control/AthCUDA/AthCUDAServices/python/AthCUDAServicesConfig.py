@@ -27,7 +27,11 @@ def HostMemoryResourceToolCfg(flags, **kwargs):
 
     # Create the components that would collaborate to provide thread-safe
     # caching to the "bare" memory resource.
-    tool = CompFactory.AthCUDA.HostMemoryResourceTool(**kwargs)
+    if flags.Device.Memory.PinnedHost:
+        tool = CompFactory.AthCUDA.HostMemoryResourceTool(**kwargs)
+    else:
+        tool = CompFactory.AthDevice.HostMemoryResourceTool(**kwargs)
+        pass
     if flags.Device.Memory.Monitor:
         monitorTool = CompFactory.AthDevice.MonitoredMemoryResourceTool(
             'CUDAHostMemoryResourceMonitorTool',

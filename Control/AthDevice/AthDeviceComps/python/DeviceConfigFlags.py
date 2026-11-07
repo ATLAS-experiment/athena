@@ -42,6 +42,8 @@ def createDeviceConfigFlags():
                    help='Whether or not to use "shared" memory for device '
                         'allocations. In case it is set to False, a separate '
                         'host and device memory resource is to be used.')
+    result.addFlag('Device.Memory.PinnedHost', True,
+                   help='Whether or not to use pinned host memory.')
 
     # Memory copy management flag(s).
     result.addFlag('Device.Copy.Async', True,

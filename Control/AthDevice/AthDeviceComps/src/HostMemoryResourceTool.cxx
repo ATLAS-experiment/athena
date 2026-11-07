@@ -18,7 +18,7 @@ std::pmr::memory_resource& HostMemoryResourceTool::mr() const {
 
 std::string_view HostMemoryResourceTool::deviceName() const {
 
-  return "(Unpinned) Host";
+  return "(Unpinned) Host Memory";
 }
 
 }  // namespace AthDevice
