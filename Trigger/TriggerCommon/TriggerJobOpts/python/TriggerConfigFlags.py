@@ -421,7 +421,7 @@ def createTriggerFlags(doTriggerRecoFlags):
     flags.addFlag('Trigger.crestServer', lambda prevFlags: prevFlags.IOVDb.DBConnection,
                   help='CREST server to access trigger configuration')
 
-    flags.addFlag('Trigger.triggerMenuSetup', lambda flags: 'MC_pp_run3_v1_BulkMCProd_prescale' if flags.GeoModel.Run is LHCPeriod.Run3 else 'MC_pp_run4_v1_BulkMCProd_prescale',
+    flags.addFlag('Trigger.triggerMenuSetup', lambda flags: 'MC_pp_run3_v1_BulkMCProd_prescale' if flags.GeoModel.Run is LHCPeriod.Run3 else 'MC_pp_run4_BulkMCProd_prescale',
                   help='name of the trigger menu')
 
     flags.addFlag('Trigger.generateMenuDiagnostics', False,

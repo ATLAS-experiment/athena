@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-
-# art-description: Trigger RDO->RDO_TRIG athena CaloGPU for Run4 with ttbar mu=200
+#
+# art-description: Test of transform RDO->RDO_TRIG->AOD with threads=8 and Acts tracking (C230)
 # art-type: grid
-# art-include: main/Athena
+# art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-input: group.trig-hlt.mc23_valid.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8586_s4680_r17821
-# art-input-nfiles: 2
+# art-input-nfiles: 1
 # art-athena-mt: 8
-# art-architecture: '#&nvidia'
+# art-memory: 3072
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
@@ -16,33 +16,24 @@
 # art-output: *.log.tar.gz
 # art-output: *.new
 # art-output: *.json
-# art-output: expert-monitoring.root
-# art-output: rootcomp.root
+# art-output: *.root
 # art-output: *.pmon.gz
 # art-output: *perfmon*
 # art-output: prmon*
 # art-output: *.check*
 
-from TriggerTest.MCExecStep import MCGridStep
 from TrigValTools.TrigValSteering import Test, CheckSteps
-from AthenaConfiguration.TestDefaults import defaultConditionsTags
+from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 
-ex = MCGridStep(
-    menu='MC_pp_run4_v1',
-    global_tag=defaultConditionsTags.RUN4_MC,
-    mc_campaign='Campaigns.MC23PhaseIIPileUp200'
-)
-
-ex.input = 'ttbar_pu200_Run4'
-
-ex.flags += [ 'CaloRecGPU.GlobalFlags.UseCaloRecGPU=True',
-              'ITk.doTruth=False',
-              'Tracking.doTruth=False']
+EFTrackPipeline = "C230"
+from TrigAnalysisTest.test_trigAna_RDOtoAOD_Dev_Run4_Acts_Common import prepare_acts_rdo2aod
+rdo2aod = prepare_acts_rdo2aod(EFTrackPipeline)
 
 test = Test.Test()
 test.art_type = 'grid'
-test.exec_steps = [ex]
+test.exec_steps = [rdo2aod]
 test.check_steps = CheckSteps.default_check_steps(test)
+add_analysis_steps(test)
 
 import sys
 sys.exit(test.run())

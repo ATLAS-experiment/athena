@@ -8,8 +8,8 @@ def setup(flags):
     flags.DQ.doMonitoring = False
     flags.IOVDb.GlobalTag = "OFLCOND-MC23-SDR-RUN3-11-02"
 
-#jsonpath = find_file_in_path("L0GlobalTestMenuv1_Khoo.json", 'DATAPATH')
-jsonpath = find_file_in_path("GlobalSimulation/L0GlobalTestMenuv1_TrigGepPerf.json", 'DATAPATH')
+#jsonpath = find_file_in_path("L0GlobalTestMenu_Khoo.json", 'DATAPATH')
+jsonpath = find_file_in_path("GlobalSimulation/L0GlobalTestMenu_TrigGepPerf.json", 'DATAPATH')
 
 force_TOBs = [
     'OfflineCellsTower',

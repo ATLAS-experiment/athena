@@ -14,7 +14,7 @@ the HLT_<menu> tests, not here.
 
 from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from TriggerMenuMT.HLT.Config.Utility.DictFromChainName import dictFromChainName
-from TriggerMenuMT.HLT.Menu.Physics_pp_run4_v1 import MultiJetGroup
+from TriggerMenuMT.HLT.Menu.Physics_pp_run4 import MultiJetGroup
 from TriggerMenuMT.HLT.Jet.JetPresel import (
     caloPreselJetHypoToolFromDict,
     roiPreselJetHypoToolFromDict,

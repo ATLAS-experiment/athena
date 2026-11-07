@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
-#
-# art-description: Test of transform RDO->RDO_TRIG->AOD with threads=8 and Acts tracking (C230)
+
+# art-description: Trigger RDO->RDO_TRIG athena for Run4 with ttbar mu=200
 # art-type: grid
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # art-input: group.trig-hlt.mc23_valid.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.recon.RDO.e8514_e8586_s4680_r17821
 # art-input-nfiles: 1
 # art-athena-mt: 8
-# art-memory: 3072
 # art-output: *.txt
 # art-output: *.log
 # art-output: log.*
@@ -22,18 +21,26 @@
 # art-output: prmon*
 # art-output: *.check*
 
+from TriggerTest.MCExecStep import MCGridStep
 from TrigValTools.TrigValSteering import Test, CheckSteps
-from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
+from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
-EFTrackPipeline = "C230"
-from TrigAnalysisTest.test_trigAna_RDOtoAOD_v1Dev_Run4_Acts_Common import prepare_acts_rdo2aod
-rdo2aod = prepare_acts_rdo2aod(EFTrackPipeline)
+ex = MCGridStep(
+    menu='MC_pp_run4',
+    global_tag=defaultConditionsTags.RUN4_MC,
+    mc_campaign='Campaigns.MC23PhaseIIPileUp200'
+)
+ex.input = 'ttbar_pu200_Run4'
+
+ex.flags += [
+    'ITk.doTruth=False',
+    'Tracking.doTruth=False',
+]
 
 test = Test.Test()
 test.art_type = 'grid'
-test.exec_steps = [rdo2aod]
+test.exec_steps = [ex]
 test.check_steps = CheckSteps.default_check_steps(test)
-add_analysis_steps(test)
 
 import sys
 sys.exit(test.run())

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Test of HLT reproc workflow, runs athenaEF with Dev_pp_run4_v1 menu followed by offline reco and monitoring (incl. EDM)
+# art-description: Test of HLT reproc workflow, runs athenaEF with Dev_pp_run4 menu followed by offline reco and monitoring (incl. EDM)
 # art-type: build
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 
@@ -10,7 +10,7 @@ from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 # Specify trigger menu once here:
-triggermenu = 'Dev_pp_run4_v1_HLTReprocessing_prescale'
+triggermenu = 'Dev_pp_run4_HLTReprocessing_prescale'
 
 # HLT BS_RDO->RAW
 hlt = ExecStep.ExecStep('BSRDOtoRAW')

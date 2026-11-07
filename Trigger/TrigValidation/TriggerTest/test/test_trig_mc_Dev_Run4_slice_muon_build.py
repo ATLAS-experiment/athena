@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
-# art-description: Trigger test for phase-II muon SW in Dev_pp_run4_v1 menu
+# art-description: Trigger test for phase-II muon SW in Dev_pp_run4 menu
 # art-type: build
 # art-include: main/Athena/x86_64-el9-gcc15-opt
 # Skipping art-output which has no effect for build tests.
@@ -15,7 +15,7 @@ from TrigValTools.TrigValSteering import Test, CheckSteps
 from MuonGeoModelTestR4.testGeoModel import MuonPhaseIITestDefaults
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
-ex = MCBuildStep(menu='Dev_pp_run4_v1', signatures=['Muon'], global_tag=defaultConditionsTags.RUN4_MC, mc_campaign='Campaigns.MC23PhaseIIPileUp200')
+ex = MCBuildStep(menu='Dev_pp_run4', signatures=['Muon'], global_tag=defaultConditionsTags.RUN4_MC, mc_campaign='Campaigns.MC23PhaseIIPileUp200')
 
 ex.input = f'{MuonPhaseIITestDefaults.RDO_R4[0]}'
 

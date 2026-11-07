@@ -1,7 +1,7 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
-# MC_pp_run4_v1.py menu for Phase-II developments 
+# MC_pp_run4.py menu for Phase-II developments 
 #------------------------------------------------------------------------#
 
 # This defines the input format of the chain and its properties with the defaults set
@@ -11,8 +11,8 @@
 from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp 
 from .SignatureDicts import ChainStore
 
-import TriggerMenuMT.HLT.Menu.Physics_pp_run4_v1 as physics_menu 
-from TriggerMenuMT.HLT.Menu.Physics_pp_run4_v1 import ( 
+import TriggerMenuMT.HLT.Menu.Physics_pp_run4 as physics_menu 
+from TriggerMenuMT.HLT.Menu.Physics_pp_run4 import ( 
     #PhysicsStream,
     #ExpressStream,
     SingleMuonGroup,

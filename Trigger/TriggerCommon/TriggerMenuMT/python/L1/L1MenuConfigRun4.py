@@ -127,12 +127,9 @@ class L1MenuConfigRun4:
         """Resolve the menu name to the actual menu to be used based from the mapping above.
         """
 
-        # remove prescale suffix
-        menuBaseName = fullMenuName
-        if fullMenuName.endswith('prescale'):
-            # take everything upto _vXX
-            if (m := re.match(r'\w*_v\d*', fullMenuName)) is not None:
-                menuBaseName = m.group(0)
+        from TriggerMenuMT.HLT.Config.Utility.MenuPrescaleSet import AutoPrescaleSetGen
+        menuBaseName, _ = AutoPrescaleSetGen.split_menu_name(fullMenuName)
+        log.info(f'Base menu name {menuBaseName} extracted from {fullMenuName}')
 
         if (menuInfo := menuMap.get(menuBaseName)) is not None:
             menuFile, menuInputFile, _ = (menuInfo + ["", ""])[:3]

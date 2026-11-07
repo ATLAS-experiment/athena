@@ -230,13 +230,12 @@ class L1MenuConfig(object):
             return None
 
     def _menuToLoad(self, silent=False):
-        """ resolve the menu name to the menu files to load"""
-        menuToLoadReq = self.menuFullName
-        # Extract the menu name, independent of menu prescale sets
-        if menuToLoadReq.endswith('prescale'):
-            if (m:=re.match(r'\w*_v\d*',self.menuFullName)) is not None:
-                menuToLoadReq = m.group(0)
-            log.info(f'Base menu name {menuToLoadReq} extracted from {self.menuFullName}')
+        """Get the L1 menu files to load from the full Menu name"""
+
+        from TriggerMenuMT.HLT.Config.Utility.MenuPrescaleSet import AutoPrescaleSetGen
+        menuToLoadReq, _ = AutoPrescaleSetGen.split_menu_name(self.menuFullName)
+        log.info(f'Base menu name {menuToLoadReq} extracted from {self.menuFullName}')
+
         from .Menu.MenuMapping import menuMap
         if menuToLoadReq in menuMap:
             menuToLoad = menuMap[menuToLoadReq]

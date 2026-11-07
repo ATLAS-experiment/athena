@@ -9,7 +9,7 @@ def setup(flags):
     flags.DQ.doMonitoring=False
     flags.Trigger.enableL1CaloPhase1=False
 
-jsonpath = find_file_in_path("GlobalSimulation/L0GlobalTestMenuv1_Khoo.json", 'DATAPATH')
+jsonpath = find_file_in_path("GlobalSimulation/L0GlobalTestMenu_Khoo.json", 'DATAPATH')
 
 # List entries below are intentionally commented as examples for running code
 # that I do not want tested in the CI at present.

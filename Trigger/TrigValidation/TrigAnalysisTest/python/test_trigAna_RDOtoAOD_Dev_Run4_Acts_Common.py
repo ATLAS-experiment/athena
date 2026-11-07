@@ -5,7 +5,7 @@ from AthenaConfiguration.TestDefaults import defaultConditionsTags
 
 def prepare_acts_rdo2aod(pipeline : str):
     _args = [
-        'flags.Trigger.triggerMenuSetup=\'MC_pp_run4_v1\'',
+        'flags.Trigger.triggerMenuSetup=\'MC_pp_run4\'',
         'flags.Trigger.AODEDMSet=\'AODFULL\'',
         'flags.Tracking.doPixelDigitalClustering=True',
         'from TrkConfig.TrkConfigFlags import TrackingComponent',

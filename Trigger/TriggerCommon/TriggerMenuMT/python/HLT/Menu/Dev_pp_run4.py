@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #------------------------------------------------------------------------#
-# Dev_pp_run4_v1.py menu for Phase-II developments 
+# Dev_pp_run4.py menu for Phase-II developments 
 #------------------------------------------------------------------------#
 
 # This defines the input format of the chain and its properties with the defaults set
@@ -12,9 +12,9 @@
 from TriggerMenuMT.HLT.Config.Utility.ChainDefInMenu import ChainProp
 from .SignatureDicts import ChainStore
 
-import TriggerMenuMT.HLT.Menu.MC_pp_run4_v1 as mc_menu
+import TriggerMenuMT.HLT.Menu.MC_pp_run4 as mc_menu
 
-from .Physics_pp_run4_v1 import ( SingleTauGroup,
+from .Physics_pp_run4 import ( SingleTauGroup,
                                   SupportPhIGroup,
                                   MultiJetGroup,
                                   MultiBjetGroup,
