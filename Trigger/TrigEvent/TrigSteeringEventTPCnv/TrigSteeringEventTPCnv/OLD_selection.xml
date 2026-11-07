@@ -34,11 +34,4 @@
 <!-- TrigPassBitsCollection -->
    <class name="TrigPassFlagsCollection_p1" id="7DE670AF-A256-4E8E-BC44-1CA30810F294"/>
 
-
-<!-- TrigOperationalInfo -->
-  <class name="TrigOperationalInfoCollection_tlp1" id="7D5A0227-E28B-4228-83C5-22F8BBB90BBF"/>
-  <class name="TrigOperationalInfoCollection_p1"   id="B6C95F89-C1B9-4B9D-A533-F6F4B57BD277"/>
-  <class name="TrigOperationalInfo_p1"             id="765F0281-801B-4F5C-8C4C-5BE7E7DB5E42"/>
-  <class name="std::vector<TrigOperationalInfo_p1>"/>
-  <class name="std::vector<TrigOperationalInfoCollection_p1>"/>
 </lcgdict>

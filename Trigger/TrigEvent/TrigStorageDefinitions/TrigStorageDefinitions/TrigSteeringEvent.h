@@ -37,7 +37,6 @@ HLT_BEGIN_TYPE_REGISTRATION
   HLT_REGISTER_TYPE(class TrigPassBits,class TrigPassBits,class  TrigPassBitsCollection)
   HLT_REGISTER_TYPE(class TrigPassFlags,class TrigPassFlags,class  TrigPassFlagsCollection)
   HLT_REGISTER_TYPE(class TrigRoiDescriptor,class TrigRoiDescriptorCollection,class TrigRoiDescriptorCollection)
-  HLT_REGISTER_TYPE(class TrigOperationalInfo,class TrigOperationalInfo,class  TrigOperationalInfoCollection)
   HLT_REGISTER_TYPE(LVL1::RecJetRoI ,LVL1::RecJetRoI, DataVector<LVL1::RecJetRoI>)
   HLT_REGISTER_TYPE(LVL1::RecJetEtRoI,LVL1::RecJetEtRoI, DataVector<LVL1::RecJetEtRoI>)
   HLT_REGISTER_TYPE(LVL1::RecEmTauRoI, LVL1::RecEmTauRoI, DataVector<LVL1::RecEmTauRoI>)

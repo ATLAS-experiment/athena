@@ -27,16 +27,6 @@
 #include "TrigSteeringEventTPCnv/TrigRoiDescriptor_p3.h"
 #include "TrigSteeringEventTPCnv/TrigRoiDescriptorCnv_p3.h"
 
-
-#include "TrigSteeringEventTPCnv/TrigOperationalInfoCollection_tlp1.h"
-#include "TrigSteeringEventTPCnv/TrigOperationalInfoCollectionCnv_tlp1.h"
-#include "TrigSteeringEventTPCnv/TrigOperationalInfoCollection_p1.h"
-#include "TrigSteeringEventTPCnv/TrigOperationalInfo_p1.h"
-
-//#include "TrigSteeringEventTPCnv/HLTAODConfigData_p1.h"
-//#include "TrigSteeringEventTPCnv/Lvl1AODConfigData_p1.h"
-//#include "TrigSteeringEventTPCnv/Lvl1AODPrescaleConfigData_p1.h"
-
 #include "TrigSteeringEventTPCnv/TrigPassBitsCollectionCnv_p1.h"
 #include "TrigSteeringEventTPCnv/TrigPassBitsCollection_p1.h"
 #include "TrigSteeringEventTPCnv/TrigPassBits_p1.h"
@@ -52,11 +42,6 @@ using namespace HLT;
 DECLARE_TPCNV_FACTORY(HLTResultCnv_p1,
                       HLT::HLTResult,
                       HLT::HLTResult_p1,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigOperationalInfoCollectionCnv_tlp1,
-                      TrigOperationalInfoCollection,
-                      TrigOperationalInfoCollection_tlp1,
                       Athena::TPCnvVers::Current)
                       
 DECLARE_TPCNV_FACTORY(TrigRoiDescriptorCnv_p1,

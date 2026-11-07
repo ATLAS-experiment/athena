@@ -146,8 +146,6 @@ TriggerHLTList = [
  
     #steer
     ('TrigRoiDescriptor#HLT_secondaryRoI_HLT',                             'BS ESD AODFULL AODSLIM',  'Steer'),
-    ('TrigOperationalInfo#HLT_OPI_HLT',                                    'BS',                      'Steer'),
-    ('TrigOperationalInfo#HLT_EXPRESS_OPI_HLT',                            'BS ESD',                  'Steer'),
 
     ('xAOD::TrigCompositeContainer#HLT_ExpressInfo_HLT',                   'BS ESD AODFULL AODSLIM AODVERYSLIM AODBLSSLIM',  'Steer'),  
     ('xAOD::TrigCompositeAuxContainer#HLT_ExpressInfo_HLTAux.',            'BS ESD AODFULL AODSLIM AODVERYSLIM AODBLSSLIM',  'Steer'),  
@@ -752,7 +750,6 @@ TriggerHLTList = [
    
    ('TrigVertexCollection#HLT_TrigBeamSpotVertex',                       'BS ESD AODFULL AODSLIM',  'Bjet'),
    ('TrigVertexCollection#HLT_TrigBeamSpotVertex_SiTrack',               '',                        'Bjet'),
-   ('TrigOperationalInfo#HLT_OPI_L2',                                    'BS',                      'Steer'),
    ('TrigInDetTrackCollection#HLT_TrigL2SiTrackFinder_Muon' ,            '',  'Muon'),
    ('TrigInDetTrackCollection#HLT_TrigL2SiTrackFinder_eGamma' ,          '',                        'Egamma'),
    ('TrigInDetTrackCollection#HLT_TrigL2SiTrackFinder_eGamma' ,          '',                        'Egamma'),
@@ -812,8 +809,6 @@ TriggerHLTList = [
     ('TrigVertexCollection#HLT_EFHistoPrmVtx',                            '',                        'Bjet'),        # category?
     ('VxContainer#HLT_PrimVx',                                            '',                        'Bjet'),
     ('VxContainer#HLT_ConversionVx',                                      '',                        'Bjet'),
-    ('TrigOperationalInfo#HLT_OPI_EF',                                    'BS',                      'Steer'),
-    ('TrigOperationalInfo#HLT_EXPRESS_OPI_EF',                            'BS',                      'Steer'),
     ('CaloCellContainer#HLT_TrigCaloCellMaker_eGamma',                    'BS ESD',                  'Calo'), 
     ('CaloCellContainer#HLT_TrigCaloCellMaker_tau',                       'BS ESD',                  'Calo'),  
     ('CaloCellContainer#HLT_TrigCaloCellLoF',                             'BS ESD',                  'Calo'),        # category?  
@@ -956,7 +951,6 @@ TriggerRoiList = [
 EDMDetails = {}
 
 EDMDetails[ "TrigRoiDescriptor" ]         = {'persistent':"TrigRoiDescriptorCollection_p3",     'typealias':'Roi', 'collection':'TrigRoiDescriptorCollection' }
-EDMDetails[ "TrigOperationalInfo" ]       = {'persistent':"TrigOperationalInfoCollection_tlp1",   'typealias':'', 'collection':'TrigOperationalInfoCollection' }
 EDMDetails[ "TrigInDetTrackCollection" ]  = {'persistent':"TrigInDetTrackCollection_tlp2",        'typealias':'InDetTrk' }
 
 EDMDetails[ "TrigSpacePointCounts" ]      = {'persistent':"TrigSpacePointCountsCollection_p4",  'typealias':'AOD', 'collection':'TrigSpacePointCountsCollection'}

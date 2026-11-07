@@ -35,7 +35,6 @@ endfunction()
 
 _add_test( HLTResultCnv_p1_test )
 _add_test( Lvl1ResultCnv_p2_test )
-_add_test( TrigOperationalInfoCnv_p1_test )
 _add_test( TrigPassBitsCnv_p1_test )
 _add_test( TrigPassFlagsCnv_p1_test )
 _add_test( TrigRoiDescriptorCnv_p1_test )

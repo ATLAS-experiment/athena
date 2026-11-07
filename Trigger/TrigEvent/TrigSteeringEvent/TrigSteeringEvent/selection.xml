@@ -1,9 +1,4 @@
 <lcgdict>
- <class name="TrigOperationalInfo" id="D5A5494B-9210-490A-8B6D-405008EC07E0" /> 
- <class name="TrigOperationalInfoCollection" id="EFECF1AB-F767-4EBA-AE4F-995384D27CA1" /> 
- <class name="DataVector<TrigOperationalInfo>" /> 
- <class name="std::vector<TrigOperationalInfo*>" /> 
-
  <class name="TrigRoiDescriptor" id="B2C86E23-8421-4F34-8014-AE4A7E4BA0A7" />
  <class name="TrigRoiDescriptorCollection" id="A2E10999-9B32-4510-8483-0BCB9E5B857F" />
  <class name="DataVector<TrigRoiDescriptor>" />
