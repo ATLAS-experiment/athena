@@ -59,13 +59,14 @@ namespace {
     const StringRegexes& default_flag_regexes)
   {
     std::vector<FTagInputConfig> inputs;
+    const std::string typeMatchStr{"type matching"};
+    const std::string defaultMatchStr{"default matching"};
     for (const auto& var: variable_names) {
       FTagInputConfig input;
       input.name = var;
-      input.type = str::match_first(type_regexes, var, "type matching");
-      input.default_flag = str::sub_first(default_flag_regexes, var,
-                                     "default matching");
-      inputs.push_back(input);
+      input.type = str::match_first(type_regexes, var, typeMatchStr);
+      input.default_flag = str::sub_first(default_flag_regexes, var, defaultMatchStr);
+      inputs.push_back(std::move(input));
     }
     return inputs;
   }
@@ -88,7 +89,7 @@ namespace {
         input.name = new_name;
         if (defaults.count(nn_name)) {
           new_defaults[new_name] = defaults.at(nn_name);
-          moved_defaults.insert(nn_name);
+          moved_defaults.insert(std::move(nn_name));
         }
         replaced_vars.erase(replacement_itr);
       }
@@ -116,13 +117,13 @@ namespace {
       for (auto& pair: node.defaults) {
         new_defaults[str::sub_first(res, pair.first, context)] = pair.second;
       }
-      node.defaults = new_defaults;
+      node.defaults = std::move(new_defaults);
     }
     std::map<std::string, OutputNodeConfig> new_outputs;
     for (auto& pair: config.outputs) {
       new_outputs[str::sub_first(res, pair.first, context)] = pair.second;
     }
-    config.outputs = new_outputs;
+    config.outputs = std::move(new_outputs);
   }
 
 }
