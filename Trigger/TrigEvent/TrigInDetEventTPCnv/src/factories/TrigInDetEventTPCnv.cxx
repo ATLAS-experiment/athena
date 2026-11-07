@@ -38,20 +38,6 @@
 #include "TrigInDetEventTPCnv/TrigHisto2DContainerCnv_tlp1.h"
 #include "TrigInDetEventTPCnv/TrigHisto2DCnv_p1.h"
 
-#include "TrigInDetEventTPCnv/TrigSpacePointCounts_p4.h"
-#include "TrigInDetEventTPCnv/TrigSpacePointCounts_p3.h"
-#include "TrigInDetEventTPCnv/TrigSpacePointCounts_p2.h"
-#include "TrigInDetEventTPCnv/TrigSpacePointCounts_p1.h"
-#include "TrigInDetEventTPCnv/TrigSpacePointCounts_p1_old_cnv.h"
-#include "TrigInDetEventTPCnv/TrigSpacePointCountsCollection_p4.h"
-#include "TrigInDetEventTPCnv/TrigSpacePointCountsCollection_p1.h"
-#include "TrigInDetEventTPCnv/TrigSpacePointCountsCollection_tlp1.h"
-#include "TrigInDetEventTPCnv/TrigSpacePointCountsCollectionCnv_p4.h"
-#include "TrigInDetEventTPCnv/TrigSpacePointCountsCollectionCnv_tlp1.h"
-#include "TrigInDetEventTPCnv/TrigSpacePointCountsCnv_p1.h"
-#include "TrigInDetEventTPCnv/TrigSpacePointCountsCnv_p2.h"
-#include "TrigInDetEventTPCnv/TrigSpacePointCountsCnv_p4.h"
-
 #include "TrigInDetEventTPCnv/TrigTrackCounts_p1.h"   
 #include "TrigInDetEventTPCnv/TrigTrackCounts_p2.h"
 #include "TrigInDetEventTPCnv/TrigTrackCountsCollection_p1.h"    
@@ -123,31 +109,6 @@ DECLARE_TPCNV_FACTORY(TrigInDetTrackCollectionCnv_tlp4,
                       TrigInDetTrackCollection,
                       TrigInDetTrackCollection_tlp4,
                       Athena::TPCnvVers::Current) 
-                      
-DECLARE_TPCNV_FACTORY(TrigSpacePointCountsCnv_p1,
-                      TrigSpacePointCounts,
-                      TrigSpacePointCounts_p1,
-                      Athena::TPCnvVers::Old)
-                      
-DECLARE_TPCNV_FACTORY(TrigSpacePointCountsCnv_p2,
-                      TrigSpacePointCounts,
-                      TrigSpacePointCounts_p2,
-                      Athena::TPCnvVers::Old)
-                      
-DECLARE_TPCNV_FACTORY(TrigSpacePointCountsCnv_p3,
-                      TrigSpacePointCounts,
-                      TrigSpacePointCounts_p3,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigSpacePointCountsCollectionCnv_tlp1,
-                      TrigSpacePointCountsCollection,
-                      TrigSpacePointCountsCollection_tlp1,
-                      Athena::TPCnvVers::Old)
-
-DECLARE_TPCNV_FACTORY(TrigSpacePointCountsCollectionCnv_p4,
-                      TrigSpacePointCountsCollection,
-                      TrigSpacePointCountsCollection_p4,
-                      Athena::TPCnvVers::Current)
                       
 DECLARE_TPCNV_FACTORY(TrigTrackCountsCnv_p1,
                       TrigTrackCounts,

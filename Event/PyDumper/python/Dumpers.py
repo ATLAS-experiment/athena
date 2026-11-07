@@ -2019,23 +2019,6 @@ def dump_TrigHisto2D (h, f):
     dump_TrigHisto (h, f)
     return
 
-def dump_TrigSpacePointCounts (c, f):
-    fprint (f, c.sctSpEndcapC(), c.sctSpBarrel(), c.sctSpEndcapA(), '[')
-    for id in c.droppedSctModules():
-        fprint (f, id.getString())
-    fprint (f, ']')
-    fprint (f, '\n   clus endcap c: ')
-    dump_TrigHisto2D (c.pixelClusEndcapC(), f)
-    fprint (f, '\n   clus barrel: ')
-    dump_TrigHisto2D (c.pixelClusBarrel(), f)
-    fprint (f, '\n   clus endcap a: ')
-    dump_TrigHisto2D (c.pixelClusEndcapA(), f)
-    return
-@nolist
-def dump_TrigSpacePointCounts_nolist (c, f):
-    dump_TrigSpacePointCounts (c, f)
-    return
-
 
 def dump_TileMu (m, f):
     fprint (f, m.eta(), m.phi(), m.quality(), list(m.enedep()))
@@ -3511,7 +3494,6 @@ dumpspecs = [
     ["TrigTrackCounts",                      dump_TrigTrackCounts_nolist],
     ["TrigInDetTrackCollection",             dump_TrigInDetTrackCollection],
     ["TrigRoiDescriptor",                    dump_TrigRoiDescriptor_nolist],
-    ["TrigSpacePointCounts",                 dump_TrigSpacePointCounts_nolist],
     ["TileContainer<TileMu>",                dump_TileMu],
     ["CaloShowerContainer",                  dump_CaloShower],
     ["CaloTowerContainer",                   dump_CaloTowerContainer],
@@ -3530,7 +3512,6 @@ dumpspecs = [
     ['AtlasHitsVector<MDTSimHit>',           dump_MDTSimHit],
     ['AtlasHitsVector<RPCSimHit>',           dump_RPCSimHit],
     ['AtlasHitsVector<TGCSimHit>',           dump_TGCSimHit],
-    ["TrigSpacePointCountsCollection",       dump_TrigSpacePointCounts],
     ["TrigTrackCountsCollection",            dump_TrigTrackCounts],
     ["TrigRoiDescriptorCollection",          dump_TrigRoiDescriptor],
     ["MdtTrackSegmentCollection",            dump_MdtTrackSegment],

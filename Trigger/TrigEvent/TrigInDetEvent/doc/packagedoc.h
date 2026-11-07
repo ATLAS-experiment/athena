@@ -24,11 +24,7 @@ The following classes are defined
    - TrigHisto1D          : A class to store a 1D histogram for a given event and provide cut
                             functionality.
    - TrigHisto2D          : A class to store a 1D histogram for a given event and provide cut and profile
-                            functionality.  This class is used by TrigSpacePointCounts and 
-                            TrigTrackCounts. 
-   - TrigSpacePointCounts : Contains 3 histograms (TrigHisto2D of Pixel cluster time over threshold vs size, 
-                            for endcap C, barrel and endcap A.  It also contains the total number of 
-                            SCT space points for endcap C, barrel and endcap A.
+                            functionality.  This class is used by TrigTrackCounts. 
    - TrigTrackCounts      : Contains 2 histograms (TrigHisto2D) of track z0 vs pt and eta vs phi 
                             respectively
 

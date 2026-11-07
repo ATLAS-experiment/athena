@@ -709,9 +709,6 @@ TriggerHLTList = [
     ('TrigPassBits#HLT_passbits',                                         'BS ESD AODFULL', 'Steer'),
     ('TrigPassFlags#HLT_passflags',                                       'BS ESD AODFULL', 'Steer'),
     
-    # particles == L2 List
-    ('TrigSpacePointCounts#HLT_spacepoints',                              'BS ESD AODFULL AODSLIM', 'MinBias'), # ? do we realy need it!
-
     # tracking == L2 List
    ('TrigInDetTrackCollection#HLT',                                      'BS ESD',                  'ID'),      # category?
    ('TrigInDetTrackCollection#HLT_TrigIDSCAN_Jet',                       '',                        'Bjet'),
@@ -952,7 +949,6 @@ EDMDetails = {}
 EDMDetails[ "TrigRoiDescriptor" ]         = {'persistent':"TrigRoiDescriptorCollection_p3",     'typealias':'Roi', 'collection':'TrigRoiDescriptorCollection' }
 EDMDetails[ "TrigInDetTrackCollection" ]  = {'persistent':"TrigInDetTrackCollection_tlp2",        'typealias':'InDetTrk' }
 
-EDMDetails[ "TrigSpacePointCounts" ]      = {'persistent':"TrigSpacePointCountsCollection_p4",  'typealias':'AOD', 'collection':'TrigSpacePointCountsCollection'}
 EDMDetails[ "TrigVertexCollection" ]      = {'persistent':"TrigVertexCollection_tlp1",            'typealias':'AOD'}
 
 EDMDetails[ "TrigTrackCounts" ]           = {'persistent':"TrigTrackCountsCollection_tlp1",       'typealias':'TrkCount', 'collection':'TrigTrackCountsCollection'}

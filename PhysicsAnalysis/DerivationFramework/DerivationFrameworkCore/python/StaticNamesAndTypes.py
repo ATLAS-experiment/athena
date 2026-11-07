@@ -97,7 +97,6 @@ StaticNamesAndTypes = {
    'HLT_TrigRoiDescriptorCollection_secondaryRoI_EF': 'TrigRoiDescriptorCollection',
    'HLT_TrigRoiDescriptorCollection_secondaryRoI_HLT': 'TrigRoiDescriptorCollection',
    'HLT_TrigRoiDescriptorCollection_secondaryRoI_L2': 'TrigRoiDescriptorCollection',
-   'HLT_TrigSpacePointCountsCollection_spacepoints': 'TrigSpacePointCountsCollection',
    'HLT_TrigT2MbtsBitsContainer_T2Mbts': 'TrigT2MbtsBitsContainer',
    'HLT_TrigTrackCountsCollection_trackcounts': 'TrigTrackCountsCollection',
    'HLT_TrigVertexCollection_TrigBeamSpotVertex': 'TrigVertexCollection',

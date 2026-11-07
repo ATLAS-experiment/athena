@@ -4,7 +4,6 @@
 
 #include "TrigInDetEvent/TrigInDetTrackCollection.h"
 #include "TrigInDetEvent/TrigVertexCollection.h"
-#include "TrigInDetEvent/TrigSpacePointCountsCollection.h"
 #include "TrigInDetEvent/TrigTrackCountsCollection.h"
 #include "TrigInDetEvent/TrigVertexCountsCollection.h"
 #include "TrigInDetEvent/TrigInDetTrackFitPar.h"
