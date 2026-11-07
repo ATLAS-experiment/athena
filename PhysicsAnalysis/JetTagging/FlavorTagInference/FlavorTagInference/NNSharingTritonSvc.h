@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef NN_SHARING_TRITON_SVC_H
@@ -7,7 +7,7 @@
 
 #include "FlavorTagInference/INNSharingSvc.h"
 #include "AsgServices/AsgService.h"
-
+#include <set>
 
 namespace FlavorTagInference
 {
@@ -31,11 +31,13 @@ namespace FlavorTagInference
       , "Triton server URL"};
     Gaudi::Property<bool> m_tritonUseSsl {this, "TritonUseSSL", true
       , "Connect to the Triton server over SSL"};
-    Gaudi::Property<std::map<std::string, std::string>> m_tritonPathToName {this, "TritonPathsMap", {}
-      , "Mapping of ONNX file paths to Triton model names"};
     Gaudi::Property<std::string> m_tritonBearer {this, "TritonBearer", ""
       , "Bearer token for Triton server authentication"};
+    Gaudi::Property<std::set<std::string>> m_tritonModelsNames{this, "TritonModelsNames", {}
+      , "The set of ModelFile:ModelName pairs"};
 
+    // Mapping of ONNX file paths to Triton model names
+    std::map<std::string, std::string> m_tritonPathToName;
   };
 
 }
