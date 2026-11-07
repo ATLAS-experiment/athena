@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // this
@@ -111,7 +111,7 @@ namespace MuonCalib {
                 pts[i] = pt;
                 i++;
             }
-            m_rt_points.push_back(pts);
+            m_rt_points.push_back(std::move(pts));
         }
         return StatusCode::SUCCESS;
     }
