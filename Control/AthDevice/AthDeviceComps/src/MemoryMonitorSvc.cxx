@@ -28,6 +28,29 @@ std::string formatBytes(std::size_t bytes) {
   }
 }
 
+/// Pretty print a @c vecmem::copy::type::copy_type value.
+MsgStream& operator<<(MsgStream& stream, vecmem::copy::type::copy_type type) {
+
+  switch (type) {
+    case vecmem::copy::type::copy_type::host_to_host:
+      stream << "host -> host";
+      break;
+    case vecmem::copy::type::copy_type::host_to_device:
+      stream << "host -> device";
+      break;
+    case vecmem::copy::type::copy_type::device_to_host:
+      stream << "device -> host";
+      break;
+    case vecmem::copy::type::copy_type::device_to_device:
+      stream << "device -> device";
+      break;
+    default:
+      stream << "unknown";
+  }
+
+  return stream;
+}
+
 }  // namespace
 
 namespace AthDevice {
@@ -46,32 +69,70 @@ StatusCode MemoryMonitorSvc::finalize() {
   helper(m_deallocations);
 
   // Print the memory allocation monitoring data.
-  ATH_MSG_INFO("Memory allocations:");
-  std::string currentDevice = "";
-  for (const auto& [key, bytes] : m_allocations) {
-    if (key.device != currentDevice) {
-      ATH_MSG_INFO("  - " << key.device);
-      currentDevice = key.device;
+  if (m_allocations.size()) {
+    ATH_MSG_INFO("Memory allocations:");
+    std::string currentDevice = "";
+    for (const auto& [key, bytes] : m_allocations) {
+      if (key.device != currentDevice) {
+        ATH_MSG_INFO("  - " << key.device);
+        currentDevice = key.device;
+      }
+      ATH_MSG_INFO("    * " << std::setw(longestComponentName + 2) << std::left
+                            << key.component << " : " << std::setw(15)
+                            << std::right << formatBytes(bytes));
     }
-    ATH_MSG_INFO("    * " << std::setw(longestComponentName) << std::left
-                          << key.component << " : " << std::setw(15)
-                          << std::right << formatBytes(bytes));
   }
 
   // Print the memory deallocation monitoring data.
-  ATH_MSG_INFO("Memory deallocations:");
-  currentDevice = "";
-  for (const auto& [key, bytes] : m_deallocations) {
-    if (key.device != currentDevice) {
-      ATH_MSG_INFO("  - " << key.device);
-      currentDevice = key.device;
+  if (m_deallocations.size()) {
+    ATH_MSG_INFO("Memory deallocations:");
+    std::string currentDevice = "";
+    for (const auto& [key, bytes] : m_deallocations) {
+      if (key.device != currentDevice) {
+        ATH_MSG_INFO("  - " << key.device);
+        currentDevice = key.device;
+      }
+      ATH_MSG_INFO("    * " << std::setw(longestComponentName + 2) << std::left
+                            << key.component << " : " << std::setw(15)
+                            << std::right << formatBytes(bytes));
     }
-    ATH_MSG_INFO("    * " << std::setw(longestComponentName) << std::left
-                          << key.component << " : " << std::setw(15)
-                          << std::right << formatBytes(bytes));
   }
 
-  // TODO: Print the memory copy monitoring data.
+  // Print the memory copy monitoring data.
+  if (m_copies.size()) {
+    ATH_MSG_INFO("Memory copies:");
+    std::string currentFlavor = "";
+    vecmem::copy::type::copy_type currentType =
+        static_cast<vecmem::copy::type::copy_type>(-1);
+    for (const auto& [key, bytes] : m_copies) {
+      if (key.flavor != currentFlavor) {
+        ATH_MSG_INFO("  - " << key.flavor);
+        currentFlavor = key.flavor;
+      }
+      if (key.type != currentType) {
+        ATH_MSG_INFO("    - " << key.type);
+        currentType = key.type;
+      }
+      ATH_MSG_INFO("      * " << std::setw(longestComponentName) << std::left
+                              << key.component << " : " << std::setw(15)
+                              << std::right << formatBytes(bytes));
+    }
+  }
+
+  // Print the memory set monitoring data.
+  if (m_memsets.size()) {
+    ATH_MSG_INFO("Memory set operations:");
+    std::string currentFlavor = "";
+    for (const auto& [key, bytes] : m_memsets) {
+      if (key.flavor != currentFlavor) {
+        ATH_MSG_INFO("  - " << key.flavor);
+        currentFlavor = key.flavor;
+      }
+      ATH_MSG_INFO("    * " << std::setw(longestComponentName + 2) << std::left
+                            << key.component << " : " << std::setw(15)
+                            << std::right << formatBytes(bytes));
+    }
+  }
 
   // Return gracefully.
   return StatusCode::SUCCESS;
@@ -94,11 +155,19 @@ void MemoryMonitorSvc::memoryDeallocated(const std::string& component,
 }
 
 void MemoryMonitorSvc::memoryCopied(const std::string& component,
+                                    const std::string& flavor,
                                     vecmem::copy::type::copy_type type,
                                     std::size_t bytes) {
 
   std::lock_guard lock(m_copiesMutex);
-  m_copies[{component, type}] += bytes;
+  m_copies[{component, flavor, type}] += bytes;
+}
+
+void MemoryMonitorSvc::memorySet(const std::string& component,
+                                 const std::string& flavor, std::size_t bytes) {
+
+  std::lock_guard lock(m_memsetsMutex);
+  m_memsets[{component, flavor}] += bytes;
 }
 
 }  // namespace AthDevice

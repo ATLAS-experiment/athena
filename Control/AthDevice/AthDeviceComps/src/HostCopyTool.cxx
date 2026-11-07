@@ -13,4 +13,8 @@ std::shared_ptr<const vecmem::copy> HostCopyTool::copy(
   return m_copy;
 }
 
+std::string_view HostCopyTool::flavor() const {
+  return "Host";
+}
+
 }  // namespace AthDevice

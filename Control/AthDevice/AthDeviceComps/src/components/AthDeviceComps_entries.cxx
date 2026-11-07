@@ -11,6 +11,7 @@
 #include "../MemoryMonitorSvc.h"
 #include "../MemoryResourceSvcAdaptorTool.h"
 #include "../MemoryResourcesAdaptorTool.h"
+#include "../MonitoredCopyTool.h"
 #include "../MonitoredMemoryResourceTool.h"
 #include "../PoolMemoryResourceSvc.h"
 
@@ -23,5 +24,6 @@ DECLARE_COMPONENT(AthDevice::HostMemoryResourceTool)
 DECLARE_COMPONENT(AthDevice::MemoryMonitorSvc)
 DECLARE_COMPONENT(AthDevice::MemoryResourceSvcAdaptorTool)
 DECLARE_COMPONENT(AthDevice::MemoryResourcesAdaptorTool)
+DECLARE_COMPONENT(AthDevice::MonitoredCopyTool)
 DECLARE_COMPONENT(AthDevice::MonitoredMemoryResourceTool)
 DECLARE_COMPONENT(AthDevice::PoolMemoryResourceSvc)
