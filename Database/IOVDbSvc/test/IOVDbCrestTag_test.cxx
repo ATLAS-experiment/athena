@@ -25,6 +25,7 @@
 //
 #include <chai/Container.h>
 #include <chai/Database.h>
+#include <chai/EnumConverters.h>
 #include <chai/PayloadSpec.h>
 #include <chai/Tag.h>
 #include <chai/VectorContainer.h>
@@ -55,6 +56,15 @@ namespace {
   constexpr uint32_t s_attrListVecClid = 55403898;
   // A CREST bound above cool::ValidityKeyMax (2^63 - 1), which IOVTime rejects
   constexpr uint64_t s_beyondValidityKeyMax = static_cast<uint64_t>(cool::ValidityKeyMax) + 5;
+
+  // The string CHAI's deprecated IovType overload of buildNodeDescription builds
+  std::string nodeDescription(chai::Tag::IovType iovType, const std::string& typeName,
+                              uint32_t clid, uint32_t serviceType = 71) {
+    return "<timeStamp>" + chai::iovTypeToNodeDescTimeStampToken(iovType) +
+           "</timeStamp><addrHeader><address_header service_type=\"" +
+           std::to_string(serviceType) + "\" clid=\"" + std::to_string(clid) +
+           "\" /></addrHeader><typeName>" + typeName + "</typeName>";
+  }
 
   // Redirects stdout to a temporary file for the scope's lifetime, so
   // DEBUG-level MsgStream output (printed to stdout) can be captured and
@@ -195,11 +205,11 @@ struct CrestFsFixture:public GaudiKernelFixture{
     auto agreeing = db.createTag(
       "AttrListTag_Agreeing", "test tag, timebase agrees", spec,
       {.iovType = chai::Tag::IovType::RunNumberLumiBlock,
-       .nodeDescription = chai::Tag::buildNodeDescription(
+       .nodeDescription = nodeDescription(
            chai::Tag::IovType::RunNumberLumiBlock, s_attrListTypeName, s_attrListClid)});
     auto c1 = agreeing->buildContainer();
     c1[0].push(1u);
-    agreeing->addPayload(c1, 100, 200);
+    agreeing->addPayload(c1, 100);
     auto c2 = agreeing->buildContainer();
     c2[0].push(2u);
     agreeing->addPayload(c2, 200);
@@ -209,11 +219,11 @@ struct CrestFsFixture:public GaudiKernelFixture{
     auto disagreeing = db.createTag(
       "AttrListTag_Disagreeing", "test tag, timebase disagrees", spec,
       {.iovType = chai::Tag::IovType::RunNumberLumiBlock,
-       .nodeDescription = chai::Tag::buildNodeDescription(
+       .nodeDescription = nodeDescription(
            chai::Tag::IovType::Time, s_attrListTypeName, s_attrListClid)});
     auto c3 = disagreeing->buildContainer();
     c3[0].push(3u);
-    disagreeing->addPayload(c3, 100, 200);
+    disagreeing->addPayload(c3, 100);
 
     // COOL's older spelling of run-lumi, as found on migrated TRT and TGC
     // folders
@@ -226,7 +236,7 @@ struct CrestFsFixture:public GaudiKernelFixture{
       {.iovType = chai::Tag::IovType::RunNumberLumiBlock, .nodeDescription = runEventDescription});
     auto cRunEvent = runEvent->buildContainer();
     cRunEvent[0].push(31u);
-    runEvent->addPayload(cRunEvent, 100, 200);
+    runEvent->addPayload(cRunEvent, 100);
 
     // An IOV whose until exceeds cool::ValidityKeyMax: CREST bounds are 64-bit,
     // COOL keys are 63-bit. Two IOVs, so the first one's until is the oversized
@@ -234,11 +244,11 @@ struct CrestFsFixture:public GaudiKernelFixture{
     auto untilBeyondMax = db.createTag(
       "AttrListTag_UntilBeyondMax", "test tag, until above ValidityKeyMax", spec,
       {.iovType = chai::Tag::IovType::RunNumberLumiBlock,
-       .nodeDescription = chai::Tag::buildNodeDescription(
+       .nodeDescription = nodeDescription(
            chai::Tag::IovType::RunNumberLumiBlock, s_attrListTypeName, s_attrListClid)});
     auto cBeyond = untilBeyondMax->buildContainer();
     cBeyond[0].push(7u);
-    untilBeyondMax->addPayload(cBeyond, 100, s_beyondValidityKeyMax);
+    untilBeyondMax->addPayload(cBeyond, 100);
     auto cBeyond2 = untilBeyondMax->buildContainer();
     cBeyond2[0].push(8u);
     untilBeyondMax->addPayload(cBeyond2, s_beyondValidityKeyMax);
@@ -248,13 +258,13 @@ struct CrestFsFixture:public GaudiKernelFixture{
     auto timeIndexed = db.createTag(
       "AttrListTag_TimeIndexed", "test tag, timestamp-indexed", spec,
       {.iovType = chai::Tag::IovType::Time,
-       .nodeDescription = chai::Tag::buildNodeDescription(
+       .nodeDescription = nodeDescription(
            chai::Tag::IovType::Time, s_attrListTypeName, s_attrListClid)});
     // Two IOVs, as for the run-lumi fixture: with only one, the last (and
     // only) IOV is open-ended, so nothing would pin the upper bound.
     auto cTime = timeIndexed->buildContainer();
     cTime[0].push(5u);
-    timeIndexed->addPayload(cTime, 1'600'000'000'000'000'000, 1'700'000'000'000'000'000);
+    timeIndexed->addPayload(cTime, 1'600'000'000'000'000'000);
     auto cTime2 = timeIndexed->buildContainer();
     cTime2[0].push(6u);
     timeIndexed->addPayload(cTime2, 1'700'000'000'000'000'000);
@@ -269,26 +279,24 @@ struct CrestFsFixture:public GaudiKernelFixture{
                            s_attrListTypeName + "</typeName>"});
     auto c4 = noTimestamp->buildContainer();
     c4[0].push(4u);
-    noTimestamp->addPayload(c4, 100, 200);
+    noTimestamp->addPayload(c4, 100);
 
     // Two named channels: exercises getAddress's AttrListColl path plus the
-    // m_named channel attachment (buildNodeDescription() has no <named/> param).
+    // m_named channel attachment (nodeDescription() has no <named/> param).
     chai::PayloadSpec collSpec(chai::FieldSpec({{"value", UInt32}}),
                                 chai::ChannelSpec({{0, "chanA"}, {1, "chanB"}}));
     auto coll = db.createTag(
       "AttrListCollTag_Named", "test tag, named multi-channel collection", collSpec,
       {.iovType = chai::Tag::IovType::RunNumberLumiBlock,
-       .nodeDescription = chai::Tag::buildNodeDescription(
+       .nodeDescription = nodeDescription(
                              chai::Tag::IovType::RunNumberLumiBlock, "CondAttrListCollection",
                              s_attrListCollClid)
                            + "<named/>"});
-    // CREST only honors addPayload()'s until as the tag's final end time: a
-    // single-IOV tag comes back open-ended regardless of it, so a second, later
-    // payload is what actually bounds the first at 400.
+    // A single-IOV tag is open-ended, so a second, later payload bounds the first at 400.
     auto cc1 = coll->buildContainer();
     cc1[0].push(10u);
     cc1[1].push(20u);
-    coll->addPayload(cc1, 300, 400);
+    coll->addPayload(cc1, 300);
     auto cc2 = coll->buildContainer();
     cc2[0].push(11u);
     cc2[1].push(21u);
@@ -299,12 +307,12 @@ struct CrestFsFixture:public GaudiKernelFixture{
     auto poolRef = db.createTag(
       "PoolRefTag", "test tag, single-channel PoolRef", poolRefSpec,
       {.iovType = chai::Tag::IovType::RunNumberLumiBlock,
-       .nodeDescription = chai::Tag::buildNodeDescription(
+       .nodeDescription = nodeDescription(
                              chai::Tag::IovType::RunNumberLumiBlock, s_attrListTypeName,
                              s_attrListClid)});
     auto pr1 = poolRef->buildContainer();
     pr1[0].push(std::string("[DB=test][CNT=test][CLID=abc][TECH=00000202][OID=00000000-00000000]"));
-    poolRef->addPayload(pr1, 500, 600);
+    poolRef->addPayload(pr1, 500);
 
     // Same PoolRef field as above, on two channels: PoolRefColl instead of PoolRef.
     chai::PayloadSpec poolRefCollSpec(chai::FieldSpec({{"PoolRef", String}}),
@@ -312,7 +320,7 @@ struct CrestFsFixture:public GaudiKernelFixture{
     auto poolRefColl = db.createTag(
       "PoolRefCollTag", "test tag, multi-channel PoolRef collection", poolRefCollSpec,
       {.iovType = chai::Tag::IovType::RunNumberLumiBlock,
-       .nodeDescription = chai::Tag::buildNodeDescription(
+       .nodeDescription = nodeDescription(
                              chai::Tag::IovType::RunNumberLumiBlock, s_attrListTypeName,
                              s_attrListClid)});
     auto prc1 = poolRefColl->buildContainer();
@@ -320,7 +328,7 @@ struct CrestFsFixture:public GaudiKernelFixture{
       std::string("[DB=test][CNT=chan0][CLID=abc][TECH=00000202][OID=00000000-00000000]"));
     prc1[1].push(
       std::string("[DB=test][CNT=chan1][CLID=abc][TECH=00000202][OID=00000000-00000000]"));
-    poolRefColl->addPayload(prc1, 500, 600);
+    poolRefColl->addPayload(prc1, 500);
 
     // Fixtures for getAddress()'s channel-0-only read behavior (see the tests below).
     chai::PayloadSpec twoChannelSpec(chai::FieldSpec({{"value", UInt32}}),
@@ -328,30 +336,30 @@ struct CrestFsFixture:public GaudiKernelFixture{
     auto twoChannels = db.createTag(
       "AttrListTag_TwoChannels", "test tag, channels 0 and 1 populated", twoChannelSpec,
       {.iovType = chai::Tag::IovType::RunNumberLumiBlock,
-       .nodeDescription = chai::Tag::buildNodeDescription(
+       .nodeDescription = nodeDescription(
            chai::Tag::IovType::RunNumberLumiBlock, s_attrListTypeName, s_attrListClid)});
     auto ctc = twoChannels->buildContainer();
     ctc[0].push(40u);
     ctc[1].push(41u);
-    twoChannels->addPayload(ctc, 100, 200);
+    twoChannels->addPayload(ctc, 100);
 
     chai::PayloadSpec channelFiveSpec(chai::FieldSpec({{"value", UInt32}}),
                                       chai::ChannelSpec({{5, ""}}));
     auto channelFive = db.createTag(
       "AttrListTag_ChannelFiveOnly", "test tag, only channel 5 populated", channelFiveSpec,
       {.iovType = chai::Tag::IovType::RunNumberLumiBlock,
-       .nodeDescription = chai::Tag::buildNodeDescription(
+       .nodeDescription = nodeDescription(
            chai::Tag::IovType::RunNumberLumiBlock, s_attrListTypeName, s_attrListClid)});
     auto ccf = channelFive->buildContainer();
     ccf[5].push(50u);
-    channelFive->addPayload(ccf, 100, 200);
+    channelFive->addPayload(ccf, 100);
 
     // Vector payload, three rows on one channel: exercises getAddress's CoolVector path
     chai::PayloadSpec vecSpec(chai::FieldSpec({{"value", UInt32}}), chai::ChannelSpec({{0, ""}}));
     auto vec = db.createTag(
       "CoolVectorTag", "test tag, vector payload multi-row", vecSpec,
       {.iovType = chai::Tag::IovType::RunNumberLumiBlock,
-       .nodeDescription = chai::Tag::buildNodeDescription(
+       .nodeDescription = nodeDescription(
                              chai::Tag::IovType::RunNumberLumiBlock, "CondAttrListVec",
                              s_attrListVecClid, 256)});
     auto vc = vec->buildVectorContainer();
@@ -362,9 +370,8 @@ struct CrestFsFixture:public GaudiKernelFixture{
       rows.push_back(std::move(row));
     }
     vc.setRows(0, rows);
-    vec->addPayload(vc, 700, 800);
-    // A second, later payload bounds the first at 800: addPayload()'s until
-    // applies to the whole tag, not per IOV (see AttrListCollTag_Named above).
+    vec->addPayload(vc, 700);
+    // A second, later payload bounds the first at 800 (see AttrListCollTag_Named above).
     auto vc2 = vec->buildVectorContainer();
     std::vector<chai::ValuesPtr> rows2;
     for (uint32_t v : {40u, 50u}) {
