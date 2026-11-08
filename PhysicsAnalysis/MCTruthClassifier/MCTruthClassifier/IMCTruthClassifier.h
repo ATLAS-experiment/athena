@@ -31,11 +31,6 @@
 #include "xAODTracking/TrackParticleFwd.h"
 #endif
 
-#ifndef XAOD_ANALYSIS
-#include <AtlasHepMC/GenParticle.h>
-class HepMcParticleLink;
-#endif
-
 class IMCTruthClassifier : virtual public asg::IAsgTool
 {
   ASG_TOOL_INTERFACE(IMCTruthClassifier)
@@ -107,15 +102,6 @@ public:
 protected:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::TruthParticle*, IMCTruthClassifier::Info* info) const = 0;
-
-#ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleHepMCTruthClassifier(const HepMcParticleLink& theLink, IMCTruthClassifier::Info* info) const = 0;
-public:
-  std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
-  particleHepMCTruthClassifier(const HepMcParticleLink& theLink)  const {return particleHepMCTruthClassifier(theLink, nullptr); }
-#endif
-protected:
 
 #ifndef GENERATIONBASE
   // Methods for Reco Particle classification

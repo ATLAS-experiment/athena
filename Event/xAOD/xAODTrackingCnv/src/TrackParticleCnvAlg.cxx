@@ -199,8 +199,7 @@ StatusCode TrackParticleCnvAlg::convert(const EventContext& ctx,
             // if configured also get truth classification
             if (result->second.particleLink().cptr() &&
                 !m_truthClassifier.empty()) {
-              auto truthClass = m_truthClassifier->particleHepMCTruthClassifier(
-                result->second.particleLink());
+              auto truthClass = m_truthClassifier->particleTruthClassifier(*link, ctx);
               type = truthClass.first;
               origin = truthClass.second;
               classification = std::get<0>(MCTruthPartClassifier::defOrigOfParticle(result->second.particleLink().cptr())); // See AGENE-2351
