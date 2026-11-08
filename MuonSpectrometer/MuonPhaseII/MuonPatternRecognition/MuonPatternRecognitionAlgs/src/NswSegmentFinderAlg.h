@@ -41,8 +41,6 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         virtual StatusCode execute(const EventContext& ctx) const override;    
         virtual StatusCode finalize() override;
 
-    private:
-        
         /** @brief Enumeration to classify the orientation of a NSW strip  */
         enum class StripOrient{
           U, /// Stereo strips with positive angle
@@ -52,6 +50,24 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
           C, /// Combined 2D space point (sTGC wire + strip / sTgc pad)
           Unknown
         };
+        /** @brief Setup an ostream operator */
+        inline friend std::ostream& operator<<(std::ostream& ostr, const StripOrient o) {
+            switch (o) {
+              using enum StripOrient;
+              case U: return ostr<<"U";
+              case V: return ostr<<"V";
+              case X: return ostr<<"X";
+              case P: return ostr<<"P";
+              case C: return ostr<<"C";
+              case Unknown: return ostr<<"Unknown";
+            }
+            return ostr;
+        }
+
+
+    private:
+        
+
 
         /** @brief Seed statistics per sector to be printed in the end */
         class SeedStatistics{
@@ -110,12 +126,14 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
         using HitVec = SpacePointPerLayerSplitter::HitVec;
 
         using HitLayVec = SpacePointPerLayerSplitter::HitLayVec;
+        /** @brief Abrivation ofthe view on the HitVec */
+        using HitSpan_t = std::span<const HitVec::value_type>;
         /** @brief Abbrivation of the space comprising multiple hit vectors without copy */
-        using HitLaySpan_t = std::vector<std::reference_wrapper<const HitVec>>;
+        using HitLaySpan_t = std::vector<HitSpan_t>;
         /** @brief Abbrivation of the container book keeping whether a hit is used or not */
         using UsedHitMarker_t = std::vector<std::vector<unsigned int>>;
         /** @brief Abbrivation of the container to pass a subset of markers wtihout copy */
-        using UsedHitSpan_t = std::vector<std::reference_wrapper<std::vector<unsigned int>>>;
+        using UsedHitSpan_t = std::vector<std::span<unsigned>>;
         /** @brief Abbrivation of the initial seed */
         using InitialSeed_t = std::array<const SpacePoint*, 4>;
         /** @brief Vector of initial seeds */
@@ -302,7 +320,10 @@ class NswSegmentFinderAlg : public AthReentrantAlgorithm {
 
         //maximum number of MM Clusters that are invalid in the seed
         UnsignedIntegerProperty m_maxInvalidClusters{this, "maxInvalidClusters", 4};
-
+        // If the outer most hit s less than the cut off apart from the upper msSector edge, then 
+        // the combinatoric strips are swapped if possible to achieve a valid beta matrix
+        DoubleProperty m_combParallelYCutOff{this, "parallelCombinatoricCutOffY", 50. * Gaudi::Units::cm};
+      
         //reject also hits from the seed even if it does not lead to succesful segment
         BooleanProperty m_markHitsFromSeed{this, "markHitsFromSeed", true};
 
