@@ -121,8 +121,6 @@ def AddTauIDDecorationCfg(flags, **kwargs):
         # Add in GNTau!
         # evaluate GNTau score for v0prune model
         tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,0,applyLooseTrackSel=True)) )
-        # evaluate GNTau score for v1trunc model
-        tools.append( acc.popToolsAndMerge(tauTools.TauGNNEvaluatorCfg(flags,1,applyLooseTrackSel=True)) )
         # set WPs decision for v0prune model
         tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags,0)) )
         # Cache tool properties
@@ -132,8 +130,6 @@ def AddTauIDDecorationCfg(flags, **kwargs):
         scoreNames.append(tools[-1].NewScoreName)
         WPNames += tools[-1].DecorWPNames
 
-        # set WPs decision for v1trunc model
-        tools.append( acc.popToolsAndMerge(tauTools.TauWPDecoratorGNNCfg(flags,1)) )
         # Cache tool properties
         doEvetoWP |= tools[-1].UseAbsEta
         # The original RNNEleScore should not be overriden
