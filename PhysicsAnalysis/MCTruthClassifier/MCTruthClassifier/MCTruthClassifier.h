@@ -124,12 +124,6 @@ protected:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::TruthParticle*,IMCTruthClassifier::Info* info) const override final;
 
-#ifndef XAOD_ANALYSIS /*These can not run in Analysis Base*/
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleHepMCTruthClassifier(const HepMcParticleLink& theLink,IMCTruthClassifier::Info* info) const override final;
-
-#endif
-
 public:
 #ifndef GENERATIONBASE /*These can not run in Generation only release*/
   //Main method for Track to Truth association

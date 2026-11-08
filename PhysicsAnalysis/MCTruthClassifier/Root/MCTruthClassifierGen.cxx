@@ -13,31 +13,8 @@
 #include "AsgDataHandles/ReadHandle.h"
 #include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/Loops.h"
-#ifndef XAOD_ANALYSIS
-#include "AtlasHepMC/GenEvent.h"
-#include "AtlasHepMC/GenVertex.h"
-#include "AtlasHepMC/GenParticle.h"
-#endif
 #include "TruthUtils/DecayProducts.h"
 using namespace MCTruthPartClassifier;
-
-#ifndef XAOD_ANALYSIS
-std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleHepMCTruthClassifier(const HepMcParticleLink& theLink, IMCTruthClassifier::Info* info /*= nullptr*/) const {
-  // Retrieve the links between HepMC and xAOD::TruthParticle
-  const EventContext& ctx = info ? info->eventContext : Gaudi::Hive::currentContext();
-  SG::ReadHandle<xAODTruthParticleLinkVector> truthParticleLinkVecReadHandle(m_truthLinkVecReadHandleKey, ctx);
-  if (!truthParticleLinkVecReadHandle.isValid()) {
-    ATH_MSG_WARNING(" Invalid ReadHandle for xAODTruthParticleLinkVector with key: " << truthParticleLinkVecReadHandle.key());
-    return std::make_pair(Unknown, NonDefined);
-  }
-  ElementLink<xAOD::TruthParticleContainer> tplink = truthParticleLinkVecReadHandle->find (theLink);
-  if (tplink.isValid()) {
-    return particleTruthClassifier (*tplink, info);
-  }
-  return std::make_pair(Unknown, NonDefined);
-}
-#endif
 
 std::pair<ParticleType, ParticleOrigin>
 MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, IMCTruthClassifier::Info* infoin /*= nullptr*/) const {
