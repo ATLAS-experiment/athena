@@ -36,10 +36,6 @@
 class HepMcParticleLink;
 #endif
 
-#if !defined(XAOD_ANALYSIS) &&  !defined(GENERATIONBASE)
-#include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
-#endif
-
 class IMCTruthClassifier : virtual public asg::IAsgTool
 {
   ASG_TOOL_INTERFACE(IMCTruthClassifier)
