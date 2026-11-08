@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -10,6 +10,7 @@
 #define ALFA_RAWDATABYTESTREAMCNV_ALFA_RAWDATAPROVIDER_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "Gaudi/Property.h"
 
 #include "GaudiKernel/ClassID.h"
 #include "GaudiKernel/Converter.h"
@@ -58,8 +59,8 @@ class ALFA_RawDataProvider : public AthAlgorithm
   ServiceHandle<IROBDataProviderSvc>   m_robDataProvider;
   
   /// Tool that does the actual work
-  ToolHandle<ALFA_RawDataProviderTool>  m_rawDataTool;
-  std::string                           m_ALFA_RawDataCollectionKey;
+  ToolHandle<ALFA_RawDataProviderTool> m_rawDataTool{this, "ProviderTool", "ALFA_RawDataProviderTool"};
+  Gaudi::Property<std::string> m_ALFA_RawDataCollectionKey{this, "ALFA_RawDataCollectionKey", "ALFA_RawData"};
   
   std::string                           m_collection;
 

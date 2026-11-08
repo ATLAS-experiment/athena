@@ -36,25 +36,6 @@ ALFA_BeamTransport::ALFA_BeamTransport(const std::string& name, ISvcLocator* pSv
   :
   AthAlgorithm(name,pSvcLocator)
 {
-  declareProperty("ConfDir", m_FPConfig.ConfDir="./config");
-  declareProperty("UseALFA", m_FPConfig.UseALFA=true);
-  declareProperty("Debug", m_WriteDebugOutput=false);
-  declareProperty("IP",m_FPConfig.IP = 1);
-  declareProperty("UseAper",m_FPConfig.useaper = true);
-  declareProperty("apermb",m_FPConfig.apermb = 0.);
-  declareProperty("xcol1",m_FPConfig.xcol1 = 999.);//999e-4 but we need open collimators
-  declareProperty("xcol2",m_FPConfig.xcol2 = 999.);//999e-4
-  declareProperty("BeamEnergy",m_FPConfig.pbeam0 = 7000.);//beam energy
-  declareProperty("RPDistance",m_FPConfig.RPDistance = 237.398);
-  declareProperty("absZMagMax",m_FPConfig.absZMagMax = 500.);//dont read magnets after this value
-  
-  //Cuts for production
-  declareProperty("EtaCut",m_EtaCut = 8.);
-  declareProperty("XiCut",m_XiCut = 0.2); 
-  
-  declareProperty("FPOutputBeam1", m_FPOutputBeam1="Beam1");
-  declareProperty("FPOutputBeam2", m_FPOutputBeam2="Beam2");
-
 }
 
 ALFA_BeamTransport::~ALFA_BeamTransport(){}
@@ -65,12 +46,24 @@ StatusCode ALFA_BeamTransport::initialize()
   ATH_MSG_INFO("Initializing " << name() << "...");
   ATH_CHECK(m_eventInfoKey.initialize());
   ATH_CHECK(m_MCKey.initialize());
+
+  m_FPConfig.ConfDir = m_ConfDir;
+  m_FPConfig.UseALFA = m_UseALFA;
+  m_FPConfig.IP = m_IP;
+  m_FPConfig.useaper = m_useaper;
+  m_FPConfig.apermb = m_apermb;
+  m_FPConfig.xcol1 = m_xcol1;
+  m_FPConfig.xcol2 = m_xcol2;
+  m_FPConfig.pbeam0 = m_pbeam0;
+  m_FPConfig.RPDistance = m_RPDistance;
+  m_FPConfig.absZMagMax = m_absZMagMax;
+
   // open files for beamtracking output
   // string in char
-  char* cBeam1Name = new char[m_FPOutputBeam1.length()];
-  strcpy(cBeam1Name, m_FPOutputBeam1.c_str());
-  char* cBeam2Name = new char[m_FPOutputBeam2.length()];
-  strcpy(cBeam2Name, m_FPOutputBeam2.c_str());
+  char* cBeam1Name = new char[m_FPOutputBeam1.value().length()];
+  strcpy(cBeam1Name, m_FPOutputBeam1.value().c_str());
+  char* cBeam2Name = new char[m_FPOutputBeam2.value().length()];
+  strcpy(cBeam2Name, m_FPOutputBeam2.value().c_str());
 
   if (m_WriteDebugOutput) {
     m_FileBeam1.open(cBeam1Name);

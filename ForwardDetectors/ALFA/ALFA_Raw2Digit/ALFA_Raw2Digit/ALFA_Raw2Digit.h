@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_Raw2Digit_h
@@ -7,6 +7,7 @@
 
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "Gaudi/Property.h"
 
 
 // for ALFA
@@ -52,7 +53,7 @@ private:
 	StatusCode ChanPlot(uint32_t pot_n, uint32_t iLayer, uint32_t MarChan, uint32_t &chan_i, uint32_t &chan_j);
 
 
-	std::string m_ALFA_RawDataCollectionKey;
+	Gaudi::Property<std::string> m_ALFA_RawDataCollectionKey{this, "ALFA_RawDataCollectionKey", "ALFA_RawData"};
 
 	int m_nEvents{};
 
@@ -114,8 +115,8 @@ private:
 	ALFA_ODDigitCollection* m_ODdigitCollection{};
 	ALFA_ODDigit*           m_ODdigitObject{};
 
-	std::string m_key_DigitCollection;
-	std::string m_key_ODDigitCollection;
+	std::string m_key_DigitCollection{"ALFA_DigitCollection"};
+	std::string m_key_ODDigitCollection{"ALFA_ODDigitCollection"};
 
 	std::ifstream m_inChan;
 	std::ifstream m_inPMF;
@@ -132,7 +133,9 @@ private:
 	uint32_t m_chan_i{}, m_chan_j{};
 
 private:
-	std::string m_strMeasuredDataType;
+	//allowed values (m_strMeasuredDataType="testbeam", "tunnel"), default value is "tunnel"
+	//this property is needed due to different mapping in the testbeam and the tunnel data
+	Gaudi::Property<std::string> m_strMeasuredDataType{this, "MeasuredDataType", "tunnel"};
 
 private:
 	std::ofstream m_toFile;

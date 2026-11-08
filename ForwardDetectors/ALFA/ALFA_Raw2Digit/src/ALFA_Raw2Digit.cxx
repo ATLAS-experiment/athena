@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_Raw2Digit/ALFA_Raw2Digit.h"
@@ -10,50 +10,8 @@
 #include <stdexcept>
 
 ALFA_Raw2Digit::ALFA_Raw2Digit(const std::string& name, ISvcLocator* pSvcLocator) 
-  : AthAlgorithm(name, pSvcLocator),
-    m_key_DigitCollection("ALFA_DigitCollection"),
-    m_key_ODDigitCollection("ALFA_ODDigitCollection")
+  : AthAlgorithm(name, pSvcLocator)
 {
-	declareProperty("ALFA_RawDataCollectionKey", m_ALFA_RawDataCollectionKey = "ALFA_RawData");
-
-	//allowed values (m_strMeasuredDataType="testbeam", "tunnel"), default value is "tunnel"
-	//this property is needed due to different mapping in the testbeam and the tunnel data
-	declareProperty("MeasuredDataType", m_strMeasuredDataType = "tunnel");
-
-
-	m_All_Trigger_norm = nullptr;
-	m_All_Trigger = nullptr;
-	m_ODdigitCollection = nullptr;
-	m_ODdigitObject = nullptr;
-	m_digitCollection = nullptr;
-	m_digitObject = nullptr;
-//	m_histSvc = NULL;
-	m_rootOutput = nullptr;
-	m_tree = nullptr;
-
-	m_nEvents = 0;
-	m_mbID      = 0;
-	m_pmfID     = 0;
-	m_fibID     = 0;
-	m_MAPMTChan = 0;
-	m_MapChan   = 0;
-	m_pot     = 0;
-	m_side    = 0;
-	m_plate   = 0;
-	m_fiber   = 0;
-	m_ODpot   = 0;
-	m_ODside  = 0;
-	m_ODplate = 0;
-	m_ODfiber = 0;
-
-	memset(&m_act_lay_h, 0, sizeof(m_act_lay_h));
-	memset(&m_hit_lay_h, 0, sizeof(m_hit_lay_h));
-	m_lumi_block     = 0;
-	m_lumi_block_old = 0;
-	m_event_no       = 0;
-	m_WordId_count   = 0;
-	m_chan_i         = 0;
-	m_chan_j         = 0;
 }
 
 StatusCode ALFA_Raw2Digit::initialize()
@@ -179,7 +137,7 @@ StatusCode ALFA_Raw2Digit::execute(const EventContext& /*ctx*/)
 
 	// retrieve the RawData RDO container from the TDS
  	const ALFA_RawDataContainer* container = nullptr;
-	StatusCode sc_read = evtStore()->retrieve(container, m_ALFA_RawDataCollectionKey);
+	StatusCode sc_read = evtStore()->retrieve(container, m_ALFA_RawDataCollectionKey.value());
 
 	if ( sc_read != StatusCode::SUCCESS ) {
 		msg(MSG::ERROR) << "ALFA_Raw2Digit: Could not find container" << endmsg;

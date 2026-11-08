@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_Digitization/ALFA_PileUpTool.h"
@@ -50,42 +50,8 @@
 ALFA_PileUpTool::ALFA_PileUpTool(const std::string& type, 
 								const std::string& name,
 								const IInterface* parent) :
-  PileUpToolBase(type, name, parent),  
-  m_SimHitCollectionName ("ALFA_HitCollection"),
-  m_SimODHitCollectionName ("ALFA_ODHitCollection"),
-  m_key_DigitCollection ("ALFA_DigitCollection"),
-  m_key_ODDigitCollection ("ALFA_ODDigitCollection"),
-  m_digitCollection (nullptr),
-  m_ODdigitCollection (nullptr),
-  m_sigma0          (0.1),
-  m_sigma1          (1.0),
-  m_meanE_dep       (0.0863), //MeV 
-  m_meanN_photo     (4.11), 
-  m_mean            (0.0), 
-  m_stdDev          (1.0),
-  m_AmplitudeCut    (0.24),
-  m_mergedALFA_HitList (nullptr),
-  m_mergedALFA_ODHitList (nullptr)
-{ 
-  // Properties  
-  declareProperty("SimHitCollection", m_SimHitCollectionName, "Name of the input ALFA Sim Hit Collection of simulated hits");
-  declareProperty("SimODHitCollection", m_SimODHitCollectionName, "Name of the input ALFA Sim OD Hit Collection of simulated hits");  
- 
-  declareProperty("ALFA_DigitCollection", m_key_DigitCollection, "Name of the Collection to hold the output from the ALFA main detector digitization"); 
-  declareProperty("ALFA_ODDigitCollection", m_key_ODDigitCollection, "Name of the Collection to hold the output from the ALFA OD digitization");
-  
-
-//  declareProperty("fillRootTree", m_fillRootTree);  
-   
-  
-  declareProperty("sigma0", m_sigma0); 
-  declareProperty("sigma1", m_sigma1);
-  declareProperty("meanE_dep", m_meanE_dep);
-  declareProperty("meanN_photo", m_meanN_photo);
-  declareProperty("mean", m_mean);
-  declareProperty("stdDev", m_stdDev);
-  declareProperty("AmplitudeCut", m_AmplitudeCut);  
-//  declareProperty("fillRootTree", m_fillRootTree);
+  PileUpToolBase(type, name, parent)
+{
 }
 
 
@@ -95,7 +61,7 @@ StatusCode ALFA_PileUpTool::initialize(){
   
   ATH_MSG_DEBUG ("ALFA_digiti initialize() called"); 
   
-  ATH_MSG_DEBUG (" Pedestal: " << m_AmplitudeCut);
+  ATH_MSG_DEBUG (" Pedestal: " << m_AmplitudeCut.value());
   
   ATH_CHECK (m_randomSvc.retrieve());
   ATH_MSG_DEBUG ( "Retrieved RandomNumber Service" );
@@ -125,22 +91,22 @@ StatusCode ALFA_PileUpTool::processAllSubEvents(const EventContext& ctx) {
   TimedALFAODHitCollList tODHitCollList;
   
   
-  if (m_mergeSvc->retrieveSubEvtsData(m_SimHitCollectionName, tHitCollList).isFailure()) { 
+  if (m_mergeSvc->retrieveSubEvtsData(m_SimHitCollectionName.value(), tHitCollList).isFailure()) { 
 
     ATH_MSG_FATAL ( "Could not fill TimedALFAHitCollList" ); return StatusCode::FAILURE; 
   }
   else { ATH_MSG_DEBUG ( "Retrieved TimedALFAHitCollList" ); }
   
-  ATH_MSG_DEBUG ( "PileUp: Merge " << tHitCollList.size() << " ALFA_HitCollection with key" << m_SimHitCollectionName );
+  ATH_MSG_DEBUG ( "PileUp: Merge " << tHitCollList.size() << " ALFA_HitCollection with key" << m_SimHitCollectionName.value() );
   
   
-  if (m_mergeSvc->retrieveSubEvtsData(m_SimODHitCollectionName, tODHitCollList).isFailure()) { 
+  if (m_mergeSvc->retrieveSubEvtsData(m_SimODHitCollectionName.value(), tODHitCollList).isFailure()) { 
 
     ATH_MSG_FATAL ( "Could not fill TimedALFAODHitCollList" ); return StatusCode::FAILURE; 
   }
   else { ATH_MSG_DEBUG ( "Retrieved TimedALFAODHitCollList" ); }
   
-  ATH_MSG_DEBUG ( "PileUp: Merge " << tODHitCollList.size() << " ALFA_ODHitCollection with key " << m_SimODHitCollectionName );
+  ATH_MSG_DEBUG ( "PileUp: Merge " << tODHitCollList.size() << " ALFA_ODHitCollection with key " << m_SimODHitCollectionName.value() );
   
   
   TimedHitCollection<ALFA_Hit> tALFAhit;
@@ -259,7 +225,7 @@ StatusCode ALFA_PileUpTool::processBunchXing(int bunchXing,
     
     const ALFA_HitCollection* tmpHitColl = nullptr;
    
-    if (!seStore.retrieve(tmpHitColl, m_SimHitCollectionName).isSuccess()) {
+    if (!seStore.retrieve(tmpHitColl, m_SimHitCollectionName.value()).isSuccess()) {
       
       ATH_MSG_ERROR ("SubEvent ALFA_HitCollection not found in StoreGate " << seStore.name() );
       
@@ -275,7 +241,7 @@ StatusCode ALFA_PileUpTool::processBunchXing(int bunchXing,
     
     const ALFA_ODHitCollection* tmpODHitColl = nullptr;
    
-    if (!seStore.retrieve(tmpODHitColl, m_SimODHitCollectionName).isSuccess()) {
+    if (!seStore.retrieve(tmpODHitColl, m_SimODHitCollectionName.value()).isSuccess()) {
       
       ATH_MSG_ERROR ( "SubEvent ALFA_ODHitCollection not found in StoreGate " << seStore.name() );
       
@@ -562,10 +528,10 @@ StatusCode ALFA_PileUpTool::fill_MD_DigitCollection(CLHEP::HepRandomEngine* rndE
 	    //             + noise_1 
 		//             + noise_2;
 			
-		amplitude = CLHEP::RandGaussZiggurat::shoot(rndEngine, N_photo, sqrt(pow(m_sigma0,2)+N_photo*pow(m_sigma1,2)));
+		amplitude = CLHEP::RandGaussZiggurat::shoot(rndEngine, N_photo, sqrt(pow(m_sigma0.value(),2)+N_photo*pow(m_sigma1.value(),2)));
 
 		//N_photo_CT   = CLHEP::RandPoisson::shoot(rndEngine,0.08*m_E_fib[l][i][j]*m_meanN_photo/m_meanE_dep); 		
-		//amplitude_CT = CLHEP::RandGaussQ::shoot (rndEngine, N_photo_CT, sqrt(pow(m_sigma0,2)+N_photo_CT*pow(m_sigma1,2)));
+		//amplitude_CT = CLHEP::RandGaussQ::shoot (rndEngine, N_photo_CT, sqrt(pow(m_sigma0.value(),2)+N_photo_CT*pow(m_sigma1.value(),2)));
 				 
 				  
 	    if (amplitude >= m_AmplitudeCut )
