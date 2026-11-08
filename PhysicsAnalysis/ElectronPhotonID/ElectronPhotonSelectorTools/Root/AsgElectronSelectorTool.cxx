@@ -1027,7 +1027,9 @@ double AsgElectronSelectorTool::combineOutputs( const std::vector<float>& mvaSco
     }
   }
   // Log transform to have values in reasonable range
-  return std::log(disc);
+  if (disc > 0)
+    return std::log(disc);
+  return -999;
 }
 
 double AsgElectronSelectorTool::combineOutputsCF( const std::vector<float>& mvaScores)
