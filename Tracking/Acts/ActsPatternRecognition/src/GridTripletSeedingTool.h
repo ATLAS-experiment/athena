@@ -362,7 +362,7 @@ protected:
       "vector containing the map of z bins in the top layers"};
 
   Gaudi::Property<int> m_numEtaNeighbors{
-      this, "numPhiNeighbors", 0,
+      this, "numEtaNeighbors", 0,
       "number of eta bin neighbors at each side of the current bin that will "
       "be used to search for SPs"};
 

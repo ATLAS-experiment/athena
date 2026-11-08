@@ -2,7 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
-from ActsConfig.ActsConfigFlags import SeedingStrategy
+from ActsConfig.ActsConfigFlags import GridType, SeedingStrategy
 from AthenaCommon.Utils.unixtools import find_datafile
 from ActsInterop import UnitConstants as ActsUnits
 import AthenaCommon.SystemOfUnits as GaudiUnits
@@ -45,7 +45,8 @@ def ActsPixelGridTripletSeedingToolCfg(
     kwargs.setdefault("hvCollisionRegionTolerance", 10. * ActsUnits.mm)
     kwargs.setdefault( "inputHoughVtx",
                        "HoughVertices" if flags.Tracking.ActiveConfig.useHoughVertexFilter else "")
-
+    kwargs.setdefault("sphericalGrid", flags.Tracking.ActiveConfig.GridType is GridType.Spherical)
+    kwargs.setdefault("numEtaNeighbors", flags.Tracking.ActiveConfig.SphericalGridEtaNeighbors)
     acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
     return acc
 
@@ -165,6 +166,8 @@ def ActsStripGridTripletSeedingToolCfg(flags,
     kwargs.setdefault("inputHoughVtx",
                       "HoughVertices" if flags.Tracking.ActiveConfig.useHoughVertexFilter else "")
     
+    kwargs.setdefault("sphericalGrid", flags.Tracking.ActiveConfig.GridType is GridType.Spherical)
+    kwargs.setdefault("numEtaNeighbors", flags.Tracking.ActiveConfig.SphericalGridEtaNeighbors)
     acc.setPrivateTools(CompFactory.ActsTrk.GridTripletSeedingTool(name, **kwargs))
     return acc
 
@@ -211,6 +214,10 @@ def ActsLargeRadiusStripSeedingToolCfg(flags,
     kwargs.setdefault("zBinEdges", [-3000., -2500, -1400., -910., -500., -250.,
                                     250., 500., 910., 1400., 2500, 3000.])
     kwargs.setdefault("zBinsCustomLooping" , [2, 10, 3, 9, 6, 4, 8, 5, 7])
+    ## eta bins of the spherical space point grid (used only with
+    ## GridType.Spherical): finer than the tool default
+    kwargs.setdefault("etaBinEdges", [-3., -2.5, -2., -1.5, -1., -0.5, 0.,
+                                      0.5, 1., 1.5, 2., 2.5, 3.])
     kwargs.setdefault("useVariableMiddleSPRange", False)
     kwargs.setdefault("zBinNeighborsTop", [
       [0, 0],  # -3000, -2500
