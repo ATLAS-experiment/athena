@@ -2,9 +2,67 @@
   Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef XAOD_ANALYSIS
 #ifndef TRUTHUTILS_LOOPS_H
 #define TRUTHUTILS_LOOPS_H
+#include "TruthUtils/MagicNumbers.h"
+
+namespace MC {
+
+/// Protection against loops in the truth record (MCTruthClassifier legacy).
+/// Some generators (notably Sherpa) record a particle as a child of itself, or as its own ancestor, which would make
+/// the ancestor searches in MCTruthClassifier run forever. The three methods below detect such loops; they are
+/// used together. The functions work with any particle and vertex type that provides the xAOD::TruthParticle /
+/// HepMC-like interface: `production_vertex()`, `end_vertex()`, `pdg_id()` on particles and `particles_out()` on
+/// vertices. Pointers and smart pointers (e.g. HepMC3 `ConstGenParticlePtr`) are both accepted.
+
+/// @brief Method 3: true if the parent and the child have the same production vertex (the Sherpa loop).
+/// @param childOrigVtx production vertex of the child
+/// @param parent       the candidate parent particle (must not be null)
+template <class V, class T> bool TruthLoopDetectionMethod3(const V& childOrigVtx, const T& parent)
+{
+  const auto parentOrigVtx = parent->production_vertex();
+  return parentOrigVtx && HepMC::is_same_vertex(parentOrigVtx, childOrigVtx);
+}
+
+/// @brief Method 1: true if the parent is among the children produced at the child's production vertex, i.e.
+/// one of them is the same generator particle with the same PDG ID. Otherwise returns the result of Method 3.
+/// Note: with several children the matching one is not necessarily the particle being classified.
+/// @param childOrigVtx production vertex of the child
+/// @param parent       the candidate parent particle (must not be null)
+template <class V, class T> bool TruthLoopDetectionMethod1(const V& childOrigVtx, const T& parent)
+{
+  const int parentPDG = parent->pdg_id();
+  for (const auto& aChild: childOrigVtx->particles_out()) {
+    if (!aChild) continue;
+    if (parentPDG == aChild->pdg_id() && HepMC::is_same_generator_particle(aChild, parent)) return true;
+  }
+  return TruthLoopDetectionMethod3(childOrigVtx, parent);
+}
+
+/// @brief Method 2: true if the parent's production vertex is the child's decay vertex and the child's production
+/// vertex is the parent's decay vertex, i.e. V0 -> parent -> V1 -> ... -> V2 -> child -> V3 with V3 == V0 and V1 == V2.
+/// Null particles are allowed and give false unless both vertices are null.
+/// @param child  the particle being classified
+/// @param parent the candidate parent particle
+template <class T1, class T2> bool TruthLoopDetectionMethod2(const T1& child, const T2& parent)
+{
+  decltype(child->production_vertex()) child_prdVtx{};
+  decltype(child->end_vertex()) child_endVtx{};
+  if (child) {
+    child_prdVtx = child->production_vertex();
+    child_endVtx = child->end_vertex();
+  }
+  decltype(parent->production_vertex()) parent_prdVtx{};
+  decltype(parent->end_vertex()) parent_endVtx{};
+  if (parent) {
+    parent_prdVtx = parent->production_vertex();
+    parent_endVtx = parent->end_vertex();
+  }
+  return (child_endVtx == parent_prdVtx && child_prdVtx == parent_endVtx);
+}
+}
+
+#ifndef XAOD_ANALYSIS
 #include <algorithm>
 #include <map>
 #include <vector>
