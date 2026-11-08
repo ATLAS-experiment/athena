@@ -5,6 +5,7 @@
 */
 
 
+#include <Gaudi/Property.h>
 #ifndef LARCALIBTOOLS_LARCOMPLETETOFLAT_H
 #define LARCALIBTOOLS_LARCOMPLETETOFLAT_H 1
 
@@ -24,6 +25,7 @@ class AthenaAttributeList;
 class ILArPedestal;
 class ILArOFC;
 class ILArRamp;
+class ILArNoise;
 class LArShapeComplete;
 class ILArDAC2uA;
 class ILAruA2MeV;
@@ -60,6 +62,7 @@ class LArCompleteToFlat: public AthReentrantAlgorithm
   CondAttrListCollection* rampFlat(const ILArRamp* input, const std::string& outputName);
   CondAttrListCollection* ofcFlat(const ILArOFC* input, const std::string& outputName, const LArfSamplSC* weights=nullptr);
   CondAttrListCollection* shapeFlat(const LArShapeComplete* input, const std::string& outputName);
+  CondAttrListCollection* noiseFlat(const ILArNoise* input, const std::string& outputName);
   AthenaAttributeList* DSPThresholdsFlat(const LArDSPThresholdsComplete* input, const std::string& outputName);
 
 
@@ -79,6 +82,8 @@ class LArCompleteToFlat: public AthReentrantAlgorithm
   StringProperty m_PedestalInput { this, "PedestalInput", "" }; // Pedestal
   StringProperty m_RampInput { this, "RampInput", "" }; // LArRamp
   StringProperty m_MphysOverMcalInput { this, "MphysOverMcalInput", "" }; // LArMphysOverMcal
+  StringProperty m_noiseInput{this,"NoiseInput",""};
+  StringProperty m_flatName {this, "FolderBase","/LAR/ElecCalibFlat"};
   std::string m_OFCInput;
   std::string m_OFCCaliInput;
   std::string m_ShapeInput;
@@ -87,7 +92,8 @@ class LArCompleteToFlat: public AthReentrantAlgorithm
   // DSPThreshold set name
   std::string m_nameOfSet;
 
-  BooleanProperty m_isSC = { this, "isSC", false };
+  BooleanProperty m_isSC{ this, "isSC", false };
+  IntegerProperty m_nGains{this,"nGains",3};
   bool m_forceStop;
   bool m_fakeEMBPSLowGain;
 }; 

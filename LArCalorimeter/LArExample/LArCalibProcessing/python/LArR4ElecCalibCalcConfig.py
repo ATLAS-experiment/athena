@@ -22,19 +22,25 @@ def LArR4ElecCalibCalcCfg(flags):
     result.merge(LArElecCalibDBCfg(flags,["DAC2uA","uA2MeV"]))
 
                            
-    theLArElecCalibCalculator = CompFactory.LArR4ElecCalibCalculator(OutputLevel=1,
-                                                                    CRESTDB="crest_fs:./larCalibTest")
+    theLArElecCalibCalculator = CompFactory.LArR4ElecCalibCalculator(OutputLevel=1)
 
     result.addEventAlgo(theLArElecCalibCalculator)
 
+    theLArCompleteToFlat = CompFactory.LArCompleteToFlat(FolderBase="/LAR/ElecCalibMC",
+                                                         nGains=2,
+                                                         PedestalInput="Pedestal",
+                                                         RampInput="RampSym",
+                                                         NoiseInput="LArNoiseSym")
+
+    result.addEventAlgo(theLArCompleteToFlat)
 
     #Output (POOL + sqlite) file writing:
     from RegistrationServices.OutputConditionsAlgConfig import OutputConditionsAlgCfg
     result.merge(OutputConditionsAlgCfg(flags,
-                                        outputFile=flags.LArCalib.Output.POOLFile,
-                                        ObjectList=["LArRampMC#LArRamp#/LAR/ElecCalibMC/Ramp",
-                                                    "LArPedestalMC#LArPedestal#/LAR/ElecCalibMC/Pedestal",
-                                                    "LArNoiseMC#LArNoise#/LAR/ElecCalibMC/Noise"],
+                                        CrestDir="./crestOut",
+                                        ObjectList=["CondAttrListCollection#/LAR/ElecCalibMC/Ramp#/LAR/ElecCalibMC/Ramp",
+                                                    "CondAttrListCollection#/LAR/ElecCalibMC/Pedestal#/LAR/ElecCalibMC/Pedestal",
+                                                    "CondAttrListCollection#/LAR/ElecCalibMC/Noise#/LAR/ElecCalibMC/Noise"],
                                         IOVTagList=["LARElecCalibMCRamp-R4-00",
                                                     "LARElecCalibMCPedestal-R4-00",
                                                     "LARElecCalibMCNoise-R4-00"],
@@ -43,7 +49,10 @@ def LArR4ElecCalibCalcCfg(flags):
                                     ))
 
     #RegistrationSvc    
-    result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = True))
+    #result.addService(CompFactory.IOVRegistrationSvc(RecreateFolders = True))
+
+
+
 
 
     #ROOT ntuple writing:
@@ -114,6 +123,7 @@ def LArR4ElecCalibCalcCfg(flags):
 
 if __name__ == "__main__":
     from AthenaConfiguration.AllConfigFlags import initConfigFlags
+    from AthenaConfiguration.Enums import LHCPeriod
     from AthenaConfiguration.TestDefaults import defaultGeometryTags
     from LArCalibProcessing.LArCalibConfigFlags import addLArCalibFlags
     import sys
@@ -124,9 +134,9 @@ if __name__ == "__main__":
     ConfigFlags.LArCalib.Output.POOLFile="LArR4ElecCalib.pool.root"
     ConfigFlags.LArCalib.Output.ROOTFile="LArR4ElecCalib.root"
 
-    ConfigFlags.IOVDb.DBConnection="sqlite://;schema=output.sqlite;dbname=OFLP200"
-    ConfigFlags.IOVDb.GlobalTag="OFLCOND-MC23-SDR-RUN3-11"
-    #ConfigFlags.IOVDb.GlobalTag="LARCALIB-RUN2-00"
+    ConfigFlags.IOVDb.GlobalTag="COND-MC21-SDR-RUN4-05"
+    ConfigFlags.GeoModel.Run=LHCPeriod.Run4 
+    ConfigFlags.IOVDb.UseCREST=True
     ConfigFlags.GeoModel.AtlasVersion=defaultGeometryTags.RUN4
     ConfigFlags.Input.isMC=True
     ConfigFlags.Common.MsgSuppression = False

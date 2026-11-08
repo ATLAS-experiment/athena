@@ -4,13 +4,6 @@
 
 #include "LArR4ElecCalibCalculator.h"
 
-#include <chai/Container.h>
-#include <chai/Database.h>
-#include <chai/Iov.h>
-#include <chai/Log.h>
-#include <chai/PayloadSpec.h>
-#include <chai/Types.h>
-
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "CaloDetDescr/CaloDetDescrElement.h"
 #include "CaloIdentifier/CaloCell_ID.h"
@@ -22,21 +15,6 @@
 #include "LArRawConditions/LArRampMC.h"
 #include "LArRawConditions/LArRampSym.h"
 
-namespace {
-
-// Method to convert coral::Blob to BlobData
-chai::BlobData vecToBlobData(const std::vector<float>& input) {
-  const std::size_t size = input.size() * sizeof(float);
-  const void* inPtr = input.data();
-  // Create vector and copy data
-  std::vector<uint8_t> bytes(size);
-  if (size > 0) {
-    memcpy(bytes.data(), inPtr, size);
-  }
-
-  return chai::BlobData(std::move(bytes));
-}
-}  // namespace
 
 StatusCode LArR4ElecCalibCalculator::initialize() {
 
@@ -212,120 +190,6 @@ StatusCode LArR4ElecCalibCalculator::stop() {
     ATH_MSG_ERROR("Failed to record LArNoiseSym object with key " << m_keyoutput);
   }
 
-
-  //If a CREST database is also given, we store the calibration constants in CREST
-  //In this case, the values are stored 'inline' in a Blob, so it can be read back into LArXYZFlat classes that are
-  //used for data-processing also in run 2 and 3.
-  if (!m_crestDBStr.value().empty()) {
-
-    chai::Tag::Metadata chaiMD{.iovType=chai::Tag::IovType::RunNumberLumiBlock, 
-        .objectType="crest-json-single-iov",
-        .synchronization=chai::Tag::Synchronization::All, 
-        .status=chai::Tag::Status::Unlocked,
-        .nodeDescription = chai::Tag::buildNodeDescription(chai::Tag::IovType::RunNumberLumiBlock, "CondAttrListCollection", 1238547719u)
-       };
-
-    std::vector<float> rampsHG, rampsMG, noiseHG, noiseMG, ped, pedRMS;
-    const LArRampSym* rampsIn = nullptr;
-    ATH_CHECK(detStore()->retrieve(rampsIn, "LArRampSym"));
-    const LArNoiseSym* noiseIn = nullptr;
-    ATH_CHECK(detStore()->retrieve(noiseIn, "LArNoiseSym"));
-
-    const unsigned int hashmax = m_onlineHelper->channelHashMax();
-
-    //Store only one pedestal value for all channels:
-    ped.push_back((m_pedestalValue.value()));
-    pedRMS.push_back(m_pedestalRMS.value());
-    for (unsigned idx = 0; idx < hashmax; ++idx) {
-      IdentifierHash hIdx(idx);
-      HWIdentifier hwid = m_onlineHelper->channel_Id(hIdx);
-      if (!(*cablingHdl)->isOnlineConnectedFromHash(hIdx)) {
-        rampsHG.push_back(0);
-        rampsHG.push_back(-999);
-        rampsMG.push_back(0);
-        rampsMG.push_back(-999);
-        noiseHG.push_back(-999);
-        noiseMG.push_back(-999);
-      } else {
-        const auto rampvecHG = rampsIn->ADC2DAC(hwid, CaloGain::LARHIGHGAIN);
-        rampsHG.push_back(rampvecHG[0]);
-        rampsHG.push_back(rampvecHG[1]);
-        const auto rampvecMG = rampsIn->ADC2DAC(hwid, CaloGain::LARMEDIUMGAIN);
-        rampsMG.push_back(rampvecMG[0]);
-        rampsMG.push_back(rampvecMG[1]);
-
-        noiseHG.push_back(noiseIn->noise(hwid, CaloGain::LARHIGHGAIN));
-        noiseMG.push_back(noiseIn->noise(hwid, CaloGain::LARMEDIUMGAIN));
-      }
-    }
-    chai::Database db = chai::Database(m_crestDBStr);
-    auto gt=db.createGlobalTag("GlobalTestTag", "test", "MC");
-
-    // Pedestals
-    {
-      chai::PayloadSpec spec(chai::FieldSpec({{"Pedestal", chai::Type::Blob}, {"PedestalRMS", chai::Type::Blob}, {"version", chai::Type::UInt32}}),
-
-                             chai::ChannelSpec({
-                                 {0, "HIGHGain"},
-                                 {1, "MEDGain"},
-                             }));
-
-      auto tag = db.createTag("LARElecCalibPedestal-R4-00", "Pedestal of FEB 2", spec, chaiMD);
-      gt->addTag("/LAR/ElecCalibMC/Pedestal","LARElecCalibPedestal-R4-00");                       
-
-      chai::Container container = tag->buildContainer();
-      for (size_t g = 0; g < 2; ++g) {
-        container[g].push(std::move(vecToBlobData(ped)));
-        container[g].push(std::move(vecToBlobData(pedRMS)));
-        container[g].push(0);  // version number
-      }
-      tag->addPayload(container, 0);
-    }
-    // Ramps
-    {
-      chai::PayloadSpec spec(chai::FieldSpec({{"RampVec", chai::Type::Blob}, {"nPoints", chai::Type::UInt32}, {"version", chai::Type::UInt32}}),
-
-                             chai::ChannelSpec({
-                                 {0, "HIGHGain"},
-                                 {1, "MEDGain"},
-                             }));
-
-      auto tag = db.createTag("LARElecCalibMCRamp-R4-00", "Electronic gain of FEB 2", spec, chaiMD);
-      gt->addTag("/LAR/ElecCalibMC/Ramp", "LARElecCalibMCRamp-R4-00");
-
-      chai::Container container = tag->buildContainer();
-      container[0].push(std::move(vecToBlobData(rampsHG)));
-      container[0].push(2);  // number of points (intercept,gradient)
-      container[0].push(0);  // version number
-
-      container[1].push(std::move(vecToBlobData(rampsMG)));
-      container[1].push(2);  // number of points (intercept,gradient)
-      container[1].push(0);  // version number
-
-      tag->addPayload(container, 0);
-    }
-    // Noise
-    {
-      chai::PayloadSpec spec(chai::FieldSpec({{"Noise", chai::Type::Blob}, {"version", chai::Type::UInt32}}),
-
-                             chai::ChannelSpec({
-                                 {0, "HIGHGain"},
-                                 {1, "MEDGain"},
-                             }));
-
-      auto tag = db.createTag("LARElecCalibMCNoise-R4-00", "Noise of FEB 2 (in ADC counts)", spec, chaiMD);
-      gt->addTag("/LAR/ElecCalibMC/Noise","LARElecCalibMCNoise-R4-00");
-
-      chai::Container container = tag->buildContainer();
-
-      container[0].push(std::move(vecToBlobData(noiseHG)));
-      container[0].push(0);  // version number
-
-      container[1].push(std::move(vecToBlobData(noiseMG)));
-      container[1].push(0);  // version number
-      tag->addPayload(container, 0);
-    }
-  }
   ATH_MSG_INFO("LArR4RampCalculator has finished.");
   return StatusCode::SUCCESS;
 }  // end finalize-method.

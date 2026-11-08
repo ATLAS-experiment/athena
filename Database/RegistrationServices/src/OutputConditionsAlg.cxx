@@ -382,7 +382,7 @@ uint64_t OutputConditionsAlg::timeToNano(unsigned long int timesec) const
 
 void OutputConditionsAlg::buildDescription(const std::string& identifier, const std::string& value, std::string& description) const {
 
-  std::string fragment="<"+identifier+">"+value+"<\\"+identifier+">";
+  const std::string fragment=std::format("<{0}>{1}</{0}>",identifier,value);
   description.insert(0,fragment);
   return;  
 }

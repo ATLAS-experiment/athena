@@ -39,16 +39,14 @@ private:
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};  
 
  
-  Gaudi::Property<std::string> m_keyoutput{this,"KeyOutput","LArRamp","SG Key of output object"};
+  Gaudi::Property<std::string> m_keyoutput{this,"KeyOutput","Ramp","SG Key of output object"};
 
   IntegerProperty m_nADCBits{this,"nADCBits",15,"Assume 15-bit ADC"};
 
   Gaudi::Property<float>  m_pedestalValue{this,"pedestal",8192,"Pedestal values for the two gains"};
   //FIXME: The pedestal RMS is 4 for the lower gain. But the current LArPedestalMC cond obj doesn't allow gain-dependent values
   Gaudi::Property<float>  m_pedestalRMS{this,"pedestalRMS",17,"Pedestal RMS for the two gains"};
-  Gaudi::Property<std::string> m_pedkeyoutput{this,"PedKeyOutput","LArPedestal","SG Key of output object"};
-
-  Gaudi::Property<std::string> m_crestDBStr{this, "CRESTDB","","CREST connection string"};
+  Gaudi::Property<std::string> m_pedkeyoutput{this,"PedKeyOutput","Pedestal","SG Key of output object"};
 
 
   const LArOnlineID* m_onlineHelper=nullptr;
