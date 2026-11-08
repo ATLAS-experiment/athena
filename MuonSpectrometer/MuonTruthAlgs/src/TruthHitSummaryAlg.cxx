@@ -5,7 +5,9 @@
 #include "TruthHitSummaryAlg.h"
 
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
-#include "MCTruthClassifier/IMCTruthClassifier.h"
+#include "TruthUtils/MagicNumbers.h"
+#include "xAODTruth/TruthParticle.h"
+#include "xAODTruth/TruthVertex.h"
 #include "TrkGeometry/TrackingGeometry.h"
 #include "TrkGeometry/TrackingVolume.h"
 

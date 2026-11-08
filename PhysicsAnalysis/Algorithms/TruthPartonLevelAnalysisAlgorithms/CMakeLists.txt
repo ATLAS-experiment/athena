@@ -11,7 +11,7 @@ atlas_add_library( TruthPartonLevelAnalysisAlgorithmsLib
   PUBLIC_HEADERS TruthPartonLevelAnalysisAlgorithms PartonHistory VectorHelpers
   INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
   LINK_LIBRARIES ${ROOT_LIBRARIES} AsgTools AsgMessagingLib AthContainers xAODEventInfo xAODTruth AnaAlgorithmLib
-  PRIVATE_LINK_LIBRARIES MCTruthClassifierLib )
+  PRIVATE_LINK_LIBRARIES TruthUtils )
 
 atlas_add_component( TruthPartonLevelAnalysisAlgorithms
   src/components/*.cxx

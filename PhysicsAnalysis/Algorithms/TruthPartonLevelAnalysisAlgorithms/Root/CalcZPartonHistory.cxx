@@ -10,7 +10,7 @@
 #include "VectorHelpers/LorentzHelper.h"
 
 #include "AthContainers/ConstAccessor.h"
-#include "MCTruthClassifier/IMCTruthClassifier.h"
+#include "TruthUtils/TruthClasses.h"
 
 #include <array>
 

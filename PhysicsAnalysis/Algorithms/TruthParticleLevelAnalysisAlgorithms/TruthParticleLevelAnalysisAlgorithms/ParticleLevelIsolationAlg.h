@@ -15,7 +15,7 @@
 #include <AsgTools/PropertyWrapper.h>
 
 // Framework includes
-#include <MCTruthClassifier/IMCTruthClassifier.h>
+#include <TruthUtils/TruthClasses.h>
 #include <xAODTruth/TruthParticleContainer.h>
 
 namespace CP {
