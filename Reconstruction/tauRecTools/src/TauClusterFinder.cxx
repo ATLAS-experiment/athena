@@ -16,7 +16,7 @@ TauClusterFinder::TauClusterFinder(const std::string& name) :
 
 
 StatusCode TauClusterFinder::executeTool(xAOD::TauJet& tau,
-					 const EventContext& /*ctx*/) const {
+					 const EventContext& ctx) const {
   tau.clearClusterLinks();
     
   if (tau.jet() == nullptr) {
@@ -50,7 +50,8 @@ StatusCode TauClusterFinder::executeTool(xAOD::TauJet& tau,
     ElementLink<xAOD::IParticleContainer> linkToCluster;
     linkToCluster.toContainedElement(
 				     *(static_cast<const xAOD::IParticleContainer*> (cluster->container())), 
-				     static_cast<const xAOD::IParticle*>(cluster));
+				     static_cast<const xAOD::IParticle*>(cluster),
+                                     ctx);
     tau.addClusterLink(linkToCluster);
   }
 

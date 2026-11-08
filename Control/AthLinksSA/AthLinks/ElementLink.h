@@ -135,6 +135,8 @@ public:
    bool toIndexedElement( BaseConstReference container, index_type index );
    /// Set link to point to given element (slowest)
    bool toContainedElement( BaseConstReference container, ElementType element );
+   bool toContainedElement( BaseConstReference container, ElementType element,
+                            const EventContext& ctx);
 
    /// Set link to point to an Element (slowest)
    bool setElement( ElementType element );

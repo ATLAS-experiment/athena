@@ -212,7 +212,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
         ElementLink<TrackCollection> link;
         link.setElement(*itr);
         auto trkPtr = std::make_unique<Trk::LinkToTrack>(link);
-        trkPtr->setStorableObject(*trackTES);
+        trkPtr->setStorableObject(*trackTES, ctx);
         selectedTracks.push_back(std::move(trkPtr));
     }
   }
@@ -254,7 +254,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
         ElementLink<xAOD::TrackParticleContainer> link;
         link.setElement(*itr);
         auto trkPtr = std::make_unique<Trk::LinkToXAODTrackParticle>(link);
-        trkPtr->setStorableObject(*trackParticles);
+        trkPtr->setStorableObject(*trackParticles, ctx);
         selectedTracks.push_back(std::move(trkPtr));
     }
   }
