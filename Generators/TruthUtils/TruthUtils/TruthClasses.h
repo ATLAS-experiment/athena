@@ -215,23 +215,7 @@ namespace MCTruthPartClassifier {
       "QCD",
       "OtherBSM",
       "MultiBoson"};
-
-      /** the vector of particle outcome */
-      std::vector<std::string> sParticleOutCome{
-      "NonDefinedOutCome",
-      "UnknownOutCome",
-      "UnConverted",
-      "Converted",
-      "NonInteract",
-      "NuclInteraction",
-      "ElectrMagInter",
-      "DecaytoElectron",
-      "DecaytoMuon",
-      "OneProng",
-      "ThreeProng",
-      "FiveProng"};
   };
-
 }
 
 #endif
