@@ -5,10 +5,9 @@
 // This absolutely needs to go first to ensure Eigen plugin is loaded
 #include "GeoPrimitives/GeoPrimitives.h"
 //
-#include "HgtdBlueprintNodeBuilder.h"
-
-#include "GeoModelKernel/GeoTube.h"
-#include "GeoModelKernel/GeoVPhysVol.h"
+#include <cstddef>
+#include <ranges>
+#include <string>
 
 #include "Acts/Definitions/Direction.hpp"
 #include "Acts/Definitions/Units.hpp"
@@ -22,33 +21,27 @@
 #include "Acts/Geometry/MaterialDesignatorBlueprintNode.hpp"
 #include "Acts/Geometry/PadBlueprintNode.hpp"
 #include "Acts/Geometry/ProtoLayer.hpp"
+#include "Acts/Geometry/StaticBlueprintNode.hpp"
 #include "Acts/Geometry/TrackingVolume.hpp"
 #include "Acts/Geometry/VolumeAttachmentStrategy.hpp"
-#include "Acts/Navigation/SurfaceArrayNavigationPolicy.hpp"
+#include "Acts/Geometry/VolumeResizeStrategy.hpp"
+#include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
 #include "Acts/Navigation/CylinderNavigationPolicy.hpp"
+#include "Acts/Navigation/SurfaceArrayNavigationPolicy.hpp"
 #include "Acts/Navigation/TryAllNavigationPolicy.hpp"
 #include "Acts/Surfaces/SurfaceArray.hpp"
 #include "Acts/Utilities/AxisDefinitions.hpp"
 #include "Acts/Utilities/AxisSpec.hpp"
-#include "Acts/Geometry/StaticBlueprintNode.hpp"
-#include "Acts/Geometry/VolumeResizeStrategy.hpp"
-#include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
-
-
-
-
 #include "ActsGeometry/ActsDetectorElement.h"
 #include "ActsGeometry/ActsElementVector.h"
 #include "ActsInterop/IdentityHelper.h"
 #include "ActsInterop/Logger.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
+#include "GeoModelKernel/GeoTube.h"
+#include "GeoModelKernel/GeoVPhysVol.h"
 #include "GeoPrimitives/GeoPrimitivesHelpers.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
-
-
-#include <cstddef>
-#include <ranges>
-#include <string>
+#include "HgtdBlueprintNodeBuilder.h"
 using namespace Acts;
 using namespace Acts::Experimental;
 using namespace Acts::UnitLiterals;
@@ -85,16 +78,16 @@ HgtdBlueprintNodeBuilder::buildBlueprintNode(
   }};
 
   auto itkHgtdNode =
-      std::make_shared<Acts::CylinderContainerBlueprintNode>(
-          "itkHgtd", AxisZ);
+      std::make_shared<Acts::CylinderContainerBlueprintNode>("itkHgtd", AxisZ);
 
   if (child) {
     itkHgtdNode->addChild(std::move(child));
   }
   buildHgtdBlueprintNode(gctx, *itkHgtdNode);
-  auto itkHgtdPad = std::make_shared<Acts::PadBlueprintNode>("itkHgtdPad", envelope);
+  auto itkHgtdPad =
+      std::make_shared<Acts::PadBlueprintNode>("itkHgtdPad", envelope);
   itkHgtdPad->addChild(std::move(itkHgtdNode));
-  
+
   auto idNode = std::make_shared<Acts::GeometryIdentifierBlueprintNode>();
   idNode->setDirectChildVolumeIdTo(s_hgtdEnvelopeId);
   idNode->addChild(std::move(itkHgtdPad));
@@ -102,8 +95,7 @@ HgtdBlueprintNodeBuilder::buildBlueprintNode(
 }
 
 void HgtdBlueprintNodeBuilder::buildHgtdBlueprintNode(
-    const Acts::GeometryContext& /*gctx*/,
-    Acts::BlueprintNode& node) {
+    const Acts::GeometryContext& /*gctx*/, Acts::BlueprintNode& node) {
   if (not m_hgtdMgr) {
     ATH_MSG_ERROR("HGTD manager not available");
     throw std::runtime_error("HGTD manager not available");
@@ -193,8 +185,7 @@ void HgtdBlueprintNodeBuilder::buildHgtdBlueprintNode(
 }
 
 void HgtdBlueprintNodeBuilder::addHgtdLayers(
-    Acts::BlueprintNode& parent, int bec, int index,
-    const std::string& name,
+    Acts::BlueprintNode& parent, int bec, int index, const std::string& name,
     std::vector<std::shared_ptr<Acts::Surface>>& surfaces, bool isInnermost) {
   using enum Acts::SurfaceArrayNavigationPolicy::LayerType;
   using enum Acts::CylinderVolumeBounds::Face;
@@ -210,13 +201,26 @@ void HgtdBlueprintNodeBuilder::addHgtdLayers(
   const auto inwardDisc = (bec > 0) ? NegativeDisc : PositiveDisc;
   const bool hasMaterial = (index != 3) || isInnermost;
 
+  // Surface-array grid: base r x phi grid scaled by the bin factor. The
+  // automatic bin count assumes rings of modules, which HGTD does not have: it
+  // gives one bin per module row (~1250 x ~1200 bins per layer).
+  const auto binsR = static_cast<std::size_t>(m_baseBinsR.value() *
+                                              m_numberOfBinsFactor.value());
+  const auto binsPhi = static_cast<std::size_t>(m_baseBinsPhi.value() *
+                                                m_numberOfBinsFactor.value());
+
   auto configureLayer = [&](auto& node) {
-    node.addLayer(name, [&surfaces](auto& layer) {
+    node.addLayer(name, [&surfaces, binsR, binsPhi](auto& layer) {
       layer.setNavigationPolicyFactory(
           Acts::NavigationPolicyFactory{}
               .add<Acts::SurfaceArrayNavigationPolicy>(
-                  Acts::SurfaceArrayNavigationPolicy::Config{.layerType = Disc,
-                                                             .bins = {0, 0}, .numberOfBinsFactor = 5.0})
+                  Acts::SurfaceArrayNavigationPolicy::Config{
+                      .layerType = Disc,
+                      .bins = {binsR, binsPhi},
+                      .envelope = Acts::ExtentEnvelope{{
+                          .z = {0.2_mm, 0.2_mm},
+                          .r = {50_mm, 50_mm},
+                      }}})
               .add<Acts::CylinderNavigationPolicy>()
               .asUniquePtr());
       layer.setSurfaces(surfaces);
