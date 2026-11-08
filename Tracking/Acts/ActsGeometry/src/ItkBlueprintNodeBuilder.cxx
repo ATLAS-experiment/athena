@@ -212,7 +212,8 @@ StatusCode ItkBlueprintNodeBuilder::initialize() {
   for (const Gaudi::Property<std::vector<unsigned int>>* window :
        {&m_itkPixelInnerBarrelNeighborWindow, &m_itkPixelInnerEndcapNeighborWindow,
         &m_itkPixelOuterBarrelNeighborWindow, &m_itkPixelOuterEndcapNeighborWindow,
-        &m_itkStripBarrelNeighborWindow, &m_itkStripEndcapNeighborWindow}) {
+        &m_itkStripBarrelNeighborWindow, &m_itkStripInnerBarrelNeighborWindow,
+        &m_itkStripEndcapNeighborWindow}) {
     if (!toNeighborWindow(window->value()).has_value()) {
       ATH_MSG_FATAL((*window)
                     << " must hold two bin counts of at most "
@@ -225,6 +226,17 @@ StatusCode ItkBlueprintNodeBuilder::initialize() {
                   << " exceeds " << static_cast<unsigned int>(std::numeric_limits<std::uint8_t>::max()));
     return StatusCode::FAILURE;
   }
+  if (!(m_itkStripBarrelBinFactor.value() > 0.)) {
+    ATH_MSG_FATAL(m_itkStripBarrelBinFactor << " must be positive");
+    return StatusCode::FAILURE;
+  }
+  // the window sizes were checked above
+  ATH_MSG_DEBUG("Strip barrel surface arrays: " << m_itkStripBarrelBinFactor.value()
+               << " bins per module, neighbor window bound {phi, z} {"
+               << m_itkStripInnerBarrelNeighborWindow.value()[0] << ", "
+               << m_itkStripInnerBarrelNeighborWindow.value()[1] << "} in layers 0-1, {"
+               << m_itkStripBarrelNeighborWindow.value()[0] << ", "
+               << m_itkStripBarrelNeighborWindow.value()[1] << "} in layers 2-3");
 
   // Retrieve the detector managers from the detector store for enabled systems
   if (m_buildPixel) {
@@ -240,11 +252,12 @@ StatusCode ItkBlueprintNodeBuilder::initialize() {
 Acts::SurfaceArrayNavigationPolicy::Config
 ItkBlueprintNodeBuilder::surfaceArrayConfig(
     Acts::SurfaceArrayNavigationPolicy::LayerType layerType,
-    const Gaudi::Property<std::vector<unsigned int>>& neighborWindow) const {
+    const Gaudi::Property<std::vector<unsigned int>>& neighborWindow,
+    double binFactor) const {
   return Acts::SurfaceArrayNavigationPolicy::Config{
       .layerType = layerType,
       .bins = {0, 0},
-      .numberOfBinsFactor = 5.0,
+      .numberOfBinsFactor = binFactor,
       .neighborWindow = *toNeighborWindow(neighborWindow.value()),
       .overfill = static_cast<std::uint8_t>(m_surfaceArrayOverfill.value())};
 }
@@ -902,9 +915,13 @@ void ItkBlueprintNodeBuilder::buildItkStripBlueprintNode(
             for (const auto& [ilayer, surfaces] : layers) {
               ATH_MSG_DEBUG("- Layer " << ilayer << " has " << surfaces.size()
                                        << " surfaces");
+              // layers 0 and 1: short strips
               addStripBarrelLayer(
                   barrel, ilayer, surfaces,
-                  surfaceArrayConfig(Cylinder, m_itkStripBarrelNeighborWindow));
+                  surfaceArrayConfig(Cylinder,
+                                     ilayer < 2 ? m_itkStripInnerBarrelNeighborWindow
+                                                : m_itkStripBarrelNeighborWindow,
+                                     m_itkStripBarrelBinFactor));
             }
           });
     });

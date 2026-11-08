@@ -35,14 +35,31 @@ class HgtdBlueprintNodeBuilder
 
   std::shared_ptr<ActsElementVector> m_elementStore{nullptr};
 
+  /// Base surface-array grid of each HGTD layer
+  Gaudi::Property<unsigned int> m_baseBinsR{
+      this, "BaseBinsR", 1,
+      "Bins in r of the sensitive-surface grid of each HGTD layer, before "
+      "NumberOfBinsFactor"};
+  Gaudi::Property<unsigned int> m_baseBinsPhi{
+      this, "BaseBinsPhi", 50,
+      "Bins in phi of the sensitive-surface grid of each HGTD layer, before "
+      "NumberOfBinsFactor"};
+
+  /// Scale of the base grid above, along both axes
+  Gaudi::Property<double> m_numberOfBinsFactor{
+      this, "NumberOfBinsFactor", 5.0,
+      "Scale of the BaseBinsR x BaseBinsPhi (r x phi) sensitive-surface grid "
+      "of each HGTD "
+      "layer (Gen1: NumberOfHgtdBinsFactor of the TrackingGeometrySvc)"};
+
   /** @brief Build the HGTD Blueprint Node
    * @param gctx Geometry context
    * @param node The node to add the HGTD node to */
   void buildHgtdBlueprintNode(const Acts::GeometryContext& gctx,
                               Acts::BlueprintNode& node);
 
-  void addHgtdLayers(Acts::BlueprintNode& parent, int bec,
-                     int layer, const std::string& name,
+  void addHgtdLayers(Acts::BlueprintNode& parent, int bec, int layer,
+                     const std::string& name,
                      std::vector<std::shared_ptr<Acts::Surface>>& surfaces,
                      bool isInnermost);
 };

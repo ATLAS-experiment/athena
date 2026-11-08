@@ -49,7 +49,7 @@ class ItkBlueprintNodeBuilder
   /// as {phi, z} for the barrel and {r, phi} for the endcap. The lookup sizes
   /// the window from the crossing angle and the layer thickness, so these
   /// values only cap it. The defaults cover the steepest crossing for
-  /// |z0| < 200 mm at a bin factor of 5.
+  /// |z0| < 200 mm at the bin factor of the layer (5, 2.5 in the strip barrel).
   Gaudi::Property<std::vector<unsigned int>> m_itkPixelInnerBarrelNeighborWindow{
       this, "ITkPixelInnerBarrelNeighborWindow", {1, 8},
       "Neighbor window bound {phi, z} of the ITk inner pixel barrel layers"};
@@ -65,6 +65,18 @@ class ItkBlueprintNodeBuilder
   Gaudi::Property<std::vector<unsigned int>> m_itkStripBarrelNeighborWindow{
       this, "ITkStripBarrelNeighborWindow", {1, 4},
       "Neighbor window bound {phi, z} of the ITk strip barrel layers"};
+  /// The two innermost strip barrel layers have short strips (rows of 24 mm
+  /// along z) and are crossed at the steepest angles (|eta| up to 1.9): their
+  /// window reaches 6 bins of 9.8 mm in z
+  Gaudi::Property<std::vector<unsigned int>> m_itkStripInnerBarrelNeighborWindow{
+      this, "ITkStripInnerBarrelNeighborWindow", {1, 6},
+      "Neighbor window bound {phi, z} of the two innermost ITk strip barrel layers (short strips)"};
+  /// Surface array bins per module along each axis in the strip barrel layers:
+  /// half the factor of the other layers, so that the window above stays
+  /// small enough for a cheap neighbour cache
+  Gaudi::Property<double> m_itkStripBarrelBinFactor{
+      this, "ITkStripBarrelBinFactor", 2.5,
+      "Surface array bins per module along each axis of the ITk strip barrel layers"};
   Gaudi::Property<std::vector<unsigned int>> m_itkStripEndcapNeighborWindow{
       this, "ITkStripEndcapNeighborWindow", {2, 1},
       "Neighbor window bound {r, phi} of the ITk strip endcap layers"};
@@ -73,12 +85,17 @@ class ItkBlueprintNodeBuilder
   Gaudi::Property<unsigned int> m_surfaceArrayOverfill{this, "SurfaceArrayOverfill", 0,
       "Extra cells per direction and axis that each surface fills in the surface arrays"};
 
+  /// Surface array bins per module along each axis, outside the strip barrel
+  static constexpr double s_binFactor = 5.0;
+
   /// Configuration of the surface array navigation policy of one layer
   /// @param layerType The layer type of the surface array
   /// @param neighborWindow The neighbor window bound property, checked in initialize()
+  /// @param binFactor Surface array bins per module along each axis
   Acts::SurfaceArrayNavigationPolicy::Config surfaceArrayConfig(
       Acts::SurfaceArrayNavigationPolicy::LayerType layerType,
-      const Gaudi::Property<std::vector<unsigned int>>& neighborWindow) const;
+      const Gaudi::Property<std::vector<unsigned int>>& neighborWindow,
+      double binFactor = s_binFactor) const;
 
   void buildItkStripBlueprintNode(const Acts::GeometryContext& gctx,
                                   Acts::BlueprintNode& node);
