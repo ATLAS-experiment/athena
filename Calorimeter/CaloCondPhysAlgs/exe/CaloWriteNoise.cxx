@@ -13,7 +13,6 @@
 
 #include <iostream>
 #include <iomanip>
-#include <climits>
 #include <fstream>
 
 #include <boost/program_options.hpp>
@@ -64,8 +63,6 @@ int main(int argc, char ** argv) {
      ( "help,h", "produce help message" )
      ( "runstart,r", boost::program_options::value<uint32_t>()->default_value(0), "run number to start IOV" )
      ( "lbstart,l", boost::program_options::value<uint32_t>()->default_value(0), "lumi block to start IOV" )
-     ( "runend,R", boost::program_options::value<uint32_t>()->default_value(0), "run number to end IOV (infty if 0)" )
-     ( "lbend,L", boost::program_options::value<uint32_t>()->default_value(0), "lumi block to end IOV (infty if 0)" )
      ( "input,i", boost::program_options::value<std::string>()->default_value("calonoise.txt"), "name of input text file" )
      ( "output,t", boost::program_options::value<std::string>()->default_value(""), "name of output text file" )
      ( "mu,,", boost::program_options::value<uint32_t>()->default_value(0), "mu for which to fill noise" )
@@ -103,9 +100,7 @@ int main(int argc, char ** argv) {
     std::string ftag(arguments["tag"].as<std::string>());
     bool isRead(arguments["readonly"].as<bool>());
     unsigned int runs(arguments["runstart"].as<uint32_t>());
-    unsigned int rune=(arguments["runend"].as<uint32_t>()) > 0 ? arguments["runend"].as<uint32_t>() : UINT_MAX;
     unsigned int lbs=(arguments["lbstart"].as<uint32_t>());
-    unsigned int lbe=(arguments["lbend"].as<uint32_t>()) > 0 ? arguments["lbend"].as<uint32_t>() : UINT_MAX;
     unsigned int mu=(arguments["mu"].as<uint32_t>());
     float dt=(arguments["dt"].as<float>());
     std::string server(arguments["crest"].as<std::string>());
@@ -235,8 +230,7 @@ int main(int argc, char ** argv) {
  
            // IOV:
            uint64_t since = ENCODE_RUNLUMIBLOCK(runs, lbs);
-           uint64_t until = ENCODE_RUNLUMIBLOCK(rune, lbe);
-           tag->addPayload(container, since, until);
+           tag->addPayload(container, since);
  
            std::cout << "All IOVs written successfully!" << std::endl << std::endl;
        } catch (const std::exception& e) {

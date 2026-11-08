@@ -58,17 +58,9 @@ def main(args = None):
     parser.add_argument("--db",  default=DEFAULT_DB,  help=f"DB connection string (default: {DEFAULT_DB})")
     parser.add_argument("--since", type=int, default=0,
                         help="Start time for IOVs (default: 0)")
-    parser.add_argument("--until", type=lambda x: int(x, 0), default=0xFFFFFFFFFFFFFFFF,
-                        help="End time for IOVs (default: 0xFFFFFFFFFFFFFFFF)")
     parser.add_argument("--dataA", type=str, default="data.json",
                         help="Path to the JSON file containing the data for A-side (default: data.json)")
     args = parser.parse_args(args)
-    since = args.since if args.since > 0 else None
-    until = args.until if args.until > 0 else None
-
-    if(args.since > 0 and args.until > 0 and until < since):
-        print(f"✗ Error: until = {until} and since = {since}")
-        sys.exit(1)
 
     sep("CHAI – Tag Content Creation")
     print(f"  Tag : {args.tag}")
@@ -206,12 +198,11 @@ def main(args = None):
     # Store the container directly using add_payload
     try:
         since = args.since
-        until = args.until
         # Store the container payload
-        tag.add_payload(container, since, until)
+        tag.add_payload(container, since)
 
         payload_json = container.to_json()
-        print(f"  ✓ Stored IOV: since={since}, until={until}")
+        print(f"  ✓ Stored IOV: since={since}")
         print(f"    Payload size: {len(payload_json)} bytes")
         print(f"    String length: {len(json.dumps(json_dataA))} characters")
 
