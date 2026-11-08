@@ -4,6 +4,7 @@
 
 #include "LArCalibTools/LArCompleteToFlat.h"
 
+#include "AthenaBaseComps/AthCheckMacros.h"
 #include "LArRawConditions/LArPedestalComplete.h"
 #include "LArCOOLConditions/LArPedestalFlat.h"
 
@@ -14,6 +15,7 @@
 #include "LArRawConditions/LAruA2MeVMC.h"
 #include "LArRawConditions/LArHVScaleCorrComplete.h"
 #include "LArRawConditions/LArMphysOverMcalComplete.h"
+#include "LArRawConditions/LArNoiseSym.h"
 
 #include "LArRawConditions/LArShapeComplete.h"
 #include "LArCOOLConditions/LArShapeFlat.h"
@@ -146,7 +148,7 @@ CondAttrListCollection* LArCompleteToFlat::pedestalFlat(const ILArPedestal* inpu
 
   CondAttrListCollection* collPed=new CondAttrListCollection(true);
 
-  const unsigned nGain = m_isSC ? 1 : 3;
+  const unsigned nGain = m_isSC ? 1 : m_nGains.value();
   for (unsigned gain=0;gain<nGain;++gain) {
     coral::AttributeList* attrList = new coral::AttributeList(*spec);               
     (*attrList)["version"].setValue(0U);                               
@@ -189,6 +191,7 @@ CondAttrListCollection* LArCompleteToFlat::pedestalFlat(const ILArPedestal* inpu
     ATH_MSG_ERROR( "Failed to record CondAttrListCollection for pedestal with key " << outputName );
     return nullptr;
   }
+  ATH_MSG_INFO("Recorded CondAttrListCollection for pedestal with key " << outputName );
   ATH_MSG_INFO( "Converted Pedestal to inline storage. Total number of channels=" << nChannels );
   if (nCopiedEMPS) 
     ATH_MSG_INFO( "\t Number of low gain EMBPS channels copied from medium gain" <<  nCopiedEMPS );    
@@ -212,7 +215,7 @@ CondAttrListCollection* LArCompleteToFlat::ofcFlat(const ILArOFC* input, const s
   spec->extend<unsigned>("version");
   CondAttrListCollection* collOFC=new CondAttrListCollection(true);
   int phase = 0;
-  const unsigned nGain = m_isSC ? 1 : 3;
+  const unsigned nGain = m_isSC ? 1 : m_nGains.value();
   for (unsigned gain=0;gain<nGain;++gain) {
     
     //Auto-detect the number of samples (at least in theory, could be different for each gain)
@@ -342,7 +345,7 @@ CondAttrListCollection* LArCompleteToFlat::shapeFlat(const LArShapeComplete* inp
   spec->extend<unsigned>("version");
   CondAttrListCollection* coll=new CondAttrListCollection(true);
   
-  const unsigned nGain = m_isSC ? 1 : 3;
+  const unsigned nGain = m_isSC ? 1 : m_nGains.value();
   for (unsigned gain=0;gain<nGain;++gain) {
 
     unsigned nSamples=0;
@@ -474,7 +477,7 @@ CondAttrListCollection* LArCompleteToFlat::rampFlat(const ILArRamp* input, const
      return coll;
   }
 
-  const unsigned nGain = m_isSC ? 1 : 3;
+  const unsigned nGain = m_isSC ? 1 : m_nGains.value();
   for (unsigned gain=0;gain<nGain;++gain) {
 
     unsigned nPoints=0;
@@ -545,6 +548,7 @@ CondAttrListCollection* LArCompleteToFlat::rampFlat(const ILArRamp* input, const
     ATH_MSG_ERROR( "Failed to record CondAttrListCollection for ramp with key " << outputName );
     return nullptr;
   }
+  ATH_MSG_INFO("Recoreded CondAttrListCollection for ramp with key " << outputName );
 
   ATH_MSG_INFO( "Converted Ramps to inline storage. Total number of channels " << nChannels );
   ATH_MSG_INFO( "Number of channels filled with default ramp {0,1} " << nDefault << " (including disconnected)" );
@@ -650,12 +654,51 @@ AthenaAttributeList* LArCompleteToFlat::DSPThresholdsFlat(const LArDSPThresholds
 }
 
 
+CondAttrListCollection* LArCompleteToFlat::noiseFlat(const ILArNoise* input, const std::string& outputName){
+  ATH_MSG_INFO("LArCompleteToFlat::pedestalFlat, starting");
+
+  unsigned nChannels=0;
+
+  coral::AttributeListSpecification* spec = new coral::AttributeListSpecification();
+  spec->extend("Noise", "blob");
+  spec->extend<unsigned>("version");
+
+  CondAttrListCollection* coll=new CondAttrListCollection(true);
+
+  const unsigned nGain = m_isSC ? 1 : m_nGains.value();
+  for (unsigned gain=0;gain<nGain;++gain) {
+    coral::AttributeList* attrList = new coral::AttributeList(*spec);               
+    (*attrList)["version"].setValue(0U);                               
+    coral::Blob& blob=(*attrList)["Noise"].data<coral::Blob>();
+    blob.resize(m_hashMax*sizeof(float));
+    float* pblob=static_cast<float*>(blob.startingAddress());
+    for (unsigned hs=0;hs<m_hashMax;++hs) {
+      const HWIdentifier chid=m_onlineID->channel_Id(hs);
+      float noiseVal=input->noise(chid,gain);
+      pblob[hs]=noiseVal;
+      ++nChannels;
+    }
+     coll->add(gain,*attrList);
+  }
+
+  StatusCode sc=detStore()->record(coll,outputName);//"/LAR/ElecCalibFlat/Noise");
+  if (sc.isFailure()) {
+    ATH_MSG_ERROR( "Failed to record CondAttrListCollection for noise with key " << outputName );
+    return nullptr;
+  }
+  ATH_MSG_INFO("Recoreded CondAttrListCollection for noise with key " << outputName );
+
+  ATH_MSG_INFO( "Converted Ramps to inline storage. Total number of channels " << nChannels );
+ 
+  return coll;
+}
+
+
 
 StatusCode LArCompleteToFlat::stop() {  
-  std::string flatName = "/LAR/ElecCalibFlat";
   StatusCode sc;
     if(m_isSC){
-      flatName += "SC";
+      m_flatName += "SC";
       const LArOnline_SuperCellID* ll = nullptr;
       sc = detStore()->retrieve(ll, "LArOnline_SuperCellID");
       if (sc.isFailure()) {
@@ -693,7 +736,7 @@ StatusCode LArCompleteToFlat::stop() {
 	ATH_MSG_WARNING( "Will not process LAruA2MeV" );
       }
     } else {
-      uA2MeVFlat(uA2MeVComplete, flatName+"/uA2MeV");
+      uA2MeVFlat(uA2MeVComplete, m_flatName+"/uA2MeV");
     }
   }//end if have m_uA2MeV
     
@@ -709,7 +752,7 @@ StatusCode LArCompleteToFlat::stop() {
 	ATH_MSG_WARNING( "Will not process LArDAC2uA" );
       }  
     } else {
-      DAC2uAFlat(DAC2uAComplete, flatName+"/DAC2uA");
+      DAC2uAFlat(DAC2uAComplete, m_flatName+"/DAC2uA");
     }
   }//end if have m_DAC2uAInput
 
@@ -724,9 +767,9 @@ StatusCode LArCompleteToFlat::stop() {
 	ATH_MSG_WARNING( "Will not process LArMphysOverMcal" );
       }   
     } else {
-      const int nGain = m_isSC ? 1 : 3;
+      const int nGain = m_isSC ? 1 : m_nGains.value();
       //const bool wfcal = m_isSC ? true : false;
-      singleFloatFlat("MphysOverMcal", MphysOverMcalComplete, flatName+"/MphysOverMcal",nGain,false); //No MphysOverMCal for FCAL
+      singleFloatFlat("MphysOverMcal", MphysOverMcalComplete, m_flatName+"/MphysOverMcal",nGain,false); //No MphysOverMCal for FCAL
     }
   }//end if have m_MphysOverMcalInput
 
@@ -742,12 +785,12 @@ StatusCode LArCompleteToFlat::stop() {
 	ATH_MSG_WARNING( "Will not process LArHVScaleCorr" );
       }   
     } else {
-      singleFloatFlat("HVScaleCorr", HVScaleCorrComplete, flatName+"/HVScaleCorr",1);
+      singleFloatFlat("HVScaleCorr", HVScaleCorrComplete, m_flatName+"/HVScaleCorr",1);
     }
   }//end if have m_HVScaleCorrInput
 
   if (!m_PedestalInput.empty()) {
-    const LArPedestalComplete* pedComplete = nullptr;
+    const ILArPedestal* pedComplete = nullptr;
     sc=detStore()->retrieve(pedComplete,m_PedestalInput);
     if (sc.isFailure()) {
       if(m_forceStop) { 
@@ -757,7 +800,7 @@ StatusCode LArCompleteToFlat::stop() {
 	ATH_MSG_WARNING( "Will not process LArPedestal" );
       }   
     } else {
-      pedestalFlat(pedComplete,flatName+"/Pedestal");
+      pedestalFlat(pedComplete,m_flatName+"/Pedestal");
     }
   }//end if have m_pedestalInput
 
@@ -781,7 +824,7 @@ StatusCode LArCompleteToFlat::stop() {
             ATH_MSG_WARNING("Do not have OFCb weights !!!! Not applying");
          }
       } 
-      ofcFlat(ofcComplete,flatName+"/OFC",weightsComplete);
+      ofcFlat(ofcComplete,m_flatName+"/OFC",weightsComplete);
     }
   }//end have m_OFCInput
   if (!m_OFCCaliInput.empty()) {
@@ -795,7 +838,7 @@ StatusCode LArCompleteToFlat::stop() {
 	ATH_MSG_WARNING( "Will not process LArOFCComplete (cali)" );
       }
     } else {
-      ofcFlat(ofcComplete,flatName+"/OFCCali");
+      ofcFlat(ofcComplete,m_flatName+"/OFCCali");
 
     }
   }//end have m_OFCInput
@@ -811,13 +854,13 @@ StatusCode LArCompleteToFlat::stop() {
 	ATH_MSG_WARNING( "Will not process LArShapeComplete" );
       }   
     } else {
-      shapeFlat(shapeComplete,flatName+"/Shape");
+      shapeFlat(shapeComplete,m_flatName+"/Shape");
     }
   }//end if have m_shapeInput
 
   //Ramp
   if (!m_RampInput.empty()) { 
-    const LArRampComplete* rampComplete = nullptr;
+    const ILArRamp* rampComplete = nullptr;
     sc=detStore()->retrieve(rampComplete,m_RampInput);
     if (sc.isFailure()) {
       if(m_forceStop) { 
@@ -827,7 +870,7 @@ StatusCode LArCompleteToFlat::stop() {
 	ATH_MSG_WARNING( "Will not process LArRampComplete" );
       }   
     } else {
-      rampFlat(rampComplete,flatName+"/Ramp");
+      rampFlat(rampComplete,m_flatName+"/Ramp");
     }
   }
   
@@ -859,6 +902,14 @@ StatusCode LArCompleteToFlat::stop() {
     */
   } //end if have m__DSPThresholdsInput
   
+
+  if (!m_noiseInput.empty()) {
+    const ILArNoise* noiseInp=nullptr;
+    ATH_CHECK(detStore()->retrieve(noiseInp,m_noiseInput));
+    noiseFlat(noiseInp, m_flatName+="/Noise");
+  }
+
+
 
   return StatusCode::SUCCESS; 
 }
