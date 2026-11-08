@@ -4,15 +4,15 @@
 
 #include "NswSegmentFinderAlg.h"
 
-#include <MuonSpacePoint/SpacePointPerLayerSplitter.h>
-#include <MuonSpacePoint/SpacePointPerLayerSorter.h>
-#include <MuonTruthHelpers/MuonSimHitHelpers.h>
-#include <MuonVisualizationHelpersR4/VisualizationHelpers.h>
+#include "MuonSpacePoint/SpacePointPerLayerSplitter.h"
+#include "MuonSpacePoint/SpacePointPerLayerSorter.h"
+#include "MuonSpacePoint/SpacePointHelpers.h"
+#include "MuonTruthHelpers/MuonSimHitHelpers.h"
+#include "MuonVisualizationHelpersR4/VisualizationHelpers.h"
 #include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
 
-
 #include "MuonPatternEvent/SegmentFitterEventData.h"
-#include "MuonSpacePoint/SpacePointHelpers.h"
+
 
 #include "xAODMuonPrepData/MMCluster.h"
 #include "xAODMuonPrepData/sTgcMeasurement.h"
@@ -20,12 +20,14 @@
 #include "TruthUtils/HepMCHelpers.h"
 
 #include "Acts/Seeding/CombinatorialSeedSolver.hpp"
+#include "Acts/Definitions/Units.hpp"
 
 #include <algorithm>
 #include <ranges>
 #include <format>
 
 using namespace Acts::Experimental::CombinatorialSeedSolver;
+using namespace Acts::UnitLiterals;
 namespace {
     inline const MuonGMR4::StripDesign& getDesign(const MuonR4::SpacePoint& sp) {
         if (sp.type() == xAOD::UncalibMeasType::MMClusterType) {
@@ -59,7 +61,6 @@ namespace {
             }
             return 0.5* design.stripLength(prd->channelNumber());
         }
-    
         return 0.;
     }
     inline std::string sTgcChannelType(const int chType) {
@@ -67,16 +68,13 @@ namespace {
                chType == sTgcIdHelper::Wire ? "W" : "P";
     }
 
-    inline int multilayer(const MuonR4::SpacePoint& sp,
-                      const Muon::IMuonIdHelperSvc& idHelperSvc) {
-        const Identifier id = sp.identify();
-        if (idHelperSvc.issTgc(id)) {
-            return idHelperSvc.stgcIdHelper().multilayer(id);
+    inline int multilayer(const MuonR4::SpacePoint& sp) {
+        const MuonGMR4::MuonReadoutElement* re = sp.primaryMeasurement()->readoutElement();
+        if (re->detectorType() == ActsTrk::DetectorType::Mm) {
+            return static_cast <const MuonGMR4::MmReadoutElement*>(re)->multilayer();
         }
-        if (idHelperSvc.isMM(id)) {
-            return idHelperSvc.mmIdHelper().multilayer(id);
-        }
-        return 0;   // not an NSW measurement
+        assert(re->detectorType() == ActsTrk::DetectorType::sTgc);
+        return static_cast<const MuonGMR4::sTgcReadoutElement*>(re)->multilayer();
     }
 
     //local struct to encapsulate hit candidates data (e.g for seed extension)
@@ -120,7 +118,6 @@ StatusCode NswSegmentFinderAlg::initialize() {
 
     SegmentAmbiSolver::Config ambicfg{};
     m_ambiSolver = std::make_unique<SegmentAmbiSolver>(name(), std::move(ambicfg));
-
 
     if(m_dumpSeedStatistics){
         m_seedCounter = std::make_unique<SeedStatistics>();
@@ -169,6 +166,7 @@ inline NswSegmentFinderAlg::HitWindow
     const Amg::Vector3D estPlaneArrivalDn = SeedingAux::extrapolateToPlane(beamSpotPos, dirEstDn, testHit); 
 
     bool below{true}, above{true};
+    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Check hit "<<testHit<<", orientation: "<<classifyStrip(testHit)<<".");
     switch (classifyStrip(testHit)) {
         using enum StripOrient;
         case U:
@@ -191,16 +189,14 @@ inline NswSegmentFinderAlg::HitWindow
             /// Analogous check for the upper edge
             above = estPlaneArrivalUp.y() < hY;
             break;
-        }
-        case P:{
+        } case P: {
             break;
-        }
-        case Unknown:{
+        } case Unknown:{
             break;
         }
 
     }
-    ATH_MSG_VERBOSE("Hit " << m_idHelperSvc->toString(testHit.identify())
+    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Hit " << m_idHelperSvc->toString(testHit.identify())
                 << (below || above ? " is outside the window" : " is inside the window"));
     if(below) {
         return HitWindow::tooLow;
@@ -211,79 +207,93 @@ inline NswSegmentFinderAlg::HitWindow
     return HitWindow::inside;
 };
 
-/// Macro to check whether a hit is compatible with the hit corridor
-#define TEST_HIT_CORRIDOR(LAYER, HIT_ITER, START_LAYER)               \
-{                                                                     \
-    const SpacePoint* testMe = combinatoricLayers[LAYER].get()[HIT_ITER]; \
-    if (usedHits[LAYER].get()[HIT_ITER] > m_maxUsed) {                 \
-        ATH_MSG_VERBOSE(__func__<<":"<<__LINE__<<" - "     \
-            <<m_idHelperSvc->toString(testMe->identify())  \
-            <<" already used in good seed." );             \
-        continue;                                          \
-    }                                                      \
-    const HitWindow inWindow = hitFromIPCorridor(*testMe, beamSpot, dirEstUp, dirEstDn); \
-    if(inWindow == HitWindow::tooHigh) {                       \
-        ATH_MSG_VERBOSE(__func__<<":"<<__LINE__<<" - Hit "     \
-            <<m_idHelperSvc->toString(testMe->identify())      \
-            <<" is beyond the corridor. Break loop");          \
-        break;                                                 \
-    } else if (inWindow == HitWindow::tooLow) {                \
-        START_LAYER =  HIT_ITER + 1;                           \
-        ATH_MSG_VERBOSE(__func__<<":"<<__LINE__<<" - Hit "     \
-            <<m_idHelperSvc->toString(testMe->identify())      \
-            <<" is still below the corridor. Update start to " \
-             <<START_LAYER);                                   \
-        continue;                                              \
-    }                                                          \
-}
-
 void NswSegmentFinderAlg::constructPreliminarySeeds(const Amg::Vector3D& beamSpot,
-                                                   const HitLaySpan_t& combinatoricLayers,
-                                                   const UsedHitSpan_t& usedHits,
-                                                   InitialSeedVec_t& seedHitsFromLayers) const {
+                                                    const HitLaySpan_t& combinatoricLayers,
+                                                    const UsedHitSpan_t& usedHits,
+                                                    InitialSeedVec_t& seedHitsFromLayers) const {
     /// Assign enough memory to the vector
     seedHitsFromLayers.clear();
     std::size_t maxSize{1};
-    for (const HitVec& hitVec : combinatoricLayers) {
+    for (const HitSpan_t& hitVec : combinatoricLayers) {
         maxSize = maxSize * hitVec.size();
     }
     seedHitsFromLayers.reserve(maxSize);
 
     unsigned iterLay0{0}, iterLay1{0}, iterLay2{0}, iterLay3{0};    
     unsigned startLay1{0}, startLay2{0}, startLay3{0};
-    
-    for( ; iterLay0 <  combinatoricLayers[0].get().size() ; ++iterLay0){
+    /** @brief Test whether a hit in a combinatoric layer is within a 
+     *         corridor cone that is defined by the first hit. If the hit
+     *         is below or above the corridor limit, the iterators are updated
+     *         accordingly to avoid a testing with subsequent corridors
+     *  @param dirEstDn: The lower edge direction of the defined corridor
+     *  @param dirEstUp: The upper edge direction of the defined corridor
+     *  @param layer: From which combinatoric layer the hit shall be picked [1-3]
+     *  @param hitIter: The index iterator within the layer. Will be set to maximum if
+     *                  the hit exceeds the upper limit (Subsequent hits will share the same destiny)
+     *  @param startIter: The current iterator from which the loop over the hits in the combinatoric layer
+     *                     will start */
+    auto testHitCorridor = [&](const Amg::Vector3D& dirEstDn,
+                                const Amg::Vector3D& dirEstUp,
+                                const unsigned layer,
+                                unsigned& hitIter,
+                                unsigned& startIter)  -> bool {
+        const SpacePoint* testMe = combinatoricLayers[layer][hitIter];
+        if (usedHits[layer][hitIter] > m_maxUsed) {
+            ATH_MSG_VERBOSE(__func__<<": "<<__LINE__<<" - Space point "<<(*testMe)
+                           <<" is already defined in good seed");
+            return false;
+        }
+        switch (hitFromIPCorridor(*testMe, beamSpot, dirEstUp, dirEstDn)) {
+            case HitWindow::tooHigh: {
+                hitIter = combinatoricLayers[layer].size();
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<(*testMe)
+                                <<" is beyond the corridor. Break loop.");
+                return false;
+            } case HitWindow::tooLow: {
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - "<<(*testMe)
+                            <<" is still below the corridor. Update start counter ");
+                startIter = hitIter + 1;
+                return false;
+            } case HitWindow::inside: {
+                break;
+            }
+        }
+        return true;
+    };
+
+    for( ; iterLay0 <  combinatoricLayers[0].size() ; ++iterLay0){
         /// The hit is alrady in a good seed. Don't consider again
-        if (usedHits[0].get()[iterLay0] > m_maxUsed) {
+        if (usedHits[0][iterLay0] > m_maxUsed) {
             continue;
         }
-        const SpacePoint* hit0 = combinatoricLayers[0].get()[iterLay0];
+        const SpacePoint* hit0 = combinatoricLayers[0][iterLay0];
         /// Construct the beamspot to first hit connection to guestimate the angle
         const Amg::Vector3D initSeedDir{(beamSpot - hit0->localPosition()).unit()};
         const Amg::Vector3D dirEstUp = Amg::dirFromAngles(initSeedDir.phi(), initSeedDir.theta() - m_windowTheta); 
         const Amg::Vector3D dirEstDn = Amg::dirFromAngles(initSeedDir.phi(), initSeedDir.theta() + m_windowTheta); 
 
-        ATH_MSG_VERBOSE("Reference hit: "<<m_idHelperSvc->toString(hit0->identify())
-                      <<", position: "<<Amg::toString(hit0->localPosition())
-                      <<", seed dir: "<<Amg::toString(initSeedDir)
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Reference hit: "<<(*hit0)<<", seed dir: "<<Amg::toString(initSeedDir)
                       <<", seed plane: "<<Amg::toString(SeedingAux::extrapolateToPlane(beamSpot, initSeedDir, *hit0)));
         /** Apply cut window on theta of the seed. */
-        for( iterLay1 = startLay1; iterLay1 <  combinatoricLayers[1].get().size() ; ++iterLay1){
-            TEST_HIT_CORRIDOR(1, iterLay1, startLay1);
-            for( iterLay2 = startLay2; iterLay2 < combinatoricLayers[2].get().size() ; ++iterLay2){
-                TEST_HIT_CORRIDOR(2, iterLay2, startLay2);
-                for( iterLay3 = startLay3; iterLay3 < combinatoricLayers[3].get().size(); ++iterLay3){
-                    TEST_HIT_CORRIDOR(3, iterLay3, startLay3);
-                    seedHitsFromLayers.emplace_back(std::array{hit0, combinatoricLayers[1].get()[iterLay1], 
-                                                           combinatoricLayers[2].get()[iterLay2],
-                                                           combinatoricLayers[3].get()[iterLay3]}); 
+        for( iterLay1 = startLay1; iterLay1 <  combinatoricLayers[1].size() ; ++iterLay1){
+            if (!testHitCorridor(dirEstDn, dirEstUp, 1, iterLay1, startLay1)) {
+                continue;
+            }
+            for( iterLay2 = startLay2; iterLay2 < combinatoricLayers[2].size() ; ++iterLay2){
+                if (!testHitCorridor(dirEstDn, dirEstUp, 2, iterLay2, startLay2)) {
+                    continue;
+                }
+                for( iterLay3 = startLay3; iterLay3 < combinatoricLayers[3].size(); ++iterLay3){
+                    if (!testHitCorridor(dirEstDn, dirEstUp, 3, iterLay3, startLay3)) {
+                        continue;
+                    }
+                    seedHitsFromLayers.emplace_back(std::array{hit0, combinatoricLayers[1][iterLay1], 
+                        combinatoricLayers[2][iterLay2], combinatoricLayers[3][iterLay3]}); 
                 }
             }
         }
     }
 }
-#undef TEST_HIT_CORRIDOR
-
 NswSegmentFinderAlg::HitVec 
     NswSegmentFinderAlg::extendHits(const Amg::Vector3D& startPos, 
                                     const Amg::Vector3D& direction, 
@@ -294,25 +304,25 @@ NswSegmentFinderAlg::HitVec
     HitVec combinatoricHits;
 
     for (std::size_t i = 0; i < extensionLayers.size(); ++i) {
-        const HitVec& layer{extensionLayers[i].get()};
+        const HitSpan_t& layer{extensionLayers[i]};
         const Amg::Vector3D extrapPos = SeedingAux::extrapolateToPlane(startPos, direction, *layer.front());
 
         
         unsigned triedHit{0};
         HitCandidate precisionHit, noPrecisionHit;
-        ATH_MSG_VERBOSE("Moving to next layer");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Moving to next layer");
         
         for (unsigned j = 0; j < layer.size(); ++j) {
-            if (usedHits[i].get().at(j) > m_maxUsed) {
-                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Hit " << (*layer[j])<< " already used with counter " << usedHits[i].get().at(j) << ". Skip.");
+            if (usedHits[i][j] > m_maxUsed) {
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Hit " << (*layer[j])<< " already used with counter " << usedHits[i][j] << ". Skip.");
                 continue;
             }
-            auto hit = layer.at(j);
+            auto hit = layer[j];
             const double pull = std::sqrt(SeedingAux::chi2Term(extrapPos, direction, *hit));
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Trying extension with hit " << *hit<<" and pull "<<pull<<" has truth: "<< (getTruthMatchedHit(*hit->primaryMeasurement()) != nullptr ? "oui" : "non"));
             bool isPrecision = isPrecisionHit(*hit);
             double minPull = isPrecision ? precisionHit.minPull : noPrecisionHit.minPull;
-            ATH_MSG_VERBOSE("Current min pull for this layer is:  "<<minPull);
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Current min pull for this layer is:  "<<minPull);
             //find the hit with the minimum pull (check at least three hits after we have increasing pulls)
             if (pull > minPull) {
                 triedHit+=1;  
@@ -341,14 +351,13 @@ NswSegmentFinderAlg::HitVec
         }else if(noPrecisionHit.minPull < m_minPullThreshold){
             bestCand = noPrecisionHit.spacePoint;
         }else{
-            ATH_MSG_VERBOSE("No hit found in layer "<<i<<" with pull below threshold "<<m_minPullThreshold);            
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - No hit found in layer "<<i
+                    <<" with pull below threshold "<<m_minPullThreshold);            
             continue;
         }
-            ATH_MSG_VERBOSE("Extension successfull - hit" << m_idHelperSvc->toString(bestCand->identify())
-                          <<", pos: "<<Amg::toString(bestCand->localPosition())
-                          <<", dir: "<<Amg::toString(bestCand->sensorDirection()));
-            combinatoricHits.push_back(bestCand);
-        }
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Extension successfull - hit" << (*bestCand));
+        combinatoricHits.push_back(bestCand);
+    }
     
     return combinatoricHits;
 }
@@ -360,17 +369,16 @@ std::unique_ptr<SegmentSeed>
                                                     const ActsTrk::GeometryContext& gctx,
                                                     const HitLaySpan_t& extensionLayers,
                                                     const UsedHitSpan_t& usedHits) const {
-    bool allValid = std::any_of(initialSeed.begin(), initialSeed.end(), 
-                                [this](const auto& hit){
+ 
+    if (std::ranges::none_of(initialSeed, 
+                                [this](const SpacePoint* hit){
         if (hit->type() == xAOD::UncalibMeasType::MMClusterType) {
             const auto* mmClust = static_cast<const xAOD::MMCluster*>(hit->primaryMeasurement());
             return mmClust->stripNumbers().size() >= m_minClusSize;
         }
         return true;
-    });
-
-    if (!allValid) {
-        ATH_MSG_VERBOSE("Seed rejection: Not all clusters meet minimum strip size");
+    })) {
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Seed rejection: Not all clusters meet minimum strip size");
         return nullptr; 
     }
     
@@ -385,7 +393,7 @@ std::unique_ptr<SegmentSeed>
         const double halfLength = stripHalfLength(*initialSeed[i]);
         
         if (std::abs(params[i]) > halfLength) {
-            ATH_MSG_VERBOSE("Seed Rejection: Invalid seed - outside of the strip's length "<< m_idHelperSvc->toString(initialSeed[i]->identify())
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Seed Rejection: Invalid seed - outside of the strip's length "<< m_idHelperSvc->toString(initialSeed[i]->identify())
                           <<", param: "<<params[i]<<", halfLength: "<<halfLength);
             return nullptr;
         }
@@ -399,7 +407,7 @@ std::unique_ptr<SegmentSeed>
     //seed quality check - we expect the tanAlpha not to be too big which would mean big deflection along the strip layers
     //we also set a cut using the beamspot for the tan alpha
     if(std::abs(tanAlpha) > m_maxTanAlpha){
-        ATH_MSG_VERBOSE("Seed Rejection: Invalid seed - tanAlpha "<<tanAlpha<<" above threshold "<<m_maxTanAlpha);
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Seed Rejection: Invalid seed - tanAlpha "<<tanAlpha<<" above threshold "<<m_maxTanAlpha);
         return nullptr;
     }
     const Amg::Vector3D beamSpotPos = max.msSector()->globalToLocalTransform(gctx).translation();
@@ -409,17 +417,18 @@ std::unique_ptr<SegmentSeed>
     }
     const double tanAlphaBS = houghTanAlpha(bsDir);
     const double cosAngle = bsDir.dot(direction);
-    double thetaWindowCut{std::cos(2*m_windowTheta)};
+    double thetaWindowCut{std::cos(2.*m_windowTheta)};
                     //accept the deflection of direction with a tolerance of 1 deg                    
     if(std::abs(cosAngle) < thetaWindowCut){  
-        ATH_MSG_VERBOSE("Seed Rejection: Not aggrement with beam spot direction");                      
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Seed Rejection: Not agreement with beam spot direction");                      
         return nullptr;                        
     }             
 
     // extend the seed to the segment -- include hits from the other layers too
     auto extendedHits = extendHits(segPos, direction, extensionLayers, usedHits);
-    HitVec hits{initialSeed.begin(),initialSeed.end()};
-    std::ranges::move(extendedHits, std::back_inserter(hits));
+    HitVec hits{};
+    hits.insert_range(hits.end(), std::move(initialSeed));
+    hits.insert_range(hits.end(), std::move(extendedHits));
 
     return std::make_unique<SegmentSeed>(tanBeta, interceptY, tanAlphaBS,
                                          interceptX, hits.size(),
@@ -432,19 +441,11 @@ std::unique_ptr<Segment> NswSegmentFinderAlg::fitSegmentSeed(const EventContext&
                                                              const SegmentSeed* patternSeed) const{
     
     if(patternSeed->getHitsInMax().size() < m_minSeedHits){
-        ATH_MSG_VERBOSE("Not enough hits in the SegmentSeed to fit a segment");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__ <<"- Not enough hits in the SegmentSeed to fit a segment");
         return nullptr;    
     }
-
-    ATH_MSG_VERBOSE("Fit the SegmentSeed");
-    if (msgLvl(MSG::VERBOSE)) {          
-        std::stringstream hitStream{};
-        for (const auto& hit : patternSeed->getHitsInMax()) {
-            hitStream<<"**** "<< (*hit)<<std::endl;
-        }
-        ATH_MSG_VERBOSE(__func__<<"() - "<<__LINE__ <<": Uncalibrated space points for the segment fit: "<<std::endl
-                <<hitStream.str());
-    }
+    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__ <<" - Use space points for the segment fit: "<<std::endl
+                <<print(patternSeed->getHitsInMax()));
 
     //Calibration of the seed spacepoints
     CalibSpacePointVec calibratedHits = m_calibTool->calibrate(ctx, patternSeed->getHitsInMax(), 
@@ -454,7 +455,7 @@ std::unique_ptr<Segment> NswSegmentFinderAlg::fitSegmentSeed(const EventContext&
     const Acts::Transform3& locToGlob{patternSeed->msSector()->localToGlobalTransform(gctx)};
  
     return m_lineFitter->fitSegment(ctx, patternSeed, patternSeed->parameters(),
-                                                locToGlob, std::move(calibratedHits));
+                                    locToGlob, std::move(calibratedHits));
 }
 
 void NswSegmentFinderAlg::processSegment(std::unique_ptr<Segment> segment, 
@@ -464,7 +465,7 @@ void NswSegmentFinderAlg::processSegment(std::unique_ptr<Segment> segment,
                                          SegmentVec_t& segments) const {
     
     if (!segment) {
-        ATH_MSG_VERBOSE("Seed Rejection: Segment fit failed");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Seed Rejection: Segment fit failed");
        
         if (m_markHitsFromSeed && seedHits.size() > m_minSeedHits) {
             // Mark hits from extended seed (used increment by 1)            
@@ -474,7 +475,7 @@ void NswSegmentFinderAlg::processSegment(std::unique_ptr<Segment> segment,
     }
 
     // -------- success path --------
-    ATH_MSG_DEBUG("Segment built with "
+    ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Segment built with "
                   << segment->measurements().size()
                   << " hits, chi2/ndof: "
                   << segment->chi2() / std::max(1u,segment->nDoF()));
@@ -482,10 +483,8 @@ void NswSegmentFinderAlg::processSegment(std::unique_ptr<Segment> segment,
     HitVec segMeasSP;
     segMeasSP.reserve(segment->measurements().size());
 
-    std::ranges::transform(
-        segment->measurements(),
-        std::back_inserter(segMeasSP),
-        [](const auto& m) { return m->spacePoint(); }
+    std::ranges::transform(segment->measurements(),std::back_inserter(segMeasSP),
+                            [](const Segment::MeasType& m) { return m->spacePoint(); }
     );
 
     // Mark segment hits as fully used (used increment by 10,
@@ -499,11 +498,11 @@ void NswSegmentFinderAlg::resolveAmbiguities(const ActsTrk::GeometryContext& gct
                                              SegmentVec_t& segmentCandidates) const{
 
     if(segmentCandidates.size()<=1){
-        ATH_MSG_VERBOSE("No segments to resolve ambiguities");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - No segments to resolve ambiguities");
         return;
     }
 
-    ATH_MSG_VERBOSE("Resolving ambiguities for "<<segmentCandidates.size()<<" segments");
+    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Resolving ambiguities for "<<segmentCandidates.size()<<" segments");
 
     std::map<const MuonGMR4::SpectrometerSector*, SegmentVec_t,
                  MuonGMR4::MuonDetectorManager::MSEnvelopeSorter> segmentsPerChamber{};
@@ -515,8 +514,8 @@ void NswSegmentFinderAlg::resolveAmbiguities(const ActsTrk::GeometryContext& gct
     }
     segmentCandidates.clear();
     for (auto& [chamber, resolveMe] : segmentsPerChamber) {    
-            SegmentVec_t resolvedSegments = m_ambiSolver->resolveAmbiguity(gctx, std::move(resolveMe));        
-            std::ranges::move(resolvedSegments, std::back_inserter(segmentCandidates));
+        std::ranges::move(m_ambiSolver->resolveAmbiguity(gctx, std::move(resolveMe)), 
+                          std::back_inserter(segmentCandidates));
     }
 
 }
@@ -544,7 +543,7 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
             THROW_EXCEPTION("Space point is not of sTgc type: "<<sp->msSector()->idHelperSvc()->toString(sp->identify()));
         }
         if(sp->dimension() != 2){
-            ATH_MSG_VERBOSE("Ignoring the 1D measurement for seeding: "<<m_idHelperSvc->toString(sp->identify()));
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Ignoring the 1D measurement for seeding: "<<m_idHelperSvc->toString(sp->identify()));
             return false;
         }
         const auto* prdPrim = static_cast<const xAOD::sTgcMeasurement*>(sp->primaryMeasurement());
@@ -552,7 +551,7 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
         //we know we have a 2D spacepoint can be: pad, strip+pad, strip+wire, wire+pad and we dont want pads appearing in this seeding stage
         bool hasPad = prdSec ? prdSec->channelType()==sTgcIdHelper::sTgcChannelTypes::Pad : prdPrim->channelType()==sTgcIdHelper::sTgcChannelTypes::Pad;
         if(hasPad && !usePad){
-            ATH_MSG_VERBOSE("Ignoring the 2D pad measurement for seeding because of pads: "<<m_idHelperSvc->toString(sp->identify()));
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Ignoring the 2D pad measurement for seeding because of pads: "<<m_idHelperSvc->toString(sp->identify()));
             return false;
         }
         bool isPrecision = isPrecisionHit(*sp);
@@ -572,8 +571,8 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
 
             //we might request to have hits from the two different multilayers for better lever arm
             if(m_skipSameMultilayer){
-                const int ml1 = multilayer(*hitLayers[layIdx1].front(), *m_idHelperSvc);
-                const int ml2 = multilayer(*hitLayers[layIdx2].front(), *m_idHelperSvc);
+                const int ml1 = multilayer(*hitLayers[layIdx1].front());
+                const int ml2 = multilayer(*hitLayers[layIdx2].front());
                 if(ml1 == ml2){
                     ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<"Skip sTGC seeding because the two hits are in the same multilayer");
                     return std::make_pair(std::move(seeds),std::move(segments));
@@ -627,7 +626,7 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
                                                          seedHits.size(), std::move(seedHits),
                                                          max.parentBucket());
             
-                    //skip segment fit with less than 5 hits    
+                    /** Do not promote seeds with little hits to segments */    
                     if(seed->getHitsInMax().size() < m_minSeedHits){
                         seeds.push_back(std::move(seed));
                         continue;
@@ -637,7 +636,6 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
                     std::unique_ptr<Segment> segment = fitSegmentSeed(ctx, gctx, seed.get());  
                     processSegment(std::move(segment), seed->getHitsInMax(), hitLayers, usedHits, segments);
                     seeds.push_back(std::move(seed));
-
                 }               
             }
         }
@@ -658,14 +656,27 @@ NswSegmentFinderAlg::buildSegmentsFromMM(const EventContext& ctx,
     SegmentSeedVec_t seeds{};
     SegmentVec_t segments{};
     std::size_t layerSize = hitLayers.size();
-
     if(layerSize < minLayers){
-        ATH_MSG_VERBOSE("Not enough layers to build a seed");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Not enough layers to build a seed");
         return {std::move(seeds), std::move(segments)};
     }
-
+    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Construct seeds from "<<layerSize<<" layers.");
+    
     //lamda helper to find the first unused strip hit on the layer
-    auto unusedStripHit = [&](const HitVec& layerHits, unsigned int layIdx) -> const SpacePoint* {
+
+
+    std::array<const SpacePoint*, 4> seedHits{};
+    std::array<StripOrient, 4> orientation{};
+    std::array<std::size_t, 4> layOrder{};
+    InitialSeedVec_t preLimSeeds{};
+    /** @brief Attempt to find the next unused hit in a certain layer and fill
+     *         the hit in the seedHits array
+     *  @param seedIdx: Destination index where the hit will be filled in the 
+     *                  seedHits / layIndices array
+     *  @param layIdx: The index of the layer to pick from the input layer hit input */
+    auto unusedStripHit = [&](unsigned seedIdx, unsigned layIdx) -> bool {
+        const HitVec& layerHits = hitLayers[layIdx];
+        
         //in case of MM only combinatorial seeding - we consider only MM strip hits for seeding
         bool isMM = useOnlyMM ? layerHits.front()->type() == xAOD::UncalibMeasType::MMClusterType : true;
         for (auto [idx, hit] : Acts::enumerate(layerHits)) {
@@ -673,61 +684,68 @@ NswSegmentFinderAlg::buildSegmentsFromMM(const EventContext& ctx,
             bool isStrip = spOrient == StripOrient::X || spOrient == StripOrient::U || spOrient == StripOrient::V;
             bool isUnused = usedHits[layIdx].at(idx) <= m_maxUsed;           
             if (isStrip && isUnused && isMM) {
-                return hit;
+                layOrder[seedIdx] = layIdx;
+                seedHits[seedIdx] = hit;
+                orientation[seedIdx] = spOrient;
+                return true;
             }
         }
-        return nullptr;       
+        return false;       
     };
 
-    std::array<const SpacePoint*, 4> seedHits{};
-    InitialSeedVec_t preLimSeeds{};
-
     for (std::size_t i = 0; i < layerSize - 3; ++i) {
-        seedHits[0] = unusedStripHit(hitLayers[i], i);
-        if(!seedHits[0]) {
+        if(!unusedStripHit(0, i)) {
             continue;
         }
         for (std::size_t j = i + 1; j < layerSize - 2; ++j) {
-            seedHits[1] = unusedStripHit(hitLayers[j], j);
-            if(!seedHits[1]){
+            if(!unusedStripHit(1, j)){
                 continue;
             }
             for (std::size_t l = layerSize - 1; l > j+1; --l) {
-                seedHits[3] = unusedStripHit(hitLayers[l], l);
-                if(!seedHits[3]){
+                if(!unusedStripHit(3, l)){
                     continue;
                 }
                 for (std::size_t k = l-1; k > j ; --k) {
-                    seedHits[2] = unusedStripHit(hitLayers[k], k);
-                    if(!seedHits[2]){
+                    if(!unusedStripHit(2, k)) {
                         continue;
                     }
-
-                    const HitLaySpan_t layers{hitLayers[i], hitLayers[j], hitLayers[k], hitLayers[l]};
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Layers: "<<layOrder<<", orientation: "
+                                   <<orientation<<"\n"<<print(seedHits));
+                    /// If one of the two strip pairs is parallel try to swap their order
+                    if (orientation[3] != orientation[1] && (orientation[3] == orientation[2]  || 
+                                                             orientation[1] == orientation[0]) && 
+                        max.msSector()->halfY() -  hitLayers[layOrder[3]].back()->localPosition().y() < m_combParallelYCutOff){
+                        std::swap(layOrder[3], layOrder[1]);
+                        std::swap(seedHits[3], seedHits[1]);
+                        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<"- Swap layer order "<<layOrder
+                            <<", "<<((max.msSector()->halfY() -  hitLayers[layOrder[3]].back()->localPosition().y()) / 1._cm)
+                            <<", "<<max.msSector()->halfY()<<", "<<(max.msSector()->localToGlobalTransform(gctx) * 
+                        hitLayers[layOrder[3]].back()->localPosition()).perp());
+                    } 
+                    const HitLaySpan_t layers{hitLayers[layOrder[0]], hitLayers[layOrder[1]], 
+                                              hitLayers[layOrder[2]], hitLayers[layOrder[3]]};
                     //skip combination with at least one too busy layer
                     bool tooBusy = std::ranges::any_of(layers,
-                                            [this](const auto& layer) {
-                                                return layer.get().size() > m_maxClustersInLayer;
+                                            [this](const HitSpan_t& layer) {
+                                                return layer.size() > m_maxClustersInLayer;
                                             });
                     if (tooBusy) {
+                        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Reject due to busy limit");
                         continue; // skip this combination
                     }
                     
                     AmgSymMatrix(2) bMatrix = betaMatrix(seedHits);   
        
                     if (std::abs(bMatrix.determinant()) < 1.e-6) {
+                        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Invalid layers picked");
                         continue;
                     }
-                    ATH_MSG_DEBUG("Space point positions for seed layers: \n"
-                                 <<(*seedHits[0]) << ",\n"
-                                 <<(*seedHits[1]) << ",\n"
-                                 <<(*seedHits[2]) << ",\n"
-                                 <<(*seedHits[3]));  
-    
-                  
-                    UsedHitSpan_t usedHitsSpan{usedHits[i], usedHits[j], usedHits[k], usedHits[l]};    
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Accepted layers"); 
+                    UsedHitSpan_t usedHitsSpan{usedHits[layOrder[0]], usedHits[layOrder[1]], 
+                                               usedHits[layOrder[2]], usedHits[layOrder[3]]};    
                     // each layer may have more than one hit - take the hit combinations                    
                     constructPreliminarySeeds(beamSpotPos, layers, usedHitsSpan, preLimSeeds);
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Constructed seeds "<<preLimSeeds.size()<<".");
 
                      //the layers not participated in the seed build - gonna be used for the extension  
                     HitLaySpan_t extensionLayers{};
@@ -743,7 +761,8 @@ NswSegmentFinderAlg::buildSegmentsFromMM(const EventContext& ctx,
                     // we have made sure to have hits from all the four layers -
                     // start by 4 hits for the seed and try to build the extended seed for the combinatorics found
                     for (auto &combinatoricHits : preLimSeeds) {
-                        auto seed = constructCombinatorialSeed(combinatoricHits, bMatrix, max, gctx, extensionLayers, usedExtensionHits);
+                        auto seed = constructCombinatorialSeed(combinatoricHits, bMatrix, max, gctx, 
+                                                               extensionLayers, usedExtensionHits);
                         if(!seed){
                             continue;
                         }
@@ -754,7 +773,6 @@ NswSegmentFinderAlg::buildSegmentsFromMM(const EventContext& ctx,
                         std::unique_ptr<Segment> segment = fitSegmentSeed(ctx, gctx, seed.get());
                         processSegment(std::move(segment), seed->getHitsInMax(), hitLayers, usedHits, segments);
                         seeds.push_back(std::move(seed));                                    
-              
                     }
                 }
             }
@@ -781,7 +799,7 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
     //counters for the number of seeds, extented seeds and segments
 
     if (layerSize < minLayers) {
-        ATH_MSG_VERBOSE("Not enough layers to build a seed");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Not enough layers to build a seed");
         return std::make_pair(std::move(seeds),std::move(segments));
     }
 
@@ -851,23 +869,18 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
     // the extended seeds are returned even if they did not make it to a segment and the segments only if successfully fitted
     auto processSeedsAndSegments = [&](std::pair<SegmentSeedVec_t, SegmentVec_t>&& seedSegmentPairs, std::string_view source) {
         auto& [returnSeeds, returnSegments] = seedSegmentPairs;
-        ATH_MSG_DEBUG("From " << source << ": built " << returnSeeds.size() << " seeds and " << returnSegments.size() << " segments.");
+        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - From " << source << ": built " << returnSeeds.size() << " seeds and " << returnSegments.size() << " segments.");
         for(auto& seed : returnSeeds) {            
             ++nSeeds;
             Acts::ObjVisualization3D visualHelper{};
             if(seed->getHitsInMax().size() < m_minSeedHits){
-                ATH_MSG_VERBOSE("Seed with "<< seed->getHitsInMax().size() <<" hits rejected");
-                for(const auto& hit : seed->getHitsInMax()){
-                     ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hit->identify())<<", "
-                                <<Amg::toString(hit->localPosition())<<", dir: "
-                                <<Amg::toString(hit->sensorDirection()));
-                     if(m_dumpObj){
-                        MuonValR4::drawSpacePoint(gctx.context(), *hit, visualHelper);
-                     }
-
-                }
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Seed with "<< seed->getHitsInMax().size() <<" hits rejected. \n"<<print(seed->getHitsInMax()));
                 if(m_dumpObj){
-                    visualHelper.write(std::format("Event_{:}_{:}_notExtendedSeed.obj", ctx.eventID().event_number(), seed->getHitsInMax().front()->chamber()->identString()));
+                    for(const auto& hit : seed->getHitsInMax()){
+                        MuonValR4::drawSpacePoint(gctx.context(), *hit, visualHelper);
+                    }
+                    visualHelper.write(std::format("Event_{:}_{:}_notExtendedSeed.obj", ctx.eventID().event_number(), 
+                                        seed->getHitsInMax().front()->chamber()->identString()));
                 }
                 continue;
             }                   
@@ -880,22 +893,18 @@ NswSegmentFinderAlg::findSegmentsFromMaximum(const HoughMaximum &max,
     };
 
     //Start from outermost sTgc layers with combined 2D measurements
-    ATH_MSG_VERBOSE("Start building seed from sTgc outermost layers");
+    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Start building seed from sTgc outermost layers");
     processSeedsAndSegments(buildSegmentsFromSTGC(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, false), "sTgc segment seeds");    
     
     //continue with the combinatorial seeding for the strip measurements
     if(m_doOnlyMMCombinatorics){
-
-        ATH_MSG_VERBOSE("Start building combinatoric seeds only from Micromegas");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Start building combinatoric seeds only from Micromegas");
         processSeedsAndSegments(buildSegmentsFromMM(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, true), "MM combinatoric segment seeds");
-
-    }else{
-
-        ATH_MSG_VERBOSE("Start building combinatoric seeds from Micromegas and sTgc hits");
+    } else {
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Start building combinatoric seeds from Micromegas and sTgc hits");
         processSeedsAndSegments(buildSegmentsFromMM(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, true), "MM combinatoric segment seeds");
         processSeedsAndSegments(buildSegmentsFromMM(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, false), "MM and STGC combinatoric segment seeds");
         processSeedsAndSegments(buildSegmentsFromSTGC(ctx, gctx, stripHitsLayers, max, globToLocal.translation(), allUsedHits, true), "sTgc segment seeds using strip+pads");    
-
     }   
     
      if(m_seedCounter) {
@@ -939,7 +948,7 @@ void NswSegmentFinderAlg::markHitsAsUsed(const HitVec& spacePoints,
             //check if they are not in the same layer
             unsigned hitLayer = layerSorter.sectorLayerNum(*hVec.front());
             if(hitLayer != measLayer) {
-                ATH_MSG_VERBOSE("Not in the same layer since measLayer = "<< measLayer << " and "<<hitLayer);
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Not in the same layer since measLayer = "<< measLayer << " and "<<hitLayer);
                 continue;
             }
             for (std::size_t hIdx = 0 ; hIdx < hVec.size(); ++hIdx) {
@@ -979,7 +988,7 @@ void NswSegmentFinderAlg::markHitsAsUsed(const HitVec& spacePoints,
 StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
     // read the inputs
     const EtaHoughMaxContainer *maxima{nullptr};
-    ATH_CHECK(SG::get( maxima, m_etaKey, ctx));
+    ATH_CHECK(SG::get(maxima, m_etaKey, ctx));
 
     const ActsTrk::GeometryContext *gctx{nullptr};
     ATH_CHECK(SG::get(gctx, m_geoCtxKey, ctx));
@@ -994,44 +1003,25 @@ StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
     // we use the information from the previous eta-hough transform
     // to get the combined hits that belong in the same maxima
     for (const HoughMaximum *max : *maxima) {
-
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Process maximum "<<max->tanBeta()<<", "<<max->interceptY()<<"\n"<<print(max->getHitsInMax()));
         auto [seeds, segments] = findSegmentsFromMaximum(*max, *gctx, ctx);
-       
-        if (msgLvl(MSG::VERBOSE)) {
-            ATH_MSG_VERBOSE("Hits from Hough maximum");
-            for(const auto& hitMax : max->getHitsInMax()){
-                ATH_MSG_VERBOSE("Hit "<<m_idHelperSvc->toString(hitMax->identify())<<", "
-                                <<Amg::toString(hitMax->localPosition())<<", dir: "
-                                <<Amg::toString(hitMax->sensorDirection()));
-            }
-        }
-
         for(auto& seed: seeds){
-
-             if (msgLvl(MSG::VERBOSE)){
-                std::stringstream sstr{};
-                sstr<<"Seed tanBeta = "<<seed->tanBeta()<<", y0 = "<<seed->interceptY()
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Seed tanBeta = "<<seed->tanBeta()<<", y0 = "<<seed->interceptY()
                          <<", tanAlpha = "<<seed->tanAlpha()<<", x0 = "<<seed->interceptX()<<", hits in the seed "
-                         <<seed->getHitsInMax().size()<<std::endl;
-        
-                for(const auto& hit : seed->getHitsInMax()){
-                    sstr<<" *** Hit "<<m_idHelperSvc->toString(hit->identify())<<", "
-                        << Amg::toString(hit->localPosition())<<", dir: "<<Amg::toString(hit->sensorDirection())<<std::endl;
-                }
-                ATH_MSG_VERBOSE(sstr.str());
-            }
+                         <<seed->getHitsInMax().size()<<"\n"<<print(seed->getHitsInMax()));
             if (m_visionTool.isEnabled()) {          
                 m_visionTool->visualizeSeed(ctx, *seed, "#phi-combinatorialSeed");
             }
-
             writeSegmentSeeds->push_back(std::move(seed));
-
+        }
+        if (seeds.empty() && m_visionTool.isEnabled()){
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Maximum could not be made to a seed");
+            m_visionTool->visualizeSeed(ctx, *max, "failed seed");
         }
 
         //Resolve ambiguities between segments before writing them to the output
-        ATH_MSG_VERBOSE("Before ambiguity resolution, there are in total "<<segments.size()<<" segments:");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Before ambiguity resolution, there are in total "<<segments.size()<<" segments:");
         for(const auto& seg : segments){
-            
             if(msgLvl(MSG::VERBOSE)){
                 std::stringstream sstr{};
                 sstr<<"Segment chi2/ndof = "<<seg->chi2()/std::max(1u,seg->nDoF())<<", hits in the segment "
@@ -1039,51 +1029,23 @@ StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
             
                 const Parameters pars = localSegmentPars(*gctx, *seg);
                 sstr<<"Segment parameters : "<<toString(pars)<<std::endl;
-                for(const auto& hit : seg->measurements()){
-                    bool hasTruth{false};
+                for(const Segment::MeasType& hit : seg->measurements()){
                     if(hit->type()!=xAOD::UncalibMeasType::Other){
-                        hasTruth = (getTruthMatchedHit(*hit->spacePoint()->primaryMeasurement()) !=nullptr);
-                        std::string type = hit->fitState() != CalibratedSpacePoint::State::Valid ? "outlier" : "valid";
-                        
-                        sstr<<" *** Hit "<<m_idHelperSvc->toString(hit->spacePoint()->identify())<<", "
-                                        << type << ", "
-                                        << Amg::toString(hit->spacePoint()->localPosition())<<", dir: "
-                                        <<Amg::toString(hit->spacePoint()->sensorDirection())<<", has truth matched: "<<hasTruth<<std::endl;
+                        sstr<<" *** Hit "<<(*hit)<<", has truth matched: "
+                            <<(getTruthMatchedHit(*hit->spacePoint()->primaryMeasurement()) !=nullptr)<<std::endl;
                     }    
                 }
-                ATH_MSG_VERBOSE(sstr.str());          
-                    
+                ATH_MSG_VERBOSE(sstr.str());
             }
-            
         }
-
-
         resolveAmbiguities(*gctx, segments);
-        ATH_MSG_VERBOSE("After ambiguity resolution, there are in total "<<segments.size()<<" segments:");
+        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - After ambiguity resolution, there are in total "
+                        <<segments.size()<<" segments:");
 
-        for (auto &seg : segments) {           
-            if(msgLvl(MSG::VERBOSE)){ 
-                std::stringstream sstr{};               
-                sstr<<"Segment chi2/ndof = "<<seg->chi2()/std::max(1u,seg->nDoF())<<", hits in the segment "
-                         <<seg->measurements().size()<<std::endl;        
-                const Parameters pars = localSegmentPars(*gctx, *seg);
-                sstr<<"Segment parameters : "<<toString(pars)<<std::endl;
+        for (auto &seg : segments) { 
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Segment chi2/ndof = "<<seg->chi2()/std::max(1u,seg->nDoF())
+                        <<", hits in the segment "<<seg->measurements().size()<<"\n"<<print(seg->measurements()));          
             
-                for(const auto& hit : seg->measurements()){
-                    bool hasTruth{false};
-                    if(hit->type()!=xAOD::UncalibMeasType::Other){
-                        hasTruth =  getTruthMatchedHit(*hit->spacePoint()->primaryMeasurement()) !=nullptr;
-                        std::string type = hit->fitState() != CalibratedSpacePoint::State::Valid ? "outlier" : "valid";
-                        sstr<<" *** Hit "<<m_idHelperSvc->toString(hit->spacePoint()->identify())<<", "
-                        << type << ", "
-                                    << Amg::toString(hit->spacePoint()->localPosition())<<", dir: "
-                                    <<Amg::toString(hit->spacePoint()->sensorDirection())<<", has truth matched: "<<hasTruth<<std::endl;
-                    }
-                }
-                ATH_MSG_VERBOSE(sstr.str());                
-            }
-            
-
             if (m_visionTool.isEnabled()) {          
                 m_visionTool->visualizeSegment(ctx, *seg, "#phi-segment");
             }
@@ -1094,12 +1056,8 @@ StatusCode NswSegmentFinderAlg::execute(const EventContext &ctx) const {
                 MuonValR4::drawSegmentLine(gctx->context(), *seg, visualHelper);
                 visualHelper.write(std::format("Event_{:}_segment_{:}.obj", ctx.eventID().event_number(), seg->msSector()->identString()));
             }
-            
-            writeSegments->push_back(std::move(seg));
-            
+            writeSegments->push_back(std::move(seg));            
         }
-       
-
     }
     
     return StatusCode::SUCCESS;
@@ -1112,7 +1070,8 @@ StatusCode NswSegmentFinderAlg::finalize() {
     return StatusCode::SUCCESS;
 }
 
-void NswSegmentFinderAlg::SeedStatistics::addToStat(const MuonGMR4::SpectrometerSector* msSector, unsigned seeds, unsigned extSeeds, unsigned segments){
+void NswSegmentFinderAlg::SeedStatistics::addToStat(const MuonGMR4::SpectrometerSector* msSector, 
+                                                    unsigned seeds, unsigned extSeeds, unsigned segments){
     std::unique_lock guard{m_mutex};
     SectorField key{};
     key.chIdx = msSector->chamberIndex();
@@ -1137,7 +1096,7 @@ void NswSegmentFinderAlg::SeedStatistics::printTableSeedStats(MsgStream& msg) co
     using namespace  Muon::MuonStationIndex;
 
     for (const auto& [sector, stats] : m_seedStat) {
-        sstr <<  "| " << std::setw(3) << chName(sector.chIdx)
+        sstr <<  "| " << std::setw(3) << sector.chIdx
              << " | " << std::setw(2) << static_cast<unsigned>(sector.phi)
              << " | " << std::setw(3) << static_cast<int>(sector.eta)
              << " | " << std::setw(7) << stats.nSeeds
