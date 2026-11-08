@@ -254,7 +254,7 @@ def FTAG1LITEKernelCfg(flags, name='FTAG1LITEKernel', **kwargs):
         floats_to_copy=[
             "RNNJetScore", "RNNJetScoreSigTrans",
             "GNTauScore_v0prune", "GNTauScoreSigTrans_v0prune",
-            "GNTauScoreSigTrans_v1trunc", "ptFinalCalib",
+            "ptFinalCalib",
         ],
         pt_priority_with_delta_r=0.3,
     ))

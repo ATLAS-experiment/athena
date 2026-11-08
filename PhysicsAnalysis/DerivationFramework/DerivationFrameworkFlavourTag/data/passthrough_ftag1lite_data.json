@@ -40,7 +40,6 @@
     "deltaPtToTauJet",
     "deltaRToTauJet",
     "GNTauScoreSigTrans_v0pruneFromTauJet",
-    "GNTauScoreSigTrans_v1truncFromTauJet",
     "GNTauScore_v0pruneFromTauJet",
     "matchedToTauJet",
     "numberOfMatchesToTauJet",
