@@ -12,6 +12,7 @@
 #include "MCTruthClassifier/MCTruthClassifier.h"
 #include "AsgDataHandles/ReadHandle.h"
 #include "TruthUtils/MagicNumbers.h"
+#include "TruthUtils/Loops.h"
 #ifndef XAOD_ANALYSIS
 #include "AtlasHepMC/GenEvent.h"
 #include "AtlasHepMC/GenVertex.h"
@@ -185,71 +186,6 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
   ATH_MSG_DEBUG("particleTruthClassifier  succeeded ");
   return std::make_pair(partType, partOrig);
 }
-namespace {
-  // Method3: Returns true if the parent and child production vertices
-  // are the same.
-bool TruthLoopDetectionMethod3(const xAOD::TruthVertex * childOrigVtx, const xAOD::TruthParticle* parent)
-{
-  // Start of method 3 of protecting against loops
-  // to resolve Sherpa loop
-  const xAOD::TruthVertex* parentOrigVtx = parent->hasProdVtx() ? parent->prodVtx() : nullptr;
-  if (parentOrigVtx && HepMC::is_same_vertex(parentOrigVtx,childOrigVtx)) {
-    // The "parent" and the "child" have the same production vertex.
-    return true;
-  }
-  return false;
-  // End of method 3 of protecting against loops
-}
-  // Temporary helper methods for detecting loops in the truth record
-  // Method1: Returns true if the parent particle is in the list of
-  // children of its decay vertex. Otherwise, returns the result of
-  // Method3.
-bool TruthLoopDetectionMethod1(const xAOD::TruthVertex * childOrigVtx, const xAOD::TruthParticle* parent)
-{
-  // Start of method 1 of protecting against loops
-  const int parentPDG = parent->pdgId();
-  for (const auto& aChild: childOrigVtx->particles_out()) {
-    if (!aChild)  continue;
-    if (parentPDG == aChild->pdgId() && HepMC::is_same_generator_particle(aChild, parent)) {
-      // One of the children produced in the decay of parent is
-      // actually the same particle.  NB In the case of multiple
-      // children this child may not necessarily be
-      // thePriPart. Does this matter?
-      return true;
-    }
-  }
-
-  // to resolve Sherpa loop
-  return TruthLoopDetectionMethod3(childOrigVtx, parent);
-  // End of method 1 of protecting against loops
-}
-
-  // Method2: Returns true if the parent production vertex is the
-  // child decay vertex and the child production vertex is the parent
-  // decay vertex.
-bool TruthLoopDetectionMethod2(const xAOD::TruthParticle* child, const xAOD::TruthParticle* parent)
-{
-  // Start of method 2 of protecting against loops
-  // to prevent Sherpa loop
-  const xAOD::TruthVertex* child_prdVtx{};
-  const xAOD::TruthVertex* child_endVtx{};
-  if (child) {
-    child_prdVtx = child->hasProdVtx() ? child->prodVtx() : nullptr;
-    child_endVtx = child->decayVtx();
-  }
-  const xAOD::TruthVertex* parent_prdVtx{};
-  const xAOD::TruthVertex* parent_endVtx{};
-  if (parent) {
-    parent_prdVtx = parent->hasProdVtx() ? parent->prodVtx() : nullptr;
-    parent_endVtx = parent->decayVtx();
-  }
-  // V0->parent->V1-> ...->V2->child->V3
-  // V3 == V0 && V1 == V2
-  return (child_endVtx == parent_prdVtx && child_prdVtx == parent_endVtx);
-}
-
-
-} /// namespace
 
 ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                     const xAOD::TruthParticle* thePart,
@@ -276,7 +212,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   if (!ancestor) { return NonDefined; } // After this point "ancestor" cannot be nullptr
 
   // Start of method 1 of protecting against loops
-  bool samePart = TruthLoopDetectionMethod1(partProdVtx, ancestor);
+  bool samePart = MC::TruthLoopDetectionMethod1(partProdVtx, ancestor);
   // to resolve Sherpa loop
   // End of method 1 of protecting against loops
 
@@ -289,7 +225,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
       // Start of method 2 of protecting against loops
       // to prevent Sherpa loop
       if (ancestor == ancestorParent) { break; }
-      if (TruthLoopDetectionMethod2(ancestor,ancestorParent)) {
+      if (MC::TruthLoopDetectionMethod2(ancestor,ancestorParent)) {
         ancestorParent = ancestor;
         break;
       }
@@ -580,7 +516,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
       // Start of method 2 of protecting against loops
       // to prevent Sherpa loop
       if (ancestor == ancestorParent) { break; }
-      if (TruthLoopDetectionMethod2(ancestor,ancestorParent)) {
+      if (MC::TruthLoopDetectionMethod2(ancestor,ancestorParent)) {
         ancestorParent = ancestor;
         break;
       }
@@ -1263,7 +1199,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
 
   // Start of method 3 of protecting against loops
   // to resolve Sherpa loop
-  bool samePart = TruthLoopDetectionMethod1(partProdVtx, ancestor);
+  bool samePart = MC::TruthLoopDetectionMethod1(partProdVtx, ancestor);
   // End of method 3 of protecting against loops
 
   if ((std::abs(ancestor->pdgId()) == nuFlav || MC::isTau(ancestor) || MC::isW(ancestor)) && ancestor->hasProdVtx() && !samePart) {
@@ -1274,7 +1210,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
       ancestorParent = MC::findMother(ancestor);
       // Start of method 2 of protecting against loops
       // to prevent Sherpa loop
-      if (TruthLoopDetectionMethod2(ancestor,ancestorParent)) {
+      if (MC::TruthLoopDetectionMethod2(ancestor,ancestorParent)) {
         ancestorParent = ancestor;
         break;
       }
