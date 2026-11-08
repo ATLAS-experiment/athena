@@ -34,6 +34,7 @@ public:
   inline const int& operator()(const size_t n) const { return this->second.at(n);}
   inline const int& last() const { return this->second.back();}
   inline const int& pid() const { return this->first;}
+  inline int apid() const { return std::abs(this->first);}
   inline int max_digit(const  int m, const  int n) const { return *std::max_element(second.rbegin() + m, second.rbegin() + n);}
   inline int min_digit(const  int m, const  int n) const { return *std::min_element(second.rbegin() + m, second.rbegin() + n);}
   inline size_t ndigits() const { return this->second.size();}
@@ -707,11 +708,21 @@ template <class T> inline bool isHiddenValley(const T& p){return isHiddenValley(
 template <>
 inline bool isHiddenValley(const DecodedPID& p) {
   const auto& pp = (p.ndigits() == 7) ? p.shift(2) : DecodedPID(0);
-  return (p.ndigits() == 7 && p(0) == 4 && p(1) == 9 &&
+  return (4900100 < p.apid() && p.apid() < 4900109) || (p.ndigits() == 7 && p(0) == 4 && p(1) == 9 &&
           (isQuark(pp) || isLepton(pp) || isBoson(pp) || isGlueball(pp) ||
            isDiquark(pp) || isHadron(pp)));
 }
 template <> inline bool isHiddenValley(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false;  auto value_digits = DecodedPID(p); return isHiddenValley(value_digits);}
+
+template <class T> inline bool isHiddenValleyFundamental(const T& p){return isHiddenValleyFundamental(p->pdg_id());}
+template <>
+inline bool isHiddenValleyFundamental(const DecodedPID& p) {
+  const auto& pp = (p.ndigits() == 7) ? p.shift(2) : DecodedPID(0);
+  return (4900100 < p.apid() && p.apid() < 4900109) || (p.ndigits() == 7 && p(0) == 4 && p(1) == 9 &&
+          (isQuark(pp) || isLepton(pp) || isBoson(pp)));
+}
+template <> inline bool isHiddenValleyFundamental(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false;  auto value_digits = DecodedPID(p); return isHiddenValleyFundamental(value_digits);}
+
 
 /// In addition, there is a need to identify ”Q-ball” and similar very exotic (multi-charged) particles which may have large, non-integer charge.
 /// These particles are assigned the ad-hoc numbering +/-100XXXY0, where the charge is XXX.Y.
