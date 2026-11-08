@@ -140,6 +140,18 @@ namespace InDet{
               return StatusCode::FAILURE;
            }
         }
+        m_posHist[kZR]=new TH2F("defects_zr", "defects_zr",
+                                200, -3000.,3000.,
+                                200,0.,1000.);
+        m_posHist[kXY]=new TH2F("defects_xy", "defects_xy",
+                                200,-1000.,1000.,
+                                200,-1000.,1000.);
+        static_assert(kNPosHistTypes==2);
+        for (unsigned int hist_i=0; hist_i<kNPosHistTypes; ++hist_i) {
+           if ( m_histSvc->regHist(m_histogramGroupName.value() + m_posHist[hist_i]->GetName(),m_posHist[hist_i]).isFailure() ) {
+              return StatusCode::FAILURE;
+           }
+        }
         m_histogrammingEnabled=true;
      }
      return StatusCode::SUCCESS;

@@ -82,6 +82,12 @@ protected:
    mutable std::array<TH2 *,kNHistTypes>            m_moduleHist ATLAS_THREAD_SAFE {};
    mutable std::array<std::vector< TH2 *>,2>        m_hist ATLAS_THREAD_SAFE;
    mutable std::vector< TH1 *>                      m_noiseShapeHist ATLAS_THREAD_SAFE;
+   enum EPostHistType {
+      kZR,
+      kXY,
+      kNPosHistTypes
+   };
+   mutable std::array<TH2 *,kNPosHistTypes>         m_posHist ATLAS_THREAD_SAFE;
 
    // Simple counters for dropped and copied RDOs
    mutable std::atomic<std::size_t>   m_rejectedRDOs {};

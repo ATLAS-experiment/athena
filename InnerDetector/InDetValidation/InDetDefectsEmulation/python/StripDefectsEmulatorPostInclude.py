@@ -128,60 +128,59 @@ def emulateITkStripDefects(flags,
 
     # dummy "fractions" for strips, module pattern are just examples, and currently all
     # modules get the same defect probabilities irrespectively of e.g. strip length.
-    if True :
-        module_pattern, module_defect_prob, fractions, ignore_NoiseProbability,ignore_NoiseShape, cornerDefectParam, cornerDefectFractions  = combineModuleDefects([
-                                         # coldNoise defects show up in petal modules 4 and 5 (endcap eta index 14-17), and only on
-                                         # the lower module part which have even index in phi ?
-                                         moduleDefect(bec=[-2,-2],layer=[0,99], phi_range=cold_noise_phi_range,eta_range=[14,17],
-                                                      side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
-                                                      all_rows=False,       # if True all rows of the same un-split module are marked as defect
-                                                      probability=[ModuleDefectProb, # probability of a module to be defect
-                                                                   StripDefectProb+coldNoiseDefectProb,  # probability of a strip to be defect
-                                                                   ],
-                                                      fractionsOfNDefects=[fractions]),
-                                         moduleDefect(bec=[2,2],layer=[0,99], phi_range=cold_noise_phi_range,eta_range=[14,17], # select endcap C4,5 even modules,
-                                                      side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
-                                                      all_rows=False,       # if True all rows of the same un-split module are marked as defect
-                                                      probability=[ModuleDefectProb, # probability of a module to be defect
-                                                                   StripDefectProb+coldNoiseDefectProb  # probability of a strip to be defect
-                                                                   ],
-                                                      fractionsOfNDefects=[fractions]),
-                                         moduleDefect(bec=[-2,-2],layer=[0,99], phi_range=[-99,99],eta_range=[14,17], # select endcap A4,5 modules,
-                                                      side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
-                                                      all_rows=False,       # if True all rows of the same un-split module are marked as defect
-                                                      probability=[ModuleDefectProb, # probability of a module to be defect
-                                                                   StripDefectProb   # probability of a strip to be defect
-                                                                   ]),
-                                         moduleDefect(bec=[2,2],layer=[0,99], phi_range=[-99,99],eta_range=[14,17], # select endcap C4,5 modules,
-                                                      side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
-                                                      all_rows=False,       # if True all rows of the same un-split module are marked as defect
-                                                      probability=[ModuleDefectProb, # probability of a module to be defect
-                                                                   StripDefectProb   # probability of a strip to be defect
-                                                                   ]),
-                                         moduleDefect(bec=[-2,-2],layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all endcap A modules
-                                                      side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
-                                                      all_rows=False,       # if True all rows of the same un-split module are marked as defect
-                                                      probability=[ModuleDefectProb, # probability of a module to be defect
-                                                                   StripDefectProb   # probability of a strip to be defect
-                                                                   ]),
-                                         moduleDefect(bec=[-1,1],layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all barrel, layer 0,1 modules
-                                                      side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
-                                                      all_rows=False,       # if True all rows of the same un-split module are marked as defect
-                                                      probability=[ModuleDefectProb, # probability of a module to be defect
-                                                                   StripDefectProb   # probability of a strip to be defect
-                                                                   ]),
-                                         moduleDefect(bec=[-1,1],layer=[2,99], phi_range=[-99,99],eta_range=[-99,99], # select all other barrel layers
-                                                      side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
-                                                      all_rows=False,       # if True all rows of the same un-split module are marked as defect
-                                                      probability=[ModuleDefectProb, # probability of a module to be defect
-                                                                   StripDefectProb   # probability of a strip to be defect
-                                                                   ]),
-                                         moduleDefect(bec=[2,2],layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all endcap C modules
-                                                      side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
-                                                      all_rows=False,       # if True all rows of the same un-split module are marked as defect
-                                                      probability=[ModuleDefectProb, # probability of a module to be defect
-                                                                   StripDefectProb   # probability of a strip to be defect
-                                                                   ])])
+    module_pattern, module_defect_prob, fractions, ignore_NoiseProbability,ignore_NoiseShape, cornerDefectParam, cornerDefectFractions  = combineModuleDefects([
+                                     # coldNoise defects show up in petal modules 4 and 5 (endcap eta index 14-17), and only on
+                                     # the lower module part which have even index in phi ?
+                                     moduleDefect(bec=[-2,-2],layer=[0,99], phi_range=cold_noise_phi_range,eta_range=[14,17],
+                                                  side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
+                                                  all_rows=False,       # if True all rows of the same un-split module are marked as defect
+                                                  probability=[ModuleDefectProb, # probability of a module to be defect
+                                                               StripDefectProb+coldNoiseDefectProb,  # probability of a strip to be defect
+                                                               ],
+                                                  fractionsOfNDefects=[fractions]),
+                                     moduleDefect(bec=[2,2],layer=[0,99], phi_range=cold_noise_phi_range,eta_range=[14,17], # select endcap C4,5 even modules,
+                                                  side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
+                                                  all_rows=False,       # if True all rows of the same un-split module are marked as defect
+                                                  probability=[ModuleDefectProb, # probability of a module to be defect
+                                                               StripDefectProb+coldNoiseDefectProb  # probability of a strip to be defect
+                                                               ],
+                                                  fractionsOfNDefects=[fractions]),
+                                     moduleDefect(bec=[-2,-2],layer=[0,99], phi_range=[-99,99],eta_range=[14,17], # select endcap A4,5 modules,
+                                                  side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
+                                                  all_rows=False,       # if True all rows of the same un-split module are marked as defect
+                                                  probability=[ModuleDefectProb, # probability of a module to be defect
+                                                               StripDefectProb   # probability of a strip to be defect
+                                                               ]),
+                                     moduleDefect(bec=[2,2],layer=[0,99], phi_range=[-99,99],eta_range=[14,17], # select endcap C4,5 modules,
+                                                  side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
+                                                  all_rows=False,       # if True all rows of the same un-split module are marked as defect
+                                                  probability=[ModuleDefectProb, # probability of a module to be defect
+                                                               StripDefectProb   # probability of a strip to be defect
+                                                               ]),
+                                     moduleDefect(bec=[-2,-2],layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all endcap A modules
+                                                  side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
+                                                  all_rows=False,       # if True all rows of the same un-split module are marked as defect
+                                                  probability=[ModuleDefectProb, # probability of a module to be defect
+                                                               StripDefectProb   # probability of a strip to be defect
+                                                               ]),
+                                     moduleDefect(bec=[-1,1],layer=[0,1], phi_range=[-99,99],eta_range=[-99,99], # select all barrel, layer 0,1 modules
+                                                  side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
+                                                  all_rows=False,       # if True all rows of the same un-split module are marked as defect
+                                                  probability=[ModuleDefectProb, # probability of a module to be defect
+                                                               StripDefectProb   # probability of a strip to be defect
+                                                               ]),
+                                     moduleDefect(bec=[-1,1],layer=[2,99], phi_range=[-99,99],eta_range=[-99,99], # select all other barrel layers
+                                                  side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
+                                                  all_rows=False,       # if True all rows of the same un-split module are marked as defect
+                                                  probability=[ModuleDefectProb, # probability of a module to be defect
+                                                               StripDefectProb   # probability of a strip to be defect
+                                                               ]),
+                                     moduleDefect(bec=[2,2],layer=[0,99], phi_range=[-99,99],eta_range=[-99,99], # select all endcap C modules
+                                                  side_range=[0,0,1,1], # randomly mark sides as defect. With [0,1] Both sides are marked as defect
+                                                  all_rows=False,       # if True all rows of the same un-split module are marked as defect
+                                                  probability=[ModuleDefectProb, # probability of a module to be defect
+                                                               StripDefectProb   # probability of a strip to be defect
+                                                               ])])
     NDefectFractionsPerPattern = fractions
 
     if NoiseProb > 0. :
