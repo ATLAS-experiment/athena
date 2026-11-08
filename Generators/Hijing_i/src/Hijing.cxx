@@ -270,7 +270,6 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
                       ion->spectator_protons=-1;
                       ion->impact_parameter= b;
                       ion->event_plane_angle=bphi;
-                      ion->event_plane_angle=-1;
                       ion->sigma_inel_NN=sigmainel;
     evt->set_heavy_ion(std::move(ion));                      
 
