@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /////////////////////////////////////////////////////////
@@ -87,18 +87,6 @@ AthAlgorithm(name, pSvcLocator)
 
   MsgStream LogStream(Athena::getMessageSvc(), "ALFA_GloRec::ALFA_GloRec");
 	LogStream << MSG::DEBUG << "begin ALFA_GloRec::ALFA_GloRec" << endmsg;
-
-	////////////////////////////////
-	// ... steerable job options 
-	////////////////////////////////
-  declareProperty("DataType", m_iDataType);
-  declareProperty("TrackPathPatterns", m_strTrackPathPatterns);
-  declareProperty("AnalysisFile", m_strGloRecAnalysisFile);
-  
-	declareProperty("OutputGloRecCollectionName",m_strGloRecCollectionName);
-	declareProperty("InputLocRecCollectionName",m_strLocRecCorrCollectionName);
-	declareProperty("TruthEventCollectionName",m_TruthCollectionName);   
-
 }
 
 /////////////////////////////////////////////////////////
@@ -124,9 +112,9 @@ StatusCode ALFA_GloRec::initialize() {
 	msg(MSG::DEBUG) << "======================================" << endmsg;
 	msg(MSG::DEBUG) << "ALFA_GloRec::initialize  - data type  " << endmsg;
 	msg(MSG::DEBUG) << "======================================" << endmsg;
-	msg(MSG::DEBUG) << "DataType = " << m_iDataType << endmsg;
+	msg(MSG::DEBUG) << "DataType = " << m_iDataType.value() << endmsg;
 
-	TString l_strtmp(m_strTrackPathPatterns);
+	TString l_strtmp(m_strTrackPathPatterns.value());
   	m_TObjArrTrackPathPatterns.Clear();
 	msg(MSG::DEBUG) << "==========================================================" << endmsg;
 	msg(MSG::DEBUG) << "ALFA_GloRec::initialize  - Path patterns from job options " << endmsg;
@@ -187,10 +175,10 @@ StatusCode ALFA_GloRec::execute(const EventContext& /*ctx*/) {
 	// ... get LocRecCorr data
 	/////////////////////////////////////////////////////////////
 	const ALFA_LocRecCorrEvCollection* pLocRecCorrCol = nullptr;
-	sc = evtStore()->retrieve(pLocRecCorrCol, m_strLocRecCorrCollectionName);
+	sc = evtStore()->retrieve(pLocRecCorrCol, m_strLocRecCorrCollectionName.value());
 	if(sc.isFailure() || !pLocRecCorrCol)
 	{
-		msg(MSG::ERROR) << "Container "<< m_strLocRecCorrCollectionName <<" NOT FOUND !!!!!!!" << endmsg;
+		msg(MSG::ERROR) << "Container "<< m_strLocRecCorrCollectionName.value() <<" NOT FOUND !!!!!!!" << endmsg;
 		return sc;
 	}
 
@@ -269,9 +257,9 @@ StatusCode ALFA_GloRec::finalize() {
 StatusCode ALFA_GloRec::Truth_info(){
 
   const McEventCollection* mcTru = nullptr;      
-  StatusCode sc = evtStore()->retrieve(mcTru,m_TruthCollectionName);
+  StatusCode sc = evtStore()->retrieve(mcTru,m_TruthCollectionName.value());
   if(sc.isFailure() || !mcTru){
-	msg(MSG::DEBUG) << "Container "<< m_TruthCollectionName <<" NOT FOUND !!!!!!!" << endmsg;
+	msg(MSG::DEBUG) << "Container "<< m_TruthCollectionName.value() <<" NOT FOUND !!!!!!!" << endmsg;
     return StatusCode::FAILURE;
   }
 
@@ -470,7 +458,7 @@ void ALFA_GloRec::WriteHistos(){
   /////////////////////////////////////////////////////////
   // ... write the histograms into a root file
   /////////////////////////////////////////////////////////
-	TFile fw_glorecanalysis(m_strGloRecAnalysisFile.data(), "RECREATE", m_strGloRecAnalysisFile.data(), 0);
+	TFile fw_glorecanalysis(m_strGloRecAnalysisFile.value().data(), "RECREATE", m_strGloRecAnalysisFile.value().data(), 0);
   m_th1_xnearuppotresiduals -> Write();
   m_th1_ynearuppotresiduals -> Write();
   m_th1_xfaruppotresiduals -> Write();

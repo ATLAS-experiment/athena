@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_CLINKALG_H
 #define ALFA_CLINKALG_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "Gaudi/Property.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
@@ -56,8 +57,10 @@ public:
 	virtual ~ALFA_CLinkAlg();
 
 private:
-	int m_nDataType; //data type (simulation or real data) using in the local reconstruction
-	int m_nProcessingMode; //1=offline, 2=online
+	// data type using in the local reconstruction
+	// for the simulation data the value is 0, for the real data the value is 1. Unset value is -1
+	Gaudi::Property<int> m_nDataType{this, "DataType", 1, "data type using in the local reconstruction"};
+	Gaudi::Property<int> m_nProcessingMode{this, "ProcessingMode", 2, "Processing mode, 1=offline, 2=online"};
 
 public:
 	virtual StatusCode initialize() override;
@@ -81,7 +84,7 @@ private:
 
 private:
 	//xAOD variables: LocRecEvCollection & LocRecODEvCollection
-	int m_nMaxTrackCnt;
+	int m_nMaxTrackCnt{0};
 	std::vector<float> m_vecXDetCS;
 	std::vector<float> m_vecYDetCS;
 	std::vector<int> m_vecDetectorPartID;

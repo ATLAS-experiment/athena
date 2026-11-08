@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -16,13 +16,8 @@
 ////////////////////////
 ALFA_RawDataProvider::ALFA_RawDataProvider(const std::string& name, ISvcLocator* pSvcLocator):
   AthAlgorithm         (name, pSvcLocator),
-  m_robDataProvider("ROBDataProviderSvc",name),
-  m_rawDataTool("ALFA_RawDataProviderTool"),
-  m_ALFA_RawDataCollectionKey(),
-  m_collection()
+  m_robDataProvider("ROBDataProviderSvc",name)
 {
-  declareProperty("ALFA_RawDataCollectionKey", m_ALFA_RawDataCollectionKey = "ALFA_RawData");
-  declareProperty ("ProviderTool", m_rawDataTool);
 }
 
 ////////////////////////
@@ -75,7 +70,7 @@ StatusCode ALFA_RawDataProvider::execute(const EventContext& ctx)
 
   StatusCode sc;
 
-  sc = evtStore()->record(container, m_ALFA_RawDataCollectionKey);
+  sc = evtStore()->record(container, m_ALFA_RawDataCollectionKey.value());
 
   if (sc.isFailure())
     {
@@ -111,7 +106,7 @@ StatusCode ALFA_RawDataProvider::execute(const EventContext& ctx)
 
   // check retrieve from StoreGate ///////////////////////////////////////////////////////////
 
-  sc = evtStore()->retrieve(container, m_ALFA_RawDataCollectionKey);
+  sc = evtStore()->retrieve(container, m_ALFA_RawDataCollectionKey.value());
   if (sc.isSuccess())
     {
       msg(MSG::DEBUG) << "ALFA RDO Container retrieved" << endmsg;

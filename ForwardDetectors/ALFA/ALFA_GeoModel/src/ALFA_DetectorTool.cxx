@@ -28,111 +28,71 @@ ALFA_DetectorTool::ALFA_DetectorTool( const std::string& type,
 				      const IInterface* parent )
   : GeoModelTool( type, name, parent)
 {
-	m_Config.clear();
-
-	declareProperty("MetrologyType",m_Config.GeometryConfig.eRPMetrologyGeoType=EMT_NOMINAL);//EMT_METROLOGY
-	declareProperty("MetrologySource",m_Config.GeometryConfig.strRPMetrologyConnString=string(""));//"rpmetrology.dat"
-	declareProperty("ShiftToX97Pos",m_Config.GeometryConfig.bShiftToX97Pos=false);
-	declareProperty("ConstructBeampipe",m_Config.bConstructBeampipe=false);
-	declareProperty("AddBPInStation",m_Config.bAddIBP=true);
-
-	declareProperty("NominalZPosA7L1",m_Config.GeometryConfig.fNominalZPosA7L1=237388*CLHEP::mm);
-	declareProperty("NominalZPosB7L1",m_Config.GeometryConfig.fNominalZPosB7L1=241528*CLHEP::mm);
-	declareProperty("NominalZPosA7R1",m_Config.GeometryConfig.fNominalZPosA7R1=-237408*CLHEP::mm);
-	declareProperty("NominalZPosB7R1",m_Config.GeometryConfig.fNominalZPosB7R1=-241548*CLHEP::mm);
-
-	declareProperty("B7L1U_PosType",m_Config.GeometryConfig.CfgRPosParams[0].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("B7L1U_MDGeometryType",m_Config.GeometryConfig.CfgRPosParams[0].eMDGeoType=EGST_IDEALGEOMETRY);//EGST_DATABASE
-	declareProperty("B7L1U_ODGeometryType",m_Config.GeometryConfig.CfgRPosParams[0].eODGeoType=EGST_IDEALGEOMETRY);//EGST_DATABASE
-	declareProperty("B7L1U_MDSource",m_Config.GeometryConfig.CfgRPosParams[0].strMDConnString=string(""));//string("ALFA:ALFA-00:ALFAFibreUp")
-	declareProperty("B7L1U_ODSource",m_Config.GeometryConfig.CfgRPosParams[0].strODConnString=string(""));//string("ALFA:ALFA-00:ALFAOvFibUp")
-	declareProperty("B7L1U_CurrentLVDT",m_Config.GeometryConfig.CfgRPosParams[0].fCurrentLVDTmm=7.0*CLHEP::mm);
-	
-	declareProperty("B7L1L_PosType",m_Config.GeometryConfig.CfgRPosParams[1].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("B7L1L_MDGeometryType",m_Config.GeometryConfig.CfgRPosParams[1].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7L1L_ODGeometryType",m_Config.GeometryConfig.CfgRPosParams[1].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7L1L_MDSource",m_Config.GeometryConfig.CfgRPosParams[1].strMDConnString=string(""));
-	declareProperty("B7L1L_ODSource",m_Config.GeometryConfig.CfgRPosParams[1].strODConnString=string(""));
-	declareProperty("B7L1L_CurrentLVDT",m_Config.GeometryConfig.CfgRPosParams[1].fCurrentLVDTmm=-7.0*CLHEP::mm);
-	
-	declareProperty("A7L1U_PosType",m_Config.GeometryConfig.CfgRPosParams[2].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("A7L1U_MDGeometryType",m_Config.GeometryConfig.CfgRPosParams[2].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7L1U_ODGeometryType",m_Config.GeometryConfig.CfgRPosParams[2].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7L1U_MDSource",m_Config.GeometryConfig.CfgRPosParams[2].strMDConnString=string(string("")));
-	declareProperty("A7L1U_ODSource",m_Config.GeometryConfig.CfgRPosParams[2].strODConnString=string(string("")));
-	declareProperty("A7L1U_CurrentLVDT",m_Config.GeometryConfig.CfgRPosParams[2].fCurrentLVDTmm=7.0*CLHEP::mm);
-
-	declareProperty("A7L1L_PosType",m_Config.GeometryConfig.CfgRPosParams[3].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("A7L1L_MDGeometryType",m_Config.GeometryConfig.CfgRPosParams[3].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7L1L_ODGeometryType",m_Config.GeometryConfig.CfgRPosParams[3].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7L1L_MDSource",m_Config.GeometryConfig.CfgRPosParams[3].strMDConnString=string(""));
-	declareProperty("A7L1L_ODSource",m_Config.GeometryConfig.CfgRPosParams[3].strODConnString=string(""));
-	declareProperty("A7L1L_CurrentLVDT",m_Config.GeometryConfig.CfgRPosParams[3].fCurrentLVDTmm=-7.0*CLHEP::mm);
-
-	declareProperty("A7R1U_PosType",m_Config.GeometryConfig.CfgRPosParams[4].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("A7R1U_MDGeometryType",m_Config.GeometryConfig.CfgRPosParams[4].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7R1U_ODGeometryType",m_Config.GeometryConfig.CfgRPosParams[4].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7R1U_MDSource",m_Config.GeometryConfig.CfgRPosParams[4].strMDConnString=string(""));
-	declareProperty("A7R1U_ODSource",m_Config.GeometryConfig.CfgRPosParams[4].strODConnString=string(""));
-	declareProperty("A7R1U_CurrentLVDT",m_Config.GeometryConfig.CfgRPosParams[4].fCurrentLVDTmm=7.0*CLHEP::mm);
-
-	declareProperty("A7R1L_PosType",m_Config.GeometryConfig.CfgRPosParams[5].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("A7R1L_MDGeometryType",m_Config.GeometryConfig.CfgRPosParams[5].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7R1L_ODGeometryType",m_Config.GeometryConfig.CfgRPosParams[5].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7R1L_MDSource",m_Config.GeometryConfig.CfgRPosParams[5].strMDConnString=string(""));
-	declareProperty("A7R1L_ODSource",m_Config.GeometryConfig.CfgRPosParams[5].strODConnString=string(""));
-	declareProperty("A7R1L_CurrentLVDT",m_Config.GeometryConfig.CfgRPosParams[5].fCurrentLVDTmm=-7.0*CLHEP::mm);
-
-	declareProperty("B7R1U_PosType",m_Config.GeometryConfig.CfgRPosParams[6].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("B7R1U_MDGeometryType",m_Config.GeometryConfig.CfgRPosParams[6].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7R1U_ODGeometryType",m_Config.GeometryConfig.CfgRPosParams[6].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7R1U_MDSource",m_Config.GeometryConfig.CfgRPosParams[6].strMDConnString=string(""));
-	declareProperty("B7R1U_ODSource",m_Config.GeometryConfig.CfgRPosParams[6].strODConnString=string(""));
-	declareProperty("B7R1U_CurrentLVDT",m_Config.GeometryConfig.CfgRPosParams[6].fCurrentLVDTmm=7.0*CLHEP::mm);
-	
-	declareProperty("B7R1L_PosType",m_Config.GeometryConfig.CfgRPosParams[7].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("B7R1L_MDGeometryType",m_Config.GeometryConfig.CfgRPosParams[7].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7R1L_ODGeometryType",m_Config.GeometryConfig.CfgRPosParams[7].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7R1L_MDSource",m_Config.GeometryConfig.CfgRPosParams[7].strMDConnString=string(""));
-	declareProperty("B7R1L_ODSource",m_Config.GeometryConfig.CfgRPosParams[7].strODConnString=string(""));
-	declareProperty("B7R1L_CurrentLVDT",m_Config.GeometryConfig.CfgRPosParams[7].fCurrentLVDTmm=-7.0*CLHEP::mm);
-
-	declareProperty("bIsTransformInStation", m_Config.bIsTransformInStation, "status if transformation in station will be calculated");
-	declareProperty("bIsTransformInDetector", m_Config.bIsTransformInDetector, "status if transformation in station will be calculated");
-
-	declareProperty("pointTransformInDetectorB7L1U", m_Config.pointTransformInDetectorB7L1U, "transformation point in the detectorfor B7L1U RP");
-	declareProperty("pointTransformInDetectorB7L1L", m_Config.pointTransformInDetectorB7L1L, "transformation point in the detectorfor B7L1L RP");
-	declareProperty("pointTransformInDetectorA7L1U", m_Config.pointTransformInDetectorA7L1U, "transformation point in the detectorfor A7L1U RP");
-	declareProperty("pointTransformInDetectorA7L1L", m_Config.pointTransformInDetectorA7L1L, "transformation point in the detectorfor A7L1L RP");
-	declareProperty("pointTransformInDetectorA7R1U", m_Config.pointTransformInDetectorA7R1U, "transformation point in the detectorfor A7R1U RP");
-	declareProperty("pointTransformInDetectorA7R1L", m_Config.pointTransformInDetectorA7R1L, "transformation point in the detectorfor A7R1L RP");
-	declareProperty("pointTransformInDetectorB7R1U", m_Config.pointTransformInDetectorB7R1U, "transformation point in the detectorfor B7R1U RP");
-	declareProperty("pointTransformInDetectorB7R1L", m_Config.pointTransformInDetectorB7R1L, "transformation point in the detectorfor B7R1L RP");
-
-	declareProperty("vecTransformInDetectorB7L1U", m_Config.vecTransformInDetectorB7L1U, "transformation data in the detectorfor B7L1U RP");
-	declareProperty("vecTransformInDetectorB7L1L", m_Config.vecTransformInDetectorB7L1L, "transformation data in the detectorfor B7L1L RP");
-	declareProperty("vecTransformInDetectorA7L1U", m_Config.vecTransformInDetectorA7L1U, "transformation data in the detectorfor A7L1U RP");
-	declareProperty("vecTransformInDetectorA7L1L", m_Config.vecTransformInDetectorA7L1L, "transformation data in the detectorfor A7L1L RP");
-	declareProperty("vecTransformInDetectorA7R1U", m_Config.vecTransformInDetectorA7R1U, "transformation data in the detectorfor A7R1U RP");
-	declareProperty("vecTransformInDetectorA7R1L", m_Config.vecTransformInDetectorA7R1L, "transformation data in the detectorfor A7R1L RP");
-	declareProperty("vecTransformInDetectorB7R1U", m_Config.vecTransformInDetectorB7R1U, "transformation data in the detectorfor B7R1U RP");
-	declareProperty("vecTransformInDetectorB7R1L", m_Config.vecTransformInDetectorB7R1L, "transformation data in the detectorfor B7R1L RP");
-
-	declareProperty("vecTransformInStationB7L1U", m_Config.vecTransformInStationB7L1U, "transformation data in the stationfor B7L1U RP");
-	declareProperty("vecTransformInStationB7L1L", m_Config.vecTransformInStationB7L1L, "transformation data in the stationfor B7L1L RP");
-	declareProperty("vecTransformInStationA7L1U", m_Config.vecTransformInStationA7L1U, "transformation data in the stationfor A7L1U RP");
-	declareProperty("vecTransformInStationA7L1L", m_Config.vecTransformInStationA7L1L, "transformation data in the stationfor A7L1L RP");
-	declareProperty("vecTransformInStationA7R1U", m_Config.vecTransformInStationA7R1U, "transformation data in the stationfor A7R1U RP");
-	declareProperty("vecTransformInStationA7R1L", m_Config.vecTransformInStationA7R1L, "transformation data in the stationfor A7R1L RP");
-	declareProperty("vecTransformInStationB7R1U", m_Config.vecTransformInStationB7R1U, "transformation data in the stationfor B7R1U RP");
-	declareProperty("vecTransformInStationB7R1L", m_Config.vecTransformInStationB7R1L, "transformation data in the stationfor B7R1L RP");
 }
 
 ALFA_DetectorTool::~ALFA_DetectorTool() = default;
 
+void ALFA_DetectorTool::fillConfig()
+{
+	m_Config.clear();
+
+	m_Config.GeometryConfig.eRPMetrologyGeoType=m_metrologyType;
+	m_Config.GeometryConfig.strRPMetrologyConnString=m_metrologySource.value();
+	m_Config.GeometryConfig.bShiftToX97Pos=m_shiftToX97Pos;
+	m_Config.bConstructBeampipe=m_constructBeampipe;
+	m_Config.bAddIBP=m_addBPInStation;
+
+	m_Config.GeometryConfig.fNominalZPosA7L1=m_nominalZPosA7L1;
+	m_Config.GeometryConfig.fNominalZPosB7L1=m_nominalZPosB7L1;
+	m_Config.GeometryConfig.fNominalZPosA7R1=m_nominalZPosA7R1;
+	m_Config.GeometryConfig.fNominalZPosB7R1=m_nominalZPosB7R1;
+
+	for(int i=0;i<RPOTSCNT;i++){
+		CFGRPPOSPARAMS& params=m_Config.GeometryConfig.CfgRPosParams[i];
+		params.eRPPosType=m_rpPosType[i];
+		params.eMDGeoType=m_mdGeoType[i];
+		params.eODGeoType=m_odGeoType[i];
+		params.strMDConnString=m_mdConnString[i].value();
+		params.strODConnString=m_odConnString[i].value();
+		params.fCurrentLVDTmm=m_currentLVDTmm[i];
+	}
+
+	m_Config.bIsTransformInStation=m_bIsTransformInStation.value();
+	m_Config.bIsTransformInDetector=m_bIsTransformInDetector.value();
+
+	m_Config.pointTransformInDetectorB7L1U=m_pointTransformInDetectorB7L1U.value();
+	m_Config.pointTransformInDetectorB7L1L=m_pointTransformInDetectorB7L1L.value();
+	m_Config.pointTransformInDetectorA7L1U=m_pointTransformInDetectorA7L1U.value();
+	m_Config.pointTransformInDetectorA7L1L=m_pointTransformInDetectorA7L1L.value();
+	m_Config.pointTransformInDetectorA7R1U=m_pointTransformInDetectorA7R1U.value();
+	m_Config.pointTransformInDetectorA7R1L=m_pointTransformInDetectorA7R1L.value();
+	m_Config.pointTransformInDetectorB7R1U=m_pointTransformInDetectorB7R1U.value();
+	m_Config.pointTransformInDetectorB7R1L=m_pointTransformInDetectorB7R1L.value();
+
+	m_Config.vecTransformInDetectorB7L1U=m_vecTransformInDetectorB7L1U.value();
+	m_Config.vecTransformInDetectorB7L1L=m_vecTransformInDetectorB7L1L.value();
+	m_Config.vecTransformInDetectorA7L1U=m_vecTransformInDetectorA7L1U.value();
+	m_Config.vecTransformInDetectorA7L1L=m_vecTransformInDetectorA7L1L.value();
+	m_Config.vecTransformInDetectorA7R1U=m_vecTransformInDetectorA7R1U.value();
+	m_Config.vecTransformInDetectorA7R1L=m_vecTransformInDetectorA7R1L.value();
+	m_Config.vecTransformInDetectorB7R1U=m_vecTransformInDetectorB7R1U.value();
+	m_Config.vecTransformInDetectorB7R1L=m_vecTransformInDetectorB7R1L.value();
+
+	m_Config.vecTransformInStationB7L1U=m_vecTransformInStationB7L1U.value();
+	m_Config.vecTransformInStationB7L1L=m_vecTransformInStationB7L1L.value();
+	m_Config.vecTransformInStationA7L1U=m_vecTransformInStationA7L1U.value();
+	m_Config.vecTransformInStationA7L1L=m_vecTransformInStationA7L1L.value();
+	m_Config.vecTransformInStationA7R1U=m_vecTransformInStationA7R1U.value();
+	m_Config.vecTransformInStationA7R1L=m_vecTransformInStationA7R1L.value();
+	m_Config.vecTransformInStationB7R1U=m_vecTransformInStationB7R1U.value();
+	m_Config.vecTransformInStationB7R1L=m_vecTransformInStationB7R1L.value();
+}
+
 StatusCode ALFA_DetectorTool::create()
 { 
   ATH_MSG_INFO("Building ALFA_ geometry");
+
+  fillConfig();
 
   if(((eMetrologyType)m_Config.GeometryConfig.eRPMetrologyGeoType)==EMT_SWCORRECTIONS){
 	  CHECK(m_iovDbSvc.retrieve());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_PILEUP_TOOL_H
@@ -87,22 +87,22 @@ class ALFA_PileUpTool: public PileUpToolBase {
   double m_E_ODfib[8][2][3][30]{};
 
   
-  std::string m_SimHitCollectionName;
-  std::string m_SimODHitCollectionName;
-  std::string m_key_DigitCollection;
-  std::string m_key_ODDigitCollection;
+  Gaudi::Property<std::string> m_SimHitCollectionName{this, "SimHitCollection", "ALFA_HitCollection", "Name of the input ALFA Sim Hit Collection of simulated hits"};
+  Gaudi::Property<std::string> m_SimODHitCollectionName{this, "SimODHitCollection", "ALFA_ODHitCollection", "Name of the input ALFA Sim OD Hit Collection of simulated hits"};
+  Gaudi::Property<std::string> m_key_DigitCollection{this, "ALFA_DigitCollection", "ALFA_DigitCollection", "Name of the Collection to hold the output from the ALFA main detector digitization"};
+  Gaudi::Property<std::string> m_key_ODDigitCollection{this, "ALFA_ODDigitCollection", "ALFA_ODDigitCollection", "Name of the Collection to hold the output from the ALFA OD digitization"};
   
   ALFA_DigitCollection* m_digitCollection{};
   ALFA_ODDigitCollection* m_ODdigitCollection{};
  
   
-  double m_sigma0{};          
-  double m_sigma1{};          
-  double m_meanE_dep{};       
-  double m_meanN_photo{};      
-  double m_mean{};             
-  double m_stdDev{};
-  double m_AmplitudeCut{};   
+  Gaudi::Property<double> m_sigma0{this, "sigma0", 0.1};
+  Gaudi::Property<double> m_sigma1{this, "sigma1", 1.0};
+  Gaudi::Property<double> m_meanE_dep{this, "meanE_dep", 0.0863}; //MeV
+  Gaudi::Property<double> m_meanN_photo{this, "meanN_photo", 4.11};
+  Gaudi::Property<double> m_mean{this, "mean", 0.0};
+  Gaudi::Property<double> m_stdDev{this, "stdDev", 1.0};
+  Gaudi::Property<double> m_AmplitudeCut{this, "AmplitudeCut", 0.24};
  
   ALFA_HitCollection      *m_mergedALFA_HitList{};
   ALFA_ODHitCollection    *m_mergedALFA_ODHitList{};

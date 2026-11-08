@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaKernel/errorcheck.h"
@@ -17,12 +17,6 @@ using namespace std;
 ALFA_CLinkAlg::ALFA_CLinkAlg(const std::string& name, ISvcLocator* pSvcLocator)
 	: AthAlgorithm(name, pSvcLocator)
 {
-	// data type using in the local reconstruction
-	// for the simulation data the value is 0, for the real data the value is 1. Unset value is -1
-	declareProperty("DataType", m_nDataType=1, "data type using in the local reconstruction");
-	declareProperty("ProcessingMode", m_nProcessingMode=2, "Processing mode, 1=offline, 2=online");
-
-	m_nMaxTrackCnt=0;
 }
 
 

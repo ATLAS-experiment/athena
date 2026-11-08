@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_GloRec_h
 #define ALFA_GloRec_h
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "Gaudi/Property.h"
 
 //root
 #include "TObjArray.h"
@@ -44,13 +45,13 @@ private:
     //////////////////////////////////////////////
     //  steerable members
     //////////////////////////////////////////////
-    int m_iDataType = 0;            
-    std::string m_strTrackPathPatterns;
+    Gaudi::Property<int> m_iDataType{this, "DataType", 0};
+    Gaudi::Property<std::string> m_strTrackPathPatterns{this, "TrackPathPatterns", ""};
     TObjArray m_TObjArrTrackPathPatterns{};
-    std::string m_strGloRecAnalysisFile;
-    std::string m_strGloRecCollectionName;   
-    std::string m_strLocRecCorrCollectionName;
-    std::string m_TruthCollectionName;   
+    Gaudi::Property<std::string> m_strGloRecAnalysisFile{this, "AnalysisFile", ""};
+    Gaudi::Property<std::string> m_strGloRecCollectionName{this, "OutputGloRecCollectionName", ""};
+    Gaudi::Property<std::string> m_strLocRecCorrCollectionName{this, "InputLocRecCollectionName", ""};
+    Gaudi::Property<std::string> m_TruthCollectionName{this, "TruthEventCollectionName", ""};
         
 
     //////////////////////////////////////////////

@@ -1,15 +1,13 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ALFA_Digitization/ALFA_DigiAlg.h"
 #include "PileUpTools/IPileUpTool.h"
 
 ALFA_DigiAlg::ALFA_DigiAlg(const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name, pSvcLocator),
-  m_digiTool("ALFA_PileUpTool", this )
+  AthAlgorithm(name, pSvcLocator)
 {
-  declareProperty("DigitizationTool", m_digiTool, "AthAlgTool which performs ALFA digitization");
 }
 
 StatusCode ALFA_DigiAlg::initialize() 

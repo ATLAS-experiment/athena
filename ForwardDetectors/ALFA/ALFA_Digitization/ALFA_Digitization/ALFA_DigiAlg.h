@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ALFA_DIGI_ALG_H
@@ -23,7 +23,7 @@ class ALFA_DigiAlg: public AthAlgorithm
    
  private:
   
-  ToolHandle<IPileUpTool> m_digiTool;
+  ToolHandle<IPileUpTool> m_digiTool{this, "DigitizationTool", "ALFA_PileUpTool", "AthAlgTool which performs ALFA digitization"};
 };
   
 #endif

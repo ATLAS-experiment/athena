@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -11,6 +11,7 @@
 
 // Gaudi includes
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "Gaudi/Property.h"
 #include "GaudiKernel/Algorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -85,6 +86,17 @@ private:
 
   FPConfig m_FPConfig;
 
+  Gaudi::Property<std::string> m_ConfDir{this, "ConfDir", "./config"};
+  Gaudi::Property<bool> m_UseALFA{this, "UseALFA", true};
+  Gaudi::Property<int> m_IP{this, "IP", 1};
+  Gaudi::Property<bool> m_useaper{this, "UseAper", true};
+  Gaudi::Property<double> m_apermb{this, "apermb", 0.};
+  Gaudi::Property<double> m_xcol1{this, "xcol1", 999.}; // 999e-4 but we need open collimators
+  Gaudi::Property<double> m_xcol2{this, "xcol2", 999.}; // 999e-4
+  Gaudi::Property<double> m_pbeam0{this, "BeamEnergy", 7000.}; // beam energy
+  Gaudi::Property<float> m_RPDistance{this, "RPDistance", 237.398};
+  Gaudi::Property<float> m_absZMagMax{this, "absZMagMax", 500.}; // dont read magnets after this value
+
   // added
   FPTracker::Particle m_Particle1;
   FPTracker::Particle m_Particle2;
@@ -99,8 +111,8 @@ private:
   double m_EnergyRP1 = 0.0;
   double m_EnergyRP3 = 0.0;
 
-  std::string m_FPOutputBeam1;
-  std::string m_FPOutputBeam2;
+  Gaudi::Property<std::string> m_FPOutputBeam1{this, "FPOutputBeam1", "Beam1"};
+  Gaudi::Property<std::string> m_FPOutputBeam2{this, "FPOutputBeam2", "Beam2"};
 
   // The two counters have to be set zero at the beginning at each execute run
   // since for every new call of the execute() funktion they have to be zero
@@ -109,14 +121,15 @@ private:
   // counter for particles marked as incomming in event record
   int m_pint = 0;
 
-  double m_EtaCut;
-  double m_XiCut;
+  // Cuts for production
+  Gaudi::Property<double> m_EtaCut{this, "EtaCut", 8.};
+  Gaudi::Property<double> m_XiCut{this, "XiCut", 0.2};
 
   // debug stuff
   std::ofstream m_FileBeam1;
   std::ofstream m_FileBeam2;
 
-  bool m_WriteDebugOutput;
+  Gaudi::Property<bool> m_WriteDebugOutput{this, "Debug", false};
 };
 
 #endif

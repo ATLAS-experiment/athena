@@ -25,118 +25,6 @@ ALFA_LocRec::ALFA_LocRec(const std::string& name, ISvcLocator* pSvcLocator) :
     AthAlgorithm(name, pSvcLocator)
 {
 	ATH_MSG_DEBUG("begin ALFA_LocRec::ALFA_LocRec");
-
-	m_pGeometryReader = new ALFA_GeometryReader();
-
-//	m_Config.eOwner=EOT_RECO;
-	m_Config.clear();
-
-	//begin of Geometry properties
-	declareProperty("MetrologyType",m_Config.eRPMetrologyGeoType=EMT_NOMINAL);//EGST_FILE
-	declareProperty("MetrologySource",m_Config.strRPMetrologyConnString=std::string(""));//"rpmetrology.dat"
-	declareProperty("ShiftToX97Pos",m_Config.bShiftToX97Pos=false);
-
-	declareProperty("B7L1U_PosType",m_Config.CfgRPosParams[0].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("B7L1U_MDGeometryType",m_Config.CfgRPosParams[0].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7L1U_ODGeometryType",m_Config.CfgRPosParams[0].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7L1U_MDSource",m_Config.CfgRPosParams[0].strMDConnString=std::string(""));
-	declareProperty("B7L1U_ODSource",m_Config.CfgRPosParams[0].strODConnString=std::string(""));
-//	declareProperty("B7L1U_CurrentLVDT",m_Config.CfgRPosParams[0].fCurrentLVDTmm=7.0*CLHEP::mm);
-
-	declareProperty("B7L1L_PosType",m_Config.CfgRPosParams[1].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("B7L1L_MDGeometryType",m_Config.CfgRPosParams[1].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7L1L_ODGeometryType",m_Config.CfgRPosParams[1].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7L1L_MDSource",m_Config.CfgRPosParams[1].strMDConnString=std::string(""));
-	declareProperty("B7L1L_ODSource",m_Config.CfgRPosParams[1].strODConnString=std::string(""));
-//	declareProperty("B7L1L_CurrentLVDT",m_Config.CfgRPosParams[1].fCurrentLVDTmm=7.0*CLHEP::mm);
-
-	declareProperty("A7L1U_PosType",m_Config.CfgRPosParams[2].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("A7L1U_MDGeometryType",m_Config.CfgRPosParams[2].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7L1U_ODGeometryType",m_Config.CfgRPosParams[2].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7L1U_MDSource",m_Config.CfgRPosParams[2].strMDConnString=std::string(""));
-	declareProperty("A7L1U_ODSource",m_Config.CfgRPosParams[2].strODConnString=std::string(""));
-//	declareProperty("A7L1U_CurrentLVDT",m_Config.CfgRPosParams[2].fCurrentLVDTmm=7.0*CLHEP::mm);
-
-	declareProperty("A7L1L_PosType",m_Config.CfgRPosParams[3].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("A7L1L_MDGeometryType",m_Config.CfgRPosParams[3].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7L1L_ODGeometryType",m_Config.CfgRPosParams[3].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7L1L_MDSource",m_Config.CfgRPosParams[3].strMDConnString=std::string(""));
-	declareProperty("A7L1L_ODSource",m_Config.CfgRPosParams[3].strODConnString=std::string(""));
-//	declareProperty("A7L1L_CurrentLVDT",m_Config.CfgRPosParams[3].fCurrentLVDTmm=7.0*CLHEP::mm);
-
-	declareProperty("A7R1U_PosType",m_Config.CfgRPosParams[4].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("A7R1U_MDGeometryType",m_Config.CfgRPosParams[4].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7R1U_ODGeometryType",m_Config.CfgRPosParams[4].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7R1U_MDSource",m_Config.CfgRPosParams[4].strMDConnString=std::string(""));
-	declareProperty("A7R1U_ODSource",m_Config.CfgRPosParams[4].strODConnString=std::string(""));
-//	declareProperty("A7R1U_CurrentLVDT",m_Config.CfgRPosParams[4].fCurrentLVDTmm=7.0*CLHEP::mm);
-
-	declareProperty("A7R1L_PosType",m_Config.CfgRPosParams[5].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("A7R1L_MDGeometryType",m_Config.CfgRPosParams[5].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7R1L_ODGeometryType",m_Config.CfgRPosParams[5].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("A7R1L_MDSource",m_Config.CfgRPosParams[5].strMDConnString=std::string(""));
-	declareProperty("A7R1L_ODSource",m_Config.CfgRPosParams[5].strODConnString=std::string(""));
-//	declareProperty("A7L1U_CurrentLVDT",m_Config.CfgRPosParams[5].fCurrentLVDTmm=7.0*CLHEP::mm);
-
-	declareProperty("B7R1U_PosType",m_Config.CfgRPosParams[6].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("B7R1U_MDGeometryType",m_Config.CfgRPosParams[6].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7R1U_ODGeometryType",m_Config.CfgRPosParams[6].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7R1U_MDSource",m_Config.CfgRPosParams[6].strMDConnString=std::string(""));
-	declareProperty("B7R1U_ODSource",m_Config.CfgRPosParams[6].strODConnString=std::string(""));
-//	declareProperty("B7R1U_CurrentLVDT",m_Config.CfgRPosParams[6].fCurrentLVDTmm=7.0*CLHEP::mm);
-
-	declareProperty("B7R1L_PosType",m_Config.CfgRPosParams[7].eRPPosType=ERPPT_ACTIVE);
-	declareProperty("B7R1L_MDGeometryType",m_Config.CfgRPosParams[7].eMDGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7R1L_ODGeometryType",m_Config.CfgRPosParams[7].eODGeoType=EGST_IDEALGEOMETRY);
-	declareProperty("B7R1L_MDSource",m_Config.CfgRPosParams[7].strMDConnString=std::string(""));
-	declareProperty("B7R1L_ODSource",m_Config.CfgRPosParams[7].strODConnString=std::string(""));
-//	declareProperty("B7R1L_CurrentLVDT",m_Config.CfgRPosParams[7].fCurrentLVDTmm=7.0*CLHEP::mm);
-	//end of Geometry properties
-
-	// data type using in the local reconstruction
-	// for the simulation data the value is 0, for the real data the value is 1. Unset value is -1
-	declareProperty("DataType", m_iDataType=1, "data type using in the local reconstruction");
-
-	//reconstruction methods properties - MDTracking, MDMultiple, ODTracking
-	declareProperty("MultiplicityCutOD", m_iMultiplicityCutOD=30);
-	declareProperty("DistanceCutOD", m_fDistanceCutOD=0.5);
-	declareProperty("LayerCutOD", m_iLayerCutOD=3);
-
-	declareProperty("OverlapCutMD", m_fOverlapCutMD=0.5);
-	declareProperty("MultiplicityCutMD", m_iMultiplicityCutMD=5);
-	declareProperty("NumLayerCutMD", m_iNumLayerCutMD=3);
-	declareProperty("UVCutMD", m_iUVCutMD=3);
-	declareProperty("UVCutMDHalfReco", m_iUVCutMDHalfReco=3);
-
-	//reconstruction methods properties - EdgeMethod
-	declareProperty("EdgeMethod_Opt_Sisters", m_bEdgeMethod_Opt_Sisters = false);
-	declareProperty("EdgeMethod_Opt_UseGaps", m_bEdgeMethod_Opt_UseGaps = false);
-
-	//reconstruction method selection for OD & MD
-	declareProperty("AlgoOD", m_strAlgoOD="ODTracking");
-	declareProperty("AlgoMD", m_strAlgoMD="MDTracking");
-
-	m_vecListAlgoMD.clear();
-	declareProperty("ListAlgoMD", m_vecListAlgoMD);
-	m_vecListAlgoOD.clear();
-	declareProperty("ListAlgoOD", m_vecListAlgoOD);
-
-	m_ListExistingRPots.clear();
-
-	m_strKeyGeometryForReco			= "ALFA_GeometryForReco";
-	m_strCollectionName				= "ALFA_DigitCollection";
-	m_strODCollectionName			= "ALFA_ODDigitCollection";
-	m_strKeyLocRecEvCollection		= "ALFA_LocRecEvCollection";
-	m_strKeyLocRecODEvCollection	= "ALFA_LocRecODEvCollection";
-
-	m_pLocRecEvCollection = NULL;
-	m_pLocRecEvent = NULL;
-	m_pLocRecODEvCollection = NULL;
-	m_pLocRecODEvent = NULL;
-
-	m_eventNum = 0;
-	m_iEvent   = 0;
-
 	ATH_MSG_DEBUG("end ALFA_LocRec::ALFA_LocRec");
 }
 
@@ -158,6 +46,19 @@ StatusCode ALFA_LocRec::initialize()
 	ATH_MSG_DEBUG("begin ALFA_LocRec::initialize()");
 
 	StatusCode sc;
+
+	m_Config.clear();
+	m_Config.eRPMetrologyGeoType = m_metrologyType;
+	m_Config.strRPMetrologyConnString = m_metrologySource;
+	m_Config.bShiftToX97Pos = m_shiftToX97Pos;
+	for (int i = 0; i < RPOTSCNT; ++i) {
+		m_Config.CfgRPosParams[i].eRPPosType = m_rpPosType[i];
+		m_Config.CfgRPosParams[i].eMDGeoType = m_mdGeoType[i];
+		m_Config.CfgRPosParams[i].eODGeoType = m_odGeoType[i];
+		m_Config.CfgRPosParams[i].strMDConnString = m_mdConnString[i];
+		m_Config.CfgRPosParams[i].strODConnString = m_odConnString[i];
+	}
+
 	ClearGeometry();
 
 //	sc = service("StoreGateSvc",m_storeGate);
@@ -1029,7 +930,7 @@ StatusCode ALFA_LocRec::RecordCollection()
 
 	if (sc.isFailure())
 	{
-		ATH_MSG_ERROR(m_strAlgoMD << "MD - Could not record the empty LocRecEv collection in StoreGate");
+		ATH_MSG_ERROR(m_strAlgoMD.value() << "MD - Could not record the empty LocRecEv collection in StoreGate");
 		return sc;
 	}
 	else
@@ -1053,7 +954,7 @@ StatusCode ALFA_LocRec::RecordODCollection()
 
 	if (sc.isFailure())
 	{
-		ATH_MSG_ERROR(m_strAlgoOD << "OD - Could not record the empty LocRecEv collection in StoreGate");
+		ATH_MSG_ERROR(m_strAlgoOD.value() << "OD - Could not record the empty LocRecEv collection in StoreGate");
 
 		return sc;
 	}
