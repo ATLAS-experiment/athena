@@ -88,7 +88,7 @@ bool CopyTruthJetParticles::classifyJetInput(const xAOD::TruthParticle* tp,
   // for dark jets: ignore SM particles; include only "stable" dark hadrons
   if (!m_includeSM && !MC::isHiddenValley(tp)) return false;
   if (m_includeDark) {
-    if (abs(tp->pdgId()) <= 4900101) return false; // ignore Xd, qd, gd
+    if (MC::isHiddenValley(tp) && !MC::isHiddenValleyFundamental(tp)) return false; // ignore Xd, qd, gd 
     if (tp->hasDecayVtx()) {
        size_t good_hadrons = 0;
        for (size_t p = 0; p < tp->end_vertex()->nOutgoingParticles(); ++p) {
