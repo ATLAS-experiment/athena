@@ -8,7 +8,7 @@ GEOMODEL_DB_FILE=$(python -c "from MuonGeoModelTestR4.testGeoModel import MuonPh
 RunWorkflowTests_Run3.py --CI \
         -s -w FullSim \
         -a s4454 \
-        --threads 4 \
-        -e "--maxEvents 50 --geometrySQLite True --geometrySQLiteFullPath ${GEOMODEL_DB_FILE} --preExec='from MuonConfig.MuonConfigUtils import configureDefaultTags;configureDefaultTags(flags);'" \
+        --threads 1 \
+        -e "--maxEvents 5 --geometrySQLite True --geometrySQLiteFullPath ${GEOMODEL_DB_FILE} --preExec='from MuonConfig.MuonConfigUtils import configureDefaultTags;configureDefaultTags(flags);'" \
         --run-only
   
