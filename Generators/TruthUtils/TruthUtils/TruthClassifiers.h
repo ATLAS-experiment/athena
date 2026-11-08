@@ -152,8 +152,29 @@ template <class T> ParticleOrigin defJetOrig(const T& allJetMothers) {
   }
   return partOrig;
 }
-  /// Bit positions of the particle classification word built by defOrigOfParticle().
-  enum MCTC_bits : unsigned int { HadTau=0, Tau, hadron, frombsm, uncat, isbsm, isgeant, stable, totalBits };
+  /**
+   * @brief Bit positions in the classification word returned by defOrigOfParticle().
+   *
+   * The word is an unsigned int whose bit i is set when the property i below holds
+   * (e.g. test it with `std::bitset<MCTC_bits::totalBits>(word).test(MCTC_bits::hadron)`).
+   * The numeric values are 1 << position: HadTau = 1, Tau = 2, hadron = 4, frombsm = 8, uncat = 16,
+   * isbsm = 32, isgeant = 64, stable = 128. The word is stored by the egamma, MCTC decoration
+   * and derivation code, so the positions must not be changed.
+   * The ancestry bits (HadTau, Tau, hadron, frombsm) are only filled for a physical particle with a
+   * production vertex that is not a simulation (Geant) particle; otherwise only `uncat` is set,
+   * together with the particle-level bits stable, isgeant and isbsm.
+   */
+  enum MCTC_bits : unsigned int {
+    HadTau=0,  ///< Descends from a hadron and from a tau: a hadronic tau decay product (hadron && Tau)
+    Tau,       ///< A tau is among the ancestors, or the parents of an ancestor, that were walked on the way up (product of a tau decay)
+    hadron,    ///< The particle is a hadron (not a beam particle) or descends from one (non-prompt); unset for prompt particles
+    frombsm,   ///< A BSM particle is among the ancestors walked, or the particle is itself BSM
+    uncat,     ///< Uncategorised: the particle is not physical (neither stable nor decayed), has no production vertex or is a simulation particle; the ancestry bits are then not set
+    isbsm,     ///< The particle itself is a BSM particle
+    isgeant,   ///< The particle is produced by the detector simulation (e.g. Geant4), not by the generator
+    stable,    ///< The particle is physical: stable or decayed (MC::isPhysical), not an intermediate or documentation entry. Despite the name this includes decayed particles
+    totalBits  ///< Number of bits (not a property)
+  };
 
 /// @brief Classify a particle into a bit-word (see MCTC_bits).
 /// @return the word and the parent hadron (nullptr if none)
