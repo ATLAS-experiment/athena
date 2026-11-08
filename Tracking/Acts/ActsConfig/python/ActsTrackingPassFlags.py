@@ -1,6 +1,6 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration 
 
-from ActsConfig.ActsConfigFlags import SeedingStrategy
+from ActsConfig.ActsConfigFlags import GridType, SeedingStrategy
 import AthenaCommon.SystemOfUnits as Units
 
 def deactivateAthenaComponents(icf):
@@ -108,6 +108,10 @@ def createActsTrackingPassFlags():
     icf.addFlag("isLargeD0", False)
     icf.addFlag("PixelSeedingStrategy", SeedingStrategy.Gbts, type=SeedingStrategy)
     icf.addFlag("StripSeedingStrategy", SeedingStrategy.Gbts, type=SeedingStrategy)
+    # space point grid of the grid triplet seeding tools of this pass, and
+    # the eta bin neighbours on each side searched with the spherical grid
+    icf.addFlag("GridType", GridType.Cylindrical, type=GridType)
+    icf.addFlag("SphericalGridEtaNeighbors", 1)
     # Extension used to name the persistified track particle container
     # (InDet{extension}TrackParticles) when storeSeparateContainer is
     # requested. If empty, the pass extension is used.
@@ -369,4 +373,6 @@ def createACTSInnerDetectorTrackingPassFlags():
     icf.addFlag("maxPrimaryImpactList"      , [5.0 * Units.mm, 5.0 * Units.mm, 25.0 * Units.mm])
     icf.addFlag("PixelSeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
     icf.addFlag("StripSeedingStrategy", SeedingStrategy.GridTriplet, type=SeedingStrategy)
+    icf.addFlag("GridType", GridType.Cylindrical, type=GridType)
+    icf.addFlag("SphericalGridEtaNeighbors", 1)
     return icf

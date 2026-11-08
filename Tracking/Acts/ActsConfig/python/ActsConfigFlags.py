@@ -15,6 +15,11 @@ class DeviceTritonMode(FlagEnum):
     Server = "Server"  # device algorithms only: cells in, traccc tracks out
     Client = "Client"  # RDO to cells, Triton request, host conversions
 
+# Space point grid of the grid triplet seeding: (phi, z, r) or (phi, eta, r)
+class GridType(FlagEnum):
+    Cylindrical = "Cylindrical"
+    Spherical = "Spherical"
+
 class AmbiguitySolverStrategy(FlagEnum):
     Greedy = "GreedySolver"
     ScoreBased = "ScoreBasedAmbiguitySolver"

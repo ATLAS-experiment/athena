@@ -240,6 +240,16 @@ StatusCode GridTripletSeedingTool::initialize() {
     return StatusCode::FAILURE;
   }
 
+  // select the grid type, the variant default-constructs the cylindrical one
+  if (m_sphericalGrid) {
+    m_gridCfg.emplace<Acts::Experimental::SphericalSpacePointGrid::Config>();
+  } else {
+    m_gridCfg.emplace<Acts::CylindricalSpacePointGrid::Config>();
+  }
+  ATH_MSG_INFO("Using " << (m_sphericalGrid ? "spherical (phi, eta, r)"
+                                            : "cylindrical (phi, z, r)")
+                        << " space point grid");
+
   std::visit([&](auto& cfg) {
       //common settings for spherical and cylindrical grids
       cfg.minPt = m_minPt;
