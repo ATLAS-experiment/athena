@@ -17,7 +17,6 @@ __version__ = "$Revision: 1.32 $"
 __author__ = "Scott Snyder, Sebastien Binet"
 
 ### imports
-from contextlib import contextmanager
 import sys
 from io import StringIO
 from math import \
@@ -32,13 +31,6 @@ from PyDumper import PDG
 import ROOT
 import cppyy
 
-def cmp(x, y):
-    return (x > y) - (x < y)
-
-# not available due to a reflex bug.
-etcone10 = 0
-nucone10 = 8
-
 # Suppress warnings we get from the gcc12 headers.
 ROOT.gROOT.ProcessLine ('#pragma clang diagnostic ignored "-Wdeprecated-declarations"')
 
@@ -47,12 +39,6 @@ getattr (ROOT.xAOD, 'TrackParticleContainer_v1', None)
 getattr (ROOT.xAOD, 'Jet_v1', None)
 
 #Typed nullptr:
-JetAssociationBase = getattr (cppyy.gbl, 'JetAssociationBase', None)
-Analysis = getattr (cppyy.gbl, 'Analysis', None)
-Muon = getattr (Analysis, 'Muon', None) if Analysis else None
-jetAssocNull = cppyy.bind_object(cppyy.nullptr, JetAssociationBase) if JetAssociationBase else None
-muonNull = cppyy.bind_object(cppyy.nullptr, Muon) if Muon else None
-
 InDet = getattr (cppyy.gbl, 'InDet', None)
 InDetLowBetaCandidate = getattr (InDet, 'InDetLowBetaCandidate', None)
 InDetLowBetaCandidateNull = cppyy.bind_object(cppyy.nullptr, InDetLowBetaCandidate) if InDetLowBetaCandidate else None
@@ -117,25 +103,6 @@ def asint32(x):
     elif x>(1<<31):
         return x - (1<<32)
     return x
-
-def safe_float_vector(v):
-    sa = ROOT.PyDumper.SafeFloatAccess(v)
-    return [sa[i]for i in range(len(v))]
-
-@contextmanager
-def signalstate (o, state):
-    if hasattr(o, 'setSignalState'):
-        old = o.signalState()
-        o.setSignalState (state)
-        yield
-        o.setSignalState (old)
-    else:
-        sh = PyAthena.SignalStateHelper (o)
-        sh.setSignalState (state)
-        yield
-        sh.releaseObject
-    return
-
 
 def daz(f):
     if math_isnan(f):
@@ -331,23 +298,6 @@ def dump_EL (l, f):
     return
 
 
-def dump_ParticleBase (e, f):
-    dump_Fourvec (e, f, 0)
-    orig = e.originLink()
-    if e.hasCharge():
-        charge = "%f" % e.charge()
-    else:
-        charge = "N/A"
-    fprint (f, " %1d %1d %4d %s" %
-            (e.dataType(), e.hasPdgId(), asint32(e.pdgId()), charge))
-    if orig.isValid():
-        fprint (f, "%1d"%orig.index())
-        dump_Threevec (e.origin().position(), f)
-    else:
-        fprint (f, "(no orig)")
-    return
-
-
 def dump_ParticleImpl (p, f):
     dump_Fourvec (p, f, 0)
     if  p.hasCharge():
@@ -361,235 +311,6 @@ def dump_ParticleImpl (p, f):
         dump_Threevec (p.origin().position(), f)
     else:
         fprint (f, "(no orig)")
-    return
-
-
-def dump_EMConvert (d, f):
-    fprint (f, d.convTrackMatch(), d.convAngleMatch())
-    return
-
-def dump_EMBremFit (d, f):
-    ip = d.bremInvpT()
-    iperr = d.bremInvpTerr()
-    if ip==-999: ip = 0
-    if iperr==-999: iperr = 0
-    br = d.bremRadius()
-    bx = d.bremX()
-    if br == -999: br = 0
-    if bx == -999: bx = 0
-    nt = d.bremNTRT()
-    nr = d.bremNR()
-    if nt == -999: nt = 0
-    if nr == -999: nr = 0
-    d0 = d.bremD0()
-    phi0 = d.bremPhi0()
-    if d0 == -999: d0 = 0
-    if phi0 == -999: phi0 = 0
-    fprint (f, "%f %f %f %f %f %2d %2d %2d %2d %f %f" %
-            (ip*1e6, br, bx, iperr*1e6,
-             d.bremClusterRadius(), d.bremFitStatus(), d.bremErrorFlag(),
-             nt, nr, d0, phi0))
-    fprint (f, d.bremZ0(), d.bremDzDr(), d.bremNZ(), d.bremFitChi2())
-    return
-
-def dump_EMTrackMatch (d, f):
-    fprint (f, "%f %f %4d %4d" %
-            (d.deltaEta(2), d.deltaPhi(2),
-             d.trackNumber(), d.tracksInBroadWindow()))
-    fprint (f, d.trackRefit(), d.isPrimary())
-    return
-
-def dump_EMShower (d, f):
-    weta1 = d.weta1()
-    if weta1 < -10: weta1 = 0
-    pos7 = d.pos7()
-    if pos7 < -10: pos7 = 0
-    # FIXME: backward compat
-    if not hasattr(d, 'etconoisedR04Sig2'):
-        d.etconoisedR04Sig2 = d.etconoise20
-        d.etconoisedR04Sig3 = d.etconoise30
-    fprint (f, d.e011(), d.e033(), d.ethad1(),
-            d.ethad(), d.ehad1(), d.f1(), d.f3(), d.f1core(), d.f3core(),
-            d.e233(), d.e235(), d.e255(), d.e237(), d.e277(), d.e333(),
-            d.e335(), d.e337(), d.e377(), weta1, d.weta2(), d.e2ts1(),
-            d.e2tsts1(), d.fracs1(), d.widths1(), d.widths2(),
-            d.poscs1(), d.poscs2(), d.asy1(), d.pos(), pos7, d.barys1(),
-            d.wtots1(), d.emins1(), d.emaxs1(), d.etcone(), d.etcone20(),
-            d.etcone30(), d.etcone40(),
-            d.etconoisedR04Sig2(), d.etconoisedR04Sig3(),
-            d.ecore())
-    if hasattr (d, 'e131'):
-        fprint (f, d.e131(), d.e1153(), d.iso())
-    else:
-        fprint (f, d.e132(), d.e1152(), d.r33over37allcalo())
-    return
-
-# Sometimes, we can get denormal floats in the files we read.
-# However, when reading, the denormals-as-zero flag can be set
-# if we've loaded any library compiled with -ffast-math.
-def uf(x):
-    if abs(x) < 1e-38: return 0
-    return x
-
-def dump_EMErrorDetail (d, f):
-    fprint (f, d.linkIndex())
-    fprint (f, '\n     ',
-            uf(d.EMconvertedphoton_perigee_d0()),
-            uf(d.EMconvertedphoton_perigee_z0()),
-            uf(d.EMconvertedphoton_perigee_phi0()),
-            uf(d.EMconvertedphoton_perigee_theta()),
-            uf(d.EMconvertedphoton_perigee_eta()),
-            uf(d.EMconvertedphoton_perigee_momentum()),
-            uf(d.EMconvertedphoton_perigee_Covd0d0 ()),
-            uf(d.EMconvertedphoton_perigee_Covd0z0 ()),
-            uf(d.EMconvertedphoton_perigee_Covd0phi ()),
-            uf(d.EMconvertedphoton_perigee_Covd0theta ()),
-            uf(d.EMconvertedphoton_perigee_Covz0z0   ()),
-            uf(d.EMconvertedphoton_perigee_Covz0phi  ()),
-            uf(d.EMconvertedphoton_perigee_Covz0theta ()),
-            uf(d.EMconvertedphoton_perigee_Covphiphi ()),
-            uf(d.EMconvertedphoton_perigee_Covphitheta ()),
-            uf(d.EMconvertedphoton_perigee_Covthetatheta ()))
-    fprint (f, '\n     ',
-            uf(d.EMtrack_perigee_d0    ()),
-            uf(d.EMtrack_perigee_phi0  ()),
-            uf(d.EMtrack_perigee_z0    ()),
-            uf(d.EMtrack_perigee_theta ()),
-            uf(d.EMtrack_perigee_eta    ()),
-            uf(d.EMtrack_perigee_momentum ()),
-            uf(d.EMtrack_perigee_Covd0d0         ()),
-            uf(d.EMtrack_perigee_Covd0z0         ()),
-            uf(d.EMtrack_perigee_Covd0phi        ()),
-            uf(d.EMtrack_perigee_Covd0theta      ()),
-            uf(d.EMtrack_perigee_Covz0z0         ()),
-            uf(d.EMtrack_perigee_Covz0phi        ()),
-            uf(d.EMtrack_perigee_Covz0theta      ()),
-            uf(d.EMtrack_perigee_Covphiphi       ()),
-            uf(d.EMtrack_perigee_Covphitheta     ()),
-            uf(d.EMtrack_perigee_Covthetatheta   ()))
-    fprint (f, '\n     ',
-            uf(d.EMphoton_eta ()),
-            uf(d.EMphoton_phi0 ()),
-            uf(d.EMphoton_Eclus ()),
-            uf(d.EMphoton_Covetaeta      ()),
-            uf(d.EMphoton_Covetaphi     ()),
-            uf(d.EMphoton_CovetaEclus      ()),
-            uf(d.EMphoton_Covphiphi    ()),
-            uf(d.EMphoton_CovphiEclus    ()),
-            uf(d.EMphoton_CovEclusEclus ()))
-    fprint (f, '\n     ',
-            uf(d.EMtrack_comb_Covd0d0         ()),
-            uf(d.EMtrack_comb_Covd0z0         ()),
-            uf(d.EMtrack_comb_Covd0phi        ()),
-            uf(d.EMtrack_comb_Covd0eta      ()),
-            uf(d.EMtrack_comb_Covd0P     ()),
-            uf(d.EMtrack_comb_Covz0z0         ()),
-            uf(d.EMtrack_comb_Covz0phi        ()),
-            uf(d.EMtrack_comb_Covz0eta      ()),
-            uf(d.EMtrack_comb_Covz0P     ()),
-            uf(d.EMtrack_comb_Covphiphi       ()),
-            uf(d.EMtrack_comb_Covphieta     ()),
-            uf(d.EMtrack_comb_CovphiP    ()),
-            uf(d.EMtrack_comb_Covetaeta   ()),
-            uf(d.EMtrack_comb_CovetaP  ()),
-            uf(d.EMtrack_comb_CovPP ()))
-    return
-
-
-def dump_EMTrackFit (d, f):
-    fprint (f, '\n     ',
-            d.track_perigee_d0    (),
-            d.track_perigee_phi0  (),
-            d.track_perigee_qOverP(),
-            d.track_perigee_z0    (),
-            d.track_perigee_theta (),
-            d.track_perigee_Covd0d0         (),
-            d.track_perigee_Covd0z0         (),
-            d.track_perigee_Covd0phi        (),
-            d.track_perigee_Covd0theta      (),
-            d.track_perigee_Covd0qOverP     (),
-            d.track_perigee_Covz0z0         (),
-            d.track_perigee_Covz0phi        (),
-            d.track_perigee_Covz0theta      (),
-            d.track_perigee_Covz0qOverP     (),
-            d.track_perigee_Covphiphi       (),
-            d.track_perigee_Covphitheta     (),
-            d.track_perigee_CovphiqOverP    (),
-            d.track_perigee_Covthetatheta   (),
-            d.track_perigee_CovthetaqOverP  (),
-            d.track_perigee_CovqOverPqOverP ())
-    fprint (f, '\n     ',
-            d.track_LastM_loc1    (),
-            d.track_LastM_loc2    (),
-            d.track_LastM_phi     (),
-            d.track_LastM_theta   (),
-            d.track_LastM_qOverP  (),
-            d.bremTrackAuthor   (),
-            d.hasBrem           (),
-            d.bremRadius      (),
-            d.bremRadiusErr   (),
-            d.bremDeltaZ      (),
-            d.bremDeltaZerr   (),
-            d.bremMaterialTraversed   (),
-            d.bremFitChi2(),
-            d.bremFitStatus   (),
-            d.linkIndex         ())
-    return
-
-def dump_egamma (e, f):
-    #cppyy.loadDictionary ('libElectronPhotonSelectorToolsDict')
-    dump_ParticleImpl (e, f)
-    fprint (f, "\n      %d %d %d" % (e.author(), e.isem(), e.isemse()))
-    if e.clusterElementLink().isValid():
-        fprint (f,  '\n      cl: %2d:' % e.clusterElementLink().index())
-        dump_Fourvec (e.cluster(), f)
-    for i in range(e.nTrackParticles()):
-        tp = e.trackParticleElementLink(i)
-        if tp.isValid():
-            fprint (f,  '\n      tp: %2d:' %tp.index())
-            dump_Fourvec (e.trackParticle(i), f)
-    for i in range(e.nConversions()):
-        cv = e.conversionElementLink(i)
-        if cv.isValid():
-            fprint (f,  '\n      cv: %2d:' % cv.index())
-            dump_Threevec (e.conversion(i).recVertex().position(), f)
-    for i in range (e.nDetails()):
-        if e.detailElementLink(i).isValid():
-            d = e.detail(i)
-            fprint (f, '\n      %s: ' % d.className())
-            if isinstance (d, PyAthena.EMConvert):
-                dump_EMConvert (d, f)
-            elif isinstance (d, PyAthena.EMBremFit):
-                dump_EMBremFit (d, f)
-            elif isinstance (d, PyAthena.EMTrackMatch):
-                dump_EMTrackMatch (d, f)
-            elif isinstance (d, PyAthena.EMShower):
-                dump_EMShower (d, f)
-            elif isinstance (d, PyAthena.EMErrorDetail):
-                dump_EMErrorDetail (d, f)
-            elif isinstance (d, PyAthena.EMTrackFit):
-                dump_EMTrackFit (d, f)
-            else:
-                fprint (f, d)
-        else:
-            fprint (f, '\n      Detail link %d not valid; skipped.' % i)
-    try:
-        pid = PyAthena.egammaPIDObs
-    except TypeError:
-        pid = PyAthena.egammaPID
-    fprint (f, '\n      pid: %g %g %f %g %f %f' % 
-            (e.egammaID(pid.ElectronWeight), e.egammaID(pid.BgWeight),
-             e.egammaID(pid.NeuralNet), e.egammaID(pid.Hmatrix),
-             e.egammaID(pid.IsolationLikelihood_jets),
-             e.egammaID(pid.IsolationLikelihood_HQDelectrons)))
-    return
-
-def dump_Electron (e, f):
-    dump_egamma (e, f)
-    return
-
-def dump_Photon (e, f):
-    dump_egamma (e, f)
     return
 
 
@@ -615,368 +336,6 @@ def dump_CaloEnergy (p, f):
     for d in p.depositInCalo():
         fprint (f, " (%d %f %f)" % 
                 (d.subCaloId(), d.energyDeposited(), d.muonEnergyLoss()))
-    return
-
-
-def dump_TauShot (t, f):
-    dump_EL (t.clusterLink(), f)
-    fprint (f, ' ')
-    dump_EL (t.seedLink(), f)
-    fprint (f, ' %d %d %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f' %
-             (t.nCellsInEta(),
-              t.nPhotons(),
-              t.pt1(),
-              t.pt3(),
-              t.pt5(),
-              t.ws5(),
-              t.sdevEta5_WRTmean(),
-              t.sdevEta5_WRTmode(),
-              t.sdevPt5(),
-              t.deltaPt12_min(),
-              t.Fside_3not1(),
-              t.Fside_5not1(),
-              t.Fside_5not3(),
-              t.fracSide_3not1(),
-              t.fracSide_5not1(),
-              t.fracSide_5not3(),
-              t.pt1OverPt3(),
-              t.pt3OverPt5(),
-              t.mergedScore(),
-              t.signalScore()))
-    return
-
-
-def dump_TauDetail (t, f):
-    nm = t.className()
-    if nm.startswith('Analysis::'):
-        nm = nm[10:]
-    fprint (f, '%s:' % nm)
-    return
-    
-def dump_Tau1P3PDetails (t, f):
-    dump_TauDetail (t, f)
-    fprint (f, ' %f %1d %f %f %1d %1d %f %f %f %f' %
-            (t.emRadius(),
-             t.numStripCells(),
-             t.etChrgHAD(),
-             t.etIsolHAD(),
-             t.nAssocTracksCore(),
-             t.nAssocTracksIsol(),
-             t.etEMAtEMScale(),
-             t.etChrgEM(),
-             t.etNeuEM(),
-             t.etChrgEM01Trk(0)))
-    fprint (f, '\n        ')
-    fprint (f, ' %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f' %
-            (t.isolationFraction(),
-             t.stripWidth2(),
-             t.etIsolEM(),
-             t.massTrk3P(),
-             t.rWidth2Trk3P(),
-             t.signD0Trk3P(),
-             t.z0SinThetaSig(),
-             t.etChrgHADoverPttot(),
-             t.etIsolFrac(),
-             t.etEflow(),
-             t.etHadAtEMScale(),
-             t.etEMCL(),
-             t.etResNeuEM(),
-             t.trFlightPathSig(),
-             t.etResChrgEMTrk(0)))
-    fprint (f, '\n        ')
-    dump_HLV (t.sumEM(), f)
-    if t.secVertex():
-        dump_Threevec (t.secVertex().position(), f)
-    if t.cellEM012Cluster():
-        dump_Fourvec (t.cellEM012Cluster(), f)
-    for i in range(t.numPi0()):
-        fprint (f, '\n        pi: ')
-        dump_Fourvec (t.pi0 (i), f)
-    return
-  
-
-def dump_TauRecDetails (t, f):
-    dump_TauDetail (t, f)
-    # numTrack, trackCaloEta, trackCaloPhi
-    fprint (f, '%f %f %f %f %2d %f %f %f' %
-            (t.emRadius(),
-             t.isolationFraction(),
-             t.centralityFraction(),
-             t.stripWidth2(),
-             t.numStripCells(),
-             t.etEMCalib(),
-             t.etHadCalib(),
-             t.leadingTrackPT()))
-    fprint (f, '\n        ')
-    for i in range(t.numTrack()):
-        fprint (f, '(%f %f) ' % (t.trackCaloEta(i), t.trackCaloPhi(i)))
-    fprint (f, '\n        ')
-    dump_HLV (t.sumEM(), f)
-    if t.secVertex():
-        dump_Threevec (t.secVertex().position(), f)
-    return
-
-    
-def dump_Tau1P3PExtraDetails (t, f):
-    dump_TauDetail (t, f)
-    fprint (f, t.sumPTTracks())
-    # Can't unpack cells in ARA; don't dump:
-    #  closestEtaTrkVertCell
-    #  closestPhiTrkVertCell
-    #  closestEtaTrkCell
-    for tr in range(t.ntrack()):
-        for s in range(t.nsamp()):
-            fprint (f, '\n        ', tr, s,
-                    t.etaTrackCaloSamp(tr,s), t.phiTrackCaloSamp(tr,s))
-    return
-
-
-def dump_TauRecExtraDetails (t, f):
-    dump_TauDetail (t, f)
-    fprint (f, t.numEMCells(), t.stripET(), t.emCentralityFraction(),
-            t.etHadAtEMScale(), t.etEMAtEMScale(), t.energy(), t.emEnergy(),
-            t.sumPTTracks(), t.seedType(), tonone(t.analysisHelper()))
-    return
-
-
-def dump_TauPi0Candidate (t, f):
-    dump_HLV (t.hlv(), f)
-    fprint (f, ' [')
-    for c in t.pi0ClusterVec():
-        fprint (f, c.clusterLink().index(), ', ')
-    fprint (f, ']')
-    return
-
-
-def dump_TauPi0Cluster (t, f):
-    fprint (f, t.clusterLink().index(),
-            t.deltaPhi(),
-            t.deltaTheta(),
-            t.engFracEM(),
-            t.engFracMAX(),
-            t.engFracCore(),
-            t.secondEngDens(),
-            t.LATERAL(),
-            t.LONGITUDINAL(),
-            t.EM1CoreFrac(),
-            t.asymmetryInEM1WRTTrk(),
-            t.NHitsInEM1(),
-            t.NPosECells_PS(),
-            t.NPosECells_EM1(),
-            t.NPosECells_EM2(),
-            t.firstEtaWRTClusterPosition_EM1(),
-            t.firstEtaWRTClusterPosition_EM2(),
-            t.secondEtaWRTClusterPosition_EM1(),
-            t.secondEtaWRTClusterPosition_EM2(),
-            t.BDTScore())
-    for s in t.tauShotVec():
-        fprint (f, '\n      shot ')
-        dump_TauShot (s, f)
-    return
-          
-
-
-def dump_TauPi0Details (t, f):
-    dump_TauDetail (t, f)
-    dump_HLV (t.visTauhlv(), f)
-    fprint (f, '  candidates')
-    for c in t.pi0CandidateVector():
-        fprint (f, '\n    ')
-        dump_TauPi0Candidate (c, f)
-    fprint (f, '  clusters')
-    for c in t.pi0ClusterVector():
-        fprint (f, '\n    ')
-        dump_TauPi0Cluster (c, f)
-    for s in t.shotVector():
-        fprint (f, '\n      shot ')
-        dump_TauShot (s, f)
-    return
-
-
-def dump_TauCommonDetails (t, f):
-    dump_TauDetail (t, f)
-    fprint (f, t.ipZ0SinThetaSigLeadTrk(), t.etOverPtLeadTrk(),
-            t.leadTrkPt(), t.ipSigLeadTrk(), t.ipSigLeadLooseTrk(),
-            t.etOverPtLeadLooseTrk(), t.leadLooseTrkPt(), t.chrgLooseTrk(),
-            t.massTrkSys(), t.trkWidth2())
-    fprint (f, '\n        ')
-    fprint (f, t.trFlightPathSig(), t.etEflow(), t.seedCalo_EMRadius(),
-            t.seedCalo_hadRadius(), t.seedCalo_etEMAtEMScale(),
-            t.seedCalo_etHadAtEMScale(), t.seedCalo_isolFrac(),
-            t.seedCalo_centFrac(), t.seedCalo_stripWidth2(), t.seedCalo_nStrip())
-    fprint (f, '\n        ')
-    fprint (f, t.seedCalo_etEMCalib(), t.seedCalo_etHadCalib(),
-            t.seedCalo_eta(), t.seedCalo_phi(), t.seedCalo_nIsolLooseTrk(),
-            t.seedTrk_EMRadius(), t.seedTrk_isolFrac(),
-            t.seedTrk_etChrgHadOverSumTrkPt(), t.seedTrk_isolFracWide(),
-            t.seedTrk_etHadAtEMScale())
-    fprint (f, '\n        ')
-    fprint (f, t.seedTrk_etEMAtEMScale(), t.seedTrk_etEMCL(),
-            t.seedTrk_etChrgEM(), t.seedTrk_etNeuEM(),
-            t.seedTrk_etResNeuEM(), t.seedTrk_hadLeakEt(),
-            t.seedTrk_sumEMCellEtOverLeadTrkPt(), t.seedTrk_secMaxStripEt(),
-            t.seedTrk_stripWidth2(), t.seedTrk_nStrip())
-    fprint (f, '\n        ')
-    fprint (f, t.seedTrk_etChrgHad(), t.seedTrk_nOtherCoreTrk(),
-            t.seedTrk_nIsolTrk(), t.seedTrk_etIsolEM(), t.seedTrk_etIsolHad())
-    fprint (f, '\n        %d loose tracks' % t.nLooseTrk())
-    looseTrks = t.looseTrk()
-    for i in range(looseTrks.size()):
-        el = looseTrks[i]
-        fprint (f, '\n          ', el.index(), el.dataID(),
-               t.seedTrk_etChrgEM01Trk(i), t.seedTrk_etResChrgEMTrk(i))
-    fprint (f, '\n        %d pi0s' % t.nPi0())
-    vec = t.pi0LinkVec()
-    for i in range(vec.size()):
-        el = vec[i]
-        # nb. indices may vary from run to run.  list isn't sorted?
-        fprint (f, '\n          ', el.dataID(), el.e())
-    fprint (f, '\n        pi0 sum:')
-    dump_HLV (t.sumPi0Vec(), f)
-    cl = t.cellEM012ClusterLink()
-    fprint (f, '\n        cluster:')
-    if cl.isValid():
-        fprint (f, cl.index(), cl.dataID())
-    else:
-        fprintln (f, '(invalid)')
-    fprint (f, '\n        secvertex:')
-    if t.secVtx():
-        dump_RecVertex (t.secVtx(), f)
-    else:
-        fprint (f, None)
-    return
-
-
-def dump_vvelccell (c, f):
-    fprint (f, '[')
-    for v in c:
-        fprint (f, '[')
-        for el in v:
-            if el.isValid():
-                fprint (f, '(', el.dataID(), el.index(), ') ')
-            else:
-                fprint (f, '(invEL) ')
-        fprint (f, ']')
-    fprint (f, ']')
-    return
-
-    
-def dump_vvdouble (c, f):
-    fprint (f, '[')
-    for v in c:
-        fprint (f, '[')
-        for d in v:
-            fprint (f, d, ',')
-        fprint (f, ']')
-    fprint (f, ']')
-    return
-
-    
-def dump_TauCommonExtraDetails (t, f):
-    dump_TauDetail (t, f)
-    fprint (f, t.sumPtLooseTrk(), t.sumPtTrk(), t.seedCalo_nEMCell(),
-            t.seedCalo_stripEt(), t.seedCalo_EMCentFrac(),
-            t.seedCalo_sumCellEnergy(), t.seedCalo_sumEMCellEnergy())
-    fprint (f, '\n    ')
-    dump_vvelccell (t.closestEtaTrkVertCell(), f)
-    fprint (f, '\n        ')
-    dump_vvelccell (t.closestPhiTrkVertCell(), f)
-    fprint (f, '\n        ')
-    dump_vvelccell (t.closestEtaTrkCell(), f)
-    fprint (f, '\n        ')
-    dump_vvelccell (t.closestPhiTrkCell(), f)
-    fprint (f, '\n        ')
-    dump_vvdouble (t.etaTrkCaloSamp(), f)
-    fprint (f, '\n        ')
-    dump_vvdouble (t.phiTrkCaloSamp(), f)
-    fprint (f, '\n        ')
-    dump_vvdouble (t.etaLooseTrkCaloSamp(), f)
-    fprint (f, '\n        ')
-    dump_vvdouble (t.phiLooseTrkCaloSamp(), f)
-    return
-
-
-def dump_TauJet (t, f):
-    dump_ParticleImpl (t, f)
-    fprint (f, ' %1d' % (t.author(),))
-    # xxx numberOfTracks doesn't seem to be initialized in reco --- don't dump.
-    if t.clusterLink().isValid():
-        fprint (f,  '\n      cl: %2d:' % t.clusterLink().index())
-        dump_Fourvec (t.cluster(), f)
-    if t.cellClusterLink().isValid():
-        # Note: cluster container is unsorted.  Means that indices
-        # are unstable.  So don't print them.
-        fprint (f,  '\n      ce: ')
-        dump_Fourvec (t.cellCluster(), f)
-    if t.jetLink().isValid():
-        fprint (f,  '\n      je: %2d:' % t.jetLink().index())
-        j = t.jet()
-        if j.e() == 0 and j.phi() == 0 and j.eta() == 0:
-            with signalstate (j, PyAthena.P4SignalState.JETEMSCALE):
-                dump_Fourvec (j, f)
-        else:
-            dump_Fourvec (j, f)
-    for i in range (t.numTrack()):
-        el = t.trackLinkVector()[i]
-        if el.isValid():
-            fprint (f,  '\n      t%d: %2d:' % (i,el.index()))
-            dump_Fourvec (t.track(i), f)
-    pid = t.tauID()
-    TJP = PyAthena.TauJetParameters
-    if pid:
-        fprint (f, '\n      pid: %f %f %f %d %d %d' %
-                (pid.discriminant(0),
-                 pid.discriminant(1),
-                 pid.discriminant(2),
-                 pid.flag (TJP.ElectronFlag),
-                 pid.flag (TJP.EgammaFlag),
-                 pid.flag (TJP.MuonFlag)))
-        if hasattr (TJP, 'TauCutLoose'):
-            flags = [TJP.TauCutLoose,
-                     TJP.TauCutMedium,
-                     TJP.TauCutTight,
-                     TJP.ElectronVeto,
-                     TJP.MuonVeto,
-                     TJP.TauLlhTight,
-                     TJP.TauLlhMedium,
-                     TJP.TauLlhLoose,
-                     ]
-            if hasattr (TJP, 'TauRecOld'):
-                flags.append (TJP.TauRecOld)
-            if hasattr (TJP, 'Tau1P3POld'):
-                flags.append (TJP.Tau1P3POld)
-            fprint (f,  '\n          ', [pid.isTau(ff) for ff in flags])
-        else:
-            fprint (f,  '\n          ', pid.isTau())
-    for i in range (t.nDetails()):
-        fprint (f, '\n      ')
-        if t.detailElementLink(i).isValid():
-            d = t.detail(i)
-            if (hasattr (PyAthena.Analysis, 'Tau1P3PDetails') and
-                isinstance (d, PyAthena.Analysis.Tau1P3PDetails)):
-                dump_Tau1P3PDetails (d, f)
-            elif (hasattr (PyAthena.Analysis, 'TauRecDetails') and
-                  isinstance (d, PyAthena.Analysis.TauRecDetails)):
-                dump_TauRecDetails (d, f)
-            elif (hasattr (PyAthena.Analysis, 'Tau1P3PExtraDetails') and
-                  isinstance (d, PyAthena.Analysis.Tau1P3PExtraDetails)):
-                dump_Tau1P3PExtraDetails (d, f)
-            elif (hasattr (PyAthena.Analysis, 'TauRecExtraDetails') and
-                  isinstance (d, PyAthena.Analysis.TauRecExtraDetails)):
-                dump_TauRecExtraDetails (d, f)
-            elif (hasattr (PyAthena.Analysis, 'TauPi0Details') and
-                  isinstance (d, PyAthena.Analysis.TauPi0Details)):
-                dump_TauPi0Details (d, f)
-            elif isinstance (d, PyAthena.Analysis.TauCommonDetails):
-                dump_TauCommonDetails (d, f)
-            elif isinstance (d, PyAthena.Analysis.TauCommonExtraDetails):
-                dump_TauCommonExtraDetails (d, f)
-            else:
-                fprint (f, t.detailName(i), d, '(not dumped)')
-    fprint (f, '\n      p: %f %f %f' %
-            (t.parameter (0),
-             t.parameter (3),
-             t.parameter (6)))
     return
 
 
@@ -1352,14 +711,6 @@ def dump_RpcClusterOnTrack (p, f):
     return
     
 
-def dump_Attribute (p, f):
-    if isinstance (p, str):
-        fprint (f, p)
-    else:
-        ss = ROOT.std.ostringstream()
-        p.toOutputStream (ss)
-        fprint (f, ss.str())
-    return
 @nolist
 def dump_AttributeList (p, f):
     #print ('yyy', p, type(p))
@@ -1522,35 +873,6 @@ def dump_ALFA_RawDataContainer (p, f):
     for c in p:
         fprint (f, '\n    ')
         dump_ALFA_RawDataCollection (c, f)
-    return
-
-
-def dump_TrigT2ZdcSignals (p, f):
-    fprint (f, list(p.triggerEnergies()), list(p.triggerTimes()))
-    return
-
-
-@nolist
-def dump_TauDetailsContainer (p, f):
-    fprint (f, '(Dumped as a part of Analysis::TauJetContainer)')
-    return
-
-
-@nolist
-def dump_egDetailContainer (p, f):
-    fprint (f, '(Dumped as a part of egamma)')
-    return
-
-
-@nolist
-def dump_JetMomentMapCollection (p, f):
-    fprint (f, '(Dumped as a part of jets)')
-    return
-
-
-@nolist
-def dump_JetKeyDescriptorCollection (p, f):
-    fprint (f, '(Dumped as a part of jets)')
     return
 
 
@@ -2423,132 +1745,6 @@ def dump_TrigDecision (t, f):
     return
 
 
-def dump_HLTTriggerElement (e, f):
-    fprint (f, e.id(), e.name())
-    return
-
-    
-def dump_HLTSignature (s, f):
-    fprint (f, '(', s.signature_counter(),
-            s.logic(),
-            s.label())
-    for e in s.outputTEs():
-        dump_HLTTriggerElement (e, f)
-    fprint (f, ')')
-    return
-
-
-def dump_HLTStreamTag (s, f):
-    fprint (f, '(',
-            s.stream(),
-            s.type(),
-            s.obeyLB(),
-            s.prescale(),
-            ')')
-    return
-
-def dump_HLTChain (c, f):
-    fprint (f, c.chain_name(),
-            c.chain_version(),
-            c.chain_counter(),
-            c.level(),
-            c.lower_chain_name(),
-            c.lower_chain_counter(),
-            c.prescale(),
-            c.pass_through(),
-            c.chain_hash_id(),
-            c.lower_chain_hash_id())
-    for s in c.signatureList():
-        dump_HLTSignature (s, f)
-    fprint (f, [t.bit() for t in c.triggerTypeList()])
-    for s in c.streamTagList():
-        dump_HLTStreamTag (s, f)
-    fprint (f, [s for s in c.groupList()])
-    return
-
-
-def dump_HLTSequence (s, f):
-    fprint (f, '(')
-    dump_HLTTriggerElement (s.outputTE(), f)
-    dump_HLTTriggerElement (s.topoStartTE(), f)
-    for t in s.inputTEs():
-        dump_HLTTriggerElement (t, f)
-    fprint (f, [a for a in s.algorithms()], ')')
-    return
-
-
-@nolist
-def dump_HLTAODConfigData (d, f):
-    fprint (f, "%d" %
-            (d.masterKey()))
-    for c in d.getChainList().chains():
-        fprint (f, '\nch')
-        dump_HLTChain (c, f)
-    for c in d.getSequenceList().sequences():
-        fprint (f, '\nsq')
-        dump_HLTSequence (c, f)
-    return
-
-
-def dump_L1DataBaseclass (c, f):
-    fprint (f, c.id())
-    return
-
-
-def dump_CTPConfig (c, f):
-    dump_L1DataBaseclass (c, f)
-    fprint (f, c)
-#     Menu* menu() const;
-#     void setMenu( Menu* m );   
-#     PrescaleSet prescaleSet() const;
-#     void setPrescaleSet( PrescaleSet m );  
-#     BunchGroupSet bunchGroupSet() const;
-#     void setBunchGroupSet( BunchGroupSet m );  
-#     PrescaledClock prescaledClock() const;
-#     void setPrescaledClock( PrescaledClock m );   
-#     TriggerType triggerType() const;
-#     void setTriggerType( TriggerType m );   
-#     DeadTime deadTime() const;
-#     void setDeadTime( DeadTime m );   
-#     Random random() const;
-#     void setRandom( Random m );   
-    
-#     int lvl1MasterTableId() const {return m_Lvl1MasterTableId;}
-#     void setLvl1MasterTableId (const int& id){m_Lvl1MasterTableId=id;}
-    return
-
-
-@nolist
-def dump_Lvl1AODConfigData (d, f):
-    fprint (f, d.masterKey())
-    fprint (f, '\nit', [s for s in d.getItems()])
-    fprint (f, '\nmu', [s for s in d.getMuonThresholds()])
-    fprint (f, '\nem', [s for s in d.getEMTauThresholds()])
-    fprint (f, '\njt', [s for s in d.getJetThresholds()])
-    fprint (f, '\nfj', [s for s in d.getForwardJetThresholds()])
-    fprint (f, '\net', [s for s in d.getTotalEtThresholds()])
-    fprint (f, '\nje', [s for s in d.getJetEtThresholds()])
-    fprint (f, '\nms', [s for s in d.getMissingEtThresholds()])
-    fprint (f, '\nctp')
-    if d.ctpConfig():
-        dump_CTPConfig (d.ctpConfig(), f)
-    else:
-        fprint (f, None)
-    fprint (f, '\ntcf')
-    if d.thresholdConfig():
-        fprint (f, d.thresholdConfig())
-    else:
-        fprint (f, None)
-    return
-
-
-@nolist
-def dump_Lvl1AODPrescaleConfigData (d, f):
-    fprint (f, d.masterKey())
-    fprint (f, [i for i in d.getPrescales()])
-    return
-
-
 def dump_TrackRecord (t, f):
     dump_H3V (t.GetPosition(), f)
     dump_H3V (t.GetMomentum(), f)
@@ -2724,115 +1920,6 @@ def dump_TrackParticleAssocs (a, f):
     return dump_Assocs (a, f, PyAthena.Rec.TrackParticleContainer)
 
 
-def dump_JetAssociationBase (a, f):
-    fprint (f, a.name())
-    return
-
-
-def dump_ElectronAssociation (a, f):
-    dump_JetAssociationBase (a, f)
-    ele = a.electron()
-    if ele:
-        fprint (f, a.getElectronWeight (ele))
-        dump_Fourvec (ele, f)
-    return
-
-
-def dump_PhotonAssociation (a, f):
-    dump_JetAssociationBase (a, f)
-    gam = a.photon()
-    if gam:
-        fprint (f, a.getPhotonWeight (gam))
-        dump_Fourvec (gam, f)
-    return
-
-
-def dump_MuonAssociation (a, f):
-    dump_JetAssociationBase (a, f)
-    muo = a.muon()
-    if muo != muonNull:
-        fprint (f, a.getMuonWeight (muo))
-        dump_Fourvec (muo, f)
-    return
-
-
-def _infoType (i):
-    return i.infoType()
-
-def dump_Jet (j, f):
-    if j.e() == 0 and j.phi() == 0 and j.eta() == 0:
-        with signalstate (j, PyAthena.P4SignalState.JETEMSCALE):
-            dump_ParticleImpl (j, f)
-    else:
-        dump_ParticleImpl (j, f)
-    fprint (f, '\n      %s %f' %
-            (j.jetAuthor(),
-             j.getFlavourTagWeight(),))
-    # ELs to towers will always be invalid (towers aren't actually saved...)
-    tower_constituents_p = False
-    if j.firstConstituent() != j.lastConstituent():
-        if isinstance (j.getContainer(j.firstConstituent()),
-                       PyAthena.CaloTowerContainer):
-            tower_constituents_p = True
-        elif j.firstConstituent().__deref__():
-            ss = asint(j.constituentSignalState())
-            j.setConstituentSignalState (PyAthena.P4SignalState.CALIBRATED)
-            dump_HLV (j.constituent_sum4Mom(), f)
-            j.setConstituentSignalState (ss)
-    fprint (f, [x for x in j.combinedLikelihood()])
-    fprint (f, '\n      moms ')
-    for mk in j.getMomentKeys():
-        if mk in ['Timing', 'LArQuality']: continue
-        mom = j.getMoment (mk, False)
-        if  mom != 0:
-            fprint (f, mk, j.getMoment (mk, True))
-    if hasattr(j, 'getJetTime'):
-        fprint (f, '\n      timing ', j.getJetTime(),
-                ' qual ', j.getJetQuality())
-    else:
-        fprint (f, '\n      timing ', j.getMoment('Timing',True),
-                ' qual ', j.getMoment('LArQuality',True))
-    fprint (f, '\n      assoc ')
-    for ak in j.getAssociationKeys():
-        ass = j.getAssociationBase(ak)
-        if ass == jetAssocNull : continue
-        fprint (f, '\n         ', ak)
-        if isinstance (ass, PyAthena.Analysis.ElectronAssociation):
-            dump_ElectronAssociation (ass, f)
-        elif isinstance (ass, PyAthena.Analysis.PhotonAssociation):
-            dump_PhotonAssociation (ass, f)
-        elif isinstance (ass, PyAthena.Analysis.MuonAssociation):
-            dump_MuonAssociation (ass, f)
-        else:
-            fprint (f, ass)
-    ti = j.jetTagInfoVector()
-    fprint (f, '\n      tag info:')
-    if ti:
-        #ROOT.SetOwnership (ti, True)
-        ti = list(ti)
-        ti.sort (key=_infoType)
-        for info in ti:
-            if not info:
-                fprint (f, '\n      (null)')
-                continue
-            fprint (f, '\n      %s %s: %f: '
-                    % (info.infoType(), typename(info.__class__), j.getFlavourTagWeight (info.infoType())))
-            fprint (f, info)
-    if tower_constituents_p:
-        fprint (f, '\n      (not dumping tower constituents)')
-    else:
-        fprint (f, '\n      constituents:')
-        for c in toiter (j.firstConstituent(), j.lastConstituent()):
-            fprint (f, '\n        ')
-            if not c:
-                fprint (f, tonone(c))
-            else:
-                fprint (f, typename(c.__class__))
-                fprint (f, j.getWeight (c))
-                dump_Fourvec (c, f)
-    return
-
-
 def dump_ExtendedVxCandidate (c, f):
     dump_VxCandidate1 (c, f)
     fprint (f, '\n          em')
@@ -2878,29 +1965,6 @@ def dump_TrigVertex (v, f):
     return
 
 
-def dump_clist (l, f):
-    fprint (f, '[')
-    last = None
-    n = 0
-    for i in l:
-        if i != last:
-            if n > 0:
-                if n == 1:
-                    fprint (f, '%f, ' % last)
-                else:
-                    fprint (f, '%d*%f, ' % (n, last))
-            last = i
-            n = 1
-        else:
-            n = n + 1
-    if n > 0:
-        if n == 1:
-            fprint (f, '%f, ' % last)
-        else:
-            fprint (f, '%d*%f, ' % (n, last))
-    fprint (f, ']')
-    return
-            
 def dump_TrigTrackCounts (t, f):
     fprint (f, 'z0_pt:')
     dump_TrigHisto2D (t.z0_pt(), f)
@@ -3079,26 +2143,6 @@ def dump_TRTUncompressedHit (t, f):
             t.GetPreStepX(),  t.GetPreStepY(),  t.GetPreStepZ(),
             t.GetPostStepX(), t.GetPostStepY(), t.GetPostStepZ(),
             t.GetGlobalTime())
-    return
-
-
-def dump_CosmicMuon (m, f):
-    # Not really implemented.
-    # The AODs i saw had containers of these, which were always empty.
-    # Print as the address, so that if we do see one with contents,
-    # we'll see a miscompare and know to fill this in.
-    fprint (f, id(m))
-    #fprint (f, m.p(), m.theta(), m.phi(), m.t(), m.radius(),
-    #        m.isIngoing, m.NRpcPairs(), m.NTgcPairs(), m.NMdtHits(), 
-    #        m.NMdtSegs())
-#   void getRefPoint(double vec[3]) const;
-#   double residual(double z, double r) const;
-#   double longPos(double z, double r) const;
-#   void perigee(double point[3], double x0=0, double y0=0, double z0=0) const;
-#   void perigee2D(double point[2], double x0=0, double y0=0) const;
-#   double dca3D(double x0=0.0, double y0=0.0, double z0=0.0) const;
-#   double dcaXY(double x0=0.0, double y0=0.0) const;
-#   double dca2D_Z(double x0=0.0, double y0=0.0) const;
     return
 
 
@@ -4435,9 +3479,6 @@ def dump_list (l, f, dumper, nmax = None):
 """The list of tuples (cpp_type, dumper_fct)
 """
 dumpspecs = [
-    ["ElectronContainer",                    dump_Electron],
-    ["PhotonContainer",                      dump_Photon],
-    ["Analysis::TauJetContainer",            dump_TauJet],
     ["TruthParticleContainer",               dump_TruthParticle],
     ["Rec::TrackParticleContainer",          dump_TrackParticle],
     ["DataVector<Trk::Track>",               dump_Track],
@@ -4456,9 +3497,6 @@ dumpspecs = [
     ["CTP_Decision",                         dump_CTP_Decision],
     ["LVL1_ROI",                             dump_LVL1_ROI],
     ["TrigDec::TrigDecision",                dump_TrigDecision],
-    ["TrigConf::HLTAODConfigData",           dump_HLTAODConfigData],
-    ["TrigConf::Lvl1AODConfigData",          dump_Lvl1AODConfigData],
-    ["TrigConf::Lvl1AODPrescaleConfigData",  dump_Lvl1AODPrescaleConfigData],
     ["TrackParticleTruthCollection",         dump_TrackParticleTruthCollection],
     ["DetailedTrackTruthCollection",         dump_DetailedTrackTruthCollection],
     ["HLT::HLTResult",                       dump_HLTResult],
@@ -4467,9 +3505,7 @@ dumpspecs = [
     ["DetStatusMap",                         dump_DetStatusMap],
     ["AtlasHitsVector<TrackRecord>",         dump_TrackRecord],
     ["AthenaHitsVector<TrackRecord>",        dump_TrackRecord],
-    ["JetCollection",                        dump_Jet],
     ["V0Container",                          dump_V0Candidate],
-    ["egammaContainer",                      dump_egamma],
     ["DataVector<TrigVertex>",               dump_TrigVertex],
     ["TrigVertexCollection",                 dump_TrigVertex],
     ["TrigTrackCounts",                      dump_TrigTrackCounts_nolist],
@@ -4497,7 +3533,6 @@ dumpspecs = [
     ["TrigSpacePointCountsCollection",       dump_TrigSpacePointCounts],
     ["TrigTrackCountsCollection",            dump_TrigTrackCounts],
     ["TrigRoiDescriptorCollection",          dump_TrigRoiDescriptor],
-    ["CosmicMuonCollection",                 dump_CosmicMuon],
     ["MdtTrackSegmentCollection",            dump_MdtTrackSegment],
     ["InDet::InDetLowBetaContainer",         dump_InDetLowBetaCandidate],
     ["LArNoisyROSummary",                    dump_LArNoisyROSummary],
@@ -4569,11 +3604,6 @@ dumpspecs = [
     ['LVL1CTP::Lvl1Result',                  dump_Lvl1Result],
     ['AFP_RawContainer',                     dump_AFP_RawContainer],
     ['ALFA_RawDataContainer',                dump_ALFA_RawDataContainer],
-    ['TrigT2ZdcSignalsContainer',            dump_TrigT2ZdcSignals],
-    ['Analysis::TauDetailsContainer',        dump_TauDetailsContainer],
-    ['egDetailContainer',                    dump_egDetailContainer],
-    ['JetMomentMapCollection',               dump_JetMomentMapCollection],
-    ['JetKeyDescriptorCollection',           dump_JetKeyDescriptorCollection],
     ['LArFebErrorSummary',                   dump_LArFebErrorSummary],
     ['Trk::ClusterSplitProbabilityContainer', dump_ClusterSplitProbabilityContainer],
     ['InDetSimDataCollection',               dump_InDetSimDataCollection],
