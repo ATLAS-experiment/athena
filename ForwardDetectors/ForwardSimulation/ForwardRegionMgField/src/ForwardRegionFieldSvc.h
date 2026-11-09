@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -18,6 +18,7 @@
 // FrameWork includes
 #include "AthenaBaseComps/AthService.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "Gaudi/Property.h"
 #include "GaudiKernel/IIncidentListener.h"
 
 #include "ForwardRegionGeoModel/IForwardRegionProperties.h"
@@ -68,7 +69,7 @@ namespace MagField {
 
     G4ThreeVector FieldValue(G4ThreeVector Point) const;
 
-    int m_magnet;
+    Gaudi::Property<int> m_magnet{this, "Magnet", -1, "integer property"};
 
     void InitMagData();
 
@@ -80,10 +81,10 @@ namespace MagField {
     double m_magData[4];
 
     // switch for magnetic data input file type: 0 = magnets.dat, 1 = twiss file
-    int m_magDataType;
+    int m_magDataType{0};
 
-    std::string m_MQXA_DataFile; // @TODO DOCUMENT
-    std::string m_MQXB_DataFile; // @TODO DOCUMENT
+    Gaudi::Property<std::string> m_MQXA_DataFile{this, "MQXA_DataFile", ""}; // @TODO DOCUMENT ("MQXA_NOMINAL.dat" if name = Q1 or Q3)
+    Gaudi::Property<std::string> m_MQXB_DataFile{this, "MQXB_DataFile", ""}; // @TODO DOCUMENT ("MQXB_NOMINAL.dat" if name = Q2)
 
     //std::string m_twissFileB1, m_twissFileB2;
 
@@ -129,7 +130,7 @@ namespace MagField {
     // property configuration
     FWDMg_CONFIGURATION m_Config;
 
-    ToolHandle<IForwardRegionProperties> m_properties;
+    PublicToolHandle<IForwardRegionProperties> m_properties{this, "ForwardRegionProperties", "ForwardRegionProperties"};
 
 //    G4ThreeVector applyDisplacement(G4ThreeVector Point, G4ThreeVector field, int beam) const;
 
