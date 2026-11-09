@@ -1,7 +1,7 @@
-// Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+// Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "FPGAActsTrkConverter.h"
-#include "TrkEventPrimitives/ParticleHypothesis.h"
+#include "Acts/EventData/ParticleHypothesis.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Identifier/IdentifierHash.h"
 
@@ -180,15 +180,8 @@ std::unique_ptr<Acts::BoundTrackParameters> FPGAActsTrkConverter::makeParams (co
   Acts::BoundMatrix cov = Acts::BoundMatrix::Identity();
   cov *= (GeVToMeV*GeVToMeV); 
 
-  // some ACTS paperwork 
-  Trk::ParticleHypothesis hypothesis = Trk::pion;
-  float mass = Trk::ParticleMasses::mass[hypothesis] * Acts::UnitConstants::MeV;
-  Acts::PdgParticle absPdg = Acts::makeAbsolutePdgParticle(Acts::ePionPlus);
-  Acts::ParticleHypothesis actsHypothesis{
-    absPdg, mass, 1.0f};
-
-  return std::make_unique<Acts::BoundTrackParameters>(actsSurface, params,
-                                    cov, actsHypothesis);
+  return std::make_unique<Acts::BoundTrackParameters>(
+      actsSurface, params, cov, Acts::ParticleHypothesis::pion());
 
 }
 
@@ -229,15 +222,8 @@ std::unique_ptr<Acts::BoundTrackParameters> FPGAActsTrkConverter::makeParams (co
 
 
     
-  // some ACTS paperwork 
-  Trk::ParticleHypothesis hypothesis = Trk::pion;
-  float mass = Trk::ParticleMasses::mass[hypothesis] * Acts::UnitConstants::MeV;
-  Acts::PdgParticle absPdg = Acts::makeAbsolutePdgParticle(Acts::ePionPlus);
-  Acts::ParticleHypothesis actsHypothesis{
-    absPdg, mass, 1.0f};
-
-  return std::make_unique<Acts::BoundTrackParameters>(actsSurface, params,
-                                    cov, actsHypothesis);
+  return std::make_unique<Acts::BoundTrackParameters>(
+      actsSurface, params, cov, Acts::ParticleHypothesis::pion());
 
 }
 

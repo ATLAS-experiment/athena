@@ -61,6 +61,12 @@ namespace ActsTrk {
       etaBinWidth = m_etaBinWidthOverride.value();
     }
 
+    // the layer pairs carry the tau ratio cut of the triplets they make
+    Acts::Experimental::GbtsAdaptiveTauRatioCuts tauRatioCuts;
+    tauRatioCuts.tauRatioCut = m_tauRatioCut;
+    tauRatioCuts.tauRatioCorr = m_useAdaptiveCuts ? m_tauRatioCorr.value() : 0.0f;
+    Acts::Experimental::assignAdaptiveTauRatioCuts(connections, layers, tauRatioCuts);
+
     // the cluster width cuts are the only user of the tau lookup table
     if (m_finderCfg.useClusterWidthCuts) {
       ATH_CHECK(readTauLookupTable(m_finderCfg.tauLookupTable));
@@ -272,7 +278,6 @@ namespace ActsTrk {
     m_graphCfg.maxEdgesPerSP = m_maxEdgesPerSP;
     m_graphCfg.tauRatioCut = m_tauRatioCut; 
     m_graphCfg.tauRatioPrecut = m_tauRatioPrecut;
-    m_finderCfg.edgeMaskMinEta = m_edgeMaskMinEta;
     m_finderCfg.hitShareThreshold = m_hitShareThreshold;
     m_finderCfg.maxEndcapClusterWidth = m_maxEndcapClusterwidth;
     m_graphCfg.d0Max = m_d0Max;
@@ -282,8 +287,6 @@ namespace ActsTrk {
     m_graphCfg.minZ0 = m_minZ0.value();
 
     m_graphCfg.validateTriplets = m_validateTriplets;
-    m_graphCfg.useAdaptiveCuts = m_useAdaptiveCuts;
-    m_graphCfg.tauRatioCorr = m_tauRatioCorr;
     m_finderCfg.addTriplets = m_addTriplets;
     m_finderCfg.maxAbsEtaAddTriplets = m_maxEtaAddTriplets;
     m_graphCfg.cutDPhiMax = m_cutDPhiMax;
@@ -324,7 +327,7 @@ void GbtsSeedingTool::printGbtsConfig() const {
   ATH_MSG_DEBUG( "minSeedLevel: " << static_cast<unsigned>(m_finderCfg.minSeedLevel));
   ATH_MSG_DEBUG( "tauRatioPrecut: " << m_graphCfg.tauRatioPrecut);
   ATH_MSG_DEBUG( "tauRatioCut: " << m_graphCfg.tauRatioCut);
-  ATH_MSG_DEBUG( "tauRatioCorr: " << m_graphCfg.tauRatioCorr);
+  ATH_MSG_DEBUG( "tauRatioCorr: " << m_tauRatioCorr.value());
   ATH_MSG_DEBUG( "etaBinWidthOverride: " << m_etaBinWidthOverride.value());
   ATH_MSG_DEBUG( "nMaxPhiSlice: " << m_finderCfg.nMaxPhiSlice);
   ATH_MSG_DEBUG( "minPt: " << m_graphCfg.minPt);
@@ -332,14 +335,13 @@ void GbtsSeedingTool::printGbtsConfig() const {
   ATH_MSG_DEBUG( "doubletFilterRZ: " << m_graphCfg.doubletFilterRZ);
   ATH_MSG_DEBUG( "maxEdgesPerSP: " << m_graphCfg.maxEdgesPerSP);
   ATH_MSG_DEBUG( "minDeltaRadius: " << m_graphCfg.minDeltaRadius);
-  ATH_MSG_DEBUG( "edgeMaskMinEta: " << m_finderCfg.edgeMaskMinEta);
   ATH_MSG_DEBUG( "hitShareThreshold: " << m_finderCfg.hitShareThreshold);
   ATH_MSG_DEBUG( "maxEndcapClusterWidth: " << m_finderCfg.maxEndcapClusterWidth);
   ATH_MSG_DEBUG( "d0Max: " << m_graphCfg.d0Max);
   ATH_MSG_DEBUG("maxZ0: " << m_graphCfg.maxZ0);
   ATH_MSG_DEBUG("minZ0: " << m_graphCfg.minZ0);
   ATH_MSG_DEBUG( "validateTriplets: " << m_graphCfg.validateTriplets);
-  ATH_MSG_DEBUG( "useAdaptiveCuts: " << m_graphCfg.useAdaptiveCuts);
+  ATH_MSG_DEBUG( "useAdaptiveCuts: " << m_useAdaptiveCuts.value());
   ATH_MSG_DEBUG( "addTriplets: " << m_finderCfg.addTriplets);
   ATH_MSG_DEBUG( "maxEtaAddTriplets: " << m_finderCfg.maxAbsEtaAddTriplets);
   ATH_MSG_DEBUG("cutDphiMax: " << m_graphCfg.cutDPhiMax);

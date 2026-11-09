@@ -145,7 +145,12 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
 
     std::vector<std::pair<unsigned int, std::vector<unsigned int>>> binGroups;
     for (Acts::Experimental::GbtsBinGroup groups : gbtsGeo->binGroups()) {
-      binGroups.emplace_back(groups.bin, groups.links);
+      std::vector<unsigned int> links;
+      links.reserve(groups.links.size());
+      for (const Acts::Experimental::GbtsBinLink& link : groups.links) {
+        links.push_back(link.bin);
+      }
+      binGroups.emplace_back(groups.bin, std::move(links));
     }
 
     if (!m_gbts_config.setLinkingScheme(binGroups, std::move(layerInfo), identifierBinning,
