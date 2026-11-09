@@ -19,7 +19,13 @@
 inline void ApplyG4HepEmOptions(G4HepEmConfig& config, const G4HepEmOptions& opts)
 {
   // Woodcock tracking of photons
-  config.GetWoodcockTrackingRegionNames().clear();
+  // Clear the current Woodcock tracking regions through the G4HepEm API,
+  // since GetWoodcockTrackingRegionNames() returns a const vector.
+  // Iterate over a copy because removing regions changes the original vector.
+  const auto previousRegions = config.GetWoodcockTrackingRegionNames();
+  for (const std::string& region : previousRegions) {
+    config.SetWoodcockTrackingRegion(region, false);
+  }
   for (const std::string& region : opts.woodcockTrackingRegions) {
     config.SetWoodcockTrackingRegion(region);
   }
