@@ -31,6 +31,7 @@
 namespace {
     constexpr double c_inv = 1./ Gaudi::Units::c_light;
     static const SG::Decorator<int> dec_trackSign{"segmentFitDriftSign"};
+    static const SG::ConstAccessor<int> acc_trackSign{"segmentFitDriftSign"};
 
     /** @brief Helper utility to craete the bound track parameters from the track state proxy */
     inline Acts::BoundTrackParameters makeBoundPars(const ActsTrk::MutableTrackContainer::TrackStateProxy& state) {
@@ -495,9 +496,8 @@ namespace MuonR4{
                 //calibInput.setTimeOfFlight(trackPars.parameters()[Acts::eBoundTime]);
                 calibInput.setTrackDirection(trackDir, true);
                 const double driftSign = m_MdtSignFromSegment ? 
-                                         static_cast<double>(dec_trackSign(*dc)) :
+                                         static_cast<double>(acc_trackSign(*dc)) :
                                          Acts::copySign(1.,trackPars.parameters()[Acts::eBoundLoc0]);
-
                 /** Vast majority of the measurements are ordinary drift tubes */
                 if (muonMeas->numDimensions() == 1) [[likely]] {
                     MdtCalibOutput calibOutput = m_mdtCalibrationTool->calibrate(*ctx, calibInput);
@@ -653,8 +653,10 @@ namespace MuonR4{
         const Segment* detSeg = MuonR4::detailedSegment(segment);
         for (const auto& meas : detSeg->measurements()) {
             if (meas->type() == xAOD::UncalibMeasType::MdtDriftCircleType){
-                dec_trackSign(*meas->spacePoint()->primaryMeasurement()) =
-                    SeedingAux::strawSign(segPos, segLine, *meas);
+                const int sign = SeedingAux::strawSign(segPos, segLine, *meas);
+                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" Stamp: "<<sign<<" onto "
+                                <<m_idHelperSvc->toString(meas->spacePoint()->identify()));
+                dec_trackSign(*meas->spacePoint()->primaryMeasurement()) =sign;
             }
         }
     }
