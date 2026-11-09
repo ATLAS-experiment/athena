@@ -65,7 +65,6 @@ private:
 	int m_MapChan{};
 
 	int m_pot{};
-	int m_side{};
 	int m_plate{};
 	int m_fiber{};
 
@@ -88,32 +87,21 @@ private:
 	int m_mb2det[8]{};
 
 
-
-	TH2I *m_All_Trigger{};
-	TH2D *m_All_Trigger_norm{};
-
-	TH1F* m_act_lay_h[8]{};
-	TH1F* m_hit_lay_h[8]{};
-	uint32_t m_lumi_block{}, m_lumi_block_old{};
+	uint32_t m_lumi_block{};
 	uint16_t m_charge_1[8]{}, m_charge_2[8]{};
 	std::vector<bool> m_trigger_pattern;
 	bool m_pot_b[8]{}, m_layer_b[8][20]{}, m_fiber_b[8][20][64]{}, m_trigger_pattern_b[8][16]{};
 	Int_t m_n_hits_lay[8][20]{};
 	Int_t m_event_no{};
-	TTree* m_tree{};
-	TFile *m_rootOutput{};
 	TString m_rootOutputFileName{};
 
 
 	Int_t m_pmf_chan_hit_counter[8][23][64]{};
 	Int_t m_hit_counter[8]{};
-     
-   
-	ALFA_DigitCollection* m_digitCollection{};
-	ALFA_Digit*           m_digitObject{};
 
+
+	ALFA_DigitCollection* m_digitCollection{};
 	ALFA_ODDigitCollection* m_ODdigitCollection{};
-	ALFA_ODDigit*           m_ODdigitObject{};
 
 	std::string m_key_DigitCollection{"ALFA_DigitCollection"};
 	std::string m_key_ODDigitCollection{"ALFA_ODDigitCollection"};
