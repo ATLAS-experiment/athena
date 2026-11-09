@@ -60,6 +60,9 @@ private:
   StatusCode fillFromCREST(std::unique_ptr<ITkPixelCablingData>& cabling, const std::string& c) const;
 
   Gaudi::Property<bool> m_useTestCabling{this, "UseTestCabling", false, "Generate a dummy cabling for testing/development purposes, as the online IDs don't exist yet"};
+  Gaudi::Property<bool> m_sourceIDConsistencyCheck{this,
+    "SourceIDConsistencyCheck", true,
+    "Checks that all detector resources belonging to the same module have also the same sourceID"};
 
   //Retrieve the cabling from the store gate
   SG::ReadCondHandleKey<AthenaAttributeList> m_readKey {this,"ReadKey","/ITk/Pixel/Identifier"};

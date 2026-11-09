@@ -12,6 +12,8 @@
 #include "src/ITkPixelCnvTool.h"
 #include "src/ITkPixelDataRateMonTool.h"
 #include "src/ITkPixelCsvWaferIdAlg.h"
+#include "src/PixelRDOValidationAlg.h"
+#include "src/PixelPhaseIIRDOValidationAlg.h"
 
 //This is a converter - needs special macro
 DECLARE_CONVERTER( ITkPixelRawContByteStreamCnv )
@@ -26,3 +28,5 @@ DECLARE_COMPONENT( ITkPixelTranslatorAlg )
 DECLARE_COMPONENT( ITkPixelCnvTool )
 DECLARE_COMPONENT( ITkPixelDataRateMonTool )
 DECLARE_COMPONENT( ITkPixelCsvWaferIdAlg )
+DECLARE_COMPONENT( PixelRDOValidationAlg )
+DECLARE_COMPONENT( PixelPhaseIIRDOValidationAlg )

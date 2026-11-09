@@ -15,6 +15,7 @@
 #include "ITkPixelCablingAlg.h"
 
 //indet includes
+#include "AthenaBaseComps/AthMsgStreamMacros.h"
 #include "InDetIdentifier/PixelID.h"
 #include "PixelReadoutGeometry/PixelDetectorManager.h"
 #include "InDetReadoutGeometry/SiDetectorElement.h"
@@ -24,8 +25,8 @@
 //Athena includes
 #include "Identifier/Identifier.h"
 #include "Identifier/IdentifierHash.h"
-#include "PathResolver/PathResolver.h"
 #include "AthenaKernel/IOVInfiniteRange.h"
+#include <GaudiKernel/StatusCode.h>
 
 
 
@@ -34,8 +35,11 @@
 
 
 //STL
+#include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
+#include <cmath>
 
 // CREST
 #include <chai/Database.h>
@@ -228,6 +232,8 @@ StatusCode ITkPixelCablingAlg::fillFromCREST(std::unique_ptr<ITkPixelCablingData
     // Parse JSON
     nlohmann::json config = nlohmann::json::parse(s);
 
+    std::map<uint64_t, uint32_t> moduleid_sourceid_consistency_check;
+
     std::unordered_set<uint32_t> seen;
 
     for (const auto& entry : config) {
@@ -236,13 +242,48 @@ StatusCode ITkPixelCablingAlg::fillFromCREST(std::unique_ptr<ITkPixelCablingData
 
         const uint32_t trueDetectorResourceID = std::stoul(entry.at("TrueDetectorResourceID").get<std::string>(), nullptr, 16);
 
-        const uint32_t sourceID = std::stoul(entry.at("SourceID").get<std::string>(), nullptr, 16);
+        uint64_t moduleID = (static_cast<uint64_t>(ITkPixelCabling::dridToModuleID(trueDetectorResourceID)) << 32);
+
+        uint32_t sourceID = std::stoul(entry.at("SourceID").get<std::string>(), nullptr, 16);
+
+        // The Phase-II RDO decoder assumes that data from a single module comes
+        // from a single source, i.e. ROB. Otherwise we can end up in this
+        // scenario:
+        // ROB 0:
+        //   chip 0 of module X
+        //   chip 1 of module X
+        // ROB 1:
+        //   chip 0 of module Y -> data for module X are registered in the
+        //                         container (because of new module)
+        //   [..]
+        // ROB 2:
+        //   chip 2 of module X
+        //   chip 3 of module X
+        //   chip 0 of module Z -> new data for module X are registered in the
+        //                         container. Consequently previous data are
+        //                         either replaced or deleted. In any case we've
+        //                         just lost some data.
+        if (m_sourceIDConsistencyCheck) {
+          const auto it = moduleid_sourceid_consistency_check.find(moduleID);
+          if (it != moduleid_sourceid_consistency_check.end()) {
+            if (sourceID != it->second) {
+              ATH_MSG_ERROR("source ID inconsistency: different detector resources from the same module"
+                << " have different source IDs"
+                << ": detectorResourceID: " << trueDetectorResourceID
+                << ", moduleID: " << moduleID
+                << ", sourceID: " << sourceID
+                << ", sourceID of previous resources on that module: " << it->second
+              );
+              return StatusCode::FAILURE;
+            }
+          } else {
+            moduleid_sourceid_consistency_check[moduleID] = sourceID;
+          }
+        }
 
         cabling->addEntryOffOn(detectorResourceID & ITkPixelCabling::OFFLINE_DRID_MASK, ITkPixelOnlineId(sourceID, detectorResourceID));
 
         if (seen.insert(sourceID).second) cabling->addSourceID(sourceID);
-
-        uint64_t moduleID = (static_cast<uint64_t>(ITkPixelCabling::dridToModuleID(trueDetectorResourceID)) << 32);
 
         Identifier id(static_cast<Identifier::value_type>(moduleID));
         if      (m_idHelper->barrel_ec(id) == 0 && m_idHelper->layer_disk(id) == 0) cabling->addTransformType(ITkPixelCabling::dridToModuleID(trueDetectorResourceID), ITkPixelCabling::TransformType::NominalIBTriplet);

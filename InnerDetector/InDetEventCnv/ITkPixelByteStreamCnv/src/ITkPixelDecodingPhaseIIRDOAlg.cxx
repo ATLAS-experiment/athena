@@ -3,9 +3,8 @@
 */
 
 #include "ITkPixelDecodingPhaseIIRDOAlg.h"
-#include "StoreGate/ReadHandle.h"
 #include "eformat/ROBFragment.h"
-#include <fstream>
+#include "itksw/pix/endec/DecCore.hpp"
 
 #define ENABLE_TIMING = true;
 #ifdef ENABLE_TIMING
@@ -128,7 +127,7 @@ StatusCode ITkPixelDecodingPhaseIIRDOAlg::execute(const EventContext& ctx) const
         for (const auto& [detectorResourceID, range] : GBTFragments){
             
             //are we still filling the same module?
-            uint32_t currentModuleID = ITkPixelCabling::dridToModuleID(detectorResourceID);
+            const uint32_t currentModuleID = ITkPixelCabling::dridToModuleID(detectorResourceID);
             if (moduleID != currentModuleID){
                 moduleID = currentModuleID;
                 cb.setOfflineID(currentModuleID);
@@ -148,17 +147,24 @@ StatusCode ITkPixelDecodingPhaseIIRDOAlg::execute(const EventContext& ctx) const
                 payloadIdx++;
             }
 
-            //Decode!
-            core.initialize();
-            core.decode(payload64);
-            core.finalize();
-
+            try {
+                core.initialize();
+                core.decode(payload64);
+                core.finalize();
+            } catch (std::runtime_error & exc) {
+                if (m_FailOnDecodingError) {
+                    ATH_MSG_ERROR(exc.what());
+                    return StatusCode::FAILURE;
+                } else {
+                    ATH_MSG_WARNING(exc.what());
+                }
+            }
         }
-        
-        
     }
 
     cb.registerLastModule();
+
+    ATH_MSG_DEBUG("nb decoded RDOs: " << cb.getNbRDOs());
 
     //The container is filled by now. We can write it to SG
     SG::WriteHandle<PhaseIIPixelRawDataContainer> pixelRDOContainerHandle(m_pixelRDOKey, ctx);
