@@ -28,6 +28,7 @@
 
 #include "TruthUtils/TruthClasses.h"
 
+#include <tuple>
 #include <vector>
 
 using Gaudi::Units::GeV;
@@ -1124,84 +1125,31 @@ void DQTGlobalWZFinderAlg::doMuonInDetTP(std::vector<const xAOD::Muon*>& goodmuo
 }
 
 bool DQTGlobalWZFinderAlg::checkTruthElectron(const xAOD::Electron* elec) const{
-
-  using namespace MCTruthPartClassifier;
-
   // Check if input electron originates from a ZBoson, following EGamma recipe
-  bool truthMatched = false;
-
-  std::pair<unsigned int, unsigned int> res;
-
   const xAOD::TruthParticle* lastElTruth = xAOD::EgammaHelpers::getBkgElectronMother(elec);
-  if( lastElTruth ){
-    res=m_truthClassifier->particleTruthClassifier(lastElTruth);
-  
-    unsigned int iTypeOfPart = res.first;
-    unsigned int iPartOrig   = res.second;
+  if (!lastElTruth) return false;
 
-    if((iTypeOfPart == MCTruthPartClassifier::IsoElectron && iPartOrig == MCTruthPartClassifier::ZBoson) || (iPartOrig == MCTruthPartClassifier::FSRPhot)){
-      truthMatched = true;
-    }
-  }
-
-  return truthMatched;
-
+  // particleTruthClassifier argument type: const xAOD::TruthParticle*
+  const auto [iTypeOfPart, iPartOrig] = m_truthClassifier->particleTruthClassifier(lastElTruth);
+  return ((iTypeOfPart == MCTruthPartClassifier::IsoElectron && iPartOrig == MCTruthPartClassifier::ZBoson) ||
+          iPartOrig == MCTruthPartClassifier::FSRPhot);
 }
 
 bool DQTGlobalWZFinderAlg::checkTruthMuon(const xAOD::Muon* muon) const{
-
-  using namespace MCTruthPartClassifier;
-
   // Check if input muon originates from a ZBoson
-  bool truthMatched = false;
+  // particleTruthClassifier argument type: const xAOD::Muon*
+  const auto [iTypeOfPart, iPartOrig] = m_truthClassifier->particleTruthClassifier(muon);
 
-  std::pair<unsigned int, unsigned int> res;
-  ParticleDef partDef;
-
-  res=m_truthClassifier->particleTruthClassifier(muon);
-
-  unsigned int iTypeOfPart = res.first;
-  unsigned int iPartOrig   = res.second;
-
+  // truth particle matched to the muon's primary track
   auto muTrk = muon->trackParticle(xAOD::Muon::TrackParticleType::Primary);
-
-  const auto* thePart = m_truthClassifier->getGenPart(muTrk);
-
-  if(thePart){
-    if(iTypeOfPart == MCTruthPartClassifier::IsoMuon && iPartOrig == MCTruthPartClassifier::ZBoson){
-      truthMatched = true;
-    }
-  }
-
-  return truthMatched;
-
+  const auto* thePart = std::get<2>(m_truthClassifier->particleTruthClassifier_full(muTrk));
+  return (thePart && iTypeOfPart == MCTruthPartClassifier::IsoMuon && iPartOrig == MCTruthPartClassifier::ZBoson);
 }
 
 bool DQTGlobalWZFinderAlg::checkTruthTrack(const xAOD::TrackParticle* trk) const{
-
-  using namespace MCTruthPartClassifier;
-
-  // Check if input track originates from a Z boson
-  bool truthMatched = false;
-
-  std::pair<unsigned int, unsigned int> res;
-  ParticleDef partDef;
-
-  res=m_truthClassifier->particleTruthClassifier(trk);
-
-  unsigned int iTypeOfPart = res.first;
-  unsigned int iPartOrig   = res.second;
-
-  const auto* thePart = m_truthClassifier->getGenPart(trk);
-
-  if(thePart){
-    if(iTypeOfPart == MCTruthPartClassifier::IsoMuon && iPartOrig == MCTruthPartClassifier::ZBoson){
-        truthMatched = true;
-    }
-  }
-
-  return truthMatched;
-
+  // particleTruthClassifier argument type: const xAOD::TrackParticle*
+  const auto [iTypeOfPart, iPartOrig, thePart, outcome] = m_truthClassifier->particleTruthClassifier_full(trk);
+  return (thePart && iTypeOfPart == MCTruthPartClassifier::IsoMuon && iPartOrig == MCTruthPartClassifier::ZBoson);
 }
 
 
