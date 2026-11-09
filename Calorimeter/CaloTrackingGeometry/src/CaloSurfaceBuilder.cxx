@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -36,8 +36,6 @@
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "CaloDetDescr/CaloDetDescriptor.h"
 #include "CaloDetDescr/ICaloCoordinateTool.h"
-#include "CaloDetDescr/ICaloRecoMaterialTool.h"
-#include "CaloDetDescr/ICaloRecoSimpleGeomTool.h"
 
 // Tile specific stuff :
 #include "CaloIdentifier/TileID.h"
@@ -57,12 +55,7 @@ CaloSurfaceBuilder::CaloSurfaceBuilder(const std::string& type,
                                        const std::string& name,
                                        const IInterface* parent)
   : base_class(type, name, parent)
-  , m_tile_dd(nullptr)
-  , m_lar_mat("LArRecoMaterialTool")
-  , m_lar_simplegeom("LArRecoSimpleGeomTool")
 {
-  declareProperty("LArRecoMaterialTool", m_lar_mat);
-  declareProperty("LarRecoSimpleGeometryTool", m_lar_simplegeom);
 }
 
 CaloSurfaceBuilder::~CaloSurfaceBuilder() = default;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -41,13 +41,7 @@
 //###############################################################################
 GetLCClassification::GetLCClassification(const std::string& name, 
 					 ISvcLocator* pSvcLocator) 
-  : AthAlgorithm(name, pSvcLocator),
-    m_outputFile(nullptr),
-    m_clusterCollName("CaloTopoClusters"),
-    m_NormalizationType("Lin"),
-    m_NormalizationTypeNumber(0),
-    m_ClassificationType("None"),
-    m_ClassificationTypeNumber(0)
+  : AthAlgorithm(name, pSvcLocator)
 {
  
   std::vector<Gaudi::Histo1DDef> dims(6);
@@ -59,24 +53,6 @@ GetLCClassification::GetLCClassification(const std::string& name,
   dims[5] = Gaudi::Histo1DDef("log10(lambda_clus (mm))",0.0,4.0,20);
 
   mapinsert(dims);
-
-  // Dimensions to use for classification
-  declareProperty("ClassificationDimensions",m_dimensionsmap);
-
-  // Name of output file to save histograms in
-  declareProperty("OutputFileName",m_outputFileName);  
-  
-  // Name of ClusterContainer to use
-  declareProperty("ClusterCollectionName",m_clusterCollName);  
-
-  // Normalization type "Const", "Lin", "Log", "NClus"
-  declareProperty("NormalizationType",m_NormalizationType); 
-
-  // Classification type "None" for single pion MC or 
-  //                     "ParticleID_EM" for ParticleID based em-type clusters  
-  //                     "ParticleID_HAD" for ParticleID based had-type clusters  
-  declareProperty("ClassificationType", m_ClassificationType);
-
 }
 
 //###############################################################################
@@ -88,7 +64,7 @@ GetLCClassification::~GetLCClassification()
 
 StatusCode GetLCClassification::initialize()
 {
-  m_outputFile = std::make_unique<TFile>(m_outputFileName.c_str(),"RECREATE");
+  m_outputFile = std::make_unique<TFile>(m_outputFileName.value().c_str(),"RECREATE");
   m_outputFile->cd();
   m_hclus.resize(0);
   mapparse();
@@ -123,7 +99,7 @@ StatusCode GetLCClassification::initialize()
     m_ClassificationTypeNumber = GetLCDefs::PARTICLEID_HAD;
   }
   else {
-    ATH_MSG_WARNING( " unknown classification type " << m_ClassificationType << " given! Using None instead"  );
+    ATH_MSG_WARNING( " unknown classification type " << m_ClassificationType.value() << " given! Using None instead"  );
     m_ClassificationTypeNumber = GetLCDefs::NONE;
   }
 
@@ -398,13 +374,13 @@ StatusCode GetLCClassification::execute(const EventContext& ctx)
 
 void GetLCClassification::mapinsert(const std::vector<Gaudi::Histo1DDef> & dims) {
   for (unsigned int i=0;i<dims.size();i++) {
-    m_dimensionsmap[dims[i].title()] = dims[i];
+    m_dimensionsmap.value()[dims[i].title()] = dims[i];
   }
 }
 
 void GetLCClassification::mapparse() {
 
-  for (std::pair<const std::string, Gaudi::Histo1DDef>& p : m_dimensionsmap) {
+  for (std::pair<const std::string, Gaudi::Histo1DDef>& p : m_dimensionsmap.value()) {
     m_dimensions.push_back(p.second);
     ATH_MSG_DEBUG( " New Dimension: " 
 	<< p.second.title() << ", [" << p.second.lowEdge()

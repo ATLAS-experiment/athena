@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -57,34 +57,8 @@ using CLHEP::TeV;
 //###############################################################################
 GetLCDeadMaterialTree::GetLCDeadMaterialTree(const std::string& name, 
                            ISvcLocator* pSvcLocator) 
-  : AthAlgorithm(name, pSvcLocator),
-    m_HadDMCoeffInitFile("CaloHadDMCoeff_init_v2.txt"),
-    m_outputTree(nullptr),
-    m_outputFileName("DeadMaterialTree.root"),
-    m_outputFile(nullptr),
-    m_clusterCollName("CaloTopoClusters"),
-    m_HadDMCoeff(nullptr),
-    m_data(nullptr),
-    m_doSaveCalibClusInfo(false),
-    m_energyMin(200*MeV),
-    m_calo_id(nullptr)
+  : AthAlgorithm(name, pSvcLocator)
 {
-
-  // dead material zone description
-  declareProperty("HadDMCoeffInitFile",m_HadDMCoeffInitFile);
-
-  // Name of output file to save histograms in
-  declareProperty("OutputFileName",m_outputFileName);
-
-  // Name of ClusterContainer (uncalibrated) to use
-  declareProperty("ClusterCollectionName",m_clusterCollName); 
-
-  // Name of ClusterContainer (calibrated) to use
-  declareProperty("ClusterCollectionNameCalib",m_clusterCollNameCalib); 
-
-  // to save additional info from the collection with calibrated clusters
-  declareProperty("doSaveCalibClusInfo", m_doSaveCalibClusInfo);
-
 }
 
 
@@ -151,7 +125,7 @@ StatusCode GetLCDeadMaterialTree::initialize()
   ******************************************** */
   m_data = new CaloHadDMCoeffData(nullptr);
 
-  m_outputFile = new TFile(m_outputFileName.c_str(),"RECREATE");
+  m_outputFile = new TFile(m_outputFileName.value().c_str(),"RECREATE");
   m_outputFile->cd();
 
   m_outputTree = m_data->MakeTree("DeadMaterialTree");

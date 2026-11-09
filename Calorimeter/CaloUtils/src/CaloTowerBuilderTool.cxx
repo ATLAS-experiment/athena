@@ -31,14 +31,7 @@ CaloTowerBuilderTool::CaloTowerBuilderTool(const std::string& name,
   : CaloTowerBuilderToolBase(name,type,parent)
     //  , m_errorCounter(0)
 {
-  declareInterface<ICaloTowerBuilderToolBase>(this);    
-  m_includedCalos.resize(4);
-  m_includedCalos[0] = "LAREM";
-  m_includedCalos[1] = "LARHEC";
-  m_includedCalos[2] = "LARFCAL";
-  m_includedCalos[3] = "TILE";
-  // common properties
-  declareProperty("IncludedCalos",m_includedCalos);
+  declareInterface<ICaloTowerBuilderToolBase>(this);
 }
 
 CaloTowerBuilderTool::~CaloTowerBuilderTool()
@@ -246,12 +239,12 @@ StatusCode CaloTowerBuilderTool::checkSetup(MsgStream& /*log*/) {
   // any calos registered
   if (m_caloIndices.empty()) {
     ATH_MSG_ERROR("no match in requested calorimeter ranges ("
-        << m_includedCalos.size() << " requested)");
+        << m_includedCalos.value().size() << " requested)");
     // print out requested keys
-    for (unsigned int iCalos = 0; iCalos < m_includedCalos.size(); iCalos++) {
+    for (unsigned int iCalos = 0; iCalos < m_includedCalos.value().size(); iCalos++) {
       if (iCalos == 0) {
         msg(MSG::ERROR) << "requested key(s): " << m_includedCalos[iCalos];
-      } else if (iCalos == m_includedCalos.size() - 1) {
+      } else if (iCalos == m_includedCalos.value().size() - 1) {
         ATH_MSG_ERROR("," << m_includedCalos[iCalos] << " all not known!");
       } else {
         msg(MSG::ERROR) << "," << m_includedCalos[iCalos];

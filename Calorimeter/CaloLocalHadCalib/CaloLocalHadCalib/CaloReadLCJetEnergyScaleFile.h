@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -24,9 +24,9 @@ class CaloReadLCJetEnergyScaleFile : public AthAlgorithm
   StatusCode initDataFromFile(std::vector<std::string> &theLCJetEnergyScaleFileNames, std::vector<std::string> &theLCJetEnergyScaleJetCollectionNames, CaloLocalHadCoeff& data);
 
  private:
-  std::string m_key;
-  std::vector<std::string> m_LCJetEnergyScaleFileNames;
-  std::vector<std::string> m_LCJetEnergyScaleJetCollectionNames;
+  Gaudi::Property<std::string> m_key{this, "CorrectionKey", "JESCorrection", "DetStore key of the output CaloLocalHadCoeff object"};
+  Gaudi::Property<std::vector<std::string>> m_LCJetEnergyScaleFileNames{this, "LCJetEnergyScaleFileNames", {}, "Names of the input LC jet energy scale ROOT files"};
+  Gaudi::Property<std::vector<std::string>> m_LCJetEnergyScaleJetCollectionNames{this, "LCJetEnergyScaleJetCollectionNames", {}, "Jet collection names, one per input file"};
 };
 
 #endif

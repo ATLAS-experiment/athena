@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOLOCALHADCALIB_GETLCDEADMATERIAL_H
@@ -19,6 +19,7 @@
  */
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "Gaudi/Property.h"
 #include <vector>
 #include <string>
 #include "CxxUtils/checker_macros.h"
@@ -43,87 +44,87 @@ class ATLAS_NOT_THREAD_SAFE GetLCDeadMaterial : public AthAlgorithm {
     /**
      * @brief Name of text file with initial parameters for coefficients calculation
      */
-    std::string m_HadDMCoeffInputFile;
+    Gaudi::Property<std::string> m_HadDMCoeffInputFile{this, "HadDMCoeffInputFile", "CaloHadDMCoeff_init_v2.txt", "Name of text file with initial parameters for coefficients calculation"};
 
     /**
      * @brief Name of text file with calculated coefficients
      */
-    std::string m_HadDMCoeffOutputFile;
+    Gaudi::Property<std::string> m_HadDMCoeffOutputFile{this, "HadDMCoeffOutputFile", "CaloHadDMCoeff_output.txt", "Name of text file with calculated coefficients"};
 
     /**
      * @brief Name of postscript file for fit summary
      */
-    std::string m_reportProfiles;
+    Gaudi::Property<std::string> m_reportProfiles{this, "ReportProfiles", "report_CaloHadDMCoeff_profiles.ps", "Name of postscript file for fit summary"};
 
     /**
      * @brief Name of postscript file for minimization summary
      */
-    std::string m_reportMinimization;
+    Gaudi::Property<std::string> m_reportMinimization{this, "ReportMinimization", "report_CaloHadDMCoeff_minim.ps", "Name of postscript file for minimization summary"};
 
     /**
      * @brief Name of postscript file for results of toy reconstruction
      */
-    std::string m_reportCheck;
+    Gaudi::Property<std::string> m_reportCheck{this, "ReportCheck", "report_CaloHadDMCoeff_check.ps", "Name of postscript file for results of toy reconstruction"};
 
     /**
      * @brief Do TProfile fitting 
      */
-    bool m_doFit;
+    Gaudi::Property<bool> m_doFit{this, "DoFit", true, "Do TProfile fitting"};
 
     /**
      * @brief Do minimization 
      */
-    bool m_doMinimization;
+    Gaudi::Property<bool> m_doMinimization{this, "DoMinimization", false, "Do minimization"};
 
     /**
      * @brief Do pool writing
      */
-    bool m_doPool;
+    Gaudi::Property<bool> m_doPool{this, "DoPool", true, "Do pool writing"};
 
     /**
      * @brief Do toy reconstruction for final validation of new dead material constants
      */
-    bool m_doCheck;
+    Gaudi::Property<bool> m_doCheck{this, "DoCheck", true, "Do toy reconstruction for final validation of new dead material constants"};
 
     /**
      * @brief List of root files to process 
      */
-    std::vector<std::string > m_inputRootFiles;
+    Gaudi::Property<std::vector<std::string> > m_inputRootFiles{this, "InputRootFiles", {}, "List of root files to process"};
 
     /**
      * @brief Name of key to write into pool file
      */
-    std::string m_key;
+    Gaudi::Property<std::string> m_key{this, "CorrectionKey", "HadDMCoeff2", "Name of key to write into pool file"};
 
     /**
      * @brief H6 combined testbeam flag
      */
-    bool m_isTestbeam;
+    Gaudi::Property<bool> m_isTestbeam{this, "isTestbeam", false, "H6 combined testbeam flag"};
 
     /**
      * @brief data sample contains single particles only
      */
-    bool m_isSingleParticle;
+    bool m_isSingleParticle{true};
 
     /**
      * @brief Normalization type for fit procedure
      */
-    std::string m_NormalizationTypeForFit;
+    Gaudi::Property<std::string> m_NormalizationTypeForFit{this, "NormalizationTypeForFit", "Lin", "Normalization type for fit procedure"};
 
     /**
      * @brief Normalization type for minimization procedure
      */
-    std::string m_NormalizationTypeForMinim;
+    Gaudi::Property<std::string> m_NormalizationTypeForMinim{this, "NormalizationTypeForMinim", "Lin", "Normalization type for minimization procedure"};
 
     /**
      * @brief use particle id information
      */
-    std::string m_ClassificationType;
+    std::string m_ClassificationType{"pdg"};
 
     /**
      * @brief number of maximum events to process in one root files
      */
-    int m_MaxEventsPerFile;
+    Gaudi::Property<int> m_MaxEventsPerFile{this, "MaxEventsPerFile", 0, "Number of maximum events to process in one root files"};
 
 };
 

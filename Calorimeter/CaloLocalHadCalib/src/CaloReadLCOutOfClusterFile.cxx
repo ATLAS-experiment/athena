@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloLocalHadCalib/CaloReadLCOutOfClusterFile.h"
@@ -16,10 +16,7 @@
 
 CaloReadLCOutOfClusterFile::CaloReadLCOutOfClusterFile(const std::string & name, 
 						       ISvcLocator * pSvcLocator) : 
-  AthAlgorithm(name,pSvcLocator) {
-  declareProperty("LCOutOfClusterFileName",m_LCOutOfClusterFileName);
-  declareProperty("CorrectionKey",m_key="OOC");
-}
+  AthAlgorithm(name,pSvcLocator) {}
 
 
 CaloReadLCOutOfClusterFile::~CaloReadLCOutOfClusterFile() {}
@@ -138,7 +135,7 @@ StatusCode CaloReadLCOutOfClusterFile::initialize() {
   ATH_MSG_INFO( " Building CaloLocalHadCoeff object "  );
   auto data = std::make_unique<CaloLocalHadCoeff>();
   ATH_CHECK( initDataFromFile(m_LCOutOfClusterFileName, *data) );
-  ATH_CHECK( detStore()->record(std::move(data), m_key, false) );
+  ATH_CHECK( detStore()->record(std::move(data), m_key.value(), false) );
   return StatusCode::SUCCESS;
 }
 
