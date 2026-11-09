@@ -72,10 +72,10 @@ acmd diff-root \
 echo "art-result: $? diff (PHYSLITE)";
 
 # Metadata diff
-meta-diff -d file_size file_guid auto_flush ".*eventTypes" --regex -m full -x diff -s DAOD_PHYS.ttree.pool.root DAOD_PHYS.rntuple.pool.root
+meta-diff -d file_size file_guid file_comp_level auto_flush ".*eventTypes" --regex -m full -x diff -s DAOD_PHYS.ttree.pool.root DAOD_PHYS.rntuple.pool.root
 
 echo "art-result: $? metadata diff (PHYS)";
 
-meta-diff -d file_size file_guid auto_flush ".*eventTypes" --regex -m full -x diff -s DAOD_PHYSLITE.ttree.pool.root DAOD_PHYSLITE.rntuple.pool.root
+meta-diff -d file_size file_guid file_comp_level auto_flush ".*eventTypes" --regex -m full -x diff -s DAOD_PHYSLITE.ttree.pool.root DAOD_PHYSLITE.rntuple.pool.root
 
 echo "art-result: $? metadata diff (PHYSLITE)";
