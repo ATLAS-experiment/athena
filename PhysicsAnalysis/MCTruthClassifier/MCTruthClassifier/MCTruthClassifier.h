@@ -150,8 +150,6 @@ protected:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::CaloCluster*,IMCTruthClassifier::Info* info) const override final;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Jet*, bool DR, IMCTruthClassifier::Info* info) const override final;
 #endif
 
 private:

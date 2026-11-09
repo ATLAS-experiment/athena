@@ -121,12 +121,6 @@ protected:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
   particleTruthClassifier(const xAOD::CaloCluster*, IMCTruthClassifier::Info* info) const = 0;
 
-  virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::Jet*, bool DR, IMCTruthClassifier::Info* info) const = 0;
-
-public:
-  std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin> 
-  particleTruthClassifier(const xAOD::Jet* p, bool DR)  const {return particleTruthClassifier(p, DR, nullptr); }
 #endif
 public:
   /// Returns more info than the particleTruthClassifier 
