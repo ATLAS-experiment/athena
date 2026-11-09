@@ -1993,21 +1993,6 @@ def dump_TrigRoiDescriptor_nolist (d, f):
     return
 
 
-def dump_TrigHisto (h, f):
-    fprint (f, "x:", h.nbins_x(), h.min_x(), h.max_x(), '[')
-    for x in h.contents():
-        fprint (f, x)
-    fprint (f, ']')
-    return
-def dump_TrigHisto1D (h, f):
-    dump_TrigHisto (h, f)
-    return
-def dump_TrigHisto2D (h, f):
-    fprint (f, "y:", h.nbins_y(), h.min_y(), h.max_y())
-    dump_TrigHisto (h, f)
-    return
-
-
 def dump_TileMu (m, f):
     fprint (f, m.eta(), m.phi(), m.quality(), list(m.enedep()))
     return

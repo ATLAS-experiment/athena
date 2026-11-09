@@ -26,7 +26,7 @@ set( _jobOPath "${_jobOPath}:${CMAKE_JOBOPT_OUTPUT_DIRECTORY}" )
 set( _jobOPath "${_jobOPath}:$ENV{JOBOPTSEARCHPATH}" )
 
 # Set up the test(s) of the package:
-foreach( name TrigHisto1DCnv_p1_test TrigHisto2DCnv_p1_test
+foreach( name
       TrigInDetTrackCnv_p1_test TrigInDetTrackCnv_p2_test
       TrigInDetTrackCnv_p3_test TrigInDetTrackCnv_p4_test
       TrigInDetTrackCnv_p5_test TrigInDetTrackCollectionCnv_p1_test

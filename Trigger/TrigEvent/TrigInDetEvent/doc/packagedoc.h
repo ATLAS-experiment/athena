@@ -19,12 +19,6 @@ The following classes are defined
    - TrigSiSpacePoint     : a LVL2 spacepoint in Pixel or SCT
    - TrigVertex           : a LVL2 vertex class containing vertex coordinates, covariance matrix, and 
                             some auxilliary information about vertex
-   - TrigHisto            : A base class for TrigHisto1D and TrigHisto2D, contains common code.  Not 
-                            stored directly.  TP converters do not persistify this class.
-   - TrigHisto1D          : A class to store a 1D histogram for a given event and provide cut
-                            functionality.
-   - TrigHisto2D          : A class to store a 1D histogram for a given event and provide cut and profile
-                            functionality.
 
 This package also contains selection.xml - a file for lcgdict generation
       

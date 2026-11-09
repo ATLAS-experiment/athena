@@ -9,11 +9,6 @@
 #include "TrigInDetEvent/TrigInDetTrackCollection.h"
 #include "TrigInDetEvent/TrigVertex.h"
 #include "TrigInDetEvent/TrigVertexCollection.h"
-#include "TrigInDetEvent/TrigHisto.h"
-#include "TrigInDetEvent/TrigHisto1D.h"
-#include "TrigInDetEvent/TrigHisto1DContainer.h"
-#include "TrigInDetEvent/TrigHisto2D.h"
-#include "TrigInDetEvent/TrigHisto2DContainer.h"
 #include "TrigInDetEvent/TrigVertexCounts.h"
 #include "TrigInDetEvent/TrigVertexCountsCollection.h"
 
@@ -22,20 +17,12 @@ void dummyTriggerForTVCollTypedef(TrigVertexCollection a,
 				  DataVector<TrigInDetTrackCollection> b,
 				  DataVector<TrigInDetTrackFitPar> c,
 				  DataVector<TrigVertexCollection> d,
-                                  DataVector<TrigHisto1D> m,
-                                  DataVector<TrigHisto1DContainer> n,
-                                  DataVector<TrigHisto2D> o,
-                                  DataVector<TrigHisto2DContainer> p,
                                   DataVector<TrigVertexCounts> q,
                                   DataVector<TrigVertexCountsCollection> r) {
   TrigVertexCollection aa = a;
   DataVector<TrigInDetTrackCollection> bb = b; 
   DataVector<TrigInDetTrackFitPar> cc = c;
   DataVector<TrigVertexCollection> dd = d;
-  DataVector<TrigHisto1D> mm = m; 
-  DataVector<TrigHisto1DContainer> nn = n;
-  DataVector<TrigHisto2D> oo = o;                                          
-  DataVector<TrigHisto2DContainer> pp = p;
   DataVector<TrigVertexCounts> qq = q;
   DataVector<TrigVertexCountsCollection> rr = r;
 }

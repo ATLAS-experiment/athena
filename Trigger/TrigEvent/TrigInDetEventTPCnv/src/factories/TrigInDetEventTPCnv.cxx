@@ -24,20 +24,6 @@
 #include "TrigInDetEventTPCnv/TrigInDetTrackFitPar_p2.h"
 #include "TrigInDetEventTPCnv/TrigInDetTrackFitPar_p3.h"
 
-#include "TrigInDetEventTPCnv/TrigHisto1D_p1.h"
-#include "TrigInDetEventTPCnv/TrigHisto1DContainer_p1.h"
-#include "TrigInDetEventTPCnv/TrigHisto1DContainerCnv_p1.h"
-#include "TrigInDetEventTPCnv/TrigHisto1DContainer_tlp1.h"
-#include "TrigInDetEventTPCnv/TrigHisto1DContainerCnv_tlp1.h"
-#include "TrigInDetEventTPCnv/TrigHisto1DCnv_p1.h"
-
-#include "TrigInDetEventTPCnv/TrigHisto2D_p1.h"
-#include "TrigInDetEventTPCnv/TrigHisto2DContainer_p1.h"
-#include "TrigInDetEventTPCnv/TrigHisto2DContainerCnv_p1.h"
-#include "TrigInDetEventTPCnv/TrigHisto2DContainer_tlp1.h"
-#include "TrigInDetEventTPCnv/TrigHisto2DContainerCnv_tlp1.h"
-#include "TrigInDetEventTPCnv/TrigHisto2DCnv_p1.h"
-
 #include "TrigInDetEventTPCnv/TrigVertexCounts_p1.h"
 #include "TrigInDetEventTPCnv/TrigVertexCountsCollection_p1.h"
 #include "TrigInDetEventTPCnv/TrigVertexCountsCollection_tlp1.h"
@@ -52,36 +38,6 @@
 #include "TrigInDetEventTPCnv/TrigVertexCollectionCnv_tlp2.h"
 #include "TrigInDetEventTPCnv/TrigVertex_p2.h"
 
-DECLARE_TPCNV_FACTORY(TrigHisto1DCnv_p1,
-                      TrigHisto1D,
-                      TrigHisto1D_p1,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigHisto1DContainerCnv_p1,
-                      TrigHisto1DContainer,
-                      TrigHisto1DContainer_p1,
-                      Athena::TPCnvVers::Old)
-                      
-DECLARE_TPCNV_FACTORY(TrigHisto1DContainerCnv_tlp1,
-                      TrigHisto1DContainer,
-                      TrigHisto1DContainer_tlp1,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigHisto2DCnv_p1,
-                      TrigHisto2D,
-                      TrigHisto2D_p1,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigHisto2DContainerCnv_p1,
-                      TrigHisto2DContainer,
-                      TrigHisto2DContainer_p1,
-                      Athena::TPCnvVers::Old)
-                      
-DECLARE_TPCNV_FACTORY(TrigHisto2DContainerCnv_tlp1,
-                      TrigHisto2DContainer,
-                      TrigHisto2DContainer_tlp1,
-                      Athena::TPCnvVers::Current)
-                      
 DECLARE_TPCNV_FACTORY(TrigInDetTrackCollectionCnv_tlp1,
                       TrigInDetTrackCollection,
                       TrigInDetTrackCollection_tlp1,

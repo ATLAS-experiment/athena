@@ -31,20 +31,6 @@
 
  <function name="dummyTriggerForTVCollTypedef" />
 
-  <class name="TrigHisto"/>
-  <class name="TrigHisto1D" id="1DC53456-7E55-4C1F-B9AA-820EAE5C2316" />
-  <class name="TrigHisto2D" id="3C3241B3-2FDB-4C0B-B2E0-2A38C5FE6990">
-    <field name="m_underflowBin_y" transient="true" />
-    <field name="m_overflowBin_y" transient="true" />
-    <field name="m_binSize_y" transient="true" />
-  </class>
-  <class name="TrigHisto1DContainer" id="B5752F0C-EF7A-4330-8413-1CCF0FC58AC8" />
-  <class name="DataVector<TrigHisto1D>" id="0D92B990-3850-4807-8B00-66990581C65C" />
-  <class name="std::vector<TrigHisto1D*>" />
-  <class name="TrigHisto2DContainer" id="E43A29FA-3BC9-4B08-9A94-735E1EC53951" />
-  <class name="DataVector<TrigHisto2D>" id="6E82EA7A-95CD-4811-9A7B-CF96EB909338" />
-  <class name="std::vector<TrigHisto2D*>" />
-
  <class name="TrigVertexCountsCollection" id="0C1EE526-FB6C-44B6-8FA5-B9722ED6CB99" />
  <class name="DataVector<TrigVertexCounts>" id="ECC6DB82-CBE2-442A-A6A4-E5ECA7E183CC" />
  <class name="std::vector<TrigVertexCounts*>" />
