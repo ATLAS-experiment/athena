@@ -3,7 +3,7 @@
 
 # single mu HITS
 input_hits=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/HITS/ATLAS-P2-RUN4-05-00-00/mc21_14TeV.900495.PG_single_muonpm_Pt10_etaFlatnp0_43.simul.HITS.e8481_s4676/*
-n_events=1000
+n_events=10
 
 default_condition=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
 
@@ -27,7 +27,7 @@ checkCollectionOnFile() {
     return 0
 }
 
-export ATHENA_CORE_NUMBER=8
+export ATHENA_CORE_NUMBER=1
 # Run HITS -> RDO with persistified SDO and SiHit
 Reco_tf.py \
     --inputHITSFile ${input_hits} \
