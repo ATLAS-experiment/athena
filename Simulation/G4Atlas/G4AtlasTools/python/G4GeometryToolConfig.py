@@ -533,7 +533,10 @@ def ATLAS_RegionCreatorListCfg(flags):
                 regionCreatorList += [result.popToolsAndMerge(TRT_ArPhysicsRegionToolCfg(flags))] #'TRT_KrPhysicsRegionTool'
         # FIXME dislike the ordering here, but try to maintain the same ordering as in the old configuration.
         if flags.Sim.InDetParameterization is InDetParameterization.FatrasG4:
-                regionCreatorList += [result.popToolsAndMerge(InDetPhysicsRegionToolCfg(flags))]
+                # The whole ID envelope, services included, and optionally the beam
+                # pipe, so that FatrasG4 and its Geant4 physics selection cover all of it
+                volumes = ['IDET::IDET'] + (['BeamPipe::BeamPipe'] if flags.Sim.FatrasG4.IncludeBeamPipe else [])
+                regionCreatorList += [result.popToolsAndMerge(InDetPhysicsRegionToolCfg(flags, VolumeList=volumes))]
         if flags.Sim.InDetParameterization is InDetParameterization.AFatrasG4:
                 regionCreatorList += [result.popToolsAndMerge(InDetPhysicsRegionToolCfg(flags))]
         if flags.Detector.GeometryBpipe:
