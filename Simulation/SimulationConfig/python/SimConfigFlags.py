@@ -252,6 +252,22 @@ def createSimConfigFlags():
 
     # ActsFatrasG4
     scf.addFlag("Sim.ActsFatrasG4.DebugInjectParticle", False) 
+
+    # Geant4 electromagnetic processes in the FatrasG4 regions, for every particle
+    # that has them: True leaves one on, False switches it off there
+    scf.addFlag("Sim.FatrasG4.G4EMProcesses", {
+        "phot": True, "compt": True, "conv": True, "Rayl": True,          # photons
+        "eIoni": True, "eBrem": True, "annihil": True,                    # e+-
+        "muIoni": True, "muBrems": True, "muPairProd": True,              # muons
+        "hIoni": True, "hBrems": True, "hPairProd": True,                 # hadrons
+        "ionIoni": True, "nuclearStopping": True,                         # ions
+        "msc": True, "CoulombScat": True,                                 # shared
+    })
+    # Switch off every Geant4 electromagnetic process in the FatrasG4 regions,
+    # whatever G4EMProcesses says: FatrasG4 is then the only physics there
+    scf.addFlag("Sim.FatrasG4.DisableAllG4Physics", True)
+    # Add the beam pipe to the FatrasG4 region, the whole ID envelope
+    scf.addFlag("Sim.FatrasG4.IncludeBeamPipe", True)
        
     # Fatras
     scf.addFlag("Sim.Fatras.RandomStreamName", "FatrasRnd")

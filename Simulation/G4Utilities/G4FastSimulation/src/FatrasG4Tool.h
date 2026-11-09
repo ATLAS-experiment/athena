@@ -18,6 +18,9 @@
 #include "InDetSimEvent/SiHitCollection.h"
 #include "InDetSimEvent/SiHit.h"
 
+#include <string>
+#include <vector>
+
 class G4VFastSimulationModel;
 class FatrasG4Tool: public FastSimulationBase
 {
@@ -42,6 +45,8 @@ protected:
  private:
   // Geant4 ACTSFatras G4 Tool
   PublicToolHandle<IActsFatrasG4Tool> m_ActsFatrasG4Tool{this, "ActsFatrasG4Tool", "ActsFatrasG4Tool", ""};
+
+  Gaudi::Property<std::vector<std::string>> m_envelopeVolumes{this, "EnvelopeVolumes", {}, "Volumes FatrasG4 acts in, everything inside them included: it is attached to every region with a root volume inside them"};
 
   // ==============================
   // Write handles owned by this tool

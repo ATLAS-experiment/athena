@@ -45,6 +45,9 @@ def collectSimulationMetadata(flags):
             if "ActsFatrasG4.DebugInjectParticle" in flag and not flags.Sim.ActsFatrasG4.DebugInjectParticle:
                 # This flag is only written to metadata when DebugInjectParticle is enabled
                 continue
+            if flag.startswith("Sim.FatrasG4.") and flags.Sim.InDetParameterization is not InDetParameterization.FatrasG4:
+                # These flags are only written to metadata when FatrasG4 is enabled
+                continue
             if "SimplifiedGeoPath" in flag and not flags.Sim.SimplifiedGeoPath:
                 # This flag is only written to metadata in case the FastCaloSim simplified geometry path is set
                 continue

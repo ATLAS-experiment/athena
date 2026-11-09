@@ -147,3 +147,15 @@ def FastIDKillerToolCfg(flags, name="G4UA::FastIDKillerTool", **kwargs):
     kwargs.setdefault("Z", 3490.*mm) # ID maximum Z coordiate
     result.setPrivateTools(CompFactory.G4UA.FastIDKillerTool(name, **kwargs))
     return result
+
+
+def FastIDKillerAllToolCfg(flags, name="G4UA::FastIDKillerTool", **kwargs):
+    """
+    Kill every particle leaving the ID envelope (R,Z), with no exception:
+    isDalek mode covers muons as well, and the energy threshold is put far
+    above any particle the LHC produces so that nothing is spared.
+    """
+    from AthenaCommon.SystemOfUnits import MeV
+    kwargs.setdefault("energyCut", 1.e9*MeV)
+    kwargs.setdefault("isDalek", True)
+    return FastIDKillerToolCfg(flags, name, **kwargs)

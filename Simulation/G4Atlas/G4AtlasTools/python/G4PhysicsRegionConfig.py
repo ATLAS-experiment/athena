@@ -2,7 +2,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
-from SimulationConfig.SimEnums import BeamPipeSimMode
+from SimulationConfig.SimEnums import BeamPipeSimMode, InDetParameterization
 from AthenaCommon.Logging import logging
 
 RegionCreator=CompFactory.RegionCreator
@@ -308,8 +308,11 @@ def DeadMaterialPhysicsRegionToolCfg(flags, name='DeadMaterialPhysicsRegionTool'
         sectionList = list(range(191,endRange)) # does not include endRange
         if flags.GeoModel.Run > LHCPeriod.Run4:
             print('DeadMaterialPhysicsRegionToolCfg: WARNING check that RUN2 beampipe volume names are correct for this geometry tag')
-    for section in sectionList:
-        volumeList += ['BeamPipe::SectionF'+str(section)]
+    # With FatrasG4 covering the beam pipe, these sections stay in its region
+    if not (flags.Sim.InDetParameterization is InDetParameterization.FatrasG4
+            and flags.Sim.FatrasG4.IncludeBeamPipe):
+        for section in sectionList:
+            volumeList += ['BeamPipe::SectionF'+str(section)]
     volumeList += ['LArMgr::LAr::Endcap::Cryostat::Cylinder',
                    'LArMgr::LAr::Endcap::Cryostat::Cylinder::Mixed',
                    'LArMgr::LAr::Endcap::Cryostat::Cone::Mixed',

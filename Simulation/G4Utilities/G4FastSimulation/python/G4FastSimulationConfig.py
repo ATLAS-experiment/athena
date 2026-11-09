@@ -22,17 +22,33 @@ def FatrasG4Cfg(flags, **kwargs):
     result = ComponentAccumulator()
     # Name of region where FatrasG4 will be triggered
     kwargs.setdefault("RegionName", "InDet")
+    # Volumes FatrasG4 acts in, everything inside them included: the whole ID
+    # envelope, and the beam pipe with Sim.FatrasG4.IncludeBeamPipe. The regions
+    # nested inside are found from the geometry at run time.
+    kwargs.setdefault("EnvelopeVolumes", ['IDET::IDET'] + (['BeamPipe::BeamPipe'] if flags.Sim.FatrasG4.IncludeBeamPipe else []))
 
     # Set the ActsFatrasG4Tool part
     from G4AtlasTools.G4AtlasToolsConfig import ActsFatrasG4ToolCfg
-    if "ActsFatrasG4Tool" not in kwargs:        
+    if "ActsFatrasG4Tool" not in kwargs:
         kwargs.setdefault("ActsFatrasG4Tool", result.addPublicTool(result.popToolsAndMerge(ActsFatrasG4ToolCfg(flags))))
-    
+
     fatrasG4Tool = CompFactory.FatrasG4Tool(name="FatrasG4", **kwargs)
     # declare produced data
     # ExtraOutputs is now declared in SimHitContainerListCfg in G4AtlasToolsConfig.py, and called from G4AtlasAlgConfig.py
     result.setPrivateTools(fatrasG4Tool)
 
+    return result
+
+def FatrasG4PhysicsToolCfg(flags, **kwargs):
+    """Geant4 electromagnetic processes switched off where FatrasG4 runs, from
+    Sim.FatrasG4.G4EMProcesses and Sim.FatrasG4.DisableAllG4Physics."""
+    result = ComponentAccumulator()
+    # The same volumes as FatrasG4Cfg, so that the physics is switched off exactly where FatrasG4 acts
+    kwargs.setdefault("EnvelopeVolumes", ['IDET::IDET'] + (['BeamPipe::BeamPipe'] if flags.Sim.FatrasG4.IncludeBeamPipe else []))
+    kwargs.setdefault("DisableAllG4Physics", flags.Sim.FatrasG4.DisableAllG4Physics)
+    kwargs.setdefault("InactiveProcesses",
+                      [name for name, active in flags.Sim.FatrasG4.G4EMProcesses.items() if not active])
+    result.setPrivateTools(CompFactory.FatrasG4PhysicsTool(name="FatrasG4PhysicsTool", **kwargs))
     return result
 
 def AFatrasG4Cfg(flags, **kwargs):
