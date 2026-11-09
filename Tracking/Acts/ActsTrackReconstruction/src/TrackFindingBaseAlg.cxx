@@ -106,13 +106,29 @@ namespace ActsTrk {
     auto trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
 
     if(trackingGeometry->geometryVersion() == Acts::TrackingGeometry::GeometryVersion::Gen3) {
-      m_endOfWorldVolumeIds.value().clear();
+      // keep the configured volumes and add the ones where the propagation leaves the envelope
       switch (m_envelopeConstraint.value()) {
          using enum ActsTrk::SystemEnvelope;
-         case Acts::toUnderlying(ITkExit):
-         case Acts::toUnderlying(CaloExit): {
-            const Acts::TrackingVolume* volume = m_trackingGeometrySvc
-                    ->getEnvelope(static_cast<SystemEnvelope>(m_envelopeConstraint.value()));
+         case Acts::toUnderlying(ITkExit): {
+            // stop at the boundary of the ITk envelope: in its mother and, when the ITk sits in the HGTD
+            // envelope, in the HGTD sides next to it
+            const Acts::TrackingVolume* volume = m_trackingGeometrySvc->getEnvelope(ITkExit);
+            ATH_CHECK(volume != nullptr);
+            const std::uint32_t motherId = volume->motherVolume()->geometryId().volume();
+            m_endOfWorldVolumeIds.value().push_back(motherId);
+            if (motherId == detail::GeoVolIds::s_hgtdEnvelopeId) {
+               m_endOfWorldVolumeIds.value().push_back(detail::GeoVolIds::s_hgtdPosVolumeId);
+               m_endOfWorldVolumeIds.value().push_back(detail::GeoVolIds::s_hgtdNegVolumeId);
+            }
+            break;
+         } case Acts::toUnderlying(HgtdExit): {
+            // propagate through the ITk and the HGTD, stop in the HGTD envelope around both
+            const Acts::TrackingVolume* volume = m_trackingGeometrySvc->getEnvelope(HgtdExit);
+            ATH_CHECK(volume != nullptr);
+            m_endOfWorldVolumeIds.value().push_back(volume->geometryId().volume());
+            break;
+         } case Acts::toUnderlying(CaloExit): {
+            const Acts::TrackingVolume* volume = m_trackingGeometrySvc->getEnvelope(CaloExit);
             ATH_CHECK(volume != nullptr);
             m_endOfWorldVolumeIds.value().push_back(volume->motherVolume()->geometryId().volume());
             break;
@@ -121,6 +137,8 @@ namespace ActsTrk {
             return StatusCode::FAILURE;
          }
       }
+      ATH_MSG_DEBUG("Gen3 end of world for " << static_cast<SystemEnvelope>(m_envelopeConstraint.value())
+                    << ": " << m_endOfWorldVolumeIds);
     }
 
     // m_etaBins (from flags.Tracking.ActiveConfig.etaBins) includes a dummy first and last bin, which we ignore

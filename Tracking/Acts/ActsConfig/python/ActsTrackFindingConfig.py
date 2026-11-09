@@ -64,10 +64,13 @@ def ActsMainTrackFindingAlgCfg(flags,
 
     from ActsConfig.ActsGeometryConfig import ActsVolumeIdToDetectorCollectionMappingAlgCfg
     # Remove HGTD Volumes from the propagation unless we need it
-    if not flags.Acts.useHGTDClusterInTrackFinding:
-        # HGTD has volume id:
-        # 2 for negative endcap
-        # 25 for positive endcap
+    if flags.Acts.TrackingGeometry.UseBlueprint:
+        # Gen3: ITkExit stops at the ITk envelope, HgtdExit after the HGTD
+        from ROOT.ActsTrk import SystemEnvelope
+        kwargs.setdefault('EnvelopeConstaint', SystemEnvelope.HgtdExit if flags.Acts.useHGTDClusterInTrackFinding
+                                               else SystemEnvelope.ITkExit)
+    elif not flags.Acts.useHGTDClusterInTrackFinding:
+        # Gen1: HGTD has volume id 2 for negative endcap, 25 for positive endcap
         kwargs.setdefault('EndOfTheWorldVolumeIds', [2, 25])
 
     acc.merge( ActsVolumeIdToDetectorCollectionMappingAlgCfg(flags) )
