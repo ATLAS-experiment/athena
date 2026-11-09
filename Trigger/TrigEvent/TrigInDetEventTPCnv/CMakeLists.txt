@@ -32,7 +32,6 @@ foreach( name TrigHisto1DCnv_p1_test TrigHisto2DCnv_p1_test
       TrigInDetTrackCnv_p5_test TrigInDetTrackCollectionCnv_p1_test
       TrigInDetTrackFitParCnv_p1_test TrigInDetTrackFitParCnv_p2_test
       TrigInDetTrackFitParCnv_p3_test
-      TrigTrackCountsCnv_p2_test
       TrigVertexCnv_p1_test TrigVertexCnv_p2_test TrigVertexCountsCnv_p1_test )
 
    atlas_add_test( ${name}

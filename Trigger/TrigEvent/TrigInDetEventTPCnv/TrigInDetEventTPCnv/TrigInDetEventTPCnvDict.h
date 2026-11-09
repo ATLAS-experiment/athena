@@ -29,11 +29,6 @@
 #include "TrigInDetEventTPCnv/TrigHisto2DContainer_p1.h"
 #include "TrigInDetEventTPCnv/TrigHisto2DContainer_tlp1.h"
 
-#include "TrigInDetEventTPCnv/TrigTrackCounts_p1.h"   
-#include "TrigInDetEventTPCnv/TrigTrackCounts_p2.h"
-#include "TrigInDetEventTPCnv/TrigTrackCountsCollection_p1.h"    
-#include "TrigInDetEventTPCnv/TrigTrackCountsCollection_tlp1.h" 
-
 #include "TrigInDetEventTPCnv/TrigVertexCounts_p1.h"   
 #include "TrigInDetEventTPCnv/TrigVertexCountsCollection_p1.h"    
 #include "TrigInDetEventTPCnv/TrigVertexCountsCollection_tlp1.h" 
@@ -59,8 +54,6 @@ struct dummy_TrigInDetEventTPCnvDict
   std::vector<TrigInDetTrackFitPar_p3>        m_dummyTrigInDetTrackFitPar_p3;
   std::vector<TrigHisto1D_p1>                 m_dummyTrigHisto1D_p1;
   std::vector<TrigHisto2D_p1>                 m_dummyTrigHisto2D_p1;
-  std::vector<TrigTrackCounts_p1>             m_dummyTrackCounts_p1;
-  std::vector<TrigTrackCounts_p2>             m_dummyTrackCounts_p2;
   std::vector<TrigVertexCounts_p1>            m_dummyVertexCounts_p1;
   std::vector<TrigVertex_p1>                  m_dummyVertex_p1;
   std::vector<TrigVertex_p2>                  m_dummyVertex_p2;

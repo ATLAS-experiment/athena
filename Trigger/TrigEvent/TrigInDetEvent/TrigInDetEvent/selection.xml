@@ -45,11 +45,6 @@
   <class name="DataVector<TrigHisto2D>" id="6E82EA7A-95CD-4811-9A7B-CF96EB909338" />
   <class name="std::vector<TrigHisto2D*>" />
 
- <class name="TrigTrackCountsCollection" id="7A4412AD-C11D-4EFD-AE15-D343D2CB28BC" />
- <class name="DataVector<TrigTrackCounts>" id="BEB86BA3-2AE3-46D6-B496-43781B136492" />
- <class name="std::vector<TrigTrackCounts*>" />
- <class name="TrigTrackCounts" id="6277C97C-0EAA-4922-892E-E88C1FA01BA0" />
-
  <class name="TrigVertexCountsCollection" id="0C1EE526-FB6C-44B6-8FA5-B9722ED6CB99" />
  <class name="DataVector<TrigVertexCounts>" id="ECC6DB82-CBE2-442A-A6A4-E5ECA7E183CC" />
  <class name="std::vector<TrigVertexCounts*>" />

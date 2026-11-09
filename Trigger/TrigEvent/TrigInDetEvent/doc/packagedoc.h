@@ -24,9 +24,7 @@ The following classes are defined
    - TrigHisto1D          : A class to store a 1D histogram for a given event and provide cut
                             functionality.
    - TrigHisto2D          : A class to store a 1D histogram for a given event and provide cut and profile
-                            functionality.  This class is used by TrigTrackCounts. 
-   - TrigTrackCounts      : Contains 2 histograms (TrigHisto2D) of track z0 vs pt and eta vs phi 
-                            respectively
+                            functionality.
 
 This package also contains selection.xml - a file for lcgdict generation
       

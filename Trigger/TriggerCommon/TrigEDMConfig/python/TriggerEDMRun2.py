@@ -790,8 +790,6 @@ TriggerHLTList = [
    ('Rec::TrackParticleContainer#HLT_InDetTrigParticleCreation_MuonIso_EFID',          '',           'Muon'),
 
     # == EF List
-    ('TrigTrackCounts#HLT',                                               '',                        'MinBias'),
-    ('TrigTrackCounts#HLT_trackcounts',                                   'BS ESD AODFULL AODSLIM',  'MinBias'), #? this is the CMS trigger obj
     ('TrigVertexCounts#HLT_vertexcounts',                                 'BS ESD AODFULL AODSLIM',  'MinBias'),
     ('TrackCollection#TrigFastTrackFinder_Tau',                           '', 'Tau'),
     ('TrackCollection#HLT_InDetTrigTrackSlimmer_Bjet_EFID',               'ESD',                     'Bjet'),
@@ -951,7 +949,6 @@ EDMDetails[ "TrigInDetTrackCollection" ]  = {'persistent':"TrigInDetTrackCollect
 
 EDMDetails[ "TrigVertexCollection" ]      = {'persistent':"TrigVertexCollection_tlp1",            'typealias':'AOD'}
 
-EDMDetails[ "TrigTrackCounts" ]           = {'persistent':"TrigTrackCountsCollection_tlp1",       'typealias':'TrkCount', 'collection':'TrigTrackCountsCollection'}
 EDMDetails[ "TrigVertexCounts" ]           = {'persistent':"TrigVertexCountsCollection_tlp1",     'typealias':'VtxCount', 'collection':'TrigVertexCountsCollection'}
 EDMDetails[ "TrackCollection" ]           = { 'persistent':"Trk::TrackCollection_tlp2",           'typealias':'AOD' }
 EDMDetails[ "Rec::TrackParticleContainer" ]   = {'persistent':"Rec::TrackParticleContainer_tlp1", 'typealias':'' }

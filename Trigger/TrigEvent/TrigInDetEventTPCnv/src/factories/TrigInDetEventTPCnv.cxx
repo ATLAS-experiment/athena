@@ -38,14 +38,6 @@
 #include "TrigInDetEventTPCnv/TrigHisto2DContainerCnv_tlp1.h"
 #include "TrigInDetEventTPCnv/TrigHisto2DCnv_p1.h"
 
-#include "TrigInDetEventTPCnv/TrigTrackCounts_p1.h"   
-#include "TrigInDetEventTPCnv/TrigTrackCounts_p2.h"
-#include "TrigInDetEventTPCnv/TrigTrackCountsCollection_p1.h"    
-#include "TrigInDetEventTPCnv/TrigTrackCountsCollection_tlp1.h" 
-#include "TrigInDetEventTPCnv/TrigTrackCountsCollectionCnv_tlp1.h" 
-#include "TrigInDetEventTPCnv/TrigTrackCountsCnv_p1.h"
-#include "TrigInDetEventTPCnv/TrigTrackCountsCnv_p2.h"
-
 #include "TrigInDetEventTPCnv/TrigVertexCounts_p1.h"
 #include "TrigInDetEventTPCnv/TrigVertexCountsCollection_p1.h"
 #include "TrigInDetEventTPCnv/TrigVertexCountsCollection_tlp1.h"
@@ -110,21 +102,6 @@ DECLARE_TPCNV_FACTORY(TrigInDetTrackCollectionCnv_tlp4,
                       TrigInDetTrackCollection_tlp4,
                       Athena::TPCnvVers::Current) 
                       
-DECLARE_TPCNV_FACTORY(TrigTrackCountsCnv_p1,
-                      TrigTrackCounts,
-                      TrigTrackCounts_p1,
-                      Athena::TPCnvVers::Old)
-                      
-DECLARE_TPCNV_FACTORY(TrigTrackCountsCnv_p2,
-                      TrigTrackCounts,
-                      TrigTrackCounts_p2,
-                      Athena::TPCnvVers::Current)
-                      
-DECLARE_TPCNV_FACTORY(TrigTrackCountsCollectionCnv_tlp1,
-                      TrigTrackCountsCollection,
-                      TrigTrackCountsCollection_tlp1,
-                      Athena::TPCnvVers::Current)
-                     
 DECLARE_TPCNV_FACTORY(TrigVertexCountsCnv_p1,
                       TrigVertexCounts,
                       TrigVertexCounts_p1,

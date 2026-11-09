@@ -1965,18 +1965,6 @@ def dump_TrigVertex (v, f):
     return
 
 
-def dump_TrigTrackCounts (t, f):
-    fprint (f, 'z0_pt:')
-    dump_TrigHisto2D (t.z0_pt(), f)
-    fprint (f, '\neta_phi:')
-    dump_TrigHisto2D (t.eta_phi(), f)
-    return
-@nolist
-def dump_TrigTrackCounts_nolist (t, f):
-    dump_TrigTrackCounts (t, f)
-    return
-
-
 @nolist
 def dump_TrigInDetTrackCollection (t, f):
     fprintln (f, ' ROI ', t.RoI_ID())
@@ -3491,7 +3479,6 @@ dumpspecs = [
     ["V0Container",                          dump_V0Candidate],
     ["DataVector<TrigVertex>",               dump_TrigVertex],
     ["TrigVertexCollection",                 dump_TrigVertex],
-    ["TrigTrackCounts",                      dump_TrigTrackCounts_nolist],
     ["TrigInDetTrackCollection",             dump_TrigInDetTrackCollection],
     ["TrigRoiDescriptor",                    dump_TrigRoiDescriptor_nolist],
     ["TileContainer<TileMu>",                dump_TileMu],
@@ -3512,7 +3499,6 @@ dumpspecs = [
     ['AtlasHitsVector<MDTSimHit>',           dump_MDTSimHit],
     ['AtlasHitsVector<RPCSimHit>',           dump_RPCSimHit],
     ['AtlasHitsVector<TGCSimHit>',           dump_TGCSimHit],
-    ["TrigTrackCountsCollection",            dump_TrigTrackCounts],
     ["TrigRoiDescriptorCollection",          dump_TrigRoiDescriptor],
     ["MdtTrackSegmentCollection",            dump_MdtTrackSegment],
     ["InDet::InDetLowBetaContainer",         dump_InDetLowBetaCandidate],
