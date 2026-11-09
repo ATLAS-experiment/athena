@@ -6,6 +6,7 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/UpdateHandle.h"
 #include "eformat/ROBFragment.h"
+#include "itksw/pix/endec/DecCore.hpp"
 
 #define ENABLE_TIMING = true;
 #ifdef ENABLE_TIMING
@@ -89,7 +90,7 @@ StatusCode ITkPixelDecodingAlg::execute(const EventContext& ctx) const
     //e. g. print them on the screen or put them in a container as RDOs.
     DataFormat fmt;
     fmt.options.en_chip_id = true;
-    fmt.options.en_eos = true;
+    fmt.options.en_eos = false;
     PixelCallbacks::RDOCallback cb(rdoCont.get(), m_idHelper, msg());
     DecCore<PixelCallbacks::RDOCallback> core(fmt, cb);
     
@@ -189,14 +190,22 @@ StatusCode ITkPixelDecodingAlg::execute(const EventContext& ctx) const
                 payloadIdx++;
             }
 
-            //Decode!
-            core.initialize();
-            core.decode(payload64);
-            core.finalize();
-
+            try {
+                core.initialize();
+                core.decode(payload64);
+                core.finalize();
+            } catch (std::runtime_error & exc) {
+                if (m_FailOnDecodingError) {
+                    ATH_MSG_ERROR(exc.what());
+                    return StatusCode::FAILURE;
+                } else {
+                    ATH_MSG_WARNING(exc.what());
+                }
+            }
         }
-
     }
+
+    ATH_MSG_DEBUG("nb decoded RDOs: " << cb.getNbRDOs());
 
     //The container is filled by now. We can write it to SG
     SG::WriteHandle<PixelRDO_Container> pixelRDOContainerHandle(m_pixelRDOKey, ctx);

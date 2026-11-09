@@ -6,7 +6,6 @@
 #define ITKPIXEL_DECODINGALG_H
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "AthenaBaseComps/AthMessaging.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "StoreGate/ReadHandleKey.h"
@@ -20,7 +19,8 @@
 #include "InDetRawData/PixelRDO_Container.h"
 #include "InDetRawData/PixelRDO_Collection.h"
 #include "ITkPixelCabling/ITkPixelCablingData.h"
-#include "itksw/pix/endec/DecCore.hpp"
+#include "itksw/pix/endec/intf/errors.hpp"
+#include <Gaudi/Property.h>
 #include <chrono>
 
 
@@ -53,6 +53,9 @@ class ITkPixelDecodingAlg : public AthReentrantAlgorithm
     SG::ReadCondHandleKey<ITkPixelCablingData> m_pixelCablingKey{this, "PixelCablingKey", "ITkPixelCablingData", "Cond Key of Pixel Cabling"};
 
     SG::WriteHandleKey<PixelRDO_Container> m_pixelRDOKey{this,    "pixelRDOKey", "ITkPixelRDOs", "StoreGate Key of Pixel RDOs"};
+    
+    Gaudi::Property<bool> m_FailOnDecodingError{this, "FailOnDecodingError",
+        false, "Whether the algortihm should fail on decoding error"};
 
     /** Boolean to determine if the algorithm should be run in RoI seeded mode. */
     Gaudi::Property<bool> m_roiSeeded{this, "isRoI_Seeded", false, "Use RoI"};
@@ -120,7 +123,7 @@ namespace PixelCallbacks{
 
             inline void evt_done() {
                 m_rdoContainer->addCollection(m_rdoCollection.release(), m_idHelper->wafer_hash(m_identifier)).ignore();
-                m_msg_source << MSG::DEBUG << "evt_done nRDOs=" << m_n_rdos << endmsg;
+                m_msg_source << MSG::VERBOSE << "evt_done nRDOs=" << m_n_rdos << endmsg;
             };
 
             inline void add_hit(uint16_t col, uint16_t row, uint16_t tot){
@@ -134,7 +137,11 @@ namespace PixelCallbacks{
 
             inline void add_qcore([[maybe_unused]] uint8_t qcol, [[maybe_unused]] uint8_t qrow, [[maybe_unused]] uint64_t qtot) {};
 
-            inline uint8_t on_error([[maybe_unused]] itksw::pix::endec::intf::EventError error) {return 0;};
+            inline uint8_t on_error(itksw::pix::endec::intf::EventError error) {
+                std::ostringstream oss;
+                oss << "pixel decoding error: " << error.to_string();
+                throw std::runtime_error(oss.str());
+            };
             //end of non-negotiable concepts
 
             //extra members
@@ -154,6 +161,7 @@ namespace PixelCallbacks{
                 m_transform = transform;
             }
 
+            uint32_t getNbRDOs() const { return m_n_rdos; }
         private:
             PixelRDO_Container* m_rdoContainer;
             uint32_t m_offlineID = 0;

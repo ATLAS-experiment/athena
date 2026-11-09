@@ -156,3 +156,13 @@ def ITkPixelCsvWaferIdAlgCfg(flags,
     kwargs.setdefault("OutputFile", OutputFile)
     acc.addEventAlgo(CompFactory.ITkPixelCsvWaferIdAlg(name, **kwargs))
     return acc
+
+def PixelRDOValidationAlgCfg(flags, name="PixelRDOValidationAlgCfg", **kwargs):
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(CompFactory.PixelRDOValidationAlg(name, **kwargs))
+    return acc
+
+def PixelPhaseIIRDOValidationAlgCfg(flags, name="PixelPhaseIIRDOValidationAlgCfg", **kwargs):
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(CompFactory.PixelPhaseIIRDOValidationAlg(name, **kwargs))
+    return acc

@@ -3,16 +3,11 @@
 #  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 import sys
+from AthenaCommon.Constants import DEBUG
 
 if __name__=="__main__":
-   # test job skeleton reading pool files
-
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
    flags = initConfigFlags()
-
-   # --- set flags
-   # the input file
-
 
    if len(sys.argv) < 2:
       print('No input file given')
@@ -25,25 +20,18 @@ if __name__=="__main__":
    flags.Input.Files = [inputRAW]
    flags.Output.RDOFileName = "RDO_phaseII.pool.root"
 
-   from AthenaConfiguration.TestDefaults import defaultGeometryTags
+   from AthenaConfiguration.TestDefaults import defaultGeometryTags, defaultConditionsTags
    flags.GeoModel.AtlasVersion = defaultGeometryTags.RUN4
+   flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
    #flags.GeoModel.Align.Dynamic = False #uncomment for SR1 outputs
 
-   from AthenaConfiguration.TestDefaults import defaultConditionsTags
-   flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
-
-   # Set the necessary flags
-   flags.PerfMon.doFullMonMT = True
-   flags.PerfMon.OutputJSON = 'perfmonmt_test.json'
    # We want to keep the commented code for debugging
-   # from AthenaCommon.Constants import DEBUG
-   # flags.Exec.OutputLevel=DEBUG
+   # flags.PerfMon.doFullMonMT = True
+   # flags.PerfMon.OutputJSON = 'perfmonmt_test.json'
 
    flags.lock()
+   # flags.dump()
 
-
-   flags.dump()
-   # minimum stuff to read files:
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
    cfg = MainServicesCfg(flags)
 
@@ -51,7 +39,7 @@ if __name__=="__main__":
    cfg.merge(ByteStreamReadCfg(flags))
 
    from ITkPixelByteStreamCnv.ITkPixelByteStreamCnvConfig import ITkPixelDecodingPhaseIIRDOAlgCfg
-   cfg.merge( ITkPixelDecodingPhaseIIRDOAlgCfg(flags, nRDOs = 1200000) )
+   cfg.merge( ITkPixelDecodingPhaseIIRDOAlgCfg(flags, nRDOs = 1200000, OutputLevel = DEBUG) )
 
    from PerfMonComps.PerfMonCompsConfig import PerfMonMTSvcCfg
    cfg.merge(PerfMonMTSvcCfg(flags))
@@ -64,15 +52,9 @@ if __name__=="__main__":
    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
    cfg.merge(OutputStreamCfg(flags, 'RDO', itemList, AcceptAlgs=acceptAlgs))
    
-   cfg.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
-   
-   #dump what's in SG
-   sg = cfg.getService("StoreGateSvc")
-   sg.Dump = True
+   # cfg.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
+   # sg = cfg.getService("StoreGateSvc")
+   # sg.Dump = True
 
-   cfg.run()
-
-
-
-
-
+   status = cfg.run()
+   sys.exit(0 if status.isSuccess() else 1)

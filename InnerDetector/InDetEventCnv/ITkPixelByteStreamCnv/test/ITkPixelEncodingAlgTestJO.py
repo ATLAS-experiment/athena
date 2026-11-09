@@ -1,40 +1,20 @@
 #!/usr/bin/env python
 
-#  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
-
-
-# # Example to add additional algorithms:
-# from AthenaConfiguration.ComponentFactory import CompFactory
-# def MyAlgCfg(flags, name='MyAlg', **kwargs):
-#    acc = ComponentAccumulator()
-#    kwargs.setdefault(',"Property', default_value)
-#    acc.addEventAlgo(CompFactory.MyAlg(name,
-#                                       **kwargs))
-#    return acc
-
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 if __name__=="__main__":
-   # test job skeleton reading pool files
-
    from AthenaConfiguration.AllConfigFlags import initConfigFlags
    flags = initConfigFlags()
 
-   #make logging more verbose
-   from AthenaCommon.Logging import log
-   from AthenaCommon.Constants import INFO #DEBUG
-   log.setLevel(INFO)
-   
-   # --- set flags
-   # the input file
    from AthenaConfiguration.TestDefaults import defaultTestFiles
    flags.Input.Files = defaultTestFiles.RDO_RUN4
+
+   import sys
+   if len(sys.argv) > 1:
+      flags.Output.BSFileName = sys.argv[1]
    
-   # --- end flag customization
    flags.lock()
 
-
-   flags.dump()
-   # minimum stuff to read files:
    from AthenaConfiguration.MainServicesConfig import MainServicesCfg
    cfg = MainServicesCfg(flags)
 
@@ -48,16 +28,11 @@ if __name__=="__main__":
    cfg.merge( ITkPixelEncodingAlgCfg(flags) )
 
    from ByteStreamCnvSvc.ByteStreamConfig import ByteStreamWriteCfg
-   #
-   ##try and write it in a BS file
    cfg.merge(ByteStreamWriteCfg(flags))
-   cfg.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
 
- 
-   #dump what's in SG
-   sg = cfg.getService("StoreGateSvc")
-   sg.Dump = True
+   # cfg.printConfig(withDetails=True, summariseProps=True, printDefaults=True)
+   # sg = cfg.getService("StoreGateSvc")
+   # sg.Dump = True
 
-   # loop over 1 events
-   cfg.run(1)
-
+   status = cfg.run(1)
+   sys.exit(0 if status.isSuccess() else 1)

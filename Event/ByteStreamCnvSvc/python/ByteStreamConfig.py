@@ -279,6 +279,19 @@ def TransientByteStreamCfg(flags, item_list=None, type_names=None, extra_inputs=
     return result
 
 
+def ByteStreamToRawEventAlgCfg(flags, name="ByteStreamToRawEventAlg",
+    **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+
+    kwargs.setdefault("ByteStreamConvertionService", "ByteStreamCnvSvc")
+    kwargs.setdefault("ROBDataProvider", "ROBDataProviderSvc/ROBDataProviderSvc")
+
+    acc.addEventAlgo(
+        CompFactory.ByteStreamToRawEventAlg(name, **kwargs))
+    return acc
+
+
+
 if __name__ == "__main__":
     """Run a functional test if module is executed"""
 

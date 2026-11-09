@@ -46,3 +46,15 @@ atlas_install_runtime( share/*.csv )
 
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
+
+atlas_add_test(PixelEncodingDecodingTest
+  SCRIPT athena.py
+    test/ITkPixelEncodingDecodingTest.py
+  POST_EXEC_SCRIPT noerror.sh
+  PROPERTIES SKIP_RETURN_CODE 2)
+
+atlas_add_test(PixelEncodingDecodingPhaseIIRDOTest
+  SCRIPT athena.py
+    test/ITkPixelEncodingDecodingPhaseIIRDOTest.py
+  POST_EXEC_SCRIPT noerror.sh
+  PROPERTIES SKIP_RETURN_CODE 2)

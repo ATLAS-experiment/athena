@@ -13,17 +13,14 @@
   */
 
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
-#include "AthenaBaseComps/AthMessaging.h"
 #include "GaudiKernel/MsgStream.h"
-#include "StoreGate/ReadHandleKey.h"
 #include "ByteStreamCnvSvcBase/IROBDataProviderSvc.h"
 #include "InDetIdentifier/PixelID.h"
 #include "Identifier/Identifier.h"
-#include "InDetRawData/PixelRDO_Container.h"
 #include "InDetRawData/PhaseIIPixelRawDataContainerMT.h"
 #include "InDetRawData/PixelRDO_Collection.h"
 #include "ITkPixelCabling/ITkPixelCablingData.h"
-#include "itksw/pix/endec/DecCore.hpp"
+#include "itksw/pix/endec/intf/errors.hpp"
 #include <chrono>
 #include <limits>
 #include <cstdint> //for uint8_t etc.
@@ -63,12 +60,14 @@ class ITkPixelDecodingPhaseIIRDOAlg : public AthReentrantAlgorithm
 
     SG::WriteHandleKey<PhaseIIPixelRawDataContainer> m_pixelRDOKey
         {this,    "pixelRDOKey", "PixelRDOs", "StoreGate Key of Pixel RDOs"};
-    
-    std::vector<uint32_t> m_sourceIDs;
 
+    Gaudi::Property<bool> m_FailOnDecodingError{this, "FailOnDecodingError",
+        false, "Whether the algortihm should fail on decoding error"};
+    
     const PixelID* m_idHelper{};
 
-    const Gaudi::Property<uint32_t> m_n_rdos_est {this, "nRDOs", 1300000, "Estimated number of RDOs per event"};
+    const Gaudi::Property<uint32_t> m_n_rdos_est{this, "nRDOs", 1200000,
+        "Estimated number of RDOs per event"};
 
 };
 
@@ -148,14 +147,23 @@ namespace PixelCallbacksPhaseIIRDO{
                     [[maybe_unused]] uint64_t qtot)
                     {};
 
-            inline uint8_t on_error([[maybe_unused]] itksw::pix::endec::intf::EventError error) {return 0;};
+            inline uint8_t on_error(itksw::pix::endec::intf::EventError error) {
+                std::ostringstream oss;
+                oss << "pixel decoding error: " << error.to_string();
+                throw std::runtime_error(oss.str());
+            };
+                
             //end of interface-mandated methods
 
             inline void registerLastModule() {
                 if (!m_dest_range_guard.empty()) {
                     // register the RDO range for this module, or erase the newly added
                     if (!m_cont_coll->registerOrEraseNewData(m_currentIdentifierHash,m_dest_range_guard.range())) {
-                        ++m_n_rejected_work;
+                        std::ostringstream oss;
+                        oss << "pixel decoding error: "
+                            << "data for this module was already registered, older data were discarded"
+                            << ", module hash: " << m_currentIdentifierHash;
+                        throw std::runtime_error(oss.str());
                     }
                     // in the process of adding hits to the original container, its capacity may have
                     // been exceeded and the container may have been changed for the current module. To
@@ -181,7 +189,7 @@ namespace PixelCallbacksPhaseIIRDO{
                 m_transform = transform;
             }
 
-
+            uint32_t getNbRDOs() const { return m_n_rdos; }
         private:
         
             // the RDO (=hits) container
@@ -195,9 +203,6 @@ namespace PixelCallbacksPhaseIIRDO{
 
             // current offline ID hash
             unsigned int m_currentIdentifierHash{std::numeric_limits<unsigned int>::max()};
-
-            // statistics 
-            unsigned int m_n_rejected_work{};
 
             // module offline ID as defined in InnerDetector/InDetDetDescr/InDetIdentifier/InDetIdentifier/PixelID.h
             uint32_t m_offlineID = 0;
