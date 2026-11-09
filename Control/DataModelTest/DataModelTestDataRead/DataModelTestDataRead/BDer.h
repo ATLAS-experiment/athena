@@ -1,11 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: BDer.h,v 1.4 2007-10-17 01:01:47 ssnyder Exp $
-
 /**
  * @file  DataModelTestDataRead/BVec.h
  * @author snyder@bnl.gov
@@ -36,6 +32,7 @@ namespace DMTest {
 struct BDer
   : public BVec
 {
+  using BVec::BVec;
 private:
   ElementLink<BVec> m_el;
 };
