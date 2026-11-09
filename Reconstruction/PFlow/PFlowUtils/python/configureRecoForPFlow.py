@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 
 #This function adds data to the output AOD which are needed for pflow CP study workflows.
@@ -82,10 +82,8 @@ def configureRecoForPFlowCfg(cfgFlags):
     from METReconstruction.METAssociatorCfg import METAssociatorCfg
     cfg.merge(METAssociatorCfg(cfgFlags, 'AntiKt4EMPFlow'))
 
-    from METUtilities.METMakerConfig import getMETMakerAlg
-    metCA=ComponentAccumulator()    
-    metCA.addEventAlgo(getMETMakerAlg('AntiKt4EMPFlow'))
-    cfg.merge(metCA)
+    from METUtilities.METMakerConfig import METMakerCfg
+    cfg.merge(METMakerCfg(cfgFlags, 'AntiKt4EMPFlow'))
 
     #Add metadata data to xAOD such that we can run workflows such as creating physval.root 
     # from the output AOD or making ntuples from the output AOD

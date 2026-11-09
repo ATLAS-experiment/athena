@@ -17,26 +17,27 @@ def PhysValMETCfg(flags, **kwargs):
     kwargs.setdefault("DetailLevel", 10)
     kwargs.setdefault("DoTruth", flags.Input.isMC)
 
-    from METUtilities.METMakerConfig import getMETMaker
+    from METUtilities.METMakerConfig import METMakerToolCfg
     # for EMTopo jets no NNJvt is calculated so we need to fall back to Jvt (re-calculated in MissingEtDQA::PhysValMET as "NewJvt")
-    METMakerTopo = getMETMaker(jetCollection="AntiKt4EMTopoJets",
-                                                  name="METMaker_AntiKt4Topo",
-                                                  JetSelection="Loose",
-                                                  DoPFlow=False)
-    METMakerPFlow = getMETMaker(jetCollection="AntiKt4EMPFlowJets",
-                                                   name="METMaker_AntiKt4PFlow",
-                                                   JetSelection="Loose",
-                                                   DoPFlow=True)
-
+    METMakerTopo = acc.popToolsAndMerge(METMakerToolCfg(flags,
+                                                        jetCollection="AntiKt4EMTopoJets",
+                                                        name="METMaker_AntiKt4Topo",
+                                                        JetSelection="Loose",
+                                                        DoPFlow=False))
+    METMakerPFlow = acc.popToolsAndMerge(METMakerToolCfg(flags,
+                                                         jetCollection="AntiKt4EMPFlowJets",
+                                                         name="METMaker_AntiKt4PFlow",
+                                                         JetSelection="Loose",
+                                                         DoPFlow=True))
 
     kwargs.setdefault("METMakerTopo", METMakerTopo )
     kwargs.setdefault("METMakerPFlow", METMakerPFlow )
 
-    from METUtilities.METMakerConfig import getMuonSelectionTool, getEleSelLikelihood, getPhotonSelIsEM, getTauSelectionTool
-    kwargs.setdefault("MuonSelectionTool", getMuonSelectionTool())
-    kwargs.setdefault("ElectronLHSelectionTool", getEleSelLikelihood())
-    kwargs.setdefault("PhotonIsEMSelectionTool", getPhotonSelIsEM())
-    kwargs.setdefault("TauSelectionTool", getTauSelectionTool())
+    from METUtilities.METMakerConfig import METMuonSelectionToolCfg,METElectronSelectionToolCfg,METPhotonSelectionToolCfg,METTauSelectionToolCfg
+    kwargs.setdefault("MuonSelectionTool", acc.popToolsAndMerge(METMuonSelectionToolCfg(flags)))
+    kwargs.setdefault("ElectronLHSelectionTool", acc.popToolsAndMerge(METElectronSelectionToolCfg(flags)))
+    kwargs.setdefault("PhotonIsEMSelectionTool", acc.popToolsAndMerge(METPhotonSelectionToolCfg(flags)))
+    kwargs.setdefault("TauSelectionTool", acc.popToolsAndMerge(METTauSelectionToolCfg(flags)))
 
     from AthenaConfiguration.AutoConfigFlags import GetFileMD
     metadata = GetFileMD(flags.Input.Files)

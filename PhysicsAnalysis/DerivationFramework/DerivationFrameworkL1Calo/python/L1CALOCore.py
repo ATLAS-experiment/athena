@@ -583,7 +583,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
         if jet_collections & met_jet_collections:
              log.info('Scheduling rebuild of standard MET')
              from METReconstruction.METAssociatorCfg import METAssociatorCfg
-             from METUtilities.METMakerConfig import getMETMakerAlg
+             from METUtilities.METMakerConfig import METMakerCfg
              for container in jet_collections & met_jet_collections:
                  if container == 'AntiKt4EMPFlow':
                      # build links between FlowElements and electrons, photons, muons and taus
@@ -591,7 +591,7 @@ def L1CALOCoreCfg(flags, deriv='L1CALO1', **kwargs):
                      from eflowRec.PFCfg import PFGlobalFlowElementLinkingCfg
                      acc.merge(PFGlobalFlowElementLinkingCfg(flags))
                  acc.merge(METAssociatorCfg(flags, container))
-                 acc.addEventAlgo(getMETMakerAlg(container))
+                 acc.merge(METMakerCfg(flags, container))
              from CaloTools.CaloNoiseCondAlgConfig import CaloNoiseCondAlgCfg
              acc.merge(CaloNoiseCondAlgCfg(flags)) # Prereq for Calo MET
              from METReconstruction.METCalo_Cfg import METCalo_Cfg
