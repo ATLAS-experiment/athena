@@ -9,6 +9,7 @@
 #include "TileConditions/ITileBadChanTool.h"
 #include "TileCalibBlobObjs/TileBchStatus.h"
 #include "TileConditions/TileBadChannels.h"
+#include "TileCalibBlobObjs/TileCalibUtils.h"
 
 // Calo includes
 #include "CaloConditions/ICaloBadChanTool.h"
@@ -106,15 +107,15 @@ class TileBadChanTool: public extends<AthAlgTool, ITileBadChanTool, ICaloBadChan
     SG::ReadCondHandleKey<TileBadChannels> m_badChannelsKey{this,
         "TileBadChannels", "TileBadChannels", "Input Tile bad channel status"};
 
-    const TileDetDescrManager* m_tileMgr;
+    const TileDetDescrManager* m_tileMgr{nullptr};
 
-    const TileHWID* m_tileHWID;
-    TileBchStatus m_defaultStatus;
+    const TileHWID* m_tileHWID{nullptr};
+    TileBchStatus m_defaultStatus{};
 
     // dummy declarations just to make new gccreflex happy
     TileBadChanTool& operator=(const TileBadChanTool&);
 
-    std::vector<float> m_defaultTripsProbs;
+    std::vector<float> m_defaultTripsProbs = std::vector<float>(TileCalibUtils::MAX_DRAWER, 0.0F);
 
     std::vector<unsigned int> m_roses;
     std::vector<unsigned int> m_drawers;

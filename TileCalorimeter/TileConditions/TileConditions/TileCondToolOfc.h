@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILECONDTOOLOFC_H
@@ -7,6 +7,7 @@
 
 // Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
+#include "Gaudi/Property.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -66,12 +67,13 @@ class TileCondToolOfc: public extends<AthAlgTool, ITileCondToolOfc> {
     ToolHandle<TileCondToolAutoCr> m_tileToolAutoCr{this,
         "TileCondToolAutoCr", "TileCondToolAutoCr", "Tile auto correlation matrix tool"};
 
-    const TileInfo* m_tileInfo;
+    const TileInfo* m_tileInfo{nullptr};
 
     //=== properties
-    int m_nSamples;
+    Gaudi::Property<int> m_nSamples{this, "nSamples", 7, "number of samples used in the run"};
     int m_t0Sample;
-    bool m_deltaCorrelation;
+    Gaudi::Property<bool> m_deltaCorrelation{this, "OptFilterDeltaCorrelation", false,
+        "true=> use delta correlation; false=>use calculation obtained from data"};
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -27,7 +27,6 @@ TileCondToolMuID::interfaceID() {
 //____________________________________________________________________
 TileCondToolMuID::TileCondToolMuID(const std::string& type, const std::string& name, const IInterface* parent)
     : AthAlgTool(type, name, parent)
-  , m_caloID(nullptr)
 {
   declareInterface<TileCondToolMuID>(this);
 }

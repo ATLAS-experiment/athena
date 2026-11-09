@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Athena includes
@@ -27,8 +27,6 @@ const InterfaceID& TileCondIdTransforms::interfaceID() {
 TileCondIdTransforms::TileCondIdTransforms(const std::string& type, const std::string& name,
     const IInterface* parent)
     : AthAlgTool(type, name, parent)
-    , m_tileHWID(nullptr)
-    , m_tileID(nullptr)
 {
   declareInterface<TileCondIdTransforms>(this);
 }

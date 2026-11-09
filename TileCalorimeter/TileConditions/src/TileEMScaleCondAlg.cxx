@@ -1,6 +1,6 @@
 //Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileEMScaleCondAlg.h"
@@ -13,11 +13,7 @@
 #include "StoreGate/WriteCondHandle.h"
 
 TileEMScaleCondAlg::TileEMScaleCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthCondAlgorithm(name, pSvcLocator),
-  m_useOflLasFib(false),
-  m_maxChannels(0),
-  m_maxGains(0),
-  m_onlCacheUnit(TileRawChannelUnit::Invalid)
+  AthCondAlgorithm(name, pSvcLocator)
 {
 }
 

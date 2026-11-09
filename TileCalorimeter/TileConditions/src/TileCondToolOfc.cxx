@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -16,12 +16,7 @@
 TileCondToolOfc::TileCondToolOfc(const std::string& type, const std::string& name,
                                  const IInterface* parent)
     : base_class(type, name, parent)
-    , m_tileInfo(nullptr)
 {
-  declareProperty("nSamples", m_nSamples = 7, "number of samples used in the run");
-  declareProperty("OptFilterDeltaCorrelation", m_deltaCorrelation = false
-                  , "true=> use delta correlation; false=>use calculation obtained from data");
-
   m_t0Sample = (m_nSamples - 1) / 2;
 }
 
@@ -50,12 +45,12 @@ StatusCode TileCondToolOfc::initialize() {
   ATH_CHECK( detStore()->retrieve(m_tileInfo, "TileInfo") );
 
   if (m_nSamples != m_tileInfo->NdigitSamples()) {
-    ATH_MSG_WARNING( "Changing number of samples from " << m_nSamples
+    ATH_MSG_WARNING( "Changing number of samples from " << m_nSamples.value()
                     << " to " << m_tileInfo->NdigitSamples() );
 
     m_nSamples = m_tileInfo->NdigitSamples();
   } else {
-    ATH_MSG_INFO( "Number of samples is " << m_nSamples );
+    ATH_MSG_INFO( "Number of samples is " << m_nSamples.value() );
   }
 
   m_t0Sample = (m_nSamples - 1) / 2;

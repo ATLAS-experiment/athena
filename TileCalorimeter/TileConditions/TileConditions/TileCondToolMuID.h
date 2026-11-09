@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILECONDTOOLMUID_H
@@ -35,7 +35,7 @@ class TileCondToolMuID: public AthAlgTool {
 
   private:
 
-    const CaloCell_ID* m_caloID;
+    const CaloCell_ID* m_caloID{nullptr};
 
     //=== TileCalibData
     SG::ReadCondHandleKey<TileCalibDataFlt> m_calibMuIdKey{this,
