@@ -53,7 +53,7 @@ atlas_add_component( Sherpa_i
 
 # Install file(s) from the package.
 atlas_install_joboptions( share/common/*.py )
-atlas_install_python_modules( python/*.py )
+atlas_install_python_modules( python/* )
 atlas_install_scripts( share/sherpaTarCreator.py )
 
 # Set (a) Sherpa specific environment variable(s).
