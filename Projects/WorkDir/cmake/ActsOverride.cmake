@@ -45,7 +45,8 @@ if(IS_DIRECTORY ${ATLAS_ACTS_SOURCE_DIR})
     # Detray/Traccc option(s).
     set(DETRAY_BUILD_HIP ON CACHE BOOL "Turn on HIP support in Detray")
     set(TRACCC_BUILD_HIP ON CACHE BOOL "Turn on HIP support in Traccc")
-    set(TRACCC_SETUP_ROCTHRUST ON CACHE BOOL "Set up ROC Thrust for Traccc")
+    set(TRACCC_SETUP_ROCTHRUST ON CACHE BOOL "Set up rocThrust for Traccc")
+    set(TRACCC_USE_SYSTEM_ROCTHRUST ON CACHE BOOL "Use system rocThrust for Traccc")
   endif()
 
   # Make sure that find_package(traccc) and find_package(detray) calls would
