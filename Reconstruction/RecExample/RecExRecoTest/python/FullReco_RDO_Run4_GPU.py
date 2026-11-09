@@ -29,6 +29,7 @@ flags.Detector.GeometryMuon = False
 flags.Detector.GeometryCalo = False
 flags.Acts.TrackingGeometry.UseBlueprint = True
 flags.Acts.TrackingGeometry.BuildDetrayGeometry = True
+flags.Tracking.ITkActsPass.useITkStripSeeding=False
 
 # Enable full GPU based track reconstruction.
 flags.Acts.Device.doClusterization = True

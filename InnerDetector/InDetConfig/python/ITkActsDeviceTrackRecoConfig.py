@@ -293,6 +293,13 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
             seedsLocation = DataLocation.HOST
                             
         # CKF
+        # default ACTS offline chain has strip seeding enabled, 
+        # but the device path does not support strip seeding yet, 
+        # throw exception if the user has enabled strip seeding
+        
+        if flags.Tracking.ITkActsPass.useITkStripSeeding:
+            raise ValueError("Strip seeding is enabled in the configuration, but it is not supported on the device path.Turn it off with Tracking.ActiveConfig.useITkStripSeeding.")
+
         from ActsConfig.ActsTrackFindingConfig import ActsTrackFindingCfg
         acc.merge(ActsTrackFindingCfg(flags))
 
