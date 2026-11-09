@@ -1,6 +1,6 @@
 //Dear emacs, this is -*- c++ -*-
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -20,10 +20,8 @@
 #include <fstream>
 
 TileDCSCondAlg::TileDCSCondAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthCondAlgorithm(name, pSvcLocator),
-  m_cabling(nullptr)
+  AthCondAlgorithm(name, pSvcLocator)
 {
-
 }
 
 

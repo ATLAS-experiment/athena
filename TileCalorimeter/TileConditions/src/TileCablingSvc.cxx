@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Gaudi includes
@@ -29,12 +29,8 @@
 //_____________________________________________________________________________
 TileCablingSvc::TileCablingSvc(const std::string& name, ISvcLocator* pSvcLocator)
     : AthService(name, pSvcLocator)
-  , m_cablingService(nullptr)
   , m_detStore("DetectorStore", name)
 {
-  declareProperty("ConnectedDrawers", m_connectedDrawers, "List of connected drawer ranges: starts,end1,start2,end2,...");
-  declareProperty("CablingType", m_cablingType = -9, "Cabling type: -1 - testbeam, 0 - old simulation, 1 - without MBTS, 2 - with MBTS instead of crack scin, 3 - MBTS in spare channels, 4 - RUN2 cabling, 5 - RUN2a cabling");
-  declareProperty("UseCache", m_useCache = true, "Use cache for channel_id to cell_id conversion");
 }
 
 //
@@ -74,7 +70,7 @@ StatusCode TileCablingSvc::initialize ATLAS_NOT_THREAD_SAFE () {
   cablingService->setTileHWID(tileHWID);
 
   //=== set connected drawers if non-empty list
-  if (m_connectedDrawers.size() > 1) {
+  if (m_connectedDrawers.value().size() > 1) {
     //===disconnect all drawers first
     for (int ros = 1; ros < 5; ++ros) {
       for (int drawer = 0; drawer < 64; ++drawer) {
@@ -84,9 +80,9 @@ StatusCode TileCablingSvc::initialize ATLAS_NOT_THREAD_SAFE () {
     int count = 0;
 
     msg(MSG::INFO) << "Connected drawer list:" << MSG::hex;
-    for (unsigned int dr = 1; dr < m_connectedDrawers.size(); dr += 2) {
-      int frag1 = std::strtol(m_connectedDrawers[dr - 1].data(), nullptr, 0);
-      int frag2 = std::strtol(m_connectedDrawers[dr].data(), nullptr, 0);
+    for (unsigned int dr = 1; dr < m_connectedDrawers.value().size(); dr += 2) {
+      int frag1 = std::strtol(m_connectedDrawers.value()[dr - 1].data(), nullptr, 0);
+      int frag2 = std::strtol(m_connectedDrawers.value()[dr].data(), nullptr, 0);
       for (int frag = frag1; frag <= frag2; ++frag) {
         int ros = frag >> 8;
         int drawer = frag & 0xFF;
@@ -172,7 +168,7 @@ StatusCode TileCablingSvc::initialize ATLAS_NOT_THREAD_SAFE () {
           ATH_MSG_INFO( "Setting RUN2 (2014-2017) cabling" );
           m_cablingType = TileCablingService::RUN2Cabling;
         } else {
-          ATH_MSG_INFO( "Using cabling type " << m_cablingType << " from jobOptions " );
+          ATH_MSG_INFO( "Using cabling type " << m_cablingType.value() << " from jobOptions " );
         }
       }
 
@@ -185,7 +181,7 @@ StatusCode TileCablingSvc::initialize ATLAS_NOT_THREAD_SAFE () {
         ATH_MSG_INFO( "Setting RUN3 cabling" );
         m_cablingType = TileCablingService::RUN3Cabling;
       } else {
-        ATH_MSG_INFO( "Using cabling type " << m_cablingType << " from jobOptions " );
+        ATH_MSG_INFO( "Using cabling type " << m_cablingType.value() << " from jobOptions " );
       }
 
     } else if (RUN4) {
@@ -197,7 +193,7 @@ StatusCode TileCablingSvc::initialize ATLAS_NOT_THREAD_SAFE () {
         ATH_MSG_INFO( "Setting RUN3 cabling" );
         m_cablingType = TileCablingService::RUN3Cabling;
       } else {
-        ATH_MSG_INFO( "Using cabling type " << m_cablingType << " from jobOptions " );
+        ATH_MSG_INFO( "Using cabling type " << m_cablingType.value() << " from jobOptions " );
       }
 
     } else if (m_cablingType == TileCablingService::RUN3Cabling) {
@@ -225,8 +221,8 @@ StatusCode TileCablingSvc::initialize ATLAS_NOT_THREAD_SAFE () {
     }
   }
 
-  ATH_MSG_INFO( "Setting Cabling type to " << m_cablingType );
-  ATH_CHECK( cablingService->setCablingType((TileCablingService::TileCablingType) m_cablingType) );
+  ATH_MSG_INFO( "Setting Cabling type to " << m_cablingType.value() );
+  ATH_CHECK( cablingService->setCablingType((TileCablingService::TileCablingType) m_cablingType.value()) );
   ATH_MSG_DEBUG( "Maximum number of gains: " <<  m_cablingService->getMaxChannels());
 
   // ------------ Setting TileCal channel hashes in CaloDDE -------------

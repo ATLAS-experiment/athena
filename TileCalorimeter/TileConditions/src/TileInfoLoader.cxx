@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -59,117 +59,6 @@ TileInfoLoader::TileInfoLoader(const std::string& name,
   , m_pulsevar(new TilePulseShapes())
   , m_WFWeights(new TileWienerFilterWeights())
 {
-
-  //==========================================================
-  //=== expected number of ADC samples in digitization
-  //==========================================================
-  declareProperty("NSamples",            m_nSamples=7,                   "Number of 25ns time slices in TileDigits");
-  declareProperty("TrigSample",          m_iTrigSample=3,                "sample index of t=0 in TileDigits");
-
-  //==========================================================
-  //=== Noise and conversion factors used in digitization
-  //==========================================================
-  declareProperty("TileNoise",           m_tileNoise=true ,              "true => add noise to TileDigits and TileRawChannels (used in MC generation)");
-  declareProperty("TileCoherNoise",      m_tileCoherNoise=false,         "true => add coherent noise to TileDigits and TileRawChannels (used in MC generation)");
-  declareProperty("TileZeroSuppress",    m_tileZeroSuppress=false,       "true => applies threshold cuts in HitToRC, HitToDigits, RCToCells");
-  declareProperty("NoiseScaleIndex",     m_noiseScaleIndex=1,            "allowed values 0-3 to choose proper ADC->OF noise scale factor for different OF methods");
-  declareProperty("ThresholdRawChannel", m_thresholdRawChannel=-3.0,     "threshold for TileRawChannel [adc] (high gain only, negative -> cut on abs value)");
-  declareProperty("ThresholdDigits",     m_thresholdDigits=-2.0,         "threshold for TileDigits [adc] (high gain only, negative -> cut on abs value)");
-
-  // values for TileCal Level1 Trigger Towers
-  declareProperty("TTL1Calib",           m_ttL1Calib=4.1,                "converts pCb to mV for TTL1");
-  declareProperty("TTL1NoiseSigma",      m_ttL1NoiseSigma=2.5,           "sigma of noise in TTL1 (mV)");
-  declareProperty("TTL1Thresh",          m_ttL1Thresh=5.0,               "threshold cut for TTL1 signals (mV)");
-  declareProperty("TTL1Ped",             m_ttL1Ped=0.0,                  "pedestal for TTL1 signals (mV)");
-  declareProperty("TTL1Max",             m_ttL1Max=1850.0,               "max value for TTL1 signals (mV)");
-
-  // values for TileCal Muon Receiver Boards (!!! TO UPDATE !!! DUMMY Values) ~1mV = 1 ADC count
-  declareProperty("MuRcvCalib",           m_MuRcvCalib      = 14.20,     "converts pCb to ADC counts for MuRcv");
-  declareProperty("MuRcvNoiseSigma",      m_MuRcvNoiseSigma = 2,          "sigma of noise in MuRcv (ADC counts)");
-  declareProperty("MuRcvThresh",          m_MuRcvThresh     = 5,          "threshold cut for MuRcv signals (ADC count)");
-  declareProperty("MuRcvPed",             m_MuRcvPed        = 11.73,      "pedestal for MuRcv signals (ADC count)");
-  declareProperty("MuRcvMax",             m_MuRcvMax        = 255,       "max value for MuRcv signals (ADC count)");
-
-  // values for Level1 Muon output (not used currently)
-  declareProperty("MuL1Calib",           m_muL1Calib=204.2,              "converts pCb to mV for Mu");
-  declareProperty("MuL1NoiseSigma",      m_muL1NoiseSigma=15.6,          "sigma of noise in Mu (mV)");
-  declareProperty("MuL1Thresh",          m_muL1Thresh=5.0,               "threshold cut for Mu signals (mV)");
-  declareProperty("MuL1Ped",             m_muL1Ped=0.0,                  "pedestal for Mu signals (mV)");
-  declareProperty("MuL1Max",             m_muL1Max=1850.0,               "max value for Mu signals (mV)");
-
-  // new values for high gain MBTS output connected to normal trigger tower
-  declareProperty("MBTSL1Calib",         m_mbtsL1Calib=222.0,            "converts pCb to mV for MBTS");
-  declareProperty("MBTSL1NoiseSigma",    m_mbtsL1NoiseSigma=0.6,         "sigma of noise in MBTS (mV)");
-  declareProperty("MBTSL1Thresh",        m_mbtsL1Thresh=5.0,             "threshold cut for MBTS signals (mV)");
-  declareProperty("MBTSL1Ped",           m_mbtsL1Ped=0.0,                "pedestal for MBTS signals (mV)");
-  declareProperty("MBTSL1Max",           m_mbtsL1Max=1850.0,             "max value for MBTS signals (mV)");
-
-  // values for custom TileCal cosmic trigger boards
-  declareProperty("TTL1CosmicsGain",     m_ttL1CosmicsGain=5.0,          "gain of the Cosmics board");
-  declareProperty("TTL1CosmicsThresh",   m_ttL1CosmicsThresh=5.0,        "threshold in the Cosmics board");
-
-  //==========================================================
-  //=== Digits pulse shapes
-  //==========================================================
-  declareProperty("DigitsShapeFileHi",      m_digitsShapeFileHi = "pulsehi_physics.dat",     "Filename for high gain pulse shape");
-  declareProperty("DigitsShapeFileLo",      m_digitsShapeFileLo = "pulselo_physics.dat",     "Filename for low gain pulse shape");
-  //===Trigger Tower Pulse shapes
-  declareProperty("filename_TTL1ShapeFile"  ,m_TTL1ShapeFile   = "pulse_adder_tower_physics.dat", "Filename for trigger tower pulse shape");
-  declareProperty("filename_MuRcvShapeFile" ,m_MuRcvShapeFile  = "pulse_adder_muonRcv_physics.dat", "Filename for Muon Receiver pulse shape"); // using the sames as for TTL1ShapeFile !!! TO UPDATE !!!
-  declareProperty("filename_MuL1ShapeFile"  ,m_MuL1ShapeFile   = "pulse_adder_muon_physics.dat",  "Filename for muon level1 trigger pulse shape");
-
-  //==========================================================
-  //=== Reference pulseshapes
-  //==========================================================
-  //===CIS Pulse shapes and derivatives
-  declareProperty("filename_lo_cis"      ,m_pulsevar->m_filenameLoCIS    = "pulselo_cis_100.dat"  ,"Low gain CIS pulseshape 100pF");
-  declareProperty("filename_lo_cis_der"  ,m_pulsevar->m_filenameLoCISDer = "dpulselo_cis_100.dat" ,"Low gain CIS pulseshape derivative 100pF");
-  declareProperty("filename_slo_cis"     ,m_pulsevar->m_filenameSLoCIS   = "pulselo.0230055.12.cap.5.2.dat"  ,"Low gain CIS pulseshape 5pF");
-  declareProperty("filename_slo_cis_der" ,m_pulsevar->m_filenameSLoCISDer= "dpulselo.0230055.12.cap.5.2.dat" ,"Low gain CIS pulseshape derivative pF");
-  declareProperty("filename_hi_cis"      ,m_pulsevar->m_filenameHiCIS    = "pulsehi_cis_100.dat"  ,"High gain CIS pulseshape 100pF");
-  declareProperty("filename_hi_cis_der"  ,m_pulsevar->m_filenameHiCISDer = "dpulsehi_cis_100.dat" ,"High gain CIS pulseshape derivative 100pF");
-  declareProperty("filename_shi_cis"     ,m_pulsevar->m_filenameSHiCIS   = "pulsehi.0230055.12.cap.5.2.dat"  ,"High gain CIS pulseshape 5pF");
-  declareProperty("filename_shi_cis_der" ,m_pulsevar->m_filenameSHiCISDer= "dpulsehi.0230055.12.cap.5.2.dat" ,"High gain CIS pulseshape derivative 5pF");
-  //===Physics Pulse shapes and derivatives
-  declareProperty("filename_lo_phys"    ,m_pulsevar->m_filenameLoPhys    = "pulselo_physics.dat"  ,"Low gain physics pulseshape");
-  declareProperty("filename_hi_phys"    ,m_pulsevar->m_filenameHiPhys    = "pulsehi_physics.dat"  ,"Low gain physics pulseshape derivative");
-  declareProperty("filename_lo_phys_der",m_pulsevar->m_filenameLoPhysDer = "dpulselo_physics.dat" ,"High gain physics pulseshape");
-  declareProperty("filename_hi_phys_der",m_pulsevar->m_filenameHiPhysDer = "dpulsehi_physics.dat" ,"High gain physics pulseshape derivative");
-  //=== Laser Pulse shapes and derivatives
-  declareProperty("filename_lo_las"     ,m_pulsevar->m_filenameLoLas     = "pulselo_laser.dat"  ,"Low gain laser pulseshape");
-  declareProperty("filename_hi_las"     ,m_pulsevar->m_filenameHiLas     = "pulsehi_laser.dat"  ,"Low gain laser pulseshape derivative");
-  declareProperty("filename_lo_las_der" ,m_pulsevar->m_filenameLoLasDer  = "dpulselo_laser.dat" ,"High gain laser pulseshape");
-  declareProperty("filename_hi_las_der" ,m_pulsevar->m_filenameHiLasDer  = "dpulsehi_laser.dat" ,"High gain laser pulseshape derivative");
-  //=== CIS Leakage Pulse shapes and derivatives
-  declareProperty("filename_sleaklo"    ,m_pulsevar->m_filenameSLeakLo   = "leaklo.0230055.12.cap.5.2.dat" ,"Low gain CIS leakage pulse 5pF");
-  declareProperty("filename_leaklo"     ,m_pulsevar->m_filenameLeakLo    = "leaklo_100.dat"  ,"Low gain CIS leakage pulse 100pF");
-  declareProperty("filename_dsleaklo"   ,m_pulsevar->m_filenameDSLeakLo  = "dsleaklo.0230055.12.cap.5.2.dat","Derivative low gain CIS leakage pulse 5pF");
-  declareProperty("filename_dleaklo"    ,m_pulsevar->m_filenameDLeakLo   = "dleaklo_100.dat" ,"Derivative low gain CIS leakage pulse 100pF");
-  declareProperty("filename_sleakhi"    ,m_pulsevar->m_filenameSLeakHi   = "leakhi.0230055.12.cap.5.2.dat" ,"High gain CIS leakage pulse 5pF");
-  declareProperty("filename_leakhi"     ,m_pulsevar->m_filenameLeakHi    = "leakhi_100.dat"  ,"High gain CIS leakage pulse 100pF");
-  declareProperty("filename_dsleakhi"   ,m_pulsevar->m_filenameDSLeakHi  = "dsleakhi.0230055.12.cap.5.2.dat","Derivative high gain CIS leakage pulse 5pF");
-  declareProperty("filename_dleakhi"    ,m_pulsevar->m_filenameDLeakHi   = "dleakhi_100.dat" ,"Derivative high gain CIS leakage pulse 100pF");
-  //=== Digitizer noise RMS as a function of channel number
-  declareProperty("filename_orig_noise" ,m_pulsevar->m_filenameOrigNoise = "noise_digi_orig.dat" ,"file with noise rms per channel");
-  declareProperty("filename_nk_noise"   ,m_pulsevar->m_filenameNkNoise   = "noise_digi_nk.dat"   ,"file with noise rms per channel");
-
-  //==========================================================
-  //=== Covariance matrices for noise simulation
-  //==========================================================
-  declareProperty("filename_DecoCovaFilePrefix" ,m_DecoCovaFilePrefix  = "DecoCovaMatrix");
-
-  //==========================================================
-  //=== Digitization
-  //==========================================================
-  declareProperty("ADCmax"                     ,m_ADCmax = 1023);
-  declareProperty("ADCmaskValue"               ,m_ADCmaskValue = 2047);
-
-  //==========================================================
-  //=== TileWienerFilterWeights configuration
-  //==========================================================
-  declareProperty("LoadWienerFilterWeights"    ,m_loadWienerFilterWeights    = false);
-  declareProperty("WienerFilterPhysicsNSamples",m_WFWeights->m_NSamples_Phys = 7);
-  declareProperty("WienerFilterLuminosity"     ,m_WFWeights->m_Luminosity    = 40);
 }
 
 //*****************************************************************************
@@ -220,6 +109,38 @@ StatusCode TileInfoLoader::initialize() {
   info->m_ttL1CosmicsThresh = m_ttL1CosmicsThresh;
   info->m_ADCmax = m_ADCmax;
   info->m_ADCmaskValue = m_ADCmaskValue;
+
+  // Forward reference pulse shape filenames to TilePulseShapes.
+  m_pulsevar->m_filenameLoCIS = m_filenameLoCIS;
+  m_pulsevar->m_filenameLoCISDer = m_filenameLoCISDer;
+  m_pulsevar->m_filenameSLoCIS = m_filenameSLoCIS;
+  m_pulsevar->m_filenameSLoCISDer = m_filenameSLoCISDer;
+  m_pulsevar->m_filenameHiCIS = m_filenameHiCIS;
+  m_pulsevar->m_filenameHiCISDer = m_filenameHiCISDer;
+  m_pulsevar->m_filenameSHiCIS = m_filenameSHiCIS;
+  m_pulsevar->m_filenameSHiCISDer = m_filenameSHiCISDer;
+  m_pulsevar->m_filenameLoPhys = m_filenameLoPhys;
+  m_pulsevar->m_filenameHiPhys = m_filenameHiPhys;
+  m_pulsevar->m_filenameLoPhysDer = m_filenameLoPhysDer;
+  m_pulsevar->m_filenameHiPhysDer = m_filenameHiPhysDer;
+  m_pulsevar->m_filenameLoLas = m_filenameLoLas;
+  m_pulsevar->m_filenameHiLas = m_filenameHiLas;
+  m_pulsevar->m_filenameLoLasDer = m_filenameLoLasDer;
+  m_pulsevar->m_filenameHiLasDer = m_filenameHiLasDer;
+  m_pulsevar->m_filenameSLeakLo = m_filenameSLeakLo;
+  m_pulsevar->m_filenameLeakLo = m_filenameLeakLo;
+  m_pulsevar->m_filenameDSLeakLo = m_filenameDSLeakLo;
+  m_pulsevar->m_filenameDLeakLo = m_filenameDLeakLo;
+  m_pulsevar->m_filenameSLeakHi = m_filenameSLeakHi;
+  m_pulsevar->m_filenameLeakHi = m_filenameLeakHi;
+  m_pulsevar->m_filenameDSLeakHi = m_filenameDSLeakHi;
+  m_pulsevar->m_filenameDLeakHi = m_filenameDLeakHi;
+  m_pulsevar->m_filenameOrigNoise = m_filenameOrigNoise;
+  m_pulsevar->m_filenameNkNoise = m_filenameNkNoise;
+
+  // Forward Wiener filter configuration to TileWienerFilterWeights.
+  m_WFWeights->m_NSamples_Phys = m_WFNSamplesPhys;
+  m_WFWeights->m_Luminosity = m_WFLuminosity;
 
   m_WFWeights->m_NSamples_Phys = info->m_nSamples; // to make sure that everything is consistent
 
@@ -336,7 +257,7 @@ StatusCode TileInfoLoader::buildDigitsShapesHiLo(TileInfo& info) {
 
   //=== Test if files are there and can be opened
   if (file_hi.empty()) {
-    ATH_MSG_ERROR( "Could not find input file " << m_digitsShapeFileHi );
+    ATH_MSG_ERROR( "Could not find input file " << m_digitsShapeFileHi.value() );
     return StatusCode::FAILURE;
   }
 
@@ -385,7 +306,7 @@ StatusCode TileInfoLoader::buildDigitsShapesHiLo(TileInfo& info) {
 
   //=== Test if files are there and can be opened
   if (file_lo.empty()) {
-    ATH_MSG_ERROR( "Could not find input file " << m_digitsShapeFileLo );
+    ATH_MSG_ERROR( "Could not find input file " << m_digitsShapeFileLo.value() );
     return StatusCode::FAILURE;
   }
 
@@ -668,7 +589,7 @@ void TileInfoLoader::buildCovMatrix (TileInfo& info)
         if (gain == 0) sprintf(gainstr, "Hi");
         else sprintf(gainstr, "Lo");
 
-        sprintf(buff, "%s%s%02d%s.txt", m_DecoCovaFilePrefix.c_str(), partstr, modu + 1, gainstr);
+        sprintf(buff, "%s%s%02d%s.txt", m_DecoCovaFilePrefix.value().c_str(), partstr, modu + 1, gainstr);
         std::string file = PathResolver::find_file(buff, "DATAPATH");
 //        ATH_MSG_DEBUG( "  buff=" << buff  << " file=" << file.c_str()  );
 

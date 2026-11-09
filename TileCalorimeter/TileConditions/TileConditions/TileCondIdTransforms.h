@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILECONDIDTRANSFORMS_H
@@ -47,8 +47,8 @@ class TileCondIdTransforms: public AthAlgTool {
 
   private:
 
-    const TileHWID* m_tileHWID;
-    const TileID* m_tileID;
+    const TileHWID* m_tileHWID{nullptr};
+    const TileID* m_tileID{nullptr};
 };
 
 #endif

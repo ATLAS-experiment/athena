@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILECONDPROXYFILE_H
@@ -11,6 +11,9 @@
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgTool.h"
+
+// Gaudi includes
+#include "Gaudi/Property.h"
 
 
 
@@ -52,7 +55,7 @@ class TileCondProxyFile: public AthAlgTool, virtual public ITileCondProxy<T> {
                                                , unsigned int objVers, const DataMap& dataMap) const;
 
     /** Source = COOL folder */
-    std::string m_source;
+    Gaudi::Property<std::string> m_source{this, "Source", "", "The ASCII file to read"};
 
 };
 

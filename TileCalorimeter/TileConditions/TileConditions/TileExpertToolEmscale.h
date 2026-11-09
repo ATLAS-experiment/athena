@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILEEXPERTTOOLEMSCALE_H
@@ -54,8 +54,8 @@ class TileExpertToolEmscale: public TileCondToolEmscale {
 
   private:
 
-    bool m_setOnceCounter;
-    TileEmscaleCalibOptions m_emOptions;
+    bool m_setOnceCounter{false};
+    TileEmscaleCalibOptions m_emOptions{0};
 
 };
 

@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -26,10 +26,8 @@ template<typename T>
 TileCondProxyFile<T>::TileCondProxyFile(const std::string& type, const std::string& name,
     const IInterface* parent)
     : AthAlgTool(type, name, parent)
-    , m_source("")
 {
   declareInterface<ITileCondProxy<T> >(this);
-  declareProperty("Source", m_source = "", "The ASCII file to read");
 }
 
 //
@@ -46,7 +44,7 @@ StatusCode TileCondProxyFile<T>::fillCalibData(TileCalibData<T>& calibData,
                                                EventIDRange& eventRange) const {
 
  //=== file name needs to be set to read correct defaults
-  if (!m_source.size()) {
+  if (!m_source.value().size()) {
     ATH_MSG_ERROR( name() << ": Empty file name detected, initialization not possible." );
     return StatusCode::FAILURE;
   }
@@ -54,7 +52,7 @@ StatusCode TileCondProxyFile<T>::fillCalibData(TileCalibData<T>& calibData,
   //=== Try to resolve file location
   std::string fileName = PathResolver::find_file(m_source, "DATAPATH");
   if (!fileName.size()) {
-    ATH_MSG_ERROR( name() << ": Could not find file \"" << m_source << "\"" );
+    ATH_MSG_ERROR( name() << ": Could not find file \"" << m_source.value() << "\"" );
     return StatusCode::FAILURE;
   }
 

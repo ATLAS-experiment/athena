@@ -26,12 +26,7 @@
 //____________________________________________________________________
 TileBadChanTool::TileBadChanTool(const std::string& type, const std::string& name, const IInterface* parent)
     : base_class(type, name, parent)
-    , m_tileMgr(nullptr)
-    , m_tileHWID(nullptr)
-    , m_defaultStatus(TileBchStatus())
-    , m_defaultTripsProbs(TileCalibUtils::MAX_DRAWER, 0.0F)
 {
-
 }
 
 //

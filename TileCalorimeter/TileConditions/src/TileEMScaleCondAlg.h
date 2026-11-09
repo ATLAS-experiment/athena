@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECONDITIONS_TILECALIBEMSCALECONDALG_H
@@ -122,10 +122,10 @@ class TileEMScaleCondAlg: public AthCondAlgorithm {
         "TileCablingSvc", "TileCablingSvc", "The Tile cabling service" };
 
 
-    bool m_useOflLasFib;
-    unsigned int m_maxChannels;
-    unsigned int m_maxGains;
-    TileRawChannelUnit::UNIT m_onlCacheUnit;
+    bool m_useOflLasFib{false};
+    unsigned int m_maxChannels{0};
+    unsigned int m_maxGains{0};
+    TileRawChannelUnit::UNIT m_onlCacheUnit{TileRawChannelUnit::Invalid};
 };
 
 

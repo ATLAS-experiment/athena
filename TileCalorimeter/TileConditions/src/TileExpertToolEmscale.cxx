@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -20,8 +20,6 @@ const InterfaceID& TileExpertToolEmscale::interfaceID() {
 TileExpertToolEmscale::TileExpertToolEmscale(const std::string& type, const std::string& name,
     const IInterface* parent)
     : TileCondToolEmscale(type, name, parent)
-    , m_setOnceCounter(false)
-    , m_emOptions(0)
 {
   declareInterface<TileExpertToolEmscale>(this);
 }
