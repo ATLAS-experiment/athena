@@ -12,6 +12,11 @@ def ActsHGTDTrackExtensionAlgCfg(flags,
 
     kwargs.setdefault("UncalibratedMeasurementContainerKeys", ["HGTD_Clusters"])
 
+    if flags.Acts.TrackingGeometry.UseBlueprint:
+        # Gen3: the extension propagates from the ITk into the HGTD
+        from ROOT.ActsTrk import SystemEnvelope
+        kwargs.setdefault('EnvelopeConstaint', SystemEnvelope.HgtdExit)
+
     if flags.Acts.doMonitoring and "MonTools" not in kwargs:
         from ActsConfig.ActsMonitoringConfig import ActsHGTDTrackExtensionMonitoringCfg
         kwargs.setdefault('MonTool', acc.popToolsAndMerge(ActsHGTDTrackExtensionMonitoringCfg(flags)))

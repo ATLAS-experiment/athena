@@ -48,6 +48,12 @@ StatusCode KalmanFitterTool::initialize() {
             ATH_CHECK(volume != nullptr);
             m_endOfWorldId = volume->motherVolume()->geometryId().volume();
             break;
+         } case Acts::toUnderlying(HgtdExit): {
+            // propagate through the ITk and the HGTD, stop in the HGTD envelope around both
+            const Acts::TrackingVolume* volume = m_trackingGeometrySvc->getEnvelope(HgtdExit);
+            ATH_CHECK(volume != nullptr);
+            m_endOfWorldId = volume->geometryId().volume();
+            break;
          } case Acts::toUnderlying(MsExit) : {
             break;
          } default: {

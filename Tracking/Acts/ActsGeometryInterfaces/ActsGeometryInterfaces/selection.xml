@@ -4,4 +4,5 @@
 
   <!-- An attempt to make the ObjectType enumeration visible in Python...  -->
   <enum name="ActsTrk::DetectorType" />
+  <enum name="ActsTrk::SystemEnvelope" />
 </lcgdict>
