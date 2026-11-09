@@ -119,6 +119,7 @@ namespace MuonR4{
         std::vector<Muon::MuonStationIndex::StIndex> stations{};
         stations.reserve(seed.segments().size());
         for (const xAOD::MuonSegment* segment : seed.segments()) {
+            m_calibTool->stampSignsOnMeasurements(*segment);
             /** Check if the station has not yet been processed and also  
              *  check whether there were already enough stations processed */
             const auto stIdx = Muon::MuonStationIndex::toStationIndex(segment->chamberIndex());
