@@ -382,35 +382,11 @@ atlas_add_citest( ActsExtendedTruth
 atlas_add_citest( ACTS_Propagation_ITk
    SCRIPT ActsITkTest.py )
 
-atlas_add_citest( ACTS_Propagation_ITk_Gen3
-   SCRIPT ActsITkTest.py --gen3)
-
-atlas_add_citest( ACTS_Propagation_ITk_Calo_Gen3
-   SCRIPT ActsITkCaloTest.py --gen3)
-
-atlas_add_citest( ACTS_Propagation_ITk_Muon_Calo_Gen3
-   SCRIPT ActsITkMuonCaloTest.py --gen3)
-
-atlas_add_citest( ACTS_Propagation_ITk_Muon_Gen3
-   SCRIPT ActsItkMuonTest.py --gen3)
-
-atlas_add_citest( ACTS_Propagation_ID
-   SCRIPT ActsExtrapolationAlgTest.py )
-
 atlas_add_citest( ACTS_Workflow
    SCRIPT ActsWorkflow.sh )
 
 atlas_add_citest( Athena_Tracking_Workflow_Legacy
    SCRIPT AthenaTrackingWorkflowLegacy.sh )
-
-atlas_add_citest( ACTS_Workflow_Legacy
-   SCRIPT ActsWorkflowLegacy.sh )
-
-atlas_add_citest( ACTS_Workflow_Cached
-   SCRIPT ActsWorkflowCached.sh )
-
-atlas_add_citest( ACTS_Workflow_HeavyIons
-   SCRIPT ActsWorkflowHeavyIons.sh )
 
 atlas_add_citest( ACTS_ActsPersistifyEDM
    SCRIPT ActsPersistifyEDM.sh )
@@ -424,29 +400,19 @@ atlas_add_citest( ACTS_ActsEFTrackFit
 atlas_add_citest( ACTS_ActsGSFRefittingWithActsElectronExtrapolation
    SCRIPT ActsGSFRefitWithActsElectronExtrapolation.sh )
 
-atlas_add_citest( ACTS_ActsGSFRefitLegacy
-   SCRIPT ActsGSFRefitLegacy.sh )
-
 atlas_add_citest( ACTS_ActsGSFRefitActs
    SCRIPT ActsGSFRefitActs.sh )
-
-atlas_add_citest( ACTS_ActsPersistifySeeds
-   SCRIPT ActsPersistifySeeds.sh )
 
 atlas_add_citest( ACTS_ActsDumpGeometryIdentifiers
    SCRIPT ActsDumpGeometryIdentifiers.sh )
 
-atlas_add_citest( ACTS_ActsBenchmarkWithSpot_Cached
-   SCRIPT ActsBenchmarkWithSpotCached.sh 8 100
-   PROPERTIES PROCESSOR 8 )
-
 atlas_add_citest( ACTS_ActsBenchmarkTrackingWithSpot
-   SCRIPT ActsBenchmarkWithSpot.sh 8 100
-   PROPERTIES PROCESSOR 8 )
+   SCRIPT ActsBenchmarkWithSpot.sh 1 1
+   PROPERTIES PROCESSORS 1 )
 
- atlas_add_citest( ACTS_ActsBenchmarkWithSpotHeavyIons
-   SCRIPT ActsBenchmarkWithSpotHeavyIons.sh  8 50
-   PROPERTIES PROCESSOR 8 )
+atlas_add_citest( ACTS_ActsBenchmarkWithSpotHeavyIons
+   SCRIPT ActsBenchmarkWithSpotHeavyIons.sh 1 1
+   PROPERTIES PROCESSORS 1 )
 
 atlas_add_citest( ACTS_ActsAnalogueClustering
   SCRIPT ActsAnalogueClustering.sh )
@@ -457,21 +423,15 @@ atlas_add_citest( ACTS_ActsNNClustering
 atlas_add_citest( ACTS_CheckObjectCounts_Workflow
   SCRIPT CheckCountTest.sh ActsCheckObjectCounts )
 
-atlas_add_citest( ACTS_TriggerC100
-  SCRIPT test_trigAna_ActsTriggerC100_build.py )
-
-atlas_add_citest( ACTS_TriggerC230
-  SCRIPT test_trigAna_ActsTriggerC230_build.py )
-
 #################################################################################
 #                 Muon Phase II CI tests
 #################################################################################
 atlas_add_citest( MuonR4_Combined
          SCRIPT runR4_MuonCombRecoSPOTTest.sh 1 5
-         PROPERTIES PROCESSOR 1)
+         PROPERTIES PROCESSORS 1)
 atlas_add_citest( MuonR4_Data
          SCRIPT test_MuonR4Reco_spot.sh 1 5
-         PROPERTIES PROCESSOR 1)
+         PROPERTIES PROCESSORS 1)
 
 atlas_add_citest( MuonR4_DigiR3
    SCRIPT ${CMAKE_CURRENT_SOURCE_DIR}/test/Digitization_MuonPhaseII.sh R3

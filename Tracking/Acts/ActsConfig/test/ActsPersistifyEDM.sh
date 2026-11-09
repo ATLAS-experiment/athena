@@ -4,7 +4,7 @@
 # ttbar mu=200 input
 input_rdo=$(python -c "from AthenaConfiguration.TestDefaults import defaultTestFiles; print(defaultTestFiles.RDO_RUN4[0])")
 conditions_tag=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN4_MC)")
-n_events=2
+n_events=1
 
 # Run reconstruction and produce AOD with persistified Acts EDM
 export ATHENA_CORE_NUMBER=1

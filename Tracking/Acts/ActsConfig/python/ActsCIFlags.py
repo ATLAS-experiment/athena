@@ -33,11 +33,6 @@ def athenaLegacyTrackingFlags(flags) -> None:
     flags.HGTD.doActs = False
     flags.Acts.GsfRefitActs = False
 
-def actsLegacyWorkflowFlags(flags) -> None:
-    """flags for Reco_tf with CA used in CI tests: add Acts (legacy like) workflow to reco sequence"""
-    flags.Tracking.recoChain = [TrackingComponent.ActsLegacyChain]
-    flags.Tracking.doITkFastTracking = False
-
 def actsInnerDetectorWorkflowFlags(flags) -> None:
     """flags for Reco_tf with CA used in unit test: schedule a pure ACTS workflow to reco sequence, with Inner Detector settings"""
     flags.Tracking.recoChain = [TrackingComponent.ActsChain]

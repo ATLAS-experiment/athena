@@ -101,8 +101,19 @@ atlas_install_joboptions( scripts/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_scripts( test/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
 if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
-  # Disable this test in the debug build --- it takes too long to run.
-  atlas_add_test( CombinedGen3TrackTest
+  # Disable these tests in the debug build --- they take too long to run.
+  # Build the Gen3 tracking geometry and propagate particles through it.
+  atlas_add_test( ITkGen3PropagationTest
+                  PROPERTIES TIMEOUT 2000
+                  PRIVATE_WORKING_DIRECTORY
+                  SCRIPT ActsITkTest.py --gen3
+                  POST_EXEC_SCRIPT noerror.sh)
+  atlas_add_test( ITkCaloGen3PropagationTest
+                  PROPERTIES TIMEOUT 2000
+                  PRIVATE_WORKING_DIRECTORY
+                  SCRIPT ActsITkCaloTest.py --gen3
+                  POST_EXEC_SCRIPT noerror.sh)
+  atlas_add_test( ITkMuonCaloGen3PropagationTest
                   PROPERTIES TIMEOUT 2000
                   PRIVATE_WORKING_DIRECTORY
                   SCRIPT ActsITkMuonCaloTest.py

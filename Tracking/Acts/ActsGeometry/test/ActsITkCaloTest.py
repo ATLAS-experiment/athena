@@ -29,8 +29,8 @@ flags.Detector.GeometryBpipe = True
 flags.Detector.GeometryCalo = True
 flags.Detector.GeometryMuon = False
 
-flags.Concurrency.NumThreads = 64
-flags.Concurrency.NumConcurrentEvents = 64
+flags.Concurrency.NumThreads = 1
+flags.Concurrency.NumConcurrentEvents = 1
 
 flags.Exec.MaxEvents = 10
 
