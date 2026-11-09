@@ -12,6 +12,8 @@
 #include "xAODBase/IParticleHelpers.h"
 #include "xAODCore/ShallowAuxContainer.h"
 #include "AsgDataHandles/ReadHandle.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
+#include "AsgDataHandles/ReadDecorHandle.h"
 
 using namespace std;
 
@@ -50,6 +52,32 @@ StatusCode PuppiWeightTool::initialize() {
     return StatusCode::FAILURE;
   }
 
+  ATH_CHECK(m_charged_PVMatched_key.initialize());
+  ATH_CHECK(m_alphaKeys.initialize());
+  ATH_CHECK(m_weightKeys.initialize());
+
+  return StatusCode::SUCCESS;
+}
+
+//------------------------------------------------------------------------------
+
+StatusCode PuppiWeightTool::configure_decor_handle_keys() {
+  ATH_CHECK(
+    m_charged_PVMatched_key.assign(
+      m_inputChargedContainer + "." + m_charged_PVMatched_key.key()));
+
+  ATH_CHECK(
+    m_alphaKeys.assign(
+    m_outputContainer,
+    m_outputChargedContainer,
+    m_outputNeutralContainer));
+
+  ATH_CHECK(
+    m_weightKeys.assign(
+    m_outputContainer,
+    m_outputChargedContainer,
+    m_outputNeutralContainer));
+
   return StatusCode::SUCCESS;
 }
 
@@ -63,35 +91,37 @@ StatusCode PuppiWeightTool::finalize() {
 
 //------------------------------------------------------------------------------
 
-StatusCode PuppiWeightTool::process_impl(xAOD::IParticleContainer* cont) const {
+StatusCode PuppiWeightTool::process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const {
   if(m_inputType == xAOD::Type::FlowElement){
     xAOD::FlowElementContainer* feCont = static_cast<xAOD::FlowElementContainer*> (cont);
-    return applyPuppiWeights(feCont);
+    return applyPuppiWeights(feCont, ctx);
   }
   xAOD::PFOContainer* pfoCont = static_cast<xAOD::PFOContainer*> (cont);
-  return applyPuppiWeights(pfoCont);
+  return applyPuppiWeights(pfoCont, ctx);
 }
 
 //------------------------------------------------------------------------------
 
-StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::PFOContainer* cont) const{
+StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::PFOContainer* cont, const EventContext& ctx) const{
 
-  const static SG::Accessor<bool> PVMatchedAcc("matchedToPV");
-  const static SG::Accessor<double> alphaAcc("PUPPI_alpha");
-  const static SG::Accessor<double> weightAcc("PUPPI_weight");
+  SG::ReadDecorHandle<xAOD::IParticleContainer, bool> chargedPVMatched_handle(m_charged_PVMatched_key, ctx);
+  auto alphaHandle = m_alphaKeys.makeHandles(m_inputType, ctx);
+  auto weightHandle = m_weightKeys.makeHandles(m_inputType, ctx);
+
 
   std::vector<fastjet::PseudoJet> chargedHSVector;
   std::vector<fastjet::PseudoJet> chargedPUVector;
   std::vector<fastjet::PseudoJet> neutralVector;
   std::vector<fastjet::PseudoJet> forwardVector;
 
+  if (!chargedPVMatched_handle.isAvailable()) {
+    ATH_MSG_ERROR("Not known if PFO is matched to primary vertex.  Run CorrectPFOTool before PuppiWeightTool");
+    return StatusCode::FAILURE;
+  }
+
   // Fill input particle vectors for puppi
   for ( xAOD::PFO* ppfo : *cont ) {
-    if (!PVMatchedAcc.isAvailable(*ppfo)){
-      ATH_MSG_ERROR("Not known if PFO is matched to primary vertex.  Run CorrectPFOTool before ChargedHadronSubtractionTool");
-      return StatusCode::FAILURE;
-    }
-
+    
     if (ppfo->pt()<=FLT_MIN) continue;
 
     fastjet::PseudoJet pj(ppfo->p4());
@@ -103,7 +133,7 @@ StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::PFOContainer* cont) const{
     if(fabs(ppfo->eta()) > m_etaBoundary) forwardVector.push_back(pj);
     else{     
       if(isCharged){
-        bool matchedToPrimaryVertex=PVMatchedAcc(*ppfo);
+        bool matchedToPrimaryVertex=chargedPVMatched_handle(*ppfo); 
         if(matchedToPrimaryVertex) chargedHSVector.push_back(pj);
         else chargedPUVector.push_back(pj);
       }
@@ -113,7 +143,7 @@ StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::PFOContainer* cont) const{
 
   //Count the number of primary vertices
   const xAOD::VertexContainer* pvtxs = nullptr;
-  auto handle = SG::makeHandle(m_vertexContainer_key);
+  auto handle = SG::makeHandle(m_vertexContainer_key, ctx);
   if (!handle.isValid()){
     ATH_MSG_WARNING(" This event has no primary vertices " );
     return StatusCode::FAILURE;
@@ -145,8 +175,9 @@ StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::PFOContainer* cont) const{
     double alpha = puppi.getAlpha(pj);
 
     if ((!isCharged || isForward) && m_applyWeight) ppfo->setP4(weight*ppfo->p4());
-    alphaAcc(*ppfo) = alpha;
-    weightAcc(*ppfo) = weight;
+    
+    alphaHandle(*ppfo) = alpha;
+    weightHandle(*ppfo) = weight;
   }
 
   ATH_MSG_DEBUG("Median: "<<puppi.getMedian());
@@ -155,23 +186,24 @@ StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::PFOContainer* cont) const{
   return StatusCode::SUCCESS;
 }
 
-StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::FlowElementContainer* cont) const{
+StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::FlowElementContainer* cont, const EventContext& ctx) const{
 
-  const static SG::Accessor<bool> PVMatchedAcc("matchedToPV");
-  const static SG::Accessor<double> alphaAcc("PUPPI_alpha");
-  const static SG::Accessor<double> weightAcc("PUPPI_weight");
+  SG::ReadDecorHandle<xAOD::IParticleContainer, bool> chargedPVMatched_handle(m_charged_PVMatched_key, ctx);
+  auto alphaHandle = m_alphaKeys.makeHandles(m_inputType, ctx);
+  auto weightHandle = m_weightKeys.makeHandles(m_inputType, ctx);
 
   std::vector<fastjet::PseudoJet> chargedHSVector;
   std::vector<fastjet::PseudoJet> chargedPUVector;
   std::vector<fastjet::PseudoJet> neutralVector;
   std::vector<fastjet::PseudoJet> forwardVector;
 
+  if (!chargedPVMatched_handle.isAvailable()) {
+    ATH_MSG_ERROR("Not known if PFO is matched to primary vertex.  Run CorrectPFOTool before PuppiWeightTool");
+    return StatusCode::FAILURE;
+  }
+
   // Fill input particle vectors for puppi
   for ( xAOD::FlowElement* pfe : *cont ) {
-    if (!PVMatchedAcc.isAvailable(*pfe)){
-      ATH_MSG_ERROR("Not known if FlowElement is matched to primary vertex.  Run CorrectPFOTool before ChargedHadronSubtractionTool");
-      return StatusCode::FAILURE;
-    }
 
     if (pfe->pt()<=FLT_MIN) continue;
 
@@ -180,7 +212,7 @@ StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::FlowElementContainer* cont) 
     if(fabs(pfe->eta()) > m_etaBoundary) forwardVector.push_back(pj);
     else{     
       if(pfe->isCharged()){
-        bool matchedToPrimaryVertex=PVMatchedAcc(*pfe);
+        bool matchedToPrimaryVertex=chargedPVMatched_handle(*pfe);
         if(matchedToPrimaryVertex) chargedHSVector.push_back(pj);
         else chargedPUVector.push_back(pj);
       }
@@ -190,7 +222,7 @@ StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::FlowElementContainer* cont) 
 
   //Count the number of primary vertices
   const xAOD::VertexContainer* pvtxs = nullptr;
-  auto handle = SG::makeHandle(m_vertexContainer_key);
+  auto handle = SG::makeHandle(m_vertexContainer_key, ctx);
   if (!handle.isValid()){
     ATH_MSG_WARNING(" This event has no primary vertices " );
     return StatusCode::FAILURE;
@@ -220,8 +252,8 @@ StatusCode PuppiWeightTool::applyPuppiWeights(xAOD::FlowElementContainer* cont) 
     double alpha = puppi.getAlpha(pj);
 
     if ((!(pfe->isCharged()) || isForward) && m_applyWeight) pfe->setP4(weight*pfe->p4());
-    alphaAcc(*pfe) = alpha;
-    weightAcc(*pfe) = weight;
+    alphaHandle(*pfe) = alpha;
+    weightHandle(*pfe) = weight;
   }
 
   ATH_MSG_DEBUG("Median: "<<puppi.getMedian());

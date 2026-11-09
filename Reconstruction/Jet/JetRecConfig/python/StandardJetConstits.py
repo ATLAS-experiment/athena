@@ -624,7 +624,7 @@ _stdModList = [
     JetConstitModifier("EM",     "ClusterAtEMScaleTool", ),
     JetConstitModifier("ML",     "ClusterAtMLScaleTool", prereqs=["input:CaloCalTopoClustersML"]),
     JetConstitModifier("GNN",    "ClusterAtMLScaleTool", prereqs=["input:CaloCalTopoClustersGNN"],
-                       properties=dict(ClusterMLCorrectedEnergyDecorationKey="CaloCalTopoClusters.GNNCalibratedEnergy",
+                       properties=dict(ClusterMLCorrectedEnergyDecorationKey="GNNCalibratedEnergy",
                                        ClusterMLCorrectedEnergyDecorationType="double")),
     JetConstitModifier("LC",     "", ),
     # Particle flow

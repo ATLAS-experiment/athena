@@ -24,7 +24,9 @@
 #include "xAODPFlow/PFOContainer.h"
 #include "xAODPFlow/FlowElementContainer.h"
 
+#include "AthContainers/CurrentContext.h"
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "JetRecTools/WriteDecorHandleTriplet.h"
 #include <string>
 
 
@@ -37,12 +39,13 @@ class ChargedHadronSubtractionTool : public JetConstituentModifierBase{
 
   // Check that the configuration is reasonable
   StatusCode initialize();
+  StatusCode configure_decor_handle_keys() override final;
 
   private:
   // Implement the correction
-  StatusCode process_impl(xAOD::IParticleContainer* cont) const; 
-  template <class T, class U> StatusCode matchToPrimaryVertex(T &) const;
-  template <class T, class U> StatusCode matchByPrimaryVertex(T &) const;
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const; 
+  template <class T, class U> StatusCode matchToPrimaryVertex(T &, const EventContext& ctx) const;
+  template <class T, class U> StatusCode matchByPrimaryVertex(T &, const EventContext& ctx) const;
 
   const xAOD::Vertex* getPrimaryVertex() const;
 
@@ -58,15 +61,49 @@ class ChargedHadronSubtractionTool : public JetConstituentModifierBase{
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer_key = {this, "VertexContainerKey", "PrimaryVertices", "key for the primary vertex container"};
   SG::ReadHandleKey<jet::TrackVertexAssociation> m_trkVtxAssoc_key = {this, "TrackVertexAssociation", "JetTrackVtxAssoc", "key for the TrackVertexAssociation object"};
   
+  WriteDecorHandleKeyTriplet<char>
+    m_matchedToPVKeys{
+      this,
+      "MatchedToPVKey",
+      "matchedToPV",
+      "decor key for objects matched to PV"
+    };
 
+  WriteDecorHandleKeyTriplet<char>
+    m_matchedToPUsidebandKeys{
+      this,
+      "MatchedToPUsidebandKey",
+      "matchedToPUsideband",
+      "decor key for objects matched to PU sideband"
+    };
 
-};
+  WriteDecorHandleKeyTriplet<std::vector<unsigned>>
+    m_matchingPVsKeys{
+      this,
+      "MatchingPVsKey",
+      "MatchingPVs",
+      "decor key for objects matching PVs"
+    };
 
+  WriteDecorHandleKeyTriplet<std::vector<unsigned>>
+    m_matchingPUsidebandKeys{
+      this,
+      "MatchingPUsidebandKey",
+      "MatchingPUsidebands",
+      "decor key for objects matching PU sidebands"
+    };
 
-template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchToPrimaryVertex(T& cont) const
+  };
+
+template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchToPrimaryVertex(T& cont, const EventContext& ctx) const
 {
-  const static SG::Accessor<char> PVMatchedAcc("matchedToPV");
-  const static SG::Accessor<char> PUsidebandMatchedAcc("matchedToPUsideband");
+  
+  auto matchedToPVHandle =
+      m_matchedToPVKeys.makeHandles(m_inputType, ctx);
+
+  auto matchedToPUsidebandHandle =
+      m_matchedToPUsidebandKeys.makeHandles(m_inputType, ctx);
+
 
   // Use only one of TVA or PV
   const jet::TrackVertexAssociation *trkVtxAssoc = nullptr;
@@ -77,7 +114,7 @@ template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchToPrim
     // to retrieve anything related to it
     if (m_useTrackToVertexTool)
     {
-      auto handle = SG::makeHandle(m_trkVtxAssoc_key);
+      auto handle = SG::makeHandle(m_trkVtxAssoc_key, ctx);
       if (!handle.isValid())
       {
         ATH_MSG_ERROR("Can't retrieve TrackVertexAssociation : " << m_trkVtxAssoc_key.key());
@@ -174,20 +211,27 @@ template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchToPrim
         }
       } // TVA vs PV decision
     }
-    PVMatchedAcc(*ppfo) = matchedToPrimaryVertex;
-    PUsidebandMatchedAcc(*ppfo) = matchedToPileupSideband;
+    if (m_inputType == xAOD::Type::ParticleFlow || m_inputType == xAOD::Type::FlowElement) {
+      matchedToPVHandle(*ppfo) = (char)matchedToPrimaryVertex;
+      matchedToPUsidebandHandle(*ppfo) = (char)matchedToPileupSideband;
+    }
+    
   }
 
   return StatusCode::SUCCESS;
 }
 
-template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchByPrimaryVertex(T& cont) const
+template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchByPrimaryVertex(T& cont, const EventContext& ctx) const
 {
-  const static SG::Accessor<std::vector<unsigned>> matchingPVs("MatchingPVs");
-  const static SG::Accessor<std::vector<unsigned>> matchingPUSBs("MatchingPUsidebands");
+
+  auto matchingPVsHandle =
+      m_matchingPVsKeys.makeHandles(m_inputType, ctx);
+
+  auto matchingPUsidebandHandle =
+      m_matchingPUsidebandKeys.makeHandles(m_inputType, ctx);
 
   // Retrieve Primary Vertices
-  auto handle = SG::makeHandle(m_vertexContainer_key);
+  auto handle = SG::makeHandle(m_vertexContainer_key, ctx);
   if (!handle.isValid())
   {
     ATH_MSG_WARNING(" This event has no primary vertex container");
@@ -205,7 +249,7 @@ template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchByPrim
   const jet::TrackVertexAssociation *trkVtxAssoc = nullptr;
   if (m_useTrackToVertexTool)
   {
-    auto handle = SG::makeHandle(m_trkVtxAssoc_key);
+    auto handle = SG::makeHandle(m_trkVtxAssoc_key, ctx);
     if (!handle.isValid())
     {
       ATH_MSG_ERROR("Can't retrieve TrackVertexAssociation : " << m_trkVtxAssoc_key.key());
@@ -298,10 +342,11 @@ template <class T, class U> StatusCode ChargedHadronSubtractionTool::matchByPrim
       }
     }
 
-    matchingPVs(*ppfo) = std::move(matchingVertexList);
-    matchingPUSBs(*ppfo) = std::move(matchingPUSBList);
+    if (m_inputType == xAOD::Type::ParticleFlow || m_inputType == xAOD::Type::FlowElement) {
+      matchingPVsHandle(*ppfo) = std::move(matchingVertexList);
+      matchingPUsidebandHandle(*ppfo) = std::move(matchingPUSBList);
+    }
   }
-
   return StatusCode::SUCCESS;
 }
 

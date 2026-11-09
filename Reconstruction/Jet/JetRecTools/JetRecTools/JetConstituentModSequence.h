@@ -26,7 +26,10 @@
 #include "AsgDataHandles/ReadDecorHandleKeyArray.h"
 #include "AsgDataHandles/WriteHandleKey.h"
 #include "AsgDataHandles/ReadHandle.h"
+#include "AsgDataHandles/WriteHandle.h"
 #include "AsgDataHandles/ReadDecorHandle.h"
+#include "AsgDataHandles/WriteDecorHandle.h"
+#include "AsgDataHandles/WriteDecorHandleKey.h"
 #include "xAODCore/ShallowCopy.h"
 #include "AthContainers/CurrentContext.h"
 #include "AsgTools/PropertyWrapper.h"
@@ -42,7 +45,6 @@
 #include "xAODPFlow/FlowElementAuxContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODTracking/TrackParticleContainer.h"
-#include "AsgDataHandles/WriteHandle.h"
 
 
 #ifndef XAOD_ANALYSIS
@@ -105,6 +107,8 @@ protected:
   SG::ReadDecorHandleKeyArray<xAOD::FlowElementContainer> m_inChargedFEDecorKeys{this, "InChargedFEDecorKeys", {}, "Dummy keys that force all neccessary charged FlowElement decorations to be applied before running this algorithm"};
   SG::ReadDecorHandleKeyArray<xAOD::FlowElementContainer> m_inNeutralFEDecorKeys{this, "InNeutralFEDecorKeys", {}, "Dummy keys that force all neccessary neutral FlowElement decorations to be applied before running this algorithm"};
 
+  SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_constituentCopyIndexKey{this, "ConstituentCopyIndexKey", "ConstituentCopyIndexKey", "WriteDecorHandleKey for the constituent copy index"};
+
   /// helper function to cast, shallow copy and record a container.
 
   template<class T>
@@ -138,7 +142,7 @@ JetConstituentModSequence::copyModRecord(const SG::ReadHandleKey<T>& inKey,
   xAOD::ShallowCopyResult_t<T> newconstit = xAOD::shallowCopy(*inHandle);
   newconstit.second->setShallowIO(m_saveAsShallow);
 
-  for (auto t : m_modifiers) {ATH_CHECK(t->process(newconstit.first.get()));}
+  for (auto t : m_modifiers) {ATH_CHECK(t->process(newconstit.first.get(), ctx));}
 
   auto handle = makeHandle(outKey, ctx);
   ATH_CHECK(handle.record(std::move(newconstit.first), std::move(newconstit.second)));
@@ -219,29 +223,33 @@ template<class T, class U> StatusCode JetConstituentModSequence::copyModRecordFl
   }
   // Deep copy
   else{
-    // Define the accessor which will add the index
-    const SG::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
 
     // Create the new container and its auxiliary store.
     auto neutralCopies = std::make_unique<T>();
     auto neutralCopiesAux = std::make_unique<xAOD::AuxContainerBase>();
     neutralCopies->setStore(neutralCopiesAux.get()); //< Connect the two
 
+    ATH_CHECK(outNeutralHandle.record(std::move(neutralCopies),
+                                      std::move(neutralCopiesAux))
+    );
+    
+    SG::WriteDecorHandle<xAOD::IParticleContainer, unsigned> copyIndexHandle(m_constituentCopyIndexKey, ctx);
+
+    T* outNeutralCont = outNeutralHandle.ptr();
+
     // Create N copies and set copy index
     // Necessary for by-vertex jet reconstruction
     for (unsigned i = 0; i < numNeutralCopies; i++){
       for (const U* fe : *inNeutralHandle) {
           U* copy = new U();
-          neutralCopies->push_back(copy);
+          outNeutralCont->push_back(copy);
           *copy = *fe;
-          copyIndex(*copy) = i;
+          copyIndexHandle(*copy) = i;
           xAOD::setOriginalObjectLink(*fe, *copy);
       }
     }
 
-    ATH_CHECK(outNeutralHandle.record(std::move(neutralCopies),
-                                      std::move(neutralCopiesAux))
-    );
+    
   }
 
 
@@ -254,7 +262,7 @@ template<class T, class U> StatusCode JetConstituentModSequence::copyModRecordFl
       (*outChargedHandle).end());
 
   // 3. Now process modifications on all elements
-  for (auto t : m_modifiers) {ATH_CHECK(t->process(&*outAllHandle));}
+  for (auto t : m_modifiers) {ATH_CHECK(t->process(&*outAllHandle, ctx));}
   return StatusCode::SUCCESS;
 }
 

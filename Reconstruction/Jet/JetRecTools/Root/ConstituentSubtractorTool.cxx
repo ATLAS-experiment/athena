@@ -8,7 +8,7 @@
 #include "JetRecTools/ConstituentSubtractorTool.h"
 
 #include "AsgDataHandles/ReadHandle.h"
-
+#include "AsgDataHandles/WriteDecorHandle.h"
 
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/contrib/ConstituentSubtractor.hh"
@@ -94,14 +94,25 @@ StatusCode ConstituentSubtractorTool::initialize() {
     }
   }
 
-  
+  ATH_CHECK(m_csWeightKeys.initialize());
+
   return StatusCode::SUCCESS;
 }
 
 
+StatusCode ConstituentSubtractorTool::configure_decor_handle_keys()
+{
+  ATH_CHECK(m_csWeightKeys.assign(
+    m_outputContainer,
+    m_outputChargedContainer,
+    m_outputNeutralContainer));
+
+  return StatusCode::SUCCESS;
+}
+
 // Apply PU weighting and decorate the CaloCluster container appropriately:
 
-StatusCode ConstituentSubtractorTool::process_impl(xAOD::IParticleContainer* cont) const {
+StatusCode ConstituentSubtractorTool::process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const {
 
   contrib::ConstituentSubtractor subtractor;
  
@@ -198,15 +209,19 @@ StatusCode ConstituentSubtractorTool::process_impl(xAOD::IParticleContainer* con
     corrected_p4s[pj.user_index()].SetCoordinates(pj.pt(),pj.eta(),pj.phi(),pj.m());
   }
  
+
+  auto csWeightHandle = m_csWeightKeys.makeHandles(m_inputType, ctx);
+
   // Set every constituent's four-vector in the output container
   i = 0; // Again, we need to track the input container index, not the owning container index
-  const static SG::Accessor<float> weightAcc("CSWeight"); // Handle for PU weighting here
   for(xAOD::IParticle * part: *cont){
     ATH_MSG_VERBOSE("Now on constituent " << i);
     ATH_MSG_VERBOSE("Initial pt: " << part->pt() << ", subtracted pt: " << corrected_p4s[i].Pt());
     ATH_MSG_VERBOSE("Initial eta: " << part->eta() << ", subtracted pt: " << corrected_p4s[i].Eta());
     ATH_MSG_VERBOSE("Initial phi: " << part->phi() << ", subtracted pt: " << corrected_p4s[i].Phi());
-    ATH_CHECK( setP4(part,corrected_p4s[i], &weightAcc) );
+    float weight = getCorrectionFactor(part, corrected_p4s[i]);
+    csWeightHandle(*part) = weight;
+    ATH_CHECK( setP4(part,corrected_p4s[i]) );
     ++i;
   }
 

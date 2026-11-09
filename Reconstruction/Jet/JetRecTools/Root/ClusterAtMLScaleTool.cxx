@@ -36,6 +36,12 @@ StatusCode ClusterAtMLScaleTool::initialize() {
 }
 
 
+StatusCode ClusterAtMLScaleTool::configure_decor_handle_keys()
+{
+    ATH_CHECK(m_clusterMLCorrectedEnergyKey.assign(m_inputContainer + "." + m_clusterMLCorrectedEnergyKey.key()));
+    return StatusCode::SUCCESS;
+}
+
 template <typename T>
 StatusCode ClusterAtMLScaleTool::setClustersToMLScaleImpl(
       xAOD::CaloClusterContainer& cont,
@@ -74,19 +80,18 @@ ClusterAtMLScaleTool::setClustersToMLScaleImpl<double>(
     const EventContext&) const;
 
 
-StatusCode ClusterAtMLScaleTool::setClustersToMLScale(xAOD::CaloClusterContainer& cont) const {
+StatusCode ClusterAtMLScaleTool::setClustersToMLScale(xAOD::CaloClusterContainer& cont, const EventContext& ctx) const {
 
-    const EventContext& ctx = Gaudi::Hive::currentContext();
     return (m_clusterMLCorrectedEnergyDecorationType.value() == "double")
         ? setClustersToMLScaleImpl<double>(cont, ctx)
         : setClustersToMLScaleImpl<float>(cont, ctx);
 }
 
 
-StatusCode ClusterAtMLScaleTool::process_impl(xAOD::IParticleContainer* cont) const {
+StatusCode ClusterAtMLScaleTool::process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const {
     xAOD::CaloClusterContainer* clust = dynamic_cast<xAOD::CaloClusterContainer*> (cont); // Get CaloCluster container
     if(clust)
-        return setClustersToMLScale(*clust);
+        return setClustersToMLScale(*clust, ctx);
 
     return StatusCode::FAILURE;
 }

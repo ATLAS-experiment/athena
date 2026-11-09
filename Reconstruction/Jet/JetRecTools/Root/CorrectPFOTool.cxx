@@ -7,6 +7,7 @@
 #include "JetRecTools/CorrectPFOTool.h"
 #include "PFlowUtils/FEHelpers.h"
 #include "AsgDataHandles/ReadHandle.h"
+#include "AsgDataHandles/ReadDecorHandle.h"
 
 #include <cmath>
 
@@ -47,11 +48,23 @@ StatusCode CorrectPFOTool::initialize() {
   if(m_doByVertex){
     ATH_MSG_INFO("Running CorrectPFOTool by vertex:" << m_doByVertex);
   }
+
+  ATH_CHECK(m_constituentCopyIndexKey.initialize(m_doByVertex));
   
   return StatusCode::SUCCESS;
 }
 
-StatusCode CorrectPFOTool::process_impl(xAOD::IParticleContainer* cont) const {
+StatusCode CorrectPFOTool::configure_decor_handle_keys() {
+  if(m_doByVertex){
+    ATH_CHECK(
+      m_constituentCopyIndexKey.assign(
+        m_outputNeutralContainer + "." + m_constituentCopyIndexKey.key()));
+  }
+  return StatusCode::SUCCESS;
+}
+
+
+StatusCode CorrectPFOTool::process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const {
   // Type-checking happens in the JetConstituentModifierBase class
   // so it is safe just to static_cast
   if(m_inputType == xAOD::Type::FlowElement){
@@ -60,15 +73,15 @@ StatusCode CorrectPFOTool::process_impl(xAOD::IParticleContainer* cont) const {
       ATH_MSG_ERROR("CorrectPFOTool received FlowElements that aren't PFOs");
       return StatusCode::FAILURE;
     }
-    return m_doByVertex ? correctPFOByVertex(*feCont) : correctPFO(*feCont);
+    return m_doByVertex ? correctPFOByVertex(*feCont, ctx) : correctPFO(*feCont, ctx);
   }
   xAOD::PFOContainer* pfoCont = static_cast<xAOD::PFOContainer*> (cont);
-  return m_doByVertex ? correctPFOByVertex(*pfoCont) : correctPFO(*pfoCont);
+  return m_doByVertex ? correctPFOByVertex(*pfoCont, ctx) : correctPFO(*pfoCont, ctx);
 }
 
-const xAOD::Vertex* CorrectPFOTool::getPrimaryVertex() const {
+const xAOD::Vertex* CorrectPFOTool::getPrimaryVertex(const EventContext& ctx) const {
   // Retrieve Primary Vertices
-  auto handle = SG::makeHandle(m_vertexContainer_key);
+  auto handle = SG::makeHandle(m_vertexContainer_key, ctx);
   if (!handle.isValid()){
       ATH_MSG_WARNING(" This event has no primary vertex container" );
       return nullptr;
@@ -101,11 +114,11 @@ const xAOD::Vertex* CorrectPFOTool::getPrimaryVertex() const {
   return nullptr;
 }
 
-StatusCode CorrectPFOTool::correctPFO(xAOD::PFOContainer& cont) const { 
+StatusCode CorrectPFOTool::correctPFO(xAOD::PFOContainer& cont, const EventContext& ctx) const { 
 
   const xAOD::Vertex* vtx = nullptr;
   if(m_correctneutral) {
-    vtx = getPrimaryVertex();
+    vtx = getPrimaryVertex(ctx);
     if(vtx==nullptr) {
       ATH_MSG_ERROR("Primary vertex container was empty or no valid vertex found!");
       return StatusCode::FAILURE;
@@ -130,11 +143,11 @@ StatusCode CorrectPFOTool::correctPFO(xAOD::PFOContainer& cont) const {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CorrectPFOTool::correctPFO(xAOD::FlowElementContainer& cont) const { 
+StatusCode CorrectPFOTool::correctPFO(xAOD::FlowElementContainer& cont, const EventContext& ctx) const { 
   ATH_MSG_DEBUG("Using correctPFO");
   const xAOD::Vertex* vtx = nullptr;
   if(m_correctneutral) {
-    vtx = getPrimaryVertex();
+    vtx = getPrimaryVertex(ctx);
     if(vtx==nullptr) {
       ATH_MSG_ERROR("Primary vertex container was empty or no valid vertex found!");
       return StatusCode::FAILURE;
@@ -159,10 +172,15 @@ StatusCode CorrectPFOTool::correctPFO(xAOD::FlowElementContainer& cont) const {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::PFOContainer& cont) const {
-  static const SG::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
+StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::PFOContainer& cont, const EventContext& ctx) const {
+  SG::ReadDecorHandle<xAOD::IParticleContainer, unsigned> copyIndex_handle(m_constituentCopyIndexKey, ctx);
+  
+  if (!copyIndex_handle.isAvailable()) {
+    ATH_MSG_ERROR("ConstituentCopyIndex decoration is not available on the PFO container");
+    return StatusCode::FAILURE;
+  }
   // Retrieve Primary Vertices
-  auto handle = SG::makeHandle(m_vertexContainer_key);
+  auto handle = SG::makeHandle(m_vertexContainer_key, ctx);
   if (!handle.isValid()){
       ATH_MSG_WARNING(" This event has no primary vertex container" );
       return StatusCode::FAILURE;
@@ -180,13 +198,8 @@ StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::PFOContainer& cont) const {
       if(m_correctneutral) {
         // Neutral PFOs - there are copies, one per vertex, already created
         // We need to now need to correct each copy to point to the corresponding vertex
-        if (!copyIndex.isAvailable(*ppfo))
-        {
-          ATH_MSG_WARNING("Encountered a neutral per-vertex PFO object without the corresponding vertex index attribute");
-          continue;
-        }
         
-        const unsigned iVtx = copyIndex(*ppfo);
+        const unsigned iVtx = copyIndex_handle(*ppfo);
         if (iVtx >= pvtxs->size())
         {
           ATH_MSG_WARNING("Encountered a neutral per-vertex PFO object with an index beyond the size of the vertex container");
@@ -217,12 +230,18 @@ StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::PFOContainer& cont) const {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::FlowElementContainer& cont) const {
+StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::FlowElementContainer& cont, const EventContext& ctx) const {
   ATH_MSG_DEBUG("Using correctPFOByVertex");
-  static const SG::Accessor<unsigned> copyIndex("ConstituentCopyIndex");
+  
+  SG::ReadDecorHandle<xAOD::IParticleContainer, unsigned> copyIndex_handle(m_constituentCopyIndexKey, ctx);
+  
+  if (!copyIndex_handle.isAvailable()) {
+    ATH_MSG_ERROR("ConstituentCopyIndex decoration is not available on the FlowElement container");
+    return StatusCode::FAILURE;
+  }
 
   // Retrieve Primary Vertices
-  auto handle = SG::makeHandle(m_vertexContainer_key);
+  auto handle = SG::makeHandle(m_vertexContainer_key, ctx);
   if (!handle.isValid()){
       ATH_MSG_WARNING(" This event has no primary vertex container" );
       return StatusCode::FAILURE;
@@ -240,13 +259,8 @@ StatusCode CorrectPFOTool::correctPFOByVertex(xAOD::FlowElementContainer& cont) 
       if(m_correctneutral) {
         // Neutral PFOs - there are copies, one per vertex, already created
         // We need to now need to correct each copy to point to the corresponding vertex
-        if (!copyIndex.isAvailable(*ppfo))
-        {
-          ATH_MSG_WARNING("Encountered a neutral per-vertex PFO object without the corresponding vertex index attribute");
-          continue;
-        }
         
-        const unsigned iVtx = copyIndex(*ppfo);
+        const unsigned iVtx = copyIndex_handle(*ppfo);
         if (iVtx >= pvtxs->size())
         {
           ATH_MSG_WARNING("Encountered a neutral per-vertex PFO object with an index beyond the size of the vertex container");

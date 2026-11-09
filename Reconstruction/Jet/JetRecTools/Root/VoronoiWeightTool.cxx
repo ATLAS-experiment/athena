@@ -9,6 +9,8 @@
 #include "fastjet/tools/JetMedianBackgroundEstimator.hh"
 #include <fastjet/tools/Subtractor.hh>
 
+#include "AsgDataHandles/WriteDecorHandle.h"
+
 #include "xAODPFlow/PFO.h"
 #include "xAODPFlow/TrackCaloCluster.h"
 #include "xAODPFlow/FlowElement.h"
@@ -99,13 +101,27 @@ StatusCode VoronoiWeightTool::initialize() {
       return StatusCode::FAILURE;
     }
   }
+
+  ATH_CHECK(m_voronoiWeightKeys.initialize());
+
+  return StatusCode::SUCCESS;
+}
+
+
+StatusCode VoronoiWeightTool::configure_decor_handle_keys()
+{
+  ATH_CHECK(m_voronoiWeightKeys.assign(
+    m_outputContainer,
+    m_outputChargedContainer,
+    m_outputNeutralContainer));
+
   return StatusCode::SUCCESS;
 }
 
 //Have to define custom comparator for PseudoJets in order to have a map from PJs to anything
 //Comparison is fuzzy to account for rounding errors
 
-StatusCode VoronoiWeightTool::process_impl(xAOD::IParticleContainer* particlesin) const
+StatusCode VoronoiWeightTool::process_impl(xAOD::IParticleContainer* particlesin, const EventContext& ctx) const
 {
   std::vector<fastjet::PseudoJet> particles; particles.reserve(particlesin->size());
 
@@ -150,7 +166,8 @@ StatusCode VoronoiWeightTool::process_impl(xAOD::IParticleContainer* particlesin
 
   // This tracks the index of the object in the fastjet container
   size_t i=0;
-  const static SG::Accessor<float> weightAcc("VoronoiWeight"); // Handle for PU weighting here
+  auto voronoiWeightHandle = m_voronoiWeightKeys.makeHandles(m_inputType, ctx);
+
   for(xAOD::IParticle* part : SortHelper::sort_container_pt(particlesin)){
     // Skip the check on charged PFOs if needed
     // A subtle change in this check because fastjet will not return anything
@@ -205,7 +222,9 @@ StatusCode VoronoiWeightTool::process_impl(xAOD::IParticleContainer* particlesin
     // Leave it to the base class to determine if the correction
     // should not be applied
     float w = part->pt()>FLT_MIN ? newPt/part->pt() : 0.;
-    ATH_CHECK(setEnergyPt(part,part->e()*w,newPt,&weightAcc));
+    float voronoiWeight = getCorrectionFactor(part, part->e()*w, newPt);
+    voronoiWeightHandle(*part) = voronoiWeight;
+    ATH_CHECK(setEnergyPt(part,part->e()*w,newPt));
   }
   return StatusCode::SUCCESS;
  }

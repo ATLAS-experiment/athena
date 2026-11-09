@@ -15,6 +15,7 @@
 #include "xAODTracking/TrackParticleContainer.h"
 #include "xAODTracking/TrackParticleAuxContainer.h"
 #include "xAODTracking/VertexContainer.h"
+#include "JetRecTools/JetConstituentModifierBase.h"
 
 
 #include "AsgDataHandles/WriteHandle.h"
@@ -38,7 +39,6 @@ StatusCode JetConstituentModSequence::initialize() {
   ATH_MSG_INFO("Initializing tool " << name() << "...");
   ATH_MSG_DEBUG("initializing version with data handles");
 
-
   ATH_CHECK( m_modifiers.retrieve() );
   ATH_CHECK(m_vertexContainerKey.initialize(m_byVertex));
 
@@ -61,6 +61,16 @@ StatusCode JetConstituentModSequence::initialize() {
   
       ATH_CHECK(m_inClusterKey.initialize());
       ATH_CHECK(m_outClusterKey.initialize());
+
+      for (auto& tool : m_modifiers) {
+        auto* base = dynamic_cast<JetConstituentModifierBase*>(tool.get());
+        if (base) {
+          base->setInputContainer(m_inClusterKey.key());
+          base->setOutputContainer(m_outClusterKey.key());
+          ATH_CHECK(base->configure_decor_handle_keys());
+        }
+      }
+
       break;
     }
   case xAOD::Type::ParticleFlow:
@@ -87,6 +97,20 @@ StatusCode JetConstituentModSequence::initialize() {
       ATH_CHECK(m_outChargedPFOKey.initialize());
       ATH_CHECK(m_outNeutralPFOKey.initialize());
       ATH_CHECK(m_outAllPFOKey.initialize());
+
+      for (auto& tool : m_modifiers) {
+        auto* base = dynamic_cast<JetConstituentModifierBase*>(tool.get());
+        if (base) {
+          base->setInputChargedContainer(m_inChargedPFOKey.key());
+          base->setOutputChargedContainer(m_outChargedPFOKey.key());
+          base->setInputNeutralContainer(m_inNeutralPFOKey.key());
+          base->setOutputNeutralContainer(m_outNeutralPFOKey.key());
+          ATH_CHECK(base->configure_decor_handle_keys());
+        }
+      }
+
+      ATH_CHECK(m_constituentCopyIndexKey.assign(m_outNeutralPFOKey.key() + "." + m_constituentCopyIndexKey.key()));
+
       break;
     }
     break;
@@ -96,6 +120,14 @@ StatusCode JetConstituentModSequence::initialize() {
 
     ATH_CHECK(m_inTCCKey.initialize());
     ATH_CHECK(m_outTCCKey.initialize());
+    for (auto& tool : m_modifiers) {
+      auto* base = dynamic_cast<JetConstituentModifierBase*>(tool.get());
+      if (base) {
+        base->setInputContainer(m_inTCCKey.key());
+        base->setOutputContainer(m_outTCCKey.key());
+        ATH_CHECK(base->configure_decor_handle_keys());
+      }
+    }
     break;
   case xAOD::Type::FlowElement:
     {
@@ -157,9 +189,16 @@ StatusCode JetConstituentModSequence::initialize() {
       ATH_CHECK(m_outNeutralFEKey.initialize());
       ATH_CHECK(m_outAllFEKey.initialize());
 
-      // It is enough to initialise the ReadDecorHandleKeys for thread-safety
-      // We are not actually accessing the decorations, only ensuring they are present at runtime
-      // Hence, ReadDecorHandles are not explicitly required to be created
+      for (auto& tool : m_modifiers) {
+        auto* base = dynamic_cast<JetConstituentModifierBase*>(tool.get());
+        if (base) {
+          base->setInputChargedContainer(m_inChargedFEKey.key());
+          base->setOutputChargedContainer(m_outChargedFEKey.key());
+          base->setInputNeutralContainer(m_inNeutralFEKey.key());
+          base->setOutputNeutralContainer(m_outNeutralFEKey.key());
+          ATH_CHECK(base->configure_decor_handle_keys());
+        }
+      }
 
       // Prepend the FE input container name to the decorations
       for (auto& key : m_inChargedFEDecorKeys) {
@@ -176,12 +215,16 @@ StatusCode JetConstituentModSequence::initialize() {
       ATH_CHECK(m_inChargedFEDecorKeys.initialize());
       ATH_CHECK(m_inNeutralFEDecorKeys.initialize());
 
+      ATH_CHECK(m_constituentCopyIndexKey.assign(m_outNeutralFEKey.key() + "." + m_constituentCopyIndexKey.key()));
+
       break;
     }
   default:
     ATH_MSG_ERROR(" Unsupported input type "<< m_inputType );
     return StatusCode::FAILURE;
   }
+
+  ATH_CHECK(m_constituentCopyIndexKey.initialize());
 
   return StatusCode::SUCCESS;
 }

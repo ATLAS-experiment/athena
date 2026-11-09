@@ -21,6 +21,9 @@
 #include "JetRecTools/JetConstituentModifierBase.h"
 #include "xAODBase/IParticleContainer.h"
 
+#include "AthContainers/CurrentContext.h"
+#include "JetRecTools/WriteDecorHandleTriplet.h"
+
 #include "fastjet/PseudoJet.hh"
 
 class VoronoiWeightTool : public JetConstituentModifierBase{
@@ -40,7 +43,8 @@ public:
 
 protected:
   // Implement the correction
-  StatusCode process_impl(xAOD::IParticleContainer* cont) const;
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const;
+  StatusCode configure_decor_handle_keys() override final;
 
    // methods used in the analysis
   StatusCode makeVoronoiParticles(std::vector<fastjet::PseudoJet>& particles, std::vector< std::pair<fastjet::PseudoJet,std::vector<float> > >&) const;
@@ -55,6 +59,14 @@ protected:
 
   // Option to disregard cPFOs in the weight calculation
   bool m_ignoreChargedPFOs=true;
+
+  WriteDecorHandleKeyTriplet<float>
+    m_voronoiWeightKeys{
+      this,
+      "VoronoiWeightKey",
+      "VoronoiWeight",
+      "VoronoiWeight decoration"
+    };
 
   // this is needed to distribute the algorithm to the workers
   //ClassDef(VoronoiWeightTool, 1);

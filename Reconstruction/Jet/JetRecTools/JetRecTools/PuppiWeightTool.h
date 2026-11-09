@@ -7,6 +7,9 @@
 #include "JetRecTools/JetConstituentModifierBase.h"
 #include "xAODBase/IParticleContainer.h"
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "AthContainers/CurrentContext.h"
+#include "AsgDataHandles/ReadDecorHandleKey.h"
+#include "JetRecTools/WriteDecorHandleTriplet.h"
 
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
@@ -26,12 +29,13 @@ class PuppiWeightTool: public JetConstituentModifierBase {
   virtual StatusCode initialize() override final;
   virtual StatusCode finalize() override;
 
-  virtual StatusCode process_impl(xAOD::IParticleContainer* cont) const override final;
-  StatusCode applyPuppiWeights(xAOD::PFOContainer* cont) const;
-  StatusCode applyPuppiWeights(xAOD::FlowElementContainer* cont) const;
+  virtual StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const override final;
+  StatusCode applyPuppiWeights(xAOD::PFOContainer* cont, const EventContext& ctx) const;
+  StatusCode applyPuppiWeights(xAOD::FlowElementContainer* cont, const EventContext& ctx) const;
 
  private:
 
+  StatusCode configure_decor_handle_keys() override final;
   // puppi parameters
   double m_R0;
   double m_Rmin;
@@ -46,6 +50,25 @@ class PuppiWeightTool: public JetConstituentModifierBase {
   bool m_applyWeight;
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer_key{"PrimaryVertices"};
+
+  SG::ReadDecorHandleKey<xAOD::IParticleContainer> m_charged_PVMatched_key{this,"ChargedMatchedToPV", "matchedToPV", "Decoration indicating whether the PFO is matched to the PV"};
+  
+  WriteDecorHandleKeyTriplet<float>
+    m_alphaKeys{
+      this,
+      "PUPPI_alpha",
+      "PUPPI_alpha",
+      "PUPPI alpha weight"
+    };
+
+  WriteDecorHandleKeyTriplet<float>
+    m_weightKeys{
+      this,
+      "PUPPI_weight",
+      "PUPPI_weight",
+      "PUPPI weight"
+    };
+
 
 };
 

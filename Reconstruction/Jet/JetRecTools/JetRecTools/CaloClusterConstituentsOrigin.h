@@ -22,6 +22,7 @@
 #include "xAODTracking/VertexContainer.h"
 #include "xAODTracking/Vertex.h"
 
+#include "AthContainers/CurrentContext.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 
 
@@ -38,7 +39,7 @@ class CaloClusterConstituentsOrigin: public JetConstituentModifierBase {
   private:
 
   // Implement the correction
-  StatusCode process_impl(xAOD::IParticleContainer* cont) const; 
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const; 
   StatusCode correctToOriginVtx(xAOD::CaloClusterContainer& cont, const xAOD::Vertex& vert) const;
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_readVertexContainer_key;
