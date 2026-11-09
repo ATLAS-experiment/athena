@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOLOCALHADCALIB_GETLCOUTOFCLUSTER_H
@@ -81,7 +81,7 @@ class GetLCOutOfCluster : public AthAlgorithm
    * Gaudi has only a map<string,Histo1DDef> to use as property. So
    * the syntax for all dimensions introduced above is
    * {'Title': ('Title',Low,High,Bins), ... }. */
-  std::map<std::string,Gaudi::Histo1DDef> m_dimensionsmap;
+  Gaudi::Property<std::map<std::string,Gaudi::Histo1DDef>> m_dimensionsmap{this, "OutOfClusterDimensions", {}, "Dimensions to use for out-of-cluster corrections"};
 
   /**
    * @brief Vector of indices in m_dimensions 
@@ -100,17 +100,17 @@ class GetLCOutOfCluster : public AthAlgorithm
    * 
    * Use this property to set the name of the output file containing the
    * OutOfCluster histograms. */
-  std::string m_outputFileName;
+  Gaudi::Property<std::string> m_outputFileName{this, "OutputFileName", "", "Name of the output file to save histograms in"};
 
   /**
    * @brief Output file to save histograms in.
    * 
    * Internal variable pointing to the output file. */
-  std::unique_ptr<TFile> m_outputFile;
+  std::unique_ptr<TFile> m_outputFile{nullptr};
 
   /**
    * @brief Name of the CaloClusterContainer to use. */
-  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterCollName;
+  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterCollName{this, "ClusterCollectionName", "CaloTopoClusters", "Name of the CaloClusterContainer to use"};
 
   /** 
    * @brief vector of names of the calorimeter samplings not to use
@@ -119,7 +119,7 @@ class GetLCOutOfCluster : public AthAlgorithm
    * The pre-sampler layers (barrel and endcap) and the
    * gap-scintillators should not receive out-of-cluster weights as
    * they mainly deal with dead-material corrections. */
-  std::vector<std::string>  m_invalidSamplingNames;         
+  Gaudi::Property<std::vector<std::string>> m_invalidSamplingNames{this, "InvalidSamplings", {"PreSamplerB", "PreSamplerE", "TileGap3"}, "Names of samplings to ignore"};
 
   /** 
    * @brief actual set of samplings to be ignored for out-of-cluster weights
@@ -138,9 +138,9 @@ class GetLCOutOfCluster : public AthAlgorithm
    * 1/TotalNumberOfClustersWithE_calib>0.
    */
 
-  std::string m_NormalizationType;
+  Gaudi::Property<std::string> m_NormalizationType{this, "NormalizationType", "Lin", "Normalization type: Const, Lin, Log or NClus"};
 
-  int m_NormalizationTypeNumber;
+  int m_NormalizationTypeNumber{0};
 
   /** 
    * @brief string to choose different classification types
@@ -151,9 +151,9 @@ class GetLCOutOfCluster : public AthAlgorithm
    * "ParticleID_HAD" Gena's ParticleID classification (HAD type objects) for the use of QCD MC;
    */
 
-  std::string m_ClassificationType;
+  Gaudi::Property<std::string> m_ClassificationType{this, "ClassificationType", "None", "Classification type: None, ParticleID_EM or ParticleID_HAD"};
 
-  int m_ClassificationTypeNumber;
+  int m_ClassificationTypeNumber{0};
 };
 
 #endif // CALOLOCALHADCALIB_GETLCOUTOFCLUSTER_H

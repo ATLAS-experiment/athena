@@ -18,6 +18,7 @@
 
 #include "CaloUtils/CaloTowerBuilderToolBase.h"
 #include "CaloUtils/CaloTowerStore.h"
+#include "Gaudi/Property.h"
 
 
 
@@ -97,7 +98,8 @@ private:
   // Properties //
   ////////////////
 
-  std::vector<std::string> m_includedCalos;
+  Gaudi::Property<std::vector<std::string>> m_includedCalos{this, "IncludedCalos",
+    {"LAREM", "LARHEC", "LARFCAL", "TILE"}, "Calorimeters to include in the towers"};
 
   ////////////////////////
   // Store and Services //

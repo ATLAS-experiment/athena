@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -40,13 +40,7 @@
 //###############################################################################
 GetLCOutOfCluster::GetLCOutOfCluster(const std::string& name, 
 				     ISvcLocator* pSvcLocator) 
-  : AthAlgorithm(name, pSvcLocator),
-    m_outputFile(nullptr),
-    m_clusterCollName("CaloTopoClusters"),
-    m_NormalizationType("Lin"),
-    m_NormalizationTypeNumber(0),
-    m_ClassificationType("None"),
-    m_ClassificationTypeNumber(0)
+  : AthAlgorithm(name, pSvcLocator)
 {
  
   std::vector<Gaudi::Histo1DDef> dims(6);
@@ -58,32 +52,6 @@ GetLCOutOfCluster::GetLCOutOfCluster(const std::string& name,
   dims[5] = Gaudi::Histo1DDef("weight",0.,3.0,1);
 
   mapinsert(dims);
-
-  // Dimensions to use for classification
-  declareProperty("OutOfClusterDimensions",m_dimensionsmap);
-
-  // Name of output file to save histograms in
-  declareProperty("OutputFileName",m_outputFileName);  
-  
-  // Name of ClusterContainer to use
-  declareProperty("ClusterCollectionName",m_clusterCollName);  
-
-  // Name of Samplings to ignore 
-  m_invalidSamplingNames.resize(3);
-
-  m_invalidSamplingNames[0] = "PreSamplerB";
-  m_invalidSamplingNames[1] = "PreSamplerE";
-  m_invalidSamplingNames[2] = "TileGap3";
-
-  declareProperty("InvalidSamplings",m_invalidSamplingNames);
-
-  // Normalization type "Const", "Lin", "Log", "NClus"
-  declareProperty("NormalizationType",m_NormalizationType); 
-
-  // Classification type "None" for single pion MC or 
-  //                     "ParticleID_EM" for ParticleID based em-type clusters  
-  //                     "ParticleID_HAD" for ParticleID based had-type clusters  
-  declareProperty("ClassificationType", m_ClassificationType);
 }
 
 //###############################################################################
@@ -95,7 +63,7 @@ GetLCOutOfCluster::~GetLCOutOfCluster()
 
 StatusCode GetLCOutOfCluster::initialize() {
 
-  m_outputFile = std::make_unique<TFile>(m_outputFileName.c_str(),"RECREATE");
+  m_outputFile = std::make_unique<TFile>(m_outputFileName.value().c_str(),"RECREATE");
   m_outputFile->cd();
   m_ooc.resize(0);
 
@@ -131,7 +99,7 @@ StatusCode GetLCOutOfCluster::initialize() {
     m_ClassificationTypeNumber = GetLCDefs::PARTICLEID_HAD;
   }
   else {
-    ATH_MSG_WARNING( " unknown classification type " << m_ClassificationType << " given! Using None instead" );
+    ATH_MSG_WARNING( " unknown classification type " << m_ClassificationType.value() << " given! Using None instead" );
     m_ClassificationTypeNumber = GetLCDefs::NONE;
   }
 
@@ -220,7 +188,7 @@ StatusCode GetLCOutOfCluster::initialize() {
     }
   }
   //--- check sampling names to use exclude in correction
-  for (const std::string& name : m_invalidSamplingNames) {
+  for (const std::string& name : m_invalidSamplingNames.value()) {
     int theSampling(CaloSampling::Unknown);
     for (unsigned int jsamp = 0;jsamp< CaloSampling::Unknown; jsamp++) {
       if ( name == CaloSamplingHelper::getSamplingName((CaloSampling::CaloSample)jsamp)) {
@@ -248,7 +216,7 @@ StatusCode GetLCOutOfCluster::initialize() {
   }
 
   msg(MSG::INFO) << "Samplings to exclude from the out-of-cluster weighting:";
-  for (const std::string& name : m_invalidSamplingNames)
+  for (const std::string& name : m_invalidSamplingNames.value())
     msg() << " " << name;
   msg() << endmsg;
 
@@ -409,13 +377,13 @@ StatusCode GetLCOutOfCluster::execute(const EventContext& ctx)
 
 void GetLCOutOfCluster::mapinsert(const std::vector<Gaudi::Histo1DDef> & dims) {
   for (unsigned int i=0;i<dims.size();i++) {
-    m_dimensionsmap[dims[i].title()] = dims[i];
+    m_dimensionsmap.value()[dims[i].title()] = dims[i];
   }
 }
 
 void GetLCOutOfCluster::mapparse() {
 
-  for (std::pair<const std::string, Gaudi::Histo1DDef>& p : m_dimensionsmap) {
+  for (std::pair<const std::string, Gaudi::Histo1DDef>& p : m_dimensionsmap.value()) {
     m_dimensions.push_back(p.second);
     ATH_MSG_DEBUG(" New Dimension: " 
 		  << p.second.title() << ", [" << p.second.lowEdge()

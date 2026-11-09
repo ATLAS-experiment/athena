@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOLOCALHADCALIB_GETLCCLASSIFICATION_H
@@ -78,7 +78,7 @@ class GetLCClassification : public AthAlgorithm
    * Gaudi has only a map<string,Histo1DDef> to use as property. So
    * the syntax for all dimensions introduced above is
    * {'Title': ('Title',Low,High,Bins), ... }. */
-  std::map<std::string,Gaudi::Histo1DDef> m_dimensionsmap;
+  Gaudi::Property<std::map<std::string,Gaudi::Histo1DDef>> m_dimensionsmap{this, "ClassificationDimensions", {}, "Dimensions to use for classification"};
 
   /**
    * @brief Vector of indices in m_dimensions 
@@ -97,18 +97,18 @@ class GetLCClassification : public AthAlgorithm
    * 
    * Use this property to set the name of the output file containing the
    * classification histograms. */
-  std::string m_outputFileName;
+  Gaudi::Property<std::string> m_outputFileName{this, "OutputFileName", "", "Name of the output file to save histograms in"};
 
   /**
    * @brief Output file to save histograms in.
    * 
    * Internal variable pointing to the output file. */
-  std::unique_ptr<TFile> m_outputFile;
+  std::unique_ptr<TFile> m_outputFile{nullptr};
 
   /**
    * @brief Name of the CaloClusterContainer to use. */
 
-  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterCollName;
+  SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterCollName{this, "ClusterCollectionName", "CaloTopoClusters", "Name of the CaloClusterContainer to use"};
 
   /** 
    * @brief string to choose different normalization types
@@ -120,9 +120,9 @@ class GetLCClassification : public AthAlgorithm
    * 1/TotalNumberOfClustersWithE_calib>0.
    */
 
-  std::string m_NormalizationType;
+  Gaudi::Property<std::string> m_NormalizationType{this, "NormalizationType", "Lin", "Normalization type: Const, Lin, Log or NClus"};
 
-  int m_NormalizationTypeNumber;
+  int m_NormalizationTypeNumber{0};
 
   /** 
    * @brief string to choose different classification types
@@ -133,9 +133,9 @@ class GetLCClassification : public AthAlgorithm
    * "ParticleID_HAD" Gena's ParticleID classification (HAD type objects) for the use of QCD MC;
    */
 
-  std::string m_ClassificationType;
+  Gaudi::Property<std::string> m_ClassificationType{this, "ClassificationType", "None", "Classification type: None, ParticleID_EM or ParticleID_HAD"};
 
-  int m_ClassificationTypeNumber;
+  int m_ClassificationTypeNumber{0};
 
 };
 

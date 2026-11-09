@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -24,8 +24,8 @@ class CaloReadLCClassificationFile : public AthAlgorithm
                               CaloLocalHadCoeff& data);
 
  private:
-  std::string m_key;
-  std::string m_LCClassificationFileName;
+  Gaudi::Property<std::string> m_key{this, "ClassificationKey", "EMFrac", "DetStore key of the output CaloLocalHadCoeff object"};
+  Gaudi::Property<std::string> m_LCClassificationFileName{this, "LCClassificationFileName", "", "Name of the input LC classification ROOT file"};
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOUTILS_CALOTOWERBUILDERTOOLBASE_H
@@ -89,7 +89,7 @@ class CaloTowerBuilderToolBase: public AthAlgTool,
      */
     const CaloCellContainer* getCells() const;
 
-    SG::ReadHandleKey<CaloCellContainer> m_cellContainerName;
+    SG::ReadHandleKey<CaloCellContainer> m_cellContainerName{this, "CellContainerName", "AllCalo", "Input cell container"};
 
     // ReadHandle to CaloDetDescr CDO in CondStore
     SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager","CaloDetDescrManager"};

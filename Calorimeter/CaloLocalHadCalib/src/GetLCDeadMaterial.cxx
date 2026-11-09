@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -43,54 +43,8 @@
 //###############################################################################
 GetLCDeadMaterial::GetLCDeadMaterial(const std::string& name, 
                            ISvcLocator* pSvcLocator) 
-  : AthAlgorithm(name, pSvcLocator),
-    m_HadDMCoeffInputFile("CaloHadDMCoeff_init_v2.txt"),
-    m_HadDMCoeffOutputFile("CaloHadDMCoeff_output.txt"),
-    m_reportProfiles("report_CaloHadDMCoeff_profiles.ps"),
-    m_reportMinimization("report_CaloHadDMCoeff_minim.ps"),
-    m_reportCheck("report_CaloHadDMCoeff_check.ps"),
-    m_doFit(true),
-    m_doMinimization(false),
-    m_doPool(true),
-    m_doCheck(true),
-    m_isTestbeam(false),
-    m_isSingleParticle(true),
-    m_NormalizationTypeForFit("Lin"),
-    m_NormalizationTypeForMinim("Lin"),
-    m_ClassificationType("pdg"),
-    m_MaxEventsPerFile(0)
+  : AthAlgorithm(name, pSvcLocator)
 {
-
-  // initial coeffitients
-  declareProperty("HadDMCoeffInputFile",m_HadDMCoeffInputFile);
-  // output file with coeffitients
-  declareProperty("HadDMCoeffOutputFile",m_HadDMCoeffOutputFile);
-  // name of file with fitting results
-  declareProperty("ReportProfiles",m_reportProfiles);
-  // name of file with fitting results
-  declareProperty("ReportMinimization",m_reportMinimization);
-  // name of file with fitting results
-  declareProperty("ReportCheck",m_reportCheck);
-  // do TProfile fit
-  declareProperty("DoFit",m_doFit);
-  // do minimization
-  declareProperty("DoMinimization",m_doMinimization);
-  // do writing to pool file
-  declareProperty("DoPool",m_doPool);
-  // do writing to pool file
-  declareProperty("DoCheck",m_doCheck);
-  // list of files to process
-  declareProperty("InputRootFiles",m_inputRootFiles);
-  // key to write into pool file
-  declareProperty("CorrectionKey",m_key="HadDMCoeff2");
-  // H6 combined testbeam flag
-  declareProperty("isTestbeam",m_isTestbeam);
-  // normalization types
-  declareProperty("NormalizationTypeForFit",m_NormalizationTypeForFit);
-  declareProperty("NormalizationTypeForMinim",m_NormalizationTypeForMinim);
-  // number of maximum events to process in one root files
-  declareProperty("MaxEventsPerFile", m_MaxEventsPerFile);
-
 }
 
 
@@ -132,11 +86,11 @@ StatusCode GetLCDeadMaterial::initialize()
   input chain
   ******************************************** */
   TChain *pChain = new TChain("DeadMaterialTree");
-  if( m_inputRootFiles.empty() ) {
+  if( m_inputRootFiles.value().empty() ) {
     ATH_MSG_FATAL( " Empty vector of input root files! "  );
     return StatusCode::FAILURE;
   }
-  for (const std::string& fname : m_inputRootFiles) {
+  for (const std::string& fname : m_inputRootFiles.value()) {
     ATH_MSG_INFO( " Adding root file '" <<fname << "'"  );
     pChain->Add( fname.c_str() );
   }
@@ -157,21 +111,21 @@ StatusCode GetLCDeadMaterial::initialize()
   // and lookup approach (leakages, unclassified DM energy)
   if(m_doFit) {
     CaloHadDMCoeffFit *dmFit = new CaloHadDMCoeffFit();
-    dmFit->SetNormalizationType(m_NormalizationTypeForFit);
+    dmFit->SetNormalizationType(m_NormalizationTypeForFit.value());
     newHadDMCoeffFit = std::unique_ptr<CaloLocalHadCoeff>(dmFit->process(dmData.get(), initHadDMCoeff.get(), m_isSingleParticle, m_isTestbeam));
     if( !newHadDMCoeffFit ) {
       ATH_MSG_FATAL( "Failed in CaloHadDMCoeffFit::process()"  );
       delete dmFit;
       return StatusCode::FAILURE;
     }
-    if(!m_reportProfiles.empty()) dmFit->make_report(m_reportProfiles);
+    if(!m_reportProfiles.value().empty()) dmFit->make_report(m_reportProfiles.value());
     delete dmFit;
   }
 
   // minimization approach (material before FCAL)
   if(m_doMinimization) {
     CaloHadDMCoeffMinim *dmMinim = new CaloHadDMCoeffMinim();
-    dmMinim->SetNormalizationType(m_NormalizationTypeForMinim);
+    dmMinim->SetNormalizationType(m_NormalizationTypeForMinim.value());
     if(newHadDMCoeffFit) {
       // to use previous coefficients as initial values
       newHadDMCoeffMinim = std::unique_ptr<CaloLocalHadCoeff>(dmMinim->process(dmData.get(), newHadDMCoeffFit.get(), m_isSingleParticle, m_isTestbeam));
@@ -182,7 +136,7 @@ StatusCode GetLCDeadMaterial::initialize()
       ATH_MSG_FATAL( "Failed in CaloHadDMCoeffMinim::process()"  );
       return StatusCode::FAILURE;
     }
-    if(!m_reportMinimization.empty()) dmMinim->make_report(m_reportMinimization);
+    if(!m_reportMinimization.value().empty()) dmMinim->make_report(m_reportMinimization.value());
     delete dmMinim;
   }
 
@@ -197,14 +151,14 @@ StatusCode GetLCDeadMaterial::initialize()
   // prints coefficients to ASCII file
   if (result) {
     std::ofstream fout;
-    fout.open(m_HadDMCoeffOutputFile.c_str());
+    fout.open(m_HadDMCoeffOutputFile.value().c_str());
     dmHelper.PrintData(result, fout);
     fout.close();
   }
 
   // writing data to the pool
   if(m_doPool) {
-    ATH_CHECK( detStore()->record(result,m_key) );
+    ATH_CHECK( detStore()->record(result,m_key.value()) );
     ATH_CHECK( detStore()->setConst(result) );
   }
 
@@ -212,7 +166,7 @@ StatusCode GetLCDeadMaterial::initialize()
   if(m_doCheck) {
     CaloHadDMCoeffCheck *dmCheck = new CaloHadDMCoeffCheck();
     dmCheck->process(dmData.get(), result, m_isSingleParticle, m_isTestbeam);
-    dmCheck->make_report(m_reportCheck);
+    dmCheck->make_report(m_reportCheck.value());
     delete dmCheck;
   }
 

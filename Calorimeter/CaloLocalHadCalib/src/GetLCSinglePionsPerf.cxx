@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -57,84 +57,8 @@ using CLHEP::MeV;
 
 **************************************************************************** */
 GetLCSinglePionsPerf::GetLCSinglePionsPerf(const std::string& name, ISvcLocator* pSvcLocator) 
-  : AthAlgorithm(name, pSvcLocator),
-    m_id_helper(nullptr),
-    m_calo_id(nullptr),
-    m_caloDmDescrManager(nullptr),
-    m_outputFileName("CheckSinglePionsReco.root"),
-    m_outputFile(nullptr),
-    m_distance_cut(1.5),
-    m_netabin(25), m_etamin(0.0), m_etamax(5.0),
-    m_deta(0),
-    m_nphibin(1), m_phimin(-M_PI), m_phimax(M_PI),
-    m_dphi(0),
-    m_nlogenerbin(22), m_logenermin(2.0), m_logenermax(6.4),
-    m_nlogenerbin2(3),
-    m_dlogener(0),
-    m_nnormtype(3),
-    m_ncluscoll(4),
-    m_ntagcases(3),
-    m_nmoments(0),
-    m_nmomsums(6),
-    m_truthPiEngFraction(0.1),
-    m_doEngRecOverTruth(true),
-    m_doEngTag(true),
-    m_doEngRecSpect(true),
-    m_doEngNoiseClus(true),
-    m_doClusMoments(true),
-    m_doRecoEfficiency(true),
-    m_useRecoEfficiency(false),
-    m_useGoodClus(false),
-    m_doCalibHitsValidation(true),
-    m_mc_ener(0),
-    m_mc_eta(0),
-    m_mc_phi(0),
-    m_mc_etabin(0),
-    m_mc_enerbin(0),
-    m_mc_phibin(0)
+  : AthAlgorithm(name, pSvcLocator)
 {
-  // collection name where cluster always have moments
-  declareProperty("ClusterBasicCollName",m_clusterBasicCollName);
-
-  // collections names after different correction steps
-  declareProperty("ClusterCollectionNames",m_clusterCollNames);
-
-  // distance cut for clusters to calcuate engReco
-  declareProperty("DistanceCut",m_distance_cut);
-
-  // Name of output file to save histograms in
-  declareProperty("OutputFileName",m_outputFileName);
-
-  // Names of CalibrationHitContainers to use
-  declareProperty("CalibrationHitContainerNames",m_CalibrationHitContainerNames); 
-  declareProperty("DMCalibrationHitContainerNames",m_DMCalibrationHitContainerNames);
-
-  // to create different types of validation histograms
-  declareProperty("doEngRecOverTruth",m_doEngRecOverTruth);
-  declareProperty("doEngTag",m_doEngTag);
-  declareProperty("doEngRecSpect",m_doEngRecSpect);
-  declareProperty("doEngNoiseClus",m_doEngNoiseClus);
-  declareProperty("doClusMoments",m_doClusMoments);
-  declareProperty("doRecoEfficiency",m_doRecoEfficiency);
-  declareProperty("useRecoEfficiency",m_useRecoEfficiency);
-  declareProperty("useGoodClus",m_useGoodClus);
-
-  declareProperty("etamin",m_etamin);
-  declareProperty("etamax",m_etamax);
-  declareProperty("netabin",m_netabin);
-
-  declareProperty("phimin",m_phimin);
-  declareProperty("phimax",m_phimax);
-  declareProperty("nphibin",m_nphibin);
-
-  declareProperty("logenermin",m_logenermin);
-  declareProperty("logenermax",m_logenermax);
-  declareProperty("nlogenerbin",m_nlogenerbin);
-
-  declareProperty("doCalibHitsValidation",m_doCalibHitsValidation);
-//   Only use clusters that contain at least m_truthPiEngFraction % of the true pion energy
-  declareProperty("usePionClustersOnly",m_usePionClusters);
-
   // dead material identifier description manager  
   m_caloDmDescrManager = CaloDmDescrManager::instance();
 
@@ -180,7 +104,7 @@ StatusCode GetLCSinglePionsPerf::initialize()
   m_dphi = (m_phimax - m_phimin)/m_nphibin;
   m_dlogener = (m_logenermax - m_logenermin)/m_nlogenerbin;
 
-  m_outputFile = new TFile(m_outputFileName.c_str(),"RECREATE");
+  m_outputFile = new TFile(m_outputFileName.value().c_str(),"RECREATE");
   m_outputFile->cd();
 
   // defining histograms
@@ -624,15 +548,15 @@ StatusCode GetLCSinglePionsPerf::finalize()
   m_outputFile->mkdir("Parameters");
   m_outputFile->cd("Parameters");
   TTree *tree = new TTree("ParamTree","ParamTree");
-  tree->Branch("m_netabin",&m_netabin,"m_netabin/I");
-  tree->Branch("m_etamin",&m_etamin,"m_etamin/F");
-  tree->Branch("m_etamax",&m_etamax,"m_etamax/F");
-  tree->Branch("m_nphibin",&m_nphibin,"m_nphibin/I");
-  tree->Branch("m_phimin",&m_phimin,"m_phimin/F");
-  tree->Branch("m_phimax",&m_phimax,"m_phimax/F");
-  tree->Branch("m_nlogenerbin",&m_nlogenerbin,"m_nlogenerbin/I");
-  tree->Branch("m_logenermin",&m_logenermin,"m_logenermin/F");
-  tree->Branch("m_logenermax",&m_logenermax,"m_logenermax/F");
+  tree->Branch("m_netabin",&m_netabin.value(),"m_netabin/I");
+  tree->Branch("m_etamin",&m_etamin.value(),"m_etamin/F");
+  tree->Branch("m_etamax",&m_etamax.value(),"m_etamax/F");
+  tree->Branch("m_nphibin",&m_nphibin.value(),"m_nphibin/I");
+  tree->Branch("m_phimin",&m_phimin.value(),"m_phimin/F");
+  tree->Branch("m_phimax",&m_phimax.value(),"m_phimax/F");
+  tree->Branch("m_nlogenerbin",&m_nlogenerbin.value(),"m_nlogenerbin/I");
+  tree->Branch("m_logenermin",&m_logenermin.value(),"m_logenermin/F");
+  tree->Branch("m_logenermax",&m_logenermax.value(),"m_logenermax/F");
   tree->Branch("m_nnormtype",&m_nnormtype,"m_nnormtype/I");
   tree->Branch("m_ncluscoll",&m_ncluscoll,"m_ncluscoll/I");
   tree->Branch("m_ntagcases",&m_ntagcases,"m_ntagcases/I");

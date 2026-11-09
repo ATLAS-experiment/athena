@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CaloLocalHadCalib/CaloReadLCJetEnergyScaleFile.h"
@@ -16,11 +16,7 @@
 
 CaloReadLCJetEnergyScaleFile::CaloReadLCJetEnergyScaleFile(const std::string & name, 
 							   ISvcLocator * pSvcLocator) : 
-  AthAlgorithm(name,pSvcLocator) {
-  declareProperty("LCJetEnergyScaleFileNames",m_LCJetEnergyScaleFileNames);
-  declareProperty("LCJetEnergyScaleJetCollectionNames",m_LCJetEnergyScaleJetCollectionNames);
-  declareProperty("CorrectionKey",m_key="JESCorrection");
-}
+  AthAlgorithm(name,pSvcLocator) {}
 
 
 CaloReadLCJetEnergyScaleFile::~CaloReadLCJetEnergyScaleFile() {}
@@ -155,8 +151,8 @@ StatusCode CaloReadLCJetEnergyScaleFile::initDataFromFile(std::vector<std::strin
 StatusCode CaloReadLCJetEnergyScaleFile::initialize() {
   ATH_MSG_INFO( " Building CaloLocalHadCoeff object "  );
   auto data = std::make_unique<CaloLocalHadCoeff>();
-  ATH_CHECK( initDataFromFile(m_LCJetEnergyScaleFileNames, m_LCJetEnergyScaleJetCollectionNames, *data) );
-  ATH_CHECK( detStore()->record(std::move(data), m_key, false) );
+  ATH_CHECK( initDataFromFile(m_LCJetEnergyScaleFileNames.value(), m_LCJetEnergyScaleJetCollectionNames.value(), *data) );
+  ATH_CHECK( detStore()->record(std::move(data), m_key.value(), false) );
   return StatusCode::SUCCESS;
 }
 

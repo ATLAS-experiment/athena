@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -27,6 +27,8 @@
 #include "CaloDetDescr/CaloSubdetNames.h"
 #include "CaloGeoHelpers/CaloPhiRange.h"
 #include "CaloIdentifier/CaloCell_ID.h"
+#include "CaloDetDescr/ICaloRecoMaterialTool.h"
+#include "CaloDetDescr/ICaloRecoSimpleGeomTool.h"
 
 #include <CxxUtils/checker_macros.h>
 #include <vector>
@@ -34,8 +36,6 @@
 class CaloDetDescrManager;
 class ICaloCoordinateTool;
 class IMessageSvc;
-class ICaloRecoMaterialTool;
-class ICaloRecoSimpleGeomTool;
 class ICaloSurfaceHelper;
 class TileDetDescrManager;
 class TileDetDescriptor;
@@ -135,7 +135,7 @@ private:
   // fill cashed surfaces
   void fill_tg_surfaces(const CaloDetDescrManager* calo_dd) const;
 
-  const TileDetDescrManager* m_tile_dd;
+  const TileDetDescrManager* m_tile_dd{nullptr};
 
   // cache the surfaces for TG builder
   // These are protected by calls to fill once
@@ -148,8 +148,14 @@ private:
   mutable std::once_flag m_fillOnce ATLAS_THREAD_SAFE;
 
   // Simplified geometry :
-  ToolHandle<ICaloRecoMaterialTool> m_lar_mat;
-  ToolHandle<ICaloRecoSimpleGeomTool> m_lar_simplegeom;
+  ToolHandle<ICaloRecoMaterialTool> m_lar_mat{ this,
+                                               "LArRecoMaterialTool",
+                                               "LArRecoMaterialTool",
+                                               "LAr reco material tool" };
+  ToolHandle<ICaloRecoSimpleGeomTool> m_lar_simplegeom{ this,
+                                                        "LarRecoSimpleGeometryTool",
+                                                        "LArRecoSimpleGeomTool",
+                                                        "LAr reco simple geometry tool" };
 
   // Defines the depths for DD and User surfaces :
   ToolHandle<CaloDepthTool> m_calodepth{ this,

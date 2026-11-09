@@ -16,10 +16,7 @@
 
 CaloReadLCWeightsFile::CaloReadLCWeightsFile(const std::string & name, 
 					     ISvcLocator * pSvcLocator) : 
-  AthAlgorithm(name,pSvcLocator) {
-  declareProperty("LCWeightFileName",m_LCWeightFileName);
-  declareProperty("CorrectionKey",m_key="HadWeights");
-}
+  AthAlgorithm(name,pSvcLocator) {}
 
 
 CaloReadLCWeightsFile::~CaloReadLCWeightsFile() {}
@@ -178,7 +175,7 @@ StatusCode CaloReadLCWeightsFile::initialize() {
   ATH_MSG_INFO( " Building CaloLocalHadCoeff object "  );
   auto data = std::make_unique<CaloLocalHadCoeff>();
   ATH_CHECK( initDataFromFile(m_LCWeightFileName, *data) );
-  ATH_CHECK( detStore()->record(std::move(data), m_key, false) );
+  ATH_CHECK( detStore()->record(std::move(data), m_key.value(), false) );
   return StatusCode::SUCCESS;
 }
 

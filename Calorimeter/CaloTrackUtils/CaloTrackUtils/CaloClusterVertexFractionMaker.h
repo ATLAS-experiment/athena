@@ -1,17 +1,21 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCLUSTERVERTEXFRACTIONMAKER_H
 #define CALOCLUSTERVERTEXFRACTIONMAKER_H
 
 #include "GaudiKernel/ToolHandle.h"
+#include "Gaudi/Property.h"
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
+#include "TrkExInterfaces/IExtrapolator.h"
 #include <string>
 #include <vector>
 
 class CaloClusterContainer;
-namespace Trk { class IExtrapolator; class Surface; }
+namespace Trk {
+  class Surface;
+}
 
 class CaloClusterVertexFractionMaker: public AthAlgTool, virtual public CaloClusterCollectionProcessor
 {
@@ -27,18 +31,22 @@ class CaloClusterVertexFractionMaker: public AthAlgTool, virtual public CaloClus
  private:
   static double calculateDPhi(double phi1, double phi2) ;
 
-    const double m_CALO_INNER_R;        // inner radius of the EM barrel envelope in mm
-    const double m_CALO_INNER_Z;
+    const double m_CALO_INNER_R{1450.}; // inner radius of the EM barrel envelope in mm
+    const double m_CALO_INNER_Z{3641.}; // millimeter
 //     const double INV_CALO_INNER_R; // the inverse for error calculation
-    double m_dRMatchMax;  // maximum value in dR for the track to be matched to the cluster, can be set by jobOptions
-    double m_dR2MatchMax; // m_dRMatchMax * m_dRMatchMax, this is used to avoid taking the square root all the time for each track and cluster
-    double m_maxClusterEta; // maximum |eta| of clusters for which a CVF is calculated
+    Gaudi::Property<double> m_dRMatchMax{this, "dRMatchMax", 0.1,
+      "Maximum dR for the track to be matched to the cluster"};  // maximum value in dR for the track to be matched to the cluster, can be set by jobOptions
+    double m_dR2MatchMax{0.}; // will be overwritten in initialize. m_dRMatchMax * m_dRMatchMax, this is used to avoid taking the square root all the time for each track and cluster
+    Gaudi::Property<double> m_maxClusterEta{this, "maxClusterEta", 2.5,
+      "Maximum |eta| of clusters for which a CVF is calculated"}; // maximum |eta| of clusters for which a CVF is calculated
 
     // Pre-configured extrapolator
-    ToolHandle< Trk::IExtrapolator > m_extrapolator;
+    ToolHandle< Trk::IExtrapolator > m_extrapolator{this, "Extrapolator",
+      "Trk::Extrapolator/AtlasExtrapolator", "Pre-configured extrapolator"};
 
     // name of VxContainer
-    std::string m_vxContainerName;
+    Gaudi::Property<std::string> m_vxContainerName{this, "VxContainerName",
+      "VxPrimaryCandidate", "Name of VxContainer"};
 
     std::unique_ptr<Trk::Surface> m_cylinderSurface_atCaloEntrance; // to extrapolate to clusters in barrel
     std::unique_ptr<Trk::Surface> m_discSurface_atCaloEntrance_positiveZ; // to extrapolate to clusters in endcap, this surface has to be created new for each cluster ...

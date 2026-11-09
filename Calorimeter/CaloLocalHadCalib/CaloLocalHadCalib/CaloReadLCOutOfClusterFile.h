@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -24,8 +24,8 @@ class CaloReadLCOutOfClusterFile : public AthAlgorithm
                               CaloLocalHadCoeff& data);
 
  private:
-  std::string m_key;
-  std::string m_LCOutOfClusterFileName;
+  Gaudi::Property<std::string> m_key{this, "CorrectionKey", "OOC", "DetStore key of the output CaloLocalHadCoeff object"};
+  Gaudi::Property<std::string> m_LCOutOfClusterFileName{this, "LCOutOfClusterFileName", "", "Name of the input LC out-of-cluster ROOT file"};
 };
 
 #endif

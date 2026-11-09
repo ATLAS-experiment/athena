@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------
@@ -44,14 +44,7 @@
 //###############################################################################
 GetLCWeights::GetLCWeights(const std::string& name, 
 			   ISvcLocator* pSvcLocator) 
-  : AthAlgorithm(name, pSvcLocator),
-    m_outputFile(nullptr),
-    m_clusterCollName("CaloTopoClusters"),
-    m_useInversionMethod(true),
-    m_NormalizationType("Lin"),
-    m_NormalizationTypeNumber(0),
-    m_ClassificationType("None"),
-    m_ClassificationTypeNumber(0)
+  : AthAlgorithm(name, pSvcLocator)
 {
  
   std::vector<Gaudi::Histo1DDef> dims(7);
@@ -129,26 +122,6 @@ GetLCWeights::GetLCWeights(const std::string& name,
   dims[0] = Gaudi::Histo1DDef("FCal3",22.5,23.5,1);
   dims[5] = Gaudi::Histo1DDef("log10(rho_cell (MeV/mm^3))",-3.8,1,14);
   mapinsert(dims);
-
-  // Dimensions to use for all samplings
-  declareProperty("SamplingDimensions",m_dimensionsmap);
-
-  // Name of output file to save histograms in
-  declareProperty("OutputFileName",m_outputFileName);  
-  
-  // Name of ClusterContainer to use
-  declareProperty("ClusterCollectionName",m_clusterCollName); 
-
-  // Names of CalibrationHitContainers to use
-  declareProperty("CalibrationHitContainerNames",m_CalibrationHitContainerNames); 
-  // Use Inversion Method
-  declareProperty("UseInversionMethod",m_useInversionMethod); 
-  // Normalization type "Const", "Lin", "Log", "NClus"
-  declareProperty("NormalizationType",m_NormalizationType); 
-  // Classification type "None" for single pion MC or 
-  //                     "ParticleID_EM" for ParticleID based em-type clusters  
-  //                     "ParticleID_HAD" for ParticleID based had-type clusters  
-  declareProperty("ClassificationType", m_ClassificationType);
 }
 
 //###############################################################################
@@ -161,7 +134,7 @@ GetLCWeights::~GetLCWeights()
 StatusCode GetLCWeights::initialize()
 {
 
-  m_outputFile = std::make_unique<TFile>(m_outputFileName.c_str(),"RECREATE");
+  m_outputFile = std::make_unique<TFile>(m_outputFileName.value().c_str(),"RECREATE");
   m_outputFile->cd();
 
   m_weight.resize(CaloSampling::Unknown);
@@ -199,7 +172,7 @@ StatusCode GetLCWeights::initialize()
     m_ClassificationTypeNumber = GetLCDefs::PARTICLEID_HAD;
   }
   else {
-    ATH_MSG_WARNING( " unknown classification type " << m_ClassificationType << " given! Using None instead" );
+    ATH_MSG_WARNING( " unknown classification type " << m_ClassificationType.value() << " given! Using None instead" );
     m_ClassificationTypeNumber = GetLCDefs::NONE;
   }
 
@@ -613,7 +586,7 @@ StatusCode GetLCWeights::execute(const EventContext& ctx)
 
 void GetLCWeights::mapinsert(const std::vector<Gaudi::Histo1DDef> & dims) {
   for (unsigned int i=0;i<dims.size();i++) {
-    m_dimensionsmap[dims[0].title()+":"+dims[i].title()] = dims[i];
+    m_dimensionsmap.value()[dims[0].title()+":"+dims[i].title()] = dims[i];
   }
 }
 
@@ -623,7 +596,7 @@ void GetLCWeights::mapparse() {
 
   int nsamp(-1);
 
-  for (const std::pair<const std::string, Gaudi::Histo1DDef>& p : m_dimensionsmap) {
+  for (const std::pair<const std::string, Gaudi::Histo1DDef>& p : m_dimensionsmap.value()) {
     std::string_view dimname = std::string_view(p.first).substr(0,p.first.find(':'));
     int theSampling(CaloSampling::Unknown);
     for (unsigned int jsamp = 0;jsamp< CaloSampling::Unknown; jsamp++) {

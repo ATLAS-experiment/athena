@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GaudiKernel/Service.h"
@@ -14,11 +14,7 @@
 CaloTowerBuilderToolBase::CaloTowerBuilderToolBase(const std::string& name,
     const std::string& type, const IInterface* parent)
   : AthAlgTool(name, type, parent)
-  , m_cellContainerName("AllCalo")
 {
-
-  // common properties
-  declareProperty("CellContainerName", m_cellContainerName);
   declareInterface<ICaloTowerBuilderToolBase>(this);
 }
 

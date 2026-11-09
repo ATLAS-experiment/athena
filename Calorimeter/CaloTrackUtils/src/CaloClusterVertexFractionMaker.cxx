@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // in contrary to CaloClusterVertexFractionMakerAthAlg this is a CaloClusterCollectionProcessor and not an Athena Algorithm
 #include "CaloTrackUtils/CaloClusterVertexFractionMaker.h"
 
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkSurfaces/CylinderSurface.h"
 #include "TrkSurfaces/DiscSurface.h"
 #include "TrkTrackLink/ITrackLink.h"
@@ -25,19 +24,8 @@
 
 
 CaloClusterVertexFractionMaker::CaloClusterVertexFractionMaker(const std::string& type, const std::string& name, const IInterface* parent)
-  : AthAlgTool(type, name, parent),
-  m_CALO_INNER_R(1450.), // millimeter
-  m_CALO_INNER_Z(3641.), // millimeter
-  m_dRMatchMax(0.1),
-  m_dR2MatchMax(0.), // will be overwritten in initialize
-  m_maxClusterEta(2.5),
-  m_extrapolator("Trk::Extrapolator/AtlasExtrapolator"),
-  m_vxContainerName("VxPrimaryCandidate")
+  : AthAlgTool(type, name, parent)
 {
-  declareProperty ( "Extrapolator", m_extrapolator );
-  declareProperty ( "VxContainerName", m_vxContainerName );
-  declareProperty ( "dRMatchMax", m_dRMatchMax );
-  declareProperty ( "maxClusterEta", m_maxClusterEta );
 }
 
 CaloClusterVertexFractionMaker::~CaloClusterVertexFractionMaker()
@@ -48,7 +36,7 @@ CaloClusterVertexFractionMaker::~CaloClusterVertexFractionMaker()
 StatusCode CaloClusterVertexFractionMaker::initialize()
 {
   ATH_MSG_INFO( "Initializing " << name()  );
-  ATH_MSG_INFO( "Only considering clusters with |eta| < " << m_maxClusterEta << "\tdRMatchMax Cluster-Track = " << m_dRMatchMax  );
+  ATH_MSG_INFO( "Only considering clusters with |eta| < " << m_maxClusterEta.value() << "\tdRMatchMax Cluster-Track = " << m_dRMatchMax.value()  );
 
   m_dR2MatchMax = m_dRMatchMax*m_dRMatchMax;
 
@@ -74,15 +62,15 @@ CaloClusterVertexFractionMaker::execute(const EventContext& ctx,
                                         xAOD::CaloClusterContainer* caloClusterContainer) const
 {
   const VxContainer* primcontainer(nullptr);
-  if ( evtStore()->contains<VxContainer> ( m_vxContainerName ) )
+  if ( evtStore()->contains<VxContainer> ( m_vxContainerName.value() ) )
   {
-    if ( evtStore()->retrieve ( primcontainer, m_vxContainerName ).isFailure() )
+    if ( evtStore()->retrieve ( primcontainer, m_vxContainerName.value() ).isFailure() )
     {
-      ATH_MSG_WARNING( "Could not retrieve collection " << m_vxContainerName << " in StoreGate, but contains<> says it is there."  );
+      ATH_MSG_WARNING( "Could not retrieve collection " << m_vxContainerName.value() << " in StoreGate, but contains<> says it is there."  );
       return StatusCode::FAILURE;
     }
   } else {
-    ATH_MSG_WARNING( "No collection " << m_vxContainerName << " in StoreGate."  );
+    ATH_MSG_WARNING( "No collection " << m_vxContainerName.value() << " in StoreGate."  );
     return StatusCode::FAILURE; 
   }
 

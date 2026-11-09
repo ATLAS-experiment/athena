@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOLOCALHADCALIB_GETLCDEADMATERIALTREE_H
@@ -20,6 +20,8 @@
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "Gaudi/Property.h"
+#include "CLHEP/Units/SystemOfUnits.h"
 #include <vector>
 #include <string>
 #include "CxxUtils/checker_macros.h"
@@ -46,56 +48,56 @@ class ATLAS_NOT_THREAD_SAFE GetLCDeadMaterialTree : public AthAlgorithm {
      *
      * File contains binning info for cluster's emfrac, log10ener, log10lambda and eta 
      * to recover energy losses in specific dead material zones */
-    std::string m_HadDMCoeffInitFile;
+    Gaudi::Property<std::string> m_HadDMCoeffInitFile{this, "HadDMCoeffInitFile", "CaloHadDMCoeff_init_v2.txt", "Name of text file with dead material zone description"};
 
     /**
      * @brief Output tree
      *
      * Output tree to fill and save. */
-    TTree *m_outputTree;
+    TTree *m_outputTree{nullptr};
 
     /**
      * @brief Name of the output file to save tree in.
      *
      * Use this property to set the name of the output file containing the
      * DM data tree. */
-    std::string m_outputFileName;
+    Gaudi::Property<std::string> m_outputFileName{this, "OutputFileName", "DeadMaterialTree.root", "Name of the output file to save tree in"};
 
     /**
      * @brief Output file to save tree in.
      *
      * Internal variable pointing to the output file. */
-    TFile * m_outputFile;
+    TFile * m_outputFile{nullptr};
 
     /**
      * @brief Name of the uncalibrated CaloClusterContainer to use. */
-    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterCollName;
+    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterCollName{this, "ClusterCollectionName", "CaloTopoClusters", "Name of the uncalibrated CaloClusterContainer to use"};
 
     /**
      * @brief Name of the calibrated CaloClusterContainer to use. */
-    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterCollNameCalib;
+    SG::ReadHandleKey<xAOD::CaloClusterContainer> m_clusterCollNameCalib{this, "ClusterCollectionNameCalib", "", "Name of the calibrated CaloClusterContainer to use"};
 
     /**
      * @brief Collection of dead material correction coeffitients */
-    CaloLocalHadCoeff *m_HadDMCoeff;
+    CaloLocalHadCoeff *m_HadDMCoeff{nullptr};
 
     /**
      * @brief data to save into the tree */
-    CaloHadDMCoeffData *m_data;
+    CaloHadDMCoeffData *m_data{nullptr};
 
     /**
      * @brief save additional cluster info from calibrated collections */
-    bool m_doSaveCalibClusInfo;
+    Gaudi::Property<bool> m_doSaveCalibClusInfo{this, "doSaveCalibClusInfo", false, "Save additional cluster info from calibrated collections"};
 
 
-    double m_energyMin;
+    double m_energyMin{200*CLHEP::MeV};
     //double m_energyMax;
 
     typedef std::pair<std::string,xAOD::CaloCluster::MomentType> moment_name_pair;
     typedef std::vector<moment_name_pair> moment_name_vector;
     std::vector<xAOD::CaloCluster::MomentType> m_momentForDMArea;
 
-    const CaloCell_ID* m_calo_id;
+    const CaloCell_ID* m_calo_id{nullptr};
 };
 
 #endif // CALOLOCALHADCALIB_GETLCDEADMATERIALTREE_H
