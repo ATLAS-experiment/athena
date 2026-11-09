@@ -29,10 +29,46 @@ StatusCode ChargedHadronSubtractionTool::initialize()
   ATH_CHECK(m_trkVtxAssoc_key.initialize(m_useTrackToVertexTool && !m_ignoreVertex));
   ATH_CHECK(m_vertexContainer_key.initialize(!m_ignoreVertex));
 
+  ATH_CHECK(m_matchedToPVKeys.initialize());
+  ATH_CHECK(m_matchedToPUsidebandKeys.initialize());
+  ATH_CHECK(m_matchingPVsKeys.initialize());
+  ATH_CHECK(m_matchingPUsidebandKeys.initialize());
+
+
   return StatusCode::SUCCESS;
 }
 
-StatusCode ChargedHadronSubtractionTool::process_impl(xAOD::IParticleContainer *cont) const
+StatusCode ChargedHadronSubtractionTool::configure_decor_handle_keys()
+{
+  if (!m_byVertex) {
+
+    ATH_CHECK(m_matchedToPVKeys.assign(
+        m_outputContainer,
+        m_outputChargedContainer,
+        m_outputNeutralContainer));
+
+    ATH_CHECK(m_matchedToPUsidebandKeys.assign(
+        m_outputContainer,
+        m_outputChargedContainer,
+        m_outputNeutralContainer));
+
+  } else {
+
+    ATH_CHECK(m_matchingPVsKeys.assign(
+        m_outputContainer,
+        m_outputChargedContainer,
+        m_outputNeutralContainer));
+
+    ATH_CHECK(m_matchingPUsidebandKeys.assign(
+        m_outputContainer,
+        m_outputChargedContainer,
+        m_outputNeutralContainer));
+  }
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode ChargedHadronSubtractionTool::process_impl(xAOD::IParticleContainer *cont, const EventContext& ctx) const
 {
 
   // Type-checking happens in the JetConstituentModifierBase class
@@ -49,11 +85,12 @@ StatusCode ChargedHadronSubtractionTool::process_impl(xAOD::IParticleContainer *
       return StatusCode::FAILURE;
     }
 
-    return !m_byVertex ? matchToPrimaryVertex<xAOD::FlowElementContainer, xAOD::FlowElement>(*feCont) : matchByPrimaryVertex<xAOD::FlowElementContainer, xAOD::FlowElement>(*feCont);
+    return !m_byVertex ? matchToPrimaryVertex<xAOD::FlowElementContainer, xAOD::FlowElement>(*feCont, ctx) : matchByPrimaryVertex<xAOD::FlowElementContainer, xAOD::FlowElement>(*feCont, ctx);
   }
   xAOD::PFOContainer *pfoCont = static_cast<xAOD::PFOContainer *>(cont);
-  return !m_byVertex ? matchToPrimaryVertex<xAOD::PFOContainer, xAOD::PFO>(*pfoCont) : matchByPrimaryVertex<xAOD::PFOContainer, xAOD::PFO>(*pfoCont);
+  return !m_byVertex ? matchToPrimaryVertex<xAOD::PFOContainer, xAOD::PFO>(*pfoCont, ctx) : matchByPrimaryVertex<xAOD::PFOContainer, xAOD::PFO>(*pfoCont, ctx);
 }
+
 
 const xAOD::Vertex *ChargedHadronSubtractionTool::getPrimaryVertex() const
 {

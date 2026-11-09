@@ -21,7 +21,7 @@
 #include "AsgTools/AsgTool.h" 
 #include <string>
 #include "StoreGate/ReadDecorHandleKey.h"
-
+#include "AthContainers/CurrentContext.h"
 
 class ClusterAtMLScaleTool : public JetConstituentModifierBase{
   ASG_TOOL_CLASS(ClusterAtMLScaleTool, IJetConstituentModifier)
@@ -40,7 +40,7 @@ class ClusterAtMLScaleTool : public JetConstituentModifierBase{
   SG::ReadDecorHandleKey<xAOD::CaloClusterContainer> m_clusterMLCorrectedEnergyKey{
     this,
     "ClusterMLCorrectedEnergyDecorationKey",
-    "CaloCalTopoClusters.clusterE_ML",
+    "clusterE_ML",
     "Decoration storing ML-corrected cluster energy"
   };
 
@@ -53,8 +53,9 @@ class ClusterAtMLScaleTool : public JetConstituentModifierBase{
   };
 
   // Implement the correction
-  virtual StatusCode process_impl(xAOD::IParticleContainer* cont) const override; 
-  StatusCode setClustersToMLScale(xAOD::CaloClusterContainer& cont) const;
+  virtual StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const override; 
+  virtual StatusCode configure_decor_handle_keys() override final;
+  StatusCode setClustersToMLScale(xAOD::CaloClusterContainer& cont, const EventContext& ctx) const;
 
 
   template <typename T>

@@ -17,8 +17,9 @@
 
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODBase/IParticleContainer.h"
-#include "xAODCaloEvent/CaloClusterContainer.h"
 
+#include "AthContainers/CurrentContext.h"
+#include "JetRecTools/WriteDecorHandleTriplet.h"
 #include "AsgTools/AsgTool.h" 
 #include "JetRecTools/JetConstituentModifierBase.h"
 #include "AsgDataHandles/ReadHandleKey.h"
@@ -38,7 +39,8 @@ public:
 
 private:
   // Implement the correction
-  StatusCode process_impl(xAOD::IParticleContainer* cont) const; 
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const; 
+  StatusCode configure_decor_handle_keys() override final;
 
    /// Handle to EventInfo. This is used to get the evt&run number to set the Ghost area random seeds.
   SG::ReadHandleKey<xAOD::EventInfo> m_eventinfokey{"EventInfo"};
@@ -62,6 +64,13 @@ private:
   std::unique_ptr<TH1D> m_hist=nullptr;
   std::unique_ptr<TH2D> m_hist2D=nullptr;
 
+  WriteDecorHandleKeyTriplet<float>
+    m_csWeightKeys{
+      this,
+      "CSWeightKey",
+      "CSWeight",
+      "CSWeight decoration"
+    };
 
   
 };

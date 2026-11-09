@@ -13,12 +13,12 @@
 #include "xAODPFlow/FlowElement.h"
 #include "xAODPFlow/TrackCaloCluster.h"
 
-
 using namespace std;
 
 namespace {
   const static SG::ConstAccessor<float> acc_clambda("CENTER_LAMBDA");
 }
+
 
 SoftKillerWeightTool::SoftKillerWeightTool(const std::string& name) : JetConstituentModifierBase(name)
                                                                     , m_lambdaCalDivide(317)
@@ -67,34 +67,55 @@ StatusCode SoftKillerWeightTool::initialize() {
       return StatusCode::FAILURE;
     }
   }
+
+  ATH_CHECK(m_softKillerWeightKeys.initialize());
+  
+
   return StatusCode::SUCCESS;
 }
 
-StatusCode SoftKillerWeightTool::process_impl(xAOD::IParticleContainer* cont) const {
-  const static SG::Accessor<float> weightAcc("SoftKillerWeight"); // Handle for PU weighting here
+
+StatusCode SoftKillerWeightTool::configure_decor_handle_keys() {
+
+  ATH_CHECK(m_softKillerWeightKeys.assign(
+      m_outputContainer,
+      m_outputChargedContainer,
+      m_outputNeutralContainer));
+
+
+  return StatusCode::SUCCESS;
+}
+
+StatusCode SoftKillerWeightTool::process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const {
   double minPt(0.), minPtECal(0.), minPtHCal(0.);
   if(!m_isCaloSplit) {
     minPt = getSoftKillerMinPt(*cont);
     ATH_MSG_VERBOSE("For current event, minpt = " << minPt);
   }
   else {
-    std::pair<double,double> minPt_split = getSoftKillerMinPtSplit(*cont);
+    std::pair<double,double> minPt_split = getSoftKillerMinPtSplit(*cont, ctx);
     minPtECal = minPt_split.first;
     minPtHCal = minPt_split.second;
     ATH_MSG_VERBOSE("For current event, minpt = " << minPtECal << " (ECAL), "
 		    << minPtHCal << " (HCAL)");
   }
 
+
+  auto softKillerWeightHandle = m_softKillerWeightKeys.makeHandles(m_inputType, ctx);
+
+
   for(xAOD::IParticle* part : *cont) {
     float w = 1;
     if(!m_isCaloSplit) w = calculateWeight(*part, minPt);
-    else w = calculateSplitWeight(*part, minPtECal, minPtHCal);
-    // use parent class's type-sensitive setter
-    ATH_CHECK( setEnergyPt(part, part->e()*w, part->pt()*w,&weightAcc) );
+    else {
+      float center_lambda = acc_clambda.isAvailable(*part) ? acc_clambda(*part) : 0.;
+      w = calculateSplitWeight(*part, minPtECal, minPtHCal, center_lambda);
+    };
+    softKillerWeightHandle(*part) = w;
+    ATH_CHECK( setEnergyPt(part, part->e()*w, part->pt()*w) );
   }
   return StatusCode::SUCCESS;
 }
-
 
 // Finds the pT cut for this event based on the SK results
 // The partSK collection contains all particles that aren't cut, so particles below 
@@ -153,11 +174,12 @@ double SoftKillerWeightTool::getSoftKillerMinPt(xAOD::IParticleContainer& cont) 
   return findMinPt(partSK);
 }
 
-std::pair<double,double> SoftKillerWeightTool::getSoftKillerMinPtSplit(xAOD::IParticleContainer& cont) const {
+std::pair<double,double> SoftKillerWeightTool::getSoftKillerMinPtSplit(xAOD::IParticleContainer& cont, const EventContext& /*ctx*/) const {
   vector<fastjet::PseudoJet> partPJ_ECal;
   partPJ_ECal.reserve(cont.size());
   vector<fastjet::PseudoJet> partPJ_HCal;
   partPJ_HCal.reserve(cont.size());
+
 
   for(xAOD::IParticle* part : cont){
     // Only use positive E
@@ -209,10 +231,10 @@ float SoftKillerWeightTool::calculateWeight(xAOD::IParticle& part, double minPt)
 }
 
 
-float SoftKillerWeightTool::calculateSplitWeight(xAOD::IParticle& part, double minPtECal, double minPtHCal) const{
+float SoftKillerWeightTool::calculateSplitWeight(xAOD::IParticle& part, double minPtECal, double minPtHCal, float center_lambda) const{
   if( abs(part.eta()) < m_rapminApplied || abs(part.eta()) > m_rapmaxApplied) return 1;
-  double center_lambda = acc_clambda.isAvailable(part) ? acc_clambda(part) : 0.;
 
+  ATH_MSG_INFO("Center lambda for part " << part.index() << " = " << center_lambda);
   //Make a separate pT cut for the ECal and HCal
   if( center_lambda < m_lambdaCalDivide && part.pt() < minPtECal) return 0;
   if( part.pt() < minPtHCal) return 0;

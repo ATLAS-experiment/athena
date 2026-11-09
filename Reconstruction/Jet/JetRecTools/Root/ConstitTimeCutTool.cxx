@@ -4,11 +4,10 @@
 
 #include <vector>
 #include "JetRecTools/ConstitTimeCutTool.h"
-#include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODPFlow/PFOContainer.h"
-#include "xAODPFlow/FlowElementContainer.h"
 #include "xAODPFlow/PFODefs.h"
 #include "PFlowUtils/FEHelpers.h"
+#include "AsgDataHandles/ReadDecorHandle.h"
 
 using namespace std;
 
@@ -37,23 +36,36 @@ StatusCode ConstitTimeCutTool::initialize() {
                     << m_inputType);
       return StatusCode::FAILURE;
     }
+
+
+    if (m_inputType == xAOD::Type::CaloCluster) {
+      ATH_CHECK(m_clusterLarQKey.initialize());
+      ATH_CHECK(m_clusterLambdaKey.initialize());
+    }
+
+    if (m_inputType == xAOD::Type::FlowElement) {
+      ATH_CHECK(m_feTimingKey.initialize());
+      ATH_CHECK(m_feLarQKey.initialize());
+      ATH_CHECK(m_feLambdaKey.initialize());
+    }
+
   }
   return StatusCode::SUCCESS;
 }
 
 // Determine the appropriate input type and extract the timing, then
 // call the applyTimingCut method
-StatusCode ConstitTimeCutTool::process_impl(xAOD::IParticleContainer* cont) const {
+StatusCode ConstitTimeCutTool::process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const {
   switch(m_inputType) {
   case xAOD::Type::CaloCluster:
     {
      xAOD::CaloClusterContainer* clusters = static_cast<xAOD::CaloClusterContainer*> (cont);
-     const static SG::ConstAccessor<float> acc_larq("AVG_LAR_Q");
-     const static SG::ConstAccessor<float> acc_clambda("CENTER_LAMBDA");
+     SG::ReadDecorHandle<xAOD::CaloClusterContainer, float> larQ_handle(m_clusterLarQKey, ctx);
+     SG::ReadDecorHandle<xAOD::CaloClusterContainer, float> lambda_handle(m_clusterLambdaKey, ctx);
 
      for(xAOD::CaloCluster* cl : *clusters) {
         //quality is on [0,2^16-1] scale
-        ATH_CHECK( applyTimingCut(cl, cl->time(), acc_larq(*cl)/65535, acc_clambda(*cl)));
+        ATH_CHECK( applyTimingCut(cl, cl->time(), larQ_handle(*cl)/65535, lambda_handle(*cl)));
       }
     }
     break;
@@ -86,14 +98,16 @@ StatusCode ConstitTimeCutTool::process_impl(xAOD::IParticleContainer* cont) cons
         ATH_MSG_ERROR("ConstitTimeCutTool received FlowElements that aren't PFOs, this isn't supported!");
         return StatusCode::FAILURE;
       }
+
+      SG::ReadDecorHandle<xAOD::FlowElementContainer, float> timing_handle(m_feTimingKey, ctx);
+      SG::ReadDecorHandle<xAOD::FlowElementContainer, float> larQ_handle(m_feLarQKey, ctx);
+      SG::ReadDecorHandle<xAOD::FlowElementContainer, float> lambda_handle(m_feLambdaKey, ctx);
+
       for(xAOD::FlowElement* fe : *fes){
         if(!fe->isCharged() || m_applyToChargedPFO){
-          const static SG::ConstAccessor<float> acc_timing("TIMING");
-          const static SG::ConstAccessor<float> acc_larq("AVG_LAR_Q");
-          const static SG::ConstAccessor<float> acc_clambda("CENTER_LAMBDA");
-          float time = acc_timing(*fe);
-          float quality = acc_larq(*fe);
-          float lambda_center = acc_clambda(*fe);
+          float time = timing_handle(*fe);
+          float quality = larQ_handle(*fe);
+          float lambda_center = lambda_handle(*fe);
           ATH_CHECK( applyTimingCut(fe, time, quality/65535, lambda_center) );
         }
       }

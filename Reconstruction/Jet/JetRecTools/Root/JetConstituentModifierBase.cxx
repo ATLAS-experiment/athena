@@ -11,6 +11,8 @@
 #include "xAODPFlow/FlowElement.h"
 #include "xAODPFlow/TrackCaloCluster.h"
 
+#include <exception>
+
 JetConstituentModifierBase::JetConstituentModifierBase(const std::string & name): asg::AsgTool(name) {
 #ifndef XAOD_STANDALONE  
   declareInterface<IJetConstituentModifier>(this);
@@ -20,7 +22,7 @@ JetConstituentModifierBase::JetConstituentModifierBase(const std::string & name)
   declareProperty("ApplyToNeutralPFO", m_applyToNeutralPFO);
 }
 
-StatusCode JetConstituentModifierBase::process(xAOD::IParticleContainer* cont) const
+StatusCode JetConstituentModifierBase::process(xAOD::IParticleContainer* cont, const EventContext& ctx) const
 {
   // Test that we are operating on the type of object that
   // we will be writing out.
@@ -32,7 +34,7 @@ StatusCode JetConstituentModifierBase::process(xAOD::IParticleContainer* cont) c
     return StatusCode::FAILURE;
   }
 
-  ATH_CHECK(process_impl(cont));
+  ATH_CHECK(process_impl(cont, ctx));
 
   return StatusCode::SUCCESS;
 }
@@ -58,8 +60,7 @@ StatusCode JetConstituentModifierBase::setEtaPhi(xAOD::IParticle* obj, float eta
   return StatusCode::SUCCESS;
 }
 
-StatusCode JetConstituentModifierBase::setEnergyPt(xAOD::IParticle* obj, float e, float pt,
-                                                   const SG::Accessor<float>* weightAcc) const
+StatusCode JetConstituentModifierBase::setEnergyPt(xAOD::IParticle* obj, float e, float pt) const
 {
   switch(m_inputType) {
   case xAOD::Type::CaloCluster:
@@ -67,7 +68,6 @@ StatusCode JetConstituentModifierBase::setEnergyPt(xAOD::IParticle* obj, float e
       xAOD::CaloCluster* clus = static_cast<xAOD::CaloCluster*>(obj);
       // Clusters get pt via the energy
       // This currently leaves the mass unaltered.
-      if(weightAcc) (*weightAcc)(*clus) = clus->calE() > 0. ? e / clus->calE() : 0.;
       clus->setCalE(e);
     }
     break;
@@ -76,7 +76,6 @@ StatusCode JetConstituentModifierBase::setEnergyPt(xAOD::IParticle* obj, float e
       xAOD::PFO* pfo = static_cast<xAOD::PFO*>(obj);
       if( (m_applyToChargedPFO && pfo->isCharged()) || 
           (m_applyToNeutralPFO && !pfo->isCharged()) ) {
-        if(weightAcc) (*weightAcc)(*pfo) = pfo->pt() > 0. ? pt / pfo->pt() : 0.;
         // KTJ: Temporary fix
         // Defeats the purpose, but we need to use this to reset the 4-vec cache
         pfo->setP4(pt, pfo->eta(), pfo->phi());
@@ -88,7 +87,6 @@ StatusCode JetConstituentModifierBase::setEnergyPt(xAOD::IParticle* obj, float e
       xAOD::FlowElement* pfo = static_cast<xAOD::FlowElement*>(obj);
       if( (m_applyToChargedPFO && pfo->isCharged()) || 
           (m_applyToNeutralPFO && !pfo->isCharged()) ) {
-        if(weightAcc) (*weightAcc)(*pfo) = pfo->pt() > 0. ? pt / pfo->pt() : 0.;
         pfo->setP4(pt, pfo->eta(), pfo->phi(), 0.);
       }
     }
@@ -97,7 +95,6 @@ StatusCode JetConstituentModifierBase::setEnergyPt(xAOD::IParticle* obj, float e
     {
       xAOD::TrackCaloCluster* tcc = static_cast<xAOD::TrackCaloCluster*>(obj);
       if( tcc->taste() != 0) {
-        if(weightAcc) (*weightAcc)(*tcc) = tcc->pt() > 0. ? pt / tcc->pt() : 0.;
         tcc->setParameters(pt, tcc->eta(), tcc->phi(), tcc->m(), xAOD::TrackCaloCluster::Taste(tcc->taste()), tcc->trackParticleLink(), tcc->caloClusterLinks());
       }
     }
@@ -110,14 +107,12 @@ StatusCode JetConstituentModifierBase::setEnergyPt(xAOD::IParticle* obj, float e
   return StatusCode::SUCCESS;
 }
 
-StatusCode JetConstituentModifierBase::setP4(xAOD::IParticle* obj, const xAOD::JetFourMom_t& p4,
-                                             const SG::Accessor<float>* weightAcc) const {
+StatusCode JetConstituentModifierBase::setP4(xAOD::IParticle* obj, const xAOD::JetFourMom_t& p4) const {
   switch(m_inputType) {
   case xAOD::Type::CaloCluster:
     {
       xAOD::CaloCluster* clus = static_cast<xAOD::CaloCluster*>(obj);
       // This currently leaves the mass unaltered
-      if(weightAcc) (*weightAcc)(*clus) = clus->calE() > 0. ? p4.e() / clus->calE() : 0.;
       clus->setCalE(p4.e());
       clus->setCalEta(p4.eta());
       clus->setCalPhi(p4.phi());
@@ -129,7 +124,6 @@ StatusCode JetConstituentModifierBase::setP4(xAOD::IParticle* obj, const xAOD::J
       // The PFO setter defaults to m=0
       if( (m_applyToChargedPFO && pfo->isCharged()) || 
           (m_applyToNeutralPFO && !pfo->isCharged()) ) {
-        if(weightAcc) (*weightAcc)(*pfo) = pfo->pt() > 0. ? p4.pt() / pfo->pt() : 0.;
         pfo->setP4(p4.pt(),p4.eta(),p4.phi(),p4.mass());
       }
     }
@@ -139,7 +133,6 @@ StatusCode JetConstituentModifierBase::setP4(xAOD::IParticle* obj, const xAOD::J
       xAOD::FlowElement* pfo = static_cast<xAOD::FlowElement*>(obj);
       if( (m_applyToChargedPFO && pfo->isCharged()) || 
           (m_applyToNeutralPFO && !pfo->isCharged()) ) {
-        if(weightAcc) (*weightAcc)(*pfo) = pfo->pt() > 0. ? p4.pt() / pfo->pt() : 0.;
         pfo->setP4(p4.pt(),p4.eta(),p4.phi(),p4.mass());
       }
     }
@@ -148,7 +141,6 @@ StatusCode JetConstituentModifierBase::setP4(xAOD::IParticle* obj, const xAOD::J
     {
       xAOD::TrackCaloCluster* tcc = static_cast<xAOD::TrackCaloCluster*>(obj);
       if( tcc->taste() != 0) {
-              if(weightAcc) (*weightAcc)(*tcc) = tcc->pt() > 0. ? p4.pt() / tcc->pt() : 0.;
         tcc->setParameters(p4.pt(), p4.eta(), p4.phi(), p4.mass(), xAOD::TrackCaloCluster::Taste(tcc->taste()), tcc->trackParticleLink(), tcc->caloClusterLinks());
       }
       break;
@@ -160,4 +152,79 @@ StatusCode JetConstituentModifierBase::setP4(xAOD::IParticle* obj, const xAOD::J
     return StatusCode::FAILURE;
   }
   return StatusCode::SUCCESS;
+}
+
+
+float JetConstituentModifierBase::getCorrectionFactor(xAOD::IParticle* obj, const float& corrected_energy, const float& corrected_pt) const {
+  float factor = 0.;
+  switch(m_inputType) {
+  case xAOD::Type::CaloCluster:
+    {
+      xAOD::CaloCluster* clus = static_cast<xAOD::CaloCluster*>(obj);
+      factor = clus->calE() > 0. ? corrected_energy / clus->calE() : 0.;
+    }
+    break;
+  case xAOD::Type::ParticleFlow:
+    {
+      xAOD::PFO* pfo = static_cast<xAOD::PFO*>(obj);
+      factor = pfo->pt() > 0. ? corrected_pt / pfo->pt() : 0.;
+    }
+    break;
+  case xAOD::Type::FlowElement:
+    {
+      xAOD::FlowElement* pfo = static_cast<xAOD::FlowElement*>(obj);
+      factor = pfo->pt() > 0. ? corrected_pt / pfo->pt() : 0.;
+    }
+    break;
+  case xAOD::Type::TrackCaloCluster:
+    {
+      xAOD::TrackCaloCluster* tcc = static_cast<xAOD::TrackCaloCluster*>(obj);
+      factor = tcc->pt() > 0. ? corrected_pt / tcc->pt() : 0.;
+    }
+    break;
+  default:
+    ATH_MSG_ERROR("No specialisation for object type " << m_inputType);
+  }
+  return factor;
+}
+
+float JetConstituentModifierBase::getCorrectionFactor(xAOD::IParticle* obj, const xAOD::JetFourMom_t& corrected_p4) const {
+  float weight = 0.;
+  switch(m_inputType) {
+  case xAOD::Type::CaloCluster:
+    {
+      xAOD::CaloCluster* clus = static_cast<xAOD::CaloCluster*>(obj);
+      weight = clus->calE() > 0. ? corrected_p4.e() / clus->calE() : 0.;
+    }
+    break;
+  case xAOD::Type::ParticleFlow:
+    {
+      xAOD::PFO* pfo = static_cast<xAOD::PFO*>(obj);
+      // The PFO setter defaults to m=0
+      if( (m_applyToChargedPFO && pfo->isCharged()) || (m_applyToNeutralPFO && !pfo->isCharged()) ) {
+        weight = pfo->pt() > 0. ? corrected_p4.pt() / pfo->pt() : 0.;
+      }
+    }
+    break;
+  case xAOD::Type::FlowElement:
+    {
+      xAOD::FlowElement* pfo = static_cast<xAOD::FlowElement*>(obj);
+      if( (m_applyToChargedPFO && pfo->isCharged()) || (m_applyToNeutralPFO && !pfo->isCharged()) ) {
+        weight = pfo->pt() > 0. ? corrected_p4.pt() / pfo->pt() : 0.;
+      }
+    }
+    break;
+  case xAOD::Type::TrackCaloCluster:
+    {
+      xAOD::TrackCaloCluster* tcc = static_cast<xAOD::TrackCaloCluster*>(obj);
+      if( tcc->taste() != 0) {
+        weight = tcc->pt() > 0. ? corrected_p4.pt() / tcc->pt() : 0.;
+      }
+      break;
+    }
+
+  default:
+    throw std::runtime_error("No specialisation for object type " + std::to_string(m_inputType));
+  }
+  return weight;
 }

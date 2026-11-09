@@ -32,7 +32,7 @@ StatusCode ClusterAtEMScaleTool::setClustersToEMScale(xAOD::CaloClusterContainer
   return StatusCode::SUCCESS;
 }
 
-StatusCode ClusterAtEMScaleTool::process_impl(xAOD::IParticleContainer* cont) const {
+StatusCode ClusterAtEMScaleTool::process_impl(xAOD::IParticleContainer* cont, const EventContext& /*ctx*/) const {
   xAOD::CaloClusterContainer* clust = dynamic_cast<xAOD::CaloClusterContainer*> (cont); // Get CaloCluster container
   if(clust) return setClustersToEMScale(*clust);
   return StatusCode::FAILURE;

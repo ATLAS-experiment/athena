@@ -15,6 +15,7 @@
 #include "xAODBase/IParticleContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "xAODCaloEvent/CaloCluster.h"
+#include "AthContainers/CurrentContext.h"
 
 #include <string>
 
@@ -31,7 +32,7 @@ class ClusterAtEMScaleTool : public JetConstituentModifierBase{
   
   private:
   // Implement the correction
-  StatusCode process_impl(xAOD::IParticleContainer* cont) const; 
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const; 
   StatusCode setClustersToEMScale(xAOD::CaloClusterContainer& cont) const;
 
 

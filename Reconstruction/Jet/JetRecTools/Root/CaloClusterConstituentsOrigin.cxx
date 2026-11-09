@@ -24,10 +24,10 @@ StatusCode CaloClusterConstituentsOrigin::initialize() {
   return StatusCode::SUCCESS;
 }
 
-StatusCode CaloClusterConstituentsOrigin::process_impl(xAOD::IParticleContainer* cont) const {
+StatusCode CaloClusterConstituentsOrigin::process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const {
    xAOD::CaloClusterContainer* clust = static_cast<xAOD::CaloClusterContainer*> (cont); // Get CaloCluster container
 
-   auto handle = SG::makeHandle(m_readVertexContainer_key);
+   auto handle = SG::makeHandle(m_readVertexContainer_key, ctx);
    ATH_CHECK(handle.isValid());
    //if(not handle.isValid()) {
    //  // Exit silently if we did not find a designated primary vertex

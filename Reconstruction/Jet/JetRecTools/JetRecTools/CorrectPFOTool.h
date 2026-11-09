@@ -25,8 +25,10 @@
 #include "xAODPFlow/FlowElementContainer.h"
 #include "AsgTools/ToolHandle.h"
 #include "PFlowUtils/IWeightPFOTool.h"
+#include "AthContainers/CurrentContext.h"
 
 #include "AsgDataHandles/ReadHandleKey.h"
+#include "AsgDataHandles/ReadDecorHandleKey.h"
 
 
 class CorrectPFOTool : public JetConstituentModifierBase{
@@ -42,14 +44,15 @@ class CorrectPFOTool : public JetConstituentModifierBase{
  private:
 
   // Implement the correction
-  StatusCode process_impl(xAOD::IParticleContainer* cont) const override final;
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const override final;
+  StatusCode configure_decor_handle_keys() override final;
   // Type-specific operation
-  StatusCode correctPFO(xAOD::PFOContainer& cont) const;
-  StatusCode correctPFO(xAOD::FlowElementContainer& cont) const;
-  StatusCode correctPFOByVertex(xAOD::PFOContainer& cont) const;
-  StatusCode correctPFOByVertex(xAOD::FlowElementContainer& cont) const;
+  StatusCode correctPFO(xAOD::PFOContainer& cont, const EventContext& ctx) const;
+  StatusCode correctPFO(xAOD::FlowElementContainer& cont, const EventContext& ctx) const;
+  StatusCode correctPFOByVertex(xAOD::PFOContainer& cont, const EventContext& ctx) const;
+  StatusCode correctPFOByVertex(xAOD::FlowElementContainer& cont, const EventContext& ctx) const;
 
-  const xAOD::Vertex* getPrimaryVertex() const;
+  const xAOD::Vertex* getPrimaryVertex(const EventContext& ctx) const;
   StatusCode applyNeutralCorrection(xAOD::PFO& pfo, const xAOD::Vertex& vtx) const;
   StatusCode applyNeutralCorrection(xAOD::FlowElement& pfo, const xAOD::Vertex& vtx) const;
   StatusCode applyChargedCorrection(xAOD::PFO& pfo) const;
@@ -64,6 +67,7 @@ class CorrectPFOTool : public JetConstituentModifierBase{
   ToolHandle<CP::IWeightPFOTool> m_weightPFOTool;
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_vertexContainer_key;
+  SG::ReadDecorHandleKey<xAOD::IParticleContainer> m_constituentCopyIndexKey{this, "ConstituentCopyIndexKey", "ConstituentCopyIndex", "Decoration storing the index of the vertex associated with each neutral PFO copy"};
   
 };
 

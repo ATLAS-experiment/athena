@@ -50,6 +50,9 @@
 #include "JetRecTools/JetConstituentModifierBase.h"
 #include "xAODBase/IParticleContainer.h"
 
+#include "AthContainers/CurrentContext.h"
+#include "JetRecTools/WriteDecorHandleTriplet.h"
+
 #include "fastjet/PseudoJet.hh"
 
 class SoftKillerWeightTool : public JetConstituentModifierBase{
@@ -64,7 +67,9 @@ class SoftKillerWeightTool : public JetConstituentModifierBase{
 
 private:
   // Implement the correction
-  StatusCode process_impl(xAOD::IParticleContainer* cont) const; 
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const; 
+
+  StatusCode configure_decor_handle_keys() override final;
 
   // Detailed implementation methods where clusters in
   // both calorimeters are treated consistently
@@ -73,8 +78,8 @@ private:
 
   // Detailed implementation methods where clusters in
   // ECAL and HCAL are treated independently
-  float calculateSplitWeight(xAOD::IParticle& part, double minPtECal, double minPtHCal) const;
-  std::pair<double,double> getSoftKillerMinPtSplit(xAOD::IParticleContainer& cont) const;
+  float calculateSplitWeight(xAOD::IParticle& part, double minPtECal, double minPtHCal, float center_lambda) const;
+  std::pair<double,double> getSoftKillerMinPtSplit(xAOD::IParticleContainer& cont, const EventContext& ctx) const;
 
   double findMinPt(const std::vector<fastjet::PseudoJet> &partSK) const;
   std::vector<fastjet::PseudoJet> makeSKParticles(const std::vector<fastjet::PseudoJet>& partPJ) const;
@@ -94,6 +99,15 @@ private:
   float m_rapminApplied;
   float m_rapmaxApplied;
   bool m_ignoreChargedPFOs;
+
+
+  WriteDecorHandleKeyTriplet<float> m_softKillerWeightKeys{
+    this,
+    "SoftKillerWeightKey",
+    "SoftKillerWeight",
+    "SoftKillerWeight decoration"
+  };
+
 		
 };
 

@@ -14,6 +14,11 @@
 
 #include "JetRecTools/JetConstituentModifierBase.h"
 #include "xAODBase/IParticleContainer.h"
+#include "AthContainers/CurrentContext.h"
+#include "AsgDataHandles/ReadDecorHandleKey.h"
+
+#include "xAODCaloEvent/CaloClusterContainer.h"
+#include "xAODPFlow/FlowElementContainer.h"
 
 #include <string>
 
@@ -28,8 +33,50 @@ class ConstitTimeCutTool : public JetConstituentModifierBase{
   StatusCode initialize();
 
   private:
-  StatusCode process_impl(xAOD::IParticleContainer* cont) const; 
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const; 
   StatusCode applyTimingCut(xAOD::IParticle* part, const float& time, const float& quality, const float& lambda_center) const; 
+
+  // CaloCluster decorations
+  SG::ReadDecorHandleKey<xAOD::CaloClusterContainer>
+    m_clusterLarQKey{
+      this,
+      "ClusterLarQKey",
+      "AVG_LAR_Q",
+      "AVG_LAR_Q decoration"
+    };
+
+  SG::ReadDecorHandleKey<xAOD::CaloClusterContainer>
+    m_clusterLambdaKey{
+      this,
+      "ClusterLambdaKey",
+      "CENTER_LAMBDA",
+      "CENTER_LAMBDA decoration"
+    };
+
+  // FlowElement decorations
+  SG::ReadDecorHandleKey<xAOD::FlowElementContainer>
+    m_feTimingKey{
+      this,
+      "FETimingKey",
+      "TIMING",
+      "TIMING decoration"
+    };
+
+  SG::ReadDecorHandleKey<xAOD::FlowElementContainer>
+    m_feLarQKey{
+      this,
+      "FELarQKey",
+      "AVG_LAR_Q",
+      "AVG_LAR_Q decoration"
+    };
+
+  SG::ReadDecorHandleKey<xAOD::FlowElementContainer>
+    m_feLambdaKey{
+      this,
+      "FELambdaKey",
+      "CENTER_LAMBDA",
+      "CENTER_LAMBDA decoration"
+    };
 
   // Properties.
   float m_lambdaCalDivide; 

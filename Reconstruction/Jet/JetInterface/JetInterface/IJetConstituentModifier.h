@@ -12,12 +12,13 @@
 
 #include "AsgTools/IAsgTool.h"
 #include "xAODBase/IParticleContainer.h"
+#include "AthContainers/CurrentContext.h"
 
 class IJetConstituentModifier: virtual public asg::IAsgTool { 
 ASG_TOOL_INTERFACE(IJetConstituentModifier)
 
 public:
-  virtual StatusCode process (xAOD::IParticleContainer* cont) const = 0;
+  virtual StatusCode process (xAOD::IParticleContainer* cont, const EventContext& ctx) const = 0;
 
 };
 
