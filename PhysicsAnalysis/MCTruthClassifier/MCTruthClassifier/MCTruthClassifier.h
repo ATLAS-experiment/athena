@@ -127,11 +127,10 @@ protected:
 public:
 #ifndef GENERATIONBASE /*These can not run in Generation only release*/
   //Main method for Track to Truth association
-  virtual const xAOD::TruthParticle* getGenPart(const xAOD::TrackParticle*, IMCTruthClassifier::Info* info = nullptr) const override final;
-
+  const xAOD::TruthParticle* getGenPart(const xAOD::TrackParticle*, IMCTruthClassifier::Info* info = nullptr) const;
 #ifndef XAOD_ANALYSIS
   //Main method for egamma clusters to Truth Particle association
-  virtual const xAOD::TruthParticle* egammaClusMatch(const xAOD::CaloCluster*,bool,IMCTruthClassifier::Info* info) const override final;
+  const xAOD::TruthParticle* egammaClusMatch(const xAOD::CaloCluster*,bool,IMCTruthClassifier::Info* info) const;
 #endif
 
 protected:

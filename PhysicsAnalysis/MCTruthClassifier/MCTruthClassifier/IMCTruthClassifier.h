@@ -84,20 +84,6 @@ public:
   /** Virtual destructor */
   virtual ~IMCTruthClassifier() = default;
 
-  // Methods for Reco object to Truth association
-#ifndef GENERATIONBASE
-  // Method for Track to Truth association
-  virtual const xAOD::TruthParticle* getGenPart(
-      const xAOD::TrackParticle*,
-      IMCTruthClassifier::Info* info = nullptr) const = 0;
-#ifndef XAOD_ANALYSIS
-  // Method for egamma clusters to Truth Particle association
-  virtual const xAOD::TruthParticle* egammaClusMatch(
-      const xAOD::CaloCluster*, bool,
-      IMCTruthClassifier::Info* info = nullptr) const = 0;
-#endif
-#endif
-
 // Methods for Truth Particle classification
 protected:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
