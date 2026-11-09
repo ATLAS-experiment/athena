@@ -14,9 +14,6 @@
 #include "FatrasG4Tool.h"
 
 #include "FatrasG4PhotonConversion.h"
-#include "Randomize.hh"
-
-#include "CLHEP/Units/SystemOfUnits.h"
 
 #include <string>
 
@@ -71,18 +68,12 @@ private:
   // Particle path length. For the photon this is the track length seen at the
   // previous ModelTrigger call, from which the step length is derived.
   double m_photonPathLength = 0.0;
-  double m_electronPathLength = 0.0;
-  double m_positronPathLength = 0.0;
 
   // G4Track IDs
   int m_photonID = -999;
-  int m_electronID = -999;
-  int m_positronID = -999;
 
   // Extra G4Track IDs for checks
   int m_prevPhotonID = -999;
-  int m_prevElectronID = -999;
-  int m_prevPositronID = -999;
 
   // Particle radiation length. Conversion limit in units of X0, sampled once
   // per photon by the fast model FatrasG4PhotonConversion.
