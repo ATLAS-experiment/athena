@@ -165,7 +165,7 @@ def BPHY14Cfg(flags):
        BPHY14ThinningTools += [BPHY14PhotonTPThinningTool,  BPHY14MuonTPThinningTool, BPHY14Thin_vtxTrk]
        from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
        BPHY14SlimTools     = [ BPHY14_SelectEvent ]
-       BPHY14AugTools      = [BPHY14_Reco_mumu, BPHY14_AugOriginalCounts, BPHY14_Select_Jpsi2mumu, BPHY14_Select_Jpsi2mumu,
+       BPHY14AugTools      = [BPHY14_Reco_mumu, BPHY14_AugOriginalCounts, BPHY14_Select_Jpsi2mumu,
                               BPHY14_Select_Psi2mumu, BPHY14_Select_Upsi2mumu]
        for t in BPHY14ThinningTools + BPHY14SlimTools + BPHY14AugTools: acc.addPublicTool(t)
        acc.addEventAlgo(CompFactory.DerivationFramework.DerivationKernel("BPHY14Kernel", 

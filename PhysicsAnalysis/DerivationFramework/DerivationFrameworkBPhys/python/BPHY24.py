@@ -336,7 +336,7 @@ def BPHY24Cfg(flags):
       FixElecExclusion                = True,
       IncludeV0                       = True)
     BPHY24TrackIsolationDecoratorBtoKmumu = CompFactory.DerivationFramework.VertexTrackIsolation(
-      name                            = "BPHY24TrackIsolationDecoratorBtoKmumu ",
+      name                            = "BPHY24TrackIsolationDecoratorBtoKmumu",
       TrackIsoTool                    = TrackIsoTool,
       TrackContainer                  = "InDetTrackParticles",
       InputVertexContainer            = "BPHY24JpsimmKshortCascadeSV1",
