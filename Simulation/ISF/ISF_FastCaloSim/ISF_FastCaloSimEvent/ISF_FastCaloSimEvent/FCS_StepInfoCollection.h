@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_ISF_FCS_STEPINFOCOLLECTION_H
@@ -23,14 +23,12 @@ namespace ISF_FCS_Parametrization {
  *  @author Sasha Glazov, DESY Hamburg, Germany
  *  @author Zdenek Hubacek, CERN
  *
- *  @version $Id: FCS_StepInfoCollection $
- *
  */
 
 class FCS_StepInfoCollection : public DataVector<FCS_StepInfo> {
 
 public:
-  FCS_StepInfoCollection() {}
+  using DataVector<FCS_StepInfo>::DataVector;
 
 private:
 };
