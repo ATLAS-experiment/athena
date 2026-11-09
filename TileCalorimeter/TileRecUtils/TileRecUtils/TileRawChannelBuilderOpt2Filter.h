@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDEROPT2FILTER_H
@@ -84,17 +84,22 @@ class TileRawChannelBuilderOpt2Filter: public TileRawChannelBuilder {
 
     void ofc2int(int nDigits, double* w_off, short* w_int, short& scale); // convert weights to dsp short int format
 
-    int m_maxIterations; //!< maximum number of iteration to perform
-    int m_pedestalMode;  //!< pedestal mode to use
-    bool m_confTB;       //!< use testbeam configuration
-    double m_timeForConvergence; //!< minimum time difference to quit iteration procedure
-    bool m_of2;    //!< bool variable for OF method: true=> OF2;  false=> OF1
-    bool m_minus1Iter;   //!< bool variable for whether to apply -1 iteration (initial phase guess)
-    bool m_correctAmplitude; //!< If true, resulting amplitude is corrected when using weights for tau=0 without iteration
-    bool m_correctTimeNI; //!< If true, resulting time is corrected when using method  without iteration
+    Gaudi::Property<int> m_maxIterations{this, "MaxIterations", 5, "Maximum number of iteration to perform"}; //!< maximum number of iteration to perform
+    Gaudi::Property<int> m_pedestalMode{this, "PedestalMode", 17, "Pedestal mode to use"};  //!< pedestal mode to use
+    Gaudi::Property<bool> m_confTB{this, "ConfTB", false, "Use testbeam configuration"};       //!< use testbeam configuration
+    Gaudi::Property<double> m_timeForConvergence{this, "TimeForConvergence", 0.5,
+        "Minimum time difference to quit iteration procedure"}; //!< minimum time difference to quit iteration procedure
+    Gaudi::Property<bool> m_of2{this, "OF2", true, "OF method: true => OF2; false => OF1"};    //!< bool variable for OF method: true=> OF2;  false=> OF1
+    Gaudi::Property<bool> m_minus1Iter{this, "Minus1Iteration", false,
+        "Apply -1 iteration (initial phase guess)"};   //!< bool variable for whether to apply -1 iteration (initial phase guess)
+    Gaudi::Property<bool> m_correctAmplitude{this, "AmplitudeCorrection", false,
+        "Correct resulting amplitude when using weights for tau=0 without iteration"}; //!< If true, resulting amplitude is corrected when using weights for tau=0 without iteration
+    Gaudi::Property<bool> m_correctTimeNI{this, "TimeCorrection", false,
+        "Correct resulting time when using method without iteration"}; //!< If true, resulting time is corrected when using method  without iteration
 
-    bool m_bestPhase; // if true, use best phase from COOL DB in "fixed phase" mode (i.e., no iterations)
-    bool m_emulateDsp; // if true, emulate DSP reconstruction algorithm
+    Gaudi::Property<bool> m_bestPhase{this, "BestPhase", false,
+        "Use best phase from COOL DB in fixed phase mode (i.e., no iterations)"}; // if true, use best phase from COOL DB in "fixed phase" mode (i.e., no iterations)
+    Gaudi::Property<bool> m_emulateDsp{this, "EmulateDSP", false, "Emulate DSP reconstruction algorithm"}; // if true, emulate DSP reconstruction algorithm
     int m_nSignal; //!< internal counters
     int m_nNegative;  //!< internal counters
     int m_nCenter; //!< internal counters
@@ -102,14 +107,14 @@ class TileRawChannelBuilderOpt2Filter: public TileRawChannelBuilder {
 
     int m_nSamples; //!< number of samples in the data
     int m_t0SamplePosition;  //!< position of peak sample = (m_nSamples-1)/2
-    double m_maxTime; //!< max allowed time = 25*(m_nSamples-1)/2
-    double m_minTime; //!< min allowed time = -25*(m_nSamples-1)/2
+    Gaudi::Property<double> m_maxTime{this, "MaxTime", -1.0, "Max allowed time"}; //!< max allowed time = 25*(m_nSamples-1)/2
+    Gaudi::Property<double> m_minTime{this, "MinTime", 0.0, "Min allowed time"}; //!< min allowed time = -25*(m_nSamples-1)/2
 
 
     std::vector<float> m_digits;
 
-    int m_noiseThresholdHG;
-    int m_noiseThresholdLG;
+    Gaudi::Property<int> m_noiseThresholdHG{this, "NoiseThresholdHG", 5, "Noise threshold for high gain"};
+    Gaudi::Property<int> m_noiseThresholdLG{this, "NoiseThresholdLG", 3, "Noise threshold for low gain"};
 };
 
 #endif

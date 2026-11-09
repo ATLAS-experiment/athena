@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -48,48 +48,15 @@ std::string TileRawChannelBuilder::getTileRawChannelContainerID() {
 TileRawChannelBuilder::TileRawChannelBuilder(const std::string& type
     , const std::string& name, const IInterface* parent)
   : AthAlgTool(type, name, parent)
-  , m_rChType(TileFragHash::Default)
-  , m_rChUnit(TileRawChannelUnit::ADCcounts)
-  , m_bsflags(0)
-  , m_tileID(nullptr)
-  , m_tileHWID(nullptr)
-  , m_trigType(0)
-  , m_idophys(false)
-  , m_idolas(false)
-  , m_idoped(false)
-  , m_idocis(false)
-  , m_cischan(-1)
-  , m_capdaq(100)
-  , m_evtCounter(0)
-  , m_chCounter(0)
-  , m_nChL(0)
-  , m_nChH(0)
-  , m_RChSumL(0.0)
-  , m_RChSumH(0.0)
-  , m_notUpgradeCabling(true)
-  , m_tileInfo(nullptr)
 {
   resetDrawer();
   memset(m_error, 0, sizeof(m_error));
-
-  declareProperty("calibrateEnergy", m_calibrateEnergy = false);
-  declareProperty("correctTime", m_correctTime = false);
-  declareProperty("AmpMinForAmpCorrection", m_ampMinThresh = 15.0);
-  declareProperty("TimeMinForAmpCorrection", m_timeMinThresh = -12.5);
-  declareProperty("TimeMaxForAmpCorrection", m_timeMaxThresh =  12.5);
-  declareProperty("RunType", m_runType = 0);
-  declareProperty("DataPoolSize", m_dataPoollSize = -1);
-  declareProperty("UseDSPCorrection", m_useDSP = true);
-  declareProperty("TileInfoName", m_infoName = "TileInfo");
-  declareProperty("FirstSample",m_firstSample = 0); 
-
 }
 
 /**
  * Destructor
  */
-TileRawChannelBuilder::~TileRawChannelBuilder() {
-}
+TileRawChannelBuilder::~TileRawChannelBuilder() = default;
 
 /**
  * Initializer
@@ -115,7 +82,7 @@ StatusCode TileRawChannelBuilder::initialize() {
   ATH_CHECK( detStore()->retrieve(m_tileID, "TileID") );
   ATH_CHECK( detStore()->retrieve(m_tileHWID, "TileHWID") );
 
-  ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
+  ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName.value()) );
   m_i_ADCmax = m_tileInfo->ADCmax();
   m_f_ADCmax = m_i_ADCmax;
   m_i_ADCmaxPlus1 = m_i_ADCmax + 1;
@@ -154,9 +121,9 @@ StatusCode TileRawChannelBuilder::initialize() {
   if (msgLvl(MSG::DEBUG)) {
     msg(MSG::DEBUG) << "TileRawChannelBuilder created, storing rc in '"
                     << m_rawChannelContainerKey.key() << "'" << endmsg;
-    msg(MSG::DEBUG) << " calibrate energy = " << m_calibrateEnergy << endmsg;
-    msg(MSG::DEBUG) << " correct time = " << m_correctTime << endmsg;
-    msg(MSG::DEBUG) << " run type = " << m_runType << endmsg;
+    msg(MSG::DEBUG) << " calibrate energy = " << m_calibrateEnergy.value() << endmsg;
+    msg(MSG::DEBUG) << " correct time = " << m_correctTime.value() << endmsg;
+    msg(MSG::DEBUG) << " run type = " << m_runType.value() << endmsg;
   }
 
   if (m_dataPoollSize < 0) m_dataPoollSize = m_tileHWID->channel_hash_max();

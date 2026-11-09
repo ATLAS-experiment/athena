@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -35,17 +35,8 @@ const InterfaceID& TileCellNoiseFilter::interfaceID() {
 TileCellNoiseFilter::TileCellNoiseFilter(const std::string& type,
     const std::string& name, const IInterface* parent)
     : base_class(type, name, parent)
-    , m_truncationThresholdOnAbsEinSigma(4.0) // 4 sigma of ADC HF noise by default
-    , m_minimumNumberOfTruncatedChannels(0.6) // at least 60% of channels should be below threshold
-    , m_useTwoGaussNoise(false) // do not use 2G - has no sense for ADC HF noise for the moment
 {
-
   declareInterface<TileCellNoiseFilter>(this);
-
-  declareProperty("UseTwoGaussNoise", m_useTwoGaussNoise);
-  declareProperty("TruncationThresholdOnAbsEinSigma", m_truncationThresholdOnAbsEinSigma);
-  declareProperty("MinimumNumberOfTruncatedChannels", m_minimumNumberOfTruncatedChannels);
-  declareProperty("MaxNoiseSigma", m_maxNoiseSigma = 5.0, "Channels with noise more than that value are igonred in calculation of correction");
 }
 
 //========================================================

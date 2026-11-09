@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // small hack to enable datapool usage
@@ -44,15 +44,6 @@ TileRawChannelBuilderMF::TileRawChannelBuilderMF(const std::string& type, const 
   declareInterface<TileRawChannelBuilderMF>(this);
 
   m_rawChannelContainerKey = "TileRawChannelMF";
-
-  //declare properties
-  declareProperty("AmplitudeCorrection", m_correctAmplitude = false);
-  declareProperty("PedestalMode", m_pedestalMode = 1);
-  declareProperty("DefaultPedestal", m_defaultPedestal = 0.0);
-  declareProperty("MF", m_MF = 0);
-  declareProperty("MaxIterations", m_maxIterations = 5);
-  declareProperty("BestPhase", m_bestPhase = false);
-  declareProperty("TimeFromCOF", m_timeFromCOF = false);
 }
 
 /**
@@ -171,7 +162,7 @@ TileRawChannel* TileRawChannelBuilderMF::rawChannel(const TileDigits* tiledigits
     if (m_bestPhase) phase = (float) -m_tileToolTiming->getSignalPhase(drawerIdx, channel, gain);
     rms_aux = m_tileToolNoiseSample->getHfn(drawerIdx, channel, gain, TileRawChannelUnit::ADCcounts, ctx);
 
-    switch (m_pedestalMode) {
+    switch (m_pedestalMode.value()) {
 
       case -1:
         // use ped estimated from data based on the conditions value

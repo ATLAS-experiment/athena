@@ -54,24 +54,6 @@ TileRawChannelBuilderFitFilter::TileRawChannelBuilderFitFilter(const std::string
   declareInterface< TileRawChannelBuilderFitFilter >(this);
 
   m_rawChannelContainerKey = "TileRawChannelFit";
-
-  //declare properties
-  declareProperty("FrameLength",m_frameLength = 9);
-  declareProperty("MaxIterate",m_maxIterate = 9);
-  declareProperty("NoiseLowGain",m_noiseLow = 0.6);
-  declareProperty("NoiseHighGain",m_noiseHigh = 1.5);
-  declareProperty("RMSChannelNoise",m_channelNoiseRMS = 3);
-  declareProperty("ExtraSamplesLeft",m_extraSamplesLeft=0);   // increase window on left side
-  declareProperty("ExtraSamplesRight",m_extraSamplesRight=0); // increase window on right side
-  declareProperty("SaturatedSample",m_saturatedSample = -1.0);
-  declareProperty("SaturatedSampleError",m_saturatedSampleError = 6.0);
-  declareProperty("ZeroSampleError",m_zeroSampleError = 100.0);
-  declareProperty("NoiseThresholdRMS",m_noiseThresholdRMS = 3.0);
-  declareProperty("MaxTimeFromPeak",m_maxTimeFromPeak = 250.0);
-
-  declareProperty("DisableNegativeAmp",m_disableNegativeAmp = false);
-
-  declareProperty("SpecialDemoShape",m_specialDemoShape = -1); // if >=0 - pulse shape for Demo is stored in non-default structures
 }
 
 /**
@@ -104,7 +86,7 @@ StatusCode TileRawChannelBuilderFitFilter::initialize() {
 
   // Get number of samples from TileInfo - ignore jobOptions settings
   m_frameLength = m_tileInfo->NdigitSamples();
-  ATH_MSG_DEBUG( "NSamples = " << m_frameLength );
+  ATH_MSG_DEBUG( "NSamples = " << m_frameLength.value() );
   
   // Get pulse shapes from TileInfo
   m_pulseShapes = m_tileInfo->getPulseShapes();
@@ -130,7 +112,7 @@ StatusCode TileRawChannelBuilderFitFilter::initialize() {
                 << " max_tau=" << m_maxTau );
 
   if ( !m_demoFragIDs.empty() ) {
-    switch (m_specialDemoShape) {
+    switch (m_specialDemoShape.value()) {
       case 1:
         ATH_MSG_DEBUG( "Demonstrator channels use pulse shape from physics structures"); break;
       case 2:
@@ -170,7 +152,7 @@ StatusCode TileRawChannelBuilderFitFilter::initialize() {
   }
   
   if (msgLvl(MSG::DEBUG)) {
-    switch (m_channelNoiseRMS) {
+    switch (m_channelNoiseRMS.value()) {
       case 1:
         msg(MSG::DEBUG) << " noise for all channels from noiseOrig array (OBSOLETE!!!) " << endmsg;
         break;
@@ -190,8 +172,8 @@ StatusCode TileRawChannelBuilderFitFilter::initialize() {
         break;
       default:
         msg(MSG::DEBUG) << " common noise for all channels (OBSOLETE): " << endmsg;
-        msg(MSG::DEBUG) << " rmsLow = " << m_noiseLow
-                        << " rmsHi = " << m_noiseHigh << endmsg;
+        msg(MSG::DEBUG) << " rmsLow = " << m_noiseLow.value()
+                        << " rmsHi = " << m_noiseHigh.value() << endmsg;
         break;
     }
   }
@@ -305,7 +287,7 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
   int noise_channel = (ros < 3) ? channel : channel + 48;
 
   if (igain == 0) {
-    switch (m_channelNoiseRMS) {
+    switch (m_channelNoiseRMS.value()) {
       case 3:
         rms = m_tileToolNoiseSample->getHfn(drawerIdx, channel, igain, TileRawChannelUnit::ADCcounts, ctx);
         if (rms > 0.0) break;
@@ -322,7 +304,7 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
         rms = m_noiseLow;
     }
   } else if (igain == 1) {
-    switch (m_channelNoiseRMS) {
+    switch (m_channelNoiseRMS.value()) {
       case 3:
         rms = m_tileToolNoiseSample->getHfn(drawerIdx, channel, igain, TileRawChannelUnit::ADCcounts, ctx);
         if (rms > 0.0) break;
@@ -349,11 +331,11 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
                   << " Channel=" << channel
                   << " gain=" << igain
                   << " RMS=" << rms
-                  << " RMSChNoise=" << m_channelNoiseRMS );
+                  << " RMSChNoise=" << m_channelNoiseRMS.value() );
 
   // First sample to fit, number of samples to fit
   int ifit1 = 0;
-  int nfit = std::min(m_frameLength, digit->NtimeSamples());
+  int nfit = std::min(m_frameLength.value(), digit->NtimeSamples());
 
   int ipeakMax = m_iPeak0;
   int ipeakMin = m_iPeak0;
@@ -394,7 +376,7 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
       if (yvec0[isamp] >= m_saturatedSample) {
         eyvec[isamp] = m_saturatedSampleError * rms;
         ATH_MSG_VERBOSE( "Saturated ADC value yvec0[" << isamp << "]=" << yvec0[isamp]
-                        << " (MAX=" << m_saturatedSample << " ) RMS=" << eyvec[isamp] );
+                        << " (MAX=" << m_saturatedSample.value() << " ) RMS=" << eyvec[isamp] );
 
       } else { // must be yvec0[isamp]==0
         eyvec[isamp] = m_zeroSampleError * rms;
@@ -577,7 +559,7 @@ void TileRawChannelBuilderFitFilter::pulseFit(const TileDigits *digit
   int niter = 0;
   do {
     ++niter;
-    ATH_MSG_VERBOSE ( "niter=" << niter << " maxIterate=" << m_maxIterate );
+    ATH_MSG_VERBOSE ( "niter=" << niter << " maxIterate=" << m_maxIterate.value() );
 
     if (tempChi2 < oldchi2) oldchi2 = tempChi2; // best chi2 up to now
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDERMANYAMPS_H
@@ -46,9 +46,12 @@ class TileRawChannelBuilderManyAmps: public TileRawChannelBuilder {
 
   private:
 
-    int m_digitFilterMode; //<! 2=> start with 1 amplitude and add needed; 3=> start with 8 amplitudes and drop spurious
-    int m_digitFilterLevel; //<! number of parameters for fit (3-9 for mode 2)
-    int m_digitFilterTest;  //<! non-zero means call Tester (during initialization phase)
+    Gaudi::Property<int> m_digitFilterMode{this, "FilterMode", 2,
+        "Filter mode (2 or 3): 2=> start with 1 amplitude and add needed; 3=> start with 8 amplitudes and drop spurious"};
+    Gaudi::Property<int> m_digitFilterLevel{this, "FilterLevel", 5,
+        "Number of parameters for fit (3-9 for mode 2)"};
+    Gaudi::Property<int> m_digitFilterTest{this, "FilterTester", 0,
+        "Non-zero means call Tester (during initialization phase)"};
 
     //IChronoStatSvc* m_timeKeeper;
 

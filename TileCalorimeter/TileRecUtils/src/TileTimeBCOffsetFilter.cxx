@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -41,15 +41,6 @@ TileTimeBCOffsetFilter::TileTimeBCOffsetFilter(const std::string& type,
     , m_tileHWID(nullptr)
     , m_cabling(nullptr)
 {
-  declareProperty("EneThreshold3", m_ene_threshold_3chan = 1000);
-  declareProperty("EneThreshold1", m_ene_threshold_1chan = 3000);
-  declareProperty("TimeThreshold", m_time_threshold_diff = 15);
-  declareProperty("AverTimeEneThreshold", m_ene_threshold_aver_time = 500);
-  declareProperty("RefTimeThreshold", m_time_threshold_ref_ch = 10);
-  declareProperty("SampleDiffMaxMin_HG", m_sample_diffmaxmin_threshold_hg = 15);
-  declareProperty("SampleDiffMaxMin_LG", m_sample_diffmaxmin_threshold_lg = -1);
-
-  declareProperty("CheckDCS", m_checkDCS = false);
 }
 
 StatusCode TileTimeBCOffsetFilter::initialize() {
@@ -57,19 +48,19 @@ StatusCode TileTimeBCOffsetFilter::initialize() {
 
   if (msgLvl(MSG::DEBUG)) {
       msg(MSG::DEBUG) << "EneThreshold3 = " 
-                      << m_ene_threshold_3chan << endmsg;
+                      << m_ene_threshold_3chan.value() << endmsg;
       msg(MSG::DEBUG) << "EneThreshold1 = " 
-                      << m_ene_threshold_1chan << endmsg;
+                      << m_ene_threshold_1chan.value() << endmsg;
       msg(MSG::DEBUG) << "TimeThreshold = " 
-                      << m_time_threshold_diff << endmsg;
+                      << m_time_threshold_diff.value() << endmsg;
       msg(MSG::DEBUG) << "AverTimeEneThreshold = "
-                      << m_ene_threshold_aver_time << endmsg;
+                      << m_ene_threshold_aver_time.value() << endmsg;
       msg(MSG::DEBUG) << "RefTimeThreshold = "
-                      << m_time_threshold_ref_ch << endmsg;
+                      << m_time_threshold_ref_ch.value() << endmsg;
       msg(MSG::DEBUG) << "SampleDiffMaxMin_HG = "
-                      << m_sample_diffmaxmin_threshold_hg << endmsg;
+                      << m_sample_diffmaxmin_threshold_hg.value() << endmsg;
       msg(MSG::DEBUG) << "SampleDiffMaxMin_LG = "
-                      << m_sample_diffmaxmin_threshold_lg << endmsg;
+                      << m_sample_diffmaxmin_threshold_lg.value() << endmsg;
       msg(MSG::DEBUG) << "CheckDCS = " 
                       << ((m_checkDCS)?"true":"false") << endmsg;
   }

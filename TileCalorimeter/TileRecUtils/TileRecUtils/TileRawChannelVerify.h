@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -70,10 +70,13 @@ class TileRawChannelVerify: public AthAlgorithm {
                                                                          "", "Input Tile raw channel container 2 key"};
 
 
-    double m_precision; //!< maximum difference between the amplitudes of the TileRawChannels to be compared
+    Gaudi::Property<double> m_precision{this, "Precision", 0,
+        "Maximum difference between the amplitudes of the TileRawChannels to be compared"};
 
-    bool m_dumpRawChannels; //!< if true=> Differences found in the TileRawChannels are dumped on the screen
-    bool m_sortFlag;         //!< if true=> TileRawChannels are sorted by amplitude
+    Gaudi::Property<bool> m_dumpRawChannels{this, "DumpRawChannels", false,
+        "If true => Differences found in the TileRawChannels are dumped on the screen"};
+    Gaudi::Property<bool> m_sortFlag{this, "SortFlag", false,
+        "If true => TileRawChannels are sorted by amplitude"};
 };
 
 #endif // not TILERECUTILS_TILERAWCHANNELVERIFY_H

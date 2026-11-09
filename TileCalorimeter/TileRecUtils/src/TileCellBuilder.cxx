@@ -32,9 +32,6 @@
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
-#include "CLHEP/Units/SystemOfUnits.h"
-using CLHEP::MeV;
- 
 // uncomment line below for debug output
 // #define ALLOW_DEBUG_COUT 1
 
@@ -48,111 +45,14 @@ const InterfaceID& TileCellBuilder::interfaceID( ) {
 TileCellBuilder::TileCellBuilder(const std::string& type, const std::string& name,
     const IInterface* parent)
   : base_class(type, name, parent)
-  , m_eneForTimeCut(35. * MeV) // keep time only for cells above 70 MeV (more than 35 MeV in at least one PMT to be precise)
-  , m_eneForTimeCutMBTS(0.03675) // the same cut for MBTS, but in pC, corresponds to 3 ADC counts or 35 MeV
-  , m_qualityCut(254) // cut on overflow in quality (if quality is 255 - assume that channel is bad)
-  , m_eThreshold(-100000.)
-  , m_maxTimeDiff(100000.)
-  , m_maxTime (100000.)
-  , m_minTime(-100000.)
-  , m_maxChi2(100000.)
-  , m_minChi2(-100000.)
-  , m_thresholdNotSet(true)
-  , m_fullSizeCont(true)
-  , m_maskBadChannels(true)
-  , m_fakeCrackCells(false)
-  , m_tileID(nullptr)
-  , m_tileTBID(nullptr)
-  , m_tileHWID(nullptr)
-  , m_cabling(nullptr)
-  , m_tileMgr(nullptr)
-  , m_mbtsMgr(nullptr)
-  , m_notUpgradeCabling(true)
-  , m_run2(false)
-  , m_tileInfo(0)
-  , m_run2plus(false)
 {
   declareInterface<TileCellBuilder>( this );
-
-  //memset(m_drawerRunStatus, 0, sizeof(m_drawerRunStatus));
-  //memset(m_eventErrorCounter, 0, sizeof(m_eventErrorCounter));
-
-  // never set energy to zero, but set it to some small number
-  // this will help TopoCluster to assign proper weight to the cell if needed
-  m_zeroEnergy = 0.5 * MeV; // half a MeV in both PMTs i.e. one MeV in a cell
-
-  //!< normal channel energy threshold for masking
-  m_minEneChan[0] = -5000. * MeV;
-  //!< gap channel energy threshold for masking
-  m_minEneChan[1] = -10000. * MeV;
-  //!< MBTS channel energy threshold for masking (not used currently(
-  m_minEneChan[2] = -999999. * MeV;
-
-  declareProperty( "MinEnergyChan", m_minEneChan[0]);
-  declareProperty( "MinEnergyGap",  m_minEneChan[1]);
-  declareProperty( "MinEnergyMBTS", m_minEneChan[2]);
-
-  // Energy threshold in MeV that the Cell must exceed to be considered:
-  declareProperty("EThreshold",m_eThreshold);
-
-  // Maximum difference between times of two PMTs in cell:
-  declareProperty("MaxTimeDiff", m_maxTimeDiff);
-
-  // Maximum and minimum time for a cell to be included:
-  declareProperty("MaxTime", m_maxTime);
-  declareProperty("MinTime", m_minTime);
-
-  // Maximum and Minimum fit quality for cell to be considered:
-  declareProperty("MaxChi2", m_maxChi2);
-  declareProperty("MinChi2", m_minChi2);
-
-  declareProperty("fullSizeCont", m_fullSizeCont);
-
-  // put zero energy in bad channels and recover from single-channel failure using second PMT is a cell
-  declareProperty("maskBadChannels", m_maskBadChannels);
-
-  // create fake E3/E4 crack scintillators with zero energy when they do not exist 
-  declareProperty("fakeCrackCells", m_fakeCrackCells);
-
-  // PMT energy will be set to this value if channel is bad
-  declareProperty("BadChannelZeroEnergy", m_zeroEnergy);
-  // PMT with energy above cut will preserve time info in ESD
-  declareProperty("EneForTimeCut", m_eneForTimeCut);
-  declareProperty("EneForTimeCutMBTS", m_eneForTimeCutMBTS);
-  // PMT with quality greater than this cut will be masked
-  declareProperty("QualityCut", m_qualityCut);
-
-  // apply time correction taking numbers from CondDB (if not yet done in OF)
-  declareProperty("correctTime", m_correctTime = false);
-
-  // apply parabolic amplitude correction (if not yet done in OF without iterations)
-  declareProperty("correctAmplitude", m_correctAmplitude = false);
-
-  // use parabolic amplitude correction for OF2 or OF1 method
-  declareProperty("OF2", m_of2 = true);
-
-  // merge DSP results with offline reco results
-  declareProperty("mergeChannels", m_mergeChannels = true);
-
-  // thresholds for parabolic amplitude correction 
-  declareProperty("AmpMinForAmpCorrection", m_ampMinThresh = 15.0);
-  declareProperty("TimeMinForAmpCorrection", m_timeMinThresh = -12.5);
-  declareProperty("TimeMaxForAmpCorrection", m_timeMaxThresh = 12.5);
-
-  declareProperty("SkipGain", m_skipGain = -1); // never skip any gain by default
-
-  declareProperty("UseDemoCabling", m_useDemoCabling = 0); // if set to 2015 - assume TB 2015 cabling
-
-  declareProperty("TileInfoName", m_infoName = "TileInfo");
-
-  declareProperty("CheckDCS", m_checkDCS = false);
 }
 
 /**
  * Destructor
  */
-TileCellBuilder::~TileCellBuilder(){ 
-}
+TileCellBuilder::~TileCellBuilder() = default;
 
 /**
  * Initializer
@@ -226,7 +126,7 @@ StatusCode TileCellBuilder::initialize() {
   ATH_MSG_INFO( "TileCellBuilder initialization completed" );
 
   //=== get TileInfo
-  ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
+  ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName.value()) );
   m_ADCmaskValueMinusEps = m_tileInfo->ADCmaskValue() - 0.01;  // indicates channels which were masked in background dataset
   m_ADCmaskValuePlusEps  = m_tileInfo->ADCmaskValue() + 0.01;  // indicates channels which were masked in background dataset
 
@@ -248,12 +148,12 @@ void TileCellBuilder::reset(bool /* fullSizeCont */, bool printReset) {
   if (m_thresholdNotSet) {
     ATH_MSG_INFO( "none of thresholds set, all RawChannels will be converted to Cells");
   } else {
-    ATH_MSG_INFO( "Ene threshold " << m_eThreshold << " MeV" );
-    ATH_MSG_INFO( "max time diff " << m_maxTimeDiff << " ns" );
-    ATH_MSG_INFO( "max time thr  " << m_maxTime << " ns" );
-    ATH_MSG_INFO( "min time thr  " << m_minTime << " ns" );
-    ATH_MSG_INFO( "max qual thr  " << m_maxChi2 );
-    ATH_MSG_INFO( "min qual thr  " << m_minChi2 );
+    ATH_MSG_INFO( "Ene threshold " << m_eThreshold.value() << " MeV" );
+    ATH_MSG_INFO( "max time diff " << m_maxTimeDiff.value() << " ns" );
+    ATH_MSG_INFO( "max time thr  " << m_maxTime.value() << " ns" );
+    ATH_MSG_INFO( "min time thr  " << m_minTime.value() << " ns" );
+    ATH_MSG_INFO( "max qual thr  " << m_maxChi2.value() );
+    ATH_MSG_INFO( "min qual thr  " << m_minChi2.value() );
   }
   
   // prepare empty vector for all cell pointers
@@ -681,7 +581,10 @@ void TileCellBuilder::correctCell(TileCell* pCell, int correction, int pmt, int 
 // and apply corrections
 
   // do not trust to energies below certain threshold
-  if (ener < m_minEneChan[ch_type]) {
+  const float minEneChan = (ch_type == 0) ? m_minEneChan.value()
+                          : (ch_type == 1) ? m_minEneGap.value()
+                          : m_minEneMBTS.value();
+  if (ener < minEneChan) {
 #ifdef ALLOW_DEBUG_COUT
     std::cout << "channel with negative energy " << ener << " => setting quality to 255" << std::endl;
 #endif

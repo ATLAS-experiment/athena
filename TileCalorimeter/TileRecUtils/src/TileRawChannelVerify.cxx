@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -61,9 +61,6 @@ TileRawChannelVerify::TileRawChannelVerify(const std::string& name, ISvcLocator*
   : AthAlgorithm(name, pSvcLocator)
   , m_tileHWID(0)
 {
-  declareProperty("Precision", m_precision = 0);
-  declareProperty("DumpRawChannels", m_dumpRawChannels = false);
-  declareProperty("SortFlag", m_sortFlag = false);
 }
 
 TileRawChannelVerify::~TileRawChannelVerify() {

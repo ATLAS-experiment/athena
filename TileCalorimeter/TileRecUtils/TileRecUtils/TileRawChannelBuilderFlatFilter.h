@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDERFLATFILTER_H
@@ -150,16 +150,20 @@ class TileRawChannelBuilderFlatFilter: public TileRawChannelBuilder {
                   , int signalLength, double ped) const;
 
     // parameters
-    int m_pedStart; // start of pedestal window
-    int m_pedLength; // length of pedestal window
-    int m_pedOffset; // if > 0 ped can be taken after signal as well
-    int m_signalStart; // start of signal window
-    int m_signalLength; // length of signal window
-    int m_filterLength;
-    int m_frameLength;
+    Gaudi::Property<int> m_pedStart{this, "PedStart", 0, "Start of pedestal window"};
+    Gaudi::Property<int> m_pedLength{this, "PedLength", 1, "Length of pedestal window"};
+    Gaudi::Property<int> m_pedOffset{this, "PedOffset", 0, "If > 0 ped can be taken after signal as well"};
+    Gaudi::Property<int> m_signalStart{this, "SignalStart", 1, "Start of signal window"};
+    Gaudi::Property<int> m_signalLength{this, "SignalLength", 8, "Length of signal window"};
+    Gaudi::Property<int> m_filterLength{this, "FilterLength", 5, "Filter length"};
+    Gaudi::Property<int> m_frameLength{this, "FrameLength", 9, "Frame length (number of samples)"};
 
-    double m_deltaCut[2]; // Cut for signalInFrame, lo/hi gain
-    double m_rmsCut[2]; // RMS cut for signalInFram, lo/hi gain
+    // Cut for signalInFrame, lo/hi gain
+    Gaudi::Property<double> m_deltaCutLo{this, "DeltaCutLo", 4.5, "Cut for signalInFrame, low gain"};
+    Gaudi::Property<double> m_deltaCutHi{this, "DeltaCutHi", 8.5, "Cut for signalInFrame, high gain"};
+    // RMS cut for signalInFram, lo/hi gain
+    Gaudi::Property<double> m_rmsCutLo{this, "RMSCutLo", 1.0, "RMS cut for signalInFrame, low gain"};
+    Gaudi::Property<double> m_rmsCutHi{this, "RMSCutHi", 2.5, "RMS cut for signalInFrame, high gain"};
 
 };
 

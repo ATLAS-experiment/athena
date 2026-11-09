@@ -52,12 +52,15 @@ class TileRawCorrelatedNoise: public AthAlgorithm {
                                                                       "Output Tile digits container key"};
 
     // RMS threshold
-    float m_nRMS_threshold;
+    Gaudi::Property<float> m_nRMS_threshold{this, "nRMSThreshold", 2., "Threshold in units of sample 3 RMS"};
 
     // file names
-    std::string m_alphaMatrixFilePrefix;
-    std::string m_sample3RMSFilePrefix;
-    std::string m_meanFilePrefix;
+    Gaudi::Property<std::string> m_alphaMatrixFilePrefix{this, "AlphaMatrixFilePrefix", "AlphaMatrix",
+        "Prefix of the alpha matrix file names"};
+    Gaudi::Property<std::string> m_sample3RMSFilePrefix{this, "Sample3RMSFilePrefix", "RMS",
+        "Prefix of the sample 3 RMS file names"};
+    Gaudi::Property<std::string> m_meanFilePrefix{this, "MeanFilePrefix", "Mean",
+        "Prefix of the mean file names"};
 
     // matrices
     struct AlphaMatrix {
@@ -67,8 +70,9 @@ class TileRawCorrelatedNoise: public AthAlgorithm {
     float m_meanSamples[4][64][48][7]{};
     float m_sample3RMS[4][64][48]{};
 
-    bool m_useMeanFiles;
-    bool m_pmtOrder;
+    Gaudi::Property<bool> m_useMeanFiles{this, "UseMeanFiles", true, "Use mean files"};
+    Gaudi::Property<bool> m_pmtOrder{this, "PMTOrder", false,
+        "Read matrices in PMT order (but save them in channel order)"};
 
     ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
         "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile sample noise tool"};

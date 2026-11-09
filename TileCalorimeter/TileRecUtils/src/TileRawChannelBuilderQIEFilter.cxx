@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////
@@ -77,7 +77,6 @@ TileRawChannelBuilderQIEFilter::TileRawChannelBuilderQIEFilter(const std::string
 //  declareProperty("TileCondToolOfcCool",m_tileCondToolOfcCool  ,"TileCondToolOfcCool");
 //  declareProperty("TileCondToolNoiseSample", m_tileToolNoiseSample,"TileCondToolNoiseSample");
 //  declareProperty("MaxIterations",m_maxIterations = 5);
-	declareProperty("PedestalMode", m_pedestalMode = 17);
 //  declareProperty("TimeForConvergence",m_timeForConvergence = 0.5);
 //  declareProperty("ConfTB",m_confTB = false);
 //  declareProperty("OF2",m_of2 = true);
@@ -130,7 +129,7 @@ StatusCode TileRawChannelBuilderQIEFilter::initialize() {
 	//}
 
 	if (m_nSamples != 7) { // && (m_pedestalMode == 71 || m_pedestalMode == 7621)) {
-		ATH_MSG_ERROR("Incompatable pedestal mode [" << m_pedestalMode << "] and number of samples [" << m_nSamples << "]");
+		ATH_MSG_ERROR("Incompatable pedestal mode [" << m_pedestalMode.value() << "] and number of samples [" << m_nSamples << "]");
 		return StatusCode::FAILURE;
 	}
 

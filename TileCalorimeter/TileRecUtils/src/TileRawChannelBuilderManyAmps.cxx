@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // small hack to enable datapool usage
@@ -44,11 +44,6 @@ TileRawChannelBuilderManyAmps::TileRawChannelBuilderManyAmps(const std::string& 
   declareInterface< TileRawChannelBuilderManyAmps >(this);
     
   m_rawChannelContainerKey = "TileRawChannelManyAmps";
-
-  //declare properties
-  declareProperty("FilterMode",  m_digitFilterMode = 2);  // can be 2 or 3
-  declareProperty("FilterLevel", m_digitFilterLevel = 5); // number of parameters for fit (3-9 for mode 2)
-  declareProperty("FilterTester", m_digitFilterTest = 0);  // non-zero means call Tester (during initialization phase).  
 }
 
 
@@ -74,13 +69,13 @@ StatusCode TileRawChannelBuilderManyAmps::initialize() {
 
   //  **************************************************************************************
   ATH_MSG_INFO( " TileRawChannelBuilderManyAmps init:"
-               << " FilterMode=" << m_digitFilterMode
-               << ", FilterLevel=" << m_digitFilterLevel
-               << ", FilterTest=" << m_digitFilterTest );
+               << " FilterMode=" << m_digitFilterMode.value()
+               << ", FilterLevel=" << m_digitFilterLevel.value()
+               << ", FilterTest=" << m_digitFilterTest.value() );
 
   if (!(m_digitFilterMode == 2) && !(m_digitFilterMode == 3)) { // filter mode different from 2 or 3
 
-    ATH_MSG_WARNING( "Wrong Filter mode defined: FilterMode=" << m_digitFilterMode );
+    ATH_MSG_WARNING( "Wrong Filter mode defined: FilterMode=" << m_digitFilterMode.value() );
     ATH_MSG_WARNING( "Switching to FilterMode=2" );
     m_digitFilterMode = 2;
   }

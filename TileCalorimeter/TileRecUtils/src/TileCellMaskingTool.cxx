@@ -19,25 +19,11 @@
 #include "TileIdentifier/TileHWID.h"
 #include "TileEvent/TileCell.h"
 
-#include <CLHEP/Units/SystemOfUnits.h>
-
-using CLHEP::MeV;
-
 TileCellMaskingTool::TileCellMaskingTool(const std::string& type
     , const std::string& name, const IInterface* parent)
   : AthAlgTool(type, name, parent)
-  , m_tileID(0)
-  , m_tileHWID(0)
 {
   declareInterface<ICaloCellMakerTool>( this );
-
-  declareProperty("RejectedTileDrawer", m_rejectedTileDrawer) ;
-  declareProperty("RejectedTileMB", m_rejectedTileMB) ;
-  declareProperty("RejectedTileDigitizer", m_rejectedTileDigitizer) ;
-  declareProperty("RejectedTileDMU", m_rejectedTileDMU) ;
-  declareProperty("RejectedTileChannels", m_rejectedTileChannels) ;
-
-  declareProperty("BadChannelZeroEnergy",m_zeroEnergy = 0.5 * MeV); // half a MeV in both PMTs i.e. one MeV in a cell
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -24,20 +24,9 @@ TileRawChannelNoiseFilter::TileRawChannelNoiseFilter(const std::string& type,
     const std::string& name, const IInterface* parent)
     : base_class(type, name, parent)
     , m_tileHWID(0)
-    , m_truncationThresholdOnAbsEinSigma(3.0) // 3 sigma of ADC HF noise by default
-    , m_minimumNumberOfTruncatedChannels(0.6) // at least 60% of channels should be below threshold
-    , m_useTwoGaussNoise(false) // do not use 2G - has no sense for ADC HF noise for the moment
-    , m_useGapCells(false) // use gap cells for noise filter as all normal cells
     , m_tileInfo(0)
     , m_ADCmaskValueMinusEps(0)
 {
-
-  declareProperty("TruncationThresholdOnAbsEinSigma", m_truncationThresholdOnAbsEinSigma);
-  declareProperty("MinimumNumberOfTruncatedChannels", m_minimumNumberOfTruncatedChannels);
-  declareProperty("UseTwoGaussNoise", m_useTwoGaussNoise);
-  declareProperty("UseGapCells", m_useGapCells);
-  declareProperty("MaxNoiseSigma", m_maxNoiseSigma = 5.0, "Channels with noise more than that value are igonred in calculation of correction");
-  declareProperty("TileInfoName", m_infoName = "TileInfo");
 }
 
 //========================================================
@@ -47,9 +36,9 @@ StatusCode TileRawChannelNoiseFilter::initialize() {
 
   if (msgLvl(MSG::DEBUG)) {
       msg(MSG::DEBUG) << "TruncationThresholdOnAbsEinSigma = " 
-                      << m_truncationThresholdOnAbsEinSigma << endmsg;
+                      << m_truncationThresholdOnAbsEinSigma.value() << endmsg;
       msg(MSG::DEBUG) << "MinimumNumberOfTruncatedChannels = " 
-                      << m_minimumNumberOfTruncatedChannels << endmsg;
+                      << m_minimumNumberOfTruncatedChannels.value() << endmsg;
       msg(MSG::DEBUG) << "UseTwoGaussNoise = " 
                       << ((m_useTwoGaussNoise)?"true":"false") << endmsg;
       msg(MSG::DEBUG) << "UseGapCells = " 
@@ -65,7 +54,7 @@ StatusCode TileRawChannelNoiseFilter::initialize() {
   ATH_CHECK( m_badChannelsKey.initialize() );
 
   //=== get TileInfo
-  CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
+  CHECK( detStore()->retrieve(m_tileInfo, m_infoName.value()) );
   m_ADCmaskValueMinusEps = m_tileInfo->ADCmaskValue() - 0.01;  // indicates channels which were masked in background dataset
 
   ATH_CHECK( m_DQstatusKey.initialize() );
