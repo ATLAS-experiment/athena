@@ -16,6 +16,7 @@
 #include "SiClusterizationTool/OnnxNNCollection.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include "src/detail/NNPixelClusterCalibratorHelpers.h"
+#include "src/detail/NNPixelClusterInputHelpers.h"
 
 namespace ActsTrk::detail {
 
@@ -64,35 +65,6 @@ class NNClusterCalibrator
             const Acts::Vector2& predicted_local_position) const;
 
  private:
-  /// @brief returns spans of the cluster
-  /// @param cluster pixel
-  /// @return xmin, xmax, ymin, ymax
-  std::tuple<int, int, int, int> clusterIndexRanges(
-      const xAOD::PixelCluster& cluster) const;
-
-  /// @brief Calculated charge weighted cluster position
-  /// @param cluster pixel cluster to process
-  /// @param pixelID decoder decoder
-  /// @param design is geometry of the module
-  /// @return call that that is the center of the cluster
-  InDetDD::SiCellId weightedClusterCenter(
-      const xAOD::PixelCluster& cluster,
-      const InDetDD::PixelModuleDesign* design) const;
-
-  /// @brief Fills payload for NN from cluster
-  /// @param nn the NN input payload to fill
-  /// @param cluster pixel cluster to process
-  /// Presumably, this function should also take track state proxy (which
-  /// may require this to become a template) and InDetDD::SiDetectorElement
-  /// and overall would presumably fit better another place
-  void fillClusterData(NNinput& nn, const xAOD::PixelCluster& cluster,
-                       const InDetDD::SiDetectorElement& detElement) const;
-
-  /// @brief obtain probabilities of number of particles using numbers NN
-  /// @param  the network input
-  /// @return vector of size 3 with probabilities
-  std::array<float, 3> predictNumberOfClusters(NNinput& nn) const;
-
   /// @brief run position inference
   PositionNNoutput predictPositions(NNinput& nn, int number) const;
 
