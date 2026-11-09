@@ -50,11 +50,6 @@
   <class name="DataVector<TrigSpacePointCounts>" id="EB182127-C36B-419B-9057-A7CA43290D11" />
   <class name="std::vector<TrigSpacePointCounts*>" />
 
- <class name="TrigTrtHitCountsCollection" id="7631C2C2-612F-4245-8C8B-D40F59222E1E" />
- <class name="TrigTrtHitCounts" id="6F04169E-E47C-4556-9456-256A659EC68B" />
- <class name="DataVector<TrigTrtHitCounts>" id="2BA9359C-C1A5-4298-A903-3273FB0400D0" />
- <class name="std::vector<TrigTrtHitCounts*>" />
-
  <class name="TrigTrackCountsCollection" id="7A4412AD-C11D-4EFD-AE15-D343D2CB28BC" />
  <class name="DataVector<TrigTrackCounts>" id="BEB86BA3-2AE3-46D6-B496-43781B136492" />
  <class name="std::vector<TrigTrackCounts*>" />

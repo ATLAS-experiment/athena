@@ -70,18 +70,6 @@
   <class name="TrigSpacePointCountsCollection_p1" id="DD716203-F5F8-4F3E-B043-2F722B2FDF6B"/>
   <class name="std::vector<TrigSpacePointCountsCollection_p1>" />  
   
-<!-- TrigTrtHitCounts -->
-  <class name="TrigTrtHitCounts_p1" id="FB33CC3C-74B8-43DF-ABDA-E56BEA1D9D61"/>
-  <class name="std::vector<TrigTrtHitCounts_p1>" />
-  <class name="TrigTrtHitCounts_p2"/>
-  <class name="std::vector<TrigTrtHitCounts_p2>" />
-
-<!-- TrigTrtHitCountsCollection -->
-  <class name="TrigTrtHitCountsCollection_p2" id="47CBB4D9-381C-423E-A560-A7B5C325A5DD"/>
-  <class name="TrigTrtHitCountsCollection_tlp1" id="A0763CCA-553C-4365-8091-04CA2036FD97"/>
-  <class name="TrigTrtHitCountsCollection_p1" id="0CC00AC1-FB95-4E69-8C6E-29B6BB713AAE"/>
-  <class name="std::vector<TrigTrtHitCountsCollection_p1>" />
-
 <!-- TrigTrackCounts -->
   <class name="TrigTrackCounts_p2" id="BD8BB599-AE38-45CC-93DB-27F67C23DB62"/>
   <class name="std::vector<TrigTrackCounts_p2>" />

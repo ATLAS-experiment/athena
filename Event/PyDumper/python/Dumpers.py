@@ -3111,16 +3111,6 @@ def dump_MdtTrackSegment (t, f):
     return
 
 
-def dump_TrigTrtHitCounts (p, f):
-    fprint (f, '  barrel')
-    dump_TrigHisto1D (p.barrel(), f)
-    fprint (f, '\n      endcapA')
-    dump_TrigHisto1D (p.endcapA(), f)
-    fprint (f, '\n      endcapC')
-    dump_TrigHisto1D (p.endcapC(), f)
-    return
-
-
 def dump_InDetLowBetaCandidate (p, f):
     if p == InDetLowBetaCandidateNull:
         fprint (f, '(null)')
@@ -4509,7 +4499,6 @@ dumpspecs = [
     ["TrigRoiDescriptorCollection",          dump_TrigRoiDescriptor],
     ["CosmicMuonCollection",                 dump_CosmicMuon],
     ["MdtTrackSegmentCollection",            dump_MdtTrackSegment],
-    ["TrigTrtHitCountsCollection",           dump_TrigTrtHitCounts],
     ["InDet::InDetLowBetaContainer",         dump_InDetLowBetaCandidate],
     ["LArNoisyROSummary",                    dump_LArNoisyROSummary],
     ["SkimDecisionCollection",               dump_SkimDecision],
