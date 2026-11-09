@@ -51,8 +51,9 @@ def GeoModelCfg(flags):
                                 IgnoreTagDifference=flags.GeoModel.IgnoreTagDifference,
                                 SupportedGeometry=int(relversion[0]),
                                 nThreads = nThreads)
-    if flags.Common.ProductionStep == ProductionStep.Simulation or (flags.Common.ProductionStep == ProductionStep.FastChain and flags.Overlay.DataOverlay):
-        ## Protects GeoModelSvc in the simulation from the AlignCallbacks
+    if flags.Common.ProductionStep in [ProductionStep.Simulation, ProductionStep.FastChain]:
+        ## Protects GeoModelSvc in the simulation from the AlignCallbacks,
+        ## so that the alignment is applied to the GeoModel tree before Geant4
         gms.CheckTagInfo = False
     result.addService(gms, primary=True, create=True)
 
