@@ -142,7 +142,6 @@ private:
 	// data type using in the local reconstruction
 	// for the simulation data the value is 0, for the real data the value is 1. Unset value is -1
 	Gaudi::Property<Int_t> m_iDataType{this, "DataType", 1, "data type using in the local reconstruction"};	//data type (simulation or real data) using in the local reconstruction
-	Int_t m_iEvt{0};
 
 	//for transformations
 	Gaudi::Property<std::vector<bool>> m_bIsTransformInStation{this, "bIsTransformInStation", std::vector<bool>(8, false), "status if transformation in station will be calculated"};

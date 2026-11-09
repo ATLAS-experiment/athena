@@ -52,10 +52,7 @@ class ALFA_LocRec : public AthAlgorithm
 		ALFA_GeometryReader* m_pGeometryReader{new ALFA_GeometryReader()};
 
 		ALFA_LocRecEvCollection*	m_pLocRecEvCollection{nullptr};
-		ALFA_LocRecEvent*			m_pLocRecEvent{nullptr};
-
 		ALFA_LocRecODEvCollection*	m_pLocRecODEvCollection{nullptr};
-		ALFA_LocRecODEvent*			m_pLocRecODEvent{nullptr};
 
 		// Geometry properties, copied into m_Config in initialize()
 		Gaudi::Property<int> m_metrologyType{this, "MetrologyType", EMT_NOMINAL};//EGST_FILE
