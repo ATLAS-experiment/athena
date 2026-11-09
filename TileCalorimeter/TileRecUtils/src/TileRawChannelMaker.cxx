@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -25,13 +25,9 @@
 TileRawChannelMaker::TileRawChannelMaker(const std::string& name,
     ISvcLocator* pSvcLocator)
     : AthAlgorithm(name, pSvcLocator)
-    , m_fitOverflow(false)      
     , m_tileInfo(0)
     , m_ADCmaxMinusEps(0)
 {
-  declareProperty("FitOverflow", m_fitOverflow, "Fit or not overflows");
-  declareProperty("TileInfoName", m_infoName = "TileInfo");
-
   m_overflowReplaceTimeCut = 50.0;
   m_overflowReplacePedestalCut  = 170.0;
   m_overflowReplaceChi2Cut = 40000.0;  
@@ -69,7 +65,7 @@ StatusCode TileRawChannelMaker::initialize() {
   ATH_MSG_INFO( "Initialization completed successfully");
 
   // TileInfo
-  ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
+  ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName.value()) );
   m_ADCmaxMinusEps = m_tileInfo->ADCmax() - 0.01;  // indicates channels which were masked in background dataset
 
   return StatusCode::SUCCESS;

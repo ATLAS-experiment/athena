@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDERFITFILTER_H
@@ -88,25 +88,38 @@ class TileRawChannelBuilderFitFilter: public TileRawChannelBuilder {
     std::vector<double> m_dgPhysHi;
 
     // Parameters
-    int m_frameLength;
-    int m_channelNoiseRMS;
-    int m_maxIterate;
-    int m_extraSamplesLeft;
-    int m_extraSamplesRight;
-    double m_saturatedSample; // defines the saturated sample
-    double m_saturatedSampleError; // which error in terms of RMS is assigned to the saturated sample
-    double m_zeroSampleError;  // which error in terms of RMS is assigned to the zero sample (== 0)
-    double m_noiseThresholdRMS;     // for pedestal-like events only 2-parametric fit is applied
-    double m_maxTimeFromPeak; // max.time for fitting the pulse shapes. Samples with t>t0+m_MaxTimeFromPeak are not fitted.
+    Gaudi::Property<int> m_frameLength{this, "FrameLength", 9, "Frame length (number of samples)"};
+    Gaudi::Property<int> m_channelNoiseRMS{this, "RMSChannelNoise", 3, "Which channel noise RMS to use"};
+    Gaudi::Property<int> m_maxIterate{this, "MaxIterate", 9, "Maximum number of fit iterations"};
+    Gaudi::Property<int> m_extraSamplesLeft{this, "ExtraSamplesLeft", 0, "Increase window on left side"};
+    Gaudi::Property<int> m_extraSamplesRight{this, "ExtraSamplesRight", 0, "Increase window on right side"};
+    // defines the saturated sample
+    Gaudi::Property<double> m_saturatedSample{this, "SaturatedSample", -1.0, "Defines the saturated sample"};
+    // which error in terms of RMS is assigned to the saturated sample
+    Gaudi::Property<double> m_saturatedSampleError{this, "SaturatedSampleError", 6.0,
+        "Error in terms of RMS assigned to the saturated sample"};
+    // which error in terms of RMS is assigned to the zero sample (== 0)
+    Gaudi::Property<double> m_zeroSampleError{this, "ZeroSampleError", 100.0,
+        "Error in terms of RMS assigned to the zero sample (== 0)"};
+    // for pedestal-like events only 2-parametric fit is applied
+    Gaudi::Property<double> m_noiseThresholdRMS{this, "NoiseThresholdRMS", 3.0,
+        "For pedestal-like events only 2-parametric fit is applied"};
+    // max.time for fitting the pulse shapes. Samples with t>t0+m_MaxTimeFromPeak are not fitted.
+    Gaudi::Property<double> m_maxTimeFromPeak{this, "MaxTimeFromPeak", 250.0,
+        "Max time for fitting the pulse shapes. Samples with t>t0+MaxTimeFromPeak are not fitted"};
 
-    double m_noiseLow;  // default low gain noise from TileInfo used in simulation
-    double m_noiseHigh; // default high gain noise from TileInfo used in simulation
+    // default low gain noise from TileInfo used in simulation
+    Gaudi::Property<double> m_noiseLow{this, "NoiseLowGain", 0.6, "Default low gain noise"};
+    // default high gain noise from TileInfo used in simulation
+    Gaudi::Property<double> m_noiseHigh{this, "NoiseHighGain", 1.5, "Default high gain noise"};
 
     // Pulse shapes
     const TilePulseShapesStruct* m_pulseShapes;
 
-    bool m_disableNegativeAmp;
-    int m_specialDemoShape;
+    Gaudi::Property<bool> m_disableNegativeAmp{this, "DisableNegativeAmp", false, "Disable negative amplitude"};
+    // if >=0 - pulse shape for Demo is stored in non-default structures
+    Gaudi::Property<int> m_specialDemoShape{this, "SpecialDemoShape", -1,
+        "If >=0 - pulse shape for Demo is stored in non-default structures"};
 
     ToolHandle<TileCondToolNoiseSample> m_tileToolNoiseSample{this,
         "TileCondToolNoiseSample", "TileCondToolNoiseSample", "Tile sample noise tool"};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELBUILDERQIEFILTER_H
@@ -81,7 +81,7 @@ class TileRawChannelBuilderQIEFilter: public TileRawChannelBuilder {
     //void ofc2int(int nDigits, double* w_off, short* w_int, short& scale); // convert weights to dsp short int format
 
     //int m_maxIterations; //!< maximum number of iteration to perform
-    int m_pedestalMode;  //!< pedestal mode to use
+    Gaudi::Property<int> m_pedestalMode{this, "PedestalMode", 17, "Pedestal mode to use"};  //!< pedestal mode to use
     //bool m_confTB;       //!< use testbeam configuration
     //double m_timeForConvergence; //!< minimum time difference to quit iteration procedure
    // bool m_of2;    //!< bool variable for OF method: true=> OF2;  false=> OF1

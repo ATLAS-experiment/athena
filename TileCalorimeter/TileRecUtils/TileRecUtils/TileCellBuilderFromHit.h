@@ -53,6 +53,7 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "CLHEP/Random/RandomEngine.h"
+#include "CLHEP/Units/SystemOfUnits.h"
 
 // C++ STL includes
 #include <string>
@@ -129,15 +130,27 @@ class TileCellBuilderFromHit
 
     std::string m_infoName;
 
-    float m_eneForTimeCut;        //!< keep time for channels with energy above cut
-    float m_eneForTimeCutMBTS;    //!< similar cut for MBTS in pC
-    float m_zeroEnergy;           //!< energy to store in every PMT if both PMT are bad
-    int m_qualityCut;           //!< cut on channel quality (set energy to m_zeroEnergy for them)
+    // keep time only for cells above 70 MeV (more than 35 MeV in at least one PMT to be precise)
+    Gaudi::Property<float> m_eneForTimeCut{this, "EneForTimeCut", 35. * CLHEP::MeV,
+        "Keep time for channels with energy above cut"};
+    // the same cut for MBTS, but in pC, corresponds to 3 ADC counts or 35 MeV
+    Gaudi::Property<float> m_eneForTimeCutMBTS{this, "EneForTimeCutMBTS", 0.03675,
+        "Similar cut for MBTS in pC"};
+    // never set energy to zero, but set it to some small number
+    // this will help TopoCluster to assign proper weight to the cell if needed
+    // half a MeV in both PMTs i.e. one MeV in a cell
+    Gaudi::Property<float> m_zeroEnergy{this, "BadChannelZeroEnergy", 0.5 * CLHEP::MeV,
+        "Energy to store in every PMT if both PMT are bad"};
+    // cut on overflow in quality (if quality is 255 - assume that channel is bad)
+    Gaudi::Property<int> m_qualityCut{this, "QualityCut", 254,
+        "Cut on channel quality (set energy to m_zeroEnergy for them)"};
 
-    float m_maxTime;              //!< maximum time for the PMTs in the cels
-    float m_minTime;              //!< minimum time for the PMTs in the cels
-    bool m_maskBadChannels;      //!< if true=> bad channels are masked
-    float m_noiseSigma;          //!< cell electronic noise if CaloNoise is switched off 
+    Gaudi::Property<float> m_maxTime{this, "MaxTime", 25., "Maximum time for the PMTs in the cells"};
+    Gaudi::Property<float> m_minTime{this, "MinTime", -25., "Minimum time for the PMTs in the cells"};
+    Gaudi::Property<bool> m_maskBadChannels{this, "maskBadChannels", false,
+        "If true => bad channels are masked"};
+    Gaudi::Property<float> m_noiseSigma{this, "NoiseSigma", 20. * CLHEP::MeV,
+        "Cell electronic noise if CaloNoise is switched off"};
 
     const TileID* m_tileID{nullptr};   //!< Pointer to TileID
     const TileTBID* m_tileTBID{nullptr}; //!< Pointer to TileTBID

@@ -14,6 +14,7 @@
 // Calo includes
 #include "CaloInterface/ICaloCellMakerTool.h"
 
+#include "CLHEP/Units/SystemOfUnits.h"
 
 #include <string>
 #include <vector>
@@ -41,15 +42,22 @@ class TileCellMaskingTool: public AthAlgTool, virtual public ICaloCellMakerTool 
     StatusCode fillIncludedCellsMap();
     void killer(std::string_view component, int ros, int drw, int index);
 
-    std::vector<std::string> m_rejectedTileDrawer;
-    std::vector<std::string> m_rejectedTileMB;
-    std::vector<std::string> m_rejectedTileDigitizer;
-    std::vector<std::string> m_rejectedTileDMU;
-    std::vector<std::string> m_rejectedTileChannels;
-    float m_zeroEnergy;
+    Gaudi::Property<std::vector<std::string>> m_rejectedTileDrawer{this,
+        "RejectedTileDrawer", {}, "List of rejected Tile drawers (ros drawer)"};
+    Gaudi::Property<std::vector<std::string>> m_rejectedTileMB{this,
+        "RejectedTileMB", {}, "List of rejected Tile motherboards (ros drawer mb)"};
+    Gaudi::Property<std::vector<std::string>> m_rejectedTileDigitizer{this,
+        "RejectedTileDigitizer", {}, "List of rejected Tile digitizers (ros drawer digitizer)"};
+    Gaudi::Property<std::vector<std::string>> m_rejectedTileDMU{this,
+        "RejectedTileDMU", {}, "List of rejected Tile DMUs (ros drawer dmu)"};
+    Gaudi::Property<std::vector<std::string>> m_rejectedTileChannels{this,
+        "RejectedTileChannels", {}, "List of rejected Tile channels (ros drawer channel)"};
+    // half a MeV in both PMTs i.e. one MeV in a cell
+    Gaudi::Property<float> m_zeroEnergy{this, "BadChannelZeroEnergy", 0.5 * CLHEP::MeV,
+        "Energy assigned to masked channels"};
 
-    const TileID* m_tileID;
-    const TileHWID* m_tileHWID;
+    const TileID* m_tileID{nullptr};
+    const TileHWID* m_tileHWID{nullptr};
 
     std::bitset<65536> m_includedCellsMap;
 

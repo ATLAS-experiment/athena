@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -83,13 +83,18 @@ class TileRawChannelNoiseFilter: public extends<AthAlgTool, ITileRawChannelTool>
                                                   "TileDQstatus", 
                                                   "TileDQstatus key"};
 
-    float m_truncationThresholdOnAbsEinSigma;
-    float m_minimumNumberOfTruncatedChannels;
-    bool m_useTwoGaussNoise;
-    bool m_useGapCells;
-    float m_maxNoiseSigma;
+    Gaudi::Property<float> m_truncationThresholdOnAbsEinSigma{this,
+        "TruncationThresholdOnAbsEinSigma", 3.0, "Truncation threshold on |E| in units of noise sigma"}; // 3 sigma of ADC HF noise by default
+    Gaudi::Property<float> m_minimumNumberOfTruncatedChannels{this,
+        "MinimumNumberOfTruncatedChannels", 0.6, "Minimum number (or fraction if < 1) of truncated channels"}; // at least 60% of channels should be below threshold
+    Gaudi::Property<bool> m_useTwoGaussNoise{this,
+        "UseTwoGaussNoise", false, "Use two-gaussian noise"}; // do not use 2G - has no sense for ADC HF noise for the moment
+    Gaudi::Property<bool> m_useGapCells{this,
+        "UseGapCells", false, "Use gap cells for noise filter as all normal cells"};
+    Gaudi::Property<float> m_maxNoiseSigma{this, "MaxNoiseSigma", 5.0,
+        "Channels with noise more than that value are igonred in calculation of correction"};
     // TileInfo
-    std::string m_infoName;
+    Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo", "Name of TileInfo object"};
     const TileInfo* m_tileInfo;
     float m_ADCmaskValueMinusEps; //!< indicates channels which were masked in background dataset
 };

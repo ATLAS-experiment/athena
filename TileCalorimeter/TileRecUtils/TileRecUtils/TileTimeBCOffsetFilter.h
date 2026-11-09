@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_ITILETIMEBCOFFSETFILTER_H
@@ -108,14 +108,21 @@ class TileTimeBCOffsetFilter: public extends<AthAlgTool, ITileRawChannelTool> {
                                                   "TileDQstatus", 
                                                   "TileDQstatus key"};
 
-    float m_ene_threshold_3chan;
-    float m_ene_threshold_1chan;
-    float m_time_threshold_diff;
-    float m_time_threshold_ref_ch;
-    float m_ene_threshold_aver_time;
-    float m_sample_diffmaxmin_threshold_hg;
-    float m_sample_diffmaxmin_threshold_lg;
-    bool m_checkDCS;
+    Gaudi::Property<float> m_ene_threshold_3chan{this, "EneThreshold3", 1000,
+        "Energy threshold for the reference channel when 3 channels are checked"};
+    Gaudi::Property<float> m_ene_threshold_1chan{this, "EneThreshold1", 3000,
+        "Energy threshold for the reference channel when 1 channel is checked"};
+    Gaudi::Property<float> m_time_threshold_diff{this, "TimeThreshold", 15,
+        "Threshold on time difference to identify a time jump"};
+    Gaudi::Property<float> m_time_threshold_ref_ch{this, "RefTimeThreshold", 10,
+        "Threshold on absolute time of the reference channel"};
+    Gaudi::Property<float> m_ene_threshold_aver_time{this, "AverTimeEneThreshold", 500,
+        "Energy threshold for channels used in the average DMU time calculation"};
+    Gaudi::Property<float> m_sample_diffmaxmin_threshold_hg{this, "SampleDiffMaxMin_HG", 15,
+        "Threshold on max-min sample difference in high gain"};
+    Gaudi::Property<float> m_sample_diffmaxmin_threshold_lg{this, "SampleDiffMaxMin_LG", -1,
+        "Threshold on max-min sample difference in low gain"};
+    Gaudi::Property<bool> m_checkDCS{this, "CheckDCS", false, "Check Tile DCS status"};
 
 };
 #endif

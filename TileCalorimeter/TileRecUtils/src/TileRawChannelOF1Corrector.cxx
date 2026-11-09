@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Tile includes
@@ -22,8 +22,6 @@ TileRawChannelOF1Corrector::TileRawChannelOF1Corrector(const std::string& type,
     : base_class(type, name, parent)
     , m_tileHWID(0)
 {
-  declareProperty("ZeroAmplitudeWithoutDigits", m_zeroAmplitudeWithoutDigits = true);
-  declareProperty("CorrectPedestalDifference", m_correctPedestalDifference = true);
 }
 
 //========================================================

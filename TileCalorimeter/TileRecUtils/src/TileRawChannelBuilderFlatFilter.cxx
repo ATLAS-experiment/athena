@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileEvent/TileRawChannel.h"
@@ -47,19 +47,6 @@ TileRawChannelBuilderFlatFilter::TileRawChannelBuilderFlatFilter(const std::stri
   declareInterface< TileRawChannelBuilderFlatFilter >(this);
     
   m_rawChannelContainerKey = "TileRawChannelFlat";
-
-  //declare properties
-  declareProperty("PedStart",m_pedStart = 0);
-  declareProperty("PedLength",m_pedLength = 1);
-  declareProperty("PedOffset",m_pedOffset = 0);
-  declareProperty("SignalStart",m_signalStart = 1);
-  declareProperty("SignalLength",m_signalLength = 8);
-  declareProperty("FilterLength",m_filterLength = 5);
-  declareProperty("FrameLength",m_frameLength = 9);
-  declareProperty("DeltaCutLo",m_deltaCut[0] = 4.5);
-  declareProperty("DeltaCutHi",m_deltaCut[1] = 8.5);
-  declareProperty("RMSCutLo",m_rmsCut[0] = 1.0);
-  declareProperty("RMSCutHi",m_rmsCut[1] = 2.5);
 }
 
 /**
@@ -514,8 +501,10 @@ void TileRawChannelBuilderFlatFilter::flatFilter(const std::vector<float>& sampl
   }
 
   // check if signal in frame
-  signal = isSignalInFrame(samples, m_deltaCut[gain % 2], m_rmsCut[gain % 2]
-                           , frameMax, frameMin, frameMean, frameRMS);
+  signal = isSignalInFrame(samples,
+                           (gain % 2) ? m_deltaCutHi : m_deltaCutLo,
+                           (gain % 2) ? m_rmsCutHi : m_rmsCutLo,
+                           frameMax, frameMin, frameMean, frameRMS);
 
   if (signal && (m_pedOffset < 0)) {
     // take pedestal before signal

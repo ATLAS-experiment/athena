@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_ITILERAWCHANNELBUILDER_H
@@ -133,32 +133,35 @@ class TileRawChannelBuilder: public AthAlgTool {
     std::unique_ptr<TileMutableRawChannelContainer> m_rawChannelCnt;
 
     // parameters for RawChannelContainer
-    TileFragHash::TYPE m_rChType;
-    TileRawChannelUnit::UNIT m_rChUnit;
-    unsigned int m_bsflags;
+    TileFragHash::TYPE m_rChType{TileFragHash::Default};
+    TileRawChannelUnit::UNIT m_rChUnit{TileRawChannelUnit::ADCcounts};
+    unsigned int m_bsflags{0};
     // parameter to determine which sample to start with the analysis
-    int m_firstSample;
+    Gaudi::Property<int> m_firstSample{this, "FirstSample", 0, "First sample to start with the analysis"};
     // Should energy be calibrated
-    bool m_calibrateEnergy;
+    Gaudi::Property<bool> m_calibrateEnergy{this, "calibrateEnergy", false, "Calibrate energy"};
 
     // Should time be calibrated (delta added from laser run)
-    bool m_correctTime;
+    Gaudi::Property<bool> m_correctTime{this, "correctTime", false, "Correct time"};
 
 
     // Use DSP noise correction for incomplete containers
-    bool m_useDSP;
+    Gaudi::Property<bool> m_useDSP{this, "UseDSPCorrection", true, "Use DSP noise correction for incomplete containers"};
 
     // thresholds for parabolic amplitude correction (used in optimal filter without iterations)
-    float m_ampMinThresh;   //!< correct amplitude if it's above amplitude threshold (in ADC counts)
-    float m_timeMinThresh;   //!< correct amplitude is time is above time min threshold
-    float m_timeMaxThresh;   //!< correct amplitude is time is below time max threshold
+    Gaudi::Property<float> m_ampMinThresh{this, "AmpMinForAmpCorrection", 15.0,
+        "Correct amplitude if it's above amplitude threshold (in ADC counts)"};
+    Gaudi::Property<float> m_timeMinThresh{this, "TimeMinForAmpCorrection", -12.5,
+        "Correct amplitude if time is above time min threshold"};
+    Gaudi::Property<float> m_timeMaxThresh{this, "TimeMaxForAmpCorrection", 12.5,
+        "Correct amplitude if time is below time max threshold"};
 
     // runType used to override value of trigType in event
-    int m_runType;
+    Gaudi::Property<int> m_runType{this, "RunType", 0, "Run type used to override value of trigType in event"};
 
     // Tile objects
-    const TileID* m_tileID;
-    const TileHWID* m_tileHWID;
+    const TileID* m_tileID{nullptr};
+    const TileHWID* m_tileHWID{nullptr};
 
     ToolHandleArray<ITileRawChannelTool> m_noiseFilterTools{this,
         "NoiseFilterTools", {}, "Tile noise filter tools"};
@@ -179,47 +182,47 @@ class TileRawChannelBuilder: public AthAlgTool {
     ServiceHandle<TileCablingSvc> m_cablingSvc{ this,
         "TileCablingSvc", "TileCablingSvc", "The Tile cabling service"};
 
-    const TileCablingService* m_cabling; //!< TileCabling instance
+    const TileCablingService* m_cabling{nullptr}; //!< TileCabling instance
 
     Gaudi::Property<std::vector<int>> m_demoFragIDs{this,
           "DemoFragIDs", {}, "List of Tile frag IDs with new electronics (demonstrator)"};
 
-    int m_trigType;
-    bool m_idophys;   // Phys fitting
-    bool m_idolas; // Laser fitting
-    bool m_idoped; // Ped run, phys fitting
-    bool m_idocis; // CIS fitting
-    int m_cischan; // which channel is fired by CIS
-    double m_capdaq; // Capacitor
+    int m_trigType{0};
+    bool m_idophys{false};   // Phys fitting
+    bool m_idolas{false}; // Laser fitting
+    bool m_idoped{false}; // Ped run, phys fitting
+    bool m_idocis{false}; // CIS fitting
+    int m_cischan{-1}; // which channel is fired by CIS
+    double m_capdaq{100.}; // Capacitor
 
-    unsigned int m_evtCounter;
-    unsigned int m_chCounter;
+    unsigned int m_evtCounter{0};
+    unsigned int m_chCounter{0};
 
-    int m_nChL;
-    int m_nChH;
-    double m_RChSumL;
-    double m_RChSumH;
+    int m_nChL{0};
+    int m_nChH{0};
+    double m_RChSumL{0.};
+    double m_RChSumH{0.};
 
     Overflows_t m_overflows;
-    int m_dataPoollSize;
+    Gaudi::Property<int> m_dataPoollSize{this, "DataPoolSize", -1, "Data pool size"};
 
     static const int MAX_CHANNELS = 48;
     static const int MAX_DMUS = 16;
     int m_error[MAX_CHANNELS];
-    int m_lastDrawer = -1;
-    bool m_badDrawer = false;
-    
-    bool m_notUpgradeCabling;
+    int m_lastDrawer{-1};
+    bool m_badDrawer{false};
+
+    bool m_notUpgradeCabling{true};
 
     // TileInfo
-    std::string m_infoName;
-    const TileInfo* m_tileInfo;
-    int m_i_ADCmax;
-    float m_f_ADCmax;
-    int m_i_ADCmaxPlus1;
-    float m_f_ADCmaxPlus1;
-    float m_ADCmaxMinusEps;
-    float m_ADCmaskValueMinusEps; //!< indicates channels which were masked in background dataset
+    Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo", "Name of TileInfo object"};
+    const TileInfo* m_tileInfo{nullptr};
+    int m_i_ADCmax{0};
+    float m_f_ADCmax{0.f};
+    int m_i_ADCmaxPlus1{0};
+    float m_f_ADCmaxPlus1{0.f};
+    float m_ADCmaxMinusEps{0.f};
+    float m_ADCmaskValueMinusEps{0.f}; //!< indicates channels which were masked in background dataset
 
 private:
     // find all bad patterns in a drawer and fill internal static arrays

@@ -24,13 +24,6 @@ TileRawCorrelatedNoise::TileRawCorrelatedNoise(const std::string& name, ISvcLoca
   : AthAlgorithm(name, pSvcLocator)
 {
 // #############################################################################
-
-  declareProperty("nRMSThreshold", m_nRMS_threshold = 2.);
-  declareProperty("AlphaMatrixFilePrefix", m_alphaMatrixFilePrefix  = "AlphaMatrix");
-  declareProperty("MeanFilePrefix", m_meanFilePrefix  = "Mean");
-  declareProperty("Sample3RMSFilePrefix", m_sample3RMSFilePrefix  = "RMS");
-  declareProperty("UseMeanFiles", m_useMeanFiles = true);
-  declareProperty("PMTOrder", m_pmtOrder = false);
 }
 
 // #############################################################################
@@ -74,7 +67,7 @@ StatusCode TileRawCorrelatedNoise::initialize() {
       else if (Ros == 3) sprintf(Rosstr, "EBA");
       else sprintf(Rosstr, "EBC");
 
-      sprintf(buff, "%s%s%02d.txt", m_alphaMatrixFilePrefix.c_str(), Rosstr, Drawer + 1);
+      sprintf(buff, "%s%s%02d.txt", m_alphaMatrixFilePrefix.value().c_str(), Rosstr, Drawer + 1);
       std::string filestr(buff);
       std::string file = PathResolver::find_file(buff, "DATAPATH");
 //      ATH_MSG_INFO( "  buff=" << buff
@@ -150,7 +143,7 @@ StatusCode TileRawCorrelatedNoise::initialize() {
           sprintf(Rosstr, "EBA");
         else
           sprintf(Rosstr, "EBC");
-        sprintf(buff, "%s%s%02d.txt", m_meanFilePrefix.c_str(), Rosstr, Drawer + 1);
+        sprintf(buff, "%s%s%02d.txt", m_meanFilePrefix.value().c_str(), Rosstr, Drawer + 1);
         std::string filestr(buff);
         std::string file = PathResolver::find_file(buff, "DATAPATH");
         if (file.size() == 0) {
@@ -228,7 +221,7 @@ StatusCode TileRawCorrelatedNoise::initialize() {
       else if (Ros == 3) sprintf(Rosstr, "EBA");
       else sprintf(Rosstr, "EBC");
 
-      sprintf(buff, "%s%s%02d.txt", m_sample3RMSFilePrefix.c_str(), Rosstr, Drawer + 1);
+      sprintf(buff, "%s%s%02d.txt", m_sample3RMSFilePrefix.value().c_str(), Rosstr, Drawer + 1);
       std::string filestr(buff);
       std::string file = PathResolver::find_file(buff, "DATAPATH");
       if (file.size() == 0) {

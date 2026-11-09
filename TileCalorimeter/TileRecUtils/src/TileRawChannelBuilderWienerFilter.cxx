@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileEvent/TileRawChannel.h"
@@ -57,18 +57,6 @@ TileRawChannelBuilderWienerFilter::TileRawChannelBuilderWienerFilter(const std::
   declareInterface< TileRawChannelBuilderWienerFilter >(this);
 
   m_rawChannelContainerKey = "TileRawChannelWiener";
-
-  //declare properties
-  declareProperty("MaxIterations",m_maxIterations = 5);
-  declareProperty("PedestalMode",m_pedestalMode = 17);
-  declareProperty("TimeForConvergence",m_timeForConvergence = 0.5);
-  declareProperty("ConfTB",m_confTB = false);
-  declareProperty("Minus1Iteration",m_minus1Iter = false);
-  declareProperty("AmplitudeCorrection",m_correctAmplitude = false);
-  declareProperty("TimeCorrection", m_correctTimeNI = false);
-  declareProperty("BestPhase",m_bestPhase = false);
-  declareProperty("EmulateDSP",m_emulateDsp = false);
-  declareProperty("MC",m_isMC = false);
 }
 
 
@@ -96,14 +84,14 @@ StatusCode TileRawChannelBuilderWienerFilter::initialize() {
   if (m_maxIterations > 1) m_bsflags |= 0x4000;
   if (m_bestPhase) m_bsflags |= 0x8000;
 
-  ATH_MSG_DEBUG( " MaxIterations=" << m_maxIterations
-              << " PedestalMode=" << m_pedestalMode
-              << " TimeForConvergence=" << m_timeForConvergence
-              << " ConfTB=" << m_confTB
-              << " Minus1Iteration=" << m_minus1Iter
-              << " AmplitudeCorrection=" << m_correctAmplitude
-              << " TimeCorrection=" << m_correctTimeNI
-              << " Best Phase " << m_bestPhase );
+  ATH_MSG_DEBUG( " MaxIterations=" << m_maxIterations.value()
+              << " PedestalMode=" << m_pedestalMode.value()
+              << " TimeForConvergence=" << m_timeForConvergence.value()
+              << " ConfTB=" << m_confTB.value()
+              << " Minus1Iteration=" << m_minus1Iter.value()
+              << " AmplitudeCorrection=" << m_correctAmplitude.value()
+              << " TimeCorrection=" << m_correctTimeNI.value()
+              << " Best Phase " << m_bestPhase.value() );
 
   m_nSamples = m_tileInfo->NdigitSamples();
   m_t0SamplePosition = m_tileInfo->ItrigSample();
@@ -115,13 +103,13 @@ StatusCode TileRawChannelBuilderWienerFilter::initialize() {
              << " maxTime=" << m_maxTime );
 
   if (m_pedestalMode % 10 > 2 && m_nSamples != m_pedestalMode % 10) {
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Changing PedestalMode from " << m_pedestalMode;
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << "Changing PedestalMode from " << m_pedestalMode.value();
     m_pedestalMode = (m_pedestalMode / 10) * 10 + m_nSamples;
-    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " to " << m_pedestalMode << endmsg;
+    if (msgLvl(MSG::DEBUG)) msg(MSG::DEBUG) << " to " << m_pedestalMode.value() << endmsg;
   }
 
   if (m_nSamples != 7 && (m_pedestalMode == 71 || m_pedestalMode == 7621)) {
-    ATH_MSG_ERROR( "Incompatable pedestal mode [" << m_pedestalMode
+    ATH_MSG_ERROR( "Incompatable pedestal mode [" << m_pedestalMode.value()
                    << "] and number of samples [" << m_nSamples << "]" );
     return StatusCode::FAILURE;
   }
@@ -274,7 +262,7 @@ int TileRawChannelBuilderWienerFilter::findMaxDigitPosition() {
 float TileRawChannelBuilderWienerFilter::getPedestal(int ros, int drawer, int channel, int gain, const EventContext &ctx) {
   float pedestal = 0.;
 
-  switch (m_pedestalMode) {
+  switch (m_pedestalMode.value()) {
     case -1:
       // use pedestal from conditions DB
       pedestal = m_tileToolNoiseSample->getPed(TileCalibUtils::getDrawerIdx(ros, drawer), channel, gain, TileRawChannelUnit::ADCcounts, ctx);

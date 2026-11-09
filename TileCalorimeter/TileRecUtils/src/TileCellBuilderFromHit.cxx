@@ -71,13 +71,6 @@ const InterfaceID& TileCellBuilderFromHit::interfaceID( ) {
 TileCellBuilderFromHit::TileCellBuilderFromHit(const std::string& type, const std::string& name,
     const IInterface* parent)
   : base_class(type, name, parent)
-  , m_eneForTimeCut(35. * MeV) // keep time only for cells above 70 MeV (more than 35 MeV in at least one PMT to be precise)
-  , m_eneForTimeCutMBTS(0.03675) // the same cut for MBTS, but in pC, corresponds to 3 ADC counts or 35 MeV
-  , m_qualityCut(254) // cut on overflow in quality (if quality is 255 - assume that channel is bad)
-  , m_maxTime (25.)
-  , m_minTime(-25.)
-  , m_maskBadChannels(false)
-  , m_noiseSigma(20.*MeV)
   , m_RChType(TileFragHash::Default)
   , m_RUN2(false)
   , m_RUN2plus(false)
@@ -87,28 +80,6 @@ TileCellBuilderFromHit::TileCellBuilderFromHit(const std::string& type, const st
 
   //memset(m_drawerRunStatus, 0, sizeof(m_drawerRunStatus));
   //memset(m_eventErrorCounter, 0, sizeof(m_eventErrorCounter));
-
-  // never set energy to zero, but set it to some small number
-  // this will help TopoCluster to assign proper weight to the cell if needed
-  m_zeroEnergy = 0.5 * MeV; // half a MeV in both PMTs i.e. one MeV in a cell
-
-  // Noise Sigma
-  declareProperty("NoiseSigma",m_noiseSigma);
-
-  // Maximum and minimum time for a cell to be included:
-  declareProperty("MaxTime", m_maxTime);
-  declareProperty("MinTime", m_minTime);
-
-  // put zero energy in bad channels and recover from single-channel failure using second PMT is a cell
-  declareProperty("maskBadChannels", m_maskBadChannels);
-
-  // PMT energy will be set to this value if channel is bad
-  declareProperty("BadChannelZeroEnergy", m_zeroEnergy);
-  // PMT with energy above cut will preserve time info in ESD
-  declareProperty("EneForTimeCut", m_eneForTimeCut);
-  declareProperty("EneForTimeCutMBTS", m_eneForTimeCutMBTS);
-  // PMT with quality greater than this cut will be masked
-  declareProperty("QualityCut", m_qualityCut);
 }
 
 /**
@@ -155,14 +126,14 @@ StatusCode TileCellBuilderFromHit::initialize() {
     ATH_CHECK( m_caloNoiseKey.initialize() );
     ATH_MSG_INFO( "Reading electronic noise from DB" );
   } else {
-    ATH_MSG_INFO( "Noise Sigma " << m_noiseSigma << " MeV is selected!" );
+    ATH_MSG_INFO( "Noise Sigma " << m_noiseSigma.value() << " MeV is selected!" );
   }
 
   ATH_CHECK( m_rndmSvc.retrieve());
   (void) m_rndmSvc->getEngine(this); // get this created early.
 
-  ATH_MSG_INFO( "max time thr  " << m_maxTime << " ns" );
-  ATH_MSG_INFO( "min time thr  " << m_minTime << " ns" );
+  ATH_MSG_INFO( "max time thr  " << m_maxTime.value() << " ns" );
+  ATH_MSG_INFO( "min time thr  " << m_minTime.value() << " ns" );
   
   m_E1_TOWER = (m_tileID->cell_hash_max() < 10000) ? 10 : 40;
 

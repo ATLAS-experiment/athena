@@ -50,6 +50,8 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
 
+#include "CLHEP/Units/SystemOfUnits.h"
+
 // C++ STL includes
 #include <string>
 #include <vector>
@@ -165,39 +167,68 @@ private:
 
     std::string m_dspRawChannelContainer;
 
-    float m_eneForTimeCut;        //!< keep time for channels with energy above cut
-    float m_eneForTimeCutMBTS;    //!< similar cut for MBTS in pC
-    float m_zeroEnergy;           //!< energy to store in every PMT if both PMT are bad
-    int m_qualityCut;           //!< cut on channel quality (set energy to m_zeroEnergy for them)
-    bool m_correctTime;          //!< should time be corrected (deltat added from CondDB)
-    bool m_correctAmplitude; //!< If true, amplitude is corrected by parabolic function (needed for OF without iterations)
-    bool m_of2;              //!< If true, assume OF2 method for amplitude correction, otherwise - OF1
-    bool m_mergeChannels;        //!< If true, missing raw channels are taken from DSP container
+    // keep time only for cells above 70 MeV (more than 35 MeV in at least one PMT to be precise)
+    Gaudi::Property<float> m_eneForTimeCut{this, "EneForTimeCut", 35. * CLHEP::MeV,
+        "Keep time for channels with energy above cut"};
+    // the same cut for MBTS, but in pC, corresponds to 3 ADC counts or 35 MeV
+    Gaudi::Property<float> m_eneForTimeCutMBTS{this, "EneForTimeCutMBTS", 0.03675,
+        "Similar cut for MBTS in pC"};
+    // never set energy to zero, but set it to some small number
+    // this will help TopoCluster to assign proper weight to the cell if needed
+    // half a MeV in both PMTs i.e. one MeV in a cell
+    Gaudi::Property<float> m_zeroEnergy{this, "BadChannelZeroEnergy", 0.5 * CLHEP::MeV,
+        "Energy to store in every PMT if both PMT are bad"};
+    // cut on overflow in quality (if quality is 255 - assume that channel is bad)
+    Gaudi::Property<int> m_qualityCut{this, "QualityCut", 254,
+        "Cut on channel quality (set energy to m_zeroEnergy for them)"};
+    Gaudi::Property<bool> m_correctTime{this, "correctTime", false,
+        "Should time be corrected (deltat added from CondDB)"};
+    Gaudi::Property<bool> m_correctAmplitude{this, "correctAmplitude", false,
+        "If true, amplitude is corrected by parabolic function (needed for OF without iterations)"};
+    Gaudi::Property<bool> m_of2{this, "OF2", true,
+        "If true, assume OF2 method for amplitude correction, otherwise - OF1"};
+    Gaudi::Property<bool> m_mergeChannels{this, "mergeChannels", true,
+        "If true, missing raw channels are taken from DSP container"};
 
     // thresholds for parabolic amplitude correction
-    float m_ampMinThresh;   //!< correct amplitude if it's above amplitude threshold (in ADC counts)
-    float m_timeMinThresh;                //!< correct amplitude is time is above time min threshold
-    float m_timeMaxThresh;                //!< correct amplitude is time is below time max threshold
+    Gaudi::Property<float> m_ampMinThresh{this, "AmpMinForAmpCorrection", 15.0,
+        "Correct amplitude if it's above amplitude threshold (in ADC counts)"};
+    Gaudi::Property<float> m_timeMinThresh{this, "TimeMinForAmpCorrection", -12.5,
+        "Correct amplitude if time is above time min threshold"};
+    Gaudi::Property<float> m_timeMaxThresh{this, "TimeMaxForAmpCorrection", 12.5,
+        "Correct amplitude if time is below time max threshold"};
 
-    float m_minEneChan[3];        //!< channel energy thresholds for masking (normal,gap,mbts)
-    float m_eThreshold;           //!< cell energy threshold to consider the cell
-    float m_maxTimeDiff;          //!< maximum time difference between the PMTs in the cell
-    float m_maxTime;              //!< maximum time for the PMTs in the cels
-    float m_minTime;              //!< minimum time for the PMTs in the cels
-    float m_maxChi2;              //!< maximum chi2 for the PMTs in the cels
-    float m_minChi2;              //!< minimum chi2 for the PMTs in the cels
-    bool m_thresholdNotSet;      //!< bool variable to check whether some threshold have been set
-    bool m_fullSizeCont;
-    bool m_maskBadChannels;      //!< if true=> bad channels are masked
-    bool m_fakeCrackCells;       //!< if true=> fake E3/E4 cells added
-    int  m_skipGain;             //!< for two-gain calib runs skip one of two gains
-    int m_useDemoCabling;
-    bool m_checkDCS;
+    // channel energy thresholds for masking (normal,gap,mbts)
+    Gaudi::Property<float> m_minEneChan{this, "MinEnergyChan", -5000. * CLHEP::MeV,
+        "Normal channel energy threshold for masking"};
+    Gaudi::Property<float> m_minEneGap{this, "MinEnergyGap", -10000. * CLHEP::MeV,
+        "Gap channel energy threshold for masking"};
+    Gaudi::Property<float> m_minEneMBTS{this, "MinEnergyMBTS", -999999. * CLHEP::MeV,
+        "MBTS channel energy threshold for masking (not used currently)"};
+    Gaudi::Property<float> m_eThreshold{this, "EThreshold", -100000.,
+        "Cell energy threshold (in MeV) to consider the cell"};
+    Gaudi::Property<float> m_maxTimeDiff{this, "MaxTimeDiff", 100000.,
+        "Maximum time difference between the PMTs in the cell"};
+    Gaudi::Property<float> m_maxTime{this, "MaxTime", 100000., "Maximum time for the PMTs in the cells"};
+    Gaudi::Property<float> m_minTime{this, "MinTime", -100000., "Minimum time for the PMTs in the cells"};
+    Gaudi::Property<float> m_maxChi2{this, "MaxChi2", 100000., "Maximum chi2 for the PMTs in the cells"};
+    Gaudi::Property<float> m_minChi2{this, "MinChi2", -100000., "Minimum chi2 for the PMTs in the cells"};
+    bool m_thresholdNotSet{true};      //!< bool variable to check whether some threshold have been set
+    Gaudi::Property<bool> m_fullSizeCont{this, "fullSizeCont", true, "Use full size cell container"};
+    Gaudi::Property<bool> m_maskBadChannels{this, "maskBadChannels", true,
+        "Put zero energy in bad channels and recover from single-channel failure using second PMT in a cell"};
+    Gaudi::Property<bool> m_fakeCrackCells{this, "fakeCrackCells", false,
+        "Create fake E3/E4 crack scintillators with zero energy when they do not exist"};
+    Gaudi::Property<int> m_skipGain{this, "SkipGain", -1,
+        "For two-gain calib runs skip one of two gains (never skip any gain by default)"};
+    Gaudi::Property<int> m_useDemoCabling{this, "UseDemoCabling", 0,
+        "Use demonstrator cabling (if set to 2015 - assume TB 2015 cabling)"};
+    Gaudi::Property<bool> m_checkDCS{this, "CheckDCS", false, "Check DCS state"};
 
-    const TileID* m_tileID;   //!< Pointer to TileID
-    const TileTBID* m_tileTBID; //!< Pointer to TileTBID
-    const TileHWID* m_tileHWID; //!< Pointer to TileHWID
-    const TileCablingService* m_cabling; //!< TileCabling instance
+    const TileID* m_tileID{nullptr};   //!< Pointer to TileID
+    const TileTBID* m_tileTBID{nullptr}; //!< Pointer to TileTBID
+    const TileHWID* m_tileHWID{nullptr}; //!< Pointer to TileHWID
+    const TileCablingService* m_cabling{nullptr}; //!< TileCabling instance
 
     /**
      * @brief Name of TileBadChannels in condition store
@@ -229,10 +260,8 @@ private:
     ServiceHandle<TileCablingSvc> m_cablingSvc{ this,
         "TileCablingSvc", "TileCablingSvc", "The Tile cabling service"};
 
-    const TileDetDescrManager* m_tileMgr; //!< Pointer to TileDetDescrManager
-    const MbtsDetDescrManager* m_mbtsMgr; //!< Pointer to MbtsDetDescrManager
-
-    //unsigned int m_bsflags;              //!< other flags stored in TileRawChannelContainer
+    const TileDetDescrManager* m_tileMgr{nullptr}; //!< Pointer to TileDetDescrManager
+    const MbtsDetDescrManager* m_mbtsMgr{nullptr}; //!< Pointer to MbtsDetDescrManager
 
     // These were accumulated, but never actually used.
     // They also spoil reentrancy, so leave them commented-out for now.
@@ -386,15 +415,15 @@ private:
     enum CELL_CHANNEL {E1_CHANNEL = 12};
     enum CELL_TOWER {E1_TOWER = 10, E1_TOWER_UPGRADE_ABC = 42};
     int m_towerE1 = E1_TOWER;
-    bool m_notUpgradeCabling;
-    bool m_run2;
+    bool m_notUpgradeCabling{true};
+    bool m_run2{false};
 
     // TileInfo
-    std::string m_infoName;
-    const TileInfo* m_tileInfo;
-    float m_ADCmaskValueMinusEps;
-    float m_ADCmaskValuePlusEps;
-    bool m_run2plus;
+    Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo", "Name of TileInfo object"};
+    const TileInfo* m_tileInfo{nullptr};
+    float m_ADCmaskValueMinusEps{0.f};
+    float m_ADCmaskValuePlusEps{0.f};
+    bool m_run2plus{false};
 };
 
 #endif

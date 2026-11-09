@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILERECUTILS_TILERAWCHANNELMAKER_H
@@ -72,7 +72,7 @@ class TileRawChannelMaker: public AthAlgorithm {
     ToolHandleArray<TileRawChannelBuilder> m_tileRawChannelBuilderList{this,
        "TileRawChannelBuilder", {}, "Tile raw channels builder tools"};
 
-    bool m_fitOverflow;
+    Gaudi::Property<bool> m_fitOverflow{this, "FitOverflow", false, "Fit or not overflows"};
     ToolHandle<TileRawChannelBuilder> m_tileRawChannelBuilderFitOverflow{this,
        "TileRawChannelBuilderFitOverflow", "", "Tile raw channels builder tool to fit overflows"};
 
@@ -81,7 +81,7 @@ class TileRawChannelMaker: public AthAlgorithm {
     float m_overflowReplaceChi2Cut;
 
     // TileInfo
-    std::string m_infoName;
+    Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo", "Name of TileInfo object"};
     const TileInfo* m_tileInfo;
     float m_ADCmaxMinusEps;
 
