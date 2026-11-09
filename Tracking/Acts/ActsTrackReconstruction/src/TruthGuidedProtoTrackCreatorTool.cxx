@@ -3,7 +3,7 @@
   */
 
 #include "src/TruthGuidedProtoTrackCreatorTool.h"
-#include "TrkEventPrimitives/ParticleHypothesis.h"
+#include "Acts/EventData/ParticleHypothesis.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "TruthUtils/HepMCHelpers.h"
 
@@ -144,14 +144,7 @@ ActsTrk::TruthGuidedProtoTrackCreatorTool::makeDummyParams (const HepMC::ConstGe
   Acts::BoundMatrix cov = Acts::BoundMatrix::Identity();
   cov *= 100000; 
 
-  // some ACTS paperwork 
-  Trk::ParticleHypothesis hypothesis = Trk::pion;
-  float mass = Trk::ParticleMasses::mass[hypothesis] * Acts::UnitConstants::MeV;
-  Acts::PdgParticle absPdg = Acts::makeAbsolutePdgParticle(Acts::ePionPlus);
-  Acts::ParticleHypothesis actsHypothesis{
-    absPdg, mass, static_cast<float>(MC::charge(truthParticle))};
-
-  return std::make_unique<Acts::BoundTrackParameters>(actsSurface, params,
-                                    cov, actsHypothesis);
+  return std::make_unique<Acts::BoundTrackParameters>(
+      actsSurface, params, cov, Acts::ParticleHypothesis::pion());
 
 }

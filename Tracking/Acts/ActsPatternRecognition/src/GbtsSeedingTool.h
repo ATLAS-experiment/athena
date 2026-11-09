@@ -167,7 +167,6 @@ namespace ActsTrk {
     Gaudi::Property<float> m_addHit {this, "addHit", 14.0, "reward added to tracks for each accepted hit before chi2"};
     Gaudi::Property<float> m_maxCurvature {this, "maxCurvature", 1e-3f, "maximum curvature allowed for candiadte tracklet"};
     Gaudi::Property<float> m_filterMaxZ0 {this, "filterMaxZ0", 170.0, "maximum z0 allowed for candidate tracklet"};
-    Gaudi::Property<float> m_edgeMaskMinEta {this, "edgeMaskMinEta", 1.5, "minimum eta allowed for masking edges in graph so they are not used again"};
     Gaudi::Property<float> m_hitShareThreshold {this, "hitShareThreshold", 0.49, "threshold of hits that are shared between seeds before one seed is labelled a clone"};
 
     // GbtsNodeStorage

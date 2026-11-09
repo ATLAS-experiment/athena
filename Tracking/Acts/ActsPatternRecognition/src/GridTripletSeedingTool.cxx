@@ -296,8 +296,7 @@ StatusCode GridTripletSeedingTool::initialize() {
   m_bottomDoubletFinderCfg.candidateDirection = Acts::Direction::Backward();
   m_bottomDoubletFinderCfg.deltaRMin = m_deltaRMinBottomSP;
   m_bottomDoubletFinderCfg.deltaRMax = m_deltaRMaxBottomSP;
-  m_bottomDoubletFinderCfg.deltaZMin = -m_deltaZMax;
-  m_bottomDoubletFinderCfg.deltaZMax = m_deltaZMax;
+  m_bottomDoubletFinderCfg.absDeltaZMax = m_deltaZMax;
   m_bottomDoubletFinderCfg.impactMax = m_impactMax;
   m_bottomDoubletFinderCfg.interactionPointCut = m_interactionPointCut;
   m_bottomDoubletFinderCfg.collisionRegionMin = m_collisionRegionMin;
