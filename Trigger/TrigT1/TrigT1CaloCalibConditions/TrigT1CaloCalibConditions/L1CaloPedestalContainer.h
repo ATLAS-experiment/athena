@@ -26,9 +26,13 @@
 class L1CaloPedestalContainer: public DataVector<L1CaloPedestal>, public AbstractL1CaloPersistentCondition {
 
 public:
-	L1CaloPedestalContainer();
+	L1CaloPedestalContainer(SG::OwnershipPolicy ownPolicy = SG::OWN_ELEMENTS);
 	virtual ~L1CaloPedestalContainer() {};
-	virtual DataObject* makePersistent() const;
+        virtual DataObject* makePersistent() const override;
+
+        using AbstractL1CaloPersistentCondition::clear;
+        void clear (SG::OwnershipPolicy ownPolicy,
+                    SG::IndexTrackingPolicy trackIndices);
 
         // Hide from reflex to avoid warning from reflex shadow class.
 #ifndef __REFLEX__
