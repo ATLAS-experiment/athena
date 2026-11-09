@@ -55,7 +55,7 @@ struct GetSizesImpl<vecmem::edm::schema<VARTYPES...>> {
 
       // In debug mode make sure that all the other jagged vector columns would
       // have the exact same sizes.
-      auto nextSizes = [&]() -> std::vector<std::size_t> {
+      [[maybe_unused]] auto nextSizes = [&]() -> std::vector<std::size_t> {
         if constexpr (INDEX + 1 < sizeof...(COLUMNS)) {
           return get<INDEX + 1, COLUMNS...>(input, accessors);
         } else {
