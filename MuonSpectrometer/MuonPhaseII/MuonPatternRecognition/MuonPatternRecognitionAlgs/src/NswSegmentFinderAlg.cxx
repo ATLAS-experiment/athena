@@ -540,7 +540,8 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
     auto isUnusedCombined = [&](std::size_t layIdx, std::size_t hitIdx) -> bool {
         const SpacePoint* sp = hitLayers[layIdx][hitIdx];
         if (sp->type() != xAOD::UncalibMeasType::sTgcStripType) {
-            THROW_EXCEPTION("Space point is not of sTgc type: "<<sp->msSector()->idHelperSvc()->toString(sp->identify()));
+            ATH_MSG_VERBOSE("Space point is not of sTgc type: "<<sp->msSector()->idHelperSvc()->toString(sp->identify()));
+            return false;
         }
         if(sp->dimension() != 2){
             ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Ignoring the 1D measurement for seeding: "<<m_idHelperSvc->toString(sp->identify()));
@@ -560,13 +561,13 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
     };
 
     // find the 2D measurements from the outermost layers - even move one layer inside 
-    for(std::size_t layIdx1 = 0; layIdx1 < 2; ++layIdx1){        
-        for(std::size_t layIdx2 = layerSize-1; layIdx2 >= layerSize-2; --layIdx2){
-            //in case of MM layers we stop - the layers are sorted in Z
+    for(std::size_t layIdx1 = 0; layIdx1 <= layerSize-2; ++layIdx1){      
+        for(std::size_t layIdx2 = layerSize-1; layIdx2 >= layIdx1+1; --layIdx2){
+            //in case of both MM layers we stop - the layers are sorted in Z
             if(hitLayers[layIdx1].front()->type() == xAOD::UncalibMeasType::MMClusterType  || 
                hitLayers[layIdx2].front()->type() == xAOD::UncalibMeasType::MMClusterType){
                 ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<"Outermost layers are MM - stop searching for sTgc Measurements");
-                return std::make_pair(std::move(seeds), std::move(segments));
+                continue;
             }
 
             //we might request to have hits from the two different multilayers for better lever arm
@@ -593,9 +594,16 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
                      //test if this selection of the hits from the two layers is aligned with the beam spot 
                     const Amg::Vector3D beamSpotHitDir{(beamSpotPos - hit1->localPosition()).unit()};
                     const Amg::Vector3D seedDir{(hit2->localPosition() - hit1->localPosition()).unit()};
-                    const double cosAngle = beamSpotHitDir.dot(seedDir);
-                    //accept the deflection of direction with a tolerance of 1 deg                    
+                   
+                    //accept the deflection of direction within a tolerance measuring only the vectors angle in the bending plane                  
+                    auto projYZ = [](const Amg::Vector3D& v) {
+                        return Amg::Vector3D{0., v.y(), v.z()}.unit();
+                    };
+                    const double cosAngle = projYZ(beamSpotHitDir)
+                            .dot(projYZ(seedDir));                  
                     if(std::abs(cosAngle) < thetaWindowCut){                        
+                        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Seed Rejection: Not aggrement with beam spot direction for the two hits: "<< *hit1 << ", " << *hit2);   
+                        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Seed Rejection: cosAngle "<<cosAngle<<" below threshold "<<thetaWindowCut);                    
                         continue;                        
                     }                   
                     //found 2D hits on the outermost layers - build a seed
@@ -628,6 +636,7 @@ NswSegmentFinderAlg::buildSegmentsFromSTGC(const EventContext& ctx,
             
                     /** Do not promote seeds with little hits to segments */    
                     if(seed->getHitsInMax().size() < m_minSeedHits){
+                        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Seed extension failed: Skip STGC segment seed with "<<seed->getHitsInMax().size()<<" hits \n"<<print(seed->getHitsInMax()));
                         seeds.push_back(std::move(seed));
                         continue;
                     }
