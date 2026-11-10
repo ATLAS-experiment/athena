@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -169,6 +169,9 @@ StatusCode Photospp_i::execute(const EventContext& ctx) {
     };
     PhotosHepMCEvent photosEvent(event);
     photosEvent.process();
+    HepMC::fillBarcodesAttribute(event);
+  // added conversion GeV ->  MeV to ensure correct units
+    event->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
 
     return StatusCode::SUCCESS;
 }
