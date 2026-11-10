@@ -260,14 +260,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   }
   // End of section determining decay products
 
-  if (MC::isPhoton(ancestorPDG) && ancestorProdVtx) {
-    if (ancestorProdVtx->nIncomingParticles() > 1) { ATH_MSG_DEBUG("DefOrigOfElectron:: photon has more than one parent.");  }
-    for (const auto& photonParent: ancestorProdVtx->particles_in()) {
-      if (!photonParent) continue;
-      info.photonMother = photonParent;  // FIXME Just taking the first valid particle...
-    }
-  }
-
   if ((MC::isPhoton(ancestorPDG) && numberOfChildren == 2 && NumOfEl == 1 && NumOfPos == 1) || (MC::isPhoton(ancestorPDG) && numberOfChildren == 1 && (NumOfEl == 1 || NumOfPos == 1))) return PhotonConv;
 
   // e,gamma,pi+Nuclear->NuclearFragments+nuclons+e
@@ -895,7 +887,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   ATH_MSG_DEBUG("Executing DefOrigOfPhoton ");
 
   info.resetMotherProperties();
-  info.photonMother = nullptr;
 
   // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
   const xAOD::TruthParticle* thePriPart = MC::findMatching(xTruthParticleContainer, thePart);
