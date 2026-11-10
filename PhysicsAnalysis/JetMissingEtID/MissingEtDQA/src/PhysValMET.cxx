@@ -943,7 +943,7 @@ namespace MissingEtDQA {
       }
   
       int nBins = (m_MET[met_name]).at(7)->GetNbinsX();
-      const auto histCumu = m_MET_Cumu[met_name];
+      const auto & histCumu = m_MET_Cumu[met_name];
       for(int i=1;i<=nBins;i++){
         //For MET Cumu
         double err{};
