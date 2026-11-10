@@ -130,6 +130,9 @@ private:
   /// CutFlow service should be explicitly configured
   Gaudi::Property<bool> m_configured{this, "Configured", true, "configuration check"};
 
+  /// Enable metadata peeking from the input file
+  Gaudi::Property<bool> m_enableInputPeeking{this, "EnableInputPeeking", true, "enable input metadata peeking"};
+
   /// The input meta-data store
   ServiceHandle<StoreGateSvc> m_inMetaDataStore{this, "InputMetaDataStore", "StoreGateSvc/InputMetaDataStore", ""};
 

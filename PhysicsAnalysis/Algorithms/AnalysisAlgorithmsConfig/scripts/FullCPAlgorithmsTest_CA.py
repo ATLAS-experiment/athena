@@ -97,7 +97,7 @@ cfg = MainServicesCfg(flags)
 # Setup POOL reading
 cfg.merge(PoolReadCfg(flags))
 # Setup cutflow service
-cfg.merge(CutFlowSvcCfg(flags))
+cfg.merge(CutFlowSvcCfg(flags, EnableInputPeeking=False))
 
 # Setup the configuration
 cp_cfg = makeSequence(dataType, yamlPath=textConfig,

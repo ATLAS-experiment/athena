@@ -80,7 +80,7 @@ class AthenaCPRunScript(CPBaseRunner):
             from AthenaRootComps.xAODEventSelectorConfig import xAODReadCfg
             self.cfg.merge(xAODReadCfg(self.flags))
         from EventBookkeeperTools.EventBookkeeperToolsConfig import CutFlowSvcCfg
-        self.cfg.merge(CutFlowSvcCfg(self.flags))
+        self.cfg.merge(CutFlowSvcCfg(self.flags, EnableInputPeeking=False))
 
         from AthenaConfiguration.ComponentFactory import CompFactory
         if not self.args.merge_output_files:
