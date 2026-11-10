@@ -59,33 +59,64 @@ public:
   // constructor
   MCTruthClassifier(const std::string& type)  : asg::AsgTool(type) {
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
+    // Properties used by egammaClusMatch (calorimeter cluster -> truth particle matching).
+    // Angular sizes are in eta/phi units, transverse momentum cuts in GeV.
     declareProperty("FwdElectronUseG4Sel", m_FwdElectronUseG4Sel = true,
-                    "Use Geant4 selection for forward electrons calo clusters");
+                    "Use Geant4 selection for forward electrons calo clusters. "
+                    "Geant4 particles are always skipped for non-forward candidates; "
+                    "if true they are skipped for forward electrons as well, if false they are considered for them");
     declareProperty("FwdElectronTruthExtrEtaCut",
                     m_FwdElectronTruthExtrEtaCut = 2.4,
                     "Cut on the eta of the truth Particles to be extrapolated "
-                    "for Fwd electrons");
+                    "for Fwd electrons: particles with |eta| below it are not extrapolated");
     declareProperty(
         "FwdElectronTruthExtrEtaWindowCut",
         m_FwdElectronTruthExtrEtaWindowCut = 0.15,
         "Cut on the delta eta of the truth Particles to be extrapolated for "
-        "Fwd electrons and the current FwdElectron");
-    declareProperty("partExtrConePhi", m_partExtrConePhi = 0.4);
-    declareProperty("partExtrConeEta", m_partExtrConeEta = 0.2);
-    declareProperty("phtClasConePhi", m_phtClasConePhi = 0.05);
-    declareProperty("phtClasConeEta", m_phtClasConeEta = 0.025);
-    declareProperty("phtdRtoTrCut", m_phtdRtoTrCut = 0.1);
-    declareProperty("fwrdEledRtoTrCut", m_fwrdEledRtoTrCut = 0.15);
-    declareProperty("ROICone", m_ROICone = false);
+        "Fwd electrons and the current FwdElectron: particles further away in eta are not extrapolated. "
+        "Truth particles in the opposite eta hemisphere are never extrapolated");
+    declareProperty("partExtrConePhi", m_partExtrConePhi = 0.4,
+                    "Half-width in phi of the elliptical cone around the cluster in which truth particles are "
+                    "extrapolated to the calorimeter (used if ROICone is true, and for the Geant4 particles of inclG4part)");
+    declareProperty("partExtrConeEta", m_partExtrConeEta = 0.2,
+                    "Half-width in eta of the elliptical cone around the cluster in which truth particles are "
+                    "extrapolated to the calorimeter (used if ROICone is true, and for the Geant4 particles of inclG4part)");
+    declareProperty("phtClasConePhi", m_phtClasConePhi = 0.05,
+                    "Half-width in phi of the narrow elliptical cone around the cluster, "
+                    "applied to the extrapolated truth particle positions; not used for forward electrons");
+    declareProperty("phtClasConeEta", m_phtClasConeEta = 0.025,
+                    "Half-width in eta of the narrow elliptical cone around the cluster, "
+                    "applied to the extrapolated truth particle positions; not used for forward electrons");
+    declareProperty("phtdRtoTrCut", m_phtdRtoTrCut = 0.1,
+                    "Maximum distance dR between the cluster and the extrapolated truth particle for "
+                    "a match (not forward electrons)");
+    declareProperty("fwrdEledRtoTrCut", m_fwrdEledRtoTrCut = 0.15,
+                    "Maximum distance dR between the cluster and the extrapolated truth particle for "
+                    "a match (forward electrons)");
+    declareProperty("ROICone", m_ROICone = false,
+                    "Before the extrapolation, keep only truth particles inside the elliptical cone "
+                    "partExtrConePhi x partExtrConeEta around the cluster (not forward electrons). "
+                    "The truth particles are always taken from a fixed dR = 0.5 cone around the cluster");
     //AV: those below are needed in egammaClusMatch
-    declareProperty("pTChargePartCut", m_pTChargePartCut = 1.0);
-    declareProperty("pTNeutralPartCut", m_pTNeutralPartCut = 0.);
-    declareProperty("inclG4part", m_inclG4part = false);
+    declareProperty("pTChargePartCut", m_pTChargePartCut = 1.0,
+                    "Minimum pT in GeV of the charged truth particles considered for the cluster matching");
+    declareProperty("pTNeutralPartCut", m_pTNeutralPartCut = 0.,
+                    "Minimum pT in GeV of the neutral truth particles considered for the cluster matching");
+    declareProperty("inclG4part", m_inclG4part = false,
+                    "If no generator particle was matched to the cluster (not forward electrons), "
+                    "also try stable Geant4 particles without a decay vertex");
 #endif
 #ifndef GENERATIONBASE
-    declareProperty("deltaRMatchCut", m_deltaRMatchCut = 0.2);
-    declareProperty("deltaPhiMatchCut", m_deltaPhiMatchCut = 0.2);
-    declareProperty("NumOfSiHitsCut", m_NumOfSiHitsCut = 3);
+    // Properties used to match a track to a truth particle (getGenPart).
+    declareProperty("deltaRMatchCut", m_deltaRMatchCut = 0.2,
+                    "Maximum dR between a track and its truth particle for tracks with more than "
+                    "NumOfSiHitsCut silicon (pixel + SCT) hits; otherwise the match is dropped");
+    declareProperty("deltaPhiMatchCut", m_deltaPhiMatchCut = 0.2,
+                    "Maximum delta phi between a track and its truth particle for tracks with at most "
+                    "NumOfSiHitsCut silicon (pixel + SCT) hits; otherwise the match is dropped");
+    declareProperty("NumOfSiHitsCut", m_NumOfSiHitsCut = 3,
+                    "Number of silicon (pixel + SCT) hits on a track that decides whether deltaRMatchCut "
+                    "(more hits than this) or deltaPhiMatchCut (this many or fewer) is applied");
     declareProperty("jetPartDRMatch", m_jetPartDRMatch = 0.4);
 #endif
   }
@@ -188,30 +219,37 @@ private:
                      const CaloDetDescrManager& caloDDMgr) const;
 #endif
 
-  /* Data members*/
+  /* Data members */
+
+  /// Key of the xAOD truth particle container that is searched when classifying (ancestors, decay products, ...).
   SG::ReadHandleKey<xAOD::TruthParticleContainer>
   m_truthParticleContainerKey{this,"xAODTruthParticleContainerName","TruthParticles","ReadHandleKey for xAOD::TruthParticleContainer"};
 
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
+  /// Extrapolates truth particles to the calorimeter (egammaClusMatch); optional, disabled if empty.
   ToolHandle<Trk::IParticleCaloExtensionTool> m_caloExtensionTool{this,"ParticleCaloExtensionTool",""};
+  /// Calorimeter detector description, needed together with the extension tool; optional, may be empty.
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager",""};
+  /// Finds the truth particles in a cone around a cluster (egammaClusMatch); optional, disabled if empty.
   ToolHandle<xAOD::ITruthParticlesInConeTool>
   m_truthInConeTool{this,"TruthInConeTool","xAOD::TruthParticlesInConeTool/TruthParticlesInConeTool"};
 
-  bool  m_FwdElectronUseG4Sel;
-  float m_FwdElectronTruthExtrEtaCut;
-  float m_FwdElectronTruthExtrEtaWindowCut;
-  float m_partExtrConeEta;
-  float m_partExtrConePhi;
-  float m_phtClasConePhi;
-  float m_phtClasConeEta;
-  float m_phtdRtoTrCut;
-  float m_fwrdEledRtoTrCut;
-  bool m_ROICone;
+  // Properties for the calorimeter cluster -> truth particle matching (egammaClusMatch).
+  // Angular sizes are in eta/phi units, pT cuts in GeV; see the declareProperty descriptions for details.
+  bool  m_FwdElectronUseG4Sel;            ///< skip Geant4 particles also for forward electrons
+  float m_FwdElectronTruthExtrEtaCut;     ///< forward electrons: truth particles with |eta| below this are not extrapolated
+  float m_FwdElectronTruthExtrEtaWindowCut; ///< forward electrons: max |delta eta| to the cluster for a truth particle to be extrapolated
+  float m_partExtrConeEta;                ///< eta half-width of the cone in which truth particles are extrapolated
+  float m_partExtrConePhi;                ///< phi half-width of the cone in which truth particles are extrapolated
+  float m_phtClasConePhi;                 ///< phi half-width of the narrow cone around the cluster (not forward electrons)
+  float m_phtClasConeEta;                 ///< eta half-width of the narrow cone around the cluster (not forward electrons)
+  float m_phtdRtoTrCut;                   ///< max dR cluster - extrapolated truth particle (not forward electrons)
+  float m_fwrdEledRtoTrCut;               ///< max dR cluster - extrapolated truth particle (forward electrons)
+  bool  m_ROICone;                        ///< only extrapolate truth particles inside the partExtrCone ellipse
 
-  float m_pTChargePartCut;
-  float m_pTNeutralPartCut;
-  bool m_inclG4part;
+  float m_pTChargePartCut;                ///< minimum pT of charged truth particles considered
+  float m_pTNeutralPartCut;               ///< minimum pT of neutral truth particles considered
+  bool  m_inclG4part;                     ///< also try Geant4 particles if no generator particle matched
 #endif
 
 #ifndef XAOD_ANALYSIS
@@ -219,9 +257,10 @@ private:
   m_truthLinkVecReadHandleKey{this,"xAODTruthLinkVector","xAODTruthLinks", "ReadHandleKey for xAODTruthParticleLinkVector"};
 #endif
 #ifndef GENERATIONBASE
-  float m_deltaRMatchCut;
-  float m_deltaPhiMatchCut;
-  int m_NumOfSiHitsCut;
+  // Properties for the track -> truth particle matching (getGenPart).
+  float m_deltaRMatchCut;                 ///< max dR track - truth particle if the track has more than NumOfSiHitsCut Si hits
+  float m_deltaPhiMatchCut;               ///< max delta phi track - truth particle if the track has at most NumOfSiHitsCut Si hits
+  int   m_NumOfSiHitsCut;                 ///< Si (pixel + SCT) hit count selecting between deltaRMatchCut and deltaPhiMatchCut
   float m_jetPartDRMatch;
 #endif
 };
