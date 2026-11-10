@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -23,18 +23,7 @@
 // Constructor & deconstructor
 TileMuToNtuple::TileMuToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
     : AthAlgorithm(name, pSvcLocator)
-  , m_ntuplePtr(0)
-  , m_ntupleID(100)
-  , m_maxNtag(50)
-  , m_close(1)
-  , m_ntupleLoc("/FILE1/TileMuTag")
-  , m_tileMuContainer("TileMuObj")
 {
-
-  declareProperty("NTupleLoc", m_ntupleLoc);
-  declareProperty("NTupleID", m_ntupleID);
-  declareProperty("MaxNtag", m_maxNtag);
-  declareProperty("CloseNtuple", m_close);
 }
 
 TileMuToNtuple::~TileMuToNtuple() {
@@ -46,21 +35,21 @@ StatusCode TileMuToNtuple::initialize() {
   m_ntupleLoc = "/NTUPLES/FILE1/TileMuTag";
   // + m_ntupleLoc;
 
-  SmartDataPtr<NTuple::Directory> DirPtr(ntupleSvc(), m_ntupleLoc);
-  if (!DirPtr) DirPtr = ntupleSvc()->createDirectory(m_ntupleLoc);
+  SmartDataPtr<NTuple::Directory> DirPtr(ntupleSvc(), m_ntupleLoc.value());
+  if (!DirPtr) DirPtr = ntupleSvc()->createDirectory(m_ntupleLoc.value());
   if (!DirPtr) {
-    ATH_MSG_ERROR( "Invalid Ntuple Directory: " << m_ntupleLoc );
+    ATH_MSG_ERROR( "Invalid Ntuple Directory: " << m_ntupleLoc.value() );
     return StatusCode::FAILURE;
   }
 
-  m_ntuplePtr = ntupleSvc()->book(DirPtr.ptr(), m_ntupleID, CLID_ColumnWiseTuple,
+  m_ntuplePtr = ntupleSvc()->book(DirPtr.ptr(), m_ntupleID.value(), CLID_ColumnWiseTuple,
       "TileMuTag-Ntuple");
   if (!m_ntuplePtr) {
     ATH_MSG_ERROR( "Failed to book ntuple: TileMuTagNtuple" );
     return StatusCode::FAILURE;
   }
 
-  CHECK( m_ntuplePtr->addItem("TileMu/ntag", m_ntag, 0, m_maxNtag) );
+  CHECK( m_ntuplePtr->addItem("TileMu/ntag", m_ntag, 0, m_maxNtag.value()) );
   CHECK( m_ntuplePtr->addItem("TileMu/etatag", m_ntag, m_eta, -1.5, 1.5) );
   CHECK( m_ntuplePtr->addItem("TileMu/phitag", m_ntag, m_phi, 0., 6.3) );
   CHECK( m_ntuplePtr->addItem("TileMu/energydepVec", m_ntag, m_energy, 4) );
@@ -93,7 +82,7 @@ StatusCode TileMuToNtuple::execute(const EventContext& ctx) {
     m_quality[m_ntag] = mu->quality();
     m_ntag++;
 
-    if (m_ntag >= m_maxNtag) break;
+    if (m_ntag >= m_maxNtag.value()) break;
   }
 
   //  write  ntuple (is useful to keep it  open to write also MC truth)
