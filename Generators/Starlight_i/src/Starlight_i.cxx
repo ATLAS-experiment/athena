@@ -23,6 +23,7 @@
 #include "AtlasHepMC/GenParticle.h"
 #include "TruthUtils/HepMCHelpers.h"
 #include "HepMC3/GenCrossSection.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 #include "AthenaKernel/RNGWrapper.h"
 #include "CLHEP/Vector/LorentzVector.h"
@@ -54,7 +55,6 @@ StatusCode Starlight_i::genInitialize()
 {
     // Initialisation of input parameters
     //
-    ATH_MSG_INFO( "===> January 20 2011 STARLIGHT INTERFACE VERSION. \n"   );
     ATH_MSG_INFO( "===> STARLIGHT INITIALISING. \n"   );
 
     //Re-seed the random number stream
@@ -143,6 +143,10 @@ StatusCode Starlight_i::callGenerator()
 StatusCode
 Starlight_i::genFinalize()
 {
+    ATH_MSG_INFO("Adding cross-section of generated sample to MetaData."  );
+    ATH_MSG_INFO("MetaData: cross-section (mb) = " << getAcceptedCrossSection()/Gaudi::Units::millibarn );
+    ATH_MSG_INFO("MetaData: generator = Starlight " << STARLIGHTVER );
+
     ATH_MSG_DEBUG( "  STARLIGHT Ending.  \n"   );
 
     return StatusCode::SUCCESS;
@@ -249,6 +253,12 @@ Starlight_i::fillEvt(HepMC::GenEvent* evt)
     // Conversion GeV -> MeV to ensure correct units
     evt->set_units(HepMC3::Units::MEV, HepMC3::Units::MM);
 
+    double nAccepted = m_starlight->nmbAccepted();
+    double nAttempted = m_starlight->nmbAttempts();
+    auto csc = std::make_shared<HepMC3::GenCrossSection>();
+    csc->set_cross_section(getAcceptedCrossSection()/Gaudi::Units::picobarn, 0.0, nAccepted, nAttempted); // Save cross-section in pb to HepMC
+    evt->set_cross_section(csc);
+
     return StatusCode::SUCCESS;
 }
 
@@ -271,7 +281,9 @@ Starlight_i::starlight2lhef()
     
     lheStream << "<init>\n";
     lheStream << "  13  -13  "<<m_beam1_energy.value()<<"  "<<m_beam2_energy.value()<<"  0  0  0  0  3  1\n";
-    lheStream << "  1.000000e+00  0.000000e+00  1.000000e+00   9999\n";
+
+    const std::streampos pos = lheStream.tellp();
+    lheStream << std::string(70, ' ') << "\n"; // Reserve one empty line for the cross-section (filled after loop)
     lheStream << "</init>\n";
 
     // Starting from version r330 uevent can be either
@@ -312,25 +324,25 @@ Starlight_i::starlight2lhef()
       } else {
         ptscale /= static_cast<float> (ipart);
       }
-      lheStream << "     4  9999  1.000000e+00  "<<ptscale<<"  7.297e-03  2.569093e-01\n";
+      lheStream << "  4  9999  1.000000e+00  "<<ptscale<<"  7.297e-03  2.569093e-01\n";
 
       if(m_doTauolappLheFormat){
-      lheStream << " -11    -1     0     0     0     0  0.0000000000e+00  0.0000000000e+00  "
+      lheStream << "    -11    -1     0     0     0     0  0.0000000000e+00  0.0000000000e+00  "
                   << photon_system.m()/2.*std::exp(photon_system.rapidity())<<"  "
                   <<photon_system.m()/2.*std::exp(photon_system.rapidity())
                   << "  0.0000000000e+00 0. 9.\n";
-      lheStream << " 11    -1     0     0     0     0  0.0000000000e+00  0.0000000000e+00  "
+      lheStream << "     11    -1     0     0     0     0  0.0000000000e+00  0.0000000000e+00  "
                   << -photon_system.m()/2.*std::exp(-photon_system.rapidity())<<"  "
                   <<photon_system.m()/2.*std::exp(-photon_system.rapidity())
                   << "  0.0000000000e+00 0. 9.\n";
       }
 
       else{
-              lheStream << " 22    -1     0     0     0     0  0.0000000000e+00  0.0000000000e+00  "
+              lheStream << "     22    -1     0     0     0     0  0.0000000000e+00  0.0000000000e+00  "
                   << photon_system.m()/2.*std::exp(photon_system.rapidity())<<"  "
                   <<photon_system.m()/2.*std::exp(photon_system.rapidity())
                   <<"  0.0000000000e+00 0. 9.\n";
-              lheStream << " 22    -1     0     0     0     0  0.0000000000e+00  0.0000000000e+00  "
+              lheStream << "     22    -1     0     0     0     0  0.0000000000e+00  0.0000000000e+00  "
                   << -photon_system.m()/2.*std::exp(-photon_system.rapidity())<<"  "
                   <<photon_system.m()/2.*std::exp(-photon_system.rapidity())
                   <<"  0.0000000000e+00 0. 9.\n";
@@ -354,12 +366,17 @@ Starlight_i::starlight2lhef()
         else if(std::abs(pid)==13) mass = m_inputParameters.muonMass();
         else if(std::abs(pid)==15) mass = m_inputParameters.tauMass();
 
-        lheStream << pid<<"     1     1     2     0     0  "<<px<<"  "<<py<<"  "<<pz<<"  "<<e<<"  "<<mass<<"  0. 9.\n";
+        lheStream <<"    "<<(pid>0?" ":"")<<pid<<"     1     1     2     0     0  "<<px<<"  "<<py<<"  "<<pz<<"  "<<e<<"  "<<mass<<"  0. 9.\n";
 
        }
     lheStream << "</event>\n";
     }
 
+    // Go back to the header and swap cross-section line
+    lheStream.seekp(pos);
+    lheStream <<"  "<<std::scientific<<std::setprecision(6)<<getAcceptedCrossSection()/Gaudi::Units::picobarn;
+    lheStream <<"  0.000000e+00  1.000000e+00   9999\n";
+    lheStream.seekp(0, std::ios::end);
 
     lheStream << "</LesHouchesEvents>";
     lheStream.close();
@@ -579,4 +596,12 @@ bool Starlight_i::prepare_params_file()
 
     configFile.close();
     return true;
+}
+
+double Starlight_i::getAcceptedCrossSection()
+{
+    // Returns cross-section of the generated sample after acceptance cuts.
+    // The units are converted to Gaudi::Units.
+    return (static_cast<double>(m_starlight->nmbAccepted()) / m_starlight->nmbAttempts()) *
+      m_inputParameters.inputBranchingRatio() * m_starlight->getTotalCrossSection() * Gaudi::Units::barn;
 }

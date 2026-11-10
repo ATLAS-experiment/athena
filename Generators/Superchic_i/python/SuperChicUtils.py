@@ -122,7 +122,14 @@ class SuperChicConfig:
         self.dtau = 0.0
         self.calc_tau_coeff = False
         self.tau_mom = 'atau'
-        self.tau_coeff = 1      
+        self.tau_coeff = 1
+
+        # Paterns to intercept the cross-section and write to MetaData
+        self._NUM = r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?"
+        self._PATTERN = re.compile(
+            rf"Cross\s+section\s*=\s*({self._NUM})\s*\+/-\s*({self._NUM})\s*(\w+)",
+            re.IGNORECASE,
+        )
 
     def toFortran(self):
 
@@ -340,6 +347,18 @@ class SuperChicConfig:
         
         return
 
+    def intercept_cross_section(self, text):
+        """
+        Look for a cross section pattern in SuperChic output
+        and write it to MetaData if succesfully intercepted.
+        """
+
+        match = self._PATTERN.search(text)
+        if match:
+            xsec, unc, unit = match.groups()
+            print(f"MetaData: cross-section ({unit}) = {float(xsec)}")
+            print(f"MetaData: generator = SuperChic {os.environ['SUPERCHICVER']}")
+
     def run_command(self, command, stdin = None):
         """
         Run a command and print output continuously
@@ -354,6 +373,7 @@ class SuperChicConfig:
                 reaesc = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
                 text = reaesc.sub('', output.strip())
                 logger.info(text)
+                self.intercept_cross_section(text)
 
         rc = process.poll()
         return rc

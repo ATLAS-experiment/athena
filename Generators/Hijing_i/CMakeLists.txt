@@ -16,7 +16,7 @@ atlas_add_library( Hijing_iLib
    PUBLIC_HEADERS Hijing_i
    INCLUDE_DIRS ${HIJING_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
    DEFINITIONS ${CLHEP_DEFINITIONS}
-   PRIVATE_DEFINITIONS HIJINGVERSION=\"${HIJING_VERSION}\"
+   PRIVATE_DEFINITIONS HIJINGVER=\"${HIJING_LCGVERSION}\"
                        FVOIDP=INTEGER*${CMAKE_SIZEOF_VOID_P}
    LINK_LIBRARIES ${HIJING_LIBRARIES} ${CLHEP_LIBRARIES}
    GeneratorModulesLib StoreGateLib
@@ -31,3 +31,7 @@ atlas_add_component( Hijing_i
 atlas_install_joboptions( share/common/*.py )
 
 atlas_install_python_modules( python/*.py )
+
+set( HijingEnvironment_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+   CACHE PATH "Location of HijingEnvironment.cmake" )
+find_package( HijingEnvironment )

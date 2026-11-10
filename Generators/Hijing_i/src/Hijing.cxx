@@ -30,6 +30,8 @@
 #include "AtlasHepMC/GenVertex.h"
 #include "AtlasHepMC/GenParticle.h"
 #include "AtlasHepMC/HeavyIon.h"
+#include "HepMC3/GenCrossSection.h"
+#include "GaudiKernel/SystemOfUnits.h"
 
 #include <stdlib.h>
 
@@ -120,8 +122,7 @@ StatusCode Hijing::genInitialize()
     ATH_CHECK(m_event_paramsKey.initialize());
 
     // Initialisation of input parameters
-    std::cout << "MetaData: generator = Hijing "
-              << HIJINGVERSION << std::endl;
+    ATH_MSG_INFO( "MetaData: generator = Hijing " << HIJINGVER );
     ATH_MSG_INFO( "===> Hijing initialising  \n" );
     if( m_rand ){
       ATH_MSG_INFO( "===> Vertex randomization ON." );
@@ -223,6 +224,9 @@ StatusCode Hijing::callGenerator()
 StatusCode
 Hijing::genFinalize()
 {
+    ATH_MSG_INFO( "Adding HIJING cross-section to MetaData.\n" );
+    ATH_MSG_INFO( "MetaData: cross-section (mb) = " << m_hiparnt.hint1(13) );
+
     ATH_MSG_INFO( " HIJING Ending.  \n" );
     return StatusCode::SUCCESS;
 }
@@ -738,6 +742,11 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
       }
     }
     //BPK-<
+
+    double totalCsc = m_hiparnt.hint1(13) * Gaudi::Units::millibarn; // Get total cross-section in mb
+    auto csc = std::make_shared<HepMC3::GenCrossSection>();
+    csc->set_cross_section(totalCsc/Gaudi::Units::picobarn, 0.0); // Write cross-section in pb to HepMC
+    evt->set_cross_section(csc);
 
     return StatusCode::SUCCESS;
 }
