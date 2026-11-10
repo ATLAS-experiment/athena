@@ -208,6 +208,7 @@ def _FlavorTaggingChainCfg(
              nnFilePaths=networks['folds'],
              remapping=dict(networks.get('remapping', {})),
              dependencies=modset,
+             useTriton=flags.BTagging.UseTriton,
         )
 
         # Taggers trained on the poor man's impact parameters read their
@@ -289,6 +290,7 @@ def JetBTagginglessByVertexAlgCfg(
              TrackCollection=trackCollection,
              nnFilePaths=networks['folds'],
              remapping=networks.get('remapping', {}),
+             useTriton=flags.BTagging.UseTriton,
         )
 
         if foldHashName := networks.get('hash'):

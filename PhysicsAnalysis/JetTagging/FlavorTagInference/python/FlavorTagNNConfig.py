@@ -11,11 +11,18 @@ from pathlib import PurePath
 from warnings import warn
 import re
 
-# NNFiles should be a list of paths to NN files. master switch for using Triton for NN inference is 
-# flags.BTagging.UseTriton. If all of the files are in _onnx_to_triton_map, then the returned 
-# sharing service will be configured to use Triton. Otherwise it will fall back to ONNX.
-def addAndReturnSharingSvc(flags, ca, NNFiles):
-    if flags.BTagging.UseTriton:
+# NNFiles argument is a list of paths to NN files.
+#
+# If the useTriton argument is True:
+#    The function configures the NNSharingTritonSvc. It also constructs model name
+#    for each of the requested file (using tritonModelName() function)
+#    and saves it in the TritonModelsNames property of the service
+#
+# If the useTriton argument is False:
+#    The function configures the NNSharingOnnxSvc
+#
+def addAndReturnSharingSvc(useTriton, ca, NNFiles):
+    if useTriton:
         svc = CompFactory.FlavorTagInference.NNSharingTritonSvc(
             'FTagNNSharingTritonSvc',
             TritonTimeout = 0.0,
@@ -30,7 +37,7 @@ def addAndReturnSharingSvc(flags, ca, NNFiles):
     ca.addService(svc)
     return svc
 
-def GNNToolCfg(flags, NNFile, **options):
+def GNNToolCfg(flags, NNFile, useTriton=False, **options):
     acc = ComponentAccumulator()
 
     # this map lets us change the names of EDM inputs with respect to
@@ -73,7 +80,7 @@ def GNNToolCfg(flags, NNFile, **options):
         name='decorator',
         nnFile=NNFile,
         nnSharingService=addAndReturnSharingSvc(
-            flags = flags, 
+            useTriton = useTriton, 
             ca = acc, 
             NNFiles=[NNFile],
         ),
@@ -120,6 +127,7 @@ def FlavorTagNNCfg(
         NNFile,
         BTaggingCollection=None,
         FlipConfig="STANDARD",
+        useTriton=False,
         variableRemapping={}):
     
     if BTaggingCollection is not None:
@@ -149,7 +157,7 @@ def FlavorTagNNCfg(
     if NNFile_extension == "onnx":
         nn_name = NNFile.replace("/", "_").replace(".onnx", "")
         nn_opts["defaultZeroTracks"] = True
-        decorator = acc.popToolsAndMerge(GNNToolCfg(flags, **nn_opts))
+        decorator = acc.popToolsAndMerge(GNNToolCfg(flags, useTriton=useTriton, **nn_opts))
     else:
         raise ValueError("FlavorTagNNCfg: Wrong NNFile extension. Please check the NNFile argument")
 
@@ -191,6 +199,7 @@ def MultifoldGNNCfg(
         suffix='',
         dependencies=None,
         defaultOutputValues=None,
+        useTriton=False,
 ):
     """Schedule a (multifold) GNN tagger on a jet collection.
 
@@ -254,7 +263,7 @@ def MultifoldGNNCfg(
         flipTagConfig=FlipConfig,
         variableRemapping=remapping,
         nnSharingService=addAndReturnSharingSvc(
-            flags = flags, 
+            useTriton = useTriton,
             ca = acc, 
             NNFiles=nnFilePaths,
         ),
