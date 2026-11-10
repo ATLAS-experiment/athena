@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /********************************************************************
@@ -94,29 +94,7 @@ const CaloCell_ID::SUBCALO TileMuonFitter::m_caloIndex = CaloCell_ID::TILE;
 //
 TileMuonFitter::TileMuonFitter(const std::string& name, ISvcLocator* pSvcLocator)
     : AthAlgorithm(name, pSvcLocator)
-  , m_tileID(nullptr)
-  , m_tileHWID(nullptr)
-  , m_tileMgr(nullptr)
-  , m_caloCells(nullptr)
-  , m_theTrack(nullptr)
-  , m_nCells(0)
-  , m_meanX(0.0)
-  , m_meanY(0.0)
-  , m_meanZ(0.0)
-  , m_weightedMeanX(0.0)
-  , m_weightedMeanY(0.0)
-  , m_weightedMeanZ(0.0)
-  , m_maxBottomIndex(0)
-  , m_maxTopIndex(0)
-  , m_reg1to2(false)
 {
-  declareProperty("DoHoughTransform", m_doHoughTransform = true);
-  declareProperty("EThreshold", m_eThreshold = 250.);
-  declareProperty("DeltaTimeCut", m_deltaTimeCut = 6.);
-  declareProperty("MinimumCells", m_minimumCells = 2);
-  declareProperty("DoWeighted", m_doWeighted = true);
-  declareProperty("DoDensityWeighting", m_doDensity = true);
-  declareProperty("BeamType", m_beamType = "cosmics");
 }
 
 // ********************************************************************
@@ -153,9 +131,9 @@ StatusCode TileMuonFitter::initialize() {
 
   ATH_MSG_INFO( "Loading:   " << m_cellContainerKey.key() );
   ATH_MSG_INFO( "Recording: " << m_cosmicMuonContainerKey.key() << " and " << m_comTimeKey.key() );
-  ATH_MSG_INFO( "Cell Energy Threshold: " << m_eThreshold << " (MeV)" );
-  ATH_MSG_INFO( "Delta Time Cell Cut: " << m_deltaTimeCut << " (ns)" );
-  ATH_MSG_INFO( "Minimum Number of cells for fit: " << m_minimumCells );
+  ATH_MSG_INFO( "Cell Energy Threshold: " << m_eThreshold.value() << " (MeV)" );
+  ATH_MSG_INFO( "Delta Time Cell Cut: " << m_deltaTimeCut.value() << " (ns)" );
+  ATH_MSG_INFO( "Minimum Number of cells for fit: " << m_minimumCells.value() );
 
   if (m_doWeighted && m_doDensity)
     ATH_MSG_INFO( "Weighting cell position and time with energy density." );
@@ -166,13 +144,13 @@ StatusCode TileMuonFitter::initialize() {
   if (!m_doWeighted)
     ATH_MSG_INFO( "Not weighting cell position and time." );
 
-  if (!m_beamType.compare("collisions")
-      || !m_beamType.compare("singlebeam")
-      || !m_beamType.compare("cosmics")) {
+  if (!m_beamType.value().compare("collisions")
+      || !m_beamType.value().compare("singlebeam")
+      || !m_beamType.value().compare("cosmics")) {
 
-    ATH_MSG_INFO( "Setting up TMF for beam type = " << m_beamType );
+    ATH_MSG_INFO( "Setting up TMF for beam type = " << m_beamType.value() );
   } else {
-    ATH_MSG_WARNING( "BeamType " << m_beamType
+    ATH_MSG_WARNING( "BeamType " << m_beamType.value()
                      << " from jobproperties not recognized. Setting to cosmics for TMF only." );
 
     m_beamType = "cosmics";
@@ -393,9 +371,9 @@ bool TileMuonFitter::eventSelection() {
   maxReg1Index = maxReg2Index = -1;
 
   for (int i = 0; i < m_nCells; i++) {
-    if (!m_beamType.compare("singlebeam")) {
+    if (!m_beamType.value().compare("singlebeam")) {
       cellPosition = m_cellPosition[i].getZ();
-    } else if (!m_beamType.compare("collisions")) {
+    } else if (!m_beamType.value().compare("collisions")) {
       cellPosition = 1.;
     } else {
       cellPosition = m_cellPosition[i].getY();
@@ -419,7 +397,7 @@ bool TileMuonFitter::eventSelection() {
     if (m_cellTime[maxReg2Index] < m_cellTime[maxReg1Index]) m_reg1to2 = 0;
   }
 
-  if (!m_beamType.compare("collisions")) {
+  if (!m_beamType.value().compare("collisions")) {
     selection = (maxReg1Energy > m_eThreshold);
   } else {
     selection = (maxReg2Energy > m_eThreshold && maxReg1Energy > m_eThreshold);
@@ -529,7 +507,7 @@ int TileMuonFitter::fitTrack() {
 
 void TileMuonFitter::calculateTime() {
 
-  if (!m_beamType.compare("singlebeam") || !m_beamType.compare("collisions"))
+  if (!m_beamType.value().compare("singlebeam") || !m_beamType.value().compare("collisions"))
     calculateTimeAtZequal0();
   else
     calculateTimeAtYequal0();
@@ -667,7 +645,7 @@ void TileMuonFitter::calculateTimeAtZequal0() {
 
 void TileMuonFitter::buildTileCosmicMuon(int fitok) {
 
-  if (!m_beamType.compare("singlebeam") || !m_beamType.compare("collisions"))
+  if (!m_beamType.value().compare("singlebeam") || !m_beamType.value().compare("collisions"))
     buildTileCosmicMuonAtZequal0(fitok);
   else
     buildTileCosmicMuonAtYequal0(fitok);
@@ -1434,7 +1412,7 @@ void TileMuonFitter::energyInTrack(std::vector<double> & etop, std::vector<doubl
 
 void TileMuonFitter::buildComTime(int fitok) {
 
-  if (!m_beamType.compare("singlebeam") || !m_beamType.compare("collisions"))
+  if (!m_beamType.value().compare("singlebeam") || !m_beamType.value().compare("collisions"))
     buildComTimeAtZequal0(fitok);
   else
     buildComTimeAtYequal0(fitok);
