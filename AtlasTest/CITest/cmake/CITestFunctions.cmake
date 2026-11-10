@@ -15,7 +15,12 @@
 
 function( atlas_add_citest testName )
    # Look for possible extra arguments:
-   cmake_parse_arguments( ARG "" "PRE_EXEC_SCRIPT;POST_EXEC_SCRIPT" "DEPENDS_SUCCESS" ${ARGN} )
+   cmake_parse_arguments( ARG "" "PRE_EXEC_SCRIPT;POST_EXEC_SCRIPT" "DEPENDS_SUCCESS;PROPERTIES" ${ARGN} )
+
+   # Catch this common typo:
+   if( "PROCESSOR" IN_LIST ARG_PROPERTIES )
+      message( SEND_ERROR "Invalid test property, the correct spelling is 'PROCESSORS'." )
+   endif()
 
    # define private working directory (cleaned in PRE_EXEC_SCRIPT)
    set( CI_WORKDIR "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/ciTestRun/${testName}" )
@@ -41,8 +46,9 @@ function( atlas_add_citest testName )
 
    atlas_add_test( ${testName}
       PROPERTIES WORKING_DIRECTORY ${CI_WORKDIR}
-      PROPERTIES TIMEOUT 3600
-      PROPERTIES FIXTURES_SETUP CITest_${testName}_fixture
+                 TIMEOUT 3600
+                 FIXTURES_SETUP CITest_${testName}_fixture
+                 ${ARG_PROPERTIES}
       PRE_EXEC_SCRIPT "${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${testName}_citest_pre.sh || exit $?"
       POST_EXEC_SCRIPT ${CMAKE_CURRENT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/${testName}_citest_post.sh
       ${ARG_UNPARSED_ARGUMENTS} )
