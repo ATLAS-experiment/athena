@@ -35,11 +35,11 @@ public:
   ConstituentSubtractorTool(const std::string & name); 
 
   // Check that the configuration is sane
-  StatusCode initialize();
+  StatusCode initialize() override final;
 
 private:
   // Implement the correction
-  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const; 
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const override final; 
   StatusCode configure_decor_handle_keys() override final;
 
    /// Handle to EventInfo. This is used to get the evt&run number to set the Ghost area random seeds.

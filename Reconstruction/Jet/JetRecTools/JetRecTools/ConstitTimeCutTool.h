@@ -30,10 +30,10 @@ class ConstitTimeCutTool : public JetConstituentModifierBase{
   ConstitTimeCutTool(const std::string& name);
 
   // Check that the configuration is sane
-  StatusCode initialize();
+  StatusCode initialize() override final;
 
   private:
-  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const; 
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const override final; 
   StatusCode applyTimingCut(xAOD::IParticle* part, const float& time, const float& quality, const float& lambda_center) const; 
 
   // CaloCluster decorations

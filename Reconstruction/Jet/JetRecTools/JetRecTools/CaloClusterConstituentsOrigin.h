@@ -34,12 +34,12 @@ class CaloClusterConstituentsOrigin: public JetConstituentModifierBase {
   CaloClusterConstituentsOrigin(const std::string & name); // MEN: constructor 
 
   // Check that the configuration is reasonable
-  StatusCode initialize();
+  StatusCode initialize() override final;
   
   private:
 
   // Implement the correction
-  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const; 
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const override final; 
   StatusCode correctToOriginVtx(xAOD::CaloClusterContainer& cont, const xAOD::Vertex& vert) const;
 
   SG::ReadHandleKey<xAOD::VertexContainer> m_readVertexContainer_key;

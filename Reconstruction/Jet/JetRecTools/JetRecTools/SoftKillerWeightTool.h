@@ -63,11 +63,11 @@ class SoftKillerWeightTool : public JetConstituentModifierBase{
   SoftKillerWeightTool(const std::string& name);
 
   // Check that the configuration is sane
-  StatusCode initialize();
+  StatusCode initialize() override final;
 
 private:
   // Implement the correction
-  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const; 
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const override final; 
 
   StatusCode configure_decor_handle_keys() override final;
 
