@@ -14,13 +14,13 @@
 
 """
 
-from collections import defaultdict
-from datetime import datetime
-import subprocess
-import re
-import os
 import argparse
 import itertools
+import os
+import re
+import subprocess
+from collections import defaultdict
+from datetime import datetime
 from functools import cache
 
 gitlab_available = True
@@ -38,26 +38,56 @@ def main():
                         help='previous release wrt. which we diff')
     parser.add_argument('-o', '--output', nargs='?', metavar='FILE', const='release_notes.md',
                         help='write release notes to file [%(const)s]')
+    parser.add_argument('-j', '--json', nargs='?', metavar='FILE', const='release_notes.json',
+                        help='write release notes to a JSON file [%(const)s]')
     parser.add_argument('-r', '--relaxed', action='store_true',
                         help='do not stop on dubious configurations')
     parser.add_argument('-s', '--sweep', action='store_true',
                         help='prepare notes for a sweep')
+    parser.add_argument('-d', '--diff', action='store_true',
+                        help='print the diff between the previous and target release')
     parser.add_argument('-v', '--verbose',
                         action='store_true', help='print more info')
     parser.add_argument('--group-merge-requests', action='store_true',
                         help='Group merge requests with the same labels together.')
     parser.add_argument(
         '-t', '--token', help='Optionally pass a gitlab token to get more information.')
+    parser.add_argument('--analysis', action='store_true',
+                        help='This is an analysis release.')
     parser.add_argument('target', nargs='?', help='Target release')
     parser.add_argument('nightly', nargs='?', help='Nightly tag to use')
     args = parser.parse_args()
 
-    if args.token:
-        if not gitlab_available:
-            print('WARNING - passing a token but was not able to import gitlab. You probably need to setup python-gitlab first (i.e. lsetup gitlab) or install it locally (see https://python-gitlab.readthedocs.io)')
+    if args.token and not gitlab_available:
+        print('WARNING - passing a token but was not able to import gitlab. You probably need to setup python-gitlab first (i.e. lsetup gitlab) or install it locally (see https://python-gitlab.readthedocs.io)')
+        exit(1)
+
+    if args.diff:
+        if args.target is None:
+            parser.error('target release is required in diff mode')
+
+        target_release = args.target
+        sanitize_args(target_release, keep_going=args.relaxed)
+
+        tags = get_command_output("git tag --points-at '" + target_release + "^{}'")['stdout'].decode('ascii')
+        nightly_tag = None
+        for tag in sorted(tags.split()):
+            if not tag.startswith("nightly/"):
+                continue
+            # To accurately detect old nightlies for analysis releases, we need to skip the ones that are not relevant.
+            # We only want to consider nightlies that end with specific time stamps.
+            if args.analysis and not tag.endswith("T0220") and not tag.endswith("T2100") and not tag.endswith("T0600"):
+                continue
+            nightly_tag = tag
+            break
+
+        if not nightly_tag:
+            print("Could not find a nightly tag for the target release %s" % target_release)
             exit(1)
 
-    if args.sweep:
+        previous_release = guess_previous_and_check(
+            target_release=target_release) if not args.previous else args.previous
+    elif args.sweep:
         target_release = ''         # not used
         # The base for the release notes is the parent of the last merge commit.
         # Usually this should be (HEAD^) but in case commits had to be reverted it
@@ -107,7 +137,7 @@ def main():
     
     # Now handle adding a descriptive message/jira link to release notes
     optional_message = ''
-    if not args.sweep:
+    if not args.sweep and not args.diff:
         print()
         print('Is there a ticket associated with the release build request e.g. ATLINFR-XXXX? (press return to skip)')
         ticket = input(': ')
@@ -117,15 +147,21 @@ def main():
         optional_message = input(': ')
         if ticket:
             optional_message = optional_message + '\nRelease request ticket: '+ticket
+    elif args.diff and args.analysis:
+        optional_message = 'This is an analysis release. Only merge requests that required analysis review are listed.'
+
+    if args.analysis:
+        merged_mrs = [mr for mr in merged_mrs if [label for label in mr.labels if label.startswith('analysis-')]]
 
     release_notes = fill_template(sweep_template() if args.sweep else default_template(),
                                   target_release, nightly_tag, optional_message, previous_release,
-                                  merged_mrs, output_filename=args.output, verbose=verbose,
+                                  merged_mrs, output_filename=args.output, output_json=args.json,
+                                  verbose=verbose,
                                   gl=gl, group_mrs=args.group_merge_requests)
 
     print()
     # Use gitlab api to create a release  (and tag) in gitlab
-    if not args.sweep and args.token and gitlab_available:
+    if not args.sweep and not args.diff and args.token and gitlab_available:
         msg = 'Would you like to create the release in gitlab (i.e. make the tag and fill in the release notes)?'
         if input("%s (y/N) " % msg).lower() == 'y':
             try:
@@ -166,13 +202,13 @@ def main():
             print('Draft MR has been created:', mr.web_url)
 
 
-def sanitize_args(target_release, nightly_tag, keep_going=False):
+def sanitize_args(target_release, nightly_tag=None, keep_going=False):
     if not target_release.startswith('release/'):
         print("The target release should start with 'release/', you are using:\n%s" %
               target_release)
         if not keep_going:
             raise RuntimeWarning('Fix target release')
-    if not nightly_tag.startswith('nightly/'):
+    if nightly_tag and not nightly_tag.startswith('nightly/'):
         print(
             "The nightly tag should start with 'nightly/', you are using:\n%s" % nightly_tag)
         if not keep_going:
@@ -180,14 +216,17 @@ def sanitize_args(target_release, nightly_tag, keep_going=False):
 
     rel_match = re.search(
         r'release/(?P<ver>\d+)\.(?P<maj>\d+?)\.(?P<rev>\d+?)', target_release)
-    nig_match = re.search(
-        r'nightly/(?P<branch>((\d+\.\d+)|master|main|22\.0-mc20))/(?P<date>\d{4}-\d{2}-\d{2})T(?P<time>\d{4})', nightly_tag)
-
     if not rel_match:
         print("The target release is not formatted as xx.y.z (version.major.revision semantic)")
         if not keep_going:
             raise RuntimeWarning('Fix formatting target release')
-    elif not nig_match:
+
+    if not nightly_tag:
+        return
+
+    nig_match = re.search(
+        r'nightly/(?P<branch>((\d+\.\d+)|master|main|22\.0-mc20))/(?P<date>\d{4}-\d{2}-\d{2})T(?P<time>\d{4})', nightly_tag)
+    if not nig_match:
         print("The nightly tag is not formatted as expected, nightly/branch/yyyy-mm-ddThhmm\n%s" % nightly_tag)
         if not keep_going:
             raise RuntimeWarning('Fix formatting nightly tag')
@@ -321,34 +360,37 @@ def sweep_template():
 {formatted_list_of_merge_requests:s}
 """
 
+@cache
+def allowed_labels(gl=None):
+    """Read domain labels from the CI repository"""
+    gl_project = gl.projects.get("atlas-sit/CI")
+    domains_py = gl_project.files.raw("data/domain_map.py", "master")
+    namespace = {}
+    exec(domains_py, namespace)
+    labels = set(namespace['DOMAIN_MAP'])
+
+    # Add/remove some labels
+    labels.discard('full-unit-tests')
+    labels.discard('menu-review-required')
+    labels.add('frozen-tier0-violating')
+    labels.add('sweep:ignore')
+    labels.add('bugfix')
+    labels.add('package-removal')
+    labels.add('analysis-interface-change')
+    labels.add('Recommendation')
+    return labels
+
+def allowed_label(label, gl=None):
+    """Check if given label should be shown in release notes"""
+    allowed_labels_regex = [re.compile('changes-.*'), re.compile('.*-output-changed')]
+    return label in allowed_labels(gl) or any(regex.match(label) for regex in allowed_labels_regex)
+
 def format_mrs_from_gitlab(merged_mrs, group_mrs=False, gl=None):
-
-    @cache
-    def allowed_labels():
-        """Read domain labels from the CI repository"""
-        gl_project = gl.projects.get("atlas-sit/CI")
-        domains_py = gl_project.files.raw("data/domain_map.py", "master")
-        namespace = {}
-        exec(domains_py, namespace)
-        labels = set(namespace['DOMAIN_MAP'])
-
-        # Add/remove some labels
-        labels.discard('full-unit-tests')
-        labels.discard('menu-review-required')
-        labels.add('frozen-tier0-violating')
-        labels.add('sweep:ignore')
-        return labels
-
-    def allowed_label(label):
-        """Check if given label should be shown in release notes"""
-        allowed_labels_regex = [re.compile('changes-.*'), re.compile('.*-output-changed')]
-        return label in allowed_labels() or any(regex.match(label) for regex in allowed_labels_regex)
-
     lines = []
     if group_mrs:
         grouped_mrs = defaultdict(list)
         for mr in merged_mrs:
-            labels = ['~'+label for label in mr.labels if allowed_label(label)]
+            labels = ['~'+label for label in mr.labels if allowed_label(label, gl)]
             label_key = ", ".join(labels)
             grouped_mrs[label_key].append(
                 '   * !{} : {}'.format(mr.get_id(), mr.title))
@@ -358,14 +400,14 @@ def format_mrs_from_gitlab(merged_mrs, group_mrs=False, gl=None):
                 lines.append(title)
     else:
         for mr in merged_mrs:
-            labels = ['~'+label for label in mr.labels if allowed_label(label)]
+            labels = ['~'+label for label in mr.labels if allowed_label(label, gl)]
             lines.append(" * !{id} {title} {labels}".format(id=mr.get_id(),
                          title=mr.title, labels=", ".join(labels)))
     return '\n'.join(lines)
 
 
 def fill_template(template, target_release, nightly_tag, optional_message, previous_release,
-                  merged_mrs=[], output_filename='foo.md', verbose=False, gl=None, group_mrs=False):
+                  merged_mrs=[], output_filename='foo.md', output_json=None, verbose=False, gl=None, group_mrs=False):
     formatted_mrs = ""
     if gl:
         formatted_mrs = format_mrs_from_gitlab(merged_mrs, group_mrs, gl=gl)
@@ -390,6 +432,26 @@ def fill_template(template, target_release, nightly_tag, optional_message, previ
         with open(output_filename, 'w') as f:
             f.write(filled_template)
             print("Release notes stored in '%s'" % output_filename)
+
+    if output_json:
+        import json
+        with open(output_json, 'w') as f:
+            json.dump({
+                'version': target_release.split('/')[-1],
+                'date': datetime.strptime(nightly_tag.rsplit("/", 1)[-1], "%Y-%m-%dT%H%M").strftime("%Y-%m-%d"),
+                'note': None,
+                'nightly_tag': nightly_tag,
+                'merge_requests': [
+                    {
+                        'id': mr.get_id(),
+                        'url': mr.web_url,
+                        'title': mr.title,
+                        'labels': [label for label in mr.labels if allowed_label(label, gl)]
+                    } for mr in merged_mrs 
+                ]
+            }, f, indent=2)
+            print("Release notes stored in JSON format in '%s'" % output_json)
+    
     return filled_template
 
 if __name__ == '__main__':
