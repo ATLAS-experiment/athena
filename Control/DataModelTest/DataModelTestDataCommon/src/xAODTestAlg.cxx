@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 
 // $Id$
@@ -23,10 +23,8 @@ namespace DMTest {
  * @param svc The service locator.
  */
 xAODTestAlg::xAODTestAlg (const std::string &name, ISvcLocator *pSvcLocator)
-  : AthReentrantAlgorithm (name, pSvcLocator),
-    m_tools (this)
+  : AthReentrantAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("Tools", m_tools);
 }
 
 

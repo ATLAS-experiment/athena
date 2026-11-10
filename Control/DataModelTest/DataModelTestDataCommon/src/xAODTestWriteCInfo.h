@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -23,6 +23,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/WriteHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "Gaudi/Property.h"
 
 
 namespace DMTest {
@@ -62,10 +63,10 @@ public:
 
 
 private:
-  int m_offset;
+  Gaudi::Property<int> m_offset{this, "Offset", 0, "Offset to be applied to written values"};
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EvtInfo", "EventInfo", "EventInfo name"};
-  SG::ReadHandleKey<DMTest::CVec> m_cvecKey;
-  SG::WriteHandleKey<DMTest::C> m_cinfoKey;
+  SG::ReadHandleKey<DMTest::CVec> m_cvecKey{this, "CVecKey", "cvec", "Input CVec key"};
+  SG::WriteHandleKey<DMTest::C> m_cinfoKey{this, "CInfoKey", "cinfo", "Output CInfo key"};
 };
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 // $Id$
 /**
@@ -25,10 +25,8 @@ namespace DMTest {
  * @param pSvcLocator The service locator.
  */
 MetaWriterAlg::MetaWriterAlg (const std::string &name, ISvcLocator *pSvcLocator)
-  : AthAlgorithm (name, pSvcLocator),
-    m_metaStore ("StoreGateSvc/MetaDataStore", name)
+  : AthAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("MetaDataStore", m_metaStore);
 }
 
 

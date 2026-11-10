@@ -22,9 +22,7 @@ namespace DMTest {
  * @param pSvcLocator The service locator.
  */
 MetaReaderAlg::MetaReaderAlg (const std::string &name, ISvcLocator *pSvcLocator)
-  : AthReentrantAlgorithm (name, pSvcLocator),
-    m_s1Key ("MetaS1"),
-    m_cKey ("MetaC")
+  : AthReentrantAlgorithm (name, pSvcLocator)
 {
 }
 

@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 // $Id$
 /**
@@ -19,6 +19,7 @@
 #include "DataModelTestDataCommon/CVec.h"
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadDecorHandleKey.h"
+#include "Gaudi/Property.h"
 
 
 namespace DMTest {
@@ -59,20 +60,20 @@ public:
 
 private:
   /// Parameter: Prefix for names read from SG.
-  std::string m_readPrefix;
+  Gaudi::Property<std::string> m_readPrefix{this, "ReadPrefix", "", "Prefix for names read from SG"};
 
   /// Parameter: Name of the decoration.
-  std::string m_decorName;
+  Gaudi::Property<std::string> m_decorName{this, "DecorName", "dInt1", "Name of the decoration"};
 
   /// Parameter: Root names of the objects.
-  std::string m_cvecName;
-  std::string m_cinfoName;
+  Gaudi::Property<std::string> m_cvecName{this, "CVecName", "cvec", "Root name of the CVec object"};
+  Gaudi::Property<std::string> m_cinfoName{this, "CInfoName", "cinfo", "Root name of the CInfo object"};
 
   /// Handles for reading decorations.
-  SG::ReadDecorHandleKey<CVec> m_cvecDecorKey;
-  SG::ReadDecorHandleKey<C>    m_cinfoDecorKey;
-  SG::ReadDecorHandleKey<C>    m_cinfoBaseDecorKey;
-  SG::ReadDecorHandleKey<SG::AuxElement> m_objDecorKey;
+  SG::ReadDecorHandleKey<CVec> m_cvecDecorKey{this, "CVecDecorKey", "", "CVec decoration key"};
+  SG::ReadDecorHandleKey<C>    m_cinfoDecorKey{this, "CInfoDecorKey", "", "CInfo decoration key"};
+  SG::ReadDecorHandleKey<C>    m_cinfoBaseDecorKey{this, "CInfoBaseDecorKey", "", "CInfo base decoration key"};
+  SG::ReadDecorHandleKey<SG::AuxElement> m_objDecorKey{this, "ObjDecorKey", "", "Object decoration key"};
 };
 
 

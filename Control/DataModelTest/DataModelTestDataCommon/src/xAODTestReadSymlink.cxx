@@ -19,10 +19,6 @@ namespace DMTest {
 xAODTestReadSymlink::xAODTestReadSymlink (const std::string &name, ISvcLocator *pSvcLocator)
   : AthReentrantAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("Key", m_objKey);
-  declareProperty ("S1Key", m_s1Key = "S2");
-  declareProperty ("S2Key", m_s2Key = "S2");
-  declareProperty ("AliasKey", m_aliasKey = "S2alias");
 }
 
 

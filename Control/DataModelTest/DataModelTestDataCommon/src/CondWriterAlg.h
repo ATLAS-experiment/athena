@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -24,6 +24,7 @@
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaKernel/IAthenaOutputStreamTool.h"
+#include "Gaudi/Property.h"
 
 
 namespace DMTest {
@@ -59,12 +60,12 @@ private:
   StatusCode writeTSTest (unsigned int count);
 
   ServiceHandle<IIOVRegistrationSvc> m_regSvc;
-  ToolHandle<IAthenaOutputStreamTool> m_streamer;
+  ToolHandle<IAthenaOutputStreamTool> m_streamer{this, "Streamer", "AthenaOutputStreamTool/CondStream", "Output stream tool"};
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EvtInfo", "EventInfo", "EventInfo name"};
-  std::string m_attrListKey;
-  std::string m_s2Key;
-  std::string m_rltestKey;
-  std::string m_tstestKey;
+  Gaudi::Property<std::string> m_attrListKey{this, "AttrListKey", "/DMTest/TestAttrList", "Attribute list key"};
+  Gaudi::Property<std::string> m_s2Key{this, "S2Key", "/DMTest/S2", "S2 conditions object key"};
+  Gaudi::Property<std::string> m_rltestKey{this, "RLTestKey", "/DMTest/RLTest", "Run-lumi attribute list key"};
+  Gaudi::Property<std::string> m_tstestKey{this, "TSTestKey", "/DMTest/TSTest", "Timestamp attribute list key"};
 };
 
 

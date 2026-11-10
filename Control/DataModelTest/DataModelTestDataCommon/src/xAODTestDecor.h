@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -23,6 +23,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/WriteDecorHandleKey.h"
 #include "StoreGate/ReadHandleKey.h"
+#include "Gaudi/Property.h"
 
 
 namespace DMTest {
@@ -63,25 +64,25 @@ public:
 
 private:
   /// Parameter: Prefix for names read from SG.
-  std::string m_readPrefix;
+  Gaudi::Property<std::string> m_readPrefix{this, "ReadPrefix", "", "Prefix for names read from SG"};
 
   /// Parameter: Name of the decoration.
-  std::string m_decorName;
+  Gaudi::Property<std::string> m_decorName{this, "DecorName", "dInt1", "Name of the decoration"};
 
   /// Parameter: Offset to be applied to decoration.
-  int m_offset;
+  Gaudi::Property<int> m_offset{this, "Offset", 0, "Offset to be applied to decoration"};
 
   /// Flags.
-  bool m_doCVec;
-  bool m_doCInfo;
-  bool m_doCTrig;
+  Gaudi::Property<bool> m_doCVec{this, "DoCVec", true, "Decorate CVec"};
+  Gaudi::Property<bool> m_doCInfo{this, "DoCInfo", true, "Decorate CInfo"};
+  Gaudi::Property<bool> m_doCTrig{this, "DoCTrig", true, "Decorate CTrig"};
 
   /// Handles for writing decorations.
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EvtInfo", "EventInfo", "EventInfo name"};
-  SG::WriteDecorHandleKey<CVec> m_cvecDecorKey;
-  SG::WriteDecorHandleKey<C>    m_cinfoDecorKey;
-  SG::WriteDecorHandleKey<SG::AuxElement> m_objDecorKey;
-  SG::WriteDecorHandleKey<CVec> m_ctrigDecorKey;
+  SG::WriteDecorHandleKey<CVec> m_cvecDecorKey{this, "CVecDecorKey", "", "CVec decoration key"};
+  SG::WriteDecorHandleKey<C>    m_cinfoDecorKey{this, "CInfoDecorKey", "", "CInfo decoration key"};
+  SG::WriteDecorHandleKey<SG::AuxElement> m_objDecorKey{this, "ObjDecorKey", "", "Object decoration key"};
+  SG::WriteDecorHandleKey<CVec> m_ctrigDecorKey{this, "CTrigDecorKey", "", "CTrig decoration key"};
 };
 
 

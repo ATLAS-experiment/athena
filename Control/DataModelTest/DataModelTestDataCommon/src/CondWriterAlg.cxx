@@ -26,14 +26,8 @@ namespace DMTest {
  */
 CondWriterAlg::CondWriterAlg (const std::string &name, ISvcLocator *pSvcLocator)
   : AthAlgorithm (name, pSvcLocator),
-    m_regSvc ("IOVRegistrationSvc", name),
-    m_streamer ("AthenaOutputStreamTool/CondStream", this)
+    m_regSvc ("IOVRegistrationSvc", name)
 {
-  declareProperty ("Streamer",     m_streamer);
-  declareProperty ("AttrListKey",  m_attrListKey = "/DMTest/TestAttrList");
-  declareProperty ("S2Key",        m_s2Key       = "/DMTest/S2");
-  declareProperty ("RLTestKey",    m_rltestKey   = "/DMTest/RLTest");
-  declareProperty ("TSTestKey",    m_tstestKey   = "/DMTest/TSTest");
 }
 
 
@@ -52,9 +46,9 @@ StatusCode CondWriterAlg::initialize()
 StatusCode CondWriterAlg::writeSCond (unsigned int count)
 {
   auto s2 = std::make_unique<DMTest::S2> (count * 50);
-  ATH_CHECK( detStore()->overwrite (std::move (s2), m_s2Key, true) );
+  ATH_CHECK( detStore()->overwrite (std::move (s2), m_s2Key.value(), true) );
 
-  IAthenaOutputStreamTool::TypeKeyPairs typeKeys {{"DMTest::S2", m_s2Key}};
+  IAthenaOutputStreamTool::TypeKeyPairs typeKeys {{"DMTest::S2", m_s2Key.value()}};
 
   ATH_CHECK( m_streamer->connectOutput() );
   ATH_CHECK( m_streamer->streamObjects (typeKeys) );
@@ -62,7 +56,7 @@ StatusCode CondWriterAlg::writeSCond (unsigned int count)
 
   // Each IOV for this folder is two LBs long.
   ATH_CHECK( m_regSvc->registerIOV ("DMTest::S2",
-                                    m_s2Key,
+                                    m_s2Key.value(),
                                     "S2_noTag",
                                     0, 0,
                                     count, count+2) );
@@ -86,10 +80,10 @@ StatusCode CondWriterAlg::writeRLTest (unsigned int count)
     auto attrList = std::make_unique<AthenaAttributeList>();
     attrList->extend ("xint", "int");
     (*attrList)["xint"].setValue(static_cast<int> (niov));
-    ATH_CHECK( detStore()->overwrite (std::move (attrList), m_rltestKey, true) );
+    ATH_CHECK( detStore()->overwrite (std::move (attrList), m_rltestKey.value(), true) );
 
     ATH_CHECK( m_regSvc->registerIOV ("AthenaAttributeList",
-                                      m_rltestKey,
+                                      m_rltestKey.value(),
                                       "RL_noTag",
                                       0, 0,
                                       lbn, IOVTime::MAXEVENT) );
@@ -113,10 +107,10 @@ StatusCode CondWriterAlg::writeTSTest (unsigned int count)
     auto attrList = std::make_unique<AthenaAttributeList>();
     attrList->extend ("xint", "int");
     (*attrList)["xint"].setValue(static_cast<int> (niov * 100));
-    ATH_CHECK( detStore()->overwrite (std::move (attrList), m_tstestKey, true) );
+    ATH_CHECK( detStore()->overwrite (std::move (attrList), m_tstestKey.value(), true) );
 
     ATH_CHECK( m_regSvc->registerIOV ("AthenaAttributeList",
-                                      m_tstestKey,
+                                      m_tstestKey.value(),
                                       "TS_noTag",
                                       static_cast<uint64_t>(count) * 1000000000,
                                       IOVTime::MAXTIMESTAMP) );
@@ -138,10 +132,10 @@ StatusCode CondWriterAlg::execute(const EventContext& ctx)
   attrList->extend ("xint", "int");
   (*attrList)["xint"].setValue(static_cast<int> ((count+1)*10));
 
-  ATH_CHECK( detStore()->overwrite (std::move (attrList), m_attrListKey, true) );
+  ATH_CHECK( detStore()->overwrite (std::move (attrList), m_attrListKey.value(), true) );
 
   ATH_CHECK( m_regSvc->registerIOV ("AthenaAttributeList",
-                                    m_attrListKey,
+                                    m_attrListKey.value(),
                                     "AttrList_noTag",
                                     0, IOVTime::MAXRUN,
                                     count, IOVTime::MAXEVENT) );

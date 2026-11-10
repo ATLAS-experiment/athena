@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 /**
  * @file DataModelTestDataCommon/src/CondAlg1.h
@@ -48,8 +48,8 @@ public:
 
 
 private:
-  SG::ReadCondHandleKey<AthenaAttributeList> m_attrListKey;
-  SG::WriteCondHandleKey<DMTest::S2> m_scondKey;
+  SG::ReadCondHandleKey<AthenaAttributeList> m_attrListKey{this, "AttrListKey", "/DMTest/TestAttrList", "Input attribute list key"};
+  SG::WriteCondHandleKey<DMTest::S2> m_scondKey{this, "SCondKey", "scond", "Output conditions object key"};
 };
 
 

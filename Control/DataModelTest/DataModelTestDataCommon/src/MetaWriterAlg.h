@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 // $Id$
 /**
@@ -47,7 +47,7 @@ public:
 
 
 private:
-  ServiceHandle<StoreGateSvc> m_metaStore;
+  ServiceHandle<StoreGateSvc> m_metaStore{this, "MetaDataStore", "StoreGateSvc/MetaDataStore", "Metadata store"};
 };
 
 

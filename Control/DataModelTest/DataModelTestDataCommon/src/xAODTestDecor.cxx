@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -30,18 +30,6 @@ xAODTestDecor::xAODTestDecor (const std::string &name,
                               ISvcLocator *pSvcLocator)
   : AthReentrantAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("ReadPrefix",  m_readPrefix);
-  declareProperty ("DecorName",   m_decorName = "dInt1");
-  declareProperty ("Offset",      m_offset = 0);
-
-  declareProperty ("CVecDecorKey",  m_cvecDecorKey);
-  declareProperty ("CInfoDecorKey", m_cinfoDecorKey);
-  declareProperty ("ObjDecorKey",   m_objDecorKey);
-  declareProperty ("CTrigDecorKey", m_ctrigDecorKey);
-
-  declareProperty ("DoCVec",      m_doCVec = true);
-  declareProperty ("DoCInfo",     m_doCInfo = true);
-  declareProperty ("DoCTrig",     m_doCTrig = true);
 }
   
 
@@ -50,10 +38,10 @@ xAODTestDecor::xAODTestDecor (const std::string &name,
  */
 StatusCode xAODTestDecor::initialize()
 {
-  m_cvecDecorKey  = m_readPrefix + "cvec."  + m_decorName;
-  m_cinfoDecorKey = m_readPrefix + "cinfo." + m_decorName;
-  m_objDecorKey = m_readPrefix + "cinfo." + m_decorName + "Base";
-  m_ctrigDecorKey = m_readPrefix + "ctrig." + m_decorName;
+  m_cvecDecorKey  = m_readPrefix.value() + "cvec."  + m_decorName.value();
+  m_cinfoDecorKey = m_readPrefix.value() + "cinfo." + m_decorName.value();
+  m_objDecorKey = m_readPrefix.value() + "cinfo." + m_decorName.value() + "Base";
+  m_ctrigDecorKey = m_readPrefix.value() + "ctrig." + m_decorName.value();
 
   ATH_CHECK( m_eventInfoKey.initialize() );
   ATH_CHECK( m_cvecDecorKey.initialize  (m_doCVec) );
@@ -91,7 +79,7 @@ StatusCode xAODTestDecor::execute (const EventContext& ctx) const
       return StatusCode::FAILURE;
     }
     for (const C* celt : *cvecDecor) {
-      cvecDecor(*celt) = celt->anInt() + (m_offset ? m_offset : count*300);
+      cvecDecor(*celt) = celt->anInt() + (m_offset ? m_offset.value() : count*300);
     }
   }
 
