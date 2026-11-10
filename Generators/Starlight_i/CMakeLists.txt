@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 
 # Declare the package name:
@@ -18,6 +18,7 @@ atlas_add_library( Starlight_iLib
    INCLUDE_DIRS ${STARLIGHT_INCLUDE_DIRS}
    PRIVATE_INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} 
    PRIVATE_DEFINITIONS ${CLHEP_DEFINITIONS}
+                       STARLIGHTVER=\"${STARLIGHT_LCGVERSION}\"
    LINK_LIBRARIES ${STARLIGHT_LIBRARIES} GeneratorModulesLib
    PRIVATE_LINK_LIBRARIES ${CLHEP_LIBRARIES} AtlasHepMCLib AthenaKernel
    GaudiKernel CxxUtils TruthUtils StoreGateLib )

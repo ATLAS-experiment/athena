@@ -103,6 +103,7 @@ protected:
 
   bool set_user_params();
   bool prepare_params_file();
+  double getAcceptedCrossSection();
 };
 
 #endif
