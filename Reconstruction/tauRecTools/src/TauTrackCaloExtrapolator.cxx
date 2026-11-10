@@ -33,7 +33,7 @@ StatusCode TauTrackCaloExtrapolator::initialize() {
 
   ATH_CHECK( m_ParticleCacheKey.initialize(SG::AllowEmpty) );
   ATH_CHECK( m_extensionReadDecorKey.initialize(SG::AllowEmpty));
-  ATH_CHECK(m_ctxProvider.initialize(SG::AllowEmpty));
+  ATH_CHECK( m_ctxProvider.initialize(SG::AllowEmpty));
   if(!m_useACTSExtrapolator){
     if(!m_caloExtensionTool.empty()) {
     ATH_CHECK( m_caloExtensionTool.retrieve() );
@@ -84,7 +84,6 @@ StatusCode TauTrackCaloExtrapolator::executeTool(xAOD::TauJet& pTau,
   if(!m_extensionReadDecorKey.empty()){
     extensionReadDecorHandle.emplace(m_extensionReadDecorKey, ctx);
   }
-  const Acts::GeometryContext gctx = m_ctxProvider.getGeometryContext(ctx);
 
   for(const ElementLink<xAOD::TauTrackContainer>& trackLink : pTau.allTauTrackLinks())
   {
@@ -196,7 +195,9 @@ StatusCode TauTrackCaloExtrapolator::executeTool(xAOD::TauJet& pTau,
     else { 
       // use ACTS Based extrapolation
       bool use_extrap_tool = false;
-      
+     
+      const Acts::GeometryContext gctx = m_ctxProvider.getGeometryContext(ctx);
+
       ElementLink<ActsTrk::CaloExtensionContainer> trackCaloExtensionLink;
       if (extensionReadDecorHandle->isAvailable()) {
          trackCaloExtensionLink = (*extensionReadDecorHandle)(*orgTrack);
