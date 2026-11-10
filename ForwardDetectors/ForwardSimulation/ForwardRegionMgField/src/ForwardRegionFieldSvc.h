@@ -78,7 +78,7 @@ namespace MagField {
     // array for storing magnets data
     // dipoles/quadrupoles: field/gradient beam 1 | field/gradient beam 2 | x offset | y offset
     // kickers: B_x beam 1 | B_x beam 2 | B_y beam 1 | B_y beam 2
-    double m_magData[4];
+    double m_magData[4]{};
 
     // switch for magnetic data input file type: 0 = magnets.dat, 1 = twiss file
     int m_magDataType{0};
@@ -115,8 +115,11 @@ namespace MagField {
     static const int s_rowsMQXB = 89;
     static const int s_colsMQXB = 89;
 
-    double m_magIndMQXA[s_rowsMQXA][s_colsMQXA][2];
-    double m_magIndMQXB[s_rowsMQXB][s_colsMQXB][2];
+    double m_magIndMQXA[s_rowsMQXA][s_colsMQXA][2]{};
+    double m_magIndMQXB[s_rowsMQXB][s_colsMQXB][2]{};
+
+    // Load MQXA/MQXB field maps from the files given by the properties
+    StatusCode loadFieldMaps();
 
     // Load data from file into 2D array of strings
     std::vector<std::vector<std::string> > loadDataFile(const char * fileName, int cols);

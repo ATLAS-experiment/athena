@@ -38,13 +38,39 @@ MagField::ForwardRegionFieldSvc::ForwardRegionFieldSvc(const std::string& name,I
   base_class(name,svc)
 {
   m_Config.clear();
+}
+
+StatusCode MagField::ForwardRegionFieldSvc::initialize()
+{
+  ATH_CHECK(m_properties.retrieve());
+
+  // The MQXA/MQXB field maps are only used for the inner triplet when
+  // FLUKA maps are requested. Load them here, once the properties are set.
+  if(m_properties->getConf()->bUseFLUKAMapsForInnerTriplet) {
+    ATH_CHECK(loadFieldMaps());
+  }
+
+  ATH_MSG_INFO("Postponing magnet strengths initialization of " << this->name() << " till the begin of run");
+  ServiceHandle<IIncidentSvc> incidentSvc("IncidentSvc", this->name());
+  ATH_CHECK(incidentSvc.retrieve());
+  incidentSvc->addListener( this, IncidentType::BeginRun );
+  ATH_MSG_INFO("Added listener to BeginRun incident");
+  return StatusCode::SUCCESS;
+}
+
+StatusCode MagField::ForwardRegionFieldSvc::loadFieldMaps()
+{
+  const int fileCols(7); //TODO make this a property
 
   if(!m_MQXA_DataFile.value().empty())
     {
-      const int fileMQXACols(7); //TODO make this a property
-
       // load field map MQXA
-      std::vector<std::vector<std::string> > loadedDataFile = loadDataFile(m_MQXA_DataFile.value().c_str(),fileMQXACols);
+      std::vector<std::vector<std::string> > loadedDataFile = loadDataFile(m_MQXA_DataFile.value().c_str(),fileCols);
+      if(loadedDataFile.size() < static_cast<size_t>(s_rowsMQXA*s_colsMQXA)) {
+        ATH_MSG_ERROR("Field map " << m_MQXA_DataFile.value() << " contains " << loadedDataFile.size()
+                      << " entries, expected " << s_rowsMQXA*s_colsMQXA);
+        return StatusCode::FAILURE;
+      }
 
       ATH_MSG_DEBUG("Field map MQXA loaded");
 
@@ -61,10 +87,13 @@ MagField::ForwardRegionFieldSvc::ForwardRegionFieldSvc(const std::string& name,I
 
   if(!m_MQXB_DataFile.value().empty())
     {
-      const int fileMQXBCols(7); //TODO make this a property
-
       // load field map MQXB
-      std::vector<std::vector<std::string> > loadedDataFileB = loadDataFile(m_MQXB_DataFile.value().c_str(),fileMQXBCols);
+      std::vector<std::vector<std::string> > loadedDataFileB = loadDataFile(m_MQXB_DataFile.value().c_str(),fileCols);
+      if(loadedDataFileB.size() < static_cast<size_t>(s_rowsMQXB*s_colsMQXB)) {
+        ATH_MSG_ERROR("Field map " << m_MQXB_DataFile.value() << " contains " << loadedDataFileB.size()
+                      << " entries, expected " << s_rowsMQXB*s_colsMQXB);
+        return StatusCode::FAILURE;
+      }
 
       ATH_MSG_DEBUG("Field map MQXB loaded");
 
@@ -79,18 +108,6 @@ MagField::ForwardRegionFieldSvc::ForwardRegionFieldSvc(const std::string& name,I
         }
     }
 
-
-}
-
-StatusCode MagField::ForwardRegionFieldSvc::initialize()
-{
-  ATH_CHECK(m_properties.retrieve());
-
-  ATH_MSG_INFO("Postponing magnet strengths initialization of " << this->name() << " till the begin of run");
-  ServiceHandle<IIncidentSvc> incidentSvc("IncidentSvc", this->name());
-  ATH_CHECK(incidentSvc.retrieve());
-  incidentSvc->addListener( this, IncidentType::BeginRun );
-  ATH_MSG_INFO("Added listener to BeginRun incident");
   return StatusCode::SUCCESS;
 }
 
