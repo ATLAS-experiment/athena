@@ -160,7 +160,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     partType = Neutrino;
   }
 
-  ATH_MSG_DEBUG("particleTruthClassifier  succeeded ");
+  // particleTruthClassifier  succeeded 
   return std::make_pair(partType, partOrig);
 }
 
@@ -169,7 +169,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
                                                     bool& isPrompt,
                                                     IMCTruthClassifier::Info& info) const
 {
-  ATH_MSG_DEBUG("Executing DefOrigOfElectron ");
+  // Executing DefOrigOfElectron 
 
   // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
   const xAOD::TruthParticle* thePriPart = MC::findMatching(xTruthParticleContainer, thePart);
@@ -182,7 +182,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
   if (!partProdVtx) return NonDefined;
 
-  if (partProdVtx->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfElectron:: electron has more than one parent.");
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
   info.setMotherProperties(ancestor);
@@ -383,17 +382,17 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 8 &&
         (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 8) &&
         (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) {
-      ATH_MSG_VERBOSE("MultiBoson for 4topLep");
+      // MultiBoson for 4topLep
       return MultiBoson;
     }
     
     //--Sherpa Vgamma ( Z->ee+gamma or W->enu+gamma ) 
     if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && NumOfEl == 1 && NumOfPos == 1) {
-	    ATH_MSG_VERBOSE("Sherpa ee + gamma");
+	    // Sherpa ee + gamma
 	    return ZBoson;
     }
     if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && (NumOfEl == 1 || NumOfPos == 1) && NumOfElNeut == 1) {
-	    ATH_MSG_VERBOSE("Sherpa enu + gamma");
+	    // Sherpa enu + gamma
 	    return WBoson;
     }
   }
@@ -455,7 +454,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
                                                 bool& isPrompt,
                                                 IMCTruthClassifier::Info& info) const
 {
-  ATH_MSG_DEBUG("Executing DefOrigOfMuon ");
+  // Executing DefOrigOfMuon 
 
   // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
   const xAOD::TruthParticle* thePriPart = MC::findMatching(xTruthParticleContainer, thePart);
@@ -468,7 +467,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
   if (!partProdVtx) return NonDefined;
 
-  if (partProdVtx->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfMuon:: muon has more than one parent.");
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
   info.setMotherProperties(ancestor);
@@ -624,17 +622,17 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 8 &&
         (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 8) &&
         (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) {
-      ATH_MSG_VERBOSE("MultiBoson for 4topLep");
+      // MultiBoson for 4topLep
       return MultiBoson;
     }
     
     //--Sherpa Vgamma ( Z->ee+gamma or W->enu+gamma )
     if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && NumOfMuPl == 1 && NumOfMuMin == 1) {
-            ATH_MSG_VERBOSE("Sherpa mumu + gamma");
+            // Sherpa mumu + gamma
             return ZBoson;
     }
     if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && (NumOfMuPl == 1 || NumOfMuMin == 1) && NumOfMuNeut == 1) {
-            ATH_MSG_VERBOSE("Sherpa munu + gamma");
+            // Sherpa munu + gamma
             return WBoson;
     }
     
@@ -692,7 +690,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
                                                int ancestorPDGin,
                                                IMCTruthClassifier::Info& info) const
 {
-  ATH_MSG_DEBUG("Executing DefOrigOfTau ");
+  // Executing DefOrigOfTau 
 
   // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
   const xAOD::TruthParticle* thePriPart = MC::findMatching(xTruthParticleContainer, thePart);
@@ -705,7 +703,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
   if (!partProdVtx) return NonDefined;
 
-  if (partProdVtx->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfTau:: tau has more than one parent.");
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
   info.setMotherProperties(ancestor);
@@ -825,17 +822,17 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
     if ((numberOfChildren - NumOfquark - NumOfgluon) == 8 &&
         (NumOfEl + NumOfPos + NumOfMuPl + NumOfMuMin + NumOfTau + NumOfElNeut + NumOfMuNeut + NumOfTauNeut == 8) &&
         (MC::isQuark(pdg1)||MC::isGluon(pdg1)) && (MC::isQuark(pdg2)||MC::isGluon(pdg2))) {
-      ATH_MSG_VERBOSE("MultiBoson for 4topLep");
+      // MultiBoson for 4topLep
       return MultiBoson;
     }
     
     //--Sherpa Vgamma ( Z->tautau+gamma or W->taunu+gamma )
     if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && NumOfTau == 2) {
-	    ATH_MSG_VERBOSE("Sherpa tautau + gamma");
+	    // Sherpa tautau + gamma
 	    return ZBoson;
     }
     if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && NumOfTau == 1 && NumOfTauNeut == 1) {
-	    ATH_MSG_VERBOSE("Sherpa taunu + gamma");
+	    // Sherpa taunu + gamma
 	    return WBoson;
     }
   }
@@ -884,7 +881,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
                                                   IMCTruthClassifier::Info& info) const
 {
   if (!thePart) return NonDefined; // FIXME Why is this extra protection needed for this function and not the others?
-  ATH_MSG_DEBUG("Executing DefOrigOfPhoton ");
+  // Executing DefOrigOfPhoton 
 
   info.resetMotherProperties();
 
@@ -901,7 +898,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   if (!partProdVtx) return NonDefined;
 
   int numOfParents = partProdVtx->nIncomingParticles();
-  if (partProdVtx->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfPhoton:: photon has more than one parent.");
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
   info.setMotherProperties(ancestor);
@@ -976,7 +972,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
       }
       itr++;
       if (itr > 100) { // FIXME Improve loop detection here?
-        ATH_MSG_WARNING("DefOrigOfPhoton:: infinite while");
+        // DefOrigOfPhoton:: infinite while
         break;
       }
     } while (prodVert && std::abs(ancestorPDG) == PartPDG);
@@ -1145,7 +1141,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
                                      bool& isPrompt,
                                      IMCTruthClassifier::Info& info) const
 {
-  ATH_MSG_DEBUG("Executing DefOrigOfNeutrino ");
+  // Executing DefOrigOfNeutrino 
 
   const int nuFlav = std::abs(thePart->pdgId());
   // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
@@ -1159,7 +1155,6 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
   const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
   if (!partProdVtx) return NonDefined;
 
-  if (partProdVtx->nIncomingParticles() > 1) ATH_MSG_DEBUG("DefOrigOfNeutrino:: neutrino has more than one parent.");
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
   info.setMotherProperties(ancestor);
@@ -1335,7 +1330,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
     
     //--Sherpa Vgamma ( Z->nunu+gamma )
     if ((numberOfChildren - NumOfquark - NumOfgluon) >= 3 && NumOfPhot >= 1 && (NumOfElNeut == 2 || NumOfMuNeut == 2 || NumOfTauNeut == 2)) {
-	    ATH_MSG_VERBOSE("Sherpa nunu + gamma");
+	    // Sherpa nunu + gamma
 	    return ZBoson;
     }
   }
