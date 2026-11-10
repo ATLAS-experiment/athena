@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -32,16 +32,7 @@
 
 TileMuRODToNtuple::TileMuRODToNtuple(const std::string& name, ISvcLocator* pSvcLocator)
     : AthAlgorithm(name, pSvcLocator)
-  , m_ntuplePtr(0)
-  , m_ntupleID(100)
-  , m_maxNMuons(50)
-  , m_close(1)
-  , m_ntupleLoc("/FILE1/TileMuRODTag")
 {
-  declareProperty("NTupleLoc", m_ntupleLoc);
-  declareProperty("NTupleID", m_ntupleID);
-  declareProperty("MaxNMuons", m_maxNMuons);
-  declareProperty("CloseNtuple", m_close);
 }
 
 TileMuRODToNtuple::~TileMuRODToNtuple() {
@@ -51,15 +42,15 @@ StatusCode TileMuRODToNtuple::initialize() {
 
   m_ntupleLoc = "/NTUPLES/FILE1/TileMuRODTag";
 
-  SmartDataPtr<NTuple::Directory> DirPtr(ntupleSvc(), m_ntupleLoc);
-  if (!DirPtr) DirPtr = ntupleSvc()->createDirectory(m_ntupleLoc);
+  SmartDataPtr<NTuple::Directory> DirPtr(ntupleSvc(), m_ntupleLoc.value());
+  if (!DirPtr) DirPtr = ntupleSvc()->createDirectory(m_ntupleLoc.value());
 
   if (!DirPtr) {
-    ATH_MSG_ERROR( "Invalid Ntuple Directory: " << m_ntupleLoc );
+    ATH_MSG_ERROR( "Invalid Ntuple Directory: " << m_ntupleLoc.value() );
     return StatusCode::FAILURE;
   }
 
-  m_ntuplePtr = ntupleSvc()->book(DirPtr.ptr(), m_ntupleID, CLID_ColumnWiseTuple
+  m_ntuplePtr = ntupleSvc()->book(DirPtr.ptr(), m_ntupleID.value(), CLID_ColumnWiseTuple
                                       , "TileMuRODTag-Ntuple");
 
   if (!m_ntuplePtr) {
@@ -67,7 +58,7 @@ StatusCode TileMuRODToNtuple::initialize() {
     return StatusCode::FAILURE;
   }
 
-  CHECK(m_ntuplePtr->addItem("TileMuROD/NMuons", m_ntag, 0, m_maxNMuons));
+  CHECK(m_ntuplePtr->addItem("TileMuROD/NMuons", m_ntag, 0, m_maxNMuons.value()));
   CHECK(m_ntuplePtr->addItem("TileMuROD/EtaMuons", m_ntag, m_eta, -1.5, 1.5));
   CHECK(m_ntuplePtr->addItem("TileMuROD/PhiMuons", m_ntag, m_phi, 0., 6.3));
 
@@ -91,7 +82,7 @@ StatusCode TileMuRODToNtuple::execute(const EventContext& ctx) {
       m_phi[m_ntag] = l2->phi(a);
       m_ntag++;
     }
-    if (m_ntag >= m_maxNMuons) break;
+    if (m_ntag >= m_maxNMuons.value()) break;
   }
 
   if (m_close == 1) {

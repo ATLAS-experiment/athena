@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -33,6 +33,7 @@
 
 // Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
+#include "Gaudi/Property.h"
 
 // C++ STL includes
 #include <string>
@@ -183,11 +184,11 @@ class TileL2Builder: public AthAlgTool {
                                                                         "Input Tile raw channel container key"};
 
 
-    float m_noiseThreshold;
-    int m_noiseType;
+    Gaudi::Property<float> m_noiseThreshold{this, "NoiseThreshold", 100.0}; // use channels only above noise cut, 100 MeV universal cut for now
+    Gaudi::Property<int> m_noiseType{this, "Noise", 9999}; // choose between electronic or total noise, this huge value means that noise cut is taken from JO
 
     /** Pointer to TileHWID */
-    const TileHWID* m_tileHWID;
+    const TileHWID* m_tileHWID{nullptr};
 
    /**
     * @brief Name of TileEMScale in condition store
