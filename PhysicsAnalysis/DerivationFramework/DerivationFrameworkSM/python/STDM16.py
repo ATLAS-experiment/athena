@@ -23,10 +23,10 @@ streamName = "StreamDAOD_STDM16"
 
 def DStarSelectionToolCfg(flags, name, **kwargs):
     acc = ComponentAccumulator()
-    acc.addPublicTool(CompFactory.DerivationFramework.DStarSelectionTool(name = "STDM16_DStarSelectionTool",
-                                                                         InputVtxContainerName = CandidatesContainerName,
-                                                                         DeltaMassMax          = 200.0), primary = True)
-    return acc 
+    kwargs.setdefault("InputVtxContainerName", CandidatesContainerName)
+    kwargs.setdefault("DeltaMassMax", 200.0)
+    acc.setPrivateTools(CompFactory.DerivationFramework.DStarSelectionTool(name = name, **kwargs)) # TODO Migrate to AthReentrantAlgorithm (ATLASG-3211)
+    return acc
 
 
 def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
@@ -205,10 +205,10 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
     # are augmented with "passed_Dstar" flag
     #====================================================================
 
-    STDM16_DStarSelectionTool = acc.getPrimaryAndMerge(DStarSelectionToolCfg(flags,
+    STDM16_DStarSelectionTool = acc.addPublicTool(acc.popToolsAndMerge(DStarSelectionToolCfg(flags,
                                                                           name = "STDM16_DStarSelectionTool",
                                                                           InputVtxContainerName = STDM16_Reco_D0.OutputVtxContainerName,
-                                                                          DeltaMassMax          = 200.0))
+                                                                          DeltaMassMax          = 200.0)))
 
     STDM16_AugmentationTools += [STDM16_DStarSelectionTool]
     
