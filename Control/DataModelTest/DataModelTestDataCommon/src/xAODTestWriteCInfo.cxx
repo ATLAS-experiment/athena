@@ -25,13 +25,8 @@ namespace DMTest {
  */
 xAODTestWriteCInfo::xAODTestWriteCInfo (const std::string &name,
                                         ISvcLocator *pSvcLocator)
-  : AthReentrantAlgorithm (name, pSvcLocator),
-    m_cvecKey ("cvec"),
-    m_cinfoKey ("cinfo")
+  : AthReentrantAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("Offset", m_offset = 0);
-  declareProperty ("CVecKey", m_cvecKey);
-  declareProperty ("CInfoKey", m_cinfoKey);
 }
   
 

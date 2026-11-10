@@ -22,14 +22,8 @@ namespace DMTest {
  * @param pSvcLocator The service locator.
  */
 CondAlg2::CondAlg2 (const std::string &name, ISvcLocator *pSvcLocator)
-  : AthCondAlgorithm (name, pSvcLocator),
-    m_rltestKey ("/DMTest/RLTest"),
-    m_tstestKey ("/DMTest/TSTest"),
-    m_outKey ("scond3", "DMTest")
+  : AthCondAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("RLTestKey",  m_rltestKey);
-  declareProperty ("TSTestKey",  m_tstestKey);
-  declareProperty ("OutKey",     m_outKey);
 }
 
 

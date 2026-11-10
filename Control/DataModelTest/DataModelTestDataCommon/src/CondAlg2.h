@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -52,9 +52,9 @@ public:
 
 
 private:
-  SG::ReadCondHandleKey<AthenaAttributeList> m_rltestKey;
-  SG::ReadCondHandleKey<AthenaAttributeList> m_tstestKey;
-  SG::WriteCondHandleKey<DMTest::S3> m_outKey;
+  SG::ReadCondHandleKey<AthenaAttributeList> m_rltestKey{this, "RLTestKey", "/DMTest/RLTest", "Input run-lumi attribute list key"};
+  SG::ReadCondHandleKey<AthenaAttributeList> m_tstestKey{this, "TSTestKey", "/DMTest/TSTest", "Input timestamp attribute list key"};
+  SG::WriteCondHandleKey<DMTest::S3> m_outKey{this, "OutKey", "scond3", "Output conditions object key"};
 };
 
 

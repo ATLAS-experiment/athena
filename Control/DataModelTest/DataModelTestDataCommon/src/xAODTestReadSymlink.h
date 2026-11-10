@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
- * Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 
 // $Id$
@@ -52,11 +52,11 @@ public:
 
 
 private:
-  SG::ReadHandleKey<SG::AuxElement> m_objKey;
+  SG::ReadHandleKey<SG::AuxElement> m_objKey{this, "Key", "", "Object key"};
 
-  SG::ReadHandleKey<DMTest::S1> m_s1Key;
-  SG::ReadHandleKey<DMTest::S2> m_s2Key;
-  SG::ReadHandleKey<DMTest::S2> m_aliasKey;
+  SG::ReadHandleKey<DMTest::S1> m_s1Key{this, "S1Key", "S2", "S1 key"};
+  SG::ReadHandleKey<DMTest::S2> m_s2Key{this, "S2Key", "S2", "S2 key"};
+  SG::ReadHandleKey<DMTest::S2> m_aliasKey{this, "AliasKey", "S2alias", "S2 alias key"};
 };
 
 

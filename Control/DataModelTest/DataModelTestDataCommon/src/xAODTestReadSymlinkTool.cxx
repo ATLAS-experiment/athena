@@ -21,10 +21,6 @@ xAODTestReadSymlinkTool::xAODTestReadSymlinkTool (const std::string& type,
                                                   const IInterface* parent)
   : base_class (type, name, parent)
 {
-  declareProperty ("Key", m_objKey);
-  declareProperty ("S1Key", m_s1Key = "S2");
-  declareProperty ("S2Key", m_s2Key = "S2");
-  declareProperty ("AliasKey", m_aliasKey = "S2alias");
 }
 
 

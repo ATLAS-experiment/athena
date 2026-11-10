@@ -29,15 +29,6 @@ xAODTestReadDecor::xAODTestReadDecor (const std::string &name,
                                       ISvcLocator *pSvcLocator)
   : AthReentrantAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("ReadPrefix",  m_readPrefix);
-  declareProperty ("DecorName",   m_decorName = "dInt1");
-  declareProperty ("CVecName",    m_cvecName  = "cvec");
-  declareProperty ("CInfoName",   m_cinfoName = "cinfo");
-
-  declareProperty ("CVecDecorKey",  m_cvecDecorKey);
-  declareProperty ("CInfoDecorKey", m_cinfoDecorKey);
-  declareProperty ("CInfoBaseDecorKey", m_cinfoBaseDecorKey);
-  declareProperty ("ObjDecorKey",   m_objDecorKey);
 }
   
 
@@ -46,15 +37,15 @@ xAODTestReadDecor::xAODTestReadDecor (const std::string &name,
  */
 StatusCode xAODTestReadDecor::initialize()
 {
-  if (!m_cvecName.empty()) {
-    m_cvecDecorKey  = m_readPrefix + m_cvecName +  "."  + m_decorName;
+  if (!m_cvecName.value().empty()) {
+    m_cvecDecorKey  = m_readPrefix.value() + m_cvecName.value() +  "."  + m_decorName.value();
     ATH_CHECK( m_cvecDecorKey.initialize() );
   }
 
-  if (!m_cinfoName.empty()) {
-    m_cinfoDecorKey = m_readPrefix + m_cinfoName + "." + m_decorName;
-    m_cinfoBaseDecorKey = m_readPrefix + m_cinfoName + "." + m_decorName + "Base";
-    m_objDecorKey = m_readPrefix + m_cinfoName + "." + m_decorName;
+  if (!m_cinfoName.value().empty()) {
+    m_cinfoDecorKey = m_readPrefix.value() + m_cinfoName.value() + "." + m_decorName.value();
+    m_cinfoBaseDecorKey = m_readPrefix.value() + m_cinfoName.value() + "." + m_decorName.value() + "Base";
+    m_objDecorKey = m_readPrefix.value() + m_cinfoName.value() + "." + m_decorName.value();
     ATH_CHECK( m_cinfoDecorKey.initialize() );
     ATH_CHECK( m_cinfoBaseDecorKey.initialize() );
     ATH_CHECK( m_objDecorKey.initialize() );

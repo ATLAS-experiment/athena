@@ -24,23 +24,8 @@ namespace DMTest {
  * @param pSvcLocator The service locator.
  */
 CondReaderAlg::CondReaderAlg (const std::string& name, ISvcLocator *pSvcLocator)
-  : AthReentrantAlgorithm (name, pSvcLocator),
-    m_chronoSvc ("ChronoStatSvc", name),
-    m_attrListKey ("/DMTest/TestAttrList"),
-    m_scondKey ("scond", "DMTest"),
-    m_s2Key ("/DMTest/S2"),
-    m_s3Key(""),
-    m_rltestKey (""),
-    m_tstestKey ("")
+  : AthReentrantAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("ChronoSvc",    m_chronoSvc);
-  declareProperty ("AttrListKey",  m_attrListKey);
-  declareProperty ("SCondKey",     m_scondKey);
-  declareProperty ("S2Key",        m_s2Key);
-  declareProperty ("S3Key",        m_s3Key);
-  declareProperty ("RLTestKey",    m_rltestKey);
-  declareProperty ("TSTestKey",    m_tstestKey);
-  declareProperty ("Spins",        m_spins = 0);
 }
 
 

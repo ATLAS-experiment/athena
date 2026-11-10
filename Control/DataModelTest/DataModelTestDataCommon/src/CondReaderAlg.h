@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /*
  */
@@ -26,6 +26,7 @@
 #include "StoreGate/ReadCondHandleKey.h"
 #include "GaudiKernel/ServiceHandle.h"
 #include "GaudiKernel/IChronoStatSvc.h"
+#include "Gaudi/Property.h"
 
 
 namespace DMTest {
@@ -56,15 +57,15 @@ public:
 
 
 private:
-  ServiceHandle<IChronoStatSvc> m_chronoSvc;
+  ServiceHandle<IChronoStatSvc> m_chronoSvc{this, "ChronoSvc", "ChronoStatSvc", "Chrono service"};
   SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this, "EvtInfo", "EventInfo", "EventInfo name"};
-  SG::ReadCondHandleKey<AthenaAttributeList> m_attrListKey;
-  SG::ReadCondHandleKey<DMTest::S1> m_scondKey;
-  SG::ReadCondHandleKey<DMTest::S1> m_s2Key;
-  SG::ReadCondHandleKey<DMTest::S3> m_s3Key;
-  SG::ReadCondHandleKey<AthenaAttributeList> m_rltestKey;
-  SG::ReadCondHandleKey<AthenaAttributeList> m_tstestKey;
-  size_t m_spins;
+  SG::ReadCondHandleKey<AthenaAttributeList> m_attrListKey{this, "AttrListKey", "/DMTest/TestAttrList", "Attribute list key"};
+  SG::ReadCondHandleKey<DMTest::S1> m_scondKey{this, "SCondKey", "scond", "Conditions object key"};
+  SG::ReadCondHandleKey<DMTest::S1> m_s2Key{this, "S2Key", "/DMTest/S2", "S2 conditions object key"};
+  SG::ReadCondHandleKey<DMTest::S3> m_s3Key{this, "S3Key", "", "S3 conditions object key"};
+  SG::ReadCondHandleKey<AthenaAttributeList> m_rltestKey{this, "RLTestKey", "", "Run-lumi attribute list key"};
+  SG::ReadCondHandleKey<AthenaAttributeList> m_tstestKey{this, "TSTestKey", "", "Timestamp attribute list key"};
+  Gaudi::Property<size_t> m_spins{this, "Spins", 0, "Number of extra spins over conditions access"};
 };
 
 
