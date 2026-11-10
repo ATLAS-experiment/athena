@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -40,27 +40,24 @@ TileDetectorTool::TileDetectorTool(const std::string& type,
                                    const std::string& name,
                                    const IInterface* parent)
         : GeoModelTool(type, name, parent)
-        , m_switches(false,true)
-        , m_not_locked(true)
-        , m_useNewFactory(true)
-        , m_geometryConfig("FULL")
-        , m_manager(0)
 {
-  declareProperty("UseNewFactory", m_useNewFactory);
-  declareProperty("GeometryConfig",m_geometryConfig);
-  declareProperty("TestBeam", m_switches.testBeam);
-  // declareProperty("AddPlatesToCellVolume", m_switches.addPlatesToCell); to make user aware that the value is taken from DB rather from JO
-  declareProperty("Ushape",m_switches.uShape);
-  declareProperty("Glue",m_switches.glue);
-  declareProperty("PVT",m_switches.pvt);
-  declareProperty("Steel",m_switches.steel);
-  declareProperty("CsTube",m_switches.csTube);
-  declareProperty("CrackOption",m_switches.crackOption);
 }
 
 
 TileDetectorTool::~TileDetectorTool()
 {
+}
+
+
+void TileDetectorTool::fillSwitches()
+{
+  m_switches = TileSwitches(m_testBeam, true);
+  m_switches.uShape = m_uShape;
+  m_switches.glue = m_glue;
+  m_switches.pvt = m_pvt;
+  m_switches.steel = m_steel;
+  m_switches.csTube = m_csTube;
+  m_switches.crackOption = m_crackOption;
 }
 
 
@@ -84,6 +81,8 @@ StatusCode TileDetectorTool::create()
 {
   MsgStream log(msgSvc(), name());
   ATH_MSG_INFO(" Entering TileDetectorTool::create()");
+
+  fillSwitches();
 
   // Get the detector configuration
   SmartIF<IGeoModelSvc> geoModel{service("GeoModelSvc")};
@@ -173,7 +172,7 @@ StatusCode TileDetectorTool::create()
       } else if (m_useNewFactory) {
         std::vector<GeoPhysVol *> volumePtrs;
         std::vector<double> volumePositions;
-        TileAtlasFactory theTileFactory(detStore().operator->(),m_manager,m_switches,m_volumes,volumePtrs,volumePositions,&log,m_geometryConfig=="FULL");
+        TileAtlasFactory theTileFactory(detStore().operator->(),m_manager,m_switches,m_volumes,volumePtrs,volumePositions,&log,m_geometryConfig.value()=="FULL");
         theTileFactory.create(world);
 
       } else {
@@ -191,7 +190,7 @@ StatusCode TileDetectorTool::create()
 
     // For reco jobs: release DB manager. Cannot do it here for simulation jobs, they
     // release DB manager as part of global GeoModel release
-    if (m_geometryConfig=="RECO")
+    if (m_geometryConfig.value()=="RECO")
       m_manager->releaseDbManager();
 
     return StatusCode::SUCCESS;
