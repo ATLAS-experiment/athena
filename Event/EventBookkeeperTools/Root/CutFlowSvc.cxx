@@ -51,10 +51,15 @@ CutFlowSvc::initialize()
   // Create initial bookkeeper container for bookkeepers in _this_ processing
   ATH_CHECK(createContainers(1));
 
+  // Configured input stream
+  ATH_MSG_DEBUG("Configured input stream = " << m_inputStream);
+
   // Determine the skimming cycle number that we should use now from the input file
-  ATH_MSG_VERBOSE("Have currently the cycle number = " << m_skimmingCycle );
-  ATH_CHECK( this->determineCycleNumberFromInput(m_completeCollName) );
-  ATH_MSG_VERBOSE("Will use cycle number = " << m_skimmingCycle );
+  if (m_enableInputPeeking) {
+    ATH_MSG_DEBUG("Have currently the cycle number = " << m_skimmingCycle);
+    ATH_CHECK(this->determineCycleNumberFromInput(m_completeCollName));
+  }
+  ATH_MSG_DEBUG("Will use cycle number = " << m_skimmingCycle);
 
   return StatusCode::SUCCESS;
 }
@@ -232,7 +237,7 @@ void CutFlowSvc::handle( const Incident& inc )
 {
   ATH_MSG_VERBOSE( "Start incident " << inc.type() );
 
-  if (inc.type() == IncidentType::BeginInputFile) {
+  if (m_enableInputPeeking && inc.type() == IncidentType::BeginInputFile) {
     // Look up input stream name from FileMetaData
     std::string inputstream = "";
     if (m_inMetaDataStore->contains<xAOD::FileMetaData>("FileMetaData")) {
@@ -284,6 +289,11 @@ void CutFlowSvc::handle( const Incident& inc )
         return;
       }
     }
+  }
+
+  if (m_inputStream.empty()) {
+    ATH_MSG_FATAL("Input stream name is empty");
+    return;
   }
 
   // Clear the local bookkeepers
