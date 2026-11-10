@@ -60,10 +60,6 @@ protected:
       if (!from) return;
     }
     inline void resetMotherProperties() { mother = nullptr;  }
-
-    const xAOD::TruthParticle* PhotonMother() const { return photonMother;}
-    const xAOD::TruthParticle* photonMother = nullptr;
-
 #ifndef GENERATIONBASE /*Disable when no reconstruction packages are expected*/
     float deltaRMatch = -999;
     float deltaPhi = -999;
