@@ -38,12 +38,12 @@ class ChargedHadronSubtractionTool : public JetConstituentModifierBase{
   ChargedHadronSubtractionTool(const std::string& name);
 
   // Check that the configuration is reasonable
-  StatusCode initialize();
+  StatusCode initialize() override final;
   StatusCode configure_decor_handle_keys() override final;
 
   private:
   // Implement the correction
-  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const; 
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const override final; 
   template <class T, class U> StatusCode matchToPrimaryVertex(T &, const EventContext& ctx) const;
   template <class T, class U> StatusCode matchByPrimaryVertex(T &, const EventContext& ctx) const;
 

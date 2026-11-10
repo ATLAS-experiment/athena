@@ -39,11 +39,11 @@ public:
   ~VoronoiWeightTool();
 
   // Check that the configuration is sane
-  StatusCode initialize();
+  StatusCode initialize() override final;
 
 protected:
   // Implement the correction
-  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const;
+  StatusCode process_impl(xAOD::IParticleContainer* cont, const EventContext& ctx) const override final;
   StatusCode configure_decor_handle_keys() override final;
 
    // methods used in the analysis
