@@ -1,7 +1,5 @@
 #include "BoostedJetTaggers/SmoothedWZTagger.h"
 #include "BoostedJetTaggers/SmoothedTopTagger.h"
-#include "BoostedJetTaggers/JetQGTagger.h"
-#include "BoostedJetTaggers/JetQGTaggerBDT.h"
 #include "BoostedJetTaggers/qgTagger.h"
 #include "BoostedJetTaggers/JSSWTopTaggerDNN.h"
 #include "BoostedJetTaggers/JSSWTopTaggerANN.h"
@@ -15,8 +13,6 @@ DECLARE_COMPONENT(SmoothedWZTagger)
 DECLARE_COMPONENT(SmoothedTopTagger)
 DECLARE_COMPONENT(JSSWTopTaggerDNN)
 DECLARE_COMPONENT(JSSWTopTaggerANN)
-DECLARE_COMPONENT(CP::JetQGTagger)
-DECLARE_COMPONENT(CP::JetQGTaggerBDT)
 DECLARE_COMPONENT(BJT::qgTagger)
 DECLARE_COMPONENT(AthONNX::JSSMLTool)
 DECLARE_COMPONENT(JSSTaggerUtils)

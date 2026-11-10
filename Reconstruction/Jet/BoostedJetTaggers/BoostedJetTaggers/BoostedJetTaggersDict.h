@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef BOOSTEDJETTAGGERS_BOOSTEDJETTAGGERSDICT_H
@@ -14,8 +14,6 @@
 #include "BoostedJetTaggers/SmoothedTopTagger.h"
 #include "BoostedJetTaggers/JSSWTopTaggerDNN.h"
 #include "BoostedJetTaggers/JSSWTopTaggerANN.h"
-#include "BoostedJetTaggers/JetQGTagger.h"
-#include "BoostedJetTaggers/JetQGTaggerBDT.h"
 #include "BoostedJetTaggers/qgTagger.h"
 #include "BoostedJetTaggers/JSSMLTool.h"
 #include "BoostedJetTaggers/JSSTaggerUtils.h"
