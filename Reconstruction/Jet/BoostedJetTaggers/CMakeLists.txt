@@ -25,8 +25,6 @@ atlas_add_library( BoostedJetTaggersLib
   Root/JSSTaggerBase.cxx
   Root/JSSMLTool.cxx
   Root/JSSTaggerUtils.cxx
-  Root/JetQGTagger.cxx
-  Root/JetQGTaggerBDT.cxx
   Root/JSSWTopTaggerDNN.cxx
   Root/JSSWTopTaggerANN.cxx
   Root/SmoothedWZTagger.cxx
@@ -80,13 +78,6 @@ if( XAOD_STANDALONE )
       xAODEventInfo xAODJet xAODTruth xAODCore PATInterfaces xAODCore AsgTools
       BoostedJetTaggersLib
    )   
-   atlas_add_executable( test_JetQGTagger
-      util/test_JetQGTagger.cxx
-      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
-      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess
-      xAODEventInfo xAODJet xAODCore PATInterfaces xAODCore AsgTools
-      BoostedJetTaggersLib
-   )
    atlas_add_executable( test_JSSWTopTaggerDNN
       util/test_JSSWTopTaggerDNN.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
@@ -99,13 +90,6 @@ if( XAOD_STANDALONE )
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
       LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess
       xAODEventInfo xAODJet xAODTruth xAODCore PATInterfaces xAODCore AsgTools
-      BoostedJetTaggersLib
-   )
-   atlas_add_executable( test_JetQGTaggerBDT
-      util/test_JetQGTaggerBDT.cxx
-      INCLUDE_DIRS ${ROOT_INCLUDE_DIRS} 
-      LINK_LIBRARIES ${ROOT_LIBRARIES} xAODRootAccess
-      xAODEventInfo xAODJet xAODCore PATInterfaces xAODCore AsgTools
       BoostedJetTaggersLib
    )
 endif()
