@@ -427,7 +427,7 @@ std::unique_ptr<SegmentSeed>
     // extend the seed to the segment -- include hits from the other layers too
     auto extendedHits = extendHits(segPos, direction, extensionLayers, usedHits);
     HitVec hits{};
-    hits.insert_range(hits.end(), std::move(initialSeed));
+    hits.insert_range(hits.end(), initialSeed);
     hits.insert_range(hits.end(), std::move(extendedHits));
 
     return std::make_unique<SegmentSeed>(tanBeta, interceptY, tanAlphaBS,

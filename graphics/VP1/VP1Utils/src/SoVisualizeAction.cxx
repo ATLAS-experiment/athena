@@ -136,6 +136,7 @@ void SoVisualizeAction::handleShape(const GeoShape *shape)
     auto poly = a.getPolyhedron();
     if (poly) {
       //SoPolyhedron takes ownership of poly
+      //coverity[RESOURCE_LEAK]
       m_shape=new SoPolyhedron(poly.release());
     }
 #ifndef BUILDVP1LIGHT
