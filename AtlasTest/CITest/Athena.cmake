@@ -144,7 +144,7 @@ atlas_add_citest( RecoRun4Data_NVIDIA_GPU
    PRE_EXEC_SCRIPT "nvidia-check.sh || exit 2"
    PROPERTIES SKIP_RETURN_CODE 2
    SCRIPT athena.py RecExRecoTest/FullReco_RDO_Run4_GPU.py Device.Backend=DeviceBackend.CUDA
-   LOG_IGNORE_PATTERN "PathResolver.*ERROR Locating dev file|ActsPriVxFinderAlg.*ERROR Variance of|ActsPriVxFinderAlg.*ERROR sumVarZ|FPE INVALID in.*ActsPriVxFinderAlg" )
+   LOG_IGNORE_PATTERN "PathResolver.*ERROR Locating dev file|ActsPriVxFinderAlg.*ERROR Variance of|ActsPriVxFinderAlg.*ERROR sumVarZ|FPE INVALID in.*ActsPriVxFinderAlg")
 
 atlas_add_citest( RecoRun4Data_AMD_GPU
    PRE_EXEC_SCRIPT "amd-check.sh || exit 2"

@@ -27,6 +27,7 @@ flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
 # Construct the tracking geometry for the GPU.
 flags.Detector.GeometryMuon = False
 flags.Detector.GeometryCalo = False
+flags.Detector.EnableHGTD = False
 flags.Acts.TrackingGeometry.UseBlueprint = True
 flags.Acts.TrackingGeometry.BuildDetrayGeometry = True
 flags.Tracking.ITkActsPass.useITkStripSeeding=False
