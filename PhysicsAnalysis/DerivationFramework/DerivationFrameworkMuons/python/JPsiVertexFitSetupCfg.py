@@ -2,7 +2,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
-def AddRecoMumuToolCfg(flags, name = "MuonTPRecoMumuTool", **kwargs):
+def AddRecoMumuToolCfg(flags, name = "MuonTPRecoMumu", **kwargs):
     result = ComponentAccumulator()
 
     if "V0Tools" not in kwargs:
@@ -18,13 +18,15 @@ def AddRecoMumuToolCfg(flags, name = "MuonTPRecoMumuTool", **kwargs):
         result.addPublicTool(PVrefit)
         kwargs.setdefault("PVRefitter", PVrefit)
 
-    result.setPrivateTools(CompFactory.DerivationFramework.Reco_mumu(name, **kwargs))
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import Reco_mumuCfg
+    result.setPrivateTools(result.popToolsAndMerge(Reco_mumuCfg(flags,name, **kwargs)))
     return result
+
 
 def AddJPsiVertexingFitterCfg(flags, prefix='', IdTrkContainer = "InDetTrackParticles", MuonContainer = "Muons"):
   result = ComponentAccumulator()
   from JpsiUpsilonTools.JpsiUpsilonToolsConfig import JpsiFinderCfg
-  jpsi_finder_tool = result.popToolsAndMerge(JpsiFinderCfg(flags,  
+  jpsi_finder_tool = result.popToolsAndMerge(JpsiFinderCfg(flags,
                                            muAndMu = False,
                                            muAndTrack = False,
                                            TrackAndTrack = True,
@@ -38,13 +40,11 @@ def AddJPsiVertexingFitterCfg(flags, prefix='', IdTrkContainer = "InDetTrackPart
                                            trackThresholdPt = 2500,
                                            muonThresholdPt= 4000,
                                            atLeastOneComb = False,
-                                           useCombinedMeasurement = False, # Only takes effect if combOnly=True  
-                                           muonCollectionKey = MuonContainer,                                        
+                                           useCombinedMeasurement = False, # Only takes effect if combOnly=True
+                                           muonCollectionKey = MuonContainer,
                                            TrackParticleCollection = IdTrkContainer,
                                            useMCPCuts                  = True))
 
-  
-  
   MuonTP_Reco_mumu = result.getPrimaryAndMerge(AddRecoMumuToolCfg(flags,
                                                   name                   = prefix+"MuonTP_Reco_mumu",
                                                   JpsiFinder             = jpsi_finder_tool,
@@ -60,6 +60,7 @@ def AddJPsiVertexingFitterCfg(flags, prefix='', IdTrkContainer = "InDetTrackPart
   result.addEventAlgo(the_alg, primary = True)
   return result
 
+
 def MuonTPOniaSelToolCfg(flags,name = "MuonTP_Select_Jpsi2mumu", **kwargs):
   ## a/ augment and select Jpsi->mumu candidates
   result = ComponentAccumulator()
@@ -72,10 +73,12 @@ def MuonTPOniaSelToolCfg(flags,name = "MuonTP_Select_Jpsi2mumu", **kwargs):
   kwargs.setdefault("MassMax",                3500.0)
   kwargs.setdefault("Chi2Max",                200)
   kwargs.setdefault("DoVertexType",           7)
-  MuonTP_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(name = name, **kwargs)
+  from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import Select_onia2mumuCfg
+  MuonTP_Select_Jpsi2mumu = result.popToolsAndMerge(Select_onia2mumuCfg(flags,name = name, **kwargs))
   result.addPublicTool(v0_tools)
-  result.setPrivateTools(MuonTP_Select_Jpsi2mumu)                                 
+  result.setPrivateTools(MuonTP_Select_Jpsi2mumu)
   return result
+
 
 def AddJPsiVertexingSelectionCfg(flags, prefix = ''):
   ## a/ augment and select Jpsi->mumu candidates
@@ -88,11 +91,9 @@ def AddJPsiVertexingSelectionCfg(flags, prefix = ''):
   result.addEventAlgo(the_alg, primary = True)
   return result
 
+
 def AddMCPJPsiVertexFitCfg(flags, prefix = '', IdTrkContainer = "InDetTrackParticles", MuonContainer = "Muons"):
   result = ComponentAccumulator()
   result.merge(AddJPsiVertexingFitterCfg(flags, prefix = prefix, IdTrkContainer = IdTrkContainer, MuonContainer = MuonContainer))
-  result.merge(AddJPsiVertexingSelectionCfg(flags, prefix = prefix))  
+  result.merge(AddJPsiVertexingSelectionCfg(flags, prefix = prefix))
   return result
-
-
-

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY28.py
@@ -25,10 +25,10 @@ def BPHY28Kernel(flags):
    thinTrkVtxList    = [] # List of reconstructed candidates to use for the thinning of tracks from vertices
 
 
-   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+   from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (
       BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
       BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
-      AugOriginalCountsCfg)
+      AugOriginalCountsCfg, Reco_VertexCfg, Select_onia2mumuCfg)
    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
    acc = ComponentAccumulator()
    isSimulation = flags.Input.isMC
@@ -86,7 +86,7 @@ def BPHY28Kernel(flags):
        VertexPointEstimator        = vpest,
        useMCPCuts                  = False )
 
-   BPHY28MuMuSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY28MuMuSelectAndWrite",
+   BPHY28MuMuSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,name = "BPHY28MuMuSelectAndWrite",
                                                        VertexSearchTool       = BPHY28MuMuFinder,
                                                        OutputVtxContainerName = MuMuContainerName,
                                                        PVContainerName        = "PrimaryVertices",
@@ -95,12 +95,12 @@ def BPHY28Kernel(flags):
                                                        RefPVContainerName     = "SHOULDNOTBEUSED",
                                                        RelinkTracks           =  toRelink,
                                                        RelinkMuons            =  MuonReLink,
-                                                       DoVertexType           = 7)
+                                                       DoVertexType           = 7))
    augList += [ BPHY28MuMuSelectAndWrite ]
    thinTrkVtxList += [ MuMuContainerName ]
    
    ## a/ augment and select Jpsi->mumu candidates
-   BPHY28_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+   BPHY28_Select_Jpsi2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
          name                  = "BPHY28_Select_Jpsi2mumu",
          HypothesisName        = "Jpsi",
          InputVtxContainerName = MuMuContainerName,
@@ -109,7 +109,7 @@ def BPHY28Kernel(flags):
          MassMin               = 2000.0,
          MassMax               = 3600.0,
          Chi2Max               = 50, Do3d = False,  # this is chi2 cut
-         DoVertexType          = 7)
+         DoVertexType          = 7))
    augList += [ BPHY28_Select_Jpsi2mumu ]
 
 
@@ -134,7 +134,7 @@ def BPHY28Kernel(flags):
          UseMassConstraint           = False)
 
    
-   BPHY28BsKKSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY28BsKKSelectAndWrite",
+   BPHY28BsKKSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,name = "BPHY28BsKKSelectAndWrite",
                         VertexSearchTool         = BPHY28BsKKMuMu,
                         OutputVtxContainerName   = BsPhiMuMuContainerName,
                         PVContainerName          = "PrimaryVertices",
@@ -143,12 +143,12 @@ def BPHY28Kernel(flags):
                         RefPVContainerName       = "BPHY28RefittedPrimaryVertices",
                         RefitPV                  = True, Do3d = False,
                         RelinkTracks  =  toRelink,
-                        MaxPVrefit               = 10000, DoVertexType = 7)
+                        MaxPVrefit               = 10000, DoVertexType = 7))
    augList += [ BPHY28BsKKSelectAndWrite ]
    thinTrkVtxList += [ BsPhiMuMuContainerName ]
 
 
-   BPHY28_Select_Bs2KKMuMu = CompFactory.DerivationFramework.Select_onia2mumu(
+   BPHY28_Select_Bs2KKMuMu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                  name                       = "BPHY28_Select_Bs2KKMuMu",
                                  HypothesisName             = "Bs",
                                  InputVtxContainerName      = BsPhiMuMuContainerName,
@@ -157,7 +157,7 @@ def BPHY28Kernel(flags):
                                  VtxMassHypo                = 5366.3,
                                  MassMin                    = 4500.0,
                                  MassMax                    = 6500.0, Do3d = False,
-                                 Chi2Max                    = 50)  # this is chi2 cut
+                                 Chi2Max                    = 50))  # this is chi2 cut
    augList += [ BPHY28_Select_Bs2KKMuMu ]
 
 
@@ -209,7 +209,7 @@ def BPHY28Cfg(flags):
    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
    BPHY28SlimmingHelper = SlimmingHelper("BPHY28SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+   from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
    AllVariables  = getDefaultAllVariables()
    StaticContent = []
     

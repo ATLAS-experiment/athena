@@ -12,7 +12,7 @@ BPHYDerivationName = "BPHY18"
 streamName = "StreamDAOD_BPHY18"
 
 def BPHY18Cfg(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg, Reco_VertexCfg, Select_onia2mumuCfg, ReVertexCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     from DerivationFrameworkEGamma.EGammaCommonConfig import EGammaCommonCfg
 
@@ -80,7 +80,7 @@ def BPHY18Cfg(flags):
                              ElectronSelection             = "d0_or_nod0"
                              )
     extraTools = [BPHY18DiElectronFinder]
-    BPHY18DiElectronSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY18DiElectronSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,
                             name                   = "BPHY18DiElectronSelectAndWrite",
                             VertexSearchTool       = BPHY18DiElectronFinder,
                             OutputVtxContainerName = "BPHY18DiElectronCandidates",
@@ -89,9 +89,9 @@ def BPHY18Cfg(flags):
                             PVRefitter             = PVrefit,
                             RefPVContainerName     = "SHOULDNOTBEUSED",
                             DoVertexType           = 7
-                            )
+                            ))
 
-    BPHY18_Select_DiElectrons = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY18_Select_DiElectrons = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                             name                  = "BPHY18_Select_DiElectrons",
                             HypothesisName        = "Jpsi",
                             InputVtxContainerName = "BPHY18DiElectronCandidates",
@@ -101,7 +101,7 @@ def BPHY18Cfg(flags):
                             MassMax               = 7000.0,
                             Chi2Max               = 30,
                             DoVertexType          = 7
-                            )
+                            ))
 
     BPHY18BeeKst = CompFactory.Analysis.JpsiPlus2Tracks(
                             name                    = "BPHY18BeeKstFinder",
@@ -130,7 +130,7 @@ def BPHY18Cfg(flags):
                             FinalDiTrackPt          = 500.,
                             UseGSFTrackIndices      = [0,1]
                             )
-    BPHY18BeeKstSelectAndWrite  = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY18BeeKstSelectAndWrite  = acc.popToolsAndMerge(Reco_VertexCfg(flags,
                             name                   = "BPHY18BeeKstSelectAndWrite",
                             VertexSearchTool       = BPHY18BeeKst,
                             OutputVtxContainerName = "BeeKstCandidates",
@@ -141,9 +141,9 @@ def BPHY18Cfg(flags):
                             PVRefitter             = PVrefit,
                             MaxPVrefit             = 10000,
                             DoVertexType           = 7
-                            )
+                            ))
 
-    BPHY18_Select_BeeKst = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY18_Select_BeeKst = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                            name                  = "BPHY18_Select_BeeKst",
                            HypothesisName        = "Bd",
                            InputVtxContainerName = "BeeKstCandidates",
@@ -153,9 +153,9 @@ def BPHY18Cfg(flags):
                            MassMin               = 1.0,
                            MassMax               = 10000.0,
                            Chi2Max               = 30.0
-                           )
+                           ))
 
-    BPHY18_Select_BeeKstbar = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY18_Select_BeeKstbar = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                            name                  = "BPHY18_Select_Bd2JpsiKstbar",
                            HypothesisName        = "Bdbar",
                            InputVtxContainerName = "BeeKstCandidates",
@@ -165,10 +165,10 @@ def BPHY18Cfg(flags):
                            MassMin               = 1.0,
                            MassMax               = 10000.0,
                            Chi2Max               = 30.0
-                           )
+                           ))
 
 
-    BPHY18_diMeson_revertex = CompFactory.DerivationFramework.ReVertex(
+    BPHY18_diMeson_revertex = acc.popToolsAndMerge(ReVertexCfg(flags,
                            name                   = "BPHY18_diMeson_revertex",
                            InputVtxContainerName  = "BeeKstCandidates",
                            V0Tools                = V0Tools,
@@ -176,9 +176,9 @@ def BPHY18Cfg(flags):
                            TrackIndices           = [ 2, 3 ],
                            TrkVertexFitterTool    = vkalvrt,
                            OutputVtxContainerName = "BPHY18DiMeson"
-                           )
+                           ))
 
-    BPHY18_Select_Kpi = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY18_Select_Kpi = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                           name                  = "BPHY18_Select_Kpi",
                           HypothesisName        = "Kpi",
                           InputVtxContainerName = "BPHY18DiMeson",
@@ -188,9 +188,9 @@ def BPHY18Cfg(flags):
                           MassMin               = 1.0,
                           MassMax               = 100000.0,
                           Chi2Max               = 100.0
-                          )
+                          ))
 
-    BPHY18_Select_piK = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY18_Select_piK = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                        name                  = "BPHY18_Select_piK",
                        HypothesisName        = "piK",
                        InputVtxContainerName = "BPHY18DiMeson",
@@ -200,7 +200,7 @@ def BPHY18Cfg(flags):
                        MassMin               = 1.0,
                        MassMax               = 100000.0,
                        Chi2Max               = 100.0
-                       )
+                       ))
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
         xAODStringSkimmingToolCfg)
@@ -294,7 +294,7 @@ def BPHY18Cfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY18SlimmingHelper = SlimmingHelper("BPHY18SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent  = []
     ExtraVariables = []

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY25.py
 # Contact: xin.chen@cern.ch
@@ -12,10 +12,11 @@ BPHYDerivationName = "BPHY25"
 streamName = "StreamDAOD_BPHY25"
 
 def BPHY25Cfg(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (
         BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
         BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
-        AugOriginalCountsCfg)
+        AugOriginalCountsCfg, Reco_VertexCfg, Select_onia2mumuCfg, JpsiXPlus2V0Cfg,
+        JpsiXPlusDisplacedCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     isSimulation = flags.Input.isMC
@@ -111,7 +112,7 @@ def BPHY25Cfg(flags):
         useMCPCuts                  = False )
     acc.addPublicTool(BPHY25JpsiFinder)
 
-    BPHY25_Reco_mumu = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY25_Reco_mumu = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                   = "BPHY25_Reco_mumu",
         VertexSearchTool       = BPHY25JpsiFinder,
         OutputVtxContainerName = "BPHY25OniaCandidates",
@@ -122,7 +123,7 @@ def BPHY25Cfg(flags):
         RefitPV                = True,
         MaxPVrefit             = 500,
         RefPVContainerName     = "BPHY25_mumuRefittedPrimaryVertices",
-        DoVertexType           = 7)
+        DoVertexType           = 7))
 
     # B0 -> J/psi + K pi
     BPHY25B0_Jpsi2Trk = CompFactory.Analysis.JpsiPlus2Tracks(
@@ -175,7 +176,7 @@ def BPHY25Cfg(flags):
         UseMassConstraint                   = True)
     acc.addPublicTool(BPHY25Bpm_Jpsi1Trk)
 
-    BPHY25FourTrackReco_B0 = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY25FourTrackReco_B0 = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                     = "BPHY25FourTrackReco_B0",
         VertexSearchTool         = BPHY25B0_Jpsi2Trk,
         OutputVtxContainerName   = "BPHY25FourTrack_B0",
@@ -186,9 +187,9 @@ def BPHY25Cfg(flags):
         RefitPV                  = True,
         MaxPVrefit               = 500,
         RefPVContainerName       = "BPHY25_B0RefittedPrimaryVertices",
-        DoVertexType             = 7)
+        DoVertexType             = 7))
 
-    BPHY25ThreeTrackReco_Bpm = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY25ThreeTrackReco_Bpm = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                     = "BPHY25ThreeTrackReco_Bpm",
         VertexSearchTool         = BPHY25Bpm_Jpsi1Trk,
         OutputVtxContainerName   = "BPHY25ThreeTrack_Bpm",
@@ -199,9 +200,9 @@ def BPHY25Cfg(flags):
         RefitPV                  = True,
         MaxPVrefit               = 500,
         RefPVContainerName       = "BPHY25_BpmRefittedPrimaryVertices",
-        DoVertexType             = 7)
+        DoVertexType             = 7))
 
-    BPHY25Select_Jpsi              = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY25Select_Jpsi              = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
         name                       = "BPHY25Select_Jpsi",
         HypothesisName             = "Jpsi",
         InputVtxContainerName      = "BPHY25OniaCandidates",
@@ -209,9 +210,9 @@ def BPHY25Cfg(flags):
         TrkMasses                  = [Mumass, Mumass],
         MassMin                    = Jpsi_lo,
         MassMax                    = Jpsi_hi,
-        DoVertexType               = 0)
+        DoVertexType               = 0))
 
-    BPHY25Select_mumu              = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY25Select_mumu              = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
         name                       = "BPHY25Select_mumu",
         HypothesisName             = "mumu",
         InputVtxContainerName      = "BPHY25OniaCandidates",
@@ -219,7 +220,7 @@ def BPHY25Cfg(flags):
         TrkMasses                  = [Mumass, Mumass],
         MassMin                    = 500.,
         MassMax                    = 4500.,
-        DoVertexType               = 0)
+        DoVertexType               = 0))
 
     #####################################################
     ## Xi_b^- -> J/psi Xi-, Xi^- -> Lambda pi-         ##
@@ -238,7 +239,7 @@ def BPHY25Cfg(flags):
 
     list_disV_obj = []
     for hypo in list_disV_hypo:
-        list_disV_obj.append( CompFactory.DerivationFramework.JpsiXPlusDisplaced("BPHY25_"+hypo) )
+        list_disV_obj.append( acc.popToolsAndMerge(JpsiXPlusDisplacedCfg(flags, name = "BPHY25_"+hypo) ) )
 
     for i in range(len(list_disV_obj)):
         list_disV_obj[i].JXVertices               = "BPHY25OniaCandidates"
@@ -316,7 +317,7 @@ def BPHY25Cfg(flags):
 
     list_BpmV0_obj = []
     for hypo in list_BpmV0_hypo:
-        list_BpmV0_obj.append( CompFactory.DerivationFramework.JpsiXPlusDisplaced("BPHY25_"+hypo) )
+        list_BpmV0_obj.append( acc.popToolsAndMerge(JpsiXPlusDisplacedCfg(flags, name = "BPHY25_"+hypo) ) )
 
     for i in range(len(list_BpmV0_obj)):
         list_BpmV0_obj[i].JXVertices               = list_BpmV0_jxInput[i]
@@ -389,7 +390,7 @@ def BPHY25Cfg(flags):
 
     list_B0Ld_obj = []
     for hypo in list_B0Ld_hypo:
-        list_B0Ld_obj.append( CompFactory.DerivationFramework.JpsiXPlusDisplaced("BPHY25_"+hypo) )
+        list_B0Ld_obj.append( acc.popToolsAndMerge(JpsiXPlusDisplacedCfg(flags, name = "BPHY25_"+hypo) ) )
 
     for i in range(len(list_B0Ld_obj)):
         list_B0Ld_obj[i].JXVertices               = list_B0Ld_jxInput[i]
@@ -464,7 +465,7 @@ def BPHY25Cfg(flags):
 
     list_B0Ks_obj = []
     for hypo in list_B0Ks_hypo:
-        list_B0Ks_obj.append( CompFactory.DerivationFramework.JpsiXPlusDisplaced("BPHY25_"+hypo) )
+        list_B0Ks_obj.append( acc.popToolsAndMerge(JpsiXPlusDisplacedCfg(flags, name = "BPHY25_"+hypo) ) )
 
     for i in range(len(list_B0Ks_obj)):
         list_B0Ks_obj[i].JXVertices               = list_B0Ks_jxInput[i]
@@ -534,7 +535,7 @@ def BPHY25Cfg(flags):
 
     list_2V0A_obj = []
     for hypo in list_2V0A_hypo:
-        list_2V0A_obj.append( CompFactory.DerivationFramework.JpsiXPlus2V0("BPHY25_"+hypo) )
+        list_2V0A_obj.append( acc.popToolsAndMerge(JpsiXPlus2V0Cfg(flags, name = "BPHY25_"+hypo) ) )
 
     for i in range(len(list_2V0A_obj)):
         list_2V0A_obj[i].JXVertices               = "BPHY25OniaCandidates"
@@ -599,7 +600,7 @@ def BPHY25Cfg(flags):
 
     list_2V0B_obj = []
     for hypo in list_2V0B_hypo:
-        list_2V0B_obj.append( CompFactory.DerivationFramework.JpsiXPlus2V0("BPHY25_"+hypo) )
+        list_2V0B_obj.append( acc.popToolsAndMerge(JpsiXPlus2V0Cfg(flags, name = "BPHY25_"+hypo) ) )
 
     for i in range(len(list_2V0B_obj)):
         list_2V0B_obj[i].JXVertices               = "BPHY25OniaCandidates"
@@ -700,7 +701,7 @@ def BPHY25Cfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY25SlimmingHelper = SlimmingHelper("BPHY25SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     BPHY25_AllVariables  = getDefaultAllVariables()
     BPHY25_StaticContent = []
 

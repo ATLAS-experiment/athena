@@ -13,10 +13,10 @@ BPHYDerivationName = "BPHY14"
 streamName = "StreamDAOD_BPHY14"
 
 def BPHY14Cfg(flags):
-       from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+       from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (
           BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
           BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
-          AugOriginalCountsCfg)
+          AugOriginalCountsCfg, Reco_VertexCfg, Select_onia2mumuCfg)
        from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
        acc = ComponentAccumulator()
        isSimulation = flags.Input.isMC
@@ -72,7 +72,7 @@ def BPHY14Cfg(flags):
         )
        acc.addPublicTool(BPHY14JpsiFinder )
 
-       BPHY14_Reco_mumu = CompFactory.DerivationFramework.Reco_Vertex(
+       BPHY14_Reco_mumu = acc.popToolsAndMerge(Reco_VertexCfg(flags,
                                 name                   = "BPHY14_Reco_mumu",
                                 VertexSearchTool       = BPHY14JpsiFinder,
                                 OutputVtxContainerName = "BPHY14OniaCandidates",
@@ -84,11 +84,11 @@ def BPHY14Cfg(flags):
                                 RefPVContainerName     = "BPHY14RefittedPrimaryVertices",
                                 RefitPV                = True,
                                 MaxPVrefit             = 100000,
-                                DoVertexType           = 7)
+                                DoVertexType           = 7))
         
        BPHY14_AugOriginalCounts = acc.popToolsAndMerge(AugOriginalCountsCfg(flags, name = "BPHY14_AugOriginalCounts"))
 
-       BPHY14_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+       BPHY14_Select_Jpsi2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                                                 name                  = "BPHY14_Select_Jpsi2mumu",
                                                                 HypothesisName        = "Jpsi",
                                                                 InputVtxContainerName = "BPHY14OniaCandidates",
@@ -97,9 +97,9 @@ def BPHY14Cfg(flags):
                                                                 MassMin               = 2000.0,
                                                                 MassMax               = 4000.0,
                                                                 Chi2Max               = 200,
-                                                                DoVertexType          = 7)
+                                                                DoVertexType          = 7))
        
-       BPHY14_Select_Psi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+       BPHY14_Select_Psi2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                                                name                  = "BPHY14_Select_Psi2mumu",
                                                                HypothesisName        = "Psi",
                                                                V0Tools               = V0Tools,
@@ -108,9 +108,9 @@ def BPHY14Cfg(flags):
                                                                MassMin               = 3300.0,
                                                                MassMax               = 7500.0,
                                                                Chi2Max               = 200,
-                                                               DoVertexType          = 7)
+                                                               DoVertexType          = 7))
 
-       BPHY14_Select_Upsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+       BPHY14_Select_Upsi2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                                                 name                  = "BPHY14_Select_Upsi2mumu",
                                                                 HypothesisName        = "Upsi",
                                                                 InputVtxContainerName = "BPHY14OniaCandidates",
@@ -119,7 +119,7 @@ def BPHY14Cfg(flags):
                                                                 MassMin               = 7000.0,
                                                                 MassMax               = 15000.0,
                                                                 Chi2Max               = 200,
-                                                                DoVertexType          = 7)
+                                                                DoVertexType          = 7))
 
        acc.merge(EGammaCommonCfg(flags))
        photonRequirements = 'Photons.Tight'
@@ -195,7 +195,7 @@ def BPHY14Cfg(flags):
        ## combined / extrapolated muon track particles
        ## (note: for tagged muons there is no extra TrackParticle collection since the ID tracks
        ##        are store in InDetTrackParticles collection)
-       from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+       from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
        BPHY14_AllVariables   = getDefaultAllVariables()
        BPHY14_AllVariables += ["CombinedMuonTrackParticles"]
        BPHY14_AllVariables += ["ExtrapolatedMuonTrackParticles"]

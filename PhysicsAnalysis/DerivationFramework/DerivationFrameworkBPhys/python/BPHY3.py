@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY3.py
 #====================================================================
@@ -11,7 +11,7 @@ BPHYDerivationName = "BPHY3"
 streamName = "StreamDAOD_BPHY3"
 
 def BPHY3Cfg(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg, Reco_VertexCfg, Select_onia2mumuCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
@@ -45,15 +45,15 @@ def BPHY3Cfg(flags):
                     track1Mass                  = 139.57, # Not very important, only used to calculate inv. mass cut, leave it loose here
                     track2Mass                  = 139.57)
 
-    BPHY3_Reco_diTrk = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY3_Reco_diTrk = acc.popToolsAndMerge(Reco_VertexCfg(flags,
                     name                   = "BPHY3_Reco_diTrk",
                     VertexSearchTool             = BPHY3JpsiFinder,
                     OutputVtxContainerName = "BPHY3VertexCandidates",
                     V0Tools                = V0Tools,
                     PVRefitter             = PVrefit,
                     PVContainerName        = "PrimaryVertices",
-                    RefPVContainerName     = "BPHY3RefittedPrimaryVertices")
-    BPHY3_Select_PiPi = CompFactory.DerivationFramework.Select_onia2mumu(
+                    RefPVContainerName     = "BPHY3RefittedPrimaryVertices"))
+    BPHY3_Select_PiPi = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                     name                  = "BPHY3_Select_PiPi",
                     HypothesisName        = "PiPi",
                     InputVtxContainerName = "BPHY3VertexCandidates",
@@ -62,8 +62,8 @@ def BPHY3Cfg(flags):
                     VtxMassHypo           = 497.614,
                     MassMin               = 300.0,
                     MassMax               = 700.0,
-                    Chi2Max               = 20)
-    BPHY3_Select_PiK = CompFactory.DerivationFramework.Select_onia2mumu(
+                    Chi2Max               = 20))
+    BPHY3_Select_PiK = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                     name                  = "BPHY3_Select_PiK",
                     HypothesisName        = "PiK",
                     InputVtxContainerName = "BPHY3VertexCandidates",
@@ -72,8 +72,8 @@ def BPHY3Cfg(flags):
                     VtxMassHypo           = 892.,
                     MassMin               = 0.0,
                     MassMax               = 3500.0,
-                    Chi2Max               = 10)
-    BPHY3_Select_KPi = CompFactory.DerivationFramework.Select_onia2mumu(
+                    Chi2Max               = 10))
+    BPHY3_Select_KPi = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                     name                  = "BPHY3_Select_KPi",
                     HypothesisName        = "KPi",
                     InputVtxContainerName = "BPHY3VertexCandidates",
@@ -82,8 +82,8 @@ def BPHY3Cfg(flags):
                     VtxMassHypo           = 892.,
                     MassMin               = 0.0,
                     MassMax               = 3500.0,
-                    Chi2Max               = 10)
-    BPHY3_Select_KK = CompFactory.DerivationFramework.Select_onia2mumu(
+                    Chi2Max               = 10))
+    BPHY3_Select_KK = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                     name                  = "BPHY3_Select_KK",
                     HypothesisName        = "KK",
                     InputVtxContainerName = "BPHY3VertexCandidates",
@@ -92,8 +92,8 @@ def BPHY3Cfg(flags):
                     VtxMassHypo           = 1019.461,
                     MassMin               = 0.0,
                     MassMax               = 1100.0,
-                    Chi2Max               = 20)
-    BPHY3_Select_PP = CompFactory.DerivationFramework.Select_onia2mumu(
+                    Chi2Max               = 20))
+    BPHY3_Select_PP = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                     name                  = "BPHY3_Select_PP",
                     HypothesisName        = "PP",
                     InputVtxContainerName = "BPHY3VertexCandidates",
@@ -102,7 +102,7 @@ def BPHY3Cfg(flags):
                     VtxMassHypo           = 3096.916,
                     MassMin               = 2800.0,
                     MassMax               = 3600.0,
-                    Chi2Max               = 1)
+                    Chi2Max               = 1))
 
     expression = "count(BPHY3VertexCandidates.passed_PiPi) > 0 || count(BPHY3VertexCandidates.passed_KPi) > 0 || count(BPHY3VertexCandidates.passed_PiK) > 0 || count(BPHY3VertexCandidates.passed_KK) > 0 || count(BPHY3VertexCandidates.passed_PP) > 0"
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
@@ -130,7 +130,7 @@ def BPHY3Cfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY3SlimmingHelper = SlimmingHelper("BPHY3SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent = []
     

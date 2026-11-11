@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
@@ -31,7 +31,7 @@ def BPHY_V0MainDecoratorCfg(flags, derivation="",
     acc = ComponentAccumulator()
 
     if "V0Tools" not in kwargs:
-        from DerivationFrameworkBPhys.commonBPHYMethodsCfg import BPHY_V0ToolCfg
+        from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import BPHY_V0ToolCfg
         kwargs.setdefault("V0Tools", acc.popToolsAndMerge(
             BPHY_V0ToolCfg(flags, derivation)))
 

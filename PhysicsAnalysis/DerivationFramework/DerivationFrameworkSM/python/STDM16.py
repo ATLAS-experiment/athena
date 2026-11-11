@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #!/usr/bin/env python
 #====================================================================
-# STDM16.py for c-fragmentation analysi 
+# STDM16.py for c-fragmentation analysis
 # Contact: eleni.skorda@cern.ch or andrew.chisolm@cern.ch
 #====================================================================
 
@@ -31,7 +31,7 @@ def DStarSelectionToolCfg(flags, name, **kwargs):
 
 def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
     """Configure the derivation framework driving algorithm (kernel) for STDM16"""
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg, Reco_VertexCfg, Select_onia2mumuCfg)
 
     acc = ComponentAccumulator()
 
@@ -146,7 +146,7 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
     PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
     acc.addPublicTool(PVrefit)
     
-    STDM16_Reco_D0 = CompFactory.DerivationFramework.Reco_Vertex(
+    STDM16_Reco_D0 = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                   = "STDM16_Reco_D0",
         VertexSearchTool       = STDM16_Finder_D0,
         OutputVtxContainerName = "STDM16_D0Candidates",
@@ -155,7 +155,7 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
         PVRefitter             = PVrefit,
         DoVertexType           = 7, #ES not sure how this actually works, it only takes 7(all) and 1 but what does it mean ?????
         RefPVContainerName     = "SHOULDNOTBEUSED",
-        RefitPV                = False)
+        RefitPV                = False))
 
     acc.addPublicTool(STDM16_Reco_D0)
     STDM16_AugmentationTools += [STDM16_Reco_D0]
@@ -171,7 +171,7 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
     cutMaxChiSq = 50.0
     
     # Need two of these, one for each track mass hypothesis
-    STDM16_Select_D0 = CompFactory.DerivationFramework.Select_onia2mumu(
+    STDM16_Select_D0 = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
         name                  = "STDM16_Select_D0",
         HypothesisName        = "D0",
         InputVtxContainerName = STDM16_Reco_D0.OutputVtxContainerName,
@@ -180,12 +180,12 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
         MassMin               = cutMinMass,
         MassMax               = cutMaxMass,
         Chi2Max               = cutMaxChiSq,
-        LxyMin                = cutMinLxy)
+        LxyMin                = cutMinLxy))
 
     acc.addPublicTool(STDM16_Select_D0)
     STDM16_AugmentationTools += [STDM16_Select_D0]
     
-    STDM16_Select_D0b = CompFactory.DerivationFramework.Select_onia2mumu(
+    STDM16_Select_D0b = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
     name                  = "STDM16_Select_D0b",
     HypothesisName        = "D0b",
     InputVtxContainerName = STDM16_Reco_D0.OutputVtxContainerName,
@@ -194,7 +194,7 @@ def STDM16Kernel(flags, name='STDM16Kernel', **kwargs):
     MassMin               = cutMinMass,
     MassMax               = cutMaxMass,
     Chi2Max               = cutMaxChiSq,
-    LxyMin                = cutMinLxy)
+    LxyMin                = cutMinLxy))
 
     acc.addPublicTool(STDM16_Select_D0b)
     STDM16_AugmentationTools += [STDM16_Select_D0b]
@@ -281,7 +281,7 @@ def STDM16Cfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from DerivationFrameworkCore.SlimmingHelper import SlimmingHelper
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
 
     # PFlow augmentation tool
     

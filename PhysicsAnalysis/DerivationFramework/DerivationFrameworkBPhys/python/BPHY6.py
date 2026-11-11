@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY6.py
 #====================================================================
@@ -11,7 +11,7 @@ BPHYDerivationName = "BPHY6"
 streamName = "StreamDAOD_BPHY6"
 
 def BPHY6Cfg(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg, Reco_VertexCfg, Select_onia2mumuCfg, MuonExtrapolationCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     isSimulation = flags.Input.isMC
@@ -33,7 +33,7 @@ def BPHY6Cfg(flags):
     acc.addPublicTool(extrap)
     PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
     acc.addPublicTool(PVrefit)
-    BPHY6_Extrap_Tool = CompFactory.DerivationFramework.MuonExtrapolationTool(name = "BPHY6_ExtrapolationTool", Extrapolator = extrap)
+    BPHY6_Extrap_Tool = acc.popToolsAndMerge(MuonExtrapolationCfg(flags,name = "BPHY6_Extrapolation", Extrapolator = extrap))
     BPHY6JpsiFinder = CompFactory.Analysis.JpsiFinder(
                 name                        = "BPHY6JpsiFinder",
                 muAndMu                     = True,
@@ -53,16 +53,16 @@ def BPHY6Cfg(flags):
                 VertexPointEstimator        = vpest,
                 useMCPCuts                  = False )
 
-    BPHY6_Reco_mumu = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY6_Reco_mumu = acc.popToolsAndMerge(Reco_VertexCfg(flags,
                 name                   = "BPHY6_Reco_mumu",
                 VertexSearchTool             = BPHY6JpsiFinder,
                 OutputVtxContainerName = "BPHY6OniaCandidates",
                 V0Tools                = V0Tools,
                 PVRefitter             = PVrefit,
                 PVContainerName        = "PrimaryVertices",
-                RefPVContainerName     = "BPHY6RefittedPrimaryVertices")
+                RefPVContainerName     = "BPHY6RefittedPrimaryVertices"))
 
-    BPHY6_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY6_Select_Jpsi2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                 name                  = "BPHY6_Select_Jpsi2mumu",
                 HypothesisName        = "Jpsi",
                 InputVtxContainerName = "BPHY6OniaCandidates",
@@ -70,9 +70,9 @@ def BPHY6Cfg(flags):
                 VtxMassHypo           = 3096.916,
                 MassMin               = 2700.0,
                 MassMax               = 3500.0,
-                Chi2Max               = 20)
+                Chi2Max               = 20))
 
-    BPHY6_Select_Psi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY6_Select_Psi2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                 name                  = "BPHY6_Select_Psi2mumu",
                 HypothesisName        = "Psi",
                 InputVtxContainerName = "BPHY6OniaCandidates",
@@ -80,9 +80,9 @@ def BPHY6Cfg(flags):
                 VtxMassHypo           = 3686.09,
                 MassMin               = 3200.0,
                 MassMax               = 4200.0,
-                Chi2Max               = 20)
+                Chi2Max               = 20))
 
-    BPHY6_Select_Upsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY6_Select_Upsi2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                 name                  = "BPHY6_Select_Upsi2mumu",
                 HypothesisName        = "Upsi",
                 InputVtxContainerName = "BPHY6OniaCandidates",
@@ -90,9 +90,9 @@ def BPHY6Cfg(flags):
                 VtxMassHypo           = 9460.30,
                 MassMin               = 8000.0,
                 MassMax               = 12000.0,
-                Chi2Max               = 20)
+                Chi2Max               = 20))
   
-    BPHY6_Select_Bmumu2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY6_Select_Bmumu2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                 name                  = "BPHY6_Select_Bmumu2mumu",
                 HypothesisName        = "Bmumu",
                 InputVtxContainerName = "BPHY6OniaCandidates",
@@ -100,9 +100,9 @@ def BPHY6Cfg(flags):
                 VtxMassHypo           = 5366.77,
                 MassMin               = 4200.0,
                 MassMax               = 8000.0,
-                Chi2Max               = 20)
+                Chi2Max               = 20))
   
-    BPHY6_Select_Zmumu2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY6_Select_Zmumu2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                 name                  = "BPHY6_Select_Zmumu2mumu",
                 HypothesisName        = "Zmumu",
                 InputVtxContainerName = "BPHY6OniaCandidates",
@@ -110,9 +110,9 @@ def BPHY6Cfg(flags):
                 VtxMassHypo           = 91187.6,
                 MassMin               = 60000.0,
                 MassMax               = 120000.0,
-                Chi2Max               = 20)
+                Chi2Max               = 20))
 
-    BPHY6_Select_Onia2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY6_Select_Onia2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                 name                  = "BPHY6_Select_Onia2mumu",
                 HypothesisName        = "Onia",
                 InputVtxContainerName = "BPHY6OniaCandidates",
@@ -120,7 +120,7 @@ def BPHY6Cfg(flags):
                 VtxMassHypo           = 3096.916,
                 MassMin               = dimuon_mass_min,
                 MassMax               = dimuon_mass_max,
-                Chi2Max               = 20)
+                Chi2Max               = 20))
 
     skimmingTools = []
 
@@ -182,7 +182,7 @@ def BPHY6Cfg(flags):
     # Needed for trigger objects
     BPHY6SlimmingHelper.IncludeMuonTriggerContent = True
     BPHY6SlimmingHelper.IncludeBPhysTriggerContent = True
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent = []
     AllVariables += ["LVL1MuonRoIs"]

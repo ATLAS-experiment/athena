@@ -227,7 +227,7 @@ def MUON1KernelCfg(flags, name='MUON1Kernel', **kwargs):
                                         
 
         ### Tracks associated with fitted vertices
-        from DerivationFrameworkBPhys.commonBPHYMethodsCfg import Thin_vtxTrkCfg 
+        from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import Thin_vtxTrkCfg 
         MUON1Thin_vtxTrk = acc.getPrimaryAndMerge(Thin_vtxTrkCfg(flags,
                                                                  name                       = "MUON1Thin_vtxTrk",
                                                                  StreamName                 = stream_name,

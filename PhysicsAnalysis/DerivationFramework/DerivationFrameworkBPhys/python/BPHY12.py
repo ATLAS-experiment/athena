@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY12.py
@@ -19,7 +19,7 @@ streamName = "StreamDAOD_BPHY12"
 skimTruth = False
 
 def BPHY12Cfg(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg, Reco_VertexCfg, Select_onia2mumuCfg, ReVertexCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     isSimulation = flags.Input.isMC
@@ -60,7 +60,7 @@ def BPHY12Cfg(flags):
     
     
                 
-    BPHY12_SelectAndWrite_DiMuon = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY12_SelectAndWrite_DiMuon = acc.popToolsAndMerge(Reco_VertexCfg(flags,
                              name                   = "BPHY12_SelectAndWrite_DiMuon",
                              VertexSearchTool       = BPHY12_Finder_DiMuon,                             
                              OutputVtxContainerName = "BPHY12_DiMuon_Candidates",
@@ -68,9 +68,9 @@ def BPHY12Cfg(flags):
                              V0Tools                = V0Tools,  
                              PVRefitter             = PVrefit,
                              RefPVContainerName     = "SHOULDNOTBEUSED",
-                             DoVertexType           = 7)
+                             DoVertexType           = 7))
 
-    BPHY12_Select_DiMuons = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY12_Select_DiMuons = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
       name                  = "BPHY12_Select_DiMuons",
       HypothesisName        = "Jpsi",
       V0Tools               = V0Tools,
@@ -80,7 +80,7 @@ def BPHY12Cfg(flags):
       MassMin               = 0.,
       Chi2Max               = 1000.,
       DoVertexType          = 7
-      )
+      ))
 
     BPHY12_Finder_BdKstarKpiMuMu = CompFactory.Analysis.JpsiPlus2Tracks(
         name                    = "BPHY12_Finder_BdKstarKpiMuMu",
@@ -110,7 +110,7 @@ def BPHY12Cfg(flags):
         CandidateLimit          = 5000
         )
     
-    BPHY12_SelectAndWrite_BdKstarKpiMuMu  = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY12_SelectAndWrite_BdKstarKpiMuMu  = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                   = "BPHY12_SelectAndWrite_BdKstarKpiMuMu",
         VertexSearchTool       = BPHY12_Finder_BdKstarKpiMuMu,
         OutputVtxContainerName = "BPHY12_BdKstarKpiMuMu_Candidates",
@@ -121,9 +121,9 @@ def BPHY12Cfg(flags):
         RefitPV                = True,
         MaxPVrefit             = 10000,
         DoVertexType           = 7
-        )
+        ))
 
-    BPHY12_Select_BdKstarKpiMuMu = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY12_Select_BdKstarKpiMuMu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
         name                       = "BPHY12_Select_BdKstarKpiMuMu",
         V0Tools                    = V0Tools,
         HypothesisName             = "Bd",
@@ -132,9 +132,9 @@ def BPHY12Cfg(flags):
         VtxMassHypo                = 5279.6,
         MassMax                    = 10000.,                 
         MassMin                    = 0.,     
-        Chi2Max                    = 1000.)
+        Chi2Max                    = 1000.))
     
-    BPHY12_Select_BdKstarKpiMuMu_anti = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY12_Select_BdKstarKpiMuMu_anti = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
         name                       = "BPHY12_Select_BdKstarKpiMuMu_anti",
         V0Tools                    = V0Tools,
         HypothesisName             = "Bdbar",
@@ -143,9 +143,9 @@ def BPHY12Cfg(flags):
         VtxMassHypo                = 5279.6,
         MassMax                    = 10000.,
         MassMin                    = 0.,     
-        Chi2Max                    = 1000.)  
+        Chi2Max                    = 1000.))
     
-    BPHY12_ReVertex_Kstar = CompFactory.DerivationFramework.ReVertex(
+    BPHY12_ReVertex_Kstar = acc.popToolsAndMerge(ReVertexCfg(flags,
                            name                   = "BPHY12_ReVertex_Kstar",
                            InputVtxContainerName  = "BPHY12_BdKstarKpiMuMu_Candidates",
                            V0Tools                = V0Tools,
@@ -153,9 +153,9 @@ def BPHY12Cfg(flags):
                            TrackIndices           = [ 2, 3 ],
                            TrkVertexFitterTool    = vkalvrt,
                            OutputVtxContainerName = "BPHY12_Kstar_ReVertexCandidates"
-                           )
+                           ))
     
-    BPHY12_Select_KstarKpi = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY12_Select_KstarKpi = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                           name                  = "BPHY12_Select_KstarKpi",
                           HypothesisName        = "Kstar",
                           InputVtxContainerName = "BPHY12_Kstar_ReVertexCandidates",
@@ -165,9 +165,9 @@ def BPHY12Cfg(flags):
                           MassMin               = 0.,
                           MassMax               = 10000.,
                           Chi2Max               = 1000.
-                          )
+                          ))
     
-    BPHY12_Select_KstarKpi_anti = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY12_Select_KstarKpi_anti = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                        name                  = "BPHY12_Select_KstarKpi_anti",
                        HypothesisName        = "Kstarbar",
                        InputVtxContainerName = "BPHY12_Kstar_ReVertexCandidates",
@@ -177,7 +177,7 @@ def BPHY12Cfg(flags):
                        MassMin               = 0.,
                        MassMax               = 10000.,
                        Chi2Max               = 1000.
-                       )
+                       ))
     
     if skimTruth or not isSimulation: #Only Skim Data
         from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
@@ -232,7 +232,7 @@ def BPHY12Cfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY12SlimmingHelper = SlimmingHelper("BPHY12SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent = []
 
