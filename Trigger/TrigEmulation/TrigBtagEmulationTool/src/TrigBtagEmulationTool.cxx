@@ -746,7 +746,9 @@ std::unordered_map<std::string, std::vector<std::pair<const xAOD::Jet*, bool>>> 
     ATH_MSG_WARNING("Emulation not implemented for LHC Period " << m_LHCPeriod);
     return {};
   }
-  const std::vector<std::string> unsupported = {"_a10", "_invm", "_ht"}; // non-exhaustive list of unsupported chains
+  // non-exhaustive list of unsupported chains; HT chains are fine: the HT cut is not emulated,
+  // but the jet legs are, and callers take the chain decision from the TDT
+  const std::vector<std::string> unsupported = {"_a10", "_invm"};
   for (const auto &u : unsupported)
   {
     if (chainName.find(u) != std::string::npos) {
