@@ -143,8 +143,31 @@ StatusCode BTaggingEfficiencyTool::initialize() {
   ATH_MSG_INFO( " OP = " << m_OP.value() );
   ATH_MSG_INFO( " m_systStrategy is " << m_systStrategy.value() );
 
-  // Will be true only for the MV2 tagger 
-  m_isMV2Tagger = ( m_taggerName.value().find("MV2") != std::string::npos );
+
+  // For conditional taggers (related to b-jet trigger taggers) 
+  // they have names such as 
+  // ConditionalOnline{TaggerNameOnline}GivenOffline{TaggerNameOffline}WP{WorkingPoint}
+  // or 
+  // ConditionalOffline{TaggerNameOffline}GivenOnline{TaggerNameOnline}WP{WorkingPoint}
+  // e.g. 
+  // ConditionalOfflineGN2v01GivenOnlineDL1dWP60
+  // ConditionalOfflineGN2v01GivenOnlineMV2c10WP70
+  // ConditionalOnlineDL1dGivenOfflineGN2v01WP85
+  // In both cases they are of the form Conditional[Online|Offline]XXTaggerGiven[Offline|Online]YYTagger
+  // and the tagger to be used is the XXTagger 
+  // hence this special checks for those taggers 
+  if (m_taggerName.value().contains("Conditional")){ 
+    // In this case it is a conditional tagger 
+    // MV2 is the tagger to be used only if the tagger name contains 
+    // ConditionalOnlineMV2 or ConditionalOfflineMV2
+    m_isMV2Tagger = ( m_taggerName.value().contains("ConditionalOnlineMV2") ||
+                      m_taggerName.value().contains("ConditionalOfflineMV2") );
+  }
+  else {
+    // Not conditional tagger
+    // Check directly if tagger name contains "MV2" 
+    m_isMV2Tagger = m_taggerName.value().contains("MV2");
+  }
 
   m_SFNames["B"] = m_SFNamesB;
   m_SFNames["C"] = m_SFNamesC;

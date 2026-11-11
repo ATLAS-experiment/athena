@@ -72,6 +72,10 @@ private:
   bool m_initialised = false;
   bool m_continuous   = false; //Continuous1D
   bool m_continuous2D = false; //Continuous2D
+
+  // Set to true if the tagger to be used is an online tagger i.e. b-jet trigger tagger
+  bool m_usingOnlineTagger = false;
+
   // Boolean set in the initialize function, it is set to true if tagger outputs tau-probability or false otherwise 
   // All recent taggers (GN2v01 or above) are outputting a tau-probabilitiy  
   bool m_taggerWithTauFractions = true; 
@@ -124,18 +128,63 @@ private:
 
   taggerproperties m_tagger;
 
-  enum Tagger{UNKNOWN, DL1, GN1, GN2, MV2c10, GN3EPCLV01, GN3PflowMuonsV00};
+  enum Tagger{UNKNOWN, MV2c10, DL1, GN1, GN2, GN3};
   Tagger m_taggerEnum{UNKNOWN};
   
   Tagger SetTaggerEnum(const std::string& taggerName){
-    if(taggerName.find("DL1") != std::string::npos) return Tagger::DL1;
-    else if(taggerName.find("GN1") != std::string::npos) return Tagger::GN1;
-    else if(taggerName.find("GN2") != std::string::npos) return Tagger::GN2;
-    else if(taggerName.find("GN3EPCLV01") != std::string::npos) return Tagger::GN3EPCLV01;
-    else if(taggerName.find("GN3PflowMuonsV00") != std::string::npos) return Tagger::GN3PflowMuonsV00;
-    else if(taggerName == "MV2c10") return Tagger::MV2c10;
-    else 
-      ATH_MSG_ERROR("Tagger Name NOT supported.");
+
+    // For conditional taggers (related to b-jet trigger taggers) 
+    // they have names such as 
+    // ConditionalOnline{TaggerNameOnline}GivenOffline{TaggerNameOffline}WP{WorkingPoint}
+    // or 
+    // ConditionalOffline{TaggerNameOffline}GivenOnline{TaggerNameOnline}WP{WorkingPoint}
+    // e.g. 
+    // ConditionalOfflineGN2v01GivenOnlineDL1dWP60
+    // ConditionalOfflineGN2v01GivenOnlineMV2c10WP70
+    // ConditionalOnlineDL1dGivenOfflineGN2v01WP85
+    // In both cases they are of the form Conditional[Online|Offline]XXTaggerGiven[Offline|Online]YYTagger
+    // and the tagger to be used is the XXTagger 
+    // hence this special checks for those taggers 
+    const std::string conditionalOnline = "ConditionalOnline";
+    const std::string conditionalOffline = "ConditionalOffline";
+    const std::vector<std::string> vectMatchingTaggerNames({ "MV2c10", "DL1", "GN1", "GN2", "GN3" });
+
+    bool isConditionalTagger = taggerName.contains("Conditional");
+
+    for (const std::string & matchingTaggerName: vectMatchingTaggerNames){ 
+      bool foundMatchingName = false;
+      if (isConditionalTagger){
+        // If the tagger is a conditional tagger 
+        // Check if name contains ConditionalOnline{Tagger} or ConditionalOffline{Tagger}
+        if (taggerName.contains(conditionalOnline+matchingTaggerName) ||
+            taggerName.contains(conditionalOffline+matchingTaggerName)) {
+          foundMatchingName = true;
+        }
+      }
+      else if (taggerName.contains(matchingTaggerName)){
+        // In that case it is NOT a conditional tagger 
+        // check if name simply contains the tagger 
+        foundMatchingName = true;
+      }
+
+      // If no matching found then the tagger does not corresponds to the the current matchingTaggerName 
+      // On the other hand if matching was found 
+      // it means the tagger name was matched with the current matchingTaggerName 
+      if (foundMatchingName){
+        if      (matchingTaggerName == "MV2c10") { return Tagger::MV2c10; }
+        else if (matchingTaggerName == "DL1"   ) { return Tagger::DL1;    }
+        else if (matchingTaggerName == "GN1"   ) { return Tagger::GN1;    }
+        else if (matchingTaggerName == "GN2"   ) { return Tagger::GN2;    }
+        else if (matchingTaggerName == "GN3"   ) { return Tagger::GN3;    }
+        else {
+          ATH_MSG_ERROR("Tagger name NOT supported: taggerName=" << taggerName);
+          return Tagger::UNKNOWN;
+        }
+      }
+    }
+
+    // If arriving here no matching was found raise an error 
+    ATH_MSG_ERROR("Tagger name NOT supported: taggerName=" << taggerName);
     return Tagger::UNKNOWN;
   };
   //get from the CDI file the taggers cut object(that holds the definition of cut values)
