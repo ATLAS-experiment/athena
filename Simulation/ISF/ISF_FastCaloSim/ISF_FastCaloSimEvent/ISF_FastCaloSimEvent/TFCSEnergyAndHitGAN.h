@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ISF_FASTCALOSIMEVENT_TFCSEnergyAndHitGAN_h
@@ -88,6 +88,11 @@ public:
   static void unit_test(TFCSSimulationState *simulstate = nullptr,
                         const TFCSTruthState *truth = nullptr,
                         const TFCSExtrapolationState *extrapol = nullptr);
+
+  // Called immediately after being read to fix histograms that erroneously
+  // have kIsOnHeap set.  See ATLASSIM-7031.
+  virtual void fixHists() override;
+
 
 protected:
   void GetBinning(int pid, int etaMax,

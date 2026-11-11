@@ -743,3 +743,19 @@ void TFCSEnergyAndHitGAN::unit_test(TFCSSimulationState *simulstate,
   simulstate->Print();
   delete fGAN;
 }
+
+
+void TFCSEnergyAndHitGAN::fixHists()
+{
+  for (auto &[layer, h] : m_Binning) {
+    // The histograms we've read in are in an STL container.
+    // Rarely, ROOT can falsely set the kIsOnHeap flag on one of them.
+    // In that case, it will try to delete the histogram when the
+    // file is closed, which will lead to a crash later on.
+    // Make sure kIsOnHeap is clear, and also make sure that nobody else
+    // thinks that they own one of these histograms.
+    // See ATLASSIM-7031.
+    h.SetDirectory (nullptr);
+    h.ResetBit (TObject::kIsOnHeap);
+  }
+}
