@@ -84,6 +84,15 @@ StatusCode TauTrackCaloExtrapolator::executeTool(xAOD::TauJet& pTau,
   if(!m_extensionReadDecorKey.empty()){
     extensionReadDecorHandle.emplace(m_extensionReadDecorKey, ctx);
   }
+  
+  // Calculate eta, phi impact point of leading track at calorimeter layers EM 0,1,2,3
+  constexpr size_t numberOfEM_Layers{4};
+  constexpr double invalidCoordinate{-11111.};
+  std::array<double, numberOfEM_Layers> extrapolatedEta{};
+  std::array<double, numberOfEM_Layers> extrapolatedPhi{};
+  extrapolatedEta.fill(invalidCoordinate);
+  extrapolatedPhi.fill(invalidCoordinate);
+  int i = 0;
 
   for(const ElementLink<xAOD::TauTrackContainer>& trackLink : pTau.allTauTrackLinks())
   {
@@ -186,11 +195,30 @@ StatusCode TauTrackCaloExtrapolator::executeTool(xAOD::TauJet& pTau,
 		       << " HCal eta=" << etaHad 
 		       << " phi="<< phiHad
 		     );
+         
+        // for the leading track we need to save additional information used later in TauElectronVetoVariables 
+        if(i == 0 && tauTrack->flag(xAOD::TauJetParameters::classifiedCharged) ){
+          for( const Trk::CurvilinearParameters& cur : clParametersVector ){
+            if( !parsIdHelper.isEntryToVolume(cur.cIdentifier()) ) continue;
+            CaloSampling::CaloSample sample = parsIdHelper.caloSample(cur.cIdentifier());  	     
+            int index = -1;
+            if( sample == CaloSampling::PreSamplerE || sample == CaloSampling::PreSamplerB ) index = 0;
+            else if( sample == CaloSampling::EME1 || sample == CaloSampling::EMB1 )          index = 1;
+            else if( sample == CaloSampling::EME2 || sample == CaloSampling::EMB2 )          index = 2;
+            else if( sample == CaloSampling::EME3 || sample == CaloSampling::EMB3 )          index = 3;
+
+	    if( index >= 0 ){
+              extrapolatedEta[index] = cur.position().eta();
+              extrapolatedPhi[index] = cur.position().phi();
+	    }
+          }
+        }
       }
       tauTrack->setDetail(xAOD::TauJetParameters::CaloSamplingEtaEM, etaEM);
       tauTrack->setDetail(xAOD::TauJetParameters::CaloSamplingPhiEM, phiEM);
       tauTrack->setDetail(xAOD::TauJetParameters::CaloSamplingEtaHad, etaHad);
       tauTrack->setDetail(xAOD::TauJetParameters::CaloSamplingPhiHad, phiHad);
+
     }
     else { 
       // use ACTS Based extrapolation
@@ -343,9 +371,20 @@ StatusCode TauTrackCaloExtrapolator::executeTool(xAOD::TauJet& pTau,
         tauTrack->setDetail(xAOD::TauJetParameters::CaloSamplingEtaHad, etaHad);
         tauTrack->setDetail(xAOD::TauJetParameters::CaloSamplingPhiHad, phiHad);
       }
-    }	    
+    }	
+
+    // increse the counter 
+    if(tauTrack->flag(xAOD::TauJetParameters::classifiedCharged)){
+      i++;    
+    }
   }
- 
+
+  // save the information we needed ater in TauElectronVetoVariables  
+  static const SG::Accessor<std::array<double,numberOfEM_Layers>> acc_extrapolLeadTrackEta("extrapolLeadTrackEta");
+  acc_extrapolLeadTrackEta(pTau) = std::move(extrapolatedEta);
+
+  static const SG::Accessor<std::array<double,numberOfEM_Layers>> acc_extrapolLeadTrackPhi("extrapolLeadTrackPhi");
+  acc_extrapolLeadTrackPhi(pTau) = std::move(extrapolatedPhi);
 
   return StatusCode::SUCCESS;
 

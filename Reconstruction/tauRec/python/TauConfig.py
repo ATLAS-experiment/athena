@@ -220,13 +220,13 @@ def TauOutputCfg(flags):
 
     # AOD specific
     # remove GlobalFELinks - these are links between FlowElement (FE) containers created in jet finding and taus. Since these transient FE containers are not in the AOD, we should not write out these links.
-    removeAODvars = "-VertexedClusters.-shotCells.-mu.-nVtxPU.-ABS_ETA_LEAD_TRACK.-TAU_ABSDELTAPHI.-TAU_ABSDELTAETA.-absipSigLeadTrk.-passThinning.-chargedGlobalFELinks.-neutralGlobalFELinks"
+    removeAODvars = "-VertexedClusters.-shotCells.-mu.-nVtxPU.-ABS_ETA_LEAD_TRACK.-TAU_ABSDELTAPHI.-TAU_ABSDELTAETA.-absipSigLeadTrk.-passThinning.-chargedGlobalFELinks.-neutralGlobalFELinks.-extrapolLeadTrackEta.-extrapolLeadTrackPhi"
     if not flags.Tau.ActiveConfig.inTauEleRM:
         removeAODvars += f".-{flags.Tau.GNTauScoreName[0]}.-{flags.Tau.GNTauTransScoreName[0]}.-{flags.Tau.GNTauDecorWPNames[0][0]}.-{flags.Tau.GNTauDecorWPNames[0][1]}.-{flags.Tau.GNTauDecorWPNames[0][2]}.-{flags.Tau.GNTauDecorWPNames[0][3]}.-GNTauProbTau.-GNTauProbJet"
     TauAODList += [ "xAOD::TauJetAuxContainer#{}Aux.{}".format(flags.Tau.ActiveConfig.TauJets, removeAODvars) ]
 
     # ESD specific
-    removeESDvars = "-VertexedClusters.-shotCells.-chargedGlobalFELinks.-neutralGlobalFELinks"
+    removeESDvars = "-VertexedClusters.-shotCells.-chargedGlobalFELinks.-neutralGlobalFELinks.-extrapolLeadTrackEta.-extrapolLeadTrackPhi"
     if not flags.Tau.ActiveConfig.inTauEleRM:
         removeESDvars += f".-{flags.Tau.GNTauScoreName[0]}.-{flags.Tau.GNTauTransScoreName[0]}.-{flags.Tau.GNTauDecorWPNames[0][0]}.-{flags.Tau.GNTauDecorWPNames[0][1]}.-{flags.Tau.GNTauDecorWPNames[0][2]}.-{flags.Tau.GNTauDecorWPNames[0][3]}.-GNTauProbTau.-GNTauProbJet"
     TauESDList += [ "xAOD::TauJetAuxContainer#{}Aux.{}".format(flags.Tau.ActiveConfig.TauJets, removeESDvars) ]
@@ -397,8 +397,8 @@ def TauConfigTest(flags=None):
 
         flags = initConfigFlags()
 
-        flags.Input.Files = defaultTestFiles.RDO_RUN3 if flags.GeoModel.Run <= LHCPeriod.Run3 else defaultTestFiles.RDO_RUN4
-        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC if flags.GeoModel.Run <= LHCPeriod.Run3 else defaultConditionsTags.RUN4_MC
+        flags.Input.Files = defaultTestFiles.RDO_RUN3 
+        flags.IOVDb.GlobalTag = defaultConditionsTags.RUN3_MC 
 
         flags.Output.AODFileName = "AOD.pool.root"
         flags.Exec.MaxEvents = 50

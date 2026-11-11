@@ -40,15 +40,8 @@ StatusCode TauElectronVetoVariables::initialize() {
   ATH_CHECK(m_extensionReadDecorKey.initialize(SG::AllowEmpty)); 
   ATH_CHECK(m_ctxProvider.initialize(SG::AllowEmpty));
 
-  if(!m_useACTSExtrapolator){    
-    ATH_CHECK( m_caloExtensionTool.retrieve() );
-    if (!m_ParticleCacheKey.key().empty()) {
-      ATH_CHECK(m_ParticleCacheKey.initialize());
-    } else {
-      m_useOldCalo = true;
-    }
-  } else {
-   
+  if(m_useACTSExtrapolator){    
+  
     ATH_CHECK(m_trackingGeometrySvc.retrieve());
 
     // tool
@@ -95,12 +88,10 @@ StatusCode TauElectronVetoVariables::executeTool(xAOD::TauJet& pTau,
     float phi2cut = 0.075;
     float phi3cut = 0.075;
     const CaloCell *pCell;
-    int trackIndex = -1;
 
     //---------------------------------------------------------------------
     // Calculate eta, phi impact point of leading track at calorimeter layers EM 0,1,2,3
     //---------------------------------------------------------------------
-    Trk::TrackParametersIdHelper parsIdHelper;
     constexpr size_t numberOfEM_Layers{4};
     constexpr double invalidCoordinate{-11111.};
     constexpr double invalidCoordinateThreshold{-11110.}; 
@@ -110,52 +101,16 @@ StatusCode TauElectronVetoVariables::executeTool(xAOD::TauJet& pTau,
     extrapolatedPhi.fill(invalidCoordinate);
     
     const xAOD::TrackParticle *orgTrack = pTau.track(0)->track();
-    trackIndex = orgTrack->index();
 
     /*get the CaloExtension object*/
     if(!m_useACTSExtrapolator){
-      const Trk::CaloExtension * caloExtension = nullptr;
-      std::unique_ptr<Trk::CaloExtension> uniqueExtension ;
-      if (m_useOldCalo) {
-        /* If CaloExtensionBuilder is unavailable, use the calo extension tool */
-        ATH_MSG_VERBOSE("Using the CaloExtensionTool");
-        uniqueExtension = m_caloExtensionTool->caloExtension(ctx, *orgTrack);
-        caloExtension = uniqueExtension.get();
-      } else {
-        /*get the CaloExtension object*/
-        ATH_MSG_VERBOSE("Using the CaloExtensionBuilder Cache");
-        SG::ReadHandle<CaloExtensionCollection>  particleCache {m_ParticleCacheKey, ctx};
-        caloExtension = (*particleCache)[trackIndex];
-        ATH_MSG_VERBOSE("Getting element " << trackIndex << " from the particleCache");
-        if( not caloExtension ){
-          ATH_MSG_VERBOSE("Cache does not contain a calo extension -> Calculating with the a CaloExtensionTool" );
-          uniqueExtension = m_caloExtensionTool->caloExtension(ctx, *orgTrack);
-          caloExtension = uniqueExtension.get();
-        }
-      }
-      if( not caloExtension){
-        ATH_MSG_DEBUG("extrapolation of leading track to calo surfaces failed  : caloExtension is nullptr" );
-        return StatusCode::RECOVERABLE;
-      }
-      const std::vector<Trk::CurvilinearParameters>& clParametersVector = caloExtension->caloLayerIntersections();
-      if(clParametersVector.empty() ){
-        ATH_MSG_DEBUG("extrapolation of leading track to calo surfaces failed  : caloLayerIntersection is empty" );
-        return StatusCode::RECOVERABLE;
-      }
-      // loop over calo layers
-      for( const Trk::CurvilinearParameters& cur : clParametersVector ){
-        // only use entry layer
-        if( !parsIdHelper.isEntryToVolume(cur.cIdentifier()) ) continue;
-        CaloSampling::CaloSample sample = parsIdHelper.caloSample(cur.cIdentifier());
-        int index = -1;
-        if( sample == CaloSampling::PreSamplerE || sample == CaloSampling::PreSamplerB ) index = 0;
-        else if( sample == CaloSampling::EME1 || sample == CaloSampling::EMB1 )          index = 1;
-        else if( sample == CaloSampling::EME2 || sample == CaloSampling::EMB2 )          index = 2;
-        else if( sample == CaloSampling::EME3 || sample == CaloSampling::EMB3 )          index = 3;
-        if( index < 0 ) continue;
-        extrapolatedEta[index] = cur.position().eta();
-        extrapolatedPhi[index] = cur.position().phi();
-      }
+      
+      static const SG::ConstAccessor<std::array<double,numberOfEM_Layers>> acc_extrapolLeadTrackEta("extrapolLeadTrackEta");
+      extrapolatedEta = acc_extrapolLeadTrackEta(pTau);
+
+      static const SG::ConstAccessor<std::array<double,numberOfEM_Layers>> acc_extrapolLeadTrackPhi("extrapolLeadTrackPhi");
+      extrapolatedPhi = acc_extrapolLeadTrackPhi(pTau); 
+     
     } 
     else 
     { 
