@@ -106,7 +106,7 @@ if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
   atlas_add_test( ITkGen3PropagationTest
                   PROPERTIES TIMEOUT 2000
                   PRIVATE_WORKING_DIRECTORY
-                  SCRIPT ActsITkTest.py --gen3
+                  SCRIPT ActsITkTest.py --gen3 --build-detray
                   POST_EXEC_SCRIPT noerror.sh)
   atlas_add_test( ITkCaloGen3PropagationTest
                   PROPERTIES TIMEOUT 2000
@@ -116,7 +116,7 @@ if ( NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug" )
   atlas_add_test( ITkMuonCaloGen3PropagationTest
                   PROPERTIES TIMEOUT 2000
                   PRIVATE_WORKING_DIRECTORY
-                  SCRIPT ActsITkMuonCaloTest.py
+                  SCRIPT ActsITkMuonCaloTest.py --build-detray
                   POST_EXEC_SCRIPT noerror.sh)
   atlas_add_test( GeometryEnvelopeTest
                   PROPERTIES TIMEOUT 2000

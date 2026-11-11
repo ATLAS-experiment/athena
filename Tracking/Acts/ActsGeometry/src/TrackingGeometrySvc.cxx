@@ -136,6 +136,8 @@ namespace {
         {0, 0},
         {static_cast<std::uint8_t>(maxBins[0]), static_cast<std::uint8_t>(maxBins[1])}};
   }
+
+
 }
 
 namespace ActsTrk{
@@ -1427,6 +1429,21 @@ StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
 
   ActsPlugins::DetrayPayloadConverter::Config payloadConfig{};
   payloadConfig.beampipeVolume = beamPipeVolume;
+  const auto& subdetectors = m_buildSubdetectors.value();
+  const bool buildHgtd = std::ranges::find(subdetectors, "HGTD") != subdetectors.end();
+  const auto replacementEnvelope = buildHgtd ? SystemEnvelope::HgtdExit : SystemEnvelope::ITkExit;
+  payloadConfig.replacementWorld = getEnvelope(replacementEnvelope);
+  if (payloadConfig.replacementWorld == nullptr) {
+    ATH_MSG_ERROR("Detray replacement envelope " << replacementEnvelope << " was not found");
+    return StatusCode::FAILURE;
+  }
+  std::size_t sourceVolumes = 0;
+  std::size_t selectedVolumes = 0;
+  m_trackingGeometry->apply([&](const Acts::TrackingVolume&) { ++sourceVolumes; });
+  payloadConfig.replacementWorld->apply([&](const Acts::TrackingVolume&) { ++selectedVolumes; });
+  ATH_MSG_INFO("Using " << payloadConfig.replacementWorld->volumeName() << " as the Detray replacement world: "
+               << selectedVolumes << " selected volumes out of " << sourceVolumes);
+
 
   auto payloadConverter = std::make_shared<const ActsPlugins::DetrayPayloadConverter>(
       payloadConfig,
@@ -1455,6 +1472,12 @@ StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
     return StatusCode::FAILURE;
   }
 
+  ATH_MSG_INFO("Detray result contains " << detrayGeometry.detector->volumes().size()
+               << " volumes and " << detrayGeometry.detector->surfaces().size() << " surfaces");
+  if (detrayGeometry.detector->volumes().size() != selectedVolumes) {
+    ATH_MSG_ERROR("Converted volume count does not match replacement subtree");
+    return StatusCode::FAILURE;
+  }
   if (m_checkDetrayGeometry) {
     ATH_MSG_INFO("Checking the consistency of the converted Detray geometry");
     try {

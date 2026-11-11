@@ -16,8 +16,6 @@ def DeviceDetectorDescriptionSvcCfg(flags, name="ActsDeviceDetectorDescriptionSv
         raise ValueError("In-memory conversion to Detray detector is not possible without ACTS Gen3 Geometry (set by 'Acts.TrackingGeometry.UseBlueprint' flag).")
     if not flags.Acts.TrackingGeometry.BuildDetrayGeometry:
         raise ValueError("Detray detector description can not be built without a Detray detector (set by 'Acts.TrackingGeometry.BuildDetrayGeometry' flag).")
-    if flags.Detector.GeometryCalo or flags.Detector.GeometryMuon:
-        raise ValueError("Detray detector description can not be built with calo/muon volumes in the tracking geometry yet.")
 
     if 'TrackingGeometrySvc' not in kwargs:
         from ActsConfig.ActsGeometryConfig import ActsTrackingGeometrySvcCfg
