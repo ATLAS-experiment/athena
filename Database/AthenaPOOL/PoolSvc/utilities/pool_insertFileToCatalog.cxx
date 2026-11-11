@@ -10,7 +10,6 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "StorageSvc/SimpleUtilityBase.h"
 
-using namespace pool;
 
 class ATLAS_NOT_THREAD_SAFE InsertFileToCatalogApplication : public SimpleUtilityBase {
 public:
@@ -37,26 +36,26 @@ bool
 InsertFileToCatalogApplication::parseArguments()
 {
   unsigned int excludedArgument = 0;
-  for ( unsigned int iArg = 0; iArg < args.size(); ++iArg ) {
+  for ( unsigned int iArg = 0; iArg < m_args.size(); ++iArg ) {
      if ( iArg > 0 && iArg == excludedArgument )
 	continue;
-     const std::string& arg = args[iArg];
+     const std::string& arg = m_args[iArg];
      if ( arg == "-u" ) {
 	unsigned int nextArgumentIndex = iArg + 1;
-	if( nextArgumentIndex < args.size() ) {
+	if( nextArgumentIndex < m_args.size() ) {
 	   excludedArgument = nextArgumentIndex;
-	   m_catalogFN = args[nextArgumentIndex];
+	   m_catalogFN = m_args[nextArgumentIndex];
 	}
      }
      else if( arg == "-t" ) {
 	unsigned int nextArgumentIndex = iArg + 1;
-	if ( nextArgumentIndex < args.size() ) {
+	if ( nextArgumentIndex < m_args.size() ) {
 	   excludedArgument = nextArgumentIndex;
-	   technologyName = args[nextArgumentIndex];
+	   m_technologyName = m_args[nextArgumentIndex];
 	}
      }
      else {
-	fileNames.push_back( arg );
+	m_fileNames.push_back( arg );
      }
   }
   return SimpleUtilityBase::parseArguments();
@@ -74,9 +73,9 @@ InsertFileToCatalogApplication::execute()
    FileCatalogUtils::addCatalog( *catalogMgr, m_catalogFN, true );
    catalog->init();
 
-   for( const auto& fp : fidAndPfn ) {
+   for( const auto& fp : m_fidAndPfn ) {
       std::string fid = fp.first; // can't be const
-      FileCatalogUtils::registerPFN(*catalog, fp.second, technologyName, fid);
+      FileCatalogUtils::registerPFN(*catalog, fp.second, m_technologyName, fid);
    }    
    catalog->commit();
 }
@@ -85,7 +84,7 @@ InsertFileToCatalogApplication::execute()
 void
 InsertFileToCatalogApplication::printSyntax()
 {
-  std::cout << "Syntax : " << executableName << " [-u fileCatalog] [-t technologyType] files" << std::endl;
+  std::cout << "Syntax : " << m_executableName << " [-u fileCatalog] [-t technologyType] files" << std::endl;
 }
 
 

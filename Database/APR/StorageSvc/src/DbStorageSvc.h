@@ -2,26 +2,19 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef POOL_DBSTORAGESVC_H
-#define POOL_DBSTORAGESVC_H
+#ifndef STORAGESVC_DBSTORAGESVC_H
+#define STORAGESVC_DBSTORAGESVC_H
 
-// Framework include files
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/IStorageSvc.h"
 #include "StorageSvc/DbPrint.h"
 
-
 class ITechFactory;
 
-/*
- *   POOL namespace declaration
- */
-namespace pool  {
+// Forward declarations
+class DbOption;
 
-  // Forward declarations
-  class DbOption;
-
-  /** @class DbStorageSvc DbStorageSvc.h StorageSvc/DbStorageSvc.h
+/** @class DbStorageSvc DbStorageSvc.h StorageSvc/DbStorageSvc.h
     *
     * The DbStorageSvc class is able to handle user request for
     *     - transient objects to become persistent and
@@ -34,10 +27,9 @@ namespace pool  {
     * file StorageSvc/IStorageSvc for further details.
     *
     * @author  Markus Frank
-    * @version 1.0
     */
-  class DbStorageSvc  : virtual public IStorageSvc, virtual public APRMessaging
-  {
+class DbStorageSvc  : virtual public IStorageSvc, virtual public APRMessaging
+{
   private:
     /// Service Name                               
     std::string         m_name;
@@ -270,6 +262,6 @@ namespace pool  {
     /// Access technology implementations
     ITechFactory* getTechFactory();
 
-  };
-}       // End namespace pool
-#endif  // POOL_DBSTORAGESVC_H
+};
+
+#endif

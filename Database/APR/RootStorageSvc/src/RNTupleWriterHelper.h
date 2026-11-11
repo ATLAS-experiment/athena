@@ -24,7 +24,7 @@ class TFile;
 
 namespace RootStorageSvc {
 
-class RNTupleWriterHelper : public pool::APRMessaging {
+class RNTupleWriterHelper : public APRMessaging {
  public:
   /// Constructor
   RNTupleWriterHelper(TFile* file, const std::string& ntupleName,

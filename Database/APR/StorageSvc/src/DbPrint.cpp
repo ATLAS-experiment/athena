@@ -5,8 +5,6 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include "StorageSvc/DbPrint.h"
 #include "AthenaKernel/getMessageSvc.h"
 
-using namespace pool;
-
 
 // Global variable for setting APR output level from the outside (Athena)
 // otherwise the environment variable POOL_OUTMSG_LEVEL can be used for that

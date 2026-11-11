@@ -1,40 +1,22 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//
-//        Package    : RootStorageSvc (The POOL project)
-//
-//        Author     : M.Frank
-//====================================================================
-#ifndef POOL_ROOTDOMAIN_H
-#define POOL_ROOTDOMAIN_H 1
+#ifndef ROOTDOMAIN_H
+#define ROOTDOMAIN_H 1
 
 #include "StorageSvc/ITechDomain.h"
 
 class StatusCode;
+class DbOption;
 
-/*
- *  namespace declaration
- */
-namespace pool  { 
-
-  // Forward declarations
-  class DbOption;
-
-  /** @class RootDomain RootDomain.h src/RootDomain.h
+/** @class RootDomain RootDomain.h src/RootDomain.h
     *
     * Description:
     * ROOT specific implementation of Database Domain.
     * ROOT does not support Domains. This is then simply
     * a memory list.
-    *
-    * @author  M.Frank
-    * @date    1/8/2002
-    * @version 1.0
     */
-  class RootDomain : virtual public ITechDomain  {
+class RootDomain : virtual public ITechDomain  {
   protected:
     /// Default compression level
     int m_defCompression;
@@ -55,9 +37,6 @@ namespace pool  {
     /// Standard Constuctor
     RootDomain();
 
-    /// Standard destructor
-    virtual ~RootDomain();
-
     /// Set domain specific options
     /** @param type     [IN]  Specific database type (Including minor type)
       * @param refOpt   [IN]  Reference to option object
@@ -73,6 +52,6 @@ namespace pool  {
       * @return StatusCode code indicating success or failure.  
       */
     virtual StatusCode getOption(DbOption& refOpt) const;
-  };
-}
-#endif // POOL_ROOTDOMAIN_H
+};
+
+#endif

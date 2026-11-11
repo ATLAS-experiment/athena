@@ -1,20 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: DbTypeInfo.h 726071 2016-02-25 09:23:05Z krasznaa $
-//====================================================================
-//  DbTypeInfo definition
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc  (The POOL project)
-//
-//  Description: Type information for persistent objects
-//
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBTYPEINFO_H
-#define POOL_DBTYPEINFO_H 1
+#ifndef STORAGESVC_DBTYPEINFO_H
+#define STORAGESVC_DBTYPEINFO_H 1
 
 // Framework include files
 #include "DataModelRoot/RootType.h"
@@ -28,25 +16,19 @@
 
 class StatusCode;
 
-/*
- *  POOL namespace declaration
- */
-namespace pool  {
+// Forward declaration
+class DbColumn;
+class DbTypeInfo;
 
-  // Forward declaration
-  class DbColumn;
-  class DbTypeInfo;
-
-  /** @class DbTypeInfo DbTypeInfo.h StorageSvc/DbTypeInfo.h
+/** @class DbTypeInfo DbTypeInfo.h StorageSvc/DbTypeInfo.h
     * Definition of class DbTypeInfo
     *
     * Description:
     * Generalized persistent type information
     *
     * @author  M.Frank
-    * @version 1.0
     */
-  class DbTypeInfo : public Shape   {
+class DbTypeInfo : public Shape   {
 
   public:
     /// Column Container definition
@@ -113,6 +95,6 @@ namespace pool  {
     const std::string toString() const;
     /// Allow usage of base classes
     StatusCode declareBase(const DbTypeInfo* pInfo); 
-  };
-}      // End namespace pool
-#endif // POOL_DBTYPEINFO_H
+};
+
+#endif

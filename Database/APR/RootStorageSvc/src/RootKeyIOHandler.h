@@ -1,30 +1,19 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//
-//        Package    : RootStorageSvc (The POOL project)
-//
-//        Author     : M.Frank
-//====================================================================
-#ifndef POOL_ROOTSTORAGESVC_ROOTKEYIOHANDLER_H
-#define POOL_ROOTSTORAGESVC_ROOTKEYIOHANDLER_H 1
+#ifndef ROOTSTORAGESVC_ROOTKEYIOHANDLER_H
+#define ROOTSTORAGESVC_ROOTKEYIOHANDLER_H 1
 
 // Forward declarations
 class TClass;
 class TKey;
 
-namespace pool {
-
-  /** @class IRootKeyIOHandler IRootKeyIOHandler.h RootStorageSvc/IRootKeyIOHandler.h
+/** @class IRootKeyIOHandler IRootKeyIOHandler.h RootStorageSvc/IRootKeyIOHandler.h
     * Helper to perform keyed object I/O.
     *
     * @author  M.Frank
-    * @date    1/2/2003
-    * @version 1.0
     */
-  class RootKeyIOHandler {
+class RootKeyIOHandler {
   public:
     /// Initializing constructor
     RootKeyIOHandler() {}
@@ -83,6 +72,6 @@ namespace pool {
       * @return Number of bytes read from file. 0 or negative on failure.
       */
     virtual int  destroy(const char* knam) const;
-  };
-}
-#endif // POOL_ROOTSTORAGESVC_ROOTKEYIOHANDLER_H
+};
+
+#endif

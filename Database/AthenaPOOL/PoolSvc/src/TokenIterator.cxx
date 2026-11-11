@@ -12,13 +12,13 @@
 
 #include <exception>
 
-TokenIterator::TokenIterator( pool::FileDescriptor& fileDescriptor,
+TokenIterator::TokenIterator( FileDescriptor& fileDescriptor,
                               const std::string& containerName) :
         m_container( nullptr ), m_refToken ( nullptr ) {
-   pool::DbDatabase dbH( fileDescriptor.dbc()->handle() );
+   DbDatabase dbH( fileDescriptor.dbc()->handle() );
    if ( dbH.isValid() )  {
       m_refToken = new Token(dbH.cntToken(containerName));
-      m_container = new pool::DbContainer(m_refToken->technology());
+      m_container = new DbContainer(m_refToken->technology());
    }
    if( !dbH.isValid() || !m_container->open(dbH, m_refToken->contID(), 0, m_refToken->technology(), Io::READ).isSuccess() ) {
       throw std::runtime_error( "Selection from " + fileDescriptor.PFN() + "(" + containerName + ") failed (APR: \" TokenIterator::TokenIterator() \" from \" PersistencySvc \")" );

@@ -3138,7 +3138,7 @@ int AtlCoolCopy::resolvePoolRefs ATLAS_NOT_THREAD_SAFE () {
 	    << std::endl;
   setupCatalog(m_poolcat);
   if( !m_catalog ) return 110;
-  pool::SimpleUtilityBase       pool_utility;
+  SimpleUtilityBase       pool_utility;
   if (m_poolopen) {
      // prepare POOL session
      pool_utility.startSession();

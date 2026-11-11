@@ -21,41 +21,38 @@
 #include "GaudiKernel/ISvcLocator.h"
 #include "GaudiKernel/IProperty.h"
 
-
 #include "TError.h"
-
-using namespace pool;
 
 
 SimpleUtilityBase::SimpleUtilityBase( int argc, char* argv[] ):
-      technologyName( pool::ROOT_StorageType.storageName() )
+      m_technologyName( pool::ROOT_StorageType.storageName() )
 {
    // Suppress Athena MessageSvc warnings about not finding Gaudi MessageSvc
    Athena::getMessageSvcQuiet = true;
 
    if( argc > 0 && argv[0] )
-      executableName = argv[0];
+      m_executableName = argv[0];
    for ( int i = 1; i < argc; ++i )
-      args.push_back( std::string( argv[i] ) );
+      m_args.push_back( std::string( argv[i] ) );
 }
 
 
 SimpleUtilityBase::~SimpleUtilityBase()
 {
-   if( storageSvc ) {
-      storageSvc->endSession().ignore();
-      storageSvc->release();
+   if( m_storageSvc ) {
+      m_storageSvc->endSession().ignore();
+      m_storageSvc->release();
    }
 }
 
 
 bool SimpleUtilityBase::parseArguments()
 {
-   if( fileNames.empty() )
+   if( m_fileNames.empty() )
       return false;
-   pool::DbType theType = pool::DbType::getType( technologyName );
+   DbType theType = DbType::getType( m_technologyName );
    if ( theType.match( pool::TEST_StorageType ) ) {
-      throw std::runtime_error( "Unsupported file type : " + technologyName );
+      throw std::runtime_error( "Unsupported file type : " + m_technologyName );
    }
    return true;
 }
@@ -63,12 +60,12 @@ bool SimpleUtilityBase::parseArguments()
 
 void SimpleUtilityBase::startSession ATLAS_NOT_THREAD_SAFE ()
 {
-   storageSvc = pool::createStorageSvc("StorageSvc");
-   if( !storageSvc ) {
+   m_storageSvc = createStorageSvc("StorageSvc");
+   if( !m_storageSvc ) {
       throw std::runtime_error( "Could not create a StorageSvc object" );
    }
-   long technologyId = pool::DbType::getType( technologyName ).majorType();
-   if( ! storageSvc->startSession( Io::READ, technologyId).isSuccess() ) {
+   long technologyId = DbType::getType( m_technologyName ).majorType();
+   if( ! m_storageSvc->startSession( Io::READ, technologyId).isSuccess() ) {
       throw std::runtime_error( "Could not start a new session" );
    }
    if( technologyId == pool::ROOT_StorageType.majorType() ) {
@@ -81,13 +78,13 @@ void SimpleUtilityBase::startSession ATLAS_NOT_THREAD_SAFE ()
 std::string SimpleUtilityBase::readFileGUID( const std::string& pfn )
 {
    std::string fid;
-   pool::FileDescriptor fd( fid, pfn );
-   if( ! storageSvc->connect(Io::READ, fd).isSuccess() ) {
+   FileDescriptor fd( fid, pfn );
+   if( !m_storageSvc->connect(Io::READ, fd).isSuccess() ) {
       throw std::runtime_error( "Could not open file \"" + pfn + "\"" );
    }
    DbDatabase dbH( fd.dbc()->handle() );
    StatusCode sc = dbH.param( "FID", fid );
-   if( !storageSvc->disconnect( fd ).isSuccess() or !sc.isSuccess() ) {
+   if( !m_storageSvc->disconnect( fd ).isSuccess() or !sc.isSuccess() ) {
       throw std::runtime_error( "Could not retrieve the FID from file \"" + pfn + "\"" );
    }
    return fid;
@@ -96,9 +93,9 @@ std::string SimpleUtilityBase::readFileGUID( const std::string& pfn )
 
 void SimpleUtilityBase::readFileGUIDs()
 {
-   for( const auto& pfn : fileNames ) {
+   for( const auto& pfn : m_fileNames ) {
       std::string fid = readFileGUID( pfn );
-      fidAndPfn.push_back( std::make_pair( fid, pfn ) );
+      m_fidAndPfn.push_back( std::make_pair( fid, pfn ) );
    }
 }
 
@@ -112,11 +109,11 @@ int SimpleUtilityBase::run()
       else printSyntax();
    }
    catch ( std::exception& error ) {
-      std::cerr << executableName << ": " << error.what() << std::endl;
+      std::cerr << m_executableName << ": " << error.what() << std::endl;
       return 1;
    }
    catch ( ... ) {
-      std::cerr << executableName << ": Unrecognized exception!" << std::endl;
+      std::cerr << m_executableName << ": Unrecognized exception!" << std::endl;
       return 1;
    }
    return 0;

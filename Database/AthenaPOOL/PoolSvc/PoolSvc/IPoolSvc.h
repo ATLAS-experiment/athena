@@ -19,10 +19,7 @@
 
 #include <string>
 
-namespace pool {
-   class DbType;
-}
-
+class DbType;
 class Placement;
 class Token;
 
@@ -72,8 +69,8 @@ public: // Non-static members
    /// Throws std::runtime_error if the file is not connected.
    /// @param contextId [IN] id of the input context.
    /// @param connection [IN] file name, optionally prefixed with PFN:, LFN: or FID:
-   virtual pool::FileDescriptor getInputFileDescriptor(unsigned int contextId,
-                                                       const std::string& connection) = 0;
+   virtual FileDescriptor getInputFileDescriptor(unsigned int contextId,
+                                                 const std::string& connection) = 0;
 
    /// @return void
    /// @param shareCat [IN] bool to share the file catalog.

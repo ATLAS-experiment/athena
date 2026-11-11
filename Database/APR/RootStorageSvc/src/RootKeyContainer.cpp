@@ -1,17 +1,6 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//        Root Database container implementation
-//--------------------------------------------------------------------
-//
-//        Package    : pool (The POOL project)
-//
-//        Author     : M.Frank
-//====================================================================
-
-// Framework include files
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
@@ -33,14 +22,13 @@
 
 #include <algorithm>
 
-using namespace pool;
 constexpr const static auto SUCCESS = StatusCode::SUCCESS;
 constexpr const static auto FAILURE = StatusCode::FAILURE;
 
 RootKeyContainer::RootKeyContainer(const std::string& name) :
   TechContainerBase(name),
   m_dir(0),
-  m_dbH(POOL_StorageType),
+  m_dbH( pool::POOL_StorageType ),
   m_rootDb(0),
   m_ioHandler(new RootKeyIOHandler),
   m_policy(TObject::kOverwrite),    // On update write new versions
@@ -230,7 +218,7 @@ StatusCode RootKeyContainer::writeObject(ActionList::value_type& action) {
 }
 
 StatusCode RootKeyContainer::close()   {
-  m_dbH = DbDatabase(POOL_StorageType);
+  m_dbH = DbDatabase(pool::POOL_StorageType);
   m_rootDb = 0;
   m_dir = 0;
   return TechContainerBase::close();
@@ -309,7 +297,7 @@ StatusCode RootKeyContainer::open(DbDatabase&           dbH,
     /// Parent Database handle
     m_dbH = dbH;
     ATH_MSG_DEBUG("Opened container " << m_name << " of type "
-                  << ROOTKEY_StorageType.storageName() << " with policy:" << m_policy);
+                  << pool::ROOTKEY_StorageType.storageName() << " with policy:" << m_policy);
     return SUCCESS;
   }
   ATH_MSG_ERROR("Cannot open container, invalid Database handle.");

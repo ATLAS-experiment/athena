@@ -1,17 +1,8 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//        Root Database implementation
-//--------------------------------------------------------------------
-//
-//        Package    : RootStorageSvc (The POOL project)
-//
-//        Author     : M.Frank
-//====================================================================
-#ifndef POOL_ROOTSTORAGESVC_RootTechFactory_H
-#define POOL_ROOTSTORAGESVC_RootTechFactory_H 1
+#ifndef ROOTSTORAGESVC_RootTechFactory_H
+#define ROOTSTORAGESVC_RootTechFactory_H 1
 
 // Framework include files
 #include "StorageSvc/ITechFactory.h"
@@ -24,13 +15,14 @@
     * Factory for creating domains, databases and containers implemented 
     * using ROOT technologies (TFile, TTree, TKey and RNTuple)
     * 
+    * @author     : M.Frank
     */
 class RootTechFactory  : public ITechFactory  {
   public:
     typedef Gaudi::PluginService::Factory<ITechFactory*()> Factory;
 
     /// Standard Constructor
-    explicit RootTechFactory(pool::DbType typ=pool::ROOT_StorageType);
+    explicit RootTechFactory(DbType typ=pool::ROOT_StorageType);
 
     /// Name of the Database implementation
     virtual const std::string&  name () const;
@@ -43,7 +35,7 @@ class RootTechFactory  : public ITechFactory  {
     /// Create Root Database object (TFile)
     ITechDatabase* createDatabase();
     /// Create Root Container object
-    ITechContainer* createContainer(const std::string& name, const pool::DbType& typ);
+    ITechContainer* createContainer(const std::string& name, const DbType& typ);
   private:
     /// Non-owning cache for the domain pointer
     ITechDomain* m_domainCache{};
@@ -81,5 +73,4 @@ class RootTechFactory  : public ITechFactory  {
     static const char* catalogLabel()  {   return "ROOT_RNTuple";      }
   };
 
-  
-#endif  /* POOL_ROOTSTORAGESVC_RootTechFactory_H  */
+#endif

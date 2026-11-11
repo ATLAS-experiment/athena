@@ -1,25 +1,12 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  Implementation file of a Database options
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc (The POOL project)
-//
-//  @author      M.Frank
-//====================================================================
-
-// Framework include files
 #include "StorageSvc/pool.h"
 #include "StorageSvc/DbOption.h"
 #include "GaudiKernel/StatusCode.h"
 
 // C++ include files
 #include <iostream>
-
-using namespace pool;
 
 namespace {
   template <class T, class Q> struct Marshal {

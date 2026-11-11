@@ -1,28 +1,21 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
 #ifndef STORAGESVC_DBCONNECTION_H
 #define STORAGESVC_DBCONNECTION_H
 
 #include <string>
 
-/*
- *   POOL namespace
- */
-namespace pool {
-
-  class DbDatabaseObj;
+class DbDatabaseObj;
   
-  /** @class DbConnection DbConnection.h StorageSvc/DbConnection.h
+/** @class DbConnection DbConnection.h StorageSvc/DbConnection.h
     *
     * Definition of the DbConnection class. The connection holds
     * data specific to dealing with one type of Database.
     * 
     * @author: M.Frank
-    * @version 1.0
     */
-  class DbConnection {
+class DbConnection {
   private:
     /// Reference count
     int m_refCount;
@@ -61,7 +54,6 @@ namespace pool {
     const std::string& name() const           { return m_name;        }
     /// Access technoliogy type
     int type() const                          { return m_type;        }
-  };
-}      // namespace pool
+};
 
-#endif /// STORAGESVC_DBCONNECTION_H
+#endif

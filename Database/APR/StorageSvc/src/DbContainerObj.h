@@ -1,16 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbContainerObj class definitions
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc  (The POOL project)
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBCONTAINEROBJ_H
-#define POOL_DBCONTAINEROBJ_H 1
+#ifndef DBCONTAINEROBJ_H
+#define DBCONTAINEROBJ_H 1
 
 // Framework include files
 #include "PersistentDataModel/Token.h"
@@ -19,12 +11,7 @@
 #include "StorageSvc/DbPrint.h"
 #include "DbAccessObj.h"
 
-/*
- *  POOL namespace declaration
- */
-namespace pool  {
-
-  /** @class DbContainerObj DbContainerObj.h src/DbContainerObj.h
+/** @class DbContainerObj DbContainerObj.h src/DbContainerObj.h
     *
     * Description:
     *
@@ -38,9 +25,8 @@ namespace pool  {
     * existing references flying around.
     *
     * @author  M.Frank
-    * @version 1.0
     */
-  class DbContainerObj : public  DbAccessObjBase, public APRMessaging {
+class DbContainerObj : public  DbAccessObjBase, public APRMessaging {
   private:
     /// Pointer to interface of the technology dependent part
     ITechContainer*               m_info;
@@ -118,6 +104,6 @@ namespace pool  {
 
     /// Fetch next object address to set token
     StatusCode next(Token::OID_t& linkH);
-  };
-}       // End namespace pool
-#endif  // POOL_DBCONTAINEROBJ_H
+};
+
+#endif

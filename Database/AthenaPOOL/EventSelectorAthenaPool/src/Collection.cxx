@@ -23,13 +23,11 @@
 #include <utility>
 #include <vector>
 
-namespace pool {
+Collection::~Collection() = default;
 
-   Collection::~Collection() = default;
-
-   Collection::Collection( FileDescriptor& fileDescr )
+Collection::Collection( FileDescriptor& fileDescr )
       : APRMessaging( "Collection")
-      {
+{
          if( !fileDescr.dbc() ) {
             throw std::runtime_error( "Collection: file must already be connected: " + fileDescr.PFN() );
          }
@@ -85,20 +83,19 @@ namespace pool {
                }
             }
          }
-      }
+}
 
 
-   std::unique_ptr<CollectionCursor> Collection::cursor() {
+std::unique_ptr<CollectionCursor> Collection::cursor() {
       if( m_containerMap.empty() ) {
          m_containerMap.emplace( APRDefaults::TokenTypeName, std::move(m_dhCont) );
       }
-      pool::CollectionRowBuffer collectionRowBuffer;
+      CollectionRowBuffer collectionRowBuffer;
       coral::AttributeList attributeList;
       for( const auto& attrCol : m_attributeColumns ) {
          attributeList.extend( attrCol.name(), attrCol.type() );
       }
       collectionRowBuffer.setAttributeList( attributeList );
       return std::make_unique<CollectionCursor>( collectionRowBuffer, m_containerMap);
-   }
+}
 
-} //namespace pool

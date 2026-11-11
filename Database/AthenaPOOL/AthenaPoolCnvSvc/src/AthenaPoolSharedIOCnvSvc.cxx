@@ -451,7 +451,7 @@ Token* AthenaPoolSharedIOCnvSvc::registerForWrite(Placement* placement, const vo
       }
    }
    Token* token = nullptr;
-   const Guid guid = pool::DbReflex::guid(classDesc);
+   const Guid guid = DbReflex::guid(classDesc);
    if (!m_outputStreamingTool.empty() && m_outputStreamingTool->isClient()
 	   && (!m_parallelCompression || placement->containerName().compare(0, m_metadataContainerProp.value().size(), m_metadataContainerProp.value()) == 0)) {
       // Lock object
@@ -497,7 +497,7 @@ Token* AthenaPoolSharedIOCnvSvc::registerForWrite(Placement* placement, const vo
          m_outputStreamingTool->putObject(nullptr, 0).ignore();
          return(nullptr);
       }
-      const pool::DbTypeInfo* info = pool::DbTypeInfo::create(guid);
+      const DbTypeInfo* info = DbTypeInfo::create(guid);
       if (info != nullptr) {
          if (m_auxDynTool->hasAuxStore(placement->containerName(), info->clazz().Class() ) && !m_auxOutput->sendStore(info->clazz().Class(), obj, guid.toString(), placement->containerName()).isSuccess()) {
             ATH_MSG_ERROR("Could not share dynamic aux store for: " << placementStr);
@@ -540,7 +540,7 @@ Token* AthenaPoolSharedIOCnvSvc::registerForWrite(Placement* placement, const vo
          token = tempToken; tempToken = nullptr;
       } else if (!m_outputStreamingTool.empty() && !m_outputStreamingTool->isClient() && !m_streamServerActive) {
          if(placement->technology() == 0) { // No technology specified, use the default
-            placement->setTechnology(pool::DbType::getType(m_defaultContainerType).type());
+            placement->setTechnology(DbType::getType(m_defaultContainerType).type());
          }
          ATH_MSG_DEBUG("Requested write object for: " << placement->toString());
          token = m_poolSvc->registerForWrite(placement, obj, classDesc);
@@ -577,7 +577,7 @@ void AthenaPoolSharedIOCnvSvc::setObjPtr(void*& obj, const Token* token) {
             ATH_MSG_DEBUG("Server deserializing " << token->toString());
             if (token->classID() != Guid::null()) {
                // Deserialize object
-               RootType cltype(pool::DbReflex::forGuid(token->classID()));
+               RootType cltype(DbReflex::forGuid(token->classID()));
                obj = m_serializeSvc->deserialize(buffer, nbytes, cltype); buffer = nullptr;
             } else {
                // Deserialize object
@@ -599,7 +599,7 @@ void AthenaPoolSharedIOCnvSvc::setObjPtr(void*& obj, const Token* token) {
                if (m_outputStreamingTool->getObject(&buffer, nbytes, num).isSuccess() && nbytes > 0) {
                   const std::string contName = std::string(static_cast<const char*>(buffer));
                   if (classId != Guid::null()) {
-                     const pool::DbTypeInfo* info = pool::DbTypeInfo::create(classId);
+                     const DbTypeInfo* info = DbTypeInfo::create(classId);
                      if (info != nullptr) {
                         if (m_auxDynTool->hasAuxStore(contName, info->clazz().Class() ) && !m_auxOutput->receiveStore(info->clazz().Class(), obj, num).isSuccess()) {
                            ATH_MSG_ERROR("Failed to get Dynamic Aux Store for " << token->toString());
@@ -634,7 +634,7 @@ void AthenaPoolSharedIOCnvSvc::setObjPtr(void*& obj, const Token* token) {
             ATH_MSG_ERROR("Failed to get Data for " << token->toString());
             obj = nullptr;
          } else {
-            RootType cltype(pool::DbReflex::forGuid(token->classID()));
+            RootType cltype(DbReflex::forGuid(token->classID()));
             obj = m_serializeSvc->deserialize(buffer, nbytes, cltype); buffer = nullptr;
             buffer = nullptr;
             nbytes = 0;
@@ -648,7 +648,7 @@ void AthenaPoolSharedIOCnvSvc::setObjPtr(void*& obj, const Token* token) {
                if (m_inputStreamingTool->getObject(&buffer, nbytes).isSuccess() && nbytes > 0) {
                   const std::string contName = std::string(static_cast<const char*>(buffer));
                   if (classId != Guid::null()) {
-                     const pool::DbTypeInfo* info = pool::DbTypeInfo::create(classId);
+                     const DbTypeInfo* info = DbTypeInfo::create(classId);
                      if (info != nullptr) {
                         if (!m_auxInput->receiveStore(info->clazz().Class(), obj).isSuccess()) {
                            ATH_MSG_ERROR("Failed to get Dynamic Aux Store for " << token->toString());
@@ -710,7 +710,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::createAddress(long svcType,
          token->setOid(Token::OID_t(ip[0], ip[1]));
          token->setAuxString("[PNAME=" + par[2] + "]");
          RootType classDesc = RootType::ByNameNoQuiet(par[2]);
-         token->setClassID(pool::DbReflex::guid(classDesc));
+         token->setClassID(DbReflex::guid(classDesc));
          refpAddress = new TokenAddress(repSvcType(), clid, "", par[1], IPoolSvc::kInputStream, std::move(token));
          return(StatusCode::SUCCESS);
       } else {
@@ -805,7 +805,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::readData() {
       PMonUtils::BasicStopWatch stopWatch("cObj_" + objName, this->m_chronoMap);
       this->setObjPtr(instance, &token);
       // Serialize object via ROOT
-      RootType cltype(pool::DbReflex::forGuid(token.classID()));
+      RootType cltype(DbReflex::forGuid(token.classID()));
       void* buffer = nullptr;
       std::size_t nbytes = 0;
       buffer = m_serializeSvc->serialize(instance, cltype, nbytes);
@@ -818,7 +818,7 @@ StatusCode AthenaPoolSharedIOCnvSvc::readData() {
          ATH_MSG_ERROR("Could not share object for: " << token.toString());
          return(StatusCode::FAILURE);
       }
-      const pool::DbTypeInfo* info = pool::DbTypeInfo::create(token.classID());
+      const DbTypeInfo* info = DbTypeInfo::create(token.classID());
       if (info != nullptr) {
          if (m_auxDynTool->hasAuxStore(token.contID(), info->clazz().Class() ) && !m_auxInput->sendStore(info->clazz().Class(), instance, token.classID().toString(), token.contID(), num).isSuccess()) {
             ATH_MSG_ERROR("Could not share dynamic aux store for: " << token.toString());

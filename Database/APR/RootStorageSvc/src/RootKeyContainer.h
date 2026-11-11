@@ -1,17 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//        Root Database implementation
-//--------------------------------------------------------------------
-//
-//        Package    : RootStorageSvc (The POOL project)
-//
-//        Author     : M.Frank
-//====================================================================
-#ifndef POOL_ROOTKEYCONTAINER_H
-#define POOL_ROOTKEYCONTAINER_H 1
+#ifndef ROOTKEYCONTAINER_H
+#define ROOTKEYCONTAINER_H 1
 
 // Framework include files
 #include "StorageSvc/DbDatabase.h"
@@ -19,16 +10,12 @@
 
 // Forward declarations
 class StatusCode;
-namespace CINT { class IOHandler; }
 class TDirectory;
 class TBuffer;
 class TClass;
+class RootKeyIOHandler;
 
-namespace pool  { 
-  // Forward declarations
-  class RootKeyIOHandler;
-
-  /** @class RootKeyContainer RootKeyContainer.h src/RootKeyContainer.h
+/** @class RootKeyContainer RootKeyContainer.h src/RootKeyContainer.h
     *
     * Description:
     * ROOT specific implementation of Database container.
@@ -39,8 +26,6 @@ namespace pool  {
     * inside its tree.
     *
     * @author  M.Frank
-    * @date    1/8/2002
-    * @version 1.0
     */
   class RootKeyContainer : public TechContainerBase {
     /// Reference to the root tree object
@@ -118,6 +103,6 @@ namespace pool  {
       */
     /// Execute transaction action
     virtual StatusCode transAct(Transaction::Action action) override;
-  };
-}
-#endif //POOL_ROOTKEYCONTAINER_H
+};
+
+#endif

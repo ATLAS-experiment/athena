@@ -110,8 +110,8 @@ void Database::connectForWrite() {
 	     throw std::runtime_error( "The back end technology has not been specified (APR: \" Database::connectForWrite \" from \" PersistencySvc \")" );
 	  }
 	  // register in the catalog
-	  pool::DbType dbType( m_technology );
-	  pool::DbType dbTypeMajor( dbType.majorType() );
+	  DbType dbType( m_technology );
+	  DbType dbTypeMajor( dbType.majorType() );
 	  FileCatalogUtils::registerPFN( m_catalog, m_the_pfn.substr(0, m_the_pfn.find('?')), dbTypeMajor.storageName(), m_the_fid );
     ATH_MSG_DEBUG("registered PFN: " << m_the_pfn << " with FID:" << m_the_fid);
 	  dbRegistered = true;
@@ -190,7 +190,7 @@ const std::string& Database::fid() {
                return m_the_fid;
             }
             m_the_pfn = m_name;
-            m_technology = pool::DbType::getType( technology ).majorType();
+            m_technology = DbType::getType( technology ).majorType();
             m_alreadyConnected = true;
          }
          else {
@@ -246,7 +246,7 @@ const std::string& Database::pfn() {
      FileCatalogUtils::getFirstPFN( m_catalog, m_name, m_the_pfn, technology );
      if( !m_the_pfn.empty() ) {
         m_the_fid = m_name;
-        m_technology = pool::DbType::getType( technology ).majorType();
+        m_technology = DbType::getType( technology ).majorType();
         m_alreadyConnected = true;
      }
      return m_the_pfn;
@@ -257,7 +257,7 @@ const std::string& Database::pfn() {
 bool Database::setTechnology( long technology ) {
   if ( m_alreadyConnected ) return false;
   else {
-    pool::DbType dbType( technology );
+    DbType dbType( technology );
     m_technology = dbType.majorType();
     m_technologySet = true;
     return true;
@@ -307,7 +307,7 @@ bool Database::checkInRegistry() {
   else return false;
 }
 
-pool::FileDescriptor* Database::fileDescriptor() {
+FileDescriptor* Database::fileDescriptor() {
   return m_databaseHandler? &m_databaseHandler->fileDescriptor() : nullptr;
 }
 

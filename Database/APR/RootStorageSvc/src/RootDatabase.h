@@ -1,15 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//
-//        Package    : RootStorageSvc (The POOL project)
-//
-//        Author     : M.Frank
-//====================================================================
-#ifndef POOL_ROOTSTORAGESVC_ROOTDBASE_H
-#define POOL_ROOTSTORAGESVC_ROOTDBASE_H 1
+#ifndef ROOTSTORAGESVC_ROOTDBASE_H
+#define ROOTSTORAGESVC_ROOTDBASE_H 1
 
 // Framework include files
 #include "AthenaKernel/SlotSpecificObj.h"
@@ -40,23 +33,16 @@ namespace RootAuxDynIO {
 namespace RootStorageSvc {
    class RNTupleWriterHelper;
 }
-
-/*
- * POOL namespace declaration
- */
-namespace pool  {  
-   class RootTreeContainer;
+class RootTreeContainer;
    
-  /** @class RootDatabase RootDatabase.h src/RootDatabase.h
+/** @class RootDatabase RootDatabase.h src/RootDatabase.h
     *
     * Description:
     * ROOT specific implementation of Database file.
     *
     * @author  M.Frank
-    * @date    1/8/2002
-    * @version 1.0
     */
-   class RootDatabase : virtual public ITechDatabase, public APRMessaging
+class RootDatabase : virtual public ITechDatabase, public APRMessaging
    {
   public:
     enum { READ_COUNTER = 0, WRITE_COUNTER = 1, OTHER_COUNTER = 2 };
@@ -247,7 +233,6 @@ namespace pool  {
     StatusCode           close();
 
     void                 printErrno(const char* nam, int err);
-   };
+};
 
-}       // End namespace pool
-#endif  /* POOL_ROOTSTORAGESVC_ROOTDBASE_H */
+#endif

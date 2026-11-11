@@ -8,10 +8,7 @@
 #include <string>
 #include <typeinfo>
 
-namespace pool {
-  class FileDescriptor;
-}
-
+class FileDescriptor;
 class TokenIterator;
 
 /** @class Container
@@ -19,7 +16,7 @@ class TokenIterator;
 
 class Container final {
 public:
-  Container( pool::FileDescriptor& fileDescriptor, const std::string& name );
+  Container( FileDescriptor& fileDescriptor, const std::string& name );
 
   /// destructor
   ~Container() = default;
@@ -49,7 +46,7 @@ private:
   std::string m_name;
 
   /// Reference to file descriptor of the parent database
-  pool::FileDescriptor& m_fileDescriptor;
+  FileDescriptor& m_fileDescriptor;
 };
 
 #endif

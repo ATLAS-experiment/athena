@@ -1,16 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbDatabase and related class definitions
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc  (The POOL project)
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBDATABASE_H
-#define POOL_DBDATABASE_H
+#ifndef DBDATABASE_H
+#define DBDATABASE_H
 
 // Framework include files
 #include "PersistentDataModel/Token.h"
@@ -26,32 +18,26 @@
 class StatusCode;
 class ITechFactory;
 
-/*
- *  POOL namespace declaration
- */
-namespace pool  {
+// Forward declarations
+class ITechDatabase;
+class ITechContainer;
+class DbDomain;
+class DbDatabase;
+class DbDatabaseObj;
+class DbContainer;
+class DbContainerObj;
+class DbOption;
+class DbTypeInfo;
+class Shape;
 
-  // Forward declarations
-  class ITechDatabase;
-  class ITechContainer;
-  class DbDomain;
-  class DbDatabase;
-  class DbDatabaseObj;
-  class DbContainer;
-  class DbContainerObj;
-  class DbOption;
-  class DbTypeInfo;
-  class Shape;
-
-  /** @class DbDatabase DbDatabase.h StorageSvc/DbDatabase.h
+/** @class DbDatabase DbDatabase.h StorageSvc/DbDatabase.h
    *
    * Description:
    * Handle managing a DbDatabaseObj, a generic Database object.
    *
    * @author  M.Frank
-   * @version 1.0
    */
-  class DbDatabase : public DbHandleBase<DbDatabaseObj> {
+class DbDatabase : public DbHandleBase<DbDatabaseObj> {
   protected:
     /// Parameter definition
     typedef std::pair<std::string, std::string> Parameter;
@@ -62,7 +48,7 @@ namespace pool  {
     void switchPtr(DbDatabaseObj* obj);
   public:
     /// Constructor with initializing arguments
-    explicit DbDatabase(const DbType& typ=POOL_StorageType) { m_type = typ;        }
+    explicit DbDatabase(const DbType& typ=pool::POOL_StorageType) { m_type = typ;        }
     /// Copy constructor
     DbDatabase(const DbDatabase& cp) : Base()   { switchPtr(cp.m_ptr);    }
     /// Constructor
@@ -196,6 +182,6 @@ namespace pool  {
     void setAge(int value);
     /// Access age value
     int age()  const;
-  };
-}       // End namespace pool
-#endif  // POOL_DBDatabase_H
+};
+
+#endif

@@ -1,17 +1,8 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: DbReflex.h 601961 2014-06-16 14:49:09Z mnowak $
-//====================================================================
-//  DbDatabase and related class definitions
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc  (The POOL project)
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBREFLEX_H
-#define POOL_DBREFLEX_H
+#ifndef STORAGESVC_DBREFLEX_H
+#define STORAGESVC_DBREFLEX_H
 
 // Framework include files
 #include "PersistentDataModel/Guid.h"
@@ -23,19 +14,13 @@
 #include <typeinfo>
 #include <set>
 
-/*
- *  POOL namespace declaration
- */
-namespace pool  {
-  /** @class DbReflex DbReflex.h StorageSvc/DbReflex.h
+/** @class DbReflex DbReflex.h StorageSvc/DbReflex.h
     *
     * Description:
-    * Handle transparent loading of reflection classes.
-    *
-    * @author  M.Frank
-    * @version 1.0
+    * Provides mapping between type IDs (GUIDs) and type description objects (RootType)
+    * Uses ROOT automatic dictionaru loading to find types
     */
-  class DbReflex  {
+class DbReflex  {
   private:
     /// No public construction
     DbReflex() {}
@@ -55,6 +40,6 @@ namespace pool  {
       * @return  String containing full scoped name
       */
     static Guid guid(const RootType& id);
-  };
-}       // End namespace pool
-#endif  // POOL_DBREFLEX_H
+};
+
+#endif 

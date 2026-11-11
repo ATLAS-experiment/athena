@@ -1,33 +1,18 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbType definition file
-//--------------------------------------------------------------------
-//
-//  Package    : System (The pool framework)
-//
-//  Description: Management of the object Databases
-//
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBTYPE_H
-#define POOL_DBTYPE_H 1
+#ifndef STORAGESVC_DBTYPE_H
+#define STORAGESVC_DBTYPE_H 1
 
 // Framework include files
 #include <string>
 // Forward declarations
 class MsgStream;
 
-/*
- *   POOL namespace declaration
+/** @class DbType DbType.h  StorageSvc/DbType.h
+ * Keeps information about storage technology
  */
-namespace pool  {
-
-  /** @class DbType DbType.h  StorageSvc/DbType.h
-  */
-  class DbType    {
+class DbType    {
   private:
     /// Database type
     int m_type;
@@ -79,6 +64,8 @@ namespace pool  {
   inline const DbType makeTechnology(int major_typ, int minor_typ)
   { return ((major_typ<<8) + (DbType::MINOR_MASK&minor_typ));                       }
 
+namespace pool {
+  // define in the pool namespace for now to avoid conflicts with Gaudi defin itions
   // Data storage technique identifiers
   static const DbType TEST_StorageType       = makeTechnology(0,0);
   static const DbType POOL_StorageType       = makeTechnology(1,0);
@@ -87,6 +74,6 @@ namespace pool  {
   static const DbType ROOTTREE_StorageType   = makeTechnology(2,2);
   static const DbType ROOTTREEINDEX_StorageType = makeTechnology(2,3);
   static const DbType ROOTRNTUPLE_StorageType   = makeTechnology(2,4);
+}
 
-}       // End namespace pool
-#endif  // POOL_DBTYPE_H
+#endif

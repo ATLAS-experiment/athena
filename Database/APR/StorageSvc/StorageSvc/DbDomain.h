@@ -1,16 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbDomain and related class definitions
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc  (The POOL project)
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBDOMAIN_H
-#define POOL_DBDOMAIN_H
+#ifndef STORAGESVC_DBDOMAIN_H
+#define STORAGESVC_DBDOMAIN_H
 
 // Framework include files
 #include "StorageSvc/pool.h"
@@ -23,28 +15,22 @@ class Token;
 class StatusCode;
 class ITechFactory;
 
-/*
- *  POOL namespace declaration
- */
-namespace pool    {
+// Forward declarations
+class ITechDomain;
+class DbDomainObj;
+class DbDatabaseObj;
+class DbSession;
+class DbOption;
 
-  // Forward declarations
-  class ITechDomain;
-  class DbDomainObj;
-  class DbDatabaseObj;
-  class DbSession;
-  class DbOption;
-
-  /** @class DbDomain DbDomain.h StorageSvc/DbDomain.h
+/** @class DbDomain DbDomain.h StorageSvc/DbDomain.h
     *
     * Description:
     *
     * Handle managing a DbDomainObj, a generic Database domain object.
     *
     * @author  M.Frank
-    * @version 1.0
     */
-  class DbDomain : public DbHandleBase<DbDomainObj>  {
+class DbDomain : public DbHandleBase<DbDomainObj>  {
   public:
     /// Friend declarations
     friend class DbDomainObj;
@@ -128,6 +114,6 @@ namespace pool    {
     /// Allow access to the Database implementation
     ITechFactory* techFactory();
     const ITechFactory* techFactory()   const;
-  };
-}       // End namespace pool
-#endif  // POOL_DBDOMAIN_H
+};
+
+#endif

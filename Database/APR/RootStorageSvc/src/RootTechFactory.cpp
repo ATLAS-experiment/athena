@@ -1,15 +1,6 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//        Root Database factories implementation
-//--------------------------------------------------------------------
-//
-//        Package    : RootDb (The POOL project)
-//
-//        Author     : M.Frank
-//====================================================================
 #include "RootTechFactory.h"
 #include "RootDatabase.h"
 #include "RootDomain.h"
@@ -29,7 +20,6 @@ DECLARE_COMPONENT_WITH_ID(RootTreeStorageFactory, "ROOT_Tree")
 DECLARE_COMPONENT_WITH_ID(RootTreeIdxStorageFactory, "ROOT_TreeIndex")
 DECLARE_COMPONENT_WITH_ID(RootRNTupleStorageFactory, "ROOT_RNTuple")
 
-using namespace pool;
 
 /// Standard Constructor
 RootTechFactory::RootTechFactory(DbType) : m_domainCache(nullptr)
@@ -62,9 +52,9 @@ ITechContainer* RootTechFactory::createContainer(const std::string& name, const 
   if( !m_domainCache->getOption(opt).isSuccess() || !opt.getValue(optValue).isSuccess() ) {
     return nullptr;
   }
-  const pool::DbType defaultContainerType = pool::DbType(optValue);
+  const DbType defaultContainerType = DbType(optValue);
   // If no minor type is specified, use the default one from the domain
-  const pool::DbType type = inType.match(pool::ROOT_StorageType) ?  defaultContainerType : inType;
+  const DbType type = inType.match(pool::ROOT_StorageType) ?  defaultContainerType : inType;
   if ( type.match(pool::ROOTKEY_StorageType) )  {
     return new RootKeyContainer(name);
   }

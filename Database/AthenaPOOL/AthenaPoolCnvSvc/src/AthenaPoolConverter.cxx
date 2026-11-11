@@ -174,7 +174,7 @@ Placement AthenaPoolConverter::setPlacementWithType(const std::string& tname, co
 
    // Extract the technology from the container prefix (if available)
    if (auto colonPost = containerPrefix.find(':'); colonPost != std::string::npos) {
-      placement.setTechnology(pool::DbType::getType(containerPrefix.substr(0, colonPost)).type());
+      placement.setTechnology(DbType::getType(containerPrefix.substr(0, colonPost)).type());
       containerPrefix.erase(0, colonPost + 1); // Note that DataHeader and EventTag bypass this...
    }
 

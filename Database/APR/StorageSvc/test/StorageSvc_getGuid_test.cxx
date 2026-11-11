@@ -5,7 +5,6 @@
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbPrint.h"
 
-using namespace pool;
 using namespace std;
 
 

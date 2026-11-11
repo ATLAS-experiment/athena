@@ -16,7 +16,7 @@
 #include <exception>
 #include <memory>
 
-DatabaseHandler::DatabaseHandler( pool::IStorageSvc& storageSvc,
+DatabaseHandler::DatabaseHandler( IStorageSvc& storageSvc,
                                   long technology,
                                   const std::string& fid,
                                   const std::string& pfn,
@@ -38,12 +38,12 @@ DatabaseHandler::~DatabaseHandler() {
 }
 
 bool DatabaseHandler::commitTransaction() {
-   return m_storageSvc.endTransaction( m_fileDescriptor, pool::Transaction::TRANSACT_COMMIT ).isSuccess() &&
-          m_storageSvc.endTransaction( m_fileDescriptor, pool::Transaction::TRANSACT_FLUSH ).isSuccess();
+   return m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_COMMIT ).isSuccess() &&
+          m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_FLUSH ).isSuccess();
 }
 
 bool DatabaseHandler::commitAndHoldTransaction() {
-   return m_storageSvc.endTransaction( m_fileDescriptor, pool::Transaction::TRANSACT_COMMIT ).isSuccess();
+   return m_storageSvc.endTransaction( m_fileDescriptor, Transaction::TRANSACT_COMMIT ).isSuccess();
 }
 
 bool DatabaseHandler::disconnectTransaction() {
@@ -53,7 +53,7 @@ bool DatabaseHandler::disconnectTransaction() {
 std::vector< std::string > DatabaseHandler::containers() {
    std::vector< std::string > result;
    std::vector<const Token*> containerTokens;
-   pool::DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
+   DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
    if( !dbH.containers(containerTokens, false).isSuccess() ) {
       return result;
    }
@@ -101,8 +101,8 @@ Token* DatabaseHandler::writeObject( const std::string& containerName,
   if ( ! object ) return token;
 
   // Get the persistent shape.
-  const pool::Shape* shape = nullptr;
-  Guid guid = pool::DbReflex::guid(type);
+  const Shape* shape = nullptr;
+  Guid guid = DbReflex::guid(type);
   if( !m_storageSvc.getShape( m_fileDescriptor, guid, shape ).isSuccess() ) {
      shape = m_storageSvc.createShape( guid );
   }
@@ -122,7 +122,7 @@ Token* DatabaseHandler::writeObject( const std::string& containerName,
 void* DatabaseHandler::readObject( const Token& token, void* object ) {
   void* result( object );
   // Get the persistent shape
-  const pool::Shape* shape = nullptr;
+  const Shape* shape = nullptr;
   if( !m_storageSvc.getShape( m_fileDescriptor, token.classID(), shape ).isSuccess() ) {
     return result;
   }
@@ -136,8 +136,8 @@ bool DatabaseHandler::attribute( const std::string& attributeName,
                                  void* data,
                                  const std::type_info& typeInfo,
                                  const std::string& option ) {
-  pool::DbOption databaseOption( attributeName, option );
-  pool::DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
+  DbOption databaseOption( attributeName, option );
+  DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
   if( !dbH.getOption(databaseOption).isSuccess() ) return false;
   return databaseOption.i_getValue(typeInfo, data).isSuccess();
 }
@@ -146,8 +146,8 @@ bool DatabaseHandler::setAttribute( const std::string& attributeName,
                                     const void* data,
                                     const std::type_info& typeInfo,
                                     const std::string& option ) {
-  pool::DbOption databaseOption( attributeName, option );
+  DbOption databaseOption( attributeName, option );
   if( !databaseOption.i_setValue( typeInfo, const_cast<void*>( data ) ).isSuccess() ) return false;
-  pool::DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
+  DbDatabase dbH( m_fileDescriptor.dbc()->handle() );
   return dbH.setOption(databaseOption).isSuccess();
 }

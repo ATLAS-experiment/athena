@@ -159,7 +159,7 @@ public:
      CHECK(placement != nullptr);
      CHECK(obj != nullptr);
      auto token = std::make_unique<Token>();
-     auto guid = pool::DbReflex::guid (classDesc);
+     auto guid = DbReflex::guid (classDesc);
      token->setClassID (guid);
      token->setCont(placement->containerName());
      // take ownership

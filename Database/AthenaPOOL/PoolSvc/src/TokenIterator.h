@@ -7,11 +7,8 @@
 
 #include <string>
 
-namespace pool {
-  class FileDescriptor;
-  class DbContainer;
-}
-
+class FileDescriptor;
+class DbContainer;
 class Token;
 
 /** @class TokenIterator
@@ -20,7 +17,7 @@ class Token;
 class TokenIterator final {
 public:
   /// Constructor taking as argument the file descriptor, the container name
-  TokenIterator(pool::FileDescriptor& fileDescriptor, const std::string& containerName);
+  TokenIterator(FileDescriptor& fileDescriptor, const std::string& containerName);
 
   ~TokenIterator();
 
@@ -41,7 +38,7 @@ public:
   bool seek(std::size_t position);
 
 private:
-  pool::DbContainer* m_container;
+  DbContainer* m_container;
   Token* m_refToken;
 };
 

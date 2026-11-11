@@ -1,23 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  Implementation file of a Database column
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc  (The POOL project)
-//
-//  @author      M.Frank
-//====================================================================
-// Framework header files
 #include "StorageSvc/pool.h"
 #include "StorageSvc/DbColumn.h"
 // C++ header files
 #include <cstdio>
 #include <cstring>
 
-using namespace pool;
 using namespace std;
 
 /// Initializing constructor for composite columns

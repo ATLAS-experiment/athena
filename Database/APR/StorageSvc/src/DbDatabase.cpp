@@ -1,25 +1,12 @@
 /*
   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbDatabase handle implementation
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc (The POOL project)
-//
-//  Description: Generic data persistency
-//
-//  @author      M.Frank
-//====================================================================
-
 #include "StorageSvc/DbDomain.h"
 #include "StorageSvc/DbDatabase.h"
 #include "DbContainerObj.h"
 #include "DbDatabaseObj.h"
 
 using namespace std;
-using namespace pool;
 
 static const string& s_empty = "";
 

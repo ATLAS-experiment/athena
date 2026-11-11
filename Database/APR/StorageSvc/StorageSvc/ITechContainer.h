@@ -1,15 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//
-//  Package    : pool/StorageSvc (The pool framework)
-//
-//  @author      M.Frank
-//
-//====================================================================
-#ifndef POOL_IDBCONTAINER_H
-#define POOL_IDBCONTAINER_H
+#ifndef ITECHCONTAINER_H
+#define ITECHCONTAINER_H
 
 // Framework include files
 #include "PersistentDataModel/Token.h"
@@ -18,26 +11,22 @@
 #include <vector>
 #include <cstdint>
 
-/*
- *   POOL namespace declaration
- */
-namespace pool    {
+// Forward declarations
+class DbTypeInfo;
+class DbDatabase;
+class DbContainer;
+class DbOption;
+class Shape;
 
-  // Forward declarations
-  class DbTypeInfo;
-  class DbDatabase;
-  class DbContainer;
-  class DbOption;
-  class Shape;
-
-  /** @class ITechContainer ITechContainer.h StorageSvc/ITechContainer.h 
+/** @class ITechContainer ITechContainer.h StorageSvc/ITechContainer.h 
     *
     * Description:
     * Interface to the technology specific implementation of the Container object.
+    * (usually defined in a separate dynamically loaded plugin package)
     *
     * @author  M.Frank
     */
-  class ITechContainer    {
+class ITechContainer    {
   protected:
     /// Destructor (called only by sub-classes)
     virtual ~ITechContainer() = default;
@@ -98,6 +87,6 @@ namespace pool    {
 
     /// Execute Transaction Action
     virtual StatusCode transAct(Transaction::Action) = 0;
-  };
-}      // End namespace pool
-#endif // POOL_IDBCONTAINER_H
+};
+
+#endif

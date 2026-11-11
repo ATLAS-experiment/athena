@@ -6,8 +6,8 @@
 //--------------------------------------------------------------------
 //    Author     : M.Nowak
 //====================================================================
-#ifndef POOL_RNTUPLECONTAINER_H
-#define POOL_RNTUPLECONTAINER_H 1
+#ifndef RNTUPLECONTAINER_H
+#define RNTUPLECONTAINER_H 1
 
 // Framework include files
 #include "StorageSvc/DbColumn.h"
@@ -28,7 +28,7 @@ class TClass;
 namespace RootAuxDynIO { class IRootAuxDynReader; class IRNTupleAuxDynWriter; }
 namespace RootStorageSvc { class RNTupleWriterHelper; }
 namespace ROOT { class RNTupleReader; }
-namespace pool { class RootDatabase; }
+class RootDatabase;
 
 /** @class RNTupleContainer RNTupleContainer.h src/RNTupleContainer.h
  *
@@ -36,10 +36,10 @@ namespace pool { class RootDatabase; }
  * RNTUPLE specific implementation of Database Container.
  */
 
-class RNTupleContainer : public pool::TechContainerBase
+class RNTupleContainer : public TechContainerBase
 {
   /// Definition of a field info structure
-  struct FieldDesc : public pool::DbColumn
+  struct FieldDesc : public DbColumn
   {
     std::string fieldname;
     std::optional< ROOT::RNTupleView<void> > view;
@@ -75,9 +75,9 @@ class RNTupleContainer : public pool::TechContainerBase
    /// List of field descriptors
    std::vector<FieldDesc>  m_fieldDescs;
    /// Parent Database handle
-   pool::DbDatabase         m_dbH;
+   DbDatabase         m_dbH;
    /// Root database file reference
-   pool::RootDatabase*      m_rootDb;
+   RootDatabase*      m_rootDb;
    /// Number of bytes written/read during last operation. Set to -1 if it failed.
    int                m_ioBytes;
    /// flag set on writing to prevent double writes in the same commit
@@ -105,12 +105,12 @@ class RNTupleContainer : public pool::TechContainerBase
   virtual StatusCode close() override final;
 
   /// Open the container for object access
-  virtual StatusCode open(pool::DbDatabase& dbH, const std::string& nam,
-                          const pool::DbTypeInfo* info,
+  virtual StatusCode open(DbDatabase& dbH, const std::string& nam,
+                          const DbTypeInfo* info,
                           Io::IoFlag mod) override final;
 
   /// Check if we can access the container for reading with the given type
-  virtual StatusCode checkAccess(pool::DbDatabase& dbH,
+  virtual StatusCode checkAccess(DbDatabase& dbH,
                                  const std::string& nam) const override final;
 
   /// Access options
@@ -118,14 +118,14 @@ class RNTupleContainer : public pool::TechContainerBase
    *
    * @return DbStatus code indicating success or failure.
    */
-  virtual StatusCode getOption(pool::DbOption& opt) override final;
+  virtual StatusCode getOption(DbOption& opt) override final;
 
   /// Set options
   /** @param opt      [IN]  Reference to option object.
    *
    * @return DbStatus code indicating success or failure.
    */
-  virtual StatusCode setOption(const pool::DbOption& opt) override final;
+  virtual StatusCode setOption(const DbOption& opt) override final;
 
   /// Number of entries within the container
   virtual uint64_t size() override final;
@@ -147,7 +147,7 @@ class RNTupleContainer : public pool::TechContainerBase
    *
    *  @return Status code indicating success or failure.
    */
-  virtual StatusCode loadObject(void** ptr, const pool::Shape* shape,
+  virtual StatusCode loadObject(void** ptr, const Shape* shape,
                                 Token::OID_t& oid) override final;
 
   /// Commit single entry to container
@@ -158,12 +158,12 @@ class RNTupleContainer : public pool::TechContainerBase
   virtual void useNextRecordId(uint64_t nextID) override final;
 
   /// Execute transaction action
-  virtual StatusCode transAct(pool::Transaction::Action action) override final;
+  virtual StatusCode transAct(Transaction::Action action) override final;
 
   /// Store object in location
   virtual StatusCode store(const void* object,
-                                 pool::DbContainer& cntH,
-                                 const pool::Shape* shape) override final;
+                                 DbContainer& cntH,
+                                 const Shape* shape) override final;
 
  private:
   /// Init a field description for an object (i.e. find TClass etc.)

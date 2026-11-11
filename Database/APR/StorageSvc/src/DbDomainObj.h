@@ -1,49 +1,33 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+#ifndef STORAGESVC_DBDOMAINOBJ_H
+#define STORAGESVC_DBDOMAINOBJ_H 1
 
-//====================================================================
-//  DbDomainObj object definition
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc  (The POOL project)
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBDOMAINOBJ_H
-#define POOL_DBDOMAINOBJ_H 1
-
-// Framework include files
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/DbPrint.h"
 #include "DbAccessObj.h"
 
 class ITechFactory;
 
-/*
- *  POOL namespace declaration
- */
-namespace pool    {
+// Forward declarations
+class DbDatabaseObj;
+class DbOption;
+class ITechDomain;
 
-  // Forward declarations
-  class DbDatabaseObj;
-  class DbOption;
-  class ITechDomain;
-
-  /** Db objects: DbDomainObj
+/** Db objects: DbDomainObj
 
       Description:
-      Implementation independent part of a Database domain object
-      objects.
+      Technology independent part of the Domain implementation
 
       @author  M.Frank
-      @version 1.0
   */
-  class DbDomainObj : public  DbAccessObj<std::string, DbDatabaseObj >, public APRMessaging  {
+class DbDomainObj : public  DbAccessObj<std::string, DbDatabaseObj >, public APRMessaging  {
   private:
     /// Maximal age of files allowed.
     int             m_maxAge;
     /// Technology dependent stuff
-    ITechDomain*      m_info;
+    ITechDomain*    m_info;
   public:
     /// Constructor
     DbDomainObj(ITechFactory* imp, const DbType& typ, Io::IoFlag mode = Io::READ);
@@ -78,6 +62,6 @@ namespace pool    {
       * @return StatusCode indicating success or failure.
       */
     StatusCode getOption(DbOption& refOpt) const;
-  };
-}      // End namespace pool
-#endif // POOL_DBDOMAINOBJ_H
+};
+
+#endif

@@ -1,30 +1,20 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: DbString.h 726071 2016-02-25 09:23:05Z krasznaa $
-//====================================================================
-//
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBSTRING_H
-#define POOL_DBSTRING_H 1
+#ifndef DBSTRING_H
+#define DBSTRING_H 1
 
 #include <string>
 
-/*
- * POOL namespace declaration
- */
-namespace pool  {
-  /// Declaration of DbString class
-  class DbString : public std::string  {
+/// Declaration of DbString class
+class DbString : public std::string  {
   public:
     /// Standard Constructor
-    DbString() {}
+    DbString() = default;
     /// Constructor with initializer
     DbString(const std::string& s) {  assign(s); }
     /// Standard destructor
-    virtual ~DbString() {}
-  };
-}
-#endif // POOL_DBSTRING_H
+    virtual ~DbString() = default;
+};
+
+#endif

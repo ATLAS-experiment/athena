@@ -18,7 +18,7 @@ RNTupleWriterHelper::RNTupleWriterHelper(TFile* file,
                                          const std::string& ntupleName,
                                          bool enableBufferedWrite,
                                          bool enableMetrics)
-    : pool::APRMessaging(std::string("RNTupleWriterHelper[") + ntupleName + "]"),
+    : APRMessaging(std::string("RNTupleWriterHelper[") + ntupleName + "]"),
       m_model(ROOT::RNTupleModel::Create()),
       m_ntupleName(ntupleName),
       m_tfile(file),

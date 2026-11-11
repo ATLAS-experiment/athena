@@ -1,19 +1,6 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbContainerObj handle implementation
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc (The POOL project)
-//
-//  Description: Generic data persistency
-//
-//  @author      M.Frank
-//====================================================================
-
-// Framework include files
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbContainer.h"
 #include "DbContainerObj.h"
@@ -26,7 +13,6 @@
 #include <stdexcept>
 
 using namespace std;
-using namespace pool;
 static const string s_empty = "";
 
 /// Add reference count to object if present

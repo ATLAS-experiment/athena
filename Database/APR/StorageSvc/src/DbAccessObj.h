@@ -1,16 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbAccessObj Base class definitions
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc  (The POOL project)
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBACCESSOBJ_H
-#define POOL_DBACCESSOBJ_H 1
+#ifndef DBACCESSOBJ_H
+#define DBACCESSOBJ_H 1
 
 // Framework include files
 #include "StorageSvc/pool.h"
@@ -28,24 +20,13 @@
 #  include<iostream>
 #endif
 
-/* 
- *  POOL namespace declaration
+/** @class DbAccessObjBase DbAccessObj.h StorageSvc/DbAccessObj.h
+ * 
+ * Base for the DbAccessObj template (see below)
+ * provides reference counting and common members and methods but no container functionality
+ * (also used directly by DbContainerObj as it does not hold subcontainers)
  */
-namespace pool    {
 
-  /** @class DbAccessObj DbAccessObj.h StorageSvc/DbAccessObj.h
-    *
-    * Description:
-    *
-    * Templated base class for "abstarct" container objects.
-    * These abstarct containers are: DnSessions, DbDomainObjs,
-    * DbDatabaseObjs and DbContainerObjs.
-    *
-    * @author  M.Frank
-    * @version 1.0
-    */
-
-/// Base class for all access objects with reference counting and common members but no container functionality
 class DbAccessObjBase {
   private:
     /// Reference counter
@@ -111,8 +92,16 @@ class DbAccessObjBase {
     }
   };
 
-
-  template <class KEY, class TYPE> class DbAccessObj : public DbAccessObjBase {
+/** @class DbAccessObj DbAccessObj.h StorageSvc/DbAccessObj.h
+  *
+  * Description:
+  *
+  * Templated base class for "abstarct" storage container objects.
+  * These abstarct containers are: DbDomainObjs and  DbDatabaseObjs
+  *
+  * @author  M.Frank
+  */
+template <class KEY, class TYPE> class DbAccessObj : public DbAccessObjBase {
   public:
     /// Type definitions
     typedef DbAccessObj< KEY , TYPE >     Base;
@@ -173,6 +162,6 @@ class DbAccessObjBase {
     const_iterator begin()  const {      return m_keys.begin();   }
     iterator end()                {      return m_keys.end();     }
     const_iterator end()  const   {      return m_keys.end();     }
-  };
-}      // End namespace pool
-#endif // POOL_DBACCESSOBJ_H
+};
+
+#endif // DBACCESSOBJ_H

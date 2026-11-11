@@ -1,19 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbDatabaseObj object definition
-//--------------------------------------------------------------------
-//
-//  Package    : System (The POOL project)
-//
-//  Description: Generic data persistency
-//
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBDATABASEOBJ_H
-#define POOL_DBDATABASEOBJ_H 1
+#ifndef STORAGESVC_DBDATABASEOBJ_H
+#define STORAGESVC_DBDATABASEOBJ_H 1
 
 // We need the definition of the domain for defining the Database
 #include "PersistentDataModel/Guid.h"
@@ -28,23 +17,14 @@
 #include <string>
 #include <vector>
 
-
-/*
- *  POOL namespace declaration
- */
-namespace pool    {
-
-  /** @class DbDatabaseObj DbDatabaseObj.h src/DbDatabaseObj.h
+/** @class DbDatabaseObj DbDatabaseObj.h src/DbDatabaseObj.h
     *
     * Description:
-    *
-    * Implementation independent part of a Database object
-    * objects.
+    * Technology independent part of a Database object implementation
     *
     * @author  M.Frank
-    * @version 1.0
     */
-  class DbDatabaseObj : public  DbAccessObj<std::string, DbContainerObj >, public APRMessaging {
+class DbDatabaseObj : public  DbAccessObj<std::string, DbContainerObj >, public APRMessaging {
   private:
     /// Database parameter definition
     typedef std::pair<std::string, std::string>      Parameter;
@@ -164,6 +144,6 @@ namespace pool    {
 
     /// Update database age
     void setAge(int value);
-  };
-}       // End namespace pool
-#endif  // POOL_DBDATABASEOBJ_H
+};
+
+#endif

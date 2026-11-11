@@ -40,10 +40,8 @@ class ISvcLocator;
 class EventContextAthenaPool;
 class StoreGateSvc;
 class IPoolSvc;
-namespace pool {
-   class Collection;
-   class CollectionCursor;
-}
+class Collection;
+class CollectionCursor;
 
 /** @class EventSelectorAthenaPool
  *  @brief This class is the EventSelector for event data.
@@ -146,10 +144,10 @@ private: // internal member functions
    /// Reinitialize the service when a @c fork() occurred/was-issued
    StatusCode reinit() const;
    /// Return pointer to new Collection
-   std::unique_ptr<pool::Collection> getCollection(bool throwIncidents = false) const;
+   std::unique_ptr<Collection> getCollection(bool throwIncidents = false) const;
    /// Open a collection by name
    StatusCode openCollection(std::string& inputCollection,
-                             std::unique_ptr<pool::Collection>& poolCollection,
+                             std::unique_ptr<Collection>& poolCollection,
                              std::string* lastError = nullptr) const;
    /// Disconnect current collection DB if open
    void disconnectCollection() const;
@@ -158,9 +156,9 @@ private: // internal member functions
 
 private: // data
    EventContextAthenaPool*         m_endIter{};
-   mutable std::unique_ptr<pool::Collection> m_poolCollection ATLAS_THREAD_SAFE {};
+   mutable std::unique_ptr<Collection> m_poolCollection ATLAS_THREAD_SAFE {};
    mutable std::string             m_curCollectionName ATLAS_THREAD_SAFE;
-   mutable std::unique_ptr<pool::CollectionCursor> m_headerIterator ATLAS_THREAD_SAFE {};
+   mutable std::unique_ptr<CollectionCursor> m_headerIterator ATLAS_THREAD_SAFE {};
    mutable Guid m_guid ATLAS_THREAD_SAFE {};
    mutable std::map<SG::SourceID, int> m_activeEventsPerSource ATLAS_THREAD_SAFE;
    /// RAII guard: guarantees a matching EndInputFile for every BeginInputFile.

@@ -1,16 +1,6 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//
-//  Package    : StorageSvc (The POOL project)
-//
-//  @author      M.Frank
-//
-//====================================================================
-
-/// Framework include files
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/TechContainerBase.h"
 #include "GaudiKernel/StatusCode.h"
@@ -19,7 +9,7 @@
 #include <stdexcept>
 
 using namespace std;
-using namespace pool;
+
 
 /// Standard Constructor
 TechContainerBase::TechContainerBase(const std::string& name) :

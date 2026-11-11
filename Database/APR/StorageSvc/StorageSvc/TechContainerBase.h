@@ -1,37 +1,23 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
+#ifndef STORAGESVC_DBCONTAINERIMP_H
+#define STORAGESVC_DBCONTAINERIMP_H 1
 
-//====================================================================
-//
-//  Package    : StorageSvc (The POOL project)
-//
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBCONTAINERIMP_H
-#define POOL_DBCONTAINERIMP_H 1
-
-/// Framework include files
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/pool.h"
 #include "StorageSvc/ITechContainer.h"
 #include "StorageSvc/DbPrint.h"
 #include "GaudiKernel/StatusCode.h"
 
-// STL include files
 #include <map>
 #include <vector>
 #include <utility>
 
-/*
- * POOL namespace declaration
- */
-namespace pool    {
+// Forward declarations
+class ITechContainer;
 
-  // Forward declarations
-  class ITechContainer;
-
-  /** @class TechContainerBase TechContainerBase.h StorageSvc/TechContainerBase.h
+/** @class TechContainerBase TechContainerBase.h StorageSvc/TechContainerBase.h
     *
     *  "Generic" Container implementation
     *
@@ -40,10 +26,9 @@ namespace pool    {
     *  be overwritten.
     *
     *  @author  M.Frank
-    *  @version 1.0
     */
-  class TechContainerBase : virtual public ITechContainer, public APRMessaging
-  {
+class TechContainerBase : virtual public ITechContainer, public APRMessaging
+{
   protected:
 
     /// List of actions to execute at commit
@@ -148,6 +133,6 @@ namespace pool    {
       */
     virtual StatusCode loadObject(void** ptr, const Shape* shape, Token::OID_t& oid) = 0;
 
-  };
-}       // End namespace pool
-#endif  // POOL_DBCONTAINERIMP_H
+};
+
+#endif

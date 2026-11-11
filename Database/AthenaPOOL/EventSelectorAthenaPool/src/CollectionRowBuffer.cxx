@@ -7,13 +7,13 @@
 #include "PersistentDataModel/Token.h"
 
 
-pool::CollectionRowBuffer::CollectionRowBuffer()
+CollectionRowBuffer::CollectionRowBuffer()
     : m_token( new Token ),
       m_attributeList( new coral::AttributeList )
 {}
 
 
-pool::CollectionRowBuffer::CollectionRowBuffer( const pool::CollectionRowBuffer& rhs )
+CollectionRowBuffer::CollectionRowBuffer( const CollectionRowBuffer& rhs )
     : m_token( new Token ),
       m_attributeList( new coral::AttributeList )
 {
@@ -23,7 +23,7 @@ pool::CollectionRowBuffer::CollectionRowBuffer( const pool::CollectionRowBuffer&
 }
 
 
-bool pool::CollectionRowBuffer::deleteAL ATLAS_NOT_THREAD_SAFE()
+bool CollectionRowBuffer::deleteAL ATLAS_NOT_THREAD_SAFE()
 {
   delete m_attributeList;  m_attributeList = nullptr;
   delete m_token; m_token = nullptr;
@@ -31,48 +31,48 @@ bool pool::CollectionRowBuffer::deleteAL ATLAS_NOT_THREAD_SAFE()
 }
 
 
-pool::CollectionRowBuffer::~CollectionRowBuffer()
+CollectionRowBuffer::~CollectionRowBuffer()
 {
   [[maybe_unused]] bool flag ATLAS_THREAD_SAFE = deleteAL();
 }
 
 
 void
-pool::CollectionRowBuffer::setAttributeList( const coral::AttributeList& attributeList )
+CollectionRowBuffer::setAttributeList( const coral::AttributeList& attributeList )
 {
   *m_attributeList = attributeList;
 }
 
 
 Token&
-pool::CollectionRowBuffer::token()
+CollectionRowBuffer::token()
 {
   return *m_token;
 }
 
 const Token&
-pool::CollectionRowBuffer::token() const
+CollectionRowBuffer::token() const
 {
   return *m_token;
 }
 
 
 const std::string&
-pool::CollectionRowBuffer::tokenName() const
+CollectionRowBuffer::tokenName() const
 {
   return CollectionColumn::tokenColumn().name();
 }
 
 
 coral::AttributeList&
-pool::CollectionRowBuffer::attributeList()
+CollectionRowBuffer::attributeList()
 {
   return *m_attributeList;
 }
 
 
 const coral::AttributeList&
-pool::CollectionRowBuffer::attributeList() const
+CollectionRowBuffer::attributeList() const
 {
   return *m_attributeList;
 }

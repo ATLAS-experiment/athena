@@ -10,10 +10,7 @@
 #include <string>
 #include <set>
 
-namespace pool {
-  class IStorageSvc;
-}
-
+class IStorageSvc;
 class SessionTool;
 class DatabaseHandler;
 
@@ -58,7 +55,7 @@ public:
 
 private:
   SessionTool&               m_sessionTool;
-  pool::IStorageSvc*         m_storageSvc;
+  IStorageSvc*               m_storageSvc;
   long                       m_technology;
   std::set<DatabaseHandler*> m_databaseHandlers;
 };

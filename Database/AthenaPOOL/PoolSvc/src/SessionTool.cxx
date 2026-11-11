@@ -175,7 +175,7 @@ Gaudi::IFileCatalog& SessionTool::fileCatalog() {
 }
 
 MicroSessionManager& SessionTool::microSessionManager( long technology ) {
-  pool::DbType dbType( technology );
+  DbType dbType( technology );
   long majorType = dbType.majorType();
   auto iManager = m_technologies.find( majorType );
   if ( iManager != m_technologies.end() ) {

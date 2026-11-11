@@ -1,16 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  Storage service file descriptor class definitions
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc (The POOL project)
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_FILEDESCRIPTOR_H
-#define POOL_FILEDESCRIPTOR_H 1
+#ifndef STORAGESVC_FILEDESCRIPTOR_H
+#define STORAGESVC_FILEDESCRIPTOR_H 1
 
 #include "uuid/uuid.h"
 #include "CxxUtils/MD5.h"
@@ -18,16 +10,11 @@
 
 #include <string>
 
-/*
- *   POOL namespace declaration
- */
-namespace pool    {
+ class DbConnection;
+ // as from IFileCatalog
+ typedef std::string FileID;
 
-  class DbConnection;
-  // as from IFileCatalog
-  typedef std::string FileID;
-
-  /** @class FileDescriptor FileDescriptor.h StorageSvc/FileDescriptor.h
+/** @class FileDescriptor FileDescriptor.h StorageSvc/FileDescriptor.h
     *
     * Description:
     *
@@ -35,9 +22,8 @@ namespace pool    {
     * a file in terms of file handle, of the generic Db data handle.
     *
     * @author  M.Frank
-    * @version 1.0
     */
-  class FileDescriptor   {
+class FileDescriptor   {
   private:
     /// File Identifier (UNIQUE)
     FileID            m_FID;
@@ -84,6 +70,6 @@ namespace pool    {
      const DbConnection* dbc()  const        { return m_DBC;       }
      /// Access to file descriptor (WRITE)
      void setDbc(DbConnection* val)          { m_DBC = val;        }
-  };
-}       // End namespace pool
-#endif  // POOL_FILEDESCRIPTOR_H
+};
+
+#endif

@@ -18,7 +18,7 @@ public:
   int execute();
 
 private:
-  void testTechnology( const pool::DbType& tech, bool commit_every_row );
+  void testTechnology( const DbType& tech, bool commit_every_row );
   void testWriting();
   void testReading();
   
@@ -28,7 +28,7 @@ private:
   std::string           m_strContainerName = "MyString";
   int                   m_nObjects      = 10;
 
-  pool::DbType          m_storageType   = pool::ROOTTREE_StorageType;
+  DbType                m_storageType   = pool::ROOTTREE_StorageType;
   bool                  m_commitEveryRow = false;
 
 };

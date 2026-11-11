@@ -1,8 +1,7 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
- *   */
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+ */
 
-// Local implementation files
 #include "StorageSvc/DbOption.h"
 #include "RootDatabase.h"
 #include "RootTreeIndexContainer.h"
@@ -15,7 +14,6 @@
 
 #include "GaudiKernel/StatusCode.h"
 
-using namespace pool;
 
 RootTreeIndexContainer::RootTreeIndexContainer(const std::string& name) :
    RootTreeContainer(name),

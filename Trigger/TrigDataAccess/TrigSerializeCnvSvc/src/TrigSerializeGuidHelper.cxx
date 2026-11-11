@@ -71,7 +71,7 @@ StatusCode TrigSerializeGuidHelper::IntsToClassName(const uint32_t *iarr, std::s
      // Instead of getting a typename for a known guid (quite costly in ROOT6)
      // and comparing names,
      // get a class by name and compare guids
-     Guid  g( pool::DbReflex::guid( RootType(clname) ) );
+     Guid  g( DbReflex::guid( RootType(clname) ) );
      if( g != guid ) {
         // the typename was wrong, will need to look it up by GUID
         clname = "";
@@ -79,7 +79,7 @@ StatusCode TrigSerializeGuidHelper::IntsToClassName(const uint32_t *iarr, std::s
   }
 
   if( clname == "" ) {
-     RootType cltype( pool::DbReflex::forGuid(guid) );
+     RootType cltype( DbReflex::forGuid(guid) );
      clname = cltype.Name(Reflex::SCOPED);
   }
 

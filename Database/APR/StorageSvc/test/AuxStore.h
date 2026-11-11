@@ -16,14 +16,14 @@ public:
    using TestBase::TestBase;
 
    int execute();
-   void runTestForStorageType(const std::string& filename, const pool::DbType& storageType);
+   void runTestForStorageType(const std::string& filename, const DbType& storageType);
 
    std::string testWriting();
    void testReading(const std::string& testTypeID);
 
 protected:
    std::string          m_fileName;
-   pool::DbType         m_storageType;
+   DbType               m_storageType;
 
 };
 

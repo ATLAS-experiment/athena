@@ -27,7 +27,6 @@
 #include "AthContainers/AuxTypeRegistry.h"
 #include "AthenaKernel/errorcheck.h"
 
-using namespace pool;
 
 static const bool test_nodict = false;
 
@@ -68,7 +67,7 @@ int TestDriver::execute()
    return 0;
 }
 
-void TestDriver::runTestForStorageType(const std::string& filename, const pool::DbType& storageType)
+void TestDriver::runTestForStorageType(const std::string& filename, const DbType& storageType)
 {
    m_fileName = filename;
    m_storageType = storageType;

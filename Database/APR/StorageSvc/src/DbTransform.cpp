@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PersistentDataModel/Guid.h"
@@ -23,7 +23,6 @@ namespace {
 
 
 using namespace std;
-using namespace pool;
 
 typedef vector<const DbTypeInfo*> ShapeVector;
 typedef map<Guid, ShapeVector>    Shapes;
