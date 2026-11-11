@@ -47,6 +47,7 @@
 #include <cmath>
 #include <map>
 #include <vector>
+#include <concepts>
 
 namespace {
   const std::map<std::string, unsigned int> map_index = {
@@ -73,6 +74,11 @@ namespace {
     }
 
     return {fourMom, sumPt};
+  }
+  template<class T>
+  requires std::is_arithmetic_v<T>
+  bool safeForSqrt(const T val){
+    return std::isfinite(val) && (val >= T{0});
   }
 
 }
@@ -641,7 +647,12 @@ namespace MissingEtDQA {
         return StatusCode::FAILURE;
       }
       ATH_MSG_INFO("done jetonly for  MET rebuild");
-      std::vector<const xAOD::Jet*> only_jet_elems = met::getMETElements<xAOD::Jet>(*(*met_jetonly)["RefJet"]);
+      std::vector<const xAOD::Jet*> only_jet_elems;
+      if (auto pRefJet = (*met_jetonly)["RefJet"]; pRefJet){
+        only_jet_elems = met::getMETElements<xAOD::Jet>(*pRefJet);
+      } else {
+        ATH_MSG_WARNING("met_jetonly[RefJet] is missing.");
+      }
 
       //Sum up the pT's of the objects
       //Getting tlv, sum, and checking is has particle in event for Diff histos
@@ -753,12 +764,12 @@ namespace MissingEtDQA {
         int index = it_index->second;
 
         if(name == "PVSoftTrk")
-          (m_MET_CorrFinalTrk[met_name]).at(5)->Fill((*met)[name.c_str()]->met()/1000.,(*met)[finalTrkStr]->met()/1000., weight);
+          (m_MET_CorrFinalTrk[met_name]).at(5)->Fill((*met)[name]->met()/1000.,(*met)[finalTrkStr]->met()/1000., weight);
         else if(name == "SoftClus")
-          (m_MET_CorrFinalClus[met_name]).at(5)->Fill((*met)[name.c_str()]->met()/1000.,(*met)[finalClusStr]->met()/1000., weight);
+          (m_MET_CorrFinalClus[met_name]).at(5)->Fill((*met)[name]->met()/1000.,(*met)[finalClusStr]->met()/1000., weight);
         else {
-          (m_MET_CorrFinalTrk[met_name]).at(index)->Fill((*met)[name.c_str()]->met()/1000.,(*met)[finalTrkStr]->met()/1000., weight);
-          (m_MET_CorrFinalClus[met_name]).at(index)->Fill((*met)[name.c_str()]->met()/1000.,(*met)[finalClusStr]->met()/1000., weight);
+          (m_MET_CorrFinalTrk[met_name]).at(index)->Fill((*met)[name]->met()/1000.,(*met)[finalTrkStr]->met()/1000., weight);
+          (m_MET_CorrFinalClus[met_name]).at(index)->Fill((*met)[name]->met()/1000.,(*met)[finalClusStr]->met()/1000., weight);
         }
       }
 
@@ -778,8 +789,10 @@ namespace MissingEtDQA {
       }
 
       //Fill significance
-      if( (*met)[finalClusStr]->sumet() > 0) (m_MET_Significance[met_name]).at(0)->Fill((*met)[finalClusStr]->met()/std::sqrt((*met)[finalClusStr]->sumet()*1000.), weight);
-      if( (*met)[finalTrkStr]->sumet() > 0) (m_MET_Significance[met_name]).at(1)->Fill((*met)[finalTrkStr]->met()/std::sqrt((*met)[finalTrkStr]->sumet()*1000.), weight);
+      auto clusSumMet = (*met)[finalClusStr]->sumet();
+      auto trkSumMet = (*met)[finalTrkStr]->sumet();
+      if( safeForSqrt(clusSumMet)) (m_MET_Significance[met_name]).at(0)->Fill((*met)[finalClusStr]->met()/std::sqrt(clusSumMet * 1000.), weight);
+      if( safeForSqrt(trkSumMet)) (m_MET_Significance[met_name]).at(1)->Fill((*met)[finalTrkStr]->met()/std::sqrt(trkSumMet * 1000.), weight);
 
       TLorentzVector target_tlv;
 
@@ -828,7 +841,10 @@ namespace MissingEtDQA {
         auto * pPhi = m_MET_Kinematic_phi[met_name].at(index);
         auto * pMulti = m_MET_multi[met_name].at(index);
         //if any one of these pointers is invalid, do not dereference any of them
-        if (not (pPt and pEta and pPhi and pMulti))[[unlikely]] continue;
+        if (not (pPt and pEta and pPhi and pMulti))[[unlikely]]{
+          ATH_MSG_WARNING("Pointer is null; skipping fill.");
+          continue;
+        } 
         for(const auto p : particle_groups[index]){
           pPt->Fill((p->pt())/1000., weight);
           pEta->Fill(p->eta(), weight);
