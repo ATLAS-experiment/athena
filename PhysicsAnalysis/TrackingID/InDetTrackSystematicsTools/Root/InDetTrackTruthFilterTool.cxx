@@ -221,7 +221,7 @@ namespace InDet {
     return true;
   }
 
-  StatusCode InDetTrackTruthFilterTool::initTrkEffSystHistogram(float scale, std::unique_ptr<TH2>& histogram, std::string rootFileName, std::string histogramName) const {
+  StatusCode InDetTrackTruthFilterTool::initTrkEffSystHistogram(float scale, std::unique_ptr<TH2>& histogram, const std::string & rootFileName, std::string histogramName) const {
 
     ATH_CHECK( initObject<TH2>(histogram, rootFileName, histogramName) );
 
@@ -229,7 +229,7 @@ namespace InDet {
       for(int biny=1; biny<=histogram->GetNbinsY(); biny++) {
         // now using a histogram which is 1 - eff1/eff2, so we don't apply the "1 - content" correction ourselves
         float content = histogram->GetBinContent(binx, biny); // get the bin content
-        content = fabs(content); // retrieve uncertainty and symmetrize (should be positive in histogram anyway)
+        content = std::fabs(content); // retrieve uncertainty and symmetrize (should be positive in histogram anyway)
         content *= scale; // scale systematic
         if(content > 1) content = 1; // protection: no larger than 100% uncertainty
 

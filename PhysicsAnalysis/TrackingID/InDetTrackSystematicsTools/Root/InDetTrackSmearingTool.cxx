@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ROOT include(s):
@@ -78,7 +78,10 @@ namespace InDet {
 
     TH2* d0hist = m_smearD0.get();
 
-    if (d0hist == nullptr) ATH_MSG_ERROR( "d0 histogram is null!" );
+    if (d0hist == nullptr){
+      ATH_MSG_ERROR( "d0 histogram is null!" );
+      return 0.;
+    }
 
     float d0Smear = readHistogram(d0hist, pt, eta);
 
@@ -109,7 +112,10 @@ namespace InDet {
 
     TH2* z0hist = m_smearZ0.get();
 
-    if (z0hist == nullptr) ATH_MSG_ERROR( "z0 histogram is null!" );
+    if (z0hist == nullptr){ 
+      ATH_MSG_ERROR( "z0 histogram is null!" );
+      return 0.;
+    } 
 
     float z0Smear = readHistogram(z0hist, pt, eta);
 

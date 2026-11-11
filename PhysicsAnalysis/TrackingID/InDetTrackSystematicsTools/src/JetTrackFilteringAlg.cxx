@@ -77,7 +77,7 @@ StatusCode JetTrackFilteringAlg::execute(const EventContext& ctx) const
       if (!passFilter) continue;
       surviving.push_back(gl);
     }
-    ghostOut(*jet) = surviving;
+    ghostOut(*jet) = std::move(surviving);
   }
 
   return StatusCode::SUCCESS;
