@@ -8,7 +8,7 @@
  **   @date   Sun 22 Sep 2019 10:21:50 BST
  **
  **
- **   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
 
 
@@ -37,12 +37,8 @@
 
 
 RegSelCondAlg_Tile::RegSelCondAlg_Tile(const std::string& name, ISvcLocator* pSvcLocator):
-  AthCondAlgorithm( name, pSvcLocator ),
-  m_managerName(""),
-  m_printTable(false)
-{ 
-  declareProperty( "ManagerName", m_managerName );  
-  declareProperty( "PrintTable",  m_printTable=false );  
+  AthCondAlgorithm( name, pSvcLocator )
+{
 }
 
 
