@@ -18,6 +18,7 @@
 #include "AsgDataHandles/WriteDecorHandle.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 #include <memory>
+#include <stdexcept>
 
 template<typename T>
 class WriteDecorHandleTriplet
@@ -25,7 +26,7 @@ class WriteDecorHandleTriplet
   std::unique_ptr<SG::WriteDecorHandle<xAOD::IParticleContainer, T>> m_standard;
   std::unique_ptr<SG::WriteDecorHandle<xAOD::IParticleContainer, T>> m_charged;
   std::unique_ptr<SG::WriteDecorHandle<xAOD::IParticleContainer, T>> m_neutral;
-  unsigned short m_objectType;
+  unsigned short m_objectType{};
 
   void checkType() {
     switch (m_objectType) {
