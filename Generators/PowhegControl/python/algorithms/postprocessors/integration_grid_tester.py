@@ -68,8 +68,8 @@ def integration_grid_tester():
                 matched_lines = [re.sub(" +", " ", _l) for _l in matched_lines] # strip multiple whitespace
                 if len(matched_lines) > 0:
                     n_events += sum(list(map(float, [re.findall(regex_match_floats, line)[0] for line in matched_lines if "event" in line])))
-                    n_upper_bound_failures_xs += sum(list(map(float, [re.findall(regex_match_floats, line)[0] for line in matched_lines if "upper bound failure in inclusive" in line])))
-                    n_upper_bound_failures_radiation += sum(list(map(float, [re.findall(regex_match_floats, line)[0] for line in matched_lines if "upper bound failure in generation" in line])))
+                    n_upper_bound_failures_xs += sum(list(map(float, [re.findall(regex_match_floats, line)[0] for line in matched_lines if re.search(r"upper bound failures? in inclusive",line)])))
+                    n_upper_bound_failures_radiation += sum(list(map(float, [re.findall(regex_match_floats, line)[0] for line in matched_lines if re.search(r"upper bound failures? in generation",line)])))
             except Exception:  # catch all exceptions
                 pass
 
