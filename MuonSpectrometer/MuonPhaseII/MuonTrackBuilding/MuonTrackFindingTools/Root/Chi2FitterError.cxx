@@ -34,6 +34,8 @@ class GlobalChiSquareFitterErrorCategory : public std::error_category {
       case GlobalChiSquareFitterError::DirectionFlipLimitReached:
         return "Gx2f: Too many consecutive direction flips during a "
                "propagation.";
+      case GlobalChiSquareFitterError::FitAbortedByChecker:
+        return "Gx2f: Fit aborted by the abort checker.";
       default:
         return "unknown";
     }

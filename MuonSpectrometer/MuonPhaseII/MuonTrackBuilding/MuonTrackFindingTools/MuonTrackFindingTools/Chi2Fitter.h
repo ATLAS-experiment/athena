@@ -9,6 +9,7 @@
 #include "Acts/EventData/MeasurementHelpers.hpp"
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/SourceLink.hpp"
+#include "Acts/EventData/TrackContainer.hpp"
 #include "Acts/EventData/TrackProxyConcept.hpp"
 #include "Acts/EventData/Types.hpp"
 #include "Acts/EventData/VectorMultiTrajectory.hpp"
@@ -219,15 +220,21 @@ struct Gx2fMaterialProperties {
 };
 
 /// Extension struct which holds delegates to customise the GX2F behaviour
-template <typename traj_t>
+template <typename track_container_t>
 struct Gx2FitterExtensions {
+
+  using TrackStateContainerBackend = typename track_container_t::TrackStateContainerBackend;
   /// Type alias for mutable track state proxy from multi-trajectory
-  using TrackStateProxy = typename MultiTrajectory<traj_t>::TrackStateProxy;
+  using TrackStateProxy = typename TrackStateContainerBackend::TrackStateProxy;
   /// Type alias for const track state proxy from multi-trajectory
-  using ConstTrackStateProxy =
-      typename MultiTrajectory<traj_t>::ConstTrackStateProxy;
+  using ConstTrackStateProxy = typename TrackStateContainerBackend::ConstTrackStateProxy;
   /// Type alias for track parameters from track state proxy
   using Parameters = typename TrackStateProxy::Parameters;
+  /// Type alias for the track proxy backend
+  using TrackProxy = typename track_container_t::TrackProxy;
+  /// Type alias for the ConstTrack proxy backend
+  using ConstTrackProxy = typename track_container_t::ConstTrackProxy;
+   
 
   /// Type alias for calibrator delegate to process measurements
   using Calibrator =
@@ -246,6 +253,20 @@ struct Gx2FitterExtensions {
       const GeometryContext& geoContext, const CalibrationContext& calibContext,
       const Vector3& pos, const Vector3& dir, const Surface& matSurf)>;
 
+  /// Type alias of a delegate which inspects the track created in the current
+  /// iteration. If it returns true, the fit is aborted (e.g. if all hits of the
+  /// track originate from a single muon station).
+  /// @param track: Trajectory holding the track states of the current iteration.
+  ///               The states carry the uncalibrated source links of the measurements.
+  using FitAbortChecker =  Delegate<bool(const Acts::CalibrationContext& cctx,
+                                         const ConstTrackProxy track)>;
+
+  /// Default abort checker which never aborts the fit
+  static bool neverAbort(const CalibrationContext&,
+                        const ConstTrackProxy /*track*/) {
+    return false;
+  }
+
   /// The elossAcumulator is the hook to use the measured energy loss instead of
   /// the estimated energy loss from the tracking geometry. The accumulator is
   /// called at every material surface. If the accumulator returns a valid
@@ -257,14 +278,19 @@ struct Gx2FitterExtensions {
   /// to calibrate measurements using track information, this could be
   /// e.g. sagging for wires, module deformations, etc.
   Calibrator calibrator;
-/// Retrieves the associated surface from a source link
+  /// The abort checker is called in each iteration with the hits entering the
+  /// fit. If it returns true, the fit is aborted with
+  /// GlobalChiSquareFitterError::FitAbortedByChecker
+  FitAbortChecker abortChecker;
+  /// Retrieves the associated surface from a source link
   SourceLinkSurfaceAccessor surfaceAccessor;
 
   /// Default constructor which connects the default void components
   Gx2FitterExtensions() {
-    calibrator.template connect<&Acts::detail::voidFitterCalibrator<traj_t>>();
+    calibrator.template connect<&Acts::detail::voidFitterCalibrator<TrackStateContainerBackend>>();
     surfaceAccessor.connect<&Acts::detail::voidSurfaceAccessor>();
     elossAccumulator.connect<&Gx2fMaterialProperties::ELossAtSurface::invalidELoss>();
+    abortChecker.template connect<&Gx2FitterExtensions::neverAbort>();
   }
 };
 
@@ -272,19 +298,19 @@ struct Gx2FitterExtensions {
 /// Combined options for the Global-Chi-Square fitter.
 ///
 /// @tparam traj_t The trajectory type
-template <typename traj_t>
+template <TrackContainerFrontend track_container_t>
 struct Gx2FitterOptions {
    /// PropagatorOptions with context.
   ///
   /// @param gctx The geometry context for this fit
   /// @param mctx The magnetic context for this fit
   /// @param cctx The calibration context for this fit
-  /// @param extensions_ The KF extensions
+  /// @param extensions_ The global chi2 fitter extensions
   /// @param pOptions The plain propagator options
   Gx2FitterOptions(const GeometryContext& gctx,
                    const MagneticFieldContext& mctx,
                    const CalibrationContext& cctx,
-                   Gx2FitterExtensions<traj_t> extensions_,
+                   Gx2FitterExtensions<track_container_t> extensions_,
                    const PropagatorPlainOptions& pOptions)
       : geoContext{gctx},
         magFieldContext{mctx},
@@ -301,7 +327,7 @@ struct Gx2FitterOptions {
   std::reference_wrapper<const CalibrationContext> calibrationContext;
 
   /// Extensions for calibration and outlier finding
-  Gx2FitterExtensions<traj_t> extensions;
+  Gx2FitterExtensions<track_container_t> extensions;
 
   /// The trivial propagator options
   PropagatorPlainOptions propagatorPlainOptions;
@@ -350,7 +376,7 @@ struct Gx2FitterOptions {
 };
 
 /// Result container for a global chi-square fit.
-template <typename traj_t>
+template <MutableMultiTrajectoryBackend traj_t>
 struct Gx2FitterResult {
   /// Fitted states that the actor has handled.
   traj_t* fittedStates{nullptr};
@@ -532,7 +558,7 @@ void addMeasurementToGx2fSumsBackend(
 /// @param jacobianFromStart The Jacobian matrix from start to the current state
 /// @param trackState The track state to analyse
 /// @param logger A logger instance
-template <std::size_t kMeasDim, typename track_state_t>
+template <std::size_t kMeasDim, TrackStateProxyConcept track_state_t>
 void addMeasurementToGx2fSums(Gx2fSystem& extendedSystem,
                               const std::vector<BoundMatrix>& jacobianFromStart,
                               const std::vector<std::size_t>& materialIndices,
@@ -704,10 +730,13 @@ void updateGx2fCovarianceParams(BoundMatrix& fullCovariancePredicted,
 /// @tparam propagator_t Type of the propagation class
 ///
 /// TODO Write description
-template <typename propagator_t, typename traj_t>
+template <typename propagator_t, TrackContainerFrontend track_container_t>
 class Gx2Fitter {
   /// The navigator type
   using Gx2fNavigator = typename propagator_t::Navigator;
+
+  using TrackStateContainerBackend = typename track_container_t::TrackStateContainerBackend;
+
 
   static constexpr auto kInvalid = kTrackIndexInvalid;
 
@@ -757,9 +786,8 @@ class Gx2Fitter {
   class GX2FActor {
    public:
     /// Broadcast the result_type
-    using result_type = Gx2FitterResult<traj_t>;
+    using result_type = Gx2FitterResult<TrackStateContainerBackend>;
 
-    using TrackStateProxy_t = typename traj_t::TrackStateProxy;
 
     /// Allows retrieving measurements for a surface
     const std::unordered_map<const Surface*, SourceLink>* inputMeasurements{};
@@ -768,7 +796,7 @@ class Gx2Fitter {
     bool doMaterial{false};
 
     /// Pointer to the fit options steering the fit 
-    const Gx2FitterOptions<traj_t>* options{nullptr};
+    const Gx2FitterOptions<track_container_t>* options{nullptr};
     /// Start parameters of the track fit. The hypothesis is needed
     /// to estimate the material effects
     const BoundTrackParameters* startParameters = nullptr;
@@ -919,7 +947,7 @@ class Gx2Fitter {
 
       // Add a <trackStateMask> TrackState entry multi trajectory. This
       // allocates storage for all components, which we will set later.
-      TrackStateProxy_t trackStateProxy = fittedStates.makeTrackState(
+      TrackStateProxy trackStateProxy = fittedStates.makeTrackState(
           s_trackStateMask, result.lastTrackIndex);
 
       result.lastTrackIndex = trackStateProxy.index();
@@ -990,6 +1018,7 @@ class Gx2Fitter {
         return Result<void>::success();
       }
       typeFlags.setIsMeasurement();
+      trackStateProxy.setUncalibratedSourceLink(SourceLink{sourceLinkIt->second});
 
       // We have smoothed parameters, so calibrate the uncalibrated input
       // measurement
@@ -1178,12 +1207,11 @@ class Gx2Fitter {
   /// the fit.
   ///
   /// @return the output as an output track
-  template <typename source_link_iterator_t,
-            TrackContainerFrontend track_container_t>
+  template <typename source_link_iterator_t>
   Result<typename track_container_t::TrackProxy> fit(
       source_link_iterator_t it, source_link_iterator_t end,
       const BoundTrackParameters& sParameters,
-      const Gx2FitterOptions<traj_t>& gx2fOptions,
+      const Gx2FitterOptions<track_container_t>& gx2fOptions,
       track_container_t& trackContainer) const
     requires(!std::is_same_v<Gx2fNavigator, DirectNavigator>)
   {
@@ -1214,10 +1242,10 @@ class Gx2Fitter {
     // new track and delete it after updating the parameters. However, if we
     // would work on the externally provided track container, it would be
     // difficult to remove the correct track, if it contains more than one.
-    using traj_backend_t = typename track_container_t::TrackContainerBackend;
-    traj_t tempTrajectory{};
-    traj_backend_t tempTrajBackend{};
-    TrackContainer trackContainerTemp{tempTrajBackend, tempTrajectory};
+    TrackStateContainerBackend tempTrajectory{};
+    typename track_container_t::TrackContainerBackend tempTrajBackend{};
+    track_container_t trackContainerTemp{std::move(tempTrajBackend), std::move(tempTrajectory)};
+
 #ifdef ACTIVATE_LATER
     if (gx2fOptions.doMultipleScattering) {
       trackContainerTemp.trackStateContainer().template addColumn<double>(s_gx2fThetaScatteringColumn);
@@ -1280,7 +1308,7 @@ class Gx2Fitter {
         return propagatorInitResult.error();
       }
 
-      auto& r = propagatorState.template get<Gx2FitterResult<traj_t>>();
+      auto& r = propagatorState.template get<GX2FResult>();
       r.fittedStates = &trackContainerTemp.trackStateContainer();
       r.materialMap = std::move(materialMap);
 
@@ -1321,6 +1349,16 @@ class Gx2Fitter {
 
       track.tipIndex() = tipIndex;
       track.linkForward();
+
+      // Let the user decide whether the track of this iteration is
+      // acceptable to continue the fit
+      using ConstTrackProxy = typename track_container_t::ConstTrackProxy;
+      if (gx2fOptions.extensions.abortChecker(gx2fOptions.calibrationContext, 
+                                               ConstTrackProxy{track})) {
+        ACTS_INFO("Abort checker requested to abort the fit in nUpdate "
+                   << nUpdate + 1 << "/" << gx2fOptions.nUpdateMax);
+        return GlobalChiSquareFitterError::FitAbortedByChecker;
+      }
 
       // System that we fill with the information gathered by the actor and
       // evaluate later
@@ -1450,7 +1488,7 @@ class Gx2Fitter {
         return propagatorInitResult.error();
       }
 
-      auto& r = propagatorState.template get<Gx2FitterResult<traj_t>>();
+      auto& r = propagatorState.template get<GX2FResult>();
       r.fittedStates = &trackContainerTemp.trackStateContainer();
       r.materialMap = std::move(materialMap);
 

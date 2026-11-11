@@ -49,6 +49,9 @@ namespace MuonR4 {
             /** @copydoc MuonR4::ITrackSummaryTool::countMuonStations */
             virtual std::uint8_t countMuonStations(const EventContext& ctx,
                                                    const ConstTrack_t trackProxy) const override final;
+            /** @copydoc MuonR4::ITrackSummaryTool::countMuonStations */
+            virtual std::uint8_t countMuonStations(const EventContext& ctx,
+                                                   const ConstTrack_mt trackProxy) const override final;
         private:
             using Stat_t = HitSummary::Status;
             /** @brief Increments the hit summary based on the identifier extracted from the measurement

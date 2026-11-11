@@ -16,6 +16,7 @@ namespace MuonR4 {
     StatusCode FitterTool::initialize() {
         ATH_CHECK(m_trackingGeometrySvc.retrieve());
         ATH_CHECK(m_muonCalibrator.retrieve());
+        ATH_CHECK(m_summaryTool.retrieve());
         m_unalibMeasSurfAcc = xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
         for (const xAOD::UncalibMeasType type : xAOD::muonMeasurementTypes()) {
             m_uncalibMeasCalibrator.connect<&MuonR4::ISpacePointCalibrator::calibrateSourceLink>(type, m_muonCalibrator.get());
@@ -28,6 +29,9 @@ namespace MuonR4 {
         
         m_extensions.surfaceAccessor.connect<&ActsTrk::detail::xAODUncalibMeasSurfAcc::operator()>(&m_unalibMeasSurfAcc);
         m_extensions.calibrator.connect<&ActsTrk::detail::xAODUncalibMeasCalibrator::calibrate>(&m_uncalibMeasCalibrator);
+        if (m_abortSingleStation) {
+            m_extensions.abortChecker.connect<&FitterTool::abortSingleStation>(this);
+        }
         auto logger = makeActsAthenaLogger(this, "MuonTrackFit");
 
         Acts::Navigator::Config navConfig{m_trackingGeometrySvc->trackingGeometry()};
@@ -75,6 +79,12 @@ namespace MuonR4 {
                                });
         return fit (sourceLinks, initialParams, tgContext, mfContext, calContext, targetSurface);
 
+    }
+    bool FitterTool::abortSingleStation(const Acts::CalibrationContext& calContext,
+                                        const ActsTrk::MutableTrackContainer::ConstTrackProxy trajectory) const {
+        const EventContext& ctx{*calContext.get<const EventContext*>()};
+        unsigned nStations = m_summaryTool->countMuonStations(ctx, trajectory);
+        return nStations <= 1;
     }
     std::unique_ptr<ActsTrk::MutableTrackContainer> 
         FitterTool::fit(const std::vector<Acts::SourceLink>& sourceLinks,

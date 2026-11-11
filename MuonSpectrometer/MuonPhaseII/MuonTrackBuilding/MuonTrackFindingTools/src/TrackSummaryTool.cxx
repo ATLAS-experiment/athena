@@ -383,4 +383,8 @@ namespace MuonR4 {
         return countMuonStationsImpl(ctx, trackProxy);
     }
 
+    std::uint8_t TrackSummaryTool::countMuonStations(const EventContext& ctx,
+                                                      const ConstTrack_mt trackProxy) const {
+        return countMuonStationsImpl(ctx, trackProxy);
+    }
 }
