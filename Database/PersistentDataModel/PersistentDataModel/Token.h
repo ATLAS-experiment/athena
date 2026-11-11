@@ -95,9 +95,9 @@ public:
    void setAuxString(std::string_view auxString) { m_auxString = auxString; }
 
    /// Retrieve the string representation of the token.
-   const std::string toString() const;
+   std::string toString() const;
    /// Retrieve token key
-   const std::string key() const;
+   std::string key() const;
    /// Build from the string representation of a token.
    Token& fromString(const std::string_view from);
    /// Set token information
