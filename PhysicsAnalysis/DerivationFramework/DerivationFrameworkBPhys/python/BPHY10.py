@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY10.py
@@ -12,10 +12,10 @@ BPHYDerivationName = "BPHY10"
 streamName = "StreamDAOD_BPHY10"
 
 def BPHY10Cfg(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (
         BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg,
         BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
-        AugOriginalCountsCfg)
+        AugOriginalCountsCfg, Reco_VertexCfg, Select_onia2mumuCfg, JpsiPlusV0CascadeCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     PVrefit = acc.popToolsAndMerge(PrimaryVertexRefittingToolCfg(flags))
@@ -50,7 +50,7 @@ def BPHY10Cfg(flags):
                               VertexPointEstimator        = vpest,
                               useMCPCuts                  = False)
 
-    BPHY10JpsiSelectAndWrite   = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY10JpsiSelectAndWrite   = acc.popToolsAndMerge(Reco_VertexCfg(flags,
                               name                   = "BPHY10JpsiSelectAndWrite",
                               VertexSearchTool       = BPHY10JpsiFinder,
                               OutputVtxContainerName = "BPHY10JpsiCandidates",
@@ -58,8 +58,8 @@ def BPHY10Cfg(flags):
                               V0Tools                = V0Tools,
                               PVRefitter             = PVrefit,
                               RefPVContainerName     = "SHOULDNOTBEUSED",
-                              DoVertexType = 1)
-    BPHY10_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+                              DoVertexType = 1))
+    BPHY10_Select_Jpsi2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                               name                  = "BPHY10_Select_Jpsi2mumu",
                               HypothesisName        = "Jpsi",
                               InputVtxContainerName = "BPHY10JpsiCandidates",
@@ -68,7 +68,7 @@ def BPHY10Cfg(flags):
                               MassMin               = 2600.0,
                               MassMax               = 4000.0,
                               Chi2Max               = 200,
-                              DoVertexType =1)
+                              DoVertexType =1))
 
     BPHY10BdJpsiKst = CompFactory.Analysis.JpsiPlus2Tracks(
                              name                    = "BPHY10BdJpsiKst",
@@ -97,7 +97,7 @@ def BPHY10Cfg(flags):
     BPHY10LambdaContainerName = "BPHY10RecoLambdaCandidates"
     BPHY10LambdabarContainerName = "BPHY10RecoLambdabarCandidates"
 
-    BPHY10BdKstSelectAndWrite  = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY10BdKstSelectAndWrite  = acc.popToolsAndMerge(Reco_VertexCfg(flags,
                                     name                   = "BPHY10BdKstSelectAndWrite",
                                     VertexSearchTool     = BPHY10BdJpsiKst,
                                     OutputVtxContainerName = "BPHY10BdJpsiKstCandidates",
@@ -107,9 +107,9 @@ def BPHY10Cfg(flags):
                                     RefPVContainerName     = "BPHY10RefittedPrimaryVertices1",
                                     RefitPV                = True,
                                     MaxPVrefit             = 10000,
-                                    DoVertexType = 7)
+                                    DoVertexType = 7))
 
-    BPHY10_Select_Bd2JpsiKst = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY10_Select_Bd2JpsiKst = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                    name                       = "BPHY10_Select_Bd2JpsiKst",
                                    HypothesisName             = "Bd",
                                    InputVtxContainerName      = "BPHY10BdJpsiKstCandidates",
@@ -118,9 +118,9 @@ def BPHY10Cfg(flags):
                                    VtxMassHypo                = 5279.6,
                                    MassMin                    = 100.0,      #no mass cuts here
                                    MassMax                    = 100000.0,   #no mass cuts here
-                                   Chi2Max                    = 200)
+                                   Chi2Max                    = 200))
 
-    BPHY10_Select_Bd2JpsiKstbar = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY10_Select_Bd2JpsiKstbar = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                    name                       = "BPHY10_Select_Bd2JpsiKstbar",
                                    HypothesisName             = "Bdbar",
                                    InputVtxContainerName      = "BPHY10BdJpsiKstCandidates",
@@ -129,7 +129,7 @@ def BPHY10Cfg(flags):
                                    VtxMassHypo                = 5279.6,
                                    MassMin                    = 100.0,      #no mass cuts here
                                    MassMax                    = 100000.0,   #no mass cuts here
-                                   Chi2Max                    = 200)
+                                   Chi2Max                    = 200))
 
     from DerivationFrameworkBPhys.V0ToolConfig import BPHY_Reco_V0FinderCfg
     BPHY10_Reco_V0Finder = acc.popToolsAndMerge(BPHY_Reco_V0FinderCfg(
@@ -144,7 +144,7 @@ def BPHY10Cfg(flags):
     JpsiV0VertexFit = acc.popToolsAndMerge(JpsiV0VertexFitCfg(flags))
     acc.addPublicTool(JpsiV0VertexFit)
 
-    BPHY10JpsiKshort  = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
+    BPHY10JpsiKshort  = acc.popToolsAndMerge(JpsiPlusV0CascadeCfg(flags,
                                   name                    = "BPHY10JpsiKshort",
                                   V0Tools                 = V0Tools,
                                   HypothesisName          = "Bd",
@@ -161,9 +161,9 @@ def BPHY10Cfg(flags):
                                   RefPVContainerName      = "BPHY10RefittedPrimaryVertices2",
                                   JpsiVertices            = "BPHY10JpsiCandidates",
                                   CascadeVertexCollections= ["BPHY10JpsiKshortCascadeSV2", "BPHY10JpsiKshortCascadeSV1"],
-                                  V0Vertices              = BPHY10V0ContainerName)
+                                  V0Vertices              = BPHY10V0ContainerName))
 
-    BPHY10JpsiLambda   = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
+    BPHY10JpsiLambda   = acc.popToolsAndMerge(JpsiPlusV0CascadeCfg(flags,
                                   name                    = "BPHY10JpsiLambda",
                                   V0Tools                 = V0Tools,
                                   HypothesisName          = "Lambda_b",
@@ -180,9 +180,9 @@ def BPHY10Cfg(flags):
                                   RefPVContainerName      = "BPHY10RefittedPrimaryVertices3",
                                   JpsiVertices            = "BPHY10JpsiCandidates",
                                   CascadeVertexCollections= ["BPHY10JpsiLambdaCascadeSV2", "BPHY10JpsiLambdaCascadeSV1"],
-                                  V0Vertices              = BPHY10V0ContainerName)
+                                  V0Vertices              = BPHY10V0ContainerName))
 
-    BPHY10JpsiLambdabar         = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
+    BPHY10JpsiLambdabar         = acc.popToolsAndMerge(JpsiPlusV0CascadeCfg(flags,
                                   name                    = "BPHY10JpsiLambdabar",
                                   HypothesisName          = "Lambda_bbar",
                                   V0Tools                 = V0Tools,
@@ -199,7 +199,7 @@ def BPHY10Cfg(flags):
                                   RefPVContainerName      = "BPHY10RefittedPrimaryVertices4",
                                   JpsiVertices            = "BPHY10JpsiCandidates",
                                   CascadeVertexCollections= ["BPHY10JpsiLambdabarCascadeSV2", "BPHY10JpsiLambdabarCascadeSV1"],
-                                  V0Vertices              = BPHY10V0ContainerName)
+                                  V0Vertices              = BPHY10V0ContainerName))
 
     CascadeCollections = []
     CascadeCollections += BPHY10JpsiKshort.CascadeVertexCollections
@@ -241,7 +241,7 @@ def BPHY10Cfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY10SlimmingHelper = SlimmingHelper("BPHY10SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent = []
 

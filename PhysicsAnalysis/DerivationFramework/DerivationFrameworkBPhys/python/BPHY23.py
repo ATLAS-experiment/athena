@@ -1,5 +1,5 @@
 
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY23.py
@@ -14,7 +14,7 @@ BPHYDerivationName = "BPHY23"
 streamName = "StreamDAOD_BPHY23"
 
 def BPHY23Cfg(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg, Reco_VertexCfg, ReVertexCfg, JpsiPlusPsiCascadeCfg, PsiPlusPsiSingleVertexCfg, PsiPlusPsiCascadeCfg, Select_onia2mumuCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     isSimulation = flags.Input.isMC
@@ -78,7 +78,7 @@ def BPHY23Cfg(flags):
         useMCPCuts                  = False )
     acc.addPublicTool(BPHY23JpsiFinder)
 
-    BPHY23_Reco_mumu = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY23_Reco_mumu = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                   = "BPHY23_Reco_mumu",
         VertexSearchTool       = BPHY23JpsiFinder,
         OutputVtxContainerName = "BPHY23OniaCandidates",
@@ -86,7 +86,7 @@ def BPHY23Cfg(flags):
         RefPVContainerName     = "SHOULDNOTBEUSED",
         V0Tools                = V0Tools,
         PVRefitter             = PVrefit,
-        DoVertexType           = 1)
+        DoVertexType           = 1))
 
 
     # X(3872), Psi(2S) -> J/psi + pi pi
@@ -204,7 +204,7 @@ def BPHY23Cfg(flags):
         UseMassConstraint                   = False)
     acc.addPublicTool(BPHY23Bpm_Jpsi1Trk)
 
-    BPHY23FourTrackReco_PsiX3872 = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY23FourTrackReco_PsiX3872 = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                     = "BPHY23FourTrackReco_PsiX3872",
         VertexSearchTool         = BPHY23PsiX3872_Jpsi2Trk,
         OutputVtxContainerName   = "BPHY23FourTrack_PsiX3872",
@@ -212,9 +212,9 @@ def BPHY23Cfg(flags):
         V0Tools                  = V0Tools,
         PVRefitter               = PVrefit,
         RefitPV                  = False,
-        DoVertexType             = 0)
+        DoVertexType             = 0))
 
-    BPHY23FourTrackReco_Bs0 = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY23FourTrackReco_Bs0 = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                     = "BPHY23FourTrackReco_Bs0",
         VertexSearchTool         = BPHY23Bs0_Jpsi2Trk,
         OutputVtxContainerName   = "BPHY23FourTrack_Bs0",
@@ -222,9 +222,9 @@ def BPHY23Cfg(flags):
         V0Tools                  = V0Tools,
         PVRefitter               = PVrefit,
         RefitPV                  = False,
-        DoVertexType             = 0)
+        DoVertexType             = 0))
 
-    BPHY23FourTrackReco_B0 = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY23FourTrackReco_B0 = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                     = "BPHY23FourTrackReco_B0",
         VertexSearchTool         = BPHY23B0_Jpsi2Trk,
         OutputVtxContainerName   = "BPHY23FourTrack_B0",
@@ -232,9 +232,9 @@ def BPHY23Cfg(flags):
         V0Tools                  = V0Tools,
         PVRefitter               = PVrefit,
         RefitPV                  = False,
-        DoVertexType             = 0)
+        DoVertexType             = 0))
 
-    BPHY23ThreeTrackReco_Zc3900 = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY23ThreeTrackReco_Zc3900 = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                     = "BPHY23ThreeTrackReco_Zc3900",
         VertexSearchTool         = BPHY23Zc3900_Jpsi1Trk,
         OutputVtxContainerName   = "BPHY23ThreeTrack_Zc3900",
@@ -242,9 +242,9 @@ def BPHY23Cfg(flags):
         V0Tools                  = V0Tools,
         PVRefitter               = PVrefit,
         RefitPV                  = False,
-        DoVertexType             = 0)
+        DoVertexType             = 0))
 
-    BPHY23ThreeTrackReco_Bpm = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY23ThreeTrackReco_Bpm = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                     = "BPHY23ThreeTrackReco_Bpm",
         VertexSearchTool         = BPHY23Bpm_Jpsi1Trk,
         OutputVtxContainerName   = "BPHY23ThreeTrack_Bpm",
@@ -252,11 +252,11 @@ def BPHY23Cfg(flags):
         V0Tools                  = V0Tools,
         PVRefitter               = PVrefit,
         RefitPV                  = False,
-        DoVertexType             = 0)
+        DoVertexType             = 0))
 
     # revertex with mass constraints to reduce combinatorics
     # Psi(2S) -> J/psi pi pi
-    BPHY23Rev_Psi4Body = CompFactory.DerivationFramework.ReVertex(
+    BPHY23Rev_Psi4Body = acc.popToolsAndMerge(ReVertexCfg(flags,
         name                       = "BPHY23Rev_Psi4Body",
         InputVtxContainerName      = "BPHY23FourTrack_PsiX3872",
         TrackIndices               = [ 0, 1, 2, 3 ],
@@ -270,10 +270,10 @@ def BPHY23Cfg(flags):
         TrkVertexFitterTool	   = vkalvrt,
         PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Psi4Body")
+        OutputVtxContainerName     = "BPHY23Revtx_Psi4Body"))
 
     # X(3872) -> J/psi pi pi
-    BPHY23Rev_X3872 = CompFactory.DerivationFramework.ReVertex(
+    BPHY23Rev_X3872 = acc.popToolsAndMerge(ReVertexCfg(flags,
         name                       = "BPHY23Rev_X3872",
         InputVtxContainerName      = "BPHY23FourTrack_PsiX3872",
         TrackIndices               = [ 0, 1, 2, 3 ],
@@ -287,10 +287,10 @@ def BPHY23Cfg(flags):
         TrkVertexFitterTool	   = vkalvrt,
         PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_X3872")
+        OutputVtxContainerName     = "BPHY23Revtx_X3872"))
 
     # Bs0 -> J/psi K K
-    BPHY23Rev_Bs0 = CompFactory.DerivationFramework.ReVertex(
+    BPHY23Rev_Bs0 = acc.popToolsAndMerge(ReVertexCfg(flags,
         name                       = "BPHY23Rev_Bs0",
         InputVtxContainerName      = "BPHY23FourTrack_Bs0",
         TrackIndices               = [ 0, 1, 2, 3 ],
@@ -304,10 +304,10 @@ def BPHY23Cfg(flags):
         TrkVertexFitterTool	   = vkalvrt,
         PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Bs0")
+        OutputVtxContainerName     = "BPHY23Revtx_Bs0"))
 
     # B0 -> J/psi K pi
-    BPHY23Rev_B0Kpi = CompFactory.DerivationFramework.ReVertex(
+    BPHY23Rev_B0Kpi = acc.popToolsAndMerge(ReVertexCfg(flags,
         name                       = "BPHY23Rev_B0Kpi",
         InputVtxContainerName      = "BPHY23FourTrack_B0",
         TrackIndices               = [ 0, 1, 2, 3 ],
@@ -321,10 +321,10 @@ def BPHY23Cfg(flags):
         TrkVertexFitterTool	   = vkalvrt,
         PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_B0Kpi")
+        OutputVtxContainerName     = "BPHY23Revtx_B0Kpi"))
 
     # B0 -> J/psi pi K
-    BPHY23Rev_B0piK = CompFactory.DerivationFramework.ReVertex(
+    BPHY23Rev_B0piK = acc.popToolsAndMerge(ReVertexCfg(flags,
         name                       = "BPHY23Rev_B0piK",
         InputVtxContainerName      = "BPHY23FourTrack_B0",
         TrackIndices               = [ 0, 1, 2, 3 ],
@@ -338,10 +338,10 @@ def BPHY23Cfg(flags):
         TrkVertexFitterTool	   = vkalvrt,
         PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_B0piK")
+        OutputVtxContainerName     = "BPHY23Revtx_B0piK"))
 
     # Zc3900 -> J/psi pi
-    BPHY23Rev_Zc3900 = CompFactory.DerivationFramework.ReVertex(
+    BPHY23Rev_Zc3900 = acc.popToolsAndMerge(ReVertexCfg(flags,
         name                       = "BPHY23Rev_Zc3900",
         InputVtxContainerName      = "BPHY23ThreeTrack_Zc3900",
         TrackIndices               = [ 0, 1, 2 ],
@@ -356,10 +356,10 @@ def BPHY23Cfg(flags):
         TrkVertexFitterTool        = vkalvrt,
         PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Zc3900")
+        OutputVtxContainerName     = "BPHY23Revtx_Zc3900"))
 
     # Bpm -> J/psi K
-    BPHY23Rev_Bpm = CompFactory.DerivationFramework.ReVertex(
+    BPHY23Rev_Bpm = acc.popToolsAndMerge(ReVertexCfg(flags,
         name                       = "BPHY23Rev_Bpm",
         InputVtxContainerName      = "BPHY23ThreeTrack_Bpm",
         TrackIndices               = [ 0, 1, 2 ],
@@ -373,10 +373,10 @@ def BPHY23Cfg(flags):
         TrkVertexFitterTool	   = vkalvrt,
         PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Bpm")
+        OutputVtxContainerName     = "BPHY23Revtx_Bpm"))
 
 
-    BPHY23Select_Jpsi              = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY23Select_Jpsi              = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
         name                       = "BPHY23Select_Jpsi",
         HypothesisName             = "Jpsi",
         InputVtxContainerName      = "BPHY23OniaCandidates",
@@ -384,9 +384,9 @@ def BPHY23Cfg(flags):
         TrkMasses                  = [Mumass, Mumass],
         MassMin                    = Jpsi_lo,
         MassMax                    = Jpsi_hi,
-        DoVertexType               = 0)
+        DoVertexType               = 0))
 
-    BPHY23Select_Psi               = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY23Select_Psi               = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
         name                       = "BPHY23Select_Psi",
         HypothesisName             = "Psi",
         InputVtxContainerName      = "BPHY23OniaCandidates",
@@ -394,9 +394,9 @@ def BPHY23Cfg(flags):
         TrkMasses                  = [Mumass, Mumass],
         MassMin                    = Psi_lo,
         MassMax                    = Psi_hi,
-        DoVertexType               = 0)
+        DoVertexType               = 0))
 
-    BPHY23Select_Upsi              = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY23Select_Upsi              = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
         name                       = "BPHY23Select_Upsi",
         HypothesisName             = "Upsi",
         InputVtxContainerName      = "BPHY23OniaCandidates",
@@ -404,9 +404,9 @@ def BPHY23Cfg(flags):
         TrkMasses                  = [Mumass, Mumass],
         MassMin                    = Upsi_lo,
         MassMax                    = Upsi_hi,
-        DoVertexType               = 0)
+        DoVertexType               = 0))
 
-    BPHY23Rev_Jpsi = CompFactory.DerivationFramework.ReVertex(
+    BPHY23Rev_Jpsi = acc.popToolsAndMerge(ReVertexCfg(flags,
         name                       = "BPHY23Rev_Jpsi",
         InputVtxContainerName      = "BPHY23OniaCandidates",
         HypothesisNames            = [ "Jpsi" ],
@@ -419,9 +419,9 @@ def BPHY23Cfg(flags):
         TrkVertexFitterTool        = vkalvrt,
         PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Jpsi")
+        OutputVtxContainerName     = "BPHY23Revtx_Jpsi"))
 
-    BPHY23Rev_Psi = CompFactory.DerivationFramework.ReVertex(
+    BPHY23Rev_Psi = acc.popToolsAndMerge(ReVertexCfg(flags,
         name                       = "BPHY23Rev_Psi",
         InputVtxContainerName      = "BPHY23OniaCandidates",
         HypothesisNames            = [ "Psi" ],
@@ -434,9 +434,9 @@ def BPHY23Cfg(flags):
         TrkVertexFitterTool        = vkalvrt,
         PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Psi")
+        OutputVtxContainerName     = "BPHY23Revtx_Psi"))
 
-    BPHY23Rev_Upsi = CompFactory.DerivationFramework.ReVertex(
+    BPHY23Rev_Upsi = acc.popToolsAndMerge(ReVertexCfg(flags,
         name                       = "BPHY23Rev_Upsi",
         InputVtxContainerName      = "BPHY23OniaCandidates",
         HypothesisNames            = [ "Upsi" ],
@@ -449,7 +449,7 @@ def BPHY23Cfg(flags):
         TrkVertexFitterTool        = vkalvrt,
         PVRefitter                 = PVrefit,
         V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY23Revtx_Upsi")
+        OutputVtxContainerName     = "BPHY23Revtx_Upsi"))
 
 
     ########################
@@ -483,7 +483,7 @@ def BPHY23Cfg(flags):
 
     list_2trk0trk_obj = []
     for hypo in list_2trk0trk_hypo:
-        list_2trk0trk_obj.append( CompFactory.DerivationFramework.JpsiPlusPsiCascade("BPHY23_"+hypo) )
+        list_2trk0trk_obj.append( acc.popToolsAndMerge(JpsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo) ) )
 
     for i in range(len(list_2trk0trk_obj)):
         list_2trk0trk_obj[i].HypothesisName           = list_2trk0trk_hypo[i]
@@ -524,7 +524,7 @@ def BPHY23Cfg(flags):
 
     list2_2trk0trk_obj = []
     for hypo in list2_2trk0trk_hypo:
-        list2_2trk0trk_obj.append( CompFactory.DerivationFramework.PsiPlusPsiSingleVertex("BPHY23_"+hypo) )
+        list2_2trk0trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo) ) )
 
     for i in range(len(list2_2trk0trk_obj)):
         list2_2trk0trk_obj[i].HypothesisName           = list2_2trk0trk_hypo[i]
@@ -571,7 +571,7 @@ def BPHY23Cfg(flags):
 
     list_1trk0trk_obj = []
     for hypo in list_1trk0trk_hypo:
-        list_1trk0trk_obj.append( CompFactory.DerivationFramework.JpsiPlusPsiCascade("BPHY23_"+hypo) )
+        list_1trk0trk_obj.append( acc.popToolsAndMerge(JpsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo) ) )
 
     for i in range(len(list_1trk0trk_obj)):
         list_1trk0trk_obj[i].HypothesisName           = list_1trk0trk_hypo[i]
@@ -608,7 +608,7 @@ def BPHY23Cfg(flags):
 
     list2_1trk0trk_obj = []
     for hypo in list2_1trk0trk_hypo:
-        list2_1trk0trk_obj.append( CompFactory.DerivationFramework.PsiPlusPsiSingleVertex("BPHY23_"+hypo) )
+        list2_1trk0trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo) ) )
 
     for i in range(len(list2_1trk0trk_obj)):
         list2_1trk0trk_obj[i].HypothesisName           = list2_1trk0trk_hypo[i]
@@ -657,7 +657,7 @@ def BPHY23Cfg(flags):
 
     list_1trk1trk_obj = []
     for hypo in list_1trk1trk_hypo:
-        list_1trk1trk_obj.append( CompFactory.DerivationFramework.PsiPlusPsiCascade("BPHY23_"+hypo) )
+        list_1trk1trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo) ) )
 
     for i in range(len(list_1trk1trk_obj)):
         list_1trk1trk_obj[i].HypothesisName           = list_1trk1trk_hypo[i]
@@ -701,7 +701,7 @@ def BPHY23Cfg(flags):
 
     list2_1trk1trk_obj = []
     for hypo in list2_1trk1trk_hypo:
-        list2_1trk1trk_obj.append( CompFactory.DerivationFramework.PsiPlusPsiSingleVertex("BPHY23_"+hypo) )
+        list2_1trk1trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo) ) )
 
     for i in range(len(list2_1trk1trk_obj)):
         list2_1trk1trk_obj[i].HypothesisName           = list2_1trk1trk_hypo[i]
@@ -775,7 +775,7 @@ def BPHY23Cfg(flags):
 
     list_2trk1trk_obj = []
     for hypo in list_2trk1trk_hypo:
-        list_2trk1trk_obj.append( CompFactory.DerivationFramework.PsiPlusPsiCascade("BPHY23_"+hypo) )
+        list_2trk1trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo) ) )
 
     for i in range(len(list_2trk1trk_obj)):
         list_2trk1trk_obj[i].HypothesisName           = list_2trk1trk_hypo[i]
@@ -819,7 +819,7 @@ def BPHY23Cfg(flags):
 
     list2_2trk1trk_obj = []
     for hypo in list2_2trk1trk_hypo:
-        list2_2trk1trk_obj.append( CompFactory.DerivationFramework.PsiPlusPsiSingleVertex("BPHY23_"+hypo) )
+        list2_2trk1trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo) ) )
 
     for i in range(len(list2_2trk1trk_obj)):
         list2_2trk1trk_obj[i].HypothesisName           = list2_2trk1trk_hypo[i]
@@ -873,7 +873,7 @@ def BPHY23Cfg(flags):
 
     list_1trk2trk_obj = []
     for hypo in list_1trk2trk_hypo:
-        list_1trk2trk_obj.append( CompFactory.DerivationFramework.PsiPlusPsiCascade("BPHY23_"+hypo) )
+        list_1trk2trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo) ) )
 
     for i in range(len(list_1trk2trk_obj)):
         list_1trk2trk_obj[i].HypothesisName           = list_1trk2trk_hypo[i]
@@ -957,7 +957,7 @@ def BPHY23Cfg(flags):
 
     list_2trk2trk_obj = []
     for hypo in list_2trk2trk_hypo:
-        list_2trk2trk_obj.append( CompFactory.DerivationFramework.PsiPlusPsiCascade("BPHY23_"+hypo) )
+        list_2trk2trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiCascadeCfg(flags, name = "BPHY23_"+hypo) ) )
 
     for i in range(len(list_2trk2trk_obj)):
         list_2trk2trk_obj[i].HypothesisName           = list_2trk2trk_hypo[i]
@@ -1002,7 +1002,7 @@ def BPHY23Cfg(flags):
 
     list2_2trk2trk_obj = []
     for hypo in list2_2trk2trk_hypo:
-        list2_2trk2trk_obj.append( CompFactory.DerivationFramework.PsiPlusPsiSingleVertex("BPHY23_"+hypo) )
+        list2_2trk2trk_obj.append( acc.popToolsAndMerge(PsiPlusPsiSingleVertexCfg(flags, name = "BPHY23_"+hypo) ) )
 
     for i in range(len(list2_2trk2trk_obj)):
         list2_2trk2trk_obj[i].HypothesisName           = list2_2trk2trk_hypo[i]
@@ -1076,7 +1076,7 @@ def BPHY23Cfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY23SlimmingHelper = SlimmingHelper("BPHY23SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     BPHY23_AllVariables  = getDefaultAllVariables()
     BPHY23_StaticContent = []
 

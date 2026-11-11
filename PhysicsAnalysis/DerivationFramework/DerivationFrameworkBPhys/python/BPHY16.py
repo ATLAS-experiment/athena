@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY16.py
 #====================================================================
@@ -12,7 +12,7 @@ BPHYDerivationName = "BPHY16"
 streamName = "StreamDAOD_BPHY16"
 
 def BPHY16Cfg(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg, Reco_VertexCfg, Select_onia2mumuCfg, ReVertexCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     isSimulation = flags.Input.isMC
@@ -45,7 +45,7 @@ def BPHY16Cfg(flags):
           VertexPointEstimator        = vpest,
           useMCPCuts                  = False )
     acc.addPublicTool(BPHY16JpsiFinder)
-    BPHY16_Reco_mumu = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY16_Reco_mumu = acc.popToolsAndMerge(Reco_VertexCfg(flags,
           name                   = "BPHY16_Reco_mumu",
           VertexSearchTool       = BPHY16JpsiFinder,
           OutputVtxContainerName = "BPHY16OniaCandidates",
@@ -55,9 +55,9 @@ def BPHY16Cfg(flags):
           V0Tools                = V0Tools,
           PVRefitter             = PVrefit,
           MaxPVrefit             = 100000,
-          DoVertexType           = 7)
+          DoVertexType           = 7))
 
-    BPHY16_Select_Upsi = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY16_Select_Upsi = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
           name                  = "BPHY16_Select_Upsi",
           HypothesisName        = "Upsilon",
           InputVtxContainerName = "BPHY16OniaCandidates",
@@ -66,7 +66,7 @@ def BPHY16Cfg(flags):
           MassMin               = 8000.,
           MassMax               = 12000.,
           Chi2Max               = 200,
-          DoVertexType          = 7)
+          DoVertexType          = 7))
 
     BPHY16Plus2Tracks = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY16Plus2Tracks",
          kaonkaonHypothesis          = False,
@@ -88,7 +88,7 @@ def BPHY16Cfg(flags):
          TrackSelectorTool           = trackselect,
          UseMassConstraint           = False)
 
-    BPHY16FourTrackSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY16FourTrackSelectAndWrite",
+    BPHY16FourTrackSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,name = "BPHY16FourTrackSelectAndWrite",
                                       VertexSearchTool         = BPHY16Plus2Tracks,
                                       OutputVtxContainerName   = "BPHY16FourTrack",
                                       PVContainerName          = "PrimaryVertices",
@@ -96,9 +96,9 @@ def BPHY16Cfg(flags):
                                       RefitPV                  = True,
                                       V0Tools                  = V0Tools,
                                       PVRefitter               = PVrefit,
-                                      MaxPVrefit               = 10000, DoVertexType = 7)
+                                      MaxPVrefit               = 10000, DoVertexType = 7))
 
-    BPHY16_Select_FourTrack  = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY16_Select_FourTrack  = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                       name                       = "BPHY16_Select_FourTracks",
                                       HypothesisName             = "FourTracks",
                                       InputVtxContainerName      = "BPHY16FourTrack",
@@ -107,16 +107,16 @@ def BPHY16Cfg(flags):
                                       VtxMassHypo                = 18100.0,
                                       MassMin                    = 0,
                                       MassMax                    = 500000,
-                                      Chi2Max                    = BPHY16Plus2Tracks.Chi2Cut)
-    BPHY16_Revertex   = CompFactory.DerivationFramework.ReVertex(
+                                      Chi2Max                    = BPHY16Plus2Tracks.Chi2Cut))
+    BPHY16_Revertex   = acc.popToolsAndMerge(ReVertexCfg(flags,
                                       name                       = "BPHY16_ReVertex",
                                       InputVtxContainerName      = "BPHY16FourTrack",
                                       V0Tools                    = V0Tools,
                                       TrackIndices               = [ 2, 3 ],
                                       PVRefitter                 = PVrefit,
                                       TrkVertexFitterTool        = vkalvrt,
-                                      OutputVtxContainerName     = "BPHY16TwoTrack")
-    BPHY16_Select_TwoTrack  = CompFactory.DerivationFramework.Select_onia2mumu(
+                                      OutputVtxContainerName     = "BPHY16TwoTrack"))
+    BPHY16_Select_TwoTrack  = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                   name                       = "BPHY16_Select_TwoTracks",
                                   HypothesisName             = "TwoTracks",
                                   InputVtxContainerName      = "BPHY16TwoTrack",
@@ -125,7 +125,7 @@ def BPHY16Cfg(flags):
                                   VtxMassHypo                = 18100.0,
                                   MassMin                    = 1,
                                   MassMax                    = 500000,
-                                  Chi2Max                    = 90)
+                                  Chi2Max                    = 90))
 
     from DerivationFrameworkTools.DerivationFrameworkToolsConfig import (
         xAODStringSkimmingToolCfg)
@@ -150,7 +150,7 @@ def BPHY16Cfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY16SlimmingHelper = SlimmingHelper("BPHY16SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent = []
     

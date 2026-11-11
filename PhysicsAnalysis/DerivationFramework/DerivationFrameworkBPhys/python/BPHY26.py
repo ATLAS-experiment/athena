@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY26.py (Based on BPHY8, BPHY16, and BPHY13)
 # Contact: yue.xu@cern.ch
@@ -14,7 +14,7 @@ BPHYDerivationName = "BPHY26"
 streamName = "StreamDAOD_BPHY26"
 
 def BPHY26KernelCfg(flags, **kwargs):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg, Reco_VertexCfg, VertexTrackIsolationCfg, Select_onia2mumuCfg, ReVertexCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
 
@@ -65,7 +65,7 @@ def BPHY26KernelCfg(flags, **kwargs):
     
     acc.addPublicTool(BPHY26JpsiFinder)
         
-    BPHY26_Reco_mumu = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY26_Reco_mumu = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                   = "BPHY26_Reco_mumu",
         VertexSearchTool       = BPHY26JpsiFinder,
         OutputVtxContainerName = "BPHY26OniaCandidates",
@@ -74,7 +74,7 @@ def BPHY26KernelCfg(flags, **kwargs):
         V0Tools                = V0Tools,
         RefitPV                = True,
         PVRefitter             = pvrefitter,
-        DoVertexType           = 1)
+        DoVertexType           = 1))
     #https://gitlab.cern.ch/atlas/athena/-/blob/21.2/PhysicsAnalysis/DerivationFramework/DerivationFrameworkBPhys/src/BPhysPVTools.cxx#L259
     # bit pattern: doZ0BA|doZ0|doA0|doPt
     
@@ -100,7 +100,7 @@ def BPHY26KernelCfg(flags, **kwargs):
     
     acc.addPublicTool(BPHY26Plus1Track)
 
-    BPHY26ThreeTrackSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY26ThreeTrackSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                     = "BPHY26ThreeTrackSelectAndWrite",
         VertexSearchTool         = BPHY26Plus1Track,
         OutputVtxContainerName   = "BPHY26ThreeTrack",
@@ -110,10 +110,10 @@ def BPHY26KernelCfg(flags, **kwargs):
         V0Tools                  = V0Tools,
         PVRefitter               = pvrefitter,
         MaxPVrefit               = 10000,
-        DoVertexType             = 7)
+        DoVertexType             = 7))
         
         
-    BPHY26_Select_ThreeTrack      = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY26_Select_ThreeTrack      = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
         name                       = "BPHY26_Select_ThreeTrack",
         HypothesisName             = "ThreeTracks",
         InputVtxContainerName      = "BPHY26ThreeTrack",
@@ -122,14 +122,14 @@ def BPHY26KernelCfg(flags, **kwargs):
         VtxMassHypo                = Wmass, 
         MassMin                    = Wmass_lower,
         MassMax                    = Wmass_upper,
-        Chi2Max                    = 30.)
+        Chi2Max                    = 30.))
 
     #====================================================================
     # Isolation
     #====================================================================
     #Track isolation for candidates
 
-    BPHY26TrackIsolationDecorator = CompFactory.DerivationFramework.VertexTrackIsolation(
+    BPHY26TrackIsolationDecorator = acc.popToolsAndMerge(VertexTrackIsolationCfg(flags,
             name                            = "BPHY26TrackIsolationDecorator",
             TrackIsoTool                    = "xAOD::TrackIsolationTool",
             TrackContainer                  = "InDetTrackParticles",
@@ -137,13 +137,13 @@ def BPHY26KernelCfg(flags, **kwargs):
             PassFlags                       = ["passed_ThreeTracks"],
             DoIsoPerTrk                     = True,
             RemoveDuplicate                 = 2
-            )
+            ))
 
     #====================================================================
     # Revertex with mass constraint
     #====================================================================
     
-    BPHY26_Revertex_phipi          = CompFactory.DerivationFramework.ReVertex(
+    BPHY26_Revertex_phipi          = acc.popToolsAndMerge(ReVertexCfg(flags,
         name                       = "BPHY26_Revertex_phipi",
         InputVtxContainerName      = "BPHY26ThreeTrack",
         TrackIndices               = [ 0, 1, 2 ],
@@ -156,9 +156,9 @@ def BPHY26KernelCfg(flags, **kwargs):
         TrkVertexFitterTool	       = vkalvrt,
         PVRefitter                 = pvrefitter,
         V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY26Revtx_phipi")
+        OutputVtxContainerName     = "BPHY26Revtx_phipi"))
         
-    BPHY26_Select_phipi          = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY26_Select_phipi          = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
         name                       = "BPHY26_Select_phipi",
         HypothesisName             = "phipi",
         InputVtxContainerName      = "BPHY26Revtx_phipi",
@@ -166,9 +166,9 @@ def BPHY26KernelCfg(flags, **kwargs):
         VtxMassHypo                = Wmass,
         MassMin                    = Wmass_lower,
         MassMax                    = Wmass_upper,
-        Chi2Max                    = 30.)
+        Chi2Max                    = 30.))
     
-    BPHY26_Revertex_Jpsipi          = CompFactory.DerivationFramework.ReVertex(
+    BPHY26_Revertex_Jpsipi          = acc.popToolsAndMerge(ReVertexCfg(flags,
         name                       = "BPHY26_Revertex_Jpsipi",
         InputVtxContainerName      = "BPHY26ThreeTrack",
         TrackIndices               = [ 0, 1, 2 ],
@@ -181,9 +181,9 @@ def BPHY26KernelCfg(flags, **kwargs):
         TrkVertexFitterTool	       = vkalvrt,
         PVRefitter                 = pvrefitter,
         V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY26Revtx_Jpsipi")
+        OutputVtxContainerName     = "BPHY26Revtx_Jpsipi"))
     
-    BPHY26_Select_Jpsipi          = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY26_Select_Jpsipi          = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
         name                       = "BPHY26_Select_Jpsipi",
         HypothesisName             = "Jpsipi",
         InputVtxContainerName      = "BPHY26Revtx_Jpsipi",
@@ -191,9 +191,9 @@ def BPHY26KernelCfg(flags, **kwargs):
         VtxMassHypo                = Wmass,
         MassMin                    = Wmass_lower,
         MassMax                    = Wmass_upper,
-        Chi2Max                    = 30.)
+        Chi2Max                    = 30.))
         
-    BPHY26_Revertex_Upsipi          = CompFactory.DerivationFramework.ReVertex(
+    BPHY26_Revertex_Upsipi          = acc.popToolsAndMerge(ReVertexCfg(flags,
         name                       = "BPHY26_Revertex_Upsipi",
         InputVtxContainerName      = "BPHY26ThreeTrack",
         TrackIndices               = [ 0, 1, 2 ],
@@ -206,9 +206,9 @@ def BPHY26KernelCfg(flags, **kwargs):
         TrkVertexFitterTool	       = vkalvrt,
         PVRefitter                 = pvrefitter,
         V0Tools                    = V0Tools,
-        OutputVtxContainerName     = "BPHY26Revtx_Upsipi")
+        OutputVtxContainerName     = "BPHY26Revtx_Upsipi"))
         
-    BPHY26_Select_Upsipi          = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY26_Select_Upsipi          = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
         name                       = "BPHY26_Select_Upsipi",
         HypothesisName             = "Upsipi",
         InputVtxContainerName      = "BPHY26Revtx_Upsipi",
@@ -216,7 +216,7 @@ def BPHY26KernelCfg(flags, **kwargs):
         VtxMassHypo                = Wmass,
         MassMin                    = Wmass_lower,
         MassMax                    = Wmass_upper,
-        Chi2Max                    = 30.)    
+        Chi2Max                    = 30.))
     
     
     #--------------------------------------------------------------------
@@ -290,7 +290,7 @@ def BPHY26KernelCfg(flags, **kwargs):
                                            "AntiKtVR30Rmax4Rmin02PV0TrackJets",
                                           ]
 
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     BPHY26_AllVariables  = getDefaultAllVariables()
     BPHY26_StaticContent = []
     

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY2.py
@@ -13,10 +13,10 @@ streamName = "StreamDAOD_BPHY2"
 
 
 def BPHY2Cfg(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (
         BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg,
         BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
-        AugOriginalCountsCfg)
+        AugOriginalCountsCfg, Reco_VertexCfg, Select_onia2mumuCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     isSimulation = flags.Input.isMC
@@ -50,14 +50,14 @@ def BPHY2Cfg(flags):
                                          VertexPointEstimator        = vpest,
                                          useMCPCuts                  = False)
 
-    BPHY2JpsiSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name           = "BPHY2JpsiSelectAndWrite",
+    BPHY2JpsiSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,name           = "BPHY2JpsiSelectAndWrite",
                                                         VertexSearchTool       = BPHY2JpsiFinder,
                                                         OutputVtxContainerName = "BPHY2JpsiCandidates",
                                                         PVContainerName        = "PrimaryVertices",
                                                         RefPVContainerName     = "SHOULDNOTBEUSED",
                                                         V0Tools                = V0Tools,
                                                         PVRefitter             = PVrefit,
-                                                        DoVertexType           =1)
+                                                        DoVertexType           =1))
  
     BPHY2BsJpsiKK = CompFactory.Analysis.JpsiPlus2Tracks(name = "BPHY2BsJpsiKK",
                                          kaonkaonHypothesis      = True,
@@ -79,7 +79,7 @@ def BPHY2Cfg(flags):
                                          TrackSelectorTool       = trackselect,
                                          UseMassConstraint       = False)
 
-    BPHY2BsKKSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name   = "BPHY2BsKKSelectAndWrite",
+    BPHY2BsKKSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,name   = "BPHY2BsKKSelectAndWrite",
                                                            VertexSearchTool       = BPHY2BsJpsiKK,
                                                            OutputVtxContainerName   = "BPHY2BsJpsiKKCandidates",
                                                            PVContainerName          = "PrimaryVertices",
@@ -87,9 +87,9 @@ def BPHY2Cfg(flags):
                                                            RefitPV                  = True,
                                                            V0Tools                  = V0Tools,
                                                            PVRefitter               = PVrefit,
-                                                           MaxPVrefit               = 10000, DoVertexType = 7)
+                                                           MaxPVrefit               = 10000, DoVertexType = 7))
 
-    BPHY2_Select_Psi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY2_Select_Psi2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
       name                  = "BPHY2_Select_Psi2mumu",
       HypothesisName        = "Psi",
       InputVtxContainerName = "BPHY2JpsiCandidates",
@@ -98,9 +98,9 @@ def BPHY2Cfg(flags):
       MassMin               = 3300.0,
       MassMax               = 4500.0,
       Chi2Max               = 200,
-      DoVertexType          = 7)
+      DoVertexType          = 7))
  
-    BPHY2_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY2_Select_Jpsi2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
       name                  = "BPHY2_Select_Jpsi2mumu",
       HypothesisName        = "Jpsi",
       InputVtxContainerName = "BPHY2JpsiCandidates",
@@ -109,9 +109,9 @@ def BPHY2Cfg(flags):
       MassMin               = 2000.0,
       MassMax               = 3600.0,
       Chi2Max               = 200,
-      DoVertexType          = 7)
+      DoVertexType          = 7))
  
-    BPHY2_Select_Bs2JpsiKK = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY2_Select_Bs2JpsiKK = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
       name                       = "BPHY2_Select_Bs2JpsiKK",
       HypothesisName             = "Bs",
       InputVtxContainerName      = "BPHY2BsJpsiKKCandidates",
@@ -120,7 +120,7 @@ def BPHY2Cfg(flags):
       VtxMassHypo                = 5366.3,
       MassMin                    = 5000.0,
       MassMax                    = 5800.0,
-      Chi2Max                    = 200)
+      Chi2Max                    = 200))
 
     BPHY2_AugOriginalCounts = acc.popToolsAndMerge(
         AugOriginalCountsCfg(flags, name = "BPHY2_AugOriginalCounts"))
@@ -185,7 +185,7 @@ def BPHY2Cfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY2SlimmingHelper = SlimmingHelper("BPHY2SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent = []
      

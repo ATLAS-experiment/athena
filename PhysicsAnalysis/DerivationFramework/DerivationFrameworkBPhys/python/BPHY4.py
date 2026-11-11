@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY4.py
 #====================================================================
@@ -11,7 +11,7 @@ BPHYDerivationName = "BPHY4"
 streamName = "StreamDAOD_BPHY4"
 
 def BPHY4Cfg(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_TrkVKalVrtFitterCfg)
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg, BPHY_TrkVKalVrtFitterCfg, Reco_4muCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     V0Tools = acc.popToolsAndMerge(BPHY_V0ToolCfg(flags, BPHYDerivationName))
@@ -30,7 +30,7 @@ def BPHY4Cfg(flags):
             TrackParticleCollection     = "InDetTrackParticles",
             TrkVertexFitterTool         = vkalvrt,        # VKalVrt vertex fitter
             TrackSelectorTool           = trackselect)
-    BPHY4_Reco_4mu = CompFactory.DerivationFramework.Reco_4mu(
+    BPHY4_Reco_4mu = acc.popToolsAndMerge(Reco_4muCfg(flags,
             name                    = "BPHY4_Reco_4mu",
             FourMuonTool            = BPHY4FourMuonTool,
             V0Tools                 = V0Tools,
@@ -41,7 +41,7 @@ def BPHY4Cfg(flags):
             RefPVContainerName      = "BPHY4RefittedPrimaryVertices",
             RefitPV                 = True,
             MaxPVrefit              = 100000,
-            DoVertexType            = 7)
+            DoVertexType            = 7))
 
     BPHY4MuonTPThinningTool = CompFactory.DerivationFramework.MuonTrackParticleThinning(name     = "BPHY4MuonTPThinningTool",
                                                                          MuonKey    = "Muons",
@@ -71,7 +71,7 @@ def BPHY4Cfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY4SlimmingHelper = SlimmingHelper("BPHY4SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     BPHY4AllVariables  = getDefaultAllVariables()
     BPHY4StaticContent = []
     BPHY4SmartVariables =[]

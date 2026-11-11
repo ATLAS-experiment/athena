@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #====================================================================
 # BPHY5.py
@@ -19,10 +19,10 @@ BpipiContainerName   = "BPHY5BJpsipipiXCandidates"
 BdJpsiKstContainerName = "BPHY5BdJpsiKstCandidates"
 
 def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
-   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+   from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (
       BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
       BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
-      AugOriginalCountsCfg)
+      AugOriginalCountsCfg, Reco_VertexCfg, Select_onia2mumuCfg, ReVertexCfg)
    from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
    acc = ComponentAccumulator()
    isSimulation = flags.Input.isMC
@@ -77,7 +77,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
        useMCPCuts                  = False )
    acc.addPublicTool(BPHY5JpsiFinder )
 
-   BPHY5JpsiSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY5JpsiSelectAndWrite",
+   BPHY5JpsiSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,name = "BPHY5JpsiSelectAndWrite",
                                                        VertexSearchTool       = BPHY5JpsiFinder,
                                                        OutputVtxContainerName = JpsiContainerName,
                                                        PVContainerName        = "PrimaryVertices",
@@ -86,10 +86,10 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                                        RefPVContainerName     = "SHOULDNOTBEUSED",
                                                        RelinkTracks  =  toRelink,
                                                        RelinkMuons   =  MuonReLink,
-                                                       DoVertexType           =1)
+                                                       DoVertexType           =1))
    
    ## a/ augment and select Jpsi->mumu candidates
-   BPHY5_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+   BPHY5_Select_Jpsi2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
          name                  = "BPHY5_Select_Jpsi2mumu",
          HypothesisName        = "Jpsi",
          InputVtxContainerName = JpsiContainerName,
@@ -98,7 +98,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
          MassMin               = 2000.0,
          MassMax               = 3600.0,
          Chi2Max               = 200, Do3d = False,
-         DoVertexType =1)
+         DoVertexType =1))
 
    BPHY5_AugOriginalCounts = acc.popToolsAndMerge(
       AugOriginalCountsCfg(flags, name = "BPHY5_AugOriginalCounts"))
@@ -187,7 +187,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
          ExcludeCrossJpsiTracks  = False,
          ExcludeJpsiMuonsOnly    = True)
    acc.addPublicTool(BPHY5BJpsipipiX )
-   BPHY5BsKKSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name = "BPHY5BsKKSelectAndWrite",
+   BPHY5BsKKSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,name = "BPHY5BsKKSelectAndWrite",
                         VertexSearchTool         = BPHY5BsJpsiKK,
                         OutputVtxContainerName   = BsJpsiPhiContainerName,
                         PVContainerName          = "PrimaryVertices",
@@ -196,9 +196,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                         RefPVContainerName       = "BPHY5RefittedPrimaryVertices",
                         RefitPV                  = True, Do3d = False,
                         RelinkTracks  =  toRelink,
-                        MaxPVrefit               = 10000, DoVertexType = 7)
+                        MaxPVrefit               = 10000, DoVertexType = 7))
 
-   BPHY5BplKplSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name    = "BPHY5BplKplSelectAndWrite",
+   BPHY5BplKplSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,name    = "BPHY5BplKplSelectAndWrite",
                                                               VertexSearchTool      =  BPHY5BplJpsiKpl,
                                                               OutputVtxContainerName    = BPlusContainerName,
                                                               PVContainerName           = "PrimaryVertices",
@@ -207,9 +207,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                                               RefPVContainerName        = "BPHY5RefBplJpsiKplPrimaryVertices",                                                              
                                                               RefitPV                   = True,
                                                               RelinkTracks  =  toRelink,
-                                                              MaxPVrefit                = 10000 )
+                                                              MaxPVrefit                = 10000 ))
 
-   BPHY5BpipiXSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(name  = "BPHY5BpipiXSelectAndWrite",
+   BPHY5BpipiXSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,name  = "BPHY5BpipiXSelectAndWrite",
                                                            VertexSearchTool       = BPHY5BJpsipipiX,
                                                            OutputVtxContainerName   = BpipiContainerName,
                                                            PVContainerName          = "PrimaryVertices",
@@ -218,9 +218,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                                            RefPVContainerName       = "BPHY5RefittedBPipiPrimaryVertices",
                                                            RefitPV                  = True, Do3d = False,
                                                            RelinkTracks  =  toRelink,
-                                                           MaxPVrefit               = 10000, DoVertexType = 7)
+                                                           MaxPVrefit               = 10000, DoVertexType = 7))
 
-   BPHY5BdKstSelectAndWrite  = CompFactory.DerivationFramework.Reco_Vertex(
+   BPHY5BdKstSelectAndWrite  = acc.popToolsAndMerge(Reco_VertexCfg(flags,
                                  name                   = "BPHY5BdKstSelectAndWrite",
                                  VertexSearchTool       = BPHY5BdJpsiKst,
                                  OutputVtxContainerName = BdJpsiKstContainerName,
@@ -231,9 +231,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                  RefitPV                = True,
                                  RelinkTracks  =  toRelink,
                                  MaxPVrefit             = 10000,
-                                 DoVertexType = 7)
+                                 DoVertexType = 7))
 
-   BPHY5_Select_Bd2JpsiKst = CompFactory.DerivationFramework.Select_onia2mumu(
+   BPHY5_Select_Bd2JpsiKst = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                  name                       = "BPHY5_Select_Bd2JpsiKst",
                                  HypothesisName             = "Bd",
                                  InputVtxContainerName      = BdJpsiKstContainerName,
@@ -242,9 +242,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                  VtxMassHypo                = 5279.6,
                                  MassMin                    = 100.0,      #no mass cuts here
                                  MassMax                    = 100000.0,   #no mass cuts here
-                                 Chi2Max                    = 200)
+                                 Chi2Max                    = 200))
 
-   BPHY5_Select_Bd2JpsiKstbar = CompFactory.DerivationFramework.Select_onia2mumu(
+   BPHY5_Select_Bd2JpsiKstbar = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                  name                       = "BPHY5_Select_Bd2JpsiKstbar",
                                  HypothesisName             = "Bdbar",
                                  InputVtxContainerName      = BdJpsiKstContainerName,
@@ -253,9 +253,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                  VtxMassHypo                = 5279.6,
                                  MassMin                    = 100.0,      #no mass cuts here
                                  MassMax                    = 100000.0,   #no mass cuts here
-                                 Chi2Max                    = 200)
+                                 Chi2Max                    = 200))
 
-   BPHY5_Select_Bs2JpsiKK = CompFactory.DerivationFramework.Select_onia2mumu(
+   BPHY5_Select_Bs2JpsiKK = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                  name                       = "BPHY5_Select_Bs2JpsiKK",
                                  HypothesisName             = "Bs",
                                  InputVtxContainerName      = BsJpsiPhiContainerName,
@@ -264,9 +264,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                  VtxMassHypo                = 5366.3,
                                  MassMin                    = 5000.0,
                                  MassMax                    = 5800.0, Do3d = False,
-                                 Chi2Max                    = 200)
+                                 Chi2Max                    = 200))
 
-   BPHY5_Select_Bpl2JpsiKpl  = CompFactory.DerivationFramework.Select_onia2mumu(
+   BPHY5_Select_Bpl2JpsiKpl  = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                  name                       = "BPHY5_Select_Bpl2JpsiKpl",
                                  HypothesisName             = "Bplus",
                                  InputVtxContainerName      = BPlusContainerName,
@@ -275,9 +275,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                  VtxMassHypo                = 5279.26,
                                  MassMin                    = 5279.26 - 500, Do3d = False,
                                  MassMax                    = 5279.26 + 500,
-                                 Chi2Max                    = 200 )
+                                 Chi2Max                    = 200 ))
 
-   BPHY5_Select_Bpl2JpsiPi  = CompFactory.DerivationFramework.Select_onia2mumu(
+   BPHY5_Select_Bpl2JpsiPi  = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                  name                       = "BPHY5_Select_Bpl2JpsiPi",
                                  HypothesisName             = "Bc",
                                  InputVtxContainerName      = BPlusContainerName,
@@ -286,9 +286,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                  VtxMassHypo                = 6275.1, Do3d = False,
                                  MassMin                    = 6275.1 - 500,
                                  MassMax                    = 6275.1 + 500,
-                                 Chi2Max                    = 200 )
+                                 Chi2Max                    = 200 ))
 
-   BPHY5_Select_B2JpsipipiX = CompFactory.DerivationFramework.Select_onia2mumu(
+   BPHY5_Select_B2JpsipipiX = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
                                 name                       = "BPHY5_Select_B2JpsipipiX",
                                 HypothesisName             = "pipiJpsi",
                                 InputVtxContainerName      = BpipiContainerName,
@@ -297,10 +297,10 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
                                 VtxMassHypo                = 4260,
                                 MassMin                    = 3400.0,
                                 MassMax                    = 5800.0, Do3d = False,
-                                Chi2Max                    = 200)
+                                Chi2Max                    = 200))
 
    #Do vertices without constraint for systematic reference
-   BPHY5_Revertex_Bs_NoMassConst  = CompFactory.DerivationFramework.ReVertex(
+   BPHY5_Revertex_Bs_NoMassConst  = acc.popToolsAndMerge(ReVertexCfg(flags,
        name                       = "BPHY5_Revertex_Bs_NoMassConst",
        InputVtxContainerName      = BsJpsiPhiContainerName,
        TrackIndices               = [ 0, 1, 2, 3 ],
@@ -310,9 +310,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
        RelinkTracks  =  toRelink,
        PVRefitter                 = PVrefit,
        TrkVertexFitterTool        = vkalvrt,
-       OutputVtxContainerName     = "BPHY5BsJpsiKKCandidatesNoConstraint")
+       OutputVtxContainerName     = "BPHY5BsJpsiKKCandidatesNoConstraint"))
 
-   BPHY5_Revertex_Bd_NoMassConst  = CompFactory.DerivationFramework.ReVertex(
+   BPHY5_Revertex_Bd_NoMassConst  = acc.popToolsAndMerge(ReVertexCfg(flags,
        name                       = "BPHY5_Revertex_Bd_NoMassConst",
        InputVtxContainerName      = "BPHY5BdJpsiKstCandidates",
        TrackIndices               = [ 0, 1, 2, 3 ],
@@ -322,9 +322,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
        RelinkTracks  =  toRelink,
        PVRefitter                 = PVrefit,
        TrkVertexFitterTool        = vkalvrt,
-       OutputVtxContainerName     = "BPHY5BdJpsiKstCandidatesNoConstraint")
+       OutputVtxContainerName     = "BPHY5BdJpsiKstCandidatesNoConstraint"))
 
-   BPHY5_Select_Bs2JpsiKKNoConstraint = CompFactory.DerivationFramework.Select_onia2mumu(
+   BPHY5_Select_Bs2JpsiKKNoConstraint = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
      name                       = "BPHY5_Select_Bs2JpsiKKNoConstraint",
      HypothesisName             = "Bs",
      V0Tools                    = V0Tools,
@@ -333,9 +333,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
      VtxMassHypo                = 5366.3,
      MassMin                    = 5000.0,
      MassMax                    = 5800.0, Do3d = False,
-     Chi2Max                    = 200)
+     Chi2Max                    = 200))
 
-   BPHY5_Select_BdBar2JpsiKpiNoConstraint = CompFactory.DerivationFramework.Select_onia2mumu(
+   BPHY5_Select_BdBar2JpsiKpiNoConstraint = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
      name                       = "BPHY5_Select_BdBar2JpsiKpiNoConstraint",
      HypothesisName             = "BdBar",
      V0Tools                    = V0Tools,
@@ -344,9 +344,9 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
      VtxMassHypo                = 5279.6,
      MassMin                    = 100.0,      #no mass cuts here
      MassMax                    = 100000.0,   #no mass cuts here
-     Chi2Max                    = 200)
+     Chi2Max                    = 200))
 
-   BPHY5_Select_Bd2JpsiKpiNoConstraint = CompFactory.DerivationFramework.Select_onia2mumu(
+   BPHY5_Select_Bd2JpsiKpiNoConstraint = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
      name                       = "BPHY5_Select_Bd2JpsiKpiNoConstraint",
      HypothesisName             = "Bd",
      V0Tools                    = V0Tools,
@@ -355,7 +355,7 @@ def BPHY5Kernel(flags, Decays="BsB+BdKstBpipiX"):
      VtxMassHypo                = 5279.6,
      MassMin                    = 100.0,      #no mass cuts here
      MassMax                    = 100000.0,   #no mass cuts here
-     Chi2Max                    = 200)
+     Chi2Max                    = 200))
 
 
    if not isSimulation: #Only Skim Data
@@ -416,7 +416,7 @@ def BPHY5Cfg(flags):
    from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
    from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
    BPHY5SlimmingHelper = SlimmingHelper("BPHY5SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-   from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+   from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
    AllVariables  = getDefaultAllVariables()
    StaticContent = []
     

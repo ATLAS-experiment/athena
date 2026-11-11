@@ -38,10 +38,10 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
     MuonToRelink = [ "Muons", "MuonsLRT" ] if doLRT else []
     TrkToRelink = ["InDetTrackParticles", "InDetLargeD0TrackParticles"] if doLRT else []
 
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (
         BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg,
         BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
-        AugOriginalCountsCfg)
+        AugOriginalCountsCfg, Reco_VertexCfg, VertexTrackIsolationCfg)
 
     # Adds primary vertex counts and track counts to EventInfo before they are thinned
     HIGG9D1_AugOriginalCounts = acc.popToolsAndMerge(
@@ -103,7 +103,7 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         useMCPCuts                  = False )
     acc.addPublicTool(HIGG9D1UpsiFinder)
 
-    HIGG9D1_Jpsi = CompFactory.DerivationFramework.Reco_Vertex(
+    HIGG9D1_Jpsi = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                   = "HIGG9D1_Jpsi",
         VertexSearchTool       = HIGG9D1JpsiFinder,
         OutputVtxContainerName = "HIGG9D1_JpsiCandidates",
@@ -115,10 +115,10 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         RelinkTracks           = TrkToRelink,
         RelinkMuons            = MuonToRelink,
         PVRefitter             = pvRefitter,
-        DoVertexType           = 7)
+        DoVertexType           = 7))
     acc.addPublicTool(HIGG9D1_Jpsi)
 
-    HIGG9D1_Upsi = CompFactory.DerivationFramework.Reco_Vertex(
+    HIGG9D1_Upsi = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                   = "HIGG9D1_Upsi",
         VertexSearchTool       = HIGG9D1UpsiFinder,
         OutputVtxContainerName = "HIGG9D1_UpsiCandidates",
@@ -130,7 +130,7 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         RelinkTracks           = TrkToRelink,
         RelinkMuons            = MuonToRelink,
         PVRefitter             = pvRefitter,
-        DoVertexType           = 7)
+        DoVertexType           = 7))
     acc.addPublicTool(HIGG9D1_Upsi)
 
     from InDetTrackSelectionTool.InDetTrackSelectionToolConfig import (
@@ -148,22 +148,22 @@ def HIGG9D1KernelCfg(flags, name='HIGG9D1Kernel', **kwargs):
         TrackSelectionTool = HIGG9D1_isoTrackSelTool))
     acc.addPublicTool(HIGG9D1_TrackIsoTool)
 
-    HIGG9D1_JpsiVtxTrkIsoDecor = CompFactory.DerivationFramework.VertexTrackIsolation(
+    HIGG9D1_JpsiVtxTrkIsoDecor = acc.popToolsAndMerge(VertexTrackIsolationCfg(flags,
         name                            = "HIGG9D1_JpsiVtxTrkIsoDecor",
         TrackIsoTool                    = HIGG9D1_TrackIsoTool,
         TrackContainer                  = "InDetTrackParticles",
         InputVertexContainer            = "HIGG9D1_JpsiCandidates",
         FixElecExclusion                = False,
-        IncludeV0                       = False)
+        IncludeV0                       = False))
     acc.addPublicTool(HIGG9D1_JpsiVtxTrkIsoDecor)
 
-    HIGG9D1_UpsiVtxTrkIsoDecor = CompFactory.DerivationFramework.VertexTrackIsolation(
+    HIGG9D1_UpsiVtxTrkIsoDecor = acc.popToolsAndMerge(VertexTrackIsolationCfg(flags,
         name                            = "HIGG9D1_UpsiVtxTrkIsoDecor",
         TrackIsoTool                    = HIGG9D1_TrackIsoTool,
         TrackContainer                  = "InDetTrackParticles",
         InputVertexContainer            = "HIGG9D1_UpsiCandidates",
         FixElecExclusion                = False,
-        IncludeV0                       = False)
+        IncludeV0                       = False))
     acc.addPublicTool(HIGG9D1_UpsiVtxTrkIsoDecor)
 
     # New subsequence
@@ -444,7 +444,7 @@ def HIGG9D1Cfg(flags):
     if flags.Tau.TauEleRM_isAvailable:
         HIGG9D1SlimmingHelper.SmartCollections.append("TauJets_EleRM")
 
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     AllVariables = getDefaultAllVariables()
     AllVariables += ["PrimaryVertices"]
     AllVariables += ["CombinedMuonTrackParticles"]
@@ -461,8 +461,8 @@ def HIGG9D1Cfg(flags):
     })
     AllVariables += ["HIGG9D1_DiphotonPrimaryVertices"]
 
-    HIGG9D1_Jpsi = acc.getPublicTool("HIGG9D1_Jpsi")
-    HIGG9D1_Upsi = acc.getPublicTool("HIGG9D1_Upsi")
+    HIGG9D1_Jpsi = acc.getPublicTool("HIGG9D1_Jpsi") # TODO Update this line once Reco_Vertex becomes an AthReentrantAlgorithm (ATLASG-3211)
+    HIGG9D1_Upsi = acc.getPublicTool("HIGG9D1_Upsi") # TODO Update this line once Reco_Vertex becomes an AthReentrantAlgorithm (ATLASG-3211)
 
     StaticContent = []
     if HIGG9D1_Jpsi.RefitPV:

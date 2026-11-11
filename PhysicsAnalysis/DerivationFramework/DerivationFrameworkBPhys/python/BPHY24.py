@@ -23,10 +23,10 @@ def BPHY24Cfg(flags):
     thinPassFlagsList = [] # List of pass-flags in the reconstructed candidates to se for the thinning
     finalCandidateList = []
 
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (
         BPHY_V0ToolCfg, BPHY_InDetDetailedTrackSelectorToolCfg,
         BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
-        AugOriginalCountsCfg)
+        AugOriginalCountsCfg, VertexTrackIsolationCfg, Select_onia2mumuCfg, JpsiPlusV0CascadeCfg, Reco_mumuCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     isSimulation = flags.Input.isMC
@@ -85,14 +85,15 @@ def BPHY24Cfg(flags):
                                              useMCPCuts                  = False )
 
 
-    BPHY24_SelectAndWrite_DiMuon = CompFactory.DerivationFramework.Reco_mumu( name   = "BPHY24_SelectAndWrite_DiMuon",
+    BPHY24_SelectAndWrite_DiMuon = acc.popToolsAndMerge(Reco_mumuCfg(flags, name   = "BPHY24_SelectAndWrite_DiMuon",
                                         JpsiFinder               = BPHY24_Finder_DiMuon,
                                         V0Tools                  = V0Tools,
                                         PVRefitter               = PVrefit,
                                         OutputVtxContainerName   = "BPHY24_DiMuon_Candidates",
                                         PVContainerName          = "PrimaryVertices",
                                         RefPVContainerName       = "SHOULDNOTBEUSED", # The container would be created if PV refit was requested (not needed at this point)
-                                        DoVertexType             = 7 ) # Vertex type marking our own reconstruced secondary candidates
+                                        DoVertexType             = 7 # Vertex type marking our own reconstruced secondary candidates
+                                        ))
 
     augsList += [ BPHY24_SelectAndWrite_DiMuon ]
     # Final selection of the di-muon candidates
@@ -100,15 +101,15 @@ def BPHY24Cfg(flags):
     outVtxList        += [ "BPHY24_DiMuon_Candidates" ]
     thinPassFlagsList += [ "passed_Jpsi" ] # TODO: is this really needed?
 
-    BPHY24_Select_DiMuons = CompFactory.DerivationFramework.Select_onia2mumu( name    = "BPHY24_Select_DiMuons",
-                                           HypothesisName        = "Jpsi",
-                                           InputVtxContainerName = "BPHY24_DiMuon_Candidates",
-                                           V0Tools               = V0Tools,
-                                           VtxMassHypo           = 3096.916, # used only for pseudo-proper decay time etc. calculations
-                                           MassMax               = 10000., # loose cut to keep selection from BPHY24_Finder_DiMuon
-                                           MassMin               = 0.,     # loose cut to keep selection from BPHY24_Finder_DiMuon
-                                           Chi2Max               = 1000.,  # loose cut to keep selection from BPHY24_Finder_DiMuon (chi2, not chi2/NDF)
-                                           DoVertexType          = 7 ) # Vertex type marking our own reconstruced secondary candidates   
+    BPHY24_Select_DiMuons = acc.popToolsAndMerge(Select_onia2mumuCfg(flags, name    = "BPHY24_Select_DiMuons",
+                                                                      HypothesisName        = "Jpsi",
+                                                                      InputVtxContainerName = "BPHY24_DiMuon_Candidates",
+                                                                      V0Tools               = V0Tools,
+                                                                      VtxMassHypo           = 3096.916, # used only for pseudo-proper decay time etc. calculations
+                                                                      MassMax               = 10000., # loose cut to keep selection from BPHY24_Finder_DiMuon
+                                                                      MassMin               = 0.,     # loose cut to keep selection from BPHY24_Finder_DiMuon
+                                                                      Chi2Max               = 1000.,  # loose cut to keep selection from BPHY24_Finder_DiMuon (chi2, not chi2/NDF)
+                                                                      DoVertexType          = 7 )) # Vertex type marking our own reconstruced secondary candidates   
 
     augsList += [ BPHY24_Select_DiMuons ]
 
@@ -161,7 +162,7 @@ def BPHY24Cfg(flags):
         ElectronSelection             = "d0_or_nod0"
         )
 
-    BPHY24_SelectAndWrite_DiElectron = CompFactory.DerivationFramework.Reco_mumu(
+    BPHY24_SelectAndWrite_DiElectron = acc.popToolsAndMerge(Reco_mumuCfg(flags,
             name                   = "BPHY24_SelectAndWrite_DiElectron",
             JpsiFinder             = BPHY24DiElectronFinder,
             V0Tools                = V0Tools,
@@ -170,11 +171,11 @@ def BPHY24Cfg(flags):
             PVContainerName        = "PrimaryVertices",
             RefPVContainerName     = "SHOULDNOTBEUSED",
             DoVertexType           = 7
-            )
+            ))
 
     augsList += [ BPHY24_SelectAndWrite_DiElectron ]
 
-    BPHY24_Select_DiElectrons = CompFactory.DerivationFramework.Select_onia2mumu(
+    BPHY24_Select_DiElectrons = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
             name                  = "BPHY24_Select_DiElectrons",
             HypothesisName        = "Jpsi",
             InputVtxContainerName = "BPHY24_DiElectron_Candidates",
@@ -184,7 +185,7 @@ def BPHY24Cfg(flags):
             MassMax               = 7000.0,
             Chi2Max               = 30,
             DoVertexType          = 7
-            )
+            ))
 
     thinTrkVtxList    += [ "BPHY24_DiElectron_Candidates" ]
     outVtxList        += [ "BPHY24_DiElectron_Candidates" ]
@@ -248,7 +249,7 @@ def BPHY24Cfg(flags):
     JpsiV0VertexFit = acc.popToolsAndMerge(JpsiV0VertexFitCfg(flags))
     acc.addPublicTool(JpsiV0VertexFit)
 
-    BPHY24JpsimmKshort          = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
+    BPHY24JpsimmKshort          = acc.popToolsAndMerge(JpsiPlusV0CascadeCfg(flags,
         name                    = "BPHY24mmKshort",
         V0Tools                 = V0Tools,
         HypothesisName          = "Bd",
@@ -268,7 +269,7 @@ def BPHY24Cfg(flags):
         CascadeVertexCollections= ["BPHY24JpsimmKshortCascadeSV2", "BPHY24JpsimmKshortCascadeSV1"],
         V0Vertices              = "BPHY24RecoV0Candidates",
         V0TrackContainerName    = mainIDInput,
-        RelinkTracks = originalTrackCond)
+        RelinkTracks = originalTrackCond))
 
     augsList += [BPHY24JpsimmKshort]
     outVtxList += BPHY24JpsimmKshort.CascadeVertexCollections
@@ -276,7 +277,7 @@ def BPHY24Cfg(flags):
     thinTrkVtxList += BPHY24JpsimmKshort.CascadeVertexCollections
     finalCandidateList += BPHY24JpsimmKshort.CascadeVertexCollections
 
-    BPHY24JpsieeKshort          = CompFactory.DerivationFramework.JpsiPlusV0Cascade(
+    BPHY24JpsieeKshort          = acc.popToolsAndMerge(JpsiPlusV0CascadeCfg(flags,
         name                    = "BPHY24eeKshort",
         V0Tools                 = V0Tools,
         HypothesisName          = "Bd",
@@ -298,7 +299,7 @@ def BPHY24Cfg(flags):
         CascadeVertexCollections= ["BPHY24JpsieeKshortCascadeSV2", "BPHY24JpsieeKshortCascadeSV1"],
         V0Vertices              = "BPHY24RecoV0Candidates",
         V0TrackContainerName    = mainIDInput,
-        RelinkTracks = originalTrackCond)
+        RelinkTracks = originalTrackCond))
 
     augsList += [BPHY24JpsieeKshort]
     finalCandidateList += BPHY24JpsieeKshort.CascadeVertexCollections
@@ -328,36 +329,36 @@ def BPHY24Cfg(flags):
                                                               TrackSelectionTool = TrackSelTool,
                                                               TTVATool = TTVATool))
     acc.addPublicTool(TrackIsoTool)
-    BPHY24TrackIsolationDecoratorBtoKee = CompFactory.DerivationFramework.VertexTrackIsolation(
+    BPHY24TrackIsolationDecoratorBtoKee = acc.popToolsAndMerge(VertexTrackIsolationCfg(flags,
       name                            = "BPHY24TrackIsolationDecoratorBtoKee",
       TrackIsoTool                    = TrackIsoTool,
       TrackContainer                  = "InDetTrackParticles",
       InputVertexContainer            = "BPHY24JpsieeKshortCascadeSV1",
       FixElecExclusion                = True,
-      IncludeV0                       = True)
-    BPHY24TrackIsolationDecoratorBtoKmumu = CompFactory.DerivationFramework.VertexTrackIsolation(
+      IncludeV0                       = True))
+    BPHY24TrackIsolationDecoratorBtoKmumu = acc.popToolsAndMerge(VertexTrackIsolationCfg(flags,
       name                            = "BPHY24TrackIsolationDecoratorBtoKmumu",
       TrackIsoTool                    = TrackIsoTool,
       TrackContainer                  = "InDetTrackParticles",
       InputVertexContainer            = "BPHY24JpsimmKshortCascadeSV1",
       FixElecExclusion                = False,
-      IncludeV0                       = True)
+      IncludeV0                       = True))
     
-    BPHY24TrackIsolationDecoratorJpsiee = CompFactory.DerivationFramework.VertexTrackIsolation(
+    BPHY24TrackIsolationDecoratorJpsiee = acc.popToolsAndMerge(VertexTrackIsolationCfg(flags,
       name                            = "BPHY24TrackIsolationDecoratorJpsiee",
       TrackIsoTool                    = TrackIsoTool,
       TrackContainer                  = "InDetTrackParticles",
       InputVertexContainer            = "BPHY24_DiElectron_Candidates",
       FixElecExclusion                = True,
-      IncludeV0                       = False)
+      IncludeV0                       = False))
     
-    BPHY24TrackIsolationDecoratorJpsimumu = CompFactory.DerivationFramework.VertexTrackIsolation(
+    BPHY24TrackIsolationDecoratorJpsimumu = acc.popToolsAndMerge(VertexTrackIsolationCfg(flags,
       name                            = "BPHY24TrackIsolationDecoratorJpsimumu",
       TrackIsoTool                    = TrackIsoTool,
       TrackContainer                  = "InDetTrackParticles",
       InputVertexContainer            = "BPHY24_DiMuon_Candidates",
       FixElecExclusion                = False,
-      IncludeV0                       = False)
+      IncludeV0                       = False))
 
     augsList += [ BPHY24TrackIsolationDecoratorBtoKee,
               BPHY24TrackIsolationDecoratorBtoKmumu,
@@ -518,7 +519,7 @@ def BPHY24Cfg(flags):
     BPHY24SlimmingHelper = SlimmingHelper("BPHY24SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     from AthenaConfiguration.Enums import MetadataCategory
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     AllVariables  = getDefaultAllVariables()
     StaticContent = []
     ExtraVariables = []

@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # BPHY21.py
 #====================================================================
@@ -12,10 +12,10 @@ BPHYDerivationName = "BPHY21"
 streamName = "StreamDAOD_BPHY21"
 
 def BPHY21Cfg(flags):
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import (
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import (
         BPHY_V0ToolCfg,  BPHY_InDetDetailedTrackSelectorToolCfg,
         BPHY_VertexPointEstimatorCfg, BPHY_TrkVKalVrtFitterCfg,
-        AugOriginalCountsCfg)
+        AugOriginalCountsCfg, Reco_VertexCfg, Select_onia2mumuCfg)
     from JpsiUpsilonTools.JpsiUpsilonToolsConfig import PrimaryVertexRefittingToolCfg
     acc = ComponentAccumulator()
     isSimulation = flags.Input.isMC
@@ -71,7 +71,7 @@ def BPHY21Cfg(flags):
                          VertexPointEstimator       = vpest,
                          useMCPCuts                 = False)
     acc.addPublicTool(BPHY21_JpsiFinder)
-    BPHY21_JpsiSelectAndWrite = CompFactory.DerivationFramework.Reco_Vertex(
+    BPHY21_JpsiSelectAndWrite = acc.popToolsAndMerge(Reco_VertexCfg(flags,
         name                   = "BPHY21_JpsiSelectAndWrite",
         VertexSearchTool       = BPHY21_JpsiFinder,
         OutputVtxContainerName = "BPHY21_JpsiCandidates",
@@ -79,8 +79,8 @@ def BPHY21Cfg(flags):
         PVRefitter             = PVrefit,
         PVContainerName        = "PrimaryVertices",
         RefPVContainerName     = "SHOULDNOTBEUSED",
-        DoVertexType           = 1)
-    BPHY21_Select_Jpsi2mumu = CompFactory.DerivationFramework.Select_onia2mumu(
+        DoVertexType           = 1))
+    BPHY21_Select_Jpsi2mumu = acc.popToolsAndMerge(Select_onia2mumuCfg(flags,
         name                  = "BPHY21_Select_Jpsi2mumu",
         HypothesisName        = "Jpsi",
         InputVtxContainerName = "BPHY21_JpsiCandidates",
@@ -90,7 +90,7 @@ def BPHY21Cfg(flags):
         MassMax               = 3600.0,
         Chi2Max               = 200,
         LxyMin                = 0.1,
-        DoVertexType          = 1)
+        DoVertexType          = 1))
 
     BPHY21_AugOriginalCounts = acc.popToolsAndMerge(
         AugOriginalCountsCfg(flags, name = "BPHY21_AugOriginalCounts"))
@@ -128,7 +128,7 @@ def BPHY21Cfg(flags):
     from OutputStreamAthenaPool.OutputStreamConfig import OutputStreamCfg
     from xAODMetaDataCnv.InfileMetaDataConfig import SetupMetaDataForStreamCfg
     BPHY21_SlimmingHelper = SlimmingHelper("BPHY21_SlimmingHelper", NamesAndTypes = flags.Input.TypedCollections, flags = flags)
-    from DerivationFrameworkBPhys.commonBPHYMethodsCfg import getDefaultAllVariables
+    from DerivationFrameworkBPhys.CommonBPhysMethodsConfig import getDefaultAllVariables
     BPHY21_AllVariables  = getDefaultAllVariables()
     BPHY21_StaticContent = []
     
