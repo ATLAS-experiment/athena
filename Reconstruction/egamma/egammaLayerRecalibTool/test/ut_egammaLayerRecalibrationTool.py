@@ -305,7 +305,6 @@ class TestLayerxAOD(unittest.TestCase):
             self.assertAlmostEqual(inputs.E1raw, el.caloCluster().auxdataConst["double"]("correctedcl_Es1"))
             self.assertAlmostEqual(inputs.E2raw, el.caloCluster().auxdataConst["double"]("correctedcl_Es2"))
             self.assertAlmostEqual(inputs.E3raw, el.caloCluster().auxdataConst["double"]("correctedcl_Es3"))
-#            self.assertTrue(el.caloCluster().auxdataConst["string"]("layer_correction") == tune) # TODO: check why not working in 2.4
             i += 1
 
         self.assertGreater(i, 10, msg="too few electrons")

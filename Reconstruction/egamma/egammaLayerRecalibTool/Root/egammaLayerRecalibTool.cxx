@@ -1105,8 +1105,6 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
   static const SG::Decorator<double> deco_E1("correctedcl_Es1");
   static const SG::Decorator<double> deco_E2("correctedcl_Es2");
   static const SG::Decorator<double> deco_E3("correctedcl_Es3");
-  static const SG::Decorator<std::string>
-    deco_layer_correction("layer_correction");
 
   if (status == CP::CorrectionCode::Ok) {
     ATH_MSG_DEBUG("decorating cluster with corrected layer energies");
@@ -1118,7 +1116,6 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
       inputs.E2raw : cluster->energyBE(2) + addE2;
     deco_E3(*cluster) = m_doSaccCorrections ?
       inputs.E3raw : cluster->energyBE(3) + addE3;
-    deco_layer_correction(*cluster) = isData ? m_tune+fixT : fixT;
     return status;
   }
 
@@ -1132,7 +1129,6 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
   deco_E1(*cluster) = cluster->energyBE(1);
   deco_E2(*cluster) = cluster->energyBE(2) + addE2;
   deco_E3(*cluster) = cluster->energyBE(3) + addE3;
-  deco_layer_correction(*cluster) = isData ? m_tune + "_Err" + fixT : fixT;
   return status;
 
 }
