@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,6 +13,7 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "CxxUtils/checker_macros.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
 // GeoModel
 #include "GeoPrimitives/GeoPrimitives.h"
 //
@@ -20,11 +21,13 @@
 // Trk
 #include "CaloTrackingGeometry/ICaloSurfaceBuilder.h"
 #include "TrkDetDescrInterfaces/ICaloTrackingVolumeBuilder.h"
+#include "TrkDetDescrInterfaces/ITrackingVolumeCreator.h"
 #include "TrkGeometry/Material.h"
 // STL
 #include <memory>
 #include <mutex>
 #include <vector>
+#include "Gaudi/Property.h"
 
 class TileDetDescrManager;
 class CaloDetDescrManager;
@@ -33,7 +36,6 @@ class StoreGateSvc;
 
 namespace Trk {
 class ILayerArrayCreator;
-class ITrackingVolumeCreator;
 class TrackingVolume;
 class Volume;
 class Layer;
@@ -81,19 +83,19 @@ public:
 
   void throwIntoGarbage(std::unique_ptr<Trk::Material> mat) const;
 
-  const TileDetDescrManager* m_tileMgr; //!< Calo DetDescrMgr
-  std::string m_tileMgrLocation;        //!< Location of the CaloDetDescrMgr
+  const TileDetDescrManager* m_tileMgr{nullptr}; //!< Calo DetDescrMgr
+  Gaudi::Property<std::string> m_tileMgrLocation{this, "TileDetManagerLocation", "Tile"};        //!< Location of the CaloDetDescrMgr
 
-  ToolHandle<Trk::ITrackingVolumeCreator> m_trackingVolumeCreator; //!< Second helper for volume creation
+  PublicToolHandle<Trk::ITrackingVolumeCreator> m_trackingVolumeCreator{this, "TrackingVolumeCreator", "Trk::CylinderVolumeCreator/TrackingVolumeCreator"}; //!< Second helper for volume creation
 
-  double m_tileBarrelEnvelope; //!< envelope Cover of the Barrel
+  Gaudi::Property<double> m_tileBarrelEnvelope{this, "BarrelEnvelopeCover", 25.*Gaudi::Units::mm}; //!< envelope Cover of the Barrel
 
-  bool m_useCaloSurfBuilder; //!< if true use DetDescr based layering, if false use biequidistant layering
-  unsigned int m_tileBarrelLayersPerSampling; //!< if m_useCaloSurfBuilder == true, number of layers per dead material
+  Gaudi::Property<bool> m_useCaloSurfBuilder{this, "UseCaloSurfBuilder", true}; //!< if true use DetDescr based layering, if false use biequidistant layering
+  Gaudi::Property<unsigned int> m_tileBarrelLayersPerSampling{this, "BarrelLayersPerSampling", 1}; //!< if m_useCaloSurfBuilder == true, number of layers per dead material
                                               //!< region or sampling
-  ToolHandle<ICaloSurfaceBuilder> m_surfBuilder; //!< tool required for definition of active volumes
+  PublicToolHandle<ICaloSurfaceBuilder> m_surfBuilder{this, "CaloSurfaceBuilder", "CaloSurfaceBuilder"}; //!< tool required for definition of active volumes
 
-  bool m_forceSymmetry; //!< forces volume symmetry between negative/positive part
+  Gaudi::Property<bool> m_forceSymmetry{this, "ForceVolumeSymmetry", true}; //!< forces volume symmetry between negative/positive part
 
 };
 

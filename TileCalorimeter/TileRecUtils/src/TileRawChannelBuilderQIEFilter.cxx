@@ -200,20 +200,11 @@ float TileRawChannelBuilderQIEFilter::compute(int ros, int drawer, int channel, 
   amplitude = 0.;
   time = 0.; //TODO: Time needs to be implemented using the QIE TDC
 
-  //Case 1: No pileup suppression
-  // Here we assume that the digits are in fC
-  // TODO; The code needs to be able to handle QIE counts instead of fC
-  //amplitude = m_digits[3] + m_digits[4];
-  //Case 2: with Pileup suppression
-  //TODO: Timing information needs to be added
-  //February 2016: The transfer constants are taken from the Oct 2015 testbeam results; they are not optimal:
-  //0.16/(1-0.16) = 0.19
   //TODO: These numbers may be placed in a database
   const float avg_fraction = 0.18;
   const float Q_1pe = 17.; //charge per a photo-electron in fC
 
-
-  //Case 3: with pileup suppression
+  // With pileup suppression
   double prob_cut_off = 0.005;
 
   if (m_digits[2] > 0) //check if there is pileup in the preceding BC.
