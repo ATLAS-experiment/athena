@@ -310,19 +310,19 @@ def DecoratePLITCfg(
     # /cvmfs/atlas.cern.ch/repo/sw/database/GroupData/
     if lepton_name == 'Electrons':
         if isRun3:
-            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-04-25/")
+            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2026-10-29/")
             kwargs.setdefault("ConfigFileVersion", 'network_run3_electrons_barrel.onnx')
             kwargs.setdefault("ConfigFileVersion_endcap", 'network_run3_electrons_endcap.onnx')
         else:
-            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-04-25/")
+            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2026-10-29/")
             kwargs.setdefault("ConfigFileVersion", 'network_run2_electrons_barrel.onnx')
             kwargs.setdefault("ConfigFileVersion_endcap", 'network_run2_electrons_endcap.onnx')
     elif lepton_name == 'Muons':
         if isRun3:
-            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-04-25/")
+            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2026-10-29/")
             kwargs.setdefault("ConfigFileVersion", 'network_run3_muons.onnx')
         else:
-            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2025-04-25/")
+            kwargs.setdefault("ConfigPath", "IsolationSelection/PLIT/2026-10-29/")
             kwargs.setdefault("ConfigFileVersion", 'network_run2_muons.onnx')
     else:
         raise ValueError(f'Decorate{Tagger_name} - unknown lepton type: "{lepton_name}"')
