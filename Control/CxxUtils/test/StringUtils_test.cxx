@@ -7,8 +7,52 @@
 
 
 #include "CxxUtils/StringUtils.h"
+#include "CxxUtils/StringUtilsTemplates.h"
 #include <string>
 #include <iostream>
+#include <cassert>
+
+void test_make_string_compatibility() {
+    /// 1. Test String Literal
+    {
+        std::string result = CxxUtils::strcat("Hello, ");
+        assert(result == "Hello, ");
+    }
+
+    /// 2. Test std::string
+    {
+        std::string stdStr = "CERN";
+        std::string result = CxxUtils::strcat(stdStr);
+        assert(result == "CERN");
+    }
+
+    /// 3. Test std::string_view
+    {
+        std::string_view sv = "Collaboration";
+        std::string result = CxxUtils::strcat(sv);
+        assert(result == "Collaboration");
+    }
+
+    /// 4. Test single char
+    {
+        char ch = '!';
+        std::string result = CxxUtils::strcat(ch);
+        assert(result == "!");
+    }
+
+    /// 5. Test Combined Types (Mixing Literals, std::string, string_view, and char)
+    {
+        std::string midStr = " beautiful ";
+        std::string_view svEnd = "World";
+        char exclamation = '!';
+        
+        std::string result = CxxUtils::strcat("Hello", midStr, svEnd, exclamation);
+        assert(result == "Hello beautiful World!");
+    }
+
+    std::cout << "All make_string compatibility tests passed successfully!\n";
+}
+
 
 int main() {
     /// Test conversion of simple integers
@@ -87,5 +131,7 @@ int main() {
             return 1;
         }
     }
+
+    test_make_string_compatibility();
     return 0;
 }
