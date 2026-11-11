@@ -1693,9 +1693,9 @@ StatusCode TEvent::setAuxStore(const std::string &key,
 ///                or not
 /// @returns The usual @c StatusCode tyoes
 ///
-StatusCode TEvent::record(void* obj, const std::string &typeName,
-                          const std::string &key, bool overwrite, bool metadata,
-                          bool isOwner) {
+StatusCode TEvent::recordImpl(void* obj, const std::string &typeName,
+                              const std::string &key, bool overwrite, bool metadata,
+                              bool isOwner) {
 
   // Check if we have an output tree when writing an event:
   if (!m_outTree && !metadata) {

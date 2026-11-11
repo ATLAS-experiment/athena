@@ -310,9 +310,13 @@ class Event : public TVirtualEvent,
                                  bool metadata) = 0;
 
   /// Record an object into a connected output file
-  virtual StatusCode record(void* obj, const std::string& typeName,
-                            const std::string& key, bool overwrite,
-                            bool metadata, bool isOwner) = 0;
+  StatusCode record(void* obj, const std::string& typeName,
+                    const std::string& key, bool overwrite,
+                    bool metadata, bool isOwner)
+  { return recordImpl( obj, typeName, key, overwrite, metadata, isOwner ); }
+  virtual StatusCode recordImpl(void* obj, const std::string& typeName,
+                                const std::string& key, bool overwrite,
+                                bool metadata, bool isOwner) = 0;
   /// Record an auxiliary store into a connected output file
   virtual StatusCode recordAux(TVirtualManager& mgr, const std::string& key,
                                bool metadata) = 0;
