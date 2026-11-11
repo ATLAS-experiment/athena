@@ -19,6 +19,12 @@
 #include <TClass.h>
 #include <TVirtualCollectionProxy.h>
 #include <ROOT/RNTupleModel.hxx>
+#include "Math/Vector4D.h"
+
+using ROOT::Math::PtEtaPhiEVector;
+using ROOT::Math::PtEtaPhiMVector;
+using ROOT::Math::PxPyPzEVector;
+using ROOT::Math::PxPyPzMVector;
 
 // System include(s):
 #include <iostream>
@@ -94,7 +100,13 @@ namespace {
         if ( type_info == typeid(unsigned long long) ) return makeScalarField<unsigned long long>(model, fieldName, rawPtr);
         if ( type_info == typeid(char) ) return makeScalarField<char>(model, fieldName, rawPtr);
         if ( type_info == typeid(unsigned char) ) return makeScalarField<unsigned char>(model, fieldName, rawPtr);
+        if ( type_info == typeid(std::string) ) return makeScalarField<std::string>(model, fieldName, rawPtr);
         if ( type_info == typeid(bool) ) return makeScalarField<bool>(model, fieldName, rawPtr);
+        if ( type_info == typeid(PtEtaPhiEVector) ) return makeScalarField<PtEtaPhiEVector>(model, fieldName, rawPtr);
+        if ( type_info == typeid(PtEtaPhiMVector) ) return makeScalarField<PtEtaPhiMVector>(model, fieldName, rawPtr);
+        if ( type_info == typeid(PxPyPzEVector) ) return makeScalarField<PxPyPzEVector>(model, fieldName, rawPtr);
+        if ( type_info == typeid(PxPyPzMVector) ) return makeScalarField<PxPyPzMVector>(model, fieldName, rawPtr);
+
 
         // Vector types
         if ( type_info == typeid(std::vector<float>) ) return makeVecField<float>(model, fieldName, rawPtr, ops);
@@ -111,12 +123,16 @@ namespace {
         if ( type_info == typeid(std::vector<unsigned char>) ) return makeVecField<unsigned char>(model, fieldName, rawPtr, ops);
         if ( type_info == typeid(std::vector<bool>) ) return makeVecField<bool>(model, fieldName, rawPtr, ops);
         if ( type_info == typeid(std::vector<std::string>) ) return makeVecField<std::string>(model, fieldName, rawPtr, ops);
-
-        if ( type_info == typeid(std::string) ) {
-            auto ptr = model.MakeField<std::string>(fieldName);
-            rawPtr = ptr.get();
-            return ptr;
-        }
+        if ( type_info == typeid(std::vector<PtEtaPhiEVector>) ) return makeVecField<PtEtaPhiEVector>(model, fieldName, rawPtr, ops);
+        if ( type_info == typeid(std::vector<PtEtaPhiMVector>) ) return makeVecField<PtEtaPhiMVector>(model, fieldName, rawPtr, ops);
+        if ( type_info == typeid(std::vector<PxPyPzEVector>) ) return makeVecField<PxPyPzEVector>(model, fieldName, rawPtr, ops);
+        if ( type_info == typeid(std::vector<PxPyPzMVector>) ) return makeVecField<PxPyPzMVector>(model, fieldName, rawPtr, ops);
+        if ( type_info == typeid(std::vector<std::vector<float>>) ) return makeVecField<std::vector<float>>(model, fieldName, rawPtr, ops);
+        if ( type_info == typeid(std::vector<std::vector<int>>) ) return makeVecField<std::vector<int>>(model, fieldName, rawPtr, ops);
+        if ( type_info == typeid(std::vector<std::vector<PtEtaPhiEVector>>) ) return makeVecField<std::vector<PtEtaPhiEVector>>(model, fieldName, rawPtr, ops);
+        if ( type_info == typeid(std::vector<std::vector<PtEtaPhiMVector>>) ) return makeVecField<std::vector<PtEtaPhiMVector>>(model, fieldName, rawPtr, ops);
+        if ( type_info == typeid(std::vector<std::vector<PxPyPzEVector>>) ) return makeVecField<std::vector<PxPyPzEVector>>(model, fieldName, rawPtr, ops);
+        if ( type_info == typeid(std::vector<std::vector<PxPyPzMVector>>) ) return makeVecField<std::vector<PxPyPzMVector>>(model, fieldName, rawPtr, ops);
 
         msg << MSG::ERROR << "Unsupported type for RNTuple field \"" << fieldName << "\"" << endmsg;
         return nullptr;
