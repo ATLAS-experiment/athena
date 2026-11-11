@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -1363,9 +1363,8 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhoton(double time,
 
     // save info for validation
     if (m_validationMode && m_validationTool.isEnabled()) {
-      Amg::Vector3D* nMom = new Amg::Vector3D((pElectron-gammaE)*particleDir);
-      m_validationTool->saveISFVertexInfo(3,vertex,*parent,inEl,nMom,children);
-      delete nMom;
+      const Amg::Vector3D& nMom = Amg::Vector3D((pElectron-gammaE)*particleDir);
+      m_validationTool->saveISFVertexInfo(3,vertex,*parent,inEl,&nMom,children);
     }
 
 
@@ -1504,9 +1503,8 @@ void iFatras::McMaterialEffectsUpdator::recordBremPhotonLay(const ISF::ISFPartic
 
     // save info for validation
     if (m_validationMode && m_validationTool.isEnabled()) {
-      Amg::Vector3D* nMom = new Amg::Vector3D((pElectron-gammaE)*particleDir);
-      m_validationTool->saveISFVertexInfo(3,vertex,*parent,pElectron*particleDir,nMom,children);
-      delete nMom;
+      const Amg::Vector3D& nMom = Amg::Vector3D((pElectron-gammaE)*particleDir);
+      m_validationTool->saveISFVertexInfo(3,vertex,*parent,pElectron*particleDir,&nMom,children);
     }
 
 
@@ -1630,9 +1628,7 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
 
     // save info for validation
     if (m_validationMode && m_validationTool.isEnabled()) {
-      Amg::Vector3D* nMom = nullptr;
-      m_validationTool->saveISFVertexInfo(process,position,*parent,momentum,nMom,childVector);
-      delete nMom;
+      m_validationTool->saveISFVertexInfo(process,position,*parent,momentum,nullptr,childVector);
     }
 
     return nullptr;
@@ -1716,9 +1712,7 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
 
     // save info for validation
     if (m_validationMode && m_validationTool.isEnabled()) {
-      Amg::Vector3D* nMom = nullptr;
-      m_validationTool->saveISFVertexInfo(process,position,*parent,momentum,nMom,children);
-      delete nMom;
+      m_validationTool->saveISFVertexInfo(process,position,*parent,momentum,nullptr,children);
     }
 
     // kill the track -----------------------------
@@ -1739,7 +1733,6 @@ iFatras::McMaterialEffectsUpdator::interact(double time,
 
   if (process==121) {    // hadronic interaction
 
-    //const Amg::Vector3D pDir = momentum.unit();
 
     auto parm = std::make_unique<Trk::CurvilinearParameters>(position,momentum,parent->charge());
 
@@ -1837,9 +1830,7 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
 
     // save info for validation
     if (m_validationMode && m_validationTool.isEnabled()) {
-      Amg::Vector3D* nMom = nullptr;
-      m_validationTool->saveISFVertexInfo(process,position,*parent,momentum,nMom,children);
-      delete nMom;
+      m_validationTool->saveISFVertexInfo(process,position,*parent,momentum,nullptr,children);
     }
 
     // Check that the new/updated ISFParticles have a valid TruthBinding
@@ -1920,9 +1911,7 @@ ISF::ISFParticleVector  iFatras::McMaterialEffectsUpdator::interactLay(const ISF
 
     // save info for validation
     if (m_validationMode && m_validationTool.isEnabled()) {
-      Amg::Vector3D* nMom = nullptr;
-      m_validationTool->saveISFVertexInfo(process,parm.position(),*parent,parm.momentum(),nMom,childVector);
-      delete nMom;
+      m_validationTool->saveISFVertexInfo(process,parm.position(),*parent,parm.momentum(),nullptr,childVector);
     }
   }
 

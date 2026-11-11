@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -260,9 +260,7 @@ void iFatras::G4ParticleDecayHelper::handleDecayParticles(const ISF::ISFParticle
 
       // save info for validation
       if (m_validationMode && m_validationTool.isEnabled()) {
-        Amg::Vector3D* nMom = 0;
-        m_validationTool->saveISFVertexInfo(process,particle.position(),particle,particle.momentum(),nMom,decayProducts);
-        delete nMom;
+        m_validationTool->saveISFVertexInfo(process,particle.position(),particle,particle.momentum(),nullptr,decayProducts);
       }
 
     }
