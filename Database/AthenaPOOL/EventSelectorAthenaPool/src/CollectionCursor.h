@@ -14,18 +14,15 @@
 #include <map>
 #include <string>
 
+using ContainerMap = std::map< std::string, DbContainer >;
 
-namespace pool {
-
-    using ContainerMap = std::map< std::string, DbContainer >;
-
-      /**
-       * @class CollectionCursor CollectionCursor.h 
-       *
-       * Reader object for Collections
-       */
-      class CollectionCursor
-      {
+/**
+  * @class CollectionCursor CollectionCursor.h 
+  *
+  * Reader object for Collections
+  */
+class CollectionCursor
+{
       public:
 
          CollectionCursor(
@@ -60,8 +57,6 @@ namespace pool {
          std::string                         m_tokenStr;
 
          std::size_t                         m_idx;
-      };
-
-}
+};
 
 #endif

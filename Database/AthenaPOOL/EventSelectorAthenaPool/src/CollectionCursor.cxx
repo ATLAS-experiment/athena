@@ -9,8 +9,6 @@
 #include "StorageSvc/APRDefaults.h"
 #include "StorageSvc/DbContainer.h"
 
-using namespace pool;
-
 
 CollectionCursor::CollectionCursor(
    const CollectionRowBuffer& collectionRowBuffer,
@@ -58,7 +56,7 @@ bool CollectionCursor::next()
 }
 
 
-const pool::CollectionRowBuffer&
+const CollectionRowBuffer&
 CollectionCursor::currentRow() const
 {
   return m_collectionRowBuffer;

@@ -78,10 +78,10 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
          inputCollection = std::format("PFN:{}", inputCollection);
       }
       StatusCode sc = m_poolSvc->connectCollection(inputCollection, "Input", m_contextId);
-      std::unique_ptr<pool::Collection> poolCollection;
+      std::unique_ptr<Collection> poolCollection;
       try {
          auto fileDescr = m_poolSvc->getInputFileDescriptor(m_contextId, inputCollection);
-         poolCollection = std::make_unique<pool::Collection>(fileDescr);
+         poolCollection = std::make_unique<Collection>(fileDescr);
       } catch (const std::exception& e) {
          ATH_MSG_DEBUG("Failed to open collection '" << inputCollection << "': " << e.what());
       }
@@ -92,7 +92,7 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
          ATH_MSG_ERROR("Could not open item: \"" << inputCollection << "\" from the collection list.");
          return StatusCode::FAILURE;
       }
-      std::unique_ptr<pool::CollectionCursor> headerIterator = poolCollection->cursor();
+      std::unique_ptr<CollectionCursor> headerIterator = poolCollection->cursor();
       if (!headerIterator->next()) {
          ATH_MSG_WARNING("Cannot retrieve Collection.");
          continue;

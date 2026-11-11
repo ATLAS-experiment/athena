@@ -1,9 +1,9 @@
 /*
- *   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+ *   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  *   */
 
-#ifndef POOL_ROOTTREEINDEXCONTAINER_H
-#define POOL_ROOTTREEINDEXCONTAINER_H 1
+#ifndef ROOTTREEINDEXCONTAINER_H
+#define ROOTTREEINDEXCONTAINER_H 1
 
 #include "RootTreeContainer.h"
 
@@ -14,8 +14,7 @@ class StatusCode;
 class TTree;
 class TBranch;
 
-namespace pool {
-  /** @class RootTreeIndexContainer RootTreeIndexContainer.h src/RootTreeIndexContainer.h
+/** @class RootTreeIndexContainer RootTreeIndexContainer.h src/RootTreeIndexContainer.h
     *
     * Description:
     * Spezialization of RootTreeContainer
@@ -27,11 +26,9 @@ namespace pool {
     * stored inside its tree.
     *
     * @author  N.Dulin, P.v.Gemmeren
-    * @date    8/1/2018
-    * @version 1.0
     */
 
-   class RootTreeIndexContainer : public RootTreeContainer {
+ class RootTreeIndexContainer : public RootTreeContainer {
    public:
       explicit RootTreeIndexContainer(const std::string& name);
       RootTreeIndexContainer (const RootTreeIndexContainer&) = delete;
@@ -78,6 +75,6 @@ namespace pool {
 
       /// first object retrieval attempt flag (to rebuild index)
       bool              m_firstRead;
-   };
-}
-#endif //POOL_ROOTTREEINDEXCONTAINER_H
+};
+
+#endif

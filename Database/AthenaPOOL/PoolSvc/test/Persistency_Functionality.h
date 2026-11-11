@@ -14,19 +14,16 @@
 #include "TestClassSTLContainersExt.h"
 
 class Token;
-
-namespace pool {
-  class DbType; 
-}
+class DbType; 
 
 class TestDriver : public PersTestBase {
   public:
     explicit TestDriver( const std::string& catname = "PersF.catatlog.xml" );
 
     int execute();
-    void runTestForStorageType(const pool::DbType& storageType);
+    void runTestForStorageType(const DbType& storageType);
 
-    void write( pool::DbType storageType );
+    void write( DbType storageType );
     void read();
     void readCollections();
     void clearCache();

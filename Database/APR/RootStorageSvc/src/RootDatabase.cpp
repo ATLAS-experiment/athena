@@ -4,11 +4,8 @@
 
 //====================================================================
 //        Root Database file implementation
-//--------------------------------------------------------------------
-//
-//   Package  : Athena APR RootStorageSvc (earlier the POOL project)
-//
 //====================================================================
+
 #include "RootDatabase.h"
 #include "RootTreeContainer.h"
 #include "StorageSvc/DbDatabase.h"
@@ -41,7 +38,6 @@
 #include "ROOT/RNTuple.hxx"
 #include "ROOT/RNTupleReader.hxx"
 
-using namespace pool;
 using namespace std;
 constexpr const static auto SUCCESS = StatusCode::SUCCESS;
 constexpr const static auto FAILURE = StatusCode::FAILURE;

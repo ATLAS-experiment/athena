@@ -14,7 +14,6 @@
 #include <exception>
 #include <memory>
 
-using namespace pool;
 using std::cerr, std::cout, std::endl;
 using std::string;
 

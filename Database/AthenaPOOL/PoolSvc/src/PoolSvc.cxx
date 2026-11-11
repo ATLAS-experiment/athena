@@ -78,7 +78,7 @@ StatusCode PoolSvc::initialize() {
 
    MSG::Level athLvl = msg().level();
    ATH_MSG_DEBUG("OutputLevel is " << (int)athLvl);
-   pool::DbPrintLvl::setLevel(athLvl);
+   DbPrintLvl::setLevel(athLvl);
    return(setupPersistencySvc());
 }
 
@@ -335,8 +335,8 @@ unsigned int PoolSvc::getInputContextMapSize() const {
    return(m_inputContextLabel.size());
 }
 //__________________________________________________________________________
-pool::FileDescriptor PoolSvc::getInputFileDescriptor(unsigned int contextId,
-                                                     const std::string& connection) {
+FileDescriptor PoolSvc::getInputFileDescriptor(unsigned int contextId,
+                                               const std::string& connection) {
    if (contextId == m_dbSessionVec.size()) {
       ATH_MSG_DEBUG("getInputFileDescriptor: On-demand creating new input Stream id = " << contextId);
       contextId = this->getInputContext("");
@@ -350,7 +350,7 @@ pool::FileDescriptor PoolSvc::getInputFileDescriptor(unsigned int contextId,
    if (!dbH) {
       throw std::runtime_error("Could not retrieve a database handle to '" + connection + "'");
    }
-   pool::FileDescriptor* fd = dbH->fileDescriptor();
+   FileDescriptor* fd = dbH->fileDescriptor();
    if (!fd) {
       throw std::runtime_error("Could not retrieve connection info from DB '" + connection + "'");
    }
@@ -773,7 +773,7 @@ bool PoolSvc::createCatalog() {
    }
    // set the output level of the XMLCatalog component - works only if the Gaudi AppMgr was initialized
    Gaudi::svcLocator()->service<IMessageSvc>("MessageSvc")
-      ->setOutputLevel("XMLCatalog", pool::DbPrint::getOutputLvl());
+      ->setOutputLevel("XMLCatalog", DbPrint::getOutputLvl());
    m_catalogMgr->removeCatalog("*");
    for (auto& catalog : m_readCatalog.value()) {
       ATH_MSG_DEBUG("POOL ReadCatalog is " << catalog);

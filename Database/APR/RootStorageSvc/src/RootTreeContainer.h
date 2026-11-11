@@ -1,17 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//    Root Database implementation
-//--------------------------------------------------------------------
-//
-//    Package    : APR RootStorageSvc (former POOL project)
-//
-//    Author     : M.Frank M.Nowak S.Snyder
-//====================================================================
-#ifndef POOL_ROOTTREECONTAINER_H
-#define POOL_ROOTTREECONTAINER_H 1
+#ifndef ROOTTREECONTAINER_H
+#define ROOTTREECONTAINER_H 1
 
 // Framework include files
 #include "StorageSvc/DbDatabase.h"
@@ -35,18 +26,11 @@ namespace RootAuxDynIO {
    class IRootAuxDynReader;
    class IFactoryTool;
 }
-     
 
-/*
- * POOL namespace declaration
- */
-namespace pool  { 
+class DbColumn;
+class RootDatabase;
 
-  // Forward declaration
-   class DbColumn;
-   class RootDatabase;
-
-  /** @class RootTreeContainer RootTreeContainer.h src/RootTreeContainer.h
+/** @class RootTreeContainer RootTreeContainer.h src/RootTreeContainer.h
     *
     * Description:
     * ROOT specific implementation of Database container.
@@ -56,10 +40,10 @@ namespace pool  {
     * object within the data store) is accessed by the "Event" number
     * inside its tree.
     *
-    * @author  M.Frank M.Nowak
+    * @author  M.Frank M.Nowak  S.Snyder
     */
-  class RootTreeContainer : public TechContainerBase
-  {
+class RootTreeContainer : public TechContainerBase
+{
   protected:
 
     /// Definiton of a branch descriptor
@@ -211,6 +195,6 @@ namespace pool  {
 
     /// Execute Transaction action
     virtual StatusCode transAct(Transaction::Action action) override;
-  };
-}
-#endif //POOL_ROOTTREECONTAINER_H
+};
+
+#endif

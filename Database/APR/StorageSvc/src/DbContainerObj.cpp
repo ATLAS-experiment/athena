@@ -2,17 +2,6 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-//====================================================================
-//  DbContainerObj class implementation
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc (The POOL project)
-//
-//  Description: Generic data persistency
-//
-//  @author      M.Frank
-//====================================================================
-
 // Framework include files
 #include "DbContainerObj.h"
 #include "StorageSvc/ITechContainer.h"
@@ -25,7 +14,6 @@
 #include <atomic>
 
 using namespace std;
-using namespace pool;
 
 // Enable this to force regular retirement
 void retireDatabase(DbContainerObj* c)  {
@@ -65,7 +53,7 @@ DbContainerObj::DbContainerObj( DbDatabase&       dbH,
       << "  " << name()
       << " impossible."
       << " [" << type().storageName() << "] " );
-  throw std::runtime_error("POOL::DbContainer: Unknown storage type requested: " + type().storageName());
+  throw std::runtime_error("DbContainer: Unknown storage type requested: " + type().storageName());
 }
 
 // Destructor

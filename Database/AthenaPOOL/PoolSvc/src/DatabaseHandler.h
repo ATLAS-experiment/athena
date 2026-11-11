@@ -13,10 +13,7 @@
 #include <set>
 #include <utility>
 
-namespace pool {
-  class IStorageSvc;
-}
-
+class IStorageSvc;
 class Guid;
 class Token;
 class Container;
@@ -31,7 +28,7 @@ class Container;
 class DatabaseHandler final {
 public:
   /// Constructor. Connects to the database
-  DatabaseHandler( pool::IStorageSvc& storageSvc,
+  DatabaseHandler( IStorageSvc& storageSvc,
                    long technology,
                    const std::string& fid,
                    const std::string& pfn,
@@ -68,7 +65,7 @@ public:
   Io::IoFlag accessMode() const;
 
   // expose FileDescriptor object for the technology specific DB implementation
-  pool::FileDescriptor& fileDescriptor() { return m_fileDescriptor; }
+  FileDescriptor& fileDescriptor() { return m_fileDescriptor; }
 
   /// Writes an object and returns a token
   Token* writeObject( const std::string& containerName,
@@ -93,9 +90,9 @@ public:
 
 private:
   /// IStorageSvc reference
-  pool::IStorageSvc&      m_storageSvc;
+  IStorageSvc&      m_storageSvc;
   /// File descriptor for this database
-  pool::FileDescriptor    m_fileDescriptor;
+  FileDescriptor    m_fileDescriptor;
   /// Technology identifier
   long                    m_technology;
   /// Current access mode

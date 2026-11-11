@@ -1,27 +1,14 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbOption class definitions
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc  (The POOL project)
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBOPTION_H
-#define POOL_DBOPTION_H 1
+#ifndef STORAGESVC_DBOPTION_H
+#define STORAGESVC_DBOPTION_H 1
 
 // Framework include files
 #include "StorageSvc/DbColumn.h"
 #include "GaudiKernel/StatusCode.h"
 
-/*
- *  POOL namespace declaration
- */
-namespace pool  {
-
-  /** @class DbOption DbOption.h StorageSvc/DbOption.h
+/** @class DbOption DbOption.h StorageSvc/DbOption.h
     *
     * Description:
     * Definition an option to be supplied to database objects.
@@ -31,9 +18,8 @@ namespace pool  {
     * must outlive the lifetime of the DbOption.
     *
     * @author  M.Frank
-    * @version 1.0
     */
-  class DbOption {
+class DbOption {
   public:
 
     union Value  {
@@ -89,6 +75,6 @@ namespace pool  {
 
     /// Access to OS independent type name
     std::string typeName() const { return DbColumn::typeName(m_type); }
-  };
-}       // End namespace pool
-#endif  // POOL_DbOption_H
+};
+
+#endif

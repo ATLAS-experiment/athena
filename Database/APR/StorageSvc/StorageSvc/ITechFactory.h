@@ -8,17 +8,10 @@
 #include "StorageSvc/pool.h"
 
 // Forward declarations
-namespace pool    
-{
-  class ITechDomain;
-  class ITechDatabase;
-  class ITechContainer;
-  class DbType;
-}
-using pool::ITechDomain;
-using pool::ITechDatabase;
-using pool::ITechContainer;
-
+class ITechDomain;
+class ITechDatabase;
+class ITechContainer;
+class DbType;
 
 /** @class ITechFactory interface definition.
     *
@@ -31,7 +24,7 @@ using pool::ITechContainer;
     *
     * @author  Markus Frank
     */
-class ITechFactory : public pool::RefCounter  {
+class ITechFactory : public RefCounter  {
    public:  
     virtual ~ITechFactory() = default;
 
@@ -44,10 +37,10 @@ class ITechFactory : public pool::RefCounter  {
     /// Create Database
     virtual ITechDatabase* createDatabase(void) = 0;
     /// Create Database container
-    virtual ITechContainer* createContainer(const std::string& name, const pool::DbType& typ) = 0;
+    virtual ITechContainer* createContainer(const std::string& name, const DbType& typ) = 0;
 
     ///  delete object if ref count drops to 0
-    void release() { if( pool::RefCounter::subRef() <= 0 ) delete this; }
+    void release() { if( RefCounter::subRef() <= 0 ) delete this; }
 };
 
 

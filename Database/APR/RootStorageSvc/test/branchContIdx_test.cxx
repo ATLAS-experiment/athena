@@ -31,7 +31,6 @@
 #include "StorageSvc/pool.h"
 #include <iostream>
 
-using namespace pool;
 using namespace std;
 
 // branch containe names
@@ -42,21 +41,21 @@ const string            c_contNameA = "ContainerA";               // container f
 const string            c_contNameB = "ContainerB";               // container for objects B
 const string            c_contNameC = "ContainerC";               // container for objects C
 
-pool::DbString       myStringA1("This is my string A1");
-pool::DbString       myStringA2("This is my string A2");
-pool::DbString       myStringA3("This is my string A3");
-pool::DbString       myStringA4("This is my string A4");
-pool::DbString       myStringA5("This is my string A5");
-pool::DbString       myStringA6("This is my string A6");
-pool::DbString       myStringA7("This is my string A7");
+DbString       myStringA1("This is my string A1");
+DbString       myStringA2("This is my string A2");
+DbString       myStringA3("This is my string A3");
+DbString       myStringA4("This is my string A4");
+DbString       myStringA5("This is my string A5");
+DbString       myStringA6("This is my string A6");
+DbString       myStringA7("This is my string A7");
 
-pool::DbString       myStringB1("This is my string B1");
-pool::DbString       myStringB2("This is my string B2");
-pool::DbString       myStringB3("This is my string B3");
+DbString       myStringB1("This is my string B1");
+DbString       myStringB2("This is my string B2");
+DbString       myStringB3("This is my string B3");
 
-pool::DbString       myStringC1("This is my string C1");
-pool::DbString       myStringC2("This is my string C2");
-pool::DbString       myStringC3("This is my string C3");
+DbString       myStringC1("This is my string C1");
+DbString       myStringC2("This is my string C2");
+DbString       myStringC3("This is my string C3");
 
 
 void test(const DbType storageType, const std::string& filename) {
@@ -77,7 +76,7 @@ void test(const DbType storageType, const std::string& filename) {
    }
    containerNameC = c_contNameC;
 
-   pool::IStorageSvc* storSvc = pool::createStorageSvc("StorageSvc");
+   IStorageSvc* storSvc = createStorageSvc("StorageSvc");
    if ( ! storSvc ) {
       throw std::runtime_error( "Could not create a StorageSvc object" );
    }
@@ -88,18 +87,18 @@ void test(const DbType storageType, const std::string& filename) {
    }
 
    cout << "Session connect" << endl;
-   pool::FileDescriptor fd( filename, filename );
+   FileDescriptor fd( filename, filename );
    if ( ! ( storSvc->connect( Io::WRITE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
    // Retrieve DbString dictionary
-   RootType class_String ( "pool::DbString" );
+   RootType class_String ( "DbString" );
    if ( ! class_String ) {
       throw std::runtime_error( "Could not retrieve the dictionary for class DbString" );
    }
    // Create shape for DbString
-   Guid guid = pool::DbReflex::guid(class_String);
-   const pool::Shape* shape = nullptr;
+   Guid guid = DbReflex::guid(class_String);
+   const Shape* shape = nullptr;
    if( !storSvc->getShape( fd, guid, shape ).isSuccess() ) {
       cout << "need to create a Shape for DbString" << endl;
       shape = storSvc->createShape(guid);
@@ -115,12 +114,12 @@ void test(const DbType storageType, const std::string& filename) {
      throw std::runtime_error( "Could not set master index option" );
    }
    // Commit here to test empty commits
-   if( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+   if( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
       throw std::runtime_error( "Empty commit FAILED" );
    }
 
    // helper lambda to write a string object into a container
-   auto writeStr = [&](const string& contName, pool::DbString& str) {
+   auto writeStr = [&](const string& contName, DbString& str) {
       Token* token{nullptr};
       if( !storSvc->allocate( fd, contName, storageType.type(), &str, shape, token ).isSuccess() ) {
          throw std::runtime_error( "Could not write an object" );
@@ -129,7 +128,7 @@ void test(const DbType storageType, const std::string& filename) {
    };
 
    auto Commit = [&](const int) {
-      if( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+      if( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
          throw std::runtime_error( "Commit FAILED" );
       }
    };
@@ -200,11 +199,11 @@ void test(const DbType storageType, const std::string& filename) {
       }
    }
 
-   pool::DbString readString;
+   DbString readString;
    auto readfun = [&](const string& ref) {
       Token token;
       token.fromString( ref );
-      pool::DbString *str_p = &readString;
+      DbString *str_p = &readString;
       if( !storSvc->read(fd, token, shape, (void**)&str_p).isSuccess() ) {
          throw std::runtime_error( "Read FAILED" );
       }
@@ -237,8 +236,8 @@ void test(const DbType storageType, const std::string& filename) {
 int main() {
    Athena::getMessageSvcQuiet = true;
    try {
-     test(ROOTTREEINDEX_StorageType, "TTreeContIdx_testfile.root");
-     test(ROOTRNTUPLE_StorageType, "RNTupleContIdx_testfile.root");
+     test(pool::ROOTTREEINDEX_StorageType, "TTreeContIdx_testfile.root");
+     test(pool::ROOTRNTUPLE_StorageType, "RNTupleContIdx_testfile.root");
    }
    catch (const std::exception& e) {
      std::cout << e.what() << "\n";

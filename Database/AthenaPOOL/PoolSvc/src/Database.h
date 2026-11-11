@@ -12,10 +12,7 @@
 namespace Gaudi {
   class IFileCatalog;
 }
-namespace pool {
-  class FileDescriptor;
-}
-
+class FileDescriptor;
 class SessionTool;
 class DatabaseHandler;
 class Container;
@@ -85,7 +82,7 @@ public:
   Container* containerHandle( const std::string& name );
 
   // expose FileDescriptor object for the technology specific DB implementation
-  pool::FileDescriptor* fileDescriptor();
+  FileDescriptor* fileDescriptor();
 
   bool attributeOfType( const std::string& attributeName,
                         void* data,

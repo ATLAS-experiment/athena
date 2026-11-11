@@ -12,16 +12,14 @@
 
 class Token;
 
-namespace pool {
-
-  /** 
+ /** 
    * @class CollectionRowBuffer CollectionRowBuffer.h
    *
    * A class representing a row of a collection. It contains a list of named attributes
    * and a single POOL object reference. It is used when creatoing a new collection or when
    * iterating over an existing one.
    */
-  class CollectionRowBuffer
+class CollectionRowBuffer
   {
   public:
     /// Default Constructor.
@@ -67,8 +65,7 @@ namespace pool {
     coral::AttributeList*	m_attributeList;
 
     bool deleteAL ATLAS_NOT_THREAD_SAFE ();
-  };
-}
+};
 
 #endif
 

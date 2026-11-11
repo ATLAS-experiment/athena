@@ -157,7 +157,7 @@ int testRoundTrip(ISvcLocator*svcloc, const T_Helper &helper, std::span<const un
    // and make persistent data available to the dummy athena pool conversion service
    const std::type_info& ti = typeid(PERS_TYPE);
    RootType temp = RootType(ti);
-   RootType cltype((temp) ? temp : RootType(pool::DbTypeInfo::typeName(ti)));
+   RootType cltype((temp) ? temp : RootType(DbTypeInfo::typeName(ti)));
    Placement placement;
    placement.setContainerName(typeid(T_Container).name());
    auto token=std::unique_ptr<Token>(cnv_svc->registerForWrite(&placement,

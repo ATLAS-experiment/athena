@@ -1,16 +1,8 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbColumn class definitions
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc  (The POOL project)
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBCOLUMN_H
-#define POOL_DBCOLUMN_H 1
+#ifndef STORAGESVC_DBCOLUMN_H
+#define STORAGESVC_DBCOLUMN_H 1
 
 // Framework include files
 #include "GaudiKernel/StatusCode.h"
@@ -18,20 +10,14 @@
 #include <typeinfo>
 #include <string>
 
-/*
- *  POOL namespace declaration
- */
-namespace pool  {
-
-  /** @class DbColumn DbColumn.h StorageSvc/DbColumn.h
+/** @class DbColumn DbColumn.h StorageSvc/DbColumn.h
     *
     * Description:
     * Definition of the generic column in a (relational) Database.
     *
     * @author  M.Frank
-    * @version 1.0
     */
-  class DbColumn    {
+class DbColumn    {
   public:
     enum Options {PRIMARY_KEY = 1 << 0, 
                   NOT_NULL    = 1 << 1,
@@ -115,6 +101,6 @@ namespace pool  {
     StatusCode fromString(const std::string& string_rep);
     /// Access type name by type identifier from RTTI
     static const std::string typeName(int typ);
-  };
-}       // End namespace pool
-#endif  // POOL_DBCOLUMN_H
+};
+
+#endif

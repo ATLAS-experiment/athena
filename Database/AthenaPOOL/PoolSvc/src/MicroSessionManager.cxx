@@ -20,7 +20,7 @@ MicroSessionManager::MicroSessionManager(SessionTool& sessionTool, long technolo
         m_storageSvc( 0 ),
         m_technology( technology ),
         m_databaseHandlers() {
-  m_storageSvc = pool::createStorageSvc("StorageSvc");
+  m_storageSvc = createStorageSvc("StorageSvc");
   if ( ! m_storageSvc ) {
     throw std::runtime_error( "Could not create a StorageSvc object (APR: \" MicroSessionManager::MicroSessionManager \" from \" PoolSvc \"" );
   }
@@ -74,11 +74,11 @@ bool MicroSessionManager::disconnectAll() {
 
 std::string MicroSessionManager::fidForPfn( const std::string& pfn ) {
   std::string fid = "";
-  pool::FileDescriptor fd( pfn, pfn );
+  FileDescriptor fd( pfn, pfn );
   // this is only a temporary FID so use a special pattern to make that clear
   fd.setFID( fd.FID().substr(0,24) + "0FF0FF0FF0FF" );
   if ( m_storageSvc->connect(Io::READ, fd).isSuccess() ) {
-    pool::DbDatabase dbH( fd.dbc()->handle() );
+    DbDatabase dbH( fd.dbc()->handle() );
     if ( ! dbH.param( "FID", fid ).isSuccess() ) fid = "";
     m_storageSvc->disconnect( fd ).ignore();
   }
@@ -89,7 +89,7 @@ bool MicroSessionManager::attributeOfType( const std::string& attributeName,
                                            void* data,
                                            const std::type_info& typeInfo,
                                            const std::string& option ) {
-  pool::DbOption domainOption( attributeName, option );
+  DbOption domainOption( attributeName, option );
   if( !m_storageSvc->getDomainOption(domainOption).isSuccess() ) return false;
   return domainOption.i_getValue(typeInfo, data).isSuccess();
 }
@@ -98,7 +98,7 @@ bool MicroSessionManager::setAttributeOfType( const std::string& attributeName,
                                               const void* data,
                                               const std::type_info& typeInfo,
                                               const std::string& option ) {
-  pool::DbOption domainOption( attributeName, option );
+  DbOption domainOption( attributeName, option );
   if( !domainOption.i_setValue( typeInfo, const_cast<void*>( data ) ).isSuccess() ) return false;
   return m_storageSvc->setDomainOption(domainOption).isSuccess();
 }

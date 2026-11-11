@@ -1,16 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbContainer handle definitions
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc  (The POOL project)
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBCONTAINER_H
-#define POOL_DBCONTAINER_H
+#ifndef STORAGESVC_DBCONTAINER_H
+#define STORAGESVC_DBCONTAINER_H
 
 // Framework include files
 #include "PersistentDataModel/Token.h"
@@ -21,37 +13,30 @@
 
 class StatusCode;
 
-/*
- * POOL namespace declaration
- */
-namespace pool  {
+// Forward declarations
+class ITechContainer;
+class DbDatabase;
+class DbTypeInfo;
+class DbContainerObj;
+class DbOption;
+class Shape;
 
-  // Forward declarations
-  class ITechContainer;
-  class DbDatabase;
-  class DbTypeInfo;
-  class DbContainerObj;
-  class DbOption;
-  class Shape;
-
-  /** @class DbContainer DbContainer.h StorageSvc/DbContainer.h
+/** @class DbContainer DbContainer.h StorageSvc/DbContainer.h
     *
     * Description:
-    * Definition of the object describing a database container
-    * Handle managing a DbContainerObj, which is a container of persistent
-    * objects.
+    * This class is a handle managing access and lifetime for the Container implementation
+    * object: DbContainerObj
     *
     * @author  M.Frank
-    * @version 1.0
     */
-  class DbContainer : public DbHandleBase<DbContainerObj>  {
+class DbContainer : public DbHandleBase<DbContainerObj>  {
   private:
     /// Assign transient object properly (including reference counting)
     void switchPtr( DbContainerObj* obj);
 
   public:
     /// Constructor with initializing arguments
-    explicit DbContainer(const DbType& typ=POOL_StorageType) { m_type=typ;          }
+    explicit DbContainer(const DbType& typ=pool::POOL_StorageType) { m_type=typ;          }
     /// Copy constructor
     DbContainer(const DbContainer& c) : Base()  { switchPtr(c.m_ptr);      }
     /// Constructor taking transient object
@@ -153,7 +138,6 @@ namespace pool  {
     /// Store object in location
     StatusCode store(const void* object, const DbTypeInfo* typ);
     //@}
-  };
-}       // End namespace pool
+};
 
-#endif  // POOL_DBCONTAINER_H
+#endif

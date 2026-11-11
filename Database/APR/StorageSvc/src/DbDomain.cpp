@@ -1,23 +1,12 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbDomainObj handle implementation
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc  (The POOL project)
-//  @author      M.Frank
-//====================================================================
-
-// Framework include files
 #include "StorageSvc/DbDomain.h"
 #include "DbDatabaseObj.h"
 #include "DbDomainObj.h"
 #include "CxxUtils/checker_macros.h"
 
 using namespace std;
-using namespace pool;
 
 static const string s_empty = "";
 

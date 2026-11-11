@@ -24,7 +24,6 @@
 #include <sstream>
 #include <memory>
 
-using namespace pool;
 
 int main( )
 {
@@ -38,7 +37,7 @@ int main( )
 }
 
 
-void TestDriver::testTechnology( const pool::DbType& tech, bool commit_every_row )
+void TestDriver::testTechnology( const DbType& tech, bool commit_every_row )
 {
    m_storageType = tech;
    m_commitEveryRow = commit_every_row;
@@ -75,7 +74,7 @@ void
 TestDriver::testWriting()
 {
    ATH_MSG_INFO("createStorageSvc");
-   pool::IStorageSvc* storSvc = pool::createStorageSvc("StorageSvc");
+   IStorageSvc* storSvc = createStorageSvc("StorageSvc");
    if ( ! storSvc ) {
       throw std::runtime_error( "Could not create a StorageSvc object" );
    }
@@ -86,7 +85,7 @@ TestDriver::testWriting()
    }
 
    ATH_MSG_INFO("Session connect");
-   pool::FileDescriptor fd( m_filename, m_filename );
+   FileDescriptor fd( m_filename, m_filename );
    if ( ! ( storSvc->connect( Io::WRITE, fd ).isSuccess() ) ) {
       throw std::runtime_error( "Could not start a connection." );
    }
@@ -95,9 +94,9 @@ TestDriver::testWriting()
   if ( ! class_SimpleTestClass ) {
     throw std::runtime_error( "Could not retrieve the dictionary for class SimpleTestClass" );
   }
-  Guid objGuid = pool::DbReflex::guid(class_SimpleTestClass);
+  Guid objGuid = DbReflex::guid(class_SimpleTestClass);
   // Creating class shape
-  const pool::Shape* objShape = storSvc->createShape(objGuid);
+  const Shape* objShape = storSvc->createShape(objGuid);
   if( !objShape ) {
      throw std::runtime_error( "Could not create a persistent shape for SimpleTestClass" );
   }
@@ -105,16 +104,16 @@ TestDriver::testWriting()
   std::vector< SimpleTestClass* > myObjects;
   myObjects.reserve(m_nObjects);
 
-  RootType class_DbString ( "pool::DbString" );
+  RootType class_DbString ( "DbString" );
   if( ! class_DbString ) {
     throw std::runtime_error( "Could not retrieve the dictionary for class DbString" );
   }
-  Guid strGuid = pool::DbReflex::guid(class_DbString);
-  const pool::Shape* strShape = storSvc->createShape(strGuid);
+  Guid strGuid = DbReflex::guid(class_DbString);
+  const Shape* strShape = storSvc->createShape(strGuid);
   if( !strShape ) {
      throw std::runtime_error( "Could not create a persistent shape for DbString" );
   }
-  std::vector< pool::DbString > myStrings;
+  std::vector< DbString > myStrings;
   myStrings.reserve(m_nObjects);
   
   if( !class_SimpleTestClass.Properties().HasProperty( "ClassID" ) ) {
@@ -136,7 +135,7 @@ TestDriver::testWriting()
     delete token; token = nullptr;
 
     myStrings.push_back( "This is my test DbString #" + std::to_string(i) );
-    const pool::DbString* sp = &myStrings.back();    
+    const DbString* sp = &myStrings.back();
     if( !storSvc->allocate( fd, m_strContainerName, m_storageType.type(),
                             sp, strShape, token ).isSuccess() ) {
        throw std::runtime_error( "Could not write a dbString" );
@@ -144,14 +143,14 @@ TestDriver::testWriting()
     delete token; token = nullptr;
     
     if( m_commitEveryRow ) {
-       if ( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+       if ( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
           throw std::runtime_error( "Could not end a transaction." );
        }
     }
   }
   if( !m_commitEveryRow ) {
      // Closing the transaction.
-     if ( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+     if ( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
         throw std::runtime_error( "Could not end a transaction." );
      }
   }
@@ -173,7 +172,7 @@ TestDriver::testWriting()
 void
 TestDriver::testReading()
 {
-  pool::IStorageSvc* storSvc = pool::createStorageSvc("StorageSvc");
+  IStorageSvc* storSvc = createStorageSvc("StorageSvc");
   if ( ! storSvc ) {
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
@@ -183,7 +182,7 @@ TestDriver::testReading()
     throw std::runtime_error( "Could not start a session." );
   }
 
-  pool::FileDescriptor* fd = new pool::FileDescriptor( m_filename, m_filename );
+  FileDescriptor* fd = new FileDescriptor( m_filename, m_filename );
   if( !storSvc->connect(Io::READ, *fd).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
@@ -226,11 +225,11 @@ TestDriver::testReading()
     const Guid& guid = objectToken->classID();
     while ( objCntH.next(objLinkH).isSuccess() ) {
       objectToken->oid() = objLinkH;
-      const pool::Shape* shape = 0;
+      const Shape* shape = 0;
       if( !storSvc->getShape( *fd, guid, shape ).isSuccess() ) {
 	      throw std::runtime_error( "Could not fetch the persistent shape" );
       }
-      RootType classType = pool::DbReflex::forGuid(guid);
+      RootType classType = DbReflex::forGuid(guid);
       if(!classType){
 	      throw std::runtime_error( "Could not resolve the class by guid" );
       }
@@ -265,11 +264,11 @@ TestDriver::testReading()
      const Guid& guid = stringToken->classID();
      while ( strCntH.next(strLinkH).isSuccess() ) {
         stringToken->oid() = strLinkH;
-        const pool::Shape* shape = 0;
+        const Shape* shape = 0;
         if( !storSvc->getShape( *fd, guid, shape ).isSuccess() ) {
            throw std::runtime_error( "Could not retrieve the String shape" );
         }
-        RootType classType = pool::DbReflex::forGuid(guid);
+        RootType classType = DbReflex::forGuid(guid);
         if(!classType){
            throw std::runtime_error( "Could not resolve the class by guid" );
         }

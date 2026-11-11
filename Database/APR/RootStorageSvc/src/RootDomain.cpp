@@ -22,7 +22,6 @@
 #include "TTree.h"
 #include "TVirtualStreamerInfo.h"
 
-using namespace pool;
 
 /// Standard Constuctor
 RootDomain::RootDomain() :
@@ -34,10 +33,6 @@ RootDomain::RootDomain() :
   m_branchOffsetTabLen(0),
   m_defContainerType(pool::ROOTTREEINDEX_StorageType.type())
 {
-}
-
-/// Standard destructor
-RootDomain::~RootDomain()   {
 }
 
 /// Set domain specific options

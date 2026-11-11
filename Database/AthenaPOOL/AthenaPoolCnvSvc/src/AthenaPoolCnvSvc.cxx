@@ -319,7 +319,7 @@ Token* AthenaPoolCnvSvc::registerForWrite(Placement* placement, const void* obj,
       placement->setAuxString(CxxUtils::HexString<"[CTXT={}]">(m_poolSvc->getOutputContext(placement->fileName())));
    }
    if(placement->technology() == 0) { // No technology specified, use the default
-      placement->setTechnology(pool::DbType::getType(m_defaultContainerType).type());
+      placement->setTechnology(DbType::getType(m_defaultContainerType).type());
    }
    token = m_poolSvc->registerForWrite(placement, obj, classDesc);
    return(token);
@@ -515,13 +515,13 @@ StatusCode AthenaPoolCnvSvc::processPoolAttributes(std::vector<std::vector<std::
          std::string data = attrEntry[1];
          if (data == "int" || data == "DbLonglong" || data == "double" || data == "string") {
             if (doGet) {
-               if (!m_poolSvc->getAttribute(opt, data, pool::DbType(pool::ROOTTREE_StorageType).type(), contextId).isSuccess()) {
+               if (!m_poolSvc->getAttribute(opt, data, DbType(pool::ROOTTREE_StorageType).type(), contextId).isSuccess()) {
                   ATH_MSG_DEBUG("getAttribute failed for domain attr " << opt);
                   retError = true;
                }
             }
          } else if (doSet) {
-            if (m_poolSvc->setAttribute(opt, data, pool::DbType(pool::ROOTTREE_StorageType).type(), contextId).isSuccess()) {
+            if (m_poolSvc->setAttribute(opt, data, DbType(pool::ROOTTREE_StorageType).type(), contextId).isSuccess()) {
                ATH_MSG_DEBUG("setAttribute " << opt << " to " << data);
                if (doClear) {
                   attrEntry.clear();
@@ -541,13 +541,13 @@ StatusCode AthenaPoolCnvSvc::processPoolAttributes(std::vector<std::vector<std::
 	         || (file[0] == '*' && file.find("," + fileName + ",") == std::string::npos))) {
             if (data == "int" || data == "DbLonglong" || data == "double" || data == "string") {
                if (doGet) {
-                  if (!m_poolSvc->getAttribute(opt, data, pool::DbType(pool::ROOTTREE_StorageType).type(), fileName, cont, contextId).isSuccess()) {
+                  if (!m_poolSvc->getAttribute(opt, data, DbType(pool::ROOTTREE_StorageType).type(), fileName, cont, contextId).isSuccess()) {
                      ATH_MSG_DEBUG("getAttribute failed for database/container attr " << opt);
                      retError = true;
                   }
                }
             } else if (doSet) {
-               if (m_poolSvc->setAttribute(opt, data, pool::DbType(pool::ROOTTREE_StorageType).type(), fileName, cont, contextId).isSuccess()) {
+               if (m_poolSvc->setAttribute(opt, data, DbType(pool::ROOTTREE_StorageType).type(), fileName, cont, contextId).isSuccess()) {
                   ATH_MSG_DEBUG("setAttribute " << opt << " to " << data << " for db: " << fileName << " and cont: " << cont);
                   if (doClear) {
                      if (file[0] == '*' && !m_persSvcPerOutput) {

@@ -3,7 +3,7 @@
 */
 
 //====================================================================
-//    APR Database Container implementation for ROOT/RNTuple
+//    Database Container implementation for ROOT/RNTuple
 //--------------------------------------------------------------------
 //    Author     : M.Nowak
 //====================================================================
@@ -31,8 +31,6 @@
 #include <algorithm>
 
 using std::string;
-using namespace pool;
-
 
 /// Required here for unique_ptr compilation
 RNTupleContainer::FieldDesc::FieldDesc(const DbColumn& c) : DbColumn(c) {}
@@ -129,10 +127,10 @@ StatusCode RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
       m_ntupleWriter = m_rootDb->getNTupleWriter(ntupleName, true);
       if( m_ntupleWriter ) {
          ATH_MSG_DEBUG("Created container " << m_name
-             << " of type " << ROOTRNTUPLE_StorageType.storageName());
+             << " of type " << pool::ROOTRNTUPLE_StorageType.storageName());
       } else {
          ATH_MSG_ERROR("Could not create container " << m_name
-             << " of type " << ROOTRNTUPLE_StorageType.storageName());
+             << " of type " << pool::ROOTRNTUPLE_StorageType.storageName());
          return StatusCode::FAILURE;
       }
       // Prepare Field descriptions
@@ -167,7 +165,7 @@ StatusCode RNTupleContainer::open( DbDatabase& dbH, const std::string& nam,
    }
 
    ATH_MSG_DEBUG("Opened container " << m_name << " of type "
-       << ROOTRNTUPLE_StorageType.storageName());
+       << pool::ROOTRNTUPLE_StorageType.storageName());
    m_dbH = dbH;
    return StatusCode::SUCCESS;
 }
@@ -209,12 +207,12 @@ StatusCode RNTupleContainer::initObjectFieldDesc( FieldDesc& dsc )
          return StatusCode::SUCCESS;
       } else {
          ATH_MSG_ERROR("Failed to open the container " << m_name
-             << " of type " << ROOTRNTUPLE_StorageType.storageName() << " Class "
+             << " of type " << pool::ROOTRNTUPLE_StorageType.storageName() << " Class "
              << dsc.clazz->GetName() << " is unknown.");
       }
    } else {
       ATH_MSG_ERROR("Failed to open the container " << m_name
-          << " of type " << ROOTRNTUPLE_StorageType.storageName() << ". Type "
+          << " of type " << pool::ROOTRNTUPLE_StorageType.storageName() << ". Type "
           << dsc.typeName() << " is unknown.");
    }
    return StatusCode::FAILURE;

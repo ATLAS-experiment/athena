@@ -7,16 +7,13 @@
 
 #include <string>
 
-
-namespace pool {
-
-  /** 
+/** 
    * @class CollectionColumn CollectionColumn.h
    *
    * An implementation for retrieving a description of a column of a collection.
    */
-  class CollectionColumn
-  {
+class CollectionColumn
+{
   public:
     static const CollectionColumn& tokenColumn()
     {
@@ -47,7 +44,6 @@ namespace pool {
 
     /// Data type of column.
     std::string m_type;
-  };
-}
+};
 
 #endif

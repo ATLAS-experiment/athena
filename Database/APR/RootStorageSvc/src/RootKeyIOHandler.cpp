@@ -1,13 +1,6 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//
-//    Package    : RootStorageSvc (The POOL project)
-//
-//    Author     : M.Frank
-//====================================================================
 #include "RootKeyIOHandler.h"
 #include "TKey.h"
 #include "TFile.h"
@@ -23,9 +16,7 @@
 #include <algorithm>
 #include <iostream>
 
-namespace pool {
-
-  class Key : public TKey {
+class Key : public TKey {
   public:
     Key(const char *name, const char* title, TClass* cl, const void* obj, int bsiz)    {
       Int_t lbuf, nout, noutot, bufmax, nzip;
@@ -192,14 +183,14 @@ namespace pool {
       gDirectory = cursav;
       return fObjlen;
     }
-  };
-}
+};
 
-void pool::RootKeyIOHandler::release()    {
+
+void RootKeyIOHandler::release()    {
   delete this;
 }
 
-int pool::RootKeyIOHandler::destroy(const char* knam) const   {
+int RootKeyIOHandler::destroy(const char* knam) const   {
   if ( knam != 0 && gFile && gFile->IsWritable() ) {
     if ( !gFile->TestBit(TFile::kWriteError) ) {
       if ( strchr(knam,'*') )  {
@@ -221,7 +212,7 @@ int pool::RootKeyIOHandler::destroy(const char* knam) const   {
   return 0;
 }
 
-int pool::RootKeyIOHandler::write(TClass* cl,
+int RootKeyIOHandler::write(TClass* cl,
                                   const char*   knam, 
                                   const void*   obj, 
                                   int           opt,
@@ -233,7 +224,7 @@ int pool::RootKeyIOHandler::write(TClass* cl,
   return 0;
 }
 
-int pool::RootKeyIOHandler::write(TClass* cl,
+int RootKeyIOHandler::write(TClass* cl,
                                   const char*   knam, 
                                   const char*   title,
                                   const void*   obj,
@@ -291,7 +282,7 @@ int pool::RootKeyIOHandler::write(TClass* cl,
   return nbytes;
 }
 
-int pool::RootKeyIOHandler::read(const char* knam, void** obj) const    {
+int RootKeyIOHandler::read(const char* knam, void** obj) const    {
   if ( gFile )  {
     TKey *key = (TKey*)gDirectory->GetListOfKeys()->FindObject(knam);
     if ( key )  {
@@ -306,7 +297,7 @@ int pool::RootKeyIOHandler::read(const char* knam, void** obj) const    {
   return 0;
 }
 
-int pool::RootKeyIOHandler::read NO_SANITIZE_UNDEFINED (TKey* key, void** obj) const   {
+int RootKeyIOHandler::read NO_SANITIZE_UNDEFINED (TKey* key, void** obj) const   {
   if ( key )  { 
     Key* mkey = reinterpret_cast<Key*>(key);// Extremely ugly, but it works, because
     // of single inheritance and no virtuality.

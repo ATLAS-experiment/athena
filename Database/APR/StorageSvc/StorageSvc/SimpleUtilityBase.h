@@ -2,8 +2,8 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef POOL_SIMPLEUTILITYBASE
-#define POOL_SIMPLEUTILITYBASE
+#ifndef STORAGESVC_SIMPLEUTILITYBASE
+#define STORAGESVC_SIMPLEUTILITYBASE
 
 #include <iostream>
 #include <stdexcept>
@@ -16,11 +16,9 @@
 
 #include "CxxUtils/checker_macros.h"
 
-namespace pool {
    
 /// Common base class for POOL utilities
-   class SimpleUtilityBase
-   {
+class SimpleUtilityBase {
     public:
      /// constructor taking commandline parmeters
      SimpleUtilityBase( int argc = 0, char* argv[] = 0 );
@@ -40,23 +38,21 @@ namespace pool {
     static bool initGaudi();
 
     protected:
-     std::string	              executableName;
-     std::string                technologyName;
-     pool::IStorageSvc*         storageSvc = nullptr;
+     std::string	              m_executableName;
+     std::string                m_technologyName;
+     IStorageSvc*               m_storageSvc = nullptr;
 
-     std::vector< std::string > args;
-     std::vector< std::string > fileNames;
-     std::vector< std::pair< std::string, std::string > > fidAndPfn;
-   };
+     std::vector< std::string > m_args;
+     std::vector< std::string > m_fileNames;
+     std::vector< std::pair< std::string, std::string > > m_fidAndPfn;
+};
 
 
-   /// shortcut for reading file GUID from python
-   /* this is a class and not a namespace so it can be autoloaded by ROOT */
-   class Utils {
-    public:
-     static std::string        readFileGUID ATLAS_NOT_THREAD_SAFE ( const std::string& pfn );
-   };
+/// shortcut for reading file GUID from python
+/* this is a class and not a namespace so it can be autoloaded by ROOT */
+class Utils {
+  public:
+    static std::string        readFileGUID ATLAS_NOT_THREAD_SAFE ( const std::string& pfn );
+};
 
-   
-} // pool namespace
 #endif

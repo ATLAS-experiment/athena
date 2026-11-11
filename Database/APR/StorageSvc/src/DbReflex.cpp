@@ -1,12 +1,6 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  Package    : StorageSvc (The POOL project)
-//
-//  @author      M.Frank
-//====================================================================
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbTransform.h"
@@ -36,7 +30,6 @@ constexpr std::pair<Guid, const char*> GuidToClname[] = {
   ,{Guid("89AE2C6B-A862-499C-8BDA-11D24FAC83F1"), "xAOD::JetTrigAuxContainer_v1"}
 };
 
-using namespace pool;
 using namespace std;
 
 typedef map<Guid,RootType> GuidMap;

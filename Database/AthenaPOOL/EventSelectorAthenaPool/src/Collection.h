@@ -14,16 +14,14 @@
 #include <string>
 #include <vector>
 
-namespace pool {
+class CollectionColumn;
+class CollectionCursor;
 
-   class CollectionColumn;
-   class CollectionCursor;
-
-   /**
-      @brief Read-only collection implementation
-      - Supports a single Token plus meta data attributes
-   */
-   class Collection : public APRMessaging {
+/**
+   @brief Read-only collection implementation
+   - Supports a single Token plus meta data attributes
+*/
+class Collection : public APRMessaging {
 
      public:
         /// Construct from an already-connected file descriptor.
@@ -45,6 +43,6 @@ namespace pool {
         std::map<std::string, DbContainer>   m_containerMap;
         /// The DataHeader container, if present, in the file
         DbContainer                          m_dhCont;
-   };
-}
+};
+
 #endif

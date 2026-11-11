@@ -1,6 +1,6 @@
 """Configuration for POOL file writing
 
-Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 
 from AthenaConfiguration.AccumulatorCache import AccumulatorCache
@@ -55,7 +55,7 @@ def PoolWriteCfg(flags):
     PoolAttributes += ["STREAM_MEMBER_WISE = '1'"]
 
     # Set the default container type
-    PoolAttributes += [f"DEFAULT_CONTAINER_TYPE = '{ROOT.pool.DbType.getType(flags.Output.DefaultContainerType).type()}'"]
+    PoolAttributes += [f"DEFAULT_CONTAINER_TYPE = '{ROOT.DbType.getType(flags.Output.DefaultContainerType).type()}'"]
 
     # Increase default BasketSize to 32K, ROOT default (but overwritten by POOL)
     PoolAttributes += ["DEFAULT_BUFFERSIZE = '32000'"]

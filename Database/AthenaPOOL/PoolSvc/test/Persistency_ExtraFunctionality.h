@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TESTDRIVER_H
@@ -12,19 +12,16 @@
 #include "PersTestBase.h"
 
 class Token;
-
-namespace pool {
-  class DbType; 
-}
+class DbType; 
 
 class TestDriver : public PersTestBase {
   public:
     explicit TestDriver( const std::string& catname = "PersExtF.catatlog.xml" );
   
     int execute();
-    void runTestForStorageType(const pool::DbType& storageType);
+    void runTestForStorageType(const DbType& storageType);
 
-    void write( pool::DbType storageType );
+    void write( DbType storageType );
     void read();
     void clearCache();
 

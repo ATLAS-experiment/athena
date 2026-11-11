@@ -1,61 +1,48 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//
-//  Package    : StorageSvc (The pool framework)
-//
-//  Description: Management of the object Databases
-//
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_POOL_H
-#define POOL_POOL_H 1
+#ifndef STORAGESVC_POOL_H
+#define STORAGESVC_POOL_H 1
 
 #include "GaudiKernel/IFileMgr.h"
 
 // STL include files
 #include <string>
 
-/* namespace pool
- *
- *  Description:
- *  All specific constants for a storage technology
+/* pool.h
+ *  Common definitions used in the StorageSvc package
  *
  *  @author  M.Frank
- *  @version 1.0
  */
-namespace pool   {
-  // Type definitions
-  typedef void DbObject;
-  typedef std::pair< long long, long long > DbLink;
 
-  static const long long int INVALID = ~0x0LL;
+ // Type definitions
+typedef std::pair< long long, long long > DbLink;
 
-  namespace Transaction {
+static const long long int INVALID = ~0x0LL;
+
+namespace Transaction {
     enum Action { TRANSACT_COMMIT, TRANSACT_FLUSH };
-  }
+}
 
-  /// Translate access mode to string
-  const char* accessMode(Io::IoFlag access_mode);
+/// Translate access mode to string
+const char* accessMode(Io::IoFlag access_mode);
 
-  /// Delete a pointer
-  template<class T> inline void deletePtr(T*& p)  {
-    if ( 0 != p )    {
+/// Delete a pointer
+template<class T> inline void deletePtr(T*& p)  {
+   if ( 0 != p )    {
       delete p;
       p = 0;
-    }
-  }
-  /// Release a pointer
-  template<class T> inline void releasePtr(T*& p)  {
-    if ( 0 != p )    {
+   }
+}
+/// Release a pointer
+template<class T> inline void releasePtr(T*& p)  {
+   if ( 0 != p )    {
       p->release();
       p = 0;
-    }
-  }
+   }
+}
 
-  class RefCounter {
+class RefCounter {
   private: 
     int m_count = 1;
   public:
@@ -67,11 +54,11 @@ namespace pool   {
     int addRef()   { return ++m_count; }
     /// Decrease the reference count 
     int subRef()   { return --m_count; }
-  };
+};
 
 
-  /// Read an environment variable into string (returns empty string if not set)
-  std::string getEnvStr(const std::string& key);
+/// Read an environment variable into string (returns empty string if not set)
+std::string getEnvStr(const std::string& key);
 
-}
-#endif  // POOL_POOL_H
+
+#endif 

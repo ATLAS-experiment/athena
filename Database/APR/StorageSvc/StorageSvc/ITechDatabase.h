@@ -1,41 +1,27 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//
-//  Package    : pool/StorageSvc (The pool framework)
-//
-//  @author      M.Frank
-//
-//====================================================================
-#ifndef POOL_IDBDATABASE_H
-#define POOL_IDBDATABASE_H
+#ifndef STORAGESVC_IDBDATABASE_H
+#define STORAGESVC_IDBDATABASE_H
 
 // Framework include files
 #include "StorageSvc/pool.h"
 
+// Forward declarations
 class StatusCode;
+class DbOption;
+class DbDomain;
+class DbDatabase;
+class DbContainer;
 
-/*
- *  POOL namespace declaration
- */
-namespace pool    {
-
-  // Forward declarations
-  class DbOption;
-  class DbDomain;
-  class DbDatabase;
-  class DbContainer;
-
-  /** @class ITechDatabase ITechDatabase.h StorageSvc/ITechDatabase.h
+/** @class ITechDatabase ITechDatabase.h StorageSvc/ITechDatabase.h
     *
     * Description:
     * Interface to the technology specific implementation of a Database object
     *
     * @author  M.Frank
     */
-  class ITechDatabase    {
+class ITechDatabase {
   public:
     virtual ~ITechDatabase() = default;
 
@@ -79,6 +65,6 @@ namespace pool    {
       * @return Status code indicating success or failure.
       */
     virtual StatusCode transAct(Transaction::Action action) = 0;
- };
-}      // End namespace pool
-#endif // POOL_IDBDATABASE_H
+};
+
+#endif

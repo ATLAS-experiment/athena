@@ -13,7 +13,6 @@
 #include <stdexcept>
 #include <memory>
 
-using namespace pool;
 
 int main( )
 {
@@ -52,7 +51,7 @@ int TestDriver::execute()
 }
 
 
-void TestDriver::runTestForStorageType(const pool::DbType& storageType)
+void TestDriver::runTestForStorageType(const DbType& storageType)
 {
    ATH_MSG_INFO( "Writing objects in the database using " << storageType.storageName() << " storage type." );
    write(storageType);
@@ -78,7 +77,7 @@ void TestDriver::clearCache()
   Test writing TestClassSTLContainersExt class defined in the TestDictionary
   with multiple writes per commit
   */
-void TestDriver::write(pool::DbType storageType)
+void TestDriver::write(DbType storageType)
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();

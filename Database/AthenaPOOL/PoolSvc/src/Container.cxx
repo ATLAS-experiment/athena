@@ -11,7 +11,7 @@
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbConnection.h"
 
-Container::Container( pool::FileDescriptor& fileDescriptor, const std::string& name ) :
+Container::Container( FileDescriptor& fileDescriptor, const std::string& name ) :
   m_name( name ),
   m_fileDescriptor( fileDescriptor )
 {}
@@ -25,12 +25,12 @@ bool Container::attributeOfType( const std::string& attributeName,
                                  const std::type_info& typeInfo,
                                  const std::string& option ) {
   if( !m_fileDescriptor.dbc() ) return false;
-  pool::DbDatabase  dbH( m_fileDescriptor.dbc()->handle() );
-  pool::DbContainer cntH( dbH.find(name()) );
+  DbDatabase  dbH( m_fileDescriptor.dbc()->handle() );
+  DbContainer cntH( dbH.find(name()) );
   if( !cntH.isValid() && !cntH.open(dbH, name(), 0, dbH.type(), Io::READ).isSuccess() ) {
     return false;
   }
-  pool::DbOption containerOption( attributeName, option );
+  DbOption containerOption( attributeName, option );
   if( !cntH.getOption(containerOption).isSuccess() ) return false;
   return containerOption.i_getValue(typeInfo, data).isSuccess();
 }
@@ -40,10 +40,10 @@ bool Container::setAttributeOfType( const std::string& attributeName,
                                     const std::type_info& typeInfo,
                                     const std::string& option ) {
   if( !m_fileDescriptor.dbc() ) return false;
-  pool::DbOption containerOption( attributeName, option );
+  DbOption containerOption( attributeName, option );
   if( !containerOption.i_setValue(typeInfo, const_cast<void*>( data )).isSuccess() ) return false;
-  pool::DbDatabase  dbH( m_fileDescriptor.dbc()->handle() );
-  pool::DbContainer cntH( dbH.find(name()) );
+  DbDatabase  dbH( m_fileDescriptor.dbc()->handle() );
+  DbContainer cntH( dbH.find(name()) );
   if( !cntH.isValid() && !cntH.open(dbH, name(), 0, dbH.type(), Io::READ).isSuccess() ) {
     return false;
   }

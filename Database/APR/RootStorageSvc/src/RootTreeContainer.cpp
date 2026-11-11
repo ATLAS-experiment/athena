@@ -1,17 +1,6 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//    Root Database container implementation
-//--------------------------------------------------------------------
-//
-//    Package    : Athena APR RootStorageSvc (Former POOL project)
-//
-//    Author     : M.Frank, M.Nowak
-//====================================================================
-
-// Framework include files
 #include "StorageSvc/DbOption.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbColumn.h"
@@ -36,7 +25,6 @@
 
 #include "RootAuxDynIO/IRootAuxDynIO.h"
 
-using namespace pool;
 using namespace std;
 constexpr const static auto SUCCESS = StatusCode::SUCCESS;
 constexpr const static auto FAILURE = StatusCode::FAILURE;
@@ -121,7 +109,7 @@ RootTreeContainer::BranchDesc::BranchDesc( TClass* cl, TBranch* b, TLeaf* l, voi
 
 RootTreeContainer::RootTreeContainer(const std::string& name) :
    TechContainerBase(name),
-   m_tree(nullptr), m_type(0), m_dbH(POOL_StorageType),
+   m_tree(nullptr), m_type(0), m_dbH(pool::POOL_StorageType),
    m_rootDb(nullptr), m_branchName(), m_ioBytes(0), m_treeFillMode(false),
    m_isDirty(false)
 {
@@ -332,7 +320,7 @@ RootTreeContainer::loadObject(void** obj_p, const Shape* /*shape*/, Token::OID_t
 
 
 StatusCode RootTreeContainer::close()   {
-  m_dbH = DbDatabase(POOL_StorageType);
+  m_dbH = DbDatabase(pool::POOL_StorageType);
   for( BranchDesc& dsc : m_branches ) {
     if ( dsc.buffer && dsc.clazz )  {
       // This somehow fails for templates.
@@ -396,7 +384,7 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
          int count;
          if ( !m_tree->InheritsFrom(TTree::Class()) )   {
             ATH_MSG_ERROR("Cannot open the container " << m_name << " of type "
-                << ROOTTREE_StorageType.storageName() << ". " << endmsg
+                << pool::ROOTTREE_StorageType.storageName() << ". " << endmsg
                 << "The specified container is not a ROOT " << (m_branchName.empty() ? "Tree" : "Branch")
                 << ", but rather of class " << m_tree->IsA()->GetName() << ".");
             return FAILURE;
@@ -422,7 +410,7 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
                    cl = TClass::GetClass(pBranch->GetClassName());
                    if ( nullptr == cl )  {
                       ATH_MSG_DEBUG("Cannot open the container " << m_name << " of type "
-                          << ROOTTREE_StorageType.storageName()
+                          << pool::ROOTTREE_StorageType.storageName()
                           << " Class " << pBranch->GetClassName() << " is unknown.");
                       return FAILURE;
                    }
@@ -431,7 +419,7 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
                       dsc.auxdyn_reader = m_auxDynTool->getBranchAuxDynReader( m_tree, pBranch );
                       if( !dsc.auxdyn_reader ) {
                          ATH_MSG_ERROR("Failed to locate dynamic attribute storage for container "
-                             << m_name << " of type " << ROOTTREE_StorageType.storageName()
+                             << m_name << " of type " << pool::ROOTTREE_StorageType.storageName()
                              << " Class " << pBranch->GetClassName() << " is unknown.");
                          return FAILURE;
                       }
@@ -471,11 +459,11 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
             else  {
                ATH_MSG_WARNING("Branch with name:" << colnam
                    << " not present in container:" << m_name << " of type "
-                   << ROOTTREE_StorageType.storageName());
+                   << pool::ROOTTREE_StorageType.storageName());
             }
          }
          ATH_MSG_DEBUG("Opened container " << m_name << " of type "
-             << ROOTTREE_StorageType.storageName());
+             << pool::ROOTTREE_StorageType.storageName());
          m_dbH = dbH;
          m_type = info;
          return SUCCESS;
@@ -561,7 +549,7 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
             }
             if( res.isSuccess() )    {
                ATH_MSG_DEBUG("Opened container " << m_name << " of type "
-                   << ROOTTREE_StorageType.storageName());
+                   << pool::ROOTTREE_StorageType.storageName());
                m_dbH  = dbH;
                m_type = info;
                m_rootDb->registerBranchContainer(this);
@@ -579,7 +567,7 @@ StatusCode RootTreeContainer::open( DbDatabase& dbH,
       err_msg = "invalid Database handle.";
    }
    ATH_MSG_FATAL("Cannot open container " << m_name
-      << " of type " << ROOTTREE_StorageType.storageName() << "; " << err_msg);
+      << " of type " << pool::ROOTTREE_StorageType.storageName() << "; " << err_msg);
    return FAILURE;
 }
 
@@ -667,7 +655,7 @@ StatusCode  RootTreeContainer::addObject(DbDatabase& dbH,
       err_msg = "Unknown exception occurred. Cannot give more details.";
    }
    ATH_MSG_ERROR("Failed to open container " << m_name << " of type "
-       << ROOTTREE_StorageType.storageName() << "; " << err_msg);
+       << pool::ROOTTREE_StorageType.storageName() << "; " << err_msg);
    return FAILURE;
 }
 

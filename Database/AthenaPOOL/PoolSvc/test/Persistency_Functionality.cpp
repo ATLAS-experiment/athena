@@ -54,7 +54,7 @@ int TestDriver::execute()
    return  0;
 }
 
-void TestDriver::runTestForStorageType(const pool::DbType& storageType)
+void TestDriver::runTestForStorageType(const DbType& storageType)
 {
     ATH_MSG_INFO("Writing objects in the database using " << storageType.storageName() << " storage type.");
     write(storageType);
@@ -86,7 +86,7 @@ TestDriver::clearCache()
   Test writing of several classes defined in the TestDictionary
   */
 void
-TestDriver::write(pool::DbType storageType)
+TestDriver::write(DbType storageType)
 {
   Gaudi::IFileCatalog& catalog = *m_fileCatalog;
   catalog.init();

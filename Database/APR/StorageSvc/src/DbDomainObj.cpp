@@ -1,22 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbDomainObj handle implementation
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc (The POOL project)
-//
-//  Description: Generic data persistency
-//
-//  @author      M.Frank
-//====================================================================
-
 #include "DbDatabaseObj.h"
 #include "DbDomainObj.h"
-
-// Framework include files
 #include "StorageSvc/pool.h"
 #include "StorageSvc/ITechDomain.h"
 #include "StorageSvc/ITechFactory.h"
@@ -29,7 +15,6 @@
 #include <ranges>
 
 using namespace std;
-using namespace pool;
 
 /// Constructor
 DbDomainObj::DbDomainObj(ITechFactory* imp, const DbType& typ, Io::IoFlag mode)
@@ -41,7 +26,7 @@ DbDomainObj::DbDomainObj(ITechFactory* imp, const DbType& typ, Io::IoFlag mode)
   if( !techFactory() ) {
     ATH_MSG_ERROR( ">   Access   DbDomain     " << accessMode(mode)
         << " " << name() << " (UNKNOWN) impossible." << " [" << typ.storageName() << "]" );
-    throw std::runtime_error("POOL::DbDomain: Unknown storage type requested: " + typ.storageName());
+    throw std::runtime_error("DbDomain: Unknown storage type requested: " + typ.storageName());
     return;
   }
   m_info = techFactory()->createDomain();

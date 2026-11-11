@@ -1,18 +1,6 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//  ====================================================================
-//
-//  DbStorageSvc.cpp
-//  --------------------------------------------------------------------
-//
-//  Package   : StorageSvc (POOL)
-//  Author    : Markus Frank
-//
-//  ====================================================================
-
-// Framework include files
 #include "PersistentDataModel/Token.h"
 #include "DbStorageSvc.h"
 #include "StorageSvc/DbTypeInfo.h"
@@ -31,17 +19,14 @@
 using namespace std;
 
 
-namespace pool  {
+// factory function implementation
+IStorageSvc* createStorageSvc(const string& componentName){
+  return new DbStorageSvc(componentName);
+}
 
-  // factory function implementation
-  IStorageSvc* createStorageSvc(const string& componentName){
-    return new DbStorageSvc(componentName);
-  }
-
-  typedef const DbTypeInfo    *DbTypeInfoH;
-  typedef const DbDatabaseObj *DbDatabaseH;
-  typedef       DbDatabaseObj *DbDatabaseHNC;
-
+typedef const DbTypeInfo    *DbTypeInfoH;
+typedef const DbDatabaseObj *DbDatabaseH;
+typedef       DbDatabaseObj *DbDatabaseHNC;
 
    
 /// Standard Constructor.
@@ -49,9 +34,9 @@ DbStorageSvc::DbStorageSvc(const string& name)
 : APRMessaging(name),
   m_name(name),
   m_refCount(0),
-  m_domH(POOL_StorageType),
+  m_domH(pool::POOL_StorageType),
   m_ageLimit(2),
-  m_type(POOL_StorageType),
+  m_type(pool::POOL_StorageType),
   m_implementation(nullptr)
 {
   static const char * const als = getenv("POOL_STORAGESVC_DB_AGE_LIMIT");  
@@ -182,7 +167,7 @@ StatusCode DbStorageSvc::allocate( FileDescriptor&       fDesc,
       DbContainer cntH(dbH.type());
       sc = cntH.open( dbH, 
                       refCont,
-                      DbTypeInfoH(shape),
+                      static_cast<const DbTypeInfo*>(shape),
                       DbType(technology),
                       Io::WRITE);
       if ( sc.isSuccess() ) {
@@ -312,5 +297,3 @@ ITechFactory* DbStorageSvc::getTechFactory() {
   }
   return m_implementation;
 }
-
-} // namespace pool

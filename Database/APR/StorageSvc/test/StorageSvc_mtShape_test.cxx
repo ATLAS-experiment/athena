@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "StorageSvc/DbTypeInfo.h"
@@ -13,7 +13,6 @@
 #include <thread>
 #include <set>
 
-using namespace pool;
 using namespace std;
 
 

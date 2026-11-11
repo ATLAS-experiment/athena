@@ -32,7 +32,7 @@ namespace AthenaPoolCnvSvc {
 Guid guidFromTypeinfo (const std::type_info& ti)
 {
   RootType temp = RootType(ti);
-  return pool::DbReflex::guid ((temp) ? temp : RootType(pool::DbTypeInfo::typeName(ti)));
+  return DbReflex::guid ((temp) ? temp : RootType(DbTypeInfo::typeName(ti)));
 }
 
 

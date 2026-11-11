@@ -1,34 +1,20 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  Pool Handle Base class definitions
-//--------------------------------------------------------------------
-//
-//  Package    : StorageSvc  (The POOL project)
-//  @author      M.Frank
-//====================================================================
-#ifndef POOL_DBHANDLEBASE_H
-#define POOL_DBHANDLEBASE_H 1
+#ifndef DBHANDLEBASE_H
+#define DBHANDLEBASE_H 1
 
 // Framework include files
 #include "StorageSvc/DbType.h"
 
-/*
- *  POOL namespace declaration
- */
-namespace pool    {
-
-  /** @class DbHandleBase DbHandleBase.h StorageSvc/DbHandleBase.h
+/** @class DbHandleBase DbHandleBase.h StorageSvc/DbHandleBase.h
     *
     * Description:
     * Definition of the generic database object handle.
     *
     * @author  M.Frank
-    * @version 1.0
     */
-  template <class T> class DbHandleBase   {
+template <class T> class DbHandleBase   {
   protected:
     /// Data type definition
     typedef  T                       _DataType;
@@ -68,6 +54,6 @@ namespace pool    {
     bool isValid() const          { return 0 != m_ptr;  }
     /// Inquire storage type of the handle
     const DbType& type() const    { return m_type;      }
-  };
-}       // End namespace pool
-#endif  // POOL_DBHANDLEBASE_H
+};
+
+#endif

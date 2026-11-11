@@ -1,9 +1,8 @@
 /*
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-#ifndef POOL_ISTORAGESVC_H
-#define POOL_ISTORAGESVC_H
+#ifndef STORAGESVC_ISTORAGESVC_H
+#define STORAGESVC_ISTORAGESVC_H
 
 // Framework include files
 #include "StorageSvc/pool.h"
@@ -15,18 +14,11 @@
 class Guid;
 class Token;
 class StatusCode;
+class FileDescriptor;
+class DbOption;
+class Shape;
 
-/*
- *     pool namespace declaration
- */
-namespace pool  {
-
-  // Forward declarations
-  class FileDescriptor;
-  class DbOption;
-  class Shape;
-
-  /** @class IStorageSvc IStorageSvc.h StorageSvc/IStorageSvc.h
+/** @class IStorageSvc IStorageSvc.h StorageSvc/IStorageSvc.h
     *
     * The IStorageSvc interface is able to handle user request for
     *     - transient objects to become persistent and
@@ -41,10 +33,9 @@ namespace pool  {
     *     - Database Transactions: Start and end a Transaction.
     *
     * @author  Markus Frank
-    * @version 1.0
     */
 
-  class IStorageSvc   {
+class IStorageSvc   {
   public:
     /// Destructor - not protected for now because we create multipile instnces of 
     /// this object by hand and want to be able to use auto_ptr
@@ -233,10 +224,10 @@ namespace pool  {
       */
     virtual StatusCode setDomainOption(const DbOption& opt) = 0;
 
-  };
+};
 
-  // Factory function
-  IStorageSvc* createStorageSvc(const std::string& componentName);
+// Factory function
+IStorageSvc* createStorageSvc(const std::string& componentName);
   
-}       // End namespace pool
-#endif  // POOL_ISTORAGESVC_H
+
+#endif

@@ -26,7 +26,6 @@
 #include <sstream>
 #include <memory>
 
-using namespace pool;
 
 static const std::string file = "MI.test.pool.root";
 static const std::string container = "container";
@@ -64,7 +63,7 @@ int TestDriver::execute()
 void
 TestDriver::testWriting()
 {
-  pool::IStorageSvc* storSvc = pool::createStorageSvc("StorageSvc");
+  IStorageSvc* storSvc = createStorageSvc("StorageSvc");
   if ( ! storSvc ) {
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
@@ -73,7 +72,7 @@ TestDriver::testWriting()
     throw std::runtime_error( "Could not start a session." );
   }
 
-  pool::FileDescriptor fd( file, file );
+  FileDescriptor fd( file, file );
   if( !storSvc->connect(Io::WRITE, fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
@@ -91,8 +90,8 @@ TestDriver::testWriting()
     myObject_SimpleTestClass->data = i;
 
     // Creating the persistent shape.
-    Guid guid = pool::DbReflex::guid(class_SimpleTestClass);
-    const pool::Shape* shape_SimpleTestClass = storSvc->createShape(guid);
+    Guid guid = DbReflex::guid(class_SimpleTestClass);
+    const Shape* shape_SimpleTestClass = storSvc->createShape(guid);
     if( !shape_SimpleTestClass ) {
         throw std::runtime_error( "Could not create a persistent shape." );
     }
@@ -113,7 +112,7 @@ TestDriver::testWriting()
     myObject_SimpleTestClass2->setNonZero();
 
     // Creating the persistent shape.
-    const pool::Shape* shape_SimpleTestClass2 = storSvc->createShape(guid);
+    const Shape* shape_SimpleTestClass2 = storSvc->createShape(guid);
     if( !shape_SimpleTestClass2 ) {
       throw std::runtime_error( "Could not create a persistent shape." );
     }
@@ -130,7 +129,7 @@ TestDriver::testWriting()
   }
 
   // Closing the transaction.
-  if ( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+  if ( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end a transaction." );
   }
 
@@ -157,7 +156,7 @@ TestDriver::testWriting()
 void
 TestDriver::testReadingParallelSameContainer()
 {
-  pool::IStorageSvc* storSvc = pool::createStorageSvc("StorageSvc");
+  IStorageSvc* storSvc = createStorageSvc("StorageSvc");
   if ( ! storSvc ) {
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
@@ -167,7 +166,7 @@ TestDriver::testReadingParallelSameContainer()
     throw std::runtime_error( "Could not start a session." );
   }
 
-  pool::FileDescriptor* fd = new pool::FileDescriptor( file, file );
+  FileDescriptor* fd = new FileDescriptor( file, file );
   if( !storSvc->connect( Io::READ, *fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
@@ -211,7 +210,7 @@ TestDriver::testReadingParallelSameContainer()
     objectToken_SimpleTestClass1->oid() = link1H;
 
 
-    const pool::Shape* shape_SimpleTestClass1 = 0;
+    const Shape* shape_SimpleTestClass1 = 0;
     if ( !storSvc->getShape( *fd, objectToken_SimpleTestClass1->classID(), shape_SimpleTestClass1 ).isSuccess() ) {
       throw std::runtime_error( "Could not fetch the persistent shape for SimpleTestClass1" );
     }
@@ -251,7 +250,7 @@ TestDriver::testReadingParallelSameContainer()
     }
     objectToken_SimpleTestClass2->oid() = link2H;
 
-    const pool::Shape* shape_SimpleTestClass2 = 0;
+    const Shape* shape_SimpleTestClass2 = 0;
     if(! storSvc->getShape( *fd, objectToken_SimpleTestClass2->classID(), shape_SimpleTestClass2 ).isSuccess() ) {
       throw std::runtime_error( "Could not fetch the persistent shape for SimpleTestClass2" );
     }
@@ -284,7 +283,7 @@ TestDriver::testReadingParallelSameContainer()
   }
 
   // Closing the transaction.
-  if ( ! ( storSvc->endTransaction( *fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+  if ( ! ( storSvc->endTransaction( *fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end a transaction." );
   }
 

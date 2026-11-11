@@ -1,19 +1,6 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbTypeInfo implementation
-//--------------------------------------------------------------------
-//
-//  Package    : APR/StorageSvc
-//
-//  Description: Type information for persistent objects
-//
-//  @author      M.Frank
-//====================================================================
-
-// Framework include files
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbTypeInfo.h"
@@ -106,23 +93,14 @@ static const std::string __typeinfoName( const std::type_info& tinfo) {
   return result;
 }
 
-namespace pool  {
 
-   const std::string typeName(const std::type_info& typ) {
-    return __typeinfoName(typ);
-  }
-   
-  void clearColumns(DbTypeInfo::Columns& cols)  {
+void clearColumns(DbTypeInfo::Columns& cols)  {
     if ( cols.empty() ) return;
     for(DbTypeInfo::Columns::iterator i=cols.begin(); i != cols.end(); ++i)  {
       if ( 0 != (*i) ) delete (*i);
-    }
-  }
-   
+    }   
 }
 
-using namespace pool;
-using namespace std;
 
 /// Standard Constructor
 DbTypeInfo::DbTypeInfo(const Guid& guid, RootType type, Columns& cols)
@@ -305,7 +283,7 @@ Again:
 
 /// Access type name by type identifier from RTTI
 const std::string DbTypeInfo::typeName(const std::type_info& typ) {
-  return pool::typeName(typ);
+   return __typeinfoName(typ);
 }
 
 

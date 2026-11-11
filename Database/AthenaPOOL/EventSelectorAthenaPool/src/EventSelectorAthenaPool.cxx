@@ -660,14 +660,14 @@ int EventSelectorAthenaPool::findEvent(int evtNum) const {
       if (m_numEvt[i] == -1) {
          std::string collName = m_inputCollectionsProp.value()[i];
          std::string lastError;
-         std::unique_ptr<pool::Collection> coll;
+         std::unique_ptr<Collection> coll;
          StatusCode status = openCollection(collName, coll, &lastError);
          if (!status.isSuccess()) {
             break;
          }
          int collection_size = 0;
          if (coll) {
-            std::unique_ptr<pool::CollectionCursor> hi = coll->cursor();
+            std::unique_ptr<CollectionCursor> hi = coll->cursor();
             collection_size = hi->size();
          }
          else {
@@ -695,7 +695,7 @@ int EventSelectorAthenaPool::size(Context& /*ctxt*/) const {
 }
 //__________________________________________________________________________
 StatusCode EventSelectorAthenaPool::openCollection(std::string& inputCollection,
-                                                   std::unique_ptr<pool::Collection>& poolCollection,
+                                                   std::unique_ptr<Collection>& poolCollection,
                                                    std::string* lastError) const {
    if (!inputCollection.starts_with("PFN:")
        && !inputCollection.starts_with("LFN:")
@@ -705,7 +705,7 @@ StatusCode EventSelectorAthenaPool::openCollection(std::string& inputCollection,
    StatusCode sc = m_poolSvc->connectCollection(inputCollection, "Input", IPoolSvc::kInputStream);
    try {
       auto fileDescr = m_poolSvc->getInputFileDescriptor(IPoolSvc::kInputStream, inputCollection);
-      poolCollection = std::make_unique<pool::Collection>(fileDescr);
+      poolCollection = std::make_unique<Collection>(fileDescr);
       if (lastError) lastError->clear();
    } catch (const std::exception &e) {
       if (lastError) {
@@ -729,7 +729,7 @@ void EventSelectorAthenaPool::disconnectCollection() const {
    }
 }
 //__________________________________________________________________________
-std::unique_ptr<pool::Collection>
+std::unique_ptr<Collection>
 EventSelectorAthenaPool::getCollection(bool throwIncidents) const {
    while (m_inputCollectionsIterator != m_inputCollectionsProp.value().end()) {
       if (m_curCollection != 0) {
@@ -739,7 +739,7 @@ EventSelectorAthenaPool::getCollection(bool throwIncidents) const {
       }
       ATH_MSG_DEBUG("Try item: \"" << *m_inputCollectionsIterator << "\" from the collection list.");
       std::string collName = *m_inputCollectionsIterator;
-      std::unique_ptr<pool::Collection> coll;
+      std::unique_ptr<Collection> coll;
       StatusCode status = openCollection(collName, coll);
       if (!status.isSuccess()) {
          if (!status.isRecoverable()) {

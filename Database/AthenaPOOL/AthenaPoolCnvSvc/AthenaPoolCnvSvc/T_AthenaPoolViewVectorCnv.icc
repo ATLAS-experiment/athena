@@ -32,10 +32,10 @@ T_AthenaPoolViewVectorCnv<DV>::initGuids (const std::type_info& ti) const
   // Make a list of all the guids that this converter can read.
   // First, add the entry for pers_t.
   RootType temp = RootType(ti);
-  RootType typ = (temp) ? temp : RootType(pool::DbTypeInfo::typeName(ti));
+  RootType typ = (temp) ? temp : RootType(DbTypeInfo::typeName(ti));
   if (!typ)
     AthenaPoolCnvSvc::throwExcNoDictForClass (ti);
-  guids.push_back (pool::DbReflex::guid (typ));
+  guids.push_back (DbReflex::guid (typ));
 
   // Now look for entries for previous versions.
   // Look for a version tag in the type name and try replacing it with
@@ -58,7 +58,7 @@ T_AthenaPoolViewVectorCnv<DV>::initGuids (const std::type_info& ti) const
           std::string name2 = name.substr(0,vpos) + std::to_string(vers) + name.substr(vpos2,std::string::npos);
           RootType typ2 = RootType(name2);
           if (typ2)
-            guids.push_back (pool::DbReflex::guid (typ2));
+            guids.push_back (DbReflex::guid (typ2));
         }
       }
     }

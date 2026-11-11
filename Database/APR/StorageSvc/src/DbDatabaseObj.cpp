@@ -1,24 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-//====================================================================
-//  DbDatabaseObj object implementation
-//--------------------------------------------------------------------
-//
-//  Package    : System (The POOL project)
-//
-//  Description: Generic data persistency
-//
-//  @author      M.Frank
-//====================================================================
-
-#include "StorageSvc/APRDefaults.h"
-#include "StorageSvc/DbString.h"
 #include "DbDatabaseObj.h"
 #include "DbContainerObj.h"
-
-// Public POOL include files
+#include "StorageSvc/APRDefaults.h"
+#include "StorageSvc/DbString.h"
 #include "StorageSvc/DbColumn.h"
 #include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbOption.h"
@@ -31,8 +17,6 @@
 #include <cstdio>
 #include <string_view>
 #include <cstdint>
-
-using namespace pool;
 
 std::ostream& operator << (std::ostream& os, const Token::OID_t oid ) {
    os << "("<<oid.first<<","<<oid.second<<")";
@@ -68,7 +52,7 @@ DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
                   << " [" << type().storageName() << "] " << name()
                   << " impossible." << endmsg
                   << "                          " << logon());
-    throw std::runtime_error("POOL::DbDatabase: Unknown storage type requested: " + type().storageName());
+    throw std::runtime_error("DbDatabase: Unknown storage type requested: " + type().storageName());
     return;
   }
   if( !m_dom.add( name(), this ).isSuccess() ) {
@@ -84,7 +68,7 @@ DbDatabaseObj::DbDatabaseObj( DbDomain&       dom,
   DbString s;
   DbTypeInfo::Columns c;
   c.push_back(new DbColumn("db_string",DbColumn::STRING,size_t(static_cast<std::string*>(&s))-size_t(&s),0,1,0));
-  m_string_t = DbTypeInfo::create(std::string("pool::DbString"), c);
+  m_string_t = DbTypeInfo::create(std::string("DbString"), c);
   if ( m_string_t ) m_string_t->addRef();
 }
 
@@ -283,13 +267,13 @@ StatusCode DbDatabaseObj::open()   {
         DbDatabase dbH(this);
         const Guid& guid = m_string_t->shapeID();
 
-        // If we're reading, try to deduce the correct type of the POOL internal containers
+        // If we're reading, try to deduce the correct technology for internal containers
         auto containerType = type();
         if (mode() == Io::READ) {
           DbContainer testCont;
           int majorTypeValue = containerType.majorType() >> 8;
-          for(int minorTypeValue = 0; minorTypeValue < pool::DbType::MINOR_MASK; ++minorTypeValue) {
-            DbType testType = pool::makeTechnology(majorTypeValue, minorTypeValue);
+          for(int minorTypeValue = 0; minorTypeValue < DbType::MINOR_MASK; ++minorTypeValue) {
+            DbType testType = makeTechnology(majorTypeValue, minorTypeValue);
             if(testCont.checkAccess(dbH,"##Shapes",testType).isSuccess()) {
               containerType = testType;
               break;
@@ -331,7 +315,7 @@ StatusCode DbDatabaseObj::open()   {
         if ( m_shapes.open(dbH,"##Shapes",m_string_t,containerType,mode()).isSuccess() )    {
           Token::OID_t oid(0, 0);
           DbString shape_str;
-          DbObject* ptr = &shape_str;
+          void* ptr = &shape_str;
 
           while (static_cast<uint64_t>(oid.second) <= m_shapes.size()) {
             auto result = m_shapes.ptr()->load(&ptr, m_string_t, oid, oid, true);
@@ -367,7 +351,7 @@ StatusCode DbDatabaseObj::open()   {
         if ( m_links.open(dbH,"##Links",m_string_t,containerType,mode()).isSuccess() )  {
           Token::OID_t oid(0, 0);
           DbString link_str;
-          DbObject* ptr = &link_str;
+          void* ptr = &link_str;
 
           while (static_cast<uint64_t>(oid.second) <= m_links.size()) {
             auto result = m_links.ptr()->load(&ptr, m_string_t, oid, oid, true);
@@ -398,7 +382,7 @@ StatusCode DbDatabaseObj::open()   {
           std::vector<std::string> fids;
           Token::OID_t oid(0, 0);
           DbString param_str;
-          DbObject* ptr = &param_str;
+          void* ptr = &param_str;
 
           while (static_cast<uint64_t>(oid.second) <= m_params.size()) {
             auto result = m_params.ptr()->load(&ptr, m_string_t, oid, oid, true);

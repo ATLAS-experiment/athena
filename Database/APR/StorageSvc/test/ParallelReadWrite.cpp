@@ -23,7 +23,6 @@
 #include <sstream>
 #include <memory>
 
-using namespace pool;
 
 static const std::string file1 = "PARR.test1.pool.root";
 static const std::string file2 = "PARR.test2.pool.root";
@@ -62,7 +61,7 @@ int TestDriver::execute()
 void
 TestDriver::testWriting()
 {
-  pool::IStorageSvc* storSvc = pool::createStorageSvc("StorageSvc");
+  IStorageSvc* storSvc = createStorageSvc("StorageSvc");
   if ( ! storSvc ) {
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
@@ -71,7 +70,7 @@ TestDriver::testWriting()
     throw std::runtime_error( "Could not start a session." );
   }
 
-  pool::FileDescriptor fd( file1, file1 );
+  FileDescriptor fd( file1, file1 );
   if( !storSvc->connect( Io::WRITE, fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
@@ -88,8 +87,8 @@ TestDriver::testWriting()
     myObject->data = i;
 
     // Creating the persistent shape.
-    Guid guid = pool::DbReflex::guid(class_SimpleTestClass);
-    const pool::Shape* shape = storSvc->createShape(guid);
+    Guid guid = DbReflex::guid(class_SimpleTestClass);
+    const Shape* shape = storSvc->createShape(guid);
     if( !shape ) {
         throw std::runtime_error( "Could not create a persistent shape." );
     }
@@ -106,7 +105,7 @@ TestDriver::testWriting()
   }
 
   // Closing the transaction.
-  if ( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+  if ( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end a transaction." );
   }
 
@@ -128,7 +127,7 @@ TestDriver::testWriting()
 void
 TestDriver::testParallelReadWrite()
 {
-  pool::IStorageSvc* storSvc = pool::createStorageSvc("StorageSvc");
+  IStorageSvc* storSvc = createStorageSvc("StorageSvc");
   if ( ! storSvc ) {
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
@@ -139,13 +138,13 @@ TestDriver::testParallelReadWrite()
 
 
   // Open the file to read
-  pool::FileDescriptor fd1( file1, file1 );
+  FileDescriptor fd1( file1, file1 );
   if( !storSvc->connect( Io::READ, fd1 ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
 
   // Open the file to write
-  pool::FileDescriptor fd2( file2, file2 );
+  FileDescriptor fd2( file2, file2 );
   if ( ! ( storSvc->connect( Io::WRITE, fd2 ).isSuccess() ) ) {
     throw std::runtime_error( "Could not start a connection." );
   }
@@ -184,11 +183,11 @@ TestDriver::testParallelReadWrite()
     while ( cntH.next(linkH).isSuccess() ) {
       objectToken->oid() = linkH;
       // Read the object from one file
-      const pool::Shape* shape = 0;
+      const Shape* shape = 0;
       if( !storSvc->getShape( fd1, guid, shape ).isSuccess() ) {
 	      throw std::runtime_error( "Could not fetch the persistent shape" );
       }
-      RootType classType = pool::DbReflex::forGuid(guid);
+      RootType classType = DbReflex::forGuid(guid);
       if(!classType){
 	      throw std::runtime_error( "Could not resolve the class by guid" );
       }
@@ -211,8 +210,8 @@ TestDriver::testParallelReadWrite()
       myObject->data = object->data;
 
       // Creating the persistent shape.
-      Guid guidw = pool::DbReflex::guid(class_SimpleTestClass);
-      const pool::Shape* shapew = storSvc->createShape(guidw);
+      Guid guidw = DbReflex::guid(class_SimpleTestClass);
+      const Shape* shapew = storSvc->createShape(guidw);
       if( !shapew ) {
 	        throw std::runtime_error( "Could not create a persistent shape." );
       }
@@ -238,10 +237,10 @@ TestDriver::testParallelReadWrite()
 
 
   // Closing the transaction.
-  if ( ! ( storSvc->endTransaction( fd1, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+  if ( ! ( storSvc->endTransaction( fd1, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end a transaction." );
   }
-  if ( ! ( storSvc->endTransaction( fd2, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+  if ( ! ( storSvc->endTransaction( fd2, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end a transaction." );
   }
 
@@ -272,7 +271,7 @@ TestDriver::testParallelReadWrite()
 void
 TestDriver::testReading()
 {
-  pool::IStorageSvc* storSvc = pool::createStorageSvc("StorageSvc");
+  IStorageSvc* storSvc = createStorageSvc("StorageSvc");
   if ( ! storSvc ) {
     throw std::runtime_error( "Could not create a StorageSvc object" );
   }
@@ -281,7 +280,7 @@ TestDriver::testReading()
     throw std::runtime_error( "Could not start a session." );
   }
 
-  pool::FileDescriptor fd( file2, file2 );
+  FileDescriptor fd( file2, file2 );
   if( !storSvc->connect( Io::READ, fd ).isSuccess() ) {
     throw std::runtime_error( "Could not start a connection." );
   }
@@ -311,11 +310,11 @@ TestDriver::testReading()
     const Guid& guid = objectToken->classID();
     while ( cntH.next(linkH).isSuccess() ) {
       objectToken->oid() = linkH;
-      const pool::Shape* shape = 0;
+      const Shape* shape = 0;
       if( !storSvc->getShape( fd, guid, shape ).isSuccess() ) {
 	      throw std::runtime_error( "Could not fetch the persistent shape" );
       }
-      RootType classType = pool::DbReflex::forGuid(guid);
+      RootType classType = DbReflex::forGuid(guid);
       if(!classType){
 	      throw std::runtime_error( "Could not resolve the class by guid" );
       }      
@@ -340,7 +339,7 @@ TestDriver::testReading()
     throw std::runtime_error( "Objects read different from objects written" );
   }
 
-  if ( ! ( storSvc->endTransaction( fd, pool::Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
+  if ( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
     throw std::runtime_error( "Could not end a transaction." );
   }
 
