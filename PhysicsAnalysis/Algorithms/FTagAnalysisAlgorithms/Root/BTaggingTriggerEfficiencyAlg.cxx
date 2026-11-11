@@ -118,8 +118,8 @@ namespace CP
     if (!(trigSF > 0 && condSF > 0 && offlSF > 0))
     {
       ANA_MSG_WARNING ("SF computed with non-positive scale factor trigSF=" << trigSF << " condSF=" << condSF << " offlSF=" << offlSF);
-      // no scale factor can be given for this jet; the caller decorates it as invalid
-      return CP::CorrectionCode::OutOfValidityRange;
+      // no trigger scale factor for this jet: offline one, as for jets outside the calibration
+      return outsideTriggerCalibration (jet, sys, sf);
     }
     const float trigEff_MC = trigEff_data / trigSF;
     const float condEff_MC = condEff_data / condSF;
@@ -129,8 +129,8 @@ namespace CP
     if (!(num > 0 && denom > 0))
     {
       ANA_MSG_WARNING ("SF computed with negative efficiency num=" << num << " denom=" << denom);
-      // no scale factor can be given for this jet; the caller decorates it as invalid
-      return CP::CorrectionCode::OutOfValidityRange;
+      // no trigger scale factor for this jet: offline one, as for jets outside the calibration
+      return outsideTriggerCalibration (jet, sys, sf);
     }
     sf = num / denom;
     return CP::CorrectionCode::Ok;
@@ -149,8 +149,9 @@ namespace CP
     {
       m_reportedOutsideTriggerCalibration = true;
       ANA_MSG_WARNING ("trigger-matched b-jet with pt=" << jet.pt() << " MeV, eta=" << jet.eta()
-                       << " is outside the calibration range of the b-jet trigger scale factor inputs;"
-                       << " using the offline scale factor for it. Further such jets are counted and"
+                       << " has no usable b-jet trigger scale factor (outside the calibration range of its"
+                       << " inputs, or online-fail probability <= 0); using the offline scale factor for it."
+                       << " Further such jets are counted and"
                        << " reported at the end of the job.");
     }
     return code;
@@ -163,9 +164,9 @@ namespace CP
   {
     if (m_nOutsideTriggerCalibration > 0)
     {
-      ANA_MSG_WARNING (m_nOutsideTriggerCalibration << " trigger-matched b-jets (nominal) were outside"
-                       << " the calibration range of the b-jet trigger scale factor inputs and"
-                       << " received the offline scale factor");
+      ANA_MSG_WARNING (m_nOutsideTriggerCalibration << " trigger-matched b-jets (nominal) had no usable"
+                       << " b-jet trigger scale factor (outside the calibration range or online-fail"
+                       << " probability <= 0) and received the offline scale factor");
     }
     return StatusCode::SUCCESS;
   }
