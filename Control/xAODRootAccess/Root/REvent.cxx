@@ -1358,12 +1358,12 @@ StatusCode REvent::setAuxStore(const std::string& key,
 /// @returns <code>kTRUE</code> if the operation was successful, or
 ///          <code>kFALSE</code> if it was not
 ///
-StatusCode REvent::record( void* obj,
-                           const std::string& typeName,
-                           const std::string& key,
-                           bool overwrite,
-                           bool metadata,
-                           bool isOwner ) {
+StatusCode REvent::recordImpl( void* obj,
+                               const std::string& typeName,
+                               const std::string& key,
+                               bool overwrite,
+                               bool metadata,
+                               bool isOwner ) {
 
 
   // Check if we have an output file when writing an event:

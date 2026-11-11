@@ -190,8 +190,8 @@ StatusCode Event::copy(const std::string& pattern) {
     // Put the interface object into the output.
     static const bool OVERWRITE = true;
     static const bool IS_OWNER = true;
-    ATH_CHECK(record(objMgr->object(), objMgr->holder()->getClass()->GetName(),
-                     key, OVERWRITE, METADATA, IS_OWNER));
+    ATH_CHECK(recordImpl(objMgr->object(), objMgr->holder()->getClass()->GetName(),
+                         key, OVERWRITE, METADATA, IS_OWNER));
 
     // If there is also an auxiliary store for this object/container, copy that
     // as well.
