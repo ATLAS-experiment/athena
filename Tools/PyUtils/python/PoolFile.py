@@ -262,7 +262,7 @@ class PoolOpts(object):
     class RNTupleNames:
         EventData   = "EventData"
         EventTag    = "EventTag"
-        DataHeader  = "DataHeader"
+        DataHeader  = {"DataHeader", "EventData"}
         MetaData    = "MetaData"
     class CollectionType:
         PoolCollection        = 256 # Also known as "ImplicitCollection"
@@ -281,13 +281,12 @@ class PoolOpts(object):
 
     @classmethod
     def isData(cls, name):
-        return not name.startswith("##") and not cls.isDataHeader(name)
+        return not name.startswith("##") and name not in {cls.TTreeNames.DataHeader
+                                                          , cls.TTreeNames.DataHeader+"_DataHeader"}
 
     @classmethod
     def isDataHeader(cls, name):
-        return name in {cls.TTreeNames.DataHeader
-                        , cls.TTreeNames.DataHeader+"_DataHeader"
-                        , cls.RNTupleNames.DataHeader}
+        return name in {cls.TTreeNames.DataHeader, cls.TTreeNames.DataHeader+"_DataHeader"} | cls.RNTupleNames.DataHeader
 
     @classmethod
     def isEventData(cls, name):
@@ -547,7 +546,7 @@ class PoolFile(object):
 
     def __processFile(self):
         ## first we try to fetch the DataHeader
-        for name in {PoolOpts.TTreeNames.DataHeader, PoolOpts.RNTupleNames.DataHeader}:
+        for name in {PoolOpts.TTreeNames.DataHeader} | PoolOpts.RNTupleNames.DataHeader:
             dhKey = self.poolFile.FindKey( name )
             if dhKey:
                 obj = self.poolFile.Get( name )
@@ -645,18 +644,36 @@ class PoolFile(object):
 
                     self.dataHeader = poolRecord
                 elif isRNTuple(obj):
-                    diskSize = inspector.GetCompressedSize() / Units.kb
-                    memSize = inspector.GetUncompressedSize() / Units.kb
-
-                    memSizeNoZip = 0.0
-                    if diskSize < 0.001:
-                        memSizeNoZip = memSize
                     nEntries     = inspector.GetDescriptor().GetNEntries()
-                    poolRecord = PoolRecord(contName, memSize, diskSize, memSizeNoZip,
-                                            nEntries,
-                                            dirType = "N")
-                    self.dataHeader = poolRecord
-            elif PoolOpts.isData(name):
+                    if (fieldId := inspector.GetDescriptor().FindFieldId(contName)) != self.ROOT.kInvalidDescriptorId:
+                        fieldTreeInspector = inspector.GetFieldTreeInspector(fieldId)
+                        diskSize = fieldTreeInspector.GetCompressedSize() / Units.kb
+                        memSize = fieldTreeInspector.GetUncompressedSize() / Units.kb
+                        typeName = fieldTreeInspector.GetDescriptor().GetTypeName()
+                        dirType = "F"
+                        memSizeNoZip = memSize
+                        poolRecord = PoolRecord(contName, memSize, diskSize, memSizeNoZip,
+                                                nEntries,
+                                                dirType=dirType,
+                                                typeName=typeName)
+                        if self.dataHeader.dirType == "F":
+                            print(f"WARNING: Reset {contName!r} -> {contName!r} from {name!r}", file=sys.stderr)
+                        self.dataHeader = poolRecord
+                    elif self.dataHeader.dirType != "F":
+                        diskSize = inspector.GetCompressedSize() / Units.kb
+                        memSize = inspector.GetUncompressedSize() / Units.kb
+                        memSizeNoZip = 0.0
+                        if diskSize < 0.001:
+                            memSizeNoZip = memSize
+                        dirType = "N"
+                        typeName = None
+                        poolRecord = PoolRecord(contName, memSize, diskSize, memSizeNoZip,
+                                                nEntries,
+                                                dirType=dirType,
+                                                typeName=typeName)
+                        self.dataHeader = poolRecord
+
+            if PoolOpts.isData(name):
                 if isinstance(obj, self.ROOT.TTree):
                     if not hasattr(obj, 'GetListOfBranches'):
                         continue
@@ -694,7 +711,7 @@ class PoolFile(object):
                         self.augNames.add(poolRecord.augName)
                         self.data += [ poolRecord ]
         # loop over keys
-        
+
         return
     
     def fileInfos(self):
