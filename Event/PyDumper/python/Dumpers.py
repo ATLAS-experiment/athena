@@ -1965,18 +1965,6 @@ def dump_TrigVertex (v, f):
     return
 
 
-def dump_TrigTrackCounts (t, f):
-    fprint (f, 'z0_pt:')
-    dump_TrigHisto2D (t.z0_pt(), f)
-    fprint (f, '\neta_phi:')
-    dump_TrigHisto2D (t.eta_phi(), f)
-    return
-@nolist
-def dump_TrigTrackCounts_nolist (t, f):
-    dump_TrigTrackCounts (t, f)
-    return
-
-
 @nolist
 def dump_TrigInDetTrackCollection (t, f):
     fprintln (f, ' ROI ', t.RoI_ID())
@@ -2002,38 +1990,6 @@ def dump_TrigRoiDescriptor (d, f):
 @nolist
 def dump_TrigRoiDescriptor_nolist (d, f):
     dump_TrigRoiDescriptor (d, f)
-    return
-
-
-def dump_TrigHisto (h, f):
-    fprint (f, "x:", h.nbins_x(), h.min_x(), h.max_x(), '[')
-    for x in h.contents():
-        fprint (f, x)
-    fprint (f, ']')
-    return
-def dump_TrigHisto1D (h, f):
-    dump_TrigHisto (h, f)
-    return
-def dump_TrigHisto2D (h, f):
-    fprint (f, "y:", h.nbins_y(), h.min_y(), h.max_y())
-    dump_TrigHisto (h, f)
-    return
-
-def dump_TrigSpacePointCounts (c, f):
-    fprint (f, c.sctSpEndcapC(), c.sctSpBarrel(), c.sctSpEndcapA(), '[')
-    for id in c.droppedSctModules():
-        fprint (f, id.getString())
-    fprint (f, ']')
-    fprint (f, '\n   clus endcap c: ')
-    dump_TrigHisto2D (c.pixelClusEndcapC(), f)
-    fprint (f, '\n   clus barrel: ')
-    dump_TrigHisto2D (c.pixelClusBarrel(), f)
-    fprint (f, '\n   clus endcap a: ')
-    dump_TrigHisto2D (c.pixelClusEndcapA(), f)
-    return
-@nolist
-def dump_TrigSpacePointCounts_nolist (c, f):
-    dump_TrigSpacePointCounts (c, f)
     return
 
 
@@ -3508,10 +3464,8 @@ dumpspecs = [
     ["V0Container",                          dump_V0Candidate],
     ["DataVector<TrigVertex>",               dump_TrigVertex],
     ["TrigVertexCollection",                 dump_TrigVertex],
-    ["TrigTrackCounts",                      dump_TrigTrackCounts_nolist],
     ["TrigInDetTrackCollection",             dump_TrigInDetTrackCollection],
     ["TrigRoiDescriptor",                    dump_TrigRoiDescriptor_nolist],
-    ["TrigSpacePointCounts",                 dump_TrigSpacePointCounts_nolist],
     ["TileContainer<TileMu>",                dump_TileMu],
     ["CaloShowerContainer",                  dump_CaloShower],
     ["CaloTowerContainer",                   dump_CaloTowerContainer],
@@ -3530,8 +3484,6 @@ dumpspecs = [
     ['AtlasHitsVector<MDTSimHit>',           dump_MDTSimHit],
     ['AtlasHitsVector<RPCSimHit>',           dump_RPCSimHit],
     ['AtlasHitsVector<TGCSimHit>',           dump_TGCSimHit],
-    ["TrigSpacePointCountsCollection",       dump_TrigSpacePointCounts],
-    ["TrigTrackCountsCollection",            dump_TrigTrackCounts],
     ["TrigRoiDescriptorCollection",          dump_TrigRoiDescriptor],
     ["MdtTrackSegmentCollection",            dump_MdtTrackSegment],
     ["InDet::InDetLowBetaContainer",         dump_InDetLowBetaCandidate],

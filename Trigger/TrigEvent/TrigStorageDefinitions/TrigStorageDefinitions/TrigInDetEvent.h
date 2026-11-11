@@ -62,8 +62,6 @@ HLT_BEGIN_TYPE_REGISTRATION
      HLT_REGISTER_TYPE(class TrigInDetTrack,class TrigInDetTrackCollection,class TrigInDetTrackCollection)
      HLT_REGISTER_TYPE(class TrigVertex,class TrigVertex,class TrigVertexCollection )
      HLT_REGISTER_TYPE(class TrigVertex, class TrigVertexCollection,class TrigVertexCollection )
-     HLT_REGISTER_TYPE(class TrigSpacePointCounts,class  TrigSpacePointCounts,class TrigSpacePointCountsCollection )
-     HLT_REGISTER_TYPE(class TrigTrackCounts,class TrigTrackCounts,class TrigTrackCountsCollection )
      HLT_REGISTER_TYPE(class TrigVertexCounts,class TrigVertexCounts,class TrigVertexCountsCollection )
      HLT_REGISTER_TYPE(class TrigInDetTrackFitPar, DataVector<TrigInDetTrackFitPar >, DataVector<TrigInDetTrackFitPar> )
   

@@ -67,12 +67,10 @@ StatusCode TrigSerializeConvHelper::initialize(){
   
   m_oldEDMmap[ "TrigRoiDescriptor" ]         = "TrigRoiDescriptorCollection_tlp1";
   m_oldEDMmap[ "TrigInDetTrackCollection" ]  = "TrigInDetTrackCollection_tlp1";
-  m_oldEDMmap[ "TrigSpacePointCounts" ]      = "TrigSpacePointCountsCollection_tlp1";
   m_oldEDMmap[ "TrigVertexCollection" ]      = "TrigVertexCollection_tlp1";
   m_oldEDMmap[ "CaloCellContainer" ]         = "CaloCompactCellContainer";
   m_oldEDMmap[ "CaloClusterContainer" ]      = "CaloClusterContainer_p4";
   m_oldEDMmap[ "CaloShowerContainer" ]       = "CaloShowerContainer_p2";
-  m_oldEDMmap[ "TrigTrackCounts" ]           = "TrigTrackCountsCollection_tlp1";
   m_oldEDMmap[ "TrackCollection" ]           = "Trk::TrackCollection_tlp2";
   m_oldEDMmap[ "Rec::TrackParticleContainer" ]   = "Rec::TrackParticleContainer_tlp1";
   m_oldEDMmap[ "VxContainer" ]               = "";
