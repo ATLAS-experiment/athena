@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardRegionProperties.h"
@@ -7,69 +7,77 @@
 ForwardRegionProperties::ForwardRegionProperties( const std::string& type, const std::string& name, const IInterface* parent )
 : base_class( type, name, parent )
 {
-    m_Config.clear();
-    declareProperty("twissFileB1",m_Config.twissFileB1="");
-    declareProperty("twissFileB2",m_Config.twissFileB2="");
-    declareProperty("momentum",m_Config.momentum = 0);
-
-    declareProperty("pointQ1Start", m_Config.pointQ1Start);
-    declareProperty("pointQ2aStart", m_Config.pointQ2aStart);
-    declareProperty("pointQ2bStart", m_Config.pointQ2bStart);
-    declareProperty("pointQ3Start", m_Config.pointQ3Start);
-    declareProperty("pointQ4Start", m_Config.pointQ4Start);
-    declareProperty("pointQ5Start", m_Config.pointQ5Start);
-    declareProperty("pointQ6Start", m_Config.pointQ6Start);
-    declareProperty("pointQ7aStart", m_Config.pointQ7aStart);
-    declareProperty("pointQ7bStart", m_Config.pointQ7bStart);
-    declareProperty("pointD1aStart", m_Config.pointD1aStart);
-    declareProperty("pointD1bStart", m_Config.pointD1bStart);
-    declareProperty("pointD1cStart", m_Config.pointD1cStart);
-    declareProperty("pointD1dStart", m_Config.pointD1dStart);
-    declareProperty("pointD1eStart", m_Config.pointD1eStart);
-    declareProperty("pointD1fStart", m_Config.pointD1fStart);
-    declareProperty("pointD2Start", m_Config.pointD2Start);
-
-    declareProperty("pointQ1End", m_Config.pointQ1End);
-    declareProperty("pointQ2aEnd", m_Config.pointQ2aEnd);
-    declareProperty("pointQ2bEnd", m_Config.pointQ2bEnd);
-    declareProperty("pointQ3End", m_Config.pointQ3End);
-    declareProperty("pointQ4End", m_Config.pointQ4End);
-    declareProperty("pointQ5End", m_Config.pointQ5End);
-    declareProperty("pointQ6End", m_Config.pointQ6End);
-    declareProperty("pointQ7aEnd", m_Config.pointQ7aEnd);
-    declareProperty("pointQ7bEnd", m_Config.pointQ7bEnd);
-    declareProperty("pointD1aEnd", m_Config.pointD1aEnd);
-    declareProperty("pointD1bEnd", m_Config.pointD1bEnd);
-    declareProperty("pointD1cEnd", m_Config.pointD1cEnd);
-    declareProperty("pointD1dEnd", m_Config.pointD1dEnd);
-    declareProperty("pointD1eEnd", m_Config.pointD1eEnd);
-    declareProperty("pointD1fEnd", m_Config.pointD1fEnd);
-    declareProperty("pointD2End", m_Config.pointD2End);
-
-    declareProperty("fQ1RotZ", m_Config.fQ1RotZ);
-    declareProperty("fQ2aRotZ", m_Config.fQ2aRotZ);
-    declareProperty("fQ2bRotZ", m_Config.fQ2bRotZ);
-    declareProperty("fQ3RotZ", m_Config.fQ3RotZ);
-    declareProperty("fQ4RotZ", m_Config.fQ4RotZ);
-    declareProperty("fQ5RotZ", m_Config.fQ5RotZ);
-    declareProperty("fQ6RotZ", m_Config.fQ6RotZ);
-    declareProperty("fQ7aRotZ", m_Config.fQ7aRotZ);
-    declareProperty("fQ7bRotZ", m_Config.fQ7bRotZ);
-    declareProperty("fD1aRotZ", m_Config.fD1aRotZ);
-    declareProperty("fD1bRotZ", m_Config.fD1bRotZ);
-    declareProperty("fD1cRotZ", m_Config.fD1cRotZ);
-    declareProperty("fD1dRotZ", m_Config.fD1dRotZ);
-    declareProperty("fD1eRotZ", m_Config.fD1eRotZ);
-    declareProperty("fD1fRotZ", m_Config.fD1fRotZ);
-    declareProperty("fD2RotZ", m_Config.fD2RotZ);
-
-    declareProperty("bUseFLUKAMapsForInnerTriplet", m_Config.bUseFLUKAMapsForInnerTriplet=false);
-
-
     ATH_MSG_INFO("ForwardRegionProperties created");
 }
 
 ForwardRegionProperties::~ForwardRegionProperties(){}
+
+StatusCode ForwardRegionProperties::initialize()
+{
+    fillConfig();
+    return StatusCode::SUCCESS;
+}
+
+void ForwardRegionProperties::fillConfig()
+{
+    m_Config.clear();
+    m_Config.twissFileB1 = m_twissFileB1.value();
+    m_Config.twissFileB2 = m_twissFileB2.value();
+    m_Config.momentum = m_momentum;
+
+    m_Config.pointQ1Start = m_pointQ1Start.value();
+    m_Config.pointQ2aStart = m_pointQ2aStart.value();
+    m_Config.pointQ2bStart = m_pointQ2bStart.value();
+    m_Config.pointQ3Start = m_pointQ3Start.value();
+    m_Config.pointQ4Start = m_pointQ4Start.value();
+    m_Config.pointQ5Start = m_pointQ5Start.value();
+    m_Config.pointQ6Start = m_pointQ6Start.value();
+    m_Config.pointQ7aStart = m_pointQ7aStart.value();
+    m_Config.pointQ7bStart = m_pointQ7bStart.value();
+    m_Config.pointD1aStart = m_pointD1aStart.value();
+    m_Config.pointD1bStart = m_pointD1bStart.value();
+    m_Config.pointD1cStart = m_pointD1cStart.value();
+    m_Config.pointD1dStart = m_pointD1dStart.value();
+    m_Config.pointD1eStart = m_pointD1eStart.value();
+    m_Config.pointD1fStart = m_pointD1fStart.value();
+    m_Config.pointD2Start = m_pointD2Start.value();
+
+    m_Config.pointQ1End = m_pointQ1End.value();
+    m_Config.pointQ2aEnd = m_pointQ2aEnd.value();
+    m_Config.pointQ2bEnd = m_pointQ2bEnd.value();
+    m_Config.pointQ3End = m_pointQ3End.value();
+    m_Config.pointQ4End = m_pointQ4End.value();
+    m_Config.pointQ5End = m_pointQ5End.value();
+    m_Config.pointQ6End = m_pointQ6End.value();
+    m_Config.pointQ7aEnd = m_pointQ7aEnd.value();
+    m_Config.pointQ7bEnd = m_pointQ7bEnd.value();
+    m_Config.pointD1aEnd = m_pointD1aEnd.value();
+    m_Config.pointD1bEnd = m_pointD1bEnd.value();
+    m_Config.pointD1cEnd = m_pointD1cEnd.value();
+    m_Config.pointD1dEnd = m_pointD1dEnd.value();
+    m_Config.pointD1eEnd = m_pointD1eEnd.value();
+    m_Config.pointD1fEnd = m_pointD1fEnd.value();
+    m_Config.pointD2End = m_pointD2End.value();
+
+    m_Config.fQ1RotZ = m_fQ1RotZ.value();
+    m_Config.fQ2aRotZ = m_fQ2aRotZ.value();
+    m_Config.fQ2bRotZ = m_fQ2bRotZ.value();
+    m_Config.fQ3RotZ = m_fQ3RotZ.value();
+    m_Config.fQ4RotZ = m_fQ4RotZ.value();
+    m_Config.fQ5RotZ = m_fQ5RotZ.value();
+    m_Config.fQ6RotZ = m_fQ6RotZ.value();
+    m_Config.fQ7aRotZ = m_fQ7aRotZ.value();
+    m_Config.fQ7bRotZ = m_fQ7bRotZ.value();
+    m_Config.fD1aRotZ = m_fD1aRotZ.value();
+    m_Config.fD1bRotZ = m_fD1bRotZ.value();
+    m_Config.fD1cRotZ = m_fD1cRotZ.value();
+    m_Config.fD1dRotZ = m_fD1dRotZ.value();
+    m_Config.fD1eRotZ = m_fD1eRotZ.value();
+    m_Config.fD1fRotZ = m_fD1fRotZ.value();
+    m_Config.fD2RotZ = m_fD2RotZ.value();
+
+    m_Config.bUseFLUKAMapsForInnerTriplet = m_useFLUKAMapsForInnerTriplet;
+}
 
 PFWDMg_CONFIGURATION ForwardRegionProperties::getConf() {
     return &m_Config;

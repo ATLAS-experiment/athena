@@ -35,26 +35,42 @@
 // static ForwardRegionMgField q6vkick("Q6VKick",ForwardRegionField::Q6VKick);
 
 MagField::ForwardRegionFieldSvc::ForwardRegionFieldSvc(const std::string& name,ISvcLocator* svc) :
-  base_class(name,svc),
-  m_magnet(-1),
-  m_magDataType(0),
-  m_MQXA_DataFile(""), //"MQXA_NOMINAL.dat" if name = Q1 or Q3
-  m_MQXB_DataFile(""), //"MQXB_NOMINAL.dat" if name = Q2
-  m_properties("ForwardRegionProperties")
+  base_class(name,svc)
 {
-
-  declareProperty("Magnet", m_magnet, "integer property");
-  declareProperty("MQXA_DataFile", m_MQXA_DataFile, "");
-  declareProperty("MQXB_DataFile", m_MQXB_DataFile, "");
-  declareProperty("ForwardRegionProperties", m_properties);
   m_Config.clear();
+}
 
-  if(!m_MQXA_DataFile.empty())
+StatusCode MagField::ForwardRegionFieldSvc::initialize()
+{
+  ATH_CHECK(m_properties.retrieve());
+
+  // The MQXA/MQXB field maps are only used for the inner triplet when
+  // FLUKA maps are requested. Load them here, once the properties are set.
+  if(m_properties->getConf()->bUseFLUKAMapsForInnerTriplet) {
+    ATH_CHECK(loadFieldMaps());
+  }
+
+  ATH_MSG_INFO("Postponing magnet strengths initialization of " << this->name() << " till the begin of run");
+  ServiceHandle<IIncidentSvc> incidentSvc("IncidentSvc", this->name());
+  ATH_CHECK(incidentSvc.retrieve());
+  incidentSvc->addListener( this, IncidentType::BeginRun );
+  ATH_MSG_INFO("Added listener to BeginRun incident");
+  return StatusCode::SUCCESS;
+}
+
+StatusCode MagField::ForwardRegionFieldSvc::loadFieldMaps()
+{
+  const int fileCols(7); //TODO make this a property
+
+  if(!m_MQXA_DataFile.value().empty())
     {
-      const int fileMQXACols(7); //TODO make this a property
-
       // load field map MQXA
-      std::vector<std::vector<std::string> > loadedDataFile = loadDataFile(m_MQXA_DataFile.c_str(),fileMQXACols);
+      std::vector<std::vector<std::string> > loadedDataFile = loadDataFile(m_MQXA_DataFile.value().c_str(),fileCols);
+      if(loadedDataFile.size() < static_cast<size_t>(s_rowsMQXA*s_colsMQXA)) {
+        ATH_MSG_ERROR("Field map " << m_MQXA_DataFile.value() << " contains " << loadedDataFile.size()
+                      << " entries, expected " << s_rowsMQXA*s_colsMQXA);
+        return StatusCode::FAILURE;
+      }
 
       ATH_MSG_DEBUG("Field map MQXA loaded");
 
@@ -69,12 +85,15 @@ MagField::ForwardRegionFieldSvc::ForwardRegionFieldSvc(const std::string& name,I
         }
     }
 
-  if(!m_MQXB_DataFile.empty())
+  if(!m_MQXB_DataFile.value().empty())
     {
-      const int fileMQXBCols(7); //TODO make this a property
-
       // load field map MQXB
-      std::vector<std::vector<std::string> > loadedDataFileB = loadDataFile(m_MQXB_DataFile.c_str(),fileMQXBCols);
+      std::vector<std::vector<std::string> > loadedDataFileB = loadDataFile(m_MQXB_DataFile.value().c_str(),fileCols);
+      if(loadedDataFileB.size() < static_cast<size_t>(s_rowsMQXB*s_colsMQXB)) {
+        ATH_MSG_ERROR("Field map " << m_MQXB_DataFile.value() << " contains " << loadedDataFileB.size()
+                      << " entries, expected " << s_rowsMQXB*s_colsMQXB);
+        return StatusCode::FAILURE;
+      }
 
       ATH_MSG_DEBUG("Field map MQXB loaded");
 
@@ -89,18 +108,6 @@ MagField::ForwardRegionFieldSvc::ForwardRegionFieldSvc(const std::string& name,I
         }
     }
 
-
-}
-
-StatusCode MagField::ForwardRegionFieldSvc::initialize()
-{
-  ATH_CHECK(m_properties.retrieve());
-
-  ATH_MSG_INFO("Postponing magnet strengths initialization of " << this->name() << " till the begin of run");
-  ServiceHandle<IIncidentSvc> incidentSvc("IncidentSvc", this->name());
-  ATH_CHECK(incidentSvc.retrieve());
-  incidentSvc->addListener( this, IncidentType::BeginRun );
-  ATH_MSG_INFO("Added listener to BeginRun incident");
   return StatusCode::SUCCESS;
 }
 
@@ -274,38 +281,38 @@ void MagField::ForwardRegionFieldSvc::InitMagDataFromTwiss(const std::vector<std
     for(int i=0; i < 150; i++)
     {
         // dipoles
-        dipole =    (m_magnet == s_D1 && (loadedTwissFile[i][textIndex] == "\"MBXW.A4R1\"" || loadedTwissFile[i][textIndex] == "\"MBXW.A4L1\""))
-                 || (m_magnet == s_D2 && (loadedTwissFile[i][textIndex] == "\"MBRC.4R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MBRC.4L1.B2\""));
+        dipole =    (m_magnet.value() == s_D1 && (loadedTwissFile[i][textIndex] == "\"MBXW.A4R1\"" || loadedTwissFile[i][textIndex] == "\"MBXW.A4L1\""))
+                 || (m_magnet.value() == s_D2 && (loadedTwissFile[i][textIndex] == "\"MBRC.4R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MBRC.4L1.B2\""));
         if(dipole){
             m_magData[beam-1] = kLToB(atof(loadedTwissFile[i][k0LIndex].c_str()), atof(loadedTwissFile[i][lengthIndex].c_str()), momentum);
             return;
         }
 
         //quadrupoles
-        quadrupole =    (m_magnet == s_Q1 && (loadedTwissFile[i][textIndex] == "\"MQXA.1R1\"" || loadedTwissFile[i][textIndex] == "\"MQXA.1L1\""))
-                 || (m_magnet == s_Q2 && (loadedTwissFile[i][textIndex] == "\"MQXB.A2R1\"" || loadedTwissFile[i][textIndex] == "\"MQXB.A2L1\""))
-                 || (m_magnet == s_Q3 && (loadedTwissFile[i][textIndex] == "\"MQXA.3R1\"" || loadedTwissFile[i][textIndex] == "\"MQXA.3L1\""))
-                 || (m_magnet == s_Q4 && (loadedTwissFile[i][textIndex] == "\"MQY.4R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MQY.4L1.B2\""))
-                 || (m_magnet == s_Q5 && (loadedTwissFile[i][textIndex] == "\"MQML.5R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MQML.5L1.B2\""))
-                 || (m_magnet == s_Q6 && (loadedTwissFile[i][textIndex] == "\"MQML.6R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MQML.6L1.B2\""))
-                 || (m_magnet == s_Q7 && (loadedTwissFile[i][textIndex] == "\"MQM.A7R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MQM.A7L1.B2\""));
+        quadrupole =    (m_magnet.value() == s_Q1 && (loadedTwissFile[i][textIndex] == "\"MQXA.1R1\"" || loadedTwissFile[i][textIndex] == "\"MQXA.1L1\""))
+                 || (m_magnet.value() == s_Q2 && (loadedTwissFile[i][textIndex] == "\"MQXB.A2R1\"" || loadedTwissFile[i][textIndex] == "\"MQXB.A2L1\""))
+                 || (m_magnet.value() == s_Q3 && (loadedTwissFile[i][textIndex] == "\"MQXA.3R1\"" || loadedTwissFile[i][textIndex] == "\"MQXA.3L1\""))
+                 || (m_magnet.value() == s_Q4 && (loadedTwissFile[i][textIndex] == "\"MQY.4R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MQY.4L1.B2\""))
+                 || (m_magnet.value() == s_Q5 && (loadedTwissFile[i][textIndex] == "\"MQML.5R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MQML.5L1.B2\""))
+                 || (m_magnet.value() == s_Q6 && (loadedTwissFile[i][textIndex] == "\"MQML.6R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MQML.6L1.B2\""))
+                 || (m_magnet.value() == s_Q7 && (loadedTwissFile[i][textIndex] == "\"MQM.A7R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MQM.A7L1.B2\""));
         if(quadrupole){
             m_magData[beam-1] = kLToB(atof(loadedTwissFile[i][k1LIndex].c_str()), atof(loadedTwissFile[i][lengthIndex].c_str()), momentum);
             return;
         }
 
         // kickers
-        kicker =    (m_magnet == s_Q1HKick && (loadedTwissFile[i][textIndex] == "\"MCBXH.1R1\"" || loadedTwissFile[i][textIndex] == "\"MCBXH.1L1\""))
-                 || (m_magnet == s_Q1VKick && (loadedTwissFile[i][textIndex] == "\"MCBXV.1R1\"" || loadedTwissFile[i][textIndex] == "\"MCBXV.1L1\""))
-                 || (m_magnet == s_Q2HKick && (loadedTwissFile[i][textIndex] == "\"MCBXH.2R1\"" || loadedTwissFile[i][textIndex] == "\"MCBXH.2L1\""))
-                 || (m_magnet == s_Q2VKick && (loadedTwissFile[i][textIndex] == "\"MCBXV.2R1\"" || loadedTwissFile[i][textIndex] == "\"MCBXV.2L1\""))
-                 || (m_magnet == s_Q3HKick && (loadedTwissFile[i][textIndex] == "\"MCBXH.3R1\"" || loadedTwissFile[i][textIndex] == "\"MCBXH.3L1\""))
-                 || (m_magnet == s_Q3VKick && (loadedTwissFile[i][textIndex] == "\"MCBXV.3R1\"" || loadedTwissFile[i][textIndex] == "\"MCBXV.3L1\""))
-                 || (m_magnet == s_Q4VKickA && (loadedTwissFile[i][textIndex] == "\"MCBYV.A4R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MCBYV.A4L1.B2\""))
-                 || (m_magnet == s_Q4HKick && (loadedTwissFile[i][textIndex] == "\"MCBYH.4R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MCBYH.4L1.B2\""))
-                 || (m_magnet == s_Q4VKickB && (loadedTwissFile[i][textIndex] == "\"MCBYV.B4R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MCBYV.B4L1.B2\""))
-                 || (m_magnet == s_Q5HKick && (loadedTwissFile[i][textIndex] == "\"MCBCH.5R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MCBCH.5L1.B2\""))
-                 || (m_magnet == s_Q6VKick && (loadedTwissFile[i][textIndex] == "\"MCBCV.6R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MCBCV.6L1.B2\""));
+        kicker =    (m_magnet.value() == s_Q1HKick && (loadedTwissFile[i][textIndex] == "\"MCBXH.1R1\"" || loadedTwissFile[i][textIndex] == "\"MCBXH.1L1\""))
+                 || (m_magnet.value() == s_Q1VKick && (loadedTwissFile[i][textIndex] == "\"MCBXV.1R1\"" || loadedTwissFile[i][textIndex] == "\"MCBXV.1L1\""))
+                 || (m_magnet.value() == s_Q2HKick && (loadedTwissFile[i][textIndex] == "\"MCBXH.2R1\"" || loadedTwissFile[i][textIndex] == "\"MCBXH.2L1\""))
+                 || (m_magnet.value() == s_Q2VKick && (loadedTwissFile[i][textIndex] == "\"MCBXV.2R1\"" || loadedTwissFile[i][textIndex] == "\"MCBXV.2L1\""))
+                 || (m_magnet.value() == s_Q3HKick && (loadedTwissFile[i][textIndex] == "\"MCBXH.3R1\"" || loadedTwissFile[i][textIndex] == "\"MCBXH.3L1\""))
+                 || (m_magnet.value() == s_Q3VKick && (loadedTwissFile[i][textIndex] == "\"MCBXV.3R1\"" || loadedTwissFile[i][textIndex] == "\"MCBXV.3L1\""))
+                 || (m_magnet.value() == s_Q4VKickA && (loadedTwissFile[i][textIndex] == "\"MCBYV.A4R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MCBYV.A4L1.B2\""))
+                 || (m_magnet.value() == s_Q4HKick && (loadedTwissFile[i][textIndex] == "\"MCBYH.4R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MCBYH.4L1.B2\""))
+                 || (m_magnet.value() == s_Q4VKickB && (loadedTwissFile[i][textIndex] == "\"MCBYV.B4R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MCBYV.B4L1.B2\""))
+                 || (m_magnet.value() == s_Q5HKick && (loadedTwissFile[i][textIndex] == "\"MCBCH.5R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MCBCH.5L1.B2\""))
+                 || (m_magnet.value() == s_Q6VKick && (loadedTwissFile[i][textIndex] == "\"MCBCV.6R1.B1\"" || loadedTwissFile[i][textIndex] == "\"MCBCV.6L1.B2\""));
 
         if(kicker){
             // length of s_Q1--s_Q3 kickers in twiss files is zero -> it is set to 0.001 m (also the length of corresponding GeoModel volumes)

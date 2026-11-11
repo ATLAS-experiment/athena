@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2018 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ForwardRegionGeoModelTool.h"
@@ -18,31 +18,6 @@
 ForwardRegionGeoModelTool::ForwardRegionGeoModelTool( const std::string& type, const std::string& name, const IInterface* parent )
 : GeoModelTool( type, name, parent )
 {
-    m_Config.clear();
-    declareProperty("TCL4JawDistB1I",m_Config.TCL4JawDistB1I=57*Gaudi::Units::mm);
-    declareProperty("TCL4JawDistB2I",m_Config.TCL4JawDistB2I=57*Gaudi::Units::mm);
-    declareProperty("TCL5JawDistB1I",m_Config.TCL5JawDistB1I=57*Gaudi::Units::mm);
-    declareProperty("TCL5JawDistB2I",m_Config.TCL5JawDistB2I=57*Gaudi::Units::mm);
-    declareProperty("TCL6JawDistB1I",m_Config.TCL6JawDistB1I=57*Gaudi::Units::mm);
-    declareProperty("TCL6JawDistB2I",m_Config.TCL6JawDistB2I=57*Gaudi::Units::mm);
-    declareProperty("TCL4JawDistB1O",m_Config.TCL4JawDistB1O=57*Gaudi::Units::mm);
-    declareProperty("TCL4JawDistB2O",m_Config.TCL4JawDistB2O=57*Gaudi::Units::mm);
-    declareProperty("TCL5JawDistB1O",m_Config.TCL5JawDistB1O=57*Gaudi::Units::mm);
-    declareProperty("TCL5JawDistB2O",m_Config.TCL5JawDistB2O=57*Gaudi::Units::mm);
-    declareProperty("TCL6JawDistB1O",m_Config.TCL6JawDistB1O=57*Gaudi::Units::mm);
-    declareProperty("TCL6JawDistB2O",m_Config.TCL6JawDistB2O=57*Gaudi::Units::mm);
-    declareProperty("vp1Compatibility", m_Config.vp1Compatibility=false);
-    declareProperty("buildTCL4",m_Config.buildTCL4=false);
-    declareProperty("buildTCL6",m_Config.buildTCL6=false);
-    declareProperty("ALFAInNewPosition",m_Config.ALFAInNewPosition=false);
-    declareProperty("newPosB7L1",m_Config.newPosB7L1=245656.77*Gaudi::Units::mm);
-    declareProperty("newPosB7R1",m_Config.newPosB7R1=-245656.11*Gaudi::Units::mm);
-    declareProperty("posAFPL1",m_Config.posAFPL1=204500*Gaudi::Units::mm);
-    declareProperty("posAFPR1",m_Config.posAFPR1=-204500*Gaudi::Units::mm);
-    declareProperty("posAFPL2",m_Config.posAFPL2=212675*Gaudi::Units::mm);
-    declareProperty("posAFPR2",m_Config.posAFPR2=-212675*Gaudi::Units::mm);
-    declareProperty("posZDC1",m_Config.posZDC1=141580*Gaudi::Units::mm);
-    declareProperty("posZDC2",m_Config.posZDC2=-141580*Gaudi::Units::mm);
 }
 
 /**
@@ -56,6 +31,38 @@ ForwardRegionGeoModelTool::~ForwardRegionGeoModelTool()
 		delete m_detector;
 		m_detector = 0;
 	}
+}
+
+/**
+ ** Copy the property values into the configuration structure
+ **/
+void ForwardRegionGeoModelTool::fillConfig()
+{
+    m_Config.clear();
+    m_Config.TCL4JawDistB1I = m_tcl4JawDistB1I;
+    m_Config.TCL4JawDistB2I = m_tcl4JawDistB2I;
+    m_Config.TCL5JawDistB1I = m_tcl5JawDistB1I;
+    m_Config.TCL5JawDistB2I = m_tcl5JawDistB2I;
+    m_Config.TCL6JawDistB1I = m_tcl6JawDistB1I;
+    m_Config.TCL6JawDistB2I = m_tcl6JawDistB2I;
+    m_Config.TCL4JawDistB1O = m_tcl4JawDistB1O;
+    m_Config.TCL4JawDistB2O = m_tcl4JawDistB2O;
+    m_Config.TCL5JawDistB1O = m_tcl5JawDistB1O;
+    m_Config.TCL5JawDistB2O = m_tcl5JawDistB2O;
+    m_Config.TCL6JawDistB1O = m_tcl6JawDistB1O;
+    m_Config.TCL6JawDistB2O = m_tcl6JawDistB2O;
+    m_Config.vp1Compatibility = m_vp1Compatibility;
+    m_Config.buildTCL4 = m_buildTCL4;
+    m_Config.buildTCL6 = m_buildTCL6;
+    m_Config.ALFAInNewPosition = m_alfaInNewPosition;
+    m_Config.newPosB7L1 = m_newPosB7L1;
+    m_Config.newPosB7R1 = m_newPosB7R1;
+    m_Config.posAFPL1 = m_posAFPL1;
+    m_Config.posAFPR1 = m_posAFPR1;
+    m_Config.posAFPL2 = m_posAFPL2;
+    m_Config.posAFPR2 = m_posAFPR2;
+    m_Config.posZDC1 = m_posZDC1;
+    m_Config.posZDC2 = m_posZDC2;
 }
 
 /**
@@ -76,6 +83,8 @@ ForwardRegionGeoModelTool::create()
 	<< endmsg; 
     return (StatusCode::FAILURE); 
   } 
+
+  fillConfig();
 
   ForwardRegionGeoModelFactory theFactory(detStore().operator->(), &m_Config);
   if ( 0 == m_detector ) {

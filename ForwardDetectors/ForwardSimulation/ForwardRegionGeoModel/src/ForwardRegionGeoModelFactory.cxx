@@ -52,7 +52,7 @@ void FWD_CONFIGURATION::clear()
     posAFPL1 = 204500*Gaudi::Units::mm;
     posAFPL2 = 212675*Gaudi::Units::mm;
     posAFPR1 = -204500*Gaudi::Units::mm;
-    posAFPL2 = -212675*Gaudi::Units::mm;
+    posAFPR2 = -212675*Gaudi::Units::mm;
     posZDC1 = 141580*Gaudi::Units::mm;
     posZDC2 = -141580*Gaudi::Units::mm;
 }
