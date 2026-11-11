@@ -454,6 +454,20 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
 
 
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // Photon conversions (gamma -> mu+ mu-)
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  // Muon analogue of the electron PromptPhotonConversion rules. Without it these muons
+  // (BkgMuon, PhotonConv) matched no rule and ended up as Unknown, while the
+  // MCTruthClassifier-based isPrompt flag counts them as prompt.
+  if (type == MCTruthPartClassifier::BkgMuon && origin == MCTruthPartClassifier::PhotonConv)
+  {
+    classification = Truth::Type::PromptPhotonConversion;
+    return StatusCode::SUCCESS;
+  }
+
+
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // Light hadron sources
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 

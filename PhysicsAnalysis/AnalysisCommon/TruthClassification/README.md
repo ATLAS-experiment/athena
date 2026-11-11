@@ -136,6 +136,8 @@ Electrons originating from the conversion of prompt photons (**IFF class 5**) ar
 
 No distinction between external (material) and internal conversions (depends on conversion radius) is performed in the current version of the tool. A manual separation of these conversion types can be done with the `DFCommonAddAmbiguity` flag, which should be available at derivation-level via the egamma smart slimming list. See [here](https://indico.cern.ch/event/862748/contributions/3635039/attachments/1946503/3235131/conversionsIFF2019.11.18.pdf) for more information. 
 
+Muons from a generator-level photon splitting gamma -> mu+ mu- (truth-type `BkgMuon` (8) with truth-origin `PhotonConv` (5)) are also put in this class. Previously no muon rule matched them and they were returned as `Unknown`.
+
 If this category is a major contribution in you analysis, you are encouraged to perform also some truth based studies to understand better the origin of these electrons. Please, give feedback to the IFF group.
 
 ### Electrons from muons
