@@ -107,7 +107,7 @@ protected:
   SG::ReadDecorHandleKeyArray<xAOD::FlowElementContainer> m_inChargedFEDecorKeys{this, "InChargedFEDecorKeys", {}, "Dummy keys that force all neccessary charged FlowElement decorations to be applied before running this algorithm"};
   SG::ReadDecorHandleKeyArray<xAOD::FlowElementContainer> m_inNeutralFEDecorKeys{this, "InNeutralFEDecorKeys", {}, "Dummy keys that force all neccessary neutral FlowElement decorations to be applied before running this algorithm"};
 
-  SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_constituentCopyIndexKey{this, "ConstituentCopyIndexKey", "ConstituentCopyIndexKey", "WriteDecorHandleKey for the constituent copy index"};
+  SG::WriteDecorHandleKey<xAOD::IParticleContainer> m_constituentCopyIndexKey{this, "ConstituentCopyIndexKey", "ConstituentCopyIndex", "WriteDecorHandleKey for the constituent copy index"};
 
   /// helper function to cast, shallow copy and record a container.
 
