@@ -78,7 +78,6 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     for (const auto& temp: partProdVtx->particles_in()) {if (temp)  parent = temp;}
   }
   const int parentPDG = parent?parent->pdg_id():0;
-  info.setMotherProperties(parent);
 
   if (!partProdVtx && HepMC::is_simulation_particle(thePart)) {
     return std::make_pair(NonPrimary, partOrig);
@@ -112,7 +111,7 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
     return std::make_pair(Neutrino, partOrig);
   }
 
-  if (thePart && info.Mother() && HepMC::is_same_generator_particle(thePart,info.Mother()))
+  if (parent && HepMC::is_same_generator_particle(thePart, parent))
     return std::make_pair(NonPrimary, partOrig);
 
   if (isPartHadr) return std::make_pair(Hadron, partOrig);
@@ -184,7 +183,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
-  info.setMotherProperties(ancestor);
   if (!ancestor) { return NonDefined; } // After this point "ancestor" cannot be nullptr
 
   // Start of method 1 of protecting against loops
@@ -223,7 +221,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
     }
   }
 
-  info.setMotherProperties(ancestor);
   const int ancestorPDG = ancestor->pdgId();
   const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
   partProdVtx = ancestor->decayVtx();
@@ -469,7 +466,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
 
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
-  info.setMotherProperties(ancestor);
   if (!ancestor) { return NonDefined; } // ancestor is not a nullptr beyond this point
 
   // "method 1" for finding Sherpa loops from defOrigOfElectron not used here. Why?
@@ -506,7 +502,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
     }
   }
 
-  info.setMotherProperties(ancestor);
   const int ancestorPDG = ancestor->pdgId();
   const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
   partProdVtx = ancestor->decayVtx();
@@ -705,7 +700,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
 
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
-  info.setMotherProperties(ancestor);
   if (!ancestor) { return NonDefined; } // ancestor is not a nullptr beyond this point
 
   // "method 1" for finding Sherpa loops from defOrigOfElectron not used here. Why?
@@ -720,7 +714,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   }
 
   const int ancestorPDG = ancestor->pdgId();
-  info.setMotherProperties(ancestor);
   const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
   partProdVtx = ancestor->decayVtx();
   if (!partProdVtx) return NonDefined; // FIXME not sure this could ever be true?
@@ -883,7 +876,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   if (!thePart) return NonDefined; // FIXME Why is this extra protection needed for this function and not the others?
   // Executing DefOrigOfPhoton 
 
-  info.resetMotherProperties();
 
   // Find the first copy of this particle stored in the xAOD::TruthParticleContainer (i.e. the particle prior to any interactions)
   const xAOD::TruthParticle* thePriPart = MC::findMatching(xTruthParticleContainer, thePart);
@@ -900,7 +892,6 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   int numOfParents = partProdVtx->nIncomingParticles();
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
-  info.setMotherProperties(ancestor);
   if (!ancestor) { return NonDefined; } // ancestor is not a nullptr beyond this point
 
   int ancestorPDG = ancestor->pdgId();
@@ -1157,7 +1148,6 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
 
 
   const xAOD::TruthParticle* ancestor = MC::findMother(thePriPart);
-  info.setMotherProperties(ancestor);
   if (!ancestor) { return NonDefined; } // ancestor is not a nullptr beyond this point
 
   // Start of method 3 of protecting against loops
@@ -1187,7 +1177,6 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
       if (std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG) ) {
         // There will be another iteration so set ancestor to ancestorParent
         ancestor = ancestorParent; // ancestorParent is not a nullptr
-        info.setMotherProperties(ancestor); // FIXME difference in behaviour compared to MCTruthClassifier::defOrigOfElectron/Muon
       }
 
     } while ((std::abs(pPDG) == nuFlav || MC::isTau(pPDG) || MC::isW(pPDG)));
@@ -1197,13 +1186,11 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
         std::abs(pPDG) == MC::WBOSON_LRSM || MC::isNeutrinoRH(pPDG) || // Left-right symmetric model WBoson || Right-handed neutrino (Pythia-specific)
         MC::isSUSY(pPDG)) {
       ancestor = ancestorParent; // ancestorParent is not nullptr here
-      info.setMotherProperties(ancestor);
     }
   }
   //if ancestor is still nullptr, we have a problem
   if (!ancestor) return NonDefined; // FIXME it should not be possible for ancestor to be nullptr at this point???
 
-  info.setMotherProperties(ancestor);
   const int ancestorPDG = ancestor->pdgId();
   partProdVtx = ancestor->decayVtx();
   const xAOD::TruthVertex* ancestorProdVtx = ancestor->hasProdVtx() ? ancestor->prodVtx() : nullptr;
