@@ -7,8 +7,6 @@
 
 #include "tauRecTools/TauRecToolBase.h"
 
-#include "TrkCaloExtension/CaloExtensionCollection.h"
-
 #include "ActsEvent/ContextUtility.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
@@ -47,12 +45,6 @@ public:
 private:
 
   Gaudi::Property<bool> m_doVertexCorrection {this, "VertexCorrection", true, "switch of vertex correction"}; 
-  Gaudi::Property<bool> m_useOldCalo{this,"useOldCalo",false,"If true, it uses the CaloExtensionTool for calculating track extrapolation. Otherwise, it allows the code to read from the cache created by CaloExtensionBuilderalg."};
-  ToolHandle<Trk::IParticleCaloExtensionTool> m_caloExtensionTool {this, 
-    "ParticleCaloExtensionTool", "Trk::ParticleCaloExtensionTool/ParticleCaloExtensionTool", "Tool for calculating track extrapolation"}; 
-  SG::ReadHandleKey<CaloExtensionCollection>  m_ParticleCacheKey{this,
-    "tauEVParticleCache", "ParticleCaloExtension", "Name of the particle measurement extrapolation cache for TauEV Algorithm"};
-
   
   // ACTS Extrapolator
   Gaudi::Property<bool> m_useACTSExtrapolator{this, "useACTSExtrapolator", false};
