@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // -------------------------------------------------------------
@@ -257,7 +257,7 @@ Starlight_i::fillEvt(HepMC::GenEvent* evt)
     double nAttempted = m_starlight->nmbAttempts();
     auto csc = std::make_shared<HepMC3::GenCrossSection>();
     csc->set_cross_section(getAcceptedCrossSection()/Gaudi::Units::picobarn, 0.0, nAccepted, nAttempted); // Save cross-section in pb to HepMC
-    evt->set_cross_section(csc);
+    evt->set_cross_section(std::move(csc));
 
     return StatusCode::SUCCESS;
 }
