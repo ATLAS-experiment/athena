@@ -18,6 +18,7 @@
 #include "xAODTracking/TrackParticle.h"
 #include <mutex>
 #include <string>
+#include <memory>
 
 class TH2;
 class TFile;
@@ -71,7 +72,7 @@ namespace InDet {
 
   private:
 
-    StatusCode initTrkEffSystHistogram(float scale, std::unique_ptr<TH2>& histogram, std::string rootFileName, std::string histogramName) const;
+    StatusCode initTrkEffSystHistogram(float scale, std::unique_ptr<TH2>& histogram, const std::string & rootFileName, std::string histogramName) const;
     float getFractionDropped(float fDefault, const std::unique_ptr<TH2>& histogram, float x, float y, bool xAxisIspT = true) const;
 
     ToolHandle< IInDetTrackTruthOriginTool > m_trackOriginTool{this, "trackOriginTool", "InDet::InDetTrackTruthOriginTool", "Tool to get the truth origin of a track"};
