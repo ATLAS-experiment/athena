@@ -134,40 +134,56 @@ StatusCode TracccMeasurementDeviceConverterAlg::execute(const EventContext& ctx)
     auto span_local_cov = s_acc_loc_cov_xy.getDataSpan(*pixel_cont);
     auto span_global_pos = s_acc_global_pos.getDataSpan(*pixel_cont);
     (*device_copy)(
+      vecmem::ignore_event,
       vecmem::data::vector_view<unsigned long>(n_pixels, pixel_meas_device.identifier().data()),
       vecmem::data::vector_view<unsigned long>(n_pixels, span_id.data())
-      )->ignore();
+      );
     (*device_copy)(
+      vecmem::ignore_event,
       vecmem::data::vector_view<std::array<float, 2>>(n_pixels, pixel_meas_device.local_position().data()),
       vecmem::data::vector_view<std::array<float, 2>>(n_pixels, span_local_pos.data())
-      )->ignore();
+      );
     (*device_copy)(
+      vecmem::ignore_event,
       vecmem::data::vector_view<std::array<float, 4>>(n_pixels, pixel_meas_device.local_variance().data()),
       vecmem::data::vector_view<std::array<float, 4>>(n_pixels, span_local_cov.data())
-      )->ignore();
+      );
     (*device_copy)(
+      vecmem::ignore_event,
       vecmem::data::vector_view<xAOD::ArrayFloat3>(n_pixels,
         reinterpret_cast<xAOD::ArrayFloat3*>(pixel_meas_device.global_position().data())),
       vecmem::data::vector_view<xAOD::ArrayFloat3>(n_pixels, span_global_pos.data())
-      )->ignore();
+      );
     (*device_copy)(
+      vecmem::ignore_event,
       vecmem::data::vector_view<unsigned int>(n_pixels, pixel_meas_device.module_id_hash().data()),
       vecmem::data::vector_view<unsigned int>(n_pixels, span_id_hash.data())
-      )->wait();
+      );
   }
   {  // Strips
     auto span_id = s_acc_id.getDataSpan(*strip_cont);
     auto span_id_hash = s_acc_id_hash.getDataSpan(*strip_cont);
     auto span_local_pos = s_acc_loc_pos_x.getDataSpan(*strip_cont);
     auto span_local_cov = s_acc_loc_cov_x.getDataSpan(*strip_cont);
-    CUDA_ERROR_CHECK(cudaMemcpy(span_id.data(), strip_meas_device.identifier().data(),
-      sizeof(unsigned long) * n_strips, cudaMemcpyDeviceToHost));
-    CUDA_ERROR_CHECK(cudaMemcpy(span_local_pos.data(), strip_meas_device.local_position().data(),
-      sizeof(float) * n_strips, cudaMemcpyDeviceToHost));
-    CUDA_ERROR_CHECK(cudaMemcpy(span_local_cov.data(), strip_meas_device.local_variance().data(),
-      sizeof(float) * n_strips, cudaMemcpyDeviceToHost));
-    CUDA_ERROR_CHECK(cudaMemcpy(span_id_hash.data(), strip_meas_device.module_id_hash().data(),
-      sizeof(unsigned int) * n_strips, cudaMemcpyDeviceToHost));
+    (*device_copy)(
+      vecmem::ignore_event,
+      vecmem::data::vector_view<unsigned long>(n_strips, strip_meas_device.identifier().data()),
+      vecmem::data::vector_view<unsigned long>(n_strips, span_id.data())
+      );
+    (*device_copy)(
+      vecmem::ignore_event,
+      vecmem::data::vector_view<float>(n_strips, strip_meas_device.local_position().data()),
+      vecmem::data::vector_view<float>(n_strips, reinterpret_cast<float*>(span_local_pos.data()))
+      );
+    (*device_copy)(
+      vecmem::ignore_event,
+      vecmem::data::vector_view<float>(n_strips, strip_meas_device.local_variance().data()),
+      vecmem::data::vector_view<float>(n_strips, reinterpret_cast<float*>(span_local_cov.data()))
+      );
+    (*device_copy)(
+      vecmem::data::vector_view<unsigned int>(n_strips, strip_meas_device.module_id_hash().data()),
+      vecmem::data::vector_view<unsigned int>(n_strips, span_id_hash.data())
+      )->wait();
   }
 
   // ---- Register to SG
