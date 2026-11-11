@@ -746,7 +746,7 @@ Hijing::fillEvt(HepMC::GenEvent* evt)
     double totalCsc = m_hiparnt.hint1(13) * Gaudi::Units::millibarn; // Get total cross-section in mb
     auto csc = std::make_shared<HepMC3::GenCrossSection>();
     csc->set_cross_section(totalCsc/Gaudi::Units::picobarn, 0.0); // Write cross-section in pb to HepMC
-    evt->set_cross_section(csc);
+    evt->set_cross_section(std::move(csc));
 
     return StatusCode::SUCCESS;
 }
