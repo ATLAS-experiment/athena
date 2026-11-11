@@ -53,13 +53,6 @@ protected:
 
     MCTruthPartClassifier::ParticleOutCome particleOutCome = MCTruthPartClassifier::UnknownOutCome;
 
-    const xAOD::TruthParticle* mother = nullptr;
-    const xAOD::TruthParticle* Mother() const { return mother;}
-    inline void setMotherProperties(const xAOD::TruthParticle* from) {
-      mother = from;
-      if (!from) return;
-    }
-    inline void resetMotherProperties() { mother = nullptr;  }
 #ifndef GENERATIONBASE /*Disable when no reconstruction packages are expected*/
     float deltaRMatch = -999;
     float deltaPhi = -999;
