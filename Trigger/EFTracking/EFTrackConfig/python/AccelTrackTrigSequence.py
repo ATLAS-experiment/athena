@@ -44,7 +44,19 @@ class AccelTrackTrigSequence(InnerTrackerTrigSequence):
           ca.merge(self.viewDataVerifierGPU())
           pass
     else:
-      self.log.info("Not inside view, skipping ViewDataVerifier configuration.")
+      self.log.info("Not inside view, skipping ViewDataVerifier configuration adding SGInputLoader instead")
+
+      # Add SGInputLoader 
+      if self.flags.Input.isMC:
+        self.log.info(f"Added SGInputLoader for view '{self.inView}' (MC data)")
+        from SGComps.SGInputLoaderConfig import SGInputLoaderCfg
+        sgil_load = [('PixelRDO_Container', 'StoreGateSvc+ITkPixelRDOs'),
+                    ('SCT_RDO_Container', 'StoreGateSvc+ITkStripRDOs'),
+                    ('InDetSimDataCollection', 'ITkPixelSDO_Map'),
+                    ('InDetSimDataCollection' , 'StoreGateSvc+ITkStripSDO_Map'),
+                    ( 'McEventCollection' , 'StoreGateSvc+TruthEvent' )]
+        ca.merge(SGInputLoaderCfg(self.flags, Load=sgil_load))
+
 
     #if there is need for splitting of the sequence in steps it can be added here
     if recoType =="FastTrackFinder":
