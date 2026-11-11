@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -47,6 +47,7 @@
 // Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "Gaudi/Property.h"
 
 class HWIdentifier;
 
@@ -81,21 +82,21 @@ class TileMuonReceiverDecision: public AthReentrantAlgorithm {
                                                                            "Output Tile muon receiver container key"};
 
 
-  std::string m_infoName;             //!< Name of tile info object in TES
+  Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo"};             //!< Name of tile info object in TES
 
-  const TileID*             m_tileID;
-  const TileHWID*           m_tileHWID;
-  const TileCablingService* m_cablingService; //!< TileCabling instance
-  const TileInfo*           m_tileInfo;
+  const TileID* m_tileID{nullptr};
+  const TileHWID* m_tileHWID{nullptr};
+  const TileCablingService* m_cablingService{nullptr}; //!< TileCabling instance
+  const TileInfo* m_tileInfo{nullptr};
 
-  float m_threshold_d6_lo;
-  float m_threshold_d6_hi;
-  float m_threshold_d5d6_lo;
-  float m_threshold_d5d6_hi;
-  float m_threshold_d5;
-  float m_threshold_d6;
-  float m_threshold_d5d6;
-  float m_selCutQf;
+  Gaudi::Property<float> m_threshold_d6_lo{this, "MuonReceiverEneThreshCellD6Low", 500., "(RUN2) Setting the lowest trigger threshold for cell D6 in MeV (Def=500 MeV)"};
+  Gaudi::Property<float> m_threshold_d6_hi{this, "MuonReceiverEneThreshCellD6High", 600., "(RUN2) Setting the highest trigger threshold for cell D6 in MeV (Def=600 MeV)"};
+  Gaudi::Property<float> m_threshold_d5d6_lo{this, "MuonReceiverEneThreshCellD6andD5Low", 500., "(RUN2) Setting the lowest trigger threshold for cell D5+D6 in MeV (Def=500 MeV)"};
+  Gaudi::Property<float> m_threshold_d5d6_hi{this, "MuonReceiverEneThreshCellD6andD5High", 600., "(RUN2) Setting the highest trigger threshold for cell D5+D6 in MeV (Def=600 MeV)"};
+  Gaudi::Property<float> m_threshold_d5{this, "MuonReceiverEneThreshCellD5", 500., "(RUN3) Setting the single threshold for cell D5 during Run 3 in MeV (Def=500 MeV)"};
+  Gaudi::Property<float> m_threshold_d6{this, "MuonReceiverEneThreshCellD6", 500., "(RUN3) Setting the single threshold for cell D6 during Run 3 in MeV (Def=500 MeV)"};
+  Gaudi::Property<float> m_threshold_d5d6{this, "MuonReceiverEneThreshCellD5andD6", 500., "(RUN3) Setting the single threshold for cell D5+D6 during Run 3 in MeV (Def=500 MeV)"};
+  Gaudi::Property<float> m_selCutQf{this, "SelectionCutForMatchedFilterQf", 0., "n cut for the quality factor of the matched filters"};
 
   /**
     * @brief Name of TileEMScale in condition store
@@ -108,7 +109,7 @@ class TileMuonReceiverDecision: public AthReentrantAlgorithm {
    */
   ServiceHandle<TileCablingSvc> m_cablingSvc{ this,
       "TileCablingSvc", "TileCablingSvc", "The Tile cabling service"};
-  int m_runPeriod;
+  int m_runPeriod{0};
 
 };
 

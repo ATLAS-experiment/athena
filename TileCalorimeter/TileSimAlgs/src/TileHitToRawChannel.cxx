@@ -50,21 +50,7 @@ using CLHEP::RandGaussQ;
 //
 TileHitToRawChannel::TileHitToRawChannel(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_rChUnit(TileRawChannelUnit::ADCcounts)
-  , m_rChType(TileFragHash::Default)
-  , m_tileID(nullptr)
-  , m_tileTBID(nullptr)
-  , m_tileHWID(nullptr)
-  , m_tileInfo(nullptr)
-  , m_cabling(nullptr)
-  , m_tileNoise(false)
-  , m_tileThresh(false)
-  , m_threshHi(0.0)
-  , m_ampMaxHi(0.0)
 {
-  declareProperty("TileInfoName", m_infoName  = "TileInfo");
-  declareProperty("DeltaT", m_deltaT = -1.0); // keep hits only within deltaT;
-  declareProperty("calibrateEnergy", m_calibrateEnergy = false); // convert or not to pCb
 }
 
 TileHitToRawChannel::~TileHitToRawChannel() {
@@ -92,7 +78,7 @@ StatusCode TileHitToRawChannel::initialize() {
 
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
 
-  ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
+  ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName.value()) );
 
   ATH_CHECK( m_samplingFractionKey.initialize() );
   ATH_CHECK( m_emScaleKey.initialize() );

@@ -60,50 +60,6 @@ using CLHEP::RandFlat;
 TileDigitsFromPulse::TileDigitsFromPulse(const std::string& name, ISvcLocator* pSvcLocator) :
   AthAlgorithm(name, pSvcLocator)
 {
-
-	declareProperty("ImperfectionMean", m_imperfectionMean = 1.01);
-	declareProperty("ImperfectionRms", m_imperfectionRms = 0.02);
-	declareProperty("InTimeAmp", m_inTimeAmp = 300.);
-	declareProperty("OutOfTimeAmp", m_ootAmp = 150.);
-	declareProperty("InTimeOffset", m_itOffset = 0.);
-	declareProperty("OutOfTimeOffset", m_ootOffset = 50.);
-	declareProperty("OutOfTimeOffsetHistogramFile", m_ootOffsetFileName = "");
-	declareProperty("OutOfTimeOffsetHistogramName", m_ootOffsetHistName = "");
-	declareProperty("UseGaussNoise", m_gaussNoise = kFALSE);
-	declareProperty("GaussNoiseAmpOne", m_GNAmpOne = 1 / 1.039);
-	declareProperty("GaussNoiseSigmaOne", m_GNSigmaOne = 1.6);
-	declareProperty("GaussNoiseAmpTwo", m_GNAmpTwo = 0.039);
-	declareProperty("GaussNoiseSigmaTwo", m_GNSigmaTwo = 3.6);
-	declareProperty("UseInTimeAmpDist", m_useItADist = kFALSE);
-	declareProperty("UseOutOfTimeAmpDist", m_useOotADist = kFALSE);
-	declareProperty("InTimeAmpDistFileName", m_itADistFileName = "");
-	declareProperty("InTimeAmpPulseProb", m_itAPulseProb = 0);
-	declareProperty("OutOfTimeAmpDistFileName", m_ootADistFileName = "");
-	declareProperty("PileUpFraction", m_pileUpFraction = 1);
-	declareProperty("GaussianC2CPhaseVariation", m_gausC2C = 0);
-	declareProperty("ChannelSpecificPedestal", m_chanPed = kFALSE);
-	declareProperty("ChannelSpecificNoise", m_chanNoise = kFALSE);
-	declareProperty("PedestalValueHG", m_ped_HG = 100);
-	declareProperty("PedestalValueLG", m_ped_LG = 100);
-	declareProperty("AmpDistLowerLimit", m_AmpDistLowLim = 135);
-	declareProperty("InTimeAmpDistHistogramName", m_itADistHistName = "h_Eopt_hi");
-	declareProperty("OutOfTimeAmpDistHistogramName", m_ootADistHistName = "h_Eopt_hi");
-
-	declareProperty("SimulatePileUpWithPoiss", m_simPUwPoisson = kFALSE); 
-	declareProperty("AvgMuForPileUpSimulation", m_avgMuForPU = 40);
-	declareProperty("PileUpAmpDistFileName", m_pileupAmpDistFileName = "");
-
-	declareProperty("RandomSeed", m_seed = 4357);
-	declareProperty("BunchSpacing", m_BunchSpacing = 25.); // 25, 50 or 75
-	declareProperty("SimulateQIE", m_simQIE = kFALSE);
-	declareProperty("SimulatePulseChain",m_simPulseChain = kFALSE);
-
-	declareProperty("TileInfoName", m_infoName = "TileInfo");
-	declareProperty("TilePhaseII", m_PhaseII = kFALSE);
-	declareProperty("Bigain", m_bigain = kFALSE);
-	declareProperty("NSamples", m_nSamples = 7); 
-	declareProperty("NPulses", m_nPul = 21);
-
 	//Initialisations
 	m_ps[0] = new TilePulseShape(msgSvc(), "TilePulseShapeLo"); //Low Gain
 	m_ps[1] = new TilePulseShape(msgSvc(), "TilePulseShapeHi"); //High Gain
@@ -117,9 +73,6 @@ TileDigitsFromPulse::TileDigitsFromPulse(const std::string& name, ISvcLocator* p
 	m_ootOffsetFile = new TFile();
 
 	m_pileup_AmpDistFile = new TFile();
-
-	m_useOffsetHisto = kFALSE;
-
 }
 
 TileDigitsFromPulse::~TileDigitsFromPulse() {
@@ -147,7 +100,7 @@ StatusCode TileDigitsFromPulse::initialize() {
 	m_nPul_eff = (m_nPul - 1) / 2; //Used for symetrization of PU in computation
 
 	ATH_CHECK(detStore()->retrieve(m_tileHWID, "TileHWID"));
-	ATH_CHECK(detStore()->retrieve(m_tileInfo, m_infoName));
+	ATH_CHECK(detStore()->retrieve(m_tileInfo, m_infoName.value()));
  	m_i_ADCmax = m_tileInfo->ADCmax();
 	ATH_MSG_DEBUG("Max ADC counts TileDigitsFromPulse: " << m_i_ADCmax);
 
@@ -168,9 +121,9 @@ StatusCode TileDigitsFromPulse::initialize() {
 
 	//Initialise distribution histograms if in use
 	if (m_useItADist) {
-		if (m_itADistFileName.size() == 0) {
+		if (m_itADistFileName.value().size() == 0) {
 			m_itADistFileName = PathResolver::find_file("Distributions_small_h2000_177531_JetTauEtmiss.root", "DATAPATH");
-			if (m_itADistFileName.size() == 0) {
+			if (m_itADistFileName.value().size() == 0) {
 				ATH_MSG_FATAL("Could not find input file Distributions_small_h2000_177531_JetTauEtmiss.root");
 				return StatusCode::FAILURE;
 			}
@@ -183,9 +136,9 @@ StatusCode TileDigitsFromPulse::initialize() {
 
 	if (m_simPUwPoisson){
 
-		if (m_pileupAmpDistFileName.size() == 0) {
+		if (m_pileupAmpDistFileName.value().size() == 0) {
 			m_pileupAmpDistFileName = PathResolver::find_file("Distributions_MB_minbias_inelastic_lowjetphoton_e8314_e7400_s3508.root", "DATAPATH");
-			if (m_pileupAmpDistFileName.size() == 0 ) {
+			if (m_pileupAmpDistFileName.value().size() == 0 ) {
 				ATH_MSG_FATAL("Could not find input file Distributions_MB_minbias_inelastic_lowjetphoton_e8314_e7400_s3508.root");
 				return StatusCode::FAILURE;
 			}
@@ -198,9 +151,9 @@ StatusCode TileDigitsFromPulse::initialize() {
 	}
 
 	if (m_useOotADist) {
-		if (m_ootADistFileName.size() == 0) {
+		if (m_ootADistFileName.value().size() == 0) {
 			m_ootADistFileName = PathResolver::find_file("Distributions_small_h2000_177531_ZeroBias.root", "DATAPATH");
-			if (m_ootADistFileName.size() == 0) {
+			if (m_ootADistFileName.value().size() == 0) {
 				ATH_MSG_FATAL("Could not find input file Distributions_small_h2000_177531_ZeroBias.root");
 				return StatusCode::FAILURE;
 			}
@@ -212,16 +165,16 @@ StatusCode TileDigitsFromPulse::initialize() {
 		delete m_ootDist;
 
 	//Initialise timing offset distribution. If filename is empty, use static offset
-	if (m_ootOffsetFileName.size() != 0) {
-		m_ootOffsetFile = TFile::Open(m_ootOffsetFileName.c_str());
+	if (m_ootOffsetFileName.value().size() != 0) {
+		m_ootOffsetFile = TFile::Open(m_ootOffsetFileName.value().c_str());
 		if (m_ootOffsetFile->IsZombie()) {
-			ATH_MSG_WARNING("Error reading offset timing distribution from " << m_ootOffsetFileName << ". Using static timing offset.");
+			ATH_MSG_WARNING("Error reading offset timing distribution from " << m_ootOffsetFileName.value() << ". Using static timing offset.");
 		} else {
-			TKey *key = m_ootOffsetFile->FindKey(m_ootOffsetHistName.c_str());
+			TKey *key = m_ootOffsetFile->FindKey(m_ootOffsetHistName.value().c_str());
 			if (key == 0) {
-				ATH_MSG_WARNING("Histogram " << m_ootOffsetHistName << " not found in file " << m_ootOffsetFileName << ". Using static timing offset.");
+				ATH_MSG_WARNING("Histogram " << m_ootOffsetHistName.value() << " not found in file " << m_ootOffsetFileName.value() << ". Using static timing offset.");
 			} else {
-				m_ootOffsetDist = (TH1F*) m_ootOffsetFile->Get(m_ootOffsetHistName.c_str());
+				m_ootOffsetDist = (TH1F*) m_ootOffsetFile->Get(m_ootOffsetHistName.value().c_str());
 				m_useOffsetHisto = kTRUE;
 			}
 		}
@@ -254,7 +207,8 @@ StatusCode TileDigitsFromPulse::initialize() {
 	for (int ros = 1; ros < 5; ++ros) { // initialize the vector of PU amplitudes
 	  for (int drawer = 0; drawer < 64; ++drawer){
 	    for (int channel = 0; channel < 48; ++channel) {
-	      addPileUp(m_inTimeAmp, m_ootAmp, 1, ros, drawer, channel); // Initialized for HG, for LG  use the same divided by the HG/LG ratio
+	      double inTimeAmp = m_inTimeAmp; // addPileUp() takes it by reference, but modifies it only for low gain
+	      addPileUp(inTimeAmp, m_ootAmp, 1, ros, drawer, channel); // Initialized for HG, for LG  use the same divided by the HG/LG ratio
 	    }
 	  }
 	}
@@ -355,7 +309,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						}
 
 						if (gain == 1) {
-							n_inTimeAmp = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
+							n_inTimeAmp = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp.value();
 
 							if (m_random->Rndm() >= m_pileUpFraction){
 							        ootAmp = 0; //Set oot amplitude to 0 if no pile-up.
@@ -462,7 +416,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 					//ATH_MSG_DEBUG("executing QIE code");
 
 					gain = 1; //This is just a place holder. The gain is not used in QIE.
-					n_inTimeAmp = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
+					n_inTimeAmp = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp.value();
 					//if (random->Rndm() >= m_pileUpFraction) //m_pileUpFraction is 1 by default
 					m_ootAmp = 0; //Set oot amplitude to 0 if no pile-up.
 					tFit = 0; //TODO: Introduce jitter of the PMT pulse; random->Gaus(0., m_gausC2C); //C2C phase variation
@@ -475,7 +429,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 					for (int i = 0; i < 7; i++)
 						if ((((i - 3) * 25) % (int) m_BunchSpacing) == 0) {
 							if (i != 3) { //index 3 corresponds to the in-time pulse, the signal
-								my_PUAmp[i] = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp; //out-of-time pulses
+								my_PUAmp[i] = m_useOotADist ? m_ootDist->GetRandom() : m_ootAmp.value(); //out-of-time pulses
 							} else {
 								my_PUAmp[i] = 0;
 							}
@@ -516,7 +470,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 					          m_ootOffset = 0.0;
 
 						  if (m_random->Rndm() < m_itAPulseProb){
-						    n_inTimeAmp = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
+						    n_inTimeAmp = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp.value();
 						  } else{
 						    n_inTimeAmp = 0;
 						  }
@@ -535,7 +489,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						    ped = m_chanPed
 						      ? m_tileToolNoiseSample->getPed(drawerIdx, channel, gain,
 										      TileRawChannelUnit::ADCcounts, ctx)
-						      : m_ped_HG;
+						      : m_ped_HG.value();
 
 						    tFit = m_random->Gaus(0., m_gausC2C);
 						    double deformatedTime = m_random->Gaus(m_imperfectionMean, m_imperfectionRms);
@@ -562,7 +516,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						    ped = m_chanPed
 						      ? m_tileToolNoiseSample->getPed(drawerIdx, channel, gain,
 										      TileRawChannelUnit::ADCcounts, ctx)
-						      : m_ped_LG;
+						      : m_ped_LG.value();
 
 						    sample = m_tsg->fillSample(tFit, ped,
 									       m_PUAmp[ros-1][drawer][channel],
@@ -750,13 +704,13 @@ void TileDigitsFromPulse::addPileUp(double &n_inTimeAmp, double ootAmp, int gain
 
 				if(m_simPulseChain){ // Special treatment for pulse-chain simulation, add in-time pulses when initializing true-amp vector
 				  if (m_random->Rndm() < m_itAPulseProb){
-				    amp_1 = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
+				    amp_1 = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp.value();
 				  } else{
 				    amp_1 = 0;
 				  }
 
 				  if (m_random->Rndm() < m_itAPulseProb){
-				    amp_2 = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp;
+				    amp_2 = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp.value();
 				  } else{
 				    amp_2 = 0;
 				  }

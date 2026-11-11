@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -43,6 +43,7 @@ class HWIdentifier;
 
 #include <string>
 #include <vector>
+#include "Gaudi/Property.h"
 
 /**
  @class TileTBHitToBeamElem
@@ -70,11 +71,11 @@ class TileTBHitToBeamElem: public AthAlgorithm {
                                                                      "Output Tile beam elements container key"};
 
 
-    std::string m_infoName;             //!< name of the TileInfo object in TES
+    Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo"};             //!< name of the TileInfo object in TES
 
-    const TileTBID* m_tileTBID; //!< Pointer to TileID helper
-    const TileHWID* m_tileHWID; //!< Pointer to TileHWID helper
-    const TileInfo* m_tileInfo; //!< Pointer to TileInfo
+    const TileTBID* m_tileTBID{nullptr}; //!< Pointer to TileID helper
+    const TileHWID* m_tileHWID{nullptr}; //!< Pointer to TileHWID helper
+    const TileInfo* m_tileInfo{nullptr}; //!< Pointer to TileInfo
 
 };
 
