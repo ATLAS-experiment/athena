@@ -54,6 +54,18 @@ namespace CP {
       this, "rcJetEnergy", "e_%SYS%", "energy of the RC jet"
     };
 
+    // optional substructure of the RC jet, computed from its small-R jet constituents
+    // (not computed unless the decoration names are set)
+    CP::SysWriteDecorHandle<float> m_d12Decor {
+      this, "rcJetD12", "", "kt splitting scale d12 of the RC jet"
+    };
+    CP::SysWriteDecorHandle<float> m_d23Decor {
+      this, "rcJetD23", "", "kt splitting scale d23 of the RC jet"
+    };
+    CP::SysWriteDecorHandle<float> m_qwDecor {
+      this, "rcJetQw", "", "Qw of the RC jet"
+    };
+
     // output container
     CP::SysWriteHandle<xAOD::JetContainer, xAOD::JetAuxContainer> m_outHandle {
       this, "reclusteredJets", "reclusteredJets_%SYS%", "reclustered jets collection"
