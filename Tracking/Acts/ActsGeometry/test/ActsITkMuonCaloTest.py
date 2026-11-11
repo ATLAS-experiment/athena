@@ -4,6 +4,11 @@
   Run ACTS geometry construction for ITk, Muon and Calo
 """
 from pathlib import Path
+import argparse
+
+parser = argparse.ArgumentParser(description="Run ACTS geometry construction for ITk, Muon and Calo")
+parser.add_argument("--build-detray", action="store_true", help="Convert and check the Detray geometry on the CPU")
+args = parser.parse_args()
 
 from AthenaConfiguration.AllConfigFlags import initConfigFlags
 flags = initConfigFlags()
@@ -32,6 +37,7 @@ flags.Concurrency.NumConcurrentEvents = 1
 flags.Exec.MaxEvents = 10
 
 flags.Acts.TrackingGeometry.UseBlueprint = True
+flags.Acts.TrackingGeometry.BuildDetrayGeometry = args.build_detray
 configureDefaultTags(flags)
 
 flags.lock()
@@ -47,7 +53,8 @@ acc.merge(ActsTrackingGeometrySvcCfg(flags,
                                      OutputLevel=INFO,
                                      RunConsistencyChecks=True,
                                      BlueprintGraphviz=str(Path.cwd() / "blueprint.dot"),
-                                     ObjDebugOutput=False))
+                                     ObjDebugOutput=False,
+                                     CheckDetrayGeometry=args.build_detray))
 
 acc.merge(ActsExtrapolationAlgCfg(flags,
                                   OutputLevel=INFO,
