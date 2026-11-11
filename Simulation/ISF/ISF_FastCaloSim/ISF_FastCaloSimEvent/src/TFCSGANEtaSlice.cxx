@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -273,4 +273,9 @@ void TFCSGANEtaSlice::Print() const {
   ATH_MSG_INFO("  etaMin:" << m_etaMin);
   ATH_MSG_INFO("  etaMax: " << m_etaMax);
   m_param.Print();
+}
+
+void TFCSGANEtaSlice::fixHists()
+{
+  m_param.fixHists();
 }

@@ -711,4 +711,6 @@ int TFCSEnergyAndHitGANV2::GetAlphaBinsForRBin(const TAxis *x, int ix,
 void TFCSEnergyAndHitGANV2::fixHists()
 {
   m_param.fixHists();
+  if (m_slice)
+    m_slice->fixHists();
 }

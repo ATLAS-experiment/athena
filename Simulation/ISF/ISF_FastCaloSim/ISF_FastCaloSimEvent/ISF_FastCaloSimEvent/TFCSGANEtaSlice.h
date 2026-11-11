@@ -56,6 +56,10 @@ public:
 
   void Print() const;
 
+  // Called immediately after being read to fix histograms that erroneously
+  // have kIsOnHeap set.  See ATLASSIM-7031.
+  void fixHists();
+
 private:
   int m_pid{};
   int m_etaMin{};
