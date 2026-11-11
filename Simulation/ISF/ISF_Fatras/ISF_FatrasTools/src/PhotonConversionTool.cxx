@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -306,8 +306,7 @@ void iFatras::PhotonConversionTool::recordChilds(double time,
 
     // save info for validation
     if (m_validationMode && m_validationTool.isEnabled()) {
-      Amg::Vector3D* nPrim=nullptr;
-      m_validationTool->saveISFVertexInfo(14,vertex,*parent,parent->momentum(),nPrim,children);
+      m_validationTool->saveISFVertexInfo(14,vertex,*parent,parent->momentum(),nullptr,children);
     }
 
 }

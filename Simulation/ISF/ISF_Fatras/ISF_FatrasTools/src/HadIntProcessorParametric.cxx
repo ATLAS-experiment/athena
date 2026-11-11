@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class header
@@ -640,9 +640,7 @@ ISF::ISFParticleVector iFatras::HadIntProcessorParametric::getHadState(const ISF
 
   // save info for validation
   if (m_validationMode && m_validationTool.isEnabled()) {
-    Amg::Vector3D* nMom = nullptr;
-    m_validationTool->saveISFVertexInfo(m_processCode,vertex,*parent,p*particleDir,nMom,children);
-    delete nMom;
+    m_validationTool->saveISFVertexInfo(m_processCode,vertex,*parent,p*particleDir,nullptr,children);
   }
 
 

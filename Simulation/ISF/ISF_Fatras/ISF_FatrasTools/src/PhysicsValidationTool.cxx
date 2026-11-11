@@ -9,8 +9,7 @@
 // class header
 #include "PhysicsValidationTool.h"
 
-// Tracking
-#include "TrkParameters/TrackParameters.h"
+
 // ISF includes
 #include "ISF_Event/ISFParticle.h"
 #include "ISF_Event/ParticleUserInformation.h"
@@ -33,58 +32,18 @@ iFatras::PhysicsValidationTool::PhysicsValidationTool( const std::string& t,
                                       const std::string& n,
                                       const IInterface*  p )
  : base_class(t,n,p),
-   m_thistSvc("THistSvc",n),
-   m_validationStream("ISFFatras"),
-   m_eloss(0.),
-   m_ionloss(0.),
-   m_radloss(0.),
-   m_zOaTr(0.),
-   m_wZ(0.),
-   m_thIn(0.),
-   m_phIn(0.),
-   m_dIn(0.),
-   m_thEnd(0.),
-   m_phEnd(0.),
-   m_dEnd(0.),
-   m_X0(0.),
-   m_dt(0.),
-   m_interactions(nullptr),
-   m_process(0),
-   m_pdg_mother(0),
-   m_gen_mother(0),
-   m_nChild(0),
-   m_vtx_dist(0.),
-   m_vtx_theta(0.),
-   m_vtx_phi(0.),
-   m_vtx_e_diff(0.),
-   m_vtx_p_diff(0.),
-   m_vtx_plong_diff(0.),
-   m_vtx_pperp_diff(0.),
-   m_p_mother(0.)
+   m_thistSvc("THistSvc",n)
 {
   // validation output section
-  declareProperty("ValidationStreamName",
-                  m_validationStream = "ISFFatras",
+  declareProperty("ValidationStreamName", m_validationStream = "ISFFatras",
                   "Name of the output stream" );
-  declareProperty("THistService",
-                  m_thistSvc,
-                  "The THistSvc" );
+  declareProperty("THistService", m_thistSvc, "The THistSvc" );
 }
 
-/*=========================================================================
- *  DESCRIPTION OF FUNCTION:
- *  ==> see headerfile
- *=======================================================================*/
-iFatras::PhysicsValidationTool::~PhysicsValidationTool()
-{
-  m_interactions = nullptr;
-  delete(m_interactions);
-}
 
-/*=========================================================================
- *  DESCRIPTION OF FUNCTION:
- *  ==> see headerfile
- *=======================================================================*/
+iFatras::PhysicsValidationTool::~PhysicsValidationTool() =  default;
+
+
 StatusCode
 iFatras::PhysicsValidationTool::initialize()
 {
@@ -96,7 +55,7 @@ iFatras::PhysicsValidationTool::initialize()
     // Create the prefix of histogram names for the THistSvc
     const char *treeName="particles";
     const std::string prefix = "/" + m_validationStream + "/"+ treeName;
-    m_particles = new TTree( treeName, treeName );
+    m_particles = std::make_unique<TTree>( treeName, treeName );
     m_particles->Branch("pdg"       , &m_pdg    , "pdg/I"         );
     m_particles->Branch("scIn"      , &m_scIn   , "scIn/I"         );
     m_particles->Branch("scOut"     , &m_scEnd  , "scOut/I"         );
@@ -120,12 +79,12 @@ iFatras::PhysicsValidationTool::initialize()
     m_particles->Branch("dEnd"      , &m_dEnd   , "dEnd/F"            );
     
     // register the Tree to the THistSvc and return it's StatusCode
-    ATH_CHECK(m_thistSvc->regTree( prefix, m_particles) );
+    ATH_CHECK(m_thistSvc->regTree( prefix, std::move(m_particles)) );
 
 
     const char *treeNameInt="interactions";
     const std::string prefixInt = "/" + m_validationStream + "/"+ treeNameInt;
-    m_interactions = new TTree( treeNameInt, treeNameInt );
+    m_interactions = std::make_unique<TTree>( treeNameInt, treeNameInt );
     m_interactions->Branch("process"     , &m_process  , "process/I"         );
     m_interactions->Branch("pdg_mother"  , &m_pdg_mother  , "pdg_mother/I"         );
     m_interactions->Branch("gen_mother"  , &m_gen_mother  , "gen_mother/I"         );
@@ -142,17 +101,13 @@ iFatras::PhysicsValidationTool::initialize()
     m_interactions->Branch("fp_child"    , m_fp_child     , "fp_child[nch]/F"         );
     m_interactions->Branch("oa_child"    , m_oa_child     , "oa_child[nch]/F"         );
     // register the Tree to the THistSvc and return it's StatusCode
-    ATH_CHECK(m_thistSvc->regTree( prefixInt, m_interactions) );
+    ATH_CHECK(m_thistSvc->regTree( prefixInt, std::move(m_interactions)) );
     
   }
 
   return StatusCode::SUCCESS;
 }
 
-/*=========================================================================
- *  DESCRIPTION OF FUNCTION:
- *  ==> see headerfile
- *=======================================================================*/
 
 /** new transport tool */
 void iFatras::PhysicsValidationTool::saveISFParticleInfo(const ISF::ISFParticle& isp, 
@@ -292,8 +247,8 @@ void iFatras::PhysicsValidationTool::saveInfo(const ISF::ISFParticle& isp) const
 
 }
 
-void iFatras::PhysicsValidationTool::saveISFVertexInfo(int process,Amg::Vector3D vertex,const ISF::ISFParticle& parent,Amg::Vector3D primIn,
-						       Amg::Vector3D* primOut, const ISF::ISFParticleVector& children) const {
+void iFatras::PhysicsValidationTool::saveISFVertexInfo(int process,const Amg::Vector3D & vertex,const ISF::ISFParticle& parent,const Amg::Vector3D & primIn,
+						       const Amg::Vector3D* primOut, const ISF::ISFParticleVector& children) const {
 
   m_process = process;
   unsigned int nSec = children.size();

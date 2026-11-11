@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -13,16 +13,16 @@
 #include "GaudiKernel/IAlgTool.h"
 #include "CxxUtils/checker_macros.h"
 // ISF
-#include "ISF_Event/ISFParticleContainer.h"
+#include "ISF_Event/ISFParticleContainer.h" //ISFParticleVector typedef
 // Trk
 #include "TrkParameters/TrackParameters.h"
 #include "TrkNeutralParameters/NeutralParameters.h"
-#include "TrkExUtils/ExtrapolationCell.h"
+#include "TrkExUtils/ExtrapolationCell.h" //ExtrapolationCode enum
+#include "GeoPrimitives/GeoPrimitives.h" //Vector3D typedef
 
-//namespace ISF {
-//    class ISFParticle;
-//    class ISFParticleVector;
-//}
+namespace ISF {
+    class ISFParticle;
+}
 
 namespace iFatras {
   
@@ -56,8 +56,8 @@ namespace iFatras {
 				     Trk::ExtrapolationCode ecode ) const = 0;
 
     /** Interaction vertex info */
-    virtual void saveISFVertexInfo(int process, Amg::Vector3D vertex,const ISF::ISFParticle& isp, Amg::Vector3D primIn,
-				   Amg::Vector3D* primOut, const ISF::ISFParticleVector& children) const = 0;
+    virtual void saveISFVertexInfo(int process, const Amg::Vector3D & vertex,const ISF::ISFParticle& isp, const Amg::Vector3D & primIn,
+				   const Amg::Vector3D* primOut, const ISF::ISFParticleVector& children) const = 0;
   };
   
 } // end of namespace
