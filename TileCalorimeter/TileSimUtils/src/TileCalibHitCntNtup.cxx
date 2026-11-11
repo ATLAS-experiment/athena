@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileSimUtils/TileCalibHitCntNtup.h"
@@ -23,110 +23,9 @@ TileCalibHitCntNtup::interfaceID() {
  * Constructor
  */
 TileCalibHitCntNtup::TileCalibHitCntNtup(const std::string& type, const std::string& name, const IInterface* parent)
-    : AthAlgTool(type, name, parent),
-      m_thistSvc("THistSvc", name),
-      m_streamName("AANT"),
-      m_ntupleID("TileCalibHitCnt"),
-      m_treeSize(16000000000LL),
-      m_ntuplePtr(0),
-      m_act_nchan(0),
-      m_inact_nchan(0),
-      m_dm_nchan(0),
-      m_act_totE(0),
-      m_act_visE(0),
-      m_inact_totE(0),
-      m_inact_visE(0),
-      m_DM_totE(0),
-      m_DM_visE(0),
-      m_barr_totE(0),
-      m_barr_Em(0),
-      m_barr_NonEm(0),
-      m_barr_Invisible(0),
-      m_barr_Escaped(0),
-      m_inact_barr_totE(0),
-      m_inact_barr_Em(0),
-      m_inact_barr_NonEm(0),
-      m_inact_barr_Invisible(0),
-      m_inact_barr_Escaped(0),
-      m_ext_totE(0),
-      m_ext_Em(0),
-      m_ext_NonEm(0),
-      m_ext_Invisible(0),
-      m_ext_Escaped(0),
-      m_inact_ext_totE(0),
-      m_inact_ext_Em(0),
-      m_inact_ext_NonEm(0),
-      m_inact_ext_Invisible(0),
-      m_inact_ext_Escaped(0),
-      m_itc_totE(0),
-      m_itc_Em(0),
-      m_itc_NonEm(0),
-      m_itc_Invisible(0),
-      m_itc_Escaped(0),
-      m_inact_itc_totE(0),
-      m_inact_itc_Em(0),
-      m_inact_itc_NonEm(0),
-      m_inact_itc_Invisible(0),
-      m_inact_itc_Escaped(0),
-      m_gscin_totE(0),
-      m_gscin_Em(0),
-      m_gscin_NonEm(0),
-      m_gscin_Invisible(0),
-      m_gscin_Escaped(0),
-      m_inact_gscin_totE(0),
-      m_inact_gscin_Em(0),
-      m_inact_gscin_NonEm(0),
-      m_inact_gscin_Invisible(0),
-      m_inact_gscin_Escaped(0),
-      m_Total(0),
-      m_Em(0),
-      m_NonEm(0),
-      m_Invisible(0),
-      m_Escaped(0),
-      m_subCalo(0),
-      m_section(0),
-      m_side(0),
-      m_module(0),
-      m_tower(0),
-      m_sample(0),
-      m_inact_Total(0),
-      m_inact_Em(0),
-      m_inact_NonEm(0),
-      m_inact_Invisible(0),
-      m_inact_Escaped(0),
-      m_inact_subCalo(0),
-      m_inact_section(0),
-      m_inact_side(0),
-      m_inact_module(0),
-      m_inact_tower(0),
-      m_inact_sample(0),
-      m_dm_ene(0),
-      m_dm_vis(0),
-      m_dm_subDet(0),
-      m_dm_type(0),
-      m_dm_sampling(0),
-      m_dm_region(0),
-      m_dm_eta(0),
-      m_dm_phi(0),
-      m_caloCell_ID(0),
-      m_caloDM_ID(0),
-      m_max_chan(4999)
+    : AthAlgTool(type, name, parent)
 {
   declareInterface<TileCalibHitCntNtup>(this);
-
-  declareProperty("THistSvc", m_thistSvc);
-  declareProperty("StreamName", m_streamName);
-  declareProperty("NTupleID", m_ntupleID);
-  declareProperty("TreeSize", m_treeSize);
-
-  m_ActiveHitContainer = "TileCalibHitActiveCell";
-  m_InactiveHitContainer = "TileCalibHitInactiveCell";
-  m_dmHitContainer = "TileCalibHitDeadMaterial";
-
-  declareProperty("ActiveHitCnt", m_ActiveHitContainer);
-  declareProperty("InactiveHitCnt", m_InactiveHitContainer);
-  declareProperty("DMCalibHitCnt", m_dmHitContainer);
-
 }
 
 /**
@@ -149,7 +48,7 @@ StatusCode TileCalibHitCntNtup::initialize() {
 
   CHECK(m_thistSvc.retrieve());
 
-  m_ntuplePtr = new TTree(m_ntupleID.c_str(), "TileCalibHitCntNtuple");
+  m_ntuplePtr = new TTree(m_ntupleID.value().c_str(), "TileCalibHitCntNtuple");
   m_ntuplePtr->SetMaxTreeSize(m_treeSize);
 
   // The fields characterizing the Event
@@ -246,7 +145,7 @@ StatusCode TileCalibHitCntNtup::initialize() {
   m_ntuplePtr->Branch("Tile_DM_eta", &m_dm_eta);
   m_ntuplePtr->Branch("Tile_DM_phi", &m_dm_phi);
 
-  CHECK(m_thistSvc->regTree("/" + m_streamName + "/" + m_ntupleID, m_ntuplePtr));
+  CHECK(m_thistSvc->regTree("/" + m_streamName.value() + "/" + m_ntupleID.value(), m_ntuplePtr));
 
   return StatusCode::SUCCESS;
 }

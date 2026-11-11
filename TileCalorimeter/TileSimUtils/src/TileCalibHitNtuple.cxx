@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TileSimUtils/TileCalibHitNtuple.h"
@@ -23,42 +23,9 @@ TileCalibHitNtuple::interfaceID() {
  * Constructor
  */
 TileCalibHitNtuple::TileCalibHitNtuple(const std::string& type, const std::string& name, const IInterface* parent)
-    : AthAlgTool(type, name, parent),
-      m_thistSvc("THistSvc", name),
-      m_streamName("AANT"),
-      m_ntupleID("TileCalibHit"),
-      m_treeSize(16000000000LL),
-      m_ntuplePtr(0),
-      m_level(0),
-      m_det(0),
-      m_mod(0),
-      m_tow(0),
-      m_samp(0),
-      m_reg(0),
-      m_calc(0),
-      m_evt(0),
-      m_xPos(0.0),
-      m_yPos(0.0),
-      m_zPos(0.0),
-      m_ener(0.0),
-      m_volume{0},
-      m_pid(0),
-      m_ekine(0.0),
-      m_xLocal(0.0),
-      m_yLocal(0.0),
-      m_zLocal(0.0),
-      m_phiLocal(0.0)
-
+    : AthAlgTool(type, name, parent)
 {
-
   declareInterface<TileCalibHitNtuple>(this);
-
-  declareProperty("THistSvc", m_thistSvc);
-  declareProperty("StreamName", m_streamName);
-  declareProperty("NTupleID", m_ntupleID);
-  declareProperty("TreeSize", m_treeSize);
-  declareProperty("InfoLevel", m_level);
-
 }
 
 /**
@@ -76,7 +43,7 @@ StatusCode TileCalibHitNtuple::initialize() {
 
   CHECK(m_thistSvc.retrieve());
 
-  m_ntuplePtr = new TTree(m_ntupleID.c_str(), "TileCalibHit-Ntuple");
+  m_ntuplePtr = new TTree(m_ntupleID.value().c_str(), "TileCalibHit-Ntuple");
   m_ntuplePtr->SetMaxTreeSize(m_treeSize);
 
   m_ntuplePtr->Branch("detector", &m_det, "detector/S");
@@ -100,7 +67,7 @@ StatusCode TileCalibHitNtuple::initialize() {
     m_ntuplePtr->Branch("phiLocal", &m_phiLocal, "phiLocal/F");
   }
 
-  StatusCode sc = m_thistSvc->regTree("/" + m_streamName + "/" + m_ntupleID, m_ntuplePtr);
+  StatusCode sc = m_thistSvc->regTree("/" + m_streamName.value() + "/" + m_ntupleID.value(), m_ntuplePtr);
 
   if (sc.isFailure()) {
     ATH_MSG_ERROR("Problem registering TileCalibHit Tree");
