@@ -35,7 +35,6 @@
 
 #include "StoreGate/WriteHandleKey.h"
 #include "src/detail/Definitions.h"
-#include "src/detail/DuplicateSeedDetector.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/TrackStatePrinterTool.h"
 

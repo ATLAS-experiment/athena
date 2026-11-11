@@ -58,6 +58,26 @@ namespace {
     return firstMeasurement;
   }
 
+  // Collect the measurement keys of the space points that the parameter
+  // estimation uses, as the seed keys of the Acts::SeedDeduplicator.
+  const std::vector<Acts::SeedDeduplicator::MeasurementKey>&
+  collectSeedKeys(const ActsTrk::Seed& seed,
+                  const ActsTrk::ITrackParamsEstimationTool::SpacePointIndicesFun_t& spacePointIndicesFun,
+                  const ActsTrk::detail::MeasurementIndex& measurementIndex,
+                  std::vector<Acts::SeedDeduplicator::MeasurementKey>& seedKeys) {
+    seedKeys.clear();
+    const auto& sps = seed.sp();
+    for (std::size_t isp : spacePointIndicesFun(sps)) {
+      for (const xAOD::UncalibratedMeasurement* meas : sps.at(isp)->measurements()) {
+        const std::size_t hitIndex = measurementIndex.index(*meas);
+        if (hitIndex < measurementIndex.size()) {
+          seedKeys.push_back(static_cast<Acts::SeedDeduplicator::MeasurementKey>(hitIndex));
+        }
+      }
+    }
+    return seedKeys;
+  }
+
 }
 
 
@@ -211,14 +231,12 @@ namespace ActsTrk
       m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, measurements.measurementOffsets());
     }
 
-    detail::DuplicateSeedDetector duplicateSeedDetector(total_seeds,
-                                                        m_seedMeasOffset.value(),
-                                                        m_skipDuplicateSeeds);
-    for (std::size_t icontainer = 0; icontainer < seedContainers.size(); ++icontainer)
-      {
-        duplicateSeedDetector.addSeeds(icontainer, *seedContainers[icontainer], measurementIndex,
-                                       m_paramEstimationTool[icontainer]->spacePointIndicesFun());
-      }
+    // A seed is a duplicate if one accepted track holds all but
+    // seedMeasOffset of its measurements. Each measurement counts 1.
+    Acts::SeedDeduplicator seedDeduplicator({.minScore = 0, .maxMissingScore = m_seedMeasOffset.value()});
+    if (m_skipDuplicateSeeds) {
+      seedDeduplicator.reset(measurementIndex.size());
+    }
 
     // Get Beam pos and make pSurface
     SG::ReadCondHandle<InDet::BeamSpotData> beamSpotHandle = SG::makeHandle( m_beamSpotKey, ctx );
@@ -277,7 +295,7 @@ namespace ActsTrk
                              measurements,
                              measurementIndex,
                              sharedHits,
-                             duplicateSeedDetector,
+                             seedDeduplicator,
                              *seedContainers.at(icontainer),
                              actsTracksContainer,
                              icontainer,
@@ -403,7 +421,7 @@ namespace ActsTrk
                               const detail::TrackFindingMeasurements &measurements,
                               const detail::MeasurementIndex &measurementIndex,
                               detail::SharedHitCounter &sharedHits,
-                              detail::DuplicateSeedDetector &duplicateSeedDetector,
+                              Acts::SeedDeduplicator &seedDeduplicator,
                               const ActsTrk::SeedContainer &seeds,
                               detail::RecoTrackContainer &actsTracksContainer,
                               std::size_t typeIndex,
@@ -494,6 +512,12 @@ namespace ActsTrk
 
 
 
+    // The seed keys of the duplicate check: the measurements of the space
+    // points that the parameter estimation uses
+    const ITrackParamsEstimationTool::SpacePointIndicesFun_t spacePointIndicesFun =
+      m_paramEstimationTool[typeIndex]->spacePointIndicesFun();
+    std::vector<Acts::SeedDeduplicator::MeasurementKey> seedKeys;
+
     // Loop over the track finding results for all initial parameters
     for (unsigned int iseed = 0; iseed < seeds.size(); ++iseed)
       {
@@ -504,7 +528,8 @@ namespace ActsTrk
         tracksContainerTemp.clear();
 
         // Check if the seed is a duplicate seed
-        const bool isDupSeed = duplicateSeedDetector.isDuplicate(typeIndex, iseed);
+        const bool isDupSeed = m_skipDuplicateSeeds &&
+          seedDeduplicator.isDuplicate(collectSeedKeys(seed, spacePointIndicesFun, measurementIndex, seedKeys));
         if (isDupSeed) {
           ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
           category_i = getSeedCategory(typeIndex, seed);
@@ -579,7 +604,7 @@ namespace ActsTrk
             actsTracksContainer,
             measurementIndex,
             tracksContainerTemp,
-            duplicateSeedDetector,
+            seedDeduplicator,
             destiny,
             event_stat,
             ntracks,
@@ -603,7 +628,7 @@ namespace ActsTrk
                 actsTracksContainer,
                 measurementIndex,
                 tracksContainerTemp,
-                duplicateSeedDetector,
+                seedDeduplicator,
                 destiny,
                 event_stat,
                 ntracks,
@@ -644,24 +669,26 @@ namespace ActsTrk
   void
   TrackFindingAlg::storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,
                                  const detail::RecoTrackContainerProxy &track,
-                                 detail::DuplicateSeedDetector &duplicateSeedDetector,
+                                 Acts::SeedDeduplicator &seedDeduplicator,
                                  const detail::MeasurementIndex &measurementIndex) const {
 
-    const auto lastMeasurementIndex = track.tipIndex();
-    duplicateSeedDetector.newTrajectory();
-
+    // Outliers count as shared measurements, as before
+    std::vector<Acts::SeedDeduplicator::MeasurementKey> trackKeys;
     tracksContainer.trackStateContainer().visitBackwards(
-                                                         lastMeasurementIndex,
-                                                         [&duplicateSeedDetector,&measurementIndex](const detail::RecoTrackStateContainer::ConstTrackStateProxy &state) -> void
+                                                         track.tipIndex(),
+                                                         [&trackKeys,&measurementIndex](const detail::RecoTrackStateContainer::ConstTrackStateProxy &state) -> void
                                                          {
                                                            // Check there is a source link
                                                            if (not state.hasUncalibratedSourceLink())
                                                              return;
 
-                                                           // Fill the duplicate selector
-                                                           auto sl = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());;
-                                                           duplicateSeedDetector.addMeasurement(sl, measurementIndex);
+                                                           auto sl = detail::xAODUncalibMeasCalibrator::unpack(state.getUncalibratedSourceLink());
+                                                           const std::size_t hitIndex = measurementIndex.index(*sl);
+                                                           if (hitIndex < measurementIndex.size()) {
+                                                             trackKeys.push_back(static_cast<Acts::SeedDeduplicator::MeasurementKey>(hitIndex));
+                                                           }
                                                          }); // end visitBackwards
+    seedDeduplicator.addTrack(trackKeys);
   }
 
   StatusCode TrackFindingAlg::propagateDetectorElementStatusToMeasurements(const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volume_id_to_det_el_coll,
@@ -848,7 +875,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                                        detail::RecoTrackContainer &actsTracksContainer,
                                        const detail::MeasurementIndex& measurementIndex,
                                        const detail::RecoTrackContainer& tracksContainerTemp,
-                                       detail::DuplicateSeedDetector& duplicateSeedDetector,
+                                       Acts::SeedDeduplicator& seedDeduplicator,
                                        std::vector<int>* destiny,
                                        EventStats& event_stat,
                                        std::size_t& ntracks,
@@ -925,7 +952,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
 
     // Fill the track infos into the duplicate seed detector
     if (m_skipDuplicateSeeds) {
-      storeSeedInfo(tracksContainerTemp, track, duplicateSeedDetector, measurementIndex);
+      storeSeedInfo(tracksContainerTemp, track, seedDeduplicator, measurementIndex);
     }
 
     auto actsDestProxy   = actsTracksContainer.makeTrack();
@@ -1004,7 +1031,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                                       detail::RecoTrackContainer &actsTracksContainer,
                                       const detail::MeasurementIndex& measurementIndex,
                                       detail::RecoTrackContainer& tracksContainerTemp,
-                                      detail::DuplicateSeedDetector& duplicateSeedDetector,
+                                      Acts::SeedDeduplicator& seedDeduplicator,
                                       std::vector<int>* destiny,
                                       EventStats& event_stat,
                                       std::size_t& ntracks,
@@ -1061,7 +1088,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                                 actsTracksContainer,
                                 measurementIndex,
                                 tracksContainerTemp,
-                                duplicateSeedDetector,
+                                seedDeduplicator,
                                 destiny,
                                 event_stat,
                                 ntracks,
@@ -1116,7 +1143,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                                 actsTracksContainer,
                                 measurementIndex,
                                 tracksContainerTemp,
-                                duplicateSeedDetector,
+                                seedDeduplicator,
                                 destiny,
                                 event_stat,
                                 ntracks,
@@ -1145,7 +1172,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                                 actsTracksContainer,
                                 measurementIndex,
                                 tracksContainerTemp,
-                                duplicateSeedDetector,
+                                seedDeduplicator,
                                 destiny,
                                 event_stat,
                                 ntracks,

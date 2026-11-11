@@ -64,11 +64,6 @@ atlas_add_test ( TrackFindingMeasurementsTest
   LINK_LIBRARIES ActsEventLib xAODInDetMeasurement ActsCalibratorsLib
   POST_EXEC_SCRIPT noerror.sh )
 
-atlas_add_test ( DuplicateSeedDetectorTest
-  SOURCES test/DuplicateSeedDetectorTest.cxx
-  LINK_LIBRARIES ActsEventLib xAODInDetMeasurement ActsCalibratorsLib
-  POST_EXEC_SCRIPT noerror.sh)
-
 atlas_add_test ( NNHelpersTest
   SOURCES test/NNHelpersTest.cxx
   LINK_LIBRARIES xAODInDetMeasurement InDetIdentifier Identifier TestTools InDetReadoutGeometry
