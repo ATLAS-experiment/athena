@@ -618,10 +618,17 @@ namespace MuonR4{
                                 SectorProjector::rightOverlap}) {
             /// Check whether the segment belongs to the left or right sector as well
             const ExpandedSector projSector{segSector, proj};
-            if (segment->nPhiLayers() > 0 &&  projSector != ExpandedSector{segment->position().phi()}) {
-                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Segment @"<<Amg::toString(segment->position())
-                    <<" is not in sector "<<projSector);
-                continue;
+            /// Segments with phi measurements go in the center of their own sector, and in the overlap with a
+            /// neighbouring sector if their phi is inside that sector (in the overlap or in the neighbour's center)
+            if (segment->nPhiLayers() > 0 && proj != SectorProjector::center) {
+                const ExpandedSector phiSector{segment->position().phi()};
+                const unsigned neighbour = projSector.msSector() == segSector ? projSector.adjacentMsSector()
+                                                                              : projSector.msSector();
+                if (phiSector != projSector && phiSector != ExpandedSector{neighbour, SectorProjector::center}) {
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Segment @"<<Amg::toString(segment->position())
+                        <<" is not in sector "<<projSector);
+                    continue;
+                }
             }
             const Amg::Vector2D refPoint{expressOnCylinder(tgContext, *segment, loc, projSector)};
             if (!withinBounds(refPoint, loc)) {
