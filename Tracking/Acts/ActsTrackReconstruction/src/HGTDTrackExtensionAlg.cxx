@@ -43,6 +43,7 @@
 #include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Utilities/VectorHelpers.hpp"
 #include <optional>
+#include <unordered_map>
 #include "xAODTracking/TrackParticleContainer.h"
 #include "StoreGate/WriteDecorHandle.h"
 #include "StoreGate/ReadDecorHandle.h"

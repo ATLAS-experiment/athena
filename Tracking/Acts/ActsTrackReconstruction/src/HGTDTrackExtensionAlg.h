@@ -43,7 +43,6 @@
 #include "StoreGate/ReadDecorHandleKey.h"
 #include "ActsEvent/TrackContainerHandlesHelper.h"
 #include "src/detail/Definitions.h"
-#include "src/detail/DuplicateSeedDetector.h"
 #include "src/detail/TrackFindingMeasurements.h"
 #include "src/TrackStatePrinterTool.h"
 

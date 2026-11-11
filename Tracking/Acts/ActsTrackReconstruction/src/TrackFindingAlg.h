@@ -11,6 +11,7 @@
 // ACTS
 #include "Acts/TrackFinding/TrackStateCreator.hpp"
 #include "Acts/AmbiguityResolution/GreedyAmbiguityResolution.hpp"
+#include "Acts/TrackFinding/SeedDeduplicator.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 
@@ -35,7 +36,7 @@
 // Handle Keys
 #include "StoreGate/CondHandleKeyArray.h"
 #include "src/detail/Definitions.h"
-#include "src/detail/DuplicateSeedDetector.h"
+#include "src/detail/MeasurementIndex.h"
 
 namespace ActsTrk
 {
@@ -77,7 +78,7 @@ namespace ActsTrk
                         detail::RecoTrackContainer &actsTracksContainer,
                         const detail::MeasurementIndex& measurementIndex,
                         const detail::RecoTrackContainer& tracksContainerTemp,
-                        detail::DuplicateSeedDetector& duplicateSeedDetector,
+                        Acts::SeedDeduplicator& seedDeduplicator,
                         std::vector<int>* destiny,
                         EventStats& event_stat,
                         std::size_t& ntracks,
@@ -98,7 +99,7 @@ namespace ActsTrk
                             detail::RecoTrackContainer &actsTracksContainer,
                             const detail::MeasurementIndex& measurementIndex,
                             detail::RecoTrackContainer& tracksContainerTemp,
-                            detail::DuplicateSeedDetector& duplicateSeedDetector,
+                            Acts::SeedDeduplicator& seedDeduplicator,
                             std::vector<int>* destiny,
                             EventStats& event_stat,
                             std::size_t& ntracks,
@@ -172,7 +173,7 @@ namespace ActsTrk
      * @param detectorElementToGeoId - map Trk detector element to Acts Geometry id
      * @param measurements - measurements container used in MeasurementSelector
      * @param sharedHits - measurements container used for shared hit counting
-     * @param duplicateSeedDetector - duplicate seed detector
+     * @param seedDeduplicator - duplicate seed detector
      * @param seeds - spacepoint triplet seeds
      * @param detElements - Trk detector elements
      * @param actsTracksContainer - output tracks
@@ -186,7 +187,7 @@ namespace ActsTrk
                const detail::TrackFindingMeasurements &measurements,
                const detail::MeasurementIndex &measurementIndex,
                detail::SharedHitCounter &sharedHits,
-               detail::DuplicateSeedDetector &duplicateSeedDetector,
+               Acts::SeedDeduplicator &seedDeduplicator,
                const ActsTrk::SeedContainer &seeds,
                detail::RecoTrackContainer &actsTracksContainer,
                std::size_t seedCollectionIndex,
@@ -197,10 +198,10 @@ namespace ActsTrk
                std::optional<std::vector<unsigned int>>& trackCategories,
                const ROIPhiRZContainer *caloClusterROIs) const;
 
-    // Create tracks from one seed's CKF result, appending to tracksContainer
+    // Add the measurements of an accepted track to the seed deduplicator
     void storeSeedInfo(const detail::RecoTrackContainer &tracksContainer,
                        const detail::RecoTrackContainerProxy &track,
-                       detail::DuplicateSeedDetector &duplicateSeedDetector,
+                       Acts::SeedDeduplicator &seedDeduplicator,
                        const detail::MeasurementIndex &measurementIndex) const;
 
     using TrackFindingBaseAlg::CKF_pimpl;
