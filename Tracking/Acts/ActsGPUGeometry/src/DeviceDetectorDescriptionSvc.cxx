@@ -4,6 +4,7 @@
 #include "DeviceDetectorDescriptionSvc.h"
 #include "StoreGate/StoreGateSvc.h"
 #include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
+#include "ActsPlugins/Detray/DetraySurfaceIdMap.hpp"
 
 #include <cmath>
 #include <optional>
@@ -35,8 +36,6 @@ StatusCode DeviceDetectorDescriptionSvc::initialize()
     ATH_CHECK(m_detStore->retrieve(m_stripManager, "ITkStrip"));
 
     std::map<Acts::GeometryIdentifier, Identifier> actsToAthena;
-    std::unordered_map<uint64_t, Identifier> detrayToAthenaMap;
-    std::unordered_map<Identifier, uint64_t> athenaToDetrayMap;
 
     int nPix = 0, nStrip = 0, nEC = 0, nBar = 0;
     std::vector<Acts::GeometryIdentifier> actsHGTD;
@@ -212,40 +211,20 @@ StatusCode DeviceDetectorDescriptionSvc::initialize()
         ATH_MSG_DEBUG(nStrip << " Atlas Strip modules found, " << nBar << " in barrel and " << nEC << " in the endcap");
         ATH_MSG_DEBUG("Wrote segmentation info for " << m_atlasModuleInfo.size() << " modules");
 
-        // ---- 2. Get Detray Tracking Geometry and populate Detray<->ACTS map ----
+        // ---- 2. Get the Detray geometry and the ACTS<->Detray surface map ----
+        // Both are produced by the ACTS Detray plugin in the TrackingGeometrySvc
         ATH_MSG_INFO("Loading detray detector");
-        
-        int found_detray = 0; 
-        int missing_detray = 0; 
-        int missing_detray_passives = 0;
 
-        auto hostDetector = m_trackingGeometrySvc->detrayGeometry();
-        const auto& itkDetector = hostDetector->as<traccc::itk_detector>();
-        for (const auto& surface : itkDetector.surfaces()) {
-            const auto geo_id = surface.source;
-            const Acts::GeometryIdentifier acts_geom_id{geo_id};
-            auto sf = detray::tracking_surface{itkDetector, surface};
-            const auto detray_id = sf.identifier().value();
-
-            if (auto pIdPair = actsToAthena.find(acts_geom_id); pIdPair != actsToAthena.end()) {
-                auto athena_id = pIdPair->second;
-                detrayToAthenaMap[detray_id] = athena_id;
-                athenaToDetrayMap[athena_id] = detray_id;
-                found_detray++;
-            } else {
-                if (std::find(actsHGTD.begin(), actsHGTD.end(), acts_geom_id) != actsHGTD.end()) {
-                    ATH_MSG_VERBOSE("ACTS surface with key " << acts_geom_id << " is HGTD, detray id: " << detray_id);
-                    continue;
-                }
-                ATH_MSG_VERBOSE("ACTS surface with key " << acts_geom_id << " was not translated to detray geometry.");
-                missing_detray++;
-                if (surface.is_sensitive()) continue;
-                ATH_MSG_VERBOSE("found this passive surface in detray: " << acts_geom_id);
-                missing_detray_passives++;
-            }
+        const traccc::host_detector* hostDetector = m_trackingGeometrySvc->detrayGeometry();
+        const ActsPlugins::DetraySurfaceIdMap* detraySurfaceIds = m_trackingGeometrySvc->detraySurfaceIdMap();
+        if (!hostDetector || !detraySurfaceIds) {
+            ATH_MSG_FATAL("No Detray geometry available from the TrackingGeometrySvc. "
+                          "Set its BuildDetrayGeometry property to True.");
+            return StatusCode::FAILURE;
         }
-
-        ATH_MSG_DEBUG("Traccc detector has " << found_detray << " surfaces matching ACTS and " << missing_detray << " additional surfaces, out of which " << missing_detray_passives << " are not sensitive.");
+        const auto& itkDetector = hostDetector->as<traccc::itk_detector>();
+        ATH_MSG_DEBUG("ACTS Detray plugin mapped " << detraySurfaceIds->size()
+                      << " sensitive surfaces out of " << itkDetector.surfaces().size() << " Detray surfaces");
 
         // ---- 3. Deduplicate the designs ----
         // there are only a handful of unique module designs, only store unique values
@@ -265,52 +244,55 @@ StatusCode DeviceDetectorDescriptionSvc::initialize()
                 ATH_MSG_VERBOSE("Skipping passive surface with geometryId " << surface.source);
                 continue;
             }
-            const auto geo_id = surface.source;
-            const Acts::GeometryIdentifier acts_geom_id{geo_id};
-            auto sf = detray::tracking_surface{itkDetector, surface};
-            const auto detray_id = sf.identifier().value();
+            const auto detray_id = surface.identifier().value();
+            const auto actsIdOpt = detraySurfaceIds->fromDetray(surface.identifier());
+            if (!actsIdOpt) {
+                ATH_MSG_ERROR("Sensitive detray surface " << detray_id
+                              << " is missing from the ACTS<->Detray surface map");
+                return StatusCode::FAILURE;
+            }
+            const Acts::GeometryIdentifier acts_geom_id = *actsIdOpt;
 
             StaticCondEntry entry;
-            entry.detrayGeometryId = detray::geometry::identifier{detray_id};
+            entry.detrayGeometryId = surface.identifier();
             entry.actsGeometryId = acts_geom_id.value();
 
-            auto detrayIt = detrayToAthenaMap.find(detray_id);
-            std::optional<Identifier> athenaId;
-            if (detrayIt != detrayToAthenaMap.end()) {
-                athenaId = detrayIt->second;
-                auto modIt = m_atlasModuleInfo.find(*athenaId);
-                if (modIt != m_atlasModuleInfo.end()) {
-                    const moduleInfo& thismod = modIt->second;
-
-                    const int nBinsX = thismod.rows;
-                    const int nBinsY = thismod.pixel ? thismod.columns : 1;
-
-                    auto edgesX = makeEquidistantEdges(0.5f * thismod.module_width, nBinsX);
-                    auto edgesY = makeEquidistantEdges(0.5f * thismod.module_length, nBinsY);
-
-                    if(!thismod.equidistant_binning){
-                        edgesX = thismod.row_centres;
-                        edgesY = thismod.column_centres;
-                    }
-                    
-                    designKey key{thismod.pixel, thismod.isAnnulus, std::move(edgesX), std::move(edgesY),
-                                std::abs(thismod.module_width), thismod.module_length};
-
-                    const auto [it, inserted] = designLookup.try_emplace(key, nextDesignId);
-                    entry.designId = it->second;
-                    if (inserted) ++nextDesignId;
-
-                    entry.athenaId = *athenaId;
-                    entry.hasAthenaModule = true;
-                    entry.isPixel = thismod.pixel;
-                }
-            }else{
+            auto athenaIt = actsToAthena.find(acts_geom_id);
+            if (athenaIt == actsToAthena.end()) {
                 if (std::find(actsHGTD.begin(), actsHGTD.end(), acts_geom_id) != actsHGTD.end()) {
                     ATH_MSG_VERBOSE("ACTS surface with key " << acts_geom_id << " is HGTD, detray id: " << detray_id);
                     continue;
                 }
-                ATH_MSG_ERROR("Could not find matching Athena module for detray surface with geometryId " << detray_id);
+                ATH_MSG_ERROR("Could not find matching Athena module for detray surface " << detray_id
+                              << " (ACTS geometryId " << acts_geom_id << ")");
                 return StatusCode::FAILURE;
+            }
+
+            const std::optional<Identifier> athenaId = athenaIt->second;
+            if (auto modIt = m_atlasModuleInfo.find(*athenaId); modIt != m_atlasModuleInfo.end()) {
+                const moduleInfo& thismod = modIt->second;
+
+                const int nBinsX = thismod.rows;
+                const int nBinsY = thismod.pixel ? thismod.columns : 1;
+
+                auto edgesX = makeEquidistantEdges(0.5f * thismod.module_width, nBinsX);
+                auto edgesY = makeEquidistantEdges(0.5f * thismod.module_length, nBinsY);
+
+                if(!thismod.equidistant_binning){
+                    edgesX = thismod.row_centres;
+                    edgesY = thismod.column_centres;
+                }
+
+                designKey key{thismod.pixel, thismod.isAnnulus, std::move(edgesX), std::move(edgesY),
+                            std::abs(thismod.module_width), thismod.module_length};
+
+                const auto [it, inserted] = designLookup.try_emplace(key, nextDesignId);
+                entry.designId = it->second;
+                if (inserted) ++nextDesignId;
+
+                entry.athenaId = *athenaId;
+                entry.hasAthenaModule = true;
+                entry.isPixel = thismod.pixel;
             }
 
             idMapping->addEntry(detray_id, acts_geom_id.value(), athenaId);

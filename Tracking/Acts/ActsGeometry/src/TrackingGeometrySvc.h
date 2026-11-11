@@ -19,6 +19,7 @@
 
 // ACTS
 #include "Acts/Geometry/CylinderVolumeBuilder.hpp"
+#include "ActsPlugins/Detray/DetraySurfaceIdMap.hpp"
 
 #include "AthDeviceInterfaces/IMemoryResourceTool.h"
 #include "GaudiKernel/ToolHandle.h"
@@ -83,6 +84,11 @@ public:
              Only populated when the BuildDetrayGeometry property is enabled. */
   const traccc::host_detector* detrayGeometry() const override {
     return m_detrayGeometry.get();
+  }
+
+  /** @copydoc ActsTrk::ITrackingGeometrySvc::detraySurfaceIdMap */
+  const ActsPlugins::DetraySurfaceIdMap* detraySurfaceIdMap() const override {
+    return m_detraySurfaceIds.get();
   }
 
 private:
@@ -245,6 +251,10 @@ private:
   std::unique_ptr<const ActsTrk::DetectorElementToActsGeometryIdMap> m_detIdMap{};
 
   std::unique_ptr<traccc::host_detector> m_detrayGeometry;
+
+  /// ACTS <-> Detray identifier map of the sensitive surfaces, filled by the
+  /// ACTS Detray plugin alongside m_detrayGeometry
+  std::unique_ptr<const ActsPlugins::DetraySurfaceIdMap> m_detraySurfaceIds;
 };
 
 }

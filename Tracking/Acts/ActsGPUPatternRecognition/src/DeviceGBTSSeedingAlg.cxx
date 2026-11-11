@@ -144,13 +144,15 @@ StatusCode DeviceGBTSSeedingAlg::configureGBTS()
     ATH_MSG_INFO(identifierBinning.size() << " identifiers with a layer");
 
     std::vector<std::pair<unsigned int, std::vector<unsigned int>>> binGroups;
-    for (Acts::Experimental::GbtsBinGroup groups : gbtsGeo->binGroups()) {
-      std::vector<unsigned int> links;
-      links.reserve(groups.links.size());
-      for (const Acts::Experimental::GbtsBinLink& link : groups.links) {
-        links.push_back(link.bin);
+    binGroups.reserve(gbtsGeo->binGroups().size());
+    for (const Acts::Experimental::GbtsBinGroup& group : gbtsGeo->binGroups()) {
+      // traccc only takes the outer bin indices, the per-link tau ratio cuts are not passed on
+      std::vector<unsigned int> outerBins;
+      outerBins.reserve(group.links.size());
+      for (const Acts::Experimental::GbtsBinLink& link : group.links) {
+        outerBins.push_back(link.bin);
       }
-      binGroups.emplace_back(groups.bin, std::move(links));
+      binGroups.emplace_back(group.bin, std::move(outerBins));
     }
 
     if (!m_gbts_config.setLinkingScheme(binGroups, std::move(layerInfo), identifierBinning,

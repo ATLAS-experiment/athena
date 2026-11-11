@@ -5,6 +5,7 @@ atlas_subdir(ActsGPUEventCnv)
 
 find_package(vecmem)
 find_package(traccc)
+find_package(Acts COMPONENTS Core PluginDetray)
 
 set( _sources
   src/*.h src/*.cxx
@@ -17,6 +18,7 @@ set( _libraries
   traccc::io
   detray::io
   detray::core
+  Acts::PluginDetray
   traccc::device_common
   GaudiKernel
   AthenaBaseComps

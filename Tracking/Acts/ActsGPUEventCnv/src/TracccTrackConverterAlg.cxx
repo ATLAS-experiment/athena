@@ -6,11 +6,8 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #include "StoreGate/ReadHandle.h"
 #include "StoreGate/WriteHandle.h"
 
-#include "ActsGeometry/ActsDetectorElement.h"
-#include "HGTD_ReadoutGeometry/HGTD_DetectorElement.h"
-#include "InDetReadoutGeometry/SiDetectorElement.h"
-#include <detray/geometry/tracking_surface.hpp>
 #include "Acts/EventData/TrackStateType.hpp"
+#include "ActsPlugins/Detray/DetraySurfaceIdMap.hpp"
 
 #include <stdexcept>
 
@@ -31,51 +28,16 @@ StatusCode TracccTrackConverterAlg::initialize()
     ATH_CHECK(m_inputTracksKey.initialize());
     ATH_CHECK(m_outputTracksKey.initialize());
 
-    m_hostDetector = m_trackingGeometrySvc->detrayGeometry();
-
-    // Build the ACTS-surface <-> ACTS-id lookup map once,
-    // up front, rather than re-deriving them per event.
-    // Possibly this will be built during ACTS->Detray conversion
-    // Possibly this is an issue when the tracking geometry changes between events
-    if (!m_trackingGeometrySvc.empty()) {
-        ATH_CHECK(m_trackingGeometrySvc.retrieve());
-        m_trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
-        m_trackingGeometry->visitSurfaces([&](const Acts::Surface* surface) {
-            if (!surface) return;
-            // m_allsurfaces.push_back(surface->getSharedPtr());
-            const auto *actsElement = getActsDetectorElement(surface);
-            if (!actsElement){
-                ATH_MSG_DEBUG("Could not find matching Acts detector element for surface with geometryId " << surface->geometryId());
-                return;
-            } 
-            if(dynamic_cast<const InDetDD::HGTD_DetectorElement*>(actsElement->upstreamDetectorElement()) != nullptr) { 
-                // skip HGTD surfaces for now
-                // currently no time info is being used in traccc
-                ATH_MSG_VERBOSE("Found HGTD surface with geometryId " << surface->geometryId());
-                return;
-            }
-            const auto *geoElement = actsElement->upstreamDetectorElement();
-            const auto *detElem = dynamic_cast<const InDetDD::SiDetectorElement*>(geoElement);
-            if (!geoElement || !detElem) {
-                ATH_MSG_DEBUG("Could not find matching Athena silicon detector element for surface with geometryId " << surface->geometryId());
-                return;
-            }
-    
-            const Acts::GeometryIdentifier actsID = surface->geometryId();
-            const auto [it, inserted] = m_actsSurfaceMap.insert({actsID, surface});
-            if (!inserted) {
-                ATH_MSG_WARNING("ACTS id " << actsID
-                                        << " maps to two Acts surfaces: "
-                                        << it->second->geometryId() << " and "
-                                        << surface->geometryId());
-            }
-    
-        });
-
-    }else {
-        ATH_MSG_FATAL("TrackingGeometrySvc is not configured, cannot translate Traccc tracks to ACTS tracks");
+    // The Detray -> ACTS surface map is built by the ACTS Detray plugin
+    // together with the Detray geometry in the TrackingGeometrySvc
+    ATH_CHECK(m_trackingGeometrySvc.retrieve());
+    m_detraySurfaceIds = m_trackingGeometrySvc->detraySurfaceIdMap();
+    if (!m_detraySurfaceIds) {
+        ATH_MSG_FATAL("No Detray geometry available from the TrackingGeometrySvc, "
+                      "cannot translate Traccc tracks to ACTS tracks. "
+                      "Set its BuildDetrayGeometry property to True.");
         return StatusCode::FAILURE;
-    }    
+    }
 
     ATH_CHECK(m_tracksBackendHandlesHelper.initialize(
         ActsTrk::prefixFromTrackContainerName(
@@ -110,15 +72,14 @@ const xAOD::UncalibratedMeasurement& TracccTrackConverterAlg::makeSourceLink(
 }
 
 const Acts::Surface& TracccTrackConverterAlg::findActsSurface(
-    const Acts::GeometryIdentifier& actsID) const
+    detray::geometry::identifier detrayId) const
 {
-    const auto surfaceIt = m_actsSurfaceMap.find(actsID);
-    if (surfaceIt == m_actsSurfaceMap.end()) {
-        ATH_MSG_ERROR("No Acts surface known for Acts geometry id "
-                      << actsID);
-        throw std::domain_error("No Acts surface for this geometry id");
+    const Acts::Surface* surface = m_detraySurfaceIds->surface(detrayId);
+    if (!surface) {
+        ATH_MSG_ERROR("No Acts surface known for Detray surface " << detrayId);
+        throw std::domain_error("No Acts surface for this Detray surface");
     }
-    return *surfaceIt->second;
+    return *surface;
 }
 
 std::optional<Acts::BoundTrackParameters>
@@ -134,12 +95,7 @@ TracccTrackConverterAlg::convertGlobalToActsParameters(
         return std::nullopt;
     }
  
-    const auto& itkDetector = m_hostDetector->as<traccc::itk_detector>();
-    const detray::tracking_surface detray_surface{itkDetector, trkParams.surface_link()};
-    const auto geo_id = detray_surface.source();
-    const Acts::GeometryIdentifier acts_geom_id{geo_id};
-
-    const Acts::Surface& surface = findActsSurface(acts_geom_id);
+    const Acts::Surface& surface = findActsSurface(trkParams.surface_link());
  
     Acts::BoundVector params;
     params << trkParams.bound_local()[0], trkParams.bound_local()[1],
@@ -190,12 +146,7 @@ TracccTrackConverterAlg::convertSmoothedToActsParameters(
         return std::nullopt;
     }
  
-    const auto& itkDetector = m_hostDetector->as<traccc::itk_detector>();
-    const detray::tracking_surface detray_surface{itkDetector, atlasParam.surface_link()};
-    const auto geo_id = detray_surface.source();
-    const Acts::GeometryIdentifier acts_geom_id{geo_id};
-
-    const Acts::Surface& surface = findActsSurface(acts_geom_id);
+    const Acts::Surface& surface = findActsSurface(atlasParam.surface_link());
  
     // d0/z0 come from the measurement's local position; the remaining bound
     // parameters come from the smoothed track state.
