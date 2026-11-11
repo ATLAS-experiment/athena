@@ -789,7 +789,7 @@ class Gx2Fitter {
                      const navigator_t& navigator, result_type& result,
                      const Logger& logger) const {
       assert(result.fittedStates && "No MultiTrajectory set");
-      assert(result.options && "No options are set");
+      assert(options && "No options are set");
 
       
       
