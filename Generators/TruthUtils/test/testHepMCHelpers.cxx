@@ -36,14 +36,14 @@ void testStatusPredicates() {
 
   auto v0 = HepMC::newGenVertexPtr();
   v0->add_particle_in(beam); v0->add_particle_out(z);
-  evt.add_vertex(v0);
+  evt.add_vertex(std::move(v0));
   auto v1 = HepMC::newGenVertexPtr();
   v1->add_particle_in(z); v1->add_particle_out(mup); v1->add_particle_out(mum); v1->add_particle_out(nu);
-  evt.add_vertex(v1);
+  evt.add_vertex(std::move(v1));
   auto v2 = HepMC::newGenVertexPtr();
   v2->add_particle_in(mup); v2->add_particle_out(simmu);
   v2->set_status(HepMC::SIM_STATUS_THRESHOLD + 1);
-  evt.add_vertex(v2);
+  evt.add_vertex(std::move(v2));
   evt.add_particle(simdec); evt.add_particle(zero);
 
   CHECK(MC::isBeam(beam));
@@ -93,21 +93,24 @@ void testEventNavigation() {
   auto vd = HepMC::newGenVertexPtr();
   vd->add_particle_in(z); vd->add_particle_out(mup); vd->add_particle_out(mum);
   auto vg = HepMC::newGenVertexPtr();
-  vg->add_particle_in(g1); vg->add_particle_in(g2); vg->add_particle_out(b); vg->add_particle_out(bb);
+  vg->add_particle_in(std::move(g1)); 
+  vg->add_particle_in(std::move(g2)); 
+  vg->add_particle_out(b); 
+  vg->add_particle_out(std::move(bb));
   auto vh = HepMC::newGenVertexPtr();         // hadronisation  b -> B+
   vh->add_particle_in(b); vh->add_particle_out(B);
   auto vb = HepMC::newGenVertexPtr();
   vb->add_particle_in(B); vb->add_particle_out(mu_b); vb->add_particle_out(nu_b);
-  for (auto& v : {vz, vd, vg, vh, vb}) evt.add_vertex(v);
+  for (auto& v : {vz, vd, vg, std::move(vh), std::move(vb)}) evt.add_vertex(v);
 
   // hard scattering vertices: two quarks/gluons in
-  CHECK(MC::isHardScatteringVertex(vz));
-  CHECK(MC::isHardScatteringVertex(vg));
+  CHECK(MC::isHardScatteringVertex(std::move(vz)));
+  CHECK(MC::isHardScatteringVertex(std::move(vg)));
   CHECK(MC::isHardScatteringVertex(vd));                // single-parent chain is followed back to the Z production vertex
   auto vlone = HepMC::newGenVertexPtr();   // photon conversion with no hard-scatter ancestry
   vlone->add_particle_in(HepMC::newGenParticlePtr(someMomentum, 22, 2)); vlone->add_particle_out(HepMC::newGenParticlePtr(someMomentum, 11, 1)); vlone->add_particle_out(HepMC::newGenParticlePtr(someMomentum, -11, 1));
   evt.add_vertex(vlone);
-  CHECK(!MC::isHardScatteringVertex(vlone));
+  CHECK(!MC::isHardScatteringVertex(std::move(vlone)));
   CHECK(!MC::isHardScatteringVertex(HepMC::GenVertexPtr()));
 
   // ancestors and stable descendants
@@ -118,26 +121,26 @@ void testEventNavigation() {
   MC::findParticleStableDescendants(z, stable);
   CHECK(stable.size() == 2 && stable.count(mup) && stable.count(mum));
   stable.clear();
-  MC::findParticleStableDescendants(b, stable);
+  MC::findParticleStableDescendants(std::move(b), stable);
   CHECK(stable.size() == 2 && stable.count(mu_b) && stable.count(nu_b));
 
   // mothers
   CHECK(MC::findMother(mup) == z);
   CHECK(MC::findMother(z) != nullptr);               // one of the incoming quarks
-  CHECK(MC::findMother(q) == nullptr);               // no production vertex
+  CHECK(MC::findMother(std::move(q)) == nullptr);               // no production vertex
 
   // simulated end vertex: follows 1->1 same-particle chains only
-  CHECK(MC::findSimulatedEndVertex(z) == vd);
+  CHECK(MC::findSimulatedEndVertex(std::move(z)) == vd);
   CHECK(MC::findSimulatedEndVertex(mum) == nullptr);
 
   // hadron ancestry: the muon from B+ comes from a hadron, the Z muon does not
   HepMC::GenParticlePtr hadron;
   bool fromTau = false, fromBSM = false;
-  CHECK(MC::isFromHadron(mu_b, hadron, fromTau, fromBSM));
+  CHECK(MC::isFromHadron(std::move(mu_b), hadron, fromTau, fromBSM));
   CHECK(hadron == B);
   CHECK(!fromTau && !fromBSM);
   HepMC::GenParticlePtr none;
-  CHECK(!MC::isFromHadron(mum, none, fromTau, fromBSM));
+  CHECK(!MC::isFromHadron(std::move(mum), none, fromTau, fromBSM));
   CHECK(none == nullptr);
 
   // unit scaling

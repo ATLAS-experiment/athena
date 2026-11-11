@@ -243,7 +243,7 @@ namespace MC
         bool samePart = false;
         pVert = nullptr;
         auto outgoing = EndVert->particles_out();
-        auto incoming = EndVert->particles_in();
+        const auto & incoming = EndVert->particles_in();
         for (const auto& itrDaug: outgoing) {
           if (!itrDaug) continue;
           if ((( HepMC::is_same_generator_particle(itrDaug,thePart)) ||
