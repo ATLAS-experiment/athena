@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -32,6 +32,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "StoreGate/WriteHandleKey.h"
+#include "Gaudi/Property.h"
 
 // C++ STL includes
 #include <vector> 
@@ -56,7 +57,7 @@ class TileLookForMuAlg: public AthReentrantAlgorithm {
 
   private:
 
-    const TileID* m_tileID;
+    const TileID* m_tileID{nullptr};
 
     // define a  numeration  scheme for the  cells
     enum N_CELLS_SAMP {
@@ -65,23 +66,23 @@ class TileLookForMuAlg: public AthReentrantAlgorithm {
     enum N_OF_MODULES {
       N_MODULES = 64
     };
-    double m_etaD[N_CELLS_D];
-    double m_etaBC[N_CELLS_BC];
-    double m_etaA[N_CELLS_A];
-    const int m_nMuMax;
+    double m_etaD[N_CELLS_D]{};
+    double m_etaBC[N_CELLS_BC]{};
+    double m_etaA[N_CELLS_A]{};
+    const int m_nMuMax{30};
     // and patterns search from D to BC and  from BC to A layers   
-    std::vector<int> m_fromDtoBC;
-    std::vector<int> m_fromBCtoA;
+    Gaudi::Property<std::vector<int>> m_fromDtoBC{this, "From3to2", {}};
+    Gaudi::Property<std::vector<int>> m_fromBCtoA{this, "From2to1", {}};
     //   std::map<double,unsigned int> eta2map
     // lower thresholds for the 3 sample
-    double m_loThrA;
-    double m_loThrBC;
-    double m_loThrD;
-    double m_loThrITC;
+    Gaudi::Property<double> m_loThrA{this, "LowerTresh0MeV", 80.0};
+    Gaudi::Property<double> m_loThrBC{this, "LowerTresh1MeV", 80.0};
+    Gaudi::Property<double> m_loThrD{this, "LowerTresh2MeV", 80.0};
+    Gaudi::Property<double> m_loThrITC{this, "LowerTreshScinMeV", 160.0};
     // std::vector<double>  hiThrD; 
-    std::vector<double> m_hiThrD;
-    std::vector<double> m_hiThrBC;
-    std::vector<double> m_hiThrA;
+    Gaudi::Property<std::vector<double>> m_hiThrD{this, "UpperTresh2MeV", {}};
+    Gaudi::Property<std::vector<double>> m_hiThrBC{this, "UpperTresh1MeV", {}};
+    Gaudi::Property<std::vector<double>> m_hiThrA{this, "UpperTresh0MeV", {}};
 
     SG::ReadHandleKey<CaloCellContainer> m_cellContainerKey{this,"CellsNames",
                                                             "AllCalo",

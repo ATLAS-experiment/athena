@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -52,15 +52,9 @@ const InterfaceID& TileL2Builder::interfaceID() {
 TileL2Builder::TileL2Builder(const std::string& type, const std::string& name,
     const IInterface* parent)
     : AthAlgTool(type, name, parent)
-  , m_noiseThreshold(100.0) // 100 MeV universal cut for now
-  , m_noiseType(9999)       // this huge value means that noise cut is taken from JO
-  , m_tileHWID(nullptr)
 {
 
   declareInterface<TileL2Builder>(this);
-
-  declareProperty("NoiseThreshold", m_noiseThreshold);       // use channels only above noise cut
-  declareProperty("Noise", m_noiseType);            // choose between electronic or total noise
 }
 
 TileL2Builder::~TileL2Builder() {

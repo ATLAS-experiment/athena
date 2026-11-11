@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //***************************************************************************
@@ -28,22 +28,7 @@
 TileLookForMuAlg::TileLookForMuAlg(const std::string& name,
     ISvcLocator* pSvcLocator) 
   : AthReentrantAlgorithm(name, pSvcLocator)
-  , m_tileID(0)
-  , m_etaD()
-  , m_etaBC()
-  , m_etaA()
-  , m_nMuMax(30)
 {
-  declareProperty("LowerTresh0MeV", m_loThrA=80.0);
-  declareProperty("LowerTresh1MeV", m_loThrBC=80.0);
-  declareProperty("LowerTresh2MeV", m_loThrD=80.0);
-  declareProperty("LowerTreshScinMeV", m_loThrITC=160.0);
-  declareProperty("UpperTresh2MeV", m_hiThrD);
-  declareProperty("UpperTresh1MeV", m_hiThrBC);
-  declareProperty("UpperTresh0MeV", m_hiThrA);
-  declareProperty("From3to2", m_fromDtoBC);
-  declareProperty("From2to1", m_fromBCtoA);
-
 }
 
 TileLookForMuAlg::~TileLookForMuAlg() {
@@ -217,13 +202,13 @@ StatusCode TileLookForMuAlg::execute (const EventContext& ctx) const {
       if (energy >= m_loThrD) {
         int splitted = -1;
         double eta = m_etaD[iCellD];
-        double hiThr = m_hiThrD[iCellD];
+        double hiThr = m_hiThrD.value()[iCellD];
         int quality = (energy < hiThr) ? 0 : 1;
         // check for muon splitting (same phi bin and neighboring eta bin)
         if (prevCell == lastMuCell && iModule == lastMuModule) {
           int sumQuality = quality + muQualityD.back();
           float sumEnergy = energy + eneD[prevCell][iModule];
-          double hiPrevThr = m_hiThrD[prevCell];
+          double hiPrevThr = m_hiThrD.value()[prevCell];
           double maxHiThr = (hiThr > hiPrevThr) ? hiThr : hiPrevThr;
           if ((sumQuality == 0 && sumEnergy < maxHiThr) || sumQuality == 1) {
             // possible splitting with last found muon candidate 
@@ -257,7 +242,7 @@ StatusCode TileLookForMuAlg::execute (const EventContext& ctx) const {
                         << ", tower index (iCellD)= " << iCellD
                         << ", module index(iModuleD)= " << iModule
                         << ", Energy(iCellD)(iModuleD) = " << eneD[iCellD][iModule]
-                        << ", threshold2(iCellD)= " << m_hiThrD[iCellD]);
+                        << ", threshold2(iCellD)= " << m_hiThrD.value()[iCellD]);
       } else {
         // ATH_MSG_VERBOSE ( "no candidates" );
       }
@@ -292,21 +277,21 @@ StatusCode TileLookForMuAlg::execute (const EventContext& ctx) const {
       ATH_MSG_VERBOSE(
           "loop on mu candidates: iMu, module = " << iMu << ", " << module);
       int idxD = 6 * muCellD[iMu];
-      ATH_MSG_VERBOSE ("number of cells in BC layer to check = " << m_fromDtoBC[idxD]);
-      int endIdxD = idxD + m_fromDtoBC[idxD];
+      ATH_MSG_VERBOSE ("number of cells in BC layer to check = " << m_fromDtoBC.value()[idxD]);
+      int endIdxD = idxD + m_fromDtoBC.value()[idxD];
       while (++idxD <= endIdxD && muFound[iMu] != 1) {
-        int cellBC = m_fromDtoBC[idxD];
+        int cellBC = m_fromDtoBC.value()[idxD];
         float energyBC = eneBC[cellBC][module];
         ATH_MSG_VERBOSE( "cellBC = " << cellBC
                         << ", module=" << module
                         << ", eneBC =" << energyBC);
         if (energyBC > m_loThrBC) {
-          int qualityBC = (energyBC < m_hiThrBC[cellBC]) ? 0 : 1;
+          int qualityBC = (energyBC < m_hiThrBC.value()[cellBC]) ? 0 : 1;
           int idxBC = 6 * cellBC;
-          ATH_MSG_VERBOSE ("number of cells in A layer to check for mu = " << m_fromBCtoA[idxBC]);
-          int endIdxBC = idxBC + m_fromBCtoA[idxBC];
+          ATH_MSG_VERBOSE ("number of cells in A layer to check for mu = " << m_fromBCtoA.value()[idxBC]);
+          int endIdxBC = idxBC + m_fromBCtoA.value()[idxBC];
           while (++idxBC <= endIdxBC && muFound[iMu] != 1) {
-            int cellA = m_fromBCtoA[idxBC];
+            int cellA = m_fromBCtoA.value()[idxBC];
             float energyA = eneA[cellA][module];
             ATH_MSG_VERBOSE( "cellA index = " << cellA
                             << ", module=" << module
@@ -314,7 +299,7 @@ StatusCode TileLookForMuAlg::execute (const EventContext& ctx) const {
 
             if ( energyA >  ( (cellA == 4 || cellA == 25) ? m_loThrITC : m_loThrA ) ) {
 
-              int qualityA = (energyA < m_hiThrA[cellA]) ? 0 : 1;
+              int qualityA = (energyA < m_hiThrA.value()[cellA]) ? 0 : 1;
 
               // We have a   muon like signature  
 

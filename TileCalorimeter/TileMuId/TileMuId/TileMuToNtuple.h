@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -26,6 +26,7 @@
 
 // Gaudi includes
 #include "GaudiKernel/NTuple.h"
+#include "Gaudi/Property.h"
 
 
 #include <string>
@@ -46,11 +47,11 @@ class TileMuToNtuple: public AthAlgorithm {
 
   private:
 
-    NTuple::Tuple* m_ntuplePtr;
-    int m_ntupleID;
-    int m_maxNtag;
-    int m_close;
-    std::string m_ntupleLoc;
+    NTuple::Tuple* m_ntuplePtr{nullptr};
+    Gaudi::Property<int> m_ntupleID{this, "NTupleID", 100};
+    Gaudi::Property<int> m_maxNtag{this, "MaxNtag", 50};
+    Gaudi::Property<int> m_close{this, "CloseNtuple", 1};
+    Gaudi::Property<std::string> m_ntupleLoc{this, "NTupleLoc", "/FILE1/TileMuTag"};
 
     NTuple::Item<int> m_ntag;
     NTuple::Array<float> m_eta;
@@ -58,7 +59,7 @@ class TileMuToNtuple: public AthAlgorithm {
     NTuple::Matrix<float> m_energy;
     NTuple::Array<float> m_quality;
 
-    std::string m_tileMuContainer;
+    std::string m_tileMuContainer{"TileMuObj"};
 
     SG::ReadHandleKey<TileMuContainer> m_muContainerKey{this,"TileMuContainer",
                                                         "TileMuObj",

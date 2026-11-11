@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -40,160 +40,9 @@ const int TileCosmicsTrigger::m_NMaxTowers = NMAXTOWERS;
 
 TileCosmicsTrigger::TileCosmicsTrigger(const std::string& name, ISvcLocator* pSvcLocator)
     : AthAlgorithm(name, pSvcLocator)
-  , m_TThreshold(5.0)
-  , m_NBOARDS(8)
-  , m_NDRAWERSPERBOARD(12)
-  //, m_NTOWERSPERDRAWER(8)
-  , m_TT_ID(0)
-  , m_TTHash(0)
 {
   for (int iboard = 0; iboard < m_NBOARDS; iboard++) {
     m_connectedDrawers[iboard].resize(m_NDRAWERSPERBOARD);
-    m_connectedDrawers1.resize(m_NDRAWERSPERBOARD);
-    m_connectedDrawers2.resize(m_NDRAWERSPERBOARD);
-    m_connectedDrawers3.resize(m_NDRAWERSPERBOARD);
-    m_connectedDrawers4.resize(m_NDRAWERSPERBOARD);
-    m_connectedDrawers5.resize(m_NDRAWERSPERBOARD);
-    m_connectedDrawers6.resize(m_NDRAWERSPERBOARD);
-    m_connectedDrawers7.resize(m_NDRAWERSPERBOARD);
-    m_connectedDrawers8.resize(m_NDRAWERSPERBOARD);
-  }
-
-//------------------------------------------------------------------
-// Setting default configuration
-// See talk by Christophe Clement March 1, 2007
-// -----------------------------------------------------------------
-//  Board   Connected to
-//   1    bottom LBA
-//   2    bottom EBA
-//   3    top	 LBA
-//   4    top	 EBA
-//   5    bottom LBC
-//   6    bottom EBC
-//   7    top	 LBC
-//   8    top	 EBC
-//-------------------------------------------------------------------
-
-  m_connectedDrawers1[0] = "LBA43";
-  m_connectedDrawers1[1] = "LBA44";
-  m_connectedDrawers1[2] = "LBA45";
-  m_connectedDrawers1[3] = "LBA46";
-  m_connectedDrawers1[4] = "LBA47";
-  m_connectedDrawers1[5] = "LBA48";
-  m_connectedDrawers1[6] = "LBA49";
-  m_connectedDrawers1[7] = "LBA50";
-  m_connectedDrawers1[8] = "LBA51";
-  m_connectedDrawers1[9] = "LBA52";
-  m_connectedDrawers1[10] = "LBA53";
-  m_connectedDrawers1[11] = "LBA54";
-
-  m_connectedDrawers2[0] = "EBA43";
-  m_connectedDrawers2[1] = "EBA44";
-  m_connectedDrawers2[2] = "EBA45";
-  m_connectedDrawers2[3] = "EBA46";
-  m_connectedDrawers2[4] = "EBA47";
-  m_connectedDrawers2[5] = "EBA48";
-  m_connectedDrawers2[6] = "EBA49";
-  m_connectedDrawers2[7] = "EBA50";
-  m_connectedDrawers2[8] = "EBA51";
-  m_connectedDrawers2[9] = "EBA52";
-  m_connectedDrawers2[10] = "EBA53";
-  m_connectedDrawers2[11] = "EBA54";
-
-  m_connectedDrawers3[0] = "LBA11";
-  m_connectedDrawers3[1] = "LBA12";
-  m_connectedDrawers3[2] = "LBA13";
-  m_connectedDrawers3[3] = "LBA14";
-  m_connectedDrawers3[4] = "LBA15";
-  m_connectedDrawers3[5] = "LBA16";
-  m_connectedDrawers3[6] = "LBA17";
-  m_connectedDrawers3[7] = "LBA18";
-  m_connectedDrawers3[8] = "LBA19";
-  m_connectedDrawers3[9] = "LBA20";
-  m_connectedDrawers3[10] = "LBA21";
-  m_connectedDrawers3[11] = "LBA22";
-
-  m_connectedDrawers4[0] = "EBA11";
-  m_connectedDrawers4[1] = "EBA12";
-  m_connectedDrawers4[2] = "EBA13";
-  m_connectedDrawers4[3] = "EBA14";
-  m_connectedDrawers4[4] = "EBA15";
-  m_connectedDrawers4[5] = "EBA16";
-  m_connectedDrawers4[6] = "EBA17";
-  m_connectedDrawers4[7] = "EBA18";
-  m_connectedDrawers4[8] = "EBA19";
-  m_connectedDrawers4[9] = "EBA20";
-  m_connectedDrawers4[10] = "EBA21";
-  m_connectedDrawers4[11] = "EBA22";
-
-  m_connectedDrawers5[0] = "LBC43";
-  m_connectedDrawers5[1] = "LBC44";
-  m_connectedDrawers5[2] = "LBC45";
-  m_connectedDrawers5[3] = "LBC46";
-  m_connectedDrawers5[4] = "LBC47";
-  m_connectedDrawers5[5] = "LBC48";
-  m_connectedDrawers5[6] = "LBC49";
-  m_connectedDrawers5[7] = "LBC50";
-  m_connectedDrawers5[8] = "LBC51";
-  m_connectedDrawers5[9] = "LBC52";
-  m_connectedDrawers5[10] = "LBC53";
-  m_connectedDrawers5[11] = "LBC54";
-
-  m_connectedDrawers6[0] = "EBC43";
-  m_connectedDrawers6[1] = "EBC44";
-  m_connectedDrawers6[2] = "EBC45";
-  m_connectedDrawers6[3] = "EBC46";
-  m_connectedDrawers6[4] = "EBC47";
-  m_connectedDrawers6[5] = "EBC48";
-  m_connectedDrawers6[6] = "EBC49";
-  m_connectedDrawers6[7] = "EBC50";
-  m_connectedDrawers6[8] = "EBC51";
-  m_connectedDrawers6[9] = "EBC52";
-  m_connectedDrawers6[10] = "EBC53";
-  m_connectedDrawers6[11] = "EBC54";
-
-  m_connectedDrawers7[0] = "LBC11";
-  m_connectedDrawers7[1] = "LBC12";
-  m_connectedDrawers7[2] = "LBC13";
-  m_connectedDrawers7[3] = "LBC14";
-  m_connectedDrawers7[4] = "LBC15";
-  m_connectedDrawers7[5] = "LBC16";
-  m_connectedDrawers7[6] = "LBC17";
-  m_connectedDrawers7[7] = "LBC18";
-  m_connectedDrawers7[8] = "LBC19";
-  m_connectedDrawers7[9] = "LBC20";
-  m_connectedDrawers7[10] = "LBC21";
-  m_connectedDrawers7[11] = "LBC22";
-
-  m_connectedDrawers8[0] = "EBC11";
-  m_connectedDrawers8[1] = "EBC12";
-  m_connectedDrawers8[2] = "EBC13";
-  m_connectedDrawers8[3] = "EBC14";
-  m_connectedDrawers8[4] = "EBC15";
-  m_connectedDrawers8[5] = "EBC16";
-  m_connectedDrawers8[6] = "EBC17";
-  m_connectedDrawers8[7] = "EBC18";
-  m_connectedDrawers8[8] = "EBC19";
-  m_connectedDrawers8[9] = "EBC20";
-  m_connectedDrawers8[10] = "EBC21";
-  m_connectedDrawers8[11] = "EBC22";
-
-  declareProperty("ConnectedDrawers1", m_connectedDrawers1);
-  declareProperty("ConnectedDrawers2", m_connectedDrawers2);
-  declareProperty("ConnectedDrawers3", m_connectedDrawers3);
-  declareProperty("ConnectedDrawers4", m_connectedDrawers4);
-  declareProperty("ConnectedDrawers5", m_connectedDrawers5);
-  declareProperty("ConnectedDrawers6", m_connectedDrawers6);
-  declareProperty("ConnectedDrawers7", m_connectedDrawers7);
-  declareProperty("ConnectedDrawers8", m_connectedDrawers8);
-  declareProperty("Threshold", m_TThreshold);
-
-  // fix coverity complaints about these not being initialized in constructor
-  for (int i = 0; i < m_NMaxTowers; i++) {
-    m_connectedTowers[i] = 0;
-    m_firedTowers[i] = 0;
-    m_towerSum[i] = 0.0;
-    m_boardOfTower[i] = 0;
   }
 }
 
@@ -220,14 +69,14 @@ StatusCode TileCosmicsTrigger::initialize() {
     m_connectedTowers[i] = 0;
 
   for (int idrawer = 0; idrawer < m_NDRAWERSPERBOARD; idrawer++) {
-    m_connectedDrawers[0][idrawer] = m_connectedDrawers1[idrawer];
-    m_connectedDrawers[1][idrawer] = m_connectedDrawers2[idrawer];
-    m_connectedDrawers[2][idrawer] = m_connectedDrawers3[idrawer];
-    m_connectedDrawers[3][idrawer] = m_connectedDrawers4[idrawer];
-    m_connectedDrawers[4][idrawer] = m_connectedDrawers5[idrawer];
-    m_connectedDrawers[5][idrawer] = m_connectedDrawers6[idrawer];
-    m_connectedDrawers[6][idrawer] = m_connectedDrawers7[idrawer];
-    m_connectedDrawers[7][idrawer] = m_connectedDrawers8[idrawer];
+    m_connectedDrawers[0][idrawer] = m_connectedDrawers1.value()[idrawer];
+    m_connectedDrawers[1][idrawer] = m_connectedDrawers2.value()[idrawer];
+    m_connectedDrawers[2][idrawer] = m_connectedDrawers3.value()[idrawer];
+    m_connectedDrawers[3][idrawer] = m_connectedDrawers4.value()[idrawer];
+    m_connectedDrawers[4][idrawer] = m_connectedDrawers5.value()[idrawer];
+    m_connectedDrawers[5][idrawer] = m_connectedDrawers6.value()[idrawer];
+    m_connectedDrawers[6][idrawer] = m_connectedDrawers7.value()[idrawer];
+    m_connectedDrawers[7][idrawer] = m_connectedDrawers8.value()[idrawer];
   }
   for (int iboard = 0; iboard < m_NBOARDS; iboard++) {
     for (int idrawer = 0; idrawer < m_NDRAWERSPERBOARD; idrawer++) {

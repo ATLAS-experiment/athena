@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //*****************************************************************************
@@ -48,25 +48,7 @@
 //****************************************************************************
 TileFCSmStepToTileHitVec::TileFCSmStepToTileHitVec(const std::string& name, ISvcLocator* pSvcLocator)
   : AthAlgorithm(name, pSvcLocator)
-  , m_geoModSvc("GeoModelSvc",name)
-  , m_FCS_StepInfo ("MergedEventSteps")
-  , m_hitVec ("TileHitVec_FCS")
-  , m_infoName ("TileInfo")
-  , m_tileID(nullptr)
-  , m_tileInfo(nullptr)
-  , m_tileMgr(nullptr)
-  , m_calc("TileGeoG4SDCalc", name)
-  , m_deltaT(0.5 * Gaudi::Units::nanosecond)
-  , m_allHits(0)
-  , m_uShape(-1)
 {
-  declareProperty( "GeoModelSvc", m_geoModSvc );
-  declareProperty( "TileCalculator", m_calc);
-  declareProperty("StepInfoCollection",   m_FCS_StepInfo, "Name of input container (default=TileHitCnt)");
-  declareProperty("TileHitVector",        m_hitVec,       "Name of output hit vector (default=TileHitVec)");
-  declareProperty("TileInfoName",         m_infoName,     "Name of TileInfo store (default=TileInfo");
-  declareProperty("DeltaT",               m_deltaT,       "Minimal Time granularity in TileHit (default=0.5ns)");
-
 }
 
 
@@ -86,7 +68,7 @@ StatusCode TileFCSmStepToTileHitVec::initialize()
   // retrieve Tile detector manager, TileID helper and TileIfno from det store
   ATH_CHECK( detStore()->retrieve(m_tileMgr) );
   ATH_CHECK( detStore()->retrieve(m_tileID) );
-  ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName) );
+  ATH_CHECK( detStore()->retrieve(m_tileInfo, m_infoName.value()) );
   ATH_CHECK(m_geoModSvc.retrieve());
   ATH_MSG_VERBOSE("GeoModelSvc initialized.");
 
@@ -141,7 +123,7 @@ StatusCode TileFCSmStepToTileHitVec::execute(const EventContext& /*ctx*/)
   std::unique_ptr<TileHitVector> FCS_hits = std::make_unique<TileHitVector>();
 
   // Get FCS_StepInfo from FCS_StepInfoCollection
-  ATH_CHECK(evtStore()->retrieve(inCollect,m_FCS_StepInfo)); //FIXME use a ReadHandle
+  ATH_CHECK(evtStore()->retrieve(inCollect,m_FCS_StepInfo.value())); //FIXME use a ReadHandle
 
   IdContext pmt_context = m_tileID->pmt_context();
 
@@ -319,7 +301,7 @@ StatusCode TileFCSmStepToTileHitVec::execute(const EventContext& /*ctx*/)
   }
 
   // Register the set of TileHits to the event store
-  CHECK( evtStore()->record(std::move(FCS_hits), m_hitVec, false ) );
+  CHECK( evtStore()->record(std::move(FCS_hits), m_hitVec.value(), false ) );
 
   ATH_MSG_DEBUG( "Execution completed,  nHit=" << nHit << "  sum_size=" << sum_size << "  Etot=" << Etot );
   // ATH_MSG_INFO( "Execution completed,  nHit=" << nHit << "  sum_size=" << sum_size << "  Etot=" << Etot );

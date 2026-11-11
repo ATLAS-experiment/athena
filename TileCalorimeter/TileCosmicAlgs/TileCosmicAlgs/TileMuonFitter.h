@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILECOSMICALGS_TILEMUONFITTER_H
@@ -43,6 +43,7 @@
 
 // Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
+#include "Gaudi/Property.h"
 
 
 // forward declarations
@@ -192,28 +193,28 @@ class TileMuonFitter: public AthAlgorithm {
   protected:
 
     // Tile objects
-    const TileID* m_tileID;
-    const TileHWID* m_tileHWID;
-    const TileDetDescrManager* m_tileMgr;
-    const CaloCellContainer *m_caloCells;
+    const TileID* m_tileID{nullptr};
+    const TileHWID* m_tileHWID{nullptr};
+    const TileDetDescrManager* m_tileMgr{nullptr};
+    const CaloCellContainer *m_caloCells{nullptr};
 
     /** Auxiliary class representing the function to be minimized - weighted sum of
      squares of orthogonal distances from track to cells)*/
-    ROOT::Minuit2::TileMuonTrackDistance* m_theTrack;
+    ROOT::Minuit2::TileMuonTrackDistance* m_theTrack{nullptr};
 
     /** Cell energy threshold */
-    double m_eThreshold;
+    Gaudi::Property<double> m_eThreshold{this, "EThreshold", 250.};
     /** Cell Delta Time cut*/
-    double m_deltaTimeCut;
+    Gaudi::Property<double> m_deltaTimeCut{this, "DeltaTimeCut", 6.};
     /** Flag to weigh or not the chi-square with an energy parameter.*/
-    bool m_doWeighted;
+    Gaudi::Property<bool> m_doWeighted{this, "DoWeighted", true};
     /** Flag defining the energy weighting parameter: energy density or plain
      energy.*/
-    bool m_doDensity;
+    Gaudi::Property<bool> m_doDensity{this, "DoDensityWeighting", true};
     /** Flag to indicate: cosmics, singlebeam or collisions. */
-    std::string m_beamType;
+    Gaudi::Property<std::string> m_beamType{this, "BeamType", "cosmics"};
     /** Flag to use Hough Transform instead of Fit. */
-    bool m_doHoughTransform;
+    Gaudi::Property<bool> m_doHoughTransform{this, "DoHoughTransform", true};
     /** Radial bounds of the 3 samplings in LB, loaded from Detector Description.*/
     std::vector<double> m_tileDD_radiusLB;
     /** Radial bounds of the 3 samplings in EB, loaded from Detector Description.*/
@@ -226,9 +227,9 @@ class TileMuonFitter: public AthAlgorithm {
     std::vector<double> m_tileDD_zLB;
 
     /** Number of cells selected for fit.*/
-    int m_nCells;
+    int m_nCells{0};
     /** Minimum number of cells needed for fit.*/
-    int m_minimumCells;
+    Gaudi::Property<int> m_minimumCells{this, "MinimumCells", 2};
     /** Position of selected cell's center.*/
     std::vector<CLHEP::Hep3Vector> m_cellPosition;
     /** Selected cell's energy.*/
@@ -249,16 +250,16 @@ class TileMuonFitter: public AthAlgorithm {
     /** Time at y=0.*/
     std::vector<double> m_zeroCrossingTime;
 
-    double m_meanX;
-    double m_meanY;
-    double m_meanZ;
-    double m_weightedMeanX;
-    double m_weightedMeanY;
-    double m_weightedMeanZ;
+    double m_meanX{0.0};
+    double m_meanY{0.0};
+    double m_meanZ{0.0};
+    double m_weightedMeanX{0.0};
+    double m_weightedMeanY{0.0};
+    double m_weightedMeanZ{0.0};
 
-    int m_maxBottomIndex;
-    int m_maxTopIndex;
-    bool m_reg1to2;
+    int m_maxBottomIndex{0};
+    int m_maxTopIndex{0};
+    bool m_reg1to2{false};
 
     static const CaloCell_ID::SUBCALO m_caloIndex;
 

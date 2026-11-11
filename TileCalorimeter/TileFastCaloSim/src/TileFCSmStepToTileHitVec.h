@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -28,15 +28,18 @@
 #define TILEFASTCALOSIM_TILEFCSMSTEPTOTILEHITVEC_H
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "GeoModelInterfaces/IGeoModelSvc.h"
+#include "TileG4Interfaces/ITileCalculator.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/SystemOfUnits.h"
+#include "Gaudi/Property.h"
 
 class TileID;
 class TileHit;
 class TileInfo;
 class TileDetDescrManager;
 class TileGeoG4SDCalc;
-class ITileCalculator;
 class FCS_StepInfoCollection;
-class IGeoModelSvc;
 
 // C++ STL includes
 #include <string>
@@ -58,20 +61,20 @@ public:
 private:
   int getUshapeFromGM() const;
 
-  ServiceHandle<IGeoModelSvc> m_geoModSvc;
-  std::string m_FCS_StepInfo;
-  std::string m_hitVec;
-  std::string m_infoName;
+  ServiceHandle<IGeoModelSvc> m_geoModSvc{this, "GeoModelSvc", "GeoModelSvc"};
+  Gaudi::Property<std::string> m_FCS_StepInfo{this, "StepInfoCollection", "MergedEventSteps", "Name of input container (default=TileHitCnt)"};
+  Gaudi::Property<std::string> m_hitVec{this, "TileHitVector", "TileHitVec_FCS", "Name of output hit vector (default=TileHitVec)"};
+  Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo", "Name of TileInfo store (default=TileInfo"};
 
-  const TileID*               m_tileID;
-  const TileInfo*             m_tileInfo;
-  const TileDetDescrManager*  m_tileMgr;
-  ServiceHandle<ITileCalculator> m_calc;
+  const TileID*               m_tileID{nullptr};
+  const TileInfo*             m_tileInfo{nullptr};
+  const TileDetDescrManager*  m_tileMgr{nullptr};
+  ServiceHandle<ITileCalculator> m_calc{this, "TileCalculator", "TileGeoG4SDCalc"};
 
-  float   m_deltaT;
+  Gaudi::Property<float>   m_deltaT{this, "DeltaT", 0.5 * Gaudi::Units::nanosecond, "Minimal Time granularity in TileHit (default=0.5ns)"};
   std::vector<TileHit*> m_allHits;
 
-  int m_uShape;
+  int m_uShape{-1};
 };
 
 #endif // TILERECALGS_TILEFCSMSTEPTOTILEHITVEC_H
