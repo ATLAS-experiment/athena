@@ -1151,13 +1151,22 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                                 category_i,
                                 seedType,
                                 trackCategories) );
+            ++nfirst;
+            continue;
         }
 
         // need to add tracks here
         // do the stiching
         // store the original previous state to restore it later
         auto originalFirstMeasurementPrevious = firstMeasurement.previous();
-        for (auto &secondTrack : secondTracksForSeed) {
+        // With branching (numMeasurementsCutOff > 1) the second tracks share their first track states, which
+        // reverseTrackStates() relinks in place (breaking the other branches): reverse a copy of each instead.
+        for (auto &secondTrackBranch : secondTracksForSeed) {
+            auto secondTrack = secondTrackBranch;
+            if (secondTracksForSeed.size() > 1) {
+              secondTrack = tracksContainerTemp.makeTrack();
+              secondTrack.copyFrom(secondTrackBranch);
+            }
             secondTrack.reverseTrackStates(true);
 
             firstMeasurement.previous() = secondTrack.outermostTrackState().index();
