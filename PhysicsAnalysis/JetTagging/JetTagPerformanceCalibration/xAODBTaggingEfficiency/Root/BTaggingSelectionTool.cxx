@@ -72,13 +72,29 @@ StatusCode BTaggingSelectionTool::initialize() {
     ATH_MSG_ERROR( "Tagger: "+m_taggerName+" and Jet Collection : "+m_jetAuthor+"  not found in this CDI file: "+m_CutFileName);
     return StatusCode::FAILURE;
   }
+
+  // Online taggers i.e. b-jet trigger taggers 
+  // may not have the same set of probabilities to be retrieved 
+  // hence initializing this boolean 
+  // In the selection tools the online taggers information should be retrieved 
+  // either for online taggers, those taggers are called 
+  // "Online{TaggerNameOnline}"
+  // or for the conditional online tagger which are called 
+  // "ConditionalOnline{TaggerNameOnline}GivenOffline{TaggerNameOffline}WP{WorkingPoint}"
+  // as in this case the tagger to be used in the online tagger. 
+  // 
+  // NB: for the taggers called ConditionalOffline{TaggerNameOffline}GivenOnline{TaggerNameOnline}WP{WorkingPoint}
+  // i.e. tagger whose name starts with "ConditionalOffline"
+  // then tagger to be used is the offline tagger and NOT the online tagger 
+  m_usingOnlineTagger = (m_taggerName.value().starts_with("Online") || m_taggerName.value().contains("ConditionalOnline"));
  
   //set taggerEnum to avid string comparison:
   m_taggerEnum = SetTaggerEnum(m_taggerName);
   
   // For all recent taggers (GN2v01 or above), the tau fraction(s) should be saved in the CDI file and retrieved/set within the BTaggingSelectionTool
   // This boolean allows the tool knowing if we expect tau fractions or no for the tagger the user wants to use
-  m_taggerWithTauFractions = (m_taggerEnum != Tagger::MV2c10 && m_taggerEnum != Tagger::DL1 && m_taggerEnum != Tagger::GN1 && !(m_taggerName.value().find("GN2v00") != std::string::npos)); 
+  // NB: all the online taggers so far (including the GN2 online tagger) do NOT have tau probabilities 
+  m_taggerWithTauFractions = (!m_usingOnlineTagger && m_taggerEnum != Tagger::MV2c10 && m_taggerEnum != Tagger::DL1 && m_taggerEnum != Tagger::GN1 && !m_taggerName.value().contains("GN2v00")); 
 
  // Change the minPt cut if the user didn't touch it
  if (m_minPt < 0){
