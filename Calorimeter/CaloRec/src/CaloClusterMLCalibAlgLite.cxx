@@ -24,7 +24,7 @@ StatusCode CaloClusterMLCalibAlgLite::initialize()
     ATH_CHECK(m_clusterMLCalibEnergyUncDecorKey.initialize());
 
     ATH_MSG_INFO("ML calibration will be applied for clusters within [" << m_rapidityRange[0] << "," << m_rapidityRange[1] << "]");
-    ATH_MSG_INFO("ML calibration will be applied for clusters with energy >= " << m_minClusterEnergy << " MeV");
+    ATH_MSG_INFO("ML calibration will be applied for clusters with ML-predicted energy >= " << m_minClusterEnergy.value() << " MeV");
 
     return StatusCode::SUCCESS;
 }
@@ -61,7 +61,8 @@ StatusCode CaloClusterMLCalibAlgLite::execute(const EventContext &ctx) const
             ++nPrimVtx;
     }
 
-    // only run inference for clusters passing cuts
+    // Run inference for all clusters in the rapidity range. The minimum energy cut is applied
+    // to the ML-predicted energy below, after inference
     ConstDataVector<xAOD::CaloClusterContainer> selectedClusters(SG::VIEW_ELEMENTS);
     std::vector<bool> clusterMask(clusterReadHandle->size(), false);
     for (const xAOD::CaloCluster *cluster : *clusterReadHandle) {
@@ -69,9 +70,6 @@ StatusCode CaloClusterMLCalibAlgLite::execute(const EventContext &ctx) const
 	const double eta = cluster->eta(xAOD::CaloCluster::UNCALIBRATED);
 	if (eta < m_rapidityRange[0] || eta > m_rapidityRange[1]) continue;
       }
-      // minimum cluster energy cut; in MeV
-      const double energy = cluster->rawE();
-      if (energy < m_minClusterEnergy) continue;
 
       selectedClusters.push_back(cluster);
       clusterMask.at(cluster->index()) = true;
@@ -81,14 +79,20 @@ StatusCode CaloClusterMLCalibAlgLite::execute(const EventContext &ctx) const
     std::vector<double> clusterE_ML_Unc_vec;
 
     ATH_CHECK(m_calibTool->inference(*selectedClusters.asDataVector(), nPrimVtx, avgMu, clusterE_ML_vec, clusterE_ML_Unc_vec));
-    
+
     size_t i = 0;
     for (const xAOD::CaloCluster *cluster : *clusterReadHandle)
     {
       if (clusterMask.at(cluster->index()))
         {
-	  clusterMLCalibEnergyDecor(*cluster) = clusterE_ML_vec[i];
-	  clusterMLCalibEnergyUncDecor(*cluster) = clusterE_ML_Unc_vec[i];
+          const double predictedEnergy = clusterE_ML_vec[i];
+	  if (predictedEnergy >= m_minClusterEnergy.value()) {
+	    clusterMLCalibEnergyDecor(*cluster) = predictedEnergy;
+	    clusterMLCalibEnergyUncDecor(*cluster) = clusterE_ML_Unc_vec[i];
+	  } else {
+	    clusterMLCalibEnergyDecor(*cluster) = cluster->rawE();
+	    clusterMLCalibEnergyUncDecor(*cluster) = 0.0;
+	  }
 	  ++i;
         }
         else
