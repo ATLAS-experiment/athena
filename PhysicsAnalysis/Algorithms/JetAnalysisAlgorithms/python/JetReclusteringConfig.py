@@ -9,8 +9,9 @@ class JetReclusteringBlock(ConfigBlock):
     is a new container containing the reclustered jets.
     The default output variables are the RC jet kinematics
     as well as a vector of indices pointing to the
-    small-R jets that formed the RC jets.
-    ---- to be updated with substructure variables!"""
+    small-R jets that formed the RC jets. With `saveSubstructure`,
+    the kt splitting scales d12 and d23 and Qw of the RC jets are
+    also saved."""
 
     def __init__(self):
         super().__init__()
@@ -33,6 +34,9 @@ class JetReclusteringBlock(ConfigBlock):
                         info=r'maximum $\vert\eta\vert$ requirement on the reclustered jets, creating the selection `passed_sel`.')
         self.addOption ('maxRapidity', 2.5, type=float,
                         info='maximum rapidity requirement on the reclustered jets, creating the selection `passed_sel`.')
+        self.addOption ('saveSubstructure', False, type=bool,
+                        info='whether to compute and save the kt splitting scales d12 and d23 and Qw '
+                        'of the reclustered jets, using their small-R jets as constituents.')
     def instanceName (self) :
         """Return the instance name for this block"""
         return self.containerName
@@ -45,6 +49,10 @@ class JetReclusteringBlock(ConfigBlock):
         alg.reclusteredJets = config.writeName(self.containerName)
         alg.smallRjetIndices = 'smallRjetIndices_%SYS%'
         alg.rcJetEnergy = 'e_%SYS%'
+        if self.saveSubstructure:
+            alg.rcJetD12 = 'd12_%SYS%'
+            alg.rcJetD23 = 'd23_%SYS%'
+            alg.rcJetQw = 'Qw_%SYS%'
         alg.clusteringAlgorithm = self.clusteringAlgorithm
         alg.reclusteredJetsRadius = self.reclusteredJetsRadius
 
@@ -66,3 +74,7 @@ class JetReclusteringBlock(ConfigBlock):
         config.addOutputVar(self.containerName, 'm', 'm', auxType="float")
         config.addOutputVar(self.containerName, alg.rcJetEnergy, 'e', auxType="float")
         config.addOutputVar(self.containerName, alg.smallRjetIndices, 'small_r_jet_indices', auxType="vector_int")
+        if self.saveSubstructure:
+            config.addOutputVar(self.containerName, alg.rcJetD12, 'd12', auxType="float")
+            config.addOutputVar(self.containerName, alg.rcJetD23, 'd23', auxType="float")
+            config.addOutputVar(self.containerName, alg.rcJetQw, 'Qw', auxType="float")

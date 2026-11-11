@@ -6,6 +6,9 @@
 
 #include "JetAnalysisAlgorithms/JetReclusteringAlg.h"
 
+#include "JetSubStructureUtils/KtSplittingScale.h"
+#include "JetSubStructureUtils/Qw.h"
+
 namespace CP {
 
   StatusCode JetReclusteringAlg::initialize() {
@@ -15,6 +18,13 @@ namespace CP {
 
     ANA_CHECK(m_smallRjetIndicesDecor.initialize(m_systematicsList, m_outHandle));
     ANA_CHECK(m_rcEnergyDecor.initialize(m_systematicsList, m_outHandle));
+    ANA_CHECK(m_d12Decor.initialize(m_systematicsList, m_outHandle, SG::AllowEmpty));
+    ANA_CHECK(m_d23Decor.initialize(m_systematicsList, m_outHandle, SG::AllowEmpty));
+    ANA_CHECK(m_qwDecor.initialize(m_systematicsList, m_outHandle, SG::AllowEmpty));
+    if (m_d12Decor.empty() != m_d23Decor.empty() || m_d12Decor.empty() != m_qwDecor.empty()) {
+      ANA_MSG_ERROR("rcJetD12, rcJetD23 and rcJetQw must be either all set or all empty");
+      return StatusCode::FAILURE;
+    }
 
     ANA_CHECK(m_outHandle.initialize(m_systematicsList));
 
@@ -97,6 +107,16 @@ namespace CP {
 
         // Write energy to the RC jet, since default 4-vector form is (pt, eta, phi, m)
         m_rcEnergyDecor.set(*rcJet, irc.e(), sys);
+
+        // Optional substructure from the small-R jet constituents (same definitions as the large-R jet moments)
+        if (!m_d12Decor.empty()) {
+          static const JetSubStructureUtils::KtSplittingScale split12(1);
+          static const JetSubStructureUtils::KtSplittingScale split23(2);
+          static const JetSubStructureUtils::Qw qw;
+          m_d12Decor.set(*rcJet, split12.result(irc), sys);
+          m_d23Decor.set(*rcJet, split23.result(irc), sys);
+          m_qwDecor.set(*rcJet, qw.result(irc), sys);
+        }
       }
 
       ANA_CHECK(m_outHandle.record(std::move(rcJetContainer), std::move(rcJetAuxContainer), sys, ctx));

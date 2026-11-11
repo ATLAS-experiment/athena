@@ -12,7 +12,7 @@ atlas_add_library( JetAnalysisAlgorithmsLib
    PUBLIC_HEADERS JetAnalysisAlgorithms
    LINK_LIBRARIES xAODJet xAODMuon xAODTrigger SelectionHelpersLib SystematicsHandlesLib
    AnaAlgorithmLib JetCalibToolsLib JetInterface
-   JetCPInterfaces JetAnalysisInterfacesLib AsgDataHandlesLib ${FASTJET_LIBRARIES}
+   JetCPInterfaces JetAnalysisInterfacesLib AsgDataHandlesLib JetSubStructureUtils ${FASTJET_LIBRARIES}
    TrigBtagEmulationToolLib TrigDecisionToolLib TrigConfInterfaces MuonAnalysisInterfacesLib
    PRIVATE_LINK_LIBRARIES METUtilitiesLib TrigCompositeUtilsLib TrigConfHLTData
    TrigConfData )
