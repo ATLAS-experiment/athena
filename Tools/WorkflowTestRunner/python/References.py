@@ -11,7 +11,7 @@
 # Format is "test" : "version"
 references_map = {
     # Simulation
-    "s3761": "v34",
+    "s3761": "v35",
     "s4005": "v22",
     "s4006": "v31",
     "s4007": "v30",
@@ -31,7 +31,7 @@ references_map = {
     "q449": "v192",
     "q452": "v99",
     "q454": "v119",
-    "q447": "v49",
+    "q447": "v50",
     # Derivations
     "data_PHYS_Run2": "v107",
     "data_PHYSLITE_Run2": "v66",
