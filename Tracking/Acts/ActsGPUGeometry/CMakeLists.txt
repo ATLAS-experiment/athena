@@ -4,6 +4,7 @@ atlas_subdir( ActsGPUGeometry )
 
 find_package(traccc)
 find_package(vecmem)
+find_package(Acts COMPONENTS Core PluginDetray)
 
 atlas_add_component( ActsGPUGeometry
   src/*.h src/*.cxx
@@ -13,6 +14,7 @@ atlas_add_component( ActsGPUGeometry
     vecmem::core
     traccc::core
     traccc::io
+    Acts::PluginDetray
     GaudiKernel
     AthenaBaseComps
     AthDeviceInterfacesLib

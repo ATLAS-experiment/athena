@@ -1373,6 +1373,7 @@ StatusCode TrackingGeometrySvc::finalize() {
   // from is still around, which is not guaranteed any more once the service
   // itself is destroyed.
   m_detrayGeometry.reset();
+  m_detraySurfaceIds.reset();
   return AthService::finalize();
 }
 
@@ -1542,6 +1543,13 @@ StatusCode TrackingGeometrySvc::buildDetrayGeometry() {
   auto hostDetector = std::make_unique<traccc::host_detector>();
   hostDetector->set<DetrayDetector>(std::move(*detrayGeometry.detector));
   m_detrayGeometry = std::move(hostDetector);
+
+  // The plugin builds the ACTS <-> Detray map of the sensitive surfaces
+  // during the conversion, keep it so that clients don't have to rebuild it
+  m_detraySurfaceIds = std::make_unique<const ActsPlugins::DetraySurfaceIdMap>(
+      std::move(detrayGeometry.surfaceIds));
+  ATH_MSG_INFO("Mapped " << m_detraySurfaceIds->size()
+               << " sensitive surfaces between ACTS and Detray");
 
   ATH_MSG_INFO("Successfully built the Detray geometry from the Acts::TrackingGeometry");
   return StatusCode::SUCCESS;

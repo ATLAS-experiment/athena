@@ -22,6 +22,10 @@ namespace traccc {
     class host_detector;
 }
 
+namespace ActsPlugins {
+    class DetraySurfaceIdMap;
+}
+
 namespace ActsTrk{
     struct DetectorElementToActsGeometryIdMap;
 }
@@ -54,6 +58,11 @@ public:
     /** @brief Returns the type-erased Detray host detector, or nullptr if no
      *         Detray geometry was built. The service retains ownership. */
     virtual const traccc::host_detector* detrayGeometry() const = 0;
+
+    /** @brief Returns the ACTS <-> Detray identifier map of the sensitive surfaces,
+     *         as produced by the ACTS Detray plugin during the conversion, or
+     *         nullptr if no Detray geometry was built. The service retains ownership. */
+    virtual const ActsPlugins::DetraySurfaceIdMap* detraySurfaceIdMap() const = 0;
 };
 }
 

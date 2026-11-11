@@ -25,6 +25,12 @@
 
 #include "GaudiKernel/ToolHandle.h"
 
+#include <detray/geometry/identifier.hpp>
+
+namespace ActsPlugins {
+  class DetraySurfaceIdMap;
+}
+
 enum TrackValidity { kValid, kInvalidState, kInvalidGlobalParams };
 
 namespace ActsTrk {
@@ -64,7 +70,7 @@ private:
     const xAOD::PixelClusterContainer& pixel_clusters,
     const xAOD::StripClusterContainer& strip_clusters) const;
 
-  const Acts::Surface& findActsSurface(const Acts::GeometryIdentifier& actsID) const;
+  const Acts::Surface& findActsSurface(detray::geometry::identifier detrayId) const;
 
   std::optional<Acts::BoundTrackParameters> convertGlobalToActsParameters(
     traccc::bound_track_parameters<traccc::default_algebra> const& trkParams) const;
@@ -105,16 +111,15 @@ private:
   ToolHandle<AthDevice::ICopyTool> m_copy{
       this, "CopyProviderTool", "", "Vecmem copy provider tool"};
 
-  std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;    
-  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};    
-  std::map<Acts::GeometryIdentifier, const Acts::Surface*> m_actsSurfaceMap;
+  ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
+  /// Detray -> ACTS surface map built by the ACTS Detray plugin, owned by the TrackingGeometrySvc
+  const ActsPlugins::DetraySurfaceIdMap* m_detraySurfaceIds = nullptr;
   // acts helper for the output
   ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{
         this};
   Gaudi::Property<std::string> m_hostDetectorObjectName{
         this, "HostDetectorName", "",
         "Detray host detector object"};
-  const traccc::host_detector* m_hostDetector = nullptr;
   /// The object counters for debug prints in finalize method
   /// {@
   mutable std::atomic<int> m_nTracksIn = 0;
