@@ -61,6 +61,14 @@ def ITkActsDeviceTrackRecoCfg(flags, *, previousExtension=None):
         acc.merge(ActsRegionsOfInterestCreatorAlgCfg(flags,
             name=f"{flags.Tracking.ActiveConfig.extension}RegionsOfInterestCreatorAlg"))
 
+        # PLR has no device clustering; run it on the host as a sidecar
+        if flags.Detector.EnablePLR:
+            from ActsConfig.ActsClusterizationConfig import ActsPLRClusterizationAlgCfg
+            acc.merge(ActsPLRClusterizationAlgCfg(
+                flags,
+                name=f"{flags.Tracking.ActiveConfig.extension}PLRClusterizationAlg",
+                RoIs=f"{flags.Tracking.ActiveConfig.extension}RegionOfInterest"))
+
         print("Performing clusterization on device")
 
         # setup RDO converter
