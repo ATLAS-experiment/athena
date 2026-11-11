@@ -45,8 +45,8 @@ private:
   SG::WriteDecorHandleKey<xAOD::CaloClusterContainer> m_clusterMLCalibEnergyUncDecorKey{this,"ClusterMLCalibratedEnergyUncKeyName","","ML calibrated cluster energy uncertainty decoration"};
 
   Gaudi::Property<std::vector<float>> m_rapidityRange { this, "RapidityRange", { -2.5, 2.5}, "rapidity range of validity of the ML-based calibration" };
-  // Minimum cluster energy in MeV above which ML calibration will be applied.
-  Gaudi::Property<double> m_minClusterEnergy { this, "MinClusterEnergy", 300.0, "Minimum cluster energy (MeV) to apply ML calibration" };
+  // Minimum ML-predicted cluster energy in MeV above which ML calibration will be applied.
+  Gaudi::Property<double> m_minClusterEnergy { this, "MinClusterEnergy", 500.0, "Minimum ML-predicted cluster energy (MeV) to apply ML calibration" };
 };
 
 #endif // CALOREC_CALOCLUSTERMLCALIBALG_H
