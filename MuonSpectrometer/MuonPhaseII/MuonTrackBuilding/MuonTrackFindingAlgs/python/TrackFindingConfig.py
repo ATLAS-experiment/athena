@@ -34,6 +34,7 @@ def MSTrackFitterCfg(flags, name="MSTrackFitTool", **kwargs):
         kwargs.setdefault("maxSteps", 1000000)
         kwargs.setdefault("maxSurfaces", 10000000)
         kwargs.setdefault("nIterMax", 30)
+        kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
         the_tool = CompFactory.MuonR4.FitterTool(name, **kwargs)
         result.setPrivateTools(the_tool)
     elif flags.Muon.TrackFitterType == TrackFitterType.KalmanFitter:

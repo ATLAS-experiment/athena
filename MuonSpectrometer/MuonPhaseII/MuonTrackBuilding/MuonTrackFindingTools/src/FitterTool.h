@@ -12,6 +12,8 @@
 #include "ActsToolInterfaces/IFitterTool.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "MuonRecToolInterfacesR4/ISpacePointCalibrator.h"
+#include "MuonIdHelpers/IMuonIdHelperSvc.h"
+#include "MuonRecToolInterfacesR4/ITrackSummaryTool.h"
 
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
@@ -71,17 +73,22 @@ namespace MuonR4 {
             /** @brief Abrivation for the straight line propagator */
             using StraightPropagator_t = Acts::Propagator<Acts::StraightLineStepper, Acts::Navigator>;
             /** @brief Abrivation for the curved standard propagator */
-            using CurvedPropagator_t   = Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>;
+            using CurvedPropagator_t = Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>;
             /** @brief Abrivation of the fitter using the straight line propagator  */
-            using StraightFitter_t = MuonExperimental::Gx2Fitter<StraightPropagator_t, ActsTrk::MutableTrackStateBackend>;
+            using StraightFitter_t = MuonExperimental::Gx2Fitter<StraightPropagator_t, ActsTrk::MutableTrackContainer>;
             /** @brief Abrivation of the fitter using the curved line propagator */
-            using CurvedFitter_t   = MuonExperimental::Gx2Fitter<CurvedPropagator_t, ActsTrk::MutableTrackStateBackend>;
+            using CurvedFitter_t = MuonExperimental::Gx2Fitter<CurvedPropagator_t, ActsTrk::MutableTrackContainer>;
 
             /** @brief Abbrivation of the configuration to launch the fit  */
-            using Gx2FitterOptions_t = MuonExperimental::Gx2FitterOptions<ActsTrk::MutableTrackStateBackend>;
+            using Gx2FitterOptions_t = MuonExperimental::Gx2FitterOptions<ActsTrk::MutableTrackContainer>;
             /** @brief Abbrivation of the fitter extensions */
-            using Gx2FitterExtension_t = MuonExperimental::Gx2FitterExtensions<ActsTrk::MutableTrackStateBackend>;
+            using Gx2FitterExtension_t = MuonExperimental::Gx2FitterExtensions<ActsTrk::MutableTrackContainer>;
         private:
+            /** @brief Abort delegate: returns true if all muon hits entering the fit
+             *         originate from a single muon station
+             *  @param track: Track created in the current fit iteration */
+            bool abortSingleStation(const Acts::CalibrationContext& calContext,
+                                    const ActsTrk::MutableTrackContainer::ConstTrackProxy trajectory) const;
             /** @brief Do the straight line fit  */
             Gaudi::Property<bool> m_doStraightLineFit{this, "doStraightLine", false};
             /** @brief How ,many steps to go */
@@ -110,6 +117,12 @@ namespace MuonR4 {
             /** @brief Tracking geometry service */
             ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", 
                                                                                 "ActsTrackingGeometrySvc"};
+            
+            /** @brief Tool handle to the track summary tool to check for single station tracks */
+            ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" , ""};
+
+            /** @brief Abort the fit if the hits of an iteration stem from a single muon station */
+            Gaudi::Property<bool> m_abortSingleStation{this, "abortOnSingleStation", true};
             /** @brief Tool handle to calibrate the muon measurmeents */
             ToolHandle<MuonR4::ISpacePointCalibrator> m_muonCalibrator{this, "MuonCalibrationTool", ""};
             

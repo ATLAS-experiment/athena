@@ -37,6 +37,7 @@ namespace MuonR4{
            
             /** @brief Abrivation of the const Track proxy */
             using ConstTrack_t = ActsTrk::TrackContainer::ConstTrackProxy;
+            using ConstTrack_mt = ActsTrk::MutableTrackContainer::ConstTrackProxy;
             /** @brief Abrivation of the Track proxy */
             using Track_t = ActsTrk::MutableTrackContainer::TrackProxy;
 
@@ -54,7 +55,7 @@ namespace MuonR4{
              *  @param ctx: EventContext to fetch potentially needed conditions
              *  @param trackProxy: The mutable refernce to the track of interest */
             virtual std::uint8_t countMuonStations(const EventContext& ctx,
-                                                    const Track_t trackProxy) const = 0;
+                                                   const Track_t trackProxy) const = 0;
             /** @brief Count how many stations (BI/ BM / BO) contain enough precision hits.
              *         The precision hit requirement may be station specific and also depend
              *         on the chi2 contribution of the individual hits
@@ -62,7 +63,10 @@ namespace MuonR4{
              *  @param trackProxy: The mutable refernce to the track of interest */
             virtual std::uint8_t countMuonStations(const EventContext& ctx,
                                                    const ConstTrack_t trackProxy) const = 0;
-            
+            /** @copydoc countMuonStations */
+            virtual std::uint8_t countMuonStations(const EventContext& ctx,
+                                                   const ConstTrack_mt trackProxy) const = 0;
+                                                   
             /** @brief Creates a summary from the passed track
              *  @param ctx: EventContext to fetch conditions such that holes
              *              associated to dead modules are ignored

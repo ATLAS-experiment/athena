@@ -26,6 +26,7 @@
 #include "TruthUtils/HepMCHelpers.h"
 #include "MuonVisualizationHelpersR4/ObjVisualizationHelpers.h"
 
+#include <limits>
 #include <system_error>
 
 using namespace Acts::UnitLiterals;
@@ -195,6 +196,11 @@ namespace MuonR4{
         if (msgLvl(MSG::VERBOSE)) {
             std::stringstream sstr{};
             for (const xAOD::UncalibratedMeasurement* m : pickedMeas) {
+                /// Auxiliary measurements are no muon measurements and have no identifier
+                if (!xAOD::isMuon(m->type())) {
+                    sstr<<"  --- auxiliary measurement, nDim: "<<m->numDimensions()<<std::endl;
+                    continue;
+                }
                 sstr<<"  --- "<<m_idHelperSvc->toString(xAOD::identify(m))<<", nDim: "<<m->numDimensions()<<", "
                     <<xAOD::muonSurface(m).geometryId()<<std::endl;
             }
@@ -257,18 +263,69 @@ namespace MuonR4{
         };
         /// We first combine two muon
         const Acts::Surface* target = initialPars->referenceSurface().getSharedPtr().get();
-        
+
+        /** Fits all combinations of two stations of the seed. For each combination a sub seed is
+         *  constructed, the start parameters are re-estimated from the segments of the two stations only 
+         *  and the measurements are collected for them. Returns the successful fit with the best reduced chi2
+         *  or a nullptr if none of the combinations gave a track with at least two stations. */
+        auto fitBestStationPair = [&] () -> std::unique_ptr<ActsTrk::MutableTrackContainer> {
+            std::unique_ptr<ActsTrk::MutableTrackContainer> bestFit{};
+            double bestRedChi2{std::numeric_limits<double>::max()};
+            const auto stations = seed.stations();
+            for (std::size_t first = 0ul; first < stations.size(); ++first) {
+                for (std::size_t second = first + 1ul; second < stations.size(); ++second) {
+                    MsTrackSeed pairSeed{seed.location(), seed.sector()};
+                    pairSeed.setPosition(Amg::Vector3D{seed.position()});
+                    for (const xAOD::MuonSegment* segment : seed.segments()) {
+                        const auto stIdx = Muon::MuonStationIndex::toStationIndex(segment->chamberIndex());
+                        if (stIdx == stations[first] || stIdx == stations[second]) {
+                            pairSeed.addSegment(segment);
+                        }
+                    }
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Try station combination "
+                                    <<stations[first]<<" & "<<stations[second]);
+                    const auto pairPars = m_seedingTool->estimateStartParameters(ctx, pairSeed);
+                    if (!pairPars.ok()) {
+                        ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Start parameter estimation failed.");
+                        continue;
+                    }
+                    const MeasVec_t pairMeas = collectMeasurements(tgContext, *pairPars, pairSeed, 2ul, auxMeasContainer);
+                    auto pairFit = m_trackFitTool->fit(pairMeas, *pairPars, tgContext, mfContext, calContext, target);
+                    if (!pairFit) {
+                        continue;
+                    }
+                    ActsTrk::MutableTrackContainer::TrackProxy pairTrack = pairFit->getTrack(0);
+                    const std::size_t nPairStations = m_summaryTool->countMuonStations(ctx, pairTrack);
+                    const double redChi2 = pairTrack.chi2() / std::max<double>(1., pairTrack.nDoF());
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Combination "<<stations[first]<<" & "
+                                    <<stations[second]<<" gives chi2/nDoF: "<<redChi2<<", nStations: "<<nPairStations);
+                    if (nPairStations >= 2ul && redChi2 < bestRedChi2) {
+                        bestRedChi2 = redChi2;
+                        bestFit = std::move(pairFit);
+                    }
+                }
+            }
+            return bestFit;
+        };
+
         if (!copyFit(m_trackFitTool->fit(measurements, *initialPars, 
                      tgContext, mfContext, calContext, target), seed.nStations()) && seed.nStations() > 2) {
             ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - First shot failed. Attempt iteratively over the stations. ");
             for (std::size_t nStation = 2ul; nStation <= seed.nStations(); ++nStation) {
-                const Acts::BoundTrackParameters startPars = fitAttempts.size() > 0ul ?
-                        fitAttempts.getTrack(fitAttempts.size() - 1ul).createParametersAtReference() : *initialPars;
-                        
-                measurements = collectMeasurements(tgContext, startPars, seed, nStation, auxMeasContainer);
-                ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Include "<<nStation<<" stations.");
-                auto fitTraject = m_trackFitTool->fit(measurements, startPars, 
-                                                      tgContext, mfContext, calContext, target);
+                std::unique_ptr<ActsTrk::MutableTrackContainer> fitTraject{};
+                if (nStation == 2ul && seed.nStations() == 3ul) {
+                    /// Try all pairs of stations with re-estimated start parameters
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Try all combinations of two stations.");
+                    fitTraject = fitBestStationPair();
+                } else {
+                    const Acts::BoundTrackParameters startPars = fitAttempts.size() > 0ul ?
+                            fitAttempts.getTrack(fitAttempts.size() - 1ul).createParametersAtReference() : *initialPars;
+                            
+                    measurements = collectMeasurements(tgContext, startPars, seed, nStation, auxMeasContainer);
+                    ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Include "<<nStation<<" stations.");
+                    fitTraject = m_trackFitTool->fit(measurements, startPars, 
+                                                     tgContext, mfContext, calContext, target);
+                }
 
                 if (!copyFit(std::move(fitTraject), nStation)) {
                     break;

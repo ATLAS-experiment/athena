@@ -26,6 +26,8 @@ enum class GlobalChiSquareFitterError {
   MomentumBelowCutOff = 5,
   /// Too many consecutive direction flips during a propagation.
   DirectionFlipLimitReached = 6,
+  /// The abort checker rejected the hits entering the fit.
+  FitAbortedByChecker = 7,
 
 };
 
