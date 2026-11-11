@@ -91,8 +91,6 @@ namespace CP {
 
       CP::RNtupleFieldHelpers::ProcessorList m_processorList{this};
 
-      bool m_isInitialized = false;
-
       /// @}
 
    }; // class RNtupleTreeMakerAlg

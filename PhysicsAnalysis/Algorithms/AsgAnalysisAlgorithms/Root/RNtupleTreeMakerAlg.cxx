@@ -68,65 +68,63 @@ namespace CP {
       ATH_CHECK( m_eventInfoHandle.initialize( m_systematicsList ) );
       ATH_CHECK( m_eventSelection.initialize( m_systematicsList, m_eventInfoHandle, SG::AllowEmpty ) );
       ATH_CHECK( m_systematicsList.initialize() );
+
+      m_model = ROOT::RNTupleModel::Create();
+      if ( !m_model ) {
+        ATH_MSG_ERROR( "Failed to create RNTupleModel" );
+        return StatusCode::FAILURE;
+      }
+
+      ATH_CHECK( setupTree() );
+
+      TFile* outputFile = nullptr;
+#ifdef XAOD_STANDALONE
+      if( wk() ) {
+        outputFile = wk()->getOutputFile( m_outputStreamName.value() );
+      } else {
+        ATH_MSG_ERROR( "Worker not available in standalone mode" );
+        return StatusCode::FAILURE;
+      }
+#else
+      // Get the output file from THistSvc until we can use it directly
+      SmartIF<IProperty> prop{histSvc().get()};
+      std::vector<std::string> outputs;
+      ATH_CHECK(Gaudi::Parsers::parse(outputs, prop->getProperty("Output").toString()));
+      outputFile = fileForStream(outputs, m_outputStreamName.value());
+      if (outputFile == nullptr) {
+        ATH_MSG_ERROR( "Could not find TFile for stream: " << m_outputStreamName.value() );
+        return StatusCode::FAILURE;
+      }
+#endif
+
+      if( !outputFile ) {
+        ATH_MSG_ERROR( "Could not retrieve file for stream: " << m_outputStreamName.value() );
+        return StatusCode::FAILURE;
+      }
+
+      try {
+        // ROOT requires the zipped target to not exceed the unzipped maximum
+        // at every step, so set the zipped target first
+        ROOT::RNTupleWriteOptions options;
+        if( m_approxZippedClusterSize.value() > 0 ) {
+          options.SetApproxZippedClusterSize( m_approxZippedClusterSize.value() );
+        }
+        if( m_maxUnzippedClusterSize.value() > 0 ) {
+          if ( options.GetApproxZippedClusterSize() > m_maxUnzippedClusterSize.value() ) {
+            options.SetApproxZippedClusterSize( m_maxUnzippedClusterSize.value() );
+          }
+          options.SetMaxUnzippedClusterSize( m_maxUnzippedClusterSize.value() );
+        }
+        m_writer = ROOT::RNTupleWriter::Append( std::move(m_model), m_modelName.value(), *outputFile, options );
+      } catch( const std::exception& e ) {
+        ATH_MSG_ERROR( "Failed to create RNTupleWriter: " << e.what() );
+        return StatusCode::FAILURE;
+      }
+
       return StatusCode::SUCCESS;
    }
 
    StatusCode RNtupleTreeMakerAlg::execute(const EventContext& ctx) {
-      if( ! m_isInitialized ) {
-         m_model = ROOT::RNTupleModel::Create();
-         if ( !m_model ) {
-             ATH_MSG_ERROR( "Failed to create RNTupleModel" );
-             return StatusCode::FAILURE;
-         }
-
-         ATH_CHECK( setupTree() );
-
-         TFile* outputFile = nullptr;
-#ifdef XAOD_STANDALONE
-         if( wk() ) {
-            outputFile = wk()->getOutputFile( m_outputStreamName.value() );
-         } else {
-             ATH_MSG_ERROR( "Worker not available in standalone mode" );
-             return StatusCode::FAILURE;
-         }
-#else
-         // Get the output file from THistSvc until we can use it directly
-         SmartIF<IProperty> prop{histSvc().get()};
-         std::vector<std::string> outputs;
-         ATH_CHECK(Gaudi::Parsers::parse(outputs, prop->getProperty("Output").toString()));
-         outputFile = fileForStream(outputs, m_outputStreamName.value());
-         if (outputFile == nullptr) {
-             ATH_MSG_ERROR( "Could not find TFile for stream: " << m_outputStreamName.value() );
-             return StatusCode::FAILURE;
-         }
-#endif
-
-         if( !outputFile ) {
-             ATH_MSG_ERROR( "Could not retrieve file for stream: " << m_outputStreamName.value() );
-             return StatusCode::FAILURE;
-         }
-
-         try {
-             // ROOT requires the zipped target to not exceed the unzipped maximum
-             // at every step, so set the zipped target first
-             ROOT::RNTupleWriteOptions options;
-             if( m_approxZippedClusterSize.value() > 0 ) {
-                 options.SetApproxZippedClusterSize( m_approxZippedClusterSize.value() );
-             }
-             if( m_maxUnzippedClusterSize.value() > 0 ) {
-                 if ( options.GetApproxZippedClusterSize() > m_maxUnzippedClusterSize.value() ) {
-                    options.SetApproxZippedClusterSize( m_maxUnzippedClusterSize.value() );
-                 }
-                 options.SetMaxUnzippedClusterSize( m_maxUnzippedClusterSize.value() );
-             }
-             m_writer = ROOT::RNTupleWriter::Append( std::move(m_model), m_modelName.value(), *outputFile, options );
-         } catch( const std::exception& e ) {
-             ATH_MSG_ERROR( "Failed to create RNTupleWriter: " << e.what() );
-             return StatusCode::FAILURE;
-         }
-
-         m_isInitialized = true;
-      }
 
       // Skip the event if it fails the selection for every systematic
       if( m_eventSelection ) {
