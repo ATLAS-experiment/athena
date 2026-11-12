@@ -7,6 +7,16 @@ from ..powheg_RES import PowhegRES
 logger = Logging.logging.getLogger("PowhegControl")
 
 
+# Dictionary to convert the PowhegControl decay mode names to the appropriate
+# decay mode numbers understood by Powheg
+_decay_mode_lookup = {
+    "t > b l vl": 3,
+    "t > b e ve": 1,
+    "t > b mu vmu": 0,
+    "t > b tau vtau": 2,
+}
+
+
 class schan_top_dec(PowhegRES):
     """! Default Powheg configuration for off-shell s-channel single top quark production.
     Create a configurable object with all applicable Powheg options.
@@ -21,6 +31,13 @@ class schan_top_dec(PowhegRES):
         @param kwargs          dictionary of arguments from Generate_tf.
         """
         super(schan_top_dec, self).__init__(base_directory, "single-top-dec-pwhg", **kwargs)
+
+        # Add parameter validation functions
+        self.validation_functions.append("validate_decays")
+
+        ## List of allowed decay modes
+        # (The sorting of the list is just to increase readability when it's printed)
+        self.allowed_decay_modes = sorted(_decay_mode_lookup.keys())
 
         # Add all keywords for this process, overriding defaults if required
         self.add_keyword("allrad", 1)
@@ -88,6 +105,7 @@ class schan_top_dec(PowhegRES):
         self.add_keyword("iupperfsr",1)
         self.add_keyword("iupperisr")
         self.add_keyword("iymax")
+        self.add_keyword("lepflavour", self.allowed_decay_modes[1], name="decay_mode") # default decay is all three lepton families together
         self.add_keyword("lhans1", self.default_PDFs)
         self.add_keyword("lhans2", self.default_PDFs)
         self.add_keyword("lhrwgt_descr")
@@ -162,4 +180,15 @@ class schan_top_dec(PowhegRES):
         self.add_keyword("zerowidth")
         self.add_keyword("zmass")
         self.add_keyword("zwidth")
- 
+
+    def validate_decays(self):
+        """! Validate lepflavour keyword."""
+        self.expose()  # convenience call to simplify syntax
+        if self.decay_mode not in self.allowed_decay_modes:
+            error_message = "Decay mode '{given}' not recognised, valid choices are: '{choices}'!".format(given=self.decay_mode, choices="', '".join(self.allowed_decay_modes))
+            logger.warning(error_message)
+            raise ValueError(error_message)
+
+        # Calculate appropriate decay mode numbers
+        self.parameters_by_keyword("lepflavour")[0].value = _decay_mode_lookup[self.decay_mode]
+

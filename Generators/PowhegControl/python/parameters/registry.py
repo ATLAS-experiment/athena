@@ -323,6 +323,7 @@ class Registry(metaclass=Singleton):
         self.add_default("largecorrfact", -1, description="[-1:use Powheg default]")
         self.add_default("largeptscales", 0, description="[ Default 0: ttj_MiNNLO dynamical scale used at large pT in fixed-order part \n ! 0 - m_tt (invariant mass of top-quark pair) \n ! 1 - pT_tt (transverse momentum of top-quark pair) \n ! 2 - H_T^tt (sum of transverse masses of the top quarks)")
         self.add_default("lepaslight", -1, description="[-1:use Powheg default]")
+        self.add_default("lepflavour", 3, description="Lepton family in the final state for single_top_dec processes: muons (0), electrons (1), taus (2), all three families together (3)")
         self.add_default("leptonic", 0, hidden=True, description="WWj decay mode: W->lnu W->lnu [1:enabled]")
         self.add_default("leptonic_notau", 0, hidden=True, description="WWj decay mode: W->lnu W->lnu (no tau) [1:enabled]")
         self.add_default("lhans1", 260000, name="PDF", description="PDF set for hadron 1. [LHAPDF numbering]")
