@@ -5,7 +5,6 @@
 #undef NDEBUG
 #include "ELFElt.h"
 #include "ELFCont.h"
-#include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include <print>
 #include <cassert>

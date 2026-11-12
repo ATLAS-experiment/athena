@@ -51,10 +51,10 @@ class DataProxy;
  * then an exception will be thrown.
  *
  * When we create a new link, the store by default is taken from the
- * global default given by SG::CurrentEventStore::store().
+ * global default given by the current EventContext.
  * This is a thread-specific value, so fetching it can be expensive.
  * If you are creating links inside a loop, it is best to fetch
- * the default before the loop and then passing the result explicitly
+ * the context before the loop and then passing the result explicitly
  * when you create the links.
  */
 class DataProxyHolder
@@ -118,7 +118,7 @@ public:
    * Otherwise, we store a pointer to the object itself, flagging
    * this case with the low bit, and return 0.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    *
@@ -141,7 +141,7 @@ public:
    * a dummy proxy and add it to the store.  We return the SG key
    * in either case.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    */
@@ -160,7 +160,7 @@ public:
    * then we store the pointer to the proxy.  Otherwise, we create
    * a dummy proxy and add it to the store.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    *
@@ -218,7 +218,7 @@ public:
   /**
    * @brief Return the data source for this reference.
    *
-   * If the link is null, return 0.
+   * If the link is null, return nullptr.
    * If we're pointing at an object directly, then we return the default store
    * if the object is found in SG; otherwise, throw @c ExcPointerNotInSG.
    */
@@ -254,11 +254,11 @@ public:
    * in order to set the proxy pointer.  It calls @c toIdentifiedObject
    * with the provided hashed key.
    *
-   * If @c sg is 0, then we use the global default store.
+   * If @c sg is nullptr, then we use the global default store.
    */
   sgkey_t toTransient (const ID_type& dataID,
                        CLID link_clid,
-                       IProxyDict* sg = 0);
+                       IProxyDict* sg = nullptr);
 
 
   /**

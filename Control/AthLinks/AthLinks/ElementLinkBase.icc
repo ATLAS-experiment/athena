@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/ElementLinkBase.icc
@@ -152,10 +152,10 @@ void ElementLinkBase::reset ()
  * in order to set the proxy pointer.
  * Returns true.
  *
- * If @c sg is 0, then we use the global default store.
+ * If @c sg is nullptr, then we use the global default store.
  */
 inline
-bool ElementLinkBase::toTransient (IProxyDict* sg /*= 0*/)
+bool ElementLinkBase::toTransient (IProxyDict* sg /*= nullptr*/)
 {
   m_proxy.toTransient (m_persKey, sg);
   clearCachedElement();
@@ -241,7 +241,7 @@ ElementLinkBase::ElementLinkBase()
  * @param elemID The index of the element within the container.
  * @param sg Associated store.
  *
- * If @c sg is 0, we take the global default.
+ * If @c sg is nullptr, we take the global default.
  */
 inline
 ElementLinkBase::ElementLinkBase (const ID_type& dataID,
@@ -261,7 +261,7 @@ ElementLinkBase::ElementLinkBase (const ID_type& dataID,
  * @param elemID The index of the element within the container.
  * @param sg Associated store.
  *
- * If @c sg is 0, we take the global default.
+ * If @c sg is nullptr, we take the global default.
  */
 inline
 ElementLinkBase::ElementLinkBase (sgkey_t key,
@@ -285,7 +285,7 @@ ElementLinkBase::ElementLinkBase (sgkey_t key,
  * 
  * USE CAREFULLY: no coherency checks, we just trust you!
  *
- * If @c sg is 0, we take the global default.
+ * If @c sg is nullptr, we take the global default.
  */
 inline
 ElementLinkBase::ElementLinkBase (const ID_type& dataID,
@@ -310,7 +310,7 @@ ElementLinkBase::ElementLinkBase (const ID_type& dataID,
  * 
  * USE CAREFULLY: no coherency checks, we just trust you!
  *
- * If @c sg is 0, we take the global default.
+ * If @c sg is nullptr, we take the global default.
  */
 inline
 ElementLinkBase::ElementLinkBase (sgkey_t key,
@@ -333,7 +333,7 @@ ElementLinkBase::ElementLinkBase (sgkey_t key,
  * @param elemID The index of the element within the container.
  * @param sg Associated store.
  * 
- * If @c sg is 0, we take the global default.
+ * If @c sg is nullptr, we take the global default.
  */
 inline
 ElementLinkBase::ElementLinkBase (const_pointer_t obj,
@@ -442,7 +442,7 @@ void* ElementLinkBase::storableBase (castfn_t* castfn,
  * should be set if the element is now in a new storable container;
  * e.g. element ptr has been put in a new view container.
  *
- * If @c sg is 0, then we take the store from whatever the link's currently
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
  * set to.  If the link has no current store, then we take the global
  * default.
  */
@@ -473,7 +473,7 @@ bool ElementLinkBase::setStorableObject (const_pointer_t data,
  * If the link is already set, this will return false and leave the
  * link unchanged.
  *
- * If @c sg is 0, then we take the store from whatever the link's currently
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
  * set to.  If the link has no current store, then we take the global
  * default.
  */
@@ -500,7 +500,7 @@ bool ElementLinkBase::toIndexedElement (const_pointer_t obj,
  * @param elemID The index of the element within the container.
  * @param sg Associated store.
  *
- * If @c sg is 0, then we take the store from whatever the link's currently
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
  * set to.  If the link has no current store, then we take the global
  * default.
  */
@@ -523,7 +523,7 @@ void ElementLinkBase::resetWithKeyAndIndex (const ID_type& dataID,
  * @param elemID The index of the element within the container.
  * @param sg Associated store.
  *
- * If @c sg is 0, then we take the store from whatever the link's currently
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
  * set to.  If the link has no current store, then we take the global
  * default.
  */

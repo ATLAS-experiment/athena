@@ -19,6 +19,7 @@
 #include "AthContainersInterfaces/ToTransient.h"
 #include "AthenaKernel/proxyDictFromEventContext.h"
 #include "AthenaKernel/DefaultKey.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include <format>
 #include <vector>
 class EventContext;
@@ -83,8 +84,8 @@ class IProxyDict;
  * This would normally be done via a ROOT read rule.
  *
  * A link references objects in a particular event store.
- * When a link is constructed, a global default store is used
- * (see SGTools/CurrentEventStore.h).  If a link is subsequently modified,
+ * When a link is constructed, a global default store is used, taken
+ * from the current EventContext.  If a link is subsequently modified,
  * it stays associated with the same store, unless the link was null
  * or was referencing an object directly by pointer, in which case
  * the global default is again used.  Alternatively, the event
@@ -129,25 +130,17 @@ public:
   /**
    * @brief Constructor --- link to a STORABLE using a transient ref to it.
    * @param data The object to which to link.
-   * @param sg Associated store; if 0, use the global default.
+   * @param ctx Event context for this link.
    */
-  DataLink(const_reference data, IProxyDict* sg=0);
+  DataLink(const_reference data, const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
    * @brief Constructor --- link to a STORABLE using a transient ref to it.
    * @param data The object to which to link.
-   * @param ctx Event context for this link.
+   * @param sg Associated store; if nullptr, use the global default.
    */
-  DataLink(const_reference data, const EventContext& ctx);
-
-
-  /**
-   * @brief Constructor --- link to a STORABLE using a transient pointer to it.
-   * @param data The object to which to link.
-   * @param sg Associated store; if 0, use the global default.
-   */
-  DataLink(const_pointer pdata, IProxyDict* sg=0);
+  DataLink(const_reference data, IProxyDict* sg);
 
 
   /**
@@ -155,15 +148,15 @@ public:
    * @param data The object to which to link.
    * @param ctx Event context for this link.
    */
-  DataLink(const_pointer pdata, const EventContext& ctx);
+  DataLink(const_pointer pdata, const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
-   * @brief Constructor --- link to a STORABLE using a string ID.
-   * @param dataID Key of the object.
-   * @param sg Associated store; if 0, use the global default.
+   * @brief Constructor --- link to a STORABLE using a transient pointer to it.
+   * @param data The object to which to link.
+   * @param sg Associated store; if nullptr, use the global default.
    */
-  DataLink(const ID_type& dataID, IProxyDict* sg=0);
+  DataLink(const_pointer pdata, IProxyDict* sg);
 
 
   /**
@@ -171,17 +164,15 @@ public:
    * @param dataID Key of the object.
    * @param ctx Event context for this link.
    */
-  DataLink(const ID_type& dataID, const EventContext& ctx);
+  DataLink(const ID_type& dataID, const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
-   * @brief Constructor --- link to a STORABLE using a hashed ID.
-   * @param key Hashed key of the object.
-   * @param sg Associated store; if 0, use the global default.
-   *
-   * May throw @c ExcCLIDMismatch.
+   * @brief Constructor --- link to a STORABLE using a string ID.
+   * @param dataID Key of the object.
+   * @param sg Associated store; if nullptr, use the global default.
    */
-  DataLink(sgkey_t key, IProxyDict* sg=0);
+  DataLink(const ID_type& dataID, IProxyDict* sg);
 
 
   /**
@@ -191,7 +182,17 @@ public:
    *
    * May throw @c ExcCLIDMismatch.
    */
-  DataLink(sgkey_t key, const EventContext& ctx);
+  DataLink(sgkey_t key, const EventContext& ctx = Gaudi::Hive::currentContext());
+
+
+  /**
+   * @brief Constructor --- link to a STORABLE using a hashed ID.
+   * @param key Hashed key of the object.
+   * @param sg Associated store; if nullptr, use the global default.
+   *
+   * May throw @c ExcCLIDMismatch.
+   */
+  DataLink(sgkey_t key, IProxyDict* sg);
 
 
   /**
@@ -212,33 +213,21 @@ public:
   /**
    * @brief Set the link to an object given by a reference.
    * @param data The object to which to link.
-   * @param sg Associated store.
-   *
-   * If @c sg is 0, then we take the store from whatever the link's currently
-   * set to.  If the link has no current store, then we take the global
-   * default.
+   * @param ctx Event context for this link.
    */
-  void toStorableObject(const_reference data, IProxyDict* sg = 0);
+  void toStorableObject(const_reference data, const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
    * @brief Set the link to an object given by a reference.
    * @param data The object to which to link.
-   * @param ctx Event context for this link.
-   */
-  void toStorableObject(const_reference data, const EventContext& ctx);
-
-
-  /**
-   * @brief Set the link to an object given by a string key.
-   * @param dataID Key of the object.
    * @param sg Associated store.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    */
-  void toIdentifiedObject(const ID_type& dataID, IProxyDict* sg = 0);
+  void toStorableObject(const_reference data, IProxyDict* sg);
 
 
   /**
@@ -246,21 +235,19 @@ public:
    * @param dataID Key of the object.
    * @param ctx Event context for this link.
    */
-  void toIdentifiedObject(const ID_type& dataID, const EventContext& ctx);
+  void toIdentifiedObject(const ID_type& dataID, const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
-   * @brief Set the link to an object given by a hashed key.
-   * @param key Hashed key of the object.
+   * @brief Set the link to an object given by a string key.
+   * @param dataID Key of the object.
    * @param sg Associated store.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
-   *
-   * May throw @c ExcCLIDMismatch.
    */
-  void toIdentifiedObject(sgkey_t key, IProxyDict* sg = 0);
+  void toIdentifiedObject(const ID_type& dataID, IProxyDict* sg);
 
 
   /**
@@ -270,24 +257,21 @@ public:
    *
    * May throw @c ExcCLIDMismatch.
    */
-  void toIdentifiedObject(sgkey_t key, const EventContext& ctx);
+  void toIdentifiedObject(sgkey_t key, const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
-   * @brief Set the link to the default object of this type.
+   * @brief Set the link to an object given by a hashed key.
+   * @param key Hashed key of the object.
    * @param sg Associated store.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    *
-   * Note that this is _not_ the same as clearing the link
-   * (use @c clear for that).  This produces a link that will resolve
-   * to any object in SG of the given type, provided that there is only
-   * one of them.  (An attempt to dereference an ambiguous default link
-   * will give an error.)
+   * May throw @c ExcCLIDMismatch.
    */
-  void toDefaultObject (IProxyDict* sg = 0);
+  void toIdentifiedObject(sgkey_t key, IProxyDict* sg);
 
 
   /**
@@ -300,20 +284,24 @@ public:
    * one of them.  (An attempt to dereference an ambiguous default link
    * will give an error.)
    */
-  void toDefaultObject (const EventContext& ctx);
+  void toDefaultObject (const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
-   * @brief Finish initialization after link has been read.
+   * @brief Set the link to the default object of this type.
    * @param sg Associated store.
    *
-   * This should be called after a link has been read by root
-   * in order to set the proxy pointer.
-   * Returns true.
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
+   * set to.  If the link has no current store, then we take the global
+   * default.
    *
-   * If @c sg is 0, then we use the global default store.
+   * Note that this is _not_ the same as clearing the link
+   * (use @c clear for that).  This produces a link that will resolve
+   * to any object in SG of the given type, provided that there is only
+   * one of them.  (An attempt to dereference an ambiguous default link
+   * will give an error.)
    */
-  bool toTransient (IProxyDict* sg = 0);
+  void toDefaultObject (IProxyDict* sg);
 
 
   /**
@@ -324,22 +312,21 @@ public:
    * in order to set the proxy pointer.
    * Returns true.
    */
-  bool toTransient (const EventContext& ctx);
+  bool toTransient (const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
-   * @brief Finish initialization like the link as just been read from root,
-   *        but with a specified key.
-   * @param dataID Key of the object.
+   * @brief Finish initialization after link has been read.
    * @param sg Associated store.
    *
-   * The link should be clear before this is called.
+   * This should be called after a link has been read by root
+   * in order to set the proxy pointer.
    * Returns true.
    *
-   * If @c sg is 0, then we use the global default store.
+   * If @c sg is nullptr, then we use the global default store.
    */
-  bool toTransient (const ID_type& dataID, IProxyDict* sg = 0);
-  
+  bool toTransient (IProxyDict* sg);
+
 
   /**
    * @brief Finish initialization like the link as just been read from root,
@@ -350,9 +337,22 @@ public:
    * The link should be clear before this is called.
    * Returns true.
    */
-  bool toTransient (const ID_type& dataID, const EventContext& ctx);
+  bool toTransient (const ID_type& dataID, const EventContext& ctx = Gaudi::Hive::currentContext());
   
 
+  /**
+   * @brief Finish initialization like the link as just been read from root,
+   *        but with a specified key.
+   * @param dataID Key of the object.
+   * @param sg Associated store.
+   *
+   * The link should be clear before this is called.
+   * Returns true.
+   *
+   * If @c sg is nullptr, then we use the global default store.
+   */
+  bool toTransient (const ID_type& dataID, IProxyDict* sg);
+  
 
   //@}
   //========================================================================
@@ -454,9 +454,9 @@ class ToTransient<DataLink<STORABLE> >
 {
 public:
   static void toTransient (DataLink<STORABLE>& dl,
-                           IProxyDict* sg = nullptr);
+                           const EventContext& ctx = Gaudi::Hive::currentContext());
   static void toTransient (DataLink<STORABLE>& dl,
-                           const EventContext& ctx);
+                           IProxyDict* sg);
 };
 
 
@@ -469,9 +469,9 @@ class ToTransient<std::vector<DataLink<STORABLE>, ALLOC> >
 {
 public:
   static void toTransient (std::vector<DataLink<STORABLE>, ALLOC>& dlv,
-                           IProxyDict* sg = nullptr);
+                           const EventContext& ctx = Gaudi::Hive::currentContext());
   static void toTransient (std::vector<DataLink<STORABLE>, ALLOC>& dlv,
-                           const EventContext& ctx);
+                           IProxyDict* sg);
 };
 
 
@@ -484,9 +484,9 @@ class ToTransient<std::vector<std::vector<DataLink<STORABLE>, ALLOC1>, ALLOC2> >
 {
 public:
   static void toTransient (std::vector<std::vector<DataLink<STORABLE>, ALLOC1>, ALLOC2>& dlvv,
-                           IProxyDict* sg = nullptr);
+                           const EventContext& ctx = Gaudi::Hive::currentContext());
   static void toTransient (std::vector<std::vector<DataLink<STORABLE>, ALLOC1>, ALLOC2>& dlvv,
-                           const EventContext& ctx);
+                           IProxyDict* sg);
 };
 
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/DataLinkBase.icc
@@ -91,10 +91,10 @@ IProxyDict* DataLinkBase::source() const
  * in order to set the proxy pointer.
  * Returns true on success.
  *
- * If @c sg is 0, then we use the global default store.
+ * If @c sg is nullptr, then we use the global default store.
  */
 inline
-bool DataLinkBase::toTransient (IProxyDict* sg /*= 0*/)
+bool DataLinkBase::toTransient (IProxyDict* sg)
 {
   m_proxy.toTransient (m_persKey, sg);
   return true;
@@ -110,7 +110,7 @@ bool DataLinkBase::toTransient (IProxyDict* sg /*= 0*/)
  * Returns true on success.
  */
 inline
-bool DataLinkBase::toTransient (const EventContext& ctx)
+bool DataLinkBase::toTransient (const EventContext& ctx /*= currentContext()*/)
 {
   m_proxy.toTransient (m_persKey, Atlas::proxyDictFromEventContext(ctx));
   return true;
@@ -127,12 +127,12 @@ bool DataLinkBase::toTransient (const EventContext& ctx)
  * The link should be clear before this is called.
  * Returns true.
  *
- * If @c sg is 0, then we use the global default store.
+ * If @c sg is nullptr, then we use the global default store.
  */
 inline
 bool DataLinkBase::toTransient (const ID_type& dataID,
                                 CLID link_clid,
-                                IProxyDict* sg /*= 0*/)
+                                IProxyDict* sg)
 {
   if (!isDefault()) SG::throwExcBadToTransient();
   m_persKey = m_proxy.toTransient (dataID, link_clid, sg);
@@ -153,7 +153,7 @@ bool DataLinkBase::toTransient (const ID_type& dataID,
 inline
 bool DataLinkBase::toTransient (const ID_type& dataID,
                                 CLID link_clid,
-                                const EventContext& ctx)
+                                const EventContext& ctx /*= currentContext()*/)
 {
   if (!isDefault()) SG::throwExcBadToTransient();
   m_persKey = m_proxy.toTransient (dataID, link_clid, Atlas::proxyDictFromEventContext(ctx));
@@ -248,7 +248,7 @@ DataLinkBase::DataLinkBase()
  * @param link_clid CLID of the link being set.
  * @param sg Associated store.
  *
- * If @c sg is 0, we take the global default.
+ * If @c sg is nullptr, we take the global default.
  *
  * May throw @c ExcCLIDMismatch.
  */
@@ -267,7 +267,7 @@ DataLinkBase::DataLinkBase (const_pointer_t obj,
  * @param link_clid CLID of the link being set.
  * @param sg Associated store.
  *
- * If @c sg is 0, we take the global default.
+ * If @c sg is nullptr, we take the global default.
  *
  * May throw @c ExcCLIDMismatch.
  */
@@ -286,7 +286,7 @@ DataLinkBase::DataLinkBase (const ID_type& dataID,
  * @param link_clid CLID of the link being set.
  * @param sg Associated store.
  *
- * If @c sg is 0, we take the global default.
+ * If @c sg is nullptr, we take the global default.
  *
  * May throw @c ExcCLIDMismatch.
  */
@@ -318,7 +318,7 @@ DataLinkBase::DataLinkBase (sgkey_t key, const SG::DataProxyHolder& holder)
  * @param sg Associated store.
  * @returns The SG key for this object.
  *
- * If @c sg is 0, then we take the store from whatever the link's currently
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
  * set to.  If the link has no current store, then we take the global
  * default.
  *
@@ -340,7 +340,7 @@ void DataLinkBase::toStorableObject (const_pointer_t obj,
  * @param sg Associated store.
  * @returns The SG key for this object.
  *
- * If @c sg is 0, then we take the store from whatever the link's currently
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
  * set to.  If the link has no current store, then we take the global
  * default.
  */
@@ -359,7 +359,7 @@ void DataLinkBase::toIdentifiedObject (const ID_type& dataID,
  * @param link_clid CLID of the link being set.
  * @param sg Associated store.
  *
- * If @c sg is 0, then we take the store from whatever the link's currently
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
  * set to.  If the link has no current store, then we take the global
  * default.
  *
