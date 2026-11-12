@@ -1,6 +1,9 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+
+from RootUtils.LoadEnumHeader import loadEnumHeader
+loadEnumHeader ('ActsGeometryInterfaces/GeometryDefs.h')
 
 def MuonGeoUtilityToolCfg(flags, name = "MuonGeoUtilityTool", **kwargs):
     result = ComponentAccumulator()
