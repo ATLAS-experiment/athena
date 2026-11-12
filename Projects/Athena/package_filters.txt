@@ -21,7 +21,6 @@
 - PhysicsAnalysis/JetPhys/SemileptonicCorr
 - PhysicsAnalysis/SUSYPhys/SUSYTools
 - Reconstruction/Jet/JetAnalysisTools/JetTileCorrection
-- Reconstruction/Jet/JetReclustering
 
 # Don't build PerfMonVTune which has external Intel tool dependency
 - Control/PerformanceMonitoring/PerfMonVTune

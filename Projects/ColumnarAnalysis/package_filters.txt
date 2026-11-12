@@ -97,7 +97,6 @@
 + Reconstruction/Jet/BoostedJetTaggers
 - Reconstruction/Jet/JetMonitoring
 - Reconstruction/Jet/JetInputsMonitoring
-+ Reconstruction/Jet/JetReclustering
 + Reconstruction/Jet/JetRecConfig
 - Reconstruction/Jet/JetRec.+
 - Reconstruction/Jet/JetSimTools
