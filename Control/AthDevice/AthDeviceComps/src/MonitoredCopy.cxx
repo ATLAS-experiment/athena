@@ -42,4 +42,11 @@ void MonitoredCopy::do_memset(std::size_t size, void* ptr, int value) const {
   m_svc.get().memorySet(m_component, m_flavor, size);
 }
 
+auto MonitoredCopy::do_create_event() const -> event_type {
+
+  // Forward the event creation to the upstream copy object.
+  assert(m_upstream);
+  return m_upstream->create_event();
+}
+
 }  // namespace AthDevice
