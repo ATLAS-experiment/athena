@@ -54,6 +54,8 @@ Based on this input, the function `StatusCode TruthClassificationTool::classify(
 + LightFlavorDecay
 + ChargeFlipMuon
 + NonMuonLike
++ MaterialConversion (optional)
++ InternalConversion (optional)
 + TauDecayLike
 + BHadronDecayLike
 + CHadronDecayLike
@@ -98,6 +100,9 @@ ATH_CHECK(config.setProperty("separateChargeFlipElectrons", true));
 ATH_CHECK(config.setProperty("separateChargeFlipMuons",     true));
 ATH_CHECK(config.makePrivateTool(m_truthTool));
 ```
+Electrons from photon conversions can optionally be split into material and
+internal conversions with `separateConversionTypes` (see
+[Prompt photon-conversions](#prompt-photon-conversions)).
 Additionally `useTruthParticleDecorations` can be set to `True` to use
 more up-to-date decorations on truth particles (if available).
 
@@ -134,7 +139,13 @@ Electrons originating from FSR are excluded, but studies in the egamma group sho
 
 Electrons originating from the conversion of prompt photons (**IFF class 5**) are identified if the truth-type corresponds to a background electron (`== 4`) and it originates from a photon conversion or an electromagnetic process. Also if the truth type corresponds to an isolated/background photon (`== 14/16`) and the origin is a prompt photon conversion or and unhadronised photon, this category is filled. It covers also two-step processes, such as H -> gg, g -> e+ e- by checking at the truth-type and origin of the first non-Geant mother-particle. Background electrons from photon conversions (with this info also for the EG first mother) with the last mum pdgID a photon or an electron are entering in this category, as detailed in [this report](https://indico.cern.ch/event/932298/#9-ifftruthclassifier-updates). The latest updates on the conversion-classification are summarised [here](https://indico.cern.ch/event/974759/contributions/4136470/attachments/2156133/3639731/IFFTruthClassifier_PhConv_25Nov.pdf).
 
-No distinction between external (material) and internal conversions (depends on conversion radius) is performed in the current version of the tool. A manual separation of these conversion types can be done with the `DFCommonAddAmbiguity` flag, which should be available at derivation-level via the egamma smart slimming list. See [here](https://indico.cern.ch/event/862748/contributions/3635039/attachments/1946503/3235131/conversionsIFF2019.11.18.pdf) for more information. 
+By default, no distinction between external (material) and internal conversions is performed. It can be enabled with the option `separateConversionTypes` (`false` by default), based on the first non-Geant (EG) mother of the electron. The split is applied only to electrons that would otherwise be classified as `PromptPhotonConversion`:
+
++ **MaterialConversion (IFF class 50)**: background electron (truth-type `4`) from a photon conversion or an electromagnetic process in the material (truth-origin `5` or `7`), whose first EG mother is a generator-level photon (truth-type `13`, `14`, `15` or `16`). The photon converted in the detector material.
++ **InternalConversion (IFF class 51)**: background electron whose first EG mother is itself a background electron from a photon conversion (truth-type `4`, truth-origin `5`). The pair was produced at generator level (gamma* -> e+ e-), e.g. from QED radiation off a prompt lepton.
++ Conversion electrons that cannot be attributed to either case (e.g. when the reconstructed electron is matched to a truth photon, or the mother is not identified) stay in **IFF class 5**.
+
+A reconstruction-level separation of these conversion types can be done with the `DFCommonAddAmbiguity` flag, which should be available at derivation-level via the egamma smart slimming list. See [here](https://indico.cern.ch/event/862748/contributions/3635039/attachments/1946503/3235131/conversionsIFF2019.11.18.pdf) for more information.
 
 Muons from a generator-level photon splitting gamma -> mu+ mu- (truth-type `BkgMuon` (8) with truth-origin `PhotonConv` (5)) are also put in this class. Previously no muon rule matched them and they were returned as `Unknown`.
 

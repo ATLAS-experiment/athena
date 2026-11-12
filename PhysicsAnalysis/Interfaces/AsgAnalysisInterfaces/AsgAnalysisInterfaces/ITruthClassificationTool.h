@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ITRUTHCLASSIFICATIONTOOL_H_
@@ -30,6 +30,9 @@ enum class Type {
   LightFlavorDecay,
   ChargeFlipMuon,
   NonMuonlike,
+  /// sub-classes of PromptPhotonConversion, only with separateConversionTypes
+  MaterialConversion = 50,
+  InternalConversion = 51,
   TauDecayLike = 70,
   BHadronDecayLike = 80,
   CHadronDecayLike = 90,
