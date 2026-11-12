@@ -240,16 +240,14 @@ namespace columnar
       }
     };
 
-    template<typename T>
     struct ColumnReaderVectorSplitLink final : public TestUtils::ColumnReader
     {
-      using CM = ColumnarModeArray;
       BranchReader<Int_t> branchReaderSize;
       BranchReaderArray<UInt_t> branchReaderKey;
       BranchReaderArray<UInt_t> branchReaderIndex;
       const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
       std::vector<ColumnarOffsetType> offsets = {0};
-      LinkColumnVector columnData;
+      LinkColumnKeyIndex columnData;
       Benchmark benchmarkUnpack;
       Benchmark benchmark;
       unsigned entries = 0;
@@ -258,7 +256,7 @@ namespace columnar
       ColumnReaderVectorSplitLink (const std::string& val_branchName)
         : branchReaderSize (val_branchName), branchReaderKey (val_branchName + ".m_persKey"), branchReaderIndex (val_branchName + ".m_persIndex"), benchmarkUnpack (branchReaderSize.columnName()+"(unpack)"), benchmark (branchReaderSize.columnName())
       {
-        outputColumns.push_back ({.name = branchReaderSize.columnName()});
+        outputColumns.push_back ({.name = LinkColumnKeyIndex::dataColumnName (branchReaderSize.columnName())});
         outputColumns.push_back ({.name = branchReaderSize.containerName(), .isOffset = true, .primary = false});
       }
 
@@ -313,13 +311,12 @@ namespace columnar
         auto branchDataIndex = branchReaderIndex.getEntry (entry, branchDataSize);
         benchmark.stopTimer ();
         benchmarkUnpack.startTimer ();
-        columnData.checkOffsets (offsets.size() - 1);
         for (std::size_t index = 0; index < branchDataSize; ++index)
         {
           if (branchDataIndex[index] == static_cast<UInt_t>(-1))
             columnData.addEmptyLink ();
           else
-            columnData.addSplitLink (branchDataIndex[index], branchDataKey[index], offsets.size()-1);
+            columnData.addSplitLink (branchDataIndex[index], branchDataKey[index]);
         }
         offsets.push_back (columnData.size());
         if (offsetColumn)
@@ -341,7 +338,7 @@ namespace columnar
         for (std::size_t i = 2; i < outputColumns.size(); ++ i)
         {
           if (outputColumns.at(i).columnIndex != ColumnVectorHeader::nullIndex)
-            colData.setColumn (outputColumns.at(i).columnIndex, columnData.keysColumn(i-2).size(), columnData.keysColumn(i-2).data());
+            colData.setColumn (outputColumns.at(i).columnIndex, columnData.keysColumn().size(), columnData.keysColumn().data());
         }
       }
 
@@ -364,11 +361,7 @@ namespace columnar
       virtual void collectColumnData () override
       {
         entries += columnData.size();
-        for (const auto& index : columnData)
-        {
-          if (index == invalidObjectIndex)
-            nullEntries += 1;
-        }
+        nullEntries += columnData.countNullLinks();
       }
     };
 
@@ -404,6 +397,20 @@ namespace columnar
             TClass* branchClass = nullptr;
             EDataType branchType{};
             branch->GetExpectedType(branchClass, branchType);
+
+            // the key and index of split links are read by the link
+            // reader below, not as separate columns
+            if (name.ends_with (".m_persKey") || name.ends_with (".m_persIndex"))
+              continue;
+            if (branchClass != nullptr && std::string_view (branchClass->GetName()).find ("ElementLink<") != std::string_view::npos)
+            {
+              if (branch->GetListOfBranches()->GetEntries() > 0)
+                knownColumns.push_back (std::make_shared<ColumnReaderVectorSplitLink> (branch->GetName()));
+              else
+                addKeyIndexLinkReader<BranchReader> (knownColumns, branch->GetName(), branchClass->GetName());
+              continue;
+            }
+
             if (branchClass == nullptr) 
             {
               switch (branchType) 
@@ -488,23 +495,6 @@ namespace columnar
       // something that actual users can do (they need the new files), but
       // for testing it seems like a reasonable workaround.
       knownColumns.push_back(std::make_shared<ColumnReaderSamplingPattern<BranchReader>>("egammaClusters"));
-
-      // For branches that are element links they need to be explicitly
-      // declared to have the correct xAOD type, correct split setting,
-      // and correct linked containers.
-      
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorLink<xAOD::CaloClusterContainer,BranchReader>>("AnalysisElectronsAuxDyn.caloClusterLinks"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorLink<xAOD::TrackParticleContainer, BranchReader>>("AnalysisElectronsAuxDyn.trackParticleLinks"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorLink<xAOD::CaloClusterContainer,BranchReader>>("AnalysisPhotonsAuxDyn.caloClusterLinks"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorLink<xAOD::VertexContainer, BranchReader>>("AnalysisPhotonsAuxDyn.vertexLinks"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorSplitLink<xAOD::TrackParticleContainer>>("AnalysisMuonsAuxDyn.inDetTrackParticleLink"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorSplitLink<xAOD::TrackParticleContainer>>("AnalysisMuonsAuxDyn.combinedTrackParticleLink"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorSplitLink<xAOD::TrackParticleContainer>>("AnalysisMuonsAuxDyn.extrapolatedMuonSpectrometerTrackParticleLink"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorLink<xAOD::TrackParticleContainer, BranchReader>>("GSFConversionVerticesAuxDyn.trackParticleLinks"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorSplitLink<xAOD::TrackParticleContainer>>("GSFTrackParticlesAuxDyn.originalTrackParticle"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorVariantLink<xAOD::IParticleContainer, BranchReader>>("AnalysisJetsAuxDyn.GhostTrack"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorLink<xAOD::JetContainer, BranchReader>>("METAssoc_AnalysisMETAux.jetLink"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorVariantLink<xAOD::IParticleContainer, BranchReader>>("METAssoc_AnalysisMETAux.objectLinks"));
     }
   }
 }

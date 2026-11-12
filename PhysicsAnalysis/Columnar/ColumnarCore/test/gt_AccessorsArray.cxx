@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -15,11 +15,13 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 
 #include <AsgTesting/UnitTest.h>
 #include <algorithm>
+#include <array>
 #include <ColumnarCore/ColumnAccessor.h>
 #include <ColumnarCore/ColumnInfoHelpers.h>
 #include <ColumnarCore/LinkColumn.h>
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/VectorColumn.h>
+#include <ColumnarJet/JetDef.h>
 #include <ColumnarEventInfo/EventInfoDef.h>
 #include <ColumnarCore/ParticleDef.h>
 
@@ -407,10 +409,257 @@ namespace columnar
     ASSERT_SUCCESS (tool.initializeColumns());
 
     auto columns = tool.getColumnInfo();
-    auto linkColumn = std::find_if (columns.begin(), columns.end(), [] (auto& column) {return column.name == "Particles.targetLink";});
-    ASSERT_NE (linkColumn, columns.end());
-    EXPECT_EQ (linkColumn->soleLinkTargetName, "Targets");
-    EXPECT_EQ (linkColumn->soleLinkTargetClid, ClassID_traits<xAOD::IParticleContainer>::ID());
+    auto hasColumn = [&] (const std::string& name) {return std::any_of (columns.begin(), columns.end(), [&] (auto& column) {return column.name == name;});};
+    // the key and index columns have no link specific meta-data,
+    // the link just requests the offset map of its target
+    EXPECT_FALSE (hasColumn ("Particles.targetLink"));
+    EXPECT_TRUE (hasColumn ("Particles.targetLink.m_persKey"));
+    EXPECT_TRUE (hasColumn ("Particles.targetLink.m_persIndex"));
+    EXPECT_TRUE (hasColumn ("Particles.eventIndex"));
+    EXPECT_TRUE (hasColumn ("Targets"));
+  }
+
+
+  template<ColumnarModeConcept CM>
+  void checkTargetKey ()
+  {
+    using LinkAccessor = detail::ContainerFreeAccessor<OptObjectId<Particle1Def,CM>,ColumnAccessMode::input,CM>;
+    ColumnarTool<CM> tool;
+    ParticleAccessor<ObjectColumn,CM> objectAccessor {tool, "Particles"};
+    Particle1Accessor<ObjectColumn,CM> targetAccessor {tool, "Targets"};
+    LinkAccessor linkAccessor {tool, {}, {.offsetName = ParticleDef::idName, .baseName = std::string (ParticleDef::idName) + ".targetLink"}};
+    const auto expectedKey = computeSgKey ("Targets", ClassID_traits<xAOD::IParticleContainer>::ID());
+    EXPECT_EQ (linkAccessor.targetKey(), expectedKey);
+    // a link with just the target type accepts exactly one key
+    static_assert (LinkCastColumn<Particle1Def>::numLinkTypes == 1u);
+    EXPECT_EQ (linkAccessor.allTargetKeys().size(), 1u);
+
+    LinkAccessor movedAccessor {std::move (linkAccessor)};
+    EXPECT_EQ (movedAccessor.targetKey(), expectedKey);
+    LinkAccessor assignedAccessor;
+    assignedAccessor = std::move (movedAccessor);
+    EXPECT_EQ (assignedAccessor.targetKey(), expectedKey);
+  }
+
+  template<ColumnarModeConcept CM>
+  void checkTargetKeyLateRegistration ()
+  {
+    // the link is declared before the ObjectColumn of its target
+    using LinkAccessor = detail::ContainerFreeAccessor<OptObjectId<Particle1Def,CM>,ColumnAccessMode::input,CM>;
+    ColumnarTool<CM> tool;
+    ParticleAccessor<ObjectColumn,CM> objectAccessor {tool, "Particles"};
+    LinkAccessor linkAccessor {tool, {}, {.offsetName = ParticleDef::idName, .baseName = std::string (ParticleDef::idName) + ".targetLink"}};
+    Particle1Accessor<ObjectColumn,CM> targetAccessor {tool, "Targets"};
+    EXPECT_EQ (linkAccessor.targetKey(), computeSgKey ("Targets", ClassID_traits<xAOD::IParticleContainer>::ID()));
+    EXPECT_NO_THROW (tool.getColumnInfo());
+  }
+
+  template<ColumnarModeConcept CM>
+  void checkTargetKeyMissingName ()
+  {
+    // the link target has no ObjectColumn, so its name and with it
+    // the target key are unknown
+    using LinkAccessor = detail::ContainerFreeAccessor<OptObjectId<Particle1Def,CM>,ColumnAccessMode::input,CM>;
+    ColumnarTool<CM> tool;
+    ParticleAccessor<ObjectColumn,CM> objectAccessor {tool, "Particles"};
+    LinkAccessor linkAccessor {tool, {}, {.offsetName = ParticleDef::idName, .baseName = std::string (ParticleDef::idName) + ".targetLink"}};
+    EXPECT_ANY_THROW (tool.getColumnInfo());
+  }
+
+  /// @brief the name reported for links in the given column
+  std::string nameForLinks (const IColumnarTool& tool, const std::string& column)
+  {
+    for (const auto& info : tool.getColumnInfo())
+    {
+      if (info.name == column)
+        return info.nameForLinks;
+    }
+    throw std::runtime_error ("column not found: " + column);
+  }
+
+  template<ColumnarModeConcept CM>
+  void checkTargetKeyRename ()
+  {
+    using LinkAccessor = detail::ContainerFreeAccessor<OptObjectId<Particle1Def,CM>,ColumnAccessMode::input,CM>;
+    ColumnarTool<CM> tool;
+    ParticleAccessor<ObjectColumn,CM> objectAccessor {tool, "Particles"};
+    Particle1Accessor<ObjectColumn,CM> targetAccessor {tool, "Targets"};
+    LinkAccessor linkAccessor {tool, {}, {.offsetName = ParticleDef::idName, .baseName = std::string (ParticleDef::idName) + ".targetLink"}};
+    // renaming the column doesn't change the key
+    tool.renameColumn ("Targets", "Other");
+    EXPECT_EQ (linkAccessor.targetKey(), computeSgKey ("Targets", ClassID_traits<xAOD::IParticleContainer>::ID()));
+    EXPECT_EQ (nameForLinks (tool, "Other"), "Targets");
+    // setting the link target name does, using the current column name
+    tool.setLinkTargetName ("Other", "Link1");
+    EXPECT_EQ (linkAccessor.targetKey(), computeSgKey ("Link1", ClassID_traits<xAOD::IParticleContainer>::ID()));
+    EXPECT_EQ (nameForLinks (tool, "Other"), "Link1");
+    // the link target name is not the name of the column
+    EXPECT_ANY_THROW (tool.setLinkTargetName ("Link1", "Link2"));
+    tool.setLinkTargetName ("Other", "Link2");
+    EXPECT_EQ (nameForLinks (tool, "Other"), "Link2");
+    EXPECT_ANY_THROW (tool.setLinkTargetName ("Targets", "Link3"));
+    EXPECT_ANY_THROW (tool.setLinkTargetName ("Unknown", "Link3"));
+    EXPECT_ANY_THROW (tool.setLinkTargetName ("Particles.targetLink.m_persKey", "Link3"));
+    // a later rename keeps the name, and needs the new column name
+    tool.renameColumn ("Other", "Another");
+    EXPECT_EQ (nameForLinks (tool, "Another"), "Link2");
+    EXPECT_ANY_THROW (tool.setLinkTargetName ("Other", "Link3"));
+    tool.setLinkTargetName ("Another", "Link3");
+    EXPECT_EQ (linkAccessor.targetKey(), computeSgKey ("Link3", ClassID_traits<xAOD::IParticleContainer>::ID()));
+    // containers nothing links to don't report a name
+    EXPECT_EQ (nameForLinks (tool, "Particles"), "");
+  }
+
+  template<ColumnarModeConcept CM>
+  void checkTargetKeyMerge ()
+  {
+    using LinkAccessor1 = detail::ContainerFreeAccessor<OptObjectId<Particle1Def,CM>,ColumnAccessMode::input,CM>;
+    using LinkAccessor2 = detail::ContainerFreeAccessor<OptObjectId<Particle2Def,CM>,ColumnAccessMode::input,CM>;
+    ColumnarTool<CM> tool;
+    ParticleAccessor<ObjectColumn,CM> objectAccessor {tool, "Particles"};
+    Particle1Accessor<ObjectColumn,CM> targetAccessor1 {tool, "Targets1"};
+    Particle2Accessor<ObjectColumn,CM> targetAccessor2 {tool, "Targets2"};
+    LinkAccessor1 linkAccessor1 {tool, {}, {.offsetName = ParticleDef::idName, .baseName = std::string (ParticleDef::idName) + ".targetLink1"}};
+    LinkAccessor2 linkAccessor2 {tool, {}, {.offsetName = ParticleDef::idName, .baseName = std::string (ParticleDef::idName) + ".targetLink2"}};
+    // a merged column has a single name, so the two defaults conflict
+    tool.renameColumn ("Targets1", "Merged");
+    tool.renameColumn ("Targets2", "Merged");
+    EXPECT_ANY_THROW (tool.getColumnInfo());
+    // one call sets the name for both containers
+    tool.setLinkTargetName ("Merged", "Link");
+    EXPECT_EQ (nameForLinks (tool, "Merged"), "Link");
+    EXPECT_EQ (linkAccessor1.targetKey(), computeSgKey ("Link", ClassID_traits<xAOD::IParticleContainer>::ID()));
+    EXPECT_EQ (linkAccessor2.targetKey(), computeSgKey ("Link", ClassID_traits<xAOD::IParticleContainer>::ID()));
+  }
+
+  template<ColumnarModeConcept CM>
+  void checkTargetKeySubtool ()
+  {
+    // the link is in a subtool, the ObjectColumn of its target in the
+    // parent tool, and they only get joined afterwards
+    using LinkAccessor = detail::ContainerFreeAccessor<OptObjectId<Particle1Def,CM>,ColumnAccessMode::input,CM>;
+    ColumnarTool<CM> subtool;
+    ParticleAccessor<ObjectColumn,CM> subObjectAccessor {subtool, "Particles"};
+    LinkAccessor linkAccessor {subtool, {}, {.offsetName = ParticleDef::idName, .baseName = std::string (ParticleDef::idName) + ".targetLink"}};
+
+    ColumnarTool<CM> tool;
+    ParticleAccessor<ObjectColumn,CM> objectAccessor {tool, "Particles"};
+    Particle1Accessor<ObjectColumn,CM> targetAccessor {tool, "Targets"};
+    tool.addSubtool (subtool);
+    EXPECT_EQ (linkAccessor.targetKey(), computeSgKey ("Targets", ClassID_traits<xAOD::IParticleContainer>::ID()));
+    EXPECT_NO_THROW (tool.getColumnInfo());
+  }
+
+  template<ColumnarModeConcept CM>
+  void checkKeyIndexLinkResolve ()
+  {
+    using LinkAccessor = detail::ContainerFreeAccessor<OptObjectId<Particle1Def,CM>,ColumnAccessMode::input,CM>;
+    ColumnarTool<CM> tool;
+    ParticleAccessor<ObjectColumn,CM> objectAccessor {tool, "Particles"};
+    Particle1Accessor<ObjectColumn,CM> targetAccessor {tool, "Targets"};
+    LinkAccessor linkAccessor {tool, {}, {.offsetName = ParticleDef::idName, .baseName = std::string (ParticleDef::idName) + ".targetLink"}};
+    const auto key = linkAccessor.targetKey();
+    tool.setColumnIndex ("Particles.targetLink.m_persKey", 1);
+    tool.setColumnIndex ("Particles.targetLink.m_persIndex", 2);
+    tool.setColumnIndex ("Particles.eventIndex", 3);
+    tool.setColumnIndex ("Targets", 4);
+
+    // two events, with two and three target objects
+    const std::vector<typename CM::LinkKeyColumnType> keys {key, key, key, 0, key, 0, key, key + 1};
+    const std::vector<typename CM::LinkIndexColumnType> indices {0, 1, 2, 5, CM::nullLinkIndex, 0, 3, 0};
+    const std::vector<ColumnarOffsetType> events {0, 0, 1, 1, 1, 1, 1, 1};
+    const std::vector<ColumnarOffsetType> targetOffsets {0, 2, 5};
+    std::array<void*,5> data {nullptr, const_cast<void*>(static_cast<const void*>(keys.data())), const_cast<void*>(static_cast<const void*>(indices.data())), const_cast<void*>(static_cast<const void*>(events.data())), const_cast<void*>(static_cast<const void*>(targetOffsets.data()))};
+
+    EXPECT_TRUE (linkAccessor.isAvailable (data.data()));
+    EXPECT_EQ (linkAccessor (data.data(), 0).value().getIndex(), 0u);
+    EXPECT_EQ (linkAccessor (data.data(), 1).value().getIndex(), 1u);
+    // the index is relative to the event
+    EXPECT_EQ (linkAccessor (data.data(), 2).value().getIndex(), 4u);
+    // a null link if either the key or the index is null
+    EXPECT_FALSE (linkAccessor (data.data(), 3).has_value());
+    EXPECT_FALSE (linkAccessor (data.data(), 4).has_value());
+    EXPECT_FALSE (linkAccessor (data.data(), 5).has_value());
+    // the index is outside the event, even though it is inside the column
+    EXPECT_ANY_THROW ((void) linkAccessor (data.data(), 6));
+    // the key doesn't match the target
+    EXPECT_ANY_THROW ((void) linkAccessor (data.data(), 7));
+
+    auto range = linkAccessor (data.data(), 1, 3);
+    ASSERT_EQ (range.size(), 2u);
+    EXPECT_EQ (range[1].value().getIndex(), 4u);
+
+    data[4] = nullptr;
+    EXPECT_FALSE (linkAccessor.isAvailable (data.data()));
+  }
+
+  template<ColumnarModeConcept CM>
+  void checkKeyIndexLinkExtraTypes ()
+  {
+    // a generic target also accepts the key for the listed extra type,
+    // i.e. here links that were written as links to jets
+    using LinkAccessor = detail::ContainerFreeAccessor<LinkCastColumn<Particle1Def,ParticleDef,JetDef>,ColumnAccessMode::input,CM>;
+    ColumnarTool<CM> tool;
+    ParticleAccessor<ObjectColumn,CM> objectAccessor {tool, "Particles"};
+    Particle1Accessor<ObjectColumn,CM> targetAccessor {tool, "Targets"};
+    LinkAccessor linkAccessor {tool, {}, {.offsetName = ParticleDef::idName, .baseName = std::string (ParticleDef::idName) + ".targetLink"}};
+    const auto baseKey = computeSgKey ("Targets", ClassID_traits<xAOD::IParticleContainer>::ID());
+    const auto extraKey = computeSgKey ("Targets", ClassID_traits<xAOD::JetContainer>::ID());
+    EXPECT_EQ (linkAccessor.targetKey(), baseKey);
+    EXPECT_EQ (linkAccessor.allTargetKeys().size(), 2u);
+    // the static count has to match the keys the accessor really has
+    using LinkColumn = LinkCastColumn<Particle1Def,ParticleDef,JetDef>;
+    static_assert (LinkColumn::numLinkTypes == 2u);
+    EXPECT_EQ (linkAccessor.allTargetKeys().size(), LinkColumn::numLinkTypes);
+    tool.setColumnIndex ("Particles.targetLink.m_persKey", 1);
+    tool.setColumnIndex ("Particles.targetLink.m_persIndex", 2);
+    tool.setColumnIndex ("Particles.eventIndex", 3);
+    tool.setColumnIndex ("Targets", 4);
+
+    std::vector<typename CM::LinkKeyColumnType> keys {baseKey, extraKey, baseKey + extraKey};
+    std::vector<typename CM::LinkIndexColumnType> indices {0, 1, 0};
+    std::vector<ColumnarOffsetType> events {0, 0, 0};
+    std::vector<ColumnarOffsetType> targetOffsets {0, 2};
+    std::array<void*,5> data {nullptr, keys.data(), indices.data(), events.data(), targetOffsets.data()};
+    EXPECT_EQ (linkAccessor (data.data(), 0).value().getIndex(), 0u);
+    EXPECT_EQ (linkAccessor (data.data(), 1).value().getIndex(), 1u);
+    EXPECT_ANY_THROW ((void) linkAccessor (data.data(), 2));
+  }
+
+  TEST (LinkAccessorTest, keyIndexLinkExtraTypes)
+  {
+    checkKeyIndexLinkExtraTypes<ColumnarMode> ();
+  }
+
+  TEST (LinkAccessorTest, keyIndexLinkResolve)
+  {
+    checkKeyIndexLinkResolve<ColumnarMode> ();
+  }
+
+  TEST (LinkAccessorTest, targetKey)
+  {
+    checkTargetKey<ColumnarMode> ();
+  }
+
+  TEST (LinkAccessorTest, targetKeyLateRegistration)
+  {
+    checkTargetKeyLateRegistration<ColumnarMode> ();
+  }
+
+  TEST (LinkAccessorTest, targetKeyMissingName)
+  {
+    checkTargetKeyMissingName<ColumnarMode> ();
+  }
+
+  TEST (LinkAccessorTest, targetKeyRename)
+  {
+    checkTargetKeyRename<ColumnarMode> ();
+    checkTargetKeyMerge<ColumnarMode> ();
+  }
+
+  TEST (LinkAccessorTest, targetKeySubtool)
+  {
+    checkTargetKeySubtool<ColumnarMode> ();
   }
 
 

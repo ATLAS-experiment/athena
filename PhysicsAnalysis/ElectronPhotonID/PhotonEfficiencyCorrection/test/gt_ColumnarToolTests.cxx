@@ -18,6 +18,9 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <ColumnarTestFixtures/ColumnarMemoryTest.h>
 #include <ColumnarTestFixtures/ColumnarPhysliteTest.h>
 #include <xAODCore/ShallowCopy.h>
+#include <xAODCaloEvent/CaloClusterContainer.h>
+#include <xAODTracking/TrackParticleContainer.h>
+#include <xAODTracking/VertexContainer.h>
 
 #include <PhotonEfficiencyCorrection/AsgPhotonEfficiencyCorrectionTool.h>
 
@@ -55,10 +58,10 @@ TEST_F (ColumnarMemoryTest, AsgPhotonEfficiencyCorrectionTool)
 
   columnMap.addColumn ("Photons", {0, 1});
   columnMap.addColumn ("Photons.eta", {1});
-  columnMap.addColumn ("Photons.caloClusterLinks.data", {0});
-  columnMap.addColumn ("Photons.caloClusterLinks.offset", {0, columnMap.columnSize("Photons.caloClusterLinks.data")});
-  columnMap.addColumn ("Photons.vertexLinks.data", {0});
-  columnMap.addColumn ("Photons.vertexLinks.offset", {0, columnMap.columnSize("Photons.vertexLinks.data")});
+  columnMap.addKeyIndexLink<xAOD::CaloClusterContainer> ("Photons.caloClusterLinks", "egammaClusters", {0});
+  columnMap.addColumn ("Photons.caloClusterLinks.offset", {0, 1});
+  columnMap.addKeyIndexLink<xAOD::VertexContainer> ("Photons.vertexLinks", "GSFConversionVertices", {0});
+  columnMap.addColumn ("Photons.vertexLinks.offset", {0, 1});
 
   columnMap.addColumn ("egammaClusters", {0, 1});
   columnMap.addColumn ("egammaClusters.calE", {10e5 * cosh (1)});
@@ -69,8 +72,8 @@ TEST_F (ColumnarMemoryTest, AsgPhotonEfficiencyCorrectionTool)
   columnMap.addColumn ("egammaClusters.eta_sampl.offset", {0, columnMap.columnSize("egammaClusters.eta_sampl.data")});
 
   columnMap.addColumn ("GSFConversionVertices", {0, 1});
-  columnMap.addColumn ("GSFConversionVertices.trackParticleLinks.data", {0, 1});
-  columnMap.addColumn ("GSFConversionVertices.trackParticleLinks.offset", {0, columnMap.columnSize("GSFConversionVertices.trackParticleLinks.data")});
+  columnMap.addKeyIndexLink<xAOD::TrackParticleContainer> ("GSFConversionVertices.trackParticleLinks", "GSFTrackParticles", {0, 1});
+  columnMap.addColumn ("GSFConversionVertices.trackParticleLinks.offset", {0, 2});
 
   columnMap.addColumn ("GSFTrackParticles", {0, 2});
   columnMap.addColumn ("GSFTrackParticles.numberOfPixelHits", {1, 1});

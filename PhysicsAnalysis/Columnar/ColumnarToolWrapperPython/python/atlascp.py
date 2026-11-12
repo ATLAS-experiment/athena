@@ -57,11 +57,13 @@ def __getattr__(name):
     -------
     callable
         A constructor with signature
-        ``(instance_name=None, /, *, namespace="CP", properties=None, rename_containers=None)``.
+        ``(instance_name=None, /, *, namespace="CP_array", properties=None, rename_containers=None)``.
         ``instance_name`` is positional-only and optional; all other arguments are keyword-only.
-        When omitted, an auto-generated unique name is used.
+        When omitted, an auto-generated unique name is used. The ``namespace`` is
+        used as given, so it has to include any suffix for the columnar mode
+        (e.g. ``"CP_array"`` for the array mode in the dual-library setup).
     """
-    def constructor(instance_name=None, /, *, namespace="CP", properties=None, rename_containers=None):
+    def constructor(instance_name=None, /, *, namespace="CP_array", properties=None, rename_containers=None):
         if instance_name is None:
             instance_name = f"unique{uuid.uuid4().hex[:12]}"
         type_and_name = f"{namespace}::{name}/{instance_name}"
@@ -124,8 +126,7 @@ class Corrections:
                 outputs[field] = result[field]
         return ak.Array(outputs)
 
-
-def configure(path, *, namespace="CP"):
+def configure(path, *, namespace="CP_array"):
     """Load a TOML config file and return an initialized Corrections object.
 
     The ``[global]`` section provides default ``rename_containers`` and
@@ -137,7 +138,9 @@ def configure(path, *, namespace="CP"):
     path:
         Path to a TOML configuration file (str or Path).
     namespace:
-        C++ namespace for all tools (default ``"CP"``).
+        C++ namespace for all tools (default ``"CP_array"``), used as given, so
+        it has to include any suffix for the columnar mode (e.g.
+        ``"CP_array"`` for the array mode in the dual-library setup).
 
     Returns
     -------

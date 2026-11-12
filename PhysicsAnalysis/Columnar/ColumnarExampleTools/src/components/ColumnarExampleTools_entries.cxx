@@ -13,6 +13,7 @@
 #include <ColumnarExampleTools/SimpleSelectorExampleTool.h>
 #include <ColumnarExampleTools/StringExampleTool.h>
 #include <ColumnarExampleTools/VariantExampleTool.h>
+#include <ColumnarExampleTools/VariantLinkColumnExampleTool.h>
 #include <ColumnarExampleTools/VectorExampleTool.h>
 
 // Project include(s).
@@ -26,4 +27,5 @@ DECLARE_COMPONENT (ADD_CMODE(columnar)::OptionalColumnExampleTool)
 DECLARE_COMPONENT (ADD_CMODE(columnar)::SimpleSelectorExampleTool)
 DECLARE_COMPONENT (ADD_CMODE(columnar)::StringExampleTool)
 DECLARE_COMPONENT (ADD_CMODE(columnar)::VariantExampleTool)
+DECLARE_COMPONENT (ADD_CMODE(columnar)::VariantLinkColumnExampleTool)
 DECLARE_COMPONENT (ADD_CMODE(columnar)::VectorExampleTool)

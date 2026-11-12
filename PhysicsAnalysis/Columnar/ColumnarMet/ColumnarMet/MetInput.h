@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -133,11 +133,11 @@ namespace columnar
       }
     };
 
-    template<ContainerIdConcept CI> class OriginalObjectHandle<CI,ColumnarModeArray> final
+    template<ContainerIdConcept CI,ColumnarModeConcept CM>
+      requires (CM::isUprootMode)
+    class OriginalObjectHandle<CI,CM> final
     {
     public:
-
-      using CM = ColumnarModeArray;
 
       explicit OriginalObjectHandle (const asg::AsgTool& /*tool*/, ObjectRange<CI,CM> /*container*/)
       {};
@@ -188,11 +188,10 @@ namespace columnar
       }
     };
 
-    template<ContainerIdConcept CI>
-    struct ObjectTypeAccessor<CI,ColumnarModeArray> final
+    template<ContainerIdConcept CI,ColumnarModeConcept CM>
+      requires (CM::isUprootMode)
+    struct ObjectTypeAccessor<CI,CM> final
     {
-      using CM = ColumnarModeArray;
-
       // FIX ME: ideally this should rely on a global column with a
       // single type, not a type per object, but that functionality
       // doesn't currently (13 Jan 25) exist.

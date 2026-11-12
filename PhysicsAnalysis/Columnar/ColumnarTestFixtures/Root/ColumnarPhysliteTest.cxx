@@ -43,7 +43,7 @@ namespace columnar
   {
     namespace
     {
-      /// @brief wrapper around a tool and its benchmarks for mode 2
+      /// @brief wrapper around a tool and its benchmarks for the array mode
       struct ToolData
       {
         std::string name;
@@ -67,7 +67,24 @@ namespace columnar
           if (!tool)
             throw std::runtime_error ("tool is not a ColumnarTool<ColumnarModeArray>: " + td.name);
           if (!td.containerRenames.empty())
+          {
+            // the renames are the names in the file, which also enter the
+            // keys of links pointing to these containers
+            std::vector<std::string> linkTargets;
+            for (const auto& column : tool->getColumnInfo())
+            {
+              if (column.nameForLinks.empty())
+                continue;
+              for (const auto& [from, to] : td.containerRenames)
+              {
+                if (column.name == from)
+                  linkTargets.push_back (to);
+              }
+            }
             renameContainers (*tool, td.containerRenames);
+            for (const auto& linkTarget : linkTargets)
+              tool->setLinkTargetName (linkTarget, linkTarget);
+          }
           toolWrapper = std::make_unique<ToolColumnVectorMap> (columnHeader, *tool);
         }
 
@@ -176,6 +193,10 @@ namespace columnar
     }
 
     makeCommonLateColumnReaders (knownColumns, allMetTermNames);
+
+    // the event-index columns need to come after all readers that
+    // provide offset columns
+    makeEventIndexColumnReaders (knownColumns, columnHeader);
 
     makeOutputColumnReaders (knownColumns, columnHeader);
   }

@@ -87,6 +87,7 @@ namespace columnar
     void makeTTreeColumnReaders (std::vector<std::shared_ptr<TestUtils::ColumnReader>>& knownColumns, TTree *tree);
     void makeRNTupleColumnReaders (std::vector<std::shared_ptr<TestUtils::ColumnReader>>& knownColumns, RNTupleBackend* rntbackend);
     void makeCommonLateColumnReaders (std::vector<std::shared_ptr<TestUtils::ColumnReader>>& knownColumns, const std::vector<std::string>& allMetTermNames);
+    void makeEventIndexColumnReaders (std::vector<std::shared_ptr<TestUtils::ColumnReader>>& knownColumns, const ColumnVectorHeader& columnHeader);
     void makeOutputColumnReaders (std::vector<std::shared_ptr<TestUtils::ColumnReader>>& knownColumns, const ColumnVectorHeader& columnHeader);
   }
 }

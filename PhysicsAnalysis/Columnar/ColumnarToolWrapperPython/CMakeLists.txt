@@ -50,6 +50,11 @@ ColumnarToolWrapperPython/*.h
   PUBLIC_HEADERS ColumnarToolWrapperPython
   LINK_LIBRARIES ColumnarToolWrapperLib PATInterfaces)
 
+# nanobind needs Development.Module. Development.Embed is additionally
+# needed when using NB_SHARED (see below). This has to come before the
+# tests below, which run their scripts with ${Python_EXECUTABLE}.
+find_package(Python 3.8 COMPONENTS Interpreter Development.Module Development.Embed REQUIRED)
+
 find_package( GTest )
 
 if (XAOD_STANDALONE)
@@ -59,30 +64,16 @@ if (XAOD_STANDALONE)
     LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarToolWrapperPythonLib AsgTestingLib ColumnarExampleToolsLib${CMODE_SUFFIX}
     POST_EXEC_SCRIPT noerror.sh )
 
-  #atlas_add_test( ColumnarToolWrapperPython_import
-  #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_import.py
-  #  POST_EXEC_SCRIPT noerror.sh )
-
-  #atlas_add_test( ColumnarToolWrapperPython_atlascp
-  #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_atlascp.py
-  #  POST_EXEC_SCRIPT noerror.sh )
-
-  #atlas_add_test( ColumnarToolWrapperPython_example_tools
-  #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_example_tools.py
-  #  POST_EXEC_SCRIPT noerror.sh )
-
-  #atlas_add_test( ColumnarToolWrapperPython_wrapper
-  #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_wrapper.py
-  #  POST_EXEC_SCRIPT noerror.sh )
-
-  #atlas_add_test( ColumnarToolWrapperPython_bindings
-  #  SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_bindings.py
-  #  POST_EXEC_SCRIPT noerror.sh )
+  # DEACTIVATED: The python tests need numpy and awkward, and awkward is
+  # not available in the release externals. Re-enable them
+  # if/when awkward is available.
+  #
+  # foreach (PYTEST import atlascp example_tools wrapper config links logging_bridge sgkey bindings)
+  #   atlas_add_test( ColumnarToolWrapperPython_${PYTEST}
+  #     SCRIPT ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test/test_${PYTEST}.py
+  #     POST_EXEC_SCRIPT noerror.sh )
+  # endforeach ()
 endif ()
-
-# nanobind needs Development.Module. Development.Embed is additionally
-# needed when using NB_SHARED (see below).
-find_package(Python 3.8 COMPONENTS Interpreter Development.Module Development.Embed REQUIRED)
 
 # Detect the installed nanobind package and import it into CMake
 execute_process(

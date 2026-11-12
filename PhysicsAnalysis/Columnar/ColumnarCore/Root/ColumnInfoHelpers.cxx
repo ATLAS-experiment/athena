@@ -10,6 +10,7 @@
 //
 
 #include <ColumnarCore/ColumnInfoHelpers.h>
+#include <ColumnarCore/LinkColumn.h>
 
 #include <CxxUtils/crc64.h>
 
@@ -65,20 +66,13 @@ namespace columnar
     if (!source.isOptional)
       target.isOptional = false;
 
-    if (target.soleLinkTargetName != source.soleLinkTargetName)
-      throw std::runtime_error ("mismatched soleLinkTargetName in mergeColumnInfo for column: " + target.name);
+    if (target.isEventIndex != source.isEventIndex)
+      throw std::runtime_error ("mismatched isEventIndex in mergeColumnInfo for column: " + target.name);
 
-    if (target.soleLinkTargetClid != source.soleLinkTargetClid)
-      throw std::runtime_error ("mismatched soleLinkTargetClid in mergeColumnInfo for column: " + target.name);
-
-    if (target.isVariantLink != source.isVariantLink)
-      throw std::runtime_error ("mismatched isVariantLink in mergeColumnInfo for column: " + target.name);
-
-    if (target.variantLinkTargetNames != source.variantLinkTargetNames)
-      throw std::runtime_error ("mismatched variantLinkTargetNames in mergeColumnInfo for column: " + target.name);
-
-    if (target.keyColumnForVariantLink != source.keyColumnForVariantLink)
-      throw std::runtime_error ("mismatched keyColumnForVariantLink in mergeColumnInfo for column: " + target.name + ": " + target.keyColumnForVariantLink + " and " + source.keyColumnForVariantLink);
+    if (target.nameForLinks.empty())
+      target.nameForLinks = source.nameForLinks;
+    else if (!source.nameForLinks.empty() && target.nameForLinks != source.nameForLinks)
+      throw std::runtime_error ("mismatched nameForLinks in mergeColumnInfo for column: " + target.name + ": " + target.nameForLinks + " and " + source.nameForLinks + " (a single name can be set with setLinkTargetName)");
   }
 
 
@@ -89,5 +83,25 @@ namespace columnar
       crc = CxxUtils::crc64addint (crc, clid);
     // mask to SG::StringPool::sgkey_t_nbits (30) bits
     return static_cast<SG::sgkey_t> (crc & ((static_cast<std::uint64_t> (1) << 30) - 1));
+  }
+
+
+  // these are declared in LinkColumn.h, which is where they are used.
+  // they are defined out of line on purpose, see there.
+  namespace detail
+  {
+    void throwLinkIndexOutOfRange (const std::string& columnName, std::size_t index, ColumnarOffsetType event, std::size_t numTargets)
+    {
+      throw std::runtime_error ("link index out of range for column " + columnName + ": index " + std::to_string (index) + " in event " + std::to_string (event) + " with " + std::to_string (numTargets) + " target objects");
+    }
+
+
+    void throwLinkKeyMismatch (const std::string& columnName, SG::sgkey_t key, ColumnarOffsetType event, const std::vector<SG::sgkey_t>& expected)
+    {
+      std::string expectedList;
+      for (auto targetKey : expected)
+        expectedList += " " + std::to_string (targetKey);
+      throw std::runtime_error ("link key mismatch for column " + columnName + ": read key " + std::to_string (key) + " in event " + std::to_string (event) + ", expected one of:" + expectedList);
+    }
   }
 }

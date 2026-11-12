@@ -8,7 +8,7 @@ import os
 import sys
 sys.path.insert(0, os.path.dirname(__file__))
 
-from testutils import _run_tests, approx, raises
+from testutils import _run_tests, approx, raises, MUON_CALIBRATION_RELEASE
 
 import numpy as np
 import awkward as ak
@@ -61,14 +61,15 @@ def test_class_cache_consistency():
 
 def test_custom_namespace():
     """namespace keyword overrides the default 'CP' prefix."""
-    tool = atlascp.VectorExampleTool("vecEx", namespace="columnar")
+    tool = atlascp.VectorExampleTool("vecEx", namespace="columnar_array")
     assert isinstance(tool, Tool)
     assert type(tool).__name__ == "VectorExampleTool"
 
 
 def test_properties_passed_through():
     """Properties dict is forwarded to the tool handle."""
-    tool = atlascp.MuonEfficiencyScaleFactors("unique0")
+    tool = atlascp.MuonEfficiencyScaleFactors(
+        "unique0", properties={"CalibrationRelease": MUON_CALIBRATION_RELEASE})
     events = make_muon_events()
     result = tool(events)
     sf_values = result["Muons.sfOut"].to_list()

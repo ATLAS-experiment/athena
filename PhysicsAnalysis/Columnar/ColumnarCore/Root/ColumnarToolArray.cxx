@@ -101,9 +101,19 @@ namespace columnar
       }
     }
 
+    for (auto& [ciName, watchers] : subtoolData->linkTargetNameWatchers)
+    {
+      auto& target = m_data->linkTargetNameWatchers[ciName];
+      target.insert (target.end(), std::make_move_iterator (watchers.begin()), std::make_move_iterator (watchers.end()));
+    }
+    subtoolData->linkTargetNameWatchers.clear();
+    m_data->linkTargetNames.insert (subtoolData->linkTargetNames.begin(), subtoolData->linkTargetNames.end());
+
     m_data->sharedTools.insert (m_data->sharedTools.end(), subtoolData->sharedTools.begin(), subtoolData->sharedTools.end());
     for (auto& tool : subtoolData->sharedTools)
       tool->m_data = m_data;
+
+    m_data->notifyLinkTargetNameWatchers ();
   }
 
 
@@ -119,6 +129,12 @@ namespace columnar
   std::vector<ColumnInfo> ColumnarToolArray ::
   getColumnInfo () const
   {
+    for (auto& [ciName, watchers] : m_data->linkTargetNameWatchers)
+    {
+      if (!m_data->hasContainerUserName (ciName))
+        throw std::runtime_error ("no name registered for container: " + ciName + " (it needs an ObjectColumn accessor, e.g. as the target of a link)");
+    }
+
     std::vector<std::pair<std::string,std::string>> names;
     names.reserve (m_data->columns.size());
     for (auto& [name, column] : m_data->columns)
@@ -137,10 +153,8 @@ namespace columnar
       info.name = name.second;
       info.offsetName = m_data->convertInternalToUserName (info.offsetName);
       info.replacesColumn = m_data->convertInternalToUserName (info.replacesColumn);
-      info.soleLinkTargetName = m_data->convertInternalToUserName (info.soleLinkTargetName);
-      for (auto& targetName : info.variantLinkTargetNames)
-        targetName = m_data->convertInternalToUserName (targetName);
-      info.keyColumnForVariantLink = m_data->convertInternalToUserName (info.keyColumnForVariantLink);
+      if (m_data->linkTargetNameWatchers.contains (name.first))
+        info.nameForLinks = m_data->linkTargetName (name.first);
       if (result.empty() || result.back().name != info.name)
         result.push_back (std::move(info));
       else
@@ -176,6 +190,24 @@ namespace columnar
 
 
   void ColumnarToolArray ::
+  setLinkTargetName (const std::string& column, const std::string& name)
+  {
+    auto internalNames = m_data->convertUserToInternalNames (column);
+    if (internalNames.empty())
+      throw std::runtime_error ("column not found for link target name: " + column);
+    for (auto& internalName : internalNames)
+    {
+      if (!m_data->hasContainerUserName (internalName))
+        throw std::runtime_error ("column for link target name is not the offset map of a container: " + column);
+    }
+    for (auto& internalName : internalNames)
+      m_data->linkTargetNames[internalName] = name;
+    m_data->notifyLinkTargetNameWatchers ();
+  }
+
+
+
+  void ColumnarToolArray ::
   setColumnIndex (const std::string& name, std::size_t index)
   {
     auto internalNames = m_data->convertUserToInternalNames (name);
@@ -202,6 +234,20 @@ namespace columnar
     if (!success && iter->second != name)
       throw std::runtime_error ("container already registered with different name: " + name + " vs " + iter->second);
     m_data->containerUserToInternalNames[name].emplace_back (container);
+    m_data->notifyLinkTargetNameWatchers ();
+  }
+
+
+
+  void ColumnarToolArray ::
+  watchLinkTargetName (std::string_view ciName, std::function<void(const std::string&)> watcher)
+  {
+    if (m_data->hasContainerUserName (ciName))
+      watcher (m_data->linkTargetName (ciName));
+    auto iter = m_data->linkTargetNameWatchers.find (ciName);
+    if (iter == m_data->linkTargetNameWatchers.end())
+      iter = m_data->linkTargetNameWatchers.emplace (std::string (ciName), std::vector<std::function<void(const std::string&)>> ()).first;
+    iter->second.push_back (std::move (watcher));
   }
 
 
@@ -219,12 +265,6 @@ namespace columnar
       m_data->columns[info.offsetName];
     if (!info.replacesColumn.empty())
       m_data->columns[info.replacesColumn];
-    if (!info.soleLinkTargetName.empty())
-      m_data->columns[info.soleLinkTargetName];
-    for (auto& targetName : info.variantLinkTargetNames)
-      m_data->columns[targetName];
-    if (!info.keyColumnForVariantLink.empty())
-      m_data->columns[info.keyColumnForVariantLink];
   }
 
 
@@ -384,5 +424,38 @@ namespace columnar
     if (!containerInternalToUserNames.contains (containerName) && !columnInternalToUserNames.contains (name) && columns.contains (name))
       result.push_back (std::string (name));
     return result;
+  }
+
+
+
+  std::string ColumnarToolDataArray ::
+  linkTargetName (std::string_view ciName) const
+  {
+    if (auto iter = linkTargetNames.find (ciName); iter != linkTargetNames.end())
+      return iter->second;
+    return containerInternalToUserNames.find (ciName)->second;
+  }
+
+
+
+  bool ColumnarToolDataArray ::
+  hasContainerUserName (std::string_view ciName) const
+  {
+    return containerInternalToUserNames.contains (ciName);
+  }
+
+
+
+  void ColumnarToolDataArray ::
+  notifyLinkTargetNameWatchers () const
+  {
+    for (auto& [ciName, watchers] : linkTargetNameWatchers)
+    {
+      if (!hasContainerUserName (ciName))
+        continue;
+      const std::string name = linkTargetName (ciName);
+      for (auto& watcher : watchers)
+        watcher (name);
+    }
   }
 }

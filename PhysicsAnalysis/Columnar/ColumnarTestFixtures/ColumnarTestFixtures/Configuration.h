@@ -95,6 +95,11 @@ namespace columnar
       IXAODToolCaller *xAODToolCaller = nullptr;
 
       /// @brief the container name remappings to apply
+      ///
+      /// This is also used to set the names when the container is
+      /// referenced in links (see `IColumnarTool::setLinkTargetName`).
+      /// For our tests this ought to always be the same, as we directly
+      /// use the names from the input file.
       std::vector<std::pair<std::string,std::string>> containerRenames = {};
 
       /// @brief the systematic variation to apply (empty for nominal)

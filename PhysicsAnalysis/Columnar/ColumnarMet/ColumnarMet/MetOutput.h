@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -45,13 +45,13 @@ namespace columnar
     };
 
 
-    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightDecorator<CI_MET,CI_OBJ,ColumnarModeArray> final
+    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ,ColumnarModeConcept CM>
+      requires (CM::isUprootMode)
+    class ObjectWeightDecorator<CI_MET,CI_OBJ,CM> final
     {
       /// Common Public Members
       /// =====================
     public:
-
-      using CM = ColumnarModeArray;
 
       ObjectWeightDecorator (ColumnarTool<CM>& columnarBase, const std::string& weightSuffix, bool /*writeWeights*/) : weightDec (columnarBase, "MetObjectWeight" + weightSuffix, {.isOptional = true}) {}
 
@@ -145,13 +145,13 @@ namespace columnar
 
 
 
-    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ> class ObjectWeightHandle<CI_MET,CI_OBJ,ColumnarModeArray> final
+    template<ContainerIdConcept CI_MET,ContainerIdConcept CI_OBJ,ColumnarModeConcept CM>
+      requires (CM::isUprootMode)
+    class ObjectWeightHandle<CI_MET,CI_OBJ,CM> final
     {
       /// Common Public Members
       /// =====================
     public:
-
-      using CM = ColumnarModeArray;
 
       ObjectWeightHandle (const asg::AsgTool& /*tool*/, const ObjectWeightDecorator<CI_MET,CI_OBJ,CM>& decorator, ObjectId<CI_MET,CM> /*met*/, const ObjectRange<CI_OBJ,CM>& container)
       {

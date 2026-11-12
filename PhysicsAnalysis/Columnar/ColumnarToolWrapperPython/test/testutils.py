@@ -12,7 +12,26 @@
 import contextlib
 import inspect
 import math
+import os
 import sys
+
+# The muon scale factors the tests compare against depend on the
+# calibration release, which defaults to the latest one. So the tests
+# pin the release the expected values were calculated with (the same as
+# the C++ tests do).
+MUON_CALIBRATION_RELEASE = "230213_Preliminary_r22run2_loosefix"
+
+
+def physlite_test_file():
+    """Return the path of the standard PHYSLITE MC test file, or None.
+
+    This is the Run 3 MC file from ASG_TEST_FILE_LITE_RUN3_MC. It is
+    on cvmfs, so it is not available on machines without it, and tests
+    using it should skip in that case.
+    """
+    path = os.environ.get("ASG_TEST_FILE_LITE_RUN3_MC", "")
+    return path if path and os.path.exists(path) else None
+
 
 _tool_index = 0
 

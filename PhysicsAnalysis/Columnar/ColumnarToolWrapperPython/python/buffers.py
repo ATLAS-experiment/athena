@@ -11,11 +11,12 @@ import itertools
 import awkward as ak
 import numpy as np
 
-from ColumnarToolWrapperPython.python_tool_handle import (
-    ColumnAccessMode,
-    invalid_link_value,
-    sg_key,
-)
+from ColumnarToolWrapperPython.python_tool_handle import ColumnAccessMode
+
+
+# the suffixes of the key and index columns of key+index links
+_LINK_KEY_SUFFIX = ".m_persKey"
+_LINK_INDEX_SUFFIX = ".m_persIndex"
 
 
 def _inner_most_list_offset_array(array):
@@ -62,64 +63,79 @@ def _inner_most_list_offset_array(array):
 
 
 def _branch_name_for_column(name):
-    """Strip the trailing ``.data`` suffix from a nested-vector column name."""
-    return name[:-5] if name.endswith(".data") else name
+    """Strip the trailing column suffix to get the branch name.
 
-
-def _is_link_column(col):
-    """Whether a data column is a (sole-target) element link column."""
-    return bool(col.sole_link_target_name)
-
-
-def _sg_container_name(name):
-    """Recover the StoreGate container name from a branch-prefix name.
-
-    Branch prefixes append ``AuxDyn`` (dynamic variables) or ``Aux``
-    (static variables) to the StoreGate key the container was recorded
-    under, e.g. ``"InDetTrackParticlesAuxDyn"`` -> ``"InDetTrackParticles"``.
-    Unrenamed (canonical) container names pass through unchanged.
+    That is ``.data`` for nested-vector columns, and ``.m_persKey`` or
+    ``.m_persIndex`` for the key and index columns of links.
     """
-    if name.endswith("AuxDyn"):
-        return name[: -len("AuxDyn")]
-    if name.endswith("Aux"):
-        return name[: -len("Aux")]
+    for suffix in (".data", _LINK_KEY_SUFFIX, _LINK_INDEX_SUFFIX):
+        if name.endswith(suffix):
+            return name[: -len(suffix)]
     return name
 
 
-def expected_link_key(col):
-    """Expected m_persKey value for a link column's target container.
+def _is_key_index_column(col):
+    """Whether a data column is the key or index column of a key+index link."""
+    return col.name.endswith((_LINK_KEY_SUFFIX, _LINK_INDEX_SUFFIX))
 
-    The persistent key stored for an element link is the StoreGate hash of
-    the target container's name and CLID (see ``sg_key``). The StoreGate
-    name is recovered from the (possibly renamed) target container name by
-    stripping a trailing ``AuxDyn``/``Aux`` branch-prefix suffix.
 
-    Returns None when the column is not a sole-target link column or the
-    target container's CLID is not known.
+def _key_index_field(events, col):
+    """Return the jagged array for a key or index column of a link."""
+    base = _branch_name_for_column(col.name)
+    index, key = _link_index_and_key(events, base, col.name)
+    return key if col.name.endswith(_LINK_KEY_SUFFIX) else index
+
+
+def _input_field(events, col):
+    """Return the jagged array for an input column."""
+    if _is_key_index_column(col):
+        return _key_index_field(events, col)
+    return events[_branch_name_for_column(col.name)]
+
+
+def _key_index_buffers(events, col):
+    """Extract the data buffer of a key or index column, without copying.
+
+    Returns ``(nested offsets, data)``, with the nested offsets being
+    ``None`` unless this is a link inside a vector. The field only gets
+    packed if it actually needs it (e.g. after an event selection). The
+    type of the data has to match what the tool expects, so it is not
+    converted here.
     """
-    clid = getattr(col, "sole_link_target_clid", 0)
-    if not col.sole_link_target_name or not clid:
-        return None
-    return sg_key(_sg_container_name(col.sole_link_target_name), clid)
+    layout = ak.to_packed(_key_index_field(events, col)).layout
+    if not isinstance(layout, ak.contents.ListOffsetArray):
+        raise RuntimeError(f"cannot handle layout for link column '{col.name}'")
+    nested_offsets = None
+    content = layout.content
+    if isinstance(content, ak.contents.ListOffsetArray):
+        nested_offsets = np.asarray(content.offsets.data).astype(np.uint64)
+        content = content.content
+    if not isinstance(content, ak.contents.NumpyArray):
+        raise RuntimeError(f"cannot handle layout for link column '{col.name}'")
+    data = np.asarray(content.data)
+    if data.dtype != col.dtype:
+        raise RuntimeError(
+            f"link column '{col.name}' has type {data.dtype}, expected {col.dtype}"
+        )
+    return nested_offsets, data
 
 
-def link_key_map(columns):
-    """Map m_persKey value -> target container name over a tool's link columns.
+def _container_offsets_from_fields(events, name):
+    """Read the offset map of a container with no input columns from the input.
 
-    Useful for reverse-resolving the m_persKey values stored in a file to
-    the (possibly renamed) container names the tool reads:
-
-        link_key_map(tool.columns).get(pers_key)
-
-    Columns without link metadata or without a known target CLID are
-    skipped.
+    Any field of the container in the input has the same per-event
+    structure. If there is none, then the tool asked for an offset map
+    that is not available, and that is an error.
     """
-    result = {}
-    for col in columns:
-        key = expected_link_key(col)
-        if key is not None:
-            result[key] = col.sole_link_target_name
-    return result
+    prefix = f"{name}."
+    for field in ak.fields(events):
+        if field.startswith(prefix):
+            return _offsets_from_counts(ak.to_numpy(ak.num(events[field], axis=1)))
+    raise RuntimeError(
+        f"tool requires the offset map of container '{name}', but the input "
+        f"has no fields starting with '{prefix}' (read at least one branch of "
+        "that container with uproot)"
+    )
 
 
 def _offsets_from_counts(counts):
@@ -159,71 +175,6 @@ def _link_index_and_key(events, base, column_name):
     )
 
 
-def _convert_links(index, key, target_offsets, col):
-    """Convert per-event link indices to global offsets into the target.
-
-    Mirrors ``LinkColumnVector::addLink``/``addSplitLink`` in
-    ColumnarTestFixtures/Root/ColumnarPhysliteTest.cxx: a stored
-    ``(m_persKey == 0, m_persIndex == 0)`` pair (the Athena persistent
-    null encoding) or ``m_persIndex == 0xFFFFFFFF`` (the standalone
-    ``ElementLinkBase::isDefault`` encoding) marks a null link, which
-    becomes ``invalid_link_value``; every other link is offset by the
-    target container's per-event start and bounds-checked against the
-    per-event end. The m_persKey value itself is not validated against the
-    target container (see the sg_key binding for computing expected keys).
-
-    ``index``/``key`` may be jagged at depth 2 (one link per object) or
-    depth 3 (a vector of links per object); the per-event ``target_offsets``
-    broadcast down either structure.
-    """
-    starts = np.asarray(target_offsets)[:-1]
-    ends = np.asarray(target_offsets)[1:]
-    global_index = ak.values_astype(index, np.uint64) + starts
-    valid = ~(((key == 0) & (index == 0)) | (index == 0xFFFFFFFF))
-    out_of_range = valid & (global_index >= ends)
-    if ak.any(out_of_range, axis=None):
-        msg = (
-            f"link index out of range for column '{col.name}' "
-            f"targeting '{col.sole_link_target_name}'"
-        )
-        found = sorted(
-            {int(k) for k in ak.flatten(key[out_of_range], axis=None).to_list()}
-        )
-        msg += f" (m_persKey of offending links: {[hex(k) for k in found]}"
-        expected = expected_link_key(col)
-        if expected is not None:
-            msg += f", expected 0x{expected:08x}"
-        raise RuntimeError(msg + ")")
-    return ak.where(valid, global_index, np.uint64(invalid_link_value))
-
-
-def _convert_scalar_link_column(events, col, target_offsets):
-    """Flatten a one-link-per-object column to a uint64 global-offset buffer."""
-    index, key = _link_index_and_key(events, col.name, col.name)
-    converted = _convert_links(index, key, target_offsets, col)
-    return np.ascontiguousarray(
-        ak.to_numpy(ak.flatten(converted, axis=1)), dtype=np.uint64
-    )
-
-
-def _convert_vector_link_column(events, col, target_offsets):
-    """Convert a vector-of-links column to (nested offsets, data) buffers.
-
-    The returned offsets have one entry per object plus one (the nested
-    ``.offset`` column); the data buffer holds the flattened uint64 global
-    offsets in object order.
-    """
-    base = _branch_name_for_column(col.name)
-    index, key = _link_index_and_key(events, base, col.name)
-    converted = _convert_links(index, key, target_offsets, col)
-    counts = ak.to_numpy(ak.flatten(ak.num(converted, axis=2), axis=1))
-    offsets = _offsets_from_counts(counts)
-    data = np.ascontiguousarray(
-        ak.to_numpy(ak.flatten(converted, axis=None)), dtype=np.uint64
-    )
-    return offsets, data
-
-
 def classify_columns(columns):
     """Group ColumnInfo objects by container and role.
 
@@ -243,6 +194,10 @@ def classify_columns(columns):
         - ``"outputs"``: list of output ColumnInfo belonging to this container
         - ``"nested_offsets"``: dict of name -> ColumnInfo for offset columns
           that are children of this container (e.g. "Muons.NumTrkPt500.offset")
+        - ``"event_indices"``: list of event-index ColumnInfo for this
+          container's offset map. These are generated rather than read from
+          the input, so they are kept separate from ``"inputs"``. Nested
+          offsets have the same list for their own offset map.
 
     Notes
     -----
@@ -275,6 +230,7 @@ def classify_columns(columns):
                     "offset": col,
                     "inputs": [],
                     "outputs": [],
+                    "event_indices": [],
                 }
             else:
                 container_offsets[name] = col
@@ -289,6 +245,7 @@ def classify_columns(columns):
             "inputs": [],
             "outputs": [],
             "nested_offsets": nested_offsets_by_container.get(name, {}),
+            "event_indices": [],
         }
         for name, col in container_offsets.items()
     }
@@ -315,7 +272,9 @@ def classify_columns(columns):
             # Shouldn't happen with well-formed tool output
             continue
 
-        if is_output:
+        if col.is_event_index:
+            bucket["event_indices"].append(col)
+        elif is_output:
             bucket["outputs"].append(col)
         else:
             bucket["inputs"].append(col)
@@ -361,7 +320,7 @@ def _column_is_present(col, available):
     Link columns are stored as ``m_persKey``/``m_persIndex`` branch fields
     rather than under the column name itself.
     """
-    if _is_link_column(col):
+    if _is_key_index_column(col):
         base = _branch_name_for_column(col.name)
         return base in available or f"{base}.m_persIndex" in available
     return col.name in available
@@ -383,11 +342,6 @@ def extract_buffers(events, classified):
     """
     buffers = {}
     num_events = int(ak.num(events, axis=0))
-    synthesized_offsets = set()
-    # Link columns are converted after the loop, once every container's
-    # offsets are known. Entries are (offset_owner, col): the nested offset
-    # name for vector links, the container name for scalar links.
-    deferred_links = []
 
     for container_name, info in classified.items():
         nested_offsets = info["nested_offsets"]
@@ -396,13 +350,10 @@ def extract_buffers(events, classified):
         # inner-most ListOffsetArray helper before processing flat inputs.
         for nested_offset_name, nested in nested_offsets.items():
             for col in nested["inputs"]:
-                if col.is_variant_link:
-                    raise NotImplementedError(
-                        f"variant link columns are not supported "
-                        f"(column '{col.name}')"
+                if _is_key_index_column(col):
+                    buffers[nested_offset_name], buffers[col.name] = (
+                        _key_index_buffers(events, col)
                     )
-                if _is_link_column(col):
-                    deferred_links.append((nested_offset_name, col))
                     continue
                 base = _branch_name_for_column(col.name)
                 inner = _inner_most_list_offset_array(events[base])
@@ -418,44 +369,32 @@ def extract_buffers(events, classified):
                     inner.layout.content.data[start:end]
                 )
 
-        for col in info["inputs"]:
-            if col.is_variant_link:
-                raise NotImplementedError(
-                    f"variant link columns are not supported (column '{col.name}')"
-                )
-        link_inputs = [col for col in info["inputs"] if _is_link_column(col)]
-        flat_inputs = [col for col in info["inputs"] if not _is_link_column(col)]
-        deferred_links.extend((container_name, col) for col in link_inputs)
-
-        if not flat_inputs and not nested_offsets and not link_inputs:
-            # No inputs at all — synthesize an offset so outputs can be sized
-            buffers[container_name] = np.array([0, num_events], dtype=np.uint64)
-            synthesized_offsets.add(container_name)
-            continue
+        key_index_inputs = [col for col in info["inputs"] if _is_key_index_column(col)]
+        for col in key_index_inputs:
+            _, buffers[col.name] = _key_index_buffers(events, col)
+        flat_inputs = [col for col in info["inputs"] if not _is_key_index_column(col)]
 
         if not flat_inputs:
-            # No regular flat inputs: derive the container offset from the
-            # per-event structure of a nested-vector field or a link branch.
             any_nested_input = next(
                 (col for nested in nested_offsets.values() for col in nested["inputs"]),
                 None,
             )
-            if any_nested_input is not None:
-                base = _branch_name_for_column(any_nested_input.name)
-                jagged = events[base]
-            elif link_inputs:
-                jagged, _key = _link_index_and_key(
-                    events, link_inputs[0].name, link_inputs[0].name
-                )
-            else:
-                jagged = None
-            if jagged is not None:
-                buffers[container_name] = _offsets_from_counts(
-                    ak.to_numpy(ak.num(jagged, axis=1))
-                )
-            else:
+            if info["offset"].offset_name not in classified:
+                # The event range itself is defined by the number of events, it
+                # is the one offset map that doesn't get read from the input.
                 buffers[container_name] = np.array([0, num_events], dtype=np.uint64)
-                synthesized_offsets.add(container_name)
+            elif any_nested_input is not None:
+                buffers[container_name] = _offsets_from_counts(
+                    ak.to_numpy(ak.num(_input_field(events, any_nested_input), axis=1))
+                )
+            elif key_index_inputs:
+                buffers[container_name] = _offsets_from_counts(
+                    ak.to_numpy(ak.num(_key_index_field(events, key_index_inputs[0]), axis=1))
+                )
+            else:
+                buffers[container_name] = _container_offsets_from_fields(
+                    events, container_name
+                )
             continue
 
         # Group flat input columns by their offset_name, then zip + to_buffers
@@ -506,27 +445,59 @@ def extract_buffers(events, classified):
                     f"container {container_name}"
                 )
 
-    # Convert link columns now that every container's offsets are known
-    for offset_owner, col in deferred_links:
-        target = col.sole_link_target_name
-        target_offsets = buffers.get(target)
-        if target_offsets is None or target in synthesized_offsets:
-            raise RuntimeError(
-                f"link column '{col.name}' targets container '{target}', "
-                "whose offsets could not be derived from the tool's input columns"
-            )
-        if col.name.endswith(".data"):
-            nested_link_offsets, data = _convert_vector_link_column(
-                events, col, target_offsets
-            )
-            buffers[offset_owner] = nested_link_offsets
-            buffers[col.name] = data
-        else:
-            buffers[col.name] = _convert_scalar_link_column(
-                events, col, target_offsets
-            )
+    _fill_event_index_columns(classified, buffers, num_events)
 
     return buffers
+
+
+def _fill_event_index_columns(classified, buffers, num_events):
+    """Fill the event-index columns, once all offsets are known.
+
+    Each event-index column has one entry per entry of its offset map,
+    holding the index of the event that entry belongs to. For a nested
+    offset (per-object vector) that is the event of the parent object.
+    """
+    container_event_index = {}
+
+    def event_index_for_container(name):
+        if name not in container_event_index:
+            parent = classified[name]["offset"].offset_name
+            if parent not in classified:
+                # the root container (EventInfo), one entry per event
+                result = np.arange(num_events, dtype=np.uint64)
+            else:
+                result = _repeat_for_offsets(
+                    event_index_for_container(parent), buffers[name], name
+                )
+            container_event_index[name] = result
+        return container_event_index[name]
+
+    for container_name, info in classified.items():
+        if info["event_indices"]:
+            event_index = event_index_for_container(container_name)
+            for col in info["event_indices"]:
+                buffers[col.name] = event_index
+        for nested_offset_name, nested in info["nested_offsets"].items():
+            if not nested["event_indices"]:
+                continue
+            event_index = _repeat_for_offsets(
+                event_index_for_container(container_name),
+                buffers[nested_offset_name],
+                nested_offset_name,
+            )
+            for col in nested["event_indices"]:
+                buffers[col.name] = event_index
+
+
+def _repeat_for_offsets(parent_values, offsets, offset_name):
+    """Repeat one value per parent entry for each entry in its offset range."""
+    counts = np.diff(np.asarray(offsets).astype(np.int64))
+    if len(counts) != len(parent_values):
+        raise RuntimeError(
+            f"offset column '{offset_name}' has {len(counts)} entries, "
+            f"but its parent has {len(parent_values)}"
+        )
+    return np.ascontiguousarray(np.repeat(parent_values, counts), dtype=np.uint64)
 
 
 def allocate_outputs(classified, buffer_dict):

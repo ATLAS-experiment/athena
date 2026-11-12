@@ -62,6 +62,8 @@ CP tools refer to data by canonical names (`"Muons"`, `"EventInfo"`). PHYSLITE f
 
 For example, after setting `rename_containers={"EventInfo": "EventInfoAuxDyn", "Muons": "AnalysisMuonsAuxDyn"}`, the tool's `ColumnInfo.name` fields will use the prefixed names (`"EventInfoAuxDyn.runNumber"` instead of `"EventInfo.runNumber"`).
 
+Renaming does not affect the keys of element links, which get calculated from the name the tool gave the target container. If that is not the name in the file (e.g. a tool calling its container `"Muons"` when links point to `"AnalysisMuons"`), set it with `link_target_names`, using the name of the column after renaming, e.g. `link_target_names={"AnalysisMuonsAuxDyn": "AnalysisMuons"}`. The name in use is reported in `ColumnInfo.name_for_links`.
+
 ### Virtual Arrays and Lazy Loading
 
 uproot's `virtual=True` returns lazily-loaded arrays — data is read from disk only when accessed. This avoids loading unused columns and improves performance:
@@ -626,7 +628,7 @@ import uproot
 from ColumnarToolWrapperPython import Tool
 
 tool = Tool(
-    "columnar::LinkColumnExampleTool/linkExample",
+    "columnar_array::VariatnLinkColumnExampleTool/linkExample",
     rename_containers={
         "EventInfo": "EventInfoAuxDyn",
         "AnalysisMuons": "AnalysisMuonsAuxDyn",
@@ -643,24 +645,9 @@ print(result["AnalysisMuonsAuxDyn.selection"].to_list())
 
 ### How It Works
 
-A link column is identified by `ColumnInfo.sole_link_target_name`, which names the container the link points into (after any `rename_containers` mapping):
+PHYSLITE files store each link as a per-event index (`m_persIndex`) plus a hashed key naming the target container (`m_persKey`). The tool requests these as two columns, with the names `<link>.m_persKey` and `<link>.m_persIndex`, and `Tool.__call__` passes them on as they are found in the file. To resolve the links the tool also requests the event-index column of the link column (`ColumnInfo.is_event_index`, filled in by the wrapper) and the offset map of the target container. The tool itself recognizes null links, checks the key against the target container, and checks that the index is inside the event.
 
-```python
-for col in tool.input_columns:
-    if col.sole_link_target_name:
-        print(col.name, "->", col.sole_link_target_name)
-# AnalysisMuonsAuxDyn.inDetTrackParticleLink -> InDetTrackParticlesAuxDyn
-```
-
-PHYSLITE files store each link as a per-event index (`m_persIndex`) plus a hashed key naming the target container (`m_persKey`). On the columnar side a link is instead a single `uint64` *global* offset into the flattened target container. `Tool.__call__` converts automatically:
-
-- `global = target_offsets[event] + m_persIndex`
-- null links become `invalid_link_value` (`0xFFFFFFFFFFFFFFFF`). Both null encodings are recognized: `(m_persKey == 0, m_persIndex == 0)` (the Athena persistent encoding) and `m_persIndex == 0xFFFFFFFF` (the standalone `ElementLinkBase::isDefault` encoding)
-- valid links are bounds-checked against the per-event range of the target container; an out-of-range index raises `RuntimeError`
-
-`required_input_branch_names` returns the parent branch name (e.g. `"AnalysisMuonsAuxDyn.inDetTrackParticleLink"`), which uproot expands into the `m_persKey`/`m_persIndex` fields automatically. Both one-link-per-object columns and `vector<ElementLink<...>>` columns (e.g. `caloClusterLinks`, declared by the tool as a `.data`/`.offset` pair) are handled.
-
-The target container's offsets are taken from its own input columns, so the link target must have at least one readable input column (this is always the case when the tool declares accessors on the target). Variant links (links that can point into one of several containers) are not yet supported and raise `NotImplementedError`.
+For one link per object `required_input_branch_names` returns the key and index sub-branches (e.g. `"AnalysisMuonsAuxDyn.inDetTrackParticleLink.m_persKey"`), as `uproot.iterate` can't read the parent branch directly. For `vector<ElementLink<...>>` columns (e.g. `caloClusterLinks`) it returns the branch of the link itself. Variant links (links that can point into one of several containers) are handled the same way.
 
 ### A Real Tool: EgammaCalibrationAndSmearingTool
 
@@ -706,23 +693,3 @@ sg_key("InDetTrackParticles", CLID_TRACK_PARTICLE_CONTAINER)  # 0x1D3890DB
 ```
 
 The CLID is the class ID from the `CLASS_DEF` macro in the corresponding xAOD container header (e.g. `xAODMuon/MuonContainer.h`, `xAODEgamma/ElectronContainer.h`). Without the CLID the hash differs — this is why hashing just the container name never matches the values in the file.
-
-### Reverse-Resolving m_persKey: `link_key_map`
-
-You usually don't need to look up CLIDs yourself: each link column carries the CLID of its target container as `ColumnInfo.sole_link_target_clid`, so the expected key can be computed per column and the keys stored in a file can be resolved back to container names:
-
-```python
-from ColumnarToolWrapperPython import expected_link_key, link_key_map
-
-# expected m_persKey for one link column (None if the CLID is unknown)
-(link_col,) = [c for c in tool.input_columns if c.sole_link_target_name]
-expected_link_key(link_col)        # 0x1D3890DB
-
-# reverse map over all of a tool's link columns
-keys = link_key_map(tool.columns)  # {0x1D3890DB: "InDetTrackParticlesAuxDyn"}
-keys.get(490246363)                # "InDetTrackParticlesAuxDyn"
-```
-
-The StoreGate name entering the hash is recovered from the (possibly renamed) target container name by stripping a trailing `AuxDyn`/`Aux` branch-prefix suffix (`"InDetTrackParticlesAuxDyn"` → `"InDetTrackParticles"`).
-
-`Tool.__call__` itself does not validate `m_persKey` against the target container (matching the C++ test fixtures, which treat the key check as optional for single-target links); the bounds check catches gross mismatches, and its error message reports the offending keys alongside the expected one.

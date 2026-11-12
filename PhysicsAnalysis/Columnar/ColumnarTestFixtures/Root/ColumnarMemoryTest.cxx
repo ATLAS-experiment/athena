@@ -16,6 +16,8 @@
 #include <ColumnarToolWrapper/ColumnarToolHelpers.h>
 #include <PATInterfaces/SystematicsUtil.h>
 
+#include <functional>
+
 //
 // method implementations
 //
@@ -198,8 +200,56 @@ namespace columnar
 
 
     void ColumnMapType ::
+    fillEventIndexColumns ()
+    {
+      // the event index for each entry of the given offset column,
+      // determined recursively through the chain of offset columns
+      std::function<std::vector<ColumnarOffsetType> (const std::string&)> getEventIndex;
+      getEventIndex = [&] (const std::string& offsetName)
+      {
+        auto userIter = m_userColumns.find (offsetName);
+        if (userIter == m_userColumns.end() || !userIter->second.input.has_value() || !userIter->second.info.has_value())
+          throw std::runtime_error ("missing offset column for event index: " + offsetName);
+        auto& input = userIter->second.input.value();
+        input.configureType (offsetName, typeid (ColumnarOffsetType));
+        auto offsets = input.getSpan<ColumnarOffsetType> (offsetName);
+        if (offsets.empty())
+          throw std::runtime_error ("empty offset column: " + offsetName);
+
+        std::vector<ColumnarOffsetType> result;
+        const auto& parentName = userIter->second.info->offsetName;
+        if (parentName.empty())
+        {
+          // this is the event range itself, each entry is an event
+          for (ColumnarOffsetType index = 0; index < offsets.back(); ++ index)
+            result.push_back (index);
+        } else
+        {
+          const auto parent = getEventIndex (parentName);
+          if (parent.size() + 1 != offsets.size())
+            throw std::runtime_error ("offset column " + offsetName + " doesn't match size of parent " + parentName);
+          for (std::size_t index = 0; index + 1 < offsets.size(); ++ index)
+            result.insert (result.end(), offsets[index+1] - offsets[index], parent[index]);
+        }
+        return result;
+      };
+
+      for (auto& [name, userColumn] : m_userColumns)
+      {
+        if (!userColumn.info.has_value() || !userColumn.info->isEventIndex || userColumn.input.has_value())
+          continue;
+        const auto eventIndex = getEventIndex (userColumn.info->offsetName);
+        userColumn.input.emplace (std::vector<std::any> (eventIndex.begin(), eventIndex.end()));
+      }
+    }
+
+
+
+    void ColumnMapType ::
     connectColumnsToTool ()
     {
+      fillEventIndexColumns ();
+
       std::vector<std::string> missingColumns;
       for (auto& [name, userColumn] : m_userColumns)
       {

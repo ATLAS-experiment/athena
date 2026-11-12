@@ -53,21 +53,6 @@ namespace columnar
     {
       auto& existingHeader = m_elements.at(iter->second);
 
-      // Variant link key columns with different targets get auto-renamed
-      if (!columnInfo.keyColumnForVariantLink.empty() && !existingHeader.keyColumnForVariantLink.empty() && existingHeader.variantLinkTargetNames != columnInfo.variantLinkTargetNames)
-      {
-        std::string uniqueName;
-        for (unsigned suffix = 1; ; ++suffix)
-        {
-          uniqueName = columnInfo.name + "." + std::to_string(suffix);
-          if (m_nameToIndex.find(uniqueName) == m_nameToIndex.end())
-            break;
-        }
-        ColumnInfo renamedInfo = columnInfo;
-        renamedInfo.name = std::move(uniqueName);
-        return addColumn(renamedInfo);
-      }
-
       // Check that relevant fields match
       if (existingHeader.type != columnInfo.type)
         throw std::runtime_error("column " + columnInfo.name + " type mismatch");
@@ -77,16 +62,8 @@ namespace columnar
         throw std::runtime_error("column " + columnInfo.name + " isOffset mismatch");
       if (existingHeader.fixedDimensions != columnInfo.fixedDimensions)
         throw std::runtime_error("column " + columnInfo.name + " fixed dimensions mismatch");
-      if (existingHeader.soleLinkTargetName != columnInfo.soleLinkTargetName)
-        throw std::runtime_error("column " + columnInfo.name + " sole link target name mismatch");
-      if (existingHeader.soleLinkTargetClid != columnInfo.soleLinkTargetClid)
-        throw std::runtime_error("column " + columnInfo.name + " sole link target clid mismatch");
-      if (existingHeader.isVariantLink != columnInfo.isVariantLink)
-        throw std::runtime_error("column " + columnInfo.name + " isVariantLink mismatch");
-      if (existingHeader.variantLinkTargetNames != columnInfo.variantLinkTargetNames)
-        throw std::runtime_error("column " + columnInfo.name + " variant link target names mismatch");
-      if (existingHeader.keyColumnForVariantLink != columnInfo.keyColumnForVariantLink)
-        throw std::runtime_error("column " + columnInfo.name + " key column for variant link mismatch");
+      if (existingHeader.isEventIndex != columnInfo.isEventIndex)
+        throw std::runtime_error("column " + columnInfo.name + " isEventIndex mismatch");
 
       // Handle access mode conflicts
       if (columnInfo.accessMode == ColumnAccessMode::output && existingHeader.readOnly)
@@ -106,11 +83,7 @@ namespace columnar
     header.type = columnInfo.type;
     header.accessMode = columnInfo.accessMode;
     header.offsetName = columnInfo.offsetName;
-    header.soleLinkTargetName = columnInfo.soleLinkTargetName;
-    header.soleLinkTargetClid = columnInfo.soleLinkTargetClid;
-    header.isVariantLink = columnInfo.isVariantLink;
-    header.variantLinkTargetNames = columnInfo.variantLinkTargetNames;
-    header.keyColumnForVariantLink = columnInfo.keyColumnForVariantLink;
+    header.isEventIndex = columnInfo.isEventIndex;
     header.fixedDimensions = columnInfo.fixedDimensions;
 
     switch (columnInfo.accessMode)
@@ -345,11 +318,7 @@ namespace columnar
       info.fixedDimensions = header.fixedDimensions;
       info.isOffset = header.isOffset;
       info.isOptional = header.isOptional;
-      info.soleLinkTargetName = header.soleLinkTargetName;
-      info.soleLinkTargetClid = header.soleLinkTargetClid;
-      info.isVariantLink = header.isVariantLink;
-      info.variantLinkTargetNames = header.variantLinkTargetNames;
-      info.keyColumnForVariantLink = header.keyColumnForVariantLink;
+      info.isEventIndex = header.isEventIndex;
       result.emplace(info.name, std::move(info));
     }
     return result;

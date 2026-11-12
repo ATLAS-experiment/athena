@@ -79,7 +79,7 @@ namespace columnar
 
       ANA_MSG_DEBUG("attempting to dynamically cast to IColumnarTool* gives " << m_tool);
       if (m_tool == nullptr)
-        throw std::runtime_error ("The tool does not implement IColumnarTool. First, check to make sure you're in the ColumnarAnalysis release. Then, check to see if the tool inherits from ColumnarTool.");
+        throw std::runtime_error ("The tool does not implement IColumnarTool. First, check that the type name refers to a tool built for a columnar mode (in the dual-library setup the namespaces have a suffix for the mode, e.g. 'CP_array::MyTool' for the array mode, while 'CP::MyTool' is the xAOD version). Then, check to see if the tool inherits from ColumnarTool.");
       m_systTool = dynamic_cast<CP::ISystematicsTool*> (m_tool);
     }
 
@@ -98,6 +98,15 @@ namespace columnar
         m_toolWrapper = std::make_shared<ToolColumnVectorMap> (*columnHeader, *m_tool);
         m_columns = std::make_unique<ColumnVectorData> (m_columnHeader.get());
       }
+    }
+
+    /// set the names of containers when they are the targets of links
+    void setLinkTargetNames (const std::vector<std::pair<std::string,std::string>>& names)
+    {
+      if (m_tool == nullptr)
+        preinitialize ();
+      for (const auto& [container, name] : names)
+        m_tool->setLinkTargetName (container, name);
     }
 
     /// initialize the tool

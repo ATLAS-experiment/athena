@@ -117,8 +117,7 @@ TEST_F (ColumnarMemoryTest, METMaker_muon)
   columnMap.addColumn ("MetAssoc.cale.offset", {0, 1});
   columnMap.addColumn ("MetAssoc.cale.data", {10e5});
   columnMap.addColumn ("MetAssoc.objectLinks.offset", {0, 1});
-  columnMap.addColumn ("MetAssoc.objectLinks.data", {0});
-  columnMap.addColumn ("MetAssoc.objectLinks.keys", {0,1,2,3,4});
+  columnMap.addKeyIndexLink<xAOD::IParticleContainer> ("MetAssoc.objectLinks", "Particles", {0});
   columnMap.addColumn ("MetAssoc.trkkey.offset", {0, 1});
   columnMap.addColumn ("MetAssoc.trkkey.data", {0xff});
   columnMap.addColumn ("MetAssoc.trkpx.offset", {0, 1});
@@ -131,7 +130,7 @@ TEST_F (ColumnarMemoryTest, METMaker_muon)
   columnMap.addColumn ("MetAssoc.trksumpt.data", {10e5});
   columnMap.addColumn ("MetAssoc.trke.offset", {0, 1});
   columnMap.addColumn ("MetAssoc.trke.data", {10e5});
-  columnMap.addColumn ("MetAssoc.jetLink", {columnar::invalidObjectIndex});
+  columnMap.addKeyIndexLink<xAOD::JetContainer> ("MetAssoc.jetLink", "Jets", {static_cast<std::uint32_t>(-1)});
   columnMap.addColumn ("MetAssoc.jettrkpx", {10e4});
   columnMap.addColumn ("MetAssoc.jettrkpy", {10e4});
   columnMap.addColumn ("MetAssoc.jettrkpz", {10e4});
@@ -289,8 +288,7 @@ TEST_F (ColumnarMemoryTest, METMaker_jet)
   columnMap.addColumn ("MetAssoc.cale.offset", {0, 1});
   columnMap.addColumn ("MetAssoc.cale.data", {10e5});
   columnMap.addColumn ("MetAssoc.objectLinks.offset", {0, 1});
-  columnMap.addColumn ("MetAssoc.objectLinks.data", {0});
-  columnMap.addColumn ("MetAssoc.objectLinks.keys", {0,1,2,3,4});
+  columnMap.addKeyIndexLink<xAOD::IParticleContainer> ("MetAssoc.objectLinks", "Particles", {0});
   columnMap.addColumn ("MetAssoc.trkkey.offset", {0, 1});
   columnMap.addColumn ("MetAssoc.trkkey.data", {0xff});
   columnMap.addColumn ("MetAssoc.trkpx.offset", {0, 1});
@@ -303,7 +301,7 @@ TEST_F (ColumnarMemoryTest, METMaker_jet)
   columnMap.addColumn ("MetAssoc.trksumpt.data", {10e5});
   columnMap.addColumn ("MetAssoc.trke.offset", {0, 1});
   columnMap.addColumn ("MetAssoc.trke.data", {10e5});
-  columnMap.addColumn ("MetAssoc.jetLink", {0});
+  columnMap.addKeyIndexLink<xAOD::JetContainer> ("MetAssoc.jetLink", "Jets", {0});
   columnMap.addColumn ("MetAssoc.jettrkpx", {10e4});
   columnMap.addColumn ("MetAssoc.jettrkpy", {10e4});
   columnMap.addColumn ("MetAssoc.jettrkpz", {10e4});
@@ -472,8 +470,7 @@ private:
 
 
 
-// FIX ME: this test failes in the nightlies
-TEST_F (ColumnarPhysLiteTest, DISABLED_METMaker_muon)
+TEST_F (ColumnarPhysLiteTest, METMaker_muon)
 {
   if (!checkMode())
     return;
@@ -538,8 +535,7 @@ private:
   const xAOD::MissingETContainer *m_metCore = nullptr;
 };
 
-// FIX ME: this test failes in the nightlies
-TEST_F (ColumnarPhysLiteTest, DISABLED_METMaker_jet)
+TEST_F (ColumnarPhysLiteTest, METMaker_jet)
 {
   if (!checkMode())
     return;

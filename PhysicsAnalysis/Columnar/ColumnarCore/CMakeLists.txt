@@ -56,6 +56,6 @@ if(idx GREATER -1)
   atlas_add_test( gt_AccessorsArray
     SOURCES test/gt_AccessorsArray.cxx
     INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
-    LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarCoreLib ColumnarModeLib${CMODE_SUFFIX} ColumnarEventInfoLib AsgTestingLib
+    LINK_LIBRARIES ${GTEST_LIBRARIES} ColumnarCoreLib ColumnarModeLib${CMODE_SUFFIX} ColumnarEventInfoLib ColumnarJetLib AsgTestingLib
     POST_EXEC_SCRIPT noerror.sh )
 endif()

@@ -153,7 +153,6 @@ namespace columnar
       static constexpr bool hasSetter = false;
       using MemoryType = CT;
 
-      static void updateColumnInfo (ColumnInfo& /*info*/) {}
     };
   }
 
@@ -215,7 +214,6 @@ namespace columnar
       static constexpr bool hasSetter = false;
       using MemoryType = CT;
 
-      static void updateColumnInfo (ColumnInfo& /*info*/) {}
     };
   }
 
@@ -242,7 +240,6 @@ namespace columnar
       static constexpr bool hasSetter = false;
       using MemoryType = CT;
 
-      static void updateColumnInfo (ColumnInfo& /*info*/) {}
       static auto makeViewer (auto&&)
       {
         return [] (const auto& value) {return static_cast<UT>(value);};

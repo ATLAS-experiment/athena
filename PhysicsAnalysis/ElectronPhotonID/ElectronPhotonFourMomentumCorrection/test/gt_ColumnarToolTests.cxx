@@ -17,6 +17,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <ColumnarTestFixtures/ColumnarMemoryTest.h>
 #include <ColumnarTestFixtures/ColumnarPhysliteTest.h>
 #include <xAODCore/ShallowCopy.h>
+#include <xAODCaloEvent/CaloClusterContainer.h>
 
 #include <ElectronPhotonFourMomentumCorrection/EgammaCalibrationAndSmearingTool.h>
 #include <TruthUtils/ParticleConstants.h>
@@ -67,8 +68,8 @@ TEST_F (ColumnarMemoryTest, EgammaCalibrationAndSmearingTool)
   columnMap.addColumn ("Electrons.eta", {1});
   columnMap.addColumn ("Electrons.phi", {1});
   columnMap.addColumn ("Electrons.author", {unsigned (xAOD::EgammaParameters::AuthorElectron)});
-  columnMap.addColumn ("Electrons.caloClusterLinks.data", {0});
-  columnMap.addColumn ("Electrons.caloClusterLinks.offset", {0, columnMap.columnSize("Electrons.caloClusterLinks.data")});
+  columnMap.addKeyIndexLink<xAOD::CaloClusterContainer> ("Electrons.caloClusterLinks", "egammaClusters", {0});
+  columnMap.addColumn ("Electrons.caloClusterLinks.offset", {0, 1});
 
   columnMap.addColumn ("egammaClusters", {0, 1});
   columnMap.addColumn ("egammaClusters.calEta", {1});
@@ -133,9 +134,7 @@ private:
   const xAOD::EventInfo *m_eventInfo = nullptr;
 };
 
-// FIX ME: This test is failing in the nightlies and needs to be fixed
-// and reenabled.
-TEST_F (ColumnarPhysLiteTest, DISABLED_EgammaCalibrationAndSmearingTool)
+TEST_F (ColumnarPhysLiteTest, EgammaCalibrationAndSmearingTool)
 {
   auto tool = std::make_unique<EgammaCalibrationAndSmearingTool> (makeUniqueName());
   ASSERT_SUCCESS (tool->setProperty ("ESModel", "es2022_R22_PRE"));

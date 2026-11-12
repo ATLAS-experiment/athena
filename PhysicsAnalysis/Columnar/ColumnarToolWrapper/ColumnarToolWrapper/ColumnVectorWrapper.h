@@ -10,7 +10,6 @@
 
 #include <ColumnarInterfaces/ColumnInfo.h>
 
-#include <cstdint>
 #include <span>
 #include <string>
 #include <typeinfo>
@@ -93,20 +92,8 @@ namespace columnar
     /// @brief the name of the offset column (or empty for none)
     std::string offsetName;
 
-    /// @brief for simple link columns: the target container name
-    std::string soleLinkTargetName;
-
-    /// @brief for simple link columns: the target container CLID (or 0)
-    std::uint32_t soleLinkTargetClid = 0;
-
-    /// @brief whether this is a variant link column
-    bool isVariantLink = false;
-
-    /// @brief for variant link key columns: the target container names
-    std::vector<std::string> variantLinkTargetNames;
-
-    /// @brief if this is a key column for a variant link, the name of the link column
-    std::string keyColumnForVariantLink;
+    /// @brief whether this is an event-index column
+    bool isEventIndex = false;
 
     /// @brief the fixed dimensions (if any)
     std::vector<unsigned> fixedDimensions;

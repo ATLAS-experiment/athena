@@ -11,6 +11,7 @@ import numpy as np
 
 from ColumnarToolWrapperPython.buffers import (
     _branch_name_for_column,
+    _is_key_index_column,
     allocate_outputs,
     classify_columns,
     extract_buffers,
@@ -38,9 +39,16 @@ class Tool:
         branch-name prefix used in the input arrays (e.g. "AnalysisMuonsAuxDyn").
         This is passed to PythonToolHandle.rename_containers *after* initialize
         so that ColumnInfo.name values match input array fields.
+    link_target_names:
+        Optional mapping from container names, after ``rename_containers`` is
+        applied, to the names used to calculate the keys of links pointing to
+        them, e.g.
+        ``{"AnalysisMuonsAuxDyn": "AnalysisMuons"}``. By default that is the
+        canonical name, independent of ``rename_containers``. The result is
+        reported in ``ColumnInfo.name_for_links``.
     """
 
-    def __init__(self, type_and_name, properties=None, rename_containers=None):
+    def __init__(self, type_and_name, properties=None, rename_containers=None, link_target_names=None):
         self._handle = PythonToolHandle()
         self._handle.set_type_and_name(type_and_name)
         self._properties = dict(properties) if properties else {}
@@ -52,6 +60,9 @@ class Tool:
 
         if rename_containers:
             self._handle.rename_containers(rename_containers)
+
+        if link_target_names:
+            self._handle.set_link_target_names(link_target_names)
 
         # Cache classified column topology once after initialization
         self._classified = classify_columns(self._handle.columns)
@@ -93,6 +104,10 @@ class Tool:
         For nested-vector inputs, the trailing ``.data`` suffix is stripped so
         the returned name matches the actual ROOT branch (e.g.
         ``"Particles.NumTrkPt500"`` instead of ``"Particles.NumTrkPt500.data"``).
+        Key and index columns of links inside a vector map to the branch of
+        the link itself. For one link per object they keep their names, as
+        those are the actual ROOT branches: the branch of the link is a
+        grouping branch, which ``uproot.iterate`` can't read directly.
         Optional inputs are excluded.
         """
         seen = []
@@ -100,7 +115,10 @@ class Tool:
         for col in self.input_columns:
             if col.is_optional:
                 continue
-            branch = _branch_name_for_column(col.name)
+            if _is_key_index_column(col) and "." not in col.offset_name:
+                branch = col.name
+            else:
+                branch = _branch_name_for_column(col.name)
             if branch not in seen_set:
                 seen_set.add(branch)
                 seen.append(branch)
@@ -166,13 +184,13 @@ class Tool:
                     self._handle[nested_offset_name] = np.asarray(
                         buffer_dict[nested_offset_name]
                     )
-                    for col in nested["inputs"]:
+                    for col in nested["inputs"] + nested["event_indices"]:
                         self._handle[col.name] = np.asarray(buffer_dict[col.name])
                     for col in nested["outputs"]:
                         self._handle.set_column_void(col.name, buffer_dict[col.name], False)
 
-                # Flat input data columns (immutable)
-                for col in info["inputs"]:
+                # Flat input data columns and event indices (immutable)
+                for col in info["inputs"] + info["event_indices"]:
                     self._handle[col.name] = np.asarray(buffer_dict[col.name])
 
                 # Flat output data columns (mutable)

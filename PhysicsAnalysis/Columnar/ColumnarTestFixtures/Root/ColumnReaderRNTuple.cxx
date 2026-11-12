@@ -178,6 +178,8 @@ namespace columnar
 
           const auto& fieldDesc = desc.GetFieldDescriptor(fieldId);
           const std::string typeName = desc.GetTypeNameForComparison(fieldDesc);
+          if (addKeyIndexLinkReader<RNTFieldReader> (knownColumns, name, typeName))
+            continue;
           if (typeName == "std::int32_t" || typeName == "int") 
           {
             knownColumns.push_back(std::make_shared<ColumnReaderScalar<std::int32_t, RNTFieldReader>>(name));
@@ -248,19 +250,6 @@ namespace columnar
         }
       }
       knownColumns.push_back(std::make_shared<ColumnReaderSamplingPattern<RNTFieldReader>>("egammaClusters"));
-
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorLink<xAOD::CaloClusterContainer,RNTFieldReader>>("AnalysisElectronsAuxDyn:caloClusterLinks"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorLink<xAOD::TrackParticleContainer, RNTFieldReader>>("AnalysisElectronsAuxDyn:trackParticleLinks"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorLink<xAOD::CaloClusterContainer,RNTFieldReader>>("AnalysisPhotonsAuxDyn:caloClusterLinks"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorLink<xAOD::VertexContainer, RNTFieldReader>>("AnalysisPhotonsAuxDyn:vertexLinks"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorRLink<xAOD::TrackParticleContainer,RNTFieldReader>>("AnalysisMuonsAuxDyn:inDetTrackParticleLink"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorRLink<xAOD::TrackParticleContainer,RNTFieldReader>>("AnalysisMuonsAuxDyn:combinedTrackParticleLink"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorRLink< xAOD::TrackParticleContainer, RNTFieldReader>>("AnalysisMuonsAuxDyn:extrapolatedMuonSpectrometerTrackParticleLink"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorLink<xAOD::TrackParticleContainer, RNTFieldReader>>("GSFConversionVerticesAuxDyn:trackParticleLinks"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorRLink<xAOD::TrackParticleContainer,RNTFieldReader>>("GSFTrackParticlesAuxDyn:originalTrackParticle"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorVariantLink<xAOD::IParticleContainer, RNTFieldReader>>("AnalysisJetsAuxDyn:GhostTrack"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorLink<xAOD::JetContainer, RNTFieldReader>>("METAssoc_AnalysisMETAux:.jetLink"));
-      knownColumns.push_back(std::make_shared<ColumnReaderVectorVectorVariantLink<xAOD::IParticleContainer, RNTFieldReader>>("METAssoc_AnalysisMETAux:.objectLinks"));
     }
   }
 }

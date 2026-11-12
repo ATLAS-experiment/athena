@@ -28,10 +28,6 @@ namespace columnar
   /// extended with the container CLID, masked to 30 bits. SGTools
   /// itself is not available in AnalysisBase-style releases, hence
   /// this local implementation on top of CxxUtils.
-  ///
-  /// Together with @ref ColumnInfo::soleLinkTargetClid this allows
-  /// computing the expected `m_persKey` for a link column's target at
-  /// runtime instead of hard-coding the values.
   [[nodiscard]] SG::sgkey_t computeSgKey (const std::string& name, std::uint32_t clid);
 }
 

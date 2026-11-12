@@ -29,6 +29,17 @@ namespace columnar
   /// but for now I need to do it manually.
 
 
+    /// @brief throw the exception for an out-of-range index
+    ///
+    /// This is cold and not inlined, so the exception construction and
+    /// its cleanup code stay out of the (hot) element access. It is
+    /// defined here, as this header is header-only.
+    [[noreturn]] [[gnu::cold]] [[gnu::noinline]] inline void throwVectorConvertViewOutOfRange ()
+    {
+      throw std::out_of_range ("VectorConvertView::operator[]: index out of range");
+    }
+
+
     /// an iterator that does converts members using a passed in function
     template<typename FunctionType,typename IteratorType>
     class VectorConvertIterator final
@@ -49,7 +60,7 @@ namespace columnar
       VectorConvertIterator& operator ++ () noexcept {
         ++ m_iterator; return *this;}
 
-      [[nodiscard]] decltype(auto) operator * () const noexcept {
+      [[nodiscard]] decltype(auto) operator * () const {
         return m_function (*m_iterator);}
 
       /// Private Members
@@ -83,7 +94,7 @@ namespace columnar
       [[nodiscard]] decltype(auto) operator[] (std::size_t index) const
       {
         if (index >= m_view.size()) [[unlikely]]
-          throw std::out_of_range ("VectorConvertView::operator[]: index out of range");
+          throwVectorConvertViewOutOfRange ();
         return m_function (m_view[index]);
       }
 
