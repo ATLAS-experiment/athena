@@ -9,6 +9,7 @@
 #include "CaloGeoHelpers/CaloSampling.h"
 #include "xAODCaloEvent/CaloCluster.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
+#include "TrkCaloExtension/CaloExtensionHelpers.h"
 //
 #include <vector>
 // forward declarations
@@ -37,6 +38,15 @@ public:
 
   xAOD::CaloCluster* collectCells(
     const Trk::CaloExtension& extension,
+    const CaloDetDescrManager* caloMgr,
+    const CaloCellContainer& cellContainer,
+    xAOD::CaloClusterContainer& clusterContainer) const;
+
+  /** @brief Collect the cells from the entry / exit points of the extrapolation
+   *         per calorimeter layer. This is the generic implementation which does
+   *         not depend on the way the track was extrapolated through the calorimeter */
+  xAOD::CaloCluster* collectCells(
+    const CaloExtensionHelpers::EntryExitLayerMap& entryExitLayerMap,
     const CaloDetDescrManager* caloMgr,
     const CaloCellContainer& cellContainer,
     xAOD::CaloClusterContainer& clusterContainer) const;

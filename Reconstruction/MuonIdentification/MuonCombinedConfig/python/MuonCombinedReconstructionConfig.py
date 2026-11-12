@@ -258,6 +258,11 @@ def LRT_MuonCombinedAlgCfg(flags, name="MuonCombinedAlg_LRT", **kwargs):
     return MuonCombinedAlgCfg(flags, name, **kwargs)
 
 
+def muonClusterContainer(flags):
+    """Name of the legacy muon cluster container: suffixed if the Phase II reco writes MuonClusterCollection"""
+    return "MuonClusterCollectionLegacy" if flags.Muon.scheduleActsReco and flags.Muon.scheduleLegacyReco else "MuonClusterCollection"
+
+
 def MuonCreatorAlgCfg(flags, name="MuonCreatorAlg", **kwargs):
     from MuonCombinedConfig.MuonCombinedRecToolsConfig import MuonCreatorToolCfg
     result = MuonCreatorToolCfg(flags, name="MuonCreatorTool")
@@ -286,6 +291,7 @@ def MuonCreatorAlgCfg(flags, name="MuonCreatorAlg", **kwargs):
             kwargs.setdefault("CreateSAmuons", True)
             kwargs.setdefault("TagMaps", [])
     
+    kwargs.setdefault("ClusterContainerName", muonClusterContainer(flags))
     if flags.Muon.scheduleActsReco:
         kwargs.setdefault("MuonContainerLocation", "MuonsLegacy")
 
@@ -550,12 +556,13 @@ def CombinedMuonOutputCfg(flags):
 
     particle_col, trk_col = GetCombinedTrkContainers(flags)
     if flags.Detector.EnableCalo:
-        aod_items += ["xAOD::CaloClusterContainer#MuonClusterCollection"]
-        aod_items += ["xAOD::CaloClusterAuxContainer#MuonClusterCollectionAux."]
-        aod_items += ["CaloClusterCellLinkContainer#MuonClusterCollection_links"]
+        clusters = muonClusterContainer(flags)
+        aod_items += [f"xAOD::CaloClusterContainer#{clusters}"]
+        aod_items += [f"xAOD::CaloClusterAuxContainer#{clusters}Aux."]
+        aod_items += [f"CaloClusterCellLinkContainer#{clusters}_links"]
         from CaloRec.CaloThinCellsByClusterAlgConfig import CaloThinCellsByClusterAlgCfg
         result.merge(CaloThinCellsByClusterAlgCfg(flags, streamName="StreamAOD",
-                                                  clusters="MuonClusterCollection",
+                                                  clusters=clusters,
                                                   samplings=["TileGap1", "TileGap2", "TileGap3", "TileBar0", "TileExt0", "HEC0"]))
 
     # Adding the xAOD content by default
@@ -564,12 +571,8 @@ def CombinedMuonOutputCfg(flags):
     aod_items += ["xAOD::TrackParticleAuxContainer#"+col +
                   "Aux." + excludedAuxData for col in particle_col]
 
-    if not flags.Muon.scheduleActsReco:
-        aod_items += ["xAOD::MuonContainer#Muons"]
-        aod_items += ["xAOD::MuonContainer#MuonsLRT"]
-    else:
-        aod_items += ["xAOD::MuonContainer#MuonsLegacy"]
-        aod_items += ["xAOD::MuonContainer#MuonsLRTLegacy"]
+    muons, muons_lrt = ("MuonsLegacy", "MuonsLRTLegacy") if flags.Muon.scheduleActsReco else ("Muons", "MuonsLRT")
+    aod_items += [f"xAOD::MuonContainer#{muons}", f"xAOD::MuonContainer#{muons_lrt}"]
 
 
     # FIXME! Next two lines are hack to remove derivation framework variables that are added by DRAW building and are supposed to be transient
@@ -582,8 +585,8 @@ def CombinedMuonOutputCfg(flags):
 
     excludedMuonAuxData = ".-"+".-".join(iso_vars+wp_decors+gpf_vars)
 
-    aod_items += ["xAOD::MuonAuxContainer#MuonsAux" + excludedMuonAuxData]
-    aod_items += ["xAOD::MuonAuxContainer#MuonsLRTAux" + excludedMuonAuxData]
+    aod_items += [f"xAOD::MuonAuxContainer#{muons}Aux" + excludedMuonAuxData]
+    aod_items += [f"xAOD::MuonAuxContainer#{muons_lrt}Aux" + excludedMuonAuxData]
 
     # stau
     aod_items += ["xAOD::MuonContainer#Staus"]
@@ -740,7 +743,7 @@ def MuonCombinedReconstructionCfg(flags):
             result.merge(MuonSegmentTruthAssociationAlgCfg(flags))
 
     result.addEventAlgo(CompFactory.ClusterMatching.CaloClusterMatchLinkAlg(
-        "MuonTCLinks", ClustersToDecorate="MuonClusterCollection"))
+        "MuonTCLinks", ClustersToDecorate=muonClusterContainer(flags)))
     result.merge(MuonDecorationAlgsCfg(flags))
     # Setup output
     result.merge(CombinedMuonOutputCfg(flags))

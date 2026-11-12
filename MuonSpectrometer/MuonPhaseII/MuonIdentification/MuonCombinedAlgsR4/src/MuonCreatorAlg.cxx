@@ -6,10 +6,38 @@
 #include "MuonTrackEvent/AuthorHierachy.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "Acts/Utilities/Enumerate.hpp"
+#include "AthContainers/Accessor.h"
+#include "StoreGate/ReadCondHandle.h"
 
 namespace {
     constexpr double inGeV = 1./ Gaudi::Units::GeV;
     constexpr double inDeg = 1./ Gaudi::Units::deg;
+
+    /** @brief Translate the Acts calo extension into the entry / exit positions per calo layer.
+     *         The state on the sensitive surface of a sampling is used as proxy sample point, so
+     *         entry and exit coincide. The CaloCellCollector only uses their midpoint. */
+    CaloExtensionHelpers::EntryExitLayerMap entryExitLayerMap(const Acts::GeometryContext& gctx,
+                                                              const ActsTrk::CaloExtension& extension) {
+        CaloExtensionHelpers::EntryExitLayerMap result{};
+        for (std::size_t id = 0; id < static_cast<std::size_t>(CaloSampling::Unknown); ++id) {
+            const auto sample = static_cast<CaloSampling::CaloSample>(id);
+            std::optional<Amg::Vector3D> entry{std::nullopt}, exit{std::nullopt};
+            for (const Acts::BoundTrackParameters& pars : extension.caloParameters(sample)) {
+                // Reject portals: the sensitive surface is the sample point and portals carry layer 0 (PreSamplerB)
+                if (pars.referenceSurface().geometryId().boundary() != 0) {
+                    continue;
+                }
+                exit = pars.position(gctx);
+                if (!entry) {
+                    entry = exit;
+                }
+            }
+            if (entry) {
+                result.emplace(sample, std::make_pair(*entry, *exit));
+            }
+        }
+        return result;
+    }
 }
 
 namespace MuonCombinedR4 {
@@ -19,6 +47,13 @@ StatusCode MuonCreatorAlg::initialize() {
     ATH_CHECK(m_tagKeys.initialize());
     ATH_CHECK(m_selectionTool.retrieve());
     ATH_CHECK(m_summaryTool.retrieve());
+    m_useCells = m_useCaloCells && !m_clusterContainerName.key().empty();
+    ATH_CHECK(m_clusterContainerName.initialize(m_useCells));
+    ATH_CHECK(m_clusterContainerLinkName.initialize(m_useCells));
+    ATH_CHECK(m_cellContainerName.initialize(m_useCells));
+    ATH_CHECK(m_caloMgrKey.initialize(m_useCells));
+    ATH_CHECK(m_caloNoiseKey.initialize(m_useCells && !m_caloNoiseKey.empty()));
+    ATH_CHECK(m_ctxProvider.initialize(m_useCells));
     return StatusCode::SUCCESS;
 }
 StatusCode MuonCreatorAlg::execute(const EventContext& ctx) const {
@@ -39,12 +74,29 @@ StatusCode MuonCreatorAlg::execute(const EventContext& ctx) const {
                      <<", phi: "<<saTag->msTrack()->phi()*inDeg);
         createMuon(ctx, std::array{saTag}, ship);
     }
+    /** Attach the cell link container to the created clusters and record it */
+    if (m_useCells) {
+        SG::WriteHandle<CaloClusterCellLinkContainer> linkHandle{m_clusterContainerLinkName, ctx};
+        auto* clusterStore = ship.caloClusters.getHandle().storeHandle().get();
+        for (xAOD::CaloCluster* cluster : *ship.caloClusters) {
+            cluster->setLink(ship.caloClusterLinks.get(), clusterStore);
+        }
+        ATH_CHECK(linkHandle.record(std::move(ship.caloClusterLinks)));
+    }
     return StatusCode::SUCCESS;
 }
 
 
 StatusCode MuonCreatorAlg::setupDataShip(const EventContext& ctx, DataShip& ship) const {
     ATH_CHECK(ship.muons.record(m_muonKey, ctx));
+    if (m_useCells) {
+        ATH_CHECK(ship.caloClusters.record(m_clusterContainerName, ctx));
+        ATH_CHECK(SG::get(ship.caloCells, m_cellContainerName, ctx));
+        ATH_CHECK(SG::get(ship.caloMgr, m_caloMgrKey, ctx));
+        if (!m_caloNoiseKey.empty()) {
+            ATH_CHECK(SG::get(ship.caloNoise, m_caloNoiseKey, ctx));
+        }
+    }
 
     std::unordered_set<const xAOD::TrackParticle*> cmbMsTrks{};
     std::vector<const MuonR4::MuonTagContainer*> tagContainers{};
@@ -97,6 +149,45 @@ ElementLink<xAOD::TrackParticleContainer>
                        trk->index(), ctx};
 }
 
+
+void MuonCreatorAlg::collectCells(const EventContext& ctx,
+                                  xAOD::Muon& muon,
+                                  DataShip& ship) const {
+    static const SG::Accessor<float> acc_ET_Core{"ET_Core"};
+    static const SG::Accessor<float> acc_ET_EMCore{"ET_EMCore"};
+    static const SG::Accessor<float> acc_ET_TileCore{"ET_TileCore"};
+    static const SG::Accessor<float> acc_ET_HECCore{"ET_HECCore"};
+    acc_ET_Core(muon) = 0.f;
+    acc_ET_EMCore(muon) = 0.f;
+    acc_ET_TileCore(muon) = 0.f;
+    acc_ET_HECCore(muon) = 0.f;
+
+    const xAOD::TrackParticle* idTrack = muon.trackParticle(xAOD::Muon::TrackParticleType::InnerDetectorTrackParticle);
+    if (!idTrack) {
+        return;
+    }
+    const ActsTrk::CaloExtension* extension = ActsTrk::getCaloExtension(*idTrack);
+    if (!extension || extension->empty()) {
+        ATH_MSG_DEBUG("No calo extension available for the ID track of the muon");
+        return;
+    }
+    const Acts::GeometryContext gctx = m_ctxProvider.getGeometryContext(ctx);
+    xAOD::CaloCluster* cluster = m_cellCollector.collectCells(entryExitLayerMap(gctx, *extension),
+                                                              ship.caloMgr, *ship.caloCells, *ship.caloClusters);
+    if (!cluster) {
+        ATH_MSG_DEBUG("Failed to create the cluster from the calo extension");
+        return;
+    }
+    ATH_MSG_DEBUG("New cluster: eta "<<cluster->eta()<<" phi "<<cluster->phi()<<" cells "<<cluster->size());
+    muon.setClusterLink(ElementLink<xAOD::CaloClusterContainer>(*ship.caloClusters, cluster->index(), ctx));
+
+    std::vector<float> etcore(Rec::CaloCellCollector::N_ET_Core, 0.f);
+    m_cellCollector.collectEtCore(*cluster, etcore, ship.caloNoise, m_sigmaCaloNoiseCut);
+    acc_ET_Core(muon) = etcore[Rec::CaloCellCollector::ET_Core];
+    acc_ET_EMCore(muon) = etcore[Rec::CaloCellCollector::ET_EMCore];
+    acc_ET_TileCore(muon) = etcore[Rec::CaloCellCollector::ET_TileCore];
+    acc_ET_HECCore(muon) = etcore[Rec::CaloCellCollector::ET_HECCore];
+}
 
 void MuonCreatorAlg::createMuon(const EventContext& ctx,
                                 const std::span<const MuonR4::MuonTag* const>& muTags,
@@ -155,6 +246,10 @@ void MuonCreatorAlg::createMuon(const EventContext& ctx,
         p4Set = true;
     }
     newMuon->setMuonSegmentLinks(segLinks);
+
+    if (ship.caloCells) {
+        collectCells(ctx, *newMuon, ship);
+    }
 
     switch(newMuon->author()){
         using enum xAOD::Muon::Author;
