@@ -32,6 +32,7 @@
 
 #include "ActsEvent/ContextUtility.h"
 #include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "Acts/Surfaces/PerigeeSurface.hpp"
 
 
 namespace MuonValR4{
@@ -59,8 +60,15 @@ namespace MuonValR4{
          *  @param seed: The seed with the contributing segments */
         std::pair<double, double>  calcSeedLength(const Acts::GeometryContext& tgContext,
                                                   const MuonR4::MsTrackSeed& seed) const;
+        /** @brief Perigee parameters of the truth muon w.r.t. the beam line, obtained by propagating the truth
+         *         parameters at the production vertex with the ExtrapolationTool. A nullopt is returned if the
+         *         particle has no production vertex or if the propagation fails
+         *  @param ctx: EventContext to fetch the alignment & magnetic field from the conditions store
+         *  @param truthMuon: Reference to the truth muon */
+        std::optional<Acts::BoundTrackParameters> truthPerigee(const EventContext& ctx,
+                                                               const xAOD::TruthParticle& truthMuon) const;
 
-        
+
         /** @brief Returns the matched truth particle that is dumped in the tree. This method
          *         only works downstream the dumpTruthContent call
          *  @param part: Reference to the particle of interest */
@@ -164,6 +172,8 @@ namespace MuonValR4{
         ToolHandle<MuonR4::ISegmentSelectionTool> m_segSelector{this, "SegmentSelectionTool" , "" };
         /** @brief Track extrapolation tool */
         ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool{this, "ExtrapolationTool" ,"" };
+        /** @brief Beam line (z-axis) as target surface of the truth muon perigee parameters */
+        std::shared_ptr<Acts::PerigeeSurface> m_beamLine{Acts::Surface::makeShared<Acts::PerigeeSurface>(Acts::Vector3::Zero())};
         /** @brief Legacy track reconstruction chain */
         TrackKey_t m_legacyTrackKey{this,"LegacyTrackKey", "MuonSpectrometerTrackParticles"};
         /** @brief  The collection of ID tracks associated with the truth particle*/
