@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -19,6 +19,8 @@
 //#include "GaudiKernel/Algorithm.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "Gaudi/Property.h"
+#include "AthContainers/OwnershipPolicy.h"
 
 
 
@@ -64,28 +66,28 @@ private:
 
 
 	/** Does the collection own it's objects ? **/
-	int m_ownPolicy;
+	Gaudi::Property<int> m_ownPolicy{this, "OwnPolicy", static_cast<int> (SG::OWN_ELEMENTS)};
 
 
 	/** Digits data container name */
-	std::string m_ttContainerName;
+	Gaudi::Property<std::string> m_ttContainerName{this, "DigitsContainerName", "ZdcTriggerTowers", "ZdcTriggerTowers"};
 
 	/** Raw data object name */
-	std::string m_zdcModuleContainerName;
-	std::string m_zdcModuleAuxContainerName;
+	Gaudi::Property<std::string> m_zdcModuleContainerName{this, "ZdcModuleContainerName", "ZdcModules", "ZdcModules"};
+	Gaudi::Property<std::string> m_zdcModuleAuxContainerName{this, "ZdcModuleAuxContainerName", "ZdcModulesAux.", "ZdcModulesAux."};
 
 
 	/** Pointer to Zdc input "digits" data */
-	const xAOD::TriggerTowerContainer* m_ttContainer;
+	const xAOD::TriggerTowerContainer* m_ttContainer{nullptr};
 
-	int m_eventCount;
-	bool m_complainContain;
-	bool m_complainRetrieve;
+	int m_eventCount{0};
+	bool m_complainContain{true};
+	bool m_complainRetrieve{true};
 
 	//Include here all tools to do the job. They will be called by the algorithm execute method
 	//Another option is to use ToolHandleArray<IZdcRecTool>, where IZdcRecTool is the factory for
 	//the tools
-	ToolHandle<ZdcRecChannelToolV2> m_ChannelTool;
+	ToolHandle<ZdcRecChannelToolV2> m_ChannelTool{"ZdcRecChannelToolV2"};
 
 };
 

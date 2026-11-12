@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -17,6 +17,8 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "Gaudi/Property.h"
+#include "AthContainers/OwnershipPolicy.h"
 
 class ISvcLocator;
 class StatusCode;
@@ -53,8 +55,8 @@ public:
 
 private:
 	
-	int m_ownPolicy;
-	int m_DecodeRunMode; // 0 = ZDC+RPD (default), 1 = LIS only, 2 = ZDC+RPD + LIS	
+	Gaudi::Property<int> m_ownPolicy{this, "OwnPolicy", static_cast<int> (SG::OWN_ELEMENTS)};
+	Gaudi::Property<int> m_DecodeRunMode{this, "DecodeRunMode", 0}; // 0 = ZDC+RPD (default), 1 = LIS only, 2 = ZDC+RPD + LIS	
 	Gaudi::Property<unsigned int> m_nFragments{this,"NFragments",6,"Number of expected LUCROD fragments"};
 
 	SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{this,"EventInfoKey","EventInfo"};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -29,12 +29,8 @@
 //==================================================================================================
 ZdcRecRun3Decode::ZdcRecRun3Decode(const std::string& name, ISvcLocator* pSvcLocator) :
 
-	AthAlgorithm(name, pSvcLocator),
-	m_ownPolicy(static_cast<int> (SG::OWN_ELEMENTS)),
-	m_DecodeRunMode(0) // 0 = ZDC+RPD (default), 1 = LIS only, 2 = ZDC+RPD + LIS
+	AthAlgorithm(name, pSvcLocator)
 {
-  declareProperty("OwnPolicy",m_ownPolicy) ;
-  declareProperty("DecodeRunMode",m_DecodeRunMode); // 0 = ZDC+RPD (default), 1 = LIS only, 2 = ZDC+RPD + LIS	
 }
 
 //==================================================================================================
@@ -79,7 +75,7 @@ StatusCode ZdcRecRun3Decode::initialize()
 		m_nFragments.set(7);
 	}	
 	else {
-		mLog << MSG::ERROR << "--> ZDC: Unknown DecodeRunMode " << m_DecodeRunMode << ", should be 0, 1, or 2. Exiting." << endmsg;
+		mLog << MSG::ERROR << "--> ZDC: Unknown DecodeRunMode " << m_DecodeRunMode.value() << ", should be 0, 1, or 2. Exiting." << endmsg;
 		return StatusCode::FAILURE;
 	}
 

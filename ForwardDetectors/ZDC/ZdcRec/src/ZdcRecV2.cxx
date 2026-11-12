@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -30,23 +30,8 @@
 ZdcRecV2::ZdcRecV2(const std::string& name, ISvcLocator* pSvcLocator) :
 
 	AthAlgorithm(name, pSvcLocator),
-	m_storeGate("StoreGateSvc", name),
-	m_ownPolicy(static_cast<int> (SG::OWN_ELEMENTS)),
-	m_ttContainerName("ZdcTriggerTowers"),
-	m_zdcModuleContainerName("ZdcModules"),
-	m_zdcModuleAuxContainerName("ZdcModulesAux."),
-	m_ttContainer(nullptr),
-	m_eventCount(0),
-	m_complainContain(1),
-	m_complainRetrieve(1),
-        m_ChannelTool("ZdcRecChannelToolV2")
-
+	m_storeGate("StoreGateSvc", name)
 {
-	declareProperty("OwnPolicy",m_ownPolicy) ;
-
-	declareProperty("DigitsContainerName", m_ttContainerName, "ZdcTriggerTowers");
-	declareProperty("ZdcModuleContainerName",    m_zdcModuleContainerName,    "ZdcModules");
-	declareProperty("ZdcModuleAuxContainerName",    m_zdcModuleAuxContainerName,    "ZdcModulesAux.");
 }
 //==================================================================================================
 
@@ -79,7 +64,7 @@ StatusCode ZdcRecV2::initialize()
 	
 	// Container output name
 	//TODO: change MESSAGE !!
-	mLog << MSG::DEBUG << " Output Container Name " << m_zdcModuleContainerName << endmsg;
+	mLog << MSG::DEBUG << " Output Container Name " << m_zdcModuleContainerName.value() << endmsg;
 	if (m_ownPolicy == SG::OWN_ELEMENTS)
 		mLog << MSG::DEBUG << "...will OWN its cells." << endmsg;
 	else
@@ -108,19 +93,19 @@ StatusCode ZdcRecV2::execute(const EventContext& /*ctx*/)
 	//Look for the container presence
 	bool dg = m_storeGate->contains<xAOD::TriggerTowerContainer>( m_ttContainerName);
 	if (!dg) {
-	  if (m_complainContain) mLog << MSG::WARNING << "--> ZDC: StoreGate does not contain " << m_ttContainerName << endmsg;
+	  if (m_complainContain) mLog << MSG::WARNING << "--> ZDC: StoreGate does not contain " << m_ttContainerName.value() << endmsg;
 	  m_complainContain = 0;
 	  return StatusCode::SUCCESS;
 	}
 
 	// Look up the Digits "TriggerTowerContainer" in Storegate
-	StatusCode digitsLookupSC = m_storeGate->retrieve(m_ttContainer, m_ttContainerName);
+	StatusCode digitsLookupSC = m_storeGate->retrieve(m_ttContainer, m_ttContainerName.value());
 	if (digitsLookupSC.isFailure())
 	{
 	  if (m_complainRetrieve)
 	    mLog << MSG::WARNING
 		 << "--> ZDC: Could not retrieve "
-		 << m_ttContainerName
+		 << m_ttContainerName.value()
 		 << " from StoreGate"
 		 << endmsg;
 	  m_complainRetrieve = 0;
@@ -131,7 +116,7 @@ StatusCode ZdcRecV2::execute(const EventContext& /*ctx*/)
 	{
 		mLog << MSG::ERROR
 			 << "--> ZDC: Storegate returned zero pointer for "
-			 << m_ttContainerName
+			 << m_ttContainerName.value()
 			 << endmsg;
 		return StatusCode::SUCCESS;
 	}
@@ -148,8 +133,8 @@ StatusCode ZdcRecV2::execute(const EventContext& /*ctx*/)
 	msg( MSG::DEBUG ) << ZdcModuleToString(*moduleContainer) << endmsg;
 	//msg( MSG::INFO ) << ZdcModuleToString(*moduleContainer) << endmsg;
 
-	ATH_CHECK( evtStore()->record( std::move(moduleContainer), m_zdcModuleContainerName) );
-	ATH_CHECK( evtStore()->record( std::move(moduleAuxContainer), m_zdcModuleAuxContainerName) );
+	ATH_CHECK( evtStore()->record( std::move(moduleContainer), m_zdcModuleContainerName.value()) );
+	ATH_CHECK( evtStore()->record( std::move(moduleAuxContainer), m_zdcModuleAuxContainerName.value()) );
 
 	return StatusCode::SUCCESS;
 

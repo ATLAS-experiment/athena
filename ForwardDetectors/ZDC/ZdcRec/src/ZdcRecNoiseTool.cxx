@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -57,11 +57,6 @@ ZdcRecNoiseTool::ZdcRecNoiseTool(const std::string& type,
 
 	declareInterface<ZdcRecNoiseTool>(this);
 
-	declareProperty("PedestalsDirectory", m_pedestalDir = "/afs/cern.ch/user/l/leite/public/ZdcData/Pedestals",
-							"Pedestal files directory");
-	declareProperty("PedestalsFile", m_pedestalFile = "zdc_pedestal_0000.data",
-							"Pedestal file name");
-
 }
 //==================================================================================================
 
@@ -81,7 +76,7 @@ int ZdcRecNoiseTool::readPedestals()
 	unsigned int id;
 
 	//Read the file name as passed to the tool for the pedestals
-	std::string     str = m_pedestalDir + m_pedestalFile;
+	std::string     str = m_pedestalDir.value() + m_pedestalFile.value();
 	std::ifstream  infile;
 
 	infile.open(str.data(), std::ifstream::in);
@@ -129,7 +124,7 @@ int ZdcRecNoiseTool::writePedestals()
 	unsigned int id;
 
 	//Read the file name as passed to the tool for the pedestals
-	std::string     str = m_pedestalDir + m_pedestalFile;
+	std::string     str = m_pedestalDir.value() + m_pedestalFile.value();
 	std::ofstream  outfile;
 
 	//TODO: First check if it exists, never overwrites

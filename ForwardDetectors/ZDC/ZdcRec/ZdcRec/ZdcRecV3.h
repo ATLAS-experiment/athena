@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -21,6 +21,8 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "Gaudi/Property.h"
+#include "AthContainers/OwnershipPolicy.h"
 
 
 
@@ -63,7 +65,7 @@ private:
 
 
 	/** Does the collection own it's objects ? **/
-	int m_ownPolicy;
+	Gaudi::Property<int> m_ownPolicy{this, "OwnPolicy", static_cast<int> (SG::OWN_ELEMENTS)};
 
 
 	/** Digits data container name */
