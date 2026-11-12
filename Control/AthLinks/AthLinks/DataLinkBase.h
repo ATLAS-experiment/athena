@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/DataLinkBase.h
@@ -17,6 +17,7 @@
 #include "AthLinks/tools/DataProxyHolder.h"
 #include "AthLinks/exceptions.h"
 #include "AthContainersInterfaces/ToTransient.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 
 
 class EventContext;
@@ -109,9 +110,9 @@ public:
    * in order to set the proxy pointer.
    * Returns true.
    *
-   * If @c sg is 0, then we use the global default store.
+   * If @c sg is nullptr, then we use the global default store.
    */
-  bool toTransient (IProxyDict* sg = 0);
+  bool toTransient (IProxyDict* sg);
 
 
   /**
@@ -122,7 +123,7 @@ public:
    * in order to set the proxy pointer.
    * Returns true.
    */
-  bool toTransient (const EventContext& ctx);
+  bool toTransient (const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
@@ -135,9 +136,9 @@ public:
    * The link should be clear before this is called.
    * Returns true.
    *
-   * If @c sg is 0, then we use the global default store.
+   * If @c sg is nullptr, then we use the global default store.
    */
-  bool toTransient (const ID_type& dataID, CLID link_clid, IProxyDict* sg = 0);
+  bool toTransient (const ID_type& dataID, CLID link_clid, IProxyDict* sg);
 
 
   /**
@@ -151,7 +152,7 @@ public:
    * Returns true.
    */
   bool toTransient (const ID_type& dataID, CLID link_clid,
-                    const EventContext& ctx);
+                    const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
@@ -223,7 +224,7 @@ protected:
    * @param link_clid CLID of the link being set.
    * @param sg Associated store.
    *
-   * If @c sg is 0, we take the global default.
+   * If @c sg is nullptr, we take the global default.
    *
    * May throw @c ExcCLIDMismatch.
    */
@@ -236,7 +237,7 @@ protected:
    * @param link_clid CLID of the link being set.
    * @param sg Associated store.
    *
-   * If @c sg is 0, we take the global default.
+   * If @c sg is nullptr, we take the global default.
    */
   DataLinkBase (const ID_type& dataID, CLID link_clid, IProxyDict* sg);
 
@@ -247,7 +248,7 @@ protected:
    * @param link_clid CLID of the link being set.
    * @param sg Associated store.
    *
-   * If @c sg is 0, we take the global default.
+   * If @c sg is nullptr, we take the global default.
    *
    * May throw @c ExcCLIDMismatch.
    */
@@ -270,7 +271,7 @@ protected:
    * @param sg Associated store.
    * @returns The SG key for this object.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    *
@@ -288,7 +289,7 @@ protected:
    * @param sg Associated store.
    * @returns The SG key for this object.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    */
@@ -303,7 +304,7 @@ protected:
    * @param link_clid CLID of the link being set.
    * @param sg Associated store.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    *

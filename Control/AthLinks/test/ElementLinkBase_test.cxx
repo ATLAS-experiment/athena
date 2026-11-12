@@ -15,10 +15,10 @@
 #include "AthLinks/DataLinkBase.h"
 #include "AthLinks/exceptions.h"
 #include "AthLinks/tools/ForwardIndexingPolicy.h"
-#include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/ThinningCache.h" 
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/getMessageSvc.h" 
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include <vector>
 #include <print>
 #include <cstdlib>
@@ -485,8 +485,8 @@ void test3 (SGTest::TestStore& store)
   std::println ("test3");
   TestStore store2;
 
-  assert (SG::CurrentEventStore::setStore(&store2) == &store);
-  assert (SG::CurrentEventStore::setStore(&store) == &store2);
+  Atlas::setProxyDictInEventContext (&store2);
+  Atlas::setProxyDictInEventContext (&store);
 }
 
 

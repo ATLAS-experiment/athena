@@ -10,7 +10,6 @@
 
 #undef NDEBUG
 #include "AthLinks/DataLink.h"
-#include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/StorableConversions.h"
 #include "AthenaKernel/ExtendedEventContext.h"
 #include "SGTools/DataProxy.h"
@@ -19,6 +18,7 @@
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/IProxyDict.h"
 #include "AthenaKernel/getMessageSvc.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include <print>
 #include <cstdlib>
 #include <cassert>
@@ -340,8 +340,8 @@ void test3 (SGTest::TestStore& store)
 
   TestStore store2;
 
-  assert (SG::CurrentEventStore::setStore(&store2) == &store);
-  assert (SG::CurrentEventStore::setStore(&store) == &store2);
+  Atlas::setProxyDictInEventContext (&store2);
+  Atlas::setProxyDictInEventContext (&store);
 }
 
 

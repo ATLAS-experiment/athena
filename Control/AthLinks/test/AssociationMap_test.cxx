@@ -5,7 +5,6 @@
 #undef NDEBUG
 
 #include "AthLinks/AssociationMap.h"
-#include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include <print>
 #include <vector>

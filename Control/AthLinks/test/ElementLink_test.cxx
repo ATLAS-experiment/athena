@@ -13,8 +13,8 @@
 #include "AthLinks/tools/IdentContIndexingPolicy.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "AthenaKernel/ExtendedEventContext.h"
-#include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/CLASS_DEF.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "GaudiKernel/EventContext.h"
 #include <vector>
 #include <set>
@@ -841,12 +841,12 @@ void test4 (SGTest::TestStore& store)
   ElementLink<FooCont> el2 ("foocont4", 2);
   assert (el2.cptr() == 0);
 
-  assert (SG::CurrentEventStore::setStore(&store2) == &store);
+  Atlas::setProxyDictInEventContext (&store2);
 
   ElementLink<FooCont> el3 ("foocont4", 2);
   assert (*el3.cptr() == (*foocont4)[2]);
 
-  assert (SG::CurrentEventStore::setStore(&store) == &store2);
+  Atlas::setProxyDictInEventContext (&store);
 }
 
 
@@ -1182,8 +1182,8 @@ void test12 (SGTest::TestStore& store)
   std::println ("test12");
   TestStore store2;
 
-  assert (SG::CurrentEventStore::setStore(&store2) == &store);
-  assert (SG::CurrentEventStore::setStore(&store) == &store2);
+  Atlas::setProxyDictInEventContext (&store2);
+  Atlas::setProxyDictInEventContext (&store);
 }
 
 

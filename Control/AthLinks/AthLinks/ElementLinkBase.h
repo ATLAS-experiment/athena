@@ -1,7 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file AthLinks/ElementLinkBase.h
@@ -23,6 +22,7 @@
 #include "AthenaKernel/proxyDictFromEventContext.h"
 #include "SGCore/sgkey_t.h"
 #include "CxxUtils/CachedPointer.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include <cstdlib>
 #include <stdint.h>
 
@@ -180,9 +180,9 @@ public:
    * in order to set the proxy pointer.
    * Returns true.
    *
-   * If @c sg is 0, then we use the global default store.
+   * If @c sg is nullptr, then we use the global default store.
    */
-  bool toTransient (IProxyDict* sg = 0);
+  bool toTransient (IProxyDict* sg = nullptr);
 
 
   /**
@@ -240,7 +240,7 @@ protected:
    * @param elemID The index of the element within the container.
    * @param sg Associated store.
    *
-   * If @c sg is 0, we take the global default.
+   * If @c sg is nullptr, we take the global default.
    */
   ElementLinkBase (const ID_type& dataID,
                    CLID link_clid,
@@ -255,7 +255,7 @@ protected:
    * @param elemID The index of the element within the container.
    * @param sg Associated store.
    *
-   * If @c sg is 0, we take the global default.
+   * If @c sg is nullptr, we take the global default.
    */
   ElementLinkBase (sgkey_t key,
                    CLID link_clid,
@@ -274,7 +274,7 @@ protected:
    *
    * USE CAREFULLY: no coherency checks, we just trust you!
    *
-   * If @c sg is 0, we take the global default.
+   * If @c sg is nullptr, we take the global default.
    */
   ElementLinkBase (const ID_type& dataID,
                    CLID link_clid,
@@ -293,7 +293,7 @@ protected:
    *
    * USE CAREFULLY: no coherency checks, we just trust you!
    *
-   * If @c sg is 0, we take the global default.
+   * If @c sg is nullptr, we take the global default.
    */
   ElementLinkBase (sgkey_t key,
                    CLID link_clid,
@@ -309,7 +309,7 @@ protected:
    * @param elemID The index of the element within the container.
    * @param sg Associated store.
    *
-   * If @c sg is 0, we take the global default.
+   * If @c sg is nullptr, we take the global default.
    */
   ElementLinkBase (const_pointer_t obj,
                    CLID link_clid,
@@ -378,7 +378,7 @@ protected:
    * should be set if the element is now in a new storable container;
    * e.g. element ptr has been put in a new view container.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    */
@@ -399,7 +399,7 @@ protected:
    * If the link is already set, this will return false and leave the
    * link unchanged.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    */
@@ -416,7 +416,7 @@ protected:
    * @param elemID The index of the element within the container.
    * @param sg Associated store.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    */
@@ -433,7 +433,7 @@ protected:
    * @param elemID The index of the element within the container.
    * @param sg Associated store.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    */

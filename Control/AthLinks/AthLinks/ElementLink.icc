@@ -38,15 +38,13 @@ ElementLink<STORABLE>::ElementLink()
  * @brief Construct a link from a string storable key and an index.  O(1)
  * @param dataID Key of the object.
  * @param elemID The index of the element within the container.
- * @param sg Associated store.
- *
- * If @c sg is 0, we take the global default.
+ * @param ctx Event context for this link.
  */
 template <class STORABLE>
 inline
 ElementLink<STORABLE>::ElementLink(const ID_type& dataID, index_type elemID, 
-                                   IProxyDict* sg /*= 0*/)
-  : Base (dataID, classID(), elemID, sg)
+                                   const EventContext& ctx/*= currentContext()*/)
+  : Base (dataID, classID(), elemID, Atlas::proxyDictFromEventContext(ctx))
 {
 }
 
@@ -55,30 +53,15 @@ ElementLink<STORABLE>::ElementLink(const ID_type& dataID, index_type elemID,
  * @brief Construct a link from a string storable key and an index.  O(1)
  * @param dataID Key of the object.
  * @param elemID The index of the element within the container.
- * @param ctx Event context for this link.
+ * @param sg Associated store.
+ *
+ * If @c sg is nullptr, we take the global default.
  */
 template <class STORABLE>
 inline
 ElementLink<STORABLE>::ElementLink(const ID_type& dataID, index_type elemID, 
-                                   const EventContext& ctx)
-  : Base (dataID, classID(), elemID, Atlas::proxyDictFromEventContext(ctx))
-{
-}
-
-
-/**
- * @brief Construct a link from a hashed storable key and an index.  O(1)
- * @param key Hashed key of the object.
- * @param elemID The index of the element within the container.
- * @param sg Associated store.
- *
- * If @c sg is 0, we take the global default.
- */
-template <class STORABLE>
-inline
-ElementLink<STORABLE>::ElementLink(sgkey_t key, index_type elemID, 
-                                   IProxyDict* sg /*= 0*/)
-  : Base (key, classID(), elemID, sg)
+                                   IProxyDict* sg)
+  : Base (dataID, classID(), elemID, sg)
 {
 }
 
@@ -92,30 +75,25 @@ ElementLink<STORABLE>::ElementLink(sgkey_t key, index_type elemID,
 template <class STORABLE>
 inline
 ElementLink<STORABLE>::ElementLink(sgkey_t key, index_type elemID, 
-                                   const EventContext& ctx)
+                                   const EventContext& ctx/*= currentContext()*/)
   : Base (key, classID(), elemID, Atlas::proxyDictFromEventContext(ctx))
 {
 }
 
 
 /**
- * @brief Construct from a string storable key, index, AND pointer to element.  O(1)
- * @param dataID Key of the object.
+ * @brief Construct a link from a hashed storable key and an index.  O(1)
+ * @param key Hashed key of the object.
  * @param elemID The index of the element within the container.
- * @param pEl Pointer to the element.
  * @param sg Associated store.
- * 
- * USE CAREFULLY: no coherency checks, we just trust you!
  *
- * If @c sg is 0, we take the global default.
+ * If @c sg is nullptr, we take the global default.
  */
 template <class STORABLE>
 inline
-ElementLink<STORABLE>::ElementLink(const ID_type& dataID,
-                                   index_type elemID,
-                                   ElementType pEl,
-                                   IProxyDict* sg /*= 0*/)
-  : Base (dataID, classID(), elemID, pEl, sg)
+ElementLink<STORABLE>::ElementLink(sgkey_t key, index_type elemID, 
+                                   IProxyDict* sg)
+  : Base (key, classID(), elemID, sg)
 {
 }
 
@@ -134,30 +112,30 @@ inline
 ElementLink<STORABLE>::ElementLink(const ID_type& dataID,
                                    index_type elemID,
                                    ElementType pEl,
-                                   const EventContext& ctx)
+                                   const EventContext& ctx/*= currentContext()*/)
   : Base (dataID, classID(), elemID, pEl, Atlas::proxyDictFromEventContext(ctx))
 {
 }
 
 
 /**
- * @brief Construct from a hashed storable key, index, AND pointer to element.  O(1)
- * @param key Hashed key of the object.
+ * @brief Construct from a string storable key, index, AND pointer to element.  O(1)
+ * @param dataID Key of the object.
  * @param elemID The index of the element within the container.
  * @param pEl Pointer to the element.
  * @param sg Associated store.
  * 
  * USE CAREFULLY: no coherency checks, we just trust you!
  *
- * If @c sg is 0, we take the global default.
+ * If @c sg is nullptr, we take the global default.
  */
 template <class STORABLE>
 inline
-ElementLink<STORABLE>::ElementLink (sgkey_t key,
-                                    index_type elemID,
-                                    ElementType pEl,
-                                    IProxyDict* sg /*= 0*/)
-  : Base (key, classID(), elemID, pEl, sg)
+ElementLink<STORABLE>::ElementLink(const ID_type& dataID,
+                                   index_type elemID,
+                                   ElementType pEl,
+                                   IProxyDict* sg)
+  : Base (dataID, classID(), elemID, pEl, sg)
 {
 }
 
@@ -176,26 +154,30 @@ inline
 ElementLink<STORABLE>::ElementLink (sgkey_t key,
                                     index_type elemID,
                                     ElementType pEl,
-                                    const EventContext& ctx)
+                                    const EventContext& ctx/*= currentContext()*/)
   : Base (key, classID(), elemID, pEl, Atlas::proxyDictFromEventContext(ctx))
 {
 }
 
 
 /**
- * @brief Construct a link from an index and reference to the container. O(1)
- * @param data Reference to the container (storable).
+ * @brief Construct from a hashed storable key, index, AND pointer to element.  O(1)
+ * @param key Hashed key of the object.
  * @param elemID The index of the element within the container.
+ * @param pEl Pointer to the element.
  * @param sg Associated store.
  * 
- * If @c sg is 0, we take the global default.
+ * USE CAREFULLY: no coherency checks, we just trust you!
+ *
+ * If @c sg is nullptr, we take the global default.
  */
 template <class STORABLE>
 inline
-ElementLink<STORABLE>::ElementLink (BaseConstReference data,
-                                    index_type elemID, 
-                                    IProxyDict* sg /* = 0*/)
-  : Base (&data, classID(), elemID, sg)
+ElementLink<STORABLE>::ElementLink (sgkey_t key,
+                                    index_type elemID,
+                                    ElementType pEl,
+                                    IProxyDict* sg)
+  : Base (key, classID(), elemID, pEl, sg)
 {
 }
 
@@ -210,35 +192,27 @@ template <class STORABLE>
 inline
 ElementLink<STORABLE>::ElementLink (BaseConstReference data,
                                     index_type elemID, 
-                                    const EventContext& ctx)
+                                    const EventContext& ctx/*= currentContext()*/)
   : Base (&data, classID(), elemID, Atlas::proxyDictFromEventContext(ctx))
 {
 }
 
 
 /**
- * @brief Construct from an element and reference to the container. O(N)
- * @param element The element to reference.
+ * @brief Construct a link from an index and reference to the container. O(1)
  * @param data Reference to the container (storable).
+ * @param elemID The index of the element within the container.
  * @param sg Associated store.
- *
- * Does the same thing as the default ctor followed by @c toContainedElement.
- * Note the reversed parameter order compared to the previous
- * constructor.  This is to prevent ambiguities in the case that
- * the contained type is convertable to an int.
- *
- * Will throw @c SG::ExcElementNotFound if the element is not
- * in the container.
  * 
- * If @c sg is 0, we take the global default.
+ * If @c sg is nullptr, we take the global default.
  */
 template <class STORABLE>
 inline
-ElementLink<STORABLE>::ElementLink (const ElementType& element, 
-                                    BaseConstReference data,
-                                    IProxyDict* sg /*= 0*/)
+ElementLink<STORABLE>::ElementLink (BaseConstReference data,
+                                    index_type elemID, 
+                                    IProxyDict* sg)
+  : Base (&data, classID(), elemID, sg)
 {
-  toContainedElement (data, element, sg);
 }
 
 
@@ -260,9 +234,35 @@ template <class STORABLE>
 inline
 ElementLink<STORABLE>::ElementLink (const ElementType& element, 
                                     BaseConstReference data,
-                                    const EventContext& ctx)
+                                    const EventContext& ctx/*= currentContext()*/)
 {
   toContainedElement (data, element, ctx);
+}
+
+
+/**
+ * @brief Construct from an element and reference to the container. O(N)
+ * @param element The element to reference.
+ * @param data Reference to the container (storable).
+ * @param sg Associated store.
+ *
+ * Does the same thing as the default ctor followed by @c toContainedElement.
+ * Note the reversed parameter order compared to the previous
+ * constructor.  This is to prevent ambiguities in the case that
+ * the contained type is convertable to an int.
+ *
+ * Will throw @c SG::ExcElementNotFound if the element is not
+ * in the container.
+ * 
+ * If @c sg is nullptr, we take the global default.
+ */
+template <class STORABLE>
+inline
+ElementLink<STORABLE>::ElementLink (const ElementType& element, 
+                                    BaseConstReference data,
+                                    IProxyDict* sg)
+{
+  toContainedElement (data, element, sg);
 }
 
 
@@ -504,31 +504,6 @@ ElementLink<STORABLE>::cachedElement() const
  * @brief Set the link to an element given by index and pointer to container.
  * @param data Reference to the container (storable).
  * @param elemID The index of the element within the container.
- * @param sg Associated store.
- * @returns True if the link was changed.
- *
- * If the link is already set, this will return false and leave the
- * link unchanged.
- *
- * If @c sg is 0, then we take the store from whatever the link's currently
- * set to.  If the link has no current store, then we take the global
- * default.
- */
-template <class STORABLE>
-inline
-bool
-ElementLink<STORABLE>::toIndexedElement(BaseConstReference data,
-                                        index_type elemID,
-                                        IProxyDict* sg /*= 0*/)
-{
-  return Base::toIndexedElement (&data, classID(), elemID, sg);
-}
-
-
-/**
- * @brief Set the link to an element given by index and pointer to container.
- * @param data Reference to the container (storable).
- * @param elemID The index of the element within the container.
  * @param ctx The event context.
  * @returns True if the link was changed.
  *
@@ -540,9 +515,34 @@ inline
 bool
 ElementLink<STORABLE>::toIndexedElement(BaseConstReference data,
                                         index_type elemID,
-                                        const EventContext& ctx)
+                                        const EventContext& ctx/*= currentContext()*/)
 {
   return Base::toIndexedElement (&data, classID(), elemID, Atlas::proxyDictFromEventContext(ctx));
+}
+
+
+/**
+ * @brief Set the link to an element given by index and pointer to container.
+ * @param data Reference to the container (storable).
+ * @param elemID The index of the element within the container.
+ * @param sg Associated store.
+ * @returns True if the link was changed.
+ *
+ * If the link is already set, this will return false and leave the
+ * link unchanged.
+ *
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
+ * set to.  If the link has no current store, then we take the global
+ * default.
+ */
+template <class STORABLE>
+inline
+bool
+ElementLink<STORABLE>::toIndexedElement(BaseConstReference data,
+                                        index_type elemID,
+                                        IProxyDict* sg)
+{
+  return Base::toIndexedElement (&data, classID(), elemID, sg);
 }
 
 
@@ -550,27 +550,23 @@ ElementLink<STORABLE>::toIndexedElement(BaseConstReference data,
  * @brief Set from element pointer and a reference to the container (storable)
  * @param data Reference to the container (storable).
  * @param element The element.
- * @param sg Associated store.
+ * @param ctx The event context.
  * @returns True if the link was changed.
  *
  * O(N) for sequences!
  *
  * If the link is already set, this will return false and leave the
  * link unchanged.
- *
- * If @c sg is 0, then we take the store from whatever the link's currently
- * set to.  If the link has no current store, then we take the global
- * default.
  */
 template <class STORABLE>
 inline
 bool ElementLink<STORABLE>::toContainedElement(BaseConstReference data,
                                                ElementType element,
-                                               IProxyDict* sg /*= 0*/)
+                                               const EventContext& ctx/*= currentContext()*/)
 {
   index_type index = this->index();
   IndexingPolicy::reverseLookup (data, element, index);
-  bool ret = Base::toIndexedElement (&data, classID(), index, sg);
+  bool ret = Base::toIndexedElement (&data, classID(), index, Atlas::proxyDictFromEventContext(ctx));
   if (ret)
     this->storeCachedElement (element);
   return ret;
@@ -581,23 +577,27 @@ bool ElementLink<STORABLE>::toContainedElement(BaseConstReference data,
  * @brief Set from element pointer and a reference to the container (storable)
  * @param data Reference to the container (storable).
  * @param element The element.
- * @param ctx The event context.
+ * @param sg Associated store.
  * @returns True if the link was changed.
  *
  * O(N) for sequences!
  *
  * If the link is already set, this will return false and leave the
  * link unchanged.
+ *
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
+ * set to.  If the link has no current store, then we take the global
+ * default.
  */
 template <class STORABLE>
 inline
 bool ElementLink<STORABLE>::toContainedElement(BaseConstReference data,
                                                ElementType element,
-                                               const EventContext& ctx)
+                                               IProxyDict* sg)
 {
   index_type index = this->index();
   IndexingPolicy::reverseLookup (data, element, index);
-  bool ret = Base::toIndexedElement (&data, classID(), index, Atlas::proxyDictFromEventContext(ctx));
+  bool ret = Base::toIndexedElement (&data, classID(), index, sg);
   if (ret)
     this->storeCachedElement (element);
   return ret;
@@ -636,51 +636,18 @@ bool ElementLink<STORABLE>::setElement(ElementType element)
  * @brief Set link to point to a new container (storable).
  * @param data Reference to the container (storable).
  * @param replace True if we can change an existing link.
- * @param sg Associated store.
+ * @param ctx The event context.
  * @returns True if the link was changed.
  *
  * If the link is already set, this will return false and leave the
  * link unchanged unless @c replace is set.  The @c replace argument
  * should be set if the element is now in a new storable container;
  * e.g. element ptr has been put in a new view container.
- *
- * If @c sg is 0, then we take the store from whatever the link's currently
- * set to.  If the link has no current store, then we take the global
- * default.
  */
 template <class STORABLE>
 inline
 bool ElementLink<STORABLE>::setStorableObject(BaseConstReference data,
-                                              bool replace /*= false*/,
-                                              IProxyDict* sg /*= 0*/)
-{
-  bool ret = Base::setStorableObject (&data, classID(), replace, sg);
-  if (ret) {
-    ElementConstPointer elt = 0;
-    if (this->isDefaultIndex() && this->getCachedElement (elt)) {
-      index_type index = this->index();
-      IndexingPolicy::reverseLookup (data, *elt, index);
-      this->setIndex (index);
-      return true;
-    }
-  }
-  return ret;
-}
-
-
-/**
- * @brief Set link to point to a new container (storable).
- * @param data Reference to the container (storable).
- * @param ctx The event context.
- * @returns True if the link was changed.
- *
- * If the link is already set, this will return false and leave the
- * link unchanged.
- */
-template <class STORABLE>
-inline
-bool ElementLink<STORABLE>::setStorableObject(BaseConstReference data,
-                                              const EventContext& ctx)
+                                              const EventContext& ctx/*= currentContext()*/)
 {
   return this->setStorableObject (data, false, ctx);
 }
@@ -702,9 +669,45 @@ template <class STORABLE>
 inline
 bool ElementLink<STORABLE>::setStorableObject(BaseConstReference data,
                                               bool replace,
-                                              const EventContext& ctx)
+                                              const EventContext& ctx/*= currentContext()*/)
 {
   bool ret = Base::setStorableObject (&data, classID(), replace, Atlas::proxyDictFromEventContext(ctx));
+  if (ret) {
+    ElementConstPointer elt = 0;
+    if (this->isDefaultIndex() && this->getCachedElement (elt)) {
+      index_type index = this->index();
+      IndexingPolicy::reverseLookup (data, *elt, index);
+      this->setIndex (index);
+      return true;
+    }
+  }
+  return ret;
+}
+
+
+/**
+ * @brief Set link to point to a new container (storable).
+ * @param data Reference to the container (storable).
+ * @param replace True if we can change an existing link.
+ * @param sg Associated store.
+ * @returns True if the link was changed.
+ *
+ * If the link is already set, this will return false and leave the
+ * link unchanged unless @c replace is set.  The @c replace argument
+ * should be set if the element is now in a new storable container;
+ * e.g. element ptr has been put in a new view container.
+ *
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
+ * set to.  If the link has no current store, then we take the global
+ * default.
+ */
+template <class STORABLE>
+inline
+bool ElementLink<STORABLE>::setStorableObject(BaseConstReference data,
+                                              bool replace,
+                                              IProxyDict* sg)
+{
+  bool ret = Base::setStorableObject (&data, classID(), replace, sg);
   if (ret) {
     ElementConstPointer elt = 0;
     if (this->isDefaultIndex() && this->getCachedElement (elt)) {
@@ -722,33 +725,13 @@ bool ElementLink<STORABLE>::setStorableObject(BaseConstReference data,
  * @brief Set the link to an element given by string key and index.
  * @param dataID Key of the object.
  * @param elemID The index of the element within the container.
- * @param sg Associated store.
- *
- * If @c sg is 0, then we take the store from whatever the link's currently
- * set to.  If the link has no current store, then we take the global
- * default.
- */
-template <class STORABLE>
-inline
-void ElementLink<STORABLE>::resetWithKeyAndIndex(const ID_type& dataID,
-                                                 index_type elemID, 
-                                                 IProxyDict* sg /*= 0*/)
-{
-  Base::resetWithKeyAndIndex (dataID, classID(), elemID, sg);
-}
-
-
-/**
- * @brief Set the link to an element given by string key and index.
- * @param dataID Key of the object.
- * @param elemID The index of the element within the container.
  * @param ctx The event context.
  */
 template <class STORABLE>
 inline
 void ElementLink<STORABLE>::resetWithKeyAndIndex(const ID_type& dataID,
                                                  index_type elemID,
-                                                 const EventContext& ctx)
+                                                 const EventContext& ctx/*= currentContext()*/)
 {
   Base::resetWithKeyAndIndex (dataID, classID(), elemID, Atlas::proxyDictFromEventContext(ctx));
 }
@@ -756,21 +739,21 @@ void ElementLink<STORABLE>::resetWithKeyAndIndex(const ID_type& dataID,
 
 /**
  * @brief Set the link to an element given by string key and index.
- * @param key Hashed key of the object.
+ * @param dataID Key of the object.
  * @param elemID The index of the element within the container.
  * @param sg Associated store.
  *
- * If @c sg is 0, then we take the store from whatever the link's currently
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
  * set to.  If the link has no current store, then we take the global
  * default.
  */
 template <class STORABLE>
 inline
-void ElementLink<STORABLE>::resetWithKeyAndIndex(sgkey_t key,
+void ElementLink<STORABLE>::resetWithKeyAndIndex(const ID_type& dataID,
                                                  index_type elemID, 
-                                                 IProxyDict* sg /*= 0*/)
+                                                 IProxyDict* sg)
 {
-  Base::resetWithKeyAndIndex (key, classID(), elemID, sg);
+  Base::resetWithKeyAndIndex (dataID, classID(), elemID, sg);
 }
 
 
@@ -784,9 +767,29 @@ template <class STORABLE>
 inline
 void ElementLink<STORABLE>::resetWithKeyAndIndex(sgkey_t key,
                                                  index_type elemID, 
-                                                 const EventContext& ctx)
+                                                 const EventContext& ctx/*= currentContext()*/)
 {
   Base::resetWithKeyAndIndex (key, classID(), elemID, Atlas::proxyDictFromEventContext(ctx));
+}
+
+
+/**
+ * @brief Set the link to an element given by string key and index.
+ * @param key Hashed key of the object.
+ * @param elemID The index of the element within the container.
+ * @param sg Associated store.
+ *
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
+ * set to.  If the link has no current store, then we take the global
+ * default.
+ */
+template <class STORABLE>
+inline
+void ElementLink<STORABLE>::resetWithKeyAndIndex(sgkey_t key,
+                                                 index_type elemID, 
+                                                 IProxyDict* sg)
+{
+  Base::resetWithKeyAndIndex (key, classID(), elemID, sg);
 }
 
 
@@ -924,28 +927,42 @@ namespace SG {
 /*
  * @brief Do post-read processing for ElementLink el.
  * @param el The ElementLink that was just read.
- * @param sg The current event store.
+ * @param ctx The current event context.
  */
 template <class STORABLE>
 inline
 void ToTransient<ElementLink<STORABLE> >::toTransient
-  (ElementLink<STORABLE>& el, IProxyDict* sg /*= nullptr*/)
+  (ElementLink<STORABLE>& el, const EventContext& ctx/*= currentContext()*/)
 {
-  el.toTransient (sg);
+  toTransient (el, Atlas::proxyDictFromEventContext (ctx));
 }
 
 
 /*
  * @brief Do post-read processing for ElementLink el.
  * @param el The ElementLink that was just read.
- * @param ctx The current event context.
+ * @param sg The current event store.
  */
 template <class STORABLE>
 inline
 void ToTransient<ElementLink<STORABLE> >::toTransient
-  (ElementLink<STORABLE>& el, const EventContext& ctx)
+  (ElementLink<STORABLE>& el, IProxyDict* sg)
 {
-  toTransient (el, Atlas::proxyDictFromEventContext (ctx));
+  el.toTransient (sg);
+}
+
+
+/*
+ * @brief Do post-read processing for vector of ElementLinks elv.
+ * @param elv The vector of ElementLinks that was just read.
+ * @param ctx The current event context.
+ */
+template <class STORABLE, class ALLOC>
+inline
+void ToTransient<std::vector<ElementLink<STORABLE>, ALLOC> >::toTransient
+ (std::vector<ElementLink<STORABLE>, ALLOC>& elv, const EventContext& ctx/*= currentContext()*/)
+{
+  toTransient (elv, Atlas::proxyDictFromEventContext (ctx));
 }
 
 
@@ -956,7 +973,7 @@ void ToTransient<ElementLink<STORABLE> >::toTransient
  */
 template <class STORABLE, class ALLOC>
 void ToTransient<std::vector<ElementLink<STORABLE>, ALLOC> >::toTransient
-  (std::vector<ElementLink<STORABLE>, ALLOC>& elv, IProxyDict* sg /*= nullptr*/)
+  (std::vector<ElementLink<STORABLE>, ALLOC>& elv, IProxyDict* sg)
 {
   for (auto& el : elv) {
     el.toTransient (sg);
@@ -965,16 +982,17 @@ void ToTransient<std::vector<ElementLink<STORABLE>, ALLOC> >::toTransient
 
 
 /*
- * @brief Do post-read processing for vector of ElementLinks elv.
- * @param elv The vector of ElementLinks that was just read.
+ * @brief Do post-read processing for vector of vector of ElementLinks elvv.
+ * @param elvv The vector of vectors of ElementLinks that was just read.
  * @param ctx The current event context.
  */
-template <class STORABLE, class ALLOC>
+template <class STORABLE, class ALLOC1, class ALLOC2>
 inline
-void ToTransient<std::vector<ElementLink<STORABLE>, ALLOC> >::toTransient
- (std::vector<ElementLink<STORABLE>, ALLOC>& elv, const EventContext& ctx)
+void ToTransient<std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2> >::toTransient
+  (std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2>& elvv,
+   const EventContext& ctx/*= currentContext()*/)
 {
-  toTransient (elv, Atlas::proxyDictFromEventContext (ctx));
+  toTransient (elvv, Atlas::proxyDictFromEventContext (ctx));
 }
 
 
@@ -986,26 +1004,11 @@ void ToTransient<std::vector<ElementLink<STORABLE>, ALLOC> >::toTransient
 template <class STORABLE, class ALLOC1, class ALLOC2>
 void ToTransient<std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2> >::toTransient
   (std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2>& elvv,
-   IProxyDict* sg /*= nullptr*/)
+   IProxyDict* sg)
 {
   for (auto& elv : elvv) {
     ToTransient<std::vector<ElementLink<STORABLE>, ALLOC1> >::toTransient (elv, sg);
   }
-}
-
-
-/*
- * @brief Do post-read processing for vector of vector of ElementLinks elvv.
- * @param elvv The vector of vectors of ElementLinks that was just read.
- * @param ctx The current event context.
- */
-template <class STORABLE, class ALLOC1, class ALLOC2>
-inline
-void ToTransient<std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2> >::toTransient
-  (std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2>& elvv,
-   const EventContext& ctx)
-{
-  toTransient (elvv, Atlas::proxyDictFromEventContext (ctx));
 }
 
 

@@ -18,6 +18,7 @@
 #include "AthLinks/DataLink.h"
 #include "AthContainersInterfaces/ToTransient.h"
 #include "AthenaKernel/proxyDictFromEventContext.h"
+#include "GaudiKernel/ThreadLocalContext.h"
 #include <format>
 #include <utility>
 #include <vector>
@@ -182,33 +183,22 @@ public:
    * @brief Construct a link from a string storable key and an index.  O(1)
    * @param dataID Key of the object.
    * @param elemID The index of the element within the container.
-   * @param sg Associated store.
-   *
-   * If @c sg is 0, we take the global default.
+   * @param ctx Event context for this link.
    */
   ElementLink(const ID_type& dataID, index_type elemID,
-              IProxyDict* sg = 0);
+              const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
    * @brief Construct a link from a string storable key and an index.  O(1)
    * @param dataID Key of the object.
    * @param elemID The index of the element within the container.
-   * @param ctx Event context for this link.
+   * @param sg Associated store.
+   *
+   * If @c sg is nullptr, we take the global default.
    */
   ElementLink(const ID_type& dataID, index_type elemID,
-              const EventContext& ctx);
-
-
-  /**
-   * @brief Construct a link from a hashed storable key and an index.  O(1)
-   * @param key Hashed key of the object.
-   * @param elemID The index of the element within the container.
-   * @param sg Associated store.
-   *
-   * If @c sg is 0, we take the global default.
-   */
-  ElementLink(sgkey_t key, index_type elemID, IProxyDict* sg = 0);
+              IProxyDict* sg);
 
 
   /**
@@ -217,24 +207,18 @@ public:
    * @param elemID The index of the element within the container.
    * @param ctx Event context for this link.
    */
-  ElementLink(sgkey_t key, index_type elemID, const EventContext& ctx);
+  ElementLink(sgkey_t key, index_type elemID, const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
-   * @brief Construct from a string storable key, index, AND pointer to element.  O(1)
-   * @param dataID Key of the object.
+   * @brief Construct a link from a hashed storable key and an index.  O(1)
+   * @param key Hashed key of the object.
    * @param elemID The index of the element within the container.
-   * @param pEl Pointer to the element.
    * @param sg Associated store.
-   * 
-   * USE CAREFULLY: no coherency checks, we just trust you!
    *
-   * If @c sg is 0, we take the global default.
+   * If @c sg is nullptr, we take the global default.
    */
-  ElementLink(const ID_type& dataID,
-              index_type elemID,
-              ElementType pEl,
-              IProxyDict* sg = 0);
+  ElementLink(sgkey_t key, index_type elemID, IProxyDict* sg);
 
 
   /**
@@ -249,24 +233,24 @@ public:
   ElementLink(const ID_type& dataID,
               index_type elemID,
               ElementType pEl,
-              const EventContext& ctx);
+              const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
-   * @brief Construct from a hashed storable key, index, AND pointer to element.  O(1)
-   * @param key Hashed key of the object.
+   * @brief Construct from a string storable key, index, AND pointer to element.  O(1)
+   * @param dataID Key of the object.
    * @param elemID The index of the element within the container.
    * @param pEl Pointer to the element.
    * @param sg Associated store.
    * 
    * USE CAREFULLY: no coherency checks, we just trust you!
    *
-   * If @c sg is 0, we take the global default.
+   * If @c sg is nullptr, we take the global default.
    */
-  ElementLink (sgkey_t key,
-               index_type elemID,
-               ElementType pEl,
-               IProxyDict* sg = 0);
+  ElementLink(const ID_type& dataID,
+              index_type elemID,
+              ElementType pEl,
+              IProxyDict* sg);
 
 
   /**
@@ -281,20 +265,24 @@ public:
   ElementLink (sgkey_t key,
                index_type elemID,
                ElementType pEl,
-               const EventContext& ctx);
+               const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
-   * @brief Construct a link from an index and reference to the container. O(1)
-   * @param data Reference to the container (storable).
+   * @brief Construct from a hashed storable key, index, AND pointer to element.  O(1)
+   * @param key Hashed key of the object.
    * @param elemID The index of the element within the container.
+   * @param pEl Pointer to the element.
    * @param sg Associated store.
    * 
-   * If @c sg is 0, we take the global default.
+   * USE CAREFULLY: no coherency checks, we just trust you!
+   *
+   * If @c sg is nullptr, we take the global default.
    */
-  ElementLink (BaseConstReference data,
-               index_type elemID, 
-               IProxyDict* sg = 0);
+  ElementLink (sgkey_t key,
+               index_type elemID,
+               ElementType pEl,
+               IProxyDict* sg);
 
 
   /**
@@ -305,28 +293,20 @@ public:
    */
   ElementLink (BaseConstReference data,
                index_type elemID, 
-               const EventContext& ctx);
+               const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
-   * @brief Construct from an element and reference to the container. O(N)
-   * @param element The element to reference.
+   * @brief Construct a link from an index and reference to the container. O(1)
    * @param data Reference to the container (storable).
+   * @param elemID The index of the element within the container.
    * @param sg Associated store.
-   *
-   * Does the same thing as the default ctor followed by @c toContainedElement.
-   * Note the reversed parameter order compared to the previous
-   * constructor.  This is to prevent ambiguities in the case that
-   * the contained type is convertable to an int.
-   *
-   * Will throw @c SG::ExcElementNotFound if the element is not
-   * in the container.
    * 
-   * If @c sg is 0, we take the global default.
+   * If @c sg is nullptr, we take the global default.
    */
-  ElementLink (const ElementType& element, 
-               BaseConstReference data,
-               IProxyDict* sg = 0);
+  ElementLink (BaseConstReference data,
+               index_type elemID, 
+               IProxyDict* sg);
 
 
   /**
@@ -345,7 +325,28 @@ public:
    */
   ElementLink (const ElementType& element, 
                BaseConstReference data,
-               const EventContext& ctx);
+               const EventContext& ctx = Gaudi::Hive::currentContext());
+
+
+  /**
+   * @brief Construct from an element and reference to the container. O(N)
+   * @param element The element to reference.
+   * @param data Reference to the container (storable).
+   * @param sg Associated store.
+   *
+   * Does the same thing as the default ctor followed by @c toContainedElement.
+   * Note the reversed parameter order compared to the previous
+   * constructor.  This is to prevent ambiguities in the case that
+   * the contained type is convertable to an int.
+   *
+   * Will throw @c SG::ExcElementNotFound if the element is not
+   * in the container.
+   * 
+   * If @c sg is nullptr, we take the global default.
+   */
+  ElementLink (const ElementType& element, 
+               BaseConstReference data,
+               IProxyDict* sg);
 
 
   /**
@@ -489,32 +490,49 @@ public:
    * @brief Set the link to an element given by index and pointer to container.
    * @param data Reference to the container (storable).
    * @param elemID The index of the element within the container.
-   * @param sg Associated store.
+   * @param ctx The event context.
    * @returns True if the link was changed.
    *
    * If the link is already set, this will return false and leave the
    * link unchanged.
-   *
-   * If @c sg is 0, then we take the store from whatever the link's currently
-   * set to.  If the link has no current store, then we take the global
-   * default.
    */
   bool toIndexedElement(BaseConstReference data, index_type elemID,
-                        IProxyDict* sg = 0);
+                        const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
    * @brief Set the link to an element given by index and pointer to container.
    * @param data Reference to the container (storable).
    * @param elemID The index of the element within the container.
-   * @param ctx The event context.
+   * @param sg Associated store.
    * @returns True if the link was changed.
    *
    * If the link is already set, this will return false and leave the
    * link unchanged.
+   *
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
+   * set to.  If the link has no current store, then we take the global
+   * default.
    */
   bool toIndexedElement(BaseConstReference data, index_type elemID,
-                        const EventContext& ctx);
+                        IProxyDict* sg);
+
+
+  /**
+   * @brief Set from element pointer and a reference to the container (storable)
+   * @param data Reference to the container (storable).
+   * @param element The element.
+   * @param ctx The event context.
+   * @returns True if the link was changed.
+   *
+   * O(N) for sequences!
+   *
+   * If the link is already set, this will return false and leave the
+   * link unchanged.
+   */
+  bool toContainedElement(BaseConstReference data,
+                          ElementType element,
+                          const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
@@ -529,30 +547,13 @@ public:
    * If the link is already set, this will return false and leave the
    * link unchanged.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    */
   bool toContainedElement(BaseConstReference data,
                           ElementType element,
-                          IProxyDict* sg = 0);
-
-
-  /**
-   * @brief Set from element pointer and a reference to the container (storable)
-   * @param data Reference to the container (storable).
-   * @param element The element.
-   * @param ctx The event context.
-   * @returns True if the link was changed.
-   *
-   * O(N) for sequences!
-   *
-   * If the link is already set, this will return false and leave the
-   * link unchanged.
-   */
-  bool toContainedElement(BaseConstReference data,
-                          ElementType element,
-                          const EventContext& ctx);
+                          IProxyDict* sg);
 
 
   /**
@@ -572,22 +573,14 @@ public:
   /**
    * @brief Set link to point to a new container (storable).
    * @param data Reference to the container (storable).
-   * @param replace True if we can change an existing link.
-   * @param sg Associated store.
+   * @param ctx The event context.
    * @returns True if the link was changed.
    *
    * If the link is already set, this will return false and leave the
-   * link unchanged unless @c replace is set.  The @c replace argument
-   * should be set if the element is now in a new storable container;
-   * e.g. element ptr has been put in a new view container.
-   *
-   * If @c sg is 0, then we take the store from whatever the link's currently
-   * set to.  If the link has no current store, then we take the global
-   * default.
+   * link unchanged.
    */
   bool setStorableObject(BaseConstReference data,
-                         bool replace=false,
-                         IProxyDict* sg = 0);
+                         const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
@@ -604,34 +597,28 @@ public:
    */
   bool setStorableObject(BaseConstReference data,
                          bool replace,
-                         const EventContext& ctx);
+                         const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
    * @brief Set link to point to a new container (storable).
    * @param data Reference to the container (storable).
-   * @param ctx The event context.
+   * @param replace True if we can change an existing link.
+   * @param sg Associated store.
    * @returns True if the link was changed.
    *
    * If the link is already set, this will return false and leave the
-   * link unchanged.
+   * link unchanged unless @c replace is set.  The @c replace argument
+   * should be set if the element is now in a new storable container;
+   * e.g. element ptr has been put in a new view container.
+   *
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
+   * set to.  If the link has no current store, then we take the global
+   * default.
    */
   bool setStorableObject(BaseConstReference data,
-                         const EventContext& ctx);
-
-
-  /**
-   * @brief Set the link to an element given by string key and index.
-   * @param dataID Key of the object.
-   * @param elemID The index of the element within the container.
-   * @param sg Associated store.
-   *
-   * If @c sg is 0, then we take the store from whatever the link's currently
-   * set to.  If the link has no current store, then we take the global
-   * default.
-   */
-  void resetWithKeyAndIndex(const ID_type& dataID, index_type elemID, 
-                            IProxyDict* sg=0);
+                         bool replace,
+                         IProxyDict* sg);
 
 
   /**
@@ -641,21 +628,21 @@ public:
    * @param ctx The event context.
    */
   void resetWithKeyAndIndex(const ID_type& dataID, index_type elemID, 
-                            const EventContext& ctx);
+                            const EventContext& ctx = Gaudi::Hive::currentContext());
 
 
   /**
    * @brief Set the link to an element given by string key and index.
-   * @param key Hashed key of the object.
+   * @param dataID Key of the object.
    * @param elemID The index of the element within the container.
    * @param sg Associated store.
    *
-   * If @c sg is 0, then we take the store from whatever the link's currently
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
    * set to.  If the link has no current store, then we take the global
    * default.
    */
-  void resetWithKeyAndIndex(sgkey_t key, index_type elemID, 
-                            IProxyDict* sg=0);
+  void resetWithKeyAndIndex(const ID_type& dataID, index_type elemID, 
+                            IProxyDict* sg);
 
 
   /**
@@ -665,7 +652,21 @@ public:
    * @param ctx The event context.
    */
   void resetWithKeyAndIndex(sgkey_t key, index_type elemID, 
-                            const EventContext& ctx);
+                            const EventContext& ctx = Gaudi::Hive::currentContext());
+
+
+  /**
+   * @brief Set the link to an element given by string key and index.
+   * @param key Hashed key of the object.
+   * @param elemID The index of the element within the container.
+   * @param sg Associated store.
+   *
+   * If @c sg is nullptr, then we take the store from whatever the link's currently
+   * set to.  If the link has no current store, then we take the global
+   * default.
+   */
+  void resetWithKeyAndIndex(sgkey_t key, index_type elemID, 
+                            IProxyDict* sg);
 
 
   //@}
@@ -813,9 +814,9 @@ class ToTransient<ElementLink<STORABLE> >
 {
 public:
   static void toTransient (ElementLink<STORABLE>& el,
-                           IProxyDict* sg = nullptr);
+                           const EventContext& ctx = Gaudi::Hive::currentContext());
   static void toTransient (ElementLink<STORABLE>& el,
-                           const EventContext& ctx);
+                           IProxyDict* sg);
 };
 
 
@@ -828,9 +829,9 @@ class ToTransient<std::vector<ElementLink<STORABLE>, ALLOC> >
 {
 public:
   static void toTransient (std::vector<ElementLink<STORABLE>, ALLOC>& elv,
-                           IProxyDict* sg = nullptr);
+                           const EventContext& ctx = Gaudi::Hive::currentContext());
   static void toTransient (std::vector<ElementLink<STORABLE>, ALLOC>& elv,
-                           const EventContext& ctx);
+                           IProxyDict* sg);
 };
 
 
@@ -844,9 +845,9 @@ class ToTransient<std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2
 {
 public:
   static void toTransient (std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2>& elvv,
-                           IProxyDict* sg = nullptr);
+                           const EventContext& ctx = Gaudi::Hive::currentContext());
   static void toTransient (std::vector<std::vector<ElementLink<STORABLE>, ALLOC1>, ALLOC2>& elvv,
-                           const EventContext& ctx);
+                           IProxyDict* sg);
 };
 
 

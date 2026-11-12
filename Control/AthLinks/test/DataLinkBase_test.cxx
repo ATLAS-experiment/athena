@@ -11,10 +11,10 @@
 #undef NDEBUG
 #include "AthLinks/DataLinkBase.h"
 #include "AthLinks/exceptions.h"
-#include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/CLASS_DEF.h"
 #include "AthenaKernel/getMessageSvc.h"
 #include "AthenaKernel/ExtendedEventContext.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "GaudiKernel/EventContext.h"
 #include <print>
 #include <cassert>
@@ -271,8 +271,8 @@ void test3 (SGTest::TestStore& store)
 
   TestStore store2;
 
-  assert (SG::CurrentEventStore::setStore(&store2) == &store);
-  assert (SG::CurrentEventStore::setStore(&store) == &store2);
+  Atlas::setProxyDictInEventContext (&store2);
+  Atlas::setProxyDictInEventContext (&store);
 }
 
 

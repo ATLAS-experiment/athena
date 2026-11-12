@@ -16,11 +16,11 @@
 #include "SGTools/DataProxy.h"
 #include "SGTools/DataProxy_cast.h"
 #include "SGTools/TransientAddress.h"
-#include "SGTools/CurrentEventStore.h"
 #include "AthenaKernel/ThinningCache.h"
 #include "AthenaKernel/ThinningDecisionBase.h"
 #include "AthenaKernel/IProxyDict.h"
 #include "AthenaKernel/errorcheck.h"
+#include "AthenaKernel/proxyDictFromEventContext.h"
 #include "CxxUtils/checker_macros.h"
 
 
@@ -50,7 +50,7 @@ namespace SG {
  * Otherwise, we store a pointer to the object itself, flagging
  * this case with the low bit, and return 0.
  *
- * If @c sg is 0, then we take the store from whatever the link's currently
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
  * set to.  If the link has no current store, then we take the global
  * default.
  */
@@ -60,21 +60,21 @@ DataProxyHolder::toStorableObject (const_pointer_t obj,
                                    IProxyDict* sg)
 {
   sgkey_t key = 0;
-  if (obj == 0) {
+  if (obj == nullptr) {
     // Setting the link to null.
-    m_proxy = 0;
+    m_proxy = nullptr;
   }
   else {
     // Find the store to use.
-    if (sg == 0)
+    if (sg == nullptr)
       sg = this->source1();
-    if (sg == 0)
-      sg = SG::CurrentEventStore::store();
+    if (sg == nullptr)
+      sg = Atlas::proxyDictFromEventContext();
 
     if (sg) {
       m_proxy = sg->proxy (obj);
     }
-    if (m_proxy == 0) {
+    if (m_proxy == nullptr) {
       // Didn't find a proxy for this object.
       // Store the object pointer directly, and return 0.
       storeObjpointer (obj);
@@ -115,7 +115,7 @@ DataProxyHolder::toStorableObject (const_pointer_t obj,
  * a dummy proxy and add it to the store.  We return the SG key
  * in either case.
  *
- * If @c sg is 0, then we take the store from whatever the link's currently
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
  * set to.  If the link has no current store, then we take the global
  * default.
  */
@@ -125,17 +125,17 @@ DataProxyHolder::toIdentifiedObject (const ID_type& dataID,
                                      IProxyDict* sg)
 {
   // Find the store to use.
-  if (sg == 0)
+  if (sg == nullptr)
     sg = this->source1();
-  if (sg == 0)
-    sg = SG::CurrentEventStore::store();
+  if (sg == nullptr)
+    sg = Atlas::proxyDictFromEventContext();
 
   if (!sg)
     return 0;
 
   // Look up the proxy.
   m_proxy = sg->proxy (link_clid, dataID);
-  if (m_proxy == 0) {
+  if (m_proxy == nullptr) {
     // Didn't find a proxy; make a dummy.
     SG::TransientAddress tad (link_clid, dataID);
     tad.setSGKey (sg->stringToKey (dataID, link_clid));
@@ -159,7 +159,7 @@ DataProxyHolder::toIdentifiedObject (const ID_type& dataID,
  * then we store the pointer to the proxy.  Otherwise, we create
  * a dummy proxy and add it to the store.
  *
- * If @c sg is 0, then we take the store from whatever the link's currently
+ * If @c sg is nullptr, then we take the store from whatever the link's currently
  * set to.  If the link has no current store, then we take the global
  * default.
  *
@@ -173,10 +173,10 @@ DataProxyHolder::toIdentifiedObject (sgkey_t sgkey,
   if (!sgkey) return;
 
   // Find the store to use.
-  if (sg == 0)
+  if (sg == nullptr)
     sg = this->source1();
-  if (sg == 0)
-    sg = SG::CurrentEventStore::store();
+  if (sg == nullptr)
+    sg = Atlas::proxyDictFromEventContext();
 
   if (!sg)
     return;
@@ -186,7 +186,7 @@ DataProxyHolder::toIdentifiedObject (sgkey_t sgkey,
 
   CLID clid = CLID_NULL;
   const std::string* key = nullptr;
-  if (m_proxy == 0) {
+  if (m_proxy == nullptr) {
     // Didn't find it --- have SG query proxy providers.
     // Try to turn the hashed key into a string key + clid.
     key = sg->keyToString (sgkey, clid);
@@ -197,7 +197,7 @@ DataProxyHolder::toIdentifiedObject (sgkey_t sgkey,
     }
   }
   
-  if (m_proxy == 0) {
+  if (m_proxy == nullptr) {
     // Still didn't find it --- make a dummy.
     SG::TransientAddress tad;
     if (key) {
@@ -252,7 +252,7 @@ void* DataProxyHolder::storableBase (castfn_t* castfn,
 {
   // Test for null link.
   if (!m_proxy)
-    return 0;
+    return nullptr;
 
   // Test for direct pointer to an object.
   if (isObjpointer())
@@ -289,7 +289,7 @@ void* DataProxyHolder::storableBase (castfn_t* castfn,
       return db->object();
   }
 
-  return 0;
+  return nullptr;
 }
 
 
@@ -304,7 +304,7 @@ IProxyDict* DataProxyHolder::source() const
 {
   SG::DataProxy* dp = proxy();
   if (!dp)
-    return 0;
+    return nullptr;
   return dp->store();
 }
 
@@ -333,7 +333,7 @@ DataProxyHolder::toTransient (sgkey_t sgkey,
   if (sg == nullptr)
     sg = this->source1();
   if (sg == nullptr)
-    sg = SG::CurrentEventStore::store();
+    sg = Atlas::proxyDictFromEventContext();
 
   // Do input renaming.
   if (s_inputRenameMap && sg->storeID() == StoreID::EVENT_STORE) {
@@ -366,18 +366,18 @@ DataProxyHolder::toTransient (sgkey_t sgkey,
  * in order to set the proxy pointer.  It calls @c toIdentifiedObject
  * with the provided hashed key.
  *
- * If @c sg is 0, then we use the global default store.
+ * If @c sg is nullptr, then we use the global default store.
  */
 DataProxyHolder::sgkey_t
 DataProxyHolder::toTransient (const ID_type& dataID,
                               CLID link_clid,
-                              IProxyDict* sg /*= 0*/)
+                              IProxyDict* sg /*= nullptr*/)
 {
   // Find the store to use.
-  if (sg == 0)
+  if (sg == nullptr)
     sg = this->source1();
-  if (sg == 0)
-    sg = SG::CurrentEventStore::store();
+  if (sg == nullptr)
+    sg = Atlas::proxyDictFromEventContext();
 
   sgkey_t sgkey = sg->stringToKey (dataID, link_clid);
   toTransient (sgkey, sg);
@@ -580,8 +580,8 @@ SG::DataProxy* DataProxyHolder::proxy1(bool nothrow) const
 {
   const_pointer_t obj = reinterpret_cast<const_pointer_t>
     (reinterpret_cast<unsigned long> (m_proxy) & ~1UL);
-  SG::DataProxy* proxy = SG::CurrentEventStore::store()->proxy (obj);
-  if (proxy == 0 && !nothrow)
+  SG::DataProxy* proxy = Atlas::proxyDictFromEventContext()->proxy (obj);
+  if (proxy == nullptr && !nothrow)
     throw SG::ExcPointerNotInSG (obj);
   return proxy;
 }
@@ -598,8 +598,8 @@ bool DataProxyHolder::operator== (const DataProxyHolder& other) const
   // One could refer to an object directly by pointer, the other could
   // have a proxy.
 
-  const_pointer_t ptr = 0;
-  const DataProxy* proxy = 0;
+  const_pointer_t ptr = nullptr;
+  const DataProxy* proxy = nullptr;
   if (isObjpointer() && !other.isObjpointer()) {
     ptr = objpointer();
     proxy = other.m_proxy;
@@ -638,7 +638,7 @@ void setDataProxyHolderInputRenameMap ATLAS_NOT_THREAD_SAFE
 IProxyDict* DataProxyHolder::source1()
 {
   if (!m_proxy || isObjpointer()) {
-    return 0;
+    return nullptr;
   }
   return m_proxy->store();
 }
