@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -16,7 +16,6 @@
 ZDC_FiberSDTool::ZDC_FiberSDTool(const std::string& type, const std::string& name, const IInterface* parent)
   : SensitiveDetectorBase(type,name,parent)
 {
-  declareProperty("readoutPos",m_readoutPos = 511.8);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
