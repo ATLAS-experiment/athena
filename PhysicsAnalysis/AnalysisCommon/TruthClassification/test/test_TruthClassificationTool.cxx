@@ -72,6 +72,8 @@ int test1(int argc, char* argv[])
     {10, "LightFlavorDecay"},
     {11, "ChargeFlipMuon"}, 
     {12, "NonMuonlike"},
+    {50, "MaterialConversion"},
+    {51, "InternalConversion"},
     {70, "TauDecayLike"},
     {80, "BHadronDecayLike"},
     {90, "CHadronDecayLike"},
@@ -102,12 +104,14 @@ int test1(int argc, char* argv[])
 
   bool el_CFsep = true;
   bool mu_CFsep = true;
+  bool el_convSep = true;
 
   // Create the truth classification tool:
   ANA_MSG_INFO("Creating TruthClassificationTool...");
   asg::StandaloneToolHandle< CP::IClassificationTool > tool("TruthClassificationTool/TruthClassificationTool");
   ANA_CHECK(tool.setProperty("separateChargeFlipElectrons", el_CFsep));
   ANA_CHECK(tool.setProperty("separateChargeFlipMuons",     mu_CFsep));
+  ANA_CHECK(tool.setProperty("separateConversionTypes",     el_convSep));
   ANA_CHECK(tool.setProperty("OutputLevel", MSG::INFO ));
   ANA_CHECK(tool.retrieve());
 

@@ -916,6 +916,10 @@ class IFFLeptonDecorationBlock (ConfigBlock):
             meta={'role':'containerRef'})
         self.addOption ('separateChargeFlipElectrons', True, type=bool,
             info="whether to consider charged-flip electrons as a separate class.")
+        self.addOption ('separateConversionTypes', False, type=bool,
+            info="whether to split electrons from photon conversions (`PromptPhotonConversion`, 5) "
+            "into material (`MaterialConversion`, 50) and internal (`InternalConversion`, 51) "
+            "conversions. Cases that cannot be resolved stay in class 5.")
         self.addOption ('decoration', 'IFFClass_%SYS%', type=str,
             info="the name of the decoration set by the IFF "
             "`TruthClassificationTool`.")
@@ -937,6 +941,7 @@ class IFFLeptonDecorationBlock (ConfigBlock):
         config.addPrivateTool( 'tool', 'TruthClassificationTool')
         # label charge-flipped electrons as such
         alg.tool.separateChargeFlipElectrons = self.separateChargeFlipElectrons
+        alg.tool.separateConversionTypes = self.separateConversionTypes
         alg.tool.useTruthParticleDecorations = self.useDerivationClassification
         alg.decoration = self.decoration
         alg.particles = particles

@@ -39,9 +39,17 @@ private:
   StatusCode classifyMuon(const xAOD::IParticle &muon,
                           Truth::Type &classification) const;
 
+  /// \brief split a PromptPhotonConversion electron into material or
+  /// internal conversion (left unchanged if this cannot be decided)
+  void splitPromptPhotonConversion(const xAOD::IParticle &electron,
+                                   Truth::Type &classification) const;
+
   /// \brief separately store charge-flip electrons/muons
   bool m_separateChargeFlipElectrons = false;
   bool m_separateChargeFlipMuons = false;
+
+  /// \brief split electron photon conversions into material and internal conversions
+  bool m_separateConversionTypes = false;
 
   /// \brief use truth particle decorations
   bool m_useTruthParticleDecorations{false};

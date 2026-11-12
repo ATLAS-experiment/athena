@@ -28,6 +28,7 @@ TruthClassificationTool::TruthClassificationTool(const std::string &type)
   declareProperty ("separateChargeFlipElectrons", m_separateChargeFlipElectrons, "separate prompt charge-flipped electrons");
   declareProperty ("separateChargeFlipMuons",     m_separateChargeFlipMuons,     "separate prompt charge-flipped muons");
   declareProperty ("useTruthParticleDecorations", m_useTruthParticleDecorations, "use truth particle decorations");
+  declareProperty ("separateConversionTypes",     m_separateConversionTypes,     "split electrons from photon conversions into material and internal conversions");
 }
 
 
@@ -48,6 +49,10 @@ StatusCode TruthClassificationTool::classify(const xAOD::IParticle &particle,
   if (dynamic_cast<const xAOD::Electron *> (&particle) || (truthParticle != nullptr && MC::isElectron(truthParticle)))
   {
     ANA_CHECK(classifyElectron(particle, classification));
+    if (m_separateConversionTypes && classification == Truth::Type::PromptPhotonConversion)
+    {
+      splitPromptPhotonConversion(particle, classification);
+    }
   }
   else if (dynamic_cast<const xAOD::Muon *> (&particle) || (truthParticle != nullptr && MC::isMuon(truthParticle)))
   {
@@ -614,6 +619,55 @@ StatusCode TruthClassificationTool::classifyMuon(const xAOD::IParticle &muon,
 
   return StatusCode::SUCCESS;
   ///////////////////////////////////////////////////////////////////////////////////////////////////////
+}
+
+void TruthClassificationTool::splitPromptPhotonConversion(const xAOD::IParticle &electron,
+                                                          Truth::Type &classification) const
+{
+  // Only called for electrons already classified as PromptPhotonConversion,
+  // so the 'firstEgMother' decorations are known to be available.
+  const xAOD::TruthParticle *truthParticle = dynamic_cast<const xAOD::TruthParticle *> (&electron);
+  const bool isTruthParticle = truthParticle != nullptr;
+  if (!isTruthParticle)
+  {
+    truthParticle = xAOD::TruthHelpers::getTruthParticle(electron);
+  }
+
+  int type = isTruthParticle ? m_classifierParticleType(electron) : m_truthType(electron);
+  int origin = isTruthParticle ? m_classifierParticleOrigin(electron) : m_truthOrigin(electron);
+  if (m_useTruthParticleDecorations && !isTruthParticle && truthParticle != nullptr)
+  {
+    type = m_classifierParticleType(*truthParticle);
+    origin = m_classifierParticleOrigin(*truthParticle);
+  }
+
+  const int firstMotherType = m_firstMotherTruthType(electron);
+  const int firstMotherOrigin = m_firstMotherTruthOrigin(electron);
+
+  // Internal conversion (gamma* -> e+ e-): the first non-Geant mother is itself
+  // a generator-level electron from a photon conversion, i.e. the pair was
+  // produced by the generator rather than in the detector material.
+  if (type == MCTruthPartClassifier::BkgElectron
+    && firstMotherType == MCTruthPartClassifier::BkgElectron && firstMotherOrigin == MCTruthPartClassifier::PhotonConv)
+  {
+    classification = Truth::Type::InternalConversion;
+    return;
+  }
+
+  // Material conversion: a Geant4 electron (from a conversion or another
+  // electromagnetic process in the material) whose first non-Geant mother is
+  // a real generator-level photon.
+  if (type == MCTruthPartClassifier::BkgElectron
+    && (origin == MCTruthPartClassifier::PhotonConv || origin == MCTruthPartClassifier::ElMagProc)
+    && (firstMotherType == MCTruthPartClassifier::UnknownPhoton || firstMotherType == MCTruthPartClassifier::IsoPhoton
+      || firstMotherType == MCTruthPartClassifier::NonIsoPhoton || firstMotherType == MCTruthPartClassifier::BkgPhoton))
+  {
+    classification = Truth::Type::MaterialConversion;
+    return;
+  }
+
+  // Otherwise (e.g. the reconstructed electron is matched to a photon, or the
+  // mother is not identified) keep the generic PromptPhotonConversion class.
 }
 
 bool TruthClassificationTool::isPromptElectron(const xAOD::IParticle &electron,
