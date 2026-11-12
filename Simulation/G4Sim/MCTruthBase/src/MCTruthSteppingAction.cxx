@@ -101,31 +101,35 @@ namespace G4UA
   //---------------------------------------------------------------------------
   void MCTruthSteppingAction::UserSteppingAction(const G4Step* aStep)
   {
-    TrackHelper trackHelper(aStep->GetTrack());
+    // Most steps neither create secondaries nor change volume. Nothing below has
+    // an effect for them, so return before building the TrackHelper (dynamic_cast).
     const std::vector<const G4Track*>* secondaries = aStep->GetSecondaryInCurrentStep();
-
-    // info must be propagated to secondaries before MC truth incident can be created
-    propagatePrimaryInfoToSecondaries(aStep);
-
-    // A saved primary is reclassified, but its old trajectory stayed active.
-    const bool processTruth =
-      trackHelper.IsPrimary() || trackHelper.IsRegeneratedPrimary() ||
-      (trackHelper.IsRegisteredSecondary() && m_secondarySavingLevel > 1);
-
-    if (secondaries && !secondaries->empty() && processTruth) {
-      createTruthIncident(aStep);
-    }
-
-    if (m_recordingEnvelopes.size() == 0) return;
-    if (trackHelper.IsSecondary()) return;
+    const bool hasSecondaries = secondaries && !secondaries->empty();
 
     G4StepPoint* preStep = aStep->GetPreStepPoint();
     G4StepPoint* postStep = aStep->GetPostStepPoint();
+    const bool checkEnvelopes = !m_recordingEnvelopes.empty() &&
+      preStep->GetPhysicalVolume() != postStep->GetPhysicalVolume();
 
-    G4VPhysicalVolume* preVol = preStep->GetPhysicalVolume();
-    G4VPhysicalVolume* postVol = postStep->GetPhysicalVolume();
+    if (!hasSecondaries && !checkEnvelopes) return;
 
-    if (preVol == postVol) return;
+    TrackHelper trackHelper(aStep->GetTrack());
+
+    if (hasSecondaries) {
+      // info must be propagated to secondaries before MC truth incident can be created
+      propagatePrimaryInfoToSecondaries(*secondaries, trackHelper);
+
+      // A saved primary is reclassified, but its old trajectory stayed active.
+      const bool processTruth =
+        trackHelper.IsPrimary() || trackHelper.IsRegeneratedPrimary() ||
+        (trackHelper.IsRegisteredSecondary() && m_secondarySavingLevel > 1);
+      if (processTruth) {
+        createTruthIncident(aStep);
+      }
+    }
+
+    if (!checkEnvelopes) return;
+    if (trackHelper.IsSecondary()) return;
 
     const G4TouchableHistory* preTHist = static_cast<const G4TouchableHistory*>(preStep->GetTouchable());
     const G4TouchableHistory* postTHist = static_cast<const G4TouchableHistory*>(postStep->GetTouchable());
@@ -167,25 +171,19 @@ namespace G4UA
     m_truthRecordSvc.registerTruthIncident(truth);
   }
 
-  void MCTruthSteppingAction::propagatePrimaryInfoToSecondaries(const G4Step* aStep) const
+  void MCTruthSteppingAction::propagatePrimaryInfoToSecondaries(const std::vector<const G4Track*>& secondaries,
+                                                                 TrackHelper& parentHelper) const
   {
-    if (!aStep) {
+    TrackInformation* parentInfo = parentHelper.GetTrackInformation();
+    if (!parentInfo) {
       return;
     }
-
-    TrackHelper parentHelper(aStep->GetTrack());
-    TrackInformation* parentInfo = parentHelper.GetTrackInformation();
-    HepMC::GenParticlePtr primaryGenParticle = parentInfo ? parentInfo->GetPrimaryGenParticle() : nullptr;
+    HepMC::GenParticlePtr primaryGenParticle = parentInfo->GetPrimaryGenParticle();
     if (!primaryGenParticle) {
       return;
     }
 
-    const std::vector<const G4Track*>* secondaries = aStep->GetSecondaryInCurrentStep();
-    if (!secondaries) {
-      return;
-    }
-
-    for (const G4Track* secondary : *secondaries) {
+    for (const G4Track* secondary : secondaries) {
       if (!secondary || secondary->GetUserInformation()) {
         continue;
       }
