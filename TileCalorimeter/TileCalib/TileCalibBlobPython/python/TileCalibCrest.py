@@ -3,8 +3,9 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # TileCalibCrest.py
 # Sanya Solodkov <Sanya.Solodkov@cern.ch>, 2025-02-04
-# Laura Sargsyan <Laura.Sargsyan@cern.ch>, 2025-09-16
 # Siarhei Harkusha <Siarhei.Harkusha@cern.ch>, 2025-05-19
+# Laura Sargsyan <Laura.Sargsyan@cern.ch>, 2025-09-16
+# Sanya Solodkov <Sanya.Solodkov@cern.ch>, 2026-07-01 - migration to CHAI
 ################################################################
 """
 Python helper module for managing CREST DB connections and TileCalibBlobs.
@@ -15,7 +16,8 @@ import os, re, cppyy, base64, json, time, datetime
 from PyCool import cool # noqa: F401
 Blob = cppyy.gbl.coral.Blob
 
-from pycrest.api.crest_api import CrestApi
+import chai
+chai.set_log_level(chai._chai.WARNING)
 
 from TileCalibBlobObjs.Classes import TileCalibUtils, TileCalibDrawerCmt, \
      TileCalibDrawerInt, TileCalibDrawerOfc, TileCalibDrawerBch, \
@@ -26,6 +28,7 @@ from TileCalibBlobPython import TileCalibTools
 from TileCalibBlobPython.TileCalibLogger import TileCalibLogger, getLogger
 log = getLogger("TileCalibCrest")
 
+CREST_HOST = os.getenv('CREST_HOST',os.getenv('CREST_SERVER',os.getenv('CHAI_CREST_SERVER',os.getenv('CREST_SERVER_PATH',os.getenv('CREST_API_URL','https://atlas-crest-dev.cern.ch:443/api-v6.4')))))
 
 #======================================================================
 #===
@@ -67,13 +70,18 @@ class TileBlobReaderCrest(TileCalibLogger):
           #=== initialize base class
         TileCalibLogger.__init__(self,"TileBlobReader")
         self.payload = {}
-        self.__db = db
+        if db is None or ('CREST' in db and 'http' not in db):
+            self.__db = CREST_HOST
+        else:
+            self.__db = db
         self.__folder = folder
         self.__tag = tag
         self.__copyBlob = copyBlob
 
         self.__iovList = []
         self.__iov = (-1,0)
+        self.__payload_hash = []
+        self.__insertion_time = []
         self.__commentBlob = None
         self.__drawerBlob = [None]*276
         self.__comment = None
@@ -82,21 +90,29 @@ class TileBlobReaderCrest(TileCalibLogger):
         self.__modmax = modmax+1
 
         #=== try to open db
-        self.__remote = (("http://" in db) or ("https://" in db) or ("CREST" in db))
+        self.__remote = not self.__db.endswith(".json")
         if self.__remote:
-            if 'http' not in self.__db:
-                self.__db = os.getenv(db,os.getenv('CREST_HOST',os.getenv('CREST_SERVER_PATH','https://atlas-crest-dev-mgr.cern.ch:443/api-v6.0')))
-            self.log().info('Host %s' , (self.__db))
-            self.__api_instance = CrestApi(host=self.__db)
-            socks = os.getenv('CREST_SOCKS', 'False')
-            if socks == 'True': self.__api_instance.socks()
+            if 'http' in self.__db:
+                self.log().info('Host %s' , (self.__db))
+                self.__api_instance = chai.Database(f"crest:{self.__db}")
+            else:
+                self.log().info('Local db %s' , (self.__db))
+                self.__api_instance = chai.Database(f"crest_fs:{self.__db}")
             self.__tag = self.getFolderTag(folder,None,tag)
+            try:
+                self.__tag_instance = self.__api_instance.get_tag(self.__tag)
+            except Exception:
+                self.__tag_instance = None
             if run is not None and lumi is not None:
                 log.info("Initializing for run %d, lumiblock %d", run,lumi)
                 self.__getIov((run,lumi),True)
+            elif run is None and lumi is not None:
+                log.info("Initializing for hash %s", lumi)
+                self.__getIov(lumi,True)
         else:
             self.log().info('File %s' , (self.__db))
             self.__api_instance = None
+            self.__tag_instance = None
             self.__tag = 'unknown'
             self.__iovList.append(((MINRUN,MINLBK),(MAXRUN, MAXLBK)))
             self.__iov = self.__runlumi2iov(self.__iovList[-1])
@@ -166,49 +182,46 @@ class TileBlobReaderCrest(TileCalibLogger):
                 self.log().info("Use localTag \'%s\' as is", tag)
         else:
             tag=None
-            if api:
-                tags=api.find_global_tag_map(globalTag)
-            elif self.__api_instance:
-                tags=self.__api_instance.find_global_tag_map(globalTag)
-            else:
-                return globalTag
-            if tags.size==0:
+            try:
+                if api:
+                    gtag = api.get_global_tag(globalTag)
+                elif self.__api_instance and 'http' in self.__db:
+                    gtag = self.__api_instance.get_global_tag(globalTag)
+                else:
+                    api = chai.Database(f"crest:{CREST_HOST}")
+                    gtag = api.get_global_tag(globalTag)
+                tags = gtag.mapping
+            except Exception:
+                tags = {}
+            if len(tags)==0:
                 raise Exception( "globalTag %s not found" % (globalTag) )
             else:
-                for i in range(tags.size):
-                    t=tags.resources[i].tag_name
-                    l=tags.resources[i].label
+                for l in tags:
+                    t=tags[l][1]
                     if (prefix!='' and t.startswith(prefix)) or l==folder:
                         tag=t
                         self.log().info("Resolved globalTag \'%s\' to folderTag \'%s\'", globalTag,tag)
-                        #taginfo = self.__api_instance.find_tag(name=tag)
-                        #print(taginfo)
+                        #taginfo = self.__api_instance.get_tag(tag)
+                        #print(taginfo.to_json())
         return tag
 
     #____________________________________________________________________
     def getIovs(self,since=(MINRUN,MINLBK),until=(MAXRUN,MAXLBK)):
-        if self.__api_instance is None:
+        if self.__tag_instance is None:
             return [self.__iovList[0][0]]
         else:
-            run_lumi1=str((since[0]<<32)+since[1]+1)
-            run_lumi2=str((until[0]<<32)+until[1]+1)
-            MAXRUNLUMI1=str(MAXRUNLUMI+1)
-            iovs1=self.__api_instance.select_iovs(self.__tag,"0",run_lumi1,sort='id.since:DESC,id.insertionTime:DESC',size=1,snapshot=0)
-            iovs2=self.__api_instance.select_iovs(self.__tag,run_lumi2,MAXRUNLUMI1,sort='id.since:ASC,id.insertionTime:DESC',size=1,snapshot=0)
-            since1=0 if iovs1.size==0 else iovs1.resources[0].since
-            until1=MAXRUNLUMI if iovs2.size==0 else iovs2.resources[0].since
-            iovs=self.__api_instance.select_iovs(self.__tag,str(since1),str(until1),sort='id.since:ASC,id.insertionTime:DESC',size=999999,snapshot=0)
+            run_lumi1=(since[0]<<32)+since[1]
+            run_lumi2=(until[0]<<32)+until[1]
+            run_lumi0=self.__tag_instance.get_payload_at(run_lumi1).since
+            iovs=self.__tag_instance.get_iovs(run_lumi0,run_lumi2)
             iovList=[]
-            if iovs.size==0:
+            for iov in iovs:
+                runS=iov.since>>32
+                lumiS=iov.since&0xFFFFFFFF
+                if (runS,lumiS) not in iovList:
+                    iovList.append((runS,lumiS))
+            if len(iovList)==0:
                 raise Exception( "IOV for tag %s IOV [%s,%s] - (%s,%s) not found" % (self.__tag,since[0],since[1],until[0],until[1]) )
-            else:
-                for i in range(iovs.size):
-                    iov=iovs.resources[i]
-                    since=int(iov.since)
-                    runS=since>>32
-                    lumiS=since&0xFFFFFFFF
-                    if (runS,lumiS) not in iovList:
-                        iovList.append((runS,lumiS))
             return iovList
 
     #____________________________________________________________________
@@ -219,32 +232,97 @@ class TileBlobReaderCrest(TileCalibLogger):
             return self.__iovList[-1]
 
     #____________________________________________________________________
-    def __getIov(self,runlumi,dbg=False):
-        if self.__api_instance is None:
+    def getHashListSize(self):
+        return len(self.__payload_hash)
+
+    #____________________________________________________________________
+    def getPayloadHash(self):
+        return self.__payload_hash
+
+    #____________________________________________________________________
+    def getInsertionTime(self):
+        return self.__insertion_time
+
+    #____________________________________________________________________
+    def getPayloadByHash(self,hash):
+        if self.__tag_instance is None:
             pass
         else:
-            run_lumi1=str((runlumi[0]<<32)+runlumi[1]+1)
-            MAXRUNLUMI1=str(MAXRUNLUMI+1)
-            iovs1=self.__api_instance.select_iovs(self.__tag,"0",run_lumi1,sort='id.since:DESC,id.insertionTime:DESC',size=1,snapshot=0)
-            iovs2=self.__api_instance.select_iovs(self.__tag,run_lumi1,MAXRUNLUMI1,sort='id.since:ASC,id.insertionTime:DESC',size=1,snapshot=0)
-            if iovs1.size==0:
-                raise Exception( "IOV for tag %s run,lumi (%s,%s) not found" % (self.__tag,runlumi[0],runlumi[1]) )
+            if isinstance(hash,int) and hash>=0 and hash<len(self.__payload_hash):
+                hash = self.__payload_hash[hash]
+            try:
+                payload = self.__tag_instance.get_payload(hash)
+            except Exception:
+                raise Exception( "Payload for hash %s not found" % hash )
+            jdata = json.loads(payload.to_json_string())
+            if self.__copyBlob:
+                self.payload = jdata
+                return
+            for chan in range(self.__modmin,self.__modmax):
+                try:
+                    blob=jdata[str(chan)][0]
+                except Exception:
+                    blob=None
+                self.__create_drawer(blob,chan)
+            try:
+                blob=jdata['1000'][0]
+            except Exception:
+                blob=None
+            self.__create_comment(blob)
+        return
+
+    #____________________________________________________________________
+    def readIov(self,runlumi=None,dbg=False):
+        if self.__remote and runlumi is not None and not self.__checkIov(runlumi):
+            self.__getIov(runlumi,dbg)
+
+    #____________________________________________________________________
+    def __getIov(self,runlumi,dbg=False):
+        if self.__tag_instance is None:
+            pass
+        else:
+            usehash = not (isinstance(runlumi,list) or isinstance(runlumi,tuple))
+            if usehash:
+                res=self.__tag_instance.get_payload(runlumi)
             else:
-                iov=iovs1.resources[0]
-                since=int(iov.since)
-                runS=since>>32
-                lumiS=since&0xFFFFFFFF
-                until=MAXRUNLUMI if iovs2.size==0 else iovs2.resources[0].since
-                runU=until>>32
-                lumiU=until&0xFFFFFFFF
-                hash=iov.payload_hash
-                if dbg:
-                    #self.log().info('Run,Lumi (%d,%d)' , runlumi)
-                    self.log().info('IOV [%d,%d] - (%d,%d)' , runS,lumiS,runU,lumiU)
-                    self.log().info('Insertion time %s' , iov.insertion_time)
-                    self.log().info('Hash %s' , hash)
-                payload = self.__api_instance.get_payload(hash=hash).decode('utf-8')
-                jdata=json.loads(payload)
+                res=self.__tag_instance.get_payload_at((runlumi[0]<<32)+runlumi[1])
+            if not res:
+                if usehash:
+                    raise Exception( "IOV for tag %s run,lumi (%s,%s) not found" % (self.__tag,runlumi[0],runlumi[1]) )
+                else:
+                    raise Exception( "IOV for tag %s hash %s not found" % (self.__tag,runlumi) )
+            else:
+                if usehash:
+                    (runS,lumiS,runU,lumiU) = (0,0,MAXRUN,MAXLBK)
+                    self.__insertion_time.append(0)
+                    self.__payload_hash.append(runlumi)
+                    jdata = json.loads(res.to_json_string())
+                    if dbg:
+                        self.log().info('hash %s' , runlumi)
+                else:
+                    runS=res.since>>32
+                    lumiS=res.since&0xFFFFFFFF
+                    if res.until is None:
+                        runU=MAXRUN
+                        lumiU=MAXLBK
+                    else:
+                        runU=res.until>>32
+                        lumiU=res.until&0xFFFFFFFF
+                    if dbg:
+                        #self.log().info('Run,Lumi (%d,%d)' , runlumi)
+                        self.log().info('IOV [%d,%d] - (%d,%d)' , runS,lumiS,runU,lumiU)
+                    iovs=self.__tag_instance.get_iovs(res.since,res.since+1)
+                    self.__payload_hash = []
+                    self.__insertion_time = []
+                    for iov in iovs:
+                        if iov.since == res.since:
+                            self.__insertion_time.append(iov.insertion_time)
+                            self.__payload_hash.append(iov.payload_hash)
+                            if dbg:
+                                self.log().info('Insertion time %s  Hash %s' , iov.insertion_time, iov.payload_hash)
+                    self.__insertion_time.reverse()
+                    self.__payload_hash.reverse()
+                    jdata = json.loads(res.payload.to_json_string())
                 #with open("payload.json", 'w') as the_file:
                 #    the_file.write(payload)
                 #    the_file.write('\n')
@@ -274,7 +352,12 @@ class TileBlobReaderCrest(TileCalibLogger):
 
     #____________________________________________________________________
     def __checkIov(self,runlumi):
-        point = (runlumi[0]<<32) + runlumi[1]
+        if isinstance(runlumi,list) or isinstance(runlumi,tuple):
+            run = runlumi[0] if isinstance(runlumi[0],int) else 0
+            lumi = runlumi[1] if isinstance(runlumi[1],int) else 0
+            point = (run<<32) + lumi
+        else:
+            point = runlumi if isinstance(runlumi,int) else 0
         inrange = point>=self.__iov[0] and point<self.__iov[1]
         return inrange
 
@@ -539,7 +622,10 @@ class TileBlobWriterCrest(TileCalibLogger):
         TileCalibLogger.__init__(self, "TileBlobWriter")
 
         #=== store db
-        self.__db = db
+        if db is not None and 'CREST' in db and 'http' not in db:
+            self.__db = CREST_HOST
+        else:
+            self.__db = db
         self.__folderPath = folderPath
         self.__payload = payload
         if payload is not None:
@@ -594,18 +680,50 @@ class TileBlobWriterCrest(TileCalibLogger):
             jdata = self.__payload
 
         (sinceRun, sinceLumi) = since
+        fullTag = tag
+        if self.__folderPath and not (tag.upper().startswith('TILE') or tag.upper().startswith('CALO')):
+            fullTag = TileCalibUtils.getFullTag(self.__folderPath, tag)
 
-        if not self.__db or (self.__db and self.__db.endswith('.json')):
+        if not self.__db or self.__db.endswith('.json'):
             # Writting into the json file
-            fullTag = tag
-            if self.__folderPath and not (tag.upper().startswith('TILE') or tag.upper().startswith('CALO')):
-                fullTag = TileCalibUtils.getFullTag(self.__folderPath, tag)
             fileName = f"{fullTag}.{sinceRun}.{sinceLumi}.json"
             if self.__db:
                 fileName = f'{self.__db[:-5]}.{fileName}'
 
             with open(fileName, 'w') as the_file:
                 json.dump(jdata, the_file, separators=(',', ':'), sort_keys=True)
+        else:
+            if 'http' in self.__db:
+                self.log().info('Host %s' , (self.__db))
+                self.__api_instance = chai.Database(f"crest:{self.__db}")
+                fileName = 'remote host'
+            else:
+                self.log().info('Local db %s' , (self.__db))
+                self.__api_instance = chai.Database(f"crest_fs:{self.__db}")
+                fileName = self.__db + '/' + fullTag
+
+            (payload_spec,container) = self.create_container_with_blob(jdata)
+
+            try:
+                new_tag = self.__api_instance.create_tag(
+                    fullTag,
+                    '<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type="71" clid="1238547719" /></addrHeader><typeName>CondAttrListCollection</typeName>',
+                    payload_spec,
+                    chai.IovType.RunNumberLumiBlock,
+                    "crest-json-single-iov",
+                    chai.Synchronization.All,
+                    chai.TagStatus.Unlocked
+                )
+            except Exception as e:
+                # Tag might already exist, try to get it
+                try:
+                    new_tag = self.__api_instance.get_tag(fullTag)
+                except Exception as e2:
+                    self.log().error(f"Failed to create or get tag: {e}")
+                    self.log().error(f"Additional error: {e2}")
+                    raise Exception( "Failed to write data to %s" % (self.__db) )
+
+            new_tag.add_payload(container, (sinceRun<<32)+sinceLumi, MAXRUNLUMI)
 
         #=== print info
         self.log().info( 'Writting tag "%s"', fullTag)
@@ -613,6 +731,47 @@ class TileBlobWriterCrest(TileCalibLogger):
         if self.__payload is None:
             self.log().info( '... with comment field: "%s"', self.getComment())
         self.log().info( '... into file         : %s' , fileName)
+
+    #____________________________________________________________________
+    def create_container_with_blob(self, jdata, name=None, type=chai.Type.String):
+        """
+        Create a container with the blob data (base64 encoded).
+
+        Args:
+            jdata: all base64-encoded blob data in json format
+            name:  name for field specification
+            type:  type for field specification
+
+        Returns:
+            Payload specification with all channels found in jdata
+            Container with the base64-encoded blob data
+
+        This method uses String type with base64 encoding instead of Blob type
+        due to limitations in nanobind's handling of BlobData during serialization
+        """
+        if name is None:
+            if self.__calibDrawerType in ['CaloCondBlobFlt', 'CaloFlt']:
+                name='CaloCondBlob16M'
+            else:
+                name='TileCalibBlob'
+
+        field_spec = chai.FieldSpec([chai.Field(name,type)])
+
+        spec = []
+        for id in jdata.items():
+            spec += [chai.Channel(int(id[0]), "")]
+            channel_spec = chai.ChannelSpec(spec)
+
+        # Create payload specification
+        payload_spec = chai.PayloadSpec(field_spec, channel_spec)
+
+        # Create container
+        container = chai.Container(payload_spec)
+
+        for id in jdata.items():
+            container[int(id[0])].push_string(id[1][0])
+
+        return (payload_spec,container)
 
     #____________________________________________________________________
     def setComment(self, author, comment=None):
