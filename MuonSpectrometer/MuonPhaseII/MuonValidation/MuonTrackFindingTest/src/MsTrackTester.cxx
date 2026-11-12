@@ -12,12 +12,16 @@
 #include "MuonPRDTestR4/TrackContainerModule.h"
 #include "MuonTesterTree/MuonTesterTreeDict.h"
 #include "xAODTruth/xAODTruthHelpers.h"
+#include "xAODTruth/TruthVertex.h"
+#include "GeoPrimitives/GeoPrimitivesHelpers.h"
 
 #include "ActsEvent/Decoration.h"
 #include "ActsEvent/CaloExtension.h"
 #include "ActsInterop/Logger.h"
+#include "ActsInterop/UnitConverters.h"
 
 #include "Acts/Definitions/Units.hpp"
+#include "Acts/EventData/ParticleHypothesis.hpp"
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 #include "FourMomUtils/P4Helpers.h"
@@ -115,6 +119,28 @@ namespace MuonValR4 {
         }
         return std::make_pair(maxL - minL, maxTheta - minTheta);
     }
+    std::optional<Acts::BoundTrackParameters> MsTrackTester::truthPerigee(const EventContext& ctx,
+                                                                          const xAOD::TruthParticle& truthMuon) const {
+        const xAOD::TruthVertex* prodVtx = truthMuon.hasProdVtx() ? truthMuon.prodVtx() : nullptr;
+        if (!prodVtx) {
+            return std::nullopt;
+        }
+        const Amg::Vector3D prodPos{prodVtx->x(), prodVtx->y(), prodVtx->z()};
+        const auto p4 = truthMuon.p4();
+        const Acts::BoundTrackParameters start = Acts::BoundTrackParameters::createCurvilinear(
+                ActsTrk::convertPosToActs(prodPos), Amg::dirFromAngles(p4.Phi(), p4.Theta()),
+                truthMuon.charge() / ActsTrk::energyToActs(p4.P()), std::nullopt, Acts::ParticleHypothesis::muon());
+        /// The point of closest approach lies behind the production vertex if the transverse momentum points away from the beam line
+        const Acts::Direction navDir = prodPos.x() * p4.Px() + prodPos.y() * p4.Py() > 0. ? Acts::Direction::Backward()
+                                                                                          : Acts::Direction::Forward();
+        auto perigee = m_extrapolationTool->propagate(ctx, start, *m_beamLine, navDir);
+        if (!perigee.ok()) {
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Propagation of the truth muon from "<<Amg::toString(prodPos)
+                        <<" to the beam line failed: "<<perigee.error().message());
+            return std::nullopt;
+        }
+        return std::move(*perigee);
+    }
     StatusCode MsTrackTester::initialize() {
         ATH_CHECK(m_truthSegmentKey.initialize(m_isMC));
         ATH_CHECK(m_truthKey.initialize(m_isMC));
@@ -134,7 +160,7 @@ namespace MuonValR4 {
         ATH_CHECK(m_segTagKey.initialize(!m_idTrackKey.empty()));
         
         ATH_CHECK(m_ctxProvider.initialize());
-        ATH_CHECK(m_extrapolationTool.retrieve(EnableTool{m_storeID}));
+        ATH_CHECK(m_extrapolationTool.retrieve(EnableTool{m_storeID || m_isMC}));
         ATH_CHECK(detStore()->retrieve(m_detMgr));
         m_logger = makeActsAthenaLogger(this, name());
 
@@ -261,6 +287,32 @@ namespace MuonValR4 {
                     cone->push_back(theta);
                     qTimesP->push_back(m_seedingTool->estimateQtimesP(tgContext, *truthSeed, magField) / Gaudi::Units::GeV);
                     return length;
+                }));
+            /// Production vertex of the truth muon [mm]; prodR = -1 if the vertex is missing
+            m_truthTrks->addVariable(
+                std::make_unique<GenericPartDecorBranch<xAOD::TruthParticle, float>>(m_tree,
+                std::format("{:}_prodR", m_truthTrks->name()), [] (const xAOD::TruthParticle& p) -> float {
+                    return p.hasProdVtx() && p.prodVtx() ? p.prodVtx()->perp() : -1.f;
+                }));
+            m_truthTrks->addVariable(
+                std::make_unique<GenericPartDecorBranch<xAOD::TruthParticle, float>>(m_tree,
+                std::format("{:}_prodZ", m_truthTrks->name()), [] (const xAOD::TruthParticle& p) -> float {
+                    return p.hasProdVtx() && p.prodVtx() ? p.prodVtx()->z() : std::numeric_limits<float>::quiet_NaN();
+                }));
+            /// Transverse & longitudinal impact parameters of the truth muon w.r.t. the beam line [mm]; NaN if the
+            /// production vertex is missing or the propagation failed
+            auto truthZ0 = std::make_shared<VectorBranch<float>>(m_tree, std::format("{}_z0", m_truthTrks->name()));
+            m_tree.addBranch(truthZ0);
+            m_truthTrks->addVariable(
+                std::make_unique<GenericPartDecorBranch<xAOD::TruthParticle, float>>(m_tree,
+                std::format("{:}_d0", m_truthTrks->name()), [truthZ0, this] (const xAOD::TruthParticle& p) -> float {
+                    const auto perigee = truthPerigee(Gaudi::Hive::currentContext(), p);
+                    if (!perigee) {
+                        truthZ0->push_back(std::numeric_limits<float>::quiet_NaN());
+                        return std::numeric_limits<float>::quiet_NaN();
+                    }
+                    truthZ0->push_back(perigee->parameters()[Acts::eBoundLoc1]);
+                    return perigee->parameters()[Acts::eBoundLoc0];
                 }));
 
             m_tree.addBranch(m_truthTrks);
