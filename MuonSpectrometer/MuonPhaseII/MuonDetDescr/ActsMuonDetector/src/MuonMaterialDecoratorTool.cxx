@@ -43,7 +43,7 @@ namespace MuonGMR4 {
             m_material = ActsTrk::readMaterialMapJson(fullPath, level);
         } else {
             ActsPlugins::RootMaterialDecorator::Config decoratorConfig;
-            decoratorConfig.fileName = fullPath;
+            decoratorConfig.fileName = std::move(fullPath);
             m_rootMaterialDecorator = std::make_unique<ActsPlugins::RootMaterialDecorator>(decoratorConfig, level);
         }
         return StatusCode::SUCCESS;

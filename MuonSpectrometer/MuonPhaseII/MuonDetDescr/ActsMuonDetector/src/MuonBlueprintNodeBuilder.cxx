@@ -58,21 +58,21 @@ namespace {
         node.configureFace(
             Acts::CuboidVolumeBounds::Face::NegativeZFace, material);
         node.configureFace(
-            Acts::CuboidVolumeBounds::Face::PositiveZFace, material);
+            Acts::CuboidVolumeBounds::Face::PositiveZFace, std::move(material));
         break;
       }
       case Acts::VolumeBounds::BoundsType::eTrapezoid: {
         node.configureFace(
             Acts::TrapezoidVolumeBounds::Face::NegativeZFaceXY, material);
         node.configureFace(
-            Acts::TrapezoidVolumeBounds::Face::PositiveZFaceXY, material);
+            Acts::TrapezoidVolumeBounds::Face::PositiveZFaceXY, std::move(material));
         break;
       }
       case Acts::VolumeBounds::BoundsType::eDiamond: {
         node.configureFace(
             Acts::DiamondVolumeBounds::Face::NegativeZFaceXY, material);
         node.configureFace(
-            Acts::DiamondVolumeBounds::Face::PositiveZFaceXY, material);
+            Acts::DiamondVolumeBounds::Face::PositiveZFaceXY, std::move(material));
         break;
       }
       default:
