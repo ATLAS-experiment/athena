@@ -13,7 +13,7 @@ atlas_add_library( DataModelTestDataWriteLib
 atlas_add_component( DataModelTestDataWrite
                      src/components/*.cxx
                      NOCLIDDB
-                     LINK_LIBRARIES DataModelTestDataWriteLib )
+                     LINK_LIBRARIES DataModelTestDataWriteLib TrigSteeringEvent )
 
 atlas_add_dictionary( DataModelTestDataWriteDict
                       DataModelTestDataWrite/DataModelTestDataWriteDict.h

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -29,7 +29,6 @@ xAODTestClearDecor::xAODTestClearDecor (const std::string &name,
                                         ISvcLocator *pSvcLocator)
   : AthAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("ReadPrefix",  m_readPrefix);
 }
   
 
@@ -48,15 +47,15 @@ StatusCode xAODTestClearDecor::initialize()
 StatusCode xAODTestClearDecor::execute(const EventContext& /*ctx*/)
 {
   const CVec* vec = 0;
-  CHECK( evtStore()->retrieve (vec, m_readPrefix + "cvec") );
+  CHECK( evtStore()->retrieve (vec, m_readPrefix.value() + "cvec") );
   vec->clearDecorations();
 
   const C* c = 0;
-  CHECK( evtStore()->retrieve (c, m_readPrefix + "cinfo") );
+  CHECK( evtStore()->retrieve (c, m_readPrefix.value() + "cinfo") );
   c->clearDecorations();
 
   const CVec* ctrig = 0;
-  CHECK( evtStore()->retrieve (ctrig, m_readPrefix + "ctrig") );
+  CHECK( evtStore()->retrieve (ctrig, m_readPrefix.value() + "ctrig") );
   ctrig->clearDecorations();
 
   return StatusCode::SUCCESS;

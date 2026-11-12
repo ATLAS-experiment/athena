@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -60,8 +60,8 @@ public:
 
 
 private:
-  SG::ReadHandleKey<DMTest::CVec> m_cvecKey;
-  SG::WriteHandleKey<DMTest::CVec> m_writeKey;
+  SG::ReadHandleKey<DMTest::CVec> m_cvecKey{this, "CVecKey", "cvec_renamed"};
+  SG::WriteHandleKey<DMTest::CVec> m_writeKey{this, "WriteKey", "cvec"};
 };
 
 

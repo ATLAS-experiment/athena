@@ -32,8 +32,6 @@ xAODTestReadCInfo::xAODTestReadCInfo (const std::string &name,
                                       ISvcLocator *pSvcLocator)
   : AthReentrantAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("CInfoKey", m_cinfoKey = "cinfo");
-  declareProperty ("WriteKey", m_writeKey);
 }
   
 

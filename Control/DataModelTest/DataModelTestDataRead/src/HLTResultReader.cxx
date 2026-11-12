@@ -55,11 +55,8 @@ namespace DMTest {
  */
 HLTResultReader::HLTResultReader (const std::string &name,
                                   ISvcLocator *pSvcLocator)
-  : AthAlgorithm (name, pSvcLocator),
-    m_nav ("TestNav", this)
+  : AthAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("ResultKey", m_resultKey = "HLTResult_HLT");
-  declareProperty ("Nav", m_nav);
 }
   
 

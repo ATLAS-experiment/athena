@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -18,6 +18,7 @@
 
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "Gaudi/Property.h"
 
 
 namespace DMTest {
@@ -59,7 +60,7 @@ public:
 
 private:
   /// Parameter: Prefix for names read from SG.
-  std::string m_readPrefix;
+  Gaudi::Property<std::string> m_readPrefix{this, "ReadPrefix", ""};
 };
 
 

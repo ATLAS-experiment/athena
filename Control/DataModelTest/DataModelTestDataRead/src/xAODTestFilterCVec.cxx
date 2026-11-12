@@ -28,12 +28,8 @@ namespace DMTest {
  */
 xAODTestFilterCVec::xAODTestFilterCVec (const std::string &name,
                                         ISvcLocator *pSvcLocator)
-  : AthReentrantAlgorithm (name, pSvcLocator),
-    m_cvecKey ("cvec_renamed"),
-    m_writeKey ("cvec")
+  : AthReentrantAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("CVecKey", m_cvecKey);
-  declareProperty ("WriteKey", m_writeKey);
 }
   
 

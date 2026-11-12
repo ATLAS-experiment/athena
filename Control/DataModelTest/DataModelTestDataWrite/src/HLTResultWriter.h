@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -22,10 +22,7 @@
 #include "StoreGate/WriteHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrigNavigation/Navigation.h"
-
-namespace HLT {
-  class HLTResult;
-}
+#include "TrigSteeringEvent/HLTResult.h"
 
 
 namespace DMTest {
@@ -66,10 +63,10 @@ public:
 
 private:
   /// Handle to write the HLTResult object.
-  SG::WriteHandleKey<HLT::HLTResult> m_resultKey;
+  SG::WriteHandleKey<HLT::HLTResult> m_resultKey{this, "ResultKey", "HLTResult_HLT"};
 
   /// Navigation object use to fill the result.
-  ToolHandle<HLT::Navigation>        m_nav;
+  ToolHandle<HLT::Navigation> m_nav{this, "Nav", "TestNav"};
 };
 
 
