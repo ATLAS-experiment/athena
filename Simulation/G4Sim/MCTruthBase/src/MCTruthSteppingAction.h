@@ -20,6 +20,9 @@
 // Local includes
 #include "RecordingEnvelope.h"
 
+class G4Track;
+class TrackHelper;
+
 namespace ISF
 {
   class IGeoIDSvc;
@@ -70,7 +73,8 @@ namespace G4UA
       void setupRecEnvelopes();
 
       /// Propagate parent primary truth attribution to ordinary secondaries.
-      void propagatePrimaryInfoToSecondaries(const G4Step*) const;
+      void propagatePrimaryInfoToSecondaries(const std::vector<const G4Track*>& secondaries,
+                                             TrackHelper& parentHelper) const;
 
       /// Create and register a truth incident for the current step.
       void createTruthIncident(const G4Step*) const;
