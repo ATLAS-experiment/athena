@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -49,9 +49,6 @@ namespace columnar
       using ElementType = typename BaseAccessor::MemoryType;
       using MemoryType = std::vector<ElementType>;
 
-      static void updateColumnInfo (ColumnInfo& /*info*/)
-      {}
-
       [[nodiscard]] static auto makeViewer (void** dataArea)
       {
         if constexpr (BaseAccessor::viewIsReference)
@@ -66,24 +63,23 @@ namespace columnar
 
 
 
-    // the column accessor for std::vector in ColumnarModeArray
+    // the column accessor for std::vector when using offset maps
     //
     // This is one of the more tricky accessors, as it need to connect to
     // two underlying columns.  The first column is the offset column, the
     // second is the data column.
-    template<typename CT>
-      requires (ContainerFreeAccessor<CT,ColumnAccessMode::input,ColumnarModeArray>::isDefined)
-    class ContainerFreeAccessor<std::vector<CT>,ColumnAccessMode::input,ColumnarModeArray> final
+    template<typename CT,ColumnarModeConcept CM>
+      requires (CM::useOffsetMaps && ContainerFreeAccessor<CT,ColumnAccessMode::input,CM>::isDefined)
+    class ContainerFreeAccessor<std::vector<CT>,ColumnAccessMode::input,CM> final
     {
       /// Public Members
       /// ==============
     public:
 
       static constexpr ColumnAccessMode CAM = ColumnAccessMode::input;
-      using CM = ColumnarModeArray;
 
       static constexpr bool isDefined = true;
-      static constexpr unsigned internalOffsetColumns = ContainerFreeAccessor<CT,ColumnAccessMode::input,ColumnarModeArray>::internalOffsetColumns + 1;
+      static constexpr unsigned internalOffsetColumns = ContainerFreeAccessor<CT,ColumnAccessMode::input,CM>::internalOffsetColumns + 1;
 
       ContainerFreeAccessor () = default;
 
@@ -131,16 +127,16 @@ namespace columnar
         return *this;
       }
 
-      auto operator () (void** dataArea, std::size_t index) const noexcept
+      auto operator () (void** dataArea, std::size_t index) const
       {
         auto *offset = static_cast<const ColumnarOffsetType*>(dataArea[m_offsetIndex]);
         return m_dataAccessor(dataArea, offset[index], offset[index+1]);
       }
 
-      auto operator () (void** dataArea, std::size_t beginIndex, std::size_t endIndex) const noexcept
+      auto operator () (void** dataArea, std::size_t beginIndex, std::size_t endIndex) const
       {
         auto *offset = static_cast<const ColumnarOffsetType*>(dataArea[m_offsetIndex]);
-        return detail::VectorConvertView ([&dataAccessor = m_dataAccessor, dataArea] (const auto& internalIndex) noexcept {
+        return detail::VectorConvertView ([&dataAccessor = m_dataAccessor, dataArea] (const auto& internalIndex) {
             const ColumnarOffsetType& thisEndIndex = (&internalIndex)[1];
             return dataAccessor (dataArea, internalIndex, thisEndIndex);},
           std::span<const ColumnarOffsetType> (offset + beginIndex, offset + endIndex));
@@ -157,7 +153,7 @@ namespace columnar
 
       unsigned m_offsetIndex = 0u;
       std::unique_ptr<ColumnAccessorDataArray> m_offsetData;
-      ContainerFreeAccessor<CT,ColumnAccessMode::input,ColumnarModeArray> m_dataAccessor;
+      ContainerFreeAccessor<CT,ColumnAccessMode::input,CM> m_dataAccessor;
     };
   }
 }

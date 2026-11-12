@@ -239,6 +239,81 @@ namespace columnar
 
 
 
+    /// @brief a reader filling the event-index column for an offset
+    /// map
+    ///
+    /// This has to run after the reader for the offset column itself,
+    /// so that the entries for the current event are known.
+    struct ColumnReaderEventIndex final : public TestUtils::ColumnReader
+    {
+      const std::vector<ColumnarOffsetType>* offsetColumn = nullptr;
+      std::vector<ColumnarOffsetType> data;
+      ColumnarOffsetType currentEvent = 0;
+      unsigned entries = 0;
+
+      explicit ColumnReaderEventIndex (const std::string& val_columnName)
+      {
+        outputColumns.push_back ({.name = val_columnName});
+      }
+
+      virtual bool connect(Backend /*source*/, std::unordered_map<std::string, const std::vector<ColumnarOffsetType>*>& offsetColumns, std::unordered_map<std::string, ColumnInfo>& requestedColumns) override
+      {
+        auto iter = requestedColumns.find (outputColumns.at(0).name);
+        if (iter == requestedColumns.end())
+          return false;
+
+        const auto& offsetName = iter->second.offsetName;
+        if (auto offsetIter = offsetColumns.find (offsetName); offsetIter != offsetColumns.end())
+          offsetColumn = offsetIter->second;
+        else if (iter->second.isOptional)
+          return false;
+        else
+          throw std::runtime_error ("missing offset column for: " + outputColumns.at(0).name + " (offset column: " + offsetName + ")");
+        outputColumns.at(0).enabled = true;
+
+        // IMPORTANT: This has to be erased at the end of the function,
+        // since erasing it earlier would invalidate the offsetName
+        // reference.
+        requestedColumns.erase (iter);
+        return true;
+      }
+
+      virtual void clearColumns () override
+      {
+        data.clear ();
+        currentEvent = 0;
+      }
+
+      virtual void getEntry (Long64_t /*entry*/) override
+      {
+        // all entries added to the offset column for this event belong
+        // to the current event
+        data.resize (offsetColumn->back(), currentEvent);
+        ++ currentEvent;
+      }
+
+      virtual void setData (ColumnVectorData& columnData) override
+      {
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          columnData.setColumn (outputColumns.at(0).columnIndex, data.size(), data.data());
+      }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float /*emptyTime*/) override
+      {
+        BranchPerfData result;
+        result.name = outputColumns.at(0).name + "(event-index)";
+        result.entries = entries;
+        return result;
+      }
+
+      virtual void collectColumnData () override
+      {
+        entries += data.size();
+      }
+    };
+
+
+
     void makeCommonColumnReaders (std::vector<std::shared_ptr<TestUtils::ColumnReader>>& knownColumns)
     {
       knownColumns.push_back (std::make_shared<ColumnReaderEventCount> ());
@@ -262,6 +337,15 @@ namespace columnar
       knownColumns.push_back(std::make_shared<ColumnReaderOutVector<float>>("AnalysisJets.MetObjectWeight", 0));
       knownColumns.push_back(std::make_shared<ColumnReaderOutVector<float>>("AnalysisJets.MetObjectWeightSoft", 0));
       knownColumns.push_back(std::make_shared<ColumnReaderOutVector<MissingETBase::Types::bitmask_t>>("METAssoc_AnalysisMET.useObjectFlags", 0));
+    }
+
+    void makeEventIndexColumnReaders (std::vector<std::shared_ptr<TestUtils::ColumnReader>>& knownColumns, const ColumnVectorHeader& columnHeader)
+    {
+      for (auto& [name, info] : columnHeader.getAllColumnInfo())
+      {
+        if (info.isEventIndex)
+          knownColumns.push_back (std::make_shared<ColumnReaderEventIndex> (name));
+      }
     }
 
     void makeOutputColumnReaders (std::vector<std::shared_ptr<TestUtils::ColumnReader>>& knownColumns, const ColumnVectorHeader& columnHeader)
@@ -289,6 +373,8 @@ namespace columnar
           myColumn = std::make_shared<TestUtils::ColumnReaderOutVector<char>>(info.name, 0);
         else if (*info.type == typeid(std::uint16_t))
           myColumn = std::make_shared<TestUtils::ColumnReaderOutVector<std::uint16_t>>(info.name, 0);
+        else if (*info.type == typeid(std::uint32_t))
+          myColumn = std::make_shared<TestUtils::ColumnReaderOutVector<std::uint32_t>>(info.name, 0);
         else if (*info.type == typeid(std::uint64_t))
           myColumn = std::make_shared<TestUtils::ColumnReaderOutVector<std::uint64_t>>(info.name, 0);
         else 

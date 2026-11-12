@@ -21,9 +21,9 @@ import os
 import sys
 sys.path.insert(0, os.path.dirname(__file__))
 
-from testutils import _run_tests
+from testutils import _run_tests, physlite_test_file
 
-from ColumnarToolWrapperPython import crc64, crc64addint, invalid_link_value, sg_key
+from ColumnarToolWrapperPython import crc64, crc64addint, sg_key
 
 # CLIDs from the CLASS_DEF macros in the xAOD container headers
 CLID_MUON_CONTAINER = 1178459224
@@ -50,9 +50,6 @@ KNOWN_KEYS = {
     "InDetForwardTrackParticles": (CLID_TRACK_PARTICLE_CONTAINER, 0x143C6846),
     "MuonSpectrometerTrackParticles": (CLID_TRACK_PARTICLE_CONTAINER, 0x3993C8F3),
 }
-
-PHYSLITE_PATH = "/data/krumnack/DAOD_PHYSLITE_DEV_V3.root"
-
 
 def test_sg_key_known_keys():
     """sg_key reproduces every hard-coded key from PhysliteTest.cxx."""
@@ -87,20 +84,16 @@ def test_crc64_composes_to_sg_key():
     assert crc64("AnalysisMuons") & ((1 << 30) - 1) == sg_key("AnalysisMuons")
 
 
-def test_invalid_link_value():
-    """invalid_link_value matches columnar::ColumnarModeArray::invalidLinkValue."""
-    assert invalid_link_value == 0xFFFFFFFFFFFFFFFF
-
-
 def test_sg_key_matches_physlite_file():
     """Integration: sg_key reproduces the m_persKey values stored in a real PHYSLITE file."""
-    if not os.path.exists(PHYSLITE_PATH):
-        print(f"skipping: {PHYSLITE_PATH} not available")
+    physlite_path = physlite_test_file()
+    if physlite_path is None:
+        print("skipping: the PHYSLITE test file is not available")
         return
     import awkward as ak
     import uproot
 
-    with uproot.open(PHYSLITE_PATH) as f:
+    with uproot.open(physlite_path) as f:
         tree = f["CollectionTree"]
         events = tree.arrays(
             [

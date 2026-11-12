@@ -12,7 +12,6 @@
 #include <ColumnarTestFixtures/PhysliteTest.h>
 
 #include <AsgTesting/UnitTest.h>
-#include <ColumnarInterfaces/KnownSgKeys.h>
 #include <ColumnarTestFixtures/Benchmark.h>
 #include <ColumnarTestFixtures/Configuration.h>
 #include <ColumnarTestFixtures/IXAODToolCaller.h>
@@ -86,13 +85,6 @@ namespace columnar
           {
             ANA_MSG_ERROR("failed to read events from file: " << file->GetName());
             return StatusCode::FAILURE;
-          }
-          // Print known keys diagnostic
-          std::cout << "known container keys:" << std::endl;
-          for (auto& [container, key] : knownSgKeys)
-          {
-            std::cout << std::format("  {} -> 0x{:x}, 0x{:x} -> {}",
-              container, m_event->getHash(container), key, m_event->getName(key)) << std::endl;
           }
           return StatusCode::SUCCESS;
         }

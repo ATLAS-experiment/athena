@@ -13,6 +13,7 @@
 
 // Columnar includes
 #include "ColumnarCore/ColumnAccessor.h"
+#include "ColumnarCore/ParticleDef.h"
 #include "ColumnarCore/VectorColumn.h"
 #include "ColumnarTracking/TrackDef.h"
 #include "ColumnarVariant/VariantDef.h"
@@ -62,7 +63,7 @@ namespace ADD_CMODE(ORUtils)
       columnar::Particle1Accessor<columnar::ObjectLink<MyTrackDef>> m_muonTrkAcc {*this, "inDetTrackParticleLink"};
 
       // Ghost track list accessor
-      columnar::Particle2Accessor<std::vector<columnar::LinkCastColumn<MyTrackDef,xAOD::IParticleContainer>>> m_ghostAcc {*this, "GhostTrack"};
+      columnar::Particle2Accessor<std::vector<columnar::LinkCastColumn<MyTrackDef,columnar::ParticleDef>>> m_ghostAcc {*this, "GhostTrack"};
 
   }; // class MuJetGhostDRMatcher
 

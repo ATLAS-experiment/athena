@@ -8,7 +8,7 @@ import os
 import sys
 sys.path.insert(0, os.path.dirname(__file__))
 
-from testutils import _run_tests, approx, unique_name, xfail
+from testutils import _run_tests, approx, unique_name, xfail, MUON_CALIBRATION_RELEASE, physlite_test_file
 
 import numpy as np
 import awkward as ak
@@ -50,7 +50,8 @@ def make_muon_events():
 
 def make_muon_eff_tool():
     """Return an initialized MuonEfficiencyScaleFactors Tool."""
-    return Tool("CP::MuonEfficiencyScaleFactors/unique0")
+    return Tool("CP_array::MuonEfficiencyScaleFactors/unique0",
+                properties={"CalibrationRelease": MUON_CALIBRATION_RELEASE})
 
 
 # ---------------------------------------------------------------------------
@@ -80,7 +81,7 @@ def test_tool_recommended_systematics():
 def test_classify_columns():
     """classify_columns groups ColumnInfo into containers correctly."""
     handle = ColumnarToolWrapperPython.PythonToolHandle()
-    handle.set_type_and_name("CP::MuonEfficiencyScaleFactors/unique0")
+    handle.set_type_and_name("CP_array::MuonEfficiencyScaleFactors/unique0")
     handle.initialize()
 
     classified = classify_columns(handle.columns)
@@ -105,7 +106,7 @@ def test_classify_columns():
 def test_resolve_optional_columns_present():
     """Optional columns present in events are kept."""
     handle = ColumnarToolWrapperPython.PythonToolHandle()
-    handle.set_type_and_name("CP::MuonEfficiencyScaleFactors/unique0")
+    handle.set_type_and_name("CP_array::MuonEfficiencyScaleFactors/unique0")
     handle.initialize()
     classified = classify_columns(handle.columns)
 
@@ -124,7 +125,7 @@ def test_resolve_optional_columns_present():
 def test_resolve_optional_columns_absent():
     """Optional columns absent from events are removed."""
     handle = ColumnarToolWrapperPython.PythonToolHandle()
-    handle.set_type_and_name("CP::MuonEfficiencyScaleFactors/unique0")
+    handle.set_type_and_name("CP_array::MuonEfficiencyScaleFactors/unique0")
     handle.initialize()
     classified = classify_columns(handle.columns)
 
@@ -175,7 +176,7 @@ def test_tool_call_masked_events():
     sf_values = result["Muons.sfOut"].to_list()
     assert len(sf_values) == 1
     assert len(sf_values[0]) == 1
-    assert sf_values[0][0] == approx(0.99509060382843018)
+    assert sf_values[0][0] == approx(0.99569094181060791)
 
 
 def test_tool_systematics():
@@ -221,7 +222,7 @@ def test_extract_buffers_nested_vector_synthetic():
     )
 
     handle = ColumnarToolWrapperPython.PythonToolHandle()
-    handle.set_type_and_name(f"columnar::VectorExampleTool/{unique_name()}")
+    handle.set_type_and_name(f"columnar_array::VectorExampleTool/{unique_name()}")
     handle.initialize()
 
     classified = classify_columns(handle.columns)
@@ -243,7 +244,7 @@ def test_extract_buffers_nested_vector_synthetic():
 
 def test_tool_vector_example():
     """VectorExampleTool initializes and exposes nested vector columns."""
-    tool = Tool("columnar::VectorExampleTool/vecEx")
+    tool = Tool("columnar_array::VectorExampleTool/vecEx")
     col_names = [c.name for c in tool.columns]
     # VectorExampleTool should have NumTrkPt500 as a nested vector column
     assert any("NumTrkPt500" in n for n in col_names)
@@ -252,7 +253,7 @@ def test_tool_vector_example():
 
 def test_tool_vector_example_call_synthetic():
     """Tool.__call__ runs VectorExampleTool on a synthetic var * var * T awkward array."""
-    tool = Tool(f"columnar::VectorExampleTool/{unique_name()}")
+    tool = Tool(f"columnar_array::VectorExampleTool/{unique_name()}")
 
     pt = ak.values_astype(ak.Array([[10e5, 10e5, 1e3]]), np.float32)
     numtrk = ak.values_astype(ak.Array([[[3, 1, 0], [1], [0]]]), np.int32)
@@ -277,7 +278,7 @@ def test_tool_vector_example_call_synthetic():
 def test_classify_columns_nested_vector_inputs_routed():
     """classify_columns groups VectorExampleTool nested-vector data columns under their nested offset."""
     handle = ColumnarToolWrapperPython.PythonToolHandle()
-    handle.set_type_and_name(f"columnar::VectorExampleTool/{unique_name()}")
+    handle.set_type_and_name(f"columnar_array::VectorExampleTool/{unique_name()}")
     handle.initialize()
 
     classified = classify_columns(handle.columns)
@@ -307,15 +308,15 @@ def test_classify_columns_nested_vector_inputs_routed():
 
 def test_tool_vector_example_call_physlite():
     """Tool.__call__ runs VectorExampleTool on real PHYSLITE data via uproot."""
-    physlite_path = "/data/krumnack/DAOD_PHYSLITE_DEV_V3.root"
-    if not os.path.exists(physlite_path):
-        print(f"SKIP: {physlite_path} not present")
+    physlite_path = physlite_test_file()
+    if physlite_path is None:
+        print("SKIP: the PHYSLITE test file is not available")
         return
 
     import uproot
 
     tool = Tool(
-        f"columnar::VectorExampleTool/{unique_name()}",
+        f"columnar_array::VectorExampleTool/{unique_name()}",
         rename_containers={"Particles": "AnalysisJetsAuxDyn"},
     )
 
@@ -336,7 +337,7 @@ def test_tool_vector_example_call_physlite():
 
 def test_required_input_branch_names_strips_data_suffix():
     """required_input_branch_names dedupes and strips the .data suffix on nested-vector inputs."""
-    tool = Tool(f"columnar::VectorExampleTool/{unique_name()}")
+    tool = Tool(f"columnar_array::VectorExampleTool/{unique_name()}")
     branches = tool.required_input_branch_names
     branches_set = set(branches)
     assert "Particles.pt" in branches_set

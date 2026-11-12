@@ -160,7 +160,7 @@ namespace columnar
     using ObjectLinkType = ObjectLink<ObjectLinkCI,CM>;
     ColumnAccessor<MetAssociationDef,std::vector<ObjectLinkType>,CM> objectLinks;
 
-    ColumnAccessor<MetAssociationDef,LinkCastColumn<JetDef,xAOD::JetContainer>,CM> jetLink;
+    ColumnAccessor<MetAssociationDef,OptObjectId<JetDef,CM>,CM> jetLink;
 
     ColumnAccessor<MetAssociationDef,char,CM> isMisc;
 

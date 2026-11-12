@@ -18,6 +18,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <ColumnarTestFixtures/ColumnarMemoryTest.h>
 #include <ColumnarTestFixtures/ColumnarPhysliteTest.h>
 #include <xAODCore/ShallowCopy.h>
+#include <xAODCaloEvent/CaloClusterContainer.h>
 
 #include <ElectronEfficiencyCorrection/AsgElectronEfficiencyCorrectionTool.h>
 
@@ -62,8 +63,8 @@ TEST_F (ColumnarMemoryTest, AsgElectronEfficiencyCorrectionTool)
   columnMap.addColumn ("Electrons.pt", {10e5});
   columnMap.addColumn ("Electrons.eta", {1});
   columnMap.addColumn ("Electrons.author", {unsigned(xAOD::EgammaParameters::AuthorElectron)});
-  columnMap.addColumn ("Electrons.caloClusterLinks.data", {0});
-  columnMap.addColumn ("Electrons.caloClusterLinks.offset", {0, columnMap.columnSize("Electrons.caloClusterLinks.data")});
+  columnMap.addKeyIndexLink<xAOD::CaloClusterContainer> ("Electrons.caloClusterLinks", "egammaClusters", {0});
+  columnMap.addColumn ("Electrons.caloClusterLinks.offset", {0, 1});
 
   columnMap.addColumn ("egammaClusters", {0, 1});
   columnMap.addColumn ("egammaClusters.calE", {10e5 * cosh (1)});
@@ -128,9 +129,7 @@ private:
 
 
 
-// FIX ME: This is failing in the nightlies and should be reenabled once
-// the issue is understood and resolved.
-TEST_F (ColumnarPhysLiteTest, DISABLED_AsgElectronEfficiencyCorrectionTool)
+TEST_F (ColumnarPhysLiteTest, AsgElectronEfficiencyCorrectionTool)
 {
   asg::AsgToolConfig toolConfig;
   toolConfig.setTypeAndName (columnar::add_cmode("CP")+"::AsgElectronEfficiencyCorrectionTool/" + makeUniqueName());

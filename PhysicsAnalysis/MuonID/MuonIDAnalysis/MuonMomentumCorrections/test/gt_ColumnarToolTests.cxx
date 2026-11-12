@@ -19,6 +19,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <ColumnarTestFixtures/ColumnarMemoryTest.h>
 #include <ColumnarTestFixtures/ColumnarPhysliteTest.h>
 #include <xAODCore/ShallowCopy.h>
+#include <xAODTracking/TrackParticleContainer.h>
 
 #include <MuonMomentumCorrections/MuonCalibTool.h>
 #include <MuonAnalysisInterfaces/IMuonSelectionTool.h>
@@ -68,10 +69,9 @@ TEST_F (ColumnarMemoryTest, MuonCalibTool)
   columnMap.addColumn ("Muons.charge", {1});
   columnMap.addColumn ("Muons.muonType", {unsigned(xAOD::Muon::MuonType::Combined)});
   columnMap.addColumn ("Muons.author", {unsigned(xAOD::Muon::Author::CaloTag)});
-  columnMap.addColumn ("Muons.extrapolatedMuonSpectrometerTrackParticleLink", {0});
-  columnMap.addColumn ("Muons.combinedTrackParticleLink", {0});
-  columnMap.addColumn ("Muons.inDetTrackParticleLink", {0});
-  columnMap.addColumn ("Muons.inDetTrackParticleLink.keys", {0, 1, 2, 3});
+  columnMap.addKeyIndexLink<xAOD::TrackParticleContainer> ("Muons.extrapolatedMuonSpectrometerTrackParticleLink", "ExtrapolatedMuonTrackParticles", {0});
+  columnMap.addKeyIndexLink<xAOD::TrackParticleContainer> ("Muons.combinedTrackParticleLink", "CombinedMuonTrackParticles", {0});
+  columnMap.addKeyIndexLink<xAOD::TrackParticleContainer> ("Muons.inDetTrackParticleLink", "InDetTrackParticles", {0});
 
   columnMap.addColumn ("InDetTrackParticles", {0, 1});
   columnMap.addColumn ("InDetTrackParticles.d0", {0});

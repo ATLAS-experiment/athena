@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -76,12 +76,10 @@ namespace columnar
       }
     };
 
-    template<ContainerIdConcept CI>
-    class MapLookupAccessor<CI,ColumnarModeArray> final
+    template<ContainerIdConcept CI,ColumnarModeConcept CM>
+      requires (CM::isUprootMode)
+    class MapLookupAccessor<CI,CM> final
     {
-    public:
-      using CM = ColumnarModeArray;
-
     private:
       ColumnAccessor<CI,std::size_t,CM> m_nameHashAcc;
 

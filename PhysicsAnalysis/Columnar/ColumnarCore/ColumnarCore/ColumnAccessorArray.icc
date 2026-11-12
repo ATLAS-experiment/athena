@@ -45,7 +45,6 @@ namespace columnar
         auto info = options.makeColumnInfo();
         info.offsetName = optionsArray.offsetName;
         info.isOffset = optionsArray.isOffset;
-        MemoryAccessor<CT,CM>::updateColumnInfo (info);
         m_accessorData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_accessorData, &typeid (typename MemoryAccessor<CT,CM>::MemoryType), CAM);
         columnarTool.addColumn (optionsArray.baseName + optionsArray.dataSuffix, m_accessorData.get(), std::move (info));
       }
@@ -140,19 +139,23 @@ namespace columnar
       *this = AccessorTemplate (columnarTool, name, std::move (options));
     }
 
-    [[nodiscard]] decltype(auto) operator () (ObjectId<CI,CM> id) const noexcept
+    [[nodiscard]] decltype(auto) operator () (ObjectId<CI,CM> id) const
     {
       return m_accessor(id.getDataArea(), id.getIndex());
     }
 
-    [[nodiscard]] decltype(auto) operator () (ObjectRange<CI,CM> range) const noexcept
+    // Normally we should not pass ObjectRange by reference (it can
+    // break loop optimization), but since this function should be
+    // inlined and any member is only accessed once, it doesn't matter
+    // (either is sufficient) and this shuts up cppcheck.
+    [[nodiscard]] decltype(auto) operator () (const ObjectRange<CI,CM>& range) const
     {
       return m_accessor(range.getDataArea(), range.beginIndex(), range.endIndex());
     }
 
     template<typename T>
       requires requires(T value) {std::declval<detail::ContainerFreeAccessor<CT,CAM,CM>>().set (nullptr,0,value);}
-    void set (ObjectId<CI,CM> id, T&& value) const noexcept
+    void set (ObjectId<CI,CM> id, T&& value) const
     {
       m_accessor.set (id.getDataArea(), id.getIndex(), std::forward<T>(value));
     }
@@ -162,6 +165,10 @@ namespace columnar
       return m_accessor.isAvailable (id.getDataArea());
     }
 
+    // Normally we should not pass ObjectRange by reference (it can
+    // break loop optimization), but since this function should be
+    // inlined and any member is only accessed once, it doesn't matter
+    // (either is sufficient) and this shuts up cppcheck.
     [[nodiscard]] bool isAvailable (const ObjectRange<CI,CM>& range) const noexcept
     {
       return m_accessor.isAvailable (range.getDataArea());

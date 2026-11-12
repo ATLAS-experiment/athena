@@ -24,6 +24,11 @@ namespace ADD_CMODE(columnar)
   /// This is a variation on the pt selector tool that selects on the pt
   /// of the linked track.  That is probably not something you actually
   /// want to do, but it illustrates how it's done.
+  ///
+  /// Note that a plain link like this can only point into a single
+  /// container.  The combined muon track link does that, while e.g. the
+  /// inner detector track link of a muon can point to either the
+  /// regular or the forward track container, and needs a variant link.
 
   class LinkColumnExampleTool final
     : public asg::AsgTool,
@@ -37,6 +42,13 @@ namespace ADD_CMODE(columnar)
     LinkColumnExampleTool (const std::string& name);
 
     virtual StatusCode initialize () override;
+
+    /// @brief the function to call a single event
+    ///
+    /// This is split out so that the tool can also be called on a
+    /// single event in xAOD mode (e.g. for tests that compare the
+    /// modes).
+    void callSingleEvent (columnar::MuonRange muons) const;
 
     virtual void callEvents (columnar::EventContextRange events) const override;
 
@@ -59,7 +71,7 @@ namespace ADD_CMODE(columnar)
     /// essentially we need to know what the linked container is, both
     /// for doing the link itself, and for declaring all the associated
     /// accessors.
-    columnar::TrackAccessor<columnar::ObjectColumn> trackHandle {*this, "InDetTrackParticles"};
+    columnar::TrackAccessor<columnar::ObjectColumn> trackHandle {*this, "CombinedMuonTrackParticles"};
 
 
     /// @brief the link accessor for the particles
@@ -67,7 +79,7 @@ namespace ADD_CMODE(columnar)
     /// This accessor reads the link from one container to another.  In
     /// xAOD land this is done with `ElementLink`, while in columnar
     /// land this is just a simple integer index.
-    columnar::MuonAccessor<columnar::OptTrackId> trackLinkAcc {*this, "inDetTrackParticleLink"};
+    columnar::MuonAccessor<columnar::OptTrackId> trackLinkAcc {*this, "combinedTrackParticleLink"};
 
 
 

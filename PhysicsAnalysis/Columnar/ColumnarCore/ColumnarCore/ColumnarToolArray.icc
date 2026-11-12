@@ -10,6 +10,7 @@
 #include <ColumnarCore/ObjectRange.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
+#include <functional>
 #include <memory>
 
 namespace columnar
@@ -55,6 +56,7 @@ namespace columnar
 
     std::vector<ColumnInfo> getColumnInfo () const final;
     void renameColumn (const std::string& from, const std::string& to) final;
+    void setLinkTargetName (const std::string& column, const std::string& name) final;
     void setColumnIndex (const std::string& name, std::size_t index) final;
 
 
@@ -68,6 +70,34 @@ namespace columnar
   public:
 
     void setContainerUserName (std::string_view ciName, const std::string& name);
+
+    /// @brief register a watcher for the link target name of the given
+    /// container
+    ///
+    /// The watcher will be notified once the link target name is known
+    /// (which may be immediately) and whenever it changes thereafter
+    /// (including null changes). This can currently happen in several
+    /// ways:
+    /// - registering an `ObjectColumn` accessor for the container
+    /// - explicitly setting the link target name via @ref setLinkTargetName
+    /// - being added as a super-/sub-tool to another tool that already
+    ///   knows the link target name
+    ///
+    /// This is used by link accessors to determine the `sgkey` values
+    /// of their target containers, which are derived by hashing the
+    /// names and combining the result with the xAOD type CLID. It may
+    /// be used for other purposes in the future, if the name becomes
+    /// relevant for other things.
+    ///
+    /// **WARNING:** The `watcher` will be kept until the tool gets
+    /// released, there is **NO** cleanup when the accessor gets
+    /// released. Any data shared by the accessor **MUST** be held by an
+    /// `std::shared_ptr` by both the watcher and the accessor. The
+    /// reason for this choice is that it is uncommon for accessors to
+    /// get deleted outside of cleanup, so it is not deemed worth the
+    /// effort to have an "early cleanup path". If that ever changes
+    /// this will need updating.
+    void watchLinkTargetName (std::string_view ciName, std::function<void(const std::string&)> watcher);
     void addColumn (const std::string& name, ColumnAccessorDataArray *accessorData, ColumnInfo&& info);
 
 

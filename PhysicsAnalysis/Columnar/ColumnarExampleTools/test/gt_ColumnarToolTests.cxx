@@ -20,12 +20,17 @@
 #include <ColumnarExampleTools/OptionalColumnExampleTool.h>
 #include <ColumnarExampleTools/ConfigurableColumnExampleTool.h>
 #include <ColumnarExampleTools/ModularExampleTool.h>
+#include <ColumnarExampleTools/LinkColumnExampleTool.h>
 #include <ColumnarExampleTools/MomentumAccessorExampleTool.h>
 #include <ColumnarExampleTools/StringExampleTool.h>
 #include <ColumnarExampleTools/VariantExampleTool.h>
+#include <ColumnarExampleTools/VariantLinkColumnExampleTool.h>
 #include <ColumnarExampleTools/VectorExampleTool.h>
 
 #include <xAODJet/JetContainer.h>
+#include <xAODMuon/MuonContainer.h>
+#include <xAODTracking/TrackParticleContainer.h>
+#include <ColumnarCore/ColumnInfoHelpers.h>
 #include <xAODEgamma/PhotonContainer.h>
 #include <xAODCore/ShallowCopy.h>
 #include <AthContainers/CurrentContext.h>
@@ -388,6 +393,157 @@ namespace ADD_CMODE(columnar)
   }
 
 
+  // this is a helper function for the PHYSLITE test below.  there is
+  // usually some amount of boilerplate code that test needs to run in
+  // XAOD mode, which is usually factored out into a separate function.
+  class XAODLinkColumnExampleToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
+  {
+  public:
+    XAODLinkColumnExampleToolCaller (const LinkColumnExampleTool& tool, const std::string& muonName)
+      : AsgMessaging("XAODLinkColumnExampleToolCaller"), m_tool (tool), m_muonName (muonName)
+    {}
+
+    virtual StatusCode retrieve (EventStoreType& evtStore) override
+    {
+      ANA_CHECK (evtStore.retrieve (m_muons, m_muonName));
+      return StatusCode::SUCCESS;
+    }
+
+    virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
+    {
+      auto [muonsCopy, muonsAuxCopy] = xAOD::shallowCopy (*m_muons);
+      m_muons = muonsCopy.get();
+      ANA_CHECK (evtStore.record (std::move(muonsCopy), m_muonName + postfix));
+      ANA_CHECK (evtStore.record (std::move(muonsAuxCopy), m_muonName + postfix + "Aux."));
+      return StatusCode::SUCCESS;
+    }
+
+    virtual StatusCode call () override
+    {
+      m_tool.callSingleEvent (*m_muons);
+      return StatusCode::SUCCESS;
+    }
+
+  private:
+    const LinkColumnExampleTool& m_tool;
+    std::string m_muonName;
+    const xAOD::MuonContainer *m_muons = nullptr;
+  };
+
+  // this is a test that runs the link example tool on PHYSLITE.  this
+  // checks that the links resolve correctly on actual data, and that
+  // the link target containers are the ones the tool expects.
+  TEST_F (ColumnarPhysLiteTest, LinkColumnExampleTool)
+  {
+    if (!checkMode())
+      return;
+
+    auto tool = std::make_unique<LinkColumnExampleTool> (makeUniqueName());
+    ASSERT_SUCCESS (tool->initialize ());
+
+    XAODLinkColumnExampleToolCaller xAODToolCaller (*tool, "AnalysisMuons");
+
+    doCall ({.tool = tool.get(), .name = "LinkColumnExampleTool", .xAODToolCaller = &xAODToolCaller, .containerRenames = {{{}}}});
+  }
+
+  // in-memory test for the variant link example tool.  the first muon
+  // links into the regular track container and the second one into the
+  // forward track container.  the q/p values of the tracks are chosen
+  // such that the selection only gives the expected result if each link
+  // is resolved in the container it points to.
+  TEST_F (ColumnarMemoryTest, VariantLinkColumnExampleTool)
+  {
+    if (!checkMode())
+      return;
+
+    auto tool = std::make_unique<VariantLinkColumnExampleTool> (makeUniqueName());
+    ASSERT_SUCCESS (tool->initialize ());
+
+    ColumnarTestToolHandle toolHandle (*tool);
+    toolHandle.initialize ();
+
+    for (auto& name : toolHandle.getColumnNames())
+      std::cout << "requested column: " << name << std::endl;
+    std::cout << "recommended systematics size: " << toolHandle.getRecommendedSystematics().size() << std::endl;
+
+    ColumnMapType columnMap {toolHandle};
+
+    columnMap.addColumn ("EventInfo", {0, 1});
+    columnMap.addColumn ("AnalysisMuons", {0, 2});
+    columnMap.addColumn ("AnalysisMuons.selection", {0, 0});
+    columnMap.addColumn ("InDetTrackParticles", {0, 1});
+    columnMap.addColumn ("InDetTrackParticles.qOverP", {0});
+    columnMap.addColumn ("InDetForwardTrackParticles", {0, 1});
+    columnMap.addColumn ("InDetForwardTrackParticles.qOverP", {1});
+
+    // the key and index columns for the links, with the key depending
+    // on the target container (so this can't use `addKeyIndexLink`, which
+    // uses the same target for all links)
+    columnMap.addColumn ("AnalysisMuons.inDetTrackParticleLink." + std::string (columnar::ColumnarModeArray::linkKeyColumnName),
+                         {columnar::computeSgKey ("InDetTrackParticles", ClassID_traits<xAOD::TrackParticleContainer>::ID()),
+                          columnar::computeSgKey ("InDetForwardTrackParticles", ClassID_traits<xAOD::TrackParticleContainer>::ID())});
+    columnMap.addColumn ("AnalysisMuons.inDetTrackParticleLink." + std::string (columnar::ColumnarModeArray::linkIndexColumnName), {0u, 0u});
+
+    columnMap.setExpectation ("AnalysisMuons.selection", {1, 0});
+
+    columnMap.connectColumnsToTool ();
+    columnMap.call ();
+    columnMap.checkExpectations ();
+  }
+
+  // this is a helper function for the PHYSLITE test below.  there is
+  // usually some amount of boilerplate code that test needs to run in
+  // XAOD mode, which is usually factored out into a separate function.
+  class XAODVariantLinkColumnExampleToolCaller final : public IXAODToolCaller, public asg::AsgMessaging
+  {
+  public:
+    XAODVariantLinkColumnExampleToolCaller (const VariantLinkColumnExampleTool& tool, const std::string& muonName)
+      : AsgMessaging("XAODVariantLinkColumnExampleToolCaller"), m_tool (tool), m_muonName (muonName)
+    {}
+
+    virtual StatusCode retrieve (EventStoreType& evtStore) override
+    {
+      ANA_CHECK (evtStore.retrieve (m_muons, m_muonName));
+      return StatusCode::SUCCESS;
+    }
+
+    virtual StatusCode copyRecord (EventStoreType& evtStore, const std::string& postfix) override
+    {
+      auto [muonsCopy, muonsAuxCopy] = xAOD::shallowCopy (*m_muons);
+      m_muons = muonsCopy.get();
+      ANA_CHECK (evtStore.record (std::move(muonsCopy), m_muonName + postfix));
+      ANA_CHECK (evtStore.record (std::move(muonsAuxCopy), m_muonName + postfix + "Aux."));
+      return StatusCode::SUCCESS;
+    }
+
+    virtual StatusCode call () override
+    {
+      m_tool.callSingleEvent (*m_muons);
+      return StatusCode::SUCCESS;
+    }
+
+  private:
+    const VariantLinkColumnExampleTool& m_tool;
+    std::string m_muonName;
+    const xAOD::MuonContainer *m_muons = nullptr;
+  };
+
+  // this is a test that runs the variant link example tool on PHYSLITE.  this
+  // checks that the variant links resolve correctly on actual data,
+  // including the forward muons that link into a different container.
+  TEST_F (ColumnarPhysLiteTest, VariantLinkColumnExampleTool)
+  {
+    if (!checkMode())
+      return;
+
+    auto tool = std::make_unique<VariantLinkColumnExampleTool> (makeUniqueName());
+    ASSERT_SUCCESS (tool->initialize ());
+
+    XAODVariantLinkColumnExampleToolCaller xAODToolCaller (*tool, "AnalysisMuons");
+
+    doCall ({.tool = tool.get(), .name = "VariantLinkColumnExampleTool", .xAODToolCaller = &xAODToolCaller, .containerRenames = {{{}}}});
+  }
+
   TEST_F (ColumnarMemoryTest, ModularExampleTool)
   {
     if (!checkMode())
@@ -547,7 +703,7 @@ namespace ADD_CMODE(columnar)
   // tool works on actual data, not just synthetic one of the in-memory
   // test.  it also allows for performance measurements of the tool in the
   // different modes.
-  TEST_F (ColumnarPhysLiteTest, DISABLED_VariantExampleTool) // temporarily disabled, needs debugging
+  TEST_F (ColumnarPhysLiteTest, VariantExampleTool)
   {
     // check that we are in a project that supports this test
     if (!checkMode())

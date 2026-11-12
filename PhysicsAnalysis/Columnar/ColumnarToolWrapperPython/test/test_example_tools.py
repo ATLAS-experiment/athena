@@ -30,7 +30,7 @@ from ColumnarToolWrapperPython import PythonToolHandle
 def test_SimpleSelectorExampleTool():
     """Particles with pt >= 10e5 pass selection (int8 output)."""
     handle = PythonToolHandle()
-    handle.set_type_and_name(f"columnar::SimpleSelectorExampleTool/{_unique_name()}")
+    handle.set_type_and_name(f"columnar_array::SimpleSelectorExampleTool/{_unique_name()}")
     handle.initialize()
 
     event_info = np.array([0, 2], dtype=np.uint64)
@@ -55,7 +55,7 @@ def test_SimpleSelectorExampleTool():
 def test_OptionalColumnExampleTool_present():
     """When ptCorr is present, tool uses it for selection."""
     handle = PythonToolHandle()
-    handle.set_type_and_name(f"columnar::OptionalColumnExampleTool/{_unique_name()}")
+    handle.set_type_and_name(f"columnar_array::OptionalColumnExampleTool/{_unique_name()}")
     handle.initialize()
 
     event_info = np.array([0, 2], dtype=np.uint64)
@@ -78,7 +78,7 @@ def test_OptionalColumnExampleTool_present():
 def test_OptionalColumnExampleTool_absent():
     """When ptCorr is absent, tool falls back to pt for selection."""
     handle = PythonToolHandle()
-    handle.set_type_and_name(f"columnar::OptionalColumnExampleTool/{_unique_name()}")
+    handle.set_type_and_name(f"columnar_array::OptionalColumnExampleTool/{_unique_name()}")
     handle.initialize()
 
     event_info = np.array([0, 2], dtype=np.uint64)
@@ -103,7 +103,7 @@ def test_OptionalColumnExampleTool_absent():
 def test_ConfigurableColumnExampleTool():
     """With ptVar='ptCorr' property, tool reads ptCorr column."""
     handle = PythonToolHandle()
-    handle.set_type_and_name(f"columnar::ConfigurableColumnExampleTool/{_unique_name()}")
+    handle.set_type_and_name(f"columnar_array::ConfigurableColumnExampleTool/{_unique_name()}")
     handle.set_property("ptVar", "ptCorr")
     handle.initialize()
 
@@ -129,7 +129,7 @@ def test_ConfigurableColumnExampleTool():
 def test_MomentumAccessorExampleTool():
     """Jet ObjectType=2: selects on pt and eta cuts."""
     handle = PythonToolHandle()
-    handle.set_type_and_name(f"columnar::MomentumAccessorExampleTool/{_unique_name()}")
+    handle.set_type_and_name(f"columnar_array::MomentumAccessorExampleTool/{_unique_name()}")
     # ObjectType 2 corresponds to xAODType::Jet
     handle.set_property("ObjectType", 2)
     handle.initialize()
@@ -162,7 +162,7 @@ def test_MomentumAccessorExampleTool():
 def test_ModularExampleTool():
     """pt cut and |eta| < 2.5 cut applied: first passes both, second fails eta."""
     handle = PythonToolHandle()
-    handle.set_type_and_name(f"columnar::ModularExampleTool/{_unique_name()}")
+    handle.set_type_and_name(f"columnar_array::ModularExampleTool/{_unique_name()}")
     handle.initialize()
 
     event_info = np.array([0, 2], dtype=np.uint64)
@@ -189,7 +189,7 @@ def test_ModularExampleTool():
 def test_StringExampleTool():
     """String column with nested offsets: 'Final' matches, 'Invisible' does not."""
     handle = PythonToolHandle()
-    handle.set_type_and_name(f"columnar::StringExampleTool/{_unique_name()}")
+    handle.set_type_and_name(f"columnar_array::StringExampleTool/{_unique_name()}")
     handle.initialize()
 
     event_info = np.array([0, 1], dtype=np.uint64)
@@ -220,7 +220,7 @@ def test_StringExampleTool():
 def test_VariantExampleTool():
     """Cross-container pt/eta ranking across electrons and muons."""
     handle = PythonToolHandle()
-    handle.set_type_and_name(f"columnar::VariantExampleTool/{_unique_name()}")
+    handle.set_type_and_name(f"columnar_array::VariantExampleTool/{_unique_name()}")
     handle.initialize()
 
     event_info = np.array([0, 1], dtype=np.uint64)

@@ -10,6 +10,7 @@
 
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
+#include <functional>
 
 namespace columnar
 {
@@ -81,10 +82,28 @@ namespace columnar
     /// @brief the name-column map
     std::unordered_map<std::string,ColumnDataArray,StringHash,std::equal_to<>> columns;
 
+    /// @brief the names to use for link targets that were set
+    /// explicitly, instead of the name set by the ObjectColumn accessor
+    std::unordered_map<std::string,std::string,StringHash,std::equal_to<>> linkTargetNames;
+
+    /// @brief the watchers for the link target names of containers
+    std::unordered_map<std::string,std::vector<std::function<void(const std::string&)>>,StringHash,std::equal_to<>> linkTargetNameWatchers;
+
 
     /// @brief convert a column name between user and internal names
     [[nodiscard]] std::string convertInternalToUserName (std::string_view name) const;
     [[nodiscard]] std::vector<std::string> convertUserToInternalNames (std::string_view name) const;
+
+    /// @brief the name of the given container as a link target, i.e.
+    /// the name that enters the key of links pointing to it
+    [[nodiscard]] std::string linkTargetName (std::string_view ciName) const;
+
+    /// @brief whether the given container has a user name assigned
+    [[nodiscard]] bool hasContainerUserName (std::string_view ciName) const;
+
+    /// @brief call all the container name watchers for containers that
+    /// have a user name assigned
+    void notifyLinkTargetNameWatchers () const;
   };
 }
 

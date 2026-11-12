@@ -200,9 +200,6 @@ NB_MODULE(python_tool_handle, module) {
     module.attr("numberOfEventsName") = &columnar::eventRangeColumnName;
     module.attr("eventRangeColumnName") = &columnar::eventRangeColumnName;
 
-    // the value used for an invalid (null/empty) element link in array mode
-    module.attr("invalid_link_value") = columnar::ColumnarModeArray::invalidLinkValue;
-
     module.def("crc64",
         [](const std::string& data) { return CxxUtils::crc64(data); },
         "data"_a,
@@ -280,14 +277,11 @@ NB_MODULE(python_tool_handle, module) {
         .def_ro("access_mode", &columnar::ColumnInfo::accessMode)
         .def_ro("offset_name", &columnar::ColumnInfo::offsetName)
         .def_ro("fixed_dimensions", &columnar::ColumnInfo::fixedDimensions)
-        .def_ro("sole_link_target_name", &columnar::ColumnInfo::soleLinkTargetName)
-        .def_ro("sole_link_target_clid", &columnar::ColumnInfo::soleLinkTargetClid)
-        .def_ro("is_variant_link", &columnar::ColumnInfo::isVariantLink)
-        .def_ro("variant_link_target_names", &columnar::ColumnInfo::variantLinkTargetNames)
-        .def_ro("key_column_for_variant_link", &columnar::ColumnInfo::keyColumnForVariantLink)
         .def_ro("is_offset", &columnar::ColumnInfo::isOffset)
         .def_ro("replaces_column", &columnar::ColumnInfo::replacesColumn)
         .def_ro("is_optional", &columnar::ColumnInfo::isOptional)
+        .def_ro("is_event_index", &columnar::ColumnInfo::isEventIndex)
+        .def_ro("name_for_links", &columnar::ColumnInfo::nameForLinks)
         .def("__repr__", [](const columnar::ColumnInfo &self) {
           std::string access_mode;
           switch (self.accessMode) {
@@ -319,14 +313,11 @@ NB_MODULE(python_tool_handle, module) {
             d["access_mode"] = static_cast<int>(self.accessMode);
             d["offset_name"] = self.offsetName;
             d["fixed_dimensions"] = self.fixedDimensions;
-            d["sole_link_target_name"] = self.soleLinkTargetName;
-            d["sole_link_target_clid"] = self.soleLinkTargetClid;
-            d["is_variant_link"] = self.isVariantLink;
-            d["variant_link_target_names"] = self.variantLinkTargetNames;
-            d["key_column_for_variant_link"] = self.keyColumnForVariantLink;
             d["is_offset"] = self.isOffset;
             d["replaces_column"] = self.replacesColumn;
             d["is_optional"] = self.isOptional;
+            d["is_event_index"] = self.isEventIndex;
+            d["name_for_links"] = self.nameForLinks;
             return d;
         });
 
@@ -373,6 +364,18 @@ NB_MODULE(python_tool_handle, module) {
         .def("preinitialize",
              &columnar::PythonToolHandle::preinitialize,
              "Preinitialize the tool.")
+
+        // set_link_target_names({"container": "name", ...})
+        .def("set_link_target_names",
+            [](columnar::PythonToolHandle &self, const std::map<std::string,std::string>& names){
+                std::vector<std::pair<std::string, std::string>> vectorized;
+                for (const auto& pair : names)
+                    vectorized.emplace_back(pair);
+
+                return self.setLinkTargetNames(vectorized);
+            },
+            "names"_a,
+            "Set the names of containers when they are the targets of links.")
 
         // rename_containers([("from", "to"), ...])
         .def("rename_containers",

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -12,6 +12,7 @@
 #include <ColumnarInterfaces/ColumnInfo.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
 #include <ColumnarCore/ColumnarDef.h>
+#include <ColumnarCore/ColumnInfoHelpers.h>
 #include <ColumnarTestFixtures/ToolWrapper.h>
 #include <ColumnarTestFixtures/ManualColumnData.h>
 #include <PATInterfaces/ISystematicsTool.h>
@@ -119,6 +120,19 @@ namespace columnar
 
       std::size_t columnSize (const std::string& name);
 
+      /// @brief add the key and index columns for a key+index link
+      ///
+      /// The key gets calculated for the given target container, with
+      /// the link type determining the CLID.
+      template<typename ContainerType>
+      void addKeyIndexLink (const std::string& name, const std::string& targetName, const std::vector<std::uint32_t>& indices)
+      {
+        using CM = ColumnarModeArray;
+        const auto key = computeSgKey (targetName, ClassID_traits<ContainerType>::ID());
+        addColumn (name + "." + std::string (CM::linkKeyColumnName), std::vector<std::any> (indices.size(), std::any (key)));
+        addColumn (name + "." + std::string (CM::linkIndexColumnName), std::vector<std::any> (indices.begin(), indices.end()));
+      }
+
       void setExpectation (const std::string& name, std::vector<std::any> values);
 
       /// @brief add the columns we have to the tool
@@ -134,6 +148,10 @@ namespace columnar
       }
 
     private:
+
+      /// @brief fill the event-index columns requested by the tool that
+      /// were not provided by the user
+      void fillEventIndexColumns ();
 
       ColumnarTestToolHandle* m_toolHandle = nullptr;
 

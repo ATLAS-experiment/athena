@@ -229,6 +229,34 @@ namespace columnar
     virtual void renameColumn (const std::string& from, const std::string& to) = 0;
 
 
+    /// @brief set the name of a container when used for resolving the
+    /// `sgkey` for links
+    ///
+    /// This is separate from the column names, because depending on the
+    /// environment the columns may have different names (e.g. an
+    /// appended `AuxDyn`). They may also be remapped more widely, while
+    /// the link key typically is what is read from PHYSLITE.
+    ///
+    /// The main anticipated reason to set this is if you work on a
+    /// different container from the default (e.g. `AnalysisMuons` vs
+    /// `Muons`), or if there is no default container (e.g. a generic
+    /// `Particles` container).
+    ///
+    /// The current name is reported in @ref ColumnInfo::nameForLinks.
+    /// If several containers got merged into one column by renaming
+    /// them they need to agree on the name, which can be achieved by
+    /// calling this.
+    ///
+    /// IMPORTANT: We are still (30 Oct 26) working out how best to
+    /// handle links. If our approach changes, this function may also
+    /// change or disappear.
+    ///
+    /// @param column the current name of the offset map of the
+    /// container, i.e. with any calls to @ref renameColumn applied
+    /// @param name the name that is used to calculate the link key
+    virtual void setLinkTargetName (const std::string& column, const std::string& name) = 0;
+
+
     /// @brief set the index for the column
     ///
     /// This allows the user or framework to set the index of the given

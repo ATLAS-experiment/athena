@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /// @author Nils Krumnack
@@ -29,8 +29,6 @@ namespace columnar
       static constexpr bool hasSetter = false;
       using MemoryType = std::string;
 
-      static void updateColumnInfo (ColumnInfo& /*info*/) {}
-
       [[nodiscard]] static auto makeViewer (void**)
       {
         return [] (const std::string& value) {return std::string_view (value);};
@@ -39,18 +37,18 @@ namespace columnar
 
 
 
-    // in Array mode we can do a straightforward conversion from
+    // with offset maps we can do a straightforward conversion from
     // std::vector<char> to std::string_view, as uproot natively
     // represents it as a vector of char
-    template<>
-    class ContainerFreeAccessor<std::string,ColumnAccessMode::input,ColumnarModeArray> final
+    template<ColumnarModeConcept CM>
+      requires (CM::useOffsetMaps)
+    class ContainerFreeAccessor<std::string,ColumnAccessMode::input,CM> final
     {
       /// Public Members
       /// ==============
     public:
 
       static constexpr ColumnAccessMode CAM = ColumnAccessMode::input;
-      using CM = ColumnarModeArray;
       using BaseAccessor = ContainerFreeAccessor<std::vector<char>,CAM,CM>;
 
       static constexpr bool isDefined = true;
