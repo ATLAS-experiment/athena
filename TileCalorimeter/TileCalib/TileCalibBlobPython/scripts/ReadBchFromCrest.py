@@ -19,6 +19,7 @@ def usage():
     print ("-h, --help      shows this help")
     print ("-f, --folder=   specify status folder to use ONL01 or OFL02, don't need to specify full path")
     print ("-t, --tag=      specify tag to use, f.i. UPD1 or UPD4 or full suffix like RUN2-HLT-UPD1-00")
+    print ("-H, --hash=     specify hash to use, run/lumi will be ignored if hash is provided")
     print ("-r, --run=      specify run  number, by default uses latest iov")
     print ("-l, --lumi=     specify lumi block number, default is 0")
     print ("-b, --begin=    specify run number of first iov in multi-iov mode, by default uses very first iov")
@@ -31,15 +32,16 @@ def usage():
     print ("-C, --comment   print comment for every IOV")
     print ("-i, --iov       print IOVs only for every module")
     print ("-I, --IOV       print IOVs only")
+    print ("-A, --all       print all records for every IOV, including those which were overwritten")
     print ("-d, --default   print also default values stored in AUX01-AUX20")
     print ("-B, --blob      print additional blob info")
-    print ("-H, --hex       print frag id instead of module name")
+    print ("-x, --hex       print frag id instead of module name")
     print ("-P, --pmt       print pmt number in addition to channel number")
     print ("-s, --schema=   specify name of input JSON file or CREST_SERVER_PATH")
     print ("-w, --warning   suppress warning messages about missing drawers in DB")
 
-letters = "hr:l:s:t:f:dBHPwm:b:e:a:g:c:N:X:CiI"
-keywords = ["help","run=","lumi=","schema=","tag=","folder=","default","blob","hex","pmt","warning","module=","begin=","end=","chmin=","chmax=","gain=","adc=","chan=","comment","iov","IOV"]
+letters = "hH:r:l:s:t:f:dBxPwm:b:e:a:g:c:N:X:CiIA"
+keywords = ["help","hash=","run=","lumi=","schema=","tag=","folder=","default","blob","hex","pmt","warning","module=","begin=","end=","chmin=","chmax=","gain=","adc=","chan=","comment","iov","IOV","all"]
 
 try:
     opts, extraparams = getopt.getopt(sys.argv[1:],letters,keywords)
@@ -54,6 +56,7 @@ lumi = 0
 schema = 'CREST'
 folderPath =  "/TILE/OFL02/STATUS/ADC"
 tag = "UPD4"
+hash = None
 rosmin = 1
 rosmax = 5
 blob = False
@@ -75,6 +78,7 @@ gainmin = -1
 gainmax = -1
 begin = -1
 end = 2147483647
+all = False
 iov = False
 iovonly = False
 IOVONLY = False
@@ -91,6 +95,8 @@ for o, a in opts:
         tag = a
     elif o in ("-s","--schema"):
         schema = a
+    elif o in ("-H","--hash"):
+        hash = a
     elif o in ("-r","--run"):
         run = int(a)
     elif o in ("-l","--lumi"):
@@ -103,6 +109,8 @@ for o, a in opts:
         end = int(a)
         iov = True
         one_mod = True
+    elif o in ("-A","--all"):
+        all = True
     elif o in ("-i","--iov"):
         iov = True
         iovonly = True
@@ -130,7 +138,7 @@ for o, a in opts:
         rosmin = 0
     elif o in ("-B","--blob"):
         blob = True
-    elif o in ("-H","--hex"):
+    elif o in ("-x","--hex"):
         hexid = True
     elif o in ("-P","--pmt"):
         pmt = True
@@ -141,6 +149,11 @@ for o, a in opts:
         sys.exit(2)
     else:
         raise RuntimeError("unhandled option")
+
+if hash is not None:
+    iov = False
+    run = None
+    lumi = hash
 
 
 from TileCalibBlobPython import TileBchCrest
@@ -176,8 +189,7 @@ if not os.path.isfile(schema):
 mgr = TileBchCrest.TileBchMgr()
 mgr.setLogLvl(logLevel)
 mgr.initialize(schema, folderPath, folderTag, (run,lumi), warn, -2)
-if iov or comment or warn<0:
-    blobReader = mgr.getBlobReader()
+blobReader = mgr.getBlobReader()
 
 #=== Dump the current isBad definition
 isBadDef = mgr.getAdcProblems(0, TileCalibUtils.definitions_draweridx(), TileCalibUtils.bad_definition_chan(), 0)
@@ -265,7 +277,16 @@ if iov:
         if iovonly or IOVONLY:
             if comment:
                 for iovs in iovList:
-                    log.info("(%i,%i)  %s", iovs[0], iovs[1], blobReader.getComment(iovs) )
+                    blobReader.readIov(iovs)
+                    if all:
+                        phash = blobReader.getPayloadHash()
+                        itime = blobReader.getInsertionTime()
+                        for i in range(len(phash)):
+                            blobReader.getPayloadByHash(i)
+                            log.info("(%i,%i)  Insertion time %s  Hash %s", iovs[0], iovs[1], itime[i], phash[i] )
+                            log.info("(%i,%i)  %s", iovs[0], iovs[1], blobReader.getComment(iovs) )
+                    else:
+                        log.info("(%i,%i)  %s", iovs[0], iovs[1], blobReader.getComment(iovs) )
             option = 1 if iovonly else 0
             option += (2 if IOVONLY else 0)
             blobReader.dumpIovs(iovList,rosmin,rosmax,modmin,modmax,option,(rosmin<=0),True)
@@ -304,9 +325,17 @@ oneModule = ((rosmax-rosmin==1) and (modmax-modmin==1) and iov)
 oldBlob = None
 pref = ""
 for iovs in iovList:
+  blobReader.readIov(iovs)
+  phash = blobReader.getPayloadHash()
+  itime = blobReader.getInsertionTime()
+  hashmax = len(phash) if all else 1
+  for hashind in range(hashmax):
     if iov:
         pref = "(%i,%i)  " % (iovs[0],iovs[1])
         mgr.updateFromDb(schema, folderPath, folderTag, iovs, 1, warn)
+    if all:
+      blobReader.getPayloadByHash(hashind)
+      log.info("(%s,%s)  Insertion time %s  Hash %s", iovs[0], iovs[1], itime[hashind], phash[hashind] )
     if comment:
         log.info( pref + str(blobReader.getComment(iovs)) )
     modOk = False
@@ -325,13 +354,19 @@ for iovs in iovList:
             if oneModule:
                 newBlob = blobReader.getBlob(ros, mod, iovs, False)
                 if oldBlob == newBlob:
-                    log.info( f'{modName} in IOV {iovs} is identical to previous IOV')
+                    if hashind==0:
+                        log.info( f'{modName} in IOV {iovs} is identical to previous IOV')
+                    else:
+                        log.info( f'{modName} in payload {hashind+1} of IOV {iovs} is identical to previous payload')
                     continue
                 else:
                     if oldBlob is None:
                         log.info( f'Reading IOV {iovs} for module {modName}')
                     else:
-                        log.info( f'{modName} was updated in IOV {iovs}')
+                        if hashind==0:
+                            log.info( f'{modName} was updated in IOV {iovs}')
+                        else:
+                            log.info( f'{modName} was updated in payload {hashind+1} of IOV {iovs}')
                 oldBlob = newBlob
             if warn<0:
                 bch = blobReader.getDrawer(ros, mod, iovs, False, False)

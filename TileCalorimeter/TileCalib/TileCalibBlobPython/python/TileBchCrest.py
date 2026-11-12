@@ -14,8 +14,6 @@ import cppyy
 from PyCool import cool # noqa: F401
 Blob = cppyy.gbl.coral.Blob
 
-#from pycrest.api.crest_api import CrestApi
-
 from TileCalibBlobObjs.Classes import TileBchStatus, TileCalibUtils, \
      TileBchPrbs, TileBchDecoder
 from TileCalibBlobPython.TileCalibCrest  import MINRUN, MINLBK, MAXRUN, MAXLBK, \
