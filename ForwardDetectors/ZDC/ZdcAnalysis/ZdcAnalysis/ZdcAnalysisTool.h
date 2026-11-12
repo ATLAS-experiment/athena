@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCANALYSISTOOL_H
 #define ZDCANALYSIS_ZDCANALYSISTOOL_H
 
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
 
@@ -131,20 +132,20 @@ private:
   // Data members
   //
   std::string m_name;
-  bool m_init;
-  std::string m_configuration;
-  std::string m_jsonConfigurationFile;
-  std::string m_zdcAnalysisConfigPath;
+  bool m_init{false};
+  Gaudi::Property<std::string> m_configuration{this, "Configuration", "PbPb2015"};
+  Gaudi::Property<std::string> m_jsonConfigurationFile{this, "JSONConfigurationFile", "ZdcAnalysisConfig.json"};
+  Gaudi::Property<std::string> m_zdcAnalysisConfigPath{this, "ZdcAnalysisConfigPath", "$ROOTCOREBIN/data/ZdcAnalysis", "ZDC Analysis config file path"};
   std::string m_zdcEnergyCalibFileName;
   std::string m_zdcTimeCalibFileName;
   std::string m_zdcTriggerEffParamsFileName;
 
-  bool m_writeAux;
-  std::string m_auxSuffix;
+  Gaudi::Property<bool> m_writeAux{this, "WriteAux", true};
+  Gaudi::Property<std::string> m_auxSuffix{this, "AuxSuffix", ""};
 
-  bool m_eventReady;
-  unsigned int m_runNumber;
-  unsigned int m_lumiBlock;
+  bool m_eventReady{false};
+  unsigned int m_runNumber{0};
+  unsigned int m_lumiBlock{0};
 
   // internal functions
   std::unique_ptr<TF1> m_tf1SincInterp;
@@ -153,40 +154,44 @@ private:
     this, "EventInfoKey", "EventInfo",
       "Location of the event info."};
 
-  std::string m_zdcModuleContainerName;
+  Gaudi::Property<std::string> m_zdcModuleContainerName{this, "ZdcModuleContainerName", "ZdcModules", "Location of ZDC processed data"};
   const xAOD::ZdcModuleContainer* m_zdcModules {nullptr};
-  std::string m_zdcSumContainerName;
+  Gaudi::Property<std::string> m_zdcSumContainerName{this, "ZdcSumContainerName", "ZdcSums", "Location of ZDC processed sums"};
   const xAOD::ZdcModuleContainer* m_zdcSums {nullptr};
-  bool m_flipEMDelay;
-  unsigned int m_lowGainMode;
-  bool m_combineDelay{false};
-  bool m_doCalib{false};
-  bool m_doTrigEff{false};
-  bool m_doTimeCalib{false};
-  bool m_doFADCCorr{false};
-  bool m_doNonLinCorr{false};
-  bool m_doFADCCorrPerSample{false};
-  int m_forceCalibRun;
-  int m_forceCalibLB;
-  std::string m_calibVersion;
+  Gaudi::Property<bool> m_flipEMDelay{this, "FlipEMDelay", false};
+  Gaudi::Property<unsigned int> m_lowGainMode{this, "LowGainMode", 0};
+  Gaudi::Property<bool> m_combineDelay{this, "CombineDelay", false};
+  // The following job properties enable/disable and affect the calibration of the ZDC energies
+  //
+  Gaudi::Property<bool> m_doCalib{this, "DoCalib", true};
+  Gaudi::Property<bool> m_doTrigEff{this, "DoTrigEff", true};
+  Gaudi::Property<bool> m_doTimeCalib{this, "DoTimeCalib", true};
+  Gaudi::Property<bool> m_doFADCCorr{this, "DoFADCCorr", false};
+  Gaudi::Property<bool> m_doNonLinCorr{this, "DoNonLinCorr", true}; // how we have run with 2023 and most of 2024
+  Gaudi::Property<bool> m_doFADCCorrPerSample{this, "DoFADCCorrPerSample", false};
+  Gaudi::Property<int> m_forceCalibRun{this, "ForceCalibRun", -1}; // last run of Pb+Pb 2015
+  Gaudi::Property<int> m_forceCalibLB{this, "ForceCalibLB", 814}; // last LB of Pb+Pb 2015
+  Gaudi::Property<std::string> m_calibVersion{this, "CalibVersion", ""};
   
   //  Parameters that control the pulse fitting analysis
+  //  (primarily used for the "default" configuration, but also may be
+  //   used to modify/tailor other configurations)
   //
-  unsigned int m_numSample;
-  float m_deltaTSample;
-  unsigned int m_presample;
-  unsigned int m_peakSample;
-  float m_Peak2ndDerivThresh;
-  float m_t0;
-  float m_delayDeltaT;
-  float m_tau1;
-  float m_tau2;
-  bool m_fixTau1;
-  bool m_fixTau2;
-  float m_deltaTCut;
-  float m_ChisqRatioCut;
+  Gaudi::Property<unsigned int> m_numSample{this, "NumSampl", 7};
+  Gaudi::Property<float> m_deltaTSample{this, "DeltaTSample", 25};
+  Gaudi::Property<unsigned int> m_presample{this, "Presample", 0};
+  Gaudi::Property<unsigned int> m_peakSample{this, "PeakSample", 11};
+  Gaudi::Property<float> m_Peak2ndDerivThresh{this, "Peak2ndDerivThresh", 20};
+  Gaudi::Property<float> m_t0{this, "T0", 30};
+  Gaudi::Property<float> m_delayDeltaT{this, "DelayDeltaT", -12.5};
+  Gaudi::Property<float> m_tau1{this, "Tau1", 5};
+  Gaudi::Property<float> m_tau2{this, "Tau2", 25};
+  Gaudi::Property<bool> m_fixTau1{this, "FixTau1", false};
+  Gaudi::Property<bool> m_fixTau2{this, "FixTau2", false};
+  Gaudi::Property<float> m_deltaTCut{this, "DeltaTCut", 10};
+  Gaudi::Property<float> m_ChisqRatioCut{this, "ChisqRatioCut", 10};
   
-  int m_LHCRun;
+  Gaudi::Property<int> m_LHCRun{this, "LHCRun", 3};
 
   // The objects that carry out the analysis
   //
@@ -199,7 +204,7 @@ private:
   ZDCDataAnalyzer::ZDCModuleFloatArray m_peak2ndDerivMinThresholdsLG{};
 
 
-  std::shared_ptr<ZDCTriggerEfficiency> m_zdcTriggerEfficiency;
+  std::shared_ptr<ZDCTriggerEfficiency> m_zdcTriggerEfficiency{nullptr};
 
   static std::atomic<int> s_debugLevel;
 

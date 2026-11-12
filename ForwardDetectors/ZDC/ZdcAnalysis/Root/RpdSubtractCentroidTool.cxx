@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <numbers>
@@ -18,23 +18,10 @@ namespace ZDC
 RpdSubtractCentroidTool::RpdSubtractCentroidTool(const std::string& name)
   : asg::AsgTool(name)
 {
-  declareProperty("ZDCModuleContainerName", m_ZDCModuleContainerName = "ZdcModules", "Location of ZDC processed data");
-  declareProperty("ZDCSumContainerName", m_ZDCSumContainerName = "ZdcSums", "Location of ZDC processed sums");
-  declareProperty("Configuration", m_configuration = "default");
-  declareProperty("WriteAux", m_writeAux = true, "If true, write AOD decorations");
-  declareProperty("AuxSuffix", m_auxSuffix = "", "Suffix to add to AOD decorations for reading and writing");
-  declareProperty("MinZDCEnergy", m_forceMinZDCEnergy, "Minimum (calibrated) ZDC energy for valid centroid (negative to disable); per side");
-  declareProperty("MaxZDCEnergy", m_forceMaxZDCEnergy, "Maximum (calibrated) ZDC energy for valid centroid (negative to disable); per side");
-  declareProperty("MinEMEnergy", m_forceMinEMEnergy, "Minimum (calibrated) EM energy for valid centroid (negative to disable); per side");
-  declareProperty("MaxEMEnergy", m_forceMaxEMEnergy, "Minimum (calibrated) EM energy for valid centroid (negative to disable); per side");
-  declareProperty("PileupMaxFrac", m_forcePileupMaxFrac, "Maximum fractional pileup allowed in an RPD channel for valid centroid; per side");
-  declareProperty("ExcessiveSubtrUnderflowFrac", m_forceMaximumNegativeSubtrAmpFrac, "If any RPD channel subtracted amplitude is negative and its fraction of subtracted amplitude sum is greater than or equal to this number, the centroid is invalid; per side");
-  declareProperty("UseRPDSumAdc", m_forceUseRPDSumAdc, "If true, use RPD channel sum ADC for centroid calculation, else use RPD channel max ADC");
-  declareProperty("UseCalibDecorations", m_forceUseCalibDecorations, "If true, use RPD channel sum/max ADC decorations with output calibration factors applied during reconstruction, else use decorations with raw values");
 }
 
 StatusCode RpdSubtractCentroidTool::initializeKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key) {
-  writeHandleKey = containerName + key + m_auxSuffix;
+  writeHandleKey = containerName + key + m_auxSuffix.value();
   return writeHandleKey.initialize();
 }
 
@@ -50,29 +37,29 @@ StatusCode RpdSubtractCentroidTool::initialize() {
   m_useCalibDecorations = true;
 
   // then overwrite inidividual parameters from configuration if any were provided
-  if (m_forceMinZDCEnergy.has_value()) {
-    m_minZDCEnergy = m_forceMinZDCEnergy.value();
+  if (m_forceMinZDCEnergy.value().has_value()) {
+    m_minZDCEnergy = m_forceMinZDCEnergy.value().value();
   }
-  if (m_forceMaxZDCEnergy.has_value()) {
-    m_maxZDCEnergy = m_forceMaxZDCEnergy.value();
+  if (m_forceMaxZDCEnergy.value().has_value()) {
+    m_maxZDCEnergy = m_forceMaxZDCEnergy.value().value();
   }
-  if (m_forceMinEMEnergy.has_value()) {
-    m_minEMEnergy = m_forceMinEMEnergy.value();
+  if (m_forceMinEMEnergy.value().has_value()) {
+    m_minEMEnergy = m_forceMinEMEnergy.value().value();
   }
-  if (m_forceMaxEMEnergy.has_value()) {
-    m_maxEMEnergy = m_forceMaxEMEnergy.value();
+  if (m_forceMaxEMEnergy.value().has_value()) {
+    m_maxEMEnergy = m_forceMaxEMEnergy.value().value();
   }
-  if (m_forcePileupMaxFrac.has_value()) {
-    m_pileupMaxFrac = m_forcePileupMaxFrac.value();
+  if (m_forcePileupMaxFrac.value().has_value()) {
+    m_pileupMaxFrac = m_forcePileupMaxFrac.value().value();
   }
-  if (m_forceMaximumNegativeSubtrAmpFrac.has_value()) {
-    m_maximumNegativeSubtrAmpFrac = m_forceMaximumNegativeSubtrAmpFrac.value();
+  if (m_forceMaximumNegativeSubtrAmpFrac.value().has_value()) {
+    m_maximumNegativeSubtrAmpFrac = m_forceMaximumNegativeSubtrAmpFrac.value().value();
   }
-  if (m_forceUseRPDSumAdc.has_value()) {
-    m_useRPDSumAdc = m_forceUseRPDSumAdc.value();
+  if (m_forceUseRPDSumAdc.value().has_value()) {
+    m_useRPDSumAdc = m_forceUseRPDSumAdc.value().value();
   }
-  if (m_forceUseCalibDecorations.has_value()) {
-    m_useCalibDecorations = m_forceUseCalibDecorations.value();
+  if (m_forceUseCalibDecorations.value().has_value()) {
+    m_useCalibDecorations = m_forceUseCalibDecorations.value().value();
   }
 
   // if any ZDC/EM energy threshold is nonnegative, ZDC decorations must be read
@@ -86,7 +73,7 @@ StatusCode RpdSubtractCentroidTool::initialize() {
   }
 
   ATH_MSG_DEBUG("RpdSubtractCentroidTool reconstruction parameters:");
-  ATH_MSG_DEBUG("config = " << m_configuration);
+  ATH_MSG_DEBUG("config = " << m_configuration.value());
   ATH_MSG_DEBUG("minZDCEnergy = " << RPDUtils::vecToString(m_minZDCEnergy));
   ATH_MSG_DEBUG("maxZDCEnergy = " << RPDUtils::vecToString(m_maxZDCEnergy));
   ATH_MSG_DEBUG("minEMEnergy = " << RPDUtils::vecToString(m_minEMEnergy));
@@ -121,8 +108,8 @@ StatusCode RpdSubtractCentroidTool::initialize() {
   ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_reactionPlaneAngleKey, ".reactionPlaneAngle"));
   ATH_CHECK(initializeKey(m_ZDCSumContainerName, m_cosDeltaReactionPlaneAngleKey, ".cosDeltaReactionPlaneAngle"));
 
-  if (m_writeAux && !m_auxSuffix.empty()) {
-    ATH_MSG_DEBUG("suffix string = " << m_auxSuffix);
+  if (m_writeAux && !m_auxSuffix.value().empty()) {
+    ATH_MSG_DEBUG("suffix string = " << m_auxSuffix.value());
   }
 
   m_initialized = true;
@@ -175,24 +162,24 @@ RpdSubtractCentroidTool::SubstepStatus RpdSubtractCentroidTool::readAOD(xAOD::Zd
   static SG::ConstAccessor<float> const yposRelAcc("yposRel");
   static SG::ConstAccessor<unsigned short> const rowAcc("row");
   static SG::ConstAccessor<unsigned short> const colAcc("col");
-  static SG::ConstAccessor<float> const rpdChannelSumAdcAcc("RPDChannelAmplitude" + m_auxSuffix);
-  static SG::ConstAccessor<float> const rpdChannelSumAdcCalibAcc("RPDChannelAmplitudeCalib" + m_auxSuffix);
-  static SG::ConstAccessor<float> const rpdChannelMaxADCAcc("RPDChannelMaxADC" + m_auxSuffix);
-  static SG::ConstAccessor<float> const rpdChannelMaxADCCalibAcc("RPDChannelMaxADCCalib" + m_auxSuffix);
-  static SG::ConstAccessor<float> const rpdChannelPileupFracAcc("RPDChannelPileupFrac" + m_auxSuffix);
-  static SG::ConstAccessor<unsigned int> const rpdChannelStatusAcc("RPDChannelStatus" + m_auxSuffix);
-  static SG::ConstAccessor<unsigned int> const rpdSideStatusAcc("RPDStatus" + m_auxSuffix);
+  static SG::ConstAccessor<float> const rpdChannelSumAdcAcc("RPDChannelAmplitude" + m_auxSuffix.value());
+  static SG::ConstAccessor<float> const rpdChannelSumAdcCalibAcc("RPDChannelAmplitudeCalib" + m_auxSuffix.value());
+  static SG::ConstAccessor<float> const rpdChannelMaxADCAcc("RPDChannelMaxADC" + m_auxSuffix.value());
+  static SG::ConstAccessor<float> const rpdChannelMaxADCCalibAcc("RPDChannelMaxADCCalib" + m_auxSuffix.value());
+  static SG::ConstAccessor<float> const rpdChannelPileupFracAcc("RPDChannelPileupFrac" + m_auxSuffix.value());
+  static SG::ConstAccessor<unsigned int> const rpdChannelStatusAcc("RPDChannelStatus" + m_auxSuffix.value());
+  static SG::ConstAccessor<unsigned int> const rpdSideStatusAcc("RPDStatus" + m_auxSuffix.value());
   static auto const zdcModuleCalibEnergyAcc = m_readZDCDecorations
-    ? std::optional<SG::ConstAccessor<float>>("CalibEnergy" + m_auxSuffix)
+    ? std::optional<SG::ConstAccessor<float>>("CalibEnergy" + m_auxSuffix.value())
     : std::nullopt;
   static auto const zdcModuleStatusAcc = m_readZDCDecorations
-    ? std::optional<SG::ConstAccessor<unsigned int>>("Status" + m_auxSuffix)
+    ? std::optional<SG::ConstAccessor<unsigned int>>("Status" + m_auxSuffix.value())
     : std::nullopt;
   static auto const zdcFinalEnergyAcc = m_readZDCDecorations
-    ? std::optional<SG::ConstAccessor<float>>("FinalEnergy" + m_auxSuffix)
+    ? std::optional<SG::ConstAccessor<float>>("FinalEnergy" + m_auxSuffix.value())
     : std::nullopt;
   static auto const zdcStatusAcc = m_readZDCDecorations
-    ? std::optional<SG::ConstAccessor<unsigned int>>("Status" + m_auxSuffix)
+    ? std::optional<SG::ConstAccessor<unsigned int>>("Status" + m_auxSuffix.value())
     : std::nullopt;
 
   ATH_MSG_DEBUG("Processing modules");
@@ -400,7 +387,7 @@ void RpdSubtractCentroidTool::calculateReactionPlaneAngle(unsigned int side) {
 
 void RpdSubtractCentroidTool::writeAOD(xAOD::ZdcModuleContainer const& moduleSumContainer) const {
   if (!m_writeAux) return;
-  ATH_MSG_DEBUG("Adding variables with suffix = " + m_auxSuffix);
+  ATH_MSG_DEBUG("Adding variables with suffix = " + m_auxSuffix.value());
 
   // initialize write handles from write handle keys
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, char> centroidEventValidHandle(m_centroidEventValidKey);
@@ -484,11 +471,11 @@ StatusCode RpdSubtractCentroidTool::reprocessZdc() {
     ATH_MSG_WARNING("Tool not initialized!");
     return StatusCode::FAILURE;
   }
-  ATH_MSG_DEBUG("Trying to retrieve " << m_ZDCModuleContainerName);
+  ATH_MSG_DEBUG("Trying to retrieve " << m_ZDCModuleContainerName.value());
   xAOD::ZdcModuleContainer const* zdcModules = nullptr;
-  ATH_CHECK(evtStore()->retrieve(zdcModules, m_ZDCModuleContainerName));
+  ATH_CHECK(evtStore()->retrieve(zdcModules, m_ZDCModuleContainerName.value()));
   xAOD::ZdcModuleContainer const* zdcSums = nullptr;
-  ATH_CHECK(evtStore()->retrieve(zdcSums, m_ZDCSumContainerName));
+  ATH_CHECK(evtStore()->retrieve(zdcSums, m_ZDCSumContainerName.value()));
   ATH_CHECK(recoZdcModules(*zdcModules, *zdcSums));
   return StatusCode::SUCCESS;
 }

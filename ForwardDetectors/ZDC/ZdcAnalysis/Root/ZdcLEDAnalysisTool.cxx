@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <sstream>
@@ -28,8 +28,6 @@ namespace ZDC
 #ifndef XAOD_STANDALONE
   declareInterface<IZdcAnalysisTool>(this);
 #endif
-    declareProperty("ForceCalibRun", m_forceCalibRun = -1); 
-    declareProperty("DoFADCCorr", m_doFADCCorr = false); 
 }
 
 ZdcLEDAnalysisTool::~ZdcLEDAnalysisTool()
@@ -187,7 +185,7 @@ StatusCode ZdcLEDAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& mo
 
   unsigned int thisRunNumber = eventInfo->runNumber();
   if (thisRunNumber != m_runNumber) {
-    ATH_MSG_INFO("ZDC LED analysis tool will be configured for run " << thisRunNumber << " m_doFADCCorr = " << m_doFADCCorr);
+    ATH_MSG_INFO("ZDC LED analysis tool will be configured for run " << thisRunNumber << " m_doFADCCorr = " << m_doFADCCorr.value());
     if (m_doFADCCorr)
       {
 	unsigned int calibRunNumber = thisRunNumber;
