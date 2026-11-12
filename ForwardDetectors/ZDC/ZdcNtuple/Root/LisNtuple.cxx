@@ -12,13 +12,6 @@
 LisNtuple::LisNtuple(const std::string &name, ISvcLocator *pSvcLocator)
     : EL::AnaAlgorithm(name, pSvcLocator)
 {
-  declareProperty("enableOutputTree", m_enableOutputTree = true, "Enable output tree");
-  declareProperty("auxSuffix", m_auxSuffix = "", "Suffix for aux data names");
-  declareProperty("lisInj", m_lisInj = false, "LIS injected-pulse run");
-  declareProperty("lisLED", m_lisLED = false, "LIS LED run");
-  declareProperty("enableTrigger",  enableTrigger = true, "use trigger info");
-
-  m_eventCounter = 0;
 }
 
 StatusCode LisNtuple::initialize()
@@ -143,16 +136,16 @@ void LisNtuple::processLisNtupleFromModules()
 
   ANA_MSG_DEBUG("Accessing ZdcModules for LIS data");
 
-  static const SG::ConstAccessor<unsigned int> ZdcLEDTypeAccessor("ZdcLEDType" + m_auxSuffix);
-  static const SG::ConstAccessor<unsigned int> LEDTypeAccessor("LEDType" + m_auxSuffix);
-  static const SG::ConstAccessor<float> LISPresampleAccessor("LISPresample" + m_auxSuffix);
-  static const SG::ConstAccessor<int> LISADCSumAccessor("LISADCSum" + m_auxSuffix);
-  static const SG::ConstAccessor<int> LISMaxADCAccessor("LISMaxADC" + m_auxSuffix);
-  static const SG::ConstAccessor<unsigned int> LISMaxSampleAccessor("LISMaxSample" + m_auxSuffix);
-  static const SG::ConstAccessor<float> LISAvgTimeAccessor("LISAvgTime" + m_auxSuffix);
-  static const SG::ConstAccessor<unsigned int> LISModuleStatusAccessor("LISModuleStatus" + m_auxSuffix);
-  static const SG::ConstAccessor<std::vector<uint16_t>> g0dataAccessor("g0data" + m_auxSuffix);
-  static const SG::ConstAccessor<std::vector<uint16_t>> g1dataAccessor("g1data" + m_auxSuffix);
+  static const SG::ConstAccessor<unsigned int> ZdcLEDTypeAccessor("ZdcLEDType" + m_auxSuffix.value());
+  static const SG::ConstAccessor<unsigned int> LEDTypeAccessor("LEDType" + m_auxSuffix.value());
+  static const SG::ConstAccessor<float> LISPresampleAccessor("LISPresample" + m_auxSuffix.value());
+  static const SG::ConstAccessor<int> LISADCSumAccessor("LISADCSum" + m_auxSuffix.value());
+  static const SG::ConstAccessor<int> LISMaxADCAccessor("LISMaxADC" + m_auxSuffix.value());
+  static const SG::ConstAccessor<unsigned int> LISMaxSampleAccessor("LISMaxSample" + m_auxSuffix.value());
+  static const SG::ConstAccessor<float> LISAvgTimeAccessor("LISAvgTime" + m_auxSuffix.value());
+  static const SG::ConstAccessor<unsigned int> LISModuleStatusAccessor("LISModuleStatus" + m_auxSuffix.value());
+  static const SG::ConstAccessor<std::vector<uint16_t>> g0dataAccessor("g0data" + m_auxSuffix.value());
+  static const SG::ConstAccessor<std::vector<uint16_t>> g1dataAccessor("g1data" + m_auxSuffix.value());
 
   if (zdcModules.ptr())
   {

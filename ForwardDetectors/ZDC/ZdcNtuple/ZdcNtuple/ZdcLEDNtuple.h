@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZdcNtuple_ZdcLEDNtuple_H
 #define ZdcNtuple_ZdcLEDNtuple_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AsgTools/PropertyWrapper.h>
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODForward/ZdcModuleContainer.h"
@@ -15,17 +16,17 @@
 class ZdcLEDNtuple : public EL::AnaAlgorithm
 {
 public:
-  std::string auxSuffix; // what to add to name the new data, when reprocessing
+  Gaudi::Property<std::string> auxSuffix{this, "auxSuffix", "", "comment"}; // what to add to name the new data, when reprocessing
   bool isLED{};
 
 public:
   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleContainerName{this, "ZdcModuleContainerName", "ZdcModules", ""};
   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName{ this, "ZdcSumContainerName", "ZdcSums", "" };
   const xAOD::EventInfo *m_eventInfo{};
-  int m_eventCounter{};
+  int m_eventCounter{0};
 
   // flags
-  bool enableOutputTree{}; // enable output TTree
+  Gaudi::Property<bool> enableOutputTree{this, "enableOutputTree", true, "Enable output tree"}; // enable output TTree
 
   // output tree and branches
 
