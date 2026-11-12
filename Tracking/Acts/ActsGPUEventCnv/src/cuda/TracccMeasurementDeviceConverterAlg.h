@@ -24,6 +24,10 @@
 #include <traccc/geometry/detector_conditions_description.hpp>
 #include <traccc/geometry/detector_buffer.hpp>
 
+// record the map for seed conversion when requested
+#include "ActsGPUEvent/TracccMeasToPixelIndex.h"
+#include "src/cuda/MeasToPixelIndex.h"
+
 #include <cuda_runtime_api.h>
 
 /// Helper macro used for checking @c cudaError_t type return values.
@@ -102,6 +106,10 @@ private:
   SG::ReadCondHandleKey<traccc::detector_conditions_description::buffer> m_deviceCondKey{
       this, "DeviceConditionsObjectName", "",
       "Key for reading the per-IOV traccc device conditions object"};
+  /// @name Optional output: device map traccc measurement -> pixel index
+  SG::WriteHandleKey<ActsTrk::TracccMeasToPixelIndex> m_outputMeasToPixelKey{
+      this, "OutputMeasToPixelIndex", "",
+      "Optional: record the device map traccc measurement -> pixel index (empty: not recorded)"};
 
   const traccc::detector_buffer* m_detector{nullptr};
 

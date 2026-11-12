@@ -190,10 +190,37 @@ def TracccMeasurementDeviceConverterAlgCfg(flags,
         CompFactory.ActsTrk.TracccMeasurementDeviceConverterAlg(name, **kwargs))
     return acc
 
+def TracccSeedDeviceConverterAlgCfg(flags,
+                                      name="TracccSeedDeviceConverterAlg",
+                                      **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    # Pinned host memory for the bulk copy
+    kwargs.setdefault("HostMR", acc.popToolsAndMerge(HostMemoryResourceToolCfg(flags)))
+    # Tools for the device step (same as TracccMeasurementDeviceConverterAlg)
+    kwargs.setdefault("MemoryResourcesTool", acc.popToolsAndMerge(MemoryResourcesToolCfg(flags)))
+    kwargs.setdefault("CopiesProviderTool", acc.popToolsAndMerge(CopiesToolCfg(flags)))
+    kwargs.setdefault("StreamTool", acc.popToolsAndMerge(StreamToolCfg(flags)))
+    # Own output key, so it can run side by side with TracccSeedConverterAlg
+    kwargs.setdefault("OutputSeeds", "ITkTracccSeedsFromDevice")
+    # Map of traccc msmt to pixel index (two options on how to get it on device)
+    kwargs.setdefault("InputMeasurements", "TracccMeasurements")
+    kwargs.setdefault("InputMeasToPixelIndex", "")   # empty: map built in this alg
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.TracccSeedDeviceConverterAlg(name, **kwargs))
+    return acc
+
 def ClusterValidationAlgCfg(flags,
         name="ClusterValidationAlgCfg",
         **kwargs) -> ComponentAccumulator:
     acc = ComponentAccumulator()
     acc.addEventAlgo(
         CompFactory.ActsTrk.ClusterValidationAlg(name, **kwargs))
+    return acc
+
+def SeedValidationAlgCfg(flags,
+    name="SeedValidationAlg",
+    **kwargs) -> ComponentAccumulator:
+    acc = ComponentAccumulator()
+    acc.addEventAlgo(
+        CompFactory.ActsTrk.SeedValidationAlg(name, **kwargs))
     return acc

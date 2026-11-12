@@ -116,7 +116,7 @@ StatusCode TracccSeedConverterAlg::execute(const EventContext& ctx) const
             std::array{spacepoints->at(sp_host_index[0]),
                         spacepoints->at(sp_host_index[1]),
                         spacepoints->at(sp_host_index[2])},
-            0.f, 0.f);
+            seed.quality(), 0.f);
     }
 
     ATH_MSG_DEBUG(" Seed Container " << m_outputSeedsKey.key()
