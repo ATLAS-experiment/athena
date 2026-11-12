@@ -6,6 +6,9 @@ from AthenaCommon.Utils.unixtools import find_datafile
 from ActsInterop import UnitConstants
 from ActsConfig.ActsUtilities import extractChildKwargs
 
+from RootUtils.LoadEnumHeader import loadEnumHeader
+loadEnumHeader ('xAODMeasurementBase/MeasurementDefs.h')
+
 def MapToInDetSimDataWrapSvcCfg(flags,
                                 *,
                                 collectionName: str) -> ComponentAccumulator:
