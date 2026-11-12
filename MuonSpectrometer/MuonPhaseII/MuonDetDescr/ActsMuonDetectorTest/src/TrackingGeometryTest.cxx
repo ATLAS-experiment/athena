@@ -64,6 +64,8 @@ std::optional<Acts::ParticleHypothesis> makeHypothesis(const unsigned pdgId) {
     return std::nullopt;
 }
 
+constexpr uint8_t invalidByte{0xFF};
+
 }
 
 
@@ -125,7 +127,7 @@ namespace MuonValR4 {
         const Amg::Vector3D globDir = trf.linear() * locDir;
         
         auto pars = Acts::BoundTrackParameters::create(tgContext,
-                    startSurf, ActsTrk::convertPosToActs(globPos), globDir, 
+                    std::move(startSurf), ActsTrk::convertPosToActs(globPos), globDir, 
                     MC::charge(&simHit) / ActsTrk::energyToActs(simHit.kineticEnergy()), 
                     Acts::BoundMatrix::Identity(), *hypothesis);
         if (!pars.ok()) {
@@ -158,7 +160,7 @@ namespace MuonValR4 {
             m_propP.push_back(record.extpPars.absoluteMomentum());
             m_propQ.push_back(record.extpPars.charge());
             m_propSurfType.push_back(Acts::toUnderlying(record.extpPars.referenceSurface().type()));
-            m_propHitLink.push_back(record.matched.value_or(-1));
+            m_propHitLink.push_back(record.matched.value_or(invalidByte));
             m_propGeoId.push_back(record.extpPars.referenceSurface().geometryId().value());
         };
 

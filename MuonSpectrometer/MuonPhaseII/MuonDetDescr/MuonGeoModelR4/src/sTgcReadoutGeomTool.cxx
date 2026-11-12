@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTgcReadoutGeomTool.h"
@@ -212,7 +212,7 @@ StatusCode sTgcReadoutGeomTool::loadDimensions(sTgcReadoutElement::defineArgs& d
         StripLayer padLayer(factoryCache.trfNodeMaker.makeTransform(gapVol.transform 
                                               * Amg::getRotateZ3D(-90. * Gaudi::Units::deg) 
                                               * Amg::getRotateY3D(180* Gaudi::Units::deg)), 
-                                                stripDesign, padDesign, sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Pad, 0));
+                                                std::move(stripDesign), padDesign, sTgcReadoutElement::createHash(gasGap, sTgcIdHelper::Pad, 0));
         padLayer.flipPhiRotation();
         ATH_MSG_VERBOSE("Added new diamond pad layer at "<<padLayer);
         define.padLayers.push_back(std::move(padLayer));

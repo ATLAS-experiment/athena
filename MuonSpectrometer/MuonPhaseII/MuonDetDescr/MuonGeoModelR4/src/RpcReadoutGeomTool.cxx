@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcReadoutGeomTool.h"
@@ -117,18 +117,20 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
     const unsigned modulePhi = m_idHelperSvc->rpcIdHelper().doubletPhi(define.detElId);
 
     std::vector<gapVolume> allGapsWithIdx{};
+    const std::string gasGapStr{"RpcGasGap"};
+    const std::string bottomStripStr{"bottomStripLayer"};
     for (const GeoChildNodeWithTrf& rpcSinglet : rpcLayers) {
         auto fetchNodes = [this, &rpcSinglet] (const std::string& leafName) {
             std::vector<GeoChildNodeWithTrf> nodes = m_geoUtilTool->findAllLeafNodesByName(rpcSinglet.volume, leafName);
             std::ranges::for_each(nodes,[&rpcSinglet](GeoChildNodeWithTrf& node){ node.transform = rpcSinglet.transform * node.transform; });
             return nodes;
         };
-        std::vector<GeoChildNodeWithTrf> gasGaps = fetchNodes("RpcGasGap");
+        std::vector<GeoChildNodeWithTrf> gasGaps = fetchNodes(gasGapStr);
         if (gasGaps.empty()) {
             ATH_MSG_FATAL("The child "<<m_geoUtilTool->dumpVolume(rpcSinglet.volume)<<" has "<<gasGaps.size()<<" gasGaps. ");
             return StatusCode::FAILURE;
         }
-        std::vector<GeoChildNodeWithTrf> stripLayers = fetchNodes("bottomStripLayer");
+        std::vector<GeoChildNodeWithTrf> stripLayers = fetchNodes(bottomStripStr);
         if (stripLayers.empty()) {
             ATH_MSG_FATAL("The child "<<m_geoUtilTool->dumpVolume(rpcSinglet.volume)<<" does not have a strip layer ");
             return StatusCode::FAILURE;
@@ -145,6 +147,7 @@ StatusCode RpcReadoutGeomTool::loadDimensions(RpcReadoutElement::defineArgs& def
     const bool isAside{m_idHelperSvc->stationEta(define.detElId) > 0};
     /// We know now whether we had 2 or 3 gasgaps and also whether there 2 or 1 panels in phi
     define.nGasGaps = gasGap;
+    assert(gasGap!=0);
     /// Special case for the BML4 DBZ = 3 chambers. The doubletPhi is incorporated 
     /// into the detector element but there's only one strip panel
     define.nPanelsInPhi = modulePhi == 2 ? 1 : allGapsWithIdx.size () / gasGap;    

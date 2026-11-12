@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MdtReadoutGeomTool.h"
@@ -75,7 +75,7 @@ StatusCode MdtReadoutGeomTool::loadDimensions(FactoryCache& facCache,
                                                         idHelper.multilayer(define.detElId),
                                                         define.tubeLayers.size() +1, 1);
         MdtTubeLayerPtr newLay = std::make_unique<MdtTubeLayer>(childVol, trfNode, facCache.cutTubes[tubeLayId]);
-        define.tubeLayers.emplace_back(*facCache.tubeLayers.insert(newLay).first);
+        define.tubeLayers.emplace_back(*facCache.tubeLayers.insert(std::move(newLay)).first);
 
         const MdtTubeLayer& lay{*define.tubeLayers.back()};
         /// Next check all tubes whether they're made up out of air or not. If yes, then there's no tube at this place 
