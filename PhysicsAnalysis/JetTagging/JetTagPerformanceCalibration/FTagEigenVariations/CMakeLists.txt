@@ -20,3 +20,9 @@ atlas_add_test( gt_EigenDecomposition
                 INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
                 LINK_LIBRARIES ${GTEST_LIBRARIES} CxxUtils FTagEigenVariationsLib
                 POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( gt_EigenReductionRecomposition
+                SOURCES test/gt_EigenReductionRecomposition.cxx
+                INCLUDE_DIRS ${GTEST_INCLUDE_DIRS}
+                LINK_LIBRARIES ${GTEST_LIBRARIES} CxxUtils FTagEigenVariationsLib
+                POST_EXEC_SCRIPT noerror.sh )
