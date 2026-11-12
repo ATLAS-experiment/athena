@@ -28,12 +28,8 @@ xAODTestWriteCInfoTool::xAODTestWriteCInfoTool (const std::string& type,
                                                 const std::string& name,
                                                 const IInterface* parent)
 
-  : base_class (type, name, parent),
-    m_cvecKey ("cvec"),
-    m_cinfoKey ("cinfo")
+  : base_class (type, name, parent)
 {
-  declareProperty ("CVecKey", m_cvecKey);
-  declareProperty ("CInfoKey", m_cinfoKey);
 }
   
 

@@ -1,7 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -21,11 +21,8 @@
 #include "StoreGate/ReadHandleKey.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "TrigNavigation/Navigation.h"
+#include "TrigSteeringEvent/HLTResult.h"
 
-
-namespace HLT {
-  class HLTResult;
-}
 
 
 namespace DMTest {
@@ -66,10 +63,10 @@ public:
 
 private:
   /// Handle to read the HLTResult object.
-  SG::ReadHandleKey<HLT::HLTResult> m_resultKey;
+  SG::ReadHandleKey<HLT::HLTResult> m_resultKey{this, "ResultKey", "HLTResult_HLT"};
 
   /// Navigation object use to fill the result.
-  ToolHandle<HLT::Navigation>        m_nav;
+  ToolHandle<HLT::Navigation> m_nav{this, "Nav", "TestNav"};
 };
 
 

@@ -1,6 +1,6 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 // $Id$
 /**
@@ -54,13 +54,13 @@ public:
 
 private:
   /// Main output.
-  SG::WriteHandleKey<DMTest::S2> m_s2Key;
+  SG::WriteHandleKey<DMTest::S2> m_s2Key{this, "S2Key", "S2"};
 
   /// Symlink.
-  SG::WriteHandleKey<DMTest::S1> m_s1Key;
+  SG::WriteHandleKey<DMTest::S1> m_s1Key{this, "S1Key", "S2"};
 
   /// Alias.
-  SG::WriteHandleKey<DMTest::S2> m_aliasKey;
+  SG::WriteHandleKey<DMTest::S2> m_aliasKey{this, "AliasKey", "S2alias"};
 };
 
 

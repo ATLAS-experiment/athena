@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // $Id$
@@ -29,10 +29,8 @@ namespace DMTest {
  */
 xAODTestWriteCVecConst::xAODTestWriteCVecConst (const std::string &name,
                                                 ISvcLocator *pSvcLocator)
-  : AthReentrantAlgorithm (name, pSvcLocator),
-    m_cvecKey ("cvecConst")
+  : AthReentrantAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("CVecKey", m_cvecKey);
 }
   
 

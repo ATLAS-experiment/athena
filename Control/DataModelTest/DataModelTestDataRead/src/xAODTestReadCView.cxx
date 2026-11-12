@@ -29,12 +29,8 @@ namespace DMTest {
  */
 xAODTestReadCView::xAODTestReadCView (const std::string &name,
                                       ISvcLocator *pSvcLocator)
-  : AthReentrantAlgorithm (name, pSvcLocator),
-    m_cviewKey ("cview"),
-    m_writeKey ("")
+  : AthReentrantAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("CViewKey", m_cviewKey);
-  declareProperty ("WriteKey", m_writeKey);
 }
   
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration.
+ * Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration.
  */
 // $Id$
 /**
@@ -27,9 +27,6 @@ xAODTestWriteSymlinks::xAODTestWriteSymlinks (const std::string &name,
                                               ISvcLocator *pSvcLocator)
   : AthReentrantAlgorithm (name, pSvcLocator)
 {
-  declareProperty ("S2Key", m_s2Key = "S2");
-  declareProperty ("S1Key", m_s1Key = "S2");
-  declareProperty ("AliasKey", m_aliasKey = "S2alias");
 }
 
 
