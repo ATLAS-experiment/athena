@@ -36,6 +36,8 @@ class MonitoredCopy : public vecmem::copy {
                        type::copy_type cptype) const override;
   /// Perform a "low level" memory filling operation
   virtual void do_memset(std::size_t size, void* ptr, int value) const override;
+  /// Create an event for synchronization
+  virtual event_type do_create_event() const override;
 
   /// @}
 
