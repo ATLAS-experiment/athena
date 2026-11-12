@@ -154,12 +154,21 @@ Rec::CaloCellCollector::collectCells(
   const CaloCellContainer& cellContainer,
   xAOD::CaloClusterContainer& clusterContainer) const
 {
+  CaloExtensionHelpers::EntryExitLayerMap entryExitLayerMap;
+  CaloExtensionHelpers::entryExitLayerMap(extension, entryExitLayerMap);
+  return collectCells(entryExitLayerMap, caloMgr, cellContainer, clusterContainer);
+}
+
+xAOD::CaloCluster*
+Rec::CaloCellCollector::collectCells(
+  const CaloExtensionHelpers::EntryExitLayerMap& entryExitLayerMap,
+  const CaloDetDescrManager* caloMgr,
+  const CaloCellContainer& cellContainer,
+  xAOD::CaloClusterContainer& clusterContainer) const
+{
   // Collect cells in explicit window sizes
 
   std::vector<const CaloCell*> cells;
-
-  CaloExtensionHelpers::EntryExitLayerMap entryExitLayerMap;
-  CaloExtensionHelpers::entryExitLayerMap(extension, entryExitLayerMap);
 
   cells.reserve(100);
   CaloCellList myList(caloMgr, &cellContainer);

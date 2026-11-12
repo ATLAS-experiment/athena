@@ -15,6 +15,17 @@
 #include "xAODMuon/MuonContainer.h"
 #include "xAODMuon/MuonAuxContainerR4.h"
 
+#include "xAODCaloEvent/CaloClusterContainer.h"
+#include "xAODCaloEvent/CaloClusterAuxContainer.h"
+#include "CaloEvent/CaloClusterCellLinkContainer.h"
+#include "CaloEvent/CaloCellContainer.h"
+#include "CaloConditions/CaloNoise.h"
+#include "CaloDetDescr/CaloDetDescrManager.h"
+#include "TrackToCalo/CaloCellCollector.h"
+#include "StoreGate/ReadCondHandleKey.h"
+#include "ActsEvent/ContextUtility.h"
+#include "ActsEvent/CaloExtension.h"
+
 #include "MuonTrackEvent/MuonTag.h"
 #include "MuonTrackEvent/TrackingHelpers.h"
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
@@ -42,6 +53,20 @@ namespace MuonCombinedR4 {
                 
                 /** @brief The output muon container handle */
                 MuonCont_t muons{};
+
+                /** @brief The output calo cluster container handle */
+                xAOD::FillContainer<xAOD::CaloClusterContainer, xAOD::CaloClusterAuxContainer> caloClusters{};
+                /** @brief The output calo cluster cell link container handle */
+                std::unique_ptr<CaloClusterCellLinkContainer> caloClusterLinks{std::make_unique<CaloClusterCellLinkContainer>()};
+                /** @brief The calo cells used to build the muon clusters. Nullptr if the
+                 *         cluster building is switched off */
+                const CaloCellContainer* caloCells{nullptr};
+                /** @brief The calorimeter detector description */
+                const CaloDetDescrManager* caloMgr{nullptr};
+                /** @brief Optional calo noise object to compute the ET core */
+                const CaloNoise* caloNoise{nullptr};
+
+
                 /** @brief Abrivation a vector of tags */
                 using TagVec_t = std::vector<const MuonR4::MuonTag*>;
                 /** @brief Group the muon tags by the associated ID track
@@ -65,6 +90,32 @@ namespace MuonCombinedR4 {
             SG::WriteHandleKey<xAOD::MuonContainer> m_muonKey{this, "MuonKey", "Muons"};
             /** @brief Key name under which the input tags can be found*/
             SG::ReadHandleKeyArray<MuonR4::MuonTagContainer> m_tagKeys{this, "TagKeys", {}};
+
+            /** @brief Calo clusters built from the cells along the calo extension of the muon's ID track.
+             *         An empty key switches the cluster building off */
+            SG::WriteHandleKey<xAOD::CaloClusterContainer> m_clusterContainerName{this, "ClusterContainerName", "MuonClusterCollection",
+                                                                          "Clusters"};
+            /** @brief Cell links of the clusters. Set to <ClusterContainerName>_links in the python configuration */
+            SG::WriteHandleKey<CaloClusterCellLinkContainer> m_clusterContainerLinkName{this, "CaloClusterCellLinkName", "MuonClusterCollection_links",
+                                                                                "Cluster links"};
+
+            /** @brief Switch the cluster building on or off */
+            Gaudi::Property<bool> m_useCaloCells{this, "UseCaloCells", true};
+            /** @brief Clusters are built: UseCaloCells is set and the cluster container key is not empty */
+            bool m_useCells{false};
+            /** @brief Calo cell container used to build the clusters */
+            SG::ReadHandleKey<CaloCellContainer> m_cellContainerName{this, "CaloCellContainer", "AllCalo", "calo cells"};
+            /** @brief Calorimeter detector description */
+            SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this, "CaloDetDescrManager", "CaloDetDescrManager"};
+            /** @brief CaloNoise object to apply the noise cut in the ET core, or blank */
+            SG::ReadCondHandleKey<CaloNoise> m_caloNoiseKey{this, "CaloNoise", "", "CaloNoise object to use, or blank."};
+            /** @brief Noise threshold in sigmas applied when computing the ET core */
+            Gaudi::Property<float> m_sigmaCaloNoiseCut{this, "SigmaCaloNoiseCut", 3.4};
+            /** @brief Collector of the calo cells and the core energy */
+            Rec::CaloCellCollector m_cellCollector{};
+            /** @brief Provider of the Acts geometry context */
+            ActsTrk::ContextUtility m_ctxProvider{this};
+
            /** @brief Handle to the muon summary tool */
             ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "TrackSummaryTool" , ""};
             /** @brief Load all containers from store gate and setup the output containers  */
@@ -82,6 +133,16 @@ namespace MuonCombinedR4 {
             void createMuon(const EventContext& ctx,
                             const std::span<const MuonR4::MuonTag* const>& muTags,
                             DataShip& ship) const;
+
+            /** @brief Builds the calo cluster from the cells along the calo extension of the
+             *         muon's ID track, links it to the muon and fills the core energy
+             *         decorations (ET_Core, ET_EMCore, ET_TileCore, ET_HECCore).
+             *  @param ctx: EventContext to establish the ElementLink
+             *  @param muon: Muon to which the cluster is attached
+             *  @param ship: The data holder providing the cluster container and cell inputs */
+            void collectCells(const EventContext& ctx,
+                              xAOD::Muon& muon,
+                              DataShip& ship) const;
 
             /** @brief Constructs an element link to the passed track particle
              *         If a nullptr is passed, an empty link is returned

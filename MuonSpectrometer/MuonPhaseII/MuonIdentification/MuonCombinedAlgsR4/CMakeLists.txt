@@ -12,7 +12,7 @@ atlas_add_component( MuonCombinedAlgsR4
                                     MuonAnalysisInterfacesLib MuonRecToolInterfacesR4
                                     ActsToolInterfacesLib InDetTrackSelectionToolLib
                                     FourMomUtils ActsCalibratorsLib
-                                    MuonCombinedEvent
+                                    MuonCombinedEvent xAODCaloEvent CaloEvent CaloConditions CaloDetDescrLib TrackToCaloLib TrkCaloExtension
                                     )
 # Install files from the package:
 atlas_install_python_modules( python/*.py  )

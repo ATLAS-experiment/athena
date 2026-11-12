@@ -108,6 +108,14 @@ def StandaloneMuonOutputCfg(flags):
     aod_items += ["xAOD::MuonContainer#MuonsLRT"]
     aod_items += ["xAOD::MuonAuxContainerR4#MuonsLRTAux."]
 
+    if flags.Detector.EnableCalo:
+        aod_items += ["xAOD::CaloClusterContainer#MuonClusterCollection",
+                      "xAOD::CaloClusterAuxContainer#MuonClusterCollectionAux.",
+                      "CaloClusterCellLinkContainer#MuonClusterCollection_links"]
+        from CaloRec.CaloThinCellsByClusterAlgConfig import CaloThinCellsByClusterAlgCfg
+        result.merge(CaloThinCellsByClusterAlgCfg(flags, streamName="StreamAOD", clusters="MuonClusterCollection",
+                                                  samplings=["TileGap1", "TileGap2", "TileGap3", "TileBar0", "TileExt0", "HEC0"]))
+
     esd_items += aod_items
     
     if flags.Output.doWriteESD:
@@ -181,6 +189,10 @@ def MuonCombinedReconstructionConfigR4(flags):
     #### create the xAOD muons
     result.merge(MuonCreatorAlgCfg(flags, name = "MuonActsCreatorAlg",
                                           TagKeys=MuonTags))
+    #### decorate the muon clusters with the links to the topo clusters needed by MET & PFlow
+    if flags.Detector.EnableCalo:
+        result.addEventAlgo(CompFactory.ClusterMatching.CaloClusterMatchLinkAlg("MuonActsTCLinks",
+                                                                                ClustersToDecorate="MuonClusterCollection"))
     return result
 
 def LRT_MuonCombinedReconstructionConfigR4(flags):
@@ -215,7 +227,7 @@ def LRT_MuonCombinedReconstructionConfigR4(flags):
         MuonTags+=["LegacyCaloTagsLRT"]
     
     result.merge(MuonCreatorAlgCfg(flags, name = "MuonActsCreatorAlg_LRT",
-                                      TagKeys=MuonTags, MuonKey="MuonsLRT"))
+                                      TagKeys=MuonTags, MuonKey="MuonsLRT", ClusterContainerName=""))
     return result
 
 

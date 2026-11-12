@@ -129,6 +129,9 @@ def MuonCreatorAlgCfg(flags, name="MuonCreatorAlgR4", **kwargs):
     kwargs.setdefault("SelectionTool", result.popToolsAndMerge(MuonLoosenedNonCalibratedSelectionToolCfg(flags)))
     from MuonTrackFindingAlgs.TrackFindingConfig import TrackSummaryToolCfg
     kwargs.setdefault("TrackSummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
+    if not flags.Detector.EnableCalo:
+        kwargs.setdefault("ClusterContainerName", "")
+    kwargs.setdefault("CaloClusterCellLinkName", kwargs.get("ClusterContainerName", "MuonClusterCollection") + "_links")
     the_alg = CompFactory.MuonCombinedR4.MuonCreatorAlg(name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
