@@ -17,6 +17,7 @@
 #include <vecmem/containers/data/vector_view.hpp>
 #include <vecmem/containers/device_vector.hpp>
 
+
 namespace {
   const SG::Accessor<unsigned long> s_acc_id("identifier");
   const SG::Accessor<unsigned int> s_acc_id_hash("identifierHash");
@@ -41,6 +42,7 @@ StatusCode TracccMeasurementDeviceConverterAlg::initialize()
   ATH_CHECK(m_deviceCondKey.initialize());
 
   ATH_CHECK(detStore()->retrieve(m_detector, m_deviceDetectorName.value()));
+  ATH_CHECK(m_outputMeasToPixelKey.initialize(!m_outputMeasToPixelKey.key().empty()));
 
   ATH_MSG_DEBUG("Successfully initialized");
   return StatusCode::SUCCESS;
@@ -81,6 +83,15 @@ StatusCode TracccMeasurementDeviceConverterAlg::execute(const EventContext& ctx)
   traccc::edm::measurement_collection::const_view::size_type const n_meas =
     device_copy->get_size(*traccc_measurements);
 
+  // ---- Optional: device map traccc measurement -> pixel index, for downstream converters
+  if (!m_outputMeasToPixelKey.key().empty()) {
+    std::unique_ptr<ActsTrk::TracccMeasToPixelIndex> meas_to_pixel{nullptr};
+    ATH_CHECK(buildMeasToPixelIndexOnGPU(cuda_stream, m_mrTool->mainMR(), *device_copy,
+        n_meas, *traccc_measurements, meas_to_pixel));
+    SG::WriteHandle<ActsTrk::TracccMeasToPixelIndex> mapHandle{m_outputMeasToPixelKey, ctx};
+    ATH_CHECK(mapHandle.record(std::move(meas_to_pixel)));
+  }
+  
   // ---- Nothing to convert
   if (n_meas == 0) {
     // We still need to register empty containers in SG
