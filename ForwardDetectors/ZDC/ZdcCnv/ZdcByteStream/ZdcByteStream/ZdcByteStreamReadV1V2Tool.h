@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRIGT1CALOBYTESTREAM_ZDCBYTESTREAMREADV1V2TOOL_H
@@ -181,10 +181,11 @@ private:
   void initSourceIDs();
 
 private:
-  ToolHandle<ZdcL1CaloErrorByteStreamTool> m_errorTool;
+  ToolHandle<ZdcL1CaloErrorByteStreamTool> m_errorTool{"ZdcL1CaloErrorByteStreamTool/ZdcL1CaloErrorByteStreamTool"};
 
   /// Service for reading bytestream
-  ServiceHandle<IROBDataProviderSvc> m_robDataProvider;
+  ServiceHandle<IROBDataProviderSvc> m_robDataProvider{this, "ROBDataProviderSvc", "ROBDataProviderSvc",
+                                                       "Get ROB source IDs service"};
 
 private:
   std::vector<uint32_t> m_ppmSourceIDs;

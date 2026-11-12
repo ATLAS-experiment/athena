@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -22,6 +22,7 @@
 #include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "StoreGate/ReadHandleKey.h"
 #include "AthContainers/DataVector.h"
+#include "Gaudi/Property.h"
 
 class ISvcLocator;
 class StatusCode;
@@ -52,10 +53,10 @@ private:
 
 	///REMOVE Force number of LUT slices
 	///REMOVE
-	int m_forceSlicesLut;
+	Gaudi::Property<int> m_forceSlicesLut{this, "ForceSlicesLUT", 0};
 	///REMOVE Force number of FADC slices
 	///REMOVE
-	int m_forceSlicesFadc;
+	Gaudi::Property<int> m_forceSlicesFadc{this, "ForceSlicesFADC", 0};
 	//ZdcDigitsMap m_ZdcDigitsMap;
 };
 

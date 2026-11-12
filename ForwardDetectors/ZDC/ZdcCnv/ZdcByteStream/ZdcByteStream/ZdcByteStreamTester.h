@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -19,6 +19,8 @@
 
 #include "AthenaBaseComps/AthAlgorithm.h"
 #include "AthContainers/DataVector.h"
+#include "Gaudi/Property.h"
+#include "ZdcByteStream/ZdcDefs.h"
 
 class ISvcLocator;
 class StatusCode;
@@ -41,17 +43,17 @@ private:
 
 	/// ZDC Container and collection
 	/// StoreGate key
-	std::string m_ZdcDigitsLocation;
+	Gaudi::Property<std::string> m_ZdcDigitsLocation{this, "ZdcDigitsLocation", ZdcDefs::ZdcDigitsLocation};
 	std::string m_ZdcDigitsCollectionLocation;
 
 	void setupZdcDigitsMap(const ZdcDigitsCollection* jeCollection);
 
 	///REMOVE Force number of LUT slices
 	///REMOVE
-	int m_forceSlicesLut;
+	Gaudi::Property<int> m_forceSlicesLut{this, "ForceSlicesLUT", 0};
 	///REMOVE Force number of FADC slices
 	///REMOVE
-	int m_forceSlicesFadc;
+	Gaudi::Property<int> m_forceSlicesFadc{this, "ForceSlicesFADC", 0};
 	ZdcDigitsMap m_ZdcDigitsMap;
 };
 

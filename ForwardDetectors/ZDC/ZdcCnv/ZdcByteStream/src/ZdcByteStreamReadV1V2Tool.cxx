@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ===========================================================================
@@ -73,15 +73,8 @@ namespace {
 // Constructor
 ZdcByteStreamReadV1V2Tool::ZdcByteStreamReadV1V2Tool(const std::string& name /*=
   "ZdcByteStreamxAODReadTool"*/) :
-    AsgTool(name),
-    m_errorTool("ZdcL1CaloErrorByteStreamTool/ZdcL1CaloErrorByteStreamTool"),
-    //m_ppmMaps("LVL1::PpmMappingTool/PpmMappingTool"),
-    m_robDataProvider("ROBDataProviderSvc", name) {
+    AsgTool(name) {
   declareInterface<ZdcByteStreamReadV1V2Tool>(this);
-  //declareProperty("PpmMappingTool", m_ppmMaps,
-  //    "Crate/Module/Channel to Eta/Phi/Layer mapping tool");
-  declareProperty("ROBDataProviderSvc", m_robDataProvider,
-        "Get ROB source IDs service");
 }
 
 // ===========================================================================
