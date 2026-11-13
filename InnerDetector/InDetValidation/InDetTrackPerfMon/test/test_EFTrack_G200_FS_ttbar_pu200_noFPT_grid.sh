@@ -29,7 +29,7 @@ testLabel="G-200"
 
 ## search in $DATAPATH for matching files
 IDTPMjsonConfig='EFTrack_ttbar_FS_IDTPMconfig_EFsel.json'
-dcubeXmlIDTPMconfig='dcube_EFTrack_ttbar_pu200_EFsel.xml'
+dcubeXmlIDTPMconfig='dcube_EFTrack_ttbar_pu200_noFPT_EFsel.xml'
 
 IDTPMjsonConfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $IDTPMjsonConfig -print -quit 2>/dev/null )
 dcubeXmlIDTPMconfig_absPath=$( find -H ${DATAPATH//:/ } -mindepth 1 -maxdepth 2 -name $dcubeXmlIDTPMconfig -print -quit 2>/dev/null )
