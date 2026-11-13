@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcPrepDataRetriever.h"
@@ -88,17 +88,18 @@ namespace JiveXML {
     }      
 
     DataMap myDataMap;
-    myDataMap["x"] = x;
-    myDataMap["y"] = y;
-    myDataMap["z"] = z;
-    myDataMap["length"] = lengthVec;
-    myDataMap["width"] = widthVec;
-    myDataMap["identifier"] = identifierVec;
-    myDataMap["id"] = idVec;
-    myDataMap["barcode"] = barcode;
+    std::size_t n = x.size();
+    myDataMap["x"] = std::move(x);
+    myDataMap["y"] = std::move(y);
+    myDataMap["z"] = std::move(z);
+    myDataMap["length"] = std::move(lengthVec);
+    myDataMap["width"] = std::move(widthVec);
+    myDataMap["identifier"] = std::move(identifierVec);
+    myDataMap["id"] = std::move(idVec);
+    myDataMap["barcode"] = std::move(barcode);
 
     //Be verbose
-    ATH_MSG_DEBUG(dataTypeName() << ": "<< x.size());
+    ATH_MSG_DEBUG(dataTypeName() << ": "<< n);
 
     //forward data to formating tool
     return FormatTool->AddToEvent(dataTypeName(), m_sgKey.key(), &myDataMap);
