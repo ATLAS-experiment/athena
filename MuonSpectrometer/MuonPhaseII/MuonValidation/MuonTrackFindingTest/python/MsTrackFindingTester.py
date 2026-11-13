@@ -22,6 +22,11 @@ def MsTrackTesterCfg(flags, name = "MsTrackTester", scheduleLegacy = True,
         kwargs.setdefault("LegacySegmentKey", "")
         kwargs.setdefault("LegacyTrackKey", "")
         kwargs.setdefault("LegacyMuonKey" , "")
+    if flags.Input.isMC:
+        from ActsConfig.ActsTruthConfig import ActsTruhPerigeeDecorationAlgCfg
+        result.merge(ActsTruhPerigeeDecorationAlgCfg(flags,name="MuonTruthPerigeeDecorator",
+                                                           ExtrapolationTool= result.popToolsAndMerge(MSExtrapolatorCfg(flags)),
+                                                           TruthParticleContainer="MuonTruthParticles"))
     the_alg = CompFactory.MuonValR4.MsTrackTester(name= name, **kwargs)
     result.addEventAlgo(the_alg, primary = True)
     return result
