@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_PADDESIGN_ICC
 #define MUONREADOUTGEOMETRYR4_PADDESIGN_ICC
 
-#include <MuonReadoutGeometryR4/PadDesign.h>
 
 namespace MuonGMR4 {
     using CheckVector2D = PadDesign::CheckVector2D;   

@@ -56,7 +56,6 @@ namespace MuonGMR4 {
             } default:
                 THROW_EXCEPTION("Unsupported bound type "<<visitBounds.type());
         }
-        return 0.;
     }
     double halfXhighY(const Acts::VolumeBounds& visitBounds) {
         switch (visitBounds.type()) {
@@ -76,7 +75,6 @@ namespace MuonGMR4 {
             } default:
                 THROW_EXCEPTION("Unsupported bound type "<<visitBounds.type());
         }
-        return 0.;
     }
     double halfY(const Acts::VolumeBounds& visitBounds) {
         switch (visitBounds.type()) {
@@ -96,7 +94,6 @@ namespace MuonGMR4 {
             } default:
                 THROW_EXCEPTION("Unsupported bound type "<<visitBounds.type());
         }
-        return 0.;
 
     }
     double halfZ(const Acts::VolumeBounds& visitBounds) {
@@ -116,7 +113,6 @@ namespace MuonGMR4 {
             } default:
                 THROW_EXCEPTION("Unsupported bound type "<<visitBounds.type());
         }
-        return 0.;
     }
     inline const Acts::Surface* volumeLidBounadry(const Acts::TrackingVolume& volume,
                                                   const bool fetchBottom) {

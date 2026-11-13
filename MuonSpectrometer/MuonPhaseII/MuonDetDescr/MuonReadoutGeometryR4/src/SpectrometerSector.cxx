@@ -198,34 +198,34 @@ Identifier SpectrometerSector::computeDetLayerId(const MuonReadoutElement* rele)
 
     switch (rele->detectorType()) {
         case ActsTrk::DetectorType::Mdt:{
-            auto mdtRele = dynamic_cast<const MdtReadoutElement*>(rele);
+            auto mdtRele = static_cast<const MdtReadoutElement*>(rele);
             return idHelperSvc()->mdtIdHelper().channelID(mdtRele->stationName(), 1,
                                                            mdtRele->stationPhi(),
                                                            mdtRele->multilayer(),
                                                             1,1);
         }
         case ActsTrk::DetectorType::Rpc:{
-            auto rpcRele = dynamic_cast<const RpcReadoutElement*>(rele);
+            auto rpcRele = static_cast<const RpcReadoutElement*>(rele);
             return idHelperSvc()->rpcIdHelper().channelID(rpcRele->stationName(), 1, 
                                                            rpcRele->stationPhi(),
                                                              rpcRele->doubletR(), 1, 1, 
                                                                1, 0, 1);
         }
         case ActsTrk::DetectorType::Tgc:{
-            auto tgcRele = dynamic_cast<const TgcReadoutElement*>(rele);
+            auto tgcRele = static_cast<const TgcReadoutElement*>(rele);
             return idHelperSvc()->tgcIdHelper().channelID(tgcRele->stationName(), 1,
                                                            tgcRele->stationPhi(), 
                                                                1, 0, 1);
         }
         case ActsTrk::DetectorType::sTgc:{
-           auto stgcRele = dynamic_cast<const sTgcReadoutElement*>(rele);
+           auto stgcRele = static_cast<const sTgcReadoutElement*>(rele);
            return idHelperSvc()->stgcIdHelper().channelID(stgcRele->stationName(), 1,
                                                            stgcRele->stationPhi(), 
                                                            stgcRele->multilayer(),
                                                                1, 0, 1);
         }
         case ActsTrk::DetectorType::Mm:{
-            auto mmRele = dynamic_cast<const MmReadoutElement*>(rele);
+            auto mmRele = static_cast<const MmReadoutElement*>(rele);
             return idHelperSvc()->mmIdHelper().channelID(mmRele->stationName(), 1,
                                                           mmRele->stationPhi(), 
                                                           mmRele->multilayer(),
@@ -240,23 +240,23 @@ unsigned int SpectrometerSector::nLayerPerReadout (const MuonReadoutElement* rel
 
     switch (rele->detectorType()) {
         case ActsTrk::DetectorType::Mdt:{
-            auto mdtRele = dynamic_cast<const MdtReadoutElement*>(rele);
+            auto mdtRele = static_cast<const MdtReadoutElement*>(rele);
             return mdtRele->numLayers();
         }
         case ActsTrk::DetectorType::Rpc:{
-            auto rpcRele = dynamic_cast<const RpcReadoutElement*>(rele);
+            auto rpcRele = static_cast<const RpcReadoutElement*>(rele);
             return rpcRele->nGasGaps();
         }
         case ActsTrk::DetectorType::Tgc:{
-            auto tgcRele = dynamic_cast<const TgcReadoutElement*>(rele);
+            auto tgcRele = static_cast<const TgcReadoutElement*>(rele);
             return tgcRele->nGasGaps();
         }
         case ActsTrk::DetectorType::sTgc:{
-           auto stgcRele = dynamic_cast<const sTgcReadoutElement*>(rele);
+           auto stgcRele = static_cast<const sTgcReadoutElement*>(rele);
             return stgcRele->numLayers();
         }
         case ActsTrk::DetectorType::Mm:{
-            auto mmRele = dynamic_cast<const MmReadoutElement*>(rele);
+            auto mmRele = static_cast<const MmReadoutElement*>(rele);
             return mmRele->nGasGaps();
         }
         default:

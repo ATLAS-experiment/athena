@@ -31,12 +31,11 @@ namespace MuonR4{
         ATH_CHECK(m_cablingTgcKey.initialize(SG::AllowEmpty));
         return StatusCode::SUCCESS;
     }
-     template <typename Key_t,
-                typename... OtherKey_t>
+    template <typename Key_t, typename... OtherKey_t>
     StatusCode RegionSelectorCondAlg::addCondDependency(const EventContext& ctx,
                                 SG::WriteCondHandle<IRegSelLUTCondData>& writeHandle,
                                const SG::ReadCondHandleKey<Key_t>& key,
-                               OtherKey_t... others) const {
+                               const OtherKey_t&... others) const {
         if (!key.empty()) {
             SG::ReadCondHandle readHandle{key, ctx};
             if (!readHandle.isValid()){
@@ -105,7 +104,8 @@ namespace MuonR4{
                 THROW_EXCEPTION("Invalid identifier "<<m_idHelperSvc->toStringChamber(moduleID));
             }
         }
-        return {};
+        //coverity[UNREACHABLE]
+        return{};
     }
             
     StatusCode RegionSelectorCondAlg::execute(const EventContext& ctx) const {

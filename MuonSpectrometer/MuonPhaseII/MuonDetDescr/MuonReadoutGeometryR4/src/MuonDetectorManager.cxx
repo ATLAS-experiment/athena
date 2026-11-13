@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonReadoutGeometryR4/MuonDetectorManager.h"
 
@@ -44,7 +44,9 @@ namespace {
         using namespace Muon::MuonStationIndex;
         constexpr unsigned chIdxMax = Acts::toUnderlying(StIndex::StIndexMax);
         constexpr unsigned secMax = Muon::MuonStationIndex::numberOfSectors();
-        return sector +  secMax* Acts::toUnderlying(toStationIndex(chIndex))* secMax + 
+        const StIndex idx = toStationIndex(chIndex);
+//coverity[INTEGER_OVERFLOW]
+        return sector +  secMax* Acts::toUnderlying(idx)* secMax + 
                (Acts::copySign(1,side) == 1) * chIdxMax * secMax;
     }
 #endif

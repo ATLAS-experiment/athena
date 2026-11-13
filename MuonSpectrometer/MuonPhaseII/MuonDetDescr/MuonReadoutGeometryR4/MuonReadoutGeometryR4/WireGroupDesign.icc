@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #ifndef MUONREADOUTGEOMETRYR4_WIREGROUPDESIGN_ICC
 #define MUONREADOUTGEOMETRYR4_WIREGROUPDESIGN_ICC
 
-#include <MuonReadoutGeometryR4/WireGroupDesign.h>
 
 namespace MuonGMR4 {
     using CheckVector2D = WireGroupDesign::CheckVector2D;
