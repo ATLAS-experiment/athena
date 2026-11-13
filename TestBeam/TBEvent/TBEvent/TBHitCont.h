@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/DataVector.h"
@@ -19,10 +19,10 @@
 class TBHitCont : public DataVector< TBHit > {
  public:
   /** Constructor */
-  TBHitCont() : DataVector< TBHit >() { }
+  using DataVector< TBHit >::DataVector;
     
   /** destructor  */
- virtual ~TBHitCont() { } 
+  virtual ~TBHitCont() { } 
 
 } ;
 CLASS_DEF( TBHitCont , 84246700 , 1 )

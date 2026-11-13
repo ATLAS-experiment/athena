@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBHITPLANECONT_H
@@ -20,10 +20,10 @@ Holds a set of TBHitPlane objects.
 class TBHitPlaneCont : public DataVector< TBHitPlane > {
  public:
   /** Constructor */
-  TBHitPlaneCont() : DataVector< TBHitPlane >() { }
+  using DataVector< TBHitPlane >::DataVector;
 
   /** destructor  */
- virtual ~TBHitPlaneCont() { }
+  virtual ~TBHitPlaneCont() { }
 
 } ;
 CLASS_DEF( TBHitPlaneCont , 226587971 , 1 )

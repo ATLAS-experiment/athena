@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* author : Pierre-Antoine Delsart */
@@ -29,7 +29,7 @@ class TBLArCalibDigitContainer : public DataVector<LArCalibDigit> {
   /**
    * constructor
    */
-  TBLArCalibDigitContainer() : DataVector<LArCalibDigit>(),m_delayScale(1*CLHEP::ns) { }
+  using DataVector<LArCalibDigit>::DataVector;
   
   /**
    * Setter & Getter for delayScale
@@ -42,7 +42,7 @@ class TBLArCalibDigitContainer : public DataVector<LArCalibDigit> {
   */
   virtual ~TBLArCalibDigitContainer();
 private:    
-  double m_delayScale;
+  double m_delayScale = 1*CLHEP::ns;
 
 } ;
 
