@@ -1,11 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id: DDer.h,v 1.3 2007-01-31 03:12:39 ssnyder Exp $
-
 /**
  * @file  DataModelTestDataRead/DDer.h
  * @author snyder@bnl.gov
@@ -36,6 +32,7 @@ namespace DMTest {
 struct DDer
   : public DVec
 {
+  using DVec::DVec;
 };
 
 

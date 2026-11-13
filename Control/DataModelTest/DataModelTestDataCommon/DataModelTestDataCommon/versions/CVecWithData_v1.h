@@ -1,10 +1,7 @@
 // This file's extension implies that it's C, but it's really -*- C++ -*-.
-
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
-
-// $Id$
 /**
  * @file DataModelTestDataCommon/versions/CVecWithData_v1.h
  * @author scott snyder <snyder@bnl.gov>
@@ -27,8 +24,8 @@ class CVecWithData_v1
   : public CVec_v1
 {
 public:
-  CVecWithData_v1() : meta1(0) {}
-  int meta1;
+  using CVec_v1::CVec_v1;
+  int meta1 = 0;
 };
 
 
