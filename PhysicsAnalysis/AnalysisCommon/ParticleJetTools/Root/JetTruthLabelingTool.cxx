@@ -239,7 +239,7 @@ StatusCode JetTruthLabelingTool::labelRecoJets(DecorHandles& dh,
       outOfTimeTruthJets = SG::makeHandle(m_OOTJetName, ctx);
 
       if (!inTimeTruthJets.isValid() || !outOfTimeTruthJets.isValid()) {
-          ATH_MSG_WARNING("Pileup jet collections unavailabel for " << m_truthJetCollectionKey << ". Running without pileup tagger.");
+          ATH_MSG_WARNING("Pileup jet collections unavailable for " << m_truthJetCollectionKey << ". Running without pileup tagger.");
           usePileupJets = false;
       }
   }
