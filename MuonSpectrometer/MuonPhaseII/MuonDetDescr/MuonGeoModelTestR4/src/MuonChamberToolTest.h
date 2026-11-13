@@ -87,7 +87,7 @@ class MuonChamberToolTest: public AthReentrantAlgorithm {
         StatusCode pointInside(const ActsTrk::GeometryContext& gctx,
                                 const Acts::Volume& boundVol,
                                 const Amg::Vector3D& point,
-                                const std::string& descr,
+                                const std::string_view descr,
                                 const Identifier& channelId) const;
 
         /** @brief Checks whether the edge points from a trapezoid/cuboid/diamond form a volume

@@ -450,6 +450,7 @@ int main1( int argc, char** argv ) {
                 chamberOkay = false;
             }
             continue;
+            /* this code currently does not run but may be later used
             const Amg::Vector2D diffLocStrip{testStrip.locPos - refStrip.locPos};
             if (diffStrip.mag() > tolerance) {
                 std::cerr<<"runRpcGeoComparison() "<<__LINE__<<": "<<test<<" "
@@ -457,6 +458,7 @@ int main1( int argc, char** argv ) {
                          <<" displacement: "<<Amg::toString(diffLocStrip,2)<<", mag: "<<diffLocStrip.mag()<<std::endl;
                 chamberOkay = false;
             }
+            */
         }
         if (!chamberOkay) {
             return_code = EXIT_FAILURE;
