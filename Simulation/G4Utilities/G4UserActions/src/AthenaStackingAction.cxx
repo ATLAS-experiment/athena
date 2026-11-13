@@ -113,6 +113,11 @@ namespace G4UA
 
     // Handle primary particles
     if(track->GetParentID() == 0) { // Condition for Primaries
+      // A primary returned to the stack can already carry truth information.
+      // Preserve its classification and truth links instead of reinitializing them.
+      if (track->GetUserInformation()) {
+        return fUrgent;
+      }
       // Extract the PrimaryParticleInformation
       PrimaryParticleInformation* primaryPartInfo = this->getPrimaryParticleInformation(track);
       // Fill some information for this track
