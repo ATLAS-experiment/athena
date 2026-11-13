@@ -2,6 +2,9 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 
+from RootUtils.LoadEnumHeader import loadEnumHeader
+loadEnumHeader ('ActsGeometryInterfaces/GeometryDefs.h')
+
 
 def ActsTrackingGeometrySvcCfg(flags,
                                name: str = "ActsTrackingGeometrySvc",
