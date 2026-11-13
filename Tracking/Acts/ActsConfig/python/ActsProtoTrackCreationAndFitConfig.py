@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     flags.fillFromArgs()
     if flags.Input.Files == ['_ATHENA_GENERIC_INPUTFILE_NAME_']:
-        flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4494_r16632/RDO.45451592._000021.pool.root.1"]
+        flags.Input.Files = ["/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-05-00-00/mc21_14TeV.900498.PG_single_muonpm_Pt100_etaFlatnp0_43.recon.RDO.e8481_s4676_r17688/RDO.51078505._000093.pool.root.1"]
 
     from AthenaConfiguration.TestDefaults import defaultConditionsTags   
     flags.IOVDb.GlobalTag = defaultConditionsTags.RUN4_MC
