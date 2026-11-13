@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::BarrelCryostat::CalibrationMixedCalculator
@@ -98,10 +98,6 @@ namespace LArG4 {
           constexpr double oneOverDphi = 32./M_PI;  //   1/Dphi
 
           // Calculate the mid-point of the step, and the simple geometry variables.
-          G4VPhysicalVolume* physical = step->GetPreStepPoint()->GetPhysicalVolume();
-          //G4int copyNumber = physical->GetCopyNo();
-          G4String volumeName = physical->GetLogicalVolume()->GetName();
-
           G4StepPoint* pre_step_point = step->GetPreStepPoint();
           G4StepPoint* post_step_point = step->GetPostStepPoint();
 
