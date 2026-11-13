@@ -51,7 +51,7 @@ def JETM2ExtraContentCfg(flags):
     from JetRecConfig.JetInputConfig import buildEventShapeAlg
     from JetRecConfig.StandardJetConstits import stdConstitDic as cst
     from JetRecConfig.StandardSmallRJets import AntiKt4UFOCSSKNoPtCut, AntiKt4EMPFlowNoPtCut, AntiKt4EMPFlowML, AntiKt4EMTopoNoPtCut, AntiKt4MLTopo
-    from JetRecConfig.StandardLargeRJets import AntiKt10TruthDressedWZSoftDrop
+    from JetRecConfig.StandardLargeRJets import AntiKt10TruthDressedWZSoftDrop, AntiKt10UFOCSSKSoftDrop_noLeptons
 
     #=======================================
     # CHS R = 0.4 UFO jets
@@ -68,6 +68,11 @@ def JETM2ExtraContentCfg(flags):
     # NoPtCut containers
     #=======================================
     jetList = [AntiKt4UFOCSSKNoPtCut,AntiKt4EMPFlowNoPtCut,AntiKt4EMPFlowML,AntiKt4EMTopoNoPtCut, AntiKt4MLTopo]
+
+    #=======================================
+    # Jets with leptons removed
+    #=======================================
+    jetList += [AntiKt10UFOCSSKSoftDrop_noLeptons]
 
     #=======================================
     # R = 1.0 truth WZ Dressed jets
@@ -211,6 +216,7 @@ def JETM2Cfg(flags):
     JETM2SlimmingHelper.IncludeMinBiasTriggerContent = False
 
     jetOutputList = ["AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets", "AntiKt4EMPFlowMLJets", "AntiKt4MLTopoJets"]
+    jetOutputList += ["AntiKt10UFOCSSK_noLeptonsSoftDropBeta100Zcut10Jets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(JETM2SlimmingHelper, jetOutputList, JETM2SlimmingHelper.SmartCollections)
 
