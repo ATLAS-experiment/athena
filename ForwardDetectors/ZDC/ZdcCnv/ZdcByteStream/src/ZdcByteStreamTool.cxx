@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -46,46 +46,9 @@ const InterfaceID& ZdcByteStreamTool::interfaceID()
 ZdcByteStreamTool::ZdcByteStreamTool(const std::string& type,
 										      const std::string& name,
 										      const IInterface* parent) :
-			AthAlgTool(type, name, parent),
-			//m_version(1),
-			//m_compVers(4),
-			m_channels(64),
-			m_crates(8),
-			//m_modules(16),
-			m_subDetector(eformat::FORWARD_ZDC),
-			m_srcIdMap(nullptr),
-			//m_towerKey(0),
-			//m_errorBlock(0),
-			m_rodStatus(nullptr)
-
+			AthAlgTool(type, name, parent)
 {
 	declareInterface<ZdcByteStreamTool> (this);
-
-	declareProperty("PrintCompStats", m_printCompStats = 0, "Print compressed format statistics");
-
-	// Properties for reading bytestream only
-	declareProperty("ZeroSuppress", m_zeroSuppress = 0,
-					"Only make trigger towers with non-zero EM or Had energy");
-	declareProperty("ROBSourceIDs", m_sourceIDs, "ROB fragment source identifiers");
-	declareProperty("PedestalValue", m_pedestal = 10,
-					"Pedestal value - needed for compressed formats 0,1 only");
-
-	// Properties for writing bytestream only
-	declareProperty("DataFormat", m_dataFormat = 1, "Format identifier (0-3) in sub-block header");
-	declareProperty("FADCBaseline", m_fadcBaseline = 0,
-					"FADC baseline lower bound for compressed formats");
-	declareProperty("FADCThreshold", m_fadcThreshold = 1,
-					"FADC threshold for super-compressed format");
-	declareProperty("SlinksPerCrate", m_slinks = 4, "The number of S-Links per crate");
-	declareProperty("SimulSlicesLUT", m_dfltSlicesLut = 1,
-					"The number of LUT slices in the simulation");
-	declareProperty("SimulSlicesFADC", m_dfltSlicesFadc = 7,
-					"The number of FADC slices in the simulation");
-	declareProperty("ForceSlicesLUT", m_forceSlicesLut = 0,
-					"If >0, the number of LUT slices in bytestream");
-	declareProperty("ForceSlicesFADC", m_forceSlicesFadc = 0,
-					"If >0, the number of FADC slices in bytestream");
-
 }
 
 //==================================================================================================
@@ -230,7 +193,7 @@ StatusCode ZdcByteStreamTool::convert( const IROBDataProviderSvc::VROBFRAG& robF
 	  msg() << "ZDC: Minor format version number: " << MSG::hex << minorVersion << MSG::dec
 		<< endmsg << "ZDC: LUT triggered slice offset:  " << trigLut << endmsg
 		<< "ZDC: FADC triggered slice offset: " << trigFadc << endmsg
-		<< "ZDC: FADC baseline lower bound:   " << m_fadcBaseline << endmsg;
+		<< "ZDC: FADC baseline lower bound:   " << m_fadcBaseline.value() << endmsg;
 	}
       const int runNumber = (*rob)->rod_run_no() & 0xffffff;
 
@@ -609,11 +572,11 @@ const std::vector<uint32_t>& ZdcByteStreamTool::sourceIDs()
         const uint32_t rodId = ZdcSrcIdMap::getRodID(crate, slink, daqOrRoi,
                                                             m_subDetector);
         const uint32_t robId = ZdcSrcIdMap::getRobID(rodId);
-        m_sourceIDs.push_back(robId);
+        m_sourceIDs.value().push_back(robId);
       }
     }
   }
-  return m_sourceIDs;
+  return m_sourceIDs.value();
 }
 //==================================================================================================
 

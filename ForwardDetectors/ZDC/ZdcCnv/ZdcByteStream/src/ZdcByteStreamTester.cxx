@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -35,9 +35,6 @@
 ZdcByteStreamTester::ZdcByteStreamTester(const std::string& name, ISvcLocator* pSvcLocator) :
 	AthAlgorithm(name, pSvcLocator)
 {
-	declareProperty("ZdcDigitsLocation", m_ZdcDigitsLocation = ZdcDefs::ZdcDigitsLocation);
-	declareProperty("ForceSlicesLUT", m_forceSlicesLut = 0);
-	declareProperty("ForceSlicesFADC", m_forceSlicesFadc = 0);
 }
 //==================================================================================================
 

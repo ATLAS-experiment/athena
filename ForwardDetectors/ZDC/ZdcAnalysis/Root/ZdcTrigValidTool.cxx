@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/ZdcTrigValidTool.h"
@@ -24,9 +24,6 @@ ZdcTrigValidTool::ZdcTrigValidTool(const std::string& name)
 #ifndef XAOD_STANDALONE
   declareInterface<IZdcAnalysisTool>(this);
 #endif
-  declareProperty("Message", m_msg = "");
-  declareProperty("WriteAux", m_writeAux = true);
-  declareProperty("AuxSuffix", m_auxSuffix = "");
 }
 
 //**********************************************************************
@@ -70,9 +67,9 @@ StatusCode ZdcTrigValidTool::initialize() {
   m_simTrig = std::make_shared<ZDCTriggerSimModuleAmpls>(ZDCTriggerSimModuleAmpls(sideALUT, sideCLUT, combLUT));
   ATH_MSG_INFO(m_name<<" Initialised");
 
-  m_zdcModuleAmp = "ZdcModules.Amplitude"+m_auxSuffix;
+  m_zdcModuleAmp = "ZdcModules.Amplitude"+m_auxSuffix.value();
   ATH_CHECK(m_zdcModuleAmp.initialize());
-  m_trigValStatus = "ZdcSums.TrigValStatus"+m_auxSuffix;
+  m_trigValStatus = "ZdcSums.TrigValStatus"+m_auxSuffix.value();
   ATH_CHECK(m_trigValStatus.initialize());
 
   ATH_CHECK( m_eventInfoKey.initialize());

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "ZDC_G4CalibSDTool.h"
 #include "ZDC_G4CalibSD.h"
@@ -12,8 +12,6 @@
 ZDC_G4CalibSDTool::ZDC_G4CalibSDTool(const std::string &type, const std::string &name, const IInterface *parent)
     : SensitiveDetectorBase(type, name, parent)
 {
-  declareProperty("deadSD",m_deadSD = false);
-  declareProperty("doPid",m_doPid = false);
 }
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <TSystem.h>
@@ -15,12 +15,6 @@
 ZdcLEDNtuple ::ZdcLEDNtuple(const std::string &name, ISvcLocator *pSvcLocator)
     : EL::AnaAlgorithm(name, pSvcLocator)
 {
- 
-
-  declareProperty("enableOutputTree", enableOutputTree = true, "Enable output tree");
-  declareProperty("auxSuffix", auxSuffix = "", "comment");
-
-  m_eventCounter = 0;
 }
 
 StatusCode ZdcLEDNtuple ::initialize()
@@ -128,14 +122,14 @@ void ZdcLEDNtuple::processZdcLEDNtupleFromModules()
 
   ANA_MSG_DEBUG("accessing ZdcModules");
 
-  SG::ConstAccessor<int> ADCSumAcc("ADCSum" + auxSuffix);
-  SG::ConstAccessor<unsigned int> LEDTypeAcc("LEDType" + auxSuffix);
-  SG::ConstAccessor<float> PresampleAcc("Presample"+auxSuffix);
-  SG::ConstAccessor<int> MaxADCAcc("MaxADC" + auxSuffix);
-  SG::ConstAccessor<unsigned int> MaxSampleAcc("MaxSample" + auxSuffix);
-  SG::ConstAccessor<float> AvgTimeAcc("AvgTime" + auxSuffix);
-  SG::ConstAccessor<std::vector<uint16_t> > g0dataAcc("g0data" + auxSuffix);
-  SG::ConstAccessor<std::vector<uint16_t> > g1dataAcc("g1data" + auxSuffix);
+  SG::ConstAccessor<int> ADCSumAcc("ADCSum" + auxSuffix.value());
+  SG::ConstAccessor<unsigned int> LEDTypeAcc("LEDType" + auxSuffix.value());
+  SG::ConstAccessor<float> PresampleAcc("Presample"+auxSuffix.value());
+  SG::ConstAccessor<int> MaxADCAcc("MaxADC" + auxSuffix.value());
+  SG::ConstAccessor<unsigned int> MaxSampleAcc("MaxSample" + auxSuffix.value());
+  SG::ConstAccessor<float> AvgTimeAcc("AvgTime" + auxSuffix.value());
+  SG::ConstAccessor<std::vector<uint16_t> > g0dataAcc("g0data" + auxSuffix.value());
+  SG::ConstAccessor<std::vector<uint16_t> > g1dataAcc("g1data" + auxSuffix.value());
 
   if (zdcModules.ptr())
   {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -25,24 +25,8 @@
 ZdcRec::ZdcRec(const std::string& name, ISvcLocator* pSvcLocator) :
 
 	AthAlgorithm(name, pSvcLocator),
-	m_storeGate("StoreGateSvc", name),
-	m_ownPolicy(static_cast<int> (SG::OWN_ELEMENTS)),
-	m_digitsContainerName("ZdcDigitsCollection"),
-	m_rawContainerName("ZdcRawChannelCollection"),
-	m_digitsCollection(nullptr),
-	m_rawCollection(nullptr),
-	m_eventCount(0),
-	m_complainContain(1),
-	m_complainRetrieve(1),
-        m_ChannelTool("ZdcRecChannelTool"),
-        m_NoiseTool("ZdcRecNoiseTool")
-
+	m_storeGate("StoreGateSvc", name)
 {
-	declareProperty("OwnPolicy",m_ownPolicy) ;
-
-	declareProperty("DigitsContainerName", m_digitsContainerName, "ZdcDigitsCollection");
-
-	declareProperty("RawContainerName",    m_rawContainerName,    "ZdcRawChannelCollection");
 }
 //==================================================================================================
 
@@ -84,7 +68,7 @@ StatusCode ZdcRec::initialize()
 
 	// Container output name
 	//TODO: change MESSAGE !!
-	mLog << MSG::INFO << " Output Container Name " << m_rawContainerName << endmsg;
+	mLog << MSG::INFO << " Output Container Name " << m_rawContainerName.value() << endmsg;
 	if (m_ownPolicy == SG::OWN_ELEMENTS)
 		mLog << MSG::INFO << "...will OWN its cells." << endmsg;
 	else
@@ -116,19 +100,19 @@ StatusCode ZdcRec::execute(const EventContext& /*ctx*/)
 	//Look for the container presence
 	bool dg = m_storeGate->contains<ZdcDigitsCollection>( m_digitsContainerName);
 	if (!dg) {
-	  if (m_complainContain) mLog << MSG::WARNING << "--> ZDC: StoreGate does not contain " << m_digitsContainerName << endmsg;
+	  if (m_complainContain) mLog << MSG::WARNING << "--> ZDC: StoreGate does not contain " << m_digitsContainerName.value() << endmsg;
 	  m_complainContain = 0;
 	  return StatusCode::SUCCESS;
 	}
 
 	// Look up the Digits "ZdcDigitsCollection" in Storegate
-	StatusCode digitsLookupSC = m_storeGate->retrieve(m_digitsCollection, m_digitsContainerName);
+	StatusCode digitsLookupSC = m_storeGate->retrieve(m_digitsCollection, m_digitsContainerName.value());
 	if (digitsLookupSC.isFailure())
 	{
 	  if (m_complainRetrieve)
 	    mLog << MSG::WARNING
 		 << "--> ZDC: Could not retrieve "
-		 << m_digitsContainerName
+		 << m_digitsContainerName.value()
 		 << " from StoreGate"
 		 << endmsg;
 	  m_complainRetrieve = 0;
@@ -139,13 +123,13 @@ StatusCode ZdcRec::execute(const EventContext& /*ctx*/)
 	{
 		mLog << MSG::ERROR
 			 << "--> ZDC: Storegate returned zero pointer for "
-			 << m_digitsContainerName
+			 << m_digitsContainerName.value()
 			 << endmsg;
 		return StatusCode::SUCCESS;
 	}
 
 	//Create the containers to hold the reconstructed information
-	m_rawCollection = new ZdcRawChannelCollection (static_cast<SG::OwnershipPolicy>(m_ownPolicy));
+	m_rawCollection = new ZdcRawChannelCollection (static_cast<SG::OwnershipPolicy>(m_ownPolicy.value()));
 	ZdcRawChannelCollection tmpCollection  (static_cast<SG::OwnershipPolicy>(SG::VIEW_ELEMENTS));
 
 	ncha = m_ChannelTool->makeRawFromDigits(*m_digitsCollection, tmpCollection);
@@ -157,7 +141,7 @@ StatusCode ZdcRec::execute(const EventContext& /*ctx*/)
 	    m_rawCollection->push_back(*iter);
 	}
 
-	StatusCode sc = evtStore()->record(m_rawCollection, m_rawContainerName,false);
+	StatusCode sc = evtStore()->record(m_rawCollection, m_rawContainerName.value(),false);
 
 	mLog << MSG::DEBUG
 		 << "--> ZDC: ZdcRawChannelCollection size recorded into SG: "
@@ -186,7 +170,7 @@ StatusCode ZdcRec::execute(const EventContext& /*ctx*/)
 	{
 		mLog << MSG::WARNING
 				<< "execute() : cannot record Container "
-				<< m_rawContainerName
+				<< m_rawContainerName.value()
 				<< endmsg;
 
 		return StatusCode::SUCCESS;

@@ -1,11 +1,12 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDC_SD_ZDC_FIBER_SDTOOL_H
 #define ZDC_SD_ZDC_FIBER_SDTOOL_H
 
 #include "G4AtlasTools/SensitiveDetectorBase.h"
+#include "Gaudi/Property.h"
 
 // STL headers
 #include <string>
@@ -30,7 +31,7 @@ protected:
   G4VSensitiveDetector* makeSD() const override final;
 
 private:
-  float m_readoutPos; // Y position of the top of the readout fibers
+  Gaudi::Property<float> m_readoutPos{this, "readoutPos", 511.8}; // Y position of the top of the readout fibers
 
 };
 

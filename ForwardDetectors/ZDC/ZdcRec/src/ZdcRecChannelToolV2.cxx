@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -50,14 +50,6 @@ ZdcRecChannelToolV2::ZdcRecChannelToolV2(const std::string& name):
 	//Declare properties here...
 
 	declareInterface<ZdcRecChannelToolV2>(this);
-	declareProperty("ZeroSuppress", m_zeroSupress = 0,"Supress channels with only 0");
-	declareProperty("DeltaPeak", m_delta = 5,"Minimum difference between min and max to be considered a signal");
-	declareProperty("SaturationADC",m_saturation = 1000,"ADC value above which a HG channel is considered saturated");
-	declareProperty("NSamples",m_nsamples=5,"Number of samples in PPM raw data");
-	declareProperty("UseDelay",m_useDelay=0,"If true, then use delayed channels");
-	declareProperty("SampleTime",m_sample_time=12.5,"Sample time in ns (25. = 40 MHz, 12.5 = 80 MHz)");
-	declareProperty("GainFactor",m_gainFactor=10.,"High/lo gain factor");
-	declareProperty("PedestalValue",m_pedestalValue=100.,"Pedestal value");
 }
 //==================================================================================================
 

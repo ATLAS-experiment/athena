@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -26,6 +26,7 @@
 #include "AthContainers/DataVector.h"
 #include "eformat/SourceIdentifier.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "Gaudi/Property.h"
 
 class ZdcID;
 
@@ -92,41 +93,41 @@ private:
 	/// Sub_block header version
 	//int m_version;
 	/// Data compression format
-	int m_dataFormat;
+	Gaudi::Property<int> m_dataFormat{this, "DataFormat", 1, "Format identifier (0-3) in sub-block header"};
 	/// Compression version
 	//int m_compVers;
 	/// Compression statistics print flag
-	int m_printCompStats;
+	Gaudi::Property<int> m_printCompStats{this, "PrintCompStats", 0, "Print compressed format statistics"};
 	/// Number of channels per module (may not all be used)
-	int m_channels;
+	int m_channels{64};
 	/// Number of crates
-	int m_crates;
+	int m_crates{8};
 	/// Number of modules per crate (may not all exist)
 	//int m_modules;
 	/// Number of slinks per crate when writing out bytestream
-	int m_slinks;
+	Gaudi::Property<int> m_slinks{this, "SlinksPerCrate", 4, "The number of S-Links per crate"};
 	/// Default number of LUT slices in simulation
-	int m_dfltSlicesLut;
+	Gaudi::Property<int> m_dfltSlicesLut{this, "SimulSlicesLUT", 1, "The number of LUT slices in the simulation"};
 	/// Default number of FADC slices in simulation
-	int m_dfltSlicesFadc;
+	Gaudi::Property<int> m_dfltSlicesFadc{this, "SimulSlicesFADC", 7, "The number of FADC slices in the simulation"};
 	/// Force number of LUT slices in bytestream
-	int m_forceSlicesLut;
+	Gaudi::Property<int> m_forceSlicesLut{this, "ForceSlicesLUT", 0, "If >0, the number of LUT slices in bytestream"};
 	/// Force number of FADC slices in bytestream
-	int m_forceSlicesFadc;
+	Gaudi::Property<int> m_forceSlicesFadc{this, "ForceSlicesFADC", 0, "If >0, the number of FADC slices in bytestream"};
 	/// Pedestal value
-	int m_pedestal;
+	Gaudi::Property<int> m_pedestal{this, "PedestalValue", 10, "Pedestal value - needed for compressed formats 0,1 only"};
 	/// FADC baseline lower bound
-	int m_fadcBaseline;
+	Gaudi::Property<int> m_fadcBaseline{this, "FADCBaseline", 0, "FADC baseline lower bound for compressed formats"};
 	/// FADC threshold for super-compressed format
-	int m_fadcThreshold;
+	Gaudi::Property<int> m_fadcThreshold{this, "FADCThreshold", 1, "FADC threshold for super-compressed format"};
 	/// Zero suppression on input
-	int m_zeroSuppress;
+	Gaudi::Property<int> m_zeroSuppress{this, "ZeroSuppress", 0, "Only make trigger towers with non-zero EM or Had energy"};
 	/// ROB source IDs
-	std::vector<uint32_t> m_sourceIDs;
+	Gaudi::Property<std::vector<uint32_t>> m_sourceIDs{this, "ROBSourceIDs", {}, "ROB fragment source identifiers"};
 	/// Sub-detector type
-	eformat::SubDetector m_subDetector;
+	eformat::SubDetector m_subDetector{eformat::FORWARD_ZDC};
 	/// Source ID converter
-	ZdcSrcIdMap* m_srcIdMap;
+	ZdcSrcIdMap* m_srcIdMap{nullptr};
 	/// Trigger tower key provider
 	ZdcPpmSubBlock* m_errorBlock{};
 	/// Vector for current PPM sub-blocks
@@ -134,7 +135,7 @@ private:
 	/// Vector for compression statistics
 	std::vector<uint32_t> m_compStats;
 	/// ROD Status words
-	std::vector<uint32_t>* m_rodStatus;
+	std::vector<uint32_t>* m_rodStatus{nullptr};
 	/// ROD status map
 	std::map<uint32_t, std::vector<uint32_t>*> m_rodStatusMap;
 

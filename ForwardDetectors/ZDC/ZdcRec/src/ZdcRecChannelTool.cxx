@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -52,25 +52,9 @@ const InterfaceID& ZdcRecChannelTool::interfaceID()
 ZdcRecChannelTool::ZdcRecChannelTool(const std::string& type,
 				     const std::string& name,
 				     const IInterface* parent) :
-				           AthAlgTool(type, name, parent),
-				           m_bwl_time_resolution(100),
-				           m_nsamples(7),
-				           m_sample_time (25.),
-				           m_cfd_fraction (0.35),
-				           m_cfd_delay (20.)
-
+				           AthAlgTool(type, name, parent)
 {
-	//Declare properties here...
-
 	declareInterface<ZdcRecChannelTool>(this);
-
-	declareProperty("ZeroSuppress", m_zeroSupress = 0,
-	           			    "Supress channels with only 0");
-
-	declareProperty("DeltaPeak", m_delta = 5,
-		           			"Minimum difference between min and max to be considered a signal");
-
-
 }
 //==================================================================================================
 

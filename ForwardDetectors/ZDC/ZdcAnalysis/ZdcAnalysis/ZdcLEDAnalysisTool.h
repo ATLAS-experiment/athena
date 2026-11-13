@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCANALYSIS_ZDCLEDANALYSISTOOL_H
@@ -164,9 +164,9 @@ private:
   // Provide a historam that provides per-ADC channel correction factors for integral and differential
   //   non-linearities
   //
-  bool m_doFADCCorr{};
+  Gaudi::Property<bool> m_doFADCCorr{this, "DoFADCCorr", false};
   unsigned int m_runNumber{};
-  int m_forceCalibRun{};
+  Gaudi::Property<int> m_forceCalibRun{this, "ForceCalibRun", -1};
   std::array< std::array<std::unique_ptr<const TH1>,4>,2> m_FADCCorrHG;
   std::array< std::array<std::unique_ptr<const TH1>,4>,2> m_FADCCorrLG;
   double getAmplitudeCorrection(int iside, int imod, bool highGain, float fitAmp);

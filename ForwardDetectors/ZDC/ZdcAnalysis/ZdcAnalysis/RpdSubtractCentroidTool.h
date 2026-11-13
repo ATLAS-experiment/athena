@@ -12,6 +12,7 @@
 #include "ZdcUtils/RPDUtils.h"
 
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgDataHandles/ReadDecorHandleKey.h"
 #include "AsgDataHandles/WriteDecorHandleKey.h"
@@ -71,20 +72,20 @@ class RpdSubtractCentroidTool : public virtual IZdcAnalysisTool, public asg::Asg
 
  private:
   // tool properties to be configured in Python
-  std::string m_configuration;
-  std::string m_ZDCModuleContainerName;
-  std::string m_ZDCSumContainerName;
-  bool m_writeAux{};
-  std::string m_auxSuffix;
+  Gaudi::Property<std::string> m_configuration{this, "Configuration", "default"};
+  Gaudi::Property<std::string> m_ZDCModuleContainerName{this, "ZDCModuleContainerName", "ZdcModules", "Location of ZDC processed data"};
+  Gaudi::Property<std::string> m_ZDCSumContainerName{this, "ZDCSumContainerName", "ZdcSums", "Location of ZDC processed sums"};
+  Gaudi::Property<bool> m_writeAux{this, "WriteAux", true, "If true, write AOD decorations"};
+  Gaudi::Property<std::string> m_auxSuffix{this, "AuxSuffix", "", "Suffix to add to AOD decorations for reading and writing"};
   // these are optional and null by default; if their values are set, they will overwrite the bulk configuration from config string
-  RPDUtils::OptionalToolProperty<std::vector<float>> m_forceMinZDCEnergy;
-  RPDUtils::OptionalToolProperty<std::vector<float>> m_forceMaxZDCEnergy;
-  RPDUtils::OptionalToolProperty<std::vector<float>> m_forceMinEMEnergy;
-  RPDUtils::OptionalToolProperty<std::vector<float>> m_forceMaxEMEnergy;
-  RPDUtils::OptionalToolProperty<std::vector<float>> m_forcePileupMaxFrac;
-  RPDUtils::OptionalToolProperty<std::vector<float>> m_forceMaximumNegativeSubtrAmpFrac;
-  RPDUtils::OptionalToolProperty<bool> m_forceUseRPDSumAdc;
-  RPDUtils::OptionalToolProperty<bool> m_forceUseCalibDecorations;
+  Gaudi::Property<RPDUtils::OptionalToolProperty<std::vector<float>>> m_forceMinZDCEnergy{this, "MinZDCEnergy", {}, "Minimum (calibrated) ZDC energy for valid centroid (negative to disable); per side"};
+  Gaudi::Property<RPDUtils::OptionalToolProperty<std::vector<float>>> m_forceMaxZDCEnergy{this, "MaxZDCEnergy", {}, "Maximum (calibrated) ZDC energy for valid centroid (negative to disable); per side"};
+  Gaudi::Property<RPDUtils::OptionalToolProperty<std::vector<float>>> m_forceMinEMEnergy{this, "MinEMEnergy", {}, "Minimum (calibrated) EM energy for valid centroid (negative to disable); per side"};
+  Gaudi::Property<RPDUtils::OptionalToolProperty<std::vector<float>>> m_forceMaxEMEnergy{this, "MaxEMEnergy", {}, "Minimum (calibrated) EM energy for valid centroid (negative to disable); per side"};
+  Gaudi::Property<RPDUtils::OptionalToolProperty<std::vector<float>>> m_forcePileupMaxFrac{this, "PileupMaxFrac", {}, "Maximum fractional pileup allowed in an RPD channel for valid centroid; per side"};
+  Gaudi::Property<RPDUtils::OptionalToolProperty<std::vector<float>>> m_forceMaximumNegativeSubtrAmpFrac{this, "ExcessiveSubtrUnderflowFrac", {}, "If any RPD channel subtracted amplitude is negative and its fraction of subtracted amplitude sum is greater than or equal to this number, the centroid is invalid; per side"};
+  Gaudi::Property<RPDUtils::OptionalToolProperty<bool>> m_forceUseRPDSumAdc{this, "UseRPDSumAdc", {}, "If true, use RPD channel sum ADC for centroid calculation, else use RPD channel max ADC"};
+  Gaudi::Property<RPDUtils::OptionalToolProperty<bool>> m_forceUseCalibDecorations{this, "UseCalibDecorations", {}, "If true, use RPD channel sum/max ADC decorations with output calibration factors applied during reconstruction, else use decorations with raw values"};
 
   // these are the final reconstruction parameters
   std::vector<float> m_minZDCEnergy;

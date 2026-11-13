@@ -23,10 +23,7 @@
 //ClassImp(ZdcNtuple)
 
 ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
-  : EL::AnaAlgorithm(name, pSvcLocator),
-    m_grl ("GoodRunsListSelectionTool/grl", this),
-    //m_zdcAnalysisTool("ZDC::ZdcAnalysisTool/ZdcAnalysisTool", this),
-    m_selTool( "InDet::InDetTrackSelectionTool/TrackSelectionTool", this )
+  : EL::AnaAlgorithm(name, pSvcLocator)
 {
   // Here you put any code for the base initialization of variables,
   // e.g. initialize all pointers to 0.  Note that you should only put
@@ -34,50 +31,7 @@ ZdcNtuple :: ZdcNtuple (const std::string& name, ISvcLocator *pSvcLocator)
   // called on both the submission and the worker node.  Most of your
   // initialization code will go into histInitialize() and
   // initialize().
-  m_setupTrigHist = false;
-  m_eventCounter = 0;
-
-  declareProperty("isMC",  m_isMC = false, "MC mode");
-  declareProperty("enableOutputTree",  enableOutputTree = false, "Enable output tree");
-  declareProperty("enableOutputSamples",  enableOutputSamples = false, "Output ZDC and RPD raw data");
-  declareProperty("enableTrigger",  enableTrigger = true, "comment");
-  declareProperty("enableTracks",  enableTracks = false, "comment");
-  declareProperty("trackLimit",  trackLimit = 500, "comment");
-  declareProperty("enableID",  enableID = false, "turn on to enable ID tracks & vertices for physics streams");
-  declareProperty("enableCalo",  enableCalo = false, "turn on to enable calorimeter energy info for physics streams");
-  declareProperty("enableClusters",  enableClusters = false, "turn on to enable calo topo cluster info for physics streams");
-  declareProperty("writeOnlyTriggers",  writeOnlyTriggers = false, "comment");
-  declareProperty("useGRL",  useGRL = true, "comment");
-  declareProperty("grlFilename",  grlFilename = "$ROOTCOREBIN/data/ZdcNtuple/data16_hip8TeV.periodAllYear_DetStatus-v86-pro20-19_DQDefects-00-02-04_PHYS_HeavyIonP_All_Good.xml", "comment");
-  declareProperty("slimmed",  slimmed = false, "comment");
-  declareProperty("zdcCalib",  zdcCalib = false, "zdc/ZDCCalib file");
-  declareProperty("zdcInj",  zdcInj = false, "ZDC injected pulse");
-  declareProperty("zdcLaser",  zdcLaser = false, "Run 2 ZDC Laser");
-  declareProperty("zdcOnly", zdcOnly = false, "comment");
-  declareProperty("zdcLowGainMode",  zdcLowGainMode = 0, "comment");
-  declareProperty("gapPtMin", m_gapPtMin  = 200, "minimum pT of cluster used in gaps");
-  declareProperty("flipDelay",  flipDelay = 0, "comment");
-  declareProperty("reprocZdc",  reprocZdc = 0, "comment");
-  declareProperty("auxSuffix",  auxSuffix = "", "comment");
-  declareProperty("nsamplesZdc",  nsamplesZdc = 24, "number of samples, 7 = most of Run 2, 24,32,40 = Run 3");
-  declareProperty("lhcf2022", lhcf2022 = false,"LHCf2022 general config");
-  declareProperty("lhcf2022afp", lhcf2022afp = false,"LHCf2022 AFP-specific config");
-  declareProperty("lhcf2022zdc", lhcf2022zdc = false,"LHCf2022 ZDC-specific config");
-  declareProperty("pbpb2023", pbpb2023 = false, "PbPb2023 config");
-  declareProperty("oo2025", oo2025 = false, "OO and NeNe 2025 config");
-  declareProperty("zdcConfig", zdcConfig = "PbPb2018", "argument to configure ZdcAnalysisTool");
-  declareProperty("doZdcCalib", doZdcCalib = false, "perform ZDC energy calibration");
-  declareProperty("enableZDC", enableZDC = true);
-  declareProperty("enableRPD",enableRPD = false,"enable reading any RPD decorations");
-  declareProperty("enableRPDAmp",enableRPDAmp = false,"enable reading RPD amplitudes (also requires enableRPD)");
-  declareProperty("enableCentroid",enableCentroid = false,"enable reading centroid decorations (also requires enableRPD)");
-
-  declareProperty( "TrackSelectionTool", m_selTool );
-
-  trackLimitReject = false;
-
   m_zdcAnalysisTool.declarePropertyFor (this, "zdcAnalysisTool");
-  
 }
 
 /*
@@ -435,35 +389,35 @@ StatusCode ZdcNtuple :: initialize ()
   // you create here won't be available in the output if you have no
   // input events.
 
-  ANA_MSG_INFO("enableOutputTree = " << enableOutputTree);
-  ANA_MSG_INFO("writeOnlyTriggers = " << writeOnlyTriggers);
-  ANA_MSG_INFO("enableOutputSamples = " << enableOutputSamples);
-  ANA_MSG_INFO("enableTrigger = " << enableTrigger);
-  ANA_MSG_INFO("enableRPD = " << enableRPD);
-  ANA_MSG_INFO("enableCentroid = " << enableCentroid);
-  ANA_MSG_INFO("zdcCalib = " << zdcCalib);
-  ANA_MSG_INFO("zdcInj = " << zdcInj);
-  ANA_MSG_INFO("zdcLaser = " << zdcLaser);
-  ANA_MSG_INFO("zdcConfig = " << zdcConfig);
-  ANA_MSG_INFO("reprocZdc = " << reprocZdc);
-  ANA_MSG_INFO("auxSuffix = " << auxSuffix );
-  ANA_MSG_INFO("zdcLowGainMode = " << zdcLowGainMode);
-  ANA_MSG_INFO("enableID = " << enableID);
-  ANA_MSG_INFO("enableCalo = " << enableCalo);
-  ANA_MSG_INFO("enableClusters = " << enableClusters);
-  ANA_MSG_INFO("trackLimit = " << trackLimit);
+  ANA_MSG_INFO("enableOutputTree = " << enableOutputTree.value());
+  ANA_MSG_INFO("writeOnlyTriggers = " << writeOnlyTriggers.value());
+  ANA_MSG_INFO("enableOutputSamples = " << enableOutputSamples.value());
+  ANA_MSG_INFO("enableTrigger = " << enableTrigger.value());
+  ANA_MSG_INFO("enableRPD = " << enableRPD.value());
+  ANA_MSG_INFO("enableCentroid = " << enableCentroid.value());
+  ANA_MSG_INFO("zdcCalib = " << zdcCalib.value());
+  ANA_MSG_INFO("zdcInj = " << zdcInj.value());
+  ANA_MSG_INFO("zdcLaser = " << zdcLaser.value());
+  ANA_MSG_INFO("zdcConfig = " << zdcConfig.value());
+  ANA_MSG_INFO("reprocZdc = " << reprocZdc.value());
+  ANA_MSG_INFO("auxSuffix = " << auxSuffix.value() );
+  ANA_MSG_INFO("zdcLowGainMode = " << zdcLowGainMode.value());
+  ANA_MSG_INFO("enableID = " << enableID.value());
+  ANA_MSG_INFO("enableCalo = " << enableCalo.value());
+  ANA_MSG_INFO("enableClusters = " << enableClusters.value());
+  ANA_MSG_INFO("trackLimit = " << trackLimit.value());
   ANA_MSG_INFO("trackLimitReject = " << trackLimitReject);
-  ANA_MSG_INFO("isMC = " << m_isMC);
-  ANA_MSG_INFO("useGRL = " <<  useGRL);
-  ANA_MSG_INFO("grlFilename = " <<  grlFilename);
-  ANA_MSG_INFO("slimmed = " <<  slimmed);
-  ANA_MSG_INFO("zdcOnly = " << zdcOnly);
-  ANA_MSG_INFO("flipDelay = " <<  flipDelay);
-  ANA_MSG_INFO("nsamplesZdc = " <<  nsamplesZdc);
-  ANA_MSG_INFO("lhcf2022 = " << lhcf2022);
-  ANA_MSG_INFO("lhcf2022afp = " << lhcf2022afp);
-  ANA_MSG_INFO("lhcf2022zdc = " << lhcf2022zdc);
-  ANA_MSG_INFO("doZdcCalib = " << doZdcCalib);
+  ANA_MSG_INFO("isMC = " << m_isMC.value());
+  ANA_MSG_INFO("useGRL = " <<  useGRL.value());
+  ANA_MSG_INFO("grlFilename = " <<  grlFilename.value());
+  ANA_MSG_INFO("slimmed = " <<  slimmed.value());
+  ANA_MSG_INFO("zdcOnly = " << zdcOnly.value());
+  ANA_MSG_INFO("flipDelay = " <<  flipDelay.value());
+  ANA_MSG_INFO("nsamplesZdc = " <<  nsamplesZdc.value());
+  ANA_MSG_INFO("lhcf2022 = " << lhcf2022.value());
+  ANA_MSG_INFO("lhcf2022afp = " << lhcf2022afp.value());
+  ANA_MSG_INFO("lhcf2022zdc = " << lhcf2022zdc.value());
+  ANA_MSG_INFO("doZdcCalib = " << doZdcCalib.value());
 
   ANA_MSG_DEBUG("initialize: Initialize!");
 
@@ -472,7 +426,7 @@ StatusCode ZdcNtuple :: initialize ()
 
   if (useGRL)
   {
-    const char* fullGRLFilePath = gSystem->ExpandPathName (grlFilename.c_str());
+    const char* fullGRLFilePath = gSystem->ExpandPathName (grlFilename.value().c_str());
     ANA_MSG_INFO("GRL: " << fullGRLFilePath);
     std::vector<std::string> vecStringGRL;
     vecStringGRL.push_back(fullGRLFilePath);
@@ -500,14 +454,14 @@ StatusCode ZdcNtuple :: initialize ()
 
     ANA_MSG_INFO("Trying to configure ZDC Analysis Tool!");
 
-    ANA_CHECK(m_zdcAnalysisTool.setProperty("FlipEMDelay", flipDelay));
-    ANA_CHECK(m_zdcAnalysisTool.setProperty("LowGainMode", zdcLowGainMode));
-    ANA_CHECK(m_zdcAnalysisTool.setProperty("DoCalib", doZdcCalib));
-    ANA_CHECK(m_zdcAnalysisTool.setProperty("Configuration", zdcConfig));
-    ANA_CHECK(m_zdcAnalysisTool.setProperty("AuxSuffix", auxSuffix));
+    ANA_CHECK(m_zdcAnalysisTool.setProperty("FlipEMDelay", flipDelay.value()));
+    ANA_CHECK(m_zdcAnalysisTool.setProperty("LowGainMode", zdcLowGainMode.value()));
+    ANA_CHECK(m_zdcAnalysisTool.setProperty("DoCalib", doZdcCalib.value()));
+    ANA_CHECK(m_zdcAnalysisTool.setProperty("Configuration", zdcConfig.value()));
+    ANA_CHECK(m_zdcAnalysisTool.setProperty("AuxSuffix", auxSuffix.value()));
     ANA_CHECK(m_zdcAnalysisTool.setProperty("ForceCalibRun", -1));
     
-    ANA_MSG_INFO("Setting up zdcConfig=" << zdcConfig);
+    ANA_MSG_INFO("Setting up zdcConfig=" << zdcConfig.value());
     if (zdcConfig=="LHCf2022")
       {
 	ANA_CHECK(m_zdcAnalysisTool.setProperty("DoTrigEff", false)); // for now
@@ -794,67 +748,67 @@ void ZdcNtuple::processZdcNtupleFromModules()
     }
   */
 
-  static const SG::ConstAccessor<char> centroidEventValidAcc("centroidEventValid" + auxSuffix);
-  static const SG::ConstAccessor<float> cosDeltaReactionPlaneAngleAcc("cosDeltaReactionPlaneAngle" + auxSuffix);
-  static const SG::ConstAccessor<float> CalibEnergyAcc("CalibEnergy"+auxSuffix);
-  static const SG::ConstAccessor<float> CalibEnergyErrAcc("CalibEnergyErr"+auxSuffix);
-  static const SG::ConstAccessor<float> NLCalibEnergyAcc("NLCalibEnergy"+auxSuffix);
-  static const SG::ConstAccessor<float> NLCalibEnergyErrAcc("NLCalibEnergyErr"+auxSuffix);
-  static const SG::ConstAccessor<float> UncalibSumAcc("UncalibSum"+auxSuffix);
-  static const SG::ConstAccessor<float> UncalibSumErrAcc("UncalibSumErr"+auxSuffix);
-  static const SG::ConstAccessor<float> AverageTimeAcc("AverageTime"+auxSuffix);
-  static const SG::ConstAccessor<unsigned int> StatusAcc("Status"+auxSuffix);
-  static const SG::ConstAccessor<unsigned int> ModuleMaskAcc("ModuleMask"+auxSuffix);
-  static const SG::ConstAccessor<float> TruthTotalEnergyAcc("TruthTotalEnergy" + auxSuffix);
-  static const SG::ConstAccessor<float> TruthInvisibleEnergyAcc("TruthInvisibleEnergy" + auxSuffix);
-  static const SG::ConstAccessor<float> TruthEMEnergyAcc("TruthEMEnergy" + auxSuffix);
-  static const SG::ConstAccessor<float> TruthNonEMEnergyAcc("TruthNonEMEnergy" + auxSuffix);
-  static const SG::ConstAccessor<float> TruthEscapedEnergyAcc("TruthEscapedEnergy" + auxSuffix);
-  static const SG::ConstAccessor<unsigned int> centroidStatusAcc("centroidStatus" + auxSuffix);
-  static const SG::ConstAccessor<std::vector<float> > RPDChannelSubtrAmpAcc("RPDChannelSubtrAmp" + auxSuffix);
-  static const SG::ConstAccessor<float> RPDSubtrAmpSumAcc("RPDSubtrAmpSum" + auxSuffix);
-  static const SG::ConstAccessor<float> xCentroidPreGeomCorPreAvgSubtrAcc("xCentroidPreGeomCorPreAvgSubtr" + auxSuffix);
-  static const SG::ConstAccessor<float> yCentroidPreGeomCorPreAvgSubtrAcc("yCentroidPreGeomCorPreAvgSubtr" + auxSuffix);
-  static const SG::ConstAccessor<float> xCentroidPreAvgSubtrAcc("xCentroidPreAvgSubtr" + auxSuffix);
-  static const SG::ConstAccessor<float> yCentroidPreAvgSubtrAcc("yCentroidPreAvgSubtr" + auxSuffix);
-  static const SG::ConstAccessor<float> xCentroidAcc("xCentroid" + auxSuffix);
-  static const SG::ConstAccessor<float> yCentroidAcc("yCentroid" + auxSuffix);
-  static const SG::ConstAccessor<std::vector<float> > xRowCentroidAcc("xRowCentroid" + auxSuffix);
-  static const SG::ConstAccessor<std::vector<float> > yColCentroidAcc("yColCentroid" + auxSuffix);
-  static const SG::ConstAccessor<float> reactionPlaneAngleAcc("reactionPlaneAngle" + auxSuffix);
-  static const SG::ConstAccessor<unsigned int> RPDStatusAcc("RPDStatus" + auxSuffix);
-  static const SG::ConstAccessor<unsigned int> nPhotonsAcc("nPhotons" + auxSuffix);
-  static const SG::ConstAccessor<float> CalibTimeAcc("CalibTime" + auxSuffix);
-  static const SG::ConstAccessor<float> AmplitudeAcc("Amplitude" + auxSuffix);
-  static const SG::ConstAccessor<float> AmplitudeNoNonLinAcc("AmpNoNonLin" + auxSuffix);
-  static const SG::ConstAccessor<float> TimeAcc("Time" + auxSuffix);
-  static const SG::ConstAccessor<float> ChisqAcc("Chisq" + auxSuffix);
-  static const SG::ConstAccessor<float> ChisqRatioAcc("ChisqRatio" + auxSuffix);
-  static const SG::ConstAccessor<float> FitAmpAcc("FitAmp" + auxSuffix);
-  static const SG::ConstAccessor<float> FitAmpErrorAcc("FitAmpError" + auxSuffix);
-  static const SG::ConstAccessor<float> FitT0Acc("FitT0" + auxSuffix);
-  static const SG::ConstAccessor<float> BkgdMaxFractionAcc("BkgdMaxFraction" + auxSuffix);
-  static const SG::ConstAccessor<float> MinDeriv2ndAcc("MinDeriv2nd" + auxSuffix);
-  static const SG::ConstAccessor<float> PresampleAcc("Presample" + auxSuffix);
-  static const SG::ConstAccessor<float> PreSampleAmpAcc("PreSampleAmp" + auxSuffix);
-  static const SG::ConstAccessor<float> RPDChannelBaselineAcc("RPDChannelBaseline" + auxSuffix);
-  static const SG::ConstAccessor<std::vector<float> > RPDChannelPileupExpFitParamsAcc("RPDChannelPileupExpFitParams" + auxSuffix);
-  static const SG::ConstAccessor<std::vector<float> > RPDChannelPileupExpFitParamErrsAcc("RPDChannelPileupExpFitParamErrs" + auxSuffix);
-  static const SG::ConstAccessor<std::vector<float> > RPDChannelPileupStretchedExpFitParamsAcc("RPDChannelPileupStretchedExpFitParams" + auxSuffix);
-  static const SG::ConstAccessor<std::vector<float> > RPDChannelPileupStretchedExpFitParamErrsAcc("RPDChannelPileupStretchedExpFitParamErrs" + auxSuffix);
-  static const SG::ConstAccessor<float> RPDChannelPileupExpFitMSEAcc("RPDChannelPileupExpFitMSE" + auxSuffix);
-  static const SG::ConstAccessor<float> RPDChannelPileupStretchedExpFitMSEAcc("RPDChannelPileupStretchedExpFitMSE" + auxSuffix);
-  static const SG::ConstAccessor<float> RPDChannelAmplitudeAcc("RPDChannelAmplitude" + auxSuffix);
-  static const SG::ConstAccessor<float> RPDChannelAmplitudeCalibAcc("RPDChannelAmplitudeCalib" + auxSuffix);
-  static const SG::ConstAccessor<float> RPDChannelMaxADCAcc("RPDChannelMaxADC" + auxSuffix);
-  static const SG::ConstAccessor<float> RPDChannelMaxADCCalibAcc("RPDChannelMaxADCCalib" + auxSuffix);
-  static const SG::ConstAccessor<unsigned int> RPDChannelMaxSampleAcc("RPDChannelMaxSample" + auxSuffix);
-  static const SG::ConstAccessor<unsigned int> RPDChannelStatusAcc("RPDChannelStatus" + auxSuffix);
-  static const SG::ConstAccessor<float> RPDChannelPileupFracAcc("RPDChannelPileupFrac" + auxSuffix);
-  static const SG::ConstAccessor<float> AmpLGRefitAcc("AmpLGRefit" + auxSuffix);
-  static const SG::ConstAccessor<float> T0LGRefitAcc("T0LGRefit" + auxSuffix);
-  static const SG::ConstAccessor<float> T0SubLGRefitAcc("T0SubLGRefit" + auxSuffix);
-  static const SG::ConstAccessor<float> ChisqLGRefitAcc("ChisqLGRefit" + auxSuffix);
+  static const SG::ConstAccessor<char> centroidEventValidAcc("centroidEventValid" + auxSuffix.value());
+  static const SG::ConstAccessor<float> cosDeltaReactionPlaneAngleAcc("cosDeltaReactionPlaneAngle" + auxSuffix.value());
+  static const SG::ConstAccessor<float> CalibEnergyAcc("CalibEnergy"+auxSuffix.value());
+  static const SG::ConstAccessor<float> CalibEnergyErrAcc("CalibEnergyErr"+auxSuffix.value());
+  static const SG::ConstAccessor<float> NLCalibEnergyAcc("NLCalibEnergy"+auxSuffix.value());
+  static const SG::ConstAccessor<float> NLCalibEnergyErrAcc("NLCalibEnergyErr"+auxSuffix.value());
+  static const SG::ConstAccessor<float> UncalibSumAcc("UncalibSum"+auxSuffix.value());
+  static const SG::ConstAccessor<float> UncalibSumErrAcc("UncalibSumErr"+auxSuffix.value());
+  static const SG::ConstAccessor<float> AverageTimeAcc("AverageTime"+auxSuffix.value());
+  static const SG::ConstAccessor<unsigned int> StatusAcc("Status"+auxSuffix.value());
+  static const SG::ConstAccessor<unsigned int> ModuleMaskAcc("ModuleMask"+auxSuffix.value());
+  static const SG::ConstAccessor<float> TruthTotalEnergyAcc("TruthTotalEnergy" + auxSuffix.value());
+  static const SG::ConstAccessor<float> TruthInvisibleEnergyAcc("TruthInvisibleEnergy" + auxSuffix.value());
+  static const SG::ConstAccessor<float> TruthEMEnergyAcc("TruthEMEnergy" + auxSuffix.value());
+  static const SG::ConstAccessor<float> TruthNonEMEnergyAcc("TruthNonEMEnergy" + auxSuffix.value());
+  static const SG::ConstAccessor<float> TruthEscapedEnergyAcc("TruthEscapedEnergy" + auxSuffix.value());
+  static const SG::ConstAccessor<unsigned int> centroidStatusAcc("centroidStatus" + auxSuffix.value());
+  static const SG::ConstAccessor<std::vector<float> > RPDChannelSubtrAmpAcc("RPDChannelSubtrAmp" + auxSuffix.value());
+  static const SG::ConstAccessor<float> RPDSubtrAmpSumAcc("RPDSubtrAmpSum" + auxSuffix.value());
+  static const SG::ConstAccessor<float> xCentroidPreGeomCorPreAvgSubtrAcc("xCentroidPreGeomCorPreAvgSubtr" + auxSuffix.value());
+  static const SG::ConstAccessor<float> yCentroidPreGeomCorPreAvgSubtrAcc("yCentroidPreGeomCorPreAvgSubtr" + auxSuffix.value());
+  static const SG::ConstAccessor<float> xCentroidPreAvgSubtrAcc("xCentroidPreAvgSubtr" + auxSuffix.value());
+  static const SG::ConstAccessor<float> yCentroidPreAvgSubtrAcc("yCentroidPreAvgSubtr" + auxSuffix.value());
+  static const SG::ConstAccessor<float> xCentroidAcc("xCentroid" + auxSuffix.value());
+  static const SG::ConstAccessor<float> yCentroidAcc("yCentroid" + auxSuffix.value());
+  static const SG::ConstAccessor<std::vector<float> > xRowCentroidAcc("xRowCentroid" + auxSuffix.value());
+  static const SG::ConstAccessor<std::vector<float> > yColCentroidAcc("yColCentroid" + auxSuffix.value());
+  static const SG::ConstAccessor<float> reactionPlaneAngleAcc("reactionPlaneAngle" + auxSuffix.value());
+  static const SG::ConstAccessor<unsigned int> RPDStatusAcc("RPDStatus" + auxSuffix.value());
+  static const SG::ConstAccessor<unsigned int> nPhotonsAcc("nPhotons" + auxSuffix.value());
+  static const SG::ConstAccessor<float> CalibTimeAcc("CalibTime" + auxSuffix.value());
+  static const SG::ConstAccessor<float> AmplitudeAcc("Amplitude" + auxSuffix.value());
+  static const SG::ConstAccessor<float> AmplitudeNoNonLinAcc("AmpNoNonLin" + auxSuffix.value());
+  static const SG::ConstAccessor<float> TimeAcc("Time" + auxSuffix.value());
+  static const SG::ConstAccessor<float> ChisqAcc("Chisq" + auxSuffix.value());
+  static const SG::ConstAccessor<float> ChisqRatioAcc("ChisqRatio" + auxSuffix.value());
+  static const SG::ConstAccessor<float> FitAmpAcc("FitAmp" + auxSuffix.value());
+  static const SG::ConstAccessor<float> FitAmpErrorAcc("FitAmpError" + auxSuffix.value());
+  static const SG::ConstAccessor<float> FitT0Acc("FitT0" + auxSuffix.value());
+  static const SG::ConstAccessor<float> BkgdMaxFractionAcc("BkgdMaxFraction" + auxSuffix.value());
+  static const SG::ConstAccessor<float> MinDeriv2ndAcc("MinDeriv2nd" + auxSuffix.value());
+  static const SG::ConstAccessor<float> PresampleAcc("Presample" + auxSuffix.value());
+  static const SG::ConstAccessor<float> PreSampleAmpAcc("PreSampleAmp" + auxSuffix.value());
+  static const SG::ConstAccessor<float> RPDChannelBaselineAcc("RPDChannelBaseline" + auxSuffix.value());
+  static const SG::ConstAccessor<std::vector<float> > RPDChannelPileupExpFitParamsAcc("RPDChannelPileupExpFitParams" + auxSuffix.value());
+  static const SG::ConstAccessor<std::vector<float> > RPDChannelPileupExpFitParamErrsAcc("RPDChannelPileupExpFitParamErrs" + auxSuffix.value());
+  static const SG::ConstAccessor<std::vector<float> > RPDChannelPileupStretchedExpFitParamsAcc("RPDChannelPileupStretchedExpFitParams" + auxSuffix.value());
+  static const SG::ConstAccessor<std::vector<float> > RPDChannelPileupStretchedExpFitParamErrsAcc("RPDChannelPileupStretchedExpFitParamErrs" + auxSuffix.value());
+  static const SG::ConstAccessor<float> RPDChannelPileupExpFitMSEAcc("RPDChannelPileupExpFitMSE" + auxSuffix.value());
+  static const SG::ConstAccessor<float> RPDChannelPileupStretchedExpFitMSEAcc("RPDChannelPileupStretchedExpFitMSE" + auxSuffix.value());
+  static const SG::ConstAccessor<float> RPDChannelAmplitudeAcc("RPDChannelAmplitude" + auxSuffix.value());
+  static const SG::ConstAccessor<float> RPDChannelAmplitudeCalibAcc("RPDChannelAmplitudeCalib" + auxSuffix.value());
+  static const SG::ConstAccessor<float> RPDChannelMaxADCAcc("RPDChannelMaxADC" + auxSuffix.value());
+  static const SG::ConstAccessor<float> RPDChannelMaxADCCalibAcc("RPDChannelMaxADCCalib" + auxSuffix.value());
+  static const SG::ConstAccessor<unsigned int> RPDChannelMaxSampleAcc("RPDChannelMaxSample" + auxSuffix.value());
+  static const SG::ConstAccessor<unsigned int> RPDChannelStatusAcc("RPDChannelStatus" + auxSuffix.value());
+  static const SG::ConstAccessor<float> RPDChannelPileupFracAcc("RPDChannelPileupFrac" + auxSuffix.value());
+  static const SG::ConstAccessor<float> AmpLGRefitAcc("AmpLGRefit" + auxSuffix.value());
+  static const SG::ConstAccessor<float> T0LGRefitAcc("T0LGRefit" + auxSuffix.value());
+  static const SG::ConstAccessor<float> T0SubLGRefitAcc("T0SubLGRefit" + auxSuffix.value());
+  static const SG::ConstAccessor<float> ChisqLGRefitAcc("ChisqLGRefit" + auxSuffix.value());
 
   static const SG::ConstAccessor<uint16_t> LucrodTriggerAmpAcc("LucrodTriggerAmp");
   static const SG::ConstAccessor<uint16_t> LucrodTriggerAmpLGAcc("LucrodTriggerAmpLG");
@@ -1125,7 +1079,7 @@ void ZdcNtuple::processZdcNtupleFromModules()
           }
       }
     } else {
-      ANA_MSG_INFO("No ZdcModules" << auxSuffix << " when expected!");
+      ANA_MSG_INFO("No ZdcModules" << auxSuffix.value() << " when expected!");
     }
   
   if (msgLvl (MSG::VERBOSE))

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -30,10 +30,8 @@
 //==================================================================================================
 ZdcRecV3Decode::ZdcRecV3Decode(const std::string& name, ISvcLocator* pSvcLocator) :
 
-	AthAlgorithm(name, pSvcLocator),
-	m_ownPolicy(static_cast<int> (SG::OWN_ELEMENTS))
+	AthAlgorithm(name, pSvcLocator)
 {
-	declareProperty("OwnPolicy",m_ownPolicy) ;
 }
 //==================================================================================================
 

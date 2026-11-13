@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCG4SDTOOL_H
@@ -13,6 +13,7 @@
 #include "CaloG4Sim/CalibrationDefaultProcessing.h"
 #include "ZDC_EscapedEnergyProcessing.h"
 #include "CaloSimEvent/CaloCalibrationHitContainer.h"
+#include "Gaudi/Property.h"
 
 class G4VSensitiveDetector;
 
@@ -31,8 +32,8 @@ class ZDC_G4CalibSDTool : public SensitiveDetectorBase
   G4VSensitiveDetector* makeSD()const override final;
 
  private:
-  bool m_deadSD;
-  bool m_doPid;
+  Gaudi::Property<bool> m_deadSD{this, "deadSD", false};
+  Gaudi::Property<bool> m_doPid{this, "doPid", false};
 };
 
 #endif

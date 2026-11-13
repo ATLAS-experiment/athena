@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "ZdcAnalysis/ZdcAnalysisTool.h"
@@ -24,62 +24,12 @@
 namespace ZDC
 {
 ZdcAnalysisTool::ZdcAnalysisTool(const std::string& name)
-    : asg::AsgTool(name), m_name(name), m_init(false),
-      m_writeAux(false), m_eventReady(false),
-      m_runNumber(0), m_lumiBlock(0),
-      m_zdcTriggerEfficiency(0)
+    : asg::AsgTool(name), m_name(name)
 {
 
 #ifndef XAOD_STANDALONE
   declareInterface<IZdcAnalysisTool>(this);
 #endif
-
-    declareProperty("ZdcModuleContainerName", m_zdcModuleContainerName = "ZdcModules", "Location of ZDC processed data");
-    declareProperty("ZdcSumContainerName", m_zdcSumContainerName = "ZdcSums", "Location of ZDC processed sums");
-    declareProperty("JSONConfigurationFile",m_jsonConfigurationFile = "ZdcAnalysisConfig.json" );
-    declareProperty("Configuration", m_configuration = "PbPb2015");
-    declareProperty("FlipEMDelay", m_flipEMDelay = false);
-    declareProperty("LowGainMode", m_lowGainMode = 0);
-    declareProperty("WriteAux", m_writeAux = true);
-    declareProperty("AuxSuffix", m_auxSuffix = "");
-
-    // The following job properties enable/disable and affect the calibration of the ZDC energies
-    //
-    declareProperty("DoCalib", m_doCalib = true);
-    declareProperty("CalibVersion", m_calibVersion = "");
-    declareProperty("DoTrigEff", m_doTrigEff = true);
-    declareProperty("DoTimeCalib", m_doTimeCalib = true);
-    declareProperty("ZdcAnalysisConfigPath", m_zdcAnalysisConfigPath = "$ROOTCOREBIN/data/ZdcAnalysis", "ZDC Analysis config file path");
-    //declareProperty("ForceCalibRun",m_forceCalibRun=287931); // last run of Pb+Pb 2015
-    declareProperty("ForceCalibRun", m_forceCalibRun = -1); // last run of Pb+Pb 2015
-    declareProperty("ForceCalibLB", m_forceCalibLB = 814); // last LB of Pb+Pb 2015
-
-    declareProperty("DoNonLinCorr", m_doNonLinCorr = true); // how we have run with 2023 and most of 2024 
-    declareProperty("DoFADCCorr", m_doFADCCorr = false); 
-    declareProperty("DoFADCCorrPerSample", m_doFADCCorrPerSample = false); 
-    
-    // The following parameters are primarily used for the "default" configuration, but also may be
-    //   use to modify/tailor other configurations
-    //
-    declareProperty("NumSampl", m_numSample = 7);
-    declareProperty("DeltaTSample", m_deltaTSample = 25);
-    declareProperty("Presample", m_presample = 0);
-    declareProperty("CombineDelay", m_combineDelay = false);
-    declareProperty("DelayDeltaT", m_delayDeltaT = -12.5);
-
-    declareProperty("PeakSample", m_peakSample = 11);
-    declareProperty("Peak2ndDerivThresh", m_Peak2ndDerivThresh = 20);
-
-    declareProperty("T0", m_t0 = 30);
-    declareProperty("Tau1", m_tau1 = 5);
-    declareProperty("Tau2", m_tau2 = 25);
-    declareProperty("FixTau1", m_fixTau1 = false);
-    declareProperty("FixTau2", m_fixTau2 = false);
-
-    declareProperty("DeltaTCut", m_deltaTCut = 10);
-    declareProperty("ChisqRatioCut", m_ChisqRatioCut = 10);
-
-    declareProperty("LHCRun", m_LHCRun = 3);
 
 }
 
@@ -203,7 +153,7 @@ void ZdcAnalysisTool::initializeTriggerEffs(unsigned int runNumber)
 
 std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeFromJSON()
 {
-  std::string fullPath="ZdcAnalysis/"+m_jsonConfigurationFile;
+  std::string fullPath="ZdcAnalysis/"+m_jsonConfigurationFile.value();
   std::string filePath = PathResolverFindCalibFile( fullPath );
   std::ifstream ifs(filePath);
   nlohmann::json jsonConfig;
@@ -1856,11 +1806,11 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializeDefault()
             tau2[side][module] = m_tau2;
 
             peak2ndDerivMinSamples[side][module] = m_peakSample;
-            peak2ndDerivMinThresholdsHG[side][module] = -m_Peak2ndDerivThresh;
-            peak2ndDerivMinThresholdsLG[side][module] = -m_Peak2ndDerivThresh / 2;
+            peak2ndDerivMinThresholdsHG[side][module] = -m_Peak2ndDerivThresh.value();
+            peak2ndDerivMinThresholdsLG[side][module] = -m_Peak2ndDerivThresh.value() / 2;
 
             t0[side][module] = m_t0;
-            deltaT0CutLow[side][module] = -m_deltaTCut;
+            deltaT0CutLow[side][module] = -m_deltaTCut.value();
             deltaT0CutHigh[side][module] = m_deltaTCut;
             chisqDivAmpCut[side][module] = m_ChisqRatioCut;
         }
@@ -2151,7 +2101,7 @@ std::unique_ptr<ZDCDataAnalyzer> ZdcAnalysisTool::initializePbPb2018()
     //  We adopt hard-coded values for the number of samples and the frequency which we kept fixed for all physics data
     //
     std::unique_ptr<ZDCDataAnalyzer> zdcDataAnalyzer = std::make_unique<ZDCDataAnalyzer>(MakeMessageFunction(), 7, 25, 0, "FermiExpLinear", peak2ndDerivMinSamples, // presample index changed to zero 4/6/19
-            peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG, m_lowGainMode);
+            peak2ndDerivMinThresholdsHG, peak2ndDerivMinThresholdsLG, m_lowGainMode.value());
 
     // Open up tolerances on the position of the peak for now
     //
@@ -2445,7 +2395,7 @@ StatusCode ZdcAnalysisTool::initialize()
 
 
     if (m_forceCalibRun > -1) {
-        ATH_MSG_DEBUG("CAREFUL: forcing calibration run/LB =" << m_forceCalibRun << "/" << m_forceCalibLB);
+        ATH_MSG_DEBUG("CAREFUL: forcing calibration run/LB =" << m_forceCalibRun.value() << "/" << m_forceCalibLB.value());
 
         if (m_forceCalibLB < 0) {
             ATH_MSG_ERROR("Invalid settings: Forced run > 0 but lumi block < 0");
@@ -2513,39 +2463,39 @@ StatusCode ZdcAnalysisTool::initialize()
       m_zdcDataAnalyzer = initializeFromJSON();
     }
     else {
-        ATH_MSG_ERROR("Unknown configuration: "  << m_configuration);
+        ATH_MSG_ERROR("Unknown configuration: "  << m_configuration.value());
         return StatusCode::FAILURE;
     }
 
     // If an aux suffix is provided, prepend it with "_" so we don't have to do so at each use
     //
 
-    ATH_MSG_INFO("Configuration: " << m_configuration);
-    ATH_MSG_DEBUG("FlipEMDelay: " << m_flipEMDelay);
-    ATH_MSG_DEBUG("LowGainMode: " << m_lowGainMode);
+    ATH_MSG_INFO("Configuration: " << m_configuration.value());
+    ATH_MSG_DEBUG("FlipEMDelay: " << m_flipEMDelay.value());
+    ATH_MSG_DEBUG("LowGainMode: " << m_lowGainMode.value());
 
-    ATH_MSG_DEBUG("Using Combined delayed and undelayed samples: " << m_combineDelay);
+    ATH_MSG_DEBUG("Using Combined delayed and undelayed samples: " << m_combineDelay.value());
 
-    ATH_MSG_DEBUG("WriteAux: " << m_writeAux);
-    ATH_MSG_DEBUG("AuxSuffix: " << m_auxSuffix);
-    ATH_MSG_DEBUG("DoCalib: " << m_doCalib);
-    ATH_MSG_DEBUG("ForceCalibRun: " << m_forceCalibRun);
-    ATH_MSG_DEBUG("ForceCalibLB: " << m_forceCalibLB);
-    ATH_MSG_DEBUG("NumSampl: " << m_numSample);
-    ATH_MSG_DEBUG("DeltaTSample: " << m_deltaTSample);
-    ATH_MSG_DEBUG("Presample: " << m_presample);
-    ATH_MSG_DEBUG("PeakSample: " << m_peakSample);
-    ATH_MSG_DEBUG("Peak2ndDerivThresh: " << m_Peak2ndDerivThresh);
+    ATH_MSG_DEBUG("WriteAux: " << m_writeAux.value());
+    ATH_MSG_DEBUG("AuxSuffix: " << m_auxSuffix.value());
+    ATH_MSG_DEBUG("DoCalib: " << m_doCalib.value());
+    ATH_MSG_DEBUG("ForceCalibRun: " << m_forceCalibRun.value());
+    ATH_MSG_DEBUG("ForceCalibLB: " << m_forceCalibLB.value());
+    ATH_MSG_DEBUG("NumSampl: " << m_numSample.value());
+    ATH_MSG_DEBUG("DeltaTSample: " << m_deltaTSample.value());
+    ATH_MSG_DEBUG("Presample: " << m_presample.value());
+    ATH_MSG_DEBUG("PeakSample: " << m_peakSample.value());
+    ATH_MSG_DEBUG("Peak2ndDerivThresh: " << m_Peak2ndDerivThresh.value());
 
-    if (m_combineDelay)  ATH_MSG_DEBUG("DelayDeltaT: " << m_delayDeltaT);
+    if (m_combineDelay.value())  ATH_MSG_DEBUG("DelayDeltaT: " << m_delayDeltaT.value());
 
-    ATH_MSG_DEBUG("T0: " << m_t0);
-    ATH_MSG_DEBUG("Tau1: " << m_tau1);
-    ATH_MSG_DEBUG("Tau2: " << m_tau2);
-    ATH_MSG_DEBUG("FixTau1: " << m_fixTau1);
-    ATH_MSG_DEBUG("FixTau2: " << m_fixTau2);
-    ATH_MSG_DEBUG("DeltaTCut: " << m_deltaTCut);
-    ATH_MSG_DEBUG("ChisqRatioCut: " << m_ChisqRatioCut);
+    ATH_MSG_DEBUG("T0: " << m_t0.value());
+    ATH_MSG_DEBUG("Tau1: " << m_tau1.value());
+    ATH_MSG_DEBUG("Tau2: " << m_tau2.value());
+    ATH_MSG_DEBUG("FixTau1: " << m_fixTau1.value());
+    ATH_MSG_DEBUG("FixTau2: " << m_fixTau2.value());
+    ATH_MSG_DEBUG("DeltaTCut: " << m_deltaTCut.value());
+    ATH_MSG_DEBUG("ChisqRatioCut: " << m_ChisqRatioCut.value());
 
     Dump_setting(); // for good measure
     
@@ -2553,84 +2503,84 @@ StatusCode ZdcAnalysisTool::initialize()
 
     // Initialize decorations
 
-    m_zdcModuleAmplitude = m_zdcModuleContainerName+".Amplitude"+m_auxSuffix;
+    m_zdcModuleAmplitude = m_zdcModuleContainerName.value()+".Amplitude"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleAmplitude.initialize());
-    m_zdcModuleCalibEnergy = m_zdcModuleContainerName+".CalibEnergy"+m_auxSuffix;
+    m_zdcModuleCalibEnergy = m_zdcModuleContainerName.value()+".CalibEnergy"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleCalibEnergy.initialize());
-    m_zdcModuleCalibTime = m_zdcModuleContainerName+".CalibTime"+m_auxSuffix;
+    m_zdcModuleCalibTime = m_zdcModuleContainerName.value()+".CalibTime"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleCalibTime.initialize());
-    m_zdcModuleStatus = m_zdcModuleContainerName+".Status"+m_auxSuffix;
+    m_zdcModuleStatus = m_zdcModuleContainerName.value()+".Status"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleStatus.initialize());
-    m_zdcModuleTime = m_zdcModuleContainerName+".Time"+m_auxSuffix;
+    m_zdcModuleTime = m_zdcModuleContainerName.value()+".Time"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleTime.initialize());
-    m_zdcModuleChisq = m_zdcModuleContainerName+".Chisq"+m_auxSuffix;
+    m_zdcModuleChisq = m_zdcModuleContainerName.value()+".Chisq"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleChisq.initialize());
-    m_zdcModuleChisqRatio = m_zdcModuleContainerName+".ChisqRatio"+m_auxSuffix;
+    m_zdcModuleChisqRatio = m_zdcModuleContainerName.value()+".ChisqRatio"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleChisqRatio.initialize());
-    m_zdcModuleAmpNoNonLin = m_zdcModuleContainerName+".AmpNoNonLin"+m_auxSuffix;
+    m_zdcModuleAmpNoNonLin = m_zdcModuleContainerName.value()+".AmpNoNonLin"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleAmpNoNonLin.initialize());
-    m_zdcModuleFitAmp = m_zdcModuleContainerName+".FitAmp"+m_auxSuffix;
+    m_zdcModuleFitAmp = m_zdcModuleContainerName.value()+".FitAmp"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleFitAmp.initialize());
-    m_zdcModuleFitAmpError = m_zdcModuleContainerName+".FitAmpError"+m_auxSuffix;
+    m_zdcModuleFitAmpError = m_zdcModuleContainerName.value()+".FitAmpError"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleFitAmpError.initialize());
-    m_zdcModuleFitT0 = m_zdcModuleContainerName+".FitT0"+m_auxSuffix;
+    m_zdcModuleFitT0 = m_zdcModuleContainerName.value()+".FitT0"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleFitT0.initialize());
-    m_zdcModuleBkgdMaxFraction = m_zdcModuleContainerName+".BkgdMaxFraction"+m_auxSuffix;
+    m_zdcModuleBkgdMaxFraction = m_zdcModuleContainerName.value()+".BkgdMaxFraction"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleBkgdMaxFraction.initialize());
-    m_zdcModulePreSampleAmp = m_zdcModuleContainerName+".PreSampleAmp"+m_auxSuffix;
+    m_zdcModulePreSampleAmp = m_zdcModuleContainerName.value()+".PreSampleAmp"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModulePreSampleAmp.initialize());
-    m_zdcModulePresample = m_zdcModuleContainerName+".Presample"+m_auxSuffix;
+    m_zdcModulePresample = m_zdcModuleContainerName.value()+".Presample"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModulePresample.initialize());
-    m_zdcModuleMinDeriv2nd = m_zdcModuleContainerName+".MinDeriv2nd"+m_auxSuffix;
+    m_zdcModuleMinDeriv2nd = m_zdcModuleContainerName.value()+".MinDeriv2nd"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleMinDeriv2nd.initialize());
-    m_zdcModuleMaxADC = m_zdcModuleContainerName+".MaxADC"+m_auxSuffix;
+    m_zdcModuleMaxADC = m_zdcModuleContainerName.value()+".MaxADC"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleMaxADC.initialize());
 
-    m_zdcModuleMaxADCHG = m_zdcModuleContainerName+".MaxADCHG"+m_auxSuffix;
+    m_zdcModuleMaxADCHG = m_zdcModuleContainerName.value()+".MaxADCHG"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleMaxADCHG.initialize());
-    m_zdcModuleMaxADCLG = m_zdcModuleContainerName+".MaxADCLG"+m_auxSuffix;
+    m_zdcModuleMaxADCLG = m_zdcModuleContainerName.value()+".MaxADCLG"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleMaxADCLG.initialize());
 
     // LG refit data
     //
-    m_zdcModuleFitAmpLGRefit = m_zdcModuleContainerName+".FitAmpLGRefit"+m_auxSuffix;
+    m_zdcModuleFitAmpLGRefit = m_zdcModuleContainerName.value()+".FitAmpLGRefit"+m_auxSuffix.value();
     ATH_CHECK(m_zdcModuleFitAmpLGRefit.initialize());
-    m_zdcModuleAmpLGRefit = m_zdcModuleContainerName+".AmpLGRefit"+m_auxSuffix;
+    m_zdcModuleAmpLGRefit = m_zdcModuleContainerName.value()+".AmpLGRefit"+m_auxSuffix.value();
     ATH_CHECK(m_zdcModuleAmpLGRefit.initialize());
-    m_zdcModuleAmpCorrLGRefit = m_zdcModuleContainerName+".AmpCorrLGRefit"+m_auxSuffix;
+    m_zdcModuleAmpCorrLGRefit = m_zdcModuleContainerName.value()+".AmpCorrLGRefit"+m_auxSuffix.value();
     ATH_CHECK(m_zdcModuleAmpCorrLGRefit.initialize());
-    m_zdcModuleT0LGRefit = m_zdcModuleContainerName+".T0LGRefit"+m_auxSuffix;
+    m_zdcModuleT0LGRefit = m_zdcModuleContainerName.value()+".T0LGRefit"+m_auxSuffix.value();
     ATH_CHECK(m_zdcModuleT0LGRefit.initialize());
-    m_zdcModuleT0SubLGRefit = m_zdcModuleContainerName+".T0SubLGRefit"+m_auxSuffix;
+    m_zdcModuleT0SubLGRefit = m_zdcModuleContainerName.value()+".T0SubLGRefit"+m_auxSuffix.value();
     ATH_CHECK(m_zdcModuleT0SubLGRefit.initialize());
-    m_zdcModuleChisqLGRefit = m_zdcModuleContainerName+".ChisqLGRefit"+m_auxSuffix;
+    m_zdcModuleChisqLGRefit = m_zdcModuleContainerName.value()+".ChisqLGRefit"+m_auxSuffix.value();
     ATH_CHECK( m_zdcModuleChisqLGRefit.initialize());
 
     // ZDC per-calorimeter data
     //
-    m_zdcSumUncalibSum = m_zdcSumContainerName+".UncalibSum"+m_auxSuffix;
+    m_zdcSumUncalibSum = m_zdcSumContainerName.value()+".UncalibSum"+m_auxSuffix.value();
     ATH_CHECK( m_zdcSumUncalibSum.initialize());
-    m_zdcSumUncalibSumErr = m_zdcSumContainerName+".UncalibSumErr"+m_auxSuffix;
+    m_zdcSumUncalibSumErr = m_zdcSumContainerName.value()+".UncalibSumErr"+m_auxSuffix.value();
     ATH_CHECK( m_zdcSumUncalibSumErr.initialize());
-    m_zdcSumCalibEnergy = m_zdcSumContainerName+".CalibEnergy"+m_auxSuffix;
+    m_zdcSumCalibEnergy = m_zdcSumContainerName.value()+".CalibEnergy"+m_auxSuffix.value();
     ATH_CHECK( m_zdcSumCalibEnergy.initialize());
-    m_zdcSumCalibEnergyErr = m_zdcSumContainerName+".CalibEnergyErr"+m_auxSuffix;
+    m_zdcSumCalibEnergyErr = m_zdcSumContainerName.value()+".CalibEnergyErr"+m_auxSuffix.value();
     ATH_CHECK( m_zdcSumCalibEnergyErr.initialize());
-    m_zdcSumNLCalibEnergy = m_zdcSumContainerName+".NLCalibEnergy"+m_auxSuffix;
+    m_zdcSumNLCalibEnergy = m_zdcSumContainerName.value()+".NLCalibEnergy"+m_auxSuffix.value();
     ATH_CHECK( m_zdcSumNLCalibEnergy.initialize());
-    m_zdcSumNLCalibEnergyErr = m_zdcSumContainerName+".NLCalibEnergyErr"+m_auxSuffix;
+    m_zdcSumNLCalibEnergyErr = m_zdcSumContainerName.value()+".NLCalibEnergyErr"+m_auxSuffix.value();
     ATH_CHECK( m_zdcSumNLCalibEnergyErr.initialize());
-    m_zdcSumFinalEnergy = m_zdcSumContainerName+".FinalEnergy"+m_auxSuffix;
+    m_zdcSumFinalEnergy = m_zdcSumContainerName.value()+".FinalEnergy"+m_auxSuffix.value();
     ATH_CHECK( m_zdcSumFinalEnergy.initialize());
-    m_zdcSumAverageTime = m_zdcSumContainerName+".AverageTime"+m_auxSuffix;
+    m_zdcSumAverageTime = m_zdcSumContainerName.value()+".AverageTime"+m_auxSuffix.value();
     ATH_CHECK( m_zdcSumAverageTime.initialize());
-    m_zdcSumStatus = m_zdcSumContainerName+".Status"+m_auxSuffix;
+    m_zdcSumStatus = m_zdcSumContainerName.value()+".Status"+m_auxSuffix.value();
     ATH_CHECK( m_zdcSumStatus.initialize());
-    m_zdcSumModuleMask = m_zdcSumContainerName+".ModuleMask"+m_auxSuffix;
+    m_zdcSumModuleMask = m_zdcSumContainerName.value()+".ModuleMask"+m_auxSuffix.value();
     ATH_CHECK( m_zdcSumModuleMask.initialize());
 
     if (m_writeAux && m_auxSuffix != "") {
-        ATH_MSG_DEBUG("suffix string = " << m_auxSuffix);
+        ATH_MSG_DEBUG("suffix string = " << m_auxSuffix.value());
     }
 
     m_init = true;
@@ -2796,13 +2746,13 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	    }
 	  else
 	    {
-	      ATH_MSG_WARNING("Unknown LHC Run " << m_LHCRun);
+	      ATH_MSG_WARNING("Unknown LHC Run " << m_LHCRun.value());
 	      return StatusCode::FAILURE;
 	    }
 	  
 	  // Why were these static? to optimize processing time	
-	  std::vector<float> HGUndelADCSamples(m_numSample);
-	  std::vector<float> LGUndelADCSamples(m_numSample);
+	  std::vector<float> HGUndelADCSamples(m_numSample.value());
+	  std::vector<float> LGUndelADCSamples(m_numSample.value());
 	  
     if (LGUndelADCSamples.size() < adcUndelayLG->size()) {
       LGUndelADCSamples.resize(adcUndelayLG->size());
@@ -2821,8 +2771,8 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
 	    m_zdcDataAnalyzer->LoadAndAnalyzeData(side, zdcModule->zdcModule(), HGUndelADCSamples, LGUndelADCSamples);
 	  }
 	  else {
-	    std::vector<float> HGDelayADCSamples(m_numSample);
-	    std::vector<float> LGDelayADCSamples(m_numSample);
+	    std::vector<float> HGDelayADCSamples(m_numSample.value());
+	    std::vector<float> LGDelayADCSamples(m_numSample.value());
 	    if (adcDelayLG and adcDelayHG){
 	      std::copy(adcDelayLG->begin(), adcDelayLG->end(), LGDelayADCSamples.begin());
 	      std::copy(adcDelayHG->begin(), adcDelayHG->end(), HGDelayADCSamples.begin());
@@ -2845,7 +2795,7 @@ StatusCode ZdcAnalysisTool::recoZdcModules(const xAOD::ZdcModuleContainer& modul
     
     m_zdcDataAnalyzer->FinishEvent();
     
-    ATH_MSG_DEBUG("Adding variables with suffix=" + m_auxSuffix);
+    ATH_MSG_DEBUG("Adding variables with suffix=" + m_auxSuffix.value());
 
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleAmplitude(m_zdcModuleAmplitude);
     SG::WriteDecorHandle<xAOD::ZdcModuleContainer,float> zdcModuleCalibEnergy(m_zdcModuleCalibEnergy);
@@ -3013,7 +2963,7 @@ void ZdcAnalysisTool::setEnergyCalibrations(unsigned int runNumber)
 
     // "m_calibVersion", called CalibVersion when settings parameters in python, is a directory within the run-based calibration file
     TString calibVersion;
-    if (m_calibVersion != "") calibVersion = m_calibVersion + "/";
+    if (m_calibVersion.value() != "") calibVersion = m_calibVersion.value() + "/";
     
     for (int iside = 0; iside < 2; iside++)
     {
@@ -3069,7 +3019,7 @@ void ZdcAnalysisTool::setTimeCalibrations(unsigned int runNumber)
 
     // "m_calibVersion", called CalibVersion when settings parameters in python, is a directory within the run-based calibration file
     TString calibVersion = "";
-    if (m_calibVersion != "") calibVersion = m_calibVersion + "/";
+    if (m_calibVersion.value() != "") calibVersion = m_calibVersion.value() + "/";
 
     if (fCalib && !fCalib->IsZombie())
     {
@@ -3127,7 +3077,7 @@ void ZdcAnalysisTool::setFADCCorrections(unsigned int runNumber)
   if (m_LHCRun==3) {
     std::string runString;
     
-    if (runNumber == 0) runString = "ZdcFADCCorr_" + m_configuration + "_default.root";
+    if (runNumber == 0) runString = "ZdcFADCCorr_" + m_configuration.value() + "_default.root";
     else runString = ("ZdcFADCCorr_Run"+TString::Itoa(runNumber,10)+".root").Data();
     
     filename = PathResolverFindCalibFile("ZdcAnalysis/" + runString );
@@ -3222,13 +3172,13 @@ StatusCode ZdcAnalysisTool::reprocessZdc()
         return StatusCode::FAILURE;
     }
     m_eventReady = false;
-    ATH_MSG_DEBUG ("Trying to retrieve " << m_zdcModuleContainerName);
+    ATH_MSG_DEBUG ("Trying to retrieve " << m_zdcModuleContainerName.value());
 
     m_zdcModules = 0;
-    ATH_CHECK(evtStore()->retrieve(m_zdcModules, m_zdcModuleContainerName));
+    ATH_CHECK(evtStore()->retrieve(m_zdcModules, m_zdcModuleContainerName.value()));
 
     m_zdcSums = 0;
-    ATH_CHECK(evtStore()->retrieve(m_zdcSums, m_zdcSumContainerName));
+    ATH_CHECK(evtStore()->retrieve(m_zdcSums, m_zdcSumContainerName.value()));
 
     m_eventReady = true;
 

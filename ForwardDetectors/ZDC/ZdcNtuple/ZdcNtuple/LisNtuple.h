@@ -6,6 +6,7 @@
 #define ZdcNtuple_LisNtuple_H
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
+#include <AsgTools/PropertyWrapper.h>
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "xAODEventInfo/EventInfo.h"
 #include "xAODForward/ZdcModuleContainer.h"
@@ -28,15 +29,15 @@ public:
   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleContainerName{this, "ZdcModuleContainerName", "ZdcModules", ""};
   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcSumContainerName{this, "ZdcSumContainerName", "ZdcSums", ""};
   const xAOD::EventInfo *m_eventInfo{};
-  int m_eventCounter{};
+  int m_eventCounter{0};
   const xAOD::TrigDecision* m_trigDecision{};
 
   // flags
-  bool m_enableOutputTree{}; // enable output TTree
-  bool enableTrigger{}; // use trigger info
-  bool m_lisInj{}; // LIS injected-pulse run
-  bool m_lisLED{}; // LIS LED run
-  std::string m_auxSuffix{}; // suffix for aux data names when reprocessing
+  Gaudi::Property<bool> m_enableOutputTree{this, "enableOutputTree", true, "Enable output tree"}; // enable output TTree
+  Gaudi::Property<bool> enableTrigger{this, "enableTrigger", true, "use trigger info"}; // use trigger info
+  Gaudi::Property<bool> m_lisInj{this, "lisInj", false, "LIS injected-pulse run"}; // LIS injected-pulse run
+  Gaudi::Property<bool> m_lisLED{this, "lisLED", false, "LIS LED run"}; // LIS LED run
+  Gaudi::Property<std::string> m_auxSuffix{this, "auxSuffix", "", "Suffix for aux data names"}; // suffix for aux data names when reprocessing
 
   static constexpr int nTriggerWords = 16; // 16 words in trigDecision->tbp() and trigDecision->tav()
 

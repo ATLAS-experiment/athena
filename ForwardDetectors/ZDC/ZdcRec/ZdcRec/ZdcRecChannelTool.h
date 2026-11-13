@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -41,6 +41,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "Gaudi/Property.h"
 
 #include "ZdcEvent/ZdcRawChannelCollection.h"
 
@@ -112,7 +113,7 @@ private:
 
 	//Bandwidth limited interpolation (sin(x)/x) method
 	//variables
-	int m_bwl_time_resolution;
+	int m_bwl_time_resolution{100};
 	std::vector<float> m_wfm_bwl;
 	std::vector<float> m_bwl_vpeak;
 	std::vector<float> m_bwl_tpeak;
@@ -127,19 +128,19 @@ private:
 
 	//ZdcRawChannelCollection      m_ChannelCollection;
 
-	unsigned int		m_nsamples;
-	float   			m_sample_time;
+	unsigned int		m_nsamples{7};
+	float   			m_sample_time{25.};
 
-	int m_delta; // A number to check for signal
-	int m_zeroSupress;
+	Gaudi::Property<int> m_delta{this, "DeltaPeak", 5, "Minimum difference between min and max to be considered a signal"}; // A number to check for signal
+	Gaudi::Property<int> m_zeroSupress{this, "ZeroSuppress", 0, "Supress channels with only 0"};
 
 
 	static const int   s_FADC_SATURATION = 1022;
 
 	//Timing Algorithms Constants
 	// CFD method
-	float m_cfd_fraction ;
-	float m_cfd_delay ;     //ns
+	float m_cfd_fraction{0.35};
+	float m_cfd_delay{20.};     //ns
 
 	static const int   s_CFD_FRACTION  = -3;
 	static const int   s_SAMPLING_TIME = 25000;    // ps

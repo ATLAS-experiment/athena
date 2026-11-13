@@ -12,30 +12,10 @@
 namespace ZDC {
 
 RPDAnalysisTool::RPDAnalysisTool(std::string const& name) : asg::AsgTool(name) {
-  declareProperty("ZdcModuleContainerName", m_ZDCModuleContainerName = "ZdcModules", "Location of ZDC processed data");
-  declareProperty("ZdcSumContainerName", m_ZDCSumContainerName = "ZdcSums", "Location of ZDC processed sums");
-  declareProperty("Configuration", m_configuration = "default");
-  declareProperty("WriteAux", m_writeAux = true);
-  declareProperty("AuxSuffix", m_auxSuffix = "");
-
-  declareProperty("NSamples", m_forceNSamples, "Total number of FADC samples in readout window");
-  declareProperty("NBaselineSamples", m_forceNBaselineSamples, "Number of baseline samples; the sample equal to this number is the start of signal region");
-  declareProperty("EndSignalSample", m_forceEndSignalSample, "Samples before (not including) this sample are the signal region; 0 or Nsamples goes to end of window");
-  declareProperty("Pulse2ndDerivThresh", m_forcePulse2ndDerivThresh, "Second differences less than or equal to this number indicate a pulse");
-  declareProperty("PostPulseFracThresh", m_forcePostPulseFracThresh, "If there is a good pulse and post-pulse and size of post-pulse as a fraction of good pulse is less than or equal to this number, ignore post-pulse");
-  declareProperty("GoodPulseSampleStart", m_forceGoodPulseSampleStart, "Pulses before this sample are considered pre-pulses");
-  declareProperty("GoodPulseSampleStop", m_forceGoodPulseSampleStop, "Pulses after this sample are considered post-pulses");
-  declareProperty("NominalBaseline", m_forceNominalBaseline, "The global nominal baseline; used when pileup is detected");
-  declareProperty("PileupBaselineSumThresh", m_forcePileupBaselineSumThresh, "Baseline sum (after subtracting nominal baseline) less than this number indicates there is NO pileup");
-  declareProperty("PileupBaselineStdDevThresh", m_forcePileupBaselineStdDevThresh, "Baseline standard deviations less than this number indicate there is NO pileup");
-  declareProperty("NNegativesAllowed", m_forceNNegativesAllowed, "Maximum number of negative ADC values after baseline and pileup subtraction allowed in signal range");
-  declareProperty("ADCOverflow", m_forceADCOverflow, "ADC values greater than or equal to this number are considered overflow");
-  declareProperty("SideCCalibFactors", m_forceOutputCalibFactors.at(RPDUtils::sideC), "Multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel on side C");
-  declareProperty("SideACalibFactors", m_forceOutputCalibFactors.at(RPDUtils::sideA), "Multiplicative calibration factors to apply to RPD output, e.g., sum/max ADC, per channel on side A");
 }
 
 StatusCode RPDAnalysisTool::initializeWriteKey(std::string const& containerName, SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> & writeHandleKey, std::string const& key) {
-  writeHandleKey = containerName + key + m_auxSuffix;
+  writeHandleKey = containerName + key + m_auxSuffix.value();
   return writeHandleKey.initialize();
 }
 
@@ -59,41 +39,43 @@ StatusCode RPDAnalysisTool::initialize() {
   finalOutputCalibFactors.at(RPDUtils::sideA) = std::vector<float>(16, 1.0);
 
   // then overwrite individual parameters from configuration if any were provided
-  if (m_forceNSamples.has_value()) {
-    finalConfig.nSamples = m_forceNSamples.value();
+  m_forceOutputCalibFactors.at(RPDUtils::sideC) = m_forceSideCCalibFactors.value();
+  m_forceOutputCalibFactors.at(RPDUtils::sideA) = m_forceSideACalibFactors.value();
+  if (m_forceNSamples.value().has_value()) {
+    finalConfig.nSamples = m_forceNSamples.value().value();
   }
-  if (m_forceNBaselineSamples.has_value()) {
-    finalConfig.nBaselineSamples = m_forceNBaselineSamples.value();
+  if (m_forceNBaselineSamples.value().has_value()) {
+    finalConfig.nBaselineSamples = m_forceNBaselineSamples.value().value();
   }
-  if (m_forceEndSignalSample.has_value()) {
-    finalConfig.endSignalSample = m_forceEndSignalSample.value();
+  if (m_forceEndSignalSample.value().has_value()) {
+    finalConfig.endSignalSample = m_forceEndSignalSample.value().value();
   }
-  if (m_forcePulse2ndDerivThresh.has_value()) {
-    finalConfig.pulse2ndDerivThresh = m_forcePulse2ndDerivThresh.value();
+  if (m_forcePulse2ndDerivThresh.value().has_value()) {
+    finalConfig.pulse2ndDerivThresh = m_forcePulse2ndDerivThresh.value().value();
   }
-  if (m_forcePostPulseFracThresh.has_value()) {
-    finalConfig.postPulseFracThresh = m_forcePostPulseFracThresh.value();
+  if (m_forcePostPulseFracThresh.value().has_value()) {
+    finalConfig.postPulseFracThresh = m_forcePostPulseFracThresh.value().value();
   }
-  if (m_forceGoodPulseSampleStart.has_value()) {
-    finalConfig.goodPulseSampleStart = m_forceGoodPulseSampleStart.value();
+  if (m_forceGoodPulseSampleStart.value().has_value()) {
+    finalConfig.goodPulseSampleStart = m_forceGoodPulseSampleStart.value().value();
   }
-  if (m_forceGoodPulseSampleStop.has_value()) {
-    finalConfig.goodPulseSampleStop = m_forceGoodPulseSampleStop.value();
+  if (m_forceGoodPulseSampleStop.value().has_value()) {
+    finalConfig.goodPulseSampleStop = m_forceGoodPulseSampleStop.value().value();
   }
-  if (m_forceNominalBaseline.has_value()) {
-    finalConfig.nominalBaseline = m_forceNominalBaseline.value();
+  if (m_forceNominalBaseline.value().has_value()) {
+    finalConfig.nominalBaseline = m_forceNominalBaseline.value().value();
   }
-  if (m_forcePileupBaselineSumThresh.has_value()) {
-    finalConfig.pileupBaselineSumThresh = m_forcePileupBaselineSumThresh.value();
+  if (m_forcePileupBaselineSumThresh.value().has_value()) {
+    finalConfig.pileupBaselineSumThresh = m_forcePileupBaselineSumThresh.value().value();
   }
-  if (m_forcePileupBaselineStdDevThresh.has_value()) {
-    finalConfig.pileupBaselineStdDevThresh = m_forcePileupBaselineStdDevThresh.value();
+  if (m_forcePileupBaselineStdDevThresh.value().has_value()) {
+    finalConfig.pileupBaselineStdDevThresh = m_forcePileupBaselineStdDevThresh.value().value();
   }
-  if (m_forceNNegativesAllowed.has_value()) {
-    finalConfig.nNegativesAllowed = m_forceNNegativesAllowed.value();
+  if (m_forceNNegativesAllowed.value().has_value()) {
+    finalConfig.nNegativesAllowed = m_forceNNegativesAllowed.value().value();
   }
-  if (m_forceADCOverflow.has_value()) {
-    finalConfig.ADCOverflow = m_forceADCOverflow.value();
+  if (m_forceADCOverflow.value().has_value()) {
+    finalConfig.ADCOverflow = m_forceADCOverflow.value().value();
   }
   for (auto const side : RPDUtils::sides) {
     if (m_forceOutputCalibFactors.at(side).has_value()) {
@@ -102,7 +84,7 @@ StatusCode RPDAnalysisTool::initialize() {
   }
 
   ATH_MSG_DEBUG("RPDAnalysisTool reconstruction parameters:");
-  ATH_MSG_DEBUG("config = " << m_configuration);
+  ATH_MSG_DEBUG("config = " << m_configuration.value());
   ATH_MSG_DEBUG("nSamples = " << finalConfig.nSamples);
   ATH_MSG_DEBUG("nBaselineSamples = " << finalConfig.nBaselineSamples);
   ATH_MSG_DEBUG("endSignalSample = " << finalConfig.endSignalSample);
@@ -142,8 +124,8 @@ StatusCode RPDAnalysisTool::initialize() {
 
   ATH_CHECK( m_eventInfoKey.initialize());
 
-  if (m_writeAux && !m_auxSuffix.empty()) {
-    ATH_MSG_DEBUG("Suffix string = " << m_auxSuffix);
+  if (m_writeAux && !m_auxSuffix.value().empty()) {
+    ATH_MSG_DEBUG("Suffix string = " << m_auxSuffix.value());
   }
 
   m_initialized = true;
@@ -201,7 +183,7 @@ void RPDAnalysisTool::writeAOD(xAOD::ZdcModuleContainer const& moduleContainer, 
     return;
   }
 
-  ATH_MSG_DEBUG("Adding variables with suffix = " + m_auxSuffix);
+  ATH_MSG_DEBUG("Adding variables with suffix = " + m_auxSuffix.value());
 
   // write per-channel decorations (in ZdcModules)
   SG::WriteDecorHandle<xAOD::ZdcModuleContainer, float> chBaseline(m_chBaselineKey);
@@ -282,9 +264,9 @@ StatusCode RPDAnalysisTool::reprocessZdc() {
     return StatusCode::FAILURE;
   }
   xAOD::ZdcModuleContainer const* ZDCModules = nullptr;
-  ATH_CHECK(evtStore()->retrieve(ZDCModules, m_ZDCModuleContainerName));
+  ATH_CHECK(evtStore()->retrieve(ZDCModules, m_ZDCModuleContainerName.value()));
   xAOD::ZdcModuleContainer const* ZDCSums = nullptr;
-  ATH_CHECK(evtStore()->retrieve(ZDCSums, m_ZDCSumContainerName));
+  ATH_CHECK(evtStore()->retrieve(ZDCSums, m_ZDCSumContainerName.value()));
   return recoZdcModules(*ZDCModules, *ZDCSums);
 }
 

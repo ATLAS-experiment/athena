@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -34,9 +34,6 @@
 ZdcByteStreamRawData::ZdcByteStreamRawData(const std::string& name, ISvcLocator* pSvcLocator) :
 	AthAlgorithm(name, pSvcLocator)
 {
-	declareProperty("ZdcDigitsCollectionLocation", m_ZdcDigitsCollectionLocation = ZdcDefs::ZdcDigitsCollectionLocation);
-	declareProperty("ForceSlicesLUT", m_forceSlicesLut = 0);
-	declareProperty("ForceSlicesFADC", m_forceSlicesFadc = 0);
 }
 //==================================================================================================
 
@@ -53,9 +50,9 @@ StatusCode ZdcByteStreamRawData::execute(const EventContext& /*ctx*/)
 
 	const ZdcDigitsCollection* ttCollection = nullptr;
 
-	msg(MSG::DEBUG) << "Looking for ZDC Digits Collection at " << m_ZdcDigitsCollectionLocation << endmsg;
+	msg(MSG::DEBUG) << "Looking for ZDC Digits Collection at " << m_ZdcDigitsCollectionLocation.value() << endmsg;
 	//std::cout << "Looking for ZDC Digits Collection at " << m_ZdcDigitsCollectionLocation << std::endl;
-	StatusCode sc = evtStore()->retrieve(ttCollection, m_ZdcDigitsCollectionLocation);
+	StatusCode sc = evtStore()->retrieve(ttCollection, m_ZdcDigitsCollectionLocation.value());
 	if (sc.isFailure() || !ttCollection || ttCollection->empty())
 	{
 		msg() << "No Zdc Digits found" << endmsg;

@@ -8,6 +8,7 @@
 
 #include <AnaAlgorithm/AnaAlgorithm.h>
 #include <AsgTools/AnaToolHandle.h>
+#include <AsgTools/PropertyWrapper.h>
 #include <TrigDecisionTool/TrigDecisionTool.h> //template parameter
 
 #include <AsgAnalysisInterfaces/IGoodRunsListSelectionTool.h> //template parameter
@@ -50,17 +51,17 @@ class ZdcNtuple : public EL::AnaAlgorithm
   ZdcInjPulserAmpMap::Token m_injMapRunToken{};
 
 public:
-  bool slimmed; // assume slimmed output
-  bool useGRL; // use a GRL (used by default)
-  std::string grlFilename;
-  bool enableOutputTree; // enable output TTree
-  bool enableOutputSamples; // write samples into TTree
-  bool enableTrigger; // use trigger info (skip this for laser runs)
-  bool writeOnlyTriggers; // only write passed triggers to ntuple
-  bool enableID; // store ID in ntuple
-  bool enableCalo; // store calorimeter ET in ntuple
-  bool enableClusters; // store topoclusters
-  bool enableTracks; // store tracks
+  Gaudi::Property<bool> slimmed{this, "slimmed", false, "comment"}; // assume slimmed output
+  Gaudi::Property<bool> useGRL{this, "useGRL", true, "comment"}; // use a GRL (used by default)
+  Gaudi::Property<std::string> grlFilename{this, "grlFilename", "$ROOTCOREBIN/data/ZdcNtuple/data16_hip8TeV.periodAllYear_DetStatus-v86-pro20-19_DQDefects-00-02-04_PHYS_HeavyIonP_All_Good.xml", "comment"};
+  Gaudi::Property<bool> enableOutputTree{this, "enableOutputTree", false, "Enable output tree"}; // enable output TTree
+  Gaudi::Property<bool> enableOutputSamples{this, "enableOutputSamples", false, "Output ZDC and RPD raw data"}; // write samples into TTree
+  Gaudi::Property<bool> enableTrigger{this, "enableTrigger", true, "comment"}; // use trigger info (skip this for laser runs)
+  Gaudi::Property<bool> writeOnlyTriggers{this, "writeOnlyTriggers", false, "comment"}; // only write passed triggers to ntuple
+  Gaudi::Property<bool> enableID{this, "enableID", false, "turn on to enable ID tracks & vertices for physics streams"}; // store ID in ntuple
+  Gaudi::Property<bool> enableCalo{this, "enableCalo", false, "turn on to enable calorimeter energy info for physics streams"}; // store calorimeter ET in ntuple
+  Gaudi::Property<bool> enableClusters{this, "enableClusters", false, "turn on to enable calo topo cluster info for physics streams"}; // store topoclusters
+  Gaudi::Property<bool> enableTracks{this, "enableTracks", false, "comment"}; // store tracks
   bool enableMuons; // store muons in ntuple
   bool enableElectrons; // store electrons in ntuple
   bool enablePhotons; // store photons in ntuple
@@ -68,29 +69,29 @@ public:
   bool enableTruth; // store truth info
   bool enableJets; // store jets
   bool enableTriggerJets; // store trigger jets in ntuple
-  bool zdcCalib; // run calibration file
-  bool zdcLaser; // run laser file
-  bool zdcInj; // ZDC injected-pulse run
-  bool zdcOnly; // process only ZDC+trigger 
-  unsigned int zdcLowGainMode; // ZDC LG mode
-  size_t trackLimit; // max tracks for writing tree
-  bool trackLimitReject;
-  bool flipDelay; // whether or not to flip un/delay for EM ZDC modules
-  bool reprocZdc; // use ZdcAnalysisTool to reprocess ZDC, otherwise use what is there
-  std::string auxSuffix; // what to add to name the new data, when reprocessing
-  size_t nsamplesZdc; // nsamples expected by ZDC tool
-  bool lhcf2022;
-  bool lhcf2022zdc;
-  bool lhcf2022afp;
-  bool pbpb2023;
-  bool oo2025;
-  bool enableZDC; //
-  bool enableRPD; //
-  bool enableRPDAmp; //
-  bool enableCentroid;
+  Gaudi::Property<bool> zdcCalib{this, "zdcCalib", false, "zdc/ZDCCalib file"}; // run calibration file
+  Gaudi::Property<bool> zdcLaser{this, "zdcLaser", false, "Run 2 ZDC Laser"}; // run laser file
+  Gaudi::Property<bool> zdcInj{this, "zdcInj", false, "ZDC injected pulse"}; // ZDC injected-pulse run
+  Gaudi::Property<bool> zdcOnly{this, "zdcOnly", false, "comment"}; // process only ZDC+trigger 
+  Gaudi::Property<unsigned int> zdcLowGainMode{this, "zdcLowGainMode", 0, "comment"}; // ZDC LG mode
+  Gaudi::Property<size_t> trackLimit{this, "trackLimit", 500, "comment"}; // max tracks for writing tree
+  bool trackLimitReject{false};
+  Gaudi::Property<bool> flipDelay{this, "flipDelay", false, "comment"}; // whether or not to flip un/delay for EM ZDC modules
+  Gaudi::Property<bool> reprocZdc{this, "reprocZdc", false, "comment"}; // use ZdcAnalysisTool to reprocess ZDC, otherwise use what is there
+  Gaudi::Property<std::string> auxSuffix{this, "auxSuffix", "", "comment"}; // what to add to name the new data, when reprocessing
+  Gaudi::Property<size_t> nsamplesZdc{this, "nsamplesZdc", 24, "number of samples, 7 = most of Run 2, 24,32,40 = Run 3"}; // nsamples expected by ZDC tool
+  Gaudi::Property<bool> lhcf2022{this, "lhcf2022", false, "LHCf2022 general config"};
+  Gaudi::Property<bool> lhcf2022zdc{this, "lhcf2022zdc", false, "LHCf2022 ZDC-specific config"};
+  Gaudi::Property<bool> lhcf2022afp{this, "lhcf2022afp", false, "LHCf2022 AFP-specific config"};
+  Gaudi::Property<bool> pbpb2023{this, "pbpb2023", false, "PbPb2023 config"};
+  Gaudi::Property<bool> oo2025{this, "oo2025", false, "OO and NeNe 2025 config"};
+  Gaudi::Property<bool> enableZDC{this, "enableZDC", true}; //
+  Gaudi::Property<bool> enableRPD{this, "enableRPD", false, "enable reading any RPD decorations"}; //
+  Gaudi::Property<bool> enableRPDAmp{this, "enableRPDAmp", false, "enable reading RPD amplitudes (also requires enableRPD)"}; //
+  Gaudi::Property<bool> enableCentroid{this, "enableCentroid", false, "enable reading centroid decorations (also requires enableRPD)"};
 
-  bool doZdcCalib;
-  std::string zdcConfig;
+  Gaudi::Property<bool> doZdcCalib{this, "doZdcCalib", false, "perform ZDC energy calibration"};
+  Gaudi::Property<std::string> zdcConfig{this, "zdcConfig", "PbPb2018", "argument to configure ZdcAnalysisTool"};
 
   std::string outputName; // output for tree
   int outputTreeScaledown; // scaledown factor
@@ -99,9 +100,10 @@ public:
 
   PublicToolHandle<Trig::TrigDecisionTool> m_trigDecisionTool
   { this, "TrigDecisionTool", "", "Handle to the TrigDecisionTool" };
-  asg::AnaToolHandle<IGoodRunsListSelectionTool> m_grl;
+  asg::AnaToolHandle<IGoodRunsListSelectionTool> m_grl{"GoodRunsListSelectionTool/grl", this};
   asg::AnaToolHandle<ZDC::IZdcAnalysisTool> m_zdcAnalysisTool;
-  ToolHandle< InDet::IInDetTrackSelectionTool > m_selTool;
+  ToolHandle< InDet::IInDetTrackSelectionTool > m_selTool
+    {this, "TrackSelectionTool", "InDet::InDetTrackSelectionTool/TrackSelectionTool"};
 
   SG::ReadHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleContainerName
     { this, "ZdcModuleContainerName", "ZdcModules", "" };
@@ -130,9 +132,9 @@ public:
   std::shared_ptr<ZdcInjPulserAmpMap> m_zdcInjPulserAmpMap;
   
   int m_nTriggers;
-  int m_eventCounter;
-  bool m_isMC;
-  bool m_setupTrigHist;
+  int m_eventCounter{0};
+  Gaudi::Property<bool> m_isMC{this, "isMC", false, "MC mode"};
+  bool m_setupTrigHist{false};
   int m_scaledownCounter;
   std::vector<const Trig::ChainGroup*> m_chainGroups;
   std::vector<const Trig::ChainGroup*> m_rerunChainGroups;
@@ -325,7 +327,7 @@ public:
   // gaps
   float t_edgeGapA;
   float t_edgeGapC;
-  float m_gapPtMin;
+  Gaudi::Property<float> m_gapPtMin{this, "gapPtMin", 200, "minimum pT of cluster used in gaps"};
 
   double m_gapThresholds[98] =
     {4.7426,5.11018,5.07498,5.0969,5.10695,5.04098,5.07106,4.98087,5.11647,5.08988,5.16267,

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ZDCTRIGVALID_ZDCTRIGVALIDTOOL_H
@@ -15,6 +15,7 @@
 #include <xAODForward/ZdcModuleAuxContainer.h>
 #include "ZdcAnalysis/IZdcAnalysisTool.h"
 #include "AsgTools/AsgTool.h"
+#include "AsgTools/PropertyWrapper.h"
 #include "TrigDecisionTool/TrigDecisionTool.h"
 #include "ZdcUtils/ZDCTriggerSim.h"
 #include "xAODEventInfo/EventInfo.h"
@@ -58,11 +59,11 @@ class ATLAS_NOT_THREAD_SAFE ZdcTrigValidTool : public virtual IZdcAnalysisTool, 
   /** A data member to hold the ZDCTrigger Object that computes the LUT logic: shared ptr to ensure cleanup */
   std::shared_ptr<ZDCTriggerSimModuleAmpls> m_simTrig;
   
-  std::string m_msg;
+  Gaudi::Property<std::string> m_msg{this, "Message", ""};
   std::map<std::string, unsigned int > m_triggerMap;
-  std::string m_auxSuffix;
+  Gaudi::Property<std::string> m_auxSuffix{this, "AuxSuffix", ""};
   std::string m_name;
-  bool m_writeAux;
+  Gaudi::Property<bool> m_writeAux{this, "WriteAux", true};
 
   SG::ReadDecorHandleKey<xAOD::ZdcModuleContainer> m_zdcModuleAmp{this, "ZdcModuleAmplitude", "", "ZDC module Amplitude"};
   SG::WriteDecorHandleKey<xAOD::ZdcModuleContainer> m_trigValStatus{this, "TrigValStatus", "","Trigger validation status"};

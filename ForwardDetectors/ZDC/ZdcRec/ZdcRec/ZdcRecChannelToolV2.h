@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -23,6 +23,7 @@
 #include "AsgTools/AsgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "Gaudi/Property.h"
 
 #include "xAODTrigL1Calo/TriggerTowerContainer.h"
 #include "xAODTrigL1Calo/TriggerTowerAuxContainer.h"
@@ -55,14 +56,14 @@ class ZdcRecChannelToolV2: public asg::AsgTool, virtual public IIncidentListener
 private:
 
   // internal parameters, set in pythion
-  unsigned int m_nsamples;
-  float        m_sample_time;
-  float        m_gainFactor;
-  bool         m_useDelay;
-  int          m_delta; // A number to check for signal
-  int          m_zeroSupress;
-  int          m_saturation; // saturation level (absolute ADC)
-  float        m_pedestalValue; // pedestal value (set to 100)
+  Gaudi::Property<unsigned int> m_nsamples{this, "NSamples", 5, "Number of samples in PPM raw data"};
+  Gaudi::Property<float> m_sample_time{this, "SampleTime", 12.5, "Sample time in ns (25. = 40 MHz, 12.5 = 80 MHz)"};
+  Gaudi::Property<float> m_gainFactor{this, "GainFactor", 10., "High/lo gain factor"};
+  Gaudi::Property<bool> m_useDelay{this, "UseDelay", false, "If true, then use delayed channels"};
+  Gaudi::Property<int> m_delta{this, "DeltaPeak", 5, "Minimum difference between min and max to be considered a signal"}; // A number to check for signal
+  Gaudi::Property<int> m_zeroSupress{this, "ZeroSuppress", 0, "Supress channels with only 0"};
+  Gaudi::Property<int> m_saturation{this, "SaturationADC", 1000, "ADC value above which a HG channel is considered saturated"}; // saturation level (absolute ADC)
+  Gaudi::Property<float> m_pedestalValue{this, "PedestalValue", 100., "Pedestal value"}; // pedestal value (set to 100)
 
   const ZdcID* m_zdcId{};
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /*
@@ -17,6 +17,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
+#include "Gaudi/Property.h"
 
 #include "ZdcEvent/ZdcRawChannelCollection.h"
 
@@ -51,8 +52,10 @@ public:
 
 private:
 
-	std::string  m_pedestalDir;
-	std::string  m_pedestalFile;
+	Gaudi::Property<std::string> m_pedestalDir{this, "PedestalsDirectory", "/afs/cern.ch/user/l/leite/public/ZdcData/Pedestals",
+						"Pedestal files directory"};
+	Gaudi::Property<std::string> m_pedestalFile{this, "PedestalsFile", "zdc_pedestal_0000.data",
+						"Pedestal file name"};
 
 	std::unique_ptr<ZdcDigitsCollection> m_pedestalData{};
 
