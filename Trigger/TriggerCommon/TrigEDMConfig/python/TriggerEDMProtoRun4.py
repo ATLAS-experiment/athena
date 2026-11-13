@@ -721,8 +721,6 @@ TriggerHLTListProtoRun4 = [
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIso_probe',     'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoHitZ',       'BS ESD AODFULL',  'Tau'),
     ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoHitZ_probe', 'BS ESD AODFULL',  'Tau'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT',        'BS ESD AODFULL',  'Tau'),
-    ('TrigRoiDescriptorCollection#HLT_Roi_TauIsoBDT_probe',  'BS ESD AODFULL',  'Tau'),
     # boosted ditau roi
     ('TrigRoiDescriptorCollection#HLT_Roi_DiTau',            'BS ESD',          'Tau'),
 
