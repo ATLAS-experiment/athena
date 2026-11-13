@@ -23,8 +23,13 @@ def CPAlgorithmsCfg(flags):
 
     FixedElDict = {}
     FixedPhDict = {}
-    from egammaAlgs.egammaAODFixesConfig import runAODFix
-    doneFix, fixes = runAODFix(flags)
+    # egamma AOD fixes already applied upstream (when PHYS->PHYSLITE)
+    fixes = set(flags.Input.AODFixesDone)
+    # any other remaining fixes (when AOD->PHYSLITE)
+    if 'StreamAOD' in flags.Input.ProcessingTags:
+        from egammaAlgs.egammaAODFixesConfig import runAODFix
+        _, fixesThisJob = runAODFix(flags)
+        fixes |= fixesThisJob
     logPLCPAlgCfg.info(f'Existing egamma AOD fixes for timing cut issue : {fixes}')
     if 'egammatopoIsoFix' in fixes:
         FixedElDict.update({"ElectronIsolationCorrectionAlg.isolationCorrectionTool.FixTimingIssueInCore": False})

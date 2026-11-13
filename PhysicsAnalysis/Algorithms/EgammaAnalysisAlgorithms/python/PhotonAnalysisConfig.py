@@ -119,6 +119,10 @@ class PhotonCalibrationConfig (ConfigBlock) :
         alg.calibrationAndSmearingTool.decorateEmva = self.decorateEmva
         # only photons are calibrated here, so skip loading the electron BDTs
         alg.calibrationAndSmearingTool.DoElectronMVACalibration = False
+        # the tool must not re-add the cells lost to the timing cut if the
+        # egamma AODFix already corrected the clusters upstream
+        if 'egClusterL2_3Fix' in config.flags.Input.AODFixesDone :
+            alg.calibrationAndSmearingTool.FixForMissingCells = False
         alg.egammas = config.readName (self.containerName)
         alg.egammasOut = config.copyName (self.containerName)
         alg.preselection = config.getPreselection (self.containerName, '')
