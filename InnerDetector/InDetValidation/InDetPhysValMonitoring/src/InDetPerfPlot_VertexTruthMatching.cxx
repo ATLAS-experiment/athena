@@ -411,6 +411,8 @@ void InDetPerfPlot_VertexTruthMatching::fill
     for (const auto& vertex : vertexContainer.stdcont()) {
 
       unsigned int nTrackPart = vertex->nTrackParticles();
+      InDetVertexTruthMatchUtils::VertexMatchType matchType = recoVtxMatchTypeInfo(*vertex);
+      breakdown[matchType] += 1;
 
       // Skip dummy vertex (last one in the container)
       if (vertex->vertexType() == xAOD::VxType::NoVtx) {
@@ -419,44 +421,48 @@ void InDetPerfPlot_VertexTruthMatching::fill
 
       fill(*vertex);
 
-      InDetVertexTruthMatchUtils::VertexMatchType matchType = recoVtxMatchTypeInfo(*vertex);
-      breakdown[matchType] += 1;
-
       const xAOD::TruthVertex *matchVertex = getTruthVertex(vertex);
       if(matchVertex){
-	float residual_z = matchVertex->z() - vertex->z();
-	float residual_x = matchVertex->x() - vertex->x();
-	float residual_y = matchVertex->y() - vertex->y();
-	const AmgSymMatrix(3)& covariance = vertex->covariancePosition();
-	float vtxerr_x = std::abs(Amg::error(covariance, 0)) > 1e-7 ? Amg::error(covariance, 0) : 1000.;
-	float vtxerr_y = std::abs(Amg::error(covariance, 1)) > 1e-7 ? Amg::error(covariance, 1) : 1000.;
-	float vtxerr_z = std::abs(Amg::error(covariance, 2)) > 1e-7 ? Amg::error(covariance, 2) : 1000.;
 
-	fillHisto(m_vx_all_z_pull, residual_z/vtxerr_z, weight);
-	fillHisto(m_vx_all_y_pull, residual_y/vtxerr_y, weight);
-	fillHisto(m_vx_all_x_pull, residual_x/vtxerr_x, weight);
+	std::vector<float> residuals = {
+	  matchVertex->x() - vertex->x(),
+	  matchVertex->y() - vertex->y(),
+	  matchVertex->z() - vertex->z() };
+
+	const AmgSymMatrix(3)& covariance = vertex->covariancePosition();
+
+	std::vector<float> pulls;
+	for(unsigned int i=0; i<3; i++){
+	  float vtxerr = Amg::error(covariance, i);
+	  float pull = std::abs(vtxerr) > 1e-7 ? residuals[i]/vtxerr : 1000.;
+	  pulls.push_back(pull);
+	}
+
+	fillHisto(m_vx_all_x_pull, pulls[0], weight);
+	fillHisto(m_vx_all_y_pull, pulls[1], weight);
+	fillHisto(m_vx_all_z_pull, pulls[2], weight);
 
 	float localPUDensity = getLocalPUDensity(matchVertex, truthHSVertices, truthPUVertices);
     
-	fillHisto(m_vx_all_truth_z_res_vs_PU, localPUDensity, residual_z, weight);
-	fillHisto(m_vx_all_truth_x_res_vs_PU, localPUDensity, residual_x, weight);
-	fillHisto(m_vx_all_truth_y_res_vs_PU, localPUDensity, residual_y, weight);
+	fillHisto(m_vx_all_truth_x_res_vs_PU, localPUDensity, pulls[0], weight);
+	fillHisto(m_vx_all_truth_y_res_vs_PU, localPUDensity, pulls[1], weight);
+	fillHisto(m_vx_all_truth_z_res_vs_PU, localPUDensity, pulls[2], weight);
 
-	fillHisto(m_vx_all_z_res, residual_z, weight);
-	fillHisto(m_vx_all_y_res, residual_y, weight);
-	fillHisto(m_vx_all_x_res, residual_x, weight);
+	fillHisto(m_vx_all_x_res, residuals[0], weight);
+	fillHisto(m_vx_all_y_res, residuals[1], weight);
+	fillHisto(m_vx_all_z_res, residuals[2], weight);
             
-	fillHisto(m_vx_all_truth_z_pull_vs_PU, localPUDensity, residual_z/vtxerr_z, weight);
-	fillHisto(m_vx_all_truth_x_pull_vs_PU, localPUDensity, residual_x/vtxerr_x, weight);
-	fillHisto(m_vx_all_truth_y_pull_vs_PU, localPUDensity, residual_y/vtxerr_y, weight);
+	fillHisto(m_vx_all_truth_x_pull_vs_PU, localPUDensity, pulls[0], weight);
+	fillHisto(m_vx_all_truth_y_pull_vs_PU, localPUDensity, pulls[1], weight);
+	fillHisto(m_vx_all_truth_z_pull_vs_PU, localPUDensity, pulls[2], weight);
 
-	fillHisto(m_vx_all_truth_z_res_vs_nTrk, nTrackPart, residual_z, weight);
-	fillHisto(m_vx_all_truth_x_res_vs_nTrk, nTrackPart, residual_x, weight);
-	fillHisto(m_vx_all_truth_y_res_vs_nTrk, nTrackPart, residual_y, weight);
-            
-	fillHisto(m_vx_all_truth_z_pull_vs_nTrk, nTrackPart, residual_z/vtxerr_z, weight);
-	fillHisto(m_vx_all_truth_x_pull_vs_nTrk, nTrackPart, residual_x/vtxerr_x, weight);
-	fillHisto(m_vx_all_truth_y_pull_vs_nTrk, nTrackPart, residual_y/vtxerr_y, weight);
+	fillHisto(m_vx_all_truth_x_res_vs_nTrk, nTrackPart, residuals[0], weight);
+	fillHisto(m_vx_all_truth_y_res_vs_nTrk, nTrackPart, residuals[1], weight);
+	fillHisto(m_vx_all_truth_z_res_vs_nTrk, nTrackPart, residuals[2], weight);
+
+	fillHisto(m_vx_all_truth_x_pull_vs_nTrk, nTrackPart, pulls[0], weight);
+	fillHisto(m_vx_all_truth_y_pull_vs_nTrk, nTrackPart, pulls[1], weight);
+	fillHisto(m_vx_all_truth_z_pull_vs_nTrk, nTrackPart, pulls[2], weight);
       }
 
       // New Expert histograms for observables for vertex classifications for HS and PU
@@ -491,7 +497,7 @@ void InDetPerfPlot_VertexTruthMatching::fill
 	if (trackTmp) {
 	  trackPt = trackTmp->pt();  //  MeV
 	  sumPt = sumPt + trackPt;  // in MeV
-	  deltaZ = trackTmp->z0() - vertex->z();
+	  deltaZ = trackTmp->z0() + trackTmp->vz() - vertex->z();
 	  track_deltaZ.push_back(deltaZ);
 	  // get the track weight for each track to get the deltaZ/trk_weight
 	  float trk_weight = vertex->trackWeight(i);
@@ -618,35 +624,42 @@ void InDetPerfPlot_VertexTruthMatching::fill
 	fillHisto(m_resHelper_PUdensity_hsVxTruthLong, localPUDensity, residual_z, weight);
 	fillHisto(m_resHelper_PUdensity_hsVxTruthTransv, localPUDensity, residual_r, weight);
 
+	std::vector<float> residuals = {residual_x, residual_y, residual_z};
+
 	const AmgSymMatrix(3)& covariance = bestRecoHSVtx_truth->covariancePosition();
-	float vtxerr_x = Amg::error(covariance, 0);
-	float vtxerr_y = Amg::error(covariance, 1);
-	float vtxerr_z = Amg::error(covariance, 2);
 
-	if(std::abs(vtxerr_z) > 1e-7) fillHisto(m_vx_hs_z_pull, residual_z/vtxerr_z, weight);
-	if(std::abs(vtxerr_y) > 1e-7) fillHisto(m_vx_hs_y_pull, residual_y/vtxerr_y, weight);
-	if(std::abs(vtxerr_x) > 1e-7) fillHisto(m_vx_hs_x_pull, residual_x/vtxerr_x, weight);
+	std::vector<float> pulls;
+	for(unsigned int i=0; i<3; i++){
+	  float vtxerr = Amg::error(covariance, i);
+	  float pull = std::abs(vtxerr) > 1e-7 ? residuals[i]/vtxerr : 1000.;
+	  pulls.push_back(pull);
+	}
 
-	fillHisto(m_vx_hs_truth_z_res_vs_PU, localPUDensity, residual_z, weight);
-	fillHisto(m_vx_hs_truth_x_res_vs_PU, localPUDensity, residual_x, weight);
-	fillHisto(m_vx_hs_truth_y_res_vs_PU, localPUDensity, residual_y, weight);
+	fillHisto(m_vx_hs_x_pull, pulls[0], weight);
+	fillHisto(m_vx_hs_y_pull, pulls[1], weight);
+	fillHisto(m_vx_hs_z_pull, pulls[2], weight);
 
-	fillHisto(m_vx_hs_z_res, residual_z, weight);
-	fillHisto(m_vx_hs_y_res, residual_y, weight);
-	fillHisto(m_vx_hs_x_res, residual_x, weight);
+	fillHisto(m_vx_hs_truth_x_res_vs_PU, localPUDensity, residuals[0], weight);
+	fillHisto(m_vx_hs_truth_y_res_vs_PU, localPUDensity, residuals[1], weight);
+	fillHisto(m_vx_hs_truth_z_res_vs_PU, localPUDensity, residuals[2], weight);
 
-	fillHisto(m_vx_hs_truth_z_pull_vs_PU, localPUDensity, residual_z/vtxerr_z, weight);
-	fillHisto(m_vx_hs_truth_x_pull_vs_PU, localPUDensity, residual_x/vtxerr_x, weight);
-	fillHisto(m_vx_hs_truth_y_pull_vs_PU, localPUDensity, residual_y/vtxerr_y, weight);
+	fillHisto(m_vx_hs_x_res, residuals[0], weight);
+	fillHisto(m_vx_hs_y_res, residuals[1], weight);
+	fillHisto(m_vx_hs_z_res, residuals[2], weight);
+
+	fillHisto(m_vx_hs_truth_x_pull_vs_PU, localPUDensity, pulls[0], weight);
+	fillHisto(m_vx_hs_truth_y_pull_vs_PU, localPUDensity, pulls[1], weight);
+	fillHisto(m_vx_hs_truth_z_pull_vs_PU, localPUDensity, pulls[2], weight);
 
 	int nTrackPart = bestRecoHSVtx_truth->nTrackParticles();
-	fillHisto(m_vx_hs_truth_z_res_vs_nTrk, nTrackPart, residual_z, weight);
-	fillHisto(m_vx_hs_truth_x_res_vs_nTrk, nTrackPart, residual_x, weight);
-	fillHisto(m_vx_hs_truth_y_res_vs_nTrk, nTrackPart, residual_y, weight);
+	fillHisto(m_vx_hs_truth_x_res_vs_nTrk, nTrackPart, residuals[0], weight);
+	fillHisto(m_vx_hs_truth_y_res_vs_nTrk, nTrackPart, residuals[1], weight);
+	fillHisto(m_vx_hs_truth_z_res_vs_nTrk, nTrackPart, residuals[2], weight);
             
-	fillHisto(m_vx_hs_truth_z_pull_vs_nTrk, nTrackPart, residual_z/vtxerr_z, weight);
-	fillHisto(m_vx_hs_truth_x_pull_vs_nTrk, nTrackPart, residual_x/vtxerr_x, weight);
-	fillHisto(m_vx_hs_truth_y_pull_vs_nTrk, nTrackPart, residual_y/vtxerr_y, weight);
+	fillHisto(m_vx_hs_truth_x_pull_vs_nTrk, nTrackPart, pulls[0], weight);
+	fillHisto(m_vx_hs_truth_y_pull_vs_nTrk, nTrackPart, pulls[1], weight);
+	fillHisto(m_vx_hs_truth_z_pull_vs_nTrk, nTrackPart, pulls[2], weight);
+
       } else {
 	fillHisto(m_vx_hs_reco_eff, localPUDensity, 0, weight);
 	fillHisto(m_vx_hs_reco_eff_vs_ntruth, nTruthVertices, 0, weight);
