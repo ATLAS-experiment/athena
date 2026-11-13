@@ -280,7 +280,11 @@ NewVrtSecInclusiveTool::NewVrtSecInclusiveTool(const std::string& type,
     for (const auto trk : tmpVectxAOD->listSelTracks) {
       // Mark the track as selected
       m_is_selected(*trk) = true;
-      if (trk->trackFitter() == xAOD::GaussianSumFilter) m_is_selected(*xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(trk)) = true;
+      if (trk->trackFitter() == xAOD::GaussianSumFilter) {
+        auto originalTP = xAOD::EgammaHelpers::getOriginalTrackParticleFromGSF(trk);
+        if(originalTP) m_is_selected(*originalTP) = true;
+        else ATH_MSG_WARNING("No originalTrackParticle from GSF track. Please get in touch with Tracking CP if this is observed.");
+      }
     }
     delete tmpVectxAOD;
 
