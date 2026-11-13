@@ -121,7 +121,7 @@ StatusCode BuildVertexPointingAlg::execute() {
   auto dec_nphotons_good = SG::makeHandle<unsigned int>(m_nphotons_good_key);
 
   dec_nphotons(*vtx_pointing) = photons_selected.size();
-  dec_ph_links(*vtx_pointing) = ph_links;
+  dec_ph_links(*vtx_pointing) = std::move(ph_links);
   dec_nphotons_good(*vtx_pointing) = n_good_photons;
 
   // compute common vertex from the pointing

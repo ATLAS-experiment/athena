@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -131,7 +131,7 @@ StatusCode AsgPhotonEfficiencyCorrectionTool::initialize()
       ATH_MSG_INFO(" Using path = "<<filename);
     }
 
-    i = filename;
+    i = std::move(filename);
 
   }
    
@@ -472,7 +472,7 @@ std::string AsgPhotonEfficiencyCorrectionTool::getFileName(const std::string& is
 	std::string strVal = strLine.substr(nPos + 1, strLine.length() - nPos + 1);
 	
 	// check if this is the right key, if the right one stop the search
-	if(0==correction_type.compare(strKey)) {value=strVal; break;}
+	if(0==correction_type.compare(strKey)) {value=std::move(strVal); break;}
   }
   
   return value;

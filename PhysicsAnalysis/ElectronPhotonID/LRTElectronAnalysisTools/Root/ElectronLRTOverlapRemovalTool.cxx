@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LRTElectronAnalysisTools/ElectronLRTOverlapRemovalTool.h"
@@ -153,7 +153,7 @@ namespace CP
                 }
                 // check that clusters exist (necessary? copied from MuonSpec overlap, but all electrons have clusters...)
                 // TODO: This should then fall back to delta R if clusters are missing
-                if (!lrt_cluster and !prompt_cluster)
+                if (!lrt_cluster or !prompt_cluster)
                     continue;
 
                 // matching based on hottest cell of cluster
