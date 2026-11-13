@@ -34,10 +34,18 @@ For event displays which are not part of any physics paper and which you want to
 
 Some X11/GLX servers report a zero `GLX_MAX_PBUFFER_PIXELS` value. Affected
 Coin versions then reduce the offscreen dimensions to an invalid size, so VP1
-cannot save snapshots or compose rendered views. A pixel-limit-only shim has
-restored correct snapshots in our SSH/XQuartz setup. The permanent Coin fix is
-also proposed for AthenaExternals in
+cannot save snapshots or compose rendered views. The pixel-limit workaround restored
+correct snapshots in our SSH/XQuartz setup. The corresponding Coin fix is
+tracked for AthenaExternals in
 [MR 1490](https://gitlab.cern.ch/atlas/atlasexternals/-/merge_requests/1490).
+
+A separate failure occurs when older Coin versions request an indirect GLX
+context for their offscreen bootstrap, but the display cannot create it.
+The original combined shim restored snapshots and composer images in a tested
+Ubuntu/Wayland client setup using SSH to lxplus. The packaged workaround now
+tries the original context request first and automatically retries a failed
+indirect request with direct rendering requested. No extra option is needed.
+This context retry is separate from the pixel-limit fix in MR 1490.
 
 The optional launcher below works with an existing Athena installation; no
 AthenaExternals or Coin rebuild is needed.
@@ -75,21 +83,33 @@ AthenaExternals or Coin rebuild is needed.
 
    The launcher prints `enabled for this VP1 process`. When a zero query is
    changed, the shim prints `GLX_MAX_PBUFFER_PIXELS: 0 -> 16777216` once.
-   This confirms interception; inspect the image to verify successful rendering.
+   If an indirect context request fails, it also prints
+   `Indirect GLX context creation failed; retry with direct=True succeeded`
+   (or `failed`). Either correction can be exercised independently; the absence
+   of a message means that correction was not needed or not reached.
+   Inspect the image to verify successful rendering.
 
 For an older release without the new option, copy both files from
 [share/offscreen-workaround](VP1Algs/share/offscreen-workaround) into one
 Linux directory and run `bash /path/to/vp1-with-glx-workaround` with your
 usual VP1 arguments. No AthenaExternals rebuild is needed in either case.
 
-The shim changes only successful zero-valued `GLX_MAX_PBUFFER_PIXELS` query
+The shim changes successful zero-valued `GLX_MAX_PBUFFER_PIXELS` query
 results to a synthetic `4096 * 4096` value, matching Coin's existing maximum
 tile dimensions. This is a temporary reporting workaround, not a guarantee
 of available GPU memory or pbuffer capacity. Positive limits, width/height
-queries, and context creation arguments are forwarded unchanged. It does
-not force direct rendering, change EGL selection, or fix other rendering
-failures. The runtime test above was performed on aarch64; other systems
-should verify their output in the same way.
+queries, and successful context requests are unchanged. Only a failed
+`glXCreateContext(..., direct=False)` request is retried with `direct=True`;
+the display, visual and shared context arguments are preserved. Failed direct
+requests are not retried. A direct request does not guarantee a hardware GPU;
+software rendering such as Mesa llvmpipe may be used.
+
+The retry applies to GLX context requests within the preloaded process, not
+only Coin's bootstrap. It does not change EGL selection or guarantee a fix
+for other rendering failures. Regression tests exercise the automatic retry
+without an X server. Visual validation of this retry implementation is still
+required on both the Ubuntu/Wayland and XQuartz setups; the Ubuntu result
+above used the original shim, which always requested direct rendering.
 
 The launcher sets `LD_PRELOAD` only for VP1 and its child processes, preserving
 any existing preload list. It does not modify the installed libraries or your
@@ -102,7 +122,8 @@ VP1_GLX_WORKAROUND_CACHE_DIR=/path/to/private/local-cache \
   vp1 --fix-snapshots
 ```
 
-Once your release includes the Coin fix, launch ordinary `vp1` again. You can
+Once your release and display setup work without either correction, launch
+ordinary `vp1` again. The pixel-limit fix alone does not address context creation. You can
 then delete its cache directory; the installed support files can stay in place. If snapshots
 still fail with this workaround, keep the log and report the failure rather
 than adding the earlier force-direct shim on top.

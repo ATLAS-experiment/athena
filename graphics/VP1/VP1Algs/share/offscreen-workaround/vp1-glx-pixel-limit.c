@@ -1,4 +1,4 @@
-/* Temporary VP1 workaround for zero GLX_MAX_PBUFFER_PIXELS reports.
+/* Temporary VP1 workaround for GLX offscreen context and pixel-limit failures.
  * Derived from the pixel-only shim tested with VP1 over SSH/XQuartz.
  * This synthetic cap is a workaround, not a statement of driver capacity.
  */
@@ -13,6 +13,8 @@
 typedef void *(*lookup_fn)(void *, const char *);
 typedef __GLXextFuncPtr (*resolver_fn)(const GLubyte *);
 typedef int (*attribute_fn)(Display *, GLXFBConfig, int, int *);
+typedef GLXContext (*context_fn)(Display *, XVisualInfo *, GLXContext, Bool);
+static _Atomic(context_fn) context_real;
 static _Atomic(attribute_fn) attribute_real;
 static _Atomic(resolver_fn) resolver_real, resolver_arb_real;
 static atomic_flag reported = ATOMIC_FLAG_INIT;
@@ -33,6 +35,30 @@ static lookup_fn original_dlsym(void)
         _exit(127);
     }
     return fn;
+}
+
+/* Keep successful requests unchanged. Older Coin versions request an indirect
+ * bootstrap context even on displays where only direct contexts are available.
+ * Retry only a failed indirect request; preserve the other arguments. */
+GLXContext glXCreateContext(Display *display, XVisualInfo *visual,
+                           GLXContext share, Bool direct)
+{
+    context_fn fn = atomic_load(&context_real);
+    if (!fn) {
+        fn = (context_fn)original_dlsym()(RTLD_NEXT, "glXCreateContext");
+        if (!fn) {
+            fprintf(stderr, "[vp1-glx-workaround] Cannot resolve glXCreateContext\n");
+            return NULL;
+        }
+        atomic_store(&context_real, fn);
+    }
+    GLXContext context = fn(display, visual, share, direct);
+    if (!context && direct == False) {
+        context = fn(display, visual, share, True);
+        fprintf(stderr, "[vp1-glx-workaround] Indirect GLX context creation failed; "
+                        "retry with direct=True %s\n", context ? "succeeded" : "failed");
+    }
+    return context;
 }
 
 int glXGetFBConfigAttrib(Display *display, GLXFBConfig config, int attribute, int *value)
@@ -60,6 +86,11 @@ static __GLXextFuncPtr resolve(resolver_fn fn, const GLubyte *name)
         if (result != (__GLXextFuncPtr)glXGetFBConfigAttrib)
             atomic_store(&attribute_real, (attribute_fn)result);
         return (__GLXextFuncPtr)glXGetFBConfigAttrib;
+    }
+    if (result && name && strcmp((const char *)name, "glXCreateContext") == 0) {
+        if (result != (__GLXextFuncPtr)glXCreateContext)
+            atomic_store(&context_real, (context_fn)result);
+        return (__GLXextFuncPtr)glXCreateContext;
     }
     return result;
 }
@@ -93,6 +124,11 @@ void *dlsym(void *handle, const char *name)
 {
     void *result = original_dlsym()(handle, name);
     if (!result) return result;
+    if (strcmp(name, "glXCreateContext") == 0) {
+        if (result != (void *)glXCreateContext)
+            atomic_store(&context_real, (context_fn)result);
+        return (void *)glXCreateContext;
+    }
     if (strcmp(name, "glXGetProcAddress") == 0) {
         attribute_fn attr = (attribute_fn)original_dlsym()(handle, "glXGetFBConfigAttrib");
         if (attr && attr != glXGetFBConfigAttrib) atomic_store(&attribute_real, attr);
