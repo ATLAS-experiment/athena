@@ -14,8 +14,9 @@
 #include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
 
 #include "ActsEvent/ContextUtility.h"
-#include "ActsGeometryInterfaces/IExtrapolationTool.h"
+#include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
+#include "CaloGeoHelpers/CaloSampling.h"
 
 #include <vector>
 
@@ -61,7 +62,6 @@ private:
 
     // ACTS Extrapolator
     Gaudi::Property<bool> m_useACTSExtrapolator{this, "useACTSExtrapolator", false};
-    ToolHandle<ActsTrk::IExtrapolationTool> m_extrapolationTool {this, "ExtrapolationTool", "ExtrapolationTool", "Tool to run propagation in an ACTS tracking geometry" };
     ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
     SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_extensionReadDecorKey{this, "ExtensionDecoration", "InDetTrackParticles.caloExtensionLink"};
    
@@ -69,8 +69,7 @@ private:
     ActsTrk::ContextUtility m_ctxProvider{this};
 
     //Map each identifier volume and layer pair onto a calorimeter sampling layer.
-    std::map<std::pair<std::size_t, std::size_t>, std::string> m_caloVolumeLayerMap;
-
+    std::map<Acts::GeometryIdentifier, std::string> m_geoIdCaloSampleMap;  
 };
 
 #endif // TAURECTOOLS_TAUTRACKCALOEXTRAPOLATOR_H

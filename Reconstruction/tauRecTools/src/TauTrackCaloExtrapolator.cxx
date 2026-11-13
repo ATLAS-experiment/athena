@@ -42,10 +42,10 @@ StatusCode TauTrackCaloExtrapolator::initialize() {
 
     ATH_CHECK(m_trackingGeometrySvc.retrieve());
 
-    // tool
-    ATH_CHECK(m_extrapolationTool.retrieve());
-
-    std::array<std::string,8 > caloNames = {"EME1NegZ_Layer", "EME1PosZ_Layer", "EMB1_Layer", "TileBar1_Layer", "HEC1NegZ_Layer", "HEC1PosZ_Layer", "TileExt1NegZ_Layer", "TileExt1PosZ_Layer"};
+    std::array<std::string, 8 > caloNames = {"PreSamplerB_Layer",
+	                                     "EMB1_Layer", "EMB2_Layer", "EMB3_Layer",
+                                             "TileBar0_Layer", "TileBar1_Layer", 
+                                             "CaloLayerDiscNegativeZ", "CaloLayerDiscPositiveZ"};
 
     m_trackingGeometrySvc->trackingGeometry()->visitVolumes([&](const Acts::TrackingVolume *vol) {
       //get geo identifier
@@ -54,9 +54,11 @@ StatusCode TauTrackCaloExtrapolator::initialize() {
       ATH_MSG_DEBUG(name << " - " << geoId << " - surfaces: " << vol->surfaces().size());
 
       if (std::ranges::contains(caloNames, name)){
-        ATH_MSG_DEBUG("About to insert caloName " << name << " into map");
-        m_caloVolumeLayerMap[std::make_pair(geoId.volume(), geoId.layer())] = vol->volumeName();
-      }
+        vol->visitSurfaces([&](const Acts::Surface *surface){
+        ATH_MSG_DEBUG("This surface has ID" << surface->geometryId());
+        m_geoIdCaloSampleMap[surface->geometryId()] = name; 
+        });
+      };
     });
   }  
 
@@ -204,7 +206,7 @@ StatusCode TauTrackCaloExtrapolator::executeTool(xAOD::TauJet& pTau,
             int index = -1;
             if( sample == CaloSampling::PreSamplerE || sample == CaloSampling::PreSamplerB ) index = 0;
             else if( sample == CaloSampling::EME1 || sample == CaloSampling::EMB1 )          index = 1;
-            else if( sample == CaloSampling::EME2 || sample == CaloSampling::EMB2 )          index = 2;
+	    else if( sample == CaloSampling::EME2 || sample == CaloSampling::EMB2 )          index = 2;
             else if( sample == CaloSampling::EME3 || sample == CaloSampling::EMB3 )          index = 3;
 
 	    if( index >= 0 ){
@@ -222,19 +224,15 @@ StatusCode TauTrackCaloExtrapolator::executeTool(xAOD::TauJet& pTau,
     }
     else { 
       // use ACTS Based extrapolation
-      bool use_extrap_tool = false;
-     
       const Acts::GeometryContext gctx = m_ctxProvider.getGeometryContext(ctx);
 
       ElementLink<ActsTrk::CaloExtensionContainer> trackCaloExtensionLink;
       if (extensionReadDecorHandle->isAvailable()) {
          trackCaloExtensionLink = (*extensionReadDecorHandle)(*orgTrack);
-         use_extrap_tool = true;
       } 
 
-      if (!trackCaloExtensionLink.isValid() && use_extrap_tool) {
-         ATH_MSG_DEBUG("Decoration exists, but this track has no valid CaloExtension link (null link), will attempt to do the extrapolation using tool instead of cache");  
-         use_extrap_tool = true;
+      if (!trackCaloExtensionLink.isValid()) {
+         ATH_MSG_DEBUG("Decoration exists, but this track has no valid CaloExtension link (null link)");  
       } else {
 	// do extrapolation from cache      
         const ActsTrk::CaloExtension* trackCaloExtension = *trackCaloExtensionLink;
@@ -250,24 +248,24 @@ StatusCode TauTrackCaloExtrapolator::executeTool(xAOD::TauJet& pTau,
 
           const auto thisGeoID = surface.geometryId();
 
-          if (m_caloVolumeLayerMap.contains(std::make_pair(thisGeoID.volume(), thisGeoID.layer()))) {
+          if (m_geoIdCaloSampleMap.contains(thisGeoID)) {
+
             ATH_MSG_DEBUG("This surface is in the calorimeter");
-            Acts::Vector3 pos = pars.position(gctx);
-            
+
 	    // match to EM or Had calorimeter
-            std::string layer = m_caloVolumeLayerMap.at(std::make_pair(thisGeoID.volume(), thisGeoID.layer()));
+            std::string layer = m_geoIdCaloSampleMap.at(thisGeoID);   
 
             if (not validECal && layer.find("EM") != std::string::npos) {
               validECal = true;
-              etaEM = pos.eta();
-              phiEM = pos.phi();
+              etaEM = pars.position(gctx).eta();
+              phiEM = pars.position(gctx).phi();
               ATH_MSG_DEBUG("Extrapolated to ECal layer. Eta and Phi in caloLayer " << layer << " are " << etaEM << " and " << phiEM);
-            }
+	    }
 
-            if (not validHCal && ((layer.find("Tile") != std::string::npos) || (layer.find("HEC") != std::string::npos))){
+            if (not validHCal && ((layer.find("Tile") != std::string::npos) || (layer.find("Calo") != std::string::npos))){
               validHCal = true;
-              etaHad = pos.eta();
-              phiHad = pos.phi();
+              etaHad = pars.position(gctx).eta(); 
+              phiHad = pars.position(gctx).phi();
               ATH_MSG_DEBUG("Extrapolated to HCal layer. Eta and Phi in caloLayer " << layer << " are " << etaHad << " and " << phiHad);
             }
 
@@ -278,98 +276,30 @@ StatusCode TauTrackCaloExtrapolator::executeTool(xAOD::TauJet& pTau,
         tauTrack->setDetail(xAOD::TauJetParameters::CaloSamplingPhiEM, phiEM);
         tauTrack->setDetail(xAOD::TauJetParameters::CaloSamplingEtaHad, etaHad);
         tauTrack->setDetail(xAOD::TauJetParameters::CaloSamplingPhiHad, phiHad);
-      }
 
-      // backup to extrapolation tool
-      if(use_extrap_tool){ 
-        unsigned int lastMeasIdx = 0;
-        if (!orgTrack->indexOfParameterAtPosition(lastMeasIdx, xAOD::LastMeasurement)) {
-            ATH_MSG_ERROR("TrackParticle has no last measurement parameters");
-            return StatusCode::FAILURE;
-        }
+        // for the leading track we need to save additional information used later in TauElectronVetoVariables 
+        if(i == 0 && tauTrack->flag(xAOD::TauJetParameters::classifiedCharged) ){
+          for (const Acts::BoundTrackParameters& pars : trackCaloExtension->parameters()) {
+            const Acts::Surface& surface = pars.referenceSurface();
+            ATH_MSG_DEBUG("Geometry ID of surface is " << surface.geometryId());
 
-        Acts::Vector3 lastPos{orgTrack->parameterX(lastMeasIdx),
-                              orgTrack->parameterY(lastMeasIdx),
-                              orgTrack->parameterZ(lastMeasIdx)};
-        Acts::Vector3 lastMom{ActsTrk::energyToActs(orgTrack->parameterPX(lastMeasIdx)),
-                              ActsTrk::energyToActs(orgTrack->parameterPY(lastMeasIdx)),
-                              ActsTrk::energyToActs(orgTrack->parameterPZ(lastMeasIdx))};
+            const auto thisGeoID = surface.geometryId();
 
-        Acts::BoundVector lastBoundParams = Acts::BoundVector::Zero();
-        lastBoundParams[Acts::eBoundPhi]    = lastMom.phi();
-        lastBoundParams[Acts::eBoundTheta]  = lastMom.theta();
-        lastBoundParams[Acts::eBoundQOverP] = orgTrack->charge() / lastMom.norm();
+            if (m_geoIdCaloSampleMap.contains(thisGeoID)) {
+              std::string layer = m_geoIdCaloSampleMap.at(thisGeoID);
+              int index = -1;
+	      if(layer.find("PreSampler") != std::string::npos)  index = 0;
+	      else if(layer.find("EMB1") != std::string::npos)   index = 1;
+	      else if(layer.find("EMB2") != std::string::npos)   index = 2;
+	      else if(layer.find("EMB3") != std::string::npos)   index = 3;
 
-        std::shared_ptr<const Acts::Surface> lastSurface = Acts::CurvilinearSurface(lastPos, lastMom.normalized()).planeSurface()->getSharedPtr();
-
-        Acts::BoundTrackParameters boundPars{
-            std::move(lastSurface),
-            lastBoundParams,
-            std::nullopt,
-            Acts::ParticleHypothesis::pion()
-        };
-
-        Acts::Result<std::pair<std::vector<Acts::detail::Step>, Acts::RecordedMaterial>> result = m_extrapolationTool.get()->propagationSteps(ctx, boundPars);
-
-        if( !result.ok() ) {
-          ATH_MSG_WARNING("Error during extrapolation: " << result.error().message());
-          continue;
-        }
-
-        const auto &[steps, _] = result.value();
-
-        bool validECal = false;
-        bool validHCal = false;
-
-        for(const auto &step : steps) {
-
-          if( step.surface == nullptr || step.surface->geometryId().sensitive() == 0 ) {
-            continue;
-          }
-
-          Acts::GeometryIdentifier thisGeoID = step.geoID;
-          ATH_MSG_DEBUG("Got step with geoID " << thisGeoID);
-
-	  if (m_caloVolumeLayerMap.contains(std::make_pair(thisGeoID.volume(), thisGeoID.layer()))) {
-
-            ATH_MSG_DEBUG("This step is in the calorimeter");
-            const auto &p = step.position;
-
-            // match to EM or Had calorimeter
-	    std::string layer = m_caloVolumeLayerMap.at(std::make_pair(thisGeoID.volume(), thisGeoID.layer()));
-
-            if (not validECal && layer.find("EM") != std::string::npos) {
-              validECal = true; 
-	      etaEM = Acts::VectorHelpers::eta(p); 
-              phiEM = Acts::VectorHelpers::phi(p);
-              ATH_MSG_DEBUG("Extrapolated to ECal layer. Eta and Phi in caloLayer " << layer << " are " << etaEM << " and " << phiEM);
+	      if( index >= 0 ){
+                extrapolatedEta[index] = pars.position(gctx).eta();
+                extrapolatedPhi[index] = pars.position(gctx).phi();
+              }
 	    }
-
-            if (not validHCal && ((layer.find("Tile") != std::string::npos) || (layer.find("HEC") != std::string::npos))){
-              validHCal = true;
-              etaHad = Acts::VectorHelpers::eta(p);
-              phiHad = Acts::VectorHelpers::phi(p);
-	      ATH_MSG_DEBUG("Extrapolated to HCal layer. Eta and Phi in caloLayer " << layer << " are " << etaHad << " and " << phiHad);
-            }
-
-            if( validECal and validHCal ) break;
-          }
-        }
-
-        ATH_MSG_DEBUG("Finished steps loop");
-
-        ATH_MSG_DEBUG( "Extrapolated track with eta=" << orgTrack->eta()
-			 << " phi="<<orgTrack->phi()
-                         << " to ECal eta=" << etaEM
-                         << " phi="<< phiEM
-                         << " HCal eta=" << etaHad
-                         << " phi="<< phiHad
-                       );
-  
-        tauTrack->setDetail(xAOD::TauJetParameters::CaloSamplingEtaEM, etaEM);
-        tauTrack->setDetail(xAOD::TauJetParameters::CaloSamplingPhiEM, phiEM);
-        tauTrack->setDetail(xAOD::TauJetParameters::CaloSamplingEtaHad, etaHad);
-        tauTrack->setDetail(xAOD::TauJetParameters::CaloSamplingPhiHad, phiHad);
+	  }
+	}
       }
     }	
 
