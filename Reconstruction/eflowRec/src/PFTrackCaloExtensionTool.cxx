@@ -12,6 +12,8 @@
 #include "ActsGeometryInterfaces/GeometryDefs.h"
 #include "ActsInterop/UnitConverters.h"
 
+#include "CaloGeoHelpers/CaloSampling.h"
+
 #include "StoreGate/ReadDecorHandle.h"
 
 #include "eflowTrackCaloPoints.h"
@@ -21,29 +23,7 @@ StatusCode PFTrackCaloExtensionTool::initialize() {
   ATH_CHECK( AthAlgTool::initialize() );
   ATH_CHECK(m_ctxProvider.initialize());
 
-  ATH_CHECK(m_trackingGeometrySvc.retrieve());
-
   ATH_CHECK(m_extensionReadDecorKey.initialize());
-
-  std::array<std::string, 7 > caloNames = {"EMB1_Layer", "EMB2_Layer", "EMB3_Layer",
-                                          "TileBar0_Layer", "TileBar1_Layer", 
-                                          "CaloLayerDiscNegativeZ", "CaloLayerDiscPositiveZ"};
-
-
-  m_trackingGeometrySvc->trackingGeometry()->visitVolumes([&](const Acts::TrackingVolume *vol) {
-
-    //get geo identifier
-    Acts::GeometryIdentifier geoId = vol->geometryId();
-    const auto & name = vol->volumeName();
-    ATH_MSG_DEBUG(name << " - " << geoId << " - surfaces: " << vol->surfaces().size());
-  
-    if (std::ranges::contains(caloNames, name)){
-      vol->visitSurfaces([&](const Acts::Surface *surface){
-      ATH_MSG_DEBUG("This surface has ID" << surface->geometryId());
-      m_geoIdCaloSampleMap[surface->geometryId()] = static_cast<CaloSampling::CaloSample>(surface->geometryId().layer());
-      });
-    };
-  });
 
   return StatusCode::SUCCESS;
 }
@@ -66,23 +46,38 @@ std::unique_ptr<eflowTrackCaloPoints> PFTrackCaloExtensionTool::execute(const Ev
       ATH_MSG_DEBUG("Have CaloExtensions with size " << trackCaloExtension->size() << " for this track");
       ATH_MSG_DEBUG("Are the parameters empty?: " << trackCaloExtension->parameters().empty());
 
-      for (const Acts::BoundTrackParameters& pars : trackCaloExtension->parameters()) {
-          const Acts::Surface& surface = pars.referenceSurface();
-          ATH_MSG_DEBUG("Geometry ID of surface is " << surface.geometryId());
+      //loop over the calo sampling - simple loop over CaloSampling::CaloSample enum values, and check if we have a corresponding entry in the parameters map
+      for (int i = CaloSampling::EMB1; i < CaloSampling::Unknown; ++i) {
+        //skip the other presampler
+        if (i == CaloSampling::PreSamplerE) continue;
 
-          const auto thisGeoID = surface.geometryId();
-
-          if (m_geoIdCaloSampleMap.contains(thisGeoID)) {
-            CaloSampling::CaloSample caloSample = m_geoIdCaloSampleMap.at(thisGeoID);
-            ATH_MSG_DEBUG("This surface is in the calorimeter with CaloSample " << caloSample << " and eta, phi: " << pars.position(gctx).eta() << ", " << pars.position(gctx).phi());
-            /* parametersMap may have several entries for Tile1,2,3 
+        std::vector<Acts::BoundTrackParameters> caloPars = trackCaloExtension->caloParameters(static_cast<CaloSampling::CaloSample>(i));
+        if (0 == caloPars.size()) continue;
+         /* parametersMap may have several entries for Tile1,2,3 
             due to the simplfification of eflowCalo::LAYER which only considers
             Tile in general and not barrel, exctended barrel and gap.
             The impact is negligible as the eta/phi of these entries are very similar
             https://its.cern.ch/jira/browse/ATLJETMET-242
-            */
-            parametersMap[eflowCalo::translateSampl(caloSample)] = &pars;
-          }  
+            THIS HAS NOT BEEN CHECKED FOR ACTS YET, BUT SHOULD BE THE SAME AS THE ABOVE CASE
+        */
+        parametersMap[eflowCalo::translateSampl(static_cast<CaloSampling::CaloSample>(i))] = &caloPars[0];
+        if (caloPars.size() > 1) {
+          //print eta, phi and details of naming etc
+          ATH_MSG_DEBUG("Multiple parameters for CaloSample: " << i << " with size: " << caloPars.size());
+          double etaNominal = caloPars[0].position(gctx).eta();
+          double phiNominal = caloPars[0].position(gctx).phi();
+          for (const Acts::BoundTrackParameters& pars : caloPars) {
+            double etaDiff = std::abs(pars.position(gctx).eta() - etaNominal);
+            double phiDiff = std::abs(pars.position(gctx).phi() - phiNominal);
+            //for now we print the difference if larger than smallest possible cell width/2 in the calorimeter, 
+            //which is 0.025 in both eta and phi
+            double cellWidthReference = 0.025/2.0;
+            if (etaDiff > cellWidthReference || phiDiff > cellWidthReference) {
+              ATH_MSG_WARNING("Eta, phi difference from nominal: " << etaDiff << ", " << phiDiff);
+            }
+          }
+          ATH_MSG_DEBUG("Using the first one for the eflowTrackCaloPoints object");
+        }
       }
     }
 

@@ -7,9 +7,7 @@
 
 #include "ActsEvent/ContextUtility.h"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
-#include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "CaloGeoHelpers/CaloSampling.h"
 
 #include "xAODTracking/TrackParticleContainer.h"
 
@@ -32,12 +30,7 @@ private:
      /** The ContextUtility will give us access to the Acts geometry context */
      ActsTrk::ContextUtility m_ctxProvider{this};
 
-    ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
-
     SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_extensionReadDecorKey{this, "ExtensionDecoration", "InDetTrackParticles.caloExtensionLink"};
-
-    //Map geometry identifier to calo sampling layer enum
-    std::map<Acts::GeometryIdentifier, CaloSampling::CaloSample> m_geoIdCaloSampleMap;
 
 };
 #endif

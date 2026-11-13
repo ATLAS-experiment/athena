@@ -63,6 +63,7 @@ eflowTrackCaloPoints::eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, cons
 eflowTrackCaloPoints::eflowTrackCaloPoints(const std::map<eflowCalo::LAYER, const Acts::BoundTrackParameters*> & trackParameters,
   const Acts::GeometryContext& gctx) :
   m_isEM1Barrel(trackParameters.begin()->first == eflowCalo::EMB1){
+    m_isEM2Barrel = false;
     for (auto keyValuePair : trackParameters) {
       setEtaPhi(keyValuePair.first,parToPosition(keyValuePair.second, gctx));
       if (keyValuePair.first == eflowCalo::EMB2) m_isEM2Barrel = true;
