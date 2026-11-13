@@ -6,5 +6,6 @@
   <class name="IBTaggingEigenVectorRecompositionTool" />
   <class name="IBTaggingLargeRSelectionJsonTool" />
   <class name="IBTaggingLargeREfficiencyJsonTool" />
+  <class name="IBTaggingSmallREfficiencyJsonTool" />
   <class name="ftag::IFTagScaleFactorTool" />
 </lcgdict>

@@ -5,4 +5,5 @@
   <class name="BTaggingEigenVectorRecompositionTool" />
   <class name="BTaggingLargeRSelectionJsonTool" />
   <class name="BTaggingLargeREfficiencyJsonTool" />
+  <class name="BTaggingSmallRSelectionJsonTool" />
 </lcgdict>
