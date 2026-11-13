@@ -27,11 +27,14 @@
 
 #include <detray/geometry/identifier.hpp>
 
-namespace ActsPlugins {
-  class DetraySurfaceIdMap;
+namespace traccc {
+  class host_detector;
 }
 
 enum TrackValidity { kValid, kInvalidState, kInvalidGlobalParams };
+#include <atomic>
+#include <memory>
+#include <span>
 
 namespace ActsTrk {
 
@@ -41,7 +44,8 @@ namespace ActsTrk {
  * @brief Algorithm converting traccc tracks ( tracks + track states sdevice buffer) to ACTS tracks (host container)
  *
  * This algorithm retrieves the input device resident traccc track and track states collection from the event store,
- * copies the data to host buffer and converts the traccc tracks to ActsTrk::Track.
+ * copies the data to host buffer and converts the traccc tracks to ActsTrk::Track
+ * with the ACTS traccc plugin (ActsPlugins::convertTracksFromTraccc).
  * It works under the assumption that the other relevant traccc objects 
  * have already been converted to xAOD and are available on host in the event store
  * and that the indices between the HOST and DEVICE resident containers have been recorded in a index map. 
@@ -70,13 +74,6 @@ private:
     const xAOD::PixelClusterContainer& pixel_clusters,
     const xAOD::StripClusterContainer& strip_clusters) const;
 
-  const Acts::Surface& findActsSurface(detray::geometry::identifier detrayId) const;
-
-  std::optional<Acts::BoundTrackParameters> convertGlobalToActsParameters(
-    traccc::bound_track_parameters<traccc::default_algebra> const& trkParams) const;
-
-  template <typename state_t>
-  std::optional<Acts::BoundTrackParameters> convertSmoothedToActsParameters(traccc::edm::track_state<state_t> const& state) const;
 
   /// @name The input device resident cluster, measurement and cell collection names
   /// {@
@@ -111,9 +108,10 @@ private:
   ToolHandle<AthDevice::ICopyTool> m_copy{
       this, "CopyProviderTool", "", "Vecmem copy provider tool"};
 
+  std::shared_ptr<const Acts::TrackingGeometry> m_trackingGeometry;
+  /// The Detray detector built by the TrackingGeometrySvc, owned by the service
+  const traccc::host_detector* m_hostDetector{nullptr};
   ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", "ActsTrackingGeometrySvc"};
-  /// Detray -> ACTS surface map built by the ACTS Detray plugin, owned by the TrackingGeometrySvc
-  const ActsPlugins::DetraySurfaceIdMap* m_detraySurfaceIds = nullptr;
   // acts helper for the output
   ActsTrk::MutableTrackContainerHandlesHelper m_tracksBackendHandlesHelper{
         this};
@@ -122,13 +120,11 @@ private:
         "Detray host detector object"};
   /// The object counters for debug prints in finalize method
   /// {@
-  mutable std::atomic<int> m_nTracksIn = 0;
-  mutable std::atomic<int> m_nTracksOut = 0;
-  mutable std::atomic<int> m_nExcludedFitOutcome = 0;
-  mutable std::atomic<int> m_nExcludedNoState = 0;
-  mutable std::atomic<int> m_nExcludedBadNdf = 0;
-  mutable std::atomic<int> m_nExcludedWeirdState = 0;
-  mutable std::atomic<int> m_nExcludedWeirdGlobal = 0;
+  mutable std::atomic<std::size_t> m_nTracksIn = 0;
+  mutable std::atomic<std::size_t> m_nTracksOut = 0;
+  mutable std::atomic<std::size_t> m_nExcludedFitOutcome = 0;
+  mutable std::atomic<std::size_t> m_nExcludedMissingSurface = 0;
+  mutable std::atomic<std::size_t> m_nExcludedDegenerate = 0;
   /// @}    
   
 };

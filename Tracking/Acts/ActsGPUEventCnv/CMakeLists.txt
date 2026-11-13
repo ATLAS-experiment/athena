@@ -5,7 +5,7 @@ atlas_subdir(ActsGPUEventCnv)
 
 find_package(vecmem)
 find_package(traccc)
-find_package(Acts COMPONENTS Core PluginDetray)
+find_package(Acts COMPONENTS Core PluginDetray PluginTraccc)
 
 set( _sources
   src/*.h src/*.cxx
@@ -13,6 +13,7 @@ set( _sources
 )
 
 set( _libraries
+  Acts::PluginTraccc
   vecmem::core
   traccc::core
   traccc::io
