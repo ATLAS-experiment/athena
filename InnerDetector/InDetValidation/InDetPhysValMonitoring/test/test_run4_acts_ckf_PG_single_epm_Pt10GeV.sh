@@ -8,7 +8,7 @@
 # art-output: dcube*
 # art-html: dcube_acts_shifter_last
 
-rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-04-00-00/mc21_14TeV.900494.PG_single_epm_Pt10_etaFlatnp0_43.recon.RDO.e8481_s4494_r16632/RDO.45451600._000028.pool.root.1
+rdo=/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/PhaseIIUpgrade/RDO/ATLAS-P2-RUN4-05-00-00/mc21_14TeV.900494.PG_single_epm_Pt10_etaFlatnp0_43.recon.RDO.e8481_s4676_r17688/RDO.52769921._000001.1k.pool.root.1
 
 script=test_run4_acts_ckf_epm_reco.sh
 echo "Executing script ${script} "
