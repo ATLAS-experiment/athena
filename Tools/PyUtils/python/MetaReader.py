@@ -24,11 +24,11 @@ regexXAODEventFormat = re.compile(r'^xAOD::EventFormat(_v\d+)?$')
 regexXAODFileMetaData = re.compile(r'^xAOD::FileMetaData(_v\d+)?$')
 regexXAODFileMetaDataAux = re.compile(r'^xAOD::FileMetaDataAuxInfo(_v\d+)?$')
 regexXAODFileMetaDataAuxDyn = re.compile(r'^(xAOD::)?FileMetaData.*AuxDyn(\.[a-zA-Z0-9]+)?$')
-regexXAODTriggerMenu = re.compile(r'^DataVector<xAOD::TriggerMenu(_v\d+)?>$') # Run 2
+regexXAODTriggerMenu = re.compile(r'^DataVector<xAOD::TriggerMenu(_v\d+)?(,.*)?>$') # Run 2
 regexXAODTriggerMenuAux = re.compile(r'^xAOD::TriggerMenuAuxContainer(_v\d+)?$') # Run 2
-regexXAODTriggerMenuJson = re.compile(r'^DataVector<xAOD::TriggerMenuJson(_v\d+)?>$') # Run 3
+regexXAODTriggerMenuJson = re.compile(r'^DataVector<xAOD::TriggerMenuJson(_v\d+)?(,.*)?>$') # Run 3
 regexXAODTriggerMenuJsonAux = re.compile(r'^xAOD::TriggerMenuJsonAuxContainer(_v\d+)?$') # Run 3
-regexXAODTruthMetaData = re.compile(r'^DataVector<xAOD::TruthMetaData(_v\d+)?>$')
+regexXAODTruthMetaData = re.compile(r'^DataVector<xAOD::TruthMetaData(_v\d+)?(,.*)?>$')
 regexXAODTruthMetaDataAux = re.compile(r'^xAOD::TruthMetaDataAuxContainer(_v\d+)?$')
 regex_cppname = re.compile(r'^([\w:]+)(<.*>)?$')
 # regex_persistent_class = re.compile(r'^([a-zA-Z]+_p\d+::)*[a-zA-Z]+_p\d+$')
@@ -1280,13 +1280,13 @@ def _convert_value(value, aux = None):
                 return _extract_fields_cbk(interface=value, aux=aux)
             elif cl.__cpp_name__ == 'xAOD::FileMetaData_v1':
                 return _extract_fields_fmd(interface=value, aux=aux)
-            elif cl.__cpp_name__ == 'DataVector<xAOD::TruthMetaData_v1>':
+            elif cl.__cpp_name__.startswith ('DataVector<xAOD::TruthMetaData_v1'):
                 return _extract_fields_tmd(interface=value, aux=aux)
 
-            elif cl.__cpp_name__ == 'DataVector<xAOD::TriggerMenu_v1>' :
+            elif cl.__cpp_name__.startswith ('DataVector<xAOD::TriggerMenu_v1'):
                 return _extract_fields_triggermenu(interface=value, aux=aux)
 
-            elif cl.__cpp_name__ == 'DataVector<xAOD::TriggerMenuJson_v1>' :
+            elif cl.__cpp_name__.startswith ('DataVector<xAOD::TriggerMenuJson_v1'):
                 return _extract_fields_triggermenujson(interface=value, aux=aux)
 
             elif (cl.__cpp_name__ == 'EventStreamInfo_p1' or
