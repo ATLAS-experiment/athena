@@ -11,9 +11,11 @@
 
 GepCellTowerAlg::GepCellTowerAlg( const std::string& name, ISvcLocator* pSvcLocator ) : 
    AthReentrantAlgorithm( name, pSvcLocator ),
-   m_minEt(0.)
+   m_minEt(0.),
+   m_doNNFilter(0)
 {
    declareProperty("minEt", m_minEt);
+   declareProperty("doNNFilter", m_doNNFilter);
 }
 
 
@@ -89,6 +91,48 @@ StatusCode GepCellTowerAlg::execute(const EventContext& context) const {
 
       int idx = customTowers->index(cell.eta,cell.phi);
       if (idx < 0) continue;
+
+      //custom code to do the "No neighbours filter"/"Not Ned Flanders"
+      //Three levels of filter have been implemented
+      // 1. Designed to remove a set of cells which are never in 4-2-2 topoclusters.
+      //    Rejects cells with significance <4 where there are no neighbours.
+      // 2. Designed to try to replicate the 4-2-2 topoclusters are accurately as possible.
+      //    Note that some cell in 4-2-2 topoclusters are rejected and others not in 4-2-2 topoclusters are retained.
+      //    i.e. we try to replicate the overall effect but this is not perfect.
+      //    As well as those in 1. cells in PreB,EMB1,EMB2,PreE,EME1,EME2 with ET < 4sigma with only 1 neighbour which is not above 4 sigma are removed.
+      // 3. Designed to be stricter than 4-2-2 topoclustering to target the most noisy layers of the calorimeter.
+      //    As well as the cells in 1. and 2. PreB,PreE,TileGap3 cells are required to have at least 1 neighbour not in the same layer (even if ET > 4 sigma).
+      if (m_doNNFilter!=0){
+          int countNeighbours=0;
+          int countNeighboursNotInLayer=0;
+          int count4sigNeighbours=0;
+          //loop over the neighbours
+          for (unsigned int i_neighbour = 0; i_neighbour < cell.neighbours.size(); ++i_neighbour) {
+              // Check whether this neighbouring cell was sent to the GEP
+              auto const& nghbr_itr = cell_map->find(cell.neighbours[i_neighbour]);
+              if (nghbr_itr == cell_map->end()) continue;
+              Gep::GepCaloCell neighbour = nghbr_itr->second;
+              if (neighbour.isBadCell()) continue;
+              if (neighbour.et<=0) continue;
+              countNeighbours++;
+              if (neighbour.sigma>=4) count4sigNeighbours++;
+              if (neighbour.sampling!=cell.sampling) countNeighboursNotInLayer++;
+          }
+          //skip cells where no neighbour can be found
+          if (countNeighbours==0 && cell.sigma<4) continue;
+          bool passStrictNNFilter = false;
+          if (cell.sigma>4) passStrictNNFilter=true;
+          if (cell.sampling==0 && (countNeighbours>=2 || count4sigNeighbours>=1)) passStrictNNFilter=true;
+          if (cell.sampling==1 && (countNeighbours>=2 || count4sigNeighbours>=1)) passStrictNNFilter=true;
+          if (cell.sampling==2 && (countNeighbours>=2 || count4sigNeighbours>=1)) passStrictNNFilter=true;
+          if (cell.sampling==4 && (countNeighbours>=2 || count4sigNeighbours>=1)) passStrictNNFilter=true;
+          if (cell.sampling==5 && (countNeighbours>=2 || count4sigNeighbours>=1)) passStrictNNFilter=true;//maybe we don't want to do this for the EMEC-IW?
+          if (cell.sampling==6 && (countNeighbours>=2 || count4sigNeighbours>=1)) passStrictNNFilter=true;//maybe we don't want to do this for the EMEC-IW?
+          if ((cell.sampling>=6 || cell.sampling==3) && countNeighbours>=1) passStrictNNFilter=true;
+          if (m_doNNFilter>=2 && !passStrictNNFilter) continue;
+          if (m_doNNFilter>=3 && (cell.sampling==0 || cell.sampling==4 || cell.sampling==17) && countNeighboursNotInLayer==0) continue;
+      }
+
       // Internally, this results in the cell et being added to the energy (i.e. e, not et) of a
       // 4-vector with the eta and phi set to the center point of the tower
       // Effectively accumulating the et of the tower's constituent cells

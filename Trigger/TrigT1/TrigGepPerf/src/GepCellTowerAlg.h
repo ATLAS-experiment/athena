@@ -31,6 +31,7 @@ class GepCellTowerAlg: public ::AthReentrantAlgorithm {
     this, "gepCellMapKey", "GepCells", "Key to get the correct cell map"};  
 
   float m_minEt;
+  int m_doNNFilter;
 
 }; 
 
