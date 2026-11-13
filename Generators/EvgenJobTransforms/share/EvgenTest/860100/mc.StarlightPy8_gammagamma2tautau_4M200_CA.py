@@ -8,7 +8,6 @@ class Sample(EvgenConfig):
         self.description = "Starlight+Pythia8+Tauolapp+Photospp gamma + gamma UPC collisions to continuum -> 2 tau, breakup mode 5 (no selection) with pT>3 GeV charged tracks filter"
         self.keywords = ["2photon","2lepton","2tau"]
         self.contact = ["pawel.rybczynski@cern.ch"]
-        self.nEventsPerJob = 10000
 
     def setupProcess(self, flags):
 

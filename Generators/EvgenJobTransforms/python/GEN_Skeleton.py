@@ -25,6 +25,7 @@ from PyJobTransforms.TransformUtils import (
 # Helper functions
 from EvgenJobTransforms.EvgenHelpers import (
     _count_lhe_events,
+    _read_production_parameters,
     _validate_sample_properties,
     _handle_input_files,
     _is_txt_only_run
@@ -61,6 +62,24 @@ def setupSample(flags):
     )
     checkNaming(jofile)
 
+    # Read production parameters from production_parameters.yaml 
+    # and set respective flags.
+    jo_dir = os.path.abspath(FIRST_DIR)
+    production_parameters = _read_production_parameters(jo_dir)
+    flags.Generator.nEventsPerJob = production_parameters["nEventsPerJob"]
+    flags.Generator.inputFilesPerJob = production_parameters["inputFilesPerJob"]
+
+    # Check number of events requested
+    checkNEventsPerJob(flags.Generator)
+    
+    # Print metadata from production_parameters.yaml in the log.
+    for name, value in production_parameters.items():
+        evgenLog.info("MetaData: %s = %s", name, value)
+
+    # Allow normal imports of control files as modules from the jO.
+    if jo_dir not in sys.path:
+        sys.path.insert(0, jo_dir)
+
     # Import the jO as a module
     # We cannot do import BLAH directly since
     # 1. the filenames are not python compatible (mc.GEN_blah.py)
@@ -93,27 +112,16 @@ def setupSample(flags):
     if dsid.isdigit():
         flags.Generator.DSID = int(dsid)
 
-    # Set nEventsPerJob
-    if not sample.nEventsPerJob:
-        evgenLog.info("#############################################################")
-        evgenLog.info(" !!!! no sample.nEventsPerJob set !!!")
-        evgenLog.info("#############################################################")
-        # We don't need to set the global flag because its default is 10000
-    else:
-        checkNEventsPerJob(sample)
-        evgenLog.info(" nEventsPerJob = " + str(sample.nEventsPerJob))
-        flags.Generator.nEventsPerJob = sample.nEventsPerJob
-
-    # Validate all required/conditional sample metadata with explicit rules.
-    _validate_sample_properties(sample)
+    # Validate all sample metadata
+    _validate_sample_properties(sample, flags)
 
     # Propagate optional sample values to global flags.
-    flags.Generator.inputFilesPerJob = sample.inputFilesPerJob
     flags.Generator.MEgenerator = sample.MEgenerator or ""
 
     # Print sample metadata in the log.
     for var, value in vars(sample).items():
-        evgenLog.info("MetaData: {} = {}".format(var, value))
+        if var not in production_parameters:
+            evgenLog.info("MetaData: {} = {}".format(var, value))
 
     # Keywords check
     if hasattr(sample, "keywords"):
@@ -287,7 +295,7 @@ def fromRunArgs(runArgs):
     nEventsLHE = None
     if flags.Generator.inputFilesPerJob > 0:
         if not flags.Generator.inputGeneratorFile:
-            raise RuntimeError(f"Sample sets inputFilesPerJob = {flags.Generator.inputFilesPerJob} but Gen_tf run without inputGeneratorFile")
+            raise RuntimeError(f"production_parameters.yaml sets inputFilesPerJob = {flags.Generator.inputFilesPerJob} but Gen_tf run without inputGeneratorFile")
         else:
             nEventsLHE = _handle_input_files(generators, flags)
 
@@ -339,7 +347,7 @@ def fromRunArgs(runArgs):
     from EvgenProdTools.EvgenProdToolsConfig import CountHepMCCfg
     requested_output = (
         1 if txt_only_mode else
-        (sample.nEventsPerJob if flags.Exec.MaxEvents == -1 else flags.Exec.MaxEvents)
+        (flags.Generator.nEventsPerJob if flags.Exec.MaxEvents == -1 else flags.Exec.MaxEvents)
     )
     count_kwargs = {"RequestedOutput": requested_output}
     if txt_only_mode:

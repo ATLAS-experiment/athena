@@ -9,7 +9,6 @@ class Sample(EvgenConfig):
         self.description = "MadGraph LO ttbar"
         self.keywords = ["ttbar"]
         self.contact = ["spyros.argyropoulos@cern.ch"]
-        self.nEventsPerJob = 10000
 
     def setupProcess(self, flags):
         # MadGraph process to generate

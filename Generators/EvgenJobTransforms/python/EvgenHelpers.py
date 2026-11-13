@@ -210,28 +210,65 @@ def _handle_input_files(generators, flags):
     return _count_lhe_events(eventsFile)
 
 
-def _validate_sample_properties(sample):
+def _read_production_parameters(jo_dir):
+    """
+    Read the required production settings from the compulsory 
+    production_parameters.yaml in the jO directory.
+    """
+    import yaml
+
+    path = os.path.join(jo_dir, "production_parameters.yaml")
+    try:
+        with open(path, encoding="utf-8") as file:
+            yaml_content = yaml.safe_load(file)
+    except FileNotFoundError:
+        raise RuntimeError(
+            f"Required production parameters file not found: {path}. "
+            "Put production_parameters.yaml beside the jO."
+        )
+    except (OSError, yaml.YAMLError) as exc:
+        raise RuntimeError(f"Cannot read production parameters from {path}: {exc}")
+
+    if not isinstance(yaml_content, dict) or "job_parameters" not in yaml_content:
+        raise RuntimeError(f"{path} must contain a job_parameters list")
+
+    job_parameters = yaml_content["job_parameters"]
+    if (not isinstance(job_parameters, list) or len(job_parameters) != 1
+            or not isinstance(job_parameters[0], dict)):
+        raise RuntimeError(f"job_parameters in {path} must be a list containing one parameter mapping")
+
+    parameters = dict(job_parameters[0])
+    if "nEventsPerJob" not in parameters:
+        raise RuntimeError(f"Required parameter nEventsPerJob is missing from job_parameters in {path}")
+    parameters.setdefault("inputFilesPerJob", 0)
+
+    for name, minimum in (("nEventsPerJob", 1), ("inputFilesPerJob", 0)):
+        value = parameters[name]
+        if type(value) is not int or value < minimum:
+            raise RuntimeError(f"{name} in {path} must be an integer >= {minimum}")
+
+    return {name: parameters[name] for name in ("nEventsPerJob", "inputFilesPerJob")}
+
+
+def _validate_sample_properties(sample, flags):
     """Helper function to validate and set sample properties"""
     # Required fields with lightweight, explicit validators.
     required_rules = {
         "keywords": lambda v: isinstance(v, list) and len(v) > 0,
         "contact": lambda v: isinstance(v, list) and len(v) > 0,
-        "nEventsPerJob": lambda v: v is not None,
     }
     for field, validator in required_rules.items():
         value = getattr(sample, field, None)
         if not validator(value):
             raise RuntimeError(f"self.{field} should be set in Sample(EvgenConfig)")
 
-    input_files_per_job = getattr(sample, "inputFilesPerJob", 0)
+    input_files_per_job = flags.Generator.inputFilesPerJob
     me_generator = getattr(sample, "MEgenerator", None)
 
-    if input_files_per_job < 0:
-        raise RuntimeError("self.inputFilesPerJob should be >= 0 in Sample(EvgenConfig)")
     if input_files_per_job > 0 and not me_generator:
-        raise RuntimeError("self.MEgenerator should be set when self.inputFilesPerJob > 0 in Sample(EvgenConfig)")
+        raise RuntimeError("self.MEgenerator should be set when inputFilesPerJob > 0 in production_parameters.yaml")
     if input_files_per_job == 0 and me_generator:
-        raise RuntimeError("self.MEgenerator should be empty when self.inputFilesPerJob == 0 in Sample(EvgenConfig)")
+        raise RuntimeError("self.MEgenerator should be empty when inputFilesPerJob == 0 in production_parameters.yaml")
 
 
 def _is_txt_only_run(flags):

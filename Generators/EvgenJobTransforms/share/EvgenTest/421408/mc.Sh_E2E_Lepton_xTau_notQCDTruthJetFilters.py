@@ -39,7 +39,6 @@ class Sample(EvgenConfig):
         self.description = "Sherpa Z/gamma* -> tau tau + 0,1,2j@NLO + 3,4,5j@LO with di-leptonic tau decays and b-jet filter taking input from existing unfiltered input file."
         self.keywords = ["SM", "Z", "2tau", "2lepton", "jets", "NLO"]
         self.contact = ["tadej@cern.ch"]
-        self.nEventsPerJob = 10000
 
     def setupProcess(self, flags):
         # we run no generators here so it's fine only to configure the filter sequence

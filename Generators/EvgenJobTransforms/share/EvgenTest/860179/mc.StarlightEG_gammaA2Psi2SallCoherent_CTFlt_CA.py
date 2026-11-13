@@ -8,7 +8,6 @@ class Sample(EvgenConfig):
         self.description = "Starlight+EvtGen coherent gamma + A UPC collisions to Psi(2S) -> all decays, breakup mode 5, pT(trk)>0.9GeV, |eta(trk)|<2.6"
         self.keywords = ["coherent","resonance"]
         self.contact = ["pawel.rybczynski@cern.ch"]
-        self.nEventsPerJob = 10000
 
     def setupProcess(self, flags):
 

@@ -100,8 +100,9 @@ def Pythia8EvtGenBaseCfg(flags, **kwargs):
     """
     Fragment for setting up EvtGen on top of Pythia 8
     """
-    # Custom settings
-    auxfiles = ["inclusiveP8DsDPlus.pdt"]
+    # Select and stage the same particle-data table for EvtGen.
+    kwargs.setdefault("pdtFile", "inclusiveP8DsDPlus.pdt")
+    auxfiles = [kwargs["pdtFile"]]
     # FHerwig has problems with omega b* (5334), so not present in the base EvtGen fragment.
     whiteList = [-5334, 5334] 
     

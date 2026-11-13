@@ -1,4 +1,4 @@
-#  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Get logger
 from AthenaCommon.Logging import logging
@@ -10,14 +10,15 @@ class EvgenConfig():
     __slots__ = ()
  
     def __init__(self, flags):
-        # Values with invalid defaults - will throw if not implemented in jO
+        """
+        Values with invalid defaults - will throw if not implemented in jO
+        The error is thrown from EvgenHelpers._validate_sample_properties,
+        here we just add them for documentation of the class properties.
+        """
         self.keywords = []
         self.contact = []
-        self.nEventsPerJob = None
         # Optional values
-        self.inputFilesPerJob = 0
         self.MEgenerator = None
-
 
     def setupFlags(self, flags):
         raise RuntimeError("setupFlags method needs to be implemented in Sample(EvgenConfig)")

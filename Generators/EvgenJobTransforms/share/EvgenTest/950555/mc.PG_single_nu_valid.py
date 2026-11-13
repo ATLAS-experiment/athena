@@ -10,7 +10,6 @@ class Sample(EvgenConfig):
         self.description = "Single neutrinos with fixed eta and E: purely for pile-up/lumi testing"
         self.keywords = ["singleParticle", "neutrino"]
         self.contact = ["dhirsch@mail.cern.ch"]
-        self.nEventsPerJob = 100
 
     def setupProcess(self, flags):
         # TODO: update once we have a proper PG fragment

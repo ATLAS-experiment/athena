@@ -8,7 +8,6 @@ class Sample(EvgenConfig):
         self.description = "Hijing"
         self.keywords = ["minBias"]
         self.contact = ["pawel.rybczynski@cern.ch"]
-        self.nEventsPerJob = 10000
 
     def setupProcess(self, flags):
 

@@ -8,7 +8,6 @@ class Sample(EvgenConfig):
         self.description = "Herwig7 dijet sample with MMHT2014 PDF and corresponding tune"
         self.keywords = ["SM", "QCD", "dijet"]
         self.contact = ["spyros.argyropoulos@cern.ch"]
-        self.nEventsPerJob = 10000
 
     def setupProcess(self, flags):
         from Herwig7_i.Herwig7CAConfig import Herwig7BuiltinMECfg
