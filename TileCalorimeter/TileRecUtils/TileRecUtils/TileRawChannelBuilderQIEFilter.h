@@ -48,7 +48,7 @@ class TileRawChannelBuilderQIEFilter: public TileRawChannelBuilder {
     virtual StatusCode initialize() override; //!< Initialize method
 
     // Inherited from TileRawChannelBuilder
-    virtual TileRawChannel* rawChannel(const TileDigits* digits, const EventContext& ctx);
+    virtual TileRawChannel* rawChannel(const TileDigits* digits, const EventContext& ctx) override;
 
     /**
      * AlgTool InterfaceID
