@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @package PyJobTransforms.trfArgClasses
 # @brief Transform argument class definitions
@@ -1894,62 +1894,62 @@ class argLHEFile(argFile):
         super(argLHEFile, self).__init__(value=value, io=io, type=type, splitter=splitter, runarg=runarg, multipleOK=multipleOK,
                                            name=name)
 
+        # One pass over the file fills all three keys. Like the other metadata generators,
+        # _getLHEMetadata writes the values into self._fileMetadata and returns nothing.
+        # _readMetadata calls it only for a key that is not cached yet.
         self._metadataKeys.update({
-                'nentries': self._getNumberOfEvents,
-                'lheSumOfPosWeights': self._getWeightedEvents,
-                'lheSumOfNegWeights': 0,
+                'nentries': self._getLHEMetadata,
+                'lheSumOfPosWeights': self._getLHEMetadata,
+                'lheSumOfNegWeights': self._getLHEMetadata,
                 })
 
-    def _getNumberOfEvents(self, files):
-        msg.debug('Retrieving event count for LHE file {0}'.format(files))
+    ## @brief Count the events and sum the event weights of LHE tarballs
+    #  @details Reads each file line by line instead of loading it into memory. All three
+    #  metadata values are filled in one pass. The event weight is XWGTUP, the third field of
+    #  the line that follows the event tag. If a weight cannot be read, both sums are UNDEFINED.
+    def _getLHEMetadata(self, files):
+        import math
         import tarfile
         for fname in files:
-            # Decompress this as we read
-            try :
-                tar = tarfile.open(fname, "r:gz")
-                lhecount = 0
-                for untar in tar.getmembers():
-                    fileTXT = tar.extractfile(untar)
-                    if fileTXT is not None :
-                        lines = fileTXT.read().decode("utf-8")
-                        lhecount = lines.count('/event')
-
-                self._fileMetadata[fname]['nentries'] = lhecount
-            except Exception:
-                msg.debug('Entries is set to None - event count undefined for this LHE')
-                self._fileMetadata[fname]['nentries'] = 'UNDEFINED'
-
-    def _getWeightedEvents(self, files):
-        msg.debug('Retrieving weight count for LHE file {0}'.format(files))
-        import tarfile
-        import re
-
-        for fname in files:
+            msg.debug('Retrieving event count and weights for LHE file {0}'.format(fname))
+            lhecount = 0
             weightPos = 0
             weightNeg = 0
-            try :
-                tar = tarfile.open(fname, "r:gz")
-                for untar in tar.getmembers():
-                    fileTXT = tar.extractfile(untar)
-                    next = False
-                    if fileTXT is not None :
-                        lines = fileTXT.readlines()
-                        for line in lines :
-                            if next :
-                                try :
-                                    w = float(re.sub(' +',' ',line).split(" ")[2])
-                                    if w > 0 : weightPos += w
-                                    else : weightNeg += abs(w)
-                                except Exception:
-                                    pass
-                                next = False
-                            if "<event" in line :
-                                next = True
-
+            weightsValid = True
+            try:
+                with tarfile.open(fname, "r:gz") as tar:
+                    for member in tar:
+                        if not member.isfile():
+                            continue
+                        eventLineNext = False
+                        for line in tar.extractfile(member):
+                            if eventLineNext:
+                                eventLineNext = False
+                                try:
+                                    w = float(line.split()[2])
+                                except (IndexError, ValueError):
+                                    w = math.nan
+                                if not math.isfinite(w):
+                                    weightsValid = False
+                                elif w > 0:
+                                    weightPos += w
+                                else:
+                                    weightNeg += abs(w)
+                            stripped = line.lstrip()
+                            if stripped.startswith(b'<event') and stripped[6:7] in (b'>', b' ', b'\t'):
+                                eventLineNext = True
+                            elif b'</event>' in line:
+                                lhecount += 1
+                if not weightsValid:
+                    msg.warning('Could not read all event weights in LHE file {0}'.format(fname))
+                    weightPos = 'UNDEFINED'
+                    weightNeg = 'UNDEFINED'
+                self._fileMetadata[fname]['nentries'] = lhecount
                 self._fileMetadata[fname]['lheSumOfPosWeights'] = weightPos
                 self._fileMetadata[fname]['lheSumOfNegWeights'] = weightNeg
             except Exception:
-                msg.debug('Entries is set to None - negative fraction count undefined for this LHE')
+                msg.debug('Event count and weights are undefined for LHE file {0}'.format(fname))
+                self._fileMetadata[fname]['nentries'] = 'UNDEFINED'
                 self._fileMetadata[fname]['lheSumOfPosWeights'] = 'UNDEFINED'
                 self._fileMetadata[fname]['lheSumOfNegWeights'] = 'UNDEFINED'
 
