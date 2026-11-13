@@ -80,11 +80,13 @@ class LArIdHelper:
         payload=ptr.payload()["OnlineHashToOfflineId"]
         on2off=payload.read()
         nChans=int(payload.size()/4)
+
+        #Re-implement the functionality of the LArOnOffIdMappingAlg conditions alg in python ...
         
         self._cabling=ROOT.LArOnOffIdMapping(self._larOnlHelper,self._caloHelper)
         onlHash2OflIdVec=self._cabling.getOnlHash2OflId()
         oflHash2OnlIdVec=self._cabling.getOflHash2OnId()
-
+        onlHash2OflHashVec=self._cabling.getOnlHashToOflHash()
 
         i=0
         nConnected=0
@@ -107,6 +109,7 @@ class LArIdHelper:
                 onlId=self._larOnlHelper.channel_Id(onlHash)
                 onlHash2OflIdVec[iChan]=oflId
                 oflHash2OnlIdVec[oflHash.value()]=onlId
+                onlHash2OflHashVec[iChan]=oflHash
                 pass
             else: 
                 #print ("idnum %i give invalid offline id 0x%x",(idnum,oflId.get_identifier32().get_compact()))
