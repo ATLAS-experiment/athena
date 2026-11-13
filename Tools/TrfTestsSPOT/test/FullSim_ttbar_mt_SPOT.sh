@@ -21,10 +21,10 @@ Sim_tf.py \
       --perfmon 'fullmonmt' \
       --multithreaded 'True' \
       --inputEVNTFile ${DATAFILE} \
-      --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
-      --geometryVersion 'default:ATLAS-R3S-2021-03-02-00'   \
+      --conditionsTag 'default:${CONDTAG}' \
+      --geometryVersion 'default:${GEOTAG}' \
       --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True' \
-      --AMIConfig 's4006' \
+      --AMIConfig 's4369' \
       --outputHITSFile 'myHITS.pool.root' \
       --maxEvents ${NEVENTS} \
       --jobNumber '1'  >> __log.txt 2>&1;
