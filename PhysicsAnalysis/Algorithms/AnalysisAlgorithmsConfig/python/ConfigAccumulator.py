@@ -259,7 +259,8 @@ class ConfigAccumulator :
                     dataType = DataType.FullSim
             else:
                 dataType = DataType.Data
-            isPhyslite = 'StreamDAOD_PHYSLITE' in self._flags.Input.ProcessingTags
+            isPhyslite = any (tag in self._flags.Input.ProcessingTags
+                              for tag in ('StreamDAOD_PHYSLITE', 'StreamD2AOD_PHYSLITE'))
             from TrigDecisionTool.TrigDecisionToolHelpers import (
                 getRun3NavigationContainerFromInput_forAnalysisBase)
             hltSummary = getRun3NavigationContainerFromInput_forAnalysisBase(self._flags)

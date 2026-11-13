@@ -144,8 +144,8 @@ def fromRunArgs(runArgs):
         from RecJobTransforms.AODFixConfig import AODFixCfg
         cfg.merge(AODFixCfg(flags))
 
-    # Ensure proper metadata propagation for EVNT->DAOD_TRUTHx
-    if (allowedInputTypes[idx]=='EVNT'):
+    # Ensure proper metadata propagation for EVNT->DAOD_TRUTHx and DAOD->D2AOD.
+    if allowedInputTypes[idx] in ('EVNT', 'DAOD_PHYS', 'DAOD_PHYSLITE'):
        from AthenaServices.MetaDataSvcConfig import MetaDataSvcCfg
        cfg.merge(MetaDataSvcCfg(flags, ['IOVDbMetaDataTool']))
 
@@ -179,6 +179,12 @@ def fromRunArgs(runArgs):
     else:
         from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
         cfg.merge(TagInfoMgrCfg(flags))
+
+    if allowedInputTypes[idx] in ('DAOD_PHYS', 'DAOD_PHYSLITE') and flags.Input.AODFixesDone:
+        from EventInfoMgt.TagInfoMgrConfig import TagInfoMgrCfg
+        cfg.merge(TagInfoMgrCfg(flags, tagValuePairs={
+            "AODFixVersion": " ".join(sorted(flags.Input.AODFixesDone))
+        }))
 
     # Post-include
     processPostInclude(runArgs, flags, cfg)
