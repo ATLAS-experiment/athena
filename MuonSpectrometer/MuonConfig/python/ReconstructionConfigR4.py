@@ -86,7 +86,7 @@ def StandaloneMuonOutputCfg(flags):
     aod_items += ["xAOD::MuonSegmentAuxContainer#MsSegmentsAux.-localSegPars.-parentSegment.-localSegCov"]
 
     #add MS track and track particle containers to the ESD output
-    for trk in ["MuonMsAtIpTrackParticles", "MuonMsTrackParticles","MuonSTACOTrackParticles"]:
+    for trk in ["MuonMsAtIpTrackParticles", "MuonMsTrackParticles"]:
         aod_items += [f"xAOD::TrackParticleContainer#{trk}",
                       f"xAOD::TrackParticleAuxContainer#{trk}Aux."]
     # convert the Acts muon track to its xAOD representation and add it to the ESD output
@@ -101,6 +101,49 @@ def StandaloneMuonOutputCfg(flags):
                                                         InputActsTracksLocation = "MuonMsAtIpTracks", 
                                                         OutputActsTracksLocation="MuonMsAtIpTracks"))
         esd_items += MuonTrackContainersToPersistify("MuonMsAtIp")
+
+    # Track particles of the combined reconstruction
+    if flags.Reco.EnableTracking:
+        aod_items += ["xAOD::TrackParticleContainer#MuonCmbTrackParticles",
+                      "xAOD::TrackParticleAuxContainer#MuonCmbTrackParticlesAux.",
+                      "xAOD::TrackParticleContainer#MuonSTACOTrackParticles",
+                      "xAOD::TrackParticleAuxContainer#MuonSTACOTrackParticlesAux."]
+        if flags.Muon.buildMETrack:
+            aod_items += ["xAOD::TrackParticleContainer#MuonMeTrackParticles",
+                          "xAOD::TrackParticleAuxContainer#MuonMeTrackParticlesAux."]
+        if flags.Acts.doLargeRadius:
+            aod_items += ["xAOD::TrackParticleContainer#MuonCmbTrackParticlesLRT",
+                          "xAOD::TrackParticleAuxContainer#MuonCmbTrackParticlesLRTAux.",
+                          "xAOD::TrackParticleContainer#MuonSTACOTrackParticlesLRT",
+                          "xAOD::TrackParticleAuxContainer#MuonSTACOTrackParticlesLRTAux."]
+            if flags.Muon.buildMETrack:
+                aod_items += ["xAOD::TrackParticleContainer#MuonMeTrackParticlesLRT",
+                              "xAOD::TrackParticleAuxContainer#MuonMeTrackParticlesLRTAux."]
+
+        # convert the Acts tracks to their xAOD representation and add them to the ESD output
+        # (STACO builds no Acts track). The prefix is the track container name without the trailing "Tracks"
+        if flags.Output.doWriteESD:
+            from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
+            result.merge(ActsToXAODTrackConverterAlgCfg(flags, name = "CmbTracksToXAODTrackConverterAlg",
+                                                        InputActsTracksLocation = "MuonCmbTracks",
+                                                        OutputActsTracksLocation = "MuonCmbTracks"))
+            esd_items += MuonTrackContainersToPersistify("MuonCmb")
+            if flags.Muon.buildMETrack:
+                result.merge(ActsToXAODTrackConverterAlgCfg(flags, name = "MeTracksToXAODTrackConverterAlg",
+                                                            InputActsTracksLocation = "MuonMeTracks",
+                                                            OutputActsTracksLocation = "MuonMeTracks"))
+                esd_items += MuonTrackContainersToPersistify("MuonMe")
+            if flags.Acts.doLargeRadius:
+                result.merge(ActsToXAODTrackConverterAlgCfg(flags, name = "CmbTracksLRTToXAODTrackConverterAlg",
+                                                            InputActsTracksLocation = "MuonCmbTracksLRT",
+                                                            OutputActsTracksLocation = "MuonCmbTracksLRT"))
+                esd_items += MuonTrackContainersToPersistify("MuonCmbTracksLRT")
+                if flags.Muon.buildMETrack:
+                    result.merge(ActsToXAODTrackConverterAlgCfg(flags, name = "MeTracksLRTToXAODTrackConverterAlg",
+                                                                InputActsTracksLocation = "MuonMeTracksLRT",
+                                                                OutputActsTracksLocation = "MuonMeTracksLRT"))
+                    esd_items += MuonTrackContainersToPersistify("MuonMeTracksLRT")
+
     #for now add also the muon container here. This should go into the combined config at some point
     aod_items += ["xAOD::MuonContainer#Muons"]
     aod_items += ["xAOD::MuonAuxContainerR4#MuonsAux."]
