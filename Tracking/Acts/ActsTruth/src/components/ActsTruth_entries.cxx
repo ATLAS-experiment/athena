@@ -8,6 +8,7 @@
 #include "../TrackParticleTruthDecorationAlg.h"
 #include "../GbtsTrainingAlg.h"
 #include "../TruthTrackBuilderTool.h"
+#include "../TruthPerigeeDecorationAlg.h"
 
 // Algorithms
 DECLARE_COMPONENT( ActsTrk::PixelClusterToTruthAssociationAlg )
@@ -19,3 +20,4 @@ DECLARE_COMPONENT( ActsTrk::TrackFindingValidationAlg )
 DECLARE_COMPONENT( ActsTrk::TrackParticleTruthDecorationAlg )
 DECLARE_COMPONENT( ActsTrk::GbtsTrainingAlg )
 DECLARE_COMPONENT( ActsTrk::TruthTrackBuilderTool)
+DECLARE_COMPONENT( ActsTrk::TruthPerigeeDecorationAlg)

@@ -303,3 +303,11 @@ def ActsGbtsTrainingAlgCfg(flags,
     )
 
     return acc
+
+def ActsTruhPerigeeDecorationAlgCfg(flags, name="ActsTruthPergieeDecorator",**kwargs):
+    result = ComponentAccumulator()
+    from ActsConfig.ActsGeometryConfig import ActsExtrapolationToolCfg
+    kwargs.setdefault("ExtrapolationTool", result.popToolsAndMerge(ActsExtrapolationToolCfg(flags)))
+    the_alg = CompFactory.ActsTrk.TruthPerigeeDecorationAlg(name, **kwargs)
+    result.addEventAlgo(the_alg, primary = True)
+    return result
