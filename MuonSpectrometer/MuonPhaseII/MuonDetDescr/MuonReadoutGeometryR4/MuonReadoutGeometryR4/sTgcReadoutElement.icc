@@ -173,7 +173,6 @@ inline const StripLayer& sTgcReadoutElement::stripLayer(const IdentifierHash& me
             return m_pars.padLayers.at(gasGap);
     }
     THROW_EXCEPTION("Invalid channel parsed");
-    return stripLayer(0);
 }
 
 }  // namespace MuonGMR4
