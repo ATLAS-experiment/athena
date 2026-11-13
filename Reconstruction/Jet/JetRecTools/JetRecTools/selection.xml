@@ -9,7 +9,6 @@
   <class name="CorrectPFOTool" />
   <class name="JetConstituentModSequence" />
   <class name="JetConstituentModifierBase" />
-  <class name="JetInputElRemovalTool" />
   <class name="JetRecToolsDict" />
   <class name="JetTrackSelectionTool" />
   <class name="PuppiWeightTool" />

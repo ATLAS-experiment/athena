@@ -1,10 +1,9 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include  "JetInterface/IFastJetInterfaceTool.h"
 #include  "JetInterface/IJetBuildTool.h"
-#include  "JetInterface/IJetConstituentsRetriever.h"
 #include  "JetInterface/IJetConsumer.h"
 #include  "JetInterface/IJetDecorator.h"
 #include  "JetInterface/IJetExecuteTool.h"
@@ -26,7 +25,6 @@
 
 #pragma link C++ class IFastJetInterfaceTool;
 #pragma link C++ class IJetBuildTool;
-#pragma link C++ class IJetConstituentsRetriever;
 #pragma link C++ class IJetConsumer;
 #pragma link C++ class IJetDecorator;
 #pragma link C++ class IJetExecuteTool;

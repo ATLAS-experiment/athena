@@ -8,7 +8,6 @@
 #include "JetRecTools/ClusterAtMLScaleTool.h"
 #include "JetRecTools/ConstitTimeCutTool.h"
 #include "JetRecTools/ConstituentSubtractorTool.h"
-#include "JetRecTools/JetInputElRemovalTool.h"
 #include "JetRecTools/CorrectPFOTool.h"
 #include "JetRecTools/ChargedHadronSubtractionTool.h"
 #include "JetRecTools/PuppiWeightTool.h"
@@ -31,7 +30,6 @@ DECLARE_COMPONENT( ClusterAtEMScaleTool )
 DECLARE_COMPONENT( ClusterAtMLScaleTool )
 DECLARE_COMPONENT( ConstitTimeCutTool )
 DECLARE_COMPONENT( ConstituentSubtractorTool )
-DECLARE_COMPONENT( JetInputElRemovalTool )
 DECLARE_COMPONENT( CorrectPFOTool )
 DECLARE_COMPONENT( ChargedHadronSubtractionTool )
 DECLARE_COMPONENT( PuppiWeightTool )
