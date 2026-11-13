@@ -48,12 +48,12 @@ conditionsTag=$(python -c "from AthenaConfiguration.TestDefaults import defaultC
 Reco_tf.py \
     --conditionsTag "default:${conditionsTag}" \
     --maxEvents "$nEvents" \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
+    --preInclude 'ActsConfig.DoNotUseInProduction.hltLikeTrackingFlags' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec "from ActsConfig.ActsConfigFlags import SeedingStrategy; \
+    --preExec "flags.Tracking.doTruth=True; \
+               flags.ITk.doTruth=True; \
+               from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.Gbts; \
-               flags.Tracking.doPixelDigitalClustering=True; \
-               flags.Tracking.ITkActsPass.useITkStripSeeding=False; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=True;" \
     --inputRDOFile "$inputRDO" \
     --outputAODFile "$outputAOD"

@@ -52,12 +52,13 @@ if [ "$doClusters" == "1" ]; then
   Reco_tf.py \
     --conditionsTag "default:${conditionsTag}" \
     --maxEvents "$nEvents" \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
+    --preInclude 'ActsConfig.DoNotUseInProduction.hltLikeTrackingFlags' \
     --postInclude "ActsConfig.ActsRegionsOfInterestConfig.ActsMainRegionsOfInterestCreatorAlgCfg,ActsConfig.ActsClusterizationConfig.ActsMainClusterizationCfg,ActsConfig.ActsSpacePointFormationConfig.ActsMainSpacePointFormationStandaloneCfg,ActsConfig.ActsPostIncludes.PersistifyActsEDMCfg" \
-    --preExec "flags.Acts.EDM.PersistifyClusters=True; \
+    --preExec "flags.Tracking.doTruth=True; \
+               flags.ITk.doTruth=True; \
+               flags.Acts.SpacePoints.doStrip=True; \
+               flags.Acts.EDM.PersistifyClusters=True; \
                flags.Acts.EDM.PersistifySpacePoints=True; \
-               flags.Tracking.doPixelDigitalClustering=True; \
-               flags.Tracking.ITkActsPass.useITkStripSeeding=False; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet" \
@@ -67,10 +68,10 @@ else
   Reco_tf.py \
     --conditionsTag "default:${conditionsTag}" \
     --maxEvents "$nEvents" \
-    --preInclude 'InDetConfig.ConfigurationHelpers.OnlyTrackingPreInclude' \
+    --preInclude 'ActsConfig.DoNotUseInProduction.hltLikeTrackingFlags' \
     --postInclude 'ActsConfig.ActsPostIncludes.ACTSClusterPostInclude' \
-    --preExec "flags.Tracking.doPixelDigitalClustering=True; \
-               flags.Tracking.ITkActsPass.useITkStripSeeding=False; \
+    --preExec "flags.Tracking.doTruth=True; \
+               flags.ITk.doTruth=True; \
                flags.Tracking.ITkActsPass.storeTrackSeeds=True; \
                from ActsConfig.ActsConfigFlags import SeedingStrategy; \
                flags.Tracking.ITkActsPass.PixelSeedingStrategy=SeedingStrategy.GridTriplet" \
