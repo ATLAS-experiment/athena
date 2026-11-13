@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NswDcsDbAlg.h"
@@ -269,15 +269,15 @@ NswDcsDbAlg::buildChannelIdForHv(Identifier& channelId, const DcsTechType tech0,
 
     // match regex
     if(std::regex_match(chanName, reMMG)) {
-        re   = reMMG;
+        re   = std::move(reMMG);
         tech = DcsTechType::MMG;
     }
     else if(std::regex_match(chanName, reMMD)) {
-        re   = reMMD;
+        re   = std::move(reMMD);
         tech = DcsTechType::MMD;
     }
     else if(std::regex_match(chanName, reSTG)) {
-        re   = reSTG;
+        re   = std::move(reSTG);
         tech = DcsTechType::STG;
     }
     else {
@@ -375,21 +375,21 @@ bool
 NswDcsDbAlg::buildChannelIdForTDaq(Identifier& channelId, uint& elink ,const DcsTechType tech0, const std::string& chanName, bool& isOK) const {
 
     // prepare regex
-    std::regex reMMG("^ELink-MM-(A|C)/V([0-9]{1})/L1A/Strip/S([0-9]{1,2})/L([0-9]{1})/R([0-9]{1,2})/E([0-9]{1})");
-    std::regex reSTG("^ELink-sTGC-(A|C)/V([0-9]{1})/L1A/(Strip|Pad)/S([0-9]{1,2})/L([0-9]{1})/R([0-9]{1})/E([0-9]{1})");
-    std::regex reSTGTrigProc("^ELink-sTGC-A/V0/L1A/TrigProc/");
-    std::regex reSTGPadTrig("^ELink-sTGC-A/V0/L1A/PadTrig/");
+    static const std::regex reMMG("^ELink-MM-(A|C)/V([0-9]{1})/L1A/Strip/S([0-9]{1,2})/L([0-9]{1})/R([0-9]{1,2})/E([0-9]{1})");
+    static const std::regex reSTG("^ELink-sTGC-(A|C)/V([0-9]{1})/L1A/(Strip|Pad)/S([0-9]{1,2})/L([0-9]{1})/R([0-9]{1})/E([0-9]{1})");
+    static const std::regex reSTGTrigProc("^ELink-sTGC-A/V0/L1A/TrigProc/");
+    static const std::regex reSTGPadTrig("^ELink-sTGC-A/V0/L1A/PadTrig/");
     
     std::regex re;
     DcsTechType tech = DcsTechType::MMG; 
 
     // match regex
     if(std::regex_match(chanName, reMMG)) {
-        re   = reMMG;
+        re   = std::move(reMMG);
         tech = DcsTechType::MMG;
     }
     else if(std::regex_match(chanName, reSTG)) {
-        re   = reSTG;
+        re   = std::move(reSTG);
         tech = DcsTechType::STG;
     } else if(std::regex_match(chanName, reSTGPadTrig) || std::regex_match(chanName, reSTGTrigProc)){ // those are trigger elinks that are not needed in athena
         isOK = true;

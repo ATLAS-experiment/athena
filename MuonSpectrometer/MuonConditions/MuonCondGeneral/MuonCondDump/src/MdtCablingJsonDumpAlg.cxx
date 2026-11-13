@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MdtCablingJsonDumpAlg.h"
 #include "StoreGate/ReadCondHandle.h"
@@ -96,7 +96,7 @@ StatusCode MdtCablingJsonDumpAlg::execute(const EventContext& ctx) {
               }
               const TdcIdentifier tdc_id{cabling_data};
               chamber_mezz.try_emplace(tdc_id,unsetArray);
-              chamber_mezz[tdc_id][cabling_data.channelId] = dummy_card.tubeNumber(layer, tubeInLayer);
+              chamber_mezz[tdc_id].at(cabling_data.channelId) = dummy_card.tubeNumber(layer, tubeInLayer);
          }
     }
     /// Next step is to filter all the mezzanine cards
@@ -290,8 +290,9 @@ StatusCode MdtCablingJsonDumpAlg::execute(const EventContext& ctx) {
       } else{
             subdetectorId = 98;
       }
+      static const std::string mezzType6Str{"mezzanineType6"};
       for(int tubeInLayer = 1 ; tubeInLayer <= nTubes; 
-              tubeInLayer +=   mezzTypes.at("mezzanineType6").numTubesPerLayer()){
+              tubeInLayer +=   mezzTypes.at(mezzType6Str).numTubesPerLayer()){
         
         if(tubeInLayer==1 && std::abs(readEle->getStationEta()) !=7){tubeInLayer -=1;} // account for the fact that the first mezzanine card only has 5 tubes per layer for BIS 1-6
         MdtCablingData mezzCablingId_ml1{};
