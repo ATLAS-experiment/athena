@@ -41,6 +41,7 @@
 #include "GeoModelHelpers/StringUtils.h"
 
 #include <format>
+#include <array>
 
 using namespace Acts::UnitLiterals;
 using namespace Muon::MuonStationIndex;
@@ -135,7 +136,7 @@ namespace MuonGMR4 {
     StatusCode MuonChamberToolTest::pointInside(const ActsTrk::GeometryContext& gctx,
                                                 const Acts::Volume& boundVol,
                                                 const Amg::Vector3D& point,
-                                                const std::string& descr,
+                                                const std::string_view descr,
                                                 const Identifier& channelId) const {
         const Amg::Vector3D locPos{boundVol.globalToLocalTransform(gctx.context()) * point};
         const Acts::VolumeBounds& bounds{boundVol.volumeBounds()};
@@ -159,7 +160,7 @@ namespace MuonGMR4 {
 
         const Amg::Vector3D sameY = Acts::PlanarHelper::intersectPlane(pos, dir, Amg::Vector3D::UnitY(), 
                                                                         locPos.y()).position();
-        ATH_MSG_ALWAYS(__func__<<"() "<<__LINE__<<" - Inclanation angle "<<Amg::toString(dir)<<", "<<dir.phi()<<", reference edge: "
+        ATH_MSG_ALWAYS(__func__<<"() "<<__LINE__<<" - Inclination angle "<<Amg::toString(dir)<<", "<<dir.phi()<<", reference edge: "
                     <<Amg::toString(pos) <<", edge point: "<<Amg::toString(sameY));
         return StatusCode::FAILURE;
     }
@@ -605,7 +606,11 @@ namespace MuonGMR4 {
                                                    const MdtReadoutElement& mdtMl,
                                                    const Acts::Volume& detVol) const {
         ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Test whether "<<m_idHelperSvc->toStringDetEl(mdtMl.identify())<<std::endl<<mdtMl.getParameters());
-
+        constexpr std::array<std::string_view, 7> tubeStr{
+          "tube center", "tube readout", "tube HV", "bottom of the tube box",
+          "sealing of the tube box", "wall to the previous tube", "wall to the next tube" 
+        };
+        enum StrIndex{center, readout, HV, bottom, sealing, prevWall, nextWall};
         for (unsigned int layer = 1; layer <= mdtMl.numLayers(); ++layer) {
             for (unsigned int tube = 1; tube <= mdtMl.numTubesInLay(); ++tube) {
                 const IdentifierHash idHash = mdtMl.measurementHash(layer, tube);
@@ -615,18 +620,18 @@ namespace MuonGMR4 {
                 const Acts::Transform3& locToGlob{mdtMl.localToGlobalTransform(gctx, idHash)}; 
                 const Identifier measId{mdtMl.measurementId(idHash)};
 
-                ATH_CHECK(pointInside(gctx, detVol, mdtMl.globalTubePos(gctx, idHash), "tube center", measId));
+                ATH_CHECK(pointInside(gctx, detVol, mdtMl.globalTubePos(gctx, idHash), tubeStr[center], measId));
 
-                ATH_CHECK(pointInside(gctx, detVol, mdtMl.readOutPos(gctx, idHash), "tube readout", measId));
-                ATH_CHECK(pointInside(gctx, detVol, mdtMl.highVoltPos(gctx, idHash), "tube HV", measId));
+                ATH_CHECK(pointInside(gctx, detVol, mdtMl.readOutPos(gctx, idHash), tubeStr[readout], measId));
+                ATH_CHECK(pointInside(gctx, detVol, mdtMl.highVoltPos(gctx, idHash), tubeStr[HV], measId));
                 ATH_CHECK(pointInside(gctx, detVol, locToGlob*(-mdtMl.innerTubeRadius() * Amg::Vector3D::UnitX()), 
-                                      "bottom of the tube box", measId));
+                                      tubeStr[bottom], measId));
                 ATH_CHECK(pointInside(gctx, detVol, locToGlob*(mdtMl.innerTubeRadius() * Amg::Vector3D::UnitX()), 
-                                      "sealing of the tube box", measId));
+                                      tubeStr[sealing], measId));
                 ATH_CHECK(pointInside(gctx, detVol, locToGlob*(-mdtMl.innerTubeRadius() * Amg::Vector3D::UnitY()), 
-                                      "wall to the previous tube", measId));
+                                      tubeStr[prevWall], measId));
                 ATH_CHECK(pointInside(gctx, detVol, locToGlob*(-mdtMl.innerTubeRadius() * Amg::Vector3D::UnitY()), 
-                                      "wall to the next tube", measId));
+                                      tubeStr[nextWall], measId));
             }
         }
         return StatusCode::SUCCESS;
@@ -666,6 +671,9 @@ namespace MuonGMR4 {
                         <<rpc.getParameters()<<" is contained in the envelope ");
     
         const RpcIdHelper& idHelper{m_idHelperSvc->rpcIdHelper()};
+        constexpr std::string_view centreStr{"center"};
+        constexpr std::string_view leftStr{"left edge"};
+        constexpr std::string_view rightStr{"right edge"};
         for (unsigned int gasGap = 1 ; gasGap <= rpc.nGasGaps(); ++gasGap) {
             for (int doubletPhi = rpc.doubletPhi(); doubletPhi <= rpc.doubletPhiMax(); ++doubletPhi){
                 for (bool measPhi : {false, true}) {
@@ -673,9 +681,9 @@ namespace MuonGMR4 {
                     for (int strip = 1; strip <= nStrips; ++strip) {
                         const Identifier stripId = idHelper.channelID(rpc.identify(),rpc.doubletZ(), 
                                                                       doubletPhi, gasGap, measPhi, strip);
-                        ATH_CHECK(pointInside(gctx, detVol, rpc.stripPosition(gctx, stripId), "center", stripId));
-                        ATH_CHECK(pointInside(gctx, detVol, rpc.leftStripEdge(gctx, stripId), "right edge", stripId));
-                        ATH_CHECK(pointInside(gctx, detVol, rpc.rightStripEdge(gctx, stripId), "left edge", stripId));
+                        ATH_CHECK(pointInside(gctx, detVol, rpc.stripPosition(gctx, stripId), centreStr, stripId));
+                        ATH_CHECK(pointInside(gctx, detVol, rpc.leftStripEdge(gctx, stripId), rightStr, stripId));
+                        ATH_CHECK(pointInside(gctx, detVol, rpc.rightStripEdge(gctx, stripId), leftStr, stripId));
                     }
                 }
             }
@@ -684,7 +692,8 @@ namespace MuonGMR4 {
     }
     StatusCode MuonChamberToolTest::testReadoutEle(const ActsTrk::GeometryContext& gctx,
                                                    const TgcReadoutElement& tgc,
-                                                   const Acts::Volume& detVol) const {        
+                                                   const Acts::Volume& detVol) const {   
+        constexpr std::string_view centreStr{"center"};     
         for (unsigned int gasGap = 1; gasGap <= tgc.nGasGaps(); ++gasGap){
             for (bool isStrip : {false}) {
                 const IdentifierHash layHash = tgc.constructHash(0, gasGap, isStrip);
@@ -692,7 +701,7 @@ namespace MuonGMR4 {
                 for (unsigned int channel = 1; channel <= nChannel ; ++channel) {
                     const IdentifierHash measHash = tgc.constructHash(channel, gasGap, isStrip);
                     ATH_CHECK(pointInside(gctx, detVol, tgc.channelPosition(gctx, measHash), 
-                                          "center", tgc.measurementId(measHash)));
+                                          centreStr, tgc.measurementId(measHash)));
                 }
             }
         }
@@ -703,14 +712,17 @@ namespace MuonGMR4 {
                                                    const Acts::Volume& detVol) const {
 
         const MmIdHelper& idHelper{m_idHelperSvc->mmIdHelper()};
+        constexpr std::string_view centreStr{"center"};
+        constexpr std::string_view leftStr{"left edge"};
+        constexpr std::string_view rightStr{"right edge"};
         for(unsigned int gasGap = 1; gasGap <= mm.nGasGaps(); ++gasGap){
            IdentifierHash gasGapHash =  MmReadoutElement::createHash(gasGap,0);
            unsigned int firstStrip = mm.firstStrip(gasGapHash);
             for(unsigned int strip = firstStrip; strip <= mm.numStrips(gasGapHash); ++strip){
                 const Identifier stripId = idHelper.channelID(mm.identify(), mm.multilayer(), gasGap, strip);
-                ATH_CHECK(pointInside(gctx, detVol, mm.stripPosition(gctx, stripId), "center", stripId));
-                ATH_CHECK(pointInside(gctx, detVol, mm.leftStripEdge(gctx, mm.measurementHash(stripId)), "left edge", stripId));
-                ATH_CHECK(pointInside(gctx, detVol, mm.rightStripEdge(gctx, mm.measurementHash(stripId)), "right edge", stripId));
+                ATH_CHECK(pointInside(gctx, detVol, mm.stripPosition(gctx, stripId), centreStr, stripId));
+                ATH_CHECK(pointInside(gctx, detVol, mm.leftStripEdge(gctx, mm.measurementHash(stripId)), leftStr, stripId));
+                ATH_CHECK(pointInside(gctx, detVol, mm.rightStripEdge(gctx, mm.measurementHash(stripId)), rightStr, stripId));
             }
         }
         return StatusCode::SUCCESS;
@@ -720,6 +732,7 @@ namespace MuonGMR4 {
                                                    const sTgcReadoutElement& stgc,
                                                    const Acts::Volume& detVol) const{
         const sTgcIdHelper& idHelper{m_idHelperSvc->stgcIdHelper()};
+        constexpr std::string_view posStr{"channel position"};
         for(unsigned int gasGap = 1; gasGap <= stgc.numLayers(); ++gasGap) {
            
             for(unsigned int nch = 1; nch <= stgc.nChTypes(); ++nch){                
@@ -730,11 +743,11 @@ namespace MuonGMR4 {
                 for(unsigned int strip = 1; strip <= nStrips; ++strip){
                     const Identifier stripId = idHelper.channelID(stgc.identify(), stgc.multilayer(), gasGap, nch, strip);
                     const IdentifierHash stripHash = stgc.measurementHash(stripId);
-                    ATH_CHECK(pointInside(gctx, detVol, stgc.globalChannelPosition(gctx, stripHash), "channel position", stripId));
+                    ATH_CHECK(pointInside(gctx, detVol, stgc.globalChannelPosition(gctx, stripHash), posStr, stripId));
                 
                     if(channelType == sTgcReadoutElement::ReadoutChannelType::Wire || channelType == sTgcReadoutElement::ReadoutChannelType::Strip){
-                        ATH_CHECK(pointInside(gctx, detVol, stgc.rightStripEdge(gctx, stripHash), "channel position", stripId));
-                        ATH_CHECK(pointInside(gctx, detVol, stgc.leftStripEdge(gctx, stripHash), "channel position", stripId));
+                        ATH_CHECK(pointInside(gctx, detVol, stgc.rightStripEdge(gctx, stripHash), posStr, stripId));
+                        ATH_CHECK(pointInside(gctx, detVol, stgc.leftStripEdge(gctx, stripHash), posStr, stripId));
                     }
                 }
             }            
