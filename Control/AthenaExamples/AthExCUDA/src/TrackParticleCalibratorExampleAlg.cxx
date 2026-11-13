@@ -99,7 +99,8 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
 
   // Copy the input buffer to the device.
   if (m_mrTool->hostMR()) {
-    (*deviceCopy)(vecmem::ignore_event, inputHostBuffer, inputDeviceBuffer);
+    (*deviceCopy)(vecmem::ignore_event, inputHostBuffer, inputDeviceBuffer,
+                  vecmem::copy::type::copy_type::host_to_device);
   }
 
   // Construct output buffer(s).
@@ -121,9 +122,13 @@ StatusCode TrackParticleCalibratorExampleAlg::execute(
 
   // Get the output back to the host.
   if (m_mrTool->hostMR()) {
-    (*deviceCopy)(outputDeviceBuffer, outputHostCollection)->wait();
+    (*deviceCopy)(outputDeviceBuffer, outputHostCollection,
+                  vecmem::copy::type::copy_type::device_to_host)
+        ->wait();
   } else {
-    (*hostCopy)(outputDeviceBuffer, outputHostCollection)->wait();
+    (*hostCopy)(outputDeviceBuffer, outputHostCollection,
+                vecmem::copy::type::copy_type::host_to_host)
+        ->wait();
   }
 
   // Construct the output container.
