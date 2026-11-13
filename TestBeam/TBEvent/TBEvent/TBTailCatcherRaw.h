@@ -31,7 +31,7 @@ class TBTailCatcherRaw : public TBBeamDetector,
   // Constructors and Destructor //
   /////////////////////////////////
 
-  TBTailCatcherRaw();
+  using DataVector< TBScintillatorRaw >::DataVector;
   TBTailCatcherRaw(std::string_view thisTailCatcherName,
 		bool overflow,
 		const std::vector< TBScintillatorRaw* >& theScints);

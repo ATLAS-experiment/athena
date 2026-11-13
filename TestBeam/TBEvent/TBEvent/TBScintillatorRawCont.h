@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthContainers/DataVector.h"
@@ -18,7 +18,7 @@
 class TBScintillatorRawCont : public DataVector< TBScintillatorRaw > {
  public:
   /** Constructor */
-  TBScintillatorRawCont() : DataVector< TBScintillatorRaw >() { }
+  using DataVector< TBScintillatorRaw >::DataVector;
   
 
   
