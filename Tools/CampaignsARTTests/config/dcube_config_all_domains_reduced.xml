@@ -239,11 +239,6 @@
        <hist1D name="MET_Rebuilt_AntiKt4EMPFlow_RefTau_phi" plotopts="" tests="KS" type="TH1D"/>
        <hist1D name="MET_Rebuilt_AntiKt4EMPFlow_RefTau_sum" plotopts="" tests="KS" type="TH1D"/>
       </TDirectory>
-      <TDirectory name="Muons">
-       <hist1D name="MET_Rebuilt_AntiKt4EMPFlow_Muons" plotopts="" tests="KS" type="TH1D"/>
-       <hist1D name="MET_Rebuilt_AntiKt4EMPFlow_Muons_phi" plotopts="" tests="KS" type="TH1D"/>
-       <hist1D name="MET_Rebuilt_AntiKt4EMPFlow_Muons_sum" plotopts="" tests="KS" type="TH1D"/>
-      </TDirectory>
       <TDirectory name="RefJet">
        <hist1D name="MET_Rebuilt_AntiKt4EMPFlow_RefJet" plotopts="" tests="KS" type="TH1D"/>
        <hist1D name="MET_Rebuilt_AntiKt4EMPFlow_RefJet_phi" plotopts="" tests="KS" type="TH1D"/>
@@ -297,9 +292,6 @@
       </TDirectory>
       <TDirectory name="RefTau">
        <hist1D name="MET_Rebuilt_AntiKt4EMPFlow_Diff_RefTau" plotopts="" tests="KS" type="TH1D"/>
-      </TDirectory>
-      <TDirectory name="Muons">
-       <hist1D name="MET_Rebuilt_AntiKt4EMPFlow_Diff_Muons" plotopts="" tests="KS" type="TH1D"/>
       </TDirectory>
       <TDirectory name="RefJet">
        <hist1D name="MET_Rebuilt_AntiKt4EMPFlow_Diff_RefJet" plotopts="" tests="KS" type="TH1D"/>
@@ -836,8 +828,6 @@
       <hist1D name="Tau_TauJets_Nominal_Matched_NCoreTracks" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_NWideTracks" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_ptHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_RecTau_RNNEleScore" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_RecTau_RNNEleScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_GNTauScore" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_GNTauScoreSigTrans" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_ptGNTauSigLoose" plotopts="" tests="KS" type="TH1F"/>
@@ -846,7 +836,6 @@
       <hist1D name="Tau_TauJets_Nominal_Matched_ptGNTauSigMediumHighPt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_ptGNTauSigTight" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_ptGNTauSigTightHighPt" plotopts="" tests="KS" type="TH1F"/>
-      <hist1D name="Tau_TauJets_Nominal_RecTau_tauTrackSummary" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_pt" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_eta" plotopts="" tests="KS" type="TH1F"/>
       <hist1D name="Tau_TauJets_Nominal_Matched_phi" plotopts="" tests="KS" type="TH1F"/>
