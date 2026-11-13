@@ -1,12 +1,13 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 ## @Package test_trfArgClasses.py
 #  @brief Unittests for test_trfArgClasses.py
 #  @author graeme.andrew.stewart@cern.ch
 #  @note Tests of ATLAS specific file formats moved to test_trfArgClassesATLAS.py
 
+import tarfile
 import unittest
 
 import logging
@@ -553,6 +554,49 @@ class argFileTests(unittest.TestCase):
         t0file.dataset = "originalDSN"
         self.assertRaises(trfExceptions.TransformArgException, t0file.valueSetter, 
                           ["testDataset#file1", "testDataset#file2", "testDataset#file3", "testDataset#file4"])
+
+class argLHEFileTests(unittest.TestCase):
+    def setUp(self):
+        # Three events with POWHEG-style event lines (leading spaces), one with a negative weight
+        events = ''
+        for tag, weight in (('<event>', 2.5), ('<event npLO="1">', 1.5), ('<event\tnpLO="1">', -0.5)):
+            events += tag + '\n      5  10001 {0: .5E}  1.00000E+02 -1.00000E+00  1.18000E-01\n'.format(weight)
+            events += '#rwgt 1 1\n</event>\n'
+        with open('events.lhe', 'w') as f:
+            f.write('<LesHouchesEvents version="3.0">\n<header>\n</header>\n<init>\n</init>\n')
+            f.write(events)
+            f.write('</LesHouchesEvents>\n')
+        # The same file twice in one tarball: both members must be counted, but not a link to it
+        os.symlink('events.lhe', 'alias.lhe')
+        with tarfile.open('TXT.test.tar.gz', 'w:gz') as tar:
+            tar.add('events.lhe')
+            tar.add('events.lhe', arcname='events2.lhe')
+            tar.add('alias.lhe')
+        self.myLHEFile = argLHEFile(['TXT.test.tar.gz'], io='output')
+
+    def tearDown(self):
+        for f in ('events.lhe', 'alias.lhe', 'TXT.test.tar.gz', 'bad.lhe', 'TXT.bad.tar.gz'):
+            try:
+                os.unlink(f)
+            except OSError:
+                pass
+
+    def test_argLHEFileMetadata(self):
+        metadata = self.myLHEFile.getMetadata(metadataKeys=['nentries', 'lheSumOfPosWeights', 'lheSumOfNegWeights'])
+        self.assertEqual(metadata['TXT.test.tar.gz']['nentries'], 6)
+        self.assertAlmostEqual(metadata['TXT.test.tar.gz']['lheSumOfPosWeights'], 8.0)
+        self.assertAlmostEqual(metadata['TXT.test.tar.gz']['lheSumOfNegWeights'], 1.0)
+
+    def test_argLHEFileBadWeight(self):
+        # An unreadable weight makes both sums undefined, but the events are still counted
+        with open('bad.lhe', 'w') as f:
+            f.write('<LesHouchesEvents version="3.0">\n<event>\n      5  10001  NaN  1.0 -1.0 0.118\n</event>\n</LesHouchesEvents>\n')
+        with tarfile.open('TXT.bad.tar.gz', 'w:gz') as tar:
+            tar.add('bad.lhe')
+        metadata = argLHEFile(['TXT.bad.tar.gz'], io='output').getMetadata(metadataKeys=['nentries', 'lheSumOfPosWeights', 'lheSumOfNegWeights'])
+        self.assertEqual(metadata['TXT.bad.tar.gz']['nentries'], 1)
+        self.assertEqual(metadata['TXT.bad.tar.gz']['lheSumOfPosWeights'], 'UNDEFINED')
+        self.assertEqual(metadata['TXT.bad.tar.gz']['lheSumOfNegWeights'], 'UNDEFINED')
 
 if __name__ == '__main__':
     unittest.main()
