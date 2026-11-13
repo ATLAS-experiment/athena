@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonRDO/TgcL1Rdo.h"
@@ -7,25 +7,9 @@
 #include "MuonEventAthenaPool/TgcL1Rdo_p1.h"
 #include "TgcL1RdoCnv_p1.h"
 #include "TgcL1RawDataCnv_p1.h"
+#include <bit>
+#include <cstdint>
 
-namespace {
-
-union Errors_u {
-  TgcL1Rdo::Errors errors;
-  uint32_t i;
-};
-
-union SRodStatus_u {
-  TgcL1Rdo::SRodStatus srodStatus;
-  uint32_t i;
-};
-
-union LocalStatus_u {
-  TgcL1Rdo::LocalStatus localStatus;
-  uint32_t i;
-};
-
-}
 
 void
 TgcL1RdoCnv_p1::transToPers(const TgcL1Rdo* transColl, TgcL1Rdo_p1* persColl, MsgStream &log) 
@@ -44,18 +28,11 @@ TgcL1RdoCnv_p1::transToPers(const TgcL1Rdo* transColl, TgcL1Rdo_p1* persColl, Ms
     persColl->m_bcId          = transColl->bcId();
     persColl->m_l1Id          = transColl->l1Id();
 
-    Errors_u errors_u{};
-    errors_u.i = 0;
-    errors_u.errors = transColl->errors();
-    persColl->m_errors        = errors_u.i;
+    persColl->m_errors = std::bit_cast<uint32_t>(transColl->errors());
 
-    SRodStatus_u srodStatus_u{};
-    srodStatus_u.srodStatus = transColl->srodStatus();
-    persColl->m_srodStatus        = srodStatus_u.i;
+    persColl->m_srodStatus = std::bit_cast<uint32_t>(transColl->srodStatus());
 
-    LocalStatus_u localStatus_u{};
-    localStatus_u.localStatus = transColl->localStatus();
-    persColl->m_localStatus        = localStatus_u.i;
+    persColl->m_localStatus = std::bit_cast<uint32_t>(transColl->localStatus());
 
     persColl->m_orbit         = transColl->orbit();
 }
