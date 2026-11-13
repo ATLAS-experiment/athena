@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Local includes
@@ -23,6 +23,7 @@
 
 // std includes
 #include <algorithm>
+#include <cmath>
 
 namespace CP {
 
@@ -166,7 +167,7 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
   //____________________________________________________________________________
   float PhotonPointingTool::getCorrectedZ(float zPointing, float etas2) const
   {
-    if (fabs(etas2) < 1.37) return zPointing;
+    if (std::fabs(etas2) < 1.37) return zPointing;
     return zPointing - m_zCorrection->Interpolate(etas2);
   }
 
@@ -186,8 +187,8 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
     }
 
     // Beam parameters
-    double d_beamSpot   = hypot(eventInfo->beamPosY(), eventInfo->beamPosX());
-    double phi_beamSpot = atan2(eventInfo->beamPosY(), eventInfo->beamPosX());
+    double d_beamSpot   = std::hypot(eventInfo->beamPosY(), eventInfo->beamPosX());
+    double phi_beamSpot = std::atan2(eventInfo->beamPosY(), eventInfo->beamPosX());
 
     // Photon variables
     const xAOD::CaloCluster *cluster = egamma->caloCluster();
@@ -200,14 +201,14 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
     float etas1    = cluster->etaBE(1);
     float etas2    = cluster->etaBE(2);
     float phis2    = cluster->phiBE(2);
-    float cl_theta = 2.0*atan(exp(-1.0*cluster->eta()));
+    float cl_theta = 2.0*std::atan(std::exp(-1.0*cluster->eta()));
 
     // Shower depths
     std::pair<float, float> RZ1 = CP::ShowerDepthUtil::getRZ(etas1, 1);
     std::pair<float, float> RZ2 = CP::ShowerDepthUtil::getRZ(etas2, 2);
 
     // Calo cluster pointing calculation
-    double r0_with_beamSpot = d_beamSpot*cos(phis2 - phi_beamSpot);
+    double r0_with_beamSpot = d_beamSpot*std::cos(phis2 - phi_beamSpot);
 
     float s_zvertex = 0, s_errz = 0;
     s_zvertex = (RZ1.second * (RZ2.first - r0_with_beamSpot) -
@@ -215,8 +216,8 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
                 (RZ2.first - RZ1.first);
     s_zvertex = getCorrectedZ(s_zvertex, etas2);
 
-    s_errz = 0.5 * (RZ2.first + RZ1.first) * (0.060 / sqrt(cl_e * 0.001)) /
-             (sin(cl_theta) * sin(cl_theta));
+    s_errz = 0.5 * (RZ2.first + RZ1.first) * (0.060 / std::sqrt(cl_e * 0.001)) /
+             (std::sin(cl_theta) * std::sin(cl_theta));
 
     return std::make_pair(s_zvertex, s_errz);
   }
@@ -237,8 +238,8 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
     }
 
     // Beam parameters
-    double d_beamSpot   = hypot(eventInfo->beamPosY(), eventInfo->beamPosX());
-    double phi_beamSpot = atan2(eventInfo->beamPosY(), eventInfo->beamPosX());
+    double d_beamSpot   = std::hypot(eventInfo->beamPosY(), eventInfo->beamPosX());
+    double phi_beamSpot = std::atan2(eventInfo->beamPosY(), eventInfo->beamPosX());
 
     // Photon variables
     const xAOD::CaloCluster *cluster = photon->caloCluster();
@@ -264,16 +265,16 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
     std::pair<float, float> RZ1 = CP::ShowerDepthUtil::getRZ(etas1, 1);
 
     // Photon conversion
-    double conv_r = hypot(conv_x, conv_y);
+    double conv_r = std::hypot(conv_x, conv_y);
 
     // HPV pointing calculation
-    double phi_Calo         = atan2(sin(phis2), cos(phis2));
-    double r0_with_beamSpot = d_beamSpot*cos(phi_Calo - phi_beamSpot);
+    double phi_Calo         = std::atan2(std::sin(phis2), std::cos(phis2));
+    double r0_with_beamSpot = d_beamSpot*std::cos(phi_Calo - phi_beamSpot);
 
     float s_zvertex = (RZ1.second*(conv_r - r0_with_beamSpot) - conv_z*(RZ1.first - r0_with_beamSpot)) / (conv_r - RZ1.first);
 
-    float dist_vtx_to_conv = hypot(conv_r - r0_with_beamSpot, conv_z - s_zvertex);
-    float dist_conv_to_s1 = hypot(RZ1.first - conv_r, RZ1.second - conv_z);
+    float dist_vtx_to_conv = std::hypot(conv_r - r0_with_beamSpot, conv_z - s_zvertex);
+    float dist_conv_to_s1 = std::hypot(RZ1.first - conv_r, RZ1.second - conv_z);
 
     float error_etaS1 = 0.001; // FIXME is there a tool which provides a better value?
     float s_errz = 0.0;
@@ -281,12 +282,12 @@ StatusCode PhotonPointingTool::updatePointingAuxdata(const xAOD::EgammaContainer
     if ((cluster->inBarrel() && !cluster->inEndcap()) ||
         (cluster->inBarrel() &&  cluster->inEndcap() && cluster->eSample(CaloSampling::EMB1) > cluster->eSample(CaloSampling::EME1))) {
       // Barrel case
-      float error_Z_Calo_1st_Sampling_barrel = error_etaS1*RZ1.first*fabs(cosh(etas1));
+      float error_Z_Calo_1st_Sampling_barrel = error_etaS1*RZ1.first*std::fabs(std::cosh(etas1));
       s_errz = error_Z_Calo_1st_Sampling_barrel*dist_vtx_to_conv/dist_conv_to_s1;
     } else {
       // Endcap case
-      float error_R_Calo_1st_Sampling_endcap = error_etaS1*cosh(etas1)*RZ1.first*RZ1.first/fabs(RZ1.second);
-      s_errz = error_R_Calo_1st_Sampling_endcap*fabs(sinh(etas1))*dist_vtx_to_conv/dist_conv_to_s1;
+      float error_R_Calo_1st_Sampling_endcap = error_etaS1*std::cosh(etas1)*RZ1.first*RZ1.first/std::fabs(RZ1.second);
+      s_errz = error_R_Calo_1st_Sampling_endcap*std::fabs(std::sinh(etas1))*dist_vtx_to_conv/dist_conv_to_s1;
     }
 
     return std::make_pair(s_zvertex, s_errz);

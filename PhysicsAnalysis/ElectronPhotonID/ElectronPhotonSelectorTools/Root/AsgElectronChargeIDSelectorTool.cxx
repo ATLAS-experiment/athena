@@ -553,7 +553,7 @@ AsgElectronChargeIDSelectorTool::calculate(const EventContext& ctx,
     << (std::find(m_inputVars.begin(), m_inputVars.end(), "d0Err") !=
         m_inputVars.end())
     << std::endl
-    << "\t\t xAOD variables: d0Sig                   = " << d0 / d0sigma
+    << "\t\t xAOD variables: d0Sig                   = " << ((d0 != 0) ? d0 / d0sigma : -9999.)
     << ",\t isRequested= "
     << (std::find(m_inputVars.begin(), m_inputVars.end(), "d0Sig") !=
         m_inputVars.end())
