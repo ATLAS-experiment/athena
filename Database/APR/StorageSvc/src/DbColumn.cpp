@@ -4,8 +4,11 @@
 #include "StorageSvc/pool.h"
 #include "StorageSvc/DbColumn.h"
 // C++ header files
+
 #include <cstdio>
-#include <cstring>
+#include <array>
+#include <string_view>
+#include <charconv>
 
 using namespace std;
 
@@ -54,64 +57,63 @@ const string DbColumn::toString() const   {
       m_nElem);
   return txt;
 }
-static const char* const itm[] = {
-  "{NAME=", 
-  "{CLASS=",
-  "{TYP=",
-  "{OPT=", 
-  "{OFF=", 
-  "{SIZ=",
-  "{CNT="
-};
+
 
 StatusCode DbColumn::fromString( const string& string_rep)  {
+  using namespace std::literals;
+  static constexpr std::array keys{
+    "{NAME="sv, 
+    "{CLASS="sv,
+    "{TYP="sv,
+    "{OPT="sv, 
+    "{OFF="sv, 
+    "{SIZ="sv,
+    "{CNT="sv
+  };
+  static constexpr std::array intMembers{
+    &DbColumn::m_type,
+    &DbColumn::m_opts,
+    &DbColumn::m_offset,
+    &DbColumn::m_size,
+    &DbColumn::m_nElem
+  };
   m_colName = typeName(UNKNOWN);
-  string tmp = string_rep;
-  const char* p1 = tmp.c_str();
-  int nread = 0;
-  for(size_t i = 0; i < sizeof(itm)/sizeof(itm[0]); ++i)   {
-    //cppcheck-suppress nullPointerRedundantCheck
-    p1 = ::strstr(p1, itm[i]);
-    //cppcheck-suppress nullPointerRedundantCheck
-    if ( p1 )    {
-      const char* pp1 = p1+strlen(itm[i]);
-      const char* p2 = ::strstr(pp1, "}");
-      if ( p2 )   {
-        std::string s (pp1, p2-pp1);
-        switch(i)   {
-        case 0:
-          m_colName = std::move(s);
-          nread += 1;
-          break;
-        case 1:
-          m_typeName = std::move(s);
-          nread += 1;
-          break;
-        case 2:
-          nread += ::sscanf(s.c_str(), "%99d", &m_type);
-          break;
-        case 3:
-          nread += ::sscanf(s.c_str(), "%99d", &m_opts);
-          break;
-        case 4:
-          nread += ::sscanf(s.c_str(), "%99d", &m_offset);
-          break;
-        case 5:
-          nread += ::sscanf(s.c_str(), "%99d", &m_size);
-          break;
-        case 6:
-          nread += ::sscanf(s.c_str(), "%99d", &m_nElem);
-          break;
-        default:
-          break;
+  std::string_view tmp = string_rep;
+  std::size_t nread = 0;
+  for (std::size_t i = 0; i < keys.size(); ++i) {
+    const auto pos = tmp.find(keys[i]);
+    if (pos == std::string_view::npos) {
+      continue;
+    }
+    tmp.remove_prefix(pos + keys[i].size());
+    const std::size_t end = tmp.find('}');
+    if (end == std::string_view::npos) {
+      continue;
+    }
+    const auto value = tmp.substr(0, end);
+    switch(i)   {
+      case 0:
+        m_colName = value;
+        ++nread;
+        break;
+      case 1:
+        m_typeName = value;
+        ++nread;
+        break;
+      default:{
+        int& target = this->*intMembers[i - 2];
+        const auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(),
+          target);
+        if (ec == std::errc{} && ptr == value.data() + value.size()) {
+          ++nread;
         }
       }
+      break;
     }
+    tmp.remove_prefix(end + 1);
   }
-  if ( nread == 7 )   { // Must match the number of elements in sscanf
-    return StatusCode::SUCCESS;
-  }
-  return StatusCode::FAILURE;
+  
+  return nread == keys.size() ? StatusCode::SUCCESS : StatusCode::FAILURE;
 }
 
 #define _NAME_(x) #x

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <numeric>
@@ -574,7 +574,7 @@ ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::st
     FitParameter tau2Descr = GetParameterDescr("tau2");
     if (fixTau2) tau2Descr.setFixed(tau2);
     else tau2Descr.setDefaultValue(std::move(tau2));    
-    overRideParams.push_back(tau2Descr);
+    overRideParams.push_back(std::move(tau2Descr));
   }
 
   if (period > 0) {
@@ -585,7 +585,7 @@ ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::st
     else {
       FitParameter periodDescr = GetParameterDescr("period");
       periodDescr.setFixed(period);
-      overRideParams.push_back(periodDescr);
+      overRideParams.push_back(std::move(periodDescr));
     }
   }
   
@@ -597,7 +597,7 @@ ZDCFitExpFermiVariableTausInduct::ZDCFitExpFermiVariableTausInduct(const std::st
     else {
       FitParameter bIDescr = GetParameterDescr("bI");
       bIDescr.setFixed(bI);
-      overRideParams.push_back(bIDescr);
+      overRideParams.push_back(std::move(bIDescr));
     }
   }
 
@@ -1197,7 +1197,7 @@ ZDCFitExpFermiInductPreExp::ZDCFitExpFermiInductPreExp(const std::string& tag, c
     else {
       FitParameter periodDescr = GetParameterDescr("period");
       periodDescr.setFixed(period);
-      overRideParams.push_back(periodDescr);
+      overRideParams.push_back(std::move(periodDescr));
     }
   }
   
@@ -1209,7 +1209,7 @@ ZDCFitExpFermiInductPreExp::ZDCFitExpFermiInductPreExp(const std::string& tag, c
     else {
       FitParameter bIDescr = GetParameterDescr("bI");
       bIDescr.setFixed(bI);
-      overRideParams.push_back(bIDescr);
+      overRideParams.push_back(std::move(bIDescr));
     }
   }
 

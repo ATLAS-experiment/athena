@@ -221,7 +221,7 @@ namespace InDet {
     return true;
   }
 
-  StatusCode InDetTrackTruthFilterTool::initTrkEffSystHistogram(float scale, std::unique_ptr<TH2>& histogram, const std::string & rootFileName, std::string histogramName) const {
+  StatusCode InDetTrackTruthFilterTool::initTrkEffSystHistogram(float scale, std::unique_ptr<TH2>& histogram, const std::string & rootFileName, const std::string & histogramName) const {
 
     ATH_CHECK( initObject<TH2>(histogram, rootFileName, histogramName) );
 
