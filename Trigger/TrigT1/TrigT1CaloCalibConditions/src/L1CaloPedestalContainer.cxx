@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrigT1CaloCalibConditions/L1CaloPedestalContainer.h"
@@ -13,10 +13,19 @@
 using std::cout;
 using std::endl;
 
-L1CaloPedestalContainer::L1CaloPedestalContainer():AbstractL1CaloPersistentCondition("CondAttrListCollection") {
+L1CaloPedestalContainer::L1CaloPedestalContainer(SG::OwnershipPolicy ownPolicy /*= SG::OWN_ELEMENTS*/)
+  : DataVector<L1CaloPedestal>(ownPolicy),
+    AbstractL1CaloPersistentCondition("CondAttrListCollection")
+{
 	// Define DB rows names and types in order to construct the AttributeListSpecification object
 	this->addSpecification(eMean, std::string("Mean"), std::string("double"));
 	this->addSpecification(eRMS,  std::string("RMS"),  std::string("double"));
+}
+
+void L1CaloPedestalContainer::clear (SG::OwnershipPolicy ownPolicy,
+                                     SG::IndexTrackingPolicy trackIndices)
+{
+  DataVector<L1CaloPedestal>::clear (ownPolicy, trackIndices);
 }
 
 
