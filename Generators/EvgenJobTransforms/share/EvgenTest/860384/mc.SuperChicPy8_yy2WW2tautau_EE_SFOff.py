@@ -8,7 +8,6 @@ class Sample(EvgenConfig):
         self.description = "SuperChic yy->WW"
         self.keywords = ["photonFusion","WW","dissociation"]
         self.contact = ["pawel.rybczynski@cern.ch"]
-        self.nEventsPerJob = 10000
 
     def setupProcess(self, flags):
 

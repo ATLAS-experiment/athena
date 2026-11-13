@@ -8,7 +8,6 @@ class Sample(EvgenConfig):
         self.description = "Starlight+Pythia8 gamma + gamma UPC collisions to continuum -> mumu, 1.5 < m < 4 GeV, 0.75 < pT(mu) < 2. GeV, |eta(mu)| < 2.6"
         self.keywords = ["2photon","2lepton","2muon"]
         self.contact = ["pawel.rybczynski@cern.ch"]
-        self.nEventsPerJob = 10000
 
     def setupProcess(self, flags):
 

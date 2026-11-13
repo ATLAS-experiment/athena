@@ -8,10 +8,8 @@ class Sample(EvgenConfig):
         self.description = "Toponium production with 2L, singlet part, showering only, m_t = 173 GeV"
         self.keywords = ["SM", "top"]
         self.contact = ["spyros.argyropoulos@cern.ch"]
-        self.nEventsPerJob = 1000
         # This uses LHE produced by MG
         self.MEgenerator = "MadGraph"
-        self.inputFilesPerJob = 1
         
 
     def setupProcess(self, flags):

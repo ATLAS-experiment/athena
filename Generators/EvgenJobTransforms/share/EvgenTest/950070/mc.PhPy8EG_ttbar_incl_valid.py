@@ -9,7 +9,6 @@ class Sample(EvgenConfig):
         self.description = "POWHEG ttbar production for validation purposes"
         self.keywords = ["SM", "top", "ttbar"]
         self.contact = ["bwynnyck@cern.ch"]
-        self.nEventsPerJob = 10000
 
     def setupProcess(self, flags):
         from PowhegControl.PowhegConfig import PowhegCfg

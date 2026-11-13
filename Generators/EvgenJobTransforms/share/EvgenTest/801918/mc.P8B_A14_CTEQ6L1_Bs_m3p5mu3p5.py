@@ -16,7 +16,6 @@ class Sample(EvgenConfig):
         self.process = "Bs -> mumu"
         self.keywords = ["bottom", "Bs", "2muon", "exclusive"]
         self.contact = ["pavel.reznicek@cern.ch"]
-        self.nEventsPerJob = 500
 
     def setupProcess(self, flags):
         from Pythia8B_i.Pythia8BConfig import (

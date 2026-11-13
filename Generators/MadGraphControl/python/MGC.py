@@ -826,12 +826,12 @@ class ParamCard:
                             self.paramCardDict[name][new_k] = params[block][key]
                     else:
                         # if we can't find it we may be trying to update the parameter based on the name, not the block number
+                        found = False
                         for value in self.paramCardDict[name]: 
-                            found = False
                             if '# '+str(key)+' ' in str(self.paramCardDict[str(name)][str(value)]): # look at the values for each element in the sub-dictionary 
                                 self.paramCardDict[name][value] = params[block][key] # if we find the key in the value, we will update that value
                                 found = True
-                                continue
+                                break
                         if not found: # if we can't find that value, we will add a new one
                             mglog.warning("Looks like the parameter "+str(block)+" : "+str(key)+" isn't in the parameter card dictionary. Adding now!")
                             self.paramCardDict[name][key] = params[block][key]

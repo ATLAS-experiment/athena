@@ -8,7 +8,6 @@ class Sample(EvgenConfig):
         self.description = "Sherpa 3.0 example JO, Z+0,1-jet production."
         self.keywords = ["2lepton"]
         self.contact = ["atlas-generators-sherpa@cern.ch", "spyros.argyropoulos@cern.ch"]
-        self.nEventsPerJob = 10000
         
     def setupProcess(self, flags):
         from Sherpa_i.SherpaConfig import (
