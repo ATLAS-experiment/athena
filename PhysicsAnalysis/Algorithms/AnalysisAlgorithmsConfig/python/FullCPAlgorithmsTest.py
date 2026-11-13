@@ -33,6 +33,8 @@ tauTriggerChainsSF = {
     2023: ['HLT_tau25_mediumRNN_tracktwoMVA', 'HLT_tau35_mediumRNN_tracktwoMVA'],
 }
 bjetTriggerChainsPerYear = {
+    2017: ['HLT_j110_gsc150_boffperf_split_2j35_gsc55_bmv2c1077_split_L1J85_3J30'],
+    2018: ['HLT_j110_gsc150_boffperf_split_2j45_gsc55_bmv2c1070_split_L1J85_3J30'],
     2022: ['HLT_2j45_0eta290_020jvt_bdl1d60_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25'],
     2023: ['HLT_2j45_0eta290_020jvt_bgn160_2j45_pf_ftf_presel2j25XX2j25b85_L14J15p0ETA25'],
 }
