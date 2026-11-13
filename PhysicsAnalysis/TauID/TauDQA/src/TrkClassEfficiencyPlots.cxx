@@ -18,10 +18,12 @@ namespace Tau{
     m_eff_truth_pt_1p       = BookTProfile("TrkClassEff_TruthPt_1P"," Matched 1P Truth-Reco taus TrkClass eff in truth pt; truth pt; eff", 26, 0., 260.0);
     m_eff_truth_eta_1p      = BookTProfile("TrkClassEff_TruthEta_1P"," Matched 1P Truth-Reco taus TrkClass eff in truth eta; truth eta; eff", 10, -2.5,2.5);
     m_eff_mu_1p             = BookTProfile("TrkClassEff_Mu_1P", "Matched 1P Truth-Reco taus TrkClass eff in mu; mu; eff", 8, 10, 90);
+    m_eff_highmu_1p         = BookTProfile("TrkClassEff_HighMu_1P", "Matched 1P Truth-Reco taus TrkClass eff in mu (high <mu> regime); mu; eff", 8, 140, 220);
 
     m_eff_truth_pt_3p       = BookTProfile("TrkClassEff_TruthPt_3P"," Matched 3P Truth-Reco taus TrkClass eff in truth pt; truth pt; eff", 26, 0., 260.0);
     m_eff_truth_eta_3p      = BookTProfile("TrkClassEff_TruthEta_3P"," Matched 3P Truth-Reco taus TrkClass eff in truth eta; truth eta; eff", 10, -2.5,2.5);
     m_eff_mu_3p             = BookTProfile("TrkClassEff_Mu_3P", "Matched 3P Truth-Reco taus TrkClass eff in mu; mu; eff", 8, 10, 90);
+    m_eff_highmu_3p         = BookTProfile("TrkClassEff_HighMu_3P", "Matched 3P Truth-Reco taus TrkClass eff in mu (high <mu> regime); mu; eff", 8, 140, 220);
   }
 
   void TrkClassEfficiencyPlots::fill(std::vector<const xAOD::TruthParticle*> & truth_taus, std::vector<const xAOD::TauJet*> & reco_taus, float weight, float avg_mu)
@@ -51,6 +53,7 @@ namespace Tau{
 	      m_eff_truth_pt_1p->Fill(acc_ptvis(*truth_tau)/Athena::Units::GeV,track_num_match,weight);
               m_eff_truth_eta_1p->Fill(acc_etavis(*truth_tau),track_num_match,weight);
               m_eff_mu_1p->Fill(avg_mu,track_num_match,weight);
+	      m_eff_highmu_1p->Fill(avg_mu,track_num_match,weight);
 
    	   } else if ( acc_ntracks(*truth_tau) == 3){
   
@@ -60,6 +63,7 @@ namespace Tau{
               m_eff_truth_pt_3p->Fill(acc_ptvis(*truth_tau)/Athena::Units::GeV,track_num_match,weight);
               m_eff_truth_eta_3p->Fill(acc_etavis(*truth_tau),track_num_match,weight);
               m_eff_mu_3p->Fill(avg_mu,track_num_match,weight);
+	      m_eff_highmu_3p->Fill(avg_mu,track_num_match,weight);
     	   }
 	   break;
         }

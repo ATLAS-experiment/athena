@@ -23,14 +23,17 @@ public:
   TProfile* m_eff_truth_pt_all{};
   TProfile* m_eff_truth_eta_all{};
   TProfile* m_eff_mu_all{}; 
+  TProfile* m_eff_highmu_all{};  
 
   TProfile* m_eff_truth_pt_1p{};
   TProfile* m_eff_truth_eta_1p{};
   TProfile* m_eff_mu_1p{};
+  TProfile* m_eff_highmu_1p{};
 
   TProfile* m_eff_truth_pt_3p{};
   TProfile* m_eff_truth_eta_3p{};
   TProfile* m_eff_mu_3p{};
+  TProfile* m_eff_highmu_3p{};
 
 private:
   void initializePlots();
