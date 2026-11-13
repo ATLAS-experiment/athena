@@ -23,22 +23,8 @@ namespace ActsTrk {
     ATH_MSG_DEBUG( "Executing " << name() << " ..." );
     const ActsTrk::TrackContainer* actsTracks{nullptr};
     ATH_CHECK(SG::get(actsTracks, m_inputTrackContainerKey, ctx));
-   
-    // Convert to xAOD version
-    ActsTrk::MutablePersistentTrackContainer tracksContainer;
-    // tracksContainer.ensureDynamicColumns(*actsTracks);
-    for ( auto track : *actsTracks ) {
-
-      auto destProxy = tracksContainer.makeTrack();
-      destProxy.copyFrom(track);
-    }
-    ATH_MSG_DEBUG("    \\__ Converted " << tracksContainer.size() << " tracks");
-
-    // Make const
-   auto constTracksContainer = m_tracksBackendHandlesHelper.moveToConst(std::move(tracksContainer), 
-                                                                        m_ctxProvider.getGeometryContext(ctx),
-                                                                        ctx );
-
+    auto constTracksContainer = m_tracksBackendHandlesHelper.copyToPersistent(*actsTracks, 
+                                                                m_ctxProvider.getGeometryContext(ctx), ctx);
     // Store into StoreGate
     SG::WriteHandle trackContainerHandle{m_outputTrackContainerKey, ctx};
     ATH_CHECK( trackContainerHandle.record(std::move(constTracksContainer)) );    

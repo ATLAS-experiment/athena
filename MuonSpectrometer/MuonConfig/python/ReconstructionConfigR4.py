@@ -94,7 +94,8 @@ def StandaloneMuonOutputCfg(flags):
         from ActsConfig.ActsEventCnvConfig import ActsToXAODTrackConverterAlgCfg
         result.merge(ActsToXAODTrackConverterAlgCfg(flags, name = "MsTracksToXAODTrackConverterAlg", 
                                                     InputActsTracksLocation = "MuonMsTracks", 
-                                                    OutputActsTracksLocation="MuonMsTracks"))
+                                                    OutputActsTracksLocation="MuonMsTracks",
+                                                    ExcludeDecorations=["parentSeed", "muonSegLinks"]))
         esd_items += MuonTrackContainersToPersistify("MuonMs")
         if flags.Muon.buildMETrack:
             result.merge(ActsToXAODTrackConverterAlgCfg(flags, name = "MsAtIpTracksToXAODTrackConverterAlg", 

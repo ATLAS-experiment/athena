@@ -17,7 +17,8 @@ namespace ActsTrk {
            m_mtjKey{owner, "TrackMTJWriteKey", ""},
            m_xAODTrackSummaryKey{owner, "xAODTrackSummaryWriteKey", ""},
            m_trackSurfacesKey{owner, "TrackSurfacesKey", ""},
-           m_trackSummaryKey{owner, "TrackSummaryKey", ""}{}
+           m_trackSummaryKey{owner, "TrackSummaryKey", ""},
+           m_excludeDecors{owner, "ExcludeDecorations", {}} {}
    template <class PropOwner> 
       ConstTrackContainerHandlesHelper::ConstTrackContainerHandlesHelper(PropOwner* owner):
          m_statesKey{ owner, "TrackStatesReadKey", ""},

@@ -43,15 +43,13 @@ std::string prefixFromTrackContainerName(const std::string& tracks) {
         THROW_EXCEPTION("Failed to initialize key "<<key.fullKey());  \
     }
 
-StatusCode MutableTrackContainerHandlesHelper::initialize(
-    const std::string& prefix) {
-  m_statesKey = prefix + "TrackStates";
-  m_parametersKey = prefix + "TrackParameters";
-  m_jacobiansKey = prefix + "TrackJacobians";
-  m_measurementsKey = prefix + "TrackMeasurements";
-  m_surfacesKey = prefix + "TrackStateSurfaces";
-  m_mtjKey =
-      prefix + "MultiTrajectory";  // identical names, underlying types are distinct
+StatusCode MutableTrackContainerHandlesHelper::initialize(std::string_view prefix) {
+  m_statesKey = std::format("{:}TrackStates", prefix);
+  m_parametersKey = std::format("{:}TrackParameters", prefix);
+  m_jacobiansKey = std::format("{:}TrackJacobians", prefix);
+  m_measurementsKey = std::format("{:}TrackMeasurements", prefix);
+  m_surfacesKey = std::format("{:}TrackStateSurfaces", prefix);
+  m_mtjKey = std::format("{:}MultiTrajectory", prefix);  // identical names, underlying types are distinct
   INIT_CHECK(m_statesKey);
   INIT_CHECK(m_parametersKey);
   INIT_CHECK(m_jacobiansKey);
@@ -60,18 +58,35 @@ StatusCode MutableTrackContainerHandlesHelper::initialize(
   INIT_CHECK(m_mtjKey);
 
   // Track Container backends
-  m_xAODTrackSummaryKey = prefix + "TrackSummary";
-  m_trackSurfacesKey = prefix + "TrackSurfaces";
-  m_trackSummaryKey =
-      prefix +
-      "TrackSummary";  // identical names, underlying types are distinct
-
+  m_xAODTrackSummaryKey = std::format("{:}TrackSummary", prefix);
+  m_trackSurfacesKey = std::format("{:}TrackSurfaces",  prefix);
+  m_trackSummaryKey = std::format("{:}TrackSummary", prefix);
   INIT_CHECK(m_xAODTrackSummaryKey);
   INIT_CHECK(m_trackSurfacesKey);
   INIT_CHECK(m_trackSummaryKey);
   return StatusCode::SUCCESS;
 }
 
+
+
+
+ std::unique_ptr<ActsTrk::PersistentTrackContainer> 
+    MutableTrackContainerHandlesHelper::copyToPersistent(const ActsTrk::TrackContainer& tc, 
+                                                         const Acts::GeometryContext& geoContext, 
+                                                         const EventContext& evtContext) const {
+    
+    ActsTrk::MutablePersistentTrackContainer mmjt;
+    for (const auto& exclude : m_excludeDecors) { 
+      mmjt.trackStateContainer().excludeDecoration(exclude); 
+      mmjt.container().excludeDecoration(exclude);
+    }
+    mmjt.ensureDynamicColumns(tc);
+    for ( auto track : tc) {
+      auto destProxy = mmjt.makeTrack();
+      destProxy.copyFrom(track);
+    }
+    return moveToConst(std::move(mmjt), geoContext, evtContext);
+}
 std::unique_ptr<ActsTrk::MultiTrajectory>
 MutableTrackContainerHandlesHelper::moveToConst(
     ActsTrk::MutableMultiTrajectory&& mmtj, const EventContext& evtContext) const {

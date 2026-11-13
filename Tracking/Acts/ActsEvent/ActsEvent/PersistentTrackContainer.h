@@ -11,10 +11,10 @@
 
 namespace ActsTrk {
   // Containers with xAOD backends - this is for persistification
-  using MutablePersistentTrackBackend = ActsTrk::MutableTrackSummaryContainer;
-  using PersistentTrackBackend = ActsTrk::TrackSummaryContainer;
-  using MutablePersistentTrackStateBackend = ActsTrk::MutableMultiTrajectory;
-  using PersistentTrackStateBackend = ActsTrk::MultiTrajectory;
+  using MutablePersistentTrackBackend = MutableTrackSummaryContainer;
+  using PersistentTrackBackend = TrackSummaryContainer;
+  using MutablePersistentTrackStateBackend = MutableMultiTrajectory;
+  using PersistentTrackStateBackend = MultiTrajectory;
 
   template <typename T>
   struct DataLinkHolder {
@@ -30,9 +30,9 @@ namespace ActsTrk {
     operator bool() const { return m_link.isValid(); }
   };
 
-  using PersistentTrackContainerBase = Acts::TrackContainer<ActsTrk::PersistentTrackBackend,
-                                                            ActsTrk::PersistentTrackStateBackend,
-                                                            ActsTrk::DataLinkHolder>;
+  using PersistentTrackContainerBase = Acts::TrackContainer<PersistentTrackBackend,
+                                                            PersistentTrackStateBackend,
+                                                            DataLinkHolder>;
   
   class PersistentTrackContainer :
     public PersistentTrackContainerBase
@@ -49,12 +49,12 @@ namespace ActsTrk {
   };
   
   struct MutablePersistentTrackContainer
-    : public Acts::TrackContainer<ActsTrk::MutablePersistentTrackBackend,
-                                  ActsTrk::MutablePersistentTrackStateBackend,
+    : public Acts::TrackContainer<MutablePersistentTrackBackend,
+                                  MutablePersistentTrackStateBackend,
                                   Acts::detail::ValueHolder> {
     MutablePersistentTrackContainer()
-      : Acts::TrackContainer<ActsTrk::MutablePersistentTrackBackend,
-                             ActsTrk::MutablePersistentTrackStateBackend,
+      : Acts::TrackContainer<MutablePersistentTrackBackend,
+                             MutablePersistentTrackStateBackend,
                              Acts::detail::ValueHolder>(
        MutablePersistentTrackBackend(),
        MutablePersistentTrackStateBackend()) {}

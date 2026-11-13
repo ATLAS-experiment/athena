@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ACTSTRKEVENT_TRACKCONTAINERHANDLESHELPER_H
@@ -46,7 +46,14 @@ class MutableTrackContainerHandlesHelper {
    * @arg prefix - common prefix for all the names
    * the value would typically be taken from configurable string property
    */
-  StatusCode initialize(const std::string& prefix);
+  StatusCode initialize(std::string_view prefix);
+
+  
+  
+  std::unique_ptr<ActsTrk::PersistentTrackContainer> copyToPersistent(
+      const ActsTrk::TrackContainer& tc,
+      const Acts::GeometryContext& geoContext,
+      const EventContext& evtContext) const;
 
   /**
    * produces ActsTrk::ConstTrackContainer with all backends stored in SG
@@ -80,6 +87,8 @@ class MutableTrackContainerHandlesHelper {
   SG::WriteHandleKey<xAOD::TrackSummaryContainer> m_xAODTrackSummaryKey;
   SG::WriteHandleKey<xAOD::TrackSurfaceContainer> m_trackSurfacesKey;
   SG::WriteHandleKey<ActsTrk::TrackSummaryContainer> m_trackSummaryKey;
+
+  Gaudi::Property<std::set<std::string>> m_excludeDecors;
 };
 
 class ConstTrackContainerHandlesHelper {
