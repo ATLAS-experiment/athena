@@ -51,19 +51,23 @@ using ConstCovariance = Acts::TrackStateTraits<3>::Covariance;
 using Parameters = Acts::TrackStateTraits<3, false>::Parameters;
 using Covariance = Acts::TrackStateTraits<3, false>::Covariance;
 
-class MutableTrackSummaryContainer;
 
 class TrackSummaryContainer {
  public:
   using IndexType = uint32_t; // TODO find common place for it
   static constexpr auto kInvalid = Acts::kTrackIndexInvalid;
-  TrackSummaryContainer(const DataLink<xAOD::TrackSummaryContainer>& lin = nullptr);
+  explicit TrackSummaryContainer(const DataLink<xAOD::TrackSummaryContainer>& lin = nullptr);
   static const std::set<std::string> staticVariables;
   static const std::set<Acts::HashedString> staticVariableHashes;
   /**
   * return true if the container has specific decoration
   */
   constexpr bool hasColumn_impl(Acts::HashedString key) const;
+
+
+  const std::type_info& columnDataType_impl(Acts::HashedString key) const;
+
+  std::string_view columnName_impl(Acts::HashedString key) const;
 
   /**
   * return pointer to reference surface
@@ -108,11 +112,16 @@ class TrackSummaryContainer {
 
   std::vector<Acts::HashedString> dynamicKeys_impl() const;
 
+  void excludeDecoration(std::string_view decorName);
+
+// MutableTrackSummaryContainer
+
  protected:
 
   DataLink<xAOD::TrackSummaryContainer> m_trackBackend = nullptr;
-  std::vector<ActsTrk::detail::Decoration> m_decorations;
+  std::vector<detail::Decoration> m_decorations;
   std::vector<std::shared_ptr<const Acts::Surface>> m_surfaces; // decoded transient form of surfaces
+  std::unordered_set<Acts::HashedString> m_excluded{};
 };
 
 class MutableTrackSummaryContainer : public TrackSummaryContainer {
@@ -171,6 +180,8 @@ class MutableTrackSummaryContainer : public TrackSummaryContainer {
   */
   void ensureDynamicColumns_impl(const MutableTrackSummaryContainer& other);
   void ensureDynamicColumns_impl(const TrackSummaryContainer& other);
+  void ensureDynamicColumns_impl(const Acts::ConstVectorTrackContainer& other);
+
 
   /**
   * preallocate number of track objects 
@@ -236,9 +247,6 @@ constexpr bool ActsTrk::TrackSummaryContainer::hasColumn_impl(
   return false;
 }
 
-namespace details{
-} // EOF detail
-
 template <typename T>
 constexpr void MutableTrackSummaryContainer::addColumn_impl(
     std::string_view name) {
@@ -256,6 +264,9 @@ constexpr void MutableTrackSummaryContainer::addColumn_impl(
 }
 
 }  // namespace ActsTrk
+
+static_assert(Acts::MutableTrackContainerBackend<ActsTrk::MutableTrackSummaryContainer>);
+static_assert(Acts::ConstTrackContainerBackend<ActsTrk::TrackSummaryContainer>);
 
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF( ActsTrk::TrackSummaryContainer, 1185802350, 1 )

@@ -8,44 +8,7 @@
 #include "ActsEvent/ParticleHypothesisEncoding.h"
 #include "ActsGeoUtils/SurfaceEncoding.h"
 
-// this is list of xAOD container variable names that are "hardcoded" in TrackSummary_v1
-// their compatibility is maintained by the unit tests: AllStaticxAODVariablesAreKnown
-const std::set<std::string> ActsTrk::TrackSummaryContainer::staticVariables = {
-    "params", "covParams", "nMeasurements", "nHoles",   "chi2f",
-    "ndf",    "nOutliers", "nSharedHits",   "nSplitHits", "tipIndex", "stemIndex",
-    "particleHypothesis", "surfaceIndex"};
 
-using namespace Acts::HashedStringLiteral;
-const std::set<Acts::HashedString> ActsTrk::TrackSummaryContainer::staticVariableHashes = [](){
-  std::set<Acts::HashedString> result;
-  for (const auto& s: ActsTrk::TrackSummaryContainer::staticVariables) {
-    result.insert(Acts::hashStringDynamic(s));
-  }
-  return result;
-}();
-
-
-ActsTrk::TrackSummaryContainer::TrackSummaryContainer(
-    const DataLink<xAOD::TrackSummaryContainer>& link)
-    : m_trackBackend(link)
-    {}
-
-const Acts::Surface* ActsTrk::TrackSummaryContainer::referenceSurface_impl(
-    ActsTrk::IndexType itrack) const {
-  if (itrack >= m_surfaces.size())
-    throw std::out_of_range(
-        "TrackSummaryContainer index out of range when accessing reference "
-        "surface");
-  return m_surfaces[itrack].get();
-}
-
-Acts::ParticleHypothesis ActsTrk::TrackSummaryContainer::particleHypothesis_impl(IndexType itrack) const{
-  return ActsTrk::ParticleHypothesis::convert( static_cast<xAOD::ParticleHypothesis>(m_trackBackend->at(itrack)->particleHypothesis()));
-}
-
-std::size_t ActsTrk::TrackSummaryContainer::size_impl() const {
-  return m_trackBackend->size();
-}
 
 namespace {
 template <typename C>
@@ -78,8 +41,70 @@ std::any component_impl(C& container, Acts::HashedString key,
 }
 }  // namespace
 
-std::any ActsTrk::TrackSummaryContainer::component_impl(
-    Acts::HashedString key, ActsTrk::IndexType itrack) const {
+
+
+namespace ActsTrk{
+// this is list of xAOD container variable names that are "hardcoded" in TrackSummary_v1
+// their compatibility is maintained by the unit tests: AllStaticxAODVariablesAreKnown
+const std::set<std::string> TrackSummaryContainer::staticVariables = {
+    "params", "covParams", "nMeasurements", "nHoles",   "chi2f",
+    "ndf",    "nOutliers", "nSharedHits",   "nSplitHits", "tipIndex", "stemIndex",
+    "particleHypothesis", "surfaceIndex"};
+
+using namespace Acts::HashedStringLiteral;
+const std::set<Acts::HashedString> TrackSummaryContainer::staticVariableHashes = [](){
+  std::set<Acts::HashedString> result;
+  for (const auto& s: TrackSummaryContainer::staticVariables) {
+    result.insert(Acts::hashStringDynamic(s));
+  }
+  return result;
+}();
+
+
+TrackSummaryContainer::TrackSummaryContainer(
+    const DataLink<xAOD::TrackSummaryContainer>& link)
+    : m_trackBackend(link)
+    {}
+
+const Acts::Surface* TrackSummaryContainer::referenceSurface_impl(
+    IndexType itrack) const {
+  if (itrack >= m_surfaces.size())
+    throw std::out_of_range(
+        "TrackSummaryContainer index out of range when accessing reference "
+        "surface");
+  return m_surfaces[itrack].get();
+}
+
+Acts::ParticleHypothesis TrackSummaryContainer::particleHypothesis_impl(IndexType itrack) const{
+  return ParticleHypothesis::convert( static_cast<xAOD::ParticleHypothesis>(m_trackBackend->at(itrack)->particleHypothesis()));
+}
+
+std::size_t TrackSummaryContainer::size_impl() const {
+  return m_trackBackend->size();
+}
+
+std::string_view TrackSummaryContainer::columnName_impl(Acts::HashedString key) const {
+    for (auto& d : m_decorations) {
+        if (d.hash == key) {
+            return d.name;
+        }
+    }
+    throw std::runtime_error(std::format("{:}() - Key is unknown {:}",__func__, key));
+    return "";
+}
+const std::type_info& TrackSummaryContainer::columnDataType_impl(Acts::HashedString key) const {
+    for (auto& d : m_decorations) {
+        if (d.hash == key) {
+            return *SG::AuxTypeRegistry::instance().getType(d.auxid);
+        }
+    }
+    throw std::runtime_error(std::format("{:}() - Key is unknown {:}",__func__, key));
+    return typeid(const void*);
+}
+
+// 
+std::any TrackSummaryContainer::component_impl(
+    Acts::HashedString key, IndexType itrack) const {
   std::any result = ::component_impl(*m_trackBackend, key, itrack);
   if (result.has_value()) {
     return result;
@@ -90,30 +115,29 @@ std::any ActsTrk::TrackSummaryContainer::component_impl(
       return d.getter(m_trackBackend->getStore(), itrack, d.auxid);
     }
   }
-  throw std::runtime_error("TrackSummaryContainer no such component " +
-                           std::to_string(key));
+  throw std::runtime_error(std::format("TrackSummaryContainer no such component {:}", key));
 }
 
-ActsTrk::ConstParameters ActsTrk::TrackSummaryContainer::parameters(
-    ActsTrk::IndexType itrack) const {
+ConstParameters TrackSummaryContainer::parameters(
+    IndexType itrack) const {
   return m_trackBackend->at(itrack)->paramsEigen();
 }
 
-ActsTrk::ConstCovariance ActsTrk::TrackSummaryContainer::covariance(
-    ActsTrk::IndexType itrack) const {
+ConstCovariance TrackSummaryContainer::covariance(
+    IndexType itrack) const {
   return m_trackBackend->at(itrack)->covParamsEigen();
 }
 
-void ActsTrk::TrackSummaryContainer::fillFrom(
-    ActsTrk::MutableTrackSummaryContainer& mtb) {
+void TrackSummaryContainer::fillFrom(
+    MutableTrackSummaryContainer& mtb) {
   m_surfaces = std::move(mtb.m_surfaces);
 }
 
-void ActsTrk::TrackSummaryContainer::restoreDecorations() {
-  m_decorations = ActsTrk::detail::restoreDecorations(m_trackBackend->getConstStore(), staticVariables);
+void TrackSummaryContainer::restoreDecorations() {
+  m_decorations = detail::restoreDecorations(m_trackBackend->getConstStore(), staticVariables);
 }
 
-std::vector<Acts::HashedString> ActsTrk::TrackSummaryContainer::dynamicKeys_impl() const {
+std::vector<Acts::HashedString> TrackSummaryContainer::dynamicKeys_impl() const {
   std::vector<Acts::HashedString> result;
   for ( const auto& d: m_decorations) {
     if (staticVariableHashes.count(d.hash) == 1) {
@@ -124,11 +148,14 @@ std::vector<Acts::HashedString> ActsTrk::TrackSummaryContainer::dynamicKeys_impl
   return result;
 }
 
-void ActsTrk::TrackSummaryContainer::decodeSurfaces(const xAOD::TrackSurfaceContainer* src) {
+void TrackSummaryContainer::decodeSurfaces(const xAOD::TrackSurfaceContainer* src) {
   m_surfaces.reserve(src->size());
   for ( auto xAODSurfacePtr: *src) {
     m_surfaces.push_back( decodeSurface(xAODSurfacePtr));
   }
+}
+void TrackSummaryContainer::excludeDecoration(std::string_view decorName) {
+  m_excluded.insert(Acts::hashStringDynamic(decorName));
 }
 
 
@@ -137,7 +164,7 @@ void ActsTrk::TrackSummaryContainer::decodeSurfaces(const xAOD::TrackSurfaceCont
 ////////////////////////////////////////////////////////////////////
 // write api
 ////////////////////////////////////////////////////////////////////
-ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer() :
+MutableTrackSummaryContainer::MutableTrackSummaryContainer() :
   m_mutableTrackBackend(std::make_unique<xAOD::TrackSummaryContainer>()),
   m_mutableTrackBackendAux(std::make_unique<xAOD::TrackSummaryAuxContainer>())
 {
@@ -145,7 +172,7 @@ ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer() :
   TrackSummaryContainer::m_trackBackend = m_mutableTrackBackend.get();
 }
 
-ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer(
+MutableTrackSummaryContainer::MutableTrackSummaryContainer(
     MutableTrackSummaryContainer&& other) :
   m_mutableTrackBackend(std::move(other.m_mutableTrackBackend)),
   m_mutableTrackBackendAux(std::move(other.m_mutableTrackBackendAux))
@@ -159,8 +186,8 @@ ActsTrk::MutableTrackSummaryContainer::MutableTrackSummaryContainer(
 
 // move assignment operator
 //coverity[exn_spec_violation]
-ActsTrk::MutableTrackSummaryContainer& ActsTrk::MutableTrackSummaryContainer::operator = (
-    ActsTrk::MutableTrackSummaryContainer&& other) noexcept {
+MutableTrackSummaryContainer& MutableTrackSummaryContainer::operator = (
+    MutableTrackSummaryContainer&& other) noexcept {
   //NB. restoreDecorations may throw a GaudiException, resulting in a call to terminate()
   // because the function is annotated 'noexcept'
   m_mutableTrackBackend = std::exchange(other.m_mutableTrackBackend, nullptr);
@@ -184,8 +211,12 @@ ActsTrk::MutableTrackSummaryContainer& ActsTrk::MutableTrackSummaryContainer::op
 
   return *this;
 }
-
-ActsTrk::IndexType ActsTrk::MutableTrackSummaryContainer::addTrack_impl() {
+void MutableTrackSummaryContainer::ensureDynamicColumns_impl(const Acts::ConstVectorTrackContainer & /*other*/) {
+#ifdef ACTIVATE_LATER
+    ensureDynamicColumns(m_excluded, other, *this);
+#endif
+}
+IndexType MutableTrackSummaryContainer::addTrack_impl() {
   m_mutableTrackBackend->push_back(std::make_unique<xAOD::TrackSummary>());
   m_mutableTrackBackend->back()->resize();
   // ACTS assumes default to be pion, xAOD::ParticleHypothesis == 0 is geantino
@@ -194,8 +225,8 @@ ActsTrk::IndexType ActsTrk::MutableTrackSummaryContainer::addTrack_impl() {
   return m_mutableTrackBackend->size() - 1;
 }
 
-void ActsTrk::MutableTrackSummaryContainer::removeTrack_impl(
-    ActsTrk::IndexType itrack) {
+void MutableTrackSummaryContainer::removeTrack_impl(
+    IndexType itrack) {
   if (itrack >= m_mutableTrackBackend->size()) {
     throw std::out_of_range("removeTrack_impl track backend");
   }
@@ -207,18 +238,18 @@ void ActsTrk::MutableTrackSummaryContainer::removeTrack_impl(
 }
 
 // this in fact may be a copy from other MutableTrackSymmaryContainer
-void ActsTrk::MutableTrackSummaryContainer::copyDynamicFrom_impl(
-    ActsTrk::IndexType itrack, Acts::HashedString key,
+void MutableTrackSummaryContainer::copyDynamicFrom_impl(
+    IndexType itrack, Acts::HashedString key,
     const std::any& src_ptr) {
-  if ( staticVariableHashes.count(key) == 1)  { return; }
+  if ( staticVariableHashes.count(key) == 1 || m_excluded.count(key))  { return; }
   for ( const auto& d: m_decorations) {
     if (d.hash != key) { continue; }
     d.copier(m_mutableTrackBackendAux.get(), itrack, d.auxid, src_ptr);
   }
 }
 
-std::any ActsTrk::MutableTrackSummaryContainer::component_impl(
-    Acts::HashedString key, ActsTrk::IndexType itrack) {
+std::any MutableTrackSummaryContainer::component_impl(
+    Acts::HashedString key, IndexType itrack) {
   std::any result = ::component_impl(*m_mutableTrackBackend, key, itrack);
   if (result.has_value()) {
     return result;
@@ -232,50 +263,47 @@ std::any ActsTrk::MutableTrackSummaryContainer::component_impl(
                            std::to_string(key));
 }
 
-ActsTrk::Parameters ActsTrk::MutableTrackSummaryContainer::parameters(
-    ActsTrk::IndexType itrack) {
+Parameters MutableTrackSummaryContainer::parameters(
+    IndexType itrack) {
   return m_mutableTrackBackend->at(itrack)->paramsEigen();
 }
 
-ActsTrk::Covariance ActsTrk::MutableTrackSummaryContainer::covariance(
-    ActsTrk::IndexType itrack) {
+Covariance MutableTrackSummaryContainer::covariance(
+    IndexType itrack) {
   return m_mutableTrackBackend->at(itrack)->covParamsEigen();
 }
 
-void ActsTrk::MutableTrackSummaryContainer::ensureDynamicColumns_impl(
+void MutableTrackSummaryContainer::ensureDynamicColumns_impl(
     const MutableTrackSummaryContainer& other) {
-  for (auto& d : other.m_decorations) {
-    m_decorations.push_back(d);
-  }
+    m_decorations.insert_range(m_decorations.end(), other.m_decorations);
+ 
 }
 
-void ActsTrk::MutableTrackSummaryContainer::ensureDynamicColumns_impl(
+void MutableTrackSummaryContainer::ensureDynamicColumns_impl(
     const TrackSummaryContainer& other) {
-  for (auto& d : other.m_decorations) {
-    m_decorations.push_back(d);
-  }
+    m_decorations.insert_range(m_decorations.end(), other.m_decorations);  
 }
 
-void ActsTrk::MutableTrackSummaryContainer::reserve(ActsTrk::IndexType size) {
+void MutableTrackSummaryContainer::reserve(IndexType size) {
   m_mutableTrackBackend->reserve(size);
 }
 
-void ActsTrk::MutableTrackSummaryContainer::clear() {
+void MutableTrackSummaryContainer::clear() {
   m_mutableTrackBackend->clear();
   m_surfaces.clear();
 }
 
-void ActsTrk::MutableTrackSummaryContainer::setReferenceSurface_impl(
-    ActsTrk::IndexType itrack, std::shared_ptr<const Acts::Surface> surface) {
+void MutableTrackSummaryContainer::setReferenceSurface_impl(
+    IndexType itrack, std::shared_ptr<const Acts::Surface> surface) {
   m_surfaces[itrack] = std::move(surface);
 }
 
-void ActsTrk::MutableTrackSummaryContainer::encodeSurfaces(xAOD::TrackSurfaceAuxContainer* dest, const Acts::GeometryContext& geoContext) {
+void MutableTrackSummaryContainer::encodeSurfaces(xAOD::TrackSurfaceAuxContainer* dest, const Acts::GeometryContext& geoContext) {
   dest->resize(m_surfaces.size());
   size_t destIndex = 0;
   // go over all surfaces and for each free surface record persistent version of it in the xAOD
   // at the same time store index to it updating TrackSummary
-  for ( ActsTrk::IndexType index = 0, eindex = m_surfaces.size(); index < eindex; ++index ) {
+  for ( IndexType index = 0, eindex = m_surfaces.size(); index < eindex; ++index ) {
     if ( m_surfaces[index] == nullptr or m_surfaces[index]->geometryId().value() != 0  ) {
       m_mutableTrackBackend->at(index)->setSurfaceIndex(Acts::kTrackIndexInvalid);
     } else {
@@ -287,6 +315,7 @@ void ActsTrk::MutableTrackSummaryContainer::encodeSurfaces(xAOD::TrackSurfaceAux
   dest->resize(destIndex);
 }
 
-void ActsTrk::MutableTrackSummaryContainer::setParticleHypothesis_impl(ActsTrk::IndexType itrack, const Acts::ParticleHypothesis& particleHypothesis) {
-  m_mutableTrackBackend->at(itrack)->setParticleHypothesis(ActsTrk::ParticleHypothesis::convert(particleHypothesis));
+void MutableTrackSummaryContainer::setParticleHypothesis_impl(IndexType itrack, const Acts::ParticleHypothesis& particleHypothesis) {
+  m_mutableTrackBackend->at(itrack)->setParticleHypothesis(ParticleHypothesis::convert(particleHypothesis));
+}
 }

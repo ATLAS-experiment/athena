@@ -7,6 +7,7 @@
 // fitter definition:
 #include "xAODTracking/TrackingPrimitives.h"
 #include "Acts/EventData/ProxyAccessor.hpp"
+#include "ActsEvent/Decoration.h"
 
 #include <string>
 
@@ -25,7 +26,7 @@ struct TrackContainerUtils
    /// @tparam consttrackproxy_t should be of type Acts::ConstTrackProxy<...>
    template <Acts::detail::ProxyType consttrackproxy_t>
    static xAOD::TrackFitter fitterType(const consttrackproxy_t &trackProxy) {
-      return s_constFitterAccessor(trackProxy);
+      return static_cast<xAOD::TrackFitter>(s_constFitterAccessor(trackProxy));
    }
 
    /// test whether a track has a fitter type
@@ -38,12 +39,12 @@ struct TrackContainerUtils
    /// add fitter column to the track container
    /// @tparam track_container_t should be of type Acts::TackContainer<...>
    template <typename track_container_t>
-   static void addFitterTypeProperty(track_container_t &tracksContainer) { tracksContainer.template addColumn<xAOD::TrackFitter>(s_fitterColumnName); }
+   static void addFitterTypeProperty(track_container_t &tracksContainer) { tracksContainer.template addColumn<UnderlyingOrSelf_t<xAOD::TrackFitter>>(s_fitterColumnName); }
 
 private:
-   static const std::string s_fitterColumnName;
-   static const Acts::ProxyAccessor<xAOD::TrackFitter> s_fitterAccessor;
-   static const Acts::ConstProxyAccessor<xAOD::TrackFitter> s_constFitterAccessor;
+   static constexpr std::string_view s_fitterColumnName = "fitter";
+   static const Acts::ProxyAccessor<UnderlyingOrSelf_t<xAOD::TrackFitter>> s_fitterAccessor;
+   static const Acts::ConstProxyAccessor<UnderlyingOrSelf_t<xAOD::TrackFitter>> s_constFitterAccessor;
 };
 }
 #endif

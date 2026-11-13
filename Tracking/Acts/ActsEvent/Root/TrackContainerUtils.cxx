@@ -4,10 +4,9 @@
 #include "ActsEvent/TrackContainerUtils.h"
 
 namespace ActsTrk {
-const std::string TrackContainerUtils::s_fitterColumnName("fitter");
-const Acts::ProxyAccessor<xAOD::TrackFitter>
-  TrackContainerUtils::s_fitterAccessor(TrackContainerUtils::s_fitterColumnName);
+const Acts::ProxyAccessor<UnderlyingOrSelf_t<xAOD::TrackFitter>>
+  TrackContainerUtils::s_fitterAccessor(std::string{s_fitterColumnName});
 
-const Acts::ConstProxyAccessor<xAOD::TrackFitter>
-  TrackContainerUtils::s_constFitterAccessor(TrackContainerUtils::s_fitterColumnName);
+const Acts::ConstProxyAccessor<UnderlyingOrSelf_t<xAOD::TrackFitter>>
+  TrackContainerUtils::s_constFitterAccessor(std::string{s_fitterColumnName});
 }

@@ -234,6 +234,8 @@ class MutableMultiTrajectory final
     return typename TrackStateProxy::Covariance{m_trackJacobiansAux->jac[jacIdx].data()};
   }
 
+  void ensureDynamicColumns_impl(const Acts::ConstVectorMultiTrajectory& other);
+
   /**
    * @brief obtain calibrated measurements for a state at given index
    *
@@ -349,6 +351,10 @@ class MutableMultiTrajectory final
    */
   std::vector<Acts::HashedString> dynamicKeys_impl() const;
 
+  const std::type_info& columnDataType_impl(Acts::HashedString key) const;
+
+  std::string_view columnName_impl(Acts::HashedString key) const;
+
   // access to some backends (for debugging purposes)
   // the receiver should not assume ownership or similar
   inline xAOD::TrackStateAuxContainer* trackStatesAux() { return m_trackStatesAux.get(); }
@@ -382,6 +388,8 @@ class MutableMultiTrajectory final
 
   friend ActsTrk::MutableTrackContainerHandlesHelper;
 
+  void excludeDecoration(std::string_view decorName);
+
  private:
 
   std::unique_ptr<xAOD::TrackStateAuxContainer> m_trackStatesAux;
@@ -407,6 +415,8 @@ class MutableMultiTrajectory final
   GeometryContext m_geoContext;
 
   xAOD::TrackStateContainer m_trackStatesIface;
+
+  std::unordered_set<Acts::HashedString> m_excluded{};
 
   // adjust preallocated size to actually used
   void trim();
@@ -486,6 +496,10 @@ class MultiTrajectory
 
   std::vector<Acts::HashedString> dynamicKeys_impl() const;
 
+    const std::type_info& columnDataType_impl(Acts::HashedString key) const;
+
+  std::string_view columnName_impl(Acts::HashedString key) const;
+
  private:
   const DataLink<xAOD::TrackStateAuxContainer> m_trackStatesAux;
   const DataLink<xAOD::TrackParametersAuxContainer> m_trackParametersAux;
@@ -526,7 +540,8 @@ std::unique_ptr<IFACE> makeInterfaceContainer(const AUX* aux) {
 
 #include "MultiTrajectory.icc"
 
-
+// static_assert(Acts::MutableMultiTrajectoryBackend<ActsTrk::MutableMultiTrajectory>);
+static_assert(Acts::ConstMultiTrajectoryBackend<ActsTrk::MultiTrajectory>);
 #include "AthenaKernel/CLASS_DEF.h"
 CLASS_DEF( ActsTrk::MultiTrajectory , 51219308 , 1 )
 

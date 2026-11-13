@@ -10,11 +10,21 @@
 #include "ActsEvent/TrackContainer.h"
 #include "xAODCore/AuxContainerBase.h"
 #include "xAODTracking/TrackParticleFwd.h"
+#include "xAODTracking/TrackingPrimitives.h"
 #include <any>
+#include <format>
 
 #include "Acts/EventData/BoundTrackParameters.hpp"
+#include "Acts/Utilities/Helpers.hpp"
 
 namespace ActsTrk {
+
+
+/** @brief Maps an enum onto its underlying integer type, any other type onto itself */
+template <typename T> struct UnderlyingOrSelf { using type = T; };
+template <typename T> requires std::is_enum_v<T> struct UnderlyingOrSelf<T> { using type = std::underlying_type_t<T>; };
+template <typename T> using UnderlyingOrSelf_t = typename UnderlyingOrSelf<T>::type;
+
 using IndexType = std::uint32_t;  // TODO take from a common header
 namespace detail {
 using SetterType =
@@ -24,13 +34,13 @@ using GetterType = std::function<const std::any(
 using CopierType =
     std::function<void(SG::IAuxStore*, ActsTrk::IndexType, SG::auxid_t, const std::any&)>;
 
-struct Decoration {
-  std::string name;                    // for our info
-  uint32_t hash = 0;                   // Acts API comes with this
+struct Decoration { 
+  Acts::HashedString hash = 0;         // Acts API comes with this
   SG::auxid_t auxid = SG::null_auxid;  // xAOD talks with this
-  GetterType getter = nullptr;            // type aware accessors
-  CopierType copier = nullptr;
-  SetterType setter = nullptr;
+  std:: string name{};
+  GetterType getter{nullptr};            // type aware accessors
+  CopierType copier{nullptr};
+  SetterType setter{nullptr};
 };
 
 template <typename T>
@@ -89,10 +99,9 @@ static Decoration decoration(std::string_view n, GetterType g, CopierType c,
   Decoration dec;
   dec.name = n;
   dec.hash = Acts::hashStringDynamic(n);
-  dec.auxid = SG::AuxTypeRegistry::instance().getAuxID<T>(dec.name);
+  dec.auxid = SG::AuxTypeRegistry::instance().getAuxID<T>(std::string{n});
   if (dec.auxid == SG::null_auxid)
-    throw std::runtime_error("ActsTrk::Decoration Aux ID for " + dec.name +
-                             " could not be found");
+    throw std::runtime_error(std::format("ActsTrk::Decoration Aux ID for {:} could not be found", n));
   dec.getter = std::move(g);
   dec.copier = std::move(c);
   dec.setter = std::move(s);
@@ -148,6 +157,69 @@ std::optional<Acts::BoundTrackParameters>
     firstTrackParameters(const xAOD::TrackParticle& trkPart,
                         const bool skipOutlier = true);
           
+
+
+
+  namespace detail {
+    template <typename cont_out, typename d_type,
+              typename... args>
+    /** @brief Check whether the dynamic column of the input container is of
+     *         a given scalar data type, it's vector form or it's set form
+     *         and then append the column. If not try the other template arguments
+     *  @param column_name: The name of the column to be copied
+     *  @param type_info: The info on the data type to be checked
+     *  @param out_container: The output container to which the column is appended
+     *  @tparam d_type: The underlying data type to be checked  */
+    void ensureDynamicColumn(const std::string_view column_name,
+                             const std::type_info& type_info,
+                             cont_out& out_container) {
+      if (type_info == typeid(d_type)) {
+        out_container.template addColumn_impl<d_type>(column_name);
+      } else if (type_info == typeid(std::vector<d_type>)) {
+        out_container.template addColumn_impl<std::vector<d_type>>(column_name);
+      } else if (type_info == typeid(std::set<d_type>)) {
+        out_container.template addColumn_impl<std::set<d_type>>(column_name);
+      } else {
+        if constexpr(sizeof...(args) > 0) {
+          ensureDynamicColumn<cont_out, args...>(column_name, type_info, out_container);
+        } else {
+          throw std::invalid_argument(std::format("ensureDynamicColumn() - Cannot copy decoration {:} which is of type {:}",
+                                                   column_name, type_info.name() ));
+ 
+        }
+      }
+    }
+  }
+
+template <typename cont_in, typename cont_out>
+  void ensureDynamicColumns(const std::unordered_set<Acts::HashedString>& exclude,
+                            const cont_in& in_container, cont_out& out_container) {
+    for (const auto key : in_container.dynamicKeys_impl()) {
+      if (exclude.count(key)) {
+          continue;
+      }
+      if (out_container.hasColumn_impl(key)) { 
+        if (in_container.columnDataType_impl(key) != out_container.columnDataType_impl(key)) {
+            throw std::runtime_error(std::format("ensureDynamicColumns() - Non matching data types {:} vs. {:}",
+                                                 in_container.columnDataType_impl(key).name(), 
+                                                 out_container.columnDataType_impl(key).name()));
+        }
+        continue; 
+      }
+      detail::ensureDynamicColumn<cont_out, std::uint8_t, std::int8_t, 
+        std::uint16_t, std::int16_t, std::uint32_t, std::int32_t, 
+        std::uint64_t, std::int64_t, float, double, bool,
+        xAOD::TrackFitter>(in_container.columnName_impl(key),
+                           in_container.columnDataType_impl(key), 
+                           out_container);
+      if (in_container.columnName_impl(key) != out_container.columnName_impl(key)) {
+          throw std::runtime_error(std::format("ensureDynamicColumns() - Column names differ {:} vs. {:}",
+                                                in_container.columnName_impl(key),
+                                                out_container.columnName_impl(key)));
+      }
+    }
+  }
 }  // namespace ActsTrk
+
 
 #endif
