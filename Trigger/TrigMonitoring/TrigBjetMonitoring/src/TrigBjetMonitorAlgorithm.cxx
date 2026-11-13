@@ -393,8 +393,8 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                     if (nMuon*nJet > 0) {
 
                         float muonPt1(0.), muonEta1(0.), muonPhi1(0.), muonZ1(0.), jetPt1(0.), jetEta1(0.), jetPhi1(0.), jetZ1(0.), muonZ(0.);
-                        double GN1_mv(0.), GN2_mv(0.);
-                        bool theLLR_GN1(false), theLLR_GN2(false);
+                        double GN2_mv(0.);
+                        bool theLLR_GN2(false);
                         bool plotDeltaZ(false);
 
                         for(const auto& muonLinkInfo : onlinemuons) {
@@ -478,26 +478,11 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                                         obj_storing_btag = *(jetLinkInfo.link);
                                     }
 
-                                    static const SG::ConstAccessor<float> GN1pu_accessor("GN120220813_pu");
-                                    static const SG::ConstAccessor<float> GN1pc_accessor("GN120220813_pc");
-                                    static const SG::ConstAccessor<float> GN1pb_accessor("GN120220813_pb");
-
                                     static const SG::ConstAccessor<float> GN2pu_accessor("GN220240122_pu");
                                     static const SG::ConstAccessor<float> GN2pc_accessor("GN220240122_pc");
                                     static const SG::ConstAccessor<float> GN2pb_accessor("GN220240122_pb");
 
                                     // checking just pu is enough
-                                    if (GN1pu_accessor.isAvailable(*obj_storing_btag)) {
-                                        double GN1_pu(-1.), GN1_pc(-1.), GN1_pb(-1.);
-                                        GN1_pu = GN1pu_accessor(*obj_storing_btag);
-                                        ATH_MSG_DEBUG("        GN1_pu: " << GN1_pu);
-                                        GN1_pc = GN1pc_accessor(*obj_storing_btag);
-                                        ATH_MSG_DEBUG("        GN1_pc: " << GN1_pc);
-                                        GN1_pb = GN1pb_accessor(*obj_storing_btag);
-                                        ATH_MSG_DEBUG("        GN1_pb: " << GN1_pb);
-                                        theLLR_GN1 = LLR (GN1_pu, GN1_pc, GN1_pb, GN1_mv);
-                                        ATH_MSG_DEBUG("        GN1_mv: " << GN1_mv << " LLR: " << theLLR_GN1);
-                                    }
                                     if (GN2pu_accessor.isAvailable(*obj_storing_btag)) {
                                         double GN2_pu(-1.), GN2_pc(-1.), GN2_pb(-1.);
                                         GN2_pu = GN2pu_accessor(*obj_storing_btag);
@@ -555,14 +540,6 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                         RelPt = 1.e10;
                         bool calc_relpt = CalcRelPt (muonPt1, muonEta1, muonPhi1, jetPt1, jetEta1, jetPhi1, RelPt);
                         ATH_MSG_DEBUG("        RelPt : " << RelPt);
-
-                        // wGN1
-                        std::string wGN1H = "wGN1_"+trigName;
-                        ATH_MSG_DEBUG( " NameH: " << wGN1H  );
-                        auto wGN1 = Monitored::Scalar<float>(std::move(wGN1H),0.0);
-                        wGN1 = float(GN1_mv);
-                        ATH_MSG_DEBUG("        wGN1: " << wGN1 << " RelPt : " << RelPt);
-                        if (calc_relpt && theLLR_GN1) fill("TrigBjetMonitor",wGN1,RelPt);
 
                         // wGN2
                         std::string wGN2H = "wGN2_"+trigName;
@@ -659,43 +636,11 @@ StatusCode TrigBjetMonitorAlgorithm::fillHistograms( const EventContext& ctx ) c
                             }
 
                             bool theLLR(false);
-                            static const SG::ConstAccessor<float> GN1pu_accessor("GN120220813_pu");
-                            static const SG::ConstAccessor<float> GN1pc_accessor("GN120220813_pc");
-                            static const SG::ConstAccessor<float> GN1pb_accessor("GN120220813_pb");
                             static const SG::ConstAccessor<float> GN2pu_accessor("GN220240122_pu");
                             static const SG::ConstAccessor<float> GN2pc_accessor("GN220240122_pc");
                             static const SG::ConstAccessor<float> GN2pb_accessor("GN220240122_pb");
                             // checking only pu should be sufficient
-                            bool GN1_available = GN1pu_accessor.isAvailable(*obj_storing_btag);
                             bool GN2_available = GN2pu_accessor.isAvailable(*obj_storing_btag);
-                            NameH = "GN1_pu_tr_"+trigName;
-                            ATH_MSG_DEBUG( " NameH: " << NameH  );
-                            auto GN1_pu = Monitored::Scalar<double>(NameH,0.0);
-                            GN1_pu = GN1_available ? GN1pu_accessor(*obj_storing_btag) : -1.0;
-                            ATH_MSG_DEBUG("        GN1_pu: " << GN1_pu);
-                            fill("TrigBjetMonitor",GN1_pu);
-
-                            NameH = "GN1_pc_tr_"+trigName;
-                            ATH_MSG_DEBUG( " NameH: " << NameH  );
-                            auto GN1_pc = Monitored::Scalar<double>(NameH,0.0);
-                            GN1_pc = GN1_available ? GN1pc_accessor(*obj_storing_btag) : -1.0;
-                            ATH_MSG_DEBUG("        GN1_pc: " << GN1_pc);
-                            fill("TrigBjetMonitor",GN1_pc);
-
-                            NameH = "GN1_pb_tr_"+trigName;
-                            ATH_MSG_DEBUG( " NameH: " << NameH  );
-                            auto GN1_pb = Monitored::Scalar<double>(NameH,0.0);
-                            GN1_pb = GN1_available ? GN1pb_accessor(*obj_storing_btag) : -1.0;
-                            ATH_MSG_DEBUG("        GN1_pb: " << GN1_pb);
-                            fill("TrigBjetMonitor",GN1_pb);
-
-                            NameH = "GN1_mv_tr_"+trigName;
-                            ATH_MSG_DEBUG( " NameH: " << NameH  );
-                            auto GN1_mv = Monitored::Scalar<double>(NameH,0.0);
-                            theLLR = LLR (GN1_pu, GN1_pc, GN1_pb, GN1_mv);
-                            if ( theLLR ) fill("TrigBjetMonitor",GN1_mv);
-                            ATH_MSG_DEBUG("        GN1_mv: " << GN1_mv << " LLR: " << theLLR);
-
 
                             NameH = "GN2_pu_tr_"+trigName;
                             ATH_MSG_DEBUG( " NameH: " << NameH  );
