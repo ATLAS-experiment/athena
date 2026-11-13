@@ -23,12 +23,26 @@ class GLXShimTest(unittest.TestCase):
             mock = directory / "mock.c"
             mock.write_text(r'''#include <GL/glx.h>
 #include <string.h>
+#include <assert.h>
+static int mode, calls;
+static Bool requests[2];
+void configure(int value) { mode = value; calls = 0; }
+int count(void) { return calls; }
+Bool requested(int index) { return requests[index]; }
+GLXContext glXCreateContext(Display *d, XVisualInfo *v, GLXContext share, Bool direct) {
+    assert(d == (Display *)1 && v == (XVisualInfo *)2 && share == (GLXContext)3);
+    assert(calls < 2);
+    requests[calls++] = direct;
+    return mode == 0 || (mode == 1 && direct) ? (GLXContext)4 : 0;
+}
 int glXGetFBConfigAttrib(Display *d, GLXFBConfig c, int a, int *v) {
     (void)d; (void)c;
     *v = a == GLX_MAX_PBUFFER_WIDTH ? 2048 : 0;
     return a < 0 ? GLX_BAD_ATTRIBUTE : Success;
 }
 __GLXextFuncPtr glXGetProcAddress(const GLubyte *name) {
+    if (!strcmp((const char *)name, "glXCreateContext"))
+        return (__GLXextFuncPtr)glXCreateContext;
     return strcmp((const char *)name, "glXGetFBConfigAttrib") ? 0 :
         (__GLXextFuncPtr)glXGetFBConfigAttrib;
 }
@@ -61,6 +75,29 @@ int main(int argc, char **argv) {
         assert(query(0, 0, -1, &value) == GLX_BAD_ATTRIBUTE && value == 0);
         assert(!resolve((const GLubyte *)"missing"));
     }
+    void (*configure)(int) = dlsym(handle, "configure");
+    int (*count)(void) = dlsym(handle, "count");
+    Bool (*requested)(int) = dlsym(handle, "requested");
+    assert(configure && count && requested);
+    /* Cover ordinary ELF interposition, explicit dlsym and both GLX resolvers. */
+    for (int route = 0; route < 5; ++route) {
+        GLXContext (*create)(Display *, XVisualInfo *, GLXContext, Bool);
+        if (route == 0) create = glXCreateContext;
+        else if (route < 3) create = dlsym(route == 1 ? handle : RTLD_DEFAULT, "glXCreateContext");
+        else {
+            __GLXextFuncPtr (*resolve)(const GLubyte *) = dlsym(handle, names[route - 3]);
+            create = (void *)resolve((const GLubyte *)"glXCreateContext");
+        }
+        assert(create);
+        for (int mode = 0; mode < 3; ++mode) for (int direct = 0; direct < 2; ++direct) {
+            configure(mode);
+            GLXContext context = create((Display *)1, (XVisualInfo *)2, (GLXContext)3, direct);
+            assert(context == (mode < 2 ? (GLXContext)4 : 0));
+            int retry = !direct && mode != 0;
+            assert(count() == 1 + retry && requested(0) == direct);
+            if (retry) assert(requested(1) == True);
+        }
+    }
     return 0;
 }
 ''')
@@ -71,7 +108,7 @@ int main(int argc, char **argv) {
                 [compiler, "-std=c11", "-shared", "-fPIC", "-O2", "-Wall", "-Wextra",
                  "-Werror", "-o", str(shim), str(source), "-ldl"],
                 [compiler, "-shared", "-fPIC", "-o", str(library), str(mock)],
-                [compiler, "-o", str(executable), str(harness), "-ldl"],
+                [compiler, "-o", str(executable), str(harness), str(library), "-ldl"],
             ):
                 subprocess.run(command, check=True, timeout=60)
             environment = dict(os.environ, LD_PRELOAD=str(shim))

@@ -177,7 +177,7 @@ def SetupVP1():
     group = parser.add_argument_group("VP1 specific")
     group.add_argument(
         "--fix-snapshots", action="store_true",
-        help="Enable the temporary Linux GLX zero pixel-limit workaround (requires a C compiler).",
+        help="Enable the temporary Linux GLX context and pixel-limit workaround (requires a C compiler).",
     )
     group.add_argument(
         "Filename",
