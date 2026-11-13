@@ -8,7 +8,10 @@ Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 #include "Acts/EventData/TrackStateType.hpp"
 #include "ActsPlugins/Detray/DetraySurfaceIdMap.hpp"
+#include "ActsPlugins/Traccc/TrackConversion.hpp"
+#include "traccc/geometry/host_detector.hpp"
 
+#include <limits>
 #include <stdexcept>
 
 namespace ActsTrk {
@@ -28,11 +31,12 @@ StatusCode TracccTrackConverterAlg::initialize()
     ATH_CHECK(m_inputTracksKey.initialize());
     ATH_CHECK(m_outputTracksKey.initialize());
 
-    // The Detray -> ACTS surface map is built by the ACTS Detray plugin
-    // together with the Detray geometry in the TrackingGeometrySvc
+    // The Detray geometry and the Detray -> ACTS surface map are built by the
+    // ACTS Detray plugin in the TrackingGeometrySvc
     ATH_CHECK(m_trackingGeometrySvc.retrieve());
-    m_detraySurfaceIds = m_trackingGeometrySvc->detraySurfaceIdMap();
-    if (!m_detraySurfaceIds) {
+    m_trackingGeometry = m_trackingGeometrySvc->trackingGeometry();
+    m_hostDetector = m_trackingGeometrySvc->detrayGeometry();
+    if (!m_hostDetector || !m_trackingGeometrySvc->detraySurfaceIdMap()) {
         ATH_MSG_FATAL("No Detray geometry available from the TrackingGeometrySvc, "
                       "cannot translate Traccc tracks to ACTS tracks. "
                       "Set its BuildDetrayGeometry property to True.");
@@ -71,118 +75,6 @@ const xAOD::UncalibratedMeasurement& TracccTrackConverterAlg::makeSourceLink(
     
 }
 
-const Acts::Surface& TracccTrackConverterAlg::findActsSurface(
-    detray::geometry::identifier detrayId) const
-{
-    const Acts::Surface* surface = m_detraySurfaceIds->surface(detrayId);
-    if (!surface) {
-        ATH_MSG_ERROR("No Acts surface known for Detray surface " << detrayId);
-        throw std::domain_error("No Acts surface for this Detray surface");
-    }
-    return *surface;
-}
-
-std::optional<Acts::BoundTrackParameters>
-TracccTrackConverterAlg::convertGlobalToActsParameters(
-    traccc::bound_track_parameters<traccc::default_algebra> const& trkParams)
-    const
-{
-    if (trkParams.bound_local()[0] == 0 && trkParams.bound_local()[1] == 0 &&
-        trkParams.phi() == 0 && trkParams.theta() == 0 &&
-        trkParams.qop() == 0 && trkParams.time() == 0) {
-        // traccc reports degenerate states like this; treat as "no
-        // parameters" rather than as a real (but zeroed-out) track.
-        return std::nullopt;
-    }
- 
-    const Acts::Surface& surface = findActsSurface(trkParams.surface_link());
- 
-    Acts::BoundVector params;
-    params << trkParams.bound_local()[0], trkParams.bound_local()[1],
-        trkParams.phi(), trkParams.theta(), trkParams.qop(), trkParams.time();
-
-    // ---- sanity-check units ----
-    const double qop = trkParams.qop();
-    const double p   = (qop != 0) ? 1.0 / std::abs(qop) : 0.0;
-    const double pT  = p * std::sin(trkParams.theta());
-    ATH_MSG_DEBUG("Global params: d0=" << trkParams.bound_local()[0]
-                  << " z0=" << trkParams.bound_local()[1]
-                  << " phi=" << trkParams.phi()
-                  << " theta=" << trkParams.theta()
-                  << " qop=" << qop
-                  << " -> |p|=" << p << " pT=" << pT
-                  << " charge=" << (qop > 0 ? +1 : -1)
-                  << " time=" << trkParams.time());    
- 
-    // Traccc covariance has no time uncertainty; Acts::BoundMatrix does
-    // (it's eBoundSize x eBoundSize == 6x6). For now leave the time row/column at the
-    // Identity() values set above and only fill the spatial+qop values.
-    static constexpr unsigned int kAtlasCovSize = 5; // d0, z0, phi, theta, qop (no time)
-
-    Acts::BoundMatrix cov = Acts::BoundMatrix::Identity();
-    const auto& atlasCov = trkParams.covariance();
-    for (unsigned i = 0; i < kAtlasCovSize; ++i) {
-        for (unsigned j = 0; j < kAtlasCovSize; ++j) {
-            cov(i, j) = atlasCov[i][j];
-        }
-    }
- 
-    return Acts::BoundTrackParameters(surface.getSharedPtr(), params, cov,
-                                      Acts::ParticleHypothesis::pion());
-}
- 
-template <typename state_t>
-std::optional<Acts::BoundTrackParameters>
-TracccTrackConverterAlg::convertSmoothedToActsParameters(
-    traccc::edm::track_state<state_t> const& state) const
-{
-    const auto& atlasParam = state.smoothed_params();
- 
-    if (atlasParam.bound_local()[0] == 0 && atlasParam.bound_local()[1] == 0 &&
-        atlasParam.phi() == 0 && atlasParam.theta() == 0 &&
-        atlasParam.qop() == 0 && atlasParam.time() == 0) {
-        // traccc reports degenerate states like this; treat as "no
-        // parameters" rather than as a real (but zeroed-out) state.
-        return std::nullopt;
-    }
- 
-    const Acts::Surface& surface = findActsSurface(atlasParam.surface_link());
- 
-    // d0/z0 come from the measurement's local position; the remaining bound
-    // parameters come from the smoothed track state.
-    Acts::BoundVector params;
-    params << atlasParam.bound_local()[0], atlasParam.bound_local()[1],
-        atlasParam.phi(), atlasParam.theta(), atlasParam.qop(),
-        atlasParam.time();
-
-    // ---- per-state momentum check for sanity ----
-    const double qop = atlasParam.qop();
-    const double p   = (qop != 0) ? 1.0 / std::abs(qop) : 0.0;
-    const double pT  = p * std::sin(atlasParam.theta());
-    ATH_MSG_DEBUG("Smoothed state: d0=" << atlasParam.bound_local()[0]
-                  << " z0=" << atlasParam.bound_local()[1]
-                  << " phi=" << atlasParam.phi()
-                  << " theta=" << atlasParam.theta()
-                  << " qop=" << qop
-                  << " -> |p|=" << p << " pT=" << pT);    
- 
-    // Traccc covariance has no time uncertainty; Acts::BoundMatrix does
-    // (it's eBoundSize x eBoundSize == 6x6). For now leave the time row/column at the
-    // Identity() values set above and only fill the spatial+qop values.
-    static constexpr unsigned int kAtlasCovSize = 5; // d0, z0, phi, theta, qop (no time)
-
-    Acts::BoundMatrix cov = Acts::BoundMatrix::Identity();
-    const auto& atlasCov = atlasParam.covariance();
-    for (unsigned i = 0; i < kAtlasCovSize; ++i) {
-        for (unsigned j = 0; j < kAtlasCovSize; ++j) {
-            cov(i, j) = atlasCov[i][j];
-        }
-    }
-
-    return Acts::BoundTrackParameters(surface.getSharedPtr(), params, cov,
-                                      Acts::ParticleHypothesis::pion());
-}
-
 StatusCode TracccTrackConverterAlg::execute(const EventContext& ctx) const
 {
     // ---- Retrieve HOST RESIDENT clusters (always needed) ----
@@ -217,166 +109,42 @@ StatusCode TracccTrackConverterAlg::execute(const EventContext& ctx) const
         copy->to(tracks->states, m_hostMR->mr(),
             nullptr, vecmem::copy::type::device_to_host);
         
-    traccc_track_container::const_device traccc_tracks(
-        traccc_tracks_buffer);  
-
-    ATH_MSG_DEBUG("Read " << traccc_tracks.tracks.size() << " tracks from device.");
-    m_nTracksIn += traccc_tracks.tracks.size();
-
-    if(stripMeasMap->size() == 0 || pixelMeasMap->size() == 0){
-        ATH_MSG_DEBUG("Maps relating traccc measurements to xAOD cluster containers are empty!!");
-        if(traccc_tracks.tracks.size() > 0){
-            ATH_MSG_ERROR("Traccc tracks exist but mapping to xAOD clusters is empty, cannot convert tracks to ACTS");
-            return StatusCode::FAILURE;
-        }
-    }
-
     // -- Write HOST resident ACTS track container ----
     Acts::VectorTrackContainer trackBackend;
     Acts::VectorMultiTrajectory trackStateBackend;
     ActsTrk::MutableTrackContainer trackContainer(std::move(trackBackend),
                                                   std::move(trackStateBackend));
-    
-    // Bookkeeping for debug summary
-    unsigned nExcludedFitOutcome = 0;
-    unsigned nExcludedNoState = 0;
-    unsigned nExcludedBadNdf = 0;
-    unsigned nExcludedWeirdState = 0;
-    unsigned nExcludedWeirdGlobal = 0;
 
-    for (std::size_t i = 0; i < traccc_tracks.tracks.size(); ++i) {
+    // The traccc measurement index points to the xAOD pixel or strip cluster
+    auto makeActsSourceLink = [&](unsigned int meas_index,
+                                  const Acts::Surface& /*surface*/) {
+        const xAOD::UncalibratedMeasurement* measurement =
+            &makeSourceLink(meas_index, *pixelMeasMap, *stripMeasMap,
+                            *pixel_clusters, *strip_clusters);
+        return ActsTrk::detail::xAODUncalibMeasCalibrator::pack(measurement);
+    };
 
-        const traccc::edm::track track = traccc_tracks.tracks.at(i);
+    // traccc does not yet do backpropagation, so there is no true reference
+    // surface (perigee) for the track. The track parameters are on the surface
+    // of the first measurement and back-propagation during the later
+    // Acts -> xAOD conversion step finds the real perigee.
+    const ActsPlugins::TracccSourceLinkCreator sourceLinkCreator{
+        makeActsSourceLink};
+    const ActsPlugins::TracccTrackConversionStatistics stats =
+        ActsPlugins::convertTracksFromTraccc(
+            traccc_track_container::const_view(traccc_tracks_buffer),
+            m_hostDetector->as<traccc::itk_detector>(), *m_trackingGeometry,
+            sourceLinkCreator, trackContainer);
 
-        const auto fitOutcome = track.fit_outcome();
-        if (fitOutcome != traccc::track_fit_outcome::SUCCESS) {
-            ATH_MSG_DEBUG("Skipping track " << i << ": fit outcome "
-                                            << static_cast<int>(fitOutcome));
-            ++nExcludedFitOutcome;
-            continue;
-        }
- 
-        if (track.constituent_links().empty()) {
-            ++nExcludedNoState;
-            continue;
-        }
- 
-        if (track.ndf() >
-                static_cast<float>(std::numeric_limits<unsigned int>::max()) ||
-            track.ndf() <
-                static_cast<float>(std::numeric_limits<unsigned int>::min())) {
-            ++nExcludedBadNdf;
-            continue;
-        }
+    ATH_MSG_DEBUG("Traccc track conversion to " << m_outputTracksKey.key()
+                  << ": " << stats);
 
-        TrackValidity track_validity = kValid;
-
-        auto actsTrack = trackContainer.makeTrack();
-        actsTrack.chi2() = track.chi2();
-        actsTrack.nDoF() = track.ndf(); 
-
-        Acts::TrackStatePropMask const state_mask =
-            Acts::TrackStatePropMask::Smoothed;
-
-        bool firstState = true;
- 
-        for (const auto [linkType, stateIdx] : track.constituent_links()) {
-            
-            assert(linkType == traccc::edm::track_constituent_link::track_state);
- 
-            const auto& state = traccc_tracks.states.at(stateIdx);
-            const auto& meas_index = state.measurement_index();
- 
-            auto trackState = actsTrack.appendTrackState(state_mask);
-            trackState.typeFlags().setIsMeasurement();
-
-            const std::optional<Acts::BoundTrackParameters> smoothed =
-                convertSmoothedToActsParameters(state);
-
-            if (!smoothed) {
-                ATH_MSG_DEBUG("Track " << i << ": degenerate smoothed state, "
-                                             "dropping track");
-                track_validity = TrackValidity::kInvalidState;
-                break;
-            }
-
-            const xAOD::UncalibratedMeasurement* sourceLink =
-                &makeSourceLink(meas_index, *pixelMeasMap, *stripMeasMap, *pixel_clusters, *strip_clusters);
-            
-            trackState.setUncalibratedSourceLink(ActsTrk::detail::xAODUncalibMeasCalibrator::pack(sourceLink));
-
-            // traccc does not yet do backpropagation, so there is no true
-            // reference surface (perigee) for the track. We use the surface
-            // of the first measurement instead and rely on back-propagation
-            // during the later Acts -> xAOD conversion step to find the real
-            // perigee.
-            if (firstState) {
-                const std::optional<Acts::BoundTrackParameters> global =
-                    convertGlobalToActsParameters(track.params());
-                if (!global) {
-                    ATH_MSG_DEBUG("Track "
-                                  << i
-                                  << ": degenerate global parameters, "
-                                     "dropping track");
-                    track_validity = TrackValidity::kInvalidGlobalParams;
-                    break;
-                }
-                actsTrack.parameters() = global->parameters();
-                actsTrack.covariance() = *global->covariance();
-                actsTrack.setReferenceSurface(
-                    global->referenceSurface().getSharedPtr());
-                firstState = false;
-            }
-
-            try {
-                trackState.setReferenceSurface(
-                    smoothed->referenceSurface().getSharedPtr());
-                trackState.smoothed() = smoothed->parameters();
-                trackState.smoothedCovariance() = *smoothed->covariance();
-            } catch (const std::exception& e) {
-                ATH_MSG_ERROR("Track " << i << ": failed to set track state ("
-                                       << e.what() << ")");
-            }
-
-        }
-
-        if (track_validity == TrackValidity::kInvalidState) {
-            ++nExcludedWeirdState;
-            trackContainer.removeTrack(actsTrack.index());
-        } else if (track_validity == TrackValidity::kInvalidGlobalParams) {
-            ++nExcludedWeirdGlobal;
-            trackContainer.removeTrack(actsTrack.index());
-        } else {
-            // sanity checks
-            const auto& pars = actsTrack.parameters();
-            const double qop = pars[Acts::eBoundQOverP];
-            const double p   = (qop != 0) ? 1.0 / std::abs(qop) : 0.0;
-            const double pT  = p * std::sin(pars[Acts::eBoundTheta]);
-            ATH_MSG_DEBUG("Track " << i << " ACCEPTED: nHits="
-                          << track.constituent_links().size()
-                          << " chi2=" << track.chi2()
-                          << " ndf=" << track.ndf()
-                          << " |p|=" << p << " GeV pT=" << pT << " GeV");
-        }
-
-    }
-
-    ATH_MSG_DEBUG("Converted " << trackContainer.size() << " tracks to " << m_outputTracksKey.key() );
-    ATH_MSG_DEBUG("excluded: "
-                            << nExcludedFitOutcome << " (fit outcome), "
-                            << nExcludedNoState << " (no state), "
-                            << nExcludedBadNdf << " (bad ndf), "
-                            << nExcludedWeirdState << " (weird state), "
-                            << nExcludedWeirdGlobal << " (weird global params)");
-    
-    m_nExcludedFitOutcome += nExcludedFitOutcome;
-    m_nExcludedNoState += nExcludedNoState;
-    m_nExcludedBadNdf += nExcludedBadNdf;
-    m_nExcludedWeirdState += nExcludedWeirdState;
-    m_nExcludedWeirdGlobal += nExcludedWeirdGlobal;
-    
+    m_nTracksIn += stats.nInput;
+    m_nExcludedFitOutcome += stats.nFailedFit;
+    m_nExcludedMissingSurface += stats.nMissingSurface;
+    m_nExcludedDegenerate += stats.nDegenerate;
     m_nTracksOut += trackContainer.size();
-    
+
     Acts::ConstVectorTrackContainer constTrackBackend(
         std::move(trackContainer.container()));
     Acts::ConstVectorMultiTrajectory constTrackStateBackend(
@@ -398,10 +166,8 @@ StatusCode TracccTrackConverterAlg::finalize()
     ATH_MSG_INFO("Received " << m_nTracksIn << " tracks, wrote " << m_nTracksOut);
     ATH_MSG_INFO("Excluded: "
                             << m_nExcludedFitOutcome << " (fit outcome), "
-                            << m_nExcludedNoState << " (no state), "
-                            << m_nExcludedBadNdf << " (bad ndf), "
-                            << m_nExcludedWeirdState << " (weird state), "
-                            << m_nExcludedWeirdGlobal << " (weird global params)");
+                            << m_nExcludedMissingSurface << " (missing surface), "
+                            << m_nExcludedDegenerate << " (degenerate parameters)");
 
     ATH_MSG_DEBUG("Successfully finalized");
     return StatusCode::SUCCESS;
