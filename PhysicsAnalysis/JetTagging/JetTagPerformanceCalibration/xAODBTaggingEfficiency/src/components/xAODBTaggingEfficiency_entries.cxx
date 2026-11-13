@@ -6,6 +6,7 @@
 #include "xAODBTaggingEfficiency/BTaggingEigenVectorRecompositionTool.h"
 #include "xAODBTaggingEfficiency/BTaggingLargeRSelectionJsonTool.h"
 #include "xAODBTaggingEfficiency/BTaggingLargeREfficiencyJsonTool.h"
+#include "xAODBTaggingEfficiency/BTaggingSmallRSelectionJsonTool.h"
 
 // Project include(s).
 #include "AsgTools/AsgComponentFactories.h"
@@ -16,3 +17,4 @@ DECLARE_COMPONENT( BTaggingTruthTaggingTool )
 DECLARE_COMPONENT( BTaggingEigenVectorRecompositionTool )
 DECLARE_COMPONENT( BTaggingLargeRSelectionJsonTool )
 DECLARE_COMPONENT( BTaggingLargeREfficiencyJsonTool )
+DECLARE_COMPONENT( BTaggingSmallRSelectionJsonTool )

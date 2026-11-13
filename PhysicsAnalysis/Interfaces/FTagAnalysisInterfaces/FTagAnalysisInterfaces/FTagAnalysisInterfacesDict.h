@@ -19,5 +19,6 @@
 #include "FTagAnalysisInterfaces/IBTaggingLargeRSelectionJsonTool.h"
 #include "FTagAnalysisInterfaces/IBTaggingLargeREfficiencyJsonTool.h"
 #include "FTagAnalysisInterfaces/IFTagScaleFactorTool.h"
+#include "FTagAnalysisInterfaces/IBTaggingSmallRSelectionJsonTool.h"
 
 #endif // FTAGANALYSISINTERFACES_FTAGANALYSISINTERFACESDICT_H
