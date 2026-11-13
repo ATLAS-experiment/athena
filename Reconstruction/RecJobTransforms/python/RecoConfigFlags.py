@@ -68,14 +68,14 @@ def createRecoConfigFlags():
     # Enable Isolation Reconstruction
     flags.addFlag("Reco.EnableIsolation", lambda prevFlags: (
         prevFlags.Tracking.doVertexFinding
-        and (prevFlags.Reco.EnableCombinedMuon
+        and ((prevFlags.Reco.EnableCombinedMuon or prevFlags.Muon.scheduleActsReco)
              or prevFlags.Reco.EnableEgamma)))
     # Enable Jet Reconstruction
     flags.addFlag("Reco.EnableJet", lambda prevFlags: (
         prevFlags.Detector.EnableCalo
         and prevFlags.Reco.EnableTracking
         and prevFlags.Reco.EnableEgamma
-        and prevFlags.Reco.EnableCombinedMuon
+        and (prevFlags.Reco.EnableCombinedMuon or prevFlags.Muon.scheduleActsReco)
         and prevFlags.Reco.EnablePFlow
         and prevFlags.Reco.HIMode is not HIMode.HI) or
         prevFlags.Common.ProductionStep is ProductionStep.Derivation)
@@ -97,7 +97,7 @@ def createRecoConfigFlags():
                   lambda prevFlags: prevFlags.Reco.EnableJet and
                   prevFlags.Reco.EnableTau and prevFlags.Reco.EnablePFlow and
                   prevFlags.Reco.EnableEgamma and
-                  prevFlags.Reco.EnableCombinedMuon)
+                  (prevFlags.Reco.EnableCombinedMuon or prevFlags.Muon.scheduleActsReco))
     # Enable association of calorimeter cells to Tracks
     flags.addFlag("Reco.EnableTrackCellAssociation",
                   lambda prevFlags: prevFlags.Detector.EnableCalo and
@@ -148,7 +148,7 @@ def createRecoConfigFlags():
     flags.addFlag("Reco.PostProcessing.InDetForwardTrackParticleThinning",
                   lambda prevFlags: prevFlags.Reco.EnablePostProcessing and
                   prevFlags.Reco.EnableTracking and
-                  prevFlags.Reco.EnableCombinedMuon and
+                  (prevFlags.Reco.EnableCombinedMuon or prevFlags.Muon.scheduleActsReco) and
                   prevFlags.Output.doWriteAOD)
     return flags
 

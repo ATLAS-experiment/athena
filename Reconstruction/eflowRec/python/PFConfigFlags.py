@@ -10,7 +10,7 @@ def createPFConfigFlags():
     pfConfigFlags.addFlag("PF.useClusterMoments",True) #This defines whether we add a full list of cluster moments or not. Currently only the HLT config makes use of this flag, it is not used for offline config.
     pfConfigFlags.addFlag("PF.useCalibHitTruthClusterMoments",False) #This defines whether we calculate the calibration hit moments - only possible on if running from special calibraiton hit ESD samples.
     pfConfigFlags.addFlag("PF.useElPhotLinks", lambda prevFlags : prevFlags.Reco.EnableEgamma)
-    pfConfigFlags.addFlag("PF.useMuLinks", lambda prevFlags : prevFlags.Reco.EnableCombinedMuon)
+    pfConfigFlags.addFlag("PF.useMuLinks", lambda prevFlags : prevFlags.Reco.EnableCombinedMuon or prevFlags.Muon.scheduleActsReco)
     pfConfigFlags.addFlag("PF.useMLEOverP",False) #Toggle whether to use the Machine Learning based EOverP inference or not
     pfConfigFlags.addFlag("PF.EOverP_NN_Model",'/afs/cern.ch/user/m/mhodgkin/onnx_15_03_23.onnx') #Model to use in EOverP inference
     #Reference location for cell ordering and e/p lookup in particle flow. 
