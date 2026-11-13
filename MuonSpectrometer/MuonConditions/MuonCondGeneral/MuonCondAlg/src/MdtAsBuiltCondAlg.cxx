@@ -108,7 +108,7 @@ StatusCode MdtAsBuiltCondAlg::parseDataFromJSON(const nlohmann::json& lines,
                     ATH_MSG_ERROR("JSON does not contain " << itrName);
                     THROW_EXCEPTION("Bad JSON key");
                   }
-                  return line[itrName];
+                  return line[std::move(itrName)];
                 };               
                 xPar.setAlignmentParameters(ml, side, getValue("y0"), getValue("z0"),
                                             getValue("alpha"), getValue("ypitch"),
@@ -193,7 +193,7 @@ StatusCode MdtAsBuiltCondAlg::setFromAscii(const std::string& asciiData,
             auto dumpValue  = [&prefix, &newChannel](std::string_view field, const float val) {
                 std::string key{prefix};
                 key.append(field);
-                newChannel[key] = val;
+                newChannel[std::move(key)] = val;
             } ;
             
             float y0{0.f}, z0{0.f}, alpha{0.f}, ypitch{0.f}, zpitch{0.f};

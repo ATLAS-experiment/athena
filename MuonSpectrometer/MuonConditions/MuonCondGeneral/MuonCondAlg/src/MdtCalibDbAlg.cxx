@@ -169,6 +169,7 @@ StatusCode MdtCalibDbAlg::defaultRt(MuonCalib::MdtCalibDataContainer& writeCdo, 
     // Loop over all RTs in the file (but the default file only has 1 RT)
     // Use the first valid RT found in the file as the default for all chambers.
     const MdtIdHelper& idHelper{m_idHelperSvc->mdtIdHelper()};
+    //coverity[UNREACHABLE]
     for (unsigned int n = 0; n < rts.nRts(); ++n) {
         std::unique_ptr<MuonCalib::RtDataFromFile::RtRelation> rt(rts.getRt(n));
 
@@ -249,7 +250,7 @@ StatusCode MdtCalibDbAlg::defaultRt(MuonCalib::MdtCalibDataContainer& writeCdo, 
                 }
             }
             ATH_MSG_DEBUG("Add default rt constants for "<<m_idHelperSvc->toString(detElId));
-            if (!writeCdo.storeData(detElId, storeMe, msgStream())) {
+            if (!writeCdo.storeData(detElId, std::move(storeMe), msgStream())) {
                 ATH_MSG_FATAL(__FILE__<<":"<<__LINE__<<" Failed to save default rts for "<<m_idHelperSvc->toString(detElId));
                 return StatusCode::FAILURE;
             }
@@ -368,8 +369,7 @@ StatusCode MdtCalibDbAlg::legacyRtPayloadToJSON(const coral::AttributeList& attr
             case 2:
                 resos.push_back(value);
                 break;
-            default:
-                break;
+           
         }
     }
     /// Check that we picked up the right amount of points
@@ -543,7 +543,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
 
         if (!writeCdo.storeData(athenaId ,rt_rel, msgStream())) return StatusCode::FAILURE;
         if (!(m_create_b_field_function || m_createSlewingFunction)) continue;
-        loadedRtRel[athenaId] = rt_rel;
+        loadedRtRel[athenaId] = std::move(rt_rel);
         
     }  // end loop over itr (strings read from COOL)        
     ATH_CHECK(defaultRt(writeCdo, loadedRtRel));
@@ -593,7 +593,7 @@ StatusCode MdtCalibDbAlg::loadRt(const EventContext& ctx, MuonCalib::MdtCalibDat
         if (m_createSlewingFunction) {
             corrFuncSet->setSlewing(std::make_unique<MuonCalib::MdtSlewCorFuncHardcoded>(MuonCalib::CalibFunc::ParVec()));
         }
-        if (!writeCdo.storeData(athenaId, corrFuncSet, msgStream())) return StatusCode::FAILURE;
+        if (!writeCdo.storeData(athenaId, std::move(corrFuncSet), msgStream())) return StatusCode::FAILURE;
     }
     
     return StatusCode::SUCCESS;
@@ -714,8 +714,7 @@ StatusCode MdtCalibDbAlg::legacyTubePayloadToJSON(const coral::AttributeList& at
             case 2:                
                 meanAdcs.push_back(value);
                 break;
-            default:
-                break;
+        
         }
     }
     if (statusCodes.size() != tzeros.size() ||
