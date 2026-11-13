@@ -7,8 +7,8 @@
 # art-output: *.txt
 # art-output: *.root
 # art-output: *.xml
-# art-output: dcube*
-# art-html: geant4validationpipeline/output/websites/muons
+# art-output: geantcheck*
+# art-html: geantcheck/output/websites/electrons
 # art-output: log.*
 
 set -e
@@ -18,8 +18,8 @@ echo $fileList
 
 
 
-cp -rL /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/geant4validationpipeline .
-R_FILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/geantcheck_25.0.70_muons.root"
+cp -rL /cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/geantcheck .
+R_FILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/SimCoreTests/geantcheck_25.0.70_electrons.root"
 
 
 run () {
@@ -33,8 +33,8 @@ run () {
 }
 
 
-run "geant4validationpipeline" \
-    sh geant4validationpipeline/pipeline.sh --tests muons --maxEvents 10000 --art yes --ref ${R_FILE}
+run "geantcheck" \
+    sh geantcheck/pipeline.sh --tests electrons --maxEvents 10000 --art yes --ref ${R_FILE}
 status=$rc
 exit $status
 
