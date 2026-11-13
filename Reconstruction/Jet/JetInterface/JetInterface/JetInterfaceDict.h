@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETINTERFACE_JETINTERFACEDICT_H
@@ -7,7 +7,6 @@
 
 #include "JetInterface/IJetBuildTool.h"
 #include "JetInterface/IJetConstituentModifier.h"
-#include "JetInterface/IJetConstituentsRetriever.h"
 #include "JetInterface/IJetConsumer.h"
 #include "JetInterface/IJetDecorator.h"
 #include "JetInterface/IJetExecuteTool.h"

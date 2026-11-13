@@ -1,7 +1,6 @@
 <lcgdict>
   <class name="IJetBuildTool" />
   <class name="IJetConstituentModifier" />
-  <class name="IJetConstituentsRetriever" />
   <class name="IJetConsumer" />
   <class name="IJetDecorator" />  
   <class name="IJetExecuteTool" />

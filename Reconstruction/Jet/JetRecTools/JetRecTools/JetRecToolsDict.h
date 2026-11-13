@@ -15,7 +15,6 @@
 #include "JetRecTools/CorrectPFOTool.h"
 #include "JetRecTools/JetConstituentModSequence.h"
 #include "JetRecTools/JetConstituentModifierBase.h"
-#include "JetRecTools/JetInputElRemovalTool.h"
 #include "JetRecTools/JetTrackSelectionTool.h"
 #include "JetRecTools/PuppiWeightTool.h"
 #include "JetRecTools/SoftKillerWeightTool.h"
