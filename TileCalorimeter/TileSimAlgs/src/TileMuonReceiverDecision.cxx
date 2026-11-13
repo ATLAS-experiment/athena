@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -38,23 +38,8 @@
 #include "AthenaKernel/errorcheck.h"
 
 TileMuonReceiverDecision::TileMuonReceiverDecision(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthReentrantAlgorithm(name, pSvcLocator),
-    m_tileID(nullptr),
-    m_tileHWID(nullptr),
-    m_cablingService(nullptr),
-    m_tileInfo(nullptr),
-    m_runPeriod(0)
+  : AthReentrantAlgorithm(name, pSvcLocator)
 {
-  // declare properties...
-  declareProperty( "MuonReceiverEneThreshCellD6Low"       , m_threshold_d6_lo   = 500. , "(RUN2) Setting the lowest trigger threshold for cell D6 in MeV (Def=500 MeV)");
-  declareProperty( "MuonReceiverEneThreshCellD6andD5Low"  , m_threshold_d5d6_lo = 500. , "(RUN2) Setting the lowest trigger threshold for cell D5+D6 in MeV (Def=500 MeV)");
-  declareProperty( "MuonReceiverEneThreshCellD6High"      , m_threshold_d6_hi   = 600. , "(RUN2) Setting the highest trigger threshold for cell D6 in MeV (Def=600 MeV)");
-  declareProperty( "MuonReceiverEneThreshCellD6andD5High" , m_threshold_d5d6_hi = 600. , "(RUN2) Setting the highest trigger threshold for cell D5+D6 in MeV (Def=600 MeV)");
-  declareProperty( "MuonReceiverEneThreshCellD5"          , m_threshold_d5      = 500. , "(RUN3) Setting the single threshold for cell D5 during Run 3 in MeV (Def=500 MeV)");
-  declareProperty( "MuonReceiverEneThreshCellD6"          , m_threshold_d6      = 500. , "(RUN3) Setting the single threshold for cell D6 during Run 3 in MeV (Def=500 MeV)");
-  declareProperty( "MuonReceiverEneThreshCellD5andD6"     , m_threshold_d5d6    = 500. , "(RUN3) Setting the single threshold for cell D5+D6 during Run 3 in MeV (Def=500 MeV)");
-  declareProperty( "SelectionCutForMatchedFilterQf"       , m_selCutQf          =   0. , "n cut for the quality factor of the matched filters");
-  declareProperty( "TileInfoName"                         , m_infoName          = "TileInfo" );
 }
  
 TileMuonReceiverDecision::~TileMuonReceiverDecision()
@@ -87,7 +72,7 @@ StatusCode TileMuonReceiverDecision::initialize() {
   //=== retrieve TileID helper from det store
   ATH_CHECK( detStore()->retrieve(m_tileID) );
   ATH_CHECK( detStore()->retrieve(m_tileHWID) );
-  ATH_CHECK(detStore()->retrieve(m_tileInfo, m_infoName));
+  ATH_CHECK(detStore()->retrieve(m_tileInfo, m_infoName.value()));
 
   ATH_MSG_INFO("TileMuonReceiverDecision initialization completed" );
   return StatusCode::SUCCESS;
@@ -311,13 +296,13 @@ StatusCode TileMuonReceiverDecision::execute(const EventContext &ctx) const {
     if (msgLvl(MSG::VERBOSE)) {
       if ( m_runPeriod == 2 ) {
         ATH_MSG_VERBOSE( "(E.2.0)   Summary: e(d5+d6)= " << energy_d5d6 << " e(d6)= " << energy_d6  );
-        ATH_MSG_VERBOSE( "(E.3.0)   Thresholds: " << m_threshold_d5d6_lo << " " << m_threshold_d5d6_hi << " " << m_threshold_d6_lo << " " << m_threshold_d6_hi  );
+        ATH_MSG_VERBOSE( "(E.3.0)   Thresholds: " << m_threshold_d5d6_lo.value() << " " << m_threshold_d5d6_hi.value() << " " << m_threshold_d6_lo.value() << " " << m_threshold_d6_hi.value()  );
         ATH_MSG_VERBOSE( "(E.4.0)   Check which thresholds were passed: d56 high " << pass_d5d6_hi << " d56 low " << pass_d5d6_lo << " d6 high " << pass_d6_hi << " d6 low " << pass_d6_lo  );
         ATH_MSG_VERBOSE( "(E.5.0)   Output to SL: " << tile2SL[0] << tile2SL[1] << tile2SL[2] << tile2SL[3]  );
       }
       if ( m_runPeriod == 3 ) {
         ATH_MSG_VERBOSE( "(E.2.0)   Summary: e(d5+d6)= " << energy_d5d6 << " e(d6)= " << energy_d6  << " e(d5)= " << energy_d5 );
-        ATH_MSG_VERBOSE( "(E.3.0)   Thresholds: " << m_threshold_d5d6 << " " << m_threshold_d6 << " " << m_threshold_d5  );
+        ATH_MSG_VERBOSE( "(E.3.0)   Thresholds: " << m_threshold_d5d6.value() << " " << m_threshold_d6.value() << " " << m_threshold_d5.value()  );
         ATH_MSG_VERBOSE( "(E.4.0)   Check which thresholds were passed: d56 " << pass_d5d6 << " d6 " << pass_d6 << " d5 " << pass_d5 );
         ATH_MSG_VERBOSE( "(E.5.0)   Output to SL: " << tile2SL[0] << tile2SL[1] << tile2SL[2] << tile2SL[3]  );
       }

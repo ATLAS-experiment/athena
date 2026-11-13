@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILESIMUTILS_TILECALIBHITCNTNTUP_H
@@ -36,6 +36,7 @@
 #include <vector>
 
 #include <inttypes.h>
+#include "Gaudi/Property.h"
 
 class CaloCell_ID;
 class CaloDM_ID;
@@ -62,117 +63,117 @@ public:
 private:
 
   // handle to THistSvc
-  ServiceHandle<ITHistSvc>   m_thistSvc;
+  ServiceHandle<ITHistSvc> m_thistSvc{this, "THistSvc", "THistSvc"};
 
   // NTuple parameters
-  std::string m_streamName;
-  std::string m_ntupleID;
-  int64_t m_treeSize;
+  Gaudi::Property<std::string> m_streamName{this, "StreamName", "AANT"};
+  Gaudi::Property<std::string> m_ntupleID{this, "NTupleID", "TileCalibHitCnt"};
+  Gaudi::Property<int64_t> m_treeSize{this, "TreeSize", 16000000000LL};
 
   // The ntuple
-  TTree* m_ntuplePtr;
+  TTree* m_ntuplePtr{nullptr};
 
   // ntuple variables
-  long m_act_nchan;
-  long m_inact_nchan;
-  long m_dm_nchan;
+  long m_act_nchan{0};
+  long m_inact_nchan{0};
+  long m_dm_nchan{0};
 
-  float m_act_totE;
-  float m_act_visE;
-  float m_inact_totE;
-  float m_inact_visE;
-  float m_DM_totE;
-  float m_DM_visE;
+  float m_act_totE{0};
+  float m_act_visE{0};
+  float m_inact_totE{0};
+  float m_inact_visE{0};
+  float m_DM_totE{0};
+  float m_DM_visE{0};
 
-  float m_barr_totE;
-  float m_barr_Em;
-  float m_barr_NonEm;
-  float m_barr_Invisible;
-  float m_barr_Escaped;
+  float m_barr_totE{0};
+  float m_barr_Em{0};
+  float m_barr_NonEm{0};
+  float m_barr_Invisible{0};
+  float m_barr_Escaped{0};
 
-  float m_inact_barr_totE;
-  float m_inact_barr_Em;
-  float m_inact_barr_NonEm;
-  float m_inact_barr_Invisible;
-  float m_inact_barr_Escaped;
+  float m_inact_barr_totE{0};
+  float m_inact_barr_Em{0};
+  float m_inact_barr_NonEm{0};
+  float m_inact_barr_Invisible{0};
+  float m_inact_barr_Escaped{0};
 
-  float m_ext_totE;
-  float m_ext_Em;
-  float m_ext_NonEm;
-  float m_ext_Invisible;
-  float m_ext_Escaped;
+  float m_ext_totE{0};
+  float m_ext_Em{0};
+  float m_ext_NonEm{0};
+  float m_ext_Invisible{0};
+  float m_ext_Escaped{0};
 
-  float m_inact_ext_totE;
-  float m_inact_ext_Em;
-  float m_inact_ext_NonEm;
-  float m_inact_ext_Invisible;
-  float m_inact_ext_Escaped;
+  float m_inact_ext_totE{0};
+  float m_inact_ext_Em{0};
+  float m_inact_ext_NonEm{0};
+  float m_inact_ext_Invisible{0};
+  float m_inact_ext_Escaped{0};
 
-  float m_itc_totE;
-  float m_itc_Em;
-  float m_itc_NonEm;
-  float m_itc_Invisible;
-  float m_itc_Escaped;
+  float m_itc_totE{0};
+  float m_itc_Em{0};
+  float m_itc_NonEm{0};
+  float m_itc_Invisible{0};
+  float m_itc_Escaped{0};
 
-  float m_inact_itc_totE;
-  float m_inact_itc_Em;
-  float m_inact_itc_NonEm;
-  float m_inact_itc_Invisible;
-  float m_inact_itc_Escaped;
+  float m_inact_itc_totE{0};
+  float m_inact_itc_Em{0};
+  float m_inact_itc_NonEm{0};
+  float m_inact_itc_Invisible{0};
+  float m_inact_itc_Escaped{0};
 
-  float m_gscin_totE;
-  float m_gscin_Em;
-  float m_gscin_NonEm;
-  float m_gscin_Invisible;
-  float m_gscin_Escaped;
+  float m_gscin_totE{0};
+  float m_gscin_Em{0};
+  float m_gscin_NonEm{0};
+  float m_gscin_Invisible{0};
+  float m_gscin_Escaped{0};
 
-  float m_inact_gscin_totE;
-  float m_inact_gscin_Em;
-  float m_inact_gscin_NonEm;
-  float m_inact_gscin_Invisible;
-  float m_inact_gscin_Escaped;
+  float m_inact_gscin_totE{0};
+  float m_inact_gscin_Em{0};
+  float m_inact_gscin_NonEm{0};
+  float m_inact_gscin_Invisible{0};
+  float m_inact_gscin_Escaped{0};
 
-  std::vector<float>* m_Total;
-  std::vector<float>* m_Em;
-  std::vector<float>* m_NonEm;
-  std::vector<float>* m_Invisible;
-  std::vector<float>* m_Escaped;
-  std::vector<long>* m_subCalo;
-  std::vector<long>* m_section;
-  std::vector<long>* m_side;
-  std::vector<long>* m_module;
-  std::vector<long>* m_tower;
-  std::vector<long>* m_sample;
+  std::vector<float>* m_Total{nullptr};
+  std::vector<float>* m_Em{nullptr};
+  std::vector<float>* m_NonEm{nullptr};
+  std::vector<float>* m_Invisible{nullptr};
+  std::vector<float>* m_Escaped{nullptr};
+  std::vector<long>* m_subCalo{nullptr};
+  std::vector<long>* m_section{nullptr};
+  std::vector<long>* m_side{nullptr};
+  std::vector<long>* m_module{nullptr};
+  std::vector<long>* m_tower{nullptr};
+  std::vector<long>* m_sample{nullptr};
 
-  std::vector<float>* m_inact_Total;
-  std::vector<float>* m_inact_Em;
-  std::vector<float>* m_inact_NonEm;
-  std::vector<float>* m_inact_Invisible;
-  std::vector<float>* m_inact_Escaped;
-  std::vector<long>* m_inact_subCalo;
-  std::vector<long>* m_inact_section;
-  std::vector<long>* m_inact_side;
-  std::vector<long>* m_inact_module;
-  std::vector<long>* m_inact_tower;
-  std::vector<long>* m_inact_sample;
+  std::vector<float>* m_inact_Total{nullptr};
+  std::vector<float>* m_inact_Em{nullptr};
+  std::vector<float>* m_inact_NonEm{nullptr};
+  std::vector<float>* m_inact_Invisible{nullptr};
+  std::vector<float>* m_inact_Escaped{nullptr};
+  std::vector<long>* m_inact_subCalo{nullptr};
+  std::vector<long>* m_inact_section{nullptr};
+  std::vector<long>* m_inact_side{nullptr};
+  std::vector<long>* m_inact_module{nullptr};
+  std::vector<long>* m_inact_tower{nullptr};
+  std::vector<long>* m_inact_sample{nullptr};
 
-  std::vector<float>* m_dm_ene;
-  std::vector<float>* m_dm_vis;
-  std::vector<long>* m_dm_subDet;
-  std::vector<long>* m_dm_type;
-  std::vector<long>* m_dm_sampling;
-  std::vector<long>* m_dm_region;
-  std::vector<long>* m_dm_eta;
-  std::vector<long>* m_dm_phi;
+  std::vector<float>* m_dm_ene{nullptr};
+  std::vector<float>* m_dm_vis{nullptr};
+  std::vector<long>* m_dm_subDet{nullptr};
+  std::vector<long>* m_dm_type{nullptr};
+  std::vector<long>* m_dm_sampling{nullptr};
+  std::vector<long>* m_dm_region{nullptr};
+  std::vector<long>* m_dm_eta{nullptr};
+  std::vector<long>* m_dm_phi{nullptr};
 
-  std::string m_ActiveHitContainer;
-  std::string m_InactiveHitContainer;
-  std::string m_dmHitContainer;
+  Gaudi::Property<std::string> m_ActiveHitContainer{this, "ActiveHitCnt", "TileCalibHitActiveCell"};
+  Gaudi::Property<std::string> m_InactiveHitContainer{this, "InactiveHitCnt", "TileCalibHitInactiveCell"};
+  Gaudi::Property<std::string> m_dmHitContainer{this, "DMCalibHitCnt", "TileCalibHitDeadMaterial"};
 
-  const CaloCell_ID* m_caloCell_ID;
-  const CaloDM_ID*   m_caloDM_ID;
+  const CaloCell_ID* m_caloCell_ID{nullptr};
+  const CaloDM_ID* m_caloDM_ID{nullptr};
 
-  int m_max_chan;
+  int m_max_chan{4999};
 
 };
 

@@ -104,56 +104,9 @@ std::string cern_local_time(time_t unix_time)
  */
 
 TileTBDump::TileTBDump(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator)
-  , m_RobSvc("ROBDataProviderSvc", name)
-  , m_cabling(nullptr)
-  , m_runPeriod(0)
-  , m_tileToolTiming("TileCondToolTiming")
-  , m_tileCondToolOfcCool("TileCondToolOfcCool")
-  , m_tileToolEmscale("TileCondToolEmscale")
+  : AthAlgorithm(name, pSvcLocator),
+    m_RobSvc("ROBDataProviderSvc", name)
 {
-  m_drawerList.resize(9);    m_drawerType.resize(9);
-  m_drawerList[0] = "0x200"; m_drawerType[0] = 2; // barrel neg
-  m_drawerList[1] = "0x201"; m_drawerType[1] = 2; // barrel neg
-  m_drawerList[2] = "0x202"; m_drawerType[2] = 2; // barrel neg
-  m_drawerList[3] = "0x100"; m_drawerType[3] = 1; // barrel pos
-  m_drawerList[4] = "0x101"; m_drawerType[4] = 1; // barrel pos
-  m_drawerList[5] = "0x102"; m_drawerType[5] = 1; // barrel pos
-  m_drawerList[6] = "0x400"; m_drawerType[6] = 4; // ext. barrel neg
-  m_drawerList[7] = "0x401"; m_drawerType[7] = 4; // ext. barrel neg
-  m_drawerList[8] = "0x402"; m_drawerType[8] = 4; // ext. barrel neg
-
-  declareProperty("drawerList", m_drawerList);
-  declareProperty("drawerType", m_drawerType);
-  
-  declareProperty("dumpHeader", m_dumpHeader = true);
-  declareProperty("dumpData", m_dumpData = true);
-  declareProperty("dumpStatus", m_dumpStatus = true);
-  declareProperty("dumpOnce", m_dumpOnce = false);
-  declareProperty("dumpUnknown", m_dumpUnknown = false);
-  declareProperty("showUnknown", m_showUnknown = true);
-
-  declareProperty("TileCondToolTiming", m_tileToolTiming);
-  declareProperty("TileCondToolOfcCool", m_tileCondToolOfcCool, "TileCondToolOfcCool");
-  declareProperty("TileCondToolEmscale", m_tileToolEmscale);
- 
-  declareProperty("bc_time_seconds",     m_bc_time_seconds      = -1);
-  declareProperty("bc_time_nanoseconds", m_bc_time_nanoseconds  = -1);
-  declareProperty("global_id",           m_global_id            = -1);
-  declareProperty("run_type",            m_run_type             = -1);
-  declareProperty("run_no",              m_run_no               = -1);
-  declareProperty("lumi_block",          m_lumi_block           = -1);
-  declareProperty("lvl1_id",             m_lvl1_id              = -1);
-  declareProperty("bc_id",               m_bc_id                = -1);
-  declareProperty("lvl1_trigger_type",   m_lvl1_trigger_type    = -1);
-  declareProperty("nlvl1_trigger_info",  m_nlvl1_trigger_info   = -1);
-
-  m_v3Format = true;
-  m_frag5found = false;
-  m_sizeOverhead = 3;
-  m_unit = -1;
-  m_digi_mode = 0;
-  
 }
 
 
@@ -180,10 +133,10 @@ StatusCode TileTBDump::initialize() {
   m_cabling = TileCablingService::getInstance();
   m_runPeriod = m_cabling->runPeriod();
 
-  int size = m_drawerList.size();
+  int size = m_drawerList.value().size();
   for (int dr = 0; dr < size; ++dr) {
-    unsigned int frag = strtol(m_drawerList[dr].data(), NULL, 0);
-    m_drawerMap[frag] = m_drawerType[dr];
+    unsigned int frag = strtol(m_drawerList.value()[dr].data(), NULL, 0);
+    m_drawerMap[frag] = m_drawerType.value()[dr];
   }
 
   ATH_MSG_INFO( "initialization completed" );

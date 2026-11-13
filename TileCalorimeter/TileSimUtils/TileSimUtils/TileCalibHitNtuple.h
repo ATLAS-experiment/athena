@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TILESIMUTILS_TILECALIBHITNTUPLE_H
@@ -31,6 +31,7 @@
 #include <vector>
 
 #include <inttypes.h>
+#include "Gaudi/Property.h"
 
 /**
  @class TileCalibHitNtuple
@@ -55,37 +56,37 @@ class TileCalibHitNtuple: public AthAlgTool {
   private:
 
     // handle to THistSvc
-    ServiceHandle<ITHistSvc> m_thistSvc;
+    ServiceHandle<ITHistSvc> m_thistSvc{this, "THistSvc", "THistSvc"};
 
     // NTuple parameters
-    std::string m_streamName;
-    std::string m_ntupleID;
-    int64_t m_treeSize;
+    Gaudi::Property<std::string> m_streamName{this, "StreamName", "AANT"};
+    Gaudi::Property<std::string> m_ntupleID{this, "NTupleID", "TileCalibHit"};
+    Gaudi::Property<int64_t> m_treeSize{this, "TreeSize", 16000000000LL};
 
     // The ntuple
-    TTree* m_ntuplePtr;
+    TTree* m_ntuplePtr{nullptr};
 
-    int m_level;
+    Gaudi::Property<int> m_level{this, "InfoLevel", 0};
 
     // ntuple variables
-    short m_det;
-    short m_mod;
-    short m_tow;
-    short m_samp;
-    short m_reg;
-    short m_calc;
-    short m_evt;
-    float m_xPos;
-    float m_yPos;
-    float m_zPos;
-    float m_ener;
-    char m_volume[100];
-    short m_pid;
-    float m_ekine;
-    float m_xLocal;
-    float m_yLocal;
-    float m_zLocal;
-    float m_phiLocal;
+    short m_det{0};
+    short m_mod{0};
+    short m_tow{0};
+    short m_samp{0};
+    short m_reg{0};
+    short m_calc{0};
+    short m_evt{0};
+    float m_xPos{0.0};
+    float m_yPos{0.0};
+    float m_zPos{0.0};
+    float m_ener{0.0};
+    char m_volume[100]{};
+    short m_pid{0};
+    float m_ekine{0.0};
+    float m_xLocal{0.0};
+    float m_yLocal{0.0};
+    float m_zLocal{0.0};
+    float m_phiLocal{0.0};
     
 };
 

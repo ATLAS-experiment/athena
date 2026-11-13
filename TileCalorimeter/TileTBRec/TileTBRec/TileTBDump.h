@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -37,6 +37,9 @@
 // Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
 #include "GaudiKernel/ServiceHandle.h"
+#include "TileConditions/TileCondToolOfcCool.h"
+#include "TileConditions/TileCondToolTiming.h"
+#include "TileConditions/TileCondToolEmscale.h"
 
 // Athena includes
 #include "AthenaBaseComps/AthAlgorithm.h"
@@ -47,12 +50,10 @@
 #include "TileByteStream/TileRawChannel2Bytes5.h" 
 #include <vector>
 #include <map>
+#include "Gaudi/Property.h"
 
 class IROBDataProviderSvc;
 class TileCablingService;
-class TileCondToolOfcCool;
-class TileCondToolTiming;
-class TileCondToolEmscale;
 
 
 
@@ -75,41 +76,41 @@ class TileTBDump: public AthAlgorithm {
 
     ServiceHandle<IROBDataProviderSvc> m_RobSvc;
 
-    const TileCablingService* m_cabling;
-    int m_runPeriod;
+    const TileCablingService* m_cabling{nullptr};
+    int m_runPeriod{0};
 
-    std::vector<std::string> m_drawerList; // list of frag IDs in correct order
-    std::vector<int> m_drawerType; // type of every drawer 1-4: B+, B-, EB+, EB-
+    Gaudi::Property<std::vector<std::string>> m_drawerList{this, "drawerList", {"0x200", "0x201", "0x202", "0x100", "0x101", "0x102", "0x400", "0x401", "0x402"}}; // list of frag IDs in correct order
+    Gaudi::Property<std::vector<int>> m_drawerType{this, "drawerType", {2, 2, 2, 1, 1, 1, 4, 4, 4}}; // type of every drawer 1-4: B+, B-, EB+, EB-
     std::map<unsigned int, unsigned int, std::less<unsigned int> > m_drawerMap; // map for frag IDs -> index
     typedef std::map<unsigned int, unsigned int, std::less<unsigned int> >::iterator drawerMap_iterator;
     typedef std::vector<std::vector<unsigned int> > FelixData_t;
 
-    ToolHandle<TileCondToolTiming> m_tileToolTiming;
-    ToolHandle<TileCondToolOfcCool> m_tileCondToolOfcCool;
-    ToolHandle<TileCondToolEmscale> m_tileToolEmscale;
+    PublicToolHandle<TileCondToolTiming> m_tileToolTiming{this, "TileCondToolTiming", "TileCondToolTiming"};
+    PublicToolHandle<TileCondToolOfcCool> m_tileCondToolOfcCool{this, "TileCondToolOfcCool", "TileCondToolOfcCool", "TileCondToolOfcCool"};
+    PublicToolHandle<TileCondToolEmscale> m_tileToolEmscale{this, "TileCondToolEmscale", "TileCondToolEmscale"};
 
-    bool m_dumpHeader;
-    bool m_dumpData;
-    bool m_dumpStatus;
-    bool m_dumpOnce;
-    bool m_dumpUnknown;
-    bool m_showUnknown;
-    bool m_v3Format;
-    bool m_frag5found;
-    unsigned int m_sizeOverhead;
-    int m_unit;
+    Gaudi::Property<bool> m_dumpHeader{this, "dumpHeader", true};
+    Gaudi::Property<bool> m_dumpData{this, "dumpData", true};
+    Gaudi::Property<bool> m_dumpStatus{this, "dumpStatus", true};
+    Gaudi::Property<bool> m_dumpOnce{this, "dumpOnce", false};
+    Gaudi::Property<bool> m_dumpUnknown{this, "dumpUnknown", false};
+    Gaudi::Property<bool> m_showUnknown{this, "showUnknown", true};
+    bool m_v3Format{true};
+    bool m_frag5found{false};
+    unsigned int m_sizeOverhead{3};
+    int m_unit{-1};
 
-    int m_bc_time_seconds;
-    int m_bc_time_nanoseconds;
-    int m_global_id;
-    int m_run_type;
-    int m_run_no;
-    int m_lumi_block;
-    int m_lvl1_id;
-    int m_bc_id;
-    int m_lvl1_trigger_type;
-    int m_nlvl1_trigger_info;
-    int m_digi_mode;
+    Gaudi::Property<int> m_bc_time_seconds{this, "bc_time_seconds", -1};
+    Gaudi::Property<int> m_bc_time_nanoseconds{this, "bc_time_nanoseconds", -1};
+    Gaudi::Property<int> m_global_id{this, "global_id", -1};
+    Gaudi::Property<int> m_run_type{this, "run_type", -1};
+    Gaudi::Property<int> m_run_no{this, "run_no", -1};
+    Gaudi::Property<int> m_lumi_block{this, "lumi_block", -1};
+    Gaudi::Property<int> m_lvl1_id{this, "lvl1_id", -1};
+    Gaudi::Property<int> m_bc_id{this, "bc_id", -1};
+    Gaudi::Property<int> m_lvl1_trigger_type{this, "lvl1_trigger_type", -1};
+    Gaudi::Property<int> m_nlvl1_trigger_info{this, "nlvl1_trigger_info", -1};
+    int m_digi_mode{0};
 
     std::vector<int> m_all_lvl1_trigger_types;
 

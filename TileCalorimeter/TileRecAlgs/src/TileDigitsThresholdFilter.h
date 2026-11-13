@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -35,9 +35,9 @@
 
 // Gaudi includes
 #include "GaudiKernel/ToolHandle.h"
+#include "TileConditions/ITileCondToolDspThreshold.h"
 
 class TileHWID;
-class ITileCondToolDspThreshold;
 
 
 #include <string>
@@ -62,8 +62,8 @@ class TileDigitsThresholdFilter: public AthAlgorithm {
 
   private:
 
-    const TileHWID*    m_tileHWID;
-    ToolHandle<ITileCondToolDspThreshold> m_tileDspThreshold;
+    const TileHWID* m_tileHWID{nullptr};
+    PublicToolHandle<ITileCondToolDspThreshold> m_tileDspThreshold{this, "TileCondToolDspThreshold", "TileCondToolDspThreshold"};
 
     SG::ReadHandleKey<TileDigitsContainer> m_inputDigitsContainerKey{this,"InputDigitsContainer",
                                                                        "TileDigitsCnt", "Input Tile digits container key"};

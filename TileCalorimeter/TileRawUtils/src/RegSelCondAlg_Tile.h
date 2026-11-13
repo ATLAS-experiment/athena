@@ -5,7 +5,7 @@
  **   @author  sutt
  **   @date    Tue  4 Feb 2020 15:25:00 CET
  **
- **   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+ **   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  **/
  
 #ifndef RegSelCondAlg_Tile_h
@@ -24,6 +24,7 @@
 #include <string>
 
 #include "TileByteStream/TileHid2RESrcID.h"
+#include "Gaudi/Property.h"
 
 
 
@@ -39,9 +40,9 @@ public:
 private:
   virtual std::unique_ptr<RegSelectorMap> createTable(const TileHid2RESrcID* hid2re) const;
 
-  std::string m_managerName;
+  Gaudi::Property<std::string> m_managerName{this, "ManagerName", ""};
 
-  bool        m_printTable;
+  Gaudi::Property<bool> m_printTable{this, "PrintTable", false};
    
   SG::ReadCondHandleKey<TileHid2RESrcID> m_hid2RESrcIDKey
     {this, "TileHid2RESrcID", "TileHid2RESrcIDHLT", "TileHid2RESrcID key"};

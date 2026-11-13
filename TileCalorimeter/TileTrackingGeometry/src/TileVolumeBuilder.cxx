@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -56,28 +56,9 @@ using std::make_unique;
 
 // constructor
 Tile::TileVolumeBuilder::TileVolumeBuilder(const std::string& t, const std::string& n, const IInterface* p) :
-  AthAlgTool(t,n,p),
-  m_tileMgr(nullptr),
-  m_tileMgrLocation("Tile"),
-  m_trackingVolumeCreator("Trk::CylinderVolumeCreator/TrackingVolumeCreator"),
-  m_tileBarrelEnvelope(25.*mm),
-  m_useCaloSurfBuilder(true),
-  m_tileBarrelLayersPerSampling(1),
-  m_surfBuilder("CaloSurfaceBuilder"),
-  m_forceSymmetry(true)
-
+  AthAlgTool(t,n,p)
 {
   declareInterface<Trk::ICaloTrackingVolumeBuilder>(this);
-  // declare the properties via Python
-  declareProperty("TileDetManagerLocation",                 m_tileMgrLocation);
-  // layers and general setup
-  declareProperty("BarrelEnvelopeCover",                    m_tileBarrelEnvelope);
-  declareProperty("ForceVolumeSymmetry",                    m_forceSymmetry);
-  // helper tools
-  declareProperty("TrackingVolumeCreator",                  m_trackingVolumeCreator);
-  declareProperty("UseCaloSurfBuilder",                     m_useCaloSurfBuilder);
-  declareProperty("BarrelLayersPerSampling",                m_tileBarrelLayersPerSampling);
-  declareProperty("CaloSurfaceBuilder",                     m_surfBuilder);
 }
 
 // destructor
@@ -90,7 +71,7 @@ Tile::TileVolumeBuilder::~ TileVolumeBuilder()
 StatusCode Tile::TileVolumeBuilder::initialize()
 {
   // get Tile Detector Description Manager
-  ATH_CHECK(detStore()->retrieve(m_tileMgr, m_tileMgrLocation));
+  ATH_CHECK(detStore()->retrieve(m_tileMgr, m_tileMgrLocation.value()));
 
   // Retrieve the second volume creator
   ATH_CHECK(m_trackingVolumeCreator.retrieve());

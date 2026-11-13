@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //****************************************************************************
@@ -52,6 +52,7 @@
 
 #include <string>
 #include <vector>
+#include "Gaudi/Property.h"
 
 
 class IAthRNGSvc;
@@ -100,25 +101,25 @@ class TileHitToRawChannel: public AthAlgorithm {
         "TileSamplingFraction", "TileSamplingFraction", "Input Tile sampling fraction"};
 
 
-    std::string m_infoName;             //!< name of the TileInfo object
-    double m_deltaT;                    //!< if true, keep only hits in deltaT range
-    bool m_calibrateEnergy;             //!< if true, amplitude is converted to pCb
+    Gaudi::Property<std::string> m_infoName{this, "TileInfoName", "TileInfo"};             //!< name of the TileInfo object
+    Gaudi::Property<double> m_deltaT{this, "DeltaT", -1.0};                    //!< if true, keep only hits in deltaT range
+    Gaudi::Property<bool> m_calibrateEnergy{this, "calibrateEnergy", false};             //!< if true, amplitude is converted to pCb
 
-    TileRawChannelUnit::UNIT m_rChUnit; //!< Units used for the TileRawChannels (ADC, pCb, etc.)(see TileInfo.h)
-    TileFragHash::TYPE m_rChType; //!< Type of TileRawChannels (Digitizar, OF1, OF2, Fit, etc.)(see TileFragHash.h)
+    TileRawChannelUnit::UNIT m_rChUnit{TileRawChannelUnit::ADCcounts}; //!< Units used for the TileRawChannels (ADC, pCb, etc.)(see TileInfo.h)
+    TileFragHash::TYPE m_rChType{TileFragHash::Default}; //!< Type of TileRawChannels (Digitizar, OF1, OF2, Fit, etc.)(see TileFragHash.h)
 
-    const TileID* m_tileID;   //!< Pointer to TileID helper
-    const TileTBID* m_tileTBID; //!< Pointer to TileID helper
-    const TileHWID* m_tileHWID; //!< Pointer to TileHWID helper
-    const TileInfo* m_tileInfo; //!< Pointer to TileInfo
-    const TileCablingService* m_cabling;  //!< Pointer to the TileCablingService instance
+    const TileID* m_tileID{nullptr};   //!< Pointer to TileID helper
+    const TileTBID* m_tileTBID{nullptr}; //!< Pointer to TileID helper
+    const TileHWID* m_tileHWID{nullptr}; //!< Pointer to TileHWID helper
+    const TileInfo* m_tileInfo{nullptr}; //!< Pointer to TileInfo
+    const TileCablingService* m_cabling{nullptr};  //!< Pointer to the TileCablingService instance
 
     std::vector<HWIdentifier *> m_all_ids; //!< Vector to store all the drawer ids
 
-    bool m_tileNoise;    //!< If true => generate noise for the TileRawChannel creation
-    bool m_tileThresh;   //!< If true => apply threshold on the conversion to raw channels
-    double m_threshHi; //!< Value of the mimimal amplitude required to do the conversion to raw channel in high gain (not used for low gain)
-    double m_ampMaxHi; //!< Value of the maximum amplitude to be stored as a high gain channel. For larger amplitudes, the channel is converted to low gain
+    bool m_tileNoise{false};    //!< If true => generate noise for the TileRawChannel creation
+    bool m_tileThresh{false};   //!< If true => apply threshold on the conversion to raw channels
+    double m_threshHi{0.0}; //!< Value of the mimimal amplitude required to do the conversion to raw channel in high gain (not used for low gain)
+    double m_ampMaxHi{0.0}; //!< Value of the maximum amplitude to be stored as a high gain channel. For larger amplitudes, the channel is converted to low gain
 
     /**
      * @brief Name of Tile cabling service
