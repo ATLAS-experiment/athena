@@ -348,9 +348,9 @@ StatusCode TrackRNN::classifyTracks(std::vector<xAOD::TauTrack*>& vTracks,
       }
       //if this track has already been used by another tau, don't consider                                         
       if (alreadyUsed) { 
-	ATH_MSG_INFO( "Found Already Used charged track new, now putting it as unclassified" );       
+        ATH_MSG_DEBUG( "Found Already Used charged track new, now putting it as unclassified" );       
         vTracks[i]->setFlag(xAOD::TauJetParameters::classifiedCharged, false);
-	vTracks[i]->setFlag(xAOD::TauJetParameters::TauTrackFlag::unclassified, true);
+        vTracks[i]->setFlag(xAOD::TauJetParameters::TauTrackFlag::unclassified, true);
       } else { 
 	++i;
       }
