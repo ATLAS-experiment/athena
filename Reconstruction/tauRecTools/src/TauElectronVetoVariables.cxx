@@ -7,21 +7,7 @@
 #include "TauElectronVetoVariables.h"
 
 #include "CaloUtils/CaloVertexedCell.h"
-#include "TrkParametersIdentificationHelpers/TrackParametersIdHelper.h"
-#include "RecoToolInterfaces/IParticleCaloExtensionTool.h"
 #include "GaudiKernel/SystemOfUnits.h"
-
-#include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/Material/MaterialInteraction.hpp"
-#include "Acts/Propagator/detail/SteppingLogger.hpp"
-#include "Acts/Surfaces/CurvilinearSurface.hpp"
-#include "Acts/Surfaces/PlaneSurface.hpp"
-#include "ActsEvent/CaloExtension.h"
-
-#include "ActsGeometryInterfaces/GeometryDefs.h"
-#include "ActsInterop/UnitConverters.h"
-
-#include "StoreGate/ReadDecorHandle.h"
 
 #include <algorithm>
 #include <cmath>
@@ -37,41 +23,12 @@ TauRecToolBase(name) {}
 
 StatusCode TauElectronVetoVariables::initialize() {
 
-  ATH_CHECK(m_extensionReadDecorKey.initialize(SG::AllowEmpty)); 
-  ATH_CHECK(m_ctxProvider.initialize(SG::AllowEmpty));
-
-  if(m_useACTSExtrapolator){    
-  
-    ATH_CHECK(m_trackingGeometrySvc.retrieve());
-
-    // tool
-    ATH_CHECK(m_extrapolationTool.retrieve());
-
-    std::array<std::string,11> caloNames = { "PreSamplerENegZ_Layer", "PreSamplerEPosZ_Layer",
-	                                     "EME1NegZ_Layer", "EME1PosZ_Layer", "EMB1_Layer",
-					     "EME2NegZ_Layer", "EME2PosZ_Layer", "EMB2_Layer",
-                                             "EME3NegZ_Layer", "EME3PosZ_Layer", "EMB3_Layer",
-                                           };
-
-    m_trackingGeometrySvc->trackingGeometry()->visitVolumes([&](const Acts::TrackingVolume *vol) {
-      //get geo identifier
-      Acts::GeometryIdentifier geoId = vol->geometryId();
-      const auto & name = vol->volumeName();
-      ATH_MSG_DEBUG(name << " - " << geoId << " - surfaces: " << vol->surfaces().size());
-
-      if (std::ranges::contains(caloNames, name)){
-        ATH_MSG_DEBUG("About to insert caloName " << name << " into map");
-        m_caloVolumeLayerMap[std::make_pair(geoId.volume(), geoId.layer())] = vol->volumeName();
-      }
-    });
-
-  }
   return StatusCode::SUCCESS;
 }
 
 
 StatusCode TauElectronVetoVariables::executeTool(xAOD::TauJet& pTau,
-						 const EventContext& ctx) const {
+						 const EventContext& /*ctx*/) const {
     if (pTau.nTracks() < 1) {
         return StatusCode::SUCCESS;
     }
@@ -90,7 +47,7 @@ StatusCode TauElectronVetoVariables::executeTool(xAOD::TauJet& pTau,
     const CaloCell *pCell;
 
     //---------------------------------------------------------------------
-    // Calculate eta, phi impact point of leading track at calorimeter layers EM 0,1,2,3
+    // Retrieve eta, phi impact point of leading track at calorimeter layers EM 0,1,2,3
     //---------------------------------------------------------------------
     constexpr size_t numberOfEM_Layers{4};
     constexpr double invalidCoordinate{-11111.};
@@ -99,133 +56,13 @@ StatusCode TauElectronVetoVariables::executeTool(xAOD::TauJet& pTau,
     std::array<double, numberOfEM_Layers> extrapolatedPhi{};
     extrapolatedEta.fill(invalidCoordinate);
     extrapolatedPhi.fill(invalidCoordinate);
-    
-    const xAOD::TrackParticle *orgTrack = pTau.track(0)->track();
 
-    /*get the CaloExtension object*/
-    if(!m_useACTSExtrapolator){
-      
-      static const SG::ConstAccessor<std::array<double,numberOfEM_Layers>> acc_extrapolLeadTrackEta("extrapolLeadTrackEta");
-      extrapolatedEta = acc_extrapolLeadTrackEta(pTau);
+    static const SG::ConstAccessor<std::array<double,numberOfEM_Layers>> acc_extrapolLeadTrackEta("extrapolLeadTrackEta");
+    extrapolatedEta = acc_extrapolLeadTrackEta(pTau);
 
-      static const SG::ConstAccessor<std::array<double,numberOfEM_Layers>> acc_extrapolLeadTrackPhi("extrapolLeadTrackPhi");
-      extrapolatedPhi = acc_extrapolLeadTrackPhi(pTau); 
+    static const SG::ConstAccessor<std::array<double,numberOfEM_Layers>> acc_extrapolLeadTrackPhi("extrapolLeadTrackPhi");
+    extrapolatedPhi = acc_extrapolLeadTrackPhi(pTau); 
      
-    } 
-    else 
-    { 
-      // use ACTS Based extrapolation
-      SG::ReadDecorHandle<xAOD::TrackParticleContainer, ElementLink<ActsTrk::CaloExtensionContainer>> extensionReadDecorHandle(m_extensionReadDecorKey, ctx);
-      ElementLink<ActsTrk::CaloExtensionContainer> trackCaloExtensionLink = extensionReadDecorHandle(*orgTrack);
-      const Acts::GeometryContext gctx = m_ctxProvider.getGeometryContext(ctx);
-
-      bool use_extrap_tool = false;
-      if (!trackCaloExtensionLink.isValid()) {
-         ATH_MSG_DEBUG("Decoration exists, but this track has no valid CaloExtension link (null link), will attempt to do the extrapolation using tool instead of cache");
-         use_extrap_tool = true;
-      } else {
-         // do extrapolation from cache      
-        const ActsTrk::CaloExtension* trackCaloExtension = *trackCaloExtensionLink;
-        ATH_MSG_DEBUG("Have CaloExtensions with size " << trackCaloExtension->size() << " for this track");
-        ATH_MSG_DEBUG("Are the parameters empty?: " << trackCaloExtension->parameters().empty());
-
-        for (const Acts::BoundTrackParameters& pars : trackCaloExtension->parameters()) {
-          const Acts::Surface& surface = pars.referenceSurface();
-          ATH_MSG_DEBUG("Geometry ID of surface is " << surface.geometryId());
-
-          const auto thisGeoID = surface.geometryId();
-
-          if (m_caloVolumeLayerMap.contains(std::make_pair(thisGeoID.volume(), thisGeoID.layer()))) {
-            ATH_MSG_DEBUG("This surface is in the calorimeter");
-            Acts::Vector3 pos = pars.position(gctx);
-
-	    // match to EM or Had calorimeter
-            std::string layer = m_caloVolumeLayerMap.at(std::make_pair(thisGeoID.volume(), thisGeoID.layer()));
-
-            int index = -1;
-            if( layer.find("PreSampler") != std::string::npos) index = 0;
-            else if( (layer.find("EME1") != std::string::npos) || (layer.find("EMB1") != std::string::npos) ) index = 1;
-            else if( (layer.find("EME2") != std::string::npos) || (layer.find("EMB2") != std::string::npos) ) index = 2;
-            else if( (layer.find("EME3") != std::string::npos) || (layer.find("EMB3") != std::string::npos) ) index = 3;
-
-            if( index < 0 ) continue;
-
-            extrapolatedEta[index] = pos.eta();
-            extrapolatedPhi[index] = pos.phi();
-	  }
-	}  
-      }
-
-      // backup to extrapolation tool
-      if(use_extrap_tool){
- 	
-        unsigned int lastMeasIdx = 0;
-        if (!orgTrack->indexOfParameterAtPosition(lastMeasIdx, xAOD::LastMeasurement)) {
-            ATH_MSG_ERROR("TrackParticle has no last measurement parameters");
-            return StatusCode::FAILURE;
-        }
-
-        Acts::Vector3 lastPos{orgTrack->parameterX(lastMeasIdx),
-                              orgTrack->parameterY(lastMeasIdx),
-                              orgTrack->parameterZ(lastMeasIdx)};
-        Acts::Vector3 lastMom{ActsTrk::energyToActs(orgTrack->parameterPX(lastMeasIdx)),
-                              ActsTrk::energyToActs(orgTrack->parameterPY(lastMeasIdx)),
-                              ActsTrk::energyToActs(orgTrack->parameterPZ(lastMeasIdx))};
-
-        Acts::BoundVector lastBoundParams = Acts::BoundVector::Zero();
-        lastBoundParams[Acts::eBoundPhi]    = lastMom.phi();
-        lastBoundParams[Acts::eBoundTheta]  = lastMom.theta();
-        lastBoundParams[Acts::eBoundQOverP] = orgTrack->charge() / lastMom.norm();
-
-        std::shared_ptr<const Acts::Surface> lastSurface = Acts::CurvilinearSurface(lastPos, lastMom.normalized()).planeSurface()->getSharedPtr();
-
-        Acts::BoundTrackParameters boundPars{
-            std::move(lastSurface),
-            lastBoundParams,
-            std::nullopt,
-            Acts::ParticleHypothesis::pion()
-        };
-
-        Acts::Result<std::pair<std::vector<Acts::detail::Step>, Acts::RecordedMaterial>> result = m_extrapolationTool.get()->propagationSteps(ctx, boundPars);
-
-        if( !result.ok() ) {
-          ATH_MSG_WARNING("Error during extrapolation: " << result.error().message());
-	  return StatusCode::RECOVERABLE;
-        }
-
-        const auto &[steps, _] = result.value();
-
-        for(const auto &step : steps) {
-
-          if( step.surface == nullptr || step.surface->geometryId().sensitive() == 0 ) {
-            continue;
-          }  
-
-          Acts::GeometryIdentifier thisGeoID = step.geoID;
-          ATH_MSG_DEBUG("Got step with geoID " << thisGeoID);
-
-	  if (m_caloVolumeLayerMap.contains(std::make_pair(thisGeoID.volume(), thisGeoID.layer()))) {   
-            ATH_MSG_DEBUG("This step is in the calorimeter");
-            const auto &p = step.position;
-
-            // match to EM or Had calorimeter
-            std::string layer = m_caloVolumeLayerMap.at(std::make_pair(thisGeoID.volume(), thisGeoID.layer()));
-
-            int index = -1;
-  	    if( layer.find("PreSampler") != std::string::npos) index = 0;
-            else if( (layer.find("EME1") != std::string::npos) || (layer.find("EMB1") != std::string::npos) ) index = 1;
-	    else if( (layer.find("EME2") != std::string::npos) || (layer.find("EMB2") != std::string::npos) ) index = 2;    
-            else if( (layer.find("EME3") != std::string::npos) || (layer.find("EMB3") != std::string::npos) ) index = 3; 
-     
-	    if( index < 0 ) continue;
-
-            extrapolatedEta[index] = Acts::VectorHelpers::eta(p);
-            extrapolatedPhi[index] = Acts::VectorHelpers::phi(p);
-          }
-        }
-      }
-    }
-
     for (size_t i = 0; i < numberOfEM_Layers; ++i) {
       if ( extrapolatedEta[i] < invalidCoordinateThreshold || extrapolatedPhi[i] < invalidCoordinateThreshold ){
         ATH_MSG_DEBUG("extrapolation of leading track to calo surfaces failed for sampling : " << i );
