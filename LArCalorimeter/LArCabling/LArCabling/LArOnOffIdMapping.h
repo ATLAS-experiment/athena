@@ -72,7 +72,7 @@ class LArOnOffIdMapping {
    */
   std::vector<Identifier>& getOnlHash2OflId(); 
   std::vector<HWIdentifier>& getOflHash2OnId();
-  
+  std::vector<IdentifierHash>& getOnlHashToOflHash();
 
  private:
   const LArOnlineID_Base * m_onlineId ;
@@ -135,7 +135,11 @@ inline std::vector<Identifier>& LArOnOffIdMapping::getOnlHash2OflId() {
 inline std::vector<HWIdentifier>& LArOnOffIdMapping::getOflHash2OnId() {
   return m_oflHashToOnline;
 }
- 
+
+inline std::vector<IdentifierHash>& LArOnOffIdMapping::getOnlHashToOflHash() {
+  return m_onlHashToOflHash;
+}
+
 inline IdentifierHash LArOnOffIdMapping::oflHashFromOnlHash(const IdentifierHash & onlHash) const {
     assert(onlHash < m_onlHashToOflHash.size());
     return m_onlHashToOflHash[onlHash];
