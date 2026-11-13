@@ -3,8 +3,11 @@
 
 NTHREADS=${1}
 NEVENTS=${2}
-
 DATAFILE="/cvmfs/atlas-nightlies.cern.ch/repo/data/data-art/CampaignInputs/mc23/EVNT/mc23_13p6TeV.601229.PhPy8EG_A14_ttbar_hdamp258p75_SingleLep.evgen.EVNT.e8514/EVNT.32288062._002040.pool.root.1"
+CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditionsTags; print(defaultConditionsTags.RUN3_MC)")
+GEOTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultGeometryTags; print(defaultGeometryTags.RUN3)")
+
+
 
 # Run the job
 source "$(dirname "${BASH_SOURCE[0]}")/spot_numa.sh"
@@ -17,12 +20,12 @@ ${SPOT_NUMA_PREFIX} \
 Sim_tf.py \
       --perfmon 'fullmonmt' \
       --multithreaded 'True'\
-      --conditionsTag 'default:OFLCOND-MC21-SDR-RUN3-07' \
+      --conditionsTag "default:${CONDTAG}" \
       --simulator 'ATLFAST3MT_QS' \
       --postInclude 'PyJobTransforms.UseFrontier' \
-      --preInclude 'EVNTtoHITS:Campaigns.MC23aSimulationMultipleIoV' \
+      --preInclude 'EVNTtoHITS:Campaigns.MC23eSimulationMultipleIoV' \
       --preExec "EVNTtoHITS:flags.Sim.FastCalo.ParamsInputFilename=\"FastCaloSim/MC23/TFCSparam_dev_Hybrid_D_v1_all_baryons_0_500.root\";" \
-      --geometryVersion 'default:ATLAS-R3S-2021-03-02-00' \
+      --geometryVersion 'default:${GEOTAG}' \
       --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True' \
       --inputEVNTFile ${DATAFILE} \
       --outputHITSFile 'myHITS.pool.root' \
