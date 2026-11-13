@@ -1344,12 +1344,12 @@ namespace LArG4 {
             dmLog << " inSTAC " << inSTAC << std::endl;
             dmLog << " eDeposited " << thisStepEnergyDeposit << std::endl;
             const G4VPhysicalVolume* vol = thisStepPoint->GetPhysicalVolume();
-            const G4String volName = vol->GetName();
+            const G4String& volName = vol->GetName();
             dmLog << " volName " << volName << std::endl;
             const G4int ndep = g4navigation->GetDepth();
             for (G4int ii=0;ii<=ndep;ii++) {
               const G4VPhysicalVolume* v1 = g4navigation->GetVolume(ii);
-              const G4String vname = v1->GetName();
+              const G4String& vname = v1->GetName();
               dmLog << "vname " << vname << std::endl;
             }
             if (thisStepEnergyDeposit > 1.*CLHEP::MeV) {

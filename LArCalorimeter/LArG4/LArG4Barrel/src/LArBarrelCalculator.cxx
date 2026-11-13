@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // The Cell Identifier for the EM Barrel readout cells
@@ -194,7 +194,7 @@ G4bool LArBarrelCalculator::Process(const G4Step* step, std::vector<LArHitData>&
     G4int ndep = g4navigation->GetDepth();
     for (G4int ii=0;ii<=ndep;ii++) {
       G4VPhysicalVolume* v1 = g4navigation->GetVolume(ii);
-      G4String vname = v1->GetName();
+      const G4String& vname = v1->GetName();
       if ( vname.find("NegPhysical") != std::string::npos) zSide=-1;
     }
   }

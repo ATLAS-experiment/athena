@@ -1,22 +1,20 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "PhysicalVolumeAccessor.h"
 #include "G4LogicalVolumeStore.hh"
+#include <algorithm>
 #include <string>
 #include <assert.h>
 
 G4LogicalVolume* PhysicalVolumeAccessor::GetLV(const std::string& name)
 {
-  G4LogicalVolumeStore *lvs=G4LogicalVolumeStore::GetInstance();
-  for (unsigned int i=0;i<lvs->size();i++)
-    {
-      std::string lname=((lvs->operator[](i))->GetName());
-      if (name==lname)
-        return (lvs->operator[](i));
-    }
-  return nullptr;
+  G4LogicalVolumeStore* lvs = G4LogicalVolumeStore::GetInstance();
+  const auto it = std::ranges::find_if(*lvs, [&](const G4LogicalVolume* lv) {
+    return static_cast<const std::string&>(lv->GetName()) == name;
+  });
+  return it != lvs->end() ? *it : nullptr;
 }
 
 PhysicalVolumeAccessor::PhysicalVolumeAccessor(const std::string& name)

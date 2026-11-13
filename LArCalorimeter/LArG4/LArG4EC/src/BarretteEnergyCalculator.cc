@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <cmath>
@@ -558,7 +558,7 @@ G4bool EnergyCalculator::GetVolumeIndex(const G4Step *step, G4int & ModuleNumber
   const G4int         ndepth = pre_step_point->GetTouchable()->GetHistoryDepth();
 
   for(G4int i=0;i<=ndepth;++i){
-    G4String ivolname=pre_step_point->GetTouchable()->GetVolume(i)->GetName();
+    const G4String& ivolname=pre_step_point->GetTouchable()->GetVolume(i)->GetName();
     if( ivolname.find("BackOuterBarrette::Module") != std::string::npos ){
       ModuleNumber = pre_step_point->GetTouchable()->GetVolume(i)->GetCopyNo();
     }

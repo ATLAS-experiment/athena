@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // LArG4::HEC::HECGeometry
@@ -224,7 +224,7 @@ namespace LArG4 {
       Point3D<double>  globalPosition = pre_step_point->GetPosition();
 
       const G4TouchableHistory* theTouchable = static_cast<const G4TouchableHistory*>(pre_step_point->GetTouchable());
-      G4String volumeName = theTouchable->GetVolume()->GetName() ;
+      const G4String& volumeName = theTouchable->GetVolume()->GetName() ;
 
       // Do the following only once - to determine the G4 history-depth of the wheel coordinates
       // We also want to know whether the Wheels are imbedded in a HEC Mother or whether
