@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 __doc__ = """Configure the AsgElectronLikelihoodTool with the quality
              cuts and allow for (re-)setting of all provided cuts."""
@@ -14,7 +14,8 @@ def AsgElectronLikelihoodToolCfg(
         flag,
         name,
         quality,
-        menu=electronLHmenu.offlineMC21):
+        menu=electronLHmenu.offlineMC21,
+        **kwargs):
 
     mlog = logging.getLogger('AsgElectronLikelihoodTool')
     mlog.debug('Start configuration')
@@ -34,9 +35,9 @@ def AsgElectronLikelihoodToolCfg(
         raise
 
     # Create an instance of the tool
-    tool = AsgElectronLikelihoodTool(name)
+    tool = AsgElectronLikelihoodTool(name, **kwargs)
 
-    tool.usePVContainer = flag.Tracking.doVertexFinding
+    tool.usePVContainer = flag.Tracking.doVertexFinding # NB overrides kwargs...
 
     # Call the function and configure it with the standard configuration
     ntuple[1](tool)
