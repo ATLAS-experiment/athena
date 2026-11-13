@@ -20,6 +20,7 @@ class EventPlots: public PlotBase {
       void fill(float avg_mu, float weight);
 
       TH1* m_avgmu{};
+      TH1* m_highavgmu{}; 
 
    private:
       void initializePlots();

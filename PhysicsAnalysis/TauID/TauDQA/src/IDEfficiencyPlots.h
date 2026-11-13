@@ -31,6 +31,10 @@ public:
   TProfile* m_eff_mu_jetGNTaumed{};
   TProfile* m_eff_mu_jetGNTautight{};
 
+  TProfile* m_eff_highmu_jetGNTauloose{};
+  TProfile* m_eff_highmu_jetGNTaumed{};
+  TProfile* m_eff_highmu_jetGNTautight{};
+
   TProfile* m_eff_jetGNTauloose{};
   TProfile* m_eff_jetGNTaumed{};
   TProfile* m_eff_jetGNTautight{};
