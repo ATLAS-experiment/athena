@@ -37,11 +37,35 @@ namespace FlavorTagInference {
       ISaltModelPtr saltShared = saltSharedTriton;
       nn = std::make_shared<const GNN>(saltShared, opts);
     }
+    else {
+      ATH_MSG_WARNING("Cannot find " << nn_name << " in the list of configured models");
+    }
     m_base_gnns[nn_name] = nn;
     m_gnns[key] = nn;
     return nn;
   }
   StatusCode NNSharingTritonSvc::initialize() {
+    // Unpack the TritonModelsNames property
+    // The property is a set of strings. Each string is has the format "ModelFile:ModelName"
+    // ModelFile is a path relative to CALIBPATH
+    for(const auto& entry : m_tritonModelsNames.value()) {
+      size_t colon_pos = entry.find(':');
+      if(colon_pos == std::string::npos) {
+	ATH_MSG_ERROR("Wrong entry in the list of models declared to NNSharingTritonSvc: " << entry
+		      << ". The correct format it ModelFile:ModelName");
+	return StatusCode::FAILURE;
+      }
+
+      auto [it, success] = m_tritonPathToName.emplace(std::make_pair(entry.substr(0, colon_pos)
+								     , entry.substr(colon_pos + 1)));
+      if(!success) {
+	ATH_MSG_ERROR("Attempted to declare the same model "
+		      << entry.substr(0, colon_pos)
+		      << " with different names");
+	return StatusCode::FAILURE;
+      }
+    }
+
     return StatusCode::SUCCESS;
   }
 }

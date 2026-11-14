@@ -1,7 +1,8 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from PyUtils.TritonUtils import tritonModelName
 
 from FlavorTagInference.FoldDecoratorConfig import FoldDecoratorCfg
 
@@ -10,39 +11,33 @@ from pathlib import PurePath
 from warnings import warn
 import re
 
-_onnx_to_triton_map = {
-    "BTagging/20250527/GN3V01/antikt4empflow/network.onnx"           : "BTagging_network_93a858f5c730",
-    "BTagging/20231205/GN2v01/antikt4empflow/network_fold0.onnx"     : "BTagging_network_fold0_4812578c733e",
-    "BTagging/20231205/GN2v01/antikt4empflow/network_fold1.onnx"     : "BTagging_network_fold1_9280d77c131c",
-    "BTagging/20231205/GN2v01/antikt4empflow/network_fold2.onnx"     : "BTagging_network_fold2_25c6ad03db10",
-    "BTagging/20231205/GN2v01/antikt4empflow/network_fold3.onnx"     : "BTagging_network_fold3_0558b4924c49",
-    "BTagging/20250213/GN3PflowMuonsV00/antikt4empflow/network.onnx" : "BTagging_network_d2138c4252e6",
-    "BTagging/20240925/GN2Xv02/antikt10ufo/network.onnx"             : "BTagging_network_09c2dddf15bf",
-    "BTagging/20250310/GN2XTauV00/antikt10ufo/network.onnx"          : "BTagging_network_e8d5e9a3059b",
-    "BTagging/20250912/GN3XPV01/antikt10ufo/network.onnx"            : "BTagging_network_08105bb8c1d6",
-    "BTagging/20260805/GN3EPCLV01/antikt4empflow/network.onnx"       : "BTagging_network_c87686aa79c5",
-    "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20_CSSKUFO_bJR10v00Ext_20250212.onnx"  : "JetCalibTools_bbJESJMS_calibFactor_80138d800ac5",
-    "JetCalibTools/CalibArea-00-04-83/CalibrationFactors/bbJESJMS_calibFactors_R22_MC20MC23_CSSKUFO_bJR10v01_20250212.onnx" : "JetCalibTools_bbJESJMS_calibFactor_fefb85f452f9",
-}
-# NNFiles should be a list of paths to NN files. master switch for using Triton for NN inference is 
-# flags.BTagging.UseTriton. If all of the files are in _onnx_to_triton_map, then the returned 
-# sharing service will be configured to use Triton. Otherwise it will fall back to ONNX.
-def addAndReturnSharingSvc(flags, ca, NNFiles):
-    if flags.BTagging.UseTriton and set(NNFiles).issubset(set(_onnx_to_triton_map.keys())):
+# NNFiles argument is a list of paths to NN files.
+#
+# If the useTriton argument is True:
+#    The function configures the NNSharingTritonSvc. It also constructs model name
+#    for each of the requested file (using tritonModelName() function)
+#    and saves it in the TritonModelsNames property of the service
+#
+# If the useTriton argument is False:
+#    The function configures the NNSharingOnnxSvc
+#
+def addAndReturnSharingSvc(useTriton, ca, NNFiles):
+    if useTriton:
         svc = CompFactory.FlavorTagInference.NNSharingTritonSvc(
             'FTagNNSharingTritonSvc',
-            TritonPathsMap = _onnx_to_triton_map,
             TritonTimeout = 0.0,
             TritonPort = 443,
             TritonUrl = 'iaasdemo.ml4phys.com',
             TritonUseSSL = True,
         )
+        for fname in NNFiles:
+            svc.TritonModelsNames += [f'{fname}:{tritonModelName(fname)}']
     else:
         svc = CompFactory.FlavorTagInference.NNSharingOnnxSvc('FTagNNSharingOnnxSvc')
     ca.addService(svc)
     return svc
 
-def GNNToolCfg(flags, NNFile, **options):
+def GNNToolCfg(flags, NNFile, useTriton=False, **options):
     acc = ComponentAccumulator()
 
     # this map lets us change the names of EDM inputs with respect to
@@ -85,7 +80,7 @@ def GNNToolCfg(flags, NNFile, **options):
         name='decorator',
         nnFile=NNFile,
         nnSharingService=addAndReturnSharingSvc(
-            flags = flags, 
+            useTriton = useTriton, 
             ca = acc, 
             NNFiles=[NNFile],
         ),
@@ -132,6 +127,7 @@ def FlavorTagNNCfg(
         NNFile,
         BTaggingCollection=None,
         FlipConfig="STANDARD",
+        useTriton=False,
         variableRemapping={}):
     
     if BTaggingCollection is not None:
@@ -161,7 +157,7 @@ def FlavorTagNNCfg(
     if NNFile_extension == "onnx":
         nn_name = NNFile.replace("/", "_").replace(".onnx", "")
         nn_opts["defaultZeroTracks"] = True
-        decorator = acc.popToolsAndMerge(GNNToolCfg(flags, **nn_opts))
+        decorator = acc.popToolsAndMerge(GNNToolCfg(flags, useTriton=useTriton, **nn_opts))
     else:
         raise ValueError("FlavorTagNNCfg: Wrong NNFile extension. Please check the NNFile argument")
 
@@ -203,6 +199,7 @@ def MultifoldGNNCfg(
         suffix='',
         dependencies=None,
         defaultOutputValues=None,
+        useTriton=False,
 ):
     """Schedule a (multifold) GNN tagger on a jet collection.
 
@@ -266,7 +263,7 @@ def MultifoldGNNCfg(
         flipTagConfig=FlipConfig,
         variableRemapping=remapping,
         nnSharingService=addAndReturnSharingSvc(
-            flags = flags, 
+            useTriton = useTriton,
             ca = acc, 
             NNFiles=nnFilePaths,
         ),

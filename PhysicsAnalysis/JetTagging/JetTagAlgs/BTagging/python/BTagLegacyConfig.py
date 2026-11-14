@@ -118,6 +118,7 @@ def BTagAlgsCfg(
                 JetCollection=jetcol,
                 TrackCollection=trackCollection,
                 NNFile=nn_path,
+                useTriton=inputFlags.BTagging.UseTriton,
                 variableRemapping=output_remapping)
         )
         # add flip taggers if requested
@@ -129,6 +130,7 @@ def BTagAlgsCfg(
                         JetCollection=jetcol,
                         TrackCollection=trackCollection,
                         NNFile=nn_path,
+                        useTriton=inputFlags.BTagging.UseTriton,
                         FlipConfig=flip_config,
                     )
                 )

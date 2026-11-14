@@ -43,6 +43,7 @@ else()
        bin/apydep.py bin/pool_extractFileIdentifier.py
        bin/pool_insertFileToCatalog.py bin/print_auditor_callgraph.py bin/pyroot.py
        bin/vmem-sz.py bin/meta-reader.py bin/meta-diff.py bin/dump-event-from-file.py
+       bin/getTritonModelName.py
        POST_BUILD_CMD ${ATLAS_FLAKE8} )
 
     # Aliases:
@@ -62,6 +63,7 @@ else()
     atlas_add_alias( getMetadata "getMetadata.py" )
     atlas_add_alias( meta-reader "meta-reader.py" )
     atlas_add_alias( meta-diff   "meta-diff.py" )
+    atlas_add_alias( getTritonModelName   "getTritonModelName.py" )
 
     # Tests:
     atlas_add_test( RootUtils

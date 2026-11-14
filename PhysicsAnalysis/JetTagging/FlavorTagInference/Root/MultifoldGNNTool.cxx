@@ -37,7 +37,12 @@ namespace FlavorTagInference {
         if (auto def_handle = m_defaults.value().extract(file)) {
           newopts.default_output_values = def_handle.mapped();
         }
-        gnns.emplace_back(m_nnsvc->get(file, newopts));
+	auto gnn = m_nnsvc->get(file, newopts);
+	if(!gnn) {
+	  ATH_MSG_ERROR("Unable to initialize GNN");
+	  return StatusCode::FAILURE;
+	}
+        gnns.emplace_back(gnn);
       }
       if (!m_defaults.empty()) {
         ATH_MSG_ERROR("unused per-fold defaults!");
