@@ -11,6 +11,7 @@ AUTHORS:  O. Fedin
 CREATED:  Sep 2007
  ********************************************************************/
 
+#include "AsgDataHandles/ReadHandle.h"
 #include "AsgDataHandles/ReadHandleKey.h"
 #include "AsgTools/AsgTool.h"
 #include "MCTruthClassifier/IMCTruthClassifier.h"
@@ -23,6 +24,7 @@ CREATED:  Sep 2007
 #include "TruthUtils/HepMCHelpers.h"
 #include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/DecayProducts.h"
+#include "MCTruthClassifier/MCTruthClassifierGen.h"
 
 #ifndef XAOD_ANALYSIS
 #include "GaudiKernel/ToolHandle.h"
@@ -153,7 +155,24 @@ using IMCTruthClassifier::particleTruthClassifier;
   
 protected:
   virtual std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>
-  particleTruthClassifier(const xAOD::TruthParticle*,IMCTruthClassifier::Info* info) const override final;
+  particleTruthClassifier(const xAOD::TruthParticle* thePart, IMCTruthClassifier::Info* infoin) const override final {
+    IMCTruthClassifier::Info tmpinfo;
+    IMCTruthClassifier::Info& info = (infoin) ? *infoin : tmpinfo;
+
+    if (!thePart) {
+      return std::make_pair(MCTruthPartClassifier::Unknown, MCTruthPartClassifier::NonDefined);
+    }
+    info.genPart = thePart;
+
+    // retrieve collection and get a pointer
+    SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey, info.eventContext);
+    if (!truthParticleContainerReadHandle.isValid()) {
+      ATH_MSG_WARNING(" Invalid ReadHandle for xAOD::TruthParticleContainer with key: " << truthParticleContainerReadHandle.key());
+      return std::make_pair(MCTruthPartClassifier::Unknown, MCTruthPartClassifier::NonDefined);
+    }
+
+    return MCTruthPartClassifier::classifyTruthParticle(*truthParticleContainerReadHandle, thePart, info.particleOutCome);
+  }
 
 public:
 #ifndef GENERATIONBASE /*These can not run in Generation only release*/
@@ -183,31 +202,6 @@ protected:
 #endif
 
 private:
-
-  MCTruthPartClassifier::ParticleOrigin defOrigOfElectron(const xAOD::TruthParticleContainer& xTruthParticleContainer,
-                                                          const xAOD::TruthParticle*,
-                                                          bool& isPrompt,
-                                                          IMCTruthClassifier::Info& info) const;
-
-  MCTruthPartClassifier::ParticleOrigin defOrigOfMuon(const xAOD::TruthParticleContainer& xTruthParticleContainer,
-                                                      const xAOD::TruthParticle*,
-                                                      bool& isPrompt,
-                                                      IMCTruthClassifier::Info& info) const;
-
-  MCTruthPartClassifier::ParticleOrigin defOrigOfTau(const xAOD::TruthParticleContainer& xTruthParticleContainer,
-                                                     const xAOD::TruthParticle*,
-                                                     int motherPDG,
-                                                     IMCTruthClassifier::Info& info) const;
-
-  MCTruthPartClassifier::ParticleOrigin defOrigOfPhoton(const xAOD::TruthParticleContainer& xTruthParticleContainer,
-                                                        const xAOD::TruthParticle*,
-                                                        bool& isPrompt,
-                                                        IMCTruthClassifier::Info& info) const;
-
-  MCTruthPartClassifier::ParticleOrigin defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthParticleContainer,
-                                                          const xAOD::TruthParticle*,
-                                                          bool& isPrompt,
-                                                          IMCTruthClassifier::Info& info) const;
 
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
   bool genPartToCalo(const EventContext& ctx,

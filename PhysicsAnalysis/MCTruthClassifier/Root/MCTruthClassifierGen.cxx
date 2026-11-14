@@ -9,35 +9,29 @@
  *                Andrii Verbytskyi <andrii.verbytskyi@mpp.mpg.de>
  */
 
-#include "MCTruthClassifier/MCTruthClassifier.h"
+#include "MCTruthClassifier/MCTruthClassifierGen.h"
 #include "AsgDataHandles/ReadHandle.h"
+#include "xAODTruth/TruthVertex.h" // must precede DecayProducts.h (its TruthVertex overload is guarded by this header)
 #include "TruthUtils/MagicNumbers.h"
 #include "TruthUtils/Loops.h"
 #include "TruthUtils/DecayProducts.h"
-using namespace MCTruthPartClassifier;
+#include "TruthUtils/TruthClassifiers.h"
+#include "TruthUtils/HepMCHelpers.h"
+namespace MCTruthPartClassifier {
+
+// Helpers used only in this file (internal linkage).
+static ParticleOrigin defOrigOfElectron(const xAOD::TruthParticleContainer& xTruthParticleContainer, const xAOD::TruthParticle* thePart, bool& isPrompt, ParticleOutCome& outCome);
+static ParticleOrigin defOrigOfMuon(const xAOD::TruthParticleContainer& xTruthParticleContainer, const xAOD::TruthParticle* thePart, bool& isPrompt, ParticleOutCome& outCome);
+static ParticleOrigin defOrigOfTau(const xAOD::TruthParticleContainer& xTruthParticleContainer, const xAOD::TruthParticle* thePart, int ancestorPDGin, ParticleOutCome& outCome);
+static ParticleOrigin defOrigOfPhoton(const xAOD::TruthParticleContainer& xTruthParticleContainer, const xAOD::TruthParticle* thePart, bool& isPrompt, ParticleOutCome& outCome);
+static ParticleOrigin defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthParticleContainer, const xAOD::TruthParticle* thePart, bool& isPrompt, ParticleOutCome& outCome);
 
 std::pair<ParticleType, ParticleOrigin>
-MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, IMCTruthClassifier::Info* infoin /*= nullptr*/) const {
-  IMCTruthClassifier::Info tmpinfo;
-  IMCTruthClassifier::Info& info = (infoin) ? *infoin : tmpinfo;
-
-  ATH_MSG_DEBUG("Executing particleTruthClassifier");
-
+classifyTruthParticle(const xAOD::TruthParticleContainer& truthParticleContainer,
+                      const xAOD::TruthParticle* const thePart,
+                      ParticleOutCome& outCome) {
   ParticleType partType = Unknown;
   ParticleOrigin partOrig = NonDefined;
-  if (!thePart) {
-    return std::make_pair(partType, partOrig);
-  }
-  info.genPart = thePart;
-
-  // retrieve collection and get a pointer
-  SG::ReadHandle<xAOD::TruthParticleContainer> truthParticleContainerReadHandle(m_truthParticleContainerKey,info.eventContext);
-  if (!truthParticleContainerReadHandle.isValid()) {
-    ATH_MSG_WARNING( " Invalid ReadHandle for xAOD::TruthParticleContainer with key: " << truthParticleContainerReadHandle.key());
-    return std::make_pair(partType, partOrig);
-  }
-
-  ATH_MSG_DEBUG("xAODTruthParticleContainer with key  " << truthParticleContainerReadHandle.key() << " has valid ReadHandle ");
 
   if (!MC::isStable(thePart) && !MC::isDecayed(thePart)) {
     return std::make_pair(GenParticle, partOrig);
@@ -85,29 +79,29 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
   if (!partProdVtx && MC::isElectron(thePart)) {
     // to define electron outcome status
     bool isPrompt = false; // updated by defOrigOfElectron
-    partOrig = defOrigOfElectron(*truthParticleContainerReadHandle, thePart, isPrompt, info);
+    partOrig = defOrigOfElectron(truthParticleContainer, thePart, isPrompt, outCome);
     return std::make_pair(UnknownElectron, partOrig);
   }
   if (!partProdVtx && MC::isMuon(thePart)) {
     // to define electron outcome status
     bool isPrompt = false; // updated by defOrigOfMuon
-    partOrig = defOrigOfMuon(*truthParticleContainerReadHandle, thePart, isPrompt, info);
+    partOrig = defOrigOfMuon(truthParticleContainer, thePart, isPrompt, outCome);
     return std::make_pair(UnknownMuon, partOrig);
   }
   if (!partProdVtx && MC::isTau(thePart)) {
     // to define electron outcome status
-    partOrig = defOrigOfTau(*truthParticleContainerReadHandle, thePart, parentPDG, info);
+    partOrig = defOrigOfTau(truthParticleContainer, thePart, parentPDG, outCome);
     return std::make_pair(UnknownTau, partOrig);
   }
   if (!partProdVtx && MC::isPhoton(thePart)) {
     // to define photon outcome
     bool isPrompt = false; // updated by defOrigOfPhoton
-    partOrig = defOrigOfPhoton(*truthParticleContainerReadHandle, thePart, isPrompt, info);
+    partOrig = defOrigOfPhoton(truthParticleContainer, thePart, isPrompt, outCome);
     return std::make_pair(UnknownPhoton, partOrig);
   }
   if (!partProdVtx && MC::isNeutrino(thePart)) {
     // to define neutrino outcome
-    info.particleOutCome = NonInteract;
+    outCome = NonInteract;
     return std::make_pair(Neutrino, partOrig);
   }
 
@@ -119,19 +113,19 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
   if (partProdVtx && parentPDG == 0 && partProdVtx->nOutgoingParticles() == 1 &&
       partProdVtx->nIncomingParticles() == 0) {
     if (MC::isElectron(thePart)) {
-      info.particleOutCome = defOutComeOfElectron(thePart);
+      outCome = defOutComeOfElectron(thePart);
       return std::make_pair(IsoElectron, SingleElec);
     }
     if (MC::isMuon(thePart)) {
-      info.particleOutCome = defOutComeOfMuon(thePart);
+      outCome = defOutComeOfMuon(thePart);
       return std::make_pair(IsoMuon, SingleMuon);
     }
     if (MC::isTau(thePart)) {
-      info.particleOutCome = defOutComeOfTau(thePart);
+      outCome = defOutComeOfTau(thePart);
       return std::make_pair(IsoTau, SingleTau);
     }
     if (MC::isPhoton(thePart)) {
-      info.particleOutCome = defOutComeOfPhoton(thePart);
+      outCome = defOutComeOfPhoton(thePart);
       return std::make_pair(IsoPhoton, SinglePhot);
     }
   }
@@ -140,22 +134,22 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
 
   if (MC::isElectron(thePart)) {
     bool isPrompt = false; // updated by defOrigOfElectron
-    partOrig = defOrigOfElectron(*truthParticleContainerReadHandle, thePart, isPrompt, info);
+    partOrig = defOrigOfElectron(truthParticleContainer, thePart, isPrompt, outCome);
     partType = defTypeOfElectron(partOrig, isPrompt);
   } else if (MC::isMuon(thePart)) {
     bool isPrompt = false; // updated by defOrigOfMuon
-    partOrig = defOrigOfMuon(*truthParticleContainerReadHandle, thePart, isPrompt, info);
+    partOrig = defOrigOfMuon(truthParticleContainer, thePart, isPrompt, outCome);
     partType = defTypeOfMuon(partOrig, isPrompt);
   } else if (MC::isTau(thePart)) {
-    partOrig = defOrigOfTau(*truthParticleContainerReadHandle, thePart, parentPDG, info);
+    partOrig = defOrigOfTau(truthParticleContainer, thePart, parentPDG, outCome);
     partType = defTypeOfTau(partOrig);
   } else if (MC::isPhoton(thePart)) {
     bool isPrompt = false; // updated by defOrigOfPhoton
-    partOrig = defOrigOfPhoton(*truthParticleContainerReadHandle, thePart, isPrompt, info);
+    partOrig = defOrigOfPhoton(truthParticleContainer, thePart, isPrompt, outCome);
     partType = defTypeOfPhoton(partOrig);
   } else if (MC::isNeutrino(thePart)) {
     bool isPrompt = false; // updated by defOrigOfNeutrino
-    partOrig = defOrigOfNeutrino(*truthParticleContainerReadHandle, thePart, isPrompt, info);
+    partOrig = defOrigOfNeutrino(truthParticleContainer, thePart, isPrompt, outCome);
     partType = Neutrino;
   }
 
@@ -163,10 +157,10 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::TruthParticle* thePart, I
   return std::make_pair(partType, partOrig);
 }
 
-ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleContainer& xTruthParticleContainer,
+ParticleOrigin defOrigOfElectron(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                     const xAOD::TruthParticle* thePart,
                                                     bool& isPrompt,
-                                                    IMCTruthClassifier::Info& info) const
+                                                    ParticleOutCome& outCome)
 {
   // Executing DefOrigOfElectron 
 
@@ -176,7 +170,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
   if (!MC::isElectron(thePriPart)) return NonDefined;
 
   //-- to define electron outcome status
-  info.particleOutCome = defOutComeOfElectron(thePriPart);
+  outCome = defOutComeOfElectron(thePriPart);
 
   const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
   if (!partProdVtx) return NonDefined;
@@ -427,7 +421,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 
   if (MC::isMuon(ancestorPDG)) return Mu;
   if (MC::isTau(ancestorPDG)) {
-    const ParticleOrigin tauOrig = defOrigOfTau(xTruthParticleContainer, ancestor, ancestorPDG, info);
+    const ParticleOrigin tauOrig = defOrigOfTau(xTruthParticleContainer, ancestor, ancestorPDG, outCome);
     const ParticleType tautype = defTypeOfTau(tauOrig);
     return (tautype == IsoTau)?tauOrig:TauLep;
   }
@@ -446,10 +440,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfElectron(const xAOD::TruthParticleCon
 }
 
 
-ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContainer& xTruthParticleContainer,
+ParticleOrigin defOrigOfMuon(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                 const xAOD::TruthParticle* thePart,
                                                 bool& isPrompt,
-                                                IMCTruthClassifier::Info& info) const
+                                                ParticleOutCome& outCome)
 {
   // Executing DefOrigOfMuon 
 
@@ -459,7 +453,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   if (!MC::isMuon(thePriPart)) return NonDefined;
 
   //-- to define muon  outcome status
-  info.particleOutCome = defOutComeOfMuon(thePriPart);
+  outCome = defOutComeOfMuon(thePriPart);
 
   const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
   if (!partProdVtx) return NonDefined;
@@ -527,7 +521,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
   if (std::abs(ancestorPDG) == MC::PIPLUS && numberOfChildren == 2 && NumOfMuNeut == 1) return PionDecay;
   if (std::abs(ancestorPDG) == MC::KPLUS && numberOfChildren == 2 && NumOfMuNeut == 1) return KaonDecay;
   if (MC::isTau(ancestorPDG)) {
-    const ParticleOrigin tauOrig = defOrigOfTau(xTruthParticleContainer, ancestor, ancestorPDG, info);
+    const ParticleOrigin tauOrig = defOrigOfTau(xTruthParticleContainer, ancestor, ancestorPDG, outCome);
     const ParticleType tautype = defTypeOfTau(tauOrig);
     return  (tautype == IsoTau)?tauOrig:TauLep;
   }
@@ -680,10 +674,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfMuon(const xAOD::TruthParticleContain
 }
 
 
-ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContainer& xTruthParticleContainer,
+ParticleOrigin defOrigOfTau(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                const xAOD::TruthParticle* thePart,
                                                int ancestorPDGin,
-                                               IMCTruthClassifier::Info& info) const
+                                               ParticleOutCome& outCome)
 {
   // Executing DefOrigOfTau 
 
@@ -693,7 +687,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
   if (!MC::isTau(thePriPart)) return NonDefined;
 
   //-- to define tau  outcome status
-  if (MC::isPhysical(thePriPart)) info.particleOutCome = defOutComeOfTau(thePriPart); // FIXME why do we need the additional check on MC::isPhysical here c.f. defOrigOfElectron and defOrigOfMuon?
+  if (MC::isPhysical(thePriPart)) outCome = defOutComeOfTau(thePriPart); // FIXME why do we need the additional check on MC::isPhysical here c.f. defOrigOfElectron and defOrigOfMuon?
 
   const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
   if (!partProdVtx) return NonDefined;
@@ -868,10 +862,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfTau(const xAOD::TruthParticleContaine
 }
 
 
-ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleContainer& xTruthParticleContainer,
+ParticleOrigin defOrigOfPhoton(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                                   const xAOD::TruthParticle* thePart,
                                                   bool& isPrompt,
-                                                  IMCTruthClassifier::Info& info) const
+                                                  ParticleOutCome& outCome)
 {
   if (!thePart) return NonDefined; // FIXME Why is this extra protection needed for this function and not the others?
   // Executing DefOrigOfPhoton 
@@ -885,7 +879,7 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
   const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
 
   //-- to define photon outcome status
-  info.particleOutCome = defOutComeOfPhoton(thePriPart);
+  outCome = defOutComeOfPhoton(thePriPart);
 
   if (!partProdVtx) return NonDefined;
 
@@ -1127,10 +1121,10 @@ ParticleOrigin MCTruthClassifier::defOrigOfPhoton(const xAOD::TruthParticleConta
 }
 
 ParticleOrigin
-MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthParticleContainer,
+defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthParticleContainer,
                                      const xAOD::TruthParticle* thePart,
                                      bool& isPrompt,
-                                     IMCTruthClassifier::Info& info) const
+                                     ParticleOutCome& outCome)
 {
   // Executing DefOrigOfNeutrino 
 
@@ -1141,7 +1135,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
   if (std::abs(thePriPart->pdgId()) != nuFlav) return NonDefined; // FIXME should this be if (!MC::isSMNeutrino(thePriPart) || abs(thePriPart->pdgId()) != nuFlav) return NonDefined; // (Use MC::isNeutrino if 4th generation neutrinos OK)
 
   //-- to define neutrino outcome status
-  info.particleOutCome = NonInteract;
+  outCome = NonInteract;
 
   const xAOD::TruthVertex* partProdVtx = thePriPart->hasProdVtx() ? thePriPart->prodVtx() : nullptr;
   if (!partProdVtx) return NonDefined;
@@ -1351,7 +1345,7 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
   if (MC::isHeavyBoson(ancestorPDG)) return HeavyBoson; // Heavy bosons( Z', Z'', W'+)
 
   if (MC::isTau(ancestorPDG)) {
-    const ParticleOrigin tauOrig = defOrigOfTau(xTruthParticleContainer, ancestor, ancestorPDG, info);
+    const ParticleOrigin tauOrig = defOrigOfTau(xTruthParticleContainer, ancestor, ancestorPDG, outCome);
     const ParticleType tautype = defTypeOfTau(tauOrig);
     return (tautype == IsoTau)?tauOrig:TauLep;
   }
@@ -1369,3 +1363,5 @@ MCTruthClassifier::defOrigOfNeutrino(const xAOD::TruthParticleContainer& xTruthP
 
   return convHadronTypeToOrig(pType, ancestorPDG);
 }
+
+} // namespace MCTruthPartClassifier
