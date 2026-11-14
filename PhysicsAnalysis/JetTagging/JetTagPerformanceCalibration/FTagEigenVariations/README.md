@@ -65,8 +65,43 @@ also exceed 1, since the merged variation is not independent of the kept ones.
 BTaggingEfficiencyTool uses: `FT_EFF_Eigen_<flavour>_<k>`, and `FT_EFF_<source>` with spaces
 replaced by `_`.
 
+## CDI files
+
+`FTagEigenVariationsCDILib` (namespace `ftag::ev::cdi`) reads a scale factor container of a
+CDI file into the inputs of the decomposition, the way the BTaggingEfficiencyTool reads it
+today:
+
+* `readContainer` takes the bins without under- and overflow, one shift per uncertainty
+  entry, and the statistical covariance from the `statistics` matrix if there is one, else
+  none if the statistical uncertainty is stored as `stat_np` variations, else the bin errors.
+  A source that is not correlated between bins stays correlated between tag weight bins.
+  `extrapolation from charm` is not a source: the BTaggingEfficiencyTool gives it to tau
+  jets as a systematic of its own;
+* `perFlavourInput` and `globalInput` apply the exclusions given per flavour label (a
+  trailing `*` matches by prefix), and the recommended ones of the file if requested.
+  Exclusions that match no source are ignored;
+* `eigenvariationsToKeep` gives the number of eigenvariations kept by the reduction given
+  for the flavour label, from the `ReducedSets` of the file.
+
+The settings are given per flavour label, tau jets included. The rules the
+BTaggingEfficiencyTool adds (tau jets take the charm settings, the high-pT extrapolation
+uncertainties are excluded for continuous working points) are applied by the tool that fills
+them.
+
+For the global strategy, the sources of all flavours with the same name become one source.
+Names that differ only by a leading `FT_EFF_` count as the same, since some calibrations add
+the prefix and others don't (charm uses the light uncertainties `FT_EFF_Generator` as
+`Generator`); the source takes the prefixed name. The statistical uncertainties and the sources
+that are not correlated between bins stay uncorrelated between flavours.
+
 ## Tests
 
 The unit tests in `test/` check the decomposition, reduction, recomposition and names on
-small inputs with known answers. Run them with `ctest -R gt_Eigen` from the build
-directory.
+small inputs with known answers, and the CDI reading on a synthetic container.
+`gt_CompareCurrentImplementation` runs the current and the new implementation side by side
+on the CDI files used in CI: it checks that the covariance and the Loose eigenvariations
+agree, and prints the per-bin uncertainty kept by the old and the new Medium and Tight
+merge. For the global strategy, it checks that the eigenvariations add up to the covariance
+built from the sources of each flavour, including the parts that correlate different flavours.
+It also runs in the CI of merge requests that change `CalibrationDataInterface`.
+Run them with `ctest -R "gt_(Eigen|CDIInput|CompareCurrent)"` from the build directory.
