@@ -32,6 +32,8 @@ from SGComps.AddressRemappingConfig import InputOverwriteCfg
 
 
 # Enum of CaloGains
+from RootUtils.LoadEnumHeader import loadEnumHeader
+loadEnumHeader('CaloIdentifier/CaloGain.h')
 from ROOT.CaloGain import CaloGain
 
 
