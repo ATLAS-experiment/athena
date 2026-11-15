@@ -17,6 +17,8 @@ _MANUAL_RNN_JETIDWP = {"veryloose": 6, "loose": 7, "medium": 8, "tight": 9}
 _MANUAL_GNTAU_JETIDWP = {"veryloose": 10, "loose": 11, "medium": 12, "tight": 13}
 _MANUAL_ELEIDWP = {"loose": 2, "medium": 3, "tight": 4}
 
+from RootUtils.LoadEnumHeader import loadEnumHeader
+loadEnumHeader('TauAnalysisTools/Enums.h')
 
 def _campaign(config):
     """the tau CP tool campaign for the current geometry"""
