@@ -1,10 +1,13 @@
 #
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 from AthenaCommon.SystemOfUnits import GeV
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
+
+from RootUtils.LoadEnumHeader import loadEnumHeader
+loadEnumHeader('ElectronPhotonSelectorTools/egammaPIDdefs.h')
 
 
 def same( val , tool):
