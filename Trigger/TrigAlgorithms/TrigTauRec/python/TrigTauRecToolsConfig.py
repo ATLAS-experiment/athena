@@ -4,6 +4,9 @@ from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaCommon.SystemOfUnits import mm
 
+from RootUtils.LoadEnumHeader import loadEnumHeader
+loadEnumHeader('xAODTau/TauDefs.h')
+
 def trigTauVertexFinderCfg(flags, name=''):
     '''Algorithm that overwrites numTrack() and charge() of tauJets in container'''
     acc = ComponentAccumulator()
