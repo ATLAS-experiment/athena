@@ -6,13 +6,17 @@
 
 #include "MuonAnalysisInterfaces/IMuonSelectionTool.h"
 #include "AthenaBaseComps/AthAlgTool.h"
+#include "PATCore/IAsgSelectionTool.h"
 
 namespace CP{
     /** @brief Dummy selection tool to make the PhaseII workflows work with the arrival
      *         of MudiCo in the Acts version */
-    class MuonPhaseIISelectionTool : public extends<AthAlgTool,  IMuonSelectionTool> {
+    class MuonPhaseIISelectionTool : public extends<AthAlgTool,  IMuonSelectionTool, IAsgSelectionTool> {
         public:
             using base_class::base_class;
+            StatusCode initialize() override final;
+            /** @brief Dummy: every cut of the AcceptInfo passes */
+            virtual asg::AcceptData accept(const xAOD::IParticle* part) const override final;
             /** @copydoc IMuonSelectionTool::print */
             void print() const override final;
             /** @copydoc IMuonSelectionTool::getAcceptInfo */
