@@ -9831,7 +9831,7 @@ Enddecay
 # a_1(1260)+
 Decay a_1+ #  Edited by U. Tamponi, March 2016
 #0.308750000   rho0  pi+                                    VVS_PWAVE .9788 0.0 0.0 0.0 .0212 0.0; # S- and D-wave
-0.0.32170000   rho0  pi+                                    VVS_PWAVE .9788 0.0 0.0 0.0 .0212 0.0; # S- and D-wave
+0.32170000   rho0  pi+                                      VVS_PWAVE .9788 0.0 0.0 0.0 .0212 0.0; # S- and D-wave
 ##0.308750000   rho+  pi0                                    VVS_PWAVE .9788 0.0 0.0 0.0 .0212 0.0; # S- and D-wave
 0.32170000   rho+  pi0                                    VVS_PWAVE .9788 0.0 0.0 0.0 .0212 0.0; # S- and D-wave
 #0.013000000   rho(2S)0  pi+                                VVS_PWAVE .2154 0.0 0.0 0.0 .7846 0.0; # S- and D-wave # off mass shell, included back into the simulation on request of Pablo Goldenzweig
