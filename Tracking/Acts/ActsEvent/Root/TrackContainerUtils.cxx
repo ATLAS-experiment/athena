@@ -9,4 +9,10 @@ const Acts::ProxyAccessor<UnderlyingOrSelf_t<xAOD::TrackFitter>>
 
 const Acts::ConstProxyAccessor<UnderlyingOrSelf_t<xAOD::TrackFitter>>
   TrackContainerUtils::s_constFitterAccessor(std::string{s_fitterColumnName});
+
+const Acts::ProxyAccessor<std::uint8_t>
+  TrackContainerUtils::s_bremTrackAccessor(std::string{s_bremTrackColumnName});
+
+const Acts::ConstProxyAccessor<std::uint8_t>
+  TrackContainerUtils::s_constBremTrackAccessor(std::string{s_bremTrackColumnName});
 }

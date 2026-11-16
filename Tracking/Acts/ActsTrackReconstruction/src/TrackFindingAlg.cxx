@@ -886,7 +886,7 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
   {
 
     std::array<unsigned int, 4> expectedLayerPattern{};
-    bool bremTrack = ActsTrk::TrackContainerUtils::fitterType(track) == xAOD::GaussianSumFilter;
+    bool bremTrack = ActsTrk::TrackContainerUtils::isBremTrack(track);
     // if the the perigeeSurface was not hit (in particular the case for the inside-out pass,
     // the track has no reference surface and the extrapolation to the perigee has not been done
     // yet.
@@ -1044,13 +1044,9 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                                       const Acts::BoundTrackParameters &seedParameters) const
   {
 
-      xAOD::TrackFitter current_fitter;
-      if constexpr (std::is_same_v<TrackFinderOptionsType, TrackFinderOptions>){
-          current_fitter = xAOD::KalmanFitter;
-      }
-      else {
-          current_fitter = xAOD::GaussianSumFilter;
-      }
+      // The brem track finding runs a Gaussian mixture filter without smoothing,
+      // so its tracks are no GSF fits. They are flagged as brem tracks instead.
+      constexpr bool isBremTrackFinding = !std::is_same_v<TrackFinderOptionsType, TrackFinderOptions>;
 
       ATH_MSG_DEBUG("Running track finding for " << seedType << " seed " << iseed << ".");
 
@@ -1067,10 +1063,10 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
 
       std::size_t nfirst = 0;
       for (TrkProxy &firstTrack : tracksForSeed){
-        ActsTrk::TrackContainerUtils::setFitterType(firstTrack,current_fitter);
+        ActsTrk::TrackContainerUtils::setFitterType(firstTrack, xAOD::KalmanFitter);
+        ActsTrk::TrackContainerUtils::setBremTrack(firstTrack, isBremTrackFinding);
         // The brem track states are merged Gaussian mixtures, which the Kalman
         // smoother cannot handle consistently, so brem tracks are not smoothed
-        constexpr bool isBremTrackFinding = !std::is_same_v<TrackFinderOptionsType, TrackFinderOptions>;
         auto smoothingResult = isBremTrackFinding ? Acts::Result<void>::success()
                                                   : Acts::smoothTrack(detContext.geometry, firstTrack, logger(), Acts::MbfSmoother());
         if (!smoothingResult.ok()){

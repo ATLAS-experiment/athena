@@ -9,6 +9,7 @@
 #include "Acts/EventData/ProxyAccessor.hpp"
 #include "ActsEvent/Decoration.h"
 
+#include <cstdint>
 #include <string>
 
 namespace ActsTrk {
@@ -41,10 +42,34 @@ struct TrackContainerUtils
    template <typename track_container_t>
    static void addFitterTypeProperty(track_container_t &tracksContainer) { tracksContainer.template addColumn<UnderlyingOrSelf_t<xAOD::TrackFitter>>(s_fitterColumnName); }
 
+   /// flag a track as found with the brem recovery of the track finding
+   /// @tparam trackproxy_t should be of type Acts::TrackProxy<...>
+   template <Acts::detail::ProxyType trackproxy_t>
+   static void setBremTrack(trackproxy_t &trackProxy, bool bremTrack) {
+      s_bremTrackAccessor(trackProxy) = bremTrack;
+   }
+
+   /// test whether a track was found with the brem recovery of the track finding.
+   /// Returns false if the track container has no brem track column.
+   /// @tparam consttrackproxy_t should be of type Acts::ConstTrackProxy<...>
+   template <Acts::detail::ProxyType consttrackproxy_t>
+   static bool isBremTrack(const consttrackproxy_t &trackProxy) {
+      return s_constBremTrackAccessor.hasColumn(trackProxy) && s_constBremTrackAccessor(trackProxy) != 0;
+   }
+
+   /// add brem track column to the track container
+   /// @tparam track_container_t should be of type Acts::TackContainer<...>
+   template <typename track_container_t>
+   static void addBremTrackProperty(track_container_t &tracksContainer) { tracksContainer.template addColumn<std::uint8_t>(s_bremTrackColumnName); }
+
 private:
    static constexpr std::string_view s_fitterColumnName = "fitter";
    static const Acts::ProxyAccessor<UnderlyingOrSelf_t<xAOD::TrackFitter>> s_fitterAccessor;
    static const Acts::ConstProxyAccessor<UnderlyingOrSelf_t<xAOD::TrackFitter>> s_constFitterAccessor;
+
+   static constexpr std::string_view s_bremTrackColumnName = "bremTrack";
+   static const Acts::ProxyAccessor<std::uint8_t> s_bremTrackAccessor;
+   static const Acts::ConstProxyAccessor<std::uint8_t> s_constBremTrackAccessor;
 };
 }
 #endif

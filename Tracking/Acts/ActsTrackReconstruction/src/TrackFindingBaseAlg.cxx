@@ -573,6 +573,7 @@ namespace ActsTrk {
        tracksContainer.addColumn<unsigned int>("nHgtdOutliers");
     }
     ActsTrk::TrackContainerUtils::addFitterTypeProperty(tracksContainer);
+    ActsTrk::TrackContainerUtils::addBremTrackProperty(tracksContainer);
   }
 
   void TrackFindingBaseAlg::initCounts(const detail::RecoTrackContainer::TrackProxy &track)
@@ -643,7 +644,7 @@ namespace ActsTrk {
 
   std::array<bool, 3> TrackFindingBaseAlg::selectCounts(const detail::RecoTrackContainer::TrackProxy &track, double eta) const {
     bool enoughMeasurements = true, tooManyHoles = false, tooManyOutliers = false;
-    const auto &trackSelectorCfg = (ActsTrk::TrackContainerUtils::fitterType(track) == xAOD::GaussianSumFilter) ? bremTrackFinder().trackSelector.config() : trackFinder().trackSelector.config();
+    const auto &trackSelectorCfg = ActsTrk::TrackContainerUtils::isBremTrack(track) ? bremTrackFinder().trackSelector.config() : trackFinder().trackSelector.config();
     std::size_t etaBin = (std::abs(eta) < trackSelectorCfg.absEtaEdges.front())   ? 0
                          : (std::abs(eta) >= trackSelectorCfg.absEtaEdges.back()) ? trackSelectorCfg.absEtaEdges.size() - 1
                                                                                   : trackSelectorCfg.binIndex(eta);
