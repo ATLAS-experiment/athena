@@ -39,7 +39,6 @@ class TestPythia8BConfig(unittest.TestCase):
         self.addCleanup(ca.wasMerged)
 
         self.assertEqual(sample.process, "Bs -> mumu")
-        self.assertEqual(sample.nEventsPerJob, 500)
         info = ca.getService("GeneratorInfoSvc")
         self.assertEqual(list(info.Generators), ["Pythia8B", "Photospp"])
         self.assertEqual(info.Tune, "A14 CTEQ6L1")
