@@ -10,7 +10,7 @@
 
 
 #include <algorithm>
-
+#include "CxxUtils/StringUtilsTemplates.h"
 
 namespace SG {
 
@@ -106,14 +106,14 @@ StatusCode ThinningHandleKey<T>::initialize (const std::string& stream,
                                              bool used /*= true*/)
 {
   if (used) {
-    std::string dkey = this->fullKey().key() + "_THINNED_" + stream;
+    std::string dkey = CxxUtils::strcat(this->fullKey().key(), "_THINNED_", stream);
     if (!qualifier.empty()) {
       // Make sure that the qualifier doesn't contain any periods.
       std::string qual = qualifier;
       std::replace (qual.begin(), qual.end(), '.', '_');
-      dkey += "." + qual;
+      dkey = CxxUtils::strcat(dkey, '.', qual);
     }
-    m_decisionKey = dkey;
+    m_decisionKey = std::move(dkey);
     if (this->owner()) {
       this->owner()->addDependency (m_decisionKey.fullKey(), Gaudi::DataHandle::Writer);
     }

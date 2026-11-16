@@ -16,6 +16,7 @@
 #include <fstream>
 #include <print>
 #include <algorithm>
+#include "CxxUtils/StringUtilsTemplates.h"
 
 using namespace SG;
 using namespace std;
@@ -123,16 +124,16 @@ StatusCode StoreGateSvc::initialize()    {
     SG_MSG_ERROR ("Failed to retrieve JobOptionsSvc");
   }
   //copy our properties to the prototype (default) SGImplSvc
-  const std::string implStoreName = name() + "_Impl";
+  const std::string implStoreName = CxxUtils::strcat(name(), "_Impl");
   for (const Gaudi::Details::PropertyBase* p : getProperties()) {
-    pJOSvc->set( implStoreName + "." + p->name(), p->toString() );
+    pJOSvc->set(CxxUtils::strcat( implStoreName, '.', p->name()), p->toString() );
   }
 
   //HACK ALERT: using createService rather then the customary service(...,CREATEIF=true) we set our pointer
   // to SGImplSvc early (even before it is initialized). This should help take care of some initialize loops
   // for example when we try to record an address from one of the address providers initialize methods
 
-  std::string implStoreFullName = "SGImplSvc/" + implStoreName;
+  std::string implStoreFullName = CxxUtils::strcat("SGImplSvc/", implStoreName);
   SG_MSG_DEBUG ("trying to create store {}", implStoreFullName);
   
   m_defaultStore = serviceLocator().as<ISvcManager>()->createService(implStoreFullName);
@@ -488,13 +489,12 @@ void StoreGateSvc::rememberBad (BadItemList& bad,
 {
   if (m_storeID == StoreID::EVENT_STORE && currentHiveEventSlot != nullptr) {
     lock_t lock (m_badMutex);
-    std::string algo;
     if (m_algContextSvc.isValid()) {
       if (IAlgorithm* alg = m_algContextSvc->currentAlg()) {
         if (alg->type() == "AthenaOutputStream") return;
         if (alg->type() == "AthIncFirerAlg") return;
-        algo = alg->type() + "/" + alg->name();
-        bad.insert (BadListItem (clid, key, algo));
+        std::string algo = CxxUtils::strcat(alg->type(), '/', alg->name());
+        bad.emplace (clid, key, std::move(algo));
       }
     }
   }
@@ -512,7 +512,7 @@ void StoreGateSvc::printBadList (const BadItemList& bad,
   if (bad.empty()) return;
   std::vector<std::string> lines;
   for (const BadListItem& id : bad) {
-    lines.push_back (id.fullKey() + " [" + id.m_algo + "]");
+    lines.push_back (CxxUtils::strcat(id.fullKey(), " [", id.m_algo, "]"));
   }
   std::sort (lines.begin(), lines.end());
   SG_MSG_WARNING ("Called {} on these objects in a MT store", what);

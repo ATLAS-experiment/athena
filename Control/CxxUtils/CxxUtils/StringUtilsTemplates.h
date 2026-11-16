@@ -141,8 +141,10 @@ namespace CxxUtils {
                         p += N;
                     } else {
                         std::string_view sv(arg, sizeof(RawT) / sizeof(CharType) - 1);
-                        std::memcpy(p, sv.data(), sv.size());
-                        p += sv.size();
+                        if (!sv.empty()) { //sv.data can be null when empty and trigger UB with memcopy
+                           std::memcpy(p, sv.data(), sv.size());
+                           p += sv.size();
+                        }
                     }
                 }
                 // Serialize types with static stringSize() directly into the span buffer
@@ -159,8 +161,10 @@ namespace CxxUtils {
                 }
                 else {
                     std::string_view sv = arg;
-                    std::memcpy(p, sv.data(), sv.size());
-                    p += sv.size();
+                    if (!sv.empty()) { //sv.data can be null when empty and trigger UB with memcopy
+                       std::memcpy(p, sv.data(), sv.size());
+                       p += sv.size();
+                    }
                 }
             };
             (write_arg(std::forward<Args>(args)), ...);

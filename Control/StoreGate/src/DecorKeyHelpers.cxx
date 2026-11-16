@@ -12,6 +12,7 @@
 #include "StoreGate/DecorKeyHelpers.h"
 #include "StoreGate/exceptions.h"
 #include "StoreGate/VarHandleKey.h"
+#include "CxxUtils/StringUtilsTemplates.h"
 
 
 namespace SG {
@@ -60,7 +61,7 @@ std::string makeContDecorKey(const std::string& cont, const std::string& decor)
 {
   if (cont.empty()) return decor;
   if (decor.empty()) return cont;
-  return cont + '.' + decor;
+  return CxxUtils::strcat(cont, '.', decor);
 }
 
 
@@ -99,7 +100,7 @@ std::string makeContDecorKey(const VarHandleKey& contKey, const std::string& key
 void removeContFromDecorKey(const VarHandleKey& contKey, std::string& key)
 {
   // Remove container name from key
-  const std::string toerase = contKey.fullKey().key() + ".";
+  const std::string toerase = CxxUtils::strcat(contKey.fullKey().key(), '.');
   const size_t pos = key.find(toerase);
   if (pos != std::string::npos) {
     key.erase(pos, toerase.size());

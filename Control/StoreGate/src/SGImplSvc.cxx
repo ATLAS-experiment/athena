@@ -51,6 +51,7 @@
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/tools/SGImplSvc.h"
 #include "SGTools/DataStore.h"
+#include "CxxUtils/StringUtilsTemplates.h"
 
 using std::setw;
 using std::hex;
@@ -1197,8 +1198,7 @@ SGImplSvc::record_HistObj(const CLID& id, const std::string& key,
   if (sc.isFailure() || idname.empty() ) { 
     idname = std::to_string(id);
   }
-  idname += '/';
-  idname += key;
+  idname = CxxUtils::strcat(idname, '/', key);
 
   DataObject* obj = SG::asStorable(dho);
   
