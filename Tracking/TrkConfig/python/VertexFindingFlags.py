@@ -133,6 +133,10 @@ def createPriVertexingFlags():
     flags.addFlag("gridMaxD0Significance", 3.5)
     flags.addFlag("gridMaxZ0Significance", 12.0)
 
+    # 4D vertexing with HGTD track time (ACTS AMVF)
+    flags.addFlag("useTime", False)
+    flags.addFlag("noTimeSigma", 10.0)  # [ns] time resolution given to tracks without a valid HGTD time
+
     return flags
 
     

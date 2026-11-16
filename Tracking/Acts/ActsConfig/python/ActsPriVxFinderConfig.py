@@ -27,6 +27,14 @@ def ActsGaussAdaptiveMultiFindingCfg(flags,
     kwargs.setdefault("doFullSplitting",
                       not flags.Tracking.PriVertex.useBeamConstraint)
 
+    # 4D vertexing with HGTD track time
+    kwargs.setdefault("useTime", flags.Tracking.PriVertex.useTime)
+    kwargs.setdefault("noTimeSigma", flags.Tracking.PriVertex.noTimeSigma)
+
+    if kwargs["useTime"]:
+        kwargs.setdefault("ExtraInputs", [("xAOD::TrackParticleContainer", "InDetTrackParticles.time")])
+
+
     if flags.GeoModel.Run >= LHCPeriod.Run4:
         kwargs.setdefault("minWeight", 0.02)
         kwargs.setdefault("maxIterations", 200)
