@@ -18,15 +18,17 @@
 #include "xAODTrigger/MuonRoIContainer.h"
 #include "xAODMuonSimHit/MuonSimHit.h"
 
+#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+
+#include "xAODTrigL1Muon/L1RPCCandData.h"
 #include "xAODTrigL1Muon/L1RPCCandDataContainer.h"
 #include "xAODTrigL1Muon/L1RPCCandDataAuxContainer.h"
-#include "MuonReadoutGeometryR4/MuonDetectorManager.h"
+
 
 namespace L1Muon
 {
 
-  class RPCSimulation : public ::AthReentrantAlgorithm
-  {
+  class RPCSimulation : public ::AthReentrantAlgorithm {
   public:
     using AthReentrantAlgorithm::AthReentrantAlgorithm;
     virtual ~RPCSimulation() = default;
@@ -46,13 +48,13 @@ namespace L1Muon
     /// configuration options
     Gaudi::Property<bool> m_useTruth{this, "UseTruth", true, "Use truth information to build candidates"};
     Gaudi::Property<bool> m_usePatterns{this, "UsePatterns", false, "Use patterns to build candidates"};
-
+ 
     /// RPC Rdo
     SG::ReadHandleKey<xAOD::NRPCRDOContainer> m_keyRpcRdo{this, "NrpcRdoKey", "NRPCRDO", "Location of input RpcRDO"};
 
     /// Output Trigger candidates
-    SG::WriteHandleKey<xAOD::L1RPCCandDataContainer> m_outputCandKey{this, "RPCCandKey", "L1RPCCandData",
-                                                                         "LVL0 xAOD Barrel trigger candidates in the Muon RPC"};
+    SG::WriteHandleKey<xAOD::L1RPCCandDataContainer> m_outputCandKey{this, "RPCCandKey", "RPCCandData",
+                                                                         "LVL1 xAOD Barrel trigger candidates in the Muon RPC"};
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring Tool"};
 
     /// truth containers
@@ -70,4 +72,4 @@ namespace L1Muon
 
 } // end of namespace
 
-#endif // L0MUONRPCSIM_H
+#endif // L1MuonS1RPC_RPCSIMULATION_H
