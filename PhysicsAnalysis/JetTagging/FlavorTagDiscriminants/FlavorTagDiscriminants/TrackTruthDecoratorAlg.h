@@ -96,7 +96,6 @@ namespace FlavorTagDiscriminants {
       {Truth::Type::PromptMuon, 2}, //Prompt muon
       {Truth::Type::BHadronDecay, 3}, //From B muon
       // FromBC and FromC decay label are handled in the implementation since FromBC is not directly available for TruthClassificationTool
-      // FromBC and FromC decay label are handled in the implementation since FromBC is not directly available for TruthClassificationTool 
       {Truth::Type::LightFlavorDecay, 6}, //From light muon
       {Truth::Type::TauDecay, 7}, //From tau muon
       {Truth::Type::TauDecayLike, 8}, //4-like muons
@@ -104,6 +103,7 @@ namespace FlavorTagDiscriminants {
       {Truth::Type::CHadronDecayLike, 8}, //4-like muons
       {Truth::Type::NonMuonlike, 8}, //Non-muons like muons
       // There are also cases where the muon has the truth particle associated to the ID track that is not a muon. Those muons are labelled as 9 (NotInnerDetector muons)
+      {Truth::Type::PromptPhotonConversion, 10}, //From photon conversion muon (gamma -> mu+ mu-)
     };
 
     // ATLASRECTS-8290: this is for backward compatability, remove eventually
