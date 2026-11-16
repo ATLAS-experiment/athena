@@ -232,6 +232,10 @@ def LArHitEMapToDigitAlgCfg(flags, name="LArHitEMapToDigitAlg", **kwargs):
                       -flags.LAr.ROD.nPreceedingSamples if flags.LAr.ROD.nPreceedingSamples!=0 else flags.LAr.ROD.FirstSample)
     
 
+    if flags.Digitization.DoFCalSignalDegradation and not flags.Common.isOverlay:
+        from LArDigitization.FCalDigitModifierToolConfig import FCalDigitModifierToolCfg
+        kwargs.setdefault("FCalDigitModifierTool", acc.popToolsAndMerge(FCalDigitModifierToolCfg(flags)))
+
     LArHitEMapToDigitAlg = CompFactory.LArHitEMapToDigitAlg
     acc.addEventAlgo(LArHitEMapToDigitAlg(name, **kwargs))
     return acc

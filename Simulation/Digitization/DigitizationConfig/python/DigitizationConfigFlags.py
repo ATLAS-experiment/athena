@@ -56,6 +56,8 @@ def createDigitizationCfgFlags():
     flags.addFlag("Digitization.EnableCaloHSTruthRecoInputs", False)
     # Use high-gain Forward Calorimeters
     flags.addFlag("Digitization.HighGainFCal", False)
+    # Model FCal signal degradation (HL-LHC ion build-up) in LAr digitization
+    flags.addFlag("Digitization.DoFCalSignalDegradation", False)
     # Use high-gain ElectroMagnetic EndCap Inner Wheel
     flags.addFlag("Digitization.HighGainEMECIW", True)
     # Do global pileup digitization
