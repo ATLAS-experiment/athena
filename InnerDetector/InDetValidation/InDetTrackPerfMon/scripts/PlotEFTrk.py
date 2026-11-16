@@ -66,6 +66,7 @@ def GetParserArgs() :
     parser.add_argument( '--particle',          help="Truth particle (e.g. B-hadrons / #tau, p_{T}>15 GeV). Will be printed in ATLAS legend", default = '')
     parser.add_argument( '--legend-coord',	    help="xmin, ymin, xmax, ymax TLegend coordinates", default = [0.65,0.65,0.9,0.87], type = float, nargs = '+')
     parser.add_argument( '--layout', '--l',     help="ITk layout of samples (default 03-00-01)",   default="03-00-01")
+    parser.add_argument( '--com',               help="CoM (default 13.6)",   default="13.6")
     parser.add_argument( '--layoutTest',        help = "ITk layout of test if different ITk layout", default = None)
     parser.add_argument( '--layoutRef',         help = "ITk layout of ref if different ITk layout", default = None)
     parser.add_argument( '--tag',               help="output file tag", default = '')
@@ -169,9 +170,10 @@ def getATLASLabel(args):
 
     diffItkLayout = args.layoutTest != args.layoutRef
     itklayout = f"{args.layoutTest} vs {args.layoutRef}" if diffItkLayout else f"ITk Layout: {args.layout}"
-    subatlas = ROOT.TLatex(.2, .84, "#splitline{#bf{#it{ATLAS}} Simulation Internal}{#splitline{#sqrt{s} = 14 TeV, HL-LHC}{#splitline{%s}{<#mu> = %s, %s}}}" %(itklayout, args.mu, sample))
+    com = args.com
+    subatlas = ROOT.TLatex(.2, .84, "#splitline{#bf{#it{ATLAS}} Simulation Internal}{#splitline{#sqrt{s} = %s TeV, HL-LHC}{#splitline{%s}{<#mu> = %s, %s}}}" %(com,itklayout, args.mu, sample))
     if args.pu_comparison:   
-        subatlas = ROOT.TLatex(.2, .84, "#splitline{#bf{#it{ATLAS}} Simulation Internal}{#splitline{#sqrt{s} = 14 TeV, HL-LHC}{#splitline{%s}{%s}}}" %(itklayout,sample))
+        subatlas = ROOT.TLatex(.2, .84, "#splitline{#bf{#it{ATLAS}} Simulation Internal}{#splitline{#sqrt{s} = %s TeV, HL-LHC}{#splitline{%s}{%s}}}" %(com,itklayout,sample))
 
     subatlas.SetNDC(1)
     subatlas.SetTextFont(42)
@@ -334,6 +336,19 @@ def setRatioStyle(ratio, cfg, color, linestyle, markstyle, ref='C000', multigrap
         ratio.SetMarkerStyle(markstyle)
         ratio.SetMarkerColor(color)
         ratio.SetMarkerSize(0.8)
+
+def getRatio(histos):
+    ratio = histos[0].Clone()
+    ratio.Divide(histos[1])
+    for b in range(1, ratio.GetNbinsX()+1):
+        num = histos[0].GetBinContent(b)
+        den = histos[1].GetBinContent(b)
+        if ratio.GetBinContent(b) == 0:
+            if den == 0 and num == 0:
+                ratio.SetBinContent(b, 1)
+            elif den == 0 and num !=0:
+                ratio.SetBinContent(b, 1000)
+    return ratio
 
 def getTEfficiencyRatio(histos):
 
@@ -514,8 +529,7 @@ def draw(args, configs, tails=False, pu_comparison=False):
                 if isTEfficiencyObj: ratios.append(getTEfficiencyRatio(ratio_histos))
 
                 else:
-                    ratio = ratio_histos[1].Clone()
-                    ratio.Divide(ratio_histos[0])
+                    ratio = getRatio(ratio_histos)
                     ratios.append(ratio)
 
             for i, ratio in enumerate(ratios):
@@ -553,8 +567,7 @@ def draw(args, configs, tails=False, pu_comparison=False):
         else:
             for i in [0,2]:
                 ratio_histos = [histos[i],histos[i+1]] 
-                ratio = ratio_histos[0].Clone()
-                ratio.Divide(ratio_histos[1])
+                ratio = getRatio(ratio_histos)
                 ratios.append(ratio)
 
             for i, ratio in enumerate(ratios):
