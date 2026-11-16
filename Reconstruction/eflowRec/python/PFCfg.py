@@ -530,7 +530,6 @@ def getOfflinePFAlgorithm(inputFlags, **kwargs):
         topoClustersName="CaloTopoClusters"
         PFAlgorithm.PFClusterSelectorTool = getPFClusterSelectorTool(inputFlags,topoClustersName,"CaloCalTopoClusters","PFClusterSelectorTool")
 
-    PFAlgorithm.useUnified = True
     PFAlgorithm.UnifiedBaseTools  = [getPFUnifiedCellLevelMatchingTool(inputFlags, "PFUnifiedCellLevelMatchingTool")]
     PFAlgorithm.UnifiedBaseTools += [getPFUnifiedCellLevelSubtractionOnlyTool(inputFlags, "PFUnifiedCellLevelSubtractionOnlyTool")]
     if not inputFlags.PF.EOverPMode and not inputFlags.PF.useTruthCheating:

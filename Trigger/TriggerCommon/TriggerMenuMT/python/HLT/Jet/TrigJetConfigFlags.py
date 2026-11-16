@@ -53,9 +53,6 @@ def createTrigJetConfigFlags():
 
     flags.addFlag("Trigger.Jet.PFlowTolerance", 1e-2,
                   help='tolerance in STEP Propagator')
-    
-    flags.addFlag("Trigger.Jet.PFlowUnifiedChain", False,
-                  help='use unified PF tool chain in eflowRec')
 
     flags.addFlag("Trigger.Jet.TrackVtxAssocWP", "Custom", # offline default is "Nonprompt_All_MaxWeight"
                   help='working point for the TVA algorithm')
