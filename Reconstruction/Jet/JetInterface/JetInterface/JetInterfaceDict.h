@@ -5,14 +5,10 @@
 #ifndef JETINTERFACE_JETINTERFACEDICT_H
 #define JETINTERFACE_JETINTERFACEDICT_H
 
-#include "JetInterface/IJetBuildTool.h"
 #include "JetInterface/IJetConstituentModifier.h"
-#include "JetInterface/IJetConsumer.h"
 #include "JetInterface/IJetDecorator.h"
 #include "JetInterface/IJetExecuteTool.h"
-#include "JetInterface/IJetFinder.h"
 #include "JetInterface/IJetFromPseudojet.h"
-#include "JetInterface/IJetGroomer.h"
 #include "JetInterface/IJetModifier.h"
 #include "JetInterface/IJetPseudojetRetriever.h"
 #include "JetInterface/IJetSelector.h"
