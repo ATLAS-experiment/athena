@@ -60,6 +60,14 @@ StatusCode LArHitEMapToDigitAlg::initialize()
   m_larhec_id  = caloIdMgr->getHEC_ID();
   m_larfcal_id = caloIdMgr->getFCAL_ID();
 
+  ATH_CHECK(m_fcalModifierTool.retrieve(DisableTool{m_fcalModifierTool.empty()}));
+
+  if (!m_fcalModifierTool.empty() && m_RndmEvtOverlay) {
+
+    ATH_MSG_WARNING("FCalDigitModifierTool is not applied in overlay mode");
+
+  }
+
   sc = detStore()->retrieve(m_laronline_id);
   if (sc.isFailure()) {
     ATH_MSG_ERROR(" Unable to retrieve LArOnlineId from DetectoreStore");
@@ -434,6 +442,29 @@ StatusCode LArHitEMapToDigitAlg::MakeDigit(
   double Rndm[32]{};
   int BvsEC=0;
   if(iCalo==EM || iCalo==EMIW) BvsEC=std::abs(m_larem_id->barrel_ec(cellId));
+
+  // ===== Optional FCal signal degradation (HL-LHC ion build-up) =====
+
+  // Applied to energy samples, before noise and pedestal are added.
+
+  if (iCalo == FCAL && !m_fcalModifierTool.empty() && !m_RndmEvtOverlay) {
+
+    ATH_CHECK(m_fcalModifierTool->modifySamples(ctx, ch_id,
+
+              std::span<double>(Samples.data(), Samples.size())));
+
+    if (m_doDigiTruth) {
+
+      ATH_CHECK(m_fcalModifierTool->modifySamples(ctx, ch_id,
+
+                std::span<double>(Samples_DigiHSTruth.data(), Samples_DigiHSTruth.size())));
+
+    }
+
+  }
+
+  // ===================================================================
+
 
   bool addedNoise=false;
   if (m_NoiseOnOff &&

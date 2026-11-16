@@ -1,3 +1,4 @@
+#include "../FCalDigitModifierTool.h"
 #include "../LArHitEMapMaker.h"
 #include "../LArHitMerger.h"
 #include "../LArPileUpTool.h"
@@ -8,3 +9,4 @@ DECLARE_COMPONENT( LArHitMerger )
 DECLARE_COMPONENT( LArPileUpTool )
 DECLARE_COMPONENT( LArHitEMapToDigitAlg )
 
+DECLARE_COMPONENT( FCalDigitModifierTool )

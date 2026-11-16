@@ -48,6 +48,8 @@
 #include <string>
 #include <utility> //for std::pair
 #include <cstdint> //for uint32_t
+#include "GaudiKernel/ToolHandle.h"
+#include "IFCalDigitModifierTool.h"
 
 namespace CLHEP {
   class HepRandomEngine;
@@ -215,6 +217,9 @@ protected:
   const LArFCAL_ID*      m_larfcal_id{};
   const LArOnlineID*     m_laronline_id{};
 
+  // Optional tool modelling FCal signal degradation (empty = off)
+  ToolHandle<IFCalDigitModifierTool> m_fcalModifierTool{this, "FCalDigitModifierTool", "",
+      "Optional tool modelling FCal signal degradation"};
 };
 
 template<class T>
