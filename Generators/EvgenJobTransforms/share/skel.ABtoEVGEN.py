@@ -111,6 +111,14 @@ if not hasattr(svcMgr, 'THistSvc'):
     svcMgr += THistSvc()
 svcMgr.THistSvc.Output = ["TestHepMCname DATAFILE='TestHepMC.root' OPT='RECREATE'"]
 
+## Copy the event weight from HepMC to the Athena EventInfo class
+## (must be scheduled before CountHepMC below, which reads TMPEvtInfo's
+## mcEventWeights() to build the final EventInfo -- sequence members run
+## in the order they're added, so this needs to be added to postSeq first)
+from EvgenProdTools.EvgenProdToolsConf import CopyEventWeight
+if not hasattr(postSeq, "CopyEventWeight"):
+    postSeq += CopyEventWeight(mcEventWeightsKey="TMPEvtInfo.mcEventWeights")
+
 ## Configure the event counting (AFTER all filters)
 # TODO: Rewrite in Python?
 from EvgenProdTools.EvgenProdToolsConf import CountHepMC
