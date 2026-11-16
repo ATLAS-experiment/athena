@@ -3,6 +3,7 @@
 */
 
 // c++
+#include <algorithm>
 #include <iostream>
 #include <stdexcept>
 
@@ -41,21 +42,14 @@ namespace MCP {
       } else {
         hist->SetDirectory(nullptr);
         m_calibConstantHist.reset(hist);
-      
-        // Store to check later if the input ranges are within the range of the hist
-        // subtract epsilon so that it doesn't go into the overflow bin at the highest edge
-        m_maxX  = m_calibConstantHist->GetXaxis()->GetXmax() - std::numeric_limits<double>::epsilon();
-        m_minX  = m_calibConstantHist->GetXaxis()->GetXmin() + std::numeric_limits<double>::epsilon();
-        m_maxY  = m_calibConstantHist->GetYaxis()->GetXmax() - std::numeric_limits<double>::epsilon();
-        m_minY  = m_calibConstantHist->GetYaxis()->GetXmin() + std::numeric_limits<double>::epsilon();
       }  
     }
 
     double CalibContainer::getCalibConstant(const TrackCalibObj& trk) const
     {
         // If outside the range, use the last bin in either direction
-        const int binEta = m_calibConstantHist->GetXaxis()->FindFixBin(std::max(std::min(trk.eta,m_maxX),m_minX));
-        const int binPhi = m_calibConstantHist->GetYaxis()->FindFixBin(std::max(std::min(trk.phi,m_maxY),m_minY));
+        const int binEta = std::clamp(m_calibConstantHist->GetXaxis()->FindFixBin(trk.eta), 1, m_calibConstantHist->GetNbinsX());
+        const int binPhi = std::clamp(m_calibConstantHist->GetYaxis()->FindFixBin(trk.phi), 1, m_calibConstantHist->GetNbinsY());
 
         int gbin = m_calibConstantHist->GetBin(binEta, binPhi);
 
