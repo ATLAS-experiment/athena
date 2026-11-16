@@ -117,11 +117,6 @@ class JSSTaggerBase :   public asg::AsgTool ,
     std::string m_kerasConfigOutputName;
     std::string m_kerasCalibArea;
 
-    /// TMVA configurations for BDT taggers
-    std::string m_tmvaConfigFileName;
-    std::string m_tmvaConfigFilePath;
-    std::string m_tmvaCalibArea;
-
     /// Tagger information
     std::string m_wkpt;
     std::string m_tagType;
@@ -206,10 +201,6 @@ class JSSTaggerBase :   public asg::AsgTool ,
     std::map<std::string, std::unique_ptr<TH2D>, std::less<>> m_efficiencyHistograms;
 
     /// Truth label options
-    bool m_truthLabelUseTRUTH3{};
-    std::string m_truthParticleContainerName;
-    std::string m_truthBosonContainerName;
-    std::string m_truthTopQuarkContainerName;
     std::string m_truthLabelName;
 
     /// Truth label ReadDecorHandle key
