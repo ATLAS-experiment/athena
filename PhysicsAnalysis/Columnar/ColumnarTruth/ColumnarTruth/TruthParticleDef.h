@@ -17,6 +17,19 @@ namespace columnar
   {
     static constexpr std::string_view idName = "truthparticle";
   };
+  using TruthParticle0Def = TruthParticleDef;
+
+  /// @brief additional truth particle container ids, for tools that use
+  /// multiple truth particle containers at once (e.g. via variant links)
+  struct TruthParticle1Def : TruthParticleDef
+  {
+    static constexpr std::string_view idName = "truthparticle1";
+  };
+
+  struct TruthParticle2Def : TruthParticleDef
+  {
+    static constexpr std::string_view idName = "truthparticle2";
+  };
 
   using TruthParticleRange = ObjectRange<TruthParticleDef>;
   using TruthParticleId = ObjectId<TruthParticleDef>;

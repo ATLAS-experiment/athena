@@ -61,6 +61,7 @@ namespace columnar
   template<typename CT,ColumnarModeConcept CM=ColumnarMode> using Track3Accessor  = AccessorTemplate<Track3Def,CT,ColumnAccessMode::input,CM>;
   template<typename CT,ColumnarModeConcept CM=ColumnarMode> using Track3Decorator = AccessorTemplate<Track3Def,CT,ColumnAccessMode::output,CM>;
 
+  using VertexRange = ObjectRange<VertexDef>;
   using VertexId = ObjectId<VertexDef>;
   using OptVertexId = OptObjectId<VertexDef>;
   template<typename CT,ColumnarModeConcept CM=ColumnarMode> using VertexAccessor  = AccessorTemplate<VertexDef,CT,ColumnAccessMode::input,CM>;
