@@ -4,6 +4,7 @@
 # art-type: grid
 # art-architecture:  '#x86_64-intel'
 # art-athena-mt: 8
+# art-memory: 4096
 # art-include: 24.0/Athena
 # art-include: main/Athena
 # art-output: mc23e_presampling.SingleBS.RDO.pool.root
