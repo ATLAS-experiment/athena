@@ -13,8 +13,6 @@ PFAlgorithm::PFAlgorithm(const std::string& name, ISvcLocator* pSvcLocator)
 StatusCode PFAlgorithm::initialize(){
 
   ATH_CHECK(m_IPFClusterSelectorTool);
-  ATH_CHECK(m_IPFSubtractionTools.retrieve());
-  ATH_CHECK(m_IPFBaseTools.retrieve());
   ATH_CHECK(m_IPFUnifiedBaseTools.retrieve());
   
   ATH_CHECK(m_eflowRecTracksReadHandleKey.initialize());
@@ -59,42 +57,23 @@ StatusCode PFAlgorithm::execute(const EventContext& ctx) const{
   xAOD::CaloClusterContainer& theCaloClusterContainerReference = *(caloClustersWriteHandle.ptr());
   ATH_CHECK(m_IPFClusterSelectorTool->execute(theEFlowRecClusterContainerReference, theCaloClusterContainerReference));
 
-  // Explicitly start/stop the timer around the subtraction tool calls.
-  // In the unified chain matching, subtraction and the remaining stages are all
-  // entries in one tool list, so TIME_subtract covers that whole list rather
-  // than the charged shower subtraction alone.
+  // Explicitly start/stop the timer around the tool calls. Matching,
+  // subtraction and the remaining stages are all entries in one tool list, so
+  // TIME_subtract covers that whole list rather than the charged shower
+  // subtraction alone.
   t_subtract.start();
-  /* Run the SubtractionTools */
 
-  if (m_useUnified){
-    PFData data;
-    data.caloObjects = theElowCaloObjectContainer;
+  PFData data;
+  data.caloObjects = theElowCaloObjectContainer;
 
-    PFTrackFiller::fillTracksToConsider(data, localEFlowRecTrackContainer);
+  PFTrackFiller::fillTracksToConsider(data, localEFlowRecTrackContainer);
 
-    PFClusterFiller::fillClustersToConsider(data, theEFlowRecClusterContainerReference);
+  PFClusterFiller::fillClustersToConsider(data, theEFlowRecClusterContainerReference);
 
-    for (const auto& thisIPFUnifiedBaseTool : m_IPFUnifiedBaseTools){
-      ATH_CHECK(thisIPFUnifiedBaseTool->processPFlowData(ctx, data));
-    }
-    t_subtract.stop();
+  for (const auto& thisIPFUnifiedBaseTool : m_IPFUnifiedBaseTools){
+    ATH_CHECK(thisIPFUnifiedBaseTool->processPFlowData(ctx, data));
   }
-
-  else{
-    for (auto thisIPFSubtractionTool : m_IPFSubtractionTools){
-      thisIPFSubtractionTool->execute(
-        ctx,
-        theElowCaloObjectContainer,
-        &localEFlowRecTrackContainer,
-        &theEFlowRecClusterContainerReference);
-    }
-    t_subtract.stop();
-
-    /* Run the other AglTools */
-    for (auto thisIPFBaseTool :  m_IPFBaseTools){
-      ATH_CHECK(thisIPFBaseTool->execute(ctx, *theElowCaloObjectContainer));
-    }
-  }
+  t_subtract.stop();
 
   if (msgLvl(MSG::DEBUG)) {
     for (auto thisEFTrack : localEFlowRecTrackContainer) {
@@ -119,36 +98,6 @@ StatusCode PFAlgorithm::execute(const EventContext& ctx) const{
 StatusCode PFAlgorithm::finalize(){ return StatusCode::SUCCESS;}
 
 void PFAlgorithm::printTools() {
-  ATH_MSG_VERBOSE(" ");
-  ATH_MSG_VERBOSE("List of IPFSubtraction tools in execution sequence:");
-  ATH_MSG_VERBOSE("------------------------------------");
-  ATH_MSG_VERBOSE(" ");
-  unsigned int subtractionToolCtr = 0;
-  for (auto thisIPFSubtractionTool : m_IPFSubtractionTools){
-    subtractionToolCtr++;
-    ATH_MSG_VERBOSE(std::setw(2) << std::setiosflags(std::ios_base::right) << subtractionToolCtr << ".) "
-		    << std::resetiosflags(std::ios_base::right) << std::setw(36) << std::setfill('.')
-		    << std::setiosflags(std::ios_base::left) << thisIPFSubtractionTool->type() << std::setfill('.')
-                    << thisIPFSubtractionTool->name() << std::setfill(' '));
-  }  
-  ATH_MSG_VERBOSE(" ");
-  ATH_MSG_VERBOSE("------------------------------------");
-
-  ATH_MSG_VERBOSE(" ");
-  ATH_MSG_VERBOSE("List of IPFBase tools in execution sequence:");
-  ATH_MSG_VERBOSE("------------------------------------");
-  ATH_MSG_VERBOSE(" ");
-  unsigned int baseToolCtr = 0;
-  for (auto thisIPFBaseTool : m_IPFBaseTools){
-    baseToolCtr++;
-    ATH_MSG_VERBOSE(std::setw(2) << std::setiosflags(std::ios_base::right) << baseToolCtr << ".) "
-		    << std::resetiosflags(std::ios_base::right) << std::setw(36) << std::setfill('.')
-		    << std::setiosflags(std::ios_base::left) << thisIPFBaseTool->type() << std::setfill('.')
-                    << thisIPFBaseTool->name() << std::setfill(' '));
-  }
-  ATH_MSG_VERBOSE(" ");
-  ATH_MSG_VERBOSE("------------------------------------");
-
   ATH_MSG_VERBOSE(" ");
   ATH_MSG_VERBOSE("List of IPFUnifiedBase tools in execution sequence:");
   ATH_MSG_VERBOSE("------------------------------------");

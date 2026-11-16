@@ -15,8 +15,6 @@
 #include "../PFLCNeutralFlowElementCreatorAlgorithm.h"
 #include "../PFOClusterMLCorrectionAlgorithm.h"
 #include "../NeutralPFOClusterMLCorrectionTool.h"
-#include "../PFSubtractionTool.h"
-#include "../PFMomentCalculatorTool.h"
 #include "../PFClusterCollectionTool.h"
 #include "../PFMuonFlowElementAssoc.h"
 #include "../PFEGamFlowElementAssoc.h"
@@ -46,8 +44,6 @@ DECLARE_COMPONENT( PFNeutralFlowElementCreatorAlgorithm)
 DECLARE_COMPONENT( PFLCNeutralFlowElementCreatorAlgorithm)
 DECLARE_COMPONENT( PFOClusterMLCorrectionAlgorithm)
 DECLARE_COMPONENT( NeutralPFOClusterMLCorrectionTool )
-DECLARE_COMPONENT( PFSubtractionTool )
-DECLARE_COMPONENT( PFMomentCalculatorTool )
 DECLARE_COMPONENT( PFClusterCollectionTool )
 DECLARE_COMPONENT( eflowTrackCaloExtensionTool )
 DECLARE_COMPONENT( PFTrackClusterMatchingTool )
