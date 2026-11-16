@@ -26,11 +26,7 @@ namespace MCP {
         bool mapExist() const { return m_calibConstantHist ? true : false; };
 
     protected:
-        std::unique_ptr<const TH1> m_calibConstantHist;  
-        double m_maxX{-1};
-        double m_minX{-1};
-        double m_maxY{-1};
-        double m_minY{-1};
+        std::unique_ptr<const TH1> m_calibConstantHist;
              
     };
 
