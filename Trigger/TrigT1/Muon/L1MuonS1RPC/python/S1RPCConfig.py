@@ -14,8 +14,7 @@ def TruthMuonCfg(flags):
 
     return result
 
-def L1MuonRPCSimCfg(flags, name = "L1MuonRPCSim", **kwargs):
-
+def RPCSimCfg(flags, name = "RPCSim", **kwargs):
     result = ComponentAccumulator()
     result.merge(TruthMuonCfg(flags))
 
@@ -23,7 +22,7 @@ def L1MuonRPCSimCfg(flags, name = "L1MuonRPCSim", **kwargs):
 
     from AthenaMonitoringKernel.GenericMonitoringTool import GenericMonitoringTool
     monTool = GenericMonitoringTool(flags, 'MonTool')
-    monTool.HistPath = 'L1MuonRPCSim'
+    monTool.HistPath = 'RPCSim'
     monTool.defineHistogram('track_input_eta', path='EXPERT', type='TH1F', title=';#eta_{#mu}^{truth};Muons', xbins=50, xmin=-3, xmax=3)
 
     alg.MonTool = monTool
@@ -57,12 +56,11 @@ if __name__ == "__main__":
     acc.merge(HepMCtoXAODTruthCfg(flags))
 
     # example simulation alg
-    acc.merge(L1MuonRPCSimCfg(flags,
-                             name = "L1MuonRPCSim",
+    acc.merge(RPCSimCfg(flags,
+                             name = "RPCSim",
                              OutputLevel = DEBUG))
 
     from MuonConfig.MuonConfigUtils import setupHistSvcCfg
-    acc.merge(setupHistSvcCfg(flags, outFile="L1MuonRPCSim.root", outStream="EXPERT"))
+    acc.merge(setupHistSvcCfg(flags, outFile="RPCSim.root", outStream="EXPERT"))
 
     executeTest(acc)
-   

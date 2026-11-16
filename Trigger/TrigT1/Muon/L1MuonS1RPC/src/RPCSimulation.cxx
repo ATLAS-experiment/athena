@@ -66,7 +66,7 @@ namespace L1Muon
     SG::ReadHandle inputRDO(m_keyRpcRdo, ctx);
     ATH_CHECK(inputRDO.isPresent());
     ATH_MSG_DEBUG("Number of RPC RDO: " << inputRDO->size());
-
+    
     /// monitor RDO quantities
     if (!m_monTool.empty())
     {
@@ -134,8 +134,8 @@ namespace L1Muon
       /// create the candidate
       /// do not set the sectorId and bcTag for the moment
       uint16_t subdetectorId = eta > 0 ? 0x65 : 0x66;
-      auto* cand = outputCands.push_back(std::make_unique<xAOD::L1RPCCandData>());
-
+      auto* cand = outputCands.push_back(std::make_unique<xAOD::L1RPCCandData>()); 
+      
       cand->initialize(subdetectorId, 0, 0);
       cand->setL1Eta(eta);
       cand->setL1Phi(phi);
@@ -183,12 +183,6 @@ namespace L1Muon
             zPos[i] /= nZPos[i];
             // Normalize the Z position to the range of 12 bits
             // The range is from 0 to +12500, so we map it to 0-4095
-
-            //std::cout << "z before setZpos = " <<zPos[i] << std::endl;
-            //cand->setZPos(static_cast<uint16_t>(zPos[i]/
-            //  L1Muon::RPCCandData::s_zPosRange*L1Muon::RPCCandData::s_zPosBitRange), i);
-            //std::cout << "z after setZpos = " <<cand->zPos(i)<< std::endl;
-
           }
       }
       
