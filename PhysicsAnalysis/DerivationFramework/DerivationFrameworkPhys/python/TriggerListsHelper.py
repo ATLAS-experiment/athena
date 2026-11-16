@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 # TriggerListsHelper: helper class which retrieves the full set of triggers needed for
 # trigger matching in the DAODs and can then return them when needed. 
 
@@ -12,10 +12,13 @@ def read_trig_list_file(fname):
    """
    triggers = []
    with open(PathResolver.FindCalibFile(fname)) as fp:
-      for line in fp:
+      for lineno, line in enumerate(fp, 1):
          line = line.strip()
          if line == "" or line.startswith("#"):
             continue
+         if not line.isascii():
+            # an invisible character (e.g. a soft hyphen) makes the name match no chain
+            raise ValueError(f"{fname}:{lineno}: non-ASCII character in trigger chain name {line!r}")
          triggers.append(line)
    return triggers
 
