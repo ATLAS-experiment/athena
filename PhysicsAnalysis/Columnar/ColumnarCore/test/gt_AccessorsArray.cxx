@@ -19,6 +19,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <ColumnarCore/ColumnAccessor.h>
 #include <ColumnarCore/ColumnInfoHelpers.h>
 #include <ColumnarCore/LinkColumn.h>
+#include <ColumnarCore/MomentumAccessors.h>
 #include <ColumnarCore/ObjectColumn.h>
 #include <ColumnarCore/VectorColumn.h>
 #include <ColumnarJet/JetDef.h>
@@ -673,6 +674,80 @@ namespace columnar
     EXPECT_EQ (computeSgKey ("egammaClusters", 1219821989), 0x15788d1fu);
     // without the CLID the key differs
     EXPECT_NE (computeSgKey ("InDetTrackParticles", 0), 0x1d3890dbu);
+  }
+
+
+  TEST (MomentumAccessorTest, optionalJetScale)
+  {
+    ColumnarTool<> tool;
+    JetAccessor<ObjectColumn> jetsAccessor {tool, "jets"};
+    MomentumAccessors<JetDef> scaleAcc;
+    resetJetScale (scaleAcc, tool, "Scale_", {.isOptional = true});
+    ASSERT_SUCCESS (tool.initializeColumns());
+
+    const std::vector<std::string> varNames {"pt", "eta", "phi", "m"};
+    {
+      auto columns = tool.getColumnInfo();
+      for (const auto& var : varNames)
+      {
+        auto column = std::find_if (columns.begin(), columns.end(), [&] (const ColumnInfo& info) {return info.name == "jets.Scale_" + var;});
+        ASSERT_NE (column, columns.end()) << "missing column jets.Scale_" << var;
+        EXPECT_TRUE (column->isOptional);
+        EXPECT_EQ (column->accessMode, ColumnAccessMode::input);
+        EXPECT_EQ (column->offsetName, "jets");
+      }
+    }
+    tool.setColumnIndex ("jets", 1);
+    for (std::size_t index = 0; index < varNames.size(); ++index)
+      tool.setColumnIndex ("jets.Scale_" + varNames[index], 2 + index);
+
+    std::vector<ColumnarOffsetType> jets = {0, 2};
+    std::vector<float> pt = {100e3, 50e3};
+    std::vector<float> eta = {0.5, -1};
+    std::vector<float> phi = {1, -2};
+    std::vector<float> m = {10e3, 5e3};
+
+    // all scale columns present
+    {
+      std::vector<void*> data (6, nullptr);
+      data[1] = jets.data();
+      data[2] = pt.data();
+      data[3] = eta.data();
+      data[4] = phi.data();
+      data[5] = m.data();
+      JetId jet0 {data.data(), 0};
+      JetId jet1 {data.data(), 1};
+      EXPECT_TRUE (scaleAcc.isAvailable (jet0));
+      EXPECT_TRUE (scaleAcc.isAvailable (jet1));
+      EXPECT_FLOAT_EQ (scaleAcc.pt (jet0), 100e3);
+      EXPECT_FLOAT_EQ (scaleAcc.m (jet1), 5e3);
+      EXPECT_FLOAT_EQ (scaleAcc.phi (jet1), -2);
+    }
+
+    // no scale columns connected
+    {
+      std::vector<void*> data (6, nullptr);
+      data[1] = jets.data();
+      JetId jet0 {data.data(), 0};
+      EXPECT_FALSE (scaleAcc.isAvailable (jet0));
+    }
+
+    // replacesColumn can't be applied to all columns at once
+    {
+      ColumnarTool<> otherTool;
+      MomentumAccessors<JetDef> otherAcc;
+      EXPECT_THROW (resetJetScale (otherAcc, otherTool, "Other_", {.replacesColumn = "x"}), std::logic_error);
+    }
+
+    // only some of the scale columns connected
+    {
+      std::vector<void*> data (6, nullptr);
+      data[1] = jets.data();
+      data[2] = pt.data();
+      data[5] = m.data();
+      JetId jet0 {data.data(), 0};
+      EXPECT_FALSE (scaleAcc.isAvailable (jet0));
+    }
   }
 }
 

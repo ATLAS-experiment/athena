@@ -12,6 +12,7 @@
 #include <TruthUtils/ParticleConstants.h>
 #include <xAODBase/ObjectType.h>
 #include <Math/Vector4D.h>
+#include <stdexcept>
 
 namespace columnar
 {
@@ -107,6 +108,8 @@ namespace columnar
         return object.getXAODObject().e();}
       double rapidity (ObjectId<CI,CM> object) const {
         return object.getXAODObject().rapidity();}
+      bool isAvailable (ObjectId<CI,CM> /*object*/) const noexcept {
+        return true;}
     };
 
     /// generic columnar momentum accessors that use a pt, eta, phi, m
@@ -172,9 +175,28 @@ namespace columnar
       {}
 
       /// a constructor that uses a prefix for the variables (used for jets)
-      CoreMomentumAccessorsPtEtaPhi (ColumnarTool<CM>& columnarTool, const std::string& prefix)
-        : pt (columnarTool, prefix + "pt"), eta (columnarTool, prefix + "eta"), phi (columnarTool, prefix + "phi")
+      ///
+      /// The options get applied to each of the columns.  If
+      /// `isOptional` is set, the user has to check @ref isAvailable
+      /// before using them.  Setting `replacesColumn` is not allowed, as
+      /// it can't apply to all columns at once.
+      CoreMomentumAccessorsPtEtaPhi (ColumnarTool<CM>& columnarTool, const std::string& prefix, const ColumnAccessorOptions& options = {})
+        : pt (columnarTool, prefix + "pt", checkOptions (options)),
+          eta (columnarTool, prefix + "eta", ColumnAccessorOptions (options)),
+          phi (columnarTool, prefix + "phi", ColumnAccessorOptions (options))
       {}
+
+      /// check that the options can be applied to all the columns, and
+      /// return a copy of them
+      static ColumnAccessorOptions checkOptions (const ColumnAccessorOptions& options)
+      {
+        if (!options.replacesColumn.empty())
+          throw std::logic_error ("momentum accessors don't support replacesColumn: " + options.replacesColumn);
+        return options;
+      }
+
+      bool isAvailable (ObjectId<CI,CM> object) const {
+        return pt.isAvailable (object) && eta.isAvailable (object) && phi.isAvailable (object); }
     };
 
     /// a core momentum accessor that reads pt, eta, phi, and m from the file
@@ -187,9 +209,12 @@ namespace columnar
         : CoreMomentumAccessorsPtEtaPhi<CI,CM> (columnarTool), m (columnarTool, "m")
       {}
 
-      CoreMomentumAccessorsPtEtaPhiReadM (ColumnarTool<CM>& columnarTool, const std::string& prefix)
-        : CoreMomentumAccessorsPtEtaPhi<CI,CM> (columnarTool, prefix), m (columnarTool, prefix + "m")
+      CoreMomentumAccessorsPtEtaPhiReadM (ColumnarTool<CM>& columnarTool, const std::string& prefix, const ColumnAccessorOptions& options = {})
+        : CoreMomentumAccessorsPtEtaPhi<CI,CM> (columnarTool, prefix, options), m (columnarTool, prefix + "m", ColumnAccessorOptions (options))
       {}
+
+      bool isAvailable (ObjectId<CI,CM> object) const {
+        return CoreMomentumAccessorsPtEtaPhi<CI,CM>::isAvailable (object) && m.isAvailable (object); }
     };
 
     /// a core momentum accessor that reads pt, eta, phi from the file, but
@@ -228,6 +253,11 @@ namespace columnar
       virtual double m (ObjectId<CI,CM> object) const = 0;
       virtual double e (ObjectId<CI,CM> object) const = 0;
       virtual double rapidity (ObjectId<CI,CM> object) const = 0;
+
+      /// whether all the underlying columns are available for the
+      /// given object (always true unless the accessors were configured
+      /// with optional columns)
+      virtual bool isAvailable (ObjectId<CI,CM> object) const = 0;
     };
 
     /// the implementation of @ref IMomentumAccessors that wraps a static
@@ -255,6 +285,8 @@ namespace columnar
         return m_coreAccessors.e (object); }
       virtual double rapidity (ObjectId<CI,CM> object) const override {
         return m_coreAccessors.rapidity (object); }
+      virtual bool isAvailable (ObjectId<CI,CM> object) const override {
+        return m_coreAccessors.isAvailable (object); }
 
     private:
       CoreAccessors m_coreAccessors;
@@ -321,6 +353,14 @@ namespace columnar
     [[nodiscard]] double rapidity (ObjectId<CI,CM> object) const {
       return m_accessors->rapidity (object); }
 
+    /// @brief whether the momentum is available for the given object
+    ///
+    /// This is always true, unless the accessors were configured with
+    /// optional columns (e.g. via @ref resetJetScale), in which case
+    /// this checks that all of the underlying columns are present.
+    [[nodiscard]] bool isAvailable (ObjectId<CI,CM> object) const {
+      return m_accessors->isAvailable (object); }
+
   private:
 
     /// the underlying accessors, which default to the `xAOD::IParticle`
@@ -348,9 +388,20 @@ namespace columnar
   template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetJet (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool) {
     resetPtEtaPhiReadM (accessors, columnarTool); }
+  /// @brief reset to a jet momentum scale (signal state), i.e. the
+  /// pt, eta, phi, m columns with the given prefix, e.g.
+  /// `JetJMSScaleMomentumCalo_`
+  ///
+  /// The options get applied to each of the four columns, e.g. with
+  /// `{.isOptional = true}` the columns are declared as optional and
+  /// the user has to check `isAvailable` before reading the momentum.
+  /// Setting `replacesColumn` is not allowed.
+  template<ContainerIdConcept CI, ColumnarModeConcept CM>
+  void resetJetScale (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool, const std::string& prefix, const ColumnAccessorOptions& options = {}) {
+    accessors.reset (std::in_place_type<Detail::FullMomentumAccessorsPtEtaPhiM<Detail::CoreMomentumAccessorsPtEtaPhiReadM<CI,CM>>>, columnarTool, prefix, options); }
   template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetJetConstituentScale (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool, const std::string& prefix = "JetConstitScaleMomentum_") {
-    accessors.reset (std::in_place_type<Detail::FullMomentumAccessorsPtEtaPhiM<Detail::CoreMomentumAccessorsPtEtaPhiReadM<CI,CM>>>, columnarTool, prefix); }
+    resetJetScale (accessors, columnarTool, prefix); }
   template<ContainerIdConcept CI, ColumnarModeConcept CM>
   void resetElectron (MomentumAccessors<CI,CM>& accessors, ColumnarTool<CM>& columnarTool) {
     resetPtEtaPhiFixedM (accessors, columnarTool, ParticleConstants::electronMassInMeV); }
