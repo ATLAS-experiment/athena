@@ -106,7 +106,10 @@ StatusCode LArSCIdvsIdTest::execute(const EventContext& ctx) const {
   }  // end loop over supercells
 
   unsigned nUnused = 0;
-  for (unsigned i = 0; i < m_caloCellId->calo_cell_hash_max(); ++i) {
+  IdentifierHash dummy,nCells;
+  // hash-end of FCAL is also the hash-end of LAr
+  m_caloCellId->calo_cell_hash_range(CaloCell_ID::LARFCAL, dummy,nCells); 
+  for (unsigned i = 0; i < nCells; ++i) {
     if (!usedIds.test(i)) {
       const HWIdentifier hwid = cablingHdl->createSignalChannelIDFromHash(i);
       if (hwid.is_valid()) {
