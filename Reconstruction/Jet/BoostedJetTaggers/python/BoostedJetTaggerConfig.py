@@ -3,11 +3,11 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from JetToolHelpers.HelperConfig import HistoInputCfg
-
+from PathResolver import PathResolver
 
 def qgTagAlgCfg(configFlags, 
                 WP='50', 
-                calib_path='/cvmfs/atlas.cern.ch/repo/sw/database/GroupData/BoostedJetTaggers/QGConstituentTagger/May2025',
+                calib_path='BoostedJetTaggers/QGConstituentTagger/May2025',
                 config_file='QGTagger_AntiKt04PFlow_Transformer.dat',
                 run='run2',
                 addSFs=True,
@@ -37,7 +37,7 @@ def qgTagAlgCfg(configFlags,
     tool_args = {}
 
     histo2D = HistoInputCfg(configFlags, "histo2D",
-                            inputFile = calib_path + '/' + wps_file,
+                            inputFile = PathResolver.FindCalibFile(calib_path + '/' + wps_file),
                             histName = wps_histo,
                             varX = "pt", varY = "eta",
                             InterpType="None")
@@ -83,7 +83,7 @@ def qgTagAlgCfg(configFlags,
                 sfs_file = 'SF_' + eff + '_' + parton + '_' + run + '.root'
 
                 histo2D[parton + '_' + eff] = HistoInputCfg(configFlags, "histo2D",
-                                                            inputFile = calib_path + '/' + sfs_file,
+                                                            inputFile = PathResolver.FindCalibFile(calib_path + '/' + sfs_file),
                                                             histName = sfs_histo,
                                                             varX = "pt", varY = "eta",
                                                             InterpType="None")
