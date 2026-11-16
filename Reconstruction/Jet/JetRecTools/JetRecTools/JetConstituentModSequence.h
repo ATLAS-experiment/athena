@@ -142,12 +142,15 @@ JetConstituentModSequence::copyModRecord(const SG::ReadHandleKey<T>& inKey,
   xAOD::ShallowCopyResult_t<T> newconstit = xAOD::shallowCopy(*inHandle);
   newconstit.second->setShallowIO(m_saveAsShallow);
 
-  for (auto t : m_modifiers) {ATH_CHECK(t->process(newconstit.first.get(), ctx));}
-
   auto handle = makeHandle(outKey, ctx);
   ATH_CHECK(handle.record(std::move(newconstit.first), std::move(newconstit.second)));
 
   xAOD::setOriginalObjectLink(*inHandle, *handle);
+  T* outCont = handle.ptr();
+
+  for (auto t : m_modifiers) {
+    ATH_CHECK(t->process(outCont, ctx));
+  }
 
   return StatusCode::SUCCESS;
 }
