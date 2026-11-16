@@ -35,11 +35,11 @@ private:
 
     ToolHandle<ICaloCoordinateTool> m_coord{this, "CaloCoordinateTool", "TBCaloCoordinate"};
     ToolHandle<TBCondRunParTool> m_runpar{this, "CondRunParTool", "TBCondRunParTool"};
-	bool m_DBRead{};
-	int m_beamener{};
-	int m_beamtype{};
-	bool m_computeBeamEnergy{};
-	bool m_dumpBeamLine{};
+	Gaudi::Property<bool> m_DBRead{this, "DBRead", false, "Read run parameters from the conditions DB"};
+	Gaudi::Property<int> m_beamener{this, "BeamEnergy", 0, "Beam energy"};
+	Gaudi::Property<int> m_beamtype{this, "BeamType", 0, "Beam particle type"};
+	Gaudi::Property<bool> m_computeBeamEnergy{this, "ComputeBeamEnergy", false, "Compute the beam energy"};
+	Gaudi::Property<bool> m_dumpBeamLine{this, "DumpBeamLine", true, "Dump beam line parameters"};
 
 	//for VLE setup...
 	float  m_B8_Bdl{}; //B8dl of VLE setup B8 magnet

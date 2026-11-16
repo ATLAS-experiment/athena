@@ -27,31 +27,7 @@ template <class type1, class type2> void copyArrToVec_2d(unsigned int size1, uns
 
 
 TBTrackInfoFromTag::TBTrackInfoFromTag(const std::string& name, ISvcLocator* pSvcLocator): AthAlgorithm(name,pSvcLocator)
- {
-  // job options
-   declareProperty("SGrecordkey",     m_SGrecordkey="TBTrackReducedInfo");
-   declareProperty("EventInfoSGKey",  m_SGkey1="ByteStreamEventInfo");
-   declareProperty("InputRootFile",   m_inputRootFileName="./cbnt_RecExTB_Combined.root");
-
-   rootFile1 = 0;
-   rootFile2 = 0;
-   tbTree = 0;
-   tileRecTree = 0;
-
-   m_max_nPixelHits = 0;
-   m_max_nSctHits = 0;
-   m_max_nTrtHitsTRT = 0;
-   m_max1_Trt_HLTRT = 0;
-   m_max2_Trt_HLTRT = 0;
-   m_max_btdc1 = 0;
-   m_max_GainC = 0;
-   m_max_MuBack = 0;
-   m_max_TfitC = 0;
-   m_max_EfitC = 0;
-   m_max_Chi2C = 0;
-   m_max1_SampleC = 0;
-   m_max2_SampleC = 0;
- }
+{}
 
 TBTrackInfoFromTag::~TBTrackInfoFromTag()
 { }
@@ -82,17 +58,17 @@ TBTrackInfoFromTag::initialize()
 	// input root trees
 	TTree * tree;
 
-	ATH_MSG_DEBUG("Reading in file " << m_inputRootFileName << "  ...");
+	ATH_MSG_DEBUG("Reading in file " << m_inputRootFileName.value() << "  ...");
 
 	ATH_MSG_DEBUG("\t- Getting TileRec_h1000 tree "); 
-	rootFile1 = new TFile((TString)m_inputRootFileName);
-	rootFile1->cd((TString)m_inputRootFileName + ":/TileRec");
+	rootFile1 = new TFile((TString)m_inputRootFileName.value());
+	rootFile1->cd((TString)m_inputRootFileName.value() + ":/TileRec");
 	tree = (TTree*)gDirectory->Get("h1000");
 	tileRecTree = new TileRec_h1000(tree);
 
 	ATH_MSG_DEBUG("\t- Getting TB_tree tree "); 
-	rootFile2 = new TFile((TString)m_inputRootFileName);
-	rootFile2->cd((TString)m_inputRootFileName + ":/TB");
+	rootFile2 = new TFile((TString)m_inputRootFileName.value());
+	rootFile2->cd((TString)m_inputRootFileName.value() + ":/TB");
 	tree = (TTree*)gDirectory->Get("tree");
 	tbTree = new TB_tree(tree);
 
@@ -221,8 +197,8 @@ TBTrackInfoFromTag::execute(const EventContext& ctx)
 	copyArrToVec_2d( m_max1_SampleC,  m_max2_SampleC,  tileRecTree->SampleC2,  &(trckInfo->tileRec_SampleC2) );
 
 
-        ATH_CHECK( evtStore()->record(trckInfo,m_SGrecordkey) );
-        ATH_MSG_DEBUG("\t- Recording TBTrackInfo in StorGate with key = " << m_SGrecordkey); 
+        ATH_CHECK( evtStore()->record(trckInfo,m_SGrecordkey.value()) );
+        ATH_MSG_DEBUG("\t- Recording TBTrackInfo in StorGate with key = " << m_SGrecordkey.value()); 
 
 
         return StatusCode::SUCCESS;

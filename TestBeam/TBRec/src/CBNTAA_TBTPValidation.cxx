@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNTAA_TBTPValidation.h"
@@ -19,112 +19,7 @@
 
 
 CBNTAA_TBTPValidation::CBNTAA_TBTPValidation(const std::string & name, ISvcLocator * pSvcLocator) : CBNT_TBRecBase(name, pSvcLocator)
-{
-  declareProperty("NeverReturnFailure", m_neverReturnFailure=false);
-	
-  // TBADCRawCont
-  declareProperty("ContainerKey1",m_containerKey1="ADCRawCont");
-	m_adc=NULL;
-	m_tbDetectorName_TBADCRawCont=NULL;
-	m_overflow_TBADCRawCont=NULL;
-  // TBTDCRawCont
-	declareProperty("ContainerKey2",m_containerKey2="TDCRawCont");
-	m_tdc_raw=NULL;
-	m_underThreshold_raw=NULL;
-	m_tbDetectorName_TBTDCRawCont=NULL;
-	m_overflow_TBTDCRawCont=NULL;
-  // TBPhase
-	declareProperty("ContainerKey3",m_containerKey3="TBPhase");
-	m_phase=NULL;
-	m_phaseind=NULL;
-	m_dTtoWAC=NULL;
-  // TBEventInfo
-	declareProperty("m_containerKey4",m_containerKey4="TBEventInfo");
-	m_ev_number=NULL;
-	m_ev_clock=NULL;
-	m_ev_type=NULL;
-	m_run_num=NULL;
-	m_beam_moment=NULL;
-	m_beam_part=NULL;
-	m_cryoX=NULL;
-	m_cryoAngle=NULL;
-	m_tableY=NULL;
-  // TBBPCCont
-	declareProperty("m_containerKey5",m_containerKey5="BPCCont");
-	m_xPos=NULL;
-	m_yPos=NULL;
-	m_xErr=NULL;
-	m_yErr=NULL;
-	m_xPulse=NULL;
-	m_yPulse=NULL;
-	m_hitnumber=NULL;
-	m_xPosOverflow=NULL;
-	m_yPosOverflow=NULL;
-	m_xPulseOverflow=NULL;
-	m_yPulseOverflow=NULL;
-	m_overflowSetFlag=NULL;
-	m_tbDetectorName_TBBPCCont=NULL;
-	m_overflow_TBBPCCont=NULL;
-  // TBLArDigitContainer
-	declareProperty("m_containerKey6",m_containerKey6="FREE");
-	m_channelID=NULL;
-	m_gain=NULL;
-	m_nSamples=NULL;
-	m_samples=NULL;
-  // TBScintillatorCont
-	declareProperty("m_containerKey7",m_containerKey7="ScintillatorCont");
-	m_signal_scint=NULL;
-	m_time_signal_scint=NULL;
-	m_signal_overflow_scint=NULL;
-	m_time_overflow_scint=NULL;
-	m_tbDetectorName_TBScintillatorCont=NULL;
-	m_overflow_TBScintillatorCont=NULL;
-  // TBTailCatcher
-	declareProperty("m_containerKey8",m_containerKey8="TailCatcher");
-	m_signals=NULL;
-	m_signal_tCatch=NULL;
-	m_time_signal_tCatch=NULL;
-	m_signal_overflow_tCatch=NULL;
-	m_time_overflow_tCatch=NULL;
-	m_tbDetectorName_TBTailCatcher=NULL;
-	m_overflow_TBTailCatcher=NULL;
-  // TBTDC 
- 	declareProperty("m_containerKey9",m_containerKey9="TBTDC");
-	m_tdc_TBTDC=NULL;
-	m_tdcmin_TBTDC=NULL;
-	m_scale_TBTDC=NULL;
-	m_phase_TBTDC=NULL;
-  // TBTrack 
-  declareProperty("m_containerKey10",m_containerKey10="Track");
-	m_hitNumberU=NULL;
-	m_hitNumberV=NULL;
-	m_residualu=NULL;
-	m_residualv=NULL;
-	m_chi2=NULL;
-	m_chi2u=NULL;
-	m_chi2v=NULL;
-	m_angle=NULL;
-	m_uslope=NULL;
-	m_vslope=NULL;
-	m_uintercept=NULL;
-	m_vintercept=NULL;
-	m_cryou=NULL;
-	m_cryov=NULL;
-	m_cryow=NULL;
-  // TBTriggerPatternUnit
-  declareProperty("m_containerKey11",m_containerKey11="TBTrigPat");
-	m_triggerWord=NULL;
-	m_triggers=NULL;
-  // TBMWPCCont
-	declareProperty("m_containerKey12",m_containerKey12="MWPCCont");
-	m_cPos=NULL;
-	m_cErr=NULL;
-	m_isX=NULL;
-	m_clusterSize_c=NULL;
-	m_cPosOverflow=NULL;
-	m_tbDetectorName_TBMWPCCont=NULL;
-	m_overflow_TBMWPCCont=NULL;
-}
+{}
 
 
 CBNTAA_TBTPValidation::~CBNTAA_TBTPValidation() 
@@ -330,11 +225,11 @@ StatusCode CBNTAA_TBTPValidation::CBNT_execute()
   // TBADCRawCont  
   // ----------------------------------------------------------------------------------------------------
   const TBADCRawCont * adcCont;
-  StatusCode sc = evtStore()->retrieve(adcCont,m_containerKey1);
+  StatusCode sc = evtStore()->retrieve(adcCont,m_containerKey1.value());
   if (sc.isFailure()) {
-    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBADCRawCont from StoreGate! key= " << m_containerKey1 << "\033[0m" );
+    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBADCRawCont from StoreGate! key= " << m_containerKey1.value() << "\033[0m" );
   }  else  {
-    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBADCRawCont ( StoreGate key =" << m_containerKey1 << " ) ..."<< "\033[0m" );
+    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBADCRawCont ( StoreGate key =" << m_containerKey1.value() << " ) ..."<< "\033[0m" );
 
     const unsigned nADC = (TBADCRawCont::size_type)adcCont->size();
     m_adc->resize(nADC);
@@ -353,11 +248,11 @@ StatusCode CBNTAA_TBTPValidation::CBNT_execute()
   // TBTDCRawCont  
   // ----------------------------------------------------------------------------------------------------
   const TBTDCRawCont * tdcCont;
-  sc = evtStore()->retrieve(tdcCont,m_containerKey2);
+  sc = evtStore()->retrieve(tdcCont,m_containerKey2.value());
   if (sc.isFailure()) {
-    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBTDCRawCont from StoreGate! key= " << m_containerKey2 << "\033[0m" );
+    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBTDCRawCont from StoreGate! key= " << m_containerKey2.value() << "\033[0m" );
   }  else  {
-    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBTDCRawCont ( StoreGate key =" << m_containerKey2 << " ) ..."<< "\033[0m" );
+    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBTDCRawCont ( StoreGate key =" << m_containerKey2.value() << " ) ..."<< "\033[0m" );
 
     const unsigned nTDC = (TBTDCRawCont::size_type)tdcCont->size();
     m_tdc_raw->resize(nTDC);
@@ -378,11 +273,11 @@ StatusCode CBNTAA_TBTPValidation::CBNT_execute()
   // TBPhase  
   // ----------------------------------------------------------------------------------------------------
   const TBPhase * phase = nullptr;
-  sc = evtStore()->retrieve(phase,m_containerKey3);
+  sc = evtStore()->retrieve(phase,m_containerKey3.value());
   if (sc.isFailure()) {
-    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBPhase from StoreGate! key= " << m_containerKey3 << "\033[0m" );
+    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBPhase from StoreGate! key= " << m_containerKey3.value() << "\033[0m" );
   }  else  {	
-    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBPhase ( StoreGate key =" << m_containerKey3 << " ) ..."<< "\033[0m" );
+    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBPhase ( StoreGate key =" << m_containerKey3.value() << " ) ..."<< "\033[0m" );
 
     m_phase     ->resize(1);
     m_phaseind  ->resize(1);
@@ -397,11 +292,11 @@ StatusCode CBNTAA_TBTPValidation::CBNT_execute()
   // TBEventInfo  
   // ----------------------------------------------------------------------------------------------------
   const TBEventInfo * EventInfo = nullptr;
-  sc = evtStore()->retrieve(EventInfo,m_containerKey4);
+  sc = evtStore()->retrieve(EventInfo,m_containerKey4.value());
   if (sc.isFailure()) {
-    ATH_MSG_ERROR ( "\033[31m" << "- Can not read EventInfo from StoreGate! key= " << m_containerKey4 << "\033[0m" );
+    ATH_MSG_ERROR ( "\033[31m" << "- Can not read EventInfo from StoreGate! key= " << m_containerKey4.value() << "\033[0m" );
   }  else  {
-    ATH_MSG_DEBUG ( "\033[34m" << "- Going over EventInfo ( StoreGate key =" << m_containerKey4 << " ) ..."<< "\033[0m" );
+    ATH_MSG_DEBUG ( "\033[34m" << "- Going over EventInfo ( StoreGate key =" << m_containerKey4.value() << " ) ..."<< "\033[0m" );
 
     m_ev_number   ->resize(1);
     m_ev_clock    ->resize(1);
@@ -429,11 +324,11 @@ StatusCode CBNTAA_TBTPValidation::CBNT_execute()
   // TBBPCCont  
   // ----------------------------------------------------------------------------------------------------
   const TBBPCCont * BPCCont = nullptr;
-  sc = evtStore()->retrieve(BPCCont,m_containerKey5);
+  sc = evtStore()->retrieve(BPCCont,m_containerKey5.value());
   if (sc.isFailure()) {
-    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBBPCCont from StoreGate! key= " << m_containerKey5 << "\033[0m" );
+    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBBPCCont from StoreGate! key= " << m_containerKey5.value() << "\033[0m" );
   }  else  {
-    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBBPCCont ( StoreGate key =" << m_containerKey5 << " ) ..."<< "\033[0m" );
+    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBBPCCont ( StoreGate key =" << m_containerKey5.value() << " ) ..."<< "\033[0m" );
 
     const unsigned nBPCCont = (TBBPCCont::size_type)BPCCont->size();
     m_xPos                      ->resize(nBPCCont);
@@ -475,11 +370,11 @@ StatusCode CBNTAA_TBTPValidation::CBNT_execute()
   // TBLArDigitContainer    // FIXME !!!  probably does not work right.... //
   // ----------------------------------------------------------------------------------------------------
   const TBLArDigitContainer * LArDigitContainer = nullptr;
-  sc = evtStore()->retrieve(LArDigitContainer,m_containerKey6);
+  sc = evtStore()->retrieve(LArDigitContainer,m_containerKey6.value());
   if (sc.isFailure()) {
-    ATH_MSG_ERROR ( "\033[31m" << "- Can not read LArDigitContainer from StoreGate! key= " << m_containerKey6 << "\033[0m" );
+    ATH_MSG_ERROR ( "\033[31m" << "- Can not read LArDigitContainer from StoreGate! key= " << m_containerKey6.value() << "\033[0m" );
     }  else  {
-    ATH_MSG_DEBUG ( "\033[34m" << "- Going over LArDigitContainer ( StoreGate key =" << m_containerKey6 << " ) ..."<< "\033[0m" );
+    ATH_MSG_DEBUG ( "\033[34m" << "- Going over LArDigitContainer ( StoreGate key =" << m_containerKey6.value() << " ) ..."<< "\033[0m" );
 
     const unsigned nLArDigits = (TBLArDigitContainer::size_type)LArDigitContainer->size();
     m_channelID->resize(nLArDigits);
@@ -506,11 +401,11 @@ StatusCode CBNTAA_TBTPValidation::CBNT_execute()
   // TBScintillatorCont  
   // ----------------------------------------------------------------------------------------------------
   const TBScintillatorCont * ScintillatorCont = nullptr;
-  sc = evtStore()->retrieve(ScintillatorCont,m_containerKey7);
+  sc = evtStore()->retrieve(ScintillatorCont,m_containerKey7.value());
   if (sc.isFailure()) {
-    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBScintillatorCont from StoreGate! key= " << m_containerKey7 << "\033[0m" );
+    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBScintillatorCont from StoreGate! key= " << m_containerKey7.value() << "\033[0m" );
   }  else  {
-    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBScintillatorCont ( StoreGate key =" << m_containerKey7 << " ) ..."<< "\033[0m" );
+    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBScintillatorCont ( StoreGate key =" << m_containerKey7.value() << " ) ..."<< "\033[0m" );
 
     const unsigned nScintillators = (TBScintillatorCont::size_type)ScintillatorCont->size();
     m_signal_scint                        ->resize(nScintillators);
@@ -544,11 +439,11 @@ StatusCode CBNTAA_TBTPValidation::CBNT_execute()
   // TBTailCatcher  
   // ----------------------------------------------------------------------------------------------------
   const TBTailCatcher * TailCatcher = nullptr;
-  sc = evtStore()->retrieve(TailCatcher,m_containerKey8);
+  sc = evtStore()->retrieve(TailCatcher,m_containerKey8.value());
   if (sc.isFailure()) {
-    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBTailCatcher from StoreGate! key= " << m_containerKey8 << "\033[0m" );
+    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBTailCatcher from StoreGate! key= " << m_containerKey8.value() << "\033[0m" );
   }  else  {
-    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBTailCatcher ( StoreGate key =" << m_containerKey8 << " ) ..."<< "\033[0m" );
+    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBTailCatcher ( StoreGate key =" << m_containerKey8.value() << " ) ..."<< "\033[0m" );
 
     const unsigned nTailCatchers = (TBTailCatcher::size_type)TailCatcher->size();
     m_signals                         ->resize(nTailCatchers);
@@ -584,11 +479,11 @@ StatusCode CBNTAA_TBTPValidation::CBNT_execute()
   // TBTDC  
   // ----------------------------------------------------------------------------------------------------
   const TBTDC * TDC = nullptr;
-  sc = evtStore()->retrieve(TDC,m_containerKey9);
+  sc = evtStore()->retrieve(TDC,m_containerKey9.value());
   if (sc.isFailure()) {
-    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBTDC from StoreGate! key= " << m_containerKey9 << "\033[0m" );
+    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBTDC from StoreGate! key= " << m_containerKey9.value() << "\033[0m" );
   }  else  {
-    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBTDC ( StoreGate key =" << m_containerKey9 << " ) ..."<< "\033[0m" );
+    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBTDC ( StoreGate key =" << m_containerKey9.value() << " ) ..."<< "\033[0m" );
 
     m_tdc_TBTDC      ->resize(1);
     m_tdcmin_TBTDC   ->resize(1);
@@ -606,11 +501,11 @@ StatusCode CBNTAA_TBTPValidation::CBNT_execute()
   // TBTrack  
   // ----------------------------------------------------------------------------------------------------
   const TBTrack * Track = nullptr;
-  sc = evtStore()->retrieve(Track,m_containerKey10);
+  sc = evtStore()->retrieve(Track,m_containerKey10.value());
   if (sc.isFailure()) {
-    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBTrack from StoreGate! key= " << m_containerKey10 << "\033[0m" );
+    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBTrack from StoreGate! key= " << m_containerKey10.value() << "\033[0m" );
   }  else  {
-    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBTrack ( StoreGate key =" << m_containerKey10 << " ) ..."<< "\033[0m" );
+    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBTrack ( StoreGate key =" << m_containerKey10.value() << " ) ..."<< "\033[0m" );
 
     m_hitNumberU      ->resize(1);
     m_hitNumberV      ->resize(1);
@@ -648,11 +543,11 @@ StatusCode CBNTAA_TBTPValidation::CBNT_execute()
   // TBTriggerPatternUnit  
   // ----------------------------------------------------------------------------------------------------
   const TBTriggerPatternUnit * TriggerPatternUnit = nullptr;
-  sc = evtStore()->retrieve(TriggerPatternUnit,m_containerKey11);
+  sc = evtStore()->retrieve(TriggerPatternUnit,m_containerKey11.value());
   if (sc.isFailure()) {
-    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBTriggerPatternUnit from StoreGate! key= " << m_containerKey11 << "\033[0m" );
+    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBTriggerPatternUnit from StoreGate! key= " << m_containerKey11.value() << "\033[0m" );
   }  else  {
-    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBTriggerPatternUnit ( StoreGate key =" << m_containerKey11 << " ) ..."<< "\033[0m" );
+    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBTriggerPatternUnit ( StoreGate key =" << m_containerKey11.value() << " ) ..."<< "\033[0m" );
 
     m_triggerWord->resize(1);
     (*m_triggerWord)[0] = TriggerPatternUnit->  getTriggerWord();
@@ -665,11 +560,11 @@ StatusCode CBNTAA_TBTPValidation::CBNT_execute()
   // TBMWPCCont  
   // ----------------------------------------------------------------------------------------------------
   const TBMWPCCont * MWPCCont = nullptr;
-  sc = evtStore()->retrieve(MWPCCont,m_containerKey12);
+  sc = evtStore()->retrieve(MWPCCont,m_containerKey12.value());
   if (sc.isFailure()) {
-    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBMWPCCont from StoreGate! key= " << m_containerKey12 << "\033[0m" );
+    ATH_MSG_ERROR ( "\033[31m" << "- Can not read TBMWPCCont from StoreGate! key= " << m_containerKey12.value() << "\033[0m" );
   }  else  {
-    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBMWPCCont ( StoreGate key =" << m_containerKey12 << " ) ..."<< "\033[0m" );
+    ATH_MSG_DEBUG ( "\033[34m" << "- Going over TBMWPCCont ( StoreGate key =" << m_containerKey12.value() << " ) ..."<< "\033[0m" );
 
     const unsigned nMWPCCont = (TBMWPCCont::size_type)MWPCCont->size();
     m_cPos                        ->resize(nMWPCCont);

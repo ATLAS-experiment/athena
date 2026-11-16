@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -31,13 +31,13 @@ class TBCheckBCIDs : public AthAlgorithm
   StatusCode finalize();
 
  private:
-  int m_count;
+  int m_count{0};
   ServiceHandle<IROBDataProviderSvc> m_rdpSvc;
 
   template <class T>
     inline bool check_valid (const T* frag, MsgStream& log);
 
-  NTuple::Tuple* m_ntuplePtr;
+  NTuple::Tuple* m_ntuplePtr{nullptr};
   NTuple::Item<long> m_LVL1ID,m_EventID;
   NTuple::Item<long> m_RODIndex;
   NTuple::Array<long> m_RODID;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBDMContainerSplitter.h"
@@ -9,16 +9,8 @@
 
 TBDMContainerSplitter::TBDMContainerSplitter(const std::string& name, 
 				   ISvcLocator* pSvcLocator) : 
-  AthAlgorithm(name, pSvcLocator),
-  m_DMHitsKey("LArCalibrationHitDeadMaterial"),
-  m_DMHitsCaloKey("LArCalibrationHitDeadMaterial_Calo"),
-  m_DMHitsLeakKey("LArCalibrationHitDeadMaterial_Leakage"),
-  m_caloDmDescrManager(0)
-{ 
-  declareProperty("InputDMContainer",m_DMHitsKey);
-  declareProperty("OutputDM_Calo",m_DMHitsCaloKey);
-  declareProperty("OutputDM_Leak",m_DMHitsLeakKey);
-}
+  AthAlgorithm(name, pSvcLocator)
+{}
 
 TBDMContainerSplitter::~TBDMContainerSplitter()
 { }
@@ -49,10 +41,10 @@ StatusCode TBDMContainerSplitter::execute(const EventContext& ctx)
 
   // Retrieve Original DM container
   const CaloCalibrationHitContainer* inDMCont;
-  StatusCode sc = evtStore()->retrieve(inDMCont, m_DMHitsKey);
+  StatusCode sc = evtStore()->retrieve(inDMCont, m_DMHitsKey.value());
   if ( sc.isFailure() ) {
     ATH_MSG_ERROR
-      ( "Cannot retrieve CaloCalibrationHitContainer "<<m_DMHitsKey<<" from StoreGate" );
+      ( "Cannot retrieve CaloCalibrationHitContainer "<<m_DMHitsKey.value()<<" from StoreGate" );
     setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }
@@ -78,15 +70,15 @@ StatusCode TBDMContainerSplitter::execute(const EventContext& ctx)
   }
 
   // Store new containers
-  sc = evtStore()->record(outDMContCalo, m_DMHitsCaloKey);
+  sc = evtStore()->record(outDMContCalo, m_DMHitsCaloKey.value());
   if ( sc.isFailure() ) {
-         ATH_MSG_ERROR ( "Could not store: "<<m_DMHitsCaloKey<<" to StoreGate" );
+         ATH_MSG_ERROR ( "Could not store: "<<m_DMHitsCaloKey.value()<<" to StoreGate" );
          setFilterPassed(false, ctx);
          return StatusCode::SUCCESS;
   }
-  sc = evtStore()->record(outDMContLeak, m_DMHitsLeakKey);
+  sc = evtStore()->record(outDMContLeak, m_DMHitsLeakKey.value());
   if ( sc.isFailure() ) {
-         ATH_MSG_ERROR ( "Could not store: "<<m_DMHitsLeakKey<<" to StoreGate" );
+         ATH_MSG_ERROR ( "Could not store: "<<m_DMHitsLeakKey.value()<<" to StoreGate" );
          setFilterPassed(false, ctx);
          return StatusCode::SUCCESS;
   }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBPHASESTREAMERTOOL_H
@@ -40,8 +40,8 @@ class TBPhaseStreamerTool : public TBEventStreamerTool
 
  protected:
 
-  float       m_guardValue;
-  std::string m_TBPhaseKey;
+  Gaudi::Property<float>       m_guardValue{this, "Guard", 11., "guard value in TDC counts"};
+  Gaudi::Property<std::string> m_TBPhaseKey{this, "TBPhaseKey", "TBPhase", "TBPhase object key"};
     
 };
 #endif // not TBREC_TBPHASESTREAMERTOOL_H

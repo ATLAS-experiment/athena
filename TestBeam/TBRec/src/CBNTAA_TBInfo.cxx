@@ -18,14 +18,7 @@
 
 CBNTAA_TBInfo::CBNTAA_TBInfo(const std::string& name, ISvcLocator* pSvcLocator) :
 CBNT_TBRecBase(name, pSvcLocator) 
-{
-  declareProperty("DBRead",     m_DBRead=false);
-  declareProperty("BeamEnergy", m_beamener);
-  declareProperty("BeamType",   m_beamtype);
-  declareProperty("ComputeBeamEnergy", m_computeBeamEnergy=false);
-  declareProperty("DumpBeamLine",      m_dumpBeamLine=true);
-
-}
+{}
 
 CBNTAA_TBInfo::~CBNTAA_TBInfo()
 {

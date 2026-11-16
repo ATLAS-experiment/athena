@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBLARRAWCHANNELBUILDER_H
@@ -35,26 +35,27 @@ private:
   //Services & Tools 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
 
-  const LArEM_ID*   m_emId;
-  const LArFCAL_ID* m_fcalId;
-  const LArHEC_ID*  m_hecId;
-  const LArOnlineID* m_onlineHelper;
+  const LArEM_ID*   m_emId{nullptr};
+  const LArFCAL_ID* m_fcalId{nullptr};
+  const LArHEC_ID*  m_hecId{nullptr};
+  const LArOnlineID* m_onlineHelper{nullptr};
   
   LArRawOrdering m_larRawOrdering;
   
   //Algo-properties
-  std::string m_DataLocation, m_ChannelContainerName;
-  int m_imaxSamp;
-  std::string m_mode;
-  float m_cubicAdcCut;
+  Gaudi::Property<std::string> m_DataLocation{this, "DataLocation", "FREE", "Input LArDigitContainer key"};
+  Gaudi::Property<std::string> m_ChannelContainerName{this, "LArRawChannelContainerName", "LArRawChannels", "Output LArRawChannelContainer key"};
+  Gaudi::Property<int> m_imaxSamp{this, "maxSamp", 8, "Sample used in FIXED mode"};
+  Gaudi::Property<std::string> m_mode{this, "RecoMode", "CUBIC", "Reconstruction mode (MAX, CUBIC, FIXED)"};
+  Gaudi::Property<float> m_cubicAdcCut{this, "CubicAdcCut", 50.0, "ADC cut for cubic fit"};
   
-  float m_ADCtoMeVFCAL[3];
-  float m_ADCtoMeVHEC[2];
-  float m_ADCtoMeVEMECInner[2];
-  float m_ADCtoMeVEMECOuter[2];
-  float m_ADCtoMeVEMB[2];
+  float m_ADCtoMeVFCAL[3]{};
+  float m_ADCtoMeVHEC[2]{};
+  float m_ADCtoMeVEMECInner[2]{};
+  float m_ADCtoMeVEMECOuter[2]{};
+  float m_ADCtoMeVEMB[2]{};
   
-  unsigned int m_iPedestal;
+  unsigned int m_iPedestal{0};                              // jobO ?
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBCLUSTERMAKER_H
@@ -47,7 +47,7 @@ class TBClusterMaker: public AthAlgTool, virtual public CaloClusterCollectionPro
    * @brief Vectors containing the list of used samplings and 
    * corresponding cone cuts; list of used calorimeters **/
   std::vector<CaloSampling::CaloSample> m_samplings;
-  std::vector<float> m_coneCuts;
+  Gaudi::Property<std::vector<float>> m_coneCuts{this, "coneCuts", {}, "Cone cuts for each (!!) sampling used"};
   std::vector<CaloCell_ID::SUBCALO> m_calos;
 
   /**
@@ -56,44 +56,44 @@ class TBClusterMaker: public AthAlgTool, virtual public CaloClusterCollectionPro
 
   /**
    * @brief Threshold cut on cell energy in sigma noise units **/
-  float m_cellCut;
+  Gaudi::Property<float> m_cellCut{this, "cellCut", -99999., "Cut on a cell energy in sigma noise units"};
 
   /**
    * @brief Threshold cut on seed cell energy in sigma noise units to find 
    the 1st approximation of cluster \f$ \eta, \phi \f$ **/
-  float m_seedCut;
+  Gaudi::Property<float> m_seedCut{this, "seedCut", 5., "Cut on a seed cell energy in sigma noise units"};
 
   /**
    * @brief Maximal claster position shift at the current step to stop 
    iterations **/
-  float m_deltaR;
+  Gaudi::Property<float> m_deltaR{this, "deltaR", 0.02, "Maximal claster position shift at the current step to stop iterations"};
 
   /**
    * @brief Maximal number of iterations to find cluster position **/
-  int m_maxIter;
+  Gaudi::Property<int> m_maxIter{this, "maxIterations", 4, "Maximal number of iterations to find cluster"};
 
   /**
    * @brief Flag to fix cluster position ( \f$ \eta,\phi \f$) from JO file **/
-  bool m_fixClusterPosition;
+  Gaudi::Property<bool> m_fixClusterPosition{this, "fixClusterPosition", false, "Flag to fix cluster position (eta,phi) from JO file"};
 
   /**
    * @brief Cluster \f$ \eta,\phi \f$) set in JO file **/
-  float m_eta0;
-  float m_phi0;
+  Gaudi::Property<float> m_eta0{this, "etaCluster", 99., "Cluster eta from JO file"};
+  Gaudi::Property<float> m_phi0{this, "phiCluster", 99., "Cluster phi from JO file"};
 
   /** True if cell enrgy is in ADC counts, default = FALSE **/
-  bool m_CellEnergyInADC;
+  Gaudi::Property<bool> m_CellEnergyInADC{this, "CellEnergyInADC", false, "True if cell enrgy is in ADC counts"};
 
   /** Services */
-  const CaloCell_ID* m_calo_id;
+  const CaloCell_ID* m_calo_id{nullptr};
 
   SG::ReadCondHandleKey<CaloNoise> m_elecNoiseKey
     { this, "ElecNoiseKey", "electronicNoise", "SG key for electronic noise" };
   
   /** Names */
-  std::string m_caloCellContainerName;
+  Gaudi::Property<std::string> m_caloCellContainerName{this, "caloCellContainerName", "AllCalo", "CaloCell Container Name"};
   std::string m_clusterContainerName;
-  std::vector<std::string> m_samplingNames;
+  Gaudi::Property<std::vector<std::string>> m_samplingNames{this, "samplingNames", {}, "Names of used calorimeter samplings"};
 
   std::map<std::string, CaloSampling::CaloSample> m_samplingFromNameLookup;
   std::map<CaloSampling::CaloSample, CaloCell_ID::SUBCALO> m_caloLookup;

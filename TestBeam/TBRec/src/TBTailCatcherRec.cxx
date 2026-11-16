@@ -10,14 +10,7 @@
 TBTailCatcherRec::TBTailCatcherRec(const std::string& name,
 				 ISvcLocator* pSvcLocator) :
   AthAlgorithm(name,pSvcLocator)
- {
-  // job options
-
-   declareProperty("SGkey",  m_SGkey="TailCatcherRaw");
-   declareProperty("TailCatcherCalib",  m_tailcatch_calib);
-   declareProperty("TailCatcherPed",  m_tailcatch_ped);
-
- }
+{}
 
 TBTailCatcherRec::~TBTailCatcherRec()
 { }
@@ -34,15 +27,15 @@ TBTailCatcherRec::execute(const EventContext& ctx)
   ATH_MSG_DEBUG ( "In execute()" );
 
   TBTailCatcherRaw * tailcatchraw;
-  StatusCode sc = evtStore()->retrieve(tailcatchraw, m_SGkey);
+  StatusCode sc = evtStore()->retrieve(tailcatchraw, m_SGkey.value());
   if (sc.isFailure()){
-    ATH_MSG_DEBUG ( "TBObjectReco: Retrieval of "<<m_SGkey<<" failed" );
+    ATH_MSG_DEBUG ( "TBObjectReco: Retrieval of "<<m_SGkey.value()<<" failed" );
     setFilterPassed(false, ctx);
     return StatusCode::SUCCESS;
   }else {
     
-    if(m_tailcatch_calib.size()!=tailcatchraw->size()){
-      ATH_MSG_ERROR ( "Calib factor number : "<<m_tailcatch_calib.size()
+    if(m_tailcatch_calib.value().size()!=tailcatchraw->size()){
+      ATH_MSG_ERROR ( "Calib factor number : "<<m_tailcatch_calib.value().size()
                       << " != "<<tailcatchraw->size()<<" = number of scints in TailCatcherRaw");
       setFilterPassed(false, ctx);
       return StatusCode::SUCCESS;

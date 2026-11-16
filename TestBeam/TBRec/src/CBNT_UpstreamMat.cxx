@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNT_UpstreamMat.h"
@@ -15,16 +15,7 @@ using CLHEP::Hep3Vector;
 
 CBNT_UpstreamMat::CBNT_UpstreamMat(const std::string & name, ISvcLocator * pSvcLocator) :
   CBNT_TBRecBase(name, pSvcLocator)
-{
-  declareProperty("CollectionName",m_key);
-  m_notFound=false;
-  m_nElec = 0;
-  m_nPhot = 0;
-  m_ElecAng = 0;
-  m_ElecEne = 0;
-  m_PhotAng = 0;
-  m_PhotEne = 0;
-}
+{}
 
 
 CBNT_UpstreamMat::~CBNT_UpstreamMat() 
@@ -54,13 +45,13 @@ StatusCode CBNT_UpstreamMat::CBNT_execute() {
 
   if (!evtStore()->contains<TrackRecordCollection>(m_key)) {
     if (!m_notFound) {
-      log << MSG::WARNING << "TrackRecordCollection with key " << m_key << " not found" << endmsg;
+      log << MSG::WARNING << "TrackRecordCollection with key " << m_key.value() << " not found" << endmsg;
       m_notFound=true;
     }
     return StatusCode::SUCCESS;
   }
   const TrackRecordCollection *trackRecordCollection(0);
-  ATH_CHECK( evtStore()->retrieve(trackRecordCollection, m_key) );
+  ATH_CHECK( evtStore()->retrieve(trackRecordCollection, m_key.value()) );
 
   for (const TrackRecord& trackRecord : *trackRecordCollection) {
     const int pdgCode=trackRecord.GetPDGCode();

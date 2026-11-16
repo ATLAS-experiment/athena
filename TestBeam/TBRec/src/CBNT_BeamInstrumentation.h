@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_CBNT_BEAM_H
@@ -24,30 +24,30 @@ class CBNT_BeamInstrumentation : public CBNT_TBRecBase
   virtual StatusCode CBNT_clear() override;
  private:
 
-  bool m_neverReturnFailure;   // controls when StatusCode::FAILURE can be issued in execute()
+  Gaudi::Property<bool> m_neverReturnFailure{this, "NeverReturnFailure", false, "Never return FAILURE from execute()"};   // controls when StatusCode::FAILURE can be issued in execute()
 
-  std::string m_containerKey1;
-  std::string m_containerKey2;
-  std::string m_containerKey3;
-  std::string m_containerKey4;
-  std::string m_containerKey5;
-  std::vector<std::string> m_scint_names;
-  std::vector<std::string> m_bpc_names;
+  Gaudi::Property<std::string> m_containerKey1{this, "ContainerKey1", "ScintillatorCont", "SG key of TBScintillatorCont"};
+  Gaudi::Property<std::string> m_containerKey2{this, "ContainerKey2", "BPCCont", "SG key of TBBPCCont"};
+  Gaudi::Property<std::string> m_containerKey3{this, "ContainerKey3", "BPCRawCont", "SG key of TBBPCRawCont"};
+  Gaudi::Property<std::string> m_containerKey4{this, "ContainerKey4", "TBPhase", "SG key of TBPhase"};
+  Gaudi::Property<std::string> m_containerKey5{this, "ContainerKey5", "TBTrigPat", "SG key of TBTriggerPatternUnit"};
+  Gaudi::Property<std::vector<std::string> > m_scint_names{this, "Scintnames", {}, "Names of scintillators"};
+  Gaudi::Property<std::vector<std::string> > m_bpc_names{this, "BPCnames", {}, "Names of BPCs"};
 
-  float *m_scint_adc, *m_scint_tdc, *m_bpc_x, *m_bpc_y;
-  int m_trig;
-  float m_clock;
+  float *m_scint_adc{nullptr}, *m_scint_tdc{nullptr}, *m_bpc_x{nullptr}, *m_bpc_y{nullptr};
+  int m_trig{0};
+  float m_clock{0};
 
   // BPC raw data, set to False by default
-  bool m_bpc_raw;
-  float *m_bpc_up, *m_bpc_down, *m_bpc_left, *m_bpc_right, *m_bpc_adc_hor, *m_bpc_adc_ver;
+  Gaudi::Property<bool> m_bpc_raw{this, "BPCRAW", false, "Store BPC raw data"};
+  float *m_bpc_up{nullptr}, *m_bpc_down{nullptr}, *m_bpc_left{nullptr}, *m_bpc_right{nullptr}, *m_bpc_adc_hor{nullptr}, *m_bpc_adc_ver{nullptr};
 
   // Trigger Array, set to False by default 
-  bool m_trig_array;
-  std::vector<unsigned int> m_triggflag;
+  Gaudi::Property<bool> m_trig_array{this, "TrigArray", false, "Store trigger array"};
+  Gaudi::Property<std::vector<unsigned int> > m_triggflag{this, "TrigPattern", {}, "Trigger pattern bit masks"};
 
-  int m_trig_id;
-  std::vector<long> *m_trig_sel;
+  int m_trig_id{0};
+  std::vector<long> *m_trig_sel{nullptr};
 
   //Private function to build names for ntuple entries. Concatinates strings
   //but omitts characters that are problematic for root like -+:*/

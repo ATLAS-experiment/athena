@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_CBNTAA_TBTPVALIDATION_H
@@ -32,95 +32,95 @@ class CBNTAA_TBTPValidation : public CBNT_TBRecBase
 
  private:
 
-  bool m_neverReturnFailure;   // controls when StatusCode::FAILURE can be issued in execute()
+  Gaudi::Property<bool> m_neverReturnFailure{this, "NeverReturnFailure", false, "Never return FAILURE from execute()"};   // controls when StatusCode::FAILURE can be issued in execute()
 
   // TBADCRawCont
-	std::vector<unsigned int> *m_adc;
-  std::vector< std::string > *m_tbDetectorName_TBADCRawCont;
-  std::vector< bool > *m_overflow_TBADCRawCont;
-  std::string m_containerKey1;
+	std::vector<unsigned int> *m_adc{nullptr};
+  std::vector< std::string > *m_tbDetectorName_TBADCRawCont{nullptr};
+  std::vector< bool > *m_overflow_TBADCRawCont{nullptr};
+  Gaudi::Property<std::string> m_containerKey1{this, "ContainerKey1", "ADCRawCont", "SG key of TBADCRawCont"};
   // TBTDCRawCont
-  std::vector<unsigned int> *m_tdc_raw;
-	std::vector<bool> *m_underThreshold_raw;
-  std::vector< std::string > *m_tbDetectorName_TBTDCRawCont;
-  std::vector< bool > *m_overflow_TBTDCRawCont;
-	std::string m_containerKey2;
+  std::vector<unsigned int> *m_tdc_raw{nullptr};
+	std::vector<bool> *m_underThreshold_raw{nullptr};
+  std::vector< std::string > *m_tbDetectorName_TBTDCRawCont{nullptr};
+  std::vector< bool > *m_overflow_TBTDCRawCont{nullptr};
+	Gaudi::Property<std::string> m_containerKey2{this, "ContainerKey2", "TDCRawCont", "SG key of TBTDCRawCont"};
   // TBPhase
-  std::vector<float> *m_phase;
-  std::vector<short> *m_phaseind;
-  std::vector<float> *m_dTtoWAC;
-	std::string m_containerKey3;
+  std::vector<float> *m_phase{nullptr};
+  std::vector<short> *m_phaseind{nullptr};
+  std::vector<float> *m_dTtoWAC{nullptr};
+	Gaudi::Property<std::string> m_containerKey3{this, "ContainerKey3", "TBPhase", "SG key of TBPhase"};
   // TBEventInfo
-  std::vector<int> *m_ev_number;
-  std::vector<int> *m_ev_clock;
-  std::vector<int> *m_ev_type;
-  std::vector<unsigned int> *m_run_num;
-  std::vector<float> *m_beam_moment;
-  std::vector<std::string> *m_beam_part;
-  std::vector<float> *m_cryoX;
-  std::vector<float> *m_cryoAngle;
-  std::vector<float> *m_tableY;
-	std::string m_containerKey4;
+  std::vector<int> *m_ev_number{nullptr};
+  std::vector<int> *m_ev_clock{nullptr};
+  std::vector<int> *m_ev_type{nullptr};
+  std::vector<unsigned int> *m_run_num{nullptr};
+  std::vector<float> *m_beam_moment{nullptr};
+  std::vector<std::string> *m_beam_part{nullptr};
+  std::vector<float> *m_cryoX{nullptr};
+  std::vector<float> *m_cryoAngle{nullptr};
+  std::vector<float> *m_tableY{nullptr};
+	Gaudi::Property<std::string> m_containerKey4{this, "m_containerKey4", "TBEventInfo", "SG key of TBEventInfo"};
   // TBBPCCont
   typedef double signal_type_TBBPCCont;
-  std::vector< signal_type_TBBPCCont > *m_xPos,*m_yPos;
-  std::vector< signal_type_TBBPCCont > *m_xErr,*m_yErr;
-  std::vector< signal_type_TBBPCCont > *m_xPulse, *m_yPulse;
-  std::vector< short > *m_hitnumber;
-  std::vector< bool > *m_xPosOverflow,   *m_yPosOverflow;
-  std::vector< bool > *m_xPulseOverflow, *m_yPulseOverflow;
-  std::vector< bool > *m_overflowSetFlag;
-  std::vector< std::string > *m_tbDetectorName_TBBPCCont;
-  std::vector< bool > *m_overflow_TBBPCCont;
-	std::string m_containerKey5;
+  std::vector< signal_type_TBBPCCont > *m_xPos{nullptr},*m_yPos{nullptr};
+  std::vector< signal_type_TBBPCCont > *m_xErr{nullptr},*m_yErr{nullptr};
+  std::vector< signal_type_TBBPCCont > *m_xPulse{nullptr}, *m_yPulse{nullptr};
+  std::vector< short > *m_hitnumber{nullptr};
+  std::vector< bool > *m_xPosOverflow{nullptr},   *m_yPosOverflow{nullptr};
+  std::vector< bool > *m_xPulseOverflow{nullptr}, *m_yPulseOverflow{nullptr};
+  std::vector< bool > *m_overflowSetFlag{nullptr};
+  std::vector< std::string > *m_tbDetectorName_TBBPCCont{nullptr};
+  std::vector< bool > *m_overflow_TBBPCCont{nullptr};
+	Gaudi::Property<std::string> m_containerKey5{this, "m_containerKey5", "BPCCont", "SG key of TBBPCCont"};
   // TBLArDigitContainer
-  std::vector<unsigned int> *m_channelID;
-  std::vector<unsigned char> *m_gain;
-  std::vector<unsigned short> *m_nSamples;
-  std::vector<unsigned short> *m_samples;
-	std::string m_containerKey6;
+  std::vector<unsigned int> *m_channelID{nullptr};
+  std::vector<unsigned char> *m_gain{nullptr};
+  std::vector<unsigned short> *m_nSamples{nullptr};
+  std::vector<unsigned short> *m_samples{nullptr};
+	Gaudi::Property<std::string> m_containerKey6{this, "m_containerKey6", "FREE", "SG key of TBLArDigitContainer"};
   // TBScintillatorCont
-  std::vector< float > *m_signal_scint, *m_time_signal_scint;
-  std::vector< bool > *m_signal_overflow_scint, *m_time_overflow_scint;
-  std::vector< std::string > *m_tbDetectorName_TBScintillatorCont;
-  std::vector< bool > *m_overflow_TBScintillatorCont;
-	std::string m_containerKey7;
+  std::vector< float > *m_signal_scint{nullptr}, *m_time_signal_scint{nullptr};
+  std::vector< bool > *m_signal_overflow_scint{nullptr}, *m_time_overflow_scint{nullptr};
+  std::vector< std::string > *m_tbDetectorName_TBScintillatorCont{nullptr};
+  std::vector< bool > *m_overflow_TBScintillatorCont{nullptr};
+	Gaudi::Property<std::string> m_containerKey7{this, "m_containerKey7", "ScintillatorCont", "SG key of TBScintillatorCont"};
   // TBTailCatcher
-  std::vector< double > *m_signals;  
-  std::vector< float > *m_signal_tCatch, *m_time_signal_tCatch;
-  std::vector< bool > *m_signal_overflow_tCatch, *m_time_overflow_tCatch; 
-  std::vector< std::string > *m_tbDetectorName_TBTailCatcher;
-  std::vector< bool > *m_overflow_TBTailCatcher;
-	std::string m_containerKey8;
+  std::vector< double > *m_signals{nullptr};  
+  std::vector< float > *m_signal_tCatch{nullptr}, *m_time_signal_tCatch{nullptr};
+  std::vector< bool > *m_signal_overflow_tCatch{nullptr}, *m_time_overflow_tCatch{nullptr}; 
+  std::vector< std::string > *m_tbDetectorName_TBTailCatcher{nullptr};
+  std::vector< bool > *m_overflow_TBTailCatcher{nullptr};
+	Gaudi::Property<std::string> m_containerKey8{this, "m_containerKey8", "TailCatcher", "SG key of TBTailCatcher"};
   // TBTDC
-  std::vector< int > *m_tdc_TBTDC;
-  std::vector< int > *m_tdcmin_TBTDC;
-  std::vector< float > *m_scale_TBTDC;
-  std::vector< int > *m_phase_TBTDC;
-	std::string m_containerKey9;
+  std::vector< int > *m_tdc_TBTDC{nullptr};
+  std::vector< int > *m_tdcmin_TBTDC{nullptr};
+  std::vector< float > *m_scale_TBTDC{nullptr};
+  std::vector< int > *m_phase_TBTDC{nullptr};
+	Gaudi::Property<std::string> m_containerKey9{this, "m_containerKey9", "TBTDC", "SG key of TBTDC"};
   // TBTrack
-  std::vector< int > *m_hitNumberU, *m_hitNumberV;
-  std::vector<double > *m_residualu, *m_residualv;
-  std::vector<double > *m_chi2, *m_chi2u, *m_chi2v;
-  std::vector<double > *m_angle;
-  std::vector<double > *m_uslope,*m_vslope;
-  std::vector<double > *m_uintercept, *m_vintercept;
-  std::vector< double > *m_cryou,*m_cryov,*m_cryow;    
-	std::string m_containerKey10;
+  std::vector< int > *m_hitNumberU{nullptr}, *m_hitNumberV{nullptr};
+  std::vector<double > *m_residualu{nullptr}, *m_residualv{nullptr};
+  std::vector<double > *m_chi2{nullptr}, *m_chi2u{nullptr}, *m_chi2v{nullptr};
+  std::vector<double > *m_angle{nullptr};
+  std::vector<double > *m_uslope{nullptr},*m_vslope{nullptr};
+  std::vector<double > *m_uintercept{nullptr}, *m_vintercept{nullptr};
+  std::vector< double > *m_cryou{nullptr},*m_cryov{nullptr},*m_cryow{nullptr};    
+	Gaudi::Property<std::string> m_containerKey10{this, "m_containerKey10", "Track", "SG key of TBTrack"};
   // TBTriggerPatternUnit
-  std::vector< unsigned int > *m_triggerWord;
-  std::vector<bool> *m_triggers;
-	std::string m_containerKey11;
+  std::vector< unsigned int > *m_triggerWord{nullptr};
+  std::vector<bool> *m_triggers{nullptr};
+	Gaudi::Property<std::string> m_containerKey11{this, "m_containerKey11", "TBTrigPat", "SG key of TBTriggerPatternUnit"};
   // TBMWPCCont
-  std::vector < std::vector<float> > *m_cPos;
-  std::vector < std::vector<float> > *m_cErr;
-  std::vector < bool > *m_isX;
-  std::vector < std::vector<float> > *m_clusterSize_c; 
-  std::vector< std::string > *m_tbDetectorName_TBMWPCCont;
-  std::vector< bool > *m_overflow_TBMWPCCont;
-	std::string m_containerKey12;
+  std::vector < std::vector<float> > *m_cPos{nullptr};
+  std::vector < std::vector<float> > *m_cErr{nullptr};
+  std::vector < bool > *m_isX{nullptr};
+  std::vector < std::vector<float> > *m_clusterSize_c{nullptr}; 
+  std::vector< std::string > *m_tbDetectorName_TBMWPCCont{nullptr};
+  std::vector< bool > *m_overflow_TBMWPCCont{nullptr};
+	Gaudi::Property<std::string> m_containerKey12{this, "m_containerKey12", "MWPCCont", "SG key of TBMWPCCont"};
   // {vector of vector of unsigned} instead of {vector of vector of bool}
-  std::vector < std::vector<unsigned> > *m_cPosOverflow;
+  std::vector < std::vector<unsigned> > *m_cPosOverflow{nullptr};
 
 
   //Private function to build names for ntuple entries. Concatinates strings

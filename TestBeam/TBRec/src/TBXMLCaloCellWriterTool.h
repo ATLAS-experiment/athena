@@ -14,6 +14,8 @@
 #include "CaloDetDescr/CaloDetDescrManager.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
+#include "CLHEP/Units/SystemOfUnits.h"
+
 #include "TBXMLWriterToolBase.h"
 
 #include <iosfwd>
@@ -59,16 +61,19 @@ class TBXMLCaloCellWriterTool : public TBXMLWriterToolBase
 
   static const unsigned int m_nCols;
 
-  std::vector<std::string>              m_includedCalos;
-  std::vector<std::string>              m_includedSamplings;
+  Gaudi::Property<std::vector<std::string>> m_includedCalos{this, "IncludedCalos", {}, "List of included calorimeters"};
+  Gaudi::Property<std::vector<std::string>> m_includedSamplings{this, "IncludedSamplings", {}, "List of included calorimeter samplings"};
 
-  double                                m_etaMin, m_etaMax, m_phiMin, m_phiMax;
+  Gaudi::Property<double> m_etaMin{this, "EtaMin", -5.0, "Minimum cell eta"};
+  Gaudi::Property<double> m_etaMax{this, "EtaMax", 5.0, "Maximum cell eta"};
+  Gaudi::Property<double> m_phiMin{this, "PhiMin", 0.*CLHEP::deg, "Minimum cell phi"};
+  Gaudi::Property<double> m_phiMax{this, "PhiMax", 360.*CLHEP::deg, "Maximum cell phi"};
 
-  bool                                  m_firstEvent;
+  bool                                  m_firstEvent{true};
 
   std::vector<CaloCell_ID::SUBCALO>     m_caloIndices;
   std::vector<CaloSampling::CaloSample> m_caloSamplings;
-  std::string                           m_cellContainer;
+  Gaudi::Property<std::string>          m_cellContainer{this, "InputCellContainer", "", "Input CaloCellContainer name"};
 
   const CaloCell_ID*                    m_idHelper{};
 

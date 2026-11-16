@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -42,55 +42,13 @@ using Amg::RotationMatrix3D;
 TBCaloCoordinate::TBCaloCoordinate(const std::string& type,
 				   const std::string& name, 
 				   const IInterface* parent) :
-  base_class(type, name, parent),
-  m_table_axis_data(0.), m_table_axis_MC(0.),
-  m_table_proj_data(0.), m_table_proj_MC(0.),
-  m_table_eta(0.), 
-  m_calo_phi_shift(0.), m_calo_theta_shift(0.),
-  m_calo_psi_shift(0.),  m_calo_x_shift(0.), 
-  m_calo_y_shift(0.),  m_calo_z_shift(0.), 
-  m_table_theta(0.),  m_table_z(0.),  m_table_delta(0.), 
-  m_table_calc_theta(0.),  m_table_calc_x(0.), 
-  m_DBRead(-1), m_PoolRead(-1), m_runNumber(0), m_firstevt(0) 
+  base_class(type, name, parent)
 {
-
-  // by default, assume Atlas :  m_DBRead=-1, m_PoolRead=-1
-  // other clients need to include the jobOpt fragment and set
-  // what they want via the properties :
-
-  declareProperty("DBRead",m_DBRead);
-  declareProperty("PoolRead",m_PoolRead);
-
-  declareProperty("calo_phi_shift",m_calo_phi_shift);
-  declareProperty("calo_theta_shift",m_calo_theta_shift);
-  declareProperty("calo_psi_shift",m_calo_psi_shift);
-  declareProperty("calo_x_shift",m_calo_x_shift);
-  declareProperty("calo_y_shift",m_calo_y_shift);
-  declareProperty("calo_z_shift",m_calo_z_shift);
-
-  declareProperty("table_eta",m_table_eta);
-
-  // default values for MC, will be overwritten by Pool numbers
-  m_table_axis_MC = 6062.; 
-  m_table_proj_MC = 1276. - 6062.;
-
-  // number taken from the note ATC-TT-IN-0001, Feb 12, 2005:
-  m_table_axis_data = 6208.;
-
-  // number extracted from the Tiles table rotation program, S. Solodkov, Nov 2004
-  m_table_proj_data = -3910. ;
-
-  // this will be calculated
-  m_table_calc_theta=0.;
-  m_table_calc_x=0.;
-
   m_transform_calo_to_ctb = new Transform3D(); 
   m_transform_ctb_to_calo = new Transform3D();
   //m_table_rotate = new Rotate3D();
   m_table_rotate = new RotationMatrix3D(); // uninitialized, but always assigned before use
   m_table_shift = new Translation3D(0.,0.,0.);
-  m_postool=0;
-  m_MCmgr=0;
   m_range = new CaloPhiRange;
 }
 
@@ -102,12 +60,12 @@ TBCaloCoordinate::initialize()
     
   ATH_MSG_DEBUG 
     ( " Numbers used for Calo geometry : "  
-      << "phi=" << m_calo_phi_shift << " theta="
-      << m_calo_theta_shift << " (=> deta=" << eta << ") psi="
-      << m_calo_psi_shift << " x,y,z= "
-      << m_calo_x_shift << " "
-      << m_calo_y_shift << " "
-      << m_calo_z_shift );
+      << "phi=" << m_calo_phi_shift.value() << " theta="
+      << m_calo_theta_shift.value() << " (=> deta=" << eta << ") psi="
+      << m_calo_psi_shift.value() << " x,y,z= "
+      << m_calo_x_shift.value() << " "
+      << m_calo_y_shift.value() << " "
+      << m_calo_z_shift.value() );
     
   // For global Calo position build HepTransforms according to 
   // jobOpt parameters :
@@ -330,7 +288,7 @@ TBCaloCoordinate:: read_data_position()
       ATH_MSG_INFO ( " --------------------------------------------------------------------- "  );
       ATH_MSG_INFO ( "  " );
       ATH_MSG_INFO ( " Calorimeter table position is read from DB : for run " << m_runNumber
-                     << " eta is = " << m_table_eta );
+                     << " eta is = " << m_table_eta.value() );
       ATH_MSG_INFO ( "  " );
 
 
@@ -458,7 +416,7 @@ TBCaloCoordinate:: read_user_position()
   ATH_MSG_DEBUG ( " --------------------------------------------------------------------- "  );
   ATH_MSG_DEBUG ( "  " );
   ATH_MSG_DEBUG ( " Calorimeter table DCS either OFF of not used, position is hardcoded :  for run " 
-                  << m_runNumber << " eta is = " << m_table_eta );
+                  << m_runNumber << " eta is = " << m_table_eta.value() );
   ATH_MSG_DEBUG ( "  " );
   ATH_MSG_DEBUG ( "      If it does not match the LAr logbook, inform LAr people        " );
   ATH_MSG_DEBUG ( "  " );
@@ -482,7 +440,7 @@ TBCaloCoordinate:: read_user_position()
   *m_transform_ctb_to_calo = m_transform_calo_to_ctb->inverse();
 
   ATH_MSG_DEBUG ( " Moovement defined by hardcoded numbers : eta was set to " 
-                  << m_table_eta);
+                  << m_table_eta.value());
 
   ATH_MSG_DEBUG  ( "Calculated table position is : " );
   ATH_MSG_DEBUG  ( "         angle against y axis = " 

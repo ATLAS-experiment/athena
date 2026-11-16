@@ -34,29 +34,13 @@
 #include <cmath>
 
 
-using CLHEP::deg;
-
-
 const unsigned int TBXMLCaloCellWriterTool::m_nCols = 2;
 
 TBXMLCaloCellWriterTool::TBXMLCaloCellWriterTool(const std::string& type, 
 						 const std::string& name,
 						 const IInterface* parent)
   : TBXMLWriterToolBase(type,name,parent)
-    , m_etaMin(-5.0)
-    , m_etaMax(5.0)
-    , m_phiMin(0.*deg)
-    , m_phiMax(360.*deg)
-    , m_firstEvent(true)
-    , m_idHelper(0)
 {
-  declareProperty("InputCellContainer", m_cellContainer);
-  declareProperty("IncludedCalos",      m_includedCalos);
-  declareProperty("IncludedSamplings",  m_includedSamplings);
-  declareProperty("EtaMin",             m_etaMin);
-  declareProperty("EtaMax",             m_etaMax);
-  declareProperty("PhiMin",             m_phiMin);
-  declareProperty("PhiMax",             m_phiMax);
   // save pointer to algorithm
   m_mother = dynamic_cast<const TBXMLWriter*>(parent);
 }
@@ -147,7 +131,7 @@ TBXMLCaloCellWriterTool::writeEvent(std::ostream& outStream,
   //////////////////////////////////
 
   const CaloCellContainer* theContainer = 0;
-  ATH_CHECK( evtStore()->retrieve(theContainer,m_cellContainer) );
+  ATH_CHECK( evtStore()->retrieve(theContainer,m_cellContainer.value()) );
 
   //////////////////////////////////
   // Loop Individual Calorimeters //
@@ -426,8 +410,8 @@ TBXMLCaloCellWriterTool::convertProperties()
   // Get Calo Indices //
   //////////////////////
 
-  std::vector<std::string>::iterator firstCalo = m_includedCalos.begin();
-  std::vector<std::string>::iterator lastCalo  = m_includedCalos.end();
+  std::vector<std::string>::iterator firstCalo = m_includedCalos.value().begin();
+  std::vector<std::string>::iterator lastCalo  = m_includedCalos.value().end();
   while ( firstCalo != lastCalo )
     {
       if ( *firstCalo == "LAREM" )
@@ -452,7 +436,7 @@ TBXMLCaloCellWriterTool::convertProperties()
 	}
       else
 	{
-	  firstCalo = m_includedCalos.erase(firstCalo);
+	  firstCalo = m_includedCalos.value().erase(firstCalo);
 	}
     }
 

@@ -12,18 +12,7 @@
 TBScintillatorRec::TBScintillatorRec(const std::string& name,
 				 ISvcLocator* pSvcLocator) :
   AthAlgorithm(name,pSvcLocator)
- {
-  // job options
-
-   declareProperty("SGkey",  m_SGkey="ScintillatorRawCont");
-   declareProperty("SGrecordkey",  m_SGrecordkey="ScintillatorCont");
-
-   declareProperty("SCINTnames",  m_scint_names);
-   declareProperty("SCINTtimecalib",  m_scint_timecalib);
-   declareProperty("SCINTtimeped",  m_scint_ped);
-
-
- }
+{}
 
 TBScintillatorRec::~TBScintillatorRec()
 { }
@@ -31,7 +20,7 @@ TBScintillatorRec::~TBScintillatorRec()
 StatusCode
 TBScintillatorRec::initialize()
 {
-  ATH_MSG_DEBUG ( "Size of knowns scintillator list = " <<m_scint_names.size() );
+  ATH_MSG_DEBUG ( "Size of knowns scintillator list = " <<m_scint_names.value().size() );
   return StatusCode::SUCCESS;
 }
 
@@ -41,9 +30,9 @@ TBScintillatorRec::execute(const EventContext& ctx)
   ATH_MSG_DEBUG ( "In execute()" );
 
   TBScintillatorRawCont * scintrawCont;
-  StatusCode sc = evtStore()->retrieve(scintrawCont, m_SGkey);
+  StatusCode sc = evtStore()->retrieve(scintrawCont, m_SGkey.value());
   if (sc.isFailure()){
-    ATH_MSG_DEBUG ( "TBObjectReco: Retrieval of "<<m_SGkey<<" failed" );
+    ATH_MSG_DEBUG ( "TBObjectReco: Retrieval of "<<m_SGkey.value()<<" failed" );
     
   }else {
 
@@ -55,12 +44,12 @@ TBScintillatorRec::execute(const EventContext& ctx)
       unsigned int ind=0;
       // Find calibration index for this Scint
   
-      while(ind<m_scint_names.size()) 
+      while(ind<m_scint_names.value().size()) 
 	{
 	  if(name==m_scint_names[ind]) break; 
 	  else ind++;
 	}
-      if(ind==m_scint_names.size()) {
+      if(ind==m_scint_names.value().size()) {
 	ATH_MSG_DEBUG( "No calibrations for Scintillator " <<name);
 	continue;
       }
@@ -80,7 +69,7 @@ TBScintillatorRec::execute(const EventContext& ctx)
     }
     
     
-    sc = evtStore()->record(scintCont,m_SGrecordkey);
+    sc = evtStore()->record(scintCont,m_SGrecordkey.value());
     if ( sc.isFailure( ) ) {
       ATH_MSG_FATAL ( "Cannot record ScintCont" );
     }

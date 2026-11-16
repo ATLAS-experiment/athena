@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //#####################################################
@@ -25,13 +25,8 @@
 TBBeamQualityMuonToolH6::TBBeamQualityMuonToolH6(const std::string& type,
 						 const std::string& name,
 						 const IInterface* parent)
-  : TBBeamQualityTool(type,name,parent),
-    m_mu1(false),
-    m_mu2(false),
-    m_mu3(false),
-    m_mu4(false),
-    m_successflag(false)
-{ 
+  : TBBeamQualityTool(type,name,parent)
+{
   declareInterface<TBBeamQualityTool>(this); 
 }
 

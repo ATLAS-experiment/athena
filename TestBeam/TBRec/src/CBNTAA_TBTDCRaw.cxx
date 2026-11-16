@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNTAA_TBTDCRaw.h"
@@ -7,12 +7,7 @@
 #include <vector>
 
 CBNTAA_TBTDCRaw::CBNTAA_TBTDCRaw(const std::string & name, ISvcLocator * pSvcLocator) : CBNT_TBRecBase(name, pSvcLocator)
-{
-  declareProperty("NeverReturnFailure", m_neverReturnFailure=false);
-	declareProperty("ContainerKey1",m_containerKey1="TDCRawCont");
-	m_tdc=NULL;
-	m_underThreshold=NULL;
-}
+{}
 
 CBNTAA_TBTDCRaw::~CBNTAA_TBTDCRaw() 
 {//Clean up arrays of ntuple entries (if they have been booked)
@@ -36,10 +31,10 @@ StatusCode CBNTAA_TBTDCRaw::CBNT_initialize()
 StatusCode CBNTAA_TBTDCRaw::CBNT_execute()
 {
   const TBTDCRawCont * tdcCont;
-  StatusCode sc = evtStore()->retrieve(tdcCont,m_containerKey1);
+  StatusCode sc = evtStore()->retrieve(tdcCont,m_containerKey1.value());
   if (sc.isFailure()) 
     {
-      ATH_MSG_ERROR ( "\033[31m" << " Cannot read TBTDCRawCont from StoreGate! key= " << m_containerKey1 << "\033[0m" );
+      ATH_MSG_ERROR ( "\033[31m" << " Cannot read TBTDCRawCont from StoreGate! key= " << m_containerKey1.value() << "\033[0m" );
       if (m_neverReturnFailure) {
 	return StatusCode::SUCCESS;
       } else {

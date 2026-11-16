@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_CBNTAA_TBSCINT_H
@@ -27,10 +27,10 @@ class CBNTAA_TBScint : public CBNT_TBRecBase
  private:
 
   // Scint. parameters from MC
-  std::vector<int> *m_scint_num; 
-  std::vector<float> *m_scint_en; 
-  std::vector<int> *m_scint_trackid; 
-  std::vector<int> *m_scint_pdg; 
+  std::vector<int> *m_scint_num{nullptr}; 
+  std::vector<float> *m_scint_en{nullptr}; 
+  std::vector<int> *m_scint_trackid{nullptr}; 
+  std::vector<int> *m_scint_pdg{nullptr}; 
 
   virtual StatusCode CBNT_clear() override;
 };

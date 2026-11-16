@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBEMECCellEtaCorrection.h"
@@ -17,40 +17,9 @@
 TBEMECCellEtaCorrection::TBEMECCellEtaCorrection(const std::string& type, 
 						 const std::string& name,
 						 const IInterface* parent)
-  : CaloCellCorrection(type, name, parent),
-    m_EMEC_response_eta_correction(false),
-    m_EMEC_eta1(2.5),m_EMEC_eta2(2.8),m_EMEC_eta3(3.2),
-    m_EMEC_eta0_1(0),
-    m_EMEC_eta0_2(0),
-    m_EMEC_beta1(1.),m_EMEC_alpha1(0.),m_EMEC_beta2(1.),m_EMEC_alpha2(0.),
-    m_ramp_corr(1.045),m_ramp_corr_eta1(2.8),m_ramp_corr_eta2(2.9),
-    m_EMEC_rescale(1.),m_FCAL_rescale(0.9818),
-    m_EMEC_1_scale(1.),m_EMEC_2_scale(1.),
-    m_HEC_0_scale(1.),m_HEC_1_scale(1.),m_HEC_2_scale(1.),
-    m_FCAL_0_scale(1.),m_FCAL_1_scale(1.)
+  : CaloCellCorrection(type, name, parent)
 { 
    declareInterface<CaloCellCorrection>(this);
-  // Cell level correction of EMEC eta-dependent response
-  declareProperty("EMEC_beta1",m_EMEC_beta1);
-  declareProperty("EMEC_beta2",m_EMEC_beta2);
-  declareProperty("EMEC_alpha1",m_EMEC_alpha1);
-  declareProperty("EMEC_alpha2",m_EMEC_alpha2);
-  declareProperty("ramp_corr",m_ramp_corr);
-  declareProperty("EMEC_rescale",m_EMEC_rescale);
-  declareProperty("FCAL_rescale",m_FCAL_rescale);
-  declareProperty("LowEta",m_EMEC_eta1);
-  declareProperty("MiddleEta",m_EMEC_eta2);
-  declareProperty("HighEta",m_EMEC_eta3);
-
-  declareProperty("EMEC1_scale",m_EMEC_1_scale);
-  declareProperty("EMEC2_scale",m_EMEC_2_scale);
-
-  declareProperty("HEC0_scale",m_HEC_0_scale);
-  declareProperty("HEC1_scale",m_HEC_1_scale);
-  declareProperty("HEC2_scale",m_HEC_2_scale);
-
-  declareProperty("FCAL0_scale",m_FCAL_0_scale);
-  declareProperty("FCAL1_scale",m_FCAL_1_scale);
 }
 
 
@@ -72,14 +41,14 @@ StatusCode TBEMECCellEtaCorrection::initialize()
     log << MSG::INFO << "Correction of EMEC response eta-dependance is ON;" 
 	<<endmsg;
     log << MSG::INFO << "EMEC_eta0_1, EMEC_alpha1, EMEC_beta1 = " <<
-      m_EMEC_eta0_1 << " " << m_EMEC_alpha1 << " " << m_EMEC_beta1 << endmsg;
+      m_EMEC_eta0_1 << " " << m_EMEC_alpha1.value() << " " << m_EMEC_beta1.value() << endmsg;
     log << MSG::INFO << "EMEC_eta0_2, EMEC_alpha2, EMEC_beta2 = " <<
-      m_EMEC_eta0_2 << " " << m_EMEC_alpha2 << " " << m_EMEC_beta2 << endmsg;
+      m_EMEC_eta0_2 << " " << m_EMEC_alpha2.value() << " " << m_EMEC_beta2.value() << endmsg;
   }
   log << MSG::INFO << "ramp_corr, ramp_corr_eta1, ramp_corr_eta2 = "
-      <<m_ramp_corr<< " "<<m_ramp_corr_eta1<<" "<<m_ramp_corr_eta2<<endmsg;
-  log << MSG::INFO << "EMEC_rescale = "<<m_EMEC_rescale<<endmsg;
-  log << MSG::INFO << "FCAL_rescale = "<<m_FCAL_rescale<<endmsg;
+      <<m_ramp_corr.value()<< " "<<m_ramp_corr_eta1<<" "<<m_ramp_corr_eta2<<endmsg;
+  log << MSG::INFO << "EMEC_rescale = "<<m_EMEC_rescale.value()<<endmsg;
+  log << MSG::INFO << "FCAL_rescale = "<<m_FCAL_rescale.value()<<endmsg;
   return StatusCode::SUCCESS; 
 }
 

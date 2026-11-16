@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBDMCONTAINERSPLITTER_H
@@ -25,11 +25,11 @@ class TBDMContainerSplitter: public AthAlgorithm {
   
  private: 
   // Names and pointers
-  std::string m_DMHitsKey;               // Original DM hits container key
-  std::string m_DMHitsCaloKey;               // DM hits in calo modules  container key
-  std::string m_DMHitsLeakKey;               // DM hits for leakage container key
+  Gaudi::Property<std::string> m_DMHitsKey{this, "InputDMContainer", "LArCalibrationHitDeadMaterial", "Original DM hits container key"};
+  Gaudi::Property<std::string> m_DMHitsCaloKey{this, "OutputDM_Calo", "LArCalibrationHitDeadMaterial_Calo", "DM hits in calo modules container key"};
+  Gaudi::Property<std::string> m_DMHitsLeakKey{this, "OutputDM_Leak", "LArCalibrationHitDeadMaterial_Leakage", "DM hits for leakage container key"};
 
-  const CaloDmDescrManager* m_caloDmDescrManager; 
+  const CaloDmDescrManager* m_caloDmDescrManager{nullptr};
 };
 
 #endif

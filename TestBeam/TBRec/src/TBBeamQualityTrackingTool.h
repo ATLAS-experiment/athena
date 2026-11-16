@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //#####################################################
@@ -41,8 +41,9 @@ class TBBeamQualityTrackingTool : public TBBeamQualityTool
   // TRIGGERING
   std::vector<unsigned int> m_triggflag;
   
-  float  m_chi2cut_u;
-  float  m_chi2cut_v;
+  // defaults are 0, which means no cut; if cutting, must specify both.
+  Gaudi::Property<float> m_chi2cut_u{this, "Chi2Cut_x", 0., "chi2 cut on x (u) track fit; 0 means no cut"};
+  Gaudi::Property<float> m_chi2cut_v{this, "Chi2Cut_y", 0., "chi2 cut on y (v) track fit; 0 means no cut"};
 };
 #endif
 

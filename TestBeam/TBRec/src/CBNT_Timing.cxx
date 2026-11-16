@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNT_Timing.h"
@@ -25,35 +25,7 @@ using Athena::Units::ns;
 
 CBNT_Timing::CBNT_Timing(const std::string & name, ISvcLocator * pSvcLocator)
   :CBNT_TBRecBase(name, pSvcLocator)
-   , m_onlineHelper(0)
-   , m_energy_cut(2.*GeV)
-   , m_first_event(true)
-   , m_caloCellName("AllCalo")
-{
-  m_sampling_names.resize(0);
-
-  declareProperty("TBPhase",m_tbphase="TBPhase");
-  declareProperty("CellContainerName",     m_caloCellName);
-  declareProperty("EnergyCut", m_energy_cut);
-  declareProperty("IncludedSamplings", m_sampling_names);
-
-  m_energy = 0;
-  m_tdc_phase = 0;
-  m_time = 0;
-
-  m_energy_cell = 0;
-  m_eta_cell = 0;
-  m_febId_cell = 0;
-  m_febId_feb = 0;
-  m_feedthrough_feb = 0;
-  m_layer_cell = 0;
-  m_layer_layer = 0;
-  m_phi_cell = 0;
-  m_slot_feb = 0;
-  m_time_cell = 0;
-  m_time_feb = 0;
-  m_time_layer = 0;
-}
+{}
 
 CBNT_Timing::~CBNT_Timing() 
 {//empty
@@ -90,7 +62,7 @@ StatusCode CBNT_Timing::CBNT_initialize() {
 
   // get calorimeter samplings ids for the requested samplings
   msg() << MSG::INFO << "Included calorimeter samplings: ";
-  for (const std::string& sampling : m_sampling_names) {
+  for (const std::string& sampling : m_sampling_names.value()) {
     CaloSampling::CaloSample idSamp = m_samplingFromNameLookup[sampling];
     if (idSamp != CaloSampling::Unknown) {
       m_samplingIndices.push_back(idSamp);
@@ -148,11 +120,11 @@ StatusCode CBNT_Timing::CBNT_execute()
 
   // CaloCells
   const CaloCellContainer* cellContainer = nullptr;
-  ATH_CHECK( evtStore()->retrieve(cellContainer, m_caloCellName ) );
+  ATH_CHECK( evtStore()->retrieve(cellContainer, m_caloCellName.value() ) );
 
   // TBPhase 
   TBPhase * phase = nullptr;
-  ATH_CHECK( evtStore()->retrieve(phase,m_tbphase) );
+  ATH_CHECK( evtStore()->retrieve(phase,m_tbphase.value()) );
   
   m_tdc_phase = phase->getPhase();
 

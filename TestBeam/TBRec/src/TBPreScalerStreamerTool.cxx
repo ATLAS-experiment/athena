@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBEventStreamerTool.h"
@@ -16,11 +16,8 @@ TBPreScalerStreamerTool::TBPreScalerStreamerTool(const std::string& type,
 						 const std::string& name,
 						 const IInterface* parent)
   : TBEventStreamerTool(type,name,parent)
-    , m_acceptFraction(1.)
-    , m_randomizer(nullptr)
 {
-  declareInterface<TBEventStreamerTool>(this); 
-  declareProperty("AcceptEventFraction",m_acceptFraction);
+  declareInterface<TBEventStreamerTool>(this);
 }
 
 TBPreScalerStreamerTool::~TBPreScalerStreamerTool()

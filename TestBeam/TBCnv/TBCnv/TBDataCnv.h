@@ -30,7 +30,7 @@ class TBDataCnv: public Converter {
   static CLID classID();
 
  private:
-  TBByteStreamCnvTool* m_tool;  //Tool that does the actual conversion
+  TBByteStreamCnvTool* m_tool{nullptr};  //Tool that does the actual conversion
 
 };
 

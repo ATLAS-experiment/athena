@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBEventInfoStreamerTool.h"
@@ -12,12 +12,9 @@
 TBEventInfoStreamerTool::TBEventInfoStreamerTool(const std::string& type,
 						 const std::string& name,
 					         const IInterface* parent)
-  : TBEventStreamerTool(type,name,parent),
-    m_selected_events(0)
+  : TBEventStreamerTool(type,name,parent)
 {
-   declareInterface<TBEventStreamerTool>(this);
-  m_acceptTypes.resize(1,"Physics");
-  declareProperty("AcceptedTypes",m_acceptTypes);
+  declareInterface<TBEventStreamerTool>(this);
 }
 
 TBEventInfoStreamerTool::~TBEventInfoStreamerTool()
@@ -31,7 +28,7 @@ StatusCode TBEventInfoStreamerTool::initializeTool()
 {
   m_selected_events = 0;
 
-  for ( unsigned int i=0; i<m_acceptTypes.size(); i++ )
+  for ( unsigned int i=0; i<m_acceptTypes.value().size(); i++ )
     {
       if ( m_acceptTypes[i] == "Physics" )
 	{
@@ -55,7 +52,7 @@ StatusCode TBEventInfoStreamerTool::initializeTool()
 	}
       else
 	{
-	  ATH_MSG_FATAL ( "Detector event type not existing " << m_acceptTypes );
+	  ATH_MSG_FATAL ( "Detector event type not existing " << m_acceptTypes.value() );
 	  ATH_MSG_FATAL ( "Possible types are: Special, Physics, f/e_calibration, Random, BPC_Calibration" );
 	  return StatusCode::FAILURE;
 	}

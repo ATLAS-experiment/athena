@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNTAA_TBTrack.h"
@@ -12,20 +12,8 @@
 
 
 CBNTAA_TBTrack::CBNTAA_TBTrack(const std::string & name, ISvcLocator * pSvcLocator) :
-  CBNT_TBRecBase(name, pSvcLocator),
-  m_readFileforXcryo(true),
-  m_nRun(0),
-  m_beam_coor_x(0),
-  m_beam_coor_y(0),
-  m_beam_chi2_x(0),
-  m_beam_chi2_y(0),
-  m_beam_intercept_x(0),
-  m_beam_intercept_y(0),
-  m_beam_slope_x(0),
-  m_beam_slope_y(0)
-{
-   declareProperty("ReadFileforXcryo", m_readFileforXcryo);
-}
+  CBNT_TBRecBase(name, pSvcLocator)
+{}
 
 StatusCode CBNTAA_TBTrack::CBNT_initialize() {
   ATH_MSG_DEBUG ( "in initialize()"  );

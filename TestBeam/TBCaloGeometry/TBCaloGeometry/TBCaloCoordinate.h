@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -128,36 +128,41 @@ private:
   // these are the famous key numbers :
 
   // 1) position of the table axis (oral tradition)
-  double m_table_axis_data;
-  double m_table_axis_MC;
+  // number taken from the note ATC-TT-IN-0001, Feb 12, 2005:
+  double m_table_axis_data{6208.};
+  // default value for MC, will be overwritten by Pool numbers
+  double m_table_axis_MC{6062.};
   // 2) distance between the table axis and projective point (oral tradition)
-  double m_table_proj_data;
-  double m_table_proj_MC;
+  // number extracted from the Tiles table rotation program, S. Solodkov, Nov 2004
+  double m_table_proj_data{-3910.};
+  // default value for MC, will be overwritten by Pool numbers
+  double m_table_proj_MC{1276. - 6062.};
   // 3) angle of rotation : default is set in jobOpt (property)
   //                        + will be overwritten if DB/Pool is used
   //                        + will be ignored "if atlas" 
-  double m_table_eta;
+  Gaudi::Property<double> m_table_eta{this, "table_eta", 0., "Table rotation eta (overwritten if DB/Pool is used)"};
 
   // Another layer on top, "in case" the user wants to add an
   // extra HepTransform on top of these known moovements :
-  double m_calo_phi_shift;
-  double m_calo_theta_shift;
-  double m_calo_psi_shift;
-  double m_calo_x_shift;
-  double m_calo_y_shift;
-  double m_calo_z_shift;
+  Gaudi::Property<double> m_calo_phi_shift{this, "calo_phi_shift", 0., "Extra calorimeter rotation around z"};
+  Gaudi::Property<double> m_calo_theta_shift{this, "calo_theta_shift", 0., "Extra calorimeter rotation around y"};
+  Gaudi::Property<double> m_calo_psi_shift{this, "calo_psi_shift", 0., "Extra calorimeter rotation (psi)"};
+  Gaudi::Property<double> m_calo_x_shift{this, "calo_x_shift", 0., "Extra calorimeter shift along x"};
+  Gaudi::Property<double> m_calo_y_shift{this, "calo_y_shift", 0., "Extra calorimeter shift along y"};
+  Gaudi::Property<double> m_calo_z_shift{this, "calo_z_shift", 0., "Extra calorimeter shift along z"};
 
   // these will be read in the DB :
-  double m_table_theta;
-  double m_table_z;
-  double m_table_delta;
+  double m_table_theta{0.};
+  double m_table_z{0.};
+  double m_table_delta{0.};
   // this is calculated from the DB info :
-  double m_table_calc_theta;
-  double m_table_calc_x;
+  double m_table_calc_theta{0.};
+  double m_table_calc_x{0.};
 
   // these properties define what we are reading (see jobOpt)
-  int m_DBRead;
-  int m_PoolRead;
+  // by default, assume Atlas :  m_DBRead=-1, m_PoolRead=-1
+  Gaudi::Property<int> m_DBRead{this, "DBRead", -1, "Read table position from DB (>=0) or not (-1)"};
+  Gaudi::Property<int> m_PoolRead{this, "PoolRead", -1, "Read table position from Pool (>=0) or not (-1)"};
 
   // keep the 2 steps separated : table rotation, then translation 
   //HepGeom::Rotate3D* m_table_rotate;
@@ -177,13 +182,13 @@ private:
   Amg::Transform3D* m_transform_ctb_to_calo;
 
   // Run number
-  long m_runNumber;
+  long m_runNumber{0};
 
   // to limit the printout
-  int m_firstevt;
+  int m_firstevt{0};
 
-  ITBCaloPosTool* m_postool;
-  const TBDetDescrManager* m_MCmgr;
+  ITBCaloPosTool* m_postool{nullptr};
+  const TBDetDescrManager* m_MCmgr{nullptr};
   CaloPhiRange* m_range;
 };
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBXCRYYTABLEREAD_H
@@ -27,18 +27,18 @@ class ATLAS_NOT_THREAD_SAFE TBXCryYTableRead : public AthAlgorithm {
   /** Get Xcryo and Ytable from a text file */
   StatusCode getXcryoYtable(float &x, float &y, float &eBeam);
   
-  int m_nEvent;                     // counter
-  int m_nEventRandomTrigger;        // counter
-  bool m_first;                     // First event flag
+  int m_nEvent{0};                  // counter
+  int m_nEventRandomTrigger{0};     // counter
+  bool m_first{true};               // First event flag
 
-  int m_nRun;               /** Run number */
-  float m_beamMom;          /** Beam momentum */
-  float m_xCryo;            /** CryoX */
-  float m_yTable;           /** TableY */
+  int m_nRun{0};            /** Run number */
+  float m_beamMom{0};       /** Beam momentum */
+  float m_xCryo{0};         /** CryoX */
+  float m_yTable{0};        /** TableY */
 
-  std::string m_txtFileWithXY;            // name of the file with X,y info
+  Gaudi::Property<std::string> m_txtFileWithXY{this, "FileName", "xcryo_ytable.txt", "name of the file with X,y info"};
 
-  TBEventInfo * m_eventinfo;
+  TBEventInfo * m_eventinfo{nullptr};
 };
 
 #endif

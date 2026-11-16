@@ -11,8 +11,7 @@
 
 template< class DATATYPE >
 TBDataCnv<DATATYPE>::TBDataCnv(ISvcLocator* svcloc) :
-  Converter(storageType(), classID(),svcloc),
-  m_tool(nullptr)
+  Converter(storageType(), classID(),svcloc)
 {
 }
 

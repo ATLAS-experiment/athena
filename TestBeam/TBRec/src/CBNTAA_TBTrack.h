@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_CBNTAA_TBTRACK_H
@@ -26,19 +26,19 @@ class CBNTAA_TBTrack : public CBNT_TBRecBase
  private:
   // by A. Mineanko
   /** Get Xcryo and Ytable from a text file */
-  bool m_readFileforXcryo;
+  Gaudi::Property<bool> m_readFileforXcryo{this, "ReadFileforXcryo", true, "Get Xcryo and Ytable from a text file"};
   StatusCode getXcryoYtable(float &x, float &y, float &eBeam);
-  int m_nRun;
+  int m_nRun{0};
 
   // Beam track parameters
-  float m_beam_coor_x;
-  float m_beam_coor_y;
-  float m_beam_chi2_x;
-  float m_beam_chi2_y;
-  float m_beam_intercept_x;
-  float m_beam_intercept_y;
-  float m_beam_slope_x;
-  float m_beam_slope_y;
+  float m_beam_coor_x{0};
+  float m_beam_coor_y{0};
+  float m_beam_chi2_x{0};
+  float m_beam_chi2_y{0};
+  float m_beam_intercept_x{0};
+  float m_beam_intercept_y{0};
+  float m_beam_slope_x{0};
+  float m_beam_slope_y{0};
 
   // taken from CBNTAA_BeamInstrumentation
   //Private function to build names for ntuple entries. Concatinates strings

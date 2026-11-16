@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBBeamQualityMC.h"
@@ -15,21 +15,8 @@
 
 
 TBBeamQualityMC::TBBeamQualityMC(const std::string & name, ISvcLocator * pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator),
-  m_readFileforXcryo(true),
-  m_nRun(0)
-{
-   declareProperty("ReadFileforXcryo", m_readFileforXcryo);
-   declareProperty("CheckTrackParams",m_check_trackpar=false);
-   declareProperty("TrackCutX",m_bm_cut_x=35.);
-   declareProperty("TrackCutY",m_bm_cut_y=35.);
-   declareProperty("CheckPrimaryTrack",m_check_primary=true);
-   declareProperty("ScintForPrimaryTrack",m_scint_prim);
-   declareProperty("CheckVetoScint",m_check_veto=true);
-   declareProperty("CheckClusters",m_check_clus=false);
-   declareProperty("CheckTrackReco",m_check_trackreco=false);
-   declareProperty("ClusterCollectionName",m_clusterCollName="CaloTopoClusters");
-}
+  AthAlgorithm(name, pSvcLocator)
+{}
 
 StatusCode TBBeamQualityMC::initialize() {
   ATH_MSG_DEBUG ( "in initialize()"  );
@@ -92,8 +79,8 @@ StatusCode TBBeamQualityMC::execute(const EventContext& ctx) {
 
   if(m_check_primary) { // check for primary energy deposition in vector of scintilators
 
-     std::vector<bool> has_energy (m_scint_prim.size());
-     for(int ll=0; ll<(int)m_scint_prim.size(); ++ll) has_energy[ll]=false;
+     std::vector<bool> has_energy (m_scint_prim.value().size());
+     for(int ll=0; ll<(int)m_scint_prim.value().size(); ++ll) has_energy[ll]=false;
 
      const LArG4H6FrontHitCollection *frontcoll = nullptr;
      ATH_CHECK( evtStore()->retrieve(frontcoll,"Front::Hits") );
@@ -103,7 +90,7 @@ StatusCode TBBeamQualityMC::execute(const EventContext& ctx) {
      for (const LArG4H6FrontHit* hit : *frontcoll) {
          scnum = hit->GetSC();
          if(scnum  <= 0) continue; // not a scintilator hit
-         for(i=0; i<m_scint_prim.size(); ++i) {
+         for(i=0; i<m_scint_prim.value().size(); ++i) {
            ATH_MSG_DEBUG ( "Scint: "<<scnum<<", track: "<<hit->GetTrackID()<<", energy: "<<hit->GetEdep());
             if( (scnum==m_scint_prim[i]) && (hit->GetTrackID() == 1) && (hit->GetEdep() > 0.)) {
                has_energy[i] = true;
@@ -116,14 +103,14 @@ StatusCode TBBeamQualityMC::execute(const EventContext& ctx) {
      for (const LArG4H6FrontHit* hit : *movecoll) {
          scnum = hit->GetSC();
          if(scnum  <= 0) continue; // not a scintilator hit
-         for(i=0; i<m_scint_prim.size(); ++i) {
+         for(i=0; i<m_scint_prim.value().size(); ++i) {
            ATH_MSG_DEBUG ( "Scint: "<<scnum<<", track: "<<hit->GetTrackID()<<", energy: "<<hit->GetEdep());
             if( (scnum==m_scint_prim[i]) && (hit->GetTrackID() == 1) && (hit->GetEdep() > 0.)) {
                has_energy[i] = true;
             }
          }
      }
-     for(int ll=0; ll<(int)m_scint_prim.size(); ++ll) has_energy[0] = has_energy[0] && has_energy[ll];      
+     for(int ll=0; ll<(int)m_scint_prim.value().size(); ++ll) has_energy[0] = has_energy[0] && has_energy[ll];      
      if(!has_energy[0]) {
        ATH_MSG_DEBUG ( "CheckPrimaryTrack failed, no energy deposit in all asked scint." );
         //return StatusCode::FAILURE;
@@ -152,7 +139,7 @@ StatusCode TBBeamQualityMC::execute(const EventContext& ctx) {
 
   if(m_check_clus) { // Rejected if no good cluster
      const xAOD::CaloClusterContainer* cc = nullptr;
-     ATH_CHECK( evtStore()->retrieve(cc,m_clusterCollName) );
+     ATH_CHECK( evtStore()->retrieve(cc,m_clusterCollName.value()) );
      bool haveit=false;
      for (const xAOD::CaloCluster * theCluster : *cc) {
            double cL = theCluster->getMomentValue(xAOD::CaloCluster::CENTER_LAMBDA);

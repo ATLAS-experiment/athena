@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -22,13 +22,7 @@
 TBXMLWriter::TBXMLWriter(const std::string& name, 
 			 ISvcLocator* pSvcLocator)
   : AthAlgorithm(name,pSvcLocator)
-    , m_outputFrequency(1)
-    , m_eventCounter(0)
-{
-  declareProperty("OutputFrequency",m_outputFrequency);
-  declareProperty("WriteTools",m_writerToolNames);
-  declareProperty("FileTopDirectory",m_topDirectory);
-}
+{}
 
 TBXMLWriter::~TBXMLWriter()
 { }
@@ -125,7 +119,7 @@ StatusCode TBXMLWriter::execute(const EventContext& ctx)
 
   // construct directory and file name
   std::ostringstream thisFileName;
-  thisFileName << m_topDirectory << "/evnt." 
+  thisFileName << m_topDirectory.value() << "/evnt." 
 	       << std::setw(6)   << std::setfill('0')
 	       << ctx.eventID().run_number()    << "." << std::setfill('0')
 	       << std::setw(6)

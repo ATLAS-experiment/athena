@@ -22,18 +22,10 @@ using CLHEP::RandFlat;
 TBCellNoiseCorrection::TBCellNoiseCorrection(const std::string& type, 
 						 const std::string& name,
 						 const IInterface* parent)
-  : CaloCellCorrection(type, name, parent),
-    m_noise_correction(false),m_noise_file(),
-    m_engine(0),
-    m_tree(0), m_xcryo(0.), m_ytable(0.), m_energy(-1.), m_cell_id(0), m_cell_energy(0),m_entries(0)
+  : CaloCellCorrection(type, name, parent)
     //m_myevtnum(-1)
 { 
   declareInterface<CaloCellCorrection>(this);
-  declareProperty("NoiseFile", m_noise_file);
-  declareProperty("NoiseAdd", m_noise_correction);
-  declareProperty("NoiseX",   m_xcryo);
-  declareProperty("NoiseY",   m_ytable);
-  declareProperty("NoiseE",   m_energy);
 }
 
 // Desctructor
@@ -69,16 +61,16 @@ StatusCode TBCellNoiseCorrection::initialize()
         break;
      }
      if(en < 0.) {
-        ATH_MSG_FATAL( " Do not have X: "<<m_xcryo<<" Y: "<<m_ytable<< " E: "<<m_energy<<" in 	xcryo_ytable.txt"  );
+        ATH_MSG_FATAL( " Do not have X: "<<m_xcryo.value()<<" Y: "<<m_ytable.value()<< " E: "<<m_energy.value()<<" in 	xcryo_ytable.txt"  );
 	return StatusCode::FAILURE;
      }
      // we have run number - let's change the file name (and take only one):
      ATH_MSG_DEBUG( "Found run number: "<<runnumber  );
-     unsigned pos = m_noise_file[0].find_last_of("0123456789");
+     unsigned pos = m_noise_file.value()[0].find_last_of("0123456789");
      std::ostringstream buf;
      buf<<runnumber;
-     m_noise_file[0].replace(pos-3,4,buf.str());
-     ATH_MSG_DEBUG( "patched name: "<<m_noise_file[0].c_str() );
+     m_noise_file.value()[0].replace(pos-3,4,buf.str());
+     ATH_MSG_DEBUG( "patched name: "<<m_noise_file.value()[0].c_str() );
   }
 
   // Open file and get Tree
@@ -96,8 +88,8 @@ StatusCode TBCellNoiseCorrection::initialize()
   */
   // Make a chain
   m_tree = new TChain("NoiseTree");
-  for(unsigned int l=0; l<m_noise_file.size(); ++l) {
-     m_tree->AddFile(m_noise_file[l].c_str());
+  for(unsigned int l=0; l<m_noise_file.value().size(); ++l) {
+     m_tree->AddFile(m_noise_file.value()[l].c_str());
   }
   m_entries = m_tree->GetEntries();
   if(m_entries < 100) {

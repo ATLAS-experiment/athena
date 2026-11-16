@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBClusterMaker.h"
@@ -21,38 +21,8 @@ TBClusterMaker::TBClusterMaker(const std::string& type,
 				     const std::string& name,
 				     const IInterface* parent)
   
-  : AthAlgTool(type, name, parent),
-    m_cellCut(-99999.),
-    m_seedCut(5.),
-    m_deltaR(0.02),
-    m_maxIter(4),
-    m_CellEnergyInADC(false),
-    m_calo_id(0)
-{
-  // CaloCell Container Name
-  declareProperty("caloCellContainerName",m_caloCellContainerName="AllCalo");
-  // Names of used calorimeter samplings
-  declareProperty("samplingNames",m_samplingNames);
-  // Cone cuts for each (!!) sampling used
-  declareProperty("coneCuts",m_coneCuts);
-  // Cut on a cell energy in sigma noise units
-  declareProperty("cellCut",m_cellCut);
-  // Cut on a seed cell energy in sigma noise units
-  declareProperty("seedCut",m_seedCut);
-  // Maximal claster position shift at the current step to stop iterations 
-  declareProperty("deltaR",m_deltaR);
-  // Maximal number of iterations to find cluster
-  declareProperty("maxIterations",m_maxIter);
-  // True if cell enrgy is in ADC counts, default = FALSE
-  declareProperty("CellEnergyInADC",m_CellEnergyInADC);
-  // Flag to fix cluster position ( \f$ \eta,\phi \f$) from JO file
-  declareProperty("fixClusterPosition",m_fixClusterPosition=false);
-  // Cluster \f$ \eta \f$) from JO file
-  declareProperty("etaCluster",m_eta0=99.);
-  // Cluster \f$ \phi \f$) from JO file
-  declareProperty("phiCluster",m_phi0=99.);
-
-}
+  : AthAlgTool(type, name, parent)
+{}
 ////////////////////
 // Initialization //
 ////////////////////
@@ -75,22 +45,22 @@ StatusCode TBClusterMaker::initialize(){
   }
 
   // fill map with cone cuts
-  if (m_samplingNames.size() <= 0) {
+  if (m_samplingNames.value().size() <= 0) {
     log << MSG::FATAL << "List of samplings is not supplied" << endmsg;
     return StatusCode::FAILURE;    
   }
-  if (m_samplingNames.size() != m_coneCuts.size()) {
-    log << MSG::FATAL << "Number of cone cuts = " << m_coneCuts.size() << 
+  if (m_samplingNames.value().size() != m_coneCuts.value().size()) {
+    log << MSG::FATAL << "Number of cone cuts = " << m_coneCuts.value().size() << 
       " does not correspond to the number of samplings = " << 
       m_samplings.size() << endmsg;
     return StatusCode::FAILURE;
   }
 
   log << MSG::INFO << "Included calorimeter samplings(coneCuts): ";
-  std::vector<std::string>::const_iterator sampling = m_samplingNames.begin();
-  std::vector<float>::const_iterator cut = m_coneCuts.begin();
+  std::vector<std::string>::const_iterator sampling = m_samplingNames.value().begin();
+  std::vector<float>::const_iterator cut = m_coneCuts.value().begin();
   m_samplingConeCuts.resize (CaloSampling::getNumberOfSamplings());
-  for (; sampling != m_samplingNames.end(); ++sampling, ++cut) {
+  for (; sampling != m_samplingNames.value().end(); ++sampling, ++cut) {
      CaloSampling::CaloSample idSamp = m_samplingFromNameLookup[*sampling];
     if (idSamp == CaloSampling::Unknown) {
       log << MSG::FATAL << " Unknown sampling: \042" << *sampling << "\042 "
@@ -137,11 +107,11 @@ StatusCode TBClusterMaker::execute(const EventContext& ctx,
   // CaloCells
   const CaloCellContainer* cellContainer;
   StatusCode sc 
-    = evtStore()->retrieve(cellContainer, m_caloCellContainerName);
+    = evtStore()->retrieve(cellContainer, m_caloCellContainerName.value());
   if (sc.isFailure()) {
     log << MSG::ERROR
 	<< "cannot allocate CaloCellContainer with key <"
-	<< m_caloCellContainerName << ">" << endmsg;
+	<< m_caloCellContainerName.value() << ">" << endmsg;
     return sc;
   }
   log << MSG::DEBUG << "CaloCellContainer container size = " <<  

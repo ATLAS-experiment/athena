@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -9,9 +9,7 @@
 TBEventStreamer::TBEventStreamer(const std::string& name,
 				 ISvcLocator* pService)
   : AthAlgorithm(name,pService)
-{
-  declareProperty("ToolNames",m_tools);
-}
+{}
 
 TBEventStreamer::~TBEventStreamer() 
 { }

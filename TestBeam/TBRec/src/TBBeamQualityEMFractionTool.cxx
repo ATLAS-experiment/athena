@@ -22,18 +22,9 @@
 TBBeamQualityEMFractionTool::TBBeamQualityEMFractionTool(const std::string& type,
 							 const std::string& name,
 							 const IInterface* parent)
-  : TBBeamQualityTool(type,name,parent),
-    m_emecID_help(nullptr),
-    m_hecID_help(nullptr),
-    m_fcalID_help(nullptr),
-    m_em_frac(0)
-{  
+  : TBBeamQualityTool(type,name,parent)
+{
   declareInterface<TBBeamQualityTool>(this);
-  declareProperty("EM_fraccut",m_em_fraccut=0.2);
-  declareProperty("EM_fracnumsamp",m_em_fracnumsamp);
-  declareProperty("EM_fracdensamp",m_em_fracdensamp);
-  declareProperty("EM_fracnumdet",m_em_fracnumdet="none");
-  declareProperty("EM_fracdendet",m_em_fracdendet="none");
 }
 
 TBBeamQualityEMFractionTool::~TBBeamQualityEMFractionTool()
@@ -79,32 +70,32 @@ StatusCode TBBeamQualityEMFractionTool::initializeTool()
   log<<MSG::DEBUG<<"Got to before p_toolSvc"<<endmsg;
   
   if (m_em_fracnumdet=="HEC") {
-    m_em_fracnumsamp.push_back(8);
-    m_em_fracnumsamp.push_back(9);
-    m_em_fracnumsamp.push_back(10);
+    m_em_fracnumsamp.value().push_back(8);
+    m_em_fracnumsamp.value().push_back(9);
+    m_em_fracnumsamp.value().push_back(10);
   }
   if (m_em_fracdendet=="HEC") {
-    m_em_fracdensamp.push_back(8);
-    m_em_fracdensamp.push_back(9);
-    m_em_fracdensamp.push_back(10);
+    m_em_fracdensamp.value().push_back(8);
+    m_em_fracdensamp.value().push_back(9);
+    m_em_fracdensamp.value().push_back(10);
   }
   if (m_em_fracnumdet=="EMEC") {
-    m_em_fracnumsamp.push_back(6);
-    m_em_fracnumsamp.push_back(7);
+    m_em_fracnumsamp.value().push_back(6);
+    m_em_fracnumsamp.value().push_back(7);
   }
   if (m_em_fracdendet=="EMEC") {
-    m_em_fracdensamp.push_back(6);
-    m_em_fracdensamp.push_back(7);
+    m_em_fracdensamp.value().push_back(6);
+    m_em_fracdensamp.value().push_back(7);
   }
   if (m_em_fracnumdet=="FCAL") {
-    m_em_fracnumsamp.push_back(21);
-    m_em_fracnumsamp.push_back(22);
-    m_em_fracnumsamp.push_back(23);
+    m_em_fracnumsamp.value().push_back(21);
+    m_em_fracnumsamp.value().push_back(22);
+    m_em_fracnumsamp.value().push_back(23);
   }
   if (m_em_fracdendet=="FCAL") {
-    m_em_fracdensamp.push_back(21);
-    m_em_fracdensamp.push_back(22);
-    m_em_fracdensamp.push_back(23);
+    m_em_fracdensamp.value().push_back(21);
+    m_em_fracdensamp.value().push_back(22);
+    m_em_fracdensamp.value().push_back(23);
   }
   
   return StatusCode::SUCCESS;
@@ -121,8 +112,8 @@ StatusCode TBBeamQualityEMFractionTool::accept(const std::vector<std::string>& p
   
   StatusCode sc;
   
-  log << MSG::DEBUG << "m_em_fracnumdet: "<<m_em_fracnumdet<<endmsg;
-  log << MSG::DEBUG << "m_em_fracdendet: "<<m_em_fracdendet<<endmsg;
+  log << MSG::DEBUG << "m_em_fracnumdet: "<<m_em_fracnumdet.value()<<endmsg;
+  log << MSG::DEBUG << "m_em_fracdendet: "<<m_em_fracdendet.value()<<endmsg;
   log << MSG::DEBUG << " called for:  "<<particles.size()<<" particles"<<endmsg;
   
   // setting up layers (h6)
@@ -166,12 +157,12 @@ StatusCode TBBeamQualityEMFractionTool::accept(const std::vector<std::string>& p
   
   // picking out layers of interest and filling numerator and denominator energies.
   
-  for (unsigned int i=0;i<m_em_fracnumsamp.size();++i) {
+  for (unsigned int i=0;i<m_em_fracnumsamp.value().size();++i) {
     if (m_em_fracnumsamp[i] < m_Mlayer.size())
       numenergy+=m_Mlayer[m_em_fracnumsamp[i]];
   }  
   
-  for (unsigned int i=0;i<m_em_fracdensamp.size();++i) {
+  for (unsigned int i=0;i<m_em_fracdensamp.value().size();++i) {
     if (m_em_fracdensamp[i] < m_Mlayer.size())
       denenergy+=m_Mlayer[m_em_fracdensamp[i]];
   } 

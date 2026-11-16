@@ -38,7 +38,8 @@ class TBMWPCRec : public AthAlgorithm
   // Properties //
   ////////////////
 
-  std::string m_SGkey,m_SGrecordkey;
+  Gaudi::Property<std::string> m_SGkey{this, "SGkey", "MWPCRawCont", "SG key of the input TBMWPCRawCont"};
+  Gaudi::Property<std::string> m_SGrecordkey{this, "SGrecordkey", "MWPCCont", "SG key of the output TBMWPCCont"};
 
   //////////////////
   // Calib consts //
@@ -46,11 +47,11 @@ class TBMWPCRec : public AthAlgorithm
   
   std::string m_mwpc_names[8];
 
-  std::vector<float> m_mwpc_wirestep;
-  std::vector<float> m_mwpc_halfsize;
+  Gaudi::Property<std::vector<float>> m_mwpc_wirestep{this, "MWPCwirestep", {}, "MWPC wire step"};
+  Gaudi::Property<std::vector<float>> m_mwpc_halfsize{this, "MWPChalfsize", {}, "MWPC half size"};
 
-  std::vector<int> m_mwpc_invX;
-  std::vector<int> m_mwpc_invY;
+  Gaudi::Property<std::vector<int>> m_mwpc_invX{this, "MWPCinvX", {}, "MWPC X inversion"};
+  Gaudi::Property<std::vector<int>> m_mwpc_invY{this, "MWPCinvY", {}, "MWPC Y inversion"};
 
 };
 

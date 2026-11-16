@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_CBNT_UPSTREAMMAT_H
@@ -19,16 +19,16 @@ public:
 	virtual StatusCode CBNT_clear() override;
 
 private:
-	std::string m_key;
-	bool m_notFound;
+	Gaudi::Property<std::string> m_key{this, "CollectionName", "", "SG key of TrackRecordCollection"};
+	bool m_notFound{false};
    //Ntuple variables:
 
-	long     m_nElec;
-	std::vector<float>    *m_ElecEne;
-	std::vector<float>    *m_ElecAng;
-	long     m_nPhot;
-	std::vector<float>    *m_PhotEne;
-	std::vector<float>    *m_PhotAng;
+	long     m_nElec{0};
+	std::vector<float>    *m_ElecEne{nullptr};
+	std::vector<float>    *m_ElecAng{nullptr};
+	long     m_nPhot{0};
+	std::vector<float>    *m_PhotEne{nullptr};
+	std::vector<float>    *m_PhotAng{nullptr};
 };
 
 #endif // CBNT_EVENTINFO_H

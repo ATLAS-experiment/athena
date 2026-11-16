@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -30,15 +30,15 @@
 class ICaloCoordinateTool;
 class IMessageSvc;
 class CaloDepthTool;
-class ICaloSurfaceBuilder;
 class ImpactInCalo;
 
 #include "TrkParameters/TrackParameters.h"
 #include "TrkDetDescrUtils/Intersection.h"
+#include "TrkExInterfaces/IExtrapolator.h"
+#include "CaloTrackingGeometry/ICaloSurfaceBuilder.h"
 
 namespace Trk {
   class Track;
-  class IExtrapolator;
   class TrackParticleBase;
 }
 
@@ -251,11 +251,11 @@ private:
   CaloPhiRange m_range;
 
   // Defines the surface  for extrapolation : 
-  ToolHandle<ICaloSurfaceBuilder> m_calosurf;
+  ToolHandle<ICaloSurfaceBuilder> m_calosurf{this, "CaloSurfaceBuilder", "CaloSurfaceBuilder", "CaloSurfaceBuilder ToolHandle"};
 
 
   // Pre-configured extrapolator : will be choosen via jobOpt
-  ToolHandle< Trk::IExtrapolator > m_extrapolator;
+  ToolHandle< Trk::IExtrapolator > m_extrapolator{this, "Extrapolator", "Trk::Extrapolator/AtlasExtrapolator", "Extrapolation ToolHandle"};
 };
 
  

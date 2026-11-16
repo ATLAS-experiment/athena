@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -35,21 +35,21 @@ class ReadTBLArDigits : public AthAlgorithm
   virtual StatusCode finalize() override;
 
  private:
-  int m_count;
+  int m_count{0};
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey
     {this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
-  const LArEM_ID*   m_emId;
-  const LArFCAL_ID* m_fcalId;
-  const LArHEC_ID*  m_hecId;
-  const LArOnlineID* m_onlineHelper;
+  const LArEM_ID*   m_emId{nullptr};
+  const LArFCAL_ID* m_fcalId{nullptr};
+  const LArHEC_ID*  m_hecId{nullptr};
+  const LArOnlineID* m_onlineHelper{nullptr};
   std::ofstream m_outfile;
-  std::string m_containerKey;
-  std::string m_dumpFile;
-  bool m_printCellLoc;
-  bool m_printFebChan;
+  Gaudi::Property<std::string> m_containerKey{this, "ContainerKey", "", "SG key of the TBLArDigitContainer (empty: retrieve default)"};
+  Gaudi::Property<std::string> m_dumpFile{this, "DumpFile", "", "Name of the text dump file (empty: no dump)"};
+  Gaudi::Property<bool> m_printCellLoc{this, "PrintCellLocation", false, "Print cell layer/eta/phi in the dump file"};
+  Gaudi::Property<bool> m_printFebChan{this, "PrintFebChan", true, "Print FEB ID and channel in the dump file"};
   //std::string m_NTupleLoc;
   
-  NTuple::Tuple* m_ntuplePtr;
+  NTuple::Tuple* m_ntuplePtr{nullptr};
   //NTuple::Item<long> m_cellIndex;
   NTuple::Item<long> m_cellIndex;
   NTuple::Array<long> m_layer, m_eta, m_phi, m_gain;

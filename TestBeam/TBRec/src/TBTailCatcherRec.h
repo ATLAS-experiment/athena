@@ -36,14 +36,14 @@ class TBTailCatcherRec : public AthAlgorithm
   // Properties //
   ////////////////
 
-  std::string m_SGkey;
+  Gaudi::Property<std::string> m_SGkey{this, "SGkey", "TailCatcherRaw", "SG key of the TBTailCatcherRaw object"};
 
   //////////////////
   // Calib consts //
   //////////////////
 
-  std::vector<float> m_tailcatch_calib;
-  std::vector<float> m_tailcatch_ped;
+  Gaudi::Property<std::vector<float>> m_tailcatch_calib{this, "TailCatcherCalib", {}, "TailCatcher calibration factors"};
+  Gaudi::Property<std::vector<float>> m_tailcatch_ped{this, "TailCatcherPed", {}, "TailCatcher pedestals"};
 
 };
 

@@ -9,21 +9,7 @@
 TBMWPCRec::TBMWPCRec(const std::string& name,
 				 ISvcLocator* pSvcLocator) :
   AthAlgorithm(name,pSvcLocator)
- {
-  // job options
-
-   declareProperty("SGkey",  m_SGkey="MWPCRawCont");
-   declareProperty("SGrecordkey",  m_SGrecordkey="MWPCCont");
-
-
-
-   declareProperty("MWPCwirestep",  m_mwpc_wirestep);
-   declareProperty("MWPChalfsize",  m_mwpc_halfsize);
-
-   declareProperty("MWPCinvX",  m_mwpc_invX);
-   declareProperty("MWPCinvY",  m_mwpc_invY);
-
- }
+{}
 
 TBMWPCRec::~TBMWPCRec()
 { }
@@ -44,12 +30,12 @@ TBMWPCRec::execute(const EventContext& ctx)
 
   // Reconstruct MWPC :
   TBMWPCRawCont * mwpcrawCont;
-  StatusCode sc = evtStore()->retrieve(mwpcrawCont, m_SGkey);
+  StatusCode sc = evtStore()->retrieve(mwpcrawCont, m_SGkey.value());
   if (sc.isFailure()){
-    ATH_MSG_INFO ( "TBObjectReco: Retrieval of "<<m_SGkey<<" failed" );
+    ATH_MSG_INFO ( "TBObjectReco: Retrieval of "<<m_SGkey.value()<<" failed" );
     
   }else {
-    ATH_MSG_DEBUG ( "TBMWPCRec : Retrieval of "<<m_SGkey<<" succeed : cont size=" << mwpcrawCont->size());
+    ATH_MSG_DEBUG ( "TBMWPCRec : Retrieval of "<<m_SGkey.value()<<" succeed : cont size=" << mwpcrawCont->size());
     
     auto mwpcCont = std::make_unique<TBMWPCCont>();
 
@@ -113,8 +99,8 @@ TBMWPCRec::execute(const EventContext& ctx)
       mwpcCont->push_back(std::move(mwpc));
     }
 
-    ATH_MSG_DEBUG ( " recording "<<m_SGrecordkey);
-    sc = evtStore()->record(std::move(mwpcCont),m_SGrecordkey);
+    ATH_MSG_DEBUG ( " recording "<<m_SGrecordkey.value());
+    sc = evtStore()->record(std::move(mwpcCont),m_SGrecordkey.value());
     if ( sc.isFailure( ) ) {
       ATH_MSG_FATAL ( "Cannot record MWPCCont" );
     }

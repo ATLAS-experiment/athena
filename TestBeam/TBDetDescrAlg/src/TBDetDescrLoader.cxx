@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Gaudi Includes
@@ -15,14 +15,8 @@
 
 // Constructor & destructor
 TBDetDescrLoader::TBDetDescrLoader(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator),
-    m_TBDDM(0),
-    c_TBDDM(0)
+  : AthAlgorithm(name, pSvcLocator)
 {
-  declareProperty("TBDetDescrManager", m_TBDetDescrManager = "TBDetDescrMgr");
-  declareProperty("TBElementContainer", m_TBElementContainer = "TBElementCnt");
-  declareProperty("ReadAction",  m_readAction = -1);
-  declareProperty("WriteAction", m_writeAction = 0);
 }
 
 TBDetDescrLoader::~TBDetDescrLoader()
@@ -53,9 +47,9 @@ StatusCode TBDetDescrLoader::initialize()
     
     if (m_readAction < 0) {
       m_readAction = 0;
-      sc=detStore()->record(m_TBDDM, m_TBDetDescrManager, true);
+      sc=detStore()->record(m_TBDDM, m_TBDetDescrManager.value(), true);
     } else {
-        sc=detStore()->record(m_TBDDM, m_TBDetDescrManager, false);
+        sc=detStore()->record(m_TBDDM, m_TBDetDescrManager.value(), false);
     }
     
     if(sc.isFailure()) {
@@ -114,14 +108,14 @@ StatusCode TBDetDescrLoader::execute(const EventContext& /*ctx*/) {
 
   TBElementContainer* pTBElementContainer;
 
-  switch (m_readAction) {
+  switch (m_readAction.value()) {
 
   case 0: // do nothing
     ATH_MSG_DEBUG( "readAction: do nothing" );
 
     // write to StoreGate only if we are not reading from it!
 
-    switch (m_writeAction) {
+    switch (m_writeAction.value()) {
 
     case 0: // do nothing
       ATH_MSG_DEBUG( "writeAction: do nothing" );
@@ -141,7 +135,7 @@ StatusCode TBDetDescrLoader::execute(const EventContext& /*ctx*/) {
       c_TBDDM->getAll(pTBElementContainer);
       c_TBDDM->print(msg());
   
-      sc=evtStore()->record(pTBElementContainer, m_TBElementContainer, false);
+      sc=evtStore()->record(pTBElementContainer, m_TBElementContainer.value(), false);
       if(sc.isFailure()) {
         ATH_MSG_FATAL( "failed to register the TBElementContainer" );
         return StatusCode::FAILURE;
@@ -164,7 +158,7 @@ StatusCode TBDetDescrLoader::execute(const EventContext& /*ctx*/) {
     ATH_MSG_DEBUG( "Action: read TBDetDescr from StoreGate" );
     {
       const TBElementContainer* pContainer = nullptr;
-      ATH_CHECK( evtStore()->retrieve(pContainer,m_TBElementContainer) );
+      ATH_CHECK( evtStore()->retrieve(pContainer,m_TBElementContainer.value()) );
       m_TBDDM->initialize(pContainer);
       m_TBDDM->print(msg());
     }

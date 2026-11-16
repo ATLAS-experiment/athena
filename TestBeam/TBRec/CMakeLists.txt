@@ -19,8 +19,11 @@ atlas_add_library( TBRecLib
                    PUBLIC_HEADERS TBRec
                    INCLUDE_DIRS CxxUtils ${ROOT_INCLUDE_DIRS} ${CLHEP_INCLUDE_DIRS}
                    DEFINITIONS ${CLHEP_DEFINITIONS}
-                   LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} CaloGeoHelpers CaloIdentifier AthenaBaseComps AthenaKernel AthContainers GeoPrimitives Identifier xAODTracking GaudiKernel LArIdentifier LArRawEvent TBEvent TrkDetDescrUtils TrkParameters TrkTrack CaloUtilsLib StoreGateLib LArRawUtilsLib LArCablingLib CaloDetDescrLib TBCaloGeometryLib TBCondRunParLib
-                   PRIVATE_LINK_LIBRARIES  CaloDmDetDescr CaloSimEvent CondDBObjects xAODCaloEvent LArG4TBSimEvent Particle PathResolver TrkSurfaces TrkEventPrimitives TrkExInterfaces CaloTrackingGeometryLib TrackRecordLib CaloConditions )
+                   LINK_LIBRARIES ${ROOT_LIBRARIES} ${CLHEP_LIBRARIES} CaloGeoHelpers CaloIdentifier AthenaBaseComps AthenaKernel AthContainers GeoPrimitives
+		                  Identifier xAODTracking GaudiKernel LArIdentifier LArRawEvent TBEvent TrkDetDescrUtils TrkParameters TrkTrack CaloUtilsLib StoreGateLib
+		                  LArRawUtilsLib LArCablingLib CaloDetDescrLib TBCaloGeometryLib TBCondRunParLib TrkExInterfaces CaloTrackingGeometryLib
+		   PRIVATE_LINK_LIBRARIES  CaloDmDetDescr CaloSimEvent CondDBObjects xAODCaloEvent LArG4TBSimEvent Particle PathResolver TrkSurfaces
+				  TrkEventPrimitives TrackRecordLib CaloConditions )
 
 atlas_add_component( TBRec
                      src/components/*.cxx

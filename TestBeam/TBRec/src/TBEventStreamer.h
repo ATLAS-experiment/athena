@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBEVENTSTREAMER_H
@@ -33,7 +33,7 @@ class TBEventStreamer : public AthAlgorithm
 
  protected:
 
-  ToolHandleArray<TBEventStreamerTool> m_tools;
+  ToolHandleArray<TBEventStreamerTool> m_tools{this, "ToolNames", {}, "event streamer tools to invoke"};
 
   std::map<ToolHandle<TBEventStreamerTool>, unsigned int> m_acceptCounter;
   std::map<ToolHandle<TBEventStreamerTool>, unsigned int> m_rejectCounter;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCnv/TBByteStreamCnvTool.h"
@@ -40,20 +40,9 @@ TBByteStreamCnvTool::TBByteStreamCnvTool
 ( const std::string& type, const std::string& name,const IInterface* parent )
   :  AthAlgTool(type,name,parent),
      m_ByteStreamEventAccess("ByteStreamCnvSvc", name),
-     m_rdpSvc("ROBDataProviderSvc", name),
-     m_lastEventID(0, UINT_MAX), m_subdet_id(eformat::TDAQ_BEAM_CRATE),
-     m_theRodBlock(0), m_theROB(0)
+     m_rdpSvc("ROBDataProviderSvc", name)
 { 
   declareInterface< TBByteStreamCnvTool  >( this );
-  m_tbtdc=0;
-  declareProperty("ForceHchoice",m_force_Hchoice=false);
-  declareProperty("Dump",m_dump=false);
-  declareProperty("isH6Run",m_H6run=true);
-  declareProperty("isH8Run",m_H8run=false);
-  declareProperty("Keys",m_keys);
-  declareProperty("SubDetID",m_subdet_key);
-  declareProperty("SummaryPath",m_summary_path);
-
 }
  
 StatusCode TBByteStreamCnvTool::initialize()
@@ -77,8 +66,8 @@ StatusCode TBByteStreamCnvTool::initialize()
   ATH_CHECK( m_ByteStreamEventAccess.retrieve() );
   ATH_CHECK( m_rdpSvc.retrieve() );
 
-  std::vector<std::string>::const_iterator it   = m_keys.begin();
-  std::vector<std::string>::const_iterator it_e = m_keys.end();
+  std::vector<std::string>::const_iterator it   = m_keys.value().begin();
+  std::vector<std::string>::const_iterator it_e = m_keys.value().end();
   std::vector<std::string> keys;
   keys.resize(24);
   for(; it!=it_e;++it) {
@@ -108,7 +97,7 @@ StatusCode TBByteStreamCnvTool::initialize()
 
   
   m_keys=std::move(keys);
-  m_subdet_id=(eformat::SubDetector)m_subdet_key;
+  m_subdet_id=(eformat::SubDetector)m_subdet_key.value();
 
   m_isCalib = false;
 
@@ -1195,7 +1184,7 @@ StatusCode TBByteStreamCnvTool::H6BuildObjects(int unrec_code)
 	//     m_summary_path = m_summary_path+"/run";
 //     m_summary_path = m_summary_path+m_run_num;
 //     m_summary_path = m_summary_path+".summary";
-	std::ofstream outfile(m_summary_path.c_str());
+	std::ofstream outfile(m_summary_path.value().c_str());
 	
 	outfile << "Run number " << m_run_num << '\n';
 	outfile << '\n';

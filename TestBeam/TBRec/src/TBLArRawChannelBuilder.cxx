@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBLArRawChannelBuilder.h"
@@ -13,27 +13,8 @@ using CLHEP::nanosecond;
 
 
 TBLArRawChannelBuilder::TBLArRawChannelBuilder (const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name, pSvcLocator),
-  m_emId(0),
-  m_fcalId(0),
-  m_hecId(0),
-  m_onlineHelper(0),
-  m_DataLocation("FREE"),
-  m_ChannelContainerName("LArRawChannels"),
-  m_ADCtoMeVFCAL(),
-  m_ADCtoMeVHEC(),
-  m_ADCtoMeVEMECInner(),
-  m_ADCtoMeVEMECOuter(),
-  m_ADCtoMeVEMB(),
-  m_iPedestal(0)                              // jobO ?
-{
-   //m_useIntercept={false,false,false,false};
- declareProperty("LArRawChannelContainerName",m_ChannelContainerName);
- declareProperty("DataLocation", m_DataLocation );
- declareProperty("maxSamp",m_imaxSamp=8);
- declareProperty("RecoMode",m_mode="CUBIC");
- declareProperty("CubicAdcCut",m_cubicAdcCut=50.0);
-}
+  AthAlgorithm(name, pSvcLocator)
+{}
 
 StatusCode TBLArRawChannelBuilder::initialize(){
   ATH_MSG_DEBUG ( "In Initialize." );
@@ -78,7 +59,7 @@ StatusCode TBLArRawChannelBuilder::execute(const EventContext& ctx) {
   const LArDigitContainer* digitContainer;//Pointer to LArDigitContainer
 
   //Retrieve Digit Container
-  ATH_CHECK( evtStore()->retrieve(digitContainer,m_DataLocation) );
+  ATH_CHECK( evtStore()->retrieve(digitContainer,m_DataLocation.value()) );
   ATH_MSG_DEBUG ( "1) LArDigitContainer container size = " <<  digitContainer->size() );
 
   ATH_MSG_DEBUG ( "2) LArDigitContainer container size = " <<  digitContainer->size() );
@@ -91,7 +72,7 @@ StatusCode TBLArRawChannelBuilder::execute(const EventContext& ctx) {
   ATH_MSG_DEBUG ( "Making new LArRawChannelContainer " <<  digitContainer->size() );
   LArRawChannelContainer* larRawChannelContainer=new LArRawChannelContainer();
   larRawChannelContainer->reserve(digitContainer->size());
-  ATH_CHECK( evtStore()->record(larRawChannelContainer,m_ChannelContainerName) );
+  ATH_CHECK( evtStore()->record(larRawChannelContainer,m_ChannelContainerName.value()) );
   
   //Now all data is available, start loop over Digit Container
   ATH_MSG_DEBUG ( "Loop over Digit Container " );
@@ -207,7 +188,7 @@ StatusCode TBLArRawChannelBuilder::execute(const EventContext& ctx) {
       ( "Flag: "
 	<< CubicFailed
 	<< " Mode: "
-	<< m_mode
+	<< m_mode.value()
 	<< " Signal: "
 	<<  ADCPeak
 	<< " Peak: "

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBPlaneTrackingAlgo.h"
@@ -19,24 +19,8 @@
 class ISvcLocator;
 
 TBPlaneTrackingAlgo::TBPlaneTrackingAlgo(const std::string& name, ISvcLocator* pSvcLocator) 
-  : AthAlgorithm(name, pSvcLocator),
-    m_runnumber(0)
-{
-  declareProperty("TestAlgo",m_testAlgo=false);
-  declareProperty("CalibFileName",  m_calib_filename="H6HitCalib.txt");
-  declareProperty("BPCnames",  m_bpc_names);
-  declareProperty("BPCposX",  m_bpc_posX);
-  declareProperty("BPCposY",  m_bpc_posY);
-  declareProperty("BPCposZX",  m_bpc_posZX);
-  declareProperty("BPCposZY",  m_bpc_posZY);
-  declareProperty("BPCerrposX",  m_bpc_errposX);
-  declareProperty("BPCerrposY",  m_bpc_errposY);
-  declareProperty("BPCerrposZX",  m_bpc_errposZX);
-  declareProperty("BPCerrposZY",  m_bpc_errposZY);
-  declareProperty("BPCerrmeasX",  m_bpc_errmeasX);
-  declareProperty("BPCerrmeasY",  m_bpc_errmeasY);
-  
-}
+  : AthAlgorithm(name, pSvcLocator)
+{}
 
 ////////////////////////////////////////////
 StatusCode TBPlaneTrackingAlgo::initialize()
@@ -368,12 +352,12 @@ StatusCode TBPlaneTrackingAlgo::buildHits()
     ATH_MSG_DEBUG (" Hits in BPC "<< name);
     // Find calibration index for this BPC
     unsigned int ind=0;
-    while(ind<m_bpc_names.size()) 
+    while(ind<m_bpc_names.value().size()) 
     {
       if(name==m_bpc_names[ind]) break; 
       else ind++;
     }
-    if(ind==m_bpc_names.size()){
+    if(ind==m_bpc_names.value().size()){
       ATH_MSG_ERROR ("No calibrations for BPC" << name);
       continue;
     }
@@ -429,18 +413,18 @@ StatusCode TBPlaneTrackingAlgo::getnewcalib()
 
   ATH_MSG_DEBUG ("Get new calibs for run " << m_runnumber);
   
-  int bpcnumber= m_bpc_names.size();
+  int bpcnumber= m_bpc_names.value().size();
 
-  m_bpc_posX.clear(); m_bpc_posX.resize(bpcnumber);
-  m_bpc_posY.clear(); m_bpc_posY.resize(bpcnumber);
-  m_bpc_posZX.clear(); m_bpc_posZX.resize(bpcnumber);
-  m_bpc_posZY.clear(); m_bpc_posZY.resize(bpcnumber);
-  m_bpc_errposX.clear(); m_bpc_errposX.resize(bpcnumber);
-  m_bpc_errposY.clear(); m_bpc_errposY.resize(bpcnumber);
-  m_bpc_errposZX.clear(); m_bpc_errposZX.resize(bpcnumber);
-  m_bpc_errposZY.clear(); m_bpc_errposZY.resize(bpcnumber);
-  m_bpc_errmeasX.clear(); m_bpc_errmeasX.resize(bpcnumber);
-  m_bpc_errmeasY.clear(); m_bpc_errmeasY.resize(bpcnumber);
+  m_bpc_posX.value().clear(); m_bpc_posX.value().resize(bpcnumber);
+  m_bpc_posY.value().clear(); m_bpc_posY.value().resize(bpcnumber);
+  m_bpc_posZX.value().clear(); m_bpc_posZX.value().resize(bpcnumber);
+  m_bpc_posZY.value().clear(); m_bpc_posZY.value().resize(bpcnumber);
+  m_bpc_errposX.value().clear(); m_bpc_errposX.value().resize(bpcnumber);
+  m_bpc_errposY.value().clear(); m_bpc_errposY.value().resize(bpcnumber);
+  m_bpc_errposZX.value().clear(); m_bpc_errposZX.value().resize(bpcnumber);
+  m_bpc_errposZY.value().clear(); m_bpc_errposZY.value().resize(bpcnumber);
+  m_bpc_errmeasX.value().clear(); m_bpc_errmeasX.value().resize(bpcnumber);
+  m_bpc_errmeasY.value().clear(); m_bpc_errmeasY.value().resize(bpcnumber);
 
   int pos;
 
@@ -448,7 +432,7 @@ StatusCode TBPlaneTrackingAlgo::getnewcalib()
   std::string filename = PathResolver::find_file (m_calib_filename, "DATAPATH");
   calibfile.open(filename.c_str());
   if(!calibfile.good()){
-    ATH_MSG_WARNING (" Problem with file named "<< m_calib_filename << " in $DATAPATH");
+    ATH_MSG_WARNING (" Problem with file named "<< m_calib_filename.value() << " in $DATAPATH");
     return StatusCode::FAILURE;
   } else {
     ATH_MSG_DEBUG (" File: "<< filename << " opened");
@@ -482,16 +466,16 @@ StatusCode TBPlaneTrackingAlgo::getnewcalib()
     {
       int bpcn;
       calibfile >> bpcn; 
-      calibfile >> m_bpc_posX[j];
-      calibfile >> m_bpc_posY[j];
-      calibfile >> m_bpc_posZX[j];
-      calibfile >> m_bpc_posZY[j];
-      calibfile >> m_bpc_errposX[j];
-      calibfile >> m_bpc_errposY[j];
-      calibfile >> m_bpc_errposZX[j];
-      calibfile >> m_bpc_errposZY[j];
-      calibfile >> m_bpc_errmeasX[j];
-      calibfile >> m_bpc_errmeasY[j];
+      calibfile >> m_bpc_posX.value()[j];
+      calibfile >> m_bpc_posY.value()[j];
+      calibfile >> m_bpc_posZX.value()[j];
+      calibfile >> m_bpc_posZY.value()[j];
+      calibfile >> m_bpc_errposX.value()[j];
+      calibfile >> m_bpc_errposY.value()[j];
+      calibfile >> m_bpc_errposZX.value()[j];
+      calibfile >> m_bpc_errposZY.value()[j];
+      calibfile >> m_bpc_errmeasX.value()[j];
+      calibfile >> m_bpc_errmeasY.value()[j];
 
       ATH_MSG_DEBUG (bpcn << " "<<m_bpc_posX[j]
                      << " "<< m_bpc_posY[j]    

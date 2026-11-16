@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //######################################################
@@ -47,29 +47,29 @@ class CBNT_CaloH6 : public CBNT_TBRecBase
   // LArDetDescrManager* m_larMgr;
 
   // Identifier Pointers
-  const LArEM_ID* m_emecID_help;
-  const LArHEC_ID* m_hecID_help;
-  const LArFCAL_ID* m_fcalID_help;
+  const LArEM_ID* m_emecID_help{nullptr};
+  const LArHEC_ID* m_hecID_help{nullptr};
+  const LArFCAL_ID* m_fcalID_help{nullptr};
 
   SG::ReadCondHandleKey<CaloNoise> m_elecNoiseKey
     { this, "ElecNoiseKey", "electronicNoise", "SG key for electronic noise" };
   
-  float m_noiseSigma;
+  float m_noiseSigma{0};
   
   // picking detector and number of channels
-  std::string m_det_type;
-  int m_numchan;
+  Gaudi::Property<std::string> m_det_type{this, "Det_Type", "", "Detector type (HEC, EMEC or FCAL)"};
+  Gaudi::Property<int> m_numchan{this, "Max_Chan", 0, "Maximum number of channels"};
 
   /*-------------------Ntuple--------------------------------*/
   
-  std::vector<float> *m_energy;
-  std::vector<float> *m_NoiseRMS;
-  std::vector<float> *m_ieta;
-  std::vector<float> *m_iphi;
-  std::vector<float> *m_eta;
-  std::vector<float> *m_phi;
-  std::vector<float> *m_sampling;
-  std::vector<float> *m_region;
+  std::vector<float> *m_energy{nullptr};
+  std::vector<float> *m_NoiseRMS{nullptr};
+  std::vector<float> *m_ieta{nullptr};
+  std::vector<float> *m_iphi{nullptr};
+  std::vector<float> *m_eta{nullptr};
+  std::vector<float> *m_phi{nullptr};
+  std::vector<float> *m_sampling{nullptr};
+  std::vector<float> *m_region{nullptr};
 
 };                                                                      
 #endif

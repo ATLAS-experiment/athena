@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //Dear emacs, this is -*-c++-*-
@@ -37,7 +37,7 @@ class CBNT_TBRecBase : public AthAlgorithm {
   virtual StatusCode CBNT_clear() {return StatusCode::SUCCESS;}
 
  private:
-  bool m_initialized;
+  bool m_initialized{false};
 
  protected:   
  // wrapper to add branches
@@ -58,14 +58,14 @@ class CBNT_TBRecBase : public AthAlgorithm {
   std::string m_ntpath, m_ntTitle;
 
   //Ntuple pointer
-  TTree* m_nt;
+  TTree* m_nt{nullptr};
 
-  MsgStream* m_log;
+  MsgStream* m_log{nullptr};
 
-  const LArEM_ID* m_emId;
-  const LArHEC_ID* m_hecId;
-  const LArFCAL_ID* m_fcalId;
-  const LArOnlineID* m_onlineId;
+  const LArEM_ID* m_emId{nullptr};
+  const LArHEC_ID* m_hecId{nullptr};
+  const LArFCAL_ID* m_fcalId{nullptr};
+  const LArOnlineID* m_onlineId{nullptr};
 
 };
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ***************************************************************************
@@ -18,7 +18,6 @@
 #include "TrkTrack/Track.h"
 #include "TrkEventPrimitives/PropDirection.h"
 #include "TrkEventPrimitives/ParticleHypothesis.h"
-#include "TrkExInterfaces/IExtrapolator.h"
 #include "xAODTracking/Vertex.h"
 // CLHEP
 #include "CLHEP/Units/SystemOfUnits.h"
@@ -27,7 +26,6 @@
 
 // Calo specific stuff :
 #include "CaloDetDescr/ICaloCoordinateTool.h"
-#include "CaloTrackingGeometry/ICaloSurfaceBuilder.h"
 #include "CaloDetDescr/CaloDepthTool.h"
 
 #include <cmath>
@@ -39,15 +37,8 @@
 TBExtrapolTrackToCaloTool::TBExtrapolTrackToCaloTool(const std::string& type, 
 			     const std::string& name, 
 			     const IInterface* parent) :
-  AthAlgTool(type, name, parent),
-  m_calosurf("CaloSurfaceBuilder"),
-  m_extrapolator("Trk::Extrapolator/AtlasExtrapolator")
-{
-
- declareProperty ("CaloSurfaceBuilder",m_calosurf,"Extrapolation ToolHandle");
- declareProperty ("Extrapolator",m_extrapolator,"CaloSurfaceBuilder ToolHandle");
-
-}
+  AthAlgTool(type, name, parent)
+{}
 
 TBExtrapolTrackToCaloTool::~TBExtrapolTrackToCaloTool()
 {}

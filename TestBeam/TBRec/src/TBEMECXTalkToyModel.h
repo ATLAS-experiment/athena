@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBEMECXTALKTOYMODEL_H
@@ -29,17 +29,17 @@ public:
  private:
 // properties
 
-  std::vector<int> m_caloNums ; // which calo to correct
+  Gaudi::Property<std::vector<int>> m_caloNums{this, "CaloNums", {static_cast<int>(CaloCell_ID::NSUBCALO)}, "which calo to correct (default: all)"};
   //reminder  enum SUBCALO { LAREM = 0, LARHEC = 1, LARFCAL = 2, TILE = 3, NSUBCALO = 4, NOT_VALID=999999 };
 
-  bool m_caloSelection ;
+  bool m_caloSelection{false};
 
-  const CaloCell_ID * m_calo_id;
+  const CaloCell_ID * m_calo_id{nullptr};
 
 
-  float m_xtalkScaleLong;
-  float m_xtalkScaleEta;
-  float m_xtalkScaleEMEC2Eta;
+  Gaudi::Property<float> m_xtalkScaleLong{this, "XTalkScaleLong", 0, "Longitudinal cross-talk scale"};
+  Gaudi::Property<float> m_xtalkScaleEta{this, "XTalkScaleEta", 0, "Eta cross-talk scale"};
+  Gaudi::Property<float> m_xtalkScaleEMEC2Eta{this, "XTalkScaleEMEC2Eta", 0, "EMEC2 eta cross-talk scale"};
 
   StatusCode processOnCellIterators(const CaloCellContainer::iterator  &  itrCellBeg, const CaloCellContainer::iterator & itrCellEnd ) const;
   

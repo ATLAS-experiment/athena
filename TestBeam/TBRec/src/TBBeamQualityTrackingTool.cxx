@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //#####################################################
@@ -23,14 +23,8 @@ TBBeamQualityTrackingTool::TBBeamQualityTrackingTool(const std::string& type,
                                                      const std::string& name,
                                                      const IInterface* parent)
   : TBBeamQualityTool(type,name,parent)
-{  
-
-  // defaults are 0, which means no cut.
-  // if cutting, must specify both.
+{
   declareInterface<TBBeamQualityTool>(this);
-  declareProperty("Chi2Cut_x",m_chi2cut_u=0.);
-  declareProperty("Chi2Cut_y",m_chi2cut_v=0.);
-
 }
 
 TBBeamQualityTrackingTool::~TBBeamQualityTrackingTool()
