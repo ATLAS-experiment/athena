@@ -37,12 +37,6 @@ JSSTaggerBase::JSSTaggerBase(const std::string &name) :
   declareProperty( "KerasOutput",     m_kerasConfigOutputName = "XXX",
 		   "Name of output variable by the ML-tagger (Keras)" );
 
-  /// TMVA properties
-  declareProperty( "CalibAreaTMVA",  m_tmvaCalibArea = "BoostedJetTaggers/JSSWTopTaggerBDT/Boost2017/",
-		   "Path to xml file to configure ML-taggers (TMVA)" );
-  declareProperty( "TMVAConfigFile", m_tmvaConfigFileName = "XXX",
-		   "Name of xml file to configure ML-taggers (TMVA)" );
-
   /// Tagging scale factors
   declareProperty( "WeightDecorationName",      m_weightDecorationName = "SF",
 		   "Name of SF variable decorated to xAOD::Jet" );
