@@ -1,12 +1,8 @@
 <lcgdict>
-  <class name="IJetBuildTool" />
   <class name="IJetConstituentModifier" />
-  <class name="IJetConsumer" />
   <class name="IJetDecorator" />  
   <class name="IJetExecuteTool" />
-  <class name="IJetFinder" />
   <class name="IJetFromPseudojet" />
-  <class name="IJetGroomer" />
   <class name="IJetModifier" />  
   <class name="IJetPseudojetRetriever" />
   <class name="IJetSelector" />

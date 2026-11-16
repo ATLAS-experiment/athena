@@ -9,11 +9,9 @@
 #include "JetRec/MuonSegmentPseudoJetAlgorithm.h"
 
 #include "JetRec/JetFromPseudojet.h"
-#include "JetRec/FastJetInterfaceTool.h"
 
 #include "JetRec/JetSorter.h"
 #include "JetRec/JetPseudojetRetriever.h"
-#include "JetRec/JetPseudojetCopier.h"
 #include "JetRec/JetFilterTool.h"
 #include "JetRec/JetClusterer.h"
 #include "JetRec/JetClustererByVertex.h"
@@ -25,9 +23,7 @@
 DECLARE_COMPONENT( JetFromPseudojet )
 DECLARE_COMPONENT( JetSorter )
 DECLARE_COMPONENT( JetFilterTool )
-DECLARE_COMPONENT( FastJetInterfaceTool )
 DECLARE_COMPONENT( JetPseudojetRetriever )
-DECLARE_COMPONENT( JetPseudojetCopier )
 DECLARE_COMPONENT( JetClusterer )
 DECLARE_COMPONENT( JetClustererByVertex )
 DECLARE_COMPONENT( JetCopier )
