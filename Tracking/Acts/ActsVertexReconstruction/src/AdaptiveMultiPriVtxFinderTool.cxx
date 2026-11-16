@@ -28,6 +28,15 @@
 // STL
 #include <iostream>
 #include <memory>
+#include <cmath>
+#include "AthContainers/ConstAccessor.h"
+#include "AthContainers/Decorator.h"
+namespace {
+  // Vertex time fitted by the 4D AMVF, kept separate from the vertex "time" set by VertexTimeAlg
+  const SG::Decorator<float> s_decAmvfTime("amvfTime");
+  const SG::Decorator<float> s_decAmvfTimeRes("amvfTimeResolution");
+}
+
 
 namespace
 {
@@ -95,6 +104,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
     fitterCfg.minWeight = m_minWeightFitter;
     fitterCfg.maxRelativeShift = m_fitterMaxRelativeShift;
     fitterCfg.doSmoothing = m_fitterDoSmoothing;
+    fitterCfg.useTime = m_useTime;
     fitterCfg.extractParameters.connect<&TrackWrapper::extractParameters>();
     fitterCfg.trackLinearizer.connect<&TrackLinearizer::linearizeTrack>(&*m_linearizer);
     VertexFitter fitter(std::move(fitterCfg), logger().cloneWithSuffix("Fitter"));
@@ -159,6 +169,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
       return StatusCode::FAILURE;
     }
 
+    ATH_MSG_DEBUG("4D vertexing with HGTD track time (useTime): " << (m_useTime ? "ON" : "OFF"));
     ATH_MSG_INFO("ACTS AMVF tool successfully initialized");
     return StatusCode::SUCCESS;
   }
@@ -181,6 +192,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::initialize()
   finderConfig.initialVariances            = Acts::Vector4::Constant(m_looseConstrValue);
   finderConfig.useVertexCovForIPEstimation = m_useVertexCovForIPEstimation;
   finderConfig.useSeedConstraint           = m_useSeedConstraint;
+  finderConfig.useTime                     = m_useTime;
 
   finderConfig.extractParameters.connect<&TrackWrapper::extractParameters>();
 
@@ -309,8 +321,26 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
       const auto& trkParams = trk->parameters();
       const auto& params = trkParams->parameters();
 
+      // ---- HGTD track time for 4D vertexing ----
+      double trkTime = 0.;   // default = previous behaviour
+      double trkVarT = 1.;   // default = previous behaviour
+      if (m_useTime) {
+        // tracks without a valid HGTD time: huge time uncertainty, so their time is ignored
+        const double noTimeSigma = m_noTimeSigma.value() * 1_ns;
+        trkVarT = noTimeSigma * noTimeSigma;
+        const auto* linkToXAODTP = dynamic_cast<const Trk::LinkToXAODTrackParticle*>(trk.get());
+        if (linkToXAODTP && linkToXAODTP->isValid()) {
+          const xAOD::TrackParticle* tp = **linkToXAODTP;
+          if(tp->hasValidTime()) {
+            trkTime = tp->time() * 1_ns;                     // ns -> ACTS units
+            const double sigT = tp->timeResolution() * 1_ns;
+            trkVarT = sigT * sigT;
+          }
+        }
+      }
+
       Acts::BoundVector actsParams;
-      actsParams << params(0), params(1), params(2), params(3), params(4)*1./(1_MeV), 0.;
+      actsParams << params(0), params(1), params(2), params(3), params(4)*1./(1_MeV), trkTime;
 
       if(trkParams->covariance() == nullptr){
           continue;
@@ -327,7 +357,7 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
       , cov(2,0) , cov(2,1) , cov(2,2) , cov(2,3) , cov(2,4) *1./(1_MeV) , 0
       , cov(3,0) , cov(3,1) , cov(3,2) , cov(3,3) , cov(3,4) *1./(1_MeV) , 0 
       , cov(4,0) *1./(1_MeV) , cov(4,1) *1./(1_MeV) , cov(4,2) *1./(1_MeV) , cov(4,3) *1./(1_MeV) , cov(4,4) *1./(1_MeV*1_MeV), 0
-      , 0. , 0. , 0. , 0., 0., 1.;
+      , 0. , 0. , 0. , 0., 0., trkVarT;
       
       allTracks.emplace_back(trk.get(),Acts::BoundTrackParameters(perigeeSurface, actsParams, covMat, Acts::ParticleHypothesis::pion()));
     }
@@ -347,6 +377,14 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
       looseConstraintCovariance.setIdentity();
       looseConstraintCovariance = looseConstraintCovariance * 1e+8;
       beamSpotConstraintVtx.setCovariance(looseConstraintCovariance);
+    }
+
+    // The beam spot has no time information. With useTime, give the constraint a loose time
+    // variance (otherwise it stays 0 and the 4D constraint covariance is singular in ACTS)
+    if (m_useTime) {
+      Acts::SquareMatrix4 constraintCov = beamSpotConstraintVtx.fullCovariance();
+      constraintCov(Acts::eTime, Acts::eTime) = m_looseConstrValue;
+      beamSpotConstraintVtx.setFullCovariance(constraintCov);
     }
 
     vertexingOptions.useConstraintInFit = m_useBeamConstraint;
@@ -381,6 +419,11 @@ ActsTrk::AdaptiveMultiPriVtxFinderTool::findVertex(const EventContext& ctx,
       xAODVtx->setPosition(vtx.position());
       xAODVtx->setCovariancePosition(vtx.covariance());
       xAODVtx->setFitQuality(vtx.fitQuality().first, vtx.fitQuality().second);
+      // ---- 4D vertexing: store the vertex time fitted by the AMVF ----
+      if (m_useTime) {
+        s_decAmvfTime(*xAODVtx)    = vtx.time() / 1_ns;    // ACTS units -> ns
+        s_decAmvfTimeRes(*xAODVtx) = std::sqrt(vtx.fullCovariance()(Acts::eTime, Acts::eTime)) / 1_ns;
+      }
 
       const auto& tracks = vtx.tracks();
       std::vector<Trk::VxTrackAtVertex>* trkAtVtxVec = &(xAODVtx->vxTrackAtVertex());

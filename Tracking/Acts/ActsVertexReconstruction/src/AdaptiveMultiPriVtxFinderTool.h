@@ -151,6 +151,11 @@ namespace ActsTrk {
     DoubleProperty m_looseConstrValue{this, "looseConstrValue", 1e+8, "Loose constraint value"};
     BooleanProperty m_useVertexCovForIPEstimation{this, "useVertexCovForIPEstimation", false, "Use seed vertex cov for IPEstimation"};
     BooleanProperty m_useSeedConstraint{this, "useSeedConstraint", false, "Use seed constraint in fit"};
+
+    // 4D vertexing with HGTD track time
+    BooleanProperty m_useTime{this, "useTime", false, "Use HGTD track time in vertex finding and fitting (4D vertexing)"};
+    DoubleProperty m_noTimeSigma{this, "noTimeSigma", 10., "Time resolution [ns] given to tracks without a valid HGTD time when useTime is true"};
+
     // Final vertex selection variables
     DoubleProperty m_finalCutMaxVertexChi2{this, "finalCutMaxVertexChi2", 18.42, "Final cut max. vertex chi2"};
     // Gaussian seeder finder variables
