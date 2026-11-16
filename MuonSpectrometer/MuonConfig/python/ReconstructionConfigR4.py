@@ -144,13 +144,17 @@ def StandaloneMuonOutputCfg(flags):
                                                                 InputActsTracksLocation = "MuonMeTracksLRT",
                                                                 OutputActsTracksLocation = "MuonMeTracksLRT"))
                     esd_items += MuonTrackContainersToPersistify("MuonMeTracksLRT")
+    # Transient links to the GlobalFE containers, which are not in the AOD (as for the legacy muons)
+    gpf_vars = ["chargedGlobalFELinks", "neutralGlobalFELinks",
+                "deltaR_muon_clus_GlobalFEalg", "muon_efrac_matched_GlobalFE"]
+    excludedMuonAuxData = ".-" + ".-".join(gpf_vars)
 
     #for now add also the muon container here. This should go into the combined config at some point
     aod_items += ["xAOD::MuonContainer#Muons"]
-    aod_items += ["xAOD::MuonAuxContainerR4#MuonsAux."]
-    
+    aod_items += ["xAOD::MuonAuxContainerR4#MuonsAux" + excludedMuonAuxData]
+
     aod_items += ["xAOD::MuonContainer#MuonsLRT"]
-    aod_items += ["xAOD::MuonAuxContainerR4#MuonsLRTAux."]
+    aod_items += ["xAOD::MuonAuxContainerR4#MuonsLRTAux" + excludedMuonAuxData]
 
     if flags.Detector.EnableCalo:
         aod_items += ["xAOD::CaloClusterContainer#MuonClusterCollection",

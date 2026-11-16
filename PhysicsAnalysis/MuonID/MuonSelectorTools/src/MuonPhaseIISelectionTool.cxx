@@ -3,6 +3,7 @@
 */
 #include "MuonPhaseIISelectionTool.h"
 
+#include <array>
 #include <format>
 
 #define NOT_IMPLEMENTED() \
@@ -10,7 +11,25 @@
                     __FILE__, __LINE__, __func__);
 
 
+namespace {
+    /// Same cuts as the CP::MuonSelectionTool, so that any CutType requested by the DAOD wrappers exists
+    constexpr std::array<std::string, 4> s_cutNames{"Eta", "IDHits", "Preselection", "Quality"};
+}
+
 namespace CP {
+    StatusCode MuonPhaseIISelectionTool::initialize() {
+        for (const std::string& cut : s_cutNames) {
+            m_acceptInfo.addCut(cut, "Dummy cut of the PhaseII selection tool");
+        }
+        return StatusCode::SUCCESS;
+    }
+    asg::AcceptData MuonPhaseIISelectionTool::accept(const xAOD::IParticle*) const {
+        asg::AcceptData data{&m_acceptInfo};
+        for (const std::string& cut : s_cutNames) {
+            data.setCutResult(cut, true);
+        }
+        return data;
+    }
 /** @copydoc IMuonSelectionTool::getAcceptInfo */
     void MuonPhaseIISelectionTool::print() const {
         NOT_IMPLEMENTED()
