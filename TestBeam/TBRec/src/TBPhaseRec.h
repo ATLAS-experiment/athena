@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBPHASEREC
@@ -14,6 +14,7 @@
  */  
 
 #include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaKernel/Units.h"
 
 #include <string>
 #include <vector>
@@ -36,25 +37,25 @@ class TBPhaseRec : public AthAlgorithm
   ////////////////
   // Properties //
   ////////////////
-  std::vector<std::string> m_tdcNames ;   // the TDC(s) with phase information
-  std::vector<float> m_tdcToTime;         // per TDC
-  std::vector<float> m_tdcwac;            // wrap around constants
-  std::vector<float> m_tdcMin;            // used only for choosing the best TDC if necessary
-  float m_delta;                          // ttc clock period
-  int m_timeBins;                         // number of time bins in a ttc period
-  std::string m_TBPhaseKey;               // key of the TBPhase object that TBPhaseRec tries to create
-  bool m_neverReturnFailure;              // controls when StatusCode::FAILURE can be issued in execute()
+  Gaudi::Property<std::vector<std::string>> m_tdcNames{this, "TDCNames", {}, "TDC(s) with phase information"};   // the TDC(s) with phase information
+  Gaudi::Property<std::vector<float>> m_tdcToTime{this, "TDCToTime", {}, "TDC to time conversion per TDC"};         // per TDC
+  Gaudi::Property<std::vector<float>> m_tdcwac{this, "TDCwac", {}, "TDC wrap around constants"};            // wrap around constants
+  Gaudi::Property<std::vector<float>> m_tdcMin{this, "TDCMin", {}, "TDC minimum values (for choosing the best TDC)"};            // used only for choosing the best TDC if necessary
+  Gaudi::Property<float> m_delta{this, "TTCClockPeriod", 25.0*Athena::Units::ns, "TTC clock period"};                          // ttc clock period
+  Gaudi::Property<int> m_timeBins{this, "TimeBins", 25, "number of time bins in a TTC period"};                         // number of time bins in a ttc period
+  Gaudi::Property<std::string> m_TBPhaseKey{this, "TBPhaseKey", "TBPhase", "key of the TBPhase object to create"};               // key of the TBPhase object that TBPhaseRec tries to create
+  Gaudi::Property<bool> m_neverReturnFailure{this, "NeverReturnFailure", false, "never set filter failure in execute()"};              // controls when StatusCode::FAILURE can be issued in execute()
 
-  std::string m_calib_filename;
-  unsigned int m_runnumber;
+  Gaudi::Property<std::string> m_calib_filename{this, "CalibFileName", "", "TDC calibration constants file"};
+  unsigned int m_runnumber{0};
 
-  float m_guardValue;                     // guard region cut
+  Gaudi::Property<float> m_guardValue{this, "GuardCutValue", -1., "guard region cut value in TDC counts"};                     // guard region cut
 
   ///////////////////////////////
   // member data and functions //
   ///////////////////////////////
   
-  int m_nTDC ;
+  int m_nTDC{0};
   std::vector<int> m_tdcRaw;
   std::vector<float> m_phaseReco;
   float computePhase(int tdcIndex);

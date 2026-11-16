@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBPatternUnitStreamerTool.h"
@@ -14,14 +14,8 @@ TBPatternUnitStreamerTool::TBPatternUnitStreamerTool(const std::string& type,
 						     const std::string& name,
 						     const IInterface* parent)
   : TBEventStreamerTool(type,name,parent)
-    , m_patternUnitKey("TBTrigPat")
-    , m_acceptPattern()
-    , m_rejectPattern()
 {
   declareInterface<TBEventStreamerTool>(this);
-  declareProperty("PatternUnitName",m_patternUnitKey);
-  declareProperty("AcceptPattern",  m_acceptPatternNames);
-  declareProperty("RejectPattern",  m_rejectPatternNames);
   // pre-settings (to be moved to helper!)
   m_triggerBitMap["S1"]          = 0x00000001;  // S1 accept
   m_triggerBitMap["S2"]          = 0x00000002;  // S2 accept
@@ -166,7 +160,7 @@ StatusCode TBPatternUnitStreamerTool::accept()
 
   // retrieve pattern unit
   const TBTriggerPatternUnit* theTrigger;
-  ATH_CHECK( evtStore()->retrieve(theTrigger,m_patternUnitKey) );
+  ATH_CHECK( evtStore()->retrieve(theTrigger,m_patternUnitKey.value()) );
 
   //
   bit_mask thePattern = theTrigger->getTriggerWord() & 0x00ffffff;

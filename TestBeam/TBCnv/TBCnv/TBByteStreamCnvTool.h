@@ -1,13 +1,14 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TESTBEAM_BYTESTREAMTOOL_H
 #define TESTBEAM_BYTESTREAMTOOL_H
 
 #include <stdint.h>
+#include <climits>
 #include <string>
 
 #include "AthenaBaseComps/AthAlgTool.h"
@@ -90,21 +91,21 @@ private:
 
   ServiceHandle<IByteStreamEventAccess> m_ByteStreamEventAccess;
   ServiceHandle<IROBDataProviderSvc> m_rdpSvc;
-  EventID m_lastEventID{};
-  eformat::SubDetector m_subdet_id{};
+  EventID m_lastEventID{0, UINT_MAX};
+  eformat::SubDetector m_subdet_id{eformat::TDAQ_BEAM_CRATE};
   std::vector<uint32_t> m_rodBlock; //For reading only : data fragment
   const LArOnlineID* m_onlineHelper{};
   
   // event fragments for writing
-  std::vector<uint32_t> * m_theRodBlock{};
-  OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment * m_theROB{};
+  std::vector<uint32_t> * m_theRodBlock{nullptr};
+  OFFLINE_FRAGMENTS_NAMESPACE_WRITE::ROBFragment * m_theROB{nullptr};
 
-  bool m_H6run{};
-  bool m_H8run{};
-  bool m_force_Hchoice{};
-  bool m_dump{};
-  std::vector<std::string> m_keys;
-  int m_subdet_key{};
+  Gaudi::Property<bool> m_H6run{this, "isH6Run", true, "Data taken at H6"};
+  Gaudi::Property<bool> m_H8run{this, "isH8Run", false, "Data taken at H8"};
+  Gaudi::Property<bool> m_force_Hchoice{this, "ForceHchoice", false, "Force the H6/H8 choice from the job options"};
+  Gaudi::Property<bool> m_dump{this, "Dump", false, "Dump fragment content"};
+  Gaudi::Property<std::vector<std::string>> m_keys{this, "Keys", {}, "List of type#key for the objects to be created"};
+  Gaudi::Property<int> m_subdet_key{this, "SubDetID", 0, "Sub-detector ID of the beam crate"};
 
   // H6 SubFragment navigation :
   int m_subfrag_id{};
@@ -124,7 +125,7 @@ private:
     {this, "CalibLineKey", "LArCalibLineMap", "SG calib line key"};
 
   // pointers to raw objects :
-  TBTDC * m_tbtdc{};
+  TBTDC * m_tbtdc{nullptr};
   TBTDCRawCont* m_tdcrawCont{};
   TBADCRawCont* m_adcrawCont{};
   TBBPCRawCont * m_bpcrawCont{};
@@ -179,7 +180,7 @@ private:
   float m_cryoX{};
   float m_cryoAngle{};
   float m_tableY{};
-  std::string m_summary_path;
+  Gaudi::Property<std::string> m_summary_path{this, "SummaryPath", "", "Path of the run summary file"};
 
 
 

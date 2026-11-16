@@ -33,16 +33,17 @@ class TBScintillatorRec : public AthAlgorithm
   ////////////////
   // Properties //
   ////////////////
-  std::string m_SGkey,m_SGrecordkey;
+  Gaudi::Property<std::string> m_SGkey{this, "SGkey", "ScintillatorRawCont", "SG key of the input TBScintillatorRawCont"};
+  Gaudi::Property<std::string> m_SGrecordkey{this, "SGrecordkey", "ScintillatorCont", "SG key of the output TBScintillatorCont"};
 
   //////////////////
   // Calib consts //
   //////////////////
 
   // Scintillators
-  std::vector<std::string> m_scint_names;
-  std::vector<float> m_scint_timecalib;
-  std::vector<float> m_scint_ped;
+  Gaudi::Property<std::vector<std::string>> m_scint_names{this, "SCINTnames", {}, "Scintillator names"};
+  Gaudi::Property<std::vector<float>> m_scint_timecalib{this, "SCINTtimecalib", {}, "Scintillator TDC time calibration"};
+  Gaudi::Property<std::vector<float>> m_scint_ped{this, "SCINTtimeped", {}, "Scintillator TDC pedestals"};
 
 
 };

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //#####################################################
@@ -22,24 +22,8 @@
 
 
 CBNT_CaloH6::CBNT_CaloH6(const std::string & name, ISvcLocator * pSvcLocator) :
-  CBNT_TBRecBase(name, pSvcLocator),
-  m_emecID_help(0),
-  m_hecID_help(0),
-  m_fcalID_help(0)
-{
-  declareProperty("Det_Type", m_det_type);
-  declareProperty("Max_Chan", m_numchan);
-  m_noiseSigma = 0;
-
-  m_NoiseRMS = 0;
-  m_energy = 0;
-  m_eta = 0;
-  m_ieta = 0;
-  m_iphi = 0;
-  m_phi = 0;
-  m_region = 0;
-  m_sampling = 0;
-}
+  CBNT_TBRecBase(name, pSvcLocator)
+{}
 
 CBNT_CaloH6::~CBNT_CaloH6(){}
 
@@ -82,16 +66,16 @@ StatusCode CBNT_CaloH6::CBNT_initialize()
   //emec, 113 channels
   //fcal, 347 channels
   
-  addBranch(m_det_type+"_energy",m_energy);
-  addBranch(m_det_type+"_noiseRMS",m_NoiseRMS);
-  addBranch(m_det_type+"_ieta",m_ieta);
-  addBranch(m_det_type+"_iphi",m_iphi);
-  addBranch(m_det_type+"_eta",m_eta);
-  addBranch(m_det_type+"_phi",m_phi);
-  addBranch(m_det_type+"_sampling",m_sampling);
+  addBranch(m_det_type.value()+"_energy",m_energy);
+  addBranch(m_det_type.value()+"_noiseRMS",m_NoiseRMS);
+  addBranch(m_det_type.value()+"_ieta",m_ieta);
+  addBranch(m_det_type.value()+"_iphi",m_iphi);
+  addBranch(m_det_type.value()+"_eta",m_eta);
+  addBranch(m_det_type.value()+"_phi",m_phi);
+  addBranch(m_det_type.value()+"_sampling",m_sampling);
   
   if(m_det_type=="HEC") {
-    addBranch(m_det_type+"_region",m_region);
+    addBranch(m_det_type.value()+"_region",m_region);
   } else m_region = 0;
   
   return StatusCode::SUCCESS;

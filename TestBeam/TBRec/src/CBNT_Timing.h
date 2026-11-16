@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_CBNT_TIMING_H
@@ -12,6 +12,7 @@
 #include "Identifier/HWIdentifier.h"
 #include "CaloIdentifier/LArEM_ID.h"
  #include "LArCabling/LArOnOffIdMapping.h"
+#include "CLHEP/Units/SystemOfUnits.h"
 
 class LArOnlineID;
 
@@ -37,14 +38,14 @@ class CBNT_Timing : public CBNT_TBRecBase
   static const int NOENERGY = -999;
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
-  const LArOnlineID* m_onlineHelper;
+  const LArOnlineID* m_onlineHelper{nullptr};
 
-  double m_energy_cut;
-  bool m_first_event;
+  Gaudi::Property<double> m_energy_cut{this, "EnergyCut", 2.*CLHEP::GeV, "Cell energy cut"};
+  bool m_first_event{true};
 
-  std::string m_tbphase;
-  std::vector<std::string> m_sampling_names;
-  std::string m_caloCellName;
+  Gaudi::Property<std::string> m_tbphase{this, "TBPhase", "TBPhase", "SG key of TBPhase"};
+  Gaudi::Property<std::vector<std::string> > m_sampling_names{this, "IncludedSamplings", {}, "Names of included calorimeter samplings"};
+  Gaudi::Property<std::string> m_caloCellName{this, "CellContainerName", "AllCalo", "SG key of CaloCellContainer"};
 
  /*! \brief stores */
   //  const CaloCell_ID* m_caloCellHelper;
@@ -63,20 +64,20 @@ class CBNT_Timing : public CBNT_TBRecBase
 
 
   // per cell:
-  std::vector<long>  *m_layer_cell, *m_eta_cell, *m_phi_cell, *m_febId_cell;
-  std::vector<float> *m_energy_cell, *m_time_cell;
+  std::vector<long>  *m_layer_cell{nullptr}, *m_eta_cell{nullptr}, *m_phi_cell{nullptr}, *m_febId_cell{nullptr};
+  std::vector<float> *m_energy_cell{nullptr}, *m_time_cell{nullptr};
   // per layer:
-  std::vector<float> *m_time_layer;
-  std::vector<long>  *m_layer_layer;
+  std::vector<float> *m_time_layer{nullptr};
+  std::vector<long>  *m_layer_layer{nullptr};
 
   // per feb
-  std::vector<long>  *m_febId_feb;
-  std::vector<float> *m_time_feb;
-  std::vector<long> *m_slot_feb;
-  std::vector<long> *m_feedthrough_feb;
+  std::vector<long>  *m_febId_feb{nullptr};
+  std::vector<float> *m_time_feb{nullptr};
+  std::vector<long> *m_slot_feb{nullptr};
+  std::vector<long> *m_feedthrough_feb{nullptr};
 
   // per event:
-  float  m_energy, m_time, m_tdc_phase; // time = calculated cell time (cubic), clock = phase (TBRec)
+  float  m_energy{0}, m_time{0}, m_tdc_phase{0}; // time = calculated cell time (cubic), clock = phase (TBRec)
 };
 
 #endif

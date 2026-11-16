@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBEVENTINFOSTREAMERTOOL_H
@@ -28,8 +28,8 @@ class TBEventInfoStreamerTool : public TBEventStreamerTool
   // Properties //
   ////////////////
  std::vector<int> m_acceptCodes;
- std::vector<std::string> m_acceptTypes;
+ Gaudi::Property<std::vector<std::string>> m_acceptTypes{this, "AcceptedTypes", {"Physics"}, "accepted detector event types"};
 
- int m_selected_events;
+ int m_selected_events{0};
 };
 #endif

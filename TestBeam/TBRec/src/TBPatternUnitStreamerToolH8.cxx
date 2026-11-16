@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBPatternUnitStreamerToolH8.h"
@@ -13,13 +13,7 @@ TBPatternUnitStreamerToolH8::TBPatternUnitStreamerToolH8(
 						     const std::string& name,
 						     const IInterface* parent)
   : TBEventStreamerTool(type,name,parent)
-    , m_patternUnitKey("TBTrigPat")
-    , m_acceptPattern()
-    , m_rejectPattern()
 {
-  declareProperty("PatternUnitName",m_patternUnitKey);
-  declareProperty("AcceptPattern",  m_acceptPatternNames);
-  declareProperty("RejectPattern",  m_rejectPatternNames);
   // pre-settings (to be moved to helper!)
   m_triggerBitMap["Physics"]     = 0x00000001;  // Physics accept
   m_triggerBitMap["Calibration"] = 0x00000002;  // Calib accept
@@ -138,7 +132,7 @@ StatusCode TBPatternUnitStreamerToolH8::accept()
   
   // retrieve pattern unit
   const TBTriggerPatternUnit* theTrigger;
-  ATH_CHECK( evtStore()->retrieve(theTrigger,m_patternUnitKey) );
+  ATH_CHECK( evtStore()->retrieve(theTrigger,m_patternUnitKey.value()) );
 
   //
   bit_mask thePattern = theTrigger->getTriggerWord() & 0x00ffffff;

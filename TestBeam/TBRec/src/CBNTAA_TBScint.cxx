@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNTAA_TBScint.h"
@@ -10,8 +10,8 @@
 #include "PathResolver/PathResolver.h"
 
 
-CBNTAA_TBScint::CBNTAA_TBScint(const std::string & name, ISvcLocator * pSvcLocator) : CBNT_TBRecBase(name, pSvcLocator),m_scint_num(0),m_scint_en(0),m_scint_trackid(0),m_scint_pdg(0)  {
-}
+CBNTAA_TBScint::CBNTAA_TBScint(const std::string & name, ISvcLocator * pSvcLocator) : CBNT_TBRecBase(name, pSvcLocator)
+{}
 
 StatusCode CBNTAA_TBScint::CBNT_initialize() {
   ATH_MSG_DEBUG ( "in initialize()"  );

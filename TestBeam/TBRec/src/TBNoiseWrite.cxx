@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class TBNoiseWrite // Write ROOT Tree with noise in randomly triggered 
@@ -24,30 +24,8 @@
 
 TBNoiseWrite::TBNoiseWrite(const std::string& name, 
 				   ISvcLocator* pSvcLocator) : 
-  AthAlgorithm(name, pSvcLocator),
-  m_nEvent(0), m_nEventRandomTrigger(0), m_first(true),
-  m_cell_id(0),
-  m_cell_energy(0),
-  m_caloCellContainerName("AllCalo"),
-  m_headerTreeName("HeaderTree"),
-  m_noiseTreeName("NoiseTree"),
-  m_rootfile_name("tbh6tree_noise.root"),
-  m_rootfile(0),
-  m_header_tree(0),
-  m_tree(0),
-  //m_calo_id(0),
-  //m_calo_dd_man(0),
-  m_txtFileWithXY("xcryo_ytable.txt")
-{ 
-  declareProperty("CellContainer",m_caloCellContainerName);
-  declareProperty("RootFileName",m_rootfile_name);
-  declareProperty("NoiseTreeName",m_noiseTreeName);
-
-  m_header.m_nRun = 0;
-  m_header.m_beamMom = 0;
-  m_header.m_xCryo = 0;
-  m_header.m_yTable = 0;
-}
+  AthAlgorithm(name, pSvcLocator)
+{}
 
 TBNoiseWrite::~TBNoiseWrite()
 { }
@@ -59,14 +37,14 @@ StatusCode TBNoiseWrite::initialize()
   m_cell_energy = new std::vector<float>;
 
   // Open file and create TTrees
-  m_rootfile = new TFile(m_rootfile_name.data(), "RECREATE");
+  m_rootfile = new TFile(m_rootfile_name.value().data(), "RECREATE");
   if (!m_rootfile->IsOpen()) {
     ATH_MSG_FATAL ( "Cann't open Root file" );
     return StatusCode::FAILURE;
   }
   m_header_tree = 
     new TTree(m_headerTreeName.c_str(), m_headerTreeName.c_str());
-  m_tree = new TTree(m_noiseTreeName.c_str(), m_noiseTreeName.c_str());
+  m_tree = new TTree(m_noiseTreeName.value().c_str(), m_noiseTreeName.value().c_str());
 
   // Define branches
   // Header
@@ -85,7 +63,7 @@ StatusCode TBNoiseWrite::finalize()
 {
   ATH_MSG_INFO ( "finalize(): (invoked/random) ("<< m_nEvent
                  << "/" << m_nEventRandomTrigger << ")" );
-  ATH_MSG_INFO ( "Print contents of " << m_noiseTreeName );
+  ATH_MSG_INFO ( "Print contents of " << m_noiseTreeName.value() );
   m_rootfile->Print();
   m_rootfile->Write();
   m_rootfile->Close();
@@ -133,7 +111,7 @@ StatusCode TBNoiseWrite::execute(const EventContext& /*ctx*/)
 
   // Get cell information
   const CaloCellContainer* cellContainer = 0;
-  ATH_CHECK( evtStore()->retrieve(cellContainer, m_caloCellContainerName) );
+  ATH_CHECK( evtStore()->retrieve(cellContainer, m_caloCellContainerName.value()) );
 
   // Cell loop
   for (const CaloCell* cell : *cellContainer) {

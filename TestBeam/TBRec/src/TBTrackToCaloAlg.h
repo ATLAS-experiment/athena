@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -109,25 +109,25 @@ private:
   ///////////////////////////////////////////////////////////////////
 private:
   // Tracking variables :
-  std::string m_TrackName;
-  const TrackCollection *m_tracks; 
-  std::string m_TrackParticleName;
-  const Rec::TrackParticleContainer *m_particle;
-  std::string m_trkinput;
+  Gaudi::Property<std::string> m_TrackName{this, "TrackName", "Tracks", "Name of the input TrackCollection"};
+  const TrackCollection *m_tracks{nullptr}; 
+  Gaudi::Property<std::string> m_TrackParticleName{this, "TrackParticleName", "", "Name of the input TrackParticleContainer"};
+  const Rec::TrackParticleContainer *m_particle{nullptr};
+  Gaudi::Property<std::string> m_trkinput{this, "TrackInputType", "", "Track input type (e.g. TrackParticleCandidates)"};
 
   // Calo variables :
-  std::string m_cluster_container;
-  std::string m_cell_container;
-  const CaloCell_ID* m_calo_id;
+  Gaudi::Property<std::string> m_cluster_container{this, "ClusterContainerName", "", "Name of the CaloCluster container"};
+  Gaudi::Property<std::string> m_cell_container{this, "CaloCellContainerName", "", "Name of the CaloCell container"};
+  const CaloCell_ID* m_calo_id{nullptr};
 
   // Between the 2 :
-  std::string m_ImpactInCalosOutputName;
-  TBExtrapolTrackToCaloTool* m_toCalo;
-  CaloDepthTool* m_calodepth;
+  Gaudi::Property<std::string> m_ImpactInCalosOutputName{this, "ImpactInCaloContainerName", "", "Name of the output ImpactInCaloCollection"};
+  TBExtrapolTrackToCaloTool* m_toCalo{nullptr};
+  CaloDepthTool* m_calodepth{nullptr};
   CaloPhiRange m_phiRange;
 
   // these ones are only here for debugging, not for general use !
-  ICaloCoordinateTool* m_calo_tb_coord;
+  ICaloCoordinateTool* m_calo_tb_coord{nullptr};
 
   SG::ReadCondHandleKey<CaloDetDescrManager> m_caloMgrKey{this,"CaloDetDescrManager", "CaloDetDescrManager"};
 

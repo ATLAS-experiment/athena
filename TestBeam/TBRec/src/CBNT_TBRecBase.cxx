@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CBNT_TBRecBase.h"
@@ -10,10 +10,8 @@
 
 
 CBNT_TBRecBase::CBNT_TBRecBase(const std::string& name, ISvcLocator* pSvcLocator): 
-  AthAlgorithm(name, pSvcLocator), m_initialized(false), m_nt(NULL), m_log(NULL), 
-  m_emId(NULL), m_hecId(NULL), m_fcalId(NULL),m_onlineId(NULL)
-{
-}
+  AthAlgorithm(name, pSvcLocator)
+{}
 
 CBNT_TBRecBase::~CBNT_TBRecBase() {
   delete m_log;

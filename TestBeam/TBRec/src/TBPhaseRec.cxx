@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -24,30 +24,7 @@ using Athena::Units::ns;
 TBPhaseRec::TBPhaseRec(const std::string& name,
 				 ISvcLocator* pSvcLocator) :
   AthAlgorithm(name,pSvcLocator)
-  , m_delta(25.0*ns)
-  , m_timeBins(25)
-  , m_TBPhaseKey("TBPhase")
-  , m_neverReturnFailure(false)
-  , m_guardValue(-1.) // in TDC counts
-  , m_nTDC(0)
- {
-  // job options
-   declareProperty("CalibFileName",m_calib_filename="");
-   m_tdcNames.resize(0);
-   m_tdcToTime.resize(0);
-   m_tdcwac.resize(0);
-   m_tdcMin.resize(0);
-   declareProperty("TDCNames",           m_tdcNames);
-   declareProperty("TDCToTime",          m_tdcToTime);
-   declareProperty("TDCwac",             m_tdcwac);
-   declareProperty("TDCMin",             m_tdcMin);
-   declareProperty("TTCClockPeriod",     m_delta);
-   declareProperty("TimeBins",           m_timeBins);
-   declareProperty("TBPhaseKey",         m_TBPhaseKey);
-   declareProperty("NeverReturnFailure", m_neverReturnFailure);  
-   declareProperty("GuardCutValue",      m_guardValue);
-   m_runnumber = 0;
-}
+{}
 
 TBPhaseRec::~TBPhaseRec()
 { }
@@ -60,18 +37,18 @@ TBPhaseRec::initialize()
   float default_tdcwac   = 0.;
   float default_tdcMin   = 0.;
 
-  m_nTDC = m_tdcNames.size() ;
+  m_nTDC = m_tdcNames.value().size() ;
   if ( m_nTDC == 0 ) {
     ATH_MSG_ERROR ( "Empty list of TDC names" );
     return StatusCode::FAILURE ;
   }
 
-  if (m_nTDC != (int)m_tdcToTime.size()) {  // check consistency of joboption vectors
-    if (m_tdcToTime.size() == 0) {
-      m_tdcToTime.resize(m_nTDC) ;
+  if (m_nTDC != (int)m_tdcToTime.value().size()) {  // check consistency of joboption vectors
+    if (m_tdcToTime.value().size() == 0) {
+      m_tdcToTime.value().resize(m_nTDC) ;
       for (int k = 0; k < m_nTDC; k++) m_tdcToTime[k] = default_tdc2time;
-    } else if (m_tdcToTime.size() == 1) {
-      m_tdcToTime.resize(m_nTDC);
+    } else if (m_tdcToTime.value().size() == 1) {
+      m_tdcToTime.value().resize(m_nTDC);
       float tdc2time = m_tdcToTime[0];
       for (int k = 0; k < m_nTDC; k++) m_tdcToTime[k] = tdc2time;
     } else {
@@ -80,12 +57,12 @@ TBPhaseRec::initialize()
     }
   }
 
-  if (m_nTDC != (int)m_tdcwac.size()) {  // check consistency of joboption vectors
-    if (m_tdcwac.size() == 0) {
-      m_tdcwac.resize(m_nTDC) ;
+  if (m_nTDC != (int)m_tdcwac.value().size()) {  // check consistency of joboption vectors
+    if (m_tdcwac.value().size() == 0) {
+      m_tdcwac.value().resize(m_nTDC) ;
       for (int k = 0; k < m_nTDC; k++) m_tdcwac[k] = default_tdcwac;
-    } else if (m_tdcwac.size() == 1) {
-      m_tdcwac.resize(m_nTDC);
+    } else if (m_tdcwac.value().size() == 1) {
+      m_tdcwac.value().resize(m_nTDC);
       float tdcwac = m_tdcwac[0];
       for (int k = 0; k < m_nTDC; k++) m_tdcwac[k] = tdcwac;
     } else {
@@ -94,12 +71,12 @@ TBPhaseRec::initialize()
     }
   }
 
-  if (m_nTDC != (int)m_tdcMin.size()) {  // check consistency of joboption vectors
-    if (m_tdcMin.size() == 0) {
-      m_tdcMin.resize(m_nTDC) ;
+  if (m_nTDC != (int)m_tdcMin.value().size()) {  // check consistency of joboption vectors
+    if (m_tdcMin.value().size() == 0) {
+      m_tdcMin.value().resize(m_nTDC) ;
       for (int k = 0; k < m_nTDC; k++) m_tdcMin[k] = default_tdcMin;
-    } else if (m_tdcMin.size() == 1) {
-      m_tdcMin.resize(m_nTDC);
+    } else if (m_tdcMin.value().size() == 1) {
+      m_tdcMin.value().resize(m_nTDC);
       float tdcMin = m_tdcMin[0];
       for (int k = 0; k < m_nTDC; k++) m_tdcMin[k] = tdcMin;
     } else {
@@ -122,7 +99,7 @@ TBPhaseRec::initialize()
   m_tdcRaw.resize(m_nTDC);
   
   if ( m_guardValue > 0. )
-    ATH_MSG_INFO (  " Cut events using guard value: " << m_guardValue );
+    ATH_MSG_INFO (  " Cut events using guard value: " << m_guardValue.value() );
   
   return StatusCode::SUCCESS ;
 }
@@ -245,7 +222,7 @@ StatusCode TBPhaseRec::execute(const EventContext& ctx)
       short phaseInd = (short)floor(phase/m_delta * (float)m_timeBins);
       float tdc_to_wac = 100.;
       TBPhase* theTBPhase = new TBPhase(phase, phaseInd, tdc_to_wac);
-      sc = evtStore()->record(theTBPhase, m_TBPhaseKey);
+      sc = evtStore()->record(theTBPhase, m_TBPhaseKey.value());
       if (sc.isFailure( )) {
 	ATH_MSG_FATAL ( "Cannot record TBPhase" );
         setFilterPassed(false, ctx); // always return failure for this one!
@@ -315,7 +292,7 @@ StatusCode TBPhaseRec::execute(const EventContext& ctx)
     ATH_MSG_ERROR
       ( "Phase " << phase/ns << " ns "
         << "has TDC-WAC " << tdcdTtoWAC[tdcBestIndex]
-        << " inside the guard region [0," << m_guardValue  << "]" );
+        << " inside the guard region [0," << m_guardValue.value()  << "]" );
     if (!m_neverReturnFailure) {
        setFilterPassed(false, ctx);
     }
@@ -330,7 +307,7 @@ StatusCode TBPhaseRec::execute(const EventContext& ctx)
   // TBPhase* theTBPhase = new TBPhase(phase, phaseInd);
   TBPhase* theTBPhase = new TBPhase(phase, phaseInd, tdcdTtoWAC[tdcBestIndex] );
   
-  sc = evtStore()->record(theTBPhase, m_TBPhaseKey);
+  sc = evtStore()->record(theTBPhase, m_TBPhaseKey.value());
   if (sc.isFailure( )) {
     ATH_MSG_FATAL ( "Cannot record TBPhase" );
     setFilterPassed(false, ctx);  // always return failure for this one!
@@ -369,19 +346,19 @@ StatusCode TBPhaseRec::getnewcalib() {
 
   ATH_MSG_INFO ( "Get TDC calibration constants for run " << m_runnumber);
   
-  int tdcnumber= m_tdcNames.size();
+  int tdcnumber= m_tdcNames.value().size();
 
-  m_tdcToTime.clear(); m_tdcToTime.resize(tdcnumber);
-  m_tdcwac.clear();    m_tdcwac.resize(tdcnumber);
-  m_tdcMin.clear();    m_tdcMin.resize(tdcnumber);
+  m_tdcToTime.value().clear(); m_tdcToTime.value().resize(tdcnumber);
+  m_tdcwac.value().clear();    m_tdcwac.value().resize(tdcnumber);
+  m_tdcMin.value().clear();    m_tdcMin.value().resize(tdcnumber);
 
   // find file in share directory
   m_calib_filename = PathResolver::find_file (m_calib_filename, "DATAPATH");
 
   std::ifstream calibfile;
-  calibfile.open(m_calib_filename.c_str());
+  calibfile.open(m_calib_filename.value().c_str());
   if (!calibfile.good()) {
-    ATH_MSG_INFO ( "Problem with calibration file "<< m_calib_filename );
+    ATH_MSG_INFO ( "Problem with calibration file "<< m_calib_filename.value() );
     return StatusCode::FAILURE;
   }
 
@@ -408,7 +385,7 @@ StatusCode TBPhaseRec::getnewcalib() {
      runnumber = -1 ;     
      calibfile >> runnumber;
      if ( runnumber==-1 ) { // reached an empty line
-       ATH_MSG_WARNING ( "Empty line found in " << m_calib_filename );
+       ATH_MSG_WARNING ( "Empty line found in " << m_calib_filename.value() );
        calibfile.clear();
        runnumber = prevrunnumber ;
        break ;

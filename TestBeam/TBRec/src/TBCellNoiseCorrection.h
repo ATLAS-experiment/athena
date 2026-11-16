@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBCELLNOISECORRECTION_H
@@ -42,22 +42,22 @@ class TBCellNoiseCorrection : public CaloCellCorrection, virtual public IInciden
  private: 
 
   // Properties:  
-  bool m_noise_correction;
-  std::vector<std::string>  m_noise_file;
+  Gaudi::Property<bool> m_noise_correction{this, "NoiseAdd", false, "Add noise to cells"};
+  Gaudi::Property<std::vector<std::string>>  m_noise_file{this, "NoiseFile", {}, "Noise ROOT files"};
 
   // Data members:
   ServiceHandle <IAthRNGSvc> m_rndmSvc
     { this, "RndmSvc", "AthRNGSvc", "" };
-  ATHRNG::RNGWrapper* m_engine;
+  ATHRNG::RNGWrapper* m_engine{nullptr};
   //TFile *m_root; // File with noise tree
-  TChain *m_tree;
-  float m_xcryo;  // if given, try to find run number from xcryo_ytable.txt file
-  float m_ytable; // then a run number in file name is changed to this one
-  float m_energy;
+  TChain *m_tree{nullptr};
+  Gaudi::Property<float> m_xcryo{this, "NoiseX", 0., "CryoX; if given, try to find run number from xcryo_ytable.txt file"};
+  Gaudi::Property<float> m_ytable{this, "NoiseY", 0., "TableY; then a run number in file name is changed to this one"};
+  Gaudi::Property<float> m_energy{this, "NoiseE", -1., "Beam energy"};
   // Cell parameters
-  std::vector<unsigned int>* m_cell_id;
-  std::vector<float>* m_cell_energy;
-  unsigned int m_entries;
+  std::vector<unsigned int>* m_cell_id{nullptr};
+  std::vector<float>* m_cell_energy{nullptr};
+  unsigned int m_entries{0};
   // should check the event number
   //int m_myevtnum;
 };

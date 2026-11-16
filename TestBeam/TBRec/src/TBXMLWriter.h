@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBXMLWRITER_H
@@ -50,12 +50,12 @@ class TBXMLWriter : public AthAlgorithm
   // Properties //
   ////////////////
 
-  unsigned int m_outputFrequency;
-  unsigned int m_eventCounter;
+  Gaudi::Property<unsigned int> m_outputFrequency{this, "OutputFrequency", 1, "Write out every N-th event"};
+  unsigned int m_eventCounter{0};
 
-  std::vector<std::string> m_writerToolNames;
+  Gaudi::Property<std::vector<std::string>> m_writerToolNames{this, "WriteTools", {}, "List of XML writer tools (type/name)"};
  
-  std::string m_topDirectory;
+  Gaudi::Property<std::string> m_topDirectory{this, "FileTopDirectory", "", "Top directory for XML output files"};
 
   std::vector<TBXMLWriterToolBase*> m_writerTools;
 

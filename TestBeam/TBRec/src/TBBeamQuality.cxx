@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //#####################################################
@@ -21,10 +21,7 @@
 TBBeamQuality::TBBeamQuality(const std::string& name,  
 			     ISvcLocator* pService)
   : AthAlgorithm(name,pService)
-{ //properties
-  declareProperty("BQParticles", m_bqparticle=std::vector<std::string>(1,"noselect"));
-  declareProperty("BQToolNames", m_bqtools);
-} //properties
+{}
 
 TBBeamQuality::~TBBeamQuality()
 { }

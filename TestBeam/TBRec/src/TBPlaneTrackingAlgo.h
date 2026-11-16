@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBPLANETRACKINGALGO_H
@@ -73,20 +73,27 @@ class TBPlaneTrackingAlgo : public AthAlgorithm {
   StatusCode buildHits();
     
   //Used to test this algo set to true if you want to debug
-  bool m_testAlgo;
+  Gaudi::Property<bool> m_testAlgo{this, "TestAlgo", false, "Use FillRandomHit to generate test data"};
   TBHitPlaneCont m_hitPlaneCont_u;
   TBHitPlaneCont m_hitPlaneCont_v;
 
   // Positions of BPC needed to construct hits  
-  std::vector<float> m_bpc_posZX,m_bpc_posZY,m_bpc_posX,m_bpc_posY;
-  std::vector<float> m_bpc_errposZX,m_bpc_errposZY,m_bpc_errposX,m_bpc_errposY;
-  std::vector<float> m_bpc_errmeasX,m_bpc_errmeasY;
+  Gaudi::Property<std::vector<float>> m_bpc_posZX{this, "BPCposZX", {}, "BPC Z positions (X plane)"};
+  Gaudi::Property<std::vector<float>> m_bpc_posZY{this, "BPCposZY", {}, "BPC Z positions (Y plane)"};
+  Gaudi::Property<std::vector<float>> m_bpc_posX{this, "BPCposX", {}, "BPC X positions"};
+  Gaudi::Property<std::vector<float>> m_bpc_posY{this, "BPCposY", {}, "BPC Y positions"};
+  Gaudi::Property<std::vector<float>> m_bpc_errposZX{this, "BPCerrposZX", {}, "Errors on BPC Z positions (X plane)"};
+  Gaudi::Property<std::vector<float>> m_bpc_errposZY{this, "BPCerrposZY", {}, "Errors on BPC Z positions (Y plane)"};
+  Gaudi::Property<std::vector<float>> m_bpc_errposX{this, "BPCerrposX", {}, "Errors on BPC X positions"};
+  Gaudi::Property<std::vector<float>> m_bpc_errposY{this, "BPCerrposY", {}, "Errors on BPC Y positions"};
+  Gaudi::Property<std::vector<float>> m_bpc_errmeasX{this, "BPCerrmeasX", {}, "BPC X measurement errors"};
+  Gaudi::Property<std::vector<float>> m_bpc_errmeasY{this, "BPCerrmeasY", {}, "BPC Y measurement errors"};
 
-  std::vector<std::string> m_bpc_names;
+  Gaudi::Property<std::vector<std::string>> m_bpc_names{this, "BPCnames", {}, "BPC names"};
 
   // filename containing positions constants
-  std::string m_calib_filename;
-  unsigned int m_runnumber;
+  Gaudi::Property<std::string> m_calib_filename{this, "CalibFileName", "H6HitCalib.txt", "File name containing positions constants"};
+  unsigned int m_runnumber{0};
 
 };
 

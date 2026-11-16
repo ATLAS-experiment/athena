@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBPartIDCherenkovMuTag.h"
@@ -7,21 +7,8 @@
 #include "TBEvent/TBScintillatorCont.h"
 
 TBPartIDCherenkovMuTag::TBPartIDCherenkovMuTag(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name,pSvcLocator) { 
-  declareProperty("SGScintkey",m_SGkeyscint = "ScintillatorCont");
-  declareProperty("MuonTagName",m_muonTagName="muTag"); 
-  declareProperty("CherenkovName",m_CherenkovName="C1");
-  declareProperty("IdentifiedParticleKey",m_particleKey="TBIdentifiedParticle");
-  declareProperty("CherenkovADCcut",m_cherenkovADCcut=410);
-  declareProperty("MuonADCcut",m_muonADCcut=500);
-  declareProperty("PrintSummary",m_printSummary=false);
-
-  m_NElectrons=0;
-  m_NPions=0;
-  m_NMuons=0;
-  m_Nunknown=0;
-  m_useCherenkovBelow = 0;
-}
+  AthAlgorithm(name,pSvcLocator)
+{}
 
 TBPartIDCherenkovMuTag::~TBPartIDCherenkovMuTag() 
 {}
@@ -32,9 +19,9 @@ StatusCode TBPartIDCherenkovMuTag::initialize() {
 
 StatusCode TBPartIDCherenkovMuTag::execute(const EventContext& /*ctx*/) {
   const TBScintillatorCont *scintCont;
-  StatusCode sc = evtStore()->retrieve(scintCont, m_SGkeyscint);
+  StatusCode sc = evtStore()->retrieve(scintCont, m_SGkeyscint.value());
   if (sc.isFailure()){
-    ATH_MSG_WARNING ( "Retrieval of TBScintillatorContainer with key "<<m_SGkeyscint<<" failed" );
+    ATH_MSG_WARNING ( "Retrieval of TBScintillatorContainer with key "<<m_SGkeyscint.value()<<" failed" );
     return StatusCode::SUCCESS;
   }
   TBIdentifiedParticle* myParticle = new TBIdentifiedParticle();
@@ -73,9 +60,9 @@ StatusCode TBPartIDCherenkovMuTag::execute(const EventContext& /*ctx*/) {
     ATH_MSG_DEBUG ( " Particle cannot be identified." );
     m_Nunknown++;
   }
-  sc = evtStore()->record(myParticle,m_particleKey);
+  sc = evtStore()->record(myParticle,m_particleKey.value());
   if (sc.isFailure()){
-    ATH_MSG_WARNING ( "Cannot record TBIdentifiedParticle with key " << m_particleKey );
+    ATH_MSG_WARNING ( "Cannot record TBIdentifiedParticle with key " << m_particleKey.value() );
   }
   return StatusCode::SUCCESS;
 }

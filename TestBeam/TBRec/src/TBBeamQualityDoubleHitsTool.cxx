@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //#####################################################
@@ -25,21 +25,10 @@
 TBBeamQualityDoubleHitsTool::TBBeamQualityDoubleHitsTool(const std::string& type,
 							 const std::string& name,
 							 const IInterface* parent)
-  : TBBeamQualityTool(type,name,parent),
-    m_Scint1ADC(0),
-    m_Scint2ADC(0)
+  : TBBeamQualityTool(type,name,parent)
 {
-
-  // enter cut parameters
-  // H6 default:
   declareInterface<TBBeamQualityTool>(this);
-  declareProperty("Scintnames",m_scint_names);
-  declareProperty("ScintCut1",m_ScintCut1=1);
-  declareProperty("ScintCut2",m_ScintCut2=2);
-  declareProperty("ScintCut1ADC",m_ScintCut1ADC);
-  declareProperty("ScintCut2ADC",m_ScintCut2ADC);
-  declareProperty("h6cuts",m_h6cuts=true);
-} 
+}
 
 TBBeamQualityDoubleHitsTool::~TBBeamQualityDoubleHitsTool()
 { }
@@ -81,8 +70,8 @@ StatusCode TBBeamQualityDoubleHitsTool::accept(const std::vector<std::string>& p
   }// h6cuts
 
   log <<MSG::DEBUG
-      << "m_ScintCut1ADC: "<< m_ScintCut1ADC
-      << "m_ScintCut2ADC: "<< m_ScintCut2ADC 
+      << "m_ScintCut1ADC: "<< m_ScintCut1ADC.value()
+      << "m_ScintCut2ADC: "<< m_ScintCut2ADC.value()
       <<endmsg;
   
   TBScintillatorCont * scintCont = nullptr;

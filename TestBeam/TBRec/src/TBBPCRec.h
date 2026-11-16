@@ -42,33 +42,34 @@ class TBBPCRec : public AthAlgorithm
   // Properties //
   ////////////////
 
-  std::string m_SGkey,m_SGrecordkey;
-  std::string m_calib_filename;
+  Gaudi::Property<std::string> m_SGkey{this, "SGkey", "BPCRawCont", "input BPC raw container key"};
+  Gaudi::Property<std::string> m_SGrecordkey{this, "SGrecordkey", "BPCCont", "output BPC container key"};
+  Gaudi::Property<std::string> m_calib_filename{this, "CalibFileName", "H6BPCCalib.txt", "BPC calibration constants file"};
 
-  unsigned int m_runnumber;
+  unsigned int m_runnumber{0};
 
   //////////////////
   // Calib consts //
   //////////////////  
   
-  std::vector<std::string> m_bpc_names;
+  Gaudi::Property<std::vector<std::string>> m_bpc_names{this, "BPCnames", {}, "BPC names"};
 
-  std::vector<float> m_bpc_calibX;
-  std::vector<float> m_bpc_calibY;
-  std::vector<float> m_bpc_leftright;
-  std::vector<float> m_bpc_updown;
-  std::vector<float> m_bpc_udoffset;
-  std::vector<float> m_bpc_lroffset;
+  Gaudi::Property<std::vector<float>> m_bpc_calibX{this, "BPCcalibX", {}, "BPC X calibration"};
+  Gaudi::Property<std::vector<float>> m_bpc_calibY{this, "BPCcalibY", {}, "BPC Y calibration"};
+  Gaudi::Property<std::vector<float>> m_bpc_leftright{this, "BPCleftright", {}, "BPC left/right coefficient"};
+  Gaudi::Property<std::vector<float>> m_bpc_updown{this, "BPCupdown", {}, "BPC up/down coefficient"};
+  Gaudi::Property<std::vector<float>> m_bpc_udoffset{this, "BPCudoffset", {}, "BPC up/down offset"};
+  Gaudi::Property<std::vector<float>> m_bpc_lroffset{this, "BPClroffset", {}, "BPC left/right offset"};
 
-  std::vector<float> m_bpc_invX;
-  std::vector<float> m_bpc_invY;
+  Gaudi::Property<std::vector<float>> m_bpc_invX{this, "BPCinvX", {}, "BPC X inversion"};
+  Gaudi::Property<std::vector<float>> m_bpc_invY{this, "BPCinvY", {}, "BPC Y inversion"};
 
-  std::vector<float> m_tdccutmin;
-  std::vector<float> m_tdccutmax;
-  std::vector<float> m_tdccutlr;
-  std::vector<float> m_tdccutud;
+  Gaudi::Property<std::vector<float>> m_tdccutmin{this, "TDCmin", {}, "minimum TDC cut"};
+  Gaudi::Property<std::vector<float>> m_tdccutmax{this, "TDCmax", {}, "maximum TDC cut"};
+  Gaudi::Property<std::vector<float>> m_tdccutlr{this, "TDClrcut", {}, "TDC left+right sum cut"};
+  Gaudi::Property<std::vector<float>> m_tdccutud{this, "TDCudcut", {}, "TDC up+down sum cut"};
 
-  std::vector<float> m_rotation;
+  Gaudi::Property<std::vector<float>> m_rotation{this, "BPCRotation", {}, "BPC rotation angle"};
 
 };
 

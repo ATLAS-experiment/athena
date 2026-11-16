@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class TBTree_CaloClusterH6 // make ROOT Tree for H6 CaloCluster
@@ -35,97 +35,8 @@
 
 TBTree_CaloClusterH6::TBTree_CaloClusterH6(const std::string& name, 
 				   ISvcLocator* pSvcLocator) : 
-  AthAlgorithm(name, pSvcLocator), m_suffix(""), 
-  m_nEvent(0),
-  m_nEventRejected(0),
-  m_nEventAccepted(0),
-  m_nEventRandomTrigger(0),
-  m_addMoments(false),
-  m_addGain(false),
-  m_addTime(false),
-  m_addQuality(false),
-  m_addBeamTrack(false),
-  m_addWTC(false), 
-  m_useEMTBCluster(false),
-  m_first(true),
-  m_nRun(0),
-  m_beamMom(0),
-  m_xCryo(-9999), m_yTable(-9999), m_zCalo(30000),
-  m_evType(0),
-  m_eTotal(0),
-  m_etaTotal(0),
-  m_phiTotal(0),
-  m_eEME2(0),
-  m_eEME3(0),
-  m_eHEC0(0),
-  m_eHEC1(0),
-  m_eHEC2(0),
-  m_eFCAL0(0),
-  m_eFCAL1(0),
-  m_eFCAL2(0),
-  m_nClusters(0),
-  m_nCellCluster(0),
-  m_eCluster(0),
-  m_etaCluster (0),
-  m_phiCluster (0),
-  m_m1_eta(0),
-  m_m1_phi(0),
-  m_m2_r(0),
-  m_m2_lambda(0),
-  m_delta_phi(0),
-  m_delta_theta(0),
-  m_delta_alpha(0),
-  m_center_x(0),
-  m_center_y(0),
-  m_center_z(0),
-  m_center_lambda(0),
-  m_lateral(0),
-  m_longitudinal(0),
-  m_eng_frac_em(0),
-  m_eng_frac_max(0),
-  m_eng_frac_core(0),
-  m_m1_dens(0),
-  m_m2_dens(0),
-  m_nCells(0),
-  m_cell_id(0),
-  m_cell_ind_cluster(0),
-  m_cell_energy(0),
-  m_cell_gain(0),
-  m_cell_time(0),
-  m_cell_quality(0),
-  m_beam_coor_x(0),
-  m_beam_coor_y(0),
-  m_beam_chi2_x(0),
-  m_beam_chi2_y(0),
-  m_beam_intercept_x(0),
-  m_beam_intercept_y(0),
-  m_beam_slope_x(0),
-  m_beam_slope_y(0),
-  m_wtcNOverflow(0),
-  m_wtcSignal(0),
-  m_caloCellContainerName("AllCalo"),
-  m_clusterContainerName("TBClusters"),
-  m_WTCContainerName("TailCatcher"),
-  m_TBTreeName("TBH6Tree"),
-  m_rootfile_name("tbh6tree.root"),
-  m_rootfile(0),
-  m_tree(0),
-  m_txtFileWithXY("xcryo_ytable.txt")
-{ 
-  declareProperty("ClusterContainer",m_clusterContainerName);
-  declareProperty("CellContainer",m_caloCellContainerName);
-  declareProperty("RootFileName",m_rootfile_name);
-  declareProperty("TBTreeName",m_TBTreeName);
-  declareProperty("Suffix", m_suffix);
-  declareProperty("addBeamTrack", m_addBeamTrack);
-  declareProperty("addMoments", m_addMoments);
-  declareProperty("addGain", m_addGain);
-  declareProperty("addTime", m_addTime);
-  declareProperty("addWTC", m_addWTC);
-  declareProperty("addQuality", m_addQuality);
-  declareProperty("useEMTBCluster", m_useEMTBCluster);
-  declareProperty("zCalo", m_zCalo);
-}
+  AthAlgorithm(name, pSvcLocator)
+{}
 
 TBTree_CaloClusterH6::~TBTree_CaloClusterH6()
 { }
@@ -173,104 +84,104 @@ StatusCode TBTree_CaloClusterH6::initialize()
   }
 
   // Open file and create TTree
-  m_rootfile = new TFile(m_rootfile_name.data(), "RECREATE");
+  m_rootfile = new TFile(m_rootfile_name.value().data(), "RECREATE");
   if (!m_rootfile->IsOpen()) {
     ATH_MSG_FATAL ( "Cann't open Root file" );
     return StatusCode::FAILURE;
   }
-  m_tree = new TTree(m_TBTreeName.c_str(), m_TBTreeName.c_str());
+  m_tree = new TTree(m_TBTreeName.value().c_str(), m_TBTreeName.value().c_str());
 
   // Define branches
   //Event type
-  m_tree->Branch(("ev_type"+m_suffix).c_str(),&m_evType,
-		 ("ev_type"+m_suffix+"/s").c_str());
+  m_tree->Branch(("ev_type"+m_suffix.value()).c_str(),&m_evType,
+		 ("ev_type"+m_suffix.value()+"/s").c_str());
   // Parameters of the sum of clusters (TB particle)
-  m_tree->Branch(("eTotal"+m_suffix).c_str(),&m_eTotal,
-		 ("eTotal"+m_suffix+"/F").c_str());
-  m_tree->Branch(("etaTotal"+m_suffix).c_str(),&m_etaTotal,
-		 ("etaTotal"+m_suffix+"/F").c_str());
-  m_tree->Branch(("phiTotal"+m_suffix).c_str(),&m_phiTotal,
-		 ("phiTotal"+m_suffix+"/F").c_str());
-  m_tree->Branch(("e_emec2"+m_suffix).c_str(),&m_eEME2,
-		 ("e_emec2"+m_suffix+"/F").c_str());
-  m_tree->Branch(("e_emec3"+m_suffix).c_str(),&m_eEME3,
-		 ("e_emec3"+m_suffix+"/F").c_str());
-  m_tree->Branch(("e_hec0"+m_suffix).c_str(),&m_eHEC0,
-		 ("e_hec0"+m_suffix+"/F").c_str());
-  m_tree->Branch(("e_hec1"+m_suffix).c_str(),&m_eHEC1,
-		 ("e_hec1"+m_suffix+"/F").c_str());
-  m_tree->Branch(("e_hec2"+m_suffix).c_str(),&m_eHEC2,
-		 ("e_hec2"+m_suffix+"/F").c_str());
-  m_tree->Branch(("e_fcal0"+m_suffix).c_str(),&m_eFCAL0,
-		 ("e_fcal0"+m_suffix+"/F").c_str());
-  m_tree->Branch(("e_fcal1"+m_suffix).c_str(),&m_eFCAL1,
-		 ("e_fcal1"+m_suffix+"/F").c_str());
-  m_tree->Branch(("e_fcal2"+m_suffix).c_str(),&m_eFCAL2,
-		 ("e_fcal2"+m_suffix+"/F").c_str());
+  m_tree->Branch(("eTotal"+m_suffix.value()).c_str(),&m_eTotal,
+		 ("eTotal"+m_suffix.value()+"/F").c_str());
+  m_tree->Branch(("etaTotal"+m_suffix.value()).c_str(),&m_etaTotal,
+		 ("etaTotal"+m_suffix.value()+"/F").c_str());
+  m_tree->Branch(("phiTotal"+m_suffix.value()).c_str(),&m_phiTotal,
+		 ("phiTotal"+m_suffix.value()+"/F").c_str());
+  m_tree->Branch(("e_emec2"+m_suffix.value()).c_str(),&m_eEME2,
+		 ("e_emec2"+m_suffix.value()+"/F").c_str());
+  m_tree->Branch(("e_emec3"+m_suffix.value()).c_str(),&m_eEME3,
+		 ("e_emec3"+m_suffix.value()+"/F").c_str());
+  m_tree->Branch(("e_hec0"+m_suffix.value()).c_str(),&m_eHEC0,
+		 ("e_hec0"+m_suffix.value()+"/F").c_str());
+  m_tree->Branch(("e_hec1"+m_suffix.value()).c_str(),&m_eHEC1,
+		 ("e_hec1"+m_suffix.value()+"/F").c_str());
+  m_tree->Branch(("e_hec2"+m_suffix.value()).c_str(),&m_eHEC2,
+		 ("e_hec2"+m_suffix.value()+"/F").c_str());
+  m_tree->Branch(("e_fcal0"+m_suffix.value()).c_str(),&m_eFCAL0,
+		 ("e_fcal0"+m_suffix.value()+"/F").c_str());
+  m_tree->Branch(("e_fcal1"+m_suffix.value()).c_str(),&m_eFCAL1,
+		 ("e_fcal1"+m_suffix.value()+"/F").c_str());
+  m_tree->Branch(("e_fcal2"+m_suffix.value()).c_str(),&m_eFCAL2,
+		 ("e_fcal2"+m_suffix.value()+"/F").c_str());
   // Claster parameters
-  m_tree->Branch(("cl_num"+m_suffix).c_str(),&m_nClusters,
-		 ("cl_num"+m_suffix+"/I").c_str());
-  m_tree->Branch(("cl_cell_num"+m_suffix).c_str(),&m_nCellCluster);
-  m_tree->Branch(("cl_ener"+m_suffix).c_str(),&m_eCluster);
-  m_tree->Branch(("cl_eta"+m_suffix).c_str(),&m_etaCluster);
-  m_tree->Branch(("cl_phi"+m_suffix).c_str(),&m_phiCluster);
+  m_tree->Branch(("cl_num"+m_suffix.value()).c_str(),&m_nClusters,
+		 ("cl_num"+m_suffix.value()+"/I").c_str());
+  m_tree->Branch(("cl_cell_num"+m_suffix.value()).c_str(),&m_nCellCluster);
+  m_tree->Branch(("cl_ener"+m_suffix.value()).c_str(),&m_eCluster);
+  m_tree->Branch(("cl_eta"+m_suffix.value()).c_str(),&m_etaCluster);
+  m_tree->Branch(("cl_phi"+m_suffix.value()).c_str(),&m_phiCluster);
   if (m_addMoments) {
-    m_tree->Branch(("cl_m1_eta"+m_suffix).c_str(),& m_m1_eta);
-    m_tree->Branch(("cl_m1_phi"+m_suffix).c_str(), &m_m1_phi);
-    m_tree->Branch(("cl_m2_r"+m_suffix).c_str(),&m_m2_r);
-    m_tree->Branch(("cl_m2_lambda"+m_suffix).c_str(), &m_m2_lambda);
-    m_tree->Branch(("cl_delta_phi"+m_suffix).c_str(), &m_delta_phi);
-    m_tree->Branch(("cl_delta_theta"+m_suffix).c_str(), &m_delta_theta);
-    m_tree->Branch(("cl_delta_alpha"+m_suffix).c_str(), &m_delta_alpha);
-    m_tree->Branch(("cl_center_x"+m_suffix).c_str(), &m_center_x);
-    m_tree->Branch(("cl_center_y"+m_suffix).c_str(), &m_center_y);
-    m_tree->Branch(("cl_center_z"+m_suffix).c_str(), &m_center_z);
-    m_tree->Branch(("cl_center_lambda"+m_suffix).c_str(), &m_center_lambda);
-    m_tree->Branch(("cl_lateral"+m_suffix).c_str(), &m_lateral);
-    m_tree->Branch(("cl_longitudinal"+m_suffix).c_str(), &m_longitudinal);
-    m_tree->Branch(("cl_eng_frac_em"+m_suffix).c_str(), &m_eng_frac_em);
-    m_tree->Branch(("cl_eng_frac_max"+m_suffix).c_str(), &m_eng_frac_max);
-    m_tree->Branch(("cl_eng_frac_core"+m_suffix).c_str(), &m_eng_frac_core);
-    m_tree->Branch(("cl_m1_dens"+m_suffix).c_str(), &m_m1_dens);
-    m_tree->Branch(("cl_m2_dens"+m_suffix).c_str(), &m_m2_dens);
+    m_tree->Branch(("cl_m1_eta"+m_suffix.value()).c_str(),& m_m1_eta);
+    m_tree->Branch(("cl_m1_phi"+m_suffix.value()).c_str(), &m_m1_phi);
+    m_tree->Branch(("cl_m2_r"+m_suffix.value()).c_str(),&m_m2_r);
+    m_tree->Branch(("cl_m2_lambda"+m_suffix.value()).c_str(), &m_m2_lambda);
+    m_tree->Branch(("cl_delta_phi"+m_suffix.value()).c_str(), &m_delta_phi);
+    m_tree->Branch(("cl_delta_theta"+m_suffix.value()).c_str(), &m_delta_theta);
+    m_tree->Branch(("cl_delta_alpha"+m_suffix.value()).c_str(), &m_delta_alpha);
+    m_tree->Branch(("cl_center_x"+m_suffix.value()).c_str(), &m_center_x);
+    m_tree->Branch(("cl_center_y"+m_suffix.value()).c_str(), &m_center_y);
+    m_tree->Branch(("cl_center_z"+m_suffix.value()).c_str(), &m_center_z);
+    m_tree->Branch(("cl_center_lambda"+m_suffix.value()).c_str(), &m_center_lambda);
+    m_tree->Branch(("cl_lateral"+m_suffix.value()).c_str(), &m_lateral);
+    m_tree->Branch(("cl_longitudinal"+m_suffix.value()).c_str(), &m_longitudinal);
+    m_tree->Branch(("cl_eng_frac_em"+m_suffix.value()).c_str(), &m_eng_frac_em);
+    m_tree->Branch(("cl_eng_frac_max"+m_suffix.value()).c_str(), &m_eng_frac_max);
+    m_tree->Branch(("cl_eng_frac_core"+m_suffix.value()).c_str(), &m_eng_frac_core);
+    m_tree->Branch(("cl_m1_dens"+m_suffix.value()).c_str(), &m_m1_dens);
+    m_tree->Branch(("cl_m2_dens"+m_suffix.value()).c_str(), &m_m2_dens);
   }
   // Cell parameters
-  m_tree->Branch(("cl_ncells"+m_suffix).c_str(),&m_nCells,
-		 ("cl_ncells"+m_suffix+"/I").c_str());
-  m_tree->Branch(("cl_cell_id"+m_suffix).c_str(), &m_cell_id);
-  m_tree->Branch(("cl_cell_clu_ind"+m_suffix).c_str(), &m_cell_ind_cluster);
-  m_tree->Branch(("cl_cell_ener"+m_suffix).c_str(), &m_cell_energy);
+  m_tree->Branch(("cl_ncells"+m_suffix.value()).c_str(),&m_nCells,
+		 ("cl_ncells"+m_suffix.value()+"/I").c_str());
+  m_tree->Branch(("cl_cell_id"+m_suffix.value()).c_str(), &m_cell_id);
+  m_tree->Branch(("cl_cell_clu_ind"+m_suffix.value()).c_str(), &m_cell_ind_cluster);
+  m_tree->Branch(("cl_cell_ener"+m_suffix.value()).c_str(), &m_cell_energy);
   if (m_addGain) 
-    m_tree->Branch(("cl_cell_gain"+m_suffix).c_str(), &m_cell_gain);
+    m_tree->Branch(("cl_cell_gain"+m_suffix.value()).c_str(), &m_cell_gain);
   if (m_addTime) 
-    m_tree->Branch(("cl_cell_time"+m_suffix).c_str(), &m_cell_time);
+    m_tree->Branch(("cl_cell_time"+m_suffix.value()).c_str(), &m_cell_time);
   if (m_addQuality)
-    m_tree->Branch(("cl_cell_quality"+m_suffix).c_str(), &m_cell_quality);
+    m_tree->Branch(("cl_cell_quality"+m_suffix.value()).c_str(), &m_cell_quality);
   
   // Add beam track parameters
   if (m_addBeamTrack) {
-    m_tree->Branch(("bm_x"+m_suffix).c_str(), &m_beam_coor_x, 
-		   ("bm_x"+m_suffix).c_str());
-    m_tree->Branch(("bm_y"+m_suffix).c_str(), &m_beam_coor_y, 
-		   ("bm_y"+m_suffix).c_str());
-    m_tree->Branch(("bm_chi2_x"+m_suffix).c_str(), &m_beam_chi2_x, 
-		   ("bm_chi2_x"+m_suffix).c_str());
-    m_tree->Branch(("bm_chi2_y"+m_suffix).c_str(), &m_beam_chi2_y, 
-		   ("bm_chi2_y"+m_suffix).c_str());
-    m_tree->Branch(("bm_x0"+m_suffix).c_str(), &m_beam_intercept_x, 
-		   ("bm_x0"+m_suffix).c_str());
-    m_tree->Branch(("bm_y0"+m_suffix).c_str(), &m_beam_intercept_y, 
-		   ("bm_y0"+m_suffix).c_str());
-    m_tree->Branch(("bm_slope_x"+m_suffix).c_str(),&m_beam_slope_x,
-		   ("bm_slope_x"+m_suffix).c_str());
-    m_tree->Branch(("bm_slope_y"+m_suffix).c_str(),&m_beam_slope_y,
-		   ("bm_slope_y"+m_suffix).c_str());
+    m_tree->Branch(("bm_x"+m_suffix.value()).c_str(), &m_beam_coor_x, 
+		   ("bm_x"+m_suffix.value()).c_str());
+    m_tree->Branch(("bm_y"+m_suffix.value()).c_str(), &m_beam_coor_y, 
+		   ("bm_y"+m_suffix.value()).c_str());
+    m_tree->Branch(("bm_chi2_x"+m_suffix.value()).c_str(), &m_beam_chi2_x, 
+		   ("bm_chi2_x"+m_suffix.value()).c_str());
+    m_tree->Branch(("bm_chi2_y"+m_suffix.value()).c_str(), &m_beam_chi2_y, 
+		   ("bm_chi2_y"+m_suffix.value()).c_str());
+    m_tree->Branch(("bm_x0"+m_suffix.value()).c_str(), &m_beam_intercept_x, 
+		   ("bm_x0"+m_suffix.value()).c_str());
+    m_tree->Branch(("bm_y0"+m_suffix.value()).c_str(), &m_beam_intercept_y, 
+		   ("bm_y0"+m_suffix.value()).c_str());
+    m_tree->Branch(("bm_slope_x"+m_suffix.value()).c_str(),&m_beam_slope_x,
+		   ("bm_slope_x"+m_suffix.value()).c_str());
+    m_tree->Branch(("bm_slope_y"+m_suffix.value()).c_str(),&m_beam_slope_y,
+		   ("bm_slope_y"+m_suffix.value()).c_str());
  }
  
   // Add Warm TailCatcher data
   if (m_addWTC) {
-    m_tree->Branch(("wtc_n_overflow"+m_suffix).c_str(), &m_wtcNOverflow);
-    m_tree->Branch(("wtc_signal"+m_suffix).c_str(), &m_wtcSignal);
+    m_tree->Branch(("wtc_n_overflow"+m_suffix.value()).c_str(), &m_wtcNOverflow);
+    m_tree->Branch(("wtc_signal"+m_suffix.value()).c_str(), &m_wtcSignal);
   }
 
   // pointer to Cell ID helper:
@@ -289,7 +200,7 @@ StatusCode TBTree_CaloClusterH6::finalize()
   ATH_MSG_INFO ( "finalize(): (invoked/accept/reject/random) ("<< m_nEvent
       << "/" << m_nEventAccepted << "/" << m_nEventRejected 
                  << "/" << m_nEventRandomTrigger << ")" );
-  ATH_MSG_INFO ( "Print contents of " << m_TBTreeName );
+  ATH_MSG_INFO ( "Print contents of " << m_TBTreeName.value() );
   m_rootfile->Print();
   m_rootfile->Close();
   return StatusCode::SUCCESS;
@@ -351,7 +262,7 @@ StatusCode TBTree_CaloClusterH6::execute(const EventContext& ctx)
   const int lastScintInLayer[] = {11, 23, 29, 35, 41, 47};
   m_nEvent++;
   ATH_MSG_DEBUG ( "Executing TBTree_CaloClusterH6 for "
-                  << m_clusterContainerName );
+                  << m_clusterContainerName.value() );
 
   // Retrieve Event Info
   const TBEventInfo* theEventInfo = nullptr;
@@ -399,12 +310,12 @@ StatusCode TBTree_CaloClusterH6::execute(const EventContext& ctx)
     if (m_addQuality) m_cell_quality->clear();
     // Get cell information
     const CaloCellContainer* cellContainer = nullptr;
-    sc = evtStore()->retrieve(cellContainer, m_caloCellContainerName);
+    sc = evtStore()->retrieve(cellContainer, m_caloCellContainerName.value());
     if (sc.isFailure()) {
       m_nEventRejected++;
       ATH_MSG_ERROR
         ( "cannot allocate CaloCellContainer with key <"
-	  << m_caloCellContainerName
+	  << m_caloCellContainerName.value()
 	  << "> for random trigger event");
       return sc;
     }
@@ -454,7 +365,7 @@ StatusCode TBTree_CaloClusterH6::execute(const EventContext& ctx)
     
     // Get cell information
     const CaloCellContainer* cellContainer = nullptr;
-    ATH_CHECK( evtStore()->retrieve(cellContainer, m_caloCellContainerName) );
+    ATH_CHECK( evtStore()->retrieve(cellContainer, m_caloCellContainerName.value()) );
     m_nCells = cellContainer->size();
     ATH_MSG_DEBUG ( "CaloCellContainer container size = " <<  m_nCells );
     
@@ -607,11 +518,12 @@ StatusCode TBTree_CaloClusterH6::execute(const EventContext& ctx)
   }
   // Clusters
   const xAOD::CaloClusterContainer* clusterContainer = nullptr;
-  sc = evtStore()->retrieve(clusterContainer, m_clusterContainerName);
+  sc = evtStore()->retrieve(clusterContainer, m_clusterContainerName.value());
+
   if (sc.isFailure()) {
     ATH_MSG_ERROR
       ( "cannot allocate CaloClusterContainer with key <"
-	<< m_clusterContainerName
+	<< m_clusterContainerName.value()
 	<< ">");
     m_nEventRejected++;
     return sc;

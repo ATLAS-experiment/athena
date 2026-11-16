@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCnv/ReadTBLArCalibDigits.h"
@@ -7,12 +7,8 @@
 #include <vector>
 
 ReadTBLArCalibDigits::ReadTBLArCalibDigits(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator),
-    m_count(0),
-    m_onlineHelper(0)
+  : AthAlgorithm(name, pSvcLocator)
 {
-  declareProperty("ContainerKey",m_containerKey="");
-  declareProperty("DumpFile",m_dumpFile="");
 }
 
 ReadTBLArCalibDigits::~ReadTBLArCalibDigits() 
@@ -30,8 +26,8 @@ StatusCode ReadTBLArCalibDigits::initialize()
     return StatusCode::FAILURE;
   }
   
-  if (m_dumpFile.size()>0)
-    m_outfile.open(m_dumpFile.c_str(),std::ios::out);
+  if (m_dumpFile.value().size()>0)
+    m_outfile.open(m_dumpFile.value().c_str(),std::ios::out);
 
   m_count=0;
   
@@ -50,12 +46,12 @@ StatusCode ReadTBLArCalibDigits::execute(const EventContext& /*ctx*/) {
   StatusCode sc;
   
   log << MSG::DEBUG << "======== executing event "<< m_count << " ========" << endmsg;
-  log << MSG::DEBUG << "Retrieving TBLArCalibDigitContainer. Key= " << m_containerKey << endmsg; 
+  log << MSG::DEBUG << "Retrieving TBLArCalibDigitContainer. Key= " << m_containerKey.value() << endmsg; 
   TBLArCalibDigitContainer* larCalibDigitCont;
-  sc = evtStore()->retrieve(larCalibDigitCont ,m_containerKey);
+  sc = evtStore()->retrieve(larCalibDigitCont ,m_containerKey.value());
 
   if (sc.isFailure()) {
-    log << MSG::FATAL << " Cannot read TBLArCalibDigitContainer from StoreGate! key=" << m_containerKey << endmsg;
+    log << MSG::FATAL << " Cannot read TBLArCalibDigitContainer from StoreGate! key=" << m_containerKey.value() << endmsg;
     return StatusCode::FAILURE;
   }
   

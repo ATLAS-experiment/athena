@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_CBNTAA_TBTDCRAW_H
@@ -32,11 +32,11 @@ class CBNTAA_TBTDCRaw : public CBNT_TBRecBase
 
  private:
 
-  bool m_neverReturnFailure;   // controls when StatusCode::FAILURE can be issued in execute()
+  Gaudi::Property<bool> m_neverReturnFailure{this, "NeverReturnFailure", false, "Never return FAILURE from execute()"};   // controls when StatusCode::FAILURE can be issued in execute()
 
-  std::vector<unsigned int> *m_tdc;
-  std::vector<bool> *m_underThreshold;
-  std::string m_containerKey1;
+  std::vector<unsigned int> *m_tdc{nullptr};
+  std::vector<bool> *m_underThreshold{nullptr};
+  Gaudi::Property<std::string> m_containerKey1{this, "ContainerKey1", "TDCRawCont", "SG key of TBTDCRawCont"};
 
   //Private function to build names for ntuple entries. Concatinates strings
   //but omits characters that are problematic for root like -+:*/

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBPRESCALERSTREAMERTOOL_H
@@ -37,13 +37,13 @@ class TBPreScalerStreamerTool : public TBEventStreamerTool
   // Properties //
   ////////////////
 
-  double m_acceptFraction;
+  Gaudi::Property<double> m_acceptFraction{this, "AcceptEventFraction", 1., "fraction of accepted events"};
 
   /////////////////////
   // Internal Stores //
   /////////////////////
 
-  CLHEP::RanluxEngine* m_randomizer;
+  CLHEP::RanluxEngine* m_randomizer{nullptr};
 
   //////////////////////
   // Internal Helpers //

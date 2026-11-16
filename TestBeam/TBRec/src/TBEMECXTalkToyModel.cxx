@@ -32,18 +32,8 @@ TBEMECXTalkToyModel::TBEMECXTalkToyModel(
 			     const std::string& type, 
 			     const std::string& name, 
 			     const IInterface* parent)
-  :base_class (type, name, parent),
-   m_caloSelection(false),
-   m_calo_id(nullptr)
-{
-  declareProperty("CaloNums",m_caloNums);
-  declareProperty("XTalkScaleLong",    m_xtalkScaleLong);
-  declareProperty("XTalkScaleEta",     m_xtalkScaleEta);
-  declareProperty("XTalkScaleEMEC2Eta",m_xtalkScaleEMEC2Eta);
-  m_caloNums.clear();
-  //default: process all calo
-  m_caloNums.push_back( static_cast<int>(CaloCell_ID::NSUBCALO) );
-}
+  :base_class (type, name, parent)
+{}
 
 
 
@@ -59,18 +49,18 @@ StatusCode TBEMECXTalkToyModel::initialize()
 
   //check calo number specified
   m_caloSelection = true ;
-  if (m_caloNums.size()==0) {
+  if (m_caloNums.value().size()==0) {
     ATH_MSG_WARNING (" no calo specified for correction. Will do nothing. ");
     return StatusCode::SUCCESS;
-  } else if  (m_caloNums.size()>nSubCalo ) {
+  } else if  (m_caloNums.value().size()>nSubCalo ) {
     ATH_MSG_ERROR (" More than " 
                    << nSubCalo << " calo specified. Must be wrong. Stop.");
     return StatusCode::FAILURE;
-  }  else if  (m_caloNums.size()==1 && m_caloNums[0]==static_cast<int>(nSubCalo)) {
+  }  else if  (m_caloNums.value().size()==1 && m_caloNums[0]==static_cast<int>(nSubCalo)) {
     m_caloSelection = false ;
     ATH_MSG_INFO (" Correction will be applied on all calo.");
   } else {
-    for (unsigned int index=0; index < m_caloNums.size() ; ++index) {
+    for (unsigned int index=0; index < m_caloNums.value().size() ; ++index) {
       if (m_caloNums[index]<0 || m_caloNums[index]>=static_cast<int>(nSubCalo) ) {
         ATH_MSG_ERROR ("Invalid calo specification:" 
                        << m_caloNums[index] << "Stop.");
@@ -84,9 +74,9 @@ StatusCode TBEMECXTalkToyModel::initialize()
 
   ATH_CHECK(detStore()->retrieve(m_calo_id,"CaloCell_ID"));
 
-  ATH_MSG_VERBOSE ("XTalkScaleLong     = " << m_xtalkScaleLong);
-  ATH_MSG_VERBOSE ("XTalkScaleEta      = " << m_xtalkScaleEta);
-  ATH_MSG_VERBOSE ("XTalkScaleEMEC2Eta = " << m_xtalkScaleEMEC2Eta);
+  ATH_MSG_VERBOSE ("XTalkScaleLong     = " << m_xtalkScaleLong.value());
+  ATH_MSG_VERBOSE ("XTalkScaleEta      = " << m_xtalkScaleEta.value());
+  ATH_MSG_VERBOSE ("XTalkScaleEMEC2Eta = " << m_xtalkScaleEMEC2Eta.value());
   ATH_MSG_VERBOSE ("Initialization completed successfully" );
 
   return StatusCode::SUCCESS;
@@ -109,7 +99,7 @@ StatusCode TBEMECXTalkToyModel::process (CaloCellContainer* theCont,
   }else {
     // selection mode 
 
-    for (std::vector<int>::const_iterator itrCalo=m_caloNums.begin();itrCalo!=m_caloNums.end();++itrCalo){
+    for (std::vector<int>::const_iterator itrCalo=m_caloNums.value().begin();itrCalo!=m_caloNums.value().end();++itrCalo){
 
 
       CaloCell_ID::SUBCALO caloNum=static_cast<CaloCell_ID::SUBCALO>(*itrCalo);

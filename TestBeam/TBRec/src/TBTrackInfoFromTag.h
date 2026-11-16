@@ -67,18 +67,19 @@ class TBTrackInfoFromTag : public AthAlgorithm
   ////////////////
 
 	
-	std::string m_SGrecordkey, m_SGkey1;
-	std::string m_inputRootFileName;
+	Gaudi::Property<std::string> m_SGrecordkey{this, "SGrecordkey", "TBTrackReducedInfo", "SG key of the recorded TBTrackInfo"};
+	Gaudi::Property<std::string> m_SGkey1{this, "EventInfoSGKey", "ByteStreamEventInfo", "SG key of the EventInfo"};
+	Gaudi::Property<std::string> m_inputRootFileName{this, "InputRootFile", "./cbnt_RecExTB_Combined.root", "Input ROOT file name"};
 
-	unsigned int		m_max_nPixelHits, m_max_nSctHits, m_max_nTrtHitsTRT;
-	unsigned int		m_max1_Trt_HLTRT, m_max2_Trt_HLTRT;
-	unsigned int		m_max_btdc1, m_max_GainC;
-	unsigned int		m_max_MuBack, m_max_TfitC, m_max_EfitC, m_max_Chi2C;
-	unsigned int		m_max1_SampleC, m_max2_SampleC;
+	unsigned int		m_max_nPixelHits{0}, m_max_nSctHits{0}, m_max_nTrtHitsTRT{0};
+	unsigned int		m_max1_Trt_HLTRT{0}, m_max2_Trt_HLTRT{0};
+	unsigned int		m_max_btdc1{0}, m_max_GainC{0};
+	unsigned int		m_max_MuBack{0}, m_max_TfitC{0}, m_max_EfitC{0}, m_max_Chi2C{0};
+	unsigned int		m_max1_SampleC{0}, m_max2_SampleC{0};
 
-	TFile * rootFile1, * rootFile2;
-	TileRec_h1000 * tileRecTree;
-	TB_tree * tbTree;
+	TFile * rootFile1{nullptr}, * rootFile2{nullptr};
+	TileRec_h1000 * tileRecTree{nullptr};
+	TB_tree * tbTree{nullptr};
 
 };
 

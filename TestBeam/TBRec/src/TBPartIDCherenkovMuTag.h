@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBPARTICLEIDCHERENKOVMUTAG_H
@@ -19,12 +19,16 @@ class TBPartIDCherenkovMuTag : public AthAlgorithm
   virtual StatusCode finalize() override;
   
  private:
-  std::string m_SGkeyscint,m_muonTagName,m_CherenkovName,m_particleKey;
-  int m_muonADCcut, m_cherenkovADCcut;
-  double m_useCherenkovBelow;
+  Gaudi::Property<std::string> m_SGkeyscint{this, "SGScintkey", "ScintillatorCont", "SG key of the TBScintillatorCont"};
+  Gaudi::Property<std::string> m_muonTagName{this, "MuonTagName", "muTag", "Name of the muon tag scintillator"};
+  Gaudi::Property<std::string> m_CherenkovName{this, "CherenkovName", "C1", "Name of the Cherenkov counter"};
+  Gaudi::Property<std::string> m_particleKey{this, "IdentifiedParticleKey", "TBIdentifiedParticle", "SG key of the output TBIdentifiedParticle"};
+  Gaudi::Property<int> m_muonADCcut{this, "MuonADCcut", 500, "ADC cut for the muon tag"};
+  Gaudi::Property<int> m_cherenkovADCcut{this, "CherenkovADCcut", 410, "ADC cut for the Cherenkov counter"};
+  double m_useCherenkovBelow{0};
 
-  bool m_printSummary;
-  unsigned m_NElectrons,m_NPions,m_NMuons,m_Nunknown;
+  Gaudi::Property<bool> m_printSummary{this, "PrintSummary", false, "Print summary in finalize"};
+  unsigned m_NElectrons{0},m_NPions{0},m_NMuons{0},m_Nunknown{0};
 };
 
 #endif

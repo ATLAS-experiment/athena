@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //#####################################################
@@ -39,10 +39,10 @@ class TBBeamQuality : public AthAlgorithm
   
  protected:
   /* Properties*/
-  std::vector<std::string> m_bqparticle;  //particles to select
+  Gaudi::Property<std::vector<std::string>> m_bqparticle{this, "BQParticles", {"noselect"}, "particles to select"};  //particles to select
 //  std::vector<std::string> m_bqtoolNames;
   
-  ToolHandleArray<TBBeamQualityTool> m_bqtools;
+  ToolHandleArray<TBBeamQualityTool> m_bqtools{this, "BQToolNames", {}, "beam quality tools"};
   
   // output maps
   std::map<ToolHandle<TBBeamQualityTool>, unsigned int> m_bqacceptCounter;

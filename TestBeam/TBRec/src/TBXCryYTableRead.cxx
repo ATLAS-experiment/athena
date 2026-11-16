@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // class TBXCryYTableRead 
@@ -12,19 +12,8 @@
 
 TBXCryYTableRead::TBXCryYTableRead(const std::string& name, 
 				   ISvcLocator* pSvcLocator) : 
-  AthAlgorithm(name, pSvcLocator),
-  m_nEvent(0),
-  m_nEventRandomTrigger(0),
-  m_first(true),
-  m_nRun(0),
-  m_beamMom(0),
-  m_xCryo(0),
-  m_yTable(0),
-  m_txtFileWithXY("xcryo_ytable.txt"),
-  m_eventinfo(0)
-{ 
-  declareProperty("FileName",m_txtFileWithXY);
-}
+  AthAlgorithm(name, pSvcLocator)
+{}
 
 TBXCryYTableRead::~TBXCryYTableRead()
 { }
@@ -115,7 +104,7 @@ StatusCode TBXCryYTableRead::getXcryoYtable(float &x, float &y, float &e) {
   std::string filename = PathResolver::find_file(m_txtFileWithXY, "DATAPATH");
   xyFile.open(filename.c_str());
   if (!xyFile.is_open()) {
-    ATH_MSG_ERROR ( "File " << m_txtFileWithXY << " fail to open in $DATAPATH");
+    ATH_MSG_ERROR ( "File " << m_txtFileWithXY.value() << " fail to open in $DATAPATH");
     return StatusCode::FAILURE;
   }
 

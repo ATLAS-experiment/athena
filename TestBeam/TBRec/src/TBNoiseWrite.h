@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBNOISEWRITE_H
@@ -31,37 +31,37 @@ class TBNoiseWrite: public AthAlgorithm {
   /** Get Xcryo and Ytable from a text file */
   StatusCode getXcryoYtable(float &x, float &y, float &eBeam);
   
-  int m_nEvent;                     // counter
-  int m_nEventRandomTrigger;        // counter
-  bool m_first;                     // First event flag
+  int m_nEvent{0};                  // counter
+  int m_nEventRandomTrigger{0};     // counter
+  bool m_first{true};               // First event flag
 
   // Run header
   struct NoiseHeader{
-    int m_nRun;               /** Run number */
-    float m_beamMom;          /** Beam momentum */
-    float m_xCryo;            /** CryoX */
-    float m_yTable;           /** TableY */
+    int m_nRun{0};            /** Run number */
+    float m_beamMom{0};       /** Beam momentum */
+    float m_xCryo{0};         /** CryoX */
+    float m_yTable{0};        /** TableY */
   };
   NoiseHeader m_header;
 
   // Variables to be in the TTree
   //--------------------------
   // Cell parameters
-  std::vector<unsigned int>* m_cell_id;
-  std::vector<float>* m_cell_energy;
+  std::vector<unsigned int>* m_cell_id{nullptr};
+  std::vector<float>* m_cell_energy{nullptr};
   
   // Names and pointers
   std::string m_digitContainerName;
-  std::string m_caloCellContainerName;    // Cell container name
-  std::string m_headerTreeName;           // Header Tree name
-  std::string m_noiseTreeName;            // Noise Tree name
-  std::string m_rootfile_name;            // name of the ROOT file with TBTree
-  TFile* m_rootfile;                      // and its pointer
-  TTree* m_header_tree;                   // Header Tree pointer
-  TTree* m_tree;                          // Noise Tree pointer
+  Gaudi::Property<std::string> m_caloCellContainerName{this, "CellContainer", "AllCalo", "Cell container name"};
+  std::string m_headerTreeName{"HeaderTree"};           // Header Tree name
+  Gaudi::Property<std::string> m_noiseTreeName{this, "NoiseTreeName", "NoiseTree", "Noise Tree name"};
+  Gaudi::Property<std::string> m_rootfile_name{this, "RootFileName", "tbh6tree_noise.root", "name of the ROOT file with TBTree"};
+  TFile* m_rootfile{nullptr};             // and its pointer
+  TTree* m_header_tree{nullptr};          // Header Tree pointer
+  TTree* m_tree{nullptr};                 // Noise Tree pointer
 
   /** Text file containing xCryo and yTable */
-  std::string m_txtFileWithXY;
+  std::string m_txtFileWithXY{"xcryo_ytable.txt"};
 };
 
 #endif

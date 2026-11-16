@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBPATTERNUNITSTREAMERTOOLH8_H
@@ -54,16 +54,16 @@ class TBPatternUnitStreamerToolH8 : public TBEventStreamerTool
   // Properties //
   ////////////////
 
-  std::string    m_patternUnitKey;
-  pattern_store  m_acceptPatternNames;
-  pattern_store  m_rejectPatternNames;
+  Gaudi::Property<std::string>   m_patternUnitKey{this, "PatternUnitName", "TBTrigPat", "object key for the pattern unit"};
+  Gaudi::Property<pattern_store> m_acceptPatternNames{this, "AcceptPattern", {}, "list of named bits required for acceptance"};
+  Gaudi::Property<pattern_store> m_rejectPatternNames{this, "RejectPattern", {}, "list of named bits required for rejection"};
 
   /////////////////////
   // Internal Stores //
   /////////////////////
 
-  bit_mask       m_acceptPattern;
-  bit_mask       m_rejectPattern;
+  bit_mask       m_acceptPattern{};
+  bit_mask       m_rejectPattern{};
   bit_mask_store m_triggerBitMap;
 
   //////////////////////

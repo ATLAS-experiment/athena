@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //#####################################################
@@ -38,18 +38,18 @@ class TBBeamQualityDoubleHitsTool : public TBBeamQualityTool
   std::string m_SGScintkey;
   
   //Properties
-  std::vector<std::string> m_scint_names; 
+  Gaudi::Property<std::vector<std::string>> m_scint_names{this, "Scintnames", {}, "scintillator names"};
 
-  bool m_h6cuts; 
+  Gaudi::Property<bool> m_h6cuts{this, "h6cuts", true, "use H6 cut values"};
   
-  int m_ScintCut1;
-  int m_ScintCut2;
+  Gaudi::Property<int> m_ScintCut1{this, "ScintCut1", 1, "index of first scintillator in Scintnames"};
+  Gaudi::Property<int> m_ScintCut2{this, "ScintCut2", 2, "index of second scintillator in Scintnames"};
   
-  float m_ScintCut1ADC;
-  float m_ScintCut2ADC;
+  Gaudi::Property<float> m_ScintCut1ADC{this, "ScintCut1ADC", 0, "ADC cut on first scintillator"};
+  Gaudi::Property<float> m_ScintCut2ADC{this, "ScintCut2ADC", 0, "ADC cut on second scintillator"};
   
-  float m_Scint1ADC;
-  float m_Scint2ADC;
+  float m_Scint1ADC{0};
+  float m_Scint2ADC{0};
 
 };
 

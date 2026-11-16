@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBECLArRawChannelBuilder.h"
@@ -24,74 +24,17 @@ using CLHEP::megahertz;
 using Athena::Units::picosecond;
 
 TBECLArRawChannelBuilder::TBECLArRawChannelBuilder (const std::string& name, ISvcLocator* pSvcLocator):
-  AthAlgorithm(name, pSvcLocator),
-  m_onlineHelper(0),
-  m_calo_id(0),
-  m_DataLocation("FREE"),
-  m_ChannelContainerName("LArRawChannels"),
-  m_useTDC(false),
-  m_useRamp(true),
-  m_useShape(true),
-  m_ConvertADCToHighGain(false),
-  m_Ecut(256*MeV),
-  m_initialTimeSampleShift(0),
-  m_ramp_max(),
-  m_noEnergy(0),
-  m_noTime(0),
-  m_noShape(0),
-  m_noShapeDer(0),
-  m_saturation(0),
-  m_lastNoEnergy(0),
-  m_lastNoTime(0),
-  m_lastNoShape(0),
-  m_lastNoShapeDer(0),
-  m_aveNoEnergy(0),
-  m_aveNoTime(0),
-  m_aveNoShape(0),
-  m_aveNoShapeDer(0),
-  m_aveSaturCells(0),
-  m_nEvents(0),
-  m_aveChannels(0),
-  m_SamplingPeriodeUpperLimit(0),
-  m_SamplingPeriodeLowerLimit(0),
-  m_emId(0),
-  m_adc2mev()
-  //m_NOFCPhases(24),
-  //m_NOFCTimeBins(24)
- {
-   //m_useIntercept={false,false,false,false};
- declareProperty("LArRawChannelContainerName",m_ChannelContainerName);
- declareProperty("DataLocation",              m_DataLocation );
- declareProperty("UseTDC",                    m_useTDC);
- declareProperty("UseRamp",m_useRamp);
- declareProperty("UseShape",m_useShape);
- declareProperty("ConvertADCToHighGain",m_ConvertADCToHighGain);
- declareProperty("Ecut",                      m_Ecut);
- declareProperty("UseHighGainRampIntercept",  m_useIntercept[CaloGain::LARHIGHGAIN]=false);
- declareProperty("UseMedGainRampIntercept",   m_useIntercept[CaloGain::LARMEDIUMGAIN]=false);
- declareProperty("UseLowGainRampIntercept",   m_useIntercept[CaloGain::LARLOWGAIN]=false);
- declareProperty("InitialTimeSampleShift",    m_initialTimeSampleShift);
- declareProperty("NOFCTimeBins",              m_NOFCTimeBins=25); //Number of OFC time bins in a sampling periode
- m_NOFCPhases = m_NOFCTimeBins; 
- declareProperty("NOFCPhases",                m_NOFCPhases);      //Total number of available OFC sets
- declareProperty("UseOFCPhase",               m_useOFCPhase=false);
- declareProperty("PhaseInversion",            m_phaseInv=false);
- declareProperty("SamplingPeriod",            m_SamplingPeriode=1/(40.08*megahertz));
- declareProperty("OFCTimeBin",                m_OFCTimeBin=m_SamplingPeriode/m_NOFCTimeBins);
- declareProperty("BinHalfOffset",             m_binHalfOffset=false);
- declareProperty("AllowTimeSampleJump",       m_allowTimeJump=true);
- declareProperty("PedestalFallbackMode",      m_pedestalFallbackMode=0); // 0=only DB, 1=Only if missing,
- declareProperty("PedestalSample",            m_iPedestal=0);            // 2=Low, 3=Low+Me dium, 4=All LAr
- declareProperty("ShapeMode",                 m_shapeMode=0); 
- declareProperty("SkipSaturCellsMode",        m_skipSaturCells=0);
- declareProperty("ADCMax",                    m_AdcMax=4095);
- declareProperty("HVcorr",                    m_hvcorr=false);
-}
+  AthAlgorithm(name, pSvcLocator)
+{}
 
 
 StatusCode TBECLArRawChannelBuilder::initialize(){
 
   ATH_CHECK( detStore()->retrieve(m_onlineHelper, "LArOnlineID") );
+
+  m_useIntercept[CaloGain::LARHIGHGAIN]   = m_useHighGainIntercept;
+  m_useIntercept[CaloGain::LARMEDIUMGAIN] = m_useMedGainIntercept;
+  m_useIntercept[CaloGain::LARLOWGAIN]    = m_useLowGainIntercept;
 
   ATH_CHECK( m_ofcKey.initialize() );
   ATH_CHECK( m_adc2mevKey.initialize (m_useRamp) );
@@ -167,8 +110,8 @@ StatusCode TBECLArRawChannelBuilder::initialize(){
     m_SamplingPeriodeLowerLimit = 0;
   }
 
-  ATH_MSG_DEBUG ( "Number of OFC time bins per sampling periode=" << m_NOFCTimeBins );
-  ATH_MSG_DEBUG ( "Sampling Periode=" << m_SamplingPeriode << "ns" );
+  ATH_MSG_DEBUG ( "Number of OFC time bins per sampling periode=" << m_NOFCTimeBins.value() );
+  ATH_MSG_DEBUG ( "Sampling Periode=" << m_SamplingPeriode.value() << "ns" );
   ATH_MSG_DEBUG ( "Sampling Periode Limits: (" << m_SamplingPeriodeLowerLimit
                   << "," << m_SamplingPeriodeUpperLimit << ") ns" );
 
@@ -215,7 +158,7 @@ StatusCode TBECLArRawChannelBuilder::execute(const EventContext& ctx)
   const ILArShape* larShape=NULL;
   //Retrieve Digit Container
 
-  ATH_CHECK( evtStore()->retrieve(digitContainer,m_DataLocation) );
+  ATH_CHECK( evtStore()->retrieve(digitContainer,m_DataLocation.value()) );
   
   //Retrieve calibration data
   const ILArPedestal* larPedestal=nullptr;
@@ -264,7 +207,7 @@ StatusCode TBECLArRawChannelBuilder::execute(const EventContext& ctx)
 
   LArRawChannelContainer* larRawChannelContainer=new LArRawChannelContainer();
   larRawChannelContainer->reserve(digitContainer->size());
-  StatusCode sc = evtStore()->record(larRawChannelContainer,m_ChannelContainerName);
+  StatusCode sc = evtStore()->record(larRawChannelContainer,m_ChannelContainerName.value());
   if(sc.isFailure()) {
     ATH_MSG_ERROR ( "Can't record LArRawChannelContainer in StoreGate" );
   }
@@ -346,7 +289,7 @@ StatusCode TBECLArRawChannelBuilder::execute(const EventContext& ctx)
     if (pedestal < (1.0+LArElecCalib::ERRORCODE)) {
       if( m_pedestalFallbackMode >= 1 ) {
         ATH_MSG_DEBUG ( "No pedestal found for channel 0x" << MSG::hex << chid.get_compact() << MSG::dec 
-                        << " Gain " << gain <<".  Using time sample " << m_iPedestal );
+                        << " Gain " << gain <<".  Using time sample " << m_iPedestal.value() );
         pedestalAverage=samples[m_iPedestal];
       } else {              
 	ATH_MSG_DEBUG ( noEnergy << ". No pedestal found for channel 0x" << MSG::hex << chid.get_compact() << MSG::dec 
@@ -360,7 +303,7 @@ StatusCode TBECLArRawChannelBuilder::execute(const EventContext& ctx)
           ( m_pedestalFallbackMode>=3 && gain==CaloGain::LARMEDIUMGAIN ) ||
           ( m_pedestalFallbackMode>=4 && gain==CaloGain::LARHIGHGAIN )       ) {
         ATH_MSG_DEBUG ( "Forcing pedestal fallback for  channel 0x" << MSG::hex << chid.get_compact()
-                        << MSG::dec   << " Gain=" << gain << ". Using time sample " << m_iPedestal );
+                        << MSG::dec   << " Gain=" << gain << ". Using time sample " << m_iPedestal.value() );
         pedestalAverage=samples[m_iPedestal];
       } else {
         pedestalAverage=pedestal;
@@ -426,7 +369,7 @@ StatusCode TBECLArRawChannelBuilder::execute(const EventContext& ctx)
       //else 
       //   OFCTimeBin -= 1 ; 
       
-      if (debugPrint) ATH_MSG_VERBOSE ( "OFC bin width = " << m_OFCTimeBin << " - OFCBin = " << OFCTimeBin << " - timeShift = " << timeShift );
+      if (debugPrint) ATH_MSG_VERBOSE ( "OFC bin width = " << m_OFCTimeBin.value() << " - OFCBin = " << OFCTimeBin << " - timeShift = " << timeShift );
       
       if ( OFCTimeBin < 0 ) {
         ATH_MSG_ERROR ( "Channel " << MSG::hex << chid.get_compact() << MSG::dec << " asks for OFC bin = " << OFCTimeBin << ". Set to 0." );

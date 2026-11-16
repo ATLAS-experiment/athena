@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBREC_TBBEAMQUALITYMC_H
@@ -21,23 +21,23 @@ class TBBeamQualityMC : public AthAlgorithm
 
  private:
   /** Get Xcryo and Ytable from a text file */
-  bool m_readFileforXcryo;
+  Gaudi::Property<bool> m_readFileforXcryo{this, "ReadFileforXcryo", true, "Get Xcryo and Ytable from a text file"};
   StatusCode getXcryoYtable(float &x, float &y, float &eBeam);
-  int m_nRun;
+  int m_nRun{0};
 
-  float m_bm_cut_x;
-  float m_bm_cut_y;
-  bool m_check_trackpar;
+  Gaudi::Property<float> m_bm_cut_x{this, "TrackCutX", 35., "cut on beam track x position"};
+  Gaudi::Property<float> m_bm_cut_y{this, "TrackCutY", 35., "cut on beam track y position"};
+  Gaudi::Property<bool> m_check_trackpar{this, "CheckTrackParams", false, "check track parameters"};
 
-  bool m_check_primary;
-  std::vector<int> m_scint_prim;
+  Gaudi::Property<bool> m_check_primary{this, "CheckPrimaryTrack", true, "check primary energy deposition in scintillators"};
+  Gaudi::Property<std::vector<int>> m_scint_prim{this, "ScintForPrimaryTrack", {}, "scintillators for primary track check"};
 
-  bool m_check_veto;
+  Gaudi::Property<bool> m_check_veto{this, "CheckVetoScint", true, "check for hit in veto scintillator"};
 
-  bool m_check_clus;
-  bool m_check_trackreco;
+  Gaudi::Property<bool> m_check_clus{this, "CheckClusters", false, "reject events without good cluster"};
+  Gaudi::Property<bool> m_check_trackreco{this, "CheckTrackReco", false, "reject events with bad track reconstruction"};
 
-  std::string m_clusterCollName;
+  Gaudi::Property<std::string> m_clusterCollName{this, "ClusterCollectionName", "CaloTopoClusters", "cluster collection name"};
 };
 
 #endif

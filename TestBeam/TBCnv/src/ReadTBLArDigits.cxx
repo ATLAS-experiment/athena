@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBCnv/ReadTBLArDigits.h"
@@ -15,19 +15,8 @@ ReadTBLArDigits::SortDigits::SortDigits(const LArOnlineID* onlineHelper)
 }
 
 ReadTBLArDigits::ReadTBLArDigits(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator),
-    m_count(0),
-    m_emId(0),
-    m_fcalId(0),
-    m_hecId(0),
-    m_onlineHelper(0),
-    m_ntuplePtr(0)
+  : AthAlgorithm(name, pSvcLocator)
 {
- declareProperty("ContainerKey",m_containerKey="");
- declareProperty("DumpFile",m_dumpFile="");
- declareProperty("PrintCellLocation",m_printCellLoc=false);
- declareProperty("PrintFebChan",m_printFebChan=true);
- 
 }
 
 ReadTBLArDigits::~ReadTBLArDigits() 
@@ -46,8 +35,8 @@ StatusCode ReadTBLArDigits::initialize()
 
   ATH_CHECK( detStore()->retrieve(m_onlineHelper, "LArOnlineID") );
 
-  if (m_dumpFile.size()>0)
-    m_outfile.open(m_dumpFile.c_str(),std::ios::out);
+  if (m_dumpFile.value().size()>0)
+    m_outfile.open(m_dumpFile.value().c_str(),std::ios::out);
   //Ntuple booking
  
 
@@ -94,14 +83,14 @@ StatusCode ReadTBLArDigits::execute(const EventContext& ctx)
  m_count++; 
  StatusCode sc; 
  log << MSG::DEBUG << "======== executing event "<< m_count << " ========" << endmsg;
- log << MSG::DEBUG << "Retrieving TBLArDigitContainer. Key= " << m_containerKey << endmsg; 
+ log << MSG::DEBUG << "Retrieving TBLArDigitContainer. Key= " << m_containerKey.value() << endmsg; 
  TBLArDigitContainer* larDigitCont = nullptr;
- if (m_containerKey.size())
-   sc = evtStore()->retrieve(larDigitCont ,m_containerKey);
+ if (m_containerKey.value().size())
+   sc = evtStore()->retrieve(larDigitCont ,m_containerKey.value());
  else
    sc = evtStore()->retrieve(larDigitCont);
  if (sc.isFailure()) 
-   {log << MSG::FATAL << " Cannot read TBLArDigitContainer from StoreGate! key=" << m_containerKey << endmsg;
+   {log << MSG::FATAL << " Cannot read TBLArDigitContainer from StoreGate! key=" << m_containerKey.value() << endmsg;
     return StatusCode::FAILURE;
    }
  

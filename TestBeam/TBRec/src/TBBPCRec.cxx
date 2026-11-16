@@ -21,31 +21,7 @@
 TBBPCRec::TBBPCRec(const std::string& name,
                    ISvcLocator* pSvcLocator) :
   AthAlgorithm(name,pSvcLocator)
- {
-  // job options
-
-   declareProperty("SGkey",  m_SGkey="BPCRawCont");
-   declareProperty("SGrecordkey",  m_SGrecordkey="BPCCont");
-   declareProperty("CalibFileName",  m_calib_filename="H6BPCCalib.txt");
-
-   declareProperty("BPCnames",  m_bpc_names);
-   declareProperty("BPCcalibX",  m_bpc_calibX);
-   declareProperty("BPCcalibY",  m_bpc_calibY);
-   declareProperty("BPCleftright",  m_bpc_leftright);
-   declareProperty("BPCupdown",  m_bpc_updown);
-   declareProperty("BPCudoffset",  m_bpc_udoffset);
-   declareProperty("BPClroffset",  m_bpc_lroffset);
-
-   declareProperty("BPCinvX",  m_bpc_invX);
-   declareProperty("BPCinvY",  m_bpc_invY);
-   m_runnumber = 0;
-
-   declareProperty("TDCmin", m_tdccutmin);
-   declareProperty("TDCmax", m_tdccutmax);
-   declareProperty("TDClrcut", m_tdccutlr);
-   declareProperty("TDCudcut", m_tdccutud);
-   declareProperty("BPCRotation", m_rotation);
- }
+{}
 
 TBBPCRec::~TBBPCRec()
 { }
@@ -73,11 +49,11 @@ TBBPCRec::execute(const EventContext& ctx)
 
   // Reconstruct BPC :
   TBBPCRawCont * bpcrawCont;
-  StatusCode sc = evtStore()->retrieve(bpcrawCont, m_SGkey);
+  StatusCode sc = evtStore()->retrieve(bpcrawCont, m_SGkey.value());
   if (sc.isFailure()){
-    ATH_MSG_DEBUG ( "TBObjectReco: Retrieval of "<<m_SGkey<<" failed" );
+    ATH_MSG_DEBUG ( "TBObjectReco: Retrieval of "<<m_SGkey.value()<<" failed" );
   }else {
-    ATH_MSG_DEBUG ( "TBBPCRec : Retrieval of "<<m_SGkey<<" succeed : cont size=" << bpcrawCont->size());
+    ATH_MSG_DEBUG ( "TBBPCRec : Retrieval of "<<m_SGkey.value()<<" succeed : cont size=" << bpcrawCont->size());
 
     TBBPCCont * bpcCont = new TBBPCCont();
 
@@ -86,12 +62,12 @@ TBBPCRec::execute(const EventContext& ctx)
       std::string name = bpcraw->getDetectorName();
       unsigned int ind=0;
       // Find calibration index for this BPC
-      while(ind<m_bpc_names.size()) 
+      while(ind<m_bpc_names.value().size()) 
 	{
 	  if(name==m_bpc_names[ind]) break; 
 	  else ind++;
 	}
-      if(ind==m_bpc_names.size()){
+      if(ind==m_bpc_names.value().size()){
         ATH_MSG_ERROR( "No calibrations for BPC" <<name);
         continue;
       }
@@ -110,7 +86,7 @@ TBBPCRec::execute(const EventContext& ctx)
       float xposR;
       float yposR;
 
-      if (m_rotation.size()>0) {
+      if (m_rotation.value().size()>0) {
          xposR = xpos*cos(m_rotation[ind]) - ypos*sin(m_rotation[ind]);
          yposR = xpos*sin(m_rotation[ind]) + ypos*cos(m_rotation[ind]);
       } else {
@@ -145,7 +121,7 @@ TBBPCRec::execute(const EventContext& ctx)
 
       //PWK 29/06/05 set xcut, ycut true only if TDCmin, TDCmax properties set 
 
-      if (m_tdccutmin.size()>0 && m_tdccutmax.size()>0) {       
+      if (m_tdccutmin.value().size()>0 && m_tdccutmax.value().size()>0) {       
       
 	if (bpcraw->getTDCLeft()>m_tdccutmax[ind] || bpcraw->getTDCLeft()<m_tdccutmin[ind]) {xcut = true;}
 	if (bpcraw->getTDCRight()>m_tdccutmax[ind] || bpcraw->getTDCRight()<m_tdccutmin[ind]) {xcut = true;}
@@ -163,14 +139,14 @@ TBBPCRec::execute(const EventContext& ctx)
  
       //PWK 29/06/05 set xcut, ycut true only if TDClrcut, TDCudcut properties set 
 
-      if (m_tdccutlr.size()>0) {
+      if (m_tdccutlr.value().size()>0) {
 	if (bpcraw->getTDCLeft()+bpcraw->getTDCRight() < m_tdccutlr[ind]) 
 	  {
 	    xcut = true;
 	    ATH_MSG_INFO ( "TDC left+right sum below cutoff for BPC " << ind );
 	  }
       }
-      if (m_tdccutud.size()>0) {
+      if (m_tdccutud.value().size()>0) {
 	if (bpcraw->getTDCUp()+bpcraw->getTDCDown() < m_tdccutud[ind]) 
 	  {
 	    ycut = true;
@@ -188,7 +164,7 @@ TBBPCRec::execute(const EventContext& ctx)
       bpcCont->push_back(bpc);
     }
 
-    sc = evtStore()->record(bpcCont,m_SGrecordkey);
+    sc = evtStore()->record(bpcCont,m_SGrecordkey.value());
     if ( sc.isFailure( ) ) {
       ATH_MSG_FATAL ( "Cannot record BPCCont" );
     }
@@ -228,16 +204,16 @@ StatusCode TBBPCRec::getnewcalib()
 
   ATH_MSG_DEBUG ( "Get new calibs for run " << m_runnumber);
   
-  int bpcnumber= m_bpc_names.size();
+  int bpcnumber= m_bpc_names.value().size();
 
-  m_bpc_calibX.clear(); m_bpc_calibX.resize(bpcnumber);
-  m_bpc_calibY.clear(); m_bpc_calibY.resize(bpcnumber);
-  m_bpc_leftright.clear(); m_bpc_leftright.resize(bpcnumber);
-  m_bpc_updown.clear();    m_bpc_updown.resize(bpcnumber);
-  m_bpc_udoffset.clear();  m_bpc_udoffset.resize(bpcnumber);
-  m_bpc_lroffset.clear();  m_bpc_lroffset.resize(bpcnumber);
-  m_bpc_invX.clear(); m_bpc_invX.resize(bpcnumber);
-  m_bpc_invY.clear(); m_bpc_invY.resize(bpcnumber);
+  m_bpc_calibX.value().clear(); m_bpc_calibX.value().resize(bpcnumber);
+  m_bpc_calibY.value().clear(); m_bpc_calibY.value().resize(bpcnumber);
+  m_bpc_leftright.value().clear(); m_bpc_leftright.value().resize(bpcnumber);
+  m_bpc_updown.value().clear();    m_bpc_updown.value().resize(bpcnumber);
+  m_bpc_udoffset.value().clear();  m_bpc_udoffset.value().resize(bpcnumber);
+  m_bpc_lroffset.value().clear();  m_bpc_lroffset.value().resize(bpcnumber);
+  m_bpc_invX.value().clear(); m_bpc_invX.value().resize(bpcnumber);
+  m_bpc_invY.value().clear(); m_bpc_invY.value().resize(bpcnumber);
 
   int pos;
 
@@ -245,7 +221,7 @@ StatusCode TBBPCRec::getnewcalib()
   std::string filename = PathResolver::find_file (m_calib_filename, "DATAPATH");
   calibfile.open(filename.c_str());
   if(!calibfile.good()){
-    ATH_MSG_WARNING ( " Problem with file named "<< m_calib_filename << " in $DATAPATH" );
+    ATH_MSG_WARNING ( " Problem with file named "<< m_calib_filename.value() << " in $DATAPATH" );
     return StatusCode::FAILURE;
   } else {
     ATH_MSG_DEBUG ( " file " << filename << " opened" );

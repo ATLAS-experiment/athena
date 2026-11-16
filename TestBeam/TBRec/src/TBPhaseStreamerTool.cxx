@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TBPhaseStreamerTool.h"
@@ -11,12 +11,8 @@ TBPhaseStreamerTool::TBPhaseStreamerTool(const std::string& type,
                                          const std::string& name,
                                          const IInterface* parent)
   : TBEventStreamerTool(type,name,parent)
-    , m_guardValue(11.)         // in TDC counts
-    , m_TBPhaseKey("TBPhase")
 {
-  declareInterface<TBEventStreamerTool>(this); 
-  declareProperty("TBPhaseKey",m_TBPhaseKey);
-  declareProperty("Guard",m_guardValue);
+  declareInterface<TBEventStreamerTool>(this);
 }
 
 TBPhaseStreamerTool::~TBPhaseStreamerTool()
@@ -30,7 +26,7 @@ StatusCode TBPhaseStreamerTool::initializeTool()
 { 
   MsgStream report(msgSvc(),name());
   
-  report << MSG::INFO << " Cut events using guard value: " << m_guardValue;
+  report << MSG::INFO << " Cut events using guard value: " << m_guardValue.value();
   
   return StatusCode::SUCCESS;
 }
@@ -44,7 +40,7 @@ StatusCode TBPhaseStreamerTool::accept()
   MsgStream report(msgSvc(),name());
   
   const TBPhase* thePhase = 0;
-  ATH_CHECK( evtStore()->retrieve(thePhase,m_TBPhaseKey) );
+  ATH_CHECK( evtStore()->retrieve(thePhase,m_TBPhaseKey.value()) );
 
   // Get the absolute value of the distance of the TDC-WAC
   float dTtoWAC = thePhase->getdTtoWAC();

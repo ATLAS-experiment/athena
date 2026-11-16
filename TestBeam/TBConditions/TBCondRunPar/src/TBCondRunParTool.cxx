@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // TBCondRunParTool.cxx
@@ -19,7 +19,6 @@ TBCondRunParTool::TBCondRunParTool(const std::string& type,
   : AthAlgTool(type,name,parent)
 {
   declareInterface<TBCondRunParTool>(this);
-  declareProperty("RunParamFolder",m_runpfolder);
 }
 
 TBCondRunParTool::~TBCondRunParTool()
@@ -32,7 +31,7 @@ StatusCode TBCondRunParTool::initialize()
 {
   ATH_MSG_INFO ( "In initialize of TBCondRunParTool" );
   ATH_MSG_INFO ( 
-    "RunParams will be read from folder: " << m_runpfolder << 
+    "RunParams will be read from folder: " << m_runpfolder.value() << 
     " in COOL database" );
   // check StoreGate service available
   return StatusCode::SUCCESS;
@@ -164,7 +163,7 @@ StatusCode TBCondRunParTool::getVal(const std::string& folder, const unsigned in
 bool TBCondRunParTool::extractCool(const int run) {
   bool update=true;
   const AthenaAttributeList* atrlist=0;
-  std::string table=m_runpfolder+"/RunParams.RunParams";
+  std::string table=m_runpfolder.value()+"/RunParams.RunParams";
   if (StatusCode::SUCCESS==detStore()->retrieve(atrlist,table)) {
     // std::ostringstream atrs;
     // atrlist->print(atrs);

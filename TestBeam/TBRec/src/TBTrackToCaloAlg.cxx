@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 ///////////////////////////////////////////////////////////////////
@@ -42,23 +42,8 @@ using Athena::Units::GeV;
 // Constructor with parameters:
 TBTrackToCaloAlg::TBTrackToCaloAlg(const std::string &name, 
                                    ISvcLocator *pSvcLocator) :
-  AthAlgorithm(name,pSvcLocator),
-  m_TrackName("Tracks"),
-  m_tracks(0),
-  m_calodepth(nullptr)
-{  
-  // Get parameter values from jobOptions file
-  declareProperty("TrackName", m_TrackName);
-  declareProperty("TrackParticleName", m_TrackParticleName);
-  declareProperty("ClusterContainerName", m_cluster_container);
-  declareProperty("CaloCellContainerName", m_cell_container);
-  declareProperty("ImpactInCaloContainerName", m_ImpactInCalosOutputName);
-  declareProperty("TrackInputType", m_trkinput);
-  m_calo_id = 0;
-  m_calo_tb_coord = 0;
-  m_particle = 0;
-  m_toCalo = 0;
-}
+  AthAlgorithm(name,pSvcLocator)
+{}
 
 // Initialize method:
 StatusCode TBTrackToCaloAlg::initialize()
@@ -137,10 +122,10 @@ bool TBTrackToCaloAlg::CreateTrkImpactInCalo()
 
   //create and record new ImpactInCalo container
   ImpactInCaloCollection* outputContainer = new ImpactInCaloCollection();
-  StatusCode sc=evtStore()->record(outputContainer,m_ImpactInCalosOutputName,false); //"false" indicates it can't be modified by another algorithm
+  StatusCode sc=evtStore()->record(outputContainer,m_ImpactInCalosOutputName.value(),false); //"false" indicates it can't be modified by another algorithm
   if(sc != StatusCode::SUCCESS){
     ATH_MSG_ERROR ( " Could not record ImpactInCaloCollection" 
-                    << m_ImpactInCalosOutputName );
+                    << m_ImpactInCalosOutputName.value() );
     return got_a_track ;
   }
 
@@ -154,9 +139,9 @@ bool TBTrackToCaloAlg::CreateTrkImpactInCalo()
 	return true;
       }
 
-      sc = evtStore()->retrieve(m_particle, m_TrackParticleName);
+      sc = evtStore()->retrieve(m_particle, m_TrackParticleName.value());
 
-      if (sc.isFailure()) ATH_MSG_ERROR ("TrackParticle not found: will only play with calo " << m_TrackParticleName );
+      if (sc.isFailure()) ATH_MSG_ERROR ("TrackParticle not found: will only play with calo " << m_TrackParticleName.value() );
       else {
 	ATH_MSG_DEBUG ("TrackParticle found in StoreGate" );
         for (const Rec::TrackParticle* tp : *m_particle) {
@@ -176,9 +161,9 @@ bool TBTrackToCaloAlg::CreateTrkImpactInCalo()
 	return true;
       }
 
-      sc = evtStore()->retrieve(m_tracks, m_TrackName);
+      sc = evtStore()->retrieve(m_tracks, m_TrackName.value());
 
-      if (sc.isFailure()) ATH_MSG_ERROR ("Tracks not found: will only play with calo " << m_TrackName );
+      if (sc.isFailure()) ATH_MSG_ERROR ("Tracks not found: will only play with calo " << m_TrackName.value() );
       else {
 	ATH_MSG_DEBUG ("Tracks found in StoreGate" );
         for (const Trk::Track* tr : *m_tracks) {
@@ -446,10 +431,10 @@ void TBTrackToCaloAlg::CompareImpactWithCluster()
   // loop on clusters
   
   const xAOD::CaloClusterContainer* cluster_container = nullptr;
-  sc1=evtStore()->retrieve(cluster_container,m_cluster_container);
+  sc1=evtStore()->retrieve(cluster_container,m_cluster_container.value());
   
   const ImpactInCaloCollection* impact_collection;
-  sc2=evtStore()->retrieve(impact_collection,m_ImpactInCalosOutputName);
+  sc2=evtStore()->retrieve(impact_collection,m_ImpactInCalosOutputName.value());
   
   if(sc1 == StatusCode::SUCCESS && sc2 == StatusCode::SUCCESS ){
 
@@ -479,10 +464,10 @@ void TBTrackToCaloAlg::CompareImpactWithCluster()
   else {
     if (sc1 != StatusCode::SUCCESS)
       ATH_MSG_ERROR ("Clusters not found" 
-                     << m_cluster_container );
+                     << m_cluster_container.value() );
     if (sc2 != StatusCode::SUCCESS)
       ATH_MSG_ERROR ("ImpactInCalos not found" 
-                     << m_ImpactInCalosOutputName );
+                     << m_ImpactInCalosOutputName.value() );
   }
 }
 
@@ -497,7 +482,7 @@ void TBTrackToCaloAlg::PrintImpact()
   ATH_MSG_INFO ( " Start with Impacts : " );
   
   const ImpactInCaloCollection* impact_collection;
-  sc=evtStore()->retrieve(impact_collection,m_ImpactInCalosOutputName);
+  sc=evtStore()->retrieve(impact_collection,m_ImpactInCalosOutputName.value());
   
   if(sc == StatusCode::SUCCESS ){
 
@@ -513,7 +498,7 @@ void TBTrackToCaloAlg::PrintImpact()
   }
   else {
     ATH_MSG_ERROR ("ImpactInCalos not found" 
-                   << m_ImpactInCalosOutputName );
+                   << m_ImpactInCalosOutputName.value() );
   }
 
   if (m_tracks) {
@@ -577,7 +562,7 @@ TBTrackToCaloAlg::CellsCrossedByTrack(const Trk::Track* trk,
   // Retreive CaloCell's from StoreGate :  
 
   const CaloCellContainer* cell_container;
-  StatusCode sc=evtStore()->retrieve(cell_container,m_cell_container);
+  StatusCode sc=evtStore()->retrieve(cell_container,m_cell_container.value());
   if ( sc != StatusCode::SUCCESS  ) return 0;
 
   SG::ReadCondHandle<CaloDetDescrManager> caloMgrHandle{m_caloMgrKey};
@@ -645,10 +630,10 @@ bool TBTrackToCaloAlg::PrintCellsCrossed()
     return true;
   }
 
-  StatusCode sc = evtStore()->retrieve(m_tracks, m_TrackName);
+  StatusCode sc = evtStore()->retrieve(m_tracks, m_TrackName.value());
   if (sc.isFailure()){
     ATH_MSG_ERROR ("Tracks not found: will only play with calo " 
-                   << m_TrackName );
+                   << m_TrackName.value() );
   }
   else{ 
     ATH_MSG_DEBUG ("Tracks found in StoreGate" );

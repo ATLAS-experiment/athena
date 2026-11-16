@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //#####################################################
@@ -41,11 +41,11 @@ class TBBeamQualityMuonToolH6 : public TBBeamQualityTool
   // TRIGGERING
   std::vector<unsigned int> m_triggflag;
   
-  bool m_mu1;
-  bool m_mu2;
-  bool m_mu3;
-  bool m_mu4;
-  bool m_successflag;
+  bool m_mu1{false};
+  bool m_mu2{false};
+  bool m_mu3{false};
+  bool m_mu4{false};
+  bool m_successflag{false};
 };
 #endif
 

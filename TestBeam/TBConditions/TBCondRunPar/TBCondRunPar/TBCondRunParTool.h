@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBCONDRUNPAR_TBCONDRUNPARTOOL_H
@@ -60,7 +60,7 @@ class TBCondRunParTool: public AthAlgTool {
 
   int m_crun{-1};
   int m_cevent{-1};
-  std::string m_runpfolder;
+  Gaudi::Property<std::string> m_runpfolder{this, "RunParamFolder", "", "COOL folder holding the RunParams"};
   // cached data
   int m_status{-1};
   int m_run_number{-1};

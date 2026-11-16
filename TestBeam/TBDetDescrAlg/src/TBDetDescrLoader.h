@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TBDetDescrLoader_H
@@ -26,13 +26,13 @@ public:
 
 private:
 
-    std::string m_TBDetDescrManager;
-    std::string m_TBElementContainer;
-    int m_readAction;
-    int m_writeAction;
+    Gaudi::Property<std::string> m_TBDetDescrManager{this, "TBDetDescrManager", "TBDetDescrMgr", "DetectorStore key of the TBDetDescrManager"};
+    Gaudi::Property<std::string> m_TBElementContainer{this, "TBElementContainer", "TBElementCnt", "StoreGate key of the TBElementContainer"};
+    Gaudi::Property<int> m_readAction{this, "ReadAction", -1, "Read action: 0 - nothing, 1 - read once, 2 - read always, <0 - create manager"};
+    Gaudi::Property<int> m_writeAction{this, "WriteAction", 0, "Write action: 0 - nothing, 1 - write once, 2 - write always"};
 
-    TBDetDescrManager * m_TBDDM;
-    const TBDetDescrManager * c_TBDDM;
+    TBDetDescrManager * m_TBDDM{nullptr};
+    const TBDetDescrManager * c_TBDDM{nullptr};
 };
 
 #endif
