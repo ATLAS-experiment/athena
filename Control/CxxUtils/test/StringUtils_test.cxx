@@ -50,6 +50,23 @@ void test_make_string_compatibility() {
         assert(result == "Hello beautiful World!");
     }
 
+    /// 6. Test Empty Strings and Empty string_views (including default-constructed views)
+    {
+        std::string emptyStdStr = "";
+        std::string_view emptySv = "";
+        std::string_view defaultSv{};
+        
+        // Single empty tests
+        assert(CxxUtils::strcat("") == "");
+        assert(CxxUtils::strcat(emptyStdStr) == "");
+        assert(CxxUtils::strcat(emptySv) == "");
+        assert(CxxUtils::strcat(defaultSv) == "");
+
+        // Mixed combinations with empty strings and views
+        std::string result = CxxUtils::strcat("Start_", emptyStdStr, "Middle_", emptySv, defaultSv, "_End");
+        assert(result == "Start_Middle__End");
+    }
+
     std::cout << "All make_string compatibility tests passed successfully!\n";
 }
 

@@ -18,6 +18,7 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "AthenaKernel/errorcheck.h"
 #include "AthenaKernel/StoreID.h"
+#include "CxxUtils/StringUtilsTemplates.h"
 
 #include <sstream>
 
@@ -290,7 +291,7 @@ void VarHandleKey::parseKey (const std::string& key,
   if (m_sgKey.empty()) {
     Gaudi::DataHandle::updateKey("");
   } else {
-    Gaudi::DataHandle::updateKey(sn + storeSeparator + m_sgKey);
+    Gaudi::DataHandle::updateKey(CxxUtils::strcat( sn, storeSeparator, m_sgKey));
   }
 
 
@@ -323,7 +324,7 @@ std::string VarHandleKey::pythonRepr() const
 
   std::ostringstream ost;
   std::print (ost, "DataHandle(");;
-  Gaudi::Utils::toStream(m_storeHandle.name() + storeSeparator + m_sgKey, ost);
+  Gaudi::Utils::toStream(CxxUtils::strcat(m_storeHandle.name(), storeSeparator, m_sgKey), ost);
   std::print (ost, ",");
   switch (mode()) {
   case Gaudi::DataHandle::Writer:
