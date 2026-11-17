@@ -124,12 +124,15 @@ StatusCode LundVariablesTool::decorate(const xAOD::JetContainer& jets) const {
   return StatusCode::SUCCESS;
 }
 
-std::vector<LundVariablesTool::Declustering> LundVariablesTool::getLundVar( std::vector<fastjet::PseudoJet> v_jcs, bool do_primaryLund)
+std::vector<LundVariablesTool::Declustering> LundVariablesTool::getLundVar( std::vector<fastjet::PseudoJet> v_jcs, bool do_primaryLund, bool do_KtLJP)
 {
-  fastjet::JetDefinition jd(fastjet::cambridge_algorithm, 1.0);
+  fastjet::JetAlgorithm algorithm = do_KtLJP ? fastjet::kt_algorithm : fastjet::cambridge_algorithm;
+  fastjet::JetDefinition jd(algorithm, 1.0);
   std::vector<LundVariablesTool::Declustering> result;
   fastjet::ClusterSequence cs(v_jcs, jd);
   std::vector<fastjet::PseudoJet> v_pj = sorted_by_pt(cs.inclusive_jets());
+
+  if (v_pj.empty()) return result;
 
   fastjet::PseudoJet j = v_pj.at(0);
 
@@ -144,10 +147,6 @@ std::vector<LundVariablesTool::Declustering> LundVariablesTool::getLundVar( std:
     bool thisJHasParents = thisJ.has_parents(pJLeft, pJRight);
 
     if (!thisJHasParents){
-      /// PrimaryLundJetPlane
-      /// Always follow the harder split along the LundGraph
-      /// When thisJ has no parents, it moves to the next LundJetPlane
-      if (do_primaryLund) return result;
       continue;
     }
 
@@ -159,7 +158,11 @@ std::vector<LundVariablesTool::Declustering> LundVariablesTool::getLundVar( std:
     }
 
     jetStack.push(pJLeft);
-    jetStack.push(pJRight);
+
+    /// PrimaryLundJetPlane
+    /// Always follow the harder split(pJLeft) along the LundGraph
+    /// Only look at softer split(pJRight) when looking at higher order LJP
+    if (!do_primaryLund) jetStack.push(pJRight);
 
     LundVariablesTool::Declustering declust;
 
