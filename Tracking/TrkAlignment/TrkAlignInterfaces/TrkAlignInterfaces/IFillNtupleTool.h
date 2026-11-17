@@ -36,9 +36,6 @@ namespace Trk {
     virtual ~IFillNtupleTool() {}
     
     static const InterfaceID& interfaceID();
-    
-    virtual StatusCode initialize() = 0;
-    virtual StatusCode finalize() = 0;
 
     /** dumps track information to ntuple */
     virtual void dumpTrack(const EventContext& ctx, int itrk, const AlignTrack* alignTrack) = 0;

@@ -35,41 +35,13 @@
 
 namespace InDet {
 //________________________________________________________________________
-  DetailedIDNtupleTool::DetailedIDNtupleTool(const std::string& type, const std::string& name, const IInterface* parent)
-    : AthAlgTool(type, name, parent)
-    , m_trackSumTool("Trk::TrackSummaryTool/TrackSummaryTool", this)
-    , m_alignModuleTool{}
-    , m_storeNormalRefittedOnly{false}
-    , m_storeConstrainedOnly{true}
-    , m_storeTruth{true}
-    , m_matchProbability{0.8}
-    , m_file{}
-    , m_tree{}
-    , m_trackCollection{"Tracks"}
-    , m_tracksTruthName{"TrackTruthCollection"} {
-    declareInterface<Trk::IFillNtupleTool>(this);
-
-    declareProperty("FileName", m_filename = "IDAlign.root");
-    declareProperty("FilePath", m_filepath = "./");
-    declareProperty("TrackCollection", m_trackCollection);
-    declareProperty("TracksTruthName", m_tracksTruthName);
-    declareProperty("TrackSummaryTool", m_trackSumTool);
-    declareProperty("AlignModuleTool", m_alignModuleTool);
-    declareProperty("MatchProbability", m_matchProbability);
-    declareProperty("StoreTruth", m_storeTruth);
-    declareProperty("MatchProbability", m_matchProbability);
-    declareProperty("StoreNormalRefittedOnly", m_storeNormalRefittedOnly);
-    declareProperty("StoreConstrainedOnly", m_storeConstrainedOnly);
-  }
-
-//________________________________________________________________________
   DetailedIDNtupleTool::~DetailedIDNtupleTool() {
   }
 
 //________________________________________________________________________
   StatusCode DetailedIDNtupleTool::initialize() {
     ATH_MSG_DEBUG("initialize() of DetailedIDNtupleTool");
-    ATH_MSG_DEBUG("creating file with name " << m_filepath << m_filename);
+    ATH_MSG_DEBUG("creating file with name " << m_filepath.value() << m_filename.value());
 
     if (!m_tree) initializeNtuple();
     ATH_CHECK(m_truthToTrack.retrieve());
@@ -352,13 +324,13 @@ namespace InDet {
 
     const TrackCollection* RecCollection = nullptr;
 
-    if (evtStore()->retrieve(RecCollection, m_trackCollection).isFailure()) {
-      ATH_MSG_WARNING("Track collection \"" << m_trackCollection << "\" not found.");
+    if (evtStore()->retrieve(RecCollection, m_trackCollection.value()).isFailure()) {
+      ATH_MSG_WARNING("Track collection \"" << m_trackCollection.value() << "\" not found.");
       return false;
     }
     if (RecCollection) {
       ATH_MSG_DEBUG(
-        "Retrieved " << m_trackCollection << " with size " << RecCollection->size() <<
+        "Retrieved " << m_trackCollection.value() << " with size " << RecCollection->size() <<
       " reconstructed tracks from storegate");
     } else {
       ATH_MSG_WARNING("RecCollection is null pointer in DetailedIDNtupleTool::retrieveTruthInfo");
@@ -367,13 +339,13 @@ namespace InDet {
 
     // get TrackTruthCollection
     const TrackTruthCollection* TruthMap = nullptr;
-    if (StatusCode::SUCCESS != evtStore()->retrieve(TruthMap, m_tracksTruthName)) {
-      ATH_MSG_DEBUG("Cannot find " << m_tracksTruthName);
+    if (StatusCode::SUCCESS != evtStore()->retrieve(TruthMap, m_tracksTruthName.value())) {
+      ATH_MSG_DEBUG("Cannot find " << m_tracksTruthName.value());
       return false;
     }
 
     ATH_MSG_DEBUG(
-      "Track Truth Collection with name " << m_tracksTruthName << " with size " << TruthMap->size() <<
+      "Track Truth Collection with name " << m_tracksTruthName.value() << " with size " << TruthMap->size() <<
     " found in StoreGate");
 
     bool flag = false;

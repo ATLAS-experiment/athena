@@ -35,84 +35,6 @@
 
 namespace InDet {
 //________________________________________________________________________
-  SimpleIDNtupleTool::SimpleIDNtupleTool(const std::string& type, const std::string& name, const IInterface* parent)
-    : AthAlgTool(type, name, parent)
-    , m_particleCreator("Trk::TrackParticleCreatorTool/TrackParticleCreatorTool", this)
-    , m_alignModuleTool{}
-    , m_idHelper{}
-    , m_file{}
-    , m_tree(nullptr)
-    , m_runNumber{}
-    , m_evtNumber{}
-    , m_xvtx{}
-    , m_yvtx{}
-    , m_zvtx{}
-    , m_d0{}
-    , m_z0{}
-    , m_phi0{}
-    , m_theta{}
-    , m_qoverp{}
-    , m_pt{}
-    , m_eta{}
-    , m_chi2{}
-    , m_ndof{}
-    , m_chi2prob{}
-    , m_nhits{}
-    , m_nhitstrt{}
-    , m_nhitssct{}
-    , m_nhitspix{}
-    , m_nshared{}
-    , m_nshsct{}
-    , m_nshpix{}
-    , m_nholes{}
-    , m_nhsct{}
-    , m_nhpix{}
-    , m_hit_rho{}
-    , m_hit_phi{}
-    , m_hit_z{}
-    , m_hit_cotth{}
-    , m_hit_eta{}
-    , m_hit_xloc{}
-    , m_hit_yloc{}
-    , m_hit_zloc{}
-    , m_hit_drd{}
-    , m_hit_sig{}
-    , m_hit_resx{}
-    , m_hit_resx_err{}
-    , m_hit_resy{}
-    , m_hit_resy_err{}
-    , m_hit_tpar_x{}
-    , m_hit_tpar_y{}
-    , m_hit_det{}
-    , m_hit_type{}
-    , m_hit_derivx_transx{}
-    , m_hit_derivx_transy{}
-    , m_hit_derivx_transz{}
-    , m_hit_derivx_rotx{}
-    , m_hit_derivx_roty{}
-    , m_hit_derivx_rotz{}
-    , m_hit_derivx_bowx{}
-    , m_hit_derivx_bowy{}
-    , m_hit_derivx_bowz{}
-    , m_hit_derivy_transx{}
-    , m_hit_derivy_transy{}
-    , m_hit_derivy_transz{}
-    , m_hit_derivy_rotx{}
-    , m_hit_derivy_roty{}
-    , m_hit_derivy_rotz{}
-    , m_hit_derivy_bowx{}
-    , m_hit_derivy_bowy{}
-    , m_hit_derivy_bowz{}
-    , m_max_hits{150}
-    , m_storeDerivatives{false} {
-    declareInterface<Trk::IFillNtupleTool>(this);
-    declareProperty("TrackParticleCreatorTool", m_particleCreator, "tool to build TrackParticle");
-    declareProperty("AlignModuleTool", m_alignModuleTool);
-    declareProperty("MaxHits", m_max_hits);
-    declareProperty("StoreDerivatives", m_storeDerivatives);
-  }
-
-//________________________________________________________________________
   SimpleIDNtupleTool::~SimpleIDNtupleTool() {
     if (m_hit_rho) {
       delete [] m_hit_rho;
@@ -573,7 +495,7 @@ namespace InDet {
       ++nhits;
 
       if (nhits >= m_max_hits) {
-        ATH_MSG_WARNING("Number of hits on track more that maximum: " << m_nhits << " > " << m_max_hits << " "
+        ATH_MSG_WARNING("Number of hits on track more that maximum: " << m_nhits << " > " << m_max_hits.value() << " "
                                                                       << "Some hits will not be stored.");
         break;
       }
