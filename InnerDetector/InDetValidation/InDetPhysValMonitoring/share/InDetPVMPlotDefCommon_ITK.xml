@@ -24,7 +24,7 @@
   <z title="# InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
 </h>
 <h id="nInnerMostPixelEndcapHits_vs_mu" type="TProfile" title="InnerMost Pixel Endcap Hits vs Mu">
-  <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+  <x title="#mu" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="# InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
 </h>
 
@@ -46,7 +46,7 @@
   <y title="# Next To InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
 </h>
 <h id="nNextToInnerMostPixelEndcapHits_vs_mu" type="TProfile" title="Next To InnerMost Pixel Endcap Hits vs Mu">
-  <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+  <x title="#mu" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="# Next To InnerMost Pixel Endcap Hits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
 </h>
 
@@ -64,7 +64,7 @@
   <y title="# InnerMost Pixel Endcap Outliers" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
 </h>
 <h id="nInnerMostPixelEndcapOutliers_vs_mu" type="TProfile" title="InnerMost Pixel Endcap Outliers vs Mu">
-  <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+  <x title="#mu" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="# InnerMost Pixel Endcap Outliers" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
 </h>
 
@@ -81,7 +81,7 @@
   <y title="# InnerMost Pixel Endcap SharedHits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
 </h>
 <h id="nInnerMostPixelSharedEndcapHits_vs_mu" type="TProfile" title="InnerMost Pixel Endcap SharedHits vs Mu">
-  <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+  <x title="#mu" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="# InnerMost Pixel Endcap SharedHits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
 </h>
 
@@ -98,7 +98,7 @@
   <y title="# InnerMost Pixel Endcap SplitHits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
 </h>
 <h id="nInnerMostPixelSplitEndcapHits_vs_mu" type="TProfile" title="InnerMost Pixel Endcap SplitHits vs Mu">
-  <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+  <x title="#mu" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="# InnerMost Pixel Endcap SplitHits" n="&PIXHIT;" lo="0." hi="&PIXHIT;"/>
 </h>
 
@@ -129,7 +129,7 @@ HGTD hit plots
   <y title="# HGTD Hits" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
 </h>
 <h id="nHGTDHits_vs_mu" type="TProfile" title="HGTD Hits vs Mu">
-  <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+  <x title="#mu" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="# HGTD Hits" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
 </h>
 
@@ -151,7 +151,7 @@ HGTD hit plots
   <y title="# HGTD Holes" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
 </h>
 <h id="nHGTDHoles_vs_mu" type="TProfile" title="HGTD Holes vs Mu">
-  <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+  <x title="#mu" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="# HGTD Holes" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
 </h>
 
@@ -168,7 +168,7 @@ HGTD hit plots
   <y title="# HGTD Outliers" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
 </h>
 <h id="nHGTDOutliers_vs_mu" type="TProfile" title="HGTD Outliers vs Mu">
-  <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+  <x title="#mu" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="# HGTD Outliers" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
 </h>
 
@@ -185,7 +185,7 @@ HGTD hit plots
   <y title="# HGTD SharedHits" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
 </h>
 <h id="nHGTDSharedHits_vs_mu" type="TProfile" title="HGTD SharedHits vs Mu">
-  <x title="#mu" n="100" lo="-0.5" hi="99.5"/>
+  <x title="#mu" n="&EXPMU;" lo="0.0" hi="&EXPMU;"/>
   <y title="# HGTD SharedHits" n="&HGTDHIT;" lo="0." hi="&HGTDHIT;"/>
 </h>
 
