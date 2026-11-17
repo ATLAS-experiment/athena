@@ -72,3 +72,8 @@ atlas_add_test( VP1GLXShim
 atlas_add_test( VP1MuonRdoToDigitConfig
    SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/VP1MuonRdoToDigitConfig_test.py
    POST_EXEC_SCRIPT noerror.sh )
+
+# Remote detection must be predictable without Athena, a display or OpenGL.
+atlas_add_test( VP1RemoteMode
+   SCRIPT python ${CMAKE_CURRENT_SOURCE_DIR}/test/VP1RemoteMode_test.py
+   POST_EXEC_SCRIPT noerror.sh )

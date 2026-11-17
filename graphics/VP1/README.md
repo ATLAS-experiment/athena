@@ -1,3 +1,5 @@
+<!-- Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration -->
+
 
 # VP1 (Virtual Point 1) - The ATLAS 3D event display
 
@@ -47,8 +49,9 @@ tries the original context request first and automatically retries a failed
 indirect request with direct rendering requested. No extra option is needed.
 This context retry is separate from the pixel-limit fix in MR 1490.
 
-The optional launcher below works with an existing Athena installation; no
-AthenaExternals or Coin rebuild is needed.
+Remote mode automatically activates this combined workaround before Athena or
+Coin is loaded. The explicit `--fix-snapshots` flag also works in normal mode.
+No AthenaExternals or Coin rebuild is needed.
 
 1. Use an Athena release or local VP1 build containing this launcher change.
    For a local build, rebuild/install VP1Algs and source the build setup again.
@@ -59,7 +62,7 @@ AthenaExternals or Coin rebuild is needed.
    environment, including the container or VM if applicable. Start from a
    shell without earlier experimental shims or custom Coin library overrides.
 
-3. Add the option to your normal command:
+3. Remote mode activates the workaround automatically. To request it explicitly:
 
    ```bash
    vp1 --fix-snapshots
@@ -122,8 +125,69 @@ VP1_GLX_WORKAROUND_CACHE_DIR=/path/to/private/local-cache \
   vp1 --fix-snapshots
 ```
 
-Once your release and display setup work without either correction, launch
-ordinary `vp1` again. The pixel-limit fix alone does not address context creation. You can
+To test whether your release and display setup work without either correction,
+launch `vp1 --no-fix-snapshots`. The pixel-limit fix alone does not address context creation. You can
 then delete its cache directory; the installed support files can stay in place. If snapshots
 still fail with this workaround, keep the log and report the failure rather
 than adding the earlier force-direct shim on top.
+
+## Remote viewing
+
+The `vp1` launcher detects SSH sessions, common VNC/XRDP/NX/X2Go session
+indicators, nonlocal X11 displays and localhost X11 forwarding displays (number
+10 or higher). Detection uses the launch environment, without opening an X11
+connection or querying OpenGL. Containers without forwarding indicators and some
+remote desktop configurations may not be detected; an SSH session can also be a
+false positive. Restart with `vp1 --no-remote` to bypass detection and use normal
+mode. Use `vp1 --remote` to force remote mode without automatic detection.
+The two flags are mutually exclusive. Detection and the overrides are processed
+before Athena imports, so remote mode can preload the GLX compatibility shim.
+
+Remote mode automatically enables the snapshot/composer workaround on Linux
+glibc (aarch64 or x86_64). The cache is reused; initial compilation requires a C
+compiler and OpenGL/X11 development headers. If automatic preparation fails or
+the platform is unsupported, VP1 continues with remote rotation settings and
+reports why snapshot compatibility is unavailable in the terminal and startup
+notice. An explicit `--fix-snapshots` request retains its failure-on-error behavior.
+
+Use `vp1 --remote --no-fix-snapshots` to retain remote mode while disabling
+automatic shim activation, or `vp1 --no-remote --fix-snapshots` to request the
+shim in normal mode. `--fix-snapshots` and `--no-fix-snapshots` are mutually
+exclusive. An already preloaded shim remains active: the opt-out prevents new
+automatic activation and cannot unload a library inherited through `LD_PRELOAD`.
+
+The launcher preserves arguments and existing preload entries across restart,
+and verifies that its shim is already preloaded to prevent a restart loop.
+No shim is built when requesting help.
+
+Remote mode also defaults `COIN_FULL_INDIRECT_RENDERING` to `1` before loading
+Coin. This allows supported OpenGL 1.1+ features and extensions in indirect
+contexts, including polygon offset where available. It does not force indirect
+rendering or hardware acceleration; direct contexts already bypass Coin's
+conservative indirect-rendering restriction. Existing values (including `0` or
+an empty value) are preserved. `COIN_FORCE_GL1_0_ONLY=1` takes precedence and
+prevents the automatic full-feature default. Normal mode does not change either
+Coin variable. Terminal and GUI notices report the effective policy.
+
+To retain remote mode while opting out of full indirect features:
+
+```bash
+COIN_FULL_INDIRECT_RENDERING=0 vp1 --remote
+```
+
+These settings affect VP1 and its child processes, without modifying the shell.
+Coin's conservative default exists for compatibility with problematic drivers;
+use the override above if enabling newer features causes rendering problems.
+
+Remote mode prints the detection reason in the terminal, displays a notice in
+the first main window and keeps a **REMOTE MODE** indicator in the status bar.
+The notices include snapshot compatibility status (active, disabled or unavailable).
+Batch mode prints the terminal notice but does not show a GUI dialog.
+
+The 3D viewer's right-click menu contains **Continue rotating after mouse
+release**. It defaults to off in remote mode and on in normal mode. Changing it
+stops any current inertial spin when disabled and saves the preference for future
+viewers and launches. Normal and remote preferences are stored separately in Qt
+settings; loading a VP1 configuration does not overwrite them. Existing open
+viewers keep their current setting. Direct mouse rotation and camera tours are
+unaffected. Remote mode also activates the GLX snapshot compatibility workaround as described above.

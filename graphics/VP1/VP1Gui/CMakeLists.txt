@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Declare the package name:
 atlas_subdir( VP1Gui )
@@ -28,5 +28,17 @@ atlas_add_library( VP1Gui VP1Gui/*.h src/*.h src/*.cxx src/*.qrc
 # Enable Qt support for cppcheck:
 if( CMAKE_CXX_CPPCHECK )
    set_property( TARGET VP1Gui
+      APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
+endif()
+# Exercise the real rotation menu and startup notices using Qt's offscreen plugin.
+atlas_add_test( RemoteMode
+   SOURCES test/RemoteMode_test.cxx
+   INCLUDE_DIRS ${COIN3D_INCLUDE_DIRS} ${SOQT_INCLUDE_DIRS}
+      ${CMAKE_CURRENT_BINARY_DIR}/VP1Gui_autogen/include
+      ${CMAKE_CURRENT_SOURCE_DIR}/../VP1Base/src
+   LINK_LIBRARIES VP1Gui VP1Base Qt5::Network ${COIN3D_LIBRARIES} ${SOQT_LIBRARIES}
+   POST_EXEC_SCRIPT nopost.sh )
+if( CMAKE_CXX_CPPCHECK )
+   set_property( TARGET VP1Gui_RemoteMode
       APPEND PROPERTY CXX_CPPCHECK "--library=qt" )
 endif()

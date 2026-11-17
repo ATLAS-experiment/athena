@@ -40,6 +40,7 @@
 #include "VP1Base/IVP1System.h"
 #include "VP1Base/VP1Msg.h"
 #include "VP1Base/VP1Settings.h"
+#include "VP1Base/VP1SnapshotStatus.h"
 #include "VP1Base/VP1QtUtils.h"
 
 
@@ -95,11 +96,7 @@ bool saveSnapshot(QWidget *parent, const QPixmap& snapshot, const QString& filen
     if (snapshot.isNull()) {
         error = QStringLiteral("VP1 could not render the snapshot. No image was saved.\n\n"
                                "Offscreen OpenGL rendering may be unavailable on this display. "
-                               "Check the terminal for Coin/GLX errors.\n\n"
-                               "Try restarting VP1 with --fix-snapshots (for example, vp1 --fix-snapshots) "
-                               "to enable the temporary workaround for remote offscreen rendering.\n\n"
-                               "Usage and requirements are documented in the Athena source repository: "
-                               "graphics/VP1/README.md, section \"Temporary workaround for remote snapshot rendering\".");
+                               "Check the terminal for Coin/GLX errors.\n\n") + VP1SnapshotStatus::failureHint();
     } else {
         QImageWriter writer(filename);
         if (!writer.write(snapshot.toImage())) {
@@ -465,6 +462,45 @@ VP1MainWindow::VP1MainWindow(VP1ExecutionScheduler*sched,VP1AvailEvents * ae,QWi
   m_action_openAbout = menu_help->addAction("&About VP1");
 
 	QTimer::singleShot(0, this, SLOT(postInitUpdates()));
+
+    if (qgetenv("VP1_REMOTE_MODE") == "1") {
+        QString coinPolicy = QString::fromLocal8Bit(qgetenv("VP1_COIN_INDIRECT_RENDERING_MESSAGE"));
+        if (coinPolicy.isEmpty())
+            coinPolicy = tr("Coin default policy (not initialized by the vp1 launcher).");
+        auto *modeLabel = new QLabel(tr("REMOTE MODE"), this);
+        modeLabel->setStyleSheet("QLabel { background: #ffe08a; color: #202020; font-weight: bold; padding: 4px; }");
+        modeLabel->setToolTip(tr("Remote mode enabled. Continuous rotation after mouse release is off by default. "
+                                "Restart with --no-remote if detection is incorrect."));
+        modeLabel->setToolTip(modeLabel->toolTip() + QStringLiteral("\nSnapshot compatibility: ")
+                              + VP1SnapshotStatus::description()
+                              + QStringLiteral("\nCoin OpenGL policy: ") + coinPolicy);
+        statusBar()->addPermanentWidget(modeLabel);
+        if (!VP1QtUtils::environmentVariableIsSet("VP1_BATCHMODE")) {
+            QTimer::singleShot(0, this, [this, coinPolicy]() {
+                auto *notice = new QMessageBox(QMessageBox::Information, tr("VP1 remote mode"),
+                    tr("VP1 has launched in remote mode.\n\nReason: %1.\n\n"
+                       "In particular, a workaround to fix remote snapshot creation " 
+                       "is applied if needed, and 3D view rotation is limited to mouse movements " 
+                       "to prevent the creation of extra frames and slow response.\n\n"
+                       "If auto-detection of remote running is incorrect, restart VP1 with '--no-remote' "
+                       "to force full behavior.\n\n"
+                       "==== Details: ====\n"
+                       "To improve responsiveness, Continue rotating after mouse release is OFF by default. "
+                       "Your saved remote preference takes precedence. Normal mouse dragging still works.\n\n"
+                       "You can change this setting in the 3D viewer's right-click menu.\n\n"
+                       "Snapshot compatibility: %2\n\n"
+                       "Coin OpenGL policy: %3\n\n"
+                       "If detection is incorrect, restart VP1 with --no-remote.")
+                        .arg(QString::fromLocal8Bit(qgetenv("VP1_REMOTE_REASON")),
+                             VP1SnapshotStatus::description(), coinPolicy),
+                    QMessageBox::Ok, this);
+                notice->setTextFormat(Qt::PlainText);
+                notice->setAttribute(Qt::WA_DeleteOnClose);
+                notice->open();
+            });
+        }
+    }
+
 	m_currentsaveimagepath = VP1Settings::defaultFileSelectDirectory();
 	m_currentloadpluginpath = VP1Settings::defaultFileSelectDirectory();
 

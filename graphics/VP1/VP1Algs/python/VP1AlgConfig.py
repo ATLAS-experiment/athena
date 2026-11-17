@@ -166,6 +166,8 @@ def SetupVP1():
 
     parser = flags.getArgumentParser()
     parser.prog = "vp1"
+    parser.allow_abbrev = False  # Match early bootstrap parsing before preloading libraries.
+    parser.allow_abbrev = False
     parser.description = """
     VP1, or Virtual Point 1, is the interactive 3D event display for the ATLAS experiment at CERN.
     Detailed documentation can be found at the webpage: https://atlas-vp1.web.cern.ch/atlas-vp1
@@ -175,10 +177,8 @@ def SetupVP1():
     So for example, to run VP1 on a file: vp1 [options] myESD.pool.root"""
     # Add VP1-specific arguments here, but remember you can also directly pass flags in form <flagName>=<value>.
     group = parser.add_argument_group("VP1 specific")
-    group.add_argument(
-        "--fix-snapshots", action="store_true",
-        help="Enable the temporary Linux GLX context and pixel-limit workaround (requires a C compiler).",
-    )
+    from VP1Algs.VP1RemoteMode import addRemoteArguments
+    addRemoteArguments(group)
     group.add_argument(
         "Filename",
         nargs='?',
@@ -263,6 +263,9 @@ def SetupVP1():
         # No point doing more here, since we just want to print the help.
         import sys
         sys.exit()
+
+    from VP1Algs.VP1RemoteMode import configureRemoteMode
+    configureRemoteMode(no_remote=args.no_remote, force_remote=args.remote, reuse_bootstrap=True)
 
     # Support the positional version of passing file name e.g. vp1 myESD.pool.root
     if args.Filename and (

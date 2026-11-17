@@ -17,6 +17,7 @@
 
 #include "VP1Base/VP1QtInventorUtils.h"
 #include "VP1Base/VP1ExaminerViewer.h"
+#include "VP1Base/VP1SnapshotStatus.h"
 #include "VP1Base/VP1Msg.h"
 
 #include "Inventor/nodes/SoMaterial.h"
@@ -551,12 +552,8 @@ QImage VP1QtInventorUtils::renderToImage(VP1ExaminerViewer *ra, int pixels_x, in
 	// render the scenegraph
 	// if fails, delete the renderer and return an empty image
 	if (!myRenderer->render(root)) {
-        VP1Msg::message("ERROR - Snapshot: Coin offscreen scene rendering failed. "
-                        "Try restarting VP1 with --fix-snapshots (for example, vp1 --fix-snapshots) "
-                        "to enable the temporary workaround for remote offscreen rendering. "
-                        "Usage and requirements are documented in the Athena source repository: "
-                        "graphics/VP1/README.md, section \"Temporary workaround for remote snapshot rendering\". "
-                        "Restart with COIN_DEBUG_GLGLUE=1 for diagnostics.");
+        VP1Msg::message(QStringLiteral("ERROR - Snapshot: Coin offscreen scene rendering failed. ")
+                        + VP1SnapshotStatus::failureHint());
 		delete myRenderer;
 		fclose (tmpf);
         QFile::remove(tmpfile);
@@ -569,11 +566,8 @@ QImage VP1QtInventorUtils::renderToImage(VP1ExaminerViewer *ra, int pixels_x, in
 	if (rootOverlay) {
 		bool okOver = myRenderer->render(rootOverlay);
 		if ( !okOver) {
-            VP1Msg::message("ERROR - Snapshot: Coin offscreen overlay rendering failed. "
-                            "Try restarting VP1 with --fix-snapshots (for example, vp1 --fix-snapshots) "
-                            "to enable the temporary workaround for remote offscreen rendering.\n\n"
-                            "Usage and requirements are documented in the Athena source repository: "
-                            "graphics/VP1/README.md, section \"Temporary workaround for remote snapshot rendering\".");
+            VP1Msg::message(QStringLiteral("ERROR - Snapshot: Coin offscreen overlay rendering failed. ")
+                            + VP1SnapshotStatus::failureHint());
 			delete myRenderer;
 			fclose (tmpf);
             QFile::remove(tmpfile);
