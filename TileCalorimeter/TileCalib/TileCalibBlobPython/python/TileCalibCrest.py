@@ -17,7 +17,7 @@ from PyCool import cool # noqa: F401
 Blob = cppyy.gbl.coral.Blob
 
 import chai
-chai.set_log_level(chai._chai.WARNING)
+chai.set_log_level(chai.LogLevel.WARNING)
 
 from TileCalibBlobObjs.Classes import TileCalibUtils, TileCalibDrawerCmt, \
      TileCalibDrawerInt, TileCalibDrawerOfc, TileCalibDrawerBch, \
@@ -43,7 +43,6 @@ MINRUN      = 0
 MINLBK      = 0
 MAXRUN      = (1<<31)-1
 MAXLBK      = (1<<32)-1
-MAXRUNLUMI  = (MAXRUN<<32)+MAXLBK
 # empty Tile channel for storing laser partition variation. DO NOT CHANGE.
 LASPARTCHAN = 43
 
@@ -254,7 +253,7 @@ class TileBlobReaderCrest(TileCalibLogger):
                 payload = self.__tag_instance.get_payload(hash)
             except Exception:
                 raise Exception( "Payload for hash %s not found" % hash )
-            jdata = json.loads(payload.to_json_string())
+            jdata = json.loads(payload.to_json())
             if self.__copyBlob:
                 self.payload = jdata
                 return
@@ -296,7 +295,7 @@ class TileBlobReaderCrest(TileCalibLogger):
                     (runS,lumiS,runU,lumiU) = (0,0,MAXRUN,MAXLBK)
                     self.__insertion_time.append(0)
                     self.__payload_hash.append(runlumi)
-                    jdata = json.loads(res.to_json_string())
+                    jdata = json.loads(res.to_json())
                     if dbg:
                         self.log().info('hash %s' , runlumi)
                 else:
@@ -322,7 +321,7 @@ class TileBlobReaderCrest(TileCalibLogger):
                                 self.log().info('Insertion time %s  Hash %s' , iov.insertion_time, iov.payload_hash)
                     self.__insertion_time.reverse()
                     self.__payload_hash.reverse()
-                    jdata = json.loads(res.payload.to_json_string())
+                    jdata = json.loads(res.payload.to_json())
                 #with open("payload.json", 'w') as the_file:
                 #    the_file.write(payload)
                 #    the_file.write('\n')
@@ -707,8 +706,9 @@ class TileBlobWriterCrest(TileCalibLogger):
             try:
                 new_tag = self.__api_instance.create_tag(
                     fullTag,
-                    '<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type="71" clid="1238547719" /></addrHeader><typeName>CondAttrListCollection</typeName>',
+                    "",  # tag description
                     payload_spec,
+                    '<timeStamp>run-lumi</timeStamp><addrHeader><address_header service_type="71" clid="1238547719" /></addrHeader><typeName>CondAttrListCollection</typeName>',
                     chai.IovType.RunNumberLumiBlock,
                     "crest-json-single-iov",
                     chai.Synchronization.All,
@@ -723,7 +723,7 @@ class TileBlobWriterCrest(TileCalibLogger):
                     self.log().error(f"Additional error: {e2}")
                     raise Exception( "Failed to write data to %s" % (self.__db) )
 
-            new_tag.add_payload(container, (sinceRun<<32)+sinceLumi, MAXRUNLUMI)
+            new_tag.add_payload(container, (sinceRun<<32)+sinceLumi)
 
         #=== print info
         self.log().info( 'Writting tag "%s"', fullTag)
