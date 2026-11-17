@@ -22,6 +22,33 @@ atlas_add_library( FTagEigenVariationsCDILib
                    LINK_LIBRARIES ${ROOT_LIBRARIES} FTagEigenVariationsLib CalibrationDataInterfaceLib
                    PRIVATE_LINK_LIBRARIES CxxUtils )
 
+atlas_add_library( FTagEigenVariationsToolLib
+                   Root/tool/*.cxx
+                   PUBLIC_HEADERS FTagEigenVariations
+                   PRIVATE_INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
+                   LINK_LIBRARIES AsgTools FTagAnalysisInterfacesLib
+                   PRIVATE_LINK_LIBRARIES ${ROOT_LIBRARIES} CxxUtils FTagEigenVariationsCDILib PathResolver )
+
+atlas_add_component( FTagEigenVariations
+                     src/components/*.cxx
+                     LINK_LIBRARIES FTagEigenVariationsToolLib )
+
+atlas_add_dictionary( FTagEigenVariationsDict
+                      FTagEigenVariations/FTagEigenVariationsDict.h
+                      FTagEigenVariations/selection.xml
+                      LINK_LIBRARIES FTagEigenVariationsToolLib )
+
+# Outside AnalysisBase, the tester and the tool test start Gaudi with POOLRootAccess:
+set( extra_libs )
+if( NOT XAOD_STANDALONE )
+  set( extra_libs POOLRootAccessLib )
+endif()
+
+# Executable(s) in the package:
+atlas_add_executable( FTagEigenRecompositionToolTester
+                      util/FTagEigenRecompositionToolTester.cxx
+                      LINK_LIBRARIES AsgTools CxxUtils FTagEigenVariationsToolLib ${extra_libs} )
+
 # Test(s) in the package:
 atlas_add_test( gt_EigenDecomposition
                 SOURCES test/gt_EigenDecomposition.cxx
@@ -49,3 +76,10 @@ atlas_add_test( gt_CompareCurrentImplementation
                 LINK_LIBRARIES ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils FTagEigenVariationsCDILib PathResolver
                 LABELS CalibrationDataInterface
                 POST_EXEC_SCRIPT noerror.sh )
+
+atlas_add_test( gt_FTagEigenRecompositionTool
+                SOURCES test/gt_FTagEigenRecompositionTool.cxx
+                INCLUDE_DIRS ${GTEST_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
+                LINK_LIBRARIES ${GTEST_LIBRARIES} ${ROOT_LIBRARIES} CxxUtils FTagEigenVariationsCDILib
+                               FTagEigenVariationsToolLib PathResolver ${extra_libs}
+                POST_EXEC_SCRIPT nopost.sh ) # the configuration errors it tests are printed as errors

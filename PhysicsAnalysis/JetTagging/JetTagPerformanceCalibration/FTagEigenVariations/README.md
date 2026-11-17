@@ -7,6 +7,42 @@ uncertainties. It is developed next to the current one in `CalibrationDataInterf
 The core library `FTagEigenVariationsLib` (namespace `ftag::ev`) depends only on Eigen. It
 works on plain per-bin numbers, so any calibration format can feed it through an adapter.
 
+## Overview
+
+```mermaid
+flowchart LR
+  props["Tool properties<br>(BTaggingEfficiencyTool names)"] --> tool
+  cdi[("CDI file")] --> read
+  tool["FTagEigenRecompositionTool<br>settings per flavour"] -->|opens| read
+  tool -->|settings| input
+  tool -->|settings| keep
+  read["cdi::readContainer"] --> input["cdi::perFlavourInput<br>cdi::globalInput"]
+  read --> keep["cdi::eigenvariationsToKeep"]
+  input -->|DecompositionInput| decompose
+  decompose --> reduce
+  keep -->|m| reduce
+  decompose --> recompose
+  reduce --> recompose
+  recompose --> tables["table per flavour label"]
+  tables --> newif["IFTagEigenRecompositionTool"]
+  tables --> oldif["IBTaggingEigenVectorRecompositionTool"]
+  json[("JSON calibration")] -.-> jsonad["JSON adapter"] -.-> decompose
+  reduce -.->|same variations| sftool["BTaggingEfficiencyTool"]
+  classDef core fill:#d6e4f5,stroke:#4a7ab5
+  classDef cdilib fill:#d5ead5,stroke:#4f9a4f
+  classDef toollib fill:#fbe3c8,stroke:#d08a3c
+  classDef planned stroke-dasharray:5 5
+  class decompose,reduce,recompose core
+  class read,input,keep cdilib
+  class tool,tables,newif,oldif toollib
+  class json,jsonad,sftool planned
+```
+
+Blue is the core (`FTagEigenVariationsLib`), green the CDI adapter
+(`FTagEigenVariationsCDILib`), orange the recomposition tool (`FTagEigenVariationsToolLib`).
+Dashed parts are planned: a JSON adapter, and the BTaggingEfficiencyTool applying the
+variations of this core, so that the recomposition describes the variations analyses get.
+
 ## Decomposition
 
 `ftag::ev::decompose` takes one or more flavour blocks (the per-flavour strategy uses one,
@@ -94,6 +130,44 @@ the prefix and others don't (charm uses the light uncertainties `FT_EFF_Generato
 `Generator`); the source takes the prefixed name. The statistical uncertainties and the sources
 that are not correlated between bins stay uncorrelated between flavours.
 
+## Recomposition tool
+
+`ftag::ev::FTagEigenRecompositionTool` (interface `ftag::ev::IFTagEigenRecompositionTool`)
+gives analyses the recomposition of the eigenvector nuisance parameters of a CDI file. It is
+**not recommended yet**: until the BTaggingEfficiencyTool uses this decomposition, its
+eigenvariations differ from the ones described here, and the tool warns about it.
+
+It takes the BTaggingEfficiencyTool properties of the same name: `ScaleFactorFileName`,
+`TaggerName`, `OperatingPoint`, `JetAuthor`, `SystematicsStrategy` (`SFEigen` or
+`SFGlobalEigen`), `ScaleFactor{B,C,T,Light}Calibration`, `EigenvectorReduction{B,C,Light}`,
+`ExcludeFromEigenVectorTreatment`, `ExcludeFromEigenVector{B,C,Light}Treatment`,
+`ExcludeRecommendedFromEigenVectorTreatment`, `Uncertainty{B,C,T,Light}Suffix` and
+`splitTauCharmEff`. Everything is computed in `initialize()`, which fails for a wrong
+configuration, including an exclusion without `*` that matches no uncertainty of the
+flavours it applies to.
+
+The tool fills the settings of the CDI adapter as the BTaggingEfficiencyTool does: tau jets
+take the charm exclusions and reduction, and for continuous working points the high-pT
+extrapolation uncertainties (`extrapolation_pt_<b,c,l>_Eigen*`) are not decomposed.
+
+`recomposition(label)` returns, for `B`, `C`, `T` or `Light`, the nuisance parameter names as
+the BTaggingEfficiencyTool names them, the source names, the coefficients and the described
+fractions. Tau jets share the charm table, and its names, unless `splitTauCharmEff` is set.
+With `SFGlobalEigen`, which supports Loose only, each eigenvariation acts on all flavours
+together, so every flavour label gives the same table, named `FT_EFF_Eigen_Global_<k>` without
+suffix. Tau jets take the charm part of the global decomposition unless `splitTauCharmEff` is
+set. The BTaggingEfficiencyTool names them per flavour today (`FT_EFF_Eigen_B_<k>`, ...), which
+loses the correlation between flavours, and moves to these names at the switch.
+
+The tool also implements `IBTaggingEigenVectorRecompositionTool`, the interface of the
+current `BTaggingEigenVectorRecompositionTool`, with its conventions: keys `Eigen_<label>_<k>`
+(`Eigen_Global_<k>` with `SFGlobalEigen`), source names as in the CDI file, and float
+coefficients. It applies no systematic variations. An unknown label or eigenvector index throws
+`std::invalid_argument`.
+
+`FTagEigenRecompositionToolTester <CDI file> <tagger> <jet collection> <operating point>
+<strategy>` prints a summary.
+
 ## Tests
 
 The unit tests in `test/` check the decomposition, reduction, recomposition and names on
@@ -104,4 +178,7 @@ agree, and prints the per-bin uncertainty kept by the old and the new Medium and
 merge. For the global strategy, it checks that the eigenvariations add up to the covariance
 built from the sources of each flavour, including the parts that correlate different flavours.
 It also runs in the CI of merge requests that change `CalibrationDataInterface`.
-Run them with `ctest -R "gt_(Eigen|CDIInput|CompareCurrent)"` from the build directory.
+`gt_FTagEigenRecompositionTool` checks the tool against the core on one of these files, for
+both strategies, both interfaces, and its configuration errors; like the tester, it runs in
+AnalysisBase, AthAnalysis and Athena. Run them with `ctest -R FTagEigenVariations` from the
+build directory.
