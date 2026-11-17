@@ -1,6 +1,6 @@
 """Define methods to construct configured SCT Digitization tools and algorithms
 
-Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 """
 from AthenaCommon.Logging import logging
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -164,11 +164,19 @@ def ITkStripSurfaceChargesGeneratorCfg(flags, name="ITkStripSurfaceChargesGenera
     kwargs.setdefault("SubtractTime", -999)
     kwargs.setdefault("SurfaceDriftTime", 10*Units.ns)
     kwargs.setdefault("NumberOfCharges", 1)
-    kwargs.setdefault("SmallStepLength", 5*Units.micrometer)
     kwargs.setdefault("DepletionVoltage", 70)
     kwargs.setdefault("BiasVoltage", 150)
     kwargs.setdefault("isOverlay", flags.Common.isOverlay)
     # kwargs.setdefault("doTrapping", True) # ATL-INDET-INT-2016-019
+    
+    if flags.Digitization.ITkStripRadDamageLUT:
+        kwargs.setdefault("RadDamageLUTTool", acc.popToolsAndMerge(ITkStripRadDamageLUTToolCfg(flags)))
+        # LUT z-binning is 15um (expected charge fraction deposited to every nearby strip)
+        kwargs.setdefault("SmallStepLength", 15*Units.micrometer) 
+    else:
+        # sample diffusion once per 5um step (given to a single strip)
+        kwargs.setdefault("SmallStepLength", 5*Units.micrometer)
+
     # experimental ITkStripDetailedSurfaceChargesGenerator config dropped here
     tool = CompFactory.ITk.StripSurfaceChargesGenerator(name, **kwargs)
     tool.RadDamageSummaryTool = CompFactory.SCT_RadDamageSummaryTool(name="ITkStripRadDamageSummaryTool")
@@ -343,3 +351,14 @@ def ITkStripDigitizationPUCfg(flags, name="ITkStripDigitizationPU", **kwargs):
     acc = ITkStripDigitizationBasicCfg(flags, name=name, **kwargs)
     acc.merge(ITkStripOutputCfg(flags))
     return acc
+
+# 2D CCE LUTs for every barrel layer and endcap disk/ring
+def ITkStripRadDamageLUTToolCfg(flags, name="ITkStripRadDamageLUTTool", **kwargs):
+    acc = ComponentAccumulator()
+    kwargs.setdefault("IntegratedLuminosity", flags.Digitization.ITkStripRadDamageLuminosity)
+    kwargs.setdefault("LUTFile", "ITkStripDigitization/CarletonLUTs_Feb2025/ITkStrip_LUTs_Temp253K_LumiInclusive.root")
+    # Best estimate of CCE spread, see s39 of https://indico.cern.ch/event/1523367/#1-itk-strip-digitization-maps
+    kwargs.setdefault("LUTChargeSmear", 0.03)
+    acc.setPrivateTools(CompFactory.ITk.StripRadDamageLUTTool(name, **kwargs))
+    return acc
+
