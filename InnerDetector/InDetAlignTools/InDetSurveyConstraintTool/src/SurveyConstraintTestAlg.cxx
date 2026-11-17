@@ -20,23 +20,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-SurveyConstraintTestAlg::SurveyConstraintTestAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-AthAlgorithm(name, pSvcLocator),
-  m_SurvConstr{},
-  m_pixid{},
-  m_sctid{},
-  m_h_PixEC_Align_Disk{},
-  m_h_PixEC_Align_first{},
-  m_h_PixEC_Align{},
-  m_AlignResults_nModules{},
-  m_NLoop(1){
-
-// Part 2: Properties go here
-  declareProperty("NLoop"                   ,     m_NLoop);
-
-
-}
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 StatusCode SurveyConstraintTestAlg::initialize(){

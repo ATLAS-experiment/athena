@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SURVEYCONSTRAINTTOOLS_SURVEYCONSTRAINT_H
@@ -19,7 +19,7 @@ class SCT_ID;
 
 class SurveyConstraint : public extends <AthAlgTool, ISurveyConstraint>{
  public:
-  SurveyConstraint(const std::string& type,const std::string& name,const IInterface* parent);
+  using base_class::base_class;
   
   virtual ~SurveyConstraint() = default;
   
@@ -60,13 +60,13 @@ class SurveyConstraint : public extends <AthAlgTool, ISurveyConstraint>{
 			       Amg::Transform3D CurrentTransRandSect) override;
   
  private :
-  const AtlasDetectorID*                 m_idHelper;
-  const PixelID*                         m_pixid;
-  const SCT_ID*                          m_sctid;
+  const AtlasDetectorID*                 m_idHelper{};
+  const PixelID*                         m_pixid{nullptr};
+  const SCT_ID*                          m_sctid{nullptr};
   
 
-  IInDetAlignDBTool*                     m_current_IDAlignDBTool;
-  IInDetAlignDBTool*                     m_survey_IDAlignDBTool;
+  IInDetAlignDBTool*                     m_current_IDAlignDBTool{nullptr};
+  IInDetAlignDBTool*                     m_survey_IDAlignDBTool{nullptr};
 
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "PixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_SCTDetEleCollKey{this, "SCTDetEleCollKey", "SCT_DetectorElementCollection", "Key of SiDetectorElementCollection for SCT"};
@@ -75,62 +75,62 @@ class SurveyConstraint : public extends <AthAlgTool, ISurveyConstraint>{
   std::map<Identifier, SurveyConstraintModule*, std::less<Identifier> >  m_ModuleMap;        //!< Map of Wafer objects
 
   // algorithm parameters, possible to declare at runtime
-  double                                 m_SurveyWeightX;              //!< Multiplicative weight, representing systematic unc. of survey 
+  Gaudi::Property<double> m_SurveyWeightX{this, "SurveyWeightX", 1.0};              //!< Multiplicative weight, representing systematic unc. of survey 
                                                                        // (e.g. bow), set to 1 for now
-  double                                 m_SurveyWeightY;              //!< ""
-  double                                 m_SurveyWeightZ;              //!< ""
-  double                                 m_SurveyWeightPhiX;           //!< ""
-  double                                 m_SurveyWeightPhiY;           //!< ""
-  double                                 m_SurveyWeightPhiZ;           //!< ""
-  double                                 m_TransX;                     //!< Translation in X of the first current PixEC module 
-  double                                 m_TransY;                     //!< Translation in Y of the first current PixEC module 
-  double                                 m_TransZ;                     //!< Translation in Z of the first current PixEC module 
-  double                                 m_RotX;                       //!< Rotation in X of the first current PixEC module 
-  double                                 m_RotX2;                      //!< Rotation in X (after Y & Z) of the first current PixEC module 
-  double                                 m_RotY;                       //!< Rotation in Y of the first current PixEC module 
-  double                                 m_RotZ;                       //!< Rotation in Z of the first current PixEC module 
-  double                                 m_TransXRand;                 //!< Weight & rand Translation in X of current PixEC modules 
-  double                                 m_TransYRand;                 //!< Weight & rand Translation in Y of current PixEC modules 
-  double                                 m_TransZRand;                 //!< Weight & rand Translation in Z of current PixEC modules 
-  double                                 m_RotXRand;                   //!< Weight & rand Rotation in X of current PixEC modules 
-  double                                 m_RotYRand;                   //!< Weight & rand Rotation in Y of current PixEC modules 
-  double                                 m_RotZRand;                   //!< Weight & rand Rotation in Z of current PixEC modules  
-  double                                 m_TransXRandPixB;             //!< Weight & rand Translation in X of current PixB modules 
-  double                                 m_TransYRandPixB;             //!< Weight & rand Translation in Y of current PixB modules 
-  double                                 m_TransZRandPixB;             //!< Weight & rand Translation in Z of current PixB modules 
-  double                                 m_RotXRandPixB;               //!< Weight & rand Rotation in X of current PixB modules 
-  double                                 m_RotYRandPixB;               //!< Weight & rand Rotation in Y of current PixB modules 
-  double                                 m_RotZRandPixB;               //!< Weight & rand Rotation in Z of current PixB modules   
-  double                                 m_TransXRandSCTEC;             //!< Weight & rand Translation in X of current SCTEC modules 
-  double                                 m_TransYRandSCTEC;             //!< Weight & rand Translation in Y of current SCTEC modules 
-  double                                 m_TransZRandSCTEC;             //!< Weight & rand Translation in Z of current SCTEC modules 
-  double                                 m_RotXRandSCTEC;               //!< Weight & rand Rotation in X of current SCTEC modules 
-  double                                 m_RotYRandSCTEC;               //!< Weight & rand Rotation in Y of current SCTEC modules 
-  double                                 m_RotZRandSCTEC;               //!< Weight & rand Rotation in Z of current SCTEC modules    
-  double                                 m_TransXRandSCTB;             //!< Weight & rand Translation in X of current SCTB modules 
-  double                                 m_TransYRandSCTB;             //!< Weight & rand Translation in Y of current SCTB modules 
-  double                                 m_TransZRandSCTB;             //!< Weight & rand Translation in Z of current SCTB modules 
-  double                                 m_RotXRandSCTB;               //!< Weight & rand Rotation in X of current SCTB modules 
-  double                                 m_RotYRandSCTB;               //!< Weight & rand Rotation in Y of current SCTB modules 
-  double                                 m_RotZRandSCTB;               //!< Weight & rand Rotation in Z of current SCTB modules  
-  bool                                   m_gaus;                       //!< use random (Gaus) rotations and translations   
-  double                                 m_TransXRandSect;             //!< rand Translation in X of current PixEC sectors 
-  double                                 m_TransYRandSect;             //!< rand Translation in Y of current PixEC sectors 
-  double                                 m_TransZRandSect;             //!< rand Translation in Z of current PixEC sectors 
-  double                                 m_RotXRandSect;               //!< rand Rotation in X of current PixEC sectors 
-  double                                 m_RotYRandSect;               //!< rand Rotation in Y of current PixEC sectors 
-  double                                 m_RotZRandSect;               //!< rand Rotation in Z of current PixEC sectors  
-  double                                 m_TransLayerRand;             //!< rand Translation in X,Y,Z of all Pixel/SCT EC/B layers  
-  int                                    m_misaligncase;               //!< misaligncase
-  bool                                   m_gausSect;                   //!< use random (Gaus) rotations and translations for sectors  
-  bool                                   m_FullDisk;                   //!< use Full Disk
-  double                                 m_scaleZ;                     //!< scale Z coordinate to match sensitivity
-  double                                 m_proximity;                  //!< Proximity of Survey points used for alignment of SOW
-  std::string                            m_aligndbtoolinst; 
-  std::string                            m_surveydbtoolinst; 
-  std::string                            m_surveywfile;
-  std::string                            m_surveyrfile;
-  bool                                   m_ntuple;
+  Gaudi::Property<double> m_SurveyWeightY{this, "SurveyWeightY", 1.0};              //!< ""
+  Gaudi::Property<double> m_SurveyWeightZ{this, "SurveyWeightZ", 1.0};              //!< ""
+  Gaudi::Property<double> m_SurveyWeightPhiX{this, "SurveyWeightPhiX", 1.0};           //!< ""
+  Gaudi::Property<double> m_SurveyWeightPhiY{this, "SurveyWeightPhiY", 1.0};           //!< ""
+  Gaudi::Property<double> m_SurveyWeightPhiZ{this, "SurveyWeightPhiZ", 1.0};           //!< ""
+  Gaudi::Property<double> m_TransX{this, "TransX", 0.0};                     //!< Translation in X of the first current PixEC module 
+  Gaudi::Property<double> m_TransY{this, "TransY", 0.0};                     //!< Translation in Y of the first current PixEC module 
+  Gaudi::Property<double> m_TransZ{this, "TransZ", 0.0};                     //!< Translation in Z of the first current PixEC module 
+  Gaudi::Property<double> m_RotX{this, "RotX", 0.0};                       //!< Rotation in X of the first current PixEC module 
+  Gaudi::Property<double> m_RotX2{this, "RotX2", 0.0};                      //!< Rotation in X (after Y & Z) of the first current PixEC module 
+  Gaudi::Property<double> m_RotY{this, "RotY", 0.0};                       //!< Rotation in Y of the first current PixEC module 
+  Gaudi::Property<double> m_RotZ{this, "RotZ", 0.0};                       //!< Rotation in Z of the first current PixEC module 
+  Gaudi::Property<double> m_TransXRand{this, "TransXRand", 0.0046};                 //!< Weight & rand Translation in X of current PixEC modules 
+  Gaudi::Property<double> m_TransYRand{this, "TransYRand", 0.0047};                 //!< Weight & rand Translation in Y of current PixEC modules 
+  Gaudi::Property<double> m_TransZRand{this, "TransZRand", 0.0127};                 //!< Weight & rand Translation in Z of current PixEC modules 
+  Gaudi::Property<double> m_RotXRand{this, "RotXRand", 0.0003};                   //!< Weight & rand Rotation in X of current PixEC modules 
+  Gaudi::Property<double> m_RotYRand{this, "RotYRand", 0.0007};                   //!< Weight & rand Rotation in Y of current PixEC modules 
+  Gaudi::Property<double> m_RotZRand{this, "RotZRand", 0.00012};                   //!< Weight & rand Rotation in Z of current PixEC modules  
+  Gaudi::Property<double> m_TransXRandPixB{this, "TransXRandPixB", 0.01};             //!< Weight & rand Translation in X of current PixB modules 
+  Gaudi::Property<double> m_TransYRandPixB{this, "TransYRandPixB", 0.01};             //!< Weight & rand Translation in Y of current PixB modules 
+  Gaudi::Property<double> m_TransZRandPixB{this, "TransZRandPixB", 0.1};             //!< Weight & rand Translation in Z of current PixB modules 
+  Gaudi::Property<double> m_RotXRandPixB{this, "RotXRandPixB", 0.001};               //!< Weight & rand Rotation in X of current PixB modules 
+  Gaudi::Property<double> m_RotYRandPixB{this, "RotYRandPixB", 0.001};               //!< Weight & rand Rotation in Y of current PixB modules 
+  Gaudi::Property<double> m_RotZRandPixB{this, "RotZRandPixB", 0.00024};               //!< Weight & rand Rotation in Z of current PixB modules   
+  Gaudi::Property<double> m_TransXRandSCTEC{this, "TransXRandSCTEC", 0.03};             //!< Weight & rand Translation in X of current SCTEC modules 
+  Gaudi::Property<double> m_TransYRandSCTEC{this, "TransYRandSCTEC", 0.03};             //!< Weight & rand Translation in Y of current SCTEC modules 
+  Gaudi::Property<double> m_TransZRandSCTEC{this, "TransZRandSCTEC", 0.03};             //!< Weight & rand Translation in Z of current SCTEC modules 
+  Gaudi::Property<double> m_RotXRandSCTEC{this, "RotXRandSCTEC", 0.001};               //!< Weight & rand Rotation in X of current SCTEC modules 
+  Gaudi::Property<double> m_RotYRandSCTEC{this, "RotYRandSCTEC", 0.001};               //!< Weight & rand Rotation in Y of current SCTEC modules 
+  Gaudi::Property<double> m_RotZRandSCTEC{this, "RotZRandSCTEC", 0.0003};               //!< Weight & rand Rotation in Z of current SCTEC modules    
+  Gaudi::Property<double> m_TransXRandSCTB{this, "TransXRandSCTB", 0.1};             //!< Weight & rand Translation in X of current SCTB modules 
+  Gaudi::Property<double> m_TransYRandSCTB{this, "TransYRandSCTB", 0.1};             //!< Weight & rand Translation in Y of current SCTB modules 
+  Gaudi::Property<double> m_TransZRandSCTB{this, "TransZRandSCTB", 0.1};             //!< Weight & rand Translation in Z of current SCTB modules 
+  Gaudi::Property<double> m_RotXRandSCTB{this, "RotXRandSCTB", 0.001};               //!< Weight & rand Rotation in X of current SCTB modules 
+  Gaudi::Property<double> m_RotYRandSCTB{this, "RotYRandSCTB", 0.001};               //!< Weight & rand Rotation in Y of current SCTB modules 
+  Gaudi::Property<double> m_RotZRandSCTB{this, "RotZRandSCTB", 0.001};               //!< Weight & rand Rotation in Z of current SCTB modules  
+  Gaudi::Property<bool> m_gaus{this, "Gaus", false};                       //!< use random (Gaus) rotations and translations   
+  Gaudi::Property<double> m_TransXRandSect{this, "TransXRandSect", 0.0};             //!< rand Translation in X of current PixEC sectors 
+  Gaudi::Property<double> m_TransYRandSect{this, "TransYRandSect", 0.0};             //!< rand Translation in Y of current PixEC sectors 
+  Gaudi::Property<double> m_TransZRandSect{this, "TransZRandSect", 0.0};             //!< rand Translation in Z of current PixEC sectors 
+  Gaudi::Property<double> m_RotXRandSect{this, "RotXRandSect", 0.0};               //!< rand Rotation in X of current PixEC sectors 
+  Gaudi::Property<double> m_RotYRandSect{this, "RotYRandSect", 0.0};               //!< rand Rotation in Y of current PixEC sectors 
+  Gaudi::Property<double> m_RotZRandSect{this, "RotZRandSect", 0.0};               //!< rand Rotation in Z of current PixEC sectors  
+  Gaudi::Property<double> m_TransLayerRand{this, "TransLayerRand", -1};             //!< rand Translation in X,Y,Z of all Pixel/SCT EC/B layers  
+  Gaudi::Property<int> m_misaligncase{this, "Misaligncase", -1};               //!< misaligncase
+  Gaudi::Property<bool> m_gausSect{this, "GausSect", false};                   //!< use random (Gaus) rotations and translations for sectors  
+  Gaudi::Property<bool> m_FullDisk{this, "FullDisk", false};                   //!< use Full Disk
+  Gaudi::Property<double> m_scaleZ{this, "ScaleZ", 1.0};                     //!< scale Z coordinate to match sensitivity
+  Gaudi::Property<double> m_proximity{this, "Proximity", 999999.};                  //!< Proximity of Survey points used for alignment of SOW
+  Gaudi::Property<std::string> m_aligndbtoolinst{this, "CurrentDBToolInst", "InDetCurrentDBTool"}; 
+  Gaudi::Property<std::string> m_surveydbtoolinst{this, "SurveyDBToolInst", "InDetSurveyDBTool"}; 
+  Gaudi::Property<std::string> m_surveywfile{this, "SurveyWfile", ""};
+  Gaudi::Property<std::string> m_surveyrfile{this, "SurveyRFile", ""};
+  Gaudi::Property<bool> m_ntuple{this, "Ntuple", false};
 
 };
 
