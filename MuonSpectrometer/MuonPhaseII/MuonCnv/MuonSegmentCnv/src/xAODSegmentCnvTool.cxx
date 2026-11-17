@@ -71,7 +71,7 @@ namespace MuonR4{
             using SegCov_t = xAOD::PosAccessor<Acts::sumUpToN(Acts::toUnderlying(SegmentFit::ParamDefs::nPars))>::element_type;
             SegCov_t& localCov{ship.dec_localSegCov(*convertedSeg)};
             constexpr std::size_t n = Acts::toUnderlying(SegmentFit::ParamDefs::nPars);
-            for (std::size_t p = 1; p < n; ++p) {
+            for (std::size_t p = 0; p < n; ++p) {
                 for (std::size_t p1 = 0 ; p1 <=p;++p1) {
                     localCov[Acts::vecIdxFromSymMat<n>(p,p1)] = inSegment.covariance()(p, p1);
                 }
