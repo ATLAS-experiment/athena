@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -34,23 +34,6 @@
 
 namespace InDetAlignment {
  
-  RefitSiOnlyTool::RefitSiOnlyTool (const std::string& type, const std::string& name, const IInterface* parent):
-    AthAlgTool(type,name,parent),
-    m_idHelper{},
-    m_ITrkFitter("Trk::KalmanFitter"),
-    m_comPar(nullptr),
-    m_ParticleHypothesis(Trk::nonInteracting),
-    m_trkindex{}
-  {
-    declareInterface<ICollectionProcessor>(this);
-    declareProperty("OutlierRemoval" , m_OutlierRemoval = true);
-    declareProperty("FitterTool"     , m_ITrkFitter);
-    declareProperty("ParticleNumber" , m_ParticleNumber = 2);
-    declareProperty("Cosmic"         , m_doCosmic = false);
-    declareProperty("StripPixelHits" , m_stripPixelHits = false);
-    declareProperty("StripSCTHits"   , m_stripSCTHits   = false);
-    declareProperty("StripTRTHits"   , m_stripTRTHits   = true);
-  }
   //_________________________________________________________________________________________
 
   //destructor
@@ -81,7 +64,7 @@ namespace InDetAlignment {
     else if (m_ParticleNumber == 99) m_ParticleHypothesis = Trk::noHypothesis;
   
     if (msgLvl(MSG::DEBUG)) {
-      msg(MSG::DEBUG) << "ParticleNumber: " << m_ParticleNumber << endmsg;
+      msg(MSG::DEBUG) << "ParticleNumber: " << m_ParticleNumber.value() << endmsg;
       msg(MSG::DEBUG) << "ParticleHypothesis: " << m_ParticleHypothesis << endmsg;    
       msg(MSG::DEBUG) << "Initialize() of RefitSiOnlyTool successful" << endmsg;
     }

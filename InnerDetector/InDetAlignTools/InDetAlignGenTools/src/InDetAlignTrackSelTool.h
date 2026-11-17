@@ -28,16 +28,15 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "InDetAlignGenTools/IInDetAlignTrackSelTool.h"
+#include "TrkToolInterfaces/ITrackParticleCreatorTool.h"
 
 namespace Trk {
   class Track;
-  class ITrackParticleCreatorTool;
 }
 
-class InDetAlignTrackSelTool: virtual public IInDetAlignTrackSelTool, public AthAlgTool {
+class InDetAlignTrackSelTool: public extends<AthAlgTool, IInDetAlignTrackSelTool> {
  public:
-  InDetAlignTrackSelTool(const std::string& type, const std::string& name,
-			 const IInterface* parent);
+  using base_class::base_class;
   virtual ~InDetAlignTrackSelTool();
   virtual StatusCode initialize();
   virtual StatusCode finalize();
@@ -51,13 +50,13 @@ class InDetAlignTrackSelTool: virtual public IInDetAlignTrackSelTool, public Ath
   int nHoles(const EventContext& ctx, const Trk::Track&) const;
   double chi2Prob(const Trk::Track&) const;
   
-  ToolHandle <Trk::ITrackParticleCreatorTool> m_particleCreator; //!< Pointer to track particle creator tool
+  ToolHandle <Trk::ITrackParticleCreatorTool> m_particleCreator{this, "TrackParticleCreatorTool", "Trk::TrackParticleCreatorTool/TrackParticleCreatorTool", "tool to build TrackParticle"}; //!< Pointer to track particle creator tool
 
-  double m_minMomentum; //!< Minimum value of the momentum of the track
-  double m_minPt;  //!< Minimum value of the transverse momentum of the track
-  int m_maxShared; //!< Maximum number of shared hits of the track
-  int m_maxHoles;  //!< Maximum number of holes of the track
-  double m_minChi2Prob;  //!< Minimum value of the chi2 Probality of the track
+  Gaudi::Property<double> m_minMomentum{this, "MinMomentum", 0}; //!< Minimum value of the momentum of the track
+  Gaudi::Property<double> m_minPt{this, "MinPt", 2};  //!< Minimum value of the transverse momentum of the track
+  Gaudi::Property<int> m_maxShared{this, "MaxShared", 0}; //!< Maximum number of shared hits of the track
+  Gaudi::Property<int> m_maxHoles{this, "MaxHoles", 1};  //!< Maximum number of holes of the track
+  Gaudi::Property<double> m_minChi2Prob{this, "MinChi2Prob", 0.2};  //!< Minimum value of the chi2 Probality of the track
 };
 
 #endif // INDETALIGNTOOLS_ALIGNTRACKSELTOOL_H

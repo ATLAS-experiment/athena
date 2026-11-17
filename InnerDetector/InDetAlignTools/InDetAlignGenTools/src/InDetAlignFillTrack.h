@@ -37,8 +37,7 @@ class INTupleSvc;
 
 class InDetAlignFillTrack: public extends<AthAlgTool, IInDetAlignFillTrack> {
  public:
-  InDetAlignFillTrack(const std::string& type, const std::string& name,
-		      const IInterface* parent);
+  using base_class::base_class;
   
   virtual StatusCode initialize() override;
   virtual StatusCode finalize() override;

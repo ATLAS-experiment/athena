@@ -22,30 +22,6 @@
 #include "TrkEventPrimitives/FitQuality.h"
 #include "CLHEP/GenericFunctions/CumulativeChiSquare.hh"
 
-InDetAlignTrackSelTool::InDetAlignTrackSelTool( const std::string& type
-						, const std::string& name
-						, const IInterface* parent
-						)
-  : AthAlgTool(type,name,parent),
-    m_particleCreator("Trk::TrackParticleCreatorTool/TrackParticleCreatorTool", this),
-    m_minMomentum(0),
-    m_minPt(2),
-    m_maxShared(0),
-    m_maxHoles(1),
-    m_minChi2Prob(0.2)
-{
-  declareInterface<IInDetAlignTrackSelTool>(this);
-  declareProperty("MinMomentum"        , m_minMomentum);
-  declareProperty("MinPt"              , m_minPt);
-  declareProperty("MaxShared"          , m_maxShared);
-  declareProperty("MaxHoles"           , m_maxHoles);
-  declareProperty("MinChi2Prob"        , m_minChi2Prob);
-
-  // Tools
-  declareProperty("TrackParticleCreatorTool", m_particleCreator,
-                  "tool to build TrackParticle");
-}
-
 InDetAlignTrackSelTool::~InDetAlignTrackSelTool()
 {}
 
@@ -56,11 +32,11 @@ StatusCode InDetAlignTrackSelTool::initialize(){
   // get TrackParticleCreatorTool
   ATH_CHECK(m_particleCreator.retrieve());
   
-  ATH_MSG_DEBUG( "Cuts selected : min_Momentum(CLHEP::GeV)=" <<  m_minMomentum
-		<< " min_pt(CLHEP::GeV)=" <<  m_minPt
-		<< " max_shared=" << m_maxShared
-		<< " max_holes=" << m_maxHoles
-		<< " min_chi2Prob=" << m_minChi2Prob ) ;
+  ATH_MSG_DEBUG( "Cuts selected : min_Momentum(CLHEP::GeV)=" <<  m_minMomentum.value()
+		<< " min_pt(CLHEP::GeV)=" <<  m_minPt.value()
+		<< " max_shared=" << m_maxShared.value()
+		<< " max_holes=" << m_maxHoles.value()
+		<< " min_chi2Prob=" << m_minChi2Prob.value() ) ;
 
   ATH_MSG_DEBUG( "InDetAlignTrackSelTool initialize() successful" ) ;
   return StatusCode::SUCCESS;

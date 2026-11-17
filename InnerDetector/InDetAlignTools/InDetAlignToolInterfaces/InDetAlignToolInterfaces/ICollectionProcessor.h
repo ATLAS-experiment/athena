@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNMENT_COLLECTIONPROCESSOR_IH
@@ -31,10 +31,6 @@ namespace InDetAlignment {
   class ICollectionProcessor: virtual public IAlgTool {
   public:
     static const InterfaceID& interfaceID();
-
-    /** does necessary configuration to the tool */
-    //virtual void configure() = 0;
-    virtual StatusCode configure() = 0;
 
     /** main processing of track collection
         current policy: if a track cannot be processed (e.g. refit fails), a zero pointer is inserted in the track collection

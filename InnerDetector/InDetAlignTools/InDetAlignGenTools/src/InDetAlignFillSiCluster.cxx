@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //////////////////////////////////////////////////////////////////////////
@@ -30,26 +30,6 @@
 
 static const int maxclusters = 24000;
 static const int maxclsize = 10;
-
-//=====================================================================
-// InDetAlignFillSiCluster()
-//=====================================================================
-InDetAlignFillSiCluster::InDetAlignFillSiCluster(const std::string& type,
-						 const std::string& name,
-						 const IInterface* parent)
-  : AthAlgTool(type,name,parent),
-    m_pixelid(nullptr),
-    m_sctID(nullptr),
-    m_Pixel_clcontainer(nullptr),
-    m_Sct_clcontainer(nullptr)
-{
-  declareInterface<IInDetAlignFillSiCluster>(this);
-  declareProperty("Pixel_SiClusterContainerName", m_Pixel_SiClustersName="PixelClusters");
-  declareProperty("SCT_SiClusterContainerName",   m_Sct_SiClustersName="SCT_Clusters");
-
-  // Ntuple
-  declareProperty("NtupleName", m_ntupleName="/NTUPLES/GLOBFILE");
-}
 
 //=====================================================================
 // initialize()
@@ -111,7 +91,7 @@ StatusCode InDetAlignFillSiCluster::FillSiCluster() {
   if(RetrievePixelSiClusters() != StatusCode::FAILURE)
     FillPixelSiNtuple();
     
-  std::string nt0id = m_ntupleName + "/SiCluster";
+  std::string nt0id = m_ntupleName.value() + "/SiCluster";
   sc = m_ntupleSvc->writeRecord(nt0id);
   if (sc.isFailure()) ATH_MSG_DEBUG("Could not write " << nt0id << "!");
 
@@ -127,7 +107,7 @@ void InDetAlignFillSiCluster::bookNtuple() {
   ATH_MSG_DEBUG ("Booking Trk::Track Info...");
     
   NTupleFilePtr file1(m_ntupleSvc.get(), m_ntupleName);
-  std::string nt0id    = m_ntupleName + "/SiCluster";
+  std::string nt0id    = m_ntupleName.value() + "/SiCluster";
   std::string comments = "Silicon Cluster Information";
 
   StatusCode sc;
@@ -188,7 +168,7 @@ StatusCode InDetAlignFillSiCluster::RetrieveSCTSiClusters() {
   StatusCode sc;
   
   // get clusters from TDS
-  sc = evtStore()->retrieve(m_Sct_clcontainer, m_Sct_SiClustersName);
+  sc = evtStore()->retrieve(m_Sct_clcontainer, m_Sct_SiClustersName.value());
   if (sc.isFailure()  || !m_Sct_clcontainer){
     ATH_MSG_DEBUG ("SCT Cluster container for SCT not found");
     return StatusCode::FAILURE;
@@ -208,7 +188,7 @@ StatusCode InDetAlignFillSiCluster::RetrievePixelSiClusters() {
   StatusCode sc;
 
   // get pixel clusters from TDS
-  sc = evtStore()->retrieve(m_Pixel_clcontainer, m_Pixel_SiClustersName);
+  sc = evtStore()->retrieve(m_Pixel_clcontainer, m_Pixel_SiClustersName.value());
   if (sc.isFailure()  || !m_Pixel_clcontainer){
     ATH_MSG_DEBUG ("Pixel Cluster container for Pixels not found");
     return StatusCode::FAILURE;

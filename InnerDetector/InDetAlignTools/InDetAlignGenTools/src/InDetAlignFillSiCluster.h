@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNGENTOOLS_INDETALIGNFILLSICLUSTER_H
@@ -32,15 +32,13 @@
 class PixelID;
 class SCT_ID;
 
-class InDetAlignFillSiCluster: virtual public IInDetAlignFillSiCluster, public AthAlgTool {
+class InDetAlignFillSiCluster: public extends<AthAlgTool, IInDetAlignFillSiCluster> {
 
   typedef InDet::PixelClusterContainer PixelClusterContainer;
   typedef InDet::SCT_ClusterContainer SCT_ClusterContainer;
 
  public:
-  InDetAlignFillSiCluster(const std::string& type, 
-			  const std::string& name,
-			  const IInterface* parent);
+  using base_class::base_class;
   virtual ~InDetAlignFillSiCluster() = default;
   
   virtual StatusCode initialize() override;
@@ -51,14 +49,14 @@ class InDetAlignFillSiCluster: virtual public IInDetAlignFillSiCluster, public A
  private:
   ServiceHandle<INTupleSvc>  m_ntupleSvc{this,"NTupleSvc","NTupleSvc"};
 
-  const PixelID*                        m_pixelid;              //!< Pixel ID helper  
-  const SCT_ID*                         m_sctID;                //!< SCT ID helper
+  const PixelID*                        m_pixelid{nullptr};           //!< Pixel ID helper  
+  const SCT_ID*                         m_sctID{nullptr};           //!< SCT ID helper
 
-  std::string                           m_Pixel_SiClustersName;
-  std::string                           m_Sct_SiClustersName;
+  Gaudi::Property<std::string> m_Pixel_SiClustersName{this, "Pixel_SiClusterContainerName", "PixelClusters"};
+  Gaudi::Property<std::string> m_Sct_SiClustersName{this, "SCT_SiClusterContainerName", "SCT_Clusters"};
 
-  const InDet::PixelClusterContainer*          m_Pixel_clcontainer;
-  const InDet::SCT_ClusterContainer*           m_Sct_clcontainer;
+  const InDet::PixelClusterContainer*          m_Pixel_clcontainer{nullptr};
+  const InDet::SCT_ClusterContainer*           m_Sct_clcontainer{nullptr};
 
   // For P->T converter of PixelClusters
   SG::ReadCondHandleKey<InDetDD::SiDetectorElementCollection> m_pixelDetEleCollKey{this, "PixelDetEleCollKey", "PixelDetectorElementCollection", "Key of SiDetectorElementCollection for Pixel"};
@@ -73,7 +71,7 @@ class InDetAlignFillSiCluster: virtual public IInDetAlignFillSiCluster, public A
   void FillPixelSiNtuple();
 
   // variables
-  std::string                           m_ntupleName;    //!< ntuple name
+  Gaudi::Property<std::string> m_ntupleName{this, "NtupleName", "/NTUPLES/GLOBFILE"};    //!< ntuple name
 
   NTuple::Item<long> m_pixel_nclusters;   //!< number of Pixel Clusters
   NTuple::Item<long> m_sct_nclusters;   //!< number of SCT Clusters

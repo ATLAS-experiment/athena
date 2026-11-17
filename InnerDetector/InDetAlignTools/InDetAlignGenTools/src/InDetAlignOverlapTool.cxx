@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
  */
 
 #include <cmath>
@@ -21,13 +21,6 @@
 
 using namespace std;
 
-
-InDetAlignOverlapTool::InDetAlignOverlapTool(const std::string& t, const std::string& n, const IInterface* p)
-  : AthAlgTool(t, n, p)
-  , m_Overlaphits{}
-  , p_modlist{} {
-  declareInterface<IInDetAlignOverlapTool>(this);
-}
 
 InDetAlignOverlapTool::~InDetAlignOverlapTool() {}
 
