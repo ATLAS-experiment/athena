@@ -2,6 +2,9 @@
 
 """Regression tests for VP1 extrapolator configuration, without a GUI or geometry."""
 
+import contextlib
+import io
+import os
 import unittest
 from unittest.mock import patch
 
@@ -61,6 +64,40 @@ class VP1AlgConfigTest(unittest.TestCase):
 
     def test_standard_empty_input_launch(self):
         self.check_empty_input_launch()
+
+    def test_remote_launch_and_override(self):
+        with patch.dict(os.environ, {"SSH_CONNECTION": "client server"}):
+            self.check_empty_input_launch()
+            self.assertEqual(os.environ["VP1_REMOTE_MODE"], "1")
+            self.check_empty_input_launch("--no-remote")
+            self.assertEqual(os.environ["VP1_REMOTE_MODE"], "0")
+            self.assertEqual(os.environ["VP1_REMOTE_REASON"], "")
+
+    def test_forced_remote_launch(self):
+        with patch.dict(os.environ, {"DISPLAY": ":0", "SSH_CONNECTION": "", "SSH_CLIENT": ""}), \
+                patch("VP1Algs.VP1RemoteMode.remoteSessionReasons") as detect:
+            self.check_empty_input_launch("--remote")
+            detect.assert_not_called()
+            self.assertEqual(os.environ["VP1_REMOTE_MODE"], "1")
+            self.assertEqual(os.environ["VP1_REMOTE_REASON"], "requested with --remote")
+
+    def test_conflicting_remote_flags(self):
+        with patch("sys.argv", ["vp1", "--remote", "--no-remote"]), \
+                contextlib.redirect_stderr(io.StringIO()), \
+                self.assertRaises(SystemExit) as result:
+            SetupVP1()
+        self.assertEqual(result.exception.code, 2)
+
+    def test_snapshot_opt_out_retains_remote_mode(self):
+        with patch.dict(os.environ):
+            self.check_empty_input_launch("--remote", "--no-fix-snapshots")
+            self.assertEqual(os.environ["VP1_REMOTE_MODE"], "1")
+
+    def test_conflicting_snapshot_flags(self):
+        with patch("sys.argv", ["vp1", "--fix-snapshots", "--no-fix-snapshots"]), \
+                contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as result:
+            SetupVP1()
+        self.assertEqual(result.exception.code, 2)
 
     def test_phaseII_empty_input_launch(self):
         self.check_empty_input_launch("--phaseII")

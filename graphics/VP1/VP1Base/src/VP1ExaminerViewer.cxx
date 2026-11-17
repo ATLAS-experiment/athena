@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -42,6 +42,7 @@
 #include <Inventor/nodekits/SoBaseKit.h>
 #include <Inventor/SoSceneManager.h>
 
+#include "VP1InertialRotationSettings.h"
 #include <QBuffer>
 #include <QByteArray>
 #include <QMenu>
@@ -81,6 +82,7 @@ public:
   customstereoeditor(0),
   popup_menu(0),
   popup_headLightAction(0),
+  popup_inertialRotationAction(0),
   popup_antiAliasAction(0),
   popup_bgdColAction(0),
   popup_ambientLightAction(0),
@@ -214,6 +216,7 @@ public:
 	VP1CustomStereoEditor * customstereoeditor;
 	QMenu * popup_menu;
 	QAction* popup_headLightAction;
+	QAction* popup_inertialRotationAction;
 	QAction* popup_antiAliasAction;
 	QAction* popup_bgdColAction;
 	QAction* popup_ambientLightAction;
@@ -533,6 +536,7 @@ VP1ExaminerViewer::VP1ExaminerViewer(QWidget * parent,
   m_d(new Imp(this,detectorViewButtons))
 {
 	VP1Msg::messageDebug("VP1ExaminerViewer::VP1ExaminerViewer()");
+    setAnimationEnabled(VP1InertialRotationSettings::enabled());
 	// Explicitly trigger the construction of viewer decorations.
 	QWidget * widget = buildWidget(getParentWidget());
 	if (rightWheelLabel)
@@ -1923,6 +1927,9 @@ bool VP1ExaminerViewer::Imp::ensureMenuInit()
 
 	}
 
+    popup_inertialRotationAction = VP1InertialRotationSettings::addAction(
+        popup_menu, [this](bool enabled) { theclass->setAnimationEnabled(enabled); });
+
 	QMenu * advancedmenu = popup_menu->addMenu("&More");
 
 	popup_hidedecorationsaction = advancedmenu->addAction("Hide &controls");
@@ -2219,6 +2226,7 @@ void VP1ExaminerViewer::Imp::updatePopupMenuStates()
 
 	if (!popup_headLightAction)
 		return;
+	popup_inertialRotationAction->setChecked(theclass->isAnimationEnabled());
 	popup_headLightAction->setChecked(theclass->isHeadlight());
 	popup_antiAliasAction->setChecked(theclass->isAntiAlias());
 	popup_hidedecorationsaction->setChecked(! theclass->isDecoration());
@@ -2451,6 +2459,9 @@ void VP1ExaminerViewer::showPopupMenu()
 	if (!selAct) {
 		VP1Msg::messageVerbose("     => No selection.");
 		return;
+	}
+	if (selAct == m_d->popup_inertialRotationAction) {
+		return; // Applied and persisted by the action's triggered signal.
 	}
 	if ( selAct == m_d->popup_bgdColAction ) {
 		VP1Msg::messageVerbose("VP1ExaminerViewer::showPopupMenu Change background colour.");
