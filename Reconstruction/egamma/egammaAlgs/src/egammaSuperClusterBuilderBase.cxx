@@ -598,6 +598,7 @@ egammaSuperClusterBuilderBase::fillClusterConstrained(
       info.etamax = cp0.etaEC;
       info.phimax = cp0.phiEC;
     }
+    ATH_MSG_VERBOSE("seed eta, phi = " << info.etamax << " " << info.phimax);
     if (m_egammaCellRecoveryTool->execute(tofill,info).isFailure()) {
       ATH_MSG_WARNING("Issue trying to recover cells");
     }
@@ -607,8 +608,20 @@ egammaSuperClusterBuilderBase::fillClusterConstrained(
       tofill.getCellLinks()->getCellContainer();
     for (const auto *c : info.addedCells) {
       int index = inputcells->findIndex(c->caloDDE()->calo_hash());
+      ATH_MSG_VERBOSE("Adding cell index " << index
+		      << " raw eta/phi, e = "
+		      << c->caloDDE()->eta_raw() << " "
+		      << c->caloDDE()->phi_raw() << " "
+		      << c->energy());
       tofill.addCell(index, 1.);
     }
+
+    // Also decorate the cluster with these two quantities,
+    // to be used for isolation core fix
+    static const SG::Accessor<float> aaE2("Eadded_Lr2");
+    static const SG::Accessor<float> aaE3("Eadded_Lr3");
+    aaE2(tofill) = info.eCells[0];
+    aaE3(tofill) = info.eCells[1];
   }
 
   return StatusCode::SUCCESS;

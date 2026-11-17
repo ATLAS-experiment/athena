@@ -56,6 +56,9 @@ def createEgammaConfigFlags():
     egcf.addFlag("Egamma.doLowMu",  
                  lambda prevFlags: prevFlags.Reco.HIMode is HIMode.UPC)
 
+    # Apply fix for timing cut at reco level
+    egcf.addFlag("Egamma.fixTimingCutIssueAtReco", True)
+
     # The cluster corrections/calib.
     egcf.addFlag("Egamma.Calib.ClusterCorrectionVersion",
                  'v12phiflip_noecorrnogap')

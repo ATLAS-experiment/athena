@@ -359,6 +359,10 @@ namespace xAOD {
 	  "EFlowEDForwardContainer", "NeutralParticleFlowIsoForwardEventShape", 
 	  "Name of energy flow ED Forward"};
 
+      /** Property : to fix core isolation in case of timing issue */
+      Gaudi::Property<bool> m_fixCore57{this,
+	  "FixCore57", false, "Is there a timing issue to fix"};
+
       /** Property: The size of the coneCore core energy calculation. */
       Gaudi::Property<double> m_coneCoreSizeEg {this,
 	  "coneCoreSizeEg", 0.1,  

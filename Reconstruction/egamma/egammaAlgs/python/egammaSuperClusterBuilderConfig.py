@@ -19,7 +19,7 @@ def electronSuperClusterBuilderCfg(flags,
                                    **kwargs):
 
     mlog = logging.getLogger(name)
-    mlog.debug('Start configuration')
+    mlog.debug('Start electronSuperClusterBuilder configuration')
 
     seqkw = {'sequence': sequenceName} if sequenceName else {}
     acc = ComponentAccumulator(**seqkw)
@@ -50,6 +50,14 @@ def electronSuperClusterBuilderCfg(flags,
         "SuperClusterCollectionName",
         flags.Egamma.Keys.Internal.ElectronSuperClusters)
 
+    if flags.Calo.TopoCluster.doTimeCut and \
+      flags.Egamma.fixTimingCutIssueAtReco:
+        mlog.info("Will try to add the cells "
+                      "cut by timing back to egamma clusters")
+        kwargs.setdefault(
+            "egammaCellRecoveryTool",
+            CompFactory.egammaCellRecoveryTool())
+
     acc.addEventAlgo(CompFactory.electronSuperClusterBuilder(name, **kwargs))
     return acc
 
@@ -59,6 +67,9 @@ def photonSuperClusterBuilderCfg(
         name='photonSuperClusterBuilder',
         sequenceName=None,
         **kwargs):
+
+    mlog = logging.getLogger(name)
+    mlog.debug('Start photonSuperClusterBuilder configuration')
 
     seqkw = {'sequence': sequenceName} if sequenceName else {}
     acc = ComponentAccumulator(**seqkw)
@@ -89,6 +100,14 @@ def photonSuperClusterBuilderCfg(
     kwargs.setdefault(
         "SuperClusterCollectionName",
         flags.Egamma.Keys.Internal.PhotonSuperClusters)
+
+    if flags.Calo.TopoCluster.doTimeCut and \
+      flags.Egamma.fixTimingCutIssueAtReco:
+        mlog.info("Will try to add the cells "
+                      "cut by timing back to egamma clusters")
+        kwargs.setdefault(
+            "egammaCellRecoveryTool",
+            CompFactory.egammaCellRecoveryTool())
 
     acc.addEventAlgo(CompFactory.photonSuperClusterBuilder(name, **kwargs))
   

@@ -1156,6 +1156,18 @@ for( auto isoType : isoTypes ){
 	eraw57 = egcCloneFor57->e();
 	eta    = cleg->eta(); //FillRectangularCluster doesn't recalculated the overall cluster eta (only per-sampling)
 	coreV  = eraw57/cosh(eta);
+	if (m_fixCore57) {
+	  static const SG::Accessor<float> aaE2("Eadded_Lr2");
+	  static const SG::Accessor<float> aaE3("Eadded_Lr3");
+	  if (aaE2.isAvailable(*cleg) && aaE3.isAvailable(*cleg)) {
+	    coreV -= (aaE2(*cleg)+aaE3(*cleg))/std::cosh(cleg->etaBE(2));
+	  } else {
+	    ATH_MSG_WARNING("Asked to fix core isolation for timing cut"
+			    " but at least one of the needed energies is"
+			    " not there");
+	  }
+	}
+
 	ATH_MSG_DEBUG("Number of cells in 5x7 " << egcCloneFor57->size()
 		      << " seed eta,phi " << cleg->eta0() << " " << cleg->phi0()
 		      << " eraw = " << eraw57 << " etraw = " << coreV
