@@ -1,7 +1,7 @@
 # Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #====================================================================
 # DAOD_LLP1.py
-# This defines DAOD_LLP1, an unskimmed DAOD format for Run 3.
+# This defines DAOD_LLP1, skimmed DAOD format for Run 3.
 # It contains the variables and objects needed for the large majority
 # of physics analyses in ATLAS.
 # It requires the flag LLP1 in Derivation_tf.py
@@ -13,6 +13,7 @@ from AthenaConfiguration.Enums import LHCPeriod, MetadataCategory
 
 LLP1VrtSecInclusiveSuffixes = []
 LLP1NewVSISuffixes = []
+
 
 # Main algorithm config
 def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
@@ -231,6 +232,17 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                           LLP1IsolationTrackDecoratorPdEdxTool,
                           LLP1IsolationTrackDecoratorPdEdxTightTool,
                           LLP1TrackParticleCaloCellDecoratorTool ]
+
+    # Di-lepton invariant masses, used to gate the photon-cone track thinning
+    from DerivationFrameworkLLP.LLPToolsConfig import (
+        LLP1eeMassToolCfg, LLP1mumuMassToolCfg)
+    LLP1eeMassTool = acc.popToolsAndMerge(LLP1eeMassToolCfg(flags))
+    acc.addPublicTool(LLP1eeMassTool)
+    augmentationTools.append(LLP1eeMassTool)
+    LLP1mumuMassTool = acc.popToolsAndMerge(LLP1mumuMassToolCfg(flags))
+    acc.addPublicTool(LLP1mumuMassTool)
+    augmentationTools.append(LLP1mumuMassTool)
+
     if flags.Tracking.doLargeD0:
         augmentationTools += [ LLP1LRTMaxCellDecoratorTool ]
     if flags.Tracking.doTrackSegmentsDisappearing:
@@ -670,6 +682,25 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
         BestMatchOnly            = True,
         BestVtxMatchOnly         = True))
 
+    # Keep ALL inner-detector / GSF tracks within dR < 0.6 of photons (no pt
+    # cut on the tracks)
+    LLP1PhotonLowPtTPThinningTool = (
+        CompFactory.DerivationFramework.EgammaTrackParticleThinning(
+            name                     = "LLP1PhotonLowPtTPThinningTool",
+            StreamName               = kwargs['StreamName'],
+            SGKey                    = "Photons",
+            GSFTrackParticlesKey     = "GSFTrackParticles",
+            InDetTrackParticlesKey   = "InDetTrackParticles",
+            GSFConversionVerticesKey = "GSFConversionVertices",
+            SelectionString          = ("(Photons.pt > 9*GeV) && ( "
+                                        "(count(LLP1_DiElectronMass > 40.0*GeV) >= 1) || "
+                                        "(count(LLP1_DiMuonMass > 40.0*GeV) >= 1) )"),
+            BestMatchOnly            = False,
+            ConeSize                 = 0.6,
+        )
+    )
+    acc.addPublicTool(LLP1PhotonLowPtTPThinningTool)
+
     # Tau-related containers: taus, tau tracks and associated ID tracks, neutral PFOs, secondary vertices
     tau_thinning_expression = f"TauJets.pt >= {flags.Tau.MinPtDAOD}"
     LLP1TauJetsThinningTool = acc.getPrimaryAndMerge(TauThinningCfg(
@@ -829,6 +860,7 @@ def LLP1KernelCfg(flags, name='LLP1Kernel', **kwargs):
                      LLP1ElectronTPThinningTool,
                      LLP1MuonTPThinningTool,
                      LLP1PhotonTPThinningTool,
+                     LLP1PhotonLowPtTPThinningTool,
                      LLP1TauJetsThinningTool,
                      LLP1TauTPThinningTool,
                      LLP1TauJetMuonRMParticleThinningTool,
