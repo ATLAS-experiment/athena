@@ -14,7 +14,7 @@ from AthenaCommon.Logging import logging
 log = logging.getLogger("SuperChicConfig")
 
 
-def SuperChicBaseCfg(flags, Config={}, safety=1.1, **kwargs):
+def SuperChicBaseCfg(flags, Config={}, safety=1.1,gridpack="auto", makeGridpack=False, strictGridpack=True, **kwargs):
     """
     The main SuperChic configuration fragment. It creates a SuperChicControl
     instance that stores the generator configuration parameters and is used
@@ -22,15 +22,27 @@ def SuperChicBaseCfg(flags, Config={}, safety=1.1, **kwargs):
 
     All the configurable parameters and their default values can be found
     in SuperChicUtils.
+
+    Gridpack options (the gridpack is written by the SuperChic init step):
+      gridpack="auto"  use the gridpack mc_<E>TeV.<physics_short>.GRID.tar.gz
+                       from the DSID directory if it exists, else run init
+      gridpack=<path>  use this gridpack
+      gridpack=False   ignore gridpacks and run init
+      makeGridpack     run init and pack the grids into a gridpack
+      strictGridpack   differences in input.DAT (other than iseed, nev) between
+                       the gridpack and the job are errors, not warnings
+    A gridpack from a different SuperChic version or with different grid-defining
+    parameters is always an error; a different AthGeneration version is a warning.
     """
 
+    Config = dict(Config)
     Config.setdefault("rts", 2*flags.Beam.Energy/GeV)
     Config.setdefault("nev", _get_nevents(flags, safety))
     Config.setdefault("iseed", flags.Random.SeedOffset)
 
     # Create SuperChicControl instance and generate events
     from Superchic_i.SuperChicControl import SuperChicControl
-    control = SuperChicControl(Config=Config)
+    control = SuperChicControl(Config=Config, gridpack=gridpack, makeGridpack=makeGridpack, strictGridpack=strictGridpack)
     control.initialize()
     control.generate()
 

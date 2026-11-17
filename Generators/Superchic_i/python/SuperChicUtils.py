@@ -1,7 +1,7 @@
 #  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
 
 
-import subprocess, os, shlex, re, shutil
+import subprocess, os, shlex, re, shutil, tarfile, json, difflib
 from packaging.version import Version
 
 from AthenaCommon import Logging
@@ -9,6 +9,9 @@ from AthenaCommon import Logging
 ## Get handle to Athena logging
 logger = Logging.logging.getLogger("SuperChicUtils")
 
+GRIDPACK_SIG = "gridpack_signature.json"
+GRIDPACK_DAT = "gridpack_input.DAT"
+GRIDPACK_VER = "gridpack_versions.json"
 
 class SuperChicConfig:
 
@@ -378,6 +381,192 @@ class SuperChicConfig:
         rc = process.poll()
         return rc
 
+    def _ensureCards(self):
+        """Copy param_card.dat and ident_card.dat from the installation if absent."""
+        for card in ("param_card.dat", "ident_card.dat"):
+            if not os.path.exists(card):
+                src = os.path.join(self.superchicpath, "share/doc/SuperChic/Cards", card)
+                if os.path.exists(src):
+                    shutil.copyfile(src, card)
+                else:
+                    raise Exception("Unexpected error in superchic execution: probably absent " + card)
+
+
+    # ------------------------------------------------------------------
+    # Gridpack support
+    #
+    # A gridpack contains:
+    #   inputs/                  grids written by bin/init
+    #   gridpack_input.DAT       input.DAT of the job that created it
+    #   gridpack_signature.json  parameters that determine the validity of the grids
+    #   gridpack_versions.json   SuperChic and AthGeneration versions used to make it
+    #
+    # When a gridpack is used:
+    #   - SuperChic version differs        -> error
+    #   - AthGeneration version differs    -> warning
+    #   - signature differs                -> error
+    #   - rest of input.DAT (ignoring iseed and nev) differs
+    #                                      -> warning, or error if strict
+    # ------------------------------------------------------------------
+
+    def initSignature(self):
+        """
+        Parameters that determine whether the grids in inputs/ are valid for a job.
+        A gridpack is only accepted if all of these match (hard check).
+
+        Conservative choice: besides the parameters the input.DAT header lists as
+        requiring a new init (rts, isurv, intag, PDFname, PDFmember; beam='prot'),
+        also proc, diff and sfaci are included, i.e. one gridpack per process.
+        Remove entries only after validating that the grids do not depend on them.
+        """
+        return {
+            "rts": float(self.rts),
+            "isurv": int(self.isurv),
+            "intag": self.intag,
+            "PDFname": self.PDFname,
+            "PDFmember": int(self.PDFmember),
+            "beam": self.beam,
+            "proc": int(self.proc),
+            "diff": self.diff,
+            "sfaci": bool(self.sfaci),
+        }
+
+    @staticmethod
+    def athGenerationVersion():
+        """AthGeneration release of the running job, e.g. 'AthGeneration-23.6.40'."""
+        proj = os.environ.get("AtlasProject", "unknown")
+        ver = os.environ.get("AtlasVersion", "unknown")
+        return "%s-%s" % (proj, ver)
+
+    def currentVersions(self):
+        return {
+            "superchic": os.environ["SUPERCHICVER"],
+            "athgeneration": self.athGenerationVersion(),
+        }
+
+    def gridpackFileName(self):
+        """Standard DSID gridpack name: mc_13TeV.<physics_short>.GRID.tar.gz"""
+        from MCJobOptionUtils.JOsupport import get_physics_short
+        e = self.rts / 1000.
+        estr = str(int(e)) if e == int(e) else ("%g" % e).replace('.', 'p')
+        return "mc_%sTeV.%s.GRID.tar.gz" % (estr, get_physics_short())
+
+    def findGridpack(self):
+        """Look for the DSID gridpack in the cwd and on the JO search path."""
+        try:
+            name = self.gridpackFileName()
+        except Exception as e:
+            logger.warning("Could not determine gridpack name (%s); running init in this job", e)
+            return None
+        if os.path.isfile(name):
+            return name
+        for d in re.split(r'[:,]', os.environ.get("JOBOPTSEARCHPATH", "")):
+            p = os.path.join(d, name)
+            if d and os.path.isfile(p):
+                return p
+        return None
+
+    @staticmethod
+    def _normaliseDAT(text):
+        """input.DAT lines with the per-job values (iseed, nev) removed."""
+        return [' '.join(l.split()) for l in text.splitlines()
+                if '! [iseed]' not in l and '! [nev]' not in l]
+
+    def makeGridpack(self, name=None):
+        """Pack inputs/ together with input.DAT and the metadata (run after init)."""
+        if not os.path.isdir("inputs") or not os.listdir("inputs"):
+            raise Exception("inputs/ is empty after init; refusing to make an empty gridpack")
+        if name is None:
+            name = self.gridpackFileName()
+        with open(GRIDPACK_SIG, "w") as f:
+            json.dump(self.initSignature(), f, sort_keys=True, indent=1)
+        with open(GRIDPACK_DAT, "w") as f:
+            f.write(self.toFortran())
+        with open(GRIDPACK_VER, "w") as f:
+            json.dump(self.currentVersions(), f, sort_keys=True, indent=1)
+        with tarfile.open(name, "w:gz") as tar:
+            tar.add("inputs")
+            tar.add(GRIDPACK_SIG)
+            tar.add(GRIDPACK_DAT)
+            tar.add(GRIDPACK_VER)
+        logger.info("Created SuperChic gridpack %s", name)
+        return name
+
+    def useGridpack(self, path, strict=False):
+        """Unpack a gridpack and check it is compatible with this job."""
+        logger.info("Unpacking SuperChic gridpack %s", path)
+        with tarfile.open(path) as tar:
+            if hasattr(tarfile, "data_filter"):
+                tar.extractall(".", filter="data")
+            else:
+                tar.extractall(".")
+
+        # version checks
+        if not os.path.isfile(GRIDPACK_VER):
+            raise Exception("Gridpack %s has no %s: cannot verify SuperChic version" % (path, GRIDPACK_VER))
+        with open(GRIDPACK_VER) as f:
+            storedVer = json.load(f)
+        nowVer = self.currentVersions()
+        if storedVer.get("superchic") != nowVer["superchic"]:
+            raise Exception("SuperChic version mismatch: gridpack made with %s, this job uses %s"
+                            % (storedVer.get("superchic"), nowVer["superchic"]))
+        if storedVer.get("athgeneration") != nowVer["athgeneration"]:
+            logger.warning("AthGeneration version differs: gridpack made with %s, this job uses %s",
+                           storedVer.get("athgeneration"), nowVer["athgeneration"])
+
+        # hard check: parameters that determine the grids
+        with open(GRIDPACK_SIG) as f:
+            stored = json.load(f)
+        current = self.initSignature()
+        if stored != current:
+            diff = {k: (stored.get(k), current.get(k))
+                    for k in set(stored) | set(current)
+                    if stored.get(k) != current.get(k)}
+            raise Exception("Gridpack incompatible with this job (gridpack, job): %s" % diff)
+
+        if not os.path.isdir("inputs") or not os.listdir("inputs"):
+            raise Exception("Gridpack %s did not provide any files in inputs/" % path)
+
+        # soft check: everything else in input.DAT except iseed and nev
+        with open(GRIDPACK_DAT) as f:
+            old = self._normaliseDAT(f.read())
+        new = self._normaliseDAT(self.toFortran())
+        if old != new:
+            delta = [l for l in difflib.unified_diff(old, new, "gridpack", "job", lineterm="", n=0)
+                     if l[:1] in "+-" and l[:3] not in ("+++", "---")]
+            msg = "input.DAT differs from the one used to make the gridpack:\n" + "\n".join(delta)
+            if strict:
+                raise Exception(msg)
+            logger.warning(msg)
+
+    def prepareGrids(self, gridpack="auto", makeGridpackFile=False, strict=True):
+        """
+        Provide the grids in inputs/, either from a gridpack or by running init.
+
+        gridpack="auto"  : look for the DSID gridpack (mc_<E>TeV.<physics_short>.GRID.tar.gz);
+                           if none is found, run init in this job (previous behaviour)
+        gridpack=<path>  : use this gridpack
+        gridpack=False   : ignore any gridpack and run init
+        makeGridpackFile : run init (ignoring any gridpack) and pack inputs/ into a gridpack
+        strict           : treat differences in input.DAT (other than iseed, nev) as errors
+        """
+        if makeGridpackFile:
+            gridpack = None
+        elif gridpack == "auto":
+            gridpack = self.findGridpack()
+            if gridpack is None:
+                logger.info("No gridpack found, running init in this job")
+        elif gridpack is False:
+            gridpack = None
+
+        if gridpack:
+            self.useGridpack(gridpack, strict=strict)
+        else:
+            self.superChicInitialize()
+            if makeGridpackFile:
+                self.makeGridpack()
+
+
     def superChicInitialize(self, stdin=None):
 
         logger.info("Starting SuperChic Initialization")
@@ -385,16 +574,7 @@ class SuperChicConfig:
         os.makedirs('inputs', exist_ok=True)
         os.makedirs('evrecs', exist_ok=True)
         os.makedirs('outputs', exist_ok=True)
-        if not os.path.exists("param_card.dat"):
-            if os.path.exists(self.superchicpath+"/share/doc/SuperChic/Cards/param_card.dat"):
-                shutil.copyfile(self.superchicpath+"/share/doc/SuperChic/Cards/param_card.dat","param_card.dat")
-            else:
-                raise Exception('Unexpected error in superchic init execution: probably absent param_card.dat')
-        if not os.path.exists("ident_card.dat"):
-            if os.path.exists(self.superchicpath+"/share/doc/SuperChic/Cards/ident_card.dat"):
-                shutil.copyfile(self.superchicpath+"/share/doc/SuperChic/Cards/ident_card.dat","ident_card.dat")
-            else:
-                raise Exception('Unexpected error in superchic init execution: probably absent ident_card.dat')
+        self._ensureCards()
 
         try:
             inputDAT = open('input.DAT')
@@ -423,6 +603,7 @@ class SuperChicConfig:
         os.makedirs('inputs', exist_ok=True)
         os.makedirs('evrecs', exist_ok=True)
         os.makedirs('outputs', exist_ok=True)
+        self._ensureCards()
 
         try:
             inputDAT = open('input.DAT')
@@ -444,8 +625,7 @@ class SuperChicConfig:
 
         return
 
-
-def SuperChicRun(Init, genSeq):
+def SuperChicRun(Init, genSeq, gridpack="auto", makeGridpackFile=False, strictGridpack=True):
 
     # dump the job configuration for fortran code
     print(Init.toFortran())
@@ -454,7 +634,7 @@ def SuperChicRun(Init, genSeq):
     genSeq.SuperChicConfig = Init
     
     Init.writeInputDAT()
-    Init.superChicInitialize()
+    Init.prepareGrids(gridpack=gridpack, makeGridpackFile=makeGridpackFile, strict=strictGridpack)
     Init.superChicExecute()
     
     return
