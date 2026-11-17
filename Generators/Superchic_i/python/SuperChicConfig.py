@@ -56,32 +56,21 @@ def SuperChicBaseCfg(flags, Config={}, safety=1.1,gridpack="auto", makeGridpack=
     return ca
 
 
-def SuperChicPythia8BaseCfg(flags, Commands=[],
-        LHEFile=None, Config={}, **kwargs):
+def SuperChicPythia8BaseCfg(flags, Config={}, **kwargs):
     """
     Modular fragment for setting up base Pythia8 on top of SuperChic.
 
     LHEFile is the path to LHE output file produced by SuperChic,
-    that is taken as input for Pythia8. It can be set explicitly,
-    or read from the Config dictionary. Otherwise it is set to
-    the default "evrecs/evrecout.dat".
+    that is taken as input for Pythia8. If no specific output tag
+    was set in `Config`, it is set to the default "evrecs/evrecout.dat".
 
     TestHepMC selection is additionally loosened to avoid crashes.
     """
 
-    if LHEFile is None:
-        # if no path for LHE file was specify try to read it from Config
-        if 'outtg' in Config:
-            LHEFile = f"evrecs/evrec{Config['outtg']}.dat"
-        # if there was none set in Config use the default
-        else:
-            LHEFile = "evrecs/evrecout.dat"
-
     # Add Pythia8
     ca = Pythia8BaseCfg(
         flags,
-        Commands=Commands,
-        LHEFile=LHEFile,
+        LHEFile=_get_path_to_LHE(Config),
         **kwargs
     )
 
@@ -96,33 +85,22 @@ def SuperChicPythia8BaseCfg(flags, Commands=[],
     return ca
 
 
-def SuperChic_Pythia8_A14_NNPDF23LO_Common_Cfg(flags, Commands=[],
-        LHEFile=None, Config={}, **kwargs):
+def SuperChic_Pythia8_A14_NNPDF23LO_Common_Cfg(flags, Config={}, **kwargs):
     """
     Modular fragment for setting up Pythia8 with A14_NNPDF23LO
     tunes on top of SuperChic.
 
     LHEFile is the path to LHE output file produced by SuperChic,
-    that is taken as input for Pythia8. It can be set explicitly,
-    or read from the Config dictionary. Otherwise it is set to
-    the default "evrecs/evrecout.dat".
+    that is taken as input for Pythia8. If no specific output tag
+    was set in `Config`, it is set to the default "evrecs/evrecout.dat".
 
     TestHepMC selection is additionally loosened to avoid crashes.
     """
 
-    if LHEFile is None:
-        # if no path for LHE file was specify try to read it from Config
-        if 'outtg' in Config:
-            LHEFile = f"evrecs/evrec{Config['outtg']}.dat"
-        # if there was none set in Config use the default
-        else:
-            LHEFile = "evrecs/evrecout.dat"
-
     # Add Pythia8
     ca = Pythia8_A14_NNPDF23LO_Common_Cfg(
         flags,
-        Commands=Commands,
-        LHEFile=LHEFile,
+        LHEFile=_get_path_to_LHE(Config),
         **kwargs
     )
 
@@ -137,16 +115,20 @@ def SuperChic_Pythia8_A14_NNPDF23LO_Common_Cfg(flags, Commands=[],
     return ca
 
 
-def SuperChicPythia8LheConverterUpcCfg(flags,
-        inputLHEFile="evrecs/evrecout.dat", **kwargs):
+def SuperChicPythia8LheConverterUpcCfg(flags, Config={}, **kwargs):
     """
     Modular fragment for setting the LheConverterUpc.
     """
+
+    kwargs.setdefault("energy", 2*flags.Beam.Energy/GeV)
+    kwargs.setdefault("inFileName", _get_path_to_LHE(Config))
+    kwargs.setdefault("outFileName", _get_path_to_LHE(Config))
+
     from MCJobOptionUtils.LheConverterUpc import LheConverterUpc
-    lheConverter = LheConverterUpc(generator='SuperChic',
+    lheConverter = LheConverterUpc(generator='Superchic',
                                     mode='Pythia8',
-                                    energy=2*flags.Beam.Energy/GeV)
-    lheConverter.fileName = inputLHEFile
+                                    **kwargs
+    )
 
     # Create CA object
     ca = ComponentAccumulator(EvgenSequenceFactory(EvgenSequence.Generator))
@@ -172,4 +154,12 @@ def SuperChicLheEvntFillerCfg(flags, name="LheEVNTFiller", **kwargs):
     ))
 
     return ca
+
+def _get_path_to_LHE(Config):
+    LHEFile = "evrecs/evrecout.dat"
+
+    if 'outtg' in Config:
+        LHEFile = f"evrecs/evrec{Config['outtg']}.dat"
+
+    return LHEFile
 
