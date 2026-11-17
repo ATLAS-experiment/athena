@@ -13,10 +13,7 @@ atlas_subdir( ColumnarMode )
 SET (COLUMNAR_DEFAULT_ACCESS_MODE 0 CACHE STRING "access mode for columnar components (0: xaod, 2: array-columnar, 100: xaod-array-columnar)")
 
 # FIX ME: These settings should come from the Project configuration
-if (COLUMNAR_ANALYSIS)
-  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeArray;ColumnarModeArray")
-  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
-elseif (XAOD_STANDALONE)
+if (XAOD_STANDALONE)
   SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD;ColumnarModeArray")
   SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
 else()

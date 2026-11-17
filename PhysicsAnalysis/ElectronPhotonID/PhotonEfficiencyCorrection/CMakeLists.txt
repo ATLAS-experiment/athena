@@ -7,10 +7,7 @@ atlas_subdir( PhotonEfficiencyCorrection )
 find_package( ROOT COMPONENTS Core )
 
 # FIX ME: These settings should come from the Project configuration
-if (COLUMNAR_ANALYSIS)
-  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeArray;ColumnarModeArray")
-  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
-elseif (XAOD_STANDALONE)
+if (XAOD_STANDALONE)
   SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD;ColumnarModeArray")
   SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
 else()
@@ -61,7 +58,7 @@ atlas_add_executable( PrintPhotonSF
    LINK_LIBRARIES ${ROOT_LIBRARIES} ElectronEfficiencyCorrectionLib PATCoreAcceptLib
    PhotonEfficiencyCorrectionLib )
 
-if( XAOD_STANDALONE AND NOT COLUMNAR_ANALYSIS )
+if( XAOD_STANDALONE )
    atlas_add_executable( TestxAODPhotonAlg
       util/TestxAODPhotonAlg.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}

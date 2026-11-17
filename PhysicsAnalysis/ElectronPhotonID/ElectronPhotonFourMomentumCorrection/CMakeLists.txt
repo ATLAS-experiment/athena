@@ -14,10 +14,7 @@ find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
 find_package( GTest )
 
 # FIX ME: These settings should come from the Project configuration
-if (COLUMNAR_ANALYSIS)
-  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeArray;ColumnarModeArray")
-  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
-elseif (XAOD_STANDALONE)
+if (XAOD_STANDALONE)
   SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD;ColumnarModeArray")
   SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
 else()
@@ -82,7 +79,7 @@ atlas_add_executable( ElectronPhotonFourMomentumCorrection_testUniformityCorrect
    util/testUniformityCorrections.cxx
    LINK_LIBRARIES ElectronPhotonFourMomentumCorrectionLib )
 
-if( XAOD_STANDALONE AND NOT COLUMNAR_ANALYSIS )
+if( XAOD_STANDALONE )
    atlas_add_executable( ElectronPhotonFourMomentumCorrection_testEgammaCalibTool
       util/testEgammaCalibTool.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}
@@ -91,7 +88,7 @@ if( XAOD_STANDALONE AND NOT COLUMNAR_ANALYSIS )
 endif()
 
 # Test(s) in the package:
-if( XAOD_STANDALONE AND NOT COLUMNAR_ANALYSIS )
+if( XAOD_STANDALONE )
    atlas_add_test( ut_maintest
                    SCRIPT test/ut_ElectronPhotonFourMomentumCorrection_maintest.py
                    # Expected errors

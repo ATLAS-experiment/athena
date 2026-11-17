@@ -13,13 +13,13 @@ atlas_add_test( JetDefUTest
    SCRIPT test_JetDefinitions_properties.py
    POST_EXEC_SCRIPT noerror.sh )
 
-if( NOT XAOD_ANALYSIS AND NOT COLUMNAR_ANALYSIS)
+if( NOT XAOD_ANALYSIS)
   atlas_add_test( JetDefCopyTest
     SCRIPT test_JetDefinitions_copy.py
     POST_EXEC_SCRIPT noerror.sh )
 endif()
 
-if( NOT GENERATIONBASE AND NOT XAOD_ANALYSIS AND NOT COLUMNAR_ANALYSIS)
+if( NOT GENERATIONBASE AND NOT XAOD_ANALYSIS)
   # argument '-n 0' prevent a full run and performs only the jet config
   atlas_add_test( JetStandarSmallRConfig
     SCRIPT test_StandardJets.py "-j smallR -n 0"
