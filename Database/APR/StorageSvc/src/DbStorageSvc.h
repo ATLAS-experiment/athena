@@ -81,18 +81,18 @@ class DbStorageSvc  : virtual public IStorageSvc, virtual public APRMessaging
       * @param   refCont   [IN] Reference to container name 
       * @param   technology[IN] Specialised sub-technology
       * @param   object    [IN] Pointer to persistent data object.
-      * @param   shape     [IN] Persistent type information
+      * @param   type      [IN] Persistent type information
       * @param   refpTok  [OUT] Reference to location for storing the
       *                         pointer of the persistent object token.
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode allocate( FileDescriptor&       refDB,
-                                 const std::string&    refCont,
-                                 int                   technology,
-                                 const void*           object,
-                                 const Shape*          shape,
-                                 Token*&               refpTok) override final;
+    virtual StatusCode write( FileDescriptor&       refDB,
+                              const std::string&    refCont,
+                              int                   technology,
+                              const void*           object,
+                              const RootType        type,
+                              Token*&               refpTok) override final;
 
     /// Read a persistent object from the medium.
     /** Reading an object does not create the object.
@@ -100,13 +100,11 @@ class DbStorageSvc  : virtual public IStorageSvc, virtual public APRMessaging
       * @param   refDB     [IN] Reference to Database descriptor 
       * @param   persToken [IN] Reference to persistent token information.
       * @param   object   [OUT] Pointer to persistent data pointer.
-      * @param   shape     [IN] Desired object shape to be read
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode read(     const FileDescriptor& refDB,
-                                 const Token&          persToken,
-                                 const Shape*          shape,
-                                 void**                object) override final;
+    virtual StatusCode read( FileDescriptor& refDB,
+                             const Token&    persToken,
+                             void**          object) override final;
 
     /// Get container name for object
     /**
@@ -117,29 +115,29 @@ class DbStorageSvc  : virtual public IStorageSvc, virtual public APRMessaging
     virtual std::string getContName(FileDescriptor& refDB,
                                     Token&          persToken) const override final;
 
-    /// Retrieve persistent shape from Storage manager.
-    /** The persistent shape is saved at write time to a Database.
-      * To match the transient shape of an object to the persistent shape of 
+    /// Retrieve persistent tinfo from Storage manager.
+    /** The persistent tinfo is saved at write time to a Database.
+      * To match the transient tinfo of an object to the persistent tinfo of 
       * the data at the time the data were written should allow for schema
       * evolution and object transformation(s).
       *
       * @param   refDB     [IN] Reference to Database descriptor 
       * @param   objType   [IN] Shape identifier.
-      * @param   shape    [OUT] Persistent shape of a given object type.
+      * @param   tinfo    [OUT] Persistent tinfo of a given object type.
       *
       * @return                 StatusCode code indicating success or failure.
       */
     virtual StatusCode getShape(  FileDescriptor&       refDB,
                                   const Guid&           objType,
-                                  const Shape*&         shape) override final;
+                                  const DbTypeInfo*&    tinfo) override final;
 
     /// Create a Shape representation based on a ShapeID
     /**
-      * @param   shapeID   [IN] Shape identifier.
+      * @param   typeID   [IN] Type identifier.
       *
       * @return            Handle to persistent mapping of a given object type.
       */
-    virtual const Shape* createShape( const Guid& shapeID ) override final;
+    virtual const DbTypeInfo* createShape( const Guid& typeID ) override final;
 
     /// Start a new Database Session.
     /** The Database session handles Databases of one given type. This

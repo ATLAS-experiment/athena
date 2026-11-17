@@ -5,12 +5,9 @@
 #include "BasicFunctionality.h"
 #include "SimpleTestClass.h"
 
-#include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
 
-#include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbConnection.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbDatabase.h"
@@ -94,12 +91,6 @@ TestDriver::testWriting()
   if ( ! class_SimpleTestClass ) {
     throw std::runtime_error( "Could not retrieve the dictionary for class SimpleTestClass" );
   }
-  Guid objGuid = DbReflex::guid(class_SimpleTestClass);
-  // Creating class shape
-  const Shape* objShape = storSvc->createShape(objGuid);
-  if( !objShape ) {
-     throw std::runtime_error( "Could not create a persistent shape for SimpleTestClass" );
-  }
   // object cache
   std::vector< SimpleTestClass* > myObjects;
   myObjects.reserve(m_nObjects);
@@ -107,11 +98,6 @@ TestDriver::testWriting()
   RootType class_DbString ( "DbString" );
   if( ! class_DbString ) {
     throw std::runtime_error( "Could not retrieve the dictionary for class DbString" );
-  }
-  Guid strGuid = DbReflex::guid(class_DbString);
-  const Shape* strShape = storSvc->createShape(strGuid);
-  if( !strShape ) {
-     throw std::runtime_error( "Could not create a persistent shape for DbString" );
   }
   std::vector< DbString > myStrings;
   myStrings.reserve(m_nObjects);
@@ -128,16 +114,16 @@ TestDriver::testWriting()
 
     // Writing the object.
     Token* token = nullptr;
-    if ( ! ( storSvc->allocate( fd, m_objContainerName, m_storageType.type(),
-				myObject, objShape, token ).isSuccess() ) ) {
+    if( !storSvc->write( fd, m_objContainerName, m_storageType.type(),
+			myObject, class_SimpleTestClass, token ).isSuccess() ) {
       throw std::runtime_error( "Could not write a SimpleTestClass object" );
     }
     delete token; token = nullptr;
 
     myStrings.push_back( "This is my test DbString #" + std::to_string(i) );
     const DbString* sp = &myStrings.back();
-    if( !storSvc->allocate( fd, m_strContainerName, m_storageType.type(),
-                            sp, strShape, token ).isSuccess() ) {
+    if( !storSvc->write( fd, m_strContainerName, m_storageType.type(),
+                            sp, class_DbString, token ).isSuccess() ) {
        throw std::runtime_error( "Could not write a dbString" );
     }
     delete token; token = nullptr;
@@ -222,24 +208,11 @@ TestDriver::testReading()
   int iObject = 0;
   if ( sc.isSuccess() && objCntH.isValid() ) {
     Token* objectToken = new Token(objCntH.token());
-    const Guid& guid = objectToken->classID();
     while ( objCntH.next(objLinkH).isSuccess() ) {
       objectToken->oid() = objLinkH;
-      const Shape* shape = 0;
-      if( !storSvc->getShape( *fd, guid, shape ).isSuccess() ) {
-	      throw std::runtime_error( "Could not fetch the persistent shape" );
-      }
-      RootType classType = DbReflex::forGuid(guid);
-      if(!classType){
-	      throw std::runtime_error( "Could not resolve the class by guid" );
-      }
       void* ptr = 0;
-      if ( ! ( storSvc->read( *fd, *objectToken, shape, &ptr ) ).isSuccess() ) {
+      if( !storSvc->read( *fd, *objectToken, &ptr ).isSuccess() ) {
 	      throw std::runtime_error( "failed to read an object back from the persistency" );
-      }
-
-      if ( shape->shapeID().toString() != "4E1F4DBB-1973-1974-1999-204F37331A01" ) {
-	      throw std::runtime_error( std::string("read wrong class type: ") + shape->shapeID().toString());
       }
 
       SimpleTestClass* object = reinterpret_cast< SimpleTestClass* >( ptr );
@@ -261,26 +234,13 @@ TestDriver::testReading()
   sc = strCntH.open(dbH, m_strContainerName, 0, strContToken->technology(), Io::READ);
   if ( sc.isSuccess() && strCntH.isValid() ) {
      Token* stringToken = new Token(strCntH.token());
-     const Guid& guid = stringToken->classID();
      while ( strCntH.next(strLinkH).isSuccess() ) {
         stringToken->oid() = strLinkH;
-        const Shape* shape = 0;
-        if( !storSvc->getShape( *fd, guid, shape ).isSuccess() ) {
-           throw std::runtime_error( "Could not retrieve the String shape" );
-        }
-        RootType classType = DbReflex::forGuid(guid);
-        if(!classType){
-           throw std::runtime_error( "Could not resolve the class by guid" );
-        }
         DbString str;
         void *ptr = &str;
         void *originalPtr = ptr; // this is to check if the pointer is changed (RootKeyContainer modifies it!)
-        if( !storSvc->read( *fd, *stringToken, shape, &ptr ).isSuccess() ) {
+        if( !storSvc->read( *fd, *stringToken, &ptr ).isSuccess() ) {
            throw std::runtime_error( "failed to read an object back from the persistency" );
-        }
-
-        if ( shape->shapeID().toString() != "DA8F479C-09BC-49D4-94BC-99D025A23A3B" ) {
-           throw std::runtime_error( std::string("read wrong class type: ") + shape->shapeID().toString());
         }
 
         if (ptr == originalPtr) {

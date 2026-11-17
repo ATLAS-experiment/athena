@@ -104,15 +104,14 @@ void clearColumns(DbTypeInfo::Columns& cols)  {
 
 /// Standard Constructor
 DbTypeInfo::DbTypeInfo(const Guid& guid, RootType type, Columns& cols)
-      : Shape(),
-        m_refCount( 0 ),
+      : m_refCount( 0 ),
         m_columns(),
         m_mult( 0 )
 {
    if (type) {
      m_class.store (type);
    }
-   setShapeID(guid);
+   setTypeID(guid);
    if( cols.size() == 0 )   {
       std::string nam = type.Name();
       if (nam.starts_with ("::")) {
@@ -147,12 +146,11 @@ DbTypeInfo::DbTypeInfo(const Guid& guid, RootType type, Columns& cols)
 
 
 DbTypeInfo::DbTypeInfo(const Guid& guid)
-: Shape(),
-  m_refCount( 0 ),
+: m_refCount( 0 ),
   m_columns(),
   m_mult( 0 )
 {
-  setShapeID(guid);
+  setTypeID(guid);
 }
 
 // Destructor
@@ -198,7 +196,7 @@ const std::string DbTypeInfo::toString() const   {
   std::string rep;
   char txt[256];
   rep = "{ID=";
-  rep += shapeID().toString();
+  rep += typeID().toString();
   rep += "}";
   RootType cls = clazz();
   if ( !cls )
@@ -233,7 +231,7 @@ StatusCode DbTypeInfo::i_fromString( const std::string& string_rep)  {
   m_columns.clear();
   const char* p1 = tmp.c_str();
   DbColumn* col = 0;
-  setShapeID(Guid::null());
+  setTypeID(Guid::null());
   for(i = 0; p1 != nullptr && i < sizeof(itm)/sizeof(itm[0]); ++i)   {
 Again:
     p1 = ::strstr(p1, itm[i][0]);
@@ -245,7 +243,7 @@ Again:
         std::string s (pp1, p2-pp1);
         switch(i) {
         case 0:
-          setShapeID(s);
+          setTypeID(s);
           // this->clazz();
           break;
         case 1: {
@@ -256,8 +254,8 @@ Again:
           else {
             m_class.reset();
           }
-          if ( cls && shapeID() == Guid::null() )  {
-            setShapeID(DbReflex::guid(cls));
+          if ( cls && typeID() == Guid::null() )  {
+            setTypeID(DbReflex::guid(cls));
           }
           break;
         }
@@ -306,12 +304,12 @@ const DbTypeInfo* DbTypeInfo::fromString(const std::string& string_rep)
    if( new_type_info->i_fromString(string_rep).isSuccess() )   {
       // find existing typeinfo or create a fresh one based on transient dictionary
       // do this first to ensure current type is first in the DbTransform list
-      //cout << " -- fromDbString DbTypeInfo: " << string_rep << "  GUID=" << new_type_info->shapeID() <<  endl;
+      //cout << " -- fromDbString DbTypeInfo: " << string_rep << "  GUID=" << new_type_info->typeID() <<  endl;
       RootType cls;
       if (new_type_info->m_class.isValid()) {
         cls = *new_type_info->m_class.ptr();
       }
-      if( !DbTransform::getShape( new_type_info->shapeID() , main_type_info).isSuccess() ) {
+      if( !DbTransform::getShape( new_type_info->typeID() , main_type_info).isSuccess() ) {
          // new shape
          if( !cls ) {
             // no transient type info for this type, use the string description as it is          
@@ -320,7 +318,7 @@ const DbTypeInfo* DbTypeInfo::fromString(const std::string& string_rep)
          }
          // create new shape from transient type
          Columns cols;
-         main_type_info = new DbTypeInfo( new_type_info->shapeID(), cls, cols );
+         main_type_info = new DbTypeInfo( new_type_info->typeID(), cls, cols );
          DbTransform::regShape(main_type_info).ignore();
          created_main_ti = true;
          // cout << "DbTypeInfo::fromString:  registered new " <<  main_type_info->toString() << endl;
@@ -335,7 +333,7 @@ const DbTypeInfo* DbTypeInfo::fromString(const std::string& string_rep)
             // cout << "DbTypeInfo::fromString:  registered new MAIN " << main_type_info->toString() << endl;
          }
          // cout << " -- fromDbString DbTypeInfo:" <<"   searching for:" << string_rep << endl;
-         const DbTypeInfo* extra_info = DbTransform::getShape( new_type_info->shapeID(), string_rep );
+         const DbTypeInfo* extra_info = DbTransform::getShape( new_type_info->typeID(), string_rep );
          if( extra_info ) {
             // this extra shape is already registered, use it
             main_type_info = extra_info;

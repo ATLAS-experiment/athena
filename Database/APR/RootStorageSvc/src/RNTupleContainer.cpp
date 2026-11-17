@@ -309,7 +309,7 @@ StatusCode RNTupleContainer::writeObject( ActionList::value_type& action )
 
 
 /// Find object by object identifier and load it into memory
-StatusCode RNTupleContainer::loadObject(void** obj_p, const Shape*, Token::OID_t& oid)
+StatusCode RNTupleContainer::loadObject(void** obj_p, const DbTypeInfo*, Token::OID_t& oid)
 {
    int64_t evt_id = oid.second;
    if( (evt_id >> 32) > 0 ) {
@@ -422,8 +422,8 @@ StatusCode RNTupleContainer::transAct(Transaction::Action action) {
 }
 
 /// Store object in location
-StatusCode RNTupleContainer::store(const void* object, DbContainer& cntH, const Shape* shape) {
-  StatusCode status = TechContainerBase::store(object, cntH, shape);
+StatusCode RNTupleContainer::store(const void* object, DbContainer& cntH, const DbTypeInfo* tinfo) {
+  StatusCode status = TechContainerBase::store(object, cntH, tinfo);
   clearDirty();
   return status;
 }

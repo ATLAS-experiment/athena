@@ -163,7 +163,7 @@ StatusCode DbDatabaseObj::makeLink(Token* pTok, Token::OID_t& refLnk) {
 const DbTypeInfo* DbDatabaseObj::objectShape(const Guid& id) const {
   ShapeMap::const_iterator i = m_shapeMap.find(id);
   if( i != m_shapeMap.end() ) return (*i).second;
-  if( id == m_string_t->shapeID() ) return m_string_t;
+  if( id == m_string_t->typeID() ) return m_string_t;
   return nullptr;
 }
 
@@ -193,7 +193,7 @@ const DbTypeInfo* DbDatabaseObj::contShape(const std::string& nam) const {
 // Add persistent shape to the Database
 StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
   if ( pShape )    {
-    const Guid& id = pShape->shapeID();
+    const Guid& id = pShape->typeID();
     ShapeMap::iterator i = m_shapeMap.find(id);
     if ( i != m_shapeMap.end() )   {
       return StatusCode::SUCCESS;
@@ -201,7 +201,7 @@ StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
     else if ( m_string_t and (pShape == m_string_t) )  {
       return StatusCode::SUCCESS;
     }
-    else if ( m_string_t and (id == m_string_t->shapeID()) )  {
+    else if ( m_string_t and (id == m_string_t->typeID()) )  {
       return StatusCode::SUCCESS;
     }
     else if ( mode() != Io::READ )  {
@@ -216,7 +216,7 @@ StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
         // infinite recursion
         const DbTypeInfo::Columns& cols = pShape->columns();
         ATH_MSG_DEBUG("--->Adding Shape[" << m_shapeMap.size() << " , "
-                       << pShape->shapeID().toString() << "]: "
+                       << pShape->typeID().toString() << "]: "
                        << " [" << cols.size() << " Column(s)]" );
         ATH_MSG_DEBUG("---->Class:" << (pShape->clazz() ? pShape->clazz().Name() : "<not available>"));
         for (size_t ic=0; ic < cols.size();++ic)  {
@@ -228,7 +228,7 @@ StatusCode DbDatabaseObj::addShape(const DbTypeInfo* pShape) {
               << " #Elements:" << c->nElement());
         }
         bool inserted = m_shapeMap.insert( ShapeMap::value_type(id, pShape) ).second;
-        if ( pShape == m_string_t || id == m_string_t->shapeID() )   {
+        if ( pShape == m_string_t || id == m_string_t->typeID() )   {
           return StatusCode::SUCCESS;
         }
         DbString shape_string(dsc);
@@ -265,7 +265,7 @@ StatusCode DbDatabaseObj::open()   {
       }
       if ( 0 != m_string_t )   {
         DbDatabase dbH(this);
-        const Guid& guid = m_string_t->shapeID();
+        const Guid& guid = m_string_t->typeID();
 
         // If we're reading, try to deduce the correct technology for internal containers
         auto containerType = type();
@@ -327,7 +327,7 @@ StatusCode DbDatabaseObj::open()   {
             }
             const DbTypeInfo::Columns& cols = pShape->columns();
             ATH_MSG_DEBUG("--->Reading Shape[" << m_shapeMap.size() << " , "
-                          << pShape->shapeID().toString() << "]: "
+                          << pShape->typeID().toString() << "]: "
                           << "[" << cols.size() << " Column(s)]" );
             for (size_t ic=0; ic < cols.size();++ic)  {
               const DbColumn* c = cols[ic];
@@ -338,7 +338,7 @@ StatusCode DbDatabaseObj::open()   {
                   << " #Elements:" << c->nElement());
             }
             // Update the transient list of links
-            if( m_shapeMap.insert(ShapeMap::value_type(pShape->shapeID(), pShape)).second )
+            if( m_shapeMap.insert(ShapeMap::value_type(pShape->typeID(), pShape)).second )
                pShape->addRef();
             const bool noIdScan = true;
             if ( pShape->clazz(noIdScan) )  {
@@ -557,7 +557,7 @@ std::string DbDatabaseObj::cntName(Token& token) const {
   return "";
 }
 
-StatusCode DbDatabaseObj::read(const Token& token, const Shape* shape, void** object)
+StatusCode DbDatabaseObj::read(const Token& token, const DbTypeInfo* shape, void** object)
 {
    if( 0 == m_info ) open().ignore();
    if( 0 != m_info ) {
@@ -593,7 +593,7 @@ StatusCode DbDatabaseObj::read(const Token& token, const Shape* shape, void** ob
             return cntH.load(object, shape, oid);
          }
          ATH_MSG_ERROR("Token ClassID " << token.classID().toString()
-              << " is different from requested Shape " << shape->shapeID().toString());
+              << " is different from requested Shape " << shape->typeID().toString());
       }
    }
    return StatusCode::FAILURE;

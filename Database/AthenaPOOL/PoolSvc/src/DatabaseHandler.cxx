@@ -6,11 +6,8 @@
 #include "Container.h"
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/Shape.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbOption.h"
-#include "StorageSvc/DbReflex.h"
-#include "StorageSvc/DbTypeInfo.h"
 #include "StorageSvc/DbConnection.h"
 
 #include <exception>
@@ -97,37 +94,22 @@ Token* DatabaseHandler::writeObject( const std::string& containerName,
                                      long minorTechnology,
                                      const void* object,
                                      const RootType& type ) {
-  Token* token = 0;
-  if ( ! object ) return token;
-
-  // Get the persistent shape.
-  const Shape* shape = nullptr;
-  Guid guid = DbReflex::guid(type);
-  if( !m_storageSvc.getShape( m_fileDescriptor, guid, shape ).isSuccess() ) {
-     shape = m_storageSvc.createShape( guid );
-  }
-  if ( shape )  {
-    if ( m_storageSvc.allocate( m_fileDescriptor,
-                                containerName,
-                                minorTechnology,
-                                object,
-                                shape,
-                                token ).isSuccess() ) {
-      token->setClassID( shape->shapeID() );
-    }
+  Token* token = nullptr;
+  if( !m_storageSvc.write( m_fileDescriptor,
+                           containerName,
+                           minorTechnology,
+                           object,
+                           type,
+                           token ).isSuccess() ) {
+     return nullptr;
   }
   return token;
 }
 
 void* DatabaseHandler::readObject( const Token& token, void* object ) {
   void* result( object );
-  // Get the persistent shape
-  const Shape* shape = nullptr;
-  if( !m_storageSvc.getShape( m_fileDescriptor, token.classID(), shape ).isSuccess() ) {
-    return result;
-  }
-  if( !m_storageSvc.read( m_fileDescriptor, token, shape, &result ).isSuccess() ) {
-    return nullptr;
+  if( !m_storageSvc.read( m_fileDescriptor, token, &result ).isSuccess() ) {
+     return nullptr;
   }
   return result;
 }

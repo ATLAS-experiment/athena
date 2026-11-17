@@ -155,24 +155,24 @@ StatusCode DbContainer::store(const void* object, const DbTypeInfo* typ) {
 }
 
 /// In place allocation of object location
-StatusCode DbContainer::allocate(const void* object, const Shape* shape, Token::OID_t& oid) {
+StatusCode DbContainer::allocate(const void* object, const DbTypeInfo* tinfo, Token::OID_t& oid) {
   if ( !isValid() ) {
     throw std::runtime_error("DbContainer::allocate failed: invalid container");
   }
   if ( !object ) {
     throw std::runtime_error("DbContainer::allocate failed: null object pointer");
   }
-  return m_ptr->allocate(*this, object, shape, oid);
+  return m_ptr->allocate(*this, object, tinfo, oid);
 }
 
 /// Load object in the container identified by its handle
 StatusCode DbContainer::load( void** ptr,
-                            const Shape* shape,
+                            const DbTypeInfo* tinfo,
                             const Token::OID_t& linkH )
 {
   if ( isValid() )  {
     Token::OID_t oid;
-    StatusCode sc = m_ptr->load(ptr, shape, linkH, oid, false);
+    StatusCode sc = m_ptr->load(ptr, tinfo, linkH, oid, false);
     return sc;
   }
   return StatusCode::FAILURE;

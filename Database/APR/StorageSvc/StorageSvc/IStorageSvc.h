@@ -6,6 +6,7 @@
 
 // Framework include files
 #include "StorageSvc/pool.h"
+#include "DataModelRoot/RootType.h"
 
 // STL include files
 #include <string>
@@ -16,7 +17,7 @@ class Token;
 class StatusCode;
 class FileDescriptor;
 class DbOption;
-class Shape;
+class DbTypeInfo;
 
 /** @class IStorageSvc IStorageSvc.h StorageSvc/IStorageSvc.h
     *
@@ -62,18 +63,18 @@ class IStorageSvc   {
       * @param   refCont   [IN] Reference to container name 
       * @param   technology[IN] Specialised sub-technology
       * @param   object    [IN] Pointer to persistent data object.
-      * @param   shape     [IN] Persistent type information
+      * @param   type      [IN] Persistent type information
       * @param   refpTok  [OUT] Reference to location for storing the
       *                         pointer of the persistent object token.
       *
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode allocate(  FileDescriptor&       refDB,
-                                  const std::string&    refCont,
-                                  int                   technology,
-                                  const void*           object,
-                                  const Shape*          shape,
-                                  Token*&               refpTok) = 0;
+    virtual StatusCode write(  FileDescriptor&       refDB,
+                               const std::string&    refCont,
+                               int                   technology,
+                               const void*           object,
+                               const RootType        type,
+                               Token*&               refpTok) = 0;
 
 
     /// Read a persistent object from the medium.
@@ -82,35 +83,34 @@ class IStorageSvc   {
       * @param   refDB     [IN] Reference to Database descriptor 
       * @param   pToken    [IN] Reference to persistent token information.
       * @param   object   [OUT] Pointer to persistent data pointer.
-      * @param   shape     [IN] Desired object shape to be read
+      * 
       * @return                 StatusCode code indicating success or failure.
       */
-    virtual StatusCode read(      const FileDescriptor& refDB,
-                                  const Token&          pToken,
-                                  const Shape*          shape,
-                                  void**                object) = 0;
+    virtual StatusCode read( FileDescriptor& refDB,
+                             const Token&    pToken,
+                             void**          object) = 0;
 
-    /** Retrieve persistent shape from Storage manager.
-      * The persistent shape is saved at write time to a Database.
-      * It should match the transient type shape when reading
+    /** Retrieve persistent tinfo from Storage manager.
+      * The persistent tinfo is saved at write time to a Database.
+      * It should match the transient type tinfo when reading
       *
       * @param   refDB     [IN] Reference to Database descriptor 
       * @param   objType   [IN] Shape identifier.
-      * @param   shape    [OUT] Persistent shpae of a given object type.
+      * @param   tinfo    [OUT] Persistent shpae of a given object type.
       *
       * @return                 StatusCode code indicating success or failure.
       */
     virtual StatusCode getShape(  FileDescriptor&       refDB,
                                   const Guid&           objType,
-                                  const Shape*&         shape) = 0;
+                                  const DbTypeInfo*&    tinfo) = 0;
 
     /// Create a Shape representation based on a ShapeID
     /**
-      * @param   shapeID   [IN] Shape identifier.
+      * @param   typeID   [IN] Shape identifier.
       *
       * @return            Handle to persistent mapping of a given object type.
       */
-    virtual const Shape* createShape( const Guid& shapeID ) = 0;
+    virtual const DbTypeInfo* createShape( const Guid& typeID ) = 0;
 
     /// Start a new Database Session.
     /** The Database session handles Databases of one given type. This

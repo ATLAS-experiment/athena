@@ -4,6 +4,7 @@
 #include "PersistentDataModel/Token.h"
 #include "DbStorageSvc.h"
 #include "StorageSvc/DbTypeInfo.h"
+#include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbDatabase.h"
 #include "StorageSvc/DbTransform.h"
@@ -16,33 +17,25 @@
 
 #include <memory>
 
-using namespace std;
-
-
 // factory function implementation
-IStorageSvc* createStorageSvc(const string& componentName){
+IStorageSvc* createStorageSvc(const std::string& componentName){
   return new DbStorageSvc(componentName);
 }
-
-typedef const DbTypeInfo    *DbTypeInfoH;
-typedef const DbDatabaseObj *DbDatabaseH;
-typedef       DbDatabaseObj *DbDatabaseHNC;
-
    
 /// Standard Constructor.
-DbStorageSvc::DbStorageSvc(const string& name)
+DbStorageSvc::DbStorageSvc(const std::string& name)
 : APRMessaging(name),
   m_name(name),
   m_refCount(0),
   m_domH(pool::POOL_StorageType),
   m_ageLimit(2),
-  m_type(pool::POOL_StorageType),
+  m_type( m_domH.type() ),
   m_implementation(nullptr)
 {
   static const char * const als = getenv("POOL_STORAGESVC_DB_AGE_LIMIT");  
   if ( als )    {
     int alimit = 2;
-    istringstream buf(als);
+    std::istringstream buf(als);
     buf >> alimit;
     if ( alimit > 0 && buf.good() )  {
       m_ageLimit = alimit;
@@ -91,7 +84,7 @@ StatusCode DbStorageSvc::finalize()   {
 
 std::string DbStorageSvc::getContName(FileDescriptor& refDB, Token& persToken) const {
   if ( m_domH.isValid() )   {
-    DbDatabase dbH(DbDatabaseHNC(refDB.dbc()->handle()));
+    DbDatabase dbH( refDB.dbc()->handle() );
     if ( dbH.isValid() )  {
       return dbH.cntName(persToken);
     }
@@ -99,14 +92,14 @@ std::string DbStorageSvc::getContName(FileDescriptor& refDB, Token& persToken) c
   return "";
 }
 
-/// Retrieve persistent shape from Storage manager.
+/// Retrieve persistent tinfo from Storage manager.
 StatusCode DbStorageSvc::getShape( FileDescriptor&       fDesc,
                                    const Guid&           objType,
-                                   const Shape*&         shape)
+                                   const DbTypeInfo*&    tinfo)
 {
-  shape = 0;
-  if ( /*0 != &fDesc &&*/ m_domH.isValid() )   {
-    DbDatabase dbH(DbDatabaseHNC(fDesc.dbc()->handle()));
+  tinfo = 0;
+  if( m_domH.isValid() )   {
+    DbDatabase dbH( fDesc.dbc()->handle()) ;
     if ( !dbH.isValid() )  {
       StatusCode sc = dbH.open(m_domH, fDesc.PFN(), fDesc.FID(), Io::READ);
       if ( !sc.isSuccess() )    {
@@ -122,8 +115,8 @@ StatusCode DbStorageSvc::getShape( FileDescriptor&       fDesc,
           return sc;
         }
       }
-      shape = dbH.objectShape(objType);
-      if ( shape )  {
+      tinfo = dbH.objectShape(objType);
+      if ( tinfo )  {
         return StatusCode::SUCCESS;
       }
       return StatusCode::FAILURE;
@@ -133,47 +126,48 @@ StatusCode DbStorageSvc::getShape( FileDescriptor&       fDesc,
   return StatusCode::FAILURE;
 }
 
-/// Create a persistent shape.
-const Shape* DbStorageSvc::createShape( const Guid& shapeID )
+/// Create a persistent tinfo.
+const DbTypeInfo* DbStorageSvc::createShape( const Guid& typeID )
 {
   const DbTypeInfo* typ_info = nullptr;
-  if( DbTransform::getShape(shapeID, typ_info).isSuccess() ) {
+  if( DbTransform::getShape(typeID, typ_info).isSuccess() ) {
     return typ_info;
   }
-  typ_info = DbTypeInfo::create(shapeID);
+  typ_info = DbTypeInfo::create(typeID);
   if( typ_info )   {
     ATH_MSG_INFO( "Building shape according to reflection information using shape ID for: " << endmsg
-                  << typ_info->clazz().Name() << " [" << shapeID.toString() << "]" );
+                  << typ_info->clazz().Name() << " [" << typeID.toString() << "]" );
   } else {
-    ATH_MSG_ERROR( "The shape with ID=" << shapeID.toString() << " is unknown." );
+    ATH_MSG_ERROR( "The tinfo with ID=" << typeID.toString() << " is unknown." );
   }
   return typ_info;
 }
 
 /// Register object for write
-StatusCode DbStorageSvc::allocate( FileDescriptor&       fDesc,
-                                   const string&         refCont,
-                                   int                   technology,
-                                   const void*           object,
-                                   const Shape*          shape,
-                                   Token*&               refpToken)
+StatusCode DbStorageSvc::write( FileDescriptor&       fDesc,
+                                const std::string&    refCont,
+                                int                   technology,
+                                const void*           object,
+                                const RootType        type,
+                                Token*&               refpToken)
 {
    StatusCode sc = StatusCode::FAILURE;
    refpToken = 0;
 
-   if( shape && object ) {
-      void* handle = fDesc.dbc()->handle();
-      DbDatabase dbH(static_cast<DbDatabaseHNC>(handle));
+   // Get the persistent tinfo.
+   const DbTypeInfo* tinfo = nullptr;
+   Guid guid = DbReflex::guid(type);
+   if( !getShape( fDesc, guid, tinfo ).isSuccess() ) {
+      tinfo = createShape( guid );
+   }
+   if( tinfo && object ) {
+      DbDatabase dbH( fDesc.dbc()->handle() );
       DbContainer cntH(dbH.type());
-      sc = cntH.open( dbH, 
-                      refCont,
-                      static_cast<const DbTypeInfo*>(shape),
-                      DbType(technology),
-                      Io::WRITE);
+      sc = cntH.open( dbH, refCont, tinfo, DbType(technology), Io::WRITE );
       if ( sc.isSuccess() ) {
          Token* t = new Token(cntH.token());
-         t->setClassID(shape->shapeID());
-         sc = cntH.allocate(object, shape, t->oid());
+         t->setClassID(tinfo->typeID());
+         sc = cntH.allocate(object, tinfo, t->oid());
          if ( sc.isSuccess() )  {
             sc = dbH.makeLink(t, t->oid());
             if ( sc.isSuccess() )  {
@@ -184,28 +178,32 @@ StatusCode DbStorageSvc::allocate( FileDescriptor&       fDesc,
          t->release();
       }
    }
-   ATH_MSG_ERROR( "Cannot allocate persistent object." << endmsg
-       << " Shape Handle :" << static_cast<const void*>(shape)  << endmsg
+   ATH_MSG_ERROR( "Cannot store object." << endmsg
+       << " Shape Handle :" << static_cast<const void*>(tinfo)  << endmsg
        << " FID=" << fDesc.FID() << endmsg
        << " Cnt=" << refCont );
    return sc;
 }
 
-/// Read a persistent object from the medium.
-StatusCode DbStorageSvc::read( const FileDescriptor& fDesc,
-                               const Token&          token,
-                               const Shape*          shape,
-                               void**                object)
-{
 
+/// Read a persistent object from the medium.
+StatusCode DbStorageSvc::read( FileDescriptor& fDesc,
+                               const Token&    token,
+                               void**          object)
+{
+  // Get the persistent tinfo
+  const DbTypeInfo* tinfo = nullptr;
+  if( !getShape( fDesc, token.classID(), tinfo ).isSuccess() ) {
+    return StatusCode::FAILURE;
+  }
   Io::IoFlag mode = Io::READ;
   if ( m_domH.isValid() ) {
     DbType typ(token.technology());
     if ( m_domH.type() == typ ) {
       DbDatabase dbH(m_domH.type());
-      const string& fid = fDesc.FID();
+      const std::string& fid = fDesc.FID();
       if( dbH.open(m_domH, fDesc.PFN(), fid, mode).isSuccess() ) {
-         if( dbH.read( token, shape, object).isSuccess() ) {
+         if( dbH.read( token, tinfo, object).isSuccess() ) {
             return StatusCode::SUCCESS;
          } else {
             ATH_MSG_ERROR( "Could not read object: " << token.toString() );
@@ -220,6 +218,7 @@ StatusCode DbStorageSvc::read( const FileDescriptor& fDesc,
   }
   return StatusCode::FAILURE;
 }
+
 
 /// Start a new Database Session.
 StatusCode DbStorageSvc::startSession(Io::IoFlag accessmode, int technology, int ageLimit) {
@@ -254,10 +253,10 @@ StatusCode DbStorageSvc::connect(Io::IoFlag mod, FileDescriptor& fDesc) {
 
 /// Disconnect from a logical Database unit.
 StatusCode DbStorageSvc::disconnect(FileDescriptor& fDesc) {
-  DbConnection* dbc = dynamic_cast<DbConnection*>(fDesc.dbc());
+  DbConnection* dbc = fDesc.dbc();
   ATH_MSG_DEBUG( "Disconnect request for database: FID=" << fDesc.FID() << " PFN=" << fDesc.PFN() );
   if ( dbc )   {
-    DbDatabase  dbH(DbDatabaseHNC(dbc->handle()));
+    DbDatabase  dbH( dbc->handle() );
     dbc->release();
     fDesc.setDbc(0);
     ATH_MSG_DEBUG( "Closing database: FID=" << fDesc.FID() );
@@ -268,9 +267,9 @@ StatusCode DbStorageSvc::disconnect(FileDescriptor& fDesc) {
 
 /// Query the access mode of a Database unit.
 StatusCode DbStorageSvc::openMode(FileDescriptor& refDB, Io::IoFlag& mode) {
-  DbConnection* dbc = dynamic_cast<DbConnection*>(refDB.dbc());
+  DbConnection* dbc = refDB.dbc();
   if ( dbc )   {
-    DbDatabase  dbH(DbDatabaseHNC(dbc->handle()));
+    DbDatabase  dbH( dbc->handle() );
     if ( dbH.isOpen() )  {
       mode = dbH.openMode();
       return StatusCode::SUCCESS;

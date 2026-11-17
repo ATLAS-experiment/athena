@@ -16,7 +16,7 @@ class DbTypeInfo;
 class DbDatabase;
 class DbContainer;
 class DbOption;
-class Shape;
+class DbTypeInfo;
 
 /** @class ITechContainer ITechContainer.h StorageSvc/ITechContainer.h 
     *
@@ -45,11 +45,11 @@ class ITechContainer    {
     /// Store object in location
     virtual StatusCode store(const void* object,
                              DbContainer&  cntH,
-                             const Shape* shape) = 0;
+                             const DbTypeInfo* tinfo) = 0;
     /// In place allocation of object location
     virtual StatusCode allocate(DbContainer& cntH,
                                 const void* object,
-                                const Shape* shape,
+                                const DbTypeInfo* tinfo,
                                 Token::OID_t& oid) = 0;
 
     /// Number of next record in the container (=size if no delete is allowed)
@@ -72,7 +72,7 @@ class ITechContainer    {
 
     /// Find object within the container and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
-      * @param  shape     [IN]   Object type
+      * @param  tinfo     [IN]   Object type
       * @param  linkH     [IN]   Preferred object OID
       * @param  oid      [OUT]   Actual object OID
       * @param  any_next  [IN]   On selection, objects may be skipped.
@@ -80,7 +80,7 @@ class ITechContainer    {
       *                          will differ from the preferred oid.
       * @return Status code indicating success or failure.
       */
-    virtual StatusCode load( void** ptr, const Shape* shape,
+    virtual StatusCode load( void** ptr, const DbTypeInfo* tinfo,
                            const Token::OID_t& lnkH,
                            Token::OID_t&       oid,
                            bool                any_next=false) = 0;

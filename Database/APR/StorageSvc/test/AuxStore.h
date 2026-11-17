@@ -19,7 +19,7 @@ public:
    void runTestForStorageType(const std::string& filename, const DbType& storageType);
 
    std::string testWriting();
-   void testReading(const std::string& testTypeID);
+   void testReading();
 
 protected:
    std::string          m_fileName;

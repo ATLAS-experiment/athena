@@ -38,7 +38,7 @@ class DbDatabaseObj : public  DbAccessObj<std::string, DbContainerObj >, public 
     typedef std::map< Guid , Token* >                LinkMap;
     /// Definition of array with link elements
     typedef std::vector<Token*>                      LinkVector;
-    /// Definition of map with shape elements
+    /// Definition of map with tinfo elements
     typedef std::map< Guid , const DbTypeInfo* >     ShapeMap;
     /// Definition of map with index elements
     typedef std::map< long long int , int >          IndexMap;
@@ -49,7 +49,7 @@ class DbDatabaseObj : public  DbAccessObj<std::string, DbContainerObj >, public 
     DbDomain                      m_dom;
     /// Handle to link container
     DbContainer                   m_links;
-    /// Handle to shapes container
+    /// Handle to tinfos container
     DbContainer                   m_shapes;
     /// Handle to the parameter container
     DbContainer                   m_params;
@@ -61,7 +61,7 @@ class DbDatabaseObj : public  DbAccessObj<std::string, DbContainerObj >, public 
     LinkVector                    m_linkVec;
     /// Map containing all index
     IndexMap                      m_indexMap;
-    /// Map containing all shapes
+    /// Map containing all tinfos
     ShapeMap                      m_shapeMap;
     /// Map with all cached file properties
     ParamMap                      m_paramMap;
@@ -115,14 +115,14 @@ class DbDatabaseObj : public  DbAccessObj<std::string, DbContainerObj >, public 
     StatusCode transAct(Transaction::Action action);
 
     /// read an object referenced by the token
-    StatusCode read(const Token& token, const Shape* shape, void** object);
+    StatusCode read(const Token& token, const DbTypeInfo* tinfo, void** object);
     /// Retrieve container name from link container (using token oid, rather than contID)
     std::string cntName(Token& token) const;
     /// Add association link to link container
     StatusCode makeLink(Token* pToken, Token::OID_t& refLink);
     /// Retrieve persistent type information by class handle
     const DbTypeInfo* objectShape(const RootType& classH) const;
-    /// Retrieve persistent type information by shape identifier
+    /// Retrieve persistent type information by tinfo identifier
     const DbTypeInfo* objectShape(const Guid& nam) const;
     /// Retrieve persistent type information by container
     const DbTypeInfo* contShape(const std::string& nam) const;
