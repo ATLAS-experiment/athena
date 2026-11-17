@@ -9,15 +9,11 @@
 #include <vector>
 #include <cmath>
 
-MonitoredAlg::MonitoredAlg(const std::string& name, ISvcLocator* pSvcLocator) :
-  AthAlgorithm(name, pSvcLocator)
-{
-}
 
 StatusCode MonitoredAlg::initialize()
 {
   // Only try to retrieve the tool if one has been set
-  if (!m_monTool.empty()) CHECK(m_monTool.retrieve());
+  if (!m_monTool.empty()) ATH_CHECK(m_monTool.retrieve());
 
   return StatusCode::SUCCESS;
 }
@@ -34,7 +30,7 @@ private:
 };
 
 
-StatusCode MonitoredAlg::execute(const EventContext& /*ctx*/) 
+StatusCode MonitoredAlg::execute(const EventContext& /*ctx*/) const
 {
   std::vector<Track> tracks;
 
@@ -51,13 +47,14 @@ StatusCode MonitoredAlg::execute(const EventContext& /*ctx*/)
 
   auto mon = Monitored::Group(m_monTool, count, eta, absphi, timer);
 
-  count = Athena_test::randi_seed (m_seed, 11, 1);   // random number of tracks
+  uint32_t seed = m_seed;
+  count = Athena_test::randi_seed (seed, 11, 1);   // random number of tracks
 
   // Creating some random tracks
   for (int i=0; i<count; ++i) {
-    float eta = Athena_test::randf_seed (m_seed, 3.0, -3.0);
-    float phi = Athena_test::randf_seed (m_seed, M_PI, -M_PI);
-    float pt  = Athena_test::randf_seed (m_seed, 100);
+    float eta = Athena_test::randf_seed (seed, 3.0, -3.0);
+    float phi = Athena_test::randf_seed (seed, M_PI, -M_PI);
+    float pt  = Athena_test::randf_seed (seed, 100);
     tracks.push_back(Track(eta, phi, pt));
   }
   

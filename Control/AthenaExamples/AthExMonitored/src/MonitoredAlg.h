@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef ATHEXMONITORED_MONITOREDALG_H
@@ -7,16 +7,16 @@
 
 #include "GaudiKernel/ToolHandle.h"
 #include "Gaudi/Property.h"
-#include "AthenaBaseComps/AthAlgorithm.h"
+#include "AthenaBaseComps/AthReentrantAlgorithm.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
 #include <string>
 
-class MonitoredAlg : public AthAlgorithm {
+class MonitoredAlg : public AthReentrantAlgorithm {
 public:
-  MonitoredAlg( const std::string& name, ISvcLocator* pSvcLocator );
-  StatusCode initialize();
-  StatusCode execute(const EventContext& ctx);
+  using AthReentrantAlgorithm::AthReentrantAlgorithm;
+  virtual StatusCode initialize() override;
+  virtual StatusCode execute(const EventContext& ctx) const override;
 
 private:
   ToolHandle<GenericMonitoringTool> m_monTool{this,"MonTool","","Monitoring tool"};
