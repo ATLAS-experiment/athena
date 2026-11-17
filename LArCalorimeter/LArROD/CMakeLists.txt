@@ -6,24 +6,16 @@ atlas_subdir( LArROD )
 # External dependencies:
 find_package( CLHEP )
 find_package( ROOT COMPONENTS Core Tree MathCore Hist RIO pthread )
-find_package( COOL COMPONENTS CoolKernel )
-find_package( CORAL COMPONENTS CoralBase CoralKernel RelationalAccess )
 find_package( onnxruntime )
 
 # Component(s) in the package:
-atlas_add_library( LArRODLib
-                   LArROD/*.h
-                   INTERFACE
-                   PUBLIC_HEADERS LArROD
-                   LINK_LIBRARIES CaloIdentifier GaudiKernel Identifier LArRawEvent PathResolver)
-
 atlas_add_component( LArROD
                      src/*.cxx
                      src/tests/*.cxx
                      src/components/*.cxx
                      INCLUDE_DIRS ${CLHEP_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS} ${ONNXRUNTIME_INCLUDE_DIRS}
                      DEFINITIONS ${CLHEP_DEFINITIONS}
-                     LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthAllocators AthContainers AthenaBaseComps AthenaKernel AthenaPoolUtilities CaloConditions CaloDetDescrLib CaloEvent CaloIdentifier CommissionEvent CxxUtils GaudiKernel GeoModelInterfaces Identifier LArCOOLConditions LArCablingLib LArDigitizationLib LArElecCalib LArIdentifier LArRODLib LArRawConditions LArRawEvent LArRecConditions LArRecEvent LArRecUtilsLib LArSimEvent StoreGateLib xAODEventInfo CoraCool AthOnnxInterfaces)
+                     LINK_LIBRARIES ${ONNXRUNTIME_LIBRARIES} ${CLHEP_LIBRARIES} ${ROOT_LIBRARIES} AthAllocators AthContainers AthenaBaseComps AthenaKernel AthenaPoolUtilities CaloConditions CaloDetDescrLib CaloEvent CaloIdentifier CxxUtils GaudiKernel GeoModelInterfaces Identifier LArCOOLConditions LArCablingLib LArDigitizationLib LArElecCalib LArIdentifier LArRawConditions LArRawEvent LArRecConditions LArRecEvent LArRecUtilsLib LArSimEvent PathResolver StoreGateLib xAODEventInfo CoraCool AthOnnxInterfaces)
 
 # Install files from the package:
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
