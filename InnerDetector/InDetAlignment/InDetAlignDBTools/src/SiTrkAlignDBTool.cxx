@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -30,69 +30,6 @@
 
 namespace InDet
 {
-
-//________________________________________________________________________
-SiTrkAlignDBTool::SiTrkAlignDBTool(const std::string & type, const std::string & name, const IInterface * parent)
-   : AthAlgTool(type,name,parent)
-   , m_pixHelper(nullptr)
-   , m_sctHelper(nullptr)
-   , m_idHelper(nullptr)
-   , m_writeSQLFile(true)
-   , m_SQLiteTag("test_tag")
-   , m_outputAlignFile("OutputSiAlignment.txt")
-   , m_outIBLDistFile("OutputIBLDist.txt")
-   , m_outGlobalFolderFile("OutputSiGlobalFolder.txt")
-   , m_writeTextFile(true)
-   , m_writeOldConstants(false)
-   , m_oldIBLDistFile("OldIBLDist.txt")
-   , m_oldAlignFile("OldSiAlignment.txt")
-   , m_oldGlobalFolderFile("OldSiGlobalFolder.txt")
-   , m_updateConstants(true)
-   , m_IDAlignDBTool("InDetAlignDBTool")
-   , m_alignModuleTool("Trk::AlignModuleTool/AlignModuleTool")
-   , m_pixelGeoManager("")
-   , m_sctGeoManager("")
-   , m_siGeoManager("")
-   , m_ntuple{}
-   , m_pixelAlignLevel(-1)
-   , m_pixelAlignLevelBarrel(-1)
-   , m_pixelAlignLevelEndcaps(-1)
-   , m_pixelaAlignDBM(false)
-   , m_sctAlignLevel(-1)
-   , m_sctAlignLevelBarrel(-1)
-   , m_sctAlignLevelEndcaps(-1)
-   , m_siAlignLevel(-1)
-   , m_doSi(false)
-   , m_doPixel(false)
-   , m_doSCT(false)
-   , m_writeAsL3(false)
-   , m_writeAsL2(false)
-   , m_writeAsL16(false)
-{
-  declareInterface<ITrkAlignDBTool>(this);
-
-  declareProperty("WriteSQLFile",      m_writeSQLFile);
-  declareProperty("SQLiteTag",         m_SQLiteTag);
-  declareProperty("OutputTextFile",    m_outputAlignFile);
-  declareProperty("OutputIBLDistFile", m_outIBLDistFile, "File to write out IBL distortions - set empy to suppress writing this folder");
-  declareProperty("OutputGlobalFolderFile",m_outGlobalFolderFile);
-  declareProperty("WriteTextFile",     m_writeTextFile);
-  declareProperty("WriteOldConstants", m_writeOldConstants);
-  declareProperty("OldAlignFile",      m_oldAlignFile);
-  declareProperty("OldIBLDistFile",    m_oldIBLDistFile,"File to write out  (old-style) IBL distortions - set empy to suppress writing this folder");
-  declareProperty("OldGlobalFolderFile",m_oldGlobalFolderFile);
-  declareProperty("UpdateConstants",   m_updateConstants);
-  declareProperty("WriteAsL2",         m_writeAsL2);
-  declareProperty("WriteAsL3",         m_writeAsL3);
-
-  declareProperty("IDAlignDBTool",     m_IDAlignDBTool);
-  declareProperty("AlignModuleTool",   m_alignModuleTool, "Tool for handling of align module collections");
-  declareProperty("AlignmentDBM",      m_pixelaAlignDBM);
-
-  declareProperty("PixelGeometryManager", m_pixelGeoManager, "Tool for handling the Pixel alignment geometry");
-  declareProperty("SCTGeometryManager",   m_sctGeoManager,   "Tool for handling the SCT alignment geometry");
-  declareProperty("SiGeometryManager",    m_siGeoManager,    "Tool for handling the Silicon alignment geometry");
-}
 
 //________________________________________________________________________
 SiTrkAlignDBTool::~SiTrkAlignDBTool()
@@ -150,7 +87,7 @@ StatusCode SiTrkAlignDBTool::initialize() {
       ATH_MSG_DEBUG("Retrieved Pixel Global alignment level: "<<m_pixelAlignLevel);
       ATH_MSG_DEBUG("Retrieved Pixel Barrel alignment level: "<<m_pixelAlignLevelBarrel);
       ATH_MSG_DEBUG("Retrieved Pixel Endcap alignment level: "<<m_pixelAlignLevelEndcaps);
-      ATH_MSG_DEBUG("Retrieved DBM alignment configuration: "<<m_pixelaAlignDBM);
+      ATH_MSG_DEBUG("Retrieved DBM alignment configuration: "<<m_pixelaAlignDBM.value());
       
       if(m_pixelAlignLevel == 1)
         ATH_MSG_INFO(" Requested update of Level "<<m_pixelAlignLevel<<" alignment constants for Pixel");
@@ -217,7 +154,7 @@ StatusCode SiTrkAlignDBTool::initialize() {
 //    return;
   }
   ATH_MSG_DEBUG("Made it till here..... "<<m_doSi<<" "<<m_doPixel<<" "<<m_doSCT);
-  ATH_MSG_DEBUG("update constants..... "<<m_updateConstants);
+  ATH_MSG_DEBUG("update constants..... "<<m_updateConstants.value());
   return StatusCode::SUCCESS;
 }
 
@@ -356,7 +293,7 @@ void SiTrkAlignDBTool::writeAlignPar()
 
   // write initial alignment constants
   if(m_writeOldConstants) {
-    ATH_MSG_INFO("Writing old Silicon alignment constants to file "<<m_oldAlignFile);
+    ATH_MSG_INFO("Writing old Silicon alignment constants to file "<<m_oldAlignFile.value());
     m_IDAlignDBTool->writeFile(false, m_oldAlignFile);
     if(m_oldIBLDistFile!="") m_IDAlignDBTool->writeIBLDistFile(m_oldIBLDistFile);
     m_IDAlignDBTool->writeGlobalFolderFile(m_oldGlobalFolderFile);
@@ -367,7 +304,7 @@ void SiTrkAlignDBTool::writeAlignPar()
 
   // and write the final alignment constants
   if(m_writeTextFile) {
-    ATH_MSG_INFO("Writing Silicon alignment constants to file "<<m_outputAlignFile);
+    ATH_MSG_INFO("Writing Silicon alignment constants to file "<<m_outputAlignFile.value());
     m_IDAlignDBTool->writeFile(false, m_outputAlignFile);
     if(m_outIBLDistFile!="") m_IDAlignDBTool->writeIBLDistFile(m_outIBLDistFile);
     m_IDAlignDBTool->writeGlobalFolderFile(m_outGlobalFolderFile);

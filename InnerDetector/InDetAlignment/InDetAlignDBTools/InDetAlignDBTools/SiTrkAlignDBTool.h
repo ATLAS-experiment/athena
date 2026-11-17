@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNDBTOOLS_SITRKALIGNDBTOOL_H
@@ -7,6 +7,10 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkAlignInterfaces/ITrkAlignDBTool.h"
+#include "TrkAlignInterfaces/IAlignModuleTool.h"
+#include "TrkAlignInterfaces/IGeometryManagerTool.h"
+#include "InDetAlignGenTools/IInDetAlignDBTool.h"
+#include "GaudiKernel/ToolHandle.h"
 
 #include "GeoPrimitives/GeoPrimitives.h"
 
@@ -29,24 +33,20 @@ class AtlasDetectorID;
 
 class Identifier;
 
-class IInDetAlignDBTool;
-
 namespace Trk
 {
   class AlignModule;
-  class IAlignModuleTool;
-  class IGeometryManagerTool;
 }
 
 namespace InDet
 {
 
-  class SiTrkAlignDBTool : virtual public Trk::ITrkAlignDBTool, public AthAlgTool {
+  class SiTrkAlignDBTool : public extends<AthAlgTool, Trk::ITrkAlignDBTool> {
 
   public:
 
     /** constructor */
-    SiTrkAlignDBTool(const std::string & type, const std::string & name, const IInterface * parent);
+    using base_class::base_class;
 
     /** destructor */
     virtual ~SiTrkAlignDBTool();
@@ -86,49 +86,49 @@ namespace InDet
     
     virtual Identifier GetL1L2fromL3Identifier( const Identifier& ident , const int& level) const ;
 
-    const PixelID          * m_pixHelper; //!< pointer to PIX detector manager
-    const SCT_ID           * m_sctHelper; //!< pointer to SCT detector manager
-    const AtlasDetectorID  * m_idHelper;
+    const PixelID          * m_pixHelper{nullptr}; //!< pointer to PIX detector manager
+    const SCT_ID           * m_sctHelper{nullptr}; //!< pointer to SCT detector manager
+    const AtlasDetectorID  * m_idHelper{nullptr};
 
-    bool        m_writeSQLFile;           //!< flag wether to write out .db file or not (file is not needed in parallel jobs)
-    std::string m_SQLiteTag;              //!< tag name for the ConditionsDB
-    std::string m_outputAlignFile;        //!< filename for the textfile with final alignment constants
-    std::string m_outIBLDistFile;         //!< filename for the textfile with final IBLDist params 
-    std::string m_outGlobalFolderFile;    //!< filename for the textfile with final GlobalFolder constants
-    bool        m_writeTextFile;          //!< flag whether to write out the final constants into text file
-    bool        m_writeOldConstants;      //!< flag whether to write out the initial constants into text file
-    std::string m_oldIBLDistFile;         //!< filename for the textfile with initial IBLDist params           
-    std::string m_oldAlignFile;           //!< filename for the textfile with initial alignment constants
-    std::string m_oldGlobalFolderFile;    //!< filename for the textfile with initial GlobalFolder constants
-    bool        m_updateConstants;        //!< flag whether to update the constants
+    Gaudi::Property<bool>        m_writeSQLFile{this, "WriteSQLFile", true};                           //!< flag wether to write out .db file or not (file is not needed in parallel jobs)
+    Gaudi::Property<std::string> m_SQLiteTag{this, "SQLiteTag", "test_tag"};                           //!< tag name for the ConditionsDB
+    Gaudi::Property<std::string> m_outputAlignFile{this, "OutputTextFile", "OutputSiAlignment.txt"};   //!< filename for the textfile with final alignment constants
+    Gaudi::Property<std::string> m_outIBLDistFile{this, "OutputIBLDistFile", "OutputIBLDist.txt", "File to write out IBL distortions - set empy to suppress writing this folder"}; //!< filename for the textfile with final IBLDist params
+    Gaudi::Property<std::string> m_outGlobalFolderFile{this, "OutputGlobalFolderFile", "OutputSiGlobalFolder.txt"}; //!< filename for the textfile with final GlobalFolder constants
+    Gaudi::Property<bool>        m_writeTextFile{this, "WriteTextFile", true};                         //!< flag whether to write out the final constants into text file
+    Gaudi::Property<bool>        m_writeOldConstants{this, "WriteOldConstants", false};                //!< flag whether to write out the initial constants into text file
+    Gaudi::Property<std::string> m_oldIBLDistFile{this, "OldIBLDistFile", "OldIBLDist.txt", "File to write out  (old-style) IBL distortions - set empy to suppress writing this folder"}; //!< filename for the textfile with initial IBLDist params
+    Gaudi::Property<std::string> m_oldAlignFile{this, "OldAlignFile", "OldSiAlignment.txt"};           //!< filename for the textfile with initial alignment constants
+    Gaudi::Property<std::string> m_oldGlobalFolderFile{this, "OldGlobalFolderFile", "OldSiGlobalFolder.txt"}; //!< filename for the textfile with initial GlobalFolder constants
+    Gaudi::Property<bool>        m_updateConstants{this, "UpdateConstants", true};                     //!< flag whether to update the constants
 
-    ToolHandle<IInDetAlignDBTool>        m_IDAlignDBTool;
-    ToolHandle<Trk::IAlignModuleTool>    m_alignModuleTool;
+    PublicToolHandle<IInDetAlignDBTool>        m_IDAlignDBTool{this, "IDAlignDBTool", "InDetAlignDBTool"};
+    PublicToolHandle<Trk::IAlignModuleTool>    m_alignModuleTool{this, "AlignModuleTool", "Trk::AlignModuleTool/AlignModuleTool", "Tool for handling of align module collections"};
 
-    ToolHandle<Trk::IGeometryManagerTool> m_pixelGeoManager;
-    ToolHandle<Trk::IGeometryManagerTool> m_sctGeoManager;
-    ToolHandle<Trk::IGeometryManagerTool> m_siGeoManager;
+    PublicToolHandle<Trk::IGeometryManagerTool> m_pixelGeoManager{this, "PixelGeometryManager", "", "Tool for handling the Pixel alignment geometry"};
+    PublicToolHandle<Trk::IGeometryManagerTool> m_sctGeoManager{this, "SCTGeometryManager", "", "Tool for handling the SCT alignment geometry"};
+    PublicToolHandle<Trk::IGeometryManagerTool> m_siGeoManager{this, "SiGeometryManager", "", "Tool for handling the Silicon alignment geometry"};
 
-    TFile * m_ntuple;
+    TFile * m_ntuple{};
 
-    int m_pixelAlignLevel;
-    int m_pixelAlignLevelBarrel;
-    int m_pixelAlignLevelEndcaps;
-    bool m_pixelaAlignDBM;
+    int m_pixelAlignLevel{-1};
+    int m_pixelAlignLevelBarrel{-1};
+    int m_pixelAlignLevelEndcaps{-1};
+    Gaudi::Property<bool> m_pixelaAlignDBM{this, "AlignmentDBM", false};
 
-    int m_sctAlignLevel;
-    int m_sctAlignLevelBarrel;
-    int m_sctAlignLevelEndcaps;
+    int m_sctAlignLevel{-1};
+    int m_sctAlignLevelBarrel{-1};
+    int m_sctAlignLevelEndcaps{-1};
 
-    int m_siAlignLevel;
+    int m_siAlignLevel{-1};
 
-    bool m_doSi;
-    bool m_doPixel;
-    bool m_doSCT;
+    bool m_doSi{false};
+    bool m_doPixel{false};
+    bool m_doSCT{false};
 
-    bool m_writeAsL3;
-    bool m_writeAsL2;
-    bool m_writeAsL16;
+    Gaudi::Property<bool> m_writeAsL3{this, "WriteAsL3", false};
+    Gaudi::Property<bool> m_writeAsL2{this, "WriteAsL2", false};
+    bool m_writeAsL16{false};
 
   }; // end class
 

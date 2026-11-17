@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNDBTOOLS_TRTTRKALIGNDBTOOL_H
@@ -7,6 +7,11 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkAlignInterfaces/ITrkAlignDBTool.h"
+#include "TrkAlignInterfaces/IAlignModuleTool.h"
+#include "TrkAlignInterfaces/IGeometryManagerTool.h"
+#include "TRT_ConditionsServices/ITRT_AlignDbSvc.h"
+#include "GaudiKernel/ServiceHandle.h"
+#include "GaudiKernel/ToolHandle.h"
 
 
 /**
@@ -23,25 +28,22 @@ class TFile;
 
 class TRT_ID;
 class PixelID;
-class ITRT_AlignDbSvc;
 
 class Identifier;
 
 namespace Trk
 {
    class AlignModule;
-   class IAlignModuleTool;
-   class IGeometryManagerTool;
 }
 
 namespace InDet
 {
 
-   class TRTTrkAlignDBTool : virtual public Trk::ITrkAlignDBTool, public AthAlgTool
+   class TRTTrkAlignDBTool : public extends<AthAlgTool, Trk::ITrkAlignDBTool>
    {
 
       public:
-         TRTTrkAlignDBTool(const std::string & type, const std::string & name, const IInterface * parent);
+         using base_class::base_class;
          virtual ~TRTTrkAlignDBTool();
 
          StatusCode initialize();
@@ -70,26 +72,26 @@ namespace InDet
 
          bool checkAlignLevel();
 
-         const TRT_ID  * m_trtHelper;
-         const PixelID * m_pixHelper;
+         const TRT_ID  * m_trtHelper{nullptr};
+         const PixelID * m_pixHelper{nullptr};
 
-         std::string m_outputAlignFile;
-         std::string m_outputStrawAlignFile;
-         std::string m_oldAlignFile;
-         std::string m_oldStrawAlignFile;
-         bool m_writeTextFile;
-         bool m_writeOldConstants;
-         bool m_updateConstants;
+         Gaudi::Property<std::string> m_outputAlignFile{this, "OutputTextFile", "OutputTRTAlignment.txt", "Text file to write the final alignment constants"};
+         Gaudi::Property<std::string> m_outputStrawAlignFile{this, "OutputStrawTextFile", "OutputTRTStrawAlignment.txt", "Text file to write the final straw alignment constants"};
+         Gaudi::Property<std::string> m_oldAlignFile{this, "OldAlignFile", "OldTRTAlignment.txt", "Text file to write the initial/old alignment constants"};
+         Gaudi::Property<std::string> m_oldStrawAlignFile{this, "OldStrawAlignFile", "OldTRTStrawAlignment.txt", "Text file to write the initial/old straw alignment constants"};
+         Gaudi::Property<bool> m_writeTextFile{this, "WriteTextFile", true, "Whether or not to write the final/new alignment constants to text file"};
+         Gaudi::Property<bool> m_writeOldConstants{this, "WriteOldConstants", false, "Whether or not to write the initial/old alignment constants to text file"};
+         Gaudi::Property<bool> m_updateConstants{this, "UpdateConstants", true, "Whether or no to update the alignment constants"};
 
-         ServiceHandle<ITRT_AlignDbSvc>         m_trtAlignDbSvc;
-         ToolHandle<Trk::IAlignModuleTool>      m_alignModuleTool;
-         ToolHandle<Trk::IGeometryManagerTool>  m_trtGeoManager;
-	 
-         int m_trtAlignLevel;
-         int m_trtAlignLevelBarrel;
-         int m_trtAlignLevelEndcaps;
+         ServiceHandle<ITRT_AlignDbSvc>         m_trtAlignDbSvc{this, "TrtAlignDbSvc", "TRT_AlignDbSvc", "Service for interaction with the TRT alignment DB"};
+         PublicToolHandle<Trk::IAlignModuleTool>      m_alignModuleTool{this, "AlignModuleTool", "Trk::AlignModuleTool/AlignModuleTool", "Tool for handling of align module collections"};
+         PublicToolHandle<Trk::IGeometryManagerTool>  m_trtGeoManager{this, "TRTGeometryManager", "", "Tool for handling the TRT alignment geometry"};
 
-         TFile * m_ntuple;
+         int m_trtAlignLevel{-1};
+         int m_trtAlignLevelBarrel{-1};
+         int m_trtAlignLevelEndcaps{-1};
+
+         TFile * m_ntuple{};
 
    }; // end class
 
