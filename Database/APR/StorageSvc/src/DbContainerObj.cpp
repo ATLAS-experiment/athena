@@ -108,7 +108,7 @@ StatusCode DbContainerObj::open(const DbTypeInfo* typ)   {
           tok.setDb(database().name());
           tok.setCont(name());
           tok.setTechnology(type().type());
-          tok.setClassID(typ->shapeID());
+          tok.setClassID(typ->typeID());
           sc = database().makeLink(&tok, tok.oid());
           if ( !sc.isSuccess() )   {
             m_info->close().ignore();
@@ -189,11 +189,11 @@ StatusCode DbContainerObj::getOption(DbOption& refOpt) {
 /// Store object in location
 StatusCode DbContainerObj::store(const void* object,
                                DbContainer& cntH,
-                               const Shape* shape)
+                               const DbTypeInfo* tinfo)
 {
   if ( !isReadOnly() && hasAccess() )  {
     m_dbH.setAge(0);
-    return m_info->store(object, cntH, shape);
+    return m_info->store(object, cntH, tinfo);
   }
   return StatusCode::FAILURE;
 }
@@ -201,7 +201,7 @@ StatusCode DbContainerObj::store(const void* object,
 /// In place allocation of raw memory
 StatusCode DbContainerObj::allocate(DbContainer& cntH,
                                   const void* object,
-                                  const Shape* shape,
+                                  const DbTypeInfo* tinfo,
                                   Token::OID_t& oid)
 {
   if ( isReadOnly() ) {
@@ -214,7 +214,7 @@ StatusCode DbContainerObj::allocate(DbContainer& cntH,
     throw std::runtime_error("DbContainerObj::allocate failed: null object pointer");
   }
   m_dbH.setAge(0);
-  return m_info->allocate(cntH, object, shape, oid);
+  return m_info->allocate(cntH, object, tinfo, oid);
 }
 
 /// Retrieve persistent type information
@@ -223,7 +223,7 @@ const DbTypeInfo* DbContainerObj::objectShape(const Guid& guid) {
 }
 
 /// Select object in the container identified by its handle
-StatusCode DbContainerObj::load( void** ptr, const Shape* shape,
+StatusCode DbContainerObj::load( void** ptr, const DbTypeInfo* tinfo,
                                const Token::OID_t& linkH, 
                                Token::OID_t& oid,
                                bool any_next)
@@ -232,7 +232,7 @@ StatusCode DbContainerObj::load( void** ptr, const Shape* shape,
     m_dbH.setAge(0);
     oid.first  = token()->oid().first;
     // Specific implementation may overwrite OID
-    return m_info->load(ptr, shape, linkH, oid, any_next);
+    return m_info->load(ptr, tinfo, linkH, oid, any_next);
   }
   return StatusCode::FAILURE;
 }

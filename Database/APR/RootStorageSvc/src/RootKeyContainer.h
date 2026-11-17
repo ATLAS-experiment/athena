@@ -68,16 +68,16 @@ class RootKeyIOHandler;
 
     /// Find object by object identifier and load it into memory
    /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
-      * @param  shape     [IN]   Object type
+      * @param  tinfo     [IN]   Object type
       * @param  oid      [OUT]   Object OID
       *
       * @return Status code indicating success or failure.
       */
-    virtual StatusCode loadObject( void** ptr, const Shape* shape,
+    virtual StatusCode loadObject( void** ptr, const DbTypeInfo* tinfo,
                                    Token::OID_t& oid) override;
 
     /// Interface Implementation: Find entry in container
-    virtual StatusCode load( void** ptr, const Shape* shape,
+    virtual StatusCode load( void** ptr, const DbTypeInfo* tinfo,
                              const Token::OID_t& linkH,
                              Token::OID_t& oid,
                              bool          any_next) override;

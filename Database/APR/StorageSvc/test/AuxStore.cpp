@@ -6,12 +6,9 @@
 #include "AuxStore.h"
 #include "AuxStoreTest.h"
 
-#include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
 
-#include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbConnection.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbDatabase.h"
@@ -81,7 +78,7 @@ void TestDriver::runTestForStorageType(const std::string& filename, const DbType
    ATH_MSG_INFO(" ...done");
 
    ATH_MSG_INFO(" Testing the reading operations");
-   testReading(testTypeID);
+   testReading();
    ATH_MSG_INFO(" ...done");
 }
 
@@ -152,25 +149,21 @@ std::string TestDriver::testWriting()
    if ( ! testtype ) {
       throw std::runtime_error( "Could not retrieve the dictionary for class APRTest::AuxStore" );
    }
-   Guid guid = DbReflex::guid(testtype);
-   const Shape* shape = storSvc->createShape(guid);
-   if( !shape ) {
-      throw std::runtime_error( "Could not create a persistent shape." );
-   }
-   std::string testTypeID = shape->shapeID().toString();
-
+   std::string testTypeID;
    // Writing the objects.
    ATH_MSG_INFO("Writing objects");
    for( int objn=0; objn <nObjects; objn++ ) {
       Token* token;
-      if( ! ( storSvc->allocate( fd, container, m_storageType.type(),
-                                 objs[objn], shape, token ).isSuccess() ) ) {
+      if( !storSvc->write( fd, container, m_storageType.type(),
+                           objs[objn], testtype, token ).isSuccess() ) {
          throw std::runtime_error( "Could not write an object" );
       }
       ATH_MSG_INFO("Committing transaction");
       if( ! ( storSvc->endTransaction( fd, Transaction::TRANSACT_COMMIT ).isSuccess() ) ) {
          throw std::runtime_error( "Commit ERROR" );
       }
+      if( testTypeID.empty() )
+         testTypeID = token->classID().toString();
       delete token;
    }
 
@@ -201,7 +194,7 @@ std::string TestDriver::testWriting()
 
 
 void
-TestDriver::testReading(const std::string& testTypeID)
+TestDriver::testReading()
 {
   IStorageSvc* storSvc = createStorageSvc("StorageSvc");
   if ( ! storSvc ) {
@@ -244,25 +237,11 @@ TestDriver::testReading(const std::string& testTypeID)
   int iObject = 0;
   if ( sc.isSuccess() && cntH.isValid() ) {
     Token* objectToken = new Token(cntH.token());
-    const Guid& guid = objectToken->classID();
     while ( cntH.next(linkH).isSuccess() ) {
       objectToken->oid() = linkH;
-      const Shape* shape = 0;
-      if( !storSvc->getShape( *fd, guid, shape ).isSuccess() ) {
-	      throw std::runtime_error( "Could not fetch the persistent shape" );
-      }
-      RootType classType = DbReflex::forGuid(guid);
-      if(!classType){
-	      throw std::runtime_error( "Could not resolve the class by guid" );
-      }
       void* ptr = 0;
-      if ( ! ( storSvc->read( *fd, *objectToken, shape, &ptr ) ).isSuccess() ) {
+      if( !storSvc->read( *fd, *objectToken, &ptr ).isSuccess() ) {
 	      throw std::runtime_error( "failed to read an object back from the persistency" );
-      }
-
-      if ( shape->shapeID().toString() != testTypeID ) {
-	      throw std::runtime_error( std::string("read wrong class type: ") + shape->shapeID().toString()
-                                  + "  while expecting: " + testTypeID );
       }
 
       APRTest::AuxStore   * object = reinterpret_cast< APRTest::AuxStore* >( ptr );

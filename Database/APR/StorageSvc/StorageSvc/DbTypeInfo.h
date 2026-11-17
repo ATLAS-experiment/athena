@@ -5,9 +5,9 @@
 #define STORAGESVC_DBTYPEINFO_H 1
 
 // Framework include files
+#include "PersistentDataModel/Guid.h"
 #include "DataModelRoot/RootType.h"
 #include "StorageSvc/pool.h"
-#include "StorageSvc/Shape.h"
 #include "CxxUtils/CachedValue.h"
 
 // C/C++ include files
@@ -28,7 +28,7 @@ class DbTypeInfo;
     *
     * @author  M.Frank
     */
-class DbTypeInfo : public Shape   {
+class DbTypeInfo {
 
   public:
     /// Column Container definition
@@ -37,6 +37,8 @@ class DbTypeInfo : public Shape   {
   private:
     /// Reference counter
     mutable std::atomic<int> m_refCount;
+    /// Type global identifier
+    Guid        m_id;
     /// Column definitions
     Columns     m_columns;
     /// Multiplicity
@@ -50,7 +52,7 @@ class DbTypeInfo : public Shape   {
     DbTypeInfo(const Guid& guid);
 
     /// Destructor
-    virtual ~DbTypeInfo();
+    ~DbTypeInfo();
 
     /// Load type information object from string representation
     StatusCode i_fromString(const std::string& string_rep);
@@ -58,6 +60,13 @@ class DbTypeInfo : public Shape   {
     static DbTypeInfo* regShape(const Guid& guid, const RootType& type, Columns& cols);
    
   public:
+    /// Access the type identifier
+    const Guid& typeID() const               { return m_id;       }
+          Guid& typeID()                     { return m_id;       }
+    /// Set the type identifier
+    void  setTypeID(const Guid& id)          { m_id=id;           }
+    Guid& setTypeID(const std::string &id)   { m_id.fromString(id); return  typeID(); }
+
     /// Destroy type information; to be used with extreme care
     void destroy() {  delete this; }
     /// Create type information using name

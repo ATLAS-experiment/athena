@@ -34,12 +34,12 @@ class TechContainerBase : virtual public ITechContainer, public APRMessaging
     /// List of actions to execute at commit
     struct DbAction {
       const void*         object;
-      const Shape*        shape;
+      const DbTypeInfo*   tinfo;
       Token::OID_t        link;
 
-      DbAction() : object(nullptr), shape(nullptr) { }
-      DbAction(const void* obj, const Shape* s, const Token::OID_t&  l)
-            : object(obj), shape(s), link(l) { }
+      DbAction() : object(nullptr), tinfo(nullptr) { }
+      DbAction(const void* obj, const DbTypeInfo* s, const Token::OID_t&  l)
+            : object(obj), tinfo(s), link(l) { }
 
       const void*       dataAtOffset(size_t offset) {
          return static_cast<const char*>(object) + offset;
@@ -100,18 +100,18 @@ class TechContainerBase : virtual public ITechContainer, public APRMessaging
     /// Store object in location
     virtual StatusCode store(      const void* object,
                                  DbContainer&  cntH,
-                                 const Shape* shape) override;
+                                 const DbTypeInfo* tinfo) override;
     /// In place allocation of object location
     virtual StatusCode allocate(DbContainer& cntH,
                               const void* object,
-                              const Shape* shape,
+                              const DbTypeInfo* tinfo,
                               Token::OID_t& oid) override;
     /// Fetch next object address to set token
     virtual StatusCode next(Token::OID_t& linkH) override;
 
     /// Find object within the container and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
-      * @param  shape     [IN]   Object type
+      * @param  tinfo     [IN]   Object type
       * @param  linkH     [IN]   Preferred object OID
       * @param  oid      [OUT]   Actual object OID
       * @param  any_next  [IN]   On selection, objects may be skipped.
@@ -119,19 +119,19 @@ class TechContainerBase : virtual public ITechContainer, public APRMessaging
       *                          will differ from the preferred oid.
       * @return Status code indicating success or failure.
       */
-    virtual StatusCode load( void** ptr, const Shape* shape,
+    virtual StatusCode load( void** ptr, const DbTypeInfo* tinfo,
                            const Token::OID_t& lnkH,
                            Token::OID_t&       oid,
                            bool                any_next) override;
 
     /// Find object by object identifier and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
-      * @param  shape     [IN]   Object type
+      * @param  tinfo     [IN]   Object type
       * @param  oid      [OUT]   Object OID
       *
       * @return Status code indicating success or failure.
       */
-    virtual StatusCode loadObject(void** ptr, const Shape* shape, Token::OID_t& oid) = 0;
+    virtual StatusCode loadObject(void** ptr, const DbTypeInfo* tinfo, Token::OID_t& oid) = 0;
 
 };
 

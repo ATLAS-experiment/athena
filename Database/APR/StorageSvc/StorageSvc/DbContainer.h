@@ -19,7 +19,6 @@ class DbDatabase;
 class DbTypeInfo;
 class DbContainerObj;
 class DbOption;
-class Shape;
 
 /** @class DbContainer DbContainer.h StorageSvc/DbContainer.h
     *
@@ -126,9 +125,9 @@ class DbContainer : public DbHandleBase<DbContainerObj>  {
       */
     //@{
     /// In place allocation of object location
-    StatusCode allocate(const void* object, const Shape* shape, Token::OID_t& oid);
+    StatusCode allocate(const void* object, const DbTypeInfo* tinfo, Token::OID_t& oid);
     /// Select object in the container identified by its handle
-    StatusCode load(void** ptr, const Shape* shape, const Token::OID_t& lH);
+    StatusCode load(void** ptr, const DbTypeInfo* tinfo, const Token::OID_t& lH);
     //@}
 
     /** Access objects by handle directly.

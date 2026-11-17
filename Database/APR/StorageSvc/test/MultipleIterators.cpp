@@ -5,13 +5,10 @@
 #include "MultipleIterators.h"
 #include "SimpleTestClass.h"
 
-#include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
 #include "GaudiKernel/StatusCode.h"
 
-#include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbConnection.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbDatabase.h"
@@ -89,21 +86,12 @@ TestDriver::testWriting()
     SimpleTestClass* myObject_SimpleTestClass = myObjects_SimpleTestClass.back();
     myObject_SimpleTestClass->data = i;
 
-    // Creating the persistent shape.
-    Guid guid = DbReflex::guid(class_SimpleTestClass);
-    const Shape* shape_SimpleTestClass = storSvc->createShape(guid);
-    if( !shape_SimpleTestClass ) {
-        throw std::runtime_error( "Could not create a persistent shape." );
-    }
-  
     // Writing the object.
     Token* token_SimpleTestClass;
-    if ( ! ( storSvc->allocate( fd,
-				container, pool::ROOTKEY_StorageType.type(),
-				myObject_SimpleTestClass, shape_SimpleTestClass, token_SimpleTestClass ).isSuccess() ) ) {
+    if( !storSvc->write( fd, container, pool::ROOTKEY_StorageType.type(),
+                         myObject_SimpleTestClass, class_SimpleTestClass, token_SimpleTestClass ).isSuccess() ) {
       throw std::runtime_error( "Could not write an object" );
     }
-    //token_SimpleTestClass->setClassID( guid_SimpleTestClass );
     delete token_SimpleTestClass;
 
     // The second class
@@ -111,20 +99,12 @@ TestDriver::testWriting()
     SimpleTestClass* myObject_SimpleTestClass2 = myObjects_SimpleTestClass2.back();
     myObject_SimpleTestClass2->setNonZero();
 
-    // Creating the persistent shape.
-    const Shape* shape_SimpleTestClass2 = storSvc->createShape(guid);
-    if( !shape_SimpleTestClass2 ) {
-      throw std::runtime_error( "Could not create a persistent shape." );
-    }
-  
     // Writing the object.
     Token* token_SimpleTestClass2;
-    if ( ! ( storSvc->allocate( fd,
-				container, pool::ROOTKEY_StorageType.type(),
-				myObject_SimpleTestClass2, shape_SimpleTestClass2, token_SimpleTestClass2 ).isSuccess() ) ) {
+    if( !storSvc->write( fd, container, pool::ROOTKEY_StorageType.type(),
+                         myObject_SimpleTestClass2, class_SimpleTestClass, token_SimpleTestClass2 ).isSuccess() ) {
       throw std::runtime_error( "Could not write an object" );
     }
-    //token_SimpleTestClass2->setClassID( guid_SimpleTestClass2 );
     delete token_SimpleTestClass2;
   }
 
@@ -209,20 +189,11 @@ TestDriver::testReadingParallelSameContainer()
     }
     objectToken_SimpleTestClass1->oid() = link1H;
 
-
-    const Shape* shape_SimpleTestClass1 = 0;
-    if ( !storSvc->getShape( *fd, objectToken_SimpleTestClass1->classID(), shape_SimpleTestClass1 ).isSuccess() ) {
-      throw std::runtime_error( "Could not fetch the persistent shape for SimpleTestClass1" );
-    }
     void* ptr_SimpleTestClass1 = 0;
-    if ( !storSvc->read( *fd, *objectToken_SimpleTestClass1, shape_SimpleTestClass1, &ptr_SimpleTestClass1 ).isSuccess() ) {
+    if ( !storSvc->read( *fd, *objectToken_SimpleTestClass1, &ptr_SimpleTestClass1 ).isSuccess() ) {
       throw std::runtime_error( "failed to read a SimpleTestClass1 object back from the persistency" );
     }
     
-    if ( shape_SimpleTestClass1->shapeID().toString() != "4E1F4DBB-1973-1974-1999-204F37331A01" ) {
-      throw std::runtime_error( std::string("read wrong class type: ") + shape_SimpleTestClass1->shapeID().toString());
-    }
-
     SimpleTestClass* object_SimpleTestClass1 = reinterpret_cast< SimpleTestClass* >(ptr_SimpleTestClass1);
     if ( object_SimpleTestClass1->data != iObject ) {
       throw std::runtime_error( "Object read different from object written" );
@@ -250,17 +221,9 @@ TestDriver::testReadingParallelSameContainer()
     }
     objectToken_SimpleTestClass2->oid() = link2H;
 
-    const Shape* shape_SimpleTestClass2 = 0;
-    if(! storSvc->getShape( *fd, objectToken_SimpleTestClass2->classID(), shape_SimpleTestClass2 ).isSuccess() ) {
-      throw std::runtime_error( "Could not fetch the persistent shape for SimpleTestClass2" );
-    }
     void* ptr_SimpleTestClass2 = 0;
-    if ( ! ( storSvc->read( *fd, *objectToken_SimpleTestClass2, shape_SimpleTestClass2, &ptr_SimpleTestClass2 ) ).isSuccess() ) {
+    if( !storSvc->read( *fd, *objectToken_SimpleTestClass2, &ptr_SimpleTestClass2 ).isSuccess() ) {
       throw std::runtime_error( "failed to read a SimpleTestClass2 object back from the persistency" );
-    }
-    
-    if ( shape_SimpleTestClass2->shapeID().toString() != "4E1F4DBB-1973-1974-1999-204F37331A01" ) {
-      throw std::runtime_error( std::string("read wrong class type: ") + shape_SimpleTestClass2->shapeID().toString());
     }
 
     SimpleTestClass referenceObject;

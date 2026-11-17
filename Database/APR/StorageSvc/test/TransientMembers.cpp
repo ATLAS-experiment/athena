@@ -5,13 +5,10 @@
 #include "TransientMembers.h"
 #include "TestClassWithTransients.h"
 
-#include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
 #include "GaudiKernel/StatusCode.h"
 
-#include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbConnection.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbDatabase.h"
@@ -85,13 +82,6 @@ TestDriver::testWriting()
   if ( ! class_TestClassWithTransients ) {
     throw std::runtime_error( "Could not retrieve the dictionary for class TestClassWithTransients" );
   }
-  //std::string guid_nam = class_TestClassWithTransients->propertyList()->getProperty( "ClassID" );
-  //if ( guid_nam.empty() ) {
-  //  std::ostringstream error;
-  //  error << "There is no ClassID property for class \"TestClassWithTransients\"" << std::ends;
-  //  throw std::runtime_error( error.str() );
-  //}
-  //Guid guid(guid_nam);
 
   std::vector< TestClassWithTransients* > myObjects;
   std::vector< TestClassTransient* > myTransientObjects;
@@ -112,21 +102,12 @@ TestDriver::testWriting()
     myObject->transientObject.data2 = 2;
     myObject->data2 = 2*i + 0.3;
 
-    // Creating the persistent shape.
-    Guid guidWT = DbReflex::guid(class_TestClassWithTransients);
-    const Shape* shape = storSvc->createShape(guidWT);
-    if( !shape ) {
-      throw std::runtime_error( "Could not create a persistent shape." );
-    }
-  
     // Writing the object.
     Token* token;
-    if ( ! ( storSvc->allocate( fd,
-				container, pool::ROOTTREE_StorageType.type(),
-				myObject, shape, token ).isSuccess() ) ) {
+    if( !storSvc->write( fd, container, pool::ROOTTREE_StorageType.type(),
+                         myObject, class_TestClassWithTransients, token ).isSuccess() ) {
       throw std::runtime_error( "Could not write an object" );
     }
-    //token->setClassID( guid );
     delete token;
   }
 
@@ -190,21 +171,13 @@ TestDriver::testReading()
   int iObject = 0;
   if ( sc.isSuccess() && cntH.isValid() ) {
     Token* objectToken = new Token(cntH.token());
-    const Guid& guid = objectToken->classID();
     while ( cntH.next(linkH).isSuccess() ) {
       objectToken->oid() = linkH;
-      const Shape* shape = 0;
-      if( !storSvc->getShape( fd, guid, shape ).isSuccess() ) {
-	      throw std::runtime_error( "Could not fetch the persistent shape" );
-      }
       void* ptr = 0;
-      if ( ! ( storSvc->read( fd, *objectToken, shape, &ptr ) ).isSuccess() ) {
+      if( !storSvc->read( fd, *objectToken, &ptr ).isSuccess() ) {
 	      throw std::runtime_error( "failed to read an object back from the persistency" );
       }
 
-      if ( shape->shapeID().toString() != "A1111111-B111-C111-D111-E22111111121" ) {
-        throw std::runtime_error( std::string("read wrong class type: ") + shape->shapeID().toString());
-      }
       TestClassWithTransients* object = reinterpret_cast< TestClassWithTransients* >(ptr);
       int expectedData1 = iObject;
       if ( object->data1 != expectedData1 ) {

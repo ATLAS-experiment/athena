@@ -20,7 +20,6 @@
 
 #include "AthenaKernel/getMessageSvc.h"
 #include "StorageSvc/DbType.h"
-#include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbConnection.h"
@@ -96,16 +95,6 @@ void test(const DbType storageType, const std::string& filename) {
    if ( ! class_String ) {
       throw std::runtime_error( "Could not retrieve the dictionary for class DbString" );
    }
-   // Create shape for DbString
-   Guid guid = DbReflex::guid(class_String);
-   const Shape* shape = nullptr;
-   if( !storSvc->getShape( fd, guid, shape ).isSuccess() ) {
-      cout << "need to create a Shape for DbString" << endl;
-      shape = storSvc->createShape(guid);
-      if( !shape ) {
-         throw std::runtime_error( "Could not create a persistent shape." );
-      }
-   }
 
    // Set container for master index (enables index synchronization between TTrees)
    DbOption masterIdxOpt("INDEX_MASTER", "", "*");
@@ -121,7 +110,7 @@ void test(const DbType storageType, const std::string& filename) {
    // helper lambda to write a string object into a container
    auto writeStr = [&](const string& contName, DbString& str) {
       Token* token{nullptr};
-      if( !storSvc->allocate( fd, contName, storageType.type(), &str, shape, token ).isSuccess() ) {
+      if( !storSvc->write( fd, contName, storageType.type(), &str, class_String, token ).isSuccess() ) {
          throw std::runtime_error( "Could not write an object" );
       }
       return token;
@@ -189,22 +178,13 @@ void test(const DbType storageType, const std::string& filename) {
    if( !storSvc->connect( Io::READ, fd ).isSuccess() ) {
       throw std::runtime_error( "Could not start a read connection." );
    }
-   // get shape again
-   shape = nullptr;
-   if( !storSvc->getShape( fd, guid, shape ).isSuccess() ) {
-      cout << "need to create a Shape for DbString" << endl;
-      shape = storSvc->createShape(guid);
-      if( !shape ) {
-         throw std::runtime_error( "Could not create a persistent shape." );
-      }
-   }
 
    DbString readString;
    auto readfun = [&](const string& ref) {
       Token token;
       token.fromString( ref );
       DbString *str_p = &readString;
-      if( !storSvc->read(fd, token, shape, (void**)&str_p).isSuccess() ) {
+      if( !storSvc->read(fd, token, (void**)&str_p).isSuccess() ) {
          throw std::runtime_error( "Read FAILED" );
       }
    };

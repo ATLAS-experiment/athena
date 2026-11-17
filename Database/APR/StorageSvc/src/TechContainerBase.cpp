@@ -45,21 +45,21 @@ StatusCode TechContainerBase::close()   {
 }
 
 /// In place allocation of raw memory for the transient object
-StatusCode TechContainerBase::store(const void* object, DbContainer& cntH, const Shape* shape)  {
+StatusCode TechContainerBase::store(const void* object, DbContainer& cntH, const DbTypeInfo* tinfo)  {
   Token::OID_t objLink(cntH.token()->oid().first, nextRecordId());
-  DbAction action( object, shape, objLink );
+  DbAction action( object, tinfo, objLink );
   return writeObject( action );
 }
 
 /// In place allocation of raw memory for the transient object
-StatusCode TechContainerBase::allocate(DbContainer& cntH, const void* object, const Shape* shape, Token::OID_t& oid) {
+StatusCode TechContainerBase::allocate(DbContainer& cntH, const void* object, const DbTypeInfo* tinfo, Token::OID_t& oid) {
   if ( object )  {
     oid.first  = cntH.token()->oid().first;
     oid.second = nextRecordId();
     if ( m_writeStack.size() < m_size+1 )  {
       m_writeStack.resize(m_size+1024);
     }
-    m_writeStack[m_size] = DbAction( object, shape, oid );
+    m_writeStack[m_size] = DbAction( object, tinfo, oid );
     m_size++;
     return StatusCode::SUCCESS;
   }
@@ -103,7 +103,7 @@ StatusCode TechContainerBase::next(Token::OID_t& linkH) {
 } 
 
 // Read object (oid) from a container container (linkH)
-StatusCode TechContainerBase::load( void** ptr, const Shape* shape,
+StatusCode TechContainerBase::load( void** ptr, const DbTypeInfo* tinfo,
                                const Token::OID_t& linkH, Token::OID_t& oid,
                                bool any_next )
 {
@@ -113,7 +113,7 @@ StatusCode TechContainerBase::load( void** ptr, const Shape* shape,
       while( static_cast<uint64_t>(oid.second) < size() ) {
 	 oid.second = linkH.second;
          if( linkH.second >= 0 && static_cast<uint64_t>(linkH.second) < size() )  {
-            sc = loadObject(ptr, shape, oid);
+            sc = loadObject(ptr, tinfo, oid);
             if( sc.isSuccess() )  {
                return sc;
             }
@@ -126,7 +126,7 @@ StatusCode TechContainerBase::load( void** ptr, const Shape* shape,
       }
    }
    else {
-      sc = loadObject(ptr, shape, oid);
+      sc = loadObject(ptr, tinfo, oid);
    }
    return sc;
 }

@@ -142,12 +142,12 @@ class RNTupleContainer : public TechContainerBase
 
   /// Find object by object identifier and load it into memory
   /** @param  ptr   [IN/OUT]   address of the pointer to object
-   *  @param  shape     [IN]   Object Shape
+   *  @param  tinfo     [IN]   Object Shape
    *  @param  oid      [OUT]   Object OID
    *
    *  @return Status code indicating success or failure.
    */
-  virtual StatusCode loadObject(void** ptr, const Shape* shape,
+  virtual StatusCode loadObject(void** ptr, const DbTypeInfo* tinfo,
                                 Token::OID_t& oid) override final;
 
   /// Commit single entry to container
@@ -163,7 +163,7 @@ class RNTupleContainer : public TechContainerBase
   /// Store object in location
   virtual StatusCode store(const void* object,
                                  DbContainer& cntH,
-                                 const Shape* shape) override final;
+                                 const DbTypeInfo* tinfo) override final;
 
  private:
   /// Init a field description for an object (i.e. find TClass etc.)

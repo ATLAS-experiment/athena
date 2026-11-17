@@ -100,7 +100,7 @@ StatusCode RootKeyContainer::next(Token::OID_t& linkH) {
       if ( typ )  {
         return SUCCESS;
       }
-      ATH_MSG_ERROR("Failed to find the correct shape identifier for class:" << class_name);
+      ATH_MSG_ERROR("Failed to find the correct tinfo identifier for class:" << class_name);
       return FAILURE;
     }
     else {
@@ -112,7 +112,7 @@ StatusCode RootKeyContainer::next(Token::OID_t& linkH) {
 } 
 
 // Interface Implementation: Find entry in container
-StatusCode RootKeyContainer::load( void** ptr, const Shape* shape,
+StatusCode RootKeyContainer::load( void** ptr, const DbTypeInfo* tinfo,
                                    const Token::OID_t& linkH,
                                    Token::OID_t& oid,
                                    bool any_next)
@@ -124,7 +124,7 @@ StatusCode RootKeyContainer::load( void** ptr, const Shape* shape,
     ::sprintf(txt, "_pool_valid_%08d", static_cast<int>(oid.second));
     const TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
     if ( key )    {
-       sc = loadObject(ptr, shape, oid);
+       sc = loadObject(ptr, tinfo, oid);
        return sc;
     }
     if ( !any_next )  {
@@ -139,7 +139,7 @@ StatusCode RootKeyContainer::load( void** ptr, const Shape* shape,
   return sc;
 }
 
-StatusCode RootKeyContainer::loadObject( void** ptr, const Shape* shape,
+StatusCode RootKeyContainer::loadObject( void** ptr, const DbTypeInfo* tinfo,
                                        Token::OID_t&   oid )
 {
    char txt[64];
@@ -148,7 +148,7 @@ StatusCode RootKeyContainer::loadObject( void** ptr, const Shape* shape,
    TKey* key = (TKey*)m_dir->GetListOfKeys()->FindObject(txt);
    if ( key && ptr )    {
       const char* class_name = key->GetClassName();
-      const DbTypeInfo* typ = dynamic_cast<const DbTypeInfo*>(shape);
+      const DbTypeInfo* typ = dynamic_cast<const DbTypeInfo*>(tinfo);
       if( typ )  {
          TClass* cl = TClass::GetClass(class_name);
          if( 0 != cl ) {
@@ -180,7 +180,7 @@ StatusCode RootKeyContainer::writeObject(ActionList::value_type& action) {
    if ( m_dir )  {
       char knam[64];
       ::sprintf(knam, "_pool_valid_%08d", static_cast<int>(action.link.second));
-      auto typ = static_cast<const DbTypeInfo*>(action.shape);
+      auto typ = static_cast<const DbTypeInfo*>(action.tinfo);
       if ( 0 == typ )   {
          ATH_MSG_ERROR("No type information present when writing an object!");
          return FAILURE;

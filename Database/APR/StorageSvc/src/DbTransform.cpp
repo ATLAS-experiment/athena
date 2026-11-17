@@ -65,12 +65,12 @@ const ShapeVector allShapes() {
 
 
 /// Access shape registry
-StatusCode DbTransform::getShape(const Guid& shape_Guid, const DbTypeInfo*& shape)
+StatusCode DbTransform::getShape(const Guid& typeID, const DbTypeInfo*& tinfo)
 {
    shared_lock_t lock(shapesMutex);
-   ShapeVector& v = _Init::shape(shape_Guid);
+   ShapeVector& v = _Init::shape(typeID);
    if ( v.size() > 0 ) {
-      shape = *(v.begin());
+      tinfo = *(v.begin());
       return StatusCode::SUCCESS;
    }
    return StatusCode::FAILURE;
@@ -78,12 +78,12 @@ StatusCode DbTransform::getShape(const Guid& shape_Guid, const DbTypeInfo*& shap
 
 
 /// Access shape registry
-const DbTypeInfo* DbTransform::getShape(const Guid& shape_Guid, const std::string& rep)
+const DbTypeInfo* DbTransform::getShape(const Guid& typeID, const std::string& rep)
 {
    shared_lock_t lock(shapesMutex);
-   for( auto shape: _Init::shape(shape_Guid) ) {
-      if( shape->toString() == rep )
-         return shape;
+   for( auto tinfo: _Init::shape(typeID) ) {
+      if( tinfo->toString() == rep )
+         return tinfo;
    }
    return 0;
 }
@@ -92,13 +92,13 @@ const DbTypeInfo* DbTransform::getShape(const Guid& shape_Guid, const std::strin
 /// Register a new shape in the registry
 // This method does nothing if one tries to register the same *pointer* - very unlikely after 'new()'
 // May result in duplicate identical shapes registered (in MT case) but that should be OK
-StatusCode DbTransform::regShape(const DbTypeInfo*  shape)  {
-  if ( shape )    {
+StatusCode DbTransform::regShape(const DbTypeInfo*  tinfo)  {
+  if ( tinfo )    {
     lock_guard_t lock(shapesMutex); 
-    ShapeVector& v = _Init::shape(shape->shapeID());
-    ShapeVector::iterator i=find(v.begin(), v.end(), shape);
+    ShapeVector& v = _Init::shape(tinfo->typeID());
+    ShapeVector::iterator i=find(v.begin(), v.end(), tinfo);
     if ( i == v.end() ) {
-      v.push_back(shape);
+      v.push_back(tinfo);
       return StatusCode::SUCCESS;
     }
   }
@@ -106,21 +106,21 @@ StatusCode DbTransform::regShape(const DbTypeInfo*  shape)  {
 }
 
 /// keep shape until the end
-void DbTransform::ownShape(const DbTypeInfo*  shape)  {
-  if ( shape ) {
+void DbTransform::ownShape(const DbTypeInfo*  tinfo)  {
+  if ( tinfo ) {
      lock_guard_t lock(shapesMutex); 
-     _Init::ownedShapes().push_back(shape);
-     shape->addRef();
+     _Init::ownedShapes().push_back(tinfo);
+     tinfo->addRef();
   }
 }
 
 /// Access entry in shape registry
-StatusCode DbTransform::removeShape (const DbTypeInfo* shape)  {
-  if ( shape )    {
+StatusCode DbTransform::removeShape (const DbTypeInfo* tinfo)  {
+  if ( tinfo )    {
     lock_guard_t lock(shapesMutex); 
     if (_Init::shapes().size() == 0) return StatusCode::SUCCESS;
-    ShapeVector& v = _Init::shape(shape->shapeID());
-    ShapeVector::iterator i=find(v.begin(), v.end(), shape);
+    ShapeVector& v = _Init::shape(tinfo->typeID());
+    ShapeVector::iterator i=find(v.begin(), v.end(), tinfo);
     if ( i != v.end() ) {
       v.erase(i);
       return StatusCode::SUCCESS;

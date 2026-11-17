@@ -182,12 +182,12 @@ class RootTreeContainer : public TechContainerBase
 
     /// Find object by object identifier and load it into memory
     /** @param  ptr    [IN/OUT]  ROOT-style address of the pointer to object
-      * @param  shape     [IN]   Object type
+      * @param  tinfo     [IN]   Object type
       * @param  oid      [OUT]   Object OID
       *
       * @return Status code indicating success or failure.
       */
-    virtual StatusCode loadObject( void** ptr, const Shape* shape, 
+    virtual StatusCode loadObject( void** ptr, const DbTypeInfo* tinfo, 
                                  Token::OID_t& oid) override;
 
     /// Commit single entry to container

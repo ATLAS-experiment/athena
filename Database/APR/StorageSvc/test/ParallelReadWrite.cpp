@@ -5,13 +5,10 @@
 #include "ParallelReadWrite.h"
 #include "SimpleTestClass.h"
 
-#include "PersistentDataModel/Guid.h"
 #include "PersistentDataModel/Token.h"
 #include "GaudiKernel/StatusCode.h"
 
-#include "StorageSvc/Shape.h"
 #include "StorageSvc/IStorageSvc.h"
-#include "StorageSvc/DbReflex.h"
 #include "StorageSvc/DbConnection.h"
 #include "StorageSvc/FileDescriptor.h"
 #include "StorageSvc/DbDatabase.h"
@@ -86,21 +83,12 @@ TestDriver::testWriting()
     SimpleTestClass* myObject = myObjects.back();
     myObject->data = i;
 
-    // Creating the persistent shape.
-    Guid guid = DbReflex::guid(class_SimpleTestClass);
-    const Shape* shape = storSvc->createShape(guid);
-    if( !shape ) {
-        throw std::runtime_error( "Could not create a persistent shape." );
-    }
-  
     // Writing the object.
     Token* token;
-    if ( ! ( storSvc->allocate( fd,
-				container, pool::ROOTTREE_StorageType.type(),
-				myObject, shape, token ).isSuccess() ) ) {
+    if( !storSvc->write( fd,	container, pool::ROOTTREE_StorageType.type(),
+                         myObject, class_SimpleTestClass, token ).isSuccess() ) {
       throw std::runtime_error( "Could not write an object" );
     }
-    //token->setClassID( guid );
     delete token;
   }
 
@@ -179,25 +167,12 @@ TestDriver::testParallelReadWrite()
   int iObject = 0;
   if ( sc.isSuccess() && cntH.isValid() ) {
     Token* objectToken = new Token(cntH.token());
-    const Guid& guid = objectToken->classID();
     while ( cntH.next(linkH).isSuccess() ) {
       objectToken->oid() = linkH;
       // Read the object from one file
-      const Shape* shape = 0;
-      if( !storSvc->getShape( fd1, guid, shape ).isSuccess() ) {
-	      throw std::runtime_error( "Could not fetch the persistent shape" );
-      }
-      RootType classType = DbReflex::forGuid(guid);
-      if(!classType){
-	      throw std::runtime_error( "Could not resolve the class by guid" );
-      }
       void* ptr = 0;
-      if ( ! ( storSvc->read( fd1, *objectToken, shape, &ptr ) ).isSuccess() ) {
+      if( !storSvc->read( fd1, *objectToken, &ptr ).isSuccess() ) {
 	      throw std::runtime_error( "failed to read an object back from the persistency" );
-      }
-
-      if ( shape->shapeID().toString() != "4E1F4DBB-1973-1974-1999-204F37331A01" ) {
-        throw std::runtime_error( std::string("read wrong class type: ") + shape->shapeID().toString());
       }
       SimpleTestClass* object = reinterpret_cast< SimpleTestClass* >(ptr);
       if ( object->data != iObject ) {
@@ -209,21 +184,12 @@ TestDriver::testParallelReadWrite()
       SimpleTestClass* myObject = myObjects.back();
       myObject->data = object->data;
 
-      // Creating the persistent shape.
-      Guid guidw = DbReflex::guid(class_SimpleTestClass);
-      const Shape* shapew = storSvc->createShape(guidw);
-      if( !shapew ) {
-	        throw std::runtime_error( "Could not create a persistent shape." );
-      }
-      
       // Writing the object.
       Token* tokenw;
-      if ( ! ( storSvc->allocate( fd2,
-				  container, pool::ROOTTREE_StorageType.type(),
-				  myObject, shapew, tokenw ).isSuccess() ) ) {
+      if( !storSvc->write( fd2, container, pool::ROOTTREE_StorageType.type(),
+                           myObject, class_SimpleTestClass, tokenw ).isSuccess() ) {
 	      throw std::runtime_error( "Could not write an object" );
       }
-      tokenw->setClassID( guidw );
       tokenw->release();
 
       delete object;
@@ -307,24 +273,11 @@ TestDriver::testReading()
   int iObject = 0;
   if ( sc.isSuccess() && cntH.isValid() ) {
     Token* objectToken = new Token(cntH.token());
-    const Guid& guid = objectToken->classID();
     while ( cntH.next(linkH).isSuccess() ) {
       objectToken->oid() = linkH;
-      const Shape* shape = 0;
-      if( !storSvc->getShape( fd, guid, shape ).isSuccess() ) {
-	      throw std::runtime_error( "Could not fetch the persistent shape" );
-      }
-      RootType classType = DbReflex::forGuid(guid);
-      if(!classType){
-	      throw std::runtime_error( "Could not resolve the class by guid" );
-      }      
       void* ptr = 0;
-      if ( ! ( storSvc->read( fd, *objectToken, shape, &ptr ) ).isSuccess() ) {
+      if( !storSvc->read( fd, *objectToken, &ptr ).isSuccess() ) {
 	      throw std::runtime_error( "failed to read an object back from the persistency" );
-      }
-
-      if ( shape->shapeID().toString() != "4E1F4DBB-1973-1974-1999-204F37331A01" ) {
-        throw std::runtime_error( std::string("read wrong class type: ") + shape->shapeID().toString());
       }
       SimpleTestClass* object = reinterpret_cast< SimpleTestClass* >(ptr);
       if ( object->data != iObject ) {
