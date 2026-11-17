@@ -19,7 +19,8 @@ ATLAS_EXTRA_CMAKE_ARGS=(-DLCG_VERSION_NUMBER=110
                         -DATLAS_VECMEM_SOURCE="URL;http://cern.ch/atlas-software-dist-eos/externals/vecmem/v1.31.0.tar.gz;https://github.com/acts-project/vecmem/archive/refs/tags/v1.31.0.tar.gz;URL_MD5;c2b1bcb8ec50452197913e169786b255"
                         -DATLAS_GEANT4_USE_LTO=TRUE
                         -DATLAS_VECGEOM_USE_LTO=TRUE
-                        -DATLAS_GAUDI_USE_CUDA=TRUE)
+                        -DATLAS_GAUDI_USE_CUDA=TRUE
+                        -DATLAS_ITKSW_ENDEC_SOURCE="URL;https://cern.ch/atlas-software-dist-eos/externals/itksw/endec-v4.2.0.tar.gz;https://gitlab.cern.ch/itksw/endec/-/archive/v4.2.0/endec-v4.2.0.tar.gz;URL_MD5;34d530a3287783325493093cb0e4a170")
 ATLAS_EXTRA_MAKE_ARGS=()
 
 # Let "the common script" do all the heavy lifting.

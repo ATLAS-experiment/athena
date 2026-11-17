@@ -3,9 +3,27 @@
 # Declare the package name:
 atlas_subdir( ITkPixelByteStreamCnv )
 
+set(ATLAS_ITKSW_ENDEC_SOURCE_DIR "" CACHE PATH "Optional local source director for Endec")
+
+if(IS_DIRECTORY "${ATLAS_ITKSW_ENDEC_SOURCE_DIR}")
+  message(STATUS "Using Endec from: ${ATLAS_ITKSW_ENDEC_SOURCE_DIR}")
+
+  set(ENDEC_BUILD_TESTS FALSE CACHE BOOL "Turn off the endec unit tests")
+  set(ENDEC_BUILD_PYTHON_BINDINGS FALSE CACHE BOOL "Turn off endec python bindings")
+
+  include(FetchContent)
+  set(FETCHCONTENT_SOURCE_DIR_ITKSW_ENDEC "${ATLAS_ITKSW_ENDEC_SOURCE_DIR}" CACHE PATH "")
+
+  FetchContent_Declare(itksw_endec
+    SYSTEM
+    OVERRIDE_FIND_PACKAGE
+  )
+endif()
+
 # External dependencies:
 find_package( tdaq-common COMPONENTS eformat )
 find_package( Boost COMPONENTS unit_test_framework )
+find_package( itksw_endec )
 
 # Component(s) in the package:
 atlas_add_library( ITkPixelByteStreamCnvLib
@@ -18,7 +36,7 @@ atlas_add_library( ITkPixelByteStreamCnvLib
 atlas_add_component( ITkPixelByteStreamCnv
    src/*.h src/*.cxx src/components/*.cxx
    INCLUDE_DIRS ${TDAQ-COMMON_INCLUDE_DIRS}
-   LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} ByteStreamData AthenaKernel EventContainers
+   LINK_LIBRARIES ${TDAQ-COMMON_LIBRARIES} itksw::pix_endec ByteStreamData AthenaKernel EventContainers
    GaudiKernel InDetRawData AthenaBaseComps AthContainers CxxUtils StoreGateLib
    ByteStreamCnvSvcBaseLib InDetIdentifier ITkPixelCablingLib PixelReadoutGeometryLib IRegionSelector
    xAODEventInfo TrigSteeringEvent InDetByteStreamErrors  ITkPixelByteStreamCnvLib)
