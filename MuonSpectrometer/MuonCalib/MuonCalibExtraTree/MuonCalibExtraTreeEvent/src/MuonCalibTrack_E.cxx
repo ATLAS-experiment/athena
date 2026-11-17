@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibExtraTreeEvent/MuonCalibTrack_E.h"
@@ -55,7 +55,7 @@ namespace MuonCalib {
     void MuonCalibTrack_E::setTheta(float theta) { m_params.theta = theta; }
     void MuonCalibTrack_E::setQOverP(float qOverP) { m_params.qOverP = qOverP; }
     void MuonCalibTrack_E::setAuthor(int author) { m_params.author = author; }
-
+    //coverity[PASS_BY_VALUE]
     MuonCalibTrack_E::MuonCalibTrack_E(defineParams pars) : m_params{std::move(pars)}, m_pos{x0(), y0(), z0()} {
         Amg::setThetaPhi(m_dir, theta(), phi());
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibExtraTreeEvent/EventHandler.h"
@@ -29,6 +29,7 @@
 #include "MuonCalibExtraTreeEvent/MuonCalibTrack_E.h"
 #include "MuonCalibExtraTreeEvent/MuonCalibTriggerInfo.h"
 #include "MuonCalibIdentifier/MuonFixedId.h"
+#include <stdexcept>
 
 namespace MuonCalib {
 
@@ -55,7 +56,10 @@ namespace MuonCalib {
     const MuonCalibExtendedRawHits& EventHandler::extendedRawHits() const { return m_extendedRawHits; }
 
     /** get event */
-    const MuonCalibEvent_E& EventHandler::event() const { return *m_event; }
+    const MuonCalibEvent_E& EventHandler::event() const { 
+      if (m_event)[[likely]]{return *m_event; }
+      throw(std::runtime_error("EventHandler::event: m_event is nullptr."));
+    }
 
     /** get author indices for Moore */
     const EventHandler::AuthorIndices& EventHandler::mooreIndices() const { return m_mooreIndices; }
@@ -230,7 +234,7 @@ namespace MuonCalib {
                 }
             }
 #endif
-            trackVec.push_back(extendedTrack);
+            trackVec.push_back(std::move(extendedTrack));
         }
     }
 

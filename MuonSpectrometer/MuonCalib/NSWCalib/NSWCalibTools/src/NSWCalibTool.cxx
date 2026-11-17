@@ -255,8 +255,6 @@ StatusCode Muon::NSWCalibTool::calibrateStrip(const EventContext& ctx,
              << mmRawData->timeAndChargeInCounts() <<", "<< m_isData << " to charge: " 
              << calibStrip.charge << " electrons  time after corrections " << calibStrip.time 
              << " ns  time before corrections "<< time << "ns");
-  //get stripWidth
-  detEl->getDesign(rdoId)->channelWidth(); // positon is not used for strip width 
 
   calibStrip.distDrift = m_vDrift * calibStrip.time;
   calibStrip.resTransDistDrift = pitchErr + std::pow(m_transDiff * calibStrip.distDrift, 2);

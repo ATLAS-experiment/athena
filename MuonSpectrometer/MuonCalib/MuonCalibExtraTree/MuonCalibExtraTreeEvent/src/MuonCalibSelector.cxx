@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2020 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibExtraTreeEvent/MuonCalibSelector.h"
@@ -46,7 +46,7 @@ namespace MuonCalib {
 
             if (segmentSelection->twoML && (summary.nmdtHitsPerMl(1) == 0 || summary.nmdtHitsPerMl(2) == 0)) return false;
 
-            float adcGoodHitFraction = (summary.nmdtHits - summary.nmdtHitsBelowADCCut) / summary.nmdtHits;
+            float adcGoodHitFraction = (summary.nmdtHits - summary.nmdtHitsBelowADCCut) / static_cast<float>(summary.nmdtHits);
             if (adcGoodHitFraction < segmentSelection->minAdcGoodFraction) return false;
         }
 

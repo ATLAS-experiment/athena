@@ -373,7 +373,7 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
     m_trkTriggerHit_id.push_back(fixid.getIdInt()) ;
     m_trkTriggerHit_trackIndex.push_back(itrk);
     m_trkTriggerHit_type.push_back(1);  // RPC ROT
-    const Muon::RpcClusterOnTrack* rpc = dynamic_cast<const Muon::RpcClusterOnTrack*>(rot);
+    const Muon::RpcClusterOnTrack* rpc = static_cast<const Muon::RpcClusterOnTrack*>(rot);
     const Muon::RpcPrepData* rpcPRD = rpc->prepRawData();
     m_trkTriggerHit_time.push_back(rpcPRD->time());
     m_trkTriggerHit_gPos.push_back(rpcPRD->globalPosition());
@@ -386,8 +386,8 @@ void MuonSegmentReader::storeMeasurement(const EventContext& ctx, const MuonGM::
     m_trkTriggerHit_id.push_back(fixid.getIdInt()) ;
     m_trkTriggerHit_trackIndex.push_back(itrk);
     m_trkTriggerHit_type.push_back(3); // tgc ROT
-    const Muon::TgcClusterOnTrack* tgc  = dynamic_cast<const Muon::TgcClusterOnTrack*>(rot);
-    const Muon::TgcPrepData*       tgcPRD = tgc->prepRawData() ;
+    const Muon::TgcClusterOnTrack* tgc  = static_cast<const Muon::TgcClusterOnTrack*>(rot);
+    const Muon::TgcPrepData* tgcPRD = tgc->prepRawData() ;
     m_trkTriggerHit_time.push_back(tgcPRD->getBcBitMap());
     m_trkTriggerHit_gPos.push_back(tgcPRD->globalPosition());
 

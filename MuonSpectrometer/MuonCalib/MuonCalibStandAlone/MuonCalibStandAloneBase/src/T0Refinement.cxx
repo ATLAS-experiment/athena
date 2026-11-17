@@ -1,10 +1,8 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonCalibStandAloneBase/T0Refinement.h"
 
-#include <fstream>
-#include <iostream>
 
 #include "MdtCalibInterfaces/IMdtSegmentFitter.h"
 #include "MuonCalibMath/BaseFunctionFitter.h"
@@ -284,7 +282,7 @@ double T0Refinement::getDeltaT0(MuonCalibSegment* segment, const IRtRelation* rt
     }
 
     segment_fitter->SetRefineSegmentFlag(true);
-    if (segment_fitter->fit(*segment, r_selection) == 0.0) {
+    if (segment_fitter->fit(*segment, std::move(r_selection)) == 0.0) {
         failed = true;
         return 0.0;
     }
