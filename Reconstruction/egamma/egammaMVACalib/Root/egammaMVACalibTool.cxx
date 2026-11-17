@@ -43,9 +43,7 @@ egammaMVACalibTool::egammaMVACalibTool(const std::string& name) :
 
 // Need to declare this out-of-line since the full type of m_funcs
 // isn't available in the header.
-egammaMVACalibTool::~egammaMVACalibTool()
-{
-}
+egammaMVACalibTool::~egammaMVACalibTool() = default;
 
 
 StatusCode egammaMVACalibTool::initialize()
@@ -64,7 +62,7 @@ StatusCode egammaMVACalibTool::initialize()
     ATH_MSG_FATAL("Unsupported shift: " << m_shiftType);
     return StatusCode::FAILURE;
   }
-  
+
   // get the BDTs and initialize functions
   ATH_MSG_DEBUG("get BDTs in folder: " << m_folder);
   switch (m_particleType) {
@@ -100,7 +98,7 @@ StatusCode egammaMVACalibTool::initialize()
                          PathResolverFindCalibFile("egammaMVACalib/MVACalib_fwdelectron.weights.root")));
     }
     break;
-    
+
   default:
     ATH_MSG_FATAL("Particle type not set properly: " << m_particleType);
     return StatusCode::FAILURE;
@@ -230,7 +228,7 @@ StatusCode egammaMVACalibTool::setupBDT(const egammaMVAFunctions::funcMap_t& fun
 
 }
 
-const TString& egammaMVACalibTool::getString(TObject* obj) 
+const TString& egammaMVACalibTool::getString(TObject* obj)
 {
   TObjString *objS = dynamic_cast<TObjString*>(obj);
   if (!objS) {
@@ -241,17 +239,20 @@ const TString& egammaMVACalibTool::getString(TObject* obj)
 
 float egammaMVACalibTool::getEnergy(const xAOD::CaloCluster& clus,
                                     const xAOD::Egamma* eg,
-				    const egammaMVACalib::GlobalEventInfo& gei) const
+				                            const egammaMVACalib::GlobalEventInfo& gei) const
 {
 
   ATH_MSG_DEBUG("calling getEnergy with cluster index " << clus.index());
 
   // find the bin of BDT and the shift
-  const auto initEnergy =
-    m_particleType == xAOD::EgammaParameters::forwardelectron ?
-    float(clus.e()) : (m_useLayerCorrected ?
-		egammaMVAFunctions::compute_correctedcl_Eacc(clus) :
-		egammaMVAFunctions::compute_rawcl_Eacc(clus));
+  float initEnergy = 0;
+  if (m_particleType == xAOD::EgammaParameters::forwardelectron) {
+    initEnergy = float(clus.e());
+  } else if (m_useLayerCorrected && eg != nullptr) {
+    initEnergy = egammaMVAFunctions::compute_correctedcl_Eacc(*eg);
+  } else {
+    initEnergy = egammaMVAFunctions::compute_rawcl_Eacc(clus);
+  }
 
   const auto etVarGeV = (initEnergy / std::cosh(clus.eta())) / GeV;
   const auto etaVar = std::abs(clus.eta());
@@ -296,7 +297,7 @@ float egammaMVACalibTool::getEnergy(const xAOD::CaloCluster& clus,
     vars[i] = funcs[i](eg, &clus);
     ATH_MSG_DEBUG("Variable " << i << " = " << std::format("{:10.4f}", vars[i]));
   }
-  
+
   // Retrieve nPV and mu in case of forward electron;
   // they are the last two variables in the input vars
   if (m_particleType == xAOD::EgammaParameters::forwardelectron) {

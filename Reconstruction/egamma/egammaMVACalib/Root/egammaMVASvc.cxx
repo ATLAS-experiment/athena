@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaMVACalib/egammaMVASvc.h"
@@ -93,7 +93,7 @@ StatusCode egammaMVASvc::resolve_flags()
 
 bool egammaMVASvc::isConvCalib(const xAOD::Photon& ph) const
 {
-  bool isConvCalib = xAOD::EgammaHelpers::isConvertedPhoton(&ph) && 
+  bool isConvCalib = xAOD::EgammaHelpers::isConvertedPhoton(&ph) &&
                      xAOD::EgammaHelpers::conversionRadius(&ph) < m_maxConvR;
   if (m_removeTRTConvBarrel) {
     // special case in Run3 to avoid TRT converted photons in the barrel
@@ -105,7 +105,7 @@ bool egammaMVASvc::isConvCalib(const xAOD::Photon& ph) const
 StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
                                    const xAOD::Egamma& eg,
                                    double& mvaE,
-				   const egammaMVACalib::GlobalEventInfo& gei) const
+				                           const egammaMVACalib::GlobalEventInfo& gei) const
 {
 
   ATH_MSG_DEBUG("calling egammaMVASvc::getEnergy with cluster and eg");
@@ -156,7 +156,7 @@ StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
 StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
                                    const xAOD::EgammaParameters::EgammaType egType,
                                    double& mvaE,
-				   const egammaMVACalib::GlobalEventInfo& gei) const
+		                        		   const egammaMVACalib::GlobalEventInfo& gei) const
 {
 
   ATH_MSG_DEBUG("calling egammaMVASvc::getEnergy with cluster and egType (" << egType <<")");
@@ -201,7 +201,7 @@ StatusCode egammaMVASvc::getEnergy(const xAOD::CaloCluster& cluster,
 
 StatusCode egammaMVASvc::execute(xAOD::CaloCluster& cluster,
                                  const xAOD::Egamma& eg,
-				 const egammaMVACalib::GlobalEventInfo& gei) const
+		                         		 const egammaMVACalib::GlobalEventInfo& gei) const
 {
   double mvaE = 0.;
 
@@ -220,7 +220,7 @@ StatusCode egammaMVASvc::execute(xAOD::CaloCluster& cluster,
 
 StatusCode egammaMVASvc::execute(xAOD::CaloCluster& cluster,
                                  const xAOD::EgammaParameters::EgammaType egType,
-				 const egammaMVACalib::GlobalEventInfo& gei) const
+                                 const egammaMVACalib::GlobalEventInfo& gei) const
 {
 
   double mvaE = 0.;

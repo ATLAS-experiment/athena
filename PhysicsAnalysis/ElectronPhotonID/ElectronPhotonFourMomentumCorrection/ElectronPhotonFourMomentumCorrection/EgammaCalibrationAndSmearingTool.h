@@ -108,13 +108,13 @@ namespace columnar {
       ColumnAccessor<CI,float,CM> m_phicaloframeAcc;
 
     public:
-      
+
       PhiCaloAccessor (ColumnarTool<CM>& columnarTool)
         : m_phiCaloAcc (columnarTool, "phiCalo", {.isOptional = true}),
           m_phiAcc (columnarTool, "calPhi"),
           m_phicaloframeAcc (columnarTool, "PHICALOFRAME", {.isOptional = true})
       {}
-  
+
       float operator () (ClusterId cluster, int author, bool do_throw=false) const
       {
         double phi_calo;
@@ -477,10 +477,10 @@ public:
     columnar::EgammaAccessor<std::vector<columnar::OptVertexId>> photonVertexAcc;
     columnar::ClusterAccessor<columnar::ObjectColumn> m_clusterHandle {*this, "egammaClusters"};
     columnar::EgammaAccessor<std::vector<columnar::OptClusterId>> caloClusterAcc {*this, "caloClusterLinks"};
-    columnar::ClusterAccessor<double> Es0Acc {*this, "correctedcl_Es0", {.isOptional = true}};
-    columnar::ClusterAccessor<double> Es1Acc {*this, "correctedcl_Es1", {.isOptional = true}};
-    columnar::ClusterAccessor<double> Es2Acc {*this, "correctedcl_Es2", {.isOptional = true}};
-    columnar::ClusterAccessor<double> Es3Acc {*this, "correctedcl_Es3", {.isOptional = true}};
+    columnar::EgammaAccessor<double> Es0Acc {*this, "correctedcl_Es0", {.isOptional = true}};
+    columnar::EgammaAccessor<double> Es1Acc {*this, "correctedcl_Es1", {.isOptional = true}};
+    columnar::EgammaAccessor<double> Es2Acc {*this, "correctedcl_Es2", {.isOptional = true}};
+    columnar::EgammaAccessor<double> Es3Acc {*this, "correctedcl_Es3", {.isOptional = true}};
     columnar::ClusterAccessor<columnar::RetypeColumn<double,float>> clusterEtaAcc {*this, "calEta"};
     columnar::ClusterAccessor<columnar::RetypeColumn<double,float>> clusterPhiAcc {*this, "calPhi"};
     columnar::ClusterHelpers::EnergyBEAccessor<> energyBEAcc {*this};

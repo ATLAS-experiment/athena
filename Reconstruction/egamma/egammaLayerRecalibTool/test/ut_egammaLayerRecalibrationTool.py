@@ -288,8 +288,8 @@ class TestLayerxAOD(unittest.TestCase):
         i = 0
         for el in itertools.islice(xAOD_electron_generator(self.tree), None, N):
             event_info = self.tree.EventInfo
-
-            self.assertTrue(tool.applyCorrection(el, event_info) == ROOT.CP.CorrectionCode.Ok)
+            el_copy = ROOT.xAOD.Electron(el)
+            self.assertTrue(tool.applyCorrection(el_copy, event_info) == ROOT.CP.CorrectionCode.Ok)
 
             inputs = ROOT.StdCalibrationInputs()
             inputs.RunNumber = event_info.runNumber()
@@ -301,10 +301,10 @@ class TestLayerxAOD(unittest.TestCase):
             inputs.eta = el.caloCluster().eta()
 
             self.assertTrue(tool.scale_inputs(inputs) == ROOT.CP.CorrectionCode.Ok)
-            self.assertAlmostEqual(inputs.E0raw, el.caloCluster().auxdataConst["double"]("correctedcl_Es0"))
-            self.assertAlmostEqual(inputs.E1raw, el.caloCluster().auxdataConst["double"]("correctedcl_Es1"))
-            self.assertAlmostEqual(inputs.E2raw, el.caloCluster().auxdataConst["double"]("correctedcl_Es2"))
-            self.assertAlmostEqual(inputs.E3raw, el.caloCluster().auxdataConst["double"]("correctedcl_Es3"))
+            self.assertAlmostEqual(inputs.E0raw, el_copy.auxdataConst["double"]("correctedcl_Es0"))
+            self.assertAlmostEqual(inputs.E1raw, el_copy.auxdataConst["double"]("correctedcl_Es1"))
+            self.assertAlmostEqual(inputs.E2raw, el_copy.auxdataConst["double"]("correctedcl_Es2"))
+            self.assertAlmostEqual(inputs.E3raw, el_copy.auxdataConst["double"]("correctedcl_Es3"))
             i += 1
 
         self.assertGreater(i, 10, msg="too few electrons")
@@ -318,7 +318,8 @@ class TestLayerxAOD(unittest.TestCase):
         for el in itertools.islice(xAOD_electron_generator(self.tree), None, N):
             event_info = self.tree.EventInfo
 
-            code = tool.applyCorrection(el, event_info).code()
+            el_copy = ROOT.xAOD.Electron(el)
+            code = tool.applyCorrection(el_copy, event_info).code()
             if abs(el.eta() < 2.5):
                 self.assertTrue(code == ROOT.CP.CorrectionCode.Ok)
 

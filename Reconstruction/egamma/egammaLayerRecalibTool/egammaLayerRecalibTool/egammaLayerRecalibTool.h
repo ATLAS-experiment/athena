@@ -337,7 +337,7 @@ private:
   bool m_aodFixMissingCells = false;
   bool m_scaleMC = false;
 
-  bool m_doLayerclEdecoration = true; 
+  bool m_doLayerclEdecoration = true;
 };
 
 #endif // EGAMMA_LAYER_RECALIB_TOOL

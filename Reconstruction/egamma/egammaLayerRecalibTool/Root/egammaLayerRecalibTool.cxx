@@ -295,7 +295,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     add_scale("ps_run3_ofc_extrapolate_v0");
     if(m_doSaccCorrections) add_scale("acc_zee_run3_v0");
   }
-  //Run 2 release 22 with fixed E1E2 and repeated acc 
+  //Run 2 release 22 with fixed E1E2 and repeated acc
   else if ("run2_alt_with_layer2_r22_Precision_v1"==tune) {
     add_scale("layer2_alt_el_mu_comb_r21_v0_fix");
     add_scale("ps_mu_r21_v0");
@@ -534,7 +534,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     TH2F* histo_acc = static_cast<TH2F*>(f.Get("hACC_Zee_rel23_gnn"));
     assert(histo_acc);
     add_scale(new ScaleEaccordion(InputModifier::ZEROBASED_ALPHA),
-              new GetAmountHisto2DEtaCaloRunNumber(*histo_acc));    
+              new GetAmountHisto2DEtaCaloRunNumber(*histo_acc));
   }
   else if ("acc_zee_run3_v0" == tune){
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v13/egammaLayerRecalibTunes.root");
@@ -542,9 +542,9 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     TH2F* histo_acc = static_cast<TH2F*>(f.Get("hACC_Zee_rel23"));
     assert(histo_acc);
     add_scale(new ScaleEaccordion(InputModifier::ZEROBASED_ALPHA),
-              new GetAmountHisto2DEtaCaloRunNumber(*histo_acc));    
+              new GetAmountHisto2DEtaCaloRunNumber(*histo_acc));
   }
-  // repeated acc scale based on layer2_alt_el_mu_comb_r21_v0_fix 
+  // repeated acc scale based on layer2_alt_el_mu_comb_r21_v0_fix
   else if ("acc_zee_r22_v1" == tune) {
     const std::string file = PathResolverFindCalibFile("egammaLayerRecalibTool/v12/egammaLayerRecalibTunes.root");
     TFile f(file.c_str());
@@ -694,7 +694,7 @@ void egammaLayerRecalibTool::add_scale(const std::string& tuneIn)
     TH1D* histo = static_cast<TH1D*>(f.Get("hE1E2_emu_run2_rel21_v1_run3ofc"));
     assert(histo);
     add_scale(new ScaleE2(InputModifier::ONEBASED),
-         new GetAmountHisto1D(*histo));    
+         new GetAmountHisto1D(*histo));
   }
   // fix E1E2 scale from R21 precision model
   else if("layer2_alt_el_mu_comb_r21_v0_fix"==tune) {
@@ -1101,20 +1101,23 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
 
   const xAOD::CaloCluster* cluster = particle.caloCluster();
 
-  static const SG::Decorator<double> deco_E0("correctedcl_Es0");
-  static const SG::Decorator<double> deco_E1("correctedcl_Es1");
-  static const SG::Decorator<double> deco_E2("correctedcl_Es2");
-  static const SG::Decorator<double> deco_E3("correctedcl_Es3");
+  // The following are applied to the non-const Egamma particle
+  // In terms of data depependeny these are part of the
+  // Egamma collecton writtem by a calling algorithm
+  static const SG::Accessor<double> deco_E0("correctedcl_Es0");
+  static const SG::Accessor<double> deco_E1("correctedcl_Es1");
+  static const SG::Accessor<double> deco_E2("correctedcl_Es2");
+  static const SG::Accessor<double> deco_E3("correctedcl_Es3");
 
   if (status == CP::CorrectionCode::Ok) {
-    ATH_MSG_DEBUG("decorating cluster with corrected layer energies");
-    deco_E0(*cluster) = m_doPSCorrections  ?
+    ATH_MSG_DEBUG("decorating egamma with corrected layer energies");
+    deco_E0(particle) = m_doPSCorrections  ?
       inputs.E0raw : cluster->energyBE(0);
-    deco_E1(*cluster) = m_doS12Corrections or m_doSaccCorrections ?
+    deco_E1(particle) = m_doS12Corrections or m_doSaccCorrections ?
       inputs.E1raw : cluster->energyBE(1);
-    deco_E2(*cluster) = m_doS12Corrections or m_doSaccCorrections ?
+    deco_E2(particle) = m_doS12Corrections or m_doSaccCorrections ?
       inputs.E2raw : cluster->energyBE(2) + addE2;
-    deco_E3(*cluster) = m_doSaccCorrections ?
+    deco_E3(particle) = m_doSaccCorrections ?
       inputs.E3raw : cluster->energyBE(3) + addE3;
     return status;
   }
@@ -1125,10 +1128,10 @@ CP::CorrectionCode egammaLayerRecalibTool::applyCorrection(xAOD::Egamma& particl
   // all the particle in the container are decorated
   // it is not possible to distinguish between decorated / non-decorated
   // since all are decorated
-  deco_E0(*cluster) = cluster->energyBE(0);
-  deco_E1(*cluster) = cluster->energyBE(1);
-  deco_E2(*cluster) = cluster->energyBE(2) + addE2;
-  deco_E3(*cluster) = cluster->energyBE(3) + addE3;
+  deco_E0(particle) = cluster->energyBE(0);
+  deco_E1(particle) = cluster->energyBE(1);
+  deco_E2(particle) = cluster->energyBE(2) + addE2;
+  deco_E3(particle) = cluster->energyBE(3) + addE3;
   return status;
 
 }
@@ -1151,13 +1154,13 @@ std::array<double,4> egammaLayerRecalibTool::getLayerCorrections(const xAOD::Ega
     }
     return {1.,1.,1.,1.};
   }
-  
+
   auto safe_divide = [](float a, float b) { return b != 0 ? a/b : 1.f; };
   return {
     safe_divide(inputs.E0raw, particle.caloCluster()->energyBE(0)),
     safe_divide(inputs.E1raw, particle.caloCluster()->energyBE(1)),
     safe_divide(inputs.E2raw, particle.caloCluster()->energyBE(2) + addE2),
-    safe_divide(inputs.E3raw, particle.caloCluster()->energyBE(3) + addE3) 
+    safe_divide(inputs.E3raw, particle.caloCluster()->energyBE(3) + addE3)
   };
 
 }
@@ -1186,19 +1189,17 @@ std::map<std::string, std::string, std::less<>> parse(const std::string& list)
       std::string key;
       std::string value;
       if (item_list->GetEntries() == 1) {
-	key = "amount";
-	value = static_cast<TObjString*>(item_list->At(0))->GetString().Data();
-      }
-      else if (item_list->GetEntries() == 2) {
-	key = static_cast<TObjString*>(item_list->At(0))->GetString().Data();
-	value = static_cast<TObjString*>(item_list->At(1))->GetString().Data();
-      }
-      else {
-	std::cerr << "invalid string " << item << std::endl;
+        key = "amount";
+        value = static_cast<TObjString*>(item_list->At(0))->GetString().Data();
+      } else if (item_list->GetEntries() == 2) {
+        key = static_cast<TObjString*>(item_list->At(0))->GetString().Data();
+        value = static_cast<TObjString*>(item_list->At(1))->GetString().Data();
+      } else {
+        std::cerr << "invalid string " << item << std::endl;
       }
       if (result.find(key) != result.end()) {
-	std::cerr << "trying to insert two times key " << key << std::endl;
-	assert(false);
+        std::cerr << "trying to insert two times key " << key << std::endl;
+        assert(false);
       }
       result.insert(std::make_pair(key, value));
     }
@@ -1245,23 +1246,25 @@ egammaLayerRecalibTool::create(const std::string& type, const std::string& args)
     }
     if (args_map.contains("formulax") ) dim = 1;
 
-    if (dim == 0)
-      {
-	std::cerr << "with histo you must specify formulax" << std::endl;
-	assert(false);
-      }
+    if (dim == 0) {
+      std::cerr << "with histo you must specify formulax" << std::endl;
+      assert(false);
+    }
     if (dim == 1) {
       TFile f(args_map["file"].c_str());
-      std::cout << "opening histo " << args_map["histo"] << " from file " << args_map["file"] << std::endl;
+      std::cout << "opening histo " << args_map["histo"] << " from file "
+                << args_map["file"] << std::endl;
       TH1F* histo = dynamic_cast<TH1F*>(f.Get(args_map["histo"].c_str()));
 
-      if(histo){
-	histo->SetDirectory(nullptr);
-	amount_getter = new GetAmountHisto1D(*histo);
+      if (histo) {
+        histo->SetDirectory(nullptr);
+        amount_getter = new GetAmountHisto1D(*histo);
+      } else {
+        assert(false);
       }
-      else{assert(false); }
+    } else {
+      assert(false);
     }
-    else { assert(false); }
   }
   else {
     std::cerr << "cannot understand argument " << args << std::endl;
