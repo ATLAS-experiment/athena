@@ -7,6 +7,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
+from AthenaCommon.SystemOfUnits import MeV
 
 # Thinning for VSI tracks
 def VSITrackParticleThinningCfg(flags, name, **kwargs):
@@ -471,3 +472,57 @@ def RecoverZeroPixelHitMuonsCfg(flags):
     acc.addEventAlgo(CompFactory.RecoverZeroPixelHitMuons(name="RecoverZeroPixelHitMuons", ExtraInputs=ExtraInputs))
     
     return acc 
+
+def LLP1eeMassToolCfg(flags):
+    """Di-electron invariant mass (OS loose-electron pairs). Used to gate the
+    photon-cone track thinning: only events with a di-lepton mass > 40 GeV keep
+    all tracks within dR < 0.6 of photons."""
+    acc = ComponentAccumulator()
+
+    requirementElectrons = " && ".join(
+        ["(Electrons.DFCommonElectronsLHLoose)", "(Electrons.pt > 9.5*GeV)"]
+    )
+
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.EGInvariantMassTool(
+            name="LLP1eeMassTool",
+            Object1Requirements=requirementElectrons,
+            Object2Requirements=requirementElectrons,
+            StoreGateEntryName="LLP1_DiElectronMass",
+            Mass1Hypothesis=0.511 * MeV,
+            Mass2Hypothesis=0.511 * MeV,
+            Container1Name="Electrons",
+            Container2Name="Electrons",
+            CheckCharge=True,
+            DoTransverseMass=False,
+            MinDeltaR=0.0,
+        )
+    )
+    return acc
+
+
+def LLP1mumuMassToolCfg(flags):
+    """Di-muon invariant mass (OS muon pairs). Used to gate the photon-cone
+    track thinning."""
+    acc = ComponentAccumulator()
+
+    requirementMuons = " && ".join(
+        ["Muons.pt>4.5*GeV", "abs(Muons.eta)<2.7", "Muons.DFCommonMuonPassPreselection"]
+    )
+
+    acc.setPrivateTools(
+        CompFactory.DerivationFramework.EGInvariantMassTool(
+            name="LLP1mumuMassTool",
+            Object1Requirements=requirementMuons,
+            Object2Requirements=requirementMuons,
+            StoreGateEntryName="LLP1_DiMuonMass",
+            Mass1Hypothesis=105 * MeV,
+            Mass2Hypothesis=105 * MeV,
+            Container1Name="Muons",
+            Container2Name="Muons",
+            CheckCharge=True,
+            DoTransverseMass=False,
+            MinDeltaR=0.0,
+        )
+    )
+    return acc
