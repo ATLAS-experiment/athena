@@ -3,9 +3,8 @@
 */
 
 #include "Collection.h"
-#include "CollectionCursor.h"
 
-#include "CoralBase/AttributeList.h"
+#include "CoralBase/Attribute.h"
 
 #include "PersistentDataModel/Token.h"
 #include "StorageSvc/APRDefaults.h"
@@ -14,19 +13,15 @@
 #include "StorageSvc/DbContainer.h"
 #include "StorageSvc/DbTypeInfo.h"
 
-#include "CollectionColumn.h"
-
-#include <algorithm>
+#include <cstdint>
 #include <format>
 #include <set>
 #include <stdexcept>
 #include <utility>
 #include <vector>
 
-Collection::~Collection() = default;
-
 Collection::Collection( FileDescriptor& fileDescr )
-      : APRMessaging( "Collection")
+      : APRMessaging( "Collection"), m_idx(-1)
 {
          if( !fileDescr.dbc() ) {
             throw std::runtime_error( "Collection: file must already be connected: " + fileDescr.PFN() );
@@ -35,6 +30,7 @@ Collection::Collection( FileDescriptor& fileDescr )
          // all errors are thrown as exceptions
          ATH_MSG_VERBOSE( "Opening collection '" << fileDescr.PFN() << "' in READ mode" );
 
+         DbContainer dhCont;
          std::vector<const Token*> containerTokens;
          DbDatabase db( fileDescr.dbc()->handle() );
          if( !db.containers(containerTokens, false).isSuccess() ) {
@@ -58,16 +54,11 @@ Collection::Collection( FileDescriptor& fileDescr )
                ATH_MSG_DEBUG("  :container " << contName << " with attribute " << attrName << " of type: " << typ_info->clazz().Name());
                DbContainer cnt( db.type() );
                if( cnt.open( db, contName, typ_info, token.technology(), db.openMode() ).isSuccess() )  {
-                  if( attrName != CollectionColumn::tokenColumn().name() ) {
-                     const auto duplicate = std::find_if(
-                        m_attributeColumns.begin(), m_attributeColumns.end(),
-                        [&attrName]( const CollectionColumn& column ) {
-                           return column.name() == attrName;
-                        } );
-                     if( duplicate != m_attributeColumns.end() ) {
+                  if( attrName != APRDefaults::TokenTypeName ) {
+                     if( m_containerMap.contains(attrName) ) {
                         throw std::runtime_error( "Column with name `" + attrName + "' already exists." );
                      }
-                     m_attributeColumns.emplace_back( attrName, typ_info->clazz().Name() );
+                     m_attributeList.extend( attrName, typ_info->clazz().Name() );
                   }
                   m_containerMap.emplace( attrName, std::move(cnt) );
                } else {
@@ -77,25 +68,66 @@ Collection::Collection( FileDescriptor& fileDescr )
                ATH_MSG_DEBUG("  :container " << contName << " is the DataHeader container");
                DbContainer cnt( db.type() );
                if( cnt.open( db, contName, typ_info, token.technology(), db.openMode() ).isSuccess() )  {
-                  m_dhCont = std::move(cnt);
+                  dhCont = std::move(cnt);
                } else {
                   ATH_MSG_WARNING("EventTag container " << contName << " could not be opened");
                }
             }
          }
+         if( m_containerMap.empty() ) {
+            m_containerMap.emplace( APRDefaults::TokenTypeName, std::move(dhCont) );
+         }
+         m_tokenContainer = m_containerMap[APRDefaults::TokenTypeName];
 }
 
 
-std::unique_ptr<CollectionCursor> Collection::cursor() {
-      if( m_containerMap.empty() ) {
-         m_containerMap.emplace( APRDefaults::TokenTypeName, std::move(m_dhCont) );
+bool Collection::next()
+{
+   if( ++m_idx >= size() ) {
+      return false;
+   }
+   // read the row
+   Token cnt_token(m_tokenContainer.token());
+   Token::OID_t oid { cnt_token.oid().first, (std::int64_t)m_idx };
+   for( auto& attr : m_attributeList ) {
+      const std::string& attr_name = attr.specification().name();
+      DbContainer &container = m_containerMap.at( attr_name );
+      void *obj = attr.addressOfData();
+      if( !container.load( &obj, nullptr, oid ).isSuccess() ) {
+         return false;
       }
-      CollectionRowBuffer collectionRowBuffer;
-      coral::AttributeList attributeList;
-      for( const auto& attrCol : m_attributeColumns ) {
-         attributeList.extend( attrCol.name(), attrCol.type() );
+   }
+
+   const std::string& newDHContName = std::format("{}(DataHeader)", APRDefaults::ReadConfig::getDataHeaderName( cnt_token.dbID().toString() ));
+   const std::string& oldDHContName = std::format("{}_DataHeader",  APRDefaults::ReadConfig::getDataHeaderName( cnt_token.dbID().toString() ));
+   std::string tokenStr;
+   if( cnt_token.contID() == newDHContName || cnt_token.contID() == oldDHContName ) {
+      cnt_token.setOid(oid);
+      tokenStr = cnt_token.toString();
+   } else {
+      // read the Token
+      void *token_addr = &tokenStr;
+      if( !m_tokenContainer.load( &token_addr, nullptr, oid ).isSuccess() ) {
+         return false;
       }
-      collectionRowBuffer.setAttributeList( attributeList );
-      return std::make_unique<CollectionCursor>( collectionRowBuffer, m_containerMap);
+   }
+   m_token.fromString( tokenStr );
+   return true;
+}
+
+
+std::size_t Collection::size()
+{
+   return m_tokenContainer.size();
+}
+
+
+bool Collection::seek(std::size_t position)
+{
+   if( position >= size() ) {
+      return false;
+   }
+   m_idx = position-1;
+   return true;
 }
 

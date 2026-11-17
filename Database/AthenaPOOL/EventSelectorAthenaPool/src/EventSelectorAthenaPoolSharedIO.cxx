@@ -20,7 +20,7 @@
 #include "AthenaKernel/IDataShare.h"
 
 // Pool
-#include "CollectionCursor.h"
+#include "Collection.h"
 
 namespace {
    /// Helper to suppress thread-checker warnings for single-threaded execution
@@ -281,7 +281,7 @@ StatusCode EventSelectorAthenaPoolSharedIO::recordAttributeList() const {
             ATH_MSG_ERROR("Cannot cast AthenaPoolCnvSvc to DataShare");
             return StatusCode::FAILURE;
          }
-         std::string token = m_headerIterator->eventRef().toString();
+         std::string token = m_poolCollection->eventRef().toString();
          StatusCode sc;
          while ( (sc = putEvent_ST(*m_eventStreamingTool,
                                    m_evtCount - 1, token.c_str(),
