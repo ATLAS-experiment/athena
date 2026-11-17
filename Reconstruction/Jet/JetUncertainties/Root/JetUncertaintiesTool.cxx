@@ -49,6 +49,7 @@
 #include "TROOT.h"
 #include "TEnv.h"
 #include "TH2D.h"
+#include "TRandom3.h"
 
 // C++ includes
 #include <unordered_set>
@@ -95,7 +96,6 @@ JetUncertaintiesTool::JetUncertaintiesTool(const std::string& name)
     , m_combMassWeightTAMassDef(CompMassDef::UNKNOWN)
     , m_combMassParam(CompParametrization::UNKNOWN)
     , m_userSeed(0)
-    , m_rand()
     , m_isData(true)
     , m_resHelper(nullptr)
     , m_namePrefix("JET_")
@@ -162,7 +162,6 @@ JetUncertaintiesTool::JetUncertaintiesTool(const JetUncertaintiesTool& toCopy) A
     , m_combMassWeightTAMassDef(CompMassDef::UNKNOWN)
     , m_combMassParam(CompParametrization::UNKNOWN)
     , m_userSeed(toCopy.m_userSeed)
-    , m_rand(toCopy.m_rand)
     , m_isData(toCopy.m_isData)
     , m_resHelper(new ResolutionHelper(*toCopy.m_resHelper))
     , m_namePrefix(toCopy.m_namePrefix)
@@ -2466,7 +2465,6 @@ double JetUncertaintiesTool::getSmearingFactor(const xAOD::Jet& jet, const CompS
                 - Nominal resolution histograms for data
                 - Nominal resolution histograms for MC
                 - Parametrizations of nominal resolution histograms
-            m_rand: the random number generator
             m_userSeed: the optional user-specified seed to use for the random generator
 
         Technical detail on relative uncertainties:
@@ -2514,17 +2512,18 @@ double JetUncertaintiesTool::getSmearingFactor(const xAOD::Jet& jet, const CompS
     // If the user specified a seed, then use it times the jet's phi times 1*10^5
     // If not, then use the jet's phi times 2*10^5 in MC, 1.23*10^5 in (pseudo-)data
     // Difference in seed between allows for easy use of pseudo-data
-    long long int seed = m_userSeed != 0 ? m_userSeed*1.00e+5*fabs(jet.phi()) : (m_isData ? 1.23e+5 : 2.00e+5)*fabs(jet.phi());
-    // SetSeed(0) uses the clock, avoid this
+    // TRandom3 takes a 32-bit seed (UInt_t)
+    UInt_t seed = static_cast<long long int>(m_userSeed != 0 ? m_userSeed*1.00e+5*std::abs(jet.phi()) : (m_isData ? 1.23e+5 : 2.00e+5)*std::abs(jet.phi()));
+    // a seed of 0 picks a random seed, avoid this
     if(seed == 0) seed = m_isData ? 34545654 : 45583453; // arbitrary numbers which the seed couldn't otherwise be
-    m_rand.SetSeed(seed);
+    TRandom3 rand (seed);
 
     // Calculate and return the smearing factor
     // Force this to be a positive value
     // Negative values should be extraordinarily rare, but they do exist
     double smearingFactor = -1;
     while (smearingFactor < 0)
-        smearingFactor = m_rand.Gaus(1.,sigmaSmear);
+        smearingFactor = rand.Gaus(1.,sigmaSmear);
     return smearingFactor;
 }
 
