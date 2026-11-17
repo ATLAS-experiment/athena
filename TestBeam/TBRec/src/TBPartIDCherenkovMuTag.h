@@ -25,7 +25,6 @@ class TBPartIDCherenkovMuTag : public AthAlgorithm
   Gaudi::Property<std::string> m_particleKey{this, "IdentifiedParticleKey", "TBIdentifiedParticle", "SG key of the output TBIdentifiedParticle"};
   Gaudi::Property<int> m_muonADCcut{this, "MuonADCcut", 500, "ADC cut for the muon tag"};
   Gaudi::Property<int> m_cherenkovADCcut{this, "CherenkovADCcut", 410, "ADC cut for the Cherenkov counter"};
-  double m_useCherenkovBelow{0};
 
   Gaudi::Property<bool> m_printSummary{this, "PrintSummary", false, "Print summary in finalize"};
   unsigned m_NElectrons{0},m_NPions{0},m_NMuons{0},m_Nunknown{0};

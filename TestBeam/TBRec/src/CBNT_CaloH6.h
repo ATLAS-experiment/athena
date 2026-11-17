@@ -54,8 +54,6 @@ class CBNT_CaloH6 : public CBNT_TBRecBase
   SG::ReadCondHandleKey<CaloNoise> m_elecNoiseKey
     { this, "ElecNoiseKey", "electronicNoise", "SG key for electronic noise" };
   
-  float m_noiseSigma{0};
-  
   // picking detector and number of channels
   Gaudi::Property<std::string> m_det_type{this, "Det_Type", "", "Detector type (HEC, EMEC or FCAL)"};
   Gaudi::Property<int> m_numchan{this, "Max_Chan", 0, "Maximum number of channels"};
