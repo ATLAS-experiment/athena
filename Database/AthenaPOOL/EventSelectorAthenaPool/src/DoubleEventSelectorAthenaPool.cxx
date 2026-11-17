@@ -14,8 +14,7 @@
 #include "DoubleEventSelectorAthenaPool.h"
 
 // Pool
-#include "CollectionCursor.h"
-#include "CollectionRowBuffer.h"
+#include "Collection.h"
 
 #include "PersistentDataModel/AthenaAttributeList.h"
 
@@ -152,7 +151,7 @@ StatusCode DoubleEventSelectorAthenaPool::recordAttributeList() const
   // Get access to AttributeList
   ATH_MSG_DEBUG("Get AttributeList from the collection");
   // MN: accessing only attribute list, ignoring token list
-  const coral::AttributeList& attrList = m_headerIterator->currentRow().attributeList();
+  const coral::AttributeList& attrList = m_poolCollection->attributeList();
   ATH_MSG_DEBUG("AttributeList size " << attrList.size());
   std::unique_ptr<AthenaAttributeList> athAttrList{};
 

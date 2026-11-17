@@ -22,7 +22,6 @@
 
 // Pool
 #include "Collection.h"
-#include "CollectionCursor.h"
 
 #include "StorageSvc/DbType.h"
 
@@ -92,13 +91,12 @@ StatusCode CondProxyProvider::preLoadAddresses(StoreID::type storeID,
          ATH_MSG_ERROR("Could not open item: \"" << inputCollection << "\" from the collection list.");
          return StatusCode::FAILURE;
       }
-      std::unique_ptr<CollectionCursor> headerIterator = poolCollection->cursor();
-      if (!headerIterator->next()) {
+      if (!poolCollection->next()) {
          ATH_MSG_WARNING("Cannot retrieve Collection.");
          continue;
       }
       auto token = std::make_unique<Token>();
-      token->fromString(headerIterator->eventRef().toString());
+      token->fromString(poolCollection->eventRef().toString());
       const std::string key = token->dbID().toString();
       CxxUtils::RefCountedPtr<TokenAddress> tokenAddr
            (new TokenAddress(pool::POOL_StorageType.type(), ClassID_traits<DataHeader>::ID(), "", key, m_contextId, std::move(token)));

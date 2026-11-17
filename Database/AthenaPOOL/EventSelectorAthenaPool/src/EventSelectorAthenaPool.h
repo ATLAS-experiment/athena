@@ -41,7 +41,6 @@ class EventContextAthenaPool;
 class StoreGateSvc;
 class IPoolSvc;
 class Collection;
-class CollectionCursor;
 
 /** @class EventSelectorAthenaPool
  *  @brief This class is the EventSelector for event data.
@@ -158,7 +157,6 @@ private: // data
    EventContextAthenaPool*         m_endIter{};
    mutable std::unique_ptr<Collection> m_poolCollection ATLAS_THREAD_SAFE {};
    mutable std::string             m_curCollectionName ATLAS_THREAD_SAFE;
-   mutable std::unique_ptr<CollectionCursor> m_headerIterator ATLAS_THREAD_SAFE {};
    mutable Guid m_guid ATLAS_THREAD_SAFE {};
    mutable std::map<SG::SourceID, int> m_activeEventsPerSource ATLAS_THREAD_SAFE;
    /// RAII guard: guarantees a matching EndInputFile for every BeginInputFile.
