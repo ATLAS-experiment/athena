@@ -15,6 +15,7 @@ def EvtGenCfg(flags,
               whiteList = None,
               allowAllKnownDecays = False,
               auxfiles = None,
+              pdtFile = 'inclusive.pdt',
               **kwargs):
 
     # Set defaults
@@ -73,6 +74,7 @@ def EvtGenCfg(flags,
           decayFile = decayFile,
           allowAllKnownDecays = allowAllKnownDecays,
           whiteList = whiteList,
+          pdtFile = pdtFile,
           **kwargs
         )
     )
