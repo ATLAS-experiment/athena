@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetIdentifier/TRT_ID.h"
@@ -8,7 +8,7 @@
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
 
 #include "TrkAlignEvent/AlignTSOS.h"
-#include "InDetAlignGeomTools/InDetAlignModuleTool.h"
+#include "InDetAlignModuleTool.h"
 
 namespace InDet {
 

@@ -17,7 +17,7 @@
 #include "TrkAlignEvent/AlignPar.h"
 
 
-#include "InDetAlignGeomTools/PixelGeometryManagerTool.h"
+#include "PixelGeometryManagerTool.h"
 
 #include "GeoModelInterfaces/IGeoModelSvc.h"
 #include "RDBAccessSvc/IRDBAccessSvc.h"
@@ -35,82 +35,10 @@ namespace InDet {
                                      const std::string& name,
                                      const IInterface * parent)
     : AthAlgTool(type,name,parent)
-    , m_etaCorrection{}
-    , m_detManager(nullptr)
-    , m_idHelper()
-    , m_alignModuleTool("Trk::AlignModuleTool/AlignModuleTool")
-    , m_idHashToAlignModuleMaps(Trk::AlignModule::NDetectorTypes,(Trk::AlignModuleList*)nullptr)
-    , m_alignParList(nullptr)
-    , m_fullAlignParList(nullptr)
     , m_rdbAccessSvc("RDBAccessSvc",name)
     , m_geoModelSvc("GeoModelSvc",name)
   {
     declareInterface<IGeometryManagerTool>(this);
-    declareProperty("AlignModuleTool",    m_alignModuleTool);
-
-    declareProperty("AlignBarrel",     m_alignBarrel     = true);
-    declareProperty("AlignEndcaps",    m_alignEndcaps    = true);
-
-    declareProperty("AlignBarrelX",    m_alignBarrelX    = true);
-    declareProperty("AlignBarrelY",    m_alignBarrelY    = true);
-    declareProperty("AlignBarrelZ",    m_alignBarrelZ    = true);
-    declareProperty("AlignBarrelRotX", m_alignBarrelRotX = true);
-    declareProperty("AlignBarrelRotY", m_alignBarrelRotY = true);
-    declareProperty("AlignBarrelRotZ", m_alignBarrelRotZ = true);
-    declareProperty("AlignBarrelBowX", m_alignBarrelBowX = false);
-
-
-    declareProperty("AlignEndcapX",    m_alignEndcapX    = true);
-    declareProperty("AlignEndcapY",    m_alignEndcapY    = true);
-    declareProperty("AlignEndcapZ",    m_alignEndcapZ    = true);
-    declareProperty("AlignEndcapRotX", m_alignEndcapRotX = true);
-    declareProperty("AlignEndcapRotY", m_alignEndcapRotY = true);
-    declareProperty("AlignEndcapRotZ", m_alignEndcapRotZ = true);
-
-    declareProperty("SetSigmaBarrelX",    m_sigmaBarrelX       = 1.);
-    declareProperty("SetSigmaBarrelY",    m_sigmaBarrelY       = 1.);
-    declareProperty("SetSigmaBarrelZ",    m_sigmaBarrelZ       = 1.);
-    declareProperty("SetSigmaBarrelRotX", m_sigmaBarrelRotX    = 0.001);
-    declareProperty("SetSigmaBarrelRotY", m_sigmaBarrelRotY    = 0.001);
-    declareProperty("SetSigmaBarrelRotZ", m_sigmaBarrelRotZ    = 0.001);
-    declareProperty("SetSigmaBarrelBowX", m_sigmaBarrelBowX    = 1);
-
-    declareProperty("SetSigmaEndcapX",    m_sigmaEndcapX       = 1.);
-    declareProperty("SetSigmaEndcapY",    m_sigmaEndcapY       = 1.);
-    declareProperty("SetSigmaEndcapZ",    m_sigmaEndcapZ       = 1.);
-    declareProperty("SetSigmaEndcapRotX", m_sigmaEndcapRotX    = 0.001);
-    declareProperty("SetSigmaEndcapRotY", m_sigmaEndcapRotY    = 0.001);
-    declareProperty("SetSigmaEndcapRotZ", m_sigmaEndcapRotZ    = 0.001);
-
-    declareProperty("SetSoftCutBarrelX",    m_softcutBarrelX       = 1.);
-    declareProperty("SetSoftCutBarrelY",    m_softcutBarrelY       = 1.);
-    declareProperty("SetSoftCutBarrelZ",    m_softcutBarrelZ       = 1.);
-    declareProperty("SetSoftCutBarrelRotX", m_softcutBarrelRotX    = 1.);
-    declareProperty("SetSoftCutBarrelRotY", m_softcutBarrelRotY    = 1.);
-    declareProperty("SetSoftCutBarrelRotZ", m_softcutBarrelRotZ    = 1.);
-    declareProperty("SetSoftCutBarrelBowX", m_softcutBarrelBowX    = 1.);
-
-    declareProperty("SetSoftCutEndcapX",    m_softcutEndcapX       = 1.);
-    declareProperty("SetSoftCutEndcapY",    m_softcutEndcapY       = 1.);
-    declareProperty("SetSoftCutEndcapZ",    m_softcutEndcapZ       = 1.);
-    declareProperty("SetSoftCutEndcapRotX", m_softcutEndcapRotX    = 1.);
-    declareProperty("SetSoftCutEndcapRotY", m_softcutEndcapRotY    = 1.);
-    declareProperty("SetSoftCutEndcapRotZ", m_softcutEndcapRotZ    = 1.);
-
-    // defines alignment level
-    declareProperty("AlignmentLevel",        m_alignLevel        =  1);
-    declareProperty("AlignmentLevelBarrel",  m_alignLevelBarrel  = -1);
-    declareProperty("AlignmentLevelEndcaps", m_alignLevelEndcaps = -1);
-    declareProperty("AlignmentDBM",          m_alignDBM          =  false);
-
-    declareProperty("doModuleSelection",  m_doModuleSelection  = false);
-    declareProperty("ModuleSelection",    m_moduleSelection);
-
-    declareProperty("DumpGeometry",       m_dumpGeometry = true);
-
-    m_hashCounter = 0;
-    m_logStream = nullptr;
-
   }
 
   //________________________________________________________________________
@@ -131,6 +59,11 @@ namespace InDet {
   {
     ATH_MSG_DEBUG("initialize() of PixelGeometryManagerTool");
 
+    // alignment levels are members of the IGeometryManagerTool base class
+    m_alignLevel = m_alignLevelProp;
+    m_alignLevelBarrel = m_alignLevelBarrelProp;
+    m_alignLevelEndcaps = m_alignLevelEndcapsProp;
+
     // retrieve AlignModuleTool
     ATH_CHECK( m_alignModuleTool.retrieve() );
 
@@ -150,8 +83,8 @@ namespace InDet {
     // dump module selection
     if(m_doModuleSelection && msgLvl(MSG::INFO)) {
     int idx{};
-    ATH_MSG_INFO("Creating geometry for selected "<<m_moduleSelection.size()<<" modules:");
-    for(const auto mod:m_moduleSelection)
+    ATH_MSG_INFO("Creating geometry for selected "<<m_moduleSelection.value().size()<<" modules:");
+    for(const auto mod:m_moduleSelection.value())
         ATH_MSG_INFO("   "<<idx++<<".  "<<mod);
     }
 
@@ -2025,9 +1958,9 @@ namespace InDet {
     if(!m_doModuleSelection)
       return true;
 
-    int nsel = m_moduleSelection.size();
+    int nsel = m_moduleSelection.value().size();
     for(int i=0;i<nsel;++i)
-      if(m_moduleSelection.at(i) == id)
+      if(m_moduleSelection.value().at(i) == id)
         return true;
 
     return false;

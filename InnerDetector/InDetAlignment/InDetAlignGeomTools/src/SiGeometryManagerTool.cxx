@@ -18,67 +18,13 @@
 #include "TrkAlignEvent/AlignModuleList.h"
 #include "TrkAlignEvent/AlignPar.h"
 
-#include "InDetAlignGeomTools/SiGeometryManagerTool.h"
+#include "SiGeometryManagerTool.h"
 #include <ostream>
 
 
 using namespace InDetDD;
 
 namespace InDet {
-
-  //________________________________________________________________________
-  SiGeometryManagerTool::SiGeometryManagerTool(const std::string& type,
-                                     const std::string& name,
-                                     const IInterface * parent)
-    : AthAlgTool(type,name,parent)
-    , m_pixelDetManager(nullptr)
-    , m_sctDetManager(nullptr)
-    , m_pixHelper()
-    , m_sctHelper()
-    , m_idHelper()
-    , m_pixelGeoManager("")
-    , m_sctGeoManager("")
-    , m_alignModuleTool("Trk::AlignModuleTool/AlignModuleTool")
-    , m_idHashToAlignModuleMaps(Trk::AlignModule::NDetectorTypes,(Trk::AlignModuleList*)nullptr)
-    , m_alignParList(nullptr)
-    , m_fullAlignParList(nullptr)
-  {
-    declareInterface<IGeometryManagerTool>(this);
-    declareProperty("AlignModuleTool",      m_alignModuleTool);
-
-    declareProperty("PixelGeometryManager", m_pixelGeoManager);
-    declareProperty("SCTGeometryManager",   m_sctGeoManager);
-
-    // Silicon joboptions
-    declareProperty("AlignPixel",         m_alignPixel        = true);
-    declareProperty("AlignSCT",           m_alignSCT          = true);
-
-    declareProperty("AlignX",             m_alignX            = true);
-    declareProperty("AlignY",             m_alignY            = true);
-    declareProperty("AlignZ",             m_alignZ            = true);
-    declareProperty("AlignRotX",          m_alignRotX         = true);
-    declareProperty("AlignRotY",          m_alignRotY         = true);
-    declareProperty("AlignRotZ",          m_alignRotZ         = true);
-
-    declareProperty("SetSigmaX",          m_sigmaX            = 1.);
-    declareProperty("SetSigmaY",          m_sigmaY            = 1.);
-    declareProperty("SetSigmaZ",          m_sigmaZ            = 1.);
-    declareProperty("SetSigmaRotX",       m_sigmaRotX         = 0.001);
-    declareProperty("SetSigmaRotY",       m_sigmaRotY         = 0.001);
-    declareProperty("SetSigmaRotZ",       m_sigmaRotZ         = 0.001);
-
-    // defines alignment level
-    declareProperty("AlignmentLevel",     m_alignLevel        = -1);
-
-    declareProperty("doModuleSelection",  m_doModuleSelection = false);
-    declareProperty("ModuleSelection",    m_moduleSelection);
-
-    declareProperty("DumpGeometry",       m_dumpGeometry = true);
-    declareProperty("ActualGeometry",     m_actualGeom = false);
-
-    m_hashCounter = 0;
-    m_logStream = nullptr;
-  }
 
   //________________________________________________________________________
   SiGeometryManagerTool::~SiGeometryManagerTool()
@@ -97,6 +43,9 @@ namespace InDet {
   StatusCode SiGeometryManagerTool::initialize()
   {
     ATH_MSG_DEBUG("initialize() of SiGeometryManagerTool");
+
+    // alignment levels are members of the IGeometryManagerTool base class
+    m_alignLevel = m_alignLevelProp;
 
     // retrieve AlignModuleTool
     ATH_CHECK( m_alignModuleTool.retrieve() );
@@ -119,8 +68,8 @@ namespace InDet {
     // dump module selection
     if(m_doModuleSelection && msgLvl(MSG::INFO)) {
       int idx{};
-      ATH_MSG_INFO("Creating geometry for selected "<<m_moduleSelection.size()<<" modules:");
-      for(const auto & mod:m_moduleSelection)
+      ATH_MSG_INFO("Creating geometry for selected "<<m_moduleSelection.value().size()<<" modules:");
+      for(const auto & mod:m_moduleSelection.value())
         ATH_MSG_INFO("   "<<idx++<<".  "<<mod);
     }
 
@@ -476,9 +425,9 @@ namespace InDet {
     if(!m_doModuleSelection)
       return true;
 
-    int nsel = m_moduleSelection.size();
+    int nsel = m_moduleSelection.value().size();
     for(int i=0;i<nsel;++i)
-      if(m_moduleSelection.at(i) == id)
+      if(m_moduleSelection.value().at(i) == id)
         return true;
 
     return false;
