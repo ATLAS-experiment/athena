@@ -28,7 +28,8 @@ StatusCode PFTrackCaloExtensionTool::initialize() {
   return StatusCode::SUCCESS;
 }
 
-std::unique_ptr<eflowTrackCaloPoints> PFTrackCaloExtensionTool::execute(const EventContext& ctx, const xAOD::TrackParticle* track) const {
+std::unique_ptr<eflowTrackCaloPoints> 
+PFTrackCaloExtensionTool::execute(const EventContext& ctx, const xAOD::TrackParticle* track) const {
 
     ATH_MSG_DEBUG("About to extrapolate track with pt, eta and phi: " << track->pt() << ", " << track->eta() << " and " << track->phi());
 

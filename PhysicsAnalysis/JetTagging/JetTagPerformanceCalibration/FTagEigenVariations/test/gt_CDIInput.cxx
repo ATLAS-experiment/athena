@@ -79,7 +79,11 @@ namespace {
     }
 
     double content(const std::string& name, int bin) const {
-      return dynamic_cast<const TH1*>(m_container.GetValue(name.c_str()))->GetBinContent(bin);
+      const auto pH = dynamic_cast<const TH1*>(m_container.GetValue(name.c_str()));
+      if (!pH)[[unlikely]]{
+        return 0.;
+      }
+      return pH->GetBinContent(bin);
     }
 
     static Source source(const Container& container, const std::string& name) {
@@ -296,7 +300,7 @@ TEST_F(SyntheticContainer, GlobalInputCombinesFlavours) {
 
   // An exclusion of one flavour removes the source from all, one that matches nothing is ignored
   settings.exclusions = {{"B", {"corr", "cOnly"}}};
-  EXPECT_EQ(ftag::ev::cdi::globalInput({b, c}, settings).excluded, std::set<std::string>{"corr"});
+  EXPECT_EQ(ftag::ev::cdi::globalInput({b, std::move(c)}, settings).excluded, std::set<std::string>{"corr"});
 }
 
 TEST_F(SyntheticContainer, GlobalInputMatchesPrefixedNames) {
@@ -322,7 +326,7 @@ TEST_F(SyntheticContainer, GlobalInputMatchesPrefixedNames) {
 
   // The same source under both names in one container is ambiguous
   light.sources.push_back(source(c, "corr"));
-  EXPECT_THROW(ftag::ev::cdi::globalInput({c, light}, settings), std::invalid_argument);
+  EXPECT_THROW(ftag::ev::cdi::globalInput({c, std::move(light)}, settings), std::invalid_argument);
 }
 
 int main(int argc, char** argv) {

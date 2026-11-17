@@ -107,7 +107,7 @@ ftag::ev::cdi::Container ftag::ev::cdi::readContainer(Analysis::CalibrationDataH
     }
     Eigen::VectorXd shifts(nBins);
     for (Eigen::Index i = 0; i < nBins; ++i) shifts(i) = hist->GetBinContent(out.histogramBins.at(i));
-    Source source{name, {shifts}, {}};
+    Source source{name, {std::move(shifts)}, {}};
     if (!container.isBinCorrelated(name)) source.binGroups = {uncorrelatedGroups};
     out.sources.push_back(std::move(source));
   }

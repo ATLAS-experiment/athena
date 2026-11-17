@@ -44,10 +44,11 @@ const std::string eflowCalo::m_layerNames[nRegions+1] =
 
 eflowCaloENUM eflowCalo::translateSampl(CaloCell_ID::CaloSample sampl)
 {
-  if (CaloCell_ID::Unknown == sampl)
-    return Unknown;
-  else
+  std::size_t idx = static_cast<std::size_t>(sampl);
+  if (idx < std::size(m_samplCaloMap))[[likely]]{
     return m_samplCaloMap[sampl];
+  }
+  return Unknown;
 }
 
 const std::string& eflowCalo::name(eflowCaloENUM layer)

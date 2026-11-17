@@ -99,6 +99,7 @@ const std::type_info& TrackSummaryContainer::columnDataType_impl(Acts::HashedStr
         }
     }
     throw std::runtime_error(std::format("{:}() - Key is unknown {:}",__func__, key));
+    //coverity[UNREACHABLE]
     return typeid(const void*);
 }
 
