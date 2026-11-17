@@ -53,7 +53,7 @@ namespace L1Muon
     SG::ReadHandleKey<xAOD::NRPCRDOContainer> m_keyRpcRdo{this, "NrpcRdoKey", "NRPCRDO", "Location of input RpcRDO"};
 
     /// Output Trigger candidates
-    SG::WriteHandleKey<xAOD::L1RPCCandDataContainer> m_outputCandKey{this, "RPCCandKey", "RPCCandData",
+    SG::WriteHandleKey<xAOD::L1RPCCandDataContainer> m_outputCandKey{this, "RPCCandKey", "L1RPCCandData",
                                                                          "LVL1 xAOD Barrel trigger candidates in the Muon RPC"};
     ToolHandle<GenericMonitoringTool> m_monTool{this, "MonTool", "", "Monitoring Tool"};
 
