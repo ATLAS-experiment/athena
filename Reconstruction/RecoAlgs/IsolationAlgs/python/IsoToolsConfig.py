@@ -82,6 +82,9 @@ def EGammaCaloIsolationToolCfg(flags, **kwargs):
     kwargs.setdefault('ParticleCaloExtensionTool',None)
     kwargs.setdefault('ParticleCaloCellAssociationTool',None)
     kwargs.setdefault('isMC',flags.Input.isMC)
+    if flags.Calo.TopoCluster.doTimeCut and \
+        flags.Egamma.fixTimingCutIssueAtReco:
+        kwargs.setdefault('FixCore57',True)
         
     acc.setPrivateTools(CompFactory.xAOD.CaloIsolationTool(**kwargs))
     return acc

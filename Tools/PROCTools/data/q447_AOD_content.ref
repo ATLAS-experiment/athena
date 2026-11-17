@@ -1429,6 +1429,8 @@ egammaClustersAuxDyn.CellLink
 egammaClustersAuxDyn.ETA1CALOFRAME
 egammaClustersAuxDyn.ETA2CALOFRAME
 egammaClustersAuxDyn.ETACALOFRAME
+egammaClustersAuxDyn.Eadded_Lr2
+egammaClustersAuxDyn.Eadded_Lr3
 egammaClustersAuxDyn.PHI1CALOFRAME
 egammaClustersAuxDyn.PHI2CALOFRAME
 egammaClustersAuxDyn.PHICALOFRAME
