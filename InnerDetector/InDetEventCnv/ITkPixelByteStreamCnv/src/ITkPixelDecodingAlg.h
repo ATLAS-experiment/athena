@@ -19,7 +19,8 @@
 #include "InDetRawData/PixelRDO_Container.h"
 #include "InDetRawData/PixelRDO_Collection.h"
 #include "ITkPixelCabling/ITkPixelCablingData.h"
-#include "itksw/pix/endec/intf/errors.hpp"
+#include "itksw/pix/endec/intf/Errors.hpp"
+#include "itksw/pix/endec/DecStreamDefs.hpp"
 #include <Gaudi/Property.h>
 #include <chrono>
 
@@ -137,10 +138,11 @@ namespace PixelCallbacks{
 
             inline void add_qcore([[maybe_unused]] uint8_t qcol, [[maybe_unused]] uint8_t qrow, [[maybe_unused]] uint64_t qtot) {};
 
-            inline uint8_t on_error(itksw::pix::endec::intf::EventError error) {
+            inline itksw::pix::endec::intf::ErrorRecoveryStrategy on_error(itksw::pix::endec::intf::EventError error, std::optional<itksw::pix::endec::ErrorContext>) {
                 std::ostringstream oss;
                 oss << "pixel decoding error: " << error.to_string();
                 throw std::runtime_error(oss.str());
+                return itksw::pix::endec::intf::ErrorRecoveryStrategy::CONTINUE_DECODING;
             };
             //end of non-negotiable concepts
 
@@ -207,9 +209,9 @@ namespace PixelCallbacks{
                     << ",qtot=" << qtot << ")" << std::endl;
             }
         
-            inline uint8_t on_error(itksw::pix::endec::intf::EventError error) {
-                m_msg_source << MSG::DEBUG << "on_error(" << error.code << ")" << std::endl;
-                return 0;
+            inline itksw::pix::endec::intf::ErrorRecoveryStrategy on_error(itksw::pix::endec::intf::EventError error, std::optional<itksw::pix::endec::ErrorContext>) {
+                m_msg_source << MSG::DEBUG << "on_error(" << error.to_string() << ")" << std::endl;
+                return itksw::pix::endec::intf::ErrorRecoveryStrategy::CONTINUE_DECODING;
             }
             
             MsgStream& m_msg_source;
