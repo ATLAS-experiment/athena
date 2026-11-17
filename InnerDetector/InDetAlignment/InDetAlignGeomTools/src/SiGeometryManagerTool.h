@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNGEOMTOOLS_SIGEOMETRYMANAGERTOOL_H
@@ -15,6 +15,7 @@
 #include "TrkAlignEvent/AlignModuleList.h"
 
 #include <TGeoManager.h>
+#include "Gaudi/Property.h"
 
 
 /**
@@ -46,10 +47,10 @@ namespace Trk
 
 namespace InDet
 {
-  class SiGeometryManagerTool : virtual public Trk::IGeometryManagerTool, public AthAlgTool
+  class SiGeometryManagerTool : public extends<AthAlgTool, Trk::IGeometryManagerTool>
   {
   public:
-    SiGeometryManagerTool(const std::string& type, const std::string& name, const IInterface * parent);
+    using base_class::base_class;
     virtual ~SiGeometryManagerTool();
 
     StatusCode initialize();
@@ -98,50 +99,51 @@ namespace InDet
     /** check whether the module is of a single detector type */
     bool isOneDetOnly(const Trk::AlignModule * mod, Trk::AlignModule::DetectorType dettype) const;
 
-    const InDetDD::PixelDetectorManager * m_pixelDetManager; //!< pointer to PIX detector manager
-    const InDetDD::SCT_DetectorManager  * m_sctDetManager;   //!< pointer to SCT detector manager
+    const InDetDD::PixelDetectorManager * m_pixelDetManager{nullptr}; //!< pointer to PIX detector manager
+    const InDetDD::SCT_DetectorManager  * m_sctDetManager{nullptr};   //!< pointer to SCT detector manager
 
-    const PixelID * m_pixHelper;  //!< pointer to PIX detector manager
-    const SCT_ID * m_sctHelper;   //!< pointer to SCT detector manager
-    const SiliconID * m_idHelper; //!< pointer to Silicon detector manager
+    const PixelID * m_pixHelper{nullptr};  //!< pointer to PIX detector manager
+    const SCT_ID * m_sctHelper{nullptr};   //!< pointer to SCT detector manager
+    const SiliconID * m_idHelper{nullptr}; //!< pointer to Silicon detector manager
 
-    ToolHandle<Trk::IGeometryManagerTool> m_pixelGeoManager; //!< pointer to Pixel geometry manager
-    ToolHandle<Trk::IGeometryManagerTool> m_sctGeoManager;   //!< pointer to SCT geometry manager
+    PublicToolHandle<Trk::IGeometryManagerTool> m_pixelGeoManager{this, "PixelGeometryManager", ""}; //!< pointer to Pixel geometry manager
+    PublicToolHandle<Trk::IGeometryManagerTool> m_sctGeoManager{this, "SCTGeometryManager", ""};   //!< pointer to SCT geometry manager
 
-    ToolHandle<Trk::IAlignModuleTool> m_alignModuleTool;     //!< pointer to AlignModuleTool
+    PublicToolHandle<Trk::IAlignModuleTool> m_alignModuleTool{this, "AlignModuleTool", "Trk::AlignModuleTool/AlignModuleTool"};     //!< pointer to AlignModuleTool
       
     Trk::AlignModuleList m_alignModuleList;
     Trk::AlignModuleList m_idHashToAlignModuleMap;
       
-    std::vector<Trk::AlignModuleList *> m_idHashToAlignModuleMaps; 
+    std::vector<Trk::AlignModuleList *> m_idHashToAlignModuleMaps{std::vector<Trk::AlignModuleList *>(Trk::AlignModule::NDetectorTypes, nullptr)}; 
 
-    DataVector< DataVector<Trk::AlignPar> > * m_alignParList;
-    DataVector< DataVector<Trk::AlignPar> > * m_fullAlignParList;
+    DataVector< DataVector<Trk::AlignPar> > * m_alignParList{nullptr};
+    DataVector< DataVector<Trk::AlignPar> > * m_fullAlignParList{nullptr};
 
     // alignment transforms
-    bool m_alignX;
-    bool m_alignY;
-    bool m_alignZ;
-    bool m_alignRotX;
-    bool m_alignRotY;
-    bool m_alignRotZ;
+    Gaudi::Property<bool> m_alignX{this, "AlignX", true};
+    Gaudi::Property<bool> m_alignY{this, "AlignY", true};
+    Gaudi::Property<bool> m_alignZ{this, "AlignZ", true};
+    Gaudi::Property<bool> m_alignRotX{this, "AlignRotX", true};
+    Gaudi::Property<bool> m_alignRotY{this, "AlignRotY", true};
+    Gaudi::Property<bool> m_alignRotZ{this, "AlignRotZ", true};
 
-    double m_sigmaX;
-    double m_sigmaY;
-    double m_sigmaZ;
-    double m_sigmaRotX;
-    double m_sigmaRotY;
-    double m_sigmaRotZ;
+    Gaudi::Property<double> m_sigmaX{this, "SetSigmaX", 1.};
+    Gaudi::Property<double> m_sigmaY{this, "SetSigmaY", 1.};
+    Gaudi::Property<double> m_sigmaZ{this, "SetSigmaZ", 1.};
+    Gaudi::Property<double> m_sigmaRotX{this, "SetSigmaRotX", 0.001};
+    Gaudi::Property<double> m_sigmaRotY{this, "SetSigmaRotY", 0.001};
+    Gaudi::Property<double> m_sigmaRotZ{this, "SetSigmaRotZ", 0.001};
 
     // Silicon joboptions
-    bool m_alignPixel;
-    bool m_alignSCT;
+    Gaudi::Property<bool> m_alignPixel{this, "AlignPixel", true};
+    Gaudi::Property<bool> m_alignSCT{this, "AlignSCT", true};
 
-    bool m_doModuleSelection;
-    std::vector<unsigned long long> m_moduleSelection;
+    Gaudi::Property<int> m_alignLevelProp{this, "AlignmentLevel", -1}; //!< property, copied to m_alignLevel in initialize()
+    Gaudi::Property<bool> m_doModuleSelection{this, "doModuleSelection", false};
+    Gaudi::Property<std::vector<unsigned long long>> m_moduleSelection{this, "ModuleSelection", {}};
 
-    bool m_dumpGeometry;
-    bool m_actualGeom;
+    Gaudi::Property<bool> m_dumpGeometry{this, "DumpGeometry", true};
+    Gaudi::Property<bool> m_actualGeom{this, "ActualGeometry", false};
 
     Gaudi::Property<std::string> m_pixelDetManagerName{this,"PixelDetectorManager","Pixel","Name of the Pixel Detector Manager to attempt to retrieve"};
     Gaudi::Property<std::string> m_stripDetManagerName{this,"StripDetectorManager","SCT","Name of the Strip Detector Manager to attempt to retrieve"};

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNGEOMTOOLS_PIXELGEOMETRYMANAGERTOOL_H
@@ -13,6 +13,7 @@
 #include "TrkAlignInterfaces/IAlignModuleTool.h"
 
 #include "TrkAlignEvent/AlignModuleList.h"
+#include "Gaudi/Property.h"
 
 /**
   @file PixelGeometryManagerTool.h
@@ -88,7 +89,7 @@ namespace InDet
   private:
       
     /** eta correction value needed when IBL is present*/
-    int m_etaCorrection;
+    int m_etaCorrection{};
     
     /** creates L1 AlignModules for Pixel : full Pixel*/
     void buildL1();
@@ -155,77 +156,80 @@ namespace InDet
 
     void printTransform(const Amg::Transform3D & tr) const;
 
-    const InDetDD::PixelDetectorManager * m_detManager; //!< pointer to PIX detector manager
+    const InDetDD::PixelDetectorManager * m_detManager{nullptr}; //!< pointer to PIX detector manager
 
-    const PixelID * m_idHelper; //!< pointer to PIX detector manager
+    const PixelID * m_idHelper{nullptr}; //!< pointer to PIX detector manager
 
-    ToolHandle<Trk::IAlignModuleTool> m_alignModuleTool;  //!< pointer to AlignModuleTool
+    PublicToolHandle<Trk::IAlignModuleTool> m_alignModuleTool{this, "AlignModuleTool", "Trk::AlignModuleTool/AlignModuleTool"};  //!< pointer to AlignModuleTool
 
     Trk::AlignModuleList m_alignModuleList;
     Trk::AlignModuleList m_idHashToAlignModuleMap;
 
-    std::vector<Trk::AlignModuleList *> m_idHashToAlignModuleMaps; 
+    std::vector<Trk::AlignModuleList *> m_idHashToAlignModuleMaps{std::vector<Trk::AlignModuleList *>(Trk::AlignModule::NDetectorTypes, nullptr)}; 
 
-    DataVector< DataVector<Trk::AlignPar> > * m_alignParList;
-    DataVector< DataVector<Trk::AlignPar> > * m_fullAlignParList;
+    DataVector< DataVector<Trk::AlignPar> > * m_alignParList{nullptr};
+    DataVector< DataVector<Trk::AlignPar> > * m_fullAlignParList{nullptr};
 
     ServiceHandle< IRDBAccessSvc > m_rdbAccessSvc;
     ServiceHandle< IGeoModelSvc > m_geoModelSvc;
 
-    bool m_doModuleSelection;
-    std::vector<unsigned long long> m_moduleSelection;
+    Gaudi::Property<int> m_alignLevelProp{this, "AlignmentLevel", 1}; //!< property, copied to m_alignLevel in initialize()
+    Gaudi::Property<int> m_alignLevelBarrelProp{this, "AlignmentLevelBarrel", -1}; //!< property, copied to m_alignLevelBarrel in initialize()
+    Gaudi::Property<int> m_alignLevelEndcapsProp{this, "AlignmentLevelEndcaps", -1}; //!< property, copied to m_alignLevelEndcaps in initialize()
+    Gaudi::Property<bool> m_doModuleSelection{this, "doModuleSelection", false};
+    Gaudi::Property<std::vector<unsigned long long>> m_moduleSelection{this, "ModuleSelection", {}};
 
-    bool m_alignBarrel;
-    bool m_alignEndcaps;
+    Gaudi::Property<bool> m_alignBarrel{this, "AlignBarrel", true};
+    Gaudi::Property<bool> m_alignEndcaps{this, "AlignEndcaps", true};
 
-    bool m_alignBarrelX;
-    bool m_alignBarrelY;
-    bool m_alignBarrelZ;
-    bool m_alignBarrelRotX;
-    bool m_alignBarrelRotY;
-    bool m_alignBarrelRotZ;
-    bool m_alignBarrelBowX;
+    Gaudi::Property<bool> m_alignBarrelX{this, "AlignBarrelX", true};
+    Gaudi::Property<bool> m_alignBarrelY{this, "AlignBarrelY", true};
+    Gaudi::Property<bool> m_alignBarrelZ{this, "AlignBarrelZ", true};
+    Gaudi::Property<bool> m_alignBarrelRotX{this, "AlignBarrelRotX", true};
+    Gaudi::Property<bool> m_alignBarrelRotY{this, "AlignBarrelRotY", true};
+    Gaudi::Property<bool> m_alignBarrelRotZ{this, "AlignBarrelRotZ", true};
+    Gaudi::Property<bool> m_alignBarrelBowX{this, "AlignBarrelBowX", false};
 
 
-    bool m_alignEndcapX;
-    bool m_alignEndcapY;
-    bool m_alignEndcapZ;
-    bool m_alignEndcapRotX;
-    bool m_alignEndcapRotY;
-    bool m_alignEndcapRotZ;
+    Gaudi::Property<bool> m_alignEndcapX{this, "AlignEndcapX", true};
+    Gaudi::Property<bool> m_alignEndcapY{this, "AlignEndcapY", true};
+    Gaudi::Property<bool> m_alignEndcapZ{this, "AlignEndcapZ", true};
+    Gaudi::Property<bool> m_alignEndcapRotX{this, "AlignEndcapRotX", true};
+    Gaudi::Property<bool> m_alignEndcapRotY{this, "AlignEndcapRotY", true};
+    Gaudi::Property<bool> m_alignEndcapRotZ{this, "AlignEndcapRotZ", true};
 
-    double m_sigmaBarrelX;
-    double m_sigmaBarrelY;
-    double m_sigmaBarrelZ;
-    double m_sigmaBarrelRotX;
-    double m_sigmaBarrelRotY;
-    double m_sigmaBarrelRotZ;
-    double m_sigmaBarrelBowX;
+    Gaudi::Property<double> m_sigmaBarrelX{this, "SetSigmaBarrelX", 1.};
+    Gaudi::Property<double> m_sigmaBarrelY{this, "SetSigmaBarrelY", 1.};
+    Gaudi::Property<double> m_sigmaBarrelZ{this, "SetSigmaBarrelZ", 1.};
+    Gaudi::Property<double> m_sigmaBarrelRotX{this, "SetSigmaBarrelRotX", 0.001};
+    Gaudi::Property<double> m_sigmaBarrelRotY{this, "SetSigmaBarrelRotY", 0.001};
+    Gaudi::Property<double> m_sigmaBarrelRotZ{this, "SetSigmaBarrelRotZ", 0.001};
+    Gaudi::Property<double> m_sigmaBarrelBowX{this, "SetSigmaBarrelBowX", 1};
 
-    double m_sigmaEndcapX;
-    double m_sigmaEndcapY;
-    double m_sigmaEndcapZ;
-    double m_sigmaEndcapRotX;
-    double m_sigmaEndcapRotY;
-    double m_sigmaEndcapRotZ;
+    Gaudi::Property<double> m_sigmaEndcapX{this, "SetSigmaEndcapX", 1.};
+    Gaudi::Property<double> m_sigmaEndcapY{this, "SetSigmaEndcapY", 1.};
+    Gaudi::Property<double> m_sigmaEndcapZ{this, "SetSigmaEndcapZ", 1.};
+    Gaudi::Property<double> m_sigmaEndcapRotX{this, "SetSigmaEndcapRotX", 0.001};
+    Gaudi::Property<double> m_sigmaEndcapRotY{this, "SetSigmaEndcapRotY", 0.001};
+    Gaudi::Property<double> m_sigmaEndcapRotZ{this, "SetSigmaEndcapRotZ", 0.001};
 
-    double m_softcutBarrelX;
-    double m_softcutBarrelY;
-    double m_softcutBarrelZ;
-    double m_softcutBarrelRotX;
-    double m_softcutBarrelRotY;
-    double m_softcutBarrelRotZ;
-    double m_softcutBarrelBowX;
+    Gaudi::Property<double> m_softcutBarrelX{this, "SetSoftCutBarrelX", 1.};
+    Gaudi::Property<double> m_softcutBarrelY{this, "SetSoftCutBarrelY", 1.};
+    Gaudi::Property<double> m_softcutBarrelZ{this, "SetSoftCutBarrelZ", 1.};
+    Gaudi::Property<double> m_softcutBarrelRotX{this, "SetSoftCutBarrelRotX", 1.};
+    Gaudi::Property<double> m_softcutBarrelRotY{this, "SetSoftCutBarrelRotY", 1.};
+    Gaudi::Property<double> m_softcutBarrelRotZ{this, "SetSoftCutBarrelRotZ", 1.};
+    Gaudi::Property<double> m_softcutBarrelBowX{this, "SetSoftCutBarrelBowX", 1.};
 
-    double m_softcutEndcapX;
-    double m_softcutEndcapY;
-    double m_softcutEndcapZ;
-    double m_softcutEndcapRotX;
-    double m_softcutEndcapRotY;
-    double m_softcutEndcapRotZ;
+    Gaudi::Property<double> m_softcutEndcapX{this, "SetSoftCutEndcapX", 1.};
+    Gaudi::Property<double> m_softcutEndcapY{this, "SetSoftCutEndcapY", 1.};
+    Gaudi::Property<double> m_softcutEndcapZ{this, "SetSoftCutEndcapZ", 1.};
+    Gaudi::Property<double> m_softcutEndcapRotX{this, "SetSoftCutEndcapRotX", 1.};
+    Gaudi::Property<double> m_softcutEndcapRotY{this, "SetSoftCutEndcapRotY", 1.};
+    Gaudi::Property<double> m_softcutEndcapRotZ{this, "SetSoftCutEndcapRotZ", 1.};
 
-    bool m_dumpGeometry;
-    bool m_alignDBM;
+    Gaudi::Property<bool> m_dumpGeometry{this, "DumpGeometry", true};
+    Gaudi::Property<bool> m_alignDBM{this, "AlignmentDBM", false};
     
     Gaudi::Property<std::string> m_pixelDetManagerName{this,"PixelDetectorManager","Pixel","Name of the Pixel Detector Manager to attempt to retrieve"};
     Gaudi::Property<bool> m_doEtaCorrection{this,"EtaCorrection",true,"If we should check the DB to see if eta 0 should be skipped"};

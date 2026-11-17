@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNINTERFACES_IGEOMETRYMANAGERTOOL_H
@@ -38,9 +38,6 @@ class IGeometryManagerTool : virtual public IAlgTool {
   virtual ~IGeometryManagerTool() {}
 
   static const InterfaceID& interfaceID();
-
-  virtual StatusCode initialize() = 0;
-  virtual StatusCode finalize() = 0;
 
   /** build collection of AlignModules for a particular detector type, return number of alignment parameters */
   virtual int ReadGeometry(int solvelevel) = 0;

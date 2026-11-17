@@ -17,7 +17,7 @@
 #include "TrkAlignEvent/AlignPar.h"
 
 
-#include "InDetAlignGeomTools/TRTGeometryManagerTool.h"
+#include "TRTGeometryManagerTool.h"
 
 
 #include <iostream>
@@ -26,85 +26,6 @@
 using namespace InDetDD;
 
 namespace InDet {
-
-//________________________________________________________________________
-TRTGeometryManagerTool::TRTGeometryManagerTool(const std::string& type,
-      const std::string& name,
-      const IInterface * parent)
-  : AthAlgTool(type,name,parent)
-      , m_trtDetManager(nullptr)
-      , m_idHelper()
-      , m_alignModuleTool("Trk::AlignModuleTool/AlignModuleTool")
-      , m_idHashToAlignModuleMaps(Trk::AlignModule::NDetectorTypes,(Trk::AlignModuleList*)nullptr)
-      , m_alignParList(nullptr)
-      , m_fullAlignParList(nullptr)
-{
-   declareInterface<IGeometryManagerTool>(this);
-   declareProperty("AlignModuleTool",    m_alignModuleTool);
-
-   declareProperty("AlignBarrel",        m_alignBarrel        = true);
-   declareProperty("AlignBarrelX",       m_alignBarrelX       = true);
-   declareProperty("AlignBarrelY",       m_alignBarrelY       = true);
-   declareProperty("AlignBarrelZ",       m_alignBarrelZ       = false);
-   declareProperty("AlignBarrelRotX",    m_alignBarrelRotX    = true);
-   declareProperty("AlignBarrelRotY",    m_alignBarrelRotY    = true);
-   declareProperty("AlignBarrelRotZ",    m_alignBarrelRotZ    = true);
-
-   declareProperty("AlignEndcaps",       m_alignEndcaps       = true);
-   declareProperty("AlignEndcapX",       m_alignEndcapX       = true);
-   declareProperty("AlignEndcapY",       m_alignEndcapY       = true);
-   declareProperty("AlignEndcapZ",       m_alignEndcapZ       = true);
-   declareProperty("AlignEndcapRotX",    m_alignEndcapRotX    = true);
-   declareProperty("AlignEndcapRotY",    m_alignEndcapRotY    = true);
-   declareProperty("AlignEndcapRotZ",    m_alignEndcapRotZ    = true);
-
-   declareProperty("SetSigmaBarrelX",    m_sigmaBarrelX       = 1.);
-   declareProperty("SetSigmaBarrelY",    m_sigmaBarrelY       = 1.);
-   declareProperty("SetSigmaBarrelZ",    m_sigmaBarrelZ       = 1.);
-   declareProperty("SetSigmaBarrelRotX", m_sigmaBarrelRotX    = 0.001);
-   declareProperty("SetSigmaBarrelRotY", m_sigmaBarrelRotY    = 0.001);
-   declareProperty("SetSigmaBarrelRotZ", m_sigmaBarrelRotZ    = 0.001);
-
-   declareProperty("SetSigmaEndcapX",    m_sigmaEndcapX       = 1.);
-   declareProperty("SetSigmaEndcapY",    m_sigmaEndcapY       = 1.);
-   declareProperty("SetSigmaEndcapZ",    m_sigmaEndcapZ       = 1.);
-   declareProperty("SetSigmaEndcapRotX", m_sigmaEndcapRotX    = 0.001);
-   declareProperty("SetSigmaEndcapRotY", m_sigmaEndcapRotY    = 0.001);
-   declareProperty("SetSigmaEndcapRotZ", m_sigmaEndcapRotZ    = 0.001);
-
-   declareProperty("SetSoftCutBarrelX",    m_softcutBarrelX       = 1.);
-   declareProperty("SetSoftCutBarrelY",    m_softcutBarrelY       = 1.);
-   declareProperty("SetSoftCutBarrelZ",    m_softcutBarrelZ       = 1.);
-   declareProperty("SetSoftCutBarrelRotX", m_softcutBarrelRotX    = 1.);
-   declareProperty("SetSoftCutBarrelRotY", m_softcutBarrelRotY    = 1.);
-   declareProperty("SetSoftCutBarrelRotZ", m_softcutBarrelRotZ    = 1.);
-
-   declareProperty("SetSoftCutEndcapX",    m_softcutEndcapX       = 1.);
-   declareProperty("SetSoftCutEndcapY",    m_softcutEndcapY       = 1.);
-   declareProperty("SetSoftCutEndcapZ",    m_softcutEndcapZ       = 1.);
-   declareProperty("SetSoftCutEndcapRotX", m_softcutEndcapRotX    = 1.);
-   declareProperty("SetSoftCutEndcapRotY", m_softcutEndcapRotY    = 1.);
-   declareProperty("SetSoftCutEndcapRotZ", m_softcutEndcapRotZ    = 1.);
-
-   declareProperty("AlignmentLevel",        m_alignLevel        = 1);
-   declareProperty("AlignmentLevelBarrel",  m_alignLevelBarrel  = -1);
-   declareProperty("AlignmentLevelEndcaps", m_alignLevelEndcaps = -1);
-
-   declareProperty("AlignBarrelPhiSectors", m_barrelPhiSectors);
-   declareProperty("AlignBarrelLayers",     m_barrelLayers);
-
-   declareProperty("AlignSingleEndcap",     m_endcap = 0);
-   declareProperty("AlignEndcapWheels",     m_endcapWheels);
-   declareProperty("AlignEndcapPhiSectors", m_endcapPhiSectors);
-
-   declareProperty("doModuleSelection",  m_doModuleSelection  = false);
-   declareProperty("ModuleSelection",    m_moduleSelection);
-
-   declareProperty("DumpGeometry",       m_dumpGeometry = true);
-
-   m_hashCounter = 0;
-   m_logStream = nullptr;
-}
 
 //________________________________________________________________________
 TRTGeometryManagerTool::~TRTGeometryManagerTool()
@@ -124,6 +45,11 @@ TRTGeometryManagerTool::~TRTGeometryManagerTool()
 StatusCode TRTGeometryManagerTool::initialize()
 {
    ATH_MSG_DEBUG("initialize() of TRTGeometryManagerTool");
+
+   // alignment levels are members of the IGeometryManagerTool base class
+   m_alignLevel = m_alignLevelProp;
+   m_alignLevelBarrel = m_alignLevelBarrelProp;
+   m_alignLevelEndcaps = m_alignLevelEndcapsProp;
 
    // retrieve AlignModuleTool
    if ( m_alignModuleTool.retrieve().isFailure() ) {
@@ -151,9 +77,9 @@ StatusCode TRTGeometryManagerTool::initialize()
 
    // dump module selection
    if(m_doModuleSelection && msgLvl(MSG::INFO)) {
-      msg(MSG::INFO)<<"Creating geometry for selected "<<m_moduleSelection.size()<<" modules:"<<endmsg;
-      for(unsigned int i=0;i<m_moduleSelection.size();i++)
-         msg(MSG::INFO)<<"   "<<i<<".  "<<m_moduleSelection.at(i)<<endmsg;
+      msg(MSG::INFO)<<"Creating geometry for selected "<<m_moduleSelection.value().size()<<" modules:"<<endmsg;
+      for(unsigned int i=0;i<m_moduleSelection.value().size();i++)
+         msg(MSG::INFO)<<"   "<<i<<".  "<<m_moduleSelection.value().at(i)<<endmsg;
    }
 
    // check the allowed geometry levels
@@ -1296,9 +1222,9 @@ bool TRTGeometryManagerTool::moduleSelected(unsigned long long id)
    if(!m_doModuleSelection)
       return true;
 
-   int nsel = m_moduleSelection.size();
+   int nsel = m_moduleSelection.value().size();
    for(int i=0;i<nsel;++i)
-      if(m_moduleSelection.at(i) == id)
+      if(m_moduleSelection.value().at(i) == id)
          return true;
 
    return false;
@@ -1316,10 +1242,10 @@ bool TRTGeometryManagerTool::moduleSelected(Trk::AlignModule * mod)
 bool TRTGeometryManagerTool::moduleSelectedBarrel(unsigned int ilayer, unsigned int iphi)
 {
    bool select = true;
-   if(!m_barrelLayers.empty()) {
+   if(!m_barrelLayers.value().empty()) {
       select = false;
-      for(unsigned int i=0;i<m_barrelLayers.size();i++) {
-         if(m_barrelLayers[i] == (int)ilayer) {
+      for(unsigned int i=0;i<m_barrelLayers.value().size();i++) {
+         if(m_barrelLayers.value()[i] == (int)ilayer) {
             select = true;
             break;
          }
@@ -1329,10 +1255,10 @@ bool TRTGeometryManagerTool::moduleSelectedBarrel(unsigned int ilayer, unsigned 
    if(!select)
       return false;
 
-   if(!m_barrelPhiSectors.empty()) {
+   if(!m_barrelPhiSectors.value().empty()) {
       select = false;
-      for(unsigned int i=0;i<m_barrelPhiSectors.size();i++) {
-         if(m_barrelPhiSectors[i] == (int)iphi) {
+      for(unsigned int i=0;i<m_barrelPhiSectors.value().size();i++) {
+         if(m_barrelPhiSectors.value()[i] == (int)iphi) {
             select = true;
             break;
          }
@@ -1346,10 +1272,10 @@ bool TRTGeometryManagerTool::moduleSelectedBarrel(unsigned int ilayer, unsigned 
 bool TRTGeometryManagerTool::moduleSelectedEndcap(unsigned int iwheel, unsigned int iphi)
 {
   bool select = true;
-  if(!m_endcapWheels.empty()) {
+  if(!m_endcapWheels.value().empty()) {
     select = false;
-    for(unsigned int i=0;i<m_endcapWheels.size();++i) {
-      if(m_endcapWheels[i] == (int)iwheel) {
+    for(unsigned int i=0;i<m_endcapWheels.value().size();++i) {
+      if(m_endcapWheels.value()[i] == (int)iwheel) {
         select = true;
         break;
       }
@@ -1359,10 +1285,10 @@ bool TRTGeometryManagerTool::moduleSelectedEndcap(unsigned int iwheel, unsigned 
   if(!select)
     return false;
 
-  if(!m_endcapPhiSectors.empty()) {
+  if(!m_endcapPhiSectors.value().empty()) {
     select = false;
-    for(unsigned int i=0;i<m_endcapPhiSectors.size();i++) {
-      if(m_endcapPhiSectors[i] == (int)iphi) {
+    for(unsigned int i=0;i<m_endcapPhiSectors.value().size();i++) {
+      if(m_endcapPhiSectors.value()[i] == (int)iphi) {
         select = true;
         break;
       }

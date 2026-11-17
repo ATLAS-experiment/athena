@@ -1,9 +1,9 @@
-#include "InDetAlignGeomTools/TRTGeometryManagerTool.h"
-#include "InDetAlignGeomTools/PixelGeometryManagerTool.h"
-#include "InDetAlignGeomTools/SCTGeometryManagerTool.h"
-#include "InDetAlignGeomTools/SiGeometryManagerTool.h"
-#include "InDetAlignGeomTools/InDetGeometryManagerTool.h"
-#include "InDetAlignGeomTools/InDetAlignModuleTool.h"
+#include "../TRTGeometryManagerTool.h"
+#include "../PixelGeometryManagerTool.h"
+#include "../SCTGeometryManagerTool.h"
+#include "../SiGeometryManagerTool.h"
+#include "../InDetGeometryManagerTool.h"
+#include "../InDetAlignModuleTool.h"
 
 DECLARE_COMPONENT( InDet::TRTGeometryManagerTool )
 DECLARE_COMPONENT( InDet::PixelGeometryManagerTool )
