@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef JETUNCERTAINTIES_JETUNCERTAINTIESTOOL_H
@@ -15,8 +15,6 @@
 #include <vector>
 #include <unordered_map>
 #include <tuple>
-
-#include "TRandom3.h"
 
 namespace jet
 {
@@ -233,7 +231,7 @@ class JetUncertaintiesTool : virtual public ICPJetUncertaintiesTool,
  
         // Smearing information
         long long int m_userSeed;
-        mutable TRandom3 m_rand ATLAS_THREAD_SAFE; // protected by m_reentrantMutex in the execute path
+        // serializes applySystematicVariation() in applyContainerCorrection(jets, syst)
         mutable std::mutex m_reentrantMutex;
         bool m_isData;
         jet::ResolutionHelper* m_resHelper;
