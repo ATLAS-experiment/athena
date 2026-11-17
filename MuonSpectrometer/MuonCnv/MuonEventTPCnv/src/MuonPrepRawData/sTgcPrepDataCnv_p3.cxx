@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -88,6 +88,6 @@ void sTgcPrepDataCnv_p3::transToPers(const Muon::sTgcPrepData *transObj,
     rdoListPers.push_back(static_cast<signed char>(diff));
   } 
   
-  persObj->m_rdoList = rdoListPers; 
+  persObj->m_rdoList = std::move(rdoListPers); 
     
 }

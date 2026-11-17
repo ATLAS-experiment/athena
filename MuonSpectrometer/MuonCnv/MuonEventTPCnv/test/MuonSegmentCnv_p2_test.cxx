@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file MuonEventTPCnv/test/MuonSegmentCnv_p2_test.cxx
@@ -145,14 +145,14 @@ void test1 ATLAS_NOT_THREAD_SAFE ()
 
   Muon::MuonSegment trans1 (std::move(locpars),
                       std::move(cov),
-                      new Trk::PlaneSurface (plsurf),
-                      DataVector<const Trk::MeasurementBase> (mvec),
+                      new Trk::PlaneSurface (std::move(plsurf)),
+                      DataVector<const Trk::MeasurementBase> (std::move(mvec)),
                       new Trk::FitQuality(fq),
                       Trk::Segment::Muonboy);
   testit (trans1);
 }
 
-
+//coverity[UNCAUGHT_EXCEPT]
 int main ATLAS_NOT_THREAD_SAFE ()
 {
   test1();

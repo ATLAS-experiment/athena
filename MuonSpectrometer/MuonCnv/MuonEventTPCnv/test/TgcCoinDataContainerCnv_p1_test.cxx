@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file MuonEventTPCnv/test/TgcCoinDataContainerCnv_p1_test.cxx
@@ -142,7 +142,7 @@ makeclusts (const MuonGM::MuonDetectorManager& muo_dd)
          15+offs,
          16+offs,
          17+offs, // trackletIdStrip
-         new Amg::MatrixX(cov),
+         new Amg::MatrixX(std::move(cov)),
          true,
          false);
 
