@@ -25,7 +25,7 @@ def createTauConfigFlags():
     tau_cfg.addFlag("Tau.classifyLRTWithDedicated", False)
     
     # Track-to-Calo extrapolation
-    tau_cfg.addFlag("Tau.useACTSExtrapolator", False)
+    tau_cfg.addFlag("Tau.useACTSExtrapolator", lambda prevFlags: prevFlags.GeoModel.Run > LHCPeriod.Run3 and prevFlags.Acts.TrackingGeometry.UseBlueprint)
 
     # Settings common to Run2 and Run3
     tau_cfg.addFlag("Tau.SeedMinPt", 0.0*Units.GeV)
