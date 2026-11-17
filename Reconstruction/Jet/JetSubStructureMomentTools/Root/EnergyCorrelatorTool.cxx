@@ -1,20 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/EnergyCorrelatorTool.h"
 #include "JetSubStructureUtils/EnergyCorrelator.h"
 #include "AthContainers/ConstAccessor.h"
-
-EnergyCorrelatorTool::EnergyCorrelatorTool(const std::string& name) : 
-  JetSubStructureMomentToolsBase(name)
-{
-  declareProperty("Beta",       m_Beta = 1.0);
-  declareProperty("BetaList",   m_rawBetaVals = {});
-  declareProperty("DoC3",       m_doC3 = false);
-  declareProperty("DoC4",       m_doC4 = false);
-  declareProperty("DoDichroic", m_doDichroic = false);
-}
 
 StatusCode EnergyCorrelatorTool::initialize() {
   if(m_jetContainerName.empty()){
@@ -29,18 +19,18 @@ StatusCode EnergyCorrelatorTool::initialize() {
   m_moments.emplace_back( 1.0, moments_t(1.0, m_prefix) );
 
   /// Add beta = m_Beta by default to keep backwards compatibility
-  if( std::abs(m_Beta-1.0) > 1.0e-5 ) {
+  if( std::abs(m_Beta.value()-1.0) > 1.0e-5 ) {
 
     /// Give warning about deprecation
     ATH_MSG_WARNING( "The Beta property is deprecated, please use the BetaList property to provide a list of values");
 
     /// Use m_Beta to not break analysis code
-    m_moments.emplace_back( m_Beta, moments_t(m_Beta, m_prefix) );
+    m_moments.emplace_back( m_Beta.value(), moments_t(m_Beta.value(), m_prefix) );
 
   }
 
   /// Clean up input list of beta values
-  for( float beta : m_rawBetaVals ) {
+  for( float beta : m_rawBetaVals.value() ) {
 
     /// Round to the nearest 0.1
     float betaFix = round( beta * 10.0 ) / 10.0;
@@ -89,11 +79,11 @@ StatusCode EnergyCorrelatorTool::initialize() {
   ATH_CHECK(m_ECF1_Keys.initialize());
   ATH_CHECK(m_ECF2_Keys.initialize());
   ATH_CHECK(m_ECF3_Keys.initialize());
-  ATH_CHECK(m_ECF4_Keys.initialize());
-  ATH_CHECK(m_ECF5_Keys.initialize());
-  ATH_CHECK(m_ECF1_ungroomed_Keys.initialize());
-  ATH_CHECK(m_ECF2_ungroomed_Keys.initialize());
-  ATH_CHECK(m_ECF3_ungroomed_Keys.initialize());
+  ATH_CHECK(m_ECF4_Keys.initialize(m_doC3.value()));
+  ATH_CHECK(m_ECF5_Keys.initialize(m_doC4.value()));
+  ATH_CHECK(m_ECF1_ungroomed_Keys.initialize(m_doDichroic.value()));
+  ATH_CHECK(m_ECF2_ungroomed_Keys.initialize(m_doDichroic.value()));
+  ATH_CHECK(m_ECF3_ungroomed_Keys.initialize(m_doDichroic.value()));
 
   return StatusCode::SUCCESS;
 
@@ -115,12 +105,14 @@ StatusCode EnergyCorrelatorTool::modify(xAOD::JetContainer& jets) const {
     wdhs_ECF1.emplace_back(m_ECF1_Keys[i]);
     wdhs_ECF2.emplace_back(m_ECF2_Keys[i]);
     wdhs_ECF3.emplace_back(m_ECF3_Keys[i]);
-    wdhs_ECF4.emplace_back(m_ECF4_Keys[i]);
-    wdhs_ECF5.emplace_back(m_ECF5_Keys[i]);
+    if( m_doC3 ) wdhs_ECF4.emplace_back(m_ECF4_Keys[i]);
+    if( m_doC4 ) wdhs_ECF5.emplace_back(m_ECF5_Keys[i]);
 
-    wdhs_ECF1_ungroomed.emplace_back(m_ECF1_ungroomed_Keys[i]);
-    wdhs_ECF2_ungroomed.emplace_back(m_ECF2_ungroomed_Keys[i]);
-    wdhs_ECF3_ungroomed.emplace_back(m_ECF3_ungroomed_Keys[i]);
+    if( m_doDichroic ) {
+      wdhs_ECF1_ungroomed.emplace_back(m_ECF1_ungroomed_Keys[i]);
+      wdhs_ECF2_ungroomed.emplace_back(m_ECF2_ungroomed_Keys[i]);
+      wdhs_ECF3_ungroomed.emplace_back(m_ECF3_ungroomed_Keys[i]);
+    }
   }
 
   for(const xAOD::Jet* injet : jets){
@@ -195,12 +187,14 @@ StatusCode EnergyCorrelatorTool::modify(xAOD::JetContainer& jets) const {
       wdhs_ECF1[i](*injet) = ECF1_value;
       wdhs_ECF2[i](*injet) = ECF2_value;
       wdhs_ECF3[i](*injet) = ECF3_value;
-      wdhs_ECF4[i](*injet) = ECF4_value;
-      wdhs_ECF5[i](*injet) = ECF5_value;
+      if( m_doC3 ) wdhs_ECF4[i](*injet) = ECF4_value;
+      if( m_doC4 ) wdhs_ECF5[i](*injet) = ECF5_value;
 
-      wdhs_ECF1_ungroomed[i](*injet) = ECF1_ungroomed_value;
-      wdhs_ECF2_ungroomed[i](*injet) = ECF2_ungroomed_value;
-      wdhs_ECF3_ungroomed[i](*injet) = ECF3_ungroomed_value;
+      if( m_doDichroic ) {
+        wdhs_ECF1_ungroomed[i](*injet) = ECF1_ungroomed_value;
+        wdhs_ECF2_ungroomed[i](*injet) = ECF2_ungroomed_value;
+        wdhs_ECF3_ungroomed[i](*injet) = ECF3_ungroomed_value;
+      }
     }
 
   }

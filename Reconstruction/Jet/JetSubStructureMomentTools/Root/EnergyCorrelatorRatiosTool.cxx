@@ -1,18 +1,9 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "JetSubStructureMomentTools/EnergyCorrelatorRatiosTool.h"
 #include "JetSubStructureUtils/EnergyCorrelator.h" 
-
-EnergyCorrelatorRatiosTool::EnergyCorrelatorRatiosTool(const std::string& name) :
-  JetSubStructureMomentToolsBase(name)
-{
-  declareProperty("BetaList", m_rawBetaVals = {});
-  declareProperty("DoC3",  m_doC3 = false);
-  declareProperty("DoC4",  m_doC4 = false);
-  declareProperty("DoDichroic", m_doDichroic = false);
-}
 
 StatusCode EnergyCorrelatorRatiosTool::initialize() {
 
@@ -23,7 +14,7 @@ StatusCode EnergyCorrelatorRatiosTool::initialize() {
   m_moments.emplace( 1.0, moments_t(1.0, m_prefix) );
 
   /// Clean up input list of beta values
-  for( float beta : m_rawBetaVals ) {
+  for( float beta : m_rawBetaVals.value() ) {
 
     /// Round to the nearest 0.1
     float betaFix = round( beta * 10.0 ) / 10.0;
@@ -178,12 +169,12 @@ int EnergyCorrelatorRatiosTool::modifyJet(xAOD::Jet &jet) const {
 
     (*moment.second.dec_C1)(jet) = C1;
     (*moment.second.dec_C2)(jet) = C2;
-    (*moment.second.dec_C3)(jet) = C3;
-    (*moment.second.dec_C4)(jet) = C4;
+    if( m_doC3 ) (*moment.second.dec_C3)(jet) = C3;
+    if( m_doC4 ) (*moment.second.dec_C4)(jet) = C4;
     
     (*moment.second.dec_D2)(jet) = D2;
 
-    (*moment.second.dec_D2_dichroic)(jet) = D2_dichroic;
+    if( m_doDichroic ) (*moment.second.dec_D2_dichroic)(jet) = D2_dichroic;
 
   }
 

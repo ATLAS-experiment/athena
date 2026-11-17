@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -22,14 +22,15 @@
 #include "JetSubStructureMomentTools/JetSubStructureMomentToolsBase.h"
 #include "JetSubStructureMomentTools/NSubjettinessHelper.h"
 
+#include "AsgTools/PropertyWrapper.h"
+
 class NSubjettinessRatiosTool :
   public JetSubStructureMomentToolsBase {
     ASG_TOOL_CLASS(NSubjettinessRatiosTool, IJetModifier)
 
     public:
 
-      /// Constructor
-      NSubjettinessRatiosTool(const std::string& name);
+      using JetSubStructureMomentToolsBase::JetSubStructureMomentToolsBase;
 
       StatusCode initialize();
 
@@ -41,8 +42,9 @@ class NSubjettinessRatiosTool :
       struct moments_t;
 
       /// Configurable as properties
-      std::vector<float> m_rawAlphaVals; /// Vector of input values before cleaning
-      bool m_doDichroic;
+      Gaudi::Property<std::vector<float>> m_rawAlphaVals{this, "AlphaList", {}, "List of alpha values (before cleaning)"};
+      Gaudi::Property<bool> m_doDichroic{this, "DoDichroic", false, "Compute ungroomed variables from Parent jet"};
+      Gaudi::Property<bool> m_doKtAxes{this, "DoKtAxes", false, "Compute TauN with kT axes (non WTA)"};
   
       /// Map of moment accessors and decorators using alpha as the key
       std::map< float, moments_t > m_moments;

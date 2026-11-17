@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,6 +13,8 @@
  *
  * The DoDichroic option adds dichroic energy correlator ratios described
  * on page 120 in https://arxiv.org/abs/1803.07977
+ * D2_dichroic is only produced if DoDichroic is true.
+ * C3 is only produced if DoC3 is true, C4 only if DoC4 is true.
  * ----------------------------------------------------------------
  */
 
@@ -22,14 +24,15 @@
 #include "JetSubStructureMomentTools/JetSubStructureMomentToolsBase.h"
 #include "JetSubStructureMomentTools/ECFHelper.h"
 
+#include "AsgTools/PropertyWrapper.h"
+
 class EnergyCorrelatorRatiosTool :
   public JetSubStructureMomentToolsBase {
     ASG_TOOL_CLASS(EnergyCorrelatorRatiosTool, IJetModifier)
 
     public:
 
-      /// Constructor
-      EnergyCorrelatorRatiosTool(const std::string& name);
+      using JetSubStructureMomentToolsBase::JetSubStructureMomentToolsBase;
      
       virtual StatusCode initialize() override;
 
@@ -41,10 +44,10 @@ class EnergyCorrelatorRatiosTool :
       struct moments_t;
 
       /// Configurable as properties
-      bool m_doC3;
-      bool m_doC4;
-      std::vector<float> m_rawBetaVals; /// Vector of input values before cleaning
-      bool m_doDichroic;
+      Gaudi::Property<bool> m_doC3{this, "DoC3", false, "Compute C3"};
+      Gaudi::Property<bool> m_doC4{this, "DoC4", false, "Compute C4"};
+      Gaudi::Property<std::vector<float>> m_rawBetaVals{this, "BetaList", {}, "List of beta values (before cleaning)"};
+      Gaudi::Property<bool> m_doDichroic{this, "DoDichroic", false, "Compute D2_dichroic from the ungroomed ECFs"};
 
       /// Map of moment accessors and decorators using beta as the key
       std::map< float, moments_t > m_moments;

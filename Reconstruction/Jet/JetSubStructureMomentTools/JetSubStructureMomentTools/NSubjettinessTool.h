@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,6 +13,10 @@
  *
  * The DoDichroic option adds dichroic N-subjettiness ratios described in
  * https://arxiv.org/abs/1612.03917
+ * The ungroomed TauN variables are only produced if DoDichroic is true.
+ *
+ * The DoKtAxes option (default false) controls whether the TauN variables
+ * with kT axes are produced in addition to the WTA ones.
  * ----------------------------------------------------------------
  */
 
@@ -30,8 +34,8 @@ class NSubjettinessTool :
     ASG_TOOL_CLASS(NSubjettinessTool, IJetModifier)
 
     public:
-      // Constructor and destructor
-      NSubjettinessTool(const std::string& name);
+
+      using JetSubStructureMomentToolsBase::JetSubStructureMomentToolsBase;
 
       StatusCode initialize() override;
 
@@ -67,9 +71,10 @@ class NSubjettinessTool :
       };
 
       /// Configurable as properties
-      float m_Alpha;
-      std::vector<float> m_rawAlphaVals; /// Vector of input values before cleaning
-      bool m_doDichroic;
+      Gaudi::Property<float> m_Alpha{this, "Alpha", 1.0, ""};
+      Gaudi::Property<std::vector<float>> m_rawAlphaVals{this, "AlphaList", {}, "List of alpha values (before cleaning)"};
+      Gaudi::Property<bool> m_doDichroic{this, "DoDichroic", false, "Compute ungroomed variables from Parent jet"};
+      Gaudi::Property<bool> m_doKtAxes{this, "DoKtAxes", false, "Compute TauN with kT axes (non WTA)"};
 
       /// Map of decorators using alpha as the key
       std::vector<std::pair< float, moments_t >> m_moments;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -13,6 +13,8 @@
  *
  * The DoDichroic option adds dichroic energy correlator ratios described
  * on page 120 in https://arxiv.org/abs/1803.07977
+ * The ungroomed ECFs are only produced if DoDichroic is true. 
+ * ECF4 is only produced if DoC3 is true, ECF5 only if DoC4 is true.
  * ----------------------------------------------------------------
  */
 
@@ -32,8 +34,7 @@ class EnergyCorrelatorTool :
 
     public:
       
-      /// Constructor
-      EnergyCorrelatorTool(const std::string& name);
+      using JetSubStructureMomentToolsBase::JetSubStructureMomentToolsBase;
      
       virtual StatusCode initialize() override;
 
@@ -69,11 +70,11 @@ class EnergyCorrelatorTool :
       };
 
       /// Configurable as properties
-      float m_Beta;
-      bool m_doC3;
-      bool m_doC4;
-      std::vector<float> m_rawBetaVals; /// Vector of input values before cleaning
-      bool m_doDichroic;
+      Gaudi::Property<float> m_Beta{this, "Beta", 1.0, ""};
+      Gaudi::Property<bool> m_doC3{this, "DoC3", false, "Compute ECF4 (needed for C3)"};
+      Gaudi::Property<bool> m_doC4{this, "DoC4", false, "Compute ECF5 (needed for C4)"};
+      Gaudi::Property<std::vector<float>> m_rawBetaVals{this, "BetaList", {}, "List of beta values (before cleaning)"};
+      Gaudi::Property<bool> m_doDichroic{this, "DoDichroic", false, "Compute ungroomed ECFs using the Parent jet"};
       
       /// Map of moment calculators and decorators using beta as the key
       std::vector<std::pair< float, moments_t >> m_moments;

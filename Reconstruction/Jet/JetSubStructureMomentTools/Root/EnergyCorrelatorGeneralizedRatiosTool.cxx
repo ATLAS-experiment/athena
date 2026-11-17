@@ -124,7 +124,7 @@ int EnergyCorrelatorGeneralizedRatiosTool::modifyJet(xAOD::Jet &jet) const {
     float ecfg_2_1 = (*moment.second.acc_ECFG_2_1)(jet);
     float ecfg_3_1 = (*moment.second.acc_ECFG_3_1)(jet);
     float ecfg_3_2 = (*moment.second.acc_ECFG_3_2)(jet);
-    float ecfg_4_1 = (*moment.second.acc_ECFG_4_2)(jet);
+    float ecfg_4_1 = (*moment.second.acc_ECFG_4_1)(jet);
     float ecfg_4_2 = (*moment.second.acc_ECFG_4_2)(jet);
     
     float ecfg_2_1_ungroomed = -999.0;
