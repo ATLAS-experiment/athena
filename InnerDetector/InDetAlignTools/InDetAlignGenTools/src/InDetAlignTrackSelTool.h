@@ -27,7 +27,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
-#include "InDetAlignGenTools/IInDetAlignTrackSelTool.h"
+#include "IInDetAlignTrackSelTool.h"
 #include "TrkToolInterfaces/ITrackParticleCreatorTool.h"
 
 namespace Trk {

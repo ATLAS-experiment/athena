@@ -25,7 +25,7 @@
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "StoreGate/ReadCondHandleKey.h"
 
-#include "InDetAlignGenTools/IInDetAlignFillSiCluster.h"
+#include "IInDetAlignFillSiCluster.h"
 #include "GaudiKernel/INTupleSvc.h"
 
 // Forward declaration

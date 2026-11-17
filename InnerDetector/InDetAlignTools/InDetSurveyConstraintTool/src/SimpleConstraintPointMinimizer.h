@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // ------------------------------------------------------------------------------
@@ -11,7 +11,7 @@
 #ifndef SIMPLECONSTRAINTPOINTMINIMIZER_HH
 #define SIMPLECONSTRAINTPOINTMINIMIZER_HH
 
-#include "InDetSurveyConstraintTool/SurveyConstraintPoint.h"
+#include "SurveyConstraintPoint.h"
 #include <vector>
 
 #include "EventPrimitives/EventPrimitives.h"

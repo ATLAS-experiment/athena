@@ -3,7 +3,7 @@
 */
 
 
-#include "InDetAlignDBTools/InDetTrkAlignDBTool.h"
+#include "InDetTrkAlignDBTool.h"
 
 #include "TFile.h"
 

@@ -3,7 +3,7 @@
 */
 
 #include "SurveyConstraintTestAlg.h"
-#include "InDetSurveyConstraintTool/ISurveyConstraint.h"
+#include "ISurveyConstraint.h"
 #include "GaudiKernel/MsgStream.h"
 
 #include "InDetIdentifier/PixelID.h"

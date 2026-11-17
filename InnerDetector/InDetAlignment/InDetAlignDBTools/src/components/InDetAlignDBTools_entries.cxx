@@ -1,6 +1,6 @@
-#include "InDetAlignDBTools/SiTrkAlignDBTool.h"
-#include "InDetAlignDBTools/TRTTrkAlignDBTool.h"
-#include "InDetAlignDBTools/InDetTrkAlignDBTool.h"
+#include "../SiTrkAlignDBTool.h"
+#include "../TRTTrkAlignDBTool.h"
+#include "../InDetTrkAlignDBTool.h"
 
 DECLARE_COMPONENT( InDet::SiTrkAlignDBTool )
 DECLARE_COMPONENT( InDet::TRTTrkAlignDBTool )

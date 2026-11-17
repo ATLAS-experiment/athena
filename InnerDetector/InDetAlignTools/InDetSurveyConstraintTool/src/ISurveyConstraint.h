@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef SURVEYCONSTRAINTTOOLS_SURVEYCONSTRAINT_IH
 #define SURVEYCONSTRAINTTOOLS_SURVEYCONSTRAINT_IH
 
 #include "GaudiKernel/IAlgTool.h"
-#include "InDetSurveyConstraintTool/SurveyConstraintPoint.h"
-#include "InDetSurveyConstraintTool/SurveyConstraintModule.h"
+#include "SurveyConstraintPoint.h"
+#include "SurveyConstraintModule.h"
 
 #include <vector>
 #include <map>

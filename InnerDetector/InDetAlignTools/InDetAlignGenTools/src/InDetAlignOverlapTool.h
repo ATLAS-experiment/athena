@@ -6,9 +6,9 @@
 #define INDETALIGNTOOLS_OVERLAPTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "InDetAlignGenTools/IInDetAlignOverlapTool.h"
+#include "IInDetAlignOverlapTool.h"
 
-#include "InDetAlignGenTools/IInDetAlignFillTrack.h"
+#include "IInDetAlignFillTrack.h"
 #include "AlignSiModuleList.h"
 #include "InDetAlignTrkInfo/AlignSiHit.h"
 #include <vector>

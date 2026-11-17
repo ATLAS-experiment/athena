@@ -23,7 +23,7 @@
 #include "GaudiKernel/NTuple.h"
 #include "GaudiKernel/ToolHandle.h"
 
-#include "InDetAlignGenTools/IInDetAlignFillTrack.h"
+#include "IInDetAlignFillTrack.h"
 #include "TrkToolInterfaces/ITruthToTrack.h"
 #include "TrkExInterfaces/IExtrapolator.h"
 #include "TrkToolInterfaces/ITrackParticleCreatorTool.h"

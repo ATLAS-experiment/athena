@@ -6,7 +6,7 @@
 #define SURVEYCONSTRAINTTOOLS_SURVEYCONSTRAINT_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "InDetSurveyConstraintTool/ISurveyConstraint.h"
+#include "ISurveyConstraint.h"
 #include "InDetReadoutGeometry/SiDetectorElementCollection.h"
 #include "StoreGate/ReadCondHandleKey.h"
 #include <vector>

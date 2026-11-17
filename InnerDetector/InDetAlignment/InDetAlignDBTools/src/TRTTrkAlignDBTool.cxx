@@ -14,7 +14,7 @@
 #include "TrkAlignEvent/AlignModule.h"
 #include "TrkAlignEvent/AlignPar.h"
 
-#include "InDetAlignDBTools/TRTTrkAlignDBTool.h"
+#include "TRTTrkAlignDBTool.h"
 
 #include "AthContainers/DataVector.h"
 #include "TFile.h"
