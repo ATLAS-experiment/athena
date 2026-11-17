@@ -234,7 +234,7 @@ NB_MODULE(python_tool_handle, module) {
     module.def("set_python_printer", [](nb::args, nb::kwargs) {
         throw std::runtime_error(
             "set_python_printer is only available in standalone "
-            "(AnalysisBase/ColumnarAnalysis) builds, not in Athena/AthAnalysis.");
+            "(AnalysisBase) builds, not in Athena/AthAnalysis.");
     }, "Not available in Athena/AthAnalysis builds.");
 #endif  // XAOD_STANDALONE
 

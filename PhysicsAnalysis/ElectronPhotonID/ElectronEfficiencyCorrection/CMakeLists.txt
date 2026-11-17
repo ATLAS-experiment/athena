@@ -14,10 +14,7 @@ else ()
 endif ()
 
 # FIX ME: These settings should come from the Project configuration
-if (COLUMNAR_ANALYSIS)
-  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeArray;ColumnarModeArray")
-  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
-elseif (XAOD_STANDALONE)
+if (XAOD_STANDALONE)
   SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD;ColumnarModeArray")
   SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
 else()
@@ -73,7 +70,7 @@ if ( NOT XAOD_STANDALONE )
 	          SCRIPT python -m  ElectronEfficiencyCorrection.TElectronTestAlgConfig --filesInput $ASG_TEST_FILE_MC --evtMax=5
               POST_EXEC_SCRIPT noerror.sh
               PROPERTIES TIMEOUT 300)
-elseif ( NOT COLUMNAR_ANALYSIS )
+else()
    atlas_add_executable( EgEfficiencyCorr_testEgEfficiencyCorr
       util/testEgEfficiencyCorr.cxx util/SFHelpers.cxx
       INCLUDE_DIRS ${ROOT_INCLUDE_DIRS}

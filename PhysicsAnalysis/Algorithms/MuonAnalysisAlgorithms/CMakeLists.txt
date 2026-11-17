@@ -18,21 +18,17 @@ atlas_add_component( MuonAnalysisAlgorithms
 atlas_install_python_modules( python/*.py POST_BUILD_CMD ${ATLAS_FLAKE8} )
 atlas_install_data( data/* )
 
-if (NOT COLUMNAR_ANALYSIS)
+atlas_add_test( TestCPRun2Muons
+   SCRIPT CPRun.py --text-config MuonAnalysisAlgorithms/test_configuration_Run2_Muons.yaml -e 30 --input-list $ASG_TEST_FILE_MC
+   POST_EXEC_SCRIPT noerror.sh
+   PRIVATE_WORKING_DIRECTORY
+   PROPERTIES TIMEOUT 400 
+)
 
-   atlas_add_test( TestCPRun2Muons
-      SCRIPT CPRun.py --text-config MuonAnalysisAlgorithms/test_configuration_Run2_Muons.yaml -e 30 --input-list $ASG_TEST_FILE_MC
-      POST_EXEC_SCRIPT noerror.sh
-      PRIVATE_WORKING_DIRECTORY
-      PROPERTIES TIMEOUT 400 
-   )
-
-   atlas_add_test( TestCPRun3Muons
-      SCRIPT CPRun.py --text-config MuonAnalysisAlgorithms/test_configuration_Run3_Muons.yaml -e 30 --input-list $ASG_TEST_FILE_RUN3_MC
-      POST_EXEC_SCRIPT noerror.sh
-      PRIVATE_WORKING_DIRECTORY
-      PROPERTIES TIMEOUT 400
-   )
-
-endif()
+atlas_add_test( TestCPRun3Muons
+   SCRIPT CPRun.py --text-config MuonAnalysisAlgorithms/test_configuration_Run3_Muons.yaml -e 30 --input-list $ASG_TEST_FILE_RUN3_MC
+   POST_EXEC_SCRIPT noerror.sh
+   PRIVATE_WORKING_DIRECTORY
+   PROPERTIES TIMEOUT 400
+)
 

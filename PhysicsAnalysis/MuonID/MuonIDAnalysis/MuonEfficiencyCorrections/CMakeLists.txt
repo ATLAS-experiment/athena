@@ -4,10 +4,7 @@
 atlas_subdir( MuonEfficiencyCorrections )
 
 # FIX ME: These settings should come from the Project configuration
-if (COLUMNAR_ANALYSIS)
-  SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeArray;ColumnarModeArray")
-  SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
-elseif (XAOD_STANDALONE)
+if (XAOD_STANDALONE)
   SET (COLUMNAR_MODE_NAME_LIST "ColumnarModeXAOD;ColumnarModeArray")
   SET (COLUMNAR_MODE_SUFFIX_LIST ";_array")
 else()
