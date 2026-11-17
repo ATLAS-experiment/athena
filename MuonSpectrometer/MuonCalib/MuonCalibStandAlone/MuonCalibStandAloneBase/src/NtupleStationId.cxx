@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibStandAloneBase/NtupleStationId.h"
@@ -60,7 +60,10 @@ namespace MuonCalib {
         }
         MdtBasicRegionHash hash;
         IdContext idCont = mdtIdHelper.module_context();
-        mdtIdHelper.get_hash(id, hash, &idCont);
+        //rc: 0 = success, 1 = failure
+        if (mdtIdHelper.get_hash(id, hash, &idCont) != 0)[[unlikely]]{
+          return false;
+        };
         m_region_hash = static_cast<int>(hash);
         m_geom_ok = true;
         return true;

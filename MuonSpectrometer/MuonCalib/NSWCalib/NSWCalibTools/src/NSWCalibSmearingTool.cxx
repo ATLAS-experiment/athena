@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "NSWCalibSmearingTool.h"
@@ -455,7 +455,7 @@ StatusCode NSWCalibSmearingTool::readHighVoltagesStatus()
 	    while(elem) {
 	      std::string subs_elem;
 	      elem >> subs_elem;
-	      if (!subs_elem.empty()) elements.push_back(subs_elem);
+	      if (!subs_elem.empty()) elements.push_back(std::move(subs_elem));
 	    }
 	    
 	    gasGap = std::stoi(elements[0]);

@@ -14,9 +14,8 @@
 #include "xAODMuonPrepData/MMClusterFwd.h"
 #include "ActsGeometryInterfaces/GeometryContext.h"
 
-
-
-#include <cmath>
+#include <functional>
+#include <stdexcept>
 #include <vector>
 
 namespace NSWCalib { 
@@ -46,6 +45,7 @@ namespace NSWCalib {
       static angleFunction dummy_func() {
         return [](float){   
            throw std::runtime_error("Please do not use the dummy lorentz function");
+           //coverity[UNREACHABLE]
            return 0.;
         };
       }

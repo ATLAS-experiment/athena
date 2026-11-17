@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "AthenaBaseComps/AthCheckMacros.h"
 #include "AthenaBaseComps/AthMsgStreamMacros.h"
@@ -11,10 +11,7 @@
 #include "MuonCalibStreamCnvSvc/MuonCalibStreamAddress.h"
 #include "MuonPrepRawData/MuonPrepDataCollection.h"
 
-#include <iostream>
-#include <list>
-#include <algorithm>
-#include <map>
+
 
 #include "StoreGate/StoreGateSvc.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -26,6 +23,9 @@
 
 #include "MuonCalibStreamCnv/RpcCalibRawDataProvider.h"
 #include "MuonReadoutGeometry/RpcReadoutElement.h"
+#include <list>
+#include <algorithm>
+#include <map>
 
 using namespace LVL2_MUON_CALIBRATION;
 
@@ -121,7 +121,12 @@ StatusCode RpcCalibRawDataProvider::decodeImpl(const EventContext& ctx,  RpcPadC
 
             // Retrieve the identifier elements from the map
             const RpcCablingCondData::RDOmap &pad_map = cabling->give_RDOs();
-            RDOindex index = (*pad_map.find(key)).second;
+            const auto pPair = pad_map.find(key);
+            if (pPair == pad_map.end())[[unlikely]]{
+              ATH_MSG_ERROR("key "<<key<<" not in map.");
+              return StatusCode::FAILURE;
+            }
+            RDOindex index = pPair->second;
             index.offline_indexes(name, eta, phi, doublet_r, doublet_z, doublet_phi, gas_gap, measures_phi, strip);
 
             // Build the pad offline identifier

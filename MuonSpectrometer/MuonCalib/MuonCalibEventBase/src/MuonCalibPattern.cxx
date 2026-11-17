@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonCalibEventBase/MuonCalibPattern.h"
@@ -40,7 +40,7 @@ namespace MuonCalib {
         /// Need to find out whether the segment should be copied or not
         for (const MuonCalibSegPtr& other_seg : other.muonSegs()) {
             MuonCalibSegPtr seg{new MuonCalibSegment(*other_seg)};
-            addMuonSegment(seg);
+            addMuonSegment(std::move(seg));
         }
     }
     MuonCalibPattern::MuonCalibPattern(const MuonCalibPattern& other) { copy(other); }
