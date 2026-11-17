@@ -8,6 +8,7 @@ Step implemented as python function
 
 from TrigValTools.TrigValSteering.Step import Step
 import contextlib
+import os
 import sys
 
 class PyStep(Step):
@@ -50,3 +51,34 @@ class PyStep(Step):
             self.result = 1
 
       return self.result, f'# (internal) {self.func.__name__}'
+
+class RmStep(PyStep):
+   """PyStep removing a file, suppressing FileNotFoundError
+
+   Usage:
+      ex_rm = RmStep('created.BS')
+   """
+
+   def __init__(self, filename, **kwargs):
+      name = kwargs.pop('name', None) or filename
+
+      def _rm():
+         with contextlib.suppress(FileNotFoundError):
+            os.remove(filename)
+
+      super(RmStep, self).__init__(_rm, name=name, **kwargs)
+
+class MvStep(PyStep):
+   """PyStep moving (renaming) a file
+
+   Usage:
+      ex_mv = MvStep('in.BS', 'out.BS')
+   """
+
+   def __init__(self, sourceFile, destFile, **kwargs):
+      name = kwargs.pop('name', None) or f'{sourceFile} -> {destFile}'
+
+      def _mv():
+         os.rename(sourceFile, destFile)
+
+      super(MvStep, self).__init__(_mv, name=name, **kwargs)
