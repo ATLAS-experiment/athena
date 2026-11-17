@@ -35,13 +35,10 @@
 #include "xAODTrigger/MuonRoIContainer.h"
 #include "AthenaMonitoringKernel/GenericMonitoringTool.h"
 
-#include "GaudiKernel/IIncidentListener.h"
-
-class IIncidentSvc;
 
 enum ECRegions{ Bulk, WeakBFieldA, WeakBFieldB };
 
-class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
+class MuFastSteering : public AthReentrantAlgorithm
 {
  public:
   enum {
@@ -61,7 +58,6 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
   MuFastSteering(const std::string& name, ISvcLocator* svc);
 
   virtual StatusCode initialize() override;
-  virtual StatusCode stop() override;
 
   /** execute(), main code of the algorithm for AthenaMT*/
   virtual StatusCode execute(const EventContext& ctx) const override;
@@ -93,8 +89,6 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
                                      const EventContext&                                ctx) const;
 
   int L2MuonAlgoMap(const std::string& name) const;
-
-  virtual void handle(const Incident& incident) override;
 
  protected:
 
@@ -190,8 +184,6 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
 
  private:
 
-  ServiceHandle< IIncidentSvc > m_incidentSvc{this, "IncidentSvc", "IncidentSvc"};      
-  ServiceHandle<Gaudi::Interfaces::IOptionsSvc> m_jobOptionsSvc {this, "JobOptionsSvc", "JobOptionsSvc",    "Job options service to retrieve DataFlowConfig"   };
   // Property
   Gaudi::Property< float > m_scaleRoadBarrelInner { this, "Scale_Road_BarrelInner", 1 };
   Gaudi::Property< float > m_scaleRoadBarrelMiddle { this, "Scale_Road_BarrelMiddle", 1 };
@@ -208,7 +200,6 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
   Gaudi::Property< bool > m_use_RoIBasedDataAccess_CSC  { this, "USE_ROIBASEDACCESS_CSC",  true};
   Gaudi::Property< bool > m_use_RoIBasedDataAccess_STGC { this, "USE_ROIBASEDACCESS_STGC", true};
   Gaudi::Property< bool > m_use_RoIBasedDataAccess_MM   { this, "USE_ROIBASEDACCESS_MM",   true};
-  Gaudi::Property< bool > m_doCalStream { this, "DoCalibrationStream", true};
   Gaudi::Property< bool > m_calDataScouting { this, "MuonCalDataScouting", false};
   Gaudi::Property< bool > m_rpcErrToDebugStream { this, "RpcErrToDebugStream", false};
   Gaudi::Property< bool > m_use_endcapInnerFromBarrel { this, "UseEndcapInnerFromBarrel", false};
@@ -235,10 +226,6 @@ class MuFastSteering : public AthReentrantAlgorithm , public IIncidentListener
   Gaudi::Property< float > m_dEtasurrRoI { this, "dEtasurrRoI", 99, "eta range to find surrounding L1 RoIs" };
 
   float getRoiSizeForID(bool isEta, const xAOD::L2StandAloneMuon* muonSA) const;
-
-  Gaudi::Property< bool > m_allowOksConfig { this, "AllowOksConfig", true};
-  Gaudi::Property< std::string > m_calBufferName { this, "MuonCalBufferName", "/tmp/testOutput"};
-  Gaudi::Property< int > m_calBufferSize { this, "MuonCalBufferSize", 1024*1024};
 
   // Enable to fill FS RoI for ID (cosmic run)
   Gaudi::Property< bool > m_fill_FSIDRoI { this, "FILL_FSIDRoI", false, "Fill FS RoI for ID (will be used in cosmic run)"};

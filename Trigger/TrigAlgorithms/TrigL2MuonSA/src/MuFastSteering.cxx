@@ -12,9 +12,7 @@
 #include "CxxUtils/phihelper.h"
 #include "TrigSteeringEvent/TrigRoiDescriptor.h"
 #include "TrigT1Interfaces/RecMuonRoI.h"
-#include "AthenaInterprocess/Incidents.h"
 
-#include "GaudiKernel/IIncidentSvc.h"
 #include "AthenaMonitoringKernel/Monitored.h"
 
 // --------------------------------------------------------------------------------
@@ -111,88 +109,11 @@ StatusCode MuFastSteering::initialize()
 
   //
   // Initialize the calibration streamer
-  ATH_CHECK(m_calStreamer.retrieve(EnableTool(m_doCalStream)));
-  if (m_doCalStream) {
-    ATH_CHECK(m_jobOptionsSvc.retrieve());
-
-    if (m_jobOptionsSvc->has("MuonHltCalibrationConfig.MuonCalBufferName")) {
-      if (m_calBufferName.fromString(m_jobOptionsSvc->get("MuonHltCalibrationConfig.MuonCalBufferName","")).isSuccess()) {
-	ATH_MSG_DEBUG("Set property " << m_calBufferName << " from MuonHltCalibrationConfig.MuonCalBufferName");
-      }
-    } else {
-      ATH_MSG_DEBUG("Could not parse MuonHltCalibrationConfig.MuonCalBufferName from JobOptionsSvc");
-    }
-    if (m_jobOptionsSvc->has("MuonHltCalibrationConfig.MuonCalBufferSize")) {
-      if (m_calBufferSize.fromString(m_jobOptionsSvc->get("MuonHltCalibrationConfig.MuonCalBufferSize","")).isSuccess()) {
-	ATH_MSG_DEBUG("Set property " << m_calBufferSize << " from MuonHltCalibrationConfig.MuonCalBufferSize");
-      }
-    }
-    else {
-      ATH_MSG_DEBUG("Could not parse MuonHltCalibrationConfig.MuonCalBufferSize from JobOptionsSvc");
-    }
-    
-    // set properties
-    m_calStreamer->setBufferName(m_calBufferName);
-    ATH_MSG_DEBUG("Initialized the Muon Calibration Streamer. Buffer name: " << m_calBufferName 
-		  << ", buffer size: " << m_calBufferSize 
-		  << " doDataScouting: "  << m_calDataScouting);
-    
-    
-    ATH_CHECK(m_incidentSvc.retrieve());
-    m_incidentSvc->addListener(this, AthenaInterprocess::UpdateAfterFork::type());
-  }
-    
+  ATH_CHECK(m_calStreamer.retrieve(EnableTool(m_calDataScouting)));
 
   return StatusCode::SUCCESS;
 }
 
-StatusCode MuFastSteering::stop()
-{
-  // close the calibration stream
-  if ( m_doCalStream ) {
-    if (m_calStreamer->isStreamOpen()){
-      StatusCode sc = m_calStreamer->closeStream();
-      if  ( sc != StatusCode::SUCCESS ) {
-	ATH_MSG_ERROR("Failed to close the calibration stream");}
-      else {
-	ATH_MSG_INFO("Calibration stream closed");
-      }
-    } 
-  }
-  return StatusCode::SUCCESS;
-}
-
-
-
-void MuFastSteering::handle(const Incident& incident) {
-  
-  
-  if (incident.type() == AthenaInterprocess::UpdateAfterFork::type() && m_doCalStream) {
-    ATH_MSG_DEBUG("+-----------------------------------+");
-    ATH_MSG_DEBUG("| handle for UpdateAfterFork called |");
-    ATH_MSG_DEBUG("+-----------------------------------+");
-    const AthenaInterprocess::UpdateAfterFork& updinc = dynamic_cast<const AthenaInterprocess::UpdateAfterFork&>(incident);
-    
-    ATH_MSG_DEBUG(" MuonCalBufferName     = " << m_calBufferName);
-    ATH_MSG_DEBUG(" MuonCalBufferSize     = " << m_calBufferSize);
-    ATH_MSG_DEBUG(" MuonCalBufferWId     = " << updinc.workerID());
-    ATH_MSG_DEBUG("=================================================");
-    
-    
-    std::string worker_name=std::to_string(updinc.workerID());
-    //
-    // Create the calibration stream
-    
-    m_calStreamer->setInstanceName(worker_name);
-    
-    //open the stream
-    if ( m_calStreamer->openStream(m_calBufferSize).isSuccess() ) {
-      ATH_MSG_INFO("Opened the connection to the circular buffer " << m_calBufferName.value());
-    } else {
-      ATH_MSG_ERROR("Failed to open the connection to the circular buffer " << m_calBufferName.value());
-    }
-  }   
-}
 
 // --------------------------------------------------------------------------------
 // --------------------------------------------------------------------------------
@@ -674,34 +595,30 @@ StatusCode MuFastSteering::findMuonSignature(const std::vector<const TrigRoiDesc
         //-----------------------
         // call the calibration streamer
         //--------------------------- 
-        if (m_doCalStream && trackPatterns.size()>0 ) { 
-        TrigL2MuonSA::TrackPattern tp = trackPatterns[0];
-        std::vector<uint32_t> localBuffer;  // init localBuffer parameter
-        sc = m_calStreamer->createRoiFragment(*p_roi,tp,mdtHits,
-                                rpcHits,
-                                tgcHits,
-                                localBuffer,
-                                m_calDataScouting,
-                                ctx); 
-        if (sc != StatusCode::SUCCESS ) {  
+        if (m_calDataScouting && trackPatterns.size()>0 ) {
+          TrigL2MuonSA::TrackPattern tp = trackPatterns[0];
+          std::vector<uint32_t> localBuffer;  // init localBuffer parameter
+          sc = m_calStreamer->createRoiFragment(*p_roi,tp,mdtHits,
+                                                rpcHits,
+                                                tgcHits,
+                                                localBuffer,
+                                                ctx);
+          if (sc != StatusCode::SUCCESS ) {
             ATH_MSG_WARNING("Calibration streamer: create Roi Fragment failed");
-        }
-        // if it's a data scouting chain
-        if ( m_calDataScouting ) {
-            ATH_MSG_DEBUG("Retrieved the buffer, with size: " << localBuffer.size());
+          }
+          ATH_MSG_DEBUG("Retrieved the buffer, with size: " << localBuffer.size());
 
-            // create the TrigCompositeContainer to store the calibration buffer
-            xAOD::TrigComposite* tc = new xAOD::TrigComposite();
-	    if (outputMuonCal){
-	      outputMuonCal->push_back(tc);
-	      ATH_MSG_DEBUG("The size of the TrigCompositeContainer is: " << outputMuonCal->size() );
-	    }else{
-	      ATH_MSG_ERROR("Trying to fill nullptr container.");
-	      delete tc;
-	      return StatusCode::FAILURE;
-	    }
-            tc->setDetail("muCalibDS", localBuffer );
-	}
+          // create the TrigCompositeContainer to store the calibration buffer
+          xAOD::TrigComposite* tc = new xAOD::TrigComposite();
+          if (outputMuonCal){
+            outputMuonCal->push_back(tc);
+              ATH_MSG_DEBUG("The size of the TrigCompositeContainer is: " << outputMuonCal->size() );
+          } else {
+            ATH_MSG_ERROR("Trying to fill nullptr container.");
+            delete tc;
+            return StatusCode::FAILURE;
+          }
+          tc->setDetail("muCalibDS", localBuffer );
         }
 
         ++p_roids;
