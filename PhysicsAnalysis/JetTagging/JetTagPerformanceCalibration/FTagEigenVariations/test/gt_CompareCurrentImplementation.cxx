@@ -127,7 +127,9 @@ namespace {
       for (Eigen::Index k = 0; k < out.cols(); ++k) {
         TH1* up = nullptr;
         TH1* down = nullptr;
-        eigen.getEigenvectorVariation(static_cast<unsigned int>(k), up, down);
+        if (!eigen.getEigenvectorVariation(static_cast<unsigned int>(k), up, down)){
+          return out;
+        };
         for (Eigen::Index i = 0; i < nBins; ++i) {
           const int bin = m_container.histogramBins.at(i);
           out(i, k) = up->GetBinContent(bin) - m_result->GetBinContent(bin);
