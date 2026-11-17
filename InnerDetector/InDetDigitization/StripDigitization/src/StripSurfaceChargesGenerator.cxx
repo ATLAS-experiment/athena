@@ -101,6 +101,14 @@ StatusCode StripSurfaceChargesGenerator::initialize() {
     return StatusCode::FAILURE;
   }
 
+  m_doRadDamageLUT = not m_radDamageLUT.empty();
+  ATH_CHECK(m_radDamageLUT.retrieve(EnableTool{m_doRadDamageLUT}));
+  if (m_doRadDamageLUT and (m_doTrapping or m_doInducedChargeModel)) {
+    ATH_MSG_FATAL("RadDamageLUTTool cannot be combined with doTrapping or doInducedChargeModel");
+    return StatusCode::FAILURE;
+  }
+
+
   ATH_CHECK(m_lorentzAngleTool.retrieve());
 
   return StatusCode::SUCCESS;
@@ -446,6 +454,18 @@ void StripSurfaceChargesGenerator::processSiHit(const SiDetectorElement* element
     }
   }
 
+  // LUT settings that are constant for a detector element, so compute once per hit rather than per step
+  LUTHitSettings lutSettings{};
+  if (m_doRadDamageLUT) {
+    lutSettings.zHalfLUT = m_radDamageLUT->zHalfRange(hashId);
+    lutSettings.maxOffset = m_radDamageLUT->maxOffset(hashId);
+    lutSettings.chargeSmear = m_radDamageLUT->chargeSmear();
+    // Get sign of the Lorentz angle to keep directionality of drift for this element.
+    // Also account for arbitrary AllPix2-vs-Athena sign change (lutDriftSign = -1) so dy matches Athena local-phi drift
+    static constexpr float lutDriftSign{-1.f};
+    lutSettings.ySign = std::copysign(1.f, static_cast<float>(tanLorentz)) * lutDriftSign;
+  }
+
   float dstep{-0.5};
   for (int istep{0}; istep < numberOfSteps; ++istep) {
     dstep += 1.0;
@@ -488,6 +508,13 @@ void StripSurfaceChargesGenerator::processSiHit(const SiDetectorElement* element
     if (t_drift > 0.0) {
       const float x1{xhit + stepX * dstep};
       float y1{yhit + stepY * dstep};
+
+      // 2D CCE LUT performs Lorentz shift, diffusion, and irradiation charge trapping
+      if (m_doRadDamageLUT) {
+        const float totalTime{(m_tfix > -998.) ? m_tfix.value() : t_drift + timeOfFlight};
+        depositWithLUT(element, design, hashId, lutSettings, x1, y1, zReadout, thickness, q1, totalTime, hitproc, trklink, inserter, rndmEngine);
+        continue;
+      }
 
       float sigma{0.};
       if (not m_doInducedChargeModel) {
@@ -686,6 +713,85 @@ bool StripSurfaceChargesGenerator::chargeIsTrapped(double spess,
   return isTrapped;
 }
 
+void StripSurfaceChargesGenerator::depositWithLUT(const SiDetectorElement* element,
+                                                  const SCT_ModuleSideDesign* design,
+                                                  const IdentifierHash& hashId,
+                                                  const LUTHitSettings& lutSettings,
+                                                  float x1, float y1, float zReadout, float thickness,
+                                                  float q1, float totalTime,
+                                                  SiCharge::Process hitproc, const HepMcParticleLink& trklink,
+                                                  ISiSurfaceChargesInserter& inserter,
+                                                  CLHEP::HepRandomEngine* rndmEngine) const {
+
+  // LUT maps the deposit position to induced charge per strip, so find deposition position in the element local frame (using undrifted y).
+  const SiLocalPosition depPos(element->hitLocalToLocal(x1, y1));
+  if (not design->inActiveArea(depPos)) return;
+  const InDetDD::SiCellId depCell{design->cellIdOfPosition(depPos)};
+  if (not depCell.isValid()) return;
+
+  // Map deposit depth (z-axis) to the LUT frame, which uses readout surface at +zHalf, backplane at -zHalf.
+  // Also rescale if the LUT's simulated thickness (304 um) differs from the GeoModel thickness.
+  const float zLUT{(0.5f * thickness - zReadout) * (lutSettings.zHalfLUT / (0.5f * thickness))};
+
+  // Find number of nearby strips close enough to experience this charge (defined by table coverage)
+  const float pitch{static_cast<float>(design->phiPitch(depPos))};
+  const int numNeighbors{static_cast<int>(std::ceil(lutSettings.maxOffset / pitch))};
+
+  // Strip and row of the deposit. Sensors can have several strip rows numbered in one sequence, so neighbours are
+  // taken within the deposit's own row (cellIdInRange() rejects every strip beyond the first row).
+  const auto [depStrip, depRow] = design->getStripRow(depCell);
+  const int stripsInRow{design->diodesInRow(depRow)};
+  if (stripsInRow < 2) return;
+
+  // This section computers the geometry of a deposit's stirp to estimate distance to neighboring strips.
+	// This avoids excess calls of expensive localPositionOfCell and endsOfStrip, keeping them to once per deposit. 
+	// Calculates perpToStrip (deposits distance to closest strip) and stripStep, the pitch between strips
+
+	// For endcap (radial & tiltied strips) measure distances perp to strip line (not xPhi diferences). 
+  const SiLocalPosition stripCenter{design->localPositionOfCell(depCell)};
+  const std::pair<SiLocalPosition, SiLocalPosition> stripEnds{design->endsOfStrip(stripCenter)};
+  const double stripDirEta{stripEnds.second.xEta() - stripEnds.first.xEta()};
+  const double stripDirPhi{stripEnds.second.xPhi() - stripEnds.first.xPhi()};
+  const double stripLength{std::hypot(stripDirEta, stripDirPhi)};
+  if (stripLength <= 0.) return;
+  // Unit vector along the strip (oriented towards +xEta) and unit normal in the sensor plane
+  const double stripOrientation{stripDirEta >= 0. ? 1. : -1.};
+  const double unitEta{stripOrientation * stripDirEta / stripLength};
+  const double unitPhi{stripOrientation * stripDirPhi / stripLength};
+  const double normalEta{-unitPhi};
+  const double normalPhi{unitEta};
+  // Perp. distance of the deposit from its own strip line
+  const double perpToOwnStrip{(depPos.xEta() - stripCenter.xEta()) * normalEta + (depPos.xPhi() - stripCenter.xPhi()) * normalPhi};
+
+	// Strip spacing (+pitch if strip number increases along the normal, -pitch if decreasing)
+  const int referenceStrip{depStrip + 1 < stripsInRow ? depStrip + 1 : depStrip - 1};
+  const SiLocalPosition referenceCenter{design->localPositionOfCell(design->strip1Dim(referenceStrip, depRow))};
+  const double referencePerp{(referenceCenter.xEta() - stripCenter.xEta()) * normalEta + (referenceCenter.xPhi() - stripCenter.xPhi()) * normalPhi};
+  const double stripStep{((referencePerp >= 0.) == (referenceStrip > depStrip) ? 1. : -1.) * pitch};
+
+  for (int iStrip{-numNeighbors}; iStrip <= numNeighbors; ++iStrip) {
+
+    const int neighborStrip{depStrip + iStrip};
+    if (neighborStrip < 0 or neighborStrip >= stripsInRow) continue;
+
+    // Perp. distance of the deposit from strip iStrip
+    const double perpToStrip{perpToOwnStrip - iStrip * stripStep};
+    const float dy{lutSettings.ySign * static_cast<float>(perpToStrip)};
+
+    // Lookup induced charge fraction on strip
+    float chargeFrac{m_radDamageLUT->cce(hashId, zLUT, dy)};
+    if (chargeFrac == 0.f) continue; // Zero means outside the table range (tables contain no negative bins)
+
+    //Smear according to simulated expectations
+    if (lutSettings.chargeSmear > 0.f) {
+      chargeFrac *= 1.f + lutSettings.chargeSmear * CLHEP::RandGaussZiggurat::shoot(rndmEngine);
+    }
+
+    // Place charge at the foot of the perpendicular from the deposit onto strip iStrip so SiChargedDiodeCollection properly assigns
+    const SiLocalPosition onStrip(depPos.xEta() - perpToStrip * normalEta, depPos.xPhi() - perpToStrip * normalPhi);
+    inserter(SiSurfaceCharge(onStrip, SiCharge(q1 * chargeFrac, totalTime, hitproc, trklink)));
+  }
+}
 
 StripSurfaceChargesGenerator::Hists&
 StripSurfaceChargesGenerator::getHists() const
@@ -694,6 +800,5 @@ StripSurfaceChargesGenerator::getHists() const
   Hists* h ATLAS_THREAD_SAFE = m_h.get();
   return *h;
 }
-
 
 } // namespace ITk

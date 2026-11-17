@@ -88,6 +88,10 @@ def createDigitizationCfgFlags():
     # Current default is False as this is what has been used so far for the ITk simulation (treating 3D as Planar)
     # This is a temporary flag that will be eventually removed FIXME
     flags.addFlag("Digitization.DigitizeITk3Das3D", False)
+    # Flag to use 2D CCE lookup tables for radiation damage simulation of ITk Strip
+    flags.addFlag("Digitization.ITkStripRadDamageLUT", False)
+    # Flag to set the integrated luminosity experienced by ITKStrip detector, to interpolate the 2D CCE LUTs to requested level of radiation damage
+    flags.addFlag("Digitization.ITkStripRadDamageLuminosity", 0.0)
 
     # for PileUp digitization
     # Bunch structure configuration

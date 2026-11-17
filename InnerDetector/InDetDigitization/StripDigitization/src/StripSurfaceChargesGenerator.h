@@ -27,6 +27,9 @@
 #include "SiPropertiesTool/ISiPropertiesTool.h"
 #include "StoreGate/ReadCondHandle.h"
 
+// For LUT radiation damage model
+#include "IStripRadDamageLUTTool.h"
+
 // Gaudi
 #include "GaudiKernel/ITHistSvc.h" // for ITHistSvc
 #include "GaudiKernel/ServiceHandle.h"
@@ -118,6 +121,29 @@ class StripSurfaceChargesGenerator : public extends<AthAlgTool, ISurfaceChargesG
   BooleanProperty m_doRamo{this, "doRamo", false, "Ramo Potential for charge trapping effect"};
   BooleanProperty m_isOverlay{this, "isOverlay", false, "flag for overlay"};
   BooleanProperty m_doInducedChargeModel{this, "doInducedChargeModel", false, "Flag for Induced Charge Model"};
+
+  /// Settings for one detector element (computed once per hit) for LUT digitization
+  struct LUTHitSettings {
+    float zHalfLUT{0.f};     // half-thickness of the table's z axis [mm]
+    float maxOffset{0.f};    // largest |dy| covered by the table [mm]
+    float chargeSmear{0.f};  // relative Gaussian smear per strip charge (0 = off)
+    float ySign{1.f};        // sign(tanL) x lutDriftSign, maps Athena local phi to the table's dy
+  };
+
+  /// For LUT radiation damage model, spreads one charge group over the neighbouring strips using the 2D LUTs
+  void depositWithLUT(const InDetDD::SiDetectorElement* element,
+                      const InDetDD::SCT_ModuleSideDesign* design,
+                      const IdentifierHash& hashId,
+                      const LUTHitSettings& lutSettings,
+                      float x1, float y1, float zReadout, float thickness,
+                      float q1, float totalTime,
+                      SiCharge::Process hitproc, const HepMcParticleLink& trklink,
+                      ISiSurfaceChargesInserter& inserter,
+                      CLHEP::HepRandomEngine* rndmEngine) const;
+  ToolHandle<IStripRadDamageLUTTool> m_radDamageLUT{this, "RadDamageLUTTool", "",
+      "2D CCE lookup tables replacing Lorentz shift + diffusion + trapping (empty = off)"};
+  /// Set in initialize(): true if RadDamageLUTTool is configured
+  bool m_doRadDamageLUT{false};
 
   //ToolHandles
   ToolHandle<ISiPropertiesTool> m_siPropertiesTool{this, "SiPropertiesTool", "StripSiPropertiesTool", "Tool to retrieve SCT silicon properties"};
