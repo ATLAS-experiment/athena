@@ -36,9 +36,7 @@ egammaTransformerCalibTool::egammaTransformerCalibTool(const std::string& name) 
 
 // Need to declare this out-of-line since the full type of m_funcs
 // isn't available in the header.
-egammaTransformerCalibTool::~egammaTransformerCalibTool()
-{
-}
+egammaTransformerCalibTool::~egammaTransformerCalibTool() = default;
 
 
 StatusCode egammaTransformerCalibTool::initialize()
@@ -69,11 +67,11 @@ StatusCode egammaTransformerCalibTool::initialize()
     m_layerRecalibTool = std::make_unique<egammaLayerRecalibTool>(m_layerCalibTune, m_useSaccCorrection);
     m_layerRecalibTool->fixForMissingCells(m_useFixForMissingCells);
     m_layerRecalibTool->disable_LayerclEdecoration();
-    // by default it will not apply timing cut fix, we apply the timing cut fix here by default 
+    // by default it will not apply timing cut fix, we apply the timing cut fix here by default
   } else {
     ATH_MSG_DEBUG("Not using layer tool, Using raw layer energies as input to Transformer");
   }
-  
+
   // get the Transformer models and initialize functions
   ATH_MSG_DEBUG("get Transformer ONNX models in folder: " << m_folder);
   switch (m_particleType) {
@@ -88,7 +86,7 @@ StatusCode egammaTransformerCalibTool::initialize()
     {
       m_num_cluster_features = 11;
       m_num_cell_features = 7;
-      ATH_CHECK(setupTransformerModel(PathResolverFindCalibFile(m_folder + "/" + m_unconvertedPhotonModelFile))); 
+      ATH_CHECK(setupTransformerModel(PathResolverFindCalibFile(m_folder + "/" + m_unconvertedPhotonModelFile)));
     }
     break;
   case xAOD::EgammaParameters::convertedPhoton:
@@ -98,7 +96,7 @@ StatusCode egammaTransformerCalibTool::initialize()
       ATH_CHECK(setupTransformerModel(PathResolverFindCalibFile(m_folder + "/" + m_convertedPhotonModelFile)));
     }
     break;
-    
+
   default:
     ATH_MSG_FATAL("Particle type not set properly: " << m_particleType);
     return StatusCode::FAILURE;
@@ -235,7 +233,7 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
     }
 
     // --- 3. Calculate Scale Factors ---
-    
+
     // Raw energies + Recovered Energy (Timing Fix)
     // double raw_Es0 = clus.energyBE(0);  // LG: not sure if this is still needed but keeping it here for consistency
     double raw_Es1 = clus.energyBE(1);
@@ -270,14 +268,14 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
             case CaloCell_ID::EMB1: case CaloCell_ID::EME1:
                 scale_factor = array_layer_scales[1]; layer_idx = 1; break;
             case CaloCell_ID::EMB2: case CaloCell_ID::EME2:
-                scale_factor = array_layer_scales[2]; layer_idx = 2; 
+                scale_factor = array_layer_scales[2]; layer_idx = 2;
                 // Track cells that might already have been returned by the recovery tool.
                 if (std::abs(cell->time()) > m_timeCut) {
                     included_cells.push_back(cell->ID());
                 }
                 break;
             case CaloCell_ID::EMB3: case CaloCell_ID::EME3:
-                scale_factor = array_layer_scales[3]; layer_idx = 3; 
+                scale_factor = array_layer_scales[3]; layer_idx = 3;
                 if (std::abs(cell->time()) > m_timeCut) {
                     included_cells.push_back(cell->ID());
                 }
@@ -288,7 +286,7 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
             }
 
             double final_E = cell->e() * scale_factor;
-            
+
             cells_E.push_back(final_E);
             cells_eta.push_back(cell->eta());
             cells_phi.push_back(cell->phi());
@@ -313,7 +311,7 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
     if (recoverySucceeded) {
       for (const CaloCell* cell : recoveryInfo.addedCells) {
         if (!cell || !cell->caloDDE()) continue;
-        
+
         // Skip if this cell is already in the cluster
         if (std::find(included_cells.begin(), included_cells.end(), cell->ID()) != included_cells.end()) {
             ATH_MSG_WARNING("Recovered cell " << cell->ID() << " already included in cluster. Skipping to avoid double counting.");
@@ -322,7 +320,7 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
         else {
             ATH_MSG_DEBUG("Adding recovered cell " << cell->ID() << " to cluster inputs.");
         }
-        
+
         int sampling = cell->caloDDE()->getSampling();
         double scale_factor = 1.0;
         int layer_idx = -1;
@@ -333,10 +331,10 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
             scale_factor = array_layer_scales[3]; layer_idx = 3;
         } else {
             // Fallback
-            if (sampling == CaloCell_ID::PreSamplerB || sampling == CaloCell_ID::PreSamplerE) { 
-                scale_factor = array_layer_scales[0]; layer_idx = 0; 
-            } else if (sampling == CaloCell_ID::EMB1 || sampling == CaloCell_ID::EME1) { 
-                scale_factor = array_layer_scales[1]; layer_idx = 1; 
+            if (sampling == CaloCell_ID::PreSamplerB || sampling == CaloCell_ID::PreSamplerE) {
+                scale_factor = array_layer_scales[0]; layer_idx = 0;
+            } else if (sampling == CaloCell_ID::EMB1 || sampling == CaloCell_ID::EME1) {
+                scale_factor = array_layer_scales[1]; layer_idx = 1;
             } else {
                 continue;
             }
@@ -426,7 +424,7 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
         static_cast<float>(ratio_L0_total),
         static_cast<float>(ratio_Tile_total)
     };
-    
+
     // For converted photons, append conversion-specific features in order: convR, convEtOverPt, convPtRatio, conversionType.
     if (m_particleType == xAOD::EgammaParameters::convertedPhoton) {
       const xAOD::Photon* photon = dynamic_cast<const xAOD::Photon*>(eg);
@@ -441,7 +439,7 @@ float egammaTransformerCalibTool::getEnergy(const xAOD::CaloCluster& clus,
         float convEtOverPt = 0.0f;
         float ptconv = egammaMVAFunctions::compute_ptconv(photon);
         if (xAOD::EgammaHelpers::numberOfSiTracks(photon) == 2 && ptconv > 0.0f) {
-           float eacc = (m_useLayerCorrected ? 
+           float eacc = (m_useLayerCorrected ?
                         (raw_Es1 * array_layer_scales[1] + raw_Es2 * array_layer_scales[2] + raw_Es3 * array_layer_scales[3]) :
                         (raw_Es1 + raw_Es2 + raw_Es3));
            float cl_eta = eg->caloCluster()->eta();

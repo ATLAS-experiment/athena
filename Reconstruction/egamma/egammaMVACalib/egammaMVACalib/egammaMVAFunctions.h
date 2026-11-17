@@ -65,39 +65,43 @@ namespace egammaMVAFunctions
   }
   inline float compute_cl_etas1(const xAOD::CaloCluster& cluster) { return cluster.etaBE(1); }
   inline float compute_cl_etas2(const xAOD::CaloCluster& cluster) { return cluster.etaBE(2); }
+
   inline float compute_rawcl_Es0(const xAOD::CaloCluster& cl) { return cl.energyBE(0); }
-  /*inline std::function<float(const xAOD::CaloCluster&)> compute_rawcl_Es0_auto(bool use_corrected)
-  {
-      if (use_corrected) return [](const xAOD::CaloCluster& cl) { return cl.energyBE(0); };
-      else return [](const xAOD::CaloCluster& cl) { return cl.energyBE(0); };
-  }*/
   inline float compute_rawcl_Es1(const xAOD::CaloCluster& cl) { return cl.energyBE(1); }
   inline float compute_rawcl_Es2(const xAOD::CaloCluster& cl) { return cl.energyBE(2); }
   inline float compute_rawcl_Es3(const xAOD::CaloCluster& cl) { return cl.energyBE(3); }
 
-  inline float compute_correctedcl_Es0(const xAOD::CaloCluster& cl) {
+  inline float compute_rawcl_Eacc(const xAOD::CaloCluster& cl) {
+    return cl.energyBE(1) + cl.energyBE(2) + cl.energyBE(3);
+  }
+  inline float compute_rawcl_f0(const xAOD::CaloCluster& cl) {
+    return cl.energyBE(0) / (cl.energyBE(1) + cl.energyBE(2) + cl.energyBE(3));
+  }
+
+  inline float compute_correctedcl_Es0(const xAOD::Egamma& eg) {
     static const SG::ConstAccessor<double> acc ("correctedcl_Es0");
-    return acc.isAvailable(cl) ? acc(cl) : cl.energyBE(0);
+    return acc.isAvailable(eg) ? acc(eg) : eg.caloCluster()->energyBE(0);
   }
-  inline float compute_correctedcl_Es1(const xAOD::CaloCluster& cl) {
+  inline float compute_correctedcl_Es1(const xAOD::Egamma& eg) {
     static const SG::ConstAccessor<double> acc ("correctedcl_Es1");
-    return acc.isAvailable(cl) ? acc(cl) : cl.energyBE(1);
+    return acc.isAvailable(eg) ? acc(eg) : eg.caloCluster()->energyBE(1);
   }
-  inline float compute_correctedcl_Es2(const xAOD::CaloCluster& cl) {
+  inline float compute_correctedcl_Es2(const xAOD::Egamma& eg) {
     static const SG::ConstAccessor<double> acc ("correctedcl_Es2");
-    return acc.isAvailable(cl) ? acc(cl) : cl.energyBE(2);
+    return acc.isAvailable(eg) ? acc(eg) : eg.caloCluster()->energyBE(2);
   }
-  inline float compute_correctedcl_Es3(const xAOD::CaloCluster& cl) {
+  inline float compute_correctedcl_Es3(const xAOD::Egamma& eg) {
     static const SG::ConstAccessor<double> acc ("correctedcl_Es3");
-    return acc.isAvailable(cl) ? acc(cl) : cl.energyBE(3);
+    return acc.isAvailable(eg) ? acc(eg) : eg.caloCluster()->energyBE(3);
   }
 
-  inline float compute_rawcl_Eacc(const xAOD::CaloCluster& cl) { return cl.energyBE(1) + cl.energyBE(2) + cl.energyBE(3); }
-  inline float compute_rawcl_f0(const xAOD::CaloCluster& cl) { return cl.energyBE(0) / (cl.energyBE(1) + cl.energyBE(2) + cl.energyBE(3)); }
-
-  inline float compute_correctedcl_Eacc(const xAOD::CaloCluster& cl) { return compute_correctedcl_Es1(cl) + compute_correctedcl_Es2(cl) + compute_correctedcl_Es3(cl); }
-  inline float compute_correctedcl_f0(const xAOD::CaloCluster& cl) { return compute_correctedcl_Es0(cl) / (compute_correctedcl_Eacc(cl)); }
-
+  inline float compute_correctedcl_Eacc(const xAOD::Egamma& eg) {
+    return compute_correctedcl_Es1(eg) + compute_correctedcl_Es2(eg) +
+           compute_correctedcl_Es3(eg);
+  }
+  inline float compute_correctedcl_f0(const xAOD::Egamma& eg) {
+    return compute_correctedcl_Es0(eg) / (compute_correctedcl_Eacc(eg));
+  }
 
   inline float compute_calibHitsShowerDepth(const std::array<float, 4>& cl, float eta)
   {
@@ -122,12 +126,12 @@ namespace egammaMVAFunctions
       return compute_calibHitsShowerDepth(cluster_array, compute_cl_eta(cl));
   }
 
-  inline float compute_correctedcl_calibHitsShowerDepth(const xAOD::CaloCluster& cl) {
-    const std::array<float, 4> cluster_array {{ compute_correctedcl_Es0(cl),
-                                                compute_correctedcl_Es1(cl),
-                                                compute_correctedcl_Es2(cl),
-                                                compute_correctedcl_Es3(cl) }};
-    return compute_calibHitsShowerDepth(cluster_array, compute_cl_eta(cl));
+  inline float compute_correctedcl_calibHitsShowerDepth(const xAOD::Egamma& eg) {
+    const std::array<float, 4> cluster_array {{ compute_correctedcl_Es0(eg),
+                                                compute_correctedcl_Es1(eg),
+                                                compute_correctedcl_Es2(eg),
+                                                compute_correctedcl_Es3(eg) }};
+    return compute_calibHitsShowerDepth(cluster_array, compute_cl_eta( *(eg.caloCluster() ) ) );
   }
 
   // ------------------------------------------------------------------
@@ -140,7 +144,7 @@ namespace egammaMVAFunctions
     const float c   = std::cosh(eta);
     return (c != 0.f) ? (e / c) : 0.f;
   }
-  // be 100% sure what variables the FE BDT should use. For the run 2 
+  // be 100% sure what variables the FE BDT should use. For the run 2
   inline float cl_getMoment(const xAOD::CaloCluster& cl,
                             xAOD::CaloCluster::MomentType m,
                             const char* name) {
@@ -156,7 +160,7 @@ namespace egammaMVAFunctions
   inline float compute_cl_lateral      (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::LATERAL       , "LATERAL"); }
   inline float compute_cl_longitudinal (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::LONGITUDINAL  , "LONGITUDINAL"); }
   inline float compute_cl_fracMax      (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::ENG_FRAC_MAX  , "ENG_FRAC_MAX"); }
-  
+
   inline float compute_cl_secondR      (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::SECOND_R      , "SECOND_R"); }
   inline float compute_cl_centerLambda (const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::CENTER_LAMBDA , "CENTER_LAMBDA"); }
   inline float compute_cl_secondDensity(const xAOD::CaloCluster& cl){ return cl_getMoment(cl, xAOD::CaloCluster::SECOND_ENG_DENS,"SECOND_ENG_DENS"); }
@@ -239,7 +243,7 @@ namespace egammaMVAFunctions
   {
     static const SG::Accessor<float> accPx("px");
     static const SG::Accessor<float> accPy("py");
-    
+
     auto vx = ph->vertex();
     return vx ? std::hypot(accPx(*vx), accPy(*vx)) : 0.0;
   }
@@ -249,7 +253,7 @@ namespace egammaMVAFunctions
   {
     auto vx = ph->vertex();
     if (!vx) return 0.0;
- 
+
     TLorentzVector sum;
     if (vx->trackParticle(0)) sum += vx->trackParticle(0)->p4();
     if (vx->trackParticle(1)) sum += vx->trackParticle(1)->p4();
@@ -259,7 +263,7 @@ namespace egammaMVAFunctions
   inline float compute_pt1conv(const xAOD::Photon* ph)
   {
     static const SG::Accessor<float> accPt1("pt1");
-    
+
     const xAOD::Vertex* vx = ph->vertex();
     if (!vx) return 0.0;
     if (accPt1.isAvailable(*vx)) {
@@ -272,7 +276,7 @@ namespace egammaMVAFunctions
   inline float compute_pt2conv(const xAOD::Photon* ph)
   {
     static const SG::Accessor<float> accPt2("pt2");
-    
+
     const xAOD::Vertex* vx = ph->vertex();
     if (!vx) return 0.0;
     if (accPt2.isAvailable(*vx)) {
@@ -333,7 +337,7 @@ namespace egammaMVAFunctions
         m_tp1(m_vertex ? m_vertex->trackParticle(1) : nullptr),
         m_pt1conv(0.), m_pt2conv(0.)
     {
-     
+
       ATH_MSG_DEBUG("init conversion helper");
       if (!m_vertex) return;
 

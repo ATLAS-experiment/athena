@@ -2,7 +2,6 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-
 #include "egammaMVACalib/egammaMVAFunctions.h"
 
 #ifndef XAOD_STANDALONE
@@ -12,368 +11,549 @@ using Gaudi::Units::GeV;
 #define GeV 1000
 #endif
 
-#include <numbers>
 #include <limits>
+#include <numbers>
 
 /**
  * These functions are for building the maps of functions
  **/
 
-namespace egammaMVAFunctions
-{
+namespace egammaMVAFunctions {
 
-  // forward declarations
-  void initializeClusterFuncs(funcMap_t& funcLibrary,
-			      const std::string& prefix,
-			      bool useLayerCorrected);
+// forward declarations
+void initializeFuncs(funcMap_t& funcLibrary, const std::string& prefix,
+                     bool useLayerCorrected);
 
-  void initializeEgammaFuncs(funcMap_t& funcLibrary,
-			     const std::string& prefix,
-			     bool useLayerCorrected);
+/// A function to build the map for electrons
+std::unique_ptr<funcMap_t> initializeElectronFuncs(bool useLayerCorrected) {
+  // rel21 uses a naming version of some variables without prefix, keep both for
+  // compatibility
+  auto funcLibraryPtr = std::make_unique<funcMap_t>();
+  funcMap_t& funcLibrary = *funcLibraryPtr;
 
-  /// A function to build the map for electrons
-  std::unique_ptr<funcMap_t> initializeElectronFuncs(bool useLayerCorrected)
-  {
-    // rel21 uses a naming version of some variables without prefix, keep both for compatibility
-    auto funcLibraryPtr = std::make_unique<funcMap_t>();
-    funcMap_t& funcLibrary = *funcLibraryPtr;
+  initializeFuncs(funcLibrary, "el", useLayerCorrected);
 
-    initializeClusterFuncs(funcLibrary, "el", useLayerCorrected);
-    initializeEgammaFuncs(funcLibrary, "el", useLayerCorrected);
+  // specific functions only for electrons
+  funcLibrary["el_charge"] = [](const xAOD::Egamma* eg,
+                                const xAOD::CaloCluster*) {
+    return compute_el_charge(*(static_cast<const xAOD::Electron*>(eg)));
+  };
+  funcLibrary["el_tracketa"] = [](const xAOD::Egamma* eg,
+                                  const xAOD::CaloCluster*) {
+    return compute_el_tracketa(*(static_cast<const xAOD::Electron*>(eg)));
+  };
+  funcLibrary["el_trackpt"] = [](const xAOD::Egamma* eg,
+                                 const xAOD::CaloCluster*) {
+    return compute_el_trackpt(*(static_cast<const xAOD::Electron*>(eg)));
+  };
+  funcLibrary["el_trackz0"] = [](const xAOD::Egamma* eg,
+                                 const xAOD::CaloCluster*) {
+    return compute_el_trackz0(*(static_cast<const xAOD::Electron*>(eg)));
+  };
+  funcLibrary["el_refittedTrack_qoverp"] = [](const xAOD::Egamma* eg,
+                                              const xAOD::CaloCluster*) {
+    return compute_el_refittedTrack_qoverp(
+        *(static_cast<const xAOD::Electron*>(eg)));
+  };
 
-    // specific functions only for electrons
-    funcLibrary["el_charge"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return compute_el_charge(*(static_cast<const xAOD::Electron*>(eg))); };
-    funcLibrary["el_tracketa"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return compute_el_tracketa(*(static_cast<const xAOD::Electron*>(eg))); };
-    funcLibrary["el_trackpt"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return compute_el_trackpt(*(static_cast<const xAOD::Electron*>(eg))); };
-    funcLibrary["el_trackz0"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return compute_el_trackz0(*(static_cast<const xAOD::Electron*>(eg))); };
-    funcLibrary["el_refittedTrack_qoverp"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return compute_el_refittedTrack_qoverp(*(static_cast<const xAOD::Electron*>(eg))); };
-
-    return funcLibraryPtr;
-  }
-
-  /// A function to build the map for uncoverted photons
-  std::unique_ptr<funcMap_t> initializeUnconvertedPhotonFuncs(bool useLayerCorrected)
-  {
-    auto funcLibraryPtr = std::make_unique<funcMap_t>();
-    funcMap_t& funcLibrary = *funcLibraryPtr;
-
-    initializeClusterFuncs(funcLibrary, "ph", useLayerCorrected);
-    initializeEgammaFuncs(funcLibrary, "ph", useLayerCorrected);
-
-    return funcLibraryPtr;
-  }
-
-
-  /// A function to build the map for converted photons
-  std::unique_ptr<funcMap_t> initializeConvertedPhotonFuncs(bool useLayerCorrected)
-  {
-    auto funcLibraryPtr = std::make_unique<funcMap_t>();
-    funcMap_t& funcLibrary = *funcLibraryPtr;
-
-    initializeClusterFuncs(funcLibrary, "ph", useLayerCorrected);
-    initializeEgammaFuncs(funcLibrary, "ph", useLayerCorrected);
-
-
-    funcLibrary["ph_Rconv"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)->float
-      { return xAOD::EgammaHelpers::conversionRadius(static_cast<const xAOD::Photon*>(eg)); };
-
-    funcLibrary["ph_convR"] = funcLibrary["convR"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)->float
-      {
-        const auto *ph = static_cast<const xAOD::Photon*>(eg);
-        if (compute_ptconv(ph) > 3*GeV) {
-          return xAOD::EgammaHelpers::conversionRadius(ph);
-        }
-        return 799.0;
-
-      };
-    funcLibrary["ph_zconv"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      {
-	const auto *vertex = static_cast<const xAOD::Photon*>(eg)->vertex();
-	return vertex ? vertex->position().z() : 9999;
-      };
-    funcLibrary["ph_pt1conv"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)->float
-      { return compute_pt1conv(static_cast<const xAOD::Photon*>(eg)); };
-    funcLibrary["ph_pt2conv"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)->float
-      { return compute_pt2conv(static_cast<const xAOD::Photon*>(eg)); };
-    funcLibrary["ph_ptconv"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return compute_ptconv(static_cast<const xAOD::Photon*>(eg)); };
-
-    funcLibrary["ph_convPtRatio"] = funcLibrary["convPtRatio"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)->float
-      {
-        const auto *ph = static_cast<const xAOD::Photon*>(eg);
-        if (xAOD::EgammaHelpers::numberOfSiTracks(ph) == 2) {
-          auto pt1 = compute_pt1conv(ph);
-          auto pt2 = compute_pt2conv(ph);
-          auto denom = pt1+pt2;
-          if (denom == 0.)[[unlikely]] return std::numeric_limits<float>::max();
-          return std::max(pt1, pt2)/denom;
-        }
-          return 1.0f;
-      };
-
-    if (useLayerCorrected) {
-      funcLibrary["ph_convEtOverPt"] = funcLibrary["convEtOverPt"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*cl)->float
-        {
-          const auto *ph = static_cast<const xAOD::Photon*>(eg);
-
-          float rv = 0.0;
-          if (xAOD::EgammaHelpers::numberOfSiTracks(ph) == 2) {
-            auto denom = std::cosh(compute_cl_eta(*cl))*compute_ptconv(ph);
-            if (denom == 0.f)[[unlikely]] rv = std::numeric_limits<float>::max();
-            else rv = std::max(0.0f, compute_correctedcl_Eacc(*cl)/denom);
-          }
-          return std::min(rv, 2.0f);
-        };
-    } else {
-      funcLibrary["ph_convEtOverPt"] = funcLibrary["convEtOverPt"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*cl)->float
-        {
-          const auto *ph = static_cast<const xAOD::Photon*>(eg);
-
-          float rv = 0.0;
-          if (xAOD::EgammaHelpers::numberOfSiTracks(ph) == 2) {
-            auto denom = (std::cosh(compute_cl_eta(*cl))*compute_ptconv(ph));
-            if (denom == 0.f)[[unlikely]] rv = std::numeric_limits<float>::max();
-            else rv = std::max(0.0f, compute_rawcl_Eacc(*cl)/denom);
-          }
-          return std::min(rv, 2.0f);
-        };
-    }
-
-    return funcLibraryPtr;
-  }
-
-  std::unique_ptr<funcMap_t> initializeForwardElectronFuncs(bool useLayerCorrected) {
-    auto funcLibraryPtr = std::make_unique<funcMap_t>();
-    funcMap_t& funcLibrary = *funcLibraryPtr;
-
-    funcLibrary["el_cl_e"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return compute_cl_e(*cl); };
-    funcLibrary["abs_el_cl_eta"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return std::abs(compute_cl_eta(*cl));  };
-    funcLibrary["etaModCalo"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return (std::abs(cl->eta()) < 3.15 ? compute_etaMod_EMEC(*cl) : compute_etaMod_FCAL(*cl)); };
-    funcLibrary["cellIndex"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return (std::abs(cl->eta()) < 3.15 ? compute_cellIndex_EMEC(*cl) : compute_cellIndex_FCAL(*cl)); };
-    funcLibrary["el_cl_phi"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return compute_cl_phi(*cl); };
-    funcLibrary["phiMod2pi32"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return compute_phiMod_EMEC(*cl); };
-    if (useLayerCorrected) {
-      funcLibrary["el_cl_secondR"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-	{ return compute_cl_secondR_fudge(*eg); };
-    } else {
-      funcLibrary["el_cl_secondR"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_cl_secondR(*cl); };
-    }
-    funcLibrary["Es1Es2Ratio"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return compute_R12_EMEC(*cl); };
-    funcLibrary["el_cl_centerX"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return compute_cl_x(*cl); };
-    funcLibrary["el_cl_centerY"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return compute_cl_y(*cl); };
-    funcLibrary["abs_el_cl_centerZ"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      {  return std::abs(compute_cl_z(*cl)); };
-    funcLibrary["el_cl_centerLambda"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return compute_cl_centerLambda(*cl); };
-    funcLibrary["el_cl_secondMoment"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return compute_cl_secondDensity(*cl); };
-    
-    return funcLibraryPtr;
-  }
-
-
-  // Initialize the functions that just depend on the cluster.
-  // This helper function is not meant for external use.
-  void initializeClusterFuncs(funcMap_t& funcLibrary,
-                              const std::string& prefix,
-                              bool useLayerCorrected)
-  {
-
-    funcLibrary[prefix + "_cl_eta"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return compute_cl_eta(*cl); };
-    funcLibrary[prefix + "_cl_phi"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return compute_cl_phi(*cl); };
-    funcLibrary[prefix + "_cl_E"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return compute_cl_e(*cl); };
-    funcLibrary[prefix + "_cl_etaCalo"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return compute_cl_etaCalo(*cl); };
-    funcLibrary[prefix + "_cl_phiCalo"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return compute_cl_phiCalo(*cl); };
-    funcLibrary[prefix + "_cl_E_TileGap3"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return cl->eSample(CaloSampling::TileGap3); };
-
-    funcLibrary[prefix + "_cellIndexCalo"] = funcLibrary["cellIndexCalo"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return std::floor(std::abs(compute_cl_etaCalo(*cl))/0.025); };
-    funcLibrary[prefix + "_phiModCalo"] = funcLibrary["phiModCalo"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return ((abs(compute_cl_eta(*cl)) < 1.425) ?
-                  std::fmod(compute_cl_phiCalo(*cl), TMath::Pi() / 512) :
-                  std::fmod(compute_cl_phiCalo(*cl), TMath::Pi() / 384));
-      };
-
-    // improved version of phiModCalo, proposed by G. Unal, studied by L. Nasella
-    // see https://its.cern.ch/jira/browse/ATLASEG-325
-    // see https://indico.cern.ch/event/1364593/contributions/5843081/
-    funcLibrary[prefix + "_phiModCalo1"] = funcLibrary["phiModCalo1"] =
-        [](const xAOD::Egamma*, const xAOD::CaloCluster* cl) {
-          using std::numbers::pi;
-          const double eta = compute_cl_eta(*cl);
-          const double phi = compute_cl_phiCalo(*cl);
-          const double pi_divisor = std::abs(eta) < 1.425 ? 512. : 384.;
-
-          if (eta > 0.) {
-            if (phi > 0.) return std::fmod(phi, pi / pi_divisor);
-            else return std::fmod((2 * pi + phi), pi / pi_divisor);
-          }
-          else return std::fmod((pi - phi), pi / pi_divisor);
-        };
-
-    funcLibrary[prefix + "_phiModCell"] = funcLibrary["phiModCell"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return std::fmod(std::abs(compute_cl_phiCalo(*cl)), TMath::Pi() / 128); };
-    funcLibrary[prefix + "_etaModCalo"] = funcLibrary["etaModCalo"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return std::fmod(std::abs(compute_cl_etaCalo(*cl)), 0.025); };
-    funcLibrary["abs(" + prefix + "_cl_eta)"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return std::abs(compute_cl_eta(*cl)); };
-    funcLibrary[prefix + "_dPhiTG3"] = funcLibrary["dPhiTG3"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-      { return std::fmod(2.*TMath::Pi()+compute_cl_phi(*cl),TMath::Pi()/32.)-TMath::Pi()/64.0; };
-
-    if (useLayerCorrected) {
-      funcLibrary[prefix + "_rawcl_Es0"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_correctedcl_Es0(*cl); };
-      funcLibrary[prefix + "_rawcl_Es1"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_correctedcl_Es1(*cl); };
-      funcLibrary[prefix + "_rawcl_Es2"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_correctedcl_Es2(*cl); };
-      funcLibrary[prefix + "_rawcl_Es3"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_correctedcl_Es3(*cl); };
-      funcLibrary[prefix + "_rawcl_Eacc"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_correctedcl_Eacc(*cl); };
-      funcLibrary[prefix + "_rawcl_f0"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_correctedcl_f0(*cl); };
-      funcLibrary[prefix + "_rawcl_calibHitsShowerDepth"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_correctedcl_calibHitsShowerDepth(*cl); };
-      funcLibrary[prefix + "_R12"] = funcLibrary["R12"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_correctedcl_Es1(*cl)/compute_correctedcl_Es2(*cl); };
-      funcLibrary[prefix + "_fTG3"] = funcLibrary["fTG3"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return cl->eSample(CaloSampling::TileGap3)/compute_correctedcl_Eacc(*cl); };
-    } else {
-      funcLibrary[prefix + "_rawcl_Es0"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_rawcl_Es0(*cl); };
-      funcLibrary[prefix + "_rawcl_Es1"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_rawcl_Es1(*cl); };
-      funcLibrary[prefix + "_rawcl_Es2"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_rawcl_Es2(*cl); };
-      funcLibrary[prefix + "_rawcl_Es3"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_rawcl_Es3(*cl); };
-      funcLibrary[prefix + "_rawcl_Eacc"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_rawcl_Eacc(*cl); };
-      funcLibrary[prefix + "_rawcl_f0"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_rawcl_f0(*cl); };
-      funcLibrary[prefix + "_rawcl_calibHitsShowerDepth"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_rawcl_calibHitsShowerDepth(*cl); };
-      funcLibrary[prefix + "_R12"] = funcLibrary["R12"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return compute_rawcl_Es1(*cl)/compute_rawcl_Es2(*cl); };
-      funcLibrary[prefix + "_fTG3"] = funcLibrary["fTG3"] = [](const xAOD::Egamma*, const xAOD::CaloCluster* cl)
-	{ return cl->eSample(CaloSampling::TileGap3)/compute_rawcl_Eacc(*cl); };
-    }
-  }
-
-  // Initialize the variables that just depend on egamma.
-  // This helper function is not meant for external use.
-  void initializeEgammaFuncs(funcMap_t& funcLibrary,
-			     const std::string& prefix,
-			     bool /* useLayerCorrected */)
-  {
-    funcLibrary[prefix + "_e011"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e011); };
-    funcLibrary[prefix + "_e033"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e033); };
-    funcLibrary[prefix + "_e132"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e132); };
-    funcLibrary[prefix + "_e1152"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e1152); };
-    funcLibrary[prefix + "_ethad1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::ethad1); };
-    funcLibrary[prefix + "_ethad"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::ethad); };
-    funcLibrary[prefix + "_f1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::f1); };
-    funcLibrary[prefix + "_f3"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::f3); };
-    funcLibrary[prefix + "_f1core"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::f1core); };
-    funcLibrary[prefix + "_f3core"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::f3core); };
-    funcLibrary[prefix + "_e233"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e233); };
-    funcLibrary[prefix + "_e235"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e235); };
-    funcLibrary[prefix + "_e255"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e255); };
-    funcLibrary[prefix + "_e237"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e237); };
-    funcLibrary[prefix + "_e277"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e277); };
-    funcLibrary[prefix + "_e333"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e333); };
-    funcLibrary[prefix + "_e335"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e335); };
-    funcLibrary[prefix + "_e337"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e337); };
-    funcLibrary[prefix + "_e377"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e377); };
-    funcLibrary[prefix + "_weta1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::weta1); };
-    funcLibrary[prefix + "_weta2"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::weta2); };
-    funcLibrary[prefix + "_e2ts1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e2ts1); };
-    funcLibrary[prefix + "_e2tsts1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::e2tsts1); };
-    funcLibrary[prefix + "_fracs1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::fracs1); };
-    funcLibrary[prefix + "_widths1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::widths1); };
-    funcLibrary[prefix + "_widths2"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::widths2); };
-    funcLibrary[prefix + "_poscs1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::poscs1); };
-    funcLibrary[prefix + "_poscs2"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::poscs2); };
-    funcLibrary[prefix + "_asy1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::asy1); };
-    funcLibrary[prefix + "_pos"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::pos); };
-    funcLibrary[prefix + "_pos7"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::pos7); };
-    funcLibrary[prefix + "_barys1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::barys1); };
-    funcLibrary[prefix + "_wtots1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::wtots1); };
-    funcLibrary[prefix + "_emins1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::emins1); };
-    funcLibrary[prefix + "_emaxs1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::emaxs1); };
-    funcLibrary[prefix + "_r33over37allcalo"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::r33over37allcalo); };
-    funcLibrary[prefix + "_ecore"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::ecore); };
-    funcLibrary[prefix + "_Reta"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::Reta); };
-    funcLibrary[prefix + "_Rphi"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::Rphi); };
-    funcLibrary[prefix + "_Eratio"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::Eratio); };
-    funcLibrary[prefix + "_Rhad"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::Rhad); };
-    funcLibrary[prefix + "_Rhad1"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::Rhad1); };
-    funcLibrary[prefix + "_DeltaE"] = [](const xAOD::Egamma* eg, const xAOD::CaloCluster*)
-      { return eg->showerShapeValue(xAOD::EgammaParameters::DeltaE); };
-
-  }
+  return funcLibraryPtr;
 }
+
+/// A function to build the map for uncoverted photons
+std::unique_ptr<funcMap_t> initializeUnconvertedPhotonFuncs(
+    bool useLayerCorrected) {
+  auto funcLibraryPtr = std::make_unique<funcMap_t>();
+  funcMap_t& funcLibrary = *funcLibraryPtr;
+  initializeFuncs(funcLibrary, "ph", useLayerCorrected);
+  return funcLibraryPtr;
+}
+
+/// A function to build the map for converted photons
+std::unique_ptr<funcMap_t> initializeConvertedPhotonFuncs(
+    bool useLayerCorrected) {
+  auto funcLibraryPtr = std::make_unique<funcMap_t>();
+  funcMap_t& funcLibrary = *funcLibraryPtr;
+
+  initializeFuncs(funcLibrary, "ph", useLayerCorrected);
+
+  funcLibrary["ph_Rconv"] = [](const xAOD::Egamma* eg,
+                               const xAOD::CaloCluster*) -> float {
+    return xAOD::EgammaHelpers::conversionRadius(
+        static_cast<const xAOD::Photon*>(eg));
+  };
+
+  funcLibrary["ph_convR"] = funcLibrary["convR"] =
+      [](const xAOD::Egamma* eg, const xAOD::CaloCluster*) -> float {
+    const auto* ph = static_cast<const xAOD::Photon*>(eg);
+    if (compute_ptconv(ph) > 3 * GeV) {
+      return xAOD::EgammaHelpers::conversionRadius(ph);
+    }
+    return 799.0;
+  };
+  funcLibrary["ph_zconv"] = [](const xAOD::Egamma* eg,
+                               const xAOD::CaloCluster*) {
+    const auto* vertex = static_cast<const xAOD::Photon*>(eg)->vertex();
+    return vertex ? vertex->position().z() : 9999;
+  };
+  funcLibrary["ph_pt1conv"] = [](const xAOD::Egamma* eg,
+                                 const xAOD::CaloCluster*) -> float {
+    return compute_pt1conv(static_cast<const xAOD::Photon*>(eg));
+  };
+  funcLibrary["ph_pt2conv"] = [](const xAOD::Egamma* eg,
+                                 const xAOD::CaloCluster*) -> float {
+    return compute_pt2conv(static_cast<const xAOD::Photon*>(eg));
+  };
+  funcLibrary["ph_ptconv"] = [](const xAOD::Egamma* eg,
+                                const xAOD::CaloCluster*) {
+    return compute_ptconv(static_cast<const xAOD::Photon*>(eg));
+  };
+
+  funcLibrary["ph_convPtRatio"] = funcLibrary["convPtRatio"] =
+      [](const xAOD::Egamma* eg, const xAOD::CaloCluster*) -> float {
+    const auto* ph = static_cast<const xAOD::Photon*>(eg);
+    if (xAOD::EgammaHelpers::numberOfSiTracks(ph) == 2) {
+      auto pt1 = compute_pt1conv(ph);
+      auto pt2 = compute_pt2conv(ph);
+      auto denom = pt1 + pt2;
+      if (denom == 0.) [[unlikely]]
+        return std::numeric_limits<float>::max();
+      return std::max(pt1, pt2) / denom;
+    }
+    return 1.0f;
+  };
+
+  if (useLayerCorrected) {
+    funcLibrary["ph_convEtOverPt"] = funcLibrary["convEtOverPt"] =
+        [](const xAOD::Egamma* eg, const xAOD::CaloCluster* cl) -> float {
+      const auto* ph = static_cast<const xAOD::Photon*>(eg);
+
+      float rv = 0.0;
+      if (xAOD::EgammaHelpers::numberOfSiTracks(ph) == 2) {
+        auto denom = std::cosh(compute_cl_eta(*cl)) * compute_ptconv(ph);
+        if (denom == 0.f) [[unlikely]]
+          rv = std::numeric_limits<float>::max();
+        else
+          rv = std::max(0.0f, compute_correctedcl_Eacc(*eg) / denom);
+      }
+      return std::min(rv, 2.0f);
+    };
+  } else {
+    funcLibrary["ph_convEtOverPt"] = funcLibrary["convEtOverPt"] =
+        [](const xAOD::Egamma* eg, const xAOD::CaloCluster* cl) -> float {
+      const auto* ph = static_cast<const xAOD::Photon*>(eg);
+
+      float rv = 0.0;
+      if (xAOD::EgammaHelpers::numberOfSiTracks(ph) == 2) {
+        auto denom = (std::cosh(compute_cl_eta(*cl)) * compute_ptconv(ph));
+        if (denom == 0.f) [[unlikely]]
+          rv = std::numeric_limits<float>::max();
+        else
+          rv = std::max(0.0f, compute_rawcl_Eacc(*cl) / denom);
+      }
+      return std::min(rv, 2.0f);
+    };
+  }
+
+  return funcLibraryPtr;
+}
+
+std::unique_ptr<funcMap_t> initializeForwardElectronFuncs(
+    bool useLayerCorrected) {
+  auto funcLibraryPtr = std::make_unique<funcMap_t>();
+  funcMap_t& funcLibrary = *funcLibraryPtr;
+
+  funcLibrary["el_cl_e"] = [](const xAOD::Egamma*,
+                              const xAOD::CaloCluster* cl) {
+    return compute_cl_e(*cl);
+  };
+  funcLibrary["abs_el_cl_eta"] = [](const xAOD::Egamma*,
+                                    const xAOD::CaloCluster* cl) {
+    return std::abs(compute_cl_eta(*cl));
+  };
+  funcLibrary["etaModCalo"] = [](const xAOD::Egamma*,
+                                 const xAOD::CaloCluster* cl) {
+    return (std::abs(cl->eta()) < 3.15 ? compute_etaMod_EMEC(*cl)
+                                       : compute_etaMod_FCAL(*cl));
+  };
+  funcLibrary["cellIndex"] = [](const xAOD::Egamma*,
+                                const xAOD::CaloCluster* cl) {
+    return (std::abs(cl->eta()) < 3.15 ? compute_cellIndex_EMEC(*cl)
+                                       : compute_cellIndex_FCAL(*cl));
+  };
+  funcLibrary["el_cl_phi"] = [](const xAOD::Egamma*,
+                                const xAOD::CaloCluster* cl) {
+    return compute_cl_phi(*cl);
+  };
+  funcLibrary["phiMod2pi32"] = [](const xAOD::Egamma*,
+                                  const xAOD::CaloCluster* cl) {
+    return compute_phiMod_EMEC(*cl);
+  };
+  if (useLayerCorrected) {
+    funcLibrary["el_cl_secondR"] = [](const xAOD::Egamma* eg,
+                                      const xAOD::CaloCluster*) {
+      return compute_cl_secondR_fudge(*eg);
+    };
+  } else {
+    funcLibrary["el_cl_secondR"] = [](const xAOD::Egamma*,
+                                      const xAOD::CaloCluster* cl) {
+      return compute_cl_secondR(*cl);
+    };
+  }
+  funcLibrary["Es1Es2Ratio"] = [](const xAOD::Egamma*,
+                                  const xAOD::CaloCluster* cl) {
+    return compute_R12_EMEC(*cl);
+  };
+  funcLibrary["el_cl_centerX"] = [](const xAOD::Egamma*,
+                                    const xAOD::CaloCluster* cl) {
+    return compute_cl_x(*cl);
+  };
+  funcLibrary["el_cl_centerY"] = [](const xAOD::Egamma*,
+                                    const xAOD::CaloCluster* cl) {
+    return compute_cl_y(*cl);
+  };
+  funcLibrary["abs_el_cl_centerZ"] = [](const xAOD::Egamma*,
+                                        const xAOD::CaloCluster* cl) {
+    return std::abs(compute_cl_z(*cl));
+  };
+  funcLibrary["el_cl_centerLambda"] = [](const xAOD::Egamma*,
+                                         const xAOD::CaloCluster* cl) {
+    return compute_cl_centerLambda(*cl);
+  };
+  funcLibrary["el_cl_secondMoment"] = [](const xAOD::Egamma*,
+                                         const xAOD::CaloCluster* cl) {
+    return compute_cl_secondDensity(*cl);
+  };
+
+  return funcLibraryPtr;
+}
+
+// This helper function is not meant for external use.
+void initializeFuncs(funcMap_t& funcLibrary, const std::string& prefix,
+                     bool useLayerCorrected) {
+
+  funcLibrary[prefix + "_cl_eta"] = [](const xAOD::Egamma*,
+                                       const xAOD::CaloCluster* cl) {
+    return compute_cl_eta(*cl);
+  };
+  funcLibrary[prefix + "_cl_phi"] = [](const xAOD::Egamma*,
+                                       const xAOD::CaloCluster* cl) {
+    return compute_cl_phi(*cl);
+  };
+  funcLibrary[prefix + "_cl_E"] = [](const xAOD::Egamma*,
+                                     const xAOD::CaloCluster* cl) {
+    return compute_cl_e(*cl);
+  };
+  funcLibrary[prefix + "_cl_etaCalo"] = [](const xAOD::Egamma*,
+                                           const xAOD::CaloCluster* cl) {
+    return compute_cl_etaCalo(*cl);
+  };
+  funcLibrary[prefix + "_cl_phiCalo"] = [](const xAOD::Egamma*,
+                                           const xAOD::CaloCluster* cl) {
+    return compute_cl_phiCalo(*cl);
+  };
+  funcLibrary[prefix + "_cl_E_TileGap3"] = [](const xAOD::Egamma*,
+                                              const xAOD::CaloCluster* cl) {
+    return cl->eSample(CaloSampling::TileGap3);
+  };
+
+  funcLibrary[prefix + "_cellIndexCalo"] = funcLibrary["cellIndexCalo"] =
+      [](const xAOD::Egamma*, const xAOD::CaloCluster* cl) {
+        return std::floor(std::abs(compute_cl_etaCalo(*cl)) / 0.025);
+      };
+  funcLibrary[prefix + "_phiModCalo"] = funcLibrary["phiModCalo"] =
+      [](const xAOD::Egamma*, const xAOD::CaloCluster* cl) {
+        return ((abs(compute_cl_eta(*cl)) < 1.425)
+                    ? std::fmod(compute_cl_phiCalo(*cl), TMath::Pi() / 512)
+                    : std::fmod(compute_cl_phiCalo(*cl), TMath::Pi() / 384));
+      };
+
+  // improved version of phiModCalo, proposed by G. Unal, studied by L.
+  // Nasella see https://its.cern.ch/jira/browse/ATLASEG-325 see
+  // https://indico.cern.ch/event/1364593/contributions/5843081/
+  funcLibrary[prefix + "_phiModCalo1"] = funcLibrary["phiModCalo1"] =
+      [](const xAOD::Egamma*, const xAOD::CaloCluster* cl) {
+        using std::numbers::pi;
+        const double eta = compute_cl_eta(*cl);
+        const double phi = compute_cl_phiCalo(*cl);
+        const double pi_divisor = std::abs(eta) < 1.425 ? 512. : 384.;
+
+        if (eta > 0.) {
+          if (phi > 0.)
+            return std::fmod(phi, pi / pi_divisor);
+          else
+            return std::fmod((2 * pi + phi), pi / pi_divisor);
+        } else
+          return std::fmod((pi - phi), pi / pi_divisor);
+      };
+
+  funcLibrary[prefix + "_phiModCell"] = funcLibrary["phiModCell"] =
+      [](const xAOD::Egamma*, const xAOD::CaloCluster* cl) {
+        return std::fmod(std::abs(compute_cl_phiCalo(*cl)), TMath::Pi() / 128);
+      };
+  funcLibrary[prefix + "_etaModCalo"] = funcLibrary["etaModCalo"] =
+      [](const xAOD::Egamma*, const xAOD::CaloCluster* cl) {
+        return std::fmod(std::abs(compute_cl_etaCalo(*cl)), 0.025);
+      };
+  funcLibrary["abs(" + prefix + "_cl_eta)"] = [](const xAOD::Egamma*,
+                                                 const xAOD::CaloCluster* cl) {
+    return std::abs(compute_cl_eta(*cl));
+  };
+  funcLibrary[prefix + "_dPhiTG3"] = funcLibrary["dPhiTG3"] =
+      [](const xAOD::Egamma*, const xAOD::CaloCluster* cl) {
+        return std::fmod(2. * TMath::Pi() + compute_cl_phi(*cl),
+                         TMath::Pi() / 32.) -
+               TMath::Pi() / 64.0;
+      };
+
+  if (useLayerCorrected) {
+    funcLibrary[prefix + "_rawcl_Es0"] = [](const xAOD::Egamma* eg,
+                                            const xAOD::CaloCluster*) {
+      return compute_correctedcl_Es0(*eg);
+    };
+    funcLibrary[prefix + "_rawcl_Es1"] = [](const xAOD::Egamma* eg,
+                                            const xAOD::CaloCluster*) {
+      return compute_correctedcl_Es1(*eg);
+    };
+    funcLibrary[prefix + "_rawcl_Es2"] = [](const xAOD::Egamma* eg,
+                                            const xAOD::CaloCluster*) {
+      return compute_correctedcl_Es2(*eg);
+    };
+    funcLibrary[prefix + "_rawcl_Es3"] = [](const xAOD::Egamma* eg,
+                                            const xAOD::CaloCluster*) {
+      return compute_correctedcl_Es3(*eg);
+    };
+    funcLibrary[prefix + "_rawcl_Eacc"] = [](const xAOD::Egamma* eg,
+                                             const xAOD::CaloCluster*) {
+      return compute_correctedcl_Eacc(*eg);
+    };
+    funcLibrary[prefix + "_rawcl_f0"] = [](const xAOD::Egamma* eg,
+                                           const xAOD::CaloCluster*) {
+      return compute_correctedcl_f0(*eg);
+    };
+    funcLibrary[prefix + "_rawcl_calibHitsShowerDepth"] =
+        [](const xAOD::Egamma* eg, const xAOD::CaloCluster*) {
+          return compute_correctedcl_calibHitsShowerDepth(*eg);
+        };
+    funcLibrary[prefix + "_R12"] = funcLibrary["R12"] =
+        [](const xAOD::Egamma* eg, const xAOD::CaloCluster*) {
+          return compute_correctedcl_Es1(*eg) / compute_correctedcl_Es2(*eg);
+        };
+    funcLibrary[prefix + "_fTG3"] = funcLibrary["fTG3"] =
+        [](const xAOD::Egamma* eg, const xAOD::CaloCluster* cl) {
+          return cl->eSample(CaloSampling::TileGap3) /
+                 compute_correctedcl_Eacc(*eg);
+        };
+    // not corrected
+  } else {
+    funcLibrary[prefix + "_rawcl_Es0"] = [](const xAOD::Egamma*,
+                                            const xAOD::CaloCluster* cl) {
+      return compute_rawcl_Es0(*cl);
+    };
+    funcLibrary[prefix + "_rawcl_Es1"] = [](const xAOD::Egamma*,
+                                            const xAOD::CaloCluster* cl) {
+      return compute_rawcl_Es1(*cl);
+    };
+    funcLibrary[prefix + "_rawcl_Es2"] = [](const xAOD::Egamma*,
+                                            const xAOD::CaloCluster* cl) {
+      return compute_rawcl_Es2(*cl);
+    };
+    funcLibrary[prefix + "_rawcl_Es3"] = [](const xAOD::Egamma*,
+                                            const xAOD::CaloCluster* cl) {
+      return compute_rawcl_Es3(*cl);
+    };
+    funcLibrary[prefix + "_rawcl_Eacc"] = [](const xAOD::Egamma*,
+                                             const xAOD::CaloCluster* cl) {
+      return compute_rawcl_Eacc(*cl);
+    };
+    funcLibrary[prefix + "_rawcl_f0"] = [](const xAOD::Egamma*,
+                                           const xAOD::CaloCluster* cl) {
+      return compute_rawcl_f0(*cl);
+    };
+    funcLibrary[prefix + "_rawcl_calibHitsShowerDepth"] =
+        [](const xAOD::Egamma*, const xAOD::CaloCluster* cl) {
+          return compute_rawcl_calibHitsShowerDepth(*cl);
+        };
+    funcLibrary[prefix + "_R12"] = funcLibrary["R12"] =
+        [](const xAOD::Egamma*, const xAOD::CaloCluster* cl) {
+          return compute_rawcl_Es1(*cl) / compute_rawcl_Es2(*cl);
+        };
+    funcLibrary[prefix + "_fTG3"] = funcLibrary["fTG3"] =
+        [](const xAOD::Egamma*, const xAOD::CaloCluster* cl) {
+          return cl->eSample(CaloSampling::TileGap3) / compute_rawcl_Eacc(*cl);
+        };
+  }
+
+  funcLibrary[prefix + "_e011"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e011);
+  };
+  funcLibrary[prefix + "_e033"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e033);
+  };
+  funcLibrary[prefix + "_e132"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e132);
+  };
+  funcLibrary[prefix + "_e1152"] = [](const xAOD::Egamma* eg,
+                                      const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e1152);
+  };
+  funcLibrary[prefix + "_ethad1"] = [](const xAOD::Egamma* eg,
+                                       const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::ethad1);
+  };
+  funcLibrary[prefix + "_ethad"] = [](const xAOD::Egamma* eg,
+                                      const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::ethad);
+  };
+  funcLibrary[prefix + "_f1"] = [](const xAOD::Egamma* eg,
+                                   const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::f1);
+  };
+  funcLibrary[prefix + "_f3"] = [](const xAOD::Egamma* eg,
+                                   const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::f3);
+  };
+  funcLibrary[prefix + "_f1core"] = [](const xAOD::Egamma* eg,
+                                       const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::f1core);
+  };
+  funcLibrary[prefix + "_f3core"] = [](const xAOD::Egamma* eg,
+                                       const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::f3core);
+  };
+  funcLibrary[prefix + "_e233"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e233);
+  };
+  funcLibrary[prefix + "_e235"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e235);
+  };
+  funcLibrary[prefix + "_e255"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e255);
+  };
+  funcLibrary[prefix + "_e237"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e237);
+  };
+  funcLibrary[prefix + "_e277"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e277);
+  };
+  funcLibrary[prefix + "_e333"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e333);
+  };
+  funcLibrary[prefix + "_e335"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e335);
+  };
+  funcLibrary[prefix + "_e337"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e337);
+  };
+  funcLibrary[prefix + "_e377"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e377);
+  };
+  funcLibrary[prefix + "_weta1"] = [](const xAOD::Egamma* eg,
+                                      const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::weta1);
+  };
+  funcLibrary[prefix + "_weta2"] = [](const xAOD::Egamma* eg,
+                                      const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::weta2);
+  };
+  funcLibrary[prefix + "_e2ts1"] = [](const xAOD::Egamma* eg,
+                                      const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e2ts1);
+  };
+  funcLibrary[prefix + "_e2tsts1"] = [](const xAOD::Egamma* eg,
+                                        const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::e2tsts1);
+  };
+  funcLibrary[prefix + "_fracs1"] = [](const xAOD::Egamma* eg,
+                                       const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::fracs1);
+  };
+  funcLibrary[prefix + "_widths1"] = [](const xAOD::Egamma* eg,
+                                        const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::widths1);
+  };
+  funcLibrary[prefix + "_widths2"] = [](const xAOD::Egamma* eg,
+                                        const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::widths2);
+  };
+  funcLibrary[prefix + "_poscs1"] = [](const xAOD::Egamma* eg,
+                                       const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::poscs1);
+  };
+  funcLibrary[prefix + "_poscs2"] = [](const xAOD::Egamma* eg,
+                                       const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::poscs2);
+  };
+  funcLibrary[prefix + "_asy1"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::asy1);
+  };
+  funcLibrary[prefix + "_pos"] = [](const xAOD::Egamma* eg,
+                                    const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::pos);
+  };
+  funcLibrary[prefix + "_pos7"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::pos7);
+  };
+  funcLibrary[prefix + "_barys1"] = [](const xAOD::Egamma* eg,
+                                       const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::barys1);
+  };
+  funcLibrary[prefix + "_wtots1"] = [](const xAOD::Egamma* eg,
+                                       const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::wtots1);
+  };
+  funcLibrary[prefix + "_emins1"] = [](const xAOD::Egamma* eg,
+                                       const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::emins1);
+  };
+  funcLibrary[prefix + "_emaxs1"] = [](const xAOD::Egamma* eg,
+                                       const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::emaxs1);
+  };
+  funcLibrary[prefix + "_r33over37allcalo"] = [](const xAOD::Egamma* eg,
+                                                 const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::r33over37allcalo);
+  };
+  funcLibrary[prefix + "_ecore"] = [](const xAOD::Egamma* eg,
+                                      const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::ecore);
+  };
+  funcLibrary[prefix + "_Reta"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::Reta);
+  };
+  funcLibrary[prefix + "_Rphi"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::Rphi);
+  };
+  funcLibrary[prefix + "_Eratio"] = [](const xAOD::Egamma* eg,
+                                       const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::Eratio);
+  };
+  funcLibrary[prefix + "_Rhad"] = [](const xAOD::Egamma* eg,
+                                     const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::Rhad);
+  };
+  funcLibrary[prefix + "_Rhad1"] = [](const xAOD::Egamma* eg,
+                                      const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::Rhad1);
+  };
+  funcLibrary[prefix + "_DeltaE"] = [](const xAOD::Egamma* eg,
+                                       const xAOD::CaloCluster*) {
+    return eg->showerShapeValue(xAOD::EgammaParameters::DeltaE);
+  };
+}
+}  // namespace egammaMVAFunctions
