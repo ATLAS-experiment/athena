@@ -125,7 +125,6 @@ private:
     {this, "CalibLineKey", "LArCalibLineMap", "SG calib line key"};
 
   // pointers to raw objects :
-  TBTDC * m_tbtdc{nullptr};
   TBTDCRawCont* m_tdcrawCont{};
   TBADCRawCont* m_adcrawCont{};
   TBBPCRawCont * m_bpcrawCont{};
