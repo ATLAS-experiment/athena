@@ -22,6 +22,11 @@ class TilePulseShape : public AthMessaging {
   virtual ~TilePulseShape();
   void loadPulseShape(const TString& fileName);
   void setPulseShape(const std::vector<double>& shapevec);
+  void setUndershootParameters(double amplitude, double decayTime);
+  double undershootAmplitude() const { return m_undershootAmplitude; }
+  double undershootDecayTime() const { return m_undershootDecayTime; }
+  double effectiveStartTime() const;
+  double effectiveEndTime() const;
   
   //=== access to the underlying graph
   TGraph* getGraph(double t0=0., double ped=0., double amp=1.);
@@ -35,6 +40,9 @@ class TilePulseShape : public AthMessaging {
   TGraph* m_pulseShape{nullptr};
   TGraph* m_deformedShape{nullptr};
   TSpline* m_deformedSpline{nullptr};
+  bool m_useConfiguredUndershoot{false};
+  double m_undershootAmplitude{};
+  double m_undershootDecayTime{};
 };
 
 #endif // TILEPULSESIMULATOR_TILEPULSESHAPE_H

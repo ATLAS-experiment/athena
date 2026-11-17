@@ -61,7 +61,7 @@ void TileSampleGenerator::fillSamples(double t0, double pedestal, double amplitu
 
 //
 //________________________________________________________
-void TileSampleGenerator::fillNSamples(double t0, double pedestal, double amp_it, const std::vector<float>& amp_pu, TF1* pdf, bool addNoise, double itOffset, int nSamples, int nPul) {
+void TileSampleGenerator::fillNSamples(double samplingPhase, double pedestal, double amp_it, const std::vector<float>& amp_pu, TF1* pdf, bool addNoise, double itOffset, int nSamples, int nPul, const std::vector<double>* pulseTimeOffsets) {
 
         std::unique_ptr<TileSampleBuffer> bufall = std::make_unique<TileSampleBuffer>(nPul, -25*((nPul-1)/2), 25.);
 
@@ -75,7 +75,6 @@ void TileSampleGenerator::fillNSamples(double t0, double pedestal, double amp_it
 
         double tin, amp_it_out;
         int nAmp = amp_pu.size();
-        vector<int> t(nAmp);
         vector<float> amp_pu_out(nAmp);
         int x = (nAmp-1)/2 + nSamples;
 
@@ -87,25 +86,36 @@ void TileSampleGenerator::fillNSamples(double t0, double pedestal, double amp_it
 
 		for (int j = 0; j < nAmp ; j++) { //Loop over PU pulses
 
-			t[j] = bufall->getTime(x + i - j) - t0;
+			double pulseTime = bufall->getTime(x + i - j) - samplingPhase;
+			if (pulseTimeOffsets) {
+				pulseTime -= pulseTimeOffsets->at(j);
+			} else {
+				pulseTime = static_cast<int>(pulseTime); // Preserve the legacy calculation
+			}
 
 			if (m_DEBUG)
 				cout << "pileupsample to compute " << j << std::endl;
 			if (m_DEBUG)
-				cout << "                time in " << i << " " << j << " " << (x + i - j) << " " << " buf " << bufall->getTime(x + i - j) << "  time_out " << t[j] << std::endl;
+					cout << "                time in " << i << " " << j << " " << (x + i - j) << " " << " buf " << bufall->getTime(x + i - j) << "  time_out " << pulseTime << std::endl;
 
-			if (t[j] < -((nSamples-1)/2)*25. || t[j] > ((nSamples+1)/2)*25.)
-				continue; //Limits of the PulseShape
-			amp_pu_out[j] = m_ps->eval(t[j]) * amp_pu.at(j); // PU Contribution
+			if (pulseTimeOffsets) {
+				if (pulseTime < m_ps->effectiveStartTime() || pulseTime >= m_ps->effectiveEndTime())
+					continue;
+			} else if (pulseTime < -((nSamples-1)/2)*25. || pulseTime > ((nSamples+1)/2)*25.) {
+				continue; //Limits of the legacy PulseShape
+			}
+			amp_pu_out[j] = m_ps->eval(pulseTime) * amp_pu.at(j); // PU Contribution
 			amp_total += amp_pu_out[j];
 
 			if (m_DEBUG)
-				cout << "                amp_pu  " << amp_pu.at(j) << "  ps  " << m_ps->eval(t[j]) << "  amp_out " << amp_pu_out[j] << std::endl;
+					cout << "                amp_pu  " << amp_pu.at(j) << "  ps  " << m_ps->eval(pulseTime) << "  amp_out " << amp_pu_out[j] << std::endl;
 			if (m_DEBUG)
 				cout << "                amp_total " << amp_total << std::endl;
 		}
 
-		tin = m_buf->getTime(i) - t0 + itOffset;
+		tin = m_buf->getTime(i) - samplingPhase + itOffset;
+		if (pulseTimeOffsets)
+			tin -= pulseTimeOffsets->at((nPul - 1) / 2);
 		amp_it_out = m_ps->eval(tin) * amp_it; //Contribution from In-time Pulse
 		amp_total += amp_it_out;
 
@@ -128,7 +138,7 @@ void TileSampleGenerator::fillNSamples(double t0, double pedestal, double amp_it
 	return;
 }
 
-float TileSampleGenerator::fillSample(double t0, double pedestal, const vector<float>& amp_pu, TF1* pdf, bool addNoise, int nPul, int gain) {
+float TileSampleGenerator::fillSample(double samplingPhase, double pedestal, const vector<float>& amp_pu, TF1* pdf, bool addNoise, int nPul, int gain, const std::vector<double>* pulseTimeOffsets) {
 
         std::unique_ptr<TileSampleBuffer> bufall = std::make_unique<TileSampleBuffer>(nPul, -25*((nPul-1)/2), 25.);
 
@@ -144,7 +154,9 @@ float TileSampleGenerator::fillSample(double t0, double pedestal, const vector<f
 
 	for (int pul=0; pul < nPul; pul++){
 
-		t[pul] = bufall->getTime(pul) - t0;
+		t[pul] = bufall->getTime(pul) - samplingPhase;
+		if (pulseTimeOffsets)
+			t[pul] -= pulseTimeOffsets->at(pul);
 
 		if(gain == 1){
 		  amp_it_out += m_ps->eval(t[pul], false, true) * amp_pu.at(pul);
@@ -167,6 +179,28 @@ float TileSampleGenerator::fillSample(double t0, double pedestal, const vector<f
 
 	return amp_it_out;
 
+}
+
+float TileSampleGenerator::fillSampleWithUndershoot(double samplingPhase, double pedestal, const vector<float>& amp_pu, TF1* pdf,
+                                                    bool addNoise, int inTimeIndex, int firstRelevantIndex,
+                                                    int firstAccumulatedIndex, int gain,
+                                                    double accumulatedUndershoot, const std::vector<double>* pulseTimeOffsets) {
+
+	double amp_it_out = pedestal + accumulatedUndershoot;
+	const double gainRatio = (gain == 1) ? 1.0 : 40.0;
+
+	for (int pul = firstRelevantIndex; pul < firstAccumulatedIndex; ++pul) {
+		double time = (pul - inTimeIndex) * 25.0 - samplingPhase;
+		if (pulseTimeOffsets)
+			time -= pulseTimeOffsets->at(pul);
+		amp_it_out += m_ps->eval(time, false, true) * amp_pu.at(pul) / gainRatio;
+	}
+
+	if (addNoise) {
+		amp_it_out += pdf->GetRandom();
+	}
+
+	return amp_it_out;
 }
 
 //

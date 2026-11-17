@@ -67,11 +67,31 @@ void TilePulseShape::setPulseShape(const std::vector<double>& shapevec)
   }
   resetDeformation();
 }
+
+//_________________________________________________________________________
+void TilePulseShape::setUndershootParameters(double amplitude, double decayTime)
+{
+  m_undershootAmplitude = amplitude;
+  m_undershootDecayTime = decayTime;
+  m_useConfiguredUndershoot = true;
+}
+
+//_________________________________________________________________________
+double TilePulseShape::effectiveStartTime() const
+{
+  return m_deformedShape->GetX()[0];
+}
+
+//_________________________________________________________________________
+double TilePulseShape::effectiveEndTime() const
+{
+  return m_deformedShape->GetX()[m_deformedShape->GetN() - 1];
+}
     
 
 //
 //_________________________________________________________________________
-// This function gives a pulse shaper for the 3-in-1 FEB
+// This function gives a pulse shaper for the FEB
 double TilePulseShape::eval(double x, bool useSpline, bool useUndershoot)
 {
 
@@ -97,7 +117,11 @@ double TilePulseShape::eval(double x, bool useSpline, bool useUndershoot)
     //=== right out of bounds, return rightmost value
 //    y = (_deformedShape->GetY())[n-1]; 
     if(useUndershoot){
-      y = 0.00196 * (1 - exp(- x / 20664.59) ) - 0.00217;
+      if (m_useConfiguredUndershoot) {
+        y = m_undershootAmplitude * exp(-x / m_undershootDecayTime);
+      } else {
+        y = 0.00196 * (1 - exp(- x / 20664.59) ) - 0.00217;
+      }
     }
     else{
       y = 0;

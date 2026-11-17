@@ -49,10 +49,14 @@
 #include "TF1.h"
 
 #include <cstdlib>
+#include <algorithm>
+#include <cmath>
 
 
 using CLHEP::RandGaussQ;
 using CLHEP::RandFlat;
+
+constexpr double MAX_PULSE_TIME_OFFSET = 12.5; // ns
 
 //
 // Constructor
@@ -116,7 +120,45 @@ StatusCode TileDigitsFromPulse::initialize() {
 	//Build pulse shapes
 	m_ps[0]->setPulseShape(m_tileInfo->digitsFullShapeLo());
 	m_ps[1]->setPulseShape(m_tileInfo->digitsFullShapeHi());
+	if (m_useGainDependentUndershoot) {
+		m_ps[0]->setUndershootParameters(-0.001964785, 20379.4);
+		m_ps[1]->setUndershootParameters(-0.002073114, 20394.6);
+	}
 
+	if (m_useRecursiveUndershoot) {
+		if (!m_simPulseChain || m_simQIE || !m_useGainDependentUndershoot || m_nPul < 1
+		    || m_gausC2C != 0.0 || m_imperfectionMean != 1.0 || m_imperfectionRms != 0.0) {
+			ATH_MSG_FATAL("Recursive undershoot requires (for the moment) continuous readout, gain-dependent "
+			              "undershoot, fixed timing, and undeformed pulse shapes");
+			return StatusCode::FAILURE;
+		}
+
+		for (int gain = 0; gain < 2; ++gain) {
+			const TilePulseShape& pulse = *m_ps[gain];
+			const double amplitude = pulse.undershootAmplitude();
+			const double tau = pulse.undershootDecayTime();
+			const double startTime = pulse.effectiveStartTime();
+			const double endTime = pulse.effectiveEndTime();
+
+			if (!std::isfinite(tau) || tau <= 0.0 || !std::isfinite(startTime) || !std::isfinite(endTime)) {
+				ATH_MSG_FATAL("Invalid pulse shape or decay time for gain " << gain);
+				return StatusCode::FAILURE;
+			}
+
+			const double pulseTimingRange = m_gaussianPulseTimingVariation > 0.0 ? MAX_PULSE_TIME_OFFSET : 0.0;
+			const double accumulationStartTime = std::max(300.0, endTime) + pulseTimingRange;
+			const int firstTailBC = static_cast<int>(std::ceil(accumulationStartTime / 25.0));
+
+			m_firstRelevantIndex[gain] = std::max(0, m_nPul_eff + static_cast<int>(std::ceil((startTime - pulseTimingRange) / 25.0)));
+			m_firstAccumulatedIndex[gain] = m_nPul_eff + firstTailBC;
+
+			m_tailDecayPerBC[gain] = std::exp(-25.0 / tau);
+			m_tailAtAccumulation[gain] = amplitude * std::exp(-25.0 * firstTailBC / tau);
+		}
+
+		m_pulseHistorySize =
+		    std::max(m_firstAccumulatedIndex[0], m_firstAccumulatedIndex[1]) + 1;
+	}
 	m_random = std::make_unique<TRandom3>(m_seed);
 
 	//Initialise distribution histograms if in use
@@ -199,18 +241,46 @@ StatusCode TileDigitsFromPulse::initialize() {
 	    m_PUAmp[ros-1][drawer].resize(48);
 	    for (int channel = 0; channel < 48; channel++){
 	      m_PUAmp[ros-1][drawer][channel].clear();
-	      m_PUAmp[ros-1][drawer][channel].resize(m_nPul);
+	      m_PUAmp[ros-1][drawer][channel].resize(m_useRecursiveUndershoot ? m_pulseHistorySize : m_nPul.value());
 	    }
 	  }
 	}
+	if (m_simPulseChain && m_gaussianPulseTimingVariation > 0.0) {
+		m_pulseTimeOffsets.resize(4);
+		for (int ros = 0; ros < 4; ++ros) {
+			m_pulseTimeOffsets[ros].resize(64);
+			for (int drawer = 0; drawer < 64; ++drawer) {
+				m_pulseTimeOffsets[ros][drawer].resize(48);
+				for (int channel = 0; channel < 48; ++channel) {
+					m_pulseTimeOffsets[ros][drawer][channel].resize(m_PUAmp[ros][drawer][channel].size(), 0.0);
+				}
+			}
+		}
+	}
 
-	for (int ros = 1; ros < 5; ++ros) { // initialize the vector of PU amplitudes
-	  for (int drawer = 0; drawer < 64; ++drawer){
-	    for (int channel = 0; channel < 48; ++channel) {
-	      double inTimeAmp = m_inTimeAmp; // addPileUp() takes it by reference, but modifies it only for low gain
-	      addPileUp(inTimeAmp, m_ootAmp, 1, ros, drawer, channel); // Initialized for HG, for LG  use the same divided by the HG/LG ratio
-	    }
-	  }
+	if (m_useRecursiveUndershoot) {
+		m_accumulatedUndershoot.resize(4);
+		for (auto& rosState : m_accumulatedUndershoot) {
+			rosState.resize(64);
+			for (auto& drawerState : rosState) {
+				drawerState.resize(48, std::array<double, 2>{0.0, 0.0});
+			}
+		}
+	} else {
+		for (int ros = 1; ros < 5; ++ros) { // initialize the vector of PU amplitudes
+			for (int drawer = 0; drawer < 64; ++drawer){
+				for (int channel = 0; channel < 48; ++channel) {
+					double inTimeAmp = m_inTimeAmp.value();
+					addPileUp(inTimeAmp, m_ootAmp.value(), 1, ros, drawer, channel); // Initialized for HG, for LG  use the same divided by the HG/LG ratio
+					if (m_simPulseChain && m_gaussianPulseTimingVariation > 0.0) {
+						for (std::size_t pulse = 0; pulse < m_PUAmp[ros-1][drawer][channel].size(); ++pulse) {
+							if (m_PUAmp[ros-1][drawer][channel][pulse] != 0.0F)
+								m_pulseTimeOffsets[ros-1][drawer][channel][pulse] = generatePulseTimeOffset();
+						}
+					}
+				}
+			}
+		}
 	}
 
 	ATH_MSG_DEBUG("initialize() successful");
@@ -245,7 +315,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 
 	DataPool < TileDigits > tileDigitsPool(m_tileHWID->adc_hash_max());
 
-	double tFit = 0, ped = 100; //Settings for simulation 
+	double samplingPhase = 0, ped = 100; //Settings for simulation
 
 	TF1* pdf = nullptr;
 	std::unique_ptr<TF1> pdf_PhaseI;
@@ -287,6 +357,11 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 
 				if (!m_simQIE && !m_simPulseChain) { //3-in-1 or FENICS is simulated below
 					double ootAmp = m_ootAmp;
+					double truePhase = samplingPhase;
+					std::vector<double> pulseTimeOffsets;
+					if (m_gaussianPulseTimingVariation > 0.0)
+						pulseTimeOffsets.resize(m_nPul, 0.0);
+					const std::vector<double>* pulseTiming = pulseTimeOffsets.empty() ? nullptr : &pulseTimeOffsets;
 
 					if(m_PhaseII){
 						ATH_MSG_VERBOSE("executing FENICS code");
@@ -314,7 +389,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 							if (m_random->Rndm() >= m_pileUpFraction){
 							        ootAmp = 0; //Set oot amplitude to 0 if no pile-up.
 							}
-							tFit = m_random->Gaus(0., m_gausC2C); //C2C phase variation
+							samplingPhase = m_random->Gaus(0., m_gausC2C); //C2C phase variation
 							double deformatedTime = m_random->Gaus(m_imperfectionMean, m_imperfectionRms); //Widening of pulseshape
 							m_ps[gain]->scalePulse(deformatedTime, deformatedTime); // Deformation of pulse shape by changing its width
 							//if(m_useOffsetHisto) m_ootOffset = m_ootOffsetDist->GetRandom();  //OLD Remove for 7 samples -> BunchSpacing
@@ -324,6 +399,17 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 							
 							// Fill amplitudes (including pile-up) for HG
 							addPileUp(n_inTimeAmp, ootAmp, gain, ros, drawer, channel);
+							if (pulseTiming) {
+								for (int pulse = 0; pulse < m_nPul; ++pulse) {
+									const bool hasPulse = m_PUAmp[ros-1][drawer][channel][pulse] != 0.0 || (pulse == m_nPul_eff && n_inTimeAmp != 0.0);
+									if (hasPulse)
+										pulseTimeOffsets[pulse] = generatePulseTimeOffset();
+								}
+							}
+							// Without an in-time pulse, retain the sampling phase; no physical pulse phase exists.
+							truePhase = n_inTimeAmp != 0.0
+							    ? samplingPhase + (pulseTiming ? pulseTimeOffsets[m_nPul_eff] : 0.0) - m_itOffset
+							    : samplingPhase;
 
 						} else {
 							double deformatedTime = m_random->Gaus(m_imperfectionMean, m_imperfectionRms); //Widening of pulseshape
@@ -344,7 +430,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						}
 
 						m_tsg->setPulseShape(m_ps[gain]);
-						m_tsg->fillNSamples(tFit, ped, n_inTimeAmp, m_PUAmp[ros-1][drawer][channel], pdf, m_gaussNoise, m_itOffset, m_nSamples, m_nPul); // Sum of Intime + PU pulses
+						m_tsg->fillNSamples(samplingPhase, ped, n_inTimeAmp, m_PUAmp[ros-1][drawer][channel], pdf, m_gaussNoise, m_itOffset, m_nSamples, m_nPul, pulseTiming); // Sum of Intime + PU pulses
 
 						samples.clear();
 						samples.resize(m_nSamples);
@@ -385,10 +471,10 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						ATH_CHECK( digitsContainer->push_back(digit) );
 						  
 						auto rawChannel = std::make_unique<TileRawChannel>(digit->adc_HWID(),
-												     n_inTimeAmp,
-												     tFit,
-												     ootAmp,
-												     m_ootOffset);
+													n_inTimeAmp,
+													truePhase,
+													ootAmp,
+													m_ootOffset);
 						  
 						ATH_CHECK( rawChannelContainer->push_back(std::move(rawChannel)) );
 
@@ -403,10 +489,10 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 						ATH_CHECK( digitsContainer->push_back(digit) );
 
 						auto rawChannel = std::make_unique<TileRawChannel>(digit->adc_HWID(),
-												     n_inTimeAmp,
-												     tFit,
-												     ootAmp,
-												     m_ootOffset);
+													n_inTimeAmp,
+													truePhase,
+													ootAmp,
+													m_ootOffset);
 
 						ATH_CHECK( rawChannelContainer->push_back(std::move(rawChannel)) );
 					}
@@ -419,7 +505,7 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 					n_inTimeAmp = m_useItADist ? m_itDist->GetRandom() : m_inTimeAmp.value();
 					//if (random->Rndm() >= m_pileUpFraction) //m_pileUpFraction is 1 by default
 					m_ootAmp = 0; //Set oot amplitude to 0 if no pile-up.
-					tFit = 0; //TODO: Introduce jitter of the PMT pulse; random->Gaus(0., m_gausC2C); //C2C phase variation
+					samplingPhase = 0; //TODO: Introduce jitter of the PMT pulse; random->Gaus(0., m_gausC2C); //C2C phase variation
 
 					//Pileup samples
 					//m_PUAmp.clear();
@@ -451,10 +537,10 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 					ATH_CHECK( digitsContainer->push_back(digit) );
 				
 					auto rawChannel = std::make_unique<TileRawChannel>(digit->adc_HWID(),
-										   n_inTimeAmp,
-										   tFit,
-										   m_ootAmp,
-										   m_ootOffset);
+											n_inTimeAmp,
+											samplingPhase,
+											m_ootAmp,
+											m_ootOffset);
 				
 					ATH_CHECK( rawChannelContainer->push_back(std::move(rawChannel)) );
 				}
@@ -462,6 +548,10 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 				        ATH_MSG_VERBOSE("executing chain-of-pulses code");
 
 					bool isHGSaturated = false;
+					double truthPulseTimeOffset = 0.0;
+					std::vector<double>* pulseTiming = m_gaussianPulseTimingVariation > 0.0
+					    ? &m_pulseTimeOffsets[ros-1][drawer][channel]
+					    : nullptr;
 
 					for (int igain = 1; igain >= 0; --igain) {
 					          gain = igain;
@@ -491,26 +581,57 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 										      TileRawChannelUnit::ADCcounts, ctx)
 						      : m_ped_HG.value();
 
-						    tFit = m_random->Gaus(0., m_gausC2C);
+						    samplingPhase = m_random->Gaus(0., m_gausC2C);
 						    double deformatedTime = m_random->Gaus(m_imperfectionMean, m_imperfectionRms);
 						    m_ps[gain]->scalePulse(deformatedTime, deformatedTime);
 
-						    // Shift the stored pulses to simulate consecutive BC
+						    // Successive execute calls represent consecutive simulated BCs.
+						    // Shift the stored pulses to simulate the next BC.
 						    m_PUAmp[ros-1][drawer][channel].pop_back();
 						    m_PUAmp[ros-1][drawer][channel].insert(m_PUAmp[ros-1][drawer][channel].begin(), 0);
+						    if (pulseTiming) {
+						      pulseTiming->pop_back();
+						      pulseTiming->insert(pulseTiming->begin(), 0.0);
+						    }
 
 						    // m_sample_tru is the amplitude for the central BC
 						    m_sample_tru = m_PUAmp[ros-1][drawer][channel][(m_nPul - 1) / 2];
+						    if (pulseTiming)
+						      truthPulseTimeOffset = pulseTiming->at(m_nPul_eff);
 
 						    // Fill the new BC at the front
 						    addPileUpSample(gain, ros, drawer, channel);
 						    m_PUAmp[ros-1][drawer][channel].front() += n_inTimeAmp; // Add amplitude from in-time pulse to true-amp vector
+						    if (pulseTiming && m_PUAmp[ros-1][drawer][channel].front() != 0.0)
+						      pulseTiming->front() = generatePulseTimeOffset();
 
-						    sample = m_tsg->fillSample(tFit, ped,
+						    if (m_useRecursiveUndershoot) {
+						      auto& accumulatedUndershoot = m_accumulatedUndershoot[ros-1][drawer][channel];
+						      for (int gainIndex = 0; gainIndex < 2; ++gainIndex) {
+						        const double gainRatio = (gainIndex == 1) ? 1.0 : 40.0;
+
+						        // Decay the accumulated undershoot and add the tail of the next older pulse
+						        double tailAtPulseTime = m_tailAtAccumulation[gainIndex];
+						        if (pulseTiming) {
+						          const double pulseTimeOffset = pulseTiming->at(m_firstAccumulatedIndex[gainIndex]);
+						          tailAtPulseTime *= std::exp(pulseTimeOffset / m_ps[gainIndex]->undershootDecayTime());
+						        }
+						        accumulatedUndershoot[gainIndex] = m_tailDecayPerBC[gainIndex] * accumulatedUndershoot[gainIndex]
+						          + m_PUAmp[ros-1][drawer][channel][m_firstAccumulatedIndex[gainIndex]]
+						            * tailAtPulseTime / gainRatio;
+						      }
+						      sample = m_tsg->fillSampleWithUndershoot(samplingPhase, ped,
+										       m_PUAmp[ros-1][drawer][channel],
+										       pdf, m_gaussNoise, m_nPul_eff,
+										       m_firstRelevantIndex[gain], m_firstAccumulatedIndex[gain],
+										       gain, accumulatedUndershoot[gain], pulseTiming);
+						    } else {
+						      sample = m_tsg->fillSample(samplingPhase, ped,
 									       m_PUAmp[ros-1][drawer][channel],
 									       pdf, m_gaussNoise,
 									       (int)m_PUAmp[ros-1][drawer][channel].size(),
-									       gain);
+									       gain, pulseTiming);
+						    }
 						  } else {
 						    // Low gain
 						    ped = m_chanPed
@@ -518,11 +639,19 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 										      TileRawChannelUnit::ADCcounts, ctx)
 						      : m_ped_LG.value();
 
-						    sample = m_tsg->fillSample(tFit, ped,
+						    if (m_useRecursiveUndershoot) {
+								sample = m_tsg->fillSampleWithUndershoot(samplingPhase, ped,
+												m_PUAmp[ros-1][drawer][channel],
+												pdf, m_gaussNoise, m_nPul_eff,
+												m_firstRelevantIndex[gain], m_firstAccumulatedIndex[gain],
+												gain, m_accumulatedUndershoot[ros-1][drawer][channel][gain], pulseTiming);
+						    } else {
+								sample = m_tsg->fillSample(samplingPhase, ped,
 									       m_PUAmp[ros-1][drawer][channel],
 									       pdf, m_gaussNoise,
 									       (int)m_PUAmp[ros-1][drawer][channel].size(),
-									       gain);
+									       gain, pulseTiming);
+							}
 
 						    // Scale truth amplitude from HG to LG
 						    if (m_PhaseII) {
@@ -550,13 +679,14 @@ StatusCode TileDigitsFromPulse::execute(const EventContext& ctx) {
 								      std::move(samples));
 						  ATH_CHECK(digitsContainer->push_back(digit));
 
-						  // Use the “truth” amplitude for rawChannel
+						  // The pulse timing offset is zero when there is no in-time pulse.
+						  const double truePhase = samplingPhase + truthPulseTimeOffset;
 						  auto rawChannel = std::make_unique<TileRawChannel>(
-												     digit->adc_HWID(),
-												     m_sample_tru,
-												     tFit,
-												     m_ootAmp,
-												     ped);
+													digit->adc_HWID(),
+													m_sample_tru,
+													truePhase,
+													m_ootAmp,
+													ped);
 						  ATH_CHECK(rawChannelContainer->push_back(std::move(rawChannel)));
 
 						  // If not bigain, break if HG didn't saturate
@@ -650,6 +780,14 @@ bool TileDigitsFromPulse::makeDist(TFile*& file, std::vector<std::vector<TH1F*>>
 	}
 
 	return kTRUE;
+}
+
+double TileDigitsFromPulse::generatePulseTimeOffset() {
+	double pulseTimeOffset = 0.0;
+	do {
+		pulseTimeOffset = m_random->Gaus(0.0, m_gaussianPulseTimingVariation);
+	} while (std::abs(pulseTimeOffset) > MAX_PULSE_TIME_OFFSET);
+	return pulseTimeOffset;
 }
 
 void TileDigitsFromPulse::addPileUp(double &n_inTimeAmp, double ootAmp, int gain, int ros, int drawer, int channel) {

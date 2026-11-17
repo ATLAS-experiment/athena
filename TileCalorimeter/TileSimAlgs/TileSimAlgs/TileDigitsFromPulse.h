@@ -68,6 +68,7 @@
 //C++ STL includes
 #include <vector>
 #include <string>
+#include <array>
 #include "Gaudi/Property.h"
 
 //Simulation includes
@@ -140,12 +141,15 @@ private:
     Gaudi::Property<double> m_GNAmpOne{this, "GaussNoiseAmpOne", 1 / 1.039}; //!< Amplitude of first gaussian of double gaussian noise.
     Gaudi::Property<double> m_GNSigmaOne{this, "GaussNoiseSigmaOne", 1.6}; //!< Standard deviation of first gaussian of double gaussian noise.
     Gaudi::Property<double> m_GNAmpTwo{this, "GaussNoiseAmpTwo", 0.039}; //!< Amplitude of second gaussian of double gaussian noise.
-    Gaudi::Property<double> m_GNSigmaTwo{this, "GaussNoiseSigmaTwo", 3.6}; //!< Standard deviation of second gaussian of double gaussian noise.    
+    Gaudi::Property<double> m_GNSigmaTwo{this, "GaussNoiseSigmaTwo", 3.6}; //!< Standard deviation of second gaussian of double gaussian noise.
     Gaudi::Property<bool> m_useItADist{this, "UseInTimeAmpDist", false}; //!< Set to TRUE in order to use a distribution for the in-time amplitude instead of a constant value
     Gaudi::Property<double> m_itAPulseProb{this, "InTimeAmpPulseProb", 0}; //!< Probability to add an in-time pulse
     Gaudi::Property<bool> m_useOotADist{this, "UseOutOfTimeAmpDist", false}; //!< Set to TRUE in order to use a distribution for the out-of-time amplitude instead of a constant value
     Gaudi::Property<float> m_pileUpFraction{this, "PileUpFraction", 1}; //!< Probability that an out-of-time component will be added
     Gaudi::Property<float> m_gausC2C{this, "GaussianC2CPhaseVariation", 0}; //!< RMS for the in-time pulse offset (channel-to-channel phase variation)
+    Gaudi::Property<double> m_gaussianPulseTimingVariation{
+        this, "GaussianPulseTimingVariation", 0.0
+    }; //!< RMS of individual pulse arrival-time variations in ns
     Gaudi::Property<std::string> m_itADistFileName{this, "InTimeAmpDistFileName", ""}; //!< Filename of file to use for amplitude distribution of in-time pulses
     Gaudi::Property<std::string> m_ootADistFileName{this, "OutOfTimeAmpDistFileName", ""}; //!< Filename of file to use for amplitude distribution of out-of-time pulses
     Gaudi::Property<bool> m_chanPed{this, "ChannelSpecificPedestal", false}; //!< Use channel specific pedestal value if true. Otherwise, same for all channels.
@@ -158,17 +162,33 @@ private:
     
     Gaudi::Property<bool> m_simQIE{this, "SimulateQIE", false}; //!<Raw PMT pulses are generated if the option is set to true. The option is intended to simulate the QIE FEB.
     Gaudi::Property<bool> m_simPulseChain{this, "SimulatePulseChain", false}; //!< Simulate continous output of readout for HL-LHC paradigm
+    Gaudi::Property<bool> m_useGainDependentUndershoot{
+        this, "UseGainDependentUndershoot", false
+    }; //!< Use gain-dependent analytical undershoot parameters
+    Gaudi::Property<bool> m_useRecursiveUndershoot{
+        this, "UseRecursiveUndershoot", false
+    }; //!< Recursively accumulate the long undershoot in continuous readout
 
     Gaudi::Property<int> m_seed{this, "RandomSeed", 4357};
     Gaudi::Property<int> m_BunchSpacing{this, "BunchSpacing", 25}; //!< Time between pulses in ms 25, 50 or 75
     Gaudi::Property<int> m_nSamples{this, "NSamples", 7};  //!< number of read out samples
-    Gaudi::Property<int> m_nPul{this, "NPulses", 21};  //!< number of pileup pulses 
+    Gaudi::Property<int> m_nPul{this, "NPulses", 21};  //!< number of pileup pulses
     int m_nPul_eff{};  //Used for symetrization of PU in computation
-    std::vector<std::vector<std::vector<std::vector<float>>>> m_PUAmp; // Used to store PU amplitudes
+    std::vector<std::vector<std::vector<std::vector<float>>>> m_PUAmp; // Pulse amplitude history (in HG ADC counts)
+    std::vector<std::vector<std::vector<std::vector<double>>>> m_pulseTimeOffsets; // Pulse arrival-time history in ns
+
+    // Recursive accumulation of the long undershoot
+    std::vector<std::vector<std::vector<std::array<double, 2>>>> m_accumulatedUndershoot; // Accumulated undershoot per channel and gain (LG, HG)
+    std::array<double, 2> m_tailDecayPerBC{};          // Exponential decay factor over 25 ns, exp(-25/tau)
+    std::array<double, 2> m_tailAtAccumulation{};      // Normalized tail amplitude when a pulse enters the accumulator
+    std::array<int, 2> m_firstAccumulatedIndex{};      // Index of the first pulse included in the accumulated undershoot
+    std::array<int, 2> m_firstRelevantIndex{};         // Index of the first pulse contributing to the current sample
+    int m_pulseHistorySize{};                          // Number of pulse amplitudes retained in the history
+
     Gaudi::Property<bool> m_PhaseII{this, "TilePhaseII", false}; //Use parameters of TilePhaseII if the option is set to true
     Gaudi::Property<bool> m_bigain{this, "Bigain", false}; //If true, save the two gains in the ntuples
 
-    Gaudi::Property<bool> m_simPUwPoisson{this, "SimulatePileUpWithPoiss", false}; //If true, simulate PU overlapping amplitudes n times, with n being generated with a poissonian distribution 
+    Gaudi::Property<bool> m_simPUwPoisson{this, "SimulatePileUpWithPoiss", false}; //If true, simulate PU overlapping amplitudes n times, with n being generated with a poissonian distribution
     Gaudi::Property<int> m_avgMuForPU{this, "AvgMuForPileUpSimulation", 40}; //Mean of the poissonian distribution to generate the number of interactions per bunch crossing for PU simulation
     Gaudi::Property<std::string> m_pileupAmpDistFileName{this, "PileUpAmpDistFileName", ""}; //!< Filename for PU amplitude distribution histograms
 
@@ -194,6 +214,7 @@ private:
 
     void addPileUp(double &n_inTimeAmp, double ootAmp, int gain, int ros, int drawer, int channel); //!< Fill vector with pile-up amplitudes
     void addPileUpSample(int gain, int ros, int drawer, int channel); //!< Fill only a BC with pile-up amplitude
+    double generatePulseTimeOffset(); //!< Generate a pulse arrival-time variation in ns
 
     float m_sample_tru = 0;
 
