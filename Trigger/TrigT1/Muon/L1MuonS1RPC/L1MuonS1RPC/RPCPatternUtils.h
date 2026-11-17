@@ -22,7 +22,7 @@ class MsgStream;
 class Identifier;
 namespace Muon{
     class IMuonIdHelperSvc;
-    class RpcCablingData;
+    struct RpcCablingData;
 }
 
 namespace MuonGMR4{
