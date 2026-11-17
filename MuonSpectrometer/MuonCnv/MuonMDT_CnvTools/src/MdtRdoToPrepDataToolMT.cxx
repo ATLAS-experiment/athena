@@ -100,15 +100,15 @@ namespace Muon {
             ATH_CHECK(detStore()->retrieve(muDetMgr));
 
             ATH_MSG_INFO("Processing configuration for layouts with BMG chambers.");
-
+            const std::string bmgStr{"BMG"};
             for (int phi = 6; phi < 8; phi++) {                 // phi sectors
                 for (int eta = 1; eta < 4; eta++) {             // eta sectors
                     for (int side = -1; side < 2; side += 2) {  // side
-                        if (!muDetMgr->getMuonStation("BMG", side * eta, phi)) continue;
-                        for (int roe = 1; roe <= (muDetMgr->getMuonStation("BMG", side * eta, phi))->nMuonReadoutElements();
+                        if (!muDetMgr->getMuonStation(bmgStr, side * eta, phi)) continue;
+                        for (int roe = 1; roe <= (muDetMgr->getMuonStation(bmgStr, side * eta, phi))->nMuonReadoutElements();
                              roe++) {  // iterate on readout elemets
                             const MdtReadoutElement* mdtRE = dynamic_cast<const MdtReadoutElement*>(
-                                (muDetMgr->getMuonStation("BMG", side * eta, phi))->getMuonReadoutElement(roe));  // has to be an MDT
+                                (muDetMgr->getMuonStation(bmgStr, side * eta, phi))->getMuonReadoutElement(roe));  // has to be an MDT
                             if (mdtRE) initDeadChannels(mdtRE);
                         }
                     }

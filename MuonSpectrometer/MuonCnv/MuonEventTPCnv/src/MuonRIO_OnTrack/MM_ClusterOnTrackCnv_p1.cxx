@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //-----------------------------------------------------------------------------
@@ -36,7 +36,7 @@ void MM_ClusterOnTrackCnv_p1::persToTrans(const Muon::MM_ClusterOnTrack_p1 *pers
      Amg::MatrixX tmp(2, 2);
      tmp(0, 0) = persObj->m_stripDriftDistErrors_0_0.at(i_strip);
      tmp(1, 1) = persObj->m_stripDriftDistErrors_1_1.at(i_strip);
-     stripDriftDistErrors.push_back(tmp);
+     stripDriftDistErrors.push_back(std::move(tmp));
    }
 
 

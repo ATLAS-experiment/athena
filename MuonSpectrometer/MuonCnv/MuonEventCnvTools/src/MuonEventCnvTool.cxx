@@ -4,9 +4,7 @@
 
 #include "MuonEventCnvTool.h"
 
-#include <cassert>
-#include <iostream>
-#include <vector>
+
 
 #include "EventPrimitives/EventPrimitives.h"
 #include "Identifier/Identifier.h"
@@ -26,7 +24,7 @@
 #include "TrkDetElementBase/TrkDetElementBase.h"
 #include "TrkPrepRawData/PrepRawData.h"
 #include "TrkRIO_OnTrack/RIO_OnTrack.h"
-
+#include <vector>
 
 StatusCode Muon::MuonEventCnvTool::initialize() {
     ATH_CHECK(m_idHelperSvc.retrieve());
@@ -68,6 +66,10 @@ std::pair<const Trk::TrkDetElementBase*, const Trk::PrepRawData*> Muon::MuonEven
         // Okay, so we might have hit the nasty issue that the TGC EL is broken in some samples
         // Need to fix by pointing to the key defined here (assumung it has been configured correctly for this sample)
         Muon::TgcClusterOnTrack* tgc = dynamic_cast<Muon::TgcClusterOnTrack*>(&rioOnTrack);
+        if (!tgc){
+          ATH_MSG_ERROR("Cast to TgcClusterOnTrack failed.");
+          return{};
+        }
         ElementLinkToIDC_TGC_Container& el = tgc->m_rio;
         el.resetWithKeyAndIndex(m_tgcPrdKey.key(), el.index());
     }

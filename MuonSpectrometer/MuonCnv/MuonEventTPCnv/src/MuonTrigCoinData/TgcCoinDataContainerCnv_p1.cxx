@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /* Takashi Kubota - June 30, 2008 */
@@ -23,6 +23,7 @@
 #include "AthenaKernel/errorcheck.h"
 #include "AthAllocators/DataPool.h"
 #include "StoreGate/StoreGateSvc.h"
+#include <stdexcept>
 
 
 StatusCode Muon::TgcCoinDataContainerCnv_p1::initialize(MsgStream &log) {
@@ -139,6 +140,9 @@ void  Muon::TgcCoinDataContainerCnv_p1::persToTrans(const Muon::MuonCoinDataCont
         for (unsigned int ichan = 0; ichan < nchans; ++ ichan) {
             const TPObjRef pchan = persCont->m_CoinData[ichan + pcoll.m_begin];
             Muon::TgcCoinData* chan = dynamic_cast<Muon::TgcCoinData*>(createTransFromPStore((CONV**)nullptr, pchan, log ) );
+            if (!chan)[[unlikely]]{
+              throw std::runtime_error("Dynamic cast failed in Muon::TgcCoinDataContainerCnv_p1::persToTrans");
+            }
 	    if(chan->type()!=Muon::TgcCoinData::TYPE_TRACKLET_EIFI) {
 	      const MuonGM::TgcReadoutElement * deOut = getReadOutElement(Identifier(chan->channelIdOut()));
 	      chan->m_detElOut = deOut;

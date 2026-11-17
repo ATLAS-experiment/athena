@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 /**
  * @file MuonEventTPCnv/test/CompetingMuonClustersOnTrackCnv_p2_test.cxx
@@ -170,7 +170,7 @@ void test1 ATLAS_NOT_THREAD_SAFE (const MuonGM::MuonDetectorManager& muo_dd)
                                              std::move(cov),
                                              new Trk::PerigeeSurface(Amg::Vector3D (50, 100, 150)),
                                              std::move(childrots),
-                                             std::vector<double> (probs));
+                                             std::vector<double> (std::move(probs)));
 
   testit (trans1);
   Athena_test::Leakcheck check;

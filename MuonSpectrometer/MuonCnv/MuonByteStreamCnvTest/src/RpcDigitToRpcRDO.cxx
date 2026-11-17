@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "RpcDigitToRpcRDO.h"
@@ -262,7 +262,12 @@ RpcPad* RpcDigitToRpcRDO::decodePad(PADreadout& pad, const RpcCablingCondData* r
 
     // Retrieve the identifier elements from the map
     const RpcCablingCondData::RDOmap& pad_map = readCdo->give_RDOs();
-    RDOindex index = (*pad_map.find(key)).second;
+    const auto pPair = pad_map.find(key);
+    if (pPair == pad_map.end())[[unlikely]]{
+      ATH_MSG_ERROR("key "<<key<<" was not found in the pad_map");
+      return {};
+    }
+    RDOindex index = pPair->second;
 
     index.offline_indexes(name, eta, phi, doublet_r, doublet_z, doublet_phi, gas_gap, measures_phi, strip);
 
