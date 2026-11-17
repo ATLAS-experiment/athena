@@ -37,11 +37,12 @@ def TileDigitsFromPulseCfg(flags, **kwargs):
         InTimeAmpPulseProb            -- Probability to add an in-time pulse
         PileUpFraction                -- Probability that an out-of-time component will be added
         GaussianC2CPhaseVariation     -- RMS for the in-time pulse offset (channel-to-channel phase variation)
+        GaussianPulseTimingVariation -- RMS of independent pulse arrival-time variations in ns; Gaussian offsets are rejected outside ±12.5 ns
         ChannelSpecificPedestal       -- Set to TRUE in order to use a channel specific value for the pedestal
         ChannelSpecificNoise          -- Set to TRUE in order to add channel specific noise
         OutOfTimeOffsetHistogramFile  -- Filename of file containing histogram of pile-up timing distribution
         OutOfTimeOffsetHistogramName  -- Name of the histogram to use for pile-up timing distribution
-        AmpDistLowerLimit             -- Set all bins lower than this to zero. Default = 135
+        AmpDistLowerLimit             -- Set all bins lower than this to zero
         PedestalValueHG               -- Pedestal in HG if not taken from database
         PedestalValueLG               -- Pedestal in LG if not taken from database
         SimulatePileUpWithPoiss       -- Simulate pile-up overlaying signals from distribution
@@ -49,6 +50,8 @@ def TileDigitsFromPulseCfg(flags, **kwargs):
         PileUpAmpDistFileName         -- Distribution to simulate pile-up with SimulatePileUpWithPoiss
         RandomSeed                    -- Random seed for random number generator
         SimulatePulseChain            -- Simulate continuous output from readout cosidering HL-LHC paradigm
+        UseGainDependentUndershoot    -- Enable gain-dependent exponential extrapolation of the pulse undershoot
+        UseRecursiveUndershoot        -- Enable recursive accumulation of the long undershoot in continuous-readout mode
         Bigain                        -- Save two gains in ntuple
         NPulses                       -- The number of neighboring bunch crossings (before and after the in-time crossing) whose signals are accounted for when simulating the total contribution to a given bunch crossing
     """
@@ -135,6 +138,12 @@ if __name__ == '__main__':
     parser.add_argument('--run', type=int, default=410000, help='Run number')
     parser.add_argument('--save-true-amplitude', action='store_true', help='Save true Tile raw channel amplitude into h2000')
     parser.add_argument('--pulseChain', type=bool, default=False, help='Simulate continuous output of readout across bunch crossings')
+    parser.add_argument('--gainDependentUndershoot', action='store_true',
+                        help='Enable gain-dependent exponential undershoot')
+    parser.add_argument('--recursiveUndershoot', action='store_true',
+                        help='Enable recursive undershoot accumulation')
+    parser.add_argument('--pulseTimingSigma', type=float, default=0.0,
+                        help='RMS of individual pulse timing variations in ns')
     parser.add_argument('--acr-db', action='store_true', help='Use auto correlation matrix from DB')
 
     args, _ = parser.parse_known_args()
@@ -185,7 +194,15 @@ if __name__ == '__main__':
         cfg.merge(PoolReadCfg(flags))
 
     # =======>>> Configure Tile digits from pulse algorithm
-    cfg.merge( TileDigitsFromPulseCfg(flags, NSamples=args.nsamples, TilePhaseII=args.phaseII, SimulatePulseChain=args.pulseChain) )
+    # Recursive undershoot requires SimulatePulseChain=True, UseGainDependentUndershoot=True,
+    # GaussianC2CPhaseVariation=0, ImperfectionMean=1, ImperfectionRms=0, and QIE disabled.
+    cfg.merge( TileDigitsFromPulseCfg(flags,
+                                      NSamples=args.nsamples,
+                                      TilePhaseII=args.phaseII,
+                                      SimulatePulseChain=args.pulseChain,
+                                      UseGainDependentUndershoot=args.gainDependentUndershoot,
+                                      UseRecursiveUndershoot=args.recursiveUndershoot,
+                                      GaussianPulseTimingVariation=args.pulseTimingSigma) )
 
     # =======>>> Configure Tile raw channel maker
     from TileRecUtils.TileRawChannelMakerConfig import TileRawChannelMakerCfg

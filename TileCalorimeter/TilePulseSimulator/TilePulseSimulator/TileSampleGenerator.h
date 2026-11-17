@@ -23,8 +23,15 @@ public:
 		m_ps = ps;
 	}
 	void fillSamples(double t0, double pedestal, double amplitude1, double amplitude2, TF1* pdf, bool addNoise, double itOffset = 0, double otOffset = 50);
-	void fillNSamples(double t0, double pedestal, double amp_it, const std::vector<float>& amp_pu, TF1* pdf, bool addNoise, double itOffset = 0, int nSamples = 7, int nPul = 21);
-  float fillSample(double t0, double pedestal, const std::vector<float>& amp_pu, TF1* pdf, bool addNoise, int nPul = 21, int gain = 1);
+	void fillNSamples(double samplingPhase, double pedestal, double amp_it, const std::vector<float>& amp_pu,
+	                  TF1* pdf, bool addNoise, double itOffset = 0, int nSamples = 7, int nPul = 21,
+	                  const std::vector<double>* pulseTimeOffsets = nullptr);
+	float fillSample(double samplingPhase, double pedestal, const std::vector<float>& amp_pu,
+	                 TF1* pdf, bool addNoise, int nPul = 21, int gain = 1,
+	                 const std::vector<double>* pulseTimeOffsets = nullptr);
+	float fillSampleWithUndershoot(double samplingPhase, double pedestal, const std::vector<float>& amp_pu, TF1* pdf, bool addNoise,
+	                              int inTimeIndex, int firstRelevantIndex, int firstAccumulatedIndex, int gain,
+	                              double accumulatedUndershoot, const std::vector<double>* pulseTimeOffsets = nullptr);
 	void fill7SamplesQIE(float amp_it, float *amp_pu); //The function calculates charges for 7 intervals with each interval of 25 ns
 
 private:
