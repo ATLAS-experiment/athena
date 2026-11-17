@@ -8,6 +8,10 @@ import xml.dom.minidom
 from AthenaPython.PyAthena import StatusCode
 from AthenaPython.PyAthena import Alg
 
+from AthenaCommon.Logging import logging
+log = logging.getLogger("LheConverterUpc")
+
+
 class LheConverterUpc(Alg):
     '''
     Class for modifying output LHE file from Superchic and Madgraph + ensuring compatibility with Tauola
@@ -17,26 +21,30 @@ class LheConverterUpc(Alg):
     The hack changes the PDG ID of the initial state particles, from photons to electrons
     '''
 
-    def __init__(self, name='LheConverterUpc', generator='Superchic', mode='Pythia8', energy=5020):
+    def __init__(self, name='LheConverterUpc', generator='Superchic', mode='Pythia8', energy=5020, **kwargs):
         super(LheConverterUpc, self).__init__(name=name)
         self.generator = generator # options: 'Superchic' (default), 'Madgraph5'
         self.mode = mode # options: 'Pythia8' (default), 'Tauolapp'
-        self.energy = energy # energy read via JOs from runArg
+        self.cmEnergy = energy
+
+        self.fileName  = kwargs.pop('inFileName', 'events.lhe')
+        self.outFileName = kwargs.pop('outFileName', 'events.lhe')
     
-    outFileName = 'events.lhe'
     done = False
     leptons = ['11', '-11', '13', '-13', '15', '-15']  # e, µ, τ
 
     def initialize(self):
+        log.debug("inFileName: " + self.fileName)
+        log.debug("outFileName: " + self.outFileName)
 
-        self.inFileName = self.fileName
-
-        if self.inFileName==self.outFileName:
+        if self.fileName == self.outFileName:
             import shutil
-            shutil.move('./events.lhe','events.lhe_tmpconverter')
-            self.inFileName = 'events.lhe_tmpconverter'
-        if(os.path.isfile(self.inFileName)):
-            print(self.fileName)
+            tmpFile = self.fileName + '_tmpconverter'
+            shutil.move(self.fileName, tmpFile)
+            self.fileName = tmpFile
+
+        if(os.path.isfile(self.fileName)):
+            log.info("Running LheConverterUpc on: " + self.fileName)
             return self.convert()
         else:
             return StatusCode.Failure
@@ -49,23 +57,34 @@ class LheConverterUpc(Alg):
             - Recalculates energy scales as an average of lepton pair transverse momentum
         '''
         if not self.done:
-            DOMTree = xml.dom.minidom.parse(self.inFileName)
+            DOMTree = xml.dom.minidom.parse(self.fileName)
             collection = DOMTree.documentElement
 
-            # Replace init block
+            # Get the init block
             init = collection.getElementsByTagName('init')
 
-            # LHE requires very strict format of the <init> block
-            l_init_repl1=["13","-13","2.510000e+03","2.510000e+03","0","0","0","0","3","1"]
-            str_init_repl2 =" 1.000000e+00  0.000000e+00  1.000000e+00  9999"
-            l_init_repl1[2]='%.6e'  %(self.energy/2.)
-            l_init_repl1[3]='%.6e'  %(self.energy/2.)
+            # Read lines from init block
+            initText = init[0].firstChild.data
+            lines = initText.strip().splitlines()
+
+            # Get cross-section the second init line
+            proc = lines[1].split()
+            xsec = float(proc[0])
+            xerr = float(proc[1])
+
+            # Define new values
+            l_init_repl1=["13","-13",f"{self.cmEnergy/2:.6e}",f"{self.cmEnergy/2:.6e}","0","0","0","0","3","1"]
+            l_init_repl2=[f"{xsec:.6e}", f"{xerr:.6e}", "1.000000e+00", "9999"]
             
+            # Create new LHE <init> block
             delimiter = "  " # Define a delimiter
             str_init_repl1 = map(str, l_init_repl1)
+            str_init_repl2 = map(str, l_init_repl2)
             jstr_init_repl1 = delimiter.join(str_init_repl1)
-            jstr_init_repl1 = '\n ' + jstr_init_repl1 + '\n'
-            jstr_init_repl = jstr_init_repl1 + str_init_repl2 + '\n'
+            jstr_init_repl2 = delimiter.join(str_init_repl2)
+            jstr_init_repl = '\n   ' + jstr_init_repl1 + '\n   ' + jstr_init_repl2 + '\n '
+
+            # Swap the <init> block
             init[0].firstChild.data = jstr_init_repl
 
             # The comment line below indicates which part of the regex grabs the parton-level information that's to be modified. The index in list(header.groups()) is also shown
