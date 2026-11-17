@@ -8,17 +8,11 @@
 
 from TrigValTools.TrigValSteering import Test, ExecStep, PyStep, CheckSteps
 from AthenaConfiguration.TestDefaults import defaultConditionsTags, defaultGeometryTags
-import os
-from contextlib import suppress
-
-#Remove created.BS to avoid complaints
-def cleanup():
-   with suppress(FileNotFoundError):
-      os.remove("created.BS")
 
 nevents = 1
 
-ex_rm = PyStep.PyStep(cleanup)
+#Remove created.BS to avoid complaints
+ex_rm = PyStep.RmStep("created.BS")
 
 rdotrig_ref = ExecStep.ExecStep('RDOtoRDOTrig')
 rdotrig_ref.type = 'Reco_tf'
@@ -32,6 +26,11 @@ rdotrig_ref.flags = [
    'Trigger.triggerMenuSetup=\'Dev_pp_run3_v1_TriggerValidation_prescale\'',
    'Trigger.AODEDMSet=\'AODFULL\''
 ]
+
+#expert-monitoring.root will be lost when we run the BSRDOtoRAW step
+mon_mv = PyStep.MvStep("expert-monitoring.root", "expert-monitoring.ref.root")
+
+chaindump_rdotrig = CheckSteps.ChainDumpStep(name="ChainDump_RDOTrig", input_file="expert-monitoring.ref.root", suffix=".ref")
 
 # RDO -> BS step
 rdo2bs = ExecStep.ExecStep('RDOtoBS')
@@ -62,30 +61,15 @@ ex.flags = [
    f'GeoModel.AtlasVersion=\'{defaultGeometryTags.RUN3}\'',
 ]
 
-class DiffRootStep(CheckSteps.RefComparisonStep):
-   def __init__(self,name):
-       super(DiffRootStep, self).__init__(name)
-       self.executable = 'acmd.py diff-root'
-       self.input_file = None
-       self.auto_report_result = True
-   def configure(self, test):
-       if self.reference is None:
-           self.log.error('Missing reference for %s', self.name)
-       if self.input_file is None:
-           self.log.error('Missing input for %s', self.name)
-       super(DiffRootStep,self).configure(test)
-       self.args += ' {} {}'.format(self.reference, self.input_file)
-   def run(self, dry_run=False):
-       retcode, cmd = super(DiffRootStep, self).run(dry_run)
-       return retcode, cmd
-diff = DiffRootStep('diff-root')
+diff = CheckSteps.DiffRootStep('diff-root')
 diff.reference = 'RDO_TRIG.ref.pool.root'
 diff.input_file = 'RDO_TRIG.pool.root'
 
+
 test = Test.Test()
 test.art_type = 'build'
-test.exec_steps = [ex_rm, rdotrig_ref, rdo2bs, ex]
-test.check_steps = CheckSteps.default_check_steps(test) + [diff]
+test.exec_steps = [ex_rm, rdotrig_ref, mon_mv, rdo2bs, ex]
+test.check_steps = CheckSteps.default_check_steps(test) + [chaindump_rdotrig] + [diff]
 
 import sys
 sys.exit(test.run())

@@ -9,21 +9,32 @@
 from TrigValTools.TrigValSteering import Test, ExecStep, PyStep, CheckSteps, Input
 from AthenaConfiguration.AutoConfigFlags import GetFileMD
 from AthenaConfiguration.TestDefaults import defaultConditionsTags
-import os
-from contextlib import suppress
+
+nevents = 1
 
 #Remove created.BS to avoid complaints
-def cleanup():
-   with suppress(FileNotFoundError):
-      os.remove("created.BS")
+ex_rm = PyStep.RmStep("created.BS")
 
-ex_rm = PyStep.PyStep(cleanup)
+rdotrig_ref = ExecStep.ExecStep('RDOtoRDOTrig')
+rdotrig_ref.type = 'Reco_tf'
+rdotrig_ref.input = 'ttbar_pu200_Run4'
+rdotrig_ref.threads = 1
+rdotrig_ref.max_events = nevents
+rdotrig_ref.args = '--outputRDO_TRIGFile=RDO_TRIG.ref.pool.root'
+rdotrig_ref.flags = [
+   'Trigger.triggerMenuSetup=\'Dev_pp_run4\'',
+]
+
+#expert-monitoring.root will be lost when we run the BSRDOtoRAW step
+mon_mv = PyStep.MvStep("expert-monitoring.root", "expert-monitoring.ref.root")
+
+chaindump_rdotrig = CheckSteps.ChainDumpStep(name="ChainDump_RDOTrig", input_file="expert-monitoring.ref.root", suffix=".ref")
 
 # RDO -> BS step
 rdo2bs = ExecStep.ExecStep('RDOtoBS')
 rdo2bs.type = 'Reco_tf'
 rdo2bs.input = 'ttbar_pu200_Run4'
-rdo2bs.max_events = 1
+rdo2bs.max_events = nevents
 rdo2bs.args +=  ' --outputBSFile=created.BS'
 rdo2bs.args += f' --conditionsTag="{defaultConditionsTags.RUN4_MC}"'
 
@@ -45,10 +56,15 @@ ex.flags = ['Trigger.triggerMenuSetup="Dev_pp_run4"', 'Trigger.doLVL1=True', 'Tr
             'Trigger.enableL1CaloLegacy=False',
             ]
 
+diff = CheckSteps.DiffRootStep('diff-root')
+diff.reference = 'RDO_TRIG.ref.pool.root'
+diff.input_file = 'RDO_TRIG.pool.root'
+
 test = Test.Test()
 test.art_type = 'build'
-test.exec_steps = [ex_rm, rdo2bs, ex]
-test.check_steps = CheckSteps.default_check_steps(test)
+test.exec_steps = [ex_rm, rdotrig_ref, mon_mv, rdo2bs, ex]
+test.check_steps = CheckSteps.default_check_steps(test) + [chaindump_rdotrig] + [diff]
+
 
 import sys
 sys.exit(test.run())

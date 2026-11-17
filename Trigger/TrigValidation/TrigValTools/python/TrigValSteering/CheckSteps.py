@@ -92,6 +92,23 @@ class RefComparisonStep(Step):
 
         return super(RefComparisonStep, self).configure(test)
 
+class DiffRootStep(RefComparisonStep):
+   def __init__(self,name):
+       super(DiffRootStep, self).__init__(name)
+       self.executable = 'acmd.py diff-root'
+       self.input_file = None
+       self.auto_report_result = True
+   def configure(self, test):
+       if self.reference is None:
+           self.log.error('Missing reference for %s', self.name)
+       if self.input_file is None:
+           self.log.error('Missing input for %s', self.name)
+       super(DiffRootStep,self).configure(test)
+       self.args += ' {} {}'.format(self.reference, self.input_file)
+   def run(self, dry_run=False):
+       retcode, cmd = super(DiffRootStep, self).run(dry_run)
+       return retcode, cmd
+
 
 class InputDependentStep(Step):
     '''Base class for steps executed only if the input file exists'''
@@ -446,22 +463,24 @@ class HistCountStep(InputDependentStep):
         self.args += ' '+self.input_file
         super(HistCountStep, self).configure(test)
 
-
 class ChainDumpStep(InputDependentStep):
     '''
     Execute chainDump.py to print trigger counts from histograms to text files
     '''
 
-    def __init__(self, name='ChainDump'):
+    def __init__(self, name='ChainDump', input_file='expert-monitoring.root', suffix=''):
         super(ChainDumpStep, self).__init__(name)
-        self.input_file = 'expert-monitoring.root'
+        self.input_file = input_file
         self.executable = 'chainDump.py'
-        self.args = '--json --yaml'
+        self.suffix = suffix
+        self.args = ' '.join(['--json', '--yaml'])
 
     def configure(self, test):
-        self.args += ' -f '+self.input_file
+        args = self.args.split() + ['-f', self.input_file]
+        if self.suffix:
+            args += ['--suffix', self.suffix]
+        self.args = ' '.join(args)
         super(ChainDumpStep, self).configure(test)
-
 
 class ChainCompStep(RefComparisonStep):
     '''

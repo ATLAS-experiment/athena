@@ -9,6 +9,7 @@ import sys
 import argparse
 import logging
 import json
+import os
 import yaml
 import ROOT
 from collections import defaultdict
@@ -56,6 +57,11 @@ def get_parser():
     parser.add_argument('--yamlL1',
                         action='store_true',
                         help='Include the L1 count information to the yaml file')
+    parser.add_argument('--suffix',
+                        metavar='SUFFIX',
+                        default='',
+                        help='String appended before the extension of the txt, json and yaml output files, '
+                             'default = %(default)s')
     parser.add_argument('--fracTolerance',
                         metavar='FRAC',
                         type=float,
@@ -313,22 +319,22 @@ def format_txt_count(count):
     return '{val:>{w}s}'.format(val=count, w=column_width)
 
 
-def write_txt_output(json_dict, diff_only=False, printHeader=False):
+def write_txt_output(json_dict, diff_only=False, printHeader=False, suffix=''):
     for text_name in sorted(json_dict):
         if text_name == total_events_key:
-            logging.info('Writing total event count to file %s.txt', text_name)
-            with open('{:s}.txt'.format(text_name), 'w') as outfile:
+            logging.info('Writing total event count to file %s%s.txt', text_name, suffix)
+            with open('{:s}{:s}.txt'.format(text_name, suffix), 'w') as outfile:
                 outfile.write('{:d}\n'.format(json_dict[text_name]['count']))
             continue
         hist_name = json_dict[text_name]['hist_name']
-        logging.info('Writing counts from histogram %s to file %s.txt', hist_name, text_name)
+        logging.info('Writing counts from histogram %s to file %s%s.txt', hist_name, text_name, suffix)
         counts = json_dict[text_name]['counts']
         no_ref = True
         for item_counts in counts.values():
             if item_counts['ref_count'] != 'n/a':
                 no_ref = False
                 break
-        with open('{:s}.txt'.format(text_name), 'w') as outfile:
+        with open('{:s}{:s}.txt'.format(text_name, suffix), 'w') as outfile:
             if printHeader:
                 line = '{name:{nw}s}'.format(name='chain', nw=name_width)
                 if not no_ref:
@@ -383,6 +389,18 @@ def make_light_dict(full_dict, includeL1Counts):
         )
 
     return light_dict
+
+
+def apply_suffix(path, suffix):
+    '''
+    Insert suffix before the file extension if suffix is not empty,
+    e.g. 'chainDump.json' -> 'chainDump.ref.json'. The path is returned
+    unchanged otherwise.
+    '''
+    if suffix:
+        base, ext = os.path.splitext(path)
+        path = base + suffix + ext
+    return path
 
 
 def main():
@@ -494,17 +512,19 @@ def main():
         print_counts(json_dict)
 
     if not args.printOnly:
-        write_txt_output(json_dict, args.diffOnly, args.printHeader)
+        write_txt_output(json_dict, args.diffOnly, args.printHeader, suffix=args.suffix)
 
     if args.json:
-        logging.info('Writing results to %s', args.json)
-        with open(args.json, 'w') as outfile:
+        json_path = apply_suffix(args.json, args.suffix)
+        logging.info('Writing results to %s', json_path)
+        with open(json_path, 'w') as outfile:
             json.dump(json_dict, outfile, sort_keys=False) # Key order defined above
 
     if args.yaml:
-        logging.info('Writing results extract to %s', args.yaml)
+        yaml_path = apply_suffix(args.yaml, args.suffix)
+        logging.info('Writing results extract to %s', yaml_path)
         light_dict = make_light_dict(json_dict, includeL1Counts = args.yamlL1)
-        with open(args.yaml, 'w') as outfile:
+        with open(yaml_path, 'w') as outfile:
             yaml.dump(light_dict, outfile, sort_keys=False) # Key order defined above
 
     return retcode
