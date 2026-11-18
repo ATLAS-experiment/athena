@@ -67,8 +67,6 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
   const xAOD::TruthParticle* theBestPartdR(nullptr);
   double LeadingPhtPT(0);
   double LeadingPartPT(0);
-  double LeadingPhtdR(999.);
-  double LeadingPartdR(999.);
   double BestPartdR(999.);
   double etaClus = clus->etaBE(2);
   double phiClus = clus->phiBE(2);
@@ -118,12 +116,6 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
     bool isNCone = false;
     bool isExt = genPartToCalo(ctx, clus, thePart, isFwrdEle, dR, isNCone, *caloDDMgr);
     if (!isExt) continue;
-    theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(), thePart);
-    if (info) {
-      info->egPartPtr.push_back(thePart);
-      info->egPartdR.push_back(dR);
-      info->egPartClas.push_back(particleTruthClassifier(theMatchPart, info));
-    }
     // Gen particles Not forward
     if (!isFwrdEle) {
       // the leading photon or electron  inside narrow eleptical cone
@@ -131,14 +123,12 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
       if ((iParticlePDG == 22 || std::abs(iParticlePDG) == 11) && isNCone && pt > LeadingPhtPT) {
         theEgamma = thePart;
         LeadingPhtPT = pt;
-        LeadingPhtdR = dR;
       }
       // leading particle (excluding photon and electron) inside narrow eleptic
       // cone m_phtClasConePhi  X m_phtClasConeEta
       if ((iParticlePDG != 22 && std::abs(iParticlePDG) != 11) && isNCone && pt > LeadingPartPT) {
         theLeadingPartInCone = thePart;
         LeadingPartPT = pt;
-        LeadingPartdR = dR;
       };
       // the best dR matched particle outside  narrow eleptic cone cone
       // m_phtClasConePhi  X m_phtClasConeEta
@@ -156,16 +146,12 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
 
   if (theEgamma != nullptr) {
     theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(), theEgamma);
-    if (info) info->deltaRMatch = LeadingPhtdR;
   } else if (theLeadingPartInCone != nullptr) {
     theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),theLeadingPartInCone);
-    if (info) info->deltaRMatch = LeadingPartdR;
   } else if (theBestPartOutCone != nullptr) {
     theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),theBestPartOutCone);
-    if (info) info->deltaRMatch = BestPartdR;
   } else if (isFwrdEle && theBestPartdR != nullptr) {
     theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),theBestPartdR );
-    if (info) info->deltaRMatch = BestPartdR;
   } else {
     theMatchPart = nullptr;
   }
@@ -194,25 +180,17 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
     bool isExt = genPartToCalo(ctx, clus, thePart, isFwrdEle, dR, isNCone, *caloDDMgr);
     if (!isExt) continue;
 
-    theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),thePart);
-    if (info) {
-      info->egPartPtr.push_back(thePart);
-      info->egPartdR.push_back(dR);
-      info->egPartClas.push_back(particleTruthClassifier(theMatchPart, info));
-    }
     // the leading photon or electron  inside narrow eleptical cone
     // m_phtClasConePhi  X m_phtClasConeEta
     if ((iParticlePDG == 22 || std::abs(iParticlePDG) == 11) && isNCone && pt > LeadingPhtPT) {
       theEgamma = thePart;
       LeadingPhtPT = pt;
-      LeadingPhtdR = dR;
     }
     // leading particle (excluding photon or electron) inside narrow eleptic
     // cone m_phtClasConePhi  X m_phtClasConeEta
     if ((iParticlePDG != 22 && std::abs(iParticlePDG) != 11) && isNCone && pt > LeadingPartPT) {
       theLeadingPartInCone = thePart;
       LeadingPartPT = pt;
-      LeadingPartdR = dR;
     }
     // the best dR matched particle outside  narrow eleptic cone cone
     // m_phtClasConePhi  X m_phtClasConeEta
@@ -224,13 +202,10 @@ const xAOD::TruthParticle* MCTruthClassifier::egammaClusMatch(const xAOD::CaloCl
 
   if (theEgamma != nullptr) {
     theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),theEgamma);
-    if (info) info->deltaRMatch = LeadingPhtdR;
   } else if (theLeadingPartInCone != nullptr) {
     theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),theLeadingPartInCone);
-    if (info)  info->deltaRMatch = LeadingPartdR;
   } else if (theBestPartOutCone != nullptr) {
     theMatchPart = MC::findMatching(truthParticleContainerReadHandle.ptr(),theBestPartOutCone);
-    if (info) info->deltaRMatch = BestPartdR;
   } else {
     theMatchPart = nullptr;
   }
