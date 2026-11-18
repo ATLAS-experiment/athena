@@ -1,15 +1,10 @@
 /// job opts for MetaDataSvc unit test
+/// The MetaDataSvc instances under test are created and configured by the
+/// test itself, one per test case.
 
 MessageSvc.OutputLevel = 2;
 StoreGateSvc.OutputLevel = 2;
 ApplicationMgr.ExtSvc += { "ToolSvc" };
 ApplicationMgr.ExtSvc += { "StoreGateSvc/MetaDataStore" };
-ApplicationMgr.ExtSvc += { "MetaDataSvc" };
-ToolSvc += "MetaDataToolStub";
-MetaDataSvc.OutputLevel = 1;
-MetaDataSvc.MetaDataTools += ["MetaDataToolStub"];
-
-ApplicationMgr.ExtSvc += { "MetaDataSvc/WithMDContainer" };
-WithMDContainer.OutputLevel = 1;
-WithMDContainer.MetaDataTools += ["MetaDataToolStub"];
-WithMDContainer.MetaDataContainer = "MetaDataHdr";
+/// Stands in for AthenaPoolSharedIOCnvSvc in the shmProxy test cases
+EventPersistencySvc.CnvServices += { "SharedIOCnvSvcStub/AthenaPoolSharedIOCnvSvc" };

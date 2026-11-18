@@ -1,0 +1,21 @@
+MDS_new              ERROR Unable to get FileName from EndInputFile incident
+MDS_new              ERROR Unable to call beginInputFile for ToolSvc.MDS_new_A
+RootFileHandler      ERROR Unable to open ROOT file "MetaDataSvc_test_missing.root" with options "READ"
+RootDatabase         ERROR You cannot open the ROOT file [MetaDataSvc_test_missing.root] in mode READ if it does not exists.
+StorageSvc           ERROR Cannot connect to Database: FID=921C3CA6-B930-FAFD-2E86-0FF0FF0FF0FF PFN=MetaDataSvc_test_missing.root
+MDS_retire           ERROR Unable to get FileName from EndInputFile incident
+MDS_retire           ERROR ../MetaDataSvc.cxx (StatusCode MetaDataSvc::retireMetadataSource(const Incident&)): code FAILURE: tool->endInputFile(guid)
+MDS_handle           ERROR Unable to call beginInputFile for ToolSvc.MDS_handle_A
+MDS_handle           ERROR Could not process new metadata source dummy.txt
+MDS_handle           ERROR ../MetaDataSvc.cxx (StatusCode MetaDataSvc::retireMetadataSource(const Incident&)): code FAILURE: tool->endInputFile(guid)
+MDS_handle           ERROR Could not retire metadata source dummy.txt
+MDS_handle           ERROR Unable to get FileName from EndInputFile incident
+MDS_prepfail         ERROR Unable to call metaDataStop for ToolSvc.MDS_prepfail_A
+MDS_shm              ERROR shmProxy failed: unsupported AddressCreator AthenaPoolCnvSvc
+MDS_shmadd           ERROR addProxyToInputMetaDataStore: no CLID for persistent class NoSuchClass in [DB=00000000-0000-0000-0000-000000000000][CNT=MetaDataHdr(Other)][FILE=out.root][CONT=MetaDataHdr(Other)][PNAME=NoSuchClass][NUM=1]
+MDS_shmadd           ERROR ../MetaDataSvc.cxx (StatusCode MetaDataSvc::shmProxy(const std::string&)): code FAILURE: addProxyToInputMetaDataStore(tokenStr)
+MDS_shmadd           ERROR addProxyToInputMetaDataStore: no CLID for persistent class NoSuchClass_p1 in [DB=00000000-0000-0000-0000-000000000000][CNT=MetaDataHdr(Other)][FILE=out.root][CONT=MetaDataHdr(Other)][PNAME=NoSuchClass_p1][NUM=1]
+MDS_shmadd           ERROR ../MetaDataSvc.cxx (StatusCode MetaDataSvc::shmProxy(const std::string&)): code FAILURE: addProxyToInputMetaDataStore(tokenStr)
+MDS_shmadd           ERROR addProxyToInputMetaDataStore: no CLID for persistent class SharedIOStubObject_pX in [DB=00000000-0000-0000-0000-000000000000][CNT=MetaDataHdr(Other)][FILE=out.root][CONT=MetaDataHdr(Other)][PNAME=SharedIOStubObject_pX][NUM=1]
+MDS_shmadd           ERROR ../MetaDataSvc.cxx (StatusCode MetaDataSvc::shmProxy(const std::string&)): code FAILURE: addProxyToInputMetaDataStore(tokenStr)
+*** No errors detected

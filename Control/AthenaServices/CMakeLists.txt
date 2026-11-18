@@ -94,8 +94,11 @@ atlas_add_test( MetaDataSvc_test
    INCLUDE_DIRS ${Boost_INCLUDE_DIRS} ${ROOT_INCLUDE_DIRS}
    LINK_LIBRARIES ${ROOT_LIBRARIES} TestTools AthenaKernel CxxUtils GaudiKernel
                   StoreGateLib AthenaBaseComps RootAuxDynIOHeaders PersistentDataModel SGTools Boost::unit_test_framework
-   LOG_IGNORE_PATTERN "ERROR Unable to get|ERROR Failing|ERROR Unable to call|tool->endInputFile|TFile::TFile         ERROR|RootFileHandler      ERROR|FileMgr            WARNING|RootDatabase         ERROR|StorageSvc           ERROR|Cannot create proxy|FAILURE: addProxyToInputMetaDataStore|ERROR shmProxy failed: unsupported AddressCreator AthenaPoolCnvSvc"
-   POST_EXEC_SCRIPT noerror.sh)
+   # Compare only the ERROR/FATAL lines (always selected by post.sh) and the
+   # Boost summary with the reference. The test also checks the ERROR count of
+   # each case. TFile prints the absolute path of the missing input file.
+   LOG_SELECT_PATTERN "^[*]{3} No errors detected"
+   LOG_IGNORE_PATTERN "^TFile::TFile +ERROR file .*/MetaDataSvc_test_missing[.]root does not exist" )
 
 atlas_add_test( AthTPCnvSvc
    SCRIPT test/AthTPCnvSvc_test.py
