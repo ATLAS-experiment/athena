@@ -26,12 +26,13 @@ from TrigValTools.TrigValSteering import Test, CheckSteps
 from TrigAnalysisTest.TrigAnalysisSteps import add_analysis_steps
 
 EFTrackPipeline = "C230"
-from TrigAnalysisTest.test_trigAna_RDOtoAOD_Dev_Run4_Acts_Common import prepare_acts_rdo2aod
+from TrigAnalysisTest.test_trigAna_RDOtoAOD_Dev_Run4_Acts_Common import prepare_acts_rdo2aod, run_idtpm
 rdo2aod = prepare_acts_rdo2aod(EFTrackPipeline)
+ana = run_idtpm()
 
 test = Test.Test()
 test.art_type = 'grid'
-test.exec_steps = [rdo2aod]
+test.exec_steps = [rdo2aod,ana]
 test.check_steps = CheckSteps.default_check_steps(test)
 add_analysis_steps(test)
 

@@ -24,7 +24,7 @@ def prepare_acts_rdo2aod(pipeline : str):
     rdo2aod.type = 'Reco_tf'
     rdo2aod.input = 'ttbar_pu200_Run4'
     rdo2aod.threads = 8
-    rdo2aod.max_events = 100
+    rdo2aod.max_events = 200
     rdo2aod.args = '--outputAODFile=AOD.pool.root --steering "doRDO_TRIG"'
     rdo2aod.args += ' --perfmon fullmonmt'
     rdo2aod.args += f' --preExec "all:{preExec};"'
@@ -41,3 +41,17 @@ def prepare_acts_rdo2aod(pipeline : str):
                      ]
 
     return rdo2aod
+
+def run_idtpm():
+
+    ana = ExecStep.ExecStep('runIDTPM')
+    ana.type = 'other'
+    ana.input= ''
+    ana.executable = 'runIDTPM.py'
+    #ana.input = ''
+    ana.args = '--inputFileNames AOD.pool.root --trkAnaCfgFile InDetTrackPerfMon/TrigRun4MenuSubset_vs_offl.json'
+
+    return ana
+
+
+
