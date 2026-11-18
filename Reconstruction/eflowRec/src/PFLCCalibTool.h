@@ -2,15 +2,15 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFUNIFIEDLCCALIBTOOL_H
-#define PFUNIFIEDLCCALIBTOOL_H
+#ifndef PFLCCALIBTOOL_H
+#define PFLCCALIBTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "xAODCaloEvent/CaloClusterFwd.h"
 #include "CaloUtils/CaloClusterProcessor.h"
 #include "CaloDetDescr/CaloDetDescrManager.h"
-#include "IPFUnifiedBaseTool.h"
+#include "IPFBaseTool.h"
 #include "IPFClusterCollectionTool.h"
 
 class eflowRecCluster;
@@ -19,13 +19,13 @@ struct PFData;
 /**
 This tool can either use a series of CaloClusterProcessor to calibrate the modified xAOD::CaloCluster (modified when we do the charged shower subtraction) using recalculated LC weights or its own internal method to use the stored LC weights in the eflowRecCluster objects. If using the LC weights which were stored in the eflowRecCluster then we use the container of eflowRecCluster, but if using recalculated LC weights for the modified xAOD::CaloCluster (modified when we remove calorimeter cells in the charged shower subtraction) then we need the container of xAOD::CaloCluster. The PFClusterCollectionTool provides both of these containers.
 */
-class PFUnifiedLCCalibTool : public extends<AthAlgTool, IPFUnifiedBaseTool> {
+class PFLCCalibTool : public extends<AthAlgTool, IPFBaseTool> {
 
   public:
   
-  PFUnifiedLCCalibTool(const std::string& type,const std::string& name,const IInterface* parent);
+  PFLCCalibTool(const std::string& type,const std::string& name,const IInterface* parent);
 
-  ~PFUnifiedLCCalibTool() {}
+  ~PFLCCalibTool() {}
 
   virtual StatusCode initialize() override;
   virtual StatusCode processPFlowData(const EventContext& ctx, PFData &thePFData) const override;

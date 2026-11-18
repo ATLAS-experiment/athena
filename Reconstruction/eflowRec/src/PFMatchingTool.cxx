@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "PFUnifiedMatchingTool.h"
+#include "PFMatchingTool.h"
 #include "PFData.h"
 
 #include "eflowCaloObject.h"
@@ -25,15 +25,15 @@
 
 using namespace eflowSubtract;
 
-PFUnifiedMatchingTool::PFUnifiedMatchingTool(const std::string &type, const std::string &name, const IInterface *parent) : base_class(type, name, parent),
-                                                                                                                   m_binnedParameters(std::make_unique<eflowEEtaBinnedParameters>())
+PFMatchingTool::PFMatchingTool(const std::string &type, const std::string &name, const IInterface *parent) : base_class(type, name, parent),
+                                                                                                             m_binnedParameters(std::make_unique<eflowEEtaBinnedParameters>())
 {
 }
 
-PFUnifiedMatchingTool::~PFUnifiedMatchingTool()
+PFMatchingTool::~PFMatchingTool()
 = default;
 
-StatusCode PFUnifiedMatchingTool::initialize()
+StatusCode PFMatchingTool::initialize()
 {
 
   ATH_CHECK(m_theEOverPTool.retrieve());
@@ -55,7 +55,7 @@ StatusCode PFUnifiedMatchingTool::initialize()
 
 }
 
-StatusCode PFUnifiedMatchingTool::processPFlowData(
+StatusCode PFMatchingTool::processPFlowData(
   const EventContext& ctx,
   PFData &data
 ) const
@@ -94,7 +94,7 @@ StatusCode PFUnifiedMatchingTool::processPFlowData(
   return StatusCode::SUCCESS;
 }
 
-unsigned int PFUnifiedMatchingTool::matchAndCreateEflowCaloObj(const EventContext& ctx, PFData &data) const{
+unsigned int PFMatchingTool::matchAndCreateEflowCaloObj(const EventContext& ctx, PFData &data) const{
 
   //Counts up how many tracks found at least 1 calorimeter cluster matched to it.
   unsigned int nMatches(0);
@@ -217,19 +217,19 @@ unsigned int PFUnifiedMatchingTool::matchAndCreateEflowCaloObj(const EventContex
 }
 
 
-std::string PFUnifiedMatchingTool::printTrack(const xAOD::TrackParticle* track) {
+std::string PFMatchingTool::printTrack(const xAOD::TrackParticle* track) {
   std::stringstream result;
   result << " track with E, eta and phi "<< track->e() << ", " << track->eta() << " and " << track->phi();
   return result.str();
 }
 
-std::string PFUnifiedMatchingTool::printCluster(const xAOD::CaloCluster* cluster) {
+std::string PFMatchingTool::printCluster(const xAOD::CaloCluster* cluster) {
   std::stringstream result;
   result << " cluster with E, eta and phi of " << cluster->e() << ", " << cluster->eta() << " and " << cluster->phi();
   return result.str();
 }
 
-void PFUnifiedMatchingTool::printAllClusters(const std::vector<eflowRecCluster *>& recClusterVector) const {
+void PFMatchingTool::printAllClusters(const std::vector<eflowRecCluster *>& recClusterVector) const {
 
   for ( const auto *thisEFRecCluster : recClusterVector){
     if (thisEFRecCluster->getTrackMatches().empty()) {

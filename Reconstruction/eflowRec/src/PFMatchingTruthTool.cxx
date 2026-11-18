@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "PFUnifiedMatchingTruthTool.h"
+#include "PFMatchingTruthTool.h"
 #include "PFData.h"
 
 #include "eflowCaloObject.h"
@@ -23,10 +23,10 @@
 using namespace eflowSubtract;
 
 
-PFUnifiedMatchingTruthTool::~PFUnifiedMatchingTruthTool()
+PFMatchingTruthTool::~PFMatchingTruthTool()
 = default;
 
-StatusCode PFUnifiedMatchingTruthTool::initialize()
+StatusCode PFMatchingTruthTool::initialize()
 {
 
   ATH_CHECK(m_theEOverPTool.retrieve());
@@ -53,7 +53,7 @@ StatusCode PFUnifiedMatchingTruthTool::initialize()
 
 }
 
-unsigned int PFUnifiedMatchingTruthTool::matchAndCreateEflowCaloObj(const EventContext& ctx, PFData &data) const{
+unsigned int PFMatchingTruthTool::matchAndCreateEflowCaloObj(const EventContext& ctx, PFData &data) const{
 
   //Counts up how many tracks found at least 1 calorimeter cluster matched to it.
   unsigned int nMatches(0);

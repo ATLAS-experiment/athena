@@ -26,13 +26,13 @@
 #include "../PFClusterWidthDecorator.h"
 #include "../PFSimulateTruthShowerTool.h"
 
-#include "../PFUnifiedMatchingTool.h"
-#include "../PFUnifiedSubtractionOnlyTool.h"
-#include "../PFUnifiedLCCalibTool.h"
-#include "../PFUnifiedMomentCalculatorTool.h"
-#include "../PFUnifiedRadialEnergyCalculatorTool.h"
-#include "../PFUnifiedMatchingTruthTool.h"
-#include "../PFUnifiedSubtractionOnlyTruthTool.h"
+#include "../PFMatchingTool.h"
+#include "../PFSubtractionTool.h"
+#include "../PFLCCalibTool.h"
+#include "../PFMomentCalculatorTool.h"
+#include "../PFRadialEnergyCalculatorTool.h"
+#include "../PFMatchingTruthTool.h"
+#include "../PFSubtractionTruthTool.h"
 #include "../PFTrackCaloExtensionTool.h"
 
 DECLARE_COMPONENT( PFLeptonSelector )
@@ -59,11 +59,11 @@ DECLARE_COMPONENT( PFEnergyPredictorTool )
 DECLARE_COMPONENT( PFSimulateTruthShowerTool)
 DECLARE_COMPONENT( PFClusterWidthDecorator )
 
-DECLARE_COMPONENT( PFUnifiedMatchingTool )
-DECLARE_COMPONENT( PFUnifiedSubtractionOnlyTool )
-DECLARE_COMPONENT( PFUnifiedLCCalibTool )
-DECLARE_COMPONENT( PFUnifiedMomentCalculatorTool )
-DECLARE_COMPONENT( PFUnifiedRadialEnergyCalculatorTool )
-DECLARE_COMPONENT( PFUnifiedMatchingTruthTool )
-DECLARE_COMPONENT( PFUnifiedSubtractionOnlyTruthTool )
+DECLARE_COMPONENT( PFMatchingTool )
+DECLARE_COMPONENT( PFSubtractionTool )
+DECLARE_COMPONENT( PFLCCalibTool )
+DECLARE_COMPONENT( PFMomentCalculatorTool )
+DECLARE_COMPONENT( PFRadialEnergyCalculatorTool )
+DECLARE_COMPONENT( PFMatchingTruthTool )
+DECLARE_COMPONENT( PFSubtractionTruthTool )
 DECLARE_COMPONENT( PFTrackCaloExtensionTool )

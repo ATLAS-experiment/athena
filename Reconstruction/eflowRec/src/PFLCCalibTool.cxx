@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "PFUnifiedLCCalibTool.h"
+#include "PFLCCalibTool.h"
 #include "PFData.h"
 #include "eflowCaloObject.h"
 #include "eflowRecCluster.h"
@@ -16,12 +16,12 @@
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "CaloUtils/CaloClusterStoreHelper.h"
 
-PFUnifiedLCCalibTool::PFUnifiedLCCalibTool(const std::string& type, const std::string& name, const IInterface* parent) :
+PFLCCalibTool::PFLCCalibTool(const std::string& type, const std::string& name, const IInterface* parent) :
   base_class(type, name, parent)
 {
 }
 
-StatusCode PFUnifiedLCCalibTool::initialize() {
+StatusCode PFLCCalibTool::initialize() {
 
   /* Retrieve the cluster collection tool */
   ATH_CHECK(m_clusterCollectionTool.retrieve());
@@ -44,7 +44,7 @@ StatusCode PFUnifiedLCCalibTool::initialize() {
 
 }
 
-StatusCode PFUnifiedLCCalibTool::processPFlowData(const EventContext& ctx, PFData &thePFData) const {
+StatusCode PFLCCalibTool::processPFlowData(const EventContext& ctx, PFData &thePFData) const {
 
   if (!thePFData.caloObjects) {
     ATH_MSG_ERROR("PFData::caloObjects is null; caller must set it before invoking the LC calib tool");
@@ -80,13 +80,13 @@ StatusCode PFUnifiedLCCalibTool::processPFlowData(const EventContext& ctx, PFDat
   return StatusCode::SUCCESS;
 }
 
-StatusCode PFUnifiedLCCalibTool::apply(const EventContext& ctx, const ToolHandle<CaloClusterProcessor>& calibTool, xAOD::CaloCluster* cluster) const {
+StatusCode PFLCCalibTool::apply(const EventContext& ctx, const ToolHandle<CaloClusterProcessor>& calibTool, xAOD::CaloCluster* cluster) const {
   if (m_useLocalWeight) ATH_MSG_WARNING("Applying recalculated weights, when configuration requested to use original weights");
   ATH_CHECK(calibTool->execute(ctx,cluster));
   return StatusCode::SUCCESS;  
 }
 
-void PFUnifiedLCCalibTool::applyLocalWeight(eflowRecCluster* theEFRecClusters, const CaloDetDescrManager& calo_dd_man) {
+void PFLCCalibTool::applyLocalWeight(eflowRecCluster* theEFRecClusters, const CaloDetDescrManager& calo_dd_man) {
   xAOD::CaloCluster* theCluster = theEFRecClusters->getCluster();
 
   /* Iterate over cells of old cluster and replicate them with energy weighted by -1 if negative and add it to the new cluster */

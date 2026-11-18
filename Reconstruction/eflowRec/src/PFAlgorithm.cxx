@@ -13,7 +13,7 @@ PFAlgorithm::PFAlgorithm(const std::string& name, ISvcLocator* pSvcLocator)
 StatusCode PFAlgorithm::initialize(){
 
   ATH_CHECK(m_IPFClusterSelectorTool);
-  ATH_CHECK(m_IPFUnifiedBaseTools.retrieve());
+  ATH_CHECK(m_IPFBaseTools.retrieve());
   
   ATH_CHECK(m_eflowRecTracksReadHandleKey.initialize());
 
@@ -70,8 +70,8 @@ StatusCode PFAlgorithm::execute(const EventContext& ctx) const{
 
   PFClusterFiller::fillClustersToConsider(data, theEFlowRecClusterContainerReference);
 
-  for (const auto& thisIPFUnifiedBaseTool : m_IPFUnifiedBaseTools){
-    ATH_CHECK(thisIPFUnifiedBaseTool->processPFlowData(ctx, data));
+  for (const auto& thisIPFBaseTool : m_IPFBaseTools){
+    ATH_CHECK(thisIPFBaseTool->processPFlowData(ctx, data));
   }
   t_subtract.stop();
 
@@ -99,16 +99,16 @@ StatusCode PFAlgorithm::finalize(){ return StatusCode::SUCCESS;}
 
 void PFAlgorithm::printTools() {
   ATH_MSG_VERBOSE(" ");
-  ATH_MSG_VERBOSE("List of IPFUnifiedBase tools in execution sequence:");
+  ATH_MSG_VERBOSE("List of IPFBase tools in execution sequence:");
   ATH_MSG_VERBOSE("------------------------------------");
   ATH_MSG_VERBOSE(" ");
-  unsigned int unifiedToolCtr = 0;
-  for (const auto& thisIPFUnifiedBaseTool : m_IPFUnifiedBaseTools){
-    unifiedToolCtr++;
-    ATH_MSG_VERBOSE(std::setw(2) << std::setiosflags(std::ios_base::right) << unifiedToolCtr << ".) "
+  unsigned int toolCtr = 0;
+  for (const auto& thisIPFBaseTool : m_IPFBaseTools){
+    toolCtr++;
+    ATH_MSG_VERBOSE(std::setw(2) << std::setiosflags(std::ios_base::right) << toolCtr << ".) "
 		    << std::resetiosflags(std::ios_base::right) << std::setw(36) << std::setfill('.')
-		    << std::setiosflags(std::ios_base::left) << thisIPFUnifiedBaseTool->type() << std::setfill('.')
-                    << thisIPFUnifiedBaseTool->name() << std::setfill(' '));
+		    << std::setiosflags(std::ios_base::left) << thisIPFBaseTool->type() << std::setfill('.')
+                    << thisIPFBaseTool->name() << std::setfill(' '));
   }
   ATH_MSG_VERBOSE(" ");
   ATH_MSG_VERBOSE("------------------------------------");

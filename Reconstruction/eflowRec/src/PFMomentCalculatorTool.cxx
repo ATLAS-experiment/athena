@@ -2,19 +2,19 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "PFUnifiedMomentCalculatorTool.h"
+#include "PFMomentCalculatorTool.h"
 #include "PFData.h"
 #include "eflowCaloObject.h"
 #include "eflowRecCluster.h"
 
 #include "xAODCaloEvent/CaloClusterKineHelper.h"
 
-PFUnifiedMomentCalculatorTool::PFUnifiedMomentCalculatorTool(const std::string& type,const std::string& name,const IInterface* parent) :
+PFMomentCalculatorTool::PFMomentCalculatorTool(const std::string& type,const std::string& name,const IInterface* parent) :
   base_class( type, name, parent)
 {
 }
 
-StatusCode PFUnifiedMomentCalculatorTool::initialize(){
+StatusCode PFMomentCalculatorTool::initialize(){
 
   /* Retrieve the cluster collection tool */
   ATH_CHECK(m_clusterCollectionTool.retrieve());
@@ -29,7 +29,7 @@ StatusCode PFUnifiedMomentCalculatorTool::initialize(){
   return StatusCode::SUCCESS;
 }
 
-StatusCode PFUnifiedMomentCalculatorTool::processPFlowData(const EventContext& ctx, PFData &thePFData) const {
+StatusCode PFMomentCalculatorTool::processPFlowData(const EventContext& ctx, PFData &thePFData) const {
 
   if (!thePFData.caloObjects) {
     ATH_MSG_ERROR("PFData::caloObjects is null; caller must set it before invoking the moment calculator tool");

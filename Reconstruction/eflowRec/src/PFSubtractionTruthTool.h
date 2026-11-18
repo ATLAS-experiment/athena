@@ -2,21 +2,21 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFUNIFIEDSUBTRACTIONONLYTRUTHTOOL_H
-#define PFUNIFIEDSUBTRACTIONONLYTRUTHTOOL_H
+#ifndef PFSUBTRACTIONTRUTHTOOL_H
+#define PFSUBTRACTIONTRUTHTOOL_H
 
-#include "PFUnifiedSubtractionOnlyTool.h"
+#include "PFSubtractionTool.h"
 #include "PFSimulateTruthShowerTool.h"
 
 class eflowCaloObject;
 struct PFData;
 
 
-class PFUnifiedSubtractionOnlyTruthTool : public PFUnifiedSubtractionOnlyTool{
+class PFSubtractionTruthTool : public PFSubtractionTool{
 
 public:
-  using PFUnifiedSubtractionOnlyTool::PFUnifiedSubtractionOnlyTool;
-  ~PFUnifiedSubtractionOnlyTruthTool();
+  using PFSubtractionTool::PFSubtractionTool;
+  ~PFSubtractionTruthTool();
 
   virtual StatusCode initialize() override;
   virtual StatusCode processPFlowData(const EventContext& ctx, PFData &thePFData) const override;

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "PFUnifiedSubtractionOnlyTruthTool.h"
+#include "PFSubtractionTruthTool.h"
 #include "PFData.h"
 
 #include "eflowCaloObject.h"
@@ -19,11 +19,11 @@
 
 using namespace eflowSubtract;
 
-PFUnifiedSubtractionOnlyTruthTool::~PFUnifiedSubtractionOnlyTruthTool()
+PFSubtractionTruthTool::~PFSubtractionTruthTool()
 = default;
 
 
-StatusCode PFUnifiedSubtractionOnlyTruthTool::initialize()
+StatusCode PFSubtractionTruthTool::initialize()
 {
 
   ATH_CHECK(m_theEOverPTool.retrieve());
@@ -52,7 +52,7 @@ StatusCode PFUnifiedSubtractionOnlyTruthTool::initialize()
 
 }
 
-StatusCode PFUnifiedSubtractionOnlyTruthTool::processPFlowData(
+StatusCode PFSubtractionTruthTool::processPFlowData(
   const EventContext& ctx,
   PFData &data
 ) const
@@ -67,7 +67,7 @@ StatusCode PFUnifiedSubtractionOnlyTruthTool::processPFlowData(
 }
 
 
-void PFUnifiedSubtractionOnlyTruthTool::performSubtraction(const EventContext& ctx, const unsigned int& startingPoint, const unsigned int& nCaloObj, PFData &data ) const{
+void PFSubtractionTruthTool::performSubtraction(const EventContext& ctx, const unsigned int& startingPoint, const unsigned int& nCaloObj, PFData &data ) const{
 
   //starting point is defined in the base class API and used in other derived API.
   //It is not used here, so we silence compiler warnings about it being unused
@@ -101,7 +101,7 @@ void PFUnifiedSubtractionOnlyTruthTool::performSubtraction(const EventContext& c
 
 }
 
-void PFUnifiedSubtractionOnlyTruthTool::performSubtraction(eflowCaloObject& thisEflowCaloObject) const{
+void PFSubtractionTruthTool::performSubtraction(eflowCaloObject& thisEflowCaloObject) const{
 
   for (unsigned iTrack = 0; iTrack < thisEflowCaloObject.nTracks(); ++iTrack){
     eflowRecTrack *thisEfRecTrack = thisEflowCaloObject.efRecTrack(iTrack);

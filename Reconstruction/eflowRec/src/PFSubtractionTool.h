@@ -2,13 +2,13 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFUNIFIEDSUBTRACTIONONLYTOOL_H
-#define PFUNIFIEDSUBTRACTIONONLYTOOL_H
+#ifndef PFSUBTRACTIONTOOL_H
+#define PFSUBTRACTIONTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 
-#include "IPFUnifiedBaseTool.h"
+#include "IPFBaseTool.h"
 #include "PFEnergyPredictorTool.h"
 #include "PFMatchPositions.h"
 #include "PFSubtractionStatusSetter.h"
@@ -24,12 +24,12 @@ class IEFlowCellEOverPTool;
 struct PFData;
 
 
-class PFUnifiedSubtractionOnlyTool : public extends<AthAlgTool, IPFUnifiedBaseTool>
+class PFSubtractionTool : public extends<AthAlgTool, IPFBaseTool>
 {
 
 public:
-  PFUnifiedSubtractionOnlyTool(const std::string &type, const std::string &name, const IInterface *parent);
-  ~PFUnifiedSubtractionOnlyTool();
+  PFSubtractionTool(const std::string &type, const std::string &name, const IInterface *parent);
+  ~PFSubtractionTool();
 
   virtual StatusCode initialize() override;
   virtual StatusCode processPFlowData(

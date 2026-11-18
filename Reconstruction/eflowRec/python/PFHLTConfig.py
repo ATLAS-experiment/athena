@@ -242,9 +242,9 @@ def getHLTPFMomentCalculatorTool(inputFlags):
     else:
         MomentsNames = ["CENTER_MAG"]
 
-    from eflowRec.PFCfg import getPFUnifiedMomentCalculatorTool
+    from eflowRec.PFCfg import getPFMomentCalculatorTool
     PFMomentCalculatorTool = result.popToolsAndMerge(
-        getPFUnifiedMomentCalculatorTool(inputFlags, MomentsNames))
+        getPFMomentCalculatorTool(inputFlags, MomentsNames))
     result.setPrivateTools(PFMomentCalculatorTool)
     return result
 
@@ -288,29 +288,29 @@ def PFCfg(inputFlags, tracktype="", clustersin=None, calclustersin=None, tracksi
     monTool_matching.HistPath = 'PFTrackClusterMatchingTool_1'
     PFTrackClusterMatchingTool_1.MonTool_ClusterMatching = monTool_matching
 
-    from eflowRec.PFCfg import (getPFUnifiedCellLevelMatchingTool,
-                                getPFUnifiedCellLevelSubtractionOnlyTool,
-                                getPFUnifiedRecoverSplitShowersMatchingTool,
-                                getPFUnifiedRecoverSplitShowersSubtractionOnlyTool)
+    from eflowRec.PFCfg import (getPFCellLevelMatchingTool,
+                                getPFCellLevelSubtractionTool,
+                                getPFRecoverSplitShowersMatchingTool,
+                                getPFRecoverSplitShowersSubtractionTool)
 
-    cellMatchingTool = getPFUnifiedCellLevelMatchingTool(
+    cellMatchingTool = getPFCellLevelMatchingTool(
         inputFlags,
-        "PFUnifiedCellLevelMatchingTool",
+        "PFCellLevelMatchingTool",
     )
     cellMatchingTool.PFTrackClusterMatchingTool = PFTrackClusterMatchingTool_1
 
-    recoverSplitShowersMatchingTool = getPFUnifiedRecoverSplitShowersMatchingTool(
+    recoverSplitShowersMatchingTool = getPFRecoverSplitShowersMatchingTool(
         inputFlags,
-        "PFUnifiedRecoverSplitShowersMatchingTool",
+        "PFRecoverSplitShowersMatchingTool",
     )
     recoverSplitShowersMatchingTool.PFTrackClusterMatchingTool = PFTrackClusterMatchingTool_1
 
     # the split-shower stages are run unconditionally
-    unifiedBaseTools = [
+    BaseTools = [
         cellMatchingTool,
-        getPFUnifiedCellLevelSubtractionOnlyTool(inputFlags, "PFUnifiedCellLevelSubtractionOnlyTool"),
+        getPFCellLevelSubtractionTool(inputFlags, "PFCellLevelSubtractionTool"),
         recoverSplitShowersMatchingTool,
-        getPFUnifiedRecoverSplitShowersSubtractionOnlyTool(inputFlags, "PFUnifiedRecoverSplitShowersSubtractionOnlyTool"),
+        getPFRecoverSplitShowersSubtractionTool(inputFlags, "PFRecoverSplitShowersSubtractionTool"),
         result.popToolsAndMerge(getHLTPFMomentCalculatorTool(inputFlags)),
     ]
 
@@ -328,7 +328,7 @@ def PFCfg(inputFlags, tracktype="", clustersin=None, calclustersin=None, tracksi
             eflowRecClustersOutputName = f"eflowRecClusters_{tracktype}",
             PFCaloClustersOutputName = f"PFCaloCluster_{tracktype}",
             eflowCaloObjectsOutputName = f"eflowCaloObjects_{tracktype}",
-            UnifiedBaseTools = unifiedBaseTools,
+            BaseTools = BaseTools,
         ),
         seqname
     )
