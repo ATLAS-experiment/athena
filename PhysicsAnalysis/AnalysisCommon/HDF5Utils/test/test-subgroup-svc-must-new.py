@@ -23,6 +23,9 @@ svc_dup.parent = root_svc
 svc_dup.mustBeNew = True
 acc.addService(svc_dup, create=True)
 
-sc = acc.run(0)
-# Pass the ctest when the run fails (as expected):
-sys.exit(sc.isSuccess())
+try:
+   acc.run(0)
+except SystemExit:
+   sys.exit(0)  # expect failure
+else:
+   sys.exit(1)

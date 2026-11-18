@@ -1107,8 +1107,15 @@ class ComponentAccumulator(AccumulatorCachable):
 
         return appPropsToSet, mspPropsToSet, bshPropsToSet
 
-    def run(self,maxEvents=None):
+    def run(self, maxEvents=None):
+        """Run the application. Returns StatusCode.SUCCESS or raises SystemExit on failure.
+
+        maxEvents: number of events to process (if different from flags)
+        """
+        from AthenaCommon import ExitCodes
+        from Gaudi.Main import BootstrapHelper
         from os import environ
+
         outpklfile = environ.get("PICKLECAFILE", None)
         if outpklfile is not None:
             if outpklfile:  # non-empty string
@@ -1118,7 +1125,6 @@ class ComponentAccumulator(AccumulatorCachable):
             else:           # empty string, just exit
                 self.wasMerged()
                 self._msg.info("Exiting after configuration stage")
-            from Gaudi.Main import BootstrapHelper
             return BootstrapHelper.StatusCode(True)
 
         # Make sure python output is flushed before triggering output from Gaudi.
@@ -1156,19 +1162,15 @@ class ComponentAccumulator(AccumulatorCachable):
 
         if (self._debugStage.value == "init"):
             hookDebugger()
-        sc = app.initialize()
-        if not sc.isSuccess():
-            self._msg.error("Failed to initialize AppMgr")
-            return sc
 
-        sc = app.start()
-        if not sc.isSuccess():
-            self._msg.error("Failed to start AppMgr")
-            return sc
+        if app.initialize().isFailure():
+            raise SystemExit(ExitCodes.INI_ALG_FAILURE)
+
+        if app.start().isFailure():
+            raise SystemExit(ExitCodes.INI_ALG_FAILURE)
 
         if (self._debugStage.value=="exec"):
             hookDebugger()
-
 
         if self.interactive == 'run':
             printInteractiveMsg_run()
@@ -1176,26 +1178,22 @@ class ComponentAccumulator(AccumulatorCachable):
             sg=py_svc("StoreGateSvc/StoreGateSvc")
             startInteractive(locals())
         else:
-            sc = app.run(maxEvents)
-            if not sc.isSuccess():
-                self._msg.error("Failure running application")
-                return sc
+            if app.run(maxEvents).isFailure():
+                raise SystemExit(ExitCodes.EXE_ALG_FAILURE)
 
-        scStop=app.stop()
-        if not scStop.isSuccess():
-            self._msg.error("Failed to stop AppMgr")
-            return scStop
+        if app.stop().isFailure():
+            raise SystemExit(ExitCodes.FIN_ALG_FAILURE)
 
         if (self._debugStage.value == "fini"):
             hookDebugger()
             
-        scFin=app.finalize()
-        if not scFin.isSuccess():
-            self._msg.error("Failed to finalize AppMgr")
-            return scFin
+        if app.finalize().isFailure():
+            raise SystemExit(ExitCodes.FIN_ALG_FAILURE)
 
-        sc1 = app.terminate()
-        return sc1
+        if app.terminate().isFailure():
+            raise SystemExit(ExitCodes.FIN_ALG_FAILURE)
+
+        return BootstrapHelper.StatusCode(True)  # SUCCESS
 
     def foreach_component(self, path):
         """Utility to set properties of components using wildcards.

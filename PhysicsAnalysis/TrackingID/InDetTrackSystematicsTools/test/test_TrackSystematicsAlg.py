@@ -53,8 +53,12 @@ def main():
             **kwargs,
         ))
 
-    sc = acc.run(args.events)
-    sys.exit(sc.isSuccess() if args.unknown_syst else sc.isFailure())
+    try:
+        acc.run(args.events)
+    except SystemExit:
+        sys.exit(0 if args.unknown_syst else 1)
+    else:
+        sys.exit(1 if args.unknown_syst else 0)
 
 
 if __name__ == '__main__':

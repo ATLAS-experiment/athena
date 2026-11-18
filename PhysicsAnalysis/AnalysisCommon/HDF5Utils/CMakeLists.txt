@@ -72,9 +72,9 @@ if (NOT XAOD_STANDALONE)
     POST_EXEC_SCRIPT test-subgroup-svc-output )
   atlas_add_test( test_subgroup_svc_must_new
     SCRIPT test-subgroup-svc-must-new.py
-    # Expected errors.
-    LOG_IGNORE_PATTERN "subgroup .grp. already exists|Service: SvcDup|initialize AppMgr"
-    POST_EXEC_SCRIPT noerror.sh )
+    # Expected error.
+    LOG_SELECT_PATTERN "subgroup 'grp' already exists"
+    LOG_IGNORE_PATTERN "ServiceManager" )
 endif()
 
 # unit tests
