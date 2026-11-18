@@ -285,6 +285,7 @@ class EgammaCalibrationAndSmearingTool
   int m_useS12Correction;
   int m_useSaccCorrection;
   bool m_decorateEmva;
+  bool m_startFromEmva;
 
   // 2D histrogram (eta,phi) for a correction to cope with calo distortion
   // (sagging)
@@ -468,6 +469,7 @@ public:
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> ptAcc {*this, "pt"};
     columnar::EgammaDecorator<float> ptOutDec {*this, "ptOut", {.replacesColumn = "pt"}};
     columnar::EgammaDecorator<float> decEmva;
+    columnar::EgammaAccessor<float> emvaAcc;
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> etaAcc {*this, "eta"};
     columnar::EgammaAccessor<columnar::RetypeColumn<double,float>> phiAcc {*this, "phi"};
     // test GNN

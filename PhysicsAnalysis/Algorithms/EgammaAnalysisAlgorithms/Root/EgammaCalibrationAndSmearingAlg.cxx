@@ -45,8 +45,7 @@ namespace CP
       xAOD::EgammaContainer *egammas = nullptr;
       ANA_CHECK (m_egammaHandle.getCopy (egammas, sys, ctx));
 
-      if (sys.empty() && m_skipNominal.value())
-        continue;
+      const bool skipCorrection = sys.empty() && m_skipNominal.value();
 
       if (!m_noToolSystematics.value())
         ANA_CHECK (m_calibrationAndSmearingTool->applySystematicVariation (sys));
@@ -54,7 +53,10 @@ namespace CP
       {
         if (m_preselection.getBool (*egamma, sys))
         {
-          ANA_CHECK_CORRECTION (m_outOfValidity, *egamma, m_calibrationAndSmearingTool->applyCorrection (*egamma));
+          if (!skipCorrection)
+          {
+            ANA_CHECK_CORRECTION (m_outOfValidity, *egamma, m_calibrationAndSmearingTool->applyCorrection (*egamma));
+          }
           float caloClusterEnergyReso = m_calibrationAndSmearingTool->getResolution (*egamma);
           m_caloClusterEnergyResoHandle.set(*egamma, caloClusterEnergyReso, sys);
         } else {
