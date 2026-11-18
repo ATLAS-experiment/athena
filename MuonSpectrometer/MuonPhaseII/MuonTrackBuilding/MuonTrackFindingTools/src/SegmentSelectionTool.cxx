@@ -4,6 +4,7 @@
 #include "SegmentSelectionTool.h"
 
 #include "MuonTrackEvent/ExpandedSector.h"
+#include "Acts/Definitions/Units.hpp"
 
 namespace {
     using namespace Muon::MuonStationIndex;
@@ -91,32 +92,48 @@ namespace MuonR4{
            segA.etaIndex() * segB.etaIndex() < 0) {
             return false;
         }
-        /** If both segments don't have phi information, then they may be compatible */
-        if (!segA.nPhiLayers() && !segB.nPhiLayers()) {
-            return true;
-        } 
-        /** If one segment has phi information and the other doesn't then just check
-         *  whether it's possible that the segment with phi is also in the same sector as the other */
-        else if (segA.nPhiLayers() && !segB.nPhiLayers()) {
-            if (!ExpandedSector{segA.position().phi()}.isNeighbour(
-                 ExpandedSector{static_cast<unsigned>(segB.sector()), ExpandedSector::SectorProjector::center})){
-                return false;
-            }
-        } else if (!segA.nPhiLayers() && segB.nPhiLayers()) {
-            if (!ExpandedSector{segB.position().phi()}.isNeighbour(
-                 ExpandedSector{static_cast<unsigned>(segA.sector()), ExpandedSector::SectorProjector::center})){
-                return false;
-            }
-        } 
-        /** Both segments have phi information. Ensure that their phi is within 5 degrees */
-        else {        
-            /// Accept only segments that are 5 degree apart
-            const double dPhi = std::abs(segA.position().deltaPhi(segB.position()));
-            if (dPhi > 5. * Gaudi::Units::deg) {
-                return false;
+        if (segA.nPhiLayers() || segB.nPhiLayers()) {
+            /** If one segment has phi information and the other doesn't then just check
+            *  whether it's possible that the segment with phi is also in the same sector as the other */
+            if (!segB.nPhiLayers()) {
+                if (!ExpandedSector{segA.position().phi()}.isNeighbour(
+                    ExpandedSector{static_cast<unsigned>(segB.sector()), ExpandedSector::SectorProjector::center})){
+                    return false;
+                }
+            } else if (!segA.nPhiLayers()) {
+                if (!ExpandedSector{segB.position().phi()}.isNeighbour(
+                    ExpandedSector{static_cast<unsigned>(segA.sector()), ExpandedSector::SectorProjector::center})){
+                    return false;
+                }
+            } else {        
+                /** Both segments have phi information. Ensure that their phi is within 5 degrees */
+                const double dPhi = std::abs(segA.position().deltaPhi(segB.position()));
+                if (dPhi > 5. * Gaudi::Units::deg) {
+                    return false;
+                }
             }
         }
-        return true;
+        using namespace Acts::UnitLiterals;
+        /** One toroid kick between the two segments: in the bending plane the chord
+         *  between the segments must lie between their directions. If it doesn't, 
+         *  the smaller of the two deviations is the violation */
+        const xAOD::MuonSegment& a = segA.position().mag() < segB.position().mag() ? segA : segB;
+        const xAOD::MuonSegment& b = &a == &segA ? segB : segA;
+        const Amg::Vector3D eR{Acts::makeDirectionFromPhiTheta(a.position().phi(), 90._degree)};
+        const Amg::Vector3D chord{b.position() - a.position()};
+        auto angle = [&eR](const Amg::Vector3D& v) { 
+            return std::atan2(v.dot(eR), v.z()); 
+        };
+        const double thetaA {angle(a.direction())};
+        const double thetaB {angle(b.direction())};
+        const double thetaC {angle(chord)};
+        const double dA {std::remainder(thetaC - thetaA, 360._degree)};
+        const double dB {std::remainder(thetaB - thetaC, 360._degree)};
+        if (dA * dB >= 0.) {
+            return true;
+        }
+        const double violation {std::min(std::abs(dA), std::abs(dB))};
+        return violation < m_maxKickViolation;
     }
 
 }

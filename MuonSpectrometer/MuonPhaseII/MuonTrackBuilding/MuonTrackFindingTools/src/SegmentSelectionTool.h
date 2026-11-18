@@ -53,6 +53,8 @@ namespace MuonR4 {
             Gaudi::Property<unsigned> m_nTgcPhiSeedHitCutEI{this, "minTgcPhiSeedHitsEI", 1};
             /** @brief Minimum number of Tgc phi hits in EM to consider the segment for seeding */
             Gaudi::Property<unsigned> m_nTgcPhiSeedHitCutEM{this, "minTgcPhiSeedHitsEM", 2};
+            Gaudi::Property<double> m_maxKickViolation{this, "MaxKickViolation", 50. * Gaudi::Units::mrad,
+                "Maximum angle by which the chord between two segments may lie outside their directions (kick between them)"};
     };
 }
 #endif
