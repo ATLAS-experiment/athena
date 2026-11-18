@@ -365,7 +365,7 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
         return StatusCode::FAILURE;
       }
 
-      std::string trigFold = m_useGNTau ? "GNTau" : "RNN";
+      std::string trigFold = m_useGNTau ? "GNTau" : "RNN_R22";
 
       // Warning message for using GNTau offline ID on Run2
       if(m_useGNTau && m_sCampaign=="mc20")
@@ -387,8 +387,14 @@ StatusCode TauEfficiencyCorrectionsTool::initializeTools_2025_prerec()
             return StatusCode::FAILURE;
           }
 	} else if(m_sCampaign=="mc23d"){
-          if (m_sTriggerName.value().find("mediumRNN_tracktwoMVA") != std::string::npos) {
-            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/"+trigFold+"/Trigger_TrueHadTau_data2023"+GetTriggerSFMeasurementString()+m_sTriggerName+".root";
+          
+	  // for tau20 the SFs exists only for RNN and not for the v1 version     	
+          if (m_sTriggerName.value().find("tau20") != std::string::npos) {
+	    m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/RNN_R22/Trigger_TrueHadTau_data2023"+GetTriggerSFMeasurementString()+m_sTriggerName+".root"; 	  
+	  }
+	  else if (m_sTriggerName.value().find("mediumRNN_tracktwoMVA") != std::string::npos) {
+            std::string version = m_useGNTau ? "" : "_v1";		  
+            m_sInputFilePathTriggerHadTau = sDirectory+"Trigger/"+trigFold+"/Trigger_TrueHadTau_data2023"+GetTriggerSFMeasurementString()+m_sTriggerName+version+".root";
           }
           else {
             ATH_MSG_ERROR("Trigger " << m_sTriggerName << " is not supported for " << m_sCampaign << " campaign. Please fix \"TriggerName\" property. In case of doubt please consult with TauTrigger coordinators");
