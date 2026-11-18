@@ -6,6 +6,8 @@
 #include "FlavorTagInference/SaltModelTriton.h"
 #include "PathResolver/PathResolver.h"
 
+#include <algorithm>
+
 namespace FlavorTagInference {
 
   std::shared_ptr<const GNN> NNSharingTritonSvc::get(
@@ -27,13 +29,25 @@ namespace FlavorTagInference {
       ATH_MSG_INFO("building " << nn_name << " from onnx file to run with Triton");
       //using namespace FlavorTagInference;
       std::string fullPathToOnnxFile = PathResolverFindCalibFile(nn_name);
+      const auto& batched = m_tritonBatchedModels.value();
+      const bool isBatched =
+        std::find(batched.begin(), batched.end(), it->second) != batched.end();
+      if (isBatched) {
+        std::string padding;
+        for (const auto& [input, n]: m_tritonPaddedInputs.value()) {
+          padding += " " + input + "=" + std::to_string(n);
+        }
+        ATH_MSG_INFO(nn_name << " -> " << it->second << " as a batched model, padding:" << padding);
+      }
       auto saltSharedTriton = std::make_shared<const SaltModelTriton>(fullPathToOnnxFile
 								    , it->second
 								    , m_tritonTimeout
 								    , m_tritonPort
 								    , m_tritonUrl
 								    , m_tritonUseSsl
-								    , m_tritonBearer);
+								    , m_tritonBearer
+								    , isBatched ? m_tritonPaddedInputs.value() : std::map<std::string, int>{}
+								    , isBatched ? m_tritonOutputRenames.value() : std::map<std::string, std::string>{});
       ISaltModelPtr saltShared = saltSharedTriton;
       nn = std::make_shared<const GNN>(saltShared, opts);
     }

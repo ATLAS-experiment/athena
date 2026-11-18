@@ -12,11 +12,15 @@
 #include <tuple>
 #include <set>
 #include <memory>
+#include <algorithm>
+#include <deque>
 
 // DType traits for Triton
 template <typename T> struct TritonDType;
 template <> struct TritonDType<float>    { static constexpr const char* value = "FP32"; };
 template <> struct TritonDType<int64_t>  { static constexpr const char* value = "INT64"; };
+// boolean masks are sent as one byte per element
+template <> struct TritonDType<uint8_t>  { static constexpr const char* value = "BOOL"; };
 
 template <typename T>
 bool prepareInput(const std::string& name,
@@ -82,13 +86,17 @@ namespace FlavorTagInference {
 				   , int port
 				   , const std::string& url
 				   , bool useSSL
-				   , const std::string& bearer)
+				   , const std::string& bearer
+				   , const std::map<std::string, int>& padded_inputs
+				   , const std::map<std::string, std::string>& output_renames)
     : m_model_name(model_name)
     , m_clientTimeout(client_timeout)
     , m_port(port)
     , m_url(url)
     , m_useSSL(useSSL)
     , m_bearer(bearer)
+    , m_paddedInputs(padded_inputs)
+    , m_outputRenames(output_renames)
     //load the onnx model to memory using the path m_path_to_onnx
   {
     std::unique_ptr< Ort::Env > env = std::make_unique<Ort::Env>(ORT_LOGGING_LEVEL_FATAL, "");
@@ -214,13 +222,45 @@ namespace FlavorTagInference {
 
     // Create tensor for the input data
     std::vector<std::shared_ptr<tc::InferInput> > inputs_;
-    inputs_.reserve(gnn_inputs.size());
+    inputs_.reserve(2 * gnn_inputs.size());
+
+    // Padded copies must outlive the Infer() call: InferInput does not copy.
+    // std::deque keeps element addresses stable as it grows.
+    std::deque<std::vector<float>> paddedData;
+    std::deque<std::vector<uint8_t>> maskData;
 
     for (auto& [inputName, inputInfo]: gnn_inputs) {
       const std::vector<float>& inputData  = inputInfo.first; // ? good name ?
       const std::vector<int64_t>& inputShape = inputInfo.second;
-      if(!prepareInput<float>(inputName, inputShape, inputData, inputs_)) {
-	throw std::runtime_error("Failed to prepare input for inference"); // ? more informative error message ?
+      auto pad = m_paddedInputs.find(inputName);
+      if (pad == m_paddedInputs.end()) {
+        // Unpadded input. In batched mode the global jet input is already [1, F],
+        // which doubles as a batch of one.
+        if(!prepareInput<float>(inputName, inputShape, inputData, inputs_)) {
+	  throw std::runtime_error("Failed to prepare input for inference"); // ? more informative error message ?
+        }
+        continue;
+      }
+      // Sequence input [n, F] -> [1, N, F] zero padded, plus mask [1, N]
+      if (inputShape.size() != 2) {
+        throw std::runtime_error("Expected a [n_objects, n_features] input for " + inputName);
+      }
+      const int64_t nObj = inputShape[0];
+      const int64_t nFeat = inputShape[1];
+      const int64_t nPad = pad->second;
+      const int64_t nKeep = std::min(nObj, nPad);
+      if (nObj > nPad && m_nTruncated++ == 0) {
+        std::cerr << "SaltModelTriton WARNING: " << inputName << " has " << nObj
+                  << " objects, truncated to " << nPad << " for " << m_model_name
+                  << " (reported once per model)" << std::endl;
+      }
+      std::vector<float>& padded = paddedData.emplace_back(nPad * nFeat, 0.f);
+      std::copy_n(inputData.begin(), nKeep * nFeat, padded.begin());
+      std::vector<uint8_t>& mask = maskData.emplace_back(nPad, uint8_t{1});
+      std::fill_n(mask.begin(), nKeep, uint8_t{0});
+      if(!prepareInput<float>(inputName, {1, nPad, nFeat}, padded, inputs_) ||
+         !prepareInput<uint8_t>(inputName + "_mask", {1, nPad}, mask, inputs_)) {
+	throw std::runtime_error("Failed to prepare padded input " + inputName);
       }
     }
 
@@ -259,18 +299,22 @@ namespace FlavorTagInference {
     std::shared_ptr<tc::InferResult> results(rawResultPtr);
     for (size_t node_idx = 0; node_idx < m_output_nodes.size(); ++node_idx) {
       const auto& output_node = m_output_nodes[node_idx];
+      // name of this output on the Triton model (differs for some batched exports)
+      auto renamed = m_outputRenames.find(output_node.name);
+      const std::string& tritonName =
+        renamed == m_outputRenames.end() ? output_node.name : renamed->second;
       switch(output_node.type) {
       case SaltModelOutput::OutputType::VECFLOAT:
 	{
 	  std::vector<float> outputVecFloat;
-	  extractOutput<float>(output_node.name, results, outputVecFloat);
+	  extractOutput<float>(tritonName, results, outputVecFloat);
 	  output.vecFloat[output_node.name] = std::move(outputVecFloat);
 	}
 	break;
       case SaltModelOutput::OutputType::FLOAT:
 	{
 	  std::vector<float> outputFloat;
-	  extractOutput<float>(output_node.name, results, outputFloat);
+	  extractOutput<float>(tritonName, results, outputFloat);
 	  if(outputFloat.size()==1) {
 	    output.singleFloat[output_node.name] = outputFloat[0];
 	  }
@@ -282,7 +326,7 @@ namespace FlavorTagInference {
       case SaltModelOutput::OutputType::VECCHAR:
 	{
 	  std::vector<int8_t> outputVecInt;
-	  extractOutput<int8_t>(output_node.name, results, outputVecInt);
+	  extractOutput<int8_t>(tritonName, results, outputVecInt);
 	  // convert int8_t vector to char vector
 	  std::vector<char> outputVecChar(outputVecInt.begin(), outputVecInt.end());
 	  output.vecChar[output_node.name] = std::move(outputVecChar);

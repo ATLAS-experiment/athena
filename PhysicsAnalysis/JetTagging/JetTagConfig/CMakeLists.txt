@@ -13,3 +13,11 @@ atlas_install_scripts(
 atlas_add_test(FTagNamesTest
   SCRIPT ftag-test-tagger-names
   POST_EXEC_SCRIPT noerror.sh )
+
+# The opt-in tagger test imports BTagging and DerivationFrameworkFlavourTag,
+# which analysis releases do not build.
+if( NOT XAOD_ANALYSIS )
+  atlas_add_test(FTagOptInTaggersTest
+    SCRIPT test/ftag-test-opt-in-taggers
+    POST_EXEC_SCRIPT noerror.sh )
+endif()

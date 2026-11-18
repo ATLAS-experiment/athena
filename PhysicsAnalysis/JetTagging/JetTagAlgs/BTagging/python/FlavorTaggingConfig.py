@@ -63,7 +63,8 @@ def _supportDecorations(nns, jetTrackAssociator: str, fast: bool) -> dict:
     decorations = set() if fast else {'SecVtx'}
     for networks in nns:
         dirname = str(Path(networks['folds'][0]).parent)
-        modset = getDependencySet(resolveTaggerName(dirname, networks))
+        modset = getDependencySet(
+            resolveTaggerName(dirname, networks), networks.get('dependencies'))
         decorations.add(
             jetTrackAssociator if networks.get('cone_association')
             else 'GhostTrack'
@@ -150,6 +151,10 @@ def _FlavorTaggingChainCfg(
     algorithms (track association, secondary vertexing, tagger
     dependencies) run on supportCollection when given, e.g. the source
     collection of a shallow copy which shares its aux store.
+
+    Besides 'folds', the networks may carry 'tagger_name', 'dependencies'
+    (override for getDependencySet/TaggerDependenciesCfg, for models not
+    in the registry) and 'flip'.
     """
 
     support = supportCollection or JetCollection
@@ -198,8 +203,10 @@ def _FlavorTaggingChainCfg(
         if is_calibarea and is_bjr10:
             modset = set()
         else:
-            acc.merge(TaggerDependenciesCfg(flags, tagger_name, support))
-            modset = getDependencySet(tagger_name)
+            deps = networks.get('dependencies')
+            acc.merge(TaggerDependenciesCfg(
+                flags, tagger_name, support, dependencies=deps))
+            modset = getDependencySet(tagger_name, deps)
 
         args = dict(
              flags=flags,
@@ -244,9 +251,17 @@ def _FlavorTaggingChainCfg(
             args['tag_requirements'] = {'nonzeroTracks'}
         acc.merge(MultifoldGNNCfg(**args))
 
-        # add flip taggers
-        if flags.BTagging.RunFlipTaggers and networks.get('flip', True):
-            for flip_config in getFlipConfigs(dirname):
+        # add flip taggers. Networks without a 'flip' key are flipped
+        # whenever their path is flippable, an explicit flip=True on a
+        # path we can't flip is a configuration error.
+        flip_requested = networks.get('flip', True)
+        if flags.BTagging.RunFlipTaggers and flip_requested:
+            flip_configs = getFlipConfigs(dirname)
+            if not flip_configs and networks.get('flip') is True:
+                raise ValueError(
+                    f'{tagger_name}: flip requested but no flip configuration'
+                    f' is known for {dirname}, see getFlipConfigs')
+            for flip_config in flip_configs:
                 acc.merge(MultifoldGNNCfg(**args, FlipConfig=flip_config))
 
     return acc
