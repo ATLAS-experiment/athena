@@ -14,6 +14,7 @@
 #include <ColumnarCore/ColumnInfoHelpers.h>
 #include <ColumnarCore/ColumnarToolDataArray.h>
 #include <ColumnarInterfaces/ColumnInfo.h>
+#include <ColumnarInterfaces/ColumnInfoHelpers.h>
 
 //
 // method implementations
@@ -32,14 +33,20 @@ namespace columnar
 
       setContainerUserName (eventContextCIName, eventRangeColumnName);
       m_eventsData = std::make_unique<ColumnAccessorDataArray> (&m_eventsIndex, &m_eventsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
-      addColumn (std::string (eventContextCIName), m_eventsData.get(), {.isOffset = true});
+      ColumnInfo eventsInfo;
+      eventsInfo.isOffset = true;
+      setColumnType<ColumnarOffsetType> (eventsInfo);
+      addColumn (std::string (eventContextCIName), m_eventsData.get(), std::move (eventsInfo));
     } else
     {
       m_data = val_parent->m_data;
       m_data->sharedTools.push_back (this);
 
       m_eventsData = std::make_unique<ColumnAccessorDataArray> (&m_eventsIndex, &m_eventsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
-      addColumn (std::string (EventContextDef::idName), m_eventsData.get(), {.isOffset = true});
+      ColumnInfo eventsInfo;
+      eventsInfo.isOffset = true;
+      setColumnType<ColumnarOffsetType> (eventsInfo);
+      addColumn (std::string (EventContextDef::idName), m_eventsData.get(), std::move (eventsInfo));
     }
   }
 
@@ -255,7 +262,10 @@ namespace columnar
   void ColumnarToolArray ::
   addColumn (const std::string& name, ColumnAccessorDataArray *accessorData, ColumnInfo&& info)
   {
-    info.type = accessorData->type;
+    if (info.type == nullptr || info.sizeOfType == 0u)
+      throw std::logic_error ("missing type information for column: " + name);
+    if (*info.type != *accessorData->type)
+      throw std::logic_error ("inconsistent type information for column: " + name);
     info.accessMode = accessorData->accessMode;
 
     m_data->columns[name].addAccessor (name, info, accessorData);
@@ -332,6 +342,8 @@ namespace columnar
         m_info.accessMode = ColumnAccessMode::output;
       if (!val_info.isOptional)
         m_info.isOptional = false;
+      // for the type matching the strictest accessor wins
+      m_info.typeCategory = mergeColumnTypeCategory (m_info.typeCategory, val_info.typeCategory);
       if (val_info.offsetName != m_info.offsetName)
         throw std::runtime_error ("inconsistent offset map for column: " + name);
     }

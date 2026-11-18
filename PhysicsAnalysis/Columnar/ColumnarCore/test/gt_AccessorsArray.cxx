@@ -25,6 +25,7 @@ ATLAS_NO_CHECK_FILE_THREAD_SAFETY;
 #include <ColumnarJet/JetDef.h>
 #include <ColumnarEventInfo/EventInfoDef.h>
 #include <ColumnarCore/ParticleDef.h>
+#include <ColumnarCore/SelectionColumn.h>
 
 //
 // method implementations
@@ -136,6 +137,78 @@ namespace columnar
       EXPECT_EQ (objectRange.beginIndex(), 1);
       EXPECT_EQ (objectRange.endIndex(), 6);
     }
+  }
+
+
+  TEST (AccessorTest, selectionAccessor)
+  {
+    ColumnarTool<> tool;
+    ParticleAccessor<ObjectColumn> objectAccessor {tool, "particles"};
+    ParticleAccessor<SelectionColumn> selAccessor {tool, preselectionName};
+    ASSERT_SUCCESS (tool.initializeColumns());
+    {
+      auto columns = tool.getColumnInfo();
+      EXPECT_EQ (columns.size(), 3);
+      auto& column = columns[2];
+      EXPECT_EQ (column.name, "particles.preselection");
+      EXPECT_EQ (column.type, &typeid (char));
+      EXPECT_EQ (column.accessMode, ColumnAccessMode::input);
+      EXPECT_EQ (column.offsetName, "particles");
+    }
+    tool.setColumnIndex ("particles", 1);
+    tool.setColumnIndex ("particles.preselection", 2);
+    std::vector<void*> data (3, nullptr);
+    std::vector<ColumnarOffsetType> particles = {0, 1, 4};
+    data[1] = particles.data();
+    std::vector<char> sel = {1, 0, 1, 2};
+    data[2] = sel.data();
+
+    ParticleId id0 {data.data(), 0};
+    ParticleId id1 {data.data(), 1};
+    ParticleId id3 {data.data(), 3};
+    static_assert (std::is_same_v<decltype(selAccessor(id0)),bool>, "selection columns should be read as bool");
+    EXPECT_TRUE (selAccessor.isAvailable (id0));
+    EXPECT_TRUE (selAccessor (id0));
+    EXPECT_FALSE (selAccessor (id1));
+    EXPECT_TRUE (selAccessor (id3));
+
+    ParticleRange range {data.data(), 0, 4};
+    std::vector<bool> values;
+    for (bool value : selAccessor (range))
+      values.push_back (value);
+    EXPECT_EQ (values, (std::vector<bool>{true, false, true, true}));
+  }
+
+
+  TEST (AccessorTest, selectionDecorator)
+  {
+    ColumnarTool<> tool;
+    ParticleAccessor<ObjectColumn> objectAccessor {tool, "particles"};
+    ParticleDecorator<SelectionColumn> selDecorator {tool, "selection"};
+    ASSERT_SUCCESS (tool.initializeColumns());
+    {
+      auto columns = tool.getColumnInfo();
+      EXPECT_EQ (columns.size(), 3);
+      auto& column = columns[2];
+      EXPECT_EQ (column.name, "particles.selection");
+      EXPECT_EQ (column.type, &typeid (char));
+      EXPECT_EQ (column.accessMode, ColumnAccessMode::output);
+      EXPECT_EQ (column.offsetName, "particles");
+    }
+    tool.setColumnIndex ("particles", 1);
+    tool.setColumnIndex ("particles.selection", 2);
+    std::vector<void*> data (3, nullptr);
+    std::vector<ColumnarOffsetType> particles = {0, 1, 4};
+    data[1] = particles.data();
+    std::vector<char> sel = {5, 5, 5, 5};
+    data[2] = sel.data();
+
+    EXPECT_TRUE (selDecorator.isAvailable (ParticleId {data.data(), 0}));
+    selDecorator (ParticleId {data.data(), 0}) = true;
+    selDecorator (ParticleId {data.data(), 1}) = false;
+    selDecorator.set (ParticleId {data.data(), 2}, false);
+    selDecorator.set (ParticleId {data.data(), 3}, true);
+    EXPECT_EQ (sel, (std::vector<char>{1, 0, 0, 1}));
   }
 
 

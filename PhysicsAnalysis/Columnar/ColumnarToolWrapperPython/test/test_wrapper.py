@@ -8,7 +8,7 @@ import os
 import sys
 sys.path.insert(0, os.path.dirname(__file__))
 
-from testutils import _run_tests, approx, unique_name, xfail, MUON_CALIBRATION_RELEASE, physlite_test_file
+from testutils import _run_tests, approx, raises, unique_name, xfail, MUON_CALIBRATION_RELEASE, physlite_test_file
 
 import numpy as np
 import awkward as ak
@@ -134,6 +134,70 @@ def test_resolve_optional_columns_absent():
     effective = resolve_optional_columns(classified, events)
     muon_input_names = [c.name for c in effective["Muons"]["inputs"]]
     assert "Muons.isLRT" not in muon_input_names
+
+
+def _classify_optional_link_vector():
+    """Classified columns of a tool with an optional vector of links.
+
+    The columns are modeled on a tau efficiency tool that reads the number
+    of charged tracks from the optional ``TauJets.nChargedTracks``, or else
+    from the optional ``TauJets.tauTrackLinks`` into the optional
+    ``TauTracks`` container. None of the example tools has an optional
+    vector of links, so the column list is built by hand.
+    """
+    from types import SimpleNamespace
+
+    def column(name, offset_name, is_offset=False, is_optional=False,
+               access_mode=ColumnarToolWrapperPython.ColumnAccessMode.input):
+        return SimpleNamespace(name=name, offset_name=offset_name,
+                               is_offset=is_offset, is_optional=is_optional,
+                               is_event_index=False, access_mode=access_mode)
+
+    return classify_columns([
+        column("EventInfo", "", is_offset=True),
+        column("TauJets", "EventInfo", is_offset=True),
+        column("TauJets.nChargedTracks", "TauJets", is_optional=True),
+        column("TauJets.tauTrackLinks.offset", "TauJets", is_offset=True, is_optional=True),
+        column("TauJets.tauTrackLinks.m_persIndex", "TauJets.tauTrackLinks.offset", is_optional=True),
+        column("TauJets.tauTrackLinks.m_persKey", "TauJets.tauTrackLinks.offset", is_optional=True),
+        column("TauTracks", "EventInfo", is_offset=True, is_optional=True),
+        column("TauTracks.flagSet", "TauTracks", is_optional=True),
+        column("TauJets.sfOut", "TauJets",
+               access_mode=ColumnarToolWrapperPython.ColumnAccessMode.output),
+    ])
+
+
+def test_resolve_optional_columns_nested_absent():
+    """An absent optional vector of links is removed, with its target container."""
+    classified = _classify_optional_link_vector()
+    assert "TauJets.tauTrackLinks.offset" in classified["TauJets"]["nested_offsets"]
+    assert "TauTracks" in classified
+
+    events = ak.Array({"TauJets.nChargedTracks": ak.Array([[1, 3]])})
+    effective = resolve_optional_columns(classified, events)
+    assert "TauJets.nChargedTracks" in [c.name for c in effective["TauJets"]["inputs"]]
+    assert "TauJets.tauTrackLinks.offset" not in effective["TauJets"]["nested_offsets"]
+    assert "TauTracks" not in effective
+    # the original is unchanged
+    assert "TauJets.tauTrackLinks.offset" in classified["TauJets"]["nested_offsets"]
+    assert "TauTracks" in classified
+
+
+def test_resolve_optional_columns_nested_present():
+    """A present optional vector of links is kept, with its target container."""
+    classified = _classify_optional_link_vector()
+    links = ak.zip({"m_persIndex": ak.values_astype(ak.Array([[[0], [1, 2]]]), np.uint32),
+                    "m_persKey": ak.values_astype(ak.Array([[[5], [5, 5]]]), np.uint32)})
+    events = ak.Array({
+        "TauJets.tauTrackLinks": links,
+        "TauTracks.flagSet": ak.values_astype(ak.Array([[2, 2, 2]]), np.uint16),
+    })
+    effective = resolve_optional_columns(classified, events)
+    assert "TauJets.nChargedTracks" not in [c.name for c in effective["TauJets"]["inputs"]]
+    nested = effective["TauJets"]["nested_offsets"]["TauJets.tauTrackLinks.offset"]
+    assert sorted(c.name for c in nested["inputs"]) == [
+        "TauJets.tauTrackLinks.m_persIndex", "TauJets.tauTrackLinks.m_persKey"]
+    assert [c.name for c in effective["TauTracks"]["inputs"]] == ["TauTracks.flagSet"]
 
 
 def test_tool_call_synthetic():
@@ -275,6 +339,90 @@ def test_tool_vector_example_call_synthetic():
     assert selection == [[1, 0, 0]]
 
 
+def test_tool_call_preselection():
+    """Tool.__call__ accepts a bool mask for a SelectionColumn input (the preselection)."""
+    tool = Tool(f"columnar_array::PreselectionExampleTool/{unique_name()}")
+    pt = ak.values_astype(ak.Array([[10e5, 10e5, 1e3], [10e5]]), np.float32)
+
+    # without the (optional) preselection all particles are processed
+    result = tool(ak.Array({"Particles.pt": pt}))
+    assert result["Particles.selection"].to_list() == [[1, 1, 0], [1]]
+
+    # the preselection is a plain awkward mask, i.e. bool, while the tool
+    # stores it as char
+    preselection = ak.Array([[True, False, True], [False]])
+    assert ak.type(preselection).content.content.primitive == "bool"
+    result = tool(ak.Array({"Particles.pt": pt, "Particles.preselection": preselection}))
+    assert result["Particles.selection"].to_list() == [[1, 0, 0], [0]]
+
+
+def test_tool_call_selection_output_is_bool():
+    """Selection outputs come back as bool, the tool only writes 0 or 1 to them."""
+    tool = Tool(f"columnar_array::PreselectionExampleTool/{unique_name()}")
+    pt = ak.values_astype(ak.Array([[10e5, 10e5, 1e3], [10e5]]), np.float32)
+    result = tool(ak.Array({"Particles.pt": pt}))
+    assert ak.type(result["Particles.selection"]).content.content.primitive == "bool"
+    assert result["Particles.selection"].to_list() == [[True, True, False], [True]]
+
+
+def test_tool_call_wrong_sign_rejected():
+    """An integer input of the wrong sign is not reinterpreted (unless the column asks for it)."""
+    tool = Tool(f"columnar_array::VectorExampleTool/{unique_name()}")
+    pt = ak.values_astype(ak.Array([[10e5, 10e5, 1e3]]), np.float32)
+    sumpt = ak.values_astype(ak.Array([[[3000.0], [500.0], [0.0]]]), np.float32)
+    # the tool declares NumTrkPt500 as a vector of (signed) int
+    numtrk = ak.values_astype(ak.Array([[[3, 1, 0], [1], [0]]]), np.uint32)
+    events = ak.Array(
+        {
+            "Particles.pt": pt,
+            "Particles.NumTrkPt500": numtrk,
+            "Particles.SumPtTrkPt500": sumpt,
+        }
+    )
+    with raises(RuntimeError):
+        tool(events)
+
+
+def test_handle_bool_column_types():
+    """A numpy bool array is a one-byte integer for reading, writing needs a boolean column."""
+    handle = ColumnarToolWrapperPython.PythonToolHandle()
+    handle.set_type_and_name(f"columnar_array::PreselectionExampleTool/{unique_name()}")
+    handle.initialize()
+
+    columns = {col.name: col for col in handle.columns}
+    category = ColumnarToolWrapperPython.ColumnTypeCategory
+    assert columns["Particles.selection"].type_category == category.boolean
+    assert columns["Particles.selection"].size_of_type == 1
+    assert columns["Particles.selection"].dtype == "bool"
+    assert columns["Particles.preselection"].type_category == category.boolean
+    assert columns["Particles.pt"].type_category == category.floatingPoint
+    assert columns["Particles.pt"].size_of_type == 4
+    assert columns["Particles.pt"].dtype == "float32"
+    assert columns["Particles"].type_category == category.unsignedInteger
+    assert columns["Particles"].dtype == "uint64"
+
+    # a float column can not be written as bool, nor read as one
+    with raises(RuntimeError):
+        handle.set_column_void("Particles.pt", np.zeros(3, dtype=bool), False)
+    with raises(RuntimeError):
+        handle["Particles.pt"] = np.zeros(3, dtype=bool)
+
+    # the handle stores raw pointers, so all arrays need to stay alive
+    event_info = np.array([0, 1], dtype=np.uint64)
+    particles = np.array([0, 3], dtype=np.uint64)
+    pt = np.array([10e5, 10e5, 1e3], dtype=np.float32)
+    preselection = np.array([True, False, True])
+    selection = np.zeros(3, dtype=bool)
+    handle["EventInfo"] = event_info
+    handle["Particles"] = particles
+    handle["Particles.pt"] = pt
+    handle["Particles.preselection"] = preselection
+    handle.set_column_void("Particles.selection", selection, False)
+    handle.call()
+    assert selection.dtype == np.bool_
+    assert selection.tolist() == [True, False, False]
+
+
 def test_classify_columns_nested_vector_inputs_routed():
     """classify_columns groups VectorExampleTool nested-vector data columns under their nested offset."""
     handle = ColumnarToolWrapperPython.PythonToolHandle()
@@ -376,6 +524,37 @@ def test_inner_most_list_offset_array_var_int_passthrough():
     inner = _inner_most_list_offset_array(arr)
     np.testing.assert_array_equal(np.asarray(inner.layout.offsets.data), [0, 3, 5])
     np.testing.assert_array_equal(np.asarray(inner.layout.content.data), [3, 1, 0, 2, 4])
+
+
+
+def test_tool_call_string_column():
+    """Per-object strings as read by uproot (var * string) are passed to the tool."""
+    tool = Tool(f"columnar_array::StringExampleTool/{unique_name()}")
+    events = ak.Array({"Met.name": [["Invisible", "Final"], ["Final"]]})
+    result = tool(events)
+    assert result["Met.selection"].to_list() == [[0, 1], [1]]
+
+
+def test_reconstruct_output_per_event():
+    """Outputs of the root container (e.g. EventInfo decorations) have one value per event."""
+    from types import SimpleNamespace
+    event_info = SimpleNamespace(name="EventInfo", offset_name="")
+    output = SimpleNamespace(name="EventInfo.passed", offset_name="EventInfo", dtype="int8")
+    classified = {
+        "EventInfo": {
+            "offset": event_info,
+            "inputs": [],
+            "outputs": [output],
+            "nested_offsets": {},
+            "event_indices": [],
+        },
+    }
+    buffer_dict = {
+        "EventInfo": np.array([0, 3], dtype=np.uint64),
+        "EventInfo.passed": np.array([1, 0, 1], dtype=np.int8),
+    }
+    result = reconstruct_output(classified, buffer_dict, 3)
+    assert result["EventInfo.passed"].to_list() == [1, 0, 1]
 
 
 if __name__ == "__main__":

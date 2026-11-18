@@ -138,6 +138,61 @@ namespace columnar
       }
     };
 
+    /// @brief a reader for per-event scalar output columns (e.g. EventInfo
+    /// decorations), filled with a default value for each event
+    template <typename T>
+    struct ColumnReaderOutScalar final : public TestUtils::ColumnReader 
+    {
+      T defaultValue;
+      std::vector<T> outData;
+      unsigned entries = 0;
+
+      ColumnReaderOutScalar (const std::string& val_columnName, const T& val_defaultValue)
+        : defaultValue (val_defaultValue)
+      {
+        outputColumns.push_back ({.name = val_columnName});
+      }
+
+      virtual bool connect(Backend /*source*/, std::unordered_map<std::string, const std::vector<ColumnarOffsetType>*>& /*offsetColumns*/, std::unordered_map<std::string, ColumnInfo>& requestedColumns) override 
+      {
+        auto iter = requestedColumns.find (outputColumns.at(0).name);
+        if (iter == requestedColumns.end())
+          return false;
+        outputColumns.at(0).enabled = true;
+        requestedColumns.erase (iter);
+        return true;
+      }
+
+      virtual void clearColumns () override
+      {
+        outData.clear ();
+      }
+
+      virtual void getEntry (Long64_t /*entry*/) override
+      {
+        outData.push_back (defaultValue);
+      }
+
+      virtual void setData (ColumnVectorData& columnData) override
+      {
+        if (outputColumns.at(0).columnIndex != ColumnVectorHeader::nullIndex)
+          columnData.setColumn (outputColumns.at(0).columnIndex, outData.size(), outData.data());
+      }
+
+      [[nodiscard]] virtual BranchPerfData getPerfData (float /*emptyTime*/) override
+      {
+        BranchPerfData result;
+        result.name = outputColumns.at(0).name + "(out)";
+        result.entries = entries;
+        return result;
+      }
+
+      virtual void collectColumnData () override
+      {
+        entries += outData.size();
+      }
+    };
+
     struct ColumnReaderOutputMet final : public TestUtils::ColumnReader 
     {
      std::vector<std::string> termNames;
@@ -348,6 +403,24 @@ namespace columnar
       }
     }
 
+    /// @brief create an output column reader of the given template for
+    /// the type of the column, or nullptr if the type is not handled
+    template <template <typename> class ReaderTemplate>
+    std::shared_ptr<TestUtils::ColumnReader> makeOutputColumnReader (const ColumnInfo& info)
+    {
+      if (*info.type == typeid(float))
+        return std::make_shared<ReaderTemplate<float>>(info.name, 0);
+      if (*info.type == typeid(char))
+        return std::make_shared<ReaderTemplate<char>>(info.name, 0);
+      if (*info.type == typeid(std::uint16_t))
+        return std::make_shared<ReaderTemplate<std::uint16_t>>(info.name, 0);
+      if (*info.type == typeid(std::uint32_t))
+        return std::make_shared<ReaderTemplate<std::uint32_t>>(info.name, 0);
+      if (*info.type == typeid(std::uint64_t))
+        return std::make_shared<ReaderTemplate<std::uint64_t>>(info.name, 0);
+      return nullptr;
+    }
+
     void makeOutputColumnReaders (std::vector<std::shared_ptr<TestUtils::ColumnReader>>& knownColumns, const ColumnVectorHeader& columnHeader)
     {
       using namespace asg::msgUserCode;
@@ -360,24 +433,22 @@ namespace columnar
       {
         if (info.accessMode != ColumnAccessMode::output || !info.fixedDimensions.empty())
           continue;
-        auto offsetIter = requestedColumns.find(info.offsetName);
-        if (offsetIter == requestedColumns.end() || offsetIter->second.offsetName != eventRangeColumnName)
-        {
-          ANA_MSG_WARNING ("skipping column {} as it is not a scalar decoration on a global container", name);
-          continue;
-        }
         std::shared_ptr<TestUtils::ColumnReader> myColumn;
-        if (*info.type == typeid(float))
-          myColumn = std::make_shared<TestUtils::ColumnReaderOutVector<float>>(info.name, 0);
-        else if (*info.type == typeid(char))
-          myColumn = std::make_shared<TestUtils::ColumnReaderOutVector<char>>(info.name, 0);
-        else if (*info.type == typeid(std::uint16_t))
-          myColumn = std::make_shared<TestUtils::ColumnReaderOutVector<std::uint16_t>>(info.name, 0);
-        else if (*info.type == typeid(std::uint32_t))
-          myColumn = std::make_shared<TestUtils::ColumnReaderOutVector<std::uint32_t>>(info.name, 0);
-        else if (*info.type == typeid(std::uint64_t))
-          myColumn = std::make_shared<TestUtils::ColumnReaderOutVector<std::uint64_t>>(info.name, 0);
-        else 
+        if (info.offsetName == eventRangeColumnName)
+        {
+          // a per-event scalar output (e.g. an EventInfo decoration)
+          myColumn = makeOutputColumnReader<ColumnReaderOutScalar> (info);
+        } else
+        {
+          auto offsetIter = requestedColumns.find(info.offsetName);
+          if (offsetIter == requestedColumns.end() || offsetIter->second.offsetName != eventRangeColumnName)
+          {
+            ANA_MSG_WARNING ("skipping column {} as it is neither a scalar per-event output nor a scalar decoration on a global container", name);
+            continue;
+          }
+          myColumn = makeOutputColumnReader<TestUtils::ColumnReaderOutVector> (info);
+        }
+        if (!myColumn)
         {
           ANA_MSG_WARNING("unhandled column type: " << info.name << " "<< info.type->name());
           continue;

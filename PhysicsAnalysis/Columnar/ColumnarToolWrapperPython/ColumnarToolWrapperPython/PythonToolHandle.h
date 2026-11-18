@@ -142,22 +142,30 @@ namespace columnar
     }
 
     /// set a column pointer
-    void setColumnVoid (const std::string& name, std::size_t size, const void *dataPtr, const std::type_info& type, bool isConst) {
+    ///
+    /// `type` can be `nullptr` if there is no C++ type for the data
+    /// (e.g. for data coming from python), in which case the data is
+    /// only checked via its category and size (see
+    /// `isColumnTypeCompatible`).
+    void setColumnVoid (const std::string& name, std::size_t size, const void *dataPtr, const std::type_info *type, ColumnTypeCategory typeCategory, unsigned sizeOfType, bool isConst) {
       if (!m_columns)
         throw std::runtime_error ("tool not initialized");
-      m_columns->setColumnVoid (m_toolWrapper->getColumnIndex (name), size, dataPtr, type, isConst);
+      m_columns->setColumnVoid (m_toolWrapper->getColumnIndex (name), size, dataPtr, type, typeCategory, sizeOfType, isConst);
     }
 
-    /// get a column pointer by name; returns {size, ptr, type_info}
-    [[nodiscard]] std::tuple<std::size_t, const void*, const std::type_info*>
+    /// get a column pointer by name; returns {size, ptr, header}
+    ///
+    /// The header contains the type information for the column, i.e.
+    /// the data is of exactly that type.
+    [[nodiscard]] std::tuple<std::size_t, const void*, const ColumnVectorElementHeader*>
     getColumnVoid (const std::string& name) const
     {
       if (!m_columns)
         throw std::runtime_error ("tool not initialized");
       const std::size_t index = m_toolWrapper->getColumnIndex (name);
-      const std::type_info* type = m_columnHeader->getColumn (index).type;
-      auto [size, ptr] = m_columns->getColumnVoid (index, type, true);
-      return {size, ptr, type};
+      const auto& header = m_columnHeader->getColumn (index);
+      auto [size, ptr] = m_columns->getColumnVoid (index, header.type, header.typeCategory, header.sizeOfType, true);
+      return {size, ptr, &header};
     }
 
     /// call the tool and reset the columns

@@ -13,6 +13,7 @@
 #include <ColumnarCore/ColumnAccessor.h>
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarCore/SelectionColumn.h>
 #include <ColumnarCore/LinkColumn.h>
 #include <ColumnarMuon/MuonDef.h>
 #include <ColumnarTracking/TrackDef.h>
@@ -99,7 +100,7 @@ namespace ADD_CMODE(columnar)
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    columnar::MuonDecorator<char> selectionDec {*this, "selection"};
+    columnar::MuonDecorator<columnar::SelectionColumn> selectionDec {*this, "selection"};
   };
 }
 

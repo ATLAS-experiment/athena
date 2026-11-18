@@ -13,6 +13,7 @@
 #include <ColumnarCore/ColumnAccessor.h>
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarCore/SelectionColumn.h>
 #include <ColumnarMuon/MuonDef.h>
 #include <ColumnarTracking/TrackDef.h>
 #include <ColumnarVariant/VariantAccessor.h>
@@ -95,7 +96,7 @@ namespace ADD_CMODE(columnar)
     columnar::ColumnAccessor<TrackVariantDef,float> trackQOverPAcc {*this, "qOverP"};
 
     /// @brief the selection decorator for the particles
-    columnar::MuonDecorator<char> selectionDec {*this, "selection"};
+    columnar::MuonDecorator<columnar::SelectionColumn> selectionDec {*this, "selection"};
   };
 }
 

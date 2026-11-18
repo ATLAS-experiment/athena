@@ -9,6 +9,7 @@
 #include <ColumnarToolWrapperPython/PythonToolHandle.h>
 #include <ColumnarCore/ColumnarDef.h>
 #include <ColumnarCore/ColumnInfoHelpers.h>
+#include <ColumnarInterfaces/ColumnInfoHelpers.h>
 #include <CxxUtils/crc64.h>
 
 #ifdef XAOD_STANDALONE
@@ -26,7 +27,9 @@
 #include <nanobind/stl/pair.h>
 #include <nanobind/stl/map.h>
 
+#include <cstdint>
 #include <cstdio>
+#include <optional>
 #include <string>
 
 namespace nb = nanobind;
@@ -41,34 +44,48 @@ std::string getAddressString(const columnar::PythonToolHandle &obj) {
     return std::string(buffer);
 }
 
-// this function converts us from type_info to a human-readable name
-std::string get_type_name(const std::type_info& type_info) {
-    if (type_info == typeid(int)) {
-        return "int32";
-    } else if (type_info == typeid(unsigned int)) {
-        return "uint32";
-    } else if (type_info == typeid(short)) {
-        return "int16";
-    } else if (type_info == typeid(unsigned short)) {
-        return "uint16";
-    } else if (type_info == typeid(char)) {
-        /// escape hatch for char
-        return "int8";
-    } else if (type_info == typeid(unsigned char)) {
-        return "uint8";
-    } else if (type_info == typeid(float)) {
-        return "float32";
-    } else if (type_info == typeid(double)) {
-        return "float64";
-    } else if (type_info == typeid(long)) {
-        return "int64";
-    } else if (type_info == typeid(unsigned long)) {
-        return "uint64";
-    } else if (type_info == typeid(bool)) {
-        return "bool";
-    } else {
-        // If the type is unknown, you can return the mangled name or a default message
-        return std::string("unknown ('") + type_info.name() + "')";
+// the dlpack dtype matching a column with the given type category and
+// size (or nothing if there is no matching dtype)
+std::optional<nb::dlpack::dtype> columnDtype(columnar::ColumnTypeCategory category, unsigned size) {
+    nb::dlpack::dtype result {0, static_cast<std::uint8_t>(size * 8), 1};
+    switch (category) {
+        case columnar::ColumnTypeCategory::floatingPoint:
+            result.code = static_cast<std::uint8_t>(nb::dlpack::dtype_code::Float);
+            break;
+        // a sign-agnostic column (e.g. `char`) is reported as signed,
+        // but it will accept an unsigned array as well
+        case columnar::ColumnTypeCategory::signedInteger:
+        case columnar::ColumnTypeCategory::signAgnosticInteger:
+            result.code = static_cast<std::uint8_t>(nb::dlpack::dtype_code::Int);
+            break;
+        case columnar::ColumnTypeCategory::unsignedInteger:
+            result.code = static_cast<std::uint8_t>(nb::dlpack::dtype_code::UInt);
+            break;
+        // a numpy bool is a single byte holding 0 or 1, which is what a
+        // boolean column holds (if it has that size)
+        case columnar::ColumnTypeCategory::boolean:
+            result.code = static_cast<std::uint8_t>(size == 1 ? nb::dlpack::dtype_code::Bool : nb::dlpack::dtype_code::UInt);
+            break;
+        default:
+            return std::nullopt;
+    }
+    if (size == 0)
+        return std::nullopt;
+    return result;
+}
+
+// the numpy name of the dtype for a column with the given type
+// category and size, e.g. "float32", "uint64" or "bool"
+std::string columnTypeName(columnar::ColumnTypeCategory category, unsigned size) {
+    auto dtype = columnDtype(category, size);
+    if (!dtype)
+        return std::string("unknown (") + columnar::columnTypeCategoryName(category) + ", " + std::to_string(size) + " bytes)";
+    switch (static_cast<nb::dlpack::dtype_code>(dtype->code)) {
+        case nb::dlpack::dtype_code::Float: return "float" + std::to_string(dtype->bits);
+        case nb::dlpack::dtype_code::Int: return "int" + std::to_string(dtype->bits);
+        case nb::dlpack::dtype_code::UInt: return "uint" + std::to_string(dtype->bits);
+        case nb::dlpack::dtype_code::Bool: return "bool";
+        default: return "unknown";
     }
 }
 
@@ -85,67 +102,41 @@ void setProperty(columnar::PythonToolHandle &self, const std::string& key, nb::o
 }
 
 nb::object getColumnVoid(columnar::PythonToolHandle &self, const std::string& key) {
-  auto [size, ptr, type] = self.getColumnVoid(key);
+  auto [size, ptr, header] = self.getColumnVoid(key);
+  auto dtype = columnDtype(header->typeCategory, header->sizeOfType);
+  if (!dtype)
+    throw std::runtime_error("getColumnVoid: unsupported column type for " + key + ": " + columnTypeName(header->typeCategory, header->sizeOfType));
   // Wrap the raw pointer in a numpy array without copying.  The caller is
   // responsible for keeping the PythonToolHandle alive while using the result.
-#define MAKE_NDARRAY(T) \
-  nb::ndarray<nb::numpy, T, nb::ro>(static_cast<const T*>(ptr), {size}).cast()
-  if (*type == typeid(float))          return MAKE_NDARRAY(float);
-  if (*type == typeid(double))         return MAKE_NDARRAY(double);
-  if (*type == typeid(char))           return MAKE_NDARRAY(char);
-  if (*type == typeid(int))            return MAKE_NDARRAY(int);
-  if (*type == typeid(std::uint8_t))   return MAKE_NDARRAY(std::uint8_t);
-  if (*type == typeid(std::uint16_t))  return MAKE_NDARRAY(std::uint16_t);
-  if (*type == typeid(std::uint32_t))  return MAKE_NDARRAY(std::uint32_t);
-  if (*type == typeid(std::uint64_t))  return MAKE_NDARRAY(std::uint64_t);
-  if (*type == typeid(std::int16_t))   return MAKE_NDARRAY(std::int16_t);
-  if (*type == typeid(std::int32_t))   return MAKE_NDARRAY(std::int32_t);
-  if (*type == typeid(std::int64_t))   return MAKE_NDARRAY(std::int64_t);
-#undef MAKE_NDARRAY
-  throw std::runtime_error("getColumnVoid: unsupported column type: " + std::string(type->name()));
+  const std::size_t shape[1] = {size};
+  return nb::ndarray<nb::numpy, nb::ro>(ptr, 1, shape, nb::handle(), nullptr, *dtype).cast();
 }
 
 void setColumnVoid(columnar::PythonToolHandle &self, const std::string& key, nb::ndarray<> column, bool is_const = true) {
-  // TODO: figure out how to get type_info from handle instead...
-  // nb::handle handle = column.handle();
-
-  const std::type_info* type_info = nullptr;
+  // we don't have a C++ type for the array, so we only pass on the
+  // category and size, and let the tool wrapper check whether those
+  // are compatible with the column
+  columnar::ColumnTypeCategory category = columnar::ColumnTypeCategory::other;
   const nb::dlpack::dtype dtype = column.dtype();
   switch ((nb::dlpack::dtype_code) dtype.code) {
      case nb::dlpack::dtype_code::Int:
-         switch (dtype.bits) {
-             // escape hatch to handle char for now
-             // we should rely on signed/unsigned and nbits, instead of std::type_info
-             // case 8: type_info = &typeid(std::int8_t); break;
-             case 8: type_info = &typeid(char); break;
-             case 16: type_info = &typeid(std::int16_t); break;
-             case 32: type_info = &typeid(std::int32_t); break;
-             case 64: type_info = &typeid(std::int64_t); break;
-         }
+         category = columnar::ColumnTypeCategory::signedInteger;
          break;
-
      case nb::dlpack::dtype_code::UInt:
-         switch (dtype.bits) {
-             case 8: type_info = &typeid(std::uint8_t); break;
-             case 16: type_info = &typeid(std::uint16_t); break;
-             case 32: type_info = &typeid(std::uint32_t); break;
-             case 64: type_info = &typeid(std::uint64_t); break;
-         }
+         category = columnar::ColumnTypeCategory::unsignedInteger;
          break;
-
+     case nb::dlpack::dtype_code::Bool:
+         category = columnar::ColumnTypeCategory::boolean;
+         break;
      case nb::dlpack::dtype_code::Float:
-         switch (dtype.bits) {
-             case 32: type_info = &typeid(float); break;
-             case 64: type_info = &typeid(double); break;
-         }
+         category = columnar::ColumnTypeCategory::floatingPoint;
          break;
-
      default:
-         break;
+         throw std::runtime_error ("unsupported array type passed in for column " + key);
   }
-
-  if (type_info == nullptr) throw std::runtime_error ("unsupported column type passed in");
-  self.setColumnVoid(key, column.shape(0), column.data(), *type_info, is_const);
+  if (dtype.lanes != 1 || dtype.bits % 8 != 0)
+    throw std::runtime_error ("unsupported array type passed in for column " + key);
+  self.setColumnVoid(key, column.shape(0), column.data(), nullptr, category, dtype.bits / 8, is_const);
 }
 
 void setImmutableColumnVoid(columnar::PythonToolHandle &self, const std::string& key, nb::ndarray<> column){
@@ -267,13 +258,23 @@ NB_MODULE(python_tool_handle, module) {
         .value("FATAL",   MSG::FATAL)
         .export_values();
 
+    nb::enum_<columnar::ColumnTypeCategory>(module, "ColumnTypeCategory")
+      .value("floatingPoint", columnar::ColumnTypeCategory::floatingPoint)
+      .value("signedInteger", columnar::ColumnTypeCategory::signedInteger)
+      .value("unsignedInteger", columnar::ColumnTypeCategory::unsignedInteger)
+      .value("signAgnosticInteger", columnar::ColumnTypeCategory::signAgnosticInteger)
+      .value("boolean", columnar::ColumnTypeCategory::boolean)
+      .value("other", columnar::ColumnTypeCategory::other);
+
     nb::class_<columnar::ColumnInfo>(module, "ColumnInfo")
         .def(nb::init<>()) // Default constructor
         .def_ro("name", &columnar::ColumnInfo::name)
         .def_ro("index", &columnar::ColumnInfo::index)
         .def_prop_ro("dtype", [](const columnar::ColumnInfo &self){
-            return get_type_name(*self.type);
+            return columnTypeName(self.typeCategory, self.sizeOfType);
         })
+        .def_ro("type_category", &columnar::ColumnInfo::typeCategory)
+        .def_ro("size_of_type", &columnar::ColumnInfo::sizeOfType)
         .def_ro("access_mode", &columnar::ColumnInfo::accessMode)
         .def_ro("offset_name", &columnar::ColumnInfo::offsetName)
         .def_ro("fixed_dimensions", &columnar::ColumnInfo::fixedDimensions)
@@ -301,7 +302,7 @@ NB_MODULE(python_tool_handle, module) {
             return "<ColumnInfo name='" + self.name + "'" +
                    (self.isOffset ? "" : ", offset='" + self.offsetName + "'") +
                    ", access_mode='" + access_mode + "'" +
-                   ", dtype='" + (self.type ? get_type_name(*self.type) : "" ) + "'" +
+                   ", dtype='" + columnTypeName(self.typeCategory, self.sizeOfType) + "'" +
                    (self.isOptional ? ", optional": "") +
                    ">";
         })
@@ -309,7 +310,9 @@ NB_MODULE(python_tool_handle, module) {
             nb::dict d;
             d["name"] = self.name;
             d["index"] = self.index;
-            d["dtype"] = self.type ? get_type_name(*self.type) : "";
+            d["dtype"] = columnTypeName(self.typeCategory, self.sizeOfType);
+            d["type_category"] = self.typeCategory;
+            d["size_of_type"] = self.sizeOfType;
             d["access_mode"] = static_cast<int>(self.accessMode);
             d["offset_name"] = self.offsetName;
             d["fixed_dimensions"] = self.fixedDimensions;
@@ -407,53 +410,11 @@ NB_MODULE(python_tool_handle, module) {
              "Apply a systematic variation to the tool.")
 
         .def("set_column",
-             [](columnar::PythonToolHandle &self, const std::string& key, nb::ndarray<float> column) {
-                 self.setColumn<float>(key, column.shape(0), column.data());
+             [](columnar::PythonToolHandle &self, const std::string& key, nb::ndarray<> column) {
+                 setColumnVoid(self, key, column, false);
              },
              "key"_a, "column"_a,
-             "Set a float column pointer.")
-
-        .def("set_column",
-             [](columnar::PythonToolHandle &self, const std::string& key, nb::ndarray<char> column) {
-                 self.setColumn<char>(key, column.shape(0), column.data());
-             },
-             "key"_a, "column"_a,
-             "Set a char column pointer.")
-
-        .def("set_column",
-             [](columnar::PythonToolHandle &self, const std::string& key, nb::ndarray<int> column) {
-                 self.setColumn<int>(key, column.shape(0), column.data());
-             },
-             "key"_a, "column"_a,
-             "Set an int column pointer.")
-
-        .def("set_column",
-             [](columnar::PythonToolHandle &self, const std::string& key, nb::ndarray<std::uint8_t> column) {
-                 self.setColumn<uint8_t>(key, column.shape(0), column.data());
-             },
-             "key"_a, "column"_a,
-             "Set a uint8_t column pointer.")
-
-        .def("set_column",
-             [](columnar::PythonToolHandle &self, const std::string& key, nb::ndarray<std::uint16_t> column) {
-                 self.setColumn<uint16_t>(key, column.shape(0), column.data());
-             },
-             "key"_a, "column"_a,
-             "Set a uint16_t column pointer.")
-
-        .def("set_column",
-             [](columnar::PythonToolHandle &self, const std::string& key, nb::ndarray<std::uint32_t> column) {
-                 self.setColumn<uint32_t>(key, column.shape(0), column.data());
-             },
-             "key"_a, "column"_a,
-             "Set a uint32_t column pointer.")
-
-        .def("set_column",
-             [](columnar::PythonToolHandle &self, const std::string& key, nb::ndarray<std::uint64_t> column) {
-                 self.setColumn<uint64_t>(key, column.shape(0), column.data());
-             },
-             "key"_a, "column"_a,
-             "Set a uint64_t column pointer.")
+             "Set a (mutable) column pointer, the array has to be of a type compatible with the column.")
 
         .def("set_column_void", &setColumnVoid,
              // cppcheck-suppress assignBoolToPointer

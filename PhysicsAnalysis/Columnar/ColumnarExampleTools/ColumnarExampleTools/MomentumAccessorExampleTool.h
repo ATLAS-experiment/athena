@@ -14,6 +14,7 @@
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarCore/MomentumAccessors.h>
 #include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarCore/SelectionColumn.h>
 #include <ColumnarCore/ObjectTypeAccessor.h>
 #include <ColumnarCore/ParticleDef.h>
 
@@ -86,7 +87,7 @@ namespace ADD_CMODE(columnar)
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    columnar::ParticleDecorator<char> selectionDec {*this, "selection"};
+    columnar::ParticleDecorator<columnar::SelectionColumn> selectionDec {*this, "selection"};
   };
 }
 

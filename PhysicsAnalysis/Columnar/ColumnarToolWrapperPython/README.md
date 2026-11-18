@@ -537,6 +537,20 @@ handle.call()
 print(list(selection))  # [1, 1, 0]
 ```
 
+### Column Types
+
+Arrays are matched to columns by the kind of number they hold and its size in bytes, as reported in the column metadata. Nothing is converted or copied, so a mismatch is an error:
+
+- `col.type_category`: a `ColumnTypeCategory`, one of `floatingPoint`, `signedInteger`, `unsignedInteger`, `signAgnosticInteger`, `boolean` or `other`.
+- `col.size_of_type`: the size of a single entry in bytes.
+- `col.dtype`: the numpy dtype matching the two above (e.g. `"float32"`, `"uint64"` or `"bool"`).
+
+Floating-point, signed and unsigned columns need an array of the same kind and size, e.g. an `int32` array is rejected for a `uint32` column. The exceptions are:
+
+- `signAgnosticInteger`: the column accepts any integer array of that size, signed or unsigned. The data is reinterpreted, not converted. This is the case for all `char` columns (strings and flags), which is what lets the `uint8` that uproot reads strings as be passed in directly. For other integer columns the tool has to ask for it on the accessor (`{.isSignAgnostic = true}`).
+- `boolean`: the tool only checks these columns for non-zero, and only ever writes 0 or 1 to them (this is the case for `SelectionColumn`). They accept any integer array of their size, and a numpy `bool` array. The `dtype` of these columns is `bool`, so the `Tool` wrapper returns them as `bool`.
+- A numpy `bool` array can be used for reading with any one-byte integer column, but for writing (`is_const=False`) only with a boolean column.
+
 ### Reading Columns Back
 
 You can read any column (input or output) via `__getitem__`:
@@ -693,3 +707,11 @@ sg_key("InDetTrackParticles", CLID_TRACK_PARTICLE_CONTAINER)  # 0x1D3890DB
 ```
 
 The CLID is the class ID from the `CLASS_DEF` macro in the corresponding xAOD container header (e.g. `xAODMuon/MuonContainer.h`, `xAODEgamma/ElectronContainer.h`). Without the CLID the hash differs — this is why hashing just the container name never matches the values in the file.
+
+## Running the Tests
+
+The python tests are in `test/test_*.py`. They need `numpy` and `awkward`, and `awkward` is not part of the release externals, so they are currently not registered with ctest (only the C++ test `gt_PythonToolHandle` is). In an environment that has `awkward` installed they can be run directly after setting up the release and the build area, e.g.:
+
+```sh
+python PhysicsAnalysis/Columnar/ColumnarToolWrapperPython/test/test_wrapper.py
+```

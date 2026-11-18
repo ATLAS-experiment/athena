@@ -18,6 +18,7 @@
 
 #include <ColumnarExampleTools/SimpleSelectorExampleTool.h>
 #include <ColumnarExampleTools/OptionalColumnExampleTool.h>
+#include <ColumnarExampleTools/PreselectionExampleTool.h>
 #include <ColumnarExampleTools/ConfigurableColumnExampleTool.h>
 #include <ColumnarExampleTools/ModularExampleTool.h>
 #include <ColumnarExampleTools/LinkColumnExampleTool.h>
@@ -210,6 +211,68 @@ namespace ADD_CMODE(columnar)
     for (auto& name : toolHandle.getColumnNames())
       std::cout << "requested column: " << name << std::endl;
     std::cout << "recommended systematics size: " << toolHandle.getRecommendedSystematics().size() << std::endl;
+
+    ColumnMapType columnMap {toolHandle};
+
+    columnMap.addColumn ("EventInfo", {0, 2});
+
+    columnMap.addColumn ("Particles", {0, 1, 3});
+    columnMap.addColumn ("Particles.pt", {10e5, 10e5, 1e3});
+    columnMap.addColumn ("Particles.selection", {0, 0, 0});
+
+    columnMap.setExpectation ("Particles.selection", {1, 1, 0});
+
+    columnMap.connectColumnsToTool ();
+
+    columnMap.call ();
+
+    columnMap.checkExpectations ();
+  }
+
+
+  TEST_F (ColumnarMemoryTest, PreselectionExampleTool_present)
+  {
+    if (!checkMode())
+      return;
+
+    auto tool = std::make_unique<PreselectionExampleTool> (makeUniqueName());
+    ASSERT_SUCCESS (tool->initialize ());
+
+    ColumnarTestToolHandle toolHandle (*tool);
+    toolHandle.initialize ();
+
+    for (auto& name : toolHandle.getColumnNames())
+      std::cout << "requested column: " << name << std::endl;
+
+    ColumnMapType columnMap {toolHandle};
+
+    columnMap.addColumn ("EventInfo", {0, 2});
+
+    columnMap.addColumn ("Particles", {0, 2, 4});
+    columnMap.addColumn ("Particles.pt", {10e5, 10e5, 1e3, 10e5});
+    columnMap.addColumn ("Particles.preselection", {1, 0, 1, 2});
+    columnMap.addColumn ("Particles.selection", {0, 0, 0, 0});
+
+    columnMap.setExpectation ("Particles.selection", {1, 0, 0, 1});
+
+    columnMap.connectColumnsToTool ();
+
+    columnMap.call ();
+
+    columnMap.checkExpectations ();
+  }
+
+
+  TEST_F (ColumnarMemoryTest, PreselectionExampleTool_absent)
+  {
+    if (!checkMode())
+      return;
+
+    auto tool = std::make_unique<PreselectionExampleTool> (makeUniqueName());
+    ASSERT_SUCCESS (tool->initialize ());
+
+    ColumnarTestToolHandle toolHandle (*tool);
+    toolHandle.initialize ();
 
     ColumnMapType columnMap {toolHandle};
 

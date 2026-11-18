@@ -7,6 +7,8 @@
 
 #include <ColumnarCore/ColumnAccessorDataArray.h>
 #include <ColumnarCore/VectorConvertView.h>
+#include <stdexcept>
+#include <type_traits>
 
 namespace columnar
 {
@@ -36,6 +38,7 @@ namespace columnar
 
       static constexpr bool isDefined = true;
       static constexpr bool viewIsReference = MemoryAccessor<CT,CM>::viewIsReference;
+      static constexpr bool useSetter = !viewIsReference && CAM == ColumnAccessMode::output && MemoryAccessor<CT,CM>::hasSetter;
       static constexpr unsigned internalOffsetColumns = 0;
 
       ContainerFreeAccessor () noexcept = default;
@@ -45,6 +48,15 @@ namespace columnar
         auto info = options.makeColumnInfo();
         info.offsetName = optionsArray.offsetName;
         info.isOffset = optionsArray.isOffset;
+        setColumnType<ColumnType> (info);
+        if (options.isSignAgnostic)
+        {
+          if (info.typeCategory != ColumnTypeCategory::signedInteger && info.typeCategory != ColumnTypeCategory::unsignedInteger && info.typeCategory != ColumnTypeCategory::signAgnosticInteger)
+            throw std::logic_error ("isSignAgnostic set on a column that is not an integer: " + optionsArray.baseName + optionsArray.dataSuffix);
+          info.typeCategory = ColumnTypeCategory::signAgnosticInteger;
+        }
+        if constexpr (requires { requires MemoryAccessor<CT,CM>::isBooleanValued; })
+          info.typeCategory = ColumnTypeCategory::boolean;
         m_accessorData = std::make_unique<ColumnAccessorDataArray> (&m_dataIndex, &m_accessorData, &typeid (typename MemoryAccessor<CT,CM>::MemoryType), CAM);
         columnarTool.addColumn (optionsArray.baseName + optionsArray.dataSuffix, m_accessorData.get(), std::move (info));
       }
@@ -91,6 +103,21 @@ namespace columnar
         auto *data = static_cast<ColumnType*>(dataArea[m_dataIndex]);
         std::span<ColumnType> mySpan (data+beginIndex, endIndex-beginIndex);
         return VectorConvertView (MemoryAccessor<CT,CM>::makeViewer (dataArea), std::span (mySpan));
+      }
+
+      [[nodiscard]] auto operator () (void** dataArea, std::size_t index) const noexcept
+        requires (useSetter)
+      {
+        auto *data = static_cast<ColumnType*>(dataArea[m_dataIndex]);
+        return OutputProxy (data[index], MemoryAccessor<CT,CM>::makeSetter (dataArea));
+      }
+
+      template<typename T>
+        requires (useSetter)
+      void set (void** dataArea, std::size_t index, T&& value) const
+      {
+        auto *data = static_cast<ColumnType*>(dataArea[m_dataIndex]);
+        MemoryAccessor<CT,CM>::makeSetter (dataArea)(data[index], std::forward<T>(value));
       }
 
       [[nodiscard]] bool isAvailable (void** dataArea) const noexcept

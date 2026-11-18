@@ -37,6 +37,7 @@ namespace columnar
       auto info = options.makeColumnInfo();
       info.offsetName = (CI::perEventRange ? eventContextCIName : "");
       info.isOffset = true;
+      setColumnType<ColumnarOffsetType> (info);
       columnBase.addColumn (std::string (CI::idName), m_offsetsData.get(), std::move (info));
     }
 

@@ -35,6 +35,8 @@ namespace columnar
           return std::any_cast<char> (value);
         if (value.type() == typeid(int))
           return std::any_cast<int> (value);
+        if (value.type() == typeid(std::uint16_t))
+          return std::any_cast<std::uint16_t> (value);
         if (value.type() == typeid(unsigned))
           return std::any_cast<unsigned> (value);
         if (value.type() == typeid(std::size_t))
@@ -78,6 +80,9 @@ namespace columnar
       if (type == typeid(float))
       {
         m_column = castGetAnyColumn<float> (columnName, m_data);
+      } else if (type == typeid(double))
+      {
+        m_column = castGetAnyColumn<double> (columnName, m_data);
       } else if (type == typeid(char))
       {
         m_column = castGetAnyColumn<char> (columnName, m_data);

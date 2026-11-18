@@ -288,11 +288,13 @@ namespace columnar
 
         auto keyInfo = options.makeColumnInfo();
         keyInfo.offsetName = optionsArray.offsetName;
+        setColumnType<typename CM::LinkKeyColumnType> (keyInfo);
         m_keyData = std::make_unique<ColumnAccessorDataArray> (&m_keyIndex, &m_keyData, &typeid (typename CM::LinkKeyColumnType), ColumnAccessMode::input);
         columnarTool.addColumn (optionsArray.baseName + "." + std::string (CM::linkKeyColumnName), m_keyData.get(), std::move (keyInfo));
 
         auto indexInfo = options.makeColumnInfo();
         indexInfo.offsetName = optionsArray.offsetName;
+        setColumnType<typename CM::LinkIndexColumnType> (indexInfo);
         m_indexData = std::make_unique<ColumnAccessorDataArray> (&m_indexIndex, &m_indexData, &typeid (typename CM::LinkIndexColumnType), ColumnAccessMode::input);
         columnarTool.addColumn (optionsArray.baseName + "." + std::string (CM::linkIndexColumnName), m_indexData.get(), std::move (indexInfo));
 
@@ -306,6 +308,7 @@ namespace columnar
         eventInfo.offsetName = optionsArray.offsetName;
         eventInfo.isOptional = options.isOptional;
         eventInfo.isEventIndex = true;
+        setColumnType<ColumnarOffsetType> (eventInfo);
         m_eventData = std::make_unique<ColumnAccessorDataArray> (&m_eventIndex, &m_eventData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
         columnarTool.addColumn (eventName, m_eventData.get(), std::move (eventInfo));
 
@@ -313,6 +316,7 @@ namespace columnar
         targetInfo.offsetName = eventContextCIName;
         targetInfo.isOffset = true;
         targetInfo.isOptional = options.isOptional;
+        setColumnType<ColumnarOffsetType> (targetInfo);
         m_targetOffsetsData = std::make_unique<ColumnAccessorDataArray> (&m_targetOffsetsIndex, &m_targetOffsetsData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
         columnarTool.addColumn (std::string (LT::idName), m_targetOffsetsData.get(), std::move (targetInfo));
       }

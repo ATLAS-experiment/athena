@@ -82,8 +82,8 @@ namespace columnar
 
     /// @brief set the data for the given column with the user passing
     /// in the type
-    void setColumnVoid (ColumnVectorData& columnData, const std::string& name, std::size_t size, const void *dataPtr, const std::type_info& type, bool isConst) const {
-      columnData.setColumnVoid (getColumnIndex(name), size, dataPtr, type, isConst);
+    void setColumnVoid (ColumnVectorData& columnData, const std::string& name, std::size_t size, const void *dataPtr, const std::type_info *type, ColumnTypeCategory typeCategory, unsigned sizeOfType, bool isConst) const {
+      columnData.setColumnVoid (getColumnIndex(name), size, dataPtr, type, typeCategory, sizeOfType, isConst);
     }
 
 
@@ -97,8 +97,8 @@ namespace columnar
 
     /// @brief get the data for the given column in a type-erased manner
     [[nodiscard]] std::pair<std::size_t,const void*>
-    getColumnVoid (ColumnVectorData& columnData, const std::string& name, const std::type_info *type, bool isConst) const {
-      return columnData.getColumnVoid (getColumnIndex(name), type, isConst);
+    getColumnVoid (ColumnVectorData& columnData, const std::string& name, const std::type_info *type, ColumnTypeCategory typeCategory, unsigned sizeOfType, bool isConst) const {
+      return columnData.getColumnVoid (getColumnIndex(name), type, typeCategory, sizeOfType, isConst);
     }
 
 

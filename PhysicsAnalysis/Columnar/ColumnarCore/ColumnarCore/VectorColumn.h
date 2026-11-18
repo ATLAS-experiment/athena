@@ -102,6 +102,7 @@ namespace columnar
         auto offsetInfo = options.makeColumnInfo();
         offsetInfo.offsetName = optionsArray.offsetName;
         offsetInfo.isOffset = true;
+        setColumnType<ColumnarOffsetType> (offsetInfo);
         m_offsetData = std::make_unique<ColumnAccessorDataArray> (&m_offsetIndex, &m_offsetData, &typeid (ColumnarOffsetType), ColumnAccessMode::input);
         columnarTool.addColumn (offsetColumn, m_offsetData.get(), std::move (offsetInfo));
         auto dataOptions = optionsArray;

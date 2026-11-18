@@ -12,6 +12,7 @@
 
 #include <span>
 #include <string>
+#include <type_traits>
 #include <typeinfo>
 #include <unordered_map>
 #include <vector>
@@ -46,6 +47,18 @@ namespace columnar
 
     /// @brief the type to use for the column
     const std::type_info *type = nullptr;
+
+
+    /// @brief the size (in bytes) of the individual entries
+    unsigned sizeOfType = 0u;
+
+
+    /// @brief the type category of the individual entries
+    ///
+    /// Together with @ref sizeOfType this determines which other
+    /// types can be used for the column, see @ref
+    /// isColumnTypeCompatible.
+    ColumnTypeCategory typeCategory = ColumnTypeCategory::other;
 
 
     /// @brief whether this column is optional
@@ -192,12 +205,19 @@ namespace columnar
 
 
     /// @brief set the data for the given column
+    ///
+    /// The type has to match the type of the column, or its category
+    /// and size have to be compatible with those of the column (see
+    /// @ref isColumnTypeCompatible). For the void version `type` can
+    /// be `nullptr`, in which case only the category and size are
+    /// checked, e.g. when the data comes from python and there is no
+    /// C++ type for it.
     template<typename CT>
     void setColumn (std::size_t columnIndex, std::size_t size, CT* dataPtr) {
       auto voidPtr = reinterpret_cast<const void*>(const_cast<const CT*>(dataPtr));
-      setColumnVoid (columnIndex, size, voidPtr, typeid (std::decay_t<CT>), std::is_const_v<CT>);
+      setColumnVoid (columnIndex, size, voidPtr, &typeid (std::decay_t<CT>), columnTypeCategoryFor<CT>(), sizeof (CT), std::is_const_v<CT>);
     }
-    void setColumnVoid (std::size_t columnIndex, std::size_t size, const void *dataPtr, const std::type_info& type, bool isConst);
+    void setColumnVoid (std::size_t columnIndex, std::size_t size, const void *dataPtr, const std::type_info *type, ColumnTypeCategory typeCategory, unsigned sizeOfType, bool isConst);
 
 
     /// @brief get the data for the given column
@@ -205,14 +225,14 @@ namespace columnar
     [[nodiscard]] std::pair<std::size_t,CT*>
     getColumn (std::size_t columnIndex)
     {
-      auto [size, ptr] = getColumnVoid (columnIndex, &typeid (std::decay_t<CT>), std::is_const_v<CT>);
+      auto [size, ptr] = getColumnVoid (columnIndex, &typeid (std::decay_t<CT>), columnTypeCategoryFor<CT>(), sizeof (CT), std::is_const_v<CT>);
       if constexpr (std::is_const_v<CT>)
         return std::make_pair (size, static_cast<CT*>(ptr));
       else
         return std::make_pair (size, static_cast<CT*>(const_cast<void*>(ptr)));
     }
     [[nodiscard]] std::pair<std::size_t,const void*>
-    getColumnVoid (std::size_t columnIndex, const std::type_info *type, bool isConst) const;
+    getColumnVoid (std::size_t columnIndex, const std::type_info *type, ColumnTypeCategory typeCategory, unsigned sizeOfType, bool isConst) const;
 
 
     /// @brief do a basic check of the data vector
