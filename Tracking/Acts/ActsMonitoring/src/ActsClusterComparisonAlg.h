@@ -7,7 +7,9 @@
 
 // Athena includes
 #include <array>
+#include <map>
 #include <optional>
+#include <set>
 #include <unordered_map>
 #include <utility>
 
@@ -81,7 +83,6 @@ public:
             std::vector<const xAOD::StripCluster*>& reference_list,
             const std::string& module_id,
             std::vector<std::pair<const xAOD::StripCluster*, const xAOD::StripCluster*>>& pairs) const;
-
         /// Lorentz shift stored in the traccc host conditions object for the given Athena module (side)
         std::optional<std::pair<float, float>> tracccLorentzShift(
             const Identifier& athenaId,
@@ -95,12 +96,13 @@ public:
             const traccc::detector_conditions_description::host& cond) const;
 
         Gaudi::Property<std::string> m_monDesignObjectName{
-        this, "TracccDesignObjectName", "", "Candidate host design object in detStore"};    
+        this, "TracccDesignObjectName", "TracccHostDigitizationConfig", "Candidate host design object in detStore"};
+        const traccc::detector_design_description::host* m_monDesign{nullptr};
         SG::ReadCondHandleKey<traccc::detector_conditions_description::host> m_monCondKey{
         this, "TracccCondKey", "DeviceDetectorDescriptionHostCond",
         "Key for reading the candidate host conditions object"};
         /// @name The detector description service providing the Athena<->Detray ID map
-        Gaudi::Property<std::string> m_geoIdMappingObjectName{this, "GeoIdMapping", "", "ID mapping between the three detector description realms."};
+        Gaudi::Property<std::string> m_geoIdMappingObjectName{this, "GeoIdMapping", "TracccGeometryIdMapping", "ID mapping between the three detector description realms."};
         const ActsTrk::GeometryIdMapping* m_idMapping{nullptr};
 
         /// @name Boolean varibale turning on/off spacepoint validation

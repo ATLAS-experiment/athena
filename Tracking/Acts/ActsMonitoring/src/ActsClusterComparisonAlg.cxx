@@ -2,10 +2,11 @@
 /*
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
-
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <fstream>
+#include <iomanip>
 #include <stdexcept>
 
 #include "ActsClusterComparisonAlg.h"
@@ -42,6 +43,7 @@ StatusCode ActsClusterComparisonAlg::initialize()
     ATH_CHECK(detStore()->retrieve(m_stripID, "SCT_ID"));
 
     ATH_CHECK(detStore()->retrieve(m_idMapping, m_geoIdMappingObjectName.value()));
+    ATH_CHECK(detStore()->retrieve(m_monDesign, m_monDesignObjectName.value()));
 
     ATH_CHECK(m_stripLorentzAngleTool.retrieve());
     ATH_CHECK(m_pixelLorentzAngleTool.retrieve());
@@ -60,6 +62,39 @@ StatusCode ActsClusterComparisonAlg::initialize()
     ATH_MSG_INFO("ActsClusterComparisonAlg::initialize complete");
     return StatusCode::SUCCESS;
 }
+
+std::optional<std::pair<float, float>> ActsClusterComparisonAlg::tracccLorentzShift(
+    const Identifier& athenaId,
+    const traccc::detector_conditions_description::host& cond) const
+{
+    const auto detrayId = m_idMapping->athenaToDetray(athenaId);
+    if (!detrayId) return std::nullopt;
+    const auto condIndex = m_idMapping->detrayToDetDescIndex(*detrayId);
+    if (!condIndex || *condIndex >= cond.size()) return std::nullopt;
+    const auto& shift = cond.measurement_translation()[*condIndex];
+    return std::make_pair(static_cast<float>(shift[0]), static_cast<float>(shift[1]));
+}
+
+std::optional<std::array<float, 2>> ActsClusterComparisonAlg::tracccCellPosition(
+    const Identifier& athenaId, unsigned int channel0, unsigned int channel1,
+    const traccc::detector_design_description::host& design,
+    const traccc::detector_conditions_description::host& cond) const
+{
+
+    const auto detrayId = m_idMapping->athenaToDetray(athenaId);
+    if (!detrayId) return std::nullopt;
+    const auto condIndex = m_idMapping->detrayToDetDescIndex(*detrayId);
+    if (!condIndex || *condIndex >= cond.size()) return std::nullopt;
+    const unsigned int designIndex = cond.module_to_design_id()[*condIndex];
+    if (designIndex >= design.size()) return std::nullopt;
+    const auto& edgesX = design.bin_edges_x()[designIndex];
+    const auto& edgesY = design.bin_edges_y()[designIndex];
+    if (channel0 + 1 >= edgesX.size() || channel1 + 1 >= edgesY.size()) return std::nullopt;
+    return std::array<float, 2>{
+        0.5f * static_cast<float>(edgesX[channel0] + edgesX[channel0 + 1]),
+        0.5f * static_cast<float>(edgesY[channel1] + edgesY[channel1 + 1])};
+}
+
 
 StatusCode ActsClusterComparisonAlg::execute(const EventContext& ctx) const
 {
@@ -119,6 +154,8 @@ void  ActsClusterComparisonAlg::matchPixelClusters(
 
         bool found_match = false;
         for (size_t j = 0; j < reference_rdo_sets.size(); ++j) {
+            // each reference cluster can only be matched once
+            if (!unmatched_reference.count(j)) continue;
             if (monitored_rdo_sets[i] == reference_rdo_sets[j]) {
                 matched_pairs.emplace_back(i, j);
                 pairs.emplace_back(monitored_list.at(i), reference_list.at(j));
@@ -142,7 +179,7 @@ void  ActsClusterComparisonAlg::matchPixelClusters(
             for (int i : unmatched_monitored) {
                 ATH_MSG_DEBUG("    - #" << i);
                 const xAOD::PixelCluster* monitored_cluster = monitored_list.at(i);
-                const auto& monitored_cov = monitored_cluster->localCovariance<1>();
+                const auto& monitored_cov = monitored_cluster->localCovariance<2>();
 
                 ATH_MSG_DEBUG("Detailed print of cluster: ");
 
@@ -164,7 +201,7 @@ void  ActsClusterComparisonAlg::matchPixelClusters(
             for (int j : unmatched_reference) {
                 ATH_MSG_DEBUG("    - #" << j);
                 const xAOD::PixelCluster* reference_cluster = reference_list.at(j);
-                const auto& reference_cov = reference_cluster->localCovariance<1>();
+                const auto& reference_cov = reference_cluster->localCovariance<2>();
 
                 ATH_MSG_DEBUG("Detailed print of cluster: ");
                 
@@ -223,6 +260,8 @@ void  ActsClusterComparisonAlg::matchStripClusters(
     for (size_t i = 0; i < monitored_rdo_sets.size(); ++i) {
         bool found_match = false;
         for (size_t j = 0; j < reference_rdo_sets.size(); ++j) {
+            // each reference cluster can only be matched once
+            if (!unmatched_reference.count(j)) continue;
             if (monitored_rdo_sets[i] == reference_rdo_sets[j]) {
                 matched_pairs.emplace_back(i, j);
                 pairs.emplace_back(monitored_list.at(i), reference_list.at(j));
@@ -285,37 +324,6 @@ void  ActsClusterComparisonAlg::matchStripClusters(
     }
 }
 
-std::optional<std::pair<float, float>> ActsClusterComparisonAlg::tracccLorentzShift(
-    const Identifier& athenaId,
-    const traccc::detector_conditions_description::host& cond) const
-{
-    const auto detrayId = m_idMapping->athenaToDetray(athenaId);
-    if (!detrayId) return std::nullopt;
-    const auto condIndex = m_idMapping->detrayToDetDescIndex(*detrayId);
-    if (!condIndex || *condIndex >= cond.size()) return std::nullopt;
-    const auto& shift = cond.measurement_translation()[*condIndex];
-    return std::make_pair(static_cast<float>(shift[0]), static_cast<float>(shift[1]));
-}
-
-std::optional<std::array<float, 2>> ActsClusterComparisonAlg::tracccCellPosition(
-    const Identifier& athenaId, unsigned int channel0, unsigned int channel1,
-    const traccc::detector_design_description::host& design,
-    const traccc::detector_conditions_description::host& cond) const
-{
-    const auto detrayId = m_idMapping->athenaToDetray(athenaId);
-    if (!detrayId) return std::nullopt;
-    const auto condIndex = m_idMapping->detrayToDetDescIndex(*detrayId);
-    if (!condIndex || *condIndex >= cond.size()) return std::nullopt;
-    const unsigned int designIndex = cond.module_to_design_id()[*condIndex];
-    if (designIndex >= design.size()) return std::nullopt;
-    const auto& edgesX = design.bin_edges_x()[designIndex];
-    const auto& edgesY = design.bin_edges_y()[designIndex];
-    if (channel0 + 1 >= edgesX.size() || channel1 + 1 >= edgesY.size()) return std::nullopt;
-    return std::array<float, 2>{
-        0.5f * static_cast<float>(edgesX[channel0] + edgesX[channel0 + 1]),
-        0.5f * static_cast<float>(edgesY[channel1] + edgesY[channel1 + 1])};
-}
-
 StatusCode ActsClusterComparisonAlg::validateClusters(
     const EventContext& eventContext, std::unordered_map<const xAOD::PixelCluster*, const xAOD::PixelCluster*>& pixel_cluster_matches, std::unordered_map<const xAOD::StripCluster*, const xAOD::StripCluster*>& strip_cluster_matches) const
 {
@@ -355,9 +363,6 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
     ATH_CHECK(referenceStripClustersHandle.isValid());
     const xAOD::StripClusterContainer* referenceStripClusters =
         referenceStripClustersHandle.cptr();
-
-    const traccc::detector_design_description::host* monDesign = nullptr;
-    ATH_CHECK(detStore()->retrieve(monDesign, m_monDesignObjectName.value()));  
 
     const traccc::detector_conditions_description::host* monCond{};
     ATH_CHECK(SG::get(monCond,m_monCondKey, eventContext));  
@@ -506,7 +511,7 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
 
                 ATH_MSG_DEBUG("Detailed print of cluster discrepancy: ");
                 ATH_MSG_DEBUG("On module: " << monitored_Pixel_ModuleID);
-                ATH_MSG_DEBUG("Lorentz shift: " << std::fixed << std::setprecision(9) << monitored_lorentz_shift);
+                ATH_MSG_DEBUG("Lorentz shift: " << std::setprecision(9) << monitored_lorentz_shift << std::setprecision(6));
                 if (auto tracccShift = tracccLorentzShift(monitored_Pixel_ModuleID, *monCond)) {
                     ATH_MSG_DEBUG("Lorentz shift (traccc conditions): " << tracccShift->first);
                     ATH_MSG_DEBUG(" Δshift = " << tracccShift->first - monitored_lorentz_shift);
@@ -555,7 +560,7 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                     // traccc cells use channel0 = phi index, channel1 = eta index for pixels
                     if (auto tracccPos = tracccCellPosition(monitored_Pixel_ModuleID,
                                                             chargeCellId.phiIndex(), chargeCellId.etaIndex(),
-                                                            *monDesign, *monCond)) {
+                                                            *m_monDesign, *monCond)) {
                         ATH_MSG_DEBUG("  traccc position for this cell: " << (*tracccPos)[0]
                                       << ", " << (*tracccPos)[1]
                                       << "  (Δ = " << (*tracccPos)[0] - si_param.position()[0]
@@ -665,27 +670,26 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
             if (std::abs(pos_diff / (std::sqrt(reference_cov(0, 0)))) > 0.25) {
                 strip_pos_diff_0p25sig++;
 
-                int side = m_stripID->side(monitored_element->identify());
-                const Identifier strip_moduleID = m_stripID->module_id(monitored_element->identify());
+                // conditions object is keyed by the wafer (side) id, as in DeviceDetectorDescriptionCondAlg
+                const Identifier strip_waferID = monitored_element->identify();
+                const Identifier strip_moduleID = m_stripID->module_id(strip_waferID);
 
                 if (m_stripID->barrel_ec(strip_moduleID) == 0) strip_pos_diff_barrel++;
-                else strip_pos_diff_EC++; 
+                else strip_pos_diff_EC++;
 
-                const IdentifierHash Strip_ModuleHash = m_stripID->wafer_hash(strip_moduleID);
                 double monitored_lorentz_shift =
-                    m_stripLorentzAngleTool->getLorentzShift(Strip_ModuleHash + side, eventContext);
+                    m_stripLorentzAngleTool->getLorentzShift(monitored_element->identifyHash(), eventContext);
 
                 ATH_MSG_DEBUG("Detailed print of cluster discrepancy: ");
-                ATH_MSG_DEBUG("On module: " << strip_moduleID << ", side: " << m_stripID->side(monitored_element->identify()));
-                ATH_MSG_DEBUG("Lorentz shift: " << std::fixed << std::setprecision(9) << monitored_lorentz_shift);
-                // conditions object is keyed by the wafer (side) id, as in DeviceDetectorDescriptionCondAlg
-                const Identifier strip_waferID = m_stripID->wafer_id(Strip_ModuleHash + side);
+                ATH_MSG_DEBUG("On module: " << strip_moduleID << ", side: " << m_stripID->side(strip_waferID));
+                ATH_MSG_DEBUG("Lorentz shift: " << std::setprecision(9) << monitored_lorentz_shift << std::setprecision(6));
                 if (auto tracccShift = tracccLorentzShift(strip_waferID, *monCond)) {
                     ATH_MSG_DEBUG("Lorentz shift (traccc conditions): " << tracccShift->first);
                     ATH_MSG_DEBUG(" Δshift = " << tracccShift->first - monitored_lorentz_shift);
                 } else {
                     ATH_MSG_DEBUG("Lorentz shift (traccc conditions): not found for wafer " << strip_waferID);
                 }
+
 
                 ATH_MSG_DEBUG("Local position: ");
                 ATH_MSG_DEBUG(
@@ -704,13 +708,14 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                     rdoListRange.begin(), rdoListRange.end());
 
                 if (monitored_element->isBarrel()) {
-                    const InDetDD::SCT_BarrelModuleSideDesign* s_design = (static_cast<const InDetDD::SCT_BarrelModuleSideDesign*>(&monitored_element->design()));
+                    // ITk strip barrel modules are StripBoxDesign, localPositionOfCell is virtual so no cast needed
+                    const InDetDD::SiDetectorDesign& s_design = monitored_element->design();
 
                     for (auto rdoIter : monitored_rdoList) {
                         const InDetDD::SiCellId& chargeCellId =
                             monitored_element->cellIdFromIdentifier(rdoIter);
                         InDetDD::SiLocalPosition si_pos =
-                            s_design->localPositionOfCell(chargeCellId);
+                            s_design.localPositionOfCell(chargeCellId);
                         Amg::Vector2D loc_pos(si_pos.xPhi(), si_pos.xEta());
                         ATH_MSG_DEBUG("hit id for this cell: "
                                     << chargeCellId
@@ -718,7 +723,7 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                                     << ", " << loc_pos[1]);
                         // barrel: traccc channel0 = strip, measured coordinate is local x
                         const int strip = m_stripID->strip(rdoIter);
-                        if (auto tracccPos = tracccCellPosition(strip_waferID, strip, 0, *monDesign, *monCond)) {
+                        if (auto tracccPos = tracccCellPosition(strip_waferID, strip, 0, *m_monDesign, *monCond)) {
                             ATH_MSG_DEBUG("  traccc position for this cell (strip " << strip << "): "
                                           << (*tracccPos)[0]
                                           << "  (Δ = " << (*tracccPos)[0] - loc_pos[0] << ")");
@@ -749,7 +754,7 @@ StatusCode ActsClusterComparisonAlg::validateClusters(
                                     << ", " << pc_pos.xEta());
                         // endcap: traccc channel1 = strip, measured coordinate is local y (phi)
                         const int strip = m_stripID->strip(rdoIter);
-                        if (auto tracccPos = tracccCellPosition(strip_waferID, 0, strip, *monDesign, *monCond)) {
+                        if (auto tracccPos = tracccCellPosition(strip_waferID, 0, strip, *m_monDesign, *monCond)) {
                             ATH_MSG_DEBUG("  traccc position for this cell (strip " << strip << "): "
                                           << (*tracccPos)[1]
                                           << "  (Δphi = " << (*tracccPos)[1] - pc_pos.xPhi() << ")");
