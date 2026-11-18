@@ -6,7 +6,6 @@
 
 #include "ActsInterop/LoggerUtils.h"
 #include "PathResolver/PathResolver.h"
-#include "ActsPlugins/Root/RootMaterialDecorator.hpp"
 #include "ActsGeometry/MaterialMapJson.h"
 
 
@@ -16,11 +15,7 @@ namespace MuonGMR4 {
     
     void MuonMaterialDecoratorTool::visitSurface(Acts::Surface& surface){
         bool hasMat = surface.hasMaterial(); 
-        if (m_rootMaterialDecorator) {
-            m_rootMaterialDecorator->decorate(surface);
-        } else {
-            m_material.apply(surface);
-        }
+        m_material.apply(surface);
         if (hasMat != surface.hasMaterial()) {
             ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" Decorated "<<surface.geometryId()<<" with material");
         }
@@ -36,21 +31,19 @@ namespace MuonGMR4 {
                 <<m_materialMapFolder.value() + "/" + m_materialMapFile.value());
             return StatusCode::FAILURE;
         }
+        if (fullPath.ends_with(".root")) {
+            ATH_MSG_ERROR(__func__<<"() "<<__LINE__<<" Root material maps are not supported any more ('"
+                <<fullPath<<"'): provide a Json/Cbor map, optionally zstd compressed");
+            return StatusCode::FAILURE;
+        }
         ATH_MSG_INFO("Loading material map from " << fullPath);
 
-        // Only ROOT uses an extension-specific reader; JSON/CBOR and zstd are detected from content.
-        if (!fullPath.ends_with(".root")) {
-            m_material = ActsTrk::readMaterialMapJson(fullPath, level);
-        } else {
-            ActsPlugins::RootMaterialDecorator::Config decoratorConfig;
-            decoratorConfig.fileName = std::move(fullPath);
-            m_rootMaterialDecorator = std::make_unique<ActsPlugins::RootMaterialDecorator>(decoratorConfig, level);
-        }
+        // Json or Cbor, optionally zstd compressed: detected from the file contents
+        m_material = ActsTrk::readMaterialMapJson(fullPath, level);
         return StatusCode::SUCCESS;
     }
 
     StatusCode MuonMaterialDecoratorTool::finalize(){
-        m_rootMaterialDecorator.reset();
         m_material = {};
         return StatusCode::SUCCESS;
     }

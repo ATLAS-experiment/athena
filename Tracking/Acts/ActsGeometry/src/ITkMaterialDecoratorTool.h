@@ -9,14 +9,13 @@
 
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Material/TrackingGeometryMaterial.hpp"
-#include "ActsPlugins/Root/RootMaterialDecorator.hpp"
 
 namespace ActsTrk {
     /** @brief Mutable tracking geometry visitor to load the material on the tracking surfaces
      *         inside the ITk.
-     *         The material map is read from a versioned or legacy Json/Cbor file (optionally zstd compressed), or a Root file,
-     *         chosen automatically from the extension of "MaterialDbFile" ('.root' selects the
-     *         Root reader, anything else - notably '.json' / '.cbor' - selects the Json reader). */
+     *         The material map is read with the ACTS Json plugin from a versioned or legacy Json/Cbor
+     *         file, optionally zstd compressed; the encoding and the compression are detected from the
+     *         file contents. Root material maps are not supported. */
     class ITkMaterialDecoratorTool : public extends<AthAlgTool, IRefineTrackingGeoTool> {
         public:
             using base_class::base_class;
@@ -28,8 +27,6 @@ namespace ActsTrk {
             Gaudi::Property<std::string> m_materialMapFile{this, "MaterialDbFile", "", ""};
             Gaudi::Property<std::string> m_materialMapFolder{this, "MaterialDbFolder", "", ""};
             Acts::TrackingGeometryMaterial m_material;
-            // ROOT compatibility retains its geometry-ID-only matching semantics.
-            std::unique_ptr<ActsPlugins::RootMaterialDecorator> m_rootMaterialDecorator{};
     };
 }
 #endif

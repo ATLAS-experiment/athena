@@ -173,8 +173,8 @@ def ITkMaterialDecoratorToolCfg(flags, name="ITkMaterialDecorator", **kwargs) ->
     filename = flags.Acts.TrackingGeometry.ITkHgtdMaterialSource
     folder = flags.Acts.TrackingGeometry.ITkHgtdMaterialMapPath
     if flags.Acts.TrackingGeometry.ITkHgtdMaterialSource == "Default":
-        # ITkMaterialDecoratorTool picks its reader (Json or Root) from the file
-        # extension, so this is what selects the default format read back in.
+        # ITkMaterialDecoratorTool reads Json/Cbor maps (optionally zstd compressed)
+        # with the ACTS Json plugin, the format is detected from the file contents.
         filename = f"material-maps-itk-hgtd-{flags.GeoModel.AtlasVersion}.json"
     kwargs.setdefault("MaterialDbFile", filename)
     kwargs.setdefault("MaterialDbFolder", folder)
@@ -187,8 +187,8 @@ def MuonMaterialDecoratorToolCfg(flags, name = "MuonMaterialDecoratorTool", **kw
     fileName = flags.Acts.TrackingGeometry.MuonMaterialSource
     folderName = flags.Acts.TrackingGeometry.MuonMaterialMapPath
     if flags.Acts.TrackingGeometry.MuonMaterialSource == "Default":
-        # MuonMaterialDecoratorTool picks its reader (Json or Root) from the file
-        # extension, so this is what selects the default format read back in.
+        # MuonMaterialDecoratorTool reads Json/Cbor maps (optionally zstd compressed)
+        # with the ACTS Json plugin, the format is detected from the file contents.
         folderName = "ACTS/MaterialMaps/gen3"
         fileName = "material-maps-muon-v1.json"
     kwargs.setdefault('MuonMaterialDbFolder', folderName)
