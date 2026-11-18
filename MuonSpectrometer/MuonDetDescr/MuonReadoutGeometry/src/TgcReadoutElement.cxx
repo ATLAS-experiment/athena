@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/TgcReadoutElement.h"
@@ -301,13 +301,13 @@ namespace MuonGM {
         return true;
     }
 
-    double TgcReadoutElement::distanceToReadout(const Amg::Vector2D&, const Identifier&) const {
+    [[noreturn]] double 
+    TgcReadoutElement::distanceToReadout(const Amg::Vector2D&, const Identifier&) const {
         THROW_EXCEPT("distanceToReadout() -- method not implemented");
-        return 0.;
     }
-    int TgcReadoutElement::stripNumber(const Amg::Vector2D&, const Identifier&) const {
+    [[noreturn]] int 
+    TgcReadoutElement::stripNumber(const Amg::Vector2D&, const Identifier&) const {
         THROW_EXCEPT("stripNumber() -- method not implemented");
-        return 0. ;
     }
     bool TgcReadoutElement::stripPosition(const Identifier& id, Amg::Vector2D& pos) const {
         /** please don't copy the inefficient code below!! Look at the RpcReadoutElement for a proper implementation */

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonReadoutGeometry/MuonPadDesign.h"
@@ -30,10 +30,9 @@ double MuonPadDesign::maxAbsSensitiveX(const double& y) const {
             return 0.5 * lPadWidth;
         else
             return y * std::tan(half_openingAngle * CLHEP::degree) + 0.5 * lPadWidth;
-    } else
-        return (y - Size * 0.5) * std::tan(half_openingAngle * CLHEP::degree) + 0.5 * lPadWidth;
+    } 
+    return (y - Size * 0.5) * std::tan(half_openingAngle * CLHEP::degree) + 0.5 * lPadWidth;
 
-    return -1;
 }
 //----------------------------------------------------------
 std::pair<int, int> MuonPadDesign::channelNumber(const Amg::Vector2D& pos) const {

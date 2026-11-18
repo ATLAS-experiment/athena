@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -9,6 +9,7 @@ using namespace NswAsBuilt;
 
 
 //===============================================================================
+//coverity[PASS_BY_VALUE]
 PcbElement::PcbElement(stripConfiguration_t config, const Element& element)
   : m_config(std::move(config)), m_element(element)
 { }

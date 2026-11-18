@@ -1,17 +1,16 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include <list>
-#include <iostream>
-#include <memory>
-#include <nlohmann/json.hpp>
+
 
 #include "MuonNSWAsBuilt/StripCalculator.h"
 #include "MuonNSWAsBuilt/Element.h"
 #include "MuonNSWAsBuilt/ElementModelRigid.h"
 #include "MuonNSWAsBuilt/ElementModelScaleSag.h"
-
+#include <list>
+#include <memory>
+#include <nlohmann/json.hpp>
 
 using namespace NswAsBuilt;
 
@@ -138,12 +137,12 @@ pcbIdentifier_t StripCalculator::getPcbIdentifier(quadrupletIdentifier_t quad_id
 
 //===============================================================================
 PcbElement::stripConfiguration_t StripCalculator::getStripConfiguration(json_t j) const {
-  auto getPoint = [](const nlohmann::json& j) {
+  auto getPoint = [](const nlohmann::json& js) {
     double xpos, ypos, xpitch, ypitch;
-    j.at("pos").at("x").get_to(xpos);
-    j.at("pos").at("y").get_to(ypos);
-    j.at("pitchvec").at("x").get_to(xpitch);
-    j.at("pitchvec").at("y").get_to(ypitch);
+    js.at("pos").at("x").get_to(xpos);
+    js.at("pos").at("y").get_to(ypos);
+    js.at("pitchvec").at("x").get_to(xpitch);
+    js.at("pitchvec").at("y").get_to(ypitch);
     return PcbElement::stripPoint_t{{xpos,ypos,0.0},{xpitch,ypitch,0.0}};
   };
   PcbElement::stripConfiguration_t ret;

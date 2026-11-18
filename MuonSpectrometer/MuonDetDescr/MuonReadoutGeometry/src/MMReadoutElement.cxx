@@ -118,6 +118,9 @@ namespace MuonGM {
                 childShape = opA;
             } 
             const GeoTrd* trd = dynamic_cast<const GeoTrd*>(childShape);
+            if (!trd)[[unlikely]]{
+              THROW_EXCEPTION_MM("Dynamic cast failed");
+            }
             m_halfX = trd->getZHalfLength();
             // adjust phi dimensions according to the active area
             m_minHalfY = trd->getYHalfLength1();

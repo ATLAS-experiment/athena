@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -91,7 +91,7 @@ namespace MuonGM {
 
         /** distance to readout.
             If the local position is outside the active volume, the function first shift the position back into the active volume */
-        virtual double distanceToReadout(const Amg::Vector2D& pos, const Identifier& id) const override final;
+        [[noreturn]] virtual double distanceToReadout(const Amg::Vector2D& pos, const Identifier& id) const override final;
 
         /** strip number corresponding to local position.
             If the local position is outside the active volume, the function first shift the position back into the active volume */

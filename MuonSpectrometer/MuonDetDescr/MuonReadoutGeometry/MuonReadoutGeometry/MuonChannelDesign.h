@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -15,7 +15,8 @@
 #include "GeoPrimitives/GeoPrimitives.h"
 #include "EventPrimitives/EventPrimitives.h"
 #include "MuonReadoutGeometry/GlobalUtilities.h"
-#include "cmath"
+#include <cmath>
+#include <stdexcept>
 namespace MuonGM {
 
     struct MuonChannelDesign {
@@ -41,7 +42,7 @@ namespace MuonGM {
         int totalStrips{0};      // total strips per MM module
         bool isConvertedFromPhaseII{false};
         /// distance to readout 
-        double distanceToReadout(const Amg::Vector2D& pos) const;
+        [[noreturn]] double distanceToReadout(const Amg::Vector2D& /*pos*/) const;
 
         /// distance to channel - residual 
         double distanceToChannel(const Amg::Vector2D& pos, int nChannel) const;
@@ -184,9 +185,9 @@ namespace MuonGM {
     
 
     //============================================================================
-    inline double MuonChannelDesign::distanceToReadout(const Amg::Vector2D& pos) const {
+    [[noreturn]] inline double 
+    MuonChannelDesign::distanceToReadout(const Amg::Vector2D& /*pos*/) const {
         throw std::runtime_error("MuonChannelDesign::distanceToReadout() - is not properly defined");
-        return pos.dot(pos);
     }
 
 

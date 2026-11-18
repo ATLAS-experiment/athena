@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -16,14 +16,15 @@
 #include <GeoModelKernel/GeoVFullPhysVol.h>
 #include <GeoModelKernel/GeoVPhysVol.h>
 
-#include <cmath>
-#include <stdexcept>
+
 
 
 #include "GeoModelUtilities/GeoVisitVolumes.h"
 #include "TrkSurfaces/PlaneSurface.h"
 #include "TrkSurfaces/RectangleBounds.h"
-
+#include <cmath>
+#include <stdexcept>
+#include <sstream>
 
 
 #define THROW_EXCEPTION_RE(MSG)                                                                            \
@@ -55,10 +56,9 @@ namespace MuonGM {
     void RpcReadoutElement::setDoubletR(int doubletR) { m_dbR = doubletR;}
     void RpcReadoutElement::setDoubletZ(int doubletZ) { m_dbZ = doubletZ; }
     void RpcReadoutElement::setDoubletPhi(int doubletPhi) { m_dbPhi = doubletPhi; }
-    double RpcReadoutElement::distanceToReadout(const Amg::Vector2D& pos, const Identifier& id) const {
-        const MuonStripDesign* design = getDesign(id);
+    [[noreturn]] double 
+    RpcReadoutElement::distanceToReadout(const Amg::Vector2D& /*pos*/, const Identifier& /*id*/) const {
         THROW_EXCEPTION_RE("Method is not implemented");
-        return design ? design->distanceToReadout(pos) : 0.;
     }
     double RpcReadoutElement::localStripSCoord(int doubletPhi, bool measphi, int strip) const {
         bool notintheribs = !inTheRibs();
