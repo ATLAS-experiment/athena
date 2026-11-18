@@ -38,6 +38,8 @@
 #include "ElectronPhotonFourMomentumCorrection/egammaEnergyCorrectionTool.h"
 #include "egammaLayerRecalibTool/egammaLayerRecalibTool.h"
 
+#include "TFile.h"
+
 namespace ADD_CMODE(CP) {
 
 const double GeV = 1000.;
