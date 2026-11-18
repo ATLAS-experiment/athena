@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /**
@@ -17,8 +17,6 @@ This package provides algorithms for testing LAr Calorimeter conditions data
 @section LArConditionsTest_FixLArCondDB ElecCalib Algorithms to fix the LAr conditions data
 
    FixLArElecCalib : fix electronics calibration data. 
-
-   FixLArIdMap :     fix the LAr identifier mapping data 
 
 @section LArConditionsTest_DCSTest Test DCS data
 
