@@ -17,7 +17,7 @@
 
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
-
+#include "ActsEvent/ContextUtility.h"
 
 // ACTS
 #include "Acts/EventData/BoundTrackParameters.hpp"
@@ -89,6 +89,19 @@ namespace MuonR4 {
              *  @param track: Track created in the current fit iteration */
             bool abortSingleStation(const Acts::CalibrationContext& calContext,
                                     const ActsTrk::MutableTrackContainer::ConstTrackProxy trajectory) const;
+            /** @brief Produce a string to print a list of source links in term of identifiers and 
+             *         surface boundaries / positions
+             *  @param calContext: The calibration context carring the event context
+             *  @param sourceLinks: List of measurements to be printed */
+            std::string print(const Acts::CalibrationContext& calContext,
+                              std::span<const Acts::SourceLink> sourceLinks) const;
+            /** @brief Produce a string to print a track to screen including the track states
+              * @param calContext: The calibration context carring the event context
+              * @param trajectory: The track to be printed */
+            template <Acts::TrackProxyConcept Proxy_t>
+            std::string print(const Acts::CalibrationContext& calContext,
+                              const Proxy_t& trajectory) const;
+
             /** @brief Do the straight line fit  */
             Gaudi::Property<bool> m_doStraightLineFit{this, "doStraightLine", false};
             /** @brief How ,many steps to go */
@@ -114,10 +127,13 @@ namespace MuonR4 {
             Gaudi::Property<double> m_redChiSqCutOff{this, "RedChiSqCutOff", 0.1};
             /** @brief Convergence criterion on the relative change in chi2 */
             Gaudi::Property<double> m_relChiSqConvergence{this, "RelChiSqConvergence" , 1.e-5};
+            /** @brief Utility to fetch the geometry, magnetic field and calibration context in the event */
+            ActsTrk::ContextUtility m_ctxProvider{this};
             /** @brief Tracking geometry service */
             ServiceHandle<ActsTrk::ITrackingGeometrySvc> m_trackingGeometrySvc{this, "TrackingGeometrySvc", 
                                                                                 "ActsTrackingGeometrySvc"};
-            
+            /** @brief Muon id helper service */
+            ServiceHandle<Muon::IMuonIdHelperSvc> m_idHelperSvc{this, "IdHelperSvc",  "Muon::MuonIdHelperSvc/MuonIdHelperSvc"};
             /** @brief Tool handle to the track summary tool to check for single station tracks */
             ToolHandle<MuonR4::ITrackSummaryTool> m_summaryTool{this, "SummaryTool" , ""};
 
