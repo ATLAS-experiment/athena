@@ -1,0 +1,567 @@
+#!/usr/bin/env python
+
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
+
+"""
+Test the opt-in small-R taggers selected with BTagging.OptInSmallRTaggers
+(.json file paths, one model per file, local path or DATAPATH): the
+resolver, getNNs scheduling, dependency override, slimming, flip, Triton.
+"""
+
+import FlavorTagInference.FlavorTagNNConfig as FTNN
+from FlavorTagInference.FlavorTagNNConfig import (
+    OPT_IN_SMALL_R_JET_COLLECTION,
+    TaggerDependenciesCfg,
+    addAndReturnSharingSvc,
+    getDependencySet,
+    getFlipConfigs,
+    resolveOptInSmallRTaggers,
+)
+from JetTagConfig.BTaggingConfigFlags import getNNs
+from PyUtils.TritonUtils import tritonModelName
+
+from AthenaConfiguration.AllConfigFlags import initConfigFlags
+from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
+from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
+
+import json
+import os
+import tempfile
+import unittest
+from pathlib import PurePath
+from unittest import mock
+
+# the shipped model file and its complete expected content, written out
+# independently so the test does not trust the code
+GN3LARGE_FILE = 'FlavorTagInference/GN3Large.json'
+GN3LARGE = {
+    'name': 'GN3Large',
+    'path': 'dev/BTagging/20261031/TN25_86M/antikt4empflow/network.onnx',
+    'dependencies': ['E', 'L'],
+    'outputs': ['pb', 'pc', 'pu', 'ptau', 'ptFromTruthDressedWZJet'],
+    'flip': False,
+}
+GN3LARGE_PATH = GN3LARGE['path']
+CUSTOM_PATH = 'BTagging/Fake/Model/Path/For/Tests/network.onnx'
+
+# a full configuration dict for a model that is not shipped
+CUSTOM = {
+    'name': 'MyModel',
+    'path': CUSTOM_PATH,
+    'dependencies': ['E'],
+    'outputs': ['pb', 'pc', 'ptau', 'foo'],
+    'flip': True,
+}
+# what the resolver returns for a file holding CUSTOM
+CUSTOM_RESOLVED = {'name': 'MyModel', 'path': CUSTOM_PATH, 'dependencies': {'E'},
+                   'outputs': ['pb', 'pc', 'ptau', 'foo'], 'flip': True}
+
+
+def _custom(**changes):
+    """A fresh copy of CUSTOM with some keys changed."""
+    return {**CUSTOM, **changes}
+
+
+GN3LARGE_TRITON_NAME = 'dev_network_797ff423ee56'
+GN2V01_FOLDS = [
+    f'BTagging/20261022/GN2v01/antikt4empflow/network_fold{i}.onnx'
+    for i in range(4)
+]
+
+
+def _flags(opt_in=None, step=ProductionStep.Derivation):
+    flags = initConfigFlags()
+    # some flags are only automatically set if we have inputs, short
+    # circuit that by defining them
+    flags.GeoModel.Run = LHCPeriod.Run3
+    # the opt-in taggers are only scheduled in derivations
+    flags.Common.ProductionStep = step
+    if opt_in is not None:
+        flags.BTagging.OptInSmallRTaggers = opt_in
+    return flags
+
+
+def _has_triton_svc():
+    """NNSharingTritonSvc is not built in every project (e.g. AthAnalysis)."""
+    try:
+        CompFactory.FlavorTagInference.NNSharingTritonSvc
+        return True
+    except Exception:
+        return False
+
+
+def _aux_vars(content, jetcol):
+    """All variable names requested for the aux store of jetcol."""
+    prefix = f'{jetcol}Aux.'
+    names = set()
+    for item in content:
+        if item.startswith(prefix):
+            names.update(item[len(prefix):].split('.'))
+    return names
+
+
+def _write(tmpdir, name, obj_or_text):
+    """Write obj_or_text (raw text if a str, else as JSON) to tmpdir/name.
+
+    Returns the absolute path of the file.
+    """
+    path = os.path.abspath(os.path.join(tmpdir, name))
+    text = obj_or_text if isinstance(obj_or_text, str) else json.dumps(obj_or_text)
+    with open(path, 'w') as f:
+        f.write(text)
+    return path
+
+
+class TestJsonFiles(unittest.TestCase):
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+
+    def write(self, name, obj_or_text):
+        return _write(self.tmp.name, name, obj_or_text)
+
+    def assertRejected(self, content, exc=ValueError):
+        """A file holding content is rejected with exc naming the file."""
+        path = self.write('bad.json', content)
+        with self.assertRaises(exc) as ctx:
+            resolveOptInSmallRTaggers([path])
+        self.assertIn(path, str(ctx.exception))
+
+    def test_single_file(self):
+        tagger, = resolveOptInSmallRTaggers([self.write('single.json', CUSTOM)])
+        self.assertEqual(tagger, CUSTOM_RESOLVED)
+        self.assertIsInstance(tagger['dependencies'], set)
+        self.assertIsInstance(tagger['outputs'], list)
+        # the result is independent of CUSTOM
+        tagger['outputs'].append('bar')
+        tagger['dependencies'].add('L')
+        self.assertEqual(CUSTOM['outputs'], ['pb', 'pc', 'ptau', 'foo'])
+        self.assertEqual(CUSTOM['dependencies'], ['E'])
+
+    def test_two_files(self):
+        taggers = resolveOptInSmallRTaggers(
+            [self.write('custom.json', CUSTOM), self.write('gn3.json', GN3LARGE)])
+        self.assertEqual([t['name'] for t in taggers], ['MyModel', 'GN3Large'])
+        self.assertEqual([t['path'] for t in taggers],
+                         [CUSTOM_PATH, GN3LARGE_PATH])
+
+    def test_shipped_file(self):
+        found = FTNN._findOptInTaggerFile(GN3LARGE_FILE)
+        self.assertTrue(found)
+        self.assertTrue(os.path.isfile(found))
+        with open(found) as f:
+            self.assertEqual(json.load(f), GN3LARGE)
+        self.assertEqual(resolveOptInSmallRTaggers([GN3LARGE_FILE]),
+                         [{**GN3LARGE, 'dependencies': {'E', 'L'}}])
+
+    def test_relative_path(self):
+        self.write('taggers.json', CUSTOM)
+        cwd = os.getcwd()
+        os.chdir(self.tmp.name)
+        self.addCleanup(os.chdir, cwd)
+        self.assertEqual(resolveOptInSmallRTaggers(['taggers.json']),
+                         [CUSTOM_RESOLVED])
+
+    def test_local_precedence(self):
+        path = self.write('single.json', CUSTOM)
+        with mock.patch.object(
+                FTNN, 'find_datafile',
+                side_effect=AssertionError(
+                    'DATAPATH lookup must not run for an existing local file'),
+        ) as lookup:
+            self.assertEqual(resolveOptInSmallRTaggers([path]), [CUSTOM_RESOLVED])
+        lookup.assert_not_called()
+
+    def test_datapath_fallback(self):
+        path = self.write('single.json', CUSTOM)
+        name = 'pkg/taggers.json'
+        with mock.patch.object(
+                FTNN, 'find_datafile',
+                return_value=path) as lookup:
+            self.assertEqual(resolveOptInSmallRTaggers([name]), [CUSTOM_RESOLVED])
+        lookup.assert_called_once_with(name)
+
+    def test_not_found(self):
+        name = 'pkg/missing.json'
+        with mock.patch.object(
+                FTNN, 'find_datafile', return_value=None):
+            with self.assertRaises(FileNotFoundError) as ctx:
+                resolveOptInSmallRTaggers([name])
+        self.assertIn(name, str(ctx.exception))
+
+    def test_bad_json(self):
+        self.assertRejected('{not json')
+
+    def test_not_one_dict(self):
+        # a list file (even of one valid dict) and a number are rejected
+        for content in ([CUSTOM], 3):
+            with self.subTest(content):
+                self.assertRejected(content)
+
+    def test_wrong_keys(self):
+        bad = {f'missing {key}': {k: v for k, v in CUSTOM.items() if k != key}
+               for key in CUSTOM}
+        bad['unknown key'] = _custom(colour='blue')
+        for what, spec in bad.items():
+            with self.subTest(what):
+                self.assertRejected(spec)
+
+    def test_bad_types(self):
+        bad = [
+            dict(path='x/network.json'), dict(path=123),
+            dict(flip=1), dict(flip='yes'),
+            dict(outputs=[]), dict(outputs=['pb', 3]),
+            dict(dependencies='EL'), dict(dependencies=[1]),
+            dict(name=3), dict(name=''), dict(name='My_Model'),
+            dict(name='My/Model'),
+        ]
+        for change in bad:
+            with self.subTest(change):
+                self.assertRejected(_custom(**change))
+
+    def test_duplicate_name(self):
+        specs = [self.write('first.json', CUSTOM),
+                 self.write('second.json', CUSTOM)]
+        with self.assertRaises(ValueError) as ctx:
+            resolveOptInSmallRTaggers(specs)
+        self.assertIn('MyModel', str(ctx.exception))
+
+    def test_entry_not_a_path(self):
+        # an inline configuration dict is not accepted, only file paths
+        with self.assertRaises(TypeError) as ctx:
+            resolveOptInSmallRTaggers([CUSTOM])
+        self.assertIn(repr(CUSTOM)[:40], str(ctx.exception))
+        with self.assertRaises(TypeError) as ctx:
+            resolveOptInSmallRTaggers([3])
+        self.assertIn('3', str(ctx.exception))
+
+    def test_bare_string(self):
+        with self.assertRaises(TypeError) as ctx:
+            resolveOptInSmallRTaggers('x.json')
+        self.assertIn("'x.json'", str(ctx.exception))
+
+    def test_not_a_list(self):
+        path = self.write('custom.json', CUSTOM)
+        for specs in ((path,), {path}, None, {path: 1}):
+            with self.subTest(specs), self.assertRaises(TypeError) as ctx:
+                resolveOptInSmallRTaggers(specs)
+            self.assertIn(repr(specs), str(ctx.exception))
+
+    def test_empty(self):
+        self.assertEqual(resolveOptInSmallRTaggers([]), [])
+
+
+class TestGetNNs(unittest.TestCase):
+
+    def test_default_unchanged(self):
+        default = _flags().BTagging.NNs
+        explicit = _flags(opt_in=[]).BTagging.NNs
+        self.assertEqual(explicit, default)
+        for networks in default.values():
+            for network in networks:
+                self.assertNotIn('tagger_name', network)
+
+    def test_select_file(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = _write(tmpdir, 'taggers.json', CUSTOM)
+            selected = _flags(opt_in=[path]).BTagging.NNs
+            self.assertEqual(selected[OPT_IN_SMALL_R_JET_COLLECTION][-1], {
+                'folds': [CUSTOM_PATH], 'tagger_name': 'MyModel',
+                'dependencies': {'E'}, 'flip': True})
+
+    def test_select_shipped(self):
+        default = _flags().BTagging.NNs
+        selected = _flags(opt_in=[GN3LARGE_FILE]).BTagging.NNs
+        self.assertEqual(set(selected), set(default))
+        for collection, networks in selected.items():
+            if collection != OPT_IN_SMALL_R_JET_COLLECTION:
+                self.assertEqual(networks, default[collection])
+                continue
+            self.assertEqual(networks, default[collection] + [{
+                'folds': [GN3LARGE_PATH], 'tagger_name': 'GN3Large',
+                'dependencies': {'E', 'L'}, 'flip': False}])
+
+    def test_collision(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = _write(tmpdir, 'gn2.json', _custom(
+                name='GN2v01',
+                path='BTagging/x/GN2v01/antikt4empflow/network.onnx'))
+            flags = _flags(opt_in=[path])
+            with self.assertRaises(ValueError):
+                getNNs(flags)
+
+    def test_not_outside_derivations(self):
+        step = ProductionStep.Reconstruction
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = _write(tmpdir, 'taggers.json', CUSTOM)
+            default = _flags(step=step).BTagging.NNs
+            selected = _flags(opt_in=[path], step=step).BTagging.NNs
+            self.assertEqual(selected, default)
+
+
+class TestOnlyOptIn(unittest.TestCase):
+
+    def test_default_off(self):
+        self.assertIs(_flags().BTagging.OnlyOptInTaggers, False)
+        self.assertEqual(_flags(opt_in=[GN3LARGE_FILE]).BTagging.NNs,
+                         getNNs(_flags(opt_in=[GN3LARGE_FILE])))
+
+    def test_only_opt_in(self):
+        flags = _flags(opt_in=[GN3LARGE_FILE])
+        flags.BTagging.OnlyOptInTaggers = True
+        nns = flags.BTagging.NNs
+        scheduled = [n for networks in nns.values() for n in networks]
+        self.assertEqual([n['folds'] for n in scheduled], [[GN3LARGE_PATH]])
+        self.assertEqual(scheduled[0]['tagger_name'], 'GN3Large')
+        # every other collection is kept, but empty
+        self.assertTrue(all(networks == [] for collection, networks
+                            in nns.items()
+                            if collection != OPT_IN_SMALL_R_JET_COLLECTION))
+
+    def test_without_opt_in_raises(self):
+        flags = _flags()
+        flags.BTagging.OnlyOptInTaggers = True
+        with self.assertRaises(ValueError):
+            flags.BTagging.NNs
+
+
+class TestDependencyOverride(unittest.TestCase):
+
+    def test_get_dependency_set(self):
+        self.assertEqual(getDependencySet('MyModel', set()), set())
+        with self.assertRaises(KeyError):
+            getDependencySet('MyModel')
+        # opt-in models carry their dependencies, they are not in the dict
+        with self.assertRaises(KeyError):
+            getDependencySet('GN3Large')
+        self.assertEqual(getDependencySet('GN3V01'), {'L', 'E'})
+
+    def test_support_decorations(self):
+        from BTagging.FlavorTaggingConfig import _supportDecorations
+        network = {'folds': [CUSTOM_PATH], 'tagger_name': 'MyModel'}
+        decorations = _supportDecorations(
+            [{**network, 'dependencies': {'E'}}],
+            jetTrackAssociator='TracksForBTagging',
+            fast=False,
+        )
+        self.assertIn('FTagElectrons', decorations)
+        self.assertNotIn('FTagMuons', decorations)
+        with self.assertRaises(KeyError):
+            _supportDecorations(
+                [network], jetTrackAssociator='TracksForBTagging', fast=False)
+
+    def test_tagger_dependencies_cfg(self):
+        # Only the empty override is checked here: the algorithms of a
+        # non-empty one need an input file to configure.
+        acc = TaggerDependenciesCfg(
+            _flags(), 'MyModel', OPT_IN_SMALL_R_JET_COLLECTION,
+            dependencies=set())
+        self.assertEqual(len(acc.getEventAlgos()), 0)
+        acc.wasMerged()
+
+
+class TestSlimming(unittest.TestCase):
+
+    jetcol = OPT_IN_SMALL_R_JET_COLLECTION
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.custom_file = _write(self.tmp.name, 'custom.json', CUSTOM)
+
+    @staticmethod
+    def _content(flags, jetcol):
+        from DerivationFrameworkFlavourTag.BTaggingContent import (
+            BTaggingStandardContent,
+        )
+        return BTaggingStandardContent(flags, jetcol)
+
+    def test_default_unchanged(self):
+        self.assertEqual(self._content(_flags(opt_in=[]), self.jetcol),
+                         self._content(_flags(), self.jetcol))
+
+    def test_shipped(self):
+        names = _aux_vars(
+            self._content(_flags(opt_in=[GN3LARGE_FILE]), self.jetcol),
+            self.jetcol)
+        gn3 = {n for n in names if n.startswith('GN3Large')}
+        self.assertEqual(gn3, {f'GN3Large_{o}' for o in GN3LARGE['outputs']})
+        self.assertEqual(sorted(gn3),
+                         sorted(f'GN3Large_{o}' for o in GN3LARGE['outputs']))
+
+    def test_file_with_flip(self):
+        names = _aux_vars(
+            self._content(_flags(opt_in=[self.custom_file]), self.jetcol),
+            self.jetcol)
+        my = {n for n in names if n.startswith('MyModel')}
+        self.assertEqual(my, {f'{tagger}_{o}' for o in ('pb', 'pc', 'ptau', 'foo')
+                              for tagger in ('MyModel', 'MyModelSimpleFlip')})
+
+    def test_other_collection(self):
+        content = self._content(
+            _flags(opt_in=[self.custom_file]), 'AntiKt4EMTopoJets')
+        self.assertFalse([item for item in content if 'MyModel' in item])
+
+
+class TestFlip(unittest.TestCase):
+
+    # flip=True on a path without a flip configuration raises ValueError in
+    # _FlavorTaggingChainCfg, which needs a full job configuration with an
+    # input file, so it is not tested here.
+    def test_flip(self):
+        self.assertEqual(getFlipConfigs('BTagging/x/SV1/antikt4empflow'), [])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            path = _write(tmpdir, 'sv1x.json', _custom(
+                name='SV1X', path='BTagging/x/SV1X/antikt4empflow/network.onnx'))
+            tagger, = resolveOptInSmallRTaggers([path])
+        self.assertIs(tagger['flip'], True)
+
+
+def _fake_triton_name(path):
+    """Stand-in for tritonModelName that needs no CALIBPATH lookup."""
+    return 'fake_' + PurePath(path).stem
+
+
+def _handle_name(handle):
+    """Instance name of a service handle (a configurable or its string)."""
+    if hasattr(handle, 'getName'):
+        return handle.getName()
+    return str(handle).split('/')[-1]
+
+
+class TestTriton(unittest.TestCase):
+
+    def test_shipped_name(self):
+        # tritonModelName (PyUtils.TritonUtils) resolves the file on
+        # CALIBPATH, here the dev file on cvmfs GroupData, which ctest and
+        # CI have. The name is dev_<stem[:20]>_<sha256(resolved path)[:12]>.
+        self.assertEqual(tritonModelName(GN3LARGE_PATH), GN3LARGE_TRITON_NAME)
+
+    @staticmethod
+    def svc(useTriton, files):
+        ca = ComponentAccumulator()
+        s = addAndReturnSharingSvc(useTriton, ca, files)
+        ca.wasMerged()
+        return s
+
+    @unittest.skipUnless(_has_triton_svc(),
+                         'NNSharingTritonSvc not built (AthAnalysis)')
+    def test_routing(self):
+        # (i) useTriton: Triton, one '<path>:<name>' entry per file
+        s = self.svc(True, [GN3LARGE_PATH])
+        self.assertIn('Triton', s.getType())
+        self.assertEqual(set(s.TritonModelsNames),
+                         {f'{GN3LARGE_PATH}:{GN3LARGE_TRITON_NAME}'})
+
+        # (ii) no useTriton: ONNX
+        self.assertIn('Onnx', self.svc(False, [GN3LARGE_PATH]).getType())
+
+        # (iii) a multifold tagger gets one entry per fold
+        with mock.patch.object(FTNN, 'tritonModelName',
+                               side_effect=_fake_triton_name):
+            s = self.svc(True, GN2V01_FOLDS)
+        self.assertIn('Triton', s.getType())
+        self.assertEqual(
+            set(s.TritonModelsNames),
+            {f'{p}:fake_network_fold{i}' for i, p in enumerate(GN2V01_FOLDS)})
+        self.assertEqual(len(set(s.TritonModelsNames)), 4)
+
+    @unittest.skipUnless(_has_triton_svc(),
+                         'NNSharingTritonSvc not built (AthAnalysis)')
+    def test_routing_dedup(self):
+        # two taggers with different files share one service, which must
+        # carry the entries of both. A failure here means the CA
+        # deduplication does not union the std::set property: a finding
+        # about !92294, not something to work around in this test.
+        ca1 = ComponentAccumulator()
+        addAndReturnSharingSvc(True, ca1, [GN3LARGE_PATH])
+        ca2 = ComponentAccumulator()
+        with mock.patch.object(FTNN, 'tritonModelName',
+                               side_effect=_fake_triton_name):
+            addAndReturnSharingSvc(True, ca2, GN2V01_FOLDS)
+        ca1.merge(ca2)
+        names = set(
+            ca1.getService('FTagNNSharingTritonSvc').TritonModelsNames)
+        self.assertEqual(names, {
+            f'{GN3LARGE_PATH}:{GN3LARGE_TRITON_NAME}',
+            *(f'{p}:fake_network_fold{i}' for i, p in enumerate(GN2V01_FOLDS)),
+        })
+        ca1.wasMerged()
+
+    @unittest.skipUnless(_has_triton_svc(),
+                         'NNSharingTritonSvc not built (AthAnalysis)')
+    def test_opt_in_full_chain(self):
+        """The opt-in entry from getNNs, scheduled with MultifoldGNNCfg.
+
+        A configuration-level test: useTriton is passed here by hand, so
+        this is not proof that BTagging.UseTriton propagates through the
+        production chain (see test_production_chain_forwards_use_triton).
+        """
+        flags = _flags(opt_in=[GN3LARGE_FILE])
+        flags.BTagging.UseTriton = True
+        entry, = [n for n in getNNs(flags)['AntiKt4EMPFlowJets']
+                  if n['folds'] == [GN3LARGE_PATH]]
+        acc = FTNN.MultifoldGNNCfg(
+            flags, 'AntiKt4EMPFlowJets', 'InDetTrackParticles',
+            entry['folds'], dependencies=entry.get('dependencies'),
+            useTriton=flags.BTagging.UseTriton)
+        self.assertIn(
+            f'{GN3LARGE_PATH}:{GN3LARGE_TRITON_NAME}',
+            set(acc.getService('FTagNNSharingTritonSvc').TritonModelsNames))
+        acc.wasMerged()
+
+    @unittest.skipUnless(_has_triton_svc(),
+                         'NNSharingTritonSvc not built (AthAnalysis)')
+    def test_production_chain_forwards_use_triton(self):
+        # Through the production entry point, which reads
+        # BTagging.UseTriton itself: useTriton is not passed here.
+        # The support algorithms need an input file to configure and are
+        # not under test, so they are replaced by empty accumulators;
+        # MultifoldGNNCfg is the real one.
+        from BTagging import FlavorTaggingConfig as FTC
+
+        def empty(*args, **kwargs):
+            return ComponentAccumulator()
+
+        for use_triton in (True, False):
+            with self.subTest(UseTriton=use_triton):
+                flags = _flags(opt_in=[GN3LARGE_FILE])
+                flags.BTagging.UseTriton = use_triton
+                entry, = [n for n in flags.BTagging.NNs['AntiKt4EMPFlowJets']
+                          if n['folds'] == [GN3LARGE_PATH]]
+                with mock.patch.multiple(
+                        FTC,
+                        BTagTrackAugmenterAlgCfg=mock.DEFAULT,
+                        JetTagVertexDecoratorCfg=mock.DEFAULT,
+                        TaggerDependenciesCfg=mock.DEFAULT,
+                        JetParticleAssociationAlgCfg=mock.DEFAULT,
+                ) as patched:
+                    for patch in patched.values():
+                        patch.side_effect = empty
+                    acc = FTC._FlavorTaggingChainCfg(
+                        flags, 'AntiKt4EMPFlowJets', nns=[entry])
+                services = {s.getName(): s for s in acc.getServices()}
+                decorator, = [
+                    alg.decorator for alg in acc.getEventAlgos()
+                    if alg.getName().startswith('FtagNN_')
+                    and getattr(alg.decorator, 'nnFile', None) == GN3LARGE_PATH
+                ]
+                svc_name = _handle_name(decorator.nnSharingService)
+                if use_triton:
+                    self.assertIn('FTagNNSharingTritonSvc', services)
+                    self.assertIn(
+                        f'{GN3LARGE_PATH}:{GN3LARGE_TRITON_NAME}',
+                        set(services['FTagNNSharingTritonSvc'].TritonModelsNames))
+                    self.assertEqual(svc_name, 'FTagNNSharingTritonSvc')
+                    self.assertIn('Triton', services[svc_name].getType())
+                else:
+                    self.assertIn('FTagNNSharingOnnxSvc', services)
+                    self.assertNotIn('FTagNNSharingTritonSvc', services)
+                    self.assertEqual(svc_name, 'FTagNNSharingOnnxSvc')
+                acc.wasMerged()
+
+
+if __name__ == '__main__':
+    unittest.main()

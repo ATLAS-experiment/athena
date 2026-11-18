@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+from AthenaCommon.Utils.unixtools import find_datafile
 from PyUtils.TritonUtils import tritonModelName
 
 from FlavorTagInference.FoldDecoratorConfig import FoldDecoratorCfg
@@ -9,6 +10,8 @@ from FlavorTagInference.FoldDecoratorConfig import FoldDecoratorCfg
 from os.path import commonpath
 from pathlib import PurePath
 from warnings import warn
+import json
+import os
 import re
 
 # NNFiles argument is a list of paths to NN files.
@@ -368,6 +371,99 @@ def _defaultsFromPaths(nn_paths):
     return defaults
 
 
+# Opt-in small-R taggers (BTagging.OptInSmallRTaggers: .json paths, one model
+# each; see resolveOptInSmallRTaggers) run on this collection only. GN3Large
+# ships as FlavorTagInference/GN3Large.json.
+OPT_IN_SMALL_R_JET_COLLECTION = 'AntiKt4EMPFlowJets'
+
+# keys of an opt-in tagger .json file, all required
+OPT_IN_TAGGER_KEYS = frozenset({'name', 'path', 'dependencies', 'outputs', 'flip'})
+
+
+def _findOptInTaggerFile(entry: str) -> str:
+    """The path of the .json file ``entry`` of BTagging.OptInSmallRTaggers.
+
+    An existing local path (absolute or relative to the cwd) is used as
+    it is, otherwise the file is looked up on DATAPATH with find_datafile
+    (the files shipped with atlas_install_data).
+    """
+    if os.path.isfile(entry):
+        return entry
+    resolved = find_datafile(entry)
+    if not resolved:
+        raise FileNotFoundError(
+            f'BTagging.OptInSmallRTaggers: file {entry!r} not found (not a'
+            ' local path, not on DATAPATH)')
+    return resolved
+
+
+def _loadOptInTagger(entry: str) -> dict:
+    """The tagger held by the .json file ``entry`` of BTagging.OptInSmallRTaggers.
+
+    The file holds exactly one dict with the keys OPT_IN_TAGGER_KEYS;
+    every error names the file.
+    """
+    where = f'BTagging.OptInSmallRTaggers: file {entry!r}'
+    with open(_findOptInTaggerFile(entry)) as f:
+        try:
+            spec = json.load(f)
+        except json.JSONDecodeError as err:
+            raise ValueError(f'{where}: invalid JSON: {err}') from err
+    if not isinstance(spec, dict) or set(spec) != OPT_IN_TAGGER_KEYS:
+        raise ValueError(
+            f'{where}: expected one dict with exactly the keys'
+            f' {sorted(OPT_IN_TAGGER_KEYS)}, got {spec!r}')
+    name, path, deps, outputs, flip = (
+        spec[k] for k in ('name', 'path', 'dependencies', 'outputs', 'flip'))
+    if not isinstance(name, str) or not re.fullmatch(r'[A-Za-z0-9]+', name):
+        raise ValueError(f'{where}: name {name!r} must be a str matching [A-Za-z0-9]+')
+    if not isinstance(path, str) or not path.endswith('.onnx'):
+        raise ValueError(f'{where}: path {path!r} must be a str ending in .onnx')
+    if not isinstance(deps, list) or not all(isinstance(d, str) for d in deps):
+        raise ValueError(f'{where}: dependencies {deps!r} must be a list of str')
+    if (not isinstance(outputs, list) or not outputs
+            or not all(isinstance(o, str) for o in outputs)):
+        raise ValueError(f'{where}: outputs {outputs!r} must be a non-empty list of str')
+    if not isinstance(flip, bool):
+        raise ValueError(f'{where}: flip {flip!r} must be a bool')
+    return {'name': name, 'path': path, 'dependencies': set(deps),
+            'outputs': list(outputs), 'flip': flip}
+
+
+def resolveOptInSmallRTaggers(specs) -> list[dict]:
+    """Resolve the BTagging.OptInSmallRTaggers flag into tagger definitions.
+
+    ``specs`` is a list of .json file paths, e.g.
+    ``['FlavorTagInference/GN3Large.json']``. An existing local path
+    (absolute or relative to the cwd) is used as it is, otherwise the
+    file is looked up on DATAPATH with find_datafile (package data
+    installed with atlas_install_data). Each file holds exactly one
+    dict with the keys ``name`` (the output prefix of the model,
+    [A-Za-z0-9]+), ``path`` (PathResolver calibration path of the .onnx
+    file), ``dependencies`` (modifiers, see getDependencySet),
+    ``outputs`` (the names the model writes after ``<name>_``) and
+    ``flip`` (schedule the SimpleFlip variant). Returns one new dict per
+    file, in order, with ``dependencies`` a set and ``outputs`` a list.
+    """
+    if not isinstance(specs, list):
+        raise TypeError(
+            'BTagging.OptInSmallRTaggers: expected a list of .json file'
+            f' paths, got {specs!r}')
+    taggers = []
+    for entry in specs:
+        if not isinstance(entry, str):
+            raise TypeError(
+                'BTagging.OptInSmallRTaggers: every entry is the path of a'
+                f' .json file, got {entry!r}')
+        taggers.append(_loadOptInTagger(entry))
+    names = [t['name'] for t in taggers]
+    if len(set(names)) != len(names):
+        raise ValueError(
+            'BTagging.OptInSmallRTaggers: a model name is selected more than'
+            f' once: {sorted({n for n in names if names.count(n) > 1})}')
+    return taggers
+
+
 def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[str]:
     """Return the dependency modifier set for a given tagger.
 
@@ -399,7 +495,7 @@ def getDependencySet(tagger_name: str, override: set[str] | None = None) -> set[
     override : set[str] | None, optional
         Override the hardcoded list of tagger names and dependencies
         and simply return the set which is provided here. This is a
-        dev option and should not be used in the main inference. 
+        dev option and should not be used in the main inference.
         By default None
 
     Returns

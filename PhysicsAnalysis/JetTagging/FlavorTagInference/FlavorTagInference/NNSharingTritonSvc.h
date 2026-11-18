@@ -33,6 +33,12 @@ namespace FlavorTagInference
       , "Connect to the Triton server over SSL"};
     Gaudi::Property<std::string> m_tritonBearer {this, "TritonBearer", ""
       , "Bearer token for Triton server authentication"};
+    Gaudi::Property<std::vector<std::string>> m_tritonBatchedModels {this, "TritonBatchedModels", {}
+      , "Triton model names that take batched, padded inputs with *_mask inputs"};
+    Gaudi::Property<std::map<std::string, int>> m_tritonPaddedInputs {this, "TritonPaddedInputs", {}
+      , "For batched models: sequence input name -> number of objects to pad to"};
+    Gaudi::Property<std::map<std::string, std::string>> m_tritonOutputRenames {this, "TritonOutputRenames", {}
+      , "For batched models: output name in the ONNX file -> output name on the Triton model"};
     Gaudi::Property<std::set<std::string>> m_tritonModelsNames{this, "TritonModelsNames", {}
       , "The set of ModelFile:ModelName pairs"};
 

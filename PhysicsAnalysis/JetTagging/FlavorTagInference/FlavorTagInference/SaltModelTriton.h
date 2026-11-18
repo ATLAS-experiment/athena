@@ -17,6 +17,9 @@
 #include "grpc_client.h"
 #include "grpc_service.pb.h"
 
+#include <atomic>
+#include <map>
+
 namespace Ort {
   class Session;
 }
@@ -34,7 +37,9 @@ namespace FlavorTagInference {
 		    , int port
 		    , const std::string& url
 		    , bool useSSL
-		    , const std::string& bearer = "");
+		    , const std::string& bearer = ""
+		    , const std::map<std::string, int>& padded_inputs = {}
+		    , const std::map<std::string, std::string>& output_renames = {});
 
     virtual InferenceOutput runInference(InputMap& gnn_inputs) const override;
 
@@ -63,6 +68,15 @@ namespace FlavorTagInference {
     std::string                       m_url{};
     bool                              m_useSSL{false};
     std::string                       m_bearer{};
+
+    // Batched-model mode (salt --batched-standalone export served with dynamic
+    // batching): sequence inputs listed here are sent as [1, N, F], zero padded
+    // to N objects, with a boolean <input>_mask [1, N] (true = padding).
+    // Empty map = standard per-jet interface.
+    std::map<std::string, int>         m_paddedInputs;
+    // Athena output name -> output name of the Triton model, where they differ
+    std::map<std::string, std::string> m_outputRenames;
+    mutable std::atomic<size_t>        m_nTruncated{0};
   }; // Class SaltModelnTriton
 } // end of FlavorTagInference namespace
 

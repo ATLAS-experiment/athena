@@ -12,6 +12,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from AthenaConfiguration.Enums import LHCPeriod
+from FlavorTagInference.FlavorTagNNConfig import (
+    OPT_IN_SMALL_R_JET_COLLECTION,
+    resolveOptInSmallRTaggers,
+)
+from JetTagConfig.BTaggingConfigFlags import isRun3Derivation
 
 if TYPE_CHECKING:
     from AthenaConfiguration.AthConfigFlags import AthConfigFlags
@@ -53,6 +58,35 @@ def _get_large_r_discriminant_vars(
 
     flavours = ["hbb", "hcc", "top", "qcd"] + extra_flavours
     return [f"{name}_p{flavour}" for flavour in flavours]
+
+
+def _get_opt_in_small_r_vars(flags: AthConfigFlags, jetcol: str) -> list[str]:
+    """Return the outputs of the opt-in small-R taggers for a jet collection.
+
+    Opt-in taggers are selected with the BTagging.OptInSmallRTaggers flag
+    and are only scheduled on OPT_IN_SMALL_R_JET_COLLECTION in derivations
+    before Run 4 (Run 2 and Run 3; ``isRun3Derivation``). The names are
+    exactly ``<name>_<output>`` for each entry of the tagger's ``outputs``
+    in its .json file (see resolveOptInSmallRTaggers), plus the
+    ``<name>SimpleFlip_<output>`` copies when ``flip`` is set. Nothing is
+    prepended (no c/u/b), so a model which writes no ``_pu`` gets no
+    ``_pu`` in the list.
+    """
+    if flags is None or jetcol != OPT_IN_SMALL_R_JET_COLLECTION:
+        return []
+    if not isRun3Derivation(flags):
+        return []
+
+    aux: list[str] = []
+    for tagger in resolveOptInSmallRTaggers(flags.BTagging.OptInSmallRTaggers):
+        name = tagger["name"]
+        variants = [""] + (["SimpleFlip"] if tagger["flip"] else [])
+        aux += [
+            f"{name}{variant}_{output}"
+            for variant in variants
+            for output in tagger["outputs"]
+        ]
+    return aux
 
 
 def _get_standard_small_r_vars() -> list[str]:
@@ -168,6 +202,8 @@ def BTaggingStandardContent(flags: AthConfigFlags, jetcol: str) -> list[str]:
         btagging_aux += ["GN3PflowMuonsV00_ptFromTruthDressedWZJet"]
         btagging_aux += ["GN3EPCLV01_ptFromTruthDressedWZJet"]
         btagging_aux += ["GN3V03_ptFromTruthDressedWZJet"]
+
+    btagging_aux += _get_opt_in_small_r_vars(flags, jetcol)
 
     btag_content = _get_variable_list(collection=jetcol, aux_list=btagging_aux)
     return btag_content + jet_basic_content

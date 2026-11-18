@@ -1,0 +1,7 @@
+{
+    "name": "GN3Large",
+    "path": "dev/BTagging/20261031/TN25_86M/antikt4empflow/network.onnx",
+    "dependencies": ["E", "L"],
+    "outputs": ["pb", "pc", "pu", "ptau", "ptFromTruthDressedWZJet"],
+    "flip": false
+}

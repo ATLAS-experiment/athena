@@ -2,8 +2,15 @@
 
 from AthenaConfiguration.AthConfigFlags import AthConfigFlags
 from AthenaConfiguration.Enums import LHCPeriod, ProductionStep
+from FlavorTagInference.FlavorTagNNConfig import (
+    OPT_IN_SMALL_R_JET_COLLECTION,
+    resolveOptInSmallRTaggers,
+    resolveTaggerName,
+)
 # For using GeV units
 import AthenaCommon.SystemOfUnits as Units
+
+from pathlib import Path
 
 def minimumJetPtForTrackAssociation(flags):
     if flags.Trigger.doHLT:
@@ -149,7 +156,10 @@ def getNNs(flags):
 
     sv1_paths = [sv1OnnxPath(flags)] if flags.BTagging.RunSV1Onnx else []
 
-    return {
+    opt_in = (resolveOptInSmallRTaggers(flags.BTagging.OptInSmallRTaggers)
+              if isRun3Derivation(flags) else [])
+
+    nns = {
         'AntiKt4EMPFlowJets': [
             {
                 'folds': ak4_nns,
@@ -195,6 +205,41 @@ def getNNs(flags):
         ]
     }
 
+    # opt-in taggers run directly on the original jets of one collection
+    if opt_in:
+        collection = OPT_IN_SMALL_R_JET_COLLECTION
+        scheduled = {
+            resolveTaggerName(str(Path(networks['folds'][0]).parent), networks)
+            for networks in nns[collection]
+        }
+        for tagger in opt_in:
+            name = tagger['name']
+            if name in scheduled:
+                raise ValueError(
+                    f"BTagging.OptInSmallRTaggers: '{name}' is already"
+                    f" scheduled on {collection}")
+            nns[collection].append({
+                'folds': [tagger['path']],
+                'tagger_name': name,
+                'dependencies': tagger['dependencies'],
+                'flip': tagger['flip'],
+            })
+
+    # keep only the opt-in taggers, dropping every other network on every
+    # collection (e.g. to run one model alone on an inference server)
+    if flags.BTagging.OnlyOptInTaggers:
+        if not opt_in:
+            raise ValueError(
+                'BTagging.OnlyOptInTaggers is set but no opt-in tagger is'
+                ' scheduled (BTagging.OptInSmallRTaggers is empty, or this'
+                ' is not a Run 2/3 derivation)')
+        names = {tagger['name'] for tagger in opt_in}
+        nns = {collection: [n for n in networks
+                            if n.get('tagger_name') in names]
+               for collection, networks in nns.items()}
+
+    return nns
+
 
 def createBTaggingConfigFlags():
     btagcf = AthConfigFlags()
@@ -207,6 +252,21 @@ def createBTaggingConfigFlags():
     # Run the SV1 likelihood as an onnx model.
     # The probabilities are not written to any output by default.
     btagcf.addFlag("BTagging.RunSV1Onnx", False)
+
+    # Opt-in small-R taggers: paths of .json files, each holding ONE dict
+    # {name, path, dependencies, outputs, flip} (all required), used as a local path if it
+    # exists, else found on DATAPATH (see resolveOptInSmallRTaggers). GN3Large ships as
+    # FlavorTagInference/GN3Large.json. Run only on OPT_IN_SMALL_R_JET_COLLECTION, on the original
+    # (not calibrated) jets, in Run 2/3 derivations (isRun3Derivation). Derivation_tf.py:
+    #   --preExec 'flags.BTagging.OptInSmallRTaggers=["FlavorTagInference/GN3Large.json"]'
+    #   --preExec 'flags.BTagging.OptInSmallRTaggers=["/path/to/MyModel.json"]'
+    btagcf.addFlag("BTagging.OptInSmallRTaggers", [])
+
+    # Run only the taggers in BTagging.OptInSmallRTaggers and switch off all
+    # other flavour-tagging networks, on every jet collection. Their support
+    # algorithms (the opt-in tagger's dependencies) still run. Derivation_tf.py:
+    #   --preExec 'flags.BTagging.OptInSmallRTaggers=["GN3LargeBatched.json"]; flags.BTagging.OnlyOptInTaggers=True'
+    btagcf.addFlag("BTagging.OnlyOptInTaggers", False)
 
     # Run the flip taggers
     btagcf.addFlag("BTagging.RunFlipTaggers", runFlipTag)
