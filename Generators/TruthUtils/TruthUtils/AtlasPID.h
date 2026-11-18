@@ -243,6 +243,7 @@ template <> inline bool isFourthGeneration(const int& p) {return std::abs(p) == 
 
 /// PDG rule 4
 /// Diquarks have 4-digit numbers with nq1 >= nq2 and nq3 = 0
+/// PDG rule 13: only (excited) quarks, squarks and diquarks have nq3 = 0 (hence the p(2) == 0 test below).
 /// APID: states with top quarks are diquarks
 /// APID: states with fourth generation quarks are not diquarks
 template <class T> inline bool isDiquark(const T& p){return isDiquark(p->pdg_id());}
@@ -266,6 +267,7 @@ template <> inline bool isDiquark(const int& p){ if (!hasAllowedNumberOfDigits(p
 /// quark composition.
 /// PDG rule 5c:
 /// The special numbers 310 and 130 are given to the K0S and K0L respectively.
+/// PDG rule 13: only mesons, the reggeon and the pomeron have nq1 = 0 and nq2 != 0 (hence the nq1 == 0 test below).
 /// APID: The special code K0 is used when a generator uses K0S/K0L
 /// APID: states with fourth generation quarks are not mesons
 template <class T> inline bool isMeson(const T& p){return isMeson(p->pdg_id());}
@@ -301,6 +303,10 @@ template <> inline bool isQuarkonium(const DecodedPID& p) {
 template <> inline bool isQuarkonium(const int& p){ auto value_digits = DecodedPID(p); return isQuarkonium(value_digits);}
 
 ///Table 43.2
+/// PDG rule 6:
+/// The numbering of baryons is guided by the nonrelativistic quark model. 6a asks for nq1 >= nq2 >= nq3 in general, with the
+/// exceptions of 6b (nq2 and nq3 reversed for the lighter J=1/2 baryon with three different quarks) and 6e (excited singlets
+/// have nq3 > nq1 > nq2).
 /// APID: states with fourth generation quarks are not baryons
 template <class T> inline bool isBaryon(const T& p){return isBaryon(p->pdg_id());}
 template <> inline bool isBaryon(const DecodedPID& p){
@@ -309,6 +315,8 @@ template <> inline bool isBaryon(const DecodedPID& p){
   if (p.min_digit(1,4) == 0) return false; // Ignore pdg_ids with zero for nq1, nq2, nq3
   if (p.ndigits() == 4 && (p.last() == 2 || p.last() == 4|| p.last() == 6|| p.last() == 8) ) return true;
 
+  // PDG rule 6c, 6d: excited baryons (nL nq1 nq2 nq3 nJ or nr nL nq1 nq2 nq3 nJ); explicit list of the accepted
+  // nr, nL, nJ combinations.
   if (p.ndigits() == 5 && p(0) == 1 &&  (p.last() == 2 || p.last() == 4) ) return true;
   if (p.ndigits() == 5 && p(0) == 3 &&  (p.last() == 2 || p.last() == 4) ) return true;
 
@@ -350,7 +358,9 @@ template <> inline bool isTetraquark(const DecodedPID& p){
   return (p.ndigits() == 9 && p(0) == 1 && p(5) == 0 &&
           p.max_digit(1,3) < QUARK_LIMIT && p.min_digit(1,3) > 0 && // ignore 4th generation quarks for nq3 and nq4
           p.max_digit(4,6) < QUARK_LIMIT && p.min_digit(4,6) > 0 && // ignore 4th generation quarks for nq1 and nq2
-          ( p(3) >= p(4) && p(6) >= p(7) ) && ( ( p(3) > p(6) ) || ( p(3) == p(6) && (p(4) >= p(7))))
+          ( p(3) >= p(4) && p(6) >= p(7) ) && ( ( p(3) > p(6) ) || ( p(3) == p(6) && (p(4) >= p(7)))) &&
+          // Flavour-diagonal states (nq1 == nq3 and nq2 == nq4) are particles only: reject them for the antiparticle (negative code).
+          !( p.pid() < 0 && p(3) == p(6) && p(4) == p(7) )
           );
 }
 template <> inline bool isTetraquark(const int& p){ if (!hasAllowedNumberOfDigits(p,9)) return false; auto value_digits = DecodedPID(p); return isTetraquark(value_digits);}
@@ -540,6 +550,7 @@ template <> inline bool isSleptonRH(const int& p){ auto value_digits = DecodedPI
 
 
 // APID: Super-partners of gauge bosons including gravitons
+// PDG rule 11d (n = 1 for the superpartner of a boson)
 template <class T> inline bool isGaugino(const T& p) { return isGaugino(p->pdg_id()); }
 template <> inline bool isGaugino(const DecodedPID& p){
   auto pp = p.shift(1); return (p.ndigits() == 7 && p(0) == 1 && isBoson(pp.pid()));
