@@ -16,8 +16,8 @@ Sim_tf.py \
       --multithreaded 'True' \
       --maxEvents ${NEVENTS} \
       --perfmon 'fullmonmt' \
-      --conditionsTag 'default:${CONDTAG}' \
-      --geometryVersion 'default:${GEOTAG}' \
+      --conditionsTag "default:${CONDTAG}" \
+      --geometryVersion "default:${GEOTAG}" \
       --postInclude 'default:PyJobTransforms.UseFrontier' \
       --preInclude 'EVNTtoHITS:Campaigns.MC23PhaseIISimulation' \
       --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True' \

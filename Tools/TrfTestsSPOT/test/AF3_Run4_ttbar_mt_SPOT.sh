@@ -18,7 +18,7 @@ Sim_tf.py \
       --maxEvents ${NEVENTS} \
       --perfmon 'fullmonmt' \
       --conditionsTag "default:${CONDTAG}" \
-      --geometryVersion 'default:${GEOTAG}' \
+      --geometryVersion "default:${GEOTAG}" \
       --postInclude 'default:PyJobTransforms.UseFrontier' \
       --preInclude 'EVNTtoHITS:Campaigns.MC23PhaseIISimulation' \
       --preExec "EVNTtoHITS:flags.Sim.FastCalo.ParamsInputFilename=\"FastCaloSim/MC23/TFCSparam_dev_Hybrid_D_v1_all_baryons_0_500.root\";" \

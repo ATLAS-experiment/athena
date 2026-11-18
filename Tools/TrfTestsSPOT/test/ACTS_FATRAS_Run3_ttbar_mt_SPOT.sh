@@ -16,6 +16,7 @@ export TRF_ECHO=1;
 export ATHENA_CORE_NUMBER=${NTHREADS};
 
 Sim_tf.py \
+      --multithreaded 'True' \
       --maxEvents ${NEVENTS} \
       --perfmon 'fullmonmt' \
       --conditionsTag "default:${CONDTAG}" \
