@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "egammaLayerRecalibTool/corr_HV_EMBPS.h"
@@ -15,31 +15,29 @@
 
 #include "PathResolver/PathResolver.h"
 
-
-corr_HV_EMBPS::corr_HV_EMBPS(){
+corr_HV_EMBPS::corr_HV_EMBPS() {
   std::string filename = PathResolverFindCalibFile("egammaLayerRecalibTool/v1/HVmaps_embps_2012.root");
-  m_file = TFile::Open(filename.c_str());
-  if (not m_file or m_file->IsZombie()) {
+  auto file = std::unique_ptr<TFile>(TFile::Open(filename.c_str()));
+  if (not file or file->IsZombie()) {
     std::cerr << "FATAL: cannot open " << filename << std::endl;
-  }
-  else {
-    for (int iperiod=0;iperiod<6;iperiod++) {
-      for (int igap=0;igap<2;igap++) {
-	char name[12];
-	snprintf(name,sizeof(name),"h%d%d",iperiod+1,igap);
-	m_hHV[iperiod][igap]=(TProfile2D*) (m_file->Get(name));
-	if (not m_hHV[iperiod][igap]) {
-	  std::cerr << "FATAL: cannot find " << name << std::endl;
-	}
+  } else {
+    for (int iperiod = 0; iperiod < 6; iperiod++) {
+      for (int igap = 0; igap < 2; igap++) {
+        char name[12];
+        snprintf(name, sizeof(name), "h%d%d", iperiod + 1, igap);
+        TProfile2D* obj = dynamic_cast<TProfile2D*>(file->Get(name));
+        if (not obj) {
+          std::cerr << "FATAL: cannot find " << name << std::endl;
+        } else {
+          obj->SetDirectory(nullptr);
+          m_hHV[iperiod][igap].reset(obj);
+        }
       }
     }
   }
 }
 //===============================================================================
-corr_HV_EMBPS::~corr_HV_EMBPS()
-{
-    m_file->Close();
-}
+corr_HV_EMBPS::~corr_HV_EMBPS() = default;
 
 //===============================================================================
 float corr_HV_EMBPS::getCorr(int run, float eta,float phi) const
@@ -96,7 +94,7 @@ float corr_HV_EMBPS::getCorr(int run, float eta,float phi) const
 
 //===============================================================================
 // return scale factor of response vs HV used in reconstruction
-float corr_HV_EMBPS::getRecoCorrection(float hv,float eta) 
+float corr_HV_EMBPS::getRecoCorrection(float hv,float eta)
 {
       float nominal = 2000.;
       float T = 88.37;
@@ -117,7 +115,7 @@ float corr_HV_EMBPS::getRecoCorrection(float hv,float eta)
 }
 
 //===============================================================================
-float corr_HV_EMBPS::Respo(float e, float e_nominal,float tempe)  
+float corr_HV_EMBPS::Respo(float e, float e_nominal,float tempe)
 {
   if (e < -999.) return 1.;
   if (e < 0.01) return 0;
@@ -128,7 +126,7 @@ float corr_HV_EMBPS::Respo(float e, float e_nominal,float tempe)
 }
 
 //===============================================================================
-float corr_HV_EMBPS::InvCharge(float e) 
+float corr_HV_EMBPS::InvCharge(float e)
 {
   float q = 1.;
   if ( e > 2.) q=(1.+0.36/e);
@@ -137,18 +135,20 @@ float corr_HV_EMBPS::InvCharge(float e)
 }
 
 //===============================================================================
-float corr_HV_EMBPS::vdrift(float e, float tempe) 
+float corr_HV_EMBPS::vdrift(float e, float tempe)
 {
   const float T = tempe;
   static const float P[6] = {-0.01481,-0.0075,0.141,12.4,1.627,0.317};
   if ( e < -999.) return 0.;
-  float vd = (P[0]*T+1)*( P[2]*e*std::log(1+ (P[3]/e)) + P[4]*std::pow(e,P[5])) + P[1]*T; // vdrift formula walcowialk mm/micro_s
+  // vdrift formula walcowialk mm/micro_s
+  float vd = (P[0] * T + 1) * (P[2] * e * std::log(1 + (P[3] / e)) +
+                               P[4] * std::pow(e, P[5])) + P[1] * T;
   return vd;
 }
 
 
 //===============================================================================
-float corr_HV_EMBPS::getDataCorrection(float hv,float eta) 
+float corr_HV_EMBPS::getDataCorrection(float hv,float eta)
 //
 // values are measured 1 +   <Eraw0_end of run>-<Eraw0 beginning of run> / <Eraw0>  (i.e <Eraw end>/<Eraw begin>)
 //  for the sectors with both sides going from 1600->1200V from beginning to end of run
@@ -169,7 +169,7 @@ float corr_HV_EMBPS::getDataCorrection(float hv,float eta)
 }
 
 //===============================================================================
-float corr_HV_EMBPS::getExtraScaleFactor() 
+float corr_HV_EMBPS::getExtraScaleFactor()
 {
    return 1.013;
 }
