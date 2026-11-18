@@ -5,9 +5,9 @@ Configuration for the FTAG ghost truth labels of taus.
 
 The labels are taken from the seed jet of each tau and copied to the tau by the
 TauSeedJetLabelCopyAlg. By default the seed jets are the standard AntiKt4LCTopo
-jets of the full event, which carry the truth labels on MC, and are found
-through the tau jet link. Alternatively, the TauSeedJetAlg builds the seed jets
-again from the tau clusters only, with the truth ghosts associated.
+jets of the full event, which carry the truth labels on MC, and are matched
+to the taus by their clusters. Alternatively, the TauSeedJetAlg builds the
+seed jets again from the tau clusters only, with the truth ghosts associated.
 """
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
@@ -124,7 +124,7 @@ def TauGhostLabelCfg(flags, tau_collection="TauJets", full_event=True, **kwargs)
             flags,
             tau_collection=tau_collection,
             SeedJets="AntiKt4LCTopoJets",
-            SeedJetLink="jetLink",
+            MatchConstituents=True,
         ))
         return acc
 
