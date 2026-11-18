@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonAGDDBase/sTGCHandler.h"
 #include "MuonAGDDBase/AGDDsTGC.h"
 #include "AGDDControl/AGDDController.h"
-#include <iostream>
 
 
 sTGCHandler::sTGCHandler(const std::string& s,
@@ -46,7 +45,7 @@ void sTGCHandler::ElementHandle(AGDDController& c,
         m_sTGCCurrent = b;
 	b->SetXYZ(vvv);
 	b->subType(sType);
-	b->tech=technology;
+	b->tech = std::move(technology);
 	
 	double xf=getAttributeAsDouble(c, t, "xFrame",0.);
 	b->xFrame(xf);

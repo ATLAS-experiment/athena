@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/MMSpacer.h"
@@ -29,13 +29,18 @@ namespace MuonGM {
 
     MMSpacer::MMSpacer(const MYSQL& mysql, Component *ss) : DetectorElement(ss->name) {
         MMSpacerComponent *s = dynamic_cast<MMSpacerComponent*>(ss);
-        m_component = s;
-        width = s->dx1;
-        longWidth = s->dx2;
-        length = s->dy;
-        name = s->name;
-        thickness = s->GetThickness(mysql);
-        index = s->index;
+        if (!s)[[unlikely]]{
+          MsgStream log(Athena::getMessageSvc(), "MuonGM::MMSpacer");
+          log << MSG::ERROR <<"Dynamic cast failed." <<endmsg;
+        } else {
+          m_component = s;
+          width = s->dx1;
+          longWidth = s->dx2;
+          length = s->dy;
+          name = s->name;
+          thickness = s->GetThickness(mysql);
+          index = s->index;
+        }
     }
 
     GeoPhysVol *MMSpacer::build(StoredMaterialManager& matManager,
@@ -52,6 +57,11 @@ namespace MuonGM {
                                 const std::vector<Cutout *>&) {
 
         const MMSpacer_Technology *t = dynamic_cast<const MMSpacer_Technology*>(mysql.GetTechnology(name));
+        if (!t)[[unlikely]]{
+          MsgStream log(Athena::getMessageSvc(), "MuonGM::MMSpacer");
+          log << MSG::ERROR <<"build: Dynamic cast failed." <<endmsg;
+          return {};
+        }
         thickness = t->Thickness();
 
         // Build Micromegas mother volume out of G10

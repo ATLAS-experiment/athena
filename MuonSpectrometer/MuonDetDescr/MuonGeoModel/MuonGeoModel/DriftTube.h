@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DriftTube_H
@@ -8,7 +8,7 @@
 #include "MuonGeoModel/DetectorElement.h"
 
 #include <string>
-
+class StoredMaterialManager;
 class GeoVPhysVol;
 
 namespace MuonGM {

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/DriftTube.h"
@@ -18,7 +18,6 @@
 
 #include <GaudiKernel/IMessageSvc.h>
 #include <GaudiKernel/MsgStream.h>
-#include <iostream>
 #include <string>
 #include <utility>
 
@@ -33,9 +32,14 @@ namespace MuonGM {
           length(0.) // length is set in MultiLayer.cxx
     {
         const MDT *md = dynamic_cast<const MDT*>(mysql.GetTechnology(name.substr(0, 5)));
-        gasRadius = md->innerRadius;
-        outerRadius = gasRadius + md->tubeWallThickness;
-        plugLength = md->tubeEndPlugLength;
+        if (!md)[[unlikely]]{
+          MsgStream log(Athena::getMessageSvc(), "MuonGM::DriftTube");
+          log << MSG::ERROR <<"Dynamic cast failed in DriftTube::DriftTube"<<endmsg;
+        } else {
+          gasRadius = md->innerRadius;
+          outerRadius = gasRadius + md->tubeWallThickness;
+          plugLength = md->tubeEndPlugLength;
+        }
     }
 
     GeoVPhysVol *DriftTube::build(StoredMaterialManager& matManager) {

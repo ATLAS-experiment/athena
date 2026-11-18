@@ -1,9 +1,10 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Ded.h"
 
+#include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "GeoModelKernel/GeoCutVolAction.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/GeoLogVol.h"
@@ -42,6 +43,11 @@ namespace MuonGM {
     PVLink Ded::build(StoredMaterialManager& matManager, const MYSQL& mysql,
                       int cutoutson, const std::vector<Cutout *>& vcutdef) {
         const DED *r = dynamic_cast<const DED*>(mysql.GetTechnology(name));
+        if (!r)[[unlikely]]{
+          MsgStream log(Athena::getMessageSvc(), "MuonGM::Ded");
+          log << MSG::ERROR <<"Dynamic cast failed in Ded::build"<<endmsg;
+          return {};
+        }
 
         double tckaluminum = r->AlThickness;
         double honthickness = r->HoneyCombThickness;

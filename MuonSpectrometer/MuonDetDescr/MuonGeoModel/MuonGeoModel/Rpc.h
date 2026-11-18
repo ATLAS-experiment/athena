@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef Rpc_H
@@ -9,6 +9,8 @@
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "MuonGeoModel/RpcComponent.h"
 
+
+class StoredMaterialManager;
 namespace MuonGM {
   class MYSQL;
 }

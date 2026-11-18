@@ -1,15 +1,17 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CscMultiLayer_H
 #define CscMultiLayer_H
 
 #include "MuonGeoModel/DetectorElement.h"
-///
-#include "GeoModelKernel/GeoShape.h"
-#include "GeoModelKernel/GeoVPhysVol.h"
+#include <array>
+#include <vector>
+#include <string>
 
+class GeoVPhysVol;
+class StoredMaterialManager;
 
 namespace MuonGM {
 

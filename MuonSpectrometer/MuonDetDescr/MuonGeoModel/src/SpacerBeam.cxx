@@ -5,6 +5,7 @@
 #include "MuonGeoModel/SpacerBeam.h"
 
 #include "AthenaKernel/getMessageSvc.h"
+#include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/GeoLogVol.h"

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/CscMultiLayer.h"
@@ -38,9 +38,15 @@ namespace MuonGM {
 
     CscMultiLayer::CscMultiLayer(const MYSQL& mysql, const std::string& n) : DetectorElement(n) {
         const CSC *md = dynamic_cast<const CSC*>(mysql.GetTechnology(name));
-        nrOfLayers = md->numOfLayers;
-        cscthickness = md->totalThickness;
-        thickness = cscthickness;
+        if (!md)[[unlikely]]{
+          MsgStream log(Athena::getMessageSvc(), "MuonGM::CscMultiLayer");
+          log << MSG::ERROR << "CscMultiLayer dynamic cast failed. " << endmsg;
+        } else {
+          //set public data members
+          nrOfLayers = md->numOfLayers;
+          cscthickness = md->totalThickness;
+          thickness = cscthickness;
+        }
     }
 
     GeoVPhysVol *CscMultiLayer::build(StoredMaterialManager& matManager,
@@ -55,6 +61,11 @@ namespace MuonGM {
                                       int /*cutoutson*/,
                                       const std::vector<Cutout *>& /*vcutdef*/) {
         const CSC *md = dynamic_cast<const CSC*>(mysql.GetTechnology(name));
+        if (!md)[[unlikely]]{
+          MsgStream log(Athena::getMessageSvc(), "MuonGM::CscMultiLayer");
+          log << MSG::ERROR << "CscMultiLayer::build: cast failed. " << endmsg;
+          return {};
+        }
 
         // define the chamber volumes --- for CSS and CSL
 

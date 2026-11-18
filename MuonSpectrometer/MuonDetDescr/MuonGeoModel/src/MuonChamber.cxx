@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "GeoPrimitives/GeoPrimitives.h"
@@ -46,6 +46,7 @@
 #include "MuonIdHelpers/TgcIdHelper.h"
 //
 #include "GaudiKernel/SystemOfUnits.h"
+#include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "GeoModelKernel/GeoBox.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/GeoFullPhysVol.h"
@@ -354,12 +355,9 @@ namespace MuonGM {
                 if (nRpc == 1)
                     nDoubletR++;
                 double depth = -thickness / 2. + d->posz + d->GetThickness(mysql) / 2.;
-                // std::cerr << " nRpc, nDoubletR, depth " << nRpc << " " << nDoubletR
-                //           << " " << depth;
                 // BI RPC Chambers have one one doubletR
                 if (!(stname.compare(0, 2, "BI") == 0) && nDoubletR == 1 && nRpc > 1 && depth * previous_depth < 0)
                     nDoubletR++;
-                // std::cerr<<" updated to "<<nDoubletR<<std::endl;
 
                 previous_depth = depth;
             }
@@ -385,6 +383,10 @@ namespace MuonGM {
             std::string_view cname = std::string_view(c->name).substr(0, 2);
             if (cname == "LB") {
                 const LBI *lb = dynamic_cast<const LBI *>(mysql.GetTechnology(c->name));
+                if (!lb)[[unlikely]]{
+                  ATH_MSG_ERROR("Dynamic cast failed");
+                  return {};
+                }
                 LByShift = lb->yShift;
 
                 numLB++;
@@ -1339,6 +1341,10 @@ namespace MuonGM {
         }
 
         const CSC *thisc = dynamic_cast<const CSC*>(mysql.GetTechnology(tname));
+        if (!thisc)[[unlikely]]{
+          ATH_MSG_ERROR("setCscReadoutGeom: Dynamic cast failed ");
+          return;
+        }
         re->m_anodecathode_distance = thisc->anocathodist;
         re->m_ngasgaps = thisc->numOfLayers;
         re->m_nstriplayers = thisc->numOfLayers;
@@ -1383,6 +1389,10 @@ namespace MuonGM {
         std::string tname = cc->name;
         re->setTechnologyName(tname);
         const MDT *thism = dynamic_cast<const MDT*>(mysql.GetTechnology(tname));
+        if (!thism)[[unlikely]]{
+          ATH_MSG_ERROR("dynamic_cast failed");
+          return;
+        }
         re->m_nlayers = thism->numOfLayers;
         re->m_tubepitch = thism->pitch;
         re->m_tubelayerpitch = thism->y[1] - thism->y[0];
@@ -1439,6 +1449,10 @@ namespace MuonGM {
         std::string tname = cc->name;
         re->setTechnologyName(tname);
         const RPC *thisr = dynamic_cast<const RPC*>(mysql.GetTechnology(tname));
+        if (!thisr)[[unlikely]]{
+          ATH_MSG_ERROR("setRpcReadoutGeom: Dynamic cast failed ");
+          return;
+        }
         re->m_nphigasgaps = thisr->NGasGaps_in_s;
         re->m_gasgapssize = re->m_Ssize / re->m_nphigasgaps - 2. * thisr->bakeliteframesize;
         re->m_gasgapzsize = re->m_Zsize - 2. * thisr->bakeliteframesize;
@@ -1451,7 +1465,10 @@ namespace MuonGM {
 
         }
         const RPC* genericRpc = dynamic_cast<const RPC*>(mysql.GetATechnology("RPC0"));
-
+        if (!genericRpc)[[unlikely]]{
+          ATH_MSG_ERROR("setRpcReadoutGeom: Dynamic cast failed ");
+          return;
+        }
         if (re->numberOfLayers() == 3) {
             constexpr double rpc3GapLayerThickness = 11.8;  // gas vol. + ( bakelite + graphite + PET )x2
             for (int gasGap =1 ; gasGap <= re->numberOfLayers(); ++gasGap) {
@@ -1517,6 +1534,10 @@ namespace MuonGM {
         re->setLongZsize(cc->GetThickness(mysql));
 
         const TGC *genericTgc = dynamic_cast<const TGC*>(mysql.GetATechnology("TGC0"));
+        if (!genericTgc)[[unlikely]]{
+          ATH_MSG_ERROR( "setTgcReadoutGeom: dynamic cast failed ");
+          return;
+        }
         re->setFrameThickness(genericTgc->frame_h,
                               genericTgc->frame_ab);
 
@@ -1538,6 +1559,10 @@ namespace MuonGM {
         re->setReadOutParams(mysql.GetTgcRPars(tname_index));
 
         const TGC *thist = dynamic_cast<const TGC*>(mysql.GetTechnology(tname));
+        if (!thist)[[unlikely]]{
+          ATH_MSG_ERROR( "setTgcReadoutGeom: dynamic cast failed ");
+          return;
+        }
         const std::size_t ncomp = (thist->materials).size();
 
         unsigned int gasGap{0};

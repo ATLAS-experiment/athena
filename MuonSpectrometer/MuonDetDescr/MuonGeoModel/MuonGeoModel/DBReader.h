@@ -14,13 +14,12 @@
 #define MUONGEOMODEL_DBREADER_H
 
 #include "MuonReadoutGeometry/GlobalUtilities.h"
-//<<<<<< INCLUDES                                                       >>>>>>
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/SystemOfUnits.h"
 #include "StoreGate/StoreGateSvc.h"
 
+
 #include <atomic>
-#include <iostream>
 #include <string>
 
 // WMDT - Mdt inner structure
@@ -632,6 +631,10 @@ namespace MuonGM {
         MsgStream log(Athena::getMessageSvc(), "MuGM:ProcPosition");
 
         const MDT *mdtobj = dynamic_cast<const MDT*>(mysql.GetATechnology("MDT0"));
+        if (!mdtobj)[[unlikely]]{
+          log << MSG::ERROR << "Dynamic cast failed."<<endmsg;
+          return;
+        }
         double default_halfpitch = 0.5 * (mdtobj->pitch);
         double halfpitch = default_halfpitch;
 
@@ -690,7 +693,7 @@ namespace MuonGM {
                     njtyp++;
                     jtypvec.push_back(std::string(aptp[ipos].type, 0, 3));
                 }
-                oldnamejtyp = namejtyp;
+                oldnamejtyp = std::move(namejtyp);
             }
 
             Station *stat = mysql.GetStation(name);

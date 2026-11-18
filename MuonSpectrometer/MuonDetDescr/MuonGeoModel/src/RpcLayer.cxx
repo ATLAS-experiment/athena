@@ -5,6 +5,8 @@
 #include "MuonGeoModel/RpcLayer.h"
 ///
 #include "AthenaKernel/getMessageSvc.h"
+#include "GeoModelInterfaces/StoredMaterialManager.h"
+
 #include "GeoModelKernel/GeoCutVolAction.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"

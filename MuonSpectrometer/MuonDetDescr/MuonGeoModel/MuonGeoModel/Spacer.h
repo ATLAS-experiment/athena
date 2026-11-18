@@ -9,6 +9,7 @@
 #include "MuonGeoModel/SpaComponent.h"
 
 class GeoVPhysVol;
+class StoredMaterialManager;
 
 namespace MuonGM {
     class MYSQL;

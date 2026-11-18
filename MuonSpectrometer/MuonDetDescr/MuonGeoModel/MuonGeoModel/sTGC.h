@@ -9,6 +9,8 @@
 
 #include <vector>
 
+class StoredMaterialManager;
+
 class GeoFullPhysVol;
 
 namespace MuonGM {
