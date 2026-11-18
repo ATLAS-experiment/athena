@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArEventTest/DumpLArRawChannels.h"
+#include "DumpLArRawChannels.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "xAODEventInfo/EventInfo.h"
 //#include "testpack/compdigit.h"

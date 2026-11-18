@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArEventTest/FakeLArOFCs.h"
+#include "FakeLArOFCs.h"
 #include "LArRawConditions/LArOFCComplete.h"
 #include "LArIdentifier/LArOnlineID.h"
 

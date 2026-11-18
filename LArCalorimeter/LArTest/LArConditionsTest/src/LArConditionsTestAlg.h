@@ -29,7 +29,7 @@
 #include "LArCabling/LArOnOffIdMapping.h"
 #include "LArRecConditions/LArCalibLineMapping.h"
 #include "LArRecConditions/LArFebRodMapping.h"
-#include "LArConditionsTest/LArRampPTmp.h" 
+#include "LArRampPTmp.h" 
 
 
 class LArOnlineID; 

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArEventTest/FindDuplicatedLArDigits.h"
+#include "FindDuplicatedLArDigits.h"
 #include "CaloIdentifier/CaloGain.h"
 #include "xAODEventInfo/EventInfo.h"
 

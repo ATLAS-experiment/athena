@@ -1,7 +1,7 @@
-#include "LArCalibTest/LArCablingChecker.h"
-#include "LArCalibTest/LArReadHadDMCoeffFile.h"
-#include "LArCalibTest/LArReadHadDMCoeffFile2.h"
-#include "LArCalibTest/DumpCaloBadChannels.h"
+#include "../LArCablingChecker.h"
+#include "../LArReadHadDMCoeffFile.h"
+#include "../LArReadHadDMCoeffFile2.h"
+#include "../DumpCaloBadChannels.h"
 
 
 

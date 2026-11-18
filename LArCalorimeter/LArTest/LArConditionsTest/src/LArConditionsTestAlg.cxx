@@ -12,7 +12,7 @@
  * @author Hong Ma      <hma@bnl.gov>
  */
 
-#include "LArConditionsTest/LArConditionsTestAlg.h"
+#include "LArConditionsTestAlg.h"
 
 #include "LArIdentifier/LArOnlineID.h"
 #include "CaloIdentifier/CaloCell_ID.h"

@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArConditionsTest/LArCablingTest.h"
+#include "LArCablingTest.h"
 
 #include "LArIdentifier/LArOnlineID.h"
 #include "CaloIdentifier/CaloIdManager.h"

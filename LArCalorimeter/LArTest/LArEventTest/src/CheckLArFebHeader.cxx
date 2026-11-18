@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArEventTest/CheckLArFebHeader.h"
+#include "CheckLArFebHeader.h"
 #include <vector>
 #include "GaudiKernel/IToolSvc.h"
 #include "LArRawEvent/LArFebHeaderContainer.h"

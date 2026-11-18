@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArEventTest/CaloClusterNavTest.h"
+#include "CaloClusterNavTest.h"
 
 #include "CaloEvent/CaloCellContainer.h"
 #include "CaloEvent/CaloCell.h"

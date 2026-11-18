@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArCalibTest/DumpCaloBadChannels.h"
+#include "DumpCaloBadChannels.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/ThreadLocalContext.h"
 #include "CaloIdentifier/CaloCell_ID.h"

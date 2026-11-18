@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArCalibTest/LArReadHadDMCoeffFile.h"
+#include "LArReadHadDMCoeffFile.h"
 #include "GaudiKernel/MsgStream.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "StoreGate/StoreGateSvc.h"

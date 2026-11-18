@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArEventTest/FakeLArTimeOffset.h"
+#include "FakeLArTimeOffset.h"
 #include "LArRawConditions/LArFEBTimeOffset.h"
 #include "LArRawConditions/LArGlobalTimeOffset.h"
 

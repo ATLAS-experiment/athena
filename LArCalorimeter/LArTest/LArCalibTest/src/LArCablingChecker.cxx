@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "LArCalibTest/LArCablingChecker.h"
+#include "LArCablingChecker.h"
 #include "LArRawEvent/LArDigit.h"
 #include "CaloIdentifier/CaloCell_ID.h"
 #include "LArRawConditions/LArCalibParams.h"

@@ -13,7 +13,7 @@
  *
  * $Id: LArCondDataTest.cxx,v 1.7 2009-04-27 15:53:09 gunal Exp $ */
 
-#include "LArConditionsTest/LArCondDataTest.h"
+#include "LArCondDataTest.h"
 
 #include "StoreGate/StoreGateSvc.h"
 
