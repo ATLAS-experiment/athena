@@ -26,7 +26,6 @@
 #include "xAODCaloEvent/CaloClusterFwd.h"
 #include "xAODEgamma/ElectronFwd.h"
 #include "xAODEgamma/PhotonFwd.h"
-#include "xAODJet/Jet.h"
 #include "xAODMuon/Muon.h"
 #include "xAODTracking/TrackParticleFwd.h"
 #endif
@@ -38,8 +37,6 @@ protected:
   // Additional information that can be returned by the classifier.
   // Originally, these were all held in member variables in the classifier,
   // but that prevents the classifier methods from being made const.
-  // Not all of these are filled by all classifier calls; it would probably
-  // be better to split this up into a hierarchy of structures.
   class Info
   {
   public:
@@ -53,21 +50,6 @@ protected:
 
     MCTruthPartClassifier::ParticleOutCome particleOutCome = MCTruthPartClassifier::UnknownOutCome;
 
-#ifndef GENERATIONBASE /*Disable when no reconstruction packages are expected*/
-    float deltaRMatch = -999;
-    float deltaPhi = -999;
-    float probTrkToTruth = 0;
-    uint8_t numOfSiHits = 0;
-
-    std::vector<const xAOD::TruthParticle*> egPartPtr;
-    std::vector<float> egPartdR;
-    std::vector<std::pair<MCTruthPartClassifier::ParticleType, MCTruthPartClassifier::ParticleOrigin>> egPartClas;
-
-    std::vector<const xAOD::TrackParticle*> cnvPhotTrkPtr;
-    std::vector<const xAOD::TruthParticle*> cnvPhotTrkToTruthPart;
-    std::vector<MCTruthPartClassifier::ParticleType> cnvPhotPartType;
-    std::vector<MCTruthPartClassifier::ParticleOrigin> cnvPhotPartOrig;
-#endif
   };
 public:
   /** Virtual destructor */

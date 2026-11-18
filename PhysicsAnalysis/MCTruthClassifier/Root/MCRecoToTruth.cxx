@@ -60,23 +60,6 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::Photon* phot, IMCTruthCla
   if (!clus) return std::make_pair(parttype, partorig);
   if (std::fabs(clus->eta()) > 10.0 || std::fabs(clus->phi()) > 6.28 || (clus->et()) <= 0.)  return std::make_pair(parttype, partorig);
 
-  const xAOD::Vertex* VxCvPtr = phot->vertex();
-  if (VxCvPtr != nullptr) {
-    for (int itrk = 0; itrk < (int)VxCvPtr->nTrackParticles(); itrk++) {
-      if (itrk > 1) continue;
-      const xAOD::TrackParticle* trkPtr = VxCvPtr->trackParticle(itrk);
-      if (!trkPtr) continue;
-      const xAOD::TruthParticle* thePart = getGenPart(trkPtr);
-      std::pair<ParticleType, ParticleOrigin> classif = particleTruthClassifier(thePart, info);
-      if (info) {
-        info->cnvPhotTrkPtr.push_back(trkPtr);
-        info->cnvPhotTrkToTruthPart.push_back(thePart);
-        info->cnvPhotPartType.push_back(classif.first);
-        info->cnvPhotPartOrig.push_back(classif.second);
-      }
-    }
-  }
-
   const xAOD::TruthParticle* genPart = nullptr;
 #ifndef XAOD_ANALYSIS // Fwd electron available only in Athena
   genPart = egammaClusMatch(clus, false, info);
@@ -127,18 +110,11 @@ MCTruthClassifier::particleTruthClassifier(const xAOD::CaloCluster* clus, IMCTru
 }
 
 const xAOD::TruthParticle*
-MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, IMCTruthClassifier::Info* info /*= nullptr*/) const
+MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk) const
 {
   // return GenParticle corresponding to given TrackParticle
   ATH_MSG_DEBUG("Executing getGenPart ");
   if (!trk) return nullptr;
-  if (info) {
-    info->deltaRMatch = -999.;
-    info->deltaPhi = -999.;
-    info->probTrkToTruth = 0;
-    info->numOfSiHits = 0;
-  }
-
   uint8_t NumOfPixHits = 0;
   uint8_t NumOfSCTHits = 0;
   typedef ElementLink<xAOD::TruthParticleContainer> TruthLink_t;
@@ -159,15 +135,6 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, IMCTruthClassifier
   if (!theGenParticle) {
     ATH_MSG_DEBUG("Could not find truth matching for track");
     return nullptr;
-  }
-
-  if (info) {
-    static const SG::Accessor<float> tMP("truthMatchProbability");
-    if (tMP.isAvailable(*trk)) {
-      info->probTrkToTruth = tMP(*trk);
-    } else {
-      ATH_MSG_DEBUG("Truth match probability not available");
-    }
   }
 
   if (theGenParticle->status() == 3) {
@@ -215,11 +182,6 @@ MCTruthClassifier::getGenPart(const xAOD::TrackParticle* trk, IMCTruthClassifier
   if ((NumOfSiHits > m_NumOfSiHitsCut && deltaRMatch > m_deltaRMatchCut) ||
       (NumOfSiHits <= m_NumOfSiHitsCut && deltaPhi > m_deltaPhiMatchCut)) theGenParticle = nullptr;
 
-  if (info) {
-    info->deltaRMatch = deltaRMatch;
-    info->deltaPhi = deltaPhi;
-    info->numOfSiHits = NumOfSiHits;
-  }
   ATH_MSG_DEBUG("getGenPart  succeeded ");
   return (theGenParticle);
 }

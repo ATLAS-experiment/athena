@@ -40,7 +40,6 @@ CREATED:  Sep 2007
 #include "xAODEgamma/Electron.h"
 #include "xAODEgamma/Photon.h"
 #include "xAODMuon/Muon.h"
-#include "xAODJet/Jet.h"
 #endif
 
 #if !defined(XAOD_ANALYSIS) && !defined(GENERATIONBASE)
@@ -119,7 +118,6 @@ public:
     declareProperty("NumOfSiHitsCut", m_NumOfSiHitsCut = 3,
                     "Number of silicon (pixel + SCT) hits on a track that decides whether deltaRMatchCut "
                     "(more hits than this) or deltaPhiMatchCut (this many or fewer) is applied");
-    declareProperty("jetPartDRMatch", m_jetPartDRMatch = 0.4);
 #endif
   }
   virtual ~MCTruthClassifier()  = default ;
@@ -177,7 +175,7 @@ protected:
 public:
 #ifndef GENERATIONBASE /*These can not run in Generation only release*/
   //Main method for Track to Truth association
-  const xAOD::TruthParticle* getGenPart(const xAOD::TrackParticle*, IMCTruthClassifier::Info* info = nullptr) const;
+  const xAOD::TruthParticle* getGenPart(const xAOD::TrackParticle*) const;
 #ifndef XAOD_ANALYSIS
   //Main method for egamma clusters to Truth Particle association
   const xAOD::TruthParticle* egammaClusMatch(const xAOD::CaloCluster*,bool,IMCTruthClassifier::Info* info) const;
@@ -255,7 +253,6 @@ private:
   float m_deltaRMatchCut;                 ///< max dR track - truth particle if the track has more than NumOfSiHitsCut Si hits
   float m_deltaPhiMatchCut;               ///< max delta phi track - truth particle if the track has at most NumOfSiHitsCut Si hits
   int   m_NumOfSiHitsCut;                 ///< Si (pixel + SCT) hit count selecting between deltaRMatchCut and deltaPhiMatchCut
-  float m_jetPartDRMatch;
 #endif
 };
 #endif // MCTRUTHCLASSIFIER_MCTRUTHCLASSIFIER_H
