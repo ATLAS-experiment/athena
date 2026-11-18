@@ -75,4 +75,7 @@
   <function name="SGdebug::aux_var_as_string"/>
   <function name="SGdebug::print_aux_vars"/>
   <function name="SGdebug::dump_aux_vars"/>
+
+  <class name="CxxUtils::ClassName"/>
+  <class name="CxxUtils::ClassName::Rules"/>
 </lcgdict>
