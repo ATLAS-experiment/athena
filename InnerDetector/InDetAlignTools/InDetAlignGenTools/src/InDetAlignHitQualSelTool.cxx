@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "TrkTrack/TrackStateOnSurface.h"
@@ -17,35 +17,6 @@
 #include "InDetAlignHitQualSelTool.h"
 
 using namespace std ;
-
-InDetAlignHitQualSelTool::InDetAlignHitQualSelTool( const std::string& t
-                                                  , const std::string& n
-                                                  , const IInterface*  p
-                                                  )
-  : AthAlgTool(t,n,p)
-  , m_rejectOutliers( true )
-  , m_maxClusterSize( 5 )
-  , m_rejectEdgeChannels( true )
-  , m_rejectGangedPixels( false )
-  , m_maxIncidAngle( 0.8 ) //!< corresponds to 45 deg. -- recomm. by pixel ppl
-  , m_acceptIBLHits( true )
-  , m_acceptPixelHits( true )
-  , m_acceptSCTHits( true )
-  , m_PIXManager{}
-  , m_pixelid{}
-  , m_sctID{} 
-{
-  declareInterface<IInDetAlignHitQualSelTool>(this) ;
-  declareProperty( "RejectOutliers",         m_rejectOutliers     ) ;
-  declareProperty( "MaxClusterSize",         m_maxClusterSize     ) ;
-  declareProperty( "RejectEdgeChannels",     m_rejectEdgeChannels ) ;
-  declareProperty( "RejectGangedPixels",     m_rejectGangedPixels ) ;
-  declareProperty( "MaxIncidAngle",          m_maxIncidAngle      ) ;
-  declareProperty( "AcceptIBLHits",          m_acceptIBLHits    ) ;
-  declareProperty( "AcceptPixelHits",        m_acceptPixelHits    ) ;
-  declareProperty( "AcceptSCTHits",          m_acceptSCTHits    ) ;
-}
-
 
 InDetAlignHitQualSelTool::~InDetAlignHitQualSelTool() {}
 
@@ -274,7 +245,7 @@ bool InDetAlignHitQualSelTool::isGoodClusterSize( const std::vector<Identifier>&
   int clusterSize = idVec.size() ;
   ATH_MSG_DEBUG( "clusterSize = " << clusterSize ) ;
   if( clusterSize > m_maxClusterSize ) { //!< cut only if m_maxClusterSize set
-    ATH_MSG_DEBUG( "clusterSize = " << clusterSize << " > " << m_maxClusterSize << ", reject" ) ;
+    ATH_MSG_DEBUG( "clusterSize = " << clusterSize << " > " << m_maxClusterSize.value() << ", reject" ) ;
     return false ;
   }
   return true ;
@@ -313,7 +284,7 @@ bool InDetAlignHitQualSelTool::isGoodAngle( const Trk::TrackParameters* trkPar
                                                 ) const {
   const double trkIncidAngle = incidAngle( trkPar, detEle ) ;
   if( std::abs(trkIncidAngle) > m_maxIncidAngle ) {
-    ATH_MSG_DEBUG( "trkIncidAngle = |" << trkIncidAngle << "| > " << m_maxIncidAngle << ", reject" ) ;
+    ATH_MSG_DEBUG( "trkIncidAngle = |" << trkIncidAngle << "| > " << m_maxIncidAngle.value() << ", reject" ) ;
     return false ;
   }
   return true;

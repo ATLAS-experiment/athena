@@ -61,13 +61,6 @@ NTuple::Item<float> nt_alpha;
 NTuple::Item<float> nt_beta;
 NTuple::Item<float> nt_gamma;
 
-InDetAlignDBTool::InDetAlignDBTool(const std::string& type,
-           const std::string& name, const IInterface* parent)
-  : AthAlgTool(type,name,parent)
-{
-  declareInterface<IInDetAlignDBTool>(this);
-}
-
 InDetAlignDBTool::~InDetAlignDBTool()
 {}
 

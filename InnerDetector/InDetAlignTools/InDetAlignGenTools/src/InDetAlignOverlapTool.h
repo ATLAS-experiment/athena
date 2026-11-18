@@ -1,15 +1,16 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNTOOLS_OVERLAPTOOL_H
 #define INDETALIGNTOOLS_OVERLAPTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
-#include "InDetAlignGenTools/IInDetAlignOverlapTool.h"
+#include "IInDetAlignOverlapTool.h"
 
-#include "InDetAlignGenTools/IInDetAlignFillTrack.h"
+#include "IInDetAlignFillTrack.h"
 #include "AlignSiModuleList.h"
+#include "InDetAlignTrkInfo/AlignSiHit.h"
 #include <vector>
 //#include "AthContainers/DataVector.h"
 
@@ -19,15 +20,14 @@
 */
 
 class AlignTrk;
-class AlignSiHit;
 class AlignSiModuleList;
 
 
 
-class InDetAlignOverlapTool : virtual public IInDetAlignOverlapTool, public AthAlgTool {
+class InDetAlignOverlapTool : public extends<AthAlgTool, IInDetAlignOverlapTool> {
  public:
   //standard constructor
-  InDetAlignOverlapTool( const std::string&, const std::string&, const IInterface* ) ;
+  using base_class::base_class;
   virtual ~InDetAlignOverlapTool() ;
   
   virtual StatusCode initialize() ;
@@ -41,9 +41,9 @@ class InDetAlignOverlapTool : virtual public IInDetAlignOverlapTool, public AthA
 
 
  private:
-  std::vector<AlignSiHit>  m_Overlaphits;
+  std::vector<AlignSiHit>  m_Overlaphits{};
      
-  const AlignSiModuleList* p_modlist;  
+  const AlignSiModuleList* p_modlist{};  
   
   
 } ;

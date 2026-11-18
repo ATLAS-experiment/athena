@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef TRKALIGNINTERFACES_ALIGNDBTOOL_IH
@@ -35,9 +35,6 @@ namespace Trk {
 
   public:
     static const InterfaceID& interfaceID();
-    
-    virtual StatusCode initialize() = 0;
-    virtual StatusCode finalize() = 0;
 
     /** writes alignment parameters to output */
     virtual void writeAlignPar() {}

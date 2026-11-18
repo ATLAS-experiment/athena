@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "AthenaBaseComps/AthAlgorithm.h"
@@ -17,7 +17,7 @@ class TH1;
 
 class ATLAS_NOT_THREAD_SAFE SurveyConstraintTestAlg : public AthAlgorithm {
  public:
-  SurveyConstraintTestAlg (const std::string& name, ISvcLocator* pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
   virtual StatusCode initialize() override;
   virtual StatusCode execute(const EventContext& ctx) override;
   virtual StatusCode finalize() override;
@@ -25,14 +25,14 @@ class ATLAS_NOT_THREAD_SAFE SurveyConstraintTestAlg : public AthAlgorithm {
   void CreateMisAlignNtuple();
   
  private :
-  ISurveyConstraint*                     m_SurvConstr;
-  const PixelID*                         m_pixid;
-  const SCT_ID*                          m_sctid;
-  TH1*                                   m_h_PixEC_Align_Disk[6];
-  TH1*                                   m_h_PixEC_Align_first[6];
-  TH1*                                   m_h_PixEC_Align[6];
+  ISurveyConstraint*                     m_SurvConstr{};
+  const PixelID*                         m_pixid{};
+  const SCT_ID*                          m_sctid{};
+  TH1*                                   m_h_PixEC_Align_Disk[6]{};
+  TH1*                                   m_h_PixEC_Align_first[6]{};
+  TH1*                                   m_h_PixEC_Align[6]{};
 
-  int                  m_AlignResults_nModules;
+  int                  m_AlignResults_nModules{};
   NTuple::Item<double> m_AlignResults_x;
   NTuple::Item<double> m_AlignResults_y;
   NTuple::Item<double> m_AlignResults_z;
@@ -47,6 +47,6 @@ class ATLAS_NOT_THREAD_SAFE SurveyConstraintTestAlg : public AthAlgorithm {
   NTuple::Item<long>   m_AlignResults_Identifier_Eta;
 
   // algorithm parameters, possible to declare at runtime
-  int                                    m_NLoop;                       //!< 
+  Gaudi::Property<int> m_NLoop{this, "NLoop", 1};
 };
  

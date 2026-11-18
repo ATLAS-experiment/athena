@@ -10,6 +10,8 @@
 #include "GaudiKernel/ToolHandle.h"
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkAlignInterfaces/IFillNtupleTool.h"
+#include "TrkAlignInterfaces/IAlignModuleTool.h"
+#include "TrkToolInterfaces/ITrackSummaryTool.h"
 #include  "TrkParameters/TrackParameters.h"
 
 
@@ -26,17 +28,15 @@ class TRT_ID;
 namespace Trk
 {
   class AlignTrack;
-  class ITrackSummaryTool;
-  class IAlignModuleTool;
   class Track; 
 }
 
 namespace InDet
 {
-  class DetailedIDNtupleTool : virtual public Trk::IFillNtupleTool, public AthAlgTool
+  class DetailedIDNtupleTool : public extends<AthAlgTool, Trk::IFillNtupleTool>
   {
   public:
-    DetailedIDNtupleTool(const std::string & type, const std::string & name, const IInterface * parent);
+    using base_class::base_class;
     virtual ~DetailedIDNtupleTool();
 
     virtual StatusCode initialize() override;
@@ -59,26 +59,28 @@ namespace InDet
     const Trk::TrackParameters* perigeeParameter(const Trk::AlignTrack* track) const;
     void initializeNtuple();
 
-    ToolHandle <Trk::ITrackSummaryTool>         m_trackSumTool;    //!< Pointer to track summary tool
-    ToolHandle <Trk::IAlignModuleTool>          m_alignModuleTool; //!< Pointer to AlignmModuleTool
+    ToolHandle <Trk::ITrackSummaryTool>         m_trackSumTool
+      {this,"TrackSummaryTool","Trk::TrackSummaryTool/TrackSummaryTool",""};    //!< Pointer to track summary tool
+    PublicToolHandle <Trk::IAlignModuleTool>    m_alignModuleTool
+      {this,"AlignModuleTool","",""}; //!< Pointer to AlignmModuleTool
     PublicToolHandle <Trk::ITruthToTrack>             m_truthToTrack
       {this,"TruthToTrack","Trk::TruthToTrack/InDetTruthToTrack",""};    //!< the truth to track Tool
     PublicToolHandle <Trk::IExtrapolator>             m_extrapolator
       {this,"Extrapolator","Trk::Extrapolator/AtlasExtrapolator",""};    //!< track extrapolator
 
-    bool m_storeNormalRefittedOnly;     //!< only store the AlignTrack which is normally refitted
-    bool m_storeConstrainedOnly;       //!< onlystore the AlignTrack which is normally refitted
-    bool m_storeTruth;                  //!< retrieve the truth information
-    double m_matchProbability;          //!< the probabililty cut in the truth matching
+    Gaudi::Property<bool> m_storeNormalRefittedOnly{this, "StoreNormalRefittedOnly", false}; //!< only store the AlignTrack which is normally refitted
+    Gaudi::Property<bool> m_storeConstrainedOnly{this, "StoreConstrainedOnly", true};        //!< onlystore the AlignTrack which is normally refitted
+    Gaudi::Property<bool> m_storeTruth{this, "StoreTruth", true};                            //!< retrieve the truth information
+    Gaudi::Property<double> m_matchProbability{this, "MatchProbability", 0.8};               //!< the probabililty cut in the truth matching
 
-    TFile * m_file;
-    TTree * m_tree;
+    TFile * m_file{};
+    TTree * m_tree{};
 
-    std::string m_filename;        //!< name of ntuple file
-    std::string m_filepath;        //!< path to ntuple file
+    Gaudi::Property<std::string> m_filename{this, "FileName", "IDAlign.root"}; //!< name of ntuple file
+    Gaudi::Property<std::string> m_filepath{this, "FilePath", "./"};           //!< path to ntuple file
 
-    std::string m_trackCollection; //!
-    std::string m_tracksTruthName; //!
+    Gaudi::Property<std::string> m_trackCollection{this, "TrackCollection", "Tracks"};               //!
+    Gaudi::Property<std::string> m_tracksTruthName{this, "TracksTruthName", "TrackTruthCollection"}; //!
 
     // Reconstructed variables
     int      m_runNumber = 0;

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNTOOLS_HITQUALSELTOOL_H
@@ -31,9 +31,9 @@ namespace InDetDD {
 class AtlasDetectorID ;
 class Identifier ;
 
-class InDetAlignHitQualSelTool : virtual public IInDetAlignHitQualSelTool, public AthAlgTool {
+class InDetAlignHitQualSelTool : public extends<AthAlgTool, IInDetAlignHitQualSelTool> {
  public:
-  InDetAlignHitQualSelTool( const std::string&, const std::string&, const IInterface* ) ;
+  using base_class::base_class;
   virtual ~InDetAlignHitQualSelTool() ;
   
   virtual StatusCode initialize() ;
@@ -66,37 +66,38 @@ class InDetAlignHitQualSelTool : virtual public IInDetAlignHitQualSelTool, publi
                         ) const ;
   // steering parameters
   /** reject hits labeled as outliers by the track fitter */
-  bool  m_rejectOutliers ;
+  Gaudi::Property<bool>  m_rejectOutliers{this, "RejectOutliers", true} ;
   /* maximum size of the cluster forming the hit. typically, clusters with more than
   5 pixels/hits are due to brem and are of less quality for alignment. */
-  int   m_maxClusterSize ;
+  Gaudi::Property<int>   m_maxClusterSize{this, "MaxClusterSize", 5} ;
   /** reject clusters containing edge channels */
-  bool  m_rejectEdgeChannels ;
+  Gaudi::Property<bool>  m_rejectEdgeChannels{this, "RejectEdgeChannels", true} ;
   /** reject clusters containing ganged pixels */
-  bool  m_rejectGangedPixels ;
+  Gaudi::Property<bool>  m_rejectGangedPixels{this, "RejectGangedPixels", false} ;
 
   /** maximum incidence angle of a track (to which the hit belongs) on the Si-module.
   It is caculated in the local xz frame to ensure that the only the angle component 
-  perpendicular to the strips is considered. It is defined w/r/t the local z-axis. */
-  float m_maxIncidAngle ;
+  perpendicular to the strips is considered. It is defined w/r/t the local z-axis.
+  The default 0.8 corresponds to 45 deg. -- recomm. by pixel ppl */
+  Gaudi::Property<float> m_maxIncidAngle{this, "MaxIncidAngle", 0.8f} ;
  
   // acceptIBLHits -> if true, IBL hits are accepted if they satisfy the quality selection criteria.
   // if false, IBL hits are always rejected  
-  bool m_acceptIBLHits ;
+  Gaudi::Property<bool> m_acceptIBLHits{this, "AcceptIBLHits", true} ;
 
   // acceptPixelHits -> if true, pixel hits are accepted if they satisfy the quality selection criteria.
   // if false, pixel hits are always rejected  
-  bool m_acceptPixelHits ;
+  Gaudi::Property<bool> m_acceptPixelHits{this, "AcceptPixelHits", true} ;
 
   // acceptSCTHits -> if true, SCT hits are accepted if they satisfy the quality selection criteria.
   // if false, SCT hits are always rejected  
-  bool m_acceptSCTHits ;
+  Gaudi::Property<bool> m_acceptSCTHits{this, "AcceptSCTHits", true} ;
 
  // "infrastructure" members
  
-  const InDetDD::PixelDetectorManager*   m_PIXManager ; //!< to get pixel phi and eta identifiers
-  const PixelID*                         m_pixelid ;    //!< Pixel id helper
-  const SCT_ID*                          m_sctID ;    //!< Pixel id helper
+  const InDetDD::PixelDetectorManager*   m_PIXManager{} ; //!< to get pixel phi and eta identifiers
+  const PixelID*                         m_pixelid{} ;    //!< Pixel id helper
+  const SCT_ID*                          m_sctID{} ;    //!< Pixel id helper
 } ;
 
 #endif // INDETALIGNTOOLS_HITQUALSELTOOL_H

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNDBTOOLS_INDETTRKALIGNDBTOOL_H
@@ -7,6 +7,7 @@
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "TrkAlignInterfaces/ITrkAlignDBTool.h"
+#include "GaudiKernel/ToolHandle.h"
 
 /**
   @file InDetTrkAlignDBTool.h 
@@ -23,12 +24,12 @@ class TFile;
 namespace InDet
 {
 
-  class InDetTrkAlignDBTool : virtual public Trk::ITrkAlignDBTool, public AthAlgTool {
+  class InDetTrkAlignDBTool : public extends<AthAlgTool, Trk::ITrkAlignDBTool> {
 
   public:
 
     /** constructor */
-    InDetTrkAlignDBTool(const std::string & type, const std::string & name, const IInterface * parent);
+    using base_class::base_class;
 
     /** destructor */
     virtual ~InDetTrkAlignDBTool();
@@ -47,8 +48,8 @@ namespace InDet
     /** updates alignment constants in the DB */
     void updateDB();
 
-    ToolHandle<Trk::ITrkAlignDBTool>      m_siDBtool;
-    ToolHandle<Trk::ITrkAlignDBTool>      m_trtDBtool;
+    PublicToolHandle<Trk::ITrkAlignDBTool> m_siDBtool{this, "SiTrkAlignDBTool", "InDet::SiTrkAlignDBTool/SiTrkAlignDBTool", "Tool for handling the Silicon DB I/O"};
+    PublicToolHandle<Trk::ITrkAlignDBTool> m_trtDBtool{this, "TRTTrkAlignDBTool", "InDet::TRTTrkAlignDBTool/TRTTrkAlignDBTool", "Tool for handling the TRT DB I/O"};
 
   }; // end class
 

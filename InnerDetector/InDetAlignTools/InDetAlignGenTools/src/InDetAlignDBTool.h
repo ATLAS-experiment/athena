@@ -52,10 +52,9 @@ namespace InDetDD {
 }
 
 class ATLAS_NOT_THREAD_SAFE InDetAlignDBTool: // Global variables and const_cast are used.
-virtual public IInDetAlignDBTool, public AthAlgTool {
+public extends<AthAlgTool, IInDetAlignDBTool> {
  public:
-  InDetAlignDBTool(const std::string& type, const std::string& name,
-		 const IInterface* parent);
+  using base_class::base_class;
   virtual ~InDetAlignDBTool();
 
   virtual StatusCode initialize() override;

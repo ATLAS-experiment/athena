@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "InDetIdentifier/TRT_ID.h"
@@ -14,7 +14,7 @@
 #include "TrkAlignEvent/AlignModule.h"
 #include "TrkAlignEvent/AlignPar.h"
 
-#include "InDetAlignDBTools/TRTTrkAlignDBTool.h"
+#include "TRTTrkAlignDBTool.h"
 
 #include "AthContainers/DataVector.h"
 #include "TFile.h"
@@ -24,42 +24,6 @@
 
 namespace InDet
 {
-
-//________________________________________________________________________
-TRTTrkAlignDBTool::TRTTrkAlignDBTool(const std::string & type, const std::string & name, const IInterface * parent)
-   : AthAlgTool(type,name,parent)
-   , m_trtHelper(nullptr)
-   , m_pixHelper(nullptr)
-   , m_outputAlignFile("OutputTRTAlignment.txt")
-   , m_outputStrawAlignFile("OutputTRTStrawAlignment.txt")
-   , m_oldAlignFile("OldTRTAlignment.txt")
-   , m_oldStrawAlignFile("OldTRTStrawAlignment.txt")
-   , m_writeTextFile(true)
-   , m_writeOldConstants(false)
-   , m_updateConstants(true)
-   , m_trtAlignDbSvc("TRT_AlignDbSvc",name)
-   , m_alignModuleTool("Trk::AlignModuleTool/AlignModuleTool")
-   , m_trtGeoManager("")
-   , m_trtAlignLevel(-1)
-   , m_trtAlignLevelBarrel(-1)
-   , m_trtAlignLevelEndcaps(-1)
-   , m_ntuple{}
-{
-   declareInterface<ITrkAlignDBTool>(this);
-
-   declareProperty("OutputTextFile",       m_outputAlignFile,   "Text file to write the final alignment constants");
-   declareProperty("OutputStrawTextFile",  m_outputStrawAlignFile,   "Text file to write the final straw alignment constants");
-   declareProperty("WriteTextFile",        m_writeTextFile,     "Whether or not to write the final/new alignment constants to text file");
-   declareProperty("WriteOldConstants",    m_writeOldConstants, "Whether or not to write the initial/old alignment constants to text file");
-   declareProperty("OldAlignFile",         m_oldAlignFile,      "Text file to write the initial/old alignment constants");
-   declareProperty("OldStrawAlignFile",    m_oldStrawAlignFile, "Text file to write the initial/old straw alignment constants");
-   declareProperty("TrtAlignDbSvc",        m_trtAlignDbSvc,     "Service for interaction with the TRT alignment DB");
-   declareProperty("AlignModuleTool",      m_alignModuleTool,   "Tool for handling of align module collections");
-   declareProperty("TRTGeometryManager",   m_trtGeoManager,     "Tool for handling the TRT alignment geometry");
-   declareProperty("UpdateConstants",      m_updateConstants,   "Whether or no to update the alignment constants");
-
-   m_logStream = nullptr;
-}
 
 //________________________________________________________________________
 TRTTrkAlignDBTool::~TRTTrkAlignDBTool()
@@ -174,11 +138,11 @@ void TRTTrkAlignDBTool::writeAlignPar()
 
    // write initial alignment constants
    if(m_writeOldConstants) {
-      ATH_MSG_INFO("Writing old TRT alignment constants to file "<<m_oldAlignFile);
+      ATH_MSG_INFO("Writing old TRT alignment constants to file "<<m_oldAlignFile.value());
       if( m_trtAlignDbSvc -> writeAlignTextFile(m_oldAlignFile) != StatusCode::SUCCESS )
-         ATH_MSG_ERROR("Cannot write to file "<<m_oldAlignFile);
+         ATH_MSG_ERROR("Cannot write to file "<<m_oldAlignFile.value());
       if( m_trtAlignDbSvc -> writeStrawAlignTextFile(m_oldStrawAlignFile) != StatusCode::SUCCESS )
-         ATH_MSG_ERROR("Cannot write to file "<<m_oldStrawAlignFile);
+         ATH_MSG_ERROR("Cannot write to file "<<m_oldStrawAlignFile.value());
    }
 
    // now update the DB
@@ -187,14 +151,14 @@ void TRTTrkAlignDBTool::writeAlignPar()
    // and write the final alignment constants
    if(m_writeTextFile) {
      if( m_trtAlignDbSvc->writeAlignTextFile(m_outputAlignFile) != StatusCode::SUCCESS )
-         ATH_MSG_ERROR("Cannot write to file "<<m_outputAlignFile);
+         ATH_MSG_ERROR("Cannot write to file "<<m_outputAlignFile.value());
       else
-         ATH_MSG_INFO("Wrote final TRT alignment constants into "<<m_outputAlignFile);
+         ATH_MSG_INFO("Wrote final TRT alignment constants into "<<m_outputAlignFile.value());
 
      if( m_trtAlignDbSvc->writeStrawAlignTextFile(m_outputStrawAlignFile) != StatusCode::SUCCESS )
-        ATH_MSG_ERROR("Cannot write to file "<<m_outputStrawAlignFile);
+        ATH_MSG_ERROR("Cannot write to file "<<m_outputStrawAlignFile.value());
      else
-        ATH_MSG_INFO("Wrote final TRT Straw alignment constants into "<<m_outputStrawAlignFile);
+        ATH_MSG_INFO("Wrote final TRT Straw alignment constants into "<<m_outputStrawAlignFile.value());
    }
 
    return;

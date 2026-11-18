@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //--------------------------------------------------------------------------
@@ -14,7 +14,7 @@
 #define SURVEYCONSTRAINTMODULE_HH  
 
 #include "Identifier/Identifier.h"
-#include "InDetSurveyConstraintTool/SurveyConstraintPoint.h"
+#include "SurveyConstraintPoint.h"
 #include "EventPrimitives/EventPrimitives.h"
 #include "GeoPrimitives/GeoPrimitives.h"
 

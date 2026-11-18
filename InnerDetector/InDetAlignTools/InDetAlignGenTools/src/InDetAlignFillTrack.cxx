@@ -47,16 +47,6 @@
 static const int maxTracks = 10000; // maximal number of tracks per event
 
 //=====================================================================
-// InDetAlignFillTrack()
-//=====================================================================
-InDetAlignFillTrack::InDetAlignFillTrack (const std::string& type,
-                                          const std::string& name,
-                                          const IInterface* parent)
-  : base_class(type, name, parent)
-{
-}
-
-//=====================================================================
 // initialize()
 //=====================================================================
 StatusCode InDetAlignFillTrack::initialize() {

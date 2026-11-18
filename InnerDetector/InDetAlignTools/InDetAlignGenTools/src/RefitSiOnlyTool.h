@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef INDETALIGNGENTOOLS_REFITSIONLYTOOL_H
@@ -21,20 +21,20 @@
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "InDetAlignToolInterfaces/ICollectionProcessor.h"
+#include "TrkFitterInterfaces/ITrackFitter.h"
 #include "TrkEventUtils/TrkParametersComparisonFunction.h"//typedef, cannot fwd declare
 #include "TrkEventPrimitives/ParticleHypothesis.h"
 
 namespace Trk {
   class Track;
-  class ITrackFitter;
 }
 
 class AtlasDetectorID;
 
 namespace InDetAlignment {
-  class RefitSiOnlyTool : virtual public InDetAlignment::ICollectionProcessor, public AthAlgTool {
+  class RefitSiOnlyTool : public extends<AthAlgTool, InDetAlignment::ICollectionProcessor> {
   public:
-    RefitSiOnlyTool (const std::string& type, const std::string& name, const IInterface* parent); //constructor
+    using base_class::base_class;
     virtual ~RefitSiOnlyTool(); //destructor
 
     virtual StatusCode initialize(); ///< Athena Tool methods
@@ -46,7 +46,7 @@ namespace InDetAlignment {
     /** main processing of track collection -
         refits a track using only filtered hits (e.g. only silicon hits) */
     virtual const DataVector<Trk::Track>* processTrackCollection(const DataVector<Trk::Track>* trks);
-    const AtlasDetectorID * m_idHelper;
+    const AtlasDetectorID * m_idHelper{};
    
     void dumpTrackCol(DataVector<Trk::Track>* tracks);
    
@@ -58,20 +58,20 @@ namespace InDetAlignment {
     bool filterHit(const Identifier& id) const;
 
        
-    ToolHandle<Trk::ITrackFitter> m_ITrkFitter;
+    PublicToolHandle<Trk::ITrackFitter> m_ITrkFitter{this, "FitterTool", "Trk::KalmanFitter"};
 
-    Trk::TrkParametersComparisonFunction*  m_comPar;
+    Trk::TrkParametersComparisonFunction*  m_comPar{nullptr};
 
-    bool                      m_doCosmic;           //!< Flag for cosmics
-    bool                      m_OutlierRemoval;     //!< flag for outlier removal
+    Gaudi::Property<bool>     m_doCosmic{this, "Cosmic", false};                 //!< Flag for cosmics
+    Gaudi::Property<bool>     m_OutlierRemoval{this, "OutlierRemoval", true};    //!< flag for outlier removal
 
-    bool                      m_stripSCTHits;       ///< flag to not consider SCT hits in the refit
-    bool                      m_stripPixelHits;     ///< flag to not consider Pixel hits in the refit
-    bool                      m_stripTRTHits;       ///< flag to not consider TRT hits in the refit
+    Gaudi::Property<bool>     m_stripSCTHits{this, "StripSCTHits", false};       ///< flag to not consider SCT hits in the refit
+    Gaudi::Property<bool>     m_stripPixelHits{this, "StripPixelHits", false};   ///< flag to not consider Pixel hits in the refit
+    Gaudi::Property<bool>     m_stripTRTHits{this, "StripTRTHits", true};        ///< flag to not consider TRT hits in the refit
 
-    int                       m_ParticleNumber;
-    Trk::ParticleHypothesis   m_ParticleHypothesis;
-    int                       m_trkindex;
+    Gaudi::Property<int>      m_ParticleNumber{this, "ParticleNumber", 2};
+    Trk::ParticleHypothesis   m_ParticleHypothesis{Trk::nonInteracting};
+    int                       m_trkindex{};
 
 
 
