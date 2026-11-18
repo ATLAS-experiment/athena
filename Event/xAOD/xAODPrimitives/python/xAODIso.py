@@ -1,7 +1,11 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 # Make sure that the dictionary is loaded.
 import ROOT
+
+from RootUtils.LoadEnumHeader import loadEnumHeader
+loadEnumHeader('xAODPrimitives/IsolationType.h')
+loadEnumHeader('xAODPrimitives/IsolationCorrection.h')
 
 # Declare the xAODIso type.
 xAODIso = ROOT.xAOD.Iso

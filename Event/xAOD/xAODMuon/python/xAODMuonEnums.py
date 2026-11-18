@@ -1,6 +1,9 @@
-# Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from ROOT import xAODMuonEnums   # noqa: F401
+
+from RootUtils.LoadEnumHeader import loadEnumHeader
+loadEnumHeader ('xAODMuon/xAODMuonEnums.h')
 
 # pull in the MuonType enum dictionary by name - it makes the enum names
 # (and also other enums names from the same dictionary)

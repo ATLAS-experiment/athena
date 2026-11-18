@@ -15,6 +15,9 @@ import ROOT
 # E/gamma import(s).
 from xAODEgamma.xAODEgammaParameters import xAOD
 
+from RootUtils.LoadEnumHeader import loadEnumHeader
+loadEnumHeader ('ElectronPhotonSelectorTools/egammaPIDdefs.h')
+
 import PATCore.ParticleDataType
 
 class PhotonCalibrationConfig (ConfigBlock) :
