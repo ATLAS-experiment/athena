@@ -19,7 +19,7 @@ def HgtdSensorSDCfg(flags, name="HgtdSensorSD", **kwargs):
                                                     
     if flags.HGTD.Geometry.useGeoModelXml:
         kwargs.setdefault("GmxSensor", True)
-        kwargs.setdefault("LogicalVolumeNames", ["HGTD::HGTDSiSensor","HGTD::HGTDSiSensorPosL0","HGTD::HGTDSiSensorPosL1","HGTD::HGTDSiSensorPosL2","HGTD::HGTDSiSensorPosL3","HGTD::HGTDSiSensorNegL0","HGTD::HGTDSiSensorNegL1","HGTD::HGTDSiSensorNegL2","HGTD::HGTDSiSensorNegL3"])    
+        kwargs.setdefault("LogicalVolumeNames", ["HGTD::HGTDSiSensorPosL0","HGTD::HGTDSiSensorPosL1","HGTD::HGTDSiSensorPosL2","HGTD::HGTDSiSensorPosL3","HGTD::HGTDSiSensorNegL0","HGTD::HGTDSiSensorNegL1","HGTD::HGTDSiSensorNegL2","HGTD::HGTDSiSensorNegL3"])
     else:
         kwargs.setdefault("LogicalVolumeNames", ["HGTD::HGTDSiSensor0", "HGTD::HGTDSiSensor1", "HGTD::HGTDSiSensor2", "HGTD::HGTDSiSensor3"])
 

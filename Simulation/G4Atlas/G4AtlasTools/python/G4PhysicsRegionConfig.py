@@ -137,8 +137,7 @@ def HGTDPhysicsRegionToolCfg(flags, name='HGTDPhysicsRegionTool', **kwargs):
         volumeList = ['HGTD::HGTDSiSensorPosL0',"HGTD::HGTDSiSensorPosL1",
                       'HGTD::HGTDSiSensorPosL2','HGTD::HGTDSiSensorPosL3',
                       'HGTD::HGTDSiSensorNegL0','HGTD::HGTDSiSensorNegL1',
-                      'HGTD::HGTDSiSensorNegL2','HGTD::HGTDSiSensorNegL3',
-                      'HGTD::HGTDSiSensor']
+                      'HGTD::HGTDSiSensorNegL2','HGTD::HGTDSiSensorNegL3']
     else:
         volumeList = ['HGTD::HGTDSiSensor0', 'HGTD::HGTDSiSensor1',
                       'HGTD::HGTDSiSensor2', 'HGTD::HGTDSiSensor3']
