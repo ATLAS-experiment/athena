@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCABLINGTEST_H
@@ -21,7 +21,7 @@ class CaloCell_ID;
 class LArCablingTest : public AthAlgorithm
 {
  public:
-  LArCablingTest(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
   ~LArCablingTest();
 
   //standard algorithm methods
@@ -34,10 +34,10 @@ class LArCablingTest : public AthAlgorithm
     SG::ReadCondHandleKey<LArCalibLineMapping>  m_CLKey{this, "CalibLineKey", "LArCalibLineMap", "SG calib line key"};
     SG::ReadCondHandleKey<LArFebRodMapping>  m_RodKey{this, "FebRodKey", "LArFebRodMap", "SG ROD mapping key"};
 
-  bool m_print;
-  unsigned m_mode;
-  const LArOnlineID* m_onlineId;
-  const CaloCell_ID* m_caloCellId;
+  Gaudi::Property<bool> m_print{this, "Print", true};
+  Gaudi::Property<unsigned> m_mode{this, "TestMode", 0xF, "1: On->Off, 2: Off->On 4: disconnected, 8: FEB->ROD"};
+  const LArOnlineID* m_onlineId{nullptr};
+  const CaloCell_ID* m_caloCellId{nullptr};
 
   void print (const HWIdentifier& hwid, std::ostream& out, const LArOnOffIdMapping* cabling, const LArCalibLineMapping *clCont); 
 };
