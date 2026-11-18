@@ -1231,10 +1231,10 @@ class Gx2Fitter {
     using Actors = Acts::ActorList<GX2FActor>;
 
     using PropagatorOptions = typename propagator_t::template Options<Actors>;
-
+    /// The fittedtrack parameters
     BoundTrackParameters params = sParameters;
     params.covariance() = BoundMatrix::Identity();
-    // params.
+
     double chi2sum = 0;
     double oldChi2sum = std::numeric_limits<double>::max();
 
@@ -1349,13 +1349,16 @@ class Gx2Fitter {
 
       track.tipIndex() = tipIndex;
       track.linkForward();
+      track.parameters() = params.parameters();
+      track.covariance() = fullCovariancePredicted;
+      track.setReferenceSurface(params.referenceSurface().getSharedPtr());
 
       // Let the user decide whether the track of this iteration is
       // acceptable to continue the fit
       using ConstTrackProxy = typename track_container_t::ConstTrackProxy;
       if (gx2fOptions.extensions.abortChecker(gx2fOptions.calibrationContext, 
                                                ConstTrackProxy{track})) {
-        ACTS_INFO("Abort checker requested to abort the fit in nUpdate "
+        ACTS_DEBUG("Abort fit as requested by client in nUpdate "
                    << nUpdate + 1 << "/" << gx2fOptions.nUpdateMax);
         return GlobalChiSquareFitterError::FitAbortedByChecker;
       }
@@ -1431,7 +1434,7 @@ class Gx2Fitter {
         // want to investigate the behaviour of the fitter before it converges,
         // like in some unit-tests.
         if (gx2fOptions.nUpdateMax > 5) {
-          ACTS_INFO("Did not converge in " << gx2fOptions.nUpdateMax
+          ACTS_DEBUG("Did not converge in " << gx2fOptions.nUpdateMax
                                            << " updates.");
           return GlobalChiSquareFitterError::DidNotConverge;
         }

@@ -3,8 +3,10 @@
 */
 #include "FitterTool.h"
 
+#include "MuonTrackEvent/TrackingHelpers.h"
 #include "GeoModelKernel/throwExcept.h"
-
+#include "GeoPrimitives/GeoPrimitivesToStringConverter.h"
+#include "MuonReadoutGeometryR4/MuonDetectorDefs.h"
 #include "ActsCalibrators/xAODUncalibMeasCalibrator.h"
 #include "xAODMuonPrepData/UtilFunctions.h"
 #include "ActsGeometry/ATLASMagneticFieldWrapper.h"
@@ -12,9 +14,52 @@
 #include "ActsInterop/Logger.h"
 
 using namespace ActsTrk::detail;
+
+
+
+
 namespace MuonR4 {
+     std::string FitterTool::print(const Acts::CalibrationContext& calContext,
+                                    std::span<const Acts::SourceLink> sourceLinks) const {
+        std::stringstream sstr{};
+        const EventContext& ctx{*calContext.get<const EventContext*>()};
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+        for (const auto& sl : sourceLinks) {
+            const xAOD::UncalibratedMeasurement* m = xAODUncalibMeasCalibrator::unpack(sl);
+            const Acts::Surface& s{*m_unalibMeasSurfAcc.get(m)};
+            sstr<<"  -- "<<m_idHelperSvc->toString(xAOD::identify(m))<<", dimensions: "<<m->numDimensions()
+                <<", @"<<Amg::toString(s.localToGlobalTransform(tgContext))<<", "<<s.bounds()<<"\n";
+        }
+        return sstr.str(); 
+    }
+    template <Acts::TrackProxyConcept Proxy_t>
+        std::string FitterTool::print(const Acts::CalibrationContext& calContext,
+                                      const Proxy_t& trajectory) const {
+        const EventContext& ctx{*calContext.get<const EventContext*>()};
+        const Acts::GeometryContext tgContext = m_ctxProvider.getGeometryContext(ctx);
+        std::stringstream sstr{};
+        auto refPars = trajectory.createParametersAtReference();
+        sstr<<"Track parameters "<<refPars<<", momentum: "<<refPars.absoluteMomentum()<<"\n";
+        for (const auto state : trajectory.trackStates()) {
+            auto stateFlags = state.typeFlags();
+            sstr<<" --- "<<state.referenceSurface().geometryId()<<", material: "<<(stateFlags.hasMaterial() ? "yay" : "nay")
+                         <<", measurement: "<<(stateFlags.hasMeasurement() ? "yay" : "nay")
+                         <<", outlier: "<<(stateFlags.isOutlier() ? "yay" : "nay")
+                         <<", hole: "<<(stateFlags.isHole() ? "yay": "nay");
+            if (state.hasUncalibratedSourceLink()) {
+                const xAOD::UncalibratedMeasurement* m = m_uncalibMeasCalibrator.unpack(state.getUncalibratedSourceLink());
+                sstr<<", "<<m_idHelperSvc->toString(xAOD::identify(m));
+                sstr<<", chi2: "<<state.chi2();
+                sstr<<", @"<<Amg::toString(m_unalibMeasSurfAcc.get(m)->localToGlobalTransform(tgContext));
+            }
+            sstr<<"\n";
+        }
+        return sstr.str();
+    }
     StatusCode FitterTool::initialize() {
         ATH_CHECK(m_trackingGeometrySvc.retrieve());
+        ATH_CHECK(m_idHelperSvc.retrieve());
+        ATH_CHECK(m_ctxProvider.initialize());
         ATH_CHECK(m_muonCalibrator.retrieve());
         ATH_CHECK(m_summaryTool.retrieve());
         m_unalibMeasSurfAcc = xAODUncalibMeasSurfAcc{m_trackingGeometrySvc.get()};
@@ -24,11 +69,11 @@ namespace MuonR4 {
         for (const xAOD::UncalibMeasType type : {xAOD::UncalibMeasType::PixelClusterType,
                                                  xAOD::UncalibMeasType::StripClusterType,
                                                  xAOD::UncalibMeasType::HGTDClusterType}) {
-            m_uncalibMeasCalibrator.connect<&ActsTrk::detail::xAODUncalibMeasCalibrator::passThrough>(type, &m_uncalibMeasCalibrator);
+            m_uncalibMeasCalibrator.connect<&xAODUncalibMeasCalibrator::passThrough>(type, &m_uncalibMeasCalibrator);
         }
         
-        m_extensions.surfaceAccessor.connect<&ActsTrk::detail::xAODUncalibMeasSurfAcc::operator()>(&m_unalibMeasSurfAcc);
-        m_extensions.calibrator.connect<&ActsTrk::detail::xAODUncalibMeasCalibrator::calibrate>(&m_uncalibMeasCalibrator);
+        m_extensions.surfaceAccessor.connect<&xAODUncalibMeasSurfAcc::operator()>(&m_unalibMeasSurfAcc);
+        m_extensions.calibrator.connect<&xAODUncalibMeasCalibrator::calibrate>(&m_uncalibMeasCalibrator);
         if (m_abortSingleStation) {
             m_extensions.abortChecker.connect<&FitterTool::abortSingleStation>(this);
         }
@@ -75,7 +120,7 @@ namespace MuonR4 {
         std::vector<Acts::SourceLink> sourceLinks{};
         std::ranges::transform(measList, std::back_inserter(sourceLinks),
                                [](const xAOD::UncalibratedMeasurement* m ){
-                                    return ActsTrk::detail::xAODUncalibMeasCalibrator::pack(m);
+                                    return xAODUncalibMeasCalibrator::pack(m);
                                });
         return fit (sourceLinks, initialParams, tgContext, mfContext, calContext, targetSurface);
 
@@ -84,7 +129,12 @@ namespace MuonR4 {
                                         const ActsTrk::MutableTrackContainer::ConstTrackProxy trajectory) const {
         const EventContext& ctx{*calContext.get<const EventContext*>()};
         unsigned nStations = m_summaryTool->countMuonStations(ctx, trajectory);
-        return nStations <= 1;
+        if (nStations > 1) {
+            ATH_MSG_VERBOSE(__func__<<"() "<<__LINE__<<" - Fit has enough stations "<<nStations<<" \n"<<print(calContext, trajectory));
+            return false;
+        }
+        ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Abort fit \n"<<print(calContext, trajectory)); 
+        return true;
     }
     std::unique_ptr<ActsTrk::MutableTrackContainer> 
         FitterTool::fit(const std::vector<Acts::SourceLink>& sourceLinks,
@@ -124,7 +174,9 @@ namespace MuonR4 {
             }
         }, m_fitter);
         if (!ok) {
-            ATH_MSG_VERBOSE("Fit failed");
+            ATH_MSG_DEBUG(__func__<<"() "<<__LINE__<<" - Fit failed\n "
+                <<initialParams<<", momentum: "<<initialParams.absoluteMomentum()<<"\n"
+                <<print(calContext, sourceLinks));
             return nullptr;
         }
         ActsTrk::TrackContainerUtils::addFitterTypeProperty(*tracks);
