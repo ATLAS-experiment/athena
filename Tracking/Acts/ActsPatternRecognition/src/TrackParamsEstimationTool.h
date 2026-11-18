@@ -40,15 +40,17 @@ namespace ActsTrk {
       std::pair<std::optional<Acts::BoundTrackParameters>, EstimationStatus>
       estimateTrackParameters(
 			      const ActsTrk::Seed& seed,
+			      std::size_t spIndex,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::MagneticFieldContext& magFieldContext,
 			      const Acts::CalibrationContext& calContext,
-			      std::function<const Acts::Surface&(const ActsTrk::Seed& seed)> retrieveSurface) const override;
+			      RetrieveSurfaceFun_t retrieveSurface) const override;
 
     virtual
       std::pair<std::optional<Acts::BoundTrackParameters>, EstimationStatus>
       estimateTrackParameters(
 			      const ActsTrk::Seed& seed,
+			      std::size_t spIndex,
 			      const Acts::GeometryContext& geoContext,
 			      const Acts::MagneticFieldContext& magFieldContext,
 			      const Acts::CalibrationContext& calContext,
@@ -82,10 +84,10 @@ namespace ActsTrk {
         "Inflate track variances"};
     Gaudi::Property< int > m_parameterEstimationMode {this, "parameterEstimationMode", 2,
         "0=use 1st 3 SPs, 1=use first,middle,last SPs to improve pT measurement, 2=use for all parameters, "
-        "3=use 1st 3 SPs separated by more than minDeltaR, starting from the innermost SP, "
+        "3=use 1st 3 SPs separated by more than minDeltaR, starting from the first SP of the estimate, "
         "4=fit all SPs"};
     Gaudi::Property<int> m_bFieldMode{this, "bFieldMode", 0,
-        "B-field mode: 0=B-field at the innermost SP; 1=z-component of B-field at the innermost SP"};
+        "B-field mode: 0=B-field at the first SP of the estimate; 1=z-component of it; 2=B-field at the innermost SP"};
     Gaudi::Property<std::size_t> m_firstSp{this, "firstSp", 0ul,
         "Index of first SP to use"};
     Gaudi::Property<double> m_minDeltaR{this, "minDeltaR", 15 * Acts::UnitConstants::mm,
@@ -105,7 +107,18 @@ namespace ActsTrk {
         const Acts::BoundTrackParameters &initialParameters,
         const Acts::GeometryContext& geometry,
         const Acts::MagneticFieldContext& magField,
-        const Acts::CalibrationContext& calib) const;
+        const Acts::CalibrationContext& calib,
+        std::size_t spIndex) const;
+
+    /// The estimate at the last SP uses reverse SP order; the refit starts at the first SP
+    bool reverseOrder(std::size_t nSp, std::size_t spIndex) const {
+      return !m_refitSeeds && spIndex > 0 && spIndex + 1 == nSp;
+    }
+
+    /// An inward search starts at the outer measurement of its SP
+    static std::size_t measurementIndex(const xAOD::SpacePoint& sp, std::size_t spIndex) {
+      return spIndex > 0 ? sp.measurements().size() - 1 : 0;
+    }
 
     detail::xAODUncalibMeasSurfAcc m_uncalibMeasSurfAcc {};
 

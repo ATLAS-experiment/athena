@@ -14,6 +14,7 @@
 #include "Acts/TrackFinding/SeedDeduplicator.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
+#include "Acts/TrackFitting/TrackletJoiner.hpp"
 
 // ActsTrk
 #include "ActsEvent/SeedContainer.h"
@@ -109,7 +110,8 @@ namespace ActsTrk
                             std::optional<std::vector<unsigned int>>& trackCategories,
                             const TrackFinderOptionsType& options,
                             const TrackFinderOptionsType& secondOptions,
-                            const Acts::BoundTrackParameters &seedParameters) const;
+                            const Acts::BoundTrackParameters &seedParameters,
+                            bool searchInward) const;
 
   private:
     // Tool Handles
@@ -137,6 +139,9 @@ namespace ActsTrk
     // Configuration
     Gaudi::Property<bool> m_skipDuplicateSeeds{this, "skipDuplicateSeeds", true, "skip duplicate seeds before calling CKF"};
     Gaudi::Property<unsigned int> m_seedMeasOffset{this,"seedMeasOffset", 0, "Reduce the requirement on the space points on seed to mark a seed as duplicate, e.g seedMeasOffset=1, only N-1 measurements on seed are sufficient deduplicate the seed"};
+    Gaudi::Property<std::vector<double>> m_useTopSpRZboundary {this, "useTopSpRZboundary", {350. * Acts::UnitConstants::mm, 1060. * Acts::UnitConstants::mm}, "R/|z| of the bottom SP beyond which autoReverseSearch starts at the top SP"};
+    Gaudi::Property<bool> m_autoReverseSearch{this, "autoReverseSearch", false, "Search seeds beyond useTopSpRZboundary inward from the top SP first"};
+    Gaudi::Property<bool> m_twoWaySmoothing{this, "twoWaySmoothing", true, "Smooth the joined two-way passes, else only link them. Needed by the reverse search; assumes no inflateCovarianceTwoWay"};
     Gaudi::Property<bool> m_countSharedHits{this, "countSharedHits", true, "add shared hit flags to tracks"};
     Gaudi::Property<bool> m_forceTrackOnSeed{this, "forceTrackOnSeed", true, "force track to use measurements from the seed"};
 
@@ -155,7 +160,11 @@ namespace ActsTrk
                                                             const std::vector< const InDet::SiDetectorElementStatus *> &det_el_status_arr,
                                                             detail::TrackFindingMeasurements &measurements) const;
 
+    /// Seed SP where the search starts: the top SP for a reverse search, else the bottom SP
+    std::size_t searchStartSp(const ActsTrk::Seed& seed) const;
+
     std::optional<Acts::GreedyAmbiguityResolution> m_ambi;
+    std::optional<Acts::TrackletJoiner> m_trackletJoiner;
 
 
     Acts::Result<void> extrapolateTrackToReferenceSurface(

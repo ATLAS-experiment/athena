@@ -106,6 +106,8 @@ def createActsTrackingPassFlags():
     # ACTS specifc config flags
     icf.addFlag("isSecondaryPass", False)
     icf.addFlag("isLargeD0", False)
+    # search seeds beyond useTopSpRZboundary inward from the top SP first
+    icf.addFlag("autoReverseSearch", False)
     icf.addFlag("PixelSeedingStrategy", SeedingStrategy.Gbts, type=SeedingStrategy)
     icf.addFlag("StripSeedingStrategy", SeedingStrategy.Gbts, type=SeedingStrategy)
     # space point grid of the grid triplet seeding tools of this pass, and

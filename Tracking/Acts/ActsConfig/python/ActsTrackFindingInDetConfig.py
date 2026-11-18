@@ -99,6 +99,8 @@ def ActsInDetMainTrackFindingAlgCfg(flags,
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
     kwargs.setdefault("inflateCovarianceTwoWay", True)
     kwargs.setdefault("twoWayinflateCovarianceFactor", 100.0)
+    # the join assumes a second pass without covariance inflation
+    kwargs.setdefault("twoWaySmoothing", False)
     
     # forceTrackOnSeed isn't effective with secondary passes, which will have removed most/all of the seed measurements from the measurement containers.
     kwargs.setdefault("forceTrackOnSeed", flags.Acts.forceTrackOnSeed and not flags.Tracking.ActiveConfig.isSecondaryPass)

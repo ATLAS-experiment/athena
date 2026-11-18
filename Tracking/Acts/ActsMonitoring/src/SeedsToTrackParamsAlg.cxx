@@ -20,6 +20,11 @@ namespace ActsTrk {
     ATH_CHECK(m_inputSeedContainerKey.initialize());
     ATH_CHECK(m_outputTrackParamsCollectionKey.initialize());
 
+    if (m_useTopSpRZboundary.size() != 2) {
+      ATH_MSG_FATAL("useTopSpRZboundary must have 2 elements, but has " << m_useTopSpRZboundary.size());
+      return StatusCode::FAILURE;
+    }
+
     return StatusCode::SUCCESS;
   }
 
@@ -48,10 +53,9 @@ namespace ActsTrk {
       ActsTrk::Seed seed = seeds[iseed];
 
       auto retrieveSurfaceFunction = 
-        [this, &detElements] (const ActsTrk::Seed& seed) -> const Acts::Surface& { 
-          const xAOD::SpacePoint* sp = seed.sp().front();
+        [this, &detElements] (const xAOD::SpacePoint& sp, std::size_t measIndex) -> const Acts::Surface& { 
           const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(
-                sp->elementIdList().front());
+                sp.elementIdList().at(measIndex));
           const Trk::Surface& atlas_surface = element->surface();
           return *m_geometryConvTool->convertSurfaceToActs(atlas_surface);
         };
@@ -59,6 +63,7 @@ namespace ActsTrk {
       const auto& [optTrackParams, estimationStatus] =
         m_paramEstimationTool->estimateTrackParameters(
 						       seed,
+						       searchStartSp(seed),
 						       tgContext,
 						       mfContext,
 						       calContext,
@@ -74,6 +79,13 @@ namespace ActsTrk {
     }
 
     return StatusCode::SUCCESS;
+  }
+
+  std::size_t SeedsToTrackParamsAlg::searchStartSp(const ActsTrk::Seed& seed) const {
+    const xAOD::SpacePoint* bottom_sp = seed.sp().front();
+    const bool reverse = m_autoReverseSearch && (bottom_sp->radius() > m_useTopSpRZboundary.value()[0] ||
+                                                 std::abs(bottom_sp->z()) > m_useTopSpRZboundary.value()[1]);
+    return reverse ? seed.sp().size() - 1 : 0;
   }
 
 }
