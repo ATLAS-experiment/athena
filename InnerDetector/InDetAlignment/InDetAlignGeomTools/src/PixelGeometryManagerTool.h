@@ -115,6 +115,9 @@ namespace InDet
     /** creates L2 AlignModules for Pixel Endcaps : 2 x 3 disks */
     void buildL2Endcaps();
 
+    /** creates L2 AlignModules for ITk Pixel Endcaps : 2 x 9 disks */
+    void buildL2ITkEndcaps();
+
     /** creates L22 AlignModules for Pixel Barrel : 6 half-layers */
     void buildL22Barrel();
 
@@ -228,9 +231,9 @@ namespace InDet
     Gaudi::Property<double> m_softcutEndcapRotY{this, "SetSoftCutEndcapRotY", 1.};
     Gaudi::Property<double> m_softcutEndcapRotZ{this, "SetSoftCutEndcapRotZ", 1.};
 
+    Gaudi::Property<bool> m_useITkGeometry{this, "UseITkGeometry",false,"Use ITk pixel geometry"};    
     Gaudi::Property<bool> m_dumpGeometry{this, "DumpGeometry", true};
     Gaudi::Property<bool> m_alignDBM{this, "AlignmentDBM", false};
-    
     Gaudi::Property<std::string> m_pixelDetManagerName{this,"PixelDetectorManager","Pixel","Name of the Pixel Detector Manager to attempt to retrieve"};
     Gaudi::Property<bool> m_doEtaCorrection{this,"EtaCorrection",true,"If we should check the DB to see if eta 0 should be skipped"};
 
