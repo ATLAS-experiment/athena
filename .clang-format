@@ -5,6 +5,10 @@ Language: Cpp
 AllowShortBlocksOnASingleLine: false
 AllowShortCaseLabelsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: Inline
-AllowShortIfStatementsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: true
 AllowShortLoopsOnASingleLine: false
+AllowShortNamespacesOnASingleLine: true
+IndentAccessModifiers: false
+AccessModifierOffset: -2
+ColumnLimit: 120
 KeepEmptyLinesAtTheStartOfBlocks: true
