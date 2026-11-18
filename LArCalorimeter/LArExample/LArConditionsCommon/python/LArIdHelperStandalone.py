@@ -62,6 +62,7 @@ class LArIdHelper:
         #but python's garbage collector doesn't know about this relationship. So it may delete the sub-helpers at any time.
 
         self._cabling=None
+        self._mcSym=None
         return
 
 
@@ -123,6 +124,83 @@ class LArIdHelper:
         return self._cabling
 
 
+
+    def getMCSym(self):
+        if self._mcSym: return self._mcSym
+        lar_em_id=self._caloHelper.em_idHelper()
+        lar_hec_id=self._caloHelper.hec_idHelper()
+        lar_fcal_id=self._caloHelper.fcal_idHelper()
+
+        ncellem=lar_em_id.channel_hash_max()
+        ncellhec=lar_hec_id.channel_hash_max()
+        ncellfcal=lar_fcal_id.channel_hash_max()
+        onlHashMax=self._larOnlHelper.channelHashMax()
+
+        oflHashtoSymOnl=[ROOT.HWIdentifier(),]*(ncellem+ncellhec+ncellfcal)
+        onlHashtoSymOnl=[ROOT.HWIdentifier(),]*onlHashMax
+        symIds=set()
+
+        #Loop over EM cells
+        for idhash in range(ncellem):
+            id=lar_em_id.channel_id (idhash)
+            hwid=self.getCabling().createSignalChannelID(id)
+            hwid_hash=self._larOnlHelper.channel_Hash(hwid)
+            barrel_ec = abs( lar_em_id.barrel_ec(id) ) 
+            sampling  = lar_em_id.sampling(id)
+            region    = lar_em_id.region(id)
+            regId     = lar_em_id.region_id(barrel_ec, sampling, region )
+            eta       = lar_em_id.eta(id)
+            phi       = lar_em_id.phi_min(regId)
+            symOffId = lar_em_id.channel_id(barrel_ec, sampling, region, eta, phi )
+            symOnId = self.getCabling().createSignalChannelID(symOffId)
+            idHash = lar_em_id.channel_hash(id)
+            oflHashtoSymOnl[int(idHash)] = symOnId
+            onlHashtoSymOnl[int(hwid_hash)]= symOnId
+            symIds.add(symOnId)
+
+        #Loop over HEC cells
+        for idhash in range (ncellhec):
+            id=lar_hec_id.channel_id (idhash)
+            hwid=self.getCabling().createSignalChannelID(id)
+            hwid_hash=self._larOnlHelper.channel_Hash(hwid)
+
+            pos_neg   = abs( lar_hec_id.pos_neg(id) ) 
+            sampling  = lar_hec_id.sampling(id)
+            region    = lar_hec_id.region(id)
+            regId = lar_hec_id.region_id(pos_neg, sampling, region )
+            eta       = lar_hec_id.eta(id)
+            phi       = lar_hec_id.phi_min(regId)
+            symOffId = lar_hec_id.channel_id(pos_neg, sampling, region, eta, phi )
+            symOnId = self.getCabling().createSignalChannelID(symOffId)
+            
+            idHash=lar_hec_id.channel_hash(id)
+            oflHashtoSymOnl[ncellem+int(idHash)] = symOnId
+            onlHashtoSymOnl[int(hwid_hash)]= symOnId
+            symIds.add(symOnId)
+
+        
+        for idhash in range(ncellfcal):
+            id=lar_fcal_id.channel_id (idhash)
+            hwid=self.getCabling().createSignalChannelID(id)
+            hwid_hash=self._larOnlHelper.channel_Hash(hwid)
+            pos_neg   = abs( lar_fcal_id.pos_neg(id) ) 
+            module    = lar_fcal_id.module(id)
+            eta  = lar_fcal_id.eta(id)
+            phi  = lar_fcal_id.phi(id)
+            if phi > 7: phi = phi-8
+            symOffId = lar_fcal_id.channel_id(pos_neg, module, eta, phi )
+            symOnId = self.getCabling().createSignalChannelID(symOffId)
+            idHash=lar_fcal_id.channel_hash(id)
+            oflHashtoSymOnl[ncellem+ncellhec+int(idHash)] = symOnId
+            onlHashtoSymOnl[int(hwid_hash)]= symOnId
+            symIds.add(symOnId)
+
+
+            
+        symvec=sorted([x for x in symIds],key=IdToNum)
+        self._mcSym=ROOT.LArMCSym( self._larOnlHelper, self._caloHelper, oflHashtoSymOnl, onlHashtoSymOnl, symvec)
+        return self._mcSym
+
 if __name__=="__main__":
 
     #usage example & self-test
@@ -130,7 +208,7 @@ if __name__=="__main__":
     cc=c.getCabling()
 
     onlId1=NumToId(978347776)
-    oflId1=IdToNum(cc.cnvToIdentifier(onlId1))
+    oflId1=IdToNum(cc.cnvToIdentifier(ROOT.HWIdentifier(onlId1)))
     assert(oflId1==740295168)
 
     
@@ -149,7 +227,6 @@ if __name__=="__main__":
                                   0, #iphi
                                   )
     oflId2Num=IdToNum(oflId2)
-    print (oflId2Num)
     assert(oflId2Num==740295168)
     
     onlId2=cc.createSignalChannelID(oflId2)
@@ -159,3 +236,76 @@ if __name__=="__main__":
     onlId2Num=IdToNum(onlId2)
     assert(onlId2Num==978347776)
         
+
+    mcSym=c.getMCSym()
+    assert (IdToNum(mcSym.ZPhiSymOfl(oflId2)) == 991429120)
+    assert (IdToNum(mcSym.ZPhiSymOnl(onlId2)) == 991429120)
+
+    if len(sys.argv)>1 and sys.argv[1]=="dump":
+        #Create a dump of all identifiers:
+        
+        nChans=mcSym.hashMax()[0]
+        onlineID=c.larOnlHelper()
+        offlineID=c.caloHelper()
+        for idx in range(nChans):
+            chid=c.larOnlHelper().channel_Id(idx) #Convert hash to id
+            onlName="{0:#x} ".format(chid.get_identifier32().get_compact())
+            bec=onlineID.barrel_ec(chid)
+            side=onlineID.pos_neg(chid)
+            ft=onlineID.feedthrough(chid)
+            slot=onlineID.slot(chid)
+            chan=onlineID.channel(chid)
+            ftname=onlineID.feedthrough_name(chid) 
+            
+            if bec==0:
+                onlName+="[BARREL/"
+            else:
+                onlName+="[ENDCAP/"
+                
+            if side==0:
+                onlName+="C/"
+            else:
+                onlName+="A/"
+
+            onlName+="FT {} ({})/Slot {}/Chan {}]".format(ft,ftname,slot,chan)
+            #convert online hash to offline Id
+            id=cc.cnvToIdentifierFromHash(idx)
+            if not id.is_valid():
+                oflName=" disconnected"
+                symName=""
+            else:
+                oflName="{0:#x} ".format(id.get_identifier32().get_compact())
+                subcalo=offlineID.sub_calo(id)
+                side=offlineID.pos_neg(id)
+                layer=offlineID.sampling(id)
+                region=offlineID.region(id)
+                eta=offlineID.eta(id)
+                phi=offlineID.phi(id)
+
+                if subcalo == offlineID.LAREM:
+                    if abs(side)==1:
+                        oflName+="[EMB"
+                    elif abs(side)==2:
+                        oflName+="[EMECOW"
+                    elif abs(side)==3:
+                        oflName+="[EMECIW"
+                    else:
+                        oflName+="[UNKNOWN"
+                elif subcalo == offlineID.LARHEC:
+                    oflName+="[HEC"
+                elif subcalo == offlineID.LARFCAL:
+                    oflName+="[FCAL"
+                else:
+                    oflName+="[UNKNOWN"
+
+                oflName+="/"
+                if side>0:
+                    oflName+="A/"
+                else:
+                    oflName+="C/"
+
+                oflName+="Lay {}/Reg {}/Eta {}/Phi {}]".format(layer,region,eta,phi)
+                symId=mcSym.ZPhiSymOfl(id)
+
+                symName=" symId={0:#x}".format(symId.get_identifier32().get_compact())
+            print (onlName+" = "+oflName+symName)
