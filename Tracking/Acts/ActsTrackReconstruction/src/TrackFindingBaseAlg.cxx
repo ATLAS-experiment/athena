@@ -669,6 +669,8 @@ namespace ActsTrk {
   }
 
   StatusCode TrackFindingBaseAlg::initializeMeasurementSelector() {
+    // check that number of accepted measurements per surface does not exceed the hard limit
+     ATH_CHECK(ActsTrk::detail::checkNumMeasurementsCutOff(m_numMeasurementsCutOff.value()));
     // the cuts for each eta bin are (measurement, outlier) pairs for each measurement dimension
     auto &chi2CutOffOutlier = m_measurementSelectorConfig.m_chi2CutOffOutlier;
     const std::vector<double> &cutOff = m_chi2CutOffSigma.value();

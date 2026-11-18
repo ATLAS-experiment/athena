@@ -391,6 +391,15 @@ namespace {
 }
 
 namespace ActsTrk::detail {
+bool checkNumMeasurementsCutOff(const std::vector<size_t> &numMeasurementsCutOff) {
+   for (std::size_t cut_off: numMeasurementsCutOff) {
+      if (cut_off>gAbsoluteMaxBranchesPerSurface) {
+         return false;
+      }
+   }
+   return true;
+}
+
 // return a configured, wrapper for the measurement selector
 std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(const EventContext &ctx,
        const ActsTrk::IPixelOnTrackCalibratorTool<detail::RecoTrackStateContainer> *pixelOnTrackCalibratorTool,

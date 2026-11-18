@@ -230,7 +230,7 @@ struct TopCollection {
    // @param max_n the maximum number of top-candidates is fixed by the template parameter
    //    N but can be reduced further to this number
    void init(std::size_t max_n) {
-      assert( max_n < N);
+      assert( max_n <= N);
       m_nextSlot=0;
       m_maxSlots=max_n;
       m_order[0]=0;

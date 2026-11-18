@@ -21,6 +21,7 @@
 #include <utility>
 
 namespace ActsTrk::detail {
+   bool checkNumMeasurementsCutOff(const std::vector<size_t> &numMeasurementsCutOff);
    class IOnBoundStateCalibratorTool;
    std::unique_ptr<ActsTrk::IMeasurementSelector>  getMeasurementSelector(
            const EventContext &ctx,
