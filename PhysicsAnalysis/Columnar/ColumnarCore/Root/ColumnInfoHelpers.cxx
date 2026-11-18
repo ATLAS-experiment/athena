@@ -10,6 +10,7 @@
 //
 
 #include <ColumnarCore/ColumnInfoHelpers.h>
+#include <ColumnarInterfaces/ColumnInfoHelpers.h>
 #include <ColumnarCore/LinkColumn.h>
 
 #include <CxxUtils/crc64.h>
@@ -46,7 +47,11 @@ namespace columnar
       throw std::runtime_error ("missing type information in mergeColumnInfo for column: " + target.name);
     if (*target.type != *source.type)
       throw std::runtime_error ("mismatched column types in mergeColumnInfo for column: " + target.name + ": " + boost::core::demangle(target.type->name()) + " and " + boost::core::demangle(source.type->name()));
-    
+
+    // for the "relaxed type matching" the strictest column wins. note
+    // that size missmatches can't happen, due to the type check above.
+    target.typeCategory = mergeColumnTypeCategory (target.typeCategory, source.typeCategory);
+
     addColumnAccessMode (target, source.accessMode);
 
     if (target.offsetName != source.offsetName)

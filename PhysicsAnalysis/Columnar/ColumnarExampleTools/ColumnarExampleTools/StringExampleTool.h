@@ -13,6 +13,7 @@
 #include <ColumnarCore/ColumnAccessor.h>
 #include <ColumnarCore/ColumnarTool.h>
 #include <ColumnarCore/ObjectColumn.h>
+#include <ColumnarCore/SelectionColumn.h>
 #include <ColumnarMet/MetDef.h>
 #include <ColumnarCore/StringColumn.h>
 
@@ -67,7 +68,7 @@ namespace ADD_CMODE(columnar)
     /// the option to return individual output values.  Instead it needs
     /// to provide an output value per object, which in the columnar
     /// world is done by filling a column.
-    columnar::MetDecorator<char> selectionDec {*this, "selection"};
+    columnar::MetDecorator<columnar::SelectionColumn> selectionDec {*this, "selection"};
   };
 }
 

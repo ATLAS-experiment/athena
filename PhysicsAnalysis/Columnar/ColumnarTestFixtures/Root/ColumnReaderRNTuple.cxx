@@ -195,6 +195,9 @@ namespace columnar
           } else if (typeName == "std::vector<float>") 
           {
             knownColumns.push_back(std::make_shared<ColumnReaderVector<float, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<double>") 
+          {
+            knownColumns.push_back(std::make_shared<ColumnReaderVector<double, RNTFieldReader>>(name));
           } else if (typeName == "std::vector<char>") 
           {
             knownColumns.push_back(std::make_shared<ColumnReaderVector<char, RNTFieldReader>>(name));
@@ -228,6 +231,9 @@ namespace columnar
           } else if (typeName == "std::vector<std::vector<std::int32_t>>") 
           {
              knownColumns.push_back(std::make_shared<ColumnReaderVectorVector<std::int32_t, RNTFieldReader>>(name));
+          } else if (typeName == "std::vector<std::vector<std::uint32_t>>") 
+          {
+             knownColumns.push_back(std::make_shared<ColumnReaderVectorVector<std::uint32_t, RNTFieldReader>>(name));
           } else if (typeName == "std::vector<std::vector<std::uint64_t>>") 
           {
              knownColumns.push_back(std::make_shared<ColumnReaderVectorVector<std::uint64_t, RNTFieldReader>>(name));

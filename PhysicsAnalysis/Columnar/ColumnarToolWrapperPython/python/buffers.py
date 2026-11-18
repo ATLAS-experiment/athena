@@ -286,8 +286,13 @@ def resolve_optional_columns(classified, events):
     """Remove optional input columns absent from events.
 
     Checks each optional input column against ``ak.fields(events)`` and drops
-    it if not present. Returns a new dict (shallow copy per container); the
-    original classified dict is not modified.
+    it if not present, including the inputs of nested-vector offsets (e.g. an
+    optional vector of links). An optional nested-vector offset whose inputs
+    are all dropped gets dropped with its event-index columns, and so does an
+    optional container that is left without inputs, nested offsets and
+    outputs and has no fields in ``events`` (e.g. the target container of an
+    optional link). Returns a new dict (shallow copy per container and nested
+    offset); the original classified dict is not modified.
 
     Parameters
     ----------
@@ -303,14 +308,27 @@ def resolve_optional_columns(classified, events):
         columns removed from each container's ``"inputs"`` list.
     """
     available = set(ak.fields(events))
+
+    def keep(col):
+        return not col.is_optional or _column_is_present(col, available)
+
     result = {}
     for container, info in classified.items():
-        result[container] = dict(info)
-        result[container]["inputs"] = [
-            col
-            for col in info["inputs"]
-            if not col.is_optional or _column_is_present(col, available)
-        ]
+        resolved = dict(info)
+        resolved["inputs"] = [col for col in info["inputs"] if keep(col)]
+        resolved["nested_offsets"] = {}
+        for nested_offset_name, nested in info["nested_offsets"].items():
+            inputs = [col for col in nested["inputs"] if keep(col)]
+            if not inputs and nested["inputs"] and nested["offset"].is_optional:
+                continue
+            resolved["nested_offsets"][nested_offset_name] = dict(nested, inputs=inputs)
+        if (info["offset"].is_optional
+                and not resolved["inputs"]
+                and not resolved["nested_offsets"]
+                and not info["outputs"]
+                and not any(field.startswith(f"{container}.") for field in available)):
+            continue
+        result[container] = resolved
     return result
 
 
@@ -356,7 +374,13 @@ def extract_buffers(events, classified):
                     )
                     continue
                 base = _branch_name_for_column(col.name)
-                inner = _inner_most_list_offset_array(events[base])
+                # uproot reads std::string as a list of uint8 with the
+                # parameter __array__="string", which awkward treats as a
+                # leaf. Dropping the parameters exposes the character
+                # level as a regular list (no-op for non-string arrays).
+                inner = _inner_most_list_offset_array(
+                    ak.without_parameters(events[base])
+                )
                 raw_offsets = np.asarray(inner.layout.offsets.data)
                 start = int(raw_offsets[0])
                 end = int(raw_offsets[-1])
@@ -365,6 +389,9 @@ def extract_buffers(events, classified):
                 buffers[nested_offset_name] = np.ascontiguousarray(
                     raw_offsets - start, dtype=np.uint64
                 )
+                # The data is passed as it is: the tool handle accepts
+                # the uint8 that uproot reads strings as for the char
+                # columns of the tools, and rejects genuine mismatches.
                 buffers[col.name] = np.ascontiguousarray(
                     inner.layout.content.data[start:end]
                 )
@@ -541,6 +568,8 @@ def allocate_outputs(classified, buffer_dict):
                 )
                 raise RuntimeError(msg)
             size = int(offset_data[-1])
+            # boolean columns (i.e. selections) have dtype bool, the
+            # tool only ever writes 0 or 1 to them
             arr = np.zeros(size, dtype=col.dtype)
             output_buffers[col.name] = arr
             buffer_dict[col.name] = arr
@@ -563,8 +592,10 @@ def reconstruct_output(classified, buffer_dict, num_events):
     Returns
     -------
     ak.Array
-        Record array with one field per output column, each a variable-length
-        list of per-particle values (i.e. ``var * dtype``).
+        Record array with one field per output column. Columns of a
+        per-object container are a variable-length list of per-object values
+        (i.e. ``var * dtype``), columns of the root container (e.g. EventInfo
+        decorations) have one value per event (i.e. ``dtype``).
     """
     form_fields = []
     form_contents = []
@@ -579,21 +610,26 @@ def reconstruct_output(classified, buffer_dict, num_events):
             node_index += 1
 
             form_fields.append(col.name)
-            form_contents.append(
-                {
-                    "class": "ListOffsetArray",
-                    "offsets": "i64",
-                    "content": {
-                        "class": "NumpyArray",
-                        "primitive": col.dtype,
-                        "form_key": node_data,
-                    },
-                    "form_key": node_offset,
-                }
-            )
-
+            data_form = {
+                "class": "NumpyArray",
+                "primitive": str(buffer_dict[col.name].dtype),
+                "form_key": node_data,
+            }
             out_buffers[f"{node_data}-data"] = buffer_dict[col.name]
-            out_buffers[f"{node_offset}-offsets"] = buffer_dict[col.offset_name]
+
+            if classified[col.offset_name]["offset"].offset_name not in classified:
+                # the root container (e.g. EventInfo): one value per event
+                form_contents.append(data_form)
+            else:
+                form_contents.append(
+                    {
+                        "class": "ListOffsetArray",
+                        "offsets": "i64",
+                        "content": data_form,
+                        "form_key": node_offset,
+                    }
+                )
+                out_buffers[f"{node_offset}-offsets"] = buffer_dict[col.offset_name]
 
     form = {
         "class": "RecordArray",

@@ -238,6 +238,14 @@ namespace columnar
       {
         if (!userColumn.info.has_value() || !userColumn.info->isEventIndex || userColumn.input.has_value())
           continue;
+        // optional columns (e.g. optional links) the user didn't provide
+        // don't need an event index
+        if (userColumn.info->isOptional)
+        {
+          auto offsetIter = m_userColumns.find (userColumn.info->offsetName);
+          if (offsetIter == m_userColumns.end() || !offsetIter->second.input.has_value())
+            continue;
+        }
         const auto eventIndex = getEventIndex (userColumn.info->offsetName);
         userColumn.input.emplace (std::vector<std::any> (eventIndex.begin(), eventIndex.end()));
       }
@@ -280,7 +288,8 @@ namespace columnar
           {
             const bool isConst = columnInfo.accessMode == ColumnAccessMode::input;
             input.configureType (name, *columnInfo.type);
-            m_toolHandle->getToolWrapper().setColumnVoid (*m_columnData, name, input.columnSize(), input.columnVoidData(), *columnInfo.type, isConst);
+            // the data is of exactly the type of the column
+            m_toolHandle->getToolWrapper().setColumnVoid (*m_columnData, name, input.columnSize(), input.columnVoidData(), columnInfo.type, columnInfo.typeCategory, columnInfo.sizeOfType, isConst);
           }
           break;
         default:

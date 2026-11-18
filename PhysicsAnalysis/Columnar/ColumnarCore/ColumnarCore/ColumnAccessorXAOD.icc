@@ -28,6 +28,7 @@ namespace columnar
       static constexpr bool isDefined = true;
       static constexpr bool viewIsReference = MemoryAccessor<CT,ColumnarModeXAOD>::viewIsReference;
       static constexpr bool allowRead = true;
+      static constexpr bool useSetter = !viewIsReference && CAM == ColumnAccessMode::output && MemoryAccessor<CT,CM>::hasSetter;
 
       static_assert (!std::is_const_v<CT>, "CT must not be const");
 
@@ -113,12 +114,18 @@ namespace columnar
         if (!container.empty())
           mySpan = std::span<ColumnType> (&m_accessor (*container[0]), container.size());
         void **dataPtr = nullptr;
-        return detail::VectorConvertView (MemoryAccessor<CT,CM>::make_viewer(dataPtr), std::span (mySpan));
+        return detail::VectorConvertView (MemoryAccessor<CT,CM>::makeViewer(dataPtr), std::span (mySpan));
+      }
+
+      [[nodiscard]] auto operator () (const SG::AuxElement& element) const
+        requires (useSetter)
+      {
+        void **dataPtr = nullptr;
+        return OutputProxy (m_accessor(element), MemoryAccessor<CT,CM>::makeSetter(dataPtr));
       }
 
       template<typename T>
-        requires (!viewIsReference && CAM == ColumnAccessMode::output)
-        // requires (!viewIsReference && CAM == ColumnAccessMode::output && requires(MemoryType memory, T value) {MemoryAccessor<CT,CM>::makeSetter(nullptr)(memory, value);})
+        requires (useSetter)
       void set (const SG::AuxElement& element, T&& value) const
       {
         void **dataPtr = nullptr;

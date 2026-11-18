@@ -9,6 +9,7 @@
 #define COLUMNAR_INTERFACES_COLUMN_INFO_H
 
 #include <string>
+#include <type_traits>
 #include <typeinfo>
 #include <vector>
 
@@ -25,6 +26,43 @@ namespace columnar
 
     /// @brief an updateable column
     update
+  };
+
+
+  /// @brief the category of type we use for a column
+  ///
+  /// This is primarily meant to simplify the python interface, as well
+  /// as allowing to reinterpret types that have identical memory
+  /// representation.
+  enum class ColumnTypeCategory
+  {
+    /// @brief a floating-point type
+    floatingPoint,
+
+    /// @brief a signed integer type
+    signedInteger,
+
+    /// @brief an unsigned integer type
+    unsignedInteger,
+
+    /// @brief a sign-agnostic type
+    ///
+    /// For some columns we don't care if they are stored as signed or
+    /// unsigned integers. In particular for `char`-type columns C++
+    /// doesn't define whether it is signed or unsigned, and this is
+    /// chosen by default.
+    signAgnosticInteger,
+
+    /// @brief a boolean type
+    ///
+    /// This is separate from the C++ `bool` type, and instead it is
+    /// typically one byte (matching numpy `bool`), and it is
+    /// distinguished by being only 1 or 0. For input columns any other
+    /// value is interpreted as 1.
+    boolean,
+
+    /// @brief some other type
+    other
   };
 
 
@@ -52,6 +90,14 @@ namespace columnar
     /// neither be const-qualified nor in a container like
     /// `std::vector<float>`.
     const std::type_info *type = nullptr;
+
+
+    /// @brief the size (in bytes) of the individual entries in the column
+    unsigned sizeOfType = 0u;
+
+
+    /// @brief the type category for the individual entries in the column
+    ColumnTypeCategory typeCategory = ColumnTypeCategory::other;
 
 
     /// @brief the access mode for the column
@@ -149,6 +195,41 @@ namespace columnar
     /// entry per event).
     std::string nameForLinks {};
   };
+
+
+
+  /// @brief the default @ref ColumnTypeCategory for the given C++ type
+  ///
+  /// `char` is sign-agnostic, since C++ doesn't define whether it is
+  /// signed. A C++ `bool` is `other`, since its memory layout is not
+  /// guaranteed to match any other type, i.e. it has to be matched
+  /// exactly.
+  template<typename T>
+  [[nodiscard]] constexpr ColumnTypeCategory columnTypeCategoryFor () noexcept
+  {
+    using Type = std::remove_cv_t<T>;
+    if constexpr (std::is_floating_point_v<Type>)
+      return ColumnTypeCategory::floatingPoint;
+    else if constexpr (std::is_same_v<Type,bool> || !std::is_integral_v<Type>)
+      return ColumnTypeCategory::other;
+    else if constexpr (std::is_same_v<Type,char>)
+      return ColumnTypeCategory::signAgnosticInteger;
+    else if constexpr (std::is_signed_v<Type>)
+      return ColumnTypeCategory::signedInteger;
+    else
+      return ColumnTypeCategory::unsignedInteger;
+  }
+
+
+  /// @brief set the type information in the @ref ColumnInfo for the
+  /// given C++ type
+  template<typename T>
+  void setColumnType (ColumnInfo& info) noexcept
+  {
+    info.type = &typeid (std::remove_cv_t<T>);
+    info.sizeOfType = sizeof (T);
+    info.typeCategory = columnTypeCategoryFor<T> ();
+  }
 }
 
 #endif

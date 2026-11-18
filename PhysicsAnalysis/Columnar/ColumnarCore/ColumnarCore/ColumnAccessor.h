@@ -60,6 +60,19 @@ namespace columnar
     /// this accessor should be added as a data dependency in AthenaMT.
     bool addMTDependency = false;
 
+
+    /// @brief whether this (integer) column accepts data of the same
+    /// size but different sign
+    ///
+    /// With this set the column can be filled from either the signed or
+    /// the unsigned integer type of the same size, reinterpreting the
+    /// data instead of converting it (see @ref
+    /// ColumnTypeCategory::signAgnosticInteger). Only set this if the
+    /// values are known to fit in either type, or if the sign carries
+    /// no meaning. This is always the case for `char` columns, and has
+    /// no effect in xAOD mode.
+    bool isSignAgnostic = false;
+
     ColumnInfo makeColumnInfo () const
     {
       ColumnInfo info;
@@ -153,6 +166,44 @@ namespace columnar
       static constexpr bool hasSetter = false;
       using MemoryType = CT;
 
+    };
+
+
+
+    /// @brief a write-only proxy for output columns that don't have a
+    /// reference view
+    ///
+    /// For column types that are converted between the user-visible
+    /// type and the type in memory (i.e. `viewIsReference` is false),
+    /// the decorator can't return a reference to the memory.  Instead
+    /// it returns this proxy, which applies the conversion via the
+    /// setter of the @ref MemoryAccessor on assignment.  This allows
+    /// to write `decorator(object) = value` for those columns as well.
+    ///
+    /// TO DO: This currently only allows write access. Read access
+    /// should be supported at some point.
+    template<typename MT,typename Setter>
+    class OutputProxy final
+    {
+    public:
+      OutputProxy (MT& memory, Setter setter) noexcept
+        : m_memory (memory), m_setter (std::move (setter))
+      {}
+
+      OutputProxy (const OutputProxy&) = delete;
+      OutputProxy& operator = (const OutputProxy&) = delete;
+
+      template<typename T>
+        requires requires (const Setter setter, MT& memory, T&& value) {setter (memory, std::forward<T>(value));}
+      const OutputProxy& operator = (T&& value) const
+      {
+        m_setter (m_memory, std::forward<T>(value));
+        return *this;
+      }
+
+    private:
+      MT& m_memory;
+      [[no_unique_address]] Setter m_setter;
     };
   }
 

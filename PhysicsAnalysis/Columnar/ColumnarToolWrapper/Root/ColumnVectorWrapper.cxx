@@ -12,6 +12,7 @@
 #include <ColumnarToolWrapper/ColumnVectorWrapper.h>
 
 #include <ColumnarInterfaces/ColumnInfo.h>
+#include <ColumnarInterfaces/ColumnInfoHelpers.h>
 #include <ColumnarInterfaces/IColumnarTool.h>
 #include <CxxUtils/checker_macros.h>
 
@@ -38,6 +39,8 @@ namespace columnar
     // we always reserve the second column as the size column
     m_elements.at(sizeIndex).debugName = "<size>";
     m_elements.at(sizeIndex).type = &typeid(std::size_t);
+    m_elements.at(sizeIndex).sizeOfType = sizeof(std::size_t);
+    m_elements.at(sizeIndex).typeCategory = columnTypeCategoryFor<std::size_t>();
     m_elements.at(sizeIndex).isOptional = false;
     m_elements.at(sizeIndex).readOnly = true;
   }
@@ -56,6 +59,9 @@ namespace columnar
       // Check that relevant fields match
       if (existingHeader.type != columnInfo.type)
         throw std::runtime_error("column " + columnInfo.name + " type mismatch");
+      // for the "relaxed type matching" the strictest tool wins. note
+      // that size missmatches can't happen, due to the type check above.
+      existingHeader.typeCategory = mergeColumnTypeCategory (existingHeader.typeCategory, columnInfo.typeCategory);
       if (existingHeader.offsetName != columnInfo.offsetName)
         throw std::runtime_error("column " + columnInfo.name + " offset name mismatch: " + existingHeader.offsetName + " vs " + columnInfo.offsetName);
       if (existingHeader.isOffset != columnInfo.isOffset)
@@ -72,6 +78,10 @@ namespace columnar
       if (columnInfo.accessMode == ColumnAccessMode::update)
         existingHeader.readOnly = false;
       // If existing is already non-readOnly (output or update), keep it that way
+
+      // the column is required if any tool requires it
+      if (!columnInfo.isOptional)
+        existingHeader.isOptional = false;
       return iter->second;
     }
 
@@ -81,6 +91,8 @@ namespace columnar
     auto& header = m_elements.back();
     header.debugName = columnInfo.name;
     header.type = columnInfo.type;
+    header.sizeOfType = columnInfo.sizeOfType;
+    header.typeCategory = columnInfo.typeCategory;
     header.accessMode = columnInfo.accessMode;
     header.offsetName = columnInfo.offsetName;
     header.isEventIndex = columnInfo.isEventIndex;
@@ -229,6 +241,37 @@ namespace columnar
 
 
 
+  namespace
+  {
+    /// @brief check that the given user type can be used for the
+    /// given column
+    ///
+    /// That is either the exact type of the column, or a type whose
+    /// category and size are compatible with the column (see @ref
+    /// isColumnTypeCompatible).
+    void checkColumnType (const ColumnVectorElementHeader& header, const std::type_info *type, ColumnTypeCategory typeCategory, unsigned sizeOfType, bool isConst)
+    {
+      if (type != nullptr && header.type != nullptr && *type == *header.type)
+        return;
+      // boolean data is fine for any column that is only read
+      const bool readOnly = isConst || header.readOnly;
+      if (isColumnTypeCompatible (header.typeCategory, header.sizeOfType, typeCategory, sizeOfType, readOnly))
+        return;
+      std::string message = "invalid type for column: " + header.debugName + ", got ";
+      if (type != nullptr)
+        message += boost::core::demangle (type->name()) + " ";
+      message += "(" + std::string (columnTypeCategoryName (typeCategory)) + ", " + std::to_string (sizeOfType) + " byte(s)) but expected ";
+      if (header.type != nullptr)
+        message += boost::core::demangle (header.type->name()) + " ";
+      message += "(" + std::string (columnTypeCategoryName (header.typeCategory)) + ", " + std::to_string (header.sizeOfType) + " byte(s))";
+      if (!readOnly && typeCategory == ColumnTypeCategory::boolean)
+        message += ", boolean data can only be written to boolean columns";
+      throw std::runtime_error (message);
+    }
+  }
+
+
+
   ColumnVectorData ::
   ColumnVectorData (const ColumnVectorHeader *val_header)
     : m_header (val_header),
@@ -241,7 +284,7 @@ namespace columnar
 
 
   void ColumnVectorData ::
-  setColumnVoid (std::size_t columnIndex, std::size_t size, const void *dataPtr, const std::type_info& type, bool isConst)
+  setColumnVoid (std::size_t columnIndex, std::size_t size, const void *dataPtr, const std::type_info *type, ColumnTypeCategory typeCategory, unsigned sizeOfType, bool isConst)
   {
     if (columnIndex == ColumnVectorHeader::nullIndex)
       throw std::logic_error ("cannot set the null column");
@@ -261,8 +304,7 @@ namespace columnar
       dataPtr = &dummyValue;
     }
 
-    if (type != *header.type)
-      throw std::runtime_error ("invalid type for column: " + header.debugName);
+    checkColumnType (header, type, typeCategory, sizeOfType, isConst);
     if (isConst && !header.readOnly)
       throw std::runtime_error ("assigning const vector to a column that is not read-only: " + header.debugName);
     if (m_data[columnIndex] != nullptr)
@@ -275,14 +317,13 @@ namespace columnar
 
 
   std::pair<std::size_t,const void*> ColumnVectorData ::
-  getColumnVoid (std::size_t columnIndex, const std::type_info *type, bool isConst) const
+  getColumnVoid (std::size_t columnIndex, const std::type_info *type, ColumnTypeCategory typeCategory, unsigned sizeOfType, bool isConst) const
   {
     if (columnIndex >= m_header->numColumns())
       throw std::runtime_error ("invalid column index: " + std::to_string(columnIndex) + " (max is " + std::to_string(m_header->numColumns()-1) + ")");
 
     auto& header = m_header->getColumn (columnIndex);
-    if (*type != *header.type)
-      throw std::runtime_error ("invalid type for column: " + header.debugName);
+    checkColumnType (header, type, typeCategory, sizeOfType, isConst);
     if (!isConst && header.readOnly)
       throw std::runtime_error ("retrieving non-const vector from a read-only column: " + header.debugName);
     if (m_data[columnIndex] != nullptr)
@@ -313,6 +354,8 @@ namespace columnar
       info.name = header.debugName;
       info.index = static_cast<unsigned>(i);
       info.type = header.type;
+      info.sizeOfType = header.sizeOfType;
+      info.typeCategory = header.typeCategory;
       info.accessMode = header.accessMode;
       info.offsetName = header.offsetName;
       info.fixedDimensions = header.fixedDimensions;

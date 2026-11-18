@@ -439,6 +439,9 @@ namespace columnar
               if (*branchClass->GetTypeInfo() == typeid(std::vector<float>))
               {
                 knownColumns.push_back (std::make_shared<ColumnReaderVector<float,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<double>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnReaderVector<double,BranchReader>> (branch->GetName()));
               } else if (*branchClass->GetTypeInfo() == typeid(std::vector<char>))
               {
                 knownColumns.push_back (std::make_shared<ColumnReaderVector<char,BranchReader>> (branch->GetName()));
@@ -472,6 +475,9 @@ namespace columnar
               } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::vector<std::int32_t>>))
               {
                 knownColumns.push_back (std::make_shared<ColumnReaderVectorVector<std::int32_t,BranchReader>> (branch->GetName()));
+              } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::vector<std::uint32_t>>))
+              {
+                knownColumns.push_back (std::make_shared<ColumnReaderVectorVector<std::uint32_t,BranchReader>> (branch->GetName()));
               } else if (*branchClass->GetTypeInfo() == typeid(std::vector<std::vector<std::uint64_t>>))
               {
                 knownColumns.push_back (std::make_shared<ColumnReaderVectorVector<std::uint64_t,BranchReader>> (branch->GetName()));
