@@ -2,13 +2,13 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFUNIFIEDMATCHINGTOOL_H
-#define PFUNIFIEDMATCHINGTOOL_H
+#ifndef PFMATCHINGTOOL_H
+#define PFMATCHINGTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 
-#include "IPFUnifiedBaseTool.h"
+#include "IPFBaseTool.h"
 #include "PFEnergyPredictorTool.h"
 #include "PFMatchPositions.h"
 #include "PFTrackClusterMatchingTool.h"
@@ -22,12 +22,12 @@ class IEFlowCellEOverPTool;
 struct PFData;
 
 
-class PFUnifiedMatchingTool : public extends<AthAlgTool, IPFUnifiedBaseTool>
+class PFMatchingTool : public extends<AthAlgTool, IPFBaseTool>
 {
 
 public:
-  PFUnifiedMatchingTool(const std::string &type, const std::string &name, const IInterface *parent);
-  ~PFUnifiedMatchingTool();
+  PFMatchingTool(const std::string &type, const std::string &name, const IInterface *parent);
+  ~PFMatchingTool();
 
   virtual StatusCode initialize() override;
   virtual StatusCode processPFlowData(

@@ -2,20 +2,20 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFUNIFIEDMATCHINGTRUTHTOOL_H
-#define PFUNIFIEDMATCHINGTRUTHTOOL_H
+#ifndef PFMATCHINGTRUTHTOOL_H
+#define PFMATCHINGTRUTHTOOL_H
 
-#include "PFUnifiedMatchingTool.h"
+#include "PFMatchingTool.h"
 
 struct PFData;
 
 
-class PFUnifiedMatchingTruthTool : public PFUnifiedMatchingTool
+class PFMatchingTruthTool : public PFMatchingTool
 {
 
 public:
-  using PFUnifiedMatchingTool::PFUnifiedMatchingTool;
-  ~PFUnifiedMatchingTruthTool();
+  using PFMatchingTool::PFMatchingTool;
+  ~PFMatchingTruthTool();
 
   virtual StatusCode initialize() override;
 

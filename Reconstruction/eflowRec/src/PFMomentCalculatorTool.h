@@ -2,13 +2,13 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef PFUNIFIEDMOMENTCALCULATORTOOL_H
-#define PFUNIFIEDMOMENTCALCULATORTOOL_H
+#ifndef PFMOMENTCALCULATORTOOL_H
+#define PFMOMENTCALCULATORTOOL_H
 
 #include "AthenaBaseComps/AthAlgTool.h"
 #include "GaudiKernel/ToolHandle.h"
 #include "CaloUtils/CaloClusterCollectionProcessor.h"
-#include "IPFUnifiedBaseTool.h"
+#include "IPFBaseTool.h"
 #include "IPFClusterCollectionTool.h"
 
 struct PFData;
@@ -16,13 +16,13 @@ struct PFData;
 /**
 This tool uses a CaloClusterCollectionProcessor to calculate new moments for the modified calorimeter clusters (modified when we do the charged shower subtraction), and makes use of IPFClusterCollectionTool to generate a VIEW container of xAOD::CaloCluster to be used in the CaloClusterCollectionProcessor tool. Inherits from IPFBaseAlgTool.
 */
-class PFUnifiedMomentCalculatorTool : public extends<AthAlgTool, IPFUnifiedBaseTool> {
+class PFMomentCalculatorTool : public extends<AthAlgTool, IPFBaseTool> {
 
   public:
   
-  PFUnifiedMomentCalculatorTool(const std::string& type,const std::string& name,const IInterface* parent);
+  PFMomentCalculatorTool(const std::string& type,const std::string& name,const IInterface* parent);
 
-  ~PFUnifiedMomentCalculatorTool() {}
+  ~PFMomentCalculatorTool() {}
 
   virtual StatusCode initialize() override;
   virtual StatusCode processPFlowData(const EventContext& ctx, PFData &thePFData) const override;

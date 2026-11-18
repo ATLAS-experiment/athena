@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "PFUnifiedSubtractionOnlyTool.h"
+#include "PFSubtractionTool.h"
 #include "PFData.h"
 
 #include "eflowCaloObject.h"
@@ -21,15 +21,15 @@
 
 using namespace eflowSubtract;
 
-PFUnifiedSubtractionOnlyTool::PFUnifiedSubtractionOnlyTool(const std::string &type, const std::string &name, const IInterface *parent) : base_class(type, name, parent),
-                                                                                                                   m_binnedParameters(std::make_unique<eflowEEtaBinnedParameters>())
+PFSubtractionTool::PFSubtractionTool(const std::string &type, const std::string &name, const IInterface *parent) : base_class(type, name, parent),
+                                                                                                                           m_binnedParameters(std::make_unique<eflowEEtaBinnedParameters>())
 {
 }
 
-PFUnifiedSubtractionOnlyTool::~PFUnifiedSubtractionOnlyTool()
+PFSubtractionTool::~PFSubtractionTool()
 = default;
 
-StatusCode PFUnifiedSubtractionOnlyTool::initialize()
+StatusCode PFSubtractionTool::initialize()
 {
 
   ATH_CHECK(m_theEOverPTool.retrieve());
@@ -56,7 +56,7 @@ StatusCode PFUnifiedSubtractionOnlyTool::initialize()
 
 }
 
-StatusCode PFUnifiedSubtractionOnlyTool::processPFlowData(
+StatusCode PFSubtractionTool::processPFlowData(
   const EventContext& ctx,
   PFData &data
 ) const
@@ -90,7 +90,7 @@ StatusCode PFUnifiedSubtractionOnlyTool::processPFlowData(
   return StatusCode::SUCCESS;
 }
 
-void PFUnifiedSubtractionOnlyTool::simulateShowers(const EventContext& ctx, eflowCaloObjectContainer& eflowCaloObjects, const unsigned int& nCaloObj) const {
+void PFSubtractionTool::simulateShowers(const EventContext& ctx, eflowCaloObjectContainer& eflowCaloObjects, const unsigned int& nCaloObj) const {
 
   const double gaussianRadius = 0.032;
   const double gaussianRadiusError = 1.0e-3;
@@ -105,7 +105,7 @@ void PFUnifiedSubtractionOnlyTool::simulateShowers(const EventContext& ctx, eflo
   }
 }
 
-void PFUnifiedSubtractionOnlyTool::performSubtraction(const EventContext& ctx, const unsigned int& startingPoint, const unsigned int& nCaloObj, PFData &data ) const{
+void PFSubtractionTool::performSubtraction(const EventContext& ctx, const unsigned int& startingPoint, const unsigned int& nCaloObj, PFData &data ) const{
 
   /** Start loop from nCaloObj, which should be zero on a first pass */
   if (!m_recoverSplitShowers && 0 != nCaloObj) ATH_MSG_WARNING("Not in Split Showers Mode and already have " << nCaloObj << " eflowCaloObjects");
@@ -119,7 +119,7 @@ void PFUnifiedSubtractionOnlyTool::performSubtraction(const EventContext& ctx, c
   }
 }
 
-void PFUnifiedSubtractionOnlyTool::performSubtraction(eflowCaloObject& thisEflowCaloObject) const{
+void PFSubtractionTool::performSubtraction(eflowCaloObject& thisEflowCaloObject) const{
 
   ATH_MSG_DEBUG("In performSubtraction");
 
@@ -320,18 +320,18 @@ void PFUnifiedSubtractionOnlyTool::performSubtraction(eflowCaloObject& thisEflow
 
 }
 
-bool PFUnifiedSubtractionOnlyTool::isEOverPFail(double expectedEnergy, double sigma, double clusterEnergy) const
+bool PFSubtractionTool::isEOverPFail(double expectedEnergy, double sigma, double clusterEnergy) const
 {
   if ((expectedEnergy == 0) && (clusterEnergy > 0)) return false;
   return clusterEnergy < expectedEnergy - m_consistencySigmaCut * sigma;
 }
 
-bool PFUnifiedSubtractionOnlyTool::canAnnihilate(double expectedEnergy, double sigma, double clusterEnergy) const
+bool PFSubtractionTool::canAnnihilate(double expectedEnergy, double sigma, double clusterEnergy) const
 {
   return clusterEnergy - expectedEnergy < m_subtractionSigmaCut * sigma;
 }
 
-void PFUnifiedSubtractionOnlyTool::addSubtractedCells(eflowCaloObject& thisEflowCaloObject, const std::vector<std::pair<xAOD::CaloCluster *, bool> >& clusterList) const{
+void PFSubtractionTool::addSubtractedCells(eflowCaloObject& thisEflowCaloObject, const std::vector<std::pair<xAOD::CaloCluster *, bool> >& clusterList) const{
 
   unsigned int numTracks = thisEflowCaloObject.nTracks();
   const std::string allCaloStr{"AllCalo"};

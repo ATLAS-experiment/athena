@@ -13,7 +13,7 @@
 
 #include "xAODCaloEvent/CaloClusterContainer.h"
 #include "IPFClusterSelectorTool.h"
-#include "IPFUnifiedBaseTool.h"
+#include "IPFBaseTool.h"
 
 #include "PFData.h"
 
@@ -41,8 +41,8 @@ private:
     "eflowRecCluster to be used"
   };
 
-  /** List of IPFUnifiedBaseTool, which will be executed by this algorithm */
-  ToolHandleArray<IPFUnifiedBaseTool> m_IPFUnifiedBaseTools{this, "UnifiedBaseTools", {}, "List of Private IPFUnifiedBaseTools"};
+  /** List of IPFBaseTool, which will be executed by this algorithm */
+  ToolHandleArray<IPFBaseTool> m_IPFBaseTools{this, "BaseTools", {}, "List of Private IPFBaseTools"};
 
   /** ReadHandleKey for the eflowRecTrackContainer to be read in */
   SG::ReadHandleKey<eflowRecTrackContainer> m_eflowRecTracksReadHandleKey{

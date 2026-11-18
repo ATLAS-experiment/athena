@@ -2,7 +2,7 @@
   Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
-#include "PFUnifiedRadialEnergyCalculatorTool.h"
+#include "PFRadialEnergyCalculatorTool.h"
 #include "PFData.h"
 
 #include "eflowCaloObject.h"
@@ -14,7 +14,7 @@
 #include "eflowTrackClusterLink.h"
 #include "xAODCaloEvent/CaloCluster.h"
 
-StatusCode PFUnifiedRadialEnergyCalculatorTool::processPFlowData(const EventContext& /*ctx*/, PFData &thePFData) const {
+StatusCode PFRadialEnergyCalculatorTool::processPFlowData(const EventContext& /*ctx*/, PFData &thePFData) const {
 
   ATH_MSG_DEBUG("Accessed radial energy profile function");
 
