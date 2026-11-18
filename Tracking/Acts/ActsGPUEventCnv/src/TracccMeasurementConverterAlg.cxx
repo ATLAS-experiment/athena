@@ -303,16 +303,10 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
         InDet::SiWidth siWidth(Amg::Vector2D(rowWidth, colWidth),
                                 Amg::Vector2D(phiWidth, etaWidth));
 
-        float width0 = phiWidth / rowWidth;
-        float width1 = etaWidth / colWidth;
-        Eigen::Matrix<float, 2, 2> localCovariance =
-            Eigen::Matrix<float, 2, 2>::Zero();
-        localCovariance(0, 0) = width0 * width0 / 12.0f;
-        localCovariance(1, 1) = width1 * width1 / 12.0f;
-
-        Eigen::Matrix<float, 2, 1> localPosition(meas.local_position()[0], meas.local_position()[1]);
-        xaod_pcl->setMeasurement<2>(Pixel_ModuleHash, localPosition,
-                                        localCovariance);
+        // The local covariance is taken from the traccc measurement in
+        // fillPixelCluster, with and without cells. Traccc
+        // gives (average pixel pitch)^2/12, the same as the Athena pixel
+        // clustering without broad errors.
 
         std::sort(rdoList.begin(), rdoList.end());
         xaod_pcl->setIdentifier(rdoList.front().get_compact());

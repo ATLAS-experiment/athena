@@ -159,6 +159,8 @@ StatusCode xAODToTracccMeasurementConverterAlg::execute(const EventContext& ctx)
     auto meas = measurements.at(i);
     meas.local_position() = rec.localPosition;
     meas.local_variance() = rec.localVariance;
+    // The xAOD clusters do not carry the charge-weighted spread of their cells
+    meas.charge_variance() = {0.f, 0.f};
     meas.dimensions() = static_cast<unsigned int>(m_hostDesign->dimensions()[designIdx]);
     meas.time() = 0.f;
     meas.diameter() = rec.diameter;
