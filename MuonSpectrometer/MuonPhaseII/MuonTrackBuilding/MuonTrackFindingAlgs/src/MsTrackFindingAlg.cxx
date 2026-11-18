@@ -86,8 +86,8 @@ namespace MuonR4{
                 auto lastTrack = cacheTrkContainer.getTrack(cacheTrkContainer.size() -1);
                 lastTrack.component<std::size_t, Acts::hashString("parentSeed")>() = seedIdx;
                 seed.triggerOverlapMarker();
+                ++seedIdx;
             }
-            ++seedIdx;
         }
         auto [rBegin, rEnd] = std::ranges::remove_if(*seedContainer, &MsTrackSeed::hasOverlap);
         seedContainer->erase(rBegin, rEnd);
