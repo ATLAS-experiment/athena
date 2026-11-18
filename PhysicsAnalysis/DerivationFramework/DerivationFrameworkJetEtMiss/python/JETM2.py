@@ -6,6 +6,7 @@
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import MetadataCategory, LHCPeriod
+from Campaigns.Utils import Campaign
 
 # Main algorithm config
 def JETM2KernelCfg(flags, name='JETM2Kernel', **kwargs):
@@ -71,8 +72,11 @@ def JETM2ExtraContentCfg(flags):
 
     #=======================================
     # Jets with leptons removed
+    # Input variables only available from mc23e onwards
     #=======================================
-    jetList += [AntiKt10UFOCSSKSoftDrop_noLeptons]
+    if flags.Input.isMC:
+        if flags.Input.MCCampaign in [Campaign.MC23e, Campaign.MC23g]:
+            jetList += [AntiKt10UFOCSSKSoftDrop_noLeptons]
 
     #=======================================
     # R = 1.0 truth WZ Dressed jets
@@ -216,7 +220,9 @@ def JETM2Cfg(flags):
     JETM2SlimmingHelper.IncludeMinBiasTriggerContent = False
 
     jetOutputList = ["AntiKt4UFOCSSKNoPtCutJets","AntiKt4EMPFlowNoPtCutJets", "AntiKt4EMPFlowMLJets", "AntiKt4MLTopoJets"]
-    jetOutputList += ["AntiKt10UFOCSSK_noLeptonsSoftDropBeta100Zcut10Jets"]
+    if flags.Input.isMC:
+        if flags.Input.MCCampaign in [Campaign.MC23e, Campaign.MC23g]:
+            jetOutputList += ["AntiKt10UFOCSSK_noLeptonsSoftDropBeta100Zcut10Jets"]
     from DerivationFrameworkJetEtMiss.JetCommonConfig import addJetsToSlimmingTool
     addJetsToSlimmingTool(JETM2SlimmingHelper, jetOutputList, JETM2SlimmingHelper.SmartCollections)
 
