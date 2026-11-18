@@ -473,6 +473,9 @@ atlas_add_citest( Trigger_athenaEF_v1PhysP1_HI
 atlas_add_citest( TriggerConfigFlags
    SCRIPT python -m TriggerJobOpts.TriggerConfigFlags --verbose )
 
+atlas_add_citest( Trigger_RDOtoBS_Run4
+   SCRIPT test_trig_RDOtoBS_Dev_Run4_build.py )
+
 atlas_add_citest( EFTracking_FPGATrackSim_CI
   SCRIPT FPGATrackSim_CI.sh
    LOG_IGNORE_PATTERN "FPGATrackSimProto.*ERROR Propagation reached the step count limit.*|FPGATrackSimProto.*ERROR.*Propagation failed: PropagatorError.*|WARNING FPE.*FPGATrackSimProtoTackFitAlg.*|.*WARNING FPE INVALID.*ResolvedProtoTrackToAltTrackParticleCnvAlg.*|.*ERROR.*No start volume resolved.*|.*WARNING ERROR message limit.*|.*ERROR \|" )
