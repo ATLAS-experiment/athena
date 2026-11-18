@@ -28,6 +28,10 @@ class HHJ(PowhegRES):
         # Add flag for the MiNNLO reweight
         self.reweight_for_MiNNLO = True
 
+        # Keywords handled by HHJ's rwl_setup_param_weights_user, so that weight groups varying them
+        # can be computed in a single XML-reweighting pass instead of one generator run per weight
+        self.extra_xml_reweighting_keywords = {"mt-approx": "mt-approx"}
+
         # Add all keywords for this process, overriding defaults if required
         self.add_keyword("ih1")
         self.add_keyword("ih2")
@@ -77,7 +81,7 @@ class HHJ(PowhegRES):
         self.add_keyword("zwidth")
         self.add_keyword("wwidth")
         self.add_keyword("twidth")
-        self.add_keyword("hwidth")
+        self.add_keyword("hwidth", 0.0)  # Higgs bosons are stable final-state particles; OpenLoops amplitudes are generated with wMH = 0
 
         # Quark masses used unconditionally for momentum reshuffling at event generation level
         # (c and b are active flavours in the HHJ Born/real flavour structures; unlike the lepton
@@ -126,3 +130,20 @@ class HHJ(PowhegRES):
         self.add_keyword("parallelstage")
         self.add_keyword("xgriditeration")
         self.add_keyword("maxseeds")
+
+    def complete_xml_weight_settings(self, keyword_pairs):
+        """! Add mt-approx explicitly to every XML reweighting line.
+
+        POWHEG resets its standard keywords (renscfact, facscfact, lhapdf, ...) before each weight,
+        but HHJ's rwl_setup_param_weights_user does not reset the process-specific ones. A weight
+        that does not set mt-approx (e.g. the nominal or the scale variations) would otherwise be
+        computed with the mt-approx value of the previous weight, typically from the previous event.
+
+        @param keyword_pairs  List of "keyword=value" strings for one XML weight line.
+        @returns The list, with "keyword=<run-card value>" added for each missing process-specific keyword.
+        """
+        set_keywords = set(pair.split("=")[0].strip() for pair in keyword_pairs)
+        for powheg_keyword, xml_keyword in self.extra_xml_reweighting_keywords.items():
+            if xml_keyword not in set_keywords:
+                keyword_pairs.append("{}={}".format(xml_keyword, list(self.parameters_by_keyword(powheg_keyword))[0].value))
+        return keyword_pairs

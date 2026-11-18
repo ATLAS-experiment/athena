@@ -141,6 +141,10 @@ class PowhegBase(Configurable):
         ## Switch to determine whether XML reweighting should be used
         self.use_XML_reweighting = None
 
+        ## Process-specific keywords that the process's rwl_setup_param_weights_user can handle
+        ## in XML reweighting, as {PowhegControl keyword: keyword used in the XML weight line}
+        self.extra_xml_reweighting_keywords = {}
+
         ## Switch to determine if the #rwgt and #pdf comments should be kept in lhe files despite using xml reweighting
         self.remove_oldStyle_rwt_comments = None
 
