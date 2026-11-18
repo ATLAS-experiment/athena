@@ -1,7 +1,7 @@
 // Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -23,6 +23,7 @@
 #include "AthContainers/ThinningDecision.h"
 #include "AthContainers/debug.h"
 #include "AthLinks/DataLink.h"
+#include "CxxUtils/ClassName.h"
 
 
 namespace {
