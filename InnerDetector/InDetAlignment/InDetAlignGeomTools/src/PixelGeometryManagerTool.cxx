@@ -315,7 +315,8 @@ namespace InDet {
             buildL12Endcaps();
             break;
           case 2:
-            buildL2Endcaps();
+            if (m_useITkGeometry) buildL2ITkEndcaps();
+            else buildL2Endcaps();
             break;
           case 3:
             buildL3Endcaps();
@@ -1285,6 +1286,108 @@ namespace InDet {
 
         // add AlignModule to the geometry
         m_alignModuleListPtr->push_back(mod);
+      }
+    }
+  }
+
+  void PixelGeometryManagerTool::buildL2ITkEndcaps()
+  {
+    // ========================================
+    // ITk PIXEL END CAPS L2 
+    // ========================================
+    ATH_MSG_INFO("Preparing the ITk Pixel Endcap geometry for L2");
+
+    if (!m_alignEndcaps) {
+      ATH_MSG_DEBUG("Not aligning ITk Pixel endcaps");
+      return;
+    }
+
+    Amg::Transform3D transform = Amg::Transform3D::Identity();
+    const auto& numerology = m_detManager->numerology();
+
+    unsigned int maxHash = m_idHelper->wafer_hash_max();
+
+    if (!m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel))
+      m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel) = new Trk::AlignModuleList((size_t)(maxHash), nullptr);
+
+    Trk::AlignModuleList* pixelIdHashMap = m_idHashToAlignModuleMapsPtr->at(Trk::AlignModule::Pixel);
+
+    ATH_MSG_INFO("ITk Pixel L2 Endcap numerology: numEndcaps = " << numerology.numEndcaps() << ", numDiskLayers = " << numerology.numDiskLayers());
+
+    // ========================================
+    // Loop over Endcap A / C
+    // ========================================
+    for (int iEndcapIndex = 0; iEndcapIndex < numerology.numEndcaps(); iEndcapIndex++) {
+      int iSide = numerology.endcapId(iEndcapIndex);
+
+      // ========================================
+      // Loop over EC layers (EC1–EC9)
+      // One AlignModule per layer
+      // ========================================
+      for (int iLayer = 0; iLayer < numerology.numDiskLayers(); iLayer++) {
+
+        Trk::AlignModule* mod = new Trk::AlignModule(this);
+        mod->setIdHash(getNextIDHash());
+        mod->setIdentifier(m_idHelper->wafer_id(iSide, iLayer, 0, 0));
+
+        const std::string layerStr{std::to_string(iLayer + 1)};
+        std::string name = (iSide == 2) ? "Pixel/EndcapA/Layer_" + layerStr : "Pixel/EndcapC/Layer_" + layerStr;
+        mod->setName(name);
+
+        if (!moduleSelected(mod)) {
+          ATH_MSG_DEBUG("Module " << mod->name() << " NOT selected");
+          delete mod;
+          continue;
+        }
+
+        ATH_MSG_DEBUG("Building module " << mod->name());
+
+        unsigned int nElements = 0;
+        const int nRings = numerology.numDisksForLayer(iLayer);
+        ATH_MSG_DEBUG("ITk Pixel L2: " << mod->name() << " | Layer index = " << iLayer << " | Number of rings = " << nRings);
+        // ========================================
+        // Loop over rings within this EC layer
+        // ========================================
+        for (int iRing = 0; iRing < nRings; iRing++) {
+          
+          const int nPhi = numerology.numPhiModulesForLayerDisk(iLayer, iRing);
+          unsigned int nRingElements = 0;
+          
+          // Loop over phi sensors (both faces)
+          for (int iPhi = 0; iPhi < nPhi; iPhi++) {
+
+            const SiDetectorElement* element2 = m_detManager->getDetectorElement(iSide, iLayer, iPhi, iRing);
+            const Trk::TrkDetElementBase* element = static_cast<const Trk::TrkDetElementBase*>(element2);
+
+            if (element) {
+              mod->addDetElement(Trk::AlignModule::Pixel, element, transform);
+              (*pixelIdHashMap)[element->identifyHash()] = mod;
+              ++nElements;
+              ++nRingElements;
+            }
+          }
+          ATH_MSG_DEBUG("  " << mod->name() << " | Ring " << iRing << " | Phi slots = " << nPhi << " | Sensors found = " << nRingElements);
+        }
+
+        ATH_MSG_INFO("ITk Pixel L2 module " << mod->name() << " contains " << nElements << " detector elements");
+
+        if (nElements == 0) {
+          ATH_MSG_WARNING("Skipping empty ITk Pixel module " << mod->name());
+          delete mod;
+          continue;
+        }
+
+        // ========================================
+        // Set alignment frame at layer CoG
+        // ========================================
+        Amg::Translation3D translation(mod->centerOfGravity());
+        ATH_MSG_DEBUG("Endcap: " << iSide << ", Layer: " << iLayer << ", CoG (" << translation.x() << ", " << translation.y() << ", " << translation.z() << ")");
+
+        Amg::Transform3D localtoglobal = translation * Amg::RotationMatrix3D::Identity();
+        mod->setGlobalFrameToAlignFrameTransform(localtoglobal.inverse());
+
+        m_alignModuleListPtr->push_back(mod);
+        ATH_MSG_INFO("Adding alignment module " << mod->name());
       }
     }
   }

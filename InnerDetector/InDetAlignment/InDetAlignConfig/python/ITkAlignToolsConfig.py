@@ -2,6 +2,7 @@
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
+import os
 
 def ITkAlignModuleToolCfg(flags, name="ITkAlignModuleTool", **kwargs):   
     cfg = ComponentAccumulator()
@@ -44,7 +45,8 @@ def ITkPixelGeometryManagerToolCfg(flags, name="ITkPixelManagerTool", **kwargs):
     kwargs.setdefault("EtaCorrection",False)
     
     ## TODO: Figure out proper alignment levels (many leads to errors)
-    kwargs.setdefault("AlignmentLevel", 1)
+    kwargs.setdefault("AlignmentLevel", 1)   # level 2 for layer level 
+    kwargs.setdefault("UseITkGeometry", True)  
    # kwargs.setdefault("AlignmentLevelBarrel", 12)
    # kwargs.setdefault("AlignmentLevelEndcaps", 12)
 
@@ -132,7 +134,16 @@ def ITkMatrixToolCfg(flags, name="ITkMatrixTool", **kwargs):
 
     kwargs.setdefault("PathBinName", f"{flags.ITk.Align.baseDir}/Accumulate/")
     kwargs.setdefault("PathTxtName", f"{flags.ITk.Align.baseDir}/Accumulate/")
-    kwargs.setdefault("InputTFiles", [f"{flags.ITk.Align.baseDir}/Accumulate/{flags.ITk.Align.inputTFiles}"])
+    # Allow multi TFiles 
+    input_files = flags.ITk.Align.inputTFiles
+    if isinstance(input_files, str):
+        input_files = [input_files]
+    input_files = [
+        f if os.path.isabs(f)
+        else os.path.join(flags.ITk.Align.baseDir, "Accumulate", f)
+        for f in input_files] 
+
+    kwargs.setdefault("InputTFiles", input_files)
     kwargs.setdefault("SolveOption", 3)
     kwargs.setdefault("MinNumHitsPerModule", 10)
 

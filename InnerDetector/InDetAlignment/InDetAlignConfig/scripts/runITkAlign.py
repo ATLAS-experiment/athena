@@ -24,8 +24,7 @@ def parser():
     parser.add_argument("-i", "--input", default = defaultTestFiles.RDO_RUN4, nargs = "+", help='Input file(s)')
     parser.add_argument("--maxEvents", default = -1, type = int, help='Number of maximal processed events')
     parser.add_argument("-t", "--inputTracksCollection", default = "CombinedITkTracks", type = str, help='Name of the track collection to use')
-    parser.add_argument("--inputTFiles", default = "AlignmentTFile.root", type = str, help='ROOT file produced in MatrixTool in the accumulation step')
-    
+    parser.add_argument("--inputTFiles",nargs="+",default=None,help="ROOT files produced by MatrixTool during accumulation")    
     parser.add_argument("--alignmentConstants", default = [], nargs = "+", help='Local alignment constants to use')
     
     ## Things to align
@@ -111,7 +110,8 @@ flags.ITk.Align.alignITkStrip = kwargs["alignITkStrip"]  or flags.ITk.Align.alig
 
 flags.ITk.Align.writeSilicon = False #Issues with folders ATM - should be flags.ITk.Align.alignITkPixel or flags.ITk.Align.alignITkStrip
 
-flags.ITk.Align.inputTFiles = kwargs["inputTFiles"]
+if kwargs["inputTFiles"] is not None:
+    flags.ITk.Align.inputTFiles = kwargs["inputTFiles"]
 
 flags.Input.Files = kwargs["input"]
 flags.Exec.MaxEvents = kwargs["maxEvents"] if not kwargs["solve"] else 1
@@ -182,11 +182,11 @@ misalignModeMap = {0:'InDetSi_MisalignmentMode_no Misalignment',
                    21: 'InDetSi_MisalignmentMode_R deltaPhi (curl)', 22: 'Phi deltaPhi (clamshell) ',23:'Z deltaPhi (twist)',
                    31: 'InDetSi_MisalignmentMode_R deltaZ (telescope)',32:'Phi deltaZ (skew)',33:'Z deltaZ (z-expansion)'}
 
-get_db_name = os.path.basename(kwargs["localDB"])
-
-misalign_mode = int(get_db_name.removeprefix("MisalignmentSet").removesuffix(".db"))
-alignment_tag = misalignModeMap.get(int(misalign_mode),'unknown')
 if kwargs["localDB"]:
+    get_db_name = os.path.basename(kwargs["localDB"])
+    misalign_mode = int(get_db_name.removeprefix("MisalignmentSet").removesuffix(".db"))
+    alignment_tag = misalignModeMap.get(int(misalign_mode),'unknown')
+
     flags.ITk.Align.useLocalDatabase = True
 
     if os.path.isabs(kwargs["localDB"]):
@@ -255,4 +255,5 @@ if kwargs["dryRun"]:
    
 else:
     cfg.run()
+
 
