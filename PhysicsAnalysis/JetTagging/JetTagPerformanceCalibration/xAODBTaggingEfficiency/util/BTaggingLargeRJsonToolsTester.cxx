@@ -117,7 +117,7 @@ int test1 ATLAS_NOT_THREAD_SAFE (int argc, char* argv[]) {
   // Just for sanity do not process more than 5000 event or the number of events in the file
   // as this is CI so we don't want to use too much ressources
   // Since we are processing a ttbar sample in CI not many event passing Xbb working point 
-  long long int NMaxEvent = std::min((long long int) 5000, (long long int) event.getEntries()); 
+  long long int NMaxEvent = std::min((long long int) 5000, (long long int) event.getEntries()-1);
   long long int entry = -1;
 
   // Values required for a jet to be considered as valid 
