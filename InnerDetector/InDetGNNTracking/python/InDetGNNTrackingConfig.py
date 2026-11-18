@@ -78,6 +78,7 @@ def GNNTrackFinderTritonToolCfg(flags, name='GNNTrackFinderTritonTool', **kwargs
         TritonToolCfg(flags, model_name=flags.Tracking.GNN.Triton.model, 
                       url=flags.Tracking.GNN.Triton.url,
                       port=flags.Tracking.GNN.Triton.port,
+                      AddModelNameHeader=flags.Tracking.GNN.Triton.addModelNameHeader,
                       ))
     )
     kwargs.setdefault("SpacepointFeatureTool", acc.popToolsAndMerge(SpacepointFeatureToolCfg(flags)))
