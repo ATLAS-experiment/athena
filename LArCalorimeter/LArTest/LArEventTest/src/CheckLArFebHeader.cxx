@@ -1,19 +1,11 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArEventTest/CheckLArFebHeader.h"
 #include <vector>
 #include "GaudiKernel/IToolSvc.h"
 #include "LArRawEvent/LArFebHeaderContainer.h"
-
-CheckLArFebHeader::CheckLArFebHeader(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator),
-    m_onlineHelper(0)
-{
-  m_count=0;
-  //declareProperty("KeyList",m_keylistproperty);
-}
 
 CheckLArFebHeader::~CheckLArFebHeader() 
 {

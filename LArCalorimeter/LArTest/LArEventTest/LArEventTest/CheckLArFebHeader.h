@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -19,7 +19,7 @@
 class CheckLArFebHeader : public AthAlgorithm
 {
  public:
-  CheckLArFebHeader(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
 
   ~CheckLArFebHeader();
 
@@ -29,8 +29,8 @@ class CheckLArFebHeader : public AthAlgorithm
   StatusCode finalize();
 
  private:
-  int m_count;
-  const LArOnlineID* m_onlineHelper;
+  int m_count{0};
+  const LArOnlineID* m_onlineHelper{nullptr};
 };
 
 

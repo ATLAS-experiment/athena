@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef CALOCLUSTERNAVTEST_H
@@ -12,7 +12,7 @@ class CaloClusterNavTest: public AthAlgorithm
 
  public:    
   
-  CaloClusterNavTest(const std::string& name, ISvcLocator* pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
   virtual ~CaloClusterNavTest();
   
   virtual StatusCode execute(const EventContext& ctx) ; 
@@ -20,7 +20,7 @@ class CaloClusterNavTest: public AthAlgorithm
   virtual StatusCode finalize();
   
  private: 
- std::vector<std::string> m_clusterContainerNames; 
+ Gaudi::Property<std::vector<std::string>> m_clusterContainerNames{this, "ClusterContainerNames", {}};
 };
 
 #endif 

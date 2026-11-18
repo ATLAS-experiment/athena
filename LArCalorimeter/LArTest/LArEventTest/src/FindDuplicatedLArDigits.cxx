@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArEventTest/FindDuplicatedLArDigits.h"
@@ -15,18 +15,6 @@
 #include <fstream>
 
  
-
-FindDuplicatedLArDigits::FindDuplicatedLArDigits(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator),
-    m_nProblemEvent(0),
-    m_onlineHelper(0),
-    m_emId(0),
-    m_hecId(0),
-    m_fcalId(0)
-{ 
-  declareProperty("ContainerKey",m_contKey);
-  m_nDigits=-1;
-}
 
 FindDuplicatedLArDigits::~FindDuplicatedLArDigits() 
 {}
@@ -75,10 +63,10 @@ StatusCode FindDuplicatedLArDigits::execute(const EventContext& /*ctx*/)
   // Retrieve LArDigitContainer
   const LArDigitContainer* digit_cont;
   if (m_contKey.size())
-    ATH_CHECK( evtStore()->retrieve(digit_cont,m_contKey) );
+    ATH_CHECK( evtStore()->retrieve(digit_cont,m_contKey.value()) );
   else
     ATH_CHECK( evtStore()->retrieve(digit_cont) );
-  ATH_MSG_DEBUG ( "Retrieved LArDigitContainer from StoreGate! key=" << m_contKey );
+  ATH_MSG_DEBUG ( "Retrieved LArDigitContainer from StoreGate! key=" << m_contKey.value() );
 
   int nDigits=digit_cont->size();
   if (m_nDigits==-1 || m_nDigits==nDigits) { //first event or no change 

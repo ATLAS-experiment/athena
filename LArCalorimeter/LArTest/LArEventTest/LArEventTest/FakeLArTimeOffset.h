@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FAKELARTIMEOFFSET
@@ -12,18 +12,19 @@
 class FakeLArTimeOffset : public AthAlgorithm {
   
  public:
-  FakeLArTimeOffset(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
   ~FakeLArTimeOffset();
 
   StatusCode initialize();
   StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
  private:
-  std::vector<unsigned> m_FEBids;
-  std::vector<float> m_FEBtimeOffsets;
-  float m_globalTimeOffset;
-  
-  std::string m_keyFebOffset, m_keyGlobalOffset;
+  Gaudi::Property<std::vector<unsigned>> m_FEBids{this, "FEBids", {}};
+  Gaudi::Property<std::vector<float>> m_FEBtimeOffsets{this, "FEbTimeOffsets", {}};
+  Gaudi::Property<float> m_globalTimeOffset{this, "GlobalTimeOffset", 0};
+
+  Gaudi::Property<std::string> m_keyFebOffset{this, "FebTimeOffsetKey", "FebTimeOffset"};
+  Gaudi::Property<std::string> m_keyGlobalOffset{this, "GlobalTimeOffsetKey", "GlobalTimeOffset"};
 };
 
 #endif

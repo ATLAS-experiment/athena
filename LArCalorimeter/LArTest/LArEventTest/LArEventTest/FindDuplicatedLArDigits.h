@@ -1,7 +1,7 @@
 //Dear emacs, this is -*- c++ -*-
 
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 
@@ -35,7 +35,7 @@
 class FindDuplicatedLArDigits : public AthAlgorithm
 {
  public:
-  FindDuplicatedLArDigits(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
   ~FindDuplicatedLArDigits();
 
   //standard algorithm methods
@@ -44,15 +44,15 @@ class FindDuplicatedLArDigits : public AthAlgorithm
   StatusCode finalize();
  private:
 
-  std::string m_contKey;
+  Gaudi::Property<std::string> m_contKey{this, "ContainerKey", ""};
   std::bitset<200000> m_bitpattern;
-  unsigned m_nProblemEvent;
-  int m_nDigits;
-  const LArOnlineID *m_onlineHelper;
+  unsigned m_nProblemEvent{0};
+  int m_nDigits{-1};
+  const LArOnlineID *m_onlineHelper{nullptr};
   
-  const LArEM_ID    *m_emId;
-  const LArHEC_ID   *m_hecId;
-  const LArFCAL_ID  *m_fcalId;
+  const LArEM_ID    *m_emId{nullptr};
+  const LArHEC_ID   *m_hecId{nullptr};
+  const LArFCAL_ID  *m_fcalId{nullptr};
 };
 
 #endif

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DUMPLARRAWCHANNEL_H
@@ -31,21 +31,23 @@ class DumpLArRawChannels : public AthAlgorithm
   StatusCode finalize();
  private:
   SG::ReadCondHandleKey<LArOnOffIdMapping>  m_cablingKey {this,"keyCabling", "LArOnOffIdMap", "Input key for Id mapping"};
-  int m_count, m_chan;
+  int m_count{0};
+  int m_chan{0};
   //LArRawChannelContainer* m_larChannelCont;
-  const LArOnlineID*       m_onlineHelper; 
-  const LArEM_ID* m_emId;
+  const LArOnlineID*       m_onlineHelper{nullptr};
+  const LArEM_ID* m_emId{nullptr};
   std::ofstream m_outfile;
-  std::string m_key, m_FileName;
+  Gaudi::Property<std::string> m_key{this, "LArRawChannelContainerName", ""};
+  Gaudi::Property<std::string> m_FileName{this, "OutputFileName", "LArRawChannels.txt"};
  private:
 
-  std::string m_ntup;
+  Gaudi::Property<std::string> m_ntup{this, "NtupStream", ""};
   TTree* m_tree=nullptr;
   int m_evt=0;
   float m_e=0,m_t=0,m_Q=0;
   unsigned m_gain=0;
   unsigned m_id=0;
-  bool m_toLog;
+  Gaudi::Property<bool> m_toLog{this, "ToLog", true};
   bool m_toFile = false;
 
   ServiceHandle<ITHistSvc> m_thistSvc;

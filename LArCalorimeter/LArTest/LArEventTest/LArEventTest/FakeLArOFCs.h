@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef FAKELAROFS
@@ -10,14 +10,15 @@
 class FakeLArOFCs : public AthAlgorithm {
   
  public:
-  FakeLArOFCs(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
   ~FakeLArOFCs();
 
   StatusCode initialize();
   StatusCode execute(const EventContext& ctx);
   StatusCode finalize();
  private:
-  short m_maxSample, m_NSample;
-  std::string m_keyOFC;
+  Gaudi::Property<short> m_maxSample{this, "MaxSample", 2};
+  Gaudi::Property<short> m_NSample{this, "NSample", 5};
+  Gaudi::Property<std::string> m_keyOFC{this, "OFCKey", "LArOFC"};
 };
 #endif
