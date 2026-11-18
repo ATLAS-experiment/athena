@@ -132,8 +132,8 @@ StatusCode xAODToTracccSpacePointConverterAlg::execute(const EventContext& ctx) 
     auto spDeviceBuffer = std::make_unique<traccc::edm::spacepoint_collection::buffer>(
         spHostBuffer->capacity(), m_MRs->mainMR());
 
-    // We ignore() the setup and wait() on the copy to allow parallelism.
-    deviceCopy->setup(*spDeviceBuffer)->ignore();
+    // Ignore the setup event and wait() on the copy to allow parallelism.
+    deviceCopy->setup(vecmem::ignore_event, *spDeviceBuffer);
     (*deviceCopy)(*spHostBuffer, *spDeviceBuffer)->wait();
     ATH_CHECK(spHandle.record(std::move(spDeviceBuffer)));
   } else {

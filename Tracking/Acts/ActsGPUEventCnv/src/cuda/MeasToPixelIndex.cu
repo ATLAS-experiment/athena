@@ -66,7 +66,7 @@ StatusCode buildMeasToPixelIndexOnGPU(
 {
     try {
         output = std::make_unique<vecmem::data::vector_buffer<unsigned int>>(nb_measurements, mr);
-        copy.setup(*output)->ignore();
+        copy.setup(vecmem::ignore_event, *output);
     } catch (const std::exception& e) {
         std::fprintf(stderr, "buildMeasToPixelIndexOnGPU: %s\n", e.what());
         return StatusCode::FAILURE;
@@ -81,7 +81,7 @@ StatusCode buildMeasToPixelIndexOnGPU(
 
     // Mark which measurement is what type (but only pixels)
     vecmem::data::vector_buffer<unsigned int> flags(nb_measurements, mr);
-    copy.setup(flags)->ignore();
+    copy.setup(vecmem::ignore_event, flags);
     kernels::markPixelMeasurements<<<num_blocks, block_size, 0, stream>>>(
         measurements, flags);
 
