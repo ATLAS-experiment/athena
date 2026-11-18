@@ -355,6 +355,7 @@ EgammaCalibrationAndSmearingTool::EgammaCalibrationAndSmearingTool(
       "useAFII", m_use_AFII = -1,
       "This is now deprecated. Kept for explicit error message for now");
   declareProperty("decorateEmva", m_decorateEmva = false, "whether to decorate the eMVA value");
+  declareProperty("startFromEmva", m_startFromEmva = false, "use the already decorated eMVA value");
 }
 
 EgammaCalibrationAndSmearingTool::~EgammaCalibrationAndSmearingTool() {
@@ -599,6 +600,15 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
   m_rootTool->msg().setLevel(this->msg().level());
   m_rootTool->initialize();
 
+  if (m_startFromEmva) {
+    if (m_decorateEmva) {
+      ATH_MSG_ERROR("startFromEmva and decorateEmva cannot both be set");
+      return StatusCode::FAILURE;
+    }
+    // the energy is read from the input, there is nothing to compute
+    m_use_mva_calibration = false;
+  }
+
   // configure MVA calibration
   if (m_use_mva_calibration != 0) {
     ATH_MSG_DEBUG("creating MVA calibration tool (if needed)");
@@ -808,7 +818,7 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
       m_ADCLinearity_tool = std::make_shared<LinearityADC>(adcLinearityCorr_filename);
       m_ADCLinearity_tool->msg().setLevel(this->msg().level());
       m_rootTool->setADCTool(m_ADCLinearity_tool);
-    } else {
+    } else if (m_doScaleCorrection != 0) {
       ATH_MSG_WARNING(
           m_ESModel + " recommendations use ADC corrections for scale "
           "derivation. Disabling the ADCLinearity flag will create "
@@ -833,7 +843,7 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
           dynamic_cast<TH2*>(fCorr->Get("CaloDistortionPhiUniformityCorrection/"
                                         "es2023_R22_Run2_v0/h2DcorrPhiUnif")));
       m_caloDistPhiUnifCorr->SetDirectory(nullptr);
-    } else {
+    } else if (m_doScaleCorrection != 0) {
       ATH_MSG_WARNING(
           m_ESModel + " recommendations use CaloDistPhiUnif for scale "
           "derivation. Disabling the CaloDistPhiUnif flag will create "
@@ -885,8 +895,8 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
   // An alternative would be to mark the column with `isOptional`, but
   // since it is always required for the GNN calibration (and never
   // otherwise), declaring it only for the GNN calibration seemed
-  // cleaner.
-  if (m_TESModel == egEnergyCorr::es2025_Run3_GNN_v0) {
+  // cleaner.  It is also not needed if the energy is not recomputed.
+  if (m_TESModel == egEnergyCorr::es2025_Run3_GNN_v0 && m_use_mva_calibration) {
     resetAccessor (m_accessors->gnn_energy_Acc, *this, "TransformerEnergy");
   }
   if (m_onlyElectrons.value() && m_onlyPhotons.value()) {
@@ -905,6 +915,8 @@ StatusCode EgammaCalibrationAndSmearingTool::initialize() {
   }
   if (m_decorateEmva)
     resetAccessor (m_accessors->decEmva, *this, "E_mva_only");
+  if (m_startFromEmva)
+    resetAccessor (m_accessors->emvaAcc, *this, "E_mva_only");
 
   ANA_CHECK (initializeColumns ());
 
@@ -1061,8 +1073,16 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
   }
 
   double energy = acc.momAcc.e (input);
+  if (m_startFromEmva) {
+    if (!acc.emvaAcc.isAvailable(input)) {
+      ATH_MSG_ERROR("startFromEmva requested but decoration E_mva_only not found");
+      return CP::CorrectionCode::Error;
+    }
+    energy = acc.emvaAcc(input);
+    ATH_MSG_DEBUG("energy from E_mva_only = " << std::format("{:.2f}", energy));
+  }
   // apply MVA calibration
-  if (!m_MVACalibSvc.empty()) {
+  else if (!m_MVACalibSvc.empty()) {
     egammaMVACalib::GlobalEventInfo gei;
     if (acc.authorAcc (input) ==
 	xAOD::EgammaParameters::AuthorFwdElectron && m_doFwdCalib) {
@@ -1090,7 +1110,7 @@ CP::CorrectionCode EgammaCalibrationAndSmearingTool::applyCorrection(
       ATH_MSG_DEBUG("energy after MVA calibration = " << std::format("{:.2f}", energy));
     }
   }
-  else if (m_TESModel == egEnergyCorr::es2025_Run3_GNN_v0) {
+  else if (m_TESModel == egEnergyCorr::es2025_Run3_GNN_v0 && m_use_mva_calibration) {
     // for now assume the input has already the layer calibration applied
     // and just take the decorated gnn_energy
     if (!acc.gnn_energy_Acc.isAvailable(input)) {

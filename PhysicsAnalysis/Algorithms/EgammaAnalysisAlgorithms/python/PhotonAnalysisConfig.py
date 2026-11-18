@@ -48,8 +48,10 @@ class PhotonCalibrationConfig (ConfigBlock) :
             info="whether to recompute the photon shower shape fudge "
             "corrections (sets up an instance of `CP::PhotonShowerShapeFudgeAlg`) or rely on derivation flags.")
         self.addOption ('recalibratePhyslite', True, type=bool,
-            info="whether to run the `CP::EgammaCalibrationAndSmearingAlg` on "
-            "PHYSLITE derivations.")
+            info="whether to recalibrate PHYSLITE derivations, i.e. run the "
+            "`CP::EgammaCalibrationAndSmearingAlg` on the nominal. If `False` "
+            "the nominal stored in the PHYSLITE is used, and only the "
+            "systematic variations are recomputed.")
         self.addOption ('minPt', 10*GeV, type=float,
             info=r"the minimum $p_\mathrm{T}$ cut (in MeV) to apply to calibrated photons.")
         self.addOption ('maxEta', 2.37, type=float,
@@ -63,13 +65,14 @@ class PhotonCalibrationConfig (ConfigBlock) :
         self.addOption ('applyIsolationCorrection', True, type=bool,
             info="whether to apply the isolation corrections.")
         self.addOption ('splitCalibrationAndSmearing', False, type=bool,
-            info="EXPERIMENTAL: This splits the `EgammaCalibrationAndSmearingTool` "
-            " into two steps. The first step applies a baseline calibration that "
+            info="whether to split the `EgammaCalibrationAndSmearingTool` "
+            "into two steps. The first step applies a baseline calibration that "
             "is not affected by systematics. The second step then applies the "
-            "systematics dependent corrections.  The net effect is that the "
+            "systematics-dependent corrections. The net effect is that the "
             "slower first step only has to be run once, while the second is run "
-            "once per systematic. ATLASG-2358.",
-            expertMode=True)
+            "once per systematic. On PHYSLITE with `recalibratePhyslite=False` "
+            "the first step is skipped, and for simulation the second step "
+            "starts from the `E_mva_only` stored in the PHYSLITE. ATLASG-2358.")
         self.addOption ('decorateTruth', False, type=bool,
             info="decorate the truth particle information on the reconstructed one.")
         self.addOption ('decorateCaloClusterEta', False, type=bool,
@@ -253,21 +256,26 @@ class PhotonCalibrationConfig (ConfigBlock) :
             # effect is that the slower first step only has to be run
             # once, while the second is run once per systematic.
             #
-            # For now (22 May 24) this has to happen in the same job, as
-            # the output of the first step is not part of PHYSLITE, and
-            # even for the nominal the output of the first and second
-            # step are different.  In the future the plan is to put both
-            # the output of the first and second step into PHYSLITE,
-            # allowing to skip the first step when running on PHYSLITE.
+            # On PHYSLITE the output of the first step is already
+            # available: in data it is the final energy, which is what is
+            # stored, and in simulation it is the energy after the MVA
+            # calibration, which is stored as `E_mva_only`.  So if the
+            # PHYSLITE is not to be recalibrated, the first step is
+            # skipped, and in simulation the second step starts from `E_mva_only`.
             #
-            # WARNING: All of this is experimental, see: ATLASG-2358
+            # See: ATLASG-2358
+            skipBaseStep = config.isPhyslite() and not self.recalibratePhyslite
 
-            # Set up the calibration algorithm:
-            alg = self.makeCalibrationAndSmearingAlg (config, 'PhotonBaseCalibrationAlg')
-            # turn off systematics for the calibration step
-            alg.noToolSystematics = True
-            # turn off smearing for the calibration step
-            alg.calibrationAndSmearingTool.doSmearing = False
+            if not skipBaseStep :
+                # Set up the calibration algorithm:
+                alg = self.makeCalibrationAndSmearingAlg (config, 'PhotonBaseCalibrationAlg')
+                # turn off systematics for the calibration step
+                alg.noToolSystematics = True
+                # turn off smearing for the calibration step
+                alg.calibrationAndSmearingTool.doSmearing = False
+                if config.dataType() is DataType.FastSim :
+                    # don't correct FastSim samples twice
+                    alg.calibrationAndSmearingTool.useFastSim = 0
 
             # Set up the smearing algorithm:
             alg = self.makeCalibrationAndSmearingAlg (config, 'PhotonCalibrationSystematicsAlg')
@@ -275,6 +283,16 @@ class PhotonCalibrationConfig (ConfigBlock) :
             alg.calibrationAndSmearingTool.doScaleCorrection = False
             alg.calibrationAndSmearingTool.useMVACalibration = False
             alg.calibrationAndSmearingTool.decorateEmva = False
+            if skipBaseStep and config.dataType() is not DataType.Data :
+                # the first step is not run, start from its output
+                alg.calibrationAndSmearingTool.startFromEmva = True
+            if config.dataType() is DataType.Data :
+                # these have already been applied to data in the first step
+                alg.calibrationAndSmearingTool.useIntermoduleCorrection = False
+                alg.calibrationAndSmearingTool.usePhiUniformCorrection = False
+                alg.calibrationAndSmearingTool.useCaloDistPhiUnifCorrection = False
+                alg.calibrationAndSmearingTool.doADCLinearityCorrection = False
+                alg.calibrationAndSmearingTool.useGainCorrection = False
 
         if not self.applyIsolationCorrection:
             warnings.warn_explicit(
@@ -329,8 +347,7 @@ class PhotonCalibrationConfig (ConfigBlock) :
         config.addOutputVar (self.containerName, 'eta', 'eta', noSys=True, auxType='float')
         config.addOutputVar (self.containerName, 'phi', 'phi', noSys=True, auxType='float')
         config.addOutputVar (self.containerName, 'e_%SYS%', 'e', auxType='float')
-        if self.splitCalibrationAndSmearing or not (config.isPhyslite() and not self.recalibratePhyslite) :
-            config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True, auxType='float')
+        config.addOutputVar (self.containerName, 'caloClusterEnergyReso_%SYS%', 'caloClusterEnergyReso', noSys=True, auxType='float')
 
         # decorate truth information on the reconstructed object:
         if self.decorateTruth and config.dataType() is not DataType.Data:
