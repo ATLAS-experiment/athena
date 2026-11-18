@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 #include "MuonReadoutGeometry/TgcReadoutParams.h"
 #include "GeoModelKernel/throwExcept.h"
@@ -157,7 +157,7 @@ namespace MuonGM {
         } else {
             gasGap = 1;
         }
-        return m_stripPositionOnShortBase[gasGap-1][istrip - 1];
+        return m_stripPositionOnShortBase.at(gasGap-1).at(istrip - 1);
     }
     
     double TgcReadoutParams::stripCenter(int istrip, int gasGap) const {

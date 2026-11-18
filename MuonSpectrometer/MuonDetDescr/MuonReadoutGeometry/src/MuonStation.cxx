@@ -96,7 +96,8 @@ namespace MuonGM {
                 if (muonRE->detectorType() !=Trk::DetectorElemType::Mdt) {
                     continue;
                 }
-                const MdtReadoutElement* mdtRE = dynamic_cast<const MdtReadoutElement*>(muonRE);
+                const MdtReadoutElement* mdtRE = static_cast<const MdtReadoutElement*>(muonRE);
+               
                 // Correct for tube staggering on barrel side C
                 double shiftInZ = -0.5 * mdtRE->tubePitch();
                 // in addition, correct for 35microm glue width incorrectly applied
@@ -277,6 +278,10 @@ namespace MuonGM {
                 continue;
             }
             MdtReadoutElement* mdt = dynamic_cast<MdtReadoutElement*>(re);
+            if (!mdt){
+              ATH_MSG_WARNING("Dynamic cast failed");
+              continue;
+            }
             mdt->setBLinePar(bline);
         }
     }

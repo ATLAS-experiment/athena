@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include <utility>
@@ -7,6 +7,7 @@
 #include "MuonNSWAsBuilt/CathodeBoardElement.h"
 using namespace NswAsBuilt;
 
+//coverity[PASS_BY_VALUE]
 CathodeBoardElement::CathodeBoardElement(stgcStripConfiguration_t config, const Element& element)
   : m_config_stgc(std::move(config)), m_element_stgc(element)
 {

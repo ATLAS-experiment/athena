@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 /***************************************************************************
@@ -860,6 +860,7 @@ namespace MuonGM {
         return *m_tubeSurfaces.at(itube);
     }
     const Trk::CylinderBounds& MdtReadoutElement::bounds(const int tubeLayer, const int tube) const {
+        //coverity[NEGATIVE_RETURNS]
         const auto& bounds = m_tubeBounds.at(boundHash(tubeLayer, tube));
         assert(bounds!= nullptr);
         return *bounds;
@@ -939,6 +940,7 @@ namespace MuonGM {
                     Identifier id = m_idHelper.channelID(identify(), getMultilayer(), tubeLayer, tube);
                     surface = std::make_unique<Trk::StraightLineSurface>(*this, id);
                 }
+                //coverity[NEGATIVE_RETURNS]
                 std::unique_ptr<Trk::CylinderBounds>& ptr = m_tubeBounds.at(boundHash(tubeLayer, tube));
                 if (!ptr) {
                     double tubelength = getTubeLengthForCaching(tubeLayer, tube);
