@@ -85,6 +85,8 @@ INSTAN_BOTH(LArCaliWaveVec);
 INSTAN_BOTH(LArPhysWave);
 //PYGATE(LArPhysWaveContainer);
 
+//=== LArMCSym
+#include "LArRawConditions/LArMCSym.h"
 
 //=== Others
 

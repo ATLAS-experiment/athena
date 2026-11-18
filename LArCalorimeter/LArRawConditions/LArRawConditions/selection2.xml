@@ -355,6 +355,7 @@
 
   <!--  <class name="ILArPedestal" />  done in ElecCalib -->
 
+  <class name="LArMCSym" />
 
   <exclusion>
     <class name="integral_constant<bool,true>" />
