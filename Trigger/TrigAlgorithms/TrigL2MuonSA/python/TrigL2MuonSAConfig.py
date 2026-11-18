@@ -1,5 +1,5 @@
 #
-#  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+#  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 #
 #  This file configs the L2MuonSA reco alg in the newJO way, 
 #      but now is located here temporarily until newJO migrations are done in all trigger signatures.
@@ -226,7 +226,6 @@ def muFastSteeringCfg( flags, roisKey="", setup="", **kwargs ):
         MuRoIs                 = roisKey,
         R_WIDTH_TGC_FAILED     = 200,
         R_WIDTH_RPC_FAILED     = 400,
-        DoCalibrationStream    = False,
         USE_ROIBASEDACCESS_CSC = True,
         # NSW on/off
         USE_STGC               = useNSW,
@@ -263,14 +262,10 @@ def muFastSteeringCfg( flags, roisKey="", setup="", **kwargs ):
         muFastAlg.Scale_Road_BarrelOuter  = 1
 
     if setup == 'Calib' and not flags.Muon.usePhaseIIGeoSetup:
-        muFastAlg.DoCalibrationStream = True
         muFastAlg.MuonCalDataScouting = True
-        muFastAlg.MuonCalBufferSize   = 1024*1024
 
     elif setup == 'MuonCalibDataScouting' and not flags.Muon.usePhaseIIGeoSetup:
-        muFastAlg.DoCalibrationStream = True
         muFastAlg.MuonCalDataScouting = True
-        muFastAlg.MuonCalBufferSize   = 1024*1024
 
     elif setup == 'l2mtmode':
         muFastAlg.multitrackMode = True

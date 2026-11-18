@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef  TRIGL2MUONSA_MUCALSTREAMERTOOL_H
@@ -12,7 +12,6 @@
 #include "RpcData.h"
 #include "TgcData.h"
 #include "TrackData.h"
-#include "MuCalCircClient.h"
 #include "MuonCnvToolInterfaces/IMuonRawDataProviderTool.h"
 #include "RPC_CondCabling/RpcCablingCondData.h"
 #include "StoreGate/ReadCondHandleKey.h"
@@ -61,22 +60,6 @@ namespace TrigL2MuonSA {
 
     virtual StatusCode initialize() override;
 
-    const std::string& instanceName() const {return m_algInstanceName;}
-    void setInstanceName(const std::string& name) { m_algInstanceName = name; }
-
-    // set the properties
-    void setBufferName(const std::string& buffName) {m_calBufferName=buffName;}
-
-    // initialize the stream
-    StatusCode openStream(int calBufferSize);
-
-    //
-    // finalize and close the stream
-    StatusCode closeStream();
-
-    bool isStreamOpen();
-    
-    //
     // create the fragment corresponding to an roi
     StatusCode createRoiFragment(const xAOD::MuonRoI* roi, 
 				 TrigL2MuonSA::TrackPattern& trackPattern, 
@@ -84,26 +67,15 @@ namespace TrigL2MuonSA {
 				 TrigL2MuonSA::RpcHits& rpcHits, 
 				 TrigL2MuonSA::TgcHits& tgcHits, 
 				 std::vector<uint32_t>& localBuffer,  // Add localBuffer parameter
-				 bool doDataScouting,
-				 const EventContext& ctx) const; 
+				 const EventContext& ctx) const;
 
   private:
 
-    Gaudi::Property< bool > m_writeToFile { this, "WriteToFile", false, "" };
     SG::ReadHandleKey<TgcRdoContainer> m_tgcRdoKey{this, "TgcRdoContainer", "TGCRDO", "Tgc RDO Input"};
     SG::ReadHandleKey<xAOD::EventInfo> m_eventInfoKey{ this, "EventInfoKey", "EventInfo", "" };
     SG::ReadHandleKey<RpcPadContainer> m_rpcPadKey{this, "RpcPadContainerKey", "RPCPAD", "RpcPad container fro MuCalStreamerTool"};
 
-    // name of the calibration buffer or of the 
-    // output file
-    std::string m_calBufferName;
-    std::string m_algInstanceName;
-
-    // output file 
-    std::ofstream m_outputFile;
-
     // the region selector
-
     ToolHandle<IRegSelTool> m_regSel_MDT{this, "RegSel_MDT", "RegSelTool/RegSelTool_MDT", "MDT Region Selector Tool"};
     ToolHandle<IRegSelTool> m_regSel_TGC{this, "RegSel_TGC", "RegSelTool/RegSelTool_TGC", "TGC Region Selector Tool"};
     
@@ -120,8 +92,6 @@ namespace TrigL2MuonSA {
     // create the TGC fragment
     StatusCode createTgcFragment(std::vector<uint32_t>& tgcRobIdList,
                  LVL2_MUON_CALIBRATION::TgcCalibFragment& tgcFragment, const EventContext& ctx) const;
-
-    TrigL2MuonSA::MuCalCircClient *m_circ = nullptr;
 
   };
   
