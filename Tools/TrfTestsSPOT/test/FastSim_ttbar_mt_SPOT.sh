@@ -25,7 +25,7 @@ Sim_tf.py \
       --postInclude 'PyJobTransforms.UseFrontier' \
       --preInclude 'EVNTtoHITS:Campaigns.MC23eSimulationMultipleIoV' \
       --preExec "EVNTtoHITS:flags.Sim.FastCalo.ParamsInputFilename=\"FastCaloSim/MC23/TFCSparam_dev_Hybrid_D_v1_all_baryons_0_500.root\";" \
-      --geometryVersion 'default:${GEOTAG}' \
+      --geometryVersion "default:${GEOTAG}" \
       --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True' \
       --inputEVNTFile ${DATAFILE} \
       --outputHITSFile 'myHITS.pool.root' \

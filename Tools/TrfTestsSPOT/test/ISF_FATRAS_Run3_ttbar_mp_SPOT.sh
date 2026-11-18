@@ -12,10 +12,11 @@ CONDTAG=$(python -c "from AthenaConfiguration.TestDefaults import defaultConditi
 
 # Run the job
 export TRF_ECHO=1;
-export ATHENA_CORE_NUMBER=1
+export ATHENA_CORE_NUMBER=${NTHREADS}
 
 Sim_tf.py \
       --CA 'True' \
+      --multiprocess 'True' \
       --maxEvents ${NEVENTS} \
       --perfmon 'fullmonmt' \
       --conditionsTag "default:${CONDTAG}" \

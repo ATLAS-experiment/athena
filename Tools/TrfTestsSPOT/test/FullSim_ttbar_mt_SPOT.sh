@@ -21,8 +21,8 @@ Sim_tf.py \
       --perfmon 'fullmonmt' \
       --multithreaded 'True' \
       --inputEVNTFile ${DATAFILE} \
-      --conditionsTag 'default:${CONDTAG}' \
-      --geometryVersion 'default:${GEOTAG}' \
+      --conditionsTag "default:${CONDTAG}" \
+      --geometryVersion "default:${GEOTAG}" \
       --postExec 'all:cfg.getService("AlgResourcePool").CountAlgorithmInstanceMisses = True' \
       --AMIConfig 's4369' \
       --outputHITSFile 'myHITS.pool.root' \
