@@ -79,7 +79,7 @@ struct TritonTool::Impl : public AthMessaging {
 
   tc::Error checkServerHealth(tc::InferenceServerGrpcClient& client) const {
 
-    tc::Headers httpHeaders;
+    const tc::Headers& httpHeaders = m_headers;
     bool live = false;
     tc::Error err =
         client.IsServerLive(&live, httpHeaders, m_options->client_timeout_);
@@ -127,7 +127,7 @@ struct TritonTool::Impl : public AthMessaging {
       const int maxRetries, const int retryDelayMs,
       std::shared_ptr<tc::InferResult>& results) const {
 
-    tc::Headers httpHeaders;
+    const tc::Headers& httpHeaders = m_headers;
     grpc_compression_algorithm compressionAlgorithm =
         grpc_compression_algorithm::GRPC_COMPRESS_NONE;
 
@@ -233,6 +233,8 @@ struct TritonTool::Impl : public AthMessaging {
 
   const AthAsynchronousAlgorithm* m_parentAsyncAlg = nullptr;
   std::unique_ptr<tc::InferOptions> m_options;
+  /// Headers attached to every gRPC request
+  tc::Headers m_headers;
 
 };  // struct TritonTool::Impl
 
@@ -249,6 +251,12 @@ StatusCode TritonTool::initialize() {
   m_impl->m_options = std::make_unique<tc::InferOptions>(m_modelName.value());
   m_impl->m_options->model_version_ = m_modelVersion;
   m_impl->m_options->client_timeout_ = m_clientTimeout;
+  if (m_addModelNameHeader) {
+    m_impl->m_headers["x-rtc-model-name"] = m_modelName.value();
+  }
+  if (!m_bearer.value().empty()) {
+    m_impl->m_headers["authorization"] = "Bearer " + m_bearer.value();
+  }
 
   // Figure out if parent is an AthAsynchronousAlgorithm, and set pointer if it
   // is

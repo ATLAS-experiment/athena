@@ -54,6 +54,13 @@ class TritonTool : public extends<AthAlgTool, IAthInferenceTool> {
   StringProperty m_url{this, "URL", "", "Triton URL"};
   BooleanProperty m_useSSL{this, "UseSSL", false,
                            "Use SSL for Triton server connection"};
+  BooleanProperty m_addModelNameHeader{
+      this, "AddModelNameHeader", false,
+      "Add the 'x-rtc-model-name: <ModelName>' header to every gRPC request "
+      "(required by the IaaS server at Perlmutter)"};
+  StringProperty m_bearer{
+      this, "Bearer", "",
+      "Bearer token for Triton server authentication, empty for none"};
   IntegerProperty m_maxRetries{
       this, "MaxRetries", 10,
       "Number of times to retry a failed Triton inference request"};
