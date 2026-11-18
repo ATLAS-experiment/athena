@@ -51,6 +51,8 @@ def reweighter(process, weight_groups, powheg_LHE_output):
 
     ## Dictionary of available keywords for faster XML-reweighting: from rwl_setup_param_weights.f
     xml_kwds = {"renscfact": "renscfact", "facscfact": "facscfact", "lhans1": "lhapdf", "lhans2": "lhapdf", "width_correction" : "width_correction", "run_mode": "run_mode"}
+    # ... extended by any process-specific keywords handled in the process's rwl_setup_param_weights_user
+    xml_kwds.update(getattr(process, "extra_xml_reweighting_keywords", {}))
 
     # Initial values for scale, PDF and other weight groups
     _idx_scale_start, _idx_PDF_start, _idx_other_start = 1001, 2001, 3001
@@ -133,7 +135,11 @@ def reweighter(process, weight_groups, powheg_LHE_output):
                 xml_lines.append("<weightgroup name='{}' combine='{}'>".format(weight.group, weight.combine))
             # Weight elements
             if weight.parallel_xml_compatible:
-                keyword_pairs_str = " ".join(["{}={}".format(k, v) for p, v in weight.parameter_settings for k in weight.keywords[p]])
+                keyword_pairs = ["{}={}".format(k, v) for p, v in weight.parameter_settings for k in weight.keywords[p]]
+                # Let the process add settings to the weight line if it needs to (e.g. HHJ)
+                if hasattr(process, "complete_xml_weight_settings"):
+                    keyword_pairs = process.complete_xml_weight_settings(keyword_pairs)
+                keyword_pairs_str = " ".join(keyword_pairs)
                 xml_lines.append("<weight id='{}'> {} </weight>".format(weight.ID, keyword_pairs_str))
             else:
                 serial_xml_weight_list.append(weight)
