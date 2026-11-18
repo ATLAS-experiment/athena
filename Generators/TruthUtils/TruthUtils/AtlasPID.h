@@ -735,12 +735,12 @@ inline bool isHiddenValleyFundamental(const DecodedPID& p) {
 template <> inline bool isHiddenValleyFundamental(const int& p){ if (!hasAllowedNumberOfDigits(p,7)) return false;  auto value_digits = DecodedPID(p); return isHiddenValleyFundamental(value_digits);}
 
 
-/// In addition, there is a need to identify ”Q-ball” and similar very exotic (multi-charged) particles which may have large, non-integer charge.
-/// These particles are assigned the ad-hoc numbering +/-100XXXY0, where the charge is XXX.Y.
-/// or +/-200XXYY0, where the charge is XX/YY.
+/// APID Define codes for  ”Q-ball” and similar very exotic (multi-charged) particles which may have large, non-integer charge.
+/// These particles are assigned 8-digit codes using the ad-hoc numbering scheme:  +/-100XXXY0, where the charge is XXX.Y, or +/-200XXYY0, where the charge is XX/YY.
 /// The case of +/-200XXYY0 is legacy, see https://gitlab.cern.ch/atlas/athena/-/merge_requests/25862
 /// Note that no other quantum numbers besides the charge are considered for these generic multi-charged particles (e.g. isSUSY() is false for them).
-/// Such a model was used in previous Run-1 (https://arxiv.org/abs/1301.5272, https://arxiv.org/abs/1504.04188) and Run-2 (https://arxiv.org/abs/1812.03673, https://arxiv.org/abs/2303.13613) ATLAS searches.
+/// Such a model was used in previous Run-1 (https://arxiv.org/abs/1301.5272, https://arxiv.org/abs/1504.04188)
+/// and Run-2 (https://arxiv.org/abs/1812.03673, https://arxiv.org/abs/2303.13613) ATLAS searches.
 template <class T> inline bool isGenericMultichargedParticle(const T& p){return isGenericMultichargedParticle(p->pdg_id());}
 template <> inline bool isGenericMultichargedParticle(const DecodedPID& p){return (p.ndigits() == 8 && (p(0) == 1 || p(0) == 2) && p(1) == 0 && p(2) == 0 && p(7) == 0);}
 template <> inline bool isGenericMultichargedParticle(const int& p){if (!hasAllowedNumberOfDigits(p,8)) return false;  auto value_digits = DecodedPID(p); return isGenericMultichargedParticle(value_digits);}
