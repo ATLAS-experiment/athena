@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef Tgc_H
@@ -7,8 +7,10 @@
 
 #include "MuonGeoModel/DetectorElement.h"
 #include "MuonGeoModel/TgcComponent.h"
+#include <vector>
 
 class GeoFullPhysVol;
+class StoredMaterialManager;
 
 namespace MuonGM {
 
@@ -34,7 +36,7 @@ namespace MuonGM {
         GeoFullPhysVol *build(StoredMaterialManager& matManager,
                               const MYSQL& mysql,
                               int minimalgeo, int cutoutson,
-                              const std::vector<Cutout *>&);
+                              const std::vector<Cutout*>&);
         virtual void print() const override;
 
       private:

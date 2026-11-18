@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef MultiLayer_H
@@ -10,8 +10,10 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <array>
 
 class GeoFullPhysVol;
+class StoredMaterialManager;
 
 namespace MuonGM {
     class MYSQL;

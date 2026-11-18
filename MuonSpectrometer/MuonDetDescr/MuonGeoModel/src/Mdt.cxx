@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonGeoModel/Mdt.h"
@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include <stdlib.h>
 #include <utility>
+#include <cmath>
 
 #define verbose_mdt false
 
@@ -34,25 +35,29 @@ namespace MuonGM {
         logVolName = lVName;
         MdtComponent *s = static_cast<MdtComponent *>(ss);
         const MDT *thism = dynamic_cast<const MDT*>(mysql.GetTechnology(s->name));
-
-        width = s->dx1;
-        longWidth = s->dx2;
-        thickness = s->GetThickness(mysql);
-        length = s->dy;
-        m_component = s;
-        m_component->cutoutTubeXShift = 0.;
-        layer = std::make_unique<MultiLayer>(mysql, s->name);
-        layer->logVolName = lVName;
-        layer->cutoutNsteps = 0;
-        layer->width = width;
-        layer->longWidth = longWidth;
-        tubePitch = thism->pitch;
-        layer->length = length;
-        layer->nrOfTubes = (int)(layer->length / thism->pitch);
-        if (longWidth > width)
-            layer->nrOfSteps = int(length / s->tubelenStepSize);
-        tubelenStepSize = s->tubelenStepSize;
-        index = s->index;
+        if (thism)[[likely]]{
+          width = s->dx1;
+          longWidth = s->dx2;
+          thickness = s->GetThickness(mysql);
+          length = s->dy;
+          m_component = s;
+          m_component->cutoutTubeXShift = 0.;
+          layer = std::make_unique<MultiLayer>(mysql, s->name);
+          layer->logVolName = lVName;
+          layer->cutoutNsteps = 0;
+          layer->width = width;
+          layer->longWidth = longWidth;
+          tubePitch = thism->pitch;
+          layer->length = length;
+          layer->nrOfTubes = (int)(layer->length / thism->pitch);
+          if (longWidth > width)
+              layer->nrOfSteps = int(length / s->tubelenStepSize);
+          tubelenStepSize = s->tubelenStepSize;
+          index = s->index;
+        } else {
+          MsgStream log(Athena::getMessageSvc(), "Mdt::Mdt");
+          log << MSG::ERROR <<"Dynamic cast failed"<<endmsg;
+        }
     }
 
 
@@ -403,8 +408,8 @@ namespace MuonGM {
 	// Pass information to multilayer and MdtComponent
 	m_component->cutoutTubeXShift = 0;
 	layer->cutoutNsteps = nonCutoutXSteps.size();
-	layer->m_nonCutoutXSteps = nonCutoutXSteps;
-	layer->m_nonCutoutYSteps = nonCutoutYSteps;
+	layer->m_nonCutoutXSteps = std::move(nonCutoutXSteps);
+	layer->m_nonCutoutYSteps = std::move(nonCutoutYSteps);
 	layer->cutoutAtAngle = false;
       }
     }

@@ -1,13 +1,13 @@
 /*
-  Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef DetectorElement_H
 #define DetectorElement_H
 
-#include "GeoPrimitives/GeoPrimitives.h"
+//#include "GeoPrimitives/GeoPrimitives.h"
 
-#include "GeoModelInterfaces/StoredMaterialManager.h"
+//#include "GeoModelInterfaces/StoredMaterialManager.h"
 #include <string>
 
 namespace MuonGM {

@@ -7,6 +7,7 @@
 #include "AthenaKernel/getMessageSvc.h"
 #include "GaudiKernel/MsgStream.h"
 #include "GaudiKernel/SystemOfUnits.h"
+#include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/GeoLogVol.h"
 #include "GeoModelKernel/GeoMaterial.h"

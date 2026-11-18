@@ -3,8 +3,12 @@
 */
 
 #include "MuonGeoModel/Rpc.h"
+#include "MuonGeoModel/MYSQL.h"
+#include "MuonGeoModel/RPC_Technology.h"
+#include "MuonGeoModel/RpcLayer.h"
 
 #include "GaudiKernel/SystemOfUnits.h"
+#include "GeoModelInterfaces/StoredMaterialManager.h"
 #include "GeoModelKernel/GeoCutVolAction.h"
 #include "GeoModelKernel/GeoDefinitions.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
@@ -19,9 +23,7 @@
 #include "GeoModelKernel/GeoTrd.h"
 #include "GeoModelKernel/GeoVFullPhysVol.h"
 #include "GeoModelUtilities/GeoRef.h"
-#include "MuonGeoModel/MYSQL.h"
-#include "MuonGeoModel/RPC_Technology.h"
-#include "MuonGeoModel/RpcLayer.h"
+
 #include "AthenaKernel/getMessageSvc.h"
 
 #include <cassert>

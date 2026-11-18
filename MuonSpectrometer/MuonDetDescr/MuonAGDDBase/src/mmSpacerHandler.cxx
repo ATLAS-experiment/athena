@@ -5,7 +5,6 @@
 #include "MuonAGDDBase/mmSpacerHandler.h"
 #include "MuonAGDDBase/AGDDMMSpacer.h"
 #include "AGDDControl/AGDDController.h"
-#include <iostream>
 
 
 mmSpacerHandler::mmSpacerHandler(const std::string& s,
@@ -32,6 +31,6 @@ void mmSpacerHandler::ElementHandle(AGDDController& c,
 	
 	AGDDMMSpacer *b=new AGDDMMSpacer(name, c.GetVolumeStore(), c.GetSectionStore());
 	b->SetXYZ(vvv);
-	b->tech=technology;
+	b->tech = std::move(technology);
 	
 }

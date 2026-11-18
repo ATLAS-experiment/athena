@@ -1,11 +1,10 @@
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MuonAGDDBase/micromegasHandler.h"
 #include "MuonAGDDBase/AGDDMicromegas.h"
 #include "AGDDControl/AGDDController.h"
-#include <iostream>
 
 
 micromegasHandler::micromegasHandler(const std::string& s,
@@ -18,9 +17,6 @@ micromegasHandler::micromegasHandler(const std::string& s,
 void micromegasHandler::ElementHandle(AGDDController& c,
                                       xercesc::DOMNode *t)
 {
-    
-//    std::cout<<" this is micromegasHandler::Handle"<<std::endl;
-
 	bool ret=true;
 	std::string name=getAttributeAsString(c, t, "type",ret);
 	std::string sType=getAttributeAsString(c, t, "subType",ret);
@@ -36,10 +32,10 @@ void micromegasHandler::ElementHandle(AGDDController& c,
                                              c.GetDetectorStore(),
                                              c.GetVolumeStore(),
                                              c.GetSectionStore());
-        m_mmCurrent = b;
+  m_mmCurrent = b;
 	b->SetXYZ(vvv);
 	b->subType(sType);
-	b->tech=technology;
+	b->tech = std::move(technology);
 
 	double xf=getAttributeAsDouble(c, t, "xFrame",0.);
 	b->xFrame(xf);
@@ -48,9 +44,7 @@ void micromegasHandler::ElementHandle(AGDDController& c,
 	double ylf=getAttributeAsDouble(c, t, "ylFrame",0.);
 	b->ylFrame(ylf);
 	
-//	std::string col=getAttributeAsString(c, t, "color",ret);
-//	if (ret)
-//		b->SetColor(col);
+
 }
 
 

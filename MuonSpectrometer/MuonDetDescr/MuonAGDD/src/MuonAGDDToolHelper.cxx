@@ -90,7 +90,7 @@ std::string MuonAGDDToolHelper::GetAGDD(const bool dumpIt, const std::string& ta
    std::string detectorKey  = MuonVersion.empty() ? AtlasVersion : MuonVersion;
    std::string detectorNode = MuonVersion.empty() ? "ATLAS" : "MuonSpectrometer";
    if ( MuonVersion == "CUSTOM"){
-     detectorKey  = AtlasVersion ;
+     detectorKey  = std::move(AtlasVersion) ;
      detectorNode = "ATLAS"  ;
    }
 

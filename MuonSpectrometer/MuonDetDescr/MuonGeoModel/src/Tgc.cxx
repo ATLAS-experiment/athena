@@ -5,6 +5,8 @@
 #include "MuonGeoModel/Tgc.h"
 
 #include "AthenaKernel/getMessageSvc.h"
+#include "GeoModelInterfaces/StoredMaterialManager.h"
+
 #include "GeoModelKernel/GeoFullPhysVol.h"
 #include "GeoModelKernel/GeoIdentifierTag.h"
 #include "GeoModelKernel/GeoLogVol.h"
