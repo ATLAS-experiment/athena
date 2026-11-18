@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2023 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
@@ -56,8 +56,6 @@ def ITkPixelSensorSDCfg(ConfigFlags, name="ITkPixelSensorSD", **kwargs):
     kwargs.setdefault("GmxSensor",True) 
     kwargs.setdefault("LogicalVolumeNames", ["ITkPixel::InnerBarrelSingleMod_Sensor",
                                              "ITkPixel::InnerRingSingleMod_Sensor",
-                                             "ITkPixel::InnerQuadMod_Sensor",
-                                             "ITkPixel::OuterQuadMod_Sensor",
                                              "ITkPixel::InnerBarrelQuadMod_Sensor",
                                              "ITkPixel::InnerEndcapQuadMod_Sensor",
                                              "ITkPixel::OuterBarrelQuadMod_Sensor",

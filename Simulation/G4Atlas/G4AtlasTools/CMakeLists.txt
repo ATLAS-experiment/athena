@@ -81,6 +81,10 @@ atlas_add_test( G4PhysicsRegionConfig_test
                 SCRIPT test/G4PhysicsRegionConfig_test.py
                 POST_EXEC_SCRIPT noerror.sh )
 
+atlas_add_test( ITkPixelPhysicsRegionConfig_test
+                SCRIPT test/ITkPixelPhysicsRegionConfig_test.py
+                POST_EXEC_SCRIPT noerror.sh )
+
 atlas_add_test( G4FieldConfig_test
                 SCRIPT test/G4FieldConfig_test.py
                 POST_EXEC_SCRIPT noerror.sh )

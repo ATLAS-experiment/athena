@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+# Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 from AthenaConfiguration.ComponentAccumulator import ComponentAccumulator
 from AthenaConfiguration.ComponentFactory import CompFactory
 from AthenaConfiguration.Enums import LHCPeriod
@@ -107,8 +107,10 @@ def ITkPixelPhysicsRegionToolCfg(flags, name='ITkPixelPhysicsRegionTool', **kwar
     kwargs.setdefault("RegionName", 'ITkPixel')
     volumeList = ['ITkPixel::InnerBarrelSingleMod_Sensor',
                   'ITkPixel::InnerRingSingleMod_Sensor',
-                  'ITkPixel::InnerQuadMod_Sensor',
-                  'ITkPixel::OuterQuadMod_Sensor',
+                  'ITkPixel::InnerBarrelQuadMod_Sensor',
+                  'ITkPixel::InnerEndcapQuadMod_Sensor',
+                  'ITkPixel::OuterBarrelQuadMod_Sensor',
+                  'ITkPixel::OuterEndcapQuadMod_Sensor',
                   'ITkPixel::InclinedQuadMod_Sensor']
     kwargs.setdefault("VolumeList",  volumeList)
     kwargs.setdefault("ElectronCut", 0.05)
