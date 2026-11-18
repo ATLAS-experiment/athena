@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTest/LArCablingChecker.h"
@@ -10,32 +10,6 @@
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
-
-LArCablingChecker::LArCablingChecker(const std::string& name, ISvcLocator* pSvcLocator)
-  : AthAlgorithm(name, pSvcLocator),
-    //m_chan(0),
-    m_onlineHelper(0),
-    m_emId(0),
-    m_errorcellsThisEvent(0),
-    m_errorCounterThisEvent(0),
-    m_errorcellsPreviousEvent(0),
-    m_errorCounterPreviousEvent(0),
-    m_numberOfEventsWithThisErrorState(0),
-    m_channelHashMax(0)
-{
-  m_count = 0;
-  declareProperty("DigitKey", m_key = ""); 
-  declareProperty("FileName", m_outFileName = "CablingSummary.txt");
-  //declareProperty("Pattern", m_vPattern);
-  declareProperty("ADCThreshold", m_ADCThreshold = 1250);
-  declareProperty("DACHighGainThreshold", m_DACHighGainThreshold = 100);
-  declareProperty("DACMediumGainThreshold", m_DACMediumGainThreshold = 1000);
-  declareProperty("DACLowGainThreshold", m_DACLowGainThreshold = 10000);
-  declareProperty("PrintAllCellsAndEvents", m_PrintAllCellsAndEvents = false);
-  declareProperty("PrintDisconnectedCells", m_PrintDisconnectedCells = true);
-  declareProperty("PrintEventSummary", m_printEventSummary = false);
-  declareProperty("UseBadChannelTool", m_useBadChannelTool = true);
-}
 
 LArCablingChecker::~LArCablingChecker() {
   //empty
@@ -50,9 +24,9 @@ StatusCode LArCablingChecker::initialize() {
      ATH_CHECK( m_BCKey.initialize() );
   }
 
-  m_outfile.open(m_outFileName.c_str(), std::ios::out);
+  m_outfile.open(m_outFileName.value().c_str(), std::ios::out);
   if (!m_outfile.is_open()) {
-    ATH_MSG_ERROR ( "Unable to open output file with name " << m_outFileName );
+    ATH_MSG_ERROR ( "Unable to open output file with name " << m_outFileName.value() );
     return StatusCode::FAILURE;
   }
 
@@ -81,7 +55,7 @@ StatusCode LArCablingChecker::execute(const EventContext& ctx) {
 
   //log << MSG::INFO << "Retrieving LArDigitContainer. Key= " << m_key << std::endl; 
   const LArDigitContainer* larDigitCont = nullptr;
-  ATH_CHECK( evtStore()->retrieve(larDigitCont, m_key) );
+  ATH_CHECK( evtStore()->retrieve(larDigitCont, m_key.value()) );
   
   //const LArCalibParams* calibParams;
   const LArCalibParams* calibParams = nullptr;

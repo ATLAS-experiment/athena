@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2017 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #ifndef LARCABLINGCHECKER
@@ -20,7 +20,7 @@
 class LArCablingChecker : public AthAlgorithm
 {
  public:
-  LArCablingChecker(const std::string & name, ISvcLocator * pSvcLocator);
+  using AthAlgorithm::AthAlgorithm;
 
   ~LArCablingChecker();
 
@@ -30,36 +30,36 @@ class LArCablingChecker : public AthAlgorithm
   StatusCode finalize();
 
  private:
-  int m_count;
+  int m_count{0};
 
   SG::ReadCondHandleKey<LArOnOffIdMapping> m_cablingKey{this,"CablingKey","LArOnOffIdMap","SG Key of LArOnOffIdMapping object"};
   SG::ReadCondHandleKey<LArBadChannelCont> m_BCKey{this, "BadChanKey", "LArBadChannel", "SG bad channels key"};
   SG::ReadCondHandleKey<LArCalibLineMapping>  m_CLKey{this, "CalibLineKey", "LArCalibLineMap", "SG calib line key"};
 
-  const LArOnlineID* m_onlineHelper;
-  const LArEM_ID* m_emId;
+  const LArOnlineID* m_onlineHelper{nullptr};
+  const LArEM_ID* m_emId{nullptr};
 
   std::ofstream m_outfile;
-  std::string m_key;
-  std::string m_outFileName;
+  Gaudi::Property<std::string> m_key{this, "DigitKey", ""};
+  Gaudi::Property<std::string> m_outFileName{this, "FileName", "CablingSummary.txt"};
   //std::vector<unsigned> m_vPattern;
 
-  std::vector<bool> *m_errorcellsThisEvent;
-  int m_errorCounterThisEvent;
-  std::vector<bool> *m_errorcellsPreviousEvent;
-  int m_errorCounterPreviousEvent;
-  int m_numberOfEventsWithThisErrorState;
-  LArOnlineID::size_type m_channelHashMax;
+  std::vector<bool> *m_errorcellsThisEvent{nullptr};
+  int m_errorCounterThisEvent{0};
+  std::vector<bool> *m_errorcellsPreviousEvent{nullptr};
+  int m_errorCounterPreviousEvent{0};
+  int m_numberOfEventsWithThisErrorState{0};
+  LArOnlineID::size_type m_channelHashMax{0};
 
   // Properties
-  bool m_PrintAllCellsAndEvents;
-  bool m_PrintDisconnectedCells;
-  int m_ADCThreshold;
-  int m_DACHighGainThreshold;
-  int m_DACMediumGainThreshold;
-  int m_DACLowGainThreshold;
-  bool m_printEventSummary;
-  bool m_useBadChannelTool;
+  Gaudi::Property<bool> m_PrintAllCellsAndEvents{this, "PrintAllCellsAndEvents", false};
+  Gaudi::Property<bool> m_PrintDisconnectedCells{this, "PrintDisconnectedCells", true};
+  Gaudi::Property<int> m_ADCThreshold{this, "ADCThreshold", 1250};
+  Gaudi::Property<int> m_DACHighGainThreshold{this, "DACHighGainThreshold", 100};
+  Gaudi::Property<int> m_DACMediumGainThreshold{this, "DACMediumGainThreshold", 1000};
+  Gaudi::Property<int> m_DACLowGainThreshold{this, "DACLowGainThreshold", 10000};
+  Gaudi::Property<bool> m_printEventSummary{this, "PrintEventSummary", false};
+  Gaudi::Property<bool> m_useBadChannelTool{this, "UseBadChannelTool", true};
 };
 
 #endif

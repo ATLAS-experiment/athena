@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "LArCalibTest/LArReadHadDMCoeffFile2.h"
@@ -14,14 +14,6 @@
 /* ***************************************************************************
 c-tor
 *************************************************************************** */
-LArReadHadDMCoeffFile2::LArReadHadDMCoeffFile2(const std::string & name, 
-             ISvcLocator * pSvcLocator) : AthAlgorithm(name,pSvcLocator) {
-  declareProperty("HadDMCoeffFileName",m_hadDMCoeffFileName);
-  declareProperty("CorrectionKey",m_key="HadDMCoeff");
-
-  m_data = 0;
-}
-
 LArReadHadDMCoeffFile2::~LArReadHadDMCoeffFile2() {}
 
 
@@ -29,12 +21,12 @@ LArReadHadDMCoeffFile2::~LArReadHadDMCoeffFile2() {}
 initialize
 *************************************************************************** */
 StatusCode LArReadHadDMCoeffFile2::initialize() {
-   ATH_MSG_INFO ( "=== LArReadHadDMCoeffFile2::initialize() ===  m_key:" << m_key );
+   ATH_MSG_INFO ( "=== LArReadHadDMCoeffFile2::initialize() ===  m_key:" << m_key.value() );
    ATH_CHECK(initDataFromFile(m_hadDMCoeffFileName));
 
    if(msgLvl(MSG::DEBUG)) m_data->PrintData(std::cout);
 
-   ATH_CHECK( detStore()->record(m_data,m_key) );
+   ATH_CHECK( detStore()->record(m_data,m_key.value()) );
    ATH_CHECK( detStore()->setConst(m_data) );
    return StatusCode::SUCCESS;
 }
