@@ -189,8 +189,13 @@ namespace MuonGMR4 {
     }
     std::unique_ptr<Acts::TrackingVolume> BoundsExpander::makeEnvelope(Acts::VolumeBoundFactory& factory,
                                                                        std::string_view volName) {
+        // makeBounds as a side effect changes m_shiftTrf, which is then
+        // read by toVertexCenter().  So we can't evaluate this as one of the
+        // arguments to TrackingVolume; otherwise, the toVertexCenter()
+        // call may be done before m_shiftTrf is set.
+        auto bounds = makeBounds (factory);
         auto volume = std::make_unique<Acts::TrackingVolume>(toVertexCenter().inverse(),
-                                                             makeBounds(factory), std::string{volName});
+                                                             bounds, std::string{volName});
         ACTS_DEBUG(__func__<<"() "<<__LINE__<<" - Created new volume envelope "
                 <<volName<<" located at @"<<Amg::toString(toVertexCenter().inverse())
                 <<" with bounds: "<<volume->volumeBounds());
