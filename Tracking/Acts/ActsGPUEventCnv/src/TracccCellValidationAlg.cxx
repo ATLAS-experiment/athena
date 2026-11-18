@@ -49,12 +49,12 @@ StatusCode TracccCellValidationAlg::execute(const EventContext& ctx) const
   // The data are on device so they need to be copied to host first
   traccc::edm::silicon_cell_collection::buffer reference_cells_host_buffer{
     copy->get_size(*reference_cells_handle), m_hostMR->mr()};
-  copy->setup(reference_cells_host_buffer)->ignore();
+  copy->setup(vecmem::ignore_event, reference_cells_host_buffer);
   (*copy)(*reference_cells_handle, reference_cells_host_buffer)->wait();
 
   traccc::edm::silicon_cell_collection::buffer cells_host_buffer{
     copy->get_size(*cells_handle), m_hostMR->mr()};
-  copy->setup(cells_host_buffer)->ignore();
+  copy->setup(vecmem::ignore_event, cells_host_buffer);
   (*copy)(*cells_handle, cells_host_buffer)->wait();
 
   traccc::edm::silicon_cell_collection::const_device reference_cells{reference_cells_host_buffer};

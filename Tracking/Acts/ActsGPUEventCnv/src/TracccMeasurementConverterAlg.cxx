@@ -149,7 +149,7 @@ StatusCode TracccMeasurementConverterAlg::execute(const EventContext& ctx) const
 
   traccc::edm::measurement_collection::buffer traccc_measurements_buffer{
       copy->get_size(*measurements), m_hostMR->mr()};
-  copy->setup(traccc_measurements_buffer)->ignore();
+  copy->setup(vecmem::ignore_event, traccc_measurements_buffer);
   (*copy)(*measurements, traccc_measurements_buffer)->wait();
 
   traccc::edm::measurement_collection::const_device traccc_measurements(

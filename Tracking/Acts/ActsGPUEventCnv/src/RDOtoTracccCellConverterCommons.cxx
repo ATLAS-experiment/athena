@@ -85,8 +85,8 @@ StatusCode RDOtoTracccCellConverterCommons::copyToGpuAndRecordToSG(
   auto traccc_cells_gpu_buffer = std::make_unique<traccc::edm::silicon_cell_collection::buffer>(
     cells.capacity(), m_deviceMR->mr());
 
-  // We ignore() the setup and wait() on the copy to allow parallelism.
-  device_copy->setup(*traccc_cells_gpu_buffer)->ignore();
+  // Ignore the setup event and wait() on the copy to allow parallelism.
+  device_copy->setup(vecmem::ignore_event, *traccc_cells_gpu_buffer);
   (*device_copy)(cells, *traccc_cells_gpu_buffer)->wait();
 
   auto outputTracccCells = SG::makeHandle(m_tracccCellsKey, ctx);

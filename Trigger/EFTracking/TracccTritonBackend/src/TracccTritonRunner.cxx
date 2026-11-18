@@ -249,7 +249,7 @@ void TracccTritonRunner::run(const uint8_t* buffer, std::size_t byteSize,
         auto deviceCells =
             std::make_unique<::traccc::edm::silicon_cell_collection::buffer>(
                 static_cast<unsigned int>(cells.size()), m_impl->device_mr);
-        m_impl->copy->setup(*deviceCells)->ignore();
+        m_impl->copy->setup(vecmem::ignore_event, *deviceCells);
         (*m_impl->copy)(vecmem::get_data(cells), *deviceCells)->wait();
 
         if (m_impl->eventStore

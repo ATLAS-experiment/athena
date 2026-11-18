@@ -109,7 +109,7 @@ StatusCode TracccSeedDeviceConverterAlg::execute(const EventContext& ctx) const
     DeviceSeedContainer::buffer host_seeds_buffer(n_seeds, m_hostMR->mr());
     {
         Athena::Chrono chrono("SeedDeviceConv:copyD2H", m_chronoSvc.get());
-        device_copy->setup(host_seeds_buffer)->ignore();
+        device_copy->setup(vecmem::ignore_event, host_seeds_buffer);
         (*device_copy)(*device_seeds, host_seeds_buffer)->wait();
     }
     const DeviceSeedContainer::const_device host_seeds(host_seeds_buffer);

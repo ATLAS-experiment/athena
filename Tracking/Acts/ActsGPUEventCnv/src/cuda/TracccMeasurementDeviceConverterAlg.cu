@@ -145,18 +145,18 @@ StatusCode convertMeasurementsOnGPU(
 
   // Mark which measurement is what type
   vecmem::data::vector_buffer<unsigned int> state_pixels(nb_measurements, mr);
-  copy.setup(state_pixels)->ignore();
+  copy.setup(vecmem::ignore_event, state_pixels);
   vecmem::data::vector_buffer<unsigned int> state_strips(nb_measurements, mr);
-  copy.setup(state_strips)->ignore();
+  copy.setup(vecmem::ignore_event, state_strips);
 
   kernels::mark_pixels_strips<<<num_blocks, block_size, 0, stream>>>(
     input_meas, state_pixels, state_strips);
 
   // Scan: provides index and count
   vecmem::data::vector_buffer<unsigned int> index_pixels(nb_measurements, mr);
-  copy.setup(state_pixels)->ignore();
+  copy.setup(vecmem::ignore_event, state_pixels);
   vecmem::data::vector_buffer<unsigned int> index_strips(nb_measurements, mr);
-  copy.setup(state_strips)->ignore();
+  copy.setup(vecmem::ignore_event, state_strips);
 
   // Scan pixels
   const vecmem::device_vector<const unsigned int> state_pixels_device(state_pixels);
@@ -199,8 +199,8 @@ StatusCode convertMeasurementsOnGPU(
   // Allocate output buffer now that we now their size
   output_pixel_meas = std::make_unique<DevicePixelMeasurementContainer::buffer>(output_n_pixels, mr);
   output_strip_meas = std::make_unique<DeviceStripMeasurementContainer::buffer>(output_n_strips, mr);
-  copy.setup(*output_pixel_meas)->ignore();
-  copy.setup(*output_strip_meas)->ignore();
+  copy.setup(vecmem::ignore_event, *output_pixel_meas);
+  copy.setup(vecmem::ignore_event, *output_strip_meas);
 
   // Do the actual conversion now that we know where is what
   kernels::convertTracccToAthenaMeasurements<<<num_blocks, block_size, 0, stream>>>(

@@ -180,8 +180,8 @@ StatusCode xAODToTracccMeasurementConverterAlg::execute(const EventContext& ctx)
     auto measDeviceBuffer = std::make_unique<traccc::edm::measurement_collection::buffer>(
         measHostBuffer->capacity(), m_MRs->mainMR());
 
-    // We ignore() the setup and wait() on the copy to allow parallelism.
-    deviceCopy->setup(*measDeviceBuffer)->ignore();
+    // Ignore the setup event and wait() on the copy to allow parallelism.
+    deviceCopy->setup(vecmem::ignore_event, *measDeviceBuffer);
     (*deviceCopy)(*measHostBuffer, *measDeviceBuffer)->wait();
     ATH_CHECK(measHandle.record(std::move(measDeviceBuffer)));
   } else {

@@ -83,7 +83,7 @@ StatusCode convertSeedsOnGPU(
 {
     try {
         output_seeds = std::make_unique<DeviceSeedContainer::buffer>(nb_seeds, mr);
-        copy.setup(*output_seeds)->ignore();
+        copy.setup(vecmem::ignore_event, *output_seeds);
     } catch (const std::exception& e) {
         std::fprintf(stderr, "convertSeedsOnGPU: failed to allocate the output buffer: %s\n",
                      e.what());

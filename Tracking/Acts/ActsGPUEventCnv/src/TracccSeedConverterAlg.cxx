@@ -55,7 +55,7 @@ StatusCode TracccSeedConverterAlg::execute(const EventContext& ctx) const
 
     traccc::edm::spacepoint_collection::buffer traccc_spacepoints_buffer{
         copy->get_size(*traccc_spacepoints), m_hostMR->mr()};
-    copy->setup(traccc_spacepoints_buffer)->ignore();
+    copy->setup(vecmem::ignore_event, traccc_spacepoints_buffer);
     (*copy)(*traccc_spacepoints, traccc_spacepoints_buffer)->wait();
 
     traccc::edm::spacepoint_collection::const_device traccc_sp(
@@ -68,7 +68,7 @@ StatusCode TracccSeedConverterAlg::execute(const EventContext& ctx) const
 
     traccc::edm::seed_collection::buffer traccc_seeds_buffer{
         copy->get_size(*seeds), m_hostMR->mr()};
-    copy->setup(traccc_seeds_buffer)->ignore();
+    copy->setup(vecmem::ignore_event, traccc_seeds_buffer);
     (*copy)(*seeds, traccc_seeds_buffer)->wait();
 
     traccc::edm::seed_collection::const_device traccc_seeds(
