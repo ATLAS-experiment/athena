@@ -40,8 +40,11 @@ namespace ActsTrk {
     SG::ReadHandleKey<ActsTrk::SeedContainer> m_inputSeedContainerKey{this, "InputSeedContainerKey", "", "Name of the input seed container"};
     SG::WriteHandleKey<ActsTrk::BoundTrackParametersContainer> m_outputTrackParamsCollectionKey{this, "OutputTrackParamsCollectionKey","", "Name of the output track parameters collection"};
 
+    Gaudi::Property<bool> m_autoReverseSearch{this, "autoReverseSearch", false, "Estimate seeds beyond useTopSpRZboundary at the top SP, as the track finding"};
+    Gaudi::Property<std::vector<double>> m_useTopSpRZboundary {this, "useTopSpRZboundary", {350. * Acts::UnitConstants::mm, 1060. * Acts::UnitConstants::mm}, "R/|z| of the bottom SP beyond which autoReverseSearch estimates at the top SP"};
     /** @brief Auxiliary class to access the magnetic field, geometry and calibration context */
     ContextUtility m_ctxProvider{this};
+    std::size_t searchStartSp(const ActsTrk::Seed& seed) const;
 
   };
 

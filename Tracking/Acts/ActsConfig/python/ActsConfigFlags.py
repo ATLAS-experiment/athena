@@ -258,6 +258,7 @@ def createActsConfigFlags():
     actscf.addFlag('Acts.doPrintTrackStates', False)
     actscf.addFlag('Acts.skipDuplicateSeeds', True)
     actscf.addFlag('Acts.doTwoWayCKF', True) # run CKF twice, first with forward propagation with smoothing, then with backward propagation
+    actscf.addFlag('Acts.doTwoWaySmoothing', True) # smooth the joined two-way CKF passes; needed by the reverse search
     actscf.addFlag('Acts.useStripSeedsFirst', False) # switch order of seed collections
     actscf.addFlag('Acts.useHGTDClusterInTrackFinding', False) # use HGTD cluster in track finding
     actscf.addFlag('Acts.branchStopperMeasCutReduce', 2)

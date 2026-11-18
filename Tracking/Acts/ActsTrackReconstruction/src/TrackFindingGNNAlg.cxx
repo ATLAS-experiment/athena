@@ -153,9 +153,8 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
   detail::RecoTrackContainer tracks(trackBackend, trackStateBackend);
   TrackContainerUtils::addFitterTypeProperty(tracks);
 
-  auto retrieveSurface = [&](const ActsTrk::Seed& seed) -> const Acts::Surface& {
-    const xAOD::SpacePoint* sp = seed.sp().front();
-    auto geoId = ActsTrk::getSurfaceGeometryIdOfMeasurement(*detElToGeoIdMap, *sp->measurements().front());
+  auto retrieveSurface = [&](const xAOD::SpacePoint& sp, std::size_t measIndex) -> const Acts::Surface& {
+    auto geoId = ActsTrk::getSurfaceGeometryIdOfMeasurement(*detElToGeoIdMap, *sp.measurements().at(measIndex));
     const auto* surface = m_trackingGeometrySvc->trackingGeometry()->findSurface(geoId);
     if (!surface) {
       throw std::runtime_error("retrieveSurface: no Acts surface for GeometryIdentifier " + std::to_string(geoId.value()));
@@ -168,7 +167,7 @@ StatusCode TrackFindingGNNAlg::execute(const EventContext &ctx) const {
 
     // The parameter estimation tool selects the SPs used for the estimate (see its parameterEstimationMode property)
     const auto& [initialParamsOpt, estimationStatus] = m_paramEstimationTool->estimateTrackParameters(
-        gnnSeed, gctx, mctx, cctx, retrieveSurface);
+        gnnSeed, /*spIndex=*/0, gctx, mctx, cctx, retrieveSurface);
     if (!initialParamsOpt.has_value()) continue;
 
     // Space points are already ordered by radius by the GNN pipeline tool

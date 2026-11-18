@@ -109,9 +109,11 @@ def ActsMainTrackFindingAlgCfg(flags,
         kwargs.setdefault("NMeasurementsMin", 7)
 
     kwargs.setdefault("doTwoWay", flags.Acts.doTwoWayCKF)
-    # The LRT second pass carries the whole inward leg, where the hits run out
-    # at the displaced origin. Measured on the other passes it is a ~1% effect.
-    kwargs.setdefault("doSecondPassBranchStopper", flags.Tracking.ActiveConfig.isLargeD0)
+    kwargs.setdefault("twoWaySmoothing", flags.Acts.doTwoWaySmoothing)
+    kwargs.setdefault("autoReverseSearch", flags.Tracking.ActiveConfig.autoReverseSearch)
+    # needed where the second pass is the long leg (LRT inward, reverse search outward)
+    kwargs.setdefault("doSecondPassBranchStopper",
+                      flags.Tracking.ActiveConfig.isLargeD0 != flags.Tracking.ActiveConfig.autoReverseSearch)
     # drop the track states on material-only surfaces: nothing downstream reads them, and the CKF is faster without
     kwargs.setdefault("recordMaterialStates", False)
     # forceTrackOnSeed isn't effective with secondary passes, which will have removed most/all of the seed measurements from the measurement containers.

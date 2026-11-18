@@ -41,6 +41,8 @@
 #include <stdexcept>
 #include <utility>
 #include <algorithm>
+#include <iterator>
+#include <ranges>
 #include <variant>
 
 namespace {
@@ -63,11 +65,12 @@ namespace {
   const std::vector<Acts::SeedDeduplicator::MeasurementKey>&
   collectSeedKeys(const ActsTrk::Seed& seed,
                   const ActsTrk::ITrackParamsEstimationTool::SpacePointIndicesFun_t& spacePointIndicesFun,
+                  std::size_t spIndex,
                   const ActsTrk::detail::MeasurementIndex& measurementIndex,
                   std::vector<Acts::SeedDeduplicator::MeasurementKey>& seedKeys) {
     seedKeys.clear();
     const auto& sps = seed.sp();
-    for (std::size_t isp : spacePointIndicesFun(sps)) {
+    for (std::size_t isp : spacePointIndicesFun(sps, spIndex)) {
       for (const xAOD::UncalibratedMeasurement* meas : sps.at(isp)->measurements()) {
         const std::size_t hitIndex = measurementIndex.index(*meas);
         if (hitIndex < measurementIndex.size()) {
@@ -77,6 +80,46 @@ namespace {
     }
     return seedKeys;
   }
+
+  // Links the unsmoothed two-way passes of the brem search, with the interface of Acts::TrackletJoiner
+  struct BremLinker {
+    using TrkProxy = ActsTrk::detail::RecoTrackContainer::TrackProxy;
+    using StateProxy = ActsTrk::detail::RecoTrackStateContainerProxy;
+
+    Acts::Result<void> joinInPlace(const Acts::GeometryContext& /*gctx*/, TrkProxy& first,
+                                   StateProxy sharedState, TrkProxy& second) const {
+      const auto tipIndex = first.tipIndex();
+      if (second.tipIndex() != Acts::kTrackIndexInvalid) {
+        second.reverseTrackStates(true);
+        sharedState.previous() = second.outermostTrackState().index();
+      }
+      first.copyFromWithoutStates(second);
+      first.tipIndex() = tipIndex;
+      first.stemIndex() = second.stemIndex();
+      return Acts::Result<void>::success();
+    }
+
+    Acts::Result<TrkProxy> joinCopy(const Acts::GeometryContext& gctx, ActsTrk::detail::RecoTrackContainer& out,
+                                    const TrkProxy& first, const StateProxy& sharedState,
+                                    const TrkProxy& second) const {
+      // position of the shared state, counted from the tip
+      std::size_t position = 0;
+      for (auto ts : first.trackStatesReversed()) {
+        if (ts.index() == sharedState.index()) break;
+        ++position;
+      }
+      TrkProxy firstCopy = out.makeTrack();
+      firstCopy.copyFrom(first);
+      TrkProxy secondCopy = out.makeTrack();
+      secondCopy.copyFrom(second);
+      auto copyStates = firstCopy.trackStatesReversed();
+      StateProxy sharedCopy = *std::ranges::next(copyStates.begin(), position);
+      (void)joinInPlace(gctx, firstCopy, sharedCopy, secondCopy);  // a link cannot fail
+      // the second copy is a shell now, its states are in the joined chain
+      out.removeTrack(secondCopy.index());
+      return Acts::Result<TrkProxy>::success(firstCopy);
+    }
+  };
 
 }
 
@@ -101,8 +144,11 @@ namespace ActsTrk
     ATH_MSG_DEBUG("   " << m_statEtaBins);
     ATH_MSG_DEBUG("   " << m_seedLabels);
     ATH_MSG_DEBUG("   " << m_dumpAllStatEtaBins);
+    ATH_MSG_DEBUG("   " << m_useTopSpRZboundary);
     ATH_MSG_DEBUG("   " << m_seedMeasOffset);
     ATH_MSG_DEBUG("   " << m_ambiStrategy);
+    ATH_MSG_DEBUG("   " << m_autoReverseSearch);
+    ATH_MSG_DEBUG("   " << m_twoWaySmoothing);
     ATH_MSG_DEBUG("   " << m_countSharedHits);
     ATH_MSG_DEBUG("   " << m_forceTrackOnSeed);
 
@@ -119,6 +165,25 @@ namespace ActsTrk
 
     if (m_paramEstimationTool.size() != m_seedContainerKeys.size()) {
       ATH_MSG_FATAL("There are " << m_seedContainerKeys.size() << " SeedContainerKeys. Each needs its own TrackParamsEstimationTool, but there are " << m_paramEstimationTool.size());
+    }
+
+    if (m_useTopSpRZboundary.size() != 2) {
+      ATH_MSG_FATAL("useTopSpRZboundary must have 2 elements, but has " << m_useTopSpRZboundary.size());
+      return StatusCode::FAILURE;
+    }
+
+    if (m_autoReverseSearch && m_doTwoWay && !m_twoWaySmoothing) {
+      ATH_MSG_WARNING("autoReverseSearch without twoWaySmoothing: the perigee of a reversed seed does not use the outward second pass");
+    }
+    if (m_twoWaySmoothing && m_inflateCovarianceTwoWay) {
+      ATH_MSG_WARNING("twoWaySmoothing with inflateCovarianceTwoWay: the join underweights the second pass");
+    }
+
+    {
+      Acts::TrackletJoiner::Config joinerCfg;
+      joinerCfg.smoothSecond = m_twoWaySmoothing;
+      joinerCfg.conditionFirst = m_twoWaySmoothing;
+      m_trackletJoiner.emplace(joinerCfg, logger().cloneWithSuffix("TrackletJoiner"));
     }
 
     if (m_ambiStrategy != 0u /* OUTSIDE_TF */) m_showResolvedStats = true;
@@ -413,6 +478,13 @@ namespace ActsTrk
     return StatusCode::SUCCESS;
   }
 
+  std::size_t TrackFindingAlg::searchStartSp(const ActsTrk::Seed& seed) const {
+    const xAOD::SpacePoint* bottom_sp = seed.sp().front();
+    const bool reverse = m_autoReverseSearch && (bottom_sp->radius() > m_useTopSpRZboundary.value()[0] ||
+                                                 std::abs(bottom_sp->z()) > m_useTopSpRZboundary.value()[1]);
+    return reverse ? seed.sp().size() - 1 : 0;
+  }
+
   // === findTracks ==========================================================
 
   StatusCode
@@ -495,9 +567,8 @@ namespace ActsTrk
     // Function for Estimate Track Parameters
     auto retrieveSurfaceFunction =
        [detectorElementToGeometryIdMapPtr=m_trackingGeometrySvc->surfaceIdMap(),
-        actsTrackingGeometryPtr=m_trackingGeometrySvc->trackingGeometry().get()] (const ActsTrk::Seed& seed) -> const Acts::Surface& {
-        const xAOD::SpacePoint* sp = seed.sp().front();
-        const xAOD::UncalibratedMeasurement* meas = sp->measurements().front();
+        actsTrackingGeometryPtr=m_trackingGeometrySvc->trackingGeometry().get()] (const xAOD::SpacePoint& sp, std::size_t measIndex) -> const Acts::Surface& {
+        const xAOD::UncalibratedMeasurement* meas = sp.measurements().at(measIndex);
         const auto geoid_iter = detectorElementToGeometryIdMapPtr->find(ActsTrk::makeDetectorElementKey(meas->type(), meas->identifierHash()));
         if (geoid_iter == detectorElementToGeometryIdMapPtr->end()) {
            throw std::runtime_error("measurement not linked to Acts surface.");
@@ -527,9 +598,11 @@ namespace ActsTrk
         category_i = typeIndex * (m_statEtaBins.size() + 1);
         tracksContainerTemp.clear();
 
+        const std::size_t spIndex = searchStartSp(seed);
+
         // Check if the seed is a duplicate seed
         const bool isDupSeed = m_skipDuplicateSeeds &&
-          seedDeduplicator.isDuplicate(collectSeedKeys(seed, spacePointIndicesFun, measurementIndex, seedKeys));
+          seedDeduplicator.isDuplicate(collectSeedKeys(seed, spacePointIndicesFun, spIndex, measurementIndex, seedKeys));
         if (isDupSeed) {
           ATH_MSG_DEBUG("skip " << seedType << " seed " << iseed << " - already found");
           category_i = getSeedCategory(typeIndex, seed);
@@ -542,6 +615,7 @@ namespace ActsTrk
         // Get first estimate of parameters from the seed
         const auto& [optTrackParams, estimationStatus] =
           m_paramEstimationTool[typeIndex]->estimateTrackParameters(seed,
+                                                                    spIndex,
                                                                     detContext.geometry,
                                                                     detContext.magField,
                                                                     detContext.calib,
@@ -579,7 +653,12 @@ namespace ActsTrk
           }
         }
 
-        // TODO since the second pass is strictly an extension we should have a separate branch stopper which never drops and always extrapolates to the target surface
+        // Above the bottom SP: first pass inward, then outward; a failed refit starts at the bottom SP
+        const bool searchInward = spIndex > 0 && estimationStatus != ITrackParamsEstimationTool::kSeedRefitFailed;
+        options.propagatorPlainOptions.direction = searchInward ? Acts::Direction::Backward() : Acts::Direction::Forward();
+        secondOptions.propagatorPlainOptions.direction = options.propagatorPlainOptions.direction.invert();
+        options.targetSurface = searchInward ? &pSurface : nullptr;
+        secondOptions.targetSurface = searchInward ? nullptr : &pSurface;
 
         // @TODO introduce additional enums to distinguish Acts CKF from other implementations?
         //
@@ -614,11 +693,12 @@ namespace ActsTrk
             trackCategories,
             options,
             secondOptions,
-            *optTrackParams));
+            *optTrackParams,
+            searchInward));
 
 
-            // If nominal track finder produces no tracks, and seed matches a calo ROI, run gsf-enhanced track finding
-        if (ntracks == 0 && caloClusterROIs != nullptr && hasMatchingCaloROI(detContext.geometry, optTrackParams, *caloClusterROIs)){
+        // No tracks and a matching calo ROI: run the brem track finding, outward first only.
+        if (ntracks == 0 && !searchInward && caloClusterROIs != nullptr && hasMatchingCaloROI(detContext.geometry, optTrackParams, *caloClusterROIs)){
             ++event_stat[category_i][kNBremSeeds];
             ATH_CHECK(runTrackFinder<BremTrackFinderOptions>(
                 detContext,
@@ -638,7 +718,8 @@ namespace ActsTrk
                 trackCategories,
                 bremOptions.value().options,
                 bremOptions.value().secondOptions,
-                *optTrackParams));
+                *optTrackParams,
+                /*searchInward=*/false));
         }
 
         if (m_storeDestinies) {
@@ -1041,7 +1122,8 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                                       std::optional<std::vector<unsigned int>>& trackCategories,
                                       const TrackFinderOptionsType& options,
                                       const TrackFinderOptionsType& secondOptions,
-                                      const Acts::BoundTrackParameters &seedParameters) const
+                                      const Acts::BoundTrackParameters &seedParameters,
+                                      bool searchInward) const
   {
 
       // The brem track finding runs a Gaussian mixture filter without smoothing,
@@ -1075,23 +1157,22 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                         << " failed with error " << smoothingResult.error());
             continue;
         }
+        // Add the first pass alone; reverse a copy if inward, siblings share its states
+        auto addFirstTrack = [&]() -> StatusCode {
+            TrkProxy track = firstTrack;
+            if (searchInward) {
+                track = tracksContainerTemp.makeTrack();
+                track.copyFrom(firstTrack);
+                track.reverseTrackStates(true);
+            }
+            return addTrack(detContext, track, pSurface, extrapolationStrategy, sharedHits,
+                            actsTracksContainer, measurementIndex, tracksContainerTemp,
+                            seedDeduplicator, destiny, event_stat, ntracks, iseed,
+                            category_i, seedType, trackCategories);
+        };
+
         if (not m_doTwoWay){
-            ATH_CHECK( addTrack(detContext,
-                                firstTrack,
-                                pSurface,
-                                extrapolationStrategy,
-                                sharedHits,
-                                actsTracksContainer,
-                                measurementIndex,
-                                tracksContainerTemp,
-                                seedDeduplicator,
-                                destiny,
-                                event_stat,
-                                ntracks,
-                                iseed,
-                                category_i,
-                                seedType,
-                                trackCategories) );
+            ATH_CHECK( addFirstTrack() );
             ++nfirst;
             continue;
         }
@@ -1120,6 +1201,10 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
             }
             auto secondRootBranch = tracksContainerTemp.makeTrack();
             secondRootBranch.copyFromWithoutStates(firstTrack); // #3634
+            // addTrack extrapolates the joined track to the perigee again
+            if (searchInward) {
+                secondRootBranch.setReferenceSurface(nullptr);
+            }
 
             // perform track finding
             auto secondResult = findTracksCKF(secondInitialParameters, secondOptions, tracksContainerTemp, secondRootBranch);
@@ -1131,46 +1216,48 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
         if ( secondTracksForSeed.empty() ) {
             ATH_MSG_DEBUG("No viable result from second track finding for " << seedType << " seed " << iseed << " track " << nfirst);
             ++event_stat[category_i][kNoSecond];
-            ATH_CHECK( addTrack(detContext,
-                                firstTrack,
-                                pSurface,
-                                extrapolationStrategy,
-                                sharedHits,
-                                actsTracksContainer,
-                                measurementIndex,
-                                tracksContainerTemp,
-                                seedDeduplicator,
-                                destiny,
-                                event_stat,
-                                ntracks,
-                                iseed,
-                                category_i,
-                                seedType,
-                                trackCategories) );
-            ++nfirst;
-            continue;
+            ATH_CHECK( addFirstTrack() );
         }
 
-        // need to add tracks here
-        // do the stiching
-        // store the original previous state to restore it later
-        auto originalFirstMeasurementPrevious = firstMeasurement.previous();
-        // With branching (numMeasurementsCutOff > 1) the second tracks share their first track states, which
-        // reverseTrackStates() relinks in place (breaking the other branches): reverse a copy of each instead.
-        for (auto &secondTrackBranch : secondTracksForSeed) {
-            auto secondTrack = secondTrackBranch;
-            if (secondTracksForSeed.size() > 1) {
-              secondTrack = tracksContainerTemp.makeTrack();
-              secondTrack.copyFrom(secondTrackBranch);
+        // KF: smooth and condition the joined passes; brem: link the unsmoothed passes
+        const auto& joiner = [&]() -> const auto& {
+            if constexpr (isBremTrackFinding) {
+                static const BremLinker bremLinker;
+                return bremLinker;
+            } else {
+                return *m_trackletJoiner;
             }
-            secondTrack.reverseTrackStates(true);
+        }();
 
-            firstMeasurement.previous() = secondTrack.outermostTrackState().index();
-            secondTrack.tipIndex() = firstTrack.tipIndex();
-
-            // Add track to collection
+        // In place only for the last join of the seed: earlier siblings are already stored
+        const bool lastFirstTrack = &firstTrack == &tracksForSeed.back();
+        std::size_t nJoined = 0;
+        bool firstTrackModified = false;
+        for (std::size_t iSecond = 0; iSecond < secondTracksForSeed.size(); ++iSecond) {
+            auto &secondTrack = secondTracksForSeed[iSecond];
+            const bool inPlace = lastFirstTrack && iSecond + 1 == secondTracksForSeed.size();
+            Acts::Result<TrkProxy> joinedTrack = Acts::Result<TrkProxy>::success(firstTrack);
+            if (inPlace) {
+                auto res = joiner.joinInPlace(detContext.geometry, firstTrack, firstMeasurement, secondTrack);
+                if (not res.ok()) {
+                    firstTrackModified = true;
+                    joinedTrack = Acts::Result<TrkProxy>::failure(res.error());
+                }
+            } else {
+                joinedTrack = joiner.joinCopy(detContext.geometry, tracksContainerTemp,
+                                              firstTrack, firstMeasurement, secondTrack);
+            }
+            if (not joinedTrack.ok()) {
+                ATH_MSG_DEBUG("Join of the two passes failed for " << seedType << " seed " << iseed
+                              << " with error " << joinedTrack.error().message());
+                continue;
+            }
+            // Put the innermost state first, as in the forward search
+            if (searchInward) {
+                joinedTrack->reverseTrackStates(true);
+            }
             ATH_CHECK( addTrack(detContext,
-                                secondTrack,
+                                *joinedTrack,
                                 pSurface,
                                 extrapolationStrategy,
                                 sharedHits,
@@ -1185,12 +1272,21 @@ Acts::Result<void> TrackFindingAlg::extrapolateTrackToReferenceSurface(
                                 category_i,
                                 seedType,
                                 trackCategories) );
-        } // loop on tracks
+            ++nJoined;
+        }
 
-        // finish the stiching
-        // restore the original previous state for the first track
-        firstMeasurement.previous() = originalFirstMeasurementPrevious;
-
+        if (not secondTracksForSeed.empty() && nJoined == 0) {
+            // A failed in-place join can leave the first track conditioned: smooth it again
+            if (firstTrackModified) {
+                auto resmooth = Acts::smoothTrack(detContext.geometry, firstTrack, logger(), Acts::MbfSmoother());
+                if (not resmooth.ok()) {
+                    ATH_MSG_DEBUG("Smoothing the first track again failed for " << seedType << " seed " << iseed);
+                    nfirst++;
+                    continue;
+                }
+            }
+            ATH_CHECK( addFirstTrack() );
+        }
         nfirst++;
     } // loop on tracks from seed
 

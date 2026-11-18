@@ -234,11 +234,10 @@ namespace ActsTrk {
     // utilities
     // Used for param estimation
     auto retrieveSurfaceFunction = 
-      [this, &detElements] (const ActsTrk::Seed& seed) -> const Acts::Surface& 
+      [this, &detElements] (const xAOD::SpacePoint& sp, std::size_t measIndex) -> const Acts::Surface& 
       { 
-          const xAOD::SpacePoint* sp = seed.sp().front();
           const InDetDD::SiDetectorElement* element = detElements.getDetectorElement(
-                sp->elementIdList().front());
+                sp.elementIdList().at(measIndex));
           const Trk::Surface& atlas_surface = element->surface();
           return *m_geometryConvTool->convertSurfaceToActs(atlas_surface);
       };
@@ -257,6 +256,7 @@ namespace ActsTrk {
       const auto& [optTrackParams, estimationStatus] =
         m_paramEstimationTool->estimateTrackParameters(
 						       seed,
+						       m_useTopSp ? seed.sp().size() - 1 : 0,
 						       geo_context.context(),
 						       magFieldContext,
 						       calContext,
