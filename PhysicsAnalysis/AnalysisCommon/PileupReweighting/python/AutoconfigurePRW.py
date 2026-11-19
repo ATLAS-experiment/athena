@@ -58,9 +58,12 @@ def getLumicalcDict():
     GRLDict['GRL2016_ignore_TOROID_STATUS'] = ['GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_ignore_TOROID_STATUS_297730-311481_OflLumi-13TeV-009.root']
     GRLDict['GRL2016_BjetHLT'] = ['GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_BjetHLT_297730-311481_OflLumi-13TeV-009.root']
     GRLDict['GRL2016_BjetHLT_Tight'] = ['GoodRunsLists/data16_13TeV/20180129/PHYS_StandardGRL_All_Good_25ns_BjetHLT_Tight_297730-311481_OflLumi-13TeV-009.root']
+    GRLDict['GRL2016_BjetHLTwithout2015'] = GRLDict['GRL2016_BjetHLT']
 
     # 2015
     GRLDict['GRL2015'] = ['GoodRunsLists/data15_13TeV/20170619/PHYS_StandardGRL_All_Good_25ns_276262-284484_OflLumi-13TeV-008.root']
+    # no 2015 b-jet trigger GRL: this suffix excludes 2015
+    GRLDict['GRL2015_BjetHLTwithout2015'] = []
 
     return GRLDict
 
@@ -101,9 +104,12 @@ def getActualMuDict():
     GRLDict['GRL2016_ignore_TOROID_STATUS'] = []
     GRLDict['GRL2016_BjetHLT'] = []
     GRLDict['GRL2016_BjetHLT_Tight'] = []
+    GRLDict['GRL2016_BjetHLTwithout2015'] = []
 
     # 2015
     GRLDict['GRL2015'] = []
+    # no 2015 b-jet trigger GRL: this suffix excludes 2015
+    GRLDict['GRL2015_BjetHLTwithout2015'] = []
 
     return GRLDict
 
