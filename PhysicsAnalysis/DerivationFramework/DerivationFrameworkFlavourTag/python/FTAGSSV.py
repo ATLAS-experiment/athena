@@ -39,6 +39,7 @@ def _get_NVSI_track_systematics_list() -> list[str]:
         "_TRK_BIAS_D0_WM",
         "_TRK_BIAS_QOVERP_SAGITTA_WM",
         "_TRK_BIAS_Z0_WM",
+        "_TRK_BIAS_D0_WM_ONLY",
         "_TRK_EFF_LOOSE_IBL",
         "_TRK_EFF_LOOSE_PHYSMODEL",
         "_TRK_EFF_LOOSE_PP0",
@@ -108,6 +109,21 @@ def FTAGSSVExtraContentCfg(
                     input_tracks=track_collection,
                     output_tracks=varied_track_container,
                     bias_kwargs=InDetTrackBiasingCalibKwargs(flags),
+                )
+            # For Run3 the recommendation right now is to only apply the D0 BIAS correction 
+            elif suffix == "_TRK_BIAS_D0_WM_ONLY":
+                track_sys_acc = TrackSmearingAlgCfg(
+                    flags,
+                    syst="",
+                    input_tracks=track_collection,
+                    output_tracks=varied_track_container,
+                    bias_kwargs={
+                        **InDetTrackBiasingCalibKwargs(flags),
+                        "name": f"InDetTrackBiasingTool_{varied_track_container}",
+                        "applyD0Bias": True,
+                        "applyZ0Bias": False,
+                        "applyQoverPBias": False,
+                    },
                 )
             else:
                 track_sys_acc = TrackSmearingAlgCfg(
