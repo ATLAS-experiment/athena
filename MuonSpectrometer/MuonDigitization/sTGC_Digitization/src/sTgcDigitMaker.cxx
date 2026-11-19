@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "sTGC_Digitization/sTgcDigitMaker.h"
@@ -798,6 +798,7 @@ sTgcDigitMaker::GammaParameter sTgcDigitMaker::getGammaParameter(double distance
     }
     ++index;
   }
+  //coverity[NEGATIVE_RETURNS]
   return m_gammaParameter.at(index);
 }
 

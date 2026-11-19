@@ -51,15 +51,15 @@ CXXUTILS_TRAPPING_FP;
 
 // Core includes
 #include <TString.h>  // for Form
+#include "EventInfoMgt/ITagInfoMgr.h"
+#include "PathResolver/PathResolver.h"
 
 #include <atomic>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <utility>
-
-#include "EventInfoMgt/ITagInfoMgr.h"
-#include "PathResolver/PathResolver.h"
+#include <bit>
 
 // 12 charge points, 15 BetaGamma points, 180 efficiency points for fcp search
 namespace {
@@ -833,6 +833,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
                     ATH_MSG_ERROR("Unable to get RPC hash id from RPC Digit collection "
                                   << "context begin_index = " << rpcContext.begin_index()
                                   << " context end_index  = " << rpcContext.end_index() << " the identifier is \n"<<elemId);
+                    return StatusCode::FAILURE;
                 }
 
                 // make new digit
@@ -840,6 +841,7 @@ StatusCode RpcDigitizationTool::doDigitization(const EventContext& ctx,
 
                 // remember new collection.
                 if (coll_hash >= collections.size()) {
+                //coverity[INTEGER_OVERFLOW]
                   collections.resize (coll_hash+1);
                 }
                 digitCollection = collections[coll_hash].get();
@@ -1017,26 +1019,14 @@ long long int RpcDigitizationTool::PackMCTruth(float proptime, float bctime, flo
 }
 
 //--------------------------------------------
-void RpcDigitizationTool::UnPackMCTruth(double theWord, float& proptime, float& bctime, float& posy, float& posz) {
-    // int64_t is just a shorter way of writing long long int
-    using Repacker = union
+void RpcDigitizationTool::UnPackMCTruth(double theWord, float& proptime, float& bctime,
+    float& posy, float& posz){
+  const auto word = std::bit_cast<std::uint64_t>(theWord);
 
-    {
-        double dWord;
-
-        int64_t iWord;
-    };
-    Repacker MCTruth;
-    MCTruth.dWord = theWord;
-    proptime = ((MCTruth.iWord) & 0x00000000000000ffLL) / 10.;
-    bctime = (((MCTruth.iWord) & 0x0000000000ffff00LL) >> 8) / 10.;
-    posy = (((MCTruth.iWord) & 0x000000ffff000000LL) >> 24) / 10.;
-    posz = (((MCTruth.iWord) & 0x00ffff0000000000LL) >> 40) / 10.;
-
-    //
-    bctime = bctime - 300.;
-    posy = posy - 1500.;
-    posz = posz - 1500.;
+  proptime = (word & 0xffULL) / 10.;
+  bctime   = ((word >> 8)  & 0xffffULL) / 10. - 300.;
+  posy     = ((word >> 24) & 0xffffULL) / 10. - 1500.;
+  posz     = ((word >> 40) & 0xffffULL) / 10. - 1500.;
 }
 
 //--------------------------------------------

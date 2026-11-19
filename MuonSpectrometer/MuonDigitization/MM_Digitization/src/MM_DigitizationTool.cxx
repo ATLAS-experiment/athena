@@ -703,7 +703,7 @@ StatusCode MM_DigitizationTool::doDigitization(const EventContext& ctx) {
             MuonSimData::Deposit deposit(particleLink, MuonMCData(hitOnSurface.x(), hitOnSurface.y()));
 
             // Record the SDO collection in StoreGate
-            std::vector<MuonSimData::Deposit> deposits{deposit};
+            std::vector<MuonSimData::Deposit> deposits{std::move(deposit)};
             MuonSimData simData(std::move(deposits), 0);
             simData.setPosition(hitAtCenterOfGasGapGlobal);
             simData.setTime(globalHitTime);

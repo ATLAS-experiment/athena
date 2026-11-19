@@ -347,6 +347,7 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
                         << "context begin_index = " << tgcContext.begin_index()
                         << " context end_index  = " << tgcContext.end_index()
                         << " the identifier is \n" << elemId);
+                    return StatusCode::FAILURE;
                 }
 
                 // make new TgcDigit and record it in StoreGate
@@ -355,6 +356,7 @@ StatusCode TgcDigitizationTool::digitizeCore(const EventContext& ctx) {
                 // record the digit container in StoreGate
                 bool duplicate = false;
                 if (coll_hash >= collections.size()) {
+                    //coverity[INTEGER_OVERFLOW]
                     collections.resize(coll_hash + 1);
                 }
                 digitCollection = collections[coll_hash].get();
