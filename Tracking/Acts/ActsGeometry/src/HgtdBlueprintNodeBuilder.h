@@ -52,6 +52,15 @@ class HgtdBlueprintNodeBuilder
       "of each HGTD "
       "layer (Gen1: NumberOfHgtdBinsFactor of the TrackingGeometrySvc)"};
 
+  /// Material binning: equidistant bins {r, phi} of the material designated on
+  /// the HGTD layer discs (the outward disc of each layer and the inward disc
+  /// of the innermost one). The bins span the disc, whose extent is set when
+  /// the volumes are built. The material map is binned the same way, so a map
+  /// made with other values does not fit the geometry.
+  Gaudi::Property<std::vector<unsigned int>> m_hgtdDiscMaterialBins{
+      this, "HgtdDiscMaterialBins", {50, 50},
+      "Material bins {r, phi} of the HGTD layer discs"};
+
   /** @brief Build the HGTD Blueprint Node
    * @param gctx Geometry context
    * @param node The node to add the HGTD node to */

@@ -60,6 +60,13 @@ namespace ActsTrk {
 StatusCode HgtdBlueprintNodeBuilder::initialize() {
   ATH_MSG_DEBUG("Initializing HgtdBlueprintNodeBuilder");
 
+  const std::vector<unsigned int>& discBins = m_hgtdDiscMaterialBins.value();
+  if (discBins.size() != 2 || discBins[0] == 0 || discBins[1] == 0) {
+    ATH_MSG_FATAL(m_hgtdDiscMaterialBins << " must hold two positive bin counts");
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG("Material binning " << m_hgtdDiscMaterialBins);
+
   ATH_CHECK(detStore()->retrieve(m_hgtdMgr, "HGTD"));
 
   m_elementStore = std::make_shared<ActsElementVector>();
@@ -235,15 +242,19 @@ void HgtdBlueprintNodeBuilder::addHgtdLayers(
   // MaterialDesignator wrapper to avoid empty-designator warnings.
   if (hasMaterial) {
     const std::string materialName = name + "_Material";
+    const std::size_t materialBinsR = m_hgtdDiscMaterialBins.value()[0];
+    const std::size_t materialBinsPhi = m_hgtdDiscMaterialBins.value()[1];
     parent.addMaterial(materialName, [&](auto& mat) {
       if (index != 3) {
-        mat.configureFace(outwardDisc, AxisSpec::DeferredEquidistant(50, AxisR),
-                          AxisSpec::DeferredEquidistant(50, AxisPhi),
+        mat.configureFace(outwardDisc,
+                          AxisSpec::DeferredEquidistant(materialBinsR, AxisR),
+                          AxisSpec::DeferredEquidistant(materialBinsPhi, AxisPhi),
                           materialName + "_Outward");
       }
       if (isInnermost) {
-        mat.configureFace(inwardDisc, AxisSpec::DeferredEquidistant(50, AxisR),
-                          AxisSpec::DeferredEquidistant(50, AxisPhi),
+        mat.configureFace(inwardDisc,
+                          AxisSpec::DeferredEquidistant(materialBinsR, AxisR),
+                          AxisSpec::DeferredEquidistant(materialBinsPhi, AxisPhi),
                           materialName + "_Inward");
       }
       configureLayer(mat);

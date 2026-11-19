@@ -40,6 +40,15 @@ using ResizeStrategy = Acts::VolumeResizeStrategy;
 namespace ActsTrk {
 
 StatusCode BeamPipeBlueprintNodeBuilder::initialize() {
+  const std::vector<unsigned int>& cylinderBins =
+      m_beamPipeCylinderMaterialBins.value();
+  if (cylinderBins.size() != 2 || cylinderBins[0] == 0 || cylinderBins[1] == 0) {
+    ATH_MSG_FATAL(m_beamPipeCylinderMaterialBins
+                  << " must hold two positive bin counts");
+    return StatusCode::FAILURE;
+  }
+  ATH_MSG_DEBUG("Material binning " << m_beamPipeCylinderMaterialBins);
+
   if (m_loadfromDatabase) {
     ATH_CHECK(detStore()->retrieve(m_beamPipeMgr, "BeamPipe"));
   }
@@ -135,11 +144,13 @@ BeamPipeBlueprintNodeBuilder::buildBlueprintNode(
   beamPipeContainer.setAttachmentStrategy(AttachmentStrategy::Gap);
   beamPipeContainer.setResizeStrategy(ResizeStrategy::Gap);
 
+  const std::size_t materialBinsRPhi = m_beamPipeCylinderMaterialBins.value()[0];
+  const std::size_t materialBinsZ = m_beamPipeCylinderMaterialBins.value()[1];
   beamPipeContainer.addMaterial("BeamPipe_Material", [&](auto& mat) {
     // Place material on the outer cylindrical surface facing outward
     mat.configureFace(OuterCylinder,
-                      Acts::AxisSpec::DeferredEquidistant(1, AxisRPhi),
-                      Acts::AxisSpec::DeferredEquidistant(35, AxisZ),
+                      Acts::AxisSpec::DeferredEquidistant(materialBinsRPhi, AxisRPhi),
+                      Acts::AxisSpec::DeferredEquidistant(materialBinsZ, AxisZ),
                       "BeamPipe_Material");
     // A solid cylinder from r=0 to beamPipeRadius, extending ±3 m in z
     mat.addStaticVolume(beamPipeTransform,

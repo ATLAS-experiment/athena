@@ -175,7 +175,7 @@ def ITkMaterialDecoratorToolCfg(flags, name="ITkMaterialDecorator", **kwargs) ->
     if flags.Acts.TrackingGeometry.ITkHgtdMaterialSource == "Default":
         # ITkMaterialDecoratorTool reads Json/Cbor maps (optionally zstd compressed)
         # with the ACTS Json plugin, the format is detected from the file contents.
-        filename = f"material-maps-itk-hgtd-{flags.GeoModel.AtlasVersion}.json"
+        filename = f"material-maps-itk-hgtd-{flags.GeoModel.AtlasVersion}.json.zst"
     kwargs.setdefault("MaterialDbFile", filename)
     kwargs.setdefault("MaterialDbFolder", folder)
     the_tool = CompFactory.ActsTrk.ITkMaterialDecoratorTool(name, **kwargs)
