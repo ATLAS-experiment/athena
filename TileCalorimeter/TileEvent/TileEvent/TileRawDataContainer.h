@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2019 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 //********************************************************************
@@ -56,10 +56,10 @@ public:
     void initialize(bool createColl, TYPE type,
                     SG::OwnershipPolicy ownPolicy=SG::OWN_ELEMENTS);
 
-    inline TYPE get_hashType() const { return this->m_hashFunc.type(); }
-    inline UNIT get_unit() const { return this->m_unit; }
+    inline TileFragHash::TYPE get_hashType() const { return this->m_hashFunc.type(); }
+    inline TileRawChannelUnit::UNIT get_unit() const { return this->m_unit; }
     inline void set_unit(UNIT unit) { m_unit=unit; }
-    inline TYPE get_type() const { return this->m_type; }
+    inline TileFragHash::TYPE get_type() const { return this->m_type; }
     inline void set_type(TYPE type) { m_type=type; }
     inline uint32_t get_bsflags() const { return this->m_bsflags; }
     inline void set_bsflags(uint32_t bsflags) { m_bsflags=bsflags; }
