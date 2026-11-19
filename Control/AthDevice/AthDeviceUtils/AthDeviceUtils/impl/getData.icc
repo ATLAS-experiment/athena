@@ -19,7 +19,6 @@ vecmem::data::jagged_vector_data<const T> getData(
   const std::size_t size = data.size();
 
   // Construct the object to be returned.
-  assert(std::pmr::get_default_resource() != nullptr);
   vecmem::data::jagged_vector_data<const T> result(
       vecmem::details::narrow_size<
           typename vecmem::data::jagged_vector_data<const T>::size_type>(size),
@@ -48,7 +47,6 @@ vecmem::data::jagged_vector_data<T> getData(
   const std::size_t size = data.size();
 
   // Construct the object to be returned.
-  assert(std::pmr::get_default_resource() != nullptr);
   vecmem::data::jagged_vector_data<T> result(
       vecmem::details::narrow_size<
           typename vecmem::data::jagged_vector_data<T>::size_type>(size),
