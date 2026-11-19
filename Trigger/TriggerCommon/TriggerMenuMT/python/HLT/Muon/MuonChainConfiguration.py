@@ -20,7 +20,7 @@ from .MuonMenuSequences import (
     muEFCBIDperfSequenceGenCfg, muEFCBLRTSequenceGenCfg, muEFCBLRTIDperfSequenceGenCfg, 
     muEFCBFSSequenceGenCfg, muEFIDtpSequenceGenCfg, muEFIsoSequenceGenCfg, 
     muEFMSIsoSequenceGenCfg, efLateMuRoISequenceGenCfg, muRoiClusterSequenceGenCfg, 
-    MlMuonDVtxCaloTowerSequenceGenCfg, MlMuonDVtxSequenceGenCfg )
+    MlMuonDVtxCaloTowerSequenceGenCfg, MlMuonDVtxSequenceGenCfg, MlMuonDVtxTrkVetoSequenceGenCfg )
 
 from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFInvMassHypoToolFromDict
 from TrigMuonHypo.TrigMuonHypoConfig import TrigMuonEFIdtpInvMassHypoToolFromDict
@@ -87,7 +87,7 @@ class MuonChainConfiguration(ChainConfigurationBase):
             "lateMu":['getLateMuRoI','getLateMu'], #late muon triggers
             "muoncalib":['getmuFast'], #calibration
             "vtx":['getmuRoiClu'], #LLP Trigger
-            "mlvtx":['getMlVtxCaloTower','getMlVtx'], #ML LLP trigger
+            "mlvtx":['getMlVtxCaloTower','getMlVtx','getMlVtxTrkVeto'], #ML LLP trigger
             "mucombTag":['getmuFast', muCombStep], #Trigger for alignment 
         }
 
@@ -230,6 +230,9 @@ class MuonChainConfiguration(ChainConfigurationBase):
 
     def getMlVtx(self, flags, is_probe_leg=False):
         return self.getStep(flags, 'mlvtx',[MlMuonDVtxSequenceGenCfg])
+
+    def getMlVtxTrkVeto(self, flags, is_probe_leg=False):
+        return self.getStep(flags, 'mlvtxtrkveto',[MlMuonDVtxTrkVetoSequenceGenCfg])
 
 
 def TrigMuonEFIdtpInvMassHypoToolCfg(flags, chainDict):

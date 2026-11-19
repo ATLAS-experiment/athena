@@ -1086,6 +1086,31 @@ def MlMuonDVtxSequenceGenCfg(flags):
 
     return efmuMSSequence
 
+
+@AccumulatorCache
+def MlMuonDVtxTrkVetoSequenceGenCfg(flags):
+    """Prompt-track veto, only on the events passing the ML score cut.
+    Same full-scan tracking and input maker as the jet chains, so the algorithms are shared."""
+
+    from ..CommonSequences.FullScanDefs import trkFSRoI
+    from ..Jet.JetMenuSequencesConfig import getTrackingInputMaker
+    from ..Jet.JetTrackingConfig import JetFSTrackingCfg
+    reco = InEventRecoCA("EFMlMuonDVtxTrkVetoReco", inputMaker=getTrackingInputMaker(flags, 'ftf'))
+    reco.mergeReco(JetFSTrackingCfg(flags, trkopt='ftf', RoIs=trkFSRoI))
+
+    selAcc = SelectionCA('EFMlMuonDVtxTrkVetoSel')
+    selAcc.mergeReco(reco)
+
+    from TrigLongLivedParticlesHypo.TrigLongLivedParticlesHypoConfig import MlMuonDVtxTrkVetoHypoAlgConfig, MlMuonDVtxTrkVetoHypoToolFromDict
+    jetContext = flags.Jet.Context['ftf']
+    selAcc.addHypoAlgo(MlMuonDVtxTrkVetoHypoAlgConfig(flags,
+                                                      name = 'TrigMlMuonDVtxTrkVetoHypoAlg',
+                                                      TracksKey = jetContext["Tracks"],
+                                                      VerticesKey = jetContext["Vertices"]))
+
+    return MenuSequence(flags, selAcc,
+                        HypoToolGen = MlMuonDVtxTrkVetoHypoToolFromDict)
+
 ##############################
 ### Get Bphysics triggers to #
 ### filter chains where we   #
