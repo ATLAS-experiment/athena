@@ -62,8 +62,8 @@ flags.GeoModel.Align.Dynamic = False
 flags.Acts.TrackingGeometry.UseBlueprint = True
 flags.Acts.TrackingGeometry.KeepGoingOnMaterialMergeFailure = True
 flags.Acts.TrackingGeometry.ITkHgtdMaterialSource = "Default"
-flags.Acts.TrackingGeometry.ITkHgtdMaterialSource = "material-maps-itk-hgtd-ATLAS-P2-RUN4-05-00-00.json"
-flags.Acts.TrackingGeometry.ITkHgtdMaterialMapPath = "."
+#flags.Acts.TrackingGeometry.ITkHgtdMaterialSource = "material-maps-itk-hgtd-ATLAS-P2-RUN4-05-00-00.json.zst"
+#flags.Acts.TrackingGeometry.ITkHgtdMaterialMapPath = "."
 
 # Geometry dump runs serially
 flags.Concurrency.NumThreads = 1

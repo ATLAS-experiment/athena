@@ -7,6 +7,8 @@
 
 #include "ActsGeometryInterfaces/IBlueprintNodeBuilder.h"
 
+#include <vector>
+
 class BeamPipeDetectorManager;
 
 namespace ActsTrk {
@@ -40,6 +42,14 @@ class BeamPipeBlueprintNodeBuilder
       this, "defaultInnerRadius", 20.,
       "The inner radius of the beam pipe to use if not loading from the "
       "database."};
+
+  /// Material binning: equidistant bins {r*phi, z} of the material designated
+  /// on the outer cylinder of the beam pipe. The bins span the cylinder, whose
+  /// extent is set when the volumes are built. The material map is binned the
+  /// same way, so a map made with other values does not fit the geometry.
+  Gaudi::Property<std::vector<unsigned int>> m_beamPipeCylinderMaterialBins{
+      this, "BeamPipeCylinderMaterialBins", {1, 35},
+      "Material bins {r*phi, z} of the beam pipe outer cylinder"};
 };
 
 }  // namespace ActsTrk

@@ -85,6 +85,36 @@ class ItkBlueprintNodeBuilder
   Gaudi::Property<unsigned int> m_surfaceArrayOverfill{this, "SurfaceArrayOverfill", 0,
       "Extra cells per direction and axis that each surface fills in the surface arrays"};
 
+  /// Material binning: equidistant bins of the material designated on each
+  /// surface, as {r*phi, z} on cylinder faces and {r, phi} on disc faces. The
+  /// bins span the face, whose extent is set when the volumes are built. The
+  /// material map is binned the same way, so a map made with other values
+  /// does not fit the geometry.
+  Gaudi::Property<std::vector<unsigned int>> m_itkPixelCylinderMaterialBins{
+      this, "ITkPixelCylinderMaterialBins", {50, 100},
+      "Material bins {r*phi, z} of the ITk pixel cylinders: barrel layers, outer "
+      "cylinders of the inner and outer pixel, cylinders between the outer "
+      "endcap ring groups"};
+  Gaudi::Property<std::vector<unsigned int>> m_itkDiscMaterialBins{
+      this, "ITkDiscMaterialBins", {50, 50},
+      "Material bins {r, phi} of the two discs closing the whole ITk in z "
+      "(built with the strip)"};
+  Gaudi::Property<std::vector<unsigned int>> m_itkCylinderMaterialBins{
+      this, "ITkCylinderMaterialBins", {50, 100},
+      "Material bins {r*phi, z} of the cylinder closing the whole ITk in r "
+      "(outer cylinder of the strip)"};
+  Gaudi::Property<std::vector<unsigned int>> m_itkPixelDiscMaterialBins{
+      this, "ITkPixelDiscMaterialBins", {50, 50},
+      "Material bins {r, phi} of the ITk pixel discs: endcap and ring layers "
+      "and discs closing the barrels in z"};
+  Gaudi::Property<std::vector<unsigned int>> m_itkStripCylinderMaterialBins{
+      this, "ITkStripCylinderMaterialBins", {50, 100},
+      "Material bins {r*phi, z} of the ITk strip barrel layers"};
+  Gaudi::Property<std::vector<unsigned int>> m_itkStripDiscMaterialBins{
+      this, "ITkStripDiscMaterialBins", {50, 50},
+      "Material bins {r, phi} of the ITk strip discs: endcap layers and discs "
+      "closing the barrel in z"};
+
   /// Surface array bins per module along each axis, outside the strip barrel
   static constexpr double s_binFactor = 5.0;
 
