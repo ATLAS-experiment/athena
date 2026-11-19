@@ -31,7 +31,7 @@ def MSTrackFitterCfg(flags, name="MSTrackFitTool", **kwargs):
     if flags.Muon.TrackFitterType == TrackFitterType.GlobalChiSquareFitter:
         kwargs.setdefault("doScattering", flags.Acts.TrackingGeometry.MuonPassiveMaterial)
         kwargs.setdefault("doEnergyLoss",  flags.Acts.TrackingGeometry.MuonPassiveMaterial)
-        kwargs.setdefault("maxSteps", 1000000)
+        kwargs.setdefault("maxSteps", 100000)
         kwargs.setdefault("maxSurfaces", 10000000)
         kwargs.setdefault("nIterMax", 30)
         kwargs.setdefault("SummaryTool", result.popToolsAndMerge(TrackSummaryToolCfg(flags)))
