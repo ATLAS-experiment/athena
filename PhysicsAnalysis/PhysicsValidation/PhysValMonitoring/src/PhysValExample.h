@@ -1,7 +1,7 @@
 ///////////////////////// -*- C++ -*- /////////////////////////////
 
 /*
-  Copyright (C) 2002-2021 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // PhysValExample.h 
@@ -22,7 +22,6 @@
 #include "KinematicsPlots.h"
 #include "TrkAndVtxPlots.h"
 #include "METPlots.h"
-#include "BTagPlots.h"
 #include "EventInfoPlots.h"
 
 // Root includes
@@ -93,13 +92,11 @@ class PhysValExample
   PhysVal::TrkAndVtxPlots m_trkvtxPlots;
   PhysVal::EventInfoPlots m_evtPlots;
   PhysVal::METPlots m_metPlots;
-  PhysVal::BTagPlots m_btagPlots;
 
   StatusCode book(PlotBase& plots);
 
-  //Flags to determine whether to fill example jet,met,btag plots
+  //Flags to determine whether to fill example jet,met plots
   bool m_doExJet;
-  bool m_doExBtag;
   bool m_doExMET;
 
 
