@@ -1227,9 +1227,18 @@ float TgcDigitMaker::getTimeOffset(const TgcDigitTimeOffsetData* readCdo,
                                    const TgcSensor sensor) {
     uint16_t chamberId =
         (station_num << 3) + static_cast<uint16_t>(std::abs(station_eta));
-    return ((sensor == TgcSensor::kSTRIP)
-                ? readCdo->stripOffset.find(chamberId)->second
-                : readCdo->wireOffset.find(chamberId)->second);
+    if (sensor == TgcSensor::kSTRIP){
+      const auto pPair = readCdo->stripOffset.find(chamberId);
+      if (pPair == readCdo->stripOffset.end())[[unlikely]]{
+        throw std::runtime_error("TgcDigitMaker::getTimeOffset: chamberId not found in stripOffset");
+      }
+      return  pPair->second;
+    }
+    const auto pPair = readCdo->wireOffset.find(chamberId);
+    if (pPair == readCdo->wireOffset.end())[[unlikely]]{
+        throw std::runtime_error("TgcDigitMaker::getTimeOffset: chamberId not found in wireOffset");
+    }
+    return pPair->second;
 }
 
 float TgcDigitMaker::getCrosstalkProbability(

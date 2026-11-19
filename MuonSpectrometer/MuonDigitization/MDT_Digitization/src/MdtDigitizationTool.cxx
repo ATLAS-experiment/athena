@@ -725,7 +725,7 @@ bool MdtDigitizationTool::createDigits(const EventContext& ctx, Collections_t& c
 
             // Record the SDO collection in StoreGate
             std::vector<MuonSimData::Deposit> deposits;
-            deposits.push_back(deposit);
+            deposits.push_back(std::move(deposit));
             MuonSimData tempSDO(deposits, 0);
             const Amg::Vector3D& tempLocPos = (*(it->simhit))->localPosition();
             Amg::Vector3D p = geo->localToGlobalTransf(idDigit)*tempLocPos;
@@ -750,9 +750,11 @@ MdtDigitCollection* MdtDigitizationTool::getDigitCollection(Identifier elementId
         ATH_MSG_ERROR("Unable to get MDT hash id from MDT Digit collection "
                       << "context begin_index = " << mdtContext.begin_index() << " context end_index  = " << mdtContext.end_index()
                       << " the identifier is \n"<<elementId);
+       return nullptr;
     }
 
     if (coll_hash >= collections.size()) {
+      //coverity[INTEGER_OVERFLOW]
       collections.resize (coll_hash+1);
     }
 
@@ -846,7 +848,7 @@ MdtDigitizationTool::GeoCorOut MdtDigitizationTool::correctGeometricalWireSag(co
     
     // recalculate tracking sign
     Amg::Vector2D lpsag{Amg::Vector2D::Zero()};
-    surface.globalToLocal(gpos, gdir, lpsag);
+    std::ignore  = surface.globalToLocal(gpos, gdir, lpsag);
     trackingSign = lpsag[Trk::locR] < 0 ? -1. : 1.;
 
 

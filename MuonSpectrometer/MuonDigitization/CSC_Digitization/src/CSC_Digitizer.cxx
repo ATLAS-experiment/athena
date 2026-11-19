@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2024 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 // Author: Ketevi A. Assamagan
@@ -582,7 +582,7 @@ void CSC_Digitizer::fillSampleMaps(const IdentifierHash hashId, const double dri
             std::cout << std::endl;
         }
 
-        data_map[hashId] = existingSamples;
+        data_map[hashId] = std::move(existingSamples);
 
     } else {
         data_map.insert(std::pair<IdentifierHash, std::vector<float>>(hashId, m_pcalib->getSamplesFromBipolarFunc(driftTime, stripCharge)));
