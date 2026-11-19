@@ -106,15 +106,15 @@ void test_roundtrip_all_fields(int& passCount) {
     std::cout << "[RUN] Testing round-trip pack/unpack across all standard stations..." << std::endl;
 
     struct TestCase {
-        bool side;
-        uint8_t sector;
-        bool doubletPhi;
-        Muon::MuonStationIndex::StIndex station;
-        uint8_t doubletR;
-        uint8_t chamber;
-        uint8_t doubletZ;
-        uint8_t strip;
-        bool measuresPhi;
+        bool side{};
+        uint8_t sector{};
+        bool doubletPhi{};
+        Muon::MuonStationIndex::StIndex station{};
+        uint8_t doubletR{};
+        uint8_t chamber{};
+        uint8_t doubletZ{};
+        uint8_t strip{};
+        bool measuresPhi{};
     };
 
     std::vector<TestCase> cases = {
