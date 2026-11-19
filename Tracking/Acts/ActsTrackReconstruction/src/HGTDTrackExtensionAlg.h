@@ -53,6 +53,7 @@
 #include "ActsEvent/TrackContainer.h"
 
 // Tools
+#include "ActsGeometry/ActsVolumeIdToDetectorElementCollectionMap.h"
 #include "ActsGeometryInterfaces/ITrackingGeometrySvc.h"
 #include "ActsCalibrators/xAODUncalibMeasSurfAcc.h"
 #include "Acts/Surfaces/PerigeeSurface.hpp"
@@ -81,6 +82,10 @@ private:
 
   // Measurement collections
   SG::ReadHandleKeyArray<xAOD::UncalibratedMeasurementContainer> m_uncalibratedMeasurementContainerKeys{this, "UncalibratedMeasurementContainerKeys", {}, "input cluster collections"};
+  // map from volume id to detector element collection
+  SG::ReadCondHandleKey<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap> m_volumeIdToDetectorElementCollMapKey
+     {this, "ActsVolumeIdToDetectorElementCollectionMapKey", "VolumeIdToDetectorElementCollectionMap",
+      "Map which associates Acts geometry volume IDs to detector element collections."};
 
   SG::ReadDecorHandleKey<xAOD::TrackParticleContainer> m_actsTrackLinkKey {this, "ActsTrackLink", m_trackParticleContainerName, "actsTrack", "Link to Acts track"};
   
@@ -146,6 +151,8 @@ private:
     const DetectorContextHolder& detContext,
     const detail::TrackFindingMeasurements &measurements,
     const detail::MeasurementIndex& measurementIndex,
+    const std::vector< const InDet::SiDetectorElementStatus *> &detElStatusArr,
+    const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
     const Acts::BoundTrackParameters & lastMeasurementStateParameters,
     detail::RecoTrackContainer &tracksContainerTemp,
     detail::RecoTrackContainer &actsTracksContainer,

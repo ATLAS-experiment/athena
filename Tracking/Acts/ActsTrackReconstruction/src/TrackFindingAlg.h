@@ -156,10 +156,6 @@ namespace ActsTrk
     Gaudi::Property<std::size_t> m_ambiStrategy {this, "ambiStrategy", 0, "0 - Do ambiguity resolution outside track finding; 1 - Do ambiguity in track finding using GreedyAmbiguitySolver tool; 2 - Do shared hit cut during track candidate selection"};
 
 
-    StatusCode propagateDetectorElementStatusToMeasurements(const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volume_id_to_det_el_coll,
-                                                            const std::vector< const InDet::SiDetectorElementStatus *> &det_el_status_arr,
-                                                            detail::TrackFindingMeasurements &measurements) const;
-
     /// Seed SP where the search starts: the top SP for a reverse search, else the bottom SP
     std::size_t searchStartSp(const ActsTrk::Seed& seed) const;
 
@@ -195,6 +191,8 @@ namespace ActsTrk
                const DetectorContextHolder& detContext,
                const detail::TrackFindingMeasurements &measurements,
                const detail::MeasurementIndex &measurementIndex,
+               const std::vector< const InDet::SiDetectorElementStatus *> &detElStatusArr,
+               const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
                detail::SharedHitCounter &sharedHits,
                Acts::SeedDeduplicator &seedDeduplicator,
                const ActsTrk::SeedContainer &seeds,

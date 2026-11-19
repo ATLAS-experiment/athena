@@ -261,9 +261,9 @@ namespace ActsTrk
     SG::ReadCondHandle<ActsTrk::ActsVolumeIdToDetectorElementCollectionMap>
       volumeIdToDetectorElementCollMap(m_volumeIdToDetectorElementCollMapKey,ctx);
     ATH_CHECK(volumeIdToDetectorElementCollMap.isValid());
-    std::vector< const InDet::SiDetectorElementStatus *> det_el_status_arr;
+    std::vector< const InDet::SiDetectorElementStatus *> detElStatusArr;
     const std::vector<const InDetDD::SiDetectorElementCollection*> &det_el_collections =volumeIdToDetectorElementCollMap->collections();
-    det_el_status_arr.resize( det_el_collections.size(), nullptr);
+    detElStatusArr.resize( det_el_collections.size(), nullptr);
     for (const SG::ReadHandleKey<InDet::SiDetectorElementStatus> &det_el_status_key : m_detElStatus) {
       SG::ReadHandle<InDet::SiDetectorElementStatus> det_el_status(det_el_status_key,ctx);
       ATH_CHECK( det_el_status.isValid());
@@ -271,7 +271,7 @@ namespace ActsTrk
         det_el_col_iter = std::find(det_el_collections.begin(),
                                     det_el_collections.end(),
                                     &det_el_status->getDetectorElements());
-      det_el_status_arr.at(det_el_col_iter - det_el_collections.begin()) = det_el_status.cptr();
+      detElStatusArr.at(det_el_col_iter - det_el_collections.begin()) = det_el_status.cptr();
     }
 
     detail::MeasurementIndex measurementIndex(uncalibratedMeasurementContainers.size());
@@ -289,8 +289,6 @@ namespace ActsTrk
     }
 
     ATH_MSG_DEBUG("measurement index size = " << measurementIndex.size());
-
-    ATH_CHECK( propagateDetectorElementStatusToMeasurements(*(volumeIdToDetectorElementCollMap.cptr()), det_el_status_arr, measurements) );
 
     if (m_trackStatePrinter.isSet()) {
       m_trackStatePrinter->printMeasurements(ctx, uncalibratedMeasurementContainers, measurements.measurementOffsets());
@@ -359,6 +357,8 @@ namespace ActsTrk
                              detContext,
                              measurements,
                              measurementIndex,
+                             detElStatusArr,
+                             *(volumeIdToDetectorElementCollMap.cptr()),
                              sharedHits,
                              seedDeduplicator,
                              *seedContainers.at(icontainer),
@@ -492,6 +492,8 @@ namespace ActsTrk
                               const DetectorContextHolder& detContext,
                               const detail::TrackFindingMeasurements &measurements,
                               const detail::MeasurementIndex &measurementIndex,
+                              const std::vector< const InDet::SiDetectorElementStatus *> &detElStatusArr,
+                              const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
                               detail::SharedHitCounter &sharedHits,
                               Acts::SeedDeduplicator &seedDeduplicator,
                               const ActsTrk::SeedContainer &seeds,
@@ -506,10 +508,11 @@ namespace ActsTrk
   {
     ATH_MSG_DEBUG(name() << "::" << __FUNCTION__);
 
-    auto [options, secondOptions, measurementSelector] = getDefaultOptions(ctx, detContext, measurements, &pSurface);
+    auto [options, secondOptions, measurementSelector]
+       = getDefaultOptions(ctx, detContext, measurements, detElStatusArr,volumeIdMap, &pSurface);
     std::optional<TrackFindingBremOptions> bremOptions;
     if (m_doBremRecovery){
-        bremOptions = getBremOptions(ctx, detContext, measurements, &pSurface);
+        bremOptions = getBremOptions(ctx, detContext, measurements, detElStatusArr,volumeIdMap, &pSurface);
     }
 
     Acts::VectorTrackContainer trackBackend;
@@ -770,64 +773,6 @@ namespace ActsTrk
                                                            }
                                                          }); // end visitBackwards
     seedDeduplicator.addTrack(trackKeys);
-  }
-
-  StatusCode TrackFindingAlg::propagateDetectorElementStatusToMeasurements(const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volume_id_to_det_el_coll,
-                                                                           const std::vector< const InDet::SiDetectorElementStatus *> &det_el_status_arr,
-                                                                           detail::TrackFindingMeasurements &measurements) const {
-    const Acts::TrackingGeometry *
-      acts_tracking_geometry = m_trackingGeometrySvc->trackingGeometry().get();
-    ATH_CHECK(acts_tracking_geometry != nullptr);
-
-    using Counter = struct { unsigned int n_volumes, n_volumes_with_status, n_missing_detector_elements, n_detector_elements, n_disabled_detector_elements;};
-    Counter counter {0u,0u,0u,0u,0u};
-    acts_tracking_geometry->visitVolumes([&counter,
-                                          &volume_id_to_det_el_coll,
-                                          &det_el_status_arr,
-                                          &measurements,
-                                          this](const Acts::TrackingVolume *volume_ptr) {
-      ++counter.n_volumes;
-      if (!volume_ptr) return;
-
-      const InDet::SiDetectorElementStatus*
-        det_el_status = det_el_status_arr.at(volume_id_to_det_el_coll.collecionMap().at(volume_ptr->geometryId().volume()));
-      if (det_el_status) {
-        ++counter.n_volumes_with_status;
-        volume_ptr->visitSurfaces([&counter, det_el_status, &measurements,this](const Acts::Surface *surface_ptr) {
-
-          const auto* acts_detector_element = getActsDetectorElement(surface_ptr);
-          if (!acts_detector_element) {
-            return;
-          }
-          ++counter.n_detector_elements;
-
-          if (!det_el_status->isGood( acts_detector_element->identifyHash() )) {
-            ActsTrk::detail::MeasurementRange old_range = measurements.markSurfaceInsensitive(surface_ptr->geometryId());
-            if (!old_range.empty()) {
-              auto geoid_to_string = [](const Acts::GeometryIdentifier &id) -> std::string  {
-                std::stringstream amsg;
-                amsg << id;
-                return amsg.str();
-              };
-              std::string a_msg ( geoid_to_string(surface_ptr->geometryId()));
-              ATH_MSG_WARNING("Reject " << (old_range.elementEndIndex() - old_range.elementBeginIndex())
-                              << " measurements because surface " << a_msg);
-            }
-            ++counter.n_disabled_detector_elements;
-          }
-
-        }, true /*only sensitive surfaces*/);
-      }
-      else {
-        ++counter.n_missing_detector_elements;
-      }
-    });
-    ATH_MSG_DEBUG("Volumes with detector element status " << counter.n_volumes_with_status << " / " << counter.n_volumes
-                  << " disabled detector elements " << counter.n_disabled_detector_elements
-                  << " / " << counter.n_detector_elements
-                  << " missing detector elements "
-                  << counter.n_missing_detector_elements);
-    return StatusCode::SUCCESS;
   }
 
   std::size_t TrackFindingAlg::getSeedCategory(std::size_t typeIndex,

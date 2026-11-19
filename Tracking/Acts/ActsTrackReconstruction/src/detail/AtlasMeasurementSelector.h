@@ -20,6 +20,14 @@
 #include <vector>
 #include <utility>
 
+namespace InDet {
+   class SiDetectorElementStatus;
+}
+
+namespace ActsTrk {
+   class ActsVolumeIdToDetectorElementCollectionMap;
+}
+
 namespace ActsTrk::detail {
    bool checkNumMeasurementsCutOff(const std::vector<size_t> &numMeasurementsCutOff);
    class IOnBoundStateCalibratorTool;
@@ -29,6 +37,8 @@ namespace ActsTrk::detail {
            const ActsTrk::IStripOnTrackCalibratorTool<detail::RecoTrackStateContainer> *stripOnTrackCalibratorTool,
            const ActsTrk::IHGTDOnTrackCalibratorTool<detail::RecoTrackStateContainer> *hgtdOnTrackCalibratorTool,
            const ActsTrk::detail::MeasurementRangeList &measurementRanges,
+           const std::vector<const InDet::SiDetectorElementStatus *> &detectorElementStatus,
+           const ActsTrk::ActsVolumeIdToDetectorElementCollectionMap &volumeIdMap,
            const std::vector<float> &etaBinsf,
            const std::vector<std::array<std::pair<float, float>, 4> > &chi2CutOffOutlier,
            const std::vector<size_t> &numMeasurementsCutOff,
