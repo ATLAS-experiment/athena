@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "MDTSensitiveDetectorCosmics.h"
@@ -12,7 +12,6 @@
 #include "MuonIdHelpers/MdtIdHelper.h"
 
 #include <string>
-#include <iostream>
 #include <limits>
 
 
@@ -23,7 +22,6 @@ namespace {
   constexpr unsigned int maxNTubesPerLayer = MdtIdHelper::maxNTubesPerLayer;
 }
 
-typedef std::istringstream my_isstream;
 
 // construction/destruction
 MDTSensitiveDetectorCosmics::MDTSensitiveDetectorCosmics(const std::string& name, const std::string& hitCollectionName, const unsigned int nTubesMax)
@@ -216,7 +214,7 @@ int MDTSensitiveDetectorCosmics::GetIdentifier(const G4TouchableHistory* touchHi
       volName.resize(npos-2);
       int volCopyNo = touchHist->GetVolume(i)->GetCopyNo();
       volCopyNo=volCopyNo%1000;
-      stationName   = volName;
+      stationName   = std::move(volName);
       stationEta    = volCopyNo/100;
       stationPhi    = abs(volCopyNo%100);
 

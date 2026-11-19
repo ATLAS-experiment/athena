@@ -223,7 +223,7 @@ TEST_F ( MDTSensitiveDetectorCosmicstest, ProcessHits )
   track->SetVertexPosition(threeVector);
 
   G4ProcessType aType = atype; 
-  G4String aString = astring;
+  G4String aString = std::move(astring);
   G4MyProcess* process = new G4MyProcess( aString, aType );//para para
   track->SetCreatorProcess( process );
 

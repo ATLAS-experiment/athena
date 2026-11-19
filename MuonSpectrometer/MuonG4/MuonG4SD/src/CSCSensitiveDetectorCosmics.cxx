@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CSCSensitiveDetectorCosmics.h"
@@ -130,7 +130,7 @@ G4bool CSCSensitiveDetectorCosmics::ProcessHits(G4Step* aStep,G4TouchableHistory
       /** station name, station eta and station phi */
       volName.resize(npos-2);
       int volCopyNo = touchHist->GetVolume(i)->GetCopyNo();
-      stationName   = volName;
+      stationName   = std::move(volName);
       //stationEta    = volCopyNo/100;
       // bug fix for 14.2.0 to cope with non-mirrored chambers as proposed by
       // S.Spagnolo (ported from CSCSensitiveDetector.cxx for rel 20.3.3)

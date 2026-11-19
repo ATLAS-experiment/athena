@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2002-2022 CERN for the benefit of the ATLAS collaboration
+  Copyright (C) 2002-2026 CERN for the benefit of the ATLAS collaboration
 */
 
 #include "CxxUtils/checker_macros.h"
@@ -222,7 +222,7 @@ TEST_F ( MDTSensitiveDetectortest, ProcessHits )
   track->SetStep(stepForTrack);
 
   G4ProcessType aType = atype; 
-  G4String aString = astring;
+  G4String aString = std::move(astring);
   G4MyProcess* process = new G4MyProcess( aString, aType );//para para
   track->SetCreatorProcess( process );
 
