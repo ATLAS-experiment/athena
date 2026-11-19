@@ -2,11 +2,11 @@
   Copyright (C) 2002-2025 CERN for the benefit of the ATLAS collaboration
 */
 
-#ifndef MCTRUTHCLASSIFIER_MCTRUTHCLASSIFIERGEN_H
-#define MCTRUTHCLASSIFIER_MCTRUTHCLASSIFIERGEN_H
+#ifndef TRUTHUTILS_MCTRUTHCLASSIFIERGEN_H
+#define TRUTHUTILS_MCTRUTHCLASSIFIERGEN_H
 /*
  * Declarations of the free functions implementing the classification of
- * truth particles (see Root/MCTruthClassifierGen.cxx).
+ * truth particles (see src/MCTruthClassifierGen.cxx).
  */
 
 #include "TruthUtils/TruthClasses.h"
@@ -25,4 +25,4 @@ classifyTruthParticle(const xAOD::TruthParticleContainer& truthParticleContainer
 
 } // namespace MCTruthPartClassifier
 
-#endif // MCTRUTHCLASSIFIER_MCTRUTHCLASSIFIERGEN_H
+#endif // TRUTHUTILS_MCTRUTHCLASSIFIERGEN_H

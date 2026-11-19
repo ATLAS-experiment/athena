@@ -17,6 +17,12 @@ atlas_add_library( TruthUtils
    LINK_LIBRARIES  ${extra_libs}
    )
 
+# Truth particle classification (used by MCTruthClassifier)
+atlas_add_library( TruthUtilsClassifierLib
+   src/*.cxx
+   PUBLIC_HEADERS TruthUtils
+   LINK_LIBRARIES TruthUtils xAODTruth )
+
 # Install files from the package:
 atlas_install_runtime( share/*.txt )
 

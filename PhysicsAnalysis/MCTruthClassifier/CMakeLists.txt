@@ -26,7 +26,7 @@ endif()
 atlas_add_library( MCTruthClassifierLib
    MCTruthClassifier/*.h src/*.cxx Root/*.cxx
    PUBLIC_HEADERS MCTruthClassifier
-   LINK_LIBRARIES AsgTools xAODTruth TruthUtils AsgDataHandlesLib
+   LINK_LIBRARIES AsgTools xAODTruth TruthUtils TruthUtilsClassifierLib AsgDataHandlesLib
 	${extra_libs} )
 
 if( NOT XAOD_STANDALONE )
